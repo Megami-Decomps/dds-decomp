@@ -1,0 +1,1424 @@
+battle-table 1 kind=skill profile=dds1
+
+action-attribute 1 attribute=2
+action-attribute 2 attribute=2
+action-attribute 3 attribute=2
+action-attribute 4 attribute=2
+action-attribute 5 attribute=2
+action-attribute 6 attribute=2
+action-attribute 7 attribute=2
+action-attribute 8 attribute=2
+action-attribute 9 attribute=2
+action-attribute 10 attribute=3
+action-attribute 11 attribute=3
+action-attribute 12 attribute=3
+action-attribute 13 attribute=3
+action-attribute 14 attribute=3
+action-attribute 15 attribute=3
+action-attribute 16 attribute=3
+action-attribute 17 attribute=3
+action-attribute 18 attribute=3
+action-attribute 19 attribute=4
+action-attribute 20 attribute=4
+action-attribute 21 attribute=4
+action-attribute 22 attribute=4
+action-attribute 23 attribute=4
+action-attribute 24 attribute=4
+action-attribute 25 attribute=4
+action-attribute 26 attribute=4
+action-attribute 27 attribute=4
+action-attribute 28 attribute=5
+action-attribute 29 attribute=5
+action-attribute 30 attribute=5
+action-attribute 31 attribute=5
+action-attribute 32 attribute=5
+action-attribute 33 attribute=5
+action-attribute 34 attribute=5
+action-attribute 35 attribute=5
+action-attribute 36 attribute=5
+action-attribute 37 attribute=6
+action-attribute 38 attribute=6
+action-attribute 39 attribute=6
+action-attribute 40 attribute=6
+action-attribute 41 attribute=6
+action-attribute 42 attribute=6
+action-attribute 43 attribute=6
+action-attribute 44 attribute=6
+action-attribute 45 attribute=6
+action-attribute 46 attribute=7
+action-attribute 47 attribute=7
+action-attribute 48 attribute=7
+action-attribute 49 attribute=7
+action-attribute 50 attribute=12
+action-attribute 51 attribute=12
+action-attribute 52 attribute=7
+action-attribute 53 attribute=7
+action-attribute 54 attribute=7
+action-attribute 55 attribute=7
+action-attribute 56 attribute=7
+action-attribute 57 attribute=7
+action-attribute 58 attribute=7
+action-attribute 59 attribute=7
+action-attribute 60 attribute=8
+action-attribute 61 attribute=8
+action-attribute 62 attribute=8
+action-attribute 63 attribute=8
+action-attribute 64 attribute=8
+action-attribute 65 attribute=9
+action-attribute 66 attribute=9
+action-attribute 67 attribute=9
+action-attribute 68 attribute=9
+action-attribute 69 attribute=9
+action-attribute 70 attribute=9
+action-attribute 71 attribute=9
+action-attribute 72 attribute=9
+action-attribute 73 attribute=12
+action-attribute 74 attribute=12
+action-attribute 75 attribute=14
+action-attribute 76 attribute=14
+action-attribute 77 attribute=14
+action-attribute 78 attribute=14
+action-attribute 79 attribute=14
+action-attribute 80 attribute=11
+action-attribute 81 attribute=11
+action-attribute 82 attribute=11
+action-attribute 83 attribute=13
+action-attribute 84 attribute=13
+action-attribute 85 attribute=13
+action-attribute 86 attribute=10
+action-attribute 87 attribute=10
+action-attribute 88 attribute=10
+action-attribute 89 attribute=7
+action-attribute 90 attribute=3
+action-attribute 91 attribute=-1
+action-attribute 92 attribute=-1
+action-attribute 93 attribute=-1
+action-attribute 94 attribute=7
+action-attribute 95 attribute=7
+action-attribute 96 attribute=-1
+action-attribute 97 attribute=-1
+action-attribute 98 attribute=-1
+action-attribute 99 attribute=-1
+action-attribute 100 attribute=-1
+action-attribute 101 attribute=-1
+action-attribute 102 attribute=-1
+action-attribute 103 attribute=-1
+action-attribute 104 attribute=-1
+action-attribute 105 attribute=-1
+action-attribute 106 attribute=-1
+action-attribute 107 attribute=-1
+action-attribute 108 attribute=-1
+action-attribute 109 attribute=-1
+action-attribute 110 attribute=-1
+action-attribute 111 attribute=-1
+action-attribute 141 attribute=7
+action-attribute 145 attribute=-1
+action-attribute 146 attribute=-1
+action-attribute 147 attribute=-1
+action-attribute 148 attribute=-1
+action-attribute 149 attribute=-1
+action-attribute 150 attribute=-1
+action-attribute 151 attribute=-1
+action-attribute 152 attribute=-1
+action-attribute 153 attribute=-1
+action-attribute 154 attribute=-1
+action-attribute 155 attribute=-1
+action-attribute 156 attribute=-1
+action-attribute 157 attribute=-1
+action-attribute 158 attribute=-1
+action-attribute 159 attribute=-1
+action-attribute 160 attribute=16
+action-attribute 161 attribute=16
+action-attribute 162 attribute=16
+action-attribute 163 attribute=16
+action-attribute 164 attribute=16
+action-attribute 165 attribute=16
+action-attribute 166 attribute=16
+action-attribute 167 attribute=16
+action-attribute 168 attribute=16
+action-attribute 169 attribute=16
+action-attribute 170 attribute=16
+action-attribute 171 attribute=16
+action-attribute 172 attribute=16
+action-attribute 173 attribute=16
+action-attribute 174 attribute=16
+action-attribute 175 attribute=17
+action-attribute 176 attribute=17
+action-attribute 177 attribute=17
+action-attribute 178 attribute=17
+action-attribute 179 attribute=17
+action-attribute 180 attribute=17
+action-attribute 181 attribute=17
+action-attribute 182 attribute=17
+action-attribute 183 attribute=17
+action-attribute 184 attribute=17
+action-attribute 185 attribute=17
+action-attribute 186 attribute=17
+action-attribute 187 attribute=17
+action-attribute 188 attribute=17
+action-attribute 189 attribute=17
+action-attribute 190 attribute=17
+action-attribute 191 attribute=18
+action-attribute 192 attribute=18
+action-attribute 193 attribute=18
+action-attribute 194 attribute=18
+action-attribute 195 attribute=18
+action-attribute 196 attribute=18
+action-attribute 197 attribute=18
+action-attribute 198 attribute=18
+action-attribute 199 attribute=18
+action-attribute 200 attribute=18
+action-attribute 201 attribute=18
+action-attribute 202 attribute=18
+action-attribute 203 attribute=18
+action-attribute 204 attribute=18
+action-attribute 205 attribute=18
+action-attribute 206 attribute=16
+action-attribute 207 attribute=16
+action-attribute 208 attribute=16
+action-attribute 209 attribute=16
+action-attribute 210 attribute=16
+action-attribute 211 attribute=18
+action-attribute 212 attribute=16
+action-attribute 213 attribute=18
+action-attribute 214 attribute=-1
+action-attribute 215 attribute=-1
+action-attribute 216 attribute=-1
+action-attribute 217 attribute=-1
+action-attribute 218 attribute=-1
+action-attribute 219 attribute=-1
+action-attribute 220 attribute=-1
+action-attribute 221 attribute=-1
+action-attribute 222 attribute=-1
+action-attribute 223 attribute=-1
+action-attribute 224 attribute=15 auxiliary=2
+action-attribute 225 attribute=15 auxiliary=2
+action-attribute 226 attribute=15 auxiliary=2
+action-attribute 227 attribute=15 auxiliary=2
+action-attribute 228 attribute=15 auxiliary=2
+action-attribute 229 attribute=15 auxiliary=2
+action-attribute 230 attribute=15 auxiliary=2
+action-attribute 231 attribute=15 auxiliary=2
+action-attribute 232 attribute=15 auxiliary=2
+action-attribute 233 attribute=15 auxiliary=2
+action-attribute 234 attribute=15 auxiliary=2
+action-attribute 235 attribute=15 auxiliary=2
+action-attribute 236 attribute=15 auxiliary=2
+action-attribute 237 attribute=15 auxiliary=2
+action-attribute 238 attribute=15 auxiliary=2
+action-attribute 239 attribute=15 auxiliary=2
+action-attribute 240 attribute=15 auxiliary=2
+action-attribute 241 attribute=15 auxiliary=2
+action-attribute 242 attribute=15 auxiliary=2
+action-attribute 243 attribute=15 auxiliary=2
+action-attribute 244 attribute=15 auxiliary=2
+action-attribute 245 attribute=15 auxiliary=2
+action-attribute 246 attribute=15 auxiliary=2
+action-attribute 247 attribute=-1
+action-attribute 248 attribute=-1
+action-attribute 249 attribute=-1
+action-attribute 250 attribute=-1
+action-attribute 251 attribute=-1
+action-attribute 252 attribute=-1
+action-attribute 253 attribute=-1
+action-attribute 254 attribute=-1
+action-attribute 255 attribute=-1
+action-attribute 259 attribute=-1
+action-attribute 260 attribute=-1
+action-attribute 261 attribute=-1
+action-attribute 262 attribute=-1
+action-attribute 263 attribute=-1
+action-attribute 264 attribute=-1
+action-attribute 265 attribute=-1
+action-attribute 266 attribute=-1
+action-attribute 267 attribute=-1
+action-attribute 268 attribute=-1
+action-attribute 269 attribute=-1
+action-attribute 270 attribute=-1
+action-attribute 271 attribute=-1
+action-attribute 272 attribute=16
+action-attribute 273 attribute=16
+action-attribute 274 attribute=16
+action-attribute 275 attribute=16
+action-attribute 276 attribute=16
+action-attribute 277 attribute=16
+action-attribute 278 attribute=16
+action-attribute 279 attribute=16
+action-attribute 280 attribute=16
+action-attribute 281 attribute=16
+action-attribute 282 attribute=16
+action-attribute 283 attribute=-1
+action-attribute 284 attribute=16
+action-attribute 285 attribute=-1
+action-attribute 286 attribute=-1
+action-attribute 287 attribute=-1
+action-attribute 288 attribute=-1
+action-attribute 289 attribute=-1
+action-attribute 290 attribute=-1
+action-attribute 291 attribute=-1
+action-attribute 292 attribute=-1
+action-attribute 293 attribute=-1
+action-attribute 294 attribute=-1
+action-attribute 295 attribute=-1
+action-attribute 296 attribute=-1
+action-attribute 297 attribute=-1
+action-attribute 298 attribute=-1
+action-attribute 299 attribute=-1
+action-attribute 300 attribute=-1
+action-attribute 301 attribute=-1
+action-attribute 302 attribute=-1
+action-attribute 303 attribute=-1
+action-attribute 304 attribute=1 auxiliary=5
+action-attribute 305 attribute=1 auxiliary=5
+action-attribute 306 attribute=1 auxiliary=5
+action-attribute 307 attribute=1 auxiliary=5
+action-attribute 308 attribute=1 auxiliary=5
+action-attribute 309 attribute=1 auxiliary=5
+action-attribute 310 attribute=1 auxiliary=5
+action-attribute 311 attribute=1 auxiliary=5
+action-attribute 312 attribute=1 auxiliary=5
+action-attribute 313 attribute=1 auxiliary=5
+action-attribute 314 attribute=1 auxiliary=5
+action-attribute 315 attribute=1 auxiliary=5
+action-attribute 316 attribute=1 auxiliary=5
+action-attribute 317 attribute=1 auxiliary=5
+action-attribute 318 attribute=1 auxiliary=5
+action-attribute 319 attribute=1 auxiliary=5
+action-attribute 320 attribute=1 auxiliary=5
+action-attribute 321 attribute=-1
+action-attribute 322 attribute=-1
+action-attribute 323 attribute=-1
+action-attribute 324 attribute=-1
+action-attribute 325 attribute=-1
+action-attribute 326 attribute=-1
+action-attribute 327 attribute=-1
+action-attribute 328 attribute=-1
+action-attribute 329 attribute=-1
+action-attribute 330 attribute=-1
+action-attribute 331 attribute=-1
+action-attribute 332 attribute=-1
+action-attribute 333 attribute=-1
+action-attribute 334 attribute=-1
+action-attribute 335 attribute=-1
+action-attribute 336 attribute=-1 auxiliary=3
+action-attribute 337 attribute=-1 auxiliary=3
+action-attribute 338 attribute=-1 auxiliary=3
+action-attribute 339 attribute=-1 auxiliary=3
+action-attribute 340 attribute=-1 auxiliary=3
+action-attribute 341 attribute=-1 auxiliary=3
+action-attribute 342 attribute=-1 auxiliary=3
+action-attribute 343 attribute=-1 auxiliary=3
+action-attribute 344 attribute=-1 auxiliary=3
+action-attribute 345 attribute=-1 auxiliary=3
+action-attribute 346 attribute=-1 auxiliary=3
+action-attribute 347 attribute=-1 auxiliary=3
+action-attribute 348 attribute=-1 auxiliary=3
+action-attribute 349 attribute=-1 auxiliary=3
+action-attribute 350 attribute=-1 auxiliary=3
+action-attribute 351 attribute=-1 auxiliary=3
+action-attribute 352 attribute=-1 auxiliary=3
+action-attribute 353 attribute=-1 auxiliary=3
+action-attribute 354 attribute=-1 auxiliary=3
+action-attribute 355 attribute=-1 auxiliary=3
+action-attribute 356 attribute=-1 auxiliary=3
+action-attribute 357 attribute=-1 auxiliary=3
+action-attribute 358 attribute=-1 auxiliary=3
+action-attribute 359 attribute=-1 auxiliary=3
+action-attribute 360 attribute=-1 auxiliary=3
+action-attribute 361 attribute=-1 auxiliary=3
+action-attribute 362 attribute=-1 auxiliary=3
+action-attribute 363 attribute=-1 auxiliary=3
+action-attribute 364 attribute=-1 auxiliary=3
+action-attribute 365 attribute=-1 auxiliary=3
+action-attribute 366 attribute=-1 auxiliary=3
+action-attribute 367 attribute=-1
+action-attribute 368 attribute=18
+action-attribute 369 attribute=7
+action-attribute 370 attribute=18
+action-attribute 371 attribute=18
+action-attribute 372 attribute=18
+action-attribute 373 attribute=7
+action-attribute 374 attribute=7
+action-attribute 375 attribute=3
+action-attribute 376 attribute=7
+action-attribute 377 attribute=18
+action-attribute 378 attribute=18
+action-attribute 379 attribute=7
+action-attribute 380 attribute=7
+action-attribute 383 attribute=12
+action-attribute 384 attribute=2
+action-attribute 385 attribute=2
+action-attribute 387 attribute=-1
+action-attribute 388 attribute=5
+action-attribute 389 attribute=7
+action-attribute 390 attribute=7
+action-attribute 392 attribute=6
+action-attribute 393 attribute=18
+action-attribute 395 attribute=18
+action-attribute 396 attribute=18
+action-attribute 397 attribute=5
+action-attribute 398 attribute=5
+action-attribute 399 attribute=3
+action-attribute 400 attribute=7
+action-attribute 401 attribute=7
+action-attribute 402 attribute=-1
+action-attribute 403 attribute=18
+action-attribute 404 attribute=7
+action-attribute 405 attribute=1
+action-attribute 406 attribute=18
+action-attribute 407 attribute=2
+action-attribute 408 attribute=4
+action-attribute 409 attribute=6
+action-attribute 410 attribute=9
+action-attribute 411 attribute=8
+action-attribute 412 attribute=4
+action-attribute 413 attribute=7
+action-attribute 414 attribute=16
+action-attribute 415 attribute=7
+action-attribute 416 attribute=18
+action-attribute 417 attribute=18
+action-attribute 419 attribute=7
+action-attribute 422 attribute=18
+action-attribute 423 attribute=7
+action-attribute 424 attribute=7
+action-attribute 427 attribute=2 auxiliary=1
+action-attribute 428 attribute=8 auxiliary=1
+action-attribute 429 attribute=7 auxiliary=1
+action-attribute 430 attribute=2 auxiliary=1
+action-attribute 431 attribute=-1
+action-attribute 432 attribute=2 auxiliary=1
+action-attribute 433 attribute=2 auxiliary=1
+action-attribute 434 attribute=2 auxiliary=1
+action-attribute 435 attribute=2 auxiliary=1
+action-attribute 436 attribute=3 auxiliary=1
+action-attribute 437 attribute=3 auxiliary=1
+action-attribute 438 attribute=3 auxiliary=1
+action-attribute 439 attribute=3 auxiliary=1
+action-attribute 440 attribute=4 auxiliary=1
+action-attribute 441 attribute=4 auxiliary=1
+action-attribute 442 attribute=4 auxiliary=1
+action-attribute 443 attribute=4 auxiliary=1
+action-attribute 444 attribute=5 auxiliary=1
+action-attribute 445 attribute=5 auxiliary=1
+action-attribute 446 attribute=5 auxiliary=1
+action-attribute 447 attribute=5 auxiliary=1
+action-attribute 448 attribute=6 auxiliary=1
+action-attribute 449 attribute=6 auxiliary=1
+action-attribute 450 attribute=6 auxiliary=1
+action-attribute 451 attribute=6 auxiliary=1
+action-attribute 452 attribute=7 auxiliary=1
+action-attribute 453 attribute=8 auxiliary=1
+action-attribute 454 attribute=8 auxiliary=1
+action-attribute 455 attribute=8 auxiliary=1
+action-attribute 456 attribute=9 auxiliary=1
+action-attribute 457 attribute=9 auxiliary=1
+action-attribute 458 attribute=13 auxiliary=1
+action-attribute 459 attribute=10 auxiliary=1
+action-attribute 460 attribute=9 auxiliary=1
+action-attribute 461 attribute=14 auxiliary=1
+action-attribute 462 attribute=9 auxiliary=1
+action-attribute 463 auxiliary=1
+action-attribute 464 auxiliary=1
+action-attribute 465 auxiliary=1
+action-attribute 466 attribute=7 auxiliary=1
+action-attribute 467 auxiliary=1
+action-attribute 468 attribute=3 auxiliary=1
+action-attribute 469 attribute=5 auxiliary=1
+action-attribute 470 auxiliary=1
+action-attribute 471 attribute=9 auxiliary=1
+action-attribute 472 attribute=16 auxiliary=1
+action-attribute 473 attribute=17 auxiliary=1
+action-attribute 474 auxiliary=1
+action-attribute 475 auxiliary=1
+action-attribute 476 attribute=7 auxiliary=1
+action-attribute 477 attribute=7 auxiliary=1
+action-attribute 478 attribute=8 auxiliary=1
+action-attribute 479 attribute=16 auxiliary=1
+action-attribute 480 attribute=1 auxiliary=1
+action-attribute 481 attribute=3 auxiliary=1
+action-attribute 482 attribute=3 auxiliary=1
+action-attribute 483 attribute=3 auxiliary=1
+action-attribute 484 attribute=2 auxiliary=1
+action-attribute 485 attribute=2 auxiliary=1
+action-attribute 486 attribute=2 auxiliary=1
+action-attribute 487 attribute=6 auxiliary=1
+action-attribute 488 attribute=6 auxiliary=1
+action-attribute 489 attribute=6 auxiliary=1
+action-attribute 490 attribute=5 auxiliary=1
+action-attribute 491 attribute=5 auxiliary=1
+action-attribute 492 attribute=5 auxiliary=1
+action-attribute 493 attribute=4 auxiliary=1
+action-attribute 494 attribute=4 auxiliary=1
+action-attribute 495 attribute=4 auxiliary=1
+action-attribute 496 attribute=1 auxiliary=1
+action-attribute 497 attribute=1 auxiliary=1
+action-attribute 498 attribute=1 auxiliary=1
+action-attribute 499 attribute=16 auxiliary=1
+action-attribute 500 attribute=12 auxiliary=1
+action-attribute 501 attribute=17 auxiliary=1
+action-attribute 502 attribute=17 auxiliary=1
+action-attribute 503 attribute=16 auxiliary=1
+action-attribute 504 attribute=16 auxiliary=1
+action-attribute 505 attribute=16 auxiliary=1
+action-attribute 506 attribute=17 auxiliary=1
+action-attribute 507 attribute=17 auxiliary=1
+action-attribute 508 attribute=17 auxiliary=1
+action-attribute 509 attribute=7 auxiliary=1
+action-attribute 510 attribute=7 auxiliary=1
+action-attribute 511 attribute=7 auxiliary=1
+action-attribute 512 attribute=18 auxiliary=4
+action-attribute 513 attribute=18 auxiliary=4
+action-attribute 514 attribute=18 auxiliary=4
+action-attribute 515 attribute=18 auxiliary=4
+action-attribute 516 attribute=18 auxiliary=4
+action-attribute 517 attribute=18 auxiliary=4
+action-attribute 518 attribute=18 auxiliary=4
+action-attribute 519 attribute=18 auxiliary=4
+action-attribute 520 attribute=18 auxiliary=4
+action-attribute 521 attribute=18 auxiliary=4
+action-attribute 522 attribute=18 auxiliary=4
+action-attribute 523 attribute=18 auxiliary=4
+action-attribute 524 attribute=18 auxiliary=4
+action-attribute 525 attribute=18 auxiliary=4
+action-attribute 526 attribute=18 auxiliary=4
+action-attribute 527 attribute=18 auxiliary=4
+action-attribute 528 attribute=18 auxiliary=4
+action-attribute 529 attribute=18 auxiliary=4
+action-attribute 530 attribute=18 auxiliary=4
+action-attribute 531 attribute=18 auxiliary=4
+action-attribute 532 attribute=18 auxiliary=4
+action-attribute 533 attribute=18 auxiliary=4
+action-attribute 534 attribute=18 auxiliary=4
+action-attribute 535 attribute=18 auxiliary=4
+action-attribute 536 attribute=18 auxiliary=4
+action-attribute 537 attribute=18 auxiliary=4
+action-attribute 538 attribute=18 auxiliary=4
+action-attribute 539 attribute=18 auxiliary=4
+action-attribute 540 attribute=18 auxiliary=4
+action-attribute 541 attribute=18 auxiliary=4
+action-attribute 542 attribute=18 auxiliary=4
+action-attribute 543 attribute=18 auxiliary=4
+action-attribute 544 attribute=18 auxiliary=4
+action-attribute 545 attribute=18 auxiliary=4
+action-attribute 546 attribute=18 auxiliary=4
+action-attribute 547 attribute=18 auxiliary=4
+action-attribute 548 attribute=18 auxiliary=4
+action-attribute 549 attribute=18 auxiliary=4
+action-attribute 550 attribute=18 auxiliary=4
+action-attribute 551 attribute=18 auxiliary=4
+action-attribute 552 attribute=18 auxiliary=4
+action-attribute 553 attribute=18 auxiliary=4
+action-attribute 554 attribute=18 auxiliary=4
+action-attribute 555 attribute=18 auxiliary=4
+action-attribute 556 attribute=18 auxiliary=4
+action-attribute 557 attribute=18 auxiliary=4
+action-attribute 558 attribute=18 auxiliary=4
+action-attribute 559 attribute=18 auxiliary=4
+action-attribute 560 attribute=18 auxiliary=4
+action-attribute 561 attribute=18 auxiliary=4
+action-attribute 562 attribute=18 auxiliary=4
+action-attribute 563 attribute=18 auxiliary=4
+action-attribute 564 attribute=18 auxiliary=4
+action-attribute 565 attribute=18 auxiliary=4
+action-attribute 566 attribute=18 auxiliary=4
+action-attribute 567 attribute=18 auxiliary=4
+action-attribute 568 attribute=18 auxiliary=4
+action-attribute 569 attribute=18 auxiliary=4
+action-attribute 570 attribute=18 auxiliary=4
+action-attribute 571 attribute=18 auxiliary=4
+action-attribute 572 attribute=18 auxiliary=4
+action-attribute 573 attribute=18 auxiliary=4
+action-attribute 574 attribute=18 auxiliary=4
+action-attribute 575 attribute=18 auxiliary=4
+action-attribute 576 attribute=18 auxiliary=4
+action-attribute 577 attribute=18 auxiliary=4
+action-attribute 578 attribute=18 auxiliary=4
+action-attribute 579 attribute=18 auxiliary=4
+action-attribute 580 attribute=18 auxiliary=4
+action-attribute 581 attribute=18 auxiliary=4
+action-attribute 582 attribute=18 auxiliary=4
+action-attribute 583 attribute=18 auxiliary=4
+action-attribute 584 attribute=18 auxiliary=4
+action-attribute 585 attribute=18 auxiliary=4
+action-attribute 586 attribute=18 auxiliary=4
+action-attribute 587 attribute=18 auxiliary=4
+action-attribute 588 attribute=18 auxiliary=4
+action-attribute 589 attribute=18 auxiliary=4
+action-attribute 590 attribute=18 auxiliary=4
+action-attribute 591 attribute=18 auxiliary=4
+action-attribute 592 attribute=18 auxiliary=4
+action-attribute 593 attribute=18 auxiliary=4
+action-attribute 594 attribute=18 auxiliary=4
+action-attribute 595 attribute=18 auxiliary=4
+action-attribute 596 attribute=18 auxiliary=4
+action-attribute 597 attribute=18 auxiliary=4
+action-attribute 598 attribute=18 auxiliary=4
+action-attribute 599 attribute=18 auxiliary=4
+action-attribute 600 attribute=18 auxiliary=4
+action-attribute 601 attribute=18 auxiliary=4
+action-attribute 602 attribute=-1
+action-attribute 603 attribute=-1
+action-attribute 604 attribute=-1
+action-attribute 605 attribute=-1
+action-attribute 606 attribute=-1
+action-attribute 607 attribute=-1
+
+action 0 use=2 target_area=2 hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=14 hp_power=15 effect_percent=100 ailment_level=100 magic_base=5 magic_limit=31000
+action 1 use=2 effect_type=1 cost_type=2 cost=3 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=30 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 2 use=2 effect_type=1 cost_type=2 cost=6 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=60 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 3 use=2 effect_type=1 cost_type=2 cost=12 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=100 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 4 use=2 effect_type=1 cost_type=2 cost=8 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=25 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 5 use=2 effect_type=1 cost_type=2 cost=16 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=55 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 6 use=2 effect_type=1 cost_type=2 cost=32 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=90 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 7 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=1 hp_power=35 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 8 use=2 effect_type=1 cost_type=2 cost=24 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=1 hp_power=60 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 9 use=2 effect_type=1 cost_type=2 cost=48 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=120 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 10 use=2 effect_type=1 cost_type=2 cost=3 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=25 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x4 magic_base=10 magic_limit=31000
+action 11 use=2 effect_type=1 cost_type=2 cost=6 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=55 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x4 magic_base=10 magic_limit=31000
+action 12 use=2 effect_type=1 cost_type=2 cost=12 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=95 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x4 magic_base=10 magic_limit=31000
+action 13 use=2 effect_type=1 cost_type=2 cost=8 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=20 effect_percent=100 ailment_type=1 ailment_level=10 base_status=0x4 magic_base=10 magic_limit=31000
+action 14 use=2 effect_type=1 cost_type=2 cost=16 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=50 effect_percent=100 ailment_type=1 ailment_level=10 base_status=0x4 magic_base=10 magic_limit=31000
+action 15 use=2 effect_type=1 cost_type=2 cost=32 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=80 effect_percent=100 ailment_type=1 ailment_level=10 base_status=0x4 magic_base=10 magic_limit=31000
+action 16 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=1 hp_power=30 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x4 magic_base=20 magic_limit=31000
+action 17 use=2 effect_type=1 cost_type=2 cost=24 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=1 hp_power=50 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x4 magic_base=20 magic_limit=31000
+action 18 use=2 effect_type=1 cost_type=2 cost=48 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=110 effect_percent=100 ailment_type=1 ailment_level=20 base_status=0x4 magic_base=20 magic_limit=31000
+action 19 use=2 effect_type=1 cost_type=2 cost=3 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=25 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x2 magic_base=10 magic_limit=31000
+action 20 use=2 effect_type=1 cost_type=2 cost=6 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=55 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x2 magic_base=10 magic_limit=31000
+action 21 use=2 effect_type=1 cost_type=2 cost=12 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=95 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x2 magic_base=10 magic_limit=31000
+action 22 use=2 effect_type=1 cost_type=2 cost=8 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=20 effect_percent=100 ailment_type=1 ailment_level=10 base_status=0x2 magic_base=10 magic_limit=31000
+action 23 use=2 effect_type=1 cost_type=2 cost=16 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=50 effect_percent=100 ailment_type=1 ailment_level=10 base_status=0x2 magic_base=10 magic_limit=31000
+action 24 use=2 effect_type=1 cost_type=2 cost=32 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=80 effect_percent=100 ailment_type=1 ailment_level=10 base_status=0x2 magic_base=10 magic_limit=31000
+action 25 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=1 hp_power=30 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x2 magic_base=20 magic_limit=31000
+action 26 use=2 effect_type=1 cost_type=2 cost=24 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=1 hp_power=50 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x2 magic_base=20 magic_limit=31000
+action 27 use=2 effect_type=1 cost_type=2 cost=48 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=110 effect_percent=100 ailment_type=1 ailment_level=20 base_status=0x2 magic_base=20 magic_limit=31000
+action 28 use=2 effect_type=1 cost_type=2 cost=3 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=30 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 29 use=2 effect_type=1 cost_type=2 cost=6 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=60 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 30 use=2 effect_type=1 cost_type=2 cost=12 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=100 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 31 use=2 effect_type=1 cost_type=2 cost=8 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=25 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 32 use=2 effect_type=1 cost_type=2 cost=16 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=55 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 33 use=2 effect_type=1 cost_type=2 cost=32 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=90 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 34 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=1 hp_power=35 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 35 use=2 effect_type=1 cost_type=2 cost=24 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=1 hp_power=60 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 36 use=2 effect_type=1 cost_type=2 cost=48 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=120 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 37 use=2 effect_type=1 cost_type=2 cost=3 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=30 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 38 use=2 effect_type=1 cost_type=2 cost=6 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=60 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 39 use=2 effect_type=1 cost_type=2 cost=12 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=100 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 40 use=2 effect_type=1 cost_type=2 cost=8 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=25 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 41 use=2 effect_type=1 cost_type=2 cost=16 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=55 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 42 use=2 effect_type=1 cost_type=2 cost=32 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=90 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 43 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=1 hp_power=35 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 44 use=2 effect_type=1 cost_type=2 cost=24 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=1 hp_power=60 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 45 use=2 effect_type=1 cost_type=2 cost=48 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=120 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 46 use=2 effect_type=1 cost_type=2 cost=30 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=70 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 47 use=2 effect_type=1 cost_type=2 cost=45 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=90 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 48 use=2 effect_type=1 cost_type=2 cost=60 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=120 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 49 flags=0x2 use=2 effect_type=1 cost_type=2 cost=5 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=12 hp_power=30 effect_percent=100 ailment_level=100 magic_limit=100
+action 50 flags=0x2 use=2 effect_type=1 cost_type=2 cost=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 mp_type=12 mp_power=20 effect_percent=100 ailment_level=100 magic_limit=31000
+action 51 flags=0x2 use=2 effect_type=1 cost_type=2 cost=15 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=12 hp_power=25 mp_type=12 mp_power=20 effect_percent=100 ailment_level=100 magic_limit=31000
+action 52 use=2 effect_type=1 cost_type=2 cost=66 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=150 effect_percent=100 ailment_level=100 base_status=0x8000 magic_base=20 magic_limit=31000
+action 53 flags=0x8 use=2 cost_type=1 cost_base=1 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=96 hits_min=2 hits_max=5 hp_type=1 hp_power=40 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 54 flags=0x8 use=2 cost_type=1 cost_base=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=68 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 55 flags=0x1 use=2 effect_type=1 target_area=9 target_rule=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_points=2 program=9 magic_limit=31000
+action 56 flags=0x1 use=2 effect_type=1 target_area=9 target_rule=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_points=4 program=9 magic_limit=31000
+action 57 flags=0x1 use=2 effect_type=1 cost_type=2 cost=25 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=3 ailment_level=50 base_status=0x2b8 support_points=99 magic_limit=31000
+action 58 flags=0x1 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=60 base_status=0x8000 magic_base=10 magic_limit=31000
+action 59 flags=0x1 use=2 effect_type=1 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x8000 magic_base=10 magic_limit=31000
+action 60 flags=0x1 use=2 effect_type=1 cost_type=2 cost=6 target_area=2 hit_type=1 hit_level=65 hits_min=1 hits_max=1 hp_type=8 hp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 61 flags=0x1 use=2 effect_type=1 cost_type=2 cost=10 target_area=2 hit_type=1 hit_level=75 hits_min=1 hits_max=1 hp_type=8 hp_power=66 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 62 flags=0x1 use=2 effect_type=1 cost_type=2 cost=15 target_type=1 target_area=2 hit_type=1 hit_level=40 hits_min=1 hits_max=1 hp_type=8 hp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 63 flags=0x1 use=2 effect_type=1 cost_type=2 cost=25 target_type=1 target_area=2 hit_type=1 hit_level=50 hits_min=1 hits_max=1 hp_type=8 hp_power=66 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 64 use=2 effect_type=1 cost_type=2 cost=36 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=110 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 65 flags=0x1 use=2 effect_type=1 cost_type=2 cost=6 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x4000 magic_base=10 magic_limit=31000
+action 66 flags=0x1 use=2 effect_type=1 cost_type=2 cost=10 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=60 base_status=0x4000 magic_base=10 magic_limit=31000
+action 67 flags=0x1 use=2 effect_type=1 cost_type=2 cost=15 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=20 base_status=0x4000 magic_base=10 magic_limit=31000
+action 68 flags=0x1 use=2 effect_type=1 cost_type=2 cost=25 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=30 base_status=0x4000 magic_base=10 magic_limit=31000
+action 69 flags=0x1 use=2 effect_type=1 cost_type=2 cost=10 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=35 base_status=0x400 magic_base=10 magic_limit=31000
+action 70 flags=0x1 use=2 effect_type=1 cost_type=2 cost=15 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=25 base_status=0x400 magic_base=10 magic_limit=31000
+action 71 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=45 base_status=0x800 magic_base=10 magic_limit=31000
+action 72 flags=0x1 use=2 effect_type=1 cost_type=2 cost=10 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=30 base_status=0x800 magic_base=10 magic_limit=31000
+action 73 flags=0x1 use=2 effect_type=1 cost_type=2 cost=4 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x10 magic_base=10 magic_limit=31000
+action 74 flags=0x1 use=2 effect_type=1 cost_type=2 cost=11 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=25 base_status=0x10 magic_base=10 magic_limit=31000
+action 75 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=60 base_status=0x8 magic_base=10 magic_limit=31000
+action 76 flags=0x1 use=2 effect_type=1 cost_type=2 cost=9 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=30 base_status=0x8 magic_base=10 magic_limit=31000
+action 77 flags=0x1 use=2 effect_type=1 cost_type=2 cost=16 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=100 base_status=0x4000 program=4 magic_base=10 magic_limit=31000
+action 78 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x100 magic_base=10 magic_limit=31000
+action 79 flags=0x1 use=2 effect_type=1 cost_type=2 cost=10 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=35 base_status=0x100 magic_base=10 magic_limit=31000
+action 80 use=2 effect_type=1 cost_type=2 cost=8 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=1 hp_power=25 effect_percent=100 ailment_type=1 ailment_level=35 base_status=0x80 magic_base=10 magic_limit=31000
+action 81 flags=0x1 use=2 effect_type=1 cost_type=2 cost=15 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=55 effect_percent=100 ailment_type=1 ailment_level=35 base_status=0x80 magic_base=10 magic_limit=31000
+action 82 use=2 effect_type=1 cost_type=2 cost=25 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=75 effect_percent=100 ailment_type=1 ailment_level=30 base_status=0x80 magic_base=10 magic_limit=31000
+action 83 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=60 base_status=0x20 magic_base=10 magic_limit=31000
+action 84 use=2 effect_type=1 cost_type=2 cost=24 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=60 mp_power=50 effect_percent=100 ailment_type=1 ailment_level=20 base_status=0x20 magic_base=10 magic_limit=31000
+action 85 flags=0x1 use=2 effect_type=1 cost_type=2 cost=9 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=25 base_status=0x20 magic_base=10 magic_limit=31000
+action 86 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=55 base_status=0x200 magic_base=10 magic_limit=31000
+action 87 flags=0x1 use=2 effect_type=1 cost_type=2 cost=13 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=45 base_status=0x200 magic_base=10 magic_limit=31000
+action 88 use=2 effect_type=1 cost_type=2 cost=20 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=60 effect_percent=100 ailment_type=1 ailment_level=45 base_status=0x200 magic_base=10 magic_limit=31000
+action 89 use=2 effect_type=1 cost_type=2 cost=99 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=200 effect_percent=100 ailment_type=3 ailment_level=100 base_status=0x2b8 support_points=99 magic_base=10 magic_limit=31000
+action 90 use=2 effect_type=1 cost_type=2 cost=20 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=5 hits_max=8 hp_type=1 hp_power=35 effect_percent=100 ailment_type=1 ailment_level=25 base_status=0x4 magic_base=10 magic_limit=31000
+action 91 use=2 effect_type=1 cost_type=2 cost=20 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=5 hits_max=8 hp_type=1 hp_power=30 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 92 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 93 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 94 use=2 effect_type=1 cost_type=2 cost=80 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=180 effect_percent=100 ailment_type=1 ailment_level=100 base_status=0x4000 magic_base=10 magic_limit=31000
+action 95 use=2 effect_type=1 cost_type=2 cost=70 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=5 hits_max=8 hp_type=1 hp_power=100 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 96 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 97 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 98 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 99 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 100 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 101 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 102 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 103 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 104 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 105 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 106 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 107 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 108 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 109 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 110 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 111 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 112 use=2 cost_type=1 cost=10 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=18 effect_percent=100 ailment_level=100 magic_base=5 magic_limit=31000
+action 113 use=2 cost_type=1 cost=10 target_area=2 hit_type=1 hit_level=96 hits_min=2 hits_max=4 hp_type=1 hp_power=6 effect_percent=100 ailment_level=100 magic_base=5 magic_limit=31000
+action 114 use=2 cost_type=1 cost=12 target_area=2 hit_type=1 hit_level=96 hits_min=2 hits_max=4 hp_type=1 hp_power=6 effect_percent=100 ailment_type=1 ailment_level=25 base_status=0x80 magic_base=5 magic_limit=31000
+action 115 use=2 cost_type=1 cost=12 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=18 effect_percent=100 ailment_type=1 ailment_level=35 base_status=0x80 magic_base=10 magic_limit=31000
+action 116 use=2 cost_type=1 cost=12 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=19 effect_percent=100 ailment_type=1 ailment_level=35 base_status=0x20 magic_base=10 magic_limit=31000
+action 117 use=2 cost_type=1 cost=14 target_area=2 hit_type=1 hit_level=96 hits_min=2 hits_max=4 hp_type=1 hp_power=7 effect_percent=100 ailment_type=1 ailment_level=20 base_status=0x400 magic_base=5 magic_limit=31000
+action 118 use=2 cost_type=1 cost=15 target_area=2 hit_type=1 hit_level=96 hits_min=2 hits_max=4 hp_type=1 hp_power=7 effect_percent=100 ailment_type=1 ailment_level=25 base_status=0x100 magic_base=5 magic_limit=31000
+action 119 use=2 cost_type=1 cost=15 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=96 hits_min=2 hits_max=4 hp_type=1 hp_power=11 effect_percent=100 magic_base=2 magic_limit=31000
+action 120 use=2 cost_type=1 cost=17 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=96 hits_min=3 hits_max=5 hp_type=1 hp_power=13 effect_percent=100 ailment_level=25 base_status=0x80 magic_base=5 magic_limit=31000
+action 121 use=2 cost_type=1 cost=12 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=20 effect_percent=100 ailment_level=100 magic_base=12 magic_limit=31000
+action 122 use=2 cost_type=1 cost=16 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=23 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 123 use=2 cost_type=1 cost=17 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=21 effect_percent=100 ailment_type=1 ailment_level=55 base_status=0x8 magic_base=10 magic_limit=31000
+action 124 use=2 cost_type=1 cost=18 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=22 effect_percent=100 ailment_type=1 ailment_level=35 base_status=0x200 magic_base=12 magic_limit=31000
+action 125 use=2 cost_type=1 cost=23 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=96 hits_min=2 hits_max=4 hp_type=1 hp_power=19 effect_percent=100 ailment_type=1 ailment_level=20 base_status=0x200 magic_base=10 magic_limit=31000
+action 126 use=2 cost_type=1 cost=21 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=20 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 127 use=2 cost_type=1 cost=24 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=22 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x100 magic_base=10 magic_limit=31000
+action 128 use=2 cost_type=1 cost=22 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=19 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x400 magic_base=10 magic_limit=31000
+action 129 use=2 cost_type=1 cost=24 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=22 effect_percent=100 ailment_level=100 base_status=0x200 magic_base=25 magic_limit=31000
+action 130 use=2 cost_type=1 cost=20 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=6 hp_power=23 mp_power=50 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x10 magic_base=15 magic_limit=31000
+action 131 use=2 cost_type=1 cost=21 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=6 hp_power=25 effect_percent=100 ailment_level=100 magic_base=15 magic_limit=31000
+action 132 use=2 cost_type=1 cost=26 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=96 hits_min=3 hits_max=5 hp_type=6 hp_power=16 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 133 use=2 cost_type=1 cost=29 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=96 hits_min=5 hits_max=8 hp_type=1 hp_power=25 effect_percent=100 ailment_type=1 ailment_level=32 base_status=0x20 magic_base=10 magic_limit=31000
+action 134 use=2 cost_type=1 cost=16 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=6 hp_power=14 mp_power=50 effect_percent=100 ailment_level=100 magic_base=14 magic_limit=31000
+action 135 use=2 cost_type=1 cost=18 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=6 hp_power=15 mp_power=50 effect_percent=100 ailment_type=1 ailment_level=30 base_status=0x80 magic_base=10 magic_limit=31000
+action 136 use=2 cost_type=1 cost=27 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=6 hp_power=21 mp_power=50 effect_percent=100 ailment_level=100 magic_base=12 magic_limit=31000
+action 137 use=2 cost_type=1 cost=31 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=6 hp_power=24 mp_power=50 effect_percent=100 ailment_type=1 ailment_level=35 base_status=0x800 magic_base=5 magic_limit=31000
+action 138 use=2 cost_type=1 cost=25 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=35 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 139 use=2 cost_type=1 cost=30 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=30 mp_power=50 effect_percent=100 ailment_level=100 magic_base=16 magic_limit=31000
+action 140 use=2 cost_type=1 cost=29 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=27 mp_power=50 effect_percent=100 ailment_type=1 ailment_level=25 base_status=0x10 magic_base=10 magic_limit=31000
+action 141 use=2 cost_type=1 cost=35 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=33 mp_power=50 effect_percent=100 ailment_level=10 support_type=0x80 support_points=1 magic_base=10 magic_limit=31000
+action 142 use=2 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=15 mp_power=50 effect_percent=100 ailment_level=100 magic_base=5 magic_limit=31000
+action 143 use=2 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=20 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 144 use=2 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=25 mp_power=50 effect_percent=100 ailment_level=100 magic_base=15 magic_limit=31000
+action 145 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 146 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 147 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 148 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 149 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 150 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 151 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 152 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 153 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 154 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 155 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 156 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 157 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 158 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 159 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 160 flags=0x1 use=3 effect_type=1 cost_type=2 cost=3 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=2 hp_power=60 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 161 flags=0x1 use=3 effect_type=1 cost_type=2 cost=7 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=2 hp_power=200 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 162 flags=0x1 use=3 effect_type=1 cost_type=2 cost=15 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=11 hp_power=100 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 163 flags=0x1 use=3 effect_type=1 cost_type=2 cost=10 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=2 hp_power=45 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 164 flags=0x1 use=3 effect_type=1 cost_type=2 cost=18 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=2 hp_power=150 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 165 flags=0x1 use=3 effect_type=1 cost_type=2 cost=36 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=11 hp_power=100 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 166 flags=0x1 use=2 effect_type=1 cost_type=2 cost=10 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=50 mp_power=50 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x228 magic_limit=31000
+action 167 flags=0x1 use=2 effect_type=1 cost_type=2 cost=15 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=50 mp_power=50 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x228 magic_limit=31000
+action 168 flags=0x1 use=3 effect_type=1 cost_type=2 cost=5 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=50 mp_power=50 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x10 magic_base=10 magic_limit=31000
+action 169 flags=0x1 use=3 effect_type=1 cost_type=2 cost=5 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x80 magic_base=10 magic_limit=31000
+action 170 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x200 magic_base=10 magic_limit=31000
+action 171 flags=0x1 use=2 effect_type=1 cost_type=2 cost=20 target_area=9 untargetable_status=0xbfff hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=11 hp_power=25 mp_power=50 hp_base=10 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x4000 magic_base=10 magic_limit=31000
+action 172 flags=0x1 use=2 effect_type=1 cost_type=2 cost=35 target_area=9 untargetable_status=0xbfff hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=11 hp_power=100 mp_power=50 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x4000 magic_base=10 magic_limit=31000
+action 173 flags=0x9 use=2 effect_type=1 cost_type=1 cost_base=1 target_type=1 target_area=9 target_rule=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=11 hp_power=100 mp_type=11 mp_power=100 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x4000 magic_base=10 magic_limit=31000
+action 174 flags=0x1 use=2 effect_type=1 cost_type=2 cost=50 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=11 hp_power=100 mp_power=50 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0xffe magic_base=10 magic_limit=31000
+action 175 flags=0x1 use=2 effect_type=1 cost_type=2 cost=50 target_area=9 target_rule=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=50 mp_type=5 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 176 flags=0x1 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x2 support_points=1 magic_base=10 magic_limit=31000
+action 177 flags=0x1 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x220 support_points=1 magic_base=10 magic_limit=31000
+action 178 flags=0x1 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x80 support_points=1 magic_base=10 magic_limit=31000
+action 179 flags=0x1 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x8 support_points=1 magic_base=10 magic_limit=31000
+action 180 flags=0x1 use=2 effect_type=1 cost_type=2 cost=10 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x1000 support_points=1 magic_base=10 magic_limit=31000
+action 181 flags=0x1 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x1 support_points=1 magic_base=10 magic_limit=31000
+action 182 flags=0x1 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x110 support_points=1 magic_base=10 magic_limit=31000
+action 183 flags=0x1 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x40 support_points=1 magic_base=10 magic_limit=31000
+action 184 flags=0x1 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x4 support_points=1 magic_base=10 magic_limit=31000
+action 185 flags=0x1 use=2 effect_type=1 cost_type=2 cost=10 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x800 support_points=50 magic_base=10 magic_limit=31000
+action 186 flags=0x1 use=2 effect_type=1 cost_type=2 cost=40 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x2 support_points=2 magic_base=10 magic_limit=31000
+action 187 flags=0x1 use=2 effect_type=1 cost_type=2 cost=30 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x8 support_points=2 magic_base=10 magic_limit=31000
+action 188 flags=0x1 use=2 effect_type=1 cost_type=2 cost=30 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x220 support_points=2 magic_base=10 magic_limit=31000
+action 189 flags=0x1 use=2 effect_type=1 cost_type=2 cost=20 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x81 support_points=2 magic_base=10 magic_limit=31000
+action 190 flags=0x1 use=2 effect_type=1 cost_type=2 cost=48 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x2aa support_points=1 magic_base=10 magic_limit=31000
+action 191 flags=0x1 use=2 effect_type=1 cost_type=2 cost=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=1 magic_base=10 magic_limit=31000
+action 192 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_area=9 target_rule=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x400 support_points=99 magic_base=10 magic_limit=31000
+action 193 flags=0x1 use=2 effect_type=1 cost_type=2 cost=10 target_area=9 target_rule=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x2000 support_points=99 magic_base=10 magic_limit=31000
+action 194 flags=0x1 use=2 effect_type=1 target_area=9 target_rule=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=3 magic_base=10 magic_limit=31000
+action 195 flags=0x1 use=2 effect_type=1 target_area=9 target_rule=12 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=2 magic_base=10 magic_limit=31000
+action 196 flags=0x1 use=1 effect_type=1 cost_type=2 cost=10 target_type=3 target_area=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=5 magic_base=10 magic_limit=31000
+action 197 flags=0x1 use=1 effect_type=1 cost_type=2 cost=8 target_type=3 target_area=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=6 magic_base=10 magic_limit=31000
+action 198 flags=0x1 use=1 effect_type=1 cost_type=2 cost=12 target_type=3 target_area=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=7 magic_base=10 magic_limit=31000
+action 199 flags=0x1 use=1 effect_type=1 cost_type=2 cost=2 target_type=3 target_area=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 200 flags=0x1 use=1 effect_type=1 cost_type=2 cost=5 target_type=3 target_area=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 201 flags=0x1 use=1 effect_type=1 cost_type=2 cost=10 target_type=3 target_area=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 202 flags=0x1 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 203 flags=0x1 use=2 effect_type=1 target_area=9 target_rule=12 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=2 magic_base=10 magic_limit=31000
+action 204 flags=0x1 use=2 effect_type=1 target_area=9 target_rule=12 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=2 magic_base=10 magic_limit=31000
+action 205 flags=0x1 use=2 effect_type=1 target_area=9 target_rule=12 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=2 magic_base=10 magic_limit=31000
+action 206 flags=0x1 use=3 effect_type=1 cost_type=2 cost=5 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x40 magic_base=10 magic_limit=31000
+action 207 flags=0x1 use=3 effect_type=1 cost_type=2 cost=5 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x100 magic_base=10 magic_limit=31000
+action 208 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x800 magic_base=10 magic_limit=31000
+action 209 flags=0x1 use=2 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x2000 magic_base=10 magic_limit=31000
+action 210 flags=0x1 use=2 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x2000 magic_base=10 magic_limit=31000
+action 211 flags=0x1 use=2 effect_type=1 target_area=9 target_rule=12 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=2 magic_base=10 magic_limit=31000
+action 212 flags=0x1 use=3 effect_type=1 cost_type=2 cost=5 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x400 magic_base=10 magic_limit=31000
+action 213 flags=0x1 use=2 effect_type=1 target_area=9 target_rule=12 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=2 magic_base=10 magic_limit=31000
+action 214 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 215 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 216 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 217 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 218 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 219 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 220 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 221 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 222 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 223 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 224 flags=0x20 use=2 cost_type=1 cost=12 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=9 effect_percent=100 death_type=25 magic_base=10 magic_limit=31000
+action 225 flags=0x20 use=2 cost_type=1 cost=15 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=15 effect_percent=100 death_type=10 magic_base=10 magic_limit=31000
+action 226 flags=0x21 use=2 effect_type=2 cost_type=1 cost=18 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 death_type=20 magic_base=10 magic_limit=31000
+action 227 flags=0x21 use=2 effect_type=2 cost_type=1 cost=22 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 death_type=30 magic_base=10 magic_limit=31000
+action 228 flags=0x20 use=2 cost_type=1 cost=26 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=96 hits_min=2 hits_max=4 hp_type=1 hp_power=6 effect_percent=100 magic_base=10 magic_limit=31000
+action 229 flags=0x20 use=2 cost_type=1 cost=32 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=12 effect_percent=100 magic_base=10 magic_limit=31000
+action 230 flags=0x21 use=2 effect_type=2 cost_type=1 cost=34 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 death_type=15 magic_base=10 magic_limit=31000
+action 231 flags=0x21 use=2 effect_type=2 cost_type=1 cost=35 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 death_type=30 magic_base=10 magic_limit=31000
+action 232 flags=0x20 use=2 effect_type=2 cost_type=1 cost=35 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 233 flags=0x20 use=2 effect_type=2 cost_type=1 cost=38 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 death_type=23 magic_base=10 magic_limit=31000
+action 234 use=2 effect_type=2 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 235 use=2 effect_type=2 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 236 use=2 effect_type=2 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 237 use=2 effect_type=2 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 238 use=2 effect_type=2 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=60 magic_base=10 magic_limit=31000
+action 239 use=2 effect_type=2 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=60 base_status=0x1 magic_base=10 magic_limit=31000
+action 240 use=2 effect_type=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 241 use=2 effect_type=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 242 use=2 effect_type=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 243 use=2 effect_type=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 244 use=2 effect_type=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 245 use=2 effect_type=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 246 use=2 effect_type=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 247 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=60 base_status=0x1 magic_base=10 magic_limit=31000
+action 248 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=60 base_status=0x1 magic_base=10 magic_limit=31000
+action 249 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 250 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 251 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 252 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 253 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 254 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 255 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 256 use=2 cost_type=1 cost=30 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=40 mp_power=50 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x10 magic_base=20 magic_limit=31000
+action 257 use=2 cost_type=1 cost=30 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=1 hp_power=45 mp_power=50 effect_percent=100 ailment_type=1 ailment_level=50 base_status=0x100 magic_base=20 magic_limit=31000
+action 258 use=2 cost=16 target_type=1 target_area=2 hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=6 hp_power=30 mp_power=50 effect_percent=100 ailment_level=100 magic_base=32 magic_limit=31000
+action 259 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 260 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 261 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 262 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 263 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 264 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 265 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 266 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 267 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 268 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 269 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 270 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 271 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 272 flags=0x1 use=3 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=5 hp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 273 flags=0x1 use=3 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=5 hp_power=150 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 274 flags=0x1 use=3 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=5 hp_power=300 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 275 flags=0x1 use=3 effect_type=1 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=5 hp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 276 flags=0x1 use=3 effect_type=1 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=5 hp_power=150 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 277 flags=0x1 use=3 effect_type=1 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=5 hp_power=150 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 278 flags=0x1 use=3 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 mp_type=5 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 279 flags=0x1 use=3 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 mp_type=5 mp_power=150 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 280 flags=0x1 use=3 effect_type=1 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 mp_type=11 mp_power=100 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 281 flags=0x1 use=3 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=11 hp_power=100 mp_type=11 mp_power=100 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 282 flags=0x1 use=3 effect_type=1 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=11 hp_power=100 mp_type=11 mp_power=100 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 283 flags=0x1 use=3 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=11 hp_power=80 mp_type=11 mp_power=80 effect_percent=100 ailment_type=3 ailment_level=75 base_status=0x1c0 magic_base=10 magic_limit=31000
+action 284 flags=0x1 use=3 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x40 magic_base=10 magic_limit=31000
+action 285 flags=0x1 use=3 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=11 hp_power=50 effect_percent=100 ailment_type=1 ailment_level=50 base_status=0x80 magic_base=10 magic_limit=31000
+action 286 flags=0x1 use=3 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=11 hp_power=50 effect_percent=100 ailment_type=1 ailment_level=50 base_status=0x40 magic_base=10 magic_limit=31000
+action 287 flags=0x1 use=3 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=11 hp_power=50 effect_percent=100 ailment_type=1 ailment_level=50 base_status=0x10 magic_base=10 magic_limit=31000
+action 288 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 289 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 290 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 291 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 292 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 293 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 294 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 295 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 296 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 297 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 298 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 299 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 300 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 301 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 302 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 303 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 304 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=8 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 305 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=24 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x2 magic_base=10 magic_limit=31000
+action 306 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=48 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x8 magic_base=10 magic_limit=31000
+action 307 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=16 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 308 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=64 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x100 magic_base=10 magic_limit=31000
+action 309 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=32 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x4 magic_base=10 magic_limit=31000
+action 310 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=40 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 311 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=56 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 312 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=104 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x200 magic_base=10 magic_limit=31000
+action 313 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=80 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 314 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=88 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x80 magic_base=10 magic_limit=31000
+action 315 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=72 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x10 magic_base=10 magic_limit=31000
+action 316 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=96 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 317 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=120 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 318 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=112 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x800 magic_base=10 magic_limit=31000
+action 319 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=128 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 320 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=200 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 321 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 322 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 323 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 324 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 325 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 326 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 327 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 328 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 329 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 330 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 331 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 332 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 333 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 334 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 335 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 336 flags=0x1 use=2 effect_type=1 cost_type=2 cost=20 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=1 magic_base=10 magic_limit=31000
+action 337 flags=0x1 use=2 effect_type=1 cost_type=2 cost=3 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=2 magic_base=10 magic_limit=31000
+action 338 flags=0x1 use=2 effect_type=1 cost_type=2 cost=3 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=3 magic_base=10 magic_limit=31000
+action 339 flags=0x1 use=2 effect_type=1 cost_type=2 cost=3 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=4 magic_base=10 magic_limit=31000
+action 340 flags=0x1 use=2 effect_type=1 cost_type=2 cost=3 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=5 magic_base=10 magic_limit=31000
+action 341 flags=0x1 use=2 effect_type=1 cost_type=2 cost=3 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=6 magic_base=10 magic_limit=31000
+action 342 flags=0x1 use=2 effect_type=1 cost_type=2 cost=3 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=7 magic_base=10 magic_limit=31000
+action 343 flags=0x1 use=2 effect_type=1 cost_type=2 cost=3 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=8 magic_base=10 magic_limit=31000
+action 344 flags=0x1 use=2 effect_type=1 cost_type=2 cost=3 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=9 magic_base=10 magic_limit=31000
+action 345 flags=0x1 use=2 effect_type=1 cost_type=2 cost=3 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=10 magic_base=10 magic_limit=31000
+action 346 flags=0x1 use=2 effect_type=1 cost_type=2 cost=3 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=11 magic_base=10 magic_limit=31000
+action 347 flags=0x1 use=2 effect_type=1 cost_type=2 cost=3 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=12 magic_base=10 magic_limit=31000
+action 348 flags=0x1 use=2 effect_type=1 cost_type=2 cost=3 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=13 magic_base=10 magic_limit=31000
+action 349 flags=0x1 use=2 effect_type=1 cost_type=2 cost=25 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=14 magic_base=10 magic_limit=31000
+action 350 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=15 magic_base=10 magic_limit=31000
+action 351 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=16 magic_base=10 magic_limit=31000
+action 352 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=17 magic_base=10 magic_limit=31000
+action 353 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=18 magic_base=10 magic_limit=31000
+action 354 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=19 magic_base=10 magic_limit=31000
+action 355 flags=0x1 use=2 effect_type=1 cost_type=2 cost=30 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=20 magic_base=10 magic_limit=31000
+action 356 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=21 magic_base=10 magic_limit=31000
+action 357 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=22 magic_base=10 magic_limit=31000
+action 358 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=23 magic_base=10 magic_limit=31000
+action 359 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=24 magic_base=10 magic_limit=31000
+action 360 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=25 magic_base=10 magic_limit=31000
+action 361 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=26 magic_base=10 magic_limit=31000
+action 362 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=27 magic_base=10 magic_limit=31000
+action 363 flags=0x1 use=2 effect_type=1 cost_type=2 cost=7 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=28 magic_base=10 magic_limit=31000
+action 364 flags=0x1 use=2 effect_type=1 cost_type=2 cost=30 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=29 magic_base=10 magic_limit=31000
+action 365 flags=0x1 use=2 effect_type=1 cost_type=2 cost=30 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=30 magic_base=10 magic_limit=31000
+action 366 flags=0x1 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=31 magic_base=10 magic_limit=31000
+action 367 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 368 flags=0x1 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=15 magic_base=10 magic_limit=31000
+action 369 flags=0x2 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=12 hp_power=35 effect_percent=100 ailment_level=100 magic_limit=31000
+action 370 flags=0x1 use=2 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=13 magic_base=10 magic_limit=31000
+action 371 flags=0x1 use=2 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=13 magic_base=10 magic_limit=31000
+action 372 flags=0x1 use=2 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=13 magic_base=10 magic_limit=31000
+action 373 use=2 effect_type=1 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=210 effect_percent=100 ailment_type=1 ailment_level=100 base_status=0x4000 magic_base=10 magic_limit=31000
+action 374 use=2 effect_type=1 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=5 hits_max=8 hp_type=1 hp_power=90 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 375 use=2 effect_type=1 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=5 hits_max=8 hp_type=1 hp_power=50 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x4 magic_base=10 magic_limit=31000
+action 376 use=2 target_area=2 hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=1 hp_power=30 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 377 flags=0x1 use=2 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=45 base_status=0x2000 magic_base=10 magic_limit=31000
+action 378 flags=0x1 use=2 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x2000 magic_base=10 magic_limit=31000
+action 379 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 380 flags=0x2 use=2 effect_type=1 cost_type=2 cost=8 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=12 hp_power=500 effect_percent=100 ailment_level=100 magic_limit=31000
+action 381 use=2 target_area=2 hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=14 hp_power=20 effect_percent=100 ailment_level=100 magic_base=5 magic_limit=31000
+action 382 use=2 target_area=2 hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=14 hp_power=15 effect_percent=100 ailment_level=100 magic_base=5 magic_limit=31000
+action 383 flags=0x2 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 mp_type=12 mp_power=35 effect_percent=100 ailment_level=100 magic_limit=31000
+action 384 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=18 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 385 use=2 effect_type=1 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=45 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 386 use=2 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=5 hits_max=8 hp_type=1 hp_power=7 mp_power=50 effect_percent=100 ailment_level=100 magic_base=5 magic_limit=31000
+action 387 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 388 use=2 effect_type=1 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=50 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 389 flags=0x2 use=2 effect_type=1 cost_type=2 cost=5 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=12 hp_power=65 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 390 flags=0x2 use=2 effect_type=1 cost_type=2 cost=5 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=12 hp_power=55 mp_power=50 effect_percent=100 ailment_type=1 ailment_level=100 base_status=0x1000 magic_limit=31000
+action 391 use=2 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=22 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 392 use=2 effect_type=1 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=60 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 393 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=14 magic_base=10 magic_limit=31000
+action 394 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=25 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 395 flags=0x1 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 396 flags=0x1 use=2 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=65 base_status=0x2000 magic_base=10 magic_limit=31000
+action 397 use=2 effect_type=1 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=200 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 398 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=150 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 399 use=2 effect_type=1 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=150 effect_percent=100 ailment_type=1 ailment_level=80 base_status=0x4 magic_base=10 magic_limit=31000
+action 400 use=2 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=27 effect_percent=100 ailment_type=1 ailment_level=25 base_status=0x800 magic_base=10 magic_limit=31000
+action 401 use=2 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=128 effect_percent=100 ailment_level=65 base_status=0x4 magic_limit=31000
+action 402 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 403 flags=0x1 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 404 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 405 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 406 flags=0x1 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 407 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 408 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 409 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 410 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 411 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 412 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 413 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 414 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 415 use=2 effect_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 416 flags=0x1 use=2 target_area=9 target_rule=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=10 magic_base=10 magic_limit=31000
+action 417 flags=0x1 use=2 effect_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=13 magic_base=10 magic_limit=31000
+action 418 use=2 target_area=2 hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=14 hp_power=30 effect_percent=100 ailment_level=100 magic_base=30 magic_limit=31000
+action 419 use=2 target_area=2 hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=14 hp_power=30 effect_percent=100 ailment_level=100 magic_base=30 magic_limit=31000
+action 420 use=2 target_area=2 hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=14 hp_power=20 effect_percent=100 ailment_level=100 magic_base=5 magic_limit=31000
+action 421 use=2 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=14 hp_power=20 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 422 flags=0x1 use=2 effect_type=1 target_area=9 target_rule=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=12 magic_base=10 magic_limit=31000
+action 423 use=2 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=1500 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 424 use=2 effect_type=1 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=250 effect_percent=100 ailment_type=3 ailment_level=100 base_status=0x2b8 support_points=99 magic_base=10 magic_limit=31000
+action 425 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=25 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 426 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=25 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 427 use=2 effect_type=1 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=130 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 428 flags=0x1 use=2 effect_type=1 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=8 hp_power=80 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 429 use=2 effect_type=1 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=365 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 430 use=2 effect_type=1 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=99 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 431 use=2 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 432 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=25 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 433 use=2 effect_type=1 cost_type=2 cost=10 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=55 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 434 use=2 effect_type=1 cost_type=2 cost=20 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=90 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 435 use=2 effect_type=1 cost_type=2 cost=40 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=256 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 436 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=20 effect_percent=100 ailment_type=1 ailment_level=20 base_status=0x4 magic_base=10 magic_limit=31000
+action 437 use=2 effect_type=1 cost_type=2 cost=10 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=50 effect_percent=100 ailment_type=1 ailment_level=20 base_status=0x4 magic_base=10 magic_limit=31000
+action 438 use=2 effect_type=1 cost_type=2 cost=20 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=80 effect_percent=100 ailment_type=1 ailment_level=20 base_status=0x4 magic_base=10 magic_limit=31000
+action 439 use=2 effect_type=1 cost_type=2 cost=40 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=230 effect_percent=100 ailment_type=1 ailment_level=30 base_status=0x4 magic_base=10 magic_limit=31000
+action 440 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=20 effect_percent=100 ailment_type=1 ailment_level=20 base_status=0x2 magic_base=10 magic_limit=31000
+action 441 use=2 effect_type=1 cost_type=2 cost=10 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=50 effect_percent=100 ailment_type=1 ailment_level=20 base_status=0x2 magic_base=10 magic_limit=31000
+action 442 use=2 effect_type=1 cost_type=2 cost=20 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=80 effect_percent=100 ailment_type=1 ailment_level=20 base_status=0x2 magic_base=10 magic_limit=31000
+action 443 use=2 effect_type=1 cost_type=2 cost=40 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=230 effect_percent=100 ailment_type=1 ailment_level=30 base_status=0x2 magic_base=10 magic_limit=31000
+action 444 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=25 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 445 use=2 effect_type=1 cost_type=2 cost=10 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=55 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 446 use=2 effect_type=1 cost_type=2 cost=20 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=90 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 447 use=2 effect_type=1 cost_type=2 cost=40 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=256 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 448 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=25 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 449 use=2 effect_type=1 cost_type=2 cost=10 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=55 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 450 use=2 effect_type=1 cost_type=2 cost=20 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=90 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 451 use=2 effect_type=1 cost_type=2 cost=40 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=256 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 452 flags=0x1 use=2 effect_type=1 cost_type=2 cost=15 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=3 ailment_level=50 base_status=0x2b8 support_points=99 magic_base=10 magic_limit=31000
+action 453 flags=0x1 use=2 effect_type=1 cost_type=2 cost=8 target_type=1 target_area=2 hit_type=1 hit_level=60 hits_min=1 hits_max=1 hp_type=8 hp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 454 flags=0x1 use=2 effect_type=1 cost_type=2 cost=15 target_type=1 target_area=2 hit_type=1 hit_level=70 hits_min=1 hits_max=1 hp_type=8 hp_power=66 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 455 use=2 effect_type=1 cost_type=2 cost=22 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=120 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 456 flags=0x1 use=2 effect_type=1 cost_type=2 cost=8 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x4000 magic_base=10 magic_limit=31000
+action 457 flags=0x1 use=2 effect_type=1 cost_type=2 cost=15 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=60 base_status=0x4000 magic_base=10 magic_limit=31000
+action 458 use=2 effect_type=1 cost_type=2 cost=15 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=70 mp_power=50 effect_percent=100 ailment_type=1 ailment_level=25 base_status=0x20 magic_base=10 magic_limit=31000
+action 459 flags=0x1 use=2 effect_type=1 cost_type=2 cost=8 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=55 base_status=0x200 magic_base=10 magic_limit=31000
+action 460 flags=0x1 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=35 base_status=0x400 magic_base=10 magic_limit=31000
+action 461 flags=0x1 use=2 effect_type=1 cost_type=2 cost=8 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x100 magic_base=10 magic_limit=31000
+action 462 flags=0x1 use=2 effect_type=1 cost_type=2 cost=8 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=40 base_status=0x800 magic_base=10 magic_limit=31000
+action 463 use=2 cost_type=1 cost=12 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=6 hp_power=16 mp_power=50 effect_percent=100 ailment_level=100 magic_base=16 magic_limit=31000
+action 464 use=2 cost_type=1 cost=15 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=23 effect_percent=100 ailment_level=10 base_status=0x200 magic_base=27 magic_limit=31000
+action 465 use=2 cost_type=1 cost=20 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=6 hp_power=26 mp_power=50 effect_percent=100 ailment_level=100 magic_base=12 magic_limit=31000
+action 466 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=45 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 467 use=2 cost_type=1 cost=13 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=19 effect_percent=100 ailment_level=100 magic_base=15 magic_limit=31000
+action 468 use=2 effect_type=1 cost_type=2 cost=8 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=40 effect_percent=100 ailment_type=1 ailment_level=60 base_status=0x4 magic_base=10 magic_limit=31000
+action 469 use=2 effect_type=1 cost_type=2 cost=10 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=50 effect_percent=100 ailment_type=1 ailment_level=30 base_status=0x100 magic_base=10 magic_limit=31000
+action 470 use=2 cost_type=1 cost=18 target_area=2 hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=1 hp_power=50 effect_percent=100 ailment_level=100 magic_base=15 magic_limit=31000
+action 471 flags=0x1 use=2 effect_type=1 cost_type=2 cost=10 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=3 ailment_level=60 base_status=0x4400 magic_base=10 magic_limit=31000
+action 472 flags=0x1 use=2 effect_type=1 cost_type=2 cost=8 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=11 hp_power=80 effect_percent=100 ailment_level=100 support_type=0x40 support_points=1 magic_base=10 magic_limit=31000
+action 473 flags=0x1 use=2 effect_type=1 cost_type=2 cost=15 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x155 support_points=1 magic_base=10 magic_limit=31000
+action 474 use=2 cost_type=1 cost=17 target_area=2 hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=1 hp_power=42 effect_percent=100 ailment_level=100 magic_base=15 magic_limit=31000
+action 475 use=2 cost_type=1 cost=5 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=26 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 476 use=2 effect_type=1 cost_type=2 cost=99 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=666 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 477 use=2 cost_type=1 cost=25 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=42 effect_percent=100 ailment_level=100 support_type=0x2aa support_points=1 magic_base=10 magic_limit=31000
+action 478 flags=0x1 use=2 effect_type=1 cost_type=2 cost=13 target_type=1 target_area=2 hit_type=1 hit_level=70 hits_min=1 hits_max=1 hp_type=8 hp_power=80 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 479 flags=0x1 use=2 effect_type=1 cost_type=2 cost=16 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=11 hp_power=100 mp_power=50 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0xffe magic_base=10 magic_limit=31000
+action 480 flags=0x40 use=2 cost_type=1 cost=10 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=30 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 481 flags=0x80 use=2 effect_type=1 cost_type=2 cost=3 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=25 effect_percent=100 ailment_type=1 ailment_level=60 base_status=0x4 magic_base=10 magic_limit=31000
+action 482 flags=0x80 use=2 effect_type=1 cost_type=2 cost=6 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=55 effect_percent=100 ailment_type=1 ailment_level=60 base_status=0x4 magic_base=10 magic_limit=31000
+action 483 flags=0x80 use=2 effect_type=1 cost_type=2 cost=9 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=90 effect_percent=100 ailment_type=1 ailment_level=60 base_status=0x4 magic_base=10 magic_limit=31000
+action 484 flags=0x80 use=2 effect_type=1 cost_type=2 cost=6 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=13 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 485 flags=0x80 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=25 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 486 flags=0x80 use=2 effect_type=1 cost_type=2 cost=18 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=40 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 487 flags=0x80 use=2 effect_type=1 cost_type=2 cost=4 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=25 effect_percent=100 ailment_level=100 magic_base=70 magic_limit=31000
+action 488 flags=0x80 use=2 effect_type=1 cost_type=2 cost=8 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=55 effect_percent=100 ailment_level=100 magic_base=70 magic_limit=31000
+action 489 flags=0x80 use=2 effect_type=1 cost_type=2 cost=12 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=90 effect_percent=100 ailment_level=100 magic_base=70 magic_limit=31000
+action 490 flags=0x80 use=2 effect_type=1 cost_type=2 cost=5 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=1 hp_power=15 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 491 flags=0x80 use=2 effect_type=1 cost_type=2 cost=10 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=1 hp_power=30 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 492 flags=0x80 use=2 effect_type=1 cost_type=2 cost=15 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=1 hp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 493 flags=0x80 use=2 effect_type=1 cost_type=2 cost=6 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=4 hits_max=6 hp_type=1 hp_power=10 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x2 magic_base=10 magic_limit=31000
+action 494 flags=0x80 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=4 hits_max=6 hp_type=1 hp_power=20 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x2 magic_base=10 magic_limit=31000
+action 495 flags=0x80 use=2 effect_type=1 cost_type=2 cost=18 target_type=1 target_area=2 target_random=1 hit_type=1 hit_level=99 hits_min=4 hits_max=6 hp_type=1 hp_power=30 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x2 magic_base=10 magic_limit=31000
+action 496 flags=0x80 use=2 effect_type=1 cost_type=2 cost=6 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=15 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x2 magic_base=10 magic_limit=31000
+action 497 flags=0x80 use=2 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=30 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x2 magic_base=10 magic_limit=31000
+action 498 flags=0x80 use=2 effect_type=1 cost_type=2 cost=18 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=50 effect_percent=100 ailment_type=1 ailment_level=15 base_status=0x2 magic_base=10 magic_limit=31000
+action 499 flags=0x1 use=2 effect_type=1 cost_type=2 cost=10 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=50 mp_power=50 effect_percent=100 ailment_type=2 ailment_level=100 base_status=0x228 magic_limit=31000
+action 500 flags=0x1 use=2 effect_type=1 cost_type=2 cost=7 target_type=1 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=1 ailment_level=25 base_status=0x10 magic_base=10 magic_limit=31000
+action 501 flags=0x1 use=2 effect_type=1 cost_type=2 cost=20 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=29 magic_base=10 magic_limit=31000
+action 502 flags=0x1 use=2 effect_type=1 cost_type=2 cost=20 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 lookup_id=30 magic_base=10 magic_limit=31000
+action 503 flags=0x1 use=3 effect_type=1 cost_type=2 cost=8 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=2 hp_power=60 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 504 flags=0x1 use=3 effect_type=1 cost_type=2 cost=12 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=2 hp_power=180 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 505 flags=0x1 use=3 effect_type=1 cost_type=2 cost=22 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=11 hp_power=100 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 506 flags=0x1 use=2 effect_type=1 cost_type=2 cost=17 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x2aa support_points=1 magic_base=10 magic_limit=31000
+action 507 flags=0x1 use=2 effect_type=1 cost_type=2 cost=6 target_type=1 target_area=9 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x1000 support_points=1 magic_base=10 magic_limit=31000
+action 508 flags=0x1 use=2 effect_type=1 cost_type=2 cost=6 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=0x800 support_points=50 magic_base=10 magic_limit=31000
+action 509 use=2 effect_type=1 cost_type=2 cost=15 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=70 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 510 use=2 effect_type=1 cost_type=2 cost=20 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=90 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 511 use=2 effect_type=1 cost_type=2 cost=25 target_type=1 target_area=2 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=1 hp_power=120 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+
+requirement 0x1ab conditions=any,any,any count=3 flags=0x2
+requirement 0x1ac conditions=any,any,none count=2 flags=0x2
+requirement 0x1ad conditions=any,any,any count=3 flags=0x2
+requirement 0x1ae conditions=any,any,none count=2 flags=0x2
+requirement 0x1af conditions=any,any,none count=2 flags=0x2
+requirement 0x1b0 conditions=skill:1,skill:28,none count=2
+requirement 0x1b1 conditions=skill:2,skill:29,none count=2
+requirement 0x1b2 conditions=skill:3,skill:30,none count=2
+requirement 0x1b3 conditions=skill:530,skill:533,group:12 count=3
+requirement 0x1b4 conditions=skill:10,skill:37,none count=2
+requirement 0x1b5 conditions=skill:11,skill:38,none count=2
+requirement 0x1b6 conditions=skill:12,skill:39,none count=2
+requirement 0x1b7 conditions=skill:531,skill:534,group:12 count=3
+requirement 0x1b8 conditions=skill:19,skill:10,none count=2
+requirement 0x1b9 conditions=skill:20,skill:11,none count=2
+requirement 0x1ba conditions=skill:21,skill:12,none count=2
+requirement 0x1bb conditions=skill:532,skill:531,group:12 count=3
+requirement 0x1bc conditions=skill:28,skill:19,none count=2
+requirement 0x1bd conditions=skill:29,skill:20,none count=2
+requirement 0x1be conditions=skill:30,skill:21,none count=2
+requirement 0x1bf conditions=skill:533,skill:532,group:12 count=3
+requirement 0x1c0 conditions=skill:37,skill:1,none count=2
+requirement 0x1c1 conditions=skill:38,skill:2,none count=2
+requirement 0x1c2 conditions=skill:39,skill:3,none count=2
+requirement 0x1c3 conditions=skill:534,skill:530,group:12 count=3
+requirement 0x1c4 conditions=group:8,group:8,group:8 count=3
+requirement 0x1c5 conditions=skill:60,skill:163,none count=2
+requirement 0x1c6 conditions=skill:61,skill:164,none count=2
+requirement 0x1c7 conditions=none,none,none count=3 flags=0x1
+requirement 0x1c8 conditions=skill:65,skill:117,none count=2
+requirement 0x1c9 conditions=skill:66,skill:128,none count=2
+requirement 0x1ca conditions=none,none,none count=3 flags=0x1
+requirement 0x1cb conditions=none,none,none count=3 flags=0x1
+requirement 0x1cc conditions=none,none,none count=3 flags=0x1
+requirement 0x1cd conditions=none,none,none count=3 flags=0x1
+requirement 0x1ce conditions=none,none,none count=3 flags=0x1
+requirement 0x1cf conditions=skill:119,skill:1,skill:37 count=3
+requirement 0x1d0 conditions=none,none,none count=3 flags=0x1
+requirement 0x1d1 conditions=skill:123,skill:126,skill:122 count=3
+requirement 0x1d2 conditions=skill:1,skill:10,skill:37 count=3 flags=0x1
+requirement 0x1d3 conditions=group:7,group:7,group:7 count=3 flags=0x1
+requirement 0x1d4 conditions=skill:16,group:1,group:1 count=3 flags=0x1
+requirement 0x1d5 conditions=group:10,group:11,group:7 count=3 flags=0x1
+requirement 0x1d6 conditions=group:7,group:7,skill:182 count=3 flags=0x1
+requirement 0x1d7 conditions=group:9,group:9,group:9 count=3 flags=0x1
+requirement 0x1d8 conditions=skill:160,skill:160,skill:160 count=3 flags=0x1
+requirement 0x1d9 conditions=none,none,none count=3 flags=0x1
+requirement 0x1da conditions=group:6,group:6,group:6 count=3 flags=0x1
+requirement 0x1db conditions=none,none,none count=3 flags=0x1
+requirement 0x1dc conditions=skill:141,skill:48,skill:174 count=3 flags=0x1
+requirement 0x1dd conditions=skill:233,skill:137,skill:190 count=3 flags=0x1
+requirement 0x1de conditions=skill:60,skill:60,skill:60 count=3 flags=0x1
+requirement 0x1df conditions=skill:163,skill:167,skill:171 count=3 flags=0x1
+requirement 0x1e0 conditions=unit-mask:0x0,unit-mask:0x0,unit-mask:0x0 count=3 flags=0x1
+requirement 0x1e1 conditions=unit-mask:0x2,group:3,none count=2 flags=0x1
+requirement 0x1e2 conditions=unit-mask:0x2,group:5,none count=2 flags=0x1
+requirement 0x1e3 conditions=unit-mask:0x2,group:4,none count=2 flags=0x1
+requirement 0x1e4 conditions=unit-mask:0x8,group:3,none count=2 flags=0x1
+requirement 0x1e5 conditions=unit-mask:0x8,group:5,none count=2 flags=0x1
+requirement 0x1e6 conditions=unit-mask:0x8,group:4,none count=2 flags=0x1
+requirement 0x1e7 conditions=unit-mask:0x10,group:3,none count=2 flags=0x1
+requirement 0x1e8 conditions=unit-mask:0x10,group:5,none count=2 flags=0x1
+requirement 0x1e9 conditions=unit-mask:0x10,group:4,none count=2 flags=0x1
+requirement 0x1ea conditions=unit-mask:0x20,group:3,none count=2 flags=0x1
+requirement 0x1eb conditions=unit-mask:0x20,group:5,none count=2 flags=0x1
+requirement 0x1ec conditions=unit-mask:0x20,group:4,none count=2 flags=0x1
+requirement 0x1ed conditions=unit-mask:0x40,group:3,none count=2 flags=0x1
+requirement 0x1ee conditions=unit-mask:0x40,group:5,none count=2 flags=0x1
+requirement 0x1ef conditions=unit-mask:0x40,group:4,none count=2 flags=0x1
+requirement 0x1f0 conditions=none,none,none count=2 flags=0x1
+requirement 0x1f1 conditions=none,none,none count=2 flags=0x1
+requirement 0x1f2 conditions=none,none,none count=2 flags=0x1
+requirement 0x1f3 conditions=skill:166,skill:163,none count=2 flags=0x1
+requirement 0x1f4 conditions=skill:73,skill:73,none count=2 flags=0x1
+requirement 0x1f5 conditions=skill:336,skill:572,none count=2 flags=0x1
+requirement 0x1f6 conditions=skill:539,group:2,none count=2 flags=0x1
+requirement 0x1f7 conditions=skill:160,skill:160,none count=2 flags=0x1
+requirement 0x1f8 conditions=skill:161,skill:161,none count=2 flags=0x1
+requirement 0x1f9 conditions=skill:162,skill:162,none count=2 flags=0x1
+requirement 0x1fa conditions=group:0,group:0,group:0 count=3 flags=0x1
+requirement 0x1fb conditions=group:1,group:1,none count=2 flags=0x1
+requirement 0x1fc conditions=group:0,group:0,none count=2 flags=0x1
+requirement 0x1fd conditions=skill:60,skill:65,group:1 count=3 flags=0x1
+requirement 0x1fe conditions=skill:61,skill:66,group:1 count=3 flags=0x1
+requirement 0x1ff conditions=skill:63,skill:68,group:1 count=3 flags=0x1
+
+coefficient 0x30 value=2
+coefficient 0x38 value=0.5
+coefficient 0x40 value=0.5
+coefficient 0x48 value=1.25
+coefficient 0x68 value=1.3
+coefficient 0x70 value=1.3
+coefficient 0x78 value=1.3
+coefficient 0x80 value=1.3
+coefficient 0x88 value=1.3
+coefficient 0x90 value=1.5
+coefficient 0x98 value=1.5
+coefficient 0xa0 value=1.5
+coefficient 0xa8 value=1.5
+coefficient 0xb0 value=1.5
+coefficient 0xb8 value=1.5
+coefficient 0xc0 value=2
+coefficient 0xc8 value=0.4
+coefficient 0xd0 value=0.5
+coefficient 0xd8 value=0.6
+coefficient 0xe8 value=0.25
+coefficient 0x108 value=1.5
+coefficient 0x110 value=2
+coefficient 0x118 value=1.5
+coefficient 0x120 value=2
+coefficient 0x148 value=0.1
+coefficient 0x150 value=0.1
+coefficient 0x158 value=1
+coefficient 0x160 value=0.05
+coefficient 0x168 value=0.5
+coefficient 0x170 value=1.1
+coefficient 0x178 value=0.5
+coefficient 0x180 value=1.3
+coefficient 0x188 value=1
+coefficient 0x190 value=1.5
+coefficient 0x198 value=0.5
+coefficient 0x1a0 value=0.75
+coefficient 0x1a8 value=0.75
+coefficient 0x1c8 value=1.5
+coefficient 0x1d8 value=2
+coefficient 0x1e0 value=0.5
+coefficient 0x1e8 value=0.5
+coefficient 0x1f0 value=0.5
+coefficient 0x1f8 value=0.5
+coefficient 0x200 value=0.5
+coefficient 0x208 value=0.5
+coefficient 0x210 value=0.5
+coefficient 0x218 value=0.5
+coefficient 0x270 value=0.5
+coefficient 0x280 value=0.1
+
+party-default 0 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 1 base_value=20 value_02=7777 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 2 base_value=20 value_02=7777 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 3 base_value=9 value_02=1375 multiplier=0.2 flags_08=0x201 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 4 base_value=15 value_02=19298 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 5 base_value=8 value_02=1376 multiplier=0.4 flags_08=0x201 flags_0a=0x100 repeat_min=2 repeat_max=4 value_10=264 value_12=1
+party-default 6 base_value=6 value_02=1375 multiplier=0.2 flags_08=0x201 flags_0a=0x100 repeat_min=4 repeat_max=6 value_10=264 value_12=1
+party-default 7 base_value=14 value_02=5215 multiplier=0.4 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 8 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 9 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 10 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 11 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 12 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 13 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 14 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 15 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+
+item-entry 0 flags=0x400 value=10000
+item-entry 1 flags=0x403 item=272 value=50
+item-entry 2 flags=0x403 item=273 value=250
+item-entry 3 flags=0x403 item=274 value=1000
+item-entry 4 flags=0x2 item=160 value=25000
+item-entry 5 flags=0x2 item=161 value=9464 auxiliary=1
+item-entry 6 flags=0x403 item=277 value=2500
+item-entry 7 flags=0x403 item=278 value=1500
+item-entry 8 flags=0x2 item=278 value=34464 auxiliary=1
+item-entry 9 flags=0x403 item=279 value=5000
+item-entry 10 flags=0x403 item=280 value=20000
+item-entry 11 flags=0x403 item=281 value=10000
+item-entry 12 flags=0x403 item=282 value=30000
+item-entry 13 flags=0x403 item=283 value=1000
+item-entry 14 flags=0x402 item=171 value=250
+item-entry 15 flags=0x402 item=172 value=5000
+item-entry 16 flags=0x2 item=172 value=37856 auxiliary=4
+item-entry 17 flags=0x400 value=10000
+item-entry 18 flags=0x400 value=10000
+item-entry 19 flags=0x403 item=169 value=100
+item-entry 20 flags=0x403 item=206 value=75
+item-entry 21 flags=0x403 item=168 value=75
+item-entry 22 flags=0x403 item=207 value=50
+item-entry 23 flags=0x402 item=208 value=150
+item-entry 24 flags=0x403 item=212 value=100
+item-entry 25 flags=0x402 item=166 value=75
+item-entry 26 flags=0x403 item=285 value=20
+item-entry 27 flags=0x403 item=286 value=20
+item-entry 28 flags=0x403 item=287 value=20
+item-entry 29 flags=0x400 value=10000
+item-entry 30 flags=0x400 value=10000
+item-entry 31 flags=0x400 value=10000
+item-entry 32 flags=0x402 item=365 value=2000
+item-entry 33 flags=0x402 item=364 value=2000
+item-entry 34 flags=0x402 item=185 value=3000
+item-entry 35 flags=0x400 value=10000
+item-entry 36 flags=0x402 item=4 value=250
+item-entry 37 flags=0x402 item=5 value=1500
+item-entry 38 flags=0x402 item=13 value=250
+item-entry 39 flags=0x402 item=14 value=1500
+item-entry 40 flags=0x402 item=22 value=250
+item-entry 41 flags=0x402 item=23 value=1500
+item-entry 42 flags=0x402 item=31 value=250
+item-entry 43 flags=0x402 item=32 value=1500
+item-entry 44 flags=0x402 item=40 value=250
+item-entry 45 flags=0x402 item=41 value=1500
+item-entry 46 flags=0x402 item=62 value=1000
+item-entry 47 flags=0x402 item=67 value=1000
+item-entry 48 flags=0x2 item=67 value=5000
+item-entry 49 flags=0x2 item=68 value=10000
+item-entry 50 flags=0x400 value=10000
+item-entry 51 flags=0x400 value=10000
+item-entry 52 flags=0x402 item=46 value=2000
+item-entry 53 flags=0x2 item=46 value=18928 auxiliary=2
+item-entry 54 flags=0x402 item=47 value=4000
+item-entry 55 flags=0x400 value=10000
+item-entry 56 flags=0x2 item=191 value=2500
+item-entry 57 flags=0x401 item=196 value=1500
+item-entry 58 flags=0x401 item=197 value=1500
+item-entry 59 flags=0x401 item=198 value=750
+item-entry 60 flags=0x400 value=10000
+item-entry 61 flags=0x400 value=10000
+item-entry 62 flags=0x400 value=10000
+item-entry 63 flags=0x400 value=10000
+item-entry 64 flags=0x402 item=337 value=100
+item-entry 65 flags=0x402 item=338 value=100
+item-entry 66 flags=0x402 item=339 value=100
+item-entry 67 flags=0x402 item=340 value=100
+item-entry 68 flags=0x402 item=341 value=100
+item-entry 69 flags=0x400 value=10000
+item-entry 70 flags=0x400 value=10000
+item-entry 71 flags=0x400 value=10000
+item-entry 72 flags=0x400 value=10000
+item-entry 73 flags=0x400 value=10000
+item-entry 74 flags=0x400 value=10000
+item-entry 75 flags=0x400 value=10000
+item-entry 76 flags=0x400 value=10000
+item-entry 77 flags=0x400 value=10000
+item-entry 78 flags=0x400 value=10000
+item-entry 79 flags=0x400 value=10000
+item-entry 80 flags=0x401 value=1000
+item-entry 81 flags=0x401 value=1000
+item-entry 82 flags=0x401 value=1000
+item-entry 83 flags=0x401 value=1000
+item-entry 84 flags=0x401 value=1000
+item-entry 85 flags=0x401 value=1000
+item-entry 86 flags=0x401 value=1000
+item-entry 87 flags=0x400 value=10000
+item-entry 88 flags=0x400 value=10000
+item-entry 89 flags=0x400 value=10000
+item-entry 90 flags=0x400 value=10000
+item-entry 91 flags=0x400 value=10000
+item-entry 92 flags=0x400 value=10000
+item-entry 93 flags=0x400 value=10000
+item-entry 94 flags=0x400 value=10000
+item-entry 95 flags=0x400 value=10000
+item-entry 96 flags=0x400 value=10000
+item-entry 97 flags=0x400 value=2000
+item-entry 98 flags=0x400 value=6000
+item-entry 99 flags=0x400 value=10000
+item-entry 100 flags=0x400 value=10000
+item-entry 101 flags=0x400 value=10000
+item-entry 102 flags=0x400 value=10000
+item-entry 103 flags=0x400 value=10000
+item-entry 104 flags=0x400 value=10000
+item-entry 105 flags=0x400 value=10000
+item-entry 106 flags=0x400 value=10000
+item-entry 107 flags=0x400 value=10000
+item-entry 108 flags=0x400 value=10000
+item-entry 109 flags=0x400 value=10000
+item-entry 110 flags=0x400 value=10000
+item-entry 111 flags=0x400 value=10000
+item-entry 112 flags=0x400 value=10000
+item-entry 113 flags=0x400 value=10000
+item-entry 114 flags=0x400 value=10000
+item-entry 115 flags=0x400 value=10000
+item-entry 116 flags=0x400 value=10000
+item-entry 117 flags=0x400 value=10000
+item-entry 118 flags=0x400 value=10000
+item-entry 119 flags=0x400 value=10000
+item-entry 120 flags=0x400 value=10000
+item-entry 121 flags=0x400 value=10000
+item-entry 122 flags=0x400 value=10000
+item-entry 123 flags=0x400 value=10000
+item-entry 124 flags=0x400 value=10000
+item-entry 125 flags=0x400 value=10000
+item-entry 126 flags=0x400 value=10000
+item-entry 127 flags=0x400 value=10000
+item-entry 128 flags=0xb04 value=10000
+item-entry 129 flags=0xb04 value=10000
+item-entry 130 flags=0xb04 value=10000
+item-entry 131 flags=0xb04 value=10000
+item-entry 132 flags=0xb04 value=10000
+item-entry 133 flags=0xb04 value=10000
+item-entry 134 flags=0xb04 value=10000
+item-entry 135 flags=0xb04 value=10000
+item-entry 136 flags=0xb04 value=10000
+item-entry 137 flags=0xb04 value=10000
+item-entry 138 flags=0xb04 value=10000
+item-entry 139 flags=0xb04 value=10000
+item-entry 140 flags=0xb04 value=10000
+item-entry 141 flags=0xb04 value=10000
+item-entry 142 flags=0xb04 value=10000
+item-entry 143 flags=0xb04 value=10000
+item-entry 144 flags=0xb04 value=10000
+item-entry 145 flags=0xb04 value=10000
+item-entry 146 flags=0xb04 value=10000
+item-entry 147 flags=0xb04 value=10000
+item-entry 148 flags=0xb04 value=10000
+item-entry 149 flags=0xb04 value=10000
+item-entry 150 flags=0xb04 value=10000
+item-entry 151 flags=0x400 value=10000
+item-entry 152 flags=0x400 value=10000
+item-entry 153 flags=0x400 value=10000
+item-entry 154 flags=0x400 value=10000
+item-entry 155 flags=0x400 value=10000
+item-entry 156 flags=0x400 value=10000
+item-entry 157 flags=0x400 value=10000
+item-entry 158 flags=0x400 value=10000
+item-entry 159 flags=0x400 value=10000
+item-entry 160 flags=0x400 value=10000
+item-entry 161 flags=0x401 item=304 value=500
+item-entry 162 flags=0x401 item=305 value=750
+item-entry 163 flags=0x401 item=306 value=5000
+item-entry 164 flags=0x401 item=307 value=400
+item-entry 165 flags=0x401 item=308 value=7500
+item-entry 166 flags=0x401 item=309 value=3000
+item-entry 167 flags=0x401 item=310 value=2500
+item-entry 168 flags=0x401 item=311 value=5000
+item-entry 169 flags=0x401 item=312 value=25000
+item-entry 170 flags=0x401 item=313 value=7500
+item-entry 171 flags=0x401 item=314 value=12500
+item-entry 172 flags=0x401 item=315 value=25000
+item-entry 173 flags=0x401 item=316 value=12500
+item-entry 174 flags=0x401 item=317 value=25000
+item-entry 175 flags=0x401 item=318 value=18928 auxiliary=2
+item-entry 176 flags=0x401 item=319 value=10000
+item-entry 177 flags=0x401 item=320 value=3392 auxiliary=3
+item-entry 178 flags=0x401 value=10000
+
+group 0 skills=176,177,178,179
+group 1 skills=181,182,183,184
+group 2 skills=356,357,359,358,360,361,362
+group 3 skills=336,337,338,339,340,341,342,343,344,345,346,347,348
+group 4 skills=349,350,351,352,353,354
+group 5 skills=364,356,357,358,359,360,361,362,365
+group 6 skills=224,225,226,227,228,229,230,233
+group 7 skills=112,113,115,116,117,118,121,122,123,124,130,131,138,114
+group 8 skills=69,70,71,73,74,75,76,78,79,80,83,85,86,87,84
+group 9 skills=65,66,67,68
+group 10 skills=28,31,29,32,30,33,34
+group 11 skills=78,79,118,127
+group 12 skills=46,47,48
