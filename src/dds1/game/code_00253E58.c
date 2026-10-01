@@ -1,6 +1,16 @@
 #include "common.h"
 
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
+extern s32 func_002CB3B8(u32, u32);
+extern u32 D_003BC4CC;
+extern u32 *func_0024FA18(void);
+extern s32 func_00255E08();
+extern void func_0024E5A0(s32, s32, s32, s32, s32, s32, f32, f32);
+extern void func_0025D2F8(s32, s32, s32, s32, s32, s32);
+extern void func_0025DD80(s32, s32, s32, s32);
+extern void func_002570A8(s32, s32, s32);
+extern f32 sdfSinPoly(f32 angle);
+extern void func_00254758(s32, s32, s32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_00253E58", func_00253E58);
 
@@ -19,7 +29,86 @@ void func_00254218(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0) {
     func_002C0F88(a0 * 16, a1, a2, 0x2000, 0xC70, arr, t0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00253E58", func_00254288);
+/* Fill-level dispatch: direct, inverted, or sin-pulsed, then the shared layers. */
+s32 func_00254288(void) {
+    s32 s16;
+    s32 s17;
+    s32 w;
+    s32 i;
+    s32 r;
+    f32 f;
+    u32 *v;
+
+    f = 0.0f;
+    func_0024FA18();
+    s16 = func_002CB3B8(D_003BC4CC, -1);
+    s17 = func_002CB3B8(D_003BC4CC, 1);
+    func_00255E08(s16, 0x80, 0x52);
+    w = *(s32 *)(s16 + 0x1C);
+    if (w == 1) {
+        goto case1;
+    }
+    if (w >= 2) {
+        goto ge2;
+    }
+    if (w != 0) {
+        goto tail;
+    }
+    goto case0;
+ge2:
+    if (w != 2) {
+        goto tail;
+    }
+    goto case2;
+case0:
+    f = (f32)*(s32 *)(s16 + 0x20) / 10.0f;
+    i = (s32)(f * 128.0f);
+    func_0024E5A0(0, 0, 0, i, 0x3A, 0x53, 1.5f, 1.5f);
+    func_00254218(0, 0, 0, i, 0x53);
+    func_0025D2F8(0, 0, 1, i, s17, 0x53);
+    func_00254758(0, 0, 1, 0x80, 0x53);
+    func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
+    func_0024E260(0, 0, 0, i, 0x5B, 0x53);
+    v = func_0024FA18();
+    func_0025DD80(*v, s17 + 0x590, i, 0x53);
+    func_0024E260(0x20, 0, 0, i, 0xB, 0x53);
+    goto tail;
+case2:
+    f = (f32)*(s32 *)(s16 + 0x20) / 10.0f;
+    f = 1.0f - f;
+    i = (s32)(f * 128.0f);
+    func_0024E5A0(0, 0, 0, i, 0x3A, 0x53, 1.5f, 1.5f);
+    func_00254218(0, 0, 0, i, 0x53);
+    func_0025D2F8(0, 0, 1, i, s17, 0x53);
+    func_00254758(0, 0, 0, 0x80, 0x53);
+    func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
+    func_0024E260(0, 0, 0, i, 0x5B, 0x53);
+    v = func_0024FA18();
+    func_0025DD80(*v, s17 + 0x590, i, 0x53);
+    func_0024E260(0x20, 0, 0, i, 0xB, 0x53);
+    goto tail;
+case1:
+    r = *(s32 *)(s17 + 0x550);
+    if (r > 0) {
+        f = (f32)r / 10.0f;
+    } else if (r < 0) {
+        f = (f32)(-r) / 10.0f;
+    }
+    f = 1.0f - sdfSinPoly(f * 3.14159265f);
+    func_0024E5A0(0, 0, 0, 0x80, 0x3A, 0x53, 1.5f, 1.5f);
+    func_00254218(0, 0, 0, 0x80, 0x53);
+    func_0025D2F8(0, 0, 1, (s32)(f * 128.0f), s17, 0x53);
+    func_00254758(0, 0, 1, 0x80, 0x53);
+    func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
+    func_0024E260(0, 0, 0, 0x80, 0x5B, 0x53);
+    v = func_0024FA18();
+    func_0025DD80(*v, s17 + 0x590, 0x80, 0x53);
+    func_0024E260(0x20, 0, 0, 0x80, 0xB, 0x53);
+tail:
+    func_002570A8(s17, 0x80, 0x53);
+    func_0024E260(0, 0, 0, 0x80, 0xD, 0x53);
+    return 0;
+}
 
 void func_00254680(s32 p0, s32 a1, s32 a2) {
     func_00255E08();
