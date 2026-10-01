@@ -15,7 +15,7 @@ extern void func_0024FEF0(void *);
 INCLUDE_ASM(const s32, "event/evtPicture", func_0024FEF0);
 
 /* Run the picture's own update step while its active flag is set. */
-s32 func_0024FF80(void) {
+s32 evtUpdatePictureWhenFlagged(void) {
     Picture *picture;
 
     picture = kwlnTaskGetUserValue();
@@ -29,7 +29,7 @@ s32 func_0024FF80(void) {
 }
 
 /* Drop the picture's texture, then free the task data. */
-void func_0024FFC8(void) {
+void evtPictureReleaseTaskTextureAndState(void) {
     Picture *picture;
 
     picture = kwlnTaskGetUserValue();

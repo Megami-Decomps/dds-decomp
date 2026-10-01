@@ -71,7 +71,7 @@ s32 dds3GetWorldObjectValue(WorldObjectPointer *object) {
 
 INCLUDE_ASM(const s32, "game/code_00110DC0", func_00110ED0);
 
-u32 *func_00110F80(WorldObjectPointer *object, const u8 *name) {
+u32 *dds3FindObjectChainNodeByName(WorldObjectPointer *object, const u8 *name) {
     u32 *node;
     s32 i;
 

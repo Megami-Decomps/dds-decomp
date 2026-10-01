@@ -148,7 +148,7 @@ extern void func_002DA420(void *, f32);
 
 extern u16 D_003DC9E0[];
 
-extern u32 func_002A3BD8(u32, u32, u32);
+extern u32 effCreateTrackSetWithSharedReferences(u32, u32, u32);
 
 extern void func_001FBA38(s32);
 
@@ -1625,7 +1625,7 @@ u8 *effCreateBillFrameNode(u8 *config, u32 resource) {
     body += headerSize;
     ((EffFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
-    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(count, 0, resource);
+    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(count, 0, resource);
     return node;
 }
 
@@ -1737,7 +1737,7 @@ u8 *billCreateCellNode(u8 *config, u32 resource) {
     body += headerSize;
     ((EffFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
-    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(count, 1, resource);
+    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(count, 1, resource);
     return node;
 }
 
@@ -1817,7 +1817,7 @@ u8 *billCreateParticleNode(u8 *config, u32 resource) {
     body += headerSize;
     ((EffFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
-    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(count, 1, resource);
+    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(count, 1, resource);
     return node;
 }
 
@@ -1935,7 +1935,7 @@ void effInitializeAlternatingTransformRows(u8 *node, u8 *config) {
 
 u8 *billCreateAnimatedTransform(u8 *config, u32 resource) {
     u8 *node = billAllocateAnimatedTransformEntries(config);
-    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(((EffBillConfig *)config)->frames.count, 3, resource);
+    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(((EffBillConfig *)config)->frames.count, 3, resource);
     effInitializeAlternatingTransformRows(node, config);
     return node;
 }
@@ -2071,7 +2071,7 @@ void billInitializeEmitterRows(u8 *node, u8 *config) {
 
 u8 *billCreateEmitterTransform(u8 *config, u32 resource) {
     u8 *node = billAllocEmitterNode(config);
-    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(((EffBillConfig *)config)->frames.count, 4, resource);
+    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(((EffBillConfig *)config)->frames.count, 4, resource);
     billInitializeEmitterRows(node, config);
     return node;
 }
@@ -2200,7 +2200,7 @@ extern u8 *billAllocStripNode(u8 *);
 u8 *billCreateStripTransform(u8 *config, u32 resource) {
     u8 *node = billAllocStripNode(config);
 
-    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(((EffBillConfig *)config)->frames.count, 3, resource);
+    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(((EffBillConfig *)config)->frames.count, 3, resource);
     billInitializeStripRows(node, config);
     return node;
 }
@@ -2290,7 +2290,7 @@ u8 *billCreateTrailNode(u8 *config, u32 resource) {
     *(u8 **)(header + 8) = base;
     *(u8 **)header = cursor;
     /* Required to match: this later count load retains byte-pointer arithmetic. */
-    ((EffFrameState *)header)->asset = (u8 *)func_002A3BD8(*(u32 *)(config + 0x38), 0, resource);
+    ((EffFrameState *)header)->asset = (u8 *)effCreateTrackSetWithSharedReferences(*(u32 *)(config + 0x38), 0, resource);
     return header;
 }
 
@@ -2406,7 +2406,7 @@ void billInitializeQuadRows(u8 *node, u8 *config) {
 
 u8 *billCreateQuadTransform(u8 *config, u32 resource) {
     u8 *node = billAllocQuadNode(config);
-    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(((EffBillConfig *)config)->frames.count, 4, resource);
+    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(((EffBillConfig *)config)->frames.count, 4, resource);
     billInitializeQuadRows(node, config);
     return node;
 }
@@ -2681,7 +2681,7 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
 
 extern u32 D_003BC96C;
 
-u32 func_002A3BD8(u32 arg0, u32 kind, u32 arg2) {
+u32 effCreateTrackSetWithSharedReferences(u32 arg0, u32 kind, u32 arg2) {
     EffTrackSet *effect = effCreateTrackSet(arg0, (u16)kind);
 
     if (effect->columns != 0) {
@@ -3971,7 +3971,7 @@ EffectStripNode *effCreateStripNode(u32 percent) {
     node->color = 0x80808080;
     node->opacity = 1.0f;
     node->active = 0;
-    node->transform = func_002A3BD8(percent * 4, 2, 0);
+    node->transform = effCreateTrackSetWithSharedReferences(percent * 4, 2, 0);
     node->resource = effRetainResource(0);
     node->count = 1;
     return node;
@@ -4222,7 +4222,7 @@ INCLUDE_ASM(const s32, "game/code_0029C530", func_002ABDE0);
 
 extern void func_002AE498(u8 *, void *);
 
-void func_002AC4E0(u8 *work) {
+void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = ((EffBillConfig *)config)->progress;
@@ -4264,7 +4264,7 @@ void func_002AC4E0(u8 *work) {
     func_002AE498(out, mtx);
 }
 
-void func_002AC648(u8 *work) {
+void effResetBillboardFrameInstanceCounters(u8 *work) {
     u32 index = 0;
     u8 *state = ((EffBillFrameWork *)work)->frameState;
     u32 count = ((EffBillConfig *)((EffBillFrameWork *)work)->config)->frames.count;
@@ -4390,7 +4390,7 @@ void func_002ACA10(s32 work) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002ACA40);
 
-void func_002AD150(BillCellDrawWork *work) {
+void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
     u32 progress = ((EffBillConfig *)config)->progress;
@@ -5974,7 +5974,7 @@ void effResetSlots(void) {
     D_003BC9B8[1] = 0;
     D_003BC9C0[1] = 0;
     D_003BC9C8[1] = 0;
-    func_00104130();
+    kwlnPadResetMotorLevelsAndOutput();
 }
 
 void effTickSlotVolumeFade(void) {
@@ -6367,7 +6367,7 @@ extern void fileJobInvokeRotationCallback(void *, void *);
 
 extern void fileJobInvokeScaleCallback(void *, f32);
 
-extern void func_002937A0(void *, u32);
+extern void fileDispatchJobTypeCallback(void *, u32);
 
 void effApplyBattleCameraToObject(work)
     void *work;
@@ -6381,7 +6381,7 @@ void effApplyBattleCameraToObject(work)
     VU0_STORE_VF_UNCLOBBERED($vf10, &rotation[1]);
     fileJobInvokeRotationCallback(work, &rotation[1]);
     fileJobInvokeScaleCallback(work, ((EffBattleCamera *)D_003DF9A0)->scale * *(f32 *)((u8 *)D_003BD060 + 0x74));
-    func_002937A0(work, ((EffBattleCamera *)D_003DF9A0)->mode);
+    fileDispatchJobTypeCallback(work, ((EffBattleCamera *)D_003DF9A0)->mode);
 }
 
 extern void fileJobSetPrimaryData(u32, void *, u32, u16);
@@ -7255,7 +7255,7 @@ s32 effRunWithStateBackup(void) {
 
 extern u32 func_002B8648(u8 *, s32);
 
-u32 func_002B8BF0(void) {
+u32 effProcessQueuedFileRecordAndPersistChanges(void) {
     u8 *file = fileQueueGetAt(D_003BD060, func_002B5990());
     u32 result;
 
@@ -7609,7 +7609,7 @@ void func_002BA2B0(s32 request) {
     func_002B9320(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
-s32 func_002BA2D0(s32 request) {
+s32 effResolveMappingWithTemporaryTable(s32 request) {
     s32 result;
     s32 object = ((EffMappingRequest *)request)->object;
 

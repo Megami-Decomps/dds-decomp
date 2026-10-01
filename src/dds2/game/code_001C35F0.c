@@ -37,11 +37,11 @@ typedef struct UiSceneNode {
     struct UiSceneNode *next;
 } UiSceneNode;
 
-extern s32 func_001BB970(UiSceneNode *node);
+extern s32 btlHasRequiredActorStatusBits(UiSceneNode *node);
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C35F0);
 
-void func_001C3750(UiSceneNode *object, s8 mode, s8 value) {
+void btlUpdateActorSlotPresentationState(UiSceneNode *object, s8 mode, s8 value) {
     s32 count = 0;
     u8 slot = 0;
     UiSceneNode *node = *(UiSceneNode **)(func_001AA6F8() + 0x24C);
@@ -51,7 +51,7 @@ void func_001C3750(UiSceneNode *object, s8 mode, s8 value) {
     s32 offset;
 
     for (; node != 0; node = node->next) {
-        if (func_001BB970(node) != 0) {
+        if (btlHasRequiredActorStatusBits(node) != 0) {
             slot = node->slot;
             if (object->key == node->key) {
                 break;
@@ -76,14 +76,14 @@ void func_001C3750(UiSceneNode *object, s8 mode, s8 value) {
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3850);
 
-void func_001C3978(UiSceneNode *object) {
+void btlResetActorSlotPresentationValue(UiSceneNode *object) {
     s32 count = 0;
     u8 slot = 0;
     UiSceneNode *node = *(UiSceneNode **)(func_001AA6F8() + 0x24C);
     u8 *entry;
     s32 offset;
     for (; node != 0; node = node->next) {
-        if (func_001BB970(node) != 0) {
+        if (btlHasRequiredActorStatusBits(node) != 0) {
             slot = object->slot;
             if (object->key == node->key) {
                 break;
@@ -119,7 +119,7 @@ void btlUpdateActorSlotStates(u8 *context, s8 mode) {
     } while (i >= 0);
 }
 
-void func_001C3D70(u8 *scene) {
+void btlAdvancePendingSceneSlotStates(u8 *scene) {
     UiSlotEntry *entry = (UiSlotEntry *)(scene + 0xE0);
     s32 i;
 

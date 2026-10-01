@@ -18,7 +18,7 @@ extern void func_0013D650(void);
 
 extern s32 func_0013DB28(void);
 
-extern s32 func_0013DB58(s32 value);
+extern s32 fldQuerySelectedActorMotionState(s32 value);
 
 extern void fldStopCurrentBgm(void);
 
@@ -62,7 +62,7 @@ extern s32 fldIsSceneStateEight(void);
 extern s32 D_0032E3D8[];
 
 s32 fldCmdQuerySceneValue(void) {
-    scrSetIntegerReturnValue(func_0013DB58(scrReadIntParameter(0)));
+    scrSetIntegerReturnValue(fldQuerySelectedActorMotionState(scrReadIntParameter(0)));
     return 1;
 }
 
@@ -73,7 +73,7 @@ u32 fldCmdUpdateTaskRecordScene(void) {
     } else {
         scene = fldFindTaskRecordId(((FldCommandWork *)func_0010D6A0())->key);
     }
-    func_0013DC08(scene);
+    fldApplyActorEntryTrigger(scene);
     return 1;
 }
 
@@ -85,7 +85,7 @@ s32 func_0014F110(void) {
     return 1;
 }
 
-s32 func_0014F158(void) {
+s32 fldCmdGetActorSlotAttribute(void) {
     s32 param0 = scrReadIntParameter(0);
     s32 param1 = scrReadIntParameter(1);
 

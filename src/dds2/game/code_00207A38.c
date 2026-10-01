@@ -220,7 +220,7 @@ extern void func_002110E8(s32, u16);
 
 extern void func_00226558(u8);
 
-extern s32 func_00221090(void);
+extern s32 btlIsLinkedActionSceneStateActive(void);
 
 typedef struct BtlVec3 {
     f32 x, y, z;
@@ -1914,7 +1914,7 @@ u32 btlCmdTestEffectActor(void) {
 }
 
 u32 func_0020C0C0(void) {
-    if (func_002291C0() != 0) {
+    if (btlIsSpecialEnemyEffectLinkSatisfied() != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1932,7 +1932,7 @@ u32 func_0020C100(void) {
 }
 
 u32 func_0020C140(void) {
-    if (func_0021F808() != 0) {
+    if (btlIsMarkedActionSceneStateActive() != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -2022,7 +2022,7 @@ s32 func_0020C450(void) {
 }
 
 s32 func_0020C4A0(void) {
-    if (func_00221090()) {
+    if (btlIsLinkedActionSceneStateActive()) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -2136,7 +2136,7 @@ s32 func_0020C6F8(void) {
     return 1;
 }
 
-u32 func_0020C720(void) {
+u32 btlResetCommandContextAndSetStateFlag(void) {
     s32 state;
     s32 context;
 
@@ -2307,7 +2307,7 @@ u32 func_0020CD08(void) {
 }
 
 u32 func_0020CD30(void) {
-    func_002269E0();
+    btlClearSpecialEnemyEntryFlags();
     return 1;
 }
 

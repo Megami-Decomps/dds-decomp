@@ -48,7 +48,7 @@ void func_002AB8C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AB8F0);
 
-void func_002ABCD0(MenuResourceOwner *object) {
+void mnuDestroyResourceOwnerWindowContainers(MenuResourceOwner *object) {
     MenuResourceSet *resources;
 
     resources = object->resources;

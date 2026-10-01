@@ -330,7 +330,7 @@ void func_002D9FA0(u32 value) {
     D_003BD34C = value;
 }
 
-SdfResourceList *func_002D9FA8(u32 capacity) {
+SdfResourceList *sdfCreateConfiguredBufferedResourceList(u32 capacity) {
     return sdfDevCreateBufferedRequest(capacity, 4, 4);
 }
 
@@ -373,7 +373,7 @@ SdfResourceList *sdfResourceListClone(SdfResourceList *list) {
         return NULL;
     }
     count = list->count;
-    copy = func_002D9FA8(count);
+    copy = sdfCreateConfiguredBufferedResourceList(count);
     for (i = 0; i < count; i++) {
         copy->items[i] = func_002D2800(list->items[i]);
     }

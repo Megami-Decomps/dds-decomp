@@ -89,8 +89,8 @@ void effInitCh72Id(void);
 void effInitCh76Id(void);
 void effInitCh75Id(void);
 void evtPolygonMovieFreeWork(EvtGroupTable *table);
-void func_00231588(s32 group, s32 type);
-void func_00104020(void);
+void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
+void kwlnPadResetMotorLevelsAndOutput(void);
 EvtEvNode *evtEventViewerGetPendingNode(EvtViewer *viewer);
 void func_00246878(EvtViewer *viewer);
 
@@ -323,7 +323,7 @@ void evtEventViewerShutdown(EvtViewer *viewer) {
         evtPolygonMovieFreeWork(viewer->unk08);
         viewer->unk08 = 0;
     }
-    func_00104020();
+    kwlnPadResetMotorLevelsAndOutput();
 }
 
 /* Destroy every grouped entity listed in the viewer's table. */
@@ -332,7 +332,7 @@ void evtEventViewerReleaseGroups(EvtViewer *viewer) {
 
     if (viewer->unk08 != NULL) {
         for (i = 0; i < viewer->unk08->count; i++) {
-            func_00231588(viewer->unk08->recs[i].group, viewer->unk08->recs[i].type);
+            btlRemoveCurrentGroupedEntity(viewer->unk08->recs[i].group, viewer->unk08->recs[i].type);
         }
     }
 }

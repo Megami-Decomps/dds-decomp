@@ -154,7 +154,7 @@ extern void mnuSetPartyEntryCurrentId(Entry1A4 *, s32);
 
 extern s32 func_0011AEE0(s32);
 
-extern void func_00314CE8(s32, s32);
+extern void scrRemoveAvailableSkillFlagAndSlot(s32, s32);
 
 extern s32 D_0043E5C0[];
 
@@ -325,7 +325,7 @@ s32 dds3FindEntry(rosterIndex)
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AEE0);
 
-u8 func_0011B260(void) {
+u8 ptyIsRosterEntryPresent(void) {
     s64 entry;
 
     entry = dds3FindEntry();
@@ -349,7 +349,7 @@ s32 dds3EntryMax(void) {
     return max;
 }
 
-s32 func_0011B2C0(void) {
+s32 ptyGetRoundedAveragePartyLevel(void) {
     s32 sum = 0;
     s32 count = 0;
     s32 remaining = 4;
@@ -458,16 +458,16 @@ void dds3ForEachFlagged(void) {
     } while (n >= 0);
 }
 
-void func_0011D050(void) {
+void ptyClearSelectedSkillFlagsFromActiveEntries(void) {
     s32 offset = 0;
     s32 remaining = 4;
     do {
         s32 entry = D_00435DD0 + offset + 0xA60;
         offset += 0x1C4;
         if ((((Entry1A4 *)entry)->flags & 1) != 0) {
-            func_00314CE8(entry, 0x5B);
-            func_00314CE8(entry, 0x5C);
-            func_00314CE8(entry, 0x5D);
+            scrRemoveAvailableSkillFlagAndSlot(entry, 0x5B);
+            scrRemoveAvailableSkillFlagAndSlot(entry, 0x5C);
+            scrRemoveAvailableSkillFlagAndSlot(entry, 0x5D);
         }
         remaining--;
     } while (remaining >= 0);
@@ -509,7 +509,7 @@ s32 evtClearRandomStatusFlags(void) {
     return changed;
 }
 
-s32 func_0011D360(s32 id, s32 slot) {
+s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot) {
     s32 index = id - 0xC0;
     s32 tableOffset = index * 6;
     s32 flagOffset = slot + index * 5;
@@ -520,7 +520,7 @@ s32 func_0011D360(s32 id, s32 slot) {
            *(u8 *)(flagOffset + D_00435DD0 + 0x1E670);
 }
 
-void func_0011D3B8(s32 base, s32 offset, s32 amount) {
+void ptyAddClampedEntryValue(s32 base, s32 offset, s32 amount) {
     s8 *value = (s8 *)(offset + base + 0x16);
     s32 updated = *value + amount;
     if (updated < 0) {
@@ -532,7 +532,7 @@ void func_0011D3B8(s32 base, s32 offset, s32 amount) {
     *value = updated;
 }
 
-void func_0011D3E8(Entry1A4 *entry) {
+void ptyAssignRosterItemAndMarkOwned(Entry1A4 *entry) {
     s32 value = D_00386288[entry->rosterIndex];
     mnuSetPartyEntryCurrentId(entry, value);
     if (value != 0) {
@@ -540,7 +540,7 @@ void func_0011D3E8(Entry1A4 *entry) {
     }
 }
 
-void func_0011D438(void) {
+void ptyAssignPartyRosterItemsAndMarkOwned(void) {
     s32 offset = 0;
     s32 remaining = 4;
     do {
@@ -549,7 +549,7 @@ void func_0011D438(void) {
             s32 index = 0;
             do {
                 if (entry->rosterIndex == index) {
-                    func_0011D3E8(entry);
+                    ptyAssignRosterItemAndMarkOwned(entry);
                 }
                 index++;
             } while (index < 16);
@@ -750,7 +750,7 @@ s32 evtRollRandomScale(void) {
     return 1;
 }
 
-s32 func_0011DE08(void) {
+s32 scrGetBattleAverageCurrentValueForGroup(void) {
     s32 available = btlIsRuntimeAllocated();
     s32 value;
     if (available) {
@@ -764,7 +764,7 @@ s32 func_0011DE08(void) {
     return 1;
 }
 
-s32 func_0011DE58(void) {
+s32 scrGetBattleAverageMaximumValueForGroup(void) {
     s32 available = btlIsRuntimeAllocated();
     s32 value;
     if (available) {
@@ -778,7 +778,7 @@ s32 func_0011DE58(void) {
     return 1;
 }
 
-s32 func_0011DEA8(void) {
+s32 scrGetBattleAverageActorStatForGroup(void) {
     s32 available = btlIsRuntimeAllocated();
     s32 value;
     if (available) {
@@ -876,7 +876,7 @@ s32 func_0011E1D0(void) {
     return 1;
 }
 
-s32 func_0011E208(void) {
+s32 evtRollFlagDependentResultCode(void) {
     s32 value;
     if ((((EventScriptEntry *)D_0043E5CC[0])->flags & 0x20) == 0) {
         value = effMiscRandMod(0, 0x20) != 0 ? 0xA : 0x80;
@@ -897,7 +897,7 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E2A8);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E3A0);
 
-s32 func_0011E430(void) {
+s32 evtPushRosterOrGlobalCounterValue(void) {
     s32 entry = D_0043E5C8[0];
     s32 result;
     if (!(((EventScriptEntry *)entry)->flags & 0x20)) {
@@ -961,7 +961,7 @@ s32 func_0011EC00(void) {
     s32 value = scrReadIntParameter(0);
     s32 state;
     if (scrReadIntParameter(1) == 0) {
-        state = func_0011B260();
+        state = ptyIsRosterEntryPresent();
     } else {
         state = func_0011AEE0(value);
     }

@@ -229,7 +229,7 @@ void kwlnPadStepLargeMotorLevel(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104068);
 
-void func_00104130(void) {
+void kwlnPadResetMotorLevelsAndOutput(void) {
     D_003BD690[0] = 0;
     D_003BD6A0[0] = 0;
     D_003BD690[1] = 0;
@@ -642,7 +642,7 @@ void kwlnFadeBackgroundStartIn(s32 duration) {
     D_003245EC[2] = 2041.0f;
 }
 
-s32 func_001061E8(void) {
+s32 kwlnFadeIsBackgroundOverlayActive(void) {
     if (D_003BA904 & 0x0C000000) {
         return 1;
     }

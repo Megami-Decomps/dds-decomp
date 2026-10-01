@@ -1,7 +1,7 @@
 #include "common.h"
 #include "dds3Admin.h"
 
-extern AdminWork* func_00102790(void);
+extern AdminWork* dds3GetAdminTaskWork(void);
 
 extern void func_001027D8(s32 a0, s32 a1, s32 a2, s32 a3);
 
@@ -11,7 +11,7 @@ void dds3AdminSubmitMarkedRequest(s32 a0, s32 a1, s32 a2)
     AdminWork* work;
 
     func_001027D8(a0, a1, a2, 0);
-    work = func_00102790();
+    work = dds3GetAdminTaskWork();
     work->flags |= 8;
 }
 
@@ -20,18 +20,18 @@ void dds3AdminSetControlFlag(void)
 {
     AdminWork* work;
 
-    work = func_00102790();
+    work = dds3GetAdminTaskWork();
     work->flags |= 2;
 }
 
 s8 func_00102930(void)
 {
-    return func_00102790()->unk08;
+    return dds3GetAdminTaskWork()->unk08;
 }
 
 s8 func_00102950(void)
 {
-    return func_00102790()->unk09;
+    return dds3GetAdminTaskWork()->unk09;
 }
 
 /* Read the signed sample immediately before the ring buffer's write index. */
@@ -39,7 +39,7 @@ s8 dds3AdminReadPreviousSignedSample(void)
 {
     AdminWork* work;
 
-    work = func_00102790();
+    work = dds3GetAdminTaskWork();
     return work->signedHistory[(work->historyIndex + 7) & 7];
 }
 
@@ -48,7 +48,7 @@ u8 dds3AdminReadPreviousUnsignedSample(void)
 {
     AdminWork* work;
 
-    work = func_00102790();
+    work = dds3GetAdminTaskWork();
     return work->unsignedHistory[(work->historyIndex + 7) & 7];
 }
 

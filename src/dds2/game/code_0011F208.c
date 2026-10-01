@@ -9,7 +9,7 @@ extern u64 dds3GetWorldSecondaryObject(void);
 
 extern s64 func_00110628(u64);
 
-extern u64 func_00110680(u64);
+extern u64 dds3ReadIndexedWorldObjectWord(u64);
 
 extern s64 dds3AdvanceObjectValueCursor(u64);
 
@@ -37,7 +37,7 @@ extern u32 D_00435F34;
 
 extern u32 D_003898B8[];
 
-extern void func_003298C0(u32 arg0);
+extern void sdfQueueNonzeroResourceId(u32 arg0);
 
 extern u32 D_00435F0C;
 
@@ -249,7 +249,7 @@ extern void func_001027D8(s32, void *, s32, s32);
 
 u32 *fldGetPlayerSceneStateAddress(void);
 
-extern void func_00124E80(void);
+extern void fldResetPlayerSceneTransformState(void);
 
 extern u32 D_00435F78;
 
@@ -275,7 +275,7 @@ extern u8 D_0037FF88[];
 
 extern u8 D_003807F8[];
 
-extern void func_00331B38(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern void sdfStoreMessageWordsAndNotifyConsumer(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
 extern s32 D_00389770[];
 
@@ -665,7 +665,7 @@ void fldSubmitVisibleWorldBackground(void) {
     if (list != 0) {
         if (dds3ResetObjectValueCursor(list) != 0) {
             do {
-                item = func_00110680(list);
+                item = dds3ReadIndexedWorldObjectWord(list);
                 if (dds3TestObjectFlags(item, 0x200) != 0) {
                     if (dds3TestObjectFlags(item, 1) == 0) {
                         found = 1;
@@ -1041,7 +1041,7 @@ u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
 
 extern u32 D_003899F0[];
 
-u32 func_001239A8(s32 x, s32 y) {
+u32 fldFindStageCoordinateRowOffset(s32 x, s32 y) {
     FieldStageCoordinate *table = (FieldStageCoordinate *)D_00389170;
     s32 sum = 0;
     s32 i = 0;
@@ -1161,7 +1161,7 @@ f32 fldSnapAngleToCardinalDirection(f32 angle) {
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_001248E8);
 
-f32 func_001249B8(f32 ax, f32 ay, f32 bx, f32 by) {
+f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by) {
     s32 angle = (s32)(360.0f - func_001248E8(ax, ay, bx, by) + 90.0f);
     return (f32)(angle % 360);
 }
@@ -1188,7 +1188,7 @@ void fldToggleWorldNodeState(s64 mode) {
     }
     dds3ResetObjectValueCursor(iterator);
     do {
-        node = func_00110680(iterator);
+        node = dds3ReadIndexedWorldObjectWord(iterator);
         hasEntry = func_00114058(node);
         if (hasEntry == 4) {
             if (mode == 0) {
@@ -1203,7 +1203,7 @@ void fldToggleWorldNodeState(s64 mode) {
     dds3DestroyWorldIndexNode(iterator);
 }
 
-void func_00124CC8(void) {
+void fldPrepareDeferredSceneTransition(void) {
     if (*(s16 *)(D_00435DD0 + 0xe) != 0) {
         func_00118598(1);
     } else {
@@ -1236,9 +1236,9 @@ extern void func_00145818();
 extern void func_00122828();
 extern u8 D_0038A6E0[];
 
-void func_00124E28(void) {
+void fldInitializeDisplayAndSceneSound(void) {
     fldInitDisplayObjects();
-    func_00124E80();
+    fldResetPlayerSceneTransformState();
     fldResetPendingSounds();
     func_003412D8(D_0038A6E0, 0x1E240);
     fldParseMixLb();
@@ -1247,7 +1247,7 @@ void func_00124E28(void) {
     func_00122828();
 }
 
-void func_00124E80(void) {
+void fldResetPlayerSceneTransformState(void) {
     u32 *buffer = D_0038A640;
     __asm__ volatile(
         ".set noreorder\n"
@@ -1414,7 +1414,7 @@ INCLUDE_ASM(const s32, "game/code_0011F208", func_001258B8);
 
 void fldUnloadPlayerModel(void) {
     if (D_00435F34 != 0) {
-        func_003298C0(D_00435F34);
+        sdfQueueNonzeroResourceId(D_00435F34);
         D_00435F34 = 0;
         D_003898B8[0] = 0;
     }
@@ -1433,13 +1433,13 @@ void fldPrepareResourceBuffer(void) {
     memcpy(buffer, source, D_00435F40);
     D_00435F3C = (u32)buffer;
     mdlLoadViewerPackage(2, 0, 0x101, buffer, D_00435F40);
-    func_003298C0(D_00435F38);
+    sdfQueueNonzeroResourceId(D_00435F38);
     D_00435F38 = 0;
 }
 
 void fldReleaseResources(void) {
     if (D_00435F38 != 0) {
-        func_003298C0(D_00435F38);
+        sdfQueueNonzeroResourceId(D_00435F38);
         D_00435F38 = 0;
     }
     if (D_00389790[0] == 0 && D_00435F78 == 0) {
@@ -1454,7 +1454,7 @@ extern u32 D_00435F18;
 extern void effObjFetchInnerFirstVec(u32);
 extern void effObjFetchInnerSecondVecNorm(u32);
 
-void func_00125E68(void) {
+void fldSnapshotAndReleasePlayerSceneObject(void) {
     u32 *buffer;
     if (D_00435F0C != 0) {
         if (dds3GetWorldSecondaryObject() != 0) {
@@ -1482,10 +1482,10 @@ void func_00125E68(void) {
 }
 
 
-void func_00125EE8(void) {
+void fldShutdownSceneTasksAndWorld(void) {
     fldResetTaskSlots();
     fldTestDrawDestroy();
-    func_00125E68();
+    fldSnapshotAndReleasePlayerSceneObject();
     evtDestroySecondaryWorldNode();
     fldReleaseCampSceneTasks();
     fldResetTargetViewAndSound();
@@ -1572,7 +1572,7 @@ void fldClearSceneCommandFlag(void) {
 extern void fldPlayMenuSound(s32);
 extern void func_001360B8(s16, s32);
 
-void func_00126778(void) {
+void fldActivatePendingSceneCommand(void) {
     u32 value;
     if (D_00389770[0x4B] != 0) {
         if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 8) == 0) {
@@ -1607,7 +1607,7 @@ typedef struct FldSceneState {
     s32 commandActive;       /* 0x12C */
 } FldSceneState;
 
-void func_00126840(void) {
+void fldUpdateSceneCommandSpeed(void) {
     FldSceneState *scene = (FldSceneState *)D_00389770;
     u32 value;
     if (scene->commandActive == 0) {
@@ -1706,7 +1706,7 @@ u8 fldIsFlagActive(void) {
 }
 
 void func_00126B70(void) {
-    func_00331B38(D_003807F8, (s32)D_0037FF88, (s32)(D_0037FF88 + 0xC0), (s32)(D_0037FF88 + 0x100), (s32)(D_0037FF88 + 0xE0));
+    sdfStoreMessageWordsAndNotifyConsumer(D_003807F8, (s32)D_0037FF88, (s32)(D_0037FF88 + 0xC0), (s32)(D_0037FF88 + 0x100), (s32)(D_0037FF88 + 0xE0));
 }
 
 s16 fldRollEncounter(void) {
@@ -1774,7 +1774,7 @@ u8 fldGetCampSceneControlMode(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_001273E8);
 
-u8 func_001275D0(void) {
+u8 fldGetSceneReadyOrPendingState(void) {
     if (D_00435F80 > 0) {
         return 2;
     }
@@ -1886,7 +1886,7 @@ u8 fldIsFieldResourceWaitFinished(void) {
 }
 
 void func_001285E8(void) {
-    func_00141840();
+    fldSelectActorFromSceneIndexTables();
 }
 
 void func_00128600(void) {

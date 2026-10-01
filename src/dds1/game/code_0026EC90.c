@@ -83,7 +83,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
     do {
         pendingWork = sdfCheckPendingWorkWithInterrupts();
     } while (pendingWork != 0);
-    func_002D0A10(*D_003BC610);
+    sdfQueueNonzeroResourceId(*D_003BC610);
     D_003BC610 = (u32 *)0x0;
 }
 

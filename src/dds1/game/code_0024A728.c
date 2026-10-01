@@ -58,7 +58,7 @@ void evtRememberDispatchCallback(u32 callback, SceneTransition *transition) {
 
 /* Call each registered transition callback once; the flag at +0xCC picks the
    index they receive. */
-void func_0024B2E0(TransitionHost *host) {
+void mnuDispatchTransitionHostCallbacks(TransitionHost *host) {
     u32 i;
 
     for (i = 0; i < 2; i++) {

@@ -87,7 +87,7 @@ extern u32 D_00457F7C[];
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C83F0);
 
-void func_002C85B0(FileJob *job) {
+void fileStartChunkedReadWhenReady(FileJob *job) {
     WaitSema(D_00457F28.sema);
     if (job->state != FILE_JOB_READY) {
         SignalSema(D_00457F28.sema);
@@ -100,7 +100,7 @@ void func_002C85B0(FileJob *job) {
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C8638);
 
-void func_002C8878(FileJob *job) {
+void fileStartChunkedWriteWhenReady(FileJob *job) {
     WaitSema(D_00457F28.sema);
     if (job->state != FILE_JOB_READY) {
         SignalSema(D_00457F28.sema);

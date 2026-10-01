@@ -54,7 +54,7 @@ INCLUDE_ASM(const s32, "game/code_00111388", func_001114E8);
 
 INCLUDE_ASM(const s32, "game/code_00111388", func_001115B0);
 
-s32 func_00111628(ObjWithWork *obj) {
+s32 dds3AllocateClearedObjectWork(ObjWithWork *obj) {
     obj->work = func_00328D68(0x10);
     memset(obj->work, 0, 0x10);
     return 1;

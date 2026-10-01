@@ -5,7 +5,7 @@ extern s32 evtViewerTestIndexedCondition(u32);
 extern s32 func_003292A8(s32);
 extern u8 *sdfResourceRetainAddress(s32);
 extern void mnuClearPanelTransitionState(u8 *);
-extern void func_0025F7F0(u8 *);
+extern void mnuInitializeShopStatusBatches(u8 *);
 extern void func_002945B8(u8 *);
 extern void func_002C1B58(u8 *, s32);
 extern void func_003421E8(s32);
@@ -81,13 +81,13 @@ extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 extern s32 kwlnTaskGetUserValue();
 
-extern void func_00260380();
+extern void mnuShopReleaseWindowSprites();
 
 extern void sdfReleaseChipBlock();
 
 extern void mnuDestroyWindowContainer();
 
-extern void func_0025FCD8();
+extern void mnuShopReleaseWindowAndEffectResources();
 
 extern void mnuReleaseWindowTextures();
 
@@ -370,7 +370,7 @@ void mnuFxWorldDropOutOfRange(FxWorld *world, s32 threshold) {
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025DE08);
 
 /* Default three-vector slot contents; the trailing two scalars have unknown roles. */
-void func_0025DFE8(f32 *firstVector, f32 *secondVector, f32 *thirdVector, f32 *scalarA, f32 *scalarB) {
+void mnuInitializeCampPanelVisualDefaults(f32 *firstVector, f32 *secondVector, f32 *thirdVector, f32 *scalarA, f32 *scalarB) {
     firstVector[0] = 0.7f;
     firstVector[1] = 0.7f;
     firstVector[2] = 0.7f;
@@ -400,7 +400,7 @@ typedef struct CampDisplayDefaults {
     s32 unk1C;
 } CampDisplayDefaults;
 
-void func_0025E240(CampDisplayDefaults *display) {
+void mnuCampInitializeDisplayDefaults(CampDisplayDefaults *display) {
     display->width = 0x100;
     display->height = 0xE0;
     display->color[0] = -0x80;
@@ -450,7 +450,7 @@ typedef struct CampListLayout {
     s32 unk34;
 } CampListLayout;
 
-void func_0025E338(CampListLayout *layout) {
+void mnuInitializeCampListLayoutDefaults(CampListLayout *layout) {
     layout->width0 = 150;
     layout->width1 = 150;
     layout->unk10 = 80;
@@ -820,7 +820,7 @@ typedef struct ShopEffectScene {
     s32 mode;           /* 0xE4 */
 } ShopEffectScene;
 
-void func_0025F7F0(u8 *scene) {
+void mnuInitializeShopStatusBatches(u8 *scene) {
     u8 *object;
     u8 *graphics;
     s32 *params;
@@ -877,7 +877,7 @@ INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424AC0);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F8B8);
 
-void func_0025FA10(s32 object) {
+void mnuShopDestroyNestedEffectBatch(s32 object) {
     effDestroyPackedBatch(*(u32 *)(object + 0x3c));
 }
 
@@ -894,7 +894,7 @@ typedef struct ShopSceneCleanup {
     s32 resourceHandle;   /* 0x378 */
 } ShopSceneCleanup;
 
-void func_0025FCD8(s32 scene) {
+void mnuShopReleaseWindowAndEffectResources(s32 scene) {
     s32 i;
     s32 *slot = ((ShopSceneCleanup *)scene)->handles;
 
@@ -907,7 +907,7 @@ void func_0025FCD8(s32 scene) {
     switch (((ShopSceneCleanup *)scene)->mode) {
     case 1:
     case 3:
-        func_0025FA10(scene + 0x210);
+        mnuShopDestroyNestedEffectBatch(scene + 0x210);
         break;
     case 0:
     case 2:
@@ -919,7 +919,7 @@ void func_0025FCD8(s32 scene) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FD78);
 
-s32 func_0025FE70(void) {
+s32 mnuCampHasEligibleOwnedItems(void) {
     s32 result = 0;
     s32 i;
 
@@ -949,7 +949,7 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FF18);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260020);
 
-s32 func_00260138(s32 row) {
+s32 mnuCampResolveFlagRowValue(s32 row) {
     s32 i;
 
     for (i = 7; i >= 0; i--) {
@@ -1008,7 +1008,7 @@ typedef struct ShopScene {
     u8 atLimit;             /* 0xC7 */
 } ShopScene;
 
-void func_00260380(s32 keepExtra, ShopScene *scene) {
+void mnuShopReleaseWindowSprites(s32 keepExtra, ShopScene *scene) {
     ShopSprite **slot = scene->sprites;
     ShopSprite *sprite;
     u32 i;
@@ -1044,7 +1044,7 @@ u32 func_00260460(void) {
     return 0;
 }
 
-s32 func_00260468(void) {
+s32 mnuCountActivePartyEntries(void) {
     u16 entryFlags;
     u16 *entry;
     s32 remaining;
@@ -1069,7 +1069,7 @@ typedef struct CampTier {
 
 extern CampTier D_003CE408[];
 
-s32 func_002604A0(void) {
+s32 mnuCampResolveProgressTierValue(void) {
     u32 i;
 
     for (i = 0; i < 3; i++) {
@@ -1084,7 +1084,7 @@ s32 func_002604A0(void) {
     return D_003CE408[i].value;
 }
 
-void func_00260538(void) {
+void mnuCampClearListedItemCounts(void) {
     u16 entryId;
     s8 *entry;
     u32 index;
@@ -1108,24 +1108,24 @@ u8 *mnuTerminalCreateContext(void) {
     memset(obj, 0, 0x38C);
     ((ShopEffectScene *)obj)->resourceHandle = handle;
     mnuClearPanelTransitionState(obj + 0xC);
-    func_0025F7F0(obj);
+    mnuInitializeShopStatusBatches(obj);
     ((ShopEffectScene *)obj)->options = func_00260460();
-    ((ShopEffectScene *)obj)->availableCount = func_00260468();
+    ((ShopEffectScene *)obj)->availableCount = mnuCountActivePartyEntries();
     ((ShopEffectScene *)obj)->mode = 0xF;
     func_002945B8(obj);
     func_002C1B58(obj + 0x37C, 0x60);
-    func_00260538();
+    mnuCampClearListedItemCounts();
     func_003421E8(0x300000);
     sndStartTrackExtended(0x300000);
     return obj;
 }
 
-void func_00260620(s32 arg) {
+void mnuTerminalReleaseContextAndResources(s32 arg) {
     s32 scene = kwlnTaskGetUserValue();
 
     if (scene != 0) {
-        func_00260380(0, scene);
-        func_0025FCD8(scene);
+        mnuShopReleaseWindowSprites(0, scene);
+        mnuShopReleaseWindowAndEffectResources(scene);
         mnuShopReleaseSceneObjects((u8 *)scene);
         mnuDrainPanelTransitions(scene + 0xC, arg);
         dspCloseChannel();
@@ -1135,7 +1135,7 @@ void func_00260620(s32 arg) {
     }
 }
 
-s32 func_002606A0(void) {
+s32 mnuTerminalSyncMessageWindowControl(void) {
     s32 state = kwlnTaskGetUserValue() + 0x37C;
     func_002C1B70(state, 0x53);
     if (evtGetMessageWindowControlState() != 0) {
@@ -1160,7 +1160,7 @@ void mnuCampDestroyPanelTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_00424BD0, 0);
 }
 
-s32 func_00260848(void) {
+s32 mnuCampConsumePanelTaskCompletion(void) {
     s32 state = D_00437837;
     if (state == 1) {
         return 1;
@@ -1178,7 +1178,7 @@ static inline s64 campSetHandler(s32 context, u64 mode, s32 callback) {
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), mode, callback);
 }
 
-s64 func_00260880(s32 callback) {
+s64 mnuPreparePopupAndDispatchSelection(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     mnuSetPopupEntry((s32 *)(context + 0x58), D_003CE658);
     return campSetHandler(context, 0, callback);
@@ -1196,7 +1196,7 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260950);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260A58);
 
-s32 func_00260B50(s32 id) {
+s32 mnuCampFindListedItemIndex(s32 id) {
     u16 *entry = (u16 *)D_003CD8D8;
     u32 index = 0;
     do {
@@ -1243,7 +1243,7 @@ s32 func_00260C38(s32 slot, s32 row) {
     return row * 2 + slot;
 }
 
-u32 func_00260C48(s32 row) {
+u32 mnuCampChooseSolarWeightedOption(s32 row) {
     s32 chance = effMiscRand(0) & 0xFF;
     u8 *item = D_003CD8DD + row * 8;
     s32 total = 0;
@@ -1263,7 +1263,7 @@ u32 func_00260C48(s32 row) {
     return 0;
 }
 
-u8 func_00260CE8(void) {
+u8 mnuCampChooseWeightedTableValue(void) {
     s32 chance = effMiscRand(0) & 0xFF;
     s32 total = 0;
     u8 *item = D_003CD8D0;
@@ -1279,7 +1279,7 @@ u8 func_00260CE8(void) {
     return 1;
 }
 
-s32 func_00260D50(s32 row) {
+s32 mnuCampFindFreeWideEntryIndex(s32 row) {
     s32 *entry = (s32 *)(D_003CDA8C + row * 0xC0);
     s32 index = 0;
     do {
@@ -1293,7 +1293,7 @@ s32 func_00260D50(s32 row) {
     return 15;
 }
 
-s32 func_00260DA0(s32 unused, s32 row) {
+s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 row) {
     s32 *entry = (s32 *)(D_003CD8F8 + row * 0x44);
     s32 index = 0;
     do {
@@ -1321,7 +1321,7 @@ u8 func_00261018(s32 row, s32 column) {
     return D_003CD8F4[column * 8 + row * 0x44];
 }
 
-s32 func_00261040(s32 row, s32 column) {
+s32 mnuCampResolveOwnedItemVariant(s32 row, s32 column) {
     u8 *entry = D_003CDA88 + column * 0xC + row * 0xC0;
     s32 id = *(s32 *)(D_003CDA88 + column * 0xC + row * 0xC0 + 4);
 
@@ -1331,7 +1331,7 @@ s32 func_00261040(s32 row, s32 column) {
     return id;
 }
 
-s32 func_002610C0(s32 row, s32 column) {
+s32 mnuCampGetCompactEntryId(s32 row, s32 column) {
     return *(s32 *)(D_003CD8F8 + row * 0x44 + column * 8);
 }
 
@@ -1347,7 +1347,7 @@ s32 mnuCampCountRemainingUses(s32 mode, s32 id, s32 record) {
     } else {
         value = 99 - ((SaveItemCounts *)D_00435DD0)->counts[id];
     }
-    if (func_00260B50(id) >= 0) {
+    if (mnuCampFindListedItemIndex(id) >= 0) {
         if (value >= 2) {
             value = ((SaveItemCounts *)D_00435DD0)->counts[id] == 0;
         }
@@ -1398,7 +1398,7 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_002619A8);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261B98);
 
-void func_00261D78(s32 fontValue, s32 enabled, s32 unused2, s32 unused3, s32 fontArg, s32 flags) {
+void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2, s32 unused3, s32 fontArg, s32 flags) {
     s32 handle;
 
     if (enabled != 0) {

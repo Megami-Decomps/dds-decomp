@@ -94,7 +94,7 @@ void effInitModelVUState(void *model) {
 VU0_MOVE_VF(vf10, vf0);
     mdlStorePrimaryVectorVU(model);
     VU0_MOVE_VF(vf10, vf0);
-    func_00232AD0(model);
+    mdlUpdateContextRotationBasisFromQuaternion(model);
     VU0_SET_ONES_XYZ(vf10);
     mdlStoreTertiaryVectorVU(model);
     mdlBroadcastMasked(model, 0x80808080);
@@ -195,7 +195,7 @@ VU0_LOAD_VF_MEMORY(vf10, vec);
 
 void effApplyModelVecB(EffModelOwner *owner, u8 *vec) {
 VU0_LOAD_VF_MEMORY(vf10, vec);
-    func_00232AD0((void *)owner->model);
+    mdlUpdateContextRotationBasisFromQuaternion((void *)owner->model);
 }
 
 void effBroadcastModelMask(EffModelOwner *owner) {
@@ -551,7 +551,7 @@ VU0_LOAD_VF_MEMORY(vf10, vec);
 
 void func_002DDA30(u8 *obj, u8 *vec) {
 VU0_LOAD_VF_MEMORY(vf10, vec);
-    func_00232AD0(*(void **)(obj + 0xC0));
+    mdlUpdateContextRotationBasisFromQuaternion(*(void **)(obj + 0xC0));
 }
 
 void func_002DDA50(s32 model) {

@@ -11,7 +11,7 @@ extern u8 D_0037F660[];
 
 extern void func_00336C10(void *);
 
-extern void func_00336B00(void);
+extern void sdfMultiplyVuMatrixInPlace(void);
 
 extern struct MdlNode *mdlFindNodeById();
 
@@ -128,7 +128,7 @@ typedef struct MdlLink {
 
 extern void btlDestroyGroupNode();
 
-extern u32 func_00344010(u64);
+extern u32 sdfRelocatePackedResourcePayload(u64);
 
 typedef struct MdlLoadCmd {
     u8 unk0[6];    /* 0x0 */
@@ -145,14 +145,14 @@ extern void mdlExecuteAndFreeJob(void *job);
 
 void mdlFinishLoadCmd(s32 arg0, MdlLoadCmd *cmd) {
     cmd->handle = fileGetResourceHandle(arg0);
-    cmd->size = func_00344010(func_002C8110(arg0));
+    cmd->size = sdfRelocatePackedResourcePayload(func_002C8110(arg0));
     func_002C7D00(arg0);
     if (cmd->deferred == 0) {
         mdlExecuteAndFreeJob(cmd);
     }
 }
 
-extern u32 func_00344098(u64);
+extern u32 sdfRelocatePackedResourceWordsFromHeader(u64);
 
 typedef struct MdlLoadJob {
     u8 unk0[0x18]; /* 0x0 */
@@ -162,7 +162,7 @@ typedef struct MdlLoadJob {
 
 void mdlFinishLoadJob(s32 arg0, MdlLoadJob *job) {
     job->handle = fileGetResourceHandle(arg0);
-    job->sizeWord = func_00344098(func_002C8110(arg0));
+    job->sizeWord = sdfRelocatePackedResourceWordsFromHeader(func_002C8110(arg0));
     func_002C7D00(arg0);
     mdlExecuteAndFreeJob(job);
 }
@@ -265,7 +265,7 @@ void mdlEnableAllEntries(MdlCtx *ctx) {
     }
 }
 
-extern struct MdlNode *func_00231618(MdlCtx *, s32);
+extern struct MdlNode *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
 extern void func_00334280(struct MdlNode *, s32, s32, f32, f32);
 extern void mdlRemoveResourceSubtype(MdlCtx *, s32);
 extern void mdlApplyResourceEntries(MdlCtx *, s32, s32);
@@ -282,7 +282,7 @@ void func_002327C0(MdlCtx *ctx, s32 id, s32 arg2, s32 arg3, f32 arg4, f32 arg5) 
         }
     }
     if (node == NULL) {
-        node = func_00231618(ctx, id);
+        node = motionOwnerCreateObjectForRecord(ctx, id);
     }
     slot = node->slotIndex;
     ctx->slots[slot] = node;
@@ -390,7 +390,7 @@ void mdlLoadSecondaryVectorVU(MdlCtx *ctx) {
 extern void effMiscQuaternionToMatrixVU(void);
 
 /* Store vf10 as the secondary vector, then the rotation matrix rows built by the VU0 routine. */
-void func_00232AD0(MdlCtx *ctx) {
+void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *ctx) {
     void *secondary;
     void *row0;
     void *row1;
@@ -441,7 +441,7 @@ void mdlBroadcastValue(MdlCtx *ctx, u32 value) {
 
 extern void mdlSetResourceAmount(MdlCtx *ctx, u32 *node, f32 amount);
 
-void func_00232C18(MdlCtx *ctx, f32 amount) {
+void mdlSetAmountOnAllContextResources(MdlCtx *ctx, f32 amount) {
     u32 *node;
 
     for (node = ctx->list14; node != NULL; node = (u32 *)*node) {
@@ -460,7 +460,7 @@ void mdlProjectPointVU(MdlCtx *ctx, void *point)
     VU0_MOVE_VF(vf27, vf31);
     VU0_LOAD_MATRIX(&ctx->inner->vector20);
     VU0_SCALE_MATRIX_ROWS(vf10);
-    func_00336B00();
+    sdfMultiplyVuMatrixInPlace();
     VU0_LOAD_VF(vf10, point);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_PERSPECTIVE_DIVIDE_VF10();
@@ -492,7 +492,7 @@ void mdlProjectPoints(MdlCtx *ctx, f32 (*in)[4], f32 (*out)[4], s32 count)
     }
 }
 
-void func_00232E38(MdlCtx *ctx) {
+void mdlSuspendAllContextMotions(MdlCtx *ctx) {
     MdlNode *node;
 
     for (node = ctx->inner->list; node != NULL; node = node->next) {
@@ -500,7 +500,7 @@ void func_00232E38(MdlCtx *ctx) {
     }
 }
 
-void func_00232E80(MdlCtx *ctx) {
+void mdlResumeAllContextMotions(MdlCtx *ctx) {
     MdlNode *node;
 
     for (node = ctx->inner->list; node != NULL; node = node->next) {

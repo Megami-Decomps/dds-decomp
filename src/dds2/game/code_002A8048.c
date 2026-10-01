@@ -114,7 +114,7 @@ extern void kwlnDrawSetupDc8(s32);
 extern s32 itfPanelReleaseHold(void);
 extern void scrSetIntegerReturnValue(s32);
 
-s32 func_002A8120(void) {
+s32 mnuUpdateMovieDrawShutdownCountdown(void) {
     if (D_00437AE8 == 0 && scrCommandIsProcessControlFlagClear() == 1 && D_0037F530[0] < 0) {
         D_00437AE8 = 1;
         kwlnDrawSetDc8Second(0x44);
@@ -245,15 +245,15 @@ void mnuDestroyMovieViewerTask(void) {
     mnuClearMovieList();
 }
 
-void func_002A8B78(void) {
+void mnuMarkMovieDrawValuesPending(void) {
     D_00457E60.wordPending = 1;
     D_00457E60.blockPending = 1;
 }
 
-void func_002A8B90(void) {
+void mnuBindMovieDrawValueSources(void) {
     D_00457E60.wordSource = 0x10002010;
     D_00457E60.blockSource = (u32)D_003E5608;
-    func_002A8B78();
+    mnuMarkMovieDrawValuesPending();
 }
 
 /* Copy a source word and a 0x40-byte block when their pending flags are set. */
@@ -276,12 +276,12 @@ s32 mnuUpdateIpuRegisterViewer(void) {
 
     if (D_00457E60.started == 0) {
         D_00457E60.started = 1;
-        func_002A8B90();
+        mnuBindMovieDrawValueSources();
     }
     if (D_0040B7D8.reset != 0) {
-        func_002A8B78();
+        mnuMarkMovieDrawValuesPending();
     } else if (D_0040B7D8.init != 0) {
-        func_002A8B90();
+        mnuBindMovieDrawValueSources();
     } else if (D_0040B7D8.next & 2) {
         D_00457E60.cursor++;
         if (D_00457E60.cursor == 0x10) {

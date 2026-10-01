@@ -10,7 +10,7 @@ extern u64 func_00325790(u64, u32);
 
 extern void (*D_004389C4)(void);
 
-extern void func_00320C88(u32);
+extern void dds3DestroyCallbackNodeAfterLastNotification(u32);
 extern u32 func_0035A828(s32 bytes);
 extern void func_003211F0(void);
 
@@ -59,7 +59,7 @@ typedef struct DdsAllocBlock {
     u32 buffer; /* 0x04 */
 } DdsAllocBlock;
 
-u64 func_0031F0E8(void) {
+u64 dds3AllocateEmptyPackedValueBuffer(void) {
     DdsAllocBlock *block = (DdsAllocBlock *)func_0035A828(8);
     u32 buffer;
 
@@ -94,10 +94,10 @@ void func_0031F208(u32 unused, u32 node) {
 }
 
 
-u64 func_0031F228(s32 object) {
+u64 dds3AllocateAndAttachPackedValueBuffer(s32 object) {
     u64 record;
 
-    record = func_0031F0E8();
+    record = dds3AllocateEmptyPackedValueBuffer();
     func_00320CE0(*(u32 *)(object + 4), 0, record);
     return record;
 }
@@ -108,10 +108,10 @@ u32 func_0031F270(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F280);
 
-void func_0031F300(u32 node) {
-    func_00320C88(((DdsCallbackCollection *)node)->callbacks[0]);
-    func_00320C88(((DdsCallbackCollection *)node)->callbacks[1]);
-    func_00320C88(((DdsCallbackCollection *)node)->callbacks[2]);
+void dds3ReleaseCallbackCollectionAndNodes(u32 node) {
+    dds3DestroyCallbackNodeAfterLastNotification(((DdsCallbackCollection *)node)->callbacks[0]);
+    dds3DestroyCallbackNodeAfterLastNotification(((DdsCallbackCollection *)node)->callbacks[1]);
+    dds3DestroyCallbackNodeAfterLastNotification(((DdsCallbackCollection *)node)->callbacks[2]);
     func_0035A880(node);
 }
 
@@ -185,7 +185,7 @@ s32 dds3ApplyNamedRelocations(u32 *object) {
     return 1;
 }
 
-u32 func_0031F6A0(u32 object) {
+u32 dds3WritePendingNamedReferenceValues(u32 object) {
     DdsNamedNode *node = ((DdsNamedList *)((DdsPackedObject *)object)->pendingReferences)->first;
     u32 destination;
     if (node == NULL) {
@@ -199,7 +199,7 @@ u32 func_0031F6A0(u32 object) {
     return destination;
 }
 
-u32 func_0031F708(u32 *object, u32 extra) {
+u32 dds3RegisterPendingNamedReferences(u32 *object, u32 extra) {
     DdsNamedNode *node = ((DdsNamedList *)object[1])->first;
     while (node) {
         DdsNamedRecord *record = node->record;
@@ -295,7 +295,7 @@ u32 mnuCreateCallbackNode(u32 userData) {
     return (u32)node;
 }
 
-void func_00320C88(u32 node) {
+void dds3DestroyCallbackNodeAfterLastNotification(u32 node) {
     if (node != 0) {
         void (*callback)(s32, u32);
         func_00321018(node);
@@ -306,7 +306,7 @@ void func_00320C88(u32 node) {
 }
 
 
-void func_00320CD0(s32 callbackNode, s32 callbackAddress) {
+void dds3SetCallbackNodeLastListener(s32 callbackNode, s32 callbackAddress) {
     if (callbackAddress != 0) {
         ((DdsCallbackNode *)callbackNode)->onLast = (s32)callbackAddress;
     }
@@ -316,7 +316,7 @@ INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320CE0);
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320D80);
 
-void func_00320EA8(s32 callbackNode, s32 callbackAddress) {
+void dds3SetCallbackNodeFirstListener(s32 callbackNode, s32 callbackAddress) {
     if (callbackAddress != 0) {
         ((DdsCallbackNode *)callbackNode)->onFirst = (s32)callbackAddress;
     }
@@ -338,7 +338,7 @@ typedef struct SdfList {
     void (*onRemove)(u32, void *); /* 0x10 */
 } SdfList;
 
-SdfListNode *func_00320EB8(SdfList *list, SdfListNode *node) {
+SdfListNode *dds3DetachIndexedListNodeAndRenumber(SdfList *list, SdfListNode *node) {
     SdfListNode *it;
 
     if (node == NULL) {
@@ -368,12 +368,12 @@ SdfListNode *func_00320EB8(SdfList *list, SdfListNode *node) {
     return node->prev;
 }
 
-u32 func_00320F68(u32 list, u32 node) {
+u32 dds3RemoveListNodeAndNotify(u32 list, u32 node) {
     u32 remaining;
     if (node == 0) {
         return 0;
     }
-    remaining = func_00320EB8(list, node);
+    remaining = dds3DetachIndexedListNodeAndRenumber(list, node);
     (*(void (**)(u32, u32))(list + 0x10))(*(u32 *)node, *(u32 *)(node + 0x10));
     func_0035A880(node);
     return remaining;

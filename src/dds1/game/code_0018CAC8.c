@@ -381,7 +381,7 @@ void func_0018DBB0(void) {
     func_001028E8(0, 0, 0, 0);
 }
 
-void func_0018DBD8(void) {
+void sdfProjectVuVectorToScreen(void) {
     u8 *matrix;
     VU0_LOAD_MATRIX(D_003296F0);
     matrix = D_00324610;

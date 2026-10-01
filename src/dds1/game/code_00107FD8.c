@@ -522,7 +522,7 @@ u8 evtWaitFileMenuTaskThree(void) {
     return operationResult == 0;
 }
 
-void func_0010A288(u32 unused, u32 *value) {
+void evtOpenTitleMenuWithOptionalValue(u32 unused, u32 *value) {
     if (value == 0) {
         func_0026BCE8(0);
         return;
@@ -530,8 +530,8 @@ void func_0010A288(u32 unused, u32 *value) {
     func_0026BCE8(*value);
 }
 
-u32 func_0010A2B8(void) {
-    func_0026BD08();
+u32 evtCloseTitleMenu(void) {
+    mnuDestroyTitleMenuTask();
     return 0;
 }
 
@@ -750,7 +750,7 @@ void evtDispatchSelectionCommand(s32 source, s32 *params) {
 }
 
 void func_0010A6E0(void) {
-    func_001A1068();
+    btlExitWhenAudioAndTasksIdle();
 }
 
 u32 evtEnsureSelectionTask(void) {
@@ -844,7 +844,7 @@ u8 func_0010A890(void) {
 
 void evtCreateSkyAndCampTasks(u32 unused, u32 campMode) {
     evtCreateSkyTask();
-    func_002449F0(campMode);
+    mnuOpenShopSceneWithInitialSelection(campMode);
 }
 
 u32 evtDestroySkyAndCampTasks(void) {

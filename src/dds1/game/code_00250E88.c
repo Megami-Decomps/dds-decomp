@@ -185,7 +185,7 @@ s32 fldResetSceneState(void) {
     return 0;
 }
 
-void func_00253CF8(void) {
+void mnuCopySceneCoordinatesAndReleaseNodeList(void) {
     s32 context = func_002CB3B8(D_003BC4CC, 1);
     func_002512F0(context, 1);
     mnuCopySceneCoordinates(context);

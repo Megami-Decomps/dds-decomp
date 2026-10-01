@@ -4,13 +4,13 @@
 extern void *sdfInitNodeHeaderFromWords(s32 arg0, s32 arg1, s32 arg2);
 extern void *func_002CFEB8(s32 arg0);
 extern void *sdfDevCreateBufferedRequest(s32 arg0, s32 arg1, s32 arg2);
-extern void func_002EFD30(s32 arg0);
+extern void sdfInstallPoolNodeReleaseCallbacks(s32 arg0);
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern void sdfFreeNodeLists(void);
 extern void sdfEnsureFreeRootWorkspace(void *arg0);
 extern void func_002D83F8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_002D86E0(void *arg0, void *arg1);
-extern void func_002DDC50(void);
+extern void sdfMultiplyVuMatrixInPlace(void);
 extern void func_002E1FF8(u32 arg0);
 extern vu8 D_003BD2EA;
 
@@ -312,7 +312,7 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     translation = drawNode->vectors[0];
     VU0_LOAD_VF_MEMORY(vf31, translation);
     VU0_LOAD_MATRIX_B(parentMatrix);
-    func_002DDC50();
+    sdfMultiplyVuMatrixInPlace();
     transformed = drawNode->transformed;
     VU0_STORE_MATRIX(transformed);
     address = drawNode->address;
@@ -370,12 +370,12 @@ void sdfModelUpdateCurrentFrameTransforms(SdfModel *model) {
 }
 
 /* Store four message words, then notify the consumer of the second word. */
-void func_002D8C88(SdfMsg *msg, s32 unk0, s32 unk4, s32 unk8, s32 unkC) {
+void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *msg, s32 unk0, s32 unk4, s32 unk8, s32 unkC) {
     msg->unkC = unkC;
     msg->unk0 = unk0;
     msg->unk8 = unk8;
     msg->unk4 = unk4;
-    func_002EFD30(unk4);
+    sdfInstallPoolNodeReleaseCallbacks(unk4);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8CB8);

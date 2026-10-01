@@ -40,7 +40,7 @@ extern void *dds3GetSlot1Data(void *obj);
 extern void func_001175D0(void *data);
 extern void func_001175E0(void *data);
 
-void func_00220458(void *obj, s32 flag) {
+void evtToggleWorldSlotScaledValueFlag(void *obj, s32 flag) {
     void *data = dds3GetSlot1Data(obj);
 
     if (data == NULL) {
@@ -80,7 +80,7 @@ typedef struct EvtNodeOwner {
 
 extern void func_0014FC98();
 
-void func_00220508(EvtNodeOwner *owner, s32 flag) {
+void evtDispatchSupportedNodeOnClear(EvtNodeOwner *owner, s32 flag) {
     EvtNodeInner *inner = owner->inner;
     void *node;
 
@@ -157,7 +157,7 @@ typedef struct EvtMoveUnit {
 extern void effMiscQuaternionToMatrixVU(void);
 
 /* vf10 = (a - b) with y replaced by 0 */
-void func_002205D8(f32 *a, f32 *b) {
+void evtComputeHorizontalDisplacementVu(f32 *a, f32 *b) {
     VU0_LOAD_VF(vf10, a);
     VU0_LOAD_VF(vf11, b);
     VU0_SUB(vf10, vf10, vf11);
@@ -165,7 +165,7 @@ void func_002205D8(f32 *a, f32 *b) {
 }
 
 /* vf10 = the unit's rotated y axis flattened to the ground plane, negated */
-void func_00220600(EvtMoveUnit *unit) {
+void evtComputePlanarTargetDirectionVu(EvtMoveUnit *unit) {
     f32 v[4];
 
     VU0_LOAD_VF(vf10, unit->target->data + 0x50);

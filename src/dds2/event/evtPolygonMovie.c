@@ -607,7 +607,7 @@ s32 evtPolygonMovieScaleByProgress(PolyMovieObject *movie, s32 undo, s32 start, 
 }
 
 /* Store elapsed frames plus an offset, bounded below by zero and above by clip duration. */
-void func_0024F130(PolyMovieObject *movie, s32 unused, s32 start, s32 end, s32 offset) {
+void evtSetMovieClipPositionClampedToDuration(PolyMovieObject *movie, s32 unused, s32 start, s32 end, s32 offset) {
     PolyMovieClip *clip;
 
     clip = movie->state->clip;

@@ -41,7 +41,7 @@ s64 func_002729C8(s32 request) {
 s32 mnuStartStaffDisplay(void) {
     u8 *context = (u8 *)kwlnTaskGetUserValue();
     mnuSetStaffDisplayMode(5, context);
-    func_0027E790(((StaffScreenContext *)context)->display, ((StaffScreenContext *)context)->staffResource, 0, 1);
+    mnuActivatePanelAndConfigureGridResources(((StaffScreenContext *)context)->display, ((StaffScreenContext *)context)->staffResource, 0, 1);
     mnuCreateConfigTasks(0);
     return 1;
 }
@@ -51,7 +51,7 @@ u32 func_00272A58(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    func_0027E790(((StaffScreenContext *)context)->display, ((StaffScreenContext *)context)->displayVariant, 0, 1);
+    mnuActivatePanelAndConfigureGridResources(((StaffScreenContext *)context)->display, ((StaffScreenContext *)context)->displayVariant, 0, 1);
     return 1;
 }
 

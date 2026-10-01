@@ -29,7 +29,7 @@ extern void func_0022AF90();
 
 extern void func_00229728();
 
-extern void func_00203F08();
+extern void btlSelectSceneAudioTrack();
 
 typedef struct {
     void (*initialize)(s32);
@@ -191,7 +191,7 @@ extern SceneDescriptor *D_00435E04;
 
 extern f32 *D_0037F770[];
 
-extern s32 func_00201108(BattleEffectParams *, s32);
+extern s32 btlCreateEffectTaskWithSourceParams(BattleEffectParams *, s32);
 
 extern s32 btlCountTasksForOwner(s64);
 
@@ -221,7 +221,7 @@ extern SceneParty *D_00435DD0;
 
 extern s32 func_00206090();
 
-extern void func_00206060();
+extern void btlRepositionPartyAroundBattleCenter();
 
 extern s32 func_001AC648();
 
@@ -253,7 +253,7 @@ extern void fldSetEncounterPendingValue();
 
 extern void evtSetSolarOverlayFullyVisible();
 
-extern void func_001AF060();
+extern void btlSyncModelFlagFromEventThresholds();
 
 extern void func_00204000();
 
@@ -267,7 +267,7 @@ extern s32 btlReleaseScriptResourceA();
 
 extern s32 btlReleaseScriptResource();
 
-extern s32 func_00201540();
+extern s32 btlCreateSoundUpdateTask();
 
 extern s32 btlCreateSoundReleaseTask();
 
@@ -275,13 +275,13 @@ extern s32 btlCreateWaitUnitListIdleTask();
 
 extern s32 btlCreateApplyToActiveActorsTask();
 
-extern s32 func_002028C8();
+extern s32 btlCreateFadeStateResetTask();
 
 extern void func_001B8078();
 
 extern void func_001B81B0();
 
-extern void func_001D3E00(void);
+extern void fldEnableSceneGroupAdvancement(void);
 
 extern s8 D_0037F531[];
 
@@ -314,7 +314,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
     }
     func_0022AF90();
     func_00229728(((BattleSceneWork *)scene)->mode);
-    func_00203F08(((BattleSceneWork *)scene)->effectLayer, ((BattleSceneWork *)scene)->mode);
+    btlSelectSceneAudioTrack(((BattleSceneWork *)scene)->effectLayer, ((BattleSceneWork *)scene)->mode);
     VU0_STORE_VF($vf0, scene);
 }
 
@@ -330,10 +330,10 @@ s32 btlLoadBankWhenTasksIdle(void) {
 }
 
 void fldMarkGridTiles(BattleSceneWork *scene) {
-    u8 *tile = (u8 *)func_00200D00(scene->tileX, scene->tileY);
+    u8 *tile = (u8 *)fldCreateSceneTileTask(scene->tileX, scene->tileY);
     ((SceneTask *)tile)->linkedOwnerId = 0x8000000000000001ULL;
     btlStartTask(tile);
-    tile = (u8 *)func_00200F28(scene->tileX, scene->tileY);
+    tile = (u8 *)btlCreateFloorLoadTask(scene->tileX, scene->tileY);
     btlStartTask(tile);
 }
 
@@ -356,7 +356,7 @@ s32 fldSceneStateStartTileEffect(BattleSceneWork *scene) {
             params.position[0] = origin[4];
             params.position[1] = origin[5];
             params.position[2] = origin[6];
-            btlStartTask(func_00201108(&params, 0));
+            btlStartTask(btlCreateEffectTaskWithSourceParams(&params, 0));
         }
         return 4;
     }
@@ -369,7 +369,7 @@ s32 fldSceneStateRestoreDisplay(BattleSceneWork *scene) {
     if (btlCountTasksForOwner(0x8000000000000002LL) == 0) {
         func_00206090();
         if (!(scene->flags & 0x4000)) {
-            func_00206060();
+            btlRepositionPartyAroundBattleCenter();
         }
         func_001AC648();
         if (scene->subFlags & 0x80) {
@@ -405,7 +405,7 @@ s32 fldSceneStateRestoreDisplay(BattleSceneWork *scene) {
                 scene->flags &= 0xFFEFFFFF;
             }
         }
-        func_001AF060();
+        btlSyncModelFlagFromEventThresholds();
         return 5;
     }
     return 0;
@@ -422,10 +422,10 @@ s32 fldConsumeSceneInputFlags(BattleSceneWork *scene) {
     u32 flags = scene->flags;
     s32 result;
     if ((flags & 0x800) != 0) {
-        func_001D3E28();
+        fldClearSceneAdvanceFlag();
         result = 8;
     } else if ((flags & 0x400) != 0) {
-        func_001D3E28();
+        fldClearSceneAdvanceFlag();
         result = 7;
     } else {
         return 0;
@@ -434,7 +434,7 @@ s32 fldConsumeSceneInputFlags(BattleSceneWork *scene) {
     return result;
 }
 
-void func_001D1190(BattleSceneWork *scene) {
+void fldAdvanceSceneGroupInitialization(BattleSceneWork *scene) {
     s32 notFirst = scene->variant != 1;
     scene->variant = 2 - notFirst;
     if (scene->sceneCallback != 0) {
@@ -462,11 +462,11 @@ s32 fldSceneStateWaitScriptRelease(BattleSceneWork *scene) {
         if (btlReleaseScriptResourceA() == 0) {
             finished = 0;
         } else if (!(scene->subFlags & 0x40000)) {
-            btlStartTask(func_00201540(0xC));
+            btlStartTask(btlCreateSoundUpdateTask(0xC));
             btlStartTask(btlCreateSoundReleaseTask(0xC));
             btlStartTask(btlCreateWaitUnitListIdleTask(0xC));
             btlStartTask(btlCreateApplyToActiveActorsTask(0xC));
-            btlStartTask(func_002028C8());
+            btlStartTask(btlCreateFadeStateResetTask());
             btlStartTask(btlCreateSecondaryCommandSoundTask());
         }
         break;
@@ -496,7 +496,7 @@ s32 fldSceneStateWaitScriptRelease(BattleSceneWork *scene) {
 
     if (finished != 0) {
         if ((scene->flags & 0x800) == 0) {
-            func_001D3E00();
+            fldEnableSceneGroupAdvancement();
             scene->flags &= ~0x400;
             scene->flags &= ~0x1000;
             scene->flags &= ~0x20;
@@ -636,7 +636,7 @@ void fldMarkSceneRefresh(BattleSceneWork *scene) {
     scene->refreshFlags |= 4;
 }
 
-u32 func_001D2C40(void) {
+u32 fldBeginFadeWhenSceneReady(void) {
     if (func_00230978() != 0) {
         kwlnFadeInStart(0, 0, 0, 0);
         return 2;
@@ -1039,7 +1039,7 @@ void fldUpdateSceneGroupTask(SceneTask *task) {
             scene->flags |= 8;
         }
         if ((*(u64 *)&task->flags & 0x400000100LL) == 0) {
-            if (func_001AD1C0((u8 *)actor + 0x120, 0xDE) != 0) {
+            if (btlDoesEnabledStatusMatchCurrentId((u8 *)actor + 0x120, 0xDE) != 0) {
                 task->options |= 4;
             }
         } else {
@@ -1075,14 +1075,14 @@ void btlRemoveTaskFromSceneGroup(SceneTask *task) {
     }
 }
 
-void func_001D3E00(void) {
+void fldEnableSceneGroupAdvancement(void) {
     BattleSceneWork *scene;
 
     scene = (BattleSceneWork *)func_001AA6F8();
     scene->flags = scene->flags | 0xc;
 }
 
-void func_001D3E28(void) {
+void fldClearSceneAdvanceFlag(void) {
     BattleSceneWork *scene;
 
     scene = (BattleSceneWork *)func_001AA6F8();
@@ -1186,10 +1186,10 @@ void fldClearSceneSlotsAndGroups(void) {
     for (i = 0; i < 8; i++) {
         scene->groupHandles[i] = 0;
     }
-    func_001D3E28();
+    fldClearSceneAdvanceFlag();
 }
 
-u32 func_001D4120(s32 *request) {
+u32 fldDispatchSceneGroupRequestWhenAllowed(s32 *request) {
     u8 groupIndex;
 
     if (*request == 0) {
@@ -1215,7 +1215,7 @@ u8 *fldCreateSceneGroupAction(u8 *actor, u32 owner, s32 groupIndex) {
     if (actor != 0) {
         ((SceneTask *)object)->linkedOwnerId = ((SceneTask *)actor)->actor->ownerId;
     }
-    ((SceneTask *)object)->onComplete = (void (*)(void))func_001D4120;
+    ((SceneTask *)object)->onComplete = (void (*)(void))fldDispatchSceneGroupRequestWhenAllowed;
     ((SceneTask *)object)->onUpdate = 0;
     fields = (u8 *)btlGetTaskArguments(object);
     *(u32 *)(fields + 0) = (u32)actor;
@@ -1224,7 +1224,7 @@ u8 *fldCreateSceneGroupAction(u8 *actor, u32 owner, s32 groupIndex) {
     return object;
 }
 
-void func_001D4200(void) {
+void fldStopSceneActorActionUpdate(void) {
     BattleSceneWork *scene;
 
     scene = (BattleSceneWork *)func_001AA6F8();
@@ -1251,7 +1251,7 @@ u8 *fldCreateSceneActorAction(u8 *actor, u32 owner) {
     if (actor != 0) {
         ((SceneTask *)object)->linkedOwnerId = ((SceneTask *)actor)->actor->ownerId;
     }
-    ((SceneTask *)object)->onUpdate = (void (*)(void))func_001D4200;
+    ((SceneTask *)object)->onUpdate = (void (*)(void))fldStopSceneActorActionUpdate;
     ((SceneTask *)object)->onComplete = (void (*)(void))fldActivateRequestedSceneActor;
     fields = (u32 *)btlGetTaskArguments(object);
     fields[0] = (u32)actor;
@@ -1259,7 +1259,7 @@ u8 *fldCreateSceneActorAction(u8 *actor, u32 owner) {
     return object;
 }
 
-u32 func_001D4328(u32 *slotIndex) {
+u32 fldApplySceneSlotSwapRequest(u32 *slotIndex) {
     fldSwapSceneSlots(*slotIndex);
     return 1;
 }
@@ -1268,22 +1268,22 @@ u8 *fldCreateActorAction(s32 owner) {
     u8 *object = (u8 *)btlAllocTask(4);
     object[0] = 1;
     *(s16 *)(object + 0x20) = 0x63;
-    ((SceneTask *)object)->onComplete = (void (*)(void))func_001D4328;
+    ((SceneTask *)object)->onComplete = (void (*)(void))fldApplySceneSlotSwapRequest;
     object[0x10] = 0;
     ((SceneTask *)object)->onUpdate = 0;
     *(u32 *)btlGetTaskArguments(object) = owner;
     return object;
 }
 
-void func_001D43B0(s32 task) {
+void btlSetSceneTaskActiveFlag(s32 task) {
     ((SceneTask *)task)->flags |= 1;
 }
 
-void func_001D43C0(s32 task) {
+void btlClearSceneTaskActiveFlag(s32 task) {
     ((SceneTask *)task)->flags &= ~1;
 }
 
-void func_001D43D8(s32 task, s32 actor) {
+void btlBindActorTaskAndSelectActionNumber(s32 task, s32 actor) {
     u32 flags;
 
     flags = ((SceneActor *)actor)->status.words.activeFlags;

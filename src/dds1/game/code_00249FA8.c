@@ -60,7 +60,7 @@ extern char D_0036ADF4[];
 
 extern void mnuSetPopupEntry(s32 *, char *);
 
-void func_0024A0D8(s32 value) {
+void mnuPreparePopupAndDispatchSelection(s32 value) {
     s32 context = kwlnTaskGetUserValue();
     s32 *state = (s32 *)(context + 0x54);
 
@@ -80,7 +80,7 @@ void func_0024A170(s32 value) {
     func_00285670(context + 8, context + 0x54, 2, value);
 }
 
-s32 func_0024A1A8(void) {
+s32 evtIsFadeCompleteAndMessageWindowIdle(void) {
     s32 fadeActive = kwlnFadeIsActive();
 
     if (fadeActive != 0) {

@@ -629,7 +629,7 @@ void func_0018FF78(Work24 *src) {
 extern ChState D_00356360;
 extern s8 D_003BB13F;
 
-s32 func_0018FFD0(void) {
+s32 effAdvancePendingChannelState(void) {
     u8 ready = D_003BB13F;
 
     if (D_003BB13F == 0) {

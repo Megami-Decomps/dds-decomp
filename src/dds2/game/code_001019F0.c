@@ -3,7 +3,7 @@
 
 extern u32 D_00435D8C;
 
-extern AdminWork *func_00102790(void);
+extern AdminWork *dds3GetAdminTaskWork(void);
 extern char D_00435C18[];
 extern void *func_00101740(char *);
 extern u32 kwlnTaskGetUserValue(void *);
@@ -36,14 +36,14 @@ u32 func_00102768(void) {
     return 0;
 }
 
-AdminWork *func_00102790(void) {
+AdminWork *dds3GetAdminTaskWork(void) {
     return (AdminWork *)kwlnTaskGetUserValue(func_00101740(D_00435C18));
 }
 
-u32 func_001027B8(void) {
+u32 dds3GetAdminTaskValue(void) {
     AdminWork *work;
 
-    work = (AdminWork *)func_00102790();
+    work = (AdminWork *)dds3GetAdminTaskWork();
     return work->value;
 }
 
@@ -56,7 +56,7 @@ void func_001027D8(s32 value, void *data, u32 size, s32 flag) {
     u32 flags;
 
     if (data == NULL || size <= 0x100) {
-        work = func_00102790();
+        work = dds3GetAdminTaskWork();
         old = work->unk1C;
         work->unk09 = value;
         flags = work->flags;

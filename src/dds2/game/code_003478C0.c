@@ -9,7 +9,7 @@ typedef struct SdfRequest {
 
 extern void sdfReleasePoolNode();
 
-extern void func_00348B78();
+extern void sdfUpdatePoolFreeListByMode();
 
 typedef struct SdfAllocWork {
     u8 unk0[8];
@@ -44,7 +44,7 @@ extern void sdfDevQueueRead();
 
 extern void func_00348540();
 
-extern s32 func_00328390();
+extern s32 sdfCreateThreadWithAllocatedWorkspace();
 
 extern void _StartThread();
 
@@ -119,7 +119,7 @@ INCLUDE_ASM(const s32, "game/code_003478C0", func_00348408);
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00348540);
 
 void sdfStartAndSuspendWorkerThread(void) {
-    s32 stack = func_00328390(func_00348540, 0x1000, 0x4C);
+    s32 stack = sdfCreateThreadWithAllocatedWorkspace(func_00348540, 0x1000, 0x4C);
 
     _StartThread(stack, 0);
     D_00439224 = GetThreadId();
@@ -153,7 +153,7 @@ INCLUDE_ASM(const s32, "game/code_003478C0", func_00348AA0);
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00348B10);
 
-void func_00348B78(SdfPool *pool, s32 mode, SdfPoolNode *node) {
+void sdfUpdatePoolFreeListByMode(SdfPool *pool, s32 mode, SdfPoolNode *node) {
     switch (mode) {
     case 0:
         func_00348B10(pool);
@@ -167,9 +167,9 @@ void func_00348B78(SdfPool *pool, s32 mode, SdfPoolNode *node) {
     }
 }
 
-void func_00348BD8(u32 *work) {
+void sdfInstallPoolNodeReleaseCallbacks(u32 *work) {
     work[4] = (u32)sdfReleasePoolNode;
-    work[5] = (u32)func_00348B78;
+    work[5] = (u32)sdfUpdatePoolFreeListByMode;
 }
 
 INCLUDE_RODATA(const s32, "game/code_003478C0", D_0042EDD0);

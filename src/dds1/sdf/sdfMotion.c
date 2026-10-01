@@ -696,7 +696,7 @@ void func_002DC838(HasSub *a0, f32 t) {
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DC878);
 
-void func_002DC928(CmdI *a0) {
+void sdfMotionCopyTrackValueToBinding(CmdI *a0) {
     a0->res = a0->sub->i28;
 }
 
@@ -857,7 +857,7 @@ void sdfMotionApplySampledSecondaryTextValue(HasSub *a0, f32 t) {
     sdfCopySecondaryTextScalars(a0->sub, b.firstKey);
 }
 
-void func_002DD000(HasSub *a0, f32 t) {
+void sdfMotionSampleTextScalarsAtTime(HasSub *a0, f32 t) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t);

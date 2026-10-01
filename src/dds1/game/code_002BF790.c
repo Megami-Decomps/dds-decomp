@@ -43,7 +43,7 @@ typedef struct GridTextWidget {
     u8 pad34[0xC];
 } GridTextWidget;
 
-extern s32 func_002C2568(s32, void *);
+extern s32 sdfGridSeekSelectedNodeByIndex(s32, void *);
 
 typedef struct GridQuantizedEntry {
     u8 pad0[0x44];
@@ -265,7 +265,7 @@ void itfSubmitToggledGridWord(s32 data, s32 alternate, s32 kind) {
     entry->draw(entry, context);
 }
 
-void func_002C0950(data, kind)
+void sdfSubmitGsTestOneRegisterPacket(data, kind)
     u32 data;
     u32 kind;
 {
@@ -293,7 +293,7 @@ void sdfSubmitGsAlphaRegisterPacket(s32 data, s32 alternate, s32 kind) {
     entry->draw(entry, context);
 }
 
-void func_002C0A48(u32 data, u32 kind) {
+void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind) {
     sdfSubmitGsAlphaRegisterPacket(data, 0, kind);
 }
 
@@ -396,7 +396,7 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     }
 }
 
-void func_002C1430(s32 surfaceIndex) {
+void sdfDispatchSurfaceWithPreparedTexturePacket(s32 surfaceIndex) {
     void *list = sdfAllocPacketAligned(0x20);
     void *texture;
     sdfInitPacketList((s32)list);
@@ -410,17 +410,17 @@ void func_002C1430(s32 surfaceIndex) {
 }
 
 void uiDrawTexturedSurfaceAtFarDepth(s32 surface) {
-    func_002C0950(0x30000, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
     func_002C0DD8(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, surface);
-    func_002C0950(0x3000DL, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, surface);
     uiDrawActiveSurfaceRegion(surface);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1548);
 
 void uiDrawSurfaceAtNearDepth(u32 surface) {
-    func_002C0950(0x30000, surface);
-    func_002C0A48(0x44, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
     func_002C0DD8(0, 0, 0, 0x2000, 0xe00, 0, surface);
 }
 
@@ -762,7 +762,7 @@ s32 itfFindGridNodeByKey(u32 key, u32 head) {
     return n;
 }
 
-s32 func_002C2568(s32 index, void *w) {
+s32 sdfGridSeekSelectedNodeByIndex(s32 index, void *w) {
     u8 *widget = (u8 *)w;
     s16 count = ((GridScrollControl *)widget)->count;
     u16 width;
@@ -791,12 +791,12 @@ s32 func_002C2568(s32 index, void *w) {
     return 1;
 }
 
-void func_002C25E0(u32 widget) {
-    func_002C2568(0, widget);
+void sdfGridSeekFirstNode(u32 widget) {
+    sdfGridSeekSelectedNodeByIndex(0, widget);
 }
 
-s32 func_002C2600(s32 widget) {
-    return func_002C2568(((GridScrollControl *)widget)->count - 1, (void *)widget);
+s32 sdfGridSeekLastNode(s32 widget) {
+    return sdfGridSeekSelectedNodeByIndex(((GridScrollControl *)widget)->count - 1, (void *)widget);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002BF790", D_003BD218);

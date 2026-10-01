@@ -63,7 +63,7 @@ typedef struct InnerVecObj {
 } InnerVecObj;
 
 /* Build the inner-vector object of a world object and fill in its default state. */
-u32 func_001164C8(WorldResourceOwner *object) {
+u32 dds3InitializeInnerVectorEffectObject(WorldResourceOwner *object) {
     InnerVecObj *obj;
 
     effObjInnerCreate();

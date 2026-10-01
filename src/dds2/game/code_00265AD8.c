@@ -127,7 +127,7 @@ s64 func_00265F60(s32 callback) {
     if (state == 0) {
         if (*window == 0) {
             if (evtGetMessageWindowControlState() == 0) {
-                func_0026C710();
+                evtFinishMessageWindowAndNotify();
                 mnuSetPopupEntryFlagged(window, D_003CE690);
             }
         }

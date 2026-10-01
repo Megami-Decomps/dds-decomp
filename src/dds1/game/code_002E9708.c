@@ -103,7 +103,7 @@ typedef struct SoundFormat {
 
 extern SoundNode *D_003BDA98;
 extern s32 sceIpuSync(s32, s32);
-extern u32 func_002CF530(s32);
+extern u32 sdfAllocateBlockBySizeThreshold(s32);
 extern void sdfSoundInitNodeFromFormat(SoundNode *, SoundFormat *);
 extern void sdfStreamOpen(SoundNode *, SoundFormat *, s32, s32);
 extern void sdfSoundInitFormattedNode(SoundNode *, SoundFormat *, s32, s32);
@@ -115,7 +115,7 @@ extern u64 func_002EAF70(u64, u32 *, u64, u64);
 
 extern void func_002EB578(SoundNode *node, u8 *data, s32 size);
 
-extern s32 func_002D9FA8(s32);
+extern s32 sdfCreateConfiguredBufferedResourceList(s32);
 
 extern void func_002DA058(s32, u64);
 
@@ -376,9 +376,9 @@ extern char D_003B4DB8[]; /* " <<< GS memory information >>>..." */
 extern char D_003B4E30[]; /* " %08X : %08X %08X %8s %08X %d\n" */
 extern char D_003BD610[]; /* "%d" */
 extern char *D_00398A28[];
-extern GsMemBlock *func_002D1D10(void);
+extern GsMemBlock *sdfGetTextureListHead(void);
 extern char *D_00398A38[];
-extern GsMemBlock *func_002D1D18(void);
+extern GsMemBlock *sdfGetTextureBlockListHead(void);
 
 void sdfDumpGsMemoryForward(void) {
     char buf[8];
@@ -388,7 +388,7 @@ void sdfDumpGsMemoryForward(void) {
     char *name;
 
     sdfPrintFormattedDevMessage(D_003B4DB8);
-    head = func_002D1D10();
+    head = sdfGetTextureListHead();
     node = head;
     while (node != 0) {
         if (node->type < 4) {
@@ -414,7 +414,7 @@ void sdfDumpGsMemoryBackward(void) {
     char *name;
 
     sdfPrintFormattedDevMessage(D_003B4DB8);
-    head = func_002D1D18();
+    head = sdfGetTextureBlockListHead();
     node = head;
     while (node != 0) {
         if (node->type < 4) {
@@ -451,7 +451,7 @@ u64 func_002EB028(u64 name, u32 *info, u64 flags) {
     return func_002EAF70(name, info, flags, 0);
 }
 
-u64 func_002EB040(u64 name) {
+u64 sdfLoadNamedResourceAndReleaseLookupHandle(u64 name) {
     u64 handle;
     u64 resource;
     u32 info[4];
@@ -472,7 +472,7 @@ typedef struct SoundResourceList {
 u64 sndBuildResourceHandleListFromOffsets(u32 resource) {
     s32 i = 0;
     s32 count = ((SoundResourceList *)resource)->count;
-    s32 handle = func_002D9FA8(count);
+    s32 handle = sdfCreateConfiguredBufferedResourceList(count);
     s32 *entry;
     if (count != i) {
         entry = ((SoundResourceList *)resource)->relativeOffsets;
@@ -485,7 +485,7 @@ u64 sndBuildResourceHandleListFromOffsets(u32 resource) {
     return handle;
 }
 
-u64 func_002EB118(u64 name) {
+u64 sndLoadNamedOffsetResourceList(u64 name) {
     u64 handle;
     u64 resource;
     u32 info[4];
@@ -504,7 +504,7 @@ typedef struct PackedRelocationHeader {
     u8 pad18[8];
 } PackedRelocationHeader;
 
-s32 func_002EB168(s32 resource) {
+s32 sdfRelocatePackedResourcePayload(s32 resource) {
     s32 payload;
 
     payload = resource + 0x20;
@@ -512,14 +512,14 @@ s32 func_002EB168(s32 resource) {
     return payload;
 }
 
-u64 func_002EB1A8(u64 name, s32 *out) {
+u64 sdfLoadPackedResourceWithRelocatedPayload(u64 name, s32 *out) {
     u32 info[4];
     u64 buffer = func_002EB028(name, info, 0);
-    *out = func_002EB168(info[0]);
+    *out = sdfRelocatePackedResourcePayload(info[0]);
     return buffer;
 }
 
-s32 func_002EB1F0(s32 resource) {
+s32 sdfRelocatePackedResourceWordsFromHeader(s32 resource) {
     s32 payload;
 
     payload = resource + 0x20;
@@ -530,7 +530,7 @@ s32 func_002EB1F0(s32 resource) {
 u64 func_002EB230(u64 name, s32 *out) {
     u32 info[4];
     u64 buffer = func_002EB028(name, info, 0);
-    *out = func_002EB1F0(info[0]);
+    *out = sdfRelocatePackedResourceWordsFromHeader(info[0]);
     return buffer;
 }
 
@@ -645,8 +645,8 @@ void sdfAllocateStreamFrameBuffers(SoundNode *node) {
     size = node->width * node->height;
     size *= channels;
     node->bufferSize = size;
-    node->buffers[0] = func_002CF530(size);
-    node->buffers[1] = func_002CF530(size);
+    node->buffers[0] = sdfAllocateBlockBySizeThreshold(size);
+    node->buffers[1] = sdfAllocateBlockBySizeThreshold(size);
 }
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB578);
 
@@ -696,7 +696,7 @@ void sdfSoundInitFormattedNode(SoundNode *node, SoundFormat *format, s32 callbac
     node->callback = callback;
     node->callbackContext = context;
     node->active = 1;
-    node->sampleBuffer = func_002CF530(0x10100) + 0x100;
+    node->sampleBuffer = sdfAllocateBlockBySizeThreshold(0x10100) + 0x100;
 }
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EBA28);
@@ -874,7 +874,7 @@ void func_002ECA40(u32 value) {
     D_003BD61C = value;
 }
 
-void func_002ECA48(s32 column, s32 row, s32 width, s32 height, u32 mode) {
+void sdfSetGridScaledDrawBounds(s32 column, s32 row, s32 width, s32 height, u32 mode) {
     D_003BD620 = column * 0x10 + 0x7000;
     D_003BD624 = row * 8 + 0x7900;
     D_003BD628 = D_003BD620 + width * 0x10;

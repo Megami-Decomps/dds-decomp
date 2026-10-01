@@ -12,7 +12,7 @@ extern s32 func_002890A8(s32);
 
 extern void func_0026D168(s32, s32, s32);
 
-extern s32 func_0026D0B0(s32, s32);
+extern s32 evtAllocateMantraSelectionWork(s32, s32);
 
 typedef struct MenuPanelNode {
     s32 index;
@@ -113,7 +113,7 @@ s32 mnuUpdateSelectedPanelSlot(MenuPanelObject *object) {
     if (*slot != 0) {
         func_0026D168((s32)*slot, source, 0);
     } else {
-        *slot = (MenuPanelSlot *)func_0026D0B0(source, 0);
+        *slot = (MenuPanelSlot *)evtAllocateMantraSelectionWork(source, 0);
     }
     return 1;
 }

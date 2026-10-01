@@ -4,7 +4,7 @@ INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BD5C8);
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BD710);
 
-s32 func_002BD9E0(s32 arg0, s32 arg1, s32 arg2, u32 *window, s32 arg4) {
+s32 mnuClearWindowPendingFlagAfterSelection(s32 arg0, s32 arg1, s32 arg2, u32 *window, s32 arg4) {
     s32 result = func_002BD5C8(window, arg4);
 
     switch (result) {
@@ -29,7 +29,7 @@ INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDC38);
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE080);
 
-INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE138);
+INCLUDE_ASM(const s32, "game/code_002BD5C8", mnuDrawSelectedPartyProfileLabel);
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE240);
 

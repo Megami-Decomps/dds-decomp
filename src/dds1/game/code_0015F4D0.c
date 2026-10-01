@@ -6,7 +6,7 @@ extern BillDispatch D_0034E658[];
 
 extern BillDispatch D_0034E654[];
 extern BillDispatch D_0034E650[];
-extern void func_002DDBF8(void);
+extern void sdfComposeVuMatrixFromRegisters(void);
 extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 extern void *sdfAllocPacketAligned(s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
@@ -87,7 +87,7 @@ void *effCreateDispatchStateForHandler(EffectDispatchState *effect) {
     return result;
 }
 
-void func_0015F578(BillObj *obj) {
+void billDispatchIndexedObjectCallback(BillObj *obj) {
     D_0034E658[*(u16 *)((u8 *)obj + 0xB0)].func();
 }
 
@@ -113,11 +113,11 @@ void func_0015F678(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-/* vu0 routine: effect->matrix20 = matrix * effect->matrix70 via func_002DDBF8 */
-void func_0015F688(u8 *effect, void *matrix) {
+/* vu0 routine: effect->matrix20 = matrix * effect->matrix70 via sdfComposeVuMatrixFromRegisters */
+void effComposeBillboardTransformMatrix(u8 *effect, void *matrix) {
     VU0_LOAD_MATRIX(matrix);
     VU0_LOAD_MATRIX_B(effect + 0x70);
-    func_002DDBF8();
+    sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(effect + 0x20);
 }
 
@@ -133,7 +133,7 @@ void effBillSetWorkValue(BillWork *work, u8 value) {
     work->currentValue = value;
 }
 
-u8 func_0015F708(BillWork *work) {
+u8 billGetCurrentValue(BillWork *work) {
     return work->currentValue;
 }
 
@@ -166,7 +166,7 @@ INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015FB88);
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015FC48);
 
-u64 *func_0015FD98(u32 flags) {
+u64 *effBuildDrawPacketWithFlags(u32 flags) {
     u64 *packet = sdfAllocPacketAligned(0x80);
 
     packet[0] = 7;

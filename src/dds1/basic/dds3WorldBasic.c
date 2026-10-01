@@ -13,7 +13,7 @@ void func_00110018(IndexObj *arg);
 s32 dds3SeekWorldNode(void *arg0, void *arg1);
 void *func_00110400(void *arg0, void *arg1, s32 arg2);
 void dds3ResetObjectValueCursor(void *arg);
-void *func_00110458(void *arg);
+void *dds3ReadIndexedWorldObjectWord(void *arg);
 s32 dds3AdvanceObjectValueCursor(void *arg);
 
 void dds3DestroyWorld(void) {
@@ -189,7 +189,7 @@ s32 dds3SeekWorldNode(void *iterator, void *target) {
     void *candidate;
 
     do {
-        candidate = func_00110458(iterator);
+        candidate = dds3ReadIndexedWorldObjectWord(iterator);
         if (candidate == NULL) {
             return 0;
         }

@@ -88,7 +88,7 @@ typedef struct AffinityRow {
 } AffinityRow;
 
 extern void func_002E7F20(f32, f32, f32);
-extern void func_00217FB8(s32);
+extern void mdlUpdateContextRotationBasisFromQuaternion(s32);
 
 typedef struct StageCameraTarget {
     u8 pad[8];
@@ -734,7 +734,7 @@ void func_00285160(void) {
     sdfReleaseChipBlock();
 }
 
-void func_00285178(s32 item, u32 grid, u32 unused, u32 firstIndex,
+void mnuCacheProfilePanelGridPositions(s32 item, u32 grid, u32 unused, u32 firstIndex,
                                     u32 secondIndex) {
     itfGridStorePosition((u32 *)(item + 0x18));
     itfSetGridEntryQuantizedAndRefresh(((MenuProfilePanel *)item)->gridOrigin.x, ((MenuProfilePanel *)item)->gridOrigin.y, 0, 0, 0, 0);
@@ -1425,7 +1425,7 @@ void func_00287420(f32 offset) {
 extern s8 D_0037CE90[];
 extern u8 D_0037CE98[];
 
-void func_00287450(s32 mode) {
+void evtStageTestInit(s32 mode) {
     f32 offset;
     s32 i;
     s32 value;
@@ -1604,7 +1604,7 @@ void evtStageTestApplyEntryRotation(s32 model) {
 
     func_002E7F20(entry->rotation[0] * 3.14159265f / 180.0f, entry->rotation[1] * 3.14159265f / 180.0f,
                   entry->rotation[2] * 3.14159265f / 180.0f);
-    func_00217FB8(model);
+    mdlUpdateContextRotationBasisFromQuaternion(model);
 }
 
 /* vu0 routine: copies the stage-test camera vectors into the view work area, builds the look-at basis for eye 600 units along the view direction, and hands the matrix to the model packet at the current slot */
@@ -1850,7 +1850,7 @@ void *evtBattleStageTestScreen(void) {
     return 0;
 }
 
-void func_002886A0(void) {
+void evtDestroyBattleStageTestWorldNode(void) {
     evtDestroySecondaryWorldNode();
 }
 
@@ -1861,7 +1861,7 @@ void evtBattleStageTestStopTask(void) {
 
 void btlCreateStageTestTask(void) {
     kwlnDebugGraphSetEnabled(1);
-    kwlnTaskCreate(D_003B2608, 0x2b0c, 1, 1, evtBattleStageTestScreen, func_002886A0, 0);
+    kwlnTaskCreate(D_003B2608, 0x2b0c, 1, 1, evtBattleStageTestScreen, evtDestroyBattleStageTestWorldNode, 0);
 }
 
 typedef struct StageTestTaskWork {

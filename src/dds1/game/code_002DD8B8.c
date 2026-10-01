@@ -25,7 +25,7 @@ typedef struct RwMatrix
 extern void func_002DD788(f32 angle, const RwV3d* axis, RwMatrix* matrix);
 
 /* Persona 4 func_004bd380 @ 004BD380 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
-void func_002DD8B8(const RwV3d* axis, f32 angle)
+void sdfBuildVuRotationFromAxisAngle(const RwV3d* axis, f32 angle)
 {
     RwMatrix matrix;
     func_002DD788(angle, axis, &matrix);
@@ -39,7 +39,7 @@ INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DD968);
 INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DD9E8);
 
 /* Build an axis-angle matrix in the VU0 secondary matrix registers. */
-void func_002DDA68(const RwV3d* axis, f32 angle)
+void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d* axis, f32 angle)
 {
     RwMatrix matrix;
     func_002DD788(angle, axis, &matrix);
@@ -50,7 +50,7 @@ extern f32 func_002F9F60(f32 angle);
 extern f32 func_002FA060(f32 angle);
 
 /* vu0 routine: rotate the vf29/vf30 pair by angle (vf29 = vf29*c + vf30*s, vf30 = vf29*s - vf30*c) */
-void func_002DDA98(f32 angle)
+void sdfRotateVuMatrixAboutX(f32 angle)
 {
     f32 c = func_002F9F60(angle);
     f32 s = func_002FA060(angle);
@@ -71,7 +71,7 @@ void func_002DDA98(f32 angle)
 }
 
 /* vu0 routine: rotate the vf28/vf30 pair by angle (vf28 = vf30*s - vf28*c, vf30 = vf30*c + vf28*s) */
-void func_002DDAF8(f32 angle)
+void sdfRotateVuMatrixAboutY(f32 angle)
 {
     f32 c = func_002F9F60(angle);
     f32 s = func_002FA060(angle);
@@ -92,7 +92,7 @@ void func_002DDAF8(f32 angle)
 }
 
 /* vu0 routine: rotate the vf28/vf29 pair by angle (vf28 = vf29*s + vf28*c, vf29 = vf28*s - vf29*c) */
-void func_002DDB58(f32 angle)
+void sdfRotateVuMatrixAboutZ(f32 angle)
 {
     f32 c = func_002F9F60(angle);
     f32 s = func_002FA060(angle);
@@ -115,20 +115,20 @@ void func_002DDB58(f32 angle)
 extern void func_002DD608(f32 angle);
 extern void func_002DD968(f32 angle);
 extern void func_002DD9E8(f32 angle);
-extern void func_002DDC50(void);
+extern void sdfMultiplyVuMatrixInPlace(void);
 
 /* Compose the three axis rotations of a per-axis angle vector into the VU0 matrix. */
 void vu0RotMatrixXYZFromVec3(const RwV3d *rot)
 {
     func_002DD608(rot->x);
     func_002DD968(rot->y);
-    func_002DDC50();
+    sdfMultiplyVuMatrixInPlace();
     func_002DD9E8(rot->z);
-    func_002DDC50();
+    sdfMultiplyVuMatrixInPlace();
 }
 
 /* vu0 routine: vf28-vf31 = vf24-vf27 * vf28-vf31 (4x4 product) */
-void func_002DDBF8(void)
+void sdfComposeVuMatrixFromRegisters(void)
 {
     VU0_APPLY_MATRIX(vf2, vf24);
     VU0_APPLY_MATRIX(vf3, vf25);
@@ -141,7 +141,7 @@ void func_002DDBF8(void)
 
 /* Persona 4 func_004bd450 @ 004BD450 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 /* vu0 routine: vf28-vf31 = vf28-vf31 * vf24-vf27 (4x4 product) */
-void func_002DDC50(void)
+void sdfMultiplyVuMatrixInPlace(void)
 {
     __asm__ volatile (
         ".set noreorder                              \n"

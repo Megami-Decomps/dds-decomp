@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern void func_00267DA0(s32 effect);
-extern void func_00267D30(s32 unused, s32 effect);
+extern void mnuEnsureProfilePanelEffect(s32 unused, s32 effect);
 
 typedef struct MenuRenderListNode {
     u8 pad00[0x70];
@@ -24,8 +24,8 @@ typedef struct MenuRenderState {
 
 /* Tear the panel's effect down, snapshot the live list, then bring the panel
  * back with the snapshot in front of it. */
-void func_00288F60(MenuRenderState *state) {
+void mnuRebuildProfilePanelFromRenderSnapshot(MenuRenderState *state) {
     func_00267DA0(state->effect);
     memcpy(state->snapshot, state->context->node->items, 0x1C4);
-    func_00267D30((s32)state->snapshot, state->effect);
+    mnuEnsureProfilePanelEffect((s32)state->snapshot, state->effect);
 }

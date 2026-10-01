@@ -3,7 +3,7 @@
 
 extern u32 D_00435D88;
 
-extern void func_0010FAA8(u8 *, u8 *, u8 *);
+extern void dds3BuildVuTransformFromComponents(u8 *, u8 *, u8 *);
 
 typedef struct {
     u8 pad0[8];
@@ -23,7 +23,7 @@ void dds3LoadOrBuildObjectMatrix(u8 *arg0) {
         VU0_LOAD_MATRIX(obj);
     } else {
         *(u32 *)(obj + 0xC0) = flags | 2;
-        func_0010FAA8(obj + 0x60, obj + 0x50, obj + 0x40);
+        dds3BuildVuTransformFromComponents(obj + 0x60, obj + 0x50, obj + 0x40);
         VU0_STORE_MATRIX(obj);
     }
 }

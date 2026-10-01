@@ -1,9 +1,9 @@
 #include "common.h"
 
 extern s32 func_0028A018(s32);
-extern s32 func_00315FC8(u16);
+extern s32 scrGetEntryRequirementFlags(u16);
 extern s32 func_00314990(s32, u16);
-extern s32 func_00314B78(s32);
+extern s32 scrGetSelectedScriptEntryId(s32);
 extern s32 func_0026CF70(s16);
 extern void func_0028D070(s32, s32, s32);
 extern void func_00291118(void);
@@ -121,7 +121,7 @@ typedef struct MantraMenuWork {
 
 void func_00289B40(s32 object) {
     s32 state = object + 0x240;
-    s16 id = func_00314B78(((MenuContainer *)object)->list->selected->value);
+    s16 id = scrGetSelectedScriptEntryId(((MenuContainer *)object)->list->selected->value);
     ((MantraMenuWork *)state)->resourceId = func_0026CF70(id);
     func_0028D070(object, 5, 0);
 }
@@ -141,7 +141,7 @@ typedef struct MantraMenuBits {
 extern void func_0028E858(s32 object);
 extern void evtStageTestInit(s32 a);
 extern void func_002A2200(s32 a);
-extern void func_002A2388(void);
+extern void mnuResetTitleStreamAfterFileIdle(void);
 
 /* Opens the mantra menu: collects the list's node ids and starts the AT3 load. */
 void func_00289DC8(s32 object) {
@@ -152,7 +152,7 @@ void func_00289DC8(s32 object) {
 
     ((MantraMenuBits *)(state + 0x554))->flag14 = 0;
     ((MantraMenuBits *)(state + 0x554))->mode = 1;
-    ((MantraMenuWork *)state)->resourceId = func_0026CF70(func_00314B78(((MenuContainer *)object)->list->selected->value));
+    ((MantraMenuWork *)state)->resourceId = func_0026CF70(scrGetSelectedScriptEntryId(((MenuContainer *)object)->list->selected->value));
     func_0028E858(object);
     list = ((MenuContainer *)object)->list;
     node = list->head;
@@ -169,12 +169,12 @@ void func_00289DC8(s32 object) {
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
     func_002A2200(0x10);
-    func_002A2388();
+    mnuResetTitleStreamAfterFileIdle();
 }
 
 extern void mnuDestroyMantraDrawPool(u32 address);
 extern s64 func_0026D148(u32 *p);
-extern void func_00279C38(u32 *sprite);
+extern void mnuReleaseMantraIconSpriteHandle(u32 *sprite);
 
 void func_00289ED0(s32 object) {
     s32 state;
@@ -194,11 +194,11 @@ void func_00289ED0(s32 object) {
         handle++;
     }
     if (((MantraMenuWork *)state)->displaySprite != 0) {
-        func_00279C38((u32 *)((MantraMenuWork *)state)->displaySprite);
+        mnuReleaseMantraIconSpriteHandle((u32 *)((MantraMenuWork *)state)->displaySprite);
     }
 }
 
-void func_00289F58(void) {
+void mnuCleanupMantraVisualsAndResetTitleStream(void) {
     func_00291118();
     mnuReleaseMiddleMantraSpriteSlots();
     kwlnFadeOutStart(0, 0, 0, 0);
@@ -210,7 +210,7 @@ s32 func_00289FA0(s32 object) {
     s32 index;
     for (index = 1; index < 0xb0; index++) {
         u16 id = index;
-        if ((func_00315FC8(id) & 1) == 0 &&
+        if ((scrGetEntryRequirementFlags(id) & 1) == 0 &&
             func_00314990(object, id) == 0) {
             return 0;
         }
@@ -231,7 +231,7 @@ s32 func_0028A0F8(s32 object) {
     return 1;
 }
 
-s32 func_0028A178(MenuContainer *object) {
+s32 mnuFindFirstMatchingListItemIndex(MenuContainer *object) {
     MenuNode *node = object->list->head;
     s32 index = 0;
     while (node != 0) {

@@ -112,13 +112,13 @@ extern void *func_0029BD90(void *);
 
 extern void mdlStorePrimaryVectorVU(void *);
 
-extern void func_00217FB8(void *);
+extern void mdlUpdateContextRotationBasisFromQuaternion(void *);
 
 void effInitModelVUState(void *model) {
     VU0_MOVE_VF(vf10, vf0);
     mdlStorePrimaryVectorVU(model);
     VU0_MOVE_VF(vf10, vf0);
-    func_00217FB8(model);
+    mdlUpdateContextRotationBasisFromQuaternion(model);
     VU0_SET_ONES_XYZ(vf10);
     mdlStoreTertiaryVectorVU(model);
     mdlBroadcastMasked(model, 0x80808080);
@@ -237,7 +237,7 @@ void effApplyModelPrimaryVector(s32 owner, void *vec) {
 
 void effApplyModelVecB(s32 owner, void *vec) {
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (vec));
-    func_00217FB8((void *)((EffModelOwner *)owner)->model);
+    mdlUpdateContextRotationBasisFromQuaternion((void *)((EffModelOwner *)owner)->model);
 }
 
 void effBroadcastModelMask(s32 owner) {
@@ -558,7 +558,7 @@ void effLoadModelPrimaryVector(s32 work, void *vec) {
 
 void func_0029BD18(s32 work, void *vec) {
     VU0_LOAD_VF(vf10, vec);
-    func_00217FB8((void *)((EffResourceOwner *)work)->model);
+    mdlUpdateContextRotationBasisFromQuaternion((void *)((EffResourceOwner *)work)->model);
 }
 
 void func_0029BD38(s32 work) {

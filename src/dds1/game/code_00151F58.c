@@ -659,7 +659,7 @@ typedef struct EffEmitterA {
 } EffEmitterA;
 
 extern f32 sdfSinPoly(f32);
-extern f32 func_002E78F8(f32);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 void parDispatchKindInit(void *work, s32 index);
 
@@ -683,7 +683,7 @@ void effEmitterRingSpawn(EffEmitterA *effect, u32 index) {
     jitter = effect->speedRange;
     packet->vel[0] = effect->f168 * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
     packet->f38 = effect->f160;
-    packet->pos[0] = func_002E78F8(phase) * effect->radius;
+    packet->pos[0] = sdfEvaluateCosineViaSinePhaseShift(phase) * effect->radius;
     packet->pos[1] = 0;
     packet->pos[2] = sdfSinPoly(phase) * effect->radius;
     VU0_LOAD_MATRIX(effect->head.matrix);
@@ -758,7 +758,7 @@ void effEmitterRingUpdate(EffEmitterA *effect) {
             packet->f3C += packet->f38;
             theta = packet->f30;
             radius = packet->f34;
-            offset[0] = func_002E78F8(theta) * radius;
+            offset[0] = sdfEvaluateCosineViaSinePhaseShift(theta) * radius;
             offset[1] = packet->f3C;
             offset[2] = sdfSinPoly(theta) * radius;
             VU0_LOAD_VF(vf10, offset);
@@ -1162,7 +1162,7 @@ extern u8 D_00324680[];
 extern u8 D_00324690[];
 extern u8 D_003246A0[];
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
-extern void func_002DD520(void);
+extern void sdfInvertRigidVuTransform(void);
 
 void effEmitterLookAtRingSpawn(EffEmitterD *effect, u32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
@@ -1173,12 +1173,12 @@ void effEmitterLookAtRingSpawn(EffEmitterD *effect, u32 index) {
 
     packet += index;
     sdfVuBuildLookAtBasis(D_00324680, D_00324690, D_003246A0);
-    func_002DD520();
+    sdfInvertRigidVuTransform();
     if (effect->mode == 0) {
         PCP_COPY_VECTOR(packet, effect->head.origin);
         period = effect->period;
         angle = (3.14159265f * 2.0f) / period * (index % period);
-        packet->vel[0] = func_002E78F8(angle);
+        packet->vel[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
         packet->vel[1] = sdfSinPoly(angle);
         packet->vel[2] = 0;
         VU0_LOAD_VF(vf10, packet->vel);
@@ -1194,7 +1194,7 @@ void effEmitterLookAtRingSpawn(EffEmitterD *effect, u32 index) {
         angle = (3.14159265f * 2.0f) / period * (index % period);
         scale *= frames;
         angle += effect->f160 * (3.14159265f / 180.0f) * frames;
-        packet->vel[0] = func_002E78F8(angle);
+        packet->vel[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
         packet->vel[1] = 0;
         packet->vel[2] = sdfSinPoly(angle);
         packet->f34 = angle;
@@ -1228,7 +1228,7 @@ void effEmitterLookAtRingUpdate(EffEmitterD *effect) {
 
     parUpdateSharedScaleAndDelta(&effect->head.sub);
     sdfVuBuildLookAtBasis(D_00324680, D_00324690, D_003246A0);
-    func_002DD520();
+    sdfInvertRigidVuTransform();
     frames = effect->head.frameCount;
     spin = effect->f160 * (3.14159265f / 180.0f);
     count = effect->head.packetCount;
@@ -1248,7 +1248,7 @@ void effEmitterLookAtRingUpdate(EffEmitterD *effect) {
             packet->pos[1] += packet->vel[1] * scale;
             packet->pos[2] += packet->vel[2] * scale;
             angle = packet->f34;
-            packet->vel[0] = func_002E78F8(angle);
+            packet->vel[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
             packet->vel[1] = sdfSinPoly(angle);
             packet->vel[2] = 0;
             VU0_LOAD_VF(vf10, packet->vel);
@@ -1389,7 +1389,7 @@ void effEmitterBurstSpawn(EffEmitterE *effect, u32 index) {
     parDispatchKindInit(&effect->head.sub, index);
 }
 
-extern void func_002DD8B8(f32 angle, f32 *axis);
+extern void sdfBuildVuRotationFromAxisAngle(f32 angle, f32 *axis);
 
 void effEmitterBurstUpdate(EffEmitterE *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
@@ -1447,7 +1447,7 @@ void effEmitterBurstUpdate(EffEmitterE *effect) {
             VU0_LOAD_VF(vf10, axis);
             VU0_ROTATE_VEC(vf10, vf10);
             VU0_STORE_VF_UNCLOBBERED(vf10, axis);
-            func_002DD8B8(spin, axis);
+            sdfBuildVuRotationFromAxisAngle(spin, axis);
             VU0_LOAD_VF(vf10, packet->vel);
             VU0_ROTATE_VEC(vf10, vf10);
             VU0_LOAD_VF(vf11, origin);
@@ -1730,7 +1730,7 @@ void effEmitterExpandRingSpawn(EffEmitterG *effect, u32 index) {
     radius = effect->radius * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
     packet->f30 = radius;
     angle = (3.14159265f * 2.0f) / effect->period * (index % effect->period);
-    packet->vel[0] = func_002E78F8(angle);
+    packet->vel[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
     packet->vel[1] = 0;
     packet->vel[2] = sdfSinPoly(angle);
     VU0_LOAD_MATRIX(effect->head.matrix);
@@ -1774,7 +1774,7 @@ void effEmitterExpandRingUpdate(EffEmitterG *effect) {
     count = effect->head.packetCount;
     frames = effect->head.frameCount;
     loop = effect->loop;
-    cosv = func_002E78F8(spin);
+    cosv = sdfEvaluateCosineViaSinePhaseShift(spin);
     sinv = sdfSinPoly(spin);
     PCP_COPY_VECTOR(origin, effect->head.origin);
     for (i = 0; i < count; i++, packet++) {
@@ -1797,7 +1797,7 @@ void effEmitterExpandRingUpdate(EffEmitterG *effect) {
             }
             angle = (f32)age / (f32)frames * 3.14159265f;
             radius = packet->f30;
-            c = func_002E78F8(angle);
+            c = sdfEvaluateCosineViaSinePhaseShift(angle);
             s = sdfSinPoly(angle);
             tmp[0] = packet->vel[0] * (radius * s);
             tmp[1] = radius * c;
@@ -1910,7 +1910,7 @@ void effEmitterConeSpawn(EffEmitterH *effect, s32 index) {
     speed = effect->speed;
     if (effect->mode == 0) {
         angle = sweep / (u32)effect->head.packetCount * index;
-        cosv = func_002E78F8(angle);
+        cosv = sdfEvaluateCosineViaSinePhaseShift(angle);
         sinv = sdfSinPoly(angle);
         packet->pos[0] = cosv * radius;
         packet->pos[1] = 0;
@@ -2474,7 +2474,7 @@ void effEmitterDiscAuxUpdate(EffEmitterK *effect) {
     }
 }
 
-void func_00158D88(EffTemplatePacketList *effect) {
+void effMarkAllTemplateBufferRecords(EffTemplatePacketList *effect) {
     EffectBufferRecord *record;
     u32 i;
 
@@ -2490,7 +2490,7 @@ void func_00158D88(EffTemplatePacketList *effect) {
 }
 
 /* Scale template position, record scale, and the second tail value. */
-void func_00158DD0(float scale, EffTemplatePacketList *effect) {
+void effScaleTemplatePacketPositions(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
     effect->y = effect->y * scale;
     effect->z = effect->z * scale;
@@ -2556,6 +2556,6 @@ s32 effCloneTemplateWithPacketDescriptors(EffTemplatePacketList *source) {
     } else {
         ((EffTemplatePacketList *)copy)->listAllocation = 0;
     }
-    func_00158D88(copy);
+    effMarkAllTemplateBufferRecords(copy);
     return copy;
 }

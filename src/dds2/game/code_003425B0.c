@@ -147,11 +147,11 @@ extern char D_00438D00[]; /* "%d" */
 
 extern char *D_0040BBD8[];
 
-extern GsMemBlock *func_0032ABC0(void);
+extern GsMemBlock *sdfGetTextureListHead(void);
 
 extern char *D_0040BBE8[];
 
-extern GsMemBlock *func_0032ABC8(void);
+extern GsMemBlock *sdfGetTextureBlockListHead(void);
 
 void func_003425B0(void) {
     func_00341650(0x180, 0, 0, 0);
@@ -278,7 +278,7 @@ void sdfDumpGsMemoryForward(void) {
     char *name;
 
     sdfPrintFormattedDevMessage(D_0042EAC8);
-    head = func_0032ABC0();
+    head = sdfGetTextureListHead();
     node = head;
     while (node != 0) {
         if (node->type < 4) {
@@ -304,7 +304,7 @@ void sdfDumpGsMemoryBackward(void) {
     char *name;
 
     sdfPrintFormattedDevMessage(D_0042EAC8);
-    head = func_0032ABC8();
+    head = sdfGetTextureBlockListHead();
     node = head;
     while (node != 0) {
         if (node->type < 4) {
@@ -343,7 +343,7 @@ u64 func_00343ED0(u64 source, u32 *info, u64 options) {
     return func_00343E18(source, info, options, 0);
 }
 
-u64 func_00343EE8(u64 source) {
+u64 sdfLoadNamedResourceAndReleaseLookupHandle(u64 source) {
     u64 buffer;
     u64 result;
     u32 info[4];
@@ -354,13 +354,13 @@ u64 func_00343EE8(u64 source) {
     return result;
 }
 
-extern s32 func_00332E58(s32);
+extern s32 sdfCreateConfiguredBufferedResourceList(s32);
 extern void func_00332F08(s32, u64);
 
 u64 sndBuildResourceHandleListFromOffsets(u32 resource) {
     s32 i = 0;
     s32 count = ((SdfResourceList *)resource)->count;
-    s32 handle = func_00332E58(count);
+    s32 handle = sdfCreateConfiguredBufferedResourceList(count);
     s32 *entry;
     if (count != i) {
         entry = (s32 *)(resource + 0x14);
@@ -373,7 +373,7 @@ u64 sndBuildResourceHandleListFromOffsets(u32 resource) {
     return handle;
 }
 
-u64 func_00343FC0(u64 source) {
+u64 sndLoadNamedOffsetResourceList(u64 source) {
     u64 buffer;
     u64 result;
     u32 info[4];
@@ -384,7 +384,7 @@ u64 func_00343FC0(u64 source) {
     return result;
 }
 
-s32 func_00344010(SdfRelocResource *resource) {
+s32 sdfRelocatePackedResourcePayload(SdfRelocResource *resource) {
     s32 payload;
 
     /* Required to match: integer address arithmetic, not &resource->payload. */
@@ -393,14 +393,14 @@ s32 func_00344010(SdfRelocResource *resource) {
     return payload;
 }
 
-u64 func_00344050(u64 source, s32 *out) {
+u64 sdfLoadPackedResourceWithRelocatedPayload(u64 source, s32 *out) {
     u32 info[4];
     u64 buffer = func_00343ED0(source, info, 0);
-    *out = func_00344010(info[0]);
+    *out = sdfRelocatePackedResourcePayload(info[0]);
     return buffer;
 }
 
-s32 func_00344098(SdfRelocResource *resource) {
+s32 sdfRelocatePackedResourceWordsFromHeader(SdfRelocResource *resource) {
     s32 payload;
 
     /* Required to match: the typed member address changes one instruction. */
@@ -412,7 +412,7 @@ s32 func_00344098(SdfRelocResource *resource) {
 u64 func_003440D8(u64 source, s32 *out) {
     u32 info[4];
     u64 buffer = func_00343ED0(source, info, 0);
-    *out = func_00344098(info[0]);
+    *out = sdfRelocatePackedResourceWordsFromHeader(info[0]);
     return buffer;
 }
 
@@ -539,7 +539,7 @@ typedef struct SdfStreamFrameNode {
     s32 secondParam;  /* 0x60 */
 } SdfStreamFrameNode;
 
-extern s32 func_003283E0(s32);
+extern s32 sdfAllocateBlockBySizeThreshold(s32);
 
 void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
     s32 channels = 4;
@@ -551,8 +551,8 @@ void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
     size = node->width * node->height;
     size *= channels;
     node->bufferSize = size;
-    node->buffers[0] = func_003283E0(size);
-    node->buffers[1] = func_003283E0(size);
+    node->buffers[0] = sdfAllocateBlockBySizeThreshold(size);
+    node->buffers[1] = sdfAllocateBlockBySizeThreshold(size);
 }
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00344420);
@@ -602,7 +602,7 @@ void sdfStreamOpen(u8 *state, s32 format, u8 *src, s32 size) {
     func_003450D8(0);
 }
 
-extern s32 func_003283E0(s32);
+extern s32 sdfAllocateBlockBySizeThreshold(s32);
 extern void sdfSoundInitNodeFromFormat();
 
 void sdfSoundInitFormattedNode(u8 *state, s32 format, s32 first, s32 second) {
@@ -610,7 +610,7 @@ void sdfSoundInitFormattedNode(u8 *state, s32 format, s32 first, s32 second) {
     ((SdfStreamFrameNode *)state)->firstParam = first;
     ((SdfStreamFrameNode *)state)->secondParam = second;
     state[0xC] = 1;
-    ((SdfStreamFrameNode *)state)->scratchBuffer = func_003283E0(0x10100) + 0x100;
+    ((SdfStreamFrameNode *)state)->scratchBuffer = sdfAllocateBlockBySizeThreshold(0x10100) + 0x100;
 }
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_003448D0);
@@ -798,7 +798,7 @@ void func_003458E8(u32 value) {
     D_00438D0C = value;
 }
 
-void func_003458F0(s32 firstStart, s32 secondStart, s32 firstLength, s32 secondLength, u32 value) {
+void sdfSetGridScaledDrawBounds(s32 firstStart, s32 secondStart, s32 firstLength, s32 secondLength, u32 value) {
     D_00438D10 = firstStart * 0x10 + 0x7000;
     D_00438D14 = secondStart * 8 + 0x7900;
     D_00438D18 = D_00438D10 + firstLength * 0x10;

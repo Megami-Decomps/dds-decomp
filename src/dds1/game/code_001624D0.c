@@ -96,7 +96,7 @@ extern void func_00217878(void *arg0, void *arg1);
 
 extern void mdlStorePrimaryVectorVU(void *work);
 
-extern void func_00217FB8(void *work);
+extern void mdlUpdateContextRotationBasisFromQuaternion(void *work);
 
 extern void mdlStoreTertiaryVectorVU(void *work);
 
@@ -213,7 +213,7 @@ void effParamInitWork(EffInitWork *work) {
     VU0_LOAD_VF(vf10, &D_00353850);
     mdlStorePrimaryVectorVU(work);
     VU0_LOAD_VF(vf10, &D_00353860);
-    func_00217FB8(work);
+    mdlUpdateContextRotationBasisFromQuaternion(work);
     VU0_LOAD_VF(vf10, &D_00353870);
     mdlStoreTertiaryVectorVU(work);
     mdlBroadcastMasked(work, 0x80808080);

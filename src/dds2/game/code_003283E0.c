@@ -1,7 +1,7 @@
 #include "common.h"
 
 
-extern s64 func_003283E0(s64);
+extern s64 sdfAllocateBlockBySizeThreshold(s64);
 
 extern u32 D_004389BC;
 
@@ -11,7 +11,7 @@ extern void *func_00328D68();
 extern void *func_003292A8(void);
 extern void sdfResourceRetainAddress(void *);
 
-s64 func_003283E0(s64 size) {
+s64 sdfAllocateBlockBySizeThreshold(s64 size) {
     if (size >= 0x401) {
         sdfResourceRetainAddress(func_003292A8());
     } else {
@@ -24,7 +24,7 @@ extern void sdfReleaseChipBlock(void *);
 extern void func_00329868(void *);
 extern void func_00328F68(void *);
 extern void *func_00329930(void *);
-extern void func_003298C0(void *);
+extern void sdfQueueNonzeroResourceId(void *);
 
 void sdfFreeMemoryFromEitherHeap(void *data) {
     if (data != NULL) {
@@ -42,7 +42,7 @@ void sdfReleaseChipOrRetainedResource(void *data) {
             func_00328F68(data);
             return;
         }
-        func_003298C0(func_00329930(data));
+        sdfQueueNonzeroResourceId(func_00329930(data));
     }
 }
 

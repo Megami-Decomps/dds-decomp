@@ -114,7 +114,7 @@ void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, u8 *info, s32 color) {
     frFontQueueGlyphInSelectedSlot(handle);
 }
 
-void func_002652E0(s32 x, s32 y, s32 z, s32 w, u8 *info, s32 color) {
+void mnuQueueRightAlignedFormattedInfoText(s32 x, s32 y, s32 z, s32 w, u8 *info, s32 color) {
     char text[32];
     u32 handle;
 

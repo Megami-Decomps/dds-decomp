@@ -951,13 +951,13 @@ u32 effResetRecordRun(u8 *work, u32 first, u32 unused) {
 void effSelectPresetByKind(u32 mode, u32 value) {
     switch (mode) {
     case 0:
-        func_002C0A48(0x44, value);
+        sdfSubmitGsAlphaOneRegisterPacket(0x44, value);
         return;
     case 1:
-        func_002C0A48(0x48, value);
+        sdfSubmitGsAlphaOneRegisterPacket(0x48, value);
         return;
     case 2:
-        func_002C0A48(0x42, value);
+        sdfSubmitGsAlphaOneRegisterPacket(0x42, value);
         break;
     }
 }
@@ -972,6 +972,6 @@ void effSelectPresetAndDispatch(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
                                     u32 arg4, u32 arg5, u32 presetMode, u32 presetValue) {
     effSelectPresetByKind(presetMode, presetValue);
     func_002C0F88(arg0, arg1, arg2, arg3, arg4, arg5, presetValue);
-    func_002C0A48(0x44, presetValue);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, presetValue);
 }
 

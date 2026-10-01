@@ -1,7 +1,7 @@
 #include "common.h"
 #include "dds3Admin.h"
 
-extern AdminWork *func_001028A0(void);
+extern AdminWork *dds3GetAdminTaskWork(void);
 
 extern u32 D_003BA9BC;
 
@@ -37,14 +37,14 @@ extern char D_003BA848[];
 extern void *kwlnTaskGetTaskByName(char *);
 extern AdminWork *kwlnTaskGetUserValue(void *);
 
-AdminWork *func_001028A0(void) {
+AdminWork *dds3GetAdminTaskWork(void) {
     return kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_003BA848));
 }
 
-u32 func_001028C8(void) {
+u32 dds3GetAdminTaskValue(void) {
     AdminWork *context;
 
-    context = func_001028A0();
+    context = dds3GetAdminTaskWork();
     return context->value;
 }
 
@@ -57,7 +57,7 @@ void func_001028E8(s32 value, void *data, u32 size, s32 flag) {
     u32 flags;
 
     if (data == NULL || size <= 0x100) {
-        work = func_001028A0();
+        work = dds3GetAdminTaskWork();
         old = work->unk1C;
         work->unk09 = value;
         flags = work->flags;

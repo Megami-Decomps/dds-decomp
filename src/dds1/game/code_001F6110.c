@@ -522,7 +522,7 @@ void btlClearActorUnitDefeatCandidates(s32 actor) {
 }
 
 
-extern s32 func_001D5D58(s32);
+extern s32 btlIsActorModeAcceptedByBattleHook(s32);
 extern void btlSetUnitPosition(s32, s32);
 extern void btlSetUnitRotation(s32, s32);
 extern void func_001D5990(s32);
@@ -535,7 +535,7 @@ void btlUpdateUnitActors(void) {
         btlFlagUnitDefeatCandidate((s32)actor);
         btlSetUnitPosition((s32)actor, (s32)((u8 *)actor + 0x30));
         btlSetUnitRotation((s32)actor, (s32)((u8 *)actor + 0x40));
-        if ((func_001D5D58((s32)actor) == 0 && actor->effectState != 0) ||
+        if ((btlIsActorModeAcceptedByBattleHook((s32)actor) == 0 && actor->effectState != 0) ||
             (actor->stateFlags & 2) != 0) {
             func_001D5990((s32)actor);
             actor->effectTimerA = 0;
@@ -1105,7 +1105,7 @@ u32 btlNbScriptCheckActorFlag(void) {
     return 1;
 }
 
-u32 func_001F89B0(void) {
+u32 btlCmdSelectActorActionAndStoreChoice(void) {
     s32 context = func_0010D6A8();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x6000000)) {
         scrSetIntegerReturnValue(1);
@@ -1654,7 +1654,7 @@ u32 btlCmdTestEffectActor(void) {
 }
 
 u32 func_001FA120(void) {
-    if (func_00207C18() != 0) {
+    if (btlIsSpecialEnemyEffectLinkSatisfied() != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1845,7 +1845,7 @@ u32 btlScriptSetBattleCommand(void) {
     return 1;
 }
 
-u32 func_001FA6D8(void) {
+u32 btlResetCommandContextAndSetStateFlag(void) {
     s32 state;
     s32 context;
 
@@ -2023,7 +2023,7 @@ u32 func_001FACB0(void) {
 }
 
 u32 func_001FACD8(void) {
-    func_00204FE0();
+    btlClearSpecialEnemyEntryFlags();
     return 1;
 }
 

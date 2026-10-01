@@ -21,7 +21,7 @@ typedef struct WorldResource {
     u16 unk26;
 } WorldResource;
 
-void func_00115F40(WorldResourceOwner *owner) {
+void dds3ResetWorldResourceState(WorldResourceOwner *owner) {
     WorldResource *resource = (WorldResource *)owner->resource;
 
     resource->unk24 = 0;

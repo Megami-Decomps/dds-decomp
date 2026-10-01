@@ -241,7 +241,7 @@ void itfInitTextDrawArgs(u8 *encodedText, TextSub *sub) {
     func_0019EDC0(&args);
 }
 
-u64 func_0019EF38(u64 x, u64 y, s32 depth, s32 alt, u64 measureFlag, u64 entryFlag, u64 colors, u64 source) {
+u64 frFontBuildColoredGlyphWithSharedFlags(u64 x, u64 y, s32 depth, s32 alt, u64 measureFlag, u64 entryFlag, u64 colors, u64 source) {
     u64 glyph;
     s32 kind = 4;
 
@@ -813,7 +813,7 @@ void itfDrawQuadTextured4(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, 
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0CA0);
 
-void func_001A0E20(DrawVertex *vertices, DrawColorRec *uv, DrawColorRec *colors, u32 tail, s32 flag, void *command) {
+void itfQueueColoredTexturedQuadPacket(DrawVertex *vertices, DrawColorRec *uv, DrawColorRec *colors, u32 tail, s32 flag, void *command) {
     void *packet;
     u64 *dst;
     s32 x0, y0, x1, y1;

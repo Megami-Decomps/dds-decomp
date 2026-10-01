@@ -147,7 +147,7 @@ typedef struct BtlHistObj {
     struct BtlHistObj *next; /* 0x178 */
 } BtlHistObj;
 
-extern void func_00211018(BtlHistObj *obj, s8 flag);
+extern void btlShiftActorStateHistory(BtlHistObj *obj, s8 flag);
 extern s8 D_00436CAC;
 
 typedef struct BtlPackedCtx {
@@ -157,7 +157,7 @@ typedef struct BtlPackedCtx {
 extern s32 D_00435E5C;
 extern void func_001A45C0(s32, s32, s32, s32);
 extern void func_001B8580(s32);
-extern void func_001B8788(s32, s32);
+extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
 extern u32 func_001B8538(void);
 extern u32 func_001B8740(void);
 extern char D_00436CA8[];
@@ -180,9 +180,9 @@ extern void func_0020FA98();
 extern s32 btlPollTimedTaskLink(BtlEffLink *link);
 extern s32 func_002103F8();
 extern s32 func_00210530();
-extern s32 func_00210720();
-extern s32 func_00210850(BtlEffLink *link);
-extern s32 func_00210AA8();
+extern s32 btlPollTimedPresentationTask();
+extern s32 btlPollEffectWaitTask(BtlEffLink *link);
+extern s32 btlAdvanceActorEffectLabelTask();
 
 typedef struct BtlEffLinkEx {
     u8 pad00[0x20];
@@ -368,7 +368,7 @@ s32 btlPollTimedTaskLink(BtlEffLink *link) {
     return 0;
 }
 
-BtlEffTask *func_002101C8(BtlEffActor *owner, s32 arg) {
+BtlEffTask *btlCreateOwnerLinkedTimedTask(BtlEffActor *owner, s32 arg) {
     BtlEffTask *obj = btlAllocTask(0xC);
     BtlEffLink *link;
 
@@ -463,7 +463,7 @@ s32 func_002103F8(BtlEffLink *link) {
         if (actor != 0) {
             func_001A45C0(((BtlEffectSlots *)work)->id, 0, ((BtlJyokyoOwner *)actor)->unk124, (((BtlJyokyoOwner *)actor)->flags & 0x20) ? 0xE : 0xF);
         }
-        func_001B8788(((BtlEffectSlots *)work)->id, link->arg);
+        btlReplaceDialogTasksAndQueueMessage(((BtlEffectSlots *)work)->id, link->arg);
     }
     if (func_001B8740() == 0 || link->unk08 >= 0x2D) {
         return 1;
@@ -502,7 +502,7 @@ s32 func_00210530(BtlEffLink *link) {
         if (actor != 0) {
             func_001A45C0(((BtlEffectSlots *)work)->alternateId, 0, ((BtlJyokyoOwner *)actor)->unk124, (((BtlJyokyoOwner *)actor)->flags & 0x20) ? 0xE : 0xF);
         }
-        func_001B8788(((BtlEffectSlots *)work)->alternateId, link->arg);
+        btlReplaceDialogTasksAndQueueMessage(((BtlEffectSlots *)work)->alternateId, link->arg);
     }
     if (func_001B8740() == 0 || link->unk08 >= 0x2D) {
         return 1;
@@ -551,7 +551,7 @@ BtlEffTask *btlCreateEffectTask3E(BtlEffActor *owner, u16 arg) {
     return obj;
 }
 
-s32 func_00210720(BtlEffLink *link) {
+s32 btlPollTimedPresentationTask(BtlEffLink *link) {
     s32 work = func_001AA6F8();
     s32 actor = link->actor;
 
@@ -559,7 +559,7 @@ s32 func_00210720(BtlEffLink *link) {
         if (actor != 0) {
             func_001A45C0(((BtlEffectSlots *)work)->thirdId, 0, ((BtlJyokyoOwner *)actor)->unk124, (((BtlJyokyoOwner *)actor)->flags & 0x20) ? 1 : 2);
         }
-        func_001B8788(((BtlEffectSlots *)work)->thirdId, link->arg);
+        btlReplaceDialogTasksAndQueueMessage(((BtlEffectSlots *)work)->thirdId, link->arg);
     }
     if (func_001B8740() == 0 || link->unk08 >= 0x2D) {
         return 1;
@@ -568,7 +568,7 @@ s32 func_00210720(BtlEffLink *link) {
     return 0;
 }
 
-BtlEffTask *func_002107C0(BtlEffActor *owner, s32 arg) {
+BtlEffTask *btlCreateOwnerLinkedTimedPresentation(BtlEffActor *owner, s32 arg) {
     BtlEffTask *obj = btlAllocTask(0xC);
     BtlEffLink *link;
 
@@ -577,7 +577,7 @@ BtlEffTask *func_002107C0(BtlEffActor *owner, s32 arg) {
     obj->flags |= 2;
     obj->id = 0x42;
     obj->unk40 = owner->ownerData;
-    obj->callback = func_00210720;
+    obj->callback = btlPollTimedPresentationTask;
     link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     link->arg = arg;
@@ -585,14 +585,14 @@ BtlEffTask *func_002107C0(BtlEffActor *owner, s32 arg) {
     return obj;
 }
 
-s32 func_00210850(BtlEffLink *link) {
+s32 btlPollEffectWaitTask(BtlEffLink *link) {
     s32 work = func_001AA6F8();
 
     if (link->unk08 == 0) {
         if (link->actor != 0) {
             func_001A45C0(((BtlEffectSlots *)work)->id, 0, *(u16 *)&link->arg, 0xD);
         }
-        func_001B8788(((BtlEffectSlots *)work)->id, 0x75);
+        btlReplaceDialogTasksAndQueueMessage(((BtlEffectSlots *)work)->id, 0x75);
     }
     if (func_001B8740() == 0 || link->unk08 >= 0x2D) {
         return 1;
@@ -612,7 +612,7 @@ BtlEffTask *btlCreateEffectWaitTask(BtlEffActor *owner, u16 arg) {
     if (owner != NULL) {
         obj->unk40 = owner->ownerData;
     }
-    obj->callback = func_00210850;
+    obj->callback = btlPollEffectWaitTask;
     link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     *(u16 *)&link->arg = arg;
@@ -656,7 +656,7 @@ BtlEffTask *btlCreateEffectTask44(BtlEffActor *owner) {
     return obj;
 }
 
-s32 func_00210AA8(BtlEffLink *link) {
+s32 btlAdvanceActorEffectLabelTask(BtlEffLink *link) {
     s32 work = func_001AA6F8();
     s32 actor = link->actor;
     char text[0x100];
@@ -667,7 +667,7 @@ s32 func_00210AA8(BtlEffLink *link) {
             func_0035C860(text, D_00436CA8, link->arg < 0 ? -link->arg : link->arg);
             func_001A4858(((BtlEffectSlots *)work)->id, 1, text);
         }
-        func_001B8788(((BtlEffectSlots *)work)->id, 0xD5);
+        btlReplaceDialogTasksAndQueueMessage(((BtlEffectSlots *)work)->id, 0xD5);
     }
     if (func_001B8740() == 0 || link->unk08 >= 0x2D) {
         return 1;
@@ -676,7 +676,7 @@ s32 func_00210AA8(BtlEffLink *link) {
     return 0;
 }
 
-BtlEffTask *func_00210B78(BtlEffActor *owner, s32 arg) {
+BtlEffTask *btlCreateTimedActorEffectLinkTask(BtlEffActor *owner, s32 arg) {
     BtlEffTask *obj = btlAllocTask(0xC);
     BtlEffLink *link;
 
@@ -687,7 +687,7 @@ BtlEffTask *func_00210B78(BtlEffActor *owner, s32 arg) {
     if (owner != NULL) {
         obj->unk40 = owner->ownerData;
     }
-    obj->callback = func_00210AA8;
+    obj->callback = btlAdvanceActorEffectLabelTask;
     link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     link->arg = arg;
@@ -700,9 +700,9 @@ extern BtlEffActor *btlFindUnitByModeClear(s32 id);
 extern BtlEffActor *btlFindUnitByModeFlagged(s32 id);
 extern BtlEffTask *btlCreateEffObjB(BtlEffActor *actor, s32 arg);
 extern void btlStartTask(BtlEffTask *task);
-extern s64 func_001A9920();
+extern s64 btlAdvanceRuntimeSequenceCounter();
 
-s32 func_00210C10(void) {
+s32 btlCmdSpawnEffectTaskForSelectedUnit(void) {
     s32 mode;
     s32 unitId;
     s32 arg;
@@ -721,7 +721,7 @@ s32 func_00210C10(void) {
         return 1;
     }
     task = btlCreateEffObjB(unit, arg);
-    task->unk40 = func_001A9920();
+    task->unk40 = btlAdvanceRuntimeSequenceCounter();
     btlStartTask(task);
     return 1;
 }
@@ -758,7 +758,7 @@ s32 btlAllocAndCheck(s32 object) {
     return 0;
 }
 
-u32 func_00210DB0(s32 task) {
+u32 btlAssignTaskResultAndArgument(s32 task) {
     ((BtlTask *)task)->result = 0xb;
     ((BtlTask *)task)->arg = 0xc2;
     return 1;
@@ -767,13 +767,13 @@ u32 func_00210DB0(s32 task) {
 void btlAdvanceHistoryCounter(BtlHistObj *obj) {
     obj->counter++;
     obj->counter = obj->counter <= 0 ? 0 : obj->counter >= 0x21 ? 0x20 : obj->counter;
-    func_00211018(obj, 0);
+    btlShiftActorStateHistory(obj, 0);
     D_00436CAC++;
     D_00436CAC = D_00436CAC <= 0 ? 0 : D_00436CAC >= 0x21 ? 0x20 : D_00436CAC;
 }
 
 
-void func_00210E48(void) {
+void btlResetBattleHistoryCounters(void) {
     BtlHistObj *node = *(BtlHistObj **)(func_001AA6F8() + 0x248);
     if (node != 0) {
         do {
@@ -813,7 +813,7 @@ s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction) {
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_00210F58);
 
-void func_00211018(BtlHistObj *obj, s8 flag) {
+void btlShiftActorStateHistory(BtlHistObj *obj, s8 flag) {
     s32 i;
 
     for (i = 6; i >= 0; i--) {

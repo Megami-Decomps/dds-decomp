@@ -26,7 +26,7 @@ extern u32 D_003DA180[];
 
 extern u32 D_003DA1C0[];
 
-extern void func_002D0A10(s32);
+extern void sdfQueueNonzeroResourceId(s32);
 
 extern u32 D_003D9140[];
 
@@ -435,7 +435,7 @@ void mnuLoadTitleStreamFrameData(char *filePath, u32 *work) {
     frames = bytes / (s32)work[2];
     work[1] = 0;
     work[0] = frames;
-    func_002D0A10(request);
+    sdfQueueNonzeroResourceId(request);
 }
 
 void mnuStoreTaskResult(void) {
@@ -471,7 +471,7 @@ s32 func_0026A490(u32 *queue) {
         memcpy((void *)queue[5], (void *)data, size);
         queue[0] = size / (s32)queue[2];
         queue[1] = 0;
-        func_002D0A10(handle);
+        sdfQueueNonzeroResourceId(handle);
         func_002F7628(D_003D9168);
         D_003D9140[9] = 2;
         ready = 1;
@@ -535,7 +535,7 @@ void mnuCommitTitleStreamReadyState(void) {
 /* Release the title stream request and reset the playback state. */
 void mnuResetTitleStream(void) {
     if (D_003D9140[8] != 0) {
-        func_002D0A10(D_003D9140[8]);
+        sdfQueueNonzeroResourceId(D_003D9140[8]);
         D_003D9140[9] = 0;
         D_003D9140[8] = 0;
         D_003D9140[5] = 0;
@@ -613,7 +613,7 @@ void func_0026AEB0(void) {
 
 INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFD48);
 
-void func_0026AEC8(void) {
+void mnuCreateTitleCameraWorldEntry(void) {
     D_003BD8E0 = func_00112C08(dds3AdvanceWorldCounter(), (f32 *)D_003DC1C0, (f32 *)D_003DC1D0);
     dds3SetWorldEntryCallbackTarget(D_003BD8E0, "title_camera");
     effObjSetInnerFloat(D_003BD8E0, 2.0f);
@@ -623,7 +623,7 @@ void func_0026AEC8(void) {
 extern void effObjSetInnerFirstVec(void *, void *);
 extern void effObjSetInnerSecondVec(void *, void *);
 
-s32 func_0026AF30(void) {
+s32 mnuApplyInnerEffectVectorsAndTickObject(void) {
     effObjSetInnerFirstVec(D_003BD8E0, D_003DC1C0);
     effObjSetInnerSecondVec(D_003BD8E0, D_003DC1D0);
     return (*(s32 (**)(void *))(*(s32 *)((u8 *)D_003BD8E0 + 0x10) + 8))(D_003BD8E0);
@@ -645,7 +645,7 @@ extern void func_0026CB10(void *, void *);
 
 s64 func_0026B1C0(void) {
     func_0026CB10(D_003DC1C0, D_003DC1D0);
-    return func_0026AF30();
+    return mnuApplyInnerEffectVectorsAndTickObject();
 }
 
 INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFD80);
@@ -657,7 +657,7 @@ u32 func_0026BCE8(void) {
     return 0xffffffff;
 }
 
-s32 func_0026BD08(void) {
+s32 mnuDestroyTitleMenuTask(void) {
     func_0026B160();
     kwlnTaskDestroyWithHierarchyByName(D_003AFD80, 1);
     return 0;

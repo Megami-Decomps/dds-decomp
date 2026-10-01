@@ -36,7 +36,7 @@ u16 func_00110400(s32 object) {
     return value;
 }
 
-u32 func_00110418(WorldObject *object, u32 value) {
+u32 dds3WriteIndexedWorldObjectWord(WorldObject *object, u32 value) {
     if (object->value06 == 0) {
         return 0;
     }
@@ -47,7 +47,7 @@ u32 func_00110418(WorldObject *object, u32 value) {
     return 1;
 }
 
-u32 func_00110458(WorldObject *object) {
+u32 dds3ReadIndexedWorldObjectWord(WorldObject *object) {
     if (object->value06 == 0) {
         return 0;
     }
@@ -119,7 +119,7 @@ INCLUDE_ASM(const s32, "game/code_001102C8", func_00110A48);
 
 INCLUDE_ASM(const s32, "game/code_001102C8", func_00110AB0);
 
-void func_00110B48(WorldObject *object, u32 resourceId) {
+void dds3AttachResourceHandleToWorldObject(WorldObject *object, u32 resourceId) {
     WorldObjectData *data;
     u32 handle;
 
@@ -128,7 +128,7 @@ void func_00110B48(WorldObject *object, u32 resourceId) {
     data->handle14 = handle;
 }
 
-void func_00110B78(WorldObject *object, u32 arg1, u32 arg2, u32 arg3,
+void dds3AttachConstructedResourceToWorldObject(WorldObject *object, u32 arg1, u32 arg2, u32 arg3,
                                     u32 arg4, u32 arg5, u32 arg6) {
     WorldObjectData *data;
     u32 handle;

@@ -19,7 +19,7 @@ typedef struct SdfGraphObj {
     void *auxBuffer;
 } SdfGraphObj;
 
-void func_0032AA40(void *arg0);
+void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
 
 void *sdfAllocImageBuffer(s32 arg0, s32 arg1, s32 arg2);
 
@@ -31,11 +31,11 @@ void sdfGraphSetDisplayMode(s32 mode) {
 
 /* Release all three independently allocated image buffers before rebuilding. */
 void sdfGraphReleaseBuffers(SdfGraphObj *graph) {
-    func_0032AA40(graph->firstBuffer);
+    sdfUpdateTextureHeadsWithInterruptsMasked(graph->firstBuffer);
     graph->firstBuffer = NULL;
-    func_0032AA40(graph->secondBuffer);
+    sdfUpdateTextureHeadsWithInterruptsMasked(graph->secondBuffer);
     graph->secondBuffer = NULL;
-    func_0032AA40(graph->auxBuffer);
+    sdfUpdateTextureHeadsWithInterruptsMasked(graph->auxBuffer);
     graph->auxBuffer = NULL;
 }
 

@@ -8,7 +8,7 @@ typedef struct EffRandState
 
 extern EffRandState D_00398938;
 extern f32 sdfSinPoly(f32 angle);
-extern f32 func_002E78F8(f32 angle);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern void sdfAtan2(f32 x, f32 y);
 extern f32 D_00398380[4];
 
@@ -92,7 +92,7 @@ void effMiscAxisAngleToQuaternionVU(f32 angle)
     f32 halfAngle = angle * 0.5f;
     f32 trigValue = sdfSinPoly(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.xyzw vf10, vf10, vf2x");
-    trigValue = func_002E78F8(halfAngle);
+    trigValue = sdfEvaluateCosineViaSinePhaseShift(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.w vf10, vf0, vf2x");
 }
 
@@ -102,7 +102,7 @@ void effMiscAxisAngleToQuaternionVf11(f32 angle)
     f32 halfAngle = angle * 0.5f;
     f32 trigValue = sdfSinPoly(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.xyzw vf11, vf11, vf2x");
-    trigValue = func_002E78F8(halfAngle);
+    trigValue = sdfEvaluateCosineViaSinePhaseShift(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.w vf11, vf0, vf2x");
 }
 
@@ -151,7 +151,7 @@ INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E7F20);
 
 INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E8038);
 
-INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E8180);
+INCLUDE_ASM(const s32, "game/code_002E7C20", effMiscSlerpQuaternionVu);
 
 /* vu0 routine: normalized lerp of quaternions vf10 and vf11 by amount (shorter arc), result in vf10 */
 void effMiscQuaternionNlerpVU(f32 amount)
@@ -172,7 +172,7 @@ void effMiscQuaternionNlerpVU(f32 amount)
 }
 
 /* vu0 routine: rotate D_00398380 by the quaternion matrix, atan2 of the result x and y */
-void func_002E82F8(void)
+void effMiscComputeQuaternionRotatedReferenceAngle(void)
 {
     f32 x;
     f32 y;

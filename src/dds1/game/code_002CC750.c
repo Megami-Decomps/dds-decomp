@@ -5,7 +5,7 @@ extern void ptyMergeStockSkills(u8 *);
 
 extern void (*D_003BD2D4)(void);
 
-extern u64 func_002CF530(u64);
+extern u64 sdfAllocateBlockBySizeThreshold(u64);
 
 extern u32 D_003BD2C8;
 
@@ -144,7 +144,7 @@ typedef struct PtyProfileUnit {
     u16 skills[24];     /* 0x22 */
 } PtyProfileUnit;
 
-void func_002CC750(s32 left, s32 right) {
+void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
     s32 file = func_002FE950("debug.log", D_003BD2B8);
     if (file != 0) {
         func_002FE978(file, D_003BD2C0, left, right);
@@ -549,7 +549,7 @@ u32 ptyCheckLevelAtLeastProfileParam7b6(ScrVmOperand *operand, u16 index) {
     return 1;
 }
 
-void func_002CDE98(u32 arg0, u32 arg1, u32 arg2) {
+void scrClearPairedEntryOutput(u32 arg0, u32 arg1, u32 arg2) {
     memset(arg2, 0, 8);
 }
 
@@ -775,11 +775,11 @@ INCLUDE_ASM(const s32, "game/code_002CC750", func_002CEC40);
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CF248);
 
-float func_002CF390(ScrVmOperand *op) {
+float scrGetOperandFloatValue(ScrVmOperand *op) {
     return op->f50;
 }
 
-void func_002CF398(ScrVmOperand *op, float value) {
+void scrSetOperandFloatValue(ScrVmOperand *op, float value) {
     op->f50 = value;
 }
 
@@ -835,10 +835,10 @@ s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", sdfCreateThread);
 
-void func_002CF4E0(u64 destination, u64 encoded, u64 option) {
+void sdfCreateThreadWithAllocatedWorkspace(u64 destination, u64 encoded, u64 option) {
     u64 decoded;
 
-    decoded = func_002CF530(encoded);
+    decoded = sdfAllocateBlockBySizeThreshold(encoded);
     sdfCreateThread(destination, decoded, encoded, option);
 }
 

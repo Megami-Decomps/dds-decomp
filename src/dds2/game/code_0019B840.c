@@ -68,9 +68,9 @@ extern void *func_0019C4D0(void *arg0);
 
 extern u32 itfReleaseMemNodeBuffer(s32 arg0);
 
-extern void func_0019B7A8(void);
+extern void fmGslReleaseActiveResourceBuffers(void);
 
-extern void func_0032AA40(void *arg0);
+extern void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
 
 extern u32 D_003B2F30[];
 
@@ -145,9 +145,9 @@ void frFontReleaseAll(void) {
     func_0019C4D0(D_00452720.glyphSlots[1]);
     itfReleaseMemNodeBuffer(D_00452720.unk150);
     itfReleaseMemNodeBuffer(D_00452720.unk154);
-    func_0019B7A8();
-    func_0032AA40(D_00452720.unk158);
-    func_0032AA40(D_00452720.unk15C);
+    fmGslReleaseActiveResourceBuffers();
+    sdfUpdateTextureHeadsWithInterruptsMasked(D_00452720.unk158);
+    sdfUpdateTextureHeadsWithInterruptsMasked(D_00452720.unk15C);
 }
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019C130);

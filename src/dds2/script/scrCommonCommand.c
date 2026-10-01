@@ -303,7 +303,7 @@ s32 func_0010E000(void)
     return 1;
 }
 
-s32 func_0010E020(void)
+s32 scrCmdStoreDirectionVector(void)
 {
     ScrVec4 v;
     f32 x;
@@ -329,7 +329,7 @@ INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412668);
 
 INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010E098);
 
-s32 func_0010E148(void)
+s32 scrCmdStorePositionVector(void)
 {
     ScrVec4 v;
     f32 x;
@@ -393,7 +393,7 @@ s32 scrCommandSetDrawOffsetTransition(void)
     return 1;
 }
 
-s32 func_0010E3F8(void)
+s32 scrCmdSetDrawFloatPairByMode(void)
 {
     s32 p2;
     s32 mode;
@@ -420,7 +420,7 @@ s32 func_0010E3F8(void)
     return 1;
 }
 
-s32 func_0010E480(void)
+s32 scrCmdSetPackedDrawComponentBytes(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
     s32 p2;
@@ -690,7 +690,7 @@ s32 func_0010EC10(void)
     return 1;
 }
 
-s32 func_0010EC38(void)
+s32 scrCmdSetIndexedDrawMode(void)
 {
     s32 p0;
     s32 mode;

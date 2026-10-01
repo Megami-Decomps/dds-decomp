@@ -2,9 +2,9 @@
 
 extern void evtRememberDispatchCallback(s32, s32);
 
-extern void func_00249C08(s32);
+extern void mnuSetWorldObjectAndMenuEnabled(s32);
 
-extern void func_0024DBB0(void);
+extern void evtFinishMessageWindowAndNotify(void);
 
 extern void func_0024A2D8(s32);
 
@@ -18,7 +18,7 @@ extern s32 kwlnTaskGetUserValue();
 
 extern void func_0024A340(s32, s32);
 
-extern void func_0024B2E0(s32);
+extern void mnuDispatchTransitionHostCallbacks(s32);
 
 extern void func_0024A930(s32);
 
@@ -67,7 +67,7 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024B478);
 
 extern s32 fldClassifyRemainingFrames(s32);
 
-s64 func_0024B6C0(u64 request) {
+s64 evtDispatchSelectionAfterFieldFrameGate(u64 request) {
     s32 state = kwlnTaskGetUserValue();
 
     func_0024A2D8(state);
@@ -75,7 +75,7 @@ s64 func_0024B6C0(u64 request) {
     if (fldClassifyRemainingFrames(state) != 2) {
         return 0;
     }
-    func_0024B2E0(state);
+    mnuDispatchTransitionHostCallbacks(state);
     func_0024A930(state);
     func_0024A610(state);
     return menuRunPanel(state, 1, request);
@@ -93,8 +93,8 @@ s32 evtBClearAndReset(void) {
 
     evtRememberDispatchCallback(0, context);
     *(s32 *)(((EvtBContext *)context)->visualList + 0x3C) = 0;
-    func_00249C08(0);
-    func_0024DBB0();
+    mnuSetWorldObjectAndMenuEnabled(0);
+    evtFinishMessageWindowAndNotify();
     return 1;
 }
 
@@ -104,13 +104,13 @@ extern void func_0024A570(s32, s32, s32);
 extern void mnuReleaseVisualResources(s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
-u32 func_0024B7E8(void) {
+u32 evtBeginSelectionExitFade(void) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024AB70(1, context);
     evtRememberDispatchCallback((s32)func_0024ACD8, context);
     func_0024A570(0, -2, context);
-    func_00249C08(1);
+    mnuSetWorldObjectAndMenuEnabled(1);
     mnuReleaseVisualResources(context);
     kwlnFadeOutStart(0, 0, 0, 15);
     return 1;
@@ -142,7 +142,7 @@ extern void evtClearActiveFlag(s32);
 
 extern void evtSetBoundedDisplayValue(s32, s32);
 
-u32 func_0024B9D8(void) {
+u32 evtInitializeSelectionListWhenReady(void) {
     s32 context = kwlnTaskGetUserValue();
 
     if (((EvtBContext *)context)->transitionPending == 0) {
@@ -165,7 +165,7 @@ extern void func_0024AE18(s32, s32);
 extern void func_0024AB70(s32, s32);
 extern void func_0024A570(s32, s32, s32);
 
-u32 func_0024BA78(void) {
+u32 evtFinishPendingSelectionTransition(void) {
     s32 context = kwlnTaskGetUserValue();
 
     if (((EvtBContext *)context)->transitionPending != 0) {
@@ -174,7 +174,7 @@ u32 func_0024BA78(void) {
         func_0024AE18(4, context);
         func_0024AB70(3, context);
         func_0024A570(3, 0, context);
-        func_0024DBB0();
+        evtFinishMessageWindowAndNotify();
     }
     ((EvtBContext *)context)->transitionPending = 0;
     return 1;
@@ -186,7 +186,7 @@ s64 func_0024BC18(s32 item) {
     s32 state = kwlnTaskGetUserValue();
     func_0024A2D8(state);
     func_0024A340(0, state);
-    func_0024B2E0(state);
+    mnuDispatchTransitionHostCallbacks(state);
     func_0024A930(state);
     func_0024A610(state);
     return menuRunPanel(state, 1, item);
@@ -206,7 +206,7 @@ extern void func_0024B090(s32, s32);
 extern void func_0024AB70(s32, s32);
 extern void func_0024B168(void);
 
-u32 func_0024BCD0(void) {
+u32 evtEnterThresholdSelectionList(void) {
     s32 context = kwlnTaskGetUserValue();
 
     mnuRefreshThresholdNodeFlags(((EvtBContext *)context)->thresholdList);
@@ -222,7 +222,7 @@ extern void func_0024A570(s32, s32, s32);
 extern void func_0024B090(s32, s32);
 extern void func_0024AB70(s32, s32);
 extern void func_0024ACD8(void);
-extern void func_00249420(s32);
+extern void mnuHighlightProgressNodeByMode(s32);
 
 u32 evtBEnterStateA(void) {
     s32 context = kwlnTaskGetUserValue();
@@ -231,7 +231,7 @@ u32 evtBEnterStateA(void) {
     func_0024B090(4, context);
     func_0024AB70(3, context);
     evtRememberDispatchCallback((s32)func_0024ACD8, context);
-    func_00249420(context);
+    mnuHighlightProgressNodeByMode(context);
     return 1;
 }
 
@@ -241,11 +241,11 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024BF48);
 
 extern void func_0024BF48(s32, s32);
 
-s64 func_0024C028(s32 item) {
+s64 mnuInitializeSelectionDispatchWhenModeUnset(s32 item) {
     s32 state = kwlnTaskGetUserValue();
     func_0024A2D8(state);
     func_0024A340(0, state);
-    func_0024B2E0(state);
+    mnuDispatchTransitionHostCallbacks(state);
     func_0024A930(state);
     func_0024A610(state);
     if (*(s32 *)(state + 0x7C) == 0) {
@@ -284,11 +284,11 @@ extern void mnuReleaseStaffImageHandles(s32);
 extern void func_0024A728(s32, s32);
 extern void func_0024A570(s32, s32, s32);
 extern void func_0024AB70(s32, s32);
-extern void func_0024DBB0(void);
+extern void evtFinishMessageWindowAndNotify(void);
 extern void dspCloseChannel(void);
 extern void func_002E96D8(u32);
 
-u32 func_0024C2E0(void) {
+u32 evtBReleaseImagesAndQueueMenuTransition(void) {
     s32 context = kwlnTaskGetUserValue();
 
     mnuReleaseStaffImageHandles(context + 0xE0);
@@ -298,13 +298,13 @@ u32 func_0024C2E0(void) {
     evtRememberDispatchCallback(0, context);
     ((EvtBContext *)context)->exitPending = 1;
     *(s32 *)(context + 0x98) = 0;
-    func_0024DBB0();
+    evtFinishMessageWindowAndNotify();
     dspCloseChannel();
     func_002E96D8(((EvtBContext *)context)->resourceHandle);
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C368);
+INCLUDE_ASM(const s32, "game/code_0024B3A8", mnuOpenTerminalSelectionMessageWindow);
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C3F8);
 
@@ -325,7 +325,7 @@ extern void mnuSelectFirstListNode(s32);
 extern void func_0024DD90(s32, void *);
 extern void dspSetActive(s32);
 extern void dspStartEntry(s32);
-extern void func_0024DAE8(s32);
+extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtCaptureMessageWindowSoundMode(s32);
 
 u32 evtPrepareSelectedMenuEntry(void) {
@@ -339,7 +339,7 @@ u32 evtPrepareSelectedMenuEntry(void) {
     func_0024DD90(0, &D_00347C68[*selectionIndex]);
     dspSetActive(1);
     dspStartEntry(0);
-    func_0024DAE8(1);
+    evtSetMessageWindowOptionWhenOpen(1);
     evtCaptureMessageWindowSoundMode(6);
     return 1;
 }
@@ -354,7 +354,7 @@ s64 func_0024C7E8(s32 item) {
     s32 state = kwlnTaskGetUserValue();
     func_0024A2D8(state);
     func_0024A340(0, state);
-    func_0024B2E0(state);
+    mnuDispatchTransitionHostCallbacks(state);
     func_0024A930(state);
     func_0024A610(state);
     return menuRunPanel(state, 1, item);
@@ -406,7 +406,7 @@ s64 func_0024C9A0(s32 item) {
     s32 state = kwlnTaskGetUserValue();
     func_0024A2D8(state);
     func_0024A340(0, state);
-    func_0024B2E0(state);
+    mnuDispatchTransitionHostCallbacks(state);
     func_0024A930(state);
     func_0024A610(state);
     return menuRunPanel(state, 1, item);
@@ -426,7 +426,7 @@ extern void func_0024AB70(s32, s32);
 extern void func_002E96D8(u32);
 extern void evtClearActiveFlag(s32);
 
-u32 func_0024CA58(void) {
+u32 evtExitSelectionMenuAndSendSoundCommand(void) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024A728(2, context);
@@ -451,7 +451,7 @@ extern void func_0024A570(s32, s32, s32);
 extern void func_0024AB70(s32, s32);
 extern void func_0024ACD8(void);
 
-u32 func_0024CB00(void) {
+u32 evtBRebuildTerminalMenuAndResetDispatch(void) {
     s32 context = kwlnTaskGetUserValue();
 
     mnuReleaseWorkResources(context);
@@ -478,7 +478,7 @@ s64 evtBDispatchSyncD2(s32 item) {
     } else {
         func_0024A340(0, state);
     }
-    func_0024B2E0(state);
+    mnuDispatchTransitionHostCallbacks(state);
     if (((EvtBContext *)state)->dispatchMode != 3) {
         func_0024A930(state);
     }
@@ -498,7 +498,7 @@ extern void evtSetBoundedDisplayValue(s32, s32);
 extern char D_003AF590[];
 extern char D_003AF620[];
 
-u32 func_0024CDB0(void) {
+u32 evtBEndDispatchAndReloadEffectResource(void) {
     EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
 
     mnuFadeOrPlayCloseSfx(0, (s32)context);

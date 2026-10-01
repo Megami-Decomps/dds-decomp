@@ -12,7 +12,7 @@ extern FmGslWork D_00452360;
 extern void func_003297C8(void *);
 
 /* Release the group's handles once and clear its active-node flag. */
-s32 func_0019B7A8(void) {
+s32 fmGslReleaseActiveResourceBuffers(void) {
     if (D_00452360.unk1C == 0) {
         return 0;
     }

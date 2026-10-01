@@ -19,22 +19,22 @@ extern s32 mdlFlagTest(u32);
 extern u32 sdfCounterGetDisplayWordPointer(void);
 extern void func_003014F0(char *, char *, s32);
 extern void func_0024DD90(s32, void *);
-extern void func_0024DAE8(s32);
+extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void dspStartEntry(s32);
 extern void evtCaptureMessageWindowSoundMode(s32);
 extern char D_003BD250[];
 extern s32 evtGetMessageWindowControlState(void);
 extern void func_0024DD78(void);
-extern void func_0024DBB0(void);
+extern void evtFinishMessageWindowAndNotify(void);
 extern void func_002E96D8(u32);
 extern s32 fldReleaseLocalMapResources(void);
-extern s64 func_002C4630(void);
+extern s64 sdfDestroyActiveCounterRuntime(void);
 extern void fldReleaseMapRequestQueues(void);
 extern void fldReleaseCameraColorEffect(void);
 extern void func_002CF430(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
 extern void dspCloseChannel(void);
-extern void func_002D0A10(s32);
+extern void sdfQueueNonzeroResourceId(s32);
 extern void evtDestroySecondaryWorldNode(void);
 extern s32 D_003BD254;
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void *, void *, void *);
@@ -43,7 +43,7 @@ extern s32 fldLmapTaskUpdate(void);
 extern s32 D_003BD23C;
 extern s32 D_003BD96C;
 extern void fldInitializeLmapState(void);
-extern s32 func_002C3060(void);
+extern s32 fldStartAndPollLocalMapTrack(void);
 extern void func_002C30F0(void);
 extern s32 func_002C3220(void);
 extern void func_002C3420(void);
@@ -70,12 +70,12 @@ typedef struct LmapList {
     LmapNode *hi;    /* 0x1C */
 } LmapList;
 
-extern LmapNode *func_002C25E0(LmapList *);
-extern LmapNode *func_002C2600(LmapList *);
-extern LmapNode *func_002C2620(LmapList *);
+extern LmapNode *sdfGridSeekFirstNode(LmapList *);
+extern LmapNode *sdfGridSeekLastNode(LmapList *);
+extern LmapNode *fldLmapAdvanceWindowStart(LmapList *);
 extern LmapNode *func_002C2658(LmapList *);
 
-LmapNode *func_002C2620(LmapList *list) {
+LmapNode *fldLmapAdvanceWindowStart(LmapList *list) {
     LmapNode *cur = list->cur;
     LmapNode *node = list->first;
 
@@ -104,7 +104,7 @@ LmapNode *fldLmapAdvanceCursor(LmapList *list) {
         return cur;
     }
     if (cur == list->hi) {
-        func_002C25E0(list);
+        sdfGridSeekFirstNode(list);
         return list->cur;
     }
     next = cur->next;
@@ -115,7 +115,7 @@ LmapNode *fldLmapAdvanceCursor(LmapList *list) {
     list->cur = cur;
     list->count++;
     if (list->count >= list->capacity - 1) {
-        cur = func_002C2620(list);
+        cur = fldLmapAdvanceWindowStart(list);
     }
     return cur;
 }
@@ -131,7 +131,7 @@ LmapNode *fldLmapRewindCursor(LmapList *list) {
         return cur;
     }
     if (cur == list->lo) {
-        func_002C2600(list);
+        sdfGridSeekLastNode(list);
         return list->cur;
     }
     next = cur->prev;
@@ -190,7 +190,7 @@ s32 fldLmapTaskUpdate(void) {
     s32 result;
 
     if (state == 0) {
-        if (func_002C3060() != 0) {
+        if (fldStartAndPollLocalMapTrack() != 0) {
             D_003BD96C = 1;
         }
         return 0;
@@ -253,17 +253,17 @@ void fldInitializeLmapState(void) {
 void fldShutdownLmapResources(void) {
     func_002E96D8(0x400001);
     fldReleaseLocalMapResources();
-    func_002C4630();
+    sdfDestroyActiveCounterRuntime();
     fldReleaseMapRequestQueues();
     fldReleaseCameraColorEffect();
     func_002CF430();
     evtSetSolarOverlayFullyTransparent();
     dspCloseChannel();
-    func_002D0A10(D_003BD254);
+    sdfQueueNonzeroResourceId(D_003BD254);
     evtDestroySecondaryWorldNode();
 }
 
-s32 func_002C3060(void) {
+s32 fldStartAndPollLocalMapTrack(void) {
     if (D_003BD248 == 1) {
         if (func_002E92C0(0x400000) == 0) {
             func_002E9340(0x400000);
@@ -291,7 +291,7 @@ INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3420);
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3510);
 
-s32 func_002C35C8(void) {
+s32 mdlCollectFlagBitsIntoMask(void) {
     s32 bits;
 
     bits = mdlFlagTest(0x40A) << 3;
@@ -327,7 +327,7 @@ void fldDisplayLocalMapCounterMessage(void) {
 
     func_003014F0(text, D_003BD250, sdfCounterGetDisplayWordPointer());
     func_0024DD90(0, text);
-    func_0024DAE8(0);
+    evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(0);
     evtCaptureMessageWindowSoundMode(1);
 }
@@ -338,7 +338,7 @@ s32 fldLmapToggleOverlay(void) {
     if (evtGetMessageWindowControlState() != 0) {
         func_0024DD78();
     } else {
-        func_0024DBB0();
+        evtFinishMessageWindowAndNotify();
         result = 1;
     }
     return result;

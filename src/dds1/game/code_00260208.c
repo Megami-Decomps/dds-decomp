@@ -29,7 +29,7 @@ typedef struct {
     s32 mode;             /* 0xAC: command phase, 0–3 */
 } MenuCommandWork;
 
-void func_00260530(MenuCommandWork *work, u32 value) {
+void mnuStorePendingMenuCommandValue(MenuCommandWork *work, u32 value) {
     MenuCommand *command;
 
     command = work->command;
@@ -203,11 +203,11 @@ void brsApplyRewardBundle(u32 partyWork, MenuIconBatch *batch, u32 rewardState) 
 }
 
 extern void mnuReleaseStaffMenuResources(s32 *);
-extern void func_00271480(s32, s32 *, s32, s32);
+extern void mnuInitializeStaffPageWindows(s32, s32 *, s32, s32);
 extern s32 mnuCreatePanelGroup(s32);
 extern void mnuUpdateFiveListEntries(s32, s32);
 extern s32 mnuCreateSpriteState(s32, s32, s32);
-extern void func_00287450(s32);
+extern void evtStageTestInit(s32);
 extern void mnuForwardTableByte(s32);
 
 /* Fields of the battle-result panel needed while opening its skill package. */
@@ -250,7 +250,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     s32 panel;
 
     mnuReleaseStaffMenuResources(group);
-    func_00271480((s32)work + 0x680, group, 0, (s32)work + 0x574);
+    mnuInitializeStaffPageWindows((s32)work + 0x680, group, 0, (s32)work + 0x574);
     panel = mnuCreatePanelGroup(work->panelGroup);
     work->panelHandle = panel;
     mnuUpdateFiveListEntries(panel, work->unitHandle);
@@ -258,7 +258,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
         mnuCreateSpriteState(work->spriteArg1,
                              work->spriteArg0,
                              work->panelGroup);
-    func_00287450(0);
+    evtStageTestInit(0);
     mnuForwardTableByte(((BrsRowUnit *)
         (((BrsSelectedRow *)((u8 *)work + 0x2CC))[work->selectedRow].unit))->unitId);
 }

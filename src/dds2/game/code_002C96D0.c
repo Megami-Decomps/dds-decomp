@@ -1707,7 +1707,7 @@ void *mcdHandleSaveSetupDone(void) {
 
 extern s32 mcdContinueLoadSelection();
 
-void *func_002CCAA8(void) {
+void *mcdAdvanceToLoadSelection(void) {
     fileSetMenuFlowState(13);
     return fileSetMenuCallbackAndClearResult((u32)mcdContinueLoadSelection);
 }
@@ -1915,7 +1915,7 @@ s32 fileBeginPromptDialog(void *start, void *finish, s32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002CEEC0);
 
-u32 func_002CF928(void) {
+u32 fileGetLoadSelectionState(void) {
     return D_00437D04;
 }
 
@@ -2194,34 +2194,34 @@ void func_002D06D0(void) {
     fileBeginFadeAndConfirmSound();
 }
 
-void *func_002D06F0(void) {
+void *fileBeginLoadBranchDialog(void) {
     fileSetMenuFlowState(0);
     D_00437D1C = 12;
     return fileBeginFourWayDialog((u32)func_002D06B0, (u32)func_002D06D0, 0, 0);
 }
 
-void *func_002D0730(void) {
+void *fileStartLoadDetectionAfterBranchDialog(void) {
     D_00437D18 = -1;
     D_00437D1C = 0;
     fileSetMenuFlowState(0x18);
     ((MenuWork *)D_00437D84)->unk30 = 1;
-    return fileCreateDetectionAudioCallback((u32)func_002D06F0);
+    return fileCreateDetectionAudioCallback((u32)fileBeginLoadBranchDialog);
 }
 
-void *func_002D0770(void) {
+void *fileRestartSelectionFlow(void) {
     fileResetMenuFlowState();
     return func_002CAED0;
 }
 
-void func_002D0798(void) {
+void fileBeginLoadConfirmationDialog(void) {
     fileSetMenuFlowState(0);
     D_00437D1C = 11;
-    fileBeginFourWayDialog((u32)func_002D0730, (u32)func_002D0770, (u32)func_002D0770, 0);
+    fileBeginFourWayDialog((u32)fileStartLoadDetectionAfterBranchDialog, (u32)fileRestartSelectionFlow, (u32)fileRestartSelectionFlow, 0);
 }
 
 extern void *fileNextMenuFlowState(void);
 
-void *func_002D07D8(void) {
+void *fileWaitForLoadStepBeforeDetection(void) {
     if (fileIsLoadStepComplete() != 0) {
         return fileCreateDetectionAudioCallback((u32)fileNextMenuFlowState);
     }
@@ -2243,10 +2243,10 @@ void *fileNextMenuFlowState(void) {
         work->unk36 = index + 1;
         if (D_003E7FC8[index].mask & work->unk32) {
             fileSetMenuFlowState(D_003E7FC8[index].state);
-            return func_002D07D8;
+            return fileWaitForLoadStepBeforeDetection;
         }
     }
-    return func_002D0798;
+    return fileBeginLoadConfirmationDialog;
 }
 
 extern u32 D_00435CD4;
@@ -2263,20 +2263,20 @@ s32 fileResetPendingRequest(void) {
     return 0;
 }
 
-void *func_002D08F0(void) {
+void *fileFadeBeforeResettingRequest(void) {
     kwlnFadeInStart(0, 0, 0, 8);
     return fileResetPendingRequest;
 }
 
-void func_002D0920(void) {
+void fileBeginLoadOrAbortDialog(void) {
     fileSetMenuFlowState(0);
     D_00437D1C = 10;
     ((MenuWork *)D_00437D84)->unk30 = 0;
-    fileBeginFourWayDialog((u32)func_002D0770, (u32)fileBeginFadeAndConfirmSound, (u32)func_002D08F0, 0);
+    fileBeginFourWayDialog((u32)fileRestartSelectionFlow, (u32)fileBeginFadeAndConfirmSound, (u32)fileFadeBeforeResettingRequest, 0);
 }
 
 s32 mcdContinueLoadSelection(void) {
-    u32 state = func_002CF928();
+    u32 state = fileGetLoadSelectionState();
     u32 block;
     s32 next = (s32)fileMenuWorkStart;
     if (state != 0) {
@@ -2295,7 +2295,7 @@ s32 mcdContinueLoadSelection(void) {
 
 extern s32 kwlnFadeIsActive(void);
 extern void kwlnFadeStartIn(s32);
-extern void func_002D0920(void);
+extern void fileBeginLoadOrAbortDialog(void);
 extern s32 D_00437D28;
 
 void *fileMenuWorkStart(void) {
@@ -2306,10 +2306,10 @@ void *fileMenuWorkStart(void) {
         kwlnFadeStartIn(0x10);
     }
     if (((MenuWork *)D_00437D84)->startBranchFlag == 0) {
-        return func_002D0920;
+        return fileBeginLoadOrAbortDialog;
     }
     ((MenuWork *)D_00437D84)->unk30 = 1;
-    return func_002D06F0();
+    return fileBeginLoadBranchDialog();
 }
 
 
@@ -2327,9 +2327,9 @@ void fileMenuWorkCreate(u32 startBranchFlag) {
     ((MenuWork *)D_00437D84)->unk31 = 0;
 }
 
-void func_002D0A90(void) {
+void fileReleaseMenuFlowResource(void) {
     if (D_00437D84 != 0) {
-        func_003298C0(((MenuWork *)D_00437D84)->unk3C);
+        sdfQueueNonzeroResourceId(((MenuWork *)D_00437D84)->unk3C);
         D_00437D84 = 0;
     }
 }
@@ -2626,7 +2626,7 @@ INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D1930);
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D27A0);
 
-void func_002D2C50(void) {
+void effLoadCommonTexturesAndResetRenderFlags(void) {
     effLoadFlashTextures();
     effLoadWindTexture();
     effLoadScalyTexture();
@@ -2935,7 +2935,7 @@ void fileJobInvokeScaleCallback(void *work, f32 scale) {
     }
 }
 
-void func_002D3808(void *work, u32 color) {
+void fileDispatchJobTypeCallback(void *work, u32 color) {
     u16 id = ((FileJob *)work)->type;
 
     if (D_003E918C[id].func != NULL) {
@@ -3387,15 +3387,15 @@ void fileReadVector40(void *work, void *dst) {
     PCP_COPY_VECTOR(dst, (u8 *)work + 0x40);
 }
 
-void func_002D4AB0(void *work, void *dst) {
+void fileReadStoredQuaternion(void *work, void *dst) {
     PCP_COPY_VECTOR(dst, (u8 *)work + 0x50);
 }
 
-f32 func_002D4AC8(FileQueue *queue) {
+f32 fileGetQueueScale(FileQueue *queue) {
     return queue->scale;
 }
 
-u32 func_002D4AD0(FileQueue *queue) {
+u32 fileGetQueueColor(FileQueue *queue) {
     return queue->color;
 }
 
@@ -3733,7 +3733,7 @@ typedef struct LoaderRecord {
     u8 pad52[2];
 } LoaderRecord;
 
-void *func_002D5FB8(s32 owner) {
+void *fileCreateSurfaceLoaderState(s32 owner) {
     LoaderRecord *rec = (LoaderRecord *)sdfAllocAndClearQuadwords(0x54);
     u32 color = 0x80808080;
 
@@ -3771,12 +3771,12 @@ void *fileCreateGridLoaderRecord(FileGridHeader *hdr) {
     u32 rows = hdr->rows;
     u32 count = (rows != 0 ? rows : hdr->cols) * (rows != 0 ? hdr->cols : hdr->altCols);
 
-    return func_002D5FB8(count <= 0x12C ? count : 0x12C);
+    return fileCreateSurfaceLoaderState(count <= 0x12C ? count : 0x12C);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042BB28);
 
-EffectSurfaceNode *func_002D6058(FileJob *job) {
+EffectSurfaceNode *fileCreateEffectSurfaceFromJob(FileJob *job) {
     void *primary = fileResolvePrimaryBuffer(job);
     EffectSurfaceNode *node = (EffectSurfaceNode *)fileCreateGridLoaderRecord(primary);
     void *secondary;
@@ -3809,7 +3809,7 @@ EffectSurfaceNode *func_002D6058(FileJob *job) {
     return node;
 }
 
-void func_002D6160(EffectSurfaceNode *node) {
+void fileDestroyEffectSurfaceAndChildren(EffectSurfaceNode *node) {
     u32 count;
     u32 i;
 
@@ -4271,7 +4271,7 @@ void effScaleOwnerParametersFromSource(ScaleOwner *owner, f32 scale) {
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002DA358);
 
-void func_002DAA58(ScaleOwner *owner, f32 factor) {
+void fileScaleEffectSurfaceParameterFields(ScaleOwner *owner, f32 factor) {
     f32 *source = (f32 *)owner->src;
     f32 *destination = (f32 *)owner->dst;
     u8 *sourceEntries = (u8 *)source + 4;
@@ -4417,13 +4417,7 @@ void fileClearRecordReferences(FileSlotTable *record) {
     record->references = 0;
 }
 
-void fileAcquireRecord(FileSlotTable *record) {
-    if (record->references == 0) {
-        fileResetSlotStates(record);
-    }
-    D_003E95C0[record->type].acquire(record);
-    record->references++;
-}
+INCLUDE_ASM(const s32, "game/code_002C96D0", fileAcquireRecord);
 
 void fileReadVectorPtr20(u8 *obj, void *dst) {
     PCP_COPY_VECTOR(dst, *(u8 **)(obj + 0x20));

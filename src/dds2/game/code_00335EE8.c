@@ -31,7 +31,7 @@ extern void func_00334678(void *, void *);
 void func_00335EE8(void) {
 }
 
-s32 func_00335EF0(void *object, s32 command) {
+s32 sdfDispatchMotionCommand(void *object, s32 command) {
     return D_0040B510[(u16)command](object, command);
 }
 
@@ -41,7 +41,7 @@ void sdfSelectMotionPointerEntry(s32 destination, s32 source, void *unused, s32 
     *(s32 *)(destination + 0xc) = *(s32 *)(*(s32 *)(*(s32 *)(source + 4) + 0x10) + 0xc) + entryIndex * 0x10;
 }
 
-s32 func_00335F78(s32 source, s32 unused, s32 entryIndex) {
+s32 sdfAllocateBoundMotionPointerEntry(s32 source, s32 unused, s32 entryIndex) {
     s32 entry = func_00328D68(0x20);
 
     sdfSelectMotionPointerEntry(entry, source, D_0040B518, entryIndex);
@@ -91,7 +91,7 @@ typedef struct PoseCopy {
     Block16 dst;
 } PoseCopy;
 
-void func_003361F8(PoseCopy *pose) {
+void sdfCopyPoseRecord(PoseCopy *pose) {
     pose->dst = *pose->src;
 }
 
@@ -168,13 +168,13 @@ void sdfSetAlternateIdentityMatrixVU(void) {
 }
 
 /* libvu0: sceVu0UnitMatrix */
-void func_00336358(void *dst) {
+void sdfWriteIdentityMatrixToMemory(void *dst) {
     EE_MMI_UNIT_MATRIX(dst);
 }
 
 /* Transpose the four VU rows; EE MMI interleave is needed for packed vectors. */
 /* libvu0: sceVu0TransposeMatrix, register form (vf28-vf31 in and out) */
-void func_00336388(void) {
+void sdfTransposeVuMatrix(void) {
     __asm__ volatile (
         ".set noreorder\n"
         "qmfc2.ni $8, vf28\n"
@@ -197,7 +197,7 @@ void func_00336388(void) {
 }
 
 /* vu0 routine: rigid inverse of vf28-vf31 (transpose the 3x3, translation = -(R^T * t)) */
-void func_003363D0(void) {
+void sdfInvertRigidVuTransform(void) {
     __asm__ volatile (
         ".set noreorder\n"
         "qmfc2.ni $8, vf28\n"
@@ -223,7 +223,7 @@ void func_003363D0(void) {
 }
 
 /* vu0 routine: inverse of vf28-vf31 with per-axis scale removed (transpose, rows / |row|^2, translation = -(R^T * t)) */
-void func_00336428(void) {
+void sdfInvertScaledVuTransform(void) {
     __asm__ volatile (
         ".set noreorder\n"
         "vmula.xyz ACC, vf28, vf28\n"

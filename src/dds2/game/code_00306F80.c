@@ -206,7 +206,7 @@ void itfGridStorePosition(s32 *position, s32 x, s32 y) {
     position[1] = y;
 }
 
-void func_00307398(u32 packetHandle, u32 width, u32 height, u32 data, u32 context) {
+void itfCreateGridPacketWithDefaultFlags(u32 packetHandle, u32 width, u32 height, u32 data, u32 context) {
     sdfCreateDescriptorPacket(context, packetHandle, 0, 0, width, height, data, 0);
 }
 
@@ -216,7 +216,7 @@ u8 itfGridGetOverlayFlag(GridDrawWork *work) {
 }
 
 /* Two overlay kinds use a 16x16 region; other kinds use 8x2. */
-void func_003073D8(GridDrawWork *work, s32 x, s32 y) {
+void itfDrawGridOverlayPacket(GridDrawWork *work, s32 x, s32 y) {
     s32 width;
     s32 height;
     if (work->overlayKind == 0x13 || work->overlayKind == 0x1B) {
@@ -226,7 +226,7 @@ void func_003073D8(GridDrawWork *work, s32 x, s32 y) {
         width = 8;
         height = 2;
     }
-    func_00307398(work->overlayHandle, width, height, x, y);
+    itfCreateGridPacketWithDefaultFlags(work->overlayHandle, width, height, x, y);
 }
 
 typedef struct RenderCallbackEntry {
@@ -242,17 +242,17 @@ extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(s32);
 
 /* Build the optional overlay and main packet, then dispatch their draw callback. */
-GridDrawWork *func_00307428(GridDrawWork *object, u8 *data, s32 kind) {
+GridDrawWork *itfSubmitGridPacketsAndDraw(GridDrawWork *object, u8 *data, s32 kind) {
     s32 context = sdfAllocPacketAligned(0x20);
     u8 *cursor;
     RenderCallbackEntry *entry;
     sdfInitPacketList(context);
     cursor = data + (data[1] & 0xF0) + 0x40;
     if (itfGridGetOverlayFlag(object) != 0) {
-        func_003073D8(object, (s32)cursor, context);
+        itfDrawGridOverlayPacket(object, (s32)cursor, context);
         cursor += object->overlayDataSize;
     }
-    func_00307398(object->packetHandle, object->width,
+    itfCreateGridPacketWithDefaultFlags(object->packetHandle, object->width,
                   object->height, (s32)cursor, context);
     entry = &D_0037FB48[kind];
     entry->draw(entry, context);
@@ -262,7 +262,7 @@ GridDrawWork *func_00307428(GridDrawWork *object, u8 *data, s32 kind) {
 INCLUDE_ASM(const s32, "game/code_00306F80", func_003074F0);
 
 /* Set the selected descriptor word's high control bits. */
-void func_003075A0(s32 object, s32 index) {
+void itfSetGridDescriptorControlBit(s32 object, s32 index) {
     s32 descriptor;
 
     descriptor = *(s32 *)(*(s32 *)(index * 4 + *(s32 *)(object + 0x24)) + 0x28);
@@ -355,7 +355,7 @@ void itfSubmitToggledGridWord(s32 data, s32 alternate, s32 kind) {
     entry->draw(entry, context);
 }
 
-void func_00308380(data, kind)
+void sdfSubmitGsTestOneRegisterPacket(data, kind)
     u32 data;
     u32 kind;
 {
@@ -383,7 +383,7 @@ void sdfSubmitGsAlphaRegisterPacket(s32 data, s32 alternate, s32 kind) {
     entry->draw(entry, context);
 }
 
-void func_00308478(u32 data, u32 kind) {
+void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind) {
     sdfSubmitGsAlphaRegisterPacket(data, 0, kind);
 }
 
@@ -482,7 +482,7 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
 
 extern void func_0032DB78(void *, void *, s32);
 
-void func_00308E60(surfaceIndex)
+void sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex)
     s32 surfaceIndex;
 {
     void *list = sdfAllocPacketAligned(0x20);
@@ -498,30 +498,30 @@ void func_00308E60(surfaceIndex)
 }
 
 void uiDrawTexturedSurfaceAtFarDepth(u32 context) {
-    func_00308380(0x30000, context);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, context);
     func_00308808(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, context);
-    func_00308380(0x3000DL, context);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, context);
     uiDrawActiveSurfaceRegion(context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308F78);
 
-void func_00308FE8(u32 context) {
-    func_00308380(0x30000, context);
+void uiDrawActiveSurfaceWithTestMode(u32 context) {
+    sdfSubmitGsTestOneRegisterPacket(0x30000, context);
     func_00308808(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, context);
-    func_00308380(0x3001BL, context);
+    sdfSubmitGsTestOneRegisterPacket(0x3001BL, context);
     uiDrawActiveSurfaceRegion(context);
 }
 
-void func_00309050(s32 context) {
-    func_00308E60();
-    func_00308380(0x5001BL, context);
-    func_00308478(0x44, context);
+void uiConfigureSurfaceAlphaState(s32 context) {
+    sdfDispatchSurfaceWithPreparedTexturePacket();
+    sdfSubmitGsTestOneRegisterPacket(0x5001BL, context);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, context);
 }
 
 void uiDrawSurfaceAtNearDepth(u32 context) {
-    func_00308380(0x30000, context);
-    func_00308478(0x44, context);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, context);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, context);
     func_00308808(0, 0, 0, 0x2000, 0xe00, 0, context);
 }
 
@@ -844,7 +844,7 @@ s32 itfFindGridNodeByKey(u32 key, u32 head) {
     return n;
 }
 
-s32 func_0030A070(s32 index, u8 *widget) {
+s32 sdfGridSeekSelectedNodeByIndex(s32 index, u8 *widget) {
     s16 count = ((GridListCursor *)widget)->count;
     u16 width;
     u8 *first;
@@ -872,12 +872,12 @@ s32 func_0030A070(s32 index, u8 *widget) {
     return 1;
 }
 
-void func_0030A0E8(u32 widget) {
-    func_0030A070(0, widget);
+void sdfGridSeekFirstNode(u32 widget) {
+    sdfGridSeekSelectedNodeByIndex(0, widget);
 }
 
-void func_0030A108(u8 *entry) {
-    func_0030A070(((GridListCursor *)entry)->count - 1, entry);
+void sdfGridSeekLastNode(u8 *entry) {
+    sdfGridSeekSelectedNodeByIndex(((GridListCursor *)entry)->count - 1, entry);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00306F80", D_00438868);

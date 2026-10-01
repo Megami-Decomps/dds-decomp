@@ -183,8 +183,8 @@ extern void func_00280978();
 extern void mnuClearListFlags();
 extern s32 func_002D03F8(s32);
 extern s32 *sdfResourceRetainAddress(s32);
-extern void func_00287450();
-extern void func_0027E790();
+extern void evtStageTestInit();
+extern void mnuActivatePanelAndConfigureGridResources();
 
 extern s32 func_002877A8(void);
 
@@ -332,10 +332,10 @@ s32 mnuShopReleaseResources(void) {
     return 1;
 }
 
-void func_002758D8(s32 menu) {
+void mnuPreparePartyPanelTransition(s32 menu) {
     mnuRestorePartyEntriesAndRefresh();
     mnuSetPopupEntryFlagged(menu + 0x54, (s32)D_0037CA58);
-    func_0027E790(((CampMenuContext *)menu)->display, ((CampMenuContext *)menu)->displayVariant, 0, 1);
+    mnuActivatePanelAndConfigureGridResources(((CampMenuContext *)menu)->display, ((CampMenuContext *)menu)->displayVariant, 0, 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00275920);
@@ -385,7 +385,7 @@ void mnuUpdateStaffFade(s32 opening, StaffFadeState *state) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00276018);
 
-s64 func_002761C0(s32 callback) {
+s64 mnuDrawPartySelectionPanelAndStep(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     PartyMenuHead *menu = (PartyMenuHead *)((CampMenuContext *)context)->menu;
 
@@ -431,7 +431,7 @@ void mnuReleaseStaffMenuTextureHandles(s32 *menu) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00276368);
 
-s32 func_00276428(void) {
+s32 mnuStaffCloseSelectionState(void) {
     s32 context = kwlnTaskGetUserValue();
     s32 menu = ((CampMenuContext *)context)->menu;
     mnuResetWorkFloats();
@@ -445,7 +445,7 @@ void func_00276478(u32 context) {
 }
 
 void func_00276490(void) {
-    func_00276428();
+    mnuStaffCloseSelectionState();
 }
 
 void func_002764A8(u32 context) {
@@ -453,7 +453,7 @@ void func_002764A8(u32 context) {
 }
 
 void func_002764C0(void) {
-    func_00276428();
+    mnuStaffCloseSelectionState();
 }
 
 s64 mnuStaffPopupUpdate(s32 callback) {
@@ -477,7 +477,7 @@ s64 mnuStaffPopupUpdate(s32 callback) {
         }
         if (buttons & 2) {
             mnuSetPopupEntryFlagged((s32)popup, D_0037CA78);
-            func_0027E790(((CampMenuContext *)context)->display, ((CampMenuContext *)context)->displayVariant, 0, 1);
+            mnuActivatePanelAndConfigureGridResources(((CampMenuContext *)context)->display, ((CampMenuContext *)context)->displayVariant, 0, 1);
             mnuClearListFlags(0, window);
         }
         mnuPlayInputSound(0, buttons, 0);
@@ -493,7 +493,7 @@ extern void func_002723B0();
 extern void func_00272668();
 extern void mnuDrawWindowContainer();
 
-s64 func_002765E8(s32 callback) {
+s64 mnuDrawStaffCampPageWithImage(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     CampMenuContext *work = (CampMenuContext *)context;
     StaffMenuWork *menu = (StaffMenuWork *)work->menu;
@@ -535,7 +535,7 @@ extern void func_002832F8();
 extern void func_00283820();
 extern void func_00285160();
 extern void mnuReleaseResourceList();
-extern void func_0027E6B8();
+extern void mnuStoreScrollPanelSelectionAndGridPosition();
 
 /* Tear down the staff panel and all four optional scene-side resources. */
 s32 mnuStaffReleasePanelScene(s32 unused) {
@@ -566,17 +566,17 @@ s32 mnuStaffReleasePanelScene(s32 unused) {
     }
     mnuReleaseResourceList(menu->resourceList);
     effResolveAndReleaseResource(work->resource);
-    func_0027E6B8(work->display, work->resource, 0, 0);
+    mnuStoreScrollPanelSelectionAndGridPosition(work->display, work->resource, 0, 0);
     return 1;
 }
 
-void func_00276B10(s32 context) {
+void mnuResetSelectedPanelOpacity(s32 context) {
     *(u32 *)
       (*(s32 *)(*(((MenuSelectionList *)((CampMenuContext *)context)->selectionList)->selectedSlot) * 0x134 + context + 0x2b4) + 0x3c) = 0x100
     ;
 }
 
-s32 func_00276B38(s32 contextArg) {
+s32 mnuStaffSwitchPartyPage(s32 contextArg) {
     s32 context = kwlnTaskGetUserValue();
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     s32 changed = 0;
@@ -598,7 +598,7 @@ s32 func_00276B38(s32 contextArg) {
         sndSetSequenceVolumePan(4, 0x7F, 0x3F);
         menu->activeMark = 0;
         if (menu->staffMode == 1) {
-            func_00276B10(context);
+            mnuResetSelectedPanelOpacity(context);
         }
         return 1;
     }
@@ -607,7 +607,7 @@ s32 func_00276B38(s32 contextArg) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00276C28);
 
-void func_00276DA0(s32 x, s32 context) {
+void mnuDrawSlotIcons(s32 x, s32 context) {
     s32 slot = D_003BAA00 + *(((CampMenuContext *)context)->partySelection->selectedSlot) * 0x1a4 + 0xa60;
     s32 i;
     s32 y;
@@ -628,7 +628,7 @@ void func_00276DA0(s32 x, s32 context) {
 
 extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 
-void func_00276E90(s32 flag, s32 obj) {
+void mnuDrawStaffPanelGridBackdrop(s32 flag, s32 obj) {
     s32 y;
 
     for (y = 0x360; y < 0xE40; y += 0x38) {
@@ -666,13 +666,13 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
     frFontQueueGlyphInSelectedSlot(item);
 }
 
-void func_00277220(u8 *entry, s32 id, s32 packedGroup, s32 group, s32 obj, s32 spriteFlags) {
+void mnuDrawPartySkillAndStatusPanel(u8 *entry, s32 id, s32 packedGroup, s32 group, s32 obj, s32 spriteFlags) {
     func_00283110(0xeb0, 0x518, 0, entry, packedGroup, spriteFlags);
     func_002833B0(0, 0, 0, entry, group, spriteFlags);
     itfDrawGridWithResolvedSlot(0xb0, 0xa68, 0, 1, *(s32 *)(obj + 0x1c), 0x37, spriteFlags);
     mnuDrawTextSprite(0x220, 0xa20, 0, 0xa09dc380, D_003BAA70 + *(u16 *)(entry + 4) * 17 + 0x110, spriteFlags);
     itfDrawGridWithResolvedSlot(0x120, 0xad0, 0, 1, *(s32 *)(obj + 0x14), 0x25, spriteFlags);
-    func_00276DA0(-0x16, id);
+    mnuDrawSlotIcons(-0x16, id);
 }
 
 extern void func_00283838(s32, s32, s32, s32, s32, s32, s32);
@@ -714,7 +714,7 @@ void mnuIdleVoiceTimer(MenuIdleVoiceState *voiceTimer) {
     }
 }
 
-s64 func_002775D8(s32 callback) {
+s64 mnuStaffIdlePartyUpdate(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
 
@@ -752,7 +752,7 @@ INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22D0);
 
 INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuBuildEquippedSlots);
 
-u32 func_00277C80() {
+u32 mnuDestroySelectedPartyWindow() {
     s32 context = kwlnTaskGetUserValue();
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     mnuDestroyWindowContainer(menu->selectedList);
@@ -760,7 +760,7 @@ u32 func_00277C80() {
     return 1;
 }
 
-void func_00277CB8(void) {
+void mnuSeekFirstAvailableStaffListNode(void) {
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)kwlnTaskGetUserValue())->menu;
     MenuSelectionState *state = (MenuSelectionState *)menu->selectedList;
     MenuSelectionNode *node = state->list->first;
@@ -782,7 +782,7 @@ u32 ptySkillMenuRebuildAfterMutation(s32 actor, s32 contextArg) {
     s32 selected = *((MenuSelectionState *)menu->selectedList)->list->selectedSlot;
     s32 state;
 
-    func_00277C80(contextArg);
+    mnuDestroySelectedPartyWindow(contextArg);
     ptySkillMenuBuildEquippedSlots(actor, contextArg);
     mnuSeekListNode(selected, (s32)((MenuSelectionState *)menu->selectedList)->list);
     state = menu->selectedList;
@@ -844,7 +844,7 @@ s32 mnuIsSkillCodeInBitset(s32 code, u32 *bits) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuInitPages);
 
-void func_002786E8(s32 context) {
+void mnuDestroySkillMenuWindows(s32 context) {
     u32 *menu = (u32 *)((CampMenuContext *)context)->menu;
     if (menu[2] != 0) {
         u32 i = 0;
@@ -872,25 +872,25 @@ s32 mnuCampMenuInit(void) {
     mnuForwardDupArg(work->panelList, work->option, 0, 0, 0);
     switch (*((MenuSelectionState *)work->panel)->list->selectedSlot) {
     case 0:
-        func_0027E790(work->display, work->variant, 0, 1);
+        mnuActivatePanelAndConfigureGridResources(work->display, work->variant, 0, 1);
         break;
     case 2:
-        func_0027E790(work->display, work->variant, 0x35, 0x36);
+        mnuActivatePanelAndConfigureGridResources(work->display, work->variant, 0x35, 0x36);
         break;
     default:
-        func_0027E790(work->display, work->variant, 0x33, 0x34);
+        mnuActivatePanelAndConfigureGridResources(work->display, work->variant, 0x33, 0x34);
         break;
     }
     mnuSeekListNode(0, ((MenuSelectionState *)work->panelList)->list);
     return 1;
 }
 
-s32 func_00278868(s32 contextArg) {
+s32 mnuCloseItemSelectionState(s32 contextArg) {
     s32 context = kwlnTaskGetUserValue();
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
 
     if (menu->selectedList != 0) {
-        func_00277C80(contextArg);
+        mnuDestroySelectedPartyWindow(contextArg);
     }
     func_00277DF0(context);
     func_002D0918(menu->handle);
@@ -949,7 +949,7 @@ void mnuHighlightSelectedListNode(void) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00278C90);
 
-u32 func_00278D68(void) {
+u32 mnuResetStaffSelectionFlags(void) {
     s32 context = kwlnTaskGetUserValue();
     ((StaffMenuWork *)((CampMenuContext *)context)->menu)->selectionFlags = 0;
     return 1;

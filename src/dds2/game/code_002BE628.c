@@ -10,7 +10,7 @@ extern s32 func_002C6008();
 
 extern s32 mnuLookupRangeEntry(u16);
 
-extern u64 func_0011D360(u64, s32);
+extern u64 ptyGetCombinedRecordAndSlotValue(u64, s32);
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
@@ -633,7 +633,7 @@ void mnuApplyPackedGroupValues(MenuPanelGroup *group, u64 value) {
     index = 0;
     do {
         nextIndex = index + 1;
-        entryValue = func_0011D360(value, index);
+        entryValue = ptyGetCombinedRecordAndSlotValue(value, index);
         child = *entries;
         entries = entries + 1;
         mnuStorePanelItemValue(child, entryValue);
@@ -702,7 +702,7 @@ void func_002C1B68(u32 *out, u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1B70);
 
-void func_002C1C20(u8 *object, s32 x, s32 y, s32 depth, s32 count, s32 drawArg, s32 variant, s32 texture) {
+void mnuDrawRepeatedPanelSprites(u8 *object, s32 x, s32 y, s32 depth, s32 count, s32 drawArg, s32 variant, s32 texture) {
     s32 i;
 
     for (i = 0; i < count; i++) {
@@ -935,9 +935,9 @@ u32 *mnuCreateProfilePanel(s32 source) {
     u32 i;
 
     memset(item, 0, 0x48);
-    first = func_00314B78(source);
+    first = scrGetSelectedScriptEntryId(source);
     second = ptyGetCurrentProfileRecord(source);
-    mnuSetProfilePanelValues(item, func_00314690((u16)first), *(u32 *)second);
+    mnuSetProfilePanelValues(item, ptyGetProfileRecordCap((u16)first), *(u32 *)second);
     for (i = 0; i < 5; i++) {
         item[11 + i] = effMiscRand(0) % 0xC0 + 0x40;
     }
@@ -1506,7 +1506,7 @@ u32 mnuSetPartyEntryCurrentId(u32 entry, u32 id) {
     return 1;
 }
 
-u16 func_002C55C0(s32 entry) {
+u16 mnuGetPartyEntryCurrentId(s32 entry) {
     return ((MenuPanelEntry *)entry)->currentId;
 }
 
@@ -1553,7 +1553,7 @@ s32 mnuIsEntryBlocked(s32 index) {
     return *(u8 *)(index + (s32)D_00435DD0 + 0x1E730) & 1;
 }
 
-s32 func_002C5700(void) {
+s32 mnuHasOwnedUnblockedItem(void) {
     s32 index;
     for (index = 0xC0; index < 0x100; index++) {
         if (!mnuIsEntryBlocked(index) && *(u8 *)(index + (s32)D_00435DD0 + 0x1340) != 0) {
@@ -1604,11 +1604,11 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B4C0);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", btlItemApplyPermanentBonus);
 
-s32 func_002C59B0(void) {
-    if (func_0011B260(1)) return 1;
-    if (func_0011B260(2)) return 2;
-    if (func_0011B260(5)) return 5;
-    return func_0011B260(8) ? 8 : 1;
+s32 ptyChooseFirstAvailableRosterId(void) {
+    if (ptyIsRosterEntryPresent(1)) return 1;
+    if (ptyIsRosterEntryPresent(2)) return 2;
+    if (ptyIsRosterEntryPresent(5)) return 5;
+    return ptyIsRosterEntryPresent(8) ? 8 : 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5A28);
@@ -2084,7 +2084,7 @@ void evtStageTestApplyEntryRotation(s32 model) {
 
     func_00340DC8(entry->rotation[0] * 3.14159265f / 180.0f, entry->rotation[1] * 3.14159265f / 180.0f,
                   entry->rotation[2] * 3.14159265f / 180.0f);
-    func_00232AD0(model);
+    mdlUpdateContextRotationBasisFromQuaternion(model);
 }
 
 extern s32 func_00100400(void);
@@ -2332,7 +2332,7 @@ void *evtBattleStageTestScreen(void) {
     return 0;
 }
 
-void func_002C7C00(void) {
+void evtDestroyBattleStageTestWorldNode(void) {
     evtDestroySecondaryWorldNode();
 }
 
@@ -2344,7 +2344,7 @@ void evtBattleStageTestStopTask(void) {
 
 void btlCreateStageTestTask(void) {
     kwlnDebugGraphSetEnabled(1);
-    kwlnTaskCreate(D_0042B610, 0x2B0C, 1, 1, evtBattleStageTestScreen, func_002C7C00, 0);
+    kwlnTaskCreate(D_0042B610, 0x2B0C, 1, 1, evtBattleStageTestScreen, evtDestroyBattleStageTestWorldNode, 0);
 }
 
 typedef struct StageTestTaskWork {

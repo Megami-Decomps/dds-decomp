@@ -69,7 +69,7 @@ INCLUDE_ASM(const s32, "event/evtStage", func_0023AE08);
 INCLUDE_ASM(const s32, "event/evtStage", func_0023AE70);
 
 /* Attach the object to the node its owned handle points at. */
-s32 func_0023AEB0(void *object, void *arg1) {
+s32 evtStageRelinkOwnedNodeResource(void *object, void *arg1) {
     StageNodeRef *ref;
     void *node;
 

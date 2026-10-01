@@ -242,7 +242,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", mnuFxWorldDropOutOfRange);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002429F0);
 
-void func_00242BD0(f32 *a, f32 *b, f32 *c, f32 *d, f32 *e) {
+void mnuInitializeCampPanelVisualDefaults(f32 *a, f32 *b, f32 *c, f32 *d, f32 *e) {
     a[0] = 0.7f;
     a[1] = 0.7f;
     a[2] = 0.7f;
@@ -304,7 +304,7 @@ typedef struct CampWindowDefaults {
     s32 unk34;
 } CampWindowDefaults;
 
-void func_00242F20(CampWindowDefaults *w) {
+void mnuInitializeCampListLayoutDefaults(CampWindowDefaults *w) {
     w->unk0 = 0x96;
     w->unk4 = 0x96;
     w->unk10 = 0x50;
@@ -711,7 +711,7 @@ typedef struct ShopScene {
     u8 *batches[2]; /* 0x74, 0x78 */
     s32 initialSelection; /* 0x7C */
     u8 pad80[0xC];
-    s32 count8C; /* 0x8C: func_00244898 */
+    s32 count8C; /* 0x8C: mnuCountActivePartyEntries */
     u8 pad90[8];
     s32 count98; /* 0x98: func_00244848 */
 } ShopScene;
@@ -726,7 +726,7 @@ typedef struct ShopBatch {
     ShopBatchGraphics *graphics; /* 0x08 */
 } ShopBatch;
 
-void func_00244258(ShopScene *scene) {
+void mnuInitializeShopStatusBatches(ShopScene *scene) {
     ShopBatch *object;
     ShopBatchGraphics *graphics;
     s32 *params;
@@ -891,7 +891,7 @@ s32 mnuCampGetProgressStage(void) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244848);
 
-s32 func_00244898(void) {
+s32 mnuCountActivePartyEntries(void) {
     u16 flags;
     u16 *entry;
     s32 remaining;
@@ -919,12 +919,12 @@ ShopScene *mnuShopCreateScene(void) {
     obj->resourceHandle = handle;
     mnuClearPanelTransitionState((u8 *)obj + 8);
     mnuShopLoadSpriteAssets(obj);
-    func_00244258(obj);
+    mnuInitializeShopStatusBatches(obj);
     evtLoadResourcePair("/facility/msg/shop/mes_data.bmd", obj->resourcePair);
     evtCreateMessageWindowIfMissing(obj->pairedHandle);
     D_003BC520 = obj->spriteResource;
     obj->count98 = func_00244848();
-    obj->count8C = func_00244898();
+    obj->count8C = mnuCountActivePartyEntries();
     return obj;
 }
 
@@ -956,7 +956,7 @@ extern s64 mnuCampRunPanel2(u64 request);
 /* Create the camp context and its three scheduler tasks (main, draw, update).
  * Optionally seed the initial selection from the caller. */
 
-s32 func_002449F0(s32 *initialSelection) {
+s32 mnuOpenShopSceneWithInitialSelection(s32 *initialSelection) {
     ShopScene *ctx = mnuShopCreateScene();
     s32 result;
 
@@ -1070,7 +1070,7 @@ extern void func_001958A0(s32, s32, s32);
 
 extern void frFontQueueGlyphInSelectedSlot(s32);
 
-void func_00245C00(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5) {
+void mnuQueueCampTextGlyphWithChildColor(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5) {
     s32 handle;
 
     if (a1 != 0) {

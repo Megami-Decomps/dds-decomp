@@ -11,7 +11,7 @@ typedef struct {
 } ModelRangeObj;
 
 s32 func_002D0A80(s32 arg);
-void func_002D0A10(s32 arg);
+void sdfQueueNonzeroResourceId(s32 arg);
 void sdfReleaseChipBlock(void *arg);
 
 void dds3ReleaseModelRangeData(ModelRangeObj *object) {
@@ -21,7 +21,7 @@ void dds3ReleaseModelRangeData(ModelRangeObj *object) {
     data = object->unk18;
     resource = data->unk4;
     if (resource != 0) {
-        func_002D0A10(func_002D0A80(resource));
+        sdfQueueNonzeroResourceId(func_002D0A80(resource));
     }
     sdfReleaseChipBlock(data);
 }

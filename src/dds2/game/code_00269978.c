@@ -51,7 +51,7 @@ typedef struct EventDispatchState {
     u32 previousCallback; /* 0xD0 */
     s32 exitState; /* 0xD4 */
     s32 menuActive;      /* 0xD8: cleared when the menu command chain ends */
-    s32 selectionStep;  /* 0xDC: compared against 2 by func_0026B120 */
+    s32 selectionStep;  /* 0xDC: compared against 2 by evtExitSelectionMenuAndSendSoundCommand */
     u8 padE0[0x6C];
     s32 stage;           /* 0x14C */
     u8 pad150[4];
@@ -90,7 +90,7 @@ extern void dspSetActive(s32);
 
 extern void dspStartEntry(s32);
 
-extern void func_0026C648(s32);
+extern void evtSetMessageWindowOptionWhenOpen(s32);
 
 extern void evtCaptureMessageWindowSoundMode(s32);
 
@@ -116,7 +116,7 @@ extern void func_00269978(void);
 
 extern void func_002698A0(s32, s32);
 
-extern void func_002676F0(s32);
+extern void mnuHighlightProgressNodeByMode(s32);
 
 extern void func_00342580(u32);
 
@@ -139,7 +139,7 @@ void evtRememberDispatchCallback(u32 callback, s32 address) {
 
 /* Call each registered transition callback once; the flag at +0xD4 picks the
    index they receive. */
-void func_00269B08(s32 state) {
+void mnuDispatchTransitionHostCallbacks(s32 state) {
     TransitionHost *host = (TransitionHost *)state;
     u32 i;
 
@@ -158,7 +158,7 @@ u32 func_00269C48(void) {
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_00269C50);
 
-s64 func_00269E98(s32 request) {
+s64 evtDispatchSelectionAfterFieldFrameGate(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
 
@@ -167,7 +167,7 @@ s64 func_00269E98(s32 request) {
     if (fldClassifyRemainingFrames(state) != 2) {
         return 0;
     }
-    func_00269B08(state);
+    mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
     func_00268B48(state);
     return menuSetHandler((s32)dispatchState, 1, request);
@@ -182,14 +182,14 @@ s64 evtBSetupDispatchSync(s32 request) {
 
 extern void mnuTerminalSetTrack(s32, s32);
 
-extern void func_0026C710(void);
+extern void evtFinishMessageWindowAndNotify(void);
 
 s32 evtClearDispatchVisualFlag(void) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
     evtRememberDispatchCallback(0, (s32)state);
     state->visualState->statusFlag = 0;
     mnuTerminalSetTrack(0, 0);
-    func_0026C710();
+    evtFinishMessageWindowAndNotify();
     return 1;
 }
 
@@ -201,7 +201,7 @@ extern void mnuTerminalSelectSlot(s32, s32, s32);
 
 extern void mnuReleaseResourceGroup(s32);
 
-s32 func_00269FC8(void) {
+s32 evtBeginSelectionExitFade(void) {
     s32 state = kwlnTaskGetUserValue();
     func_002690A8(1, state);
     evtRememberDispatchCallback((u32)func_00269230, state);
@@ -227,7 +227,7 @@ s64 evtBSetupDispatchSyncB(s32 request) {
     return menuSetHandler((s32)state, 2, request);
 }
 
-u32 func_0026A1B8(void) {
+u32 evtInitializeSelectionListWhenReady(void) {
     EventDispatchState *context = (EventDispatchState *)kwlnTaskGetUserValue();
 
     if (context->menuActive == 0) {
@@ -244,7 +244,7 @@ u32 func_0026A1B8(void) {
     return 1;
 }
 
-u32 func_0026A258(void) {
+u32 evtFinishPendingSelectionTransition(void) {
     EventDispatchState *context = (EventDispatchState *)kwlnTaskGetUserValue();
 
     if (context->menuActive != 0) {
@@ -253,7 +253,7 @@ u32 func_0026A258(void) {
         func_00269478(4, (s32)context);
         func_002690A8(3, (s32)context);
         mnuTerminalSelectSlot(3, 0, (s32)context);
-        func_0026C710();
+        evtFinishMessageWindowAndNotify();
     }
     context->menuActive = 0;
     return 1;
@@ -266,7 +266,7 @@ s64 func_0026A3F8(s32 request) {
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
     func_00268838(0, state);
-    func_00269B08(state);
+    mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
     func_00268B48(state);
     return menuSetHandler((s32)dispatchState, 1, request);
@@ -279,7 +279,7 @@ s64 evtBSetupDispatchSyncC(s32 request) {
     return menuSetHandler((s32)state, 2, request);
 }
 
-u32 func_0026A4B0(void) {
+u32 evtEnterThresholdSelectionList(void) {
     EventDispatchState *context = (EventDispatchState *)kwlnTaskGetUserValue();
 
     mnuRefreshThresholdNodeFlags((s32)context->thresholdOwner);
@@ -298,7 +298,7 @@ u32 evtBEnterStateA(void) {
     func_002698A0(4, context);
     func_002690A8(3, context);
     evtRememberDispatchCallback((s32)func_00269230, context);
-    func_002676F0(context);
+    mnuHighlightProgressNodeByMode(context);
     return 1;
 }
 
@@ -306,12 +306,12 @@ INCLUDE_ASM(const s32, "game/code_00269978", func_0026A598);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A728);
 
-s64 func_0026A808(s32 request) {
+s64 mnuInitializeSelectionDispatchWhenModeUnset(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
     func_00268838(0, state);
-    func_00269B08(state);
+    mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
     func_00268B48(state);
     if (dispatchState->menuMode == 0) {
@@ -352,7 +352,7 @@ extern void func_00268C48(s32, s32);
 
 extern void dspCloseChannel(void);
 
-s32 func_0026AAC0(void) {
+s32 evtBReleaseImagesAndQueueMenuTransition(void) {
     s32 state = kwlnTaskGetUserValue();
     func_002A9200(state + 0xE8);
     func_00268C48(2, state);
@@ -360,7 +360,7 @@ s32 func_0026AAC0(void) {
     func_002690A8(2, state);
     evtRememberDispatchCallback(0, state);
     *(u32 *)(state + 0xA0) = 0;
-    func_0026C710();
+    evtFinishMessageWindowAndNotify();
     dspCloseChannel();
     return 1;
 }
@@ -369,7 +369,7 @@ extern void func_002A91A0(s32);
 
 extern void evtCreateMessageWindowIfMissing(s32);
 
-s32 func_0026AB38(void) {
+s32 mnuOpenTerminalSelectionMessageWindow(void) {
     s32 state = kwlnTaskGetUserValue();
     func_002A91A0(state + 0xE8);
     func_00268C48(1, state);
@@ -421,7 +421,7 @@ s64 evtPollDispatchAfterFade(u64 request) {
 
 extern void func_00268838(s32, s32);
 
-extern void func_00269B08(s32);
+extern void mnuDispatchTransitionHostCallbacks(s32);
 
 extern void func_00268EC8(s32);
 
@@ -432,7 +432,7 @@ s64 func_0026AC90(s32 request) {
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
     func_00268838(0, state);
-    func_00269B08(state);
+    mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
     func_00268B48(state);
     return menuSetHandler((s32)dispatchState, 1, request);
@@ -455,7 +455,7 @@ u32 evtPrepareSelectedMenuEntry(void) {
     func_0026C918(0, &D_003A41A8[*slot]);
     dspSetActive(1);
     dspStartEntry(0);
-    func_0026C648(1);
+    evtSetMessageWindowOptionWhenOpen(1);
     evtCaptureMessageWindowSoundMode(6);
     return 1;
 }
@@ -471,7 +471,7 @@ s64 func_0026AEB0(s32 request) {
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
     func_00268838(0, state);
-    func_00269B08(state);
+    mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
     func_00268B48(state);
     return menuSetHandler((s32)dispatchState, 1, request);
@@ -521,7 +521,7 @@ s64 func_0026B068(s32 request) {
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
     func_00268838(0, state);
-    func_00269B08(state);
+    mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
     func_00268B48(state);
     return menuSetHandler((s32)dispatchState, 1, request);
@@ -534,7 +534,7 @@ s64 evtBSetupDispatchSyncG(s32 request) {
     return menuSetHandler((s32)state, 2, request);
 }
 
-u32 func_0026B120(void) {
+u32 evtExitSelectionMenuAndSendSoundCommand(void) {
     EventDispatchState *context = (EventDispatchState *)kwlnTaskGetUserValue();
 
     func_00268CC0(2, (s32)context);
@@ -553,7 +553,7 @@ u32 func_0026B120(void) {
 }
 
 
-s32 func_0026B1C8(void) {
+s32 evtBRebuildTerminalMenuAndResetDispatch(void) {
     s32 state = kwlnTaskGetUserValue();
     mnuReleaseWorkResources(state);
     mnuTerminalBuildMenus(state);
@@ -579,7 +579,7 @@ s64 evtBDispatchSyncD2(s32 request) {
     } else {
         func_00268838(0, state);
     }
-    func_00269B08(state);
+    mnuDispatchTransitionHostCallbacks(state);
     if (dispatchState->stage != 3) {
         func_00268EC8(state);
     }
@@ -601,7 +601,7 @@ extern void evtSetBoundedDisplayValue(s32, s32);
 
 extern void mnuStartMantraSpriteLoad(void);
 
-s32 func_0026B430(void) {
+s32 evtBCloseTerminalAndLoadMantraSprites(void) {
     s32 state = kwlnTaskGetUserValue();
     s32 mode;
     mnuTerminalFadeOrClose(0, state);

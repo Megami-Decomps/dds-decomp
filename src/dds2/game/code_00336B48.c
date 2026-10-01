@@ -290,13 +290,13 @@ void sdfVuMultiplyScratchByPrimary(void) {
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void func_00336BE8(void *matrix) {
     VU0_LOAD_MATRIX_B(matrix);
-    func_00336AA8();
+    sdfComposeVuMatrixFromRegisters();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void func_00336C10(void *matrix) {
     VU0_LOAD_MATRIX_B(matrix);
-    func_00336B00();
+    sdfMultiplyVuMatrixInPlace();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
@@ -351,7 +351,7 @@ void sdfVuBuildLookAtBasis(void *target, void *origin, void *up) {
     VU0_MOVE_VF(vf10, vf30);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_MOVE_VF(vf29, vf10);
-    func_003363D0();
+    sdfInvertRigidVuTransform();
 }
 
 void func_00336D30(void) {
@@ -598,7 +598,7 @@ void func_00338B30(work)
     }
 }
 
-void func_00338D78(VuWork *work, u64 a, u64 b, u64 c, u64 d, s32 mask) {
+void sdfBuildChunkedVuNodeTransfer(VuWork *work, u64 a, u64 b, u64 c, u64 d, s32 mask) {
     s32 remaining = work->nodeCount;
     s32 chunk;
     s32 first;
@@ -925,7 +925,7 @@ void sdfConsBuildMatrixPacket(SdfVuBonePacket *packet, u8 *node, void *matrix) {
     __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(node + 0x80));
         VU0_STORE_VF_UNCLOBBERED(vf10, packet->vecB);
     VU0_LOAD_MATRIX(matrix);
-    func_003363D0();
+    sdfInvertRigidVuTransform();
     VU0_MOVE_VF(vf10, vf31);
         VU0_STORE_VF_UNCLOBBERED(vf10, packet->vecC);
         VU0_STORE_VF_UNCLOBBERED(vf10, node + 0x90);
@@ -1204,7 +1204,7 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_0033B688);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033B8B0);
 
-u32 func_0033BA40(s32 count) {
+u32 sdfMeasureAlignedRecordBufferBytes(s32 count) {
     return (count * 0x54 + 0x4bU) & 0xfffffff0;
 }
 

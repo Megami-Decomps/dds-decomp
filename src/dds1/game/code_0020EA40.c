@@ -221,7 +221,7 @@ extern s32 kwlnTaskIsRegistered(s32);
 extern void effReleaseSharedReference(void *);
 extern void func_00105618(void);
 extern void kwlnTextureReleaseHeldReference(void);
-extern s32 func_001061E8(void);
+extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
 void btlRaiseLinkedActionPose(u8 *actor);
 
@@ -465,7 +465,7 @@ INCLUDE_ASM(const s32, "game/code_0020EA40", func_0020FF50);
 
 extern char D_003A67A0[], D_003A67B8[];
 
-s32 func_002100A8(void) {
+s32 btlIsEventSequenceTaskReady(void) {
     BtlState *battle = (BtlState *)func_001A17F0();
     if (battle->eventTaskId == -1) {
         return 1;
@@ -799,7 +799,7 @@ s32 btlIndexListNoExpiredEntryCodes(void *list, s32 command) {
     return 1;
 }
 
-u16 func_00210BA8(u8 **entries, s32 count, s32 unused, s32 command) {
+u16 btlDetermineCommandCounterEligibility(u8 **entries, s32 count, s32 unused, s32 command) {
     s32 result = -1;
     if (D_003BAA50[command * 0x38 + 9] & 1) {
         switch (*(u16 *)(D_003BAA50 + command * 0x38 + 0x16)) {
@@ -1315,16 +1315,16 @@ void btlInitializeGraphicsRuntime(void) {
 
 extern void sdfCreateDescriptorPacket(void *, s32, s32, s32, s32, s32, void *, s32);
 
-extern void func_002D0A10(void *);
+extern void sdfQueueNonzeroResourceId(void *);
 
 extern u8 *D_003BA8F8;
 
-void func_002136C0(void) {
+void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &D_003D7580;
     void *surface = sdfAllocatePacketList(0);
     sdfCreateDescriptorPacket(surface, *(s32 *)(D_003BA8F8 + 0x10), 0, 0, 0x200, 0xe0, runtime->request, 0);
     D_00325708.invoke(&D_00325708, surface);
-    func_002D0A10(runtime->handle);
+    sdfQueueNonzeroResourceId(runtime->handle);
     runtime->handle = 0;
     runtime->request = 0;
     runtime->options |= 1;
@@ -1365,7 +1365,7 @@ void btlResetRuntimeState(void);
 void btlResetAsyncState(void) {
     void *handle = D_003D7580.handle;
     if (handle != 0) {
-        func_002D0A10(handle);
+        sdfQueueNonzeroResourceId(handle);
         D_003D7580.handle = 0;
         D_003D7580.request = 0;
     }
@@ -1380,7 +1380,7 @@ void btlActivateRuntime(u8 fadeMode) {
     battle->active = 1;
     battle->pending = 0;
     battle->options = 0;
-    if (func_001061E8() != 0) {
+    if (kwlnFadeIsBackgroundOverlayActive() != 0) {
         battle->options |= 4;
     }
 }
@@ -1651,7 +1651,7 @@ typedef struct BtlMenuSelection {
     s32 count;    /* 0x0C */
 } BtlMenuSelection;
 
-s32 func_00214588(u8 *first, u8 *second, s32 mode, u8 *settings, s32 extra) {
+s32 mnuDrawMenuFrameSizedToRows(u8 *first, u8 *second, s32 mode, u8 *settings, s32 extra) {
     s32 offset = ((BtlMenuSelection *)settings)->count * 24 + 4;
     func_001FB140(first - 4, second - 4, mode, offset, 0x80806020, 0x30000000);
     return func_00214490(first, second, mode, settings, extra);
@@ -1672,7 +1672,7 @@ typedef struct BtlMenuDrawer {
 
 extern BtlMenuDrawer D_00325748;
 
-s32 func_00214618(u8 *x, u8 *y, s32 mode, u8 *menu, s32 extra) {
+s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *menu, s32 extra) {
     void *handle;
     u32 first;
     u32 count;
@@ -1908,7 +1908,7 @@ void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 arg
     BattleGroupNode *node;
     BattleGroupNode *head;
     s32 i;
-    func_00216A70(group, type);
+    btlRemoveCurrentGroupedEntity(group, type);
     node = func_002CFEB8(sizeof(BattleGroupNode));
     head = (BattleGroupNode *)D_00367940[group];
     if (head != NULL) {
@@ -1972,7 +1972,7 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
     }
     if (flag != 0) {
         sdfResourceListRelease((void *)node->resourceList, 1);
-        func_002D0A10((void *)node->requestHandle);
+        sdfQueueNonzeroResourceId((void *)node->requestHandle);
         for (i = 0; i != 8; i++) {
             if (node->slots[i].resourceHandle != 0) {
                 func_002D0918(node->slots[i].resourceHandle);
@@ -1984,7 +1984,7 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
     sdfReleaseChipBlock(node);
 }
 
-void func_00216A70(void) {
+void btlRemoveCurrentGroupedEntity(void) {
     s32 *node;
 
     node = btlFindGroupedEntity();
@@ -2039,7 +2039,7 @@ extern MotionObject *func_002DB230();
 
 /* Creates the object for record `index`; the record is reached as table->entries[index]
    at each use (the repeated array address is what keeps two address registers live). */
-MotionObject *func_00216B00(MotionOwner *owner, s32 index) {
+MotionObject *motionOwnerCreateObjectForRecord(MotionOwner *owner, s32 index) {
     void *resource = owner->records->entries[index].resource;
     s16 slot = owner->records->entries[index].slot;
     MotionObject *object = func_002DB230(owner->heap, resource);

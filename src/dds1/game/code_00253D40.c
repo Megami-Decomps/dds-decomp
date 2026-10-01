@@ -20,14 +20,14 @@ typedef struct MnuTransWork {
     MnuTransHead list590; /* 0x590 */
 } MnuTransWork;
 
-extern MnuTransRec *func_0025DAD0(MnuTransHead *head);
-extern u32 *func_0024FA18(void);
+extern MnuTransRec *mnuAppendNodeToDisplayList(MnuTransHead *head);
+extern u32 *mnuGetSelectedNodeValue(void);
 extern void mnuStopResourceAnimation(void);
 extern void mnuResetResourceAnimation(void);
 extern void func_00253558(MnuTransWork *work);
 
 void mnuBeginTransitionAlt(MnuTransWork *work, s32 mode) {
-    MnuTransRec *transition = func_0025DAD0(&work->list590);
+    MnuTransRec *transition = mnuAppendNodeToDisplayList(&work->list590);
 
     if (transition != NULL) {
         if (work->state >= 6) {
@@ -40,17 +40,17 @@ void mnuBeginTransitionAlt(MnuTransWork *work, s32 mode) {
         transition->mode = mode;
         if (mode == 1) {
             work->state = 10;
-            transition->startId = *func_0024FA18();
+            transition->startId = *mnuGetSelectedNodeValue();
             mnuStopResourceAnimation();
-            transition->endId = *func_0024FA18();
+            transition->endId = *mnuGetSelectedNodeValue();
             mnuResetResourceAnimation();
             return;
         }
         if (mode == 2) {
             work->state = -10;
-            transition->startId = *func_0024FA18();
+            transition->startId = *mnuGetSelectedNodeValue();
             mnuResetResourceAnimation();
-            transition->endId = *func_0024FA18();
+            transition->endId = *mnuGetSelectedNodeValue();
             mnuStopResourceAnimation();
         }
     }

@@ -9,7 +9,7 @@ void func_001113F0(void *arg0, void *arg1);
 
 void dds3SetSlotValue(void *arg0, void *arg1);
 
-s32 func_00111980(u8 arg);
+s32 dds3GetObjectSlotRingOccupancy(u8 arg);
 
 void *dds3SetSlotByKind(ObjBase *object, ObjData *data);
 
@@ -56,7 +56,7 @@ void *dds3SetSlotByKind(ObjBase *object, ObjData *data) {
     if (data == NULL) {
         return NULL;
     }
-    return dds3ExchangeSlot(object, data, func_00111980(data->kind));
+    return dds3ExchangeSlot(object, data, dds3GetObjectSlotRingOccupancy(data->kind));
 }
 
 void *dds3ExchangeSlot(void *obj, void *data, s32 index) {

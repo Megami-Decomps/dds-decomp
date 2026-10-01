@@ -236,7 +236,7 @@ extern void mnuSelectPage(void *, u32);
 extern void ptySkillMenuBuildEquippedSlots(s32, s32);
 extern void ptySkillMenuInitPages(void *);
 
-s32 func_00279B30(s32 menu) {
+s32 ptySkillMenuOpenPartyPage(s32 menu) {
     u8 *ctx = (u8 *)kwlnTaskGetUserValue();
     u32 *panel = (u32 *)(ctx + 0x15C);
 
@@ -247,10 +247,10 @@ s32 func_00279B30(s32 menu) {
     return 1;
 }
 
-s32 func_00279BA8(s32 selection) {
+s32 mnuCloseSelectionAndReleasePartyPanel(s32 selection) {
     s32 context = kwlnTaskGetUserValue();
-    func_00277C80(selection);
-    func_002786E8(context);
+    mnuDestroySelectedPartyWindow(selection);
+    mnuDestroySkillMenuWindows(context);
     func_002807E8(context + 0x15c);
     return 1;
 }

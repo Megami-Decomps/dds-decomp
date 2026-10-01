@@ -9,8 +9,8 @@ extern void func_002E9340(s32 sequence);
 extern s32 evtUpdateFrameVariableTask(s32 *task);
 extern s32 evtAllocateContext(void);
 extern void evtSetConvertedContextValue(s32 context, s32 value);
-extern void func_002351E0(void);
-extern void func_00235228(void);
+extern void evtUpdatePictureWhenFlagged(void);
+extern void evtPictureReleaseTaskTextureAndState(void);
 extern s32 evtFindTaskById();
 extern s32 func_003014F0(char *, char *, ...);
 extern void evtFormatTaskName(s32 taskId, void *buffer);
@@ -176,7 +176,7 @@ void evtCreateTask(s32 taskId, s32 value) {
 
     data = evtAllocateContext();
     evtSetConvertedContextValue(data, value);
-    kwlnTaskCreate(D_003BBF80, taskId, 1, 1, func_002351E0, func_00235228, (void *)data);
+    kwlnTaskCreate(D_003BBF80, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, (void *)data);
 }
 
 typedef struct EvtTaskData {
@@ -191,7 +191,7 @@ void evtCreateTaskWithValue(s32 taskId, s32 value) {
 
     data = (EvtTaskData *)evtAllocateContext();
     data->value = value;
-    kwlnTaskCreate(D_003BBF80, taskId, 1, 1, func_002351E0, func_00235228, data);
+    kwlnTaskCreate(D_003BBF80, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, data);
 }
 
 void evtSetSkyOverlayEnabled(u32 enabled) {
@@ -613,7 +613,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00236AC8);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00236D80);
 
-void func_00237048(s32 list, s32 *sel, s32 x, s32 unused, u8 *base) {
+void evtDrawSelectedEntryLabel(s32 list, s32 *sel, s32 x, s32 unused, u8 *base) {
     x += 0x6C0;
     kwlnDrawSpriteCell(list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
     sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, 0x7AE0, 0xFEFFFF, 0xE, D_003BC0C8));
@@ -755,7 +755,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00238A88);
 extern char D_003BC240[]; /* "P%d:" */
 extern char D_003BC248[]; /* "   %s" */
 extern s32 evtEventViewerGetPendingNode();
-extern EvtWorldNode *func_00110F80(EvtWorldObject *world, char *name);
+extern EvtWorldNode *dds3FindObjectChainNodeByName(EvtWorldObject *world, char *name);
 
 void evtViewerDrawPendingNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtWorldNode *node;
@@ -769,7 +769,7 @@ void evtViewerDrawPendingNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *
     }
     slot = *(s8 *)(index + evtEventViewerGetPendingNode(ctx) + 0xC);
     if (slot >= 0) {
-        node = func_00110F80(dds3GetWorldObject(), ctx->entryName[slot]);
+        node = dds3FindObjectChainNodeByName(dds3GetWorldObject(), ctx->entryName[slot]);
     }
     sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC240, index));
     if (node != NULL) {
@@ -1085,7 +1085,7 @@ void func_0023D5B0(s32 output, void *data, s32 size) {
     func_0030F190(output, data, size);
 }
 
-s32 func_0023D5C8(EvtRuntime *runtime) {
+s32 evtAssignRuntimeChildSequenceAndCount(EvtRuntime *runtime) {
     s32 index = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -1278,7 +1278,7 @@ void evtWriteGroupHeader(s32 output, EvtRuntime *runtime) {
     }
 }
 
-void func_0023E228(s32 output, EvtRuntime *runtime) {
+void evtCopyRuntimeChildPayloadsToBuffer(s32 output, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xA) {
@@ -1520,7 +1520,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023EF90);
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *runtime);
 extern void mnuStopMovieDrawTask(void);
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
-extern void func_002D0A10(s32 resource);
+extern void sdfQueueNonzeroResourceId(s32 resource);
 extern void kwlnTextureReleaseHeldReference(void);
 extern u32 D_003BA904;
 extern void func_00234CA8(u16 a, u16 b, char *path0, char *path1, char *path2);
@@ -1546,7 +1546,7 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     if (runtime->pendingResource != 0) {
-        func_002D0A10(runtime->pendingResource);
+        sdfQueueNonzeroResourceId(runtime->pendingResource);
         runtime->pendingResource = 0;
         runtime->pendingWork = 0;
     }

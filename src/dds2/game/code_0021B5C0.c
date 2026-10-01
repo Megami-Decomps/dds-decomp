@@ -117,11 +117,11 @@ extern BtlWork *func_001AA6F8(void);
 extern s32 btlBossDebugPrintf(const char *, ...);
 extern BtlTask *func_001E5FF8(s32, s32);
 extern void btlStartTask(BtlTask *);
-extern s32 func_001B2430(BtlUnit *, s32);
+extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 extern BtlTask *sndCreateStationedSeTask(s32);
-extern s32 func_001AB9F0(BtlUnit *, s32);
-extern s32 func_001B3610(BtlUnit *, s32, s32, s32, s32);
-extern s8 func_001B36B8(s32, s32, s32);
+extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
+extern s32 btlAdjustPointsForCombatFlags(BtlUnit *, s32, s32, s32, s32);
+extern s8 btlGetCommandResultKindFromFlags(s32, s32, s32);
 extern void func_001EC868(void *, f32 *, f32);
 extern void btlCopyMotionTransform(void *, f32 *);
 extern void func_00336538(f32);
@@ -130,7 +130,7 @@ extern void btlInitMotionTransformFromComponents(BtlEffect *, f32, f32, f32, f32
 extern BtlUnit *func_002172B8(BtlEffect *);
 extern void func_003364B8(f32);
 extern void func_00336818(f32);
-extern void func_00336AA8(void);
+extern void sdfComposeVuMatrixFromRegisters(void);
 extern void btlSetEffectCameraKeys(u8 *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 extern s32 func_0021C5E0();
 
@@ -158,7 +158,7 @@ u64 btlStartSubtaskWithInput(u64 input) {
     return task->result;
 }
 
-void func_0021B670(BtlUnit *unit) {
+void btlMarkActiveBossUnitExtensionFlags(BtlUnit *unit) {
     if (unit->flags & BTL_UNIT_BOSS_FLAG) {
         if (unit->flags & 2) {
             unit->ext->flags |= 0x1000000;
@@ -168,7 +168,7 @@ void func_0021B670(BtlUnit *unit) {
     }
 }
 
-f32 func_0021B6C0(BtlUnit *unit, BtlUnit *target) {
+f32 btlGetBossPresenceActionScale(BtlUnit *unit, BtlUnit *target) {
     BtlUnit *other;
     f32 scale = 1.0f;
     if (unit->flags & 0x200) {
@@ -193,10 +193,10 @@ f32 func_0021B6C0(BtlUnit *unit, BtlUnit *target) {
 void btlSetSkillTaskResults(BtlSkillTask *task, s32 arg1, s32 arg2, s32 skillId) {
     s32 percent = 100;
     if (skillId >= 0x1AB && skillId < 0x220) {
-        percent *= func_001AB9F0(task->unit, skillId);
+        percent *= btlGetSlotValueAdjustedForSpecialAbility(task->unit, skillId);
     }
-    task->adjustedValue = func_001B3610(task->unit, arg1, arg2, percent, skillId);
-    task->resultKind = func_001B36B8(arg1, arg2, skillId);
+    task->adjustedValue = btlAdjustPointsForCombatFlags(task->unit, arg1, arg2, percent, skillId);
+    task->resultKind = btlGetCommandResultKindFromFlags(arg1, arg2, skillId);
 }
 
 INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021B828);
@@ -209,7 +209,7 @@ void func_0021C390(u8 *obj) {
                   -253.6f, -2272.8f, -0.009f, -0.038f, -0.013f, 0.99f, 40.0f, 15.0f);
 }
 
-void func_0021C428(BtlEffect *fx) {
+void btlSetCameraPresetForBossUnitMode(BtlEffect *fx) {
     switch (fx->task->unit->mode) {
     case 0x111:
         btlSetEffectCameraKeys(fx, 533.4f, -167.8f, -1104.7f, -0.052f, 0.285f, -0.028f, 0.947f, 430.5f,
@@ -289,7 +289,7 @@ s32 btlGetBossEntryKind(BtlUnit *unit, s32 index) {
     return D_00435E30[index].kind;
 }
 
-s32 func_0021EB28(BtlUnit *unit, s32 value) {
+s32 btlRemapBossResponseForActionPhase(BtlUnit *unit, s32 value) {
     s32 mode;
     if (!(unit->flags & BTL_UNIT_BOSS_FLAG)) {
         return value;
@@ -308,10 +308,10 @@ s32 func_0021EB28(BtlUnit *unit, s32 value) {
     return value;
 }
 
-void func_0021EB78(BtlUnit *unit) {
+void btlPlayStationedSoundForActiveBossAction(BtlUnit *unit) {
     s32 mode;
     if (unit->flags & BTL_UNIT_BOSS_FLAG) {
-        if (func_001B2430(unit, 0)) {
+        if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0)) {
             mode = unit->mode;
             if (mode < 0x113) {
                 if (mode >= 0x111) {
@@ -322,7 +322,7 @@ void func_0021EB78(BtlUnit *unit) {
     }
 }
 
-s32 func_0021EBF0(void) {
+s32 btlGetBossSceneStateWhenActive(void) {
     BtlWork *work = func_001AA6F8();
     if (work->mode != 0x30B) {
         return 0;

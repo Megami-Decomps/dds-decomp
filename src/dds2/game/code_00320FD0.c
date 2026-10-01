@@ -43,13 +43,13 @@ typedef struct ResourceList {
     ResourceNode *first;
 } ResourceList;
 
-u32 func_00320F68(u32 list, u32 node);
+u32 dds3RemoveListNodeAndNotify(u32 list, u32 node);
 
 /* Retain the one-argument call to the old-style lookup declaration: it matches retail. */
 u32 func_00320FD0(u32 list) {
     u32 selectedNode = mnuFindResourceNodeById(list);
     if (selectedNode != 0) {
-        return func_00320F68(list, selectedNode);
+        return dds3RemoveListNodeAndNotify(list, selectedNode);
     }
     return 0;
 }

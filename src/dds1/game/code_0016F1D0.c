@@ -183,18 +183,18 @@ INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F7B0);
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016FB08);
 
-void func_0016FC28(EffectRecordGroup *group) {
+void effReleaseRecordGroupAssetAndHandle(EffectRecordGroup *group) {
     sdfQueueAssetRelease(group->handle68);
     func_002D0918(group->handle6C);
 }
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016FC58);
 
-s32 func_0016FF08(EffectRecordGroup *group, s32 index) {
+s32 effGetIndexedEffectGroupRecord(EffectRecordGroup *group, s32 index) {
     return (s32)group->records + index * 0x50;
 }
 
-s32 func_0016FF20(EffectRecordGroup *group, s32 index) {
+s32 effGetIndexedEffectGroupIndexEntry(EffectRecordGroup *group, s32 index) {
     return (s32)group->indices + index * 0x14;
 }
 
@@ -212,7 +212,7 @@ void func_0016FF48(u8 *work, f32 value) {
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016FF50);
 
-void func_00170048(EffectRecordGroup *group) {
+void effReleaseRecordPoolResourceAndBuffer(EffectRecordGroup *group) {
     sdfQueueAssetRelease(group->handle68);
     func_002D0918(group->handle6C);
 }
@@ -247,7 +247,7 @@ s32 func_00170548(EffectRecordGroup *group, s32 index) {
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_00170558);
 
 void func_001705A0(u32 id) {
-    func_0016FC28(id);
+    effReleaseRecordGroupAssetAndHandle(id);
 }
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_001705B8);

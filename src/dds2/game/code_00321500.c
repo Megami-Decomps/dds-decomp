@@ -59,7 +59,7 @@ extern u8 D_0045C870[];
 
 extern u8 D_0045C880[];
 
-extern void func_00320C88(u32);
+extern void dds3DestroyCallbackNodeAfterLastNotification(u32);
 
 extern void func_00321908(u32);
 extern u32 func_0035A828(s32 bytes);
@@ -173,7 +173,7 @@ typedef struct MenuStateRecord {
     s16 limit;      /* 0x16 */
 } MenuStateRecord;
 
-s32 func_003219F0(MenuStateRecord *record) {
+s32 mnuCanAdvanceIdleStateRecord(MenuStateRecord *record) {
     if (record->busy == 0 && (!(record->flags & 2) || record->limit > record->value)) {
         return 1;
     }
@@ -204,7 +204,7 @@ u8 *func_00321ED8(void) {
     return D_0045C880;
 }
 
-void func_00321EE8(u32 *record) {
+void mnuClearPackedMenuRecordBlock(u32 *record) {
     memset((void *)record[0], 0, record[1] * 36);
 }
 
@@ -296,7 +296,7 @@ u8 *func_00322550(u8 index) {
     return (u8 *)D_004390E4 + index * 48;
 }
 
-ShortRecord *func_00322570(ShortRecordList *list) {
+ShortRecord *mnuFindFirstFixedKindShortRecord(ShortRecordList *list) {
     s32 i;
     ShortRecord *record = list->records;
     for (i = 0; i < list->count; i++, record++) {
@@ -318,7 +318,7 @@ ShortRecord *func_003225C0(ShortRecordList *list) {
     return NULL;
 }
 
-u32 func_00322610(u32 record) {
+u32 mnuResolveTaggedRegistryRecord(u32 record) {
     u32 registry;
     u32 table;
     if ((((MenuTaggedRecord *)record)->tag & 0xffff0000) != 0x2010000) {
@@ -337,7 +337,7 @@ typedef struct ShortRecordList2 {
     u8 *records;       /* 0x04 */
 } ShortRecordList2;
 
-u8 *func_00322670(ShortRecordList2 *list) {
+u8 *mnuFindMarkedShortListRecord(ShortRecordList2 *list) {
     s32 i;
     u8 *record;
 
@@ -358,12 +358,12 @@ u8 *func_00322670(ShortRecordList2 *list) {
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_003226D8);
 
-void func_00322D08(u32 entries, u32 count) {
+void mnuRegisterWorkEntryPool(u32 entries, u32 count) {
     D_004390C8 = entries;
     D_004390CC = count;
 }
 
-void func_00322D18(void) {
+void mnuResetWorkEntryPool(void) {
     if (D_004390C8 != 0) {
         memset((void *)D_004390C8, 0, D_004390CC * 72);
     }
@@ -387,7 +387,7 @@ MenuWorkEntry *mnuFindUnusedWorkEntry(void) {
     return NULL;
 }
 
-u32 func_00322D98(void) {
+u32 mnuGetWorkEntryPool(void) {
     return D_004390C8;
 }
 
@@ -408,7 +408,7 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_00322E18);
 void mnuDeactivateWorkEntry(MenuWorkEntry *entry) {
     entry->flags = entry->flags & 0xfffffffe;
     if (entry->callback != 0) {
-        func_00320C88(entry->callback);
+        dds3DestroyCallbackNodeAfterLastNotification(entry->callback);
         entry->callback = 0;
     }
 }
@@ -482,11 +482,11 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_00324070);
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324238);
 
-u32 func_00324268(void) {
+u32 mnuGetActiveEffectWorkEntry(void) {
     return D_004390D8;
 }
 
-void func_00324270(u32 node) {
+void mnuInitializeActiveEffectWorkEntry(u32 node) {
     memset((void *)node, 0, 0x48);
     func_003242D0(node, 0);
     ((MenuWorkEntry *)node)->flags |= 0x4010;
@@ -533,10 +533,10 @@ void func_00324D28(u32 unused, u32 ptr) {
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324D50);
 
-void func_00324DB8(u32 node) {
+void mnuReleaseEffectPairAndNode(u32 node) {
     if (node != 0) {
-        func_00320C88(*(u32 *)node);
-        func_00320C88(*(u32 *)(node + 4));
+        dds3DestroyCallbackNodeAfterLastNotification(*(u32 *)node);
+        dds3DestroyCallbackNodeAfterLastNotification(*(u32 *)(node + 4));
         func_0035A880(node);
     }
 }

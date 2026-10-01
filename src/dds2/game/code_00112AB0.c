@@ -40,7 +40,7 @@ s32 dds3GetObjectOwnedHandle(object)
 }
 
 
-void func_00112B58(u32 unused, u32 value) {
+void dds3SetOwnedWorldInnerValue(u32 unused, u32 value) {
     WorldInnerState *inner;
 
     inner = (WorldInnerState *)dds3GetObjectOwnedHandle();

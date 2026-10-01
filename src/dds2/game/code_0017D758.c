@@ -97,7 +97,7 @@ u32 effGetScatterEntry(ScatterObject *object, s32 index) {
 }
 
 /* vu0 routine: copy a 4x4 matrix into the destination's second slot */
-void func_0017DD20(void *dst, void *src) {
+void effScatterStoreSourceTransformMatrix(void *dst, void *src) {
     VU0_LOAD_MATRIX(src);
     VU0_STORE_MATRIX((u8 *)dst + 0x10);
 }

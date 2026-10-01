@@ -11,17 +11,17 @@ extern void *btlAllocateIndexList(s32);
 
 extern u32 btlGetIndexListCount();
 
-extern s32 func_001A8818();
+extern s32 btlAreUnitStatusAndEntryFlagsClear();
 
 extern s32 func_001A2B00(void);
 
-extern s32 func_001A8EA8(void);
+extern s32 btlHasAvailableOption(void);
 
 extern s32 func_00200628();
 
 extern s32 func_002007A8(u32, u32, u32);
 
-extern s32 func_001A87A0();
+extern s32 btlIsSelectedActorStatusAndRecordClear();
 
 extern s8 D_003BB870;
 
@@ -411,7 +411,7 @@ s32 btlIsGroup200EligibleCountAtMost(s32 unused, u32 limit) {
 u8 func_00200308(void) {
     s32 result;
 
-    result = func_001A87A0();
+    result = btlIsSelectedActorStatusAndRecordClear();
     return result != 0;
 }
 
@@ -782,7 +782,7 @@ s32 btlIsUnitStatAtOrBelowRate(BtlUnit *unit, s32 percentage) {
 u8 func_002010D8(void) {
     s32 result;
 
-    result = func_001A8EA8();
+    result = btlHasAvailableOption();
     return result != 0;
 }
 
@@ -805,7 +805,7 @@ s32 btlAnyIndexedUnitPassesQuery(u8 *unit) {
     func_001A30F8(battle, list, 2, 0, 0);
     count = btlGetIndexListCount(list);
     for (i = 0; i < count; i++) {
-        if (func_001A8818(btlGetIndexListEntry(list, i)) != 0) {
+        if (btlAreUnitStatusAndEntryFlagsClear(btlGetIndexListEntry(list, i)) != 0) {
             btlFreeIndexList(list);
             return 1;
         }
@@ -832,7 +832,7 @@ s32 btlIsLowHpActionReady(BtlUnit *unit) {
         }
     }
     if (hit == 1) {
-        if (func_001A87A0(unit) != 0) {
+        if (btlIsSelectedActorStatusAndRecordClear(unit) != 0) {
             return 1;
         }
     }
@@ -853,7 +853,7 @@ u8 func_002012C0(void) {
 u8 func_002012E0(void) {
     s32 result;
 
-    result = func_001A8818();
+    result = btlAreUnitStatusAndEntryFlagsClear();
     return result != 0;
 }
 
@@ -1203,7 +1203,7 @@ s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 query, u32 mask) {
     return 0;
 }
 
-extern s32 func_001A55A8(void *, s32);
+extern s32 btlHasEnabledSpecialAbilityForSlot(void *, s32);
 
 extern s32 fldGetSelectedUnitStat();
 
@@ -1223,7 +1223,7 @@ s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
                             continue;
                         }
                         value = func_001A2F50((void *)unit, index);
-                        if (func_001A55A8((void *)unit, index) != 0 || (value & 0x20000) ||
+                        if (btlHasEnabledSpecialAbilityForSlot((void *)unit, index) != 0 || (value & 0x20000) ||
                             (stat == 0x20000 && btlTestSelectedItemCategoryMask((void *)unit, index) != 0)) {
                             return 1;
                         }
@@ -1231,7 +1231,7 @@ s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
                     return 0;
                 }
                 value = func_001A2F50((void *)unit, action);
-                if (func_001A55A8((void *)unit, action) != 0 || (value & 0x20000) ||
+                if (btlHasEnabledSpecialAbilityForSlot((void *)unit, action) != 0 || (value & 0x20000) ||
                     (stat == 0x20000 && btlTestSelectedItemCategoryMask((void *)unit, action) != 0)) {
                     return 1;
                 }
@@ -1247,11 +1247,11 @@ s64 func_00202158(void) {
 
 extern s32 btlTestSelectedItemCategoryMask(void *, s32);
 
-extern s32 func_001A53D8(void *, s32);
+extern s32 btlHasMappedSpecialAbilityForSlot(void *, s32);
 
-extern s32 func_001A5578(void *, s32);
+extern s32 btlHasSpecialAbilityWhenArgumentUnset(void *, s32);
 
-extern s32 func_001A55A8(void *, s32);
+extern s32 btlHasEnabledSpecialAbilityForSlot(void *, s32);
 
 s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
     u32 flags = ((BtlUnit *)unit)->flags;
@@ -1266,20 +1266,20 @@ s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
                             continue;
                         }
                         if (btlTestSelectedItemCategoryMask(unit, index) != 0 ||
-                            func_001A53D8(unit, index) != 0 ||
-                            func_001A5578(unit, index) != 0 ||
-                            func_001A55A8(unit, index) != 0) {
+                            btlHasMappedSpecialAbilityForSlot(unit, index) != 0 ||
+                            btlHasSpecialAbilityWhenArgumentUnset(unit, index) != 0 ||
+                            btlHasEnabledSpecialAbilityForSlot(unit, index) != 0) {
                             return 0;
                         }
                     }
                     return 1;
                 }
                 if (btlTestSelectedItemCategoryMask(unit, action) != 0 ||
-                    func_001A53D8(unit, action) != 0 ||
-                    func_001A5578(unit, action) != 0) {
+                    btlHasMappedSpecialAbilityForSlot(unit, action) != 0 ||
+                    btlHasSpecialAbilityWhenArgumentUnset(unit, action) != 0) {
                     return 0;
                 }
-                return func_001A55A8(unit, action) == 0;
+                return btlHasEnabledSpecialAbilityForSlot(unit, action) == 0;
             }
         }
     }
@@ -1855,7 +1855,7 @@ typedef struct BtlCommandStatus {
     u16 restrictionFlags; /* 0x26 */
 } BtlCommandStatus;
 
-void func_00204BA8(u8 *unit, u8 *command) {
+void btlTrackSpecialEnemyCommandRestrictionByTurn(u8 *unit, u8 *command) {
     u8 *battle;
     u8 *effect;
     s32 species;
@@ -1968,7 +1968,7 @@ void btlResetUnitPlacement(void) {
                         ((BtlUnit *)unit)->positionB4 = 180.0f;
                         ((BtlUnit *)unit)->positionB0 = 220.0f;
                     } else {
-                        func_001D4CA8(unit, 1, species);
+                        btlInitializeEffectVectorsFromSourceRecords(unit, 1, species);
                     }
                 }
             }
@@ -1979,7 +1979,7 @@ void btlResetUnitPlacement(void) {
 
 extern void func_001D5990(void *);
 
-void func_00204FE0(void) {
+void btlClearSpecialEnemyEntryFlags(void) {
     BtlUnit *unit = ((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         u32 flags = ((BtlUnit *)unit)->flags;
@@ -2148,7 +2148,7 @@ void func_00205420(void) {
     selected->unk_06 = selected->unk_08;
 }
 
-void func_00205520(u8 *unit) {
+void btlInitializeUnitDisplaySpeciesAndFlags(u8 *unit) {
     u8 *battle = (u8 *)func_001A17F0();
     u32 flags = ((BtlUnit *)unit)->flags;
     if (flags & 0x200) {
@@ -2167,7 +2167,7 @@ void func_00205520(u8 *unit) {
     ((BtlUnit *)unit)->unk_114 |= 0x20;
 }
 
-void func_002055B8(s32 unit) {
+void btlNormalizeDefaultPlayerDisplaySpecies(s32 unit) {
     u16 mode;
 
     if (((BtlUnit *)unit)->flags & 0x200) {
@@ -2184,7 +2184,7 @@ u32 func_002055F0(void) {
     return 2;
 }
 
-extern s32 func_001A8018(void *);
+extern s32 btlIsCurrentValueBelowQuarterThreshold(void *);
 
 extern void mdlFlagSet(u32);
 
@@ -2194,7 +2194,7 @@ s32 func_002055F8(void) {
     BtlUnit *unit = ((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if (((BtlUnit *)unit)->flags & 1) {
-            if (func_001A8018(unit) != 0) {
+            if (btlIsCurrentValueBelowQuarterThreshold(unit) != 0) {
                 if (((BtlUnit *)unit)->flags & 0x200) {
                     mdlFlagSet(0x811);
                 } else {
@@ -2230,7 +2230,7 @@ void func_002056E0(BtlUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00205730);
 
-void func_00205838(void) {
+void btlBeginEffectActorFadeOut(void) {
     BattleEffectState *effect = ((BtlState *)func_001A17F0())->effect;
     BtlUnit *actor = *(BtlUnit **)effect;
     if (actor != 0) {
@@ -2267,7 +2267,7 @@ INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5D50);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00205918);
 
-s32 func_00205B18(BtlUnit *actor, BtlUnit *target, s32 command, s32 bits) {
+s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 command, s32 bits) {
     BattleEffectState *effect;
     if (!(target->flags & 0x400)) {
         return 0;
@@ -2746,7 +2746,7 @@ u32 btlGetEffectActor(void) {
     return ((BtlState *)battle)->effect->actor;
 }
 
-s32 func_00207C18(void) {
+s32 btlIsSpecialEnemyEffectLinkSatisfied(void) {
     u8 *battle = (u8 *)func_001A17F0();
     u8 *unit = (u8 *)((BtlState *)battle)->units;
     u8 *effect = (u8 *)((BtlState *)battle)->effect;
@@ -2791,7 +2791,7 @@ typedef struct BtlNamedChunkHolder {
     BtlNamedChunkDescriptor *chunk;
 } BtlNamedChunkHolder;
 
-s32 func_00207DD0(void *query) {
+s32 btlDispatchNamedChunkNode(void *query) {
     u8 *effect = *(u8 **)(func_001A17F0() + 0x694);
     u8 *unit = *(u8 **)effect;
     u8 *model;
@@ -2882,14 +2882,14 @@ u8 *btlGetReadyUnitForSpecies(s32 mode, u32 species) {
     return (((BtlUnit *)unit)->flags & 2) ? unit : NULL;
 }
 
-extern u64 func_001A0CB0(void);
+extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
 u64 btlCreateSpecialUnitAndLoadModel(u64 owner) {
     u8 **slot = *(u8 ***)(func_001A17F0() + 0x694);
     u8 *model = *slot;
     u8 *entry;
     if (model != 0) {
-        return func_001A0CB0();
+        return btlAdvanceRuntimeSequenceCounter();
     }
     model = (u8 *)btlCreateUnit();
     *slot = model;
@@ -2930,7 +2930,7 @@ u64 btlStartSubtaskWithInput(u64 input) {
     return *(u64 *)(task + 0x38);
 }
 
-extern s32 func_00207DD0(void *);
+extern s32 btlDispatchNamedChunkNode(void *);
 
 extern s8 D_003BB880[];
 
@@ -2949,13 +2949,13 @@ void btlUpdateReadyUnits(void) {
                 if (unit->flags & 0x80) {
                     switch (unit->species) {
                     case 0x10A:
-                        ready = func_00207DD0(D_003BB880);
+                        ready = btlDispatchNamedChunkNode(D_003BB880);
                         break;
                     case 0x12E:
-                        ready = func_00207DD0(D_003BB888);
+                        ready = btlDispatchNamedChunkNode(D_003BB888);
                         break;
                     case 0x12F:
-                        ready = func_00207DD0(D_003BB890);
+                        ready = btlDispatchNamedChunkNode(D_003BB890);
                         break;
                     default:
                         ready = 1;
@@ -3030,7 +3030,7 @@ void func_002089F0(s32 unit) {
         return;
     }
     func_001A17F0();
-    func_001D4CA8(unit, 1, 0x11d);
+    btlInitializeEffectVectorsFromSourceRecords(unit, 1, 0x11d);
     func_00208860(unit, 0);
 }
 
@@ -3062,7 +3062,7 @@ u32 btlGetSpecialModeEffectValue(void) {
     return *(u16 *)(effect + 0x4);
 }
 
-extern void func_001D4CA8();
+extern void btlInitializeEffectVectorsFromSourceRecords();
 
 extern void func_001F53F0(void);
 
@@ -3079,7 +3079,7 @@ void btlTriggerSpecialUnitAction(void) {
     }
     if (unit != 0) {
         ((BtlState *)battle)->unk_5B8 = 0;
-        func_001D4CA8(unit, 1, 0x11d);
+        btlInitializeEffectVectorsFromSourceRecords(unit, 1, 0x11d);
         func_001F53F0();
     }
 }
@@ -3170,7 +3170,7 @@ u64 func_00208F10(u64 owner) {
     u8 *model = *slot;
     u8 *entry;
     if (model != 0) {
-        return func_001A0CB0();
+        return btlAdvanceRuntimeSequenceCounter();
     }
     model = (u8 *)btlCreateUnit();
     *slot = model;
@@ -3278,7 +3278,7 @@ s32 func_00209140(BtlUnit *actor, BtlUnit *target, s32 command) {
     return 0;
 }
 
-u32 func_00209220(u32 unused, s32 unit) {
+u32 btlSelectResponseCodeForEnemyFlag(u32 unused, s32 unit) {
     u32 result;
 
     result = 4;
@@ -3545,7 +3545,7 @@ s32 btlPickRandomMarkedTask(void) {
     return -1;
 }
 
-s32 func_00209B70(void) {
+s32 btlConsumeReadyEventScriptResource(void) {
     s32 absent = -1;
     s32 data;
 
@@ -3632,7 +3632,7 @@ s32 btlHasFirstSpecialEnemySpecies(void) {
     return species == 0x119;
 }
 
-void func_0020A4C0(u8 *unit, s32 action) {
+void btlDispatchSpecialEnemyActionWhenPhaseAllows(u8 *unit, s32 action) {
     u8 *data;
     if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
         return;
@@ -3644,7 +3644,7 @@ void func_0020A4C0(u8 *unit, s32 action) {
     if (((BtlUnit *)unit)->mode == 0x11a && *(u16 *)data >= 3) {
         return;
     }
-    func_001AA868(unit, action);
+    btlRestoreUnitMinimumValueAndClearStatus(unit, action);
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020A560);
@@ -3799,7 +3799,7 @@ extern char D_003A5FF0[];
 extern char D_003A6018[];
 
 /* Random battle camera shot (A-E:0..2). Must stay defined above its callers in this
-   file: retail's func_0020C9E8 sees it as nothrow (bnez vs bnel in the branch slot). */
+   file: retail's btlChooseDefeatCameraByActionAndTargets sees it as nothrow (bnez vs bnel in the branch slot). */
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5FF0);
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A6018);
@@ -3903,7 +3903,7 @@ typedef struct BtlActionTableRow {
     u8 pad1E[2];
 } BtlActionTableRow;
 
-s32 func_0020C9E8(u8 *unit) {
+s32 btlChooseDefeatCameraByActionAndTargets(u8 *unit) {
     u16 flags = ((BtlActionTableRow *)D_003BAA60)[((BtlUnit *)unit)->unk_114].flags;
     if (flags & 0x1000) {
         btlFlagAllUnitDefeatCandidatesTask();

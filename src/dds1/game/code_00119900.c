@@ -278,7 +278,7 @@ Entry1A4 *dds3FindEntry(s32 rosterIndex) {
 
 INCLUDE_ASM(const s32, "game/code_00119900", ptyRebalanceFrontline);
 
-u8 func_0011A968(s32 rosterIndex) {
+u8 ptyIsRosterEntryPresent(s32 rosterIndex) {
     return dds3FindEntry(rosterIndex) != 0;
 }
 
@@ -624,7 +624,7 @@ s32 evtRollRandomScale(void) {
     return 1;
 }
 
-s32 func_0011C1B8(void) {
+s32 scrGetBattleAverageCurrentValueForGroup(void) {
     s32 available = btlIsRuntimeAllocated();
     s32 value;
     if (available) {
@@ -638,7 +638,7 @@ s32 func_0011C1B8(void) {
     return 1;
 }
 
-s32 func_0011C208(void) {
+s32 scrGetBattleAverageMaximumValueForGroup(void) {
     s32 available = btlIsRuntimeAllocated();
     s32 value;
     if (available) {
@@ -652,7 +652,7 @@ s32 func_0011C208(void) {
     return 1;
 }
 
-s32 func_0011C258(void) {
+s32 scrGetBattleAverageActorStatForGroup(void) {
     s32 available = btlIsRuntimeAllocated();
     s32 value;
     if (available) {
@@ -863,7 +863,7 @@ void func_0011CE48(void) {
 s32 func_0011CE50(void) {
     s32 val = scrReadIntParameter(0);
 
-    scrSetIntegerReturnValue(func_0011A968(val) == 1);
+    scrSetIntegerReturnValue(ptyIsRosterEntryPresent(val) == 1);
     return 1;
 }
 

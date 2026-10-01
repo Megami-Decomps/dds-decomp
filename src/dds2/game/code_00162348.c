@@ -282,7 +282,7 @@ void parCopyVector(void *dst, void *src) {
 }
 
 void func_00162968(void) {
-    func_001622E8();
+    parComposeEffectTransformMatrices();
 }
 
 void func_00162980(ParObj *work, u32 value) {

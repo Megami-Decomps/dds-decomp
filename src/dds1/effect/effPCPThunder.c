@@ -551,7 +551,7 @@ void effPCPThunderFree4(EffPCPThunderWorkB *work) {
     func_002D0918(work->unk64);
 }
 
-void func_00166100(u8 *p, void *src) {
+void effThunderShiftEndpointsWithAnchor(u8 *p, void *src) {
         VU0_LOAD_VF(vf10, p + 0x10);
         VU0_LOAD_VF(vf11, src);
         VU0_STORE_VF(vf11, p + 0x10);

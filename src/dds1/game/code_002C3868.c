@@ -177,11 +177,11 @@ void sdfCounterDestroyRuntime(SdfCounterRuntime *rt) {
     }
 }
 
-void func_002C4630(void) {
+void sdfDestroyActiveCounterRuntime(void) {
     sdfCounterDestroyRuntime(D_003BD274);
 }
 
-void func_002C4650(void) {
+void sdfCounterTickCountdownAndMapTimers(void) {
     sdfCounterTickCountdown();
     mnuTickMapTimers();
     func_002C5C70();
@@ -286,7 +286,7 @@ void mnuTickMapTimers(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C57F0);
 
-s32 func_002C5BF8(void) {
+s32 sdfCounterGetSelectionBoundaryFlags(void) {
     SdfCounterRuntime *rt = (SdfCounterRuntime *)D_003BD274;
     s32 count;
     s32 done;
@@ -298,7 +298,7 @@ s32 func_002C5BF8(void) {
     return ((count + rt->base - 1) ^ rt->last->index) != 0 ? (done | 2) : done;
 }
 
-void func_002C5C40(s16 x, s16 y) {
+void sdfCounterStartTimerPositionTransition(s16 x, s16 y) {
     SdfCounterTimer *timer = ((SdfCounterRuntime *)D_003BD274)->timer;
 
     timer->startX = timer->curX;

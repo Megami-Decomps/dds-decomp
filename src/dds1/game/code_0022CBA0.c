@@ -855,7 +855,7 @@ extern void func_00105888();
 extern void mnuStopMovieDrawTask();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
-extern void func_002D0A10();
+extern void sdfQueueNonzeroResourceId();
 extern void kwlnTextureReleaseHeldReference();
 extern void evtEventViewerReleaseGroups();
 extern void evtEventViewerShutdown();
@@ -884,7 +884,7 @@ void evtViewerReleaseResources(viewer)
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     if (viewer->pendingResource != 0) {
-        func_002D0A10(viewer->pendingResource);
+        sdfQueueNonzeroResourceId(viewer->pendingResource);
         viewer->pendingResource = 0;
         viewer->pendingWork = 0;
     }

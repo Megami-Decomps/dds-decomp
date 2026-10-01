@@ -171,7 +171,7 @@ extern s32 fldEvaluateCameraMoveTracking(void);
 
 extern void scrSetIntegerReturnValue(s32 value);
 
-extern s32 func_00140780(s32 value);
+extern s32 fldQuerySelectedActorMotionState(s32 value);
 
 extern s32 func_0013FA98(s32 param0, s32 param1);
 
@@ -225,7 +225,7 @@ extern char *scrReadStringParameter(s32 idx);
 
 extern s32 fldFindEffectByName(char *str);
 
-extern s32 func_0014E620(void);
+extern s32 fldGetCurrentSceneSelectionResource(void);
 
 extern s32 sdfSoundIsCommandBusy(void);
 
@@ -255,7 +255,7 @@ extern s32 D_003897C0[];
 
 extern u64 dds3GetWorldSecondaryObject(void);
 
-extern u32 *func_001111A8(u64 world, const char *name);
+extern u32 *dds3FindObjectChainNodeByName(u64 world, const char *name);
 
 extern void func_0035B6E0(const char *fmt, ...);
 
@@ -567,12 +567,12 @@ s32 func_00154870(void) {
     return 1;
 }
 
-u32 func_00154880(void) {
+u32 fldCmdSetSceneControlFlag(void) {
     fldSetSceneControlFlags(0x10);
     return 1;
 }
 
-u32 func_001548A0(void) {
+u32 fldCmdClearSceneControlFlag(void) {
     fldClearSceneControlFlags(0x10);
     return 1;
 }
@@ -617,7 +617,7 @@ extern f32 D_0038BAB0[];
 
 extern f32 sdfSinPoly(f32);
 
-extern f32 func_003407A0(f32);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern s32 func_00133B10();
 
@@ -634,10 +634,10 @@ s32 fldUpdateLookAtSegment(void) {
     cam->negatedAngle = -cam->angle;
     near.x = cam->x - sdfSinPoly((cam->angle + 180.0f) * 3.14f / 180.0f);
     near.y = cam->y - 200.0f - 10.0f + 60.0f;
-    near.z = cam->z + func_003407A0((cam->angle + 180.0f) * 3.14f / 180.0f);
+    near.z = cam->z + sdfEvaluateCosineViaSinePhaseShift((cam->angle + 180.0f) * 3.14f / 180.0f);
     far.x = cam->x + sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     far.y = cam->y - 200.0f - 10.0f + 60.0f;
-    far.z = cam->z + func_003407A0(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
+    far.z = cam->z + sdfEvaluateCosineViaSinePhaseShift(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     D_0038BAB0[0] = near.x;
     D_0038BAB0[1] = near.y;
     D_0038BAB0[2] = near.z;
@@ -757,7 +757,7 @@ u32 fldCmdFreeDisplayObjects(void) {
 }
 
 s32 fldFindSearchId(const char *name) {
-    u32 *entry = func_001111A8(dds3GetWorldSecondaryObject(), name);
+    u32 *entry = dds3FindObjectChainNodeByName(dds3GetWorldSecondaryObject(), name);
     if (entry != 0) {
         return entry[1];
     }
@@ -822,7 +822,7 @@ typedef struct FldWorldItem {
     s32 *data;
 } FldWorldItem;
 
-extern FldWorldItem *func_00110680(u64);
+extern FldWorldItem *dds3ReadIndexedWorldObjectWord(u64);
 
 extern void func_00114048(FldWorldItem *, s32);
 
@@ -858,7 +858,7 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
         if (func_00110628(list) != 0) {
             dds3ResetObjectValueCursor(list);
             do {
-                item = func_00110680(list);
+                item = dds3ReadIndexedWorldObjectWord(list);
                 if (item->data[1] == room) {
                     switch (mode) {
                     case 0:
@@ -918,7 +918,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
         if (func_00110628(list) != 0) {
             dds3ResetObjectValueCursor(list);
             do {
-                item = func_00110680(list);
+                item = dds3ReadIndexedWorldObjectWord(list);
                 if (item->data[1] == room) {
                     switch (mode) {
                     case 0:
@@ -1514,19 +1514,19 @@ u32 func_00156AD0(void) {
     return 1;
 }
 
-u32 func_00156B10(void) {
+u32 fldCmdResetCameraMoveTracking(void) {
     fldResetCameraMoveTracking();
     return 1;
 }
 
-s32 func_00156B30(void) {
+s32 fldCmdQueryCameraMoveTracking(void) {
     scrSetIntegerReturnValue(fldEvaluateCameraMoveTracking());
     return 1;
 }
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
 s32 fldCmdQuerySceneValue(void) {
-    scrSetIntegerReturnValue(func_00140780(scrReadIntParameter(0)));
+    scrSetIntegerReturnValue(fldQuerySelectedActorMotionState(scrReadIntParameter(0)));
     return 1;
 }
 
@@ -1553,7 +1553,7 @@ s32 func_00156BE8(void) {
     return 1;
 }
 
-s32 func_00156C30(void) {
+s32 fldCmdGetActorSlotAttribute(void) {
     s32 param0 = scrReadIntParameter(0);
     s32 param1 = scrReadIntParameter(1);
 
@@ -1671,8 +1671,8 @@ s32 fldCommandFindEffectByName(void) {
     return 1;
 }
 
-s32 func_00156FA0(void) {
-    scrSetIntegerReturnValue(func_0014E620());
+s32 fldCmdGetCurrentSceneSelectionResource(void) {
+    scrSetIntegerReturnValue(fldGetCurrentSceneSelectionResource());
     return 1;
 }
 
@@ -1796,7 +1796,7 @@ s32 func_00157308(void) {
 
 extern void func_00341348(void *);
 
-extern void func_002D2C50(void);
+extern void effLoadCommonTexturesAndResetRenderFlags(void);
 
 extern void func_00157BE0(void);
 
@@ -1822,7 +1822,7 @@ extern char D_004363F8[];
 
 void fldCreateFieldEffectTask(void) {
     func_00341348(D_003AA868);
-    func_002D2C50();
+    effLoadCommonTexturesAndResetRenderFlags();
     func_00157BE0();
     parSysReset();
     func_0015B270();

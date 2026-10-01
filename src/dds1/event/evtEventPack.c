@@ -50,7 +50,7 @@ extern void effInitCh76Id(void);
 extern void effInitCh75Id(void);
 extern void sdfTexReleaseReferenceViaHandler(s32);
 extern void func_002887A0(s32);
-extern void func_002D0A10(s32);
+extern void sdfQueueNonzeroResourceId(s32);
 extern void func_002D0918(s32);
 
 /* Handles owned by the event task; +0x38..+0x44 are effect channels,
@@ -97,7 +97,7 @@ void evtReleaseEventPackResources(void) {
             func_002887A0(resources->objectHandle);
         }
         if (resources->resourceHandle != 0) {
-            func_002D0A10(resources->resourceHandle);
+            sdfQueueNonzeroResourceId(resources->resourceHandle);
         }
         if (resources->sceneAllocation1 != 0) {
             func_002D0918(resources->sceneAllocation1);

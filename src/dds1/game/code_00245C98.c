@@ -5,7 +5,7 @@ extern void func_0025DF68(s32, s32);
 extern void func_00261760(s32);
 extern s32 D_003BAA00;
 
-extern void func_00260530(s32, u32);
+extern void mnuStorePendingMenuCommandValue(s32, u32);
 extern void func_0025ECD0();
 extern u8 D_0036AB64[];
 
@@ -331,7 +331,7 @@ void evtSetupDispatchSyncE(s32 callback) {
     func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
-s32 func_00246E00(void) {
+s32 evtApplyBaseRateProgressStep(void) {
     s32 *state = (s32 *)kwlnTaskGetUserValue();
 
     state[32] = 1;
@@ -349,7 +349,7 @@ s32 evtAdvanceStateStage(void) {
         mnuSetCommandPhase(state, 6);
         task = ((EvtDispatchLink *)((EvtDispatchState *)state)->taskLink)->target;
         ((EvtDispatchTask *)task)->callback = (s32)func_0025ECD0;
-        func_00260530(task, 0);
+        mnuStorePendingMenuCommandValue(task, 0);
     }
     return 1;
 }
@@ -434,7 +434,7 @@ s32 evtApplyDispatchModeState(void) {
 }
 
 /* After idle dispatch, resume the state table at its saved position. */
-s64 func_002479F0(u64 argument) {
+s64 evtSetPopupEntryWhenMessageWindowIdle(u64 argument) {
     s32 state;
     s64 result;
     s32 *dispatchState;
@@ -460,7 +460,7 @@ void evtSetupDispatchSyncH(s32 callback) {
     func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
-u32 func_00247CF8(void) {
+u32 evtStartScriptFadeAndResetDisplayFlags(void) {
     evtCreateEventScriptProcess(0x323);
     kwlnFadeOutStart(0, 0, 0, 0xf);
     evtClearActiveFlag(0);

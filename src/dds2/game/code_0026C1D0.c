@@ -69,7 +69,7 @@ void evtResetDrawTransitions(void) {
     func_00197320();
 }
 
-void func_0026C298(void) {
+void evtShutdownStageAndResetDrawTransitions(void) {
     evtCommandShutdownStage();
     evtResetDrawTransitions();
 }
@@ -213,7 +213,7 @@ s32 evtCaptureMessageWindowSoundMode(s32 value) {
     return 1;
 }
 
-void func_0026C648(s32 value) {
+void evtSetMessageWindowOptionWhenOpen(s32 value) {
     if (D_00437880 >= 0) {
         D_0043788C = value;
     }
@@ -230,7 +230,7 @@ s32 sndGetActiveMode(void) {
     return itfPanelGetPairSecond(D_00437880);
 }
 
-s8 func_0026C6A0(void) {
+s8 evtGetCapturedMessageWindowSoundMode(void) {
     return D_0043788D;
 }
 
@@ -251,7 +251,7 @@ u32 evtCleanupMessageWindow(s32 notify) {
     return result;
 }
 
-void func_0026C710(void) {
+void evtFinishMessageWindowAndNotify(void) {
     evtCleanupMessageWindow(1);
 }
 
@@ -356,7 +356,7 @@ s32 evtSetBoundedDisplayValue(s32 index, s32 value) {
     return 1;
 }
 
-u32 func_0026CAA8(s32 index) {
+u32 evtGetBoundedDisplayValue(s32 index) {
     index = (index < 0x10) ? index : 0xf;
     return D_00453CC0[index];
 }
@@ -469,7 +469,7 @@ typedef struct EvtMantraWork {
     void *entries;
     u8 data[0x160];
 } EvtMantraWork; /* 0x16C bytes */
-EvtMantraWork *func_0026D0B0(s32 initialValue, s32 mode) {
+EvtMantraWork *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
     u32 allocation = func_003292A8(0x16C);
     EvtMantraWork *work = sdfMemoryGetBlockAddress(allocation);
 
@@ -501,13 +501,13 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D7E8);
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D988);
 
-extern s32 func_00315248(s32, s32);
+extern s32 prfGetIndexedProfileByte(s32, s32);
 void func_0026DA90(s32 entry, s32 *record) {
     s32 i;
     s32 value;
 
     for (i = 0; i < 5; i++) {
-        value = func_00315248(entry & 0xFFFF, i);
+        value = prfGetIndexedProfileByte(entry & 0xFFFF, i);
         if (value != 0) {
             record[1] = value;
             if (record[0] == 0) {

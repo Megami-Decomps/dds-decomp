@@ -251,7 +251,7 @@ s32 movCheckStartupSoundState(void) {
 }
 
 u32 func_002A14D0(void) {
-    func_002A2388();
+    mnuResetTitleStreamAfterFileIdle();
     return 1;
 }
 
@@ -393,7 +393,7 @@ void mnuLoadTitleStreamFrameData(char *filePath, u32 *work) {
     frames = bytes / (s32)work[2];
     work[1] = 0;
     work[0] = frames;
-    func_003298C0(request);
+    sdfQueueNonzeroResourceId(request);
 }
 
 void mnuStoreTaskResult(char *audioPath) {
@@ -429,7 +429,7 @@ s32 func_002A20A0(u32 *queue) {
         memcpy((void *)queue[5], (void *)data, size);
         queue[0] = size / (s32)queue[2];
         queue[1] = 0;
-        func_003298C0(handle);
+        sdfQueueNonzeroResourceId(handle);
         func_003504A8(D_00454D58);
         D_00454D30[9] = 2;
         ready = 1;
@@ -467,7 +467,7 @@ s32 mnuPollTitleStreamStateLocked(void) {
 
 extern u32 D_00454D68[];
 
-void func_002A2388(void) {
+void mnuResetTitleStreamAfterFileIdle(void) {
     WaitSema(D_00438FE8);
     if (mnuUpdateTitleTransition() == 1) {
         fileWaitIdle();
@@ -512,11 +512,11 @@ void mnuCommitTitleStreamReadyState(void) {
 
 extern u8 D_00455DB0[];
 
-extern void func_003298C0(u32 arg0);
+extern void sdfQueueNonzeroResourceId(u32 arg0);
 
 void mnuResetTitleStream(void) {
     if (D_00454D30[8] != 0) {
-        func_003298C0(D_00454D30[8]);
+        sdfQueueNonzeroResourceId(D_00454D30[8]);
         D_00454D30[9] = 0;
         D_00454D30[8] = 0;
         D_00454D30[5] = 0;
@@ -552,7 +552,7 @@ s32 mnuGetSoundBufferStateLocked(void) {
     return 3;
 }
 
-void func_002A2998(void) {
+void mnuClearInactiveSoundBufferState(void) {
     WaitSema(D_00438FE8);
     if (D_00455D70[4] != 1) {
         D_00455D70[4] = 0;
@@ -575,7 +575,7 @@ void mnuReleaseSoundBuffer(void) {
     if (buffer == 0) {
         return;
     }
-    func_003298C0(buffer);
+    sdfQueueNonzeroResourceId(buffer);
     state[8] = 0;
 }
 
@@ -610,7 +610,7 @@ extern void func_003297C8(u32);
 
 extern u32 D_00435BB0;
 
-void func_002A2BD0(void) {
+void mnuReleaseTitleMenuAssetsAndMarkClosed(void) {
     func_002A5F40();
     func_003458E8(0);
     mnuReleaseMenuResourceSlots();
@@ -632,8 +632,8 @@ u32 func_002A3A50(void) {
     return 0xffffffff;
 }
 
-s32 func_002A3A70(void) {
-    func_002A2BD0();
+s32 mnuDestroyTitleMenuTask(void) {
+    mnuReleaseTitleMenuAssetsAndMarkClosed();
     kwlnTaskDestroyWithHierarchyByName(D_00428680, 1);
     return 0;
 }

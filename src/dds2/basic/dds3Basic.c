@@ -5,7 +5,7 @@ extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: build the world matrix in vf28-vf31 from rotation (quaternion),
    per-row scale and translation. */
-void func_0010FAA8(void *scale, void *rotation, void *translation) {
+void dds3BuildVuTransformFromComponents(void *scale, void *rotation, void *translation) {
     VU0_LOAD_VF(vf10, rotation);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, scale);

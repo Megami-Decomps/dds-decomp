@@ -8,7 +8,7 @@ extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
 
-extern void func_00141098(void);
+extern void fldInitializeTitleBannerTask(void);
 
 void fldReleasePanelState(void) {
     void *panelState;
@@ -18,8 +18,8 @@ void fldReleasePanelState(void) {
     D_003BAE74 = 0;
 }
 
-void func_00141110(void) {
-    D_003BAE74 = kwlnTaskCreate("inputpanel", 0x2B0B, 1, 1, func_00141098, fldReleasePanelState, 0);
+void fldCreateInputPanelTask(void) {
+    D_003BAE74 = kwlnTaskCreate("inputpanel", 0x2B0B, 1, 1, fldInitializeTitleBannerTask, fldReleasePanelState, 0);
 }
 
 void fldDestroyPanelTaskIfPresent(void) {
