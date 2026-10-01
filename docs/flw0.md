@@ -96,7 +96,7 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 07 ff
-      glyphs 80e9 81a8
+      font "から"
       newline
       control f1 04
     endpage
@@ -110,26 +110,29 @@ messages msg1
     endoption
   endselect
   speaker 0
-    glyphs 83f4 8dd4 8ee1
+    font "人修羅"
   endspeaker
 end
 ```
 
-`text` holds printable ASCII, `glyphs` holds exact two-byte character codes,
+`text` holds printable single-byte ASCII. `font` holds characters from the
+DDS1 font-0 map and emits the corresponding two-byte glyph codes. The game
+uses a 128-column font index beginning at code `0x8080`; it is not Shift-JIS.
+When two codes map to the same Unicode character, one spelling is preferred
+and the other remains an explicit `glyphs` directive, so disassembly and
+assembly remain byte-exact. `glyphs` is also the fallback for a code missing
+from the current map.
+
 `newline` emits byte `0x0A`, and `control` preserves a complete DDS control
 sequence. The lead byte determines the control length, so the assembler can
 reject a truncated sequence. `bytes` remains available inside a page, option,
 or speaker when a stream does not fit those forms. NUL terminators, record
 offsets, text lengths, alignment, and the packed relocation table are derived.
 Changing message text in symbolic source therefore moves every later record
-and pointer automatically.
-
-The character codes are kept numeric until a verified DDS character map is
-available; they are not guessed through Shift-JIS. This still separates text
-from controls and makes the ASCII portions directly readable. A selection may
-declare `ext`, `pattern`, `reserved`, or `trailing` only when its physical
-record uses those fields. `trailing=00`, for example, retains one extra byte
-after the final option terminator.
+and pointer automatically. A selection may declare `ext`, `pattern`,
+`reserved`, or `trailing` only when its physical record uses those fields.
+`trailing=00`, for example, retains one extra byte after the final option
+terminator.
 
 Physical version-1 sources use the same records after an `msg1` marker inside
 their type-3 section. Their section size remains fixed. Across the tracked
