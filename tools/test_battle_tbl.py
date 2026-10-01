@@ -27,6 +27,123 @@ class BattleTableTests(unittest.TestCase):
                 self.assertEqual(len(data), size)
                 self.assertEqual(battle_tbl.decode_encount(data), model)
 
+    def test_unit_profiles_and_templates(self) -> None:
+        expected_sizes = {"dds1": 0x10810, "dds2": 0x10A10}
+        for name, size in expected_sizes.items():
+            with self.subTest(profile=name):
+                profile = battle_tbl.UNIT_PROFILES[name]
+                model = battle_tbl.default_unit(profile)
+                data = battle_tbl.encode_unit(model)
+                self.assertEqual(len(data), size)
+                self.assertEqual(battle_tbl.decode_unit(data), model)
+
+    def test_every_unit_record_family_round_trips(self) -> None:
+        profile = battle_tbl.UNIT_PROFILES["dds2"]
+        model = battle_tbl.default_unit(profile)
+        party = list(model.party)
+        party[3] = battle_tbl.PartyTemplate(
+            flags=0x107,
+            affinity_source=12,
+            unit_id=3,
+            hp=40,
+            max_hp=45,
+            mp=12,
+            max_mp=13,
+            status=0x20,
+            experience=1234,
+            level=7,
+            stats=(5, 6, 7, 8, 9),
+            unknown_1b_21=bytes.fromhex("01020304050607"),
+            skills=tuple(range(24)),
+            equipped_bullet=6,
+            unknown_54=7,
+            current_profile=8,
+            tail=bytes([9]) + bytes(profile.party_size - 0x57),
+        )
+        party_affinities = list(model.party_affinities)
+        party_affinities[3] = battle_tbl.AffinityRow(
+            (100, 0x80000078) + (0,) * 17
+        )
+        alternate_affinities = list(model.alternate_affinities)
+        alternate_affinities[3] = battle_tbl.AffinityRow((120,) * 19)
+        enemies = list(model.enemies)
+        enemies[12] = battle_tbl.EnemyTemplate(
+            flags=0x1000,
+            race=2,
+            level=17,
+            hp=200,
+            max_hp=220,
+            mp=80,
+            max_mp=90,
+            growth_profile=-2,
+            unknown_0f=4,
+            stats=(10, 11, 12, 13, 14),
+            summon_category=2,
+            unknown_16_17=b"\x05\x06",
+            skills=(1, 2, 3, 4, 5, 6, 7, 8),
+            macca=-30,
+            experience=100,
+            atma_points=200,
+            atma_bonus=300,
+            unknown_34_3d=bytes(range(10)),
+            drop_items=(4, 5),
+            drop_rates=(6, 7),
+            conditional_drop_flag=0x1234,
+            conditional_drop_item=8,
+            conditional_drop_rate=9,
+            attack_attribute=-3,
+            attack_repeats=2,
+            result_parameter=10,
+            tail=b"\x0b\x0c\x0d",
+        )
+        enemy_affinities = list(model.enemy_affinities)
+        enemy_affinities[12] = battle_tbl.AffinityRow(tuple(range(19)))
+        model = battle_tbl.UnitTable(
+            profile,
+            tuple(party),
+            tuple(party_affinities),
+            tuple(alternate_affinities),
+            tuple(enemies),
+            tuple(enemy_affinities),
+        )
+        data = battle_tbl.encode_unit(model)
+        self.assertEqual(battle_tbl.decode_unit(data), model)
+        source = battle_tbl.render_unit_source(model)
+        self.assertIn("party 3 flags=0x107 affinity_source=12 unit=3 hp=40", source)
+        self.assertIn("party-affinity 3 values=100,0x80000078", source)
+        self.assertIn("enemy 12 flags=0x1000 race=2 level=17", source)
+        self.assertEqual(battle_tbl.encode_unit(battle_tbl.parse_unit_source(source)), data)
+
+    def test_encounter_enemy_reference_validation(self) -> None:
+        encount = battle_tbl.default_encount(battle_tbl.ENCOUNT_PROFILES["dds2"])
+        encounters = list(encount.encounters)
+        encounters[4] = battle_tbl.Encounter(enemies=(7,) + (0,) * 10)
+        encount = battle_tbl.EncountTable(
+            encount.profile,
+            tuple(encounters),
+            encount.default_maps,
+            encount.zones,
+            encount.overrides,
+            encount.background_maps,
+            encount.visuals,
+        )
+        unit = battle_tbl.default_unit(battle_tbl.UNIT_PROFILES["dds2"])
+        with self.assertRaisesRegex(battle_tbl.BattleTableError, "empty enemy 7"):
+            battle_tbl.validate_encount_unit(encount, unit)
+        enemies = list(unit.enemies)
+        enemies[7] = battle_tbl.EnemyTemplate(level=1)
+        battle_tbl.validate_encount_unit(
+            encount,
+            battle_tbl.UnitTable(
+                unit.profile,
+                unit.party,
+                unit.party_affinities,
+                unit.alternate_affinities,
+                tuple(enemies),
+                unit.enemy_affinities,
+            ),
+        )
+
     def test_every_encount_record_family_round_trips(self) -> None:
         profile = battle_tbl.ENCOUNT_PROFILES["dds2"]
         model = battle_tbl.default_encount(profile)
@@ -119,20 +236,36 @@ end
         with self.assertRaisesRegex(battle_tbl.BattleTableError, "nonzero alignment"):
             battle_tbl.decode_encount(bytes(bad_padding))
 
-    def test_tracked_encount_corpus_hashes(self) -> None:
+    def test_tracked_battle_corpus_hashes(self) -> None:
         for game in ("dds1", "dds2"):
             manifest = ROOT / f"config/{game}/battle_tables.sha1"
-            digest, output = manifest.read_text(encoding="utf-8").split()
-            self.assertEqual(Path(output).name, "ENCOUNT.TBL")
-            source = ROOT / f"src/{game}/data/battle/encount.tblasm"
-            source_text = source.read_text(encoding="utf-8")
-            model = battle_tbl.parse_encount_source(source_text)
-            data = battle_tbl.encode_encount(model)
-            self.assertEqual(hashlib.sha1(data).hexdigest(), digest)
-            self.assertEqual(
-                battle_tbl.render_encount_source(battle_tbl.decode_encount(data)),
-                source_text,
+            for entry in manifest.read_text(encoding="utf-8").splitlines():
+                digest, output = entry.split()
+                name = Path(output).stem.lower()
+                source = ROOT / f"src/{game}/data/battle/{name}.tblasm"
+                source_text = source.read_text(encoding="utf-8")
+                if name == "encount":
+                    model = battle_tbl.parse_encount_source(source_text)
+                    data = battle_tbl.encode_encount(model)
+                    rendered = battle_tbl.render_encount_source(
+                        battle_tbl.decode_encount(data)
+                    )
+                elif name == "unit":
+                    model = battle_tbl.parse_unit_source(source_text)
+                    data = battle_tbl.encode_unit(model)
+                    rendered = battle_tbl.render_unit_source(battle_tbl.decode_unit(data))
+                else:
+                    self.fail(f"unhandled tracked battle table {name}")
+                self.assertEqual(hashlib.sha1(data).hexdigest(), digest)
+                self.assertEqual(rendered, source_text)
+
+            encount = battle_tbl.parse_encount_source(
+                (ROOT / f"src/{game}/data/battle/encount.tblasm").read_text()
             )
+            unit = battle_tbl.parse_unit_source(
+                (ROOT / f"src/{game}/data/battle/unit.tblasm").read_text()
+            )
+            battle_tbl.validate_encount_unit(encount, unit)
 
 
 if __name__ == "__main__":
