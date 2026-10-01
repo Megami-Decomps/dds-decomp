@@ -235,14 +235,14 @@ void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 value6, s32 
 
 /* Group setup record carried in the payload of an mdlRequestAsset job. */
 typedef struct MdlGroupSetup {
-    s32 unk0;   /* 0x0 */
-    s32 unk4;   /* 0x4 */
-    s32 unk8;   /* 0x8 */
-    s32 flags;  /* 0xC */
-    s32 unk10;  /* 0x10 */
-    s32 unk14;  /* 0x14 */
-    s32 unk18;  /* 0x18 */
-    s32 unk1C;  /* 0x1C */
+    s32 resourceList;  /* 0x0: 4th arg of btlCreateGroupNode */
+    s32 unk4;          /* 0x4: 5th arg of btlCreateGroupNode */
+    s32 requestHandle; /* 0x8: 6th arg of btlCreateGroupNode */
+    s32 flags;         /* 0xC */
+    s32 resource;      /* 0x10: resource of mdlConfigureGroupedEntitySlot */
+    s32 handleA;       /* 0x14: stored to MdlGroupEntity +0xA4 */
+    s32 handleB;       /* 0x18: stored to MdlGroupEntity +0xA0 */
+    s32 handleC;       /* 0x1C: stored to MdlGroupEntity +0xA8 */
 } MdlGroupSetup;
 
 typedef struct MdlGroupEntity {
@@ -257,15 +257,15 @@ extern void btlCreateGroupNode();
 void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlGroupSetup *setup) {
     MdlGroupEntity *entity;
 
-    btlCreateGroupNode(group, id, mode, setup->unk0, setup->unk4, setup->unk8);
+    btlCreateGroupNode(group, id, mode, setup->resourceList, setup->unk4, setup->requestHandle);
     if (setup->flags != 0) {
-        mdlConfigureGroupedEntitySlot(group, id, mode, 0, 0, 0, setup->flags, setup->unk10);
+        mdlConfigureGroupedEntitySlot(group, id, mode, 0, 0, 0, setup->flags, setup->resource);
     }
-    if (setup->unk14 != 0) {
+    if (setup->handleA != 0) {
         entity = btlFindGroupedEntity(group, id);
-        entity->unkA4 = setup->unk14;
-        entity->unkA0 = setup->unk18;
-        entity->unkA8 = setup->unk1C;
+        entity->unkA4 = setup->handleA;
+        entity->unkA0 = setup->handleB;
+        entity->unkA8 = setup->handleC;
     }
 }
 
