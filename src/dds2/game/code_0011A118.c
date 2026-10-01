@@ -10,6 +10,12 @@ extern s32 D_00435DEC;
 
 extern s32 D_00435DD0;
 
+/* Item quantities occupy byte slots in the save-state block. */
+typedef struct SaveItemCounts {
+    u8 pad00[0x1340];
+    u8 counts[0x100];
+} SaveItemCounts;
+
 typedef struct Entry1A4 {
     u16 flags; /* 0x0 */
     u8 pad2[2]; /* 0x2 */
@@ -176,7 +182,7 @@ s32 evtCheckValueThreshold(s32 index, s32 limit) {
     if ((u32)(index - 0x80) < 0x20) {
         return mdlFlagTest(index + 0x980) != 0;
     }
-    if (*(u8 *)(index + D_00435DD0 + 0x1340) < limit) {
+    if (((SaveItemCounts *)D_00435DD0)->counts[index] < limit) {
         return 0;
     }
     return 1;
@@ -530,7 +536,7 @@ void func_0011D3E8(Entry1A4 *entry) {
     s32 value = D_00386288[entry->rosterIndex];
     mnuSetPartyEntryCurrentId(entry, value);
     if (value != 0) {
-        *(u8 *)(value + D_00435DD0 + 0x1340) = 1;
+        ((SaveItemCounts *)D_00435DD0)->counts[value] = 1;
     }
 }
 
