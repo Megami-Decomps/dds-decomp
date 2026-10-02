@@ -64,7 +64,25 @@ void func_00242340(EvtPackLoadState *state) {
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_002423C8);
 
-INCLUDE_ASM(const s32, "event/evtEventPack", func_002424B0);
+extern void func_002423C8(EvtPackLoadState *state);
+
+s32 func_002424B0(void) {
+    EvtPackLoadState *state = (EvtPackLoadState *)kwlnTaskGetUserValue();
+
+    switch (state->loaded) {
+    default:
+        if (state->loaded < 2) {
+            if (state->loaded == 0) {
+                func_00242340(state);
+            }
+        }
+        break;
+    case 1:
+        func_002423C8(state);
+        break;
+    }
+    return 0;
+}
 
 extern void fileWaitIdle(void);
 extern void effInitCh72Id(void);
