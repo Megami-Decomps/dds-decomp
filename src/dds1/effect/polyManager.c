@@ -395,7 +395,15 @@ void func_0015E8B8(PolyArc *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_0015E900);
+/* Reset one arc record and choose its jittered radius. */
+void func_0015E900(PolyArc *obj, s32 index) {
+    PolyArcRecord *record = obj->records;
+    f32 spread = obj->radiusJitter;
+
+    record += index;
+    record->age = 0;
+    record->radius = obj->radius * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+}
 
 
 /* Lay a ring of point pairs for strip entry `index` on an arc of the node: the inner row sits at the arc's sine radius, the outer row `width` further out. */
