@@ -36,7 +36,7 @@ typedef struct MotionKeySample {
     f32 weight;
 } MotionKeySample;
 
-extern void func_00334678(void *, void *);
+extern void sdfFindMotionKeyInterval(void *, void *);
 
 void func_00335EE8(void) {
 }
@@ -69,7 +69,7 @@ void sdfBlendMotionKeys(MotionKeyWork *motion) {
     f32 weight;
     f32 inverse;
 
-    func_00334678(motion, &sample);
+    sdfFindMotionKeyInterval(motion, &sample);
     firstId = sample.first->id;
     secondId = sample.second->id;
     firstValue = sample.first->value;
