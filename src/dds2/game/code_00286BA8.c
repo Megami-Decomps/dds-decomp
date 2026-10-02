@@ -1,5 +1,53 @@
 #include "common.h"
 
+typedef struct MenuListNode MenuListNode;
+typedef struct MenuContainer MenuContainer;
+typedef struct MenuProgressHost MenuProgressHost;
+struct MnuStatusResource;
+
+typedef struct MenuList {
+    u32 stateFlags;
+    u32 flags;
+    u32 id;
+    s32 visibleCount;
+    MenuListNode *first;
+    MenuListNode *last;
+    MenuListNode *head;
+    MenuListNode *cursor;
+    s32 count;
+    s32 windowOffset;
+    s32 rowHeight;
+    u8 pad2C[4];
+    u32 userData;
+    u8 pad34[8];
+    s32 scale;
+} MenuList;
+
+typedef struct MtrSelectionState {
+    s16 state;
+    u16 unk02;
+    s32 timer;
+} MtrSelectionState;
+
+typedef struct MtrPlayerFlags {
+    u32 unk00 : 16;
+    u32 hasMarkedUnit : 1;
+    u32 unk17 : 15;
+} MtrPlayerFlags;
+
+typedef struct MtrUnitMenuEntry {
+    u16 unk00 : 13;
+    u16 marked : 1;
+    u16 unk14 : 2;
+    u8 pad02[6];
+} MtrUnitMenuEntry;
+
+extern MenuList *func_002884C0(void);
+extern s32 mdlFlagTest(s32);
+extern void kwlnFadeInStart(s8, s8, s8, s32);
+extern void func_00289BA0(struct MnuStatusResource *);
+extern s32 mnuMoveNodeCursorToTargetIndex(MenuContainer *, s8);
+
 extern s32 func_00312810(u32, s32);
 
 extern u32 mnuMantraSelectionResource;
@@ -10,11 +58,11 @@ extern void func_00286F18(s32, s32);
 
 extern u8 D_003CFCC0[];
 
-extern void mnuReleaseSelectionWorkResources();
+extern void mnuReleaseSelectionWorkResources(struct MnuStatusResource *);
 
-extern void mnuDestroyListState(s32);
+extern u32 mnuDestroyListState(MenuList *);
 
-extern void mnuCloseCurrentProfilePanel(s32);
+extern void mnuCloseCurrentProfilePanel(MenuProgressHost *);
 
 extern void mnuReleaseMantraMenuDrawResources(void *);
 
@@ -31,7 +79,7 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286E20);
 
 extern u32 sdfAllocGeneralBlock(s32 size);
 extern u32 sdfMemoryGetBlockAddress(void *block);
-extern u32 mnuCreateProgressHost(void);
+extern s32 mnuCreateProgressHost(void);
 extern void mnuInitPanelSoundEntries(void);
 
 /* One allocated mantra/status work area. The create side stores its own
@@ -40,13 +88,26 @@ extern void mnuInitPanelSoundEntries(void);
  * the rest of the block is passed on to the menu task untouched. */
 typedef struct MnuStatusResource {
     u32 allocationHandle; /* 0x00: the block's own handle, freed on destroy */
-    u8 pad04[0x34];
+    MenuList *list;       /* 0x04 */
+    u8 pad08[0x30];
     u32 resourceIdA;      /* 0x38 */
     u32 resourceIdB;      /* 0x3C */
     u8 pad40[8];
-    u32 *progressHost;    /* 0x48 */
-    u8 pad4C[0xBCC];
+    MenuProgressHost *progressHost; /* 0x48 */
+    u8 pad4C[0x1CC];
+    u32 flags218;
+    u8 pad21C[0x10];
+    MtrSelectionState selection; /* 0x22C */
+    u8 pad234[0x560];
+    MtrPlayerFlags playerFlags; /* 0x794 */
+    u8 pad798[0x40C];
+    u32 unkBA4;
+    u8 padBA8[8];
+    MtrUnitMenuEntry unitEntries[5]; /* 0xBB0 */
+    u8 padBD8[0x30];
 } MnuStatusResource; /* 0xC08 */
+
+extern void func_002885E8(MnuStatusResource *);
 
 /* Allocate and zero the 0xC08 status resource, then wire up its host pointer,
  * console banner and panel sound entries. */
@@ -56,7 +117,7 @@ void *func_00286E98(void) {
 
     memset(resource, 0, 0xC08);
     resource->allocationHandle = handle;
-    resource->progressHost = (u32 *)mnuCreateProgressHost();
+    resource->progressHost = (MenuProgressHost *)mnuCreateProgressHost();
     evtPrintDeveloperConsoleMessage("trmLoadStartStatusResource()!!!! \n");
     evtPrintDeveloperConsoleMessage("mtrInit\n");
     mnuInitPanelSoundEntries();
@@ -71,7 +132,7 @@ void func_00286F18(s32 arg0, s32 work) {
         sdfQueueNonzeroResourceId(resource->resourceIdA);
         sdfQueueNonzeroResourceId(resource->resourceIdB);
         mnuReleaseFirstMantraSpriteSlots();
-        mnuReleaseStaffAndTitleVisualResources(resource->progressHost);
+        mnuReleaseStaffAndTitleVisualResources((u32 *)resource->progressHost);
         evtPrintDeveloperConsoleMessage("trmDestroyStatusResource()!!!! \n");
         sdfReleaseResourceAllocation(resource->allocationHandle);
         mnuReleasePanelEntryPool();
@@ -106,7 +167,7 @@ INCLUDE_RODATA(const s32, "game/code_00286BA8", mnuResourceTaskName);
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287078);
 
 s32 mtrUnitSelectInit(void) {
-    u64 selected = func_00312810(mnuMantraSelectionResource, -1);
+    MnuStatusResource *selected = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
 
     func_002885E8(selected);
     evtPrintDeveloperConsoleMessage("mtrUnitSelectInit\n");
@@ -114,7 +175,7 @@ s32 mtrUnitSelectInit(void) {
 }
 
 void mtrUnitSelectRelease(void) {
-    u64 selected = func_00312810(mnuMantraSelectionResource, -1);
+    MnuStatusResource *selected = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
 
     mnuReleaseSelectionWorkResources(selected);
     evtPrintDeveloperConsoleMessage("mtrUnitSelectRelease\n");
@@ -188,11 +249,42 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_002882B8);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_002884C0);
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_002885E8);
+void func_002885E8(MnuStatusResource *work) {
+    MtrSelectionState *selection = &work->selection;
+    MenuList *list;
+    s32 i;
 
-void mnuReleaseSelectionWorkResources(u8 *work) {
-    mnuDestroyListState(*(s32 *)(work + 4));
-    mnuCloseCurrentProfilePanel(*(s32 *)(work + 0x48));
+    selection->state = 1;
+    selection->timer = 0;
+    list = func_002884C0();
+    list->userData = (u32)selection;
+    work->list = list;
+    work->flags218 &= ~2;
+
+    if (mdlFlagTest(0x1B1) != 0) {
+        if (mdlFlagTest(0x995) == 0) {
+            selection->state = 3;
+            kwlnFadeInStart(0, 0, 0, 10);
+        }
+        func_00289BA0(work);
+        if (work->unkBA4 != 0 || work->playerFlags.hasMarkedUnit) {
+            if (work->playerFlags.hasMarkedUnit) {
+                for (i = 0; i < 5; i++) {
+                    if (work->unitEntries[i].marked) {
+                        mnuMoveNodeCursorToTargetIndex((MenuContainer *)work, i);
+                        break;
+                    }
+                }
+            }
+            selection->state = 3;
+            kwlnFadeInStart(0, 0, 0, 10);
+        }
+    }
+}
+
+void mnuReleaseSelectionWorkResources(MnuStatusResource *work) {
+    mnuDestroyListState(work->list);
+    mnuCloseCurrentProfilePanel(work->progressHost);
     mnuReleaseMantraMenuDrawResources(work);
 }
 
