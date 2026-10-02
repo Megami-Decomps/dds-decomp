@@ -16,6 +16,7 @@ Pipeline per version (see README.md):
   FLW0 (.bfasm)      tools/flw0.py assemble -> build/<v>/scripts/, then SHA-1 check
   INF (.infasm)      tools/inf.py assemble -> build/<v>/data/field/, then SHA-1 check
   WAP (.wapasm)      tools/wap.py assemble -> build/<v>/data/field/, then SHA-1 check
+  FLD2 (.fldasm)     tools/fld.py assemble -> build/<v>/data/field/, then SHA-1 check
   battle (.tblasm)   tools/battle_tbl.py assemble -> build/<v>/data/battle/, then SHA-1 check
 
 Every version is linked as a byte-identical copy of the retail executable, so any
@@ -226,6 +227,12 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         description="wap $in",
     )
     n.rule(
+        "fld2",
+        f"mkdir -p $outdir && {sys.executable} tools/fld.py assemble "
+        "--scripts $scripts --warps $warps $in $out",
+        description="fld2 $in",
+    )
+    n.rule(
         "battle_tbl",
         f"mkdir -p $outdir && {sys.executable} tools/battle_tbl.py assemble $context $in $out",
         description="battle table $in",
@@ -403,6 +410,35 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             version_outputs.append(str(wap_stamp))
             field_data_stamps.append(str(wap_stamp))
 
+        fld_manifest = Path("config") / version / "field_fld2.sha1"
+        if (ROOT / fld_manifest).exists():
+            fld_source_dir = Path("src") / version / "data" / "field"
+            fld_output_dir = Path("build") / version / "data" / "field"
+            fld_sources = sorted((ROOT / fld_source_dir).glob("*.fldasm"))
+            fld_outputs = []
+            for source in fld_sources:
+                source = source.relative_to(ROOT)
+                output = fld_output_dir / source.with_suffix(".f2").name
+                field_stem = source.stem.split("_", 1)[0]
+                scripts = Path("src") / version / "scripts" / "field" / f"{field_stem}.bfasm"
+                warps = fld_source_dir / f"{field_stem}.wapasm"
+                n.build(
+                    str(output),
+                    "fld2",
+                    str(source),
+                    implicit=["tools/fld.py", str(scripts), str(warps)],
+                    variables={
+                        "outdir": str(output.parent),
+                        "scripts": str(scripts),
+                        "warps": str(warps),
+                    },
+                )
+                fld_outputs.append(str(output))
+            fld_stamp = fld_output_dir / "field_fld2.ok"
+            n.build(str(fld_stamp), "check", str(fld_manifest), implicit=fld_outputs)
+            version_outputs.append(str(fld_stamp))
+            field_data_stamps.append(str(fld_stamp))
+
         if field_data_stamps:
             n.build(f"{version}-field-data", "phony", field_data_stamps)
 
@@ -506,6 +542,9 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         wap_manifest = ROOT / "config" / version / "field_wap.sha1"
         if wap_manifest.exists():
             configure_inputs.append(str(wap_manifest.relative_to(ROOT)))
+        fld_manifest = ROOT / "config" / version / "field_fld2.sha1"
+        if fld_manifest.exists():
+            configure_inputs.append(str(fld_manifest.relative_to(ROOT)))
         battle_manifest = ROOT / "config" / version / "battle_tables.sha1"
         if battle_manifest.exists():
             configure_inputs.append(str(battle_manifest.relative_to(ROOT)))
