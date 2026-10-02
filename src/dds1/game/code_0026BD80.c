@@ -2,6 +2,12 @@
 
 extern s32 mnuMovieMenuState;
 
+extern u32 effLoadIndexedResource(const char *, const char *, u32);
+extern void effRequestResourceByMode(const char *, const char *, u32, u32 *);
+
+extern char D_003BC5D8[];
+extern char D_00379E50[];
+
 extern void func_0026C7E0();
 
 typedef struct {
@@ -79,7 +85,18 @@ s32 mnuIsAnyMenuInputPressed(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026BFC8);
+void func_0026BFC8(void) {
+    if (((MenuState *)mnuMovieMenuState)->firstResource == 0) {
+        ((MenuState *)mnuMovieMenuState)->firstResource =
+            effLoadIndexedResource(D_003BC5D8, D_00379E50, 0);
+    }
+    if (((MenuState *)mnuMovieMenuState)->secondResource == 0) {
+        const char *name = D_00379E50;
+        name += 0x20;
+        ((MenuState *)mnuMovieMenuState)->secondResource =
+            effLoadIndexedResource(D_003BC5D8, name, 0);
+    }
+}
 
 u32 func_0026C040(void) {
     return 1;
@@ -99,7 +116,23 @@ void mnuReleaseMenuResourceSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C098);
+void func_0026C098(s32 mode) {
+    u32 *handle = &((MenuState *)mnuMovieMenuState)->spriteHandle;
+
+    if (*handle == 0) {
+        if (mode != 0) {
+            const char *name = D_00379E50;
+            name += 0x10;
+            ((MenuState *)mnuMovieMenuState)->spriteHandle =
+                effLoadIndexedResource(D_003BC5D8, name, 0);
+        } else {
+            const char *name = D_00379E50;
+            name += 0x10;
+            effRequestResourceByMode(D_003BC5D8, name, 0,
+                                     handle);
+        }
+    }
+}
 
 u8 mnuHasSpriteHandle(void) {
     return ((MenuState *)mnuMovieMenuState)->spriteHandle != 0;
