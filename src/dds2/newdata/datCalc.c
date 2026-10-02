@@ -109,18 +109,37 @@ void datMoveCursorY(DatCalcCursor *cursor, s32 delta) {
     cursor->y = (s16)value;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_00119A10);
-extern s32 func_00119A10(u8 *unit);
+extern s32 func_00314C10(s32 unit);
+extern u32 prfGetIndexedProfileByte(u16 id, s32 sub);
+
+typedef struct DatUnitStatus {
+    u8 pad00[0xE];
+    u16 status; /* 0x0E */
+    u8 pad10[6];
+    s8 statValues[0x100];
+} DatUnitStatus;
+
+s32 func_00119A10(DatUnitStatus *unit, s32 statIndex) {
+    s32 value = unit->statValues[statIndex] +
+                prfGetIndexedProfileByte((u16)func_00314C10((s32)unit), statIndex);
+
+    if (value <= 0) {
+        value = 1;
+    }
+    if (value >= 128) value = 127;
+    return value;
+}
 extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
 
-s32 func_00119A78(u8 *unit, s32 slot) {
+s32 func_00119A78(DatUnitStatus *unit, s32 slot) {
     s32 value;
 
-    if ((*(u16 *)(unit + 0xE) & 0x7FFF) == 0x1000) {
+    if ((unit->status & 0x7FFF) == 0x1000) {
         return 1;
     }
-    value = func_00119A10(unit);
-    value += ptyGetCombinedRecordAndSlotValue(*(u16 *)(unit + 0x1B2), slot);
+    value = func_00119A10(unit, slot);
+    value += ptyGetCombinedRecordAndSlotValue(
+        *(u16 *)((u8 *)unit + 0x1B2), slot);
     if (value < 0) {
         value = 0;
     }
@@ -158,11 +177,6 @@ s32 datUnitHasSkill(DatSkillOwner *unit, s32 skill) {
     }
     return 0;
 }
-
-typedef struct DatUnitStatus {
-    u8 pad00[0xE];
-    u16 status; /* 0x0E */
-} DatUnitStatus;
 
 /* Raise the low half of `value` to a per-status minimum (0x12C, 0x96, 0xC8; status 4 forces 1) unless a bit in 0x70000 is set. */
 s32 func_00119BA0(DatUnitStatus *unit, s32 value) {
