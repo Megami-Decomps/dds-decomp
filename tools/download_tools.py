@@ -19,6 +19,8 @@ import tarfile
 import urllib.request
 from pathlib import Path
 
+from ee_gcc_aslr import CC1_RELATIVE_PATH, patch_compiler
+
 ROOT = Path(__file__).resolve().parent.parent
 TOOLS = ROOT / "tools"
 COMPILER_URL = "https://github.com/decompme/compilers/releases/download/compilers/{name}{ext}"
@@ -157,6 +159,10 @@ def main() -> None:
         raise SystemExit("prebuilt tools are linux-x86_64 only; run under Linux/WSL")
     for name in DEFAULT_COMPILERS + args.compiler:
         get_compiler(name, args.force)
+        if name == "ee-gcc2.96":
+            compiler = TOOLS / "compilers" / name / CC1_RELATIVE_PATH
+            changed = patch_compiler(compiler)
+            print(f"{'patched' if changed else 'verified'} ASLR-stable compiler {compiler}")
     get_binutils(args.force)
     get_objdiff(args.force)
     get_glibc(args.force)

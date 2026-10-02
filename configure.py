@@ -38,6 +38,7 @@ import sys
 from pathlib import Path
 
 import ninja_syntax
+from tools.ee_gcc_aslr import marker_is_valid
 
 ROOT = Path(__file__).resolve().parent
 VERSIONS = json.loads((ROOT / "config" / "versions.json").read_text())
@@ -75,9 +76,13 @@ def i386_prefix() -> str:
 
 
 def no_aslr_prefix() -> str:
-    """ee-gcc 2.96 hashes heap addresses in CSE, so under address-space
-    randomisation a fragile function compiles differently from run to run.
-    Build with a fixed layout (setarch -R) unless DDS_ALLOW_ASLR is set."""
+    """Fallback for an unpatched, manually installed ee-gcc 2.96.
+
+    tools/download_tools.py patches the compiler's GGC arena, allowing normal
+    ASLR.  Keep setarch support for an otherwise-compatible manual toolchain.
+    """
+    if marker_is_valid(ROOT / CC1):
+        return ""
     if os.environ.get("DDS_ALLOW_ASLR") or not shutil.which("setarch"):
         return ""
     return f"setarch {platform.machine()} -R "
