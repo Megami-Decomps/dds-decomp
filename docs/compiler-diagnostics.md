@@ -28,7 +28,11 @@ and writes:
 - `candidate.s`: final assembly for the translation unit;
 - `functions/NAME/`: the named function extracted from every available pass;
 - `manifest.json`: source/compiler hashes, exact command, artifacts and
-  compiler/assembler status.
+  compiler/assembler status. When an object file exists, its relative path,
+  size, raw SHA-256, and path-normalized SHA-256 are recorded separately. The
+  path-normalized hash masks only the wrapper's random same-length scratch path,
+  which old MIPS objects retain in metadata. A failed assembler can leave a
+  partial object, so the wrapper return code remains authoritative.
 
 The compiler stage can succeed even when the final assembler cannot resolve
 the unit's `INCLUDE_ASM` paths in an isolated setup. In that case the RTL and
@@ -68,6 +72,36 @@ report.
 The command exits zero when no semantic divergence is found and one when it
 finds one. `--json REPORT.json` writes the complete result. Omit `--function`
 to compare the complete translation unit and list changed assembly functions.
+
+## Get a bounded next action
+
+After capturing a baseline and candidate, run the combined diagnosis:
+
+```sh
+python3 tools/ee_gcc_why.py \
+  /tmp/snd-baseline /tmp/snd-candidate \
+  --function sndCreateSystemEffect \
+  --json /tmp/snd-why.json
+```
+
+It reports the first normalized divergence, a short diff, provenance warnings,
+and one stage-specific next action. At passes 19/20 it includes both allocation
+summaries; at pass 29 it includes both delay-slot sequences. Object hashes are
+compared only for successful whole-translation-unit outputs. Function-scoped
+diagnoses label them as whole-unit evidence instead of attributing an object
+difference to the selected function. The raw hash remains useful provenance;
+equality decisions use the path-normalized hash. Missing target-function
+artifacts and failed compiler captures are reported as insufficient evidence,
+never as evidence that a source change had no effect. The combined command
+returns status 2 for insufficient evidence, 1 for a divergence, and 0 only for
+a complete comparison with no divergence.
+
+The result is deliberately bounded. “No codegen difference” means stop varying
+that source idea. Allocation differences call for one truthful lifetime, type,
+or expression hypothesis. Sched2 work stops when the desired order has no
+truthful dependency, and delay-slot work starts with donor eligibility before
+pass 29. The command is an evidence router, not a source permutation engine or
+a claim that the first changed dump proves causation.
 
 ## Reading the first changed pass
 

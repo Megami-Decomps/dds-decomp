@@ -30,6 +30,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_REPO = ROOT
 FUNCTION_HEADER = re.compile(r"^;; Function ([^\s]+).*$", re.M)
+OBJECT_SCRATCH_DIR = re.compile(rb"\.[0-9a-fA-F]{2,4}/(?=dds[12]/)")
 
 
 def sha256(path: Path) -> str:
@@ -71,6 +72,23 @@ def extract_assembly_function(text: str, name: str) -> str | None:
 
 def artifact_record(path: Path) -> dict[str, object]:
     return {"name": path.name, "size": path.stat().st_size, "sha256": sha256(path)}
+
+
+def object_record(path: Path, root: Path) -> dict[str, object] | None:
+    """Describe an object output without implying that assembly succeeded."""
+    if not path.is_file():
+        return None
+    data = path.read_bytes()
+    normalized = OBJECT_SCRATCH_DIR.sub(
+        lambda match: b"." + (b"X" * (len(match.group(0)) - 2)) + b"/",
+        data,
+    )
+    return {
+        "path": path.relative_to(root).as_posix(),
+        "size": path.stat().st_size,
+        "sha256": hashlib.sha256(data).hexdigest(),
+        "path_normalized_sha256": hashlib.sha256(normalized).hexdigest(),
+    }
 
 
 def main() -> int:
@@ -184,6 +202,7 @@ def main() -> int:
         ],
         "function": args.function,
         "compiler": {"path": str(compiler), "sha256": sha256(compiler)},
+        "extra_cflags": args.cflag,
         "command": command,
         "environment": {
             key: env[key]
@@ -193,6 +212,7 @@ def main() -> int:
         "wrapper_returncode": result.returncode,
         "cc1_succeeded": cc1_succeeded,
         "assembled": obj.is_file(),
+        "object": object_record(obj, out_dir),
         "artifacts": [artifact_record(path) for path in ([assembly] if assembly.exists() else []) + dumps],
         "extracted": [str(path.relative_to(out_dir)) for path in extracted],
         "stdout": result.stdout,
