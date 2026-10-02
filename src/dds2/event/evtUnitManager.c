@@ -35,6 +35,7 @@ typedef struct EvtUnitNode {
 } EvtUnitNode;
 
 extern void sdfStepWrappingFloatCounter(s32 path);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern void func_001171A0(s32 path);
 extern void dds3PreparePathVectorPair(s32 path);
 extern void effObjSetInnerFirstVec(void *obj, void *vec);
@@ -294,7 +295,53 @@ s32 evtUnitGetNestedValue(EvtUnitNode *unit) {
     return unit->data->value08;
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CC60);
+extern f32 D_004215D0[];
+
+EvtUnit *func_0023CC60(EvtEffObj *effObj, EvtUnitOwner *owner) {
+    EvtUnit *work;
+    void *endpoint;
+    f32 defaultVector[4];
+    s32 i;
+
+    memcpy(defaultVector, D_004215D0, sizeof(defaultVector));
+    work = sdfAllocSizeClassBlock(sizeof(EvtUnit));
+    memset(work, 0, sizeof(EvtUnit));
+    work->motionState = 0;
+    work->transitionSourceKind = 1;
+    work->unkB8 = 1.0f;
+    work->effObj = effObj;
+    work->owner = owner;
+    work->unkC0 = 10;
+    work->unkC8 = 10;
+    work->unkBE = 0;
+    work->unkC6 = 0;
+
+    VU0_LOAD_VF(vf10, defaultVector);
+    VU0_STORE_VF_UNCLOBBERED(vf10, work->vec10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, (f32 *)((u8 *)work + 0x40));
+    /* These initialized color words fall in the unit's untyped padding. */
+    *(u32 *)((u8 *)work + 0x0C) = 0x00B2B2B2;
+    work->color = 0x00B2B2B2;
+    *(u32 *)((u8 *)work + 0x5C) = 0x80303030;
+    work->color50 = 0x80303030;
+    endpoint = sdfAllocSizeClassBlock(0xE0);
+    work->endpointWorkAddress = (s32)endpoint;
+    memset(endpoint, 0, 0xE0);
+    work->value = 0;
+    *(u32 *)((u8 *)work + 0xD8) = 0;
+    *(u32 *)((u8 *)work + 0xDC) = 0;
+    {
+        f32 *slot = &work->unk138[1];
+
+        i = 10;
+        do {
+            i--;
+            *slot = 1.0f;
+            slot++;
+        } while (i >= 0);
+    }
+    return work;
+}
 
 s32 evtReleaseUnitTransitionWork(EvtUnit *work) {
     s32 handle;

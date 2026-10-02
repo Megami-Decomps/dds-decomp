@@ -273,7 +273,43 @@ s32 evtUnitGetNestedValue(u8 *obj) {
     return *(s32 *)(*(u8 **)(obj + 0x18) + 8);
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_002220F0);
+extern void *sdfAllocSizeClassBlock(s32 size);
+extern const s32 D_003AC060[];
+
+EvtUnit *func_002220F0(EvtEffObj *effObj, EvtUnitOwner *owner) {
+    EvtUnit *work;
+    void *endpoint;
+    f32 defaultVector[4];
+
+    memcpy(defaultVector, (const f32 *)D_003AC060, sizeof(defaultVector));
+    work = sdfAllocSizeClassBlock(sizeof(EvtUnit));
+    memset(work, 0, sizeof(EvtUnit));
+    work->motionState = 0;
+    work->transitionSourceKind = 1;
+    work->unkB8 = 1.0f;
+    work->effObj = effObj;
+    work->owner = owner;
+    work->unkC0 = 10;
+    work->unkC8 = 10;
+    work->unkBE = 0;
+    work->unkC6 = 0;
+
+    VU0_LOAD_VF(vf10, defaultVector);
+    VU0_STORE_VF_UNCLOBBERED(vf10, work->vec10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, (f32 *)((u8 *)work + 0x40));
+    /* The initialized color words at +0x0C are still untyped padding. */
+    *(u32 *)((u8 *)work + 0x0C) = 0x00B2B2B2;
+    work->color = 0x00B2B2B2;
+    *(u32 *)((u8 *)work + 0x5C) = 0x80303030;
+    work->color50 = 0x80303030;
+    endpoint = sdfAllocSizeClassBlock(0xE0);
+    work->endpointWorkAddress = (s32)endpoint;
+    memset(endpoint, 0, 0xE0);
+    work->value = 0;
+    *(u32 *)((u8 *)work + 0xD8) = 0;
+    *(u32 *)((u8 *)work + 0xDC) = 0;
+    return work;
+}
 
 s32 evtReleaseUnitTransitionWork(EvtUnit *work) {
     s32 handle;
