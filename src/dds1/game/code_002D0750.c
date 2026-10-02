@@ -1,14 +1,30 @@
 #include "common.h"
 
-typedef struct SdfResource {
-    struct SdfResource *peer;
-    struct SdfResource *block;
-    s32 address;
-    u16 busy;
-    s16 referenceCount;
-} SdfResource;
+#define SDF_HEAP_BLOCK_FREE 0
+#define SDF_HEAP_BLOCK_USED 1
+#define SDF_HEAP_BLOCK_END 2
 
-extern SdfResource *sdfFindGeneralBlockByAddress(void *address);
+#define SDF_HEAP_STAT_TOTAL_BYTES 0
+#define SDF_HEAP_STAT_FREE_BYTES 1
+#define SDF_HEAP_STAT_LARGEST_FREE 2
+#define SDF_HEAP_STAT_SMALLEST_FREE 3
+#define SDF_HEAP_STAT_BLOCK_COUNT 4
+#define SDF_HEAP_STAT_FREE_BLOCK_COUNT 5
+
+#define SDF_NAMED_REQUEST_OVERHEAD_BYTES 0xC
+#define SDF_RPC_REPLY_ALIGNMENT_MASK 0x3F
+#define SDF_NAMED_RESOURCE_RPC_ID 0x6F496453
+#define SDF_RPC_BIND_RETRY_TICKS 0x1ED2
+
+typedef struct SdfAllocation {
+    struct SdfAllocation *previous;
+    struct SdfAllocation *next;
+    s32 address;
+    u16 state;
+    s16 referenceCount;
+} SdfAllocation;
+
+extern SdfAllocation *sdfFindGeneralBlockByAddress(void *address);
 extern void sdfReleaseChipBlock(void *block);
 extern s32 func_00312C08(void);
 extern void EIntr(void);
@@ -19,51 +35,55 @@ void sdfPendingQueuePush(void *arg0, s32 arg1);
 
 INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0750);
 
+/* Unlink the successor, not node itself, and reconnect both neighboring links. */
 void sdfSkipNextListNode(u8 *node) {
-    u8 *next = *(u8 **)(*(u8 **)(node + 4) + 4);
-    *(u8 **)next = node;
-    *(u8 **)(node + 4) = next;
+    u8 *followingNode = *(u8 **)(*(u8 **)(node + 4) + 4);
+    *(u8 **)followingNode = node;
+    *(u8 **)(node + 4) = followingNode;
 }
 
-void sdfReleaseResourceAllocation(SdfResource *node) {
-    SdfResource *block;
-    s32 lock;
+/* Coalesce adjacent free records, then recycle this record or mark it free. */
+void sdfReleaseResourceAllocation(SdfAllocation *allocation) {
+    SdfAllocation *nextBlock;
+    s32 interruptsDisabled;
 
-    if (node == NULL) {
+    if (allocation == NULL) {
         return;
     }
-    lock = func_00312C08();
-    block = node->block;
-    if (block->busy == 0) {
-        sdfSkipNextListNode((u8 *)node);
-        sdfReleaseChipBlock(block);
+    interruptsDisabled = func_00312C08();
+    nextBlock = allocation->next;
+    if (nextBlock->state == SDF_HEAP_BLOCK_FREE) {
+        sdfSkipNextListNode((u8 *)allocation);
+        sdfReleaseChipBlock(nextBlock);
     }
-    if (node->peer->busy == 0) {
-        sdfSkipNextListNode((u8 *)node->peer);
-        sdfReleaseChipBlock(node);
+    if (allocation->previous->state == SDF_HEAP_BLOCK_FREE) {
+        sdfSkipNextListNode((u8 *)allocation->previous);
+        sdfReleaseChipBlock(allocation);
     } else {
-        node->busy = 0;
-        node->referenceCount = 0;
+        allocation->state = SDF_HEAP_BLOCK_FREE;
+        allocation->referenceCount = 0;
     }
-    if (lock != 0) {
+    if (interruptsDisabled != 0) {
         EIntr();
     }
 }
 
+/* Resolve a data address to its allocation record before releasing it. */
 void sdfReleaseCurrentResourceHandle(void *address) {
-    SdfResource *handle;
+    SdfAllocation *allocation;
 
-    handle = sdfFindGeneralBlockByAddress(address);
-    sdfReleaseResourceAllocation(handle);
+    allocation = sdfFindGeneralBlockByAddress(address);
+    sdfReleaseResourceAllocation(allocation);
 }
 
-void sdfReleaseMemorySlot(s32 *slot) {
-    s32 handle;
+/* Clear the owner's handle before releasing the allocation it contained. */
+void sdfReleaseMemorySlot(s32 *handleSlot) {
+    s32 allocationHandle;
 
-    handle = *slot;
-    if (handle != 0) {
-        *slot = 0;
-        sdfReleaseResourceAllocation((SdfResource *)handle);
+    allocationHandle = *handleSlot;
+    if (allocationHandle != 0) {
+        *handleSlot = 0;
+        sdfReleaseResourceAllocation((SdfAllocation *)allocationHandle);
         return;
     }
 }
@@ -77,38 +97,40 @@ void sdfQueueNonzeroResourceId(s32 arg0) {
 }
 
 
-u32 sdfResourceRetainAddress(SdfResource *resource) {
-    resource->referenceCount = resource->referenceCount + 1;
-    return resource->address;
+/* Increment the signed reference count and return the stored data address. */
+u32 sdfResourceRetainAddress(SdfAllocation *allocation) {
+    allocation->referenceCount = allocation->referenceCount + 1;
+    return allocation->address;
 }
 
-void sdfDecrementAllocationReferenceCount(u8 *work) {
-    u16 value = *(u16 *)(work + 0xE);
-    if (value != 0) {
-        *(u16 *)(work + 0xE) = value - 1;
+/* This path reads the same reference-count storage unsigned and never decrements zero. */
+void sdfDecrementAllocationReferenceCount(u8 *allocation) {
+    u16 referenceCount = *(u16 *)(allocation + 0xE);
+    if (referenceCount != 0) {
+        *(u16 *)(allocation + 0xE) = referenceCount - 1;
     }
 }
 
 typedef struct SdfHeapRoot {
     s32 unk0; /* 0x0 */
-    SdfResource *first; /* 0x4: first block record */
+    SdfAllocation *first; /* 0x4: first block record */
     s32 unk8; /* 0x8 */
     s32 unkC; /* 0xC */
-    SdfResource *last; /* 0x10: end marker */
+    SdfAllocation *last; /* 0x10: end marker */
 } SdfHeapRoot;
 
 extern SdfHeapRoot D_003E2748;
 
-/* Find the used heap block whose data address is `address`. */
-SdfResource *sdfFindGeneralBlockByAddress(void *address) {
+/* The address must belong to an existing used block: the end-marker path does not end this scan. */
+SdfAllocation *sdfFindGeneralBlockByAddress(void *address) {
     SdfHeapRoot *heap = &D_003E2748;
-    SdfResource *block;
+    SdfAllocation *block;
     s32 interruptsDisabled;
 
     interruptsDisabled = func_00312C08();
-    for (block = heap->first;; block = block->block) {
-        if (block->busy != 1) {
-            if (block->busy == 2) {
+    for (block = heap->first;; block = block->next) {
+        if (block->state != SDF_HEAP_BLOCK_USED) {
+            if (block->state == SDF_HEAP_BLOCK_END) {
                 if (interruptsDisabled != 0) {
                     EIntr();
                 }
@@ -122,56 +144,56 @@ SdfResource *sdfFindGeneralBlockByAddress(void *address) {
     }
 }
 
-extern SdfResource *D_003E274C[];
+extern SdfAllocation *D_003E274C[];
 
 /* Walk the general heap's block list and write its statistics: total bytes, free bytes, largest and smallest free block, block count and free block count. */
-void sdfGetGeneralHeapStats(s32 *out) {
-    SdfResource *block = D_003E274C[0];
-    s32 total = 0;
+void sdfGetGeneralHeapStats(s32 *stats) {
+    SdfAllocation *block = D_003E274C[0];
+    s32 totalBytes = 0;
     s32 freeBytes = 0;
-    s32 largest = 0;
-    s32 smallest = 0;
-    s32 blocks = 0;
-    s32 freeBlocks = 0;
-    s32 size;
-    u16 busy;
+    s32 largestFreeBytes = 0;
+    s32 smallestFreeBytes = 0;
+    s32 blockCount = 0;
+    s32 freeBlockCount = 0;
+    s32 blockBytes;
+    u16 state;
 
-    for (; block->busy != 2; block = block->block) {
-        size = block->block->address - block->address;
-        busy = block->busy;
-        blocks++;
-        total += size;
-        if (busy == 0) {
-            if (smallest == 0 || size < smallest) {
-                smallest = size;
+    for (; block->state != SDF_HEAP_BLOCK_END; block = block->next) {
+        blockBytes = block->next->address - block->address;
+        state = block->state;
+        blockCount++;
+        totalBytes += blockBytes;
+        if (state == SDF_HEAP_BLOCK_FREE) {
+            if (smallestFreeBytes == 0 || blockBytes < smallestFreeBytes) {
+                smallestFreeBytes = blockBytes;
             }
-            if (largest < size) {
-                largest = size;
+            if (largestFreeBytes < blockBytes) {
+                largestFreeBytes = blockBytes;
             }
-            freeBytes += size;
-            freeBlocks++;
+            freeBytes += blockBytes;
+            freeBlockCount++;
         }
     }
-    out[0] = total;
-    out[1] = freeBytes;
-    out[3] = smallest;
-    out[2] = largest;
-    out[4] = blocks;
-    out[5] = freeBlocks;
+    stats[SDF_HEAP_STAT_TOTAL_BYTES] = totalBytes;
+    stats[SDF_HEAP_STAT_FREE_BYTES] = freeBytes;
+    stats[SDF_HEAP_STAT_SMALLEST_FREE] = smallestFreeBytes;
+    stats[SDF_HEAP_STAT_LARGEST_FREE] = largestFreeBytes;
+    stats[SDF_HEAP_STAT_BLOCK_COUNT] = blockCount;
+    stats[SDF_HEAP_STAT_FREE_BLOCK_COUNT] = freeBlockCount;
 }
 
 /* Find the used heap block that contains `address`; NULL when the end marker is reached. */
-SdfResource *sdfFindGeneralBlockContaining(s32 address) {
-    SdfResource *block = D_003E274C[0];
-    SdfResource *next;
+SdfAllocation *sdfFindGeneralBlockContaining(s32 address) {
+    SdfAllocation *block = D_003E274C[0];
+    SdfAllocation *nextBlock;
 
-    for (;; block = next) {
-        next = block->block;
-        if (block->busy != 1) {
-            if (block->busy == 2) {
+    for (;; block = nextBlock) {
+        nextBlock = block->next;
+        if (block->state != SDF_HEAP_BLOCK_USED) {
+            if (block->state == SDF_HEAP_BLOCK_END) {
                 return NULL;
             }
-        } else if (address >= block->address && address < next->address) {
+        } else if (address >= block->address && address < nextBlock->address) {
             return block;
         }
     }
@@ -186,27 +208,29 @@ typedef struct SifRpcClientData {
 
 extern SifRpcClientData D_003E2770;
 
+/* Pack name/data lengths, a terminated name and optional data; return transport error or server result. */
 s32 sdfSendNamedResourceRequest(char *name, s32 dataSize, void *data, s32 *outSize) {
-    u8 buffer[0x50];
+    u8 replyScratch[0x50];
     s32 nameLength = strlen(name);
-    s32 total = nameLength + dataSize + 0xC;
-    u32 *block = (u32 *)sdfResourceRetainAddress((SdfResource *)sdfAllocGeneralBlock(total));
-    u32 *reply;
+    s32 requestBytes = nameLength + dataSize + SDF_NAMED_REQUEST_OVERHEAD_BYTES;
+    u32 *requestWords = (u32 *)sdfResourceRetainAddress((SdfAllocation *)sdfAllocGeneralBlock(requestBytes));
+    u32 *replyWords;
     s32 result;
 
-    block[0] = nameLength;
-    block[1] = dataSize;
-    memcpy(block + 2, name, nameLength + 1);
+    requestWords[0] = nameLength;
+    requestWords[1] = dataSize;
+    memcpy(requestWords + 2, name, nameLength + 1);
     if (dataSize != 0) {
-        memcpy((u8 *)block + nameLength + 9, data, dataSize);
+        memcpy((u8 *)requestWords + nameLength + 9, data, dataSize);
     }
-    reply = (u32 *)(((u32)buffer + 0x3F) & ~0x3F);
-    result = func_002F4FD8(&D_003E2770, 1, 0, block, total, reply, 8, 0, 0);
+    /* Align the two-word reply within the stack scratch buffer to 64 bytes. */
+    replyWords = (u32 *)(((u32)replyScratch + SDF_RPC_REPLY_ALIGNMENT_MASK) & ~SDF_RPC_REPLY_ALIGNMENT_MASK);
+    result = func_002F4FD8(&D_003E2770, 1, 0, requestWords, requestBytes, replyWords, 8, 0, 0);
     if (result >= 0) {
         if (outSize != NULL) {
-            *outSize = reply[1];
+            *outSize = replyWords[1];
         }
-        result = reply[0];
+        result = replyWords[0];
     }
     return result;
 }
@@ -217,26 +241,26 @@ extern void func_002F4A38(s32 arg);
 extern s32 func_002CF930(void);
 extern s32 sdfGetElapsedTimerTicks(s32 start);
 
-/* Load the two IOP modules (the first optional), then bind the RPC client to its server, retrying until it answers. */
-void func_002D0D70(const char *module, const char *firstModule) {
-    s32 start;
+/* Load the optional module first, then the required one; bind retries wait in timer ticks. */
+void func_002D0D70(const char *modulePath, const char *optionalModulePath) {
+    s32 retryStartTick;
 
-    if (firstModule != NULL) {
-        while (sceSifLoadModule(firstModule, 0, NULL) < 0) {
+    if (optionalModulePath != NULL) {
+        while (sceSifLoadModule(optionalModulePath, 0, NULL) < 0) {
         }
     }
-    while (sceSifLoadModule(module, 0, NULL) < 0) {
+    while (sceSifLoadModule(modulePath, 0, NULL) < 0) {
     }
-    if (firstModule != NULL) {
+    if (optionalModulePath != NULL) {
         func_002F4A38(0);
     }
     while (1) {
-        sceSifMBindRpc(&D_003E2770, 0x6F496453, 0);
+        sceSifMBindRpc(&D_003E2770, SDF_NAMED_RESOURCE_RPC_ID, 0);
         if (D_003E2770.server != NULL) {
             break;
         }
-        start = func_002CF930();
-        while (sdfGetElapsedTimerTicks(start) < 0x1ED2) {
+        retryStartTick = func_002CF930();
+        while (sdfGetElapsedTimerTicks(retryStartTick) < SDF_RPC_BIND_RETRY_TICKS) {
         }
     }
 }
