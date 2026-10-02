@@ -16,6 +16,8 @@ Pipeline per version (see README.md):
   FLW0 (.bfasm)      tools/flw0.py assemble -> build/<v>/scripts/, then SHA-1 check
   INF (.infasm)      tools/inf.py assemble -> build/<v>/data/field/, then SHA-1 check
   WAP (.wapasm)      tools/wap.py assemble -> build/<v>/data/field/, then SHA-1 check
+  NPL (.nplasm)      tools/npl.py assemble -> build/<v>/data/field/, then SHA-1 check
+  SKY (.skyasm)      tools/sky.py assemble -> build/<v>/data/field/, then SHA-1 check
   FLD2 (.fldasm)     tools/fld.py assemble -> build/<v>/data/field/, then SHA-1 check
   LB (.lbasm)        tools/lb.py assemble over an extracted base -> build/<v>/data/field/
   battle (.tblasm)   tools/battle_tbl.py assemble -> build/<v>/data/battle/, then SHA-1 check
@@ -358,6 +360,16 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         f"mkdir -p $outdir && {sys.executable} tools/wap.py assemble "
         "--scripts $scripts --interactions $interactions $in $out",
         description="wap $in",
+    )
+    n.rule(
+        "npl",
+        f"mkdir -p $outdir && {sys.executable} tools/npl.py assemble $in $out",
+        description="npl $in",
+    )
+    n.rule(
+        "sky",
+        f"mkdir -p $outdir && {sys.executable} tools/sky.py assemble $in $out",
+        description="sky $in",
     )
     n.rule(
         "fld2",
@@ -750,6 +762,37 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             version_outputs.append(str(wap_stamp))
             field_data_stamps.append(str(wap_stamp))
 
+        for kind in ("npl", "sky"):
+            environment_manifest = Path("config") / version / f"field_{kind}.sha1"
+            if not (ROOT / environment_manifest).exists():
+                continue
+            environment_source_dir = Path("src") / version / "data" / "field"
+            environment_output_dir = Path("build") / version / "data" / "field"
+            environment_sources = sorted(
+                (ROOT / environment_source_dir).glob(f"*.{kind}asm")
+            )
+            environment_outputs = []
+            for source in environment_sources:
+                source = source.relative_to(ROOT)
+                output = environment_output_dir / source.with_suffix(f".{kind}").name
+                n.build(
+                    str(output),
+                    kind,
+                    str(source),
+                    implicit=[f"tools/{kind}.py"],
+                    variables={"outdir": str(output.parent)},
+                )
+                environment_outputs.append(str(output))
+            environment_stamp = environment_output_dir / f"field_{kind}.ok"
+            n.build(
+                str(environment_stamp),
+                "check",
+                str(environment_manifest),
+                implicit=environment_outputs,
+            )
+            version_outputs.append(str(environment_stamp))
+            field_data_stamps.append(str(environment_stamp))
+
         fld_manifest = Path("config") / version / "field_fld2.sha1"
         if (ROOT / fld_manifest).exists():
             fld_source_dir = Path("src") / version / "data" / "field"
@@ -957,6 +1000,10 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         wap_manifest = ROOT / "config" / version / "field_wap.sha1"
         if wap_manifest.exists():
             configure_inputs.append(str(wap_manifest.relative_to(ROOT)))
+        for kind in ("npl", "sky"):
+            environment_manifest = ROOT / "config" / version / f"field_{kind}.sha1"
+            if environment_manifest.exists():
+                configure_inputs.append(str(environment_manifest.relative_to(ROOT)))
         fld_manifest = ROOT / "config" / version / "field_fld2.sha1"
         if fld_manifest.exists():
             configure_inputs.append(str(fld_manifest.relative_to(ROOT)))

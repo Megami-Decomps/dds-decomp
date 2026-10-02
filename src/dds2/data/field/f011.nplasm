@@ -1,0 +1,7 @@
+npl 1 count=64
+
+default primary=#737373 secondary=#333333 texture=15,0 direction=0
+
+palette 1 primary=#887360 secondary=#2c2019 texture=15,0 direction=50
+palette 2 primary=#4c5953 secondary=#2c2c26 texture=15,0 direction=55
+palette 3 primary=#535953 secondary=#2c2c2c texture=15,0 direction=55

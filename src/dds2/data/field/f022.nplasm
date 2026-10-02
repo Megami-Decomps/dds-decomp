@@ -1,0 +1,36 @@
+npl 1 count=64
+
+default primary=#737373 secondary=#333333 texture=15,0 direction=0
+
+palette 0 primary=#665340 secondary=#262019 texture=15,0 direction=0
+palette 1 primary=#39404c secondary=#26262c texture=15,0 direction=50
+palette 2 primary=#39404c secondary=#26262c texture=15,0 direction=50
+palette 3 primary=#39404c secondary=#26262c texture=15,0 direction=50
+palette 4 primary=#39404c secondary=#26262c texture=15,0 direction=50
+palette 5 primary=#35373c secondary=#201d23 texture=15,0 direction=50
+palette 6 primary=#35373c secondary=#201d23 texture=15,0 direction=50
+palette 7 primary=#393946 secondary=#202026 texture=15,0 direction=50
+palette 8 primary=#393946 secondary=#202026 texture=15,0 direction=50
+palette 9 primary=#596059 secondary=#262c2c texture=15,0 direction=48
+palette 10 primary=#596059 secondary=#2c2c26 texture=15,0 direction=48
+palette 11 primary=#604633 secondary=#262020 texture=15,0 direction=50
+palette 12 primary=#596059 secondary=#2c2c26 texture=15,0 direction=48
+palette 13 primary=#596059 secondary=#2c2c26 texture=15,0 direction=48
+palette 14 primary=#604633 secondary=#262020 texture=15,0 direction=50
+palette 15 primary=#596059 secondary=#2c2c26 texture=15,0 direction=48
+palette 16 primary=#596059 secondary=#2c2c26 texture=15,0 direction=48
+palette 17 primary=#596059 secondary=#2c2c26 texture=15,0 direction=48
+palette 18 primary=#604633 secondary=#262020 texture=15,0 direction=50
+palette 19 primary=#596059 secondary=#2c2c26 texture=15,0 direction=48
+palette 20 primary=#596059 secondary=#2c2c26 texture=15,0 direction=48
+palette 21 primary=#4c5966 secondary=#263340 texture=15,0 direction=51
+palette 22 primary=#665340 secondary=#262019 texture=15,0 direction=0
+palette 23 primary=#665340 secondary=#262019 texture=15,0 direction=0
+palette 24 primary=#665340 secondary=#262019 texture=15,0 direction=0
+palette 25 primary=#665340 secondary=#262019 texture=15,0 direction=0
+palette 26 primary=#665340 secondary=#262019 texture=15,0 direction=0
+palette 27 primary=#665340 secondary=#262019 texture=15,0 direction=0
+palette 28 primary=#665340 secondary=#262019 texture=15,0 direction=0
+palette 29 primary=#665340 secondary=#262019 texture=15,0 direction=0
+palette 30 primary=#665340 secondary=#262019 texture=15,0 direction=0
+palette 31 primary=#665340 secondary=#262019 texture=15,0 direction=0
