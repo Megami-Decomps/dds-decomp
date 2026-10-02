@@ -100,7 +100,7 @@ extern void kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
-extern void mnuResumeEffectQueueFrameAdvance(void);
+extern u32 mnuResumeEffectQueueFrameAdvance(void);
 
 extern void func_00317AD0(MnuShootingWork *handle);
 
@@ -183,7 +183,13 @@ u8 func_00316ED0(void) {
     return func_00101740(D_0042D4D0) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00316EF8);
+u32 func_00316EF8(void) {
+    mnuMovieTaskState = 2;
+    D_00435BB0 = 1;
+    func_00316FA8((u32)D_0043891C);
+    kwlnTaskDestroyWithHierarchyByName(D_0042D4D0, 1);
+    return mnuResumeEffectQueueFrameAdvance();
+}
 
 /* Return cleared 0x1E0-byte task work with its allocation handle and defaults. */
 MnuShootingWork *mdlAllocateViewerPackageWork(void) {
