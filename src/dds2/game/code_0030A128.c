@@ -2,6 +2,13 @@
 
 extern s32 func_0030AC10(void);
 
+extern void func_00134A18(void);
+extern void func_00137888(void);
+extern void func_0030C8E8(s32);
+extern void func_0030DB40(s32, s32, s32, s32, s32, s32, s32);
+extern void func_0030E1A0(s32);
+extern void func_0030ECC0(void);
+
 extern u32 D_004388AC;
 
 extern u32 D_004388B0;
@@ -495,7 +502,36 @@ void fldInitializeLocalMapScene(void) {
 
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030B1E8);
 
-INCLUDE_ASM(const s32, "game/code_0030A128", func_0030B470);
+void func_0030B470(void) {
+    func_00134A18();
+    func_0030DB40(0, 0, 0, 0x80, 0x21, 0, 0x53);
+    func_0030DB40(0, 0, 0, 0x80, 0x22, 0, 0x53);
+
+    switch (D_004388AC) {
+    case 1:
+    case 2:
+        func_0030C8E8(1);
+        func_0030ECC0();
+        func_0030E1A0(0);
+        break;
+    case 3:
+        func_0030C8E8(0);
+        func_0030ECC0();
+        func_0030E1A0(1);
+        break;
+    case 4:
+        func_0030C8E8(0);
+        func_0030E1A0(1);
+        break;
+    case 5:
+        func_0030E1A0(0);
+        break;
+    }
+
+    if (D_004388B0 != 0) {
+        func_00137888();
+    }
+}
 
 s32 fldPackLocalMapFlagStates(void) {
     s32 bits;
