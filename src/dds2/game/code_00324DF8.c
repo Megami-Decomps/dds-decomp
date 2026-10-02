@@ -18,10 +18,6 @@ extern u64 sdfAllocateBlockBySizeThreshold(u64);
 
 extern void *func_0035A828(u64);
 
-extern u64 func_00325BB0(u64, u32);
-
-extern u64 func_00325AB8(u64, u32);
-
 extern u64 func_00325790(u64, u32);
 
 extern s32 CreateSema(void *);
@@ -59,6 +55,15 @@ typedef struct SdfResourceRecord {
     u32 *items;
     SdfResourceInfo *info;
 } SdfResourceRecord;
+
+typedef struct SdfResourceVectorRecord1C {
+    u8 data[0x1C];
+} SdfResourceVectorRecord1C;
+
+typedef struct SdfResourceVectorRecord30 {
+    u8 data[0x2C];
+    SdfVec4 *vector;
+} SdfResourceVectorRecord30;
 
 extern u32 *func_00324D50(void);
 extern void *memcpy(void *, const void *, u32);
@@ -146,9 +151,45 @@ u32 *func_00325688(const SdfResourceRecord *source, s32 count) {
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325790);
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325AB8);
+u32 *func_00325AB8(const SdfResourceVectorRecord1C *source, s32 count) {
+    u32 *owner = func_00324D50();
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325BB0);
+    while (count != 0) {
+        SdfResourceVectorRecord1C *copy =
+            (SdfResourceVectorRecord1C *)func_00324F50((s32)owner, sizeof(*copy) + sizeof(SdfVec4));
+        SdfVec4 *vector;
+
+        memset(copy, 0, sizeof(*copy) + sizeof(*vector));
+        *copy = *source;
+        vector = (SdfVec4 *)(copy + 1);
+        *(SdfVec4 **)((u8 *)copy + 0x18) = vector;
+        *vector = **(SdfVec4 **)((u8 *)source + 0x18);
+        func_00324DF8(owner, (u32)copy);
+        source++;
+        count--;
+    }
+    return owner;
+}
+
+u32 *func_00325BB0(const SdfResourceVectorRecord30 *source, s32 count) {
+    u32 *owner = func_00324D50();
+
+    while (count != 0) {
+        SdfResourceVectorRecord30 *copy =
+            (SdfResourceVectorRecord30 *)func_00324F50((s32)owner, sizeof(*copy) + sizeof(SdfVec4));
+        SdfVec4 *vector;
+
+        memset(copy, 0, sizeof(*copy) + sizeof(*vector));
+        *copy = *source;
+        vector = (SdfVec4 *)(copy + 1);
+        copy->vector = vector;
+        *vector = *source->vector;
+        func_00324DF8(owner, (u32)copy);
+        source++;
+        count--;
+    }
+    return owner;
+}
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325CC8);
 
@@ -472,4 +513,3 @@ INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389BC);
 INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389C0);
 
 INCLUDE_SDATA(const s32, "game/code_00324DF8", sdfTickCallback);
-
