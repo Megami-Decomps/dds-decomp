@@ -16,6 +16,9 @@ import ee_gcc_compare as compare
 import ee_gcc_delay_slots as delay_slots
 
 
+DIAGNOSTIC_CFLAG = re.compile(r"^-fsched-verbose(?:=.*)?$")
+
+
 def read_manifest(directory: Path) -> tuple[dict[str, Any], str | None]:
     path = directory / "manifest.json"
     if not path.is_file():
@@ -63,6 +66,13 @@ def effective_cflags(manifest: dict[str, Any]) -> list[str] | None:
     except ValueError:
         return None
     return args[start:end]
+
+
+def semantic_cflags(flags: Any) -> list[str] | None:
+    """Exclude flags which only add text to captured diagnostics."""
+    if not isinstance(flags, list):
+        return None
+    return [str(flag) for flag in flags if not DIAGNOSTIC_CFLAG.match(str(flag))]
 
 
 def resolve_function_scope(left: Path, right: Path,
@@ -276,6 +286,21 @@ def analyze(left: Path, right: Path, function: str | None = None) -> dict[str, A
         for manifest in (left_manifest, right_manifest)
     )
     diagnosis = diagnosis_for(comparison, objects, function, compiler_evidence)
+    incompatible: list[str] = []
+    left_flags = semantic_cflags(left_provenance["extra_cflags"])
+    right_flags = semantic_cflags(right_provenance["extra_cflags"])
+    if left_flags is not None and right_flags is not None and left_flags != right_flags:
+        incompatible.append("code-affecting compiler flags differ")
+    left_compiler = left_provenance["compiler_sha256"]
+    right_compiler = right_provenance["compiler_sha256"]
+    if left_compiler and right_compiler and left_compiler != right_compiler:
+        incompatible.append("compiler hashes differ")
+    if incompatible:
+        diagnosis = {
+            "class": "insufficient-evidence",
+            "basis": incompatible,
+            "next_step": "recapture both probes with the same compiler and code-affecting options",
+        }
     first = comparison["first_semantic_divergence"]
     report: dict[str, Any] = {
         "schema": 1,

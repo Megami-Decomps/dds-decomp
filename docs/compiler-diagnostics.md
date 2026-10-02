@@ -94,7 +94,10 @@ diagnoses label them as whole-unit evidence instead of attributing an object
 difference to the selected function. The raw hash remains useful provenance;
 equality decisions use the path-normalized hash. Missing target-function
 artifacts and failed compiler captures are reported as insufficient evidence,
-never as evidence that a source change had no effect. The combined command
+never as evidence that a source change had no effect. A compiler-hash or
+code-affecting option mismatch also fails closed; diagnostic-only
+`-fsched-verbose` differences remain comparable after comment normalization.
+The combined command
 returns status 2 for insufficient evidence, 1 for a divergence, and 0 only for
 a complete comparison with no divergence.
 
