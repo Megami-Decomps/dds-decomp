@@ -28,6 +28,7 @@ jobs:
           python3 tools/test_battle_tbl.py
           python3 tools/test_dev_elf.py
           python3 tools/test_ee_gcc_aslr.py
+          python3 tools/test_ee_gcc_contracts.py
 
       # The retail executables are not in this repository. CI reads them from a
       # private repository with a read-only deploy key (secret ORIG_DEPLOY_KEY).
