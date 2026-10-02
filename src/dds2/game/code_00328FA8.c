@@ -1,5 +1,12 @@
 #include "common.h"
 
+#define SDF_CHIP_CLASS_COUNT 7
+#define SDF_CHIP_BLOCK_SHIFT 12
+#define SDF_CHIP_BLOCK_BYTES (1 << SDF_CHIP_BLOCK_SHIFT)
+#define SDF_MEM_ALIGNMENT_MASK 0x7F
+#define SDF_MEM_BLOCK_FREE 0
+#define SDF_MEM_BLOCK_SENTINEL 2
+
 extern u32 D_0045F0FC[];
 
 INCLUDE_ASM(const s32, "game/code_00328FA8", func_00328FA8);
@@ -27,7 +34,7 @@ typedef struct SdfChipStats {
     u32 blockCount; /* 0x08 */
     u32 emptyBlocks; /* 0x0C: blocks without a size class */
     u32 partialBlocks; /* 0x10: blocks with free cells */
-    u32 usedCells[7]; /* 0x14: used cells per size class */
+    u32 usedCells[SDF_CHIP_CLASS_COUNT]; /* 0x14: used cells per size class */
 } SdfChipStats;
 
 extern SdfChipBlockRecord *D_00439108;
@@ -37,37 +44,38 @@ extern SdfChipClass D_0045F0A0[];
 /* Fill `stats` with the chip heap's block totals and per-size-class usage. */
 void sdfGetChipHeapStats(SdfChipStats *stats) {
     SdfChipBlockRecord *block;
-    s32 remaining;
-    s32 i;
+    s32 blocksRemaining;
+    s32 classIndex;
     s32 partialBlocks;
     s32 emptyBlocks;
     s32 freeBytes;
-    s32 delta;
+    s32 freeCells;
 
-    remaining = D_00439118;
-    stats->blockCount = remaining;
-    stats->totalBytes = remaining << 12;
-    for (i = 0; i != 7; i++) {
-        stats->usedCells[i] = 0;
+    blocksRemaining = D_00439118;
+    stats->blockCount = blocksRemaining;
+    stats->totalBytes = blocksRemaining << SDF_CHIP_BLOCK_SHIFT;
+    for (classIndex = 0; classIndex != SDF_CHIP_CLASS_COUNT; classIndex++) {
+        stats->usedCells[classIndex] = 0;
     }
     block = D_00439108;
     emptyBlocks = 0;
     partialBlocks = 0;
     freeBytes = 0;
+    /* This post-tested walk assumes a nonzero heap block count. */
     do {
         if (block->sizeClass == NULL) {
             emptyBlocks++;
-            freeBytes += 0x1000;
+            freeBytes += SDF_CHIP_BLOCK_BYTES;
         } else {
-            delta = block->sizeClass->cellCount - block->usedCells;
-            if (delta != 0) {
+            freeCells = block->sizeClass->cellCount - block->usedCells;
+            if (freeCells != 0) {
                 partialBlocks++;
-                freeBytes += delta * block->sizeClass->unitSize;
+                freeBytes += freeCells * block->sizeClass->unitSize;
             }
             stats->usedCells[block->sizeClass - D_0045F0A0] += block->usedCells;
         }
         block++;
-    } while (--remaining != 0);
+    } while (--blocksRemaining != 0);
     stats->freeBytes = freeBytes;
     stats->emptyBlocks = emptyBlocks;
     stats->partialBlocks = partialBlocks;
@@ -97,33 +105,33 @@ extern u8 D_00439128[4];
 extern void sdfReleaseResourceAllocation();
 extern void sdfInitializeSynchronizedRequest();
 
-/* Set up the general heap over a `size`-byte allocation: one free block between the two end sentinels. */
-void sdfInitGeneralHeap(u32 size) {
+/* Align the usable span to 128 bytes and link one free block between sentinels. */
+void sdfInitGeneralHeap(u32 heapSize) {
     SdfMemHeap *heap = &D_0045F0F8;
-    SdfMemBlock *block;
-    u32 first;
-    u32 end;
+    SdfMemBlock *freeBlock;
+    u32 alignedStart;
+    u32 alignedEnd;
 
-    heap->base = (u32)func_0035A828(size);
-    heap->size = size;
-    block = sdfAllocSizeClassBlock(0x10);
-    first = (heap->base + 0x7F) & ~0x7F;
-    end = (heap->base + size) & ~0x7F;
+    heap->base = (u32)func_0035A828(heapSize);
+    heap->size = heapSize;
+    freeBlock = sdfAllocSizeClassBlock(0x10);
+    alignedStart = (heap->base + SDF_MEM_ALIGNMENT_MASK) & ~SDF_MEM_ALIGNMENT_MASK;
+    alignedEnd = (heap->base + heapSize) & ~SDF_MEM_ALIGNMENT_MASK;
     heap->head.prev = NULL;
-    heap->head.next = block;
-    heap->head.state = 2;
+    heap->head.next = freeBlock;
+    heap->head.state = SDF_MEM_BLOCK_SENTINEL;
     heap->head.tag = -1;
-    heap->tail.state = 2;
+    heap->tail.state = SDF_MEM_BLOCK_SENTINEL;
     heap->tail.tag = -1;
-    heap->tail.address = end;
-    heap->tail.prev = block;
+    heap->tail.address = alignedEnd;
+    heap->tail.prev = freeBlock;
     heap->tail.next = NULL;
-    heap->head.address = first;
-    block->prev = &heap->head;
-    block->state = 0;
-    block->next = &heap->tail;
-    block->address = first;
-    block->tag = 0;
+    heap->head.address = alignedStart;
+    freeBlock->prev = &heap->head;
+    freeBlock->state = SDF_MEM_BLOCK_FREE;
+    freeBlock->next = &heap->tail;
+    freeBlock->address = alignedStart;
+    freeBlock->tag = 0;
     D_004389CC = 0;
     sdfInitializeSynchronizedRequest(D_00439128, sdfReleaseResourceAllocation);
 }
