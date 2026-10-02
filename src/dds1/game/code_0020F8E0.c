@@ -3,6 +3,7 @@
 #include "btl_state.h"
 #include "btl_command.h"
 #include "ee_mmi.h"
+#include "kwln.h"
 
 extern void func_003014F0(char *, const char *, const char *, s32);
 
@@ -20,17 +21,19 @@ s32 btlFindScriptResource(char *name) {
     return bfFindScriptIndexByName(battle->scriptHandle, path);
 }
 
+/* Start the requested skill script as a child of the battle owner task.
+ * The new task uses the owner's scheduler priority minus one. */
 void btlStartSkillEventTask(s32 skill) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    s32 handle;
+    s32 taskId;
     if (battle->eventTaskId == -1) {
         return;
     }
-    handle = scrCreateTaskForProcessId(*(s32 *)((u8 *)battle->scriptOwner + 0x20) - 1,
+    taskId = scrCreateTaskForProcessId((s32)((KwlnTask *)battle->scriptOwner)->unk20 - 1,
                             battle->scriptHandle, skill);
-    scrSetCurrentActor(handle, 0);
-    func_00101A80(battle->scriptOwner, handle);
-    battle->scriptTask = handle;
+    scrSetCurrentActor(taskId, 0);
+    func_00101A80(battle->scriptOwner, taskId);
+    battle->scriptTask = taskId;
 }
 
 s32 btlReleaseScriptResource(void) {
@@ -63,22 +66,23 @@ s32 btlCanStartPrimaryScriptTask(void) {
 
 extern s32 scrCreateTaskForProcessId(s32, s32, s32);
 
+/* Find the primary script entry, launch it at owner priority minus one, and mark it started. */
 void btlStartPrimaryScriptTask(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    s32 skill;
-    s32 handle;
+    s32 scriptId;
+    s32 taskId;
     if (battle->eventTaskId == -1) {
         return;
     }
-    skill = btlFindScriptResource(btlPrimaryScriptResourceName);
-    if (skill == -1) {
+    scriptId = btlFindScriptResource(btlPrimaryScriptResourceName);
+    if (scriptId == -1) {
         return;
     }
-    handle = scrCreateTaskForProcessId(*(s32 *)((u8 *)battle->scriptOwner + 0x20) - 1,
-                            battle->scriptHandle, skill);
-    scrSetCurrentActor(handle, 0);
-    func_00101A80(battle->scriptOwner, handle);
-    battle->scriptTask = handle;
+    taskId = scrCreateTaskForProcessId((s32)((KwlnTask *)battle->scriptOwner)->unk20 - 1,
+                            battle->scriptHandle, scriptId);
+    scrSetCurrentActor(taskId, 0);
+    func_00101A80(battle->scriptOwner, taskId);
+    battle->scriptTask = taskId;
     battle->scriptFlags |= 1;
 }
 
@@ -103,22 +107,23 @@ s32 btlHasScriptResource(void) {
     return btlFindScriptResource(btlSecondaryScriptResourceName) != -1;
 }
 
+/* Find the secondary script entry, launch it at owner priority minus one, and mark it started. */
 void btlStartSecondaryScriptTask(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    s32 skill;
-    s32 handle;
+    s32 scriptId;
+    s32 taskId;
     if (battle->eventTaskId == -1) {
         return;
     }
-    skill = btlFindScriptResource(btlSecondaryScriptResourceName);
-    if (skill == -1) {
+    scriptId = btlFindScriptResource(btlSecondaryScriptResourceName);
+    if (scriptId == -1) {
         return;
     }
-    handle = scrCreateTaskForProcessId(*(s32 *)((u8 *)battle->scriptOwner + 0x20) - 1,
-                            battle->scriptHandle, skill);
-    scrSetCurrentActor(handle, 0);
-    func_00101A80(battle->scriptOwner, handle);
-    battle->scriptTask = handle;
+    taskId = scrCreateTaskForProcessId((s32)((KwlnTask *)battle->scriptOwner)->unk20 - 1,
+                            battle->scriptHandle, scriptId);
+    scrSetCurrentActor(taskId, 0);
+    func_00101A80(battle->scriptOwner, taskId);
+    battle->scriptTask = taskId;
     battle->scriptFlags |= 2;
 }
 
