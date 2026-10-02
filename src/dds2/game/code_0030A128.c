@@ -31,6 +31,7 @@ typedef struct LmapNode {
     u8 unk0[0x18];
     struct LmapNode *prev; /* 0x18 */
     struct LmapNode *next; /* 0x1C */
+    struct LmapList *child; /* 0x20 */
 } LmapNode;
 
 typedef struct LmapList {
@@ -47,6 +48,9 @@ typedef struct LmapList {
     s32 y;
     s32 width;
     s32 height;
+    u8 pad30[4];
+    void (*selected)(struct LmapList *);
+    void (*draw)(s32, s32, s32, struct LmapList *, s32);
 } LmapList;
 
 extern LmapNode *sdfGridSeekFirstNode(LmapList *);
@@ -258,7 +262,46 @@ void fldLocalMapDrawScrollIndicators(s32 offsetX, s32 offsetY, s32 z, u32 color,
         uiDrawUniformRgbRange(coordinates[0], coordinates[1], z, color, channel);
     }
 }
-INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A528);
+extern s32 D_00438888;
+extern LmapList *D_00439088;
+extern void fldLmapSubmitScaledSpritePacket(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_00309DF8(s32, s32, s32, LmapList *, s32);
+
+void func_0030A528(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
+    u32 color;
+
+    D_00438888++;
+    color = (list->flags & 2) ? 0x80608060 : 0x80606060;
+    if (!(list->flags & 0x40)) {
+        fldLmapSubmitScaledSpritePacket(list->x + x, list->y + y, z, list->width,
+                                       list->height, 0x40000000, color, channel);
+        if (list->flags & 2) {
+            fldLocalMapDrawScrollIndicators(x, y, z, 0x60806080, list, channel);
+        }
+    }
+    func_00309DF8(x, y, z, list, channel);
+    if (list->draw != 0) {
+        list->draw(list->x + x, list->y + y, z, list, channel);
+    }
+    if ((list->flags & 0x10) && D_00438888 >= 2) {
+        list->flags &= ~1;
+        list->flags &= ~2;
+        D_00439088->flags |= 2;
+        D_00439088->flags &= ~1;
+        list->flags &= ~0x10;
+    } else {
+        D_00439088 = list;
+        if (list->flags & 0x21) {
+            if (list->cursor->child != 0) {
+                func_0030A528(x + ((list->width + 8) << 4), y, z, list->cursor->child, channel);
+            }
+        } else if ((list->flags & 2) && list->selected != 0) {
+            list->selected(list);
+        }
+    }
+    D_00438888--;
+}
+
 
 typedef struct LmapDrawSurface {
     u8 pad00[0x10];

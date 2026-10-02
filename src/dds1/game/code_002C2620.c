@@ -77,6 +77,7 @@ typedef struct LmapNode {
     u8 unk0[0x18];
     struct LmapNode *prev; /* 0x18 */
     struct LmapNode *next; /* 0x1C */
+    struct LmapList *child; /* 0x20 */
 } LmapNode;
 
 typedef struct LmapList {
@@ -93,6 +94,9 @@ typedef struct LmapList {
     s32 y;
     s32 width;
     s32 height;
+    u8 pad30[4];
+    void (*selected)(struct LmapList *);
+    void (*draw)(s32, s32, s32, struct LmapList *, s32);
 } LmapList;
 
 extern LmapNode *sdfGridSeekFirstNode(LmapList *);
@@ -254,7 +258,46 @@ void fldLocalMapDrawScrollIndicators(s32 offsetX, s32 offsetY, s32 z, u32 color,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2A20);
+extern s32 D_003BD238;
+extern LmapList *D_003BD968;
+extern void fldLmapSubmitScaledSpritePacket(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_002C22F0(s32, s32, s32, LmapList *, s32);
+
+void func_002C2A20(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
+    u32 color;
+
+    D_003BD238++;
+    color = (list->flags & 2) ? 0x80608060 : 0x80606060;
+    if (!(list->flags & 0x40)) {
+        fldLmapSubmitScaledSpritePacket(list->x + x, list->y + y, z, list->width,
+                                       list->height, 0x40000000, color, channel);
+        if (list->flags & 2) {
+            fldLocalMapDrawScrollIndicators(x, y, z, 0x60806080, list, channel);
+        }
+    }
+    func_002C22F0(x, y, z, list, channel);
+    if (list->draw != 0) {
+        list->draw(list->x + x, list->y + y, z, list, channel);
+    }
+    if ((list->flags & 0x10) && D_003BD238 >= 2) {
+        list->flags &= ~1;
+        list->flags &= ~2;
+        D_003BD968->flags |= 2;
+        D_003BD968->flags &= ~1;
+        list->flags &= ~0x10;
+    } else {
+        D_003BD968 = list;
+        if (list->flags & 0x21) {
+            if (list->cursor->child != 0) {
+                func_002C2A20(x + ((list->width + 8) << 4), y, z, list->cursor->child, channel);
+            }
+        } else if ((list->flags & 2) && list->selected != 0) {
+            list->selected(list);
+        }
+    }
+    D_003BD238--;
+}
+
 
 typedef struct LmapDrawSurface {
     u8 pad00[0x10];
