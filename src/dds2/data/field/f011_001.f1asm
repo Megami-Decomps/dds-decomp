@@ -42604,19 +42604,30 @@ mesh_program address=12
 vif_nops count=2
 
 label md_01all_01_motion
-bytes 01000500
-pointer @loc_161e70
-bytes 000000000b000000020000000b000000030000000b000000020001002e000000
-bytes 020001002f000000
-label loc_161e70
-pointer @loc_161e74
-label loc_161e74
-bytes 3c0000001800000001000c0000000000cdd90848c0c09ac3a57a424618000000
-bytes 01000c0000000000b61e853f0000803ffeff7f3f140000000100080000000000
-bytes 00009cfe0000f00f34000000020014000000dc0500000000000000000000803f
-bytes 0000803f000000000000803f000000000000803f0000803f0000000034000000
-bytes 020014000000dc0500000000000000000000803f0000803f0000000000000040
-bytes 000000000000803f0000803f00000000000000000000000000000000
+model_motion_playbook clip_count=1 bindings=5 clips=@md_01all_01_motion_clips
+model_motion_binding family=node selector=translation target=11
+model_motion_binding family=node selector=scale target=11
+model_motion_binding family=node selector=quaternion target=11
+model_motion_binding family=asset selector=2 target=46
+model_motion_binding family=asset selector=2 target=47
+
+label md_01all_01_motion_clips
+model_motion_clip_table clips=@md_01all_01_motion_clip_0
+
+label md_01all_01_motion_clip_0
+model_motion_clip duration=60 reserved=0
+model_motion_track format=vector3 frames=0
+motion_vector3 140135.203125,-309.505859375,12446.6611328125
+model_motion_track format=vector3 frames=0
+motion_vector3 1.0399997234344482,1.0,0.9999998807907104
+model_motion_track format=quaternion_s16 frames=0
+motion_quaternion_s16 0,-356,0,4080
+model_motion_track format=float5 frames=0,1500
+motion_float5 0.0,0.0,1.0,1.0,0.0 1.0,0.0,1.0,1.0,0.0
+model_motion_track format=float5 frames=0,1500
+motion_float5 0.0,0.0,1.0,1.0,0.0 2.0,0.0,1.0,1.0,0.0
+
+zeros 12
 label md_01d_01_data
 model_resource items=@md_01d_01_items assets=@md_01all_01_assets motion=@md_01d_01_motion
 
@@ -42721,16 +42732,21 @@ mesh_program address=12
 vif_nops count=2
 
 label md_01d_01_motion
-bytes 01000200
-pointer @loc_1629d8
-bytes 020001002e000000020001002f000000
-label loc_1629d8
-pointer @loc_1629dc
-label loc_1629dc
-bytes fa00000034000000020014000000dc0500000000000000000000803f0000803f
-bytes 000000000000803f000000000000803f0000803f000000003400000002001400
-bytes 0000dc0500000000000000000000803f0000803f000000000000004000000000
-bytes 0000803f0000803f000000000000000000000000
+model_motion_playbook clip_count=1 bindings=2 clips=@md_01d_01_motion_clips
+model_motion_binding family=asset selector=2 target=46
+model_motion_binding family=asset selector=2 target=47
+
+label md_01d_01_motion_clips
+model_motion_clip_table clips=@md_01d_01_motion_clip_0
+
+label md_01d_01_motion_clip_0
+model_motion_clip duration=250 reserved=0
+model_motion_track format=float5 frames=0,1500
+motion_float5 0.0,0.0,1.0,1.0,0.0 1.0,0.0,1.0,1.0,0.0
+model_motion_track format=float5 frames=0,1500
+motion_float5 0.0,0.0,1.0,1.0,0.0 2.0,0.0,1.0,1.0,0.0
+
+zeros 8
 label md_01d_01b_data
 model_resource items=@md_01d_01b_items assets=@md_01all_01_assets motion=@md_01d_01b_motion
 
@@ -42835,16 +42851,21 @@ mesh_program address=12
 vif_nops count=2
 
 label md_01d_01b_motion
-bytes 01000200
-pointer @loc_1634f8
-bytes 020001002e000000020001002f000000
-label loc_1634f8
-pointer @loc_1634fc
-label loc_1634fc
-bytes fa00000034000000020014000000dc0500000000000000000000803f0000803f
-bytes 000000000000803f000000000000803f0000803f000000003400000002001400
-bytes 0000dc0500000000000000000000803f0000803f000000000000004000000000
-bytes 0000803f0000803f000000000000000000000000
+model_motion_playbook clip_count=1 bindings=2 clips=@md_01d_01b_motion_clips
+model_motion_binding family=asset selector=2 target=46
+model_motion_binding family=asset selector=2 target=47
+
+label md_01d_01b_motion_clips
+model_motion_clip_table clips=@md_01d_01b_motion_clip_0
+
+label md_01d_01b_motion_clip_0
+model_motion_clip duration=250 reserved=0
+model_motion_track format=float5 frames=0,1500
+motion_float5 0.0,0.0,1.0,1.0,0.0 1.0,0.0,1.0,1.0,0.0
+model_motion_track format=float5 frames=0,1500
+motion_float5 0.0,0.0,1.0,1.0,0.0 2.0,0.0,1.0,1.0,0.0
+
+zeros 8
 label md_01all_02_data
 model_resource items=@md_01all_02_items assets=@md_01all_01_assets motion=@md_01all_02_motion
 
@@ -43446,19 +43467,30 @@ color 97,97,97,0 105,109,113,64
 mesh_program address=12
 
 label md_01all_02_motion
-bytes 01000500
-pointer @loc_167760
-bytes 000000000200000002000000020000000300000002000000020001002e000000
-bytes 020001002f000000
-label loc_167760
-pointer @loc_167764
-label loc_167764
-bytes dc0500001800000001000c0000000000cace0148c81a5cc622a0294718000000
-bytes 01000c000000000013d0923fc426163f12d0923f140000000100080000000000
-bytes 00003df30000a60934000000020014000000dc0500000000000000000000803f
-bytes 0000803f000000000000803f000000000000803f0000803f0000000034000000
-bytes 020014000000dc0500000000000000000000803f0000803f0000000000000040
-bytes 000000000000803f0000803f00000000000000000000000000000000
+model_motion_playbook clip_count=1 bindings=5 clips=@md_01all_02_motion_clips
+model_motion_binding family=node selector=translation target=2
+model_motion_binding family=node selector=scale target=2
+model_motion_binding family=node selector=quaternion target=2
+model_motion_binding family=asset selector=2 target=46
+model_motion_binding family=asset selector=2 target=47
+
+label md_01all_02_motion_clips
+model_motion_clip_table clips=@md_01all_02_motion_clip_0
+
+label md_01all_02_motion_clip_0
+model_motion_clip duration=1500 reserved=0
+model_motion_track format=vector3 frames=0
+motion_vector3 132923.15625,-14086.6953125,43424.1328125
+model_motion_track format=vector3 frames=0
+motion_vector3 1.1469749212265015,0.586529016494751,1.146974802017212
+model_motion_track format=quaternion_s16 frames=0
+motion_quaternion_s16 0,-3267,0,2470
+model_motion_track format=float5 frames=0,1500
+motion_float5 0.0,0.0,1.0,1.0,0.0 1.0,0.0,1.0,1.0,0.0
+model_motion_track format=float5 frames=0,1500
+motion_float5 0.0,0.0,1.0,1.0,0.0 2.0,0.0,1.0,1.0,0.0
+
+zeros 12
 label md_01all_01_assets
 model_assets count=48
 model_asset index=0 resource_04=0
