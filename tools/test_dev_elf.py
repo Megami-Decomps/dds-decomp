@@ -650,6 +650,38 @@ class DevElfTests(unittest.TestCase):
         self.assertEqual(resolved["additions"][0]["new_vaddr"], 0x00412004)
         self.assertEqual(resolved["additions"][0]["size"], 8)
 
+    def test_linked_extension_sizes_require_ordered_boundary_symbols(self) -> None:
+        spec = {"extension_vaddr": 0x00412000}
+        symbols = [
+            ("dev_extension_VRAM_START", 0x00412000, 0, 0, 1),
+            ("dev_extension_FILE_END", 0x00412008, 0, 0, 1),
+            ("dev_extension_VRAM_END", 0x00412048, 0, 0, 1),
+        ]
+        self.assertEqual(
+            dev_elf._linked_extension_sizes(spec, _metadata_elf(symbols, [])),
+            (8, 0x48),
+        )
+        reversed_symbols = [*symbols[:2], (symbols[2][0], 0x00412004, 0, 0, 1)]
+        with self.assertRaisesRegex(dev_elf.DevElfError, "precedes its file end"):
+            dev_elf._linked_extension_sizes(
+                spec, _metadata_elf(reversed_symbols, [])
+            )
+
+    def test_range_storage_distinguishes_file_nobits_and_mixed(self) -> None:
+        _, programs = dev_elf.parse_elf(_elf(payload_size=0x40))
+        self.assertEqual(
+            dev_elf._range_storage(programs, 0x00100000, 0x00100040), "file"
+        )
+        self.assertEqual(
+            dev_elf._range_storage(programs, 0x00100040, 0x00100080), "nobits"
+        )
+        self.assertEqual(
+            dev_elf._range_storage(programs, 0x00100020, 0x00100060), "mixed"
+        )
+        self.assertIsNone(
+            dev_elf._range_storage(programs, 0x00100200, 0x00100240)
+        )
+
     def test_stale_reference_scan_rejects_words_and_jumps(self) -> None:
         ranges = [(0x00100020, 0x00100040, 0x00412000, 0x00412024)]
         image = bytearray(_elf())
@@ -707,6 +739,105 @@ class DevElfTests(unittest.TestCase):
         with self.assertRaisesRegex(dev_elf.DevElfError, "still targets abandoned"):
             dev_elf.audit_relocation_closure(
                 bytes(base), output, relocation_elf, spec
+            )
+
+    def test_relocation_closure_accepts_nobits_move_and_target_count(self) -> None:
+        old_vaddr = 0x00100080
+        extension_vaddr = 0x00412000
+        new_vaddr = extension_vaddr + 8
+        base = bytearray(_elf(payload_size=0x40))
+        old_hi, old_lo = _address_words(old_vaddr)
+        struct.pack_into("<I", base, 0x1000, old_hi)
+        struct.pack_into("<I", base, 0x1004, old_lo)
+
+        linked = bytearray(base)
+        new_hi, new_lo = _address_words(new_vaddr)
+        struct.pack_into("<I", linked, 0x1000, new_hi)
+        struct.pack_into("<I", linked, 0x1004, new_lo)
+        linked.extend(bytes((-len(linked)) & 0xFFF))
+        linked.extend(bytes(8))
+        spec = {
+            "format": 1,
+            "base_sha1": hashlib.sha1(base).hexdigest(),
+            "extension_vaddr": extension_vaddr,
+            "retail_static_end": 0x00100200,
+            "moves": [
+                {
+                    "old_vaddr": old_vaddr,
+                    "new_vaddr": new_vaddr,
+                    "size": 0x40,
+                    "storage": "nobits",
+                    "expected_relocations": 0,
+                    "expected_target_relocations": 2,
+                }
+            ],
+        }
+        output, _ = dev_elf.finalize_image(
+            bytes(base),
+            bytes(linked),
+            spec,
+            linked_file_size=8,
+            linked_memory_size=0x48,
+        )
+        relocation_elf = _relocation_elf(
+            [
+                (0x00100000, new_vaddr, dev_elf.R_MIPS_HI16, "fileManagerWork"),
+                (0x00100004, new_vaddr, dev_elf.R_MIPS_LO16, "fileManagerWork"),
+            ]
+        )
+        summary = dev_elf.audit_relocation_closure(
+            bytes(base), output, relocation_elf, spec
+        )
+        self.assertEqual(summary["target_relocations"], 2)
+        self.assertEqual(summary["changed_payload_words"], 0)
+
+        with self.assertRaisesRegex(dev_elf.DevElfError, "expected 3"):
+            wrong_count = {
+                **spec,
+                "moves": [
+                    {**spec["moves"][0], "expected_target_relocations": 3}
+                ],
+            }
+            dev_elf.audit_relocation_closure(
+                bytes(base), output, relocation_elf, wrong_count
+            )
+
+        with self.assertRaisesRegex(dev_elf.DevElfError, "old range has nobits"):
+            wrong_storage = {
+                **spec,
+                "moves": [{**spec["moves"][0], "storage": "file"}],
+            }
+            dev_elf.audit_relocation_closure(
+                bytes(base), output, relocation_elf, wrong_storage
+            )
+
+        bad_new_vaddr = extension_vaddr + 4
+        bad_linked = bytearray(linked)
+        bad_hi, bad_lo = _address_words(bad_new_vaddr)
+        struct.pack_into("<I", bad_linked, 0x1000, bad_hi)
+        struct.pack_into("<I", bad_linked, 0x1004, bad_lo)
+        bad_spec = {
+            **spec,
+            "moves": [{**spec["moves"][0], "new_vaddr": bad_new_vaddr}],
+        }
+        bad_output, _ = dev_elf.finalize_image(
+            bytes(base),
+            bytes(bad_linked),
+            bad_spec,
+            linked_file_size=8,
+            linked_memory_size=0x48,
+        )
+        bad_relocations = _relocation_elf(
+            [
+                (0x00100000, bad_new_vaddr, dev_elf.R_MIPS_HI16, "fileManagerWork"),
+                (0x00100004, bad_new_vaddr, dev_elf.R_MIPS_LO16, "fileManagerWork"),
+            ]
+        )
+        with self.assertRaisesRegex(
+            dev_elf.DevElfError, "outside the development nobits payload"
+        ):
+            dev_elf.audit_relocation_closure(
+                bytes(base), bad_output, bad_relocations, bad_spec
             )
 
     def test_moved_payload_allows_validated_relocation(self) -> None:
@@ -1285,6 +1416,30 @@ class DevElfTests(unittest.TestCase):
         ):
             dev_elf.audit_replacement_objects(spec, [replacement])
 
+    def test_moved_section_storage_must_match_input_section_kind(self) -> None:
+        spec = {
+            "moves": [
+                {
+                    "object": "old.o",
+                    "section": ".bss",
+                    "storage": "nobits",
+                }
+            ]
+        }
+        nobits = _allocated_object([(".bss", 0x40, dev_elf.SHT_NOBITS)])
+        self.assertEqual(
+            dev_elf.audit_moved_sections(spec, {"old.o": nobits}),
+            {"moved_input_sections": 1},
+        )
+
+        progbits = _allocated_object([(".bss", 0x40, 1)])
+        with self.assertRaisesRegex(dev_elf.DevElfError, "declares nobits"):
+            dev_elf.audit_moved_sections(spec, {"old.o": progbits})
+
+        file_spec = {"moves": [{"object": "old.o", "section": ".bss"}]}
+        with self.assertRaisesRegex(dev_elf.DevElfError, "declares file"):
+            dev_elf.audit_moved_sections(file_spec, {"old.o": nobits})
+
     def test_replacement_object_rejects_nonempty_retained_section(self) -> None:
         spec = {
             "replacements": [
@@ -1478,6 +1633,42 @@ class DevElfTests(unittest.TestCase):
         dev_elf.assert_mips_address(output, 0x210, 0x218, retail_end, "bss")
         self.assertEqual(struct.unpack_from("<I", output, 0x20C)[0], 0x00412080)
 
+    def test_finalize_keeps_nobits_tail_out_of_file_payload(self) -> None:
+        base = _elf()
+        linked = bytearray(base)
+        linked.extend(bytes((-len(linked)) & 0xFFF))
+        linked.extend(bytes.fromhex("1122334455667788"))
+        spec = {
+            "format": 1,
+            "base_sha1": hashlib.sha1(base).hexdigest(),
+            "extension_vaddr": 0x00412000,
+            "extension_memory_size": 0x48,
+            "retail_static_end": 0x0040C5F0,
+        }
+
+        output, summary = dev_elf.finalize_image(
+            base,
+            bytes(linked),
+            spec,
+            linked_file_size=8,
+            linked_memory_size=0x48,
+        )
+        _, programs = dev_elf.parse_elf(output)
+        self.assertEqual(programs[-1].file_size, 8)
+        self.assertEqual(programs[-1].memory_size, 0x48)
+        self.assertEqual(len(output), len(linked))
+        self.assertEqual(output[-8:], bytes.fromhex("1122334455667788"))
+        self.assertEqual(summary["heap_start"], 0x00412080)
+
+        with self.assertRaisesRegex(dev_elf.DevElfError, "expected 0x49"):
+            dev_elf.finalize_image(
+                base,
+                bytes(linked),
+                {**spec, "extension_memory_size": 0x49},
+                linked_file_size=8,
+                linked_memory_size=0x48,
+            )
+
     def test_finalize_rejects_drifted_patch_site(self) -> None:
         base = bytearray(_elf())
         hi, lo = _address_words(0x0040C5F0)
@@ -1552,6 +1743,55 @@ SECTIONS
         self.assertIn("dev_addition_0_END", result)
         self.assertIn(".dev_extension 0x412000", result)
         self.assertLess(result.index(".dev_extension"), result.index("/DISCARD/"))
+
+    def test_linker_script_places_nobits_move_in_no_load_tail(self) -> None:
+        source = """\
+SECTIONS
+{
+    .main :
+    {
+        old.o(.text);
+    }
+    .main_bss (NOLOAD) :
+    {
+        old.o(.bss);
+    }
+    elf_trailer_VRAM_END = .;
+    /DISCARD/ : { *(*); }
+}
+"""
+        spec = {
+            "moves": [
+                {
+                    "object": "old.o",
+                    "section": ".text",
+                    "old_size": 4,
+                    "new_size": 4,
+                },
+                {
+                    "object": "old.o",
+                    "section": ".bss",
+                    "storage": "nobits",
+                    "old_size": 0x40,
+                    "new_size": 0x40,
+                    "alignment": 8,
+                },
+            ],
+            "extension_vaddr": 0x412000,
+        }
+        result = dev_elf.render_linker_script(source, spec)
+        file_start = result.index(".dev_extension 0x412000")
+        file_end = result.index("dev_extension_FILE_END")
+        nobits_start = result.index(".dev_extension_nobits (NOLOAD)")
+        memory_end = result.index("dev_extension_VRAM_END")
+        size_assertion = result.index("ASSERT(dev_move_1_END")
+        self.assertLess(file_start, file_end)
+        self.assertLess(file_end, nobits_start)
+        self.assertLess(nobits_start, memory_end)
+        self.assertLess(memory_end, size_assertion)
+        self.assertLess(result.index("old.o(.text);", file_start), file_end)
+        self.assertLess(nobits_start, result.rindex("old.o(.bss);"))
+        self.assertLess(result.rindex("old.o(.bss);"), memory_end)
 
     def test_linker_script_rejects_missing_or_duplicate_placement(self) -> None:
         spec = {

@@ -199,6 +199,15 @@ def _move_new_size(move: dict[str, Any], index: int) -> int:
     return new_size
 
 
+def _move_storage(move: dict[str, Any], index: int) -> str:
+    storage = move.get("storage", "file")
+    if storage not in ("file", "nobits"):
+        raise DevElfError(
+            f"moves[{index}].storage must be 'file' or 'nobits', got {storage!r}"
+        )
+    return storage
+
+
 def parse_elf(image: bytes | bytearray) -> tuple[ElfHeader, list[ProgramHeader]]:
     if len(image) < ELF_HEADER.size:
         raise DevElfError("file is smaller than an ELF32 header")
@@ -454,10 +463,10 @@ def _object_sections(image: bytes | bytearray) -> list[ObjectSection]:
     return result
 
 
-def parse_allocated_sections(image: bytes | bytearray) -> dict[str, int]:
-    """Return allocated input-section names and sizes from an ELF32 object."""
+def parse_allocated_sections(image: bytes | bytearray) -> dict[str, ObjectSection]:
+    """Return allocated input sections from an ELF32 object."""
 
-    result: dict[str, int] = {}
+    result: dict[str, ObjectSection] = {}
     for section in _object_sections(image):
         if not section.flags & SHF_ALLOC:
             continue
@@ -465,7 +474,7 @@ def parse_allocated_sections(image: bytes | bytearray) -> dict[str, int]:
             raise DevElfError(
                 f"replacement object has duplicate section {section.name}"
             )
-        result[section.name] = section.size
+        result[section.name] = section
     return result
 
 
@@ -721,7 +730,7 @@ def audit_replacement_objects(
             section = unaccounted[0]
             raise DevElfError(
                 f"replacements[{index}] has unaccounted allocated section "
-                f"{section} of size 0x{actual[section]:X}"
+                f"{section} of size 0x{actual[section].size:X}"
             )
         missing = sorted(
             section
@@ -736,11 +745,11 @@ def audit_replacement_objects(
             if (
                 section in actual
                 and expected_size is not None
-                and actual[section] != expected_size
+                and actual[section].size != expected_size
             ):
                 raise DevElfError(
                     f"replacements[{index}] section {section} has size "
-                    f"0x{actual[section]:X}, expected 0x{expected_size:X}"
+                    f"0x{actual[section].size:X}, expected 0x{expected_size:X}"
                 )
         symbols = _object_symbols(image, _object_sections(image))
         common = [
@@ -767,6 +776,58 @@ def audit_replacement_objects(
     return {"fallback_symbols": fallback_count}
 
 
+def _effective_move_object_paths(spec: dict[str, Any]) -> list[str]:
+    replacements = {
+        replacement.get("retail_object"): replacement.get("object")
+        for replacement in spec.get("replacements", [])
+        if isinstance(replacement, dict)
+    }
+    result = []
+    for index, move in enumerate(spec.get("moves", [])):
+        if not isinstance(move, dict):
+            raise DevElfError(f"moves[{index}] is not an object")
+        obj = move.get("object")
+        if not isinstance(obj, str):
+            raise DevElfError(f"moves[{index}].object is not a string")
+        linked_obj = replacements.get(obj, obj)
+        if not isinstance(linked_obj, str):
+            raise DevElfError(f"moves[{index}] replacement object is not a string")
+        result.append(linked_obj)
+    return result
+
+
+def audit_moved_sections(
+    spec: dict[str, Any], objects: dict[str, bytes]
+) -> dict[str, int]:
+    """Require each moved input section to match its declared storage kind."""
+
+    paths = _effective_move_object_paths(spec)
+    parsed: dict[str, dict[str, ObjectSection]] = {}
+    for path in set(paths):
+        if path not in objects:
+            raise DevElfError(f"no object image was supplied for moved object {path}")
+        parsed[path] = parse_allocated_sections(objects[path])
+
+    for index, (move, path) in enumerate(zip(spec.get("moves", []), paths)):
+        section_name = move.get("section")
+        if not isinstance(section_name, str):
+            raise DevElfError(f"moves[{index}].section is not a string")
+        section = parsed[path].get(section_name)
+        if section is None:
+            raise DevElfError(
+                f"moves[{index}] object {path} has no allocated section {section_name}"
+            )
+        storage = _move_storage(move, index)
+        is_nobits = section.kind == SHT_NOBITS
+        if (storage == "nobits") != is_nobits:
+            actual = "SHT_NOBITS" if is_nobits else "file-backed"
+            raise DevElfError(
+                f"moves[{index}] declares {storage} storage but {path}"
+                f"({section_name}) is {actual}"
+            )
+    return {"moved_input_sections": len(paths)}
+
+
 def _unique_defined_symbol(
     symbols: list[LinkedSymbol], name: str, context: str
 ) -> LinkedSymbol:
@@ -780,6 +841,33 @@ def _unique_defined_symbol(
             f"{context} symbol {name} has {len(matching)} definitions, expected one"
         )
     return matching[0]
+
+
+def _linked_extension_sizes(
+    spec: dict[str, Any], relocation_elf: bytes
+) -> tuple[int, int]:
+    """Resolve the file-backed and in-memory extension spans from linker symbols."""
+
+    symbols = parse_linked_symbols(relocation_elf)
+    start = _unique_defined_symbol(
+        symbols, "dev_extension_VRAM_START", "development extension"
+    ).value
+    file_end = _unique_defined_symbol(
+        symbols, "dev_extension_FILE_END", "development extension"
+    ).value
+    memory_end = _unique_defined_symbol(
+        symbols, "dev_extension_VRAM_END", "development extension"
+    ).value
+    expected_start = _number(spec.get("extension_vaddr"), "extension_vaddr")
+    if start != expected_start:
+        raise DevElfError(
+            f"development extension starts at 0x{start:X}, expected 0x{expected_start:X}"
+        )
+    if file_end <= start:
+        raise DevElfError("development extension has an empty file-backed prefix")
+    if memory_end < file_end:
+        raise DevElfError("development extension memory end precedes its file end")
+    return file_end - start, memory_end - start
 
 
 def _matched_gp_values(
@@ -1271,6 +1359,33 @@ def _load_ranges(programs: list[ProgramHeader]) -> list[tuple[int, int]]:
     ]
 
 
+def _range_storage(
+    programs: list[ProgramHeader], start: int, end: int
+) -> str | None:
+    """Classify a nonempty range within one PT_LOAD as file, nobits, or mixed."""
+
+    if end <= start:
+        raise DevElfError("cannot classify an empty or reversed range")
+    matches = []
+    for program in programs:
+        if program.kind != PT_LOAD:
+            continue
+        memory_end = program.vaddr + program.memory_size
+        if program.vaddr <= start and end <= memory_end:
+            file_end = program.vaddr + program.file_size
+            if end <= file_end:
+                matches.append("file")
+            elif start >= file_end:
+                matches.append("nobits")
+            else:
+                matches.append("mixed")
+    if len(matches) > 1:
+        raise DevElfError(
+            f"range 0x{start:X}..0x{end:X} is covered by multiple PT_LOAD segments"
+        )
+    return matches[0] if matches else None
+
+
 def install_appended_load_segment(
     image: bytearray,
     *,
@@ -1523,6 +1638,7 @@ def _audit_moved_payloads(
     ranges: list[tuple[int, int, int, int]],
     replacement_moves: set[int],
     retail_gp: int | None,
+    moves: list[dict[str, Any]],
 ) -> int:
     """Require each moved byte to equal retail, except validated relocations."""
 
@@ -1560,7 +1676,7 @@ def _audit_moved_payloads(
 
     changed_words = 0
     for index, (old_start, old_end, new_start, new_end) in enumerate(ranges):
-        if index in replacement_moves:
+        if index in replacement_moves or _move_storage(moves[index], index) == "nobits":
             continue
         size = old_end - old_start
         if new_end - new_start != size:
@@ -1768,8 +1884,17 @@ def audit_relocation_closure(
     allowed_bytes.update(range(new_phdr_slot, new_phdr_slot + PROGRAM_HEADER.size))
 
     for index, (old_start, old_end, _, _) in enumerate(ranges):
+        storage = _move_storage(moves[index], index)
+        actual_storage = _range_storage(base_programs, old_start, old_end)
+        if actual_storage != storage:
+            raise DevElfError(
+                f"moves[{index}] old range has {actual_storage or 'unmapped'} storage, "
+                f"expected {storage}"
+            )
+        if storage == "nobits":
+            continue
         slot_offset = _file_offset_for_vaddr(base_programs, old_start)
-        if slot_offset is None or _file_offset_for_vaddr(base_programs, old_end - 1) is None:
+        if slot_offset is None:
             raise DevElfError(f"moves[{index}] old range is not wholly file-backed")
         old_slot = output[slot_offset : slot_offset + old_end - old_start]
         if any(old_slot):
@@ -1837,6 +1962,7 @@ def audit_relocation_closure(
         ranges,
         replacement_moves,
         retail_gp,
+        moves,
     )
     stale_relocations = [
         (relocation, target)
@@ -2053,6 +2179,7 @@ def audit_relocation_closure(
             raise DevElfError(f"redirect wrapper {wrapper} has a non-R_MIPS_26 relocation")
 
     extension_relocations = 0
+    target_relocations = 0
     for index, move in enumerate(spec.get("moves", [])):
         start = _number(move.get("new_vaddr"), f"moves[{index}].new_vaddr")
         size = _move_new_size(move, index)
@@ -2065,6 +2192,27 @@ def audit_relocation_closure(
                 f"moves[{index}] retained {actual} relocation entries, expected {expected}"
             )
         extension_relocations += actual
+        targeted = sum(
+            any(start <= target < start + size for target in targets)
+            for targets in effective_targets.values()
+        )
+        if _move_storage(move, index) == "nobits" and (
+            "expected_target_relocations" not in move
+        ):
+            raise DevElfError(
+                f"moves[{index}] nobits move requires expected_target_relocations"
+            )
+        if "expected_target_relocations" in move:
+            expected_targets = _number(
+                move["expected_target_relocations"],
+                f"moves[{index}].expected_target_relocations",
+            )
+            if targeted != expected_targets:
+                raise DevElfError(
+                    f"moves[{index}] has {targeted} target relocation entries, "
+                    f"expected {expected_targets}"
+                )
+        target_relocations += targeted
 
     addition_relocations = 0
     addition_ranges: list[tuple[int, int]] = []
@@ -2101,19 +2249,31 @@ def audit_relocation_closure(
         raise DevElfError("final PT_LOAD is not the declared development extension")
     if output_header.phnum != old_header.phnum + 1:
         raise DevElfError("development ELF did not gain exactly one program header")
-    extension_end = extension.vaddr + extension.file_size
+    extension_file_end = extension.vaddr + extension.file_size
+    extension_memory_end = extension.vaddr + extension.memory_size
     for index, (_, _, new_start, new_end) in enumerate(ranges):
-        if new_start < extension.vaddr or new_end > extension_end:
+        storage = _move_storage(moves[index], index)
+        if storage == "file":
+            in_payload = (
+                extension.vaddr <= new_start
+                and new_end <= extension_file_end
+            )
+        else:
+            in_payload = (
+                extension_file_end <= new_start
+                and new_end <= extension_memory_end
+            )
+        if not in_payload:
             raise DevElfError(
-                f"moves[{index}] new range is outside the development payload"
+                f"moves[{index}] new range is outside the development {storage} payload"
             )
     for index, (start, end) in enumerate(addition_ranges):
-        if start < extension.vaddr or end > extension_end:
+        if start < extension.vaddr or end > extension_file_end:
             raise DevElfError(
                 f"additions[{index}] is outside the development payload"
             )
     for relocation in redirect_relocations:
-        if not extension.vaddr <= relocation.symbol_value < extension_end:
+        if not extension.vaddr <= relocation.symbol_value < extension_file_end:
             raise DevElfError(
                 f"redirect wrapper {relocation.symbol_name} is outside "
                 "the development payload"
@@ -2125,6 +2285,7 @@ def audit_relocation_closure(
         "moved_relocations": len(moved_relocations),
         "redirect_relocations": len(redirect_relocations),
         "extension_relocations": extension_relocations,
+        "target_relocations": target_relocations,
         "addition_relocations": addition_relocations,
         "checked_hi_lo_pairs": checked_pairs,
         "replacement_symbols": len(replacement_symbols),
@@ -2209,7 +2370,10 @@ def render_linker_script(base: str, spec: dict[str, Any]) -> str:
             )
 
     text = base
-    extension_lines: list[str] = []
+    file_extension_lines: list[str] = []
+    nobits_extension_lines: list[str] = []
+    # The pinned linker rejects ASSERT commands inside an output section.
+    move_assertion_lines: list[str] = []
     for index, move in enumerate(moves):
         obj = move.get("object")
         section = move.get("section")
@@ -2234,17 +2398,21 @@ def render_linker_script(base: str, spec: dict[str, Any]) -> str:
         )
         text = text.replace(original, slot, 1)
         linked_obj = replacement_by_retail.get(obj, (0, {}))[1].get("object", obj)
+        storage = _move_storage(move, index)
+        extension_lines = (
+            nobits_extension_lines if storage == "nobits" else file_extension_lines
+        )
         extension_lines.append(f"        . = ALIGN(0x{alignment:X});")
         extension_lines.append(f"        dev_move_{index}_START = .;")
         extension_lines.append(f"        {linked_obj}({section});")
         extension_lines.append(f"        dev_move_{index}_END = .;")
         if expected_new_size is not None:
             new_size = _number(expected_new_size, f"moves[{index}].new_size")
-            extension_lines.extend(
+            move_assertion_lines.extend(
                 [
-                    f"        ASSERT(dev_move_{index}_END - dev_move_{index}_START "
+                    f"    ASSERT(dev_move_{index}_END - dev_move_{index}_START "
                     f"== 0x{new_size:X},",
-                    f'               "development move {index} has unexpected size")',
+                    f'           "development move {index} has unexpected size")',
                 ]
             )
 
@@ -2284,15 +2452,15 @@ def render_linker_script(base: str, spec: dict[str, Any]) -> str:
             addition.get("alignment", 8), f"additions[{index}].alignment"
         )
         _align_up(0, alignment)
-        extension_lines.append(f"        . = ALIGN(0x{alignment:X});")
-        extension_lines.append(f"        dev_addition_{index}_START = .;")
+        file_extension_lines.append(f"        . = ALIGN(0x{alignment:X});")
+        file_extension_lines.append(f"        dev_addition_{index}_START = .;")
         for section_index, section in enumerate(sections):
             if not isinstance(section, str) or not section.startswith("."):
                 raise DevElfError(
                     f"additions[{index}].sections[{section_index}] is invalid"
                 )
-            extension_lines.append(f"        {obj}({section});")
-        extension_lines.append(f"        dev_addition_{index}_END = .;")
+            file_extension_lines.append(f"        {obj}({section});")
+        file_extension_lines.append(f"        dev_addition_{index}_END = .;")
 
     marker = "    /DISCARD/ :"
     if text.count(marker) != 1:
@@ -2309,13 +2477,20 @@ def render_linker_script(base: str, spec: dict[str, Any]) -> str:
             f"    .dev_extension 0x{vaddr:X} : AT(dev_extension_ROM_START)",
             "    {",
             "        FILL(0x00000000);",
+            "        dev_extension_VRAM_START = .;",
             "        dev_extension_TEXT_START = .;",
-            *extension_lines,
+            *file_extension_lines,
             "        dev_extension_TEXT_END = .;",
             "    }",
+            "    dev_extension_FILE_END = ADDR(.dev_extension) + SIZEOF(.dev_extension);",
             "    __romPos += SIZEOF(.dev_extension);",
             "    dev_extension_ROM_END = __romPos;",
+            "    .dev_extension_nobits (NOLOAD) :",
+            "    {",
+            *nobits_extension_lines,
+            "    }",
             "    dev_extension_VRAM_END = .;",
+            *move_assertion_lines,
             "    ASSERT(ADDR(.dev_extension) >= elf_trailer_VRAM_END,",
             '           "development extension overlaps the linker wrapper trailer")',
             "",
@@ -2335,7 +2510,12 @@ def _read_descriptor(path: Path) -> dict[str, Any]:
 
 
 def finalize_image(
-    base: bytes, linked: bytes, spec: dict[str, Any]
+    base: bytes,
+    linked: bytes,
+    spec: dict[str, Any],
+    *,
+    linked_file_size: int | None = None,
+    linked_memory_size: int | None = None,
 ) -> tuple[bytes, dict[str, int]]:
     expected_sha1 = spec.get("base_sha1")
     actual_sha1 = hashlib.sha1(base).hexdigest()
@@ -2351,13 +2531,28 @@ def finalize_image(
         base_file_size=len(base),
         vaddr=extension_vaddr,
         alignment=alignment,
+        memory_size=linked_memory_size,
     )
+    if linked_file_size is not None and program.file_size != linked_file_size:
+        raise DevElfError(
+            f"development payload is 0x{program.file_size:X} bytes, "
+            f"but linker symbols describe 0x{linked_file_size:X}"
+        )
     if "extension_size" in spec:
         expected_size = _number(spec["extension_size"], "extension_size")
         if program.file_size != expected_size:
             raise DevElfError(
                 f"development payload is 0x{program.file_size:X} bytes, "
                 f"expected 0x{expected_size:X}"
+            )
+    if "extension_memory_size" in spec:
+        expected_memory_size = _number(
+            spec["extension_memory_size"], "extension_memory_size"
+        )
+        if program.memory_size != expected_memory_size:
+            raise DevElfError(
+                f"development memory span is 0x{program.memory_size:X} bytes, "
+                f"expected 0x{expected_memory_size:X}"
             )
     heap_alignment = _number(spec.get("heap_alignment", 0x80), "heap_alignment")
     heap_start = _align_up(program.vaddr + program.memory_size, heap_alignment)
@@ -2438,6 +2633,14 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "link-script":
             _write(args.output, render_linker_script(args.input.read_text(), spec))
         else:
+            retail_image = args.retail.read_bytes()
+            linked_image = args.linked.read_bytes()
+            relocation_elf = args.reloc_elf.read_bytes()
+            retail_symbol_elf = (
+                args.retail_symbol_elf.read_bytes()
+                if args.retail_symbol_elf is not None
+                else None
+            )
             object_summary = audit_replacement_objects(
                 spec,
                 [
@@ -2449,15 +2652,29 @@ def main(argv: list[str] | None = None) -> int:
                     for replacement in spec.get("replacements", [])
                 ],
             )
+            move_paths = _effective_move_object_paths(spec)
+            object_summary.update(
+                audit_moved_sections(
+                    spec,
+                    {path: Path(path).read_bytes() for path in set(move_paths)},
+                )
+            )
+            linked_file_size, linked_memory_size = _linked_extension_sizes(
+                spec, relocation_elf
+            )
             output, summary = finalize_image(
-                args.retail.read_bytes(), args.linked.read_bytes(), spec
+                retail_image,
+                linked_image,
+                spec,
+                linked_file_size=linked_file_size,
+                linked_memory_size=linked_memory_size,
             )
             if args.retail_symbol_elf is not None:
                 output, repaired_words = repair_stale_replacement_relocations(
                     output,
-                    args.reloc_elf.read_bytes(),
+                    relocation_elf,
                     spec,
-                    args.retail_symbol_elf.read_bytes(),
+                    retail_symbol_elf,
                 )
             else:
                 repaired_words = 0
@@ -2480,15 +2697,11 @@ def main(argv: list[str] | None = None) -> int:
             summary["repaired_relocation_words"] = repaired_words
             summary.update(
                 audit_relocation_closure(
-                    args.retail.read_bytes(),
+                    retail_image,
                     output,
-                    args.reloc_elf.read_bytes(),
+                    relocation_elf,
                     spec,
-                    (
-                        args.retail_symbol_elf.read_bytes()
-                        if args.retail_symbol_elf is not None
-                        else None
-                    ),
+                    retail_symbol_elf,
                 )
             )
             _write(args.output, output)
