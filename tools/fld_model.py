@@ -21,6 +21,8 @@ ARRAY_BUFFER = 34962
 ELEMENT_ARRAY_BUFFER = 34963
 FLOAT = 5126
 UNSIGNED_BYTE = 5121
+UNSIGNED_SHORT = 5123
+UNSIGNED_INT = 5125
 
 
 @dataclass
@@ -127,6 +129,61 @@ def _pack_floats(records: tuple[tuple[float, ...], ...]) -> bytes:
         "<" + "f" * sum(len(record) for record in records),
         *(value for record in records for value in record),
     )
+
+
+def add_marker_mesh(
+    builder: GltfBuilder,
+    name: str,
+    material: int,
+    size: float,
+) -> int:
+    """Add a reusable octahedral diagnostic marker."""
+
+    positions = (
+        (size, 0.0, 0.0),
+        (-size, 0.0, 0.0),
+        (0.0, size, 0.0),
+        (0.0, -size, 0.0),
+        (0.0, 0.0, size),
+        (0.0, 0.0, -size),
+    )
+    triangles = (
+        0, 2, 4, 2, 1, 4, 1, 3, 4, 3, 0, 4,
+        2, 0, 5, 1, 2, 5, 3, 1, 5, 0, 3, 5,
+    )
+    position_accessor = builder.accessor(
+        _pack_floats(positions),
+        FLOAT,
+        "VEC3",
+        len(positions),
+        target=ARRAY_BUFFER,
+        minimum=[-size, -size, -size],
+        maximum=[size, size, size],
+    )
+    index_accessor = builder.accessor(
+        bytes(triangles),
+        UNSIGNED_BYTE,
+        "SCALAR",
+        len(triangles),
+        target=ELEMENT_ARRAY_BUFFER,
+        minimum=[0],
+        maximum=[5],
+    )
+    mesh_index = len(builder.document["meshes"])
+    builder.document["meshes"].append(
+        {
+            "name": name,
+            "primitives": [
+                {
+                    "attributes": {"POSITION": position_accessor},
+                    "indices": index_accessor,
+                    "material": material,
+                    "mode": 4,
+                }
+            ],
+        }
+    )
+    return mesh_index
 
 
 def _normalized_quaternion(values: tuple[float, float, float, float]) -> list[float]:
