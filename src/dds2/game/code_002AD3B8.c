@@ -806,7 +806,24 @@ s32 mnuHandleStaffValuePageInput(s32 callback) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AFDD0);
+typedef struct MenuRequirementRecord {
+    u8 pad00[5];
+    s8 requiredCount;
+} MenuRequirementRecord;
+
+extern s32 datGameState;
+extern s32 D_00435E3C;
+
+s32 func_002AFDD0(s32 value) {
+    s32 recordIndex = value - 0xC0;
+    u8 availableCount;
+
+    if (value == 0) {
+        return 0;
+    }
+    availableCount = *(u8 *)(value + datGameState + 0x20000 - 0x1910);
+    return availableCount < ((MenuRequirementRecord *)D_00435E3C)[recordIndex].requiredCount;
+}
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AFE18);
 

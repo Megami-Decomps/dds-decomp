@@ -258,7 +258,14 @@ s32 mnuValidateProfileEntry(MenuPanelSlot *slot, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291338);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291400);
+typedef struct MenuPanelPositionRecord {
+    u16 id;
+    u8 pad02;
+    s8 flags;
+} MenuPanelPositionRecord;
+
+INCLUDE_ASM(const MenuPanelPositionRecord *, "game/code_0028FD30", func_00291400);
+extern const MenuPanelPositionRecord *func_00291400(s32 selector, u16 id);
 
 void mnuActivatePanelSelection(MenuPanelObject *object, s8 selection) {
     MenuPanelState *state = (MenuPanelState *)((u8 *)object + 0x240);
@@ -449,7 +456,24 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_002933F0);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00293DB0);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00293FD0);
+s32 func_00293FD0(MenuPanelObject *object, u16 id) {
+    MenuPanelState *state = (MenuPanelState *)((u8 *)object + 0x240);
+    const MenuPanelPositionRecord *record;
+    s32 selector;
+    s32 result = -1;
+
+    for (selector = 0; selector < 3; selector++) {
+        if (((state->flags >> 24) & 0xF) == selector) {
+            continue;
+        }
+        record = func_00291400(selector, id);
+        if ((record->flags & 1) != 0) {
+            result = selector;
+            break;
+        }
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00294060);
 
