@@ -20,6 +20,32 @@ extern void func_0031EEE8(void *, u32);
 extern void mnuDrawFadeSequenceOffset(void *);
 extern void itfDrawFadeGlyphTriplet(void *);
 extern void mnuDrawFadeSequenceTwo(void *);
+
+typedef struct MnuDepthNodeList {
+    void *nodes;
+    s32 count;
+} MnuDepthNodeList;
+
+typedef struct MnuDepthNodeEntry {
+    MnuDepthNodeList list;
+    u32 unk8;
+    u32 unkC;
+} MnuDepthNodeEntry;
+
+typedef struct MnuDepthEntryArray {
+    u32 unk0;
+    s32 count;
+    MnuDepthNodeEntry *entries;
+} MnuDepthEntryArray;
+
+typedef struct MnuDepthObject {
+    u8 unk00[0x1C];
+    MnuDepthEntryArray *depthEntries;
+} MnuDepthObject;
+
+extern void mnuOverrideActiveNodeModelDepth(MnuDepthNodeList *list, f32 depth);
+extern void mnuRestoreActiveNodeModelDepth(MnuDepthNodeList *list);
+
 void itfDispatchObjectFadeSequenceMode(u8 *object) {
     s16 mode = *(s16 *)(object + 0x98);
 
@@ -44,11 +70,33 @@ void itfDispatchObjectFadeSequenceMode(u8 *object) {
     }
 }
 
+void func_0031ADD8(MnuDepthObject *object) {
+    MnuDepthNodeEntry *entries = object->depthEntries->entries;
+    s32 i = 0;
 
+    if (object->depthEntries->count > 0) {
+        MnuDepthNodeEntry *entry = entries;
+        do {
+            mnuOverrideActiveNodeModelDepth(&entry->list, 0.0f);
+            i++;
+            entry++;
+        } while (i < object->depthEntries->count);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031ADD8);
+void func_0031AE48(MnuDepthObject *object) {
+    MnuDepthNodeEntry *entries = object->depthEntries->entries;
+    s32 i = 0;
 
-INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031AE48);
+    if (object->depthEntries->count > 0) {
+        MnuDepthNodeEntry *entry = entries;
+        do {
+            mnuRestoreActiveNodeModelDepth(&entry->list);
+            i++;
+            entry++;
+        } while (i < object->depthEntries->count);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031AEB8);
 
