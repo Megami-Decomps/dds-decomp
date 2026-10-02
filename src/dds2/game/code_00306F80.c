@@ -51,13 +51,15 @@ typedef struct GridScrollEntry {
     float position;         /* 0x0C */
 } GridScrollEntry;
 
+typedef struct GridTextListItem GridTextListItem;
+
 /* Same 0x40-byte text widget layout as the DDS1 grid renderer. */
 typedef struct GridTextWidget {
     char *text;           /* 0x00 */
     u16 textLength;       /* 0x04 */
     s16 rows;             /* 0x06 */
     u16 unk08;
-    u16 unk0A;
+    s16 unk0A;
     u32 flags;            /* 0x0C */
     void *unk10;
     void *unk14;
@@ -587,9 +589,126 @@ s32 itfUpdateAngleAndGetCycleStep(s32 unused, u8 *out, GridAngleOwner *owner) {
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307C30);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00307D70);
+/* Apply linear ZOOM easing to the adjustment bounds and fade their alpha. */
+s32 func_00307D70(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
+    GridAngleTable *table;
+    s32 scaled[2];
+    s32 deltas[2];
+    s32 previous[2];
+    s32 scaledWidth;
+    s32 scaledHeight;
+    s32 widthAdjustment;
+    s32 heightAdjustment;
+    s32 angle;
+    u32 *sourceColor;
+    u32 *destColor;
+    s32 colorMask;
+    s32 fractionalMask;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00307EF8);
+    table = owner->slot->table;
+    colorMask = -0x100;
+    fractionalMask = 0xFFFF;
+    deltas[0] = table->divisor << 4;
+    deltas[1] = (((table->mirrored << 12) / 640) * rectangle->ratioHeight) / rectangle->ratioWidth;
+    angle = owner->angle;
+    previous[0] = out->dimensions[0];
+    previous[1] = out->dimensions[1];
+    scaledWidth = deltas[0] * angle;
+    if (scaledWidth < 0) {
+        scaledWidth += 0xFFFF;
+    }
+    scaled[0] = scaledWidth >> 16;
+    widthAdjustment = -((deltas[0] - scaled[0]) / 2);
+    out->dimensions[0] = widthAdjustment;
+    out->anchors[0] += (previous[0] - widthAdjustment) * 2;
+
+    scaledHeight = deltas[1] * angle;
+    if (scaledHeight < 0) {
+        scaledHeight += 0xFFFF;
+    }
+    scaled[1] = scaledHeight >> 16;
+    heightAdjustment = -((deltas[1] - scaled[1]) / 2);
+    out->dimensions[1] = heightAdjustment;
+    out->anchors[1] += (previous[1] - heightAdjustment) * 2;
+
+    sourceColor = rectangle->colors;
+    destColor = out->colors;
+    i = 3;
+    for (; i >= 0; i--, sourceColor++, destColor++) {
+        u32 color = *sourceColor;
+        s32 alpha = *(u8 *)sourceColor;
+        s32 colorProduct = alpha * owner->angle;
+        s32 negative = 0;
+
+        if (colorProduct < 0) {
+            negative++;
+        }
+        *destColor = (color & colorMask) | ((colorProduct + negative * fractionalMask) >> 16);
+    }
+    return 0x10000 / table->cycleDivisor;
+}
+
+/* Apply the angle-driven grid contraction and mirrored packed-color fade. */
+s32 func_00307EF8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
+    GridAngleTable *table = owner->slot->table;
+    s32 deltas[2];
+    s32 *dimensionOut = (s32 *)((u8 *)out + 4);
+    s32 colorFactor;
+    u32 *sourceColor;
+    u32 *destColor;
+    s32 i = 0;
+
+    deltas[0] = (rectangle->right - rectangle->left) << 4;
+    deltas[1] = (rectangle->bottom - rectangle->top) << 3;
+    {
+        s32 fractionalMask = 0xFFFF;
+
+        for (; i < 2; i++) {
+            s32 delta = deltas[i];
+            s32 magnitude = delta < 0 ? -delta : delta;
+            s32 product = magnitude * owner->angle;
+            s32 negative = 0;
+            s32 scaled;
+
+            if (product < 0) {
+                negative++;
+            }
+            scaled = (product + negative * fractionalMask) >> 16;
+            if (delta > 0) {
+                dimensionOut[i] = delta - scaled;
+            } else {
+                dimensionOut[i] = delta + scaled;
+            }
+        }
+    }
+
+    if (table->mirrored != 0) {
+        colorFactor = 0x10000 - owner->angle;
+    } else {
+        colorFactor = owner->angle;
+    }
+    sourceColor = rectangle->colors;
+    destColor = (u32 *)((u8 *)dimensionOut + 0x10);
+    {
+        s32 colorMask = -0x100;
+        s32 fractionalMask = 0xFFFF;
+
+        for (i = 3; i >= 0; i--, sourceColor++, destColor++) {
+            u32 color = *sourceColor;
+            s32 alpha = *(u8 *)sourceColor;
+            s32 product = alpha * colorFactor;
+            s32 negative = 0;
+
+            if (product < 0) {
+                negative++;
+            }
+            *destColor = (color & colorMask) |
+                         ((product + negative * fractionalMask) >> 16);
+        }
+    }
+    return 0x10000 / table->divisor;
+}
 
 /* Unpack engine RGBA order into GS packed R/G and B/A word pairs. */
 void itfGridUnpackColorChannels(u64 *channels, u32 color) {
@@ -980,6 +1099,19 @@ void itfExpandWidgetColumnWidth(s32 columns, GridTextWidget *widget) {
     }
 }
 
+struct GridTextListItem {
+    char *text;
+    u16 textLength;
+    u16 index;
+    u32 unk08;
+    u32 unk0C;
+    u32 unk10;
+    u32 value;
+    struct GridTextListItem *previous;
+    struct GridTextListItem *next;
+    u8 pad20[0xC];
+};
+
 u32 itfGetGridListLinkFlags(GridListOwner *owner) {
     GridListNode *node = owner->list;
     u32 flags;
@@ -1001,7 +1133,42 @@ u32 itfGetGridListLinkFlags(GridListOwner *owner) {
     return flags;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00309538);
+GridTextListItem *func_00309538(GridTextWidget *owner, const char *text, u32 value) {
+    GridTextListItem *item = (GridTextListItem *)sdfAllocSizeClassBlock(0x2C);
+    GridTextListItem *tail;
+    s32 length;
+    s32 allocation;
+    char *copy;
+
+    memset(item, 0, 0x2C);
+    if (owner->unk0A == 0) {
+        *(GridTextListItem **)((u8 *)owner + 0x10) = item;
+        *(GridTextListItem **)((u8 *)owner + 0x18) = item;
+        *(GridTextListItem **)((u8 *)owner + 0x14) = item;
+    }
+    length = strlen(text);
+    allocation = length + 1;
+    copy = (char *)sdfAllocSizeClassBlock(allocation);
+    item->textLength = allocation;
+    item->text = copy;
+    memcpy(copy, text, allocation);
+    itfExpandWidgetColumnWidth(length, owner);
+
+    /* Initialize the node links, then append it after the current tail. */
+    item->previous = *(GridTextListItem **)((u8 *)owner + 0x1C);
+    item->next = 0;
+    item->value = value;
+    tail = *(GridTextListItem **)((u8 *)owner + 0x1C);
+    item->unk08 = 0;
+    item->previous = tail;
+    if (tail != 0) {
+        tail->next = item;
+    }
+    *(GridTextListItem **)((u8 *)owner + 0x1C) = item;
+    item->index = owner->unk0A;
+    owner->unk0A++;
+    return item;
+}
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00309638);
 
