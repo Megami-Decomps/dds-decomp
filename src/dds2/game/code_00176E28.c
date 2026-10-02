@@ -22,8 +22,8 @@ typedef struct EffRecordPool {
     f32 matrix[16];
     f32 origin[3];
     u8 pad4C[4];
-    u32 settingA;  /* 0x50 */
-    u32 settingB;  /* 0x54 */
+    u32 drawMode;  /* 0x50: selects the packet submission surface */
+    u32 color;     /* 0x54: packed color passed to the packet builder */
     s32 count;     /* 0x58 */
     f32 scale;     /* 0x5C */
     s32 recordBase;    /* 0x60: address of stride-dependent records */
@@ -83,13 +83,15 @@ typedef struct EffectRing {
     u32 count;
     u8 pad14[8];
     s32 spread;
-    u8 pad20[0x10];
+    u8 pad20[8];
+    u32 firstColor;
+    u32 secondColor;
     f32 param30;
     f32 param34;
     f32 param38;
     u8 pad3C[0x14];
     u32 unk50;
-    u32 unk54;
+    u32 drawMode;
     EffectRingVertex *vertices;
     s32 unk5C;
     u32 color;
@@ -155,8 +157,8 @@ EffectRing *source;
     }
     angle = EFFECT_RING_START_ANGLE;
     ring->matrix = effAllocateIdentityMatrixWork(ring->count);
-    *(f32 *)(ring->matrix + 0x5C) = 1.0f;
-    *(u32 *)(ring->matrix + 0x50) = ring->unk54;
+    ((EffRecordPool *)ring->matrix)->scale = 1.0f;
+    ((EffRecordPool *)ring->matrix)->drawMode = ring->drawMode;
     step = EFFECT_RING_FULL_TURN / ring->count;
     spread = ring->spread;
     for (i = 0; i < ring->count; i++) {
@@ -203,24 +205,30 @@ void effCopyRingTransformMatrix(EffectRing *ring, void *src) {
     VU0_STORE_MATRIX(ring->matrix);
 }
 
+/* Each five-vertex fan group has one packed color word per vertex. */
+typedef struct EffRingColorSlot {
+    s32 colors[5];
+} EffRingColorSlot;
+
+/* Fill five fan-vertex colors; odd and even groups use different alpha values. */
 void effFlashWriteRingColorSlots(u8 *work, s32 index, s32 param) {
-    s32 slot;
+    EffRingColorSlot *slot;
     s32 rgb1;
     s32 rgb2;
 
-    slot = func_001784C8(*(void **)(work + 0x7C), index);
-    rgb1 = *(u32 *)(work + 0x28) & 0xFFFFFF;
-    rgb2 = *(u32 *)(work + 0x2C) & 0xFFFFFF;
-    *(s32 *)(slot + 0) = effMultiplyPackedColors(rgb2, param);
-    *(s32 *)(slot + 4) = effMultiplyPackedColors(rgb2, param);
+    slot = (EffRingColorSlot *)func_001784C8(((EffectRing *)work)->matrix, index);
+    rgb1 = ((EffectRing *)work)->firstColor & 0xFFFFFF;
+    rgb2 = ((EffectRing *)work)->secondColor & 0xFFFFFF;
+    slot->colors[0] = effMultiplyPackedColors(rgb2, param);
+    slot->colors[1] = effMultiplyPackedColors(rgb2, param);
     if (index & 1) {
-        *(s32 *)(slot + 8) = effMultiplyPackedColors(0x80000000, param);
-        *(s32 *)(slot + 0xC) = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
-        *(s32 *)(slot + 0x10) = effMultiplyPackedColors(0x80000000, param);
+        slot->colors[2] = effMultiplyPackedColors(0x80000000, param);
+        slot->colors[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
+        slot->colors[4] = effMultiplyPackedColors(0x80000000, param);
     } else {
-        *(s32 *)(slot + 8) = effMultiplyPackedColors(0xFF000000, param);
-        *(s32 *)(slot + 0xC) = effMultiplyPackedColors(rgb1 | 0x40000000, param);
-        *(s32 *)(slot + 0x10) = effMultiplyPackedColors(0xFF000000, param);
+        slot->colors[2] = effMultiplyPackedColors(0xFF000000, param);
+        slot->colors[3] = effMultiplyPackedColors(rgb1 | 0x40000000, param);
+        slot->colors[4] = effMultiplyPackedColors(0xFF000000, param);
     }
 }
 
@@ -344,7 +352,7 @@ void func_001778B0(EffRecordPool *work)
     remaining = work->count;
     D_00451FF0->colors = (u32 *)work->auxRecordBase;
     D_00451FF0->positions = (u128 *)work->recordBase;
-    D_00451FF0->unk08 = work->settingB;
+    D_00451FF0->unk08 = work->color;
     D_00451FF0->parameterCount = 0xF;
     D_00451FF0->vertexCount = 0x19;
     D_00451FF0->parameters = D_003B12C0;
@@ -360,8 +368,8 @@ void func_001778B0(EffRecordPool *work)
         D_00451FF0->parameterCount = chunk * 3;
         sdfAppendPacket(list, func_00167A10(D_00451FF0));
     }
-    if (work->settingA < 4) {
-        D_003B1308[work->settingA]->submit(D_003B1308[work->settingA], list);
+    if (work->drawMode < 4) {
+        D_003B1308[work->drawMode]->submit(D_003B1308[work->drawMode], list);
     } else {
         clearList = sdfAllocPacketAligned(0x20);
         sdfInitPacketList(clearList);
@@ -395,15 +403,15 @@ s32 effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index) {
 }
 
 void effSetVectorIncrementBits(EffRecordPool *pool, u32 value) {
-    pool->settingA = value;
+    pool->drawMode = value;
 }
 
 void func_00177B98(EffRecordPool *pool, u32 value) {
-    pool->settingB = value;
+    pool->color = value;
 }
 
 void func_00177BA0(u8 *work, f32 value) {
-    *(f32 *)(work + 0x5C) = value;
+    ((EffRecordPool *)work)->scale = value;
 }
 
 extern void *memset(void *dst, s32 value, u32 size);
@@ -429,8 +437,8 @@ EffRecordPool *effRecordPoolCreateTriad(s32 groups) {
     pool = (EffRecordPool *)(block + (first + second));
     pool->recordBase = (s32)block;
     pool->auxRecordBase = (s32)(block + first);
-    pool->settingB = 0x80808080;
-    pool->settingA = 2;
+    pool->color = 0x80808080;
+    pool->drawMode = 2;
     pool->count = second;
     pool->buffer = handle;
     pool->scale = 1.0f;
@@ -468,7 +476,7 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
     count = pool->count;
     D_00451FF0->colors = (u32 *)pool->auxRecordBase;
     D_00451FF0->positions = (u128 *)pool->recordBase;
-    D_00451FF0->unk08 = pool->settingB;
+    D_00451FF0->unk08 = pool->color;
     D_00451FF0->parameterCount = 0x10;
     D_00451FF0->vertexCount = 0x30;
     D_00451FF0->parameters = NULL;
@@ -483,7 +491,7 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
         D_00451FF0->vertexCount = count;
         sdfAppendPacket(packet, func_00167A10(D_00451FF0));
     }
-    surface = D_003B1318[pool->settingA];
+    surface = D_003B1318[pool->drawMode];
     surface->submit(surface, packet);
 }
 
@@ -511,12 +519,12 @@ EffRecordPool *effRecordPoolCreate(s32 groups) {
     memset(block, 0, size);
     pool = (EffRecordPool *)(block + (first + second));
     pool->recordBase = (s32)block;
-    pool->settingA = 2;
+    pool->drawMode = 2;
     pool->auxRecordBase = (s32)(block + first);
     pool->count = second;
     pool->buffer = handle;
     pool->scale = 1.0f;
-    pool->settingB = 0x80808080;
+    pool->color = 0x80808080;
     pool->resource = sdfCreateAssetWithDrawEntries();
     func_003332D0(pool->resource, 1.0f);
     memset(D_00451FF0, 0, 0x2C);
@@ -551,7 +559,7 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
     count = pool->count;
     D_00451FF0->colors = (u32 *)pool->auxRecordBase;
     D_00451FF0->positions = (u128 *)pool->recordBase;
-    D_00451FF0->unk08 = pool->settingB;
+    D_00451FF0->unk08 = pool->color;
     D_00451FF0->parameterCount = 0x10;
     D_00451FF0->vertexCount = 0x20;
     D_00451FF0->parameters = D_003B1330;
@@ -566,7 +574,7 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
         D_00451FF0->vertexCount = count;
         sdfAppendPacket(packet, func_00167A10(D_00451FF0));
     }
-    surface = D_003B1378[pool->settingA];
+    surface = D_003B1378[pool->drawMode];
     surface->submit(surface, packet);
 }
 
@@ -611,7 +619,7 @@ void func_00178210(EffRecordPool *work)
     remaining = work->count;
     D_00451FF0->colors = (u32 *)work->auxRecordBase;
     D_00451FF0->positions = (u128 *)work->recordBase;
-    D_00451FF0->unk08 = work->settingB;
+    D_00451FF0->unk08 = work->color;
     D_00451FF0->parameterCount = 0xF;
     D_00451FF0->vertexCount = 0x19;
     D_00451FF0->parameters = D_003B12C0;
@@ -627,8 +635,8 @@ void func_00178210(EffRecordPool *work)
         D_00451FF0->parameterCount = chunk * 3;
         sdfAppendPacket(list, func_00167A10(D_00451FF0));
     }
-    if (work->settingA < 4) {
-        D_003B1388[work->settingA]->submit(D_003B1388[work->settingA], list);
+    if (work->drawMode < 4) {
+        D_003B1388[work->drawMode]->submit(D_003B1388[work->drawMode], list);
     } else {
         clearList = sdfAllocPacketAligned(0x20);
         sdfInitPacketList(clearList);
@@ -661,16 +669,18 @@ s32 func_001784C8(EffRecordPool *pool, s32 index) {
     return pool->auxRecordBase + index * 0x14;
 }
 
+/* Select the record pool's packet submission mode. */
 void func_001784E0(EffRecordPool *pool, u32 value) {
-    pool->settingA = value;
+    pool->drawMode = value;
 }
 
+/* Set the packed color word passed to the pool's packet builder. */
 void func_001784E8(EffRecordPool *pool, u32 value) {
-    pool->settingB = value;
+    pool->color = value;
 }
 
 void func_001784F0(u8 *work, f32 value) {
-    *(f32 *)(work + 0x5C) = value;
+    ((EffRecordPool *)work)->scale = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_001784F8);
