@@ -602,21 +602,55 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_00250758);
-
 typedef struct MnuProfileRequirementSlot {
     s32 status;
     u8 pad04[8];
-    u8 requirements[2];
-    u8 pad0E[6];
+    u8 requirements[8];
 } MnuProfileRequirementSlot;
 
 typedef struct MnuProfileRequirementRecord {
-    u8 pad00[0x2C];
+    u8 pad00[4];
+    u32 flags04;
+    u8 pad08[0x10];
+    u32 flags18;
+    u8 pad1C[0x10];
     MnuProfileRequirementSlot slots[2];
 } MnuProfileRequirementRecord;
 
-extern s32 func_00250758(u16);
+s32 func_00250758(u16 index) {
+    s32 result = 0;
+    u8 *record = (u8 *)prfReqGetEntryRecord(index);
+    s32 requirementWordIndex = 0;
+    u8 *statusBase = record + 0xC;
+    s32 fieldOffset = 0x20;
+    s32 remaining = 1;
+
+    do {
+        if (*(u32 *)(statusBase + fieldOffset) & 1) {
+            u8 *requirementsBase = record + 0x18;
+            s32 requirementCount = 0;
+            if (requirementsBase[fieldOffset] != 0) {
+                s32 requirementOffset = requirementWordIndex * sizeof(s32);
+                u8 *requirements =
+                    (u8 *)(requirementOffset + (s32)requirementsBase + 0x20);
+                do {
+                    requirements++;
+                    requirementCount++;
+                } while (*requirements != 0);
+            }
+            if (requirementCount >= 2) {
+                result |= 1;
+            }
+        }
+        remaining--;
+        requirementWordIndex += 5;
+        fieldOffset += 0x14;
+    } while (remaining >= 0);
+    if ((*(u32 *)(record + 4) & 4) != 0 && (*(u32 *)(record + 0x18) & 4) != 0) {
+        result |= 2;
+    }
+    return result;
+}
 
 u8 *func_00250820(u16 index) {
     s32 i = 0;
