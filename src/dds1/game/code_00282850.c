@@ -2058,7 +2058,7 @@ extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, s32);
 extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
 extern s32 sdfCreateFormattedSifCommand();
-extern void func_0021FEC0(s32, s32);
+extern void evtCreateWorldObjectForKey(s32, s32);
 
 void *evtBattleStageTestScreen(void) {
     void *packets = sdfAllocPacketAligned(0x20);
@@ -2071,7 +2071,7 @@ void *evtBattleStageTestScreen(void) {
     sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
     D_00325708.invoke(&D_00325708, packets);
     if (D_00324510[0x21] < 0) {
-        func_0021FEC0(D_003BC7D0, D_003BC7D4);
+        evtCreateWorldObjectForKey(D_003BC7D0, D_003BC7D4);
         return evtCreateBattleStageTestCamera;
     }
     if (D_00324510[0x25] & 2) {

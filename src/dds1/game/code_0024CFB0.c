@@ -281,7 +281,7 @@ s32 evtCopyWorldObjectEntryValue(s32 id, s32 dst) {
 void evtSwitchWorldValueIfChanged(s32 high, s32 low) {
     s32 key = (high << 16) + low;
     if (dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) != key) {
-        func_0021FEC0(high, low);
+        evtCreateWorldObjectForKey(high, low);
     }
 }
 
