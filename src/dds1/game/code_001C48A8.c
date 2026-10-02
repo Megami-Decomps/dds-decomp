@@ -333,9 +333,150 @@ INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C5F80);
 
 INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C6888);
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", btlApplyPartyEntryWeightedDelta);
+typedef struct PartyDeltaEntry {
+    u16 flags;
+    u8 pad_002[6];
+    u16 weight;
+    u8 pad_00A[4];
+    u16 mask;
+    u8 pad_010[0x188];
+    s32 link;
+    u8 pad_19C[8];
+} PartyDeltaEntry;
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", fldStepAreaLoad);
+typedef struct PartyDeltaState {
+    u8 pad_000[0xA60];
+    PartyDeltaEntry entry[5];
+} PartyDeltaState;
+
+typedef struct SceneLoadNode {
+    s32 state;
+    u8 pad_004[0x168];
+    struct SceneLoadNode *next;
+} SceneLoadNode;
+
+typedef struct BattleSceneDeltaState {
+    u8 pad_000[0x1F4];
+    u32 flags;
+    u32 subFlags;
+    u8 pad_1FC[0x28];
+    SceneLoadNode *linkedNodes;
+    u8 pad_228[0x30];
+    u8 phaseFlag;
+    u8 pad_259[0x33];
+    s32 loadStep;
+    u8 pad_290[0x40];
+    s32 alternateLink;
+} BattleSceneDeltaState;
+
+extern PartyDeltaState *datGameState;
+
+extern void itfMesClearFlags(s32);
+
+extern void brsTaskAllowUpdate(void);
+
+extern void evtBeginSolarOverlayFadeOut(s32);
+
+extern void func_001A1960();
+
+extern s32 mnuIsTitleEntryAvailable();
+
+extern void datMoveCursorX();
+
+void btlApplyPartyEntryWeightedDelta(BattleSceneDeltaState *scene) {
+    u32 i;
+    f32 scale;
+
+    i = 0;
+    itfMesClearFlags(1);
+    scale = 0.05f;
+    brsTaskAllowUpdate();
+    evtBeginSolarOverlayFadeOut(8);
+    do {
+        func_001A1960(&datGameState->entry[i], -0x45D1);
+        if (!(scene->subFlags & 0x40)) {
+            if (datGameState->entry[i].flags & 2) {
+                if (scene->phaseFlag == 1) {
+                    if (datGameState->entry[i].link != 0 || scene->alternateLink != 0) {
+                        if (!(datGameState->entry[i].mask & 0x40)) {
+                            if (mnuIsTitleEntryAvailable(&datGameState->entry[i]) == 0) {
+                                datMoveCursorX(&datGameState->entry[i],
+                                               (s32)((f32)datGameState->entry[i].weight * scale));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        i++;
+    } while (i < 5);
+    scene->loadStep = 0;
+}
+
+extern s32 func_002629A8();
+
+extern void btlDispatchStateHandler();
+
+extern s32 fldLoadAreaResource();
+
+extern void btlReleaseEventAssets();
+
+extern void btlReleaseBossData();
+
+extern void fldPollAreaResourceLoad();
+
+extern s32 fldGetResourceReadyFlag();
+
+extern s32 btlBossDebugPrintf();
+
+extern s32 brsTaskPollDone();
+
+u32 fldStepAreaLoad(BattleSceneDeltaState *work) {
+    SceneLoadNode *node;
+    s32 step;
+
+    if (func_002629A8() == 1) {
+        work->subFlags |= 0x20;
+        if (work->linkedNodes != 0) {
+            for (node = work->linkedNodes; node != 0; node = node->next) {
+                if (node->state != 0x1E) {
+                    btlDispatchStateHandler(node, 0x1E);
+                }
+            }
+        } else {
+            switch (work->loadStep) {
+            case 0:
+                work->flags &= ~0x10;
+                if (fldLoadAreaResource() != 0) {
+                    work->loadStep = 1;
+                } else {
+                    work->loadStep = 2;
+                }
+                btlReleaseEventAssets();
+                btlReleaseBossData();
+                break;
+            case 1:
+                fldPollAreaResourceLoad();
+                if (fldGetResourceReadyFlag() == 0) {
+                    work->loadStep = 2;
+                    btlBossDebugPrintf("btl:field loding end\n");
+                }
+                break;
+            case 2:
+                break;
+            }
+        }
+    }
+    step = work->loadStep;
+    if (step < 3) {
+        if (step > 0) {
+            if (brsTaskPollDone() == 0) {
+                return 0xB;
+            }
+        }
+    }
+    return 0;
+}
 
 void fldMarkLinkedSceneActors(s32 context) {
     s32 *entry;
@@ -566,7 +707,58 @@ void fldCompactSceneSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", fldConsumeSceneSlotCounters);
+void fldConsumeSceneSlotCounters(s32 amount, u8 mode) {
+    BattleController *scene = (BattleController *)btlGetRuntime();
+    u8 head;
+    u32 i;
+
+    if (scene->flags & 0x100) {
+        head = scene->slots[0].a;
+        switch (mode) {
+        case 0:
+            break;
+        case 1:
+            if (amount < 100) {
+                if (amount < scene->slots[0].b) {
+                    scene->slots[0].b -= amount;
+                } else {
+                    scene->slots[0].b = 0;
+                    fldCompactSceneSlots();
+                }
+            } else {
+                while (amount > 0) {
+                    scene->slots[0].b = 0;
+                    fldCompactSceneSlots();
+                    if (scene->slots[0].a != head) {
+                        return;
+                    }
+                    if (scene->slots[0].b == 0) {
+                        break;
+                    }
+                    amount -= 100;
+                }
+            }
+            break;
+        case 2:
+        case 3:
+            while (amount > 0) {
+                for (i = 0; i < 8; i++) {
+                    if (scene->slots[i].a == head && scene->slots[i].b == 100) {
+                        break;
+                    }
+                }
+                if (i < 8) {
+                    scene->slots[i].b -= 50;
+                } else {
+                    scene->slots[0].b = 0;
+                    fldCompactSceneSlots();
+                }
+                amount -= 50;
+            }
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001C48A8", fldInsertSceneSlots);
 
@@ -955,4 +1147,3 @@ store:
 INCLUDE_RODATA(const s32, "game/code_001C48A8", D_003A35A8);
 
 INCLUDE_RODATA(const s32, "game/code_001C48A8", D_003A35B8);
-
