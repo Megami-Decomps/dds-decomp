@@ -25,7 +25,9 @@ typedef struct BtlUnit {
     u8 pad00[0x30];
     f32 position[4]; /* 0x30: world position */
     f32 rotation[4]; /* 0x40: world rotation passed to btlSetUnitRotation */
-    u8 pad50[0x20];
+    u8 pad50[4];
+    u32 baseColor; /* 0x54: RGB restored after temporary battle effects */
+    u8 pad58[0x18];
     f32 orientation[4]; /* 0x70: quaternion converted to a VU matrix */
     f32 scale; /* 0x80 */
     u8 pad84[4];
