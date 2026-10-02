@@ -79,16 +79,73 @@ Each of the 256 repeated rows has the following common `0x64`-byte layout:
 | `0x54` | `u8` | `after flag` | Post-transition action flags |
 | `0x55` | `char[15]` | `after script` | Post-transition procedure name |
 
+The actor kind selects one of the procedures bundled with each field script.
+The executable uses the same dispatch in both games (kind `12` is only present
+in the tracked DDS1 data):
+
+| Value | Source name | Runtime selection |
+|---:|---|---|
+| `1` | `door` | Named door actor and ordinary transfer |
+| `2` | `run_warp` | Running field transition (`runwarp_label`) |
+| `3` | `hole_warp` | Falling transition (`anawarp_label`) |
+| `4` | `jump_warp` | Jumping transition (`tobiwarp_label`) |
+| `5` | `ladder` | Ladder interaction (`hasigo_label`) |
+| `6` | `elevator_exit` | Elevator return selected by elevator and floor |
+| `7` | `side_exit` | Return selected by cached exit mode and selector |
+| `8` | `battle_exit` | Post-battle return selected by event number |
+| `9` | `special_warp` | Explicit warp selected by numeric ID |
+| `10` | `warp` | Generic scripted transition (`warp_label`) |
+| `11` | `suction_warp` | Suction transition (`suikomi_label`) |
+| `12` | `barrier` | Barrier interaction (`baria_label`) |
+
+The `scene` group names arguments according to the selected kind. Door rows
+use `motion`, `secondary_motion`, and `sound`; elevator exits use `elevator`
+and `floor`; side exits use `exit_mode` and `selector`; battle exits use
+`event`; and special warps use `id`. Ladder rows expose `direction` and the
+`direct_prompt` flag; their primary and secondary resources resolve the source
+vector and effect unit. Suction rows expose `state_selector`, `map_entry`, and
+`motion`, with the same two resources resolving the source vector and effect
+unit. Barrier rows select a separate barrier definition with `barrier`. A
+generic `args=A,B,C` triple remains available for unlabelled payloads.
+
 Warp types `field`, `elevator`, `facility`, and `event` encode the verified
-values `0..3`. Other warp types and all actor/door kinds remain numeric because
-their argument meanings vary by dispatch path. The grouped source keeps that
-overloading visible instead of assigning one speculative name to each value:
+values `0..3`. Field transfers name their destination `field` and `area`,
+elevator transfers name their `table` and `floor`, and event transfers name
+their `event` and optional `alternate_field`.
+
+Facility transfers dispatch on their first argument. The native transition
+handler stores the second argument as the initial selection for a shop or as
+the terminal slot used by the other actions. Every action applies the third
+argument as a floor flag before it enters the menu system:
+
+| Value | Source action | Second argument | Runtime action |
+|---:|---|---|---|
+| `0` | `shop` | `selection` | Open the shop scene at its initial selection |
+| `3` | `terminal` | `slot` | Open the full terminal |
+| `4` | `save` | `slot` | Open the terminal's save function |
+| `5` | `heal` | `slot` | Open the terminal's healing function |
+
+The terminal slot is also used to select the matching `side_exit` when play
+returns to the field. A generic `args=A,B,C` triple remains available for an
+unrecognized facility action or a noncanonical payload. The grouped source
+therefore reads according to the native dispatch while keeping unresolved
+values visible:
 
 ```text
-entry 5 kind=1 area=1 name=@01d_03
-  scene args=1,2,65 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=23,1,0
+entry 5 kind=door area=1 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=65 primary="md_01d_03" secondary="md_01d_03b"
+  warp field=23 area=1
   camera table=81
+end
+
+entry 18 kind=battle_exit
+  scene event=606
+  warp area=2 position="02pos_03"
+  after flag=2 script=@battle_return
+end
+
+entry 22
+  warp type=facility action=terminal slot=8 floor_flag=3
 end
 ```
 

@@ -169,7 +169,7 @@ _9:
 at3_play:
   PROC at3_play
   COMM 0x016b
-  COMM 0x011c
+  ADVANCE_STREAM_SOUND_STATE()
   return
 end
 

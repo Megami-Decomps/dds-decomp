@@ -1,40 +1,40 @@
 wap 1 profile=dds1
 
-entry 0 kind=8
-  scene args=632,0,0
-  warp args=0,1,0
+entry 0 kind=battle_exit
+  scene event=632
+  warp area=1
   camera mode=1 table=60
   after flag=2 script=@001_ciero_in
 end
 
-entry 2 kind=1 flag=27 area=1 name="01d_01"
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=25,1,0
+entry 2 kind=door flag=27 area=1 name="01d_01"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp field=25 area=1
 end
 
-entry 3 kind=1 area=1 name="01d_01"
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp type=event args=631,0,25
+entry 3 kind=door area=1 name="01d_01"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp type=event event=631 alternate_field=25
 end
 
-entry 4 kind=1 area=1 name="01d_02"
-  scene args=1,2,0 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=1,1,0
+entry 4 kind=door area=1 name="01d_02"
+  scene motion=1 secondary_motion=2 primary="md_01d_02" secondary="md_01d_02b"
+  warp field=1 area=1
   after flag=8
 end
 
-entry 5 kind=1 area=1 name="01d_03"
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=4,1,0
+entry 5 kind=door area=1 name="01d_03"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp field=4 area=1
   camera mode=3 name="01cam_03"
 end
 
-entry 6 kind=5 area=1 name="01d_04"
-  scene args=1,0,0 primary="01pos_05" secondary="01cam_02"
-  warp args=22,18,0 position="01pos_06"
+entry 6 kind=ladder area=1 name="01d_04"
+  scene direction=1 primary="01pos_05" secondary="01cam_02"
+  warp field=22 area=18 position="01pos_06"
 end
 
-entry 8 kind=9
-  scene args=32,0,0
-  warp args=3,1,0 position="01pos_05"
+entry 8 kind=special_warp
+  scene id=32
+  warp field=3 area=1 position="01pos_05"
 end

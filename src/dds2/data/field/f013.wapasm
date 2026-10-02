@@ -1,8 +1,8 @@
 wap 1 profile=dds2
 
-entry 0 kind=8
-  scene args=644,0,0
-  warp args=13,1,0 position="01pos_03"
+entry 0 kind=battle_exit
+  scene event=644
+  warp field=13 area=1 position="01pos_03"
   camera mode=1 table=10
   after script="" script_padding=6172707363725f73746172740000
 end
@@ -11,14 +11,14 @@ entry 1
   after script="" script_padding=6172707363725f65763631390000
 end
 
-entry 2 kind=1 area=1 name="01d_01"
-  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=1,1,0
+entry 2 kind=door area=1 name="01d_01"
+  scene motion=1 secondary_motion=2 primary="md_01d_01" secondary="md_01d_01b"
+  warp field=1 area=1
 end
 
-entry 3 kind=1 area=1 name=@01d_02
-  scene args=1,2,0 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=28,1,0
+entry 3 kind=door area=1 name=@01d_02
+  scene motion=1 secondary_motion=2 primary="md_01d_02" secondary="md_01d_02b"
+  warp field=28 area=1
   camera table=79
   after script="" script_padding=667465725f30303262746c000000
 end

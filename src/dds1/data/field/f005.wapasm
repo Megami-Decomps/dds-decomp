@@ -1,48 +1,48 @@
 wap 1 profile=dds1
 
-entry 0 kind=8
-  scene args=618,0,0
-  warp args=0,2,0 position="01pos_07"
+entry 0 kind=battle_exit
+  scene event=618
+  warp area=2 position="01pos_07"
   camera mode=1 table=26
 end
 
-entry 1 kind=8
-  scene args=623,0,0
-  warp args=0,1,0 position="01pos_03"
+entry 1 kind=battle_exit
+  scene event=623
+  warp area=1 position="01pos_03"
   camera mode=1 table=25
 end
 
-entry 3 kind=1 area=1 name="01d_01"
-  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=1,1,0
+entry 3 kind=door area=1 name="01d_01"
+  scene motion=1 secondary_motion=2 primary="md_01d_01" secondary="md_01d_01b"
+  warp field=1 area=1
   after flag=8
 end
 
-entry 4 kind=1 area=1 name=@01d_02
-  scene args=5,6,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=24,35,0 position="01pos_02"
+entry 4 kind=door area=1 name=@01d_02
+  scene motion=5 secondary_motion=6 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp field=24 area=35 position="01pos_02"
 end
 
-entry 6 kind=1 area=2 name="01d_01"
-  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=1,1,0
+entry 6 kind=door area=2 name="01d_01"
+  scene motion=1 secondary_motion=2 primary="md_01d_01" secondary="md_01d_01b"
+  warp field=1 area=1
   after flag=8
 end
 
-entry 7 kind=5 area=2 name=@01d_02
+entry 7 kind=ladder area=2 name=@01d_02
   scene primary="01pos_05" secondary="01cam_05"
   warp position="01pos_03"
   camera mode=1 table=27 name="01cam_03"
 end
 
-entry 8 kind=5 area=2 name=@01d_03
-  scene args=1,0,0 primary="01pos_06" secondary="01cam_06"
+entry 8 kind=ladder area=2 name=@01d_03
+  scene direction=1 primary="01pos_06" secondary="01cam_06"
   warp position="01pos_02"
   camera mode=1 table=26
 end
 
-entry 9 kind=1 area=2 name="01d_04"
-  scene args=1,2,65 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=24,1,0
+entry 9 kind=door area=2 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=65 primary="md_01d_04" secondary="md_01d_04b"
+  warp field=24 area=1
   camera table=88
 end

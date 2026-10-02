@@ -1,85 +1,85 @@
 wap 1 profile=dds1
 
-entry 0 kind=7 area=1
-  scene args=4,36,0
-  warp args=0,1,0 position="01pos_04"
+entry 0 kind=side_exit area=1
+  scene exit_mode=4 selector=36
+  warp area=1 position="01pos_04"
   camera mode=1 table=10
 end
 
-entry 1 kind=7 area=1
-  scene args=5,1,0
-  warp args=0,1,0 position="01pos_05"
+entry 1 kind=side_exit area=1
+  scene exit_mode=5 selector=1
+  warp area=1 position="01pos_05"
   camera mode=1 table=10
 end
 
-entry 3 kind=1 area=1 name="01d_01"
-  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=1,1,0
+entry 3 kind=door area=1 name="01d_01"
+  scene motion=1 secondary_motion=2 primary="md_01d_01" secondary="md_01d_01b"
+  warp field=1 area=1
   after flag=8
 end
 
-entry 4 kind=9 flag=7
-  scene args=80,0,0
-  warp args=0,2,0
+entry 4 kind=special_warp flag=7
+  scene id=80
+  warp area=2
   camera mode=1 table=11
 end
 
-entry 5 kind=9 flag=6
-  scene args=80,0,0
-  warp type=event args=611,0,21
+entry 5 kind=special_warp flag=6
+  scene id=80
+  warp type=event event=611 alternate_field=21
 end
 
-entry 6 kind=9
-  scene args=80,0,0
-  warp args=0,2,0
+entry 6 kind=special_warp
+  scene id=80
+  warp area=2
   camera mode=1 table=11
 end
 
-entry 8 kind=9
-  scene args=81,0,0
-  warp args=0,1,0 position="01pos_02"
+entry 8 kind=special_warp
+  scene id=81
+  warp area=1 position="01pos_02"
   camera mode=1 table=10
 end
 
-entry 9 kind=1 flag=25 area=2 name=@01d_02
-  scene args=1,2,0 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=21,21,0
+entry 9 kind=door flag=25 area=2 name=@01d_02
+  scene motion=1 secondary_motion=2 primary="md_01d_02" secondary="md_01d_02b"
+  warp field=21 area=21
   after footstep=4
 end
 
-entry 10 kind=1 area=2 name=@01d_02
-  scene args=1,2,0 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=21,1,0
+entry 10 kind=door area=2 name=@01d_02
+  scene motion=1 secondary_motion=2 primary="md_01d_02" secondary="md_01d_02b"
+  warp field=21 area=1
   after footstep=4
 end
 
-entry 11 kind=1 area=2 name="01d_01"
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=21,8,0
+entry 11 kind=door area=2 name="01d_01"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp field=21 area=8
   after footstep=4
 end
 
-entry 12 kind=9
-  scene args=82,0,0
-  warp args=21,14,0 position="01pos_02"
+entry 12 kind=special_warp
+  scene id=82
+  warp field=21 area=14 position="01pos_02"
   after footstep=4
 end
 
-entry 14 kind=1 area=3 name="01d_01"
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=21,13,0 position="01pos_02"
+entry 14 kind=door area=3 name="01d_01"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp field=21 area=13 position="01pos_02"
   after footstep=4
 end
 
-entry 15 kind=1 area=3 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=21,14,0
+entry 15 kind=door area=3 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp field=21 area=14
   after footstep=4
   tail control=2 args=21,1,0,11,9,3,1
 end
 
-entry 16 kind=1 area=3 name="01d_03"
-  scene args=2,1,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=21,16,0 position="01pos_03"
+entry 16 kind=door area=3 name="01d_03"
+  scene motion=2 secondary_motion=1 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp field=21 area=16 position="01pos_03"
   after footstep=4
 end

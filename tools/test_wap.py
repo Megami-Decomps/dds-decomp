@@ -79,7 +79,11 @@ class WapCodecTests(unittest.TestCase):
         )
         source = wap.render_source(model, references)
         self.assertIn("elevator 2 area=42 sound=66 floor_count=3", source)
-        self.assertIn("entry 3 kind=9 flag_mode=2 flag=1234 area=7 name=@interaction", source)
+        self.assertIn(
+            "entry 3 kind=special_warp flag_mode=2 flag=1234 area=7 name=@interaction",
+            source,
+        )
+        self.assertIn("scene args=-1,2,-3 primary=\"scene_a\" secondary=\"scene_b\"", source)
         self.assertIn("warp type=event attributes=4 args=1001,8,9", source)
         self.assertIn("after bgm=3 footstep=4 flag=2 script=@procedure", source)
         self.assertIn("script_padding=7265736964756500000000000000", source)
@@ -115,6 +119,115 @@ end
 """
         with self.assertRaisesRegex(wap.WapError, "has no DDS tail"):
             wap.parse_source(legacy_tail)
+
+        wrong_scene_payload = """\
+wap 1 profile=dds1
+entry 0 kind=battle_exit
+  scene motion=1
+end
+"""
+        with self.assertRaisesRegex(wap.WapError, "motion does not apply"):
+            wap.parse_source(wrong_scene_payload)
+
+        wrong_facility_payload = """\
+wap 1 profile=dds1
+entry 0
+  warp type=facility action=shop slot=1
+end
+"""
+        with self.assertRaisesRegex(wap.WapError, "slot does not apply"):
+            wap.parse_source(wrong_facility_payload)
+
+    def test_dispatch_specific_source(self) -> None:
+        source = """\
+wap 1 profile=dds2
+entry 0 kind=door area=1 name=01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary=md_01d_01 secondary=md_01d_01b
+  warp field=24 area=3 position=03pos_02
+end
+
+entry 1 kind=elevator_exit
+  scene elevator=1 floor=2
+  warp type=elevator table=3 floor=1
+end
+
+entry 2 kind=side_exit
+  scene exit_mode=5 selector=9
+end
+
+entry 3 kind=battle_exit
+  scene event=606
+end
+
+entry 4 kind=special_warp
+  scene id=607
+  warp type=event event=607 alternate_field=12
+end
+
+entry 5 kind=ladder
+  scene direction=1 direct_prompt=1 primary=01pos_02 secondary=01cam_02
+end
+
+entry 6 kind=suction_warp
+  scene state_selector=3 map_entry=5 motion=17 primary=01pos_03 secondary=md_01all_05
+end
+
+entry 7 kind=barrier
+  scene barrier=57
+end
+
+entry 8 kind=warp
+  scene args=1,0,0
+end
+
+entry 9
+  warp type=facility action=shop selection=4 floor_flag=12
+end
+
+entry 10
+  warp type=facility action=terminal slot=9 floor_flag=2
+end
+
+entry 11
+  warp type=facility action=save slot=-1
+end
+
+entry 12
+  warp type=facility action=heal slot=1
+end
+
+entry 13
+  warp type=facility args=2,7,8
+end
+"""
+        model = wap.parse_source(source)
+        self.assertEqual(model.entries[0].scene_args, (1, 2, 64))
+        self.assertEqual(model.entries[0].warp_args, (24, 3, 0))
+        self.assertEqual(model.entries[1].scene_args, (1, 2, 0))
+        self.assertEqual(model.entries[1].warp_args, (3, 1, 0))
+        self.assertEqual(model.entries[2].scene_args, (5, 9, 0))
+        self.assertEqual(model.entries[3].scene_args, (606, 0, 0))
+        self.assertEqual(model.entries[4].warp_args, (607, 0, 12))
+        self.assertEqual(model.entries[5].scene_args, (1, 1, 0))
+        self.assertEqual(model.entries[6].scene_args, (3, 5, 17))
+        self.assertEqual(model.entries[7].scene_args, (57, 0, 0))
+        self.assertEqual(model.entries[8].scene_args, (1, 0, 0))
+        self.assertEqual(model.entries[9].warp_args, (0, 4, 12))
+        self.assertEqual(model.entries[10].warp_args, (3, 9, 2))
+        self.assertEqual(model.entries[11].warp_args, (4, -1, 0))
+        self.assertEqual(model.entries[12].warp_args, (5, 1, 0))
+        self.assertEqual(model.entries[13].warp_args, (2, 7, 8))
+        rendered = wap.render_source(model)
+        self.assertIn("kind=ladder", rendered)
+        self.assertIn("direction=1 direct_prompt=1", rendered)
+        self.assertIn("kind=suction_warp", rendered)
+        self.assertIn("state_selector=3 map_entry=5 motion=17", rendered)
+        self.assertIn("kind=barrier", rendered)
+        self.assertIn("scene barrier=57", rendered)
+        self.assertIn("kind=warp", rendered)
+        self.assertIn("action=terminal slot=9 floor_flag=2", rendered)
+        self.assertIn("type=facility args=2,7,8", rendered)
+        self.assertEqual(wap.parse_source(rendered), model)
 
     def test_paired_references(self) -> None:
         references = wap.load_references(

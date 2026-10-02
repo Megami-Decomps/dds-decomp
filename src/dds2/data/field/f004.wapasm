@@ -1,135 +1,135 @@
 wap 1 profile=dds2
 
-entry 0 kind=9
-  scene args=30,0,0
-  warp args=4,4,0 position="01pos_04"
+entry 0 kind=special_warp
+  scene id=30
+  warp field=4 area=4 position="01pos_04"
   camera mode=1 table=23
   after flag=2 script=@warpscr_30
 end
 
-entry 1 kind=9
-  scene args=31,0,0
-  warp args=4,1,0 position="01pos_07"
+entry 1 kind=special_warp
+  scene id=31
+  warp field=4 area=1 position="01pos_07"
   camera mode=1 table=20
 end
 
-entry 3 kind=8
-  scene args=562,0,0
-  warp args=0,3,0 position="01pos_02"
+entry 3 kind=battle_exit
+  scene event=562
+  warp area=3 position="01pos_02"
   camera mode=1 table=22
 end
 
-entry 4 kind=8
-  scene args=606,0,0
-  warp args=0,4,0 position="01pos_02"
+entry 4 kind=battle_exit
+  scene event=606
+  warp area=4 position="01pos_02"
   camera mode=1 table=23
 end
 
-entry 5 kind=8
-  scene args=670,0,0
-  warp args=0,3,0 position="01pos_02"
+entry 5 kind=battle_exit
+  scene event=670
+  warp area=3 position="01pos_02"
   camera mode=1 table=22
 end
 
-entry 6 kind=8
-  scene args=668,0,0
-  warp args=0,1,0 position="01pos_08"
+entry 6 kind=battle_exit
+  scene event=668
+  warp area=1 position="01pos_08"
   camera mode=1 table=20
   after flag=2 script=@after_shooting
 end
 
-entry 8 kind=9
-  scene args=104,0,0
-  warp type=facility args=4,90,0
+entry 8 kind=special_warp
+  scene id=104
+  warp type=facility action=save slot=90
 end
 
-entry 9 kind=7 area=1
-  scene args=4,90,0
-  warp args=4,1,0 position="01pos_05"
+entry 9 kind=side_exit area=1
+  scene exit_mode=4 selector=90
+  warp field=4 area=1 position="01pos_05"
   camera mode=1 table=20
 end
 
-entry 11 kind=9
-  scene args=107,0,0
-  warp type=facility args=5,1,0
+entry 11 kind=special_warp
+  scene id=107
+  warp type=facility action=heal slot=1
 end
 
-entry 12 kind=7 area=1
-  scene args=5,1,0
-  warp args=4,1,0 position="01pos_06"
+entry 12 kind=side_exit area=1
+  scene exit_mode=5 selector=1
+  warp field=4 area=1 position="01pos_06"
   camera mode=1 table=20
 end
 
-entry 14 kind=1 area=1 name=@01d_01
-  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=21,30,0 position="01pos_02"
+entry 14 kind=door area=1 name=@01d_01
+  scene motion=1 secondary_motion=2 primary="md_01d_01" secondary="md_01d_01b"
+  warp field=21 area=30 position="01pos_02"
 end
 
-entry 15 kind=2 area=1 name="01d_02"
-  warp args=0,2,0
+entry 15 kind=run_warp area=1 name="01d_02"
+  warp area=2
   camera mode=1 table=21
 end
 
-entry 16 kind=9
-  scene args=106,0,0
-  warp args=1,1,0
+entry 16 kind=special_warp
+  scene id=106
+  warp field=1 area=1
   after flag=8
 end
 
-entry 17 kind=1 area=1 name=@01d_04
-  scene args=1,2,0 primary="md_01d_04" secondary="md_01d_04b"
-  warp type=facility args=0,1,0
+entry 17 kind=door area=1 name=@01d_04
+  scene motion=1 secondary_motion=2 primary="md_01d_04" secondary="md_01d_04b"
+  warp type=facility action=shop selection=1
 end
 
-entry 18 kind=7 area=1
-  scene args=0,1,0
-  warp args=4,1,0 position="01pos_04"
+entry 18 kind=side_exit area=1
+  scene selector=1
+  warp field=4 area=1 position="01pos_04"
   camera mode=1 table=20
 end
 
-entry 20 kind=2 area=2 name=@01d_01
-  warp args=0,1,0 position="01pos_02"
+entry 20 kind=run_warp area=2 name=@01d_01
+  warp area=1 position="01pos_02"
   camera mode=1 table=20
 end
 
-entry 21 kind=9
-  scene args=105,0,0
-  warp args=0,4,0
+entry 21 kind=special_warp
+  scene id=105
+  warp area=4
   camera mode=1 table=23
 end
 
-entry 23 kind=1 area=3 name=@01d_01
-  scene args=1,1,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,4,0 position="01pos_02"
+entry 23 kind=door area=3 name=@01d_01
+  scene motion=1 secondary_motion=1 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=4 position="01pos_02"
   camera mode=1 table=23
 end
 
-entry 25 kind=1 flag=4 area=4 name="01d_02"
-  scene args=2,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,3,0
+entry 25 kind=door flag=4 area=4 name="01d_02"
+  scene motion=2 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=3
   camera mode=1 table=22
 end
 
-entry 26 kind=9
-  scene args=100,0,0
-  warp args=0,5,0 position="01pos_02"
+entry 26 kind=special_warp
+  scene id=100
+  warp area=5 position="01pos_02"
   camera mode=1 table=23
 end
 
-entry 27 kind=9
-  scene args=101,0,0
-  warp args=0,2,0 position="01pos_02"
+entry 27 kind=special_warp
+  scene id=101
+  warp area=2 position="01pos_02"
   camera mode=1 table=21
 end
 
-entry 29 kind=9
-  scene args=102,0,0
-  warp args=0,4,0 position="01pos_03"
+entry 29 kind=special_warp
+  scene id=102
+  warp area=4 position="01pos_03"
   camera mode=1 table=23
 end
 
-entry 30 kind=9
-  scene args=103,0,0
-  warp args=5,1,0
+entry 30 kind=special_warp
+  scene id=103
+  warp field=5 area=1
   camera mode=1 table=25
 end

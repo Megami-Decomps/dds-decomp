@@ -1,12 +1,12 @@
 wap 1 profile=dds2
 
-entry 0 kind=9
-  scene args=100,0,0
-  warp args=4,5,0
+entry 0 kind=special_warp
+  scene id=100
+  warp field=4 area=5
   camera mode=1 table=23
 end
 
-entry 2 kind=1 area=1 name=@01d_03
-  scene args=1,2,0 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=22,1,0 position="01pos_02"
+entry 2 kind=door area=1 name=@01d_03
+  scene motion=1 secondary_motion=2 primary="md_01d_03" secondary="md_01d_03b"
+  warp field=22 area=1 position="01pos_02"
 end
