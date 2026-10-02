@@ -26,18 +26,26 @@ extern s64 func_00285670(s32, s32 *, u64, u64);
 
 extern void func_0024DD78(void);
 typedef struct MenuItem {
-    u8 pad00[0x55];
+    u8 pad00[0x16];
+    s8 components[5]; /* Summed when bounding the available selection extent. */
+    u8 pad1B[0x3A];
     s8 selection;
 } MenuItem;
+
+/* The selected item and the multiplier used to derive its available extent. */
+typedef struct MenuItemSelectionData {
+    MenuItem *item;
+    s32 extentFactor;
+} MenuItemSelectionData;
 
 typedef struct MenuItemScene {
     u8 pad00[4];
     u32 overlayFlags;
     u8 pad08[0x90];
-    MenuItem **items;
+    MenuItemSelectionData *selectionData;
     u8 pad9C[0x1A4];
     u32 resetStateA;
-    u32 selectedAction;
+    u32 pendingSkillCount; /* Decremented as prfCapPresentMessages presents skills. */
     u8 pad248[4];
     s32 selectionApplied;
     u8 pad250[0x174];
@@ -45,11 +53,16 @@ typedef struct MenuItemScene {
     s32 selectedExtent;
     u32 activeSlot;
     u32 slots[5];
+    u8 pad3E4[0x92C];
+    u32 panelGroup; /* 0xD10: passed to mnuSetPanelGroupSelection */
+    u8 padD14[0x864];
+    s32 unk1578; /* Nonzero enables the panel-group selection reset. */
 } MenuItemScene;
 
 
+/* Apply a capped selected profile and record whether the selection was applied. */
 void kwlnItemApplySelection(MenuItemScene *scene) {
-    MenuItem *item = *scene->items;
+    MenuItem *item = scene->selectionData->item;
     s32 *data = (s32 *)ptyGetCurrentProfileRecord(item);
     s8 selection = item->selection;
     if (selection != 0 && prfGetCapValue((u16)selection) == *data &&
@@ -65,17 +78,15 @@ void kwlnItemApplySelection(MenuItemScene *scene) {
     }
 }
 
-/* Build the capped skill list for the currently selected menu entry. */
+/* Build the capped skill list and cache its pending count; return 1. */
 u32 mnuProcessItemSelection(u32 context) {
-    u32 listState;
-    s32 scene;
+    u32 skillCount;
+    MenuItemScene *scene;
 
-    scene = (s32)context;
-    /* Required to match: typed MenuItemScene field accesses change this
-     * compiler's alias scheduling and overrun the next retail function. */
-    listState = ptyBuildProfileCapSkillList(**(u32 **)(scene + 0x98), scene + 0x4c4);
-    *(u32 *)(scene + 0x244) = listState;
-    kwlnItemApplySelection(context);
+    scene = (MenuItemScene *)context;
+    skillCount = ptyBuildProfileCapSkillList((u32)scene->selectionData->item, (s32)scene + 0x4c4);
+    scene->pendingSkillCount = skillCount;
+    kwlnItemApplySelection(scene);
     return 1;
 }
 
@@ -116,6 +127,7 @@ s64 func_002635C0(s32 request) {
     return menuRunPanel(context, 2, request);
 }
 
+/* Clear the scene's two selection-processing markers; return 1. */
 s32 mnuResetItemSelectionMarkers(void) {
     MenuItemScene *scene = (MenuItemScene *)kwlnTaskGetUserValue();
     scene->resetStateA = 0;
@@ -178,8 +190,8 @@ u32 mnuInitializeItemSelectionExtent(void) {
     scene = (MenuItemScene *)kwlnTaskGetUserValue();
     sum = 0;
     remaining = 4;
-    extent = (*(s32 **)((s32)scene + 0x98))[1] * 3;
-    byteCursor = (s8 *)(**(s32 **)((s32)scene + 0x98) + 0x16);
+    extent = scene->selectionData->extentFactor * 3;
+    byteCursor = scene->selectionData->item->components;
     do {
         component = *byteCursor;
         byteCursor = byteCursor + 1;
@@ -198,8 +210,8 @@ u32 mnuInitializeItemSelectionExtent(void) {
         *slot = 0;
         slot = slot + -1;
     } while (-1 < remaining);
-    if (*(s32 *)((s32)scene + 0x1578) != 0) {
-        mnuSetPanelGroupSelection(*(u32 *)((s32)scene + 0xd10), 0);
+    if (scene->unk1578 != 0) {
+        mnuSetPanelGroupSelection(scene->panelGroup, 0);
     }
     return 1;
 }
