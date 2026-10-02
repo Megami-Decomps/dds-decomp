@@ -57,6 +57,20 @@ typedef struct EvtViewerGroup {
     struct EvtViewerGroup *next;
 } EvtViewerGroup;
 
+struct EffNode;
+
+typedef struct EvtViewerObjectData {
+    u8 pad00[0xC];
+    struct EffNode *parameterNode;
+} EvtViewerObjectData;
+
+typedef struct EvtWorldLink {
+    u8 pad00[0x18];
+    void *data;
+    u8 pad1C[4];
+    s32 next;
+} EvtWorldLink;
+
 typedef struct EventViewerState {
     u32 resourceHandle; /* 0x00 */
     u32 flags;          /* 0x04 */
@@ -70,7 +84,8 @@ typedef struct EventViewerState {
     s32 fallbackEntry; /* 0x202C */
     u8 pad2030[4];
     EvtViewerGroup *groups;
-    u8 pad2038[0x204];
+    u8 pad2038[4];
+    EvtWorldLink *objects[128]; /* 0x203C */
     struct {
         u16 id;
         u16 a;
@@ -160,7 +175,8 @@ extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 typedef struct EvtViewGlyph {
     u16 id;       /* 0x00 */
-    u8 pad02[6];
+    u16 duration;
+    u8 pad04[4];
     s8 kind;      /* 0x08 */
     u8 pad09[3];
     s8 channel;   /* 0x0C */
@@ -260,7 +276,36 @@ void evtViewerApplySelectedEntry(EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00247858);
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_00247DE0);
+extern s32 func_0035B6E0(const char *, ...);
+extern void effSetNodeParameterValue();
+
+void func_00247DE0(EvtViewerGroup *group, EvtViewGlyph *key, s32 unused2, s32 unused3, EventViewerState *viewer) {
+    s32 elapsed;
+    struct EffNode *node;
+    s32 alpha;
+    u32 color;
+
+    switch (group->type) {
+    case 3:
+    case 20:
+    case 21:
+    case 26:
+        break;
+    default:
+        return;
+    }
+    if (key->kind < 0 || (s8)key->condition == 0) {
+        return;
+    }
+    elapsed = viewer->glyphAdvancePosition - key->id;
+    if (key->duration >= elapsed) {
+        node = ((EvtViewerObjectData *)viewer->objects[key->kind]->data)->parameterNode;
+        alpha = (s32)((128.0f / key->duration) * elapsed);
+        func_0035B6E0("alpha=%d\n", alpha);
+        color = ((u32)alpha << 24) | 0x808080;
+        effSetNodeParameterValue(node, color);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00247EE0);
 
@@ -306,10 +351,6 @@ extern s32 dds3GetSlot(s32 owner, s32 kind);
 extern void evtSetMovieClipPositionClampedToDuration(s32 object, s32 arg1, s32 start, s32 end, s32 extra);
 
 
-typedef struct EvtWorldLink {
-    u8 pad0[0x20];
-    s32 next; /* 0x20 */
-} EvtWorldLink;
 
 void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
     s32 table;

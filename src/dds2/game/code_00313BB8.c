@@ -100,7 +100,22 @@ extern u16 D_00401326[];
 
 extern u8 D_0045C828[];
 
-extern u32 *mnuGetMantraNodePositionRecord(s16);
+typedef union MantraNodeHeader {
+    u32 word;
+    struct {
+        u16 flags;
+        u16 id;
+    } parts;
+} MantraNodeHeader;
+
+typedef struct MantraNodePos {
+    MantraNodeHeader header;
+    s16 x;
+    s16 y;
+    struct MantraNodePos *adjacent[6];
+} MantraNodePos;
+
+extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 
 extern u8 D_00401320[][36];
 
@@ -753,16 +768,51 @@ s32 prfReqCheckGlobalCounter(u8 *a) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00315950);
+s32 func_00315950(s16 id, s32 context, s32 mode) {
+    s32 result = 1;
+    MantraNodePos *record = mnuGetMantraNodePositionRecord(id);
+    MantraNodePos **adjacent;
+    u32 i;
+
+    if (record == NULL) {
+        return 0;
+    }
+    if (mode == 0x40) {
+        adjacent = record->adjacent;
+        i = 0;
+        do {
+            if (*adjacent != NULL &&
+                func_00314990(context, (*adjacent)->header.parts.id) == 0 &&
+                ((*adjacent)->header.word & 0xF) != 2) {
+                result = 0;
+            }
+            i++;
+            adjacent++;
+        } while (i < 6);
+        return result;
+    }
+    adjacent = record->adjacent;
+    i = 0;
+    do {
+        if (*adjacent != NULL &&
+            func_00314990(context, (*adjacent)->header.parts.id) != 0 &&
+            ((*adjacent)->header.word & 0x100) == 0) {
+            return 1;
+        }
+        i++;
+        adjacent++;
+    } while (i < 6);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00315A50);
 
 s32 mnuIsResourceCategoryAvailable(s16 id) {
-    u32 *info = mnuGetMantraNodePositionRecord(id);
+    MantraNodePos *info = mnuGetMantraNodePositionRecord(id);
     if (info == 0) {
         return 0;
     }
-    return D_0045C828[(s32)(*info << 24) >> 28] != 0;
+    return D_0045C828[(s32)(info->header.word << 24) >> 28] != 0;
 }
 
 s32 func_00315C40(u32 index) {
