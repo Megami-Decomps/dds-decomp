@@ -2061,7 +2061,8 @@ s32 btlActorEntryIsExpired(UiObject *unit, s32 index) {
 typedef struct EntryPair {
     s16 first;
     s16 second;
-    u8 pad4[4];
+    s16 initialValue;
+    s16 countdown;
 } EntryPair;
 
 extern EntryPair D_003B4DF0[];
@@ -2081,7 +2082,22 @@ s32 btlMatchActorEntryCode(UiObject *unit, s32 index) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADD30);
+void func_001ADD30(UiObject *unit, s32 index, s16 delta) {
+    s16 code = unit->entrySlots[index].code;
+    code += delta;
+
+    if (code > D_003B4DF0[index].first) {
+        code = D_003B4DF0[index].first;
+    }
+    if (code < D_003B4DF0[index].second) {
+        code = D_003B4DF0[index].second;
+    }
+    if (code != 0) {
+        unit->entrySlots[index].unk02 = D_003B4DF0[index].initialValue;
+        unit->entrySlots[index].countdown = D_003B4DF0[index].countdown;
+    }
+    unit->entrySlots[index].code = code;
+}
 
 void btlSetActorEntryCode(UiObject *unit, s32 index, u16 code) {
     unit->entrySlots[index].code = code;
@@ -2099,7 +2115,81 @@ s16 btlGetActorEntryCode(UiObject *unit, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADE18);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADFE0);
+void func_001ADFE0(UiObject *unit, u32 flags, s16 delta) {
+    if (flags == 0) {
+        return;
+    }
+    if (flags & 1) {
+        func_001ADD30(unit, 0, delta);
+    }
+    if (flags & 2) {
+        func_001ADD30(unit, 0, -delta);
+    }
+    if (flags & 4) {
+        func_001ADD30(unit, 1, delta);
+    }
+    if (flags & 8) {
+        func_001ADD30(unit, 1, -delta);
+    }
+    if (flags & 0x10) {
+        func_001ADD30(unit, 2, delta);
+    }
+    if (flags & 0x20) {
+        func_001ADD30(unit, 2, -delta);
+    }
+    if (flags & 0x40) {
+        func_001ADD30(unit, 3, delta);
+    }
+    if (flags & 0x80) {
+        func_001ADD30(unit, 3, -delta);
+    }
+    if (flags & 0x100) {
+        func_001ADD30(unit, 4, delta);
+    }
+    if (flags & 0x200) {
+        func_001ADD30(unit, 4, -delta);
+    }
+    if (flags & 0x400) {
+        func_001ADD30(unit, 5, delta);
+    }
+    if (flags & 0x2000) {
+        func_001ADD30(unit, 6, delta);
+    }
+    if (flags & 0x800) {
+        if (btlGetActorEntryCode(unit, 0) > 0) {
+            btlSetActorEntryCode(unit, 0, 0);
+        }
+        if (btlGetActorEntryCode(unit, 1) > 0) {
+            btlSetActorEntryCode(unit, 1, 0);
+        }
+        if (btlGetActorEntryCode(unit, 2) > 0) {
+            btlSetActorEntryCode(unit, 2, 0);
+        }
+        if (btlGetActorEntryCode(unit, 3) > 0) {
+            btlSetActorEntryCode(unit, 3, 0);
+        }
+        if (btlGetActorEntryCode(unit, 4) > 0) {
+            btlSetActorEntryCode(unit, 4, 0);
+        }
+    }
+    if (flags & 0x1000) {
+        if (btlGetActorEntryCode(unit, 0) < 0) {
+            btlSetActorEntryCode(unit, 0, 0);
+        }
+        if (btlGetActorEntryCode(unit, 1) < 0) {
+            btlSetActorEntryCode(unit, 1, 0);
+        }
+        if (btlGetActorEntryCode(unit, 2) < 0) {
+            btlSetActorEntryCode(unit, 2, 0);
+        }
+        if (btlGetActorEntryCode(unit, 3) < 0) {
+            btlSetActorEntryCode(unit, 3, 0);
+        }
+        if (btlGetActorEntryCode(unit, 4) < 0) {
+            btlSetActorEntryCode(unit, 4, 0);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", btlLowestSetPairIndex);
 
@@ -3888,7 +3978,27 @@ void btlReleaseMessageWindowTask(void) {
     btlSetTrackedTaskHandle(9, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB8D0);
+u32 func_001BB8D0(UiObject *object, s32 current, s32 total, s8 mode) {
+    u32 color;
+
+    if (mode == 1 && (object->flags & 0x20) != 0) {
+        color = 0x4F4E3E40;
+    } else if ((object->statusFlags & 0x4800) != 0) {
+        color = 0x4F4E3E40;
+    } else if (current * 2 >= total) {
+        color = 0xA09DC380;
+    } else if (current <= 0) {
+        color = 0x4F4E3E40;
+    } else {
+        u32 nearColor = 0xC8747380;
+        color = 0xD1BA7180;
+        if (current * 4 < total) {
+            color = nearColor;
+        }
+    }
+    return ((color >> 24) | ((color & 0xFF00) << 8)) |
+           ((color << 24) | ((color >> 8) & 0xFF00));
+}
 
 u8 btlHasRequiredActorStatusBits(s32 arg0) {
     return (~*(u64 *)(arg0 + 0x110) & 0x201) == 0;
@@ -4121,9 +4231,24 @@ s32 func_001C0008(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C0080);
+extern u8 D_003B5D10[];
 
-extern s32 func_001C0080(s32);
+s32 func_001C0080(s32 arg0) {
+    s32 count;
+    s32 i;
+
+    func_001B7A00();
+    count = func_001AC750(arg0, D_003B5D10);
+    if (count != 0) {
+        for (i = 0; i < count; i++) {
+            if (func_001B7940(*(u16 *)(D_003B5D10 + 4 + i * 12), 2) == 0) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+    return count;
+}
 
 s64 btlGetTaskState6(void) {
     s64 task = func_00101740(btlCommandPanelTaskNameRef);
