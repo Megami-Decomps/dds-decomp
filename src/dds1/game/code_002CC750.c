@@ -1,4 +1,5 @@
 #include "common.h"
+extern void memset();
 extern u16 ptyPresetSkillSlots[][96];
 extern u16 ptyPresetPoolSkills[][96];
 extern void ptyMergeStockSkills(u8 *);
@@ -565,13 +566,34 @@ u8 ptyIsCurrentProfileId(s32 operand, u32 profileId) {
     return (s64)((ScrVmOperand *)operand)->selectedIndex == (profileId & 0xffff);
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", prfBuildRawSkillList);
-
 typedef struct PrfSkillList {
     u32 flags[8];
     s32 count;
     u16 skills[8];
 } PrfSkillList;
+
+s32 prfBuildRawSkillList(u16 profile, PrfSkillList *output) {
+    PrfSkillList list;
+    u32 i;
+    u16 *skills;
+    u16 skill;
+
+    memset(&list, 0, sizeof(PrfSkillList));
+    list.count = 0;
+    skills = &D_003907BC[profile * 14];
+    for (i = 0; i < 8; i++) {
+        skill = *skills++;
+        if (skill != 0) {
+            list.flags[list.count] = 0;
+            list.skills[list.count] = skill;
+            list.count++;
+        }
+    }
+    if (output != NULL) {
+        *output = list;
+    }
+    return list.count;
+}
 
 s32 prfBuildSkillList(ScrVmOperand *unit, u32 profile, PrfSkillList *output, s32 includeFlagged) {
     PrfSkillList list;
