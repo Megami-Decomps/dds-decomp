@@ -10,7 +10,9 @@ import sys
 from pathlib import Path
 
 
-NODE_HEADER = re.compile(r"\((call_insn|jump_insn|insn)(?::[^\s]+)?\s+(\d+)")
+NODE_HEADER = re.compile(
+    r"\((call_insn|jump_insn|insn)((?:/[A-Za-z]+)*)(?::[^\s]+)?\s+(\d+)"
+)
 SYMBOL_REF = re.compile(r'\(symbol_ref(?::[^\s]+)?\s+\("([^"]+)"\)')
 SET_REGISTER = re.compile(
     r"\(set\s+\(reg(?:/[^:\s]+)?(?::[^\s]+)?\s+\d+\s+([^\)]+)\)"
@@ -61,21 +63,28 @@ def top_level_forms(text: str) -> list[str]:
     return forms
 
 
-def sequence_nodes(form: str) -> list[tuple[str, int, str]]:
+def sequence_nodes(form: str) -> list[tuple[str, frozenset[str], int, str]]:
     marker = form.find("(sequence[")
     if marker < 0:
         return []
-    nodes: list[tuple[str, int, str]] = []
+    nodes: list[tuple[str, frozenset[str], int, str]] = []
     cursor = marker + len("(sequence[")
     while match := NODE_HEADER.search(form, cursor):
         node, end = balanced_form(form, match.start())
-        nodes.append((match.group(1), int(match.group(2)), node))
+        flags = frozenset(match.group(2).replace("/", ""))
+        nodes.append((match.group(1), flags, int(match.group(3)), node))
         cursor = end
     return nodes
 
 
-def describe_node(kind: str, uid: int, form: str) -> dict[str, object]:
+def describe_node(
+    kind: str, flags: frozenset[str], uid: int, form: str
+) -> dict[str, object]:
     result: dict[str, object] = {"kind": kind, "uid": uid}
+    if kind == "jump_insn":
+        result["annulled"] = "u" in flags
+    else:
+        result["from_target"] = "s" in flags
     symbol = SYMBOL_REF.search(form)
     if symbol:
         result["target"] = symbol.group(1)
@@ -108,11 +117,22 @@ def analyze_dump(text: str) -> list[dict[str, object]]:
         nodes = sequence_nodes(form)
         if wrapper is None or len(nodes) < 2:
             continue
-        branch_kind, branch_uid, branch_form = nodes[0]
+        branch_kind, branch_flags, branch_uid, branch_form = nodes[0]
+        branch = describe_node(branch_kind, branch_flags, branch_uid, branch_form)
+        slots = []
+        for kind, flags, uid, node in nodes[1:]:
+            slot = describe_node(kind, flags, uid, node)
+            if branch.get("annulled"):
+                slot["executes_when"] = (
+                    "taken" if slot["from_target"] else "not_taken"
+                )
+            else:
+                slot["executes_when"] = "always"
+            slots.append(slot)
         sequences.append({
-            "wrapper_uid": int(wrapper.group(2)),
-            "branch": describe_node(branch_kind, branch_uid, branch_form),
-            "slots": [describe_node(kind, uid, node) for kind, uid, node in nodes[1:]],
+            "wrapper_uid": int(wrapper.group(3)),
+            "branch": branch,
+            "slots": slots,
         })
     return sequences
 
@@ -134,8 +154,9 @@ def render(sequences: list[dict[str, object]]) -> str:
         branch = sequence["branch"]
         assert isinstance(branch, dict)
         target = f" {branch['target']}" if "target" in branch else ""
+        annulled = " annulled" if branch.get("annulled") else ""
         lines.append(
-            f"  uid {branch['uid']} {branch['kind']}{target} "
+            f"  uid {branch['uid']} {branch['kind']}{target}{annulled} "
             f"-> wrapper uid {sequence['wrapper_uid']}"
         )
         for index, slot in enumerate(sequence["slots"]):
@@ -147,8 +168,11 @@ def render(sequences: list[dict[str, object]]) -> str:
                 location = slot["source"]
                 assert isinstance(location, dict)
                 source = f" ({location['file']}:{location['line']})"
+            execution = f" executes={slot['executes_when']}"
+            origin = " origin=target" if slot.get("from_target") else ""
             lines.append(
-                f"    slot {index}: uid {slot['uid']} {operation}{destination}{source}"
+                f"    slot {index}: uid {slot['uid']} {operation}{destination}"
+                f"{execution}{origin}{source}"
             )
     return "\n".join(lines)
 
