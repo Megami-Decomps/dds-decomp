@@ -3462,9 +3462,40 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001C08B8);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001C0DF8);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlDrawCenteredPanelSegments);
+typedef struct BtlPanelInner {
+    u8 pad00[0xDCC];
+    s32 fDCC;
+    u8 padDD0[0x6C];
+    s32 fE3C;
+} BtlPanelInner;
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3078);
+typedef struct BtlPanelRes {
+    u8 pad00[0x18];
+    BtlPanelInner *inner;
+} BtlPanelRes;
+
+typedef struct BtlPanelBlock {
+    u8 pad00[0x18];
+    BtlPanelRes *res;
+} BtlPanelBlock;
+
+extern void func_002BF438(s32, s32, s32, u8 *, s32, BtlPanelRes *, s32, s32);
+
+void btlDrawCenteredPanelSegments(s32 width) {
+    u8 color[16] = {0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+                    0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+    s32 half = width / 2;
+    s32 x = width - half + 0x105;
+    func_002BF438(x * 0x10, 0x200, 0, color, 0,
+                  ((BtlPanelBlock *)btlResourceBlock)->res, 0x17, 0x53);
+    ((BtlPanelBlock *)btlResourceBlock)->res->inner->fDCC = width << 4;
+    func_002BF438((0x100 - half) * 0x10, 0x200, 0, color, 0,
+                  ((BtlPanelBlock *)btlResourceBlock)->res, 0x16, 0x53);
+    ((BtlPanelBlock *)btlResourceBlock)->res->inner->fDCC =
+        ((BtlPanelBlock *)btlResourceBlock)->res->inner->fE3C << 4;
+    func_002BF438((0x92 - half) * 0x10, 0x200, 0, color, 0,
+                  ((BtlPanelBlock *)btlResourceBlock)->res, 0x15, 0x53);
+}
 
 s32 fldStepSceneStateMachine(s64 handle) {
     BattleController *work = (BattleController *)btlGetRuntime();
@@ -11709,4 +11740,3 @@ u8 *btlCreateSoundPlaybackTask(u8 *owner, u32 soundId, u32 variant, u32 channel,
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A5410);
-
