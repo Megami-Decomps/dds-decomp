@@ -2031,11 +2031,27 @@ typedef struct EffPCPTrailParams {
     u32 colors[2];
     f32 scale;
     s32 minSize;
-    u32 objParams;
-    u32 color;
+    EffPCPTexturedBlurParams res;
 } EffPCPTrailParams;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017B180);
+EffPCPTrailWork *func_0017B180(EffPCPTrailParams *params) {
+    EffPCPTrailWork *work = sdfAllocSizeClassBlock(sizeof(EffPCPTrailWork));
+
+    work->obj = (EffPCPTrailObj *)effCloneBlurTemplate(&params->res);
+    work->color = params->res.color;
+    work->frame = 0;
+    work->flags = 0x80808080;
+    work->pos[0] = 0.0f;
+    work->pos[1] = 0.0f;
+    work->pos[2] = 0.0f;
+    work->unk1C = 0.0f;
+    work->count = params->count;
+    work->colors[0] = params->colors[0];
+    work->colors[1] = params->colors[1];
+    work->scale = params->scale;
+    work->minSize = params->minSize;
+    return work;
+}
 
 void effPcpTrailRelease(EffPCPTrailWork *work) {
     func_00186CB8((u32)work->obj);
@@ -3828,8 +3844,6 @@ void effPcpSetScaledThunderScale(EffPCPGrowWork *work, f32 val) {
     work->scale = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001801F8);
-
 /* Both beam clones own this node. The color array, point array, two
    transforms and release handles are parts of one SDK allocation. */
 typedef struct EffPCPBeamNode {
@@ -3845,6 +3859,42 @@ typedef struct EffPCPBeamNode {
     u32 assetHandle;
     u32 allocationHandle;
 } EffPCPBeamNode;
+
+/* Shared draw-request parameters are cleared before creating a beam. */
+typedef struct EffPCPBeamDrawParams {
+    u32 unk00;
+    u16 unk04;
+    u8 pad06[0x26];
+} EffPCPBeamDrawParams;
+
+extern EffPCPBeamDrawParams D_003D6610;
+extern void *sdfCreateAssetWithDrawEntries(void);
+extern void func_002DA420(void *asset, f32 scale);
+
+/* vu0 routine: initialize both transforms with the libvu0 identity primitive. */
+EffPCPBeamNode *func_001801F8(u32 segments) {
+    u32 count = segments * 4 + 4;
+    EffPCPBeamNode *node = sdfAllocSizeClassBlock(sizeof(EffPCPBeamNode));
+    void *allocation = sdfAllocGeneralBlock(count * 20);
+    f32 *points = sdfResourceRetainAddress(allocation);
+
+    memset(points, 0, count * 20);
+    node->points = points;
+    node->drawKind = 2;
+    node->colors = (u32 *)(points + count * 4);
+    node->vertexCount = count;
+    node->color = 0x80808080;
+    node->allocationHandle = (u32)allocation;
+    node->scale = 1.0f;
+    node->assetHandle = (u32)sdfCreateAssetWithDrawEntries();
+    func_002DA420((void *)node->assetHandle, 1.0f);
+    EE_MMI_UNIT_MATRIX(node->localMatrix);
+    EE_MMI_UNIT_MATRIX(node->matrix);
+    memset(&D_003D6610, 0, sizeof(D_003D6610));
+    D_003D6610.unk04 = 0x4000;
+    return node;
+}
+
 
 /* The clone copies the 0x50-byte parameter prefix, then attaches a node whose
  * entries receive three colors from that prefix. */
@@ -3925,7 +3975,6 @@ void effResetChild(EffPCPBeamWork *work) {
 }
 
 
-extern u8 *func_001801F8(u32);
 
 u8 *effBeamEffectClone(src)
     EffPCPBeamParams *src;
@@ -3945,7 +3994,7 @@ u8 *effBeamEffectClone(src)
         src->segments = 3;
         segments = 3;
     }
-    node = (EffPCPBeamNode *)func_001801F8(segments);
+    node = func_001801F8(segments);
     i = 0;
     work->node = node;
     work->vertexCount = node->vertexCount;
@@ -4151,7 +4200,7 @@ u8 *effBeamEffectCloneLarge(src)
         src->segments = 3;
         segments = 3;
     }
-    node = (EffPCPBeamNode *)func_001801F8(segments);
+    node = func_001801F8(segments);
     i = 0;
     work->node = node;
     groups = (s32)node->vertexCount >> 2;
