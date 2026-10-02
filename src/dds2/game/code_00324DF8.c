@@ -385,7 +385,30 @@ void func_00328018(SdfMat4 *out, SdfVec4 *q) {
     out->m[15] = 1.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328160);
+/* Quaternion from Euler angles using negated half angles. */
+void func_00328160(f32 *out, f32 x, f32 y, f32 z) {
+    f32 half;
+    f32 cx;
+    f32 sx;
+    f32 cy;
+    f32 sy;
+    f32 cz;
+    f32 sz;
+
+    half = -x * 0.5f;
+    cx = cos(half);
+    sx = sin(half);
+    half = -y * 0.5f;
+    cy = cos(half);
+    sy = sin(half);
+    half = -z * 0.5f;
+    cz = cos(half);
+    sz = sin(half);
+    out[0] = sz * sy * cx + cz * cy * sx;
+    out[1] = cz * sy * cx - sz * cy * sx;
+    out[2] = sz * cy * cx + cz * sy * sx;
+    out[3] = cz * cy * cx - sz * sy * sx;
+}
 
 void sdfCreateSemaphoreFromOptions(void) {
 }
