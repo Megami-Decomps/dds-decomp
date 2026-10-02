@@ -2218,6 +2218,8 @@ u16 btlGetUnitModelFrameCount(BtlUnit *unit) {
     return unit->ext->info->data->s2E;
 }
 
+/* This unit preserves the retail caller's integer view of the final `$v0`
+ * scratch value. The motion routine itself has no semantic return contract. */
 extern s32 sdfMotionSampleAtFrame(BtlUnitData *, f32);
 
 void btlSeekUnitModelFrameZero(BtlUnit *unit) {
