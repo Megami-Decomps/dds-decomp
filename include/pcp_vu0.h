@@ -320,6 +320,9 @@
 #define VU0_TRANSFORM_POINT(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
     "vmaddaz.xyzw ACC, vf30, " #src "z\n\tvmaddw.xyzw " #dst ", vf31, vf0w\n\t.set reorder")
+/* Accumulate the xyz clip tests for a transformed vector against its w. */
+#define VU0_CLIPW_XYZ(vf) __asm__ volatile ( \
+    ".set noreorder\n\tvclipw.xyz " #vf ", " #vf "w\n\t.set reorder")
 /* vf10 /= vf10.w, then w = 1: the perspective divide after a point transform. */
 #define VU0_PERSPECTIVE_DIVIDE_VF10() __asm__ volatile ( \
     ".set noreorder\n\tvdiv Q, vf0w, vf10w\n\tvmove.w vf10, vf0\n\tvwaitq\n\t" \
@@ -355,6 +358,10 @@
     "vaddz.x vf2, vf2, vf2z\n\tvsqrt Q, vf2x\n\tvwaitq\n\tcfc2.ni $2, $vi22\n\t" \
     "mtc1 $2, %0\n\t.set reorder" \
     : "=f" (out) : : "$2")
+/* Read the accumulated VU0 clip flags from vi18 into a typed integer lvalue. */
+#define VU0_READ_CLIP_FLAGS(out) __asm__ volatile ( \
+    ".set noreorder\n\tcfc2.ni %0, $vi18\n\t.set reorder" \
+    : "=r" (out))
 /* vf10 = vf10 / |vf10.xyz| (w untouched):
  *   vmul.xyz vf2,vf10,vf10; vmulax.w ACC,vf0,vf2x; vmadday.w ACC,vf0,vf2y;
  *   vmaddz.w vf2,vf0,vf2z; vrsqrt Q,vf0w,vf2w; vwaitq; vmulq.xyz vf10,vf10,Q */
