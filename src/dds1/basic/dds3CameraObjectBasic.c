@@ -3,7 +3,7 @@
 #include "pcp_vu0.h"
 
 typedef struct {
-    u8 pad0[0x40];
+    u128 matrix[4];       /* 0x00: four look-at basis quadwords stored by VU0 */
     u128 localEyeOffset; /* 0x40 */
     u128 localUp;        /* 0x50 */
     u128 worldEye;       /* 0x60 */
@@ -142,7 +142,7 @@ void dds3RebuildCameraBasis(ActionObj *obj) {
         VU0_STORE_VF(vf10, &data->worldEye);
     }
     sdfVuBuildLookAtBasis(&data->worldEye, inner + 0x40, &data->worldUp);
-    VU0_STORE_MATRIX(data);
+    VU0_STORE_MATRIX(data->matrix);
 }
 
 u32 dds3GetCameraHandle(CameraObject *camera) {
@@ -213,28 +213,33 @@ void dds3ReleaseCameraWorldNode(void) {
     dds3RemoveWorldObjectNode();
 }
 
+/* Load the owned look-at matrix into vf28-vf31. */
 void dds3LoadObjectMatrixPointerIntoVu(void *obj) {
-    VU0_LOAD_MATRIX(*(void **)((u8 *)obj + 0x18));
+    VU0_LOAD_MATRIX(((CameraObject *)obj)->data->matrix);
 }
 
+/* Copy the supplied vector to the camera's world-space eye position. */
 void dds3SetCameraVector(void *obj, void *src) {
-    PCP_COPY_VECTOR(*(u8 **)((u8 *)obj + 0x18) + 0x60, src);
+    PCP_COPY_VECTOR(&((CameraObject *)obj)->data->worldEye, src);
 }
 
-void dds3LoadCameraVectorVU(EEF0Node *arg0) {
-    u8 *p = *(u8 **)((u8 *)arg0 + 0x18) + 0x60;
+/* Return the camera's world-space eye vector in vf10. */
+void dds3LoadCameraVectorVU(void *camera) {
+    u8 *eye = (u8 *)&((CameraObject *)camera)->data->worldEye;
 
-    VU0_LOAD_VF_MEMORY(vf10, p);
+    VU0_LOAD_VF_MEMORY(vf10, eye);
 }
 
-void dds3SetCameraFieldOfView(u8 *obj, f32 value) {
-    u8 *state = *(u8 **)(obj + 0x18);
-    *(f32 *)(state + 0x8C) = value;
-    *(u32 *)(state + 0x88) |= 1;
+/* Cache a field of view in radians and request its next active-camera update. */
+void dds3SetCameraFieldOfView(CameraObject *camera, f32 value) {
+    CameraData *state = camera->data;
+    state->fieldOfView = value;
+    state->fovUpdatePending |= 1;
 }
 
-f32 dds3GetCameraFieldOfView(u8 *obj) {
-    return *(f32 *)(*(u8 **)(obj + 0x18) + 0x8C);
+/* Return the cached field of view in radians. */
+f32 dds3GetCameraFieldOfView(CameraObject *camera) {
+    return camera->data->fieldOfView;
 }
 
 extern void effMiscQuaternionToMatrixVU(void);
