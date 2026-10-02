@@ -215,18 +215,6 @@ typedef struct BillEntryList {
     s32 *entries;
 } BillEntryList;
 
-/* Kind-zero billboard payload stores its variant after a 32-bit value. */
-typedef struct BillChildPayload {
-    s32 value;
-    union {
-        s16 signedVariant;
-        u16 variant;
-    };
-    u8 pad06[0x1E];
-    f32 halfWidth;  /* 0x24 */
-    f32 halfHeight; /* 0x28 */
-} BillChildPayload;
-
 typedef struct BillKindOneView {
     u8 pad00[0x2C];
     u16 kind;
