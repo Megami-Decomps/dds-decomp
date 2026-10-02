@@ -59,7 +59,7 @@ typedef struct EffNode {
 extern EffTypeOps effNodeTypeOperations[];
 
 EffNode *effCreateNode(u16 type, u16 arg, s32 param) {
-    EffNode *node = (EffNode *)func_002CFEB8(0x10);
+    EffNode *node = (EffNode *)sdfAllocSizeClassBlock(0x10);
 
     node->type = type;
     node->unkC = 1.03f;

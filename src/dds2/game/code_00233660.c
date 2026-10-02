@@ -48,8 +48,8 @@ typedef struct MdlViewState {
     s16 unk14;
     s16 resourceCount;
     s16 unk18; /* 0x18: first s16 handed to func_00232198, and set from
-                 func_00232EE8's return */
-    s16 unk1A; /* 0x1A: second s16, and set from func_00232EF8 */
+                 mdlGetContextResourceGroup's return */
+    s16 unk1A; /* 0x1A: second s16, and set from mdlGetContextResourceId */
     s16 unk1C;
     s16 unk1E;
     s16 unk20;
@@ -365,7 +365,7 @@ typedef struct MdlViewerHeader {
 } MdlViewerHeader;
 
 extern s32 sdfAllocGeneralBlock(s32 size);
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 sdfResourceRetainAddress(s32 handle);
 extern u32 strlen(const char *);
 extern char *strcpy(char *, const char *);
@@ -399,7 +399,7 @@ void mdlInitializeViewerResourceTable(void) {
             break;
         }
         if (source != NULL) {
-            copy = func_00328D68(strlen(source) + 1);
+            copy = sdfAllocSizeClassBlock(strlen(source) + 1);
             strcpy(copy, source);
             switch (i) {
             case 0:
@@ -735,7 +735,7 @@ void mdlObjInit(MdlObj *obj, s32 data, s32 attributes) {
     }
 }
 
-void func_00234838(u32 request) {
+void mdlCreateBufferedPartRequest(u32 request) {
     sdfDevCreateBufferedRequest(request, 0x10, 4);
 }
 
@@ -1600,8 +1600,8 @@ u32 func_00236E58(void) {
     return 0;
 }
 
-extern s32 func_00232EE8(s32);
-extern s32 func_00232EF8(s32);
+extern s32 mdlGetContextResourceGroup(s32);
+extern s32 mdlGetContextResourceId(s32);
 extern void mdlDestroyContext(s32 resource);
 extern void sdfMotionInitializeAtZeroTime(void *, s32, s32);
 
@@ -1658,8 +1658,8 @@ void mdlApplyViewerResourceMenuAction(void) {
         }
         break;
     }
-    mdlViewerState.unk1C = mdlViewerState.unk18 = func_00232EE8(mdlViewerState.resources[0]);
-    mdlViewerState.unk1E = mdlViewerState.unk1A = func_00232EF8(mdlViewerState.resources[0]);
+    mdlViewerState.unk1C = mdlViewerState.unk18 = mdlGetContextResourceGroup(mdlViewerState.resources[0]);
+    mdlViewerState.unk1E = mdlViewerState.unk1A = mdlGetContextResourceId(mdlViewerState.resources[0]);
     i = ((MdlLoaded *)mdlViewerState.resources[0])->unk12;
     if (i < 0) {
         i = 0;

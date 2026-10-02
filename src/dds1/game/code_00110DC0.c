@@ -136,7 +136,7 @@ s32 dds3CreatePairedWorldIndexNodes(WorldObjectPointer *object) {
     u32 *p;
     u32 i;
 
-    object->value = func_002CFEB8(8);
+    object->value = sdfAllocSizeClassBlock(8);
     p = object->value;
     for (i = 0; i < 2; i++) {
         *p = (u32)dds3AppendWorldIndexNode(0);
@@ -158,7 +158,7 @@ void dds3DestroyObjectPointerChains(WorldObjectPointer *object) {
     sdfReleaseChipBlock(p);
 }
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern void *dds3AppendWorldIndexNode(s32 index);
 

@@ -7,7 +7,7 @@ extern u8 *sdfResourceRetainAddress(s32);
 extern void mnuClearPanelTransitionState(u8 *);
 extern void mnuInitializeShopStatusBatches(u8 *);
 extern void func_002945B8(u8 *);
-extern void func_002C1B58(u8 *, s32);
+extern void mnuResetGradientFadeColor(u8 *, s32);
 extern void sndEnsureMidiBankResident(s32);
 extern void sndStartTrackExtended(s32);
 extern s32 func_00261198();
@@ -127,7 +127,7 @@ extern u8 D_003CD8DD[];
 
 extern void evtFormatTaskName(s32 taskId, void *name);
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern void *memset(void *dst, s32 c, u32 n);
 
@@ -171,7 +171,7 @@ void mnuCampCreateTask(s32 taskId) {
 
     if (evtFindTaskById() == 0) {
         evtFormatTaskName(taskId, name);
-        data = func_00328D68(0x48);
+        data = sdfAllocSizeClassBlock(0x48);
         memset(data, 0, 0x48);
         data->taskId = taskId;
         data->unk4 = 0;
@@ -1131,7 +1131,7 @@ s32 mnuCreateEnabledCampEntryWindow(s32 count, s32 *enabled, u8 *settings) {
         }
     }
     window->list->callback = func_00295400;
-    storage = func_00328D68(0x14);
+    storage = sdfAllocSizeClassBlock(0x14);
     memset(storage, 0, 0x14);
     window->list->buffer = storage;
     storage->unk0C = ((ShopEffectScene *)settings)->unkA0;
@@ -1283,7 +1283,7 @@ u8 *mnuTerminalCreateContext(void) {
     ((ShopEffectScene *)obj)->availableCount = mnuCountActivePartyEntries();
     ((ShopEffectScene *)obj)->mode = 0xF;
     func_002945B8(obj);
-    func_002C1B58(obj + 0x37C, 0x60);
+    mnuResetGradientFadeColor(obj + 0x37C, 0x60);
     mnuCampClearListedItemCounts();
     sndEnsureMidiBankResident(0x300000);
     sndStartTrackExtended(0x300000);

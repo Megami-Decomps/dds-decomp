@@ -92,7 +92,7 @@ void func_00346988(SdfPacWork *job) {
     }
 }
 
-s32 func_00346A60(SdfPacWork *work) {
+s32 sdfPacCheckDecoderStatus(SdfPacWork *work) {
     if (work->decoder.status0F == 0) {
         return 0;
     }

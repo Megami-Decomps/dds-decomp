@@ -133,7 +133,7 @@ extern s32 D_00438F80;
 
 extern void func_0035C860();
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern u32 btlGetEffectActive(void);
 
@@ -2668,7 +2668,7 @@ void btlDestroyEntryList(s32 list) {
 }
 
 void btlAppendEntry(BtlEntryList *list, char *name, s32 category, s32 flags, s32 id) {
-    BtlEntry *entry = func_00328D68(0x44);
+    BtlEntry *entry = sdfAllocSizeClassBlock(0x44);
     BtlEntry *tail;
     entry->category = category;
     entry->flags = flags;
@@ -2691,7 +2691,7 @@ void btlAppendEntry(BtlEntryList *list, char *name, s32 category, s32 flags, s32
 }
 
 BtlResourceDescriptor *btlCreateResourceDescriptor(BtlEntryList *list) {
-    BtlResourceDescriptor *resource = func_00328D68(0x48);
+    BtlResourceDescriptor *resource = sdfAllocSizeClassBlock(0x48);
 
     resource->word00 = 8;
     resource->word04 = 8;
@@ -2802,7 +2802,7 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E1E0);
 s32 btlCreateResourceNameRecord(s32 name) {
     s32 recordAddress;
 
-    recordAddress = (s32)func_00328D68(0x38);
+    recordAddress = (s32)sdfAllocSizeClassBlock(0x38);
     ((BtlResourceNameRecord *)recordAddress)->word14 = 9;
     ((BtlResourceNameRecord *)recordAddress)->word00 = 8;
     ((BtlResourceNameRecord *)recordAddress)->word04 = 8;

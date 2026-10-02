@@ -21,7 +21,7 @@ extern s32 sdfPendingQueueSlots[2];
 
 extern SdfResource *sdfResourceListHead;
 
-extern u32 func_002CFEB8(u32);
+extern u32 sdfAllocSizeClassBlock(u32);
 extern void sdfReleaseChipBlock(void *allocation);
 
 extern u32 sdfCreateReferenceDmaNode(u32);
@@ -187,7 +187,7 @@ void sdfPendingQueuePush(SdfPendingOwner *owner, u32 entry) {
         WaitSema(sdfPendingQueueSemaphore);
         node = owner->pending;
         if (node == NULL) {
-            node = (SdfPendingNode *)func_002CFEB8(0x10);
+            node = (SdfPendingNode *)sdfAllocSizeClassBlock(0x10);
             node->remaining = 0;
             node->next = sdfPendingQueueHead;
             node->buffer = NULL;
@@ -198,7 +198,7 @@ void sdfPendingQueuePush(SdfPendingOwner *owner, u32 entry) {
         remaining = node->remaining;
         buffer = node->buffer;
         if (remaining == 0) {
-            SdfPendingBuffer *fresh = (SdfPendingBuffer *)func_002CFEB8(0x100);
+            SdfPendingBuffer *fresh = (SdfPendingBuffer *)sdfAllocSizeClassBlock(0x100);
             fresh->next = buffer;
             node->buffer = fresh;
             buffer = fresh;
@@ -650,7 +650,7 @@ void sdfBuildDmaReferenceChain(u64 *packet, u32 address, s32 count) {
     packet[7] = 0;
 }
 
-void func_002D4678(SdfPacket *packet, s32 frameAddress, s32 width, s32 height,
+void sdfBuildFrameDepthScissorPacket(SdfPacket *packet, s32 frameAddress, s32 width, s32 height,
                   s32 frameFormat, s32 depthAddress, s32 depthFormat,
                   s32 fieldOffset, s32 context) {
     s64 frameRegister;
@@ -714,11 +714,11 @@ void sdfInitDrawPacket(u64 *packet) {
     packet[7] = 0x3B;
 }
 
-extern void func_002D4678(SdfPacket *, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void sdfBuildFrameDepthScissorPacket(SdfPacket *, s32, s32, s32, s32, s32, s32, s32, s32);
 
 void sdfBuildSceneDrawHeader(SdfPacket *packet, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
     sdfInitializeDmaReferenceTag(packet, 5);
-    func_002D4678(packet + 1, a, b, c, d, e, f, 0, g);
+    sdfBuildFrameDepthScissorPacket(packet + 1, a, b, c, d, e, f, 0, g);
 }
 
 typedef struct SdfResRef {
@@ -762,8 +762,8 @@ void sdfBuildTextureScenePacket(SdfTexScenePacket *packet, SdfTexView *view, s32
     w = view->width;
     y = view->y;
     h = view->height;
-    func_002D4678(packet->tex0, tex, x, y, w, shade, h, D_003BD332, 0);
-    func_002D4678(packet->tex1, tex, x, y, w, shade, h, D_003BD332, 1);
+    sdfBuildFrameDepthScissorPacket(packet->tex0, tex, x, y, w, shade, h, D_003BD332, 0);
+    sdfBuildFrameDepthScissorPacket(packet->tex1, tex, x, y, w, shade, h, D_003BD332, 1);
     sdfBuildCenteredViewBoundsPacket(packet->limits, view->x, view->y, view->width, view->height);
     packet->regs[0] = 0x517FB;
     packet->regs[1] = 0x47;
@@ -1496,7 +1496,7 @@ void sdfEnsureFreeRootWorkspace(SdfFreeRoot *root) {
     u32 workspace;
 
     if (root->workspace == NULL) {
-        workspace = func_002CFEB8(0x100);
+        workspace = sdfAllocSizeClassBlock(0x100);
         root->workspace = (void *)workspace;
     }
 }

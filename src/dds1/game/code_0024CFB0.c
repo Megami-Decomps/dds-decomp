@@ -604,12 +604,12 @@ INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024E010);
 
 void evtDrawListViewportPanel(s32 x, s32 y, s32 width, s32 record) {
     s32 height = mnuGetListViewportHeight(*(s32 *)(record + 0x14)) + 0x80;
-    func_002C0DD8(x, y, 0, width, height, 0x30303040, 0x53);
+    uiDrawUniformColorRect(x, y, 0, width, height, 0x30303040, 0x53);
     func_0024E010(x + width - 0xA0, y, y + height, 8, record);
 }
 
 void evtDrawPlainPanel(u32 x, u32 y, u32 width, u32 height) {
-    func_002C0DD8(x, y, 0, width, height, 0x30303040, 0x53);
+    uiDrawUniformColorRect(x, y, 0, width, height, 0x30303040, 0x53);
 }
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspWindowHandle);

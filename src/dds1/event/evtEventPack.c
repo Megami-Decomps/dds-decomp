@@ -17,7 +17,7 @@ void evtFreeEventPackState(void)
 
 void func_002420B8(void);
 extern void func_003014F0(char *, char *, ...);
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern void kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
 extern char D_003AF260[];
 
@@ -27,7 +27,7 @@ void evtCreateMotionSeTask(s32 taskArg, s32 namePart1, s32 namePart2) {
     s32 *params;
 
     func_003014F0(taskName, D_003AF260, namePart1, namePart2);
-    params = func_002CFEB8(0xC);
+    params = sdfAllocSizeClassBlock(0xC);
     memset(params, 0, 0xC);
     params[0] = taskArg;
     params[1] = namePart1;

@@ -14,7 +14,7 @@ typedef struct SolarOverlayWork {
 
 extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
-void *func_002CFEB8(s32 size);
+void *sdfAllocSizeClassBlock(s32 size);
 
 void evtInitializeVisualData(s32 arg0);
 void evtLoadSolarNoiseSprite(u32 *sprite);
@@ -401,7 +401,7 @@ INCLUDE_ASM(const s32, "game/code_00228058", func_00228930);
 void *evtCreateSolarOverlayWork(s32 owner) {
     SolarOverlayWork *overlay;
 
-    overlay = func_002CFEB8(0x104);
+    overlay = sdfAllocSizeClassBlock(0x104);
     evtInitializeVisualData((s32)overlay);
     evtLoadSolarNoiseSprite(&overlay->noiseSprite);
     kwlnTaskSetUserValue(owner, overlay);

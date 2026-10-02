@@ -33,7 +33,7 @@ extern u8 D_003BB818[];
 
 extern u8 sdfPfsDebugMode;
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern s32 sceDopen(char *);
 
@@ -2371,7 +2371,7 @@ void btlDestroyEntryList(BtlEntryList *list) {
 }
 
 void btlAppendEntry(BtlEntryList *list, char *name, s32 category, s32 flags, s32 id) {
-    BtlEntry *entry = func_002CFEB8(0x44);
+    BtlEntry *entry = sdfAllocSizeClassBlock(0x44);
     BtlEntry *tail;
     entry->category = category;
     entry->flags = flags;
@@ -2424,7 +2424,7 @@ typedef struct BtlResourceDescriptor {
 } BtlResourceDescriptor;
 
 BtlResourceDescriptor *btlCreateResourceDescriptor(BtlEntryList *list) {
-    BtlResourceDescriptor *resource = func_002CFEB8(0x48);
+    BtlResourceDescriptor *resource = sdfAllocSizeClassBlock(0x48);
 
     resource->word00 = 8;
     resource->word04 = 8;
@@ -2542,7 +2542,7 @@ INCLUDE_ASM(const s32, "game/code_001F6110", func_001FC160);
 s32 btlCreateResourceNameRecord(s32 name) {
     s32 recordAddress;
 
-    recordAddress = (s32)func_002CFEB8(0x38);
+    recordAddress = (s32)sdfAllocSizeClassBlock(0x38);
     ((BtlResourceNameRecord *)recordAddress)->word14 = 9;
     ((BtlResourceNameRecord *)recordAddress)->word00 = 8;
     ((BtlResourceNameRecord *)recordAddress)->word04 = 8;

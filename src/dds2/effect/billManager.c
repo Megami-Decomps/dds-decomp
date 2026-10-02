@@ -32,7 +32,7 @@ extern BillObj *billCreateIndexed(s32 index, u32 data);
 
 extern u64 sdfReadNamedResource(u64, u32 *, u64);
 
-void *func_00328D68(s32 size);
+void *sdfAllocSizeClassBlock(s32 size);
 
 void *func_00157D38(void *arg);
 
@@ -57,7 +57,7 @@ INCLUDE_ASM(const s32, "effect/billManager", func_00158D68);
 BillObj *billAllocChild(void *resourceData) {
     BillObj *obj;
 
-    obj = func_00328D68(0x34);
+    obj = sdfAllocSizeClassBlock(0x34);
     obj->entryList = NULL;
     if (resourceData != NULL) {
         obj->entryList = func_00157D38(resourceData);
@@ -89,7 +89,7 @@ BillObj *billAllocList(void *resourceData) {
         data = func_00159678(resourceData);
     }
     n = data->entryCount;
-    newobj = func_00328D68(n * 20 + 0x6C);
+    newobj = sdfAllocSizeClassBlock(n * 20 + 0x6C);
     newobj->entryList = data;
     newobj->unk60 = (u8 *)newobj + 0x6C;
     newobj->unk50 = 1;
@@ -108,7 +108,7 @@ BillObj *billCloneList(BillObj *obj) {
     data = obj->entryList;
     n = data->entryCount;
     data->listRefCount = data->listRefCount + 1;
-    newobj = func_00328D68(n * 20 + 0x6C);
+    newobj = sdfAllocSizeClassBlock(n * 20 + 0x6C);
     newobj->entryList = data;
     newobj->unk60 = (u8 *)newobj + 0x6C;
     newobj->unk50 = 1;

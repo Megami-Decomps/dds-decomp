@@ -267,9 +267,9 @@ extern u8 *btlFindUnitByModeFlagged(s32);
 
 extern void *btlCreateModelChangeTask(void *, s32, s32, s32, s32, s32);
 
-extern void *func_00328D68(s32);
+extern void *sdfAllocSizeClassBlock(s32);
 
-extern void *func_00328D68(s32);
+extern void *sdfAllocSizeClassBlock(s32);
 
 /* The owner stores the one-based process number used to launch script tasks. */
 typedef struct BattleScriptOwner {
@@ -1757,7 +1757,7 @@ void btlLoadModelPack(s32 kind, s32 id) {
         mdlRequestAsset(kind, id, 0);
         if (sndFindListNodeForChannel(kind, id) == 0) {
             btlFormatModelResourcePath(kind, id, path);
-            entry->resource = (void *)func_002C7FF0(path);
+            entry->resource = (void *)fileQueuePlainDispatchRequest(path);
             btlBossDebugPrintf("btl:pack load start[%s][%X,%X]\n", path, kind, id);
         } else {
             entry->resource = 0;
@@ -2381,7 +2381,7 @@ s32 btlGroupContainsId(s32 group, s32 id) {
 }
 
 void btlAddGroupId(s32 group, s32 id) {
-    BattleGroupIdEntry *node = func_00328D68(sizeof(BattleGroupIdEntry));
+    BattleGroupIdEntry *node = sdfAllocSizeClassBlock(sizeof(BattleGroupIdEntry));
     BattleGroupIdEntry **head = (BattleGroupIdEntry **)&btlGroupIdHeads[group];
     node->id = id;
     node->next = *head;
@@ -2414,7 +2414,7 @@ void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 arg
     BattleGroupNode *head;
     s32 i;
     btlRemoveCurrentGroupedEntity(group, type);
-    node = func_00328D68(sizeof(BattleGroupNode));
+    node = sdfAllocSizeClassBlock(sizeof(BattleGroupNode));
     head = (BattleGroupNode *)btlGroupNodeHeads[group];
     if (head != NULL) {
         head->prev = node;

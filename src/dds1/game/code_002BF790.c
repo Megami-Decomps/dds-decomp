@@ -350,13 +350,13 @@ void uiDrawUniformRgbaRange(u32 a, u32 b, u32 c, u32 d, u32 e, u32 value, u32 g,
     func_002C0DF8(a, b, c, d, e, rgba, g, h);
 }
 
-void func_002C0DD8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g) {
+void uiDrawUniformColorRect(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g) {
     uiDrawUniformRgbaRange(a, b, c, d, e, f, 0, g);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0DF8);
 
-void func_002C0F88(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g) {
+void uiDrawGradientColorRect(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g) {
     func_002C0DF8(a, b, c, d, e, f, 0, g);
 }
 
@@ -411,7 +411,7 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(s32 surfaceIndex) {
 
 void uiDrawTexturedSurfaceAtFarDepth(s32 surface) {
     sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
-    func_002C0DD8(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, surface);
+    uiDrawUniformColorRect(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, surface);
     sdfSubmitGsTestOneRegisterPacket(0x3000DL, surface);
     uiDrawActiveSurfaceRegion(surface);
 }
@@ -421,7 +421,7 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1548);
 void uiDrawSurfaceAtNearDepth(u32 surface) {
     sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
-    func_002C0DD8(0, 0, 0, 0x2000, 0xe00, 0, surface);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xe00, 0, surface);
 }
 
 /* Scale the top three bytes of a packed color by scale / 256; the low byte is kept. */
@@ -495,13 +495,13 @@ s32 itfSetWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
 
 GridTextWidget *itfCreateGridTextWidget(const char *text, s32 x, s32 y, s32 columns, s32 rows,
                                u32 reference) {
-    GridTextWidget *widget = (GridTextWidget *)func_002CFEB8(0x40);
+    GridTextWidget *widget = (GridTextWidget *)sdfAllocSizeClassBlock(0x40);
     u32 length;
     char *copy;
 
     memset(widget, 0, 0x40);
     length = strlen(text) + 1;
-    copy = (char *)func_002CFEB8(length);
+    copy = (char *)sdfAllocSizeClassBlock(length);
     widget->textLength = length;
     widget->text = copy;
     memcpy(copy, text, length);
@@ -654,7 +654,7 @@ void itfReplaceGridTextAndExpandColumn(GridTextWidget *widget, u8 *node, const c
     sdfReleaseChipBlock(((GridTextWidget *)node)->text);
     length = strlen(text);
     allocation = length + 1;
-    copy = (char *)func_002CFEB8(allocation);
+    copy = (char *)sdfAllocSizeClassBlock(allocation);
     ((GridTextWidget *)node)->textLength = allocation;
     ((GridTextWidget *)node)->text = copy;
     memcpy(copy, text, allocation);

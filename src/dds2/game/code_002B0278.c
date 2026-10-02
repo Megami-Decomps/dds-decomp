@@ -763,7 +763,7 @@ s64 mnuOpenStaffPartySelectionPanel(s32 callback) {
     return menuSetHandler(context, 1, callback);
 }
 
-s64 func_002B2790(s32 callback) {
+s64 mnuStepPartySelectionControl(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     return menuSetHandler(context, 2, callback);
 }
@@ -894,7 +894,7 @@ s64 mnuDrawStaffCampPageWithImage(s32 callback) {
     return menuSetHandler(context, 1, callback);
 }
 
-s64 func_002B2C50(s32 callback) {
+s64 mnuStepStaffCampPageControl(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     return menuSetHandler(context, 2, callback);
 }
@@ -1173,7 +1173,7 @@ extern void func_00315388(u16, SkillInfo *);
 
 u32 *mnuBuildOwnedSkillBits(void) {
     SkillInfo info;
-    u32 *bits = (u32 *)func_00328D68(0x58);
+    u32 *bits = (u32 *)sdfAllocSizeClassBlock(0x58);
     s32 i;
     u32 j;
     memset(bits, 0, 0x58);
@@ -1271,7 +1271,7 @@ s64 mnuCampMenuDrawSlotLabel(s32 callback) {
     return menuSetHandler(context, 1, callback);
 }
 
-s64 func_002B5128(s32 callback) {
+s64 mnuStepSkillSlotControl(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     return menuSetHandler(context, 2, callback);
 }
@@ -2194,7 +2194,7 @@ void mnuDrawCampIconBackdrop(MenuBadgeSet *set, s32 arg) {
     memset(blank, 0, sizeof(blank));
     layout = D_0042AEE8;
     sdfSubmitGsTestOneRegisterPacket(0x30000, arg);
-    func_00308808(0, 0, 0, 0x2000, 0xE00, 0x80808080, arg);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x80808080, arg);
     for (i = 0; i < 1; i++) {
         itfDrawGridWithResolvedSlot(blank[i].x, blank[i].y, 0, 0, set->sheet, set->handle[blank[i].slot], arg);
     }
@@ -3425,7 +3425,7 @@ void mnuReleaseScrollPanelAnimations(menu)
 }
 
 MenuScrollPanel *mnuCreateScrollPanel(u32 owner) {
-    MenuScrollPanel *menu = (MenuScrollPanel *)func_00328D68(0x48);
+    MenuScrollPanel *menu = (MenuScrollPanel *)sdfAllocSizeClassBlock(0x48);
     memset(menu, 0, 0x48);
     menu->firstSprite = 0;
     menu->secondSprite = 0;
@@ -3693,7 +3693,7 @@ extern MenuIconLayout D_0042AFD8;
 
 u32 mnuCreateIconBundle(u32 resource) {
     MenuIconLayout layout = D_0042AFD8;
-    MenuIconBundle *set = (MenuIconBundle *)func_00328D68(0x20);
+    MenuIconBundle *set = (MenuIconBundle *)sdfAllocSizeClassBlock(0x20);
     u32 i;
     memset(set, 0, 0x20);
     for (i = 0; i < 3; i++) {

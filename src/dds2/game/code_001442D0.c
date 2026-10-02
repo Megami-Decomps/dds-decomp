@@ -237,7 +237,7 @@ extern s32 fldFindEffectByName(char *str);
 
 extern s32 fldGetCurrentSceneSelectionResource(void);
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern void kwlnTaskSetUserValue(s32 arg0, void *arg1);
 
@@ -554,7 +554,7 @@ s32 fldFieldTaskUpdate(void) {
 void *fldFieldTaskCreate(s32 task) {
     s32 *work;
 
-    work = func_00328D68(0x10);
+    work = sdfAllocSizeClassBlock(0x10);
     work[0] = 0;
     work[1] = 0;
     work[2] = 0;
@@ -948,11 +948,11 @@ s32 fldStepArchiveLoad(void) {
     return 0;
 }
 
-void func_001454B8(void) {
+void fldResetSecondaryArchiveLoadPhase(void) {
     D_0043623C = 0;
 }
 
-s32 func_001454C0(void) {
+s32 fldStepSecondaryArchiveLoad(void) {
     switch (D_0043623C) {
     case 0:
         if (sndFindPackedTrackLoadStatus(0x690000) == 0) {
@@ -1805,7 +1805,7 @@ void fldUpdateMenuResourceEffects(void) {
     }
 }
 
-extern void *func_002C7FF0(const char *path);
+extern void *fileQueuePlainDispatchRequest(const char *path);
 
 extern void func_002C81D0(void *);
 
@@ -1861,7 +1861,7 @@ void fldParseMixLb(void) {
     D_00438EDC = sdfReadNamedResource("/fld/f/bin/DAMAGE_1.D3P", &D_00438EE0, 0);
     D_00438EE4 = sdfReadNamedResource("/fld/f/bin/DAMAGE_2.D3P", &D_00438EE8, 0);
     D_00438EEC = sdfReadNamedResource("/fld/f/bin/DAMAGE_3.D3P", &D_00438EF0, 0);
-    lb = func_002C7FF0("/fld/f/bin/fldmix.LB");
+    lb = fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
     func_002C81D0(lb);
     for (node = lb->nodes; node != NULL; node = node->next, index++) {
         switch (index) {

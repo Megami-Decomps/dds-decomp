@@ -576,7 +576,7 @@ s32 btlGetEntryFlagsUnlessDisabled(s32 entry) {
 }
 
 void func_001A29B8(void) {
-    func_00119300();
+    datGetClampedProfileAdjustedStat();
 }
 
 u32 func_001A29D0(s32 arg0, s32 arg1) {
@@ -6588,9 +6588,9 @@ void btlInitFxLights(u8 *fx) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", btlInitializeEffectVectorsFromSourceRecords);
 
-extern s32 func_002183D0(s32);
+extern s32 mdlGetContextResourceGroup(s32);
 
-extern s32 func_002183E0(s32);
+extern s32 mdlGetContextResourceId(s32);
 
 s32 btlHasMatchingModel(s32 effect, s32 model) {
     s32 context = btlGetRuntime();
@@ -6599,8 +6599,8 @@ s32 btlHasMatchingModel(s32 effect, s32 model) {
         if ((*(u32 *)(node + 0x110) & 2) != 0 &&
             *(s32 *)(node + 0x320) != 0 &&
             *(s32 *)(node + 0x308) != 0 &&
-            func_002183D0(*(s32 *)(*(s32 *)(node + 0x320) + 0x8C)) == effect &&
-            func_002183E0(*(s32 *)(*(s32 *)(node + 0x320) + 0x8C)) == model) {
+            mdlGetContextResourceGroup(*(s32 *)(*(s32 *)(node + 0x320) + 0x8C)) == effect &&
+            mdlGetContextResourceId(*(s32 *)(*(s32 *)(node + 0x320) + 0x8C)) == model) {
             return 1;
         }
         node = *(s32 *)(node + 0x344);
@@ -10406,7 +10406,7 @@ void *btlCreateApplyToActiveActorsTask(u32 sound) {
 }
 
 u32 btlCancelTimedFadeTask(void) {
-    func_00105888();
+    kwlnCancelConfiguredFadeFrames();
     return 1;
 }
 
@@ -10804,7 +10804,7 @@ SoundTask *sndCreateSetStateTask(void) {
     return task;
 }
 
-extern s32 func_00288A80(const char *path);
+extern s32 fileQueuePlainDispatchRequest(const char *path);
 
 extern void func_00288C50(s32 archive);
 

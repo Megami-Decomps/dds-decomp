@@ -17,7 +17,7 @@ typedef struct WorldInnerOwner {
 } WorldInnerOwner;
 
 extern u32 dds3CreateSlotResourceState(u32);
-extern s32 func_002CFEB8(u32);
+extern s32 sdfAllocSizeClassBlock(u32);
 
 /* Each object kind keeps its handle in a different structure. */
 s32 dds3GetObjectOwnedHandle(object)
@@ -53,7 +53,7 @@ u32 dds3CreateWorldInnerState(WorldInnerOwner *object) {
     u32 handle;
 
     effObjInnerCreate();
-    inner = (WorldInnerState *)func_002CFEB8(0x90);
+    inner = (WorldInnerState *)sdfAllocSizeClassBlock(0x90);
     object->inner = inner;
     handle = dds3CreateSlotResourceState((u32)object);
     inner->handle80 = handle;

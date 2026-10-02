@@ -8,7 +8,7 @@ void effObjNodeDestroy(void *arg);
 
 void *dds3CreateWorldNodeForKind(s32 arg);
 
-void *func_00328D68(s32 arg);
+void *sdfAllocSizeClassBlock(s32 arg);
 
 void dds3GrowWorldValueChain(void *arg, s32 arg1);
 
@@ -131,7 +131,7 @@ void *dds3AppendWorldIndexNode(s32 index) {
     if (info->unk1E < index) {
         return NULL;
     }
-    node = func_00328D68(0x10);
+    node = sdfAllocSizeClassBlock(0x10);
     if (node == NULL) {
         return NULL;
     }

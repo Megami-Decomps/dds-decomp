@@ -217,7 +217,7 @@ void effRecreateModelFromSource(u32 *work, u8 *source) {
     if (owner->model != 0) {
         effDestroyModelContext(owner->model);
     }
-    model = func_00217680(func_002183D0(original->model), func_002183E0(original->model));
+    model = func_00217680(mdlGetContextResourceGroup(original->model), mdlGetContextResourceId(original->model));
     effInitModelVUState(model);
     VU0_SET_ONES_XYZ(vf10);
     VU0_SCALE_VF_MFC1(vf10, owner->scale);
@@ -537,7 +537,7 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
     if (dst->model != 0) {
         effDestroyModelContext(dst->model);
     }
-    dst->model = (u32)func_00217680(func_002183D0(src->model), func_002183E0(src->model));
+    dst->model = (u32)func_00217680(mdlGetContextResourceGroup(src->model), mdlGetContextResourceId(src->model));
     effInitModelVUState((void *)dst->model);
     if (((MdlCtx *)dst->model)->first != NULL) {
         if (dst->plainEntry != 0) {
@@ -562,7 +562,7 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
     }
 }
 
-void func_0029B7E0(s32 work) {
+void effResetModelMotionAndOwnerFlag(s32 work) {
     sdfMotionSampleAtFrame(((MdlCtx *)((EffResourceOwner *)work)->model)->first, 0.0f);
     ((EffResourceOwner *)work)->unk04 = 0;
 }
@@ -575,12 +575,12 @@ void effLoadModelPrimaryVector(s32 work, void *vec) {
     mdlStorePrimaryVectorVU((void *)((EffResourceOwner *)work)->model);
 }
 
-void func_0029BD18(s32 work, void *vec) {
+void effSetModelRotationQuaternion(s32 work, void *vec) {
     VU0_LOAD_VF(vf10, vec);
     mdlUpdateContextRotationBasisFromQuaternion((void *)((EffResourceOwner *)work)->model);
 }
 
-void func_0029BD38(s32 work) {
+void effPropagateResourceModelMask(s32 work) {
     mdlBroadcastMasked(((EffResourceOwner *)work)->model);
 }
 
@@ -751,7 +751,7 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     out->pad_08 = 0;
 }
 
-void func_0029C500(s32 owner, u32 target, s32 indexSource) {
+void effAssignSampledSegmentReference(s32 owner, u32 target, s32 indexSource) {
     func_0029C048(target, (u32)((EffExpandedList *)owner)->handles[((EffAnimSample *)indexSource)->segment]);
 }
 

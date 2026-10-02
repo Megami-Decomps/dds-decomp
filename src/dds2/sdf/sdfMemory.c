@@ -46,7 +46,7 @@ typedef struct MemHeap {
 
 extern MemHeap D_0045F0F8;
 extern void (*D_004389CC)(s32);
-extern MemBlock *func_00328D68(s32 size);
+extern MemBlock *sdfAllocSizeClassBlock(s32 size);
 
 /* First-fit allocation of `size` bytes (rounded up to 128) from the general heap: the first free block that is large enough is split if it is bigger than needed and marked used. Running into the end marker calls the out-of-memory hook. */
 MemBlock *sdfAllocGeneralBlock(s32 size) {
@@ -71,7 +71,7 @@ MemBlock *sdfAllocGeneralBlock(s32 size) {
 
             if (available >= alignedSize) {
                 if (alignedSize < available) {
-                    MemBlock *rest = func_00328D68(0x10);
+                    MemBlock *rest = sdfAllocSizeClassBlock(0x10);
 
                     rest->prev = block;
                     rest->addr = block->addr + alignedSize;
@@ -111,7 +111,7 @@ MemBlock *sdfAllocGeneralBlockHigh(s32 size) {
 
             if (available >= alignedSize) {
                 if (alignedSize < available) {
-                    MemBlock *rest = func_00328D68(0x10);
+                    MemBlock *rest = sdfAllocSizeClassBlock(0x10);
 
                     rest->prev = block;
                     rest->addr = block->addr + (available - alignedSize);
@@ -153,7 +153,7 @@ MemBlock *sdfTryAllocGeneralBlock(s32 size) {
 
             if (available >= alignedSize) {
                 if (alignedSize < available) {
-                    MemBlock *rest = func_00328D68(0x10);
+                    MemBlock *rest = sdfAllocSizeClassBlock(0x10);
 
                     rest->prev = block;
                     rest->addr = block->addr + alignedSize;

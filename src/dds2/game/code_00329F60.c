@@ -75,7 +75,7 @@ extern SdfTexHead *sdfTextureBlockListHead;
 
 extern SdfTexHead *sdfTextureListHead;
 
-void *func_00328D68(s32 size);
+void *sdfAllocSizeClassBlock(s32 size);
 
 s32 sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexBlock *block);
 
@@ -282,7 +282,7 @@ void sdfTexQueuePendingWork(s32 value) {
 void sdfTexInitializeLists(void) {
     SdfTexHead *head;
 
-    head = func_00328D68(0x1C);
+    head = sdfAllocSizeClassBlock(0x1C);
     head->unk10 = 0x100000;
     head->next = NULL;
     head->prev = NULL;
@@ -553,7 +553,7 @@ u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height, u32 format, u8
             request.pixels = sdfResourceRetainAddress(request.allocation);
             request.allocationMode = 1;
         } else {
-            request.pixels = func_00328D68(size);
+            request.pixels = sdfAllocSizeClassBlock(size);
             request.allocationMode = 2;
         }
         memcpy(request.pixels, pixels, size);

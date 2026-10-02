@@ -87,7 +87,7 @@ typedef struct SdfList {
     void (*onRemove)(u32, void *); /* 0x14 */
 } SdfList;
 
-extern void *func_002CFEB8(s32);
+extern void *sdfAllocSizeClassBlock(s32);
 
 float sdfQuatLengthSquared(float *quaternion) {
     return *quaternion * *quaternion + quaternion[1] * quaternion[1] + quaternion[2] * quaternion[2] +
@@ -450,7 +450,7 @@ void sdfSetTaskDestroyCallback(SdfTaskHeader *work, s32 callback) {
 }
 
 SdfListNode *sdfListAppend(SdfList *list, s32 key, void *value) {
-    SdfListNode *node = func_002CFEB8(0x14);
+    SdfListNode *node = sdfAllocSizeClassBlock(0x14);
 
     memset(node, 0, 0x14);
     node->value = value;
@@ -468,7 +468,7 @@ SdfListNode *sdfListAppend(SdfList *list, s32 key, void *value) {
 
 /* Insert a new node after `after`, bumping the index of every later node. */
 SdfListNode *sdfListInsertAfter(SdfList *list, SdfListNode *after, s32 key, void *value) {
-    SdfListNode *node = func_002CFEB8(0x14);
+    SdfListNode *node = sdfAllocSizeClassBlock(0x14);
     SdfListNode *it;
 
     memset(node, 0, 0x14);
@@ -788,8 +788,8 @@ TaskWork *sdfCreateNamedTaskWork(char *name, s32 destroyCallback, u32 userData) 
     work->list = sdfCreateTaskHeader(userData);
     sdfSetTaskDestroyCallback(work->list, destroyCallback);
     sdfSetTaskSecondaryCallback(work->list, (s32)sdfCallbackWorkOnRemove);
-    work->primaryTaskName = func_002CFEB8(strlen(name));
-    work->secondaryTaskName = func_002CFEB8(strlen(name) + 5);
+    work->primaryTaskName = sdfAllocSizeClassBlock(strlen(name));
+    work->secondaryTaskName = sdfAllocSizeClassBlock(strlen(name) + 5);
     func_003014F0(work->primaryTaskName, "%s", name);
     func_003014F0(work->secondaryTaskName, "draw_%s", name);
     return work;

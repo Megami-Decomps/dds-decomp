@@ -150,7 +150,7 @@ extern u8 D_00437A10[];
 
 /* The task owns a two-word title-effect state; its second word counts frames. */
 void mnuCreateTitleEffectTask(void) {
-    TitleEffectState *state = (TitleEffectState *)func_00328D68(8);
+    TitleEffectState *state = (TitleEffectState *)sdfAllocSizeClassBlock(8);
     u32 task = kwlnTaskCreate(D_00437A10, 0x5214, 1, 1,
                               mnuIncrementTitleEffectFrameCounter, mnuDestroyTitleEffectTask, 0);
     mnuTitleSoundTask = task;
@@ -162,7 +162,7 @@ void mnuCreateTitleEffectTask(void) {
 void mnuResetTitleEffectState(s32 effect) {
     TitleEffectState *state = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
     if (sdfSoundIsCommandBusy() != 0) {
-        func_00342690();
+        sdfSoundStopNamedPlayback();
     }
     sdfSoundSendNamedCommand(effect, 0x7f);
     state->frameCounter = 0;
@@ -183,15 +183,15 @@ void mnuPlayTitleVoiceFile(char *filename) {
     TitleEffectState *state = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
     if (sdfSoundIsCommandBusy() != 0) {
         func_0035B6E0(D_00428610);
-        func_00342690();
+        sdfSoundStopNamedPlayback();
     }
     func_0035C860(path, D_00428628, D_003E09F0 + 5 * state->soundNameIndex, filename);
     sdfSoundSendNamedCommand(path, 0x64);
     state->frameCounter = 0;
 }
 
-void func_002A1308(void) {
-    func_00342690();
+void mnuStopTitleVoicePlayback(void) {
+    sdfSoundStopNamedPlayback();
 }
 
 void mnuQueryTitleSoundBusy(void) {
@@ -230,14 +230,14 @@ s32 mnuInitializeTitleEffects(void) {
     s32 value;
     value = scrReadStringParameter(0);
     if (sdfSoundIsCommandBusy() != 0) {
-        func_00342690();
+        sdfSoundStopNamedPlayback();
     }
     sdfSoundSendNamedCommand(value, 0x7f);
     return 1;
 }
 
-u32 func_002A1430(void) {
-    func_00342690();
+u32 sndOpStopNamedPlayback(void) {
+    sdfSoundStopNamedPlayback();
     return 1;
 }
 
@@ -303,7 +303,7 @@ s32 sndCopyWordsToIopSynchronously(u32 source, u32 destination, u32 words) {
     return request;
 }
 
-void func_002A15B0(s32 words) {
+void sndInitializeStreamTransferBuffers(s32 words) {
     s32 bytes = words * 4;
     s32 i;
 
@@ -326,7 +326,7 @@ INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A1678);
 
 void mnuInitTitleSoundRemoteRequest(u32 arg0) {
     sceSdRemoteInit();
-    func_002A15B0(arg0);
+    sndInitializeStreamTransferBuffers(arg0);
     D_00437A2C = 0;
 }
 

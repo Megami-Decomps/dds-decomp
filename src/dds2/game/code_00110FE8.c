@@ -125,7 +125,7 @@ u32 *dds3FindObjectChainNodeByName(WorldObjectPointer *object, const u8 *name) {
     return NULL;
 }
 
-void *func_00328D68(s32 size);
+void *sdfAllocSizeClassBlock(s32 size);
 
 void *dds3AppendWorldIndexNode(s32 index);
 
@@ -133,7 +133,7 @@ s32 dds3CreatePairedWorldIndexNodes(WorldObjectPointer *object) {
     u32 *p;
     u32 i;
 
-    object->value = func_00328D68(8);
+    object->value = sdfAllocSizeClassBlock(8);
     p = object->value;
     for (i = 0; i < 2; i++) {
         *p = (u32)dds3AppendWorldIndexNode(0);

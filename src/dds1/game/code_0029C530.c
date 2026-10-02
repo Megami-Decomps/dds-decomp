@@ -220,7 +220,7 @@ extern s32 fileRequestIsReady(void *);
 
 extern void func_00288788(void *);
 
-extern void *func_00288A80(u32);
+extern void *fileQueuePlainDispatchRequest(u32);
 
 extern void func_00288C50(void *);
 
@@ -653,7 +653,7 @@ RefObj *effRetainSharedReference(RefObj *obj);
 u32 effDuplicateSmallHeader(source)
     u32 source;
 {
-    u32 *buffer = (u32 *)func_002CFEB8(12);
+    u32 *buffer = (u32 *)sdfAllocSizeClassBlock(12);
     *buffer = 0;
     memcpy(buffer + 1, (const void *)source, 8);
     return (u32)buffer;
@@ -667,7 +667,7 @@ void effCreateSmallHeaderFromFile(void) {
 }
 
 void effReleaseFadeHeaderAllocation(u32 allocation) {
-    func_00105888();
+    kwlnCancelConfiguredFadeFrames();
     sdfReleaseChipBlock(allocation);
 }
 
@@ -701,7 +701,7 @@ typedef struct EffFadeVectorWork {
 u8 *effCreateFadeVectorWork(source)
 const u8 *source;
 {
-    u8 *effect = (u8 *)func_002CFEB8(0x58);
+    u8 *effect = (u8 *)sdfAllocSizeClassBlock(0x58);
     memset(effect, 0, 0x58);
     VU0_STORE_VF($vf0, effect);
     memcpy(effect + 0x18, source, 0x40);
@@ -715,7 +715,7 @@ void effCreateFadeVectorFromFile(void) {
     effCreateFadeVectorWork(resource);
 }
 
-void func_0029C710(void) {
+void effFreeFadeVectorWork(void) {
     sdfReleaseChipBlock();
 }
 
@@ -729,11 +729,11 @@ void effResetFadeVectorFrame(s32 work) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_0029C748);
 
-void func_0029CDE0(void *dst, void *src) {
+void effCopyFadeWorkVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0029CDF0(s32 work, u32 value) {
+void effSetFadeVectorColor(s32 work, u32 value) {
     ((EffFadeVectorWork *)work)->color = value;
 }
 
@@ -771,14 +771,14 @@ void effCreateSelectionFlagListFromWork(void *work) {
 }
 
 void effCreateSelectionFlagListFromFile(void) {
-    func_002CEC08();
+    sdfInitializeFlagListFromResource();
 }
 
 void effReleaseSelectionFlagList(void) {
     sdfReleaseFlagListResource();
 }
 
-void func_0029CE98(s32 work) {
+void effCreateEmbeddedSelectionFlagList(s32 work) {
     effCreateSelectionFlagListFromWork((void *)(work + 0x14));
 }
 
@@ -807,7 +807,7 @@ void func_0029CF30(s32 work, u32 value) {
 u32 effDuplicatePayloadHeader(source)
     u32 source;
 {
-    u32 *buffer = (u32 *)func_002CFEB8(0x14);
+    u32 *buffer = (u32 *)sdfAllocSizeClassBlock(0x14);
     *buffer = 0;
     memcpy(buffer + 1, (const void *)source, 16);
     return (u32)buffer;
@@ -1340,7 +1340,7 @@ void effReleaseFadeColorWork(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_0029DBA8);
 
-void func_0029DD70(EffKindWork *work, u32 target) {
+void effReplaceLinkedKindWorkTarget(EffKindWork *work, u32 target) {
     u32 previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
@@ -1556,7 +1556,7 @@ typedef struct EffBillboardWork {
 } EffBillboardWork;
 
 u8 *effCreateBillboardWork(u8 *source) {
-    u8 *work = (u8 *)func_002CFEB8(0x68);
+    u8 *work = (u8 *)sdfAllocSizeClassBlock(0x68);
     memset(work, 0, 0x68);
     ((EffBillboardWork *)work)->frame = 0;
     ((EffBillboardWork *)work)->color = 0x80808080;
@@ -2615,7 +2615,7 @@ typedef struct EffClassWork {
 u8 *effAllocateActiveInstanceWork(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = D_0037E8B8[kind].resourceSize;
-    u8 *effect = func_002CFEB8(size + headerSize);
+    u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
     ((EffClassWork *)effect)->payload = effect + headerSize;
     ((EffClassWork *)effect)->color = 0x80808080;
     ((EffClassWork *)effect)->scale = 1.0f;
@@ -2940,7 +2940,7 @@ void effResetRingResourceFrame(s32 work) {
 }
 
 u32 *effSegmentPointerSet(u8 *work) {
-    u32 *handle = func_002CFEB8(4);
+    u32 *handle = sdfAllocSizeClassBlock(4);
     u32 kind = ((EffRingSource *)work)->segments;
     u8 *ring;
     u32 *entry;
@@ -3044,7 +3044,7 @@ INCLUDE_ASM(const s32, "game/code_0029C530", func_002A4AF0);
 
 extern void effRunClassPostFrame(EffClassWork *);
 
-void func_002A4C40(BillCellDrawWork *work) {
+void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
     u32 progress = ((EffBillConfig *)config)->progress;
@@ -3095,14 +3095,14 @@ void func_002A4C40(BillCellDrawWork *work) {
     }
 }
 
-void func_002A4DE8(s32 work) {
+void effResetClassRingFrame(s32 work) {
     ((EffClassDrawState *)((EffBillFrameWork *)work)->frameState)->ring->frame = 0;
 }
 
 extern u8 *effCreatePointSet4(u32);
 
 u32 *effCreateRingHandle(u8 *work) {
-    u32 *handle = func_002CFEB8(4);
+    u32 *handle = sdfAllocSizeClassBlock(4);
     u32 kind = ((EffRingSource *)work)->segments;
     u8 *ring;
     u32 *entry;
@@ -3187,7 +3187,7 @@ void billDrawCellBlendB(BillCellDrawWork *work) {
 u8 *effPayloadPointerSet(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = D_0037EAE4[kind].resourceSize;
-    u8 *effect = func_002CFEB8(size + headerSize);
+    u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
     ((EffClassWork *)effect)->payload = effect + headerSize;
     ((EffClassWork *)effect)->color = 0x80808080;
     ((EffClassWork *)effect)->scale = 1.0f;
@@ -3367,10 +3367,10 @@ EffectSurfaceNode *effInitializeSurfaceForKind(u8 *work) {
     }
     switch (((EffFileRequest *)work)->secondaryMode) {
     case 1:
-        func_002A6198(node, (u32)secondary);
+        effReplaceSurfacePrimaryBillboard(node, (u32)secondary);
         break;
     case 2:
-        func_002A6218(node, (u32)secondary);
+        effReplaceSurfaceFlaggedBillboard(node, (u32)secondary);
         break;
     case 3:
         break;
@@ -3495,7 +3495,7 @@ void effSetSurfaceRetainedResource(EffectSurfaceNode *node, u32 resourceId) {
 
 extern u32 billCreateIndexed(u32, u32);
 
-void func_002A6198(EffectSurfaceNode *node, u32 resourceId) {
+void effReplaceSurfacePrimaryBillboard(EffectSurfaceNode *node, u32 resourceId) {
     u32 resource = node->resource;
     if (resource != 0) {
         billDispatchByKind((void *)resource);
@@ -3507,7 +3507,7 @@ void func_002A6198(EffectSurfaceNode *node, u32 resourceId) {
     }
 }
 
-void func_002A6218(EffectSurfaceNode *node, u32 resourceId) {
+void effReplaceSurfaceFlaggedBillboard(EffectSurfaceNode *node, u32 resourceId) {
     u32 resource = node->resource;
     if (resource != 0) {
         billDispatchByKind((void *)resource);
@@ -3895,7 +3895,7 @@ typedef struct EffPointSetTable {
     EffPointSetRow *rows;
 } EffPointSetTable;
 
-EffPointSetTable *func_002A8670(EffPointSetTableSource *src) {
+EffPointSetTable *effCreateAlphaRampPointSetRows(EffPointSetTableSource *src) {
     u32 count = src->count;
     EffPointSetTable *table;
     EffPointSetRow *row;
@@ -3909,7 +3909,7 @@ EffPointSetTable *func_002A8670(EffPointSetTableSource *src) {
     s32 rampIn;
     s32 rampOut;
 
-    table = func_002CFEB8(count * sizeof(EffPointSetRow) + 4);
+    table = sdfAllocSizeClassBlock(count * sizeof(EffPointSetRow) + 4);
     table->rows = (EffPointSetRow *)(table + 1);
     if ((u32)src->layers < 3) {
         src->layers = 3;
@@ -4094,7 +4094,7 @@ void effSeedBillScaleRange(u8 *work) {
     }
 }
 
-EffScaleRange *func_002A9978(EffPointSetTableSource *src) {
+EffScaleRange *effCreateRetainedPointSetColorRows(EffPointSetTableSource *src) {
     u32 count = src->count;
     struct MemBlock *allocation;
     EffScaleRange *table;
@@ -4181,7 +4181,7 @@ INCLUDE_ASM(const s32, "game/code_0029C530", func_002AA748);
 u8 *effCreateClassResourceWork(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = D_0037EC64[kind].resourceSize;
-    u8 *effect = func_002CFEB8(size + headerSize);
+    u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
     ((EffClassWork *)effect)->payload = effect + headerSize;
     ((EffClassWork *)effect)->color = 0x80808080;
     ((EffClassWork *)effect)->scale = 1.0f;
@@ -4986,7 +4986,7 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
 u8 *effAllocateBlock(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = D_0037ED20[kind].resourceSize;
-    u8 *effect = func_002CFEB8(size + headerSize);
+    u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
     ((EffClassWork *)effect)->payload = effect + headerSize;
     ((EffClassWork *)effect)->color = 0x80808080;
     ((EffClassWork *)effect)->scale = 1.0f;
@@ -5568,7 +5568,7 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
 u8 *effAllocateBlockWithModel(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = D_0037EDA8[kind].resourceSize;
-    u8 *effect = func_002CFEB8(size + headerSize);
+    u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
     ((EffClassWork *)effect)->payload = effect + headerSize;
     ((EffClassWork *)effect)->color = 0x80808080;
     ((EffClassWork *)effect)->scale = 1.0f;
@@ -5851,7 +5851,7 @@ typedef struct EffModelResource {
 u32 effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary, u32 param) {
     u32 headerSize = 0x40;
     u32 size = effModelResourceOperations[kind].resourceSize;
-    EffModelResource *effect = (EffModelResource *)func_002CFEB8(size + headerSize);
+    EffModelResource *effect = (EffModelResource *)sdfAllocSizeClassBlock(size + headerSize);
 
     effect->source = (u8 *)effect + headerSize;
     effect->color = 0x80808080;
@@ -5908,8 +5908,8 @@ void effDestroyModelResource(EffModelResource *effect) {
 
 EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
     EffModelResource *effect = (EffModelResource *)effCreateModelResourceWithInlineData(work->kind, work->source, 0, 0);
-    u32 x = func_002183D0(work->assetId);
-    u32 y = func_002183E0(work->assetId);
+    u32 x = mdlGetContextResourceGroup(work->assetId);
+    u32 y = mdlGetContextResourceId(work->assetId);
     void *model = func_00217680(x, y);
 
     effect->model = model;
@@ -6614,7 +6614,7 @@ void effApplyKeyframeAngle(u8 *work) {
 u8 *effAllocateResourcePayload(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = D_0037EEF8[kind].resourceSize;
-    u8 *effect = func_002CFEB8(size + headerSize);
+    u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
     ((EffActiveResource *)effect)->payload = effect + headerSize;
     ((EffActiveResource *)effect)->color = 0x80808080;
     ((EffActiveResource *)effect)->scale = 1.0f;
@@ -8770,10 +8770,10 @@ s32 effClassifyResourceMask(s32 flags) {
     }
 }
 
-extern void *func_002CFEB8(u32);
+extern void *sdfAllocSizeClassBlock(u32);
 
 void *mnuAllocateValueRecord(void *owner) {
-    u32 *data = func_002CFEB8(0x14);
+    u32 *data = sdfAllocSizeClassBlock(0x14);
     memset(data, 0, 0x14);
     data[0] = (u32)owner;
     data[1] = 0;
@@ -8822,7 +8822,7 @@ typedef struct EffectList {
 
 s32 effAppendListEntry(EffectList *list, u32 value, u32 length,
                           u32 kind, u32 reference) {
-    EffectListNode *node = func_002CFEB8(sizeof(EffectListNode));
+    EffectListNode *node = sdfAllocSizeClassBlock(sizeof(EffectListNode));
     memset(node, 0, sizeof(EffectListNode));
     node->next = NULL;
     node->kind = kind;
@@ -8875,7 +8875,7 @@ s32 effPollResourceList(EffectList *list) {
                 if (list->request != NULL) {
                     func_00288788(list->request);
                 }
-                list->request = func_00288A80(node->length);
+                list->request = fileQueuePlainDispatchRequest(node->length);
                 if (list->mode == 2) {
                     func_00288C50(list->request);
                 }

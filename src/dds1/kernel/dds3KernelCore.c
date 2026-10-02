@@ -32,7 +32,7 @@ extern s32 kwlnTaskIsRegistered(KwlnTask* target);
 
 extern void kwlnUnlinkListNode(KwlnTask* task);
 
-extern void* func_002CFEB8(s32 arg0);
+extern void* sdfAllocSizeClassBlock(s32 arg0);
 
 extern void sdfReleaseChipBlock(void* ptr);
 
@@ -257,7 +257,7 @@ s32 kwlnTaskTickScheduler(void)
 
 KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay,
                          TaskUpdate update, TaskDestroy destroy, u32 userValue) {
-    KwlnTask *task = func_002CFEB8(sizeof(KwlnTask));
+    KwlnTask *task = sdfAllocSizeClassBlock(sizeof(KwlnTask));
     s32 i = 0;
 
     if (task == NULL) {

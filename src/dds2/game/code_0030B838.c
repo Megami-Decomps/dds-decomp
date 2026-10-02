@@ -149,7 +149,7 @@ extern SdfCameraVector D_00400990;
 extern SdfCameraVector D_004009A0;
 
 extern s32 mnuCreateListState(s32, s32, s32);
-extern void *func_00328D68(s32);
+extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 extern s32 mdlCollectFlagBitsIntoMask(void);
 extern SdfCounterChannel *mnuListAppendNode(s32, s32);
@@ -273,7 +273,7 @@ void sdfCycleBackward(void) {
     }
 }
 
-s8 func_0030BCE8(void) {
+s8 sdfGetMapCameraTransitionFrame(void) {
     return D_004388C0;
 }
 
@@ -324,14 +324,14 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
 
     count = 0;
     sdfActiveCounterRuntime = mnuCreateListState(0, 8, 0x16);
-    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer = func_00328D68(0x24);
+    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer = sdfAllocSizeClassBlock(0x24);
     memset(((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer, 0, 0x24);
     ((SdfCounterRuntime *)sdfActiveCounterRuntime)->draw = (SdfCounterDrawFn)func_0030CC68;
     completedMask = mdlCollectFlagBitsIntoMask();
     for (i = 0; i != 8; i++) {
         if ((mask >> i) & 1) {
             channel = mnuListAppendNode(sdfActiveCounterRuntime, 0);
-            display = func_00328D68(0x10);
+            display = sdfAllocSizeClassBlock(0x10);
             memset(display, 0, 0x10);
             display->value = i + 1;
             display->word = (u32 *)(D_00400AF0 + i * 0x18);

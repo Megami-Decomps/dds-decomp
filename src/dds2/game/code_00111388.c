@@ -15,7 +15,7 @@ typedef struct ActionObj {
 
 extern ActionObj *dds3AppendWorldObjectNode();
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 typedef struct ObjWithWork {
     u8 unk0[0x18];
@@ -115,7 +115,7 @@ void *dds3GetFirstWorldObjectNodeOfKind2(void) {
 }
 
 s32 dds3AllocateClearedObjectWork(ObjWithWork *obj) {
-    obj->work = func_00328D68(0x10);
+    obj->work = sdfAllocSizeClassBlock(0x10);
     memset(obj->work, 0, 0x10);
     return 1;
 }

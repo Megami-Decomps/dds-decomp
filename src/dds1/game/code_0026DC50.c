@@ -2,7 +2,7 @@
 
 extern void sdfReleaseChipBlock(void *);
 
-extern void func_0026FFF8(s32);
+extern void mnuRequestIndexedMovieResource(s32);
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
@@ -16,7 +16,7 @@ void mnuDrawFixedSpriteLayerGroup(void) {
 }
 
 void func_0026DD10(void) {
-    func_0026FFF8(0);
+    mnuRequestIndexedMovieResource(0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026DC50", func_0026DD30);

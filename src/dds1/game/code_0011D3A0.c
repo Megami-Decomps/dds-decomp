@@ -1204,7 +1204,7 @@ void fldToggleWorldNodeState(s64 clearMode) {
 }
 
 extern u32 D_0032E570[];
-extern void func_00118020(s32);
+extern void sdfResetGameRuntime(s32);
 extern s32 fileLoadStateChanged(void);
 extern void fileCacheSlotFlagsFromState(void);
 extern void fileRestoreSlotFlagsToState(void);
@@ -1213,9 +1213,9 @@ extern void dds3AdminSubmitModeRequest(s32, void *, s32, s32);
 
 void fldPrepareDeferredSceneTransition(void) {
     if (*(s16 *)(datGameState + 0xe) != 0) {
-        func_00118020(1);
+        sdfResetGameRuntime(1);
     } else {
-        func_00118020(0);
+        sdfResetGameRuntime(0);
     }
     if (fileLoadStateChanged() == 0) {
         fileCacheSlotFlagsFromState();

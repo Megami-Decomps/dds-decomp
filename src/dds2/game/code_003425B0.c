@@ -205,7 +205,7 @@ u32 sdfSoundIsCommandBusy(void) {
     return sdfSoundCommandBusy;
 }
 
-void func_00342690(void) {
+void sdfSoundStopNamedPlayback(void) {
     sndSendCommandPacket(0x100, 0, 0, 0);
 }
 
@@ -753,7 +753,7 @@ void sdfSoundInitFormattedNode(u8 *state, s32 format, SdfStreamRead read, u32 so
 
 extern SdfStreamTextureHead *sdfTexAllocateHeadForDimensions(s32, s32, s32, s32, s32);
 
-void func_003448D0(SdfStreamFrameNode *node) {
+void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
     SdfStreamHeader header;
     s32 status;
     s32 interruptsEnabled;

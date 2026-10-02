@@ -30,7 +30,7 @@ extern void evtCreateMessageWindowIfMissing(s32);
 extern void mnuSnapshotCampTextureHandles(u8 *);
 extern void func_002673B8();
 extern void mnuClearPanelTransitionState(u8 *);
-extern void func_002C1B58(u8 *, s32);
+extern void mnuResetGradientFadeColor(u8 *, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
 extern u32 uiBlendColors(u32, u32, s32);
@@ -123,7 +123,7 @@ extern s32 mnuListAppendNode(s32, s32);
 
 extern u8 D_00437870[];
 
-extern s32 func_00328D68(s32);
+extern s32 sdfAllocSizeClassBlock(s32);
 
 extern s32 mnuPercentOrHundred(u16, u16);
 
@@ -350,7 +350,7 @@ INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424E60);
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00266C08);
 
 s32 mnuCreateDualPercentPanel(MenuTitleResource *resource, MenuProgressHost *host) {
-    s32 panel = func_00328D68(0xa0);
+    s32 panel = sdfAllocSizeClassBlock(0xa0);
     mnuDrawPanelSequenceByRow(panel, 0, 0, 0x1e,
         mnuPercentOrHundred(resource->firstA, resource->firstB),
         host->panelStyle);
@@ -813,7 +813,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     *(s32 *)(obj + 0x150) = 0xF;
     mnuSelectTerminalResourceBank((MenuSlotState *)obj);
     mnuApplyFadeTrackMode(0, (MenuSlotState *)obj);
-    func_002C1B58(obj + 0x3E8, 0x60);
+    mnuResetGradientFadeColor(obj + 0x3E8, 0x60);
     return obj;
 }
 

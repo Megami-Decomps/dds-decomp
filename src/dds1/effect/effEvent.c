@@ -917,7 +917,7 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_00190130);
 extern u8 D_003563F0[];
 
 extern void func_00190118();
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern s32 D_003BB140;
 
@@ -994,7 +994,7 @@ extern struct EffEventWork *func_00190130();
 
 
 EffEventLight *effEventLightCreate(u32 arg, f32 param) {
-    EffEventLight *work = func_002CFEB8(sizeof(EffEventLight));
+    EffEventLight *work = sdfAllocSizeClassBlock(sizeof(EffEventLight));
 
     work->init.scale = 1.0f;
     work->init.rangeNear = 50.0f;
@@ -1024,7 +1024,7 @@ void effEventLightDestroy(EffEventLight *work) {
 
 EffEventLight *effEventLightClone(EffEventLight *src) {
     EffEventInit *block = &src->init;
-    EffEventLight *work = func_002CFEB8(sizeof(EffEventLight));
+    EffEventLight *work = sdfAllocSizeClassBlock(sizeof(EffEventLight));
 
     work->owner = func_00190130(src->handle, 0, block);
     work->handle = src->handle;

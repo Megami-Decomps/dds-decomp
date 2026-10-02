@@ -10,7 +10,7 @@ extern u32 sdfTexAcquireResourceTexture(u32);
 
 extern u64 sdfReadNamedResource(u64, u32 *, u64);
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern EffHandler32 D_003B2060[];
 
@@ -60,7 +60,7 @@ extern u8 D_0037F660[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 EffResult *effAllocDispatch(s32 kind, s32 input) {
-    EffResult *result = func_00328D68(8);
+    EffResult *result = sdfAllocSizeClassBlock(8);
     s32 value = D_003B2060[kind].handler(input);
 
     result->unk0 = kind;
@@ -335,7 +335,7 @@ typedef struct EffResourceDescriptor {
 
 /* Build a resource descriptor with the list's count and head. */
 EffResourceDescriptor *effCreateResourceListDescriptor(EffResourceList *list) {
-    EffResourceDescriptor *resource = func_00328D68(0x44);
+    EffResourceDescriptor *resource = sdfAllocSizeClassBlock(0x44);
 
     resource->word00 = 0;
     resource->word04 = 0xC8;

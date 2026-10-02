@@ -21,7 +21,7 @@ extern void (*D_003BD2DC)(s32);
 
 s32 func_00312C08(void);
 s32 EIntr(void);
-MemBlock *func_002CFEB8(s32 size);
+MemBlock *sdfAllocSizeClassBlock(s32 size);
 
 MemBlock *sdfMemoryNextBlock(MemBlock *block) {
     MemBlock *next = block->next;
@@ -70,7 +70,7 @@ MemBlock *sdfAllocGeneralBlock(s32 size) {
 
             if (available >= alignedSize) {
                 if (alignedSize < available) {
-                    MemBlock *rest = func_002CFEB8(0x10);
+                    MemBlock *rest = sdfAllocSizeClassBlock(0x10);
 
                     rest->prev = block;
                     rest->address = block->address + alignedSize;
@@ -110,7 +110,7 @@ MemBlock *sdfAllocGeneralBlockHigh(s32 size) {
 
             if (available >= alignedSize) {
                 if (alignedSize < available) {
-                    MemBlock *rest = func_002CFEB8(0x10);
+                    MemBlock *rest = sdfAllocSizeClassBlock(0x10);
 
                     rest->prev = block;
                     rest->address = block->address + (available - alignedSize);
@@ -152,7 +152,7 @@ MemBlock *sdfTryAllocGeneralBlock(s32 size) {
 
             if (available >= alignedSize) {
                 if (alignedSize < available) {
-                    MemBlock *rest = func_002CFEB8(0x10);
+                    MemBlock *rest = sdfAllocSizeClassBlock(0x10);
 
                     rest->prev = block;
                     rest->address = block->address + alignedSize;

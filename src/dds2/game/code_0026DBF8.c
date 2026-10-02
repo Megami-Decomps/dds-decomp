@@ -12,7 +12,7 @@ extern u32 mnuAllocateMantraSparkleEmitter(s16);
 
 extern s32 mnuFindMantraDrawItemByKind(u32, u32);
 
-extern s32 func_00328D68(u32);
+extern s32 sdfAllocSizeClassBlock(u32);
 
 void sdfReleaseResourceAllocation(u32 sprite);
 
@@ -271,7 +271,7 @@ extern s32 fileRequestIsReady(void *);
 extern void func_002C7CE8(void *);
 extern u32 func_00305148(void *, u32);
 extern u32 kwlnTaskGetUserValue(void);
-extern void *func_002C7FF0(const char *path);
+extern void *fileQueuePlainDispatchRequest(const char *path);
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(void),
                             void (*)(), void *);
 s32 mnuLoadMantraSpriteTask(void);
@@ -564,7 +564,7 @@ void mnuDrawMantraCostIconOffset(u32 unused1, u32 unused2, u32 third, u32 record
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026F1F0);
 
 MantraDisplayNode *mnuAllocateDisplayListNode(void) {
-    MantraDisplayNode *node = (MantraDisplayNode *)func_00328D68(sizeof(MantraDisplayNode));
+    MantraDisplayNode *node = (MantraDisplayNode *)sdfAllocSizeClassBlock(sizeof(MantraDisplayNode));
 
     memset(node, 0, sizeof(MantraDisplayNode));
     return node;
@@ -922,7 +922,7 @@ void mnuSetMantraBackgroundSelection(u32 pool, u32 value) {
 
 
 u32 mnuInitMantraBackgroundDraw(void) {
-    u32 data = func_00328D68(0x1c);
+    u32 data = sdfAllocSizeClassBlock(0x1c);
     memset((void *)data, 0, 0x1c);
     *(u16 *)data = 1;
     ((MantraBackgroundState *)data)->transitionWord &= ~0xf;
@@ -1006,10 +1006,10 @@ extern void func_0026EDB0(s32, s32, s32, s32, s32, s32, s32, f32);
 void mnuDrawMantraPulseFrame(s32 amount, s32 packet, f32 pulse) {
     sdfSubmitGsAlphaOneRegisterPacket(0x44, packet);
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
-    func_00308808(0, 0, 0, 0x2000, 0xE00, 0, packet);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, packet);
     sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
-    func_00308808(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, packet);
+    uiDrawUniformColorRect(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, packet);
     uiDrawActiveSurfaceRegion(packet);
     func_0026E788(0, -15, 0, amount, 0x60, 0x20, packet);
     func_0026E788(0, -15, 0, amount, 0x61, 0x20, packet);
@@ -1065,7 +1065,7 @@ INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004251C8);
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425258);
 
 u32 mnuInitMantraBackgroundMaskDraw(void) {
-    u32 data = func_00328D68(0xc);
+    u32 data = sdfAllocSizeClassBlock(0xc);
     memset((void *)data, 0, 0xc);
     *(u16 *)data = 1;
     evtPrintDeveloperConsoleMessage("BGMask Draw Init\n");
@@ -1357,7 +1357,7 @@ void mnuToggleMantraTitleVariant(u32 pool) {
 }
 
 u32 mnuInitMantraTitleDraw(void) {
-    u32 data = func_00328D68(0x10);
+    u32 data = sdfAllocSizeClassBlock(0x10);
     memset((void *)data, 0, 0x10);
     ((MantraBlinkState *)data)->unk2 = 0;
     ((MantraBlinkState *)data)->timer = 0;
@@ -1477,7 +1477,7 @@ void mnuSetMantraInfoDrawPosition(u32 pool, s16 x, u16 y) {
 }
 
 u32 mnuInitMantraInfoDraw(void) {
-    u32 data = func_00328D68(0x10);
+    u32 data = sdfAllocSizeClassBlock(0x10);
     memset((void *)data, 0, 0x10);
     *(u16 *)data = 1;
     evtPrintDeveloperConsoleMessage("Info Draw Init\n");
@@ -1603,7 +1603,7 @@ void mnuSetMantraScrollCursorSegmentFlags(u32 ctx, u16 flags) {
 }
 
 u32 mnuInitMantraGaugeData(void) {
-    u32 data = func_00328D68(0x18);
+    u32 data = sdfAllocSizeClassBlock(0x18);
     memset((void *)data, 0, 0x18);
     *(u16 *)data = 4;
     evtPrintDeveloperConsoleMessage("ScrollCursor Draw Init\n");
@@ -1803,7 +1803,7 @@ u32 func_002747F0(u32 pool) {
 }
 
 u32 mnuInitMantraUnitPanelDraw(u32 ctx, u32 resources) {
-    u32 data = func_00328D68(0x40);
+    u32 data = sdfAllocSizeClassBlock(0x40);
     memset((void *)data, 0, 0x40);
     *(u16 *)data = 1;
     mnuInitMantraListEntries(data + 0xc, resources,
@@ -1898,7 +1898,7 @@ void mnuToggleMantraTypeOnePanelMode(u32 pool) {
 }
 
 u32 mnuCreateTypeOneRecord(void) {
-    MenuRecord *record = (MenuRecord *)func_00328D68(sizeof(MenuRecord));
+    MenuRecord *record = (MenuRecord *)sdfAllocSizeClassBlock(sizeof(MenuRecord));
     memset(record, 0, sizeof(MenuRecord));
     record->type = 1;
     record->flags = 0;
@@ -2393,7 +2393,7 @@ void func_00279148(u32 pool) {
 }
 
 u32 mnuCreateMantraIconListA(s32 unused, u8 *menu) {
-    u32 data = func_00328D68(0x10);
+    u32 data = sdfAllocSizeClassBlock(0x10);
     u8 *slot;
     MantraNodePos *first;
     MantraNodePos *second;
@@ -2463,7 +2463,7 @@ u32 mnuDrawMantraIconList(u32 unused, u32 obj) {
 }
 
 u32 mnuCreateMantraIconListB(s32 unused, u8 *menu) {
-    u32 data = func_00328D68(0x10);
+    u32 data = sdfAllocSizeClassBlock(0x10);
     u8 *slot;
     MantraNodePos *first;
     MantraNodePos *second;
@@ -2490,7 +2490,7 @@ typedef struct MantraNodeRef {
 } MantraNodeRef;
 
 u32 mnuCreateMantraIconListC(s32 unused, u8 *menu) {
-    u32 data = func_00328D68(0x10);
+    u32 data = sdfAllocSizeClassBlock(0x10);
     u8 *slot = menu + 0x240;
     MantraNodePos *first;
     MantraNodePos *second;
@@ -2903,7 +2903,7 @@ s32 btlDrawPanelA(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 p
     func_0026E788(x, y, 0, amount, 0x77, 0, packet);
     func_0026E788(x, y, 0, amount, 0x89, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
-    func_00308808((x - 0x80) << 4, (y - 0x80) << 3, 0xffffff, 0x1000, 0x800, 0, packet);
+    uiDrawUniformColorRect((x - 0x80) << 4, (y - 0x80) << 3, 0xffffff, 0x1000, 0x800, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
     uiDrawActiveSurfaceRegion(packet);
     func_0026E788(x, y, 0, 0x80, 0x91, 0x60, packet);
@@ -3002,7 +3002,7 @@ s32 btlDrawPanelB(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 p
     func_0026E788(x, y, 0, amount, 0x77, 0, packet);
     func_0026E788(x, y, 0, amount, 0x87, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
-    func_00308808((x - 0x80) << 4, (y - 0x80) << 3, 0xffffff, 0x1000, 0x800, 0, packet);
+    uiDrawUniformColorRect((x - 0x80) << 4, (y - 0x80) << 3, 0xffffff, 0x1000, 0x800, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
     uiDrawActiveSurfaceRegion(packet);
     func_0026E788(x, y, 0, 0x80, 0x91, 0x60, packet);
@@ -3020,12 +3020,12 @@ void func_0027FB68(void) {
 
 s32 btlDrawPanelC(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 packet) {
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
-    func_00308808((x - 0x80) << 4, (y - 0x80) << 3, 0, 0x1000, 0x800, 0, packet);
+    uiDrawUniformColorRect((x - 0x80) << 4, (y - 0x80) << 3, 0, 0x1000, 0x800, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, packet);
     func_0026E788(x, y, 0, amount, 0x77, 0, packet);
     func_0026E788(x, y, 0, amount, 0x9A, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
-    func_00308808((x - 0x80) << 4, (y - 0x80) << 3, 0, 0x1000, 0x800, 0, packet);
+    uiDrawUniformColorRect((x - 0x80) << 4, (y - 0x80) << 3, 0, 0x1000, 0x800, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, packet);
     return 0;
 }
@@ -3239,7 +3239,7 @@ typedef struct MantraSparkleEmitter {
 MantraSparkle *func_00284818(MantraSparkleEmitter *);
 
 u32 mnuAllocateMantraSparkleEmitter(s16 kind) {
-    MantraSparkleEmitter *emitter = (MantraSparkleEmitter *)func_00328D68(0xA8);
+    MantraSparkleEmitter *emitter = (MantraSparkleEmitter *)sdfAllocSizeClassBlock(0xA8);
     MantraSparkle *spark;
 
     memset(emitter, 0, 0xA8);
@@ -3394,7 +3394,7 @@ MantraBurstSlot *mnuSpawnBurstSlot(MantraBurstPool *pool, s8 wide, s8 side) {
 }
 
 u32 mnuRequestEffectResource(u32 context, u32 config) {
-    MantraEffectResource *resource = (MantraEffectResource *)func_00328D68(sizeof(MantraEffectResource));
+    MantraEffectResource *resource = (MantraEffectResource *)sdfAllocSizeClassBlock(sizeof(MantraEffectResource));
     memset(resource, 0, sizeof(MantraEffectResource));
     effRequestResourceByMode(context, config, 0, &resource->handle);
     return (u32)resource;

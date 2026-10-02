@@ -180,7 +180,7 @@ void mnuDrawTitleSceneForPhase(void) {
 void mnuArmTitleMovieDrawAndResetFrame(u32 arg0, s32 arg1) {
     u32 work;
 
-    func_002A7AF0();
+    mnuRequestIndexedMovieResource();
     work = mnuMovieMenuState;
     if (mnuMovieMenuState != 0) {
         ((MenuTitleState *)mnuMovieMenuState)->movieDrawActive = 1;
@@ -840,7 +840,7 @@ extern struct {
     u8 data[20];
 } D_003E4C48[];
 
-void func_002A7AF0(index)
+void mnuRequestIndexedMovieResource(index)
 s32 index;
 {
     u32 *entry = (u32 *)&D_003E4C48[index];
@@ -1051,8 +1051,8 @@ void mnuStopMovieDrawTask(void) {
     mnuMovieDrawTask = 0;
 }
 
-s32 func_002A8008(void) {
-    return func_00346A60(mnuMovieDrawContext);
+s32 mnuCheckMovieDecoderStatus(void) {
+    return sdfPacCheckDecoderStatus(mnuMovieDrawContext);
 }
 
 extern u8 D_003E563C[];

@@ -73,7 +73,7 @@ typedef struct ConsNode {
 
 extern ConsNode *D_00438AB0;
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern void sdfEnsureFreeRootWorkspace(u32 object);
 
@@ -1142,7 +1142,7 @@ void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033B530);
 
-s32 func_0033B678(s32 count) {
+s32 sdfMeasureVertexAttributePacketBytes(s32 count) {
     return count * 0x40 + 0x40;
 }
 
@@ -1501,7 +1501,7 @@ ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 width, s32 height) {
     u32 bufferHandle;
 
     sdfDevConsInit();
-    node = func_00328D68(0x20);
+    node = sdfAllocSizeClassBlock(0x20);
     node->unk8 = first;
     node->unkA = second;
     node->width = width;

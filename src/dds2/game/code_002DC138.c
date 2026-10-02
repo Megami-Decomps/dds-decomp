@@ -89,9 +89,9 @@ extern u32 effSharedTextureReferenceCount;
 
 extern void *func_00232198(s32 group, s32 id);
 
-extern s32 func_00232EE8(void *model);
+extern s32 mdlGetContextResourceGroup(void *model);
 
-extern s32 func_00232EF8(void *model);
+extern s32 mdlGetContextResourceId(void *model);
 
 /* VU0 model helpers consume vf10 directly, as in the DDS1 counterpart. */
 extern void *sdfAllocGeneralBlock(u32);
@@ -156,8 +156,8 @@ void *effCloneModelWithVUState(void *sourceModel) {
     s32 id;
     void *model;
 
-    group = func_00232EE8(sourceModel);
-    id = func_00232EF8(sourceModel);
+    group = mdlGetContextResourceGroup(sourceModel);
+    id = mdlGetContextResourceId(sourceModel);
     model = func_00232198(group, id);
     effInitModelVUState(model);
     return model;
@@ -216,8 +216,8 @@ void effRecreateModelFromSource(EffModelOwner *owner, EffModelOwner *source) {
     if (owner->model != 0) {
         effDestroyModelContext(owner->model);
     }
-    group = func_00232EE8((void *)source->model);
-    id = func_00232EF8((void *)source->model);
+    group = mdlGetContextResourceGroup((void *)source->model);
+    id = mdlGetContextResourceId((void *)source->model);
     model = func_00232198(group, id);
     effInitModelVUState(model);
     VU0_SET_ONES_XYZ(vf10);
@@ -551,7 +551,7 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
     if (dst->model != 0) {
         effDestroyModelContext(dst->model);
     }
-    dst->model = (u32)func_00232198(func_00232EE8((void *)src->model), func_00232EF8((void *)src->model));
+    dst->model = (u32)func_00232198(mdlGetContextResourceGroup((void *)src->model), mdlGetContextResourceId((void *)src->model));
     effInitModelVUState((void *)dst->model);
     if (((MdlCtx *)dst->model)->first != NULL) {
         if (dst->plainEntry != 0) {
@@ -604,12 +604,12 @@ VU0_LOAD_VF_MEMORY(vf10, vec);
     mdlStorePrimaryVectorVU((void *)((EffResourceOwner *)obj)->model);
 }
 
-void func_002DDA30(u8 *obj, u8 *vec) {
+void effSetModelRotationQuaternion(u8 *obj, u8 *vec) {
 VU0_LOAD_VF_MEMORY(vf10, vec);
     mdlUpdateContextRotationBasisFromQuaternion((void *)((EffResourceOwner *)obj)->model);
 }
 
-void func_002DDA50(s32 model) {
+void effPropagateResourceModelMask(s32 model) {
     mdlBroadcastMasked(((EffResourceOwner *)model)->model);
 }
 
@@ -777,7 +777,7 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     out->pad_08 = 0;
 }
 
-void func_002DE218(s32 owner, u32 target, s32 indexSource) {
+void effAssignSampledSegmentReference(s32 owner, u32 target, s32 indexSource) {
     func_002DDD60(target, (u32)((EffExpandedList *)owner)->handles[((EffAnimSample *)indexSource)->segment]);
 }
 

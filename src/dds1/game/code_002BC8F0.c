@@ -238,7 +238,7 @@ extern s32 func_003014F0(char *, const char *, ...);
 
 extern u32 D_003BD064;
 
-extern void *func_002CFEB8(u32);
+extern void *sdfAllocSizeClassBlock(u32);
 
 extern void sdfReleaseChipBlock(void *);
 
@@ -331,7 +331,7 @@ void effRequestMappedResource(const char *base, const char *name, u32 *out) {
 }
 
 void *effCreateOwnerRecordList(void *owner) {
-    u32 *data = func_002CFEB8(0x44);
+    u32 *data = sdfAllocSizeClassBlock(0x44);
     memset(data, 0, 0x44);
     data[0] = (u32)owner;
     return data;
@@ -369,7 +369,7 @@ void effInsertSlotRecord(void *owner, EffectOwnerRecord *list, EffectSlotOwner *
     if (bucket >= 16) {
         bucket = 15;
     }
-    record = func_002CFEB8(sizeof(*record));
+    record = sdfAllocSizeClassBlock(sizeof(*record));
     record->prev = 0;
     record->owner = owner;
     record->slot = slot;
@@ -482,7 +482,7 @@ typedef struct EffMappedRecord {
     u8 *status;       // 0x20
 } EffMappedRecord;    // 0x24
 
-void *func_002BD028(u8 *source, EffMappedHeader *headerOut) {
+void *effLoadMappedStatusRecords(u8 *source, EffMappedHeader *headerOut) {
     EffMappedHeader header;
     u32 allocation;
     EffMappedRecord *records;
@@ -502,7 +502,7 @@ void *func_002BD028(u8 *source, EffMappedHeader *headerOut) {
         if (needed < record->size) {
             needed = record->size;
         }
-        record->status = func_002CFEB8(needed);
+        record->status = sdfAllocSizeClassBlock(needed);
         memset(record->status, 0, needed);
         memcpy(record->status, source, record->size);
         source += record->size;
@@ -523,17 +523,17 @@ typedef struct {
 } EffMappedResource;
 
 u32 effCreateMappedResource(u32 source) {
-    EffMappedResource *work = (EffMappedResource *)func_002CFEB8(0xC);
+    EffMappedResource *work = (EffMappedResource *)sdfAllocSizeClassBlock(0xC);
     EffMappedHeader header;
 
-    work->records = func_002BD028((u8 *)source, &header);
+    work->records = effLoadMappedStatusRecords((u8 *)source, &header);
     work->allocation = (void *)sdfResourceRetainAddress((u32)work->records);
     work->count = header.count;
     return (u32)work;
 }
 
 u32 *effCreateStatusBatch(u32 kind) {
-    u32 *header = func_002CFEB8(0xC);
+    u32 *header = sdfAllocSizeClassBlock(0xC);
     u32 allocation;
     u32 data;
     u32 size;
@@ -550,7 +550,7 @@ u32 *effCreateStatusBatch(u32 kind) {
         payload[5] = kind;
         size = effSumRecordStatuses(payload);
     }
-    scratch = func_002CFEB8(size);
+    scratch = sdfAllocSizeClassBlock(size);
     ((u32 *)header[2])[8] = (u32)scratch;
     memset(scratch, 0, size);
     ((u32 *)header[2])[6] = size;
@@ -694,7 +694,7 @@ u8 effHasFirstTextureHandle(s32 set) {
 
 u32 *effCreatePayload(u32 count) {
     u32 size = count * 0x6c;
-    u32 *header = func_002CFEB8(0xC);
+    u32 *header = sdfAllocSizeClassBlock(0xC);
     u32 allocation = (u32)sdfAllocGeneralBlock(size);
     u32 data;
 
@@ -717,7 +717,7 @@ INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BD9C0);
 extern void effResetSlotWork(u32, u32);
 
 u32 *effCreateResourceSlotSet(u32 *source, u32 slot, u32 count) {
-    u32 *effect = (u32 *)func_002CFEB8(0x30);
+    u32 *effect = (u32 *)sdfAllocSizeClassBlock(0x30);
     u32 index = 0;
     effect[1] = 1;
     {
@@ -971,7 +971,7 @@ INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BE8A8);
 void effSelectPresetAndDispatch(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
                                     u32 arg4, u32 arg5, u32 presetMode, u32 presetValue) {
     effSelectPresetByKind(presetMode, presetValue);
-    func_002C0F88(arg0, arg1, arg2, arg3, arg4, arg5, presetValue);
+    uiDrawGradientColorRect(arg0, arg1, arg2, arg3, arg4, arg5, presetValue);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, presetValue);
 }
 

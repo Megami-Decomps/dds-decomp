@@ -9,7 +9,7 @@ extern u8 D_00324660[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 extern void sdfMultiplyVuMatrixInPlace(void);
 
-/* Sub-record behind MdlCtx.sub (+0x8/+0xA read by func_002183D0/E0). */
+/* Sub-record behind MdlCtx.sub (+0x8/+0xA read by mdlGetContextResourceGroup/E0). */
 typedef struct MdlSub {
     u8 unk0[8]; /* 0x0 */
     u16 unk8;   /* 0x8 */
@@ -806,11 +806,11 @@ u8 mdlHasNode(MdlCtx *ctx, s32 id) {
     return found != NULL;
 }
 
-u16 func_002183D0(MdlCtx *ctx) {
+u16 mdlGetContextResourceGroup(MdlCtx *ctx) {
     return ctx->sub->unk8;
 }
 
-u16 func_002183E0(MdlCtx *ctx) {
+u16 mdlGetContextResourceId(MdlCtx *ctx) {
     return ctx->sub->unkA;
 }
 

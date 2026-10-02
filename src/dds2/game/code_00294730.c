@@ -13,7 +13,7 @@ typedef struct EventSpriteObject {
     s32 type;
 } EventSpriteObject;
 
-u32 func_00294730(EventSpriteObject *object) {
+u32 evtSelectGraphicSlotBySpriteType(EventSpriteObject *object) {
     u32 result;
 
     result = 0;
@@ -57,7 +57,7 @@ void func_00294B40(s32 x, s32 y, s32 depth, EventSpriteObject *object,
     func_0026BEC0(0, 0, 0, scale, (u8 *)object + 0xE8, option);
     func_0026BEC0(0, 0xCF8, 0, scale, (u8 *)object + 0x17C, option);
     func_00294680((struct BlendDispatchWork *)object, scale, option);
-    index = func_00294730(object);
+    index = evtSelectGraphicSlotBySpriteType(object);
     func_00306CD0(D_003D03F0[index][MENU_ICON_X] * 16, D_003D03F0[index][MENU_ICON_Y] * 8,
                   0, scale, 0, D_00438FC8->textures[D_003D03F0[index][MENU_ICON_TEXTURE]],
                   D_003D03F0[index][MENU_ICON_FRAME], option);

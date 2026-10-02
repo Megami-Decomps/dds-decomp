@@ -440,7 +440,7 @@ s32 btlUnitHasAllTenActions(void *actor) {
     return 1;
 }
 
-s32 func_00200A08(s32 unused, s32 action) {
+s32 btlAnyPartyMeetsEntryCodeCondition(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
@@ -453,7 +453,7 @@ s32 func_00200A08(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_00200A88(s32 unused, s32 action) {
+s32 btlAnyEnemyMeetsEntryCodeCondition(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((*(u64 *)&unit->flags & 0x421) == 0x401) {
@@ -480,7 +480,7 @@ u8 btlCheckUnitActionModeOne(u32 unit, u32 action) {
     return result != 0;
 }
 
-s32 func_00200B48(s32 unused, u32 action) {
+s32 btlAnyPartyPassesEntryCheck(s32 unused, u32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
@@ -493,7 +493,7 @@ s32 func_00200B48(s32 unused, u32 action) {
     return 0;
 }
 
-s32 func_00200BD0(s32 unused, u32 action) {
+s32 btlAnyPartyPassesInverseEntryCheck(s32 unused, u32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
@@ -506,7 +506,7 @@ s32 func_00200BD0(s32 unused, u32 action) {
     return 0;
 }
 
-s32 func_00200C58(s32 unused, u32 action) {
+s32 btlAnyEnemyPassesEntryCheck(s32 unused, u32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((*(u64 *)&unit->flags & 0x421) == 0x401) {
@@ -519,7 +519,7 @@ s32 func_00200C58(s32 unused, u32 action) {
     return 0;
 }
 
-s32 func_00200CE0(s32 unused, u32 action) {
+s32 btlAnyEnemyPassesInverseEntryCheck(s32 unused, u32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((*(u64 *)&unit->flags & 0x421) == 0x401) {
@@ -532,7 +532,7 @@ s32 func_00200CE0(s32 unused, u32 action) {
     return 0;
 }
 
-s32 func_00200D68(s32 unused, u32 action) {
+s32 btlAnyPartyFailsEntryCheck(s32 unused, u32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
@@ -545,7 +545,7 @@ s32 func_00200D68(s32 unused, u32 action) {
     return 0;
 }
 
-s32 func_00200DF0(s32 unused, u32 action) {
+s32 btlAnyEnemyFailsEntryCheck(s32 unused, u32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((*(u64 *)&unit->flags & 0x421) == 0x401) {
@@ -3155,7 +3155,7 @@ void *btlFindActiveMember(s32 group, s32 type) {
     return (unit[0x110 / 4] & 2) ? unit : 0;
 }
 
-u64 func_00208F10(u64 owner) {
+u64 btlEnsureEffectUnitModelLoadTask(u64 owner) {
     u8 **slot = (u8 **)((BtlState *)btlGetRuntime())->effect;
     u8 *model = *slot;
     u8 *entry;

@@ -2,7 +2,7 @@
 
 #include "kwln.h"
 
-extern void *func_00328D68(s32);
+extern void *sdfAllocSizeClassBlock(s32);
 
 #define KWLN_TASK_STATE_MASK 0xF
 
@@ -246,7 +246,7 @@ s32 kwlnTaskTickScheduler(void)
 
 KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay,
                          TaskUpdate update, TaskDestroy destroy, u32 userValue) {
-    KwlnTask *task = func_00328D68(sizeof(KwlnTask));
+    KwlnTask *task = sdfAllocSizeClassBlock(sizeof(KwlnTask));
     s32 i = 0;
 
     if (task == NULL) {

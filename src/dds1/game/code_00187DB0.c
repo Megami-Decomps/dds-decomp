@@ -24,12 +24,12 @@ typedef struct {
     u32 sourceHandle;
 } EffResourceRectWork; /* 0x28 */
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 effGetResourceFirstWord(s32 index);
 
 /* Clone rectangle parameters and select a fresh source handle. */
 EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *src) {
-    EffResourceRectWork *dst = func_002CFEB8(sizeof(EffResourceRectWork));
+    EffResourceRectWork *dst = sdfAllocSizeClassBlock(sizeof(EffResourceRectWork));
 
     dst->sourceHandle = effGetResourceFirstWord(0);
     dst->params = *src;
@@ -98,19 +98,19 @@ typedef struct {
     EffTrackPolyData *data;
 } EffTrackPolyWork; /* 0x3C */
 
-extern EffTrackPolyData *func_00188738(s32 historyLength, s32 step);
-extern void func_00188878(EffTrackPolyData *data, u32 *colors);
-extern void func_00188870(EffTrackPolyData *data, u32 kind);
+extern EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 step);
+extern void effTrackPolyFillGradientColors(EffTrackPolyData *data, u32 *colors);
+extern void effTrackPolySetDrawKind(EffTrackPolyData *data, u32 kind);
 
 /* Clone a model track with independent history and gradient storage. */
 EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *src) {
-    EffTrackPolyWork *dst = func_002CFEB8(sizeof(EffTrackPolyWork));
+    EffTrackPolyWork *dst = sdfAllocSizeClassBlock(sizeof(EffTrackPolyWork));
 
     dst->params = *src;
     dst->params.unk1C = 0xC;
     dst->updateCount = 0;
-    dst->data = func_00188738(dst->params.historyLength, 0xC);
-    func_00188878(dst->data, src->gradientColors);
-    func_00188870(dst->data, src->kind);
+    dst->data = effTrackPolyAllocateHistoryData(dst->params.historyLength, 0xC);
+    effTrackPolyFillGradientColors(dst->data, src->gradientColors);
+    effTrackPolySetDrawKind(dst->data, src->kind);
     return dst;
 }

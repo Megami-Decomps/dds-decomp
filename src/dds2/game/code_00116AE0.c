@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 dds3AppendWorldObjectNode(s32 kind);
 extern void *sdfModelCreateWithItems(void *data, void *listRef);
 extern s32 func_003340E0(s32 arg0, void *arg1, s32 arg2);
@@ -46,7 +46,7 @@ s32 evtCreateScriptObject(s32 a, s32 b, s32 c, s32 d, s32 e) {
 /* Same as evtCreateScriptObject but stores arg3 at work+0xC instead of 0x10. The store
    order is what fixes retail's saved-register order: sched1 sorts these independent
    stores by luid, and the saved regs go by live length (store position - copy position). */
-s32 func_00116B58(s32 a, s32 b, s32 c, s32 d, s32 e) {
+s32 evtCreateScriptObjectWithResource(s32 a, s32 b, s32 c, s32 d, s32 e) {
     ScriptObj *object = (ScriptObj *)dds3AppendWorldObjectNode(10);
     ObjWork *work = (ObjWork *)object->work;
 
@@ -76,7 +76,7 @@ s32 evtCreateModelFromObject(ObjWithWork *object) {
 INCLUDE_ASM(const s32, "game/code_00116AE0", evtAttachScriptToObject);
 
 s32 dds3AllocateObjectWork(ObjWithWork *obj) {
-    obj->work = func_00328D68(0x18);
+    obj->work = sdfAllocSizeClassBlock(0x18);
     memset(obj->work, 0, 0x18);
     return 1;
 }

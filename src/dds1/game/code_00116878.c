@@ -37,7 +37,7 @@ s32 evtCreateScriptObject(s32 a, s32 b, s32 c, s32 d, s32 e) {
 /* Same as evtCreateScriptObject but stores arg3 at work+0xC instead of 0x10. The store
    order is what fixes retail's saved-register order: sched1 sorts these independent
    stores by luid, and the saved regs go by live length (store position - copy position). */
-s32 func_001168F0(s32 a, s32 b, s32 c, s32 d, s32 e) {
+s32 evtCreateScriptObjectWithResource(s32 a, s32 b, s32 c, s32 d, s32 e) {
     ScriptObj *object = (ScriptObj *)dds3AppendWorldObjectNode(10);
     ObjWork *work = (ObjWork *)object->work;
 
@@ -68,10 +68,10 @@ u32 evtCreateModelFromObject(ObjWithWork *obj) {
 
 INCLUDE_ASM(const s32, "game/code_00116878", evtAttachScriptToObject);
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 s32 dds3AllocateObjectWork(ObjWithWork *obj) {
-    obj->work = func_002CFEB8(0x18);
+    obj->work = sdfAllocSizeClassBlock(0x18);
     memset(obj->work, 0, 0x18);
     return 1;
 }

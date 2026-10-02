@@ -287,13 +287,13 @@ typedef struct FrFontSegments {
     void *third;
 } FrFontSegments;
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern void itfSplitRelativeSegments(void *block, FrFontSegments *out);
 extern void func_00198088(void *dst, s32 option, void *block, FrFontSegments *segments);
 
 void *frFontCloneEntryResource(u8 index, s32 option) {
     FrFontEntry *entry = &frFontWork.entries[index];
-    void *dst = func_002CFEB8(0x120);
+    void *dst = sdfAllocSizeClassBlock(0x120);
     FrFontSegments segments;
 
     itfSplitRelativeSegments(entry->resource, &segments);

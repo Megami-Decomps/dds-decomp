@@ -1774,7 +1774,7 @@ extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern void sdfQueueNonzeroResourceId(s32 resource);
 extern void kwlnTextureReleaseHeldReference(void);
 extern u32 kwlnDrawControlFlags;
-extern void func_00234CA8(u16 a, u16 b, char *path0, char *path1, char *path2);
+extern void evtFormatPolygonMoviePaths(u16 a, u16 b, char *path0, char *path1, char *path2);
 extern s32 sdfPathExists(char *path);
 extern void evtEventViewerShutdown(EvtRuntime *runtime);
 extern void evtDestroySecondaryWorldNode(void);
@@ -1807,7 +1807,7 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     kwlnDrawControlFlags |= 0x2000000;
-    func_00234CA8(D_003BBE78, D_003BBE7A, path0, path1, path2);
+    evtFormatPolygonMoviePaths(D_003BBE78, D_003BBE7A, path0, path1, path2);
     if (mode == 1) {
         if (sdfPathExists(path0) != 1) {
             return 0;

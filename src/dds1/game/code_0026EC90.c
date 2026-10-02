@@ -179,7 +179,7 @@ void mnuStartMovieDrawTaskForResource(u32 resource, void *data) {
     }
 }
 
-void func_0026FFF8(s32 index) {
+void mnuRequestIndexedMovieResource(s32 index) {
     u8 *entry = D_0037B168 + index * 24;
 
     mnuStartMovieDrawTaskForResource(*(s32 *)entry, (s32)(entry + 4));
@@ -194,8 +194,8 @@ void mnuStopMovieDrawTask(void) {
     mnuMovieDrawTask = 0;
 }
 
-s32 func_00270068(void) {
-    func_002EDBB8(mnuMovieDrawContext);
+s32 mnuCheckMovieDecoderStatus(void) {
+    sdfPacCheckDecoderStatus(mnuMovieDrawContext);
 }
 
 s32 func_00270088(void) {

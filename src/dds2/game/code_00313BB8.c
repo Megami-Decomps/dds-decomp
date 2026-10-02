@@ -917,7 +917,7 @@ void sdfResetFlagListEntries(s32 list) {
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00316528);
 
-void func_00316648(void) {
+void sdfInitializeFlagListFromResource(void) {
     effCreateSelectionFlagListFromWork(fileResolvePrimaryBuffer());
 }
 

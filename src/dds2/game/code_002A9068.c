@@ -56,7 +56,7 @@ extern u8 D_003E5778[];
 
 extern void func_002A9908(u8 *);
 
-extern void func_002C1B58(u8 *, s32);
+extern void mnuResetGradientFadeColor(u8 *, s32);
 
 extern void func_003425B0(void);
 
@@ -702,7 +702,7 @@ u8 *mnuCreateStaffMenuWork(void) {
     evtCreateMessageWindowIfMissing((s32)D_003E5778);
     movLoadTitleEffects(work);
     func_002A9908(work);
-    func_002C1B58(work + 0xAA50, 0x60);
+    mnuResetGradientFadeColor(work + 0xAA50, 0x60);
     mnuBuildListSlotTableA((ListSlotWork *)work);
     mnuBuildListSlotTableB((ListSlotWork *)work);
     mnuBuildSkillSlotTable((ListSlotWork *)work);

@@ -4,7 +4,7 @@
 extern u64 func_00119AF8(u64);
 extern u64 scrReadIntParameter(u64);
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock(void *p);
 extern void effMiscNormalizeVU(void);
 extern void effMiscQuatMultiplyVU(void);
@@ -155,7 +155,7 @@ EffTransformNode *dds3CreateWorldNodeForKind(u32 kind) {
     if (kind >= 0x12) {
         return NULL;
     }
-    node = func_002CFEB8(0x44);
+    node = sdfAllocSizeClassBlock(0x44);
     if (node == NULL) {
         return NULL;
     }

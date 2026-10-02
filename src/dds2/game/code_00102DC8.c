@@ -134,7 +134,7 @@ extern u8 kwlnLargeMotorTarget;
 extern u8 kwlnPadMotorLevels[2];
 
 extern void *func_00101740(const char *);
-extern void *func_00328D68(s32);
+extern void *sdfAllocSizeClassBlock(s32);
 extern void *func_00102BC8(void *task);
 extern void dds3AdminReleaseTaskWork(void);
 extern char dds3AdminTaskName[];
@@ -166,7 +166,7 @@ void kwlnDebugTaskCreate(void) {
     s32 i;
 
     if (func_00101740(dds3AdminTaskName) == NULL) {
-        work = func_00328D68(0x24);
+        work = sdfAllocSizeClassBlock(0x24);
         work->unk0 = 0;
         work->unk4 = 0;
         work->unk8 = -1;
@@ -751,7 +751,7 @@ void kwlnFadeSetupFrames(s32 mode, s32 frames) {
     D_00435CEC = D_00435CEE * 4 / 10;
 }
 
-void func_001057A8(void) {
+void kwlnCancelConfiguredFadeFrames(void) {
     D_00435CE8 = 0;
 }
 

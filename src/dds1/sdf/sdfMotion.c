@@ -267,7 +267,7 @@ typedef struct FuncTab {
 
 void *sdfAllocAndClearQuadwords(s32 size);
 void sdfReleaseChipBlock(void *a0);
-void *func_002CFEB8(s32 size);
+void *sdfAllocSizeClassBlock(s32 size);
 ArrObj *sdfDevCreateBufferedRequest(u16 n, s32 e1, s32 e2);
 s32 sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
 s32 sdfModelFindDrawNode(void *a0, s32 a1);
@@ -674,7 +674,7 @@ void sdfMotionBindDrawNode(void *tmp, void *src, void *tbl, s32 x) {
 void *sdfMotionCreateDrawVectorBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
-    r = func_002CFEB8(0x20);
+    r = sdfAllocSizeClassBlock(0x20);
     sdfMotionBindDrawNode(r, a0, D_003981D0, a2);
     return r;
 }
@@ -706,7 +706,7 @@ void sdfMotionBlendDrawVectorWithCurrent(HasSub *a0, f32 t1, f32 t2) {
 void *sdfCreateMotionDrawNode(void *a0, s32 a1, s32 a2) {
     void *r;
 
-    r = func_002CFEB8(0x20);
+    r = sdfAllocSizeClassBlock(0x20);
     sdfMotionBindDrawNode(r, a0, D_003981E8, a2);
     return r;
 }
@@ -718,7 +718,7 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DBD80);
 void *sdfMotionCreateScaleVectorBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
-    r = func_002CFEB8(0x20);
+    r = sdfAllocSizeClassBlock(0x20);
     sdfMotionBindDrawNode(r, a0, D_00398200, a2);
     return r;
 }
@@ -750,7 +750,7 @@ void sdfMotionBlendScaleVectorWithCurrent(HasSub *a0, f32 t1, f32 t2) {
 void *sdfMotionCreateQuaternionBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
-    r = func_002CFEB8(0x20);
+    r = sdfAllocSizeClassBlock(0x20);
     sdfMotionBindDrawNode(r, a0, D_00398218, a2);
     return r;
 }
@@ -805,7 +805,7 @@ void sdfMotionBlendKeyQuaternionWithBase(HasSub *a0, f32 t1, f32 t2) {
 void *sdfMotionCreateKeyFlagBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
-    r = func_002CFEB8(0x14);
+    r = sdfAllocSizeClassBlock(0x14);
     sdfMotionBindDrawNode(r, a0, D_00398230, a2);
     return r;
 }
@@ -864,7 +864,7 @@ void sdfMotionBindIndexedTrack(Dst360 *a0, Src360 *a1, void *a2, s32 a3) {
 void *func_002DC3B8(void *a0, s32 a1, s32 a2) {
     void *r;
 
-    r = func_002CFEB8(0x14);
+    r = sdfAllocSizeClassBlock(0x14);
     sdfMotionBindIndexedTrack(r, a0, D_00398270, a2);
     return r;
 }
@@ -895,7 +895,7 @@ void sdfCopyTrackStateToBinding(CmdI *a0) {
 void *func_002DC518(void *a0, s32 a1, s32 a2) {
     void *r;
 
-    r = func_002CFEB8(0x14);
+    r = sdfAllocSizeClassBlock(0x14);
     sdfMotionBindIndexedTrack(r, a0, D_00398288, a2);
     return r;
 }
@@ -926,7 +926,7 @@ void sdfMotionReadBoundTrackInteger(CmdI *a0) {
 void *func_002DC678(void *a0, s32 a1, s32 a2) {
     void *r;
 
-    r = func_002CFEB8(0x14);
+    r = sdfAllocSizeClassBlock(0x14);
     sdfMotionBindIndexedTrack(r, a0, D_003982A0, a2);
     return r;
 }
@@ -957,7 +957,7 @@ void func_002DC7C8(CmdI *a0) {
 void *func_002DC7D8(void *a0, s32 a1, s32 a2) {
     void *r;
 
-    r = func_002CFEB8(0x14);
+    r = sdfAllocSizeClassBlock(0x14);
     sdfMotionBindIndexedTrack(r, a0, D_003982B8, a2);
     return r;
 }
@@ -988,7 +988,7 @@ void sdfMotionCopyTrackValueToBinding(CmdI *a0) {
 void *sdfMotionCreateFloatBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
-    r = func_002CFEB8(0x14);
+    r = sdfAllocSizeClassBlock(0x14);
     sdfMotionBindIndexedTrack(r, a0, D_003982D0, a2);
     return r;
 }
@@ -1015,7 +1015,7 @@ void sdfMotionReadBoundFloat(CmdF *a0) {
 void *sdfMotionCreateTextBlendBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
-    r = func_002CFEB8(0x24);
+    r = sdfAllocSizeClassBlock(0x24);
     sdfMotionBindIndexedTrack(r, a0, D_003982E8, a2);
     return r;
 }
@@ -1051,7 +1051,7 @@ void sdfMotionCapturePrimaryTextParams(DstBlk *a0) {
 void *sdfMotionCreateSecondaryTextBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
-    r = func_002CFEB8(0x24);
+    r = sdfAllocSizeClassBlock(0x24);
     sdfMotionBindIndexedTrack(r, a0, D_00398300, a2);
     return r;
 }
@@ -1087,7 +1087,7 @@ void sdfMotionCaptureSecondaryTextParams(DstBlk *a0) {
 void *func_002DCD30(void *a0, s32 a1, s32 a2) {
     void *r;
 
-    r = func_002CFEB8(0x14);
+    r = sdfAllocSizeClassBlock(0x14);
     sdfMotionBindIndexedTrack(r, a0, D_00398318, a2);
     return r;
 }
@@ -1118,7 +1118,7 @@ void sdfCopyMotionTargetValue(CmdI *a0) {
 void *sdfMotionCreateDirectTextKeyBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
-    r = func_002CFEB8(0x24);
+    r = sdfAllocSizeClassBlock(0x24);
     sdfMotionBindIndexedTrack(r, a0, D_00398330, a2);
     return r;
 }
@@ -1143,7 +1143,7 @@ void func_002DCF60(void) {
 void *func_002DCF68(void *a0, s32 a1, s32 a2) {
     void *r;
 
-    r = func_002CFEB8(0x24);
+    r = sdfAllocSizeClassBlock(0x24);
     sdfMotionBindIndexedTrack(r, a0, D_00398348, a2);
     return r;
 }

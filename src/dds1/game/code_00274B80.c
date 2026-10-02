@@ -401,7 +401,7 @@ s64 mnuDrawPartySelectionPanelAndStep(s32 callback) {
     return menuRunPanel(context, 1, callback);
 }
 
-s64 func_00276250(s32 callback) {
+s64 mnuStepPartySelectionControl(s32 callback) {
     return menuRunPanel(kwlnTaskGetUserValue(), 2, callback);
 }
 
@@ -522,7 +522,7 @@ s64 mnuDrawStaffCampPageWithImage(s32 callback) {
     return menuRunPanel(context, 1, callback);
 }
 
-s64 func_002766E8(s32 callback) {
+s64 mnuStepStaffCampPageControl(s32 callback) {
     return menuRunPanel(kwlnTaskGetUserValue(), 2, callback);
 }
 
@@ -863,12 +863,12 @@ typedef struct SkillInfo {
     u16 codes[14];
 } SkillInfo;
 
-extern s32 func_002CFEB8(s32);
+extern s32 sdfAllocSizeClassBlock(s32);
 extern void prfBuildRawSkillList(u32, SkillInfo *);
 
 s32 mnuBuildSkillCodeBitset(void) {
     s32 id = 0;
-    u32 *bits = (u32 *)func_002CFEB8(0x50);
+    u32 *bits = (u32 *)sdfAllocSizeClassBlock(0x50);
     SkillInfo info;
 
     memset(bits, 0, 0x50);
@@ -976,7 +976,7 @@ s64 mnuCampMenuDrawSlotLabel(s32 param) {
     return menuRunPanel(context, 1, param);
 }
 
-s64 func_00278B90(s32 callback) {
+s64 mnuStepSkillSlotControl(s32 callback) {
     return menuRunPanel(kwlnTaskGetUserValue(), 2, callback);
 }
 

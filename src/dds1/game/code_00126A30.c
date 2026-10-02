@@ -238,7 +238,7 @@ extern u32 D_003306C0[];
 extern u32 D_003308B0[];
 extern u32 fileRequestIsReady(u32 arg0);
 extern void *memset(void *s, s32 c, u32 n);
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern void kwlnTaskSetUserValue(u32 arg0, void *arg1);
 extern s32 fldDrawPendingTitleBannerWhenIdle(u32 task);
 extern s32 kwlnTaskIsRegistered(u32 arg0);
@@ -450,7 +450,7 @@ void fldSetPendingAreaAndFloor(u32 area, u32 floor) {
 
 extern char D_0039FE38[]; /* "%sf%03d_%03d.LB" */
 extern s32 func_003014F0(char *, const char *, ...);
-extern u32 func_00288A80(char *);
+extern u32 fileQueuePlainDispatchRequest(char *);
 extern void fldFormatAreaDirectory(char *, s32, s32);
 
 s32 fldLoadAreaResource(void) {
@@ -465,7 +465,7 @@ s32 fldLoadAreaResource(void) {
         fldAreaState[32] = floor;
         fldFormatAreaDirectory(directory, area, 1);
         func_003014F0(path, D_0039FE38, directory, area, floor);
-        fldAreaLoadRequest = func_00288A80(path);
+        fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
         fldAreaState[30] = 1;
         return 1;
     }
@@ -511,7 +511,7 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
     D_003BA734 = 1;
     fldFormatAreaDirectory(directory, area, 1);
     func_003014F0(path, D_0039FE38, directory, area, room);
-    fldAreaLoadRequest = func_00288A80(path);
+    fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
     ((FldAreaResourceState *)fldAreaState)->resourceFlag = 1;
     return 1;
 }
@@ -701,7 +701,7 @@ extern void func_00288C50(u32);
 extern void fldSetNpcPalette();
 extern void fldUploadSkyBuffer();
 extern void fldCopyActorWaypointTable();
-extern void func_0013D598();
+extern void fldCopyInfoTable();
 extern u32 sdfMemoryGetBlockSize(u32);
 extern u32 sdfMemoryGetBlockAddress(u32);
 extern void fldSetSceneRecordChunk(u32, u32);
@@ -728,13 +728,13 @@ void fldLoadAreaPackedResources(void) {
     if (fldAreaState[4] < 200) {
         fldFormatAreaResourceName(name);
         strcpy(D_003C9200, name);
-        fldAreaPackedArchive = func_00288A80(name);
+        fldAreaPackedArchive = fileQueuePlainDispatchRequest(name);
         func_00288C50(fldAreaPackedArchive);
         for (entry = ((FldPackedArchive *)fldAreaPackedArchive)->entries; entry != NULL;
              entry = entry->next) {
             switch (entry->kind) {
             case 1:
-                func_0013D598(entry->payload);
+                fldCopyInfoTable(entry->payload);
                 sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 2:
@@ -3580,7 +3580,7 @@ void fldLoadInfoTable(s32 field) {
     }
 }
 
-void func_0013D598(const void *source) {
+void fldCopyInfoTable(const void *source) {
     memcpy(D_00332E30, source, 0x3B80);
 }
 
@@ -4187,7 +4187,7 @@ s32 fldDrawPendingTitleBannerWhenIdle(u32 task) {
 }
 
 void * fldInitializeTitleBannerTask(u32 task) {
-    u16 *ticket = func_002CFEB8(8);
+    u16 *ticket = sdfAllocSizeClassBlock(8);
 
     ticket[1] = 1;
     ticket[0] = 0;

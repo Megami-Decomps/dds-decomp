@@ -238,7 +238,7 @@ s32 effBattleHasActiveKind(EffBattleListOwner *owner) {
 
 /* Rebuild each cloned bank's parameter work, resolving shared-entry references
  * and preserving disabled descriptors. */
-void func_00169230(void *destination, void *source) {
+void effBattleRebuildClonedParameterBanks(void *destination, void *source) {
     u8 *destinationBytes = destination;
     u8 *sourceBytes = source;
     u16 *entryCount = &((EffBattleParameterBankHeader *)destination)->entryCount;
@@ -284,7 +284,7 @@ void func_00169230(void *destination, void *source) {
 }
 
 /* Release each initialized parameter-work entry in the mixer's two banks. */
-void func_00169370(EffBattleParameterMixer *mixer) {
+void effBattleReleaseParameterBanks(EffBattleParameterMixer *mixer) {
     u16 *countAddress = &((EffBattleParameterBankHeader *)mixer)->entryCount;
     s32 bankCountdown;
     s32 bankOffset;

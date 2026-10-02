@@ -81,7 +81,7 @@ extern void *memset(void *s, s32 c, u32 n);
 
 extern void *memcpy(void *dest, const void *src, u32 n);
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 s32 sdfAllocGeneralBlock(s32 size);
 
@@ -446,7 +446,7 @@ f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00152560);
 
 u8 *billCreateUnitObject(s32 index) {
-    u8 *obj = func_002CFEB8(0x88);
+    u8 *obj = sdfAllocSizeClassBlock(0x88);
 
     ((EffUnitObject *)obj)->billboard = billCreateIndexed(1, index);
     ((EffUnitObject *)obj)->resource = sdfCreateAssetWithDrawEntries();
@@ -456,7 +456,7 @@ u8 *billCreateUnitObject(s32 index) {
 }
 
 u8 *billCloneUnitObject(u8 *src) {
-    u8 *obj = func_002CFEB8(0x88);
+    u8 *obj = sdfAllocSizeClassBlock(0x88);
 
     ((EffUnitObject *)obj)->billboard = billCloneObjectRetainingSharedData(((EffUnitObject *)src)->billboard);
     ((EffUnitObject *)obj)->resource = sdfCreateAssetWithDrawEntries();
@@ -638,7 +638,7 @@ void effScaleTemplateTail13(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the template prefix and appended tail, then allocate its packet records. */
 s32 effCloneRingTemplate(EffTemplatePacketList *source) {
-    s32 obj = (s32)func_002CFEB8(0x180);
+    s32 obj = (s32)sdfAllocSizeClassBlock(0x180);
     s32 tailLen = 0x30;
 
     memset((void *)obj, 0, 0x180);
@@ -868,7 +868,7 @@ void effScaleDiscTemplate(float scale, EffTemplatePacketList *effect) {
 }
 
 s32 effCloneTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)func_002CFEB8(0x180);
+    s32 copy = (s32)sdfAllocSizeClassBlock(0x180);
     s32 tailLen = 0x30;
 
     memset((void *)copy, 0, 0x180);
@@ -1051,7 +1051,7 @@ void effScaleBallisticTemplate(float scale, EffTemplatePacketList *effect) {
 }
 
 s32 effCloneBallisticTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)func_002CFEB8(0x180);
+    s32 copy = (s32)sdfAllocSizeClassBlock(0x180);
     s32 tailLen = 0x30;
 
     memset((void *)copy, 0, 0x180);
@@ -1185,7 +1185,7 @@ void effScaleLookAtRingTemplate(float scale, EffTemplatePacketList *effect) {
 }
 
 s32 effCloneLookAtRingTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)func_002CFEB8(0x170);
+    s32 copy = (s32)sdfAllocSizeClassBlock(0x170);
     s32 tailLen = 0x20;
 
     memset((void *)copy, 0, 0x170);
@@ -1355,7 +1355,7 @@ void effScaleBurstTemplate(float scale, EffTemplatePacketList *effect) {
 }
 
 s32 effCloneBurstTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)func_002CFEB8(0x170);
+    s32 copy = (s32)sdfAllocSizeClassBlock(0x170);
     s32 tailLen = 0x20;
 
     memset((void *)copy, 0, 0x170);
@@ -1554,7 +1554,7 @@ void effScaleSphereTemplate(float scale, EffTemplatePacketList *effect) {
 }
 
 s32 effCloneSphereTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)func_002CFEB8(0x180);
+    s32 copy = (s32)sdfAllocSizeClassBlock(0x180);
     s32 tailLen = 0x30;
 
     memset((void *)copy, 0, 0x180);
@@ -1742,7 +1742,7 @@ void effScaleExpandRingTemplate(float scale, EffTemplatePacketList *effect) {
 }
 
 s32 billCloneTemplateSmall(EffTemplatePacketList *source) {
-    s32 copy = (s32)func_002CFEB8(0x170);
+    s32 copy = (s32)sdfAllocSizeClassBlock(0x170);
     s32 tailLen = 0x20;
 
     memset((void *)copy, 0, 0x170);
@@ -1911,7 +1911,7 @@ void effScaleConeTemplate(float scale, EffTemplatePacketList *effect) {
 }
 
 s32 effCloneConeTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)func_002CFEB8(0x180);
+    s32 copy = (s32)sdfAllocSizeClassBlock(0x180);
     s32 tailLen = 0x30;
 
     memset((void *)copy, 0, 0x180);
@@ -2087,7 +2087,7 @@ void effScalePacketRecordTemplate(float scale, EffTemplatePacketList *effect) {
 }
 
 s32 effClonePacketRecordScaleTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)func_002CFEB8(0x170);
+    s32 copy = (s32)sdfAllocSizeClassBlock(0x170);
     s32 tailLen = 0x20;
 
     memset((void *)copy, 0, 0x170);
@@ -2120,7 +2120,7 @@ void effScaleSingleParticleTemplate(float scale, EffTemplatePacketList *effect) 
 
 /* Clone the prefix without tail bytes; the zero-length copy is retained for matching. */
 s32 effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)func_002CFEB8(0x150);
+    s32 copy = (s32)sdfAllocSizeClassBlock(0x150);
     s32 tailLen = 0;
 
     memset((void *)copy, 0, 0x150);
@@ -2236,7 +2236,7 @@ void effScaleOffsetGravityTemplate(float scale, EffTemplatePacketList *effect) {
 }
 
 s32 effCloneOffsetGravityTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)func_002CFEB8(0x190);
+    s32 copy = (s32)sdfAllocSizeClassBlock(0x190);
     s32 tailLen = 0x40;
 
     memset((void *)copy, 0, 0x190);
@@ -2362,7 +2362,7 @@ void effScaleDiscAuxTemplate(float scale, EffTemplatePacketList *effect) {
 }
 
 s32 effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)func_002CFEB8(0x200);
+    s32 copy = (s32)sdfAllocSizeClassBlock(0x200);
     s32 tailLen = 0xB0;
 
     memset((void *)copy, 0, 0x200);
@@ -2553,7 +2553,7 @@ void effScaleTemplatePacketPositions(float scale, EffTemplatePacketList *effect)
 
 /* Allocate one 12-byte descriptor per packet and its attached 16-byte records. */
 s32 effCloneTemplateWithPacketDescriptors(EffTemplatePacketList *source) {
-    s32 copy = (s32)func_002CFEB8(0x190);
+    s32 copy = (s32)sdfAllocSizeClassBlock(0x190);
     s32 tailLen = 0x40;
     s32 count;
     s32 perRecord;

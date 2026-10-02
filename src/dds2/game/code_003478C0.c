@@ -21,7 +21,7 @@ typedef struct SdfAllocWork {
 
 extern void sdfPacEnqueuePacket(SdfAllocWork *);
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern void sdfPacReadListAllocationCount();
 
@@ -86,7 +86,7 @@ typedef struct SdfPool {
 
 extern void sdfInsertFloatKeyTreeItem();
 
-extern void func_00348B10();
+extern void sdfRebuildPoolChain();
 
 typedef struct SdfPacCounter {
     u32 count;     /* 0x0 */
@@ -135,7 +135,7 @@ void sdfPacReadListAllocationCount(SdfPacRead *state) {
 
 void sdfQueueAndResetPacketWork(SdfAllocWork *work) {
     sdfPacEnqueuePacket(work);
-    work->buffer = func_00328D68(0x30);
+    work->buffer = sdfAllocSizeClassBlock(0x30);
     work->handler = sdfPacReadListAllocationCount;
 }
 
@@ -193,7 +193,7 @@ void sdfStreamSendChunk(void) {
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_003482B0);
 
-s32 *func_00348408(u32 command, s32 request) {
+s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
     SdfStreamCfg *state = &D_0047BCC0;
     DevState *result;
     switch (command) {
@@ -396,7 +396,7 @@ void sdfReleasePoolNode(SdfPool *pool, SdfPoolNode *node) {
 extern void sdfConnectPacketLists(void *left, void *right);
 
 /* Append a pool-node chain after the list's tail, or make it the head of an empty list, then advance the tail to the chain's last node. */
-void func_00348A30(void *first, SdfPoolNode **head, SdfPoolNode **tail) {
+void sdfAppendPoolNodeChain(void *first, SdfPoolNode **head, SdfPoolNode **tail) {
     SdfPoolNode *current;
     SdfPoolNode *next;
 
@@ -415,7 +415,7 @@ void func_00348A30(void *first, SdfPoolNode **head, SdfPoolNode **tail) {
     }
 }
 
-/* Walk a key tree depth first, applying func_00348A30 to every node's item (func_00348B10 passes the addresses of its two accumulators here). */
+/* Walk a key tree depth first, applying sdfAppendPoolNodeChain to every node's item (sdfRebuildPoolChain passes the addresses of its two accumulators here). */
 void sdfKeyTreeApply(SdfTreeNode *node, SdfPoolNode **head, SdfPoolNode **tail) {
     SdfTreeNode *next;
 
@@ -423,18 +423,18 @@ void sdfKeyTreeApply(SdfTreeNode *node, SdfPoolNode **head, SdfPoolNode **tail) 
         if (node->first != NULL) {
             sdfKeyTreeApply(node->first, head, tail);
         }
-        func_00348A30(node->item, head, tail);
+        sdfAppendPoolNodeChain(node->item, head, tail);
         next = node->second;
         node = next;
     } while (next != NULL);
 }
 
 /* Rebuild the pool's chain: collect the free list's chain, then append every key tree node's chain, and store the resulting head and tail. */
-void func_00348B10(SdfPool *pool) {
+void sdfRebuildPoolChain(SdfPool *pool) {
     SdfPoolNode *head = NULL;
     SdfPoolNode *tail = NULL;
 
-    func_00348A30(pool->free, &head, &tail);
+    sdfAppendPoolNodeChain(pool->free, &head, &tail);
     if (pool->sub[0] != NULL) {
         sdfKeyTreeApply(pool->sub[0], &head, &tail);
     }
@@ -445,7 +445,7 @@ void func_00348B10(SdfPool *pool) {
 void sdfUpdatePoolFreeListByMode(SdfPool *pool, s32 mode, SdfPoolNode *node) {
     switch (mode) {
     case 0:
-        func_00348B10(pool);
+        sdfRebuildPoolChain(pool);
         break;
     case 1:
         if (node->unk4 != 0) {

@@ -942,7 +942,7 @@ s32 fldOpSetMapTargetFlag(void) {
     return 1;
 }
 
-s32 func_0014E6C0(void) {
+s32 fldOpClearAlternateMapTargetFlag(void) {
     s32 area = scrReadIntParameter(0);
     s32 floor, target;
     if (area == 0) area = D_0032E3C0[0];
@@ -954,7 +954,7 @@ s32 func_0014E6C0(void) {
     return 1;
 }
 
-s32 func_0014E748(void) {
+s32 fldOpSetAlternateMapTargetFlag(void) {
     s32 area = scrReadIntParameter(0);
     s32 floor, target;
     if (area == 0) area = D_0032E3C0[0];

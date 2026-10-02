@@ -119,7 +119,7 @@ extern s32 D_0043E5CC[];
 
 extern s32 scrReadIntParameter(s32 idx);
 
-extern s32 func_00119A78(s32 arg0, s32 arg1);
+extern s32 datGetStatWithStatusOverride(s32 arg0, s32 arg1);
 
 extern s32 datCommandRecords;
 
@@ -776,14 +776,14 @@ s32 evtPushSecondRosterOptionStat(void) {
 s32 evtPushFirstRosterStatEligibility(void) {
     s32 val = scrReadIntParameter(0);
 
-    scrSetIntegerReturnValue(func_00119A78(D_0043E5C8[0], val));
+    scrSetIntegerReturnValue(datGetStatWithStatusOverride(D_0043E5C8[0], val));
     return 1;
 }
 
 s32 evtPushSecondRosterStatEligibility(void) {
     s32 val = scrReadIntParameter(0);
 
-    scrSetIntegerReturnValue(func_00119A78(D_0043E5CC[0], val));
+    scrSetIntegerReturnValue(datGetStatWithStatusOverride(D_0043E5CC[0], val));
     return 1;
 }
 
@@ -856,7 +856,7 @@ s32 evtPushEntryIndexedStatOption(void) {
     return 1;
 }
 
-s32 func_0011DC38(void) {
+s32 evtPushSelectedTotalOrRosterHighValue(void) {
     s32 value;
     s32 index = D_0043E5C0[1];
     if (((EventModeSlot *)datCommandSelectors)[index].kind == 5) {

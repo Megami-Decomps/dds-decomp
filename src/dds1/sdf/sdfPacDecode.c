@@ -83,7 +83,7 @@ void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
 void sdfPacAdvanceCallbackBoundary(PacState *state);
 PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet);
 void *sdfAllocAndClearQuadwords(s32 size);
-void *func_002CFEB8(s32 size);
+void *sdfAllocSizeClassBlock(s32 size);
 void func_002EE6F8(PacState *state, PacHead *packet, PacBuf *buffer);
 void sdfPacRelocateQueuedPayload(PacState *state);
 void sdfPacFinalizeRelocatedPayload(PacState *state);
@@ -262,7 +262,7 @@ void sdfPacStartPacketPayload(PacState *state, PacHead *packet) {
             state->onInput = sdfPacCopyPendingBytes;
             break;
         case PAC_ENCODING_COMPRESSED: {
-            PacBuf *decoder = func_002CFEB8(0x20);
+            PacBuf *decoder = sdfAllocSizeClassBlock(0x20);
             state->decoder = decoder;
             sdfStoreWordAndSetState(decoder, state->outputCursor);
             state->onInput = sdfPacDecodePendingBytes;
@@ -390,7 +390,7 @@ INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EE828);
 void sdfPacStartAllocationList(PacState *state, PacHead *packet) {
     sdfPacEnqueuePacket(state, packet);
     {
-        void *allocation = func_002CFEB8(0x10);
+        void *allocation = sdfAllocSizeClassBlock(0x10);
         state->allocation = (PacAlloc *)allocation;
         func_002EE6F8(state, packet, allocation);
     }

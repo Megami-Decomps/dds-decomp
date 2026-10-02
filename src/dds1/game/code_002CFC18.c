@@ -170,7 +170,7 @@ extern s32 func_00312C08(void);
 extern void EIntr(void);
 
 /* Allocate a block of `size` bytes from the size class that covers it (classes are powers of two from 16 bytes up); each class hands out from its own slot list. */
-SdfCursorNode *func_002CFEB8(s32 size) {
+SdfCursorNode *sdfAllocSizeClassBlock(s32 size) {
     s32 index = 0;
     SdfCursorOwner *owner;
     SdfCursorNode *result;

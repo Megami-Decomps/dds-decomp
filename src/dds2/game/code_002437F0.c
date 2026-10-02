@@ -25,7 +25,7 @@ void effDestroyResourceSlotSet(u32 sprite);
 /* The definition uses legacy K&R parameters. */
 void sdfSubmitGsTestOneRegisterPacket();
 
-void func_00308808(s32 x, s32 y, s32 z, s32 width, s32 height, s32 angle, s32 object);
+void uiDrawUniformColorRect(s32 x, s32 y, s32 z, s32 width, s32 height, s32 angle, s32 object);
 
 void uiDrawActiveSurfaceRegion(s32 object);
 
@@ -36,7 +36,7 @@ void sdfSubmitGsAlphaOneRegisterPacket(s32 property, s32 object);
 void func_00243958(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
 extern s32 D_003C90DC[];
 extern void func_00311F20(s32, s32, s32 *, s32, s32, s32);
-extern void func_002438F0(s32);
+extern void evtPrepareSolarOverlayTestState(s32);
 
 typedef struct SolarPoint {
     u16 age;
@@ -71,7 +71,7 @@ void evtReleaseSolarNoiseSprite(u32 *sprite) {
 
 void evtInitializeSolarOverlay(s32 object) {
     sdfSubmitGsTestOneRegisterPacket(0x30000, object);
-    func_00308808(0, 0, 0, 0x2000, 0xE00, 0, object);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, object);
     uiDrawActiveSurfaceRegion(object);
     sdfSubmitGsTestOneRegisterPacket(0x30000, object);
 }
@@ -82,10 +82,10 @@ void evtFinalizeSolarOverlay(s32 object) {
     sdfSubmitGsTestOneRegisterPacket(0x50000, object);
 }
 
-void func_002438F0(s32 object) {
+void evtPrepareSolarOverlayTestState(s32 object) {
     sdfSubmitGsAlphaOneRegisterPacket(0x44, object);
     sdfSubmitGsTestOneRegisterPacket(0x30000, object);
-    func_00308808(0, 0, 0, 0x2000, 0xE00, 0, object);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, object);
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, object);
 }
 
@@ -97,7 +97,7 @@ INCLUDE_ASM(const s32, "game/code_002437F0", func_00243C68);
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_00243DB8);
 
-void func_00243EE8(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t3) {
+void evtDrawIndexedSolarOverlayLayers(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t3) {
     s32 n;
     s32 tmp;
     s32 *p;
@@ -118,7 +118,7 @@ void func_00243EE8(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t
     }
     evtFinalizeSolarOverlay(t2);
     func_00243958(a0, a1, 0, a3, 0xA, 0x20, t1, t2);
-    func_002438F0(t2);
+    evtPrepareSolarOverlayTestState(t2);
 }
 
 void evtDrawPartialSolarOverlay(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t3) {
@@ -142,7 +142,7 @@ void evtDrawPartialSolarOverlay(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, 
     }
     evtFinalizeSolarOverlay(t2);
     func_00243958(a0, a1, 0, a3, 0x10, 0x20, t1, t2);
-    func_002438F0(t2);
+    evtPrepareSolarOverlayTestState(t2);
 }
 
 /* Draw the selected solar-noise layer; intermediate layers also receive layer 9. */
@@ -182,7 +182,7 @@ INCLUDE_ASM(const s32, "game/code_002437F0", func_002441F8);
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_00244408);
 
-void func_002446C8(s32 x, s32 y, s32 z, s32 width, SolarNoiseState *state, s32 context, s32 color) {
+void evtDrawShortSolarNoiseLayers(s32 x, s32 y, s32 z, s32 width, SolarNoiseState *state, s32 context, s32 color) {
     SolarNoiseLayer *layer = state->layers;
     s32 i;
     s32 layerX;
@@ -207,7 +207,7 @@ void func_002446C8(s32 x, s32 y, s32 z, s32 width, SolarNoiseState *state, s32 c
     }
 }
 
-void func_00244828(s32 x, s32 y, s32 z, s32 width, SolarNoiseState *state, s32 context, s32 color) {
+void evtDrawLongSolarNoiseLayers(s32 x, s32 y, s32 z, s32 width, SolarNoiseState *state, s32 context, s32 color) {
     SolarNoiseLayer *layer = state->layers;
     s32 i;
     s32 layerX;
@@ -258,7 +258,7 @@ void evtDeactivateLastSolarPoint(SolarOverlayWork *overlay) {
     }
 }
 
-void func_00244A38(SolarOverlayWork *overlay, u32 desiredCount) {
+void evtSetSolarPointActiveCount(SolarOverlayWork *overlay, u32 desiredCount) {
     SolarPoint *point;
     u8 *active;
     u32 activeCount;

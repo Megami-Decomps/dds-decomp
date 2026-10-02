@@ -11,7 +11,7 @@ extern void effBossSetPosition();
 extern void func_00185BD8(void *work);
 
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern EffParamWork *effParamWorkCreate(s32 kind, void *params);
 extern EffParamWork *effParamWorkDuplicate(EffParamWork *param);
 extern void effDispatchParameterDataAndFreeWork(EffParamWork *handle);
@@ -183,7 +183,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00184630);
 EffBossWork *effBossCreate(EffBossParams *src, void *param1) {
     EffBossWork *work;
 
-    work = func_002CFEB8(sizeof(EffBossWork));
+    work = sdfAllocSizeClassBlock(sizeof(EffBossWork));
     work->head = src->head;
     work->frame = 0;
     work->color = 0x80808080;
@@ -206,7 +206,7 @@ void effPCPBossApplyTwoBlocks(void *data) {
 EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src) {
     EffBossWork *work;
 
-    work = func_002CFEB8(sizeof(EffBossWork));
+    work = sdfAllocSizeClassBlock(sizeof(EffBossWork));
     memcpy(&work->head, &src->head, sizeof(EffBossHead));
     work->frame = 0;
     work->color = 0x80808080;
@@ -247,7 +247,7 @@ void func_001855C8(u8 *work, s32 value) {
 EffPCPBossWork *effBossBeamCreate(void *vector, void *paramA, void *paramB) {
     EffPCPBossWork *work;
 
-    work = func_002CFEB8(sizeof(EffPCPBossWork));
+    work = sdfAllocSizeClassBlock(sizeof(EffPCPBossWork));
     memcpy(work->parameterVector, vector, 0x10);
     work->color = 0x80808080;
     work->frame = 0;
@@ -272,7 +272,7 @@ void effPCPBossApplyThreeBlocks(void *data) {
 EffPCPBossWork *effBossBeamClone(EffPCPBossWork *src) {
     EffPCPBossWork *work;
 
-    work = func_002CFEB8(sizeof(EffPCPBossWork));
+    work = sdfAllocSizeClassBlock(sizeof(EffPCPBossWork));
     memcpy(work->parameterVector, src->parameterVector, 0x10);
     work->color = 0x80808080;
     work->frame = 0;

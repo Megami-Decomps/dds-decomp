@@ -133,16 +133,16 @@ void func_0026C1F8(s32 parameter) {
 
 extern void sdfSubmitGsAlphaOneRegisterPacket(s32, s32);
 extern void sdfSubmitGsTestOneRegisterPacket(s32, s32);
-extern void func_002C0DD8(s32, s32, s32, s32, s32, s32, s32);
+extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 
 void mnuDrawMovieMenuBackgroundQuad(s32 parameter) {
     sdfSubmitGsAlphaOneRegisterPacket(0x44, 0x3E);
     sdfSubmitGsTestOneRegisterPacket(0x3000D, 0x3E);
-    func_002C0DD8(0, 0, 0, 0x2000, 0xE00, parameter, 0x3E);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, parameter, 0x3E);
 }
 
 void mnuDrawMovieMenuSpriteLayers(s32 context) {
-    func_002C0DD8(0, 0, 0, 0x2000, 0xE00, 0x80, context);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x80, context);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 0, context);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 2, context);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 1, context);

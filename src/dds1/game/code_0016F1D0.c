@@ -204,7 +204,7 @@ void effSetRingColor(EffectRing *ring, u32 color) {
     ring->color = color;
 }
 
-void func_0016F4A0(u8 *work, f32 value) {
+void effSetRingScale(u8 *work, f32 value) {
     ((EffectRing *)work)->scale = value;
 }
 
@@ -337,7 +337,7 @@ void effReleaseRecordGroupAssetAndHandle(EffectRecordGroup *group) {
     sdfReleaseResourceAllocation(group->handle6C);
 }
 
-void func_0016FC58(EffRecordPool *work)
+void effDrawScaledRecordPool(EffRecordPool *work)
 {
     f32 matrix[16] __attribute__((aligned(16)));
     void *list;
@@ -607,7 +607,7 @@ void func_001705A0(u32 id) {
     effReleaseRecordGroupAssetAndHandle(id);
 }
 
-void func_001705B8(EffRecordPool *work)
+void effDrawTransformedRecordPool(EffRecordPool *work)
 {
     f32 matrix[16] __attribute__((aligned(16)));
     void *list;
@@ -679,16 +679,16 @@ s32 effGetExtendedGroupAuxEntry(EffectRecordGroup *group, s32 index) {
 }
 
 /* Select the record pool's packet submission mode. */
-void func_00170888(s32 slot, u32 mode) {
+void effSetRecordPoolDrawMode(s32 slot, u32 mode) {
     ((EffRecordPool *)slot)->drawMode = mode;
 }
 
 /* Set the packed color word passed to the pool's packet builder. */
-void func_00170890(s32 slot, u32 color) {
+void effSetRecordPoolColor(s32 slot, u32 color) {
     ((EffRecordPool *)slot)->color = color;
 }
 
-void func_00170898(u8 *work, f32 value) {
+void effSetRecordPoolScale(u8 *work, f32 value) {
     ((EffRecordPool *)work)->scale = value;
 }
 

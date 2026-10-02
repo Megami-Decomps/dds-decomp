@@ -45,7 +45,7 @@ u64 *btlCreateGsAlphaRegisterPacket(u64 owner, s32 alternative) {
 
 INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A0B28);
 
-void func_001A0CA0(void) {
+void btlResetRuntimeSequenceCounter(void) {
     D_003BB2E8 = 1;
 }
 
@@ -235,7 +235,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     itfMesDestroyWindowIfPresent(*(s32 *)(btlRuntime + 0x49C));
     itfMesDestroyWindowIfPresent(*(s32 *)(btlRuntime + 0x498));
     btlAdvanceTitleStateWithAudioCleanup();
-    func_00105888();
+    kwlnCancelConfiguredFadeFrames();
     evtDestroySelectionState();
     effResetSlots();
     evtSetSolarOverlayFullyTransparent();

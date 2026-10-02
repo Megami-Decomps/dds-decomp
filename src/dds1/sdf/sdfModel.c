@@ -9,7 +9,7 @@
 #define SDF_MODEL_ALTERNATE_ITEM_SETUP 4
 
 extern void *sdfInitNodeHeaderFromWords(s32 arg0, s32 arg1, s32 arg2);
-extern void *func_002CFEB8(s32 arg0);
+extern void *sdfAllocSizeClassBlock(s32 arg0);
 extern void *sdfDevCreateBufferedRequest(s32 arg0, s32 arg1, s32 arg2);
 extern void sdfInstallPoolNodeReleaseCallbacks(s32 arg0);
 extern void *memcpy(void *dst, const void *src, u32 n);

@@ -530,7 +530,7 @@ void mnuDrawCursorIcons(MenuAssets *assets, s32 arg) {
 
 void mnuDrawBackdrop(MenuAssets *assets, s32 option) {
     sdfSubmitGsTestOneRegisterPacket(0x30000);
-    func_002C0DD8(0, 0, 0, 0x2000, 0xE00, 0x80808080, option);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x80808080, option);
     itfDrawGridWithResolvedSlot(0, 0, 0, 0, assets->sprites[0], 0, option);
     mnuDrawCursorIcons(assets, option);
     mnuDrawCampBackdropDecoration(assets, option);

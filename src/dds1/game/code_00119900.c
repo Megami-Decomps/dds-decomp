@@ -738,7 +738,7 @@ s32 evtPushEntryIndexedStatOption(void) {
     return 1;
 }
 
-s32 func_0011BFE8(void) {
+s32 evtPushSelectedTotalOrRosterHighValue(void) {
     EvtScriptContext *work = (EvtScriptContext *)D_003C2E70;
     s32 index = work->third;
     s32 value;

@@ -70,7 +70,7 @@ typedef struct WorldObj {
 
 extern void effObjInnerCreate();
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern void *dds3CreateSlotResourceState();
 extern void dds3SetObjectFlags(EffectObject *, s32);
@@ -135,7 +135,7 @@ s32 effObjInitializeFollowModelData(EffectObject *object) {
     void *work;
 
     effObjInnerCreate(object);
-    work = func_00328D68(sizeof(EffectObjectData));
+    work = sdfAllocSizeClassBlock(sizeof(EffectObjectData));
     object->data = work;
     memset(work, 0, sizeof(EffectObjectData));
     data = object->data;
@@ -465,7 +465,7 @@ s32 effObjInitializeTransformData(EffectObject *object) {
     void *work;
 
     effObjInnerCreate(object);
-    work = func_00328D68(sizeof(EffectTransformData));
+    work = sdfAllocSizeClassBlock(sizeof(EffectTransformData));
     object->data = work;
     memset(work, 0, sizeof(EffectTransformData));
     data = (EffectTransformData *)object->data;
@@ -517,7 +517,7 @@ s32 evtInitializeEffectObjectData(EffectObject *obj) {
     EffectObjectData *data;
 
     effObjInnerCreate(obj);
-    obj->data = func_00328D68(0x50);
+    obj->data = sdfAllocSizeClassBlock(0x50);
     memset(obj->data, 0, 0x50);
     data = obj->data;
     data->handle = (u32)dds3CreateSlotResourceState(obj);

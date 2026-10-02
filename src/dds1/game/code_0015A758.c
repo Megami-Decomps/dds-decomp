@@ -111,7 +111,7 @@ extern void (*D_0034E5E0[])(void *, void *, void *);
 
 extern void *memset(void *dst, s32 c, u32 n);
 extern void *memcpy(void *dst, void *src, u32 n);
-extern void *func_002CFEB8(s32);
+extern void *sdfAllocSizeClassBlock(s32);
 extern void func_0015DA10(void *);
 
 /* Emitter descriptor copied into a fresh allocation by parCloneEmitterAndInitCells. */
@@ -157,7 +157,7 @@ typedef struct ParSystem {
 } ParSystem;
 
 extern void parUpdateCellVertexPair(ParSystem *, s32, const u128 *);
-extern void func_0015BA38(ParSystem *, s32, const u128 *);
+extern void parUpdateCellVertexTriangle(ParSystem *, s32, const u128 *);
 
 extern s32 sdfCreateAssetWithDrawEntries();
 
@@ -244,7 +244,7 @@ typedef struct ParKindResource {
 typedef struct BillObj BillObj;
 extern BillObj *billCreateIndexed(s32, u32);
 
-ParObj *func_0015A7E0(s32 kind, ParKindResource *resource) {
+ParObj *parCreateResourceKindObject(s32 kind, ParKindResource *resource) {
     ParObj *object = (ParObj *)((u8 *)resource + resource->offset + 0x10);
     s32 billboard;
 
@@ -437,12 +437,12 @@ void parUpdateBillboardCrossTriangle(s32 particle, s32 index, u32 color) {
     VU0_MOVE_VF(vf10, vf12);
     VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[2]);
-    func_0015BA38((ParSystem *)particle, index, axis);
+    parUpdateCellVertexTriangle((ParSystem *)particle, index, axis);
     func_0015BCE8(particle, index);
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
-extern void func_001884E8(s32, s32, void *);
+extern void effTrackPolyPushIndexedWorkEndpoints(s32, s32, void *);
 
 extern void effTrackPolySetIndexedColor(s32, s32, u32);
 
@@ -464,7 +464,7 @@ void parUpdateTrackPolygonCrossAxes(s32 particle, s32 index, u32 color) {
     VU0_MOVE_VF(vf10, vf12);
     VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[1]);
-    func_001884E8(particle, index, axis);
+    effTrackPolyPushIndexedWorkEndpoints(particle, index, axis);
     effTrackPolySetIndexedColor(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
@@ -625,7 +625,7 @@ void parTranslateCellVertices(ParSystem *system, s32 index, void *delta) {
     }
 }
 
-void func_0015BA38(ParSystem *system, s32 index, const u128 *vertices) {
+void parUpdateCellVertexTriangle(ParSystem *system, s32 index, const u128 *vertices) {
     ParCell *cell = &system->cells[index];
     u128 *vertex;
     s32 shiftCount;
@@ -1149,7 +1149,7 @@ void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParDrawCmd *cmd) {
 }
 
 ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
-    ParEmitDesc *desc = func_002CFEB8(src->count * 4 + 0xF0);
+    ParEmitDesc *desc = sdfAllocSizeClassBlock(src->count * 4 + 0xF0);
 
     memset(desc, 0, 0xF0);
     memcpy(desc, src, src->headerSize);

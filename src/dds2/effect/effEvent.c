@@ -908,12 +908,12 @@ typedef struct {
     f32 param;            /* 0x28 */
     u32 color;            /* 0x2C */
 } EffEventInit; /* 0x30 */
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 func_00168548(u32, u16, s32, s32);
 extern void func_00169168(u32, f32);
 
 EffEventWork *func_00197D68(u32 owner, u16 kind, const EffEventInit *params) {
-    EffEventWork *work = func_00328D68(0x38);
+    EffEventWork *work = sdfAllocSizeClassBlock(0x38);
 
     memcpy(work, params, sizeof(*params));
     work->state = 0;
@@ -972,7 +972,7 @@ typedef struct EffEventLight {
 } EffEventLight; /* 0x3C */
 
 EffEventLight *effEventLightCreate(u32 arg, f32 param) {
-    EffEventLight *work = func_00328D68(sizeof(EffEventLight));
+    EffEventLight *work = sdfAllocSizeClassBlock(sizeof(EffEventLight));
 
     work->init.scale = 1.0f;
     work->init.rangeNear = 50.0f;
@@ -1002,7 +1002,7 @@ void effEventLightDestroy(EffEventLight *work) {
 
 EffEventLight *effEventLightClone(EffEventLight *src) {
     EffEventInit *block = &src->init;
-    EffEventLight *work = func_00328D68(sizeof(EffEventLight));
+    EffEventLight *work = sdfAllocSizeClassBlock(sizeof(EffEventLight));
 
     work->owner = func_00197D68(src->handle, 0, block);
     work->handle = src->handle;

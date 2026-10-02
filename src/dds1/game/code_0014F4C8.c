@@ -73,14 +73,14 @@ s32 fldCommandSendNamedSound(void) {
     s32 commandName;
     commandName = scrReadStringParameter(0);
     if (sdfSoundIsCommandBusy() != 0) {
-        func_002E97E8();
+        sdfSoundStopNamedPlayback();
     }
     sdfSoundSendNamedCommand(commandName, 0x7f);
     return 1;
 }
 
 u32 fldCommandSendSoundControl(void) {
-    func_002E97E8();
+    sdfSoundStopNamedPlayback();
     return 1;
 }
 

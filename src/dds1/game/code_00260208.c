@@ -541,12 +541,6 @@ void brsTaskLatchPendingRows(s32 task) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA88);
-
-INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA98);
-
-INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAA8);
-
 extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfResourceRetainAddress(s32);
 extern void mnuClearPanelTransitionState(void *);
@@ -739,6 +733,12 @@ INCLUDE_ASM(const s32, "game/code_00260208", brsSelectLevelBonusMode);
 
 INCLUDE_ASM(const s32, "game/code_00260208", brsSelectNextUnit);
 
+INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA88);
+
+INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA98);
+
+INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAA8);
+
 INCLUDE_RODATA(const s32, "game/code_00260208", mnuStaffPrimaryPanelTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_00260208", mnuStaffSecondaryPanelTaskName);
@@ -768,3 +768,4 @@ INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC538);
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC540);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC548);
+

@@ -131,7 +131,7 @@ extern u32 func_0027D4A0(u32);
 
 extern u32 mnuCreateFadeSpriteResourceSet(u32);
 
-extern s32 func_002CFEB8(u32);
+extern s32 sdfAllocSizeClassBlock(u32);
 
 extern u32 mnuCreateWindowState(u32, u32, u32, u32);
 
@@ -972,7 +972,7 @@ MenuScrollPanel *mnuCreateScrollPanel(u32 startX, u32 startY, u32 endX, u32 endY
     s32 position;
     s32 remaining;
 
-    panel = (MenuScrollPanel *)func_002CFEB8(0x4c);
+    panel = (MenuScrollPanel *)sdfAllocSizeClassBlock(0x4c);
     memset(panel, 0, 0x4c);
     panel->firstSprite = 0;
     panel->secondSprite = 0;
@@ -1056,7 +1056,7 @@ typedef struct MenuPageResources {
 /* Create a ten-sprite page bundle; the caller chooses its last two slots. */
 MenuPageResources *mnuCreatePartyPageSpriteBundle(s32 mainResource, s32 secondaryResource, s32 extraResource, s32 extraIndex,
                      s32 finalResource, s32 finalIndex) {
-    MenuPageResources *item = (MenuPageResources *)func_002CFEB8(0x3C);
+    MenuPageResources *item = (MenuPageResources *)sdfAllocSizeClassBlock(0x3C);
 
     memset(item, 0, 0x3C);
     item->sprites[0] = effCreateResourceSlotSet(secondaryResource, 0, 1);
@@ -1282,7 +1282,7 @@ typedef struct MenuFadeSpriteSet {
 } MenuFadeSpriteSet;
 
 u32 mnuCreateFadeSpriteResourceSet(u32 resource) {
-    MenuFadeSpriteSet *item = (MenuFadeSpriteSet *)func_002CFEB8(0x24);
+    MenuFadeSpriteSet *item = (MenuFadeSpriteSet *)sdfAllocSizeClassBlock(0x24);
     s32 sprite;
 
     memset(item, 0, 0x24);

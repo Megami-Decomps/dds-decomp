@@ -138,14 +138,14 @@ s32 dds3VisitWorldObjectValues(WorldObject *object, s32 (*callback)(u32)) {
     return 1;
 }
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 sdfAllocGeneralBlock(s32 size);
 extern void sdfReleaseChipBlock(void *block);
 extern WorldList *sdfResourceRetainAddress(u32 resource);
 
 /* Allocate the object's data and 18 empty per-kind lists; return success. */
 u32 dds3CreateWorldObjectData(WorldObject *object) {
-    WorldObjectData *data = func_002CFEB8(0x40);
+    WorldObjectData *data = sdfAllocSizeClassBlock(0x40);
     WorldList *lists;
     s32 listIndex;
 

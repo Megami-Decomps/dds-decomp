@@ -643,11 +643,11 @@ u8 mdlHasNode(MdlCtx *ctx, s32 id) {
     return foundNode != 0;
 }
 
-u16 func_00232EE8(MdlCtx *ctx) {
+u16 mdlGetContextResourceGroup(MdlCtx *ctx) {
     return ctx->sub->unk8;
 }
 
-u16 func_00232EF8(MdlCtx *ctx) {
+u16 mdlGetContextResourceId(MdlCtx *ctx) {
     return ctx->sub->unkA;
 }
 

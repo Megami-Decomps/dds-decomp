@@ -86,7 +86,7 @@ extern u8 D_00325828[];
 
 extern u16 D_003BB044;
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern void sdfReleaseChipBlock(void *p);
 
@@ -108,9 +108,9 @@ extern void mdlLoadViewerPackage(s32 arg0, u16 arg1, s32 arg2, void *arg3, u32 a
 
 extern void *func_00217680(void *arg0, void *arg1);
 
-extern void *func_002183D0(void *arg);
+extern void *mdlGetContextResourceGroup(void *arg);
 
-extern void *func_002183E0(void *arg);
+extern void *mdlGetContextResourceId(void *arg);
 
 /* Kind-specific callback slot, 0x28 bytes per entry. */
 typedef struct EffParamCallbackEntry {
@@ -197,7 +197,7 @@ u16 effParamWorkGetId(EffParamWork *work) {
 EffParamWork *effParamWorkCreate(u16 id, void *data) {
     EffParamWork *work;
 
-    work = func_002CFEB8(8);
+    work = sdfAllocSizeClassBlock(8);
     work->id = id;
     work->data = effParamWorkFactories[id].func(data);
     return work;
@@ -218,7 +218,7 @@ void effParamWorkInvokeCallback(EffParamWork *work) {
 EffParamWork *effParamWorkDuplicate(EffParamWork *src) {
     EffParamWork *work;
 
-    work = func_002CFEB8(8);
+    work = sdfAllocSizeClassBlock(8);
     work->id = src->id;
     work->data = effParamWorkDuplicators[src->id].func(src->data);
     return work;
@@ -311,8 +311,8 @@ void *effParamAssembleWork(void *source) {
     void *secondPart;
     void *work;
 
-    firstPart = func_002183D0(source);
-    secondPart = func_002183E0(source);
+    firstPart = mdlGetContextResourceGroup(source);
+    secondPart = mdlGetContextResourceId(source);
     work = func_00217680(firstPart, secondPart);
     effParamInitWork(work);
     return work;
@@ -363,7 +363,7 @@ extern u32 func_00163250(s32 address);
 EffParamWorkEx *effCreateDispatchedParameterWork(u32 *source) {
     EffParamWorkEx *work;
 
-    work = func_002CFEB8(0xC);
+    work = sdfAllocSizeClassBlock(0xC);
     work->id = func_00163248(source);
     work->unk04 = func_00163250((s32)source);
     if (effParameterWorkOperations[work->id].altFunc == NULL) {
@@ -386,7 +386,7 @@ void effInvokeParameterWorkDispatch(EffParamWorkEx *work) {
 EffParamWorkEx *effCloneDispatchedParameterWork(EffParamWorkEx *src) {
     EffParamWorkEx *work;
 
-    work = func_002CFEB8(0xC);
+    work = sdfAllocSizeClassBlock(0xC);
     work->id = src->id;
     work->unk04 = src->unk04;
     if (effParameterWorkOperations[work->id].altFunc == NULL) {

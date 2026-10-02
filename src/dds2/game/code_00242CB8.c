@@ -35,7 +35,7 @@ void scrSetIntegerReturnValue(s32 value);
 
 extern char D_00422050[];
 
-void *func_00328D68(s32 size);
+void *sdfAllocSizeClassBlock(s32 size);
 
 void evtInitializeVisualData(s32 arg0);
 
@@ -409,7 +409,7 @@ typedef struct {
 void *evtCreateSolarOverlayWork(s32 task) {
     SolarOverlayWork *overlay;
 
-    overlay = func_00328D68(0x104);
+    overlay = sdfAllocSizeClassBlock(0x104);
     evtInitializeVisualData((s32)overlay);
     evtLoadSolarNoiseSprite(&overlay->noiseSprite);
     kwlnTaskSetUserValue(task, overlay);

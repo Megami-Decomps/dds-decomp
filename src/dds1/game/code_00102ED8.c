@@ -140,14 +140,14 @@ extern char dds3AdminTaskName[];
 extern void *kwlnTaskGetTaskByName(const char *);
 extern void *func_00102CD8(void *task);
 extern void dds3AdminReleaseTaskWork(void);
-extern void *func_002CFEB8(s32);
+extern void *sdfAllocSizeClassBlock(s32);
 
 void kwlnDebugTaskCreate(void) {
     KwlnDebugWork *work;
     s32 i;
 
     if (kwlnTaskGetTaskByName(dds3AdminTaskName) == NULL) {
-        work = func_002CFEB8(0x24);
+        work = sdfAllocSizeClassBlock(0x24);
         work->unk0 = 0;
         work->unk4 = 0;
         work->unk8 = -1;
@@ -716,7 +716,7 @@ void kwlnFadeSetupFrames(s32 mode, s32 frames) {
     D_003BA91C = D_003BA91E * 4 / 10;
 }
 
-void func_00105888(void) {
+void kwlnCancelConfiguredFadeFrames(void) {
     D_003BA918 = 0;
 }
 

@@ -203,7 +203,7 @@ extern void dds3ClearObjectFlags(PolyMovieObject *obj, s32 flags);
 extern void evtScaleValueByMultiplier(PolyMovieClip *clip, f32 multiplier);
 extern void sdfFreezeFloatCounter(PolyMovieClip *clip);
 extern void sdfUnfreezeFloatCounter(PolyMovieClip *clip);
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern s32 sdfAllocGeneralBlock(s32 size);
@@ -225,7 +225,7 @@ extern void fileWaitIdle(void);
 extern void filePollEntryCleanup(s32 arg);
 extern void sdfReleaseResourceAllocation(s32 arg);
 extern s32 mnuQueryTitleSoundBusy(void);
-extern void func_002696F8(void);
+extern void mnuStopTitleVoicePlayback(void);
 extern void func_003003F0(const char *fmt, ...);
 extern void sdfReleaseChipBlock(void *ptr);
 
@@ -652,7 +652,7 @@ void *evtPolygonMovieAllocWork(void)
 {
     void *work;
 
-    work = func_002CFEB8(0x11C);
+    work = sdfAllocSizeClassBlock(0x11C);
     if (work == NULL) {
         return work;
     }
@@ -669,7 +669,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
     }
     work->unk_114 = 0;
     work->handle = -1;
-    work->buffer = func_002CFEB8(0x1FC);
+    work->buffer = sdfAllocSizeClassBlock(0x1FC);
     for (i = 0; i < 0x7F; i++) {
         work->buffer[i] = 0;
     }
@@ -896,7 +896,7 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
             sdfReleaseResourceAllocation(work->res6C);
         }
         if (mnuQueryTitleSoundBusy() == 1) {
-            func_002696F8();
+            mnuStopTitleVoicePlayback();
         }
         func_003003F0("sound stop all. \n");
         sdfReleaseChipBlock(work);

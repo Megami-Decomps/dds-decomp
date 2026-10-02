@@ -101,7 +101,7 @@ s32 filePollEntryCleanup(FileCleanup *entry) {
 extern char *sdfStrDup(const char *text);
 extern s32 func_00289540(void);
 
-void func_00288818(FileQueueEntry *request, s32 kind, const char *requestName,
+void fileManQueueNamedRequest(FileQueueEntry *request, s32 kind, const char *requestName,
                    void *callback, void *userData) {
     FileManWork *work;
     char *duplicatedName;
@@ -188,15 +188,15 @@ void *fileAllocateDispatchRequest(u32 request, u32 flags, u32 dispatch, u32 onCo
     if (flags != 0) {
         func_002EDC40(packet);
     }
-    func_00288818(work, 1, request, onComplete, userData);
+    fileManQueueNamedRequest(work, 1, request, onComplete, userData);
     return work;
 }
 
-void func_00288A80(u32 request) {
+void fileQueuePlainDispatchRequest(u32 request) {
     fileAllocateDispatchRequest(request, 0, 0, 0, 0);
 }
 
-void func_00288AA8(u32 request) {
+void fileQueueFlaggedDispatchRequest(u32 request) {
     fileAllocateDispatchRequest(request, 1, 0, 0, 0);
 }
 
@@ -210,7 +210,7 @@ void *func_00288AD0(u32 request, u32 mode, u32 dispatch, u32 callback) {
     FileRequestCallbackWork *work = sdfAllocAndClearQuadwords(sizeof(FileRequestCallbackWork));
 
     work->unk03 = mode;
-    func_00288818(work, 0, request, dispatch, callback);
+    fileManQueueNamedRequest(work, 0, request, dispatch, callback);
     return work;
 }
 
@@ -298,11 +298,11 @@ FileWindowSlot *fileWindowSlotCreate(s32 id, s32 firstValue, s32 secondValue, s3
     slot->firstValueCopy = firstValue;
     slot->secondValue = secondValue;
     slot->secondValueCopy = secondValue;
-    func_00288818(slot, 2, id, left, right);
+    fileManQueueNamedRequest(slot, 2, id, left, right);
     return slot;
 }
 
-void func_00288D48(a, b, c)
+void fileQueueWindowSlotRequest(a, b, c)
 s32 a;
 s32 b;
 s32 c;
