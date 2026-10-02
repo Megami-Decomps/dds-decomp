@@ -5096,6 +5096,7 @@
 0x00334618	sdfMotionSuspend	inferred	Saves the previous motion mode before switching to mode six.
 0x00334638	sdfMotionResume	inferred	Restores the saved motion mode when currently in mode six.
 0x00334670	sdfSetMotionOutputValue	inferred	Writes the supplied word into the motion output at offset 0x08.
+0x00334678	sdfFindMotionKeyInterval	inferred	Finds the bracketing key records for a motion frame and computes their interpolation weight; paired with DDS1 0x002DB7C8.
 0x00334788	sdfInterpolateMotionKeys	inferred	Interpolates two float key values according to the supplied weight.
 0x003348D8	sdfMotionBlendFiveKeyValues	inferred	Passes both key arrays and their segment weight to the five-float blender. [names_reviewed6.tsv]
 0x00334900	sdfDispatchMotionBySelector	inferred	Indexes the motion callback table by the selector's low halfword and invokes it.

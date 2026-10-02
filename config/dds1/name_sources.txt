@@ -5531,6 +5531,7 @@
 0x002DB1C8	sdfDispatchAssetCommandWord	inferred	Dispatches through the table selected by the high command halfword. [names_reviewed8.tsv]
 0x002DB308	sdfDestroyMotion	inferred	unlinks the motion from its owner's list, invokes each request callback, destroys the dev request and frees the node [names_M68_VuRest.tsv]
 0x002DB518	sdfMotionInitializeAtZeroTime	inferred	Passes two zero time values to motion initializer; rest pose is not established. [names_reviewed6.tsv]
+0x002DB7C8	sdfFindMotionKeyInterval	inferred	Finds the bracketing key records for a motion frame and computes their interpolation weight; paired with DDS2 0x00334678.
 0x002DB9D8	sdfMotionBlendFiveFloats	inferred	Blends five float components with a weight and its complement.
 0x002DBA28	sdfMotionBlendFiveKeyValues	inferred	Passes both key arrays and their segment weight to the five-float blender. [names_reviewed6.tsv]
 0x002DBA80	sdfMotionBindDrawNode	inferred	Sets pointer pair and finds the indexed model draw node for the source. [names_reviewed6.tsv]
