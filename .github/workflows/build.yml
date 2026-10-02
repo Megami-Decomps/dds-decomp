@@ -19,6 +19,7 @@ jobs:
 
       - name: Test script and data tooling
         run: |
+          python3 tools/test_configure.py
           python3 tools/test_flw0.py
           python3 tools/test_inf.py
           python3 tools/test_wap.py

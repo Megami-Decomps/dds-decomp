@@ -173,7 +173,76 @@ def linker_objects(ld_script: Path) -> list[Path]:
     return list(seen)
 
 
-INCLUDE_ASM = re.compile(r'^\s*INCLUDE_(?:ASM|RODATA|SDATA)\(\s*[^,]+,\s*"([^"]+)"\s*,\s*(\w+)\s*\)', re.M)
+INCLUDE_DIRECTIVE = re.compile(
+    r'\bINCLUDE_(ASM|RODATA|SDATA)\b'
+    r'(?:\s|/\*.*?\*/|//[^\r\n]*(?:\r?\n|$))*'
+    r'\(\s*[^,]+,\s*"([^"]+)"\s*,\s*(\w+)\s*\)',
+    re.S,
+)
+INCLUDE_TOKEN = re.compile(r'\bINCLUDE_(ASM|RODATA|SDATA)\b')
+C_NON_CODE = re.compile(
+    r'//[^\r\n]*|/\*.*?\*/|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'',
+    re.S,
+)
+
+
+def splice_c_lines(text: str) -> tuple[str, list[int]]:
+    """Apply C phase-2 line splicing and map output offsets to the source."""
+
+    result = []
+    source_offsets = []
+    index = 0
+    while index < len(text):
+        if text[index] == "\\":
+            if text.startswith("\r\n", index + 1):
+                index += 3
+                continue
+            if index + 1 < len(text) and text[index + 1] in "\r\n":
+                index += 2
+                continue
+        result.append(text[index])
+        source_offsets.append(index)
+        index += 1
+    source_offsets.append(len(text))
+    return "".join(result), source_offsets
+
+
+def mask_c_non_code(text: str) -> str:
+    """Blank comments and literals while preserving token offsets and lines."""
+
+    return C_NON_CODE.sub(
+        lambda match: "".join(
+            character if character in "\r\n" else " "
+            for character in match.group()
+        ),
+        text,
+    )
+
+
+def include_directives(
+    text: str, *, context: str | None = None
+) -> list[tuple[str, str, str]]:
+    spliced, source_offsets = splice_c_lines(text)
+    code = mask_c_non_code(spliced)
+    matches = [
+        match
+        for match in INCLUDE_DIRECTIVE.finditer(spliced)
+        if code.startswith("INCLUDE_", match.start())
+    ]
+    if context is not None:
+        matched_starts = {match.start() for match in matches}
+        unmatched = [
+            match for match in INCLUDE_TOKEN.finditer(code)
+            if match.start() not in matched_starts
+        ]
+        if unmatched:
+            source_offset = source_offsets[unmatched[0].start()]
+            line = text.count("\n", 0, source_offset) + 1
+            raise SystemExit(
+                f"{context}: unsupported INCLUDE_{unmatched[0].group(1)} "
+                f"syntax at line {line}"
+            )
+    return [match.groups() for match in matches]
 
 
 def source_for(obj: Path, version: str) -> tuple[str, Path]:
@@ -304,7 +373,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 text = (ROOT / src).read_text(errors="replace")
                 eeasm = []
                 nonmatchings = Path("asm") / version / "nonmatchings"
-                for folder, name in INCLUDE_ASM.findall(text):
+                for _, folder, name in include_directives(text):
                     asm = nonmatchings / folder / f"{name}.s"
                     out = Path("build") / "eeasm" / asm
                     n.build(str(out), "eeasm", str(asm), implicit=["tools/eeas_compat.py"])
@@ -345,7 +414,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             dev_configure_inputs.add(f"config/{version}/cflags.txt")
             dev_spec = json.loads((ROOT / dev_descriptor).read_text())
             replacement_objects = []
-            replaced_objects = set()
+            replacement_by_retail = {}
             for index, replacement in enumerate(dev_spec.get("replacements", [])):
                 obj = replacement.get("object")
                 retail_obj = replacement.get("retail_object")
@@ -354,9 +423,13 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                         f"{dev_descriptor}: replacements[{index}] needs object and "
                         "retail_object"
                     )
-                if retail_obj in replaced_objects:
+                if retail_obj in replacement_by_retail:
                     raise SystemExit(
                         f"{dev_descriptor}: replacement for {retail_obj} is declared twice"
+                    )
+                if obj in replacement_objects:
+                    raise SystemExit(
+                        f"{dev_descriptor}: replacement output {obj} is declared twice"
                     )
                 if Path(retail_obj) not in objects:
                     raise SystemExit(
@@ -370,11 +443,46 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                         "must come from C"
                     )
                 source_text = (ROOT / source).read_text(errors="replace")
-                if INCLUDE_ASM.search(source_text):
+                includes = include_directives(
+                    source_text,
+                    context=f"{dev_descriptor}: replacement source {source}",
+                )
+                fallback_symbols = replacement.get("fallback_symbols", [])
+                if not isinstance(fallback_symbols, list) or not all(
+                    isinstance(symbol, str) and symbol for symbol in fallback_symbols
+                ):
                     raise SystemExit(
-                        f"{dev_descriptor}: replacement source {source} must be fully "
-                        "compiled C"
+                        f"{dev_descriptor}: replacements[{index}].fallback_symbols "
+                        "must be a list of symbol names"
                     )
+                included_symbols = [name for kind, _, name in includes if kind == "ASM"]
+                unsupported = [
+                    f"INCLUDE_{kind}({name})"
+                    for kind, _, name in includes
+                    if kind != "ASM"
+                ]
+                if unsupported:
+                    raise SystemExit(
+                        f"{dev_descriptor}: replacement source {source} has unsupported "
+                        f"fallback {unsupported[0]}"
+                    )
+                if included_symbols != fallback_symbols:
+                    raise SystemExit(
+                        f"{dev_descriptor}: replacements[{index}].fallback_symbols "
+                        f"must exactly match {included_symbols!r} from {source}"
+                    )
+                eeasm = [
+                    str(
+                        Path("build")
+                        / "eeasm"
+                        / "asm"
+                        / version
+                        / "nonmatchings"
+                        / folder
+                        / f"{name}.s"
+                    )
+                    for _, folder, name in includes
+                ]
                 dev_configure_inputs.add(str(source))
                 flags = unit_cflags(version).get(
                     source.relative_to(Path("src") / version)
@@ -382,7 +490,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     .as_posix(),
                     "",
                 )
-                replaced_objects.add(retail_obj)
+                replacement_by_retail[retail_obj] = obj
                 replacement_objects.append(obj)
                 n.build(
                     obj,
@@ -392,6 +500,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                         "include/macro.inc",
                         f"config/{version}/cflags.txt",
                         "tools/as_coproc_delay.py",
+                        *eeasm,
                     ],
                     variables={
                         "cdefs": (
@@ -409,6 +518,10 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 if not isinstance(source, str) or not isinstance(obj, str):
                     raise SystemExit(
                         f"{dev_descriptor}: additions[{index}] needs source and object"
+                    )
+                if obj in replacement_objects or obj in dev_objects:
+                    raise SystemExit(
+                        f"{dev_descriptor}: development object {obj} is declared twice"
                     )
                 dev_objects.append(obj)
                 n.build(
@@ -446,8 +559,10 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             n.build(
                 str(dev_wrapper),
                 "dev_ld",
-                [str(obj) for obj in objects if str(obj) not in replaced_objects]
-                + replacement_objects
+                [
+                    replacement_by_retail.get(str(obj), str(obj))
+                    for obj in objects
+                ]
                 + dev_objects,
                 implicit=[
                     str(dev_script),

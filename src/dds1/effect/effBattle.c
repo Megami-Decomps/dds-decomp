@@ -277,6 +277,31 @@ void func_00161650(void *destination, void *source) {
     } while (remainingBanks >= 0);
 }
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00161790);
+/* Release each initialized parameter-work entry in the mixer's two banks. */
+void func_00161790(EffBattleParameterMixer *mixer) {
+    u16 *countAddress = &((EffBattleParameterBankHeader *)mixer)->entryCount;
+    s32 bankCountdown;
+    s32 bankOffset;
+
+    for (bankOffset = 0, bankCountdown = 1; bankCountdown >= 0;
+         bankCountdown--,
+         countAddress = (u16 *)((u8 *)countAddress + sizeof(mixer->banks[0])),
+         bankOffset += sizeof(mixer->banks[0])) {
+        u16 entryCount = *countAddress;
+        EffBattleParameterEntry *entry = (EffBattleParameterEntry *)((u8 *)mixer + bankOffset + 0x80);
+
+        if (entryCount != 0) {
+            s32 remaining = entryCount;
+
+            do {
+                if (entry->kind != 0xFFFE) {
+                    effDispatchParameterDataAndFreeWork((s32)entry->value.work);
+                }
+                entry++;
+                remaining--;
+            } while (remaining != 0);
+        }
+    }
+}
 
 INCLUDE_SDATA(const s32, "effect/effBattle", effFieldColorFlags);
