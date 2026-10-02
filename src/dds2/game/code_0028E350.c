@@ -107,9 +107,37 @@ void func_0028F7B8(MenuSearchObject *object, u16 id) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028E350", func_0028F8A8);
+typedef struct MantraLimitSlot {
+    u8 pad0[8];
+    u16 *values;
+} MantraLimitSlot;
 
-INCLUDE_RODATA(const s32, "game/code_0028E350", D_00427488);
+extern u32 func_002890A8(void *object);
+extern void mnuQueueMantraLimitLineFlags(s32 pool, u32 flags);
+extern void mnuSetMantraBackgroundSelection(u32 pool, u32 value);
+
+void func_0028F8A8(u8 *object) {
+    u16 limitIds[18] = {
+        0x61, 0x3B, 0x5B, 0x23, 0x40, 0x62,
+        0x53, 0x5E, 0x1C, 0x5A, 0x63, 0x54,
+        0x15, 0x44, 0x64, 0x07, 0x5C, 0x0E
+    };
+    u32 selected = func_002890A8(object);
+    MantraLimitSlot *slot = *(MantraLimitSlot **)(object + 0x7AC + selected * 4);
+    u32 flags = 0;
+    s32 i;
+
+    for (i = 0; i < 18; i++) {
+        u16 *value = slot->values + limitIds[i];
+
+        if ((*value & 0xF) != 3) {
+            flags |= 1U << i;
+        }
+    }
+
+    mnuQueueMantraLimitLineFlags(*(s32 *)(object + 0xC00), flags);
+    mnuSetMantraBackgroundSelection(*(u32 *)(object + 0xC00), flags);
+}
 
 INCLUDE_RODATA(const s32, "game/code_0028E350", D_004274B0);
 
