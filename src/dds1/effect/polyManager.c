@@ -113,6 +113,17 @@ typedef struct {
     f32 rotationYRadians;
 } PolyRotatingBandRecord; /* 0x14 */
 
+/* Fields used from parCloneEmitterAndInitCells' copied descriptor. */
+typedef struct {
+    u8 pad00[0x10];
+    u16 count; /* The initializer consumes the low halfword. */
+    u8 pad12[0xB2];
+    u32 colorStep; /* 0xC4 */
+    u8 padC8[0x14];
+    PolyStrip *cellSystem; /* 0xDC */
+    u32 *colors; /* 0xE0 */
+} PolyCellInitDesc;
+
 typedef struct {
     PolyRingHead head;
     u32 spawnDelayStep;
@@ -148,7 +159,32 @@ void effPolyDestroyWork(PolyNode *obj) {
     sdfReleaseChipBlock(obj);
 }
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_0015DA10);
+void func_0015DA10(PolyCellInitDesc *desc) {
+    u16 count;
+    u32 color;
+    u32 *colors;
+    u16 i;
+    PolyStrip *system;
+    PolyStripEntry *cells;
+
+    count = desc->count;
+    color = 0xFF000001;
+    colors = desc->colors;
+    system = desc->cellSystem;
+    i = 0;
+    if (desc->count != 0) {
+        cells = system->entries;
+        do {
+            cells[i].unk0C = 0;
+            cells[i].count = 0;
+            cells[i].color = 0x00808080;
+            *colors = color;
+            colors++;
+            color -= desc->colorStep;
+            i++;
+        } while (i < count);
+    }
+}
 
 /* Scale the basic ring radius and its point-pair displacement. */
 void polyScaleTransformPair(f32 scale, PolyNode *obj) {
