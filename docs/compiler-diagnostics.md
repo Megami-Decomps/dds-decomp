@@ -65,7 +65,9 @@ python3 tools/ee_gcc_compare.py \
 
 The comparison normalizes the wrapper's random same-length scratch directory,
 raw lexical-block pointers, and an uninitialized numeric payload printed in
-old GCC's special RTL notes. It also canonicalizes renames recorded by the
+old GCC's special RTL notes. Scheduler commentary is excluded from semantic
+comparison, so `-fsched-verbose` reports and their truncated display names do
+not masquerade as changed RTL. It also canonicalizes renames recorded by the
 probe. Raw equality and normalized semantic equality remain distinct in the
 report.
 
@@ -95,6 +97,12 @@ artifacts and failed compiler captures are reported as insufficient evidence,
 never as evidence that a source change had no effect. The combined command
 returns status 2 for insufficient evidence, 1 for a divergence, and 0 only for
 a complete comparison with no divergence.
+
+When both manifests name the same extracted function, `ee_gcc_why.py` infers
+that scope if `--function` is omitted. It rejects one-sided or conflicting
+manifest scopes instead of silently comparing unrelated translation-unit
+artifacts. For older probe manifests, it also recovers extra compiler flags
+from the recorded command when possible.
 
 The result is deliberately bounded. “No codegen difference” means stop varying
 that source idea. Allocation differences call for one truthful lifetime, type,

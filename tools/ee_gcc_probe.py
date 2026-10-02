@@ -2,7 +2,7 @@
 """Capture exact-wrapper EE GCC assembly and RTL dumps outside the checkout.
 
 The public `tools/cc.sh` already preserves the canonical input/output filename
-lengths that affect this compiler.  This private harness adds `-da -dumpbase`
+lengths that affect this compiler.  This probe adds `-da -dumpbase`
 and `DDS_KEEP_S`, inventories every artifact, and optionally extracts one
 function across all passes.
 

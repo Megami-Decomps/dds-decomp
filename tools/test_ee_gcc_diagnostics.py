@@ -120,6 +120,39 @@ class CompareTests(unittest.TestCase):
             report = compare.compare_runs(left, right)
             self.assertIsNone(report["first_semantic_divergence"])
 
+    def test_scheduler_verbose_comments_are_observation_noise(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            left, right = root / "left", root / "right"
+            left.mkdir()
+            right.mkdir()
+            body = "\n(insn 6 0 0 (set (reg:SI 2) (const_int 1)))\n"
+            (left / "rtl.17.sched").write_text(
+                ";; Function wanted\n;; Ready list (t = 0): 6\n" + body
+            )
+            (right / "rtl.17.sched").write_text(
+                ";; Function wanted\n;; verbose dependency table\n"
+                ";; call [`renamedNameThatGCCTruncates\n" + body
+            )
+            report = compare.compare_runs(left, right)
+            self.assertIsNone(report["first_semantic_divergence"])
+            self.assertEqual("observation-noise", report["passes"][0]["status"])
+
+    def test_scheduler_rtl_difference_remains_semantic(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            left, right = root / "left", root / "right"
+            left.mkdir()
+            right.mkdir()
+            (left / "rtl.25.sched2").write_text(
+                ";; verbose text\n(insn 6 0 0 (set (reg:SI 2) (const_int 1)))\n"
+            )
+            (right / "rtl.25.sched2").write_text(
+                ";; other text\n(insn 6 0 0 (set (reg:SI 2) (const_int 2)))\n"
+            )
+            report = compare.compare_runs(left, right)
+            self.assertEqual("rtl.25.sched2", report["first_semantic_divergence"])
+
     def test_function_scope_ignores_other_functions(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -378,6 +411,35 @@ class WhyTests(unittest.TestCase):
             right = self.make_probe(root, "right", {"03.cse": "same\n"}, manifest=right_manifest)
             report = why.analyze(left, right, "wanted")
             self.assertTrue(any("extra_cflags" in warning for warning in report["warnings"]))
+
+    def test_old_manifest_flags_are_recovered_from_command(self):
+        manifest = {
+            "compiled_source": "/tmp/input.c",
+            "command": ["cc.sh", "-da", "-dumpbase", "/tmp/rtl",
+                        "-fsched-verbose=5", "/tmp/input.c", "-o", "/tmp/out.o"],
+        }
+        self.assertEqual(["-fsched-verbose=5"], why.effective_cflags(manifest))
+
+    def test_function_scope_is_inferred_from_both_manifests(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = {
+                "function": "wanted", "wrapper_returncode": 0,
+                "cc1_succeeded": True, "object": None,
+            }
+            left = self.make_probe(root, "left", {"03.cse": "same\n"}, manifest=manifest)
+            right = self.make_probe(root, "right", {"03.cse": "same\n"}, manifest=manifest)
+            report = why.analyze(left, right)
+            self.assertEqual({"function": "wanted"}, report["comparison"]["scope"])
+            self.assertTrue(any("inferred function" in item for item in report["warnings"]))
+
+    def test_function_scope_mismatch_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            left = self.make_probe(root, "left", {}, manifest={"function": "wanted"})
+            right = self.make_probe(root, "right", {}, manifest={"function": "other"})
+            with self.assertRaisesRegex(ValueError, "scope mismatch"):
+                why.analyze(left, right)
 
 
 if __name__ == "__main__":
