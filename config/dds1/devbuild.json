@@ -2,9 +2,11 @@
   "format": 1,
   "base_sha1": "6d18898e2724bf1d145392766e8ba1e678487419",
   "extension_vaddr": "0x00412000",
-  "extension_size": "0x450",
   "alignment": "0x1000",
   "heap_alignment": "0x80",
+  "expected_replacement_symbols": 12,
+  "expected_shifted_replacement_symbols": 2,
+  "expected_shifted_symbol_relocations": 7,
   "retail_static_end": "0x0040C5F0",
   "bss_end_assertions": [
     {
@@ -21,21 +23,37 @@
   "heap_word_offsets": [
     "0x29D450"
   ],
+  "replacements": [
+    {
+      "retail_object": "build/dds1/src/dds1/game/code_0010C028.o",
+      "object": "build/dds1/dev/code_0010C028.o",
+      "retained_sections": [
+        {
+          "section": ".data",
+          "size": 0
+        },
+        {
+          "section": ".bss",
+          "size": 0
+        }
+      ]
+    }
+  ],
   "moves": [
     {
       "object": "build/dds1/src/dds1/game/code_0010C028.o",
       "section": ".text",
-      "size": "0x3C8",
+      "old_size": "0x3C8",
+      "alignment": 8,
       "old_vaddr": "0x0010C028",
-      "new_vaddr": "0x00412000",
-      "expected_relocations": 17
+      "expected_relocations": 21
     },
     {
       "object": "build/dds1/src/dds1/game/code_0010C028.o",
       "section": ".rodata",
-      "size": "0x34",
+      "old_size": "0x34",
+      "alignment": 16,
       "old_vaddr": "0x0039F390",
-      "new_vaddr": "0x004123D0",
       "expected_relocations": 10
     }
   ],
@@ -48,8 +66,6 @@
         ".rodata",
         ".data"
       ],
-      "new_vaddr": "0x00412408",
-      "size": "0x48",
       "expected_relocations": 3
     }
   ],
