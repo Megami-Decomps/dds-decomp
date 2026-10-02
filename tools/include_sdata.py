@@ -25,7 +25,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 LINE = re.compile(r'^INCLUDE_SDATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?', re.M)
 DEF = re.compile(r"^[A-Za-z_][\w \t\*]*?\b(\w+)\s*\([^;{]*\)\s*\{?[ \t]*$", re.M)
-DATA_DEF = re.compile(r"^(?!extern\b|typedef\b)(?:static\s+)?(?:const\s+)?[A-Za-z_][\w \t\*]*?\b(\w+)\s*(?:\[[^\]]*\])*\s*(?:=|;)", re.M)
+DATA_DEF = re.compile(
+    r"^(?!extern\b|typedef\b)(?:static\s+)?(?:const\s+)?"
+    r"[A-Za-z_][\w \t\*]*?\b(\w+)\s*(?:\[[^\]]*\])*\s*"
+    r'(?:__attribute__\s*\(\([^;\n]*\)\)\s*)*(?:=|;)',
+    re.M,
+)
 BLOCK = re.compile(r"((?:^\.align \d+\n)*)^(?:nonmatching (\w+)[^\n]*\n\n?)?^dlabel (\w+)\n(.*?)^enddlabel \3\n", re.M | re.S)
 ADDR = re.compile(r"/\* [0-9A-F]+ ([0-9A-F]{8})")
 ROW = re.compile(r"^(\w+) = 0x([0-9A-Fa-f]+);", re.M)

@@ -4039,7 +4039,16 @@ s32 fldGetRowValue(u32 kind) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldFindTableEntry);
+s32 fldFindTableEntry(s32 index) {
+    s32 slot = D_003BAE4C;
+    s32 count = (slot + fldActorWaypointRows)->count;
+
+    if (count - 1 < index) {
+        return count - D_003BAE50 - 1;
+    }
+    index = count - index - 1;
+    return fldActorWaypointRows[slot].body.data[index];
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FA40);
 
@@ -4470,4 +4479,3 @@ INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE68);
 INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE6C);
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", fldFieldTaskHandle);
-

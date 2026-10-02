@@ -81,7 +81,7 @@ extern void (*D_003AAF10[])(void *, void *, void *);
 
 extern BillDispatch D_003AAB88[];
 
-extern s32 parGetRestartFlag();
+extern u16 parGetRestartFlag(ParObj *obj);
 
 extern void parCellInit();
 
@@ -301,7 +301,9 @@ void effParScaleComponent(float scale, ParObj *work) {
     work->scale8C = work->scale8C * scale;
 }
 
-INCLUDE_ASM(const s32, "game/code_00162348", func_00162938);
+u16 func_00162938(ParObj *obj) {
+    return parGetRestartFlag(obj);
+}
 
 void parCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);

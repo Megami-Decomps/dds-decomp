@@ -33,7 +33,13 @@ extern s32 sndFindPackedTrackLoadStatus(s32 id);
 
 extern s32 sndRequestedMidiBankId;
 
-extern u8 sndMidiTrackState[];
+typedef struct SndMidiStateView {
+    u8 pad000[0x208];
+    u32 unk208;
+    u32 unk20C;
+} SndMidiStateView;
+
+extern SndMidiStateView sndMidiTrackState;
 
 extern u8 D_0047AA50[];
 
@@ -95,7 +101,7 @@ typedef struct SndMixerBlockSlots {
 /* Returns 1 when the track id (high half of `packed`) is in the slot table, 2 when it is the
    current track, else 0. */
 s32 sndFindPackedTrackLoadStatus(s32 packed) {
-    SndMixerBlockSlots *work = (SndMixerBlockSlots *)sndMidiTrackState;
+    SndMixerBlockSlots *work = (SndMixerBlockSlots *)&sndMidiTrackState;
     s32 id = packed >> 16;
     SndTrackSlot *slot;
     s32 i;
@@ -202,19 +208,26 @@ SndTrackVolume *sndGetTrackSlotTable(void) {
     return sndTrackBalanceEntries;
 }
 
-INCLUDE_ASM(const s32, "game/code_00341FE8", func_003424B8);
+u32 func_003424B8(u32 *outSecondaryValue) {
+    if (outSecondaryValue != NULL) {
+        *outSecondaryValue = sndMidiTrackState.unk20C;
+    }
+    return sndMidiTrackState.unk208;
+}
 
 void func_003424D8(u8 *out) {
     s32 group;
+    u8 *state;
 
     if (out == NULL) {
         return;
     }
+    state = (u8 *)&sndMidiTrackState;
     for (group = 0; group < 2; group++) {
         s32 i;
 
         for (i = 0; i < 24; i++) {
-            *out++ = sndMidiTrackState[0x890 + group * 0x20 + i];
+            *out++ = state[0x890 + group * 0x20 + i];
         }
     }
 }

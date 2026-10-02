@@ -51,6 +51,9 @@ extern s32 mnuMoveNodeCursorToTargetIndex(MenuContainer *, s8);
 extern s32 func_00312810(u32, s32);
 
 extern u32 mnuMantraSelectionResource;
+extern void mnuReleaseMantraPanelPositionTable(void);
+extern void mnuCleanupMantraVisualsAndResetTitleStream(struct MnuStatusResource *);
+extern void mnuEnableTerminalTrackMode(s8);
 
 extern u8 mnuResourceTaskName[];
 
@@ -215,7 +218,16 @@ s32 mtrMantraSelectInit(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", mtrMantraSelectRelease);
+void mtrMantraSelectRelease(void) {
+    MnuStatusResource *selected =
+        (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
+
+    mnuReleaseMantraPanelPositionTable();
+    mnuCleanupMantraVisualsAndResetTitleStream(selected);
+    selected->flags218 &= ~2;
+    mnuEnableTerminalTrackMode(1);
+    evtPrintDeveloperConsoleMessage("mtrMantraSelectRelease\n");
+}
 
 extern struct SdfTaskItemDesc D_003CFCFC;
 extern void mnuTickPanelSoundEntries(void);
