@@ -532,7 +532,7 @@ extern s32 func_00232EF8(s32);
 
 extern f32 func_00208000(s32, s32, s32);
 
-extern void func_0035C860();
+extern s32 func_0035C860();
 
 extern char D_004192E8[]; /* "MDD_%03X.ADB" */
 
@@ -7973,9 +7973,31 @@ typedef struct BtlAt3LoadArgs {
     s32 index;
 } BtlAt3LoadArgs;
 
-INCLUDE_ASM(const s32, "game/code_001DD390", sndPollAtrac3SELoadTask);
-
-s32 sndPollAtrac3SELoadTask(BtlAt3LoadArgs *args);
+s32 sndPollAtrac3SELoadTask(BtlAt3LoadArgs *args) {
+    char path[0x80];
+    s32 resource;
+    s32 data;
+    s32 size;
+    if (args->state == 0) {
+        func_0035C860(path, "/soundat3/%s.at3", D_003E0F60[args->index].fileName);
+        args->loadHandle = (s32)func_002C80C8(path);
+        btlBossDebugPrintf("btl:atrac3 SE load[%s]\n", path);
+    } else if (fileIsRequestReadyInCurrentMode(args->loadHandle) != 0) {
+        if (mnuGetSoundBufferStateLocked() != 0) {
+            mnuReleaseSoundBufferLocked();
+        }
+        resource = fileGetResourceHandle(args->loadHandle);
+        data = sdfResourceRetainAddress(resource);
+        size = fileGetResourceSize(args->loadHandle);
+        filePollEntryCleanup(args->loadHandle);
+        func_002A27A8(data, size, D_003E0F60[args->index].volume);
+        sdfReleaseResourceAllocation(resource);
+        btlBossDebugPrintf("btl:atrac3 SE load end\n");
+        return 1;
+    }
+    args->state++;
+    return 0;
+}
 
 SoundTask *sndCreateAtracEffectLoadTask(s32 value) {
     SoundTask *task = btlAllocTask(0xC);
