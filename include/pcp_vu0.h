@@ -590,4 +590,50 @@
     ".set reorder" \
     : : "r" (first), "r" (second), "r" (t) : "$2", "$3", "$4", "$5")
 
+/*
+ * Store vf28-vf31 to dst+0x00..0x30, then the rows vf28-vf30 multiplied by the
+ * inverse lengths of the matrix's x/y/z columns to dst+0x40..0x60 (the VU lighting
+ * packet's normal matrix). Column y and z use vrsqrt; column x uses the FPU
+ * rsqrt.s with a 1.0f numerator built through $at. Retail sequence verbatim
+ * (DDS1 func_002E1FF8, DDS2 func_0033AEA8):
+ *     lui $1,0x3F80; mtc1 $1,$f0
+ *     vmula.xyz ACC,vf28,vf28; vmadda.xyz ACC,vf29,vf29; vmadd.xyz vf2,vf30,vf30
+ *     vrsqrt Q,vf0w,vf2y; qmfc2.ni $2,vf2; mtc1 $2,$f2; rsqrt.s $f2,$f0,$f2
+ *     sqc2 vf28..vf31, 0x00..0x30(dst); vwaitq; vaddq.y vf3,vf0,Q
+ *     vrsqrt Q,vf0w,vf2z; mfc1 $2,$f2; qmtc2.ni $2,vf4; vmove.x vf3,vf4
+ *     vwaitq; vaddq.z vf3,vf0,Q; vmul.xyz vf4..vf6, vf28..vf30, vf3
+ *     sqc2 vf4..vf6, 0x40..0x60(dst)
+ */
+#define VU0_STORE_MATRIX_AND_UNIT_ROWS(dst) __asm__ volatile ( \
+    ".set noreorder\n\t.set noat\n\t" \
+    "lui $1, 0x3F80\n\t" \
+    "mtc1 $1, $f0\n\t" \
+    "vmula.xyz ACC, vf28, vf28\n\t" \
+    "vmadda.xyz ACC, vf29, vf29\n\t" \
+    "vmadd.xyz vf2, vf30, vf30\n\t" \
+    "vrsqrt Q, vf0w, vf2y\n\t" \
+    "qmfc2.ni $2, vf2\n\t" \
+    "mtc1 $2, $f2\n\t" \
+    "rsqrt.s $f2, $f0, $f2\n\t" \
+    "sqc2 vf28, 0x0(%0)\n\t" \
+    "sqc2 vf29, 0x10(%0)\n\t" \
+    "sqc2 vf30, 0x20(%0)\n\t" \
+    "sqc2 vf31, 0x30(%0)\n\t" \
+    "vwaitq\n\t" \
+    "vaddq.y vf3, vf0, Q\n\t" \
+    "vrsqrt Q, vf0w, vf2z\n\t" \
+    "mfc1 $2, $f2\n\t" \
+    "qmtc2.ni $2, vf4\n\t" \
+    "vmove.x vf3, vf4\n\t" \
+    "vwaitq\n\t" \
+    "vaddq.z vf3, vf0, Q\n\t" \
+    "vmul.xyz vf4, vf28, vf3\n\t" \
+    "vmul.xyz vf5, vf29, vf3\n\t" \
+    "vmul.xyz vf6, vf30, vf3\n\t" \
+    "sqc2 vf4, 0x40(%0)\n\t" \
+    "sqc2 vf5, 0x50(%0)\n\t" \
+    "sqc2 vf6, 0x60(%0)\n\t" \
+    ".set at\n\t.set reorder" \
+    : : "r" (dst) : "$1", "$2", "$f0", "$f2", "memory")
+
 #endif

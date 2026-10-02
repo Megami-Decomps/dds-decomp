@@ -207,8 +207,6 @@ extern void sdfAppendReferencePacket(s32, void *);
 
 extern void sdfAppendReferencePacket(s32, void *);
 
-extern void func_0033AEA8(void *);
-
 extern void func_0033AC10(void);
 extern void sdfInitializeObjectListRequest(void);
 extern void sdfRegisterResourceQueueCallbacks(void);
@@ -1087,7 +1085,20 @@ void sdfConsAppendClearPacket(s32 list, s32 (*alloc)(s32)) {
     sdfAppendReferencePacket(list, packet);
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AEA8);
+typedef struct VuLightingPacket {
+    u128 matrix[4];
+    u128 scaledRows[3];
+    u32 tag[4];
+} VuLightingPacket;
+
+/* vu0 routine: store vf28-vf31 and its rows scaled by the inverse column lengths, then the GIF tag words. */
+void func_0033AEA8(VuLightingPacket *packet) {
+    VU0_STORE_MATRIX_AND_UNIT_ROWS(packet);
+    packet->tag[0] = 0x04000010;
+    packet->tag[1] = 0x14000000;
+    packet->tag[2] = 0;
+    packet->tag[3] = 0;
+}
 
 void sdfConsAppendVuPacket(s32 list, s32 (*alloc)(s32)) {
     u64 *packet;
@@ -1097,7 +1108,7 @@ void sdfConsAppendVuPacket(s32 list, s32 (*alloc)(s32)) {
     packet = (u64 *)alloc(0x90);
     packet[0] = ((u64)((u32)(packet + 2) & 0x0FFFFFFF) << 32) | 0x20000008;
     packet[1] = 0x6C07C000ULL << 32;
-    func_0033AEA8(packet + 2);
+    func_0033AEA8((VuLightingPacket *)(packet + 2));
     sdfAppendPacket(list, (u32)packet);
 }
 
