@@ -24,6 +24,7 @@ void effMiscSeedRandom(EffRandState *state, u32 seed);
 void func_003413F0(ClockTime *now);
 
 extern s8 D_004391E0;
+extern void *sceSifAllocIopHeap(s32);
 
 /* Uniform float in [0, 1): 24 random bits scaled by 2^-24. */
 f32 effMiscRandUnitFloat(void *state) {
@@ -65,10 +66,13 @@ void effMiscSeedRandomFromClock(void *state) {
     effMiscSeedRandom(state, t * 0x3C + now.sec);
 }
 
+INCLUDE_SDATA(const s32, "game/code_00341240", D_00438B78);
+INCLUDE_SDATA(const s32, "game/code_00341240", D_00438B79);
+
 INCLUDE_ASM(const s32, "game/code_00341240", func_003413F0);
 
-void func_003414D0(void) {
-    sceSifAllocIopHeap();
+u32 func_003414D0(s32 size) {
+    return (u32)sceSifAllocIopHeap(size);
 }
 
 INCLUDE_ASM(const s32, "game/code_00341240", func_003414E8);
@@ -84,8 +88,4 @@ void sdfServiceUnblockedWorkerThread(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00341240", func_003415A8);
-
-INCLUDE_SDATA(const s32, "game/code_00341240", D_00438B78);
-
-INCLUDE_SDATA(const s32, "game/code_00341240", D_00438B79);
 
