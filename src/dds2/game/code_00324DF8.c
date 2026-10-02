@@ -274,7 +274,31 @@ f32 *sdfVectorTransformByMatrix(f32 *vec, f32 *mat) {
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00327C80);
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328018);
+void func_00328018(SdfMat4 *out, SdfVec4 *q) {
+    f32 xx = q->x * q->x;
+    f32 yy = q->y * q->y;
+    f32 zz = q->z * q->z;
+    f32 a = 1.0f - (yy + zz) * 2.0f;
+    f32 b = 1.0f - (xx + zz) * 2.0f;
+    f32 c = 1.0f - (xx + yy) * 2.0f;
+
+    out->m[0] = a;
+    out->m[1] = (q->x * q->y - q->w * q->z) * 2.0f;
+    out->m[2] = (q->w * q->y + q->x * q->z) * 2.0f;
+    out->m[3] = 0;
+    out->m[4] = (q->x * q->y + q->w * q->z) * 2.0f;
+    out->m[5] = b;
+    out->m[6] = (q->y * q->z - q->w * q->x) * 2.0f;
+    out->m[7] = 0;
+    out->m[8] = (q->x * q->z - q->w * q->y) * 2.0f;
+    out->m[9] = (q->y * q->z + q->w * q->x) * 2.0f;
+    out->m[10] = c;
+    out->m[11] = 0;
+    out->m[12] = 0;
+    out->m[13] = 0;
+    out->m[14] = 0;
+    out->m[15] = 1.0f;
+}
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328160);
 

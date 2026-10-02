@@ -78,6 +78,47 @@ MODEL_ASSET_FIELDS = (
 )
 MODEL_ASSET_FIELD_NAMES = {name for _, name, _, _ in MODEL_ASSET_FIELDS}
 MODEL_ASSET_FLAG_MASK = sum(bit for bit, _, _, _ in MODEL_ASSET_FIELDS)
+MODEL_MOTION_FAMILIES = {0: "node", 1: "asset"}
+MODEL_MOTION_FAMILY_IDS = {name: value for value, name in MODEL_MOTION_FAMILIES.items()}
+MODEL_MOTION_NODE_SELECTORS = {
+    0: "translation",
+    1: "euler_rotation",
+    2: "scale",
+    3: "quaternion",
+    4: "flag",
+}
+MODEL_MOTION_NODE_SELECTOR_IDS = {
+    name: value for value, name in MODEL_MOTION_NODE_SELECTORS.items()
+}
+MODEL_MOTION_FORMATS = {
+    (0, 0): ("vector3", 12),
+    (0, 1): ("vector3", 12),
+    (0, 2): ("vector3", 12),
+    (0, 3): ("quaternion_s16", 8),
+    (0, 4): ("flag_u8", 1),
+    (1, 0): ("rgba8", 4),
+    (1, 1): ("rgba8", 4),
+    (1, 2): ("float5", 20),
+    (1, 3): ("float5", 20),
+    (1, 4): ("rgba8", 4),
+    (1, 5): ("float", 4),
+    (1, 6): ("float5", 20),
+    (1, 7): ("float5", 20),
+    (1, 8): ("rgba8", 4),
+    (1, 9): ("rgba8", 4),
+}
+MODEL_MOTION_VALUE_DIRECTIVES = {
+    "vector3": ("motion_vector3", 12, 3, "float"),
+    "quaternion_s16": ("motion_quaternion_s16", 8, 4, "s16"),
+    "flag_u8": ("motion_flag_u8", 1, 1, "u8"),
+    "rgba8": ("motion_rgba8", 4, 4, "u8"),
+    "float5": ("motion_float5", 20, 5, "float"),
+    "float": ("motion_float", 4, 1, "float"),
+}
+MODEL_MOTION_DIRECTIVE_FORMATS = {
+    directive: format_name
+    for format_name, (directive, _, _, _) in MODEL_MOTION_VALUE_DIRECTIVES.items()
+}
 MOTION_CURVE_SIZE = 0x10
 MOTION_KINDS = {
     0: ("vector3", 3),
@@ -201,6 +242,40 @@ class ModelMesh:
     colors: tuple[tuple[int, int, int, int], ...] | None
     controls: tuple[int, int]
     program: int
+
+
+@dataclass(frozen=True)
+class ModelMotionBinding:
+    family: int
+    selector: int
+    target: int
+
+
+@dataclass(frozen=True)
+class ModelMotionTrack:
+    offset: int
+    size: int
+    count: int
+    stride: int
+    frames: tuple[int, ...]
+    values: int
+    format_name: str
+
+
+@dataclass(frozen=True)
+class ModelMotionClip:
+    offset: int
+    duration: int
+    reserved: int
+    tracks: tuple[ModelMotionTrack, ...]
+
+
+@dataclass(frozen=True)
+class ModelMotionPlaybook:
+    offset: int
+    clip_table: int
+    bindings: tuple[ModelMotionBinding, ...]
+    clips: tuple[ModelMotionClip | None, ...]
 
 
 def _face_encounter_zone(face: tuple[int, ...], face_index: int) -> int | None:
@@ -572,6 +647,118 @@ def _read_model_assets(
     return tuple(assets)
 
 
+def _model_motion_format(family: int, selector: int, context: str) -> tuple[str, int]:
+    try:
+        return MODEL_MOTION_FORMATS[family, selector]
+    except KeyError as exc:
+        raise FldError(
+            f"{context} uses unsupported motion family {family}, selector {selector}"
+        ) from exc
+
+
+def _read_model_motion(
+    data: bytes,
+    offset: int,
+    data_end: int,
+    relocations: set[int],
+    node_count: int,
+    asset_count: int,
+    context: str,
+) -> ModelMotionPlaybook:
+    """Read the model motion playbook and its size-prefixed key tracks."""
+
+    _data_range(data, offset, 8, data_end, context)
+    clip_count, binding_count, clip_table = struct.unpack_from("<HHI", data, offset)
+    if not clip_count:
+        raise FldError(f"{context} has an empty clip table")
+    if offset + 4 not in relocations or not clip_table:
+        raise FldError(f"{context} clip-table pointer is not relocated")
+    _data_range(
+        data,
+        offset + 8,
+        binding_count * 8,
+        data_end,
+        context + " bindings",
+    )
+
+    bindings = []
+    for index in range(binding_count):
+        command, target = struct.unpack_from("<II", data, offset + 8 + index * 8)
+        family, selector = command >> 16, command & 0xFFFF
+        _model_motion_format(family, selector, context + f" binding {index}")
+        target_count = node_count if family == 0 else asset_count
+        if target >= target_count:
+            raise FldError(
+                f"{context} binding {index} targets {target}, but family "
+                f"{MODEL_MOTION_FAMILIES[family]} has only {target_count} entries"
+            )
+        bindings.append(ModelMotionBinding(family, selector, target))
+
+    _data_range(
+        data,
+        clip_table,
+        clip_count * 4,
+        data_end,
+        context + " clip table",
+    )
+    clips: list[ModelMotionClip | None] = []
+    for clip_index in range(clip_count):
+        pointer_offset = clip_table + clip_index * 4
+        clip_offset = _u32(data, pointer_offset, context + " clip pointer")
+        if not clip_offset:
+            if pointer_offset in relocations:
+                raise FldError(f"{context} null clip pointer is relocated")
+            clips.append(None)
+            continue
+        if pointer_offset not in relocations:
+            raise FldError(f"{context} clip {clip_index} pointer is not relocated")
+        _data_range(data, clip_offset, 4, data_end, context + f" clip {clip_index}")
+        duration, reserved = struct.unpack_from("<HH", data, clip_offset)
+        cursor = clip_offset + 4
+        tracks = []
+        for binding_index, binding in enumerate(bindings):
+            track_context = (
+                context + f" clip {clip_index} binding {binding_index} track"
+            )
+            _data_range(data, cursor, 8, data_end, track_context)
+            size, count, stride = struct.unpack_from("<IHH", data, cursor)
+            format_name, expected_stride = _model_motion_format(
+                binding.family, binding.selector, track_context
+            )
+            if not count:
+                raise FldError(f"{track_context} has no keys")
+            if stride != expected_stride:
+                raise FldError(
+                    f"{track_context} stride is {stride}, expected {expected_stride}"
+                )
+            frame_size = (count * 2 + 3) & ~3
+            expected_size = 8 + frame_size + count * stride
+            if size != expected_size:
+                raise FldError(
+                    f"{track_context} size is {size}, expected {expected_size}"
+                )
+            _data_range(data, cursor, size, data_end, track_context)
+            frames = struct.unpack_from(f"<{count}H", data, cursor + 8)
+            padding = data[cursor + 8 + count * 2 : cursor + 8 + frame_size]
+            if any(padding):
+                raise FldError(f"{track_context} has nonzero frame padding")
+            values = cursor + 8 + frame_size
+            tracks.append(
+                ModelMotionTrack(
+                    cursor,
+                    size,
+                    count,
+                    stride,
+                    frames,
+                    values,
+                    format_name,
+                )
+            )
+            cursor += size
+        clips.append(ModelMotionClip(clip_offset, duration, reserved, tuple(tracks)))
+    return ModelMotionPlaybook(offset, clip_table, tuple(bindings), tuple(clips))
+
+
 def _read_model_draw_graph(
     data: bytes,
     items: tuple[ModelItem, ...],
@@ -859,7 +1046,7 @@ def validate(data: bytes) -> None:
         if resource.name:
             _fixed_string(data, resource.name, f"resource at 0x{resource.offset:x} name")
         if resource.type_id == 2 and resource.data and data[4:8] == b"FLD1":
-            _, items = _read_model_resource(
+            model_resource, items = _read_model_resource(
                 data, resource.data, data_end, "field model"
             )
             assets = _read_model_assets(
@@ -867,6 +1054,15 @@ def validate(data: bytes) -> None:
                 _u32(data, resource.data + 0x14, "field model asset pointer"),
                 data_end,
                 "field model assets",
+            )
+            _read_model_motion(
+                data,
+                model_resource.motion,
+                data_end,
+                relocations,
+                len(items),
+                len(assets),
+                "field model motion",
             )
             _, _, draws = _read_model_draw_graph(
                 data,
@@ -1319,6 +1515,15 @@ def render_source(data: bytes) -> str:
                 data_end,
                 stem + " model assets",
             )
+            motion = _read_model_motion(
+                data,
+                model_resource.motion,
+                data_end,
+                relocations,
+                len(items),
+                len(assets),
+                stem + " model motion",
+            )
             draw_roots, draw_lists, draws = _read_model_draw_graph(
                 data,
                 items,
@@ -1330,6 +1535,14 @@ def render_source(data: bytes) -> str:
             _assign_label(labels, model_resource.items, f"{stem}_items")
             _assign_label(labels, model_resource.assets, f"{stem}_assets")
             _assign_label(labels, model_resource.motion, f"{stem}_motion")
+            _assign_label(labels, motion.clip_table, f"{stem}_motion_clips")
+            for clip_index, clip in enumerate(motion.clips):
+                if clip is not None:
+                    _assign_label(
+                        labels,
+                        clip.offset,
+                        f"{stem}_motion_clip_{clip_index}",
+                    )
 
             for index, item in enumerate(items):
                 if not item.commands:
@@ -1421,6 +1634,92 @@ def render_source(data: bytes) -> str:
                 asset_lines,
                 stem + " model assets",
             )
+
+            motion_lines = [
+                "model_motion_playbook "
+                f"clip_count={len(motion.clips)} bindings={len(motion.bindings)} "
+                f"clips=@{_label_for(labels, motion.clip_table)}"
+            ]
+            for binding in motion.bindings:
+                family = MODEL_MOTION_FAMILIES[binding.family]
+                if binding.family == 0:
+                    selector = MODEL_MOTION_NODE_SELECTORS[binding.selector]
+                else:
+                    selector = str(binding.selector)
+                motion_lines.append(
+                    "model_motion_binding "
+                    f"family={family} selector={selector} target={binding.target}"
+                )
+            add_span(
+                motion.offset,
+                8 + len(motion.bindings) * 8,
+                motion_lines,
+                stem + " model motion playbook",
+            )
+
+            clip_refs = ",".join(
+                "null" if clip is None else f"@{_label_for(labels, clip.offset)}"
+                for clip in motion.clips
+            )
+            add_span(
+                motion.clip_table,
+                len(motion.clips) * 4,
+                [f"model_motion_clip_table clips={clip_refs}"],
+                stem + " model motion clip table",
+            )
+
+            rendered_clips: set[int] = set()
+            for clip_index, clip in enumerate(motion.clips):
+                if clip is None or clip.offset in rendered_clips:
+                    continue
+                rendered_clips.add(clip.offset)
+                clip_lines = [
+                    "model_motion_clip "
+                    f"duration={clip.duration} reserved={clip.reserved}"
+                ]
+                for track in clip.tracks:
+                    clip_lines.append(
+                        "model_motion_track "
+                        f"format={track.format_name} "
+                        f"frames={','.join(str(frame) for frame in track.frames)}"
+                    )
+                    directive, _, width, value_kind = MODEL_MOTION_VALUE_DIRECTIVES[
+                        track.format_name
+                    ]
+                    records = []
+                    for value_index in range(track.count):
+                        value_offset = track.values + value_index * track.stride
+                        if value_kind == "float":
+                            values = struct.unpack_from(
+                                "<" + "f" * width, data, value_offset
+                            )
+                            records.append(
+                                ",".join(_float_text(value) for value in values)
+                            )
+                        elif value_kind == "s16":
+                            values = struct.unpack_from(
+                                "<" + "h" * width, data, value_offset
+                            )
+                            records.append(",".join(str(value) for value in values))
+                        elif value_kind == "u8":
+                            values = struct.unpack_from(
+                                "<" + "B" * width, data, value_offset
+                            )
+                            records.append(",".join(str(value) for value in values))
+                        else:
+                            raise AssertionError(value_kind)
+                    for start in range(0, len(records), MESH_RECORDS_PER_LINE):
+                        clip_lines.append(
+                            directive
+                            + " "
+                            + " ".join(records[start : start + MESH_RECORDS_PER_LINE])
+                        )
+                add_span(
+                    clip.offset,
+                    4 + sum(track.size for track in clip.tracks),
+                    clip_lines,
+                    f"{stem} model motion clip {clip_index}",
+                )
 
             for root_offset, list_offsets in draw_roots.items():
                 list_refs = ",".join(
@@ -1772,6 +2071,156 @@ def parse_source(source: str) -> tuple[Operation, ...]:
     return tuple(operations)
 
 
+def _model_motion_binding_source(
+    operation: Operation,
+) -> tuple[int, int, int, str]:
+    fields = _fields(operation.args)
+    if set(fields) != {"family", "selector", "target"}:
+        raise FldError(
+            f"line {operation.line}: model_motion_binding expects "
+            "family=... selector=... target=..."
+        )
+    family = MODEL_MOTION_FAMILY_IDS.get(fields["family"])
+    if family is None:
+        raise FldError(
+            f"line {operation.line}: unknown motion family {fields['family']!r}"
+        )
+    if family == 0:
+        selector = MODEL_MOTION_NODE_SELECTOR_IDS.get(fields["selector"])
+        if selector is None:
+            raise FldError(
+                f"line {operation.line}: unknown node-motion selector "
+                f"{fields['selector']!r}"
+            )
+    else:
+        selector = _int(fields["selector"])
+    format_name, _ = _model_motion_format(
+        family, selector, f"line {operation.line}"
+    )
+    target = _int(fields["target"])
+    if target < 0:
+        raise FldError(f"line {operation.line}: motion target must be nonnegative")
+    return family, selector, target, format_name
+
+
+def _validate_model_motion_source(operations: tuple[Operation, ...]) -> None:
+    """Validate linked playbook, clip-table, and typed track source blocks."""
+
+    label_operations: dict[str, int] = {}
+    for index, operation in enumerate(operations):
+        if operation.name == "label":
+            label_operations[operation.args[0]] = index
+
+    def operation_after_label(reference: str, expected: str) -> tuple[int, Operation]:
+        name = _symbol(reference)
+        if name not in label_operations:
+            raise FldError(f"unknown label @{name}")
+        index = label_operations[name] + 1
+        while index < len(operations) and operations[index].name == "label":
+            index += 1
+        if index >= len(operations) or operations[index].name != expected:
+            line = operations[label_operations[name]].line
+            raise FldError(f"line {line}: @{name} must contain {expected}")
+        return index, operations[index]
+
+    checked_clips: dict[str, tuple[tuple[int, int, int, str], ...]] = {}
+    for index, operation in enumerate(operations):
+        if operation.name != "model_motion_playbook":
+            continue
+        fields = _fields(operation.args)
+        if set(fields) != {"clip_count", "bindings", "clips"}:
+            raise FldError(
+                f"line {operation.line}: model_motion_playbook expects "
+                "clip_count=... bindings=... clips=..."
+            )
+        clip_count = _int(fields["clip_count"])
+        binding_count = _int(fields["bindings"])
+        if not 1 <= clip_count <= 0xFFFF or not 0 <= binding_count <= 0xFFFF:
+            raise FldError(
+                f"line {operation.line}: motion clip and binding counts must fit u16"
+            )
+        bindings = []
+        for binding_index in range(binding_count):
+            source_index = index + 1 + binding_index
+            if (
+                source_index >= len(operations)
+                or operations[source_index].name != "model_motion_binding"
+            ):
+                raise FldError(
+                    f"line {operation.line}: expected {binding_count} "
+                    "model_motion_binding directives"
+                )
+            bindings.append(_model_motion_binding_source(operations[source_index]))
+
+        _, table = operation_after_label(fields["clips"], "model_motion_clip_table")
+        table_fields = _fields(table.args)
+        if set(table_fields) != {"clips"}:
+            raise FldError(
+                f"line {table.line}: model_motion_clip_table expects clips=..."
+            )
+        clip_refs = tuple(table_fields["clips"].split(",")) if table_fields["clips"] else ()
+        if len(clip_refs) != clip_count:
+            raise FldError(
+                f"line {table.line}: clip table contains {len(clip_refs)} entries, "
+                f"expected {clip_count}"
+            )
+        binding_tuple = tuple(bindings)
+        for reference in clip_refs:
+            if reference == "null":
+                continue
+            clip_name = _symbol(reference)
+            old_bindings = checked_clips.get(clip_name)
+            if old_bindings is not None:
+                if old_bindings != binding_tuple:
+                    raise FldError(
+                        f"line {table.line}: shared clip @{clip_name} has incompatible bindings"
+                    )
+                continue
+            clip_index, clip = operation_after_label(reference, "model_motion_clip")
+            clip_fields = _fields(clip.args)
+            if set(clip_fields) != {"duration", "reserved"}:
+                raise FldError(
+                    f"line {clip.line}: model_motion_clip expects duration=... reserved=..."
+                )
+            if any(
+                not 0 <= _int(clip_fields[name]) <= 0xFFFF
+                for name in ("duration", "reserved")
+            ):
+                raise FldError(f"line {clip.line}: clip fields must fit u16")
+            cursor = clip_index + 1
+            for _, _, _, expected_format in bindings:
+                if (
+                    cursor >= len(operations)
+                    or operations[cursor].name != "model_motion_track"
+                ):
+                    raise FldError(
+                        f"line {clip.line}: expected {binding_count} model_motion_track directives"
+                    )
+                track = operations[cursor]
+                track_fields = _fields(track.args)
+                _operation_size(track, 0)
+                format_name = track_fields["format"]
+                if format_name != expected_format:
+                    raise FldError(
+                        f"line {track.line}: motion binding requires {expected_format}, "
+                        f"got {format_name}"
+                    )
+                key_count = len(track_fields["frames"].split(","))
+                directive = MODEL_MOTION_VALUE_DIRECTIVES[format_name][0]
+                cursor += 1
+                actual = 0
+                while cursor < len(operations) and operations[cursor].name == directive:
+                    _operation_size(operations[cursor], 0)
+                    actual += len(operations[cursor].args)
+                    cursor += 1
+                if actual != key_count:
+                    raise FldError(
+                        f"line {track.line}: track has {key_count} frames followed by "
+                        f"{actual} {directive} records"
+                    )
+            checked_clips[clip_name] = binding_tuple
+
+
 def _model_mesh_source_codes(operations: tuple[Operation, ...]) -> dict[int, int]:
     """Validate semantic mesh blocks and return their generated VIF words."""
 
@@ -1934,6 +2383,9 @@ def _operation_size(operation: Operation, offset: int) -> int:
         "model_bounds": MODEL_BOUNDS_SIZE,
         "model_assets": 4,
         "model_draw": MODEL_DRAW_SIZE,
+        "model_motion_playbook": 8,
+        "model_motion_binding": 8,
+        "model_motion_clip": 4,
         "mesh_header": 12,
         "mesh_triangles": 4,
         "mesh_positions": 4,
@@ -1988,6 +2440,48 @@ def _operation_size(operation: Operation, offset: int) -> int:
                 f"line {operation.line}: model_draw_list expects selector=... draws=..."
             )
         return 4 + len(_references(fields["draws"])) * 4
+    if name == "model_motion_clip_table":
+        fields = _fields(args)
+        if set(fields) != {"clips"}:
+            raise FldError(
+                f"line {operation.line}: model_motion_clip_table expects clips=..."
+            )
+        clips = fields["clips"].split(",") if fields["clips"] else []
+        if not clips or any(value != "null" and not value.startswith("@") for value in clips):
+            raise FldError(
+                f"line {operation.line}: motion clips must be labels or null"
+            )
+        return len(clips) * 4
+    if name == "model_motion_track":
+        fields = _fields(args)
+        if set(fields) != {"format", "frames"}:
+            raise FldError(
+                f"line {operation.line}: model_motion_track expects format=... frames=..."
+            )
+        if fields["format"] not in MODEL_MOTION_VALUE_DIRECTIVES:
+            raise FldError(
+                f"line {operation.line}: unknown motion format {fields['format']!r}"
+            )
+        frames = tuple(_int(value) for value in fields["frames"].split(","))
+        if not frames or any(not 0 <= frame <= 0xFFFF for frame in frames):
+            raise FldError(f"line {operation.line}: motion frames must be u16 values")
+        return 8 + ((len(frames) * 2 + 3) & ~3)
+    if name in MODEL_MOTION_DIRECTIVE_FORMATS:
+        format_name = MODEL_MOTION_DIRECTIVE_FORMATS[name]
+        _, record_size, width, value_kind = MODEL_MOTION_VALUE_DIRECTIVES[format_name]
+        if not args:
+            raise FldError(f"line {operation.line}: {name} expects key records")
+        for arg in args:
+            if value_kind == "float":
+                _csv(arg, width, _parse_float)
+            else:
+                values = _csv(arg, width)
+                low, high = (-0x8000, 0x7FFF) if value_kind == "s16" else (0, 0xFF)
+                if any(not low <= value <= high for value in values):
+                    raise FldError(
+                        f"line {operation.line}: {name} component is outside {value_kind}"
+                    )
+        return record_size * len(args)
     if name == "packet_data":
         if len(args) != 1:
             raise FldError(f"line {operation.line}: packet_data expects one hex string")
@@ -2047,6 +2541,7 @@ def _operation_size(operation: Operation, offset: int) -> int:
 
 def _layout(operations: tuple[Operation, ...]) -> tuple[dict[str, int], int]:
     _model_mesh_source_codes(operations)
+    _validate_model_motion_source(operations)
     labels: dict[str, int] = {}
     offset = 0
     end_data: int | None = None
@@ -2409,6 +2904,49 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
             output.extend(struct.pack("<II", 1, quadwords | asset << 16))
             output.extend(pointer(f["packet"]))
             output.extend(bytes(4))
+        elif name == "model_motion_playbook":
+            f = checked_fields(operation, ("clip_count", "bindings", "clips"))
+            clip_count, binding_count = _int(f["clip_count"]), _int(f["bindings"])
+            output.extend(struct.pack("<HH", clip_count, binding_count))
+            output.extend(pointer(f["clips"]))
+        elif name == "model_motion_binding":
+            family, selector, target, _ = _model_motion_binding_source(operation)
+            output.extend(struct.pack("<II", family << 16 | selector, target))
+        elif name == "model_motion_clip_table":
+            f = checked_fields(operation, ("clips",))
+            clips = f["clips"].split(",") if f["clips"] else []
+            for clip in clips:
+                output.extend(pointer(clip))
+        elif name == "model_motion_clip":
+            f = checked_fields(operation, ("duration", "reserved"))
+            output.extend(struct.pack("<HH", _int(f["duration"]), _int(f["reserved"])))
+        elif name == "model_motion_track":
+            f = checked_fields(operation, ("format", "frames"))
+            format_name = f["format"]
+            _, stride, _, _ = MODEL_MOTION_VALUE_DIRECTIVES[format_name]
+            frames = tuple(_int(value) for value in f["frames"].split(","))
+            frame_size = (len(frames) * 2 + 3) & ~3
+            size = 8 + frame_size + len(frames) * stride
+            output.extend(struct.pack("<IHH", size, len(frames), stride))
+            output.extend(struct.pack("<" + "H" * len(frames), *frames))
+            output.extend(bytes(frame_size - len(frames) * 2))
+        elif name in MODEL_MOTION_DIRECTIVE_FORMATS:
+            format_name = MODEL_MOTION_DIRECTIVE_FORMATS[name]
+            _, _, width, value_kind = MODEL_MOTION_VALUE_DIRECTIVES[format_name]
+            for arg in args:
+                if value_kind == "float":
+                    output.extend(
+                        struct.pack(
+                            "<" + "f" * width,
+                            *_csv(arg, width, _parse_float),
+                        )
+                    )
+                elif value_kind == "s16":
+                    output.extend(struct.pack("<" + "h" * width, *_csv(arg, width)))
+                elif value_kind == "u8":
+                    output.extend(struct.pack("<" + "B" * width, *_csv(arg, width)))
+                else:
+                    raise AssertionError(value_kind)
         elif name == "mesh_header":
             f = checked_fields(operation, ("triangles", "vertices", "controls"))
             triangles, vertices = _int(f["triangles"]), _int(f["vertices"])

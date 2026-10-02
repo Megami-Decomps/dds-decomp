@@ -21291,24 +21291,36 @@ mesh_program address=12
 vif_nops count=2
 
 label md_01all_02_motion
-bytes 01000700
-pointer @loc_ae320
-bytes 0200010001000000030001000100000004000100010000000200010004000000
-bytes 030001000400000002000100170000000300010017000000
-label loc_ae320
-pointer @loc_ae324
-label loc_ae324
-bytes e803000034000000020014000000e80300000000000000000000803f0000003f
-bytes 00000000000040c00000a0400000803f0000003f000000003400000002001400
-bytes 0000e80300000000000000000000003f0000803f000000000000a040000040c0
-bytes 0000003f0000803f0000000014000000020004000000e8038080802080808020
-bytes 34000000020014000000e80300000000000000000000803f0000803f00000000
-bytes 000080bf000080bf0000803f0000803f0000000034000000020014000000e803
-bytes 0000000000000000000000400000803f00000000000000bf0000803f00000040
-bytes 0000803f0000000034000000020014000000570200000000000000000000803f
-bytes 0000803f00000000000080bf000000000000803f0000803f0000000034000000
-bytes 020014000000570200000000000000000000803f0000803f00000000000080bf
-bytes 000000000000803f0000803f00000000000000000000000000000000
+model_motion_playbook clip_count=1 bindings=7 clips=@md_01all_02_motion_clips
+model_motion_binding family=asset selector=2 target=1
+model_motion_binding family=asset selector=3 target=1
+model_motion_binding family=asset selector=4 target=1
+model_motion_binding family=asset selector=2 target=4
+model_motion_binding family=asset selector=3 target=4
+model_motion_binding family=asset selector=2 target=23
+model_motion_binding family=asset selector=3 target=23
+
+label md_01all_02_motion_clips
+model_motion_clip_table clips=@md_01all_02_motion_clip_0
+
+label md_01all_02_motion_clip_0
+model_motion_clip duration=1000 reserved=0
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,1.0,0.5,0.0 -3.0,5.0,1.0,0.5,0.0
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,0.5,1.0,0.0 5.0,-3.0,0.5,1.0,0.0
+model_motion_track format=rgba8 frames=0,1000
+motion_rgba8 128,128,128,32 128,128,128,32
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,1.0,1.0,0.0 -1.0,-1.0,1.0,1.0,0.0
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,2.0,1.0,0.0 -0.5,1.0,2.0,1.0,0.0
+model_motion_track format=float5 frames=0,599
+motion_float5 0.0,0.0,1.0,1.0,0.0 -1.0,0.0,1.0,1.0,0.0
+model_motion_track format=float5 frames=0,599
+motion_float5 0.0,0.0,1.0,1.0,0.0 -1.0,0.0,1.0,1.0,0.0
+
+zeros 12
 label md_01all_03_data
 model_resource items=@md_01all_03_items assets=@md_01all_02_assets motion=@md_01all_03_motion
 
@@ -22804,24 +22816,36 @@ color 45,45,50,128 45,45,50,128 45,45,50,0 45,45,50,0 45,45,50,0 45,45,50,0 45,4
 mesh_program address=12
 
 label md_01all_03_motion
-bytes 01000700
-pointer @loc_b5220
-bytes 0200010001000000030001000100000004000100010000000200010004000000
-bytes 030001000400000002000100170000000300010017000000
-label loc_b5220
-pointer @loc_b5224
-label loc_b5224
-bytes e803000034000000020014000000e80300000000000000000000803f0000003f
-bytes 00000000000040c00000a0400000803f0000003f000000003400000002001400
-bytes 0000e80300000000000000000000003f0000803f000000000000a040000040c0
-bytes 0000003f0000803f0000000014000000020004000000e8038080802080808020
-bytes 34000000020014000000e80300000000000000000000803f0000803f00000000
-bytes 000080bf000080bf0000803f0000803f0000000034000000020014000000e803
-bytes 0000000000000000000000400000803f00000000000000bf0000803f00000040
-bytes 0000803f0000000034000000020014000000570200000000000000000000803f
-bytes 0000803f00000000000080bf000000000000803f0000803f0000000034000000
-bytes 020014000000570200000000000000000000803f0000803f00000000000080bf
-bytes 000000000000803f0000803f00000000000000000000000000000000
+model_motion_playbook clip_count=1 bindings=7 clips=@md_01all_03_motion_clips
+model_motion_binding family=asset selector=2 target=1
+model_motion_binding family=asset selector=3 target=1
+model_motion_binding family=asset selector=4 target=1
+model_motion_binding family=asset selector=2 target=4
+model_motion_binding family=asset selector=3 target=4
+model_motion_binding family=asset selector=2 target=23
+model_motion_binding family=asset selector=3 target=23
+
+label md_01all_03_motion_clips
+model_motion_clip_table clips=@md_01all_03_motion_clip_0
+
+label md_01all_03_motion_clip_0
+model_motion_clip duration=1000 reserved=0
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,1.0,0.5,0.0 -3.0,5.0,1.0,0.5,0.0
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,0.5,1.0,0.0 5.0,-3.0,0.5,1.0,0.0
+model_motion_track format=rgba8 frames=0,1000
+motion_rgba8 128,128,128,32 128,128,128,32
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,1.0,1.0,0.0 -1.0,-1.0,1.0,1.0,0.0
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,2.0,1.0,0.0 -0.5,1.0,2.0,1.0,0.0
+model_motion_track format=float5 frames=0,599
+motion_float5 0.0,0.0,1.0,1.0,0.0 -1.0,0.0,1.0,1.0,0.0
+model_motion_track format=float5 frames=0,599
+motion_float5 0.0,0.0,1.0,1.0,0.0 -1.0,0.0,1.0,1.0,0.0
+
+zeros 12
 label md_hoji_01_data
 model_resource items=@md_hoji_01_items assets=@md_01all_02_assets motion=@md_hoji_01_motion
 
@@ -23142,24 +23166,36 @@ mesh_program address=12
 vif_nops count=2
 
 label md_hoji_01_motion
-bytes 01000700
-pointer @loc_b84d0
-bytes 0200010001000000030001000100000004000100010000000200010004000000
-bytes 030001000400000002000100170000000300010017000000
-label loc_b84d0
-pointer @loc_b84d4
-label loc_b84d4
-bytes 5802000034000000020014000000e80300000000000000000000803f0000003f
-bytes 00000000000040c00000a0400000803f0000003f000000003400000002001400
-bytes 0000e80300000000000000000000003f0000803f000000000000a040000040c0
-bytes 0000003f0000803f0000000014000000020004000000e8038080802080808020
-bytes 34000000020014000000e80300000000000000000000803f0000803f00000000
-bytes 000080bf000080bf0000803f0000803f0000000034000000020014000000e803
-bytes 0000000000000000000000400000803f00000000000000bf0000803f00000040
-bytes 0000803f0000000034000000020014000000570200000000000000000000803f
-bytes 0000803f00000000000080bf000000000000803f0000803f0000000034000000
-bytes 020014000000570200000000000000000000803f0000803f00000000000080bf
-bytes 000000000000803f0000803f00000000000000000000000000000000
+model_motion_playbook clip_count=1 bindings=7 clips=@md_hoji_01_motion_clips
+model_motion_binding family=asset selector=2 target=1
+model_motion_binding family=asset selector=3 target=1
+model_motion_binding family=asset selector=4 target=1
+model_motion_binding family=asset selector=2 target=4
+model_motion_binding family=asset selector=3 target=4
+model_motion_binding family=asset selector=2 target=23
+model_motion_binding family=asset selector=3 target=23
+
+label md_hoji_01_motion_clips
+model_motion_clip_table clips=@md_hoji_01_motion_clip_0
+
+label md_hoji_01_motion_clip_0
+model_motion_clip duration=600 reserved=0
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,1.0,0.5,0.0 -3.0,5.0,1.0,0.5,0.0
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,0.5,1.0,0.0 5.0,-3.0,0.5,1.0,0.0
+model_motion_track format=rgba8 frames=0,1000
+motion_rgba8 128,128,128,32 128,128,128,32
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,1.0,1.0,0.0 -1.0,-1.0,1.0,1.0,0.0
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,2.0,1.0,0.0 -0.5,1.0,2.0,1.0,0.0
+model_motion_track format=float5 frames=0,599
+motion_float5 0.0,0.0,1.0,1.0,0.0 -1.0,0.0,1.0,1.0,0.0
+model_motion_track format=float5 frames=0,599
+motion_float5 0.0,0.0,1.0,1.0,0.0 -1.0,0.0,1.0,1.0,0.0
+
+zeros 12
 label md_01all_01_data
 model_resource items=@md_01all_01_items assets=@md_01all_02_assets motion=@md_01all_01_motion
 
@@ -23378,24 +23414,36 @@ color 23,23,23,0 23,23,23,0 24,24,24,0 21,21,21,128
 mesh_program address=12
 
 label md_01all_01_motion
-bytes 01000700
-pointer @loc_ba540
-bytes 0200010001000000030001000100000004000100010000000200010004000000
-bytes 030001000400000002000100170000000300010017000000
-label loc_ba540
-pointer @loc_ba544
-label loc_ba544
-bytes e803000034000000020014000000e80300000000000000000000803f0000003f
-bytes 00000000000040c00000a0400000803f0000003f000000003400000002001400
-bytes 0000e80300000000000000000000003f0000803f000000000000a040000040c0
-bytes 0000003f0000803f0000000014000000020004000000e8038080802080808020
-bytes 34000000020014000000e80300000000000000000000803f0000803f00000000
-bytes 000080bf000080bf0000803f0000803f0000000034000000020014000000e803
-bytes 0000000000000000000000400000803f00000000000000bf0000803f00000040
-bytes 0000803f0000000034000000020014000000570200000000000000000000803f
-bytes 0000803f00000000000080bf000000000000803f0000803f0000000034000000
-bytes 020014000000570200000000000000000000803f0000803f00000000000080bf
-bytes 000000000000803f0000803f00000000000000000000000000000000
+model_motion_playbook clip_count=1 bindings=7 clips=@md_01all_01_motion_clips
+model_motion_binding family=asset selector=2 target=1
+model_motion_binding family=asset selector=3 target=1
+model_motion_binding family=asset selector=4 target=1
+model_motion_binding family=asset selector=2 target=4
+model_motion_binding family=asset selector=3 target=4
+model_motion_binding family=asset selector=2 target=23
+model_motion_binding family=asset selector=3 target=23
+
+label md_01all_01_motion_clips
+model_motion_clip_table clips=@md_01all_01_motion_clip_0
+
+label md_01all_01_motion_clip_0
+model_motion_clip duration=1000 reserved=0
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,1.0,0.5,0.0 -3.0,5.0,1.0,0.5,0.0
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,0.5,1.0,0.0 5.0,-3.0,0.5,1.0,0.0
+model_motion_track format=rgba8 frames=0,1000
+motion_rgba8 128,128,128,32 128,128,128,32
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,1.0,1.0,0.0 -1.0,-1.0,1.0,1.0,0.0
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,2.0,1.0,0.0 -0.5,1.0,2.0,1.0,0.0
+model_motion_track format=float5 frames=0,599
+motion_float5 0.0,0.0,1.0,1.0,0.0 -1.0,0.0,1.0,1.0,0.0
+model_motion_track format=float5 frames=0,599
+motion_float5 0.0,0.0,1.0,1.0,0.0 -1.0,0.0,1.0,1.0,0.0
+
+zeros 12
 label md_01d_02_data
 model_resource items=@md_01d_02_items assets=@md_01all_02_assets motion=@md_01d_02_motion
 
@@ -23442,24 +23490,36 @@ color 28,28,28,128 28,28,28,128 28,28,28,128 28,28,28,128 28,28,28,128 28,28,28,
 mesh_program address=12
 
 label md_01d_02_motion
-bytes 01000700
-pointer @loc_bab20
-bytes 0200010001000000030001000100000004000100010000000200010004000000
-bytes 030001000400000002000100170000000300010017000000
-label loc_bab20
-pointer @loc_bab24
-label loc_bab24
-bytes e803000034000000020014000000e80300000000000000000000803f0000003f
-bytes 00000000000040c00000a0400000803f0000003f000000003400000002001400
-bytes 0000e80300000000000000000000003f0000803f000000000000a040000040c0
-bytes 0000003f0000803f0000000014000000020004000000e8038080802080808020
-bytes 34000000020014000000e80300000000000000000000803f0000803f00000000
-bytes 000080bf000080bf0000803f0000803f0000000034000000020014000000e803
-bytes 0000000000000000000000400000803f00000000000000bf0000803f00000040
-bytes 0000803f0000000034000000020014000000570200000000000000000000803f
-bytes 0000803f00000000000080bf000000000000803f0000803f0000000034000000
-bytes 020014000000570200000000000000000000803f0000803f00000000000080bf
-bytes 000000000000803f0000803f00000000000000000000000000000000
+model_motion_playbook clip_count=1 bindings=7 clips=@md_01d_02_motion_clips
+model_motion_binding family=asset selector=2 target=1
+model_motion_binding family=asset selector=3 target=1
+model_motion_binding family=asset selector=4 target=1
+model_motion_binding family=asset selector=2 target=4
+model_motion_binding family=asset selector=3 target=4
+model_motion_binding family=asset selector=2 target=23
+model_motion_binding family=asset selector=3 target=23
+
+label md_01d_02_motion_clips
+model_motion_clip_table clips=@md_01d_02_motion_clip_0
+
+label md_01d_02_motion_clip_0
+model_motion_clip duration=1000 reserved=0
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,1.0,0.5,0.0 -3.0,5.0,1.0,0.5,0.0
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,0.5,1.0,0.0 5.0,-3.0,0.5,1.0,0.0
+model_motion_track format=rgba8 frames=0,1000
+motion_rgba8 128,128,128,32 128,128,128,32
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,1.0,1.0,0.0 -1.0,-1.0,1.0,1.0,0.0
+model_motion_track format=float5 frames=0,1000
+motion_float5 0.0,0.0,2.0,1.0,0.0 -0.5,1.0,2.0,1.0,0.0
+model_motion_track format=float5 frames=0,599
+motion_float5 0.0,0.0,1.0,1.0,0.0 -1.0,0.0,1.0,1.0,0.0
+model_motion_track format=float5 frames=0,599
+motion_float5 0.0,0.0,1.0,1.0,0.0 -1.0,0.0,1.0,1.0,0.0
+
+zeros 12
 label md_01all_02_assets
 model_assets count=24
 model_asset index=0 word_01=0x80969696 word_02=0x80969696
