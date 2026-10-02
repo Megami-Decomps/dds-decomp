@@ -555,7 +555,7 @@ typedef struct {
     u32 fontDrawHandle; /* 0x2410: font draw handle created by func_0019CE78 */
     u8 pad2414[0x14];
     s32 descriptorHandle; /* 0x2428: submitted to the drawing packet */
-    u8 pad242C[4];
+    s32 descriptorBackingHandle; /* 0x242C */
     u32 menuState; /* 0x2430 */
     s32 shopFlag;  /* 0x2434: 1 once the shop descriptor was submitted */
     u32 linkedHandle; /* 0x2438: passed to func_0025F130 */
@@ -768,14 +768,41 @@ void mnuAdvanceShopMenuState(CampScene *scene) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EFD8);
-
 typedef struct BufferDescriptor {
     u8 pad00[0x10];
     void (*open)(struct BufferDescriptor *, s32);
 } BufferDescriptor;
 
 extern BufferDescriptor D_00380708;
+extern u8 D_00380860[];
+extern void *sdfAllocGeneralBlockHigh(s32 size);
+extern s32 sdfAllocatePacketList(s32 (*alloc)(s32));
+extern s32 sdfAllocPacketAligned(s32 size);
+extern void sdfClearLinkedPacketList(void *list);
+extern void sdfCreatePatchableResourcePacket(void *list, void *linkedList, s32 arg2, s32 arg3,
+                                            s32 width, s32 height, void *resource, s32 arg7,
+                                            s32 arg8, s32 (*alloc)(s32));
+extern void sdfAppendPacketChainNode(void *head, void *node);
+
+void func_0025EFD8(CampScene *scene) {
+    s32 surface;
+    s32 context;
+    s32 handle;
+
+    if (scene->descriptorBackingHandle == 0) {
+        handle = (s32)sdfAllocGeneralBlockHigh(0x70000);
+        scene->descriptorBackingHandle = handle;
+        scene->descriptorHandle = (s32)sdfResourceRetainAddress(handle);
+    }
+    memset((void *)scene->descriptorHandle, 0x40, 0x70000);
+    surface = sdfAllocatePacketList(0);
+    context = sdfAllocPacketAligned(0x10);
+    sdfClearLinkedPacketList((void *)context);
+    sdfCreatePatchableResourcePacket((void *)surface, (void *)context, 0, 0, 0x200, 0xE0,
+                                    (void *)scene->descriptorHandle, 0, 0, 0);
+    sdfAppendPacketChainNode(D_00380860, (void *)context);
+    D_00380708.open(&D_00380708, surface);
+}
 
 void mnuShopSubmitDescriptor(u8 *work) {
     s32 packet;
