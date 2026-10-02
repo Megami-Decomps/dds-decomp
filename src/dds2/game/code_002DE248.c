@@ -2,6 +2,8 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
+extern void func_00200930(f32 *, f32 *, s32);
+
 typedef struct EffPacketParams {
     s16 parameterCount;
     s16 vertexCount;
@@ -6714,7 +6716,7 @@ void effApplyBattleStateTint(void) {
 
     actor = btlGetRuntime();
     if ((((EffBattleState *)actor)->statusFlags & 0x6000000) == 0x6000000) {
-        func_00200930(actor + 0x50, actor + 0x60, 0);
+        func_00200930((f32 *)(actor + 0x50), (f32 *)(actor + 0x60), 0);
         return;
     }
 }

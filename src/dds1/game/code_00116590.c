@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -96,11 +97,6 @@ void evtEndUnitValueTransitionForObject(WorldUnitOwner *object) {
     evtEndUnitValueTransition(object->state->unit);
 }
 
-typedef struct WorldTransformParams {
-    f32 rotation[4];    /* 0x00 */
-    f32 position[3];    /* 0x10 */
-    f32 scale[3];       /* 0x1C */
-} WorldTransformParams;
 
 typedef struct WorldTransformData {
     f32 position[3];    /* 0x00 */
@@ -113,12 +109,6 @@ typedef struct WorldTransformData {
     u32 flags;          /* 0x64 */
 } WorldTransformData;
 
-typedef struct WorldTransformSetup {
-    u8 pad00[4];
-    u32 flags;                      /* 0x04: bit 0 -> 1, bit 1 -> 4 in the object's flags */
-    u32 mode;                       /* 0x08 */
-    WorldTransformParams transform; /* 0x0C */
-} WorldTransformSetup;
 
 typedef struct WorldTransformOwner {
     u8 pad00[0x18];

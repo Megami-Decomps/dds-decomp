@@ -1,4 +1,8 @@
 #include "common.h"
+#include "itf.h"
+
+extern SdfAllocation *sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(SdfAllocation *);
 
 extern s32 sdfTexAcquireResourceTexture(u32);
 extern s32 dds3AdminGetActiveMode(void);
@@ -52,7 +56,7 @@ typedef struct MemNode {
 
 /* Allocation handle precedes the first queue node by four bytes. */
 typedef struct MemRingHeader {
-    u32 allocation;
+    SdfAllocation *allocation;
     MemNode first;
 } MemRingHeader;
 
@@ -127,6 +131,7 @@ typedef struct TextDrawArgs {
     u8 unk1C;      /* 0x1C */
     u8 unk1D;      /* 0x1D */
 } TextDrawArgs;
+extern s32 func_00197068(TextDrawArgs *args);
 
 extern u32 D_003BB15C;
 extern u32 D_003D6E20[];
@@ -218,7 +223,7 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_00196ED0);
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197068);
 
-void itfInitTextDrawArgs(s32 encodedText, s32 sub) {
+s32 itfInitTextDrawArgs(s32 encodedText, s32 sub) {
     TextDrawArgs args;
 
     args.x = 0;
@@ -233,7 +238,7 @@ void itfInitTextDrawArgs(s32 encodedText, s32 sub) {
     args.offset = 0;
     args.unk1C = 1;
     args.unk1D = 1;
-    func_00197068(&args);
+    return func_00197068(&args);
 }
 
 u16 frFontGetSlotCellWidth(s32 index) {
@@ -545,7 +550,7 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_00198088);
 
 /* The header before each payload forms a circular free-node list. */
 u32 itfCreateMemNodeRing(s32 payloadBytes, s32 count) {
-    u32 buffer;
+    SdfAllocation *buffer;
     u8 *list;
     MemNode *cursor;
     MemNode *next;
@@ -1076,7 +1081,36 @@ void mnuReportCampProcessHalted(void) {
     func_003003F0(D_003A13F0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00199828);
+
+extern s32 D_00357AB8[];
+
+UiSprite *func_00199828(s32 kind, u32 value) {
+    SdfAllocation *allocation = sdfAllocGeneralBlock(sizeof(UiSprite));
+    UiSprite *work = (UiSprite *)sdfResourceRetainAddress(allocation);
+
+    work->kind = kind;
+    work->allocation = allocation;
+    allocation = sdfAllocGeneralBlock(D_00357AB8[kind]);
+    work->payloadAllocation = allocation;
+    work->payload = (u32 *)sdfResourceRetainAddress(allocation);
+    if (value != 0) {
+        switch (kind) {
+        case 6:
+            *work->payload = value;
+            break;
+        case 7:
+            *work->payload = value;
+            break;
+        case 8:
+            *work->payload = value;
+            break;
+        case 9:
+            *work->payload = value;
+            break;
+        }
+    }
+    return work;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00196478", D_003A13F0);
 
@@ -1089,3 +1123,4 @@ INCLUDE_SDATA(const s32, "game/code_00196478", itfFontTestScriptTask);
 INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB198);
 
 INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB1A0);
+

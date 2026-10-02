@@ -95,4 +95,19 @@ typedef struct {
     SceneObject *object;
 } Scene;
 
+/* Rotation, position and scale copied by the world-transform helpers (0x28). */
+typedef struct WorldTransformParams {
+    f32 rotation[4];
+    f32 position[3];
+    f32 scale[3];
+} WorldTransformParams;
+
+/* Setup record consumed by dds3LoadWorldTransformSetup (0x34). */
+typedef struct WorldTransformSetup {
+    u32 unk00;
+    u32 flags;                      /* bit 0 -> 1, bit 1 -> 4 in the object's flags */
+    u32 mode;
+    WorldTransformParams transform;
+} WorldTransformSetup;
+
 #endif /* DDS3OBJ_H */

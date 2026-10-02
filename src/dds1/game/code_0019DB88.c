@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf.h"
 #include "pcp_vu0.h"
 
 extern void btlUpdateFadeIndicator(u8 *);
@@ -15,15 +16,6 @@ typedef struct SoundQueue {
 
 extern SoundQueue itfMesWork;
 
-typedef struct UiSprite {
-    u8 pad0[0x10];
-    s32 left;
-    s32 top;
-    s32 right;
-    s32 bottom;
-    s32 unk20;
-    s32 screenY;
-} UiSprite;
 
 typedef struct UiPanelPlacement {
     UiSprite *frame;
@@ -72,7 +64,7 @@ typedef struct UiCursor {
 
 extern s32 func_00195ED8();
 
-extern UiSprite *func_00199828();
+extern UiSprite *func_00199828(s32, u32);
 
 extern void itfSetPanelLayoutAndNotify();
 
@@ -1207,3 +1199,4 @@ INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB6A0);
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB6A8);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB6B0);
+
