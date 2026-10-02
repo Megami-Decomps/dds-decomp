@@ -119,6 +119,12 @@ Icons also receive a reusable octahedral marker;
 preserved, and `--meters-per-unit` applies one explicit scale to geometry,
 transforms, bounds, positions, and markers.
 
+`tools/fld_scene.py` can append the same AMB representation to a composed
+FLD1/FLD2 scene. Pass `--automap` and repeat `--automap-area` to select the
+areas that belong in the exported view. The field and automap layers share one
+unit scale and native coordinate system; selection stays explicit because an
+FLD2 discovery-block value is not a universal AMB sub-block ordinal.
+
 All 54 retail AMBs export without an alternate parser: the scene exporter
 consumes the same decoded model graph used by disassembly and reuses the FLD1
 SDF-to-glTF consumer. The complete pass emits 1,446 areas, 13,810 glTF nodes,

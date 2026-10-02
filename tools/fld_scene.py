@@ -8,6 +8,8 @@ import math
 import struct
 from pathlib import Path
 
+import amb
+import amb_scene
 import fld
 import fld_model
 import lb
@@ -283,6 +285,9 @@ def build_scene(
     meters_per_unit: float = 1.0,
     frames_per_second: float = 1.0,
     placement_marker_size: float = 50.0,
+    automap_data: bytes | None = None,
+    automap_areas: set[str] | None = None,
+    icon_marker_size: float = 50.0,
 ) -> tuple[dict, bytes]:
     document, binary = fld_model.build_gltf(
         model_data,
@@ -291,18 +296,35 @@ def build_scene(
         meters_per_unit=meters_per_unit,
         frames_per_second=frames_per_second,
     )
-    return append_field_scene(
+    document, binary = append_field_scene(
         document,
         binary,
         field_data,
         meters_per_unit=meters_per_unit,
         placement_marker_size=placement_marker_size,
     )
+    if automap_data is not None:
+        document, binary = amb_scene.append_automap_scene(
+            document,
+            binary,
+            automap_data,
+            areas=automap_areas,
+            meters_per_unit=meters_per_unit,
+            icon_marker_size=icon_marker_size,
+        )
+        document["asset"]["generator"] = "dds-decomp field-world exporter"
+    return document, binary
 
 
 def _source_or_binary(path: Path, source_suffix: str) -> bytes:
     if path.suffix.lower() == source_suffix:
         return fld.encode(fld.parse_source(path.read_text(encoding="utf-8")))
+    return path.read_bytes()
+
+
+def _automap_source_or_binary(path: Path) -> bytes:
+    if path.suffix.lower() == ".ambasm":
+        return amb.encode(amb.parse_source(path.read_text(encoding="utf-8")))
     return path.read_bytes()
 
 
@@ -316,8 +338,18 @@ def main() -> None:
     parser.add_argument("--meters-per-unit", type=float, default=1.0)
     parser.add_argument("--frames-per-second", type=float, default=1.0)
     parser.add_argument("--placement-marker-size", type=float, default=50.0)
+    parser.add_argument("--automap", type=Path, help="AMB binary or source to add")
+    parser.add_argument(
+        "--automap-area",
+        action="append",
+        dest="automap_areas",
+        help="add only this AMB area name (repeatable)",
+    )
+    parser.add_argument("--icon-marker-size", type=float, default=50.0)
     args = parser.parse_args()
     try:
+        if args.automap_areas and args.automap is None:
+            raise fld.FldError("--automap-area requires --automap")
         textures = None
         if args.input.suffix.lower() == ".lb":
             if args.field is not None or args.texture_bundle is not None:
@@ -348,10 +380,26 @@ def main() -> None:
             meters_per_unit=args.meters_per_unit,
             frames_per_second=args.frames_per_second,
             placement_marker_size=args.placement_marker_size,
+            automap_data=(
+                _automap_source_or_binary(args.automap)
+                if args.automap is not None
+                else None
+            ),
+            automap_areas=(
+                set(args.automap_areas) if args.automap_areas else None
+            ),
+            icon_marker_size=args.icon_marker_size,
         )
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_bytes(fld_model.encode_glb(document, binary))
-    except (OSError, fld.FldError, lb.LbError, tmx.TmxError, ValueError) as exc:
+    except (
+        OSError,
+        amb.AmbError,
+        fld.FldError,
+        lb.LbError,
+        tmx.TmxError,
+        ValueError,
+    ) as exc:
         parser.error(str(exc))
 
 

@@ -116,6 +116,51 @@ class AmbSceneTests(unittest.TestCase):
         with self.assertRaisesRegex(amb.AmbError, "finite and nonnegative"):
             amb_scene.build_gltf(self.data, icon_marker_size=-1.0)
 
+    def test_appends_to_an_existing_scene_without_reusing_its_material(self) -> None:
+        builder = fld_model.GltfBuilder.create()
+        existing_mesh = fld_model.add_marker_mesh(builder, "existing", 0, 1.0)
+        builder.document["nodes"].append({"name": "existing", "mesh": existing_mesh})
+        builder.document["scenes"][0]["nodes"].append(0)
+        builder.document["asset"]["extras"] = {
+            "ddsMetersPerUnit": 0.01,
+            "ddsNativeAxesPreserved": True,
+        }
+        original_material = dict(builder.document["materials"][0])
+
+        document, binary = amb_scene.append_automap_scene(
+            builder.document,
+            bytes(builder.binary),
+            self.data,
+            areas={"001"},
+            meters_per_unit=0.01,
+            icon_marker_size=0.0,
+        )
+
+        self.assertEqual(document["nodes"][0]["name"], "existing")
+        self.assertEqual(document["materials"][0], original_material)
+        self.assertEqual(document["materials"][1]["name"], "AMB geometry")
+        self.assertEqual(document["materials"][2]["name"], "AMB icon")
+        automap_primitive = document["meshes"][1]["primitives"][0]
+        self.assertEqual(automap_primitive["material"], 1)
+        self.assertEqual(document["asset"]["extras"]["ddsAutomapAreaCount"], 1)
+        self.assertEqual(document["scenes"][0]["nodes"], [0, 3])
+        fld_model.encode_glb(document, binary)
+
+    def test_rejects_a_scale_mismatch_before_mutating_the_scene(self) -> None:
+        builder = fld_model.GltfBuilder.create()
+        builder.document["asset"]["extras"] = {"ddsMetersPerUnit": 0.01}
+        before = json.dumps(builder.document, sort_keys=True)
+
+        with self.assertRaisesRegex(amb.AmbError, "different unit scales"):
+            amb_scene.append_automap_scene(
+                builder.document,
+                bytes(builder.binary),
+                self.data,
+                meters_per_unit=1.0,
+            )
+
+        self.assertEqual(json.dumps(builder.document, sort_keys=True), before)
+
 
 if __name__ == "__main__":
     unittest.main()

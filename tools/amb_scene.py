@@ -29,41 +29,65 @@ def _scaled_vec3(
     return [value * meters_per_unit for value in values]
 
 
-def build_gltf(
+def _unlit_material(document: dict, name: str, color: list[float]) -> int:
+    extensions = document.setdefault("extensionsUsed", [])
+    if "KHR_materials_unlit" not in extensions:
+        extensions.append("KHR_materials_unlit")
+    material = {
+        "name": name,
+        "doubleSided": True,
+        "pbrMetallicRoughness": {
+            "baseColorFactor": color,
+            "metallicFactor": 0.0,
+            "roughnessFactor": 1.0,
+        },
+        "extensions": {"KHR_materials_unlit": {}},
+    }
+    index = len(document["materials"])
+    document["materials"].append(material)
+    return index
+
+
+def append_automap_scene(
+    document: dict,
+    binary: bytes,
     data: bytes,
     *,
     areas: set[str] | None = None,
     meters_per_unit: float = 1.0,
     icon_marker_size: float = 50.0,
 ) -> tuple[dict, bytes]:
-    """Return a glTF document and binary buffer for selected automap areas."""
+    """Append selected automap areas to an existing glTF scene."""
 
     if not math.isfinite(meters_per_unit) or meters_per_unit <= 0.0:
         raise amb.AmbError("meters per unit must be a positive finite number")
     if not math.isfinite(icon_marker_size) or icon_marker_size < 0.0:
         raise amb.AmbError("icon marker size must be finite and nonnegative")
 
+    extras = document["asset"].setdefault("extras", {})
+    old_scale = extras.get("ddsMetersPerUnit")
+    if old_scale is not None and old_scale != meters_per_unit:
+        raise amb.AmbError("automap and existing scene use different unit scales")
+
     model = amb.decode(data)
-    builder = fld_model.GltfBuilder.create()
-    builder.document["asset"]["generator"] = "dds-decomp AMB automap exporter"
-    builder.document["extensionsUsed"] = ["KHR_materials_unlit"]
-    builder.document["materials"][0].update(
-        {
-            "name": "AMB geometry",
-            "extensions": {"KHR_materials_unlit": {}},
-        }
-    )
-    builder.document["materials"].append(
-        {
-            "name": "AMB icon",
-            "doubleSided": True,
-            "pbrMetallicRoughness": {
-                "baseColorFactor": [1.0, 0.15, 0.65, 1.0],
-                "metallicFactor": 0.0,
-                "roughnessFactor": 1.0,
-            },
-            "extensions": {"KHR_materials_unlit": {}},
-        }
+    builder = fld_model.GltfBuilder(document, bytearray(binary))
+    if not document["meshes"] and len(document["materials"]) == 1:
+        geometry_material = 0
+        document["materials"][0].update(
+            {
+                "name": "AMB geometry",
+                "extensions": {"KHR_materials_unlit": {}},
+            }
+        )
+        extensions = document.setdefault("extensionsUsed", [])
+        if "KHR_materials_unlit" not in extensions:
+            extensions.append("KHR_materials_unlit")
+    else:
+        geometry_material = _unlit_material(
+            document, "AMB geometry", [1.0, 1.0, 1.0, 1.0]
+        )
+    icon_material = _unlit_material(
+        document, "AMB icon", [1.0, 0.15, 0.65, 1.0]
     )
     marker_mesh = None
 
@@ -88,6 +112,7 @@ def build_gltf(
                 graph.draw_lists,
                 graph.draws,
                 meters_per_unit=meters_per_unit,
+                default_material=geometry_material,
             )
         except fld.FldError as exc:
             raise amb.AmbError(str(exc)) from exc
@@ -131,7 +156,7 @@ def build_gltf(
                     marker_mesh = fld_model.add_marker_mesh(
                         builder,
                         "AMB icon marker",
-                        1,
+                        icon_material,
                         icon_marker_size * meters_per_unit,
                     )
                 node = {
@@ -204,12 +229,35 @@ def build_gltf(
 
     builder.binary.extend(bytes((-len(builder.binary)) & 3))
     builder.document["buffers"] = [{"byteLength": len(builder.binary)}]
-    builder.document["asset"]["extras"] = {
-        "ddsMetersPerUnit": meters_per_unit,
-        "ddsNativeAxesPreserved": True,
-        "ddsAreaCount": exported,
-    }
+    extras.setdefault("ddsMetersPerUnit", meters_per_unit)
+    extras["ddsNativeAxesPreserved"] = True
+    extras["ddsAutomapAreaCount"] = exported
     return builder.document, bytes(builder.binary)
+
+
+def build_gltf(
+    data: bytes,
+    *,
+    areas: set[str] | None = None,
+    meters_per_unit: float = 1.0,
+    icon_marker_size: float = 50.0,
+) -> tuple[dict, bytes]:
+    """Return a glTF document and binary buffer for selected automap areas."""
+
+    builder = fld_model.GltfBuilder.create()
+    builder.document["asset"]["generator"] = "dds-decomp AMB automap exporter"
+    document, binary = append_automap_scene(
+        builder.document,
+        bytes(builder.binary),
+        data,
+        areas=areas,
+        meters_per_unit=meters_per_unit,
+        icon_marker_size=icon_marker_size,
+    )
+    document["asset"]["extras"]["ddsAreaCount"] = document["asset"]["extras"][
+        "ddsAutomapAreaCount"
+    ]
+    return document, binary
 
 
 def main() -> None:
