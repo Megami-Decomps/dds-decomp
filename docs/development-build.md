@@ -2,9 +2,9 @@
 
 The `dds1-dev` and `dds2-dev` targets build separate executables whose layouts
 can grow without weakening the byte-identical retail builds. Each target
-recompiles and replaces the complete `.text` and `.rodata` sections of one
-paired code unit, and links development-only C code and data into an appended
-loadable segment:
+recompiles and replaces the complete `.text` and `.rodata` sections of two
+paired code units, one of which retains two assembly fallback functions, and
+links development-only C code and data into an appended loadable segment:
 
 ```sh
 ninja dds1-dev dds2-dev
@@ -27,6 +27,11 @@ the following hold:
 - every nonempty global or weak `FUNC` or `OBJECT` definition in a replaced
   span has exactly one development definition with the same name, binding,
   type, visibility, and logical move, wholly contained in that move;
+- relocations against named replacement symbols keep that exact identity and
+  addend; address-containment mapping is limited to ELF section-symbol
+  relocations;
+- every declared assembly fallback has the same function contract, exact
+  bytes, and relative relocation signature as its retail object definition;
 - every changed word outside the declared old slots, ELF metadata, and heap
   patches is explained by a relocation to the corresponding replacement
   symbol and addend;
@@ -37,10 +42,11 @@ the following hold:
 - the development heap begins after the appended segment while the retail BSS
   clear boundary remains unchanged;
 - each moved section contains the exact expected number of relocation entries
-  at sites within its span (21 for replacement text and 10 for read-only data
-  in each current build);
+  at sites within its span (21 and 101 for the two text sections, and 10 and
+  49 for their read-only data, in each current build);
 - every allocated replacement-object section is explicitly moved or retained;
-  currently retained data and BSS sections must remain empty;
+  currently retained data and BSS sections must remain empty, and COMMON
+  storage is rejected;
 - each development-only addition occupies its linker-derived span and retains
   its expected number of relocation entries; and
 - each static linker redirect starts at its asserted retail target and resolves
@@ -50,7 +56,9 @@ Each `replacements` entry substitutes a separately compiled object for the
 object named by its `retail_object`; its moved sections are declared in
 `moves`, while `retained_sections` accounts for allocated sections that stay
 at their retail placements. The current policy requires every retained section
-to have size zero.
+to have size zero. A replacement source may contain `INCLUDE_ASM` only when its
+symbols are explicitly listed as fallbacks in source order. `INCLUDE_RODATA`
+and `INCLUDE_SDATA` remain unsupported for replacement objects.
 
 The descriptors for the current moves and their asserted binary sites are
 `config/dds1/devbuild.json` and `config/dds2/devbuild.json`. The checks
@@ -80,12 +88,19 @@ placing any of them in the retail link.
 ## Current scope
 
 These are relocatable development builds, not general mod loaders. Each
-version replaces one paired unit's code and both of its jump tables, then
-links one development entry object. The replacement is compiled separately
-with `-G0`: its `.text` is `0x3D0` bytes rather than the retail `0x3C8`, so two
-later function definitions move by eight bytes. Seven incoming references per
-game are verified against those shifted definitions by symbol identity and
-addend; a same-offset range mapping would point them at the wrong code.
+version replaces two paired units' code and read-only data, then links one
+development entry object. The smaller replacement is compiled separately with
+`-G0`: its `.text` is `0x3D0` bytes rather than the retail `0x3C8`, so two later
+function definitions move by eight bytes. The mixed-source replacement grows
+from `0x1230` to `0x1280` bytes of text while preserving its two assembly
+fallbacks exactly.
+
+Together the replacements pair 55 exported symbols, 40 of which change their
+offset within their replacement. The verifier follows 1,011 DDS1 and 1,036
+DDS2 external relocations to shifted definitions, plus 35 relocations between
+the two replacement objects in each game. It retains 181 relocation entries
+within the replacement text and read-only data. All counts are asserted by the
+version descriptors.
 
 Replacement-owned code and read-only data may change size and contents. New
 allocated data, small-data, or BSS sections are rejected until their
