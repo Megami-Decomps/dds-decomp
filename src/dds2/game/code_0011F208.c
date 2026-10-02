@@ -697,7 +697,64 @@ INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412BB8);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00120B88);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00122828);
+typedef struct FieldActivationRecord {
+    s32 kind;
+    s16 parameter;
+    u8 pad06[0xA];
+} FieldActivationRecord;
+
+extern FieldActivationRecord D_003A8EB0[];
+extern u8 D_0039A1D0[], D_003A41A8[], D_003A47E8[], D_003A55F0[], D_0038A3B8[], D_0038A480[], D_0038A9B0[], fldCameraFollowRows[], D_00389A70[], D_00391FA0[];
+extern u32 D_003899F0[];
+extern void *fldCameraSettings;
+extern u32 sdfDevCreateCommandState(const char *);
+extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
+extern void sdfDevWaitThenReleaseCommandState(u32);
+
+/* Load every field table from FLDALL.TBL, then build D_003899F0: for each stage id (1..0x1E) the running total of the coordinate rows that precede its first record. Reads the coordinate table through the array each time: a pointer local assigned from D_00389170 would share its address with the argument use in a saved register across the calls. */
+void func_00122828(void) {
+    u32 command = sdfDevCreateCommandState("/fld/f/bin/FLDALL.TBL");
+    s32 sum;
+    s16 previous;
+    s32 i;
+
+    sdfDevQueueReadAndWait(command, D_0039A1D0, 0x3D8);
+    sdfDevQueueReadAndWait(command, D_0039A5A8, 0x3C00);
+    sdfDevQueueReadAndWait(command, D_0039E1A8, 0x4400);
+    sdfDevQueueReadAndWait(command, D_003A25A8, 0x1C00);
+    sdfDevQueueReadAndWait(command, D_003A41A8, 0x640);
+    sdfDevQueueReadAndWait(command, D_003A47E8, 0xC80);
+    sdfDevQueueReadAndWait(command, D_003A55F0, 0x3840);
+    sdfDevQueueReadAndWait(command, D_003A8EB0, 0x1000);
+    sdfDevQueueReadAndWait(command, D_0038A3B8, 0xC8);
+    sdfDevQueueReadAndWait(command, D_0038A480, 0x190);
+    sdfDevQueueReadAndWait(command, D_0038A9B0, 0x500);
+    sdfDevQueueReadAndWait(command, fldCameraFollowRows, 0xC00);
+    sdfDevQueueReadAndWait(command, fldCameraSettings, 0x2A0);
+    sdfDevQueueReadAndWait(command, D_00387D70, 0x1400);
+    sdfDevQueueReadAndWait(command, D_00389170, 0x600);
+    sdfDevQueueReadAndWait(command, D_00389A70, 0x880);
+    sdfDevQueueReadAndWait(command, D_00391FA0, 0x1200);
+    sdfDevWaitThenReleaseCommandState(command);
+    sum = 0;
+    previous = 0;
+    for (i = 0; i < 0x1F; i++) {
+        D_003899F0[i] = 0;
+    }
+    for (i = 0; i < 0x60; i++) {
+        s16 id = ((FieldStageCoordinate *)D_00389170)[i].x;
+
+        if (id > 0) {
+            if (id < 0x1F) {
+                if (id != previous) {
+                    D_003899F0[id] = sum;
+                }
+                previous = id;
+                sum += ((FieldStageCoordinate *)D_00389170)[i].rows;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00122A38);
 
@@ -934,13 +991,6 @@ u8 fldTestMapSlotValueFlag(s32 map, u32 slot, u32 bit) {
     return 0;
 }
 
-typedef struct FieldActivationRecord {
-    s32 kind;
-    s16 parameter;
-    u8 pad06[0xA];
-} FieldActivationRecord;
-
-extern FieldActivationRecord D_003A8EB0[];
 extern void fldActivateObjectById(s32);
 extern void func_0011C6A0(s32);
 
@@ -1045,8 +1095,6 @@ u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
     } while (visited < 0x280);
     return index;
 }
-
-extern u32 D_003899F0[];
 
 u32 fldFindStageCoordinateRowOffset(s32 x, s32 y) {
     FieldStageCoordinate *table = (FieldStageCoordinate *)D_00389170;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
 s32 scrReadIntParameter(s32 idx);
@@ -72,6 +73,8 @@ void evtDestroySecondaryWorldNode(void);
 s32 evtStageRelinkOwnedNodeResource(void *target, void *path);
 
 f32 bfWaitReadArgFloat(s32 idx);
+extern void func_002E7F20(f32, f32, f32);
+extern void effMiscQuatMultiplyVU(void);
 
 void evtScaleSlotByClampedMultiplier(s32 unit, f32 value);
 
@@ -646,7 +649,30 @@ s32 evtCommandSetEffectUnitFirstVector(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00227138);
+s32 func_00227138(void) {
+    void *unit;
+    f32 quaternion[4];
+    f32 radians;
+    f32 pitch;
+
+    if (scrReadIntParameter(0) < 0) {
+        unit = (void *)fldGetPlayerSceneState();
+    } else {
+        unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+    }
+    if (unit == NULL) {
+        return 1;
+    }
+    radians = 0.017453293f;
+    pitch = bfWaitReadArgFloat(1) * radians;
+    func_002E7F20(pitch, bfWaitReadArgFloat(2) * radians, 0.0f);
+    VU0_MOVE_VF(vf11, vf10);
+    func_002E7F20(0.0f, 0.0f, bfWaitReadArgFloat(3) * radians);
+    effMiscQuatMultiplyVU();
+    VU0_STORE_VF(vf10, quaternion);
+    effObjSetInnerSecondVec(unit, quaternion);
+    return 1;
+}
 
 s32 evtCommandSetEffectUnitSecondVector(void) {
     void *unit;
