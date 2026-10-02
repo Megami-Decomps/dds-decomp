@@ -153,7 +153,7 @@ extern u8 D_00438B68;
 
 extern s32 func_0036D880(const char *, s32, void *, s32 *);
 
-extern void func_0035B6E0(const char *);
+extern void func_0035B6E0(const char *fmt, ...);
 
 extern f32 sdfSinPoly(f32 arg0);
 

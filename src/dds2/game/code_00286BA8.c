@@ -34,30 +34,46 @@ extern u32 sdfMemoryGetBlockAddress(void *block);
 extern u32 mnuCreateProgressHost(void);
 extern void mnuInitPanelSoundEntries(void);
 
+/* One allocated mantra/status work area. The create side stores its own
+ * allocation handle and the progress host; the destroy side releases both
+ * resource ids and the host. Only the fields either side touches are named;
+ * the rest of the block is passed on to the menu task untouched. */
+typedef struct MnuStatusResource {
+    u32 allocationHandle; /* 0x00: the block's own handle, freed on destroy */
+    u8 pad04[0x34];
+    u32 resourceIdA;      /* 0x38 */
+    u32 resourceIdB;      /* 0x3C */
+    u8 pad40[8];
+    u32 *progressHost;    /* 0x48 */
+    u8 pad4C[0xBCC];
+} MnuStatusResource; /* 0xC08 */
+
 /* Allocate and zero the 0xC08 status resource, then wire up its host pointer,
  * console banner and panel sound entries. */
 void *func_00286E98(void) {
-    void *handle = (void *)func_003292A8(0xC08);
-    u8 *work = (u8 *)sdfMemoryGetBlockAddress(handle);
+    u32 handle = func_003292A8(0xC08);
+    MnuStatusResource *resource = (MnuStatusResource *)sdfMemoryGetBlockAddress(handle);
 
-    memset(work, 0, 0xC08);
-    *(u32 *)work = (u32)handle;
-    *(u32 **)(work + 0x48) = (u32 *)mnuCreateProgressHost();
+    memset(resource, 0, 0xC08);
+    resource->allocationHandle = handle;
+    resource->progressHost = (u32 *)mnuCreateProgressHost();
     evtPrintDeveloperConsoleMessage("trmLoadStartStatusResource()!!!! \n");
     evtPrintDeveloperConsoleMessage("mtrInit\n");
     mnuInitPanelSoundEntries();
-    return work;
+    return resource;
 }
 
 void func_00286F18(s32 arg0, s32 work) {
     if (work != 0) {
+        MnuStatusResource *resource = (MnuStatusResource *)work;
+
         dspCloseChannel();
-        sdfQueueNonzeroResourceId(*(u32 *)(work + 0x38));
-        sdfQueueNonzeroResourceId(*(u32 *)(work + 0x3C));
+        sdfQueueNonzeroResourceId(resource->resourceIdA);
+        sdfQueueNonzeroResourceId(resource->resourceIdB);
         mnuReleaseFirstMantraSpriteSlots();
-        mnuReleaseStaffAndTitleVisualResources(*(u32 **)(work + 0x48));
+        mnuReleaseStaffAndTitleVisualResources(resource->progressHost);
         evtPrintDeveloperConsoleMessage("trmDestroyStatusResource()!!!! \n");
-        func_003297C8(*(u32 *)work);
+        func_003297C8(resource->allocationHandle);
         mnuReleasePanelEntryPool();
     }
     evtPrintDeveloperConsoleMessage("mtrRelease\n");
@@ -66,8 +82,8 @@ void func_00286F18(s32 arg0, s32 work) {
 /* Store the task handle so the existence probe and explicit stop can
  * invalidate or destroy the same resource group. */
 void mnuCreateResourceTask(void) {
-    void *menuData = func_00286E98();
-    mnuMantraSelectionResource = sdfCreateTaskWorker(D_00426060, 0x402, 0x2B12, D_003CFCC0, func_00286F18, menuData);
+    MnuStatusResource *resource = (MnuStatusResource *)func_00286E98();
+    mnuMantraSelectionResource = sdfCreateTaskWorker(D_00426060, 0x402, 0x2B12, D_003CFCC0, func_00286F18, resource);
 }
 
 s32 mnuCheckResourceTask(void) {

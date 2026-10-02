@@ -116,7 +116,7 @@ s32 effInvokeOptionalNodeInstanceCallback(EffNode *node) {
     return effNodeTypeOperations[node->type].fn24(node->instance);
 }
 
-extern void func_0035B6E0(const char *, void *);
+extern void func_0035B6E0(const char *fmt, ...);
 extern void *func_00343ED0(void *, u32 *, s32);
 extern void *func_001578C0(u32);
 extern void *func_003297C8(void *);
