@@ -61,7 +61,25 @@ typedef struct SdfGridMarginPrefix {
     s16 rowMargin;     // 0x2E
 } SdfGridMarginPrefix; // 0x30
 
-extern u32 func_002CB5F0(u32 *);
+typedef struct SdfTaskItemDesc {
+    s32 key;                         /* 0x00 */
+    s32 (*init)(void);               /* 0x04 */
+    void (*destroy)(s32, s32);       /* 0x08 */
+    s32 (*update)(s32, s32);         /* 0x0C */
+    void (*callback)(s32, s32);      /* 0x10 */
+} SdfTaskItemDesc;
+
+typedef struct SdfTaskItemWork {
+    u32 type;                        /* 0x00 */
+    s32 key;                         /* 0x04 */
+    s32 (*init)(void);               /* 0x08 */
+    void (*destroy)(s32, s32);       /* 0x0C */
+    s32 (*update)(s32, s32);         /* 0x10 */
+    void (*callback)(s32, s32);      /* 0x14 */
+    u32 pad18;
+} SdfTaskItemWork;
+
+extern void *func_002CB5F0(SdfTaskItemDesc *);
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
@@ -69,7 +87,9 @@ extern s32 sdfAllocGeneralBlock(s32);
 
 extern void *sdfMemoryGetBlockAddress(u32);
 
-extern void func_002CC740();
+extern s32 func_002CC738(void);
+extern void func_002CC740(s32, s32);
+extern s32 func_002CC748(s32, s32);
 
 typedef struct SdfListNode {
     u32 index;                  /* 0x00 */
@@ -740,8 +760,8 @@ s32 kwlnTaskExists(u32 name) {
     return kwlnTaskGetTaskByName(name) != 0;
 }
 
-void sdfAttachTaskItem(TaskWork *work, u32 *item) {
-    u32 result = (u32)sdfListAppend((SdfList *)work->list, *item, (void *)func_002CB5F0(item));
+void sdfAttachTaskItem(TaskWork *work, SdfTaskItemDesc *item) {
+    u32 result = (u32)sdfListAppend((SdfList *)work->list, item->key, func_002CB5F0(item));
     if (work->firstItemHandle == 0) {
         work->firstItemHandle = result;
     }
@@ -827,7 +847,34 @@ void sdfDestroyTaskResourceWork(SdfTaskResourceWork *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB5F0);
+void *func_002CB5F0(SdfTaskItemDesc *item) {
+    SdfTaskItemWork *work = sdfAllocSizeClassBlock(0x1C);
+
+    memset(work, 0, 0x1C);
+    work->type = 0x10007;
+    work->key = item->key;
+    if (item->init == NULL) {
+        work->init = func_002CC738;
+    } else {
+        work->init = item->init;
+    }
+    if (item->destroy == NULL) {
+        work->destroy = func_002CC740;
+    } else {
+        work->destroy = item->destroy;
+    }
+    if (item->update == NULL) {
+        work->update = func_002CC748;
+    } else {
+        work->update = item->update;
+    }
+    if (item->callback == NULL) {
+        work->callback = (void (*)(s32, s32))func_002CC748;
+    } else {
+        work->callback = item->callback;
+    }
+    return work;
+}
 
 typedef struct SdfCallbackWork {
     u8 pad00[4];
@@ -1183,14 +1230,14 @@ float sdfMultiplyAddFloat(float addend, float multiplicand, float multiplier) {
     return addend + multiplicand * multiplier;
 }
 
-u32 func_002CC738(void) {
+s32 func_002CC738(void) {
     return 0;
 }
 
-void func_002CC740(void) {
+void func_002CC740(s32 key, s32 initResult) {
 }
 
-u32 func_002CC748(void) {
+s32 func_002CC748(s32 key, s32 initResult) {
     return 0;
 }
 

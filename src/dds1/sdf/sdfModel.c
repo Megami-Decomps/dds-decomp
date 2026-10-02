@@ -256,7 +256,18 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D7FB0);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8130);
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8388);
+SdfNode *func_002D8388(SdfModel *model, s32 packetSelector, s32 listIndex) {
+    SdfNode *node = sdfAllocSizeClassBlock(sizeof(SdfNode));
+    SdfNode **head = (SdfNode **)(((u32)listIndex << 2) + (u32)model + 0x28);
+    SdfNode *next = *head;
+
+    node->packetSelector = packetSelector;
+    *head = node;
+    node->quadwordCount = 1;
+    node->resourceHandle = 0;
+    node->next = next;
+    return node;
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D83F8);
 

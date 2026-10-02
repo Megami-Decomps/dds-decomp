@@ -69,6 +69,9 @@ void effBattleMiscQueryPosition(void *owner, EffBattleMiscParam *param, u128 *ou
 extern u32 effBTLFieldColorGetOverrideSelector(void);
 extern u32 effBTLFieldColorGetFinalSelector(void);
 extern void effBattleComputeTargetPosition();
+extern f32 func_00208298(u32 mask, s32 a, s32 b);
+extern f32 btlGetMaxUnitTop(u32 mask);
+extern f32 btlGetExtremeUnitY(u32 mask);
 
 void effBattleMiscCallByOwnerA(u32 unused, void *arg) {
     effBattleComputeTargetPosition(effBTLFieldColorGetOverrideSelector(), arg);
@@ -170,7 +173,81 @@ void effBattleComputeTargetPosition(EffBattleMiscUnit *unit, EffBattleMiscTarget
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169A78);
+void func_00169A78(u32 flags, u32 targetParam) {
+    f32 out[4];
+    f32 dir[4];
+    f32 pos[4];
+    f32 vertical;
+    f32 length;
+    f32 extremeY;
+    EffBattleMiscTargetParam *param = (EffBattleMiscTargetParam *)targetParam;
+    u32 kind = param->kind;
+    u32 sub = param->sub;
+
+    func_00208298(flags, 0, 0);
+    VU0_STORE_VF(vf10, pos);
+    length = 500.0f;
+    vertical = -btlGetMaxUnitTop(flags);
+    extremeY = btlGetExtremeUnitY(flags);
+    if (param->length != 0) {
+        length = (f32)param->length;
+    }
+
+    switch (kind) {
+    case 5:
+        if (sub == 8 || sub == 10) {
+            vertical = -1.0f;
+            if (param->length != 0) {
+                vertical = -length;
+            }
+        } else {
+            vertical = -1.0f;
+        }
+        break;
+    case 0:
+        vertical = pos[1];
+        break;
+    case 1:
+        vertical = pos[1];
+        break;
+    case 2:
+        break;
+    case 3:
+        break;
+    case 4:
+        vertical = 0.0f;
+        break;
+    default:
+        vertical = 0.0f;
+        break;
+    }
+
+    if (sub == 8) {
+        out[0] = pos[0];
+        out[1] = vertical;
+        out[2] = extremeY;
+    } else if (sub == 10) {
+        out[0] = pos[0];
+        out[1] = vertical;
+        out[2] = pos[2];
+    } else {
+        dir[0] = 0.0f;
+        dir[1] = 0.0f;
+        if (flags & 0x200) {
+            dir[2] = 1.0f;
+        } else {
+            dir[2] = -1.0f;
+        }
+        func_00336538(D_003AF1D8[sub]);
+        VU0_LOAD_VF(vf10, dir);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, dir);
+        out[0] = pos[0] + length * dir[0];
+        out[1] = vertical + length * dir[1];
+        out[2] = extremeY + length * dir[2];
+    }
+    VU0_LOAD_VF(vf10, out);
+}
 
 void func_00169C58(u32 unused, u32 value) {
     EffBattleMiscCtx *ctx = (EffBattleMiscCtx *)effBTLFieldColorGetOriginalSelector();
@@ -247,8 +324,6 @@ void effBattleMiscBuildUnitPartOffsetVU(EffBattleMiscUnit *unit, EffBattleMiscTa
 void effBattleMiscApplyParamByte(u32 owner, EffBattleMiscParam *param) {
     btlSetActorEffectParameterOrMuzzlePosition(owner, param->value);
 }
-
-extern f32 func_00208298(u32 mask, s32 a, s32 b);
 
 f32 effBattleMiscQueryScalar(EffBattleMiscUnit *unit, EffBattleMiscParam *param) {
     EffBattleMiscUnit *other;

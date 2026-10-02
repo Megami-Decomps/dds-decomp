@@ -300,6 +300,44 @@ Across the archived field corpus, every one of the 150,694 primary and 3,948
 secondary material texture references resolves inside its paired TBN bundle.
 This covers 3,656 DDS1 and 3,415 DDS2 model resources.
 
+### Composed field export
+
+`tools/fld_scene.py` combines the visual FLD1 layer with the matching FLD2
+world data. An LB archive already contains all three required payloads:
+
+```sh
+python3 tools/fld_scene.py extracted/f011_001.LB field.glb \
+  --meters-per-unit 0.01 --frames-per-second 30
+```
+
+Loose binaries or source use explicit companions:
+
+```sh
+python3 tools/fld_scene.py src/dds1/data/field/f011_001.f1asm field.glb \
+  --field src/dds1/data/field/f011_001.fldasm \
+  --texture-bundle extracted/f011_001.tbn \
+  --meters-per-unit 0.01 --frames-per-second 30
+```
+
+The resulting GLB contains the textured, animated model hierarchy together
+with translucent unlit collision surfaces and transformed nodes for every
+named camera and placement. Camera nodes retain their vertical field of view
+as metadata. Placements use a shared octahedral marker so doors, event points,
+terminals, and other script-facing positions are visible in ordinary glTF
+viewers; `--placement-marker-size` sets its radius in native DDS units, or zero
+hides the geometry while retaining the nodes and metadata.
+
+Collision quads are triangulated as `(0,1,2)` and `(0,2,3)`; the retail
+`0xffffffff` fourth-index sentinel selects a single triangle. Source face
+controls remain authoritative in the FLD2 source, while mesh extras record
+face and triangle counts. Unit conversion is shared with the model exporter,
+so both layers stay in the same coordinate space and DDS axes remain intact.
+
+The scene layer validates all 1,232 supported FLD2 payload occurrences across
+both games: 5,533 collision resources and 167,623 output triangles, 1,551
+cameras, and 10,222 placements. The paired DDS1 and DDS2 composed fields pass
+the Khronos glTF validator without errors or warnings.
+
 Each transform is `0x30` bytes: four position floats, four rotation floats,
 and four scale floats. Each collision object also starts with a `0x30`-byte
 header. Its header owns vertex and face counts and pointers; it is followed by
