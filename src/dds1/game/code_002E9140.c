@@ -212,7 +212,22 @@ u32 func_002E9610(u32 *outSecondaryValue) {
     return sndMidiTrackState.unk208;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9140", func_002E9630);
+void func_002E9630(u8 *out) {
+    s32 group;
+    u8 *state;
+
+    if (out == NULL) {
+        return;
+    }
+    state = (u8 *)&sndMidiTrackState;
+    for (group = 0; group < 2; group++) {
+        s32 i;
+
+        for (i = 0; i < 24; i++) {
+            *out++ = state[0x890 + group * 0x20 + i];
+        }
+    }
+}
 
 /* Sends a prepared track identifier with the 0x17f setting. */
 void sndStartTrackExtended(s32 trackId) {
