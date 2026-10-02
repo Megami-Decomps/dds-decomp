@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_state.h"
 
 extern u32 D_004367F8;
 
@@ -2093,7 +2094,7 @@ extern s32 btlRollAiBucket();
 
 s32 btlRollFearChance(s32 unused, u8 *unit, s32 flagsA, s32 flagsB) {
     s32 threshold;
-    if (*(u32 *)(btlGetRuntime() + 0x220) & 0x80) {
+    if (((BtlState *)btlGetRuntime())->unk220 & 0x80) {
         return 0;
     }
     if (((UiObject *)unit)->actionFlags & 8) {
@@ -2113,9 +2114,54 @@ s32 btlRollFearChance(s32 unused, u8 *unit, s32 flagsA, s32 flagsB) {
     return btlRollAiBucket() < threshold;
 }
 
+extern s32 btlGetActionRecordLookupValue(s32);
+extern s32 fldCountSceneSlots(void);
+
+/* Combine both contributions; groups of three or more suppress the 30% case. */
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415440);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B09F0);
+s32 func_001B09F0(s32 unused, UiObject *unit, u32 flags,
+                  s32 unusedFlags, u8 useSelectedAction) {
+    s32 actionThreshold;
+    s32 statusThreshold;
+    s32 threshold;
+    u32 category;
+
+    if (((BtlState *)btlGetRuntime())->unk220 & 0x80) {
+        return 0;
+    }
+    actionThreshold = 0;
+    statusThreshold = 0;
+    if (useSelectedAction != 0) {
+        if (unit->selectedEntryIndex == -1) {
+            return 0;
+        }
+        category = btlGetActionRecordLookupValue(unit->selectedEntryIndex);
+        switch (category) {
+            case 0x20000:
+            case 0x40000:
+                actionThreshold = 40;
+                break;
+            case 0x10000:
+                actionThreshold = 30;
+                if (fldCountSceneSlots() >= 3) {
+                    actionThreshold = 0;
+                }
+                break;
+        }
+    }
+    if (flags & 0x60000) {
+        statusThreshold = 40;
+    } else if (flags & 0x10000) {
+        statusThreshold = 30;
+        if (fldCountSceneSlots() >= 3) {
+            statusThreshold = 0;
+        }
+    }
+    threshold = statusThreshold < actionThreshold ? actionThreshold : statusThreshold;
+    btlBossDebugPrintf("btl:fear all ratio[%d]\n", threshold);
+    return btlRollAiBucket() < threshold;
+}
 
 f32 func_001B0B20(void) {
     return 1.5f;

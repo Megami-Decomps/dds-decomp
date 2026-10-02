@@ -33,8 +33,25 @@ typedef struct MnuNodeList {
     s32 count;           /* 0x04 */
 } MnuNodeList;
 
+typedef struct FileQueue FileQueue;
+
+typedef struct MnuEffectPositionStep {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} MnuEffectPositionStep;
+
+typedef struct MnuEffectRecord {
+    FileQueue *queue;
+    u32 flags;
+    s32 delay;
+    u32 unkC;
+    MnuEffectPositionStep positionStep;
+} MnuEffectRecord;
+
 typedef struct MnuEffectList {
-    u8 *records;
+    MnuEffectRecord *records;
     s32 count;
 } MnuEffectList;
 
@@ -182,7 +199,7 @@ MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts) {
     u32 handle;
     MnuEffectWork *work;
     MnuEffectList *list;
-    u8 *records;
+    MnuEffectRecord *records;
 
     for (i = 0; i < listCount; i++) allocationSize += recordCounts[i] * 32;
     evtPrintDeveloperConsoleMessage("EffectWork Object Size %d\n", allocationSize);
@@ -193,69 +210,111 @@ MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts) {
     work->count = listCount;
     work->lists = (MnuEffectList *)(work + 1);
     list = work->lists;
-    records = (u8 *)list + listBytes;
+    records = (MnuEffectRecord *)((u8 *)list + listBytes);
     for (i = 0; i < listCount; i++, list++) {
         list->records = records;
         list->count = recordCounts[i];
-        records += recordCounts[i] * 32;
+        records += recordCounts[i];
     }
     return work;
 }
 
 /* Clear each record while preserving the traversal's 16-bit index wrap. */
-void mnuClearNodeRecords(s32 *list) {
-    s32 recordAddress;
+void mnuClearNodeRecords(s32 *listAddress) {
+    MnuEffectList *list = (MnuEffectList *)listAddress;
+    MnuEffectRecord *record;
     u32 index;
 
     index = 0;
-    recordAddress = *list;
-    if (0 < list[1]) {
+    record = list->records;
+    if (0 < list->count) {
         do {
-            memset(recordAddress, 0, 0x20);
+            memset(record, 0, sizeof(*record));
             index = (index + 1) & 0xffff;
-            recordAddress = recordAddress + 0x20;
-        } while ((s32)index < list[1]);
+            record++;
+        } while ((s32)index < list->count);
     }
 }
 
-void mnuClearAllNodeBroadcastFlags(s32 *list) {
-    u8 *node = (u8 *)list[0];
+void mnuClearAllNodeBroadcastFlags(s32 *listAddress) {
+    MnuEffectList *list = (MnuEffectList *)listAddress;
+    MnuEffectRecord *node = list->records;
     s32 index = 0;
-    if (list[1] > 0) {
+    if (list->count > 0) {
         do {
-            mnuClearNodeBroadcastFlag(node);
-            node += 0x20;
+            mnuClearNodeBroadcastFlag((u8 *)node);
+            node++;
             index++;
-        } while (list[1] > index);
+        } while (list->count > index);
     }
 }
 
-void mnuDestroyNodeJobQueues(s32 *list) {
-    u8 *node = (u8 *)list[0];
+void mnuDestroyNodeJobQueues(s32 *listAddress) {
+    MnuEffectList *list = (MnuEffectList *)listAddress;
+    MnuEffectRecord *node = list->records;
     s16 index = 0;
 
-    if (list[1] > 0) {
+    if (list->count > 0) {
         do {
-            if (*(u32 *)node != 0) {
-                fileQueueDestroy(*(u32 *)node);
+            if (node->queue != NULL) {
+                fileQueueDestroy(node->queue);
             }
-            node += 0x20;
+            node++;
             index++;
-        } while (index < list[1]);
+        } while (index < list->count);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B748);
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B838);
+extern void fileQueueSetPosition(FileQueue *queue, void *vector);
+extern void fileQueueSetScale(FileQueue *queue, f32 scale);
+extern void func_0031BC10(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 zAngle);
+
+/* Position-step vectors are copied verbatim; a missing queue aborts the claim. */
+s32 func_0031B838(void *listAddress, void *stepAddress, s32 delay,
+                  f32 x, f32 y, f32 z, f32 scale) {
+    MnuEffectList *list = (MnuEffectList *)listAddress;
+    f32 position[4];
+    MnuEffectRecord *record;
+    s32 index = 0;
+    s32 count;
+
+    position[0] = x;
+    position[1] = y;
+    position[2] = z;
+    position[3] = 0.0f;
+    count = list->count;
+    record = list->records;
+    for (; index < count; index++, record++) {
+        if ((record->flags & 1) == 0) {
+            if (record->queue != NULL) {
+                fileQueueSetPosition(record->queue, position);
+                fileQueueSetScale(record->queue, scale);
+                func_0031BC10(record, 10.0f, 0.0f, 0.0f);
+                record->flags |= 1;
+                if (stepAddress != NULL) {
+                    record->positionStep = *(MnuEffectPositionStep *)stepAddress;
+                }
+                record->delay = delay;
+                record->flags = (record->flags | 0x200) & ~0x800;
+                return (s32)record;
+            }
+            return 0;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B960);
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BA28);
 
 void mnuClearNodeBroadcastFlag(u8 *node) {
-    *(u32 *)(node + 4) &= ~1U;
-    fileQueueNotifyAllJobsComplete(*(u32 *)node);
+    MnuEffectRecord *record = (MnuEffectRecord *)node;
+
+    record->flags &= ~1U;
+    fileQueueNotifyAllJobsComplete(record->queue);
 }
 
 /* Resolves a model from a resource and releases its temporary resource data. */
