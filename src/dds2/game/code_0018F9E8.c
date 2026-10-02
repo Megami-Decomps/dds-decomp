@@ -55,7 +55,25 @@ s32 effResourceRectDrawPixels(EffResourceRectWork *work) {
     return effResourceQuadDraw(work->params.color, work->sourceHandle, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0018F9E8", effResourceRectDrawGsCoords);
+/* Generate already-scaled GS coordinates; the renderer must not scale again. */
+void effResourceRectDrawGsCoords(EffResourceRectWork *work) {
+    f32 scaledExtent = (f32)work->params.extent * 1.4f;
+    s32 x = work->params.centerX + 0x1000;
+    s32 y = (work->params.centerY + 0xE00) >> 1;
+    s32 extent = (s32)scaledExtent;
+    s32 right = x + extent;
+    s32 bottom;
+
+    x -= extent;
+    extent >>= 1;
+    work->params.bounds.left = x;
+    bottom = y + extent;
+    y -= extent;
+    work->params.bounds.right = right;
+    work->params.bounds.top = y;
+    work->params.bounds.bottom = bottom;
+    effResourceQuadDraw(work->params.color, work->sourceHandle, 1);
+}
 
 typedef struct EffTrackPolyModel EffTrackPolyModel;
 typedef struct EffTrackPolyData EffTrackPolyData;
