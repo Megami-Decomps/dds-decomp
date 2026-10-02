@@ -6108,7 +6108,7 @@ void effSyncLinkedActorChildParameter(void) {
             u8 *work = (u8 *)((EffBattleUnit *)effect)->model;
             if (work != NULL) {
                 ((EffLinkedActorChild *)work)->effectValue = ((EffBattleUnit *)effect)->effectValue;
-                func_00221E08(work, 0, ((EffBattleUnit *)effect)->effectValue);
+                evtSetUnitRgbTransition(work, 0, ((EffBattleUnit *)effect)->effectValue);
             }
         }
         effect = (u8 *)((EffBattleUnit *)effect)->next;

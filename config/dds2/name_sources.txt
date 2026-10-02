@@ -272,6 +272,7 @@
 0x001113F0	dds3EnsureWorldNodeInSlot	inferred	src/dds2/game/code_00111388.c func_001113F0: Selects slot by node kind and appends node only if cursor search does not find it. Twin of DDS1 func_001111C8. [names_reviewed24.tsv]
 0x001114D0	dds3GetWorldSlotValue	inferred	Returns the indexed word from the pointer stored in a world object's slot field.
 0x001114E8	dds3CopyFilteredWorldSlot	inferred	src/dds2/game/code_00111388.c func_001114E8: Copies slot values accepted by optional filter into new index node; destroys empty result. Twin of DDS1 func_001112C0. [names_reviewed24.tsv]
+0x001115B0	dds3GetFirstWorldObjectNodeOfKind2	inferred	DDS1 twin 0x00111388; returns the first node in world-list kind 2 through a temporary indexed chain.
 0x00111628	dds3AllocateClearedObjectWork	inferred	Allocates and zeroes the work block attached to an object. [names_reviewed10.tsv]
 0x00111668	dds3ReleaseWorldSlotResource	inferred	Releases the object's resource, exchanges its first slot and frees the pointed-to slot allocation.
 0x001118E0	dds3ReplaceObjectResource	inferred	Releases any existing object resource and acquires a replacement by the stored resource ID.
@@ -934,6 +935,7 @@
 0x00169EA0	effBattleMiscQueryScalar	inferred	switch on param type -> unit height scale / func_001F6970 [names_M61_EffVu.tsv]
 0x00169F68	effBattleMiscDirectionTo	inferred	normalized (muzzle|effect pos - queried pos) [names_M61_EffVu.tsv]
 0x00169FF0	effBattleMiscBuildBasis	inferred	4x4 basis: look-at or table-driven rotation [names_M61_EffVu.tsv]
+0x0016A438	effBattleApplyUnitRgbKeyframe	inferred	Byte-identical DDS1 twin; applies and restores the command RGB transition at its two keyframes
 0x0016A5A0	effParamWorkGetData	inferred	Returns the parameter-work data pointer from offset four.
 0x0016A5A8	effParamWorkGetId	inferred	Returns the parameter-work kind ID at offset zero.
 0x0016A668	effParamWorkInvokeCallback	inferred	Invokes the per-kind callback on the 8-byte parameter work item's data pointer.
@@ -2769,6 +2771,7 @@
 0x0023C568	evtLoadUnitDirectionVectorVU	inferred	Chooses unit direction vector or default direction and loads VU register vf10. [names_reviewed6.tsv]
 0x0023C828	evtUnitSetValueAndFlag	inferred	Writes a unit value at offset 0x6c and sets the 0x20000 flag.
 0x0023C908	evtSetUnitNormalizedDirection	inferred	Normalizes VU direction into unit vector, copies another vector, and adjusts unit flags. [names_reviewed6.tsv]
+0x0023C978	evtSetUnitRgbTransition	inferred	Byte-identical DDS1 twin; updates the evt-unit RGB transition counters and applies or queues the low 24-bit model color
 0x0023CB48	evtTestUnitStatusFlags	inferred	Byte-identical dds1 twin 0x00221FD8; Tests whether any of the unit's 0x7800 flag bits are set. [names_conflicts.tsv]
 0x0023CB58	evtSetUnitStatusFlags	inferred	Byte-identical dds1 twin 0x00221FE8; Sets unit flag bits 0x300. [names_conflicts.tsv]
 0x0023CB68	evtConfigureUnitTransition	inferred	Clears transition flags for zero or initializes direction and transition flags otherwise. [names_reviewed6.tsv]

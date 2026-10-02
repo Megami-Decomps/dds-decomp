@@ -188,7 +188,7 @@ extern void effObjSetInnerSecondVec(void *, void *);
 
 extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);
 extern void func_0023C870(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
-extern void func_0023C978(EvtUnit *unit, s32 arg, u32 color);
+extern void evtSetUnitRgbTransition(EvtUnit *unit, s32 arg, u32 color);
 extern void func_0023CA60(EvtUnit *unit, s32 arg, u32 color);
 
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
@@ -1226,7 +1226,7 @@ u32 evtOpSetUnitPackedRgbColor(void) {
     VU0_SET_AXIS_CLEAR_W(bfWaitReadArgFloat(4), z);
     EE_MMI_RGBA_PACK_F128(packed);
     color[0] = packed;
-    func_0023C978(unit, scrReadIntParameter(1), packed);
+    evtSetUnitRgbTransition(unit, scrReadIntParameter(1), packed);
     return 1;
 }
 

@@ -395,6 +395,7 @@
 0x00111188	evtSpawnActionObj2	inferred	constructor for type 2
 0x001111C8	dds3EnsureWorldNodeInSlot	inferred	src/dds1/game/code_00111160.c func_001111C8: Selects slot by node kind and appends node only if cursor search does not find it. [names_reviewed24.tsv]
 0x001112C0	dds3CopyFilteredWorldSlot	inferred	src/dds1/game/code_00111160.c func_001112C0: Copies slot values accepted by optional filter into new index node; destroys empty result. [names_reviewed24.tsv]
+0x00111388	dds3GetFirstWorldObjectNodeOfKind2	inferred	Returns the first node in world-list kind 2 through a temporary indexed chain.
 0x00111400	dds3AllocateClearedObjectWork	inferred	Allocates and zeroes the work block attached to an object. [names_reviewed10.tsv]
 0x00111610	dds3SpawnSlotRingObj3	inferred	type 3 object taking next slot of 10-entry ring D_00329A68
 0x00111698	dds3SetSlotValue	inferred	Stores the supplied value in the slot data word at offset 8.
@@ -1012,6 +1013,7 @@
 0x0014FCD8	effInvokeOptionalNodeInstanceCallback	inferred	Invokes node-type callback with instance when available; otherwise returns success directly. [names_reviewed19.tsv]
 0x0014FE48	effLoadResourceNode	inferred	confidence=high; src/dds1/effect/effManager.c:func_0014FE48; Logs d3p file read, loads the requested resource, creates the resolved node, and releases the temporary resource handle. [names_qp9.tsv]
 0x0014FEB0	effCloneSourceWithTypeHandler	inferred	confidence=high; src/dds1/game/code_0014FEB0.c:func_0014FEB0; Allocates an effect-source copy, copies type and metadata, and clones its argument through the type-selected handler. [names_qp9.tsv]
+0x00150040	effInitializeBillResourceOwners	inferred	Creates the fifteen configured billboard resource owners and scales each kind-zero payload's half extents
 0x001500F0	effBillDispatchAll	inferred	Dispatches every entry in the bill-kind table. [names_qp9.tsv]
 0x00150260	effReleaseSharedTextureRecord	inferred	src/dds1/game/code_0014FEB0.c func_00150260: Decrements reference count and releases texture reference plus allocation on final reference. [names_reviewed24.tsv]
 0x001511C0	billAllocChild	inferred	allocates 0x34 child, links func_00150148 result when arg given
@@ -1227,6 +1229,7 @@
 0x00162338	effBattleMiscDirectionTo	inferred	normalized (muzzle|effect pos - queried pos) [names_M61_EffVu.tsv]
 0x001623C0	effBattleMiscBuildBasis	inferred	4x4 basis: look-at or table-driven rotation [names_M61_EffVu.tsv]
 0x001624B8	effBattleMiscGetTableEntry	inferred	Returns the indexed word in the battle-misc table.
+0x00162808	effBattleApplyUnitRgbKeyframe	inferred	Applies the command RGB transition at its start keyframe and restores the unit base color at its end keyframe
 0x00162980	effParamWorkCreate	inferred	allocs 8-byte work, stores kind id, builds data through the D_00353710 create slot
 0x001629F0	effDispatchParameterDataAndFreeWork	inferred	confidence=high; src/dds1/game/code_001624D0.c:func_001629F0; Dispatches the work-selected operation on its parameter data, then releases the work allocation. [names_qp9.tsv]
 0x00162A70	effParamWorkDuplicate	inferred	allocs a new work copying the kind id, rebuilds data through the D_0035371C clone slot
@@ -3160,6 +3163,7 @@
 0x00221CB8	evtUnitSetValueAndFlag	inferred	Byte-identical dds2 twin 0x0023C828; Writes a unit value at offset 0x6c and sets the 0x20000 flag. [names_conflicts.tsv]
 0x00221CD0	evtClearUnitValueChangeFlag	inferred	Clears the unit's value-change bit before updating the unit.
 0x00221D98	evtSetUnitNormalizedDirection	inferred	Normalizes VU direction into unit vector, copies another vector, and adjusts unit flags. [names_reviewed6.tsv]
+0x00221E08	evtSetUnitRgbTransition	inferred	Updates the evt-unit RGB transition counters and applies or queues the low 24-bit model color
 0x00221FD8	evtTestUnitStatusFlags	inferred	Tests whether any of the unit's 0x7800 flag bits are set.
 0x00221FE8	evtSetUnitStatusFlags	inferred	Sets unit flag bits 0x300.
 0x00221FF8	evtConfigureUnitTransition	inferred	Clears transition flags for zero or initializes direction and transition flags otherwise. [names_reviewed6.tsv]
@@ -5846,6 +5850,7 @@
 0x0034C8E0	fldSecondaryQueuedEffectPosition	inferred	confidence=high; data D_0034C8E0; matched-C-users=2; src/dds1/game/code_001411F0.c:1473:fldQueueSecondaryEffectPosition; src/dds1/game/code_001411F0.c:1890:fldFlushQueuedEffectPositions; Secondary queue stores XYZ; flush supplies them to resource spawn; data-twin=D_003A8EA0, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/data.data.s:56819.; seed-placeholder=D_0034C8E0; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x0034DDF0	fldMirroredSolarThresholds	inferred	confidence=high; src/dds1/game/code_0014F4C8.c:fldCmdRollMirroredSolarThreshold; Table indexed by mirrored solar phase to obtain the random-check threshold. [names_qp9.tsv]
 0x0034DE18	effNodeTypeOperations	inferred	confidence=high; src/dds1/effect/effManager.c:D_0034DE18; type=EffTypeOps[]; refs=effCreateNode,effDestroyNode; Indexed by node type to create, destroy, update and query the underlying effect instance. [names_qp9.tsv]
+0x0034DF50	effBillResourceInitTable	inferred	Fifteen resource, billboard-kind, and scale records consumed by effInitializeBillResourceOwners
 0x0034E250	parKindConstructorEntries	inferred	confidence=high; src/dds1/game/code_0015A758.c:D_0034E250; type=ParDispatch[]; refs=parInstantiateKind,parCreateIndexed; Dispatch-indexed callbacks construct particle objects; callers store the same dispatch index in results. [names_qp9.tsv]
 0x0034E650	effBillConstructorEntries	inferred	confidence=high; src/dds1/game/code_0015F4D0.c:D_0034E650; type=BillDispatch[]; refs=effBillCreateDispatch,effCreateDispatchStateForHandler; Handler-indexed callbacks construct billboard dispatch state and are reused when recreating a handler. [names_qp9.tsv]
 0x0034E658	billObjectCallbacks	inferred	confidence=high; src/dds1/game/code_0015F4D0.c:billDispatchIndexedObjectCallback; Object callback records selected by the object callback index. [names_qp9.tsv]

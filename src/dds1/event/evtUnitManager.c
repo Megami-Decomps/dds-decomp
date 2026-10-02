@@ -191,7 +191,7 @@ void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 arg) {
     unit->flags = (unit->flags | 0x2400) & ~0x4000;
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221E08);
+INCLUDE_ASM(const s32, "event/evtUnitManager", evtSetUnitRgbTransition);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221EF0);
 
