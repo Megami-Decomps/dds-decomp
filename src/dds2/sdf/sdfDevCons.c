@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ee_mmi.h"
 
 typedef struct DevConsState {
     u8 pad0[4]; /* 0x0 */
@@ -90,7 +91,44 @@ void sdfDevConsSetControlByte(DevConsState *console, u8 value) {
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033D068);
 
-INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033D0D8);
+typedef struct ConsBuf {
+    u8 *unk0; /* 0x0 */
+    u8 *unk4; /* 0x4 */
+    u8 *unk8; /* 0x8 */
+    void *unkC; /* 0xC */
+    s32 unk10[2]; /* 0x10 */
+    s32 unk18; /* 0x18 */
+    u16 unk1C; /* 0x1C */
+    u16 unk1E; /* 0x1E */
+} ConsBuf;
+
+void func_0033D068(ConsBuf *arg0);
+s32 sceDmaSync(void *ch, s32 mode, s32 timeout);
+void sceDmaSendN(void *ch, void *addr, s32 size);
+s32 sceGsSyncPath(s32 mode, s32 timeout);
+
+/* Submit the console's pending packet to the DMA channel when it holds anything, then flip to the other buffer and restart the list there. */
+void func_0033D0D8(ConsBuf *buf) {
+    s32 bytes;
+    u32 *channel;
+    u32 flip;
+
+    func_0033D068(buf);
+    bytes = buf->unk8 - buf->unk4;
+    if ((bytes >> 3) != 0) {
+        channel = buf->unkC;
+        sceDmaSync(channel, 0, 0);
+        *channel |= 0x40;
+        EE_SYNC();
+        sceDmaSendN(channel, (void *)((u32)buf->unk4 & 0x0FFFFFFF), bytes >> 4);
+        flip = buf->unk1C ^ 1;
+        buf->unk1C = flip;
+        buf->unk8 = (u8 *)buf->unk10[flip];
+        buf->unk0 = buf->unk8 + 0x10;
+        buf->unk4 = buf->unk8;
+        sceGsSyncPath(0, 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033D1A8);
 

@@ -264,4 +264,12 @@
  */
 #define EE_MMI_PLZCW(out, in) __asm__ volatile ("plzcw %0, %1" : "=r"(out) : "r"(in))
 
+/*
+ * Bare `sync` (sync.l): orders the preceding stores before the next access.
+ * Retail: the DMA channel kick in DDS1 func_002E4228 / DDS2 func_0033D0D8
+ * (`*chcr |= 0x40; sync;` before sceDmaSendN), as in Sony's libkernel
+ * inline usage.
+ */
+#define EE_SYNC() __asm__ volatile ("sync")
+
 #endif
