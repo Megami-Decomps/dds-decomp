@@ -8,7 +8,25 @@ typedef struct ScoreGlobalState {
 extern ScoreGlobalState *datGameState;
 extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
-INCLUDE_ASM(const s32, "game/code_0031A638", func_0031A638);
+
+typedef struct TimerWork {
+    u8 pad00[0x80];
+    s32 progress;  /* 0x80 clamped to 100 */
+    s32 step;      /* 0x84 quantised progress band */
+    s16 completed; /* 0x88 non-zero once the final band is reached */
+    u8 pad8A[2];
+    s32 updateCount; /* 0x8C */
+} TimerWork;
+
+void func_0031A830(u8 *work);
+
+void func_0031A638(u8 *record, s32 unused, TimerWork *timer) {
+    if ((record[1] & 0xF) == 4 && timer->completed <= 0) {
+        timer->progress++;
+        timer->updateCount++;
+        func_0031A830((u8 *)timer);
+    }
+}
 
 typedef struct ScoreResetWork {
     u8 pad00[0x74];
@@ -65,13 +83,6 @@ void func_0031A7F8(ScoreResetWork *work) {
     work->unk74 = score;
     func_0035B6E0("************************Score Reset!![%d]\n", score);
 }
-
-typedef struct TimerWork {
-    u8 pad00[0x80];
-    s32 progress;  /* 0x80 clamped to 100 */
-    s32 step;      /* 0x84 quantised progress band */
-    s16 completed; /* 0x88 non-zero once the final band is reached */
-} TimerWork;
 
 void func_0031A830(u8 *work) {
     TimerWork *timer = (TimerWork *)work;
