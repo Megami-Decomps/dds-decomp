@@ -18,9 +18,14 @@ typedef struct FntNode {
     struct FntNode *next;
 } FntNode;
 
+typedef struct FrFontValueRecord {
+    u8 unk0[0xE];
+    u16 glyphCount;
+} FrFontValueRecord;
+
 typedef struct FrFontEntry {
     u8 unk00[4];
-    void *header;      /* 0x04 */
+    FrFontValueRecord *valueRecord; /* 0x04 */
     s32 count;         /* 0x08 */
     u8 unk0C[4];
     void *table;       /* 0x10 */
@@ -196,7 +201,7 @@ typedef struct TextStyleNode {
 extern s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph);
 
 extern FrFontGlyph *func_0019C850(FrFontGlyph *source, FrFontGlyph *destination);
-void frFontSetupGlyph(FrFontGlyph *, s16, s8, s8, s32, s8);
+void frFontSetupGlyph(FrFontGlyph *, s32, s32, s32, s32, s32);
 void frFontInitGlyph(FrFontGlyph *);
 u32 frFontGetGlyphCellWidth(u8);
 u32 frFontGetGlyphCellHeight(u8);
@@ -329,7 +334,7 @@ s32 func_0019C628(void) {
     return D_00452864.unk8;
 }
 
-u32 func_0019C638(void) {
+u32 func_0019C638() {
     return 0;
 }
 
@@ -457,7 +462,7 @@ FrFontRecord *frFontRetainOrCreateCachedItem(FrFontGlyph *glyph, s32 id) {
 }
 
 /* Initialize a glyph record while retaining only the high bits of its flags. */
-void frFontSetupGlyph(FrFontGlyph *glyph, s16 glyphId, s8 byte1, s8 byte0, s32 flags, s8 byte2) {
+void frFontSetupGlyph(FrFontGlyph *glyph, s32 glyphId, s32 byte1, s32 byte0, s32 flags, s32 byte2) {
     glyph->u14.b[1] = byte1;
     glyph->u14.b[0] = byte0;
     glyph->u14.b[2] = byte2;
@@ -495,7 +500,37 @@ void frFontInitGlyph(FrFontGlyph *glyph) {
     glyph->unk40 = 0;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019CCC0);
+extern void func_0019C640(void *, s32);
+
+FrFontGlyph *func_0019CCC0(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption) {
+    FrFontGlyph *glyph;
+    s32 glyphIndex;
+    s32 fontIndex = fontIndexArg & 0xFF;
+
+    glyph = itfDequeueMemNode(frFontWork.itemPool);
+    frFontWork.itemCount++;
+    frFontSetupGlyph(glyph, glyphId, fontIndex, firstOption, 0xA09DC300, secondOption);
+
+    if ((u16)glyph->u0.h < 0x80) {
+        glyphIndex = (u16)glyph->u0.h - 0x20;
+    } else {
+        s32 adjusted = (u16)glyph->u0.h - 0x8080;
+
+        glyphIndex = ((adjusted & 0xFF00) >> 1) + (adjusted & 0x7F);
+    }
+    if (glyphIndex >=
+        ((FrFontEntry *)((u8 *)&frFontWork + fontIndex * sizeof(FrFontEntry)))->valueRecord->glyphCount) {
+        glyphIndex = 0x147;
+    }
+    glyph->firstChild = (FrFontGlyph *)frFontRetainOrCreateCachedItem(glyph, glyphIndex);
+    func_0019C640(glyph, glyphIndex);
+    if (glyph->u14.b[3] & 0x10) {
+        glyph->y = func_0019C638((s8)fontIndex, glyphIndex);
+    } else {
+        glyph->y = 0;
+    }
+    return glyph;
+}
 
 /* Append text glyphs; a negative fontIndex keeps the current font selection. */
 FrFontCtx *frFontAppendGlyphFromData(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, s32 previousGlyph) {
@@ -737,7 +772,7 @@ typedef struct FrFontGlyphMeasureWork {
     u8 pad1A[0x16];
 } FrFontGlyphMeasureWork;
 
-extern void func_0019C640(FrFontGlyphMeasureWork *work, s32 code);
+extern void func_0019C640(void *work, s32 code);
 
 s32 func_0019D9A8(const u8 *text, u8 fontIndex, u8 mode) {
     FrFontGlyphMeasureWork work;
@@ -931,4 +966,3 @@ INCLUDE_SDATA(const s32, "interface/frFont", D_00436570);
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436578);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436580);
-
