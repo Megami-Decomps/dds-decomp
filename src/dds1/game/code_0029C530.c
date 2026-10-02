@@ -2,6 +2,46 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
+typedef struct EffPacketParams {
+    s16 parameterCount;
+    s16 vertexCount;
+    u16 primitive;
+    u16 mask;
+    u32 unk08;
+    u32 *parameters;
+    u128 *positions;
+    u128 *normals;
+    u32 *texcoords;
+    u32 *extraTexcoords;
+    u32 *colors;
+    void *(*allocate)(s32);
+    f32 depth;
+} EffPacketParams;
+
+typedef struct EffGsPacket {
+    u64 dmaTag;
+    u64 vifTag;
+    u64 gifTag;
+    u64 registerList;
+    u64 registerValue;
+    u64 registerAddress;
+} EffGsPacket;
+
+typedef struct EffDrawSurface {
+    u8 pad00[0x10];
+    void (*submit)(struct EffDrawSurface *, void *);
+} EffDrawSurface;
+
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(void *);
+extern void sdfAppendPacket(void *, void *);
+extern void sdfConsAppendVuPacket();
+extern void sdfConsAppendAssetPacket();
+extern void *func_0015FE20(EffPacketParams *);
+extern u32 D_0037ECB0[];
+extern EffDrawSurface *D_0037ECF0[];
+extern EffDrawSurface *D_0037EE68[];
+
 extern char D_003B39C8[]; /* "/tool/effect/ep/" */
 
 extern char D_003B39E0[]; /* "/tool/effect/" */
@@ -3689,12 +3729,12 @@ INCLUDE_ASM(const s32, "game/code_0029C530", func_002A7568);
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A7610);
 
-s32 effBeginMatrixVuDrawPacket(const Matrix4 *matrix) {
+void effBeginMatrixVuDrawPacket(const Matrix4 *matrix) {
     void *work = sdfAllocPacketAligned(0x20);
     effCurrentRenderPacket = (u32)work;
     sdfInitPacketList(work);
     VU0_LOAD_MATRIX(matrix);
-    return sdfConsAppendVuPacket(effCurrentRenderPacket, 0);
+    sdfConsAppendVuPacket(effCurrentRenderPacket, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A78E0);
@@ -4116,7 +4156,7 @@ void effSetClassResourceMatrixComponent(EffClassWork *work, float value) {
     work->scale = value;
 }
 
-extern u16 D_003DCAD0[];
+extern EffPacketParams D_003DCAD0[];
 
 EffPointSet *effCreatePointSet5(s32 count) {
     s32 rows = count * 5 + 5;
@@ -4140,7 +4180,7 @@ EffPointSet *effCreatePointSet5(s32 count) {
     set->handle = sdfCreateAssetWithDrawEntries();
     func_002DA420(set->handle, 1.0f);
     memset(D_003DCAD0, 0, 0x2C);
-    D_003DCAD0[2] = 0x4000;
+    D_003DCAD0[0].primitive = 0x4000;
     return set;
 }
 
@@ -4149,7 +4189,62 @@ void effReleasePointSetAsset(s32 work) {
     func_002D0918(((EffAssetOwner *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002AAD00);
+void func_002AAD00(EffPointSet *set, Matrix4 *matrix) {
+    void *list;
+    EffGsPacket *packet;
+    s32 remaining;
+
+    if (set->color & 0xFF000000) {
+        list = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        if (matrix == NULL) {
+            VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+        } else {
+            VU0_LOAD_MATRIX(matrix);
+        }
+        sdfConsAppendVuPacket(list, 0);
+        sdfConsAppendAssetPacket(list, set->handle, 0);
+        if (set->flag == 0) {
+            packet = sdfAllocPacketAligned(0x30);
+            packet->dmaTag = 2;
+            packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            packet->registerList = 0xE;
+            packet->registerValue = 0x31801;
+            packet->registerAddress = 0x47;
+            sdfAppendPacket(list, packet);
+        }
+        remaining = set->rows;
+        D_003DCAD0[0].colors = (u32 *)set->tail;
+        D_003DCAD0[0].positions = (u128 *)set->buffer;
+        D_003DCAD0[0].unk08 = set->color;
+        D_003DCAD0[0].parameterCount = 0x10;
+        D_003DCAD0[0].vertexCount = 0xF;
+        D_003DCAD0[0].parameters = D_0037ECB0;
+        while (remaining >= 0xF) {
+            remaining -= 0xA;
+            sdfAppendPacket(list, func_0015FE20(D_003DCAD0));
+            D_003DCAD0[0].positions += 0xA;
+            D_003DCAD0[0].colors += 0xA;
+        }
+        if (remaining >= 0xA) {
+            D_003DCAD0[0].parameterCount = 8;
+            D_003DCAD0[0].vertexCount = remaining;
+            sdfAppendPacket(list, func_0015FE20(D_003DCAD0));
+        }
+        if (set->flag == 0) {
+            packet = sdfAllocPacketAligned(0x30);
+            packet->dmaTag = 2;
+            packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            packet->registerList = 0xE;
+            packet->registerValue = 0x51801;
+            packet->registerAddress = 0x47;
+            sdfAppendPacket(list, packet);
+        }
+        D_0037ECF0[set->type]->submit(D_0037ECF0[set->type], list);
+    }
+}
 
 typedef struct EffectStripNode {
     u32 percent;
@@ -5770,7 +5865,7 @@ void func_002B2318(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-extern u16 D_003DCB60[];
+extern EffPacketParams D_003DCB60[];
 
 EffPointSet *effCreatePointSet3(s32 count) {
     s32 rows = count * 3 + 3;
@@ -5794,7 +5889,7 @@ EffPointSet *effCreatePointSet3(s32 count) {
     set->handle = sdfCreateAssetWithDrawEntries();
     func_002DA420(set->handle, 1.0f);
     memset(D_003DCB60, 0, 0x2C);
-    D_003DCB60[2] = 0x4000;
+    D_003DCB60[0].primitive = 0x4000;
     return set;
 }
 
@@ -5803,7 +5898,62 @@ void effReleaseModelPointSetAsset(s32 work) {
     func_002D0918(((EffAssetOwner *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B2440);
+void func_002B2440(EffPointSet *set, Matrix4 *matrix) {
+    void *list;
+    EffGsPacket *packet;
+    s32 remaining;
+
+    if (set->color & 0xFF000000) {
+        list = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        if (matrix == NULL) {
+            VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+        } else {
+            VU0_LOAD_MATRIX(matrix);
+        }
+        sdfConsAppendVuPacket(list, 0);
+        sdfConsAppendAssetPacket(list, set->handle, 0);
+        if (set->flag == 0) {
+            packet = sdfAllocPacketAligned(0x30);
+            packet->dmaTag = 2;
+            packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            packet->registerList = 0xE;
+            packet->registerValue = 0x31801;
+            packet->registerAddress = 0x47;
+            sdfAppendPacket(list, packet);
+        }
+        remaining = set->rows;
+        D_003DCB60[0].colors = (u32 *)set->tail;
+        D_003DCB60[0].positions = (u128 *)set->buffer;
+        D_003DCB60[0].unk08 = set->color;
+        D_003DCB60[0].parameterCount = 0x10;
+        D_003DCB60[0].vertexCount = 0xF;
+        D_003DCB60[0].parameters = (u32 *)D_0037EB90;
+        while (remaining >= 0xF) {
+            remaining -= 0xC;
+            sdfAppendPacket(list, func_0015FE20(D_003DCB60));
+            D_003DCB60[0].positions += 0xC;
+            D_003DCB60[0].colors += 0xC;
+        }
+        if (remaining >= 6) {
+            D_003DCB60[0].parameterCount = 4;
+            D_003DCB60[0].vertexCount = remaining;
+            sdfAppendPacket(list, func_0015FE20(D_003DCB60));
+        }
+        if (set->flag == 0) {
+            packet = sdfAllocPacketAligned(0x30);
+            packet->dmaTag = 2;
+            packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            packet->registerList = 0xE;
+            packet->registerValue = 0x51801;
+            packet->registerAddress = 0x47;
+            sdfAppendPacket(list, packet);
+        }
+        D_0037EE68[set->type]->submit(D_0037EE68[set->type], list);
+    }
+}
 
 typedef struct EffectVectorRequest {
     u8 kind;
