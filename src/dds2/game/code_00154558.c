@@ -1798,7 +1798,7 @@ extern void effMiscSeedRandomFromClock(void *);
 
 extern void effLoadCommonTexturesAndResetRenderFlags(void);
 
-extern void func_00157BE0(void);
+extern void effInitializeBillResourceOwners(void);
 
 extern void parSysReset(void);
 
@@ -1823,7 +1823,7 @@ extern char D_004363F8[];
 void fldCreateFieldEffectTask(void) {
     effMiscSeedRandomFromClock(D_003AA868);
     effLoadCommonTexturesAndResetRenderFlags();
-    func_00157BE0();
+    effInitializeBillResourceOwners();
     parSysReset();
     func_0015B270();
     kwlnTaskCreate("effect_f", 0x2B04, 0, 0, func_00157400, NULL, 0);

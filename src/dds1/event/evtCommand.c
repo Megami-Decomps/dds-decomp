@@ -65,7 +65,7 @@ s32 dds3GetWorldSecondaryObject(void);
 
 s32 dds3GetWorldObjectValue(s32 world);
 
-void func_0021FEC0(s32 highPart, s32 lowPart);
+void evtCreateWorldObjectForKey(s32 highPart, s32 lowPart);
 
 void evtDestroySecondaryWorldNode(void);
 
@@ -494,7 +494,7 @@ s32 evtCommandHandleChangedSecondaryWorldKey(void)
     if (dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) != targetKey) {
         highPart = scrReadIntParameter(0);
         lowPart = scrReadIntParameter(1);
-        func_0021FEC0(highPart, lowPart);
+        evtCreateWorldObjectForKey(highPart, lowPart);
     }
     return 1;
 }

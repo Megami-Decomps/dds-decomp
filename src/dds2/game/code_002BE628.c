@@ -183,7 +183,7 @@ extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, s32);
 extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
 extern s32 sdfCreateFormattedSifCommand();
-extern void func_0023AA30(s32, s32);
+extern void evtCreateWorldObjectForKey(s32, s32);
 extern s32 D_00437CB8;
 extern s32 D_00437CBC;
 extern StageGraphicsCallback D_00380708;
@@ -2552,7 +2552,7 @@ void *evtBattleStageTestScreen(void) {
     sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
     D_00380708.invoke(&D_00380708, packets);
     if (D_0037F510[0x21] < 0) {
-        func_0023AA30(D_00437CB8, D_00437CBC);
+        evtCreateWorldObjectForKey(D_00437CB8, D_00437CBC);
         return evtCreateBattleStageTestCamera;
     }
     if (D_0037F510[0x25] & 2) {

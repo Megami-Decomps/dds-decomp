@@ -739,6 +739,7 @@
 0x00157878	effInvokeOptionalNodeInstanceCallback	inferred	Invokes node-type callback with instance when available; otherwise returns success directly. [names_reviewed19.tsv]
 0x001579E8	effLoadResourceNode	inferred	confidence=high; src/dds2/effect/effManager.c:func_001579E8; Logs d3p file read, loads the requested resource, creates the resolved node, and releases the temporary resource handle. [names_qp9.tsv]
 0x00157A50	effCloneSourceWithTypeHandler	inferred	confidence=high; src/dds2/game/code_00157A50.c:func_00157A50; Allocates an effect-source copy, copies type and metadata, and clones its argument through the type-selected handler. [names_qp9.tsv]
+0x00157BE0	effInitializeBillResourceOwners	inferred	Loads BILL.LB entries, constructs the configured billboards, scales their half extents, and fills effBillResourceOwners.
 0x00157CE0	effBillDispatchAll	inferred	Dispatches every entry in the bill-kind table; DDS1 twin. [names_qp9.tsv]
 0x00157E50	effReleaseSharedTextureRecord	inferred	src/dds2/game/code_00157A50.c func_00157E50: Decrements reference count and releases texture reference plus allocation on final reference. Twin of DDS1 func_00150260. [names_reviewed24.tsv]
 0x00158E00	billReleaseChild	inferred	Releases the billboard's child at offset 0x30 when present, then frees the billboard.
@@ -2751,6 +2752,8 @@
 0x0023A8C0	mdlAttachWorldObjectToSourceVector	inferred	Copies source vector into target object and composes target quaternion with half turn. [names_reviewed7.tsv]
 0x0023A9A8	evtDestroySecondaryWorldNode	inferred	Byte-identical dds1 twin 0x0021FE38; Obtains the secondary world object and destroys its node when it exists. [names_conflicts.tsv]
 0x0023A9E0	evtDrainSecondaryWorldNodes	inferred	M141; sources=names_pending_main.tsv; twin=0x0021FE70, input-family pairing. [names_qp10.tsv]
+0x0023AA30	evtCreateWorldObjectForKey	inferred	Called by evtCommandHandleChangedSecondaryWorldKey after the packed secondary-world key changes; creates and loads the stage world object for that key.
+0x0023AB58	evtCreateWorldObjectFromResource	inferred	Called by evtEventPack with a constructed-resource record; appends a world object and attaches a handle built from its six values.
 0x0023AC80	evtCreateEventScriptProcess	inferred	Formats event BF script path from event ID and creates a process task for it. [names_reviewed6.tsv]
 0x0023AD98	evtSetWorldSlotStatusFlag	inferred	Byte-identical DDS1 counterpart: Sets the 0x8 status bit on slot-one world data when available.
 0x0023ADD0	evtClearWorldSlotStatusFlag	inferred	Byte-identical DDS1 counterpart: Clears the 0x8 status bit on slot-one world data when available.

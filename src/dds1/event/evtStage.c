@@ -21,22 +21,22 @@ extern void *func_00101218(s32, s32);
 extern void func_003003F0(char *, void *);
 extern void kwlnTaskDestroyWithHierarchy(void *, s32);
 
-extern void *dds3AppendWorldNode(s32, s32);
+extern void *dds3AppendWorldNode(void);
 extern void dds3SetWorldSecondaryObject(void *);
 extern void dds3SetWorldObject(void *);
-extern void dds3SetWorldObjectValue(void *, s32, s32);
+extern void dds3SetWorldObjectValue(void *, u32);
 extern void fldFormatAreaDirectory(char *, s32, s32);
-extern void dds3AttachResourceHandleToWorldObject(void *, char *);
-extern void mdlSpawnViewerWorldObject(void *);
-extern void func_00106488(void *, s32, f32);
-extern void dds3DrawSetIndexedWord(void *, s32);
+extern void dds3AttachResourceHandleToWorldObject(void *, u32);
+extern void mdlSpawnViewerWorldObject(void);
+extern void func_00106488(f32);
+extern void dds3DrawSetIndexedWord(u32, s32);
 extern void kwlnDrawCopyWords20(void *);
 extern void kwlnDrawCopyRow128(void *);
 extern char D_003AC008[];
 extern char D_00367DF0[];
 extern char D_00367EB0[];
 extern char D_00367ED0[];
-extern void func_003014F0(char *, char *, s32, s32, s32);
+extern void func_003014F0(char *, char *, ...);
 
 void evtDestroySecondaryWorldNode(void)
 {
@@ -78,13 +78,64 @@ void evtDrainSecondaryWorldNodes(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtStage", func_0021FEC0);
+/* Build the field world object and load its stage resource. */
+s32 evtCreateWorldObjectForKey(s32 area, s32 room)
+{
+    char directory[0x40];
+    char resourcePath[0x50];
+    void *worldObject;
 
-INCLUDE_ASM(const s32, "event/evtStage", func_0021FFE8);
+    evtDestroySecondaryWorldNode();
+    worldObject = dds3AppendWorldNode();
+    dds3SetWorldSecondaryObject(worldObject);
+    dds3SetWorldObject(worldObject);
+    dds3SetWorldObjectValue(worldObject, (area << 16) + room);
+    fldFormatAreaDirectory(directory, area, room);
+    func_003014F0(resourcePath, D_003AC008, directory, area, room);
+    dds3AttachResourceHandleToWorldObject(worldObject, (u32)resourcePath);
+    mdlSpawnViewerWorldObject();
+    if (area < 10) {
+        func_00106488(0.9424777031f);
+    } else {
+        func_00106488(0.75398216f);
+    }
+    dds3DrawSetIndexedWord((u32)D_00367DF0, 0);
+    dds3DrawSetIndexedWord((u32)(D_00367DF0 + 0x40), 1);
+    dds3DrawSetIndexedWord((u32)(D_00367DF0 + 0x80), 2);
+    kwlnDrawCopyWords20(D_00367EB0);
+    kwlnDrawCopyRow128(D_00367ED0);
+    return 1;
+}
 
-extern void func_003014F0(char *, char *, s32, s32, s32);
+/* Build a field world object from the supplied resource parameters. */
+s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 arg2, s32 arg3, s32 arg4, s32 arg5)
+{
+    void *worldObject;
+    char directory[0x40];
+
+    evtDestroySecondaryWorldNode();
+    worldObject = dds3AppendWorldNode();
+    dds3SetWorldSecondaryObject(worldObject);
+    dds3SetWorldObject(worldObject);
+    dds3SetWorldObjectValue(worldObject, (area << 16) + room);
+    fldFormatAreaDirectory(directory, area, room);
+    dds3AttachConstructedResourceToWorldObject(worldObject, area, room, arg2, arg3, arg4, arg5);
+    mdlSpawnViewerWorldObject();
+    func_00106488(0.75398216f);
+    dds3DrawSetIndexedWord((u32)D_00367DF0, 0);
+    dds3DrawSetIndexedWord((u32)(D_00367DF0 + 0x40), 1);
+    dds3DrawSetIndexedWord((u32)(D_00367DF0 + 0x80), 2);
+    kwlnDrawCopyWords20(D_00367EB0);
+    kwlnDrawCopyRow128(D_00367ED0);
+    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    }
+    return 1;
+}
+
 extern void scrCreateProcessTaskFromResource(s32, void *, s32);
 extern char evtScriptResourcePathBuffer[];
+
+INCLUDE_RODATA(const s32, "event/evtStage", D_003AC008);
 
 void evtCreateEventScriptProcess(s32 eventId) {
     func_003014F0(evtScriptResourcePathBuffer, "/event/e%03d/e%03d/scr/e%03d.bf", eventId - eventId % 10, eventId, eventId);
