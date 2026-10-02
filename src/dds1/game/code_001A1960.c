@@ -40,6 +40,7 @@ typedef struct SceneSlot {
     u8 id;
 } SceneSlot;
 
+/* Actor-task prefix; the separate unit-data list uses UiObject. */
 typedef struct SceneTask {
     s32 state;
     u8 pad04[4];
@@ -835,19 +836,20 @@ u32 func_001A4630(void) {
     return *(u32 *)(temp_v0 + 0x254);
 }
 
+/* Return a random eligible actor task, or 0 if no candidate is available. */
 s32 btlChooseAvailableUnit(void) {
     s32 candidates[16];
     s32 count = 0;
-    s32 node = *(s32 *)(btlGetRuntime() + 0x224);
-    for (; node != 0; node = *(s32 *)(node + 0x16C)) {
-        if ((*(u32 *)(node + 8) & 8) != 0) {
-            s32 actor = *(s32 *)(node + 0x18);
-            u32 flags = *(u32 *)(actor + 0x110);
+    SceneTask *node = (SceneTask *)*(s32 *)(btlGetRuntime() + 0x224);
+    for (; node != 0; node = (SceneTask *)*(s32 *)((u8 *)node + 0x16C)) {
+        if ((node->flags & 8) != 0) {
+            UiObject *actor = node->actor;
+            u32 flags = actor->flags;
             if ((flags & 1) != 0) {
                 if ((flags & 0x200) != 0) {
                     if ((flags & 2) != 0) {
                         if ((flags & 0xE0) == 0) {
-                            candidates[count++] = node;
+                            candidates[count++] = (s32)node;
                         }
                     }
                 }
@@ -861,10 +863,10 @@ s32 btlChooseAvailableUnit(void) {
 }
 
 s32 btlCountAvailableUnits(void) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
+    UiObject *node = ((BattleController *)btlGetRuntime())->actors;
     s32 count = 0;
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        u32 flags = *(u32 *)(node + 0x110);
+    for (; node != 0; node = node->next) {
+        u32 flags = node->flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x200) != 0) {
                 if ((flags & 0xE0) == 0) {
@@ -878,9 +880,9 @@ s32 btlCountAvailableUnits(void) {
 
 s32 btlCountAvailableParticipants(void) {
     s32 count = 0;
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        u32 flags = *(u32 *)(node + 0x110);
+    UiObject *node = ((BattleController *)btlGetRuntime())->actors;
+    for (; node != 0; node = node->next) {
+        u32 flags = node->flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x200) != 0) {
                 if ((flags & 0xE0) == 0) {
@@ -893,10 +895,10 @@ s32 btlCountAvailableParticipants(void) {
         u8 *entry = (u8 *)(datGameState + 0xA60);
         s32 i;
         for (i = 4; i >= 0; i--, entry += 0x1A4) {
-            u16 flags = *(u16 *)entry;
+            u16 flags = ((BtlEntry *)entry)->flags;
             if ((flags & 1) != 0) {
                 if ((flags & 2) == 0) {
-                    if ((*(u16 *)(entry + 0xE) & 0x4000) == 0) {
+                    if ((((BtlEntry *)entry)->status & 0x4000) == 0) {
                         count++;
                     }
                 }
@@ -2097,32 +2099,33 @@ void btlReleaseResourceBlock(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC7D8);
 
+/* Clear each task's eight opaque words, forward for variant 1 and backward otherwise. */
 void btlClearTaskActorSlots(void) {
-    u8 *context = (u8 *)btlGetRuntime();
-    u8 *node = *(u8 **)(context + 0x224);
+    BattleController *context = (BattleController *)btlGetRuntime();
+    SceneTask *node = (SceneTask *)*(s32 *)((u8 *)context + 0x224);
     while (node != 0) {
         s32 i;
-        u8 *actor = *(u8 **)(node + 0x18);
+        UiObject *actor = node->actor;
         if (actor != 0) {
-            if (*(u16 *)(context + 0x24C) == 1) {
-                if (*(u32 *)(actor + 0x110) & 0x200) {
+            if (context->variant == 1) {
+                if (actor->flags & 0x200) {
                     u32 *entries;
                     i = 0;
-                    entries = (u32 *)(node + 0x148);
+                    entries = (u32 *)((u8 *)node + 0x148);
                     for (; i < 8; i++) {
                         *entries++ = 0;
                     }
                 }
-            } else if (*(u32 *)(actor + 0x110) & 0x400) {
+            } else if (actor->flags & 0x400) {
                 u32 *entries;
                 i = 7;
-                entries = (u32 *)(node + 0x164);
+                entries = (u32 *)((u8 *)node + 0x164);
                 for (; i >= 0; i--) {
                     *entries-- = 0;
                 }
             }
         }
-        node = *(u8 **)(node + 0x16C);
+        node = (SceneTask *)*(s32 *)((u8 *)node + 0x16C);
     }
 }
 
