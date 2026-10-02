@@ -17,10 +17,10 @@ extern void effObjSetInnerFloat(s32, f32);
 
 extern void dds3SetWorldCameraObject(s32, s32);
 
-extern s32 func_00112C08(s32, SdfQuad *, SdfQuad *);
+extern s32 dds3CreateCameraObject(s32, SdfQuad *, SdfQuad *);
 
 void fldCreateLocalMapCamera(void) {
-    fldLocalMapCameraObject = func_00112C08(dds3AdvanceWorldCounter(), &fldLocalMapFirstCameraVector, &fldLocalMapSecondCameraVector);
+    fldLocalMapCameraObject = dds3CreateCameraObject(dds3AdvanceWorldCounter(), &fldLocalMapFirstCameraVector, &fldLocalMapSecondCameraVector);
     dds3SetWorldEntryCallbackTarget(fldLocalMapCameraObject, "Lmap_Cam");
     effObjSetInnerFloat(fldLocalMapCameraObject, 2.0f);
     dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), fldLocalMapCameraObject);

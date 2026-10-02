@@ -159,7 +159,7 @@ extern void *memset(void *dst, s32 value, u32 size);
 
 extern s32 dds3AdvanceWorldCounter();
 
-extern s32 func_00112C08(s32 world, f32 *pos, f32 *rot);
+extern s32 dds3CreateCameraObject(s32 world, f32 *pos, f32 *rot);
 
 extern void effObjSetInnerFloat(s32 obj, f32 value);
 
@@ -607,7 +607,7 @@ s32 evtCommandCreateWorldEffectObject(void) {
     memset(rot, 0, 0x10);
     rot[3] = 1.0f;
     world = dds3AdvanceWorldCounter();
-    effObjSetInnerFloat(func_00112C08(world, pos, rot), 1.0f);
+    effObjSetInnerFloat(dds3CreateCameraObject(world, pos, rot), 1.0f);
     scrSetIntegerReturnValue(world);
     return 1;
 }
