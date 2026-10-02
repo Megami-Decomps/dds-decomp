@@ -270,9 +270,16 @@ model_item node_id=1 parent=0 rotation=0,1.5,0 position=10,20,30,1 scale=1,2,1,0
 label bounds
 model_bounds minimum=-1,-2,-3 maximum=1,2,3
 label commands
-u32 0
+model_draw_set lists=@draw_list
+label draw_list
+model_draw_list selector=2 draws=@draw
+label draw
+model_draw asset=0 qwords=2 packet=@packet
+label packet
+packet_data 000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f
 label assets
-u32 0
+model_assets count=1
+model_asset index=0 word_01=0x80969696 resource_04=3 values_08=0,0,1,0.5,0 scalar_200=0.9
 label motion
 u32 0
 label data_end
@@ -283,12 +290,19 @@ end_data
         self.assertIn("model_items count=2", rendered)
         self.assertIn("node_id=1 parent=0", rendered)
         self.assertIn("model_bounds minimum=-1.0,-2.0,-3.0", rendered)
+        self.assertIn("model_asset index=0 word_01=0x80969696", rendered)
+        self.assertIn("model_draw_list selector=2", rendered)
+        self.assertIn("model_draw asset=0 qwords=2", rendered)
         self.assertEqual(fld.encode(fld.parse_source(rendered)), data)
 
         with self.assertRaisesRegex(fld.FldError, "has parent 2"):
             fld.encode(fld.parse_source(source.replace("node_id=1 parent=0", "node_id=1 parent=2")))
         with self.assertRaisesRegex(fld.FldError, "followed by 2 model_item"):
             fld.encode(fld.parse_source(source.replace("model_items count=2", "model_items count=1")))
+        with self.assertRaisesRegex(fld.FldError, "contains 32"):
+            fld.encode(fld.parse_source(source.replace("qwords=2", "qwords=1")))
+        with self.assertRaisesRegex(fld.FldError, "only 1 assets exist"):
+            fld.encode(fld.parse_source(source.replace("model_draw asset=0", "model_draw asset=1")))
 
     def test_tracked_sources_are_canonical_and_exact(self) -> None:
         expected_links = {

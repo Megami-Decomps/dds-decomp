@@ -12,6 +12,7 @@ without preventing the rest of the file from relocating.
 from __future__ import annotations
 
 import argparse
+import bisect
 import hashlib
 import json
 import math
@@ -39,6 +40,22 @@ MODEL_RESOURCE_SIZE = 0x24
 MODEL_ITEM_LIST_SIZE = 0x10
 MODEL_ITEM_SIZE = 0x50
 MODEL_BOUNDS_SIZE = 0x18
+MODEL_DRAW_SIZE = 0x10
+MODEL_ASSET_FIELDS = (
+    (0x001, "word_01", "u32", 1),
+    (0x002, "word_02", "u32", 1),
+    (0x004, "resource_04", "resource", 1),
+    (0x008, "values_08", "float", 5),
+    (0x010, "word_10", "u32", 1),
+    (0x020, "resource_20", "resource_pair", 2),
+    (0x040, "values_40", "float", 5),
+    (0x080, "word_80", "u32", 1),
+    (0x100, "scalar_100", "float", 1),
+    (0x200, "scalar_200", "float", 1),
+    (0x400, "pair_400", "float", 2),
+)
+MODEL_ASSET_FIELD_NAMES = {name for _, name, _, _ in MODEL_ASSET_FIELDS}
+MODEL_ASSET_FLAG_MASK = sum(bit for bit, _, _, _ in MODEL_ASSET_FIELDS)
 MOTION_CURVE_SIZE = 0x10
 MOTION_KINDS = {
     0: ("vector3", 3),
@@ -129,6 +146,29 @@ class ModelItem:
     commands: int
 
 
+@dataclass(frozen=True)
+class ModelAsset:
+    index: int
+    flags: int
+    fields: tuple[tuple[str, tuple[int | float, ...]], ...]
+    size: int
+
+
+@dataclass(frozen=True)
+class ModelDraw:
+    offset: int
+    asset: int
+    quadwords: int
+    packet: int
+
+
+@dataclass(frozen=True)
+class ModelDrawList:
+    offset: int
+    selector: int
+    draws: tuple[int, ...]
+
+
 def _face_encounter_zone(face: tuple[int, ...], face_index: int) -> int | None:
     tagged = bool(face[0] & ENCOUNTER_ZONE_ATTRIBUTE)
     encounter_type, zone = face[11], face[12]
@@ -174,6 +214,14 @@ def encounter_zone_overrides(data: bytes) -> tuple[int, ...]:
 def _range(data: bytes, offset: int, size: int, context: str) -> None:
     if offset < 0 or size < 0 or offset + size > len(data):
         raise FldError(f"{context} lies outside the FLD file")
+
+
+def _data_range(
+    data: bytes, offset: int, size: int, data_end: int, context: str
+) -> None:
+    _range(data, offset, size, context)
+    if offset + size > data_end:
+        raise FldError(f"{context} lies outside the data region")
 
 
 def _u32(data: bytes, offset: int, context: str) -> int:
@@ -438,6 +486,158 @@ def _read_model_resource(
     return resource, tuple(items)
 
 
+def _read_model_assets(
+    data: bytes, offset: int, data_end: int, context: str
+) -> tuple[ModelAsset, ...]:
+    _data_range(data, offset, 4, data_end, context)
+    count = _u32(data, offset, context + " count")
+    cursor = offset + 4
+    assets = []
+    for index in range(count):
+        _data_range(data, cursor, 8, data_end, context + f" asset {index}")
+        entry_start = cursor
+        identifier, reserved, flags = struct.unpack_from("<IHH", data, cursor)
+        cursor += 8
+        if identifier != index:
+            raise FldError(
+                f"{context} asset {index} has identifier {identifier}"
+            )
+        if reserved != 0:
+            raise FldError(f"{context} asset {index} has a nonzero reserved word")
+        if flags & ~MODEL_ASSET_FLAG_MASK:
+            raise FldError(
+                f"{context} asset {index} has unsupported flags 0x{flags:x}"
+            )
+
+        fields = []
+        for bit, name, kind, width in MODEL_ASSET_FIELDS:
+            if not flags & bit:
+                continue
+            size = 4 if kind in {"resource", "resource_pair"} else width * 4
+            _data_range(
+                data, cursor, size, data_end, context + f" asset {index} {name}"
+            )
+            if kind == "u32":
+                values = struct.unpack_from("<" + "I" * width, data, cursor)
+            elif kind == "float":
+                values = struct.unpack_from("<" + "f" * width, data, cursor)
+            elif kind == "resource":
+                resource_index, padding = struct.unpack_from("<HH", data, cursor)
+                if padding != 0:
+                    raise FldError(
+                        f"{context} asset {index} {name} has nonzero padding"
+                    )
+                values = (resource_index,)
+            elif kind == "resource_pair":
+                values = struct.unpack_from("<HH", data, cursor)
+            else:
+                raise AssertionError(kind)
+            fields.append((name, values))
+            cursor += size
+        assets.append(ModelAsset(index, flags, tuple(fields), cursor - entry_start))
+    return tuple(assets)
+
+
+def _read_model_draw_graph(
+    data: bytes,
+    items: tuple[ModelItem, ...],
+    asset_count: int,
+    data_end: int,
+    relocations: set[int],
+    context: str,
+) -> tuple[dict[int, tuple[int, ...]], dict[int, ModelDrawList], dict[int, ModelDraw]]:
+    roots: dict[int, tuple[int, ...]] = {}
+    lists: dict[int, ModelDrawList] = {}
+    draws: dict[int, ModelDraw] = {}
+
+    for item_index, item in enumerate(items):
+        root = item.commands
+        if not root or root in roots:
+            continue
+        list_offsets = []
+        cursor = root
+        while True:
+            _data_range(
+                data,
+                cursor,
+                4,
+                data_end,
+                context + f" item {item_index} draw-list set",
+            )
+            list_offset = _u32(data, cursor, context + " draw-list pointer")
+            if list_offset == 0:
+                if cursor in relocations:
+                    raise FldError(f"{context} draw-list terminator is relocated")
+                break
+            if cursor not in relocations:
+                raise FldError(f"{context} draw-list pointer is not relocated")
+            list_offsets.append(list_offset)
+            cursor += 4
+        roots[root] = tuple(list_offsets)
+
+        for list_offset in list_offsets:
+            if list_offset in lists:
+                continue
+            _data_range(data, list_offset, 4, data_end, context + " draw list")
+            header = _u32(data, list_offset, context + " draw-list header")
+            count, selector = header & 0xFFFF, header >> 16
+            draw_offsets = []
+            for draw_index in range(count):
+                pointer_offset = list_offset + 4 + draw_index * 4
+                _data_range(
+                    data,
+                    pointer_offset,
+                    4,
+                    data_end,
+                    context + " draw pointer",
+                )
+                if pointer_offset not in relocations:
+                    raise FldError(f"{context} draw pointer is not relocated")
+                draw_offset = _u32(data, pointer_offset, context + " draw pointer")
+                if not draw_offset:
+                    raise FldError(f"{context} draw pointer is null")
+                draw_offsets.append(draw_offset)
+
+                if draw_offset in draws:
+                    continue
+                _data_range(
+                    data,
+                    draw_offset,
+                    MODEL_DRAW_SIZE,
+                    data_end,
+                    context + " draw",
+                )
+                opcode, packed, packet, reserved = struct.unpack_from(
+                    "<4I", data, draw_offset
+                )
+                if opcode != 1:
+                    raise FldError(f"{context} uses unsupported draw opcode {opcode}")
+                if draw_offset + 8 not in relocations:
+                    raise FldError(f"{context} draw packet pointer is not relocated")
+                if reserved != 0:
+                    raise FldError(f"{context} draw has a nonzero reserved word")
+                quadwords, asset = packed & 0xFFFF, packed >> 16
+                if asset >= asset_count:
+                    raise FldError(
+                        f"{context} draw selects asset {asset}, but only "
+                        f"{asset_count} assets exist"
+                    )
+                _data_range(
+                    data,
+                    packet,
+                    quadwords * 0x10,
+                    data_end,
+                    context + " draw packet",
+                )
+                draws[draw_offset] = ModelDraw(
+                    draw_offset, asset, quadwords, packet
+                )
+            lists[list_offset] = ModelDrawList(
+                list_offset, selector, tuple(draw_offsets)
+            )
+    return roots, lists, draws
+
+
 def _read_motion_tracks(
     data: bytes, offset: int, data_end: int, context: str
 ) -> tuple[MotionTrack, ...]:
@@ -480,7 +680,8 @@ def _read_special_point(data: bytes, offset: int, context: str) -> tuple[int, in
 def validate(data: bytes) -> None:
     """Validate the known FLD object graph and semantic index domains."""
 
-    words, data_end, _ = _read_header(data)
+    words, data_end, relocation_tuple = _read_header(data)
+    relocations = set(relocation_tuple)
     rows = _read_types(data, words, data_end)
     resources = _read_resources(data, rows)
     event_count = sum(row.count for row in rows if row.type_id == 6)
@@ -489,7 +690,23 @@ def validate(data: bytes) -> None:
         if resource.name:
             _fixed_string(data, resource.name, f"resource at 0x{resource.offset:x} name")
         if resource.type_id == 2 and resource.data and data[4:8] == b"FLD1":
-            _read_model_resource(data, resource.data, data_end, "field model")
+            _, items = _read_model_resource(
+                data, resource.data, data_end, "field model"
+            )
+            assets = _read_model_assets(
+                data,
+                _u32(data, resource.data + 0x14, "field model asset pointer"),
+                data_end,
+                "field model assets",
+            )
+            _read_model_draw_graph(
+                data,
+                items,
+                len(assets),
+                data_end,
+                relocations,
+                "field model",
+            )
         elif resource.type_id == 3 and resource.data:
             _range(data, resource.data, COLLISION_SIZE, "collision header")
             values = struct.unpack_from("<12I", data, resource.data)
@@ -704,6 +921,25 @@ def _fields(args: tuple[str, ...]) -> dict[str, str]:
     return out
 
 
+def _references(text: str) -> tuple[str, ...]:
+    references = tuple(text.split(",")) if text else ()
+    for reference in references:
+        _symbol(reference)
+    return references
+
+
+def _model_asset_source_fields(operation: Operation) -> dict[str, str]:
+    fields = _fields(operation.args)
+    if "index" not in fields:
+        raise FldError(f"line {operation.line}: model_asset requires index")
+    extra = set(fields) - MODEL_ASSET_FIELD_NAMES - {"index"}
+    if extra:
+        raise FldError(
+            f"line {operation.line}: unknown model_asset fields {sorted(extra)}"
+        )
+    return fields
+
+
 def _csv(text: str, count: int, parse=_int) -> tuple:
     values = tuple(parse(value) for value in text.split(","))
     if len(values) != count:
@@ -765,6 +1001,7 @@ def render_source(data: bytes) -> str:
         _assign_label(labels, resource.data, f"{stem}_data")
 
     spans: dict[int, tuple[int, list[str]]] = {}
+    span_starts: list[int] = []
     internal_targets: set[int] = set()
 
     def add_span(start: int, size: int, lines: list[str], context: str) -> None:
@@ -772,12 +1009,24 @@ def render_source(data: bytes) -> str:
             return
         if start <= 0 or start + size > data_end:
             raise FldError(f"{context} lies outside the data region")
-        for other_start, (other_end, _) in spans.items():
-            if start < other_end and other_start < start + size:
-                if start == other_start and start + size == other_end:
-                    return
-                raise FldError(f"{context} overlaps typed data at 0x{other_start:x}")
+        old = spans.get(start)
+        if old is not None:
+            if start + size == old[0]:
+                return
+            raise FldError(f"{context} overlaps typed data at 0x{start:x}")
+        index = bisect.bisect_left(span_starts, start)
+        if index:
+            previous = span_starts[index - 1]
+            if spans[previous][0] > start:
+                raise FldError(
+                    f"{context} overlaps typed data at 0x{previous:x}"
+                )
+        if index < len(span_starts) and span_starts[index] < start + size:
+            raise FldError(
+                f"{context} overlaps typed data at 0x{span_starts[index]:x}"
+            )
         spans[start] = (start + size, lines)
+        span_starts.insert(index, start)
 
     # Type rows and resource heads are the backbone of the object graph.
     type_lines = [
@@ -839,9 +1088,42 @@ def render_source(data: bytes) -> str:
             model_resource, items = _read_model_resource(
                 data, resource.data, data_end, stem + " field model"
             )
+            assets = _read_model_assets(
+                data,
+                model_resource.assets,
+                data_end,
+                stem + " model assets",
+            )
+            draw_roots, draw_lists, draws = _read_model_draw_graph(
+                data,
+                items,
+                len(assets),
+                data_end,
+                relocations,
+                stem + " field model",
+            )
             _assign_label(labels, model_resource.items, f"{stem}_items")
             _assign_label(labels, model_resource.assets, f"{stem}_assets")
             _assign_label(labels, model_resource.motion, f"{stem}_motion")
+
+            for index, item in enumerate(items):
+                if not item.commands:
+                    continue
+                root_name = f"{stem}_node_{index}_draws"
+                _assign_label(labels, item.commands, root_name)
+                for list_index, list_offset in enumerate(draw_roots[item.commands]):
+                    list_name = f"{root_name}_list_{list_index}"
+                    _assign_label(labels, list_offset, list_name)
+                    for draw_index, draw_offset in enumerate(
+                        draw_lists[list_offset].draws
+                    ):
+                        draw_name = f"{list_name}_draw_{draw_index}"
+                        _assign_label(labels, draw_offset, draw_name)
+                        _assign_label(
+                            labels,
+                            draws[draw_offset].packet,
+                            f"{draw_name}_packet",
+                        )
 
             def model_ref(value: int) -> str:
                 return "null" if value == 0 else f"@{_label_for(labels, value)}"
@@ -866,7 +1148,6 @@ def render_source(data: bytes) -> str:
             ]
             for index, node in enumerate(items):
                 _assign_label(labels, node.bounds, f"{stem}_node_{index}_bounds")
-                _assign_label(labels, node.commands, f"{stem}_node_{index}_commands")
                 node_lines.append(
                     "model_item "
                     f"node_id={node.node_id} parent={node.parent} "
@@ -895,6 +1176,79 @@ def render_source(data: bytes) -> str:
                         f"maximum={','.join(_float_text(value) for value in bounds[3:])}"
                     ],
                     f"{stem} model item {index} bounds",
+                )
+
+            asset_lines = [f"model_assets count={len(assets)}"]
+            for asset in assets:
+                fields = [f"index={asset.index}"]
+                for field_name, values in asset.fields:
+                    if field_name in {"values_08", "values_40", "scalar_100", "scalar_200", "pair_400"}:
+                        text = ",".join(_float_text(value) for value in values)
+                    elif field_name in {"word_01", "word_02", "word_10", "word_80"}:
+                        text = ",".join(f"0x{value:08x}" for value in values)
+                    else:
+                        text = ",".join(str(value) for value in values)
+                    fields.append(f"{field_name}={text}")
+                asset_lines.append("model_asset " + " ".join(fields))
+            add_span(
+                model_resource.assets,
+                4 + sum(asset.size for asset in assets),
+                asset_lines,
+                stem + " model assets",
+            )
+
+            for root_offset, list_offsets in draw_roots.items():
+                list_refs = ",".join(
+                    f"@{_label_for(labels, value)}" for value in list_offsets
+                )
+                add_span(
+                    root_offset,
+                    (len(list_offsets) + 1) * 4,
+                    [f"model_draw_set lists={list_refs}"],
+                    stem + " model draw-list set",
+                )
+            for list_offset, draw_list in draw_lists.items():
+                draw_refs = ",".join(
+                    f"@{_label_for(labels, value)}" for value in draw_list.draws
+                )
+                add_span(
+                    list_offset,
+                    4 + len(draw_list.draws) * 4,
+                    [
+                        "model_draw_list "
+                        f"selector={draw_list.selector} draws={draw_refs}"
+                    ],
+                    stem + " model draw list",
+                )
+            packet_sizes: dict[int, int] = {}
+            for draw_offset, draw in draws.items():
+                add_span(
+                    draw_offset,
+                    MODEL_DRAW_SIZE,
+                    [
+                        "model_draw "
+                        f"asset={draw.asset} qwords={draw.quadwords} "
+                        f"packet=@{_label_for(labels, draw.packet)}"
+                    ],
+                    stem + " model draw",
+                )
+                packet_size = draw.quadwords * 0x10
+                old_size = packet_sizes.setdefault(draw.packet, packet_size)
+                if old_size != packet_size:
+                    raise FldError(
+                        f"{stem} packet at 0x{draw.packet:x} has conflicting sizes"
+                    )
+            for packet, packet_size in packet_sizes.items():
+                packet_lines = [
+                    "packet_data "
+                    + data[start : min(start + 0x100, packet + packet_size)].hex()
+                    for start in range(packet, packet + packet_size, 0x100)
+                ]
+                add_span(
+                    packet,
+                    packet_size,
+                    packet_lines,
+                    stem + " model draw packet",
                 )
         elif resource.type_id == 3 and resource.data:
             offset = resource.data
@@ -1159,10 +1513,16 @@ def parse_source(source: str) -> tuple[Operation, ...]:
     saw_preamble = False
     source_magic = ""
     for line_number, raw_line in enumerate(source.splitlines(), 1):
-        try:
-            tokens = shlex.split(raw_line, comments=True, posix=True)
-        except ValueError as exc:
-            raise FldError(f"line {line_number}: {exc}") from exc
+        raw_bytes = re.fullmatch(
+            r"\s*(bytes|packet_data)\s+([0-9A-Fa-f]+)\s*", raw_line
+        )
+        if raw_bytes:
+            tokens = [raw_bytes.group(1), raw_bytes.group(2)]
+        else:
+            try:
+                tokens = shlex.split(raw_line, comments=True, posix=True)
+            except ValueError as exc:
+                raise FldError(f"line {line_number}: {exc}") from exc
         if not tokens:
             continue
         if not saw_preamble:
@@ -1209,6 +1569,8 @@ def _operation_size(operation: Operation, offset: int) -> int:
         "model_items": MODEL_ITEM_LIST_SIZE,
         "model_item": MODEL_ITEM_SIZE,
         "model_bounds": MODEL_BOUNDS_SIZE,
+        "model_assets": 4,
+        "model_draw": MODEL_DRAW_SIZE,
         "pointer": 4,
         "u32": 4 * len(args),
         "s32": 4 * len(args),
@@ -1218,6 +1580,37 @@ def _operation_size(operation: Operation, offset: int) -> int:
     }
     if name in fixed:
         return fixed[name]
+    if name == "model_asset":
+        fields = _model_asset_source_fields(operation)
+        size = 8
+        for _, field_name, kind, width in MODEL_ASSET_FIELDS:
+            if field_name in fields:
+                size += 4 if kind in {"resource", "resource_pair"} else width * 4
+        return size
+    if name == "model_draw_set":
+        fields = _fields(args)
+        if set(fields) != {"lists"}:
+            raise FldError(f"line {operation.line}: model_draw_set expects lists=...")
+        return (len(_references(fields["lists"])) + 1) * 4
+    if name == "model_draw_list":
+        fields = _fields(args)
+        if set(fields) != {"selector", "draws"}:
+            raise FldError(
+                f"line {operation.line}: model_draw_list expects selector=... draws=..."
+            )
+        return 4 + len(_references(fields["draws"])) * 4
+    if name == "packet_data":
+        if len(args) != 1:
+            raise FldError(f"line {operation.line}: packet_data expects one hex string")
+        try:
+            size = len(bytes.fromhex(args[0]))
+        except ValueError as exc:
+            raise FldError(f"line {operation.line}: invalid packet byte string") from exc
+        if size == 0 or size % 0x10:
+            raise FldError(
+                f"line {operation.line}: packet_data size must be a positive multiple of 16"
+            )
+        return size
     if name == "motion":
         fields = _fields(args)
         if set(fields) != {"tracks"}:
@@ -1287,19 +1680,52 @@ def _layout(operations: tuple[Operation, ...]) -> tuple[dict[str, int], int]:
         raise FldError("missing end_data")
     if labels.get("data_end") != end_data:
         raise FldError("label data_end must immediately precede end_data")
+    label_operations = {
+        operation.args[0]: index
+        for index, operation in enumerate(operations)
+        if operation.name == "label"
+    }
+    counted_blocks = {
+        "model_items": "model_item",
+        "model_assets": "model_asset",
+    }
     for index, operation in enumerate(operations):
-        if operation.name != "model_items":
+        item_name = counted_blocks.get(operation.name)
+        if item_name is not None:
+            expected = _int(_fields(operation.args).get("count", "-1"))
+            actual = 0
+            for item in operations[index + 1 :]:
+                if item.name != item_name:
+                    break
+                actual += 1
+            if actual != expected:
+                raise FldError(
+                    f"line {operation.line}: {operation.name} count is {expected}, "
+                    f"followed by {actual} {item_name} directives"
+                )
+        if operation.name != "model_draw":
             continue
-        expected = _int(_fields(operation.args).get("count", "-1"))
-        actual = 0
-        for item in operations[index + 1 :]:
-            if item.name != "model_item":
-                break
-            actual += 1
-        if actual != expected:
+        fields = _fields(operation.args)
+        if set(fields) != {"asset", "qwords", "packet"}:
             raise FldError(
-                f"line {operation.line}: model_items count is {expected}, "
-                f"followed by {actual} model_item directives"
+                f"line {operation.line}: model_draw expects asset=... qwords=... packet=..."
+            )
+        packet_name = _symbol(fields["packet"])
+        if packet_name not in label_operations:
+            raise FldError(f"unknown label @{packet_name}")
+        expected_size = _int(fields["qwords"]) * 0x10
+        packet_index = label_operations[packet_name] + 1
+        actual_size = 0
+        while (
+            packet_index < len(operations)
+            and operations[packet_index].name == "packet_data"
+        ):
+            actual_size += _operation_size(operations[packet_index], 0)
+            packet_index += 1
+        if actual_size != expected_size:
+            raise FldError(
+                f"line {operation.line}: model_draw declares {expected_size} packet bytes, "
+                f"but @{packet_name} contains {actual_size}"
             )
     return labels, end_data
 
@@ -1532,6 +1958,67 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
                     *_csv(f["maximum"], 3, _parse_float),
                 )
             )
+        elif name == "model_assets":
+            f = checked_fields(operation, ("count",))
+            output.extend(struct.pack("<I", _int(f["count"])))
+        elif name == "model_asset":
+            f = _model_asset_source_fields(operation)
+            flags = sum(
+                bit
+                for bit, field_name, _, _ in MODEL_ASSET_FIELDS
+                if field_name in f
+            )
+            output.extend(struct.pack("<IHH", _int(f["index"]), 0, flags))
+            for _, field_name, kind, width in MODEL_ASSET_FIELDS:
+                if field_name not in f:
+                    continue
+                if kind == "u32":
+                    output.extend(
+                        struct.pack("<" + "I" * width, *_csv(f[field_name], width))
+                    )
+                elif kind == "float":
+                    output.extend(
+                        struct.pack(
+                            "<" + "f" * width,
+                            *_csv(f[field_name], width, _parse_float),
+                        )
+                    )
+                elif kind == "resource":
+                    output.extend(struct.pack("<HH", _int(f[field_name]), 0))
+                elif kind == "resource_pair":
+                    output.extend(
+                        struct.pack("<HH", *_csv(f[field_name], width))
+                    )
+                else:
+                    raise AssertionError(kind)
+        elif name == "model_draw_set":
+            f = checked_fields(operation, ("lists",))
+            for reference in _references(f["lists"]):
+                output.extend(pointer(reference))
+            output.extend(bytes(4))
+        elif name == "model_draw_list":
+            f = checked_fields(operation, ("selector", "draws"))
+            references = _references(f["draws"])
+            selector = _int(f["selector"])
+            if len(references) > 0xFFFF or not 0 <= selector <= 0xFFFF:
+                raise FldError(
+                    f"line {operation.line}: draw count or selector exceeds u16"
+                )
+            output.extend(struct.pack("<I", len(references) | selector << 16))
+            for reference in references:
+                output.extend(pointer(reference))
+        elif name == "model_draw":
+            f = checked_fields(operation, ("asset", "qwords", "packet"))
+            asset, quadwords = _int(f["asset"]), _int(f["qwords"])
+            if not 0 <= asset <= 0xFFFF or not 0 <= quadwords <= 0xFFFF:
+                raise FldError(
+                    f"line {operation.line}: asset index or quadword count exceeds u16"
+                )
+            output.extend(struct.pack("<II", 1, quadwords | asset << 16))
+            output.extend(pointer(f["packet"]))
+            output.extend(bytes(4))
+        elif name == "packet_data":
+            output.extend(bytes.fromhex(args[0]))
         elif name == "event":
             f = checked_fields(operation, ("flags", "label", "reserved"))
             output.extend(struct.pack("<I", _int(f["flags"])))
