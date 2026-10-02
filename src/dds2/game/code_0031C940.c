@@ -31,7 +31,15 @@ INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CAE8);
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CBC8);
 
-INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CDE8);
+extern u32 D_0045C840[];
+void func_0031CDE8(u32 *source, s32 count) {
+    s32 i;
+
+    memset(D_0045C840, 0, 0x1C);
+    for (i = 0; i < count; i++) {
+        D_0045C840[i] = source[i];
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CE60);
 

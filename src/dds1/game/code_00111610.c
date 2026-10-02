@@ -31,6 +31,22 @@ extern u32 dds3AdvanceWorldCounter();
 extern SlotEntry dds3SlotRingEntries[];
 extern s32 dds3SlotRingCursor;
 
+typedef struct DdsSlotResourceState {
+    u32 unk00;
+    u32 indexNode;
+    s32 kind;
+    u32 unk0C;
+    s32 unk10;
+    u8 pad14[0x38];
+    s32 slots[24];
+    u32 unkAC;
+    s32 currentSlot;
+} DdsSlotResourceState;
+
+extern void *func_002CFEB8(s32);
+extern void *memset(void *, s32, u32);
+extern u32 dds3AppendWorldIndexNode(s32);
+
 SlotObjectFull *dds3SpawnSlotRingObj3(u32 owner) {
     SlotObjectFull *obj = dds3AppendWorldObjectNode(3);
     ObjectResource *resource = obj->resource;
@@ -123,7 +139,22 @@ s32 dds3GetObjectSlotRingOccupancy(u32 kind)
     return slots;
 }
 
-INCLUDE_ASM(const s32, "game/code_00111610", func_001117A8);
+DdsSlotResourceState *func_001117A8(s32 value) {
+    DdsSlotResourceState *state = func_002CFEB8(sizeof(DdsSlotResourceState));
+    s32 i;
+    u32 node;
+
+    memset(state, 0, sizeof(DdsSlotResourceState));
+    state->kind = 3;
+    node = dds3AppendWorldIndexNode(0);
+    state->indexNode = node;
+    state->unk10 = value;
+    for (i = 0; i < 24; i++) {
+        state->slots[i] = -1;
+    }
+    state->currentSlot = -1;
+    return state;
+}
 
 INCLUDE_SDATA(const s32, "game/code_00111610", dds3SlotRingCursor);
 

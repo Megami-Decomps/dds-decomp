@@ -131,7 +131,43 @@ s32 frFontHighestSetBitIndex(u32 value) {
     return (count + 0xFF) & 0xFF;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019B840", func_0019B968);
+typedef union FrFontDmaTag {
+    u128 value;
+    u32 words[4];
+} FrFontDmaTag;
+
+typedef struct FrFontGsWrite {
+    u64 value;
+    u64 reg;
+} FrFontGsWrite;
+
+typedef struct FrFontGsPacket {
+    FrFontDmaTag dma;
+    u64 gifTag;
+    u64 gifRegisters;
+    FrFontGsWrite writes[6];
+} FrFontGsPacket;
+
+void func_0019B968(FrFontGsPacket *packet) {
+    packet->dma.value = 0;
+    packet->dma.words[0] = 0x70000007;
+    packet->dma.words[2] = 0;
+    packet->dma.words[3] = 0x50000007;
+    packet->gifTag = 0x1000000000008006ULL;
+    packet->gifRegisters = 0xE;
+    packet->writes[0].value = 0;
+    packet->writes[0].reg = 0x3F;
+    packet->writes[1].value = 0x44;
+    packet->writes[1].reg = 0x42;
+    packet->writes[2].value = 0;
+    packet->writes[2].reg = 0x49;
+    packet->writes[3].value = 0x8080;
+    packet->writes[3].reg = 0x3B;
+    packet->writes[4].value = 0;
+    packet->writes[4].reg = 0x4A;
+    packet->writes[5].value = 0x517ED;
+    packet->writes[5].reg = 0x47;
+}
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BA00);
 

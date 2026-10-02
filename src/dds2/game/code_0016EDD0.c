@@ -134,7 +134,6 @@ void effInitializeColorState(EffectColorState *state) {
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_001717E8);
 
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_001719D0);
-
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_00171A68);
 
 typedef struct EffFlashRecordPart {

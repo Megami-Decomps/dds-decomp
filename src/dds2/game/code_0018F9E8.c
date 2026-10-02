@@ -27,7 +27,20 @@ void func_0018FC88(void) {
     sdfReleaseChipBlock();
 }
 
-INCLUDE_ASM(const s32, "game/code_0018F9E8", func_0018FCA0);
+extern s32 func_0018F9E8(void *data, s32 resource, s32 flags);
+
+s32 func_0018FCA0(u8 *object) {
+    s32 *values = (s32 *)object;
+    s32 offset = (s32)((f32)values[0] * 1.4f);
+    s32 x = values[1] + 0x100;
+    s32 y = values[2] + 0xE0;
+
+    values[5] = x - offset;
+    values[6] = y - offset;
+    values[7] = x + offset;
+    values[8] = y + offset;
+    return func_0018F9E8(object + 0xC, *(s32 *)(object + 0x24), 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_0018F9E8", func_0018FD10);
 

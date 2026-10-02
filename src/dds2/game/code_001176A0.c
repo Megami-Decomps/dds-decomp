@@ -349,15 +349,6 @@ void sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
     func_00118C80(unitIndex, scriptArg, contextArg, (u8)mode);
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00118CC0);
-
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00118D60);
-
-extern s32 datAbilityParameters;
-
-/* The 0x20 flag selects base enemy vitals instead of the party script path. */
-#define SDF_UNIT_ENEMY 0x20
-
 /* Party-unit header: flags, record index into the enemy table (stride 76), hp / max hp. */
 typedef struct SdfPartyUnit {
     u16 flags;          /* 0x00 */
@@ -366,6 +357,42 @@ typedef struct SdfPartyUnit {
     u16 hp;             /* 0x06 */
     u16 maxHp;          /* 0x08 */
 } SdfPartyUnit;
+
+typedef struct SdfBattleParameters {
+    u8 pad00[0xBA4];
+    f32 partyHpScale[10];
+    f32 enemyHpScale[10];
+} SdfBattleParameters;
+
+extern SdfBattleParameters *datBattleParameters;
+
+f32 func_00118CC0(SdfPartyUnit *unit) {
+    s32 hp = unit->hp;
+    s32 band;
+
+    if (hp % 10 != 0) {
+        hp = hp - hp % 10 + 10;
+    }
+    band = hp * 10 / unit->maxHp - 1;
+    if (band < 0) {
+        band = 0;
+    }
+    if (band >= 10) {
+        band = 9;
+    }
+    if (unit->flags & 0x20) {
+        return datBattleParameters->enemyHpScale[band];
+    }
+    return datBattleParameters->partyHpScale[band];
+}
+
+INCLUDE_ASM(const s32, "game/code_001176A0", func_00118D60);
+
+extern s32 datAbilityParameters;
+
+/* The 0x20 flag selects base enemy vitals instead of the party script path. */
+#define SDF_UNIT_ENEMY 0x20
+
 
 typedef struct SdfEnemyVitals {
     u32 flags;          /* 0x00 */
@@ -376,7 +403,7 @@ extern s32 func_00119F68(u32);
 extern u32 func_00119C78(SdfPackedValue *, s32);
 extern s32 datUnitHasSkill(SdfPackedValue *, s32);
 extern s32 effMiscRandMod(s32, s32);
-extern void func_0035B6E0(const char *, ...);
+extern void func_0035B6E0(const char *fmt, ...);
 extern char D_00412B08[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
 /* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */

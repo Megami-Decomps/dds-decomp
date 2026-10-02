@@ -48,7 +48,7 @@ void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void));
 void sdfPrependPacketList(SdfListHead *list, SdfListHead *item);
 void func_002D5A68(SdfPacket *arg0, u32 arg1, s32 arg2, s64 arg3, s64 arg4, s64 arg5, u32 arg6, s32 arg7, s32 arg_sp0, s32 arg_sp8, s32 arg_sp10, s32 arg_sp18, s32 arg_sp20, s32 arg_sp28);
 void sdfDestroyObjectList();
-void func_002D4368();
+void func_002D4368(SdfListHead *previous, SdfListHead *item);
 void func_002D35B8();
 void func_002D4DD0();
 s32 sdfAllocPacketAligned(s32 size);
@@ -466,7 +466,7 @@ void sdfAppendPacketList(SdfListHead *list, SdfListHead *item) {
         }
         else {
             *last = (s32)item;
-            func_002D4368(last);
+            func_002D4368(last, item);
         }
         list->last = (u32)item;
     }
@@ -506,7 +506,32 @@ s32 sdfLinkReferenceDmaNode(s32 previous, u32 source) {
     return packet + 0x10;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4368);
+void func_002D4368(SdfListHead *previous, SdfListHead *item) {
+    u32 head = previous->last;
+    u32 source;
+    u32 pending;
+
+    source = previous->firstReferenceSource;
+    pending = item->firstReferenceSource;
+    if (source != pending) {
+        if (pending != 0) {
+            head = sdfLinkReferenceDmaNode(head, pending);
+        } else {
+            item->firstReferenceSource = source;
+        }
+    }
+    source = previous->secondReferenceSource;
+    pending = item->secondReferenceSource;
+    if (source != pending) {
+        if (pending != 0) {
+            head = sdfLinkReferenceDmaNode(head, pending);
+        } else {
+            item->secondReferenceSource = source;
+        }
+    }
+    ((SdfDmaTagHeader *)head)->kind = SDF_DMA_TAG_NEXT_BYTE;
+    ((SdfDmaTagHeader *)head)->address = item->first & 0x0FFFFFFF;
+}
 
 typedef struct SdfRefNode {
     u8 pad00[0x10];
@@ -534,7 +559,6 @@ void sdfChainReferenceNodes(SdfListHead *list) {
         node->chain = ((s64)address << 32) | 0x20000000;
     }
 }
-
 /* Pool entry made by func_002D4240: per-entry packet list with append/prepend handlers. */
 typedef struct SdfPoolNode {
     struct SdfPoolNode *next; /* 0x0 */
@@ -546,6 +570,7 @@ typedef struct SdfPoolNode {
     u32 unk18;
     u32 unk1C;
 } SdfPoolNode;
+
 
 /* Flush every pool entry, chain the packet lists together and terminate the last. */
 s32 sdfFlushPoolNodes(SdfPoolNode *node) {

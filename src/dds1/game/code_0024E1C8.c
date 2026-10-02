@@ -3,6 +3,18 @@
 extern s32 func_002CB3B8(u32, u32);
 extern void func_0024F6F0(s32, s32);
 
+extern u8 *datGameState;
+extern s32 scrGetSelectedOperandIndex(void *);
+extern u32 ptyGetProfileRecordValue(void *, u16);
+extern u32 prfGetCapValue(u16);
+
+typedef struct MnuProfileProgress {
+    void *unit;
+    s32 profileId;
+    u32 value;
+    u32 cap;
+} MnuProfileProgress;
+
 
 extern u8 D_003AF7A8[];
 
@@ -136,7 +148,16 @@ s32 mnuGetMantraSourceValue(u16 index) {
     return entry->slot[slot].value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F858);
+void func_0024F858(u16 index, MnuProfileProgress *progress) {
+    s32 offset = index * 0x1A4;
+    void *unit = datGameState + offset + 0xA60;
+
+    progress->unit = unit;
+    progress->profileId = scrGetSelectedOperandIndex(unit);
+    progress->value = ptyGetProfileRecordValue(datGameState + offset + 0xA60,
+                                              progress->profileId);
+    progress->cap = prfGetCapValue(progress->profileId);
+}
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F8D8);
 

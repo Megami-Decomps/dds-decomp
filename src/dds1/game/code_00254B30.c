@@ -64,7 +64,26 @@ INCLUDE_ASM(const s32, "game/code_00254B30", func_00254EF0);
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255010);
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00255118);
+typedef struct MnuSpritePlacement {
+    s16 resourceIndex;
+    s16 spriteIndex;
+    s16 x;
+    s16 y;
+} MnuSpritePlacement;
+
+extern MnuSpritePlacement D_0036B510[];
+extern s32 D_0036C698[];
+extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+
+void func_00255118(s32 x, s32 y, s32 z, s32 alpha) {
+    s32 resource = D_0036C698[D_0036B510[41].resourceIndex];
+
+    func_002BF4E0((x + D_0036B510[41].x) << 4,
+                  (y + D_0036B510[41].y) << 3, z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f), 0,
+                  resource,
+                  D_0036B510[41].spriteIndex, 0x53);
+}
 
 INCLUDE_ASM(const s32, "game/code_00254B30", mnuDrawMantraCostCounter);
 

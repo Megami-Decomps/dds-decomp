@@ -22,6 +22,19 @@ extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern char D_003B1A78[]; /* "mnuMovieDraw" */
 
+typedef struct MnuMovieRollEntry {
+    u8 pad00[0xC];
+    u8 unk0C;
+    u8 pad0D[0xF];
+} MnuMovieRollEntry;
+
+extern MnuMovieRollEntry D_003DC1E0[];
+extern s32 D_003BC618;
+extern void mnuLoadMovieRollSprite(void);
+extern void func_0026E8D8(void);
+extern void func_002ECA40(s32);
+extern void sdfSetGridScaledDrawBounds(s32, s32, s32, s32, u32);
+
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026EC90);
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F118);
@@ -94,7 +107,22 @@ void mnuReleaseMovieResourceAfterPendingWork(void) {
     func_002ECA40(0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026FE10);
+void func_0026FE10(void) {
+    s32 i;
+    u32 *movie = mnuMovieWork;
+
+    movie[4] = 0;
+    movie[5] = 0;
+    D_003BC614 = 0;
+    D_003BC618 = 4;
+    mnuLoadMovieRollSprite();
+    func_002ECA40(1);
+    sdfSetGridScaledDrawBounds(0x68, 0x69, 0x180, 0xEE, 0x80808080);
+    for (i = 0; i < 32; i++) {
+        func_0026E8D8();
+        D_003DC1E0[i].unk0C = 0;
+    }
+}
 
 extern u32 D_003BA8EC;
 

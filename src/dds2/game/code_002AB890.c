@@ -89,7 +89,14 @@ void func_002ACA98(MenuResourceOwner *object) {
     mnuDestroyWindowContainer(object->resources->fifth);
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACAC0);
+s32 func_002ACAC0(s32 itemId, MenuResourceOwner *owner) {
+    MenuResourceSet *resources = owner->resources;
+
+    if (*(u8 *)(itemId + datGameState + 0x1340) == 0) {
+        func_002B9720(resources->fifth);
+    }
+    return ((MenuStaffList *)resources->fifth)->window->panelActive != 0;
+}
 
 void func_002ACB18(u32 arg0) {
     mnuSwitchCampVisualCategory(2, arg0);

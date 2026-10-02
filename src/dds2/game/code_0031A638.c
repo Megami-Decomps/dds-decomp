@@ -1,8 +1,14 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "game/code_0031A638", func_0031A638);
+typedef struct ScoreGlobalState {
+    u8 pad00[0x1E660];
+    u32 highScore;
+} ScoreGlobalState;
 
-INCLUDE_ASM(const s32, "game/code_0031A638", func_0031A690);
+extern ScoreGlobalState *datGameState;
+extern void mdlFlagSet(s32);
+extern void mdlFlagClear(s32);
+INCLUDE_ASM(const s32, "game/code_0031A638", func_0031A638);
 
 typedef struct ScoreResetWork {
     u8 pad00[0x74];
@@ -10,8 +16,22 @@ typedef struct ScoreResetWork {
     s32 unk78;
     s32 unk7C;
 } ScoreResetWork;
+extern void func_0035B6E0(const char *fmt, ...);
+extern s32 mdlFlagTest(s32);
 
-extern void func_0035B6E0(const char *, ...);
+void func_0031A690(ScoreResetWork *work) {
+    u32 minimum = mdlFlagTest(0x80E) == 0 ? 300000U : 600000U;
+    if (datGameState->highScore < minimum) {
+        datGameState->highScore = minimum;
+    }
+    work->unk78 = datGameState->highScore;
+    work->unk7C = datGameState->highScore;
+    work->unk74 = 0;
+    func_0035B6E0("************************Score Init!![%d]\n",
+                  datGameState->highScore);
+}
+
+
 void func_0031A730(ScoreResetWork *work) {
     u32 maximum = work->unk78;
     u32 score = work->unk7C;
@@ -24,7 +44,18 @@ void func_0031A730(ScoreResetWork *work) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0031A638", func_0031A770);
+void func_0031A770(ScoreResetWork *work) {
+    u32 score = work->unk7C;
+
+    if (datGameState->highScore < score) {
+        datGameState->highScore = score;
+        mdlFlagSet(0x815);
+    } else {
+        mdlFlagClear(0x815);
+    }
+    func_0035B6E0("************************Score Update!![%d / %d]\n",
+                  datGameState->highScore, work->unk7C);
+}
 
 
 void func_0031A7F8(ScoreResetWork *work) {

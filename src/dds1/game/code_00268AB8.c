@@ -566,7 +566,29 @@ void mnuResetTitleStreamLocked(void) {
     SignalSema(mnuTitleStreamSemaphore);
 }
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A980);
+extern u32 D_003DA1A8[];
+extern s32 func_002D03F8(s32);
+
+void func_0026A980(void) {
+    u32 *work = mnuTitleSoundBufferState;
+    u32 *decoder = D_003DA1A8;
+    s32 allocation;
+    s32 buffer;
+
+    WaitSema(mnuTitleStreamSemaphore);
+    work[7] = (u32)decoder;
+    allocation = func_002D03F8(0x1C200);
+    buffer = sdfMemoryGetBlockAddress(allocation);
+    work[8] = allocation;
+    work[4] = 2;
+    ((u32 *)work[7])[2] = 2;
+    work[5] = buffer;
+    work[6] = (u32)D_003DA1C0;
+    work[2] = 0xC0;
+    mnuLoadTitleStreamFrameData("/soundat3/se01-2.at3", work);
+    func_002F7628(decoder);
+    SignalSema(mnuTitleStreamSemaphore);
+}
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026AA28);
 

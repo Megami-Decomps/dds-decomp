@@ -194,7 +194,49 @@ void billReleaseSharedEntryBlock(void *arg) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", func_001598D8);
+typedef struct BillVec4 {
+    f32 v[4];
+} BillVec4;
+
+typedef struct BillSourceRecord {
+    u32 unk00;          /* 0x00 */
+    u8 pad04[8];
+    BillVec4 vector;    /* 0x0C */
+    f32 x;              /* 0x1C */
+    f32 y;              /* 0x20 */
+    f32 z;              /* 0x24 */
+    f32 w;              /* 0x28 */
+} BillSourceRecord;
+
+typedef struct BillSnapshot {
+    f32 x;              /* 0x00 */
+    f32 y;              /* 0x04 */
+    f32 z;              /* 0x08 */
+    f32 w;              /* 0x0C */
+    u32 unk10;          /* 0x10 */
+    BillVec4 vector;    /* 0x14 */
+} BillSnapshot;
+
+extern BillSourceRecord *func_00158F88(BillObj *obj, void *entries);
+
+/* Copy the billboard's current source record (by kind) into a snapshot. */
+void func_001598D8(BillObj *obj, BillSnapshot *snapshot) {
+    BillSourceRecord *record;
+
+    if (obj->kind == 1) {
+        record = func_00158F88(obj, obj->unk60);
+    } else if (obj->kind == 0 || obj->kind == 3) {
+        record = obj->entryList;
+    } else {
+        return;
+    }
+    snapshot->x = record->x;
+    snapshot->unk10 = record->unk00;
+    snapshot->y = record->y;
+    snapshot->z = record->z;
+    snapshot->w = record->w;
+    snapshot->vector = record->vector;
+}
 
 extern BillDispatch D_003AA990[];
 

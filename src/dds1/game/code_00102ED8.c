@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 typedef struct {
     s8 r;
@@ -399,7 +400,22 @@ s32 (*kwlnTextureFindIncompleteResource(void))(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104E20);
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105010);
+extern SdfTex *sdfGetTextureListHead(void);
+extern void func_00104E20(void *, s32, s32, SdfTex *, s32);
+
+void func_00105010(void *list, s32 x, s32 y) {
+    SdfTex *texture = sdfGetTextureListHead();
+
+    if (texture != NULL) {
+        sdfAppendPacket(list, func_0011D3E8(x - 0x20, y - 0x10,
+                                          0x0FFFFF7F, 0x840, 0x820,
+                                          0x80000000, 0x80806020));
+        do {
+            func_00104E20(list, x, y, texture, 0);
+            texture = texture->prev;
+        } while (texture != NULL);
+    }
+}
 
 void kwlnTextureAttachTask(u8 *scene) {
     void *task = sdfAllocPacketAligned(0x20);

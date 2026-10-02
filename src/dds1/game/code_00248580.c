@@ -101,6 +101,10 @@ typedef struct EffectPair {
     s32 b;
 } EffectPair;
 
+extern EffectPair D_003BC400[];
+extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
+extern void func_0024BF48(s32, s32);
+
 typedef struct EffectInner {
     u8 pad00[0x20];
     EffectPair *pair; /* 0x20 */
@@ -342,6 +346,7 @@ u8 func_00249198(void) {
     flagSet = mdlFlagTest(0x902);
     return flagSet == 0;
 }
+
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_002491B8);
 
@@ -896,7 +901,22 @@ void mnuSelectTerminalCursorSlot(u32 mode, s32 index, MenuTerminalWork *state) {
     mnuTerminalConfigureEffects(mode, state);
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024A610);
+void func_0024A610(s32 context) {
+    MenuTerminalWork *state = (MenuTerminalWork *)context;
+    EffectPair position = D_003BC400[0];
+    s32 *slot;
+    u32 i;
+
+    for (i = 0, slot = state->cursor; i < 2; i++, slot++) {
+        if (*slot >= 0) {
+            itfDrawGridWithResolvedSlot(position.a, position.b, 0, 0x81,
+                                        state->batch, *slot, 0x53);
+        }
+    }
+    if (state->mode == 2) {
+        func_0024BF48(0, context);
+    }
+}
 
 typedef struct {
     u8 pad00[0x14];
@@ -970,6 +990,7 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_0024AB28);
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024AB70);
 
+
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024ACD8);
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024AE18);
@@ -982,6 +1003,7 @@ typedef struct GridPanelHost {
     u8 pad68[0x38];
     s32 settings[1];    /* 0xA0 */
 } GridPanelHost;
+
 
 extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
 

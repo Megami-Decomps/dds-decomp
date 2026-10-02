@@ -684,6 +684,7 @@ u32 prfReqCheckGlobalCounter(u8 *operand) {
     return 1;
 }
 
+extern s32 prfReqEvaluateRules(u32, u32, u16, u32 *);
 INCLUDE_ASM(const s32, "game/code_002CC750", prfReqEvaluateRules);
 
 void prfReq54Evaluate(u32 state, u32 operand, u16 requirementId) {
@@ -698,10 +699,41 @@ u32 prfReq54GetWord1230(u16 i) {
     return D_00391230[i].v0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", prfReqCheckWithFallback);
+typedef struct PrfFallbackGroup {
+    u8 id;
+    u8 pad01[3];
+    u32 flags[2];
+} PrfFallbackGroup;
+
+extern PrfFallbackGroup D_003931B0[];
+s32 prfReqCheckWithFallback(void *operand, u16 id) {
+
+    u32 result;
+    u32 group;
+    u32 i;
+
+    id &= 0xFFFF;
+    if ((prfReq54GetWord1230(id) & 4) != 0) {
+        if (prfReqEvaluateRules(0, (u32)operand, id, &result) == 0) {
+            return result != 0;
+        }
+    }
+    for (group = 0; group < 4; group++) {
+        if (D_003931B0[group].id == id) {
+            for (i = 0; i < 2; i++) {
+                u32 flag = D_003931B0[group].flags[i];
+
+                if (flag != 0 && mdlFlagTest(flag) == 0) {
+                    return 0;
+                }
+            }
+            return 1;
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002CC750", prfReqSelectGroup);
-
 u8 prfReq18GetWord3220(s32 i) {
     return D_00393220[i].v0;
 }
