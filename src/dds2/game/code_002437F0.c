@@ -13,6 +13,21 @@ typedef struct SolarNoiseState {
     SolarNoiseLayer layers[10];
 } SolarNoiseState;
 
+typedef struct SolarSpriteLayer {
+    u8 pad00[0xC];
+    s32 drawWidth;
+    s32 drawHeight;
+    u8 pad14[0x68];
+    s32 width;
+    s32 height;
+    u8 pad84[0x1C];
+} SolarSpriteLayer;
+
+typedef struct SolarSpriteContext {
+    u8 pad00[0x18];
+    SolarSpriteLayer *layers;
+} SolarSpriteContext;
+
 extern f32 sdfSinPoly(f32 angle);
 extern void func_00243AD8(s32, s32, s32, s32, s32, s32, s32, s32, f32);
 
@@ -33,9 +48,11 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(s32 object);
 
 void sdfSubmitGsAlphaOneRegisterPacket(s32 property, s32 object);
 
-void func_00243958(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+void func_00243958(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_003C90DC[];
+extern s32 D_003C8C90[][3];
 extern void func_00311F20(s32, s32, s32 *, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern void func_002438F0(s32);
 
 typedef struct SolarPoint {
@@ -89,7 +106,32 @@ void func_002438F0(s32 object) {
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, object);
 }
 
-INCLUDE_ASM(const s32, "game/code_002437F0", func_00243958);
+void func_00243958(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
+    s32 contextHandle, s32 color) {
+    {
+        SolarSpriteContext *context = *(SolarSpriteContext **)contextHandle;
+        s32 spriteOffset = layer * sizeof(SolarSpriteLayer);
+        s32 scalePercent = D_003C8C90[layer][2];
+        SolarSpriteLayer *sprite =
+            (SolarSpriteLayer *)(spriteOffset + (s32)context->layers);
+
+        sprite->drawWidth = (s32)((f32)(sprite->width * scalePercent) / 100.0f) << 4;
+        sprite->drawHeight = (s32)((f32)(sprite->height * D_003C8C90[layer][2]) / 100.0f) << 3;
+        func_00306CD0((x + D_003C8C90[layer][0]) << 4,
+                      (y + D_003C8C90[layer][1]) << 3, z,
+                      (u32)((f32)(alpha << 8) * 0.0078125f), mode, (s32)context, layer, color);
+    }
+
+    {
+        SolarSpriteContext *restoredContext = *(SolarSpriteContext **)contextHandle;
+        s32 restoredOffset = layer * sizeof(SolarSpriteLayer);
+        SolarSpriteLayer *restoredSprite =
+            (SolarSpriteLayer *)(restoredOffset + (s32)restoredContext->layers);
+
+        restoredSprite->drawWidth = restoredSprite->width << 4;
+        restoredSprite->drawHeight = restoredSprite->height << 3;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_00243AD8);
 
@@ -317,4 +359,3 @@ INCLUDE_RODATA(const s32, "game/code_002437F0", D_00422308);
 INCLUDE_SDATA(const s32, "game/code_002437F0", D_00437210);
 
 INCLUDE_SDATA(const s32, "game/code_002437F0", D_00437218);
-
