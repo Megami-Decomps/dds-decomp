@@ -64,7 +64,7 @@ extern SdfDisplayEnv D_004681D0;
 extern void sceGsSetDefDispEnv(void *, s32, s32, s32, s32, s32);
 extern void sceGsPutDispEnv(void *);
 
-void func_00329E40(s32 index) {
+void sdfGraphSelectDisplayBuffer(s32 index) {
     SdfTexResource *buffer = D_0040B290.buffers[index];
 
     sceGsSetDefDispEnv((void *)(((u32)&D_004681D0 & 0x0FFFFFFF) | 0x20000000),

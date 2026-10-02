@@ -422,7 +422,7 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003232A0);
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_003233E8);
 
-void func_003236B0(s32 context) {
+void mnuVisitActiveWorkAndEffectEntry(s32 context) {
     s32 i;
 
     for (i = 0; i < mnuWorkEntryPoolCount; i++) {
@@ -461,7 +461,7 @@ void func_00323920(u8 *records) {
     D_004389A4 = records;
 }
 
-void func_00323928(void (*callback)(MenuWorkEntry *, s32)) {
+void mnuSetActiveWorkVisitor(void (*callback)(MenuWorkEntry *, s32)) {
     D_004389A8 = callback;
 }
 
@@ -495,7 +495,7 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_00324070);
 extern char D_0045C890[12];
 
 /* Copy the 12-byte resource progress parameter block. */
-void func_00324238(u8 *src) {
+void mnuSetInputActionSnapshot(u8 *src) {
     memcpy(D_0045C890, src, sizeof(D_0045C890));
 }
 

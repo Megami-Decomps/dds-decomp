@@ -90,7 +90,7 @@ s32 filePollEntryCleanup(FileCleanup *entry) {
 INCLUDE_ASM(const s32, "file/fileManager", func_00288818);
 
 /* Clear the node from every request slot and unlink it from the queue. */
-void func_002888C8(FileNode *node) {
+void fileManCancelRequest(FileNode *node) {
     FileManWork *work = &fileManagerWork;
     FileNode *prev;
     FileNode *cur;

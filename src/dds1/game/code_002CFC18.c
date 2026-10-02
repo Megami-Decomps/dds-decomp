@@ -10,7 +10,7 @@ void sdfUnlinkAndDeleteCurrentThread(void) {
 }
 
 extern s32 sdfSleepThreadId;
-extern s32 D_003BD9A0;
+extern s32 sdfThreadWakeWorkerId;
 extern u8 D_003BD480;
 extern s32 GetThreadId(void);
 extern s32 ChangeThreadPriority(s32, s32);
@@ -19,7 +19,7 @@ extern s32 SleepThread(void);
 
 s32 sdfWakeThreadOnCompletionEvent(s32 event) {
     if (event == 2) {
-        iWakeupThread(D_003BD9A0);
+        iWakeupThread(sdfThreadWakeWorkerId);
         if (D_003BD480 != 0) {
             D_003BD480--;
         }
@@ -72,7 +72,7 @@ s32 sdfStartQueuedThreadWakeWorker(void) {
     sdfTrackedThreadHead = NULL;
     sdfTrackedThreadSemaphore = sdfCreateSemaphore(1, 1, 0);
     thread = sdfCreateThread(sdfWakeQueuedThreadWaiters, D_003E1EF0, 0x800, 0x3E);
-    D_003BD9A0 = thread;
+    sdfThreadWakeWorkerId = thread;
     return _StartThread(thread, 0);
 }
 

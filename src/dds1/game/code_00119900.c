@@ -501,29 +501,29 @@ s32 evtPushSecondRosterLevel(void) {
     return 1;
 }
 
-s32 func_0011B9B8(void) {
+s32 evtPushFirstRosterCurrentHp(void) {
     scrSetIntegerReturnValue(((Entry1A4 *)D_003C2E78[0])->unk6);
     return 1;
 }
 
-s32 func_0011B9E0(void) {
+s32 evtPushSecondRosterCurrentHp(void) {
     scrSetIntegerReturnValue(((Entry1A4 *)D_003C2E7C[0])->unk6);
     return 1;
 }
 
-s32 func_0011BA08(void) {
+s32 evtPushFirstRosterMaximumHp(void) {
     scrSetIntegerReturnValue(((Entry1A4 *)D_003C2E78[0])->unk8);
     return 1;
 }
 
-s32 func_0011BA30(void) {
+s32 evtPushSecondRosterMaximumHp(void) {
     scrSetIntegerReturnValue(((Entry1A4 *)D_003C2E7C[0])->unk8);
     return 1;
 }
 
 extern s32 btlResolveUnitValueWithOverride(s32, s32);
 extern u32 datReadLowHalfOfCalculatedValue(s32, s32);
-s32 func_0011BA58(void) {
+s32 evtPushFirstRosterSelectedStat(void) {
     s8 stat = ((EventSelector *)datCommandSelectors)[
         ((EvtScriptContext *)D_003C2E70)->third].stat;
     s32 value;
@@ -548,7 +548,7 @@ s32 func_0011BA58(void) {
     return 1;
 }
 
-s32 func_0011BB08(void) {
+s32 evtPushSecondRosterSelectedStat(void) {
     s8 stat = ((EventSelector *)datCommandSelectors)[
         ((EvtScriptContext *)D_003C2E70)->third].stat;
     s32 value;
@@ -575,7 +575,7 @@ s32 func_0011BB08(void) {
 
 extern s32 func_00119750(s32);
 
-s32 func_0011BBB8(void) {
+s32 evtPushFirstRosterOptionStat(void) {
     s8 stat = func_00119750(((EvtScriptContext *)D_003C2E70)->options);
     s32 value = 100;
 
@@ -598,7 +598,7 @@ s32 func_0011BBB8(void) {
     return 1;
 }
 
-s32 func_0011BC60(void) {
+s32 evtPushSecondRosterOptionStat(void) {
     s8 stat = func_00119750(((EvtScriptContext *)D_003C2E70)->options);
     s32 value = 100;
 
@@ -621,21 +621,21 @@ s32 func_0011BC60(void) {
     return 1;
 }
 
-s32 func_0011BD08(void) {
+s32 evtPushFirstRosterStatEligibility(void) {
     s32 val = scrReadIntParameter(0);
 
     scrSetIntegerReturnValue(func_00119368(D_003C2E78[0], val));
     return 1;
 }
 
-s32 func_0011BD40(void) {
+s32 evtPushSecondRosterStatEligibility(void) {
     s32 val = scrReadIntParameter(0);
 
     scrSetIntegerReturnValue(func_00119368(D_003C2E7C[0], val));
     return 1;
 }
 
-s32 func_0011BD78(void) {
+s32 evtPushSelectedStatOrRosterLowValue(void) {
     EvtScriptContext *work = (EvtScriptContext *)D_003C2E70;
     s32 index = work->third;
     s32 value;

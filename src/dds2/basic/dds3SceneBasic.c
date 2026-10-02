@@ -2,7 +2,7 @@
 #include "dds3obj.h"
 #include "kwln.h"
 
-extern void *func_00343ED0(void *resource, u32 *resolvedId, s32 options);
+extern void *sdfReadNamedResource(void *resource, u32 *resolvedId, s32 options);
 extern void *sdfResourceRetainAddress(void *resource);
 extern void func_003297C8(void *arg);
 extern s32 bfFindScriptIndexByName(void *, const char *);

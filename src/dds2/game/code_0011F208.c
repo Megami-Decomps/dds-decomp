@@ -478,7 +478,7 @@ void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, 
 }
 
 
-void func_0011FAB8(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep) {
+void fldAdjustIntegerUsingMainPad(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep) {
     fldStepIntByPad(ptr, type, min, max, step, bigStep, (s8 *)D_0037F530);
 }
 
@@ -1200,7 +1200,7 @@ f32 fldSnapAngleToCompassPoint(f32 angle) {
 }
 
 /* Snap an angle in degrees to the nearest of the eight compass directions. */
-f32 func_001244A8(f32 angle) {
+f32 fldSnapAngleToCompassOctant(f32 angle) {
     f32 best;
     s32 index;
     f32 diff;
@@ -1425,7 +1425,7 @@ void fldStartSequenceRecord(void) {
 
 extern void fldInitDisplayObjects();
 extern void fldResetPendingSounds();
-extern void func_003412D8();
+extern void effMiscSeedRandom();
 extern void fldParseMixLb();
 extern void func_001343E8();
 extern void func_00145818();
@@ -1436,7 +1436,7 @@ void fldInitializeDisplayAndSceneSound(void) {
     fldInitDisplayObjects();
     fldResetPlayerSceneTransformState();
     fldResetPendingSounds();
-    func_003412D8(D_0038A6E0, 0x1E240);
+    effMiscSeedRandom(D_0038A6E0, 0x1E240);
     fldParseMixLb();
     func_001343E8();
     func_00145818();
@@ -1736,7 +1736,7 @@ extern void dds3SetCameraVector(u32, FieldVec4 *);
 extern void effObjSetInnerFloat(u32, f32);
 extern void dds3SetWorldCameraObject(u64, u32);
 
-void func_001265D0(void) {
+void fldCreateSecondaryWorldCamera(void) {
     FieldVec4 a = D_00412F10;
     FieldVec4 b;
     FieldVec4 c;

@@ -699,7 +699,7 @@ extern void mnuStopResourceTask(void);
 extern void func_00126038(s32 a, s32 b);
 extern void fldProcessDeferredSceneCommand(void);
 extern void func_002D0918(s32 handle);
-extern s8 D_003BC3E0;
+extern s8 mnuTerminalTaskState;
 
 /* Tear down the terminal menu task: release its resources and effect batches, then hand the saved mode/slot to the field scene. */
 void mnuReleaseTerminalWorkAndResumeField(s32 arg) {
@@ -713,7 +713,7 @@ void mnuReleaseTerminalWorkAndResumeField(s32 arg) {
         dspCloseChannel();
         evtReleaseResourcePairHandle((u32 *)work->messageResources);
         func_002D0918(work->allocation);
-        D_003BC3E0 = 2;
+        mnuTerminalTaskState = 2;
     }
     if (mnuCheckResourceTask() != 0) {
         mnuStopResourceTask();
@@ -756,7 +756,7 @@ s32 mnuTerminalCreateTasks(void) {
     D_003BC3E4 = kwlnTaskCreate(D_003AF658, 0x404, 1, 1, mnuPreparePopupAndDispatchSelection, 0, work);
     kwlnTaskCreate(D_003AF668, 0x2B14, 1, 1, func_0024A138, 0, work);
     result = kwlnTaskCreate(D_003AF678, 0x5210, 1, 1, func_0024A170, mnuReleaseTerminalWorkAndResumeField, work);
-    D_003BC3E0 = 1;
+    mnuTerminalTaskState = 1;
     return result;
 }
 
@@ -768,7 +768,7 @@ void fldStopSceneTasks(void) {
 }
 
 s32 fldPollSceneState(void) {
-    s32 state = D_003BC3E0;
+    s32 state = mnuTerminalTaskState;
     if (state == 1) {
         return 1;
     }
@@ -776,7 +776,7 @@ s32 fldPollSceneState(void) {
         return 0;
     }
     if (state == 2) {
-        D_003BC3E0 = 0;
+        mnuTerminalTaskState = 0;
     }
     return 0;
 }
@@ -901,7 +901,7 @@ void mnuSelectTerminalCursorSlot(u32 mode, s32 index, MenuTerminalWork *state) {
     mnuTerminalConfigureEffects(mode, state);
 }
 
-void func_0024A610(s32 context) {
+void mnuDrawTerminalSelectedSlots(s32 context) {
     MenuTerminalWork *state = (MenuTerminalWork *)context;
     EffectPair position = D_003BC400[0];
     s32 *slot;
@@ -1091,7 +1091,7 @@ extern void func_0024A340(s32, s32);
 
 extern void func_0024A930(s32);
 
-extern void func_0024A610(s32);
+extern void mnuDrawTerminalSelectedSlots(s32);
 
 /* Offsets shared by the event-B menu/dispatch handlers in this unit. */
 typedef struct EvtBContext {
@@ -1228,7 +1228,7 @@ s64 evtDispatchSelectionAfterFieldFrameGate(u64 request) {
     }
     mnuDispatchTransitionHostCallbacks(state);
     func_0024A930(state);
-    func_0024A610(state);
+    mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel(state, 1, request);
 }
 
@@ -1326,7 +1326,7 @@ s64 func_0024BC18(s32 item) {
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     func_0024A930(state);
-    func_0024A610(state);
+    mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel(state, 1, item);
 }
 
@@ -1376,7 +1376,7 @@ s64 mnuInitializeSelectionDispatchWhenModeUnset(s32 item) {
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     func_0024A930(state);
-    func_0024A610(state);
+    mnuDrawTerminalSelectedSlots(state);
     if (*(s32 *)(state + 0x7C) == 0) {
         func_0024BF48(1, state);
     }
@@ -1400,7 +1400,7 @@ u32 evtSelectFinalVisualNode(void) {
 
 /* Terminal panel poll: once the message window is idle and the field frames are drained, open the follow-up popup. */
 extern u8 D_0036AE2C[];
-s64 func_0024C120(s32 request) {
+s64 evtOpenTerminalFollowupPopupWhenIdle(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     s32 *panel = (s32 *)(state + 0x54);
     s64 result = func_00285670(state + 8, panel, 0, request);
@@ -1464,7 +1464,7 @@ s64 evtBPollSelectionChainPanel(s32 item) {
         }
         mnuDispatchTransitionHostCallbacks((TransitionHost *)state);
         func_0024A930(state);
-        func_0024A610(state);
+        mnuDrawTerminalSelectedSlots(state);
     }
     return menuRunPanel(state, 1, item);
 }
@@ -1513,7 +1513,7 @@ s64 func_0024C7E8(s32 item) {
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     func_0024A930(state);
-    func_0024A610(state);
+    mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel(state, 1, item);
 }
 
@@ -1563,7 +1563,7 @@ s64 mnuPrepareDispatchStateAndBindHandler(s32 item) {
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     func_0024A930(state);
-    func_0024A610(state);
+    mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel(state, 1, item);
 }
 
@@ -1624,7 +1624,7 @@ s64 evtBDispatchSyncD2(s32 item) {
     if (((EvtBContext *)state)->dispatchMode != 3) {
         func_0024A930(state);
     }
-    func_0024A610(state);
+    mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel(state, 1, item);
 }
 
@@ -1679,7 +1679,7 @@ INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF700);
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF710);
 
-INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3E0);
+INCLUDE_SDATA(const s32, "game/code_00248580", mnuTerminalTaskState);
 
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3E1);
 

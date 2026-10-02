@@ -92,9 +92,9 @@ void frFontEnsureSlotLoaded(s32 id, const char *path);
 
 extern u32 strlen(const char *str);
 
-extern s32 func_0032C138(u32);
+extern s32 sdfTexAcquireResourceTexture(u32);
 
-extern u64 func_00343ED0(const char *, u32 *, u64);
+extern u64 sdfReadNamedResource(const char *, u32 *, u64);
 
 typedef struct TextPoolNode {
     struct TextPoolNode *previous;
@@ -527,9 +527,9 @@ u32 itfReleaseMemNodeBuffer(u8 *payload) {
 
 void itfLoadBackgroundSprite(void) {
     u32 resource;
-    u64 buffer = func_00343ED0("/sprite/bg00.tmx", &resource, 0);
+    u64 buffer = sdfReadNamedResource("/sprite/bg00.tmx", &resource, 0);
 
-    itfBackgroundSpriteTexture = func_0032C138(resource);
+    itfBackgroundSpriteTexture = sdfTexAcquireResourceTexture(resource);
     func_003297C8(buffer);
 }
 
@@ -721,8 +721,8 @@ u64 itfLoadTextureFromAsset(const char *path) {
     u64 textureHandle;
     u32 assetInfo[4];
 
-    fileAllocation = func_00343ED0(path, assetInfo, 0);
-    textureHandle = func_0032C138(assetInfo[0]);
+    fileAllocation = sdfReadNamedResource(path, assetInfo, 0);
+    textureHandle = sdfTexAcquireResourceTexture(assetInfo[0]);
     func_003297C8(fileAllocation);
     return textureHandle;
 }

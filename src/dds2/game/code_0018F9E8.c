@@ -1,6 +1,6 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "game/code_0018F9E8", func_0018F9E8);
+INCLUDE_ASM(const s32, "game/code_0018F9E8", effResourceQuadDraw);
 
 typedef struct {
     s32 left;
@@ -40,10 +40,10 @@ void func_0018FC88(void) {
     sdfReleaseChipBlock();
 }
 
-extern s32 func_0018F9E8(void *data, s32 resource, s32 flags);
+extern s32 effResourceQuadDraw(void *data, s32 resource, s32 flags);
 
 /* Generate pixel-coordinate bounds; the renderer applies GS coordinate scale. */
-s32 func_0018FCA0(EffResourceRectWork *work) {
+s32 effResourceRectDrawPixels(EffResourceRectWork *work) {
     s32 extent = (s32)((f32)work->params.extent * 1.4f);
     s32 x = work->params.centerX + 0x100;
     s32 y = work->params.centerY + 0xE0;
@@ -52,10 +52,10 @@ s32 func_0018FCA0(EffResourceRectWork *work) {
     work->params.bounds.top = y - extent;
     work->params.bounds.right = x + extent;
     work->params.bounds.bottom = y + extent;
-    return func_0018F9E8(work->params.color, work->sourceHandle, 0);
+    return effResourceQuadDraw(work->params.color, work->sourceHandle, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0018F9E8", func_0018FD10);
+INCLUDE_ASM(const s32, "game/code_0018F9E8", effResourceRectDrawGsCoords);
 
 typedef struct EffTrackPolyModel EffTrackPolyModel;
 typedef struct EffTrackPolyData EffTrackPolyData;

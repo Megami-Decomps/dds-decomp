@@ -1062,41 +1062,41 @@ s32 btlGetRuntime(void) {
     return btlRuntime;
 }
 
-u16 func_001AA700(s32 arg0) {
+u16 btlReadCurrentUnitHp(s32 arg0) {
     return *(u16 *)(arg0 + 6);
 }
 
-u16 func_001AA708(s32 arg0) {
+u16 btlReadCurrentUnitMp(s32 arg0) {
     return *(u16 *)(arg0 + 10);
 }
 
-void func_001AA710(void) {
+void btlComputeProfileMaxHp(void) {
     func_001188F0();
 }
 
-void func_001AA728(void) {
+void btlComputeProfileMaxMp(void) {
     func_001189D0();
 }
 
-s32 func_001AA740(void *stats) {
+s32 btlComputeSkillAdjustedMaxHp(void *stats) {
     return func_001197C0(stats);
 }
 
-s32 func_001AA758() {
+s32 btlComputeSkillAdjustedMaxMp() {
     return func_001198C0();
 }
 
-void func_001AA770(void) {
+void btlAdjustUnitHp(void) {
     datMoveCursorX();
 }
 
-void func_001AA788(void) {
+void btlAdjustUnitMp(void) {
     datMoveCursorY();
 }
 
 u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 object) {
-    u16 maximum = func_001AA700(object);
-    u32 value = func_001AA740(object);
+    u16 maximum = btlReadCurrentUnitHp(object);
+    u32 value = btlComputeSkillAdjustedMaxHp(object);
     *(u16 *)(object + 8) = value;
     if (value < maximum) {
         *(u16 *)(object + 6) = value;
@@ -1105,8 +1105,8 @@ u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 object) {
 }
 
 u16 btlRefreshUnitMaximumMpAndClampCurrentMp(s32 object) {
-    u16 maximum = func_001AA708(object);
-    u32 value = func_001AA758(object);
+    u16 maximum = btlReadCurrentUnitMp(object);
+    u32 value = btlComputeSkillAdjustedMaxMp(object);
     *(u16 *)(object + 12) = value;
     if (value < maximum) {
         *(u16 *)(object + 10) = value;
@@ -1114,7 +1114,7 @@ u16 btlRefreshUnitMaximumMpAndClampCurrentMp(s32 object) {
     return *(u16 *)(object + 10);
 }
 
-u16 func_001AA840(s32 arg0) {
+u16 btlReadUnitStatusMask(s32 arg0) {
     return *(u16 *)(arg0 + 0xe) & 0x7fff;
 }
 
@@ -2751,7 +2751,7 @@ extern s32 func_003292A8(s32);
 
 extern BtlResBlock *sdfResourceRetainAddress(s32);
 
-extern s32 func_00343ED0(const char *, void *, s32);
+extern s32 sdfReadNamedResource(const char *, void *, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415B80);
 
@@ -2787,9 +2787,9 @@ void btlPanelResourcesLoad(void) {
         block->resA = 0;
         block->resB = 0;
         block->unk1C = 0;
-        btlResourceBlock->nameA = func_00343ED0("/battle/panel/batle_01.spr", params, 0);
-        btlResourceBlock->nameB = func_00343ED0("/battle/panel/batle_02.spr", params, 0);
-        btlResourceBlock->nameC = func_00343ED0("/battle/panel/battle_03.spr", params, 0);
+        btlResourceBlock->nameA = sdfReadNamedResource("/battle/panel/batle_01.spr", params, 0);
+        btlResourceBlock->nameB = sdfReadNamedResource("/battle/panel/batle_02.spr", params, 0);
+        btlResourceBlock->nameC = sdfReadNamedResource("/battle/panel/battle_03.spr", params, 0);
         btlResourceBlockLoaded = 0;
     }
     D_00436800 = 1;
@@ -2946,7 +2946,7 @@ void func_001B7E08(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7E40);
 
-u32 func_001B7FB8(void) {
+u32 btlHasRegisteredAnalysisPanelTask(void) {
     s64 temp_v0;
 
     temp_v0 = btlGetTrackedTaskHandle(0xb);
@@ -2964,7 +2964,7 @@ u32 func_001B7FB8(void) {
 }
 
 s32 btlGetRegisteredTaskValueOrDefault(void) {
-    if (func_001B7FB8() == 0) {
+    if (btlHasRegisteredAnalysisPanelTask() == 0) {
         return 0x80;
     }
     return *(s8 *)kwlnTaskGetUserValue(func_00101740(btlAnalyzPanelTaskNameRef));
@@ -3068,7 +3068,7 @@ u32 btlHasRegisteredPsechgPanelTask(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8368);
 
-u32 func_001B8538(void) {
+u32 btlHasRegisteredSkillNamePanelTask(void) {
     s64 temp_v0;
 
     temp_v0 = btlGetTrackedTaskHandle(1);
@@ -3087,7 +3087,7 @@ u32 func_001B8538(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8580);
 
-u32 func_001B8740(void) {
+u32 btlHasRegisteredAphNamePanelTask(void) {
     s64 temp_v0;
 
     temp_v0 = btlGetTrackedTaskHandle(0);
@@ -3123,11 +3123,11 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     s32 task = btlGetTrackedTaskHandle(0);
     MsgQueueTaskData *data;
 
-    if (func_001B8740() != 0) {
+    if (btlHasRegisteredAphNamePanelTask() != 0) {
         kwlnTaskDestroyWithHierarchy(task, 0);
     }
     data = (MsgQueueTaskData *)sdfAllocAndClearQuadwords(0x40);
-    if (func_001B8538() != 0) {
+    if (btlHasRegisteredSkillNamePanelTask() != 0) {
         kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
     }
     if (btlHasRegisteredGuidePanelTask() != 0) {

@@ -82,8 +82,8 @@ typedef struct {
     f32 v[4];
 } SdfCameraVector;
 
-extern SdfCameraVector D_003900A0;
-extern SdfCameraVector D_003900B0;
+extern SdfCameraVector fldLocalMapFirstCameraVector;
+extern SdfCameraVector fldLocalMapSecondCameraVector;
 extern SdfCameraVector D_003900C0;
 extern SdfCameraVector D_003900D0;
 extern f32 D_00390010[][4];
@@ -130,8 +130,8 @@ typedef struct MapResource {
 extern MapResource fldLocalMapTextureResource;
 
 void sdfInitInnerVectors(void) {
-    effObjSetInnerFirstVec(fldLocalMapCameraObject, &D_003900A0);
-    effObjSetInnerSecondVec(fldLocalMapCameraObject, &D_003900B0);
+    effObjSetInnerFirstVec(fldLocalMapCameraObject, &fldLocalMapFirstCameraVector);
+    effObjSetInnerSecondVec(fldLocalMapCameraObject, &fldLocalMapSecondCameraVector);
     ((EffObjHeader *)fldLocalMapCameraObject)->vtbl->refresh(fldLocalMapCameraObject);
 }
 
@@ -144,8 +144,8 @@ extern void sdfCommitPendingVectorAndMarkChanged();
 /* Latch the base vectors into the pending pair and flag the change. */
 void sdfLatchBaseVectorsForSelection(void) {
     D_003BD270 = 1;
-    D_003900C0 = D_003900A0;
-    D_003900D0 = D_003900B0;
+    D_003900C0 = fldLocalMapFirstCameraVector;
+    D_003900D0 = fldLocalMapSecondCameraVector;
     sdfCommitPendingVectorAndMarkChanged();
 }
 
@@ -194,23 +194,23 @@ s32 func_002C3F78(void) {
         t = (45 - D_003BD270) / 45.0f;
         t = 1.0f - t * t;
         if (t > 1.0f) t = 1.0f;
-        D_003900A0.v[0] = D_003900C0.v[0] * (1.0f - t) + D_00390010[index][0] * t;
-        D_003900A0.v[1] = D_003900C0.v[1] * (1.0f - t) + D_00390010[index][1] * t;
-        D_003900A0.v[2] = D_003900C0.v[2] * (1.0f - t) + D_00390010[index][2] * t;
-        D_003900A0.v[3] = 1.0f;
-        sdfQuatSlerp(D_003900B0.v, D_003900D0.v, D_00390050[index], t);
+        fldLocalMapFirstCameraVector.v[0] = D_003900C0.v[0] * (1.0f - t) + D_00390010[index][0] * t;
+        fldLocalMapFirstCameraVector.v[1] = D_003900C0.v[1] * (1.0f - t) + D_00390010[index][1] * t;
+        fldLocalMapFirstCameraVector.v[2] = D_003900C0.v[2] * (1.0f - t) + D_00390010[index][2] * t;
+        fldLocalMapFirstCameraVector.v[3] = 1.0f;
+        sdfQuatSlerp(fldLocalMapSecondCameraVector.v, D_003900D0.v, D_00390050[index], t);
         if ((s8)(D_003BD270 + 1) >= 45) D_003BD270 = 0;
         else D_003BD270++;
     } else {
-        D_003900A0.v[0] = D_00390010[index][0];
-        D_003900A0.v[1] = D_00390010[index][1];
-        D_003900A0.v[2] = D_00390010[index][2];
-        D_003900A0.v[3] = D_00390010[index][3];
+        fldLocalMapFirstCameraVector.v[0] = D_00390010[index][0];
+        fldLocalMapFirstCameraVector.v[1] = D_00390010[index][1];
+        fldLocalMapFirstCameraVector.v[2] = D_00390010[index][2];
+        fldLocalMapFirstCameraVector.v[3] = D_00390010[index][3];
         sdfQuaternionNormalize(D_00390050[index]);
-        D_003900B0.v[0] = D_00390050[index][0];
-        D_003900B0.v[1] = D_00390050[index][1];
-        D_003900B0.v[2] = D_00390050[index][2];
-        D_003900B0.v[3] = D_00390050[index][3];
+        fldLocalMapSecondCameraVector.v[0] = D_00390050[index][0];
+        fldLocalMapSecondCameraVector.v[1] = D_00390050[index][1];
+        fldLocalMapSecondCameraVector.v[2] = D_00390050[index][2];
+        fldLocalMapSecondCameraVector.v[3] = D_00390050[index][3];
     }
     return 1;
 }

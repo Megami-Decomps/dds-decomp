@@ -16,7 +16,7 @@ typedef struct WorldInnerOwner {
     WorldInnerState *inner;
 } WorldInnerOwner;
 
-extern u32 func_001117A8(u32);
+extern u32 dds3CreateSlotResourceState(u32);
 extern s32 func_002CFEB8(u32);
 
 /* Each object kind keeps its handle in a different structure. */
@@ -55,7 +55,7 @@ u32 dds3CreateWorldInnerState(WorldInnerOwner *object) {
     effObjInnerCreate();
     inner = (WorldInnerState *)func_002CFEB8(0x90);
     object->inner = inner;
-    handle = func_001117A8((u32)object);
+    handle = dds3CreateSlotResourceState((u32)object);
     inner->handle80 = handle;
     dds3SetObjectFlags(object, 0x62);
     inner->state88 = 0;

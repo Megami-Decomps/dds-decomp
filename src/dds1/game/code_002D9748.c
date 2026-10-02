@@ -322,7 +322,7 @@ f32 sdfGetSecondTextOverrideOrDefault(SdfTextParam *param) {
     return D_003BD35C;
 }
 
-void func_002D9FA0(u32 value) {
+void sdfSetForcedAssetTextureMode(u32 value) {
     sdfForcedAssetTextureMode = value;
 }
 
@@ -345,7 +345,7 @@ void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
     sdfDestroyDevRequest(list);
 }
 
-void func_002DA058(SdfResourceList *list, u32 item) {
+void sdfAppendResourceListItem(SdfResourceList *list, u32 item) {
     if (list->count >= list->capacity) {
         sdfDevBufferedRequestGrow(list);
     }

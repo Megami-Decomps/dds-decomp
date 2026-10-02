@@ -205,8 +205,8 @@ extern u32 fldMarkerTexture;
 extern u32 D_003BD7C0;
 extern u8 D_0032F260[];
 extern void *sdfCreateAssetWithDrawEntries(void);
-extern u32 func_002D3288(void *);
-extern u8 D_00324610[];
+extern u32 sdfTexAcquireResourceTexture(void *);
+extern u8 sdfProjectionMatrix[];
 extern u8 D_00324660[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *src);
 extern char D_003C9200[];
@@ -224,7 +224,7 @@ extern s32 fldEncProc(void);
 extern void fldResetEncounterAsyncState(void);
 extern void func_00213808(void);
 extern void btlClearRuntimeState(void);
-extern void func_00112EE8(s64 arg0, void *arg1, void *arg2);
+extern void dds3TransformCameraVectorsByInnerRotation(s64 arg0, void *arg1, void *arg2);
 extern f32 sdfAtan2(f32 arg0, f32 arg1);
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern u32 fldAreaLoadRequest;
@@ -341,7 +341,7 @@ typedef struct FldSceneRequest {
 
 extern u32 D_003C91D0[], D_003C91E0[], D_003C91F0[];
 extern char D_003BAC40[];
-extern u32 func_002EB028(const char *, u32 *, s32);
+extern u32 sdfReadNamedResource(const char *, u32 *, s32);
 extern void func_001263F0(u32, u32);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00126A30);
@@ -382,7 +382,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
             if (D_003C91D0[i] != 0) {
                 fldFormatAreaDirectory(directory, fldAreaState[4], fldAreaState[5] + 1);
                 func_003014F0(path, D_003BAC40, directory, D_003C91D0[i]);
-                D_003C91E0[i] = func_002EB028(path, &D_003C91F0[i], 0);
+                D_003C91E0[i] = sdfReadNamedResource(path, &D_003C91F0[i], 0);
             }
         }
     }
@@ -927,7 +927,7 @@ void fldInitDisplayObjects(void) {
         D_003BACEC = (u32)object;
         *(f32 *)((u8 *)object + 0x1C) = 1.0f;
         D_003BD7C0 = (u32)sdfCreateAssetWithDrawEntries();
-        fldMarkerTexture = func_002D3288(D_0032F260);
+        fldMarkerTexture = sdfTexAcquireResourceTexture(D_0032F260);
     }
 }
 
@@ -996,7 +996,7 @@ void fldProjectPointSetup(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 
         VU0_LOAD_MATRIX(sdfViewMatrix);
 ;
-    sdfPostmultiplyVuMatrixFromMemory(D_00324610);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     VU0_MOVE_MATRIX_TO_B();
     VU0_LOAD_VF_MEMORY(vf10, vec);
     VU0_TRANSFORM_POINT(vf10, vf10);
@@ -1049,7 +1049,7 @@ void fldPrepareProjectionMatrix(void) {
     u8 *matrix;
         VU0_LOAD_MATRIX(sdfViewMatrix);
 ;
-    matrix = D_00324610;
+    matrix = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
     __asm__ volatile (
         ".set noreorder\n"
@@ -1408,7 +1408,7 @@ void fldSubmitModelPacket(s32 textureId, u8 *modelData) {
     descriptor->open(descriptor, command);
 }
 
-extern s32 func_00100518(void);
+extern s32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];
 extern void func_002D4C80(const void *, u64, s32);
 extern void func_002D4CC8(const void *, u64, s32);
@@ -1420,7 +1420,7 @@ void func_0012AB40(void) {
     FieldBufferDescriptor *descriptor;
     sdfInitPacketList(command);
     texture = sdfAllocPacketAligned(0x40);
-    func_002D4C80(kwlnFrameDrawPacketRecords + func_00100518() * 0x1F40, texture, 0);
+    func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(command, texture);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
@@ -1432,7 +1432,7 @@ void func_0012ABE0(void) {
     FieldBufferDescriptor *descriptor;
     sdfInitPacketList(command);
     texture = sdfAllocPacketAligned(0x40);
-    func_002D4CC8(kwlnFrameDrawPacketRecords + func_00100518() * 0x1F40, texture, 0);
+    func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(command, texture);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
@@ -1966,7 +1966,7 @@ s64 fldGetUnselectedWorldEntry(void) {
 
 void fldSetCameraMoveMode(u32 value) {
     D_003BAD1C = value;
-    func_00112EE8(dds3GetWorldCameraObject(dds3GetWorldObject()), D_003C9230, D_003C9220);
+    dds3TransformCameraVectorsByInnerRotation(dds3GetWorldCameraObject(dds3GetWorldObject()), D_003C9230, D_003C9220);
     D_003BAD20 = 0;
 }
 
@@ -2373,7 +2373,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00131A88);
 extern void *fldSkyLightSetBuffer;
 extern char D_003A0100[];
 extern u32 fldRainTextureData;
-extern u32 func_002EB028(const char *, u32 *, s32);
+extern u32 sdfReadNamedResource(const char *, u32 *, s32);
 extern u32 sdfDevCreateCommandState(const char *);
 extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 extern void sdfDevWaitThenReleaseCommandState(u32);
@@ -2391,8 +2391,8 @@ void fldLoadSkyResource(s32 area) {
         sdfDevQueueReadAndWait(command, fldSkyLightSetBuffer, 0xE000);
         sdfDevWaitThenReleaseCommandState(command);
         if (area >= 2 && area < 100 && fldRainTextureResource == 0) {
-            fldRainTextureResource = func_002EB028(D_003A0100, &fldRainTextureData, 0);
-            fldRainTextureReference = func_002D3288((void *)fldRainTextureData);
+            fldRainTextureResource = sdfReadNamedResource(D_003A0100, &fldRainTextureData, 0);
+            fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
         }
     }
 }
@@ -2418,8 +2418,8 @@ void fldUploadSkyBuffer(void *src) {
     memcpy(fldSkyLightSetBuffer, src, 0xE000);
     fldReleaseSkyResources();
     if (D_0032E3C0[0] >= 2 && D_0032E3C0[0] < 100 && fldRainTextureResource == 0) {
-        fldRainTextureResource = func_002EB028(D_003A0100, &fldRainTextureData, 0);
-        fldRainTextureReference = func_002D3288((void *)fldRainTextureData);
+        fldRainTextureResource = sdfReadNamedResource(D_003A0100, &fldRainTextureData, 0);
+        fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
     }
 }
 
@@ -2813,12 +2813,12 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00134348);
 
 extern char D_003A0100[];
 extern u32 fldRainTextureData;
-extern u32 func_002EB028(const char *, u32 *, s32);
+extern u32 sdfReadNamedResource(const char *, u32 *, s32);
 extern void fldUpdateCameraColorEffect(FldCameraSetting *);
 
 void fldInitializeCameraColorResource(void) {
-    fldRainTextureResource = func_002EB028(D_003A0100, &fldRainTextureData, 0);
-    fldRainTextureReference = func_002D3288((void *)fldRainTextureData);
+    fldRainTextureResource = sdfReadNamedResource(D_003A0100, &fldRainTextureData, 0);
+    fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
     fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
     if (fldRainTextureResource != 0) {
         sdfQueueNonzeroResourceId(fldRainTextureResource);
@@ -4469,5 +4469,5 @@ INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE68);
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE6C);
 
-INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE70);
+INCLUDE_SDATA(const s32, "game/code_00126A30", fldFieldTaskHandle);
 

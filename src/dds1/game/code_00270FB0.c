@@ -28,21 +28,21 @@ extern char D_003BC660[];
 
 extern u32 mnuMovieDrawTask;
 
-extern s32 D_003BC630;
+extern s32 mnuMovieShutdownCounter;
 
-extern char D_003B1AC8[];
+extern char mnuMovieViewerTaskName[];
 
 extern s32 kwlnTaskGetUserValue();
 
 extern u32 D_003DC5C8[];
 
-extern char D_003BC6B8[]; /* "camp" */
+extern char mnuCampInputTaskName[]; /* "camp" */
 
-extern char D_003B20C0[]; /* "camp_draw" */
+extern char mnuCampDrawTaskName[]; /* "camp_draw" */
 
-extern char D_003B20D0[]; /* "camp_update" */
+extern char mnuCampOwnerTaskName[]; /* "camp_update" */
 
-extern s8 D_003BC6B4;
+extern s8 mnuCampTaskState;
 
 extern void effResolveAndReleaseResource(u32);
 
@@ -340,7 +340,7 @@ INCLUDE_ASM(const s32, "game/code_00270FB0", func_00271E58);
 
 extern s32 kwlnTaskGetUserValue();
 
-extern s8 D_003BC6B4;
+extern s8 mnuCampTaskState;
 
 extern void func_002D0918(u32);
 
@@ -359,7 +359,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     mnuReleaseStaffSpriteHandles((StaffSpriteHandles *)work);
     func_002BC618(*(u32 *)(work + 0x5c));
     func_002D0918(*(u32 *)work);
-    D_003BC6B4 = 2;
+    mnuCampTaskState = 2;
     func_002E9730();
 }
 
@@ -401,32 +401,32 @@ extern void func_002729C8();
 extern void func_00101A80(s32, s32);
 extern void kwlnFadeOutStart(s8, s8, s8, s32);
 
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B20C0);
+INCLUDE_RODATA(const s32, "game/code_00270FB0", mnuCampDrawTaskName);
 
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B20D0);
+INCLUDE_RODATA(const s32, "game/code_00270FB0", mnuCampOwnerTaskName);
 
 void mnuCreateCampTasks(void) {
     s32 work;
     s32 draw;
 
     work = (s32)func_00271E58();
-    kwlnTaskCreate(D_003BC6B8, 0x3F2, 1, 0, func_00272798, 0, work);
-    draw = kwlnTaskCreate(D_003B20C0, 0x2B07, 1, 0, func_002728F8, 0, work);
-    kwlnTaskCreate(D_003B20D0, 0x520B, 1, 0, func_002729C8, mnuDestroyStaffMenuTask, work);
+    kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, func_00272798, 0, work);
+    draw = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, func_002728F8, 0, work);
+    kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, func_002729C8, mnuDestroyStaffMenuTask, work);
     func_00101A80(draw, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, func_00271FC8, 0, work));
     func_00101A80(draw, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, work));
     kwlnFadeOutStart(0, 0, 0, 0xF);
-    D_003BC6B4 = 1;
+    mnuCampTaskState = 1;
 }
 
 void mnuDestroyCampTasks(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_003BC6B8, 0);
-    kwlnTaskDestroyWithHierarchyByName(D_003B20C0, 0);
-    kwlnTaskDestroyWithHierarchyByName(D_003B20D0, 0);
+    kwlnTaskDestroyWithHierarchyByName(mnuCampInputTaskName, 0);
+    kwlnTaskDestroyWithHierarchyByName(mnuCampDrawTaskName, 0);
+    kwlnTaskDestroyWithHierarchyByName(mnuCampOwnerTaskName, 0);
 }
 
 s32 mnuAcknowledgeCampState(void) {
-    s8 state = D_003BC6B4;
+    s8 state = mnuCampTaskState;
     if (state == 1) {
         return 1;
     }
@@ -434,7 +434,7 @@ s32 mnuAcknowledgeCampState(void) {
         return 0;
     }
     if (state == 2) {
-        D_003BC6B4 = 0;
+        mnuCampTaskState = 0;
     }
     return 0;
 }
@@ -507,11 +507,11 @@ void func_00272778(u32 task) {
 
 INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2100);
 
-INCLUDE_SDATA(const s32, "game/code_00270FB0", D_003BC6B4);
+INCLUDE_SDATA(const s32, "game/code_00270FB0", mnuCampTaskState);
 
 INCLUDE_SDATA(const s32, "game/code_00270FB0", D_003BC6B5);
 
-INCLUDE_SDATA(const s32, "game/code_00270FB0", D_003BC6B8);
+INCLUDE_SDATA(const s32, "game/code_00270FB0", mnuCampInputTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_00270FB0", D_003BC6C0);
 

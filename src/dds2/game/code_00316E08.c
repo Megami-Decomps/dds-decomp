@@ -10,7 +10,7 @@ extern u32 D_00438918;
 
 extern s32 D_00435BB0;
 
-extern s16 D_00435BAC;
+extern s16 mnuMovieTaskState;
 
 extern s32 (*D_0040ABF0[])(u8 *work);
 
@@ -92,7 +92,7 @@ void mdlCreateViewerPackageTask(void) {
     u8 *handle;
 
     D_00435BB0 = 0;
-    D_00435BAC = 1;
+    mnuMovieTaskState = 1;
     handle = mdlAllocateViewerPackageWork();
     D_0043891C = handle;
     func_00317AD0(handle);

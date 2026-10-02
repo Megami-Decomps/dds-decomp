@@ -24,7 +24,7 @@ extern u32 frFontMeasureGlyphChain(void *chain);
 
 extern u32 frFontSharedRenderFlags;
 
-extern u32 D_00436554;
+extern u32 frFontContextCursorSpacing;
 
 /* Glyph/record chain walked by func_001958A0/func_00195B78. */
 typedef struct FrFontGlyph {
@@ -62,7 +62,7 @@ typedef struct FrFontGlyph {
 
 extern FrFontGlyph *D_004528B4[];
 
-extern s32 func_00100400(void);
+extern s32 kwlnGetDrawBufferIndex(void);
 
 extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 positionNext);
 
@@ -140,7 +140,7 @@ typedef struct FrFontRec {
 
 extern FrFontRec frFontResourceRecords[];
 
-extern s32 D_00436558;
+extern s32 frFontDefaultGlyphCellSize;
 
 extern FrFontGlyph *func_0019CE78(void *text, s32 fontIndex, s32 firstOption, s32 secondOption, s32 existingGlyph);
 
@@ -225,7 +225,7 @@ FrFontGlyph *frFontAdvanceOrRetainFadingGlyph(FrFontGlyph *glyph) {
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C4D0);
 
 s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *glyph) {
-    FrFontGlyph **slot = &D_004528B4[func_00100400() & 0xFF];
+    FrFontGlyph **slot = &D_004528B4[kwlnGetDrawBufferIndex() & 0xFF];
 
     *slot = frFontLinkGlyph(*slot, glyph, 0);
     return 0;
@@ -472,7 +472,7 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019D550);
 /* Advance one of two cached glyph slots, chosen by the current font index. */
 /* Keep byte-base arithmetic: indexing FrFontSys.slots changes ee-gcc codegen. */
 s32 frFontAdvanceSelectedGlyphSlot(void) {
-    s32 selection = (func_00100400() & 0xFF) == 0;
+    s32 selection = (kwlnGetDrawBufferIndex() & 0xFF) == 0;
     u8 *base = (u8 *)&frFontWork;
     FrFontGlyph **slot = (FrFontGlyph **)(base + selection * 4 + 0x194);
 
@@ -570,7 +570,7 @@ u32 frFontGetGlyphCellWidth(u8 fontIndex) {
 
     if (index < 2) {
         if (index >= 0) {
-            return D_00436558;
+            return frFontDefaultGlyphCellSize;
         }
     }
     return frFontResourceRecords[index].val->cellWidth;
@@ -581,18 +581,18 @@ u32 frFontGetGlyphCellHeight(u8 fontIndex) {
 
     if (index < 2) {
         if (index >= 0) {
-            return D_00436558;
+            return frFontDefaultGlyphCellSize;
         }
     }
     return frFontResourceRecords[index].val->cellHeight;
 }
 
 void frFontResetContextCursorSpacing(void) {
-    D_00436554 = 0x19;
+    frFontContextCursorSpacing = 0x19;
 }
 
 void frFontSetContextCursorSpacing(u32 value) {
-    D_00436554 = value;
+    frFontContextCursorSpacing = value;
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019DB30);
@@ -661,16 +661,16 @@ void frFontCheckPendingGlyphState(FrFontCtx *ctx) {
 }
 
 void frFontAdvanceContextCursor(FrFontCtx *ctx) {
-    ctx->contextCursor += D_00436554 * 8;
+    ctx->contextCursor += frFontContextCursorSpacing * 8;
     ctx->flag1C = 1;
     ctx->flag1D = 1;
 }
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436550);
 
-INCLUDE_SDATA(const s32, "interface/frFont", D_00436554);
+INCLUDE_SDATA(const s32, "interface/frFont", frFontContextCursorSpacing);
 
-INCLUDE_SDATA(const s32, "interface/frFont", D_00436558);
+INCLUDE_SDATA(const s32, "interface/frFont", frFontDefaultGlyphCellSize);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_0043655C);
 

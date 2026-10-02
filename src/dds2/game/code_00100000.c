@@ -47,7 +47,7 @@ u32 func_001003F8(void) {
     return D_00435B80;
 }
 
-u32 func_00100400(void) {
+u32 kwlnGetDrawBufferIndex(void) {
     return D_00438D80;
 }
 
@@ -231,7 +231,7 @@ INCLUDE_SDATA(const s32, "game/code_00100000", D_00435BA8);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_00435BAA);
 
-INCLUDE_SDATA(const s32, "game/code_00100000", D_00435BAC);
+INCLUDE_SDATA(const s32, "game/code_00100000", mnuMovieTaskState);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_00435BB0);
 

@@ -43,7 +43,7 @@ typedef struct PtyGameCounter {
     u32 currency;           /* 0x3C */
 } PtyGameCounter;
 
-extern u8 D_00394680[];
+extern u8 frFontColoredGlyphResource[];
 
 /* 24-byte table entries (full layout unknown; stride inferred from index math). */
 typedef struct Entry24B {
@@ -761,14 +761,14 @@ Entry84W *prfReqGetEntryRecord(u16 index) {
 }
 
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
-    u32 handle = func_00197C40(x, y, first, width, (u32)D_00394680, 0);
+    u32 handle = func_00197C40(x, y, first, width, (u32)frFontColoredGlyphResource, 0);
     frFontSetChildColors(handle, second);
     func_001958A0(handle, 1, option);
     frFontQueueGlyphInSelectedSlot(handle);
 }
 
 u8 *frFontGetColoredGlyphResource(void) {
-    return D_00394680;
+    return frFontColoredGlyphResource;
 }
 
 /* Interleaved mark words and an eight-byte-per-entry value block. */

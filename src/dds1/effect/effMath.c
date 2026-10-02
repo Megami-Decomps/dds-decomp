@@ -27,7 +27,7 @@ typedef struct EffBezierSlot {
 } EffBezierSlot; /* 0x38 */
 
 /* Evaluate the cubic Bezier at t into out[3], advance t, and report whether it is still below 1. */
-s32 func_0018DFA8(EffMathSlots *table, s32 index, f32 *out) {
+s32 effMathStepBezierSlot(EffMathSlots *table, s32 index, f32 *out) {
     EffBezierSlot *slot = (EffBezierSlot *)&table->slots[index];
     f32 w[4];
     f32 t = slot->t;

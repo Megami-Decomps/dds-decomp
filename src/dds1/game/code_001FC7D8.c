@@ -43,7 +43,7 @@ extern s32 (*btlPackedEffectHandlers[])(s32, u32);
 extern s32 btlWaitEffectTask();
 extern void func_001FDA78();
 extern s32 btlPollEffectWaitTask();
-extern s32 func_001ADB30();
+extern s32 btlHasRegisteredAphNamePanelTask();
 extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
 extern void func_0019C590(s32, s32, s32, s32);
 extern void func_003003F0(const char *fmt, ...);
@@ -217,7 +217,7 @@ typedef struct BtlEffectSlots {
 } BtlEffectSlots;
 
 extern void func_001AD970(s32);
-extern s32 func_001AD928(void);
+extern s32 btlHasRegisteredSkillNamePanelTask(void);
 extern void *btlGetIndexedUiResource();
 extern s32 D_003BAA8C;
 extern s32 D_00360458[];
@@ -248,7 +248,7 @@ s32 btlPollActorOrEntryLabelTask(BtlObjLink *link) {
             func_001AD970(D_003BAA8C + resourceIndex * 17);
         }
     }
-    if (func_001AD928() == 0 || (u32)link->elapsedTicks >= 0x1E) {
+    if (btlHasRegisteredSkillNamePanelTask() == 0 || (u32)link->elapsedTicks >= 0x1E) {
         return 1;
     }
     link->elapsedTicks++;
@@ -276,14 +276,14 @@ BtlEffObj *btlCreateEffObjD(BtlUnit *owner, s32 arg) {
 
 extern s32 D_003BAA84;
 extern void func_001AD970(s32);
-extern s32 func_001AD928(void);
+extern s32 btlHasRegisteredSkillNamePanelTask(void);
 
 s32 btlPollTimedTaskLink(BtlObjLink *link) {
     btlGetRuntime();
     if (link->elapsedTicks == 0) {
         func_001AD970(D_003BAA84 + link->arg * 0x19);
     }
-    if (func_001AD928() == 0 || (u32)link->elapsedTicks >= 0x1E) {
+    if (btlHasRegisteredSkillNamePanelTask() == 0 || (u32)link->elapsedTicks >= 0x1E) {
         return 1;
     }
     link->elapsedTicks++;
@@ -356,7 +356,7 @@ s32 btlPollCategoryLabelTask(BtlObjLink *link) {
             return 1;
         }
     }
-    if (func_001AD928() == 0 || (u32)link->elapsedTicks >= 0x1E) {
+    if (btlHasRegisteredSkillNamePanelTask() == 0 || (u32)link->elapsedTicks >= 0x1E) {
         return 1;
     }
     link->elapsedTicks++;
@@ -404,7 +404,7 @@ s32 btlJyokyoEffectUpdate(BtlObjLink *link) {
         func_003003F0("JYOKYO ID : %d\n", state->dialogId);
         btlReplaceDialogTasksAndQueueMessage(state->dialogId, link->arg);
     }
-    if (func_001ADB30() == 0 || (u32)link->elapsedTicks >= 0x2D) {
+    if (btlHasRegisteredAphNamePanelTask() == 0 || (u32)link->elapsedTicks >= 0x2D) {
         return 1;
     }
     link->elapsedTicks++;
@@ -444,7 +444,7 @@ s32 btlUpdateLinkedDialogueEffect(BtlObjLink *link) {
         }
         btlReplaceDialogTasksAndQueueMessage(((BtlJyokyoState *)battleState)->alternateDialogId, link->arg);
     }
-    if (func_001ADB30() == 0 || (u32)link->elapsedTicks >= 0x2D) {
+    if (btlHasRegisteredAphNamePanelTask() == 0 || (u32)link->elapsedTicks >= 0x2D) {
         return 1;
     }
     link->elapsedTicks++;
@@ -502,7 +502,7 @@ s32 btlPollTimedPresentationTask(BtlObjLink *link) {
         }
         btlReplaceDialogTasksAndQueueMessage(state->thirdDialogId, link->arg);
     }
-    if (func_001ADB30() == 0 || (u32)link->elapsedTicks >= 0x2D) {
+    if (btlHasRegisteredAphNamePanelTask() == 0 || (u32)link->elapsedTicks >= 0x2D) {
         return 1;
     }
     link->elapsedTicks++;
@@ -537,7 +537,7 @@ s32 btlPollEffectWaitTask(BtlObjLink *link) {
         }
         btlReplaceDialogTasksAndQueueMessage(((BtlJyokyoState *)battleState)->dialogId, 0x75);
     }
-    if (func_001ADB30() == 0 || (u32)link->elapsedTicks >= 0x2D) {
+    if (btlHasRegisteredAphNamePanelTask() == 0 || (u32)link->elapsedTicks >= 0x2D) {
         return 1;
     }
     link->elapsedTicks++;

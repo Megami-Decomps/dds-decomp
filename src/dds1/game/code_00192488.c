@@ -123,7 +123,7 @@ EffChanWork *effChanWorkCreate(EffChanSource *src) {
     return work;
 }
 
-void func_00192638(EffChanWork *work) {
+void effDestroyChannelWork(EffChanWork *work) {
     EffChanRecord *record;
     u32 i = 0;
     u32 count;

@@ -59,7 +59,7 @@ extern s32 scrGetCurrentContext(void);
 
 extern s32 fldIsSceneStateEight(void);
 
-extern s32 D_0032E3D8[];
+extern s32 fldCurrentBgmId[];
 
 s32 fldCmdQuerySceneValue(void) {
     scrSetIntegerReturnValue(fldQuerySelectedActorMotionState(scrReadIntParameter(0)));
@@ -103,13 +103,13 @@ s32 func_0014F1C0(void) {
 }
 
 s32 fldCmdStartSceneBgm(void) {
-    D_0032E3D8[0] = scrReadIntParameter(0);
+    fldCurrentBgmId[0] = scrReadIntParameter(0);
     fldStartSceneBgm();
     return 1;
 }
 
 s32 fldCmdStartSceneBgmAlternate(void) {
-    D_0032E3D8[0] = scrReadIntParameter(0);
+    fldCurrentBgmId[0] = scrReadIntParameter(0);
     fldStartSceneBgmAlternate();
     return 1;
 }

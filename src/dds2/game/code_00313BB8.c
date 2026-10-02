@@ -33,7 +33,7 @@ typedef struct Entry24W {
 
 extern Entry24W D_00404AA4[];
 
-extern u8 D_00405CA8[];
+extern u8 frFontColoredGlyphResource[];
 
 /* Operand block used by the script VM helpers near ptyGetProfileRecord (layout inferred from field accesses). */
 typedef struct ScrVmOperand {
@@ -787,14 +787,14 @@ u16 scrGetEntryLowFlags(u32 context, u16 entryId) {
 }
 
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
-    u32 handle = func_0019FC38(x, y, first, width, (u32)D_00405CA8, 0);
+    u32 handle = func_0019FC38(x, y, first, width, (u32)frFontColoredGlyphResource, 0);
     frFontSetChildColors(handle, second);
     func_0019D550(handle, 1, option);
     frFontQueueGlyphInSelectedSlot(handle);
 }
 
 u8 *frFontGetColoredGlyphResource(void) {
-    return D_00405CA8;
+    return frFontColoredGlyphResource;
 }
 
 /* Each list entry occupies two words; only its first word is reset here. */

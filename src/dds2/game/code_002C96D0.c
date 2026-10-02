@@ -129,7 +129,7 @@ extern u32 effModelUpdateControlFlags;
 
 extern u32 func_002DDF48(u32);
 
-extern s8 D_00437CD4;
+extern s8 fileMenuTaskAlive;
 extern s32 mcdOriginalTitleFileMode;
 extern s32 D_00437D88;
 extern void func_0035C860(void *dst, const char *fmt, ...);
@@ -162,7 +162,7 @@ extern s32 fileSlotScanIndex;
 
 extern void mcdFormatSaveSlotName(void *buffer, s32 slot);
 
-extern void func_002C9328(u32 context, void *buffer);
+extern void mcChangeCurrentDirectory(u32 context, void *buffer);
 
 extern void *fileScanSlotIconSysBegin(void);
 
@@ -273,7 +273,7 @@ extern EffDispatchScale D_003E9188[];
 
 extern EffDispatchColor D_003E918C[];
 
-extern s8 D_00437DE5;
+extern s8 fileConfigTaskState;
 
 extern void mcdFinishFileDetectionWithAudio(void);
 
@@ -303,7 +303,7 @@ extern s32 D_00437D78;
 
 extern void *fileReadSlotPreviewBegin(void);
 extern s32 mcPollCommandStatusWithResult(s32 *);
-extern void func_002C95F0(s32, u32, s32);
+extern void mcReadOpenFile(s32, u32, s32);
 extern void *mcHandleSetupResult(void);
 extern s32 fileSaveFileDescriptor;
 extern u32 fileSaveReadBufferResource;
@@ -313,7 +313,7 @@ extern void *func_002CBA90(void);
 
 extern void fileReqSetSelectedSlot(u32 ctx, s32 slot);
 
-extern void func_002C9500(u32, const char *, s32);
+extern void mcOpenFilePath(u32, const char *, s32);
 
 extern void *fileBeginSlotOpen(void);
 
@@ -371,11 +371,11 @@ extern u32 D_00439034;
 
 extern u32 D_00439038;
 
-extern char D_00437DF8[];
+extern char fileConfigInputTaskName[];
 
-extern char D_0042BAF0[]; /* "config_draw" */
+extern char fileConfigLoadTaskName[]; /* "config_draw" */
 
-extern char D_0042BB00[]; /* "config_update" */
+extern char fileConfigOwnerTaskName[]; /* "config_update" */
 
 extern void kwlnTaskDestroyWithHierarchyByName(const char *name, s32 hierarchy);
 
@@ -514,7 +514,7 @@ extern void fileAbortSlotScanOnInput(void);
 
 extern s32 mcPollSyncResult(void);
 
-extern void func_002C9400(u32 context, const char *path, void *buffer, s32 mode);
+extern void mcReadDirectoryEntries(u32 context, const char *path, void *buffer, s32 mode);
 
 extern char D_0042B6B8[];
 
@@ -534,7 +534,7 @@ extern void *fileBuildMainBlobAfterDelete(void);
 
 extern void *func_002CC210();
 
-extern void func_002C9490(void);
+extern void mcDeleteFilePath(void);
 
 extern s32 mnuSelectFileBranch(void);
 
@@ -542,7 +542,7 @@ extern u32 D_00437D0C;
 
 extern u8 sdfViewMatrix[];
 
-extern u8 D_0037F610[];
+extern u8 sdfProjectionMatrix[];
 
 extern u8 D_0037F660[];
 
@@ -578,7 +578,7 @@ extern char D_00437E18[];
 
 extern char D_00437E20[];
 
-extern char *func_0033EC18(void);
+extern char *sdfDevGetPathBuffer(void);
 
 extern s32 func_00369B70(const char *path, s32 flags, ...);
 
@@ -592,12 +592,12 @@ void fileDestroyMenuTask(void) {
     if (D_00437CD8 != 0) {
         kwlnTaskDestroyWithHierarchy(D_00437CD8, 1);
         D_00437CD8 = 0;
-        D_00437CD4 = 0;
+        fileMenuTaskAlive = 0;
     }
 }
 
 s8 fileMenuTaskIsAlive(void) {
-    return D_00437CD4;
+    return fileMenuTaskAlive;
 }
 
 void mnuFormatSaveSlotHeaderName(void) {
@@ -757,7 +757,7 @@ void *fileBeginSlotOpen(void) {
     path[len + 1] = 0x2F;
     memcpy(&path[len + 2], &path[1], len);
     path[len * 2 + 2] = 0;
-    func_002C9500(ctx, path, 1);
+    mcOpenFilePath(ctx, path, 1);
     return fileReadSlotPreviewBegin;
 }
 
@@ -770,14 +770,14 @@ void *fileReadSlotPreviewBegin(void) {
     if (status == 1) {
         fileSaveReadBufferResource = func_003292A8(0x30);
         fileSaveReadBuffer = sdfResourceRetainAddress(fileSaveReadBufferResource);
-        func_002C95F0(fileSaveFileDescriptor, fileSaveReadBuffer, 0x30);
+        mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, 0x30);
         return fileReadSlotPreviewWait;
     }
     return fileBeginSlotMetadataRefresh();
 }
 
 extern s32 mcPollCompletionStatus(void);
-extern void func_002C9588(u32);
+extern void mcCloseOpenFile(u32);
 extern void *fileStoreSlotHeader(void);
 
 void *fileReadSlotPreviewWait(void) {
@@ -787,7 +787,7 @@ void *fileReadSlotPreviewWait(void) {
         return 0;
     }
     if (r == 1) {
-        func_002C9588(fileSaveFileDescriptor);
+        mcCloseOpenFile(fileSaveFileDescriptor);
         return (void *)fileStoreSlotHeader;
     }
     func_003297C8(fileSaveReadBufferResource);
@@ -1349,7 +1349,7 @@ void *fileBeginReadSlotIcon(void) {
 
     buf[0] = 0x2F;
     mcdFormatSaveSlotName(&buf[1], fileSlotScanIndex);
-    func_002C9328(fileMemoryCardRequestContext, buf);
+    mcChangeCurrentDirectory(fileMemoryCardRequestContext, buf);
     return fileScanSlotIconSysBegin;
 }
 
@@ -1361,7 +1361,7 @@ void *fileScanSlotIconSysBegin(void) {
     }
     if (t == 1) {
         fileReqSetSlotFlags(fileMemoryCardRequestContext, fileSlotScanIndex, 2);
-        func_002C9400(fileMemoryCardRequestContext, D_0042B6B8, D_00458040, 1);
+        mcReadDirectoryEntries(fileMemoryCardRequestContext, D_0042B6B8, D_00458040, 1);
         return mcHandleSlotWriteResult;
     }
     if (t == -1) {
@@ -1414,7 +1414,7 @@ void *fileBeginSaveSlotIconScan(void) {
 
     buf[0] = 0x2F;
     mcdFormatSaveSlotName(&buf[1], fileSlotScanIndex);
-    func_002C9328(fileMemoryCardRequestContext, buf);
+    mcChangeCurrentDirectory(fileMemoryCardRequestContext, buf);
     return fileScanSlotIconSysAltBegin;
 }
 
@@ -1426,7 +1426,7 @@ void *fileScanSlotIconSysAltBegin(void) {
     }
     if (t == 1) {
         fileReqSetSlotFlags(fileMemoryCardRequestContext, fileSlotScanIndex, 2);
-        func_002C9400(fileMemoryCardRequestContext, D_0042B6B8, D_00458040, 1);
+        mcReadDirectoryEntries(fileMemoryCardRequestContext, D_0042B6B8, D_00458040, 1);
         return mcHandleDirectoryWriteResult;
     }
     if (t == -1) {
@@ -1523,7 +1523,7 @@ void *fileCreateMainBegin(void) {
 
     buf[0] = 0x2F;
     mcdFormatSaveSlotName(&buf[1], v);
-    func_002C9328(entry, buf);
+    mcChangeCurrentDirectory(entry, buf);
     return filePrepareMainBlobWrite;
 }
 
@@ -1625,7 +1625,7 @@ void *mcChooseLoadPath(void) {
     if (!(flags & 8)) {
         return func_002CC210(entry, D_0042B6B8);
     }
-    func_002C9490();
+    mcDeleteFilePath();
     return fileBuildMainBlobAfterDelete;
 }
 
@@ -1640,7 +1640,7 @@ s32 fileBeginRequest(char *name, void *a1, void *a2, void *a3, void *a4) {
     D_0043904C = (u32 *)a2;
     D_00439050 = (u32)a3;
     D_00439054 = (u32)a4;
-    func_002C9500(fileMemoryCardRequestContext, name, 0x203);
+    mcOpenFilePath(fileMemoryCardRequestContext, name, 0x203);
     return (s32)fileWriteWaitOpen;
 }
 
@@ -1680,7 +1680,7 @@ void *mcHandleLoadResult(void) {
         return 0;
     }
     if (status == 1) {
-        func_002C9588(fileSaveFileDescriptor);
+        mcCloseOpenFile(fileSaveFileDescriptor);
         return (void *)mcDispatchReadCallback;
     }
     if (status == -1) {
@@ -1767,7 +1767,7 @@ void *fileBeginSlotCreate(void) {
     path[len + 1] = '/';
     memcpy(&path[len + 2], &path[1], len);
     path[len * 2 + 2] = 0;
-    func_002C9500(ctx, path, 1);
+    mcOpenFilePath(ctx, path, 1);
     return fileLoadMainBlobBegin;
 }
 
@@ -1782,7 +1782,7 @@ void *fileLoadMainBlobBegin(void) {
     fileSaveReadBufferResource = func_003292A8(size);
     fileSaveReadBuffer = sdfResourceRetainAddress(fileSaveReadBufferResource);
     if (status == 1) {
-        func_002C95F0(fileSaveFileDescriptor, fileSaveReadBuffer, size);
+        mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, size);
         return mcHandleSetupResult;
     }
     fileSetMenuFlowState(0);
@@ -1798,7 +1798,7 @@ void *mcHandleSetupResult(void) {
         return 0;
     }
     if (status == 1) {
-        func_002C9588(fileSaveFileDescriptor);
+        mcCloseOpenFile(fileSaveFileDescriptor);
         return (void *)mcdHandleSaveSetupDone;
     }
     func_003297C8(fileSaveReadBufferResource);
@@ -2174,19 +2174,14 @@ void fileCursorPulseUpdate(void) {
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002CFF38);
 
 void fileLoadSetMode(s8 mode) {
-    /* Raw stores on purpose: writing these through fileLoadMenuState's fields tips
-       fileAcquireRecord's CSE in the full unit (check_unit reports CONTEXT),
-       so the pointer form is what the build needs here. */
-    u8 *p = (u8 *)&fileLoadMenuState;
-
-    *(u32 *)(p + 0x14) = 0;
-    *(u8 *)(p + 0x10) = mode;
+    fileLoadMenuState.unk14 = 0;
+    fileLoadMenuState.unk10 = mode;
     if (mode == 1) {
-        *(u32 *)(p + 0x1C) = 0;
-        *(u32 *)(p + 0x18) = 0x74;
+        fileLoadMenuState.unk1C = 0;
+        fileLoadMenuState.unk18 = 0x74;
     } else {
-        *(u32 *)(p + 0x18) = 0;
-        *(u32 *)(p + 0x1C) = 0x74;
+        fileLoadMenuState.unk18 = 0;
+        fileLoadMenuState.unk1C = 0x74;
     }
 }
 
@@ -2672,7 +2667,7 @@ void fileConfigTaskDestroy(void) {
         }
         func_003297C8(((FileConfigTask *)fileConfigTaskWork)->memory);
         fileConfigTaskWork = 0;
-        D_00437DE5 = 0;
+        fileConfigTaskState = 0;
     }
 }
 
@@ -2682,26 +2677,26 @@ extern void fileConfigTaskDestroy(void);
 extern void func_002D1450(void);
 extern u32 fileGetConfigTaskFailure(void);
 
-extern s8 D_00437DE5;
+extern s8 fileConfigTaskState;
 
 void mnuCreateConfigTasks(void) {
     if (fileConfigTaskWork == 0) {
         fileConfigTaskWork = func_002D1058();
-        kwlnTaskCreate(D_00437DF8, 0x3F2, 1, 1, func_002D1450, NULL, (void *)fileConfigTaskWork);
-        kwlnTaskCreate(D_0042BAF0, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (void *)fileConfigTaskWork);
-        kwlnTaskCreate(D_0042BB00, 0x520B, 1, 1, fileGetConfigTaskFailure, fileConfigTaskDestroy, (void *)fileConfigTaskWork);
-        D_00437DE5 = 1;
+        kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, func_002D1450, NULL, (void *)fileConfigTaskWork);
+        kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (void *)fileConfigTaskWork);
+        kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileGetConfigTaskFailure, fileConfigTaskDestroy, (void *)fileConfigTaskWork);
+        fileConfigTaskState = 1;
     }
 }
 
 void mnuConfigTasksDestroy(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_00437DF8, 1);
-    kwlnTaskDestroyWithHierarchyByName(D_0042BAF0, 1);
-    kwlnTaskDestroyWithHierarchyByName(D_0042BB00, 1);
+    kwlnTaskDestroyWithHierarchyByName(fileConfigInputTaskName, 1);
+    kwlnTaskDestroyWithHierarchyByName(fileConfigLoadTaskName, 1);
+    kwlnTaskDestroyWithHierarchyByName(fileConfigOwnerTaskName, 1);
 }
 
 s32 fileConsumeConfigTaskReady(void) {
-    s32 state = D_00437DE5;
+    s32 state = fileConfigTaskState;
     if (state == 1) {
         return 1;
     }
@@ -2709,7 +2704,7 @@ s32 fileConsumeConfigTaskReady(void) {
         return 0;
     }
     if (state == 2) {
-        D_00437DE5 = 0;
+        fileConfigTaskState = 0;
     }
     return 0;
 }
@@ -2721,9 +2716,9 @@ u32 fileGetConfigTaskSlot(s32 slot) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042BAF0);
+INCLUDE_RODATA(const s32, "game/code_002C96D0", fileConfigLoadTaskName);
 
-INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042BB00);
+INCLUDE_RODATA(const s32, "game/code_002C96D0", fileConfigOwnerTaskName);
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D1450);
 
@@ -2781,7 +2776,7 @@ u32 func_002D2CB0(s32 index) {
 void mnuProjectViewPoint(void) {
     u8 *matrix;
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    matrix = D_0037F610;
+    matrix = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_PERSPECTIVE_DIVIDE_VF10();
@@ -3134,7 +3129,7 @@ void fileWriteToPfs(s32 data, s32 slotIndex) {
         func_0035C860(path, D_00437E10, slotIndex);
         fd = func_00369B70(path, 0x602, 0x1B6);
     } else {
-        func_0035C860(path, D_00437E18, func_0033EC18(), slotIndex);
+        func_0035C860(path, D_00437E18, sdfDevGetPathBuffer(), slotIndex);
         fd = func_00369B70(path, 0x602);
     }
     func_002D3B48(fd, data);
@@ -4227,7 +4222,7 @@ void fileSampleKeyTracks(FileKeyOut *out, FileKeyBlock *block, s32 frame, f32 *t
     VU0_MOVE_VF(vf22, vf30);
     VU0_MOVE_VF(vf23, vf31);
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory(D_0037F610);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     VU0_LOAD_VF(vf10, out->pos);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_PERSPECTIVE_DIVIDE_VF10();
@@ -4540,7 +4535,7 @@ void *src;
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", fileMemoryCardRequestContext);
 
-INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437CD4);
+INCLUDE_SDATA(const s32, "game/code_002C96D0", fileMenuTaskAlive);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437CD5);
 
@@ -4656,7 +4651,7 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437DD8);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437DE0);
 
-INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437DE5);
+INCLUDE_SDATA(const s32, "game/code_002C96D0", fileConfigTaskState);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", fileSlotFlagMirror);
 
@@ -4664,7 +4659,7 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", fileSavedSlotFlags);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437DF0);
 
-INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437DF8);
+INCLUDE_SDATA(const s32, "game/code_002C96D0", fileConfigInputTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E00);
 

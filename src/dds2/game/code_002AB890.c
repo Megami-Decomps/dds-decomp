@@ -54,7 +54,7 @@ void mnuDestroyResourceOwnerWindowContainers(MenuResourceOwner *object) {
 
 extern void func_002B9720(s32);
 
-s32 func_002ABD08(s32 itemId, MenuResourceOwner *owner) {
+s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuResourceOwner *owner) {
     MenuResourceSet *resources = owner->resources;
 
     if (*(u8 *)((itemId & 0xFFFF) + datGameState + 0x1340) == 0) {
@@ -175,7 +175,7 @@ typedef struct StaffUseContext {
     StaffUseSelectionList *list; /* 0xA914 */
 } StaffUseContext;
 
-s32 func_002ACF38(itemId, context)
+s32 mnuUseStaffItem(itemId, context)
 s32 itemId;
 s32 context;
 {
@@ -204,7 +204,7 @@ void mnuApplyResourceSelection(s32 index, s32 context) {
     s32 resourceActive;
 
     resources = ((MenuResourceOwner *)context)->resources;
-    resourceActive = func_002ACF38();
+    resourceActive = mnuUseStaffItem();
     if (resourceActive != 0) {
         *(u32 *)(*(s32 *)(*(s32 *)(resources->first + 0x18) + 0x1c) + 0x60) =
                   (u32)*(u8 *)(index + datGameState + 0x1340);

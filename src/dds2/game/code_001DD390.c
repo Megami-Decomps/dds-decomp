@@ -1154,8 +1154,8 @@ u32 btlApplyDeferredActorStats(u8 *arguments) {
         return 1;
     }
     resource = actor + 0x120;
-    func_001AA770(resource, primary);
-    func_001AA788(resource, ((BtlDeferredStats *)arguments)->secondary);
+    btlAdjustUnitHp(resource, primary);
+    btlAdjustUnitMp(resource, ((BtlDeferredStats *)arguments)->secondary);
     func_001E2758(actor);
     btlIsUnitDefeatTriggeredByValueDelta(actor, 0);
     return 1;
@@ -1217,7 +1217,7 @@ s32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
         return 1;
     }
     if (((BtlCategoryTableEntry *)datCommandRecords)[args->category].flags00 & 8) {
-        func_001AA770(&unit->statBits, -0x7FFF);
+        btlAdjustUnitHp(&unit->statBits, -0x7FFF);
         func_001AA850(&unit->statBits, 0x4000);
         unit->flags |= 0x20;
     }
@@ -1226,10 +1226,10 @@ s32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
     }
     switch (((BtlCategoryTableEntry *)datCommandRecords)[args->category].kind03) {
     case 1:
-        func_001AA770(&unit->statBits, -args->amount);
+        btlAdjustUnitHp(&unit->statBits, -args->amount);
         return 1;
     case 2:
-        func_001AA788(&unit->statBits, -args->amount);
+        btlAdjustUnitMp(&unit->statBits, -args->amount);
         return 1;
     default:
         return 1;
@@ -1298,7 +1298,7 @@ SoundTask *btlCreateQueuedActorEntrySelectionTask(BtlUnit *unit, TaskBlock *bloc
     return task;
 }
 
-u32 func_001E0200(u32 *taskArgs) {
+u32 btlClearQueuedActorEntrySelection(u32 *taskArgs) {
     btlClearActorSelectedEntryIndex(*taskArgs);
     func_001E2758(*taskArgs);
     return 1;
@@ -1309,7 +1309,7 @@ SoundTask *func_001E0238(BtlUnit *unit) {
     SoundTaskArgs *args;
     task->enabled = 1;
     task->status = 0;
-    task->callback = func_001E0200;
+    task->callback = btlClearQueuedActorEntrySelection;
     task->taskId = 0x4F;
     task->owner = unit->owner;
     task->onStart = 0;
@@ -3299,7 +3299,7 @@ SoundTask *btlCreateSelectedEffectUpdateTask(BtlUnit *unit) {
 }
 
 u32 btlUpdateCommandSoundTask(void) {
-    func_00208F78();
+    btlUpdateUnitActors();
     return 1;
 }
 
@@ -5974,7 +5974,7 @@ void btlWaitForPendingWorkAndReleaseBuffers(void) {
     s64 pending;
     s32 work;
 
-    func_0023A9E0();
+    evtDrainSecondaryWorldNodes();
     do {
         pending = sdfCheckPendingWorkWithInterrupts();
     } while (pending != 0);
@@ -6788,7 +6788,7 @@ SoundTask *btlCreateApplyToActiveActorsTask(u32 value) {
     return task;
 }
 
-u32 func_002028A8(void) {
+u32 btlCancelTimedFadeTask(void) {
     func_001057A8();
     return 1;
 }
@@ -6796,7 +6796,7 @@ u32 func_002028A8(void) {
 SoundTask *btlCreateFadeStateResetTask(void) {
     SoundTask *task = btlAllocTask(0);
     task->enabled = 1;
-    task->callback = func_002028A8;
+    task->callback = btlCancelTimedFadeTask;
     task->taskId = 0x35;
     task->status = 0;
     return task;

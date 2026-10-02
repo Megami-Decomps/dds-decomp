@@ -114,7 +114,7 @@ s32 func_0014F780(void) {
     return 1;
 }
 
-extern void func_002E84A0(u8 *);
+extern void effMiscSeedRandomFromClock(u8 *);
 
 extern void fileManagerResetSubsystems(void);
 
@@ -143,7 +143,7 @@ extern u8 D_0034DF38[];
 extern char D_003BB008[];
 
 void fldCreateFieldEffectTask(void) {
-    func_002E84A0(D_0034DF38);
+    effMiscSeedRandomFromClock(D_0034DF38);
     fileManagerResetSubsystems();
     func_00150040();
     parSysReset();

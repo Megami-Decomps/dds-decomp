@@ -20,7 +20,7 @@ typedef struct MenuTitleState {
 
 extern s32 mnuMovieMenuState;
 
-extern u16 D_00435BAC;
+extern u16 mnuMovieTaskState;
 
 extern u32 *mnuMovieWork;
 
@@ -30,7 +30,7 @@ extern char D_00429938[]; /* "staffImageProc" */
 
 extern char D_00429968[]; /* "staffProc" */
 
-extern u8 D_003E5608[];
+extern u8 mnuMovieDrawContext[];
 
 extern u8 D_003803C8[];
 
@@ -707,7 +707,7 @@ INCLUDE_ASM(const s32, "game/code_002A5260", func_002A7730);
 void mnuFinishStaffMovieAndFreeState(void) {
     s64 pending;
 
-    D_00435BAC = 2;
+    mnuMovieTaskState = 2;
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
     func_002A6018();
@@ -758,7 +758,7 @@ void mnuCreateStaffTask(void) {
     ((StaffTaskState *)mnuMovieWork)->handle = handle;
     ((StaffTaskState *)mnuMovieWork)->unk8 = 0;
     ((StaffTaskState *)mnuMovieWork)->unkC = 0;
-    D_00435BAC = 1;
+    mnuMovieTaskState = 1;
     frFontUploadClearedTexture();
     kwlnTaskCreate(D_00429968, 0x408, 0, 0, func_002A6580, mnuFinishStaffMovieAndFreeState, 0);
 }
@@ -775,7 +775,7 @@ s32 mnuStopStaffTasks(void) {
 }
 
 s32 mnuMovieDraw(void) {
-    func_00345BA0(D_003E5608, D_003803C8);
+    func_00345BA0(mnuMovieDrawContext, D_003803C8);
     return 0;
 }
 
@@ -783,7 +783,7 @@ extern char D_0042A338[]; /* "mnuMovieDraw" */
 
 void mnuStartMovieDrawTaskForResource(u32 resource, void *data) {
     if (mnuMovieDrawTask == 0) {
-        func_00346778(D_003E5608, data, resource);
+        func_00346778(mnuMovieDrawContext, data, resource);
         mnuMovieDrawTask = kwlnTaskCreate(D_0042A338, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
     }
 }
@@ -813,7 +813,7 @@ s32 mnuMovieDrawNextProc(s32 procedure) {
         func_0035B6E0(D_0042A348);
         return -1;
     }
-    func_002A7B28(D_003E5608, D_003803C8);
+    func_002A7B28(mnuMovieDrawContext, D_003803C8);
     D_00437AD0++;
     if (D_00437AD0 == 0x1E) {
         func_0035B6E0(D_0042A380, procedure);
@@ -999,13 +999,13 @@ void mnuStopMovieDrawTask(void) {
     if (mnuMovieDrawTask == 0) {
         return;
     }
-    func_00346988(D_003E5608);
+    func_00346988(mnuMovieDrawContext);
     kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }
 
 s32 func_002A8008(void) {
-    return func_00346A60(D_003E5608);
+    return func_00346A60(mnuMovieDrawContext);
 }
 
 extern u8 D_003E563C[];
@@ -1015,6 +1015,6 @@ u8 func_002A8028(void) {
 }
 
 u8 func_002A8038(void) {
-    return D_003E5608[0];
+    return mnuMovieDrawContext[0];
 }
 

@@ -2,7 +2,7 @@
 
 typedef struct MenuActionOwner MenuActionOwner;
 
-extern u8 D_0043798A;
+extern u8 brsUiUpdateAllowed;
 
 extern s32 kwlnFadeIsActive(void);
 
@@ -16,7 +16,7 @@ extern void mnuStorePendingMenuCommandValue(MenuActionOwner *, u32);
 
 extern s8 brsUpdateBlocked;
 
-extern s8 D_00437989;
+extern s8 brsPendingRowsLatched;
 
 extern s8 brsTaskState;
 
@@ -63,17 +63,17 @@ typedef struct MenuIconBatch {
 
 extern void func_0011A118(s32, s32);
 
-extern char D_00437990[];
+extern char brsStaffInputTaskName[];
 
-extern char D_00428388[];
+extern char mnuStaffPrimaryPanelTaskName[];
 
-extern char D_00428398[];
+extern char mnuStaffSecondaryPanelTaskName[];
 
-extern char D_00437990[];
+extern char brsStaffInputTaskName[];
 
-extern char D_00428388[];
+extern char mnuStaffPrimaryPanelTaskName[];
 
-extern char D_00428398[];
+extern char mnuStaffSecondaryPanelTaskName[];
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
@@ -175,7 +175,7 @@ INCLUDE_ASM(const s32, "game/code_00296E98", func_00298648);
 
 void brsTaskStart(void) {
     mnuStaffCreateTasks();
-    D_0043798A = 0;
+    brsUiUpdateAllowed = 0;
     brsUpdateBlocked = 1;
 }
 
@@ -184,7 +184,7 @@ s8 brsTaskIsUpdateBlocked(void) {
 }
 
 u32 brsTaskAllowUpdate(void) {
-    D_0043798A = 1;
+    brsUiUpdateAllowed = 1;
     return 1;
 }
 
@@ -193,14 +193,14 @@ void brsTaskPollDone(void) {
 }
 
 s8 brsTaskHasPendingRows(void) {
-    return D_00437989;
+    return brsPendingRowsLatched;
 }
 
 s8 brsTaskIsUiUpdateAllowed(s32 context) {
     if (*(s32 *)(context + 0xAEB0) != 0) {
         brsUpdateBlocked = 0;
     }
-    return brsUpdateBlocked ? 0 : D_0043798A;
+    return brsUpdateBlocked ? 0 : brsUiUpdateAllowed;
 }
 
 void gstApplyCounterDeltaTable(MenuIconRef *refs) {
@@ -440,9 +440,9 @@ void brsMarkPartyRowsFromLists(u32 partyRows, u32 primaryRewards, u32 secondaryR
 /* Latch whether the result task still has pending reward rows. */
 void brsTaskLatchPendingRows(s32 context) {
     if (((BrsTaskState *)context)->pendingRows == 0) {
-        D_00437989 = 0;
+        brsPendingRowsLatched = 0;
     } else {
-        D_00437989 = 1;
+        brsPendingRowsLatched = 1;
     }
 }
 
@@ -452,7 +452,7 @@ INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428368);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299578);
 
-extern s32 kwlnTaskGetUserValue(void);
+extern s32 kwlnTaskGetUserValue();
 extern void effDestroyResourceSlotSet(s32);
 extern void mnuDrainPanelTransitions(s32, s32);
 extern s32 brsAdvanceSkillPackagePanel(s32);
@@ -489,9 +489,9 @@ s32 mnuStaffCreateTasks(void) {
     s32 result;
     void *work = func_00299578();
 
-    kwlnTaskCreate(D_00437990, 0x405, 1, 0, brsMessageInputStep, 0, work);
-    kwlnTaskCreate(D_00428388, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, work);
-    result = kwlnTaskCreate(D_00428398, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, work);
+    kwlnTaskCreate(brsStaffInputTaskName, 0x405, 1, 0, brsMessageInputStep, 0, work);
+    kwlnTaskCreate(mnuStaffPrimaryPanelTaskName, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, work);
+    result = kwlnTaskCreate(mnuStaffSecondaryPanelTaskName, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, work);
     brsTaskState = 1;
     return result;
 }
@@ -500,9 +500,9 @@ u32 mnuStaffDestroyTasks(void) {
     s8 state = brsTaskState;
 
     if (state == 1) {
-        kwlnTaskDestroyWithHierarchyByName(D_00437990, 0);
-        kwlnTaskDestroyWithHierarchyByName(D_00428388, 0);
-        kwlnTaskDestroyWithHierarchyByName(D_00428398, 0);
+        kwlnTaskDestroyWithHierarchyByName(brsStaffInputTaskName, 0);
+        kwlnTaskDestroyWithHierarchyByName(mnuStaffPrimaryPanelTaskName, 0);
+        kwlnTaskDestroyWithHierarchyByName(mnuStaffSecondaryPanelTaskName, 0);
         brsUpdateBlocked = state;
         return 1;
     }
@@ -531,7 +531,23 @@ u32 brsTaskTryDestroy(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_002998D8);
+s32 func_002998D8(void) {
+    extern s32 func_00101740(const char *);
+    s32 task;
+    u8 *work;
+
+    task = func_00101740(mnuStaffPrimaryPanelTaskName);
+    if (task == 0) {
+        return task;
+    }
+    work = (u8 *)kwlnTaskGetUserValue(task);
+    if (256 - *(s32 *)(work + 0xB6E0) <= 0 && brsTaskIsUiUpdateAllowed((s32)work) != 0) {
+        if (*(s8 *)(work + 0xAEA8) == 1) {
+            return 1;
+        }
+    }
+    return *(s8 *)(work + 0xAEA8);
+}
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299988);
 
@@ -570,9 +586,9 @@ s32 mnuStaffPickRollByMode(u32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299B98);
 
-INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428388);
+INCLUDE_RODATA(const s32, "game/code_00296E98", mnuStaffPrimaryPanelTaskName);
 
-INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428398);
+INCLUDE_RODATA(const s32, "game/code_00296E98", mnuStaffSecondaryPanelTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_00296E98", D_004283B0);
 
@@ -580,13 +596,13 @@ INCLUDE_RODATA(const s32, "game/code_00296E98", D_004283C0);
 
 INCLUDE_SDATA(const s32, "game/code_00296E98", brsTaskState);
 
-INCLUDE_SDATA(const s32, "game/code_00296E98", D_00437989);
+INCLUDE_SDATA(const s32, "game/code_00296E98", brsPendingRowsLatched);
 
-INCLUDE_SDATA(const s32, "game/code_00296E98", D_0043798A);
+INCLUDE_SDATA(const s32, "game/code_00296E98", brsUiUpdateAllowed);
 
 INCLUDE_SDATA(const s32, "game/code_00296E98", brsUpdateBlocked);
 
-INCLUDE_SDATA(const s32, "game/code_00296E98", D_00437990);
+INCLUDE_SDATA(const s32, "game/code_00296E98", brsStaffInputTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_00296E98", D_00437998);
 

@@ -3,7 +3,7 @@
 #include "pcp_vu0.h"
 
 extern u8 sdfViewMatrix[];
-extern u8 D_00324610[];
+extern u8 sdfProjectionMatrix[];
 extern u8 D_00324650[];
 extern u8 D_00324660[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
@@ -738,7 +738,7 @@ void mdlSetAmountOnAllContextResources(MdlCtx *ctx, f32 amount) {
 void mdlProjectPointVU(MdlCtx *ctx, void *point)
 {
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory(D_00324610);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     VU0_MOVE_VF(vf24, vf28);
     VU0_MOVE_VF(vf25, vf29);
     VU0_MOVE_VF(vf26, vf30);
@@ -764,14 +764,14 @@ void mdlProjectPoints(MdlCtx *ctx, f32 (*in)[4], f32 (*out)[4], s32 count)
     VU0_LOAD_VF(vf10, &ctx->inner->vector70);
     VU0_SCALE_MATRIX_ROWS(vf10);
     sdfPostmultiplyVuMatrixFromMemory(sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory(D_00324610);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     for (i = 0; i < count; i++) {
         VU0_LOAD_VF(vf10, in[i]);
         VU0_TRANSFORM_POINT(vf10, vf10);
         VU0_PERSPECTIVE_DIVIDE_VF10();
-        VU0_LOAD_VF(vf11, D_00324610 + 0x40);
+        VU0_LOAD_VF(vf11, sdfProjectionMatrix + 0x40);
         VU0_MUL(vf10, vf10, vf11);
-        VU0_LOAD_VF(vf11, D_00324610 + 0x50);
+        VU0_LOAD_VF(vf11, sdfProjectionMatrix + 0x50);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF(vf10, out[i]);
     }

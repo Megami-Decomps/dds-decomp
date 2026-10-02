@@ -431,9 +431,9 @@ INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8B0);
 
 INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8B4);
 
-INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8B8);
+INCLUDE_SDATA(const s32, "game/code_0020CB38", btlPrimaryScriptResourceName);
 
-INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8C0);
+INCLUDE_SDATA(const s32, "game/code_0020CB38", btlSecondaryScriptResourceName);
 
 INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8C8);
 

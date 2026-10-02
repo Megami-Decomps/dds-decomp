@@ -52,7 +52,7 @@ extern u32 D_003BC984;
 
 extern u32 D_003BC994;
 
-extern u32 func_002EB028(const char *, u32 *, s32);
+extern u32 sdfReadNamedResource(const char *, u32 *, s32);
 
 extern u32 effQueuedFileHandle;
 
@@ -251,7 +251,7 @@ u32 effLoadIndexedResource(const char *base, const char *name, u32 retainResourc
     u32 result;
 
     func_003014F0(path, D_003BD198, base, name);
-    resource = func_002EB028(path, &handle, 0);
+    resource = sdfReadNamedResource(path, &handle, 0);
     result = func_002BD9C0(resource, retainResource);
     if (retainResource == 0) {
         func_002D0918(resource);
@@ -303,7 +303,7 @@ u32 effLoadMappedResource(const char *base, const char *name) {
     u32 resource;
 
     func_003014F0(path, D_003BD198, base, name);
-    resource = func_002EB028(path, &handle, 0);
+    resource = sdfReadNamedResource(path, &handle, 0);
     value = effCreateMappedResource(handle);
     func_002D0918(resource);
     return value;
@@ -644,7 +644,7 @@ u32 effResolveResourceSlots(TexHandleSet *set, u8 *data, s32 release, s32 only) 
             if (release == 0) {
                 if (only == -1 || only == (s32)i) {
                     if (set->handles[i] == 0) {
-                        set->handles[i] = (void *)func_002D3288(resource);
+                        set->handles[i] = (void *)sdfTexAcquireResourceTexture(resource);
                     }
                 } else {
                     set->handles[i] = 0;
@@ -658,7 +658,7 @@ u32 effResolveResourceSlots(TexHandleSet *set, u8 *data, s32 release, s32 only) 
     return (u32)entry;
 }
 
-extern u32 func_002D3288(s32 *);
+extern u32 sdfTexAcquireResourceTexture(s32 *);
 
 void effResolveAndReleaseResource(u32 *handle) {
     if (*handle != 0) {

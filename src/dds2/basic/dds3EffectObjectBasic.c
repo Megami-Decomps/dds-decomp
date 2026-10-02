@@ -29,7 +29,7 @@ extern void effObjSetInnerSecondVec(void *obj, void *vec);
 
 extern void effObjInnerVecBackup(void *params);
 
-extern void *func_00343ED0(void *resource, u32 *resolvedId, s32 options);
+extern void *sdfReadNamedResource(void *resource, u32 *resolvedId, s32 options);
 
 extern void *func_003297C8(void *arg);
 
@@ -347,7 +347,7 @@ void *effObjCreateFromResolvedResource(void *resource, void *vector, void *extra
     void *created;
 
     resolvedId = 0;
-    resourceHandle = func_00343ED0(resource, &resolvedId, 0);
+    resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
     created = func_00115358(resolvedId, vector, extra);
     func_003297C8(resourceHandle);
     return created;
@@ -391,7 +391,7 @@ void *effObjCreateKindFromResource(s32 kind, void *resource) {
     void *created;
 
     resolvedId = 0;
-    resourceHandle = func_00343ED0(resource, &resolvedId, 0);
+    resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
     created = func_001156E0(kind, resolvedId);
     func_003297C8(resourceHandle);
     return created;
@@ -433,7 +433,26 @@ s32 effObjGetIntParam(EffectObj *obj) {
     return (s32)parameters->parameter;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115BD8);
+extern void effMagatuhiInitializeInterpolatedHistory(void *bill);
+extern void effMagatuhiDispatchByKind(void *bill);
+
+/* Run the Magatuhi setup matching the ready effect's state (1 or 8). */
+s32 func_00115BD8(EffectObj *obj) {
+    if (obj->kind == 7) {
+        EffectData *data = obj->data;
+
+        switch (data->state) {
+        case 7:
+            break;
+        case 8:
+            effMagatuhiInitializeInterpolatedHistory(data->bill);
+            break;
+        case 1:
+            effMagatuhiDispatchByKind(data->bill);
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115C50);
 

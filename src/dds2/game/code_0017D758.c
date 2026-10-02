@@ -78,22 +78,22 @@ typedef struct PcpScatterPlainInstance {
 } PcpScatterPlainInstance;
 
 /* Copy the flat effect's source vector; the renderer reads the embedded copy. */
-void func_0017D758(PcpScatterPlainInstance *work, void *src) {
+void effScatterCopyFlatParameterVector(PcpScatterPlainInstance *work, void *src) {
     PCP_COPY_VECTOR(work->params.vec, src);
 }
 
 /* Set the instance scale that its update forwards to the drawable. */
-void func_0017D770(PcpScatterPlainInstance *work, f32 value) {
+void effScatterSetFlatInstanceScale(PcpScatterPlainInstance *work, f32 value) {
     work->scale = value;
 }
 
 /* Set the instance color used by the particle fade pass. */
-void func_0017D778(PcpScatterPlainInstance *work, u32 value) {
+void effScatterSetFlatInstanceColor(PcpScatterPlainInstance *work, u32 value) {
     work->color = value;
 }
 
 /* vu0 routine: copy a 4x4 matrix through vf28-vf31 */
-void func_0017D780(PcpScatterPlainInstance *work, void *src) {
+void effScatterCopyFlatInstanceMatrix(PcpScatterPlainInstance *work, void *src) {
     VU0_COPY_MATRIX(work->matrix, src);
 }
 

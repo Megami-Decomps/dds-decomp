@@ -4,11 +4,11 @@ extern s32 D_00439204;
 
 extern u32 sdfSoundCommandBusy;
 
-extern u32 D_00438B8C;
+extern u32 sdfSoundCommandStatus;
 
-extern u64 func_0032C138(u32);
+extern u64 sdfTexAcquireResourceTexture(u32);
 
-extern u64 func_00343ED0(u64, u32 *, u32 *);
+extern u64 sdfReadNamedResource(u64, u32 *, u32 *);
 
 extern u64 sndBuildResourceHandleListFromOffsets(u32);
 
@@ -156,11 +156,11 @@ typedef struct GsMemBlock {
     u32 unk10;                /* 0x10 */
 } GsMemBlock;
 
-extern char D_0042EAC8[]; /* " <<< GS memory information >>>..." */
+extern char sdfGsMemoryDumpHeader[]; /* " <<< GS memory information >>>..." */
 
-extern char D_0042EB40[]; /* " %08X : %08X %08X %8s %08X %d\n" */
+extern char sdfGsMemoryDumpRowFormat[]; /* " %08X : %08X %08X %8s %08X %d\n" */
 
-extern char D_00438D00[]; /* "%d" */
+extern char sdfGsMemoryTypeFormat[]; /* "%d" */
 
 extern char *D_0040BBD8[];
 
@@ -214,7 +214,7 @@ void sdfSoundSetChannelCount(u32 channels) {
 }
 
 u32 sdfSoundTryQueueCommand(u32 command) {
-    if (D_00438B8C != 0) {
+    if (sdfSoundCommandStatus != 0) {
         return 0;
     }
     D_00438B84 = command;
@@ -224,7 +224,7 @@ u32 sdfSoundTryQueueCommand(u32 command) {
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00342748);
 
 u32 sdfSoundGetCommandStatus(void) {
-    return D_00438B8C;
+    return sdfSoundCommandStatus;
 }
 
 void func_00342798(void) {
@@ -400,17 +400,17 @@ void sdfDumpGsMemoryForward(void) {
     GsMemBlock *walk;
     char *name;
 
-    sdfPrintFormattedDevMessage(D_0042EAC8);
+    sdfPrintFormattedDevMessage(sdfGsMemoryDumpHeader);
     head = sdfGetTextureListHead();
     node = head;
     while (node != 0) {
         if (node->type < 4) {
             name = D_0040BBD8[node->type];
         } else {
-            sdfPrintFormattedDevMessage(buf, D_00438D00, node->type);
+            sdfPrintFormattedDevMessage(buf, sdfGsMemoryTypeFormat, node->type);
             name = buf;
         }
-        sdfPrintFormattedDevMessage(D_0042EB40, node, node->link0, node->link4, name, node->unkC, node->unk10);
+        sdfPrintFormattedDevMessage(sdfGsMemoryDumpRowFormat, node, node->link0, node->link4, name, node->unkC, node->unk10);
         walk = head;
         while (walk != node) {
             walk = walk->link4;
@@ -426,17 +426,17 @@ void sdfDumpGsMemoryBackward(void) {
     GsMemBlock *walk;
     char *name;
 
-    sdfPrintFormattedDevMessage(D_0042EAC8);
+    sdfPrintFormattedDevMessage(sdfGsMemoryDumpHeader);
     head = sdfGetTextureBlockListHead();
     node = head;
     while (node != 0) {
         if (node->type < 4) {
             name = D_0040BBE8[node->type];
         } else {
-            sdfPrintFormattedDevMessage(buf, D_00438D00, node->type);
+            sdfPrintFormattedDevMessage(buf, sdfGsMemoryTypeFormat, node->type);
             name = buf;
         }
-        sdfPrintFormattedDevMessage(D_0042EB40, node, node->link0, node->link4, name, node->unkC, node->unk10);
+        sdfPrintFormattedDevMessage(sdfGsMemoryDumpRowFormat, node, node->link0, node->link4, name, node->unkC, node->unk10);
         walk = head;
         while (walk != node) {
             walk = walk->link0;
@@ -445,9 +445,9 @@ void sdfDumpGsMemoryBackward(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042EAC8);
+INCLUDE_RODATA(const s32, "game/code_003425B0", sdfGsMemoryDumpHeader);
 
-INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042EB40);
+INCLUDE_RODATA(const s32, "game/code_003425B0", sdfGsMemoryDumpRowFormat);
 
 void sndPrintMemoryInfo(void) {
     s32 info[6];
@@ -487,7 +487,7 @@ u64 sdfDevReadResourceWithExtraSpace(u64 name, u32 *outData, u32 *outSize, s32 e
     return handle;
 }
 
-u64 func_00343ED0(u64 source, u32 *info, u32 *options) {
+u64 sdfReadNamedResource(u64 source, u32 *info, u32 *options) {
     return sdfDevReadResourceWithExtraSpace(source, info, options, 0);
 }
 
@@ -496,14 +496,14 @@ u64 sdfLoadNamedResourceAndReleaseLookupHandle(u64 source) {
     u64 result;
     u32 info[4];
 
-    buffer = func_00343ED0(source, info, 0);
-    result = func_0032C138(info[0]);
+    buffer = sdfReadNamedResource(source, info, 0);
+    result = sdfTexAcquireResourceTexture(info[0]);
     func_003297C8(buffer);
     return result;
 }
 
 extern s32 sdfCreateConfiguredBufferedResourceList(s32);
-extern void func_00332F08(s32, u64);
+extern void sdfAppendResourceListItem(s32, u64);
 
 u64 sndBuildResourceHandleListFromOffsets(u32 resource) {
     s32 i = 0;
@@ -514,7 +514,7 @@ u64 sndBuildResourceHandleListFromOffsets(u32 resource) {
         entry = (s32 *)(resource + 0x14);
         do {
             i++;
-            func_00332F08(handle, func_0032C138(resource + *entry));
+            sdfAppendResourceListItem(handle, sdfTexAcquireResourceTexture(resource + *entry));
             entry++;
         } while (i != count);
     }
@@ -526,7 +526,7 @@ u64 sndLoadNamedOffsetResourceList(u64 source) {
     u64 result;
     u32 info[4];
 
-    buffer = func_00343ED0(source, info, 0);
+    buffer = sdfReadNamedResource(source, info, 0);
     result = sndBuildResourceHandleListFromOffsets(info[0]);
     func_003297C8(buffer);
     return result;
@@ -543,7 +543,7 @@ s32 sdfRelocatePackedResourcePayload(SdfRelocResource *resource) {
 
 u64 sdfLoadPackedResourceWithRelocatedPayload(u64 source, s32 *out) {
     u32 info[4];
-    u64 buffer = func_00343ED0(source, info, 0);
+    u64 buffer = sdfReadNamedResource(source, info, 0);
     *out = sdfRelocatePackedResourcePayload(info[0]);
     return buffer;
 }
@@ -559,7 +559,7 @@ s32 sdfRelocatePackedResourceWordsFromHeader(SdfRelocResource *resource) {
 
 u64 sdfReadPackedResourceAndRelocateHeader(u64 source, s32 *out) {
     u32 info[4];
-    u64 buffer = func_00343ED0(source, info, 0);
+    u64 buffer = sdfReadNamedResource(source, info, 0);
     *out = sdfRelocatePackedResourceWordsFromHeader(info[0]);
     return buffer;
 }
@@ -1071,13 +1071,13 @@ INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438B84);
 
 INCLUDE_SDATA(const s32, "game/code_003425B0", sdfSoundCommandBusy);
 
-INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438B8C);
+INCLUDE_SDATA(const s32, "game/code_003425B0", sdfSoundCommandStatus);
 
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438B90);
 
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438B94);
 
-INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438B98);
+INCLUDE_SDATA(const s32, "game/code_003425B0", fileIdleUpdateCallback);
 
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438BA0);
 
@@ -1167,7 +1167,7 @@ INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438CF0);
 
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438CF8);
 
-INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438D00);
+INCLUDE_SDATA(const s32, "game/code_003425B0", sdfGsMemoryTypeFormat);
 
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438D04);
 

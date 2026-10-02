@@ -55,7 +55,7 @@ extern void (*itfPanelHandlers[])(PanelObj *);
 extern void itfAdvancePanelLayoutAndNotify(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern s32 scrGetWindow(void);
 extern void itfMesCleanupWindow(s32 window, s32 arg1);
-extern void func_0019C968(s32 window, s32 arg1, s32 arg2);
+extern void itfMesSetWindowPageAndRefresh(s32 window, s32 arg1, s32 arg2);
 extern void itfScaleVectors(s32 *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const s32 *input, s32 count);
 extern s32 itfPanelColorTemplates[];
 extern s32 D_00357B50[];
@@ -401,7 +401,7 @@ s32 itfPanelAcquireHold(void) {
     cursor->unk4 = -1;
     cursor->unk8 = -1;
     cursor->count = 0;
-    func_0019C968(window, 3, 0);
+    itfMesSetWindowPageAndRefresh(window, 3, 0);
     return 1;
 }
 

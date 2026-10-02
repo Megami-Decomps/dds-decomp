@@ -48,7 +48,7 @@ extern char D_003D8090[];
 extern s32 func_00288B48(char *path);
 
 /* Resolve the event's script path ("/event/eNNN/eNNN/scr/eNNN.be", grouped by tens) and start loading it. */
-void func_00242340(EvtPackLoadState *state) {
+void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     s32 eventId;
     s32 directoryId;
     s32 fileHandle;
@@ -73,7 +73,7 @@ s32 func_002424B0(void) {
     default:
         if (state->loaded < 2) {
             if (state->loaded == 0) {
-                func_00242340(state);
+                evtBeginEventPackScriptLoad(state);
             }
         }
         break;

@@ -16,7 +16,7 @@ typedef struct MnuProfileProgress {
 } MnuProfileProgress;
 
 
-extern u8 D_003AF7A8[];
+extern u8 mnuResourceTaskName[];
 
 extern u32 mnuSceneResourceContext;
 extern s32 D_0036C698[];
@@ -98,11 +98,11 @@ INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F6F0);
  * both clear it when the resource group is no longer active. */
 void mnuCreateResourceTask(void) {
     s32 data = func_0024F608();
-    mnuSceneResourceContext = sdfCreateTaskWorker(D_003AF7A8, 0x402, 0x2B12, D_0036C648, func_0024F6F0, data);
+    mnuSceneResourceContext = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, D_0036C648, func_0024F6F0, data);
 }
 
 s32 mnuCheckResourceTask(void) {
-    if (kwlnTaskExists(D_003AF7A8) != 0) {
+    if (kwlnTaskExists(mnuResourceTaskName) != 0) {
         return 1;
     }
     mnuSceneResourceContext = 0;
@@ -148,7 +148,7 @@ s32 mnuGetMantraSourceValue(u16 index) {
     return entry->slot[slot].value;
 }
 
-void func_0024F858(u16 index, MnuProfileProgress *progress) {
+void mnuInitializeProfileProgress(u16 index, MnuProfileProgress *progress) {
     s32 offset = index * 0x1A4;
     void *unit = datGameState + offset + 0xA60;
 
@@ -249,7 +249,7 @@ void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
     func_002D0918(taskData[0]);
 }
 
-INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF7A8);
+INCLUDE_RODATA(const s32, "game/code_0024E1C8", mnuResourceTaskName);
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024FBB8);
 

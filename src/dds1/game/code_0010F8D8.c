@@ -59,7 +59,7 @@ typedef struct WorldCallbackHolder {
 } WorldCallbackHolder;
 
 /* Invoke the holder's first / second lifecycle callback when present; the result is 1 when there is nothing to call. */
-s32 func_0010FA00(WorldCallbackHolder *holder) {
+s32 dds3InvokeWorldCallbackFirst(WorldCallbackHolder *holder) {
     s32 result = 1;
 
     if (holder != NULL) {
@@ -72,7 +72,7 @@ s32 func_0010FA00(WorldCallbackHolder *holder) {
     return result;
 }
 
-s32 func_0010FA40(WorldCallbackHolder *holder) {
+s32 dds3InvokeWorldCallbackSecond(WorldCallbackHolder *holder) {
     s32 result = 1;
 
     if (holder != NULL) {
@@ -146,7 +146,7 @@ u32 func_0010FBC8(WorldObject *obj) {
 
     callbackTarget = obj->entry->callbackTarget;
     if (callbackTarget != 0) {
-        func_0010FA00((WorldCallbackHolder *)callbackTarget);
+        dds3InvokeWorldCallbackFirst((WorldCallbackHolder *)callbackTarget);
     }
     return 1;
 }
@@ -156,7 +156,7 @@ u32 dds3DispatchWorldEntryCallbackTarget(WorldObject *obj) {
 
     callbackTarget = obj->entry->callbackTarget;
     if (callbackTarget != 0) {
-        func_0010FA40((WorldCallbackHolder *)callbackTarget);
+        dds3InvokeWorldCallbackSecond((WorldCallbackHolder *)callbackTarget);
     }
     return 1;
 }

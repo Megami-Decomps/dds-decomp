@@ -63,7 +63,7 @@ extern u128 *D_003EB860[][3];
 extern void *D_003BD37C;
 extern void *D_003BD380;
 extern void *D_003BD390;
-extern void *func_002D3288(void *);
+extern void *sdfTexAcquireResourceTexture(void *);
 extern void *func_002D32A0(void *);
 extern void sdfEnsureFreeRootWorkspace(u32 object);
 extern void *sdfAllocPacketAligned(s32);
@@ -1416,7 +1416,7 @@ void sdfPadInit(void) {
 void sdfDevConsInit(void) {
     if (D_003BD3C4 == 0) {
         D_003BD3C4 = 1;
-        D_003BDA34 = func_002D3288(D_00315BA0);
+        D_003BDA34 = sdfTexAcquireResourceTexture(D_00315BA0);
     }
 }
 

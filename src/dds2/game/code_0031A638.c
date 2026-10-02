@@ -19,7 +19,7 @@ typedef struct ScoreResetWork {
 extern void func_0035B6E0(const char *fmt, ...);
 extern s32 mdlFlagTest(s32);
 
-void func_0031A690(ScoreResetWork *work) {
+void mnuInitializeHighScoreState(ScoreResetWork *work) {
     u32 minimum = mdlFlagTest(0x80E) == 0 ? 300000U : 600000U;
     if (datGameState->highScore < minimum) {
         datGameState->highScore = minimum;
@@ -44,7 +44,7 @@ void func_0031A730(ScoreResetWork *work) {
 }
 
 
-void func_0031A770(ScoreResetWork *work) {
+void mnuUpdateHighScoreFlag(ScoreResetWork *work) {
     u32 score = work->unk7C;
 
     if (datGameState->highScore < score) {

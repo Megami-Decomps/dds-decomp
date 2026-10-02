@@ -27,7 +27,7 @@ typedef struct SdfTexReleaseEntry {
 
 extern SdfTexHead *sdfTextureBlockListHead;
 extern SdfTexHead *sdfTextureListHead;
-extern s8 D_003BD300[2];
+extern s8 sdfBufferSlotIndices[2];
 
 /* Busy-buffer index is published by the slot setters and polled below;
  * volatile prevents the wait loop from reusing an earlier read. */
@@ -64,21 +64,21 @@ INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D10C8);
 /* Switch both references off the finished double-buffer slot before
  * publishing the slot currently in use. */
 void sdfSwapBufferSlots(s32 oldBuffer, s32 nextBuffer) {
-    if (D_003BD300[0] == oldBuffer) {
-        D_003BD300[0] = oldBuffer ^ 1;
+    if (sdfBufferSlotIndices[0] == oldBuffer) {
+        sdfBufferSlotIndices[0] = oldBuffer ^ 1;
     }
-    if (D_003BD300[1] == oldBuffer) {
-        D_003BD300[1] = oldBuffer ^ 1;
+    if (sdfBufferSlotIndices[1] == oldBuffer) {
+        sdfBufferSlotIndices[1] = oldBuffer ^ 1;
     }
     sdfBusyBufferIndex = nextBuffer;
 }
 
 void sdfSetBufferSlot(s32 singleBuffer, s32 value, s32 index) {
     if (singleBuffer == 0) {
-        D_003BD300[0] = value;
-        D_003BD300[1] = value;
+        sdfBufferSlotIndices[0] = value;
+        sdfBufferSlotIndices[1] = value;
     } else {
-        D_003BD300[index] = value;
+        sdfBufferSlotIndices[index] = value;
     }
     sdfBusyBufferIndex = -1;
 }
@@ -566,7 +566,7 @@ INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD2F8);
 
 INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD2FC);
 
-INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD300);
+INCLUDE_SDATA(const s32, "game/code_002D10B0", sdfBufferSlotIndices);
 
 INCLUDE_SDATA(const s32, "game/code_002D10B0", sdfBusyBufferIndex);
 

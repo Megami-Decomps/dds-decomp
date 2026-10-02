@@ -4,7 +4,7 @@ extern u64 func_00312810(u32, u64);
 
 extern u32 mnuMantraSelectionResource;
 
-extern u8 D_00426060[];
+extern u8 mnuResourceTaskName[];
 
 extern void func_00286F18(s32, s32);
 
@@ -83,11 +83,11 @@ void func_00286F18(s32 arg0, s32 work) {
  * invalidate or destroy the same resource group. */
 void mnuCreateResourceTask(void) {
     MnuStatusResource *resource = (MnuStatusResource *)func_00286E98();
-    mnuMantraSelectionResource = sdfCreateTaskWorker(D_00426060, 0x402, 0x2B12, D_003CFCC0, func_00286F18, resource);
+    mnuMantraSelectionResource = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, D_003CFCC0, func_00286F18, resource);
 }
 
 s32 mnuCheckResourceTask(void) {
-    if (kwlnTaskExists(D_00426060) != 0) {
+    if (kwlnTaskExists(mnuResourceTaskName) != 0) {
         return 1;
     }
     mnuMantraSelectionResource = 0;
@@ -101,9 +101,7 @@ void mnuStopResourceTask(void) {
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287030);
 
-
-
-INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426060);
+INCLUDE_RODATA(const s32, "game/code_00286BA8", mnuResourceTaskName);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287078);
 
@@ -137,7 +135,7 @@ u64 func_00287768(void) {
 s32 mtrMantraSelectInit(void) {
     u64 selected = func_00312810(mnuMantraSelectionResource, 0xffffffffffffffff);
 
-    func_00267F68(0);
+    mnuEnableTerminalTrackMode(0);
     mnuOpenMantraSelectionAndLoadTitleStream(selected);
     evtPrintDeveloperConsoleMessage("mtrMantraSelectInit\n");
     return 0;

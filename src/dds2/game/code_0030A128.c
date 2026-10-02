@@ -14,7 +14,7 @@ extern s32 mdlFlagTest(u32);
 
 extern s32 func_00101740(u32);
 
-extern char D_0042D240[]; /* "LmapMain" */
+extern char fldLocalMapTaskName[]; /* "LmapMain" */
 
 extern void fldShutdownLmapResources(void);
 
@@ -254,16 +254,16 @@ void fldStartLmapTask(s32 arg0) {
         D_00438890 = 1;
     }
     fldInitializeLmapTaskVariant((LmapTaskState *)block);
-    kwlnTaskCreate(D_0042D240, 0x2AF8, 0, 0, func_0030A8A8, 0, block);
+    kwlnTaskCreate(fldLocalMapTaskName, 0x2AF8, 0, 0, func_0030A8A8, 0, block);
 }
 
 void fldStopLmapTask(void) {
     fldShutdownLmapResources();
-    kwlnTaskDestroyWithHierarchyByName(D_0042D240, 1);
+    kwlnTaskDestroyWithHierarchyByName(fldLocalMapTaskName, 1);
 }
 
 s32 fldLmapTaskExists(void) {
-    return func_00101740((u32)D_0042D240) != 0;
+    return func_00101740((u32)fldLocalMapTaskName) != 0;
 }
 
 void func_0030AA68(const char *fmt, ...) {
@@ -271,7 +271,7 @@ void func_0030AA68(const char *fmt, ...) {
 
 /* Counter kind -> timer preset. Kinds 5, 6 and 13 have no arm of their own,
  * so they fall through to the default of 1. */
-INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D240);
+INCLUDE_RODATA(const s32, "game/code_0030A128", fldLocalMapTaskName);
 
 s32 func_0030AAB0(s32 kind) {
     s32 preset = 1;

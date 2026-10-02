@@ -56,7 +56,7 @@ ActionObj *evtSpawnActionObj9(s32 value) {
     return obj;
 }
 
-void func_001165F0(void) {
+void evtReleaseActionWorldNode(void) {
     dds3RemoveWorldObjectNode();
 }
 
@@ -126,7 +126,7 @@ typedef struct WorldTransformOwner {
 } WorldTransformOwner;
 
 /* Load flags, mode and the transform block from a setup record. */
-void func_00116710(WorldTransformOwner *object, WorldTransformSetup *setup) {
+void dds3LoadWorldTransformSetup(WorldTransformOwner *object, WorldTransformSetup *setup) {
     WorldTransformData *data = object->data;
 
     data->flags = 0;
@@ -152,7 +152,7 @@ void func_00116710(WorldTransformOwner *object, WorldTransformSetup *setup) {
 }
 
 /* Load rotation, position and scale from a parameter block. */
-void func_001167B8(WorldTransformOwner *object, WorldTransformParams *params) {
+void dds3LoadWorldTransformParams(WorldTransformOwner *object, WorldTransformParams *params) {
     WorldTransformData *data = object->data;
 
     data->rotation[0] = params->rotation[0];

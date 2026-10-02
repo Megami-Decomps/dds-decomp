@@ -9,7 +9,7 @@ extern void *sdfCreateAssetWithDrawEntries();
 extern void func_003332D0(void *, f32);
 extern void func_001594C8();
 extern s32 effEmitterDelayRandomState[];
-extern void func_00341348();
+extern void effMiscSeedRandomFromClock();
 #include "eff.h"
 
 typedef struct EffResourceOwner {
@@ -128,7 +128,7 @@ typedef struct EffBillEntry {
     u8 pad10[4];
 } EffBillEntry; /* 0x14 */
 
-extern s32 D_00451EE0[];
+extern s32 effBillResourceOwners[];
 
 s32 sdfAllocPacketAligned(s32 size);
 
@@ -166,7 +166,7 @@ typedef struct EffResourceRef {
 
 void effRetainResource(s32 index) {
     s32 *effect = (s32 *)billCreateIndexed(D_003AA884[index].billboardKind, 0);
-    s32 *resource = ((EffResourceRef *)D_00451EE0[index])->resource;
+    s32 *resource = ((EffResourceRef *)effBillResourceOwners[index])->resource;
     s32 references = resource[2];
 
     effect[12] = (s32)resource;
@@ -178,7 +178,7 @@ u32 func_00159BB0(void) {
 }
 
 s32 effGetResourceFirstWord(s32 index) {
-    return *(s32 *)((EffResourceRef *)D_00451EE0[index])->resource;
+    return *(s32 *)((EffResourceRef *)effBillResourceOwners[index])->resource;
 }
 
 void effCopyVector(dst, src)
@@ -439,7 +439,7 @@ void billSetChildHalfExtents(s32 billboard, float width, float height) {
 }
 
 extern u8 sdfViewMatrix[];
-extern u8 D_0037F610[];
+extern u8 sdfProjectionMatrix[];
 extern u8 D_0037F650[];
 extern u8 D_0037F660[];
 extern u8 D_003AA9B0[];
@@ -453,7 +453,7 @@ f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     f32 projectedOffset[4];
 
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory(D_0037F610);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     VU0_LOAD_VF(vf10, position);
     VU0_MOVE_VF(vf12, vf10);
     VU0_TRANSFORM_POINT(vf10, vf10);
@@ -544,7 +544,7 @@ void effVuCopyMatrix(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
-void func_0015A3F0(EffInstance *instance, s32 *values) {
+void effReadBillboardModeValues(EffInstance *instance, s32 *values) {
     BillObj *billboard = instance->billboard;
 
     if (billboard->kind == 1) {
@@ -594,7 +594,7 @@ void func_0015B208(s32 sink, s32 source) {
 }
 
 void func_0015B270(void) {
-    func_00341348(effEmitterDelayRandomState);
+    effMiscSeedRandomFromClock(effEmitterDelayRandomState);
 }
 
 void func_0015B290(void) {

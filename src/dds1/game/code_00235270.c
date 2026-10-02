@@ -42,8 +42,8 @@ extern s32 sdfCreateFormattedSifCommand();
 extern u32 itfMesGetEntryCount(s32 window);
 extern void evtViewerDispatchFlagMode();
 extern void func_0022E5A0();
-extern u8 D_003BBF80[];
-extern u8 D_003BBF90[];
+extern u8 evtPictureTaskName[];
+extern u8 evtSkyTaskName[];
 extern u8 D_003BC360[];
 extern char D_003BC058[]; /* "     %d" */
 extern char D_003BC0A8[]; /* " EVENT" */
@@ -187,7 +187,7 @@ void evtCreateTask(s32 taskId, s32 value) {
 
     data = evtAllocateContext();
     evtSetConvertedContextValue(data, value);
-    kwlnTaskCreate(D_003BBF80, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, (void *)data);
+    kwlnTaskCreate(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, (void *)data);
 }
 
 typedef struct EvtTaskData {
@@ -202,7 +202,7 @@ void evtCreateTaskWithValue(s32 taskId, s32 value) {
 
     data = (EvtTaskData *)evtAllocateContext();
     data->value = value;
-    kwlnTaskCreate(D_003BBF80, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, data);
+    kwlnTaskCreate(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, data);
 }
 
 void evtSetSkyOverlayEnabled(u32 enabled) {
@@ -260,7 +260,7 @@ void evtResetSkyTaskFlags(void) {
 void evtDestroySkyTask(void) {
     s32 task;
 
-    task = kwlnTaskGetTaskByName(D_003BBF90);
+    task = kwlnTaskGetTaskByName(evtSkyTaskName);
     if (task != 0) {
         kwlnTaskDestroyWithHierarchy(task, 1);
     }
@@ -271,7 +271,7 @@ void evtCreateSkyTask(void) {
     fldSetSkyDrawState(0x80);
     func_00132B80(0);
     fldSetFadeTarget(0, 1, 0);
-    kwlnTaskCreate(D_003BBF90, 0x2B0E, 1, 1, evtUpdateSkyTask, evtResetSkyTaskFlags, 0);
+    kwlnTaskCreate(evtSkyTaskName, 0x2B0E, 1, 1, evtUpdateSkyTask, evtResetSkyTaskFlags, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00235270", evtUpdateFrameVariableTask);
@@ -2004,7 +2004,7 @@ s32 evtFindTaskResourceEntryByKey(u32 taskId, s32 key) {
 }
 
 extern void sdfTexReleaseReferenceViaHandler(s32 handle);
-extern s32 func_002D3288(s32 resource);
+extern s32 sdfTexAcquireResourceTexture(s32 resource);
 extern void effSetCh72Id(s32 id);
 
 void evtRefreshTaskData(s32 taskId, s32 key) {
@@ -2016,7 +2016,7 @@ void evtRefreshTaskData(s32 taskId, s32 key) {
             sdfTexReleaseReferenceViaHandler(old);
             data->effectHandle = 0;
         }
-        resource = func_002D3288(resource);
+        resource = sdfTexAcquireResourceTexture(resource);
         effSetCh72Id(resource);
         data->effectHandle = resource;
     }
@@ -2067,13 +2067,13 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
     return found;
 }
 
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BBF80);
+INCLUDE_SDATA(const s32, "game/code_00235270", evtPictureTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", evtSkyTransitionActive);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", evtSkyOverlayEnabled);
 
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BBF90);
+INCLUDE_SDATA(const s32, "game/code_00235270", evtSkyTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BBFA0);
 

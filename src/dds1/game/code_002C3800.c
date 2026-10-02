@@ -3,9 +3,9 @@
 
 extern s32 fldLocalMapCameraObject;
 
-extern SdfQuad D_003900A0;
+extern SdfQuad fldLocalMapFirstCameraVector;
 
-extern SdfQuad D_003900B0;
+extern SdfQuad fldLocalMapSecondCameraVector;
 
 extern s32 dds3AdvanceWorldCounter(void);
 
@@ -20,7 +20,7 @@ extern void dds3SetWorldCameraObject(s32, s32);
 extern s32 func_00112C08(s32, SdfQuad *, SdfQuad *);
 
 void fldCreateLocalMapCamera(void) {
-    fldLocalMapCameraObject = func_00112C08(dds3AdvanceWorldCounter(), &D_003900A0, &D_003900B0);
+    fldLocalMapCameraObject = func_00112C08(dds3AdvanceWorldCounter(), &fldLocalMapFirstCameraVector, &fldLocalMapSecondCameraVector);
     dds3SetWorldEntryCallbackTarget(fldLocalMapCameraObject, "Lmap_Cam");
     effObjSetInnerFloat(fldLocalMapCameraObject, 2.0f);
     dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), fldLocalMapCameraObject);

@@ -156,7 +156,7 @@ extern s32 D_004361FC;
 
 extern s32 fldRainTextureResource;
 
-extern u32 func_0032C138(void *);
+extern u32 sdfTexAcquireResourceTexture(void *);
 
 extern char D_00413350[];
 
@@ -166,7 +166,7 @@ extern u32 fldCameraSettings;
 
 extern FldFadeColor fldCameraColorParameters[];
 
-extern u32 func_00343ED0(const char *, u32 *, s32);
+extern u32 sdfReadNamedResource(const char *, u32 *, s32);
 
 extern u32 effCreateSelectionFlagListFromWork(const void *);
 
@@ -366,8 +366,8 @@ typedef struct FldZone {
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00136EF8);
 
 void fldInitializeCameraColorResource(void) {
-    fldRainTextureResource = func_00343ED0(D_00413350, &fldRainTextureData, 0);
-    fldRainTextureReference = func_0032C138((void *)fldRainTextureData);
+    fldRainTextureResource = sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
+    fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
     fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
     if (fldRainTextureResource != 0) {
         sdfQueueNonzeroResourceId(fldRainTextureResource);
@@ -1775,5 +1775,5 @@ INCLUDE_SDATA(const s32, "game/code_00136EF8", D_004361F8);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_004361FC);
 
-INCLUDE_SDATA(const s32, "game/code_00136EF8", D_00436200);
+INCLUDE_SDATA(const s32, "game/code_00136EF8", fldFieldTaskHandle);
 

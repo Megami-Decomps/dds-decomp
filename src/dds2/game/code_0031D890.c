@@ -189,5 +189,7 @@ u8 mnuGetIndexedFadeTexture(s32 index) {
     return D_0040B088[index * 12];
 }
 
+INCLUDE_RODATA(const s32, "game/code_0031D890", D_0042DBA0);
+
 INCLUDE_SDATA(const s32, "game/code_0031D890", D_00438958);
 

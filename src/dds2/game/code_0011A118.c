@@ -629,29 +629,29 @@ s32 evtPushSecondRosterLevel(void) {
     return 1;
 }
 
-s32 func_0011D608(void) {
+s32 evtPushFirstRosterCurrentHp(void) {
     scrSetIntegerReturnValue(((EventScriptEntry *)D_0043E5C8[0])->value6);
     return 1;
 }
 
-s32 func_0011D630(void) {
+s32 evtPushSecondRosterCurrentHp(void) {
     scrSetIntegerReturnValue(((EventScriptEntry *)D_0043E5CC[0])->value6);
     return 1;
 }
 
-s32 func_0011D658(void) {
+s32 evtPushFirstRosterMaximumHp(void) {
     scrSetIntegerReturnValue(((EventScriptEntry *)D_0043E5C8[0])->value8);
     return 1;
 }
 
-s32 func_0011D680(void) {
+s32 evtPushSecondRosterMaximumHp(void) {
     scrSetIntegerReturnValue(((EventScriptEntry *)D_0043E5CC[0])->value8);
     return 1;
 }
 
 extern s32 btlResolveUnitValueWithOverride(s32, s32);
 extern u32 datReadLowHalfOfCalculatedValue(s32, s32);
-s32 func_0011D6A8(void) {
+s32 evtPushFirstRosterSelectedStat(void) {
     s8 stat = ((EventModeSlot *)datCommandSelectors)[D_0043E5C0[1]].stat;
     s32 value;
 
@@ -673,7 +673,7 @@ s32 func_0011D6A8(void) {
     return 1;
 }
 
-s32 func_0011D758(void) {
+s32 evtPushSecondRosterSelectedStat(void) {
     s8 stat = ((EventModeSlot *)datCommandSelectors)[D_0043E5C0[1]].stat;
     s32 value;
 
@@ -697,7 +697,7 @@ s32 func_0011D758(void) {
 
 extern s32 func_00119F68(s32);
 
-s32 func_0011D808(void) {
+s32 evtPushFirstRosterOptionStat(void) {
     s8 stat = func_00119F68(((EventScriptEntry *)D_0043E5C0)->index14);
     s32 value = 100;
 
@@ -718,7 +718,7 @@ s32 func_0011D808(void) {
     return 1;
 }
 
-s32 func_0011D8B0(void) {
+s32 evtPushSecondRosterOptionStat(void) {
     s8 stat = func_00119F68(((EventScriptEntry *)D_0043E5C0)->index14);
     s32 value = 100;
 
@@ -739,21 +739,21 @@ s32 func_0011D8B0(void) {
     return 1;
 }
 
-s32 func_0011D958(void) {
+s32 evtPushFirstRosterStatEligibility(void) {
     s32 val = scrReadIntParameter(0);
 
     scrSetIntegerReturnValue(func_00119A78(D_0043E5C8[0], val));
     return 1;
 }
 
-s32 func_0011D990(void) {
+s32 evtPushSecondRosterStatEligibility(void) {
     s32 val = scrReadIntParameter(0);
 
     scrSetIntegerReturnValue(func_00119A78(D_0043E5CC[0], val));
     return 1;
 }
 
-s32 func_0011D9C8(void) {
+s32 evtPushSelectedStatOrRosterLowValue(void) {
     s32 value;
     s32 index = D_0043E5C0[1];
     if (((EventModeSlot *)datCommandSelectors)[index].kind == 5) {

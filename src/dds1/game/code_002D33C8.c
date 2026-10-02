@@ -16,8 +16,8 @@ typedef struct SdfDmaTagHeader {
 } SdfDmaTagHeader;
 
 extern void *sdfPendingQueueHead;
-extern s8 D_003BDA04;
-extern s32 D_003BD9F8[2];
+extern s8 sdfPendingQueueRotationActive;
+extern s32 sdfPendingQueueSlots[2];
 
 extern SdfResource *sdfResourceListHead;
 
@@ -38,7 +38,7 @@ extern s32 sdfPendingQueueSemaphore;
 extern s32 sdfCreateSemaphore(u32, u32, u32);
 extern u8 sdfTextureReleaseQueue;
 extern u8 sdfObjectListReleaseQueue;
-extern volatile s8 D_003BD333;
+extern volatile s8 sdfPacketSlotIndex;
 extern s32 D_003BD338;
 extern u32 D_00398158[];
 extern SdfResEntry *sdfPacketResourceEntries[];
@@ -265,28 +265,28 @@ void sdfPendingQueueFlush(SdfPendingNode *node) {
 void sdfRotatePendingSlots(void) {
     u32 i;
 
-    D_003BDA04 = 1;
+    sdfPendingQueueRotationActive = 1;
     WaitSema(sdfPendingQueueSemaphore);
-    sdfPendingQueueFlush(D_003BD9F8[0]);
+    sdfPendingQueueFlush(sdfPendingQueueSlots[0]);
     for (i = 0; i < 1; i++) {
-        D_003BD9F8[i] = D_003BD9F8[i + 1];
+        sdfPendingQueueSlots[i] = sdfPendingQueueSlots[i + 1];
     }
-    D_003BD9F8[1] = (s32)sdfDetachQueue();
+    sdfPendingQueueSlots[1] = (s32)sdfDetachQueue();
     SignalSema(sdfPendingQueueSemaphore);
-    D_003BDA04 = 0;
+    sdfPendingQueueRotationActive = 0;
 }
 
 u64 sdfGraphHasPendingWork(void) {
     u32 i;
     s32 *entry;
-    if (D_003BDA04 != 0) {
+    if (sdfPendingQueueRotationActive != 0) {
         return 1;
     }
     if (sdfPendingQueueHead != NULL) {
         return 1;
     }
     i = 0;
-    entry = D_003BD9F8;
+    entry = sdfPendingQueueSlots;
     do {
         if (*entry != 0) {
             return 1;
@@ -830,11 +830,11 @@ void sdfInitPacketBuilder(SdfPacketBuilder *packet, s32 source, s32 data, s32 re
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4EE8);
 
 void sdfSetNonnegativePacketIndex(s32 value) {
-    D_003BD333 = (value < 0) ? 0 : value;
+    sdfPacketSlotIndex = (value < 0) ? 0 : value;
 }
 
 void sdfResetPacketSlotState(void) {
-    D_003BD333 = 0;
+    sdfPacketSlotIndex = 0;
     D_00398158[0] = 0;
     D_003BD338 = 0;
 }
@@ -1708,7 +1708,7 @@ INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD331);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD332);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD333);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPacketSlotIndex);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD334);
 

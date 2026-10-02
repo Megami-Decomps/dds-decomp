@@ -9,7 +9,7 @@ void sdfUnlinkAndDeleteCurrentThread(void) {
     func_003289C8(node);
 }
 
-extern s32 D_00439100;
+extern s32 sdfThreadWakeWorkerId;
 extern u8 D_00438B70;
 extern s32 GetThreadId(void);
 extern s32 ChangeThreadPriority(s32, s32);
@@ -18,7 +18,7 @@ extern s32 SleepThread(void);
 
 s32 sdfWakeThreadOnCompletionEvent(s32 event) {
     if (event == 2) {
-        iWakeupThread(D_00439100);
+        iWakeupThread(sdfThreadWakeWorkerId);
         if (D_00438B70 != 0) {
             D_00438B70--;
         }
@@ -71,7 +71,7 @@ s32 sdfStartQueuedThreadWakeWorker(void) {
     sdfTrackedThreadHead = NULL;
     sdfTrackedThreadSemaphore = sdfCreateSemaphore(1, 1, 0);
     thread = sdfCreateThread(sdfWakeQueuedThreadWaiters, D_0045E8A0, 0x800, 0x3E);
-    D_00439100 = thread;
+    sdfThreadWakeWorkerId = thread;
     return _StartThread(thread, 0);
 }
 

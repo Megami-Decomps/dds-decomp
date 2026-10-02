@@ -119,17 +119,17 @@ extern EffBlurTemplate *effBlurPixelWork;
 
 extern u32 effGetResourceFirstWord(s32 arg);
 
-extern EffBlurScatterWork *D_00438F0C;
+extern EffBlurScatterWork *effFilterBlurWork;
 
-extern EffBlurScaleWork *D_00438F18;
+extern EffBlurScaleWork *effStaggeredBlurWork;
 
 extern EffScreenDrawParams D_003B2238;
 
 
-extern EffSolidRectParams D_003B2260;
+extern EffSolidRectParams effColorRectangleParameters;
 
 
-extern EffTemplate *D_00438F14;
+extern EffTemplate *effTexturedSquareWork;
 
 extern u8 D_003B2208[];
 
@@ -163,19 +163,19 @@ extern EffTemplateBody D_003B29B8;
 
 extern EffBlurScaleParams D_003B2AF8;
 
-extern s8 D_00436465;
+extern s8 effTexturedSquareEnabled;
 
-extern s8 D_00436464;
+extern s8 effColorRectangleEnabled;
 
 extern s8 D_00436463;
 
-extern s8 D_00436466;
+extern s8 effStaggeredBlurEnabled;
 
-extern s8 D_00436462;
+extern s8 effFilterBlurEnabled;
 
-extern s8 D_00436461;
+extern s8 effTexturedBlurEnabled;
 
-extern s8 D_00436460;
+extern s8 effRectangleBlurEnabled;
 
 extern void effDrawBlurRectangle(EffScreenDrawParams *arg);
 
@@ -189,7 +189,7 @@ extern void func_0018F5C0(EffScreenDrawParams *arg);
 
 extern void func_0018F840(EffSolidRectParams *arg);
 
-extern void func_0018FCA0(EffTemplate *arg);
+extern void effResourceRectDrawPixels(EffTemplate *arg);
 
 extern s32 func_003292A8(s32);
 extern u8 *sdfResourceRetainAddress(s32);
@@ -225,7 +225,7 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_00195EF8);
 INCLUDE_ASM(const s32, "effect/effEvent", func_00196040);
 
 /* Evaluate the cubic Bezier made of control points segment..segment+3 at t into out (xyz, w = 1). */
-void func_00196180(EffBezierSlot *slot, f32 *out) {
+void effEvaluateSlotBezierPosition(EffBezierSlot *slot, f32 *out) {
     EffBezierPoint *p = &slot->point[slot->segment];
     f32 t = slot->t;
     f32 u = 1.0f - t;
@@ -293,15 +293,15 @@ void effSubmitSizedDrawPacket(s32 x, s32 y, s32 w, s32 h, s32 arg4, s32 arg5) {
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
 }
 
-void func_00196FD8(void) {
-    D_00436460 = 1;
+void effEnableRectangleBlur(void) {
+    effRectangleBlurEnabled = 1;
 }
 
-void func_00196FE8(void) {
-    D_00436460 = 0;
+void effDisableRectangleBlur(void) {
+    effRectangleBlurEnabled = 0;
 }
 
-void func_00196FF0(void *src) {
+void effCopyRectangleBlurParameters(void *src) {
     memcpy(&effBlurRectangleParameters, src, 0x28);
 }
 
@@ -309,12 +309,12 @@ EffScreenDrawParams *effGetCh70Params(void) {
     return &effBlurRectangleParameters;
 }
 
-void func_00197060(void) {
-    D_00436461 = 1;
+void effEnableTexturedBlur(void) {
+    effTexturedBlurEnabled = 1;
 }
 
-void func_00197070(void) {
-    D_00436461 = 0;
+void effDisableTexturedBlur(void) {
+    effTexturedBlurEnabled = 0;
 }
 
 /* Copy the pixel rectangle only; retain its selected source resource. */
@@ -334,54 +334,54 @@ void effInitCh71Id(void) {
     effBlurPixelWork->resourceWord = effGetResourceFirstWord(2);
 }
 
-void func_00197118(void) {
-    D_00436462 = 1;
+void effEnableFilterBlur(void) {
+    effFilterBlurEnabled = 1;
 }
 
-void func_00197128(void) {
-    D_00436462 = 0;
+void effDisableFilterBlur(void) {
+    effFilterBlurEnabled = 0;
 }
 
 /* Update scatter parameters without replacing the owned allocation or slots. */
 void effCopyCh72Common(EffBlurScatterParams *src) {
-    D_00438F0C->params = *src;
+    effFilterBlurWork->params = *src;
 }
 
 EffBlurScatterWork *effGetCh72Work(void) {
-    return D_00438F0C;
+    return effFilterBlurWork;
 }
 
 void effSetCh72Id(u32 id) {
-    D_00438F0C->sourceHandle = id;
+    effFilterBlurWork->sourceHandle = id;
 }
 
 void effInitCh72Id(void) {
-    D_00438F0C->sourceHandle = effGetResourceFirstWord(2);
+    effFilterBlurWork->sourceHandle = effGetResourceFirstWord(2);
 }
 
-void func_001971D0(void) {
-    D_00436466 = 1;
+void effEnableStaggeredBlur(void) {
+    effStaggeredBlurEnabled = 1;
 }
 
-void func_001971E0(void) {
-    D_00436466 = 0;
+void effDisableStaggeredBlur(void) {
+    effStaggeredBlurEnabled = 0;
 }
 
 /* Update scale parameters without replacing the owned allocation or slots. */
 void effCopyCh76Common(EffBlurScaleParams *src) {
-    D_00438F18->params = *src;
+    effStaggeredBlurWork->params = *src;
 }
 
 EffBlurScaleWork *effGetCh76Work(void) {
-    return D_00438F18;
+    return effStaggeredBlurWork;
 }
 
 void effSetCh76Id(u32 id) {
-    D_00438F18->sourceHandle = id;
+    effStaggeredBlurWork->sourceHandle = id;
 }
 
 void effInitCh76Id(void) {
-    D_00438F18->sourceHandle = effGetResourceFirstWord(3);
+    effStaggeredBlurWork->sourceHandle = effGetResourceFirstWord(3);
 }
 
 void func_00197288(void) {
@@ -400,76 +400,76 @@ EffScreenDrawParams *effGetCh73Params(void) {
     return &D_003B2238;
 }
 
-void func_00197310(void) {
-    D_00436464 = 1;
+void effEnableColorRectangle(void) {
+    effColorRectangleEnabled = 1;
 }
 
-void func_00197320(void) {
-    D_00436464 = 0;
+void effDisableColorRectangle(void) {
+    effColorRectangleEnabled = 0;
 }
 
-void func_00197328(EffSolidRectParams *src) {
-    D_003B2260 = *src;
+void effCopyColorRectangleParameters(EffSolidRectParams *src) {
+    effColorRectangleParameters = *src;
 }
 
 EffSolidRectParams *effGetCh74Params(void) {
-    return &D_003B2260;
+    return &effColorRectangleParameters;
 }
 
-void func_00197378(void) {
-    D_00436465 = 1;
+void effEnableTexturedSquare(void) {
+    effTexturedSquareEnabled = 1;
 }
 
-void func_00197388(void) {
-    D_00436465 = 0;
+void effDisableTexturedSquare(void) {
+    effTexturedSquareEnabled = 0;
 }
 
 /* Copy the resource template body while preserving its selected resource. */
 void effCopyCh75Common(EffTemplateBody *src) {
-    D_00438F14->body = *src;
+    effTexturedSquareWork->body = *src;
 }
 
 EffTemplate *effGetCh75Work(void) {
-    return D_00438F14;
+    return effTexturedSquareWork;
 }
 
 void effSetCh75Id(u32 id) {
-    D_00438F14->resourceWord = id;
+    effTexturedSquareWork->resourceWord = id;
 }
 
 void effInitCh75Id(void) {
-    D_00438F14->resourceWord = effGetResourceFirstWord(0);
+    effTexturedSquareWork->resourceWord = effGetResourceFirstWord(0);
 }
 
 void effInitWorks(void) {
     effBlurPixelWork = effCloneBlurTemplate(D_003B2208);
-    D_00438F0C = func_0018EBC8(D_003B21D8);
-    D_00438F14 = effCloneResourceTemplate(D_003B2278);
-    D_00438F18 = effCloneBlurWorkWithSlots(D_003B22A0);
+    effFilterBlurWork = func_0018EBC8(D_003B21D8);
+    effTexturedSquareWork = effCloneResourceTemplate(D_003B2278);
+    effStaggeredBlurWork = effCloneBlurWorkWithSlots(D_003B22A0);
     effGetCh76Work()->params.count = 4;
 }
 
 void effDispatchActive(void) {
-    if (D_00436460) {
+    if (effRectangleBlurEnabled) {
         effDrawBlurRectangle(&effBlurRectangleParameters);
     }
-    if (D_00436461) {
+    if (effTexturedBlurEnabled) {
         effDrawBlurPixelRectWithResource(effBlurPixelWork);
     }
-    if (D_00436462) {
-        func_0018ECD0(D_00438F0C);
+    if (effFilterBlurEnabled) {
+        func_0018ECD0(effFilterBlurWork);
     }
-    if (D_00436466) {
-        func_0018F1D0(D_00438F18);
+    if (effStaggeredBlurEnabled) {
+        func_0018F1D0(effStaggeredBlurWork);
     }
     if (D_00436463) {
         func_0018F5C0(&D_003B2238);
     }
-    if (D_00436464) {
-        func_0018F840(&D_003B2260);
+    if (effColorRectangleEnabled) {
+        func_0018F840(&effColorRectangleParameters);
     }
-    if (D_00436465) {
-        func_0018FCA0(D_00438F14);
+    if (effTexturedSquareEnabled) {
+        effResourceRectDrawPixels(effTexturedSquareWork);
     }
 }
 
@@ -826,7 +826,7 @@ EffEventLight *effEventLightCreate(u32 arg, f32 param) {
     return work;
 }
 
-void func_00198340(EffEventLight *work) {
+void effEventLightDestroy(EffEventLight *work) {
     effEventReleaseNode(work->owner);
     if (work->active != 0) {
         func_00197D50(work->handle);
@@ -1168,19 +1168,19 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_00436458);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_0043645C);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_00436460);
+INCLUDE_SDATA(const s32, "effect/effEvent", effRectangleBlurEnabled);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_00436461);
+INCLUDE_SDATA(const s32, "effect/effEvent", effTexturedBlurEnabled);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_00436462);
+INCLUDE_SDATA(const s32, "effect/effEvent", effFilterBlurEnabled);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_00436463);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_00436464);
+INCLUDE_SDATA(const s32, "effect/effEvent", effColorRectangleEnabled);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_00436465);
+INCLUDE_SDATA(const s32, "effect/effEvent", effTexturedSquareEnabled);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_00436466);
+INCLUDE_SDATA(const s32, "effect/effEvent", effStaggeredBlurEnabled);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_00436468);
 

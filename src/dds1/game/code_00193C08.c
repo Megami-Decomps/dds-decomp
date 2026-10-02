@@ -49,7 +49,7 @@ typedef struct FrFontSysLocal {
 
 extern FntList frFontResourceList;
 extern FrFontSysLocal frFontWork;
-extern u32 D_003565F8[];
+extern u32 frFontSlotLoadedFlags[];
 extern void frFontFreeAllEntries(void);
 extern void *func_00194840(void *arg0);
 extern u32 itfReleaseMemNodeBuffer(s32 arg0);
@@ -108,7 +108,7 @@ typedef struct FrFontGsPacket {
     FrFontGsWrite writes[6];
 } FrFontGsPacket;
 
-void func_00193CD8(FrFontGsPacket *packet) {
+void frFontBuildGsSetupPacket(FrFontGsPacket *packet) {
     packet->dma.value = 0;
     packet->dma.words[0] = 0x70000007;
     packet->dma.words[2] = 0;
@@ -177,7 +177,7 @@ void frFontUploadClearedTexture(void) {
     func_002D0918((void *)block);
 }
 
-extern void *func_002EB028();
+extern void *sdfReadNamedResource();
 extern void func_001944A0(s32, s32, void *);
 
 /* Load font `index` once (index 1 uses the system's first entry buffer, other fonts load `path`) and mark it loaded. */
@@ -185,13 +185,13 @@ void frFontEnsureSlotLoaded(s32 index, s32 path) {
     s32 slot = index & 0xFF;
     FrFontSysLocal *sys = &frFontWork;
 
-    if (D_003565F8[slot] != 1) {
+    if (frFontSlotLoadedFlags[slot] != 1) {
         if (slot == 1) {
             func_001944A0(1, 0, sys->entries[0].buffer);
         } else {
-            func_001944A0(slot, 0, func_002EB028(path, 0, 0));
+            func_001944A0(slot, 0, sdfReadNamedResource(path, 0, 0));
         }
-        D_003565F8[slot] = 1;
+        frFontSlotLoadedFlags[slot] = 1;
     }
 }
 
@@ -217,7 +217,7 @@ void frFontFreeEntry(s32 index) {
     if (slot < 2) {
         return;
     }
-    D_003565F8[slot] = 0;
+    frFontSlotLoadedFlags[slot] = 0;
     entry = &frFontWork.entries[slot];
     if (entry->buffer != NULL) {
         func_002D0918(entry->buffer);

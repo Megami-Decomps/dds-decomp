@@ -69,7 +69,7 @@ extern s32 func_002B86E8(u32);
 
 extern void func_002686F0(s32);
 
-extern s8 D_00437858;
+extern s8 mnuTerminalTaskState;
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -658,7 +658,7 @@ void mnuCloseCurrentProfilePanel(MenuProgressHost *host) {
     host->currentEffect = 0;
 }
 
-s32 func_00267DE0(s32 x, s32 y, s32 mode, MenuProgressHost *host) {
+s32 mnuDrawCurrentProfilePanel(s32 x, s32 y, s32 mode, MenuProgressHost *host) {
     return mnuDrawAndAdvanceProfilePanel(x, y, mode, host->currentEffect);
 }
 
@@ -707,7 +707,7 @@ void mnuTerminalSetTrack(s8 mode, s8 enable) {
     }
 }
 
-void func_00267F68(s8 index) {
+void mnuEnableTerminalTrackMode(s8 index) {
     mnuTerminalSetTrack(index, 1);
 }
 
@@ -833,7 +833,7 @@ void mnuReleaseTerminalWorkAndResumeField(s32 arg) {
         dspCloseChannel();
         evtReleaseResourcePairHandle((u32 *)((u8 *)work + 0x5C));
         func_003297C8(work->heapHandle);
-        D_00437858 = 2;
+        mnuTerminalTaskState = 2;
     }
     if (mnuCheckResourceTask() != 0) {
         mnuStopResourceTask();
@@ -870,7 +870,7 @@ void fldStopSceneTasks(void) {
 }
 
 s32 fldPollSceneState(void) {
-    s32 state = D_00437858;
+    s32 state = mnuTerminalTaskState;
     if (state == 1) {
         return 1;
     }
@@ -878,7 +878,7 @@ s32 fldPollSceneState(void) {
         return 0;
     }
     if (state == 2) {
-        D_00437858 = 0;
+        mnuTerminalTaskState = 0;
     }
     return 0;
 }
@@ -984,7 +984,7 @@ void mnuTerminalSelectSlot(s32 ctx, s32 index, MenuSlotState *state) {
     mnuTerminalConfigureEffects(ctx, state);
 }
 
-void func_00268B48(s32 context) {
+void mnuDrawTerminalSelectedSlots(s32 context) {
     MenuSlotState *state = (MenuSlotState *)context;
     EffectPair position = D_00437878[0];
     s32 *slot;
@@ -1346,7 +1346,7 @@ s64 evtDispatchSelectionAfterFieldFrameGate(s32 request) {
     }
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
-    func_00268B48(state);
+    mnuDrawTerminalSelectedSlots(state);
     return menuSetHandler((s32)dispatchState, 1, request);
 }
 
@@ -1443,7 +1443,7 @@ s64 func_0026A3F8(s32 request) {
     func_00268838(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
-    func_00268B48(state);
+    mnuDrawTerminalSelectedSlots(state);
     return menuSetHandler((s32)dispatchState, 1, request);
 }
 
@@ -1488,7 +1488,7 @@ s64 mnuInitializeSelectionDispatchWhenModeUnset(s32 request) {
     func_00268838(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
-    func_00268B48(state);
+    mnuDrawTerminalSelectedSlots(state);
     if (dispatchState->menuMode == 0) {
         func_0026A728(1, state);
     }
@@ -1510,7 +1510,7 @@ u32 evtSelectFinalVisualNode(void) {
     return 1;
 }
 
-s64 func_0026A900(s32 request) {
+s64 evtOpenTerminalFollowupPopupWhenIdle(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     s32 *panel = (s32 *)(state + 0x54);
     s64 result = func_002C4038(state + 8, panel, 0, request);
@@ -1607,7 +1607,7 @@ extern void mnuDispatchTransitionHostCallbacks(s32);
 
 extern void func_00268EC8(s32);
 
-extern void func_00268B48(s32);
+extern void mnuDrawTerminalSelectedSlots(s32);
 
 s64 func_0026AC90(s32 request) {
     s32 state = kwlnTaskGetUserValue();
@@ -1616,7 +1616,7 @@ s64 func_0026AC90(s32 request) {
     func_00268838(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
-    func_00268B48(state);
+    mnuDrawTerminalSelectedSlots(state);
     return menuSetHandler((s32)dispatchState, 1, request);
 }
 
@@ -1655,7 +1655,7 @@ s64 func_0026AEB0(s32 request) {
     func_00268838(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
-    func_00268B48(state);
+    mnuDrawTerminalSelectedSlots(state);
     return menuSetHandler((s32)dispatchState, 1, request);
 }
 
@@ -1705,7 +1705,7 @@ s64 mnuPrepareDispatchStateAndBindHandler(s32 request) {
     func_00268838(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
-    func_00268B48(state);
+    mnuDrawTerminalSelectedSlots(state);
     return menuSetHandler((s32)dispatchState, 1, request);
 }
 
@@ -1797,7 +1797,7 @@ s64 evtBDispatchSyncD2(s32 request) {
     if (dispatchState->stage != 3) {
         func_00268EC8(state);
     }
-    func_00268B48(state);
+    mnuDrawTerminalSelectedSlots(state);
     return menuSetHandler((s32)dispatchState, 1, request);
 }
 
@@ -1850,7 +1850,7 @@ s64 evtBDispatchSyncC(s32 request) {
 
     return menuSetHandler((s32)state, 2, request);
 }
-INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437858);
+INCLUDE_SDATA(const s32, "game/code_002665B0", mnuTerminalTaskState);
 
 INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437859);
 

@@ -218,7 +218,7 @@ extern void func_00341C78(u32 sound);
 
 extern s32 (*D_003C9928[])(s32, s32, void *);
 
-extern char D_004373C0[];
+extern char evtPictureTaskName[];
 extern void evtUpdatePictureWhenFlagged();
 extern void evtPictureReleaseTaskTextureAndState();
 extern u8 *evtAllocateContext();
@@ -235,11 +235,11 @@ typedef struct EvtTaskData {
 void evtCreateTask(s32 taskId, s32 value) {
     s32 taskData = (s32)evtAllocateContext();
     evtSetConvertedContextValue(taskData, value);
-    kwlnTaskCreate(D_004373C0, taskId, 1, 1, (s32)evtUpdatePictureWhenFlagged, (s32)evtPictureReleaseTaskTextureAndState, taskData);
+    kwlnTaskCreate(evtPictureTaskName, taskId, 1, 1, (s32)evtUpdatePictureWhenFlagged, (s32)evtPictureReleaseTaskTextureAndState, taskData);
 }
 
 extern s32 kwlnTaskCreate(char *name, s32 taskId, s32 arg2, s32 arg3, s32 update, s32 destroy, s32 data);
-extern char D_004373C0[];
+extern char evtPictureTaskName[];
 extern void evtUpdatePictureWhenFlagged();
 extern void evtPictureReleaseTaskTextureAndState();
 extern u8 *evtAllocateContext();
@@ -247,7 +247,7 @@ extern u8 *evtAllocateContext();
 void evtCreateTaskWithValue(s32 taskId, s32 value) {
     EvtTaskData *taskData = (EvtTaskData *)evtAllocateContext();
     taskData->value = value;
-    kwlnTaskCreate(D_004373C0, taskId, 1, 1, (s32)evtUpdatePictureWhenFlagged, (s32)evtPictureReleaseTaskTextureAndState, (s32)taskData);
+    kwlnTaskCreate(evtPictureTaskName, taskId, 1, 1, (s32)evtUpdatePictureWhenFlagged, (s32)evtPictureReleaseTaskTextureAndState, (s32)taskData);
 }
 
 void evtSetSkyOverlayEnabled(u32 enabled) {
@@ -302,10 +302,10 @@ void evtResetSkyTaskFlags(void) {
     evtSkyOverlayEnabled = 0;
 }
 
-extern char D_004373D0[];
+extern char evtSkyTaskName[];
 
 void evtDestroySkyTask(void) {
-    s32 task = func_00101740(D_004373D0);
+    s32 task = func_00101740(evtSkyTaskName);
     if (task != 0) {
         kwlnTaskDestroyWithHierarchy(task, 1);
     }
@@ -321,7 +321,7 @@ void evtCreateSkyTask(void) {
     fldSetSkyDrawState(0x80);
     func_00135588(0);
     fldSetFadeTarget(0, 1, 0);
-    kwlnTaskCreate(D_004373D0, 0x2B0E, 1, 1, (s32)evtUpdateSkyTask, (s32)evtResetSkyTaskFlags, 0);
+    kwlnTaskCreate(evtSkyTaskName, 0x2B0E, 1, 1, (s32)evtUpdateSkyTask, (s32)evtResetSkyTaskFlags, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00250010", evtUpdateFrameVariableTask);
@@ -2106,7 +2106,7 @@ void evtRefreshTaskData(s32 taskId, s32 key) {
             sdfTexReleaseReferenceViaHandler(data->effectHandle);
             data->effectHandle = 0;
         }
-        handle = func_0032C138(resource);
+        handle = sdfTexAcquireResourceTexture(resource);
         effSetCh72Id(handle);
         data->effectHandle = handle;
     }
@@ -2161,13 +2161,13 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
     return found;
 }
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004373C0);
+INCLUDE_SDATA(const s32, "game/code_00250010", evtPictureTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_00250010", evtSkyTransitionActive);
 
 INCLUDE_SDATA(const s32, "game/code_00250010", evtSkyOverlayEnabled);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004373D0);
+INCLUDE_SDATA(const s32, "game/code_00250010", evtSkyTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_00250010", D_004373E0);
 

@@ -342,7 +342,7 @@ f32 sdfGetSecondTextOverrideOrDefault(SdfTextParam *param) {
     return D_00438A4C;
 }
 
-void func_00332E50(u32 mode) {
+void sdfSetForcedAssetTextureMode(u32 mode) {
     sdfForcedAssetTextureMode = mode;
 }
 
@@ -366,7 +366,7 @@ void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
     sdfDestroyDevRequest(list);
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332F08);
+INCLUDE_ASM(const s32, "game/code_003325F8", sdfAppendResourceListItem);
 
 void sdfReduceResourceListCount(s32 listAddress, s32 newCount, s32 applyReduction) {
     s32 countCursor;

@@ -31,7 +31,7 @@ struct PcpScatterRes {
 
 extern void *func_00328D68(s32 size);
 
-extern u32 func_0032C138(u32 resId);
+extern u32 sdfTexAcquireResourceTexture(u32 resId);
 
 extern PcpScatterRes *effPcpScatterResCreate(u32 resId);
 
@@ -171,7 +171,7 @@ extern void *effScatterInstanceCreateB();
 
 extern void *effScatterInstanceCreateC();
 
-extern void *func_0017CE88();
+extern void *effPcpScatterCreatePlainInstance();
 
 typedef struct PcpScatterPlainInstance PcpScatterPlainInstance;
 
@@ -642,7 +642,7 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
     PcpScatterRes *res;
 
     res = func_00328D68(8);
-    res->resourceHandle = func_0032C138(resId);
+    res->resourceHandle = sdfTexAcquireResourceTexture(resId);
     res->refCount = 1;
     return res;
 }
@@ -1567,7 +1567,7 @@ struct PcpScatterPlainInstance {
 };
 
 /* Allocate particles after the scatter work (identity matrix), then assign randomized start delays. */
-void *func_0017CE88(src, resource)
+void *effPcpScatterCreatePlainInstance(src, resource)
     PcpScatterPlainParams *src;
     u32 resource;
 {
@@ -1612,14 +1612,14 @@ void func_0017D078(u64 table) {
 
     shared = effParamTableGetBlock(table, 0);
     local = effParamTableGetBlock(table, 1);
-    func_0017CE88(shared, local);
+    effPcpScatterCreatePlainInstance(shared, local);
 }
 
 PcpScatterPlainInstance *effCloneScatterWithSharedResource(PcpScatterPlainInstance *work)
 {
     PcpScatterPlainInstance *child;
 
-    child = func_0017CE88(&work->params, NULL);
+    child = effPcpScatterCreatePlainInstance(&work->params, NULL);
     effShareScatterResource(child->scatterObject, work->scatterObject);
     return child;
 }

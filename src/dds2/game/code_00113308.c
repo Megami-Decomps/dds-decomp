@@ -56,7 +56,7 @@ extern void effObjInnerCreate();
 
 extern void *func_00328D68(s32 size);
 
-extern u32 func_001119D0();
+extern u32 dds3CreateSlotResourceState();
 
 u32 dds3GetEffectDataHandle(EffectObject *object) {
     return object->data->handle;
@@ -457,7 +457,7 @@ s32 evtInitializeEffectObjectData(EffectObject *obj) {
     obj->data = func_00328D68(0x50);
     memset(obj->data, 0, 0x50);
     data = obj->data;
-    data->handle = func_001119D0(obj);
+    data->handle = dds3CreateSlotResourceState(obj);
     dds3SetObjectFlags(obj, 0x60);
     return 1;
 }

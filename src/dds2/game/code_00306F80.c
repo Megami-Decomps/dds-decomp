@@ -104,7 +104,7 @@ extern s32 effGetSlotWorkOrOverride();
 
 extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
 
-extern s32 func_00100400(void);
+extern s32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 
@@ -272,7 +272,7 @@ extern u8 *sdfResourceRetainAddress(u32);
 extern void sdfDecrementAllocationReferenceCount(u32);
 
 /* Return the address of entry `index` of the resource's 8-byte-stride offset table, or NULL when out of range. */
-u8 *func_003074F0(ItfGridResource *object, u32 index) {
+u8 *itfGetGridResourceEntryData(ItfGridResource *object, u32 index) {
     u8 *base;
     u8 *cursor;
     u8 *result;
@@ -508,7 +508,7 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     void *texture;
     sdfInitPacketList((s32)list);
     texture = sdfAllocPacketAligned(0x40);
-    func_0032DB30(kwlnFrameDrawPacketRecords + func_00100400() * 0x1F40, texture, 0);
+    func_0032DB30(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(list, texture);
     {
         u8 *surface = (u8 *)kwlnDrawSurfaces + (surfaceIndex << 5);
@@ -525,7 +525,7 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex)
     void *texture;
     sdfInitPacketList((s32)list);
     texture = sdfAllocPacketAligned(0x40);
-    func_0032DB78(kwlnFrameDrawPacketRecords + func_00100400() * 0x1F40, texture, 0);
+    func_0032DB78(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(list, texture);
     {
         u8 *surface = (u8 *)kwlnDrawSurfaces + (surfaceIndex << 5);

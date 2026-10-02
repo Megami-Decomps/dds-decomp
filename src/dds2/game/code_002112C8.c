@@ -279,7 +279,7 @@ typedef struct BattleSlotRecord {
     u8 pad10[0x1C4 - 0x10];
 } BattleSlotRecord;
 
-extern s32 func_001AA840();
+extern s32 btlReadUnitStatusMask();
 
 extern void *sdfAllocAndClearQuadwords(s32);
 
@@ -295,13 +295,13 @@ extern s32 mdlFlagTest(s32);
 
 extern s32 datGameState;
 
-extern s32 func_001AA700(void *);
+extern s32 btlReadCurrentUnitHp(void *);
 
-extern s32 func_001AA740(void *);
+extern s32 btlComputeSkillAdjustedMaxHp(void *);
 
-extern s32 func_001AA708(void *);
+extern s32 btlReadCurrentUnitMp(void *);
 
-extern s32 func_001AA758(void *);
+extern s32 btlComputeSkillAdjustedMaxMp(void *);
 
 extern void *btlAllocateIndexList(s32);
 
@@ -461,8 +461,8 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00211F38);
 
 s32 btlIsUnitAtOrBelowHealthRate(BtlUnit *unit, s32 multiplier) {
     u8 *stats = (u8 *)&unit->statBits;
-    s32 current = func_001AA700(stats);
-    s32 maximum = func_001AA740(stats);
+    s32 current = btlReadCurrentUnitHp(stats);
+    s32 maximum = btlComputeSkillAdjustedMaxHp(stats);
     if ((u32)(maximum * multiplier) < (u32)(current * 100)) {
         return 0;
     }
@@ -485,8 +485,8 @@ s32 btlHasUnitAtOrBelowHealthRate(s32 unused, s32 multiplier) {
     for (; unit != 0; unit = unit->nextActor) {
         if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
             u8 *stats = (u8 *)&unit->statBits;
-            s32 current = func_001AA700(stats);
-            s32 maximum = func_001AA740(stats);
+            s32 current = btlReadCurrentUnitHp(stats);
+            s32 maximum = btlComputeSkillAdjustedMaxHp(stats);
             if ((u32)(maximum * multiplier) >= (u32)(current * 100)) {
                 return 1;
             }
@@ -500,8 +500,8 @@ s32 btlHasUnitAtOrAboveHealthRate(s32 unused, s32 multiplier) {
     for (; unit != 0; unit = unit->nextActor) {
         if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
             u8 *stats = (u8 *)&unit->statBits;
-            s32 current = func_001AA700(stats);
-            s32 maximum = func_001AA740(stats);
+            s32 current = btlReadCurrentUnitHp(stats);
+            s32 maximum = btlComputeSkillAdjustedMaxHp(stats);
             if ((u32)(current * 100) >= (u32)(maximum * multiplier)) {
                 return 1;
             }
@@ -600,7 +600,7 @@ s32 btlIsGroup200CountAtMost(s32 unused, u32 limit) {
 
 /* Intersect a unit's stat mask with the requested condition bits. */
 s32 btlUnitHasActionMask(s32 actor, s32 mask) {
-    return (func_001AA840(&((BtlUnit *)actor)->statBits, mask) & mask) != 0;
+    return (btlReadUnitStatusMask(&((BtlUnit *)actor)->statBits, mask) & mask) != 0;
 }
 
 s32 btlAnyGroup400HasActionMask(s32 unused, s32 mask) {
@@ -634,7 +634,7 @@ s32 btlHasActorOrSlotMatchingActionQuery(s32 unused, u32 query) {
             if (!(record->flags & 2)) {
                 if (record->group == ((query >> 16) & 0x3F)) {
                     if ((query & 0xFFFF) == 0x7FFF) {
-                        return ((func_001AA840() & query) & 0xFFFF) != 0;
+                        return ((btlReadUnitStatusMask() & query) & 0xFFFF) != 0;
                     }
                     if ((record->actionMask & 0x7FFF & query) != 0) {
                         return 1;
@@ -930,8 +930,8 @@ s32 btlIsReadyWithoutTurns(void) {
 
 s32 btlIsUnitStatAtOrBelowRate(BtlUnit *unit, s32 percentage) {
     void *stats = &unit->statBits;
-    u32 current = func_001AA708(stats);
-    u32 scaledMaximum = func_001AA758(stats) * percentage;
+    u32 current = btlReadCurrentUnitMp(stats);
+    u32 scaledMaximum = btlComputeSkillAdjustedMaxMp(stats) * percentage;
     if (scaledMaximum < current * 100) {
         return 0;
     }
@@ -940,8 +940,8 @@ s32 btlIsUnitStatAtOrBelowRate(BtlUnit *unit, s32 percentage) {
 
 s32 btlUnitStatAtOrAboveRate(BtlUnit *unit, u32 percentage) {
     void *stats = &unit->statBits;
-    u32 current = func_001AA708(stats);
-    u32 maximum = func_001AA758(stats);
+    u32 current = btlReadCurrentUnitMp(stats);
+    u32 maximum = btlComputeSkillAdjustedMaxMp(stats);
     if (current * 100 < maximum * percentage) {
         return 0;
     }
@@ -950,8 +950,8 @@ s32 btlUnitStatAtOrAboveRate(BtlUnit *unit, u32 percentage) {
 
 s32 btlUnitStatAtMost(BtlUnit *unit, u32 limit) {
     void *stats = &unit->statBits;
-    u32 current = func_001AA708(stats);
-    func_001AA758(stats);
+    u32 current = btlReadCurrentUnitMp(stats);
+    btlComputeSkillAdjustedMaxMp(stats);
     if (limit < current) {
         return 0;
     }
@@ -960,8 +960,8 @@ s32 btlUnitStatAtMost(BtlUnit *unit, u32 limit) {
 
 s32 btlUnitStatAtLeast(BtlUnit *unit, u32 limit) {
     void *stats = &unit->statBits;
-    u32 current = func_001AA708(stats);
-    func_001AA758(stats);
+    u32 current = btlReadCurrentUnitMp(stats);
+    btlComputeSkillAdjustedMaxMp(stats);
     if (current < limit) {
         return 0;
     }
@@ -1603,8 +1603,8 @@ s32 btlSelectLowestHealthRateTarget(s32 task) {
         lowestIndex = 0x20;
         for (i = 0; i < count; i++) {
             u8 *stats = (u8 *)&((BtlUnit *)btlGetIndexListEntry(list, i))->statBits;
-            s32 current = func_001AA700(stats);
-            s32 percent = current * 100 / func_001AA740(stats);
+            s32 current = btlReadCurrentUnitHp(stats);
+            s32 percent = current * 100 / btlComputeSkillAdjustedMaxHp(stats);
 
             if (lowestPercent >= percent && current != 0) {
                 lowestPercent = percent;

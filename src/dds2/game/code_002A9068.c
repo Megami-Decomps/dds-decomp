@@ -1,18 +1,18 @@
 #include "common.h"
 
-extern u32 D_00437AE8;
+extern u32 mnuMovieShutdownCounter;
 
 extern s32 kwlnFadeIsActive(void);
 
 extern s32 kwlnTaskGetUserValue();
 
-extern char D_00437B78[]; /* "camp" */
+extern char mnuCampInputTaskName[]; /* "camp" */
 
-extern char D_0042AA08[]; /* "camp_draw" */
+extern char mnuCampDrawTaskName[]; /* "camp_draw" */
 
-extern char D_0042AA18[]; /* "camp_update" */
+extern char mnuCampOwnerTaskName[]; /* "camp_update" */
 
-extern s8 D_00437B72;
+extern s8 mnuCampTaskState;
 
 extern s32 datGameState;
 
@@ -725,7 +725,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     movReleaseTitleEffects(work);
     func_00303D58(((CampVisualWork *)work)->menuResource);
     func_003297C8(((CampVisualWork *)work)->allocationHandle);
-    D_00437B72 = 2;
+    mnuCampTaskState = 2;
     func_003425D8();
 }
 
@@ -776,32 +776,32 @@ s32 mnuStaffCampCancelCheck(s32 menu) {
     return result;
 }
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042AA08);
+INCLUDE_RODATA(const s32, "game/code_002A9068", mnuCampDrawTaskName);
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042AA18);
+INCLUDE_RODATA(const s32, "game/code_002A9068", mnuCampOwnerTaskName);
 
 void mnuCreateCampTasks(void) {
     s32 work;
     s32 draw;
 
     work = (s32)mnuCreateStaffMenuWork();
-    kwlnTaskCreate(D_00437B78, 0x3F2, 1, 0, func_002AAF70, 0, work);
-    draw = kwlnTaskCreate(D_0042AA08, 0x2B07, 1, 0, func_002AB0E0, 0, work);
-    kwlnTaskCreate(D_0042AA18, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, work);
+    kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, func_002AAF70, 0, work);
+    draw = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, func_002AB0E0, 0, work);
+    kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, work);
     func_00101968(draw, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, func_002AA278, 0, work));
     func_00101968(draw, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, work));
     kwlnFadeOutStart(0, 0, 0, 0xF);
-    D_00437B72 = 1;
+    mnuCampTaskState = 1;
 }
 
 void mnuDestroyCampTasks(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_00437B78, 0);
-    kwlnTaskDestroyWithHierarchyByName(D_0042AA08, 0);
-    kwlnTaskDestroyWithHierarchyByName(D_0042AA18, 0);
+    kwlnTaskDestroyWithHierarchyByName(mnuCampInputTaskName, 0);
+    kwlnTaskDestroyWithHierarchyByName(mnuCampDrawTaskName, 0);
+    kwlnTaskDestroyWithHierarchyByName(mnuCampOwnerTaskName, 0);
 }
 
 s32 mnuAcknowledgeCampState(void) {
-    s8 state = D_00437B72;
+    s8 state = mnuCampTaskState;
     if (state == 1) {
         return 1;
     }
@@ -809,7 +809,7 @@ s32 mnuAcknowledgeCampState(void) {
         return 0;
     }
     if (state == 2) {
-        D_00437B72 = 0;
+        mnuCampTaskState = 0;
     }
     return 0;
 }
@@ -952,7 +952,7 @@ INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042AC40);
 
 INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042AC70);
 
-INCLUDE_SDATA(const s32, "game/code_002A9068", D_00437B78);
+INCLUDE_SDATA(const s32, "game/code_002A9068", mnuCampInputTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_002A9068", D_00437B80);
 

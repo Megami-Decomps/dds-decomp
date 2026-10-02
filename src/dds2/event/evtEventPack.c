@@ -49,7 +49,7 @@ extern char D_00453C50[];
 extern s32 func_002C80C8(char *path);
 
 /* Resolve the event's script path ("/event/eNNN/eNNN/scr/eNNN.be", grouped by tens) and start loading it. */
-void func_0025D758(EvtPackLoadState *state) {
+void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     s32 eventId;
     s32 directoryId;
     s32 fileHandle;
@@ -65,7 +65,25 @@ void func_0025D758(EvtPackLoadState *state) {
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D7E0);
 
-INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D8C8);
+extern void func_0025D7E0(EvtPackLoadState *state);
+
+s32 func_0025D8C8(void) {
+    EvtPackLoadState *state = (EvtPackLoadState *)kwlnTaskGetUserValue();
+
+    switch (state->loaded) {
+    default:
+        if (state->loaded < 2) {
+            if (state->loaded == 0) {
+                evtBeginEventPackScriptLoad(state);
+            }
+        }
+        break;
+    case 1:
+        func_0025D7E0(state);
+        break;
+    }
+    return 0;
+}
 
 extern void fileWaitIdle(void);
 extern void effInitCh72Id(void);

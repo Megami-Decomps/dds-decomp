@@ -498,11 +498,11 @@ EffBossWork *effBossCloneWithGroups(EffBossWork *src) {
     return work;
 }
 
-void func_00185B78(void *work) {
+void effBossReleaseWorkCallback(void *work) {
     effBossDestroy(work);
 }
 
-void func_00185B90(void *work) {
+void effBossUpdateGeometryCallback(void *work) {
     func_00184BC8(work);
 }
 

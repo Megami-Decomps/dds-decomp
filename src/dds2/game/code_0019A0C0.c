@@ -134,7 +134,7 @@ EffChanWork *effChanWorkCreate(EffChanSource *src) {
     return work;
 }
 
-void func_0019A270(EffChanWork *work) {
+void effDestroyChannelWork(EffChanWork *work) {
     EffChanRecord *record;
     u32 i = 0;
     u32 count;

@@ -8,7 +8,7 @@ extern s32 func_0026CD50(u32);
 
 extern s32 evtGetMessageWindowControlState(void);
 
-extern u32 func_00343ED0(u32, u32 *, u32);
+extern u32 sdfReadNamedResource(u32, u32 *, u32);
 
 extern s32 dspWindowHandle;
 
@@ -20,7 +20,7 @@ extern s32 D_00437888;
 
 extern s8 dspCapturedSoundMode;
 
-extern s8 D_0043788C;
+extern s8 evtMessageWindowOption;
 
 extern s8 dspWindowStateGate;
 
@@ -62,11 +62,11 @@ void evtResetDrawTransitions(void) {
     kwlnDrawSetOffsetTransition(0, 0, 0);
     kwlnDrawSetupC70B(0);
     kwlnDrawEnableCd0(0);
-    func_00196FE8();
-    func_00197070();
-    func_00197388();
-    func_00197128();
-    func_00197320();
+    effDisableRectangleBlur();
+    effDisableTexturedBlur();
+    effDisableTexturedSquare();
+    effDisableFilterBlur();
+    effDisableColorRectangle();
 }
 
 void evtShutdownStageAndResetDrawTransitions(void) {
@@ -164,7 +164,7 @@ void evtRandomSwapBytes(u8 *buffer, u32 length, s32 count) {
 void evtLoadResourcePair(u32 resource, EvtResourcePair *record) {
     u32 value;
 
-    value = func_00343ED0(resource, &record->input, 0);
+    value = sdfReadNamedResource(resource, &record->input, 0);
     record->handle = value;
 }
 
@@ -176,7 +176,7 @@ extern s32 itfMesCreateWindow(void);
 s32 evtCreateMessageWindowIfMissing(void) {
     if (dspWindowHandle < 0) {
         dspWindowHandle = itfMesCreateWindow();
-        func_001A4988(dspWindowHandle, 2, 0);
+        itfMesSetWindowPageAndRefresh(dspWindowHandle, 2, 0);
         return 1;
     }
     return 0;
@@ -186,7 +186,7 @@ s32 func_0026C580(s32 value) {
     if (dspWindowHandle < 0) {
         return 0;
     }
-    func_001A4988(dspWindowHandle, 0, value);
+    itfMesSetWindowPageAndRefresh(dspWindowHandle, 0, value);
     return 1;
 }
 
@@ -215,12 +215,12 @@ s32 evtCaptureMessageWindowSoundMode(s32 value) {
 
 void evtSetMessageWindowOptionWhenOpen(s32 value) {
     if (dspWindowHandle >= 0) {
-        D_0043788C = value;
+        evtMessageWindowOption = value;
     }
 }
 
 s8 evtGetMessageWindowOption(void) {
-    return D_0043788C;
+    return evtMessageWindowOption;
 }
 
 s32 sndGetActiveMode(void) {
@@ -299,7 +299,7 @@ void func_0026C900(void) {
 }
 
 void func_0026C918(s32 first, s32 second) {
-    func_001A4858(dspWindowHandle, first, second);
+    itfMesCopyStringToWindowTableSlot(dspWindowHandle, first, second);
 }
 
 s8 dspGetWindowStateGate(void) {
@@ -376,14 +376,14 @@ s32 evtActivateCurrentFlag(void) {
     return 1;
 }
 
-extern s32 func_0032C138(u32);
+extern s32 sdfTexAcquireResourceTexture(u32);
 s32 evtLoadTextureFromResourcePath(u32 resource) {
     u32 buffer[2];
     u32 handle;
     s32 result;
 
-    handle = func_00343ED0(resource, &buffer[0], (u32)&buffer[1]);
-    result = func_0032C138(buffer[0]);
+    handle = sdfReadNamedResource(resource, &buffer[0], (u32)&buffer[1]);
+    result = sdfTexAcquireResourceTexture(buffer[0]);
     func_003297C8(handle);
     return result;
 }
@@ -553,7 +553,7 @@ INCLUDE_SDATA(const s32, "game/code_0026C1D0", dspWindowStateGate);
 
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", D_00437888);
 
-INCLUDE_SDATA(const s32, "game/code_0026C1D0", D_0043788C);
+INCLUDE_SDATA(const s32, "game/code_0026C1D0", evtMessageWindowOption);
 
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", dspCapturedSoundMode);
 

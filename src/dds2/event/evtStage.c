@@ -43,7 +43,7 @@ typedef struct StageSecondaryObject {
 extern void dds3RemoveWorldObjectNode(s32 node);
 
 /* Detach every world node from the secondary object's chain. */
-void func_0023A9E0(void) {
+void evtDrainSecondaryWorldNodes(void) {
     StageSecondaryObject *object = (StageSecondaryObject *)dds3GetWorldSecondaryObject();
     StageNodeParent *parent;
 
@@ -96,7 +96,7 @@ void evtClearWorldSlotStatusFlag(void) {
 extern void evtScaleValueByMultiplier(s32 slotData, f32 multiplier);
 
 /* Scale the slot data by a multiplier clamped to [0, 1]. */
-void func_0023AE08(f32 multiplier) {
+void evtScaleSlotByClampedMultiplier(f32 multiplier) {
     s32 slotData;
 
     slotData = dds3GetSlot1Data();
@@ -111,7 +111,7 @@ void func_0023AE08(f32 multiplier) {
     }
 }
 
-void func_0023AE70(s32 unused, void *data) {
+void evtSetWorldSlotValue(s32 unused, void *data) {
     s32 slotData;
 
     slotData = dds3GetSlot1Data();

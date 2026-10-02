@@ -4,7 +4,7 @@
 extern void *kwlnTaskGetUserValue(void);
 
 extern s32 datGameState;
-extern char D_003ADB20[]; /* "EventViewer" */
+extern char evtViewerTaskName[]; /* "EventViewer" */
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 s32 evtViewerHasUpdateFlag(s32 viewerAddr);
 void func_00232720(void);
@@ -925,18 +925,18 @@ void evtViewerCreateTaskWithSky(void) {
     viewer = sdfResourceRetainAddress(viewerHandle);
     memset(viewer, 0, 0x2490);
     *viewer = viewerHandle;
-    viewerTask = kwlnTaskCreate(D_003ADB20, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, func_00232D08, viewer);
+    viewerTask = kwlnTaskCreate(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, func_00232D08, viewer);
     func_00101A80((s32)viewerTask, evtCreateSkyTask());
     func_00232D48(viewer);
 }
 
 void evtEventViewerDestroyTask(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_003ADB20, 1);
+    kwlnTaskDestroyWithHierarchyByName(evtViewerTaskName, 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232E20);
 
-INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003ADB20);
+INCLUDE_RODATA(const s32, "game/code_0022CBA0", evtViewerTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBE78);
 

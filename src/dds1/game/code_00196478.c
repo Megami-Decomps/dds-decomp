@@ -1,10 +1,10 @@
 #include "common.h"
 
-extern s32 func_002D3288(u32);
+extern s32 sdfTexAcquireResourceTexture(u32);
 extern s32 dds3AdminGetActiveMode(void);
 extern void dds3AdminSetControlFlag(void);
 extern void func_003003F0(const char *);
-extern u64 func_002EB028(const char *, u32 *, u64);
+extern u64 sdfReadNamedResource(const char *, u32 *, u64);
 
 extern u32 itfFontTestScriptTask;
 extern s64 kwlnTaskGetRegisteredState(u32);
@@ -25,7 +25,7 @@ extern void frFontClearFlagBits(u64 value);
 
 extern void frFontSetChainFlag(u64 glyph, u64 value);
 
-extern s32 D_003BB168;
+extern s32 frFontDefaultGlyphCellSize;
 
 extern u32 D_003BB170;
 
@@ -247,7 +247,7 @@ void itfSetTextDrawLimit(s32 limit) {
     if (limit < 1) {
         limit = 0x14;
     }
-    D_003BB168 = limit;
+    frFontDefaultGlyphCellSize = limit;
 }
 
 u64 frFontBuildColoredGlyphWithSharedFlags(u64 x, u64 y, s32 depth, s32 alt, u64 measureFlag, u64 entryFlag, u64 colors, u64 source) {
@@ -487,9 +487,9 @@ u32 itfReleaseMemNodeBuffer(u8 *payload) {
 
 void itfLoadBackgroundSprite(void) {
     u32 resource;
-    u64 buffer = func_002EB028("/sprite/bg00.tmx", &resource, 0);
+    u64 buffer = sdfReadNamedResource("/sprite/bg00.tmx", &resource, 0);
 
-    itfBackgroundSpriteTexture = func_002D3288(resource);
+    itfBackgroundSpriteTexture = sdfTexAcquireResourceTexture(resource);
     func_002D0918(buffer);
 }
 
@@ -701,8 +701,8 @@ u64 itfLoadTextureFromAsset(const char *path) {
     u64 textureHandle;
     u32 assetInfo[4];
 
-    fileAllocation = func_002EB028(path, assetInfo, 0);
-    textureHandle = func_002D3288(assetInfo[0]);
+    fileAllocation = sdfReadNamedResource(path, assetInfo, 0);
+    textureHandle = sdfTexAcquireResourceTexture(assetInfo[0]);
     func_002D0918(fileAllocation);
     return textureHandle;
 }

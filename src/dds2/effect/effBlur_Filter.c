@@ -183,7 +183,7 @@ void effBlurSecondUpdateSlotRect(EffBlurScaleWork *work, EffBlurScaleSlot *slot)
 }
 
 /* Reset a slot for a new burst: zero phase and angle, then copy the colour, the two spare fields and the centre from the work parameters. */
-void func_0018EFE0(EffBlurScaleWork *work, EffBlurScaleSlot *slot) {
+void effBlurResetScaleSlot(EffBlurScaleWork *work, EffBlurScaleSlot *slot) {
     EffBlurQuad *quad = &slot->quad;
 
     slot->phase = 0.0f;

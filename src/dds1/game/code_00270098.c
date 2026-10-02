@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u8 D_0037B888[];
+extern u8 mnuMovieDrawContext[];
 
 extern char D_003B1168[]; /* "staffProc" */
 
@@ -52,11 +52,11 @@ extern s32 sdfCreateResetPacketList(void);
 
 extern void sdfCreatePacketA(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern s32 D_003BC630;
+extern s32 mnuMovieShutdownCounter;
 
-extern u16 D_003BA72C;
+extern u16 mnuMovieTaskState;
 
-extern char D_003B1AC8[];
+extern char mnuMovieViewerTaskName[];
 
 typedef struct MovieListNode {
     struct MovieListNode *next;
@@ -88,7 +88,7 @@ extern s32 mnuMovieViewer();
 
 extern char D_003B1A78[]; /* "mnuMovieDraw" */
 
-extern u16 D_003BA72C;
+extern u16 mnuMovieTaskState;
 
 extern char D_003B1168[];
 
@@ -101,7 +101,7 @@ s32 func_00270088(void);
 void mnuStopMovieDrawTask(void);
 
 s32 mnuSetFrameDivisor(void) {
-    func_002EC5E0(0x3c / D_003BA72C);
+    func_002EC5E0(0x3c / mnuMovieTaskState);
     return 0;
 }
 
@@ -115,13 +115,13 @@ u32 mnuScriptRequestMovieByIndex(void) {
 
     movieIndex = scrReadIntParameter(0);
     func_0026FFF8(movieIndex);
-    D_003BC630 = 0;
+    mnuMovieShutdownCounter = 0;
     return 1;
 }
 
 u32 mnuScriptStopMovieAndResetDraw(void) {
     mnuStopMovieDrawTask();
-    D_003BC630 = 0;
+    mnuMovieShutdownCounter = 0;
     kwlnDrawEnableDc8(0);
     return 1;
 }
@@ -141,20 +141,20 @@ extern void scrSetIntegerReturnValue(s32);
 extern s8 D_00324530[];
 
 s32 mnuUpdateMovieDrawShutdownCountdown(void) {
-    if (D_003BC630 == 0 && scrCommandIsProcessControlFlagClear() == 1 && D_00324530[0] < 0) {
-        D_003BC630 = 1;
+    if (mnuMovieShutdownCounter == 0 && scrCommandIsProcessControlFlagClear() == 1 && D_00324530[0] < 0) {
+        mnuMovieShutdownCounter = 1;
         kwlnDrawSetDc8Second(0x44);
         kwlnDrawSetDc8First(0x80000000);
         kwlnDrawSetupDc8(0x1E);
         itfPanelReleaseHold();
     }
-    if (D_003BC630 > 0) {
-        if (D_003BC630 == 0x1E) {
+    if (mnuMovieShutdownCounter > 0) {
+        if (mnuMovieShutdownCounter == 0x1E) {
             mnuStopMovieDrawTask();
             scrSetIntegerReturnValue(0);
             return 1;
         }
-        D_003BC630 = D_003BC630 + 1;
+        mnuMovieShutdownCounter = mnuMovieShutdownCounter + 1;
     }
     scrSetIntegerReturnValue(func_00270068() == 0);
     return 1;
@@ -241,7 +241,7 @@ void mnuDrawMovieProgressCounter(void) {
     if (func_00270068() == 0) {
         list = D_003DC570[0];
         sdfAppendPacket(list, func_0011D3E8(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
-        sdfAppendPacket(list, sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", ((MovieStatus *)D_0037B888)->current, ((MovieStatus *)D_0037B888)->total));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", ((MovieStatus *)mnuMovieDrawContext)->current, ((MovieStatus *)mnuMovieDrawContext)->total));
     }
 }
 
@@ -249,11 +249,11 @@ INCLUDE_ASM(const s32, "game/code_00270098", mnuMovieViewer);
 
 void mnuCreateMovieViewerTask(void) {
     func_002702A0();
-    mnuMovieList.task = kwlnTaskCreate(D_003B1AC8, 0x2b02, 1, 0, mnuMovieViewer, 0, 0);
+    mnuMovieList.task = kwlnTaskCreate(mnuMovieViewerTaskName, 0x2b02, 1, 0, mnuMovieViewer, 0, 0);
 }
 
 void mnuDestroyMovieViewerTask(void) {
-    s32 task = kwlnTaskGetTaskByName(D_003B1AC8);
+    s32 task = kwlnTaskGetTaskByName(mnuMovieViewerTaskName);
     if (task != 0) {
         kwlnTaskDestroyWithHierarchy(task, 0);
         mnuMovieList.task = 0;
@@ -269,7 +269,7 @@ void mnuMarkMovieDrawValuesPending(void) {
 
 void mnuBindMovieDrawValueSources(void) {
     mnuMovieDrawSources.wordSource = 0x10002010;
-    mnuMovieDrawSources.blockSource = (u32)D_0037B888;
+    mnuMovieDrawSources.blockSource = (u32)mnuMovieDrawContext;
     mnuMarkMovieDrawValuesPending();
 }
 
@@ -359,7 +359,7 @@ s32 mnuUpdateIpuRegisterViewer(void) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00270098", D_003B1AC8);
+INCLUDE_RODATA(const s32, "game/code_00270098", mnuMovieViewerTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_00270098", D_003B1AD8);
 
@@ -505,7 +505,7 @@ INCLUDE_RODATA(const s32, "game/code_00270098", D_003B2000);
 
 INCLUDE_RODATA(const s32, "game/code_00270098", D_003B2010);
 
-INCLUDE_SDATA(const s32, "game/code_00270098", D_003BC630);
+INCLUDE_SDATA(const s32, "game/code_00270098", mnuMovieShutdownCounter);
 
 INCLUDE_SDATA(const s32, "game/code_00270098", D_003BC638);
 

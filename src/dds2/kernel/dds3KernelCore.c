@@ -48,7 +48,7 @@ extern s32 kwlnTaskIsRegistered(KwlnTask* target);
 
 extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 delayTicks);
 
-extern void func_001019F0(KwlnTask* task);
+extern void kwlnUnlinkListNode(KwlnTask* task);
 
 extern void sdfReleaseChipBlock(void* ptr);
 
@@ -101,7 +101,7 @@ void kwlnTaskFinalizeDestroy(KwlnTask* task)
         task->destroy(task);
     }
     task->flags &= ~KWLN_TASK_STATE_MASK;
-    func_001019F0(task);
+    kwlnUnlinkListNode(task);
     sdfReleaseChipBlock(task);
 }
 

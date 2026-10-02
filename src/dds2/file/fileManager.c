@@ -89,7 +89,7 @@ extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 
 /* Clear the node from every request slot and unlink it from the queue. */
-void func_002C7E28(FileNode *node) {
+void fileManCancelRequest(FileNode *node) {
     FileManWork *work = &fileManagerWork;
     FileNode *prev;
     FileNode *cur;

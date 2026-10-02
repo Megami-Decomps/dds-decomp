@@ -130,7 +130,7 @@ INCLUDE_ASM(const s32, "sdf/sdfTex", func_002D2FB0);
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_002D30C8);
 
 /* Process a resource address with packet variant zero. */
-void func_002D3288(void *resourceAddress) {
+void sdfTexAcquireResourceTexture(void *resourceAddress) {
     func_002D30C8(resourceAddress, 0);
 }
 

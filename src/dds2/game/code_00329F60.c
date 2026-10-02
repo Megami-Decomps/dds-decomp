@@ -71,7 +71,7 @@ extern SdfSemaObj sdfTextureQueueWork;
 
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 
-extern s8 D_004389F0[2];
+extern s8 sdfBufferSlotIndices[2];
 
 extern volatile s8 sdfBusyBufferIndex;
 
@@ -92,21 +92,21 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_00329F78);
 /* Switch both references off the finished double-buffer slot before
  * publishing the slot currently in use. */
 void sdfSwapBufferSlots(s32 oldBuffer, s32 nextBuffer) {
-    if (D_004389F0[0] == oldBuffer) {
-        D_004389F0[0] = oldBuffer ^ 1;
+    if (sdfBufferSlotIndices[0] == oldBuffer) {
+        sdfBufferSlotIndices[0] = oldBuffer ^ 1;
     }
-    if (D_004389F0[1] == oldBuffer) {
-        D_004389F0[1] = oldBuffer ^ 1;
+    if (sdfBufferSlotIndices[1] == oldBuffer) {
+        sdfBufferSlotIndices[1] = oldBuffer ^ 1;
     }
     sdfBusyBufferIndex = nextBuffer;
 }
 
 void sdfSetBufferSlot(s32 singleBuffer, s32 value, s32 index) {
     if (singleBuffer == 0) {
-        D_004389F0[0] = value;
-        D_004389F0[1] = value;
+        sdfBufferSlotIndices[0] = value;
+        sdfBufferSlotIndices[1] = value;
     } else {
-        D_004389F0[index] = value;
+        sdfBufferSlotIndices[index] = value;
     }
     sdfBusyBufferIndex = -1;
 }
@@ -593,7 +593,7 @@ INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389E8);
 
 INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389EC);
 
-INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389F0);
+INCLUDE_SDATA(const s32, "game/code_00329F60", sdfBufferSlotIndices);
 
 INCLUDE_SDATA(const s32, "game/code_00329F60", sdfBusyBufferIndex);
 

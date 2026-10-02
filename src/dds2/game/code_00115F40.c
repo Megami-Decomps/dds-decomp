@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u32 func_001119D0(u32);
+extern u32 dds3CreateSlotResourceState(u32);
 
 extern u32 func_00328D68(u32);
 
@@ -111,7 +111,7 @@ u32 dds3InitializeResourceOwner(WorldResourceOwner *object) {
     effObjInnerCreate();
     resource = (u32 *)func_00328D68(0x10);
     object->resource = resource;
-    handle = func_001119D0((u32)object);
+    handle = dds3CreateSlotResourceState((u32)object);
     *resource = handle;
     return 1;
 }

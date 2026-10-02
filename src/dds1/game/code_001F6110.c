@@ -13,7 +13,7 @@ extern s32 D_00360348[];
 extern s32 D_0035FFE0[];
 extern s32 D_003BB6B8;
 extern s32 D_003BD854;
-extern s32 func_002EB028(s32, u32 *, s32);
+extern s32 sdfReadNamedResource(s32, u32 *, s32);
 extern void btlCmdSimpleB(s32, u16);
 extern void btlCmdSimpleA(s32, u16);
 extern void btlCmdSimpleE(s32, u16);
@@ -98,8 +98,8 @@ typedef struct BtlVec3 {
 
 extern f32 bfWaitReadArgFloat(s32);
 
-extern s32 func_001A17F8(void *);
-extern s32 func_001A1838(void *);
+extern s32 btlReadCurrentUnitHp(void *);
+extern s32 btlComputeSkillAdjustedMaxHp(void *);
 
 extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 extern void effMiscQuaternionToMatrixVU(void);
@@ -785,7 +785,7 @@ void btlDrawButtonIcon(BtnSurface *surface, s32 x, s32 y, s32 topLeftColor, s32 
 
 void btlOpenButtonIconResource(void) {
     btlBossDebugPrintf((s32)"btl:[%s]\n", D_003BB6B8);
-    D_003BD854 = func_002EB028(D_003BB6B8, &btlButtonIconTexture, 0);
+    D_003BD854 = sdfReadNamedResource(D_003BB6B8, &btlButtonIconTexture, 0);
 }
 
 /* Cache and later release the loaded battle resource in battle state. */
@@ -1611,8 +1611,8 @@ u32 btlCmdCheckHpPercent(void) {
     while (unit != NULL) {
         if ((unit->flags & 1) && (unit->flags & mask) && !(unit->flags & 0x20) && unit->identity == id) {
             u8 *stats = (u8 *)unit + 0x120;
-            s32 current = func_001A17F8(stats);
-            s32 maximum = func_001A1838(stats);
+            s32 current = btlReadCurrentUnitHp(stats);
+            s32 maximum = btlComputeSkillAdjustedMaxHp(stats);
             if (!((u32)(maximum * percent) < (u32)(current * 100))) {
                 scrSetIntegerReturnValue(1);
                 return 1;
@@ -2490,12 +2490,12 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) 
         sdfTexReleaseReferenceViaHandler(handle);
         resource->handle = 0;
     }
-    buffer = func_002EB028(name, &loaded, 0);
+    buffer = sdfReadNamedResource(name, &loaded, 0);
     btlReplaceResourceHandle(resource, loaded);
     func_002D0918(buffer);
 }
 
-extern s32 func_002D3288(s32);
+extern s32 sdfTexAcquireResourceTexture(s32);
 
 void btlReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) {
     s32 handle = resource->handle;
@@ -2503,7 +2503,7 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) {
         sdfTexReleaseReferenceViaHandler(handle);
         resource->handle = 0;
     }
-    resource->handle = func_002D3288(name);
+    resource->handle = sdfTexAcquireResourceTexture(name);
 }
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FC160);

@@ -79,7 +79,7 @@ extern void *sdfCreateFormattedSifCommand(s32 x, s32 y, s32 flags, s32 mode, con
 extern void sdfAppendPacket(void *list, void *packet);
 extern const char D_00412778[]; /* "FLAG  : 0x%08X" */
 
-u32 func_0010F490(void *object, s32 x, s32 y, void *list) {
+u32 dds3DrawObjectFlagDiagnostic(void *object, s32 x, s32 y, void *list) {
     void *handle;
     void *command;
 
@@ -129,7 +129,7 @@ s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
     width = func_0010F190(node, 3, 0xA, list) + 0xB;
     if (node[0xF] < 0xA) {
         if (node[0xF] >= 4) {
-            width += func_0010F490(node, 3, width, list);
+            width += dds3DrawObjectFlagDiagnostic(node, 3, width, list);
         }
     }
     spriteList = sdfAllocPacketAligned(0x20);

@@ -254,7 +254,7 @@ void effMagatuhiReleaseWideWorkResources(EffMagatuhiWideSecond *work) {
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192470);
 
 extern void *effMathGetSlotAt(void *slots, s32 index);
-extern void func_00195BE0(void *slots, s32 index, void *out);
+extern void effMathStepBezierSlot(void *slots, s32 index, void *out);
 extern void func_00190DE0(void *owner);
 extern void func_00192470(void *work, s32 index);
 extern void func_00191450(void *valueWork, s32 index, void *out);
@@ -308,9 +308,9 @@ void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiCallback *arg) {
             span = duration - *delays;
         }
         t = 0.0f;
-        func_00195BE0(work->mathResource, i, from);
+        effMathStepBezierSlot(work->mathResource, i, from);
         slot->scale = slot->base * (f32)*delays;
-        func_00195BE0(work->mathResource, i, to);
+        effMathStepBezierSlot(work->mathResource, i, to);
         step = 1.0f / (f32)span;
         for (j = 0; j < span; j++) {
             VU0_LOAD_VF(vf10, from);

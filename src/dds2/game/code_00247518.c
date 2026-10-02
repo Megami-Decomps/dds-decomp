@@ -154,7 +154,7 @@ typedef struct EvtViewEntry {
 
 u16 evtViewerPopHistory(EventViewerState *viewer);
 
-extern char D_004230D0[]; /* "EventViewer" */
+extern char evtViewerTaskName[]; /* "EventViewer" */
 
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
@@ -1017,18 +1017,18 @@ void evtViewerCreateTaskWithSky(void) {
     viewer = sdfResourceRetainAddress(viewerHandle);
     memset(viewer, 0, 0x24BC);
     *viewer = viewerHandle;
-    viewerTask = kwlnTaskCreate(D_004230D0, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, func_0024DAA0, viewer);
+    viewerTask = kwlnTaskCreate(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, func_0024DAA0, viewer);
     func_00101968((s32)viewerTask, evtCreateSkyTask());
     func_0024DAE0(viewer);
 }
 
 void evtEventViewerDestroyTask(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_004230D0, 1);
+    kwlnTaskDestroyWithHierarchyByName(evtViewerTaskName, 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024DBB8);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_004230D0);
+INCLUDE_RODATA(const s32, "game/code_00247518", evtViewerTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_00247518", D_004372B0);
 

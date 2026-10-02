@@ -29,9 +29,9 @@ extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 
 extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
-extern u32 func_00343ED0(const char *, void *, s32);
+extern u32 sdfReadNamedResource(const char *, void *, s32);
 
-extern u32 func_0032C138(u32);
+extern u32 sdfTexAcquireResourceTexture(u32);
 
 struct SdfRing;
 extern struct SdfRing *sdfCreateLinkedRequestRing(s16, s16);
@@ -194,10 +194,10 @@ INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030EF90);
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030F038);
 
 s32 fldLoadMapResource(const char *name, MapResource *record) {
-    u32 handle = func_00343ED0(name, &record->descriptor, 0);
+    u32 handle = sdfReadNamedResource(name, &record->descriptor, 0);
     u32 descriptor = record->descriptor;
     record->handle = handle;
-    record->image = func_0032C138(descriptor);
+    record->image = sdfTexAcquireResourceTexture(descriptor);
     if (record->handle != 0) {
         sdfQueueNonzeroResourceId((void *)record->handle);
         record->handle = 0;

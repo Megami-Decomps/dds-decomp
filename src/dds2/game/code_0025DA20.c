@@ -144,10 +144,10 @@ extern void frFontSetChildColors(s32, u32);
 extern s32 func_0019D550(s32, s32, u32);
 
 extern void evtReleaseEventPackResources(void);
-extern f32 D_00453CB0[];
-extern f32 D_00453CA0[];
-extern f32 D_00453C90[];
-extern s32 D_004377F0;
+extern f32 mnuShopSavedLastTransformVector[];
+extern f32 mnuShopSavedMiddleTransformVector[];
+extern f32 mnuShopSavedFirstTransformVector[];
+extern s32 mnuShopRestoreMiddleVector;
 extern u8 *effCreateStatusBatch(s32 kind);
 extern s32 effDestroyPackedBatch(s32);
 
@@ -751,33 +751,33 @@ void mnuShopSavePrimaryTransform(u8 *scene) {
     s32 i;
     f32 *coordinates = ((CampScene *)scene)->transform;
     for (i = 0; i < 4; i++) {
-        D_00453CB0[i] = coordinates[i + 8];
-        D_00453C90[i] = coordinates[i];
+        mnuShopSavedLastTransformVector[i] = coordinates[i + 8];
+        mnuShopSavedFirstTransformVector[i] = coordinates[i];
     }
-    D_004377F0 = 0;
+    mnuShopRestoreMiddleVector = 0;
 }
 
 void mnuShopSaveFullTransform(u8 *scene) {
     s32 i;
     f32 *coordinates = ((CampScene *)scene)->transform;
     for (i = 0; i < 4; i++) {
-        D_00453CB0[i] = coordinates[i + 8];
-        D_00453CA0[i] = coordinates[i + 4];
-        D_00453C90[i] = coordinates[i];
+        mnuShopSavedLastTransformVector[i] = coordinates[i + 8];
+        mnuShopSavedMiddleTransformVector[i] = coordinates[i + 4];
+        mnuShopSavedFirstTransformVector[i] = coordinates[i];
     }
-    D_004377F0 = 1;
+    mnuShopRestoreMiddleVector = 1;
 }
 
 void mnuShopRestoreTransform(u8 *scene) {
     s32 i;
     f32 *coordinates = ((CampScene *)scene)->transform;
-    s32 useMiddle = D_004377F0;
+    s32 useMiddle = mnuShopRestoreMiddleVector;
     for (i = 0; i < 4; i++) {
-        coordinates[i + 8] = D_00453CB0[i];
+        coordinates[i + 8] = mnuShopSavedLastTransformVector[i];
         if (useMiddle != 0) {
-            coordinates[i + 4] = D_00453CA0[i];
+            coordinates[i + 4] = mnuShopSavedMiddleTransformVector[i];
         }
-        coordinates[i] = D_00453C90[i];
+        coordinates[i] = mnuShopSavedFirstTransformVector[i];
     }
 }
 
@@ -1465,7 +1465,7 @@ void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2
     }
 }
 
-INCLUDE_SDATA(const s32, "game/code_0025DA20", D_004377F0);
+INCLUDE_SDATA(const s32, "game/code_0025DA20", mnuShopRestoreMiddleVector);
 
 INCLUDE_SDATA(const s32, "game/code_0025DA20", D_004377F8);
 

@@ -111,7 +111,7 @@ extern u32 ptyGetProfileRecordCap(u8);
 extern s32 func_00314990(MenuItem *, u8);
 extern void func_00314868(MenuItem *, u8);
 
-void func_00299FE8(u32 context) {
+void mnuApplyCompletedProfile(u32 context) {
     MenuItemScene *state = (MenuItemScene *)context;
     MenuItem *item = *state->selectedItem;
     u32 *profile = ptyGetCurrentProfileRecord(item);
@@ -136,7 +136,7 @@ u32 mnuProcessItemSelection(u32 context) {
     /* Keep these raw accesses: typed field accesses change the alias schedule. */
     listState = func_0029D790(**(u32 **)(scene + 0x9c), scene + 0x4e8);
     *(u32 *)(scene + 0x268) = listState;
-    func_00299FE8(context);
+    mnuApplyCompletedProfile(context);
     return 1;
 }
 

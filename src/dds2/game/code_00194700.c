@@ -6,9 +6,9 @@ extern s8 D_0043643D;
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
-extern u32 func_0032C138(u32);
+extern u32 sdfTexAcquireResourceTexture(u32);
 
-extern u64 func_00343ED0(u64, u32 *, u64);
+extern u64 sdfReadNamedResource(u64, u32 *, u64);
 
 extern void *func_00328D68(s32 size);
 
@@ -53,7 +53,7 @@ extern s32 func_0036B588(void);
 
 extern u8 sdfViewMatrix[];
 
-extern u8 D_0037F610[];
+extern u8 sdfProjectionMatrix[];
 
 extern u8 D_0037F660[];
 
@@ -401,7 +401,7 @@ void effSetMsgPair(EffMsg *message, u32 first, u32 second) {
     message->unk2C = second;
 }
 
-void effSetupWorkSound(EffWork *work, u64 resource) {
+void effSetWorkTextureResource(EffWork *work, u64 resource) {
     u32 textureHandle;
     u64 allocation;
     u32 resourceData[4];
@@ -410,8 +410,8 @@ void effSetupWorkSound(EffWork *work, u64 resource) {
         sdfTexReleaseReferenceViaHandler(work->textureHandle);
         work->textureHandle = 0;
     }
-    allocation = func_00343ED0(resource, resourceData, 0);
-    textureHandle = func_0032C138(resourceData[0]);
+    allocation = sdfReadNamedResource(resource, resourceData, 0);
+    textureHandle = sdfTexAcquireResourceTexture(resourceData[0]);
     work->textureHandle = textureHandle;
     func_003297C8(allocation);
 }
@@ -429,7 +429,7 @@ void func_001957E8(void) {
 void sdfProjectVuVectorToScreen(void) {
     u8 *matrix;
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    matrix = D_0037F610;
+    matrix = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_PERSPECTIVE_DIVIDE_VF10();

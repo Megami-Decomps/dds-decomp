@@ -158,11 +158,11 @@ extern s32 D_00435E5C;
 extern void func_001A45C0(s32, s32, s32, s32);
 extern void func_001B8580(s32);
 extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
-extern u32 func_001B8538(void);
-extern u32 func_001B8740(void);
+extern u32 btlHasRegisteredSkillNamePanelTask(void);
+extern u32 btlHasRegisteredAphNamePanelTask(void);
 extern char D_00436CA8[];
 extern s32 func_0035C860();
-extern void func_001A4858(s32, s32, char *);
+extern void itfMesCopyStringToWindowTableSlot(s32, s32, char *);
 extern s32 D_00435E64;
 extern u8 D_003BEB28[];
 extern u8 D_003BEB30[];
@@ -332,7 +332,7 @@ s32 btlPollActorOrEntryLabelTask(BtlEffLink *link) {
             func_001B8580(D_00435E64 + resourceIndex * 17);
         }
     }
-    if (func_001B8538() == 0 || link->elapsedTicks >= 0x1E) {
+    if (btlHasRegisteredSkillNamePanelTask() == 0 || link->elapsedTicks >= 0x1E) {
         return 1;
     }
     link->elapsedTicks++;
@@ -361,7 +361,7 @@ s32 btlPollTimedTaskLink(BtlEffLink *link) {
     if (link->elapsedTicks == 0) {
         func_001B8580(D_00435E5C + link->arg * 25);
     }
-    if (func_001B8538() == 0 || link->elapsedTicks >= 0x1E) {
+    if (btlHasRegisteredSkillNamePanelTask() == 0 || link->elapsedTicks >= 0x1E) {
         return 1;
     }
     link->elapsedTicks++;
@@ -429,7 +429,7 @@ s32 btlPollCategoryLabelTask(BtlEffLink *link) {
             return 1;
         }
     }
-    if (func_001B8538() == 0 || link->elapsedTicks >= 0x1E) {
+    if (btlHasRegisteredSkillNamePanelTask() == 0 || link->elapsedTicks >= 0x1E) {
         return 1;
     }
     link->elapsedTicks++;
@@ -466,7 +466,7 @@ s32 btlPollActorDialogTask(BtlEffLink *link) {
         }
         btlReplaceDialogTasksAndQueueMessage(((BtlEffectSlots *)battleState)->dialogId, link->arg);
     }
-    if (func_001B8740() == 0 || link->elapsedTicks >= 0x2D) {
+    if (btlHasRegisteredAphNamePanelTask() == 0 || link->elapsedTicks >= 0x2D) {
         return 1;
     }
     link->elapsedTicks++;
@@ -505,7 +505,7 @@ s32 btlUpdateLinkedDialogueEffect(BtlEffLink *link) {
         }
         btlReplaceDialogTasksAndQueueMessage(((BtlEffectSlots *)battleState)->alternateDialogId, link->arg);
     }
-    if (func_001B8740() == 0 || link->elapsedTicks >= 0x2D) {
+    if (btlHasRegisteredAphNamePanelTask() == 0 || link->elapsedTicks >= 0x2D) {
         return 1;
     }
     link->elapsedTicks++;
@@ -562,7 +562,7 @@ s32 btlPollTimedPresentationTask(BtlEffLink *link) {
         }
         btlReplaceDialogTasksAndQueueMessage(((BtlEffectSlots *)battleState)->thirdDialogId, link->arg);
     }
-    if (func_001B8740() == 0 || link->elapsedTicks >= 0x2D) {
+    if (btlHasRegisteredAphNamePanelTask() == 0 || link->elapsedTicks >= 0x2D) {
         return 1;
     }
     link->elapsedTicks++;
@@ -595,7 +595,7 @@ s32 btlPollEffectWaitTask(BtlEffLink *link) {
         }
         btlReplaceDialogTasksAndQueueMessage(((BtlEffectSlots *)battleState)->dialogId, 0x75);
     }
-    if (func_001B8740() == 0 || link->elapsedTicks >= 0x2D) {
+    if (btlHasRegisteredAphNamePanelTask() == 0 || link->elapsedTicks >= 0x2D) {
         return 1;
     }
     link->elapsedTicks++;
@@ -666,11 +666,11 @@ s32 btlAdvanceActorEffectLabelTask(BtlEffLink *link) {
         if (owner != 0) {
             func_001A45C0(((BtlEffectSlots *)battleState)->dialogId, 0, ((BtlJyokyoOwner *)owner)->mode, (((BtlJyokyoOwner *)owner)->flags & 0x20) ? 0xE : 0xF);
             func_0035C860(text, D_00436CA8, link->arg < 0 ? -link->arg : link->arg);
-            func_001A4858(((BtlEffectSlots *)battleState)->dialogId, 1, text);
+            itfMesCopyStringToWindowTableSlot(((BtlEffectSlots *)battleState)->dialogId, 1, text);
         }
         btlReplaceDialogTasksAndQueueMessage(((BtlEffectSlots *)battleState)->dialogId, 0xD5);
     }
-    if (func_001B8740() == 0 || link->elapsedTicks >= 0x2D) {
+    if (btlHasRegisteredAphNamePanelTask() == 0 || link->elapsedTicks >= 0x2D) {
         return 1;
     }
     link->elapsedTicks++;

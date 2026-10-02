@@ -1429,7 +1429,7 @@ void sdfPadInit(void) {
 void sdfDevConsInit(void) {
     if (D_00438AB4 == 0) {
         D_00438AB4 = 1;
-        D_00439194 = func_0032C138(D_00370B80);
+        D_00439194 = sdfTexAcquireResourceTexture(D_00370B80);
     }
 }
 

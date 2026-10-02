@@ -7,7 +7,7 @@ extern s32 datGameState;
 
 extern s64 scrGetWorkTaskHandle(void);
 extern void func_00118AB0();
-extern char D_00435DB0[]; /* "GBWK" */
+extern char sdfRuntimeTaskName[]; /* "GBWK" */
 extern void kwlnTaskDestroyWithHierarchyByName(char *name, s32 flag);
 extern void func_00117A80(void);
 extern void sdfDecrementAllocationReferenceCount(u32 allocation);
@@ -227,7 +227,7 @@ void sdfCreateRuntimeTask(void) {
     ((SdfRuntime *)state)->backingAllocation = (s32)mem;
     ((SdfRuntime *)state)->firstTick = 0;
     ((SdfRuntime *)state)->secondTick = 0;
-    kwlnTaskCreate(D_00435DB0, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
+    kwlnTaskCreate(sdfRuntimeTaskName, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
     datGameState = (s32)state;
     evtResetWorldAndProfileRuntime();
 }
@@ -235,7 +235,7 @@ void sdfCreateRuntimeTask(void) {
 void sdfDestroyRuntimeTask(void) {
     u32 allocation;
 
-    kwlnTaskDestroyWithHierarchyByName(D_00435DB0, 0);
+    kwlnTaskDestroyWithHierarchyByName(sdfRuntimeTaskName, 0);
     func_00117A80();
     allocation = ((SdfRuntime *)datGameState)->backingAllocation;
     sdfDecrementAllocationReferenceCount(allocation);
@@ -366,7 +366,7 @@ typedef struct SdfBattleParameters {
 
 extern SdfBattleParameters *datBattleParameters;
 
-f32 func_00118CC0(SdfPartyUnit *unit) {
+f32 sdfGetHpBracketScale(SdfPartyUnit *unit) {
     s32 hp = unit->hp;
     s32 band;
 
@@ -538,7 +538,7 @@ void sdfRaisePackedChannelValue(SdfPackedValue *item, u32 value) {
 
 INCLUDE_RODATA(const s32, "game/code_001176A0", D_00412B08);
 
-INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DB0);
+INCLUDE_SDATA(const s32, "game/code_001176A0", sdfRuntimeTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DB8);
 

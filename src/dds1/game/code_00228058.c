@@ -70,7 +70,7 @@ void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
 INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACA78);
 
-u32 func_002280B0(void) {
+u32 evtCreateTextureEntryChildTask(void) {
     EvtCommandWork *work;
     s32 id;
     s32 entry;

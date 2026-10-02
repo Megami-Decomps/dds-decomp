@@ -87,7 +87,7 @@ extern void func_002C7CE8(u32 handle);
 
 extern u8 sdfViewMatrix[];
 
-extern u8 D_0037F610[];
+extern u8 sdfProjectionMatrix[];
 
 extern u8 D_0037F660[];
 
@@ -115,7 +115,7 @@ extern u8 D_0038A700[];
 
 extern void *sdfCreateAssetWithDrawEntries(void);
 
-extern u32 func_0032C138(void *);
+extern u32 sdfTexAcquireResourceTexture(void *);
 
 extern u32 D_004360B0;
 
@@ -123,7 +123,7 @@ extern u8 D_00444980[];
 
 extern u8 D_00444970[];
 
-extern void func_00113110(s64, void *, void *);
+extern void dds3TransformCameraVectorsByInnerRotation(s64, void *, void *);
 
 extern f32 sdfAtan2(f32 y, f32 x);
 
@@ -156,7 +156,7 @@ typedef struct FldLoadRequest {
 
 extern u32 D_00444920[], D_00444930[], D_00444940[];
 extern char D_00435FD0[];
-extern u32 func_00343ED0(const char *, u32 *, s32);
+extern u32 sdfReadNamedResource(const char *, u32 *, s32);
 extern void func_001289A8(u32, u32);
 
 extern f32 D_003897DC[];
@@ -167,7 +167,7 @@ extern char D_004130D8[]; /* "%sf%03d_%03d.LB" */
 
 extern s32 func_0035C860(char *, const char *, ...);
 
-extern u32 func_002C7FF0(char *);
+extern void *func_002C7FF0(const char *path);
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
 
@@ -213,7 +213,7 @@ extern void sdfConsInitPacketHeader(u64, s32, s32, s32, s32);
 
 extern u64 *sdfConsMeasurePacketWithHeader(u64);
 
-extern s32 func_00100400(void);
+extern s32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 
@@ -550,7 +550,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
             if (D_00444920[i] != 0) {
                 fldFormatAreaDirectory(directory, fldAreaState[4], fldAreaState[5] + 1);
                 func_0035C860(path, D_00435FD0, directory, D_00444920[i]);
-                D_00444930[i] = func_00343ED0(path, &D_00444940[i], 0);
+                D_00444930[i] = sdfReadNamedResource(path, &D_00444940[i], 0);
             }
         }
     }
@@ -1120,7 +1120,7 @@ void fldInitDisplayObjects(void) {
         D_0043607C = (u32)object;
         *(f32 *)((u8 *)object + 0x1C) = 1.0f;
         D_00438EC8 = (u32)sdfCreateAssetWithDrawEntries();
-        fldMarkerTexture = func_0032C138(D_0038A700);
+        fldMarkerTexture = sdfTexAcquireResourceTexture(D_0038A700);
     }
 }
 
@@ -1186,7 +1186,7 @@ void fldProjectPointSetup(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 result[4];
 
     VU0_LOAD_MATRIX_MEMORY(sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory(D_0037F610);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     VU0_MOVE_MATRIX_TO_B();
     VU0_LOAD_VF_MEMORY(vf10, vec);
     VU0_TRANSFORM_POINT(vf10, vf10);
@@ -1222,7 +1222,7 @@ void fldProjectPointSetupAlt(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 void fldPrepareProjectionMatrix(void) {
     u8 *matrix;
     VU0_LOAD_MATRIX_MEMORY(sdfViewMatrix);
-    matrix = D_0037F610;
+    matrix = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
     VU0_MOVE_MATRIX_TO_B();
     matrix += 0x40;
@@ -1567,7 +1567,7 @@ void func_0012D070(void) {
     FieldBufferDescriptor *descriptor;
     sdfInitPacketList(command);
     texture = sdfAllocPacketAligned(0x40);
-    func_0032DB30(kwlnFrameDrawPacketRecords + func_00100400() * 0x1F40, texture, 0);
+    func_0032DB30(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(command, texture);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
@@ -1579,7 +1579,7 @@ void func_0012D110(void) {
     FieldBufferDescriptor *descriptor;
     sdfInitPacketList(command);
     texture = sdfAllocPacketAligned(0x40);
-    func_0032DB78(kwlnFrameDrawPacketRecords + func_00100400() * 0x1F40, texture, 0);
+    func_0032DB78(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(command, texture);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
@@ -2052,7 +2052,7 @@ s64 fldGetUnselectedWorldEntry(void) {
 
 void fldSetCameraMoveMode(u32 value) {
     D_004360AC = value;
-    func_00113110(dds3GetWorldCameraObject(dds3GetWorldObject()), D_00444980, D_00444970);
+    dds3TransformCameraVectorsByInnerRotation(dds3GetWorldCameraObject(dds3GetWorldObject()), D_00444980, D_00444970);
     D_004360B0 = 0;
 }
 
@@ -2466,7 +2466,7 @@ extern u32 fldRainTextureData;
 
 extern char D_00413350[];
 
-extern u32 func_00343ED0(const char *, u32 *, s32);
+extern u32 sdfReadNamedResource(const char *, u32 *, s32);
 
 extern u32 sdfDevCreateCommandState(const char *);
 extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
@@ -2493,8 +2493,8 @@ void fldLoadSkyResource(s32 area) {
         sdfDevQueueReadAndWait(command, fldSkyLightSetBuffer, 0xE000);
         sdfDevWaitThenReleaseCommandState(command);
         if (area >= 2 && area < 100 && fldRainTextureResource == 0) {
-            fldRainTextureResource = func_00343ED0(D_00413350, &fldRainTextureData, 0);
-            fldRainTextureReference = func_0032C138((void *)fldRainTextureData);
+            fldRainTextureResource = sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
+            fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
         }
     }
 }
@@ -2520,8 +2520,8 @@ void fldUploadSkyBuffer(FldSkyBuffer *src) {
     *fldSkyLightSetBuffer = *src;
     fldReleaseSkyResources();
     if (D_00389780[0] >= 2 && D_00389780[0] < 100 && fldRainTextureResource == 0) {
-        fldRainTextureResource = func_00343ED0(D_00413350, &fldRainTextureData, 0);
-        fldRainTextureReference = func_0032C138((void *)fldRainTextureData);
+        fldRainTextureResource = sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
+        fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
     }
 }
 

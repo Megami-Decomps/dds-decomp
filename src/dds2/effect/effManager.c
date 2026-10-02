@@ -76,11 +76,11 @@ void effUpdateNode(EffNode *node) {
     effNodeTypeOperations[node->type].update(node->instance);
 }
 
-void func_001576D8(EffNode *node) {
+void effRestartNodeInstance(EffNode *node) {
     effNodeTypeOperations[node->type].fn0C(node->instance);
 }
 
-void func_00157710(EffNode *node) {
+void effApplyNodeScale(EffNode *node) {
     effNodeTypeOperations[node->type].fn2C(node->instance);
 }
 
@@ -95,11 +95,11 @@ void effCopyVectorToNodeInstance(EffNode *node) {
     effNodeTypeOperations[node->type].fn14(node->instance);
 }
 
-void func_001577C8(EffNode *node) {
+void effApplyNodeTransformMatrix(EffNode *node) {
     effNodeTypeOperations[node->type].fn18(node->instance);
 }
 
-void func_00157800(EffNode *node) {
+void effSetNodeParameterValue(EffNode *node) {
     effNodeTypeOperations[node->type].fn1C(node->instance);
 }
 
@@ -117,7 +117,7 @@ s32 effInvokeOptionalNodeInstanceCallback(EffNode *node) {
 }
 
 extern void func_0035B6E0(const char *fmt, ...);
-extern void *func_00343ED0(void *, u32 *, s32);
+extern void *sdfReadNamedResource(void *, u32 *, s32);
 extern void *func_001578C0(u32);
 extern void *func_003297C8(void *);
 INCLUDE_ASM(const s32, "effect/effManager", func_001578C0);
@@ -132,7 +132,7 @@ void *effLoadResourceNode(void *resource) {
     void *node;
 
     func_0035B6E0("d3p file read...[%s]\n", resource);
-    resourceHandle = func_00343ED0(resource, &resolvedId, 0);
+    resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
     node = func_001578C0(resolvedId);
     func_003297C8(resourceHandle);
     return node;

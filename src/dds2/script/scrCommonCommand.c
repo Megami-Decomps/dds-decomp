@@ -526,7 +526,7 @@ s32 scrCmdSetFilterBlurIntegerParameters(void)
 
 s32 scrCmdSetFilterBlurTransitionMode(void)
 {
-    func_00106D10(scrReadIntParameter(0));
+    kwlnSetFilterBlurParameterTransition(scrReadIntParameter(0));
     return 1;
 }
 
@@ -604,7 +604,7 @@ s32 scrCmdSetStaggeredBlurIntegerParameters(void)
 
 s32 scrCmdSetStaggeredBlurTransitionMode(void)
 {
-    func_00106F38(scrReadIntParameter(0));
+    kwlnSetStaggeredBlurParameterTransition(scrReadIntParameter(0));
     return 1;
 }
 
@@ -675,7 +675,7 @@ s32 scrCmdSetRectangleBlurIntegerPair(void)
 
 s32 scrCmdSetRectangleBlurTransitionMode(void)
 {
-    func_001068C8(scrReadIntParameter(0));
+    kwlnSetRectangleBlurParameterTransition(scrReadIntParameter(0));
     return 1;
 }
 
@@ -736,7 +736,7 @@ s32 scrCmdSetColorRectanglePackedColor(void)
 
 s32 scrCmdSetColorRectangleTransitionMode(void)
 {
-    func_00106460(scrReadIntParameter(0));
+    kwlnDrawSnapshotSolidRect(scrReadIntParameter(0));
     return 1;
 }
 

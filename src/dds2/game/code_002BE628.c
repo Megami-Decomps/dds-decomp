@@ -26,7 +26,7 @@ extern s32 datCommandSelectors;
 
 extern void mnuSetPopupEntry(s32, s32);
 
-extern f32 D_0037F5E0[];
+extern f32 sdfSceneProjectionParameters[];
 
 extern s8 D_003E7970[];
 extern u8 D_003E7978[];
@@ -2113,8 +2113,8 @@ void func_002C6758(s32 index, f32 *out) {
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6790);
 
 void func_002C6958(f32 value) {
-    D_0037F5E0[5] = 2048.0f;
-    D_0037F5E0[4] = value + 2048.0f;
+    sdfSceneProjectionParameters[5] = 2048.0f;
+    sdfSceneProjectionParameters[4] = value + 2048.0f;
     func_002C6790();
 }
 
@@ -2165,8 +2165,8 @@ void evtStageTestStop(void) {
 
 void mnuResetWorkFloats(void) {
     evtStageTestStop();
-    D_0037F5E0[4] = 2048.0f;
-    D_0037F5E0[5] = 2048.0f;
+    sdfSceneProjectionParameters[4] = 2048.0f;
+    sdfSceneProjectionParameters[5] = 2048.0f;
 }
 
 /* Remember the model asset request result for the stage viewer. */
@@ -2320,7 +2320,7 @@ void evtStageTestApplyEntryRotation(s32 model) {
     mdlUpdateContextRotationBasisFromQuaternion(model);
 }
 
-extern s32 func_00100400(void);
+extern s32 kwlnGetDrawBufferIndex(void);
 extern void sdfCameraBuildProjection(void *);
 extern void sdfConsBuildMatrixPacket(void *packet, void *node, void *matrix);
 extern void sdfConsCacheTransformedNode(void *node, void *matrix);
@@ -2340,12 +2340,12 @@ void evtStageTestUpdateCamera(void)
     s128 at;
     s32 slot;
 
-    slot = func_00100400();
+    slot = kwlnGetDrawBufferIndex();
     func_002C6790();
     PCP_COPY_VECTOR(sdfViewTargetVector, D_003E7950);
     PCP_COPY_VECTOR(sdfViewEyeVector, D_003E7940);
     PCP_COPY_VECTOR(sdfViewUpVector, D_003E7960);
-    sdfCameraBuildProjection(D_0037F5E0);
+    sdfCameraBuildProjection(sdfSceneProjectionParameters);
     VU0_LOAD_VF(vf10, sdfViewEyeVector);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
@@ -2360,8 +2360,8 @@ void evtStageTestUpdateCamera(void)
     VU0_STORE_VF_UNCLOBBERED(vf10, &at);
     sdfVuBuildLookAtBasis(&eye, &at, sdfViewUpVector);
     VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
-    sdfConsBuildMatrixPacket(D_003820F0 + slot * 8000, D_0037F5E0, sdfViewMatrix);
-    sdfConsCacheTransformedNode(D_0037F5E0, sdfViewMatrix);
+    sdfConsBuildMatrixPacket(D_003820F0 + slot * 8000, sdfSceneProjectionParameters, sdfViewMatrix);
+    sdfConsCacheTransformedNode(sdfSceneProjectionParameters, sdfViewMatrix);
 }
 
 s8 evtStageTestUpdate(s32 frame) {

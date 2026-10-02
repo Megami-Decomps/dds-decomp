@@ -9,8 +9,8 @@ typedef struct {
     f32 v[4];
 } SdfCameraVector;
 
-extern SdfCameraVector D_00400970;
-extern SdfCameraVector D_00400980;
+extern SdfCameraVector fldLocalMapFirstCameraVector;
+extern SdfCameraVector fldLocalMapSecondCameraVector;
 extern f32 D_004008E0[][4];
 extern f32 D_00400920[][4];
 extern s8 D_004388C1;
@@ -114,7 +114,7 @@ typedef struct MapResource {
 
 extern MapResource fldLocalMapNameTextures[10];
 
-extern MapResource D_00401260;
+extern MapResource fldLocalMapAuxTextureResource;
 
 extern MapResource fldLocalMapTextureResource;
 
@@ -227,8 +227,8 @@ extern s32 fldLoadMapResource(const char *, MapResource *);
 
 
 void sdfInitInnerVectors(void) {
-    effObjSetInnerFirstVec(fldLocalMapCameraObject, &D_00400970);
-    effObjSetInnerSecondVec(fldLocalMapCameraObject, &D_00400980);
+    effObjSetInnerFirstVec(fldLocalMapCameraObject, &fldLocalMapFirstCameraVector);
+    effObjSetInnerSecondVec(fldLocalMapCameraObject, &fldLocalMapSecondCameraVector);
     ((EffObjHeader *)fldLocalMapCameraObject)->vtbl->refresh(fldLocalMapCameraObject);
 }
 
@@ -241,8 +241,8 @@ extern void sdfCommitPendingVectorAndMarkChanged();
 /* Latch the base vectors into the pending pair and flag the change. */
 void sdfLatchBaseVectorsForSelection(void) {
     D_004388C0 = 1;
-    D_00400990 = D_00400970;
-    D_004009A0 = D_00400980;
+    D_00400990 = fldLocalMapFirstCameraVector;
+    D_004009A0 = fldLocalMapSecondCameraVector;
     sdfCommitPendingVectorAndMarkChanged();
 }
 
@@ -289,23 +289,23 @@ s32 func_0030BED8(void) {
         t = (45 - D_004388C0) / 45.0f;
         t = 1.0f - t * t;
         if (t > 1.0f) t = 1.0f;
-        D_00400970.v[0] = D_00400990.v[0] * (1.0f - t) + D_004008E0[index][0] * t;
-        D_00400970.v[1] = D_00400990.v[1] * (1.0f - t) + D_004008E0[index][1] * t;
-        D_00400970.v[2] = D_00400990.v[2] * (1.0f - t) + D_004008E0[index][2] * t;
-        D_00400970.v[3] = 1.0f;
-        sdfQuatSlerp(D_00400980.v, D_004009A0.v, D_00400920[index], t);
+        fldLocalMapFirstCameraVector.v[0] = D_00400990.v[0] * (1.0f - t) + D_004008E0[index][0] * t;
+        fldLocalMapFirstCameraVector.v[1] = D_00400990.v[1] * (1.0f - t) + D_004008E0[index][1] * t;
+        fldLocalMapFirstCameraVector.v[2] = D_00400990.v[2] * (1.0f - t) + D_004008E0[index][2] * t;
+        fldLocalMapFirstCameraVector.v[3] = 1.0f;
+        sdfQuatSlerp(fldLocalMapSecondCameraVector.v, D_004009A0.v, D_00400920[index], t);
         if ((s8)(D_004388C0 + 1) >= 45) D_004388C0 = 0;
         else D_004388C0++;
     } else {
-        D_00400970.v[0] = D_004008E0[index][0];
-        D_00400970.v[1] = D_004008E0[index][1];
-        D_00400970.v[2] = D_004008E0[index][2];
-        D_00400970.v[3] = D_004008E0[index][3];
+        fldLocalMapFirstCameraVector.v[0] = D_004008E0[index][0];
+        fldLocalMapFirstCameraVector.v[1] = D_004008E0[index][1];
+        fldLocalMapFirstCameraVector.v[2] = D_004008E0[index][2];
+        fldLocalMapFirstCameraVector.v[3] = D_004008E0[index][3];
         sdfQuaternionNormalize(D_00400920[index]);
-        D_00400980.v[0] = D_00400920[index][0];
-        D_00400980.v[1] = D_00400920[index][1];
-        D_00400980.v[2] = D_00400920[index][2];
-        D_00400980.v[3] = D_00400920[index][3];
+        fldLocalMapSecondCameraVector.v[0] = D_00400920[index][0];
+        fldLocalMapSecondCameraVector.v[1] = D_00400920[index][1];
+        fldLocalMapSecondCameraVector.v[2] = D_00400920[index][2];
+        fldLocalMapSecondCameraVector.v[3] = D_00400920[index][3];
     }
     return 1;
 }
@@ -742,7 +742,7 @@ s32 fldLoadLocalMapResources(void) {
         fldLoadMapResource(name, item);
         item++;
     }
-    fldLoadMapResource("/lmap/1006.tmx", &D_00401260);
+    fldLoadMapResource("/lmap/1006.tmx", &fldLocalMapAuxTextureResource);
     fldLoadMapResource("/lmap/l_map00.tmx", &fldLocalMapTextureResource);
     return 1;
 }
@@ -755,7 +755,7 @@ s32 fldReleaseLocalMapResources(void) {
         item++;
         --i;
     } while (i >= 0);
-    fldReleaseMapResource((s32 *)&D_00401260);
+    fldReleaseMapResource((s32 *)&fldLocalMapAuxTextureResource);
     fldReleaseMapResource((s32 *)&fldLocalMapTextureResource);
     return 1;
 }

@@ -59,7 +59,7 @@ INCLUDE_RODATA(const s32, "game/code_00157A50", D_00414298);
 INCLUDE_ASM(const s32, "game/code_00157A50", func_00157BE0);
 
 extern s32 D_00438EFC;
-extern u32 D_00451EE0[];
+extern u32 effBillResourceOwners[];
 extern void billDispatchByKind(u32);
 
 void effBillDispatchAll(void) {
@@ -67,7 +67,7 @@ void effBillDispatchAll(void) {
 
     D_00438EFC = 0;
     for (i = 0; i < 15; i++) {
-        billDispatchByKind(D_00451EE0[i]);
+        billDispatchByKind(effBillResourceOwners[i]);
     }
 }
 
