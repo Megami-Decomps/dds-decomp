@@ -466,7 +466,39 @@ void sndPrintMemoryInfo(void) {
                     info[0], info[1], info[2], info[3], info[4], info[5]);
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00343D60);
+typedef struct SdfChipStats {
+    u32 totalBytes;
+    u32 freeBytes;
+    u32 blockCount;
+    u32 emptyBlocks;
+    u32 partialBlocks;
+    u32 usedCells[7];
+} SdfChipStats;
+
+extern void sdfGetChipHeapStats(SdfChipStats *stats);
+extern char D_00438C08[];
+
+/* Print the chip heap totals and how many cells are in use per size class (1..16, 17..32, ...). */
+void func_00343D60(void) {
+    SdfChipStats stats;
+    u32 limit = 16;
+    s32 i = 0;
+    u32 first;
+    u32 *used;
+
+    sdfGetChipHeapStats(&stats);
+    sdfPrintFormattedDevMessage(" <<< chip memory information >>>\n                 total : 0x%06X\n            free total : 0x%06X\n            page count : %d\n       free page count : %d\n fragmented page count : %d\n", stats.totalBytes, stats.freeBytes, stats.blockCount, stats.emptyBlocks, stats.partialBlocks);
+    sdfPrintFormattedDevMessage("\n several size alloc count...\n");
+    first = 0;
+    used = stats.usedCells;
+    do {
+        sdfPrintFormattedDevMessage("       for %3d .. %4d : %d\n", first, limit, *used++);
+        i++;
+        first = limit + 1;
+        limit *= 2;
+    } while (i != 7);
+    sdfPrintFormattedDevMessage(D_00438C08, first);
+}
 
 extern s32 sdfDevCreateCommandState(u64 name);
 extern s32 sdfDevQueueControlAndWait(s32 state);
