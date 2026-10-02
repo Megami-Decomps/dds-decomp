@@ -44,7 +44,11 @@ u32 func_00341D90(s32 command, char *text) {
     return sndSendCommandPacket(command | 0x60, 0, text, length);
 }
 
-INCLUDE_ASM(const s32, "game/code_00341CA8", func_00341DD8);
+u32 func_00341DD8(s32 command, char *text) {
+    s32 cmd = command;
+    u32 len = strlen(text);
+    return sndSendCommandPacket(cmd | 0x80, 0, text, len);
+}
 
 /* Send a 12-byte sequence command; the trailing struct word is not transmitted. */
 void sndSetSequenceVolumePan(s32 trackId, s32 volume, s32 pan) {
