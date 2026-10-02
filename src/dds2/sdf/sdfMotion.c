@@ -64,6 +64,12 @@ typedef struct SdfMotionKeyTrack {
 } SdfMotionKeyTrack;
 
 typedef struct Motion Motion;
+typedef struct SdfMotionManager SdfMotionManager;
+
+struct SdfMotionManager {
+    u8 pad00[0x14];
+    Motion *head;
+};
 
 typedef struct SdfMotionKeyBinding {
     void *dispatch;
@@ -157,8 +163,8 @@ typedef struct MotionTable {
 /* Native motion constructor/tick layout. A blend lead starts the frame clock
  * below zero; blend callbacks normalize nonnegative elapsed frames by duration. */
 struct Motion {
-    void *next;        /* 0x00: owner's intrusive motion list */
-    void *owner;       /* 0x04: owner whose list head is at +0x14 */
+    Motion *next;      /* 0x00: next node in the owner's intrusive motion list */
+    SdfMotionManager *owner; /* 0x04: owner whose list head is at +0x14 */
     MotionTable *motionTable; /* 0x08: motion entries and binding-command data */
     s32 unkC;
     ArrObj *request;        /* 0x10 */
@@ -255,7 +261,45 @@ void sdfSetMotionPointerPair(Pair *binding, void *source, void *dispatch) {
     binding->source = source;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003340E0);
+typedef struct SdfMotionCommand {
+    u32 command;
+    u32 argument;
+} SdfMotionCommand;
+
+typedef struct SdfMotionCommandTable {
+    u16 unk00;
+    u16 commandCount;
+    u8 pad04[4];
+    SdfMotionCommand commands[1];
+} SdfMotionCommandTable;
+
+void *sdfAllocAndClearQuadwords(s32 size);
+ArrObj *sdfDevCreateBufferedRequest(u16 n, s32 e1, s32 e2);
+s32 sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
+
+Motion *func_003340E0(SdfMotionManager *manager, SdfMotionCommandTable *table) {
+    Motion *motion;
+    ArrObj *request;
+    SdfMotionCommand *command;
+    s32 i;
+    u16 count;
+
+    motion = sdfAllocAndClearQuadwords(0x34);
+    motion->next = manager->head;
+    count = table->commandCount;
+    manager->head = motion;
+    motion->owner = manager;
+    motion->motionTable = table;
+    request = sdfDevCreateBufferedRequest(count, 4, 8);
+    motion->request = request;
+    request->objectCount = count;
+    for (i = 0, command = (SdfMotionCommand *)((u8 *)motion->motionTable + 8); i < count; i++, command++) {
+        motion->request->objects[i] = (void *)sdfDispatchAssetCommandWord(motion, command->command, command->argument);
+    }
+    motion->state = 0;
+    motion->frameStep = 1.0f;
+    return motion;
+}
 
 void sdfDestroyDevRequest(void *a0);
 void sdfReleaseChipBlock(void *a0);
