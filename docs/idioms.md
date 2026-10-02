@@ -451,6 +451,15 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
 - Separate `s32 cx = cam->x, cz = cam->z` and compute z before x
   to retain z-first loads (`func_00146900`); direct x-then-z
   expressions match its DDS2 twin (`func_00149E08`).
+- A saved-register exchange between a cursor and the loop index often means
+  the source indexed (`p[i]`, `entry[i]`) instead of advancing a cursor
+  (`*p++`). Loop strength reduction produces the same pointer walk, but its
+  induction-variable pseudo has a different creation order and live range
+  from a named source cursor, so the s-register priorities flip. A filtered
+  collector writes `out[count]`, not a second output cursor. Verified on
+  DDS2 `func_001B32F8` (input and output indexed), `func_0029D790`,
+  `func_002294D0`. Don't apply blindly: indexed motor, particle-replay and
+  memory-map loops did not match.
 
 ## Rodata order
 
@@ -1222,6 +1231,25 @@ codebase already has a second struct view of the object (DDS1 `func_00277CB8`:
 `MenuSelectionState->list` for the walk, `((MenuInputNode *)state)->flags` for
 the seek argument). A raw cast next to a typed access of the same field is a
 lever (DDS2 `func_002B40F8` stays INCLUDE_ASM).
+
+### Declared types change scheduling dependencies (alias sets, readonly)
+
+sched1/sched2 add dependencies between MEMs from their alias sets and
+`/u` (unchanging) flags, so a wrong declared type can swap two independent
+loads or stores even when every instruction is right:
+
+- A table that really lives in `.rodata` is `const`: the `const` extern makes
+  its loads unchanging, the false anti-dependence on a later store goes away,
+  and sched2 picks the other load first (DDS1/DDS2 `bfOpWaitDispatch`:
+  `extern const ScrCommand D_0039E288[]`; mutable spelling swaps two loads
+  around the `bnel` slot).
+- A flag word that is really a bitfield in a struct with callback-pointer
+  members takes the aggregate's alias set, which orders the flag store
+  before the callback-table load (DDS2 `func_00317FE0`); a scalar `u32 flags`
+  lets the load move up.
+
+Only fix types the data really has (rodata placement, a bitfield the code
+tests bit-by-bit). Adding views to steer alias sets is the lever above.
 
 ### Float constants never in a delay slot
 
