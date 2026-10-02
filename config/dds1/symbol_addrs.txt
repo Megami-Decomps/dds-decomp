@@ -88,7 +88,6 @@ kwlnFadeBackgroundStartOut = 0x001060C8; // type:func
 kwlnFadeBackgroundStartIn = 0x00106160; // type:func
 kwlnFadeIsBackgroundOverlayActive = 0x001061E8; // type:func
 kwlnStepBackgroundFade = 0x00106268; // type:func
-kwlnSetCameraFieldOfViewTarget = 0x00106488; // type:func
 kwlnDrawCopyRow128 = 0x00106498; // type:func
 kwlnDrawCopyWords20 = 0x001064B0; // type:func
 dds3DrawSetIndexedWord = 0x001064E8; // type:func

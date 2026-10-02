@@ -28,7 +28,7 @@ extern void dds3SetWorldObjectValue(void *, u32);
 extern void fldFormatAreaDirectory(char *, s32, s32);
 extern void dds3AttachResourceHandleToWorldObject(void *, u32);
 extern void mdlSpawnViewerWorldObject(void);
-extern void kwlnSetCameraFieldOfViewTarget(f32);
+extern void func_00106488(f32);
 extern void dds3DrawSetIndexedWord(u32, s32);
 extern void kwlnDrawCopyWords20(void *);
 extern void kwlnDrawCopyRow128(void *);
@@ -95,9 +95,9 @@ s32 evtCreateWorldObjectForKey(s32 area, s32 room)
     dds3AttachResourceHandleToWorldObject(worldObject, (u32)resourcePath);
     mdlSpawnViewerWorldObject();
     if (area < 10) {
-        kwlnSetCameraFieldOfViewTarget(0.9424777031f);
+        func_00106488(0.9424777031f);
     } else {
-        kwlnSetCameraFieldOfViewTarget(0.75398216f);
+        func_00106488(0.75398216f);
     }
     dds3DrawSetIndexedWord((u32)D_00367DF0, 0);
     dds3DrawSetIndexedWord((u32)(D_00367DF0 + 0x40), 1);
@@ -121,7 +121,7 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 arg2, s32 arg3, s32
     fldFormatAreaDirectory(directory, area, room);
     dds3AttachConstructedResourceToWorldObject(worldObject, area, room, arg2, arg3, arg4, arg5);
     mdlSpawnViewerWorldObject();
-    kwlnSetCameraFieldOfViewTarget(0.75398216f);
+    func_00106488(0.75398216f);
     dds3DrawSetIndexedWord((u32)D_00367DF0, 0);
     dds3DrawSetIndexedWord((u32)(D_00367DF0 + 0x40), 1);
     dds3DrawSetIndexedWord((u32)(D_00367DF0 + 0x80), 2);

@@ -183,7 +183,7 @@ s32 func_0010DD18(void)
 }
 
 extern char D_00412668[];
-s32 kwlnSetCameraFieldOfViewTarget(f32 arg0);
+s32 func_001063A8(f32 arg0);
 
 s32 scrCommandSetCameraFov(void)
 {
@@ -195,7 +195,7 @@ s32 scrCommandSetCameraFov(void)
         evtPrintDeveloperConsoleMessage(D_00412668, fovy);
         return 1;
     }
-    kwlnSetCameraFieldOfViewTarget(fovy);
+    func_001063A8(fovy);
     return 1;
 }
 
