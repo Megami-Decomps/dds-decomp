@@ -2,18 +2,20 @@
 """Conservatively compare C function declarations with definitions.
 
 This is intentionally a small source auditor, not a C parser. It only reports
-contracts it can recognize in ordinary project-style declarations.
+contracts it can recognize in ordinary project-style declarations. Return
+conflicts are annotated when a recognized caller directly discards the result.
 """
 
 from __future__ import annotations
 
 import argparse
+import bisect
 import json
 import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import AbstractSet, Iterable, Optional
 
 
 TYPE_WORDS = {
@@ -57,6 +59,15 @@ class Signature:
     path: str
     kind: str
     is_static: bool
+
+
+@dataclass(frozen=True)
+class IgnoredResultCall:
+    name: str
+    caller: str
+    line: int
+    path: str
+    explicit_void_cast: bool
 
 
 def _mask_source(source: str) -> str:
@@ -144,6 +155,16 @@ def _mask_source(source: str) -> str:
                 line_start = True
             i += 1
     return "".join(out)
+
+
+FUNCTION_MACRO_RE = re.compile(
+    r"(?m)^\s*#\s*define\s+([A-Za-z_$][A-Za-z0-9_$]*)\(")
+CONDITIONAL_DIRECTIVE_RE = re.compile(
+    r"(?m)^\s*#\s*(?:if|ifdef|ifndef|elif|else|endif)\b")
+
+
+def _function_macro_names(source: str) -> set[str]:
+    return set(FUNCTION_MACRO_RE.findall(source))
 
 
 def _split_top_level(tokens: list[str], delimiter: str) -> list[list[str]]:
@@ -392,7 +413,12 @@ def _candidate(tokens: list[str], delimiter: str, path: str, line: int) -> tuple
                      "static" in tokens[:opening - 1]), None
 
 
-def scan_source(source: str, path: str) -> tuple[list[Signature], list[dict[str, object]]]:
+def scan_source(
+    source: str,
+    path: str,
+    ignored_result_calls: Optional[list[IgnoredResultCall]] = None,
+    known_function_macros: AbstractSet[str] = frozenset(),
+) -> tuple[list[Signature], list[dict[str, object]]]:
     masked = _mask_source(source)
     tokens = [(m.group(), m.start()) for m in TOKEN_RE.finditer(masked)]
     signatures: list[Signature] = []
@@ -422,6 +448,7 @@ def scan_source(source: str, path: str) -> tuple[list[Signature], list[dict[str,
                     # Skip the complete function body so local declarations
                     # cannot be mistaken for file-scope contracts.
                     depth = 1
+                    body_start = i + 1
                     i += 1
                     while i < len(tokens) and depth:
                         if tokens[i][0] == "{":
@@ -429,6 +456,12 @@ def scan_source(source: str, path: str) -> tuple[list[Signature], list[dict[str,
                         elif tokens[i][0] == "}":
                             depth -= 1
                         i += 1
+                    if (ignored_result_calls is not None and depth == 0
+                            and not CONDITIONAL_DIRECTIVE_RE.search(source)):
+                        ignored_result_calls.extend(_body_ignored_result_calls(
+                            tokens[body_start:i - 1], source, path, parsed.name,
+                            _definition_parameter_names(segment),
+                            known_function_macros | _function_macro_names(source)))
                     segment = []
                     continue
                 if reason:
@@ -465,6 +498,221 @@ def scan_source(source: str, path: str) -> tuple[list[Signature], list[dict[str,
                                 tuple(normalize(param) for param in sig.params) if sig.params is not None else None,
                                 sig.varargs, sig.line, sig.path, sig.kind, sig.is_static) for sig in signatures]
     return signatures, skipped
+
+
+def _direct_call_statement(
+    segment: list[tuple[str, int]],
+) -> Optional[tuple[str, int, bool]]:
+    """Return a direct callee when a statement consists only of its call.
+
+    This deliberately excludes assignments, returns, comma expressions,
+    conditionals, and calls nested in arguments. Those forms use or may use
+    the result and require a real C parser to classify safely.
+    """
+    explicit_void_cast = False
+    if [token for token, _ in segment[:3]] == ["(", "void", ")"]:
+        segment = segment[3:]
+        explicit_void_cast = True
+    if len(segment) < 3:
+        return None
+    name, position = segment[0]
+    if (not re.fullmatch(r"[A-Za-z_$][\w$]*", name)
+            or name in {"if", "while", "switch", "for", "sizeof", "return"}
+            or segment[1][0] != "("):
+        return None
+    depth = 0
+    close = None
+    for index, (token, _) in enumerate(segment[1:], 1):
+        if token == "(":
+            depth += 1
+        elif token == ")":
+            depth -= 1
+            if depth == 0:
+                close = index
+                break
+        if depth < 0:
+            return None
+    if close != len(segment) - 1:
+        return None
+    return name, position, explicit_void_cast
+
+
+def _declared_name(tokens: list[str]) -> Optional[str]:
+    """Return one conservatively recognized declarator name."""
+    for index in range(len(tokens) - 3):
+        if tokens[index:index + 2] != ["(", "*"]:
+            continue
+        cursor = index + 2
+        while cursor < len(tokens) and tokens[cursor] in QUALIFIERS:
+            cursor += 1
+        if (cursor < len(tokens)
+                and re.fullmatch(r"[A-Za-z_$][\w$]*", tokens[cursor])):
+            return tokens[cursor]
+    if "=" in tokens:
+        tokens = tokens[:tokens.index("=")]
+    if len(tokens) < 2:
+        return None
+    candidate = next((
+        tokens[index - 1]
+        for index, token in enumerate(tokens)
+        if token == "[" and index > 0
+        and re.fullmatch(r"[A-Za-z_$][\w$]*", tokens[index - 1])
+    ), None)
+    if candidate is None:
+        identifiers = [
+            token for token in tokens
+            if re.fullmatch(r"[A-Za-z_$][\w$]*", token)
+            and token not in TYPE_WORDS | QUALIFIERS | STORAGE_WORDS
+        ]
+        candidate = identifiers[-1] if identifiers else None
+    if candidate is None or _parse_type(list(tokens)) is None:
+        return None
+    return candidate
+
+
+def _declared_names(tokens: list[str]) -> set[str]:
+    """Return names from one conservatively recognized declaration."""
+    parts = _split_top_level(tokens, ",")
+    first = _declared_name(parts[0]) if parts else None
+    if first is None:
+        return set()
+    names = {first}
+    for part in parts[1:]:
+        if "=" in part:
+            part = part[:part.index("=")]
+        function_pointer = None
+        for index in range(len(part) - 2):
+            if part[index:index + 2] == ["(", "*"]:
+                cursor = index + 2
+                while cursor < len(part) and part[cursor] in QUALIFIERS:
+                    cursor += 1
+                if (cursor < len(part)
+                        and re.fullmatch(r"[A-Za-z_$][\w$]*", part[cursor])):
+                    function_pointer = part[cursor]
+                    break
+        if function_pointer is not None:
+            names.add(function_pointer)
+            continue
+        identifiers = [
+            token for token in part
+            if re.fullmatch(r"[A-Za-z_$][\w$]*", token)
+            and token not in TYPE_WORDS | QUALIFIERS | STORAGE_WORDS
+        ]
+        if identifiers:
+            names.add(identifiers[-1])
+    return names
+
+
+def _definition_parameter_names(header: list[str]) -> set[str]:
+    if not header or header[-1] != ")":
+        return set()
+    depth = 0
+    opening = None
+    for index in range(len(header) - 1, -1, -1):
+        if header[index] == ")":
+            depth += 1
+        elif header[index] == "(":
+            depth -= 1
+            if depth == 0:
+                opening = index
+                break
+    if opening is None:
+        return set()
+    names: set[str] = set()
+    for part in _split_top_level(header[opening + 1:-1], ","):
+        names.update(_declared_names(part))
+    return names
+
+
+def _function_local_names(body: list[tuple[str, int]]) -> set[str]:
+    """Find local declarators; any same-named call then fails closed."""
+    names: set[str] = set()
+    segment: list[str] = []
+    paren = bracket = 0
+    index = 0
+    while index < len(body):
+        token = body[index][0]
+        if token == "for" and index + 1 < len(body) and body[index + 1][0] == "(":
+            depth = 1
+            cursor = index + 2
+            initializer: list[str] = []
+            while cursor < len(body) and depth:
+                value = body[cursor][0]
+                if value == "(":
+                    depth += 1
+                elif value == ")":
+                    depth -= 1
+                if value == ";" and depth == 1:
+                    break
+                initializer.append(value)
+                cursor += 1
+            names.update(_declared_names(initializer))
+        if token == "(":
+            paren += 1
+        elif token == ")":
+            paren -= 1
+        elif token == "[":
+            bracket += 1
+        elif token == "]":
+            bracket -= 1
+        if token == ";" and paren == bracket == 0:
+            names.update(_declared_names(segment))
+            segment = []
+        elif token in {"{", "}"} and paren == bracket == 0:
+            segment = []
+        else:
+            segment.append(token)
+        index += 1
+    return names
+
+
+def _body_ignored_result_calls(
+    body: list[tuple[str, int]], source: str, path: str, caller: str,
+    parameter_names: set[str], excluded_names: AbstractSet[str],
+) -> list[IgnoredResultCall]:
+    newlines = [index for index, char in enumerate(source) if char == "\n"]
+    calls: list[IgnoredResultCall] = []
+    segment: list[tuple[str, int]] = []
+    shadowed_names = set(parameter_names) | _function_local_names(body) | excluded_names
+    paren = bracket = 0
+    for token, position in body:
+        if token == "(":
+            paren += 1
+        elif token == ")":
+            paren -= 1
+        elif token == "[":
+            bracket += 1
+        elif token == "]":
+            bracket -= 1
+        if token == ";" and paren == bracket == 0:
+            found = _direct_call_statement(segment)
+            if found is not None and found[0] not in shadowed_names:
+                name, call_position, explicit_void_cast = found
+                calls.append(IgnoredResultCall(
+                    name=name,
+                    caller=caller,
+                    line=bisect.bisect_right(newlines, call_position) + 1,
+                    path=path,
+                    explicit_void_cast=explicit_void_cast,
+                ))
+            segment = []
+        elif token in {"{", "}"} and paren == bracket == 0:
+            # A block boundary cannot be part of a direct expression
+            # statement. Clearing also rejects initializer/compound forms.
+            segment = []
+        else:
+            segment.append((token, position))
+    return calls
+
+
+def scan_ignored_result_calls(
+    source: str, path: str,
+    known_function_macros: AbstractSet[str] = frozenset(),
+) -> list[IgnoredResultCall]:
+    """Find conservative direct call expression statements in C functions."""
+    calls: list[IgnoredResultCall] = []
+    scan_source(source, path, calls, known_function_macros)
+    return calls
 
 
 def _mismatch_class(left: TypeShape, right: TypeShape) -> str:
@@ -533,6 +781,99 @@ def compare(signatures: Iterable[Signature], skipped: list[dict[str, object]]) -
             "summary": {"conflicts": len(conflicts), "skipped_unsupported": len(skipped)}}
 
 
+def annotate_ignored_result_calls(
+    report: dict[str, object],
+    signatures: Iterable[Signature],
+    calls: Iterable[IgnoredResultCall],
+) -> None:
+    """Attach direct ignored-result evidence to return-contract conflicts.
+
+    A definition is only a comparison anchor, not proof of the historical
+    interface. Consequently this adds review evidence and never recommends a
+    declaration change.
+    """
+    signature_rows = list(signatures)
+    calls_by_symbol: dict[tuple[str, str], list[IgnoredResultCall]] = {}
+    signatures_by_symbol: dict[tuple[str, str], list[Signature]] = {}
+    external_definitions: dict[tuple[str, str], list[Signature]] = {}
+    static_definitions: dict[tuple[str, str], list[Signature]] = {}
+    for call in calls:
+        calls_by_symbol.setdefault((call.name, call.path), []).append(call)
+    for sig in signature_rows:
+        signatures_by_symbol.setdefault((sig.name, sig.path), []).append(sig)
+        if sig.kind != "definition":
+            continue
+        if sig.is_static:
+            static_definitions.setdefault((sig.name, sig.path), []).append(sig)
+        else:
+            game = next((part for part in Path(sig.path).parts
+                         if part in {"dds1", "dds2"}), "")
+            external_definitions.setdefault((game, sig.name), []).append(sig)
+    attached = 0
+    for conflict in report["conflicts"]:
+        return_mismatch = next(
+            (item for item in conflict["mismatches"] if item["field"] == "return"),
+            None,
+        )
+        if return_mismatch is None:
+            continue
+        declaration = conflict["declaration"]
+        definition = conflict["definition"]
+        evidence: list[dict[str, object]] = []
+        for call in calls_by_symbol.get(
+                (conflict["name"], declaration["path"]), []):
+            visible = [
+                sig for sig in signatures_by_symbol.get((call.name, call.path), [])
+                if sig.line < call.line
+            ]
+            if not visible:
+                continue
+            latest_line = max(sig.line for sig in visible)
+            latest = [sig for sig in visible if sig.line == latest_line]
+            # Fail closed when the most recent visible source contract is not
+            # uniquely the declaration represented by this conflict row.
+            if (len(latest) != 1
+                    or latest[0].path != declaration["path"]
+                    or latest[0].line != declaration["line"]):
+                continue
+            visible_contract = latest[0]
+            call_game = next(
+                (part for part in Path(call.path).parts if part in {"dds1", "dds2"}), "")
+            if visible_contract.is_static:
+                eligible_definitions = static_definitions.get(
+                    (call.name, call.path), [])
+            else:
+                eligible_definitions = external_definitions.get(
+                    (call_game, call.name), [])
+            if (len(eligible_definitions) != 1
+                    or eligible_definitions[0].path != definition["path"]
+                    or eligible_definitions[0].line != definition["line"]):
+                continue
+            declared = return_mismatch["declaration"]
+            defined = return_mismatch["definition"]
+            if declared != "void" and defined == "void":
+                mechanism = "value-return declaration for void definition"
+            elif declared == "void" and defined != "void":
+                mechanism = "void declaration for value-return definition"
+            else:
+                mechanism = "ignored-result return representation mismatch"
+            evidence.append({
+                "path": call.path,
+                "line": call.line,
+                "caller": call.caller,
+                "callee": call.name,
+                "source_form": "explicit (void) discard" if call.explicit_void_cast else "direct expression statement",
+                "mechanism": mechanism,
+                "disposition": "review caller and emitted data flow; do not change the declaration mechanically",
+                "definition": {"path": definition["path"], "line": definition["line"]},
+            })
+        if evidence:
+            conflict["ignored_result_calls"] = sorted(
+                evidence, key=lambda row: (row["path"], row["line"], row["caller"]))
+            attached += len(evidence)
+    report["summary"]["ignored_result_call_sites"] = attached
+
+
 def _source_paths(args: argparse.Namespace) -> list[Path]:
     if args.paths:
         roots = [Path(path) for path in args.paths]
@@ -546,6 +887,16 @@ def _source_paths(args: argparse.Namespace) -> list[Path]:
         elif root.is_file() and root.suffix == ".c":
             paths.add(root)
     return sorted(paths)
+
+
+def _project_function_macro_names() -> set[str]:
+    """Collect header macro names that could replace call-like source text."""
+    names: set[str] = set()
+    for root in (Path("include"), Path("src")):
+        if root.is_dir():
+            for path in root.rglob("*.h"):
+                names.update(_function_macro_names(path.read_text(errors="replace")))
+    return names
 
 
 def _game(path: Path | str) -> str | None:
@@ -583,9 +934,13 @@ def main(argv: Optional[list[str]] = None) -> int:
     if not focus:
         parser.error("no C source files found in the requested scope")
     signatures: list[Signature] = []
+    ignored_result_calls: list[IgnoredResultCall] = []
+    known_function_macros = _project_function_macro_names()
     skipped: list[dict[str, object]] = []
     for path in focus:
-        found, unsupported = scan_source(path.read_text(errors="replace"), str(path))
+        source = path.read_text(errors="replace")
+        found, unsupported = scan_source(
+            source, str(path), ignored_result_calls, known_function_macros)
         signatures.extend(found)
         skipped.extend(unsupported)
     focus_signatures = list(signatures)
@@ -604,6 +959,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         selected_focus = focus_signatures
     focus_declaration_count = sum(sig.kind == "declaration" for sig in selected_focus)
     report = compare(signatures, skipped)
+    annotate_ignored_result_calls(report, signatures, ignored_result_calls)
     report["summary"].update({
         "focus_files": len(focus),
         "focus_signatures": focus_signature_count,
@@ -626,6 +982,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             print(f"{row['name']}: declaration {loc(row['declaration'])} vs definition {loc(row['definition'])}")
             for mismatch in row["mismatches"]:
                 print(f"  {mismatch['field']}: {mismatch['declaration']} != {mismatch['definition']} ({mismatch['classification']})")
+            for call in row.get("ignored_result_calls", []):
+                print(f"  ignored result: {call['path']}:{call['line']} in {call['caller']} "
+                      f"({call['mechanism']}; review emitted data flow)")
     else:
         print("No fixed declaration/definition contract mismatches found.")
     print(f"Audited {focus_declaration_count} focused declarations against "
