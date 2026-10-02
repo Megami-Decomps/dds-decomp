@@ -1,10 +1,14 @@
 #include "common.h"
 
+typedef struct Motion Motion;
+typedef struct SdfMotionManager SdfMotionManager;
+typedef struct SdfMotionCommandTable SdfMotionCommandTable;
+
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 dds3AppendWorldObjectNode(s32 kind);
 extern void *sdfModelCreateWithItems(void *data, void *listRef);
-extern s32 func_003340E0(s32 arg0, void *arg1, s32 arg2);
-extern s32 sdfMotionInitializeAtZeroTime(void *arg0, s32 arg1, s32 arg2);
+extern Motion *func_003340E0(SdfMotionManager *, SdfMotionCommandTable *);
+extern void sdfMotionInitializeAtZeroTime(void *, s32, s32);
 
 typedef struct ObjWithWork {
     u8 unk0[0x18];
@@ -71,9 +75,20 @@ s32 evtCreateModelFromObject(ObjWithWork *object) {
     return (s32)model;
 }
 
-/* Attach the named script to the object's work area, registering a task;
-   stays asm: retail's $6 argument copy has no plain-C shape. */
-INCLUDE_ASM(const s32, "game/code_00116AE0", evtAttachScriptToObject);
+Motion *evtAttachScriptToObject(ScriptObj *object, SdfMotionManager *owner) {
+    Motion *motion = NULL;
+    ObjWork *work;
+
+    if (owner == NULL) {
+        return NULL;
+    }
+    work = object->work;
+    if (work->unk8 != NULL) {
+        motion = func_003340E0(owner, work->unk8);
+        sdfMotionInitializeAtZeroTime(motion, 0, 1);
+    }
+    return motion;
+}
 
 s32 dds3AllocateObjectWork(ObjWithWork *obj) {
     obj->work = sdfAllocSizeClassBlock(0x18);
