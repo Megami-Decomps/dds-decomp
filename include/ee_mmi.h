@@ -145,6 +145,30 @@
     : : "r"(p) : "$2", "$3")
 
 /*
+ * Two unaligned three-float vectors at a and b -> VU registers vf_a/vf_b:
+ *     ldr/ldl/lw a into $2/$3; ldr/ldl/lw b into $6/$7
+ *     pcpyld $2,$3,$2; pcpyld $6,$7,$6
+ *     qmtc2.ni $2,vf_a; qmtc2.ni $6,vf_b
+ * Plain C vec3 loads do not emit this MMI packing sequence; the paired block
+ * keeps both shuffles and transfers after the six retail loads. Scratch
+ * registers and the loads' memory effects are declared explicitly.
+ */
+#define EE_MMI_LOAD_VEC3_PAIR(vf_a, a, vf_b, b) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "ldr $2, 0(%0)\n\t" \
+    "ldl $2, 7(%0)\n\t" \
+    "lw $3, 8(%0)\n\t" \
+    "ldr $6, 0(%1)\n\t" \
+    "ldl $6, 7(%1)\n\t" \
+    "lw $7, 8(%1)\n\t" \
+    "pcpyld $2, $3, $2\n\t" \
+    "pcpyld $6, $7, $6\n\t" \
+    "qmtc2.ni $2, " #vf_a "\n\t" \
+    "qmtc2.ni $6, " #vf_b "\n\t" \
+    ".set reorder" \
+    : : "r"(a), "r"(b) : "$2", "$3", "$6", "$7", "memory")
+
+/*
  * Four s16 at p (unaligned) -> vf register as floats with 12 fractional bits
  * (quaternion keys):
  *     ldr $2,0(p); ldl $2,7(p)
