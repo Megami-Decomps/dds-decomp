@@ -135,7 +135,7 @@ extern u8 kwlnPadMotorLevels[2];
 
 extern void *func_00101740(const char *);
 extern void *func_00328D68(s32);
-extern void func_00102BC8(void);
+extern void *func_00102BC8(void *task);
 extern void dds3AdminReleaseTaskWork(void);
 extern char dds3AdminTaskName[];
 extern u64 sdfCreateResetPacketList(void);
@@ -231,9 +231,100 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103430);
 void func_001034E0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_001034E8);
+extern s8 D_0037F510[];
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_001036B0);
+/* Move one list cursor (scroll offset + cursor row) with the up / down buttons of pad set `padSet`: a fresh press wraps around the list, a held repeat stops at the ends. The scroll pointer is NULL for a list without scrolling. */
+void func_001034E8(s32 *scroll, s32 *cursor, s32 count, s32 visible, s32 padSet, s32 downButton, s32 upButton) {
+    s32 up;
+    s32 down;
+
+    if (cursor == NULL) {
+        return;
+    }
+    if (count < 2) {
+        return;
+    }
+    up = D_0037F510[upButton + padSet * 16];
+    if (up < 0) {
+        if (scroll == NULL) {
+            if (*cursor > 0) {
+                (*cursor)--;
+            } else if (count < visible) {
+                *cursor = count - 1;
+            } else {
+                *cursor = visible - 1;
+            }
+        } else if (*cursor > 0) {
+            (*cursor)--;
+        } else if (*scroll > 0) {
+            (*scroll)--;
+        } else if (visible < count) {
+            *scroll = count - visible;
+            *cursor = visible - 1;
+        } else {
+            *cursor = count - 1;
+        }
+    } else if (D_0037F510[upButton + padSet * 16] & 2) {
+        if (scroll == NULL) {
+            if (*cursor > 0) {
+                (*cursor)--;
+            }
+        } else if (*cursor > 0) {
+            (*cursor)--;
+        } else if (*scroll > 0) {
+            (*scroll)--;
+        }
+    }
+    down = D_0037F510[downButton + padSet * 16];
+    if (down < 0) {
+        if (scroll == NULL) {
+            if (*cursor < visible - 1) {
+                (*cursor)++;
+            } else {
+                *cursor = 0;
+            }
+        } else if (*cursor < visible - 1) {
+            (*cursor)++;
+        } else if (*scroll + visible < count) {
+            (*scroll)++;
+        } else {
+            *scroll = 0;
+            *cursor = 0;
+        }
+    } else if (D_0037F510[downButton + padSet * 16] & 2) {
+        if (scroll == NULL) {
+            if (*cursor < visible - 1) {
+                (*cursor)++;
+            }
+        } else if (*cursor < visible - 1) {
+            (*cursor)++;
+        } else if (*scroll + visible < count) {
+            (*scroll)++;
+        }
+    }
+}
+
+/* Step two list cursors (scroll + cursor each) from pad set `padSet`; returns 1 / -1 when the confirm / cancel button of that set is down, else 0. */
+s32 func_001036B0(s32 padSet, s32 count2, s32 count1, s32 visible2, s32 visible1, s32 *scroll2, s32 *scroll1, s32 *cursor2, s32 *cursor1) {
+    func_001034E8(scroll1, cursor1, count1, visible1, padSet, 7, 6);
+    func_001034E8(scroll2, cursor2, count2, visible2, padSet, 5, 4);
+    if (padSet == 0) {
+        if (D_0037F510[1] < 0) {
+            return 1;
+        }
+        if (D_0037F510[3] < 0) {
+            return -1;
+        }
+    } else {
+        if (D_0037F510[0x11] < 0) {
+            return 1;
+        }
+        if (D_0037F510[0x13] < 0) {
+            return -1;
+        }
+    }
+    return 0;
+}
 
 void kwlnDrawSpriteCell(void *list, s32 col, s32 row, s32 cols, s32 rows) {
     s32 cw = 0xC0, ch = 0x60;
@@ -387,7 +478,40 @@ u32 kwlnTextureGetPageIndex(void) {
     return kwlnTextureViewerPageIndex;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104908);
+s32 func_00104908(s32 index) {
+    KwlnResourceNode *node = (KwlnResourceNode *)sdfResourceListHead;
+    KwlnResourceNode *next;
+    s32 count = 0;
+
+    while (node->ready != NULL && *node->ready != 0) {
+        next = node->next;
+        if (next == NULL) {
+            return 0;
+        }
+        node = next;
+    }
+    if (index < 0) {
+        index = 0;
+    }
+    while (node != NULL && count != index) {
+        kwlnCurrentIncompleteResource = (s32)node;
+        while (node->ready != NULL && *node->ready != 0) {
+            next = node->next;
+            if (next == NULL) {
+                return count;
+            }
+            node = next;
+        }
+        next = node->next;
+        if (next == NULL) {
+            return count;
+        }
+        count++;
+        node = next;
+    }
+    kwlnCurrentIncompleteResource = (s32)node;
+    return count;
+}
 
 s32 kwlnTextureViewerHandlePad(void) {
     if (sdfPadButtonStates.unk13 < 0) {
@@ -510,7 +634,43 @@ void evtResetDisplayProjectionAndVectorState(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105290);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_001053F0);
+extern u16 D_00435CCC;
+extern u16 D_00435CCE;
+extern void kwlnTextureReleaseHeldReference(void);
+extern void func_00105290(void);
+extern u32 sdfAllocImageBuffer(u32 width, u32 height, u32 mode);
+extern s32 sdfTexCreateResourceWithReference(u32 width, u32 height, u32 a, u32 b, u32 buffer, u32 c, u32 d, u32 e);
+extern void func_0032B3E0(s32 texture, s32 mode);
+extern void sdfTexCreateFirstPacket(s32 texture);
+extern f32 D_0037F7B0[];
+
+/* Allocate a width x height image buffer and wrap it in the held texture reference; returns 1 when both exist. */
+s32 func_001053F0(u16 width, u16 height, f32 value) {
+    s32 texture;
+
+    if (kwlnHeldTextureReference != 0) {
+        kwlnTextureReleaseHeldReference();
+    }
+    kwlnTextureReferenceFlag = 0;
+    D_00435CCC = width;
+    D_00435CCE = height;
+    D_00435CC4 = sdfAllocImageBuffer(width, height, 0);
+    if (D_00435CC4 == 0) {
+        return 0;
+    }
+    texture = sdfTexCreateResourceWithReference(width, height, 0, 0, D_00435CC4, 0, 0, 0);
+    if (texture == 0) {
+        return 0;
+    }
+    kwlnHeldTextureReference = texture;
+    func_0032B3E0(texture, 5);
+    sdfTexCreateFirstPacket(texture);
+    D_0037F7B0[1] = value;
+    D_0037F7B0[6] = width;
+    D_0037F7B0[7] = height;
+    func_00105290();
+    return 1;
+}
 
 /* Release the retained texture and clear its request/pending flags. */
 void kwlnTextureReleaseHeldReference(void) {

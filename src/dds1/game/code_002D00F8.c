@@ -73,14 +73,62 @@ void func_002D01F0(SdfChipStats *stats) {
     stats->partialBlocks = partialBlocks;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D00F8", func_002D02C0);
+/* Heap block header: linked list node with its address, state (0 free, 1 used, 2 end marker) and tag. */
+typedef struct SdfMemBlock {
+    struct SdfMemBlock *prev; /* 0x0 */
+    struct SdfMemBlock *next; /* 0x4 */
+    u32 address; /* 0x8 */
+    u16 state; /* 0xC */
+    s16 tag; /* 0xE */
+} SdfMemBlock; /* 0x10 */
 
-typedef struct {
-    u8 pad00[0xC];
-    u16 state; /* 0x0C: 0 free, 1 used, 2 end marker */
-} SdfMemBlockPrefix;
+typedef struct SdfMemHeap {
+    SdfMemBlock head; /* 0x00: start sentinel */
+    SdfMemBlock tail; /* 0x10: end sentinel */
+    u32 base; /* 0x20 */
+    u32 size; /* 0x24 */
+} SdfMemHeap;
 
-u16 sdfGetMemoryBlockState(SdfMemBlockPrefix *block) {
+extern SdfMemHeap D_003E2748;
+extern void *func_002FF538(u32 size);
+extern void *func_002CFEB8(u32 size);
+extern s32 D_003BD2DC;
+extern u8 D_003BD9C8[4];
+extern void func_002D0918();
+extern void sdfInitializeSynchronizedRequest();
+
+/* Set up the general heap over a `size`-byte allocation: one free block between the two end sentinels. */
+void func_002D02C0(u32 size) {
+    SdfMemHeap *heap = &D_003E2748;
+    SdfMemBlock *block;
+    u32 first;
+    u32 end;
+
+    heap->base = (u32)func_002FF538(size);
+    heap->size = size;
+    block = func_002CFEB8(0x10);
+    first = (heap->base + 0x7F) & ~0x7F;
+    end = (heap->base + size) & ~0x7F;
+    heap->head.prev = NULL;
+    heap->head.next = block;
+    heap->head.state = 2;
+    heap->head.tag = -1;
+    heap->tail.state = 2;
+    heap->tail.tag = -1;
+    heap->tail.address = end;
+    heap->tail.prev = block;
+    heap->tail.next = NULL;
+    heap->head.address = first;
+    block->prev = &heap->head;
+    block->state = 0;
+    block->next = &heap->tail;
+    block->address = first;
+    block->tag = 0;
+    D_003BD2DC = 0;
+    sdfInitializeSynchronizedRequest(D_003BD9C8, func_002D0918);
+}
+
+u16 sdfGetMemoryBlockState(SdfMemBlock *block) {
     return block->state;
 }
 
