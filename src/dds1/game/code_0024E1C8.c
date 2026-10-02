@@ -159,8 +159,6 @@ void mnuInitializeProfileProgress(u16 index, MnuProfileProgress *progress) {
     progress->cap = prfGetCapValue(progress->profileId);
 }
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F8D8);
-
 /* Resource-task -> list -> selection chain used by the mantra display. */
 typedef struct MnuResourceSelectionNode {
     u8 pad00[0x70];
@@ -170,12 +168,62 @@ typedef struct MnuResourceSelectionNode {
 typedef struct MnuResourceList {
     u8 pad00[0x1C];
     MnuResourceSelectionNode *selectionNode;
+    u8 pad20[0xC];
+    void (*drawCallback)();
+    s32 *drawValues;
 } MnuResourceList;
 
 typedef struct MnuResourceTask {
     u8 pad00[0xC];
     MnuResourceList *menuList;
 } MnuResourceTask;
+
+typedef struct MnuPartyRecord {
+    u16 flags;
+    u8 pad02[2];
+    u16 unitId;
+    u8 pad06[0x19E];
+} MnuPartyRecord;
+
+extern MnuResourceList *mnuCreateListState(s32, s32, s32);
+extern MnuResourceSelectionNode *mnuListAppendNode(MnuResourceList *, s32);
+extern void *func_002CFEB8(s32);
+extern void func_00254C68();
+extern void *memset(void *, s32, u32);
+
+void func_0024F8D8(MnuResourceTask *task) {
+    u16 partyOrder[32];
+    s32 i = 0;
+    u16 *order;
+    MnuResourceList *list = mnuCreateListState(0, 6, 0x1A);
+
+    list->drawCallback = func_00254C68;
+    list->drawValues = func_002CFEB8(8);
+    memset(list->drawValues, 0, 8);
+    memset(partyOrder, 0, sizeof(partyOrder));
+    do {
+        s32 offset = i * sizeof(MnuPartyRecord) + 0xA60;
+        MnuPartyRecord *party = (MnuPartyRecord *)(datGameState + offset);
+        u16 active = party->flags & 1;
+        if (active != 0) {
+            partyOrder[party->unitId] = i + 1;
+        }
+        i++;
+    } while (i < 5);
+    order = partyOrder;
+    i = 31;
+    do {
+        if (*order != 0) {
+            MnuResourceSelectionNode *node = mnuListAppendNode(list, 0);
+            MnuProfileProgress *progress = func_002CFEB8(sizeof(MnuProfileProgress));
+            node->selectionAddress = (u32)progress;
+            mnuInitializeProfileProgress(*order - 1, progress);
+        }
+        order++;
+    } while (--i >= 0);
+    task->menuList = list;
+}
+
 
 /* Return the selection record address used by labels and transition IDs. */
 u32 mnuGetSelectedNodeValue(void) {
@@ -199,8 +247,6 @@ void mnuResetResourceAnimation(void) {
 
 extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfMemoryGetBlockAddress(s32);
-extern void *memset(void *, s32, u32);
-extern void func_0024F8D8(void *);
 
 u32 *mnuAllocateEmptyResourceListState(void) {
     s32 handle = sdfAllocGeneralBlock(0x10);
@@ -208,7 +254,7 @@ u32 *mnuAllocateEmptyResourceListState(void) {
 
     memset(block, 0, 0x10);
     block[0] = handle;
-    func_0024F8D8(block);
+    func_0024F8D8((MnuResourceTask *)block);
     block[1] = 0;
     block[2] = 0;
     return block;

@@ -317,7 +317,27 @@ void mnuDrawDisplayEntrySpriteFromLookup(s32 x, s32 y, s32 layer, DspEntry *entr
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_002562E8);
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00256400);
+extern f32 sdfSinPoly(f32);
+
+s32 func_00256400(s32 frame, s32 scale, s32 context) {
+    f32 wave = (f32)frame / 60.0f;
+    f32 baseScale = (f32)scale;
+    s32 drawScale;
+
+    wave = sdfSinPoly(wave * 3.1415926f);
+
+    func_0024E260(0, 0, 0, scale, 0x1F, context);
+    drawScale = (s32)(baseScale * (wave * 0.5f + 0.5f));
+    func_0024E260(0, 0, 0, drawScale, 0x16, context);
+    func_0024E260(0, 0, 0, drawScale, 0x17, context);
+    drawScale = (s32)(baseScale * 0.5f);
+    func_0024E260(0, 0, 0, drawScale, 0x18, context);
+    func_0024E260(0, 0, 0, drawScale, 0x19, context);
+    if (frame < 60) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00256540);
 
@@ -370,16 +390,15 @@ void mnuReleaseDisplayListNodes(DspListHead *head) {
     }
 }
 
-extern s32 func_00256400(s32);
 extern s32 func_00256540(DspListNode *, s32, s32);
 
 /* Advance the display list's timer and release completed nodes in order. */
-s32 itfAdvanceDisplayList(DspListHead *head, s32 unused, s32 context) {
+s32 itfAdvanceDisplayList(DspListHead *head, s32 scale, s32 context) {
     s32 *counter = &head->frameCount;
     DspListNode *node = head->first;
     s32 index = 0;
 
-    if (func_00256400(*counter) != 0) {
+    if (func_00256400(*counter, scale, context) != 0) {
         *counter = 0;
     } else {
         *counter = *counter + 1;

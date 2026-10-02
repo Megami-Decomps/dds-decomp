@@ -391,7 +391,51 @@ s32 itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 te
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00197EC8);
+extern s64 func_00197760(s64, s64, s32, s64, const void *, s32);
+
+s64 func_00197EC8(x, y, depth, color, text, segmentIndex)
+    s64 x;
+    s64 y;
+    s32 depth;
+    s64 color;
+    const u8 *text;
+    s32 segmentIndex;
+{
+    u8 buffer[0x200];
+    s32 length = strlen((const char *)text);
+    s32 segment;
+    s32 start;
+    s32 count;
+    s32 i;
+
+    if (length >= 0x200) {
+        return 0;
+    }
+    segment = 0;
+    start = 0;
+    count = 0;
+    for (i = 0; i < length; i++) {
+        s32 separator = 0;
+
+        if (text[i] == '_') {
+            segment++;
+            separator = 1;
+        }
+        if (segment == segmentIndex) {
+            count++;
+        }
+        if (segmentIndex < segment || (i >= length - 1 && count > 0)) {
+            memcpy(buffer, text + start, count);
+            buffer[count] = 0;
+            return func_00197760(x, y, depth, color, buffer, 0);
+        }
+        if (separator != 0) {
+            count = 0;
+            start = i + 1;
+        }
+    }
+    return 0;
+}
 
 u32 func_00198008(void) {
     return 0;
