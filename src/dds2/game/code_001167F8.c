@@ -91,9 +91,78 @@ void evtEndUnitValueTransitionForObject(WorldUnitOwner *object) {
     evtEndUnitValueTransition(object->state->unit);
 }
 
-INCLUDE_ASM(const s32, "game/code_001167F8", func_00116978);
+typedef struct WorldTransformParams {
+    f32 rotation[4];    /* 0x00 */
+    f32 position[3];    /* 0x10 */
+    f32 scale[3];       /* 0x1C */
+} WorldTransformParams;
 
-INCLUDE_ASM(const s32, "game/code_001167F8", func_00116A20);
+typedef struct WorldTransformData {
+    f32 position[3];    /* 0x00 */
+    f32 positionW;      /* 0x0C */
+    u8 pad10[0x30];
+    f32 scale[3];       /* 0x40 */
+    f32 scaleW;         /* 0x4C */
+    f32 rotation[4];    /* 0x50 */
+    u32 mode;           /* 0x60 */
+    u32 flags;          /* 0x64 */
+} WorldTransformData;
+
+typedef struct WorldTransformSetup {
+    u8 pad00[4];
+    u32 flags;                      /* 0x04: bit 0 -> 1, bit 1 -> 4 in the object's flags */
+    u32 mode;                       /* 0x08 */
+    WorldTransformParams transform; /* 0x0C */
+} WorldTransformSetup;
+
+typedef struct WorldTransformOwner {
+    u8 pad00[0x18];
+    WorldTransformData *data;
+} WorldTransformOwner;
+
+/* Load flags, mode and the transform block from a setup record. */
+void func_00116978(WorldTransformOwner *object, WorldTransformSetup *setup) {
+    WorldTransformData *data = object->data;
+
+    data->flags = 0;
+    if (setup->flags & 1) {
+        data->flags = 1;
+    }
+    if (setup->flags & 2) {
+        data->flags |= 4;
+    }
+    data->rotation[0] = setup->transform.rotation[0];
+    data->mode = setup->mode;
+    data->rotation[1] = setup->transform.rotation[1];
+    data->rotation[2] = setup->transform.rotation[2];
+    data->rotation[3] = setup->transform.rotation[3];
+    data->position[0] = setup->transform.position[0];
+    data->position[1] = setup->transform.position[1];
+    data->position[2] = setup->transform.position[2];
+    data->positionW = 0.0f;
+    data->scale[0] = setup->transform.scale[0];
+    data->scale[1] = setup->transform.scale[1];
+    data->scale[2] = setup->transform.scale[2];
+    data->scaleW = 1.0f;
+}
+
+/* Load rotation, position and scale from a parameter block. */
+void func_00116A20(WorldTransformOwner *object, WorldTransformParams *params) {
+    WorldTransformData *data = object->data;
+
+    data->rotation[0] = params->rotation[0];
+    data->rotation[1] = params->rotation[1];
+    data->rotation[2] = params->rotation[2];
+    data->rotation[3] = params->rotation[3];
+    data->position[0] = params->position[0];
+    data->position[1] = params->position[1];
+    data->position[2] = params->position[2];
+    data->positionW = 0.0f;
+    data->scale[0] = params->scale[0];
+    data->scale[1] = params->scale[1];
+    data->scale[2] = params->scale[2];
+    data->scaleW = 1.0f;
+}
 
 
 s32 func_00116A88(WorldUnitOwner *obj) {

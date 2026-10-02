@@ -113,7 +113,23 @@ void evtClearWorldSlotStatusFlag(void)
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtStage", func_00220298);
+extern void evtScaleValueByMultiplier(s32 slotData, f32 multiplier);
+
+/* Scale the slot data by a multiplier clamped to [0, 1]. */
+void func_00220298(f32 multiplier) {
+    s32 slotData;
+
+    slotData = dds3GetSlot1Data();
+    if (slotData != 0) {
+        if (multiplier < 0.0f) {
+            multiplier = 0.0f;
+        }
+        if (multiplier > 1.0f) {
+            multiplier = 1.0f;
+        }
+        evtScaleValueByMultiplier(slotData, multiplier);
+    }
+}
 
 void func_00220300(s32 unused, void *data) {
     s32 slotData;
