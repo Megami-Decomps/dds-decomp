@@ -79,6 +79,42 @@ end_data
         with self.assertRaisesRegex(fld.FldError, "references event 3"):
             fld.encode(fld.parse_source(source))
 
+    def test_motion_keys_must_increase(self) -> None:
+        source = ROOT / "src/dds1/data/field/f011_001.fldasm"
+        data = bytearray(fld.encode(fld.parse_source(source.read_text(encoding="utf-8"))))
+        words, data_end, _ = fld._read_header(data)
+        resources = fld._read_resources(data, fld._read_types(data, words, data_end))
+        motion = next(resource for resource in resources if resource.type_id == 9)
+        track = fld._read_motion_tracks(data, motion.data, data_end, "test motion")[0]
+        first_key = struct.unpack_from("<I", data, track.keys)[0]
+        struct.pack_into("<I", data, track.keys + 4, first_key)
+        with self.assertRaisesRegex(fld.FldError, "not strictly increasing"):
+            fld.validate(bytes(data))
+
+    def test_single_key_motion_is_valid(self) -> None:
+        source = """\
+fld2 1
+header version=23 magic=FLD2 type_count=1 type_table=@resource_types word_1c=0 word_20=0 word_24=0 word_28=0 word_2c=0 word_30=0 word_34=0 word_38=0 word_3c=0
+label resource_types
+type id=9 count=1 resources=@resources
+label resources
+resource serial=0 flags=0 type=9 name=null reserved=0 transform=null area=null link=null sblock=null data=@motion_data
+label motion_data
+motion tracks=scalar:@curve
+label curve
+motion_curve count=1 values=@values keys=@frames word_0c=1
+label values
+scalar 2.5
+label frames
+keys 120
+label data_end
+end_data
+"""
+        data = fld.encode(fld.parse_source(source))
+        fld.validate(data)
+        rendered = fld.render_source(data)
+        self.assertEqual(fld.encode(fld.parse_source(rendered)), data)
+
     def test_tracked_sources_are_canonical_and_exact(self) -> None:
         expected_links = {
             "dds1": fld.LinkSummary(2, 3, 1),
@@ -94,6 +130,9 @@ end_data
                     data = fld.encode(fld.parse_source(text))
                     self.assertEqual(hashlib.sha1(data).hexdigest(), expected)
                     self.assertEqual(fld.render_source(data), text)
+                    self.assertIn("motion tracks=vector3:", text)
+                    self.assertIn("motion_curve count=", text)
+                    self.assertIn("\nkeys ", text)
                     field_text, area_text = source.stem.split("_")
                     field, area = int(field_text[1:]), int(area_text)
                     scripts = ROOT / "src" / game / "scripts" / "field" / f"f{field:03}.bfasm"
