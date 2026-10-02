@@ -8,7 +8,7 @@ extern s32 sdfAllocGeneralBlock(s32);
 
 extern void *sdfMemoryGetBlockAddress(u32);
 
-extern void func_00313BA8();
+extern void func_00313BA8(s32, s32);
 
 extern s32 sdfReleaseResourceAllocation(u32);
 
@@ -38,7 +38,7 @@ typedef struct SdfTaskItemDesc {
     void (*callback)(s32, s32);      /* 0x10 */
 } SdfTaskItemDesc;
 
-extern u32 func_00312A48(SdfTaskItemDesc *);
+extern void *func_00312A48(SdfTaskItemDesc *);
 
 
 
@@ -182,10 +182,10 @@ typedef struct SdfList {
 extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 
-extern void func_00313BA8();
+extern void func_00313BA8(s32, s32);
 
-extern u32 func_00313BA0(void);
-extern u32 func_00313BB0(void);
+extern s32 func_00313BA0(void);
+extern s32 func_00313BB0(s32, s32);
 
 extern s32 sdfAllocGeneralBlock(s32);
 extern u32 strlen(const char *);
@@ -876,7 +876,34 @@ s64 sdfDestroyTaskResourceWork(TaskWork *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312A48);
+void *func_00312A48(SdfTaskItemDesc *item) {
+    SdfTaskEntry *work = sdfAllocSizeClassBlock(0x1C);
+
+    memset(work, 0, 0x1C);
+    work->flags = 0x100007;
+    work->key = item->key;
+    if (item->init == NULL) {
+        work->init = func_00313BA0;
+    } else {
+        work->init = item->init;
+    }
+    if (item->destroy == NULL) {
+        work->destroy = func_00313BA8;
+    } else {
+        work->destroy = item->destroy;
+    }
+    if (item->update == NULL) {
+        work->update = func_00313BB0;
+    } else {
+        work->update = item->update;
+    }
+    if (item->callback == NULL) {
+        work->callback = (void (*)(s32, s32))func_00313BB0;
+    } else {
+        work->callback = item->callback;
+    }
+    return work;
+}
 
 /* Pass the entry key and saved init result to its destructor, then release it. */
 void sdfDestroyCallbackWork(SdfTaskEntry *entry) {
@@ -1188,13 +1215,13 @@ float sdfMultiplyAddFloat(float addend, float multiplicand, float multiplier) {
     return addend + multiplicand * multiplier;
 }
 
-u32 func_00313BA0(void) {
+s32 func_00313BA0(void) {
     return 0;
 }
 
-void func_00313BA8(void) {
+void func_00313BA8(s32 key, s32 initResult) {
 }
 
-u32 func_00313BB0(void) {
+s32 func_00313BB0(s32 key, s32 initResult) {
     return 0;
 }

@@ -31,6 +31,7 @@ typedef struct {
 } SdfPacket; /* 0x10 */
 
 struct SdfDrawNode;
+struct SdfNode;
 
 typedef struct {
     u8 pad_0x00[0x04];
@@ -75,13 +76,23 @@ typedef struct {
     u8 flags;          /* 0x19: bit 0 looks up node IDs; bit 2 selects alternate item setup */
     u8 pad_0x1A[0x06]; /* 0x1A */
     u8 transformStart; /* 0x20: COP2 reads four vectors across following fields */
-    u8 pad_0x21[0x0F];
+    u8 pad_0x21[0x07];
+    struct SdfNode *nodes[2]; /* 0x28: per-slot command-list heads */
     s32 packetAddressBase; /* 0x30: base of 128-byte indexed address packets */
     u8 pad_0x34[0x04]; /* 0x34 */
     s32 commandList;   /* 0x38: source measured and compiled into both slot lists */
     u8 pad_0x3C[0x34];
     u8 scaleVector[0x10]; /* 0x70 */
 } SdfModel;
+
+typedef struct SdfNode {
+    void *next;            /* 0x00: next node in the per-slot command list */
+    u8 kind;               /* 0x04 */
+    s8 packetSelector;     /* 0x05: pass filter and packet-list selector */
+    s16 quadwordCount;     /* 0x06: payload size in 16-byte units */
+    u8 pad_0x08[0x04];
+    s32 resourceHandle;    /* 0x0C: retained allocation, zero for standalone nodes */
+} SdfNode; /* 0x10 */
 
 /* A draw node owns a circular child list and five COP2 input vectors. */
 typedef struct SdfDrawNode {
@@ -105,6 +116,7 @@ typedef struct SdfDrawNode {
 extern void sdfFreeNodeLists(void);
 
 extern void sdfEnsureFreeRootWorkspace(void *arg0);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 
 extern void func_003312A8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -224,7 +236,18 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_00330E60);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00330FE0);
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331238);
+SdfNode *func_00331238(SdfModel *model, s32 packetSelector, s32 listIndex) {
+    SdfNode *node = sdfAllocSizeClassBlock(sizeof(SdfNode));
+    SdfNode **head = (SdfNode **)(((u32)listIndex << 2) + (u32)model + 0x28);
+    SdfNode *next = *head;
+
+    node->packetSelector = packetSelector;
+    *head = node;
+    node->quadwordCount = 1;
+    node->resourceHandle = 0;
+    node->next = next;
+    return node;
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_003312A8);
 

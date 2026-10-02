@@ -58,7 +58,8 @@ typedef struct SkillMenuState {
     u8 pad00[0xC];
     SkillList *partyList;        /* 0x0C */
     SkillListWindow *window[3];  /* 0x10 */
-    u8 pad1C[8];
+    u8 pad1C[4];
+    s32 panelState;              /* 0x20 */
     SkillListWindow *selected;   /* 0x24 */
     u8 pad28[8];
     u32 selectionFlags;          /* 0x30 */
@@ -67,7 +68,11 @@ typedef struct SkillMenuState {
 typedef struct SkillMenuContext {
     u8 pad00[0x78];
     s32 actor;                   /* 0x78 */
-    u8 pad7C[0xA8];
+    u8 pad7C[0x64];
+    s32 pageGrid;                /* 0xE0 */
+    u8 padE4[4];
+    s32 pageLabels;              /* 0xE8 */
+    u8 padEC[0x38];
     SkillListWindow *panel;      /* 0x124 */
     u8 pad128[0x34];
     u32 actionFlags;             /* 0x15C */
@@ -77,6 +82,25 @@ typedef struct SkillMenuContext {
     u8 pad7E0[0x12C];
     SkillMenuState *menu;        /* 0x90C */
 } SkillMenuContext;
+
+typedef struct SkillPageBlock {
+    u32 word[14];
+} SkillPageBlock;
+
+typedef struct SkillPageWindow {
+    u8 pad00[4];
+    s32 field04;
+    u8 pad08[0xC];
+    SkillList *list;             /* 0x14 */
+    u8 pad18[0x34];
+    SkillPageBlock block;        /* 0x4C */
+    u8 pad84[4];
+    s32 field88;
+} SkillPageWindow;
+
+extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuSetPanelState(s32, s32);
+extern void func_00282DA0(s32, s32, s32, s32, s32);
 
 s64 ptySkillMenuUpdate(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
@@ -95,7 +119,44 @@ s64 ptySkillMenuUpdate(s32 callback) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279328", ptySkillMenuCopyPageState);
+static inline SkillPageWindow **getSkillPageSlot(SkillPageWindow **windows,
+                                                  s32 index) {
+    return windows + index;
+}
+
+void ptySkillMenuCopyPageState(s32 context) {
+    SkillMenuContext *work = (SkillMenuContext *)context;
+    SkillMenuState *menu = work->menu;
+    SkillPageWindow **windows = (SkillPageWindow **)menu->window;
+    s32 index = menu->partyList->cursor->index;
+    s32 pageGrid;
+    u32 i;
+
+    itfDrawGridWithResolvedSlot(0x10E0, 0x598, 0, 1,
+                                work->pageLabels,
+                                9, 0x53);
+    itfDrawGridWithResolvedSlot(0x10E0, 0xC88, 0, 1,
+                                work->pageLabels,
+                                0xA, 0x53);
+    pageGrid = work->pageGrid;
+    itfDrawGridWithResolvedSlot(0x10E0, 0xA18, 0, 1, pageGrid,
+                                0x1D, 0x53);
+    mnuSetPanelState(menu->panelState, index);
+    func_00282DA0(0xDE0, 0x350, 0, menu->panelState, 0x53);
+    mnuDrawWindowContainer(0x1220, 0x678, 0,
+                           (s32)*getSkillPageSlot(windows, index), 0x53);
+    for (i = 0; i < 4; i++) {
+        if (i != index) {
+            memcpy(&windows[i]->block,
+                   &(*getSkillPageSlot(windows, index))->block,
+                   sizeof(SkillPageBlock));
+            windows[i]->field88 =
+                (*getSkillPageSlot(windows, index))->field88;
+            windows[i]->field04 =
+                (*getSkillPageSlot(windows, index))->field04;
+        }
+    }
+}
 
 s64 ptySkillMenuEnterPage(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
