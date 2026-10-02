@@ -691,6 +691,7 @@ the plain-C forms that were tried. Use these instead of writing the asm again.
 | `VU0_PERSPECTIVE_DIVIDE_VF10()` | `vdiv Q,vf0w,vf10w; vmove.w vf10,vf0; vwaitq; vmulq.xyzw vf10,vf10,Q` |
 | `VU0_SCALE_MATRIX_ROWS(src)` | `vmulx.xyzw vf28,vf28,srcx; vmuly.xyzw vf29,vf29,srcy; vmulz.xyzw vf30,vf30,srcz`: scale the primary matrix rows |
 | `VU0_SUB(dst, a, b)` / `VU0_ADD` / `VU0_MUL` | `vsub.xyzw` / `vadd.xyzw` / `vmul.xyzw dst,a,b` between calls (position differences, blend sums) |
+| `VU0_FTOI4(dst, src)` | `vftoi4.xyzw dst,src`: convert all four float components to signed 28.4 fixed-point integers (packed screen projection in DDS1 `func_001F6300` / DDS2 `func_00207C28`) |
 | `VU0_NEGATE_XYZ(vf)` | `vsub.xyz vf,vf0,vf`: negate xyz, w kept (reversed direction after a matrix apply; 95 sites) |
 | `VU0_CLEAR_W(vf)` / `VU0_SET_W_ONE(vf)` | `vmulx.w vf,vf,vf0x` (w = 0) / `vmove.w vf,vf0` (w = 1): the w fix-up before a colour pack or point store |
 | `VU0_SET_AXIS_CLEAR_W(f, axis)` | `mfc1 $2,f; qmtc2.ni $2,vf2; vaddx.axis vf10,vf0,vf2x; vmulx.w vf10,vf10,vf0x` as one block: vf10.axis = f, w = 0 (event unit path/aim vectors; separate `VU0_SCALAR_OP` + `VU0_CLEAR_W` moves a neighbouring `daddu`) |
@@ -1028,6 +1029,26 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     Allocation order stays unchanged, while comparison pseudo `r101` moves
     from `$v0` to `$v1`. This is another application of this existing idiom,
     not evidence for declaration-order shuffling or an invented return type.
+    The same error can change late tail merging, not just two register words.
+    DDS1 `func_00232E20` / DDS2 `func_0024DBB8` ignore the genuine
+    `PolyMovieWork *` result of `evtPolygonMovieInitWork` before `flags |= 8`.
+    With a false `void` declaration, the final `lw/ori/sw` uses `$v0` and merges
+    its store with the three asset-cleanup arms. The correct pointer result
+    produces retail's separate `$v1` update; the polling function itself remains
+    `void`. Correcting only that initializer result fixes the DDS1 **52/90-word**
+    residual. Reusing the existing `EvtWindowContext` asset prefix gives
+    **47 match, 0 differ** and **50 match, 0 differ** for the two current units.
+    `filePollEntryCleanup` also has its genuine `s32` declaration, but an
+    independent control with that call still declared `void` remains exact:
+    the initializer return is the decisive change.
+    A currently matching `void` C definition is not conclusive negative evidence.
+    Both games' `sdfAllocAndClearQuadwords` actually forward the buffer returned
+    by `sdfClearQuadwords`; both formatted-packet wrappers return the cursor
+    saved by their assembly helper and consumed by real packet-append callers.
+    Giving those producers genuine `void *` results preserves **4 match, 0 differ**
+    for each allocator unit and **78 match, 0 differ** for each packet unit.
+    Do not drop an evidenced pointer result, or invent a wide wrapper result,
+    merely because either declaration can reproduce the same bytes.
 11. **`x / 5` always compiles with the zero check, and a source-order trap.**
     ee-gcc emits `addiu $2,$0,5; div; beql $2,$0,1f; break 7` even for a
     constant divisor, so the check is not evidence of a variable divisor
@@ -1267,6 +1288,43 @@ tests bit-by-bit). Adding views to steer alias sets is the lever above.
 Neither ELF has `mtc1 $1,$fN` or `mtc1 $0,$fN` in a branch slot: `li.s` is a
 `.set reorder` macro and `as -g` keeps it where cc1 put it
 (retail `li.s $f12,K; jal f; nop`, DDS2 `func_001ECC18`).
+
+### Preserve the vector type of a local coordinate result
+
+When related vector helpers reserve a 16-byte local area and save the first
+computed coordinate at its component offset (`X` at `sp+0`, `Y` at `sp+4`),
+use the existing vector type for the result. Do not flatten that object into
+independent float locals just because only two coordinates are needed:
+
+```c
+/* Scalar reconstruction: the first result stays live in an FP register. */
+f32 y, z;
+y = vector[1] * cos(angle) + vector[2] * sin(angle);
+z = vector[1] * -sin(angle) + vector[2] * cos(angle);
+vector[2] = z;
+vector[1] = y;
+
+/* Existing canonical type preserves the coordinate object's storage. */
+SdfVec4 result;
+result.y = vector[1] * cos(angle) + vector[2] * sin(angle);
+result.z = vector[1] * -sin(angle) + vector[2] * cos(angle);
+vector[2] = result.z;
+vector[1] = result.y;
+```
+
+Controlled scalar-versus-vector copies of DDS2 `func_00325EC8`,
+`func_00326018`, and `func_00326158` differ in 18/83, 18/79, and 18/83
+compared words respectively with scalar locals (`0x30` frame, first result
+in `$f20`). All three are exact with the canonical `SdfVec4` local (`0x40`
+frame and the retail coordinate stack slot); the whole unit ends
+`26 match, 0 differ`. Standard `double sin(double)`/`cos(double)` and
+ordinary expressions are sufficient; explicit compiler-helper calls or
+invented integer libm prototypes are not the source idiom.
+
+The original local declaration is inferred from those component offsets,
+the surrounding helpers' existing vector type, and the controlled result.
+This is not permission to invent an alternate view, add unused padding
+variables, or replace every scalar temporary with an arbitrary aggregate.
 
 ## Not allowed
 

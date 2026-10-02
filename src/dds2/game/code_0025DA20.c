@@ -1,6 +1,12 @@
 #include "common.h"
 #include "mnu.h"
 #include "sdf.h"
+#include "kwln.h"
+
+extern void func_00101968(KwlnTask *, KwlnTask *);
+extern s64 mnuPreparePopupAndDispatchSelection(s32);
+extern s64 mnuAdvanceCampPopup(s32);
+extern s64 mnuFinishCampPopup(s32);
 
 extern s32 sdfAllocGeneralBlock(s32);
 extern u8 *sdfResourceRetainAddress(s32);
@@ -131,7 +137,7 @@ extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern void *memset(void *dst, s32 c, u32 n);
 
-extern void kwlnTaskCreate(void *name, s32 priority, s32 mode, s32 flags, void *update, void *destroy, void *data);
+extern KwlnTask *kwlnTaskCreate();
 
 extern void evtTickPackLoad(void);
 
@@ -1172,7 +1178,8 @@ typedef struct ShopScene {
     u8 pad00[0x7C];
     CampWindowContainer *sprites[1]; /* 0x7C */
     CampWindowContainer *extra;      /* 0x80 */
-    u8 pad84[0xC];
+    u8 pad84[8];
+    s32 stockGroup;         /* 0x8C */
     s32 quantity;           /* 0x90: clamped to [1, maximum] */
     u8 pad94[0x33];
     u8 atLimit;             /* 0xC7 */
@@ -1322,7 +1329,25 @@ INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424BC0);
 
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424BD0);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260708);
+void func_00260708(const s32 *stockGroup) {
+    ShopScene *scene = (ShopScene *)mnuTerminalCreateContext();
+    KwlnTask *drawTask;
+    KwlnTask *fadeTask;
+
+    if (stockGroup != NULL) {
+        scene->stockGroup = *stockGroup;
+    }
+    kwlnTaskCreate(D_00437838, 0x402, 1, 1,
+        mnuPreparePopupAndDispatchSelection, NULL, (u32)scene);
+    drawTask = kwlnTaskCreate(D_00424BC0, 0x2B12, 1, 1,
+        mnuAdvanceCampPopup, NULL, (u32)scene);
+    kwlnTaskCreate(D_00424BD0, 0x520E, 1, 1,
+        mnuFinishCampPopup, mnuTerminalReleaseContextAndResources, (u32)scene);
+    fadeTask = kwlnTaskCreate("shop_fade", 0x2B13, 1, 0,
+        mnuTerminalSyncMessageWindowControl, NULL, (u32)scene);
+    func_00101968(drawTask, fadeTask);
+    mnuPanelTaskCompletionState = 1;
+}
 
 void mnuCampDestroyPanelTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_00437838, 0);
@@ -1556,7 +1581,35 @@ void func_00261310(u8 *scene) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_002613C8);
+typedef struct CampPriceTier {
+    u8 limit;
+    u8 percent;
+} CampPriceTier;
+
+extern CampPriceTier D_003CE3E8[];
+
+typedef struct CampRateRow {
+    u16 percent;
+    u8 pad02[10];
+} CampRateRow;
+
+extern CampRateRow D_003CE150[];
+
+s32 func_002613C8(s32 level, s32 price) {
+    u32 i;
+
+    if (level != 0) {
+        for (i = 0; i < 8; i++) {
+            if (D_003CE3E8[i].limit != 0 && D_003CE3E8[i].limit >= level) {
+                price = price * D_003CE3E8[i].percent / 100;
+                break;
+            }
+        }
+    } else {
+        price = price * D_003CE150[*(s32 *)(datGameState + 0x1E658)].percent / 100;
+    }
+    return price;
+}
 
 s32 mnuCampAdvanceCounter(s32 delta, u8 *scene) {
     s32 max = func_00261198(scene);

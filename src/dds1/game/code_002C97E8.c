@@ -159,7 +159,23 @@ void sdfQuatFromEuler(f32 *out, f32 x, f32 y, f32 z) {
     out[3] = cz * cy * cx - sz * sy * sx;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9BF0);
+void func_002C9BF0(f32 *axis, f32 *angle, f32 *q) {
+    f32 w = q[3];
+    f32 twiceAngle = 2.0f * func_002FA1C0(w);
+    f32 scale = fsqrtf(1.0f - w * w);
+    double magnitude = scale;
+
+    if (magnitude < 0.0) {
+        magnitude = -magnitude;
+    }
+    if (magnitude < 0.0005f) {
+        scale = 1.0f;
+    }
+    axis[0] = q[0] / scale;
+    axis[1] = q[1] / scale;
+    axis[2] = q[2] / scale;
+    *angle = twiceAngle;
+}
 
 void sdfQuaternionBlendNormalize(float *out, float *from, float *to, float fraction) {
     float inv = 1.0f - fraction;
@@ -750,7 +766,6 @@ u32 *sdfFindTaskItemValueByKey(TaskWork *work, s32 key) {
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB3B8);
 
-INCLUDE_RODATA(const s32, "game/code_002C97E8", D_003B3EE0);
 
 void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 mode) {
     u32 *item = sdfFindTaskItemValueByKey(work, key);
