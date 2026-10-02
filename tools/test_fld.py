@@ -293,7 +293,14 @@ label assets
 model_assets count=1
 model_asset index=0 word_01=0x80969696 resource_04=3 values_08=0,0,1,0.5,0 scalar_200=0.9
 label motion
-u32 0
+model_motion_playbook clip_count=1 bindings=1 clips=@motion_clips
+model_motion_binding family=node selector=translation target=1
+label motion_clips
+model_motion_clip_table clips=@motion_clip
+label motion_clip
+model_motion_clip duration=30 reserved=0
+model_motion_track format=vector3 frames=0,30
+motion_vector3 0,0,0 10,20,30
 label data_end
 end_data
 """
@@ -313,6 +320,9 @@ end_data
         self.assertIn("color 128,128,128,128", rendered)
         self.assertIn("mesh_program address=16", rendered)
         self.assertIn("vif_nops count=3", rendered)
+        self.assertIn("model_motion_playbook clip_count=1 bindings=1", rendered)
+        self.assertIn("family=node selector=translation target=1", rendered)
+        self.assertIn("model_motion_track format=vector3 frames=0,30", rendered)
         self.assertEqual(fld.encode(fld.parse_source(rendered)), data)
 
         with self.assertRaisesRegex(fld.FldError, "has parent 2"):
@@ -331,6 +341,32 @@ end_data
             )
         with self.assertRaisesRegex(fld.FldError, "only 1 assets exist"):
             fld.encode(fld.parse_source(source.replace("model_draw asset=0", "model_draw asset=1")))
+        with self.assertRaisesRegex(fld.FldError, "requires vector3, got float5"):
+            fld.encode(
+                fld.parse_source(
+                    source.replace("format=vector3", "format=float5", 1)
+                )
+            )
+        with self.assertRaisesRegex(fld.FldError, "motion frames must be u16"):
+            fld.encode(
+                fld.parse_source(source.replace("frames=0,30", "frames=0,65536"))
+            )
+
+        wrapped_source = source.replace("frames=0,30", "frames=65535,0")
+        wrapped_data = fld.encode(fld.parse_source(wrapped_source))
+        self.assertIn("frames=65535,0", fld.render_source(wrapped_data))
+
+        static_source = source.replace("bindings=1", "bindings=0", 1)
+        static_source = static_source.replace(
+            "model_motion_binding family=node selector=translation target=1\n", ""
+        )
+        static_source = static_source.replace(
+            "model_motion_track format=vector3 frames=0,30\n"
+            "motion_vector3 0,0,0 10,20,30\n",
+            "",
+        )
+        static_data = fld.encode(fld.parse_source(static_source))
+        self.assertIn("bindings=0", fld.render_source(static_data))
 
     def test_tracked_sources_are_canonical_and_exact(self) -> None:
         expected_links = {
