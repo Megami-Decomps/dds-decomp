@@ -168,7 +168,57 @@ u8 *btlCreateControlObject(void) {
     return (u8 *)object;
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6158);
+extern f32 sdfViewTargetVector[];
+extern f32 sdfViewMatrix[];
+extern f32 sdfProjectionMatrix[];
+extern f32 D_00324660[];
+extern void sdfInvertRigidVuTransform(void);
+extern void sdfPostmultiplyVuMatrixFromMemory(f32 *);
+
+/* vu0 routine: forward-cone projection from vf10 to integer screen XY */
+s32 func_001F6158(s32 *out) {
+    f32 distance;
+    f32 facing;
+    f32 *projection;
+    BtlVec4 position;
+
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(distance);
+    if (!(distance > 16.0)) {
+        return 0;
+    }
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    VU0_MOVE_MATRIX_TO_B();
+    sdfInvertRigidVuTransform();
+    VU0_MOVE_VF(vf10, vf30);
+    VU0_NORMALIZE_VF10();
+    VU0_DOT_XYZ(facing, vf10, vf11);
+    if (facing <= 0.5f) {
+        return 0;
+    }
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_MOVE_VF(vf28, vf24);
+    VU0_MOVE_VF(vf29, vf25);
+    VU0_MOVE_VF(vf30, vf26);
+    VU0_MOVE_VF(vf31, vf27);
+    projection = sdfProjectionMatrix;
+    sdfPostmultiplyVuMatrixFromMemory(projection);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    projection += 16;
+    VU0_LOAD_VF(vf11, projection);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_00324660);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, &position);
+    out[0] = (s32)position.f[0] - 0x700;
+    out[1] = (s32)position.f[1] * 2 - 0xF20;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6300);
 
