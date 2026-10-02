@@ -1,0 +1,295 @@
+sky 1
+
+default
+  state type=0 display=0 fade=0 sway=0
+  draw_vector 255,0,19999,20000
+  draw_color 64,80,96
+  light 0 color=0.7,0.7,0.7 direction=0.5,0.3,0.5
+  light 1 color=0.0,0.0,0.0 direction=1.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.2,0.2,0.2
+  unit_color_a 0.7,0.7,0.7
+  unit_direction 0.5,0.3,0.5
+  reserved 0000000000000000000000000000803f0000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.2,0.2,0.2
+end
+
+set 0
+  state type=5 display=-30 fade=1 sway=0
+  draw_vector 255,130,700,1000
+  draw_color 255,255,255
+  light 0 color=0.9,0.8,0.7 direction=0.14,0.4,0.91
+  light 1 color=0.5,0.5,0.5 direction=0.0,-0.14,-0.99
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.2,0.2,0.2
+  unit_color_a 0.8,0.7,0.6
+  unit_direction 0.5,0.3,0.5
+  reserved 0000000000000000000000000000803f0000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.4,0.35,0.2
+end
+
+set 1
+  state type=23 display=-110 fade=1 sway=0
+  draw_vector 255,100,2000,3000
+  draw_color 25,25,0
+  light 0 color=0.7,0.45,0.9 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.3,0.1,0.2
+  unit_color_a 0.7,0.6,0.9
+  unit_direction 0.0,0.6,0.5
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.3,0.2,0.35
+end
+
+set 2
+  state type=0 display=0 fade=1 sway=0
+  draw_vector 255,130,1000,9000
+  draw_color 40,10,20
+  light 0 color=0.8,0.8,0.8 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.2,0.2,0.2
+  unit_color_a 1.0,0.7,0.7
+  unit_direction 0.5,0.3,0.5
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.3,0.2,0.2
+end
+
+set 3
+  state type=142 display=-115 fade=1 sway=0
+  draw_vector 255,180,2000,4000
+  draw_color 40,0,20
+  light 0 color=0.7,0.4,0.65 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.4,0.2,0.3
+  unit_color_a 0.6,0.5,0.8
+  unit_direction 0.5,0.3,0.5
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 1.0,0.6,0.7
+end
+
+set 4
+  state type=192 display=-115 fade=1 sway=0
+  draw_vector 255,180,2000,4000
+  draw_color 40,0,20
+  light 0 color=0.7,0.4,0.65 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.4,0.2,0.3
+  unit_color_a 0.6,0.5,0.8
+  unit_direction 0.5,0.3,0.5
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.7,0.6,0.8
+end
+
+set 5
+  state type=0 display=0 fade=1 sway=0
+  draw_vector 255,130,1000,9000
+  draw_color 40,10,20
+  light 0 color=0.8,0.8,0.8 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.2,0.2,0.2
+  unit_color_a 1.0,1.2,1.3
+  unit_direction 0.5,0.3,0.5
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.3,0.3,0.4
+end
+
+set 6
+  state type=30 display=-80 fade=1 sway=0
+  draw_vector 255,255,2000,3500
+  draw_color 0,0,0
+  light 0 color=0.4,0.3,0.2 direction=-0.1,0.75,0.05
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.2,0.2,0.3
+  unit_color_a 0.2,0.2,0.4
+  unit_direction -0.1,0.75,0.05
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.7,0.75,1.0
+end
+
+set 7
+  state type=213 display=-100 fade=1 sway=0
+  draw_vector 255,255,2000,3500
+  draw_color 0,0,0
+  light 0 color=0.4,0.3,0.2 direction=-0.1,0.75,0.05
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.2,0.2,0.3
+  unit_color_a 0.2,0.2,0.4
+  unit_direction -0.1,0.75,0.05
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.7,0.75,1.0
+end
+
+set 10
+  state type=23 display=-110 fade=1 sway=0
+  draw_vector 255,100,2000,3000
+  draw_color 25,25,0
+  light 0 color=0.7,0.45,0.9 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.3,0.1,0.2
+  unit_color_a 1.5,1.6,1.0
+  unit_direction 0.45,-0.6,0.0
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 1.0,0.8,0.1
+end
+
+set 21
+  state type=23 display=-110 fade=1 sway=0
+  draw_vector 255,100,2000,3000
+  draw_color 25,25,0
+  light 0 color=0.7,0.45,0.85 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.3,0.1,0.15
+  unit_color_a 0.7,0.6,0.9
+  unit_direction 0.0,0.6,0.5
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.3,0.2,0.35
+end
+
+set 22
+  state type=100 display=-70 fade=2 sway=0
+  draw_vector 255,130,1000,9000
+  draw_color 40,10,20
+  light 0 color=0.8,0.8,0.8 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.2,0.2,0.2
+  unit_color_a 0.5,0.7,0.8
+  unit_direction 0.15,0.65,0.4
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.3,0.2,0.4
+end
+
+set 23
+  state type=23 display=-110 fade=1 sway=0
+  draw_vector 255,100,2000,3000
+  draw_color 25,25,0
+  light 0 color=0.7,0.45,0.9 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.3,0.1,0.2
+  unit_color_a 1.0,0.9,1.2
+  unit_direction 0.0,0.6,0.5
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.3,0.2,0.35
+end
+
+set 30
+  state type=23 display=-110 fade=1 sway=0
+  draw_vector 255,100,2000,3000
+  draw_color 25,25,0
+  light 0 color=0.7,0.45,0.9 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.3,0.1,0.2
+  unit_color_a 0.7,0.6,0.9
+  unit_direction 0.0,0.6,0.5
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.3,0.2,0.35
+end
+
+set 31
+  state type=43 display=-110 fade=1 sway=0
+  draw_vector 255,100,2000,3000
+  draw_color 25,25,0
+  light 0 color=0.7,0.45,0.85 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.3,0.1,0.15
+  unit_color_a 0.6,0.55,0.9
+  unit_direction 0.0,0.6,0.5
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.3,0.2,0.35
+end
+
+set 33
+  state type=182 display=-115 fade=1 sway=0
+  draw_vector 255,180,2000,4000
+  draw_color 30,10,50
+  light 0 color=0.7,0.4,0.65 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.4,0.2,0.3
+  unit_color_a 0.6,0.5,0.8
+  unit_direction 0.5,0.3,0.5
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.7,0.6,0.8
+end
+
+set 34
+  state type=111 display=-70 fade=1 sway=0
+  draw_vector 255,130,1000,9000
+  draw_color 40,10,20
+  light 0 color=0.8,0.8,0.8 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.2,0.2,0.2
+  unit_color_a 0.7,0.9,1.0
+  unit_direction 0.0,0.6,0.5
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.3,0.3,0.4
+end
+
+set 36
+  state type=141 display=-100 fade=1 sway=0
+  draw_vector 255,180,2000,4000
+  draw_color 40,0,20
+  light 0 color=0.6,0.3,0.25 direction=-0.1,0.75,0.05
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.3,0.1,0.15
+  unit_color_a 0.4,0.3,0.5
+  unit_direction -0.1,0.75,0.05
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.7,0.6,0.8
+end
+
+set 50
+  state type=0 display=0 fade=1 sway=0
+  draw_vector 255,130,2500,9000
+  draw_color 40,10,20
+  light 0 color=0.8,0.8,0.8 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.2,0.2,0.2
+  unit_color_a 0.8,0.8,0.7
+  unit_direction 0.2,0.2,-0.7
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.3,0.3,0.4
+end
+
+set 51
+  state type=0 display=0 fade=1 sway=0
+  draw_vector 255,130,2500,9000
+  draw_color 40,10,20
+  light 0 color=0.8,0.8,0.8 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.2,0.2,0.2
+  unit_color_a 1.0,1.0,0.5
+  unit_direction 0.2,0.2,-0.7
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.3,0.3,0.4
+end
+
+set 52
+  state type=0 display=0 fade=1 sway=0
+  draw_vector 255,130,2500,9000
+  draw_color 40,10,20
+  light 0 color=0.8,0.8,0.8 direction=0.0,0.0,0.0
+  light 1 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  light 2 color=0.0,0.0,0.0 direction=0.0,0.0,0.0
+  background 0.2,0.2,0.2
+  unit_color_a 0.9,0.9,0.6
+  unit_direction 0.2,0.2,-0.7
+  reserved 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  unit_color_b 0.3,0.3,0.4
+end

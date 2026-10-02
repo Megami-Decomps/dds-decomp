@@ -1,0 +1,45 @@
+npl 1 count=64
+
+default primary=#737373 secondary=#333333 texture=15,0 direction=0
+
+palette 1 primary=#667359 secondary=#2c392c texture=15,0 direction=49
+palette 2 primary=#6c7353 secondary=#2c392c texture=15,0 direction=48
+palette 3 primary=#6c7353 secondary=#2c392c texture=15,0 direction=50
+palette 4 primary=#6c7353 secondary=#2c392c texture=15,0 direction=50
+palette 5 primary=#667359 secondary=#2c392c texture=15,0 direction=49
+palette 6 primary=#667359 secondary=#2c392c texture=15,0 direction=49
+palette 7 primary=#59664c secondary=#2c3326 texture=15,0 direction=50
+palette 8 primary=#6c7353 secondary=#2c392c texture=15,0 direction=50
+palette 9 primary=#59664c secondary=#2c3326 texture=15,0 direction=50
+palette 10 primary=#59664c secondary=#2c3326 texture=15,0 direction=50
+palette 11 primary=#59664c secondary=#2c3326 texture=15,0 direction=50
+palette 12 primary=#59664c secondary=#2c3326 texture=15,0 direction=50
+palette 13 primary=#59664c secondary=#2c3326 texture=15,0 direction=50
+palette 14 primary=#59664c secondary=#2c3326 texture=15,0 direction=50
+palette 15 primary=#59664c secondary=#2c3326 texture=15,0 direction=50
+palette 16 primary=#59664c secondary=#2c3326 texture=15,0 direction=50
+palette 17 primary=#59664c secondary=#2c3326 texture=15,0 direction=50
+palette 18 primary=#59664c secondary=#2c3326 texture=15,0 direction=50
+palette 19 primary=#59664c secondary=#2c3326 texture=15,0 direction=50
+palette 20 primary=#262c26 secondary=#596653 texture=15,0 direction=52
+palette 21 primary=#2c3326 secondary=#465346 texture=15,0 direction=48
+palette 22 primary=#2c3326 secondary=#465346 texture=15,0 direction=48
+palette 23 primary=#2c3326 secondary=#465346 texture=15,0 direction=48
+palette 24 primary=#2c3326 secondary=#465346 texture=15,0 direction=48
+palette 25 primary=#2c3326 secondary=#465346 texture=15,0 direction=48
+palette 26 primary=#2c3326 secondary=#465346 texture=15,0 direction=48
+palette 27 primary=#2c3326 secondary=#465346 texture=15,0 direction=48
+palette 28 primary=#262c26 secondary=#596653 texture=15,0 direction=52
+palette 29 primary=#596653 secondary=#262c26 texture=15,0 direction=50
+palette 30 primary=#596653 secondary=#262c26 texture=15,0 direction=50
+palette 31 primary=#594c40 secondary=#332c26 texture=15,0 direction=49
+palette 32 primary=#262c26 secondary=#596653 texture=15,0 direction=52
+palette 33 primary=#596653 secondary=#262c26 texture=15,0 direction=50
+palette 34 primary=#6c7353 secondary=#2c392c texture=15,0 direction=50
+palette 35 primary=#6c7353 secondary=#2c392c texture=15,0 direction=50
+palette 36 primary=#6c7353 secondary=#2c392c texture=15,0 direction=50
+palette 37 primary=#6c7353 secondary=#2c392c texture=15,0 direction=50
+palette 38 primary=#13190c secondary=#263326 texture=15,0 direction=44
+palette 39 primary=#2c3326 secondary=#465346 texture=15,0 direction=48
+palette 40 primary=#2c3326 secondary=#465346 texture=15,0 direction=48
+palette 41 primary=#6c7353 secondary=#2c392c texture=15,0 direction=50
