@@ -3,19 +3,19 @@
 
 extern void func_002D0918(void *);
 extern void *sdfResourceRetainAddress(void *);
-extern u32 sdfReadNamedResource(const char *, u32 *, s32);
+extern void *sdfReadNamedResource(const char *, void **, s32);
 extern s32 bfFindScriptIndexByName(void *, const char *);
 extern void *kwlnTaskGetTaskByName(const char *);
 extern void kwlnTaskDestroyWithHierarchy(void *, s32);
 extern s32 scrCreateTaskForProcessId(s32, void *, s32);
 extern void evtReleaseSceneResource(Scene *);
 
-/* Scene object fields used by the resource helpers (0x20). */
+/* Resource ownership and resolved address stored in the scene object. */
 typedef struct {
     u8 pad0[0x18];
-    void *unk18;
-    void *unk1C;
-} SceneObjectRes;
+    void *resourceHandle;
+    void *resourceAddress;
+} SceneObjectResourceState;
 
 void dds3ClearSceneObjectState(Scene *scene) {
     SceneObject *object;
@@ -25,26 +25,43 @@ void dds3ClearSceneObjectState(Scene *scene) {
     object->state = 0;
 }
 
-/* Loads another scene's resource into this one; stays asm: a $16/$17
-   saved-register priority swap no natural declaration order produces. */
-INCLUDE_ASM(const s32, "basic/dds3SceneBasic", evtLoadSceneResourceFrom);
+s32 evtLoadSceneResourceFrom(Scene *scene, const char *resourceName) {
+    SceneObjectResourceState *object;
+    void *resourceHandle;
+    void *resourceAddress;
+
+    object = (SceneObjectResourceState *)scene->object;
+    if (resourceName == NULL) {
+        return 0;
+    }
+    if (object->resourceHandle != NULL) {
+        evtReleaseSceneResource(scene);
+    }
+    resourceHandle = sdfReadNamedResource(resourceName, &resourceAddress, 0);
+    if (resourceAddress == NULL) {
+        return 0;
+    }
+    object->resourceHandle = resourceHandle;
+    object->resourceAddress = resourceAddress;
+    return 1;
+}
 
 /* Retain `name` and hand its address to the scene object. */
 s32 evtRetainSceneResource(Scene *scene, void *name) {
     s32 result = 0;
     void *address;
-    SceneObjectRes *object = (SceneObjectRes *)scene->object;
+    SceneObjectResourceState *object = (SceneObjectResourceState *)scene->object;
 
     if (name == NULL) {
         return result;
     }
-    if (object->unk18 != NULL) {
+    if (object->resourceHandle != NULL) {
         evtReleaseSceneResource(scene);
     }
     address = sdfResourceRetainAddress(name);
     if (address != NULL) {
-        object->unk18 = name;
-        object->unk1C = address;
+        object->resourceHandle = name;
+        object->resourceAddress = address;
         return 1;
     }
     return result;
@@ -52,13 +69,13 @@ s32 evtRetainSceneResource(Scene *scene, void *name) {
 
 /* Release the resource this scene object currently owns. */
 void evtReleaseSceneResource(Scene *scene) {
-    SceneObjectRes *object = (SceneObjectRes *)scene->object;
+    SceneObjectResourceState *object = (SceneObjectResourceState *)scene->object;
 
-    if (object->unk18 != NULL) {
-        func_002D0918(object->unk18);
+    if (object->resourceHandle != NULL) {
+        func_002D0918(object->resourceHandle);
     }
-    object->unk18 = NULL;
-    object->unk1C = NULL;
+    object->resourceHandle = NULL;
+    object->resourceAddress = NULL;
 }
 
 /* Starts the named script task on the scene object's resource; stays asm:
