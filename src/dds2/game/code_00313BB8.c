@@ -1,4 +1,5 @@
 #include "common.h"
+extern void memset();
 
 #include "fpu.h"
 
@@ -572,13 +573,34 @@ u8 scrIsSelectedScriptEntryId(s32 work, u16 id) {
     return ((ScriptFlagWork *)work)->scriptId == id;
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00315388);
-
 typedef struct PrfSkillList {
     u32 flags[8];
     s32 count;
     u16 skills[8];
 } PrfSkillList;
+
+s32 func_00315388(u16 profile, PrfSkillList *output) {
+    PrfSkillList list;
+    u32 i;
+    u16 *skills;
+    u16 skill;
+
+    memset(&list, 0, sizeof(PrfSkillList));
+    list.count = 0;
+    skills = &D_00401332[profile * 18];
+    for (i = 0; i < 8; i++) {
+        skill = *skills++;
+        if (skill != 0) {
+            list.flags[list.count] = 0;
+            list.skills[list.count] = skill;
+            list.count++;
+        }
+    }
+    if (output != NULL) {
+        *output = list;
+    }
+    return list.count;
+}
 
 s32 func_003154A0(ScriptFlagWork *unit, u32 profile, PrfSkillList *output, s32 includeFlagged) {
     PrfSkillList list;
