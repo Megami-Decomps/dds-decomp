@@ -43,7 +43,9 @@ typedef struct MenuItemSelectionData {
 typedef struct MenuItemScene {
     u8 pad00[4];
     u32 overlayFlags;
-    u8 pad08[0x90];
+    u8 pad08[0x88];
+    u32 iconSprite;
+    u8 pad94[4];
     MenuItemSelectionData *selectionData;
     u8 pad9C[0x1A4];
     u32 resetStateA;
@@ -63,6 +65,8 @@ typedef struct MenuItemScene {
     s32 extentExhausted; /* 0xD18: selects the exhausted-extent message. */
     u8 padD1C[0x85C];
     s32 unk1578; /* Nonzero enables the panel-group selection reset. */
+    s32 iconFade;
+    s32 suppressCountDelta;
 } MenuItemScene;
 
 
@@ -197,7 +201,48 @@ void mnuDrawItemPanelBackdrop(s32 scene) {
     mnuDrawBackdrop(scene + 0xd1c, 0x20);
 }
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_00263A00);
+extern void func_002BF4E0(s32, s32, s32, s32, s32, u32, s32, s32);
+extern u32 uiBlendColors(u32, u32, s32);
+extern u32 func_001979C8(s32, s32, s32, u32, char *, s32);
+extern void func_001958A0(u32, s32, s32);
+extern void frFontQueueGlyphInSelectedSlot(u32);
+
+void func_00263A00(MenuItemScene *scene) {
+    char text[16];
+    MenuItem *item = scene->selectionData->item;
+    s32 fade = scene->iconFade;
+    s32 delta;
+    s32 x;
+    u32 glyph;
+    u32 color;
+
+    func_002BF4E0(0x9A0, 0x348, 0, fade, 1, scene->iconSprite, 8, 0x53);
+    delta = scene->suppressCountDelta != 0
+                ? 0
+                : scene->selectedExtent - scene->activeSlot;
+
+    x = 0xB70;
+    if (delta / 100 <= 0) {
+        x = delta / 10 > 0 ? 0xBE0 : 0xC30;
+    }
+
+    color = uiBlendColors(0xFFF06480, 0xFFF06400, fade);
+    func_003014F0(text, D_003BC550, delta);
+    glyph = func_001979C8(x, 0x408, 0, color, text, 0);
+    func_001958A0(glyph, 1, 0x53);
+    frFontQueueGlyphInSelectedSlot(glyph);
+
+    if (item->kind == 1) {
+        if (scene->iconFade < 0x100) {
+            scene->iconFade += 0x20;
+        }
+        if (scene->iconFade > 0x100) {
+            scene->iconFade = 0x100;
+        }
+    } else {
+        scene->iconFade = 0;
+    }
+}
 
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawPanelListDefault();
