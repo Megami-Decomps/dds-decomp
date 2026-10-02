@@ -11050,11 +11050,11 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_00305EB0);
 INCLUDE_ASM(const s32, "game/code_002DE248", func_00306030);
 
 extern void func_00306030(u32, u32, u32, u32, u32, u32, u32, u32,
-                          u32, u32, u32, u32, u32);
+                          f32, u32, u32, u32, u32, u32);
 
 void func_003064C0(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g, u32 h,
-                   u32 x, u32 y, u32 width, u32 height) {
-    func_00306030(a, b, c, d, e, f, g, h, x, y, 1, width, height);
+                   f32 rotation, u32 x, u32 y, u32 width, u32 height) {
+    func_00306030(a, b, c, d, e, f, g, h, rotation, x, y, 1, width, height);
 }
 
 void effSelectPresetAndDispatch(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
