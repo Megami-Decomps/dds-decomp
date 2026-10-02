@@ -351,6 +351,8 @@ def _fallback_object(
     *,
     symbol_value: int = 0,
     relocation_name: str = "target",
+    target_value: int | None = None,
+    target_size: int = 4,
     common_symbol: bool = False,
 ) -> bytes:
     """Create a relocatable object with one fallback and one text relocation."""
@@ -416,11 +418,11 @@ def _fallback_object(
         image,
         symbol_offset + 2 * dev_elf.SYMBOL_ENTRY.size,
         target_name,
-        0,
-        0,
+        0 if target_value is None else target_value,
+        0 if target_value is None else target_size,
         global_func,
         0,
-        dev_elf.SHN_UNDEF,
+        dev_elf.SHN_UNDEF if target_value is None else 2,
     )
     if common_symbol:
         dev_elf.SYMBOL_ENTRY.pack_into(
@@ -509,6 +511,39 @@ def _fallback_object(
             align,
             entsize,
         )
+    return bytes(image)
+
+
+def _retained_object(payload: bytes) -> bytes:
+    """Create an object with one sized global object in a retained .data section."""
+
+    image = bytearray(_fallback_object(payload))
+    section_name = image.find(b".text\0")
+    if section_name < 0:
+        raise AssertionError("test object has no .text section name")
+    image[section_name : section_name + 6] = b".data\0"
+    sections = dev_elf._object_sections(image)
+    relocation_section = next(
+        section for section in sections if section.kind == dev_elf.SHT_REL
+    )
+    header = dev_elf.ElfHeader(*dev_elf.ELF_HEADER.unpack_from(image))
+    struct.pack_into(
+        "<I",
+        image,
+        header.shoff + relocation_section.index * header.shentsize + 8,
+        dev_elf.SHF_ALLOC,
+    )
+    sections = dev_elf._object_sections(image)
+    table = next(section for section in sections if section.kind == dev_elf.SHT_SYMTAB)
+    fields = list(
+        dev_elf.SYMBOL_ENTRY.unpack_from(
+            image, table.offset + dev_elf.SYMBOL_ENTRY.size
+        )
+    )
+    fields[3] = (dev_elf.STB_GLOBAL << 4) | dev_elf.STT_OBJECT
+    dev_elf.SYMBOL_ENTRY.pack_into(
+        image, table.offset + dev_elf.SYMBOL_ENTRY.size, *fields
+    )
     return bytes(image)
 
 
@@ -649,6 +684,45 @@ class DevElfTests(unittest.TestCase):
         self.assertEqual(resolved["moves"][0]["new_size"], 4)
         self.assertEqual(resolved["additions"][0]["new_vaddr"], 0x00412004)
         self.assertEqual(resolved["additions"][0]["size"], 8)
+
+    def test_nonempty_retained_section_resolves_at_old_vaddr(self) -> None:
+        old_vaddr = 0x00100080
+        symbols = [
+            ("dev_move_0_START", 0x00412000, 0, 0, 1),
+            ("dev_move_0_END", 0x00412004, 0, 0, 1),
+            ("dev_replacement_0_retained_0_START", old_vaddr, 0, 0, 1),
+            ("dev_replacement_0_retained_0_END", old_vaddr + 8, 0, 0, 1),
+        ]
+        spec = {
+            "replacements": [
+                {
+                    "retained_sections": [
+                        {
+                            "section": ".data",
+                            "size": 8,
+                            "old_vaddr": old_vaddr,
+                            "alignment": 8,
+                            "storage": "file",
+                            "expected_symbols": 1,
+                            "expected_gp_references": 0,
+                        }
+                    ]
+                }
+            ],
+            "moves": [{"old_vaddr": 0x00100020, "old_size": 4}],
+        }
+        dev_elf._resolve_linked_layout(spec, _metadata_elf(symbols, []))
+
+        moved = [*symbols]
+        moved[2] = (moved[2][0], old_vaddr + 8, 0, 0, 1)
+        moved[3] = (moved[3][0], old_vaddr + 16, 0, 0, 1)
+        with self.assertRaisesRegex(dev_elf.DevElfError, "linked start"):
+            dev_elf._resolve_linked_layout(spec, _metadata_elf(moved, []))
+
+        resized = [*symbols]
+        resized[3] = (resized[3][0], old_vaddr + 4, 0, 0, 1)
+        with self.assertRaisesRegex(dev_elf.DevElfError, "linked size"):
+            dev_elf._resolve_linked_layout(spec, _metadata_elf(resized, []))
 
     def test_linked_extension_sizes_require_ordered_boundary_symbols(self) -> None:
         spec = {"extension_vaddr": 0x00412000}
@@ -1396,12 +1470,20 @@ class DevElfTests(unittest.TestCase):
                     "retail_object": "old.o",
                     "object": "new.o",
                     "retained_sections": [
-                        {"section": ".data", "size": 0},
+                        {
+                            "section": ".data",
+                            "size": 4,
+                            "old_vaddr": 0x100080,
+                            "alignment": 4,
+                            "storage": "file",
+                            "expected_symbols": 1,
+                            "expected_gp_references": 0,
+                        },
                         {"section": ".bss", "size": 0},
                     ],
                 }
             ],
-            "moves": [{"object": "old.o", "section": ".text"}],
+            "moves": [{"object": "old.o", "section": ".rel.text"}],
         }
         replacement = _allocated_object(
             [
@@ -1440,32 +1522,218 @@ class DevElfTests(unittest.TestCase):
         with self.assertRaisesRegex(dev_elf.DevElfError, "declares file"):
             dev_elf.audit_moved_sections(file_spec, {"old.o": nobits})
 
-    def test_replacement_object_rejects_nonempty_retained_section(self) -> None:
+    def test_replacement_object_verifies_nonempty_retained_section(self) -> None:
         spec = {
             "replacements": [
                 {
                     "retail_object": "old.o",
                     "object": "new.o",
-                    "retained_sections": [{"section": ".data", "size": 4}],
+                    "retained_sections": [
+                        {
+                            "section": ".data",
+                            "size": 8,
+                            "old_vaddr": 0x100080,
+                            "alignment": 4,
+                            "storage": "file",
+                            "expected_symbols": 1,
+                            "expected_gp_references": 0,
+                        }
+                    ],
+                }
+            ],
+            "moves": [{"object": "old.o", "section": ".rel.text"}],
+        }
+        retained = _retained_object(bytes.fromhex("1122334455667788"))
+        self.assertEqual(
+            dev_elf.audit_replacement_objects(spec, [retained], [retained]),
+            {
+                "fallback_symbols": 0,
+                "retained_sections": 1,
+                "retained_symbols": 1,
+            },
+        )
+
+        changed = bytearray(retained)
+        data = dev_elf.parse_allocated_sections(changed)[".data"]
+        changed[data.offset] ^= 1
+        with self.assertRaisesRegex(dev_elf.DevElfError, "changed bytes"):
+            dev_elf.audit_replacement_objects(spec, [bytes(changed)], [retained])
+
+        changed_relocation = bytearray(retained)
+        relocation = next(
+            section
+            for section in dev_elf._object_sections(changed_relocation)
+            if section.kind == dev_elf.SHT_REL
+        )
+        offset, info = dev_elf.REL_ENTRY.unpack_from(
+            changed_relocation, relocation.offset
+        )
+        dev_elf.REL_ENTRY.pack_into(
+            changed_relocation, relocation.offset, offset, (info & ~0xFF) | 2
+        )
+        with self.assertRaisesRegex(dev_elf.DevElfError, "relocation contract"):
+            dev_elf.audit_replacement_objects(
+                spec, [bytes(changed_relocation)], [retained]
+            )
+
+        incomplete = {
+            "replacements": [
+                {
+                    "retail_object": "old.o",
+                    "object": "new.o",
+                    "retained_sections": [{"section": ".data", "size": 8}],
                 }
             ],
             "moves": [{"object": "old.o", "section": ".text"}],
         }
-        replacement = _allocated_object([(".text", 4, 1), (".data", 4, 1)])
-        with self.assertRaisesRegex(dev_elf.DevElfError, "must remain empty"):
-            dev_elf.audit_replacement_objects(spec, [replacement])
+        with self.assertRaisesRegex(dev_elf.DevElfError, "nonempty contract requires"):
+            dev_elf.audit_replacement_objects(incomplete, [retained], [retained])
 
-        spec["replacements"][0]["retained_sections"][0]["size"] = 0
-        with self.assertRaisesRegex(
-            dev_elf.DevElfError, "section .data has size 0x4, expected 0x0"
-        ):
-            dev_elf.audit_replacement_objects(spec, [replacement])
-
+        empty_spec = {
+            "replacements": [
+                {
+                    "retail_object": "old.o",
+                    "object": "new.o",
+                    "retained_sections": [{"section": ".data", "size": 0}],
+                }
+            ],
+            "moves": [{"object": "old.o", "section": ".text"}],
+        }
         replacement_without_data = _fallback_object(bytes(8))
         self.assertEqual(
-            dev_elf.audit_replacement_objects(spec, [replacement_without_data]),
-            {"fallback_symbols": 0},
+            dev_elf.audit_replacement_objects(empty_spec, [replacement_without_data]),
+            {
+                "fallback_symbols": 0,
+                "retained_sections": 0,
+                "retained_symbols": 0,
+            },
         )
+
+    def test_nonempty_retained_section_verifies_linked_gp_contract(self) -> None:
+        retained_vaddr = 0x100080
+        gp = 0x108000
+        displacement = (retained_vaddr - gp) & 0xFFFF
+        raw_lw = (0x23 << 26) | (28 << 21) | (2 << 16) | displacement
+        raw_sw = (0x2B << 26) | (28 << 21) | (2 << 16) | displacement
+        base = bytearray(_elf())
+        output = bytearray(base)
+        struct.pack_into("<I", base, 0x1010, raw_lw)
+        struct.pack_into("<I", output, 0x1010, raw_lw)
+        struct.pack_into("<I", base, 0x1014, raw_sw)
+        struct.pack_into("<I", output, 0x1014, raw_sw)
+        _, base_programs = dev_elf.parse_elf(base)
+        _, output_programs = dev_elf.parse_elf(output)
+        global_object = (dev_elf.STB_GLOBAL << 4) | dev_elf.STT_OBJECT
+        global_func = (dev_elf.STB_GLOBAL << 4) | dev_elf.STT_FUNC
+        global_notype = dev_elf.STB_GLOBAL << 4
+        development_elf = _metadata_elf(
+            [
+                ("_gp", gp, 0, global_notype, 1),
+                ("state", retained_vaddr, 8, global_object, 1),
+                ("worker", 0x100000, 0x20, global_func, 1),
+            ],
+            [],
+        )
+        retail_elf = _metadata_elf(
+            [
+                ("_gp", gp, 0, global_notype, 1),
+                ("state", retained_vaddr, 8, global_object, 1),
+                ("worker", 0x100000, 0x20, global_func, 1),
+            ],
+            [],
+        )
+        development_symbols = dev_elf.parse_linked_symbols(development_elf)
+        development_gp, _ = dev_elf._matched_gp_values(
+            [], development_symbols, retail_elf, required=True
+        )
+        drifted_retail_elf = _metadata_elf(
+            [
+                ("_gp", gp + 4, 0, global_notype, 1),
+                ("state", retained_vaddr, 8, global_object, 1),
+                ("worker", 0x100000, 0x20, global_func, 1),
+            ],
+            [],
+        )
+        with self.assertRaisesRegex(dev_elf.DevElfError, "differs from retail"):
+            dev_elf._matched_gp_values(
+                [], development_symbols, drifted_retail_elf, required=True
+            )
+        spec = {
+            "replacements": [
+                {
+                    "retained_sections": [
+                        {
+                            "section": ".data",
+                            "size": 8,
+                            "old_vaddr": retained_vaddr,
+                            "alignment": 4,
+                            "storage": "file",
+                            "expected_symbols": 1,
+                            "expected_gp_references": 2,
+                        }
+                    ]
+                }
+            ],
+            "moves": [
+                {
+                    "object": "old.o",
+                    "section": ".text",
+                    "old_vaddr": 0x100000,
+                    "new_vaddr": 0x100000,
+                    "old_size": 0x20,
+                    "new_size": 0x20,
+                }
+            ],
+        }
+        self.assertEqual(
+            dev_elf._audit_retained_sections(
+                bytes(base),
+                bytes(output),
+                base_programs,
+                output_programs,
+                development_symbols,
+                retail_elf,
+                spec,
+                development_gp,
+            ),
+            {
+                "retained_linked_sections": 1,
+                "retained_linked_symbols": 1,
+                "retained_gp_references": 2,
+            },
+        )
+
+        drifted_output = bytearray(output)
+        struct.pack_into("<I", drifted_output, 0x1014, 0)
+        struct.pack_into("<I", drifted_output, 0x1018, raw_sw)
+        with self.assertRaisesRegex(
+            dev_elf.DevElfError, "changed its GP-reference sites"
+        ):
+            dev_elf._audit_retained_sections(
+                bytes(base),
+                bytes(drifted_output),
+                base_programs,
+                output_programs,
+                development_symbols,
+                retail_elf,
+                spec,
+                development_gp,
+            )
+
+        spec["replacements"][0]["retained_sections"][0][
+            "expected_gp_references"
+        ] = 0
+        with self.assertRaisesRegex(dev_elf.DevElfError, "2 retail GP references"):
+            dev_elf._audit_retained_sections(
+                bytes(base),
+                bytes(output),
+                base_programs,
+                output_programs,
+                development_symbols,
+                retail_elf,
+                spec,
+                development_gp,
+            )
 
     def test_replacement_fallback_preserves_bytes_and_relocations(self) -> None:
         spec = {
@@ -1491,12 +1759,71 @@ class DevElfTests(unittest.TestCase):
             1,
         )
 
-        corrupted = bytearray(replacement)
+        relocated = bytearray(replacement)
         text = next(
             section
-            for section in dev_elf._object_sections(corrupted)
+            for section in dev_elf._object_sections(relocated)
             if section.name == ".text"
         )
+        relocation_word = text.offset + 8 + 4
+        word = struct.unpack_from("<I", relocated, relocation_word)[0]
+        struct.pack_into("<I", relocated, relocation_word, word | 1)
+        with self.assertRaisesRegex(dev_elf.DevElfError, "changed bytes"):
+            dev_elf.audit_replacement_objects(
+                spec, [bytes(relocated)], [retail]
+            )
+
+        shifted_named_body = bytearray(body)
+        struct.pack_into("<I", shifted_named_body, 4, 0x0C000001)
+        shifted_retail = _fallback_object(body, symbol_value=8, target_value=0)
+        shifted_replacement = _fallback_object(
+            bytes(shifted_named_body), symbol_value=12, target_value=4
+        )
+        with self.assertRaisesRegex(dev_elf.DevElfError, "changed bytes"):
+            dev_elf.audit_replacement_objects(
+                spec, [shifted_replacement], [shifted_retail]
+            )
+
+        text_section = dev_elf.ObjectSection(
+            2, ".text", 1, 0, 0, 0, 0x20, 0, 0, 4, 0
+        )
+        section_relocation = (
+            4,
+            dev_elf.R_MIPS_26,
+            "",
+            0,
+            dev_elf.STT_SECTION,
+            ".text",
+        )
+        global_func = (dev_elf.STB_GLOBAL << 4) | dev_elf.STT_FUNC
+        old_target = dev_elf.LinkedSymbol(
+            1, 1, "callee", 0, 4, global_func, 0, 2
+        )
+        new_target = dev_elf.LinkedSymbol(
+            1, 1, "callee", 4, 4, global_func, 0, 2
+        )
+        self.assertEqual(
+            dev_elf._object_relocation_target(
+                0x0C000000, section_relocation, [text_section], [old_target]
+            ),
+            ("callee", 0),
+        )
+        self.assertEqual(
+            dev_elf._object_relocation_target(
+                0x0C000001, section_relocation, [text_section], [new_target]
+            ),
+            ("callee", 0),
+        )
+
+        changed_opcode = bytearray(relocated)
+        word = struct.unpack_from("<I", changed_opcode, relocation_word)[0]
+        struct.pack_into("<I", changed_opcode, relocation_word, word ^ 0x04000000)
+        with self.assertRaisesRegex(dev_elf.DevElfError, "changed bytes"):
+            dev_elf.audit_replacement_objects(
+                spec, [bytes(changed_opcode)], [retail]
+            )
+
+        corrupted = bytearray(replacement)
         corrupted[text.offset + 8] ^= 1
         with self.assertRaisesRegex(dev_elf.DevElfError, "changed bytes"):
             dev_elf.audit_replacement_objects(
@@ -1831,7 +2158,15 @@ SECTIONS
                     "retail_object": "old.o",
                     "object": "new.o",
                     "retained_sections": [
-                        {"section": ".data", "size": 0},
+                        {
+                            "section": ".data",
+                            "size": 4,
+                            "old_vaddr": 0x100080,
+                            "alignment": 4,
+                            "storage": "file",
+                            "expected_symbols": 1,
+                            "expected_gp_references": 0,
+                        },
                         {"section": ".bss", "size": 0},
                     ],
                 }
@@ -1853,6 +2188,7 @@ SECTIONS
         self.assertIn("new.o(.data);", result)
         self.assertIn("new.o(.bss);", result)
         self.assertIn("dev_replacement_0_retained_0_START", result)
+        self.assertIn("dev_replacement_0_retained_0_START == 0x100080", result)
         self.assertIn("dev_replacement_0_retained_1_END", result)
         self.assertNotIn("old.o(.text);", result)
         self.assertNotIn("old.o(.data);", result)
