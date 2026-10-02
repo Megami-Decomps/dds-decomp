@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf.h"
 
 void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
 
@@ -187,6 +188,8 @@ typedef struct ItfMesNode {
     ItfMesItem *child; /* 0x1C */
     u8 unk20[4];       /* 0x20 */
     struct ItfMesNode *next; /* 0x24 */
+    struct ItfMesNode *forward; /* 0x28: opposite link in the glyph chain */
+    struct ItfMesNode *chainHead; /* 0x2C */
 } ItfMesNode;
 
 /* Shade bytes copied from a glyph's auxiliary color record. */
@@ -242,7 +245,7 @@ void itfMesResetWindow(s32 window);
 
 void itfMesDestroyWindow(s32 window);
 
-void frFontQueueGlyphInSelectedSlot(FrFontGlyph *glyph);
+s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *glyph);
 
 void itfMesResetCursorState(void *, s32);
 
@@ -292,7 +295,7 @@ extern void func_0019DD48();
 
 extern s32 func_0019DBA8();
 
-extern s32 func_001A1858();
+extern UiSprite *func_001A1858(s32, u32);
 
 extern void itfSetPanelLayoutAndNotify();
 
@@ -623,7 +626,7 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     rect[1] = 0x430;
     rect[2] = 0x1200 + half;
     rect[3] = 0x530 + height;
-    blkA4->panelHandle = func_001A1858(9, itfMesWork.windowTexture);
+    blkA4->panelHandle = (s32)func_001A1858(9, itfMesWork.windowTexture);
     itfSetPanelLayoutAndNotify(blkA4->panelHandle, rect[0], rect[1], rect[2], rect[3], mes->renderValue);
     itfPanelUpdateValuesAndNotify(blkA4->panelHandle, 0, 0, 0, 0);
     mes->flags = (mes->flags & ~0xC00) | 0x400;
@@ -1162,7 +1165,49 @@ ItfMesNode *itfMesBuildNodeRows(u32 *items, s32 count, u32 mask, s32 x, s32 y, s
     return node;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5760);
+/* Discard preceding rows, retain one complete row and queue the remaining glyphs. */
+ItfMesNode *func_001A5760(ItfMesNode *node, s32 from, s32 to) {
+    s32 rows = to - from - 1;
+    s32 rowY = node->y;
+    ItfMesNode *next;
+    ItfMesNode *head;
+    ItfMesNode *tail;
+
+    while (rows > 0) {
+        while (rowY == node->y) {
+            next = node->next;
+            node->forward = NULL;
+            node->chainHead = node;
+            node->next = NULL;
+            frFontQueueGlyphInSelectedSlot((FrFontGlyph *)node);
+            node = next;
+            if (node == NULL) {
+                return NULL;
+            }
+        }
+        rows--;
+        rowY = node->y;
+    }
+    head = node;
+    do {
+        tail = node;
+        node = node->next;
+    } while (node != NULL && rowY == node->y);
+    while (node != NULL) {
+        next = node->next;
+        node->forward = NULL;
+        node->chainHead = node;
+        node->next = NULL;
+        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)node);
+        node = next;
+    }
+    head->forward = NULL;
+    tail->next = NULL;
+    for (node = head; node != NULL; node = node->next) {
+        node->chainHead = tail;
+    }
+    return head;
+}
 
 ItfMesNode *itfMesGetLastNode(ItfMesNode *node) {
     while (node->next != NULL) {
