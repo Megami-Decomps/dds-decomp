@@ -14,7 +14,7 @@ import math
 import re
 import struct
 from dataclasses import dataclass
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Mapping
 
 import flw0
 import flw0_profiles
@@ -146,12 +146,13 @@ class Float32(Expr):
 class Variable(Expr):
     kind: str
     index: int
+    symbol: str | None = None
 
     def lower(self) -> list[str]:
         return [f"{_VARIABLES[self.kind][0]} {self.index}"]
 
     def render(self, parent_precedence: int = 0) -> str:
-        return f"{self.kind}[{self.index}]"
+        return self.symbol or f"{self.kind}[{self.index}]"
 
 
 @dataclass(frozen=True)
@@ -357,9 +358,11 @@ class _ExpressionParser:
         text: str,
         line_number: int,
         profile: flw0_profiles.CommandProfile | None,
+        aliases: Mapping[str, Variable] | None = None,
     ) -> None:
         self.line_number = line_number
         self.profile = profile
+        self.aliases = aliases or {}
         self.tokens = self._tokenize(text)
         self.index = 0
 
@@ -447,6 +450,8 @@ class _ExpressionParser:
         name = token
         if name == "result":
             return Result()
+        if name in self.aliases:
+            return self.aliases[name]
         if name in _VARIABLES or name == "type5":
             self.take("[")
             sign = 1
@@ -553,8 +558,9 @@ def parse_expression(
     text: str,
     line_number: int,
     profile: flw0_profiles.CommandProfile | None,
+    aliases: Mapping[str, Variable] | None = None,
 ) -> Expr:
-    return _ExpressionParser(text.strip(), line_number, profile).parse()
+    return _ExpressionParser(text.strip(), line_number, profile, aliases).parse()
 
 
 def _strip_statement(line: str) -> str:
@@ -562,7 +568,15 @@ def _strip_statement(line: str) -> str:
     return line[:-1].rstrip() if line.endswith(";") else line
 
 
-def _assignment_target(text: str, line_number: int) -> tuple[str, int] | None:
+def _assignment_target(
+    text: str,
+    line_number: int,
+    aliases: Mapping[str, Variable],
+) -> tuple[str, int] | None:
+    name = text.strip()
+    if name in aliases:
+        variable = aliases[name]
+        return variable.kind, variable.index
     match = re.fullmatch(
         r"(global_int|global_float|local_int|local_float)\[(-?(?:0[xX][0-9a-fA-F]+|\d+))\]",
         text.strip(),
@@ -581,6 +595,7 @@ def _lower_semantic_line(
     line: str,
     line_number: int,
     profile: flw0_profiles.CommandProfile | None,
+    aliases: Mapping[str, Variable],
 ) -> list[str] | None:
     text = _strip_statement(line)
     if not text:
@@ -600,7 +615,7 @@ def _lower_semantic_line(
                 )
             return [f"{mnemonic} {symbol}"]
     if text.startswith("push "):
-        return parse_expression(text[5:], line_number, profile).lower()
+        return parse_expression(text[5:], line_number, profile, aliases).lower()
     if text.startswith("if_not "):
         match = re.fullmatch(
             r"if_not\s*\((.*)\)\s+goto\s+([A-Za-z_][A-Za-z0-9_]*)", text
@@ -608,17 +623,18 @@ def _lower_semantic_line(
         if match is None:
             raise flw0.Flw0Error(f"line {line_number}: invalid if_not statement")
         return [
-            *parse_expression(match.group(1), line_number, profile).lower(),
+            *parse_expression(match.group(1), line_number, profile, aliases).lower(),
             f"IF {match.group(2)}",
         ]
     assignment = re.fullmatch(
-        r"(result|(?:global_int|global_float|local_int|local_float)"
+        r"(result|[A-Za-z_][A-Za-z0-9_]*|"
+        r"(?:global_int|global_float|local_int|local_float)"
         r"\[-?(?:0[xX][0-9a-fA-F]+|\d+)\])\s*=(?!=)\s*(.+)",
         text,
     )
     if assignment is not None:
         left, right = assignment.groups()
-        expression = parse_expression(right, line_number, profile)
+        expression = parse_expression(right, line_number, profile, aliases)
         if left == "result":
             if not isinstance(expression, NativeCall):
                 raise flw0.Flw0Error(
@@ -630,14 +646,14 @@ def _lower_semantic_line(
                     f"line {line_number}: {expression.name} does not write result"
                 )
             return expression.lower_call()
-        target = _assignment_target(left, line_number)
+        target = _assignment_target(left, line_number, aliases)
         if target is None:
             raise flw0.Flw0Error(
                 f"line {line_number}: invalid assignment target {left!r}"
             )
         value_lines = expression.lower()
         return [*value_lines, f"{_VARIABLES[target[0]][1]} {target[1]}"]
-    expression = parse_expression(text, line_number, profile)
+    expression = parse_expression(text, line_number, profile, aliases)
     if not isinstance(expression, NativeCall):
         raise flw0.Flw0Error(
             f"line {line_number}: expression statement must be a native call"
@@ -718,12 +734,15 @@ def _line_label(node: object) -> str | None:
 def _lower_nodes(
     nodes: tuple[object, ...],
     profile: flw0_profiles.CommandProfile | None,
+    aliases: Mapping[str, Variable],
     following_label: str | None = None,
 ) -> list[tuple[int, str]]:
     lowered: list[tuple[int, str]] = []
     for index, node in enumerate(nodes):
         if isinstance(node, _SourceLine):
-            lines = _lower_semantic_line(node.text, node.line_number, profile)
+            lines = _lower_semantic_line(
+                node.text, node.line_number, profile, aliases
+            )
             if lines is None:
                 lowered.append((node.line_number, node.text))
             else:
@@ -736,7 +755,9 @@ def _lower_nodes(
             if index + 1 < len(nodes)
             else following_label
         )
-        condition = parse_expression(node.condition, node.line_number, profile)
+        condition = parse_expression(
+            node.condition, node.line_number, profile, aliases
+        )
         if node.kind == "while":
             start_label = _line_label(nodes[index - 1]) if index else None
             if start_label is None or next_label is None:
@@ -746,7 +767,7 @@ def _lower_nodes(
                 )
             lowered.extend((node.line_number, line) for line in condition.lower())
             lowered.append((node.line_number, f"IF {next_label}"))
-            lowered.extend(_lower_nodes(node.body, profile))
+            lowered.extend(_lower_nodes(node.body, profile, aliases))
             lowered.append((node.line_number, f"GOTO {start_label}"))
             continue
 
@@ -763,12 +784,14 @@ def _lower_nodes(
                 )
         lowered.extend((node.line_number, line) for line in condition.lower())
         lowered.append((node.line_number, f"IF {false_label}"))
-        lowered.extend(_lower_nodes(node.body, profile))
+        lowered.extend(_lower_nodes(node.body, profile, aliases))
         if node.alternative is not None:
             lowered.append((node.line_number, f"GOTO {next_label}"))
             # A nested conditional at the end of an else arm may share the
             # enclosing join label, which appears after the outer block.
-            lowered.extend(_lower_nodes(node.alternative, profile, next_label))
+            lowered.extend(
+                _lower_nodes(node.alternative, profile, aliases, next_label)
+            )
         else:
             # The retail compiler's canonical one-arm shape retains this
             # otherwise redundant jump to the join label.
@@ -779,10 +802,11 @@ def _lower_nodes(
 def lower_code(
     content: Iterable[tuple[int, str]],
     profile: flw0_profiles.CommandProfile | None,
+    aliases: Mapping[str, Variable] | None = None,
 ) -> list[tuple[int, str]]:
     """Lower semantic lines while leaving ordinary assembly lines untouched."""
 
-    return _lower_nodes(_parse_blocks(list(content)), profile)
+    return _lower_nodes(_parse_blocks(list(content)), profile, aliases or {})
 
 
 def _signed(value: int, bits: int) -> int:
@@ -791,7 +815,10 @@ def _signed(value: int, bits: int) -> int:
 
 
 def literal_expression(
-    opcode: int, operand: int, extended: int | None = None
+    opcode: int,
+    operand: int,
+    extended: int | None = None,
+    variable_names: Mapping[tuple[str, int], str] | None = None,
 ) -> Expr | None:
     """Return the exact semantic expression for one value-producing opcode."""
 
@@ -800,13 +827,25 @@ def literal_expression(
     if opcode == flw0.OPCODE_IDS["PUSHF"] and extended is not None:
         return Float32(extended)
     if opcode == flw0.OPCODE_IDS["PUSHIX"]:
-        return Variable("global_int", _signed(operand, 16))
+        index = _signed(operand, 16)
+        return Variable(
+            "global_int", index, (variable_names or {}).get(("global_int", index))
+        )
     if opcode == flw0.OPCODE_IDS["PUSHIF"]:
-        return Variable("global_float", _signed(operand, 16))
+        index = _signed(operand, 16)
+        return Variable(
+            "global_float", index, (variable_names or {}).get(("global_float", index))
+        )
     if opcode == flw0.OPCODE_IDS["PUSHLIX"]:
-        return Variable("local_int", _signed(operand, 16))
+        index = _signed(operand, 16)
+        return Variable(
+            "local_int", index, (variable_names or {}).get(("local_int", index))
+        )
     if opcode == flw0.OPCODE_IDS["PUSHLFX"]:
-        return Variable("local_float", _signed(operand, 16))
+        index = _signed(operand, 16)
+        return Variable(
+            "local_float", index, (variable_names or {}).get(("local_float", index))
+        )
     if opcode == flw0.OPCODE_IDS["PUSHIS"]:
         return Integer(_signed(operand, 16))
     if opcode == flw0.OPCODE_IDS["PUSHREG"]:
@@ -1065,6 +1104,7 @@ def render_code(
     selection_symbols: tuple[str | None, ...],
     raw_instruction: Callable[[int], tuple[str, int]],
     structured: bool = False,
+    variable_names: Mapping[tuple[str, int], str] | None = None,
 ) -> list[str]:
     """Render exact hybrid code, lifting only procedure-local proven idioms."""
 
@@ -1117,7 +1157,9 @@ def render_code(
             if operand or pc + 1 >= len(words):
                 pc = raw(pc)
                 continue
-            expression = literal_expression(opcode, operand, next_raw)
+            expression = literal_expression(
+                opcode, operand, next_raw, variable_names
+            )
             if expression is None:
                 pc = raw(pc)
                 continue
@@ -1146,7 +1188,9 @@ def render_code(
             elif procedure:
                 expression = Reference("procedure", procedure)
             else:
-                expression = literal_expression(opcode, operand)
+                expression = literal_expression(
+                    opcode, operand, variable_names=variable_names
+                )
             assert expression is not None
             stack.append(_Pending(expression, pc, pc + 1))
             pc += 1
@@ -1163,7 +1207,9 @@ def render_code(
             pc += 1
             continue
 
-        expression = literal_expression(opcode, operand)
+        expression = literal_expression(
+            opcode, operand, variable_names=variable_names
+        )
         if expression is not None:
             if isinstance(expression, Result) and not result_known:
                 pc = raw(pc)
@@ -1203,10 +1249,11 @@ def render_code(
                 continue
             value = stack.pop()
             target_name = _OPCODE_TO_STORE[opcode]
-            text = (
-                f"{target_name}[{_signed(operand, 16)}] = "
-                f"{value.expression.render()}"
+            target_index = _signed(operand, 16)
+            target_text = (variable_names or {}).get(
+                (target_name, target_index), f"{target_name}[{target_index}]"
             )
+            text = f"{target_text} = {value.expression.render()}"
             emit(text, value.start, pc + 1)
             pc += 1
             continue

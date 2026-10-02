@@ -170,12 +170,22 @@ class InstructionWord:
 
 
 @dataclass(frozen=True)
+class LocalAlias:
+    """A source-only name for one encoded local-variable slot."""
+
+    name: str
+    kind: str
+    index: int
+
+
+@dataclass(frozen=True)
 class Flw0File:
     """A parsed container with enough information for an exact rewrite."""
 
     header: Header
     sections: tuple[Section, ...]
     body: bytes
+    local_aliases: tuple[LocalAlias, ...] = ()
 
     @property
     def table_end(self) -> int:
