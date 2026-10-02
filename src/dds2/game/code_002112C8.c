@@ -3505,7 +3505,70 @@ s32 btlInitializeEffectVectors(BtlEffect *fx) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_0021C5E0);
+s32 func_0021C5E0(command, camera, rotate)
+BtlLinkedCommand *command;
+BtlEffect *camera;
+s32 rotate;
+{
+    u16 *runtime = (u16 *)btlGetRuntime();
+    BtlUnit *unit;
+    u32 kind;
+    f32 angle;
+
+    if (command->link == NULL) {
+        return 1;
+    }
+    unit = btlGetTargetUnitForLink(command);
+    if (unit == NULL) {
+        return 1;
+    }
+    if (unit->flags & 0x400) {
+        return 1;
+    }
+    if (runtime[0x134] == 3) {
+        kind = unit->lookupId;
+    } else {
+        kind = unit->lookupId == 0 ? 0 : 2;
+    }
+    btlFlagAllUnitDefeatCandidatesTask();
+    switch (kind) {
+    case 0:
+        btlInitMotionTransformFromComponents(camera, -1401.0f, -931.0f, -2245.4f,
+            0.103f, -0.19f, -0.032f, 0.967f, 40.0f);
+        break;
+    case 1:
+        btlInitMotionTransformFromComponents(camera, 131.1f, -940.3f, -2451.9f,
+            0.107f, 0.012f, -0.01f, 0.985f, 40.0f);
+        break;
+    case 2:
+        btlInitMotionTransformFromComponents(camera, 971.8f, -875.7f, -2539.8f,
+            0.099f, 0.118f, 0.0f, 0.979f, 40.0f);
+        break;
+    }
+    if (rotate == 1 && runtime[0x134] == 3) {
+        switch (kind) {
+        case 0:
+            func_003364B8(-0.13089969f);
+            func_00336818(0.13089969f);
+            sdfComposeVuMatrixFromRegisters();
+            break;
+        case 1:
+            func_003364B8(-0.13089969f);
+            break;
+        case 2:
+            angle = -0.13089969f;
+            func_003364B8(angle);
+            func_00336818(angle);
+            sdfComposeVuMatrixFromRegisters();
+            break;
+        }
+        /* vu0 routine: rotate the camera direction by the prepared matrix. */
+        VU0_LOAD_VF(vf10, camera->vec10);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, camera->vec10);
+    }
+    return 1;
+}
 
 s64 func_0021C7F8(void) {
     return func_0021C5E0();
@@ -5184,7 +5247,66 @@ s32 func_00224500(s32 object) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00224598);
+s32 func_00224598(BtlLinkedCommand *command, BtlEffect *camera, s32 rotate) {
+    u16 *runtime = (u16 *)btlGetRuntime();
+    BtlUnit *unit;
+    u32 kind;
+    f32 angle;
+
+    if (command->link == NULL) {
+        return 1;
+    }
+    unit = btlGetTargetUnitForLink(command);
+    if (unit == NULL) {
+        return 1;
+    }
+    if (unit->flags & 0x400) {
+        return 1;
+    }
+    if (runtime[0x134] == 3) {
+        kind = unit->lookupId;
+    } else {
+        kind = unit->lookupId == 0 ? 0 : 2;
+    }
+    btlFlagAllUnitDefeatCandidatesTask();
+    switch (kind) {
+    case 0:
+        btlInitMotionTransformFromComponents(camera, -785.9f, -20.1f, -1457.7f,
+            -0.108f, -0.2f, 0.008f, 0.965f, 40.0f);
+        break;
+    case 1:
+        btlInitMotionTransformFromComponents(camera, 25.4f, -36.7f, -1778.6f,
+            -0.081f, 0.014f, -0.015f, 0.988f, 40.0f);
+        break;
+    case 2:
+        btlInitMotionTransformFromComponents(camera, 622.8f, -36.7f, -1458.3f,
+            -0.093f, 0.166f, -0.036f, 0.972f, 40.0f);
+        break;
+    }
+    if (rotate == 1 && runtime[0x134] == 3) {
+        switch (kind) {
+        case 0:
+            func_003364B8(-0.13089969f);
+            func_00336818(0.13089969f);
+            sdfComposeVuMatrixFromRegisters();
+            break;
+        case 1:
+            func_003364B8(-0.13089969f);
+            break;
+        case 2:
+            angle = -0.13089969f;
+            func_003364B8(angle);
+            func_00336818(angle);
+            sdfComposeVuMatrixFromRegisters();
+            break;
+        }
+        /* vu0 routine: rotate the camera direction by the prepared matrix. */
+        VU0_LOAD_VF(vf10, camera->vec10);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, camera->vec10);
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", btlUnitWrapB);
 

@@ -366,7 +366,73 @@ void btlRaiseLinkedActionPose(BtlLinkedCommand *command) {
     func_001DB698(backCamera);
 }
 
-INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020DC38);
+extern BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *);
+extern void btlInitMotionTransformFromComponents(BtlCamState *, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void func_002DD608(f32);
+extern void func_002DD968(f32);
+extern void sdfComposeVuMatrixFromRegisters(void);
+extern f32 D_003BB8B0[];
+
+s32 func_0020DC38(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+    u16 *runtime = (u16 *)btlGetRuntime();
+    BtlUnit *unit;
+    u32 kind;
+    f32 angle;
+
+    if (command->task == NULL) {
+        return 1;
+    }
+    unit = btlGetTargetUnitForLink(command);
+    if (unit == NULL) {
+        return 1;
+    }
+    if (unit->flags & 0x400) {
+        return 1;
+    }
+    if (runtime[0x122] == 3) {
+        kind = unit->lookupId;
+    } else {
+        kind = unit->lookupId == 0 ? 0 : 2;
+    }
+    btlFlagAllUnitDefeatCandidatesTask();
+    switch (kind) {
+    case 0:
+        btlInitMotionTransformFromComponents(camera, -442.6f, -33.8f, -1426.7f,
+            -0.101f, -0.102f, -0.004f, 0.981f, 40.0f);
+        break;
+    case 1:
+        btlInitMotionTransformFromComponents(camera, 0.7f, -33.8f, -1412.4f,
+            -0.101f, D_003BB8B0[0], -0.014f, 0.986f, 40.0f);
+        break;
+    case 2:
+        btlInitMotionTransformFromComponents(camera, 309.7f, -33.8f, -1542.9f,
+            -0.101f, 0.038f, -0.018f, 0.985f, 40.0f);
+        break;
+    }
+    if (rotate == 1 && runtime[0x122] == 3) {
+        switch (kind) {
+        case 0:
+            func_002DD608(-0.13089969f);
+            func_002DD968(0.13089969f);
+            sdfComposeVuMatrixFromRegisters();
+            break;
+        case 1:
+            func_002DD608(-0.13089969f);
+            break;
+        case 2:
+            angle = -0.13089969f;
+            func_002DD608(angle);
+            func_002DD968(angle);
+            sdfComposeVuMatrixFromRegisters();
+            break;
+        }
+        /* vu0 routine: rotate the camera direction by the prepared matrix. */
+        VU0_LOAD_VF(vf10, camera->direction);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, camera->direction);
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020DE50);
 

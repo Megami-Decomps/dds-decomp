@@ -145,7 +145,9 @@ typedef struct EvtRuntime {
     f32 floatValue; /* 0x231C */
     f32 floatMin; /* 0x2320 */
     f32 floatMax; /* 0x2324 */
-    u8 pad2328[0x70];
+    u8 pad2328[0x68];
+    s32 messageField;
+    s32 compareField;
     s32 fieldIndex; /* 0x2398: selected column of the motion editor row */
     u8 pad239C[0x2C];
     s32 tableColumn; /* 0x23C8 */
@@ -933,6 +935,22 @@ s32 mnuDrawMessageMenuLabel(s32 list, s32 x, s32 y, EvtMessageMenuWork *work) {
     return 2;
 }
 
+
+extern char D_003BC250[];
+extern char D_003BC258[];
+extern char D_003BC260[];
+extern char D_003AE8D0[];
+extern char D_003AE8E0[];
+extern char D_003AE8F0[];
+extern char D_003AE900[];
+extern char D_003AE910[];
+extern char D_003AE920[];
+extern char D_003AE930[];
+extern char D_003AE940[];
+extern char D_003AE950[];
+extern char D_003AE960[];
+extern s32 itfMesGetWindowEntryItems(s32, s32);
+
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE8D0);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE8E0);
@@ -953,24 +971,88 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE950);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE960);
 
-INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE970);
+void func_00238ED0(s32 list, s32 x, s32 y, u32 kind, EvtRuntime *ctx) {
+    char *names[11] = {D_003BC250, D_003AE8D0, D_003AE8E0, D_003AE8F0,
+        D_003AE900, D_003AE910, D_003AE920, D_003AE930, D_003AE940, D_003AE950, D_003AE960};
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00238ED0);
+    switch (kind) {
+    case 0: {
+        s32 color = 4;
+        if (ctx->messageField != 0) {
+            color = 0;
+        }
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC058, ctx->value & 0xFFF));
+        if (((EvtMessageWindow *)ctx->windowContext)->entryHandle == -1) {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "NONE MESDATA!!"));
+        } else if (itfMesGetWindowEntryItems(((EvtMessageWindow *)ctx->windowContext)->entryHandle, ctx->value & 0xFFF) == 0) {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "(NORMAL)"));
+        } else {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "(BRANCH)"));
+        }
+        break;
+    }
+    case 1: {
+        s32 color = 4;
+        if (ctx->messageField != 1) {
+            color = 0;
+        }
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC258, names[(ctx->value >> 12) & 0xF]));
+        break;
+    }
+    case 3:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE78));
+        break;
+    case 4:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = SELECT "));
+        break;
+    case 5:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
+        break;
+    case 6:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00239148);
 
-INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE9D0);
 
-INCLUDE_RODATA(const s32, "game/code_00235270", jtbl_003AE9E0);
 
 s32 mnuDrawCutFlagLabel(s32 target, s32 x, s32 y) {
     sdfAppendPacket(target, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "CUTFLAG MENU"));
     return 2;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEA10);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_002393A0);
+void func_002393A0(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+    char *labels[11] = {D_003BC260, D_003AE8D0, D_003AE8E0, D_003AE8F0,
+        D_003AE900, D_003AE910, D_003AE920, D_003AE930, D_003AE940, D_003AE950, D_003AE960};
+    s32 flag;
+
+    switch (index) {
+    case 0:
+        flag = ctx->compareField != 0 ? 0 : 4;
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, flag, D_003BC258, labels[(ctx->value >> 12) & 0xF]));
+        return;
+    case 1:
+        flag = ctx->compareField != 1 ? 0 : 4;
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, flag, D_003BC058, ctx->value & 0xFFF));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, flag, "  (CMP VALUE)"));
+        return;
+    case 3:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE78));
+        return;
+    case 4:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = SELECT "));
+        return;
+    case 5:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
+        return;
+    case 6:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_002395A8);
 
