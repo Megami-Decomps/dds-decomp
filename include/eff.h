@@ -141,6 +141,18 @@ typedef struct BillData {
     u8 pad18[24];
 } BillData;
 
+/* Kind-zero billboard payload shared by the resource initializer and accessors. */
+typedef struct BillChildPayload {
+    s32 value;
+    union {
+        s16 signedVariant;
+        u16 variant;
+    };
+    u8 pad06[0x1E];
+    f32 halfWidth;  /* 0x24 */
+    f32 halfHeight; /* 0x28 */
+} BillChildPayload;
+
 /* Billboard callbacks and metadata (0xC); DDS1/2 effect/billManager.c and game billboard units. */
 typedef struct {
     void *(*func)();

@@ -112,7 +112,7 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
 }
 
 extern u32 dds3AdvanceWorldCounter(void);
-extern void *func_001115B0(void);
+extern void *dds3GetFirstWorldObjectNodeOfKind2(void);
 extern void effCopyVector(void *source, void *destination);
 extern void effCopyVectorToNodeInstance(void *source, void *destination);
 
@@ -144,7 +144,7 @@ EffectObj *effObjCreateWithBill(bill, vec, extra)
     data->ownerKind = 0;
     handle = effObjGetObjectHandle(obj);
     *(s32 *)((u8 *)handle + 8) = 2;
-    id = func_001115B0();
+    id = dds3GetFirstWorldObjectNodeOfKind2();
     if (id != NULL) {
         *(void **)((u8 *)handle + 0x24) = id;
         dds3EnsureWorldNodeInSlot(id, obj);
@@ -207,7 +207,7 @@ EffectObj *effObjCreateBillNode(bill, vec, extra)
     data->ownerKind = 0;
     handle = effObjGetObjectHandle(obj);
     *(s32 *)((u8 *)handle + 8) = 2;
-    id = func_001115B0();
+    id = dds3GetFirstWorldObjectNodeOfKind2();
     if (id != NULL) {
         *(void **)((u8 *)handle + 0x24) = id;
         dds3EnsureWorldNodeInSlot(id, obj);
@@ -267,7 +267,7 @@ EffectObj *effObjCreateWithBoundBill(bill, vec, extra)
     data->ownerKind = 0;
     handle = effObjGetObjectHandle(obj);
     *(s32 *)((u8 *)handle + 8) = 2;
-    id = func_001115B0();
+    id = dds3GetFirstWorldObjectNodeOfKind2();
     if (id != NULL) {
         *(void **)((u8 *)handle + 0x24) = id;
         dds3EnsureWorldNodeInSlot(id, obj);
@@ -319,7 +319,7 @@ EffectObj *func_00115248(bill, vec, extra)
     data->ownerKind = 0;
     handle = effObjGetObjectHandle(obj);
     *(s32 *)((u8 *)handle + 8) = 2;
-    id = func_001115B0();
+    id = dds3GetFirstWorldObjectNodeOfKind2();
     if (id != NULL) {
         *(void **)((u8 *)handle + 0x24) = id;
         dds3EnsureWorldNodeInSlot(id, obj);

@@ -2368,13 +2368,13 @@ void btlCopyUnitRotationQuaternion(u8 *unit, s128 *dst) {
     PCP_COPY_VECTOR(dst, unit + 0x70);
 }
 
-extern void func_0023C978(BtlUnitExt *, s32, u32);
+extern void evtSetUnitRgbTransition(BtlUnitExt *, s32, u32);
 
 void btlSetUnitColor(BtlUnit *unit, u32 color, s32 mode) {
     if (unit->flags & 2) {
         color = (color & 0xFFFFFF) | 0x80000000;
         unit->baseColor = (unit->baseColor & 0xFF000000) | (color & 0xFFFFFF);
-        func_0023C978(unit->ext, mode, color);
+        evtSetUnitRgbTransition(unit->ext, mode, color);
     }
 }
 
@@ -2386,7 +2386,7 @@ void btlBlendUnitColor(BtlUnit *unit, u32 color, s32 mode) {
         base = (unit->baseColor & 0xFFFFFF) | 0x80000000;
         blended = (base & color) + (((base ^ color) & 0xFEFEFEFE) >> 1);
         unit->overlayColor = (unit->overlayColor & 0xFF000000) | (color & 0xFFFFFF);
-        func_0023C978(unit->ext, mode, blended);
+        evtSetUnitRgbTransition(unit->ext, mode, blended);
     }
 }
 
@@ -3071,21 +3071,21 @@ s32 btlUnitFadeInTask(BtlFadeArgs *args) {
             args->color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
             btlFlagUnitDefeatCandidate(unit);
             mdlBroadcastMasked((s32)unit->ext->info, 0);
-            func_0023C978(unit->ext, 0, 0);
+            evtSetUnitRgbTransition(unit->ext, 0, 0);
             func_0023CA60((u32)unit->ext, 0, 0);
             func_0023CA60((u32)unit->ext, args->fadeIn, args->color);
             unit->flags |= 0x100000;
         }
         if (args->count == args->fadeIn - 1) {
             unit->overlayColor = args->color;
-            func_0023C978(unit->ext, args->fadeOut, args->color);
+            evtSetUnitRgbTransition(unit->ext, args->fadeOut, args->color);
         }
     } else {
         unit->overlayColor = args->color;
     }
     if (!(unit->flags & 0x100000)) {
         if (args->count >= total) {
-            func_0023C978(unit->ext, 0, args->color);
+            evtSetUnitRgbTransition(unit->ext, 0, args->color);
             func_0023CA60((u32)unit->ext, 0, args->color);
             return 1;
         }
@@ -3118,12 +3118,12 @@ s32 btlUnitFadeOutTask(BtlFadeArgs *args) {
     if (total != 0) {
         if (args->count == 0) {
             btlFlagUnitDefeatCandidate(unit);
-            func_0023C978(unit->ext, args->fadeOut, 0x80000000);
+            evtSetUnitRgbTransition(unit->ext, args->fadeOut, 0x80000000);
             unit->flags |= 0x200000;
         }
         if (args->count == args->fadeOut - 1) {
             unit->overlayColor = 0x80000000;
-            func_0023C978(unit->ext, 0, 0);
+            evtSetUnitRgbTransition(unit->ext, 0, 0);
             func_0023CA60((u32)unit->ext, args->fadeIn, 0);
         }
     } else {
