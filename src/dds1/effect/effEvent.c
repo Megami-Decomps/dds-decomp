@@ -4,24 +4,97 @@
 
 
 
-/* Parameter blocks have distinct 0x18, 0x24, 0x2C and 0x30 byte layouts. */
-typedef struct Work18 {
-    u8 data[0x18];
-} Work18;
+/* Packet-source layouts and concrete blur owners mirror their constructors.
+ * Equal-sized parameter prefixes do not make the blur variants interchangeable. */
+typedef struct BlurSource {
+    u8 color[4];
+    s32 blendControl;
+    f32 rotation;
+    f32 scale;
+    s32 centerX;
+    s32 centerY;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+} BlurSource;
 
-typedef struct Work24 {
-    u8 data[0x20];
-    u32 unk20;
-} Work24;
+typedef struct EffScreenDrawParams {
+    BlurSource source;
+    u8 pad28[8];
+} EffScreenDrawParams;
 
-typedef struct Work2C {
-    u8 data[0x28];
-    u32 unk28;
-} Work2C;
+typedef struct EffSolidRectParams {
+    u32 color;
+    s32 blendControl;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+} EffSolidRectParams;
 
-typedef struct Work30 {
-    u8 data[0x30];
-} Work30;
+typedef struct EffBlurTemplateBody {
+    s32 extent;
+    BlurSource source;
+} EffBlurTemplateBody;
+
+typedef struct EffBlurTemplate {
+    EffBlurTemplateBody body;
+    u32 resourceWord;
+} EffBlurTemplate;
+
+typedef struct EffBlurScatterParams {
+    s32 count;
+    s32 delaySpread;
+    f32 angleStep;
+    u32 color;
+    s32 unk10;
+    f32 unk14;
+    f32 unk18;
+    s32 x;
+    s32 y;
+    s32 positionSpread;
+    s32 size;
+} EffBlurScatterParams;
+
+typedef struct EffBlurScatterSlot EffBlurScatterSlot;
+typedef struct EffBlurScatterWork {
+    EffBlurScatterParams params;
+    u32 sourceHandle;
+    u32 allocation;
+    EffBlurScatterSlot *slots;
+} EffBlurScatterWork;
+
+typedef struct EffBlurScaleParams {
+    s32 count;
+    f32 phaseStep;
+    f32 spacing;
+    u32 color;
+    s32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 angleStep;
+    s32 x;
+    s32 y;
+    s32 size;
+} EffBlurScaleParams;
+
+typedef struct EffBlurScaleSlot EffBlurScaleSlot;
+typedef struct EffBlurScaleWork {
+    EffBlurScaleParams params;
+    u32 sourceHandle;
+    u32 allocation;
+    EffBlurScaleSlot *slots;
+} EffBlurScaleWork;
+
+typedef struct EffTemplateBody {
+    u32 words[9];
+} EffTemplateBody;
+
+typedef struct EffTemplate {
+    EffTemplateBody body;
+    u32 resourceWord;
+} EffTemplate;
 
 typedef struct EffBezierPoint {
     f32 x;
@@ -30,54 +103,28 @@ typedef struct EffBezierPoint {
 } EffBezierPoint;
 
 /* Each slot has a 0x60-byte stride: seven control points, the current segment, the curve parameter t and its step. */
-typedef struct Slot60 {
+typedef struct EffBezierSlot {
     EffBezierPoint point[7];
     s32 segment; /* 0x54 */
     f32 t;       /* 0x58 */
     f32 step;    /* 0x5C */
-} Slot60;
+} EffBezierSlot;
 
-typedef struct SlotTab {
-    Slot60 *slots;
-    u32 count;
-    s32 handle;
-} SlotTab;
 
-/* Per-channel work copies this 0x2C-byte prefix before its separate ID word.
- * The prefix's final word is copied with lw/sw rather than as part of the blob. */
-typedef struct BDCommon2C {
-    u8 data[0x28];
-    u32 unk28;
-} BDCommon2C;
 
-typedef struct BDWork2C {
-    BDCommon2C common;
-    u32 id;
-} BDWork2C;
-
-typedef struct BDCommon24 {
-    u8 data[0x20];
-    u32 unk20;
-} BDCommon24;
-
-typedef struct BDWork24 {
-    BDCommon24 common;
-    u32 id;
-} BDWork24;
-
-extern Work30 effBlurRectangleParameters;
-extern Work30 D_00355908;
-extern Work18 D_00355930;
-extern Work30 D_003559A0;
-extern Work2C D_00355AF8;
-extern Work2C D_00355C70;
-extern Work30 D_00355E48;
-extern Work18 D_00355F88;
-extern Work24 D_00356088;
-extern Work2C D_003561C8;
+extern EffScreenDrawParams effBlurRectangleParameters;
+extern EffScreenDrawParams D_00355908;
+extern EffSolidRectParams D_00355930;
+extern EffScreenDrawParams D_003559A0;
+extern EffBlurTemplateBody D_00355AF8;
+extern EffBlurScatterParams D_00355C70;
+extern EffScreenDrawParams D_00355E48;
+extern EffSolidRectParams D_00355F88;
+extern EffTemplateBody D_00356088;
+extern EffBlurScaleParams D_003561C8;
 extern void *memcpy(void *, const void *, u32);
 
-extern BDWork24 *D_003BD80C;
+extern EffTemplate *D_003BD80C;
 
 extern s8 D_003BB075;
 
@@ -85,15 +132,15 @@ extern s8 D_003BB074;
 
 extern s8 D_003BB073;
 
-extern BDWork2C *D_003BD810;
+extern EffBlurScaleWork *D_003BD810;
 
 extern s8 D_003BB076;
 
-extern BDWork2C *D_003BD804;
+extern EffBlurScatterWork *D_003BD804;
 
 extern s8 D_003BB072;
 
-extern BDWork2C *effBlurPixelWork;
+extern EffBlurTemplate *effBlurPixelWork;
 
 extern s8 D_003BB071;
 
@@ -109,30 +156,30 @@ extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket();
 extern s32 sdfCreateFormattedSifCommand();
 
-extern BDWork2C *effCloneBlurTemplate(void *arg);
-extern BDWork2C *func_00186F90(void *arg);
-extern BDWork24 *effCloneResourceTemplate(void *arg);
-extern BDWork2C *effCloneBlurWorkWithSlots(void *arg);
-extern void effDrawBlurRectangle(Work30 *arg);
-extern void effDrawBlurPixelRectWithResource(BDWork2C *arg);
-extern void func_00187098(BDWork2C *arg);
-extern void func_00187598(BDWork2C *arg);
-extern void func_00187988(Work30 *arg);
-extern void func_00187C08(Work18 *arg);
-extern void func_00188068(BDWork24 *arg);
+extern EffBlurTemplate *effCloneBlurTemplate(void *arg);
+extern EffBlurScatterWork *func_00186F90(void *arg);
+extern EffTemplate *effCloneResourceTemplate(void *arg);
+extern EffBlurScaleWork *effCloneBlurWorkWithSlots(void *arg);
+extern void effDrawBlurRectangle(EffScreenDrawParams *arg);
+extern void effDrawBlurPixelRectWithResource(EffBlurTemplate *arg);
+extern void func_00187098(EffBlurScatterWork *arg);
+extern void func_00187598(EffBlurScaleWork *arg);
+extern void func_00187988(EffScreenDrawParams *arg);
+extern void func_00187C08(EffSolidRectParams *arg);
+extern void func_00188068(EffTemplate *arg);
 extern s32 func_002D03F8(s32);
 extern u8 *sdfResourceRetainAddress(s32);
 
 /* Allocate contiguous slots followed by their count and allocation handle. */
-SlotTab *effCreateSlotArray(u32 count) {
+EffArrHdr *effCreateSlotArray(u32 count) {
     s32 slotBytes = count * 0x60;
     s32 handle = func_002D03F8(slotBytes + 0xC);
-    Slot60 *slot = (Slot60 *)sdfResourceRetainAddress(handle);
-    SlotTab *table = (SlotTab *)((u8 *)slot + slotBytes);
+    EffBezierSlot *slot = (EffBezierSlot *)sdfResourceRetainAddress(handle);
+    EffArrHdr *table = (EffArrHdr *)((u8 *)slot + slotBytes);
     u32 index = 0;
-    table->handle = handle;
+    table->allocation = (void *)handle;
     table->slots = slot;
-    table->count = count;
+    table->unk4 = count; /* The shared array header's slot count. */
     if (count != 0) {
         do {
             index++;
@@ -154,7 +201,7 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_0018E2C0);
 INCLUDE_ASM(const s32, "effect/effEvent", func_0018E408);
 
 /* Evaluate the cubic Bezier made of control points segment..segment+3 at t into out (xyz, w = 1). */
-void func_0018E548(Slot60 *slot, f32 *out) {
+void func_0018E548(EffBezierSlot *slot, f32 *out) {
     EffBezierPoint *p = &slot->point[slot->segment];
     f32 t = slot->t;
     f32 u = 1.0f - t;
@@ -170,15 +217,15 @@ void func_0018E548(Slot60 *slot, f32 *out) {
     out[3] = 1.0f;
 }
 
-void effInitSlotTail(SlotTab *table, s32 index) {
-    Slot60 *slot = &table->slots[index];
+void effInitSlotTail(EffArrHdr *table, s32 index) {
+    EffBezierSlot *slot = &((EffBezierSlot *)table->slots)[index];
 
     slot->step = 0.05f;
     slot->segment = slot->t = 0;
 }
 
-s32 effGetSlotAt(SlotTab *table, s32 index) {
-    return (s32)&table->slots[index];
+s32 effGetSlotAt(EffArrHdr *table, s32 index) {
+    return (s32)&((EffBezierSlot *)table->slots)[index];
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_0018E678);
@@ -229,7 +276,7 @@ void func_0018F3B8(void *src) {
     memcpy(&effBlurRectangleParameters, src, 0x28);
 }
 
-Work30 *effGetCh70Params(void) {
+EffScreenDrawParams *effGetCh70Params(void) {
     return &effBlurRectangleParameters;
 }
 
@@ -241,20 +288,21 @@ void func_0018F438(void) {
     D_003BB071 = 0;
 }
 
-void effCopyCh71Common(BDCommon2C *src) {
-    effBlurPixelWork->common = *src;
+/* Copy the pixel rectangle only; retain its selected source resource. */
+void effCopyCh71Common(EffBlurTemplateBody *src) {
+    effBlurPixelWork->body = *src;
 }
 
-BDWork2C *effGetCh71Work(void) {
+EffBlurTemplate *effGetCh71Work(void) {
     return effBlurPixelWork;
 }
 
 void effSetCh71Id(u32 id) {
-    effBlurPixelWork->id = id;
+    effBlurPixelWork->resourceWord = id;
 }
 
 void effInitCh71Id(void) {
-    effBlurPixelWork->id = effGetResourceFirstWord(2);
+    effBlurPixelWork->resourceWord = effGetResourceFirstWord(2);
 }
 
 void func_0018F4E0(void) {
@@ -265,20 +313,21 @@ void func_0018F4F0(void) {
     D_003BB072 = 0;
 }
 
-void effCopyCh72Common(BDCommon2C *src) {
-    D_003BD804->common = *src;
+/* Update scatter parameters without replacing the owned allocation or slots. */
+void effCopyCh72Common(EffBlurScatterParams *src) {
+    D_003BD804->params = *src;
 }
 
-BDWork2C *effGetCh72Work(void) {
+EffBlurScatterWork *effGetCh72Work(void) {
     return D_003BD804;
 }
 
 void effSetCh72Id(u32 id) {
-    D_003BD804->id = id;
+    D_003BD804->sourceHandle = id;
 }
 
 void effInitCh72Id(void) {
-    D_003BD804->id = effGetResourceFirstWord(2);
+    D_003BD804->sourceHandle = effGetResourceFirstWord(2);
 }
 
 void func_0018F598(void) {
@@ -289,20 +338,21 @@ void func_0018F5A8(void) {
     D_003BB076 = 0;
 }
 
-void effCopyCh76Common(BDCommon2C *src) {
-    D_003BD810->common = *src;
+/* Update scale parameters without replacing the owned allocation or slots. */
+void effCopyCh76Common(EffBlurScaleParams *src) {
+    D_003BD810->params = *src;
 }
 
-BDWork2C *effGetCh76Work(void) {
+EffBlurScaleWork *effGetCh76Work(void) {
     return D_003BD810;
 }
 
 void effSetCh76Id(u32 id) {
-    D_003BD810->id = id;
+    D_003BD810->sourceHandle = id;
 }
 
 void effInitCh76Id(void) {
-    D_003BD810->id = effGetResourceFirstWord(3);
+    D_003BD810->sourceHandle = effGetResourceFirstWord(3);
 }
 
 void func_0018F650(void) {
@@ -317,7 +367,7 @@ void func_0018F668(void *src) {
     memcpy(&D_00355908, src, 0x28);
 }
 
-Work30 *effGetCh73Params(void) {
+EffScreenDrawParams *effGetCh73Params(void) {
     return &D_00355908;
 }
 
@@ -329,11 +379,11 @@ void func_0018F6E8(void) {
     D_003BB074 = 0;
 }
 
-void func_0018F6F0(Work18 *src) {
+void func_0018F6F0(EffSolidRectParams *src) {
     D_00355930 = *src;
 }
 
-Work18 *effGetCh74Params(void) {
+EffSolidRectParams *effGetCh74Params(void) {
     return &D_00355930;
 }
 
@@ -345,20 +395,21 @@ void func_0018F750(void) {
     D_003BB075 = 0;
 }
 
-void effCopyCh75Common(BDCommon24 *src) {
-    D_003BD80C->common = *src;
+/* Copy the resource template body while preserving its selected resource. */
+void effCopyCh75Common(EffTemplateBody *src) {
+    D_003BD80C->body = *src;
 }
 
-BDWork24 *effGetCh75Work(void) {
+EffTemplate *effGetCh75Work(void) {
     return D_003BD80C;
 }
 
 void effSetCh75Id(u32 id) {
-    D_003BD80C->id = id;
+    D_003BD80C->resourceWord = id;
 }
 
 void effInitCh75Id(void) {
-    D_003BD80C->id = effGetResourceFirstWord(0);
+    D_003BD80C->resourceWord = effGetResourceFirstWord(0);
 }
 
 void effInitWorks(void) {
@@ -366,7 +417,7 @@ void effInitWorks(void) {
     D_003BD804 = func_00186F90(D_003558A8);
     D_003BD80C = effCloneResourceTemplate(D_00355948);
     D_003BD810 = effCloneBlurWorkWithSlots(D_00355970);
-    *(s32 *)effGetCh76Work() = 4;
+    effGetCh76Work()->params.count = 4;
 }
 
 void effDispatchActive(void) {
@@ -441,7 +492,7 @@ s32 effUpdateCh72Params(void) {
     return D_003BB0BD;
 }
 
-Work30 *effGetLoadDescA(void) {
+EffScreenDrawParams *effGetLoadDescA(void) {
     return &D_003559A0;
 }
 
@@ -481,11 +532,11 @@ s32 func_0018FA20(void) {
     return D_003BB0CD;
 }
 
-Work2C *effGetLoadDescB(void) {
+EffBlurTemplateBody *effGetLoadDescB(void) {
     return &D_00355AF8;
 }
 
-void func_0018FAE8(Work2C *src) {
+void func_0018FAE8(EffBlurTemplateBody *src) {
     D_00355AF8 = *src;
 }
 
@@ -521,11 +572,11 @@ s32 func_0018FB50(void) {
     return D_003BB0FF;
 }
 
-Work2C *effGetLoadDescC(void) {
+EffBlurScatterParams *effGetLoadDescC(void) {
     return &D_00355C70;
 }
 
-void func_0018FC18(Work2C *src) {
+void func_0018FC18(EffBlurScatterParams *src) {
     D_00355C70 = *src;
 }
 
@@ -561,7 +612,7 @@ s32 func_0018FC80(void) {
     return D_003BB114;
 }
 
-Work30 *effGetLoadDescD(void) {
+EffScreenDrawParams *effGetLoadDescD(void) {
     return &D_00355E48;
 }
 
@@ -601,11 +652,11 @@ s32 func_0018FDA8(void) {
     return D_003BB127;
 }
 
-Work18 *effGetLoadDescE(void) {
+EffSolidRectParams *effGetLoadDescE(void) {
     return &D_00355F88;
 }
 
-void func_0018FE70(Work18 *src) {
+void func_0018FE70(EffSolidRectParams *src) {
     D_00355F88 = *src;
 }
 
@@ -641,11 +692,11 @@ s32 func_0018FEB0(void) {
     return D_003BB12C;
 }
 
-Work24 *effGetLoadDescF(void) {
+EffTemplateBody *effGetLoadDescF(void) {
     return &D_00356088;
 }
 
-void func_0018FF78(Work24 *src) {
+void func_0018FF78(EffTemplateBody *src) {
     D_00356088 = *src;
 }
 
@@ -681,11 +732,11 @@ s32 effAdvancePendingChannelState(void) {
     return D_003BB13F;
 }
 
-Work2C *effGetLoadDescG(void) {
+EffBlurScaleParams *effGetLoadDescG(void) {
     return &D_003561C8;
 }
 
-void func_00190098(Work2C *src) {
+void func_00190098(EffBlurScaleParams *src) {
     D_003561C8 = *src;
 }
 
