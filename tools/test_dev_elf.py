@@ -791,6 +791,142 @@ class DevElfTests(unittest.TestCase):
         self.assertEqual(targets[relocations[2]], {second_target})
         self.assertEqual(targets[relocations[3]], {second_target})
 
+    def test_effective_targets_resolve_signed_gprel16_addends(self) -> None:
+        gp = 0x00108000
+        image = bytearray(_elf())
+        struct.pack_into("<I", image, 0x1000, (0x23 << 26) | (28 << 21) | 0x7FFF)
+        struct.pack_into("<I", image, 0x1004, (0x23 << 26) | (28 << 21) | 0x8000)
+        relocations = [
+            dev_elf.LinkedRelocation(
+                0x00100000, dev_elf.R_MIPS_GPREL16, 1, 1, 0, "positive"
+            ),
+            dev_elf.LinkedRelocation(
+                0x00100004, dev_elf.R_MIPS_GPREL16, 1, 2, 0, "negative"
+            ),
+        ]
+        _, programs = dev_elf.parse_elf(image)
+        targets = dev_elf._relocation_effective_targets(
+            bytes(image), programs, relocations, gp
+        )
+        self.assertEqual(targets[relocations[0]], {gp + 0x7FFF})
+        self.assertEqual(targets[relocations[1]], {gp - 0x8000})
+        with self.assertRaisesRegex(dev_elf.DevElfError, "requires a defined _gp"):
+            dev_elf._relocation_effective_targets(
+                bytes(image), programs, relocations
+            )
+
+    def test_relocation_closure_rejects_stale_gprel16_target(self) -> None:
+        old_vaddr = 0x00100040
+        new_vaddr = 0x00412000
+        gp = 0x00108000
+        base = bytearray(_elf())
+        immediate = (old_vaddr - gp) & 0xFFFF
+        struct.pack_into(
+            "<I", base, 0x1000, (0x23 << 26) | (28 << 21) | immediate
+        )
+        struct.pack_into("<I", base, 0x1040, 0x03E00008)
+        linked = bytearray(base)
+        struct.pack_into("<I", linked, 0x1040, 0)
+        linked.extend(bytes((-len(linked)) & 0xFFF))
+        linked.extend(struct.pack("<I", 0x03E00008))
+        spec = {
+            "format": 1,
+            "base_sha1": hashlib.sha1(base).hexdigest(),
+            "extension_vaddr": new_vaddr,
+            "extension_size": 4,
+            "retail_static_end": 0x0040C5F0,
+            "moves": [
+                {
+                    "old_vaddr": old_vaddr,
+                    "new_vaddr": new_vaddr,
+                    "size": 4,
+                    "expected_relocations": 0,
+                }
+            ],
+        }
+        output, _ = dev_elf.finalize_image(bytes(base), bytes(linked), spec)
+        relocation_elf = _metadata_elf(
+            [
+                ("stale", old_vaddr, 4, 0, 1),
+                ("_gp", gp, 0, 0, 1),
+            ],
+            [(0x00100000, dev_elf.R_MIPS_GPREL16, "stale")],
+        )
+        retail_symbols = _metadata_elf([("_gp", gp, 0, 0, 1)], [])
+        with self.assertRaisesRegex(
+            dev_elf.DevElfError, "requires the retail symbol ELF"
+        ):
+            dev_elf.audit_relocation_closure(
+                bytes(base), output, relocation_elf, spec
+            )
+        with self.assertRaisesRegex(dev_elf.DevElfError, "still targets abandoned"):
+            dev_elf.audit_relocation_closure(
+                bytes(base), output, relocation_elf, spec, retail_symbols
+            )
+
+        drifted_retail = _metadata_elf([("_gp", gp + 4, 0, 0, 1)], [])
+        with self.assertRaisesRegex(dev_elf.DevElfError, "differs from retail"):
+            dev_elf.audit_relocation_closure(
+                bytes(base), output, relocation_elf, spec, drifted_retail
+            )
+
+        duplicate_development_gp = _metadata_elf(
+            [
+                ("stale", old_vaddr, 4, 0, 1),
+                ("_gp", gp, 0, 0, 1),
+                ("_gp", gp, 0, 0, 1),
+            ],
+            [(0x00100000, dev_elf.R_MIPS_GPREL16, "stale")],
+        )
+        with self.assertRaisesRegex(dev_elf.DevElfError, "2 definitions"):
+            dev_elf.audit_relocation_closure(
+                bytes(base), output, duplicate_development_gp, spec, retail_symbols
+            )
+
+    def test_relocation_closure_accepts_unchanged_gprel16_target(self) -> None:
+        old_vaddr = 0x00100040
+        new_vaddr = 0x00412000
+        target = 0x00100100
+        gp = 0x00108000
+        base = bytearray(_elf())
+        immediate = (target - gp) & 0xFFFF
+        struct.pack_into(
+            "<I", base, 0x1000, (0x23 << 26) | (28 << 21) | immediate
+        )
+        struct.pack_into("<I", base, 0x1040, 0x03E00008)
+        linked = bytearray(base)
+        struct.pack_into("<I", linked, 0x1040, 0)
+        linked.extend(bytes((-len(linked)) & 0xFFF))
+        linked.extend(struct.pack("<I", 0x03E00008))
+        spec = {
+            "format": 1,
+            "base_sha1": hashlib.sha1(base).hexdigest(),
+            "extension_vaddr": new_vaddr,
+            "extension_size": 4,
+            "retail_static_end": 0x0040C5F0,
+            "moves": [
+                {
+                    "old_vaddr": old_vaddr,
+                    "new_vaddr": new_vaddr,
+                    "size": 4,
+                    "expected_relocations": 0,
+                }
+            ],
+        }
+        output, _ = dev_elf.finalize_image(bytes(base), bytes(linked), spec)
+        relocation_elf = _metadata_elf(
+            [
+                ("retained", target, 4, 0, 1),
+                ("_gp", gp, 0, 0, 1),
+            ],
+            [(0x00100000, dev_elf.R_MIPS_GPREL16, "retained")],
+        )
+        retail_symbols = _metadata_elf([("_gp", gp, 0, 0, 1)], [])
+        summary = dev_elf.audit_relocation_closure(
+            bytes(base), output, relocation_elf, spec, retail_symbols
+        )
+        self.assertEqual(summary["moved_relocations"], 0)
+
     def test_named_replacement_target_cannot_use_containment_mapping(self) -> None:
         old_head = 0x00100040
         old_tail = 0x00100048
@@ -1169,6 +1305,12 @@ class DevElfTests(unittest.TestCase):
             dev_elf.DevElfError, "section .data has size 0x4, expected 0x0"
         ):
             dev_elf.audit_replacement_objects(spec, [replacement])
+
+        replacement_without_data = _fallback_object(bytes(8))
+        self.assertEqual(
+            dev_elf.audit_replacement_objects(spec, [replacement_without_data]),
+            {"fallback_symbols": 0},
+        )
 
     def test_replacement_fallback_preserves_bytes_and_relocations(self) -> None:
         spec = {
