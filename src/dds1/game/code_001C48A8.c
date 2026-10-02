@@ -65,7 +65,8 @@ typedef struct BattleController {
     SceneTask *groupPrimary[20];
     SceneTask *groupSecondary[45];
     SceneTask *groupTertiary[15];
-    u8 pad_42C[0x184];
+    SceneTask *groupHandles[8];
+    u8 pad_44C[0x164];
     s32 (*sceneCallback)();
 } BattleController;
 
@@ -761,7 +762,29 @@ s32 fldGetSceneGroupEntry(s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C8330);
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", fldClearSceneSlotsAndGroups);
+void fldClearSceneSlotsAndGroups(void) {
+    BattleController *scene = (BattleController *)btlGetRuntime();
+    u32 i;
+
+    for (i = 0; i < 8; i++) {
+        scene->slots[i].a = 0;
+        scene->slots[i].b = 0;
+        scene->slots[i].id = 0;
+    }
+    for (i = 0; i < 20; i++) {
+        scene->groupPrimary[i] = 0;
+    }
+    for (i = 0; i < 45; i++) {
+        scene->groupSecondary[i] = 0;
+    }
+    for (i = 0; i < 15; i++) {
+        scene->groupTertiary[i] = 0;
+    }
+    for (i = 0; i < 8; i++) {
+        scene->groupHandles[i] = 0;
+    }
+    fldClearSceneAdvanceFlag();
+}
 
 u32 fldDispatchSceneGroupRequestWhenAllowed(s32 *arg0) {
     u8 temp_v0;

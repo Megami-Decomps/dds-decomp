@@ -116,7 +116,11 @@ extern u64 btlAdvanceRuntimeSequenceCounter();
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 typedef struct BtlUnit {
-    u8 pad_00[0x108];
+    u8 pad_00[0x80];
+    f32 scale;
+    u8 pad_84[0x3C];
+    f32 cameraRadius;
+    u8 pad_C4[0x44];
     s64 owner;
     u32 flags;
     u32 stateFlags;
@@ -5050,7 +5054,93 @@ INCLUDE_ASM(const s32, "game/code_001C8890", btlPrepareUnitPoseWithTiltRotation)
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DF410);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", btlPrepareRandomizedActionCameraPose);
+typedef struct CameraPoseTransform {
+    f32 vec0[4];
+    f32 vec1[4];
+    f32 distance;
+    f32 fov;
+} CameraPoseTransform;
+
+typedef struct CameraPoseLink {
+    u8 pad_00[0x18];
+    BtlUnit *unit;
+} CameraPoseLink;
+
+typedef struct CameraPoseAction {
+    CameraPoseTransform transform;
+    u8 pad_028[0xC8];
+    u32 flags;
+    CameraPoseLink *link;
+    u8 pad_0F8[0x38];
+    f32 cameraPreset;
+} CameraPoseAction;
+
+extern s32 func_001DB698(u8 *);
+extern s32 func_001D6428(u8 *, s32);
+extern f32 func_002FA148(f32);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3E40);
+
+void btlPrepareRandomizedActionCameraPose(CameraPoseAction *action, CameraPoseTransform *from,
+                                           CameraPoseTransform *to) {
+    f32 quat[4];
+    /* Quaternion rows, distance multiplier, camera parameter, and padding. */
+    f32 poses[4][12] = {
+        {0.0f, -0.94f, 0.02f, 0x1.333332p-2f, 0.0f, -1.0f, 0.0f, 0.0f, 1.5f, 35.0f, 0.0f, 0.0f},
+        {0.06f, -0.94f, -0x1.70a3d6p-3f, 0.25f, 0.0f, -1.0f, 0.0f, 0.0f, 1.5f, 35.0f, 0.0f, 0.0f},
+        {0.0f, -0.94f, 0.02f, -0x1.333332p-2f, 0.0f, -1.0f, 0.0f, 0.0f, 1.5f, 35.0f, 0.0f, 0.0f},
+        {-0.06f, -0.94f, -0x1.70a3d6p-3f, -0.25f, 0.0f, -1.0f, 0.0f, 0.0f, 1.5f, 35.0f, 0.0f, 0.0f},
+    };
+    BtlUnit *unit = action->link->unit;
+    u32 flags = unit->flags;
+    s32 pose;
+    f32 fov;
+    f32 half;
+    f32 span;
+    f32 distance;
+
+    if (flags & 2) {
+        btlClearAllUnitDefeatCandidates();
+        btlFlagMatchingUnitsDefeatCandidate(flags & 0x600);
+        btlCopyUnitRotationQuaternion((u8 *)unit, quat);
+        pose = effMiscRandMod(0, 4);
+        fov = action->transform.fov;
+        from->fov = fov;
+        to->fov = fov;
+        span = func_001F66D8(flags & 0x600, 0, 0) * 1.25f;
+        VU0_STORE_VF(vf10, from->vec0);
+        if (func_001D6428((u8 *)unit, 1) == 0) {
+            btlUnitGetMuzzlePosVU((u8 *)unit);
+        }
+        VU0_STORE_VF(vf10, to->vec0);
+        VU0_LOAD_VF(vf11, from->vec0);
+        VU0_LERP_VF10(0.5f);
+        VU0_STORE_VF(vf10, from->vec0);
+        half = fov * 0.5f;
+        distance = span / func_002FA148(half);
+        from->distance = distance;
+        distance = unit->cameraRadius * unit->scale / func_002FA148(half);
+        to->distance = distance * poses[pose][8];
+        VU0_LOAD_VF(vf10, poses[pose]);
+        VU0_LOAD_VF(vf11, quat);
+        effMiscQuatMultiplyVU();
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_0037E110);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, from->vec1);
+        VU0_LOAD_VF(vf10, &poses[pose][4]);
+        VU0_LOAD_VF(vf11, quat);
+        effMiscQuatMultiplyVU();
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_0037E110);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, to->vec1);
+        func_001DB698((u8 *)from);
+        func_001DB698((u8 *)to);
+        action->cameraPreset = poses[pose][9];
+        action->flags |= 0x41;
+    }
+}
 
 extern void func_001DB698(u8 *);
 
@@ -5179,10 +5269,6 @@ INCLUDE_ASM(const s32, "game/code_001C8890", btlChooseActionPoseBlendFromActorCo
 
 void func_001E57F8(void) {
 }
-
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3E40);
-
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3F00);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3FC0);
 
