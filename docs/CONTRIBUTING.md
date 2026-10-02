@@ -38,7 +38,10 @@ before you start.
 
 ## 1. Pick a function
 
-`python tools/progress.py` shows per-game coverage. Every retail function
+`python tools/progress.py` shows per-game source coverage (functions and retail
+code bytes no longer using `INCLUDE_ASM`); it does not verify matching. See
+[Reading progress](../README.md#reading-progress) for the report categories
+and comparison limits. Every retail function
 belongs to a C unit in `src/<v>/<dir>/<unit>.c`. A function that isn't done
 yet is an `INCLUDE_ASM(const s32, "<dir>/<unit>", NAME);` line, and its
 assembly is in `asm/<v>/nonmatchings/<dir>/<unit>/NAME.s`.
@@ -110,7 +113,12 @@ ninja            # both games; fails unless every ELF is byte-identical
 
 Other diff tools:
 
-- objdiff (`objdiff.json` is generated; bases are built with `-DSKIP_ASM`)
+- objdiff (`objdiff.json` is generated; bases are built with `-DSKIP_ASM`).
+  That separate compile can differ from the production build's C because of
+  ee-gcc's context sensitivity. `check_unit` recognizes a function that matches
+  as built even if this comparison differs; the report does not yet account
+  for that distinction. A fuzzy score is not a substitute for the unit and
+  retail checksum checks above.
 - asm-differ (`diff_settings.py`; `DDS_VERSION=dds2` for the sequel)
 - decomp.me (compiler `ee-gcc2.96`, flags `-O2`; `tools/m2ctx.py` writes the context)
 

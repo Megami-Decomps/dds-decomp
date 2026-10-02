@@ -899,6 +899,11 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
 
 
 def write_objdiff(units: dict[str, list[dict]]) -> None:
+    categories = [
+        {"id": "game", "name": "Atlus game/engine"},
+        {"id": "sdk", "name": "Sony SDK / C runtime"},
+        {"id": "vu1", "name": "VU1 microcode (binary)"},
+    ]
     config = {
         "$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",
         "custom_make": "ninja",
@@ -909,22 +914,24 @@ def write_objdiff(units: dict[str, list[dict]]) -> None:
     }
     for version, rows in units.items():
         for row in rows:
+            category = "sdk" if "/sdk/" in row["name"] else "game"
+            # splat exposes the binary VU1 program as a text unit, not EE code.
+            if row["name"] == f"asm/{version}/data/vutext":
+                category = "vu1"
             unit = {
                 "name": "/".join(Path(row["name"]).parts[1:]),  # drop asm/ or src/: "<version>/<unit>"
                 "target_path": row["target"],
-                "metadata": {"progress_categories": [version, "sdk" if "/sdk/" in row["name"] else "game"]},
+                "metadata": {"progress_categories": [version, category]},
             }
             if row["base"]:
                 unit["base_path"] = row["base"]
             config["units"].append(unit)
-    config["progress_categories"] = [{"id": v, "name": VERSIONS[v]["title"]} for v in units] + [
-        {"id": "game", "name": "Atlus game/engine"}, {"id": "sdk", "name": "Sony SDK / C runtime"}]
+    config["progress_categories"] = [{"id": v, "name": VERSIONS[v]["title"]} for v in units] + categories
     (ROOT / "objdiff.json").write_text(json.dumps(config, indent=2) + "\n")
     # Per-version configs for the per-version reports; objdiff resolves paths
     # relative to the config's directory.
     for version in units:
-        sub = dict(config, units=[], progress_categories=[
-            {"id": "game", "name": "Atlus game/engine"}, {"id": "sdk", "name": "Sony SDK / C runtime"}])
+        sub = dict(config, units=[], progress_categories=categories)
         for unit in config["units"]:
             if unit["name"].split("/", 1)[0] != version:
                 continue
