@@ -182,9 +182,11 @@ typedef struct SoundTask {
     u8 status;
     u8 unk_11[0xF];
     u16 taskId;
-    u8 unk_22[2];
+    u16 state;
     u16 flags;
-    u8 unk_26[0xA];
+    u8 unk_26[2];
+    s32 startDelay;
+    s32 endDelay;
     u32 unk_30;
     u32 unk_34;
     u64 unk_38;
@@ -197,6 +199,7 @@ typedef struct SoundTask {
         u32 (*playCustomSound)(u8 *);
         s32 (*releaseSound)(u16 *);
         s32 (*acquireSound)(u32 *);
+        s32 (*run)(void *);
     } callback;
     void (*onFinish)(u32 *);
     void *args;
@@ -2648,9 +2651,50 @@ void btlResetDeferredTaskQueue(void) {
     btlDeferredTaskHead = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", btlRunTask);
+void btlRunTask(s32 taskAddress) {
+    SoundTask *task = (SoundTask *)taskAddress;
+    u32 counter;
 
-extern void btlRunTask(s32);
+    if (!(task->flags & 8)) {
+        return;
+    }
+    if (task->flags & 4) {
+        btlFreeTask(taskAddress);
+        return;
+    }
+    counter = task->unk_30;
+    task->unk_30 = counter + 1;
+    switch (task->state) {
+    case 0:
+        if (btlEvalTaskCondition((TaskCondition *)task, counter) == 0) {
+            break;
+        }
+        task->state = 1;
+    case 1:
+        if (task->startDelay <= 0) {
+            task->state = 2;
+        } else {
+            task->startDelay = task->startDelay - 1;
+            break;
+        }
+    case 2:
+        if (btlEvalTaskCondition((TaskCondition *)((u8 *)task + 0x10), task->unk_34) != 0) {
+            task->state = 3;
+        } else if (task->callback.run(task->args) != 0) {
+            task->state = 3;
+        } else {
+            task->unk_34 = task->unk_34 + 1;
+            break;
+        }
+    case 3:
+        if (task->endDelay <= 0) {
+            btlFreeTask(taskAddress);
+        } else {
+            task->endDelay = task->endDelay - 1;
+        }
+        break;
+    }
+}
 
 void btlSweepFinishedTasks(void) {
     SoundTask *task = *(SoundTask **)(btlGetRuntime() + 0x230);
@@ -5270,7 +5314,40 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3D90);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3DD0);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", btlDebugPrintWorldTransform);
+typedef struct BtlDebugWorldTransform {
+    u8 pad00[0x40];
+    f32 position[3];
+    u8 pad4C[4];
+    f32 rotation[4];
+} BtlDebugWorldTransform;
+
+typedef struct BtlDebugWorldObject {
+    u8 pad00[0x1C];
+    BtlDebugWorldTransform *transform;
+} BtlDebugWorldObject;
+
+extern char D_003A3DF0[];
+extern char D_003A3E08[];
+extern void btlBossDebugPrintfN(s32, s32, s32, s32, ...);
+
+void btlDebugPrintWorldTransform(s32 arg0, u8 *arg1) {
+    BtlDebugWorldObject *object;
+
+    if (((BattleController *)btlGetRuntime())->flags & 2) {
+        object = (BtlDebugWorldObject *)dds3GetWorldCameraObject(dds3GetWorldObject());
+        if (object != 0) {
+            btlBossDebugPrintfN(arg0, (s32)arg1, 0, (s32)D_003A3DF0,
+                                (double)object->transform->position[0],
+                                (double)object->transform->position[1],
+                                (double)object->transform->position[2]);
+            btlBossDebugPrintfN(arg0, (s32)(arg1 + 0xC), 0, (s32)D_003A3E08,
+                                (double)object->transform->rotation[0],
+                                (double)object->transform->rotation[1],
+                                (double)object->transform->rotation[2],
+                                (double)object->transform->rotation[3]);
+        }
+    }
+}
 
 extern void func_001F6E28(s32, s32, s32);
 
@@ -5630,6 +5707,10 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001DD6A0);
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DD7E8);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DD890);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3DF0);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3E08);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DDE28);
 
@@ -6735,6 +6816,13 @@ void btlStopRainSoundTransition(void) {
     }
 }
 
+extern char D_003A4B98[]; /* "/fld/b/f%03d/f%03d_%03df.tmx" */
+extern char D_003A4BB8[]; /* "btl:load 0[%s]\n" */
+extern char D_003A4BC8[]; /* "/fld/b/f%03d/f%03d_%03ds.tmx" */
+extern char D_003A4BE8[]; /* "btl:load 1[%s]\n" */
+extern char D_003A4BF8[]; /* "btl:floor load end 0\n" */
+extern char D_003A4C10[]; /* "btl:floor load end 1\n" */
+
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4B40);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001EFFA8);
@@ -6758,9 +6846,62 @@ s32 fldCreateSceneTileTask(u32 soundId, u32 variant) {
     return (s32)task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", btlPollFloorLoadTask);
+typedef struct BtlFloorLoadArgs {
+    s32 frontHandle;
+    s32 sideHandle;
+    s32 stage;
+    s32 variant;
+    s32 state;
+} BtlFloorLoadArgs;
 
-extern u32 btlPollFloorLoadTask(u32 *);
+typedef struct BtlFloorLoadRuntime {
+    u8 pad_000[0x57C];
+    void *primaryBuffer;
+    void *secondaryBuffer;
+} BtlFloorLoadRuntime;
+
+s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
+    s32 result = 1;
+    BtlFloorLoadRuntime *work = (BtlFloorLoadRuntime *)btlGetRuntime();
+    s32 stage = args->stage;
+    s32 variant = args->variant;
+    char path[0x70];
+
+    if (args->state == 0) {
+        func_003014F0(path, D_003A4B98, stage, stage, variant);
+        result = 0;
+        args->frontHandle = fileQueueDefaultCallbackRequest(path);
+        btlBossDebugPrintf(D_003A4BB8, path);
+        func_003014F0(path, D_003A4BC8, stage, stage, variant);
+        args->sideHandle = fileQueueDefaultCallbackRequest(path);
+        btlBossDebugPrintf(D_003A4BE8, path);
+    } else {
+        if (args->frontHandle != 0) {
+            if (fileIsRequestReadyInCurrentMode(args->frontHandle) != 0) {
+                work->primaryBuffer =
+                    (void *)sdfResourceRetainAddress(fileGetResourceHandle(args->frontHandle));
+                filePollEntryCleanup(args->frontHandle);
+                args->frontHandle = 0;
+                btlBossDebugPrintf(D_003A4BF8);
+            } else {
+                result = 0;
+            }
+        }
+        if (args->sideHandle != 0) {
+            if (fileIsRequestReadyInCurrentMode(args->sideHandle) != 0) {
+                work->secondaryBuffer =
+                    (void *)sdfResourceRetainAddress(fileGetResourceHandle(args->sideHandle));
+                filePollEntryCleanup(args->sideHandle);
+                args->sideHandle = 0;
+                btlBossDebugPrintf(D_003A4C10);
+            } else {
+                result = 0;
+            }
+        }
+    }
+    args->state++;
+    return result;
+}
 
 u8 *btlCreateFloorLoadTask(u32 soundId, u32 variant) {
     u8 *task = btlAllocTask(20);
@@ -6936,6 +7077,18 @@ s32 sndLookupResourceType(s32 sound, s32 index) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001F0CA0);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4B98);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4BB8);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4BC8);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4BE8);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4BF8);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4C10);
 
 void sndCreateSystemEffect(u32 *effect) {
     s32 handle;
