@@ -644,7 +644,76 @@ void polyScaleNodeFloatingParameters(f32 scale, PolyRotatingBand *obj) {
     obj->targetRadius = obj->targetRadius * scale;
 }
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_00166EC0);
+void func_00166EC0(PolyRotatingBand *obj) {
+    s32 index = 0;
+    u32 completed = 0;
+    u8 loop;
+    PolyStrip *strip;
+    s32 count;
+    PolyRotatingBandRecord *record;
+    s32 duration;
+    u32 color;
+    PolyStripEntry *entry;
+
+    strip = obj->strip;
+    count = obj->head.entryCount;
+    record = obj->records;
+    duration = obj->head.duration;
+    loop = obj->head.loop;
+    color = obj->head.color;
+    entry = strip->entries;
+
+    if (count > 0) {
+        s32 inactiveAge = POLY_INACTIVE_ENTRY_AGE;
+        s32 shortDuration = duration < 2;
+
+        do {
+            s32 age = record->age;
+
+            if (age == inactiveAge) {
+                polyRotatingRandomizeRecord(obj, index);
+                age = record->age;
+            }
+            if (age < 0) {
+                age++;
+            } else {
+                if ((u32)age < obj->head.startColorRampFrames) {
+                    entry->color = polyBlendTimedTintColor(age, obj->head.startColorRampFrames, color);
+                } else if (age <= duration &&
+                           (u32)age >= duration - obj->head.endColorRampFrames) {
+                    entry->color = polyBlendTimedTintColor(duration - age, obj->head.endColorRampFrames, color);
+                } else {
+                    entry->color = color;
+                }
+
+                if (entry->color & 0xFF000000) {
+                    polyBandLayoutRingRotated(obj, index);
+                } else {
+                    entry->count = 0;
+                }
+                age++;
+            }
+
+            if (age >= duration && !shortDuration) {
+                if (loop != 0) {
+                    age = inactiveAge;
+                } else {
+                    completed++;
+                    if (completed >= (u32)count) {
+                        obj->head.active = 0;
+                    }
+                }
+                entry->count = 0;
+            }
+
+            record->age = age;
+            index++;
+            entry++;
+            record++;
+        } while (index < count);
+    }
+    parPrependCellNode(obj->strip);
+}
 
 /* Reset active records but leave inactive sentinel entries untouched. */
 void polyResetEntries(PolyRotatingBand *obj) {
