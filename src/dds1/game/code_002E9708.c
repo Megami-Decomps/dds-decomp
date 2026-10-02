@@ -1,5 +1,36 @@
 #include "common.h"
 
+#define SDF_RELOC_HEADER_BYTES 0x20
+#define SDF_STREAM_NODE_BYTES 0x8C
+#define SDF_STREAM_FRAME_HEADER_BYTES 0x10
+#define SDF_STREAM_SCRATCH_BYTES 0x10100
+#define SDF_STREAM_PREFIX_BYTES 0x100
+#define SDF_STREAM_SLOT_BYTES 0x2000
+#define SDF_STREAM_SLOT_SHIFT 13
+#define SDF_STREAM_RING_SLOTS 8
+#define SDF_STREAM_MAX_FILLED 7
+#define SDF_STREAM_TRAILER_START 0x1F00
+#define SDF_STREAM_QWORD_BYTES 16
+#define SDF_STREAM_PIXEL_BYTES_WIDE 4
+#define SDF_STREAM_PIXEL_BYTES_NARROW 2
+#define SDF_STREAM_PAGE_WIDTH 64
+#define SDF_STREAM_PAGE_WIDTH_MASK 63
+#define SDF_STREAM_WIDE_PAGE_HEIGHT 32
+#define SDF_STREAM_WIDE_HEIGHT_MASK 31
+#define SDF_STREAM_NARROW_PAGE_HEIGHT 64
+#define SDF_STREAM_NARROW_HEIGHT_MASK 63
+#define SDF_STREAM_PSMCT32 0
+#define SDF_STREAM_PSMCT16 2
+#define SDF_EE_PHYSICAL_MASK 0x0FFFFFFF
+#define SDF_EE_UNCACHED_BASE 0x20000000
+#define SDF_IPU_OUTPUT_DMA_ADDRESS 0x1000B010
+#define SDF_IPU_OUTPUT_DMA_QWC 0x1000B020
+#define SDF_IPU_OUTPUT_DMA_CTRL 0x1000B000
+#define SDF_IPU_DMA_START 0x100
+#define SDF_IPU_CMD_REGISTER 0x10002000
+#define SDF_IPU_FDEC 0x40000000
+#define SDF_IPU_FDEC_BYTE 0x40000008
+
 extern s32 D_003BD620;
 
 extern s32 D_003BD624;
@@ -98,8 +129,8 @@ typedef struct SdfStreamFrameNode {
     u32 unk4C;
     u8 headerReady;
     u8 done;
-    u8 count;
-    u8 start;
+    u8 filledSlots;
+    u8 firstSlot;
     u32 scratchBuffer;
     u8 pad58[4];
     s32 (*read)(struct SdfStreamFrameNode *, u32, s32, void *, s32);
@@ -675,98 +706,108 @@ u64 sndLoadNamedOffsetResourceList(u64 name) {
 /* Packed relocation header; payload begins at +0x20, followed by its fixup table. */
 typedef struct PackedRelocationHeader {
     u8 pad00[0x10];
-    s32 fixupOffset;
-    u32 fixupSize;
+    s32 relocationOffset;
+    u32 relocationBytes;
     u8 pad18[8];
 } PackedRelocationHeader;
 
+/* Relocate words in the payload and return its address, retaining integer address arithmetic. */
 s32 sdfRelocatePackedResourcePayload(s32 resource) {
     s32 payload;
 
-    payload = resource + 0x20;
-    sdfRelocatePackedResourceWords(payload, payload, payload + ((PackedRelocationHeader *)resource)->fixupOffset, ((PackedRelocationHeader *)resource)->fixupSize);
+    payload = resource + SDF_RELOC_HEADER_BYTES;
+    sdfRelocatePackedResourceWords(payload, payload, payload + ((PackedRelocationHeader *)resource)->relocationOffset, ((PackedRelocationHeader *)resource)->relocationBytes);
     return payload;
 }
 
-u64 sdfLoadPackedResourceWithRelocatedPayload(u64 name, s32 *out) {
+/* Return the retained allocation handle and publish the relocated payload address. */
+u64 sdfLoadPackedResourceWithRelocatedPayload(u64 name, s32 *outPayload) {
     u32 info[4];
     u64 buffer = sdfReadNamedResource(name, info, 0);
-    *out = sdfRelocatePackedResourcePayload(info[0]);
+    *outPayload = sdfRelocatePackedResourcePayload(info[0]);
     return buffer;
 }
 
+/* This entry point uses the same payload-relative relocation table. */
 s32 sdfRelocatePackedResourceWordsFromHeader(s32 resource) {
     s32 payload;
 
-    payload = resource + 0x20;
-    sdfRelocatePackedResourceWords(payload, payload, payload + ((PackedRelocationHeader *)resource)->fixupOffset, ((PackedRelocationHeader *)resource)->fixupSize);
+    payload = resource + SDF_RELOC_HEADER_BYTES;
+    sdfRelocatePackedResourceWords(payload, payload, payload + ((PackedRelocationHeader *)resource)->relocationOffset, ((PackedRelocationHeader *)resource)->relocationBytes);
     return payload;
 }
 
-u64 sdfReadPackedResourceAndRelocateHeader(u64 name, s32 *out) {
+/* Return the retained allocation handle and publish the relocated payload address. */
+u64 sdfReadPackedResourceAndRelocateHeader(u64 name, s32 *outPayload) {
     u32 info[4];
     u64 buffer = sdfReadNamedResource(name, info, 0);
-    *out = sdfRelocatePackedResourceWordsFromHeader(info[0]);
+    *outPayload = sdfRelocatePackedResourceWordsFromHeader(info[0]);
     return buffer;
 }
 
-void sdfRelocatePackedResourceWords(s32 *words, s32 base, u8 *table, s32 size) {
-    u8 *cursor = table;
+/* Byte-coded commands advance by word deltas, or relocate a run of following words.
+ * Low tag bits select one-, two-, or three-byte deltas; tag 7 encodes a run.
+ * tableBytes bounds the encoded byte stream, not the number of relocated words.
+ */
+void sdfRelocatePackedResourceWords(s32 *words, s32 relocationBase, u8 *table, s32 tableBytes) {
+    u8 *commandCursor = table;
     s32 value;
-    s32 i;
+    s32 runIndex;
 
-    while (cursor - table < size) {
-        value = *cursor++;
+    while (commandCursor - table < tableBytes) {
+        value = *commandCursor++;
         if ((value & 1) == 0) {
             value >>= 1;
         } else if ((value & 2) == 0) {
-            value = (value | *cursor++ << 8) >> 2;
+            value = (value | *commandCursor++ << 8) >> 2;
         } else if ((value & 4) == 0) {
-            value = (value | cursor[0] << 8 | cursor[1] << 16) >> 3;
-            cursor += 2;
+            value = (value | commandCursor[0] << 8 | commandCursor[1] << 16) >> 3;
+            commandCursor += 2;
         } else {
             value = (value >> 3) + 2;
-            for (i = 0; i < value; i++) {
+            for (runIndex = 0; runIndex < value; runIndex++) {
                 words++;
-                *words += base;
+                *words += relocationBase;
             }
             continue;
         }
         words += value;
-        *words += base;
+        *words += relocationBase;
     }
 }
 
-void sdfStreamNodeUnlink(SdfStreamNode *node, s32 inInterrupt) {
+/* Remove a queued node without clearing its old links; the caller may own the interrupt guard. */
+void sdfStreamNodeUnlink(SdfStreamNode *node, s32 skipInterruptGuard) {
     s32 interruptsEnabled = 0;
-    SdfStreamNode *prev;
-    SdfStreamNode *next;
-    if (inInterrupt == 0) {
+    SdfStreamNode *previousNode;
+    SdfStreamNode *nextNode;
+    if (skipInterruptGuard == 0) {
         interruptsEnabled = func_00312C08();
     }
     if (node->queued != 0) {
-        prev = node->prev;
-        next = node->next;
-        if (prev == 0) {
-            sdfStreamNodeListHead = next;
+        previousNode = node->prev;
+        nextNode = node->next;
+        if (previousNode == 0) {
+            sdfStreamNodeListHead = nextNode;
         } else {
-            prev->next = next;
+            previousNode->next = nextNode;
         }
-        if (next == 0) {
-            sdfStreamNodeListTail = prev;
+        if (nextNode == 0) {
+            sdfStreamNodeListTail = previousNode;
         } else {
-            next->prev = prev;
+            nextNode->prev = previousNode;
         }
         node->queued = 0;
     }
-    if (inInterrupt == 0 && interruptsEnabled != 0) {
+    if (skipInterruptGuard == 0 && interruptsEnabled != 0) {
         EIntr();
     }
 }
 
-void sdfStreamNodeAppend(SdfStreamNode *node, s32 inInterrupt) {
+/* Move a node to the queue tail, using one interrupt guard for unlink plus append. */
+void sdfStreamNodeAppend(SdfStreamNode *node, s32 skipInterruptGuard) {
     s32 interruptsEnabled = 0;
-    if (inInterrupt == 0) {
+    if (skipInterruptGuard == 0) {
         interruptsEnabled = func_00312C08();
     }
     if (node->queued != 0) {
@@ -781,45 +822,48 @@ void sdfStreamNodeAppend(SdfStreamNode *node, s32 inInterrupt) {
     node->prev = sdfStreamNodeListTail;
     node->next = 0;
     sdfStreamNodeListTail = node;
-    if (inInterrupt == 0 && interruptsEnabled != 0) {
+    if (skipInterruptGuard == 0 && interruptsEnabled != 0) {
         EIntr();
     }
 }
 
+/* Walk link addresses to append to the independent singly-linked sound list. */
 void sdfSoundAppendNode(SdfStreamFrameNode *node) {
-    SdfStreamFrameNode **tail = &sdfSoundNodeHead;
-    SdfStreamFrameNode *current = *tail;
-    if (current != NULL) {
-        tail = &current->next;
-        while ((current = *tail) != NULL) {
-            tail = &current->next;
+    SdfStreamFrameNode **tailLink = &sdfSoundNodeHead;
+    SdfStreamFrameNode *currentNode = *tailLink;
+    if (currentNode != NULL) {
+        tailLink = &currentNode->next;
+        while ((currentNode = *tailLink) != NULL) {
+            tailLink = &currentNode->next;
         }
     }
-    *tail = node;
+    *tailLink = node;
     node->next = NULL;
 }
 
+/* Unlink the first matching sound node; absence leaves the list unchanged. */
 void sdfSoundRemoveNode(SdfStreamFrameNode *node) {
-    SdfStreamFrameNode **link = &sdfSoundNodeHead;
-    SdfStreamFrameNode *current = *link;
-    while (current != NULL) {
-        if (current == node) {
-            *link = current->next;
+    SdfStreamFrameNode **nodeLink = &sdfSoundNodeHead;
+    SdfStreamFrameNode *currentNode = *nodeLink;
+    while (currentNode != NULL) {
+        if (currentNode == node) {
+            *nodeLink = currentNode->next;
             return;
         }
-        link = &current->next;
-        current = *link;
+        nodeLink = &currentNode->next;
+        currentNode = *nodeLink;
     }
 }
 
+/* Allocate two width-by-height frames, using four bytes per pixel for mode zero, two otherwise. */
 void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
-    s32 channels = 4;
+    s32 bytesPerPixel = SDF_STREAM_PIXEL_BYTES_WIDE;
     s32 size;
     if (node->audioMode != 0) {
-        channels = 2;
+        bytesPerPixel = SDF_STREAM_PIXEL_BYTES_NARROW;
     }
     size = node->width * node->height;
-    size *= channels;
+    size *= bytesPerPixel;
     node->bufferSize = size;
     node->buffers[0] = sdfAllocateBlockBySizeThreshold(size);
     node->buffers[1] = sdfAllocateBlockBySizeThreshold(size);
@@ -828,8 +872,9 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB578);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB650);
 
+/* Clear the node, map the format's two selector bytes to mode 0/1/2, and copy loop/playback modes. */
 void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *node, SoundFormat *format) {
-    memset(node, 0, 0x8C);
+    memset(node, 0, SDF_STREAM_NODE_BYTES);
     if (format->hasAudio == 0) {
         node->audioMode = 0;
     } else if (format->stereo == 0) {
@@ -848,16 +893,17 @@ typedef struct SoundFrameHeader {
     s32 sourceBytes;
 } SoundFrameHeader;
 
-void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 source, s32 sourceSize) {
+/* Decode the frame header, allocate its buffers, then queue the bytes after that header. */
+void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddress, s32 sourceSize) {
     s32 interruptsEnabled;
-    u8 *src = (u8 *)source;
+    u8 *frameBytes = (u8 *)sourceAddress;
 
     sdfSoundInitNodeFromFormat(node, format);
-    node->width = ((SoundFrameHeader *)src)->width;
-    node->sourceBytes = ((SoundFrameHeader *)src)->sourceBytes;
-    node->height = ((SoundFrameHeader *)src)->height;
+    node->width = ((SoundFrameHeader *)frameBytes)->width;
+    node->sourceBytes = ((SoundFrameHeader *)frameBytes)->sourceBytes;
+    node->height = ((SoundFrameHeader *)frameBytes)->height;
     sdfAllocateStreamFrameBuffers(node);
-    func_002EB578(node, src + 0x10, sourceSize - 0x10);
+    func_002EB578(node, frameBytes + SDF_STREAM_FRAME_HEADER_BYTES, sourceSize - SDF_STREAM_FRAME_HEADER_BYTES);
     interruptsEnabled = func_00312C08();
     sdfStreamNodeAppend((SdfStreamNode *)node, 0);
     if (interruptsEnabled != 0) {
@@ -866,25 +912,29 @@ void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 source, s3
     func_002EC230(0);
 }
 
-void sdfSoundInitFormattedNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead read, u32 source) {
+/* Store the callback/source token and allocate an eight-slot feed ring plus its leading mirror bytes. */
+void sdfSoundInitFormattedNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead readSource, u32 source) {
     sdfSoundInitNodeFromFormat(node, format);
-    node->read = read;
+    node->read = readSource;
     node->source = source;
     node->active = 1;
-    node->scratchBuffer = sdfAllocateBlockBySizeThreshold(0x10100) + 0x100;
+    node->scratchBuffer = sdfAllocateBlockBySizeThreshold(SDF_STREAM_SCRATCH_BYTES) + SDF_STREAM_PREFIX_BYTES;
 }
 
 extern SdfStreamTextureHead *sdfTexAllocateHeadForDimensions(s32, s32, s32, s32, s32);
 
+/* Query for a complete header before reading it. Texture dimensions are rounded
+ * only when larger than one GS page; smaller dimensions remain unchanged.
+ */
 void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
     SoundFrameHeader header;
-    s32 status;
+    s32 readStatus;
     s32 interruptsEnabled;
 
     if (node->headerReady != 0) {
         return;
     }
-    if (node->read(node, node->source, 0, &status, 0) < sizeof(header)) {
+    if (node->read(node, node->source, 0, &readStatus, 0) < sizeof(header)) {
         return;
     }
     node->headerReady = 1;
@@ -893,26 +943,26 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
     node->height = header.height;
     node->sourceBytes = header.sourceBytes;
     if (node->resourceWord == 0) {
-        s32 width = node->width;
-        s32 height = node->height;
-        s32 format;
+        s32 textureWidth = node->width;
+        s32 textureHeight = node->height;
+        s32 pixelFormat;
         SdfStreamTextureHead *texture;
 
-        if (width > 64) {
-            width = (width + 63) & ~63;
+        if (textureWidth > SDF_STREAM_PAGE_WIDTH) {
+            textureWidth = (textureWidth + SDF_STREAM_PAGE_WIDTH_MASK) & ~SDF_STREAM_PAGE_WIDTH_MASK;
         }
         if (node->audioMode == 0) {
-            format = 0;
-            if (height > 32) {
-                height = (height + 31) & ~31;
+            pixelFormat = SDF_STREAM_PSMCT32;
+            if (textureHeight > SDF_STREAM_WIDE_PAGE_HEIGHT) {
+                textureHeight = (textureHeight + SDF_STREAM_WIDE_HEIGHT_MASK) & ~SDF_STREAM_WIDE_HEIGHT_MASK;
             }
         } else {
-            format = 2;
-            if (height > 64) {
-                height = (height + 63) & ~63;
+            pixelFormat = SDF_STREAM_PSMCT16;
+            if (textureHeight > SDF_STREAM_NARROW_PAGE_HEIGHT) {
+                textureHeight = (textureHeight + SDF_STREAM_NARROW_HEIGHT_MASK) & ~SDF_STREAM_NARROW_HEIGHT_MASK;
             }
         }
-        texture = sdfTexAllocateHeadForDimensions(width, height, format, 2, 0);
+        texture = sdfTexAllocateHeadForDimensions(textureWidth, textureHeight, pixelFormat, 2, 0);
         node->textureHead = texture;
         node->resourceWord = texture->resourceWord;
     }
@@ -971,52 +1021,56 @@ void func_002EBB60(SdfStreamFrameNode *node) {
 
 extern void *memcpy(void *dst, const void *src, u32 n);
 
+/* Fill at most seven of eight 8-KiB slots. A short non-EOF query waits for more
+ * data; EOF permits a partial final read. Copy the final slot's trailing bytes
+ * into the prefix mirror, retaining the original copy even for a partial read.
+ */
 void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
-    s32 slot;
-    s32 count;
-    s32 got;
-    u32 dst;
-    s32 eof;
+    s32 writeSlot;
+    s32 filledSlots;
+    s32 availableBytes;
+    u32 destinationAddress;
+    s32 endOfStream;
 
-    count = feed->count;
-    if (feed->done == 0 && count < 7) {
+    filledSlots = feed->filledSlots;
+    if (feed->done == 0 && filledSlots < SDF_STREAM_MAX_FILLED) {
         do {
-            slot = feed->start;
-            eof = 0;
-            dst = feed->scratchBuffer;
-            slot += count;
-            if (slot >= 8) {
-                slot -= 8;
+            writeSlot = feed->firstSlot;
+            endOfStream = 0;
+            destinationAddress = feed->scratchBuffer;
+            writeSlot += filledSlots;
+            if (writeSlot >= SDF_STREAM_RING_SLOTS) {
+                writeSlot -= SDF_STREAM_RING_SLOTS;
             }
-            dst += slot << 13;
-            dst = (dst & 0x0FFFFFFF) | 0x20000000;
-            got = feed->read(feed, feed->source, 0, &eof, 0);
-            if (got < 0x2000) {
-                if (eof == 0) {
+            destinationAddress += writeSlot << SDF_STREAM_SLOT_SHIFT;
+            destinationAddress = (destinationAddress & SDF_EE_PHYSICAL_MASK) | SDF_EE_UNCACHED_BASE;
+            availableBytes = feed->read(feed, feed->source, 0, &endOfStream, 0);
+            if (availableBytes < SDF_STREAM_SLOT_BYTES) {
+                if (endOfStream == 0) {
                     return;
                 }
-                if (got > 0) {
-                    feed->read(feed, feed->source, 1, (void *)dst, got);
-                    count++;
+                if (availableBytes > 0) {
+                    feed->read(feed, feed->source, 1, (void *)destinationAddress, availableBytes);
+                    filledSlots++;
                 }
                 feed->done = 1;
             } else {
-                if (got == 0x2000) {
-                    if (eof != 0) {
+                if (availableBytes == SDF_STREAM_SLOT_BYTES) {
+                    if (endOfStream != 0) {
                         feed->done = 1;
                     }
                 }
-                feed->read(feed, feed->source, 1, (void *)dst, 0x2000);
-                count++;
+                feed->read(feed, feed->source, 1, (void *)destinationAddress, SDF_STREAM_SLOT_BYTES);
+                filledSlots++;
             }
-            if (slot == 7) {
-                memcpy((void *)(((feed->scratchBuffer - 0x100) & 0x0FFFFFFF) | 0x20000000), (void *)(dst + 0x1F00), 0x100);
+            if (writeSlot == SDF_STREAM_MAX_FILLED) {
+                memcpy((void *)(((feed->scratchBuffer - SDF_STREAM_PREFIX_BYTES) & SDF_EE_PHYSICAL_MASK) | SDF_EE_UNCACHED_BASE), (void *)(destinationAddress + SDF_STREAM_TRAILER_START), SDF_STREAM_PREFIX_BYTES);
             }
-            feed->count = count;
+            feed->filledSlots = filledSlots;
             if (feed->done != 0) {
                 break;
             }
-        } while (count < 7);
+        } while (filledSlots < SDF_STREAM_MAX_FILLED);
     }
 }
 
@@ -1030,27 +1084,29 @@ typedef struct SoundIpuBuffer {
     u32 buffers[2];
 } SoundIpuBuffer;
 
+/* Start DMA from the IPU into the selected buffer, then toggle the byte index. */
 void sdfSoundQueueIpuBuffer(SoundIpuBuffer *stream) {
-    vu32 *ipuData = (vu32 *)0x1000B010;
-    vu32 *ipuSize = (vu32 *)0x1000B020;
-    vu32 *ipuControl = (vu32 *)0x1000B000;
-    u8 active = stream->active;
-    *ipuData = stream->buffers[active] & 0x0fffffff;
-    *ipuSize = stream->size / 16;
-    *ipuControl = 0x100;
-    stream->active = active ^ 1;
+    vu32 *dmaAddress = (vu32 *)SDF_IPU_OUTPUT_DMA_ADDRESS;
+    vu32 *dmaQwords = (vu32 *)SDF_IPU_OUTPUT_DMA_QWC;
+    vu32 *dmaControl = (vu32 *)SDF_IPU_OUTPUT_DMA_CTRL;
+    u8 bufferIndex = stream->active;
+    *dmaAddress = stream->buffers[bufferIndex] & SDF_EE_PHYSICAL_MASK;
+    *dmaQwords = stream->size / SDF_STREAM_QWORD_BYTES;
+    *dmaControl = SDF_IPU_DMA_START;
+    stream->active = bufferIndex ^ 1;
 }
 
+/* Read the FDEC result, then issue FDEC with an eight-bit advance; return the earlier result. */
 s32 sdfSoundSyncIpu(void) {
-    vu32 *ipuCommand = (vu32 *)0x10002000;
-    s32 status;
-    *ipuCommand = 0x40000000;
+    vu32 *ipuCommand = (vu32 *)SDF_IPU_CMD_REGISTER;
+    s32 decodedBits;
+    *ipuCommand = SDF_IPU_FDEC;
     sceIpuSync(0, 0);
-    status = *ipuCommand;
+    decodedBits = *ipuCommand;
     sceIpuSync(0, 0);
-    *ipuCommand = 0x40000008;
+    *ipuCommand = SDF_IPU_FDEC_BYTE;
     sceIpuSync(0, 0);
-    return status;
+    return decodedBits;
 }
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC060);
@@ -1132,28 +1188,31 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC3C0);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC3F0);
 
+/* Return the indexed earlier entry only when enabled; the byte index is unchecked. */
 u32 sdfMidiPreviousEntry(MidiChannel *channel) {
-    u32 result = 0;
+    u32 selectedEntry = 0;
     if (channel->enabled != 0) {
-        result = channel->earlierEntries[channel->index];
+        selectedEntry = channel->earlierEntries[channel->index];
     }
-    return result;
+    return selectedEntry;
 }
 
+/* Return the indexed current entry only when enabled; the byte index is unchecked. */
 u32 sndGetSelectedChannelEntry(MidiChannel *channel) {
-    u32 result = 0;
+    u32 selectedEntry = 0;
     if (channel->enabled != 0) {
-        result = channel->entries[channel->index];
+        selectedEntry = channel->entries[channel->index];
     }
-    return result;
+    return selectedEntry;
 }
 
+/* Consume a pending buffer when present, but always advance processed; loop only on exact equality. */
 void sdfAdvanceBufferedPlayback(MidiPlaybackState *state) {
     s32 interruptsEnabled = func_00312C08();
-    s32 pending = state->pending;
-    s32 remaining = pending - 1;
-    if (pending > 0) {
-        state->pending = remaining;
+    s32 pendingBuffers = state->pending;
+    s32 remainingBuffers = pendingBuffers - 1;
+    if (pendingBuffers > 0) {
+        state->pending = remainingBuffers;
         state->bufferIndex ^= 1;
         state->completed++;
     }
@@ -1167,6 +1226,7 @@ void sdfAdvanceBufferedPlayback(MidiPlaybackState *state) {
     func_002EC230(0);
 }
 
+/* Return zero only when nothing is pending; otherwise call the zero-buffer handler if needed, queue and advance. */
 s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
     u32 *selectedBuffer;
     if (state->pending == 0) {
@@ -1177,7 +1237,7 @@ s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
     if (*selectedBuffer == 0) {
         func_002EB650();
     }
-    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, *selectedBuffer + state->bufferSize - 0x10);
+    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, *selectedBuffer + state->bufferSize - SDF_STREAM_QWORD_BYTES);
     sdfAdvanceBufferedPlayback(state);
     return 1;
 }
