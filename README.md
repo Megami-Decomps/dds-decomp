@@ -100,7 +100,7 @@ git clone https://github.com/Megami-Decomps/dds-decomp.git && cd dds-decomp
 python -m pip install -r requirements.txt
 python tools/download_tools.py   # ee-gcc 2.96 + ee-as, decompals binutils, objdiff-cli
 # copy your disc image(s) into the repo root or orig/, then:
-python tools/extract.py          # -> SHA-1-checked executables and selected archive inputs under orig/
+python tools/extract.py          # -> SHA-1-checked executables and authored archive inputs under orig/
 python configure.py              # split with splat, write build.ninja and objdiff.json
 ninja                            # build and verify every extracted version (or: ninja dds1)
 ninja dds1-dev dds2-dev          # build the relocatable development ELFs

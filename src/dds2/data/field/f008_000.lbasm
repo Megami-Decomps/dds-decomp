@@ -1,0 +1,8 @@
+lb 1
+base sha1=49819ce3877b4860151afd84728f97e80d988978 size=0x8400
+entry type=1 compressed=1 user=1 extension=INF raw_size=0x3b80 retail_sha1=8bd5cee0f5a810710590ee964364b4309928fb57 source=data/field/f008.inf
+entry type=1 compressed=1 user=2 extension=NPL raw_size=0x200 retail_sha1=5f535e2cda81e6c6f7d8403bc7b4cf64d446dff6 source=data/field/f008.npl
+entry type=1 compressed=1 user=3 extension=SKY raw_size=0xe000 retail_sha1=ce4563ee327fad77d8953b31b509a59cf3f63868 source=data/field/f008.sky
+entry type=1 compressed=1 user=4 extension=WAP raw_size=0x6d00 retail_sha1=53ff1c4abe91559cd6a713c84973761c2b6383b3 source=data/field/f008.wap
+entry type=1 compressed=1 user=5 extension=BF raw_size=0x9cdb retail_sha1=3011f3579c693ab6a59ae5dc69824d2de8b6422c source=scripts/field/f008.bf
+entry type=1 compressed=1 user=6 extension=AMB raw_size=0x9c36 retail_sha1=516865f65e9fa183b0975fec950d9781baf818e0 source=data/field/f008.amb

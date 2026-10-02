@@ -42,6 +42,7 @@ from pathlib import Path
 
 import ninja_syntax
 from tools.ee_gcc_aslr import marker_is_valid
+from tools import lb
 
 ROOT = Path(__file__).resolve().parent
 VERSIONS = json.loads((ROOT / "config" / "versions.json").read_text())
@@ -904,9 +905,6 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             version_outputs.append(str(fld1_stamp))
             field_data_stamps.append(str(fld1_stamp))
 
-        if field_data_stamps:
-            n.build(f"{version}-field-data", "phony", field_data_stamps)
-
         lb_manifest = Path("config") / version / "field_lb.sha1"
         if (ROOT / lb_manifest).exists():
             lb_source_dir = Path("src") / version / "data" / "field"
@@ -917,11 +915,13 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 source = source.relative_to(ROOT)
                 output = lb_output_dir / source.with_suffix(".LB").name
                 base = Path("orig") / version / "field" / output.name
-                resource = lb_output_dir / source.with_suffix(".f2").name
-                resource_f1 = lb_output_dir / source.with_suffix(".f1").name
-                resources = ["tools/lb.py", str(base), str(resource)]
-                if (ROOT / fld1_manifest).exists():
-                    resources.append(str(resource_f1))
+                description = lb.parse_source((ROOT / source).read_text(encoding="utf-8"))
+                resources = ["tools/lb.py", str(base)]
+                resources.extend(
+                    str(Path("build") / version / entry.source)
+                    for entry in description.entries
+                    if entry.source != "base"
+                )
                 n.build(
                     str(output),
                     "lb",
@@ -930,13 +930,18 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     variables={
                         "outdir": str(output.parent),
                         "base": str(base),
-                        "resources": str(lb_output_dir),
+                        "resources": str(Path("build") / version),
                     },
                 )
                 lb_outputs.append(str(output))
             lb_stamp = lb_output_dir / "field_lb.ok"
             n.build(str(lb_stamp), "check", str(lb_manifest), implicit=lb_outputs)
             n.build(f"{version}-field-archives", "phony", str(lb_stamp))
+            version_outputs.append(str(lb_stamp))
+            field_data_stamps.append(str(lb_stamp))
+
+        if field_data_stamps:
+            n.build(f"{version}-field-data", "phony", field_data_stamps)
 
         battle_manifest = Path("config") / version / "battle_tables.sha1"
         if (ROOT / battle_manifest).exists():
