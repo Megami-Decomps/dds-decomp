@@ -412,12 +412,24 @@ def main():
         retail_labels.append((ro_rows[here + 1][0] + 0xFF000, "end"))
         retail_labels.sort()
 
+    def next_unit_aligned16():
+        """The unit after this one starts 16-aligned and holds a jump table, so
+        its .rodata section is 16-aligned and the linker pads up to it."""
+        if here is None or here + 1 >= len(ro_rows) or not ro_rows[here + 1][1]:
+            return False
+        nxt_file = ROOT / "asm" / version / "data" / f"{ro_rows[here + 1][1]}.rodata.s"
+        return (ro_rows[here + 1][0] + 0xFF000) % 16 == 0 and nxt_file.exists() \
+            and re.search(r"^dlabel jtbl_", nxt_file.read_text(), re.M) is not None
+
     def retail_padding(addr, size):
         """Bytes between an item's 8-aligned end and the next retail symbol
-        (jump tables are 16-aligned)."""
+        (jump tables are 16-aligned; so is the start of a following unit whose
+        .rodata holds one, the linker pads the gap)."""
         nxt, kind = next(((a, k) for a, k in retail_labels if a > addr), (None, None))
         end = (addr + size + 7) & ~7
         if nxt is None or nxt <= end or kind == "jtbl" and nxt == (end + 15) & ~15:
+            return 0
+        if kind == "end" and nxt == (end + 15) & ~15 and next_unit_aligned16():
             return 0
         return nxt - end
 
