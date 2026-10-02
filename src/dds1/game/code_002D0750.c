@@ -3,7 +3,7 @@
 typedef struct SdfResource {
     struct SdfResource *peer;
     struct SdfResource *block;
-    u32 address;
+    s32 address;
     u16 busy;
     s16 referenceCount;
 } SdfResource;
@@ -89,11 +89,59 @@ void sdfDecrementAllocationReferenceCount(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0A80);
+typedef struct SdfHeapRoot {
+    s32 unk0; /* 0x0 */
+    SdfResource *first; /* 0x4: first block record */
+    s32 unk8; /* 0x8 */
+    s32 unkC; /* 0xC */
+    SdfResource *last; /* 0x10: end marker */
+} SdfHeapRoot;
+
+extern SdfHeapRoot D_003E2748;
+
+/* Find the used heap block whose data address is `address`. */
+SdfResource *func_002D0A80(void *address) {
+    SdfHeapRoot *heap = &D_003E2748;
+    SdfResource *block;
+    s32 interruptsDisabled;
+
+    interruptsDisabled = func_00312C08();
+    for (block = heap->first;; block = block->block) {
+        if (block->busy != 1) {
+            if (block->busy == 2) {
+                if (interruptsDisabled != 0) {
+                    EIntr();
+                }
+            }
+        } else if (block->address == (u32)address) {
+            if (interruptsDisabled != 0) {
+                EIntr();
+            }
+            return block;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0B50);
 
-INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0BF8);
+extern SdfResource *D_003E274C[];
+
+/* Find the used heap block that contains `address`; NULL when the end marker is reached. */
+SdfResource *func_002D0BF8(s32 address) {
+    SdfResource *block = D_003E274C[0];
+    SdfResource *next;
+
+    for (;; block = next) {
+        next = block->block;
+        if (block->busy != 1) {
+            if (block->busy == 2) {
+                return NULL;
+            }
+        } else if (address >= block->address && address < next->address) {
+            return block;
+        }
+    }
+}
 
 extern s32 func_002D03F8(s32 size);
 extern s32 func_002F4FD8(void *, s32, s32, void *, s32, void *, s32, s32, s32);
