@@ -137,16 +137,6 @@ void btlReleaseEventData(void) {
     btlBossDebugPrintf(D_003A67D0);
 }
 
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A67A0);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A67B8);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A67D0);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A67E8);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6810);
-
 extern s32 evtFindTaskResourceEntryByKey(s16, s32);
 
 extern void btlCreateIndexedSoundResourceNode(s32, u32);
@@ -424,6 +414,16 @@ s32 btlIndexListMatchesEntryCodes(void *list, s32 code, u32 mask) {
     }
     return matched == count;
 }
+
+INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A67A0);
+
+INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A67B8);
+
+INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A67D0);
+
+INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A67E8);
+
+INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6810);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6838);
 
@@ -861,7 +861,24 @@ void btlReleaseOwnedData(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_00212680);
+extern f32 D_00360F30[];
+extern void sdfQueueFlatTriangle(s32, s32, s32, s32, s32, s32,
+                                s32, s32, s32, s32, s32 (*)(s32));
+
+void func_00212680(s32 packets, s32 primitive, s32 x, s32 y, s32 depth, s32 color, f32 scale) {
+    f32 widthScale = scale * 16.0f;
+    f32 heightScale = scale * 8.0f;
+    s32 i;
+
+    x += 0x7000;
+    y += 0x7900;
+    for (i = 0; i < 6; i++) {
+        sdfQueueFlatTriangle(packets, color, primitive, x, y,
+            x + (s32)(D_00360F30[i * 2] * widthScale), y + (s32)(D_00360F30[i * 2 + 1] * heightScale),
+            x + (s32)(D_00360F30[i * 2 + 2] * widthScale), y + (s32)(D_00360F30[i * 2 + 3] * heightScale),
+            depth, NULL);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_002127A8);
 
@@ -3557,3 +3574,4 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003ABA38);
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003ABA50);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003ABA68);
+
