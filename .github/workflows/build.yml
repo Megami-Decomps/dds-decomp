@@ -65,7 +65,7 @@ jobs:
       # Fails unless both executables are byte-identical to retail.
       - name: Build
         if: steps.orig.outputs.available == 'true'
-        run: ninja dds1 dds2 dds1-dev
+        run: ninja dds1 dds2 dds1-dev dds2-dev
 
       - name: Progress reports
         if: steps.orig.outputs.available == 'true'
