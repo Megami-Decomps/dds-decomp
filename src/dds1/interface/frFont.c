@@ -141,7 +141,15 @@ extern s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph);
 
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 
-extern FrFontGlyph *func_00194BA0(FrFontGlyph *glyph, s32 option);
+typedef struct MemNode MemNode;
+extern void *itfDequeueMemNode(MemNode *queue);
+
+extern FrFontGlyph *func_00194BA0(FrFontGlyph *source, FrFontGlyph *destination);
+extern void frFontSetupGlyph(FrFontGlyph *glyph, s16 glyphId, s8 byte1, s8 byte0, s32 flags, s8 byte2);
+extern void frFontInitGlyph(FrFontGlyph *glyph);
+extern u32 frFontGetGlyphCellWidth(u8 fontIndex);
+extern u32 frFontGetGlyphCellHeight(u8 fontIndex);
+extern s8 D_00356470[];
 
 extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 positionNext);
 
@@ -313,7 +321,37 @@ u32 func_001949A8(void) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_001949B0);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00194BA0);
+/* Create a glyph wrapper for source and append it to an optional destination chain. */
+FrFontGlyph *func_00194BA0(FrFontGlyph *source, FrFontGlyph *destination) {
+    FrFontGlyph *glyph;
+    FrFontGlyph *previous;
+
+    if (destination == NULL) {
+        destination = itfDequeueMemNode((MemNode *)frFontWork.glyphPool);
+        frFontWork.glyphCount++;
+        frFontInitGlyph(destination);
+    }
+    glyph = itfDequeueMemNode((MemNode *)frFontWork.itemPool);
+    previous = destination->unk20;
+    frFontWork.itemCount++;
+    frFontSetupGlyph(glyph, 0, 0, 0, 0xA09DC300, 0);
+    if (previous == NULL) {
+        destination->firstChild = glyph;
+    } else {
+        previous->next = glyph;
+    }
+    glyph->unk20 = source;
+    glyph->advance = D_00356470[0];
+    glyph->unk18.b[0] = frFontGetGlyphCellWidth(0);
+    glyph->unk18.b[1] = frFontGetGlyphCellHeight(0);
+    glyph->previous = previous;
+    destination->unk20 = glyph;
+    destination->unk18.w++;
+    destination->advance += glyph->advance;
+    destination->u10.half[0] = glyph->unk18.b[0];
+    destination->u10.half[1] = glyph->unk18.b[1];
+    return destination;
+}
 
 FrFontGlyph *frFontAppendClonedGlyph(FrFontGlyph *source, FrFontGlyph *destination) {
     FrFontGlyph *glyph = func_00194BA0(source, 0);
@@ -878,4 +916,3 @@ INCLUDE_SDATA(const s32, "interface/frFont", frFontSharedRenderFlags);
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB17C);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB180);
-
