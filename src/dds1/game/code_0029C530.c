@@ -2880,7 +2880,27 @@ void effReleaseResourceRefs(u8 *work) {
     func_002D0918(refs->buffer);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", effDuplicateResourceRefs);
+/* Copy a track set: same size and kind, retaining the source's shared reference (or counting one more user of the built-in one). */
+u32 effDuplicateResourceRefs(u32 source) {
+    EffTrackSet *original = (EffTrackSet *)source;
+    EffTrackSet *effect = effCreateTrackSet(original->count, original->kind);
+
+    if (effect->columns != 0) {
+        if (original->shared != 0) {
+            effect->shared = effRetainSharedReference(original->shared);
+        } else {
+            switch (effect->kind) {
+            case 3:
+                D_003BC970[0]++;
+                break;
+            case 4:
+                D_003BC970[1]++;
+                break;
+            }
+        }
+    }
+    return (u32)effect;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A3E10);
 
@@ -4008,6 +4028,7 @@ typedef struct EffScaleRange {
     u8 *entries;
     f32 start;
     f32 delta;
+    struct MemBlock *allocation;
 } EffScaleRange;
 
 typedef struct EffScaleRangeConfig {
@@ -4023,7 +4044,8 @@ typedef struct EffScaleRangeConfig {
 
 /* The seed is initialized to one of eight negative sentinel values. */
 typedef struct EffScaleRangeEntry {
-    u8 pad_00[0x14];
+    EffPointSet *set;
+    u8 pad04[0x10];
     s32 negativeSeed;
     u8 pad_18[0x18];
 } EffScaleRangeEntry;
@@ -4064,7 +4086,67 @@ void effSeedBillScaleRange(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A9978);
+EffScaleRange *func_002A9978(EffPointSetTableSource *src) {
+    u32 count = src->count;
+    struct MemBlock *allocation;
+    EffScaleRange *table;
+    EffScaleRangeEntry *row;
+    u32 i;
+    u32 alphaA;
+    u32 alphaB;
+    u32 alphaC;
+    u32 lowA;
+    u32 lowB;
+    u32 lowC;
+    s32 rampIn;
+    s32 rampOut;
+
+    allocation = func_002D03F8(count * sizeof(EffScaleRangeEntry) + sizeof(EffScaleRange));
+    table = (EffScaleRange *)sdfResourceRetainAddress((u32)allocation);
+    table->allocation = allocation;
+    table->entries = (u8 *)(table + 1);
+    if ((u32)src->layers < 3) {
+        src->layers = 3;
+    }
+    lowA = src->colorA & 0xFFFFFF;
+    lowB = src->colorB & 0xFFFFFF;
+    lowC = src->colorC & 0xFFFFFF;
+    alphaA = src->colorA >> 24;
+    alphaB = src->colorB >> 24;
+    alphaC = src->colorC >> 24;
+    rampIn = (s32)(src->unk68 * (f32)(src->layers + 1));
+    rampOut = (s32)(src->unk6C * (f32)(src->layers + 1));
+    row = (EffScaleRangeEntry *)table->entries;
+    for (i = 0; i < count; i++) {
+        EffPointSet *set = effCreatePointSet5(src->layers);
+        u32 n;
+        u32 *rec;
+        u32 j;
+
+        row->set = set;
+        n = set->rows / 5;
+        rec = (u32 *)set->tail;
+        for (j = 0; j < n; j++) {
+            f32 ratio;
+            if (j < rampIn) {
+                ratio = (f32)j / (f32)rampIn;
+            } else if (j <= rampOut) {
+                ratio = 1.0f;
+            } else {
+                ratio = (f32)(n - j) / (f32)(n - rampOut);
+            }
+            rec[0] = lowC | ((u32)((f32)alphaC * ratio) << 24);
+            rec[1] = lowB | ((u32)((f32)alphaB * ratio) << 24);
+            rec[2] = lowA | ((u32)((f32)alphaA * ratio) << 24);
+            rec[3] = rec[1];
+            rec[4] = rec[0];
+            rec += 5;
+        }
+        row->negativeSeed = ~(i * 4);
+        row++;
+    }
+    return table;
+}
 
 extern void effReleasePointSetAsset(s32);
 
@@ -4077,11 +4159,11 @@ void effReleaseBillPointEntries(u8 *work) {
 
     if (count != 0) {
         do {
-            effReleasePointSetAsset(*(s32 *)entry);
+            effReleasePointSetAsset((s32)((EffScaleRangeEntry *)entry)->set);
             entry += 0x30;
         } while (++index < count);
     }
-    func_002D0918(((EffClassDrawState *)state)->allocation);
+    func_002D0918((u32)((EffScaleRange *)state)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A9DA8);
