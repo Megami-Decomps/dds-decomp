@@ -5226,8 +5226,10 @@
 0x003340A8	sdfInvokeMotionObjectCallback	inferred	Invokes the callback in the first pointer of a motion object's callback table.
 0x003340D0	sdfSetMotionPointerPair	inferred	Stores the two supplied pointers into the pair in reverse argument order.
 0x003341B8	sdfDestroyMotion	inferred	DDS1 twin func_002DB308 [names_M68_VuRest.tsv]
+0x00334280	sdfMotionInitialize	inferred	Selects a motion-table entry, initializes blend lead/duration and loop state, and dispatches its size-prefixed binding setup records; paired with DDS1 0x002DB3D0.
 0x003343C8	sdfMotionInitializeAtZeroTime	inferred	Passes two zero time values to motion initializer; rest pose is not established. [names_reviewed6.tsv]
 0x003343E8	sdfMotionSampleAtFrame	inferred	confidence=high; matched-C; src/dds2/sdf/sdfMotion.c:292:func_003343E8; Sets the current motion frame/state and calls each object blend callback with a lead-in-clamped weight until the blend interval ends; calls sample callbacks afterward.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x00334510	sdfMotionUpdate	inferred	Dispatches the current motion state, applies the initial or next frame, wraps looping motions, and reports completion or wrap; paired with DDS1 0x002DB660.
 0x00334618	sdfMotionSuspend	inferred	Saves the previous motion mode before switching to mode six.
 0x00334638	sdfMotionResume	inferred	Restores the saved motion mode when currently in mode six.
 0x00334670	sdfSetMotionOutputValue	inferred	Writes the supplied word into the motion output at offset 0x08.
@@ -5288,6 +5290,7 @@
 0x00336388	sdfTransposeVuMatrix	inferred	Transposes the VU matrix by interleaving matrix rows into columns. [names_reviewed10.tsv]
 0x003363D0	sdfInvertRigidVuTransform	inferred	Transposes the VU rotation basis and negates the transformed translation. [names_reviewed10.tsv]
 0x00336428	sdfInvertScaledVuTransform	inferred	Transposes and rescales the VU rotation basis then negates translation. [names_reviewed10.tsv]
+0x00336638	sdfBuildRotationMatrixFromAxisAngle	inferred	Normalizes the axis and builds the Rodrigues rotation matrix used by the named VU axis-angle wrappers.
 0x00336768	sdfBuildVuRotationFromAxisAngle	inferred	Builds a rotation matrix from an axis and angle and loads it into VU registers. [names_reviewed10.tsv]
 0x00336918	sdfVuLoadRotationMatrixFromAxisAngle	inferred	Constructs an axis-angle rotation matrix and loads it into VU matrix registers. [names_reviewed12.tsv]
 0x00336948	sdfRotateVuMatrixAboutX	inferred	Rotates the VU matrix Y and Z basis vectors by the supplied angle. [names_reviewed10.tsv]

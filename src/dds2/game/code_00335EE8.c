@@ -196,4 +196,53 @@ INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336538);
 
 INCLUDE_ASM(const s32, "game/code_00335EE8", func_003365B8);
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336638);
+extern f32 func_00353040(f32 angle);
+extern f32 func_00353140(f32 angle);
+
+typedef struct RwV3d {
+    f32 x;
+    f32 y;
+    f32 z;
+} RwV3d;
+
+typedef struct RwMatrix {
+    RwV3d right;
+    u32 flags;
+    RwV3d up;
+    u32 pad1;
+    RwV3d at;
+    u32 pad2;
+    RwV3d pos;
+    u32 pad3;
+} RwMatrix;
+
+void sdfBuildRotationMatrixFromAxisAngle(f32 angle, const RwV3d *axis, RwMatrix *matrix) {
+    f32 normalizedAxis[4];
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 cosine = func_00353040(angle);
+    f32 sine = func_00353140(angle);
+
+    VU0_LOAD_VF(vf10, axis);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, normalizedAxis);
+
+    x = normalizedAxis[0];
+    y = normalizedAxis[1];
+    z = normalizedAxis[2];
+
+    matrix->right.x = x * x + (1.0f - x * x) * cosine;
+    matrix->right.y = x * y * (1.0f - cosine) + z * sine;
+    matrix->right.z = x * z * (1.0f - cosine) - y * sine;
+    matrix->flags = 0;
+    matrix->up.x = x * y * (1.0f - cosine) - z * sine;
+    matrix->up.y = y * y + (1.0f - y * y) * cosine;
+    matrix->up.z = y * z * (1.0f - cosine) + x * sine;
+    matrix->pad1 = 0;
+    matrix->at.x = x * z * (1.0f - cosine) + y * sine;
+    matrix->at.y = y * z * (1.0f - cosine) - x * sine;
+    matrix->at.z = z * z + (1.0f - z * z) * cosine;
+    matrix->pad2 = 0;
+    VU0_STORE_VF(vf0, &matrix->pos);
+}
