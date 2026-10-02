@@ -204,7 +204,20 @@ SndTrackVolume *sndGetTrackSlotTable(void) {
 
 INCLUDE_ASM(const s32, "game/code_00341FE8", func_003424B8);
 
-INCLUDE_ASM(const s32, "game/code_00341FE8", func_003424D8);
+void func_003424D8(u8 *out) {
+    s32 group;
+
+    if (out == NULL) {
+        return;
+    }
+    for (group = 0; group < 2; group++) {
+        s32 i;
+
+        for (i = 0; i < 24; i++) {
+            *out++ = sndMidiTrackState[0x890 + group * 0x20 + i];
+        }
+    }
+}
 
 /* Sends a prepared track identifier with the 0x17f setting. */
 
