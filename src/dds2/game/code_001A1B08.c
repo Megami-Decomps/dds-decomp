@@ -113,6 +113,10 @@ extern u8 D_003B45E8[], D_003B4600[], D_003B4618[];
 extern u8 D_003B4630[], D_003B4648[], D_003B4660[];
 extern u8 D_004365A8[8], D_004365B0[8];
 extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, u64);
+extern u8 D_003B4670[];
+extern u8 D_003B4680[];
+extern u8 D_004365B8[8];
+extern u8 D_004365C0[8];
 
 
 typedef struct PanelVert {
@@ -340,7 +344,33 @@ void itfDrawFiveColorPanelQuads(PanelObj *panel, u64 command) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2450);
+void func_001A2450(PanelObj *panel, u64 command) {
+    PanelVert vertices[12];
+    PktRec *buf = panel->buf;
+    PktRec *colors = buf + 2;
+    PanelVert *input = (PanelVert *)buf;
+    s32 i;
+
+    for (i = 0; i < 3; i++) {
+        s32 xOffset = i * 16;
+        s32 yOffset = i * 8;
+        PanelVert *out = &vertices[i * 4];
+
+        out[0].x = input[0].x + xOffset;
+        out[0].y = input[0].y + yOffset;
+        out[1].x = input[1].x - xOffset;
+        out[1].y = input[1].y + yOffset;
+        out[2].x = input[2].x - xOffset;
+        out[2].y = input[2].y - yOffset;
+        out[3].x = input[3].x + xOffset;
+        out[3].y = input[3].y - yOffset;
+    }
+
+    itfDrawQuadFlat4(buf, colors, D_004365B8, D_004365C0, panel->tail, command);
+    for (i = 0; i < 3; i++) {
+        itfEmitQuadListA(vertices, colors, &D_003B4670[i * 5], &D_003B4680[i * 5], 5, panel->tail, command);
+    }
+}
 
 void itfDrawPanelQuadWithCommand(PanelObj *panel, u64 command) {
     PktRec *colors = panel->buf + 2;
