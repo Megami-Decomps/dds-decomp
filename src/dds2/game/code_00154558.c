@@ -655,7 +655,32 @@ s32 fldCmdSetScenePhaseThree(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00154558", func_00154B00);
+s32 func_00154B00(void) {
+    FldWorkView *cam;
+    FldVec3 near;
+    FldVec3 far;
+
+    if (scrReadIntParameter(0) < 0) {
+        ((FldWorkView *)fldAreaState)->negatedAngle = -((FldWorkView *)fldAreaState)->angle;
+    } else {
+        ((FldWorkView *)fldAreaState)->negatedAngle = -45 * scrReadIntParameter(0);
+    }
+    cam = (FldWorkView *)fldAreaState;
+    near.x = cam->x - sdfSinPoly((cam->angle + 180.0f) * 3.14f / 180.0f);
+    near.y = cam->y - 200.0f - 10.0f + 60.0f;
+    near.z = cam->z + sdfEvaluateCosineViaSinePhaseShift((cam->angle + 180.0f) * 3.14f / 180.0f);
+    far.x = cam->x + sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
+    far.y = cam->y - 200.0f - 10.0f + 60.0f;
+    far.z = cam->z + sdfEvaluateCosineViaSinePhaseShift(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
+    fldLookAtNearPoint[0] = near.x;
+    fldLookAtNearPoint[1] = near.y;
+    fldLookAtNearPoint[2] = near.z;
+    fldLookAtFarPoint[0] = far.x;
+    fldLookAtFarPoint[1] = far.y;
+    fldLookAtFarPoint[2] = far.z;
+    func_0012F078();
+    return 1;
+}
 
 s32 fldCmdCaptureObjectPose(void) {
     f32 pos[4];

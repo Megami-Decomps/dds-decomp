@@ -425,7 +425,6 @@ void func_001094F8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109538);
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109780);
 
 typedef struct EvtQuadDesc {
     s16 kind;
@@ -447,6 +446,47 @@ extern void sdfConsAppendAssetPacket(void *, void *, s32);
 extern void *func_0033B050(EvtQuadDesc *);
 extern void func_003332E8(void *, u32);
 extern void sdfQueueAssetRelease(void *);
+
+void func_00109780(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, f32 x3, f32 y3, f32 z3, u32 i0, u32 i1, u32 i2, u32 i3) {
+    EvtQuadDesc desc;
+    DrawVec4 verts[4];
+    s32 indices[4];
+    u64 strip[2];
+    void *list;
+    EvtDrawSurface *surface;
+
+    list = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    sdfConsAppendClearPacket(list, 0);
+    sdfConsAppendAssetPacket(list, D_00438DB0, 0);
+    memset(&desc, 0, 0x2C);
+    desc.color = 0x80808080;
+    desc.kind = 2;
+    desc.count = 4;
+    desc.verts = &verts[0].x;
+    desc.indices = indices;
+    desc.strip = strip;
+    verts[0].x = x0;
+    verts[0].y = y0;
+    verts[0].z = z0;
+    verts[1].x = x2;
+    verts[1].y = y2;
+    verts[1].z = z2;
+    verts[2].x = x3;
+    verts[2].y = y3;
+    verts[2].z = z3;
+    verts[3].x = x1;
+    verts[3].y = y1;
+    verts[3].z = z1;
+    indices[0] = i0;
+    indices[1] = i2;
+    indices[2] = i3;
+    indices[3] = i1;
+    strip[0] = D_0037F5A0[0];
+    sdfAppendPacket(list, func_0033B050(&desc));
+    surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+    surface->submit(surface, list);
+}
 
 void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32 z1, s32 i2, f32 x2, f32 y2, f32 z2, s32 i3, f32 x3, f32 y3, f32 z3, u32 bits, f32 u0, f32 v0, f32 u1, f32 v1) {
     EvtQuadDesc desc;
