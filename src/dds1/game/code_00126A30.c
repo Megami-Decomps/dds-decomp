@@ -65,7 +65,7 @@ extern void func_0012EEA0(s16, s16);
 extern void func_0012FF48(void);
 extern void func_0012EA50(s16, s32, f32);
 extern s32 *fldGetPlayerSceneStateAddress();
-extern void dds3SetCameraValue(s32, f32);
+extern void dds3SetCameraFieldOfView(s32, f32);
 extern void fldToggleWorldNodeState(s32);
 extern void func_0012C880(void);
 extern void fldRestoreCameraModelColor(void);
@@ -2036,7 +2036,7 @@ s32 fldUpdateCameraFollow(void) {
         }
         func_0012C880();
         cam = (FldCamWork *)fldAreaState;
-        dds3SetCameraValue(*world, fldCameraFollowRows[cam->rowIdx].fov * 3.14f / 180.0f);
+        dds3SetCameraFieldOfView(*world, fldCameraFollowRows[cam->rowIdx].fov * 3.14f / 180.0f);
         switch (cam->mode) {
         case 0:
             func_0012D528();

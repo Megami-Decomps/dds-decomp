@@ -24,7 +24,7 @@ void func_0022E5A0(s32 arg0, void *arg1);
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 dds3GetWorldObject(void);
 void dds3SetWorldCameraObject(s32 arg0, u32 arg1);
-f32 dds3GetCameraValue(s32 arg0);
+f32 dds3GetCameraFieldOfView(s32 arg0);
 s32 func_00106488(f32 arg0);
 void mnuStopMovieDrawTask(void);
 void func_00270068(void);
@@ -193,7 +193,7 @@ void evtViewerApplySelectedEntry(EventViewerState *viewer) {
         return;
     }
     dds3SetWorldCameraObject(dds3GetWorldObject(), entry);
-    func_00106488(dds3GetCameraValue(entry));
+    func_00106488(dds3GetCameraFieldOfView(entry));
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CED0);

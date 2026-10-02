@@ -2149,7 +2149,7 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421518);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_0023A1A0);
 
-extern s32 func_00112E30(s32 world, f32 *pos, f32 *rot);
+extern s32 dds3CreateCameraObject(s32 world, f32 *pos, f32 *rot);
 
 extern void dds3EnsureSlotData(s32 obj);
 
@@ -2162,7 +2162,7 @@ s32 mdlSpawnViewerWorldObject(void) {
 
     memset(rot, 0, 0x10);
     rot[3] = 1.0f;
-    obj = func_00112E30(dds3AdvanceWorldCounter(), pos, rot);
+    obj = dds3CreateCameraObject(dds3AdvanceWorldCounter(), pos, rot);
     effObjSetInnerFloat(obj, 10.0f);
     dds3EnsureSlotData(obj);
     dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), obj);

@@ -487,7 +487,7 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern s32 *fldGetPlayerSceneStateAddress();
 
-extern void dds3SetCameraValue(s32, f32);
+extern void dds3SetCameraFieldOfView(s32, f32);
 
 extern void fldToggleWorldNodeState(s32);
 
@@ -2133,7 +2133,7 @@ s32 fldUpdateCameraFollow(void) {
         }
         func_0012EDB0();
         cam = (FldCamWork *)fldAreaState;
-        dds3SetCameraValue(*world, fldCameraFollowRows[cam->rowIdx].fov * 3.14f / 180.0f);
+        dds3SetCameraFieldOfView(*world, fldCameraFollowRows[cam->rowIdx].fov * 3.14f / 180.0f);
         switch (cam->mode) {
         case 0:
             func_0012FA58();
