@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 
 extern s32 dds3AdvanceWorldCounter(void);
 
@@ -50,7 +51,7 @@ extern u8 D_003BC598[];
 
 extern char *strcat(char *, char *);
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
 
 extern s32 mnuTitleSoundTask;
 
@@ -86,11 +87,69 @@ extern void Exit(s32 status);
 
 extern s32 D_003BD8C0;
 
+extern KwlnTask *kwlnTaskGetTaskByName(const char *);
+extern char D_003AFBA0[]; /* "result2_draw" */
+
+typedef struct BrsResultCounter {
+    u8 pad00[0x14];
+    s8 phase;
+    u8 pad15[0x1F];
+    s32 remaining;
+    u8 pad38[0x14];
+    s8 unk4C;
+    u8 pad4D[0x13];
+    s8 unk60;
+    u8 pad61[7];
+} BrsResultCounter;
+
+typedef struct BrsResultWork {
+    u8 pad00[0xD40];
+    s32 settledFrames;
+    u8 padD44[0x19C];
+    BrsResultCounter levelCounters[8];
+    BrsResultCounter profileCounters[8];
+} BrsResultWork;
+
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00268AB8);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00268D40);
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_002692E0);
+/* Complete the result screen after five counter pairs have settled. */
+s32 func_002692E0(void) {
+    KwlnTask *task = kwlnTaskGetTaskByName(D_003AFBA0);
+    BrsResultWork *work;
+    s32 i;
+
+    if (task == NULL) {
+        return 0;
+    }
+    work = (BrsResultWork *)kwlnTaskGetUserValue(task);
+    for (i = 0; i < 5; i++) {
+        if (work->levelCounters[i].phase >= 2) {
+            if (work->levelCounters[i].remaining != 0 ||
+                work->levelCounters[i].unk4C != 0 ||
+                work->levelCounters[i].unk60 != 0) {
+                return 0;
+            }
+        } else if (work->levelCounters[i].remaining != 0) {
+            return 0;
+        }
+        if (work->profileCounters[i].phase >= 2) {
+            if (work->profileCounters[i].phase == 2) {
+                if (work->profileCounters[i].remaining != 0) {
+                    return 0;
+                }
+            }
+        }
+    }
+    work->settledFrames++;
+    work->settledFrames = work->settledFrames <= 0 ? 0 :
+        work->settledFrames >= 7 ? 6 : work->settledFrames;
+    if (work->settledFrames < 6) {
+        return 0;
+    }
+    return 1;
+}
 
 void mnuSetTitleSequenceVolumePan(u32 arg0) {
     sndSetSequenceVolumePan(arg0, 0x7f, 0x3f);

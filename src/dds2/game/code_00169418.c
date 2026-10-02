@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl.h"
 
 extern u32 effFieldColorOriginalSelector;
 
@@ -87,10 +88,35 @@ void effBTLFieldColorResetFlags(void) {
     effFieldColorFlags = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00169418", func_00169610);
+f32 func_00169610(BtlUnit *unit) {
+    f32 scale = unit->scale;
+    f32 maximum = 3.0f;
+    f32 radius = ((unit->reach * scale) + (unit->height * scale * 0.5f)) * 0.5f * (1.0f / 87.5f);
 
-void func_001696B8(void) {
-    func_00169610();
+    switch (unit->mode) {
+    case 0x126:
+    case 0x127:
+        maximum = 4.0f;
+        break;
+    case 0x110:
+    case 0x11D:
+    case 0x11E:
+    case 0x11F:
+    case 0x120:
+    case 0x121:
+        maximum = 5.0f;
+        break;
+    }
+    if (maximum < radius) {
+        radius = maximum;
+    } else if (radius < 0.8f) {
+        radius = 0.8f;
+    }
+    return radius;
+}
+
+f32 func_001696B8(BtlUnit *unit) {
+    return func_00169610(unit);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00169418", effFieldColorFlags);

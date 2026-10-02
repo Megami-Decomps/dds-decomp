@@ -25,6 +25,12 @@ extern MapResource fldLocalMapTextureResource;
 
 extern s32 fldLoadMapResource(const char *, MapResource *);
 
+extern void evtSubmitGsRegister47(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32,
+                         u32, u32, u32, u32, u32);
+extern void func_00108CB8(s32);
+extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
+
 extern s32 func_003014F0(char *, const char *, ...);
 
 extern u32 fldReleaseMapResource(s32 *);
@@ -45,7 +51,7 @@ typedef struct MapRequestNode {
     u8 pad18[8];
 } MapRequestNode;
 
-typedef struct {
+typedef struct MapRequestState {
     u32 handle;           /* 0x00 */
     MapRequestNode *first; /* 0x04 */
     MapRequestNode *next; /* 0x08 */
@@ -54,7 +60,7 @@ typedef struct {
     s16 arg;              /* 0x12 */
     s16 interval;         /* 0x14 */
     s16 elapsed;          /* 0x16 */
-    void (*callback)(void); /* 0x18 */
+    void (*callback)(s32, s32, s32, struct MapRequestState *, MapRequestNode *, f32); /* 0x18 */
 } MapRequestState;
 
 /* The ring of nodes lives inside the same block, 0x2C past the header. */
@@ -314,9 +320,9 @@ INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C6EC8);
 
 extern MapRequestState *sdfCreateLinkedRequestRing(s16, s16);
 
-extern void func_002C7180(void);
+extern void func_002C7180(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
 
-extern void func_002C7430(void);
+extern void func_002C7430(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
 
 void fldSetMapRequestInterval(MapRequestState *state, u16 interval);
 
@@ -335,11 +341,70 @@ void fldReleaseMapRequestQueues(void) {
     func_002C7B38(D_003BD98C);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C7080);
+/* Draw the auxiliary map texture centred on the requested position. */
+void func_002C7080(s32 x, s32 y, u32 colour, f32 scale) {
+    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    func_00108FA0((s32)(x - scale * 16.0f), (s32)(y - scale * 12.0f),
+                  (s32)(scale * 32.0f), (s32)(scale * 24.0f),
+                  0, 0, 32, 32, colour, colour, colour, colour,
+                  fldLocalMapAuxTextureResource.image);
+}
 
-INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C7180);
+/* Four corners use the same grey pulse colour. */
+#define MAP_GREY_COLOR(alpha) (((u32)(alpha) << 24) | 0x808080)
 
-INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C7430);
+void func_002C7180(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *node, f32 progress) {
+    s32 gridX;
+    s32 gridY;
+    f32 scale = (1.0f - progress) * 2.0f + progress;
+
+    if (progress >= 0.7f) {
+        progress = (1.0f - progress) / 0.3f;
+    } else {
+        progress /= 0.7f;
+    }
+    if (state->next->prev != node) {
+        progress -= 0.2f;
+        if (progress < 0.0f) {
+            progress = 0.0f;
+        }
+    }
+    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    fldProjectPointToGridCell(&gridX, &gridY, x, y, z);
+    func_00108FA0((s32)(gridX - scale * 16.0f), (s32)(gridY - scale * 16.0f),
+                  (s32)(scale * 32.0f), (s32)(scale * 32.0f), 0, 0, 32, 32,
+                  MAP_GREY_COLOR(progress * 24.0f), MAP_GREY_COLOR(progress * 24.0f),
+                  MAP_GREY_COLOR(progress * 24.0f), MAP_GREY_COLOR(progress * 24.0f),
+                  fldLocalMapAuxTextureResource.image);
+}
+
+
+void func_002C7430(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *node, f32 progress) {
+    s32 gridX;
+    s32 gridY;
+    f32 scale = (1.0f - progress) * 3.0f + progress;
+
+    if (state->next->prev != node) {
+        progress -= 0.5f;
+        if (progress < 0.0f) {
+            progress = 0.0f;
+        }
+        scale *= 1.5f;
+    } else if (progress >= 0.7f) {
+        progress = (1.0f - progress) / 0.3f;
+    } else {
+        progress /= 0.7f;
+    }
+    fldProjectPointToGridCell(&gridX, &gridY, x, y, z);
+    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    func_00108CB8(1);
+    func_00108FA0((s32)(gridX - scale * 16.0f), (s32)(gridY - scale * 12.0f),
+                  (s32)(scale * 32.0f), (s32)(scale * 24.0f), 0, 0, 32, 32,
+                  MAP_GREY_COLOR(progress * 64.0f), MAP_GREY_COLOR(progress * 64.0f),
+                  MAP_GREY_COLOR(progress * 64.0f), MAP_GREY_COLOR(progress * 64.0f),
+                  fldLocalMapAuxTextureResource.image);
+    func_00108CB8(0);
+}
 
 void sdfCommitPendingVectorAndMarkChanged(void) {
     D_003DFEE0[0] = D_003DFED0[0];
