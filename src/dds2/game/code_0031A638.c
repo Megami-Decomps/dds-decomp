@@ -10,11 +10,14 @@ extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
 
 typedef struct TimerWork {
-    u8 pad00[0x80];
+    u8 pad00[0x74];
+    s32 unk74;
+    s32 unk78;
+    s32 unk7C;
     s32 progress;  /* 0x80 clamped to 100 */
     s32 step;      /* 0x84 quantised progress band */
     s16 completed; /* 0x88 non-zero once the final band is reached */
-    u8 pad8A[2];
+    s16 countdown; /* 0x8A: interval before the next progress decrement */
     s32 updateCount; /* 0x8C */
 } TimerWork;
 
@@ -28,16 +31,10 @@ void func_0031A638(u8 *record, s32 unused, TimerWork *timer) {
     }
 }
 
-typedef struct ScoreResetWork {
-    u8 pad00[0x74];
-    s32 unk74;
-    s32 unk78;
-    s32 unk7C;
-} ScoreResetWork;
 extern void func_0035B6E0(const char *fmt, ...);
 extern s32 mdlFlagTest(s32);
 
-void mnuInitializeHighScoreState(ScoreResetWork *work) {
+void mnuInitializeHighScoreState(TimerWork *work) {
     u32 minimum = mdlFlagTest(0x80E) == 0 ? 300000U : 600000U;
     if (datGameState->highScore < minimum) {
         datGameState->highScore = minimum;
@@ -50,7 +47,7 @@ void mnuInitializeHighScoreState(ScoreResetWork *work) {
 }
 
 
-void func_0031A730(ScoreResetWork *work) {
+void func_0031A730(TimerWork *work) {
     u32 maximum = work->unk78;
     u32 score = work->unk7C;
 
@@ -62,7 +59,7 @@ void func_0031A730(ScoreResetWork *work) {
 }
 
 
-void mnuUpdateHighScoreFlag(ScoreResetWork *work) {
+void mnuUpdateHighScoreFlag(TimerWork *work) {
     u32 score = work->unk7C;
 
     if (datGameState->highScore < score) {
@@ -76,7 +73,7 @@ void mnuUpdateHighScoreFlag(ScoreResetWork *work) {
 }
 
 
-void func_0031A7F8(ScoreResetWork *work) {
+void func_0031A7F8(TimerWork *work) {
     s32 score = work->unk7C;
 
     work->unk78 = score;
@@ -112,6 +109,40 @@ void func_0031A830(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0031A638", func_0031A920);
+/* Decay progress at the current interval and maintain the score high-water mark. */
+void func_0031A920(TimerWork *work) {
+    u32 score;
+
+    func_0031A830((u8 *)work);
+    if (work->completed > 0) {
+        work->completed--;
+    }
+    if (work->updateCount > 0) {
+        work->updateCount--;
+    }
+    if (--work->countdown <= 0) {
+        if (work->progress > 0) {
+            work->progress--;
+        }
+        if (work->completed > 0) {
+            work->countdown = 6;
+        } else if (work->updateCount > 0) {
+            work->countdown = 24;
+        } else {
+            work->countdown = 12;
+        }
+    }
+    if (work->progress < 0) {
+        work->progress = 0;
+    }
+    score = work->unk74;
+    if (score > 99999999U) {
+        work->unk74 = 99999999;
+        score = 99999999U;
+    }
+    if ((u32)work->unk78 < score) {
+        work->unk78 = score;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0031A638", func_0031AA10);
