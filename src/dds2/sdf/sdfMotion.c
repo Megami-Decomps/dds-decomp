@@ -4,9 +4,9 @@
 
 typedef struct VTab {
     void (*invoke)(void);
-    void (*callback04)(void);
+    void (*callback04)(void *, void *);
     void (*sample)(void *, f32);
-    void (*callback0C)(void);
+    void (*callback0C)(void *);
     void (*blend)(void *, f32, f32);
 } VTab;
 
@@ -64,6 +64,12 @@ typedef struct SdfMotionKeyTrack {
 } SdfMotionKeyTrack;
 
 typedef struct Motion Motion;
+typedef struct SdfMotionManager SdfMotionManager;
+
+struct SdfMotionManager {
+    u8 pad00[0x14];
+    Motion *head;
+};
 
 typedef struct SdfMotionKeyBinding {
     void *dispatch;
@@ -143,12 +149,23 @@ typedef struct {
     void **objects; /* 0x0C: binding objects, each beginning with a callback table */
 } ArrObj;
 
+typedef struct MotionEntry {
+    u16 frameCount;
+    u16 unk02;
+    u32 bindingData[1];
+} MotionEntry;
+
+typedef struct MotionTable {
+    s32 unk00;
+    MotionEntry **entries;
+} MotionTable;
+
 /* Native motion constructor/tick layout. A blend lead starts the frame clock
  * below zero; blend callbacks normalize nonnegative elapsed frames by duration. */
 struct Motion {
-    void *next;        /* 0x00: owner's intrusive motion list */
-    void *owner;       /* 0x04: owner whose list head is at +0x14 */
-    void *motionTable; /* 0x08: motion entries and binding-command data */
+    Motion *next;      /* 0x00: next node in the owner's intrusive motion list */
+    SdfMotionManager *owner; /* 0x04: owner whose list head is at +0x14 */
+    MotionTable *motionTable; /* 0x08: motion entries and binding-command data */
     s32 unkC;
     ArrObj *request;        /* 0x10 */
     f32 blendDurationFrames; /* 0x14 */
@@ -165,7 +182,8 @@ struct Motion {
     u8 pad33;
 };
 
-void func_00334280(Motion *a0, s32 a1, s32 a2, f32 t0, f32 t1);
+void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 blendLeadFrames,
+                         f32 blendDurationFrames);
 
 typedef struct {
     Pair pair;
@@ -243,7 +261,48 @@ void sdfSetMotionPointerPair(Pair *binding, void *source, void *dispatch) {
     binding->source = source;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003340E0);
+typedef struct SdfMotionCommand {
+    u32 command;
+    u32 argument;
+} SdfMotionCommand;
+
+typedef struct SdfMotionCommandTable {
+    u16 unk00;
+    u16 commandCount;
+    u8 pad04[4];
+    SdfMotionCommand commands[1];
+} SdfMotionCommandTable;
+
+void *sdfAllocAndClearQuadwords(s32 size);
+ArrObj *sdfDevCreateBufferedRequest(u16 n, s32 e1, s32 e2);
+s32 sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
+
+Motion *func_003340E0(SdfMotionManager *manager, SdfMotionCommandTable *table) {
+    Motion *motion;
+    ArrObj *request;
+    SdfMotionCommand *command;
+    s32 i;
+    u16 count;
+
+    motion = sdfAllocAndClearQuadwords(0x34);
+    motion->next = manager->head;
+    count = table->commandCount;
+    manager->head = motion;
+    motion->owner = manager;
+    motion->motionTable = table;
+    request = sdfDevCreateBufferedRequest(count, 4, 8);
+    motion->request = request;
+    request->objectCount = count;
+    for (i = 0, command = (SdfMotionCommand *)((u8 *)motion->motionTable + 8);
+         i < count;
+         i++, command++) {
+        motion->request->objects[i] =
+            (void *)sdfDispatchAssetCommandWord(motion, command->command, command->argument);
+    }
+    motion->state = 0;
+    motion->frameStep = 1.0f;
+    return motion;
+}
 
 void sdfDestroyDevRequest(void *a0);
 void sdfReleaseChipBlock(void *a0);
@@ -298,11 +357,49 @@ void sdfDestroyMotion(MotionNode *node)
     sdfReleaseChipBlock(node);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334280);
+/* Select a motion entry, initialize its timing and state, and bind its setup records. */
+void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 blendLeadFrames,
+                         f32 blendDurationFrames) {
+    s32 i;
+    MotionEntry *entry;
+    u8 *bindingData;
+    VObj *object;
+
+    motion->motionIndex = motionIndex;
+    if (blendDurationFrames > 0.0f) {
+        motion->blendDurationFrames = blendDurationFrames;
+        motion->blendStartFrame = -blendLeadFrames;
+        for (i = 0; i < motion->request->objectCount; i++) {
+            object = motion->request->objects[i];
+            object->vtable->callback0C(object);
+        }
+    } else {
+        motion->blendDurationFrames = 0.0f;
+        motion->blendStartFrame = 0.0f;
+    }
+
+    motion->loopEnabled = loopEnabled;
+    motion->state = 1;
+    motion->currentFrame = motion->blendStartFrame;
+    entry = motion->motionTable->entries[motionIndex];
+    if (entry == NULL) {
+        motion->frameCount = 0;
+        motion->state = 5;
+        return;
+    }
+
+    motion->frameCount = entry->frameCount;
+    bindingData = (u8 *)entry->bindingData;
+    for (i = 0; i < motion->request->objectCount; i++) {
+        object = motion->request->objects[i];
+        object->vtable->callback04(object, bindingData);
+        bindingData += *(u32 *)bindingData;
+    }
+}
 
 /* Select a motion with no lead-in and no blend duration. */
 void sdfMotionInitializeAtZeroTime(void *a0, s32 a1, s32 a2) {
-    func_00334280(a0, a1, a2, 0.0f, 0.0f);
+    sdfMotionInitialize(a0, a1, a2, 0.0f, 0.0f);
 }
 
 void sdfMotionSampleAtFrame(Motion *motion, f32 frame) {
@@ -339,7 +436,48 @@ void sdfMotionSampleAtFrame(Motion *motion, f32 frame) {
     }
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334510);
+/* Apply the current motion state and report completion (1) or a loop wrap (2). */
+s32 sdfMotionUpdate(Motion *motion) {
+    s32 result;
+    f32 frame;
+    f32 frameCount;
+
+    result = 0;
+    switch (motion->state) {
+    case 0:
+    case 2:
+    case 3:
+    case 5:
+    case 6:
+        break;
+    case 1:
+        sdfMotionSampleAtFrame(motion, motion->blendStartFrame);
+        break;
+    case 4:
+        frame = motion->currentFrame + motion->frameStep;
+        frameCount = motion->frameCount;
+        if (motion->loopEnabled == 0) {
+            if (frameCount <= frame) {
+                sdfMotionSampleAtFrame(motion, frameCount);
+                motion->state = 5;
+                result = 1;
+                break;
+            }
+        } else if (frameCount <= frame) {
+            motion->blendDurationFrames = 0.0f;
+            result = 2;
+            motion->blendStartFrame = 0.0f;
+            do {
+                frame -= frameCount;
+            } while (frameCount <= frame);
+        }
+        sdfMotionSampleAtFrame(motion, frame);
+        break;
+    default:
+        break;
+    }
+    return result;
+}
 
 /* State 6 parks motion processing, retaining the previous state to resume. */
 void sdfMotionSuspend(MotionState *state) {

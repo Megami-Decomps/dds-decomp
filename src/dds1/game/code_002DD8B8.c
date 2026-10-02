@@ -22,13 +22,13 @@ typedef struct RwMatrix
     u32 pad3;
 } RwMatrix;
 
-extern void func_002DD788(f32 angle, const RwV3d* axis, RwMatrix* matrix);
+extern void sdfBuildRotationMatrixFromAxisAngle(f32 angle, const RwV3d* axis, RwMatrix* matrix);
 
 /* Persona 4 func_004bd380 @ 004BD380 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 void sdfBuildVuRotationFromAxisAngle(const RwV3d* axis, f32 angle)
 {
     RwMatrix matrix;
-    func_002DD788(angle, axis, &matrix);
+    sdfBuildRotationMatrixFromAxisAngle(angle, axis, &matrix);
     VU0_LOAD_MATRIX(&matrix);
 }
 
@@ -42,7 +42,7 @@ INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DD9E8);
 void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d* axis, f32 angle)
 {
     RwMatrix matrix;
-    func_002DD788(angle, axis, &matrix);
+    sdfBuildRotationMatrixFromAxisAngle(angle, axis, &matrix);
     VU0_LOAD_MATRIX_B(&matrix);
 }
 

@@ -57,7 +57,7 @@ python tools/download_tools.py   # ee-gcc 2.96 + ee-as, decompals binutils, objd
 python tools/extract.py          # -> SHA-1-checked executables and selected archive inputs under orig/
 python configure.py              # split with splat, write build.ninja and objdiff.json
 ninja                            # build and verify every extracted version (or: ninja dds1)
-ninja dds1-dev                   # build the relocatable DDS1 development ELF
+ninja dds1-dev dds2-dev          # build the relocatable development ELFs
 ninja dds1-scripts dds2-scripts  # assemble and verify the tracked script corpora
 ninja dds1-field-data dds2-field-data  # assemble and verify INF/WAP/FLD2 field data
 ninja dds1-field-archives dds2-field-archives  # rebuild FLD2 inside exact LB archives
@@ -72,7 +72,7 @@ See [`docs/fld.md`](docs/fld.md) for relocatable FLD2 field resources,
 [`docs/lb.md`](docs/lb.md) for their compressed field archives, and
 [`docs/battle-tables.md`](docs/battle-tables.md) for encounter and battle
 content tables. See [`docs/development-build.md`](docs/development-build.md)
-for the experimental relocatable DDS1 development ELF.
+for the experimental relocatable development ELFs.
 
 `ninja`'s last step runs `sha1sum --quiet -c` on each built ELF
 (`build/<v>/SLUS_*`). It is silent when the ELF matches. A mismatch prints
@@ -154,11 +154,11 @@ once relocations are masked. Each one decompiled in either game is ported to
 the other automatically (`tools/shared_funcs.py`).
 
 **Can I mod the game with this?**
-Not comfortably yet. The experimental `dds1-dev` target can relocate one
-complete code unit's `.text` into an appended loadable segment without
-changing the exact retail targets. It also links a development-only C entry
-hook and state block. Changed-size replacement units, broader data relocation,
-and DDS2 support are still future work.
+Not comfortably yet. The experimental `dds1-dev` and `dds2-dev` targets can
+each relocate one complete code unit's `.text` and `.rodata` into an appended
+loadable segment without changing the exact retail targets. They also link a
+development-only C entry hook and state block. Changed-size replacement units
+and broader data relocation are still future work.
 
 ## Names
 

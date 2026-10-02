@@ -5660,8 +5660,10 @@
 0x002DB158	sdfCopyAssetListParameterState	inferred	Copies matching asset states across resource lists. [names_reviewed8.tsv]
 0x002DB1C8	sdfDispatchAssetCommandWord	inferred	Dispatches through the table selected by the high command halfword. [names_reviewed8.tsv]
 0x002DB308	sdfDestroyMotion	inferred	unlinks the motion from its owner's list, invokes each request callback, destroys the dev request and frees the node [names_M68_VuRest.tsv]
+0x002DB3D0	sdfMotionInitialize	inferred	Selects a motion-table entry, initializes blend lead/duration and loop state, and dispatches its size-prefixed binding setup records; paired with DDS2 0x00334280.
 0x002DB518	sdfMotionInitializeAtZeroTime	inferred	Passes two zero time values to motion initializer; rest pose is not established. [names_reviewed6.tsv]
 0x002DB538	sdfMotionSampleAtFrame	inferred	confidence=high; matched-C; src/dds1/sdf/sdfMotion.c:370:func_002DB538; Sets the current motion frame/state and calls each object blend callback with a lead-in-clamped weight until the blend interval ends; calls sample callbacks afterward.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x002DB660	sdfMotionUpdate	inferred	Dispatches the current motion state, applies the initial or next frame, wraps looping motions, and reports completion or wrap.
 0x002DB7C8	sdfFindMotionKeyInterval	inferred	Finds the bracketing key records for a motion frame and computes their interpolation weight; paired with DDS2 0x00334678.
 0x002DB900	sdfMotionBlendVectorKeys	inferred	confidence=high; matched-C; src/dds1/sdf/sdfMotion.c:443:func_002DB900; Interpolates the two bracketing vec3 key pointers by their stored key weight, leaving the vector result in vf10.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x002DB9D8	sdfMotionBlendFiveFloats	inferred	Blends five float components with a weight and its complement.
@@ -5713,6 +5715,7 @@
 0x002DD4D8	sdfTransposeVuMatrix	inferred	Transposes the VU matrix by interleaving matrix rows into columns. [names_reviewed10.tsv]
 0x002DD520	sdfInvertRigidVuTransform	inferred	Transposes the VU rotation basis and negates the transformed translation. [names_reviewed10.tsv]
 0x002DD578	sdfInvertScaledVuTransform	inferred	Transposes and rescales the VU rotation basis then negates translation. [names_reviewed10.tsv]
+0x002DD788	sdfBuildRotationMatrixFromAxisAngle	inferred	Normalizes the axis and builds the Rodrigues rotation matrix used by the named VU axis-angle wrappers.
 0x002DD8B8	sdfBuildVuRotationFromAxisAngle	inferred	Builds a rotation matrix from an axis and angle and loads it into VU registers. [names_reviewed10.tsv]
 0x002DDA68	sdfVuLoadRotationMatrixFromAxisAngle	inferred	Constructs an axis-angle rotation matrix and loads it into VU matrix registers. [names_reviewed12.tsv]
 0x002DDA98	sdfRotateVuMatrixAboutX	inferred	Rotates the VU matrix Y and Z basis vectors by the supplied angle. [names_reviewed10.tsv]
