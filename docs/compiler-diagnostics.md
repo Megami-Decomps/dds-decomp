@@ -91,6 +91,41 @@ is intended for translation-unit context experiments, not bulk source search.
 For scheduler decision evidence, pass `--cflag=-fsched-verbose=5` (the equals
 form keeps the leading dash unambiguous to the command-line parser).
 
+## Recover source names for final locations
+
+The exact compiler can also emit STABS source records without changing its
+generated instructions. Capture a sidecar probe, then report the final home it
+attributes to each available parameter or local:
+
+```sh
+python3 tools/ee_gcc_probe.py src/dds1/game/code_001A04C0.c \
+  --function sndCreateSystemEffect --cflag=-gstabs \
+  --out-dir /tmp/snd-locations
+python3 tools/ee_gcc_source_locations.py /tmp/snd-locations \
+  --function sndCreateSystemEffect --json /tmp/snd-locations.json
+```
+
+This turns otherwise anonymous hard-register and stack behavior into bounded
+source evidence: for example, whether a named local finished in `$s0`, `$f2`,
+or a virtual-frame stack slot. GPR debug numbers map directly to MIPS registers;
+STABS numbers 38 through 69 map to `$f0` through `$f31`. Repeated records are
+preserved rather than collapsed, and a valid function with no usable records
+is reported successfully because optimized-away variables may be absent.
+
+Treat the result as a compiler-reported final-home hint, not a location
+timeline. It does not identify an RTL pseudo, prove a variable's lifetime, or
+explain an allocation decision. Compare the relevant `.19.lreg`/`.20.greg`
+data and emitted assembly independently before making a source change. The
+project has verified byte-identical `.text` with and without `-gstabs` on
+representative small and large units from both games; whole objects differ
+because the debug sections are intentionally added.
+
+Run the focused parser tests with:
+
+```sh
+python3 tools/test_ee_gcc_source_locations.py
+```
+
 ## Locate the first divergence
 
 ```sh
