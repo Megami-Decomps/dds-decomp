@@ -202,7 +202,58 @@ u32 datReadHighHalfOfCalculatedValue(void) {
     return func_00119C78() & 0xFFFF0000;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_00119F68);
+s32 func_00119F68(s32 flag) {
+    s32 result = -1;
+
+    switch (flag) {
+    case 1:
+        result = -1;
+        break;
+    case 2:
+        result = 4;
+        break;
+    case 4:
+        result = 3;
+        break;
+    case 8:
+        result = 14;
+        break;
+    case 0x10:
+        result = 12;
+        break;
+    case 0x20:
+        result = 13;
+        break;
+    case 0x40:
+        result = 7;
+        break;
+    case 0x80:
+        result = 11;
+        break;
+    case 0x100:
+        result = 14;
+        break;
+    case 0x200:
+        result = 10;
+        break;
+    case 0x400:
+        result = 9;
+        break;
+    case 0x800:
+        result = 9;
+        break;
+    case 0x1000:
+        result = 7;
+        break;
+    case 0x2000:
+        result = 7;
+        break;
+    case 0x4000:
+        result = 9;
+        break;
+    }
+    return result;
+}
 
 s32 datIsValueBelowQuarterMax(UiObject *object) {
     return *(u16 *)((u8 *)object + 6) * 100 / *(u16 *)((u8 *)object + 8) < 25;

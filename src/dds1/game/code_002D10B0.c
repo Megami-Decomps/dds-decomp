@@ -443,7 +443,26 @@ s32 sdfFormatBitsPerPixelC(u32 format) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2410);
+s32 func_002D2410(s32 format) {
+    s32 size;
+
+    switch (format) {
+    case 19:
+        size = 8;
+        break;
+    case 20:
+        size = 4;
+        break;
+    case 2:
+    case 10:
+        size = 16;
+        break;
+    default:
+        size = 32;
+        break;
+    }
+    return size;
+}
 
 u64 func_002D2468(SdfTex *texture) {
     return texture->primaryBuffer->textureState;
