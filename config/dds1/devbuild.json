@@ -48,7 +48,6 @@
       "expected_symbols": 43,
       "expected_shifted_symbols": 38,
       "fallback_symbols": [
-        "bfOpWaitDispatch",
         "bfOpBinaryEval"
       ],
       "retained_sections": [

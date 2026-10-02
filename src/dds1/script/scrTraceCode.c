@@ -3,7 +3,7 @@
 
 extern ScrVM *datGameState;
 extern ScrData *scrCurrentContext;
-extern ScrCommand D_0039E288[];
+extern const ScrCommand D_0039E288[];
 extern u32 (*D_00329930[])(ScrData *scr);
 
 void scrPushInteger(ScrData *scr, s32 val);
@@ -111,7 +111,22 @@ u32 scrAdvanceTraceProgramCounter(ScrData *scr)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpWaitDispatch);
+/* Yield without consuming operands until the command completes. */
+u32 bfOpWaitDispatch(ScrData *scr)
+{
+    s32 pc = scr->pc;
+    s32 command = scr->instructions[pc].parts.sOperand;
+
+    scrCurrentContext = scr;
+    if (D_0039E288[command].func() == 0) {
+        return 2;
+    }
+    scr->sp -= D_0039E288[command].paramCount;
+    if (pc == scr->pc) {
+        scr->pc = pc + 1;
+    }
+    return 1;
+}
 
 u32 scrReturnToStackAddress(ScrData *scr)
 {
