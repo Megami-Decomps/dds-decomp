@@ -40,9 +40,20 @@ void func_00188050(void) {
     sdfReleaseChipBlock();
 }
 
-INCLUDE_ASM(const s32, "game/code_00187DB0", effResourceRectDrawPixels);
+extern s32 effResourceQuadDraw(void *data, s32 resource, s32 flags);
 
-extern void effResourceQuadDraw(void *arg, s32 value, s32 flag);
+/* Generate pixel-coordinate bounds; the renderer applies GS coordinate scale. */
+s32 effResourceRectDrawPixels(EffResourceRectWork *work) {
+    s32 extent = (s32)((f32)work->params.extent * 1.4f);
+    s32 x = work->params.centerX + 0x100;
+    s32 y = work->params.centerY + 0xE0;
+
+    work->params.bounds.left = x - extent;
+    work->params.bounds.top = y - extent;
+    work->params.bounds.right = x + extent;
+    work->params.bounds.bottom = y + extent;
+    return effResourceQuadDraw(work->params.color, work->sourceHandle, 0);
+}
 
 /* Generate already-scaled GS coordinates; the renderer must not scale again. */
 void effResourceRectDrawGsCoords(EffResourceRectWork *work) {
