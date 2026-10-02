@@ -258,8 +258,9 @@ void mnuReleaseResourceGroupTextureHandles(u32 address) {
 }
 
 extern s32 func_0019F460(s32, s32, s32, s32, s32, s32);
+extern s32 func_0019F6C8();
 extern void func_0019D550(s32, s32, s32);
-extern void frFontQueueGlyphInSelectedSlot(s32);
+extern s32 frFontQueueGlyphInSelectedSlot(s32);
 /* Fixed-width text rows used by both font drawing and message substitution.
  * The font helper decodes single-byte and two-byte characters from this data. */
 typedef struct MenuTextEntry {
@@ -1162,7 +1163,9 @@ typedef struct EventDispatchState {
     u8 dispatchWork[0x4C]; /* 0x08 */
     s32 dispatchStatus; /* 0x54 */
     u32 dispatchValue; /* 0x58 */
-    u8 pad5C[0x1C];
+    u8 pad5C[8];
+    SceneFrameTable *frameTable; /* 0x64 */
+    u8 pad68[0x10];
     EventMenuOwner *visualState; /* 0x78 */
     EventMenuOwner *thresholdOwner; /* 0x7C */
     EventMenuOwner *menuOwner; /* 0x80 */
@@ -1481,7 +1484,33 @@ u32 evtBEnterStateA(void) {
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_0026A598);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_0026A728);
+typedef struct DatGameCounters {
+    u8 pad00[0x3C];
+    s32 currency;
+} DatGameCounters;
+
+extern s32 datGameState;
+extern char D_00437868[];
+
+void func_0026A728(s32 fading, s32 context) {
+    EventDispatchState *state = (EventDispatchState *)context;
+    s32 index;
+    s32 font;
+    u32 color;
+    char text[16];
+
+    index = fldGetModeFrameRecordIndex(context);
+    func_0035C860(text, D_00437868, ((DatGameCounters *)datGameState)->currency);
+    if (fading == 0) {
+        /* The scene record supplies the steady label's low packed-color byte. */
+        color = state->frameTable->records[index].unk14 | 0xA09DC300;
+    } else {
+        color = uiBlendColors(0xA09DC380, 0xA09DC300, state->thresholdOwner->scale);
+    }
+    font = func_0019F6C8(0x1810, 0x1C8, 0, color, text, 0);
+    func_0019D550(font, 1, 0x52);
+    frFontQueueGlyphInSelectedSlot(font);
+}
 
 s64 mnuInitializeSelectionDispatchWhenModeUnset(s32 request) {
     s32 state = kwlnTaskGetUserValue();
@@ -1649,7 +1678,31 @@ u32 func_0026ADC0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_0026ADC8);
+extern s8 evtGetCapturedMessageWindowSoundMode(void);
+extern char D_003CE928[];
+
+s64 func_0026ADC8(s32 request) {
+    EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
+    s32 *dispatch = &state->dispatchStatus;
+    s64 result = func_002C4038((s32)state->dispatchWork, dispatch, 0, request);
+
+    if (result == 0) {
+        /* Choose the follow-up only after menu and message-window work is idle. */
+        if (*dispatch == 0 && evtGetMessageWindowControlState() == 0) {
+            if (evtGetCapturedMessageWindowSoundMode() == 0) {
+                mnuResetProgressModeFromOwner((u8 *)state);
+                mnuSetPopupEntryFlagged(dispatch, D_003CE928);
+            } else if (state->menuOwner->state >= 2) {
+                state->menuActive = 1;
+                mnuSetPopupEntryFlagged(dispatch, D_003CE880);
+            } else {
+                mnuSetPopupEntryFlagged(dispatch, D_003CE848);
+            }
+        }
+        result = 0;
+    }
+    return result;
+}
 
 s64 func_0026AEB0(s32 request) {
     s32 state = kwlnTaskGetUserValue();

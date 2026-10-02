@@ -6,7 +6,7 @@ extern u32 D_00435E80;
 extern s32 datGameState;
 
 extern s64 scrGetWorkTaskHandle(void);
-extern void func_00118AB0();
+extern s32 func_00118AB0(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 extern char sdfRuntimeTaskName[]; /* "GBWK" */
 extern void kwlnTaskDestroyWithHierarchyByName(char *name, s32 flag);
 extern void func_00117A80(void);
@@ -97,6 +97,46 @@ typedef struct SdfUnitMode {
 extern SdfUnitMode *datCommandSelectors;
 
 extern SdfChannelState *datCommandRecords;
+/* The 0x20 flag selects base enemy vitals instead of the party script path. */
+#define SDF_UNIT_ENEMY 0x20
+
+
+typedef struct SdfEnemyVitals {
+    u32 flags;          /* 0x00 */
+    u8 pad04[4];
+    u16 maxHp;          /* 0x08 */
+    u8 pad0A[2];
+    u16 maxMp;          /* 0x0C */
+} SdfEnemyVitals;
+
+extern s32 datEnemyRecords;
+/* Party-unit header: flags, record index into the enemy table (stride 76), hp / max hp. */
+typedef struct SdfPartyUnit {
+    u16 flags;          /* 0x00 */
+    u8 pad02[2];
+    u16 unitId;         /* 0x04 */
+    u16 hp;             /* 0x06 */
+    u16 maxHp;          /* 0x08 */
+    u8 pad0A[0xA];
+    u16 level;          /* 0x14 */
+    u8 pad16[6];
+    u16 hpBonus;        /* 0x1C */
+    u16 mpBonus;        /* 0x1E */
+} SdfPartyUnit;
+
+typedef struct SdfBattleParameters {
+    f32 maxHpGrowth[99]; /* 0x000: one coefficient per level, starting at level 1 */
+    f32 maxMpGrowth[99]; /* 0x18C */
+    u8 pad318[0x88C];
+    f32 partyHpScale[10];
+    f32 enemyHpScale[10];
+} SdfBattleParameters;
+
+extern SdfBattleParameters *datBattleParameters;
+
+struct DatUnitStatus;
+extern s32 datGetStatWithStatusOverride(struct DatUnitStatus *, s32 statIndex);
+
 extern u32 sdfRollActionHit(s32 channel, s32 arg1, SdfPackedValue *item);
 
 extern void scrDestroyWorkTask(void);
@@ -347,11 +387,73 @@ void sdfResetChannels(void) {
     func_00118680();
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_001188F0);
+/* Enemy vitals use their base record; party vitals use level growth and bonuses. */
+s32 func_001188F0(s32 unit) {
+    s32 level;
+    s32 stat;
+    s32 result;
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_001189D0);
+    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) != 0) {
+        return ((SdfEnemyVitals *)(datEnemyRecords +
+                ((SdfPartyUnit *)unit)->unitId * 76))->maxHp;
+    }
+    level = ((SdfPartyUnit *)unit)->level;
+    stat = datGetStatWithStatusOverride((struct DatUnitStatus *)unit, 1);
+    result = level * 4.0f +
+             stat * datBattleParameters->maxHpGrowth[level - 1] + 10.0f;
+    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) == 0) {
+        result += ((SdfPartyUnit *)unit)->hpBonus;
+        if (result >= 1000) {
+            result = 999;
+        }
+    }
+    return result;
+}
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00118AB0);
+s32 func_001189D0(s32 unit) {
+    s32 level;
+    s32 stat;
+    s32 result;
+
+    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) != 0) {
+        return ((SdfEnemyVitals *)(datEnemyRecords +
+                ((SdfPartyUnit *)unit)->unitId * 76))->maxMp;
+    }
+    level = ((SdfPartyUnit *)unit)->level;
+    stat = datGetStatWithStatusOverride((struct DatUnitStatus *)unit, 2);
+    result = level * 4.0f +
+             stat * datBattleParameters->maxMpGrowth[level - 1] + 8.0f;
+    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) == 0) {
+        result += ((SdfPartyUnit *)unit)->mpBonus;
+        if (result >= 1000) {
+            result = 999;
+        }
+    }
+    return result;
+}
+
+s32 func_00118AB0(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+    s32 result;
+    u8 flags;
+
+    if (datCommandSelectors[unitIndex].kind == 5) {
+        result = evtRunContext(0x19, scriptArg, contextArg, unitIndex, mode);
+    } else {
+        flags = datCommandRecords[unitIndex].scriptFlags;
+        if (flags & 0x40) {
+            if (unitIndex != 0x1E0) {
+                result = evtRunContext(0x1F, scriptArg, contextArg, unitIndex, mode);
+            } else {
+                result = evtRunContext(0x1C, scriptArg, contextArg, 0x1E0, mode);
+            }
+        } else if (flags & 0x80) {
+            result = evtRunContext(0x1D, scriptArg, contextArg, unitIndex, mode);
+        } else {
+            result = evtRunContext(5, scriptArg, contextArg, unitIndex, mode);
+        }
+    }
+    return result;
+}
 
 void sdfDispatchCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
     func_00118AB0(unitIndex, scriptArg, contextArg, (u8)mode);
@@ -388,22 +490,6 @@ void sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
     func_00118C80(unitIndex, scriptArg, contextArg, (u8)mode);
 }
 
-/* Party-unit header: flags, record index into the enemy table (stride 76), hp / max hp. */
-typedef struct SdfPartyUnit {
-    u16 flags;          /* 0x00 */
-    u8 pad02[2];
-    u16 unitId;         /* 0x04 */
-    u16 hp;             /* 0x06 */
-    u16 maxHp;          /* 0x08 */
-} SdfPartyUnit;
-
-typedef struct SdfBattleParameters {
-    u8 pad00[0xBA4];
-    f32 partyHpScale[10];
-    f32 enemyHpScale[10];
-} SdfBattleParameters;
-
-extern SdfBattleParameters *datBattleParameters;
 
 f32 sdfGetHpBracketScale(SdfPartyUnit *unit) {
     s32 hp = unit->hp;
@@ -429,15 +515,6 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00118D60);
 
 extern s32 datAbilityParameters;
 
-/* The 0x20 flag selects base enemy vitals instead of the party script path. */
-#define SDF_UNIT_ENEMY 0x20
-
-
-typedef struct SdfEnemyVitals {
-    u32 flags;          /* 0x00 */
-} SdfEnemyVitals;
-
-extern s32 datEnemyRecords;
 extern s32 datMapFlagToStatIndex(u32);
 extern u32 func_00119C78(SdfPackedValue *, s32);
 extern s32 datUnitHasSkill(SdfPackedValue *, s32);
