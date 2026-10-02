@@ -4102,7 +4102,43 @@ s32 btlIsSupportedActorAction(ActionUnit *actor, s32 action) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00220700);
+s32 func_00220700(ActionUnit *unit) {
+    BattleActionScene *battle = (BattleActionScene *)btlGetRuntime();
+    ActionUnit *actor;
+
+    if (unit == NULL) {
+        actor = battle->units;
+        while (actor != NULL) {
+            if (actor->flags & 1) {
+                if (actor->flags & 0x400) {
+                    if (actor->mode == 0x11B) {
+                        break;
+                    }
+                }
+            }
+            actor = actor->next;
+        }
+        if (actor != NULL) {
+            s32 status = actor->actionStatus;
+
+            if (status != 0x10) {
+                if (status != 0x12) {
+                    return -1;
+                }
+            }
+            return status;
+        }
+        return -1;
+    }
+    if (unit->flags & 0x400) {
+        if (unit->mode == 0x11B) {
+            if (battle->state[2] != 0) {
+                return func_00220918() != 0 ? 8 : 7;
+            }
+        }
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00220810);
 
@@ -4184,7 +4220,49 @@ s32 btlSelectMarkedActorAndClearEntryFlags(ActionUnit *unit, u32 *entry) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00220B20);
+void func_00220B20(void) {
+    BattleActionScene *battle = (BattleActionScene *)btlGetRuntime();
+    ActionUnit *actor;
+    ActionUnit *first;
+    ActionUnit *second;
+    s32 firstReady;
+    s32 secondReady;
+    s32 handle;
+
+    if (*(s32 *)battle->state != 0) {
+        first = NULL;
+        second = NULL;
+        firstReady = 1;
+        secondReady = 1;
+        for (actor = battle->units; actor != NULL; actor = actor->next) {
+            if (actor->flags & 1) {
+                if (actor->flags & 0x400) {
+                    switch (actor->mode) {
+                    case 0x10E:
+                        first = actor;
+                        if (!(actor->flags & 0xE0)) {
+                            firstReady = 0;
+                        }
+                        break;
+                    case 0x10F:
+                        second = actor;
+                        if (!(actor->flags & 0xE0)) {
+                            secondReady = 0;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        if (!((firstReady == 0 && secondReady == 0) || (firstReady != 0 && secondReady != 0))) {
+            handle = btlFindUnitByActor((BtlUnit *)(firstReady == 0 ? first : second));
+            fldAppendSceneGroupHandle(handle);
+            ((BattleActorHandle *)handle)->phase = 0x11;
+            ((BattleActorHandle *)handle)->flags |= 8;
+            btlAppendIndexListEntry(((BattleActorHandle *)handle)->actorIndices, (u32)((BattleActorHandle *)handle)->unit);
+        }
+    }
+}
 
 void btlQueueSelectedActorResourceAndSound(ActionUnit *unit) {
     BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
