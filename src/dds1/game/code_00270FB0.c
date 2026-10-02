@@ -56,6 +56,11 @@ extern u8 D_0037B980[];
 
 extern u8 D_0037C388[];
 
+extern const char D_003B2058[16];
+extern char *D_0037C380[];
+extern u32 effLoadMappedResource(char *base, char *name);
+extern u32 *effCreateStatusBatch(u32 kind);
+
 typedef struct ResourceRef8 {
     s32 index;
     s32 pad;
@@ -204,7 +209,45 @@ void mnuSetStaffDisplayMode(s32 next, u8 *context) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00270FB0", func_00271368);
+typedef struct StaffStatusBatch {
+    u32 references;
+    u32 allocation;
+    u32 payload;
+} StaffStatusBatch;
+
+typedef struct StaffStatusBatchPayload {
+    u8 pad00[0x20];
+    u32 *values;
+} StaffStatusBatchPayload;
+
+void func_00271368(void *arg) {
+    StaffMenuWork *work = (StaffMenuWork *)arg;
+    StaffStatusBatch *batch;
+    StaffStatusBatchPayload *batchPayload;
+    u32 *payload;
+    u32 baseResource;
+
+    baseResource = effLoadMappedResource(D_003B2058, D_0037C380[0]);
+    work->primaryImage = baseResource;
+    work->secondaryImage = effLoadMappedResource(D_003B2058, D_0037C380[1]);
+
+    batch = (StaffStatusBatch *)effCreateStatusBatch(6);
+    batchPayload = (StaffStatusBatchPayload *)batch->payload;
+    work->extraImages[0] = (u32)batch;
+    payload = batchPayload->values;
+    payload[0] = 0xF;
+    payload[1] = 0;
+    payload[2] = 0;
+    payload[3] = 0;
+    payload[4] = 0;
+
+    batch = (StaffStatusBatch *)effCreateStatusBatch(1);
+    batchPayload = (StaffStatusBatchPayload *)batch->payload;
+    work->extraImages[1] = (u32)batch;
+    payload = batchPayload->values;
+    payload[0] = 0xF;
+    payload[1] = 0;
+}
 
 void mnuReleaseStaffSpriteHandles(StaffMenuWork *handles) {
     u32 *image = handles->extraImages;
@@ -225,6 +268,8 @@ void mnuInitializeStaffPageWindows(u32 container, u32 *resources, u32 unused, u3
     mnuRegisterResourceHandles(container, resources + 0x19);
     mnuUpdateHandleStates(container);
 }
+
+INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2058);
 
 void mnuAppendCampSpriteRequests(u32 *list, u32 *state) {
     s32 i;
