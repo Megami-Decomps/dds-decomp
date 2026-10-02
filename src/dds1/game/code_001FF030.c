@@ -893,9 +893,38 @@ s32 btlCheckActorEligibilityWithDebug(s32 actor) {
     return 0;
 }
 
-extern s32 func_00201900(s32, s32, s32);
+extern s32 func_00201900(s32, s16, s8);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00201900);
+s32 func_00201900(s32 mask, s16 actionId, s8 force) {
+    s32 i;
+    s32 value;
+
+    if (mask & 0x100000) {
+        for (i = 0; i < 0x13; i++) {
+            value = btlElementToBitIndex(mask, i);
+            if (value != 0x80) {
+                if (datCommandSelectors[actionId * 2] == value) {
+                    if (force != 0) {
+                        return 1;
+                    }
+                    if ((u8)(datCommandRecords[actionId * 0x38 + 9] - 1) < 2) {
+                        return 1;
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+    if (datCommandSelectors[actionId * 2] == mask) {
+        if (force != 0) {
+            return 1;
+        }
+        if ((u8)(datCommandRecords[actionId * 0x38 + 9] - 1) < 2) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 /* Action IDs occupy the low halfword of each 0x4-byte queued action slot. */
 typedef union BtlActionSlot {
@@ -1928,7 +1957,7 @@ s32 btlDisableNonBossUnits(void) {
 }
 
 void btlResetUnitPlacement(void) {
-    u8 *unit = *(u8 **)((u8 *)btlGetRuntime() + 0x228);
+    u8 *unit = (u8 *)((BtlState *)btlGetRuntime())->units;
 
     if (unit == 0) {
         return;
@@ -2071,8 +2100,9 @@ typedef struct BtlSlotTable {
 
 extern BtlSlotTable *datGameState;
 
+/* The effect slot is reused for mode-specific work; keep each handler's payload view. */
 void btlSelectSlotEntries(void) {
-    s32 *effectState = *(s32 **)((u8 *)btlGetRuntime() + 0x694);
+    s32 *effectState = (s32 *)((BtlState *)btlGetRuntime())->effect;
     BtlSlotEntry *slotEntry;
     BtlSlotEntry *readyEntry = NULL;
     BtlSlotEntry *activeEntry = NULL;
@@ -2106,7 +2136,7 @@ void btlSelectSlotEntries(void) {
 }
 
 void func_00205420(void) {
-    s32 *effectState = *(s32 **)((u8 *)btlGetRuntime() + 0x694);
+    s32 *effectState = (s32 *)((BtlState *)btlGetRuntime())->effect;
     BtlSlotEntry *activeEntry = NULL;
     u32 i;
 
@@ -2256,7 +2286,7 @@ s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 co
     default:
         return 0;
     }
-    effect = *(BattleEffectState **)(btlGetRuntime() + 0x694);
+    effect = ((BtlState *)btlGetRuntime())->effect;
     if (effect->active != 1) {
         return 0;
     }
@@ -2279,7 +2309,7 @@ void func_00205EE0(void) {
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00205EF8);
 
 s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
-    BattleEffectState *effect = *(BattleEffectState **)(btlGetRuntime() + 0x694);
+    BattleEffectState *effect = ((BtlState *)btlGetRuntime())->effect;
     if (effect->active != 1) {
         return 0;
     }
@@ -2301,7 +2331,7 @@ s32 btlAdjustDamageKind(BtlUnit *unit, s32 damageKind) {
     if (!(unit->flags & 0x400)) {
         return damageKind;
     }
-    if ((*(BattleEffectState **)(btlGetRuntime() + 0x694))->active != 1) {
+    if (((BtlState *)btlGetRuntime())->effect->active != 1) {
         return damageKind;
     }
     id = unit->mode;
@@ -2413,7 +2443,7 @@ s32 btlEffectTaskStartFinale(BtlTask *task) {
     *(s32 *)(group + 0x28) = 0x16;
     btlStartTask(group);
     effect->phase = 1;
-    return (*(u16 *)((u8 *)task->unit + 0x12E) & 0x480) ? 0x18 : 0x1A;
+    return (task->unit->conditionFlags & 0x480) ? 0x18 : 0x1A;
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002069C0);
@@ -2752,7 +2782,7 @@ typedef struct BtlNamedChunkHolder {
 } BtlNamedChunkHolder;
 
 s32 btlDispatchNamedChunkNode(void *query) {
-    u8 *effect = *(u8 **)(btlGetRuntime() + 0x694);
+    u8 *effect = (u8 *)((BtlState *)btlGetRuntime())->effect;
     u8 *unit = *(u8 **)effect;
     u8 *model;
     u8 *descriptor;
@@ -2835,7 +2865,7 @@ u8 *btlGetReadyUnitForSpecies(s32 mode, u32 species) {
     default:
         return NULL;
     }
-    unit = **(u8 ***)(btlGetRuntime() + 0x694);
+    unit = *(u8 **)((BtlState *)btlGetRuntime())->effect;
     if (unit == NULL) {
         return NULL;
     }
@@ -2845,7 +2875,7 @@ u8 *btlGetReadyUnitForSpecies(s32 mode, u32 species) {
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
 u64 btlCreateSpecialUnitAndLoadModel(u64 owner) {
-    u8 **slot = *(u8 ***)(btlGetRuntime() + 0x694);
+    u8 **slot = (u8 **)((BtlState *)btlGetRuntime())->effect;
     u8 *model = *slot;
     u8 *entry;
     if (model != 0) {
@@ -2955,7 +2985,7 @@ u32 func_00208660(void) {
 }
 
 s32 func_00208668(s32 unit) {
-    return ((*(s32 *)(unit + 0x110) & 0x200) < 1);
+    return (((s32)((BtlUnit *)unit)->flags & 0x200) < 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00208678);
@@ -2972,7 +3002,7 @@ s32 btlRemapSpecialUnitCommandIndex(u8 *unit, s32 index) {
         return -1;
     }
     {
-        u8 *data = *(u8 **)(btlGetRuntime() + 0x694);
+        u8 *data = (u8 *)((BtlState *)btlGetRuntime())->effect;
         if (index >= 17) {
             return index;
         }
@@ -3060,7 +3090,7 @@ typedef struct BtlBossEffectPayload {
 } BtlBossEffectPayload;
 
 void btlInitRandomBossSelection(void) {
-    u8 *data = *(u8 **)(btlGetRuntime() + 0x694);
+    u8 *data = (u8 *)((BtlState *)btlGetRuntime())->effect;
     ((BtlBossEffectPayload *)data)->color = 0x80808080;
     ((BtlBossEffectPayload *)data)->options = 0;
     ((BtlBossEffectPayload *)data)->selectedId = effMiscRand(effSharedRandomState) % 6;
@@ -3071,7 +3101,7 @@ s32 btlFilterBossCommandBySelection(u8 *unit, s32 command) {
     u32 flags = ((BtlUnit *)unit)->flags;
     if (flags & 1) {
         if (flags & 0x400) {
-            u8 *effect = *(u8 **)((u8 *)btlGetRuntime() + 0x694);
+            u8 *effect = (u8 *)((BtlState *)btlGetRuntime())->effect;
             if (((BtlUnit *)unit)->lookupId == ((BtlBossEffectPayload *)effect)->selectedId) {
                 if (((BtlBossEffectPayload *)effect)->options & 4) {
                     return command;
@@ -3091,7 +3121,7 @@ u8 *unit;
     if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
         return;
     }
-    battleData = *(u8 **)(btlGetRuntime() + 0x694);
+    battleData = (u8 *)((BtlState *)btlGetRuntime())->effect;
     ((BtlUnit *)unit)->stateFlags |= 0x200;
     ((BtlUnit *)unit)->height = 100.0f;
     ((BtlUnit *)unit)->reach = 25.0f;
@@ -3118,7 +3148,7 @@ void *btlFindActiveMember(s32 group, s32 type) {
     if (type != 0x10e) {
         return 0;
     }
-    unit = *(s32 **)(*(s32 *)(btlGetRuntime() + 0x694));
+    unit = *(s32 **)((BtlState *)btlGetRuntime())->effect;
     if (unit == 0) {
         return 0;
     }
@@ -3126,7 +3156,7 @@ void *btlFindActiveMember(s32 group, s32 type) {
 }
 
 u64 func_00208F10(u64 owner) {
-    u8 **slot = *(u8 ***)(btlGetRuntime() + 0x694);
+    u8 **slot = (u8 **)((BtlState *)btlGetRuntime())->effect;
     u8 *model = *slot;
     u8 *entry;
     if (model != 0) {
@@ -3169,7 +3199,7 @@ void btlStepFocusAngle(void) {
     if (!(battle->battleFlags & 0x80000)) {
         return;
     }
-    slot = *(u32 **)((u8 *)battle + 0x694);
+    slot = (u32 *)battle->effect;
     player = *(BtlUnit **)slot;
     if (player == NULL) {
         return;
@@ -3307,7 +3337,7 @@ s32 btlDispatchEligibleBossEvent(u8 *entry) {
     if ((task->unit->flags & 0x400) == 0) {
         return 1;
     }
-    data = *(u8 **)((u8 *)btlGetRuntime() + 0x694);
+    data = (u8 *)((BtlState *)btlGetRuntime())->effect;
     if (((BtlBossEffectPayload *)data)->options & 4) {
         return 1;
     }
@@ -3331,7 +3361,7 @@ s32 btlCheckAttachedMember(u8 *entry) {
         return 1;
     }
     {
-        s32 *data = *(s32 **)(btlGetRuntime() + 0x694);
+        s32 *data = (s32 *)((BtlState *)btlGetRuntime())->effect;
         s32 flags = ((BtlBossEffectPayload *)data)->options & 4;
         if (flags) {
             return 1;
@@ -3345,7 +3375,7 @@ s32 btlCheckBossOptionAllowed(u8 *unit) {
     if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
         return -1;
     }
-    data = *(s32 **)(btlGetRuntime() + 0x694);
+    data = (s32 *)((BtlState *)btlGetRuntime())->effect;
     return (((BtlBossEffectPayload *)data)->options & 4) ? -1 : 0;
 }
 
@@ -3354,7 +3384,7 @@ s32 btlRemapSelectedBossCommand(u8 *unit, s32 command, u8 mode) {
     if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
         return command;
     }
-    effect = *(u8 **)((u8 *)btlGetRuntime() + 0x694);
+    effect = (u8 *)((BtlState *)btlGetRuntime())->effect;
     if (((BtlUnit *)unit)->lookupId != ((BtlBossEffectPayload *)effect)->selectedId) {
         return -1;
     }
@@ -3509,7 +3539,7 @@ s32 btlConsumeReadyEventScriptResource(void) {
     s32 absent = -1;
     s32 data;
 
-    data = *(s32 *)(btlGetRuntime() + 0x694);
+    data = (s32)((BtlState *)btlGetRuntime())->effect;
     if (((BtlEventTriggers *)data)->pending != 0) {
         if (((BtlEventTriggers *)data)->resourceReady != 0) {
             ((BtlEventTriggers *)data)->resourceReady = 0;
@@ -3600,7 +3630,7 @@ void btlDispatchSpecialEnemyActionWhenPhaseAllows(u8 *unit, s32 action) {
     if ((u16)(((BtlUnit *)unit)->mode - 0x119) >= 2) {
         return;
     }
-    data = *(u8 **)(btlGetRuntime() + 0x694);
+    data = (u8 *)((BtlState *)btlGetRuntime())->effect;
     if (((BtlUnit *)unit)->mode == 0x11a && *(u16 *)data >= 3) {
         return;
     }
