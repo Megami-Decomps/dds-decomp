@@ -1,4 +1,11 @@
 #include "mnu.h"
+#include "kwln.h"
+
+extern KwlnTask *kwlnTaskCreate();
+extern void func_00101968(KwlnTask *, KwlnTask *);
+extern s64 mnuPrepareTerminalPopupAndDispatch(s32);
+extern s64 func_00268550(s32);
+extern s64 func_00268588(s32);
 
 
 extern void func_00266C08();
@@ -115,7 +122,7 @@ extern const char D_00424F10[];
 
 extern const char D_00424F20[];
 
-extern s32 D_0043785C;
+extern KwlnTask *D_0043785C;
 
 extern s32 mnuCreateListState();
 
@@ -866,7 +873,22 @@ INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F10);
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F20);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00268380);
+void func_00268380(s32 reduced, s32 slot) {
+    u8 *scene = mnuTerminalCreateScene(reduced, slot);
+    KwlnTask *drawTask;
+    KwlnTask *fadeTask;
+
+    D_0043785C = kwlnTaskCreate(D_00424F00, 0x404, 1, 1,
+        mnuPrepareTerminalPopupAndDispatch, NULL, (u32)scene);
+    drawTask = kwlnTaskCreate(D_00424F10, 0x2B14, 1, 1,
+        func_00268550, NULL, (u32)scene);
+    kwlnTaskCreate(D_00424F20, 0x5210, 1, 1,
+        func_00268588, mnuReleaseTerminalWorkAndResumeField, (u32)scene);
+    fadeTask = kwlnTaskCreate("term_fade", 0x2B15, 1, 0,
+        mnuUpdateTerminalMessageWindowIndicator, NULL, (u32)scene);
+    func_00101968(drawTask, fadeTask);
+    mnuTerminalTaskState = 1;
+}
 
 
 void fldStopSceneTasks(void) {
@@ -1170,9 +1192,11 @@ typedef struct EventDispatchState {
     EventMenuOwner *thresholdOwner; /* 0x7C */
     EventMenuOwner *menuOwner; /* 0x80 */
     s32 menuMode; /* 0x84 */
-    u8 pad88[8];
+    s32 unk88;
+    u8 pad8C[4];
     s32 displayMode; /* 0x90 */
-    u8 pad94[0x0C];
+    u8 pad94[8];
+    s32 fileTaskActive; /* 0x9C */
     s32 fadeStarted; /* 0xA0 */
     u8 padA4[0x28];
     u32 callback; /* 0xCC */
@@ -1392,7 +1416,36 @@ s32 evtBeginSelectionExitFade(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_0026A048);
+extern s32 sdfCheckPendingWorkWithInterrupts(void);
+extern s32 fileMenuTaskExists(void);
+extern void fileSetPreviewLocation();
+extern void func_002CE208();
+
+/* Poll the file task after the dispatch/fade barrier, then restore the menu popup. */
+s64 func_0026A048(u64 request) {
+    EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
+    s32 *dispatch = &state->dispatchStatus;
+    s64 result = func_002C4038((s32)state->dispatchWork, dispatch, 0, request);
+
+    if (result != 0) {
+        return result;
+    }
+    if (kwlnFadeIsActive() != 0) {
+        return 0;
+    }
+    if (state->fileTaskActive == 0 && sdfCheckPendingWorkWithInterrupts() == 0) {
+        mnuReleaseResourceGroupTextureHandles((u32)state);
+        fileSetPreviewLocation(state->menuMode, state->unk88);
+        func_002CE208(0);
+        state->fileTaskActive = 1;
+    }
+    if (state->dispatchStatus == 0 && fileMenuTaskExists() == 0 &&
+        sdfCheckPendingWorkWithInterrupts() == 0) {
+        state->fileTaskActive = 0;
+        mnuSetPopupEntryFlagged(dispatch, D_003CE848);
+    }
+    return 0;
+}
 
 s64 evtBDispatchStart(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
@@ -1439,7 +1492,37 @@ u32 evtFinishPendingSelectionTransition(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_0026A2E0);
+/* Handle owner-panel input only after dispatch completes and the panel is fully shown. */
+s64 func_0026A2E0(u64 request) {
+    EventDispatchState *context = (EventDispatchState *)kwlnTaskGetUserValue();
+    u32 buttons = mnuMapPadMaskToFlags(0x33);
+    s32 *dispatch = &context->dispatchStatus;
+    s64 result = func_002C4038((s32)context->dispatchWork, dispatch, 0, request);
+
+    if (result != 0 || context->menuOwner->scale < 0x100) {
+        return result;
+    }
+    if (*dispatch == 0) {
+        if (buttons & 1) {
+            mnuSetPopupEntryFlagged(dispatch, D_003CE8F0);
+        }
+        if (buttons & 2) {
+            context->menuActive = 1;
+            mnuSetPopupEntryFlagged(dispatch, D_003CE848);
+        }
+        if (!(buttons & 0x300000)) {
+            mnuClearListFlagsOneAndTwo((u32)context->menuOwner);
+        }
+        if (buttons & 0x10) {
+            mnuRetreatListCursorDefault((u32)context->menuOwner);
+        }
+        if (buttons & 0x20) {
+            mnuAdvanceListCursorDefault((u32)context->menuOwner);
+        }
+        mnuPlayInputSound(0, buttons, (u32)context->menuOwner);
+    }
+    return 0;
+}
 
 s64 func_0026A3F8(s32 request) {
     s32 state = kwlnTaskGetUserValue();
@@ -1600,7 +1683,6 @@ s32 mnuOpenTerminalSelectionMessageWindow(void) {
 extern void mnuCreateResourceTask(void);
 
 
-extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern void mnuSetPopupEntryFlagged(s32 *, char *);
 

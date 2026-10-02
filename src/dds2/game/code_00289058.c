@@ -346,7 +346,61 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_0028DC08);
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028DE10);
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028DFA0);
+typedef struct EvtMantraNodePositionRecord {
+    u32 kind : 4;
+    s32 modelFlagState : 4;
+    u32 reserved : 8;
+    s16 id;
+    s16 firstKey;
+    s16 secondKey;
+    u8 pad08[0x18];
+} EvtMantraNodePositionRecord;
+
+typedef struct MantraFlagResource {
+    u8 pad00[8];
+    u16 *flags;
+} MantraFlagResource;
+
+extern s32 mnuGetActiveMantraModelFlagState(void);
+extern s32 func_00315C68(s32, s32, u32, u16, s32);
+
+void func_0028DFA0(s32 object) {
+    s32 modelFlagState = mnuGetActiveMantraModelFlagState();
+    MenuNode *node = ((MenuContainer *)object)->list->head;
+    u32 *resourceSlot;
+
+    if (node != 0) {
+        resourceSlot = ((MantraMenuWork *)(object + 0x240))->spriteHandles;
+        do {
+            u32 value = node->value;
+            EvtMantraNodePositionRecord *record =
+                (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord(0);
+            u16 *flag = ((MantraFlagResource *)*resourceSlot)->flags;
+            s32 count = 175;
+
+            do {
+                if (record->id != 0 && record->kind != 3 &&
+                    record->kind != 4 &&
+                    modelFlagState >= record->modelFlagState &&
+                    (*flag & 0xF) == 3) {
+                    if (record->kind == 2) {
+                        *flag = (*flag & 0xFFF0) | 2;
+                    } else {
+                        if (func_00315C68(1, 2, value, record->id, 0)) {
+                            *flag = (*flag & 0xFFF0) | 1;
+                        } else {
+                            *flag = (*flag & 0xFFF0) | 2;
+                        }
+                    }
+                }
+                record++;
+                flag++;
+            } while (--count >= 0);
+            node = node->next;
+            resourceSlot++;
+        } while (node != 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028E0E8);
 

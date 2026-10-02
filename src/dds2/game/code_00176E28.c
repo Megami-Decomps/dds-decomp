@@ -3,6 +3,9 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
+typedef struct SdfMemoryBlock SdfMemoryBlock;
+
+
 extern u64 effParamTableGetBlock(u64, u64);
 
 typedef struct EffVectorPart {
@@ -110,13 +113,13 @@ typedef struct EffectRingBlock {
     EffectRingVertex vertices[1];   /* 0x80 */
 } EffectRingBlock;
 
-extern u32 sdfAllocGeneralBlock(s32);
+extern SdfMemoryBlock *sdfAllocGeneralBlock(u32 size);
 
-extern u32 sdfResourceRetainAddress(u32);
+extern void *sdfResourceRetainAddress(SdfMemoryBlock *block);
 
 extern u8 *effAllocateIdentityMatrixWork(u32);
 
-extern s32 effMiscRand(void *);
+extern u32 effMiscRand(void *state);
 
 extern u8 D_003AA868[];
 extern s32 effGetExtendedGroupElement(EffRecordPool *pool, s32 index);
@@ -140,8 +143,8 @@ EffectRing *source;
     u32 spread;
     u32 i;
 
-    handle = sdfAllocGeneralBlock(source->count * 16 + 0x80);
-    block = (EffectRingBlock *)sdfResourceRetainAddress(handle);
+    handle = (u32)sdfAllocGeneralBlock(source->count * 16 + 0x80);
+    block = (EffectRingBlock *)sdfResourceRetainAddress((SdfMemoryBlock *)handle);
     ring = &block->header;
     memcpy(ring, source, 0x58);
     ring->vertices = block->vertices;
@@ -431,8 +434,8 @@ EffRecordPool *effRecordPoolCreateTriad(s32 groups) {
     first = slots * 4;
     second = slots;
     size = (first + second) * 4 + 0x70;
-    handle = sdfAllocGeneralBlock(size);
-    block = (u32 *)sdfResourceRetainAddress(handle);
+    handle = (u32)sdfAllocGeneralBlock(size);
+    block = (u32 *)sdfResourceRetainAddress((SdfMemoryBlock *)handle);
     memset(block, 0, size);
     pool = (EffRecordPool *)(block + (first + second));
     pool->recordBase = (s32)block;
@@ -514,8 +517,8 @@ EffRecordPool *effRecordPoolCreate(s32 groups) {
     first = groups * 16;
     second = groups * 4;
     size = (first + second) * 4 + 0x70;
-    handle = sdfAllocGeneralBlock(size);
-    block = (u32 *)sdfResourceRetainAddress(handle);
+    handle = (u32)sdfAllocGeneralBlock(size);
+    block = (u32 *)sdfResourceRetainAddress((SdfMemoryBlock *)handle);
     memset(block, 0, size);
     pool = (EffRecordPool *)(block + (first + second));
     pool->recordBase = (s32)block;
@@ -683,4 +686,139 @@ void effSetRecordPoolScale(u8 *work, f32 value) {
     ((EffRecordPool *)work)->scale = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_001784F8);
+typedef struct PcpScatterRes PcpScatterRes;
+typedef struct PcpScatterPool {
+    u8 pad00[0x10];
+    u32 unk10;
+    u32 color;
+    s32 secondWordCount;
+    f32 unk1C;
+    s32 recordBase;
+    s32 auxRecordBase;
+    u32 resource;
+    SdfMemoryBlock *buffer;
+    PcpScatterRes *sharedResource;
+} PcpScatterPool;
+
+typedef struct {
+    f32 origin[4];
+    f32 width;
+    f32 height;
+    u32 poolMode;
+    u8 respawn;
+    u8 pad1D[3];
+    u32 particleCount;
+    u32 radialSegments;
+    s32 delaySpread;
+    u32 fadeIn;
+    u32 fadeOut;
+    s32 duration;
+    u8 pad38[4];
+    f32 unk3C;
+    u32 unk40;
+    f32 unk44;
+    u32 unk48;
+    f32 unk4C;
+    f32 unk50;
+    f32 radiusJitter;
+    f32 targetRadiusJitter;
+    f32 speedJitter;
+    u8 pad60[8];
+    u8 duplicateParticles;
+    u8 pad69[3];
+    s32 duplicateStartAge;
+    u32 particlesPerGroup;
+} PcpScatterRadialParams;
+
+typedef struct {
+    s32 age;
+    f32 unk04;
+    f32 unk08;
+    f32 unk0C;
+    f32 radius;
+    f32 angle;
+    f32 unk18;
+} PcpScatterRadialParticle;
+
+typedef struct PcpScatterRadialWork PcpScatterRadialWork;
+
+struct PcpScatterRadialWork {
+    PcpScatterRadialParams params;
+    PcpScatterRadialParticle *particles;
+    f32 scale;
+    u32 color;
+    PcpScatterPool *childWork;
+    SdfMemoryBlock *ownedResource;
+    u32 duplicatedCount;
+    u32 *duplicatedHandles;
+    SdfMemoryBlock *duplicateAllocation;
+};
+
+extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
+extern void effPcpScatterCreatePoolResource(PcpScatterPool *work, u32 resource);
+extern u32 effParamWorkCreate(s32 kind, void *params);
+extern u32 effParamWorkDuplicate(u32 handle);
+
+PcpScatterRadialWork *func_001784F8(params, resource, particleParams)
+    const PcpScatterRadialParams *params;
+    u32 resource;
+    void *particleParams;
+{
+    PcpScatterRadialWork *work;
+    PcpScatterRadialParticle *particle;
+    SdfMemoryBlock *handle;
+    u32 *handles;
+    u32 count;
+    u32 i;
+    s32 delaySpread;
+    s32 ageOffset;
+    u32 segments;
+
+    handle = sdfAllocGeneralBlock(sizeof(PcpScatterRadialWork) + params->particleCount * sizeof(PcpScatterRadialParticle));
+    work = sdfResourceRetainAddress(handle);
+    work->particles = (PcpScatterRadialParticle *)(work + 1);
+    work->params = *params;
+    work->color = 0x80808080;
+    work->ownedResource = handle;
+    work->scale = 1.0f;
+    work->duplicatedHandles = NULL;
+    work->duplicateAllocation = NULL;
+    work->childWork = effPcpScatterPoolCreate(params->particleCount);
+    work->childWork->unk10 = params->poolMode;
+    if (resource != 0) {
+        effPcpScatterCreatePoolResource(work->childWork, resource);
+    }
+    if (particleParams != NULL && work->params.duplicateParticles != 0) {
+        if (work->params.particlesPerGroup == 0) {
+            work->params.particlesPerGroup = 1;
+        }
+        work->duplicatedCount = work->params.particleCount / work->params.particlesPerGroup;
+        if (work->params.particleCount % work->params.particlesPerGroup != 0) {
+            work->duplicatedCount++;
+        }
+        count = work->duplicatedCount;
+        handle = sdfAllocGeneralBlock(count * sizeof(u32));
+        handles = sdfResourceRetainAddress(handle);
+        work->duplicateAllocation = handle;
+        work->duplicatedHandles = handles;
+        work->duplicatedHandles[0] = effParamWorkCreate(6, particleParams);
+        for (i = 1; i < count; i++) {
+            work->duplicatedHandles[i] = effParamWorkDuplicate(work->duplicatedHandles[0]);
+        }
+    }
+    delaySpread = work->params.delaySpread;
+    ageOffset = 0;
+    count = work->params.particleCount;
+    particle = work->particles;
+    if (delaySpread <= 0) {
+        delaySpread = 1;
+    }
+    segments = work->params.radialSegments;
+    for (i = 0; i < count; i++, particle++) {
+        particle->age = ageOffset - effMiscRand(D_003AA868) % delaySpread;
+        if ((i + 1) % segments == 0) {
+            ageOffset -= delaySpread;
+        }
+    }
+    return work;
+}

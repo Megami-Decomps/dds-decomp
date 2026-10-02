@@ -110,3 +110,4 @@ INCLUDE_SDATA(const s32, "game/code_00161838", effFieldColorOverrideSelector);
 INCLUDE_SDATA(const s32, "game/code_00161838", effFieldColorFinalSelector);
 
 INCLUDE_SDATA(const s32, "game/code_00161838", D_003BB040);
+

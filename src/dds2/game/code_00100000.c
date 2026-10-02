@@ -1,7 +1,7 @@
 #include "common.h"
 #include "kwln.h"
 
-extern u8 D_00435B88;
+extern s8 D_00435B88;
 extern u32 D_00435B84;
 extern u32 D_00435B9C;
 extern u32 D_00435BA0;
@@ -12,7 +12,7 @@ extern u32 D_00438D80;
 
 extern u32 D_00435B8C;
 
-extern u32 D_00435B90;
+extern s32 D_00435B90;
 
 extern u32 D_00435B94;
 extern u32 D_00435B98;
@@ -100,7 +100,56 @@ void func_001004A0(void) {
     D_00435B89 = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00100000", func_001004B0);
+extern s16 D_00435BA8;
+extern u16 D_00435BAA;
+extern s8 D_00435BB4;
+extern u16 D_00438A1E;
+extern u16 D_00438A24;
+extern u16 mnuMovieTaskState;
+extern u32 func_003287E0(void);
+extern u32 sdfGetElapsedTimerTicks(u32);
+extern void sdfSleepThreadCount(s32);
+extern void sdfSetNonnegativePacketIndex(s32);
+extern void sdfPadBuildButtonStates(void);
+extern void sdfRaiseDeviceThreadPriority(void);
+extern void sdfRestoreDeviceThreadPriority(void);
+extern void LoadExecPS2(const char *, s32, char **);
+
+void func_001004B0(void) {
+    u32 startTick;
+
+    func_001001D8();
+    D_00438D80 = 0;
+    while (D_00435B88 == 0) {
+        sdfSleepThreadCount(mnuMovieTaskState);
+        sdfSetNonnegativePacketIndex(mnuMovieTaskState - 1);
+        sdfPadBuildButtonStates();
+        if (D_00435BB4 != 0) {
+            sdfRaiseDeviceThreadPriority();
+        }
+        if (D_00435B8C == 0) {
+            startTick = func_003287E0();
+            func_00103A00();
+            if (kwlnTaskTickScheduler() == 0) {
+                break;
+            }
+            D_00435B80++;
+            D_00435BA8 = sdfGetElapsedTimerTicks(startTick) - D_00438A24;
+            D_00438D80 ^= 1;
+            D_00435BAA = D_00438A1E;
+        } else if (D_00435B90 > 0) {
+            D_00435B90--;
+            if (D_00435B90 == 0) {
+                D_00435B8C = 0;
+            }
+        }
+        D_00435B84++;
+        if (D_00435BB4 == 0) {
+            sdfRestoreDeviceThreadPriority();
+        }
+    }
+    LoadExecPS2("cdrom0:\\SLPS_999.99;1", 0, NULL);
+}
 
 /* Remove a task from the doubly linked queue of its state (1 delayed start, 2 active, 3 delayed destroy). */
 void kwlnTaskRemoveFromStateQueue(KwlnTask *task) {

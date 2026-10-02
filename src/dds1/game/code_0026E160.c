@@ -19,12 +19,31 @@ void func_0026E160(s32 a, s32 b, s32 c, s32 d, s32 value) {
 }
 
 
-extern void sdfDestroyTaskWork(s32);
 extern void func_0026DED0(s32, s32, u8 *, s32);
 extern u8 *sdfListRemoveNode(s32, u8 *);
 
-s32 mnuTickMovieGroup(s32 owner, s32 group) {
-    u8 *list = *(u8 **)(group + 8);
+typedef struct SdfTaskHeader {
+    u32 allocation;
+    u8 pad04[0xC];
+    u32 userData;
+    u32 callback14;
+    void (*onDestroy)(s32, u32);
+} SdfTaskHeader;
+
+extern void sdfDestroyTaskWork(SdfTaskHeader *);
+
+typedef struct MovieResourceGroup {
+    s32 allocation;
+    SdfTaskHeader *tasks[10];
+    s32 activeCount;
+    s32 spawnCountdown;
+} MovieResourceGroup;
+
+extern void *sdfCreateTaskHeader(u32);
+extern void func_0026DEA8();
+
+SdfTaskHeader *mnuTickMovieGroup(MovieResourceGroup *owner, SdfTaskHeader *group) {
+    u8 *list = *(u8 **)((u8 *)group + 8);
     u8 *node;
 
     if (list == NULL) {
@@ -35,10 +54,10 @@ s32 mnuTickMovieGroup(s32 owner, s32 group) {
         node = *(u8 **)(list + 0x10);
         *(s32 *)(node + 8) = *(s32 *)(node + 8) - 1;
         if (*(s32 *)(node + 8) == *(s32 *)(node + 0xC) - 5 && *(u8 *)(node + 0x12) != 0) {
-            func_0026DED0(owner, group, node, *(s8 *)(node + 0x11));
+            func_0026DED0((s32)owner, (s32)group, node, *(s8 *)(node + 0x11));
         }
         if (*(s32 *)(node + 8) == 0) {
-            list = sdfListRemoveNode(group, list);
+            list = sdfListRemoveNode((s32)group, list);
         } else {
             list = *(u8 **)(list + 8);
         }
@@ -46,7 +65,39 @@ s32 mnuTickMovieGroup(s32 owner, s32 group) {
     return group;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E240);
+void func_0026E240(MovieResourceGroup *resources) {
+    SdfTaskHeader **slot;
+    s32 i;
+    SdfTaskHeader *group;
+
+    if (resources->spawnCountdown == 0) {
+        if (resources->activeCount < 10) {
+            group = sdfCreateTaskHeader(0);
+            group->callback14 = (u32)func_0026DEA8;
+            func_0026DED0((s32)resources, (s32)group, NULL, 0);
+            for (i = 0; i < 10; i++) {
+                if (resources->tasks[i] == 0) {
+                    resources->tasks[i] = group;
+                    resources->activeCount++;
+                    break;
+                }
+            }
+        }
+        resources->spawnCountdown = (s32)(effMiscRandUnitFloat(0) * 20.0f + 1.0f);
+    } else {
+        resources->spawnCountdown--;
+    }
+    slot = resources->tasks;
+    for (i = 0; i < 10; i++, slot++) {
+        group = *slot;
+        if (group != 0) {
+            *slot = mnuTickMovieGroup(resources, group);
+            if (*slot == 0) {
+                resources->activeCount--;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E388);
 
@@ -73,10 +124,6 @@ void *mnuCreateMovieSpriteResource(s32 owner, u8 sprite, u8 variant) {
     return resource;
 }
 
-typedef struct {
-    s32 allocation;
-    s32 tasks[10];
-} MovieResourceGroup;
 
 void mnuReleaseMovieResourceGroup(MovieResourceGroup *resources) {
     s32 i;
@@ -89,7 +136,42 @@ void mnuReleaseMovieResourceGroup(MovieResourceGroup *resources) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E608);
+typedef struct MovieMenuState {
+    s32 allocation;
+    u8 pad04[0x0C];
+    s32 state;
+    s32 cursor;
+    s32 mode;
+    u8 pad1C[0x14];
+    void *resources;
+    u8 pad34[0x0C];
+} MovieMenuState;
+
+extern MovieMenuState *mnuMovieMenuState;
+extern void func_0026E240(MovieResourceGroup *);
+extern void func_0026E388(s32, s32, s32, s32, void *, s32);
+extern void sdfSubmitGsTestOneRegisterPacket();
+extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
+extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
+extern void uiDrawActiveSurfaceRegion(s32);
+extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
+
+void func_0026E608(s32 alpha) {
+    func_0026E240(mnuMovieMenuState->resources);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, 0x53);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, 0x53);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, 0x53);
+    uiDrawActiveSurfaceRegion(0x53);
+    mnuDrawSprite(0, 0, 0xFFFF, 0x80, 0x20, 0x1D, 0x53);
+    sdfDispatchSurfaceWithPreparedTexturePacket(0x53);
+    sdfSubmitGsAlphaOneRegisterPacket(0x48, 0x53);
+    sdfSubmitGsTestOneRegisterPacket(0x50000, 0x53);
+    func_0026E388(0, 0, 0, alpha, mnuMovieMenuState->resources, 0x53);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, 0x53);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, 0x53);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, 0x53);
+    sdfSubmitGsTestOneRegisterPacket(0x5100DL, 0x53);
+}
 
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 

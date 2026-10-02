@@ -1,6 +1,16 @@
 #include "common.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
+#include "dds3obj.h"
+
+/* vu0 routine: normalize vf10 and return its original XYZ length. */
+static inline f32 fldNormalizeProbeVector(void) {
+    f32 length;
+
+    VU0_LENGTH_VF10(length);
+    VU0_NORMALIZE_VF10();
+    return length;
+}
 
 typedef struct FldColorParams {
     s32 enabled;
@@ -32,6 +42,8 @@ typedef struct FldFadeColor {
 extern void itfCopyColorFields(s32, void *);
 
 extern u64 dds3GetWorldObject(void);
+extern u32 *dds3FindIndexedObjectChainNodeByName();
+extern void dds3SetWorldCameraObject();
 
 extern s32 mdlFlagTest(s32);
 extern int strcmp(const char *, const char *);
@@ -762,10 +774,6 @@ s32 fldPushDisplayValue(u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013BAB8);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013D308);
-
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013D598);
-
 typedef struct FldProbeKind {
     u8 pad00[0xC];
     u32 *kind; /* 0x0C */
@@ -783,6 +791,134 @@ typedef struct FldProbeActor {
 } FldProbeActor;
 
 extern void effMiscQuaternionToMatrixVU(void);
+/* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
+s32 func_0013D308(FldProbeActor *actor, NodeA *entry) {
+    f32 dir[4];
+    f32 position[4];
+    f32 length;
+    f32 dot;
+    f32 angle;
+    f32 *source;
+    s32 i;
+    u32 kind;
+
+    memset(position, 0, sizeof(position));
+    position[3] = 1.0f;
+    for (i = 0; i < fldTaskSlotCount; i++) {
+        if (fldRoomRecords[i].unk108 == *(u32 *)(entry->pad + 4)) {
+            kind = *((FldProbeKind *)D_0038BC50[i][8])->kind;
+            switch (kind) {
+            case 0:
+                source = *(f32 **)(entry->pad + 0x18);
+                position[0] = source[0];
+                position[1] = source[1];
+                position[2] = source[2];
+                VU0_LOAD_VF(vf10, actor->target->quaternion);
+                effMiscQuaternionToMatrixVU();
+                VU0_STORE_VF(vf30, dir);
+                dir[1] = 0.0f;
+                VU0_LOAD_VF(vf10, dir);
+                VU0_NORMALIZE_VF10();
+                VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+                VU0_MOVE_VF(vf12, vf10);
+                VU0_LOAD_VF(vf10, position);
+                VU0_LOAD_VF(vf11, actor->target->position);
+                VU0_SUB(vf10, vf10, vf11);
+                VU0_STORE_VF(vf10, dir);
+                dir[1] = 0.0f;
+                VU0_LOAD_VF(vf10, dir);
+                length = fldNormalizeProbeVector();
+                VU0_MOVE_VF(vf11, vf12);
+                VU0_DOT_XYZ(dot, vf10, vf11);
+                angle = dot * 180.0f / 3.14f;
+                if (angle < 0.0f) {
+                    return 0;
+                }
+                if (200.0f < length) {
+                    return 0;
+                }
+                return 1;
+            case 1:
+                return fldRoomRecords[i].unk13C == kind;
+            case 2:
+                VU0_LOAD_VF(vf10, actor->target->quaternion);
+                effMiscQuaternionToMatrixVU();
+                VU0_STORE_VF(vf30, dir);
+                dir[1] = 0.0f;
+                VU0_LOAD_VF(vf10, dir);
+                VU0_NORMALIZE_VF10();
+                VU0_STORE_VF(vf10, dir);
+                dot = fldDotVector(dir, fldRoomRecords[i].center);
+                if (dot < 0.5f) {
+                    return 0;
+                }
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+/* vu0 routine: the alternate entry probe only constrains facing, not range. */
+s32 func_0013D598(FldProbeActor *actor, NodeA *entry) {
+    f32 dir[4];
+    f32 position[4];
+    f32 dot;
+    f32 angle;
+    s32 i;
+    u32 kind;
+
+    memset(position, 0, sizeof(position));
+    position[3] = 1.0f;
+    for (i = 0; i < fldTaskSlotCount; i++) {
+        if (fldRoomRecords[i].unk108 == *(u32 *)(entry->pad + 4)) {
+            kind = *((FldProbeKind *)D_0038BC50[i][8])->kind;
+            switch (kind) {
+            case 0:
+                PCP_COPY_VECTOR(position, *(f32 **)(entry->pad + 0x18));
+                VU0_LOAD_VF(vf10, actor->target->quaternion);
+                effMiscQuaternionToMatrixVU();
+                VU0_STORE_VF(vf30, dir);
+                dir[1] = 0.0f;
+                VU0_LOAD_VF(vf10, dir);
+                VU0_NORMALIZE_VF10();
+                VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+                VU0_MOVE_VF(vf12, vf10);
+                VU0_LOAD_VF(vf10, position);
+                VU0_LOAD_VF(vf11, actor->target->position);
+                VU0_SUB(vf10, vf10, vf11);
+                VU0_STORE_VF(vf10, dir);
+                dir[1] = 0.0f;
+                VU0_LOAD_VF(vf10, dir);
+                fldNormalizeProbeVector();
+                VU0_MOVE_VF(vf11, vf12);
+                VU0_DOT_XYZ(dot, vf10, vf11);
+                angle = dot * 180.0f / 3.14f;
+                if (angle < 0.0f) {
+                    return 0;
+                }
+                return 1;
+            case 1:
+                return fldRoomRecords[i].unk13C == kind;
+            case 2:
+                VU0_LOAD_VF(vf10, actor->target->quaternion);
+                effMiscQuaternionToMatrixVU();
+                VU0_STORE_VF(vf30, dir);
+                dir[1] = 0.0f;
+                VU0_LOAD_VF(vf10, dir);
+                VU0_NORMALIZE_VF10();
+                VU0_STORE_VF(vf10, dir);
+                dot = fldDotVector(dir, fldRoomRecords[i].center);
+                if (dot < 0.5f) {
+                    return 0;
+                }
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 
 s32 fldTestActorRoomProbeCondition(s32 index, FldProbeActor *actor, f32 *position) {
     f32 dir[4];
@@ -808,8 +944,7 @@ s32 fldTestActorRoomProbeCondition(s32 index, FldProbeActor *actor, f32 *positio
         VU0_STORE_VF(vf10, dir);
         dir[1] = 0.0f;
         VU0_LOAD_VF(vf10, dir);
-        VU0_LENGTH_VF10(length);
-        VU0_NORMALIZE_VF10();
+        length = fldNormalizeProbeVector();
         VU0_MOVE_VF(vf11, vf12);
         VU0_DOT_XYZ(dot, vf10, vf11);
         angle = dot * 180.0f / 3.14f;
@@ -1290,7 +1425,39 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140A58);
+void func_00140A58(const char *name) {
+    FldActorEntry *entry;
+    char *entryName;
+    u32 *camera;
+    s32 i;
+
+    if (name == NULL) {
+        return;
+    }
+    for (i = 0; i < 0x100; i++) {
+        entry = (FldActorEntry *)D_003932A0 + i;
+        if (entry->requiredFlag != 0 && mdlFlagTest(entry->requiredFlag) == 0) {
+            continue;
+        }
+        if (entry->kind == 0) {
+            continue;
+        }
+        entryName = entry->name;
+        if (entry->floor == ((FldAreaState *)fldAreaState)->areaIndex + 1) {
+            if (strcmp(name, entryName) == 0) {
+                if (entry->variantMode == 2) {
+                    return;
+                }
+                if (entry->variantMode == 0 && entry->linkKind == 3) {
+                    camera = dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(), 4, entry->linkName);
+                    dds3SetWorldCameraObject(dds3GetWorldObject(), camera);
+                    fldHideSceneModelsAndResetCamera();
+                    return;
+                }
+            }
+        }
+    }
+}
 
 u8 fldIsSceneStateEight(void) {
     return D_004361F8 == 8;
@@ -1785,3 +1952,4 @@ INCLUDE_SDATA(const s32, "game/code_00136EF8", D_004361F8);
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_004361FC);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", fldFieldTaskHandle);
+

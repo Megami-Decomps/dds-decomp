@@ -1,9 +1,9 @@
 #include "common.h"
 #include "pcp_vu0.h"
 typedef struct EffectSurfaceNode {
-    u32 percent;
+    u32 capacity;
     u32 color;
-    f32 opacity;
+    f32 scale;
     u32 kind;
     u8 pad_10[0x1C];
     u32 index;
@@ -15,7 +15,7 @@ typedef struct EffectSurfaceNode {
     u32 queueHandle;
     void *referenceHolder;
     u32 active;
-    u16 count;
+    u16 unk50;
 } EffectSurfaceNode;
 
 extern u32 effRetainResource(u32);
@@ -425,6 +425,14 @@ typedef struct FileJob {
     struct FileJob *next;
     struct FileJob *prev;
 } FileJob;
+
+extern void fileLoadObjectSetResource(EffectSurfaceNode *node, u32 entryId, void *resource);
+extern void fileLoadObjectOpenDevice(EffectSurfaceNode *node, u32 resourceId);
+extern void fileLoadObjectOpenAndStartDevice(EffectSurfaceNode *node, u32 resourceId);
+extern void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceId);
+extern void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJob *job);
+extern void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job);
+extern void fileReplaceReferenceHolder(EffectSurfaceNode *node, u32 resource);
 
 extern FileJob *fileCreateJob(u16 type);
 
@@ -3824,49 +3832,22 @@ typedef struct FileBillboardRecord {
     s16 mode; /* 0x54 */
 } FileBillboardRecord;
 
-/* 0x54-byte loader record: same head as LoadObj (owner/colour/scale) but with a
-   u16 tail at 0x50, so it is a separate type rather than DDS2's 0x50 LoadObj. */
-typedef struct LoaderRecord {
-    s32 owner;   /* 0x00 */
-    u32 color;   /* 0x04 */
-    f32 scale;   /* 0x08 */
-    u8 pad0C[0x28];
-    s32 unk34;   /* 0x34 */
-    s32 unk38;   /* 0x38 */
-    s32 unk3C;   /* 0x3C */
-    s32 unk40;   /* 0x40 */
-    s32 unk44;   /* 0x44 */
-    u8 pad48[4];
-    s32 unk4C;   /* 0x4C */
-    u16 unk50;   /* 0x50 */
-    u8 pad52[2];
-} LoaderRecord;
-
-void *fileCreateSurfaceLoaderState(s32 owner) {
-    LoaderRecord *rec = (LoaderRecord *)sdfAllocAndClearQuadwords(0x54);
+EffectSurfaceNode *fileCreateSurfaceLoaderState(s32 capacity) {
+    EffectSurfaceNode *rec = (EffectSurfaceNode *)sdfAllocAndClearQuadwords(sizeof(EffectSurfaceNode));
     u32 color = 0x80808080;
 
-    rec->owner = owner;
+    rec->capacity = capacity;
     rec->unk50 = 1;
     rec->color = color;
     rec->scale = 1.0f;
-    rec->unk34 = 0;
-    rec->unk38 = 0;
-    rec->unk3C = 0;
-    rec->unk40 = 0;
-    rec->unk44 = 0;
-    rec->unk4C = 0;
+    rec->resource = NULL;
+    rec->jobs = NULL;
+    rec->jobHandle = 0;
+    rec->queues = NULL;
+    rec->queueHandle = 0;
+    rec->active = 0;
     return rec;
 }
-
-/* DDS2 loader work has a longer prefix than the DDS1 LoadObj. */
-typedef struct LoadObj {
-    u8 pad00[8];
-    f32 scale;             /* 0x08 */
-    u8 pad0C[0x3C];
-    void *referenceHolder; /* 0x48 */
-    void *recordWork;      /* 0x4C */
-} LoadObj;
 
 typedef struct FileGridHeader {
     u8 pad00[0x20];
@@ -3876,7 +3857,7 @@ typedef struct FileGridHeader {
     s32 altCols; /* 0xB8 */
 } FileGridHeader;
 
-void *fileCreateGridLoaderRecord(FileGridHeader *hdr) {
+EffectSurfaceNode *fileCreateGridLoaderRecord(FileGridHeader *hdr) {
     u32 rows = hdr->rows;
     u32 count = (rows != 0 ? rows : hdr->cols) * (rows != 0 ? hdr->cols : hdr->altCols);
 
@@ -3885,7 +3866,38 @@ void *fileCreateGridLoaderRecord(FileGridHeader *hdr) {
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042BB28);
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", fileCreateEffectSurfaceFromJob);
+EffectSurfaceNode *fileCreateEffectSurfaceFromJob(FileJob *job) {
+    void *primary = fileResolvePrimaryBuffer(job);
+    EffectSurfaceNode *node = fileCreateGridLoaderRecord(primary);
+    void *secondary;
+
+    fileLoadObjectSetResource(node, job->option, primary);
+    secondary = fileResolveSecondaryBuffer(job);
+    if (secondary != NULL) {
+        switch (job->slots[0].selector) {
+        case 1:
+            fileLoadObjectOpenDevice(node, (u32)secondary);
+            break;
+        case 2:
+            fileLoadObjectOpenAndStartDevice(node, (u32)secondary);
+            break;
+        case 4:
+            fileLoadObjectOpenNamedDevice(node, *(u32 *)secondary);
+            break;
+        case 5:
+            fileReplaceEffectSurfaceJobs(node, secondary);
+            break;
+        case 6:
+            fileReplaceEffectSurfaceQueues(node, secondary);
+            break;
+        case 7:
+            fileReplaceReferenceHolder(node, (u32)secondary);
+            break;
+        }
+        node->kind = job->slots[0].selector;
+    }
+    return node;
+}
 
 void fileDestroyEffectSurfaceAndChildren(EffectSurfaceNode *node) {
     u32 count;
@@ -3917,11 +3929,11 @@ void fileDestroyEffectSurfaceAndChildren(EffectSurfaceNode *node) {
     sdfReleaseChipBlock(node);
 }
 
-LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
-    LoadObj *source = (LoadObj *)((FileSlotTable *)owner->recordWork)->data1;
-    LoadObj *result = fileCreateGridLoaderRecord(source);
+EffectSurfaceNode *fileLoadObjectCreateChild(EffectSurfaceNode *owner) {
+    FileGridHeader *source = (FileGridHeader *)((FileSlotTable *)owner->active)->data1;
+    EffectSurfaceNode *result = fileCreateGridLoaderRecord(source);
 
-    fileLoadObjectSetResource(result, ((FileSlotTable *)owner->recordWork)->type, source);
+    fileLoadObjectSetResource(result, ((FileSlotTable *)owner->active)->type, source);
     fileCloneEffectSurfaceResources(result, owner);
     return result;
 }
@@ -4004,7 +4016,7 @@ void fileLoadObjectSetResource(EffectSurfaceNode *node, u32 entryId, void *resou
     if (node->active != 0) {
         fileReleaseGridRecordHandle((FileSlotTable *)node->active);
     }
-    node->active = fileAllocateGridRecordSlots((u16)entryId, node->percent, resource);
+    node->active = fileAllocateGridRecordSlots((u16)entryId, node->capacity, resource);
 }
 
 void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceId) {
@@ -4092,7 +4104,7 @@ void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job) {
     }
 }
 
-void fileReplaceReferenceHolder(LoadObj *obj, u32 resource) {
+void fileReplaceReferenceHolder(EffectSurfaceNode *obj, u32 resource) {
     u32 holder;
 
     if (obj->referenceHolder != NULL) {
@@ -4102,50 +4114,48 @@ void fileReplaceReferenceHolder(LoadObj *obj, u32 resource) {
     obj->referenceHolder = (void *)holder;
 }
 
-void fileClearLoadObjectReferences(LoadObj *obj) {
-    if (obj->recordWork != NULL) {
-        fileClearRecordReferences((FileSlotTable *)obj->recordWork);
+void fileClearLoadObjectReferences(EffectSurfaceNode *obj) {
+    if (obj->active != 0) {
+        fileClearRecordReferences((FileSlotTable *)obj->active);
         return;
     }
 }
 
-/* These one-argument calls are retail's own: each callee reads both $4 and
-   $5 (or the single $4), and each caller tail-jumps without setting the
-   later arguments. Declared unprototyped, with K&R definitions below, so
-   the calls keep compiling as they originally did. Hoisted here because
-   they must precede every caller. */
+/* The vector callers leave their second argument inherited through the
+   unprototyped declarations and the K&R definitions below. */
 extern void fileAcquireRecord();
 extern void mnuRecordSetVector();
 extern void fileSetRecordSecondVector();
 
-s32 fileAcquireLoadObjectRecord(LoadObj *obj) {
-    if ((effModelUpdateControlFlags & 2) == 0 && obj->recordWork != NULL) {
-        fileAcquireRecord(obj->recordWork);
+/* Original-style implicit int; callers ignore its result. */
+fileAcquireLoadObjectRecord(EffectSurfaceNode *obj) {
+    if ((effModelUpdateControlFlags & 2) == 0 && obj->active != 0) {
+        fileAcquireRecord((FileSlotTable *)obj->active);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D69B8);
 
 void func_002D7398(u32 objectAddr) {
-    fileAcquireLoadObjectRecord((LoadObj *)objectAddr);
+    fileAcquireLoadObjectRecord((EffectSurfaceNode *)objectAddr);
     func_002D69B8(objectAddr);
 }
 
-void fileSendLoadObjectRecordVector(LoadObj *obj) {
-    mnuRecordSetVector((u32)obj->recordWork);
+void fileSendLoadObjectRecordVector(EffectSurfaceNode *obj) {
+    mnuRecordSetVector(obj->active);
 }
 
-void fileCopyLoadObjectRecordVector(LoadObj *obj) {
-    fileSetRecordSecondVector((u32)obj->recordWork);
+void fileCopyLoadObjectRecordVector(EffectSurfaceNode *obj) {
+    fileSetRecordSecondVector(obj->active);
 }
 
 void fileSetRecordWordFour(s32 record, u32 value) {
     *(u32 *)(record + 4) = value;
 }
 
-void fileSetLoadObjectScale(LoadObj *obj, f32 scale) {
+void fileSetLoadObjectScale(EffectSurfaceNode *obj, f32 scale) {
     obj->scale = scale;
-    dds3DispatchIndexedCallback(obj->recordWork);
+    dds3DispatchIndexedCallback((FileSlotTable *)obj->active);
 }
 
 

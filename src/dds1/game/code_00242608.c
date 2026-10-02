@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf.h"
 
+
 extern s32 sdfAllocGeneralBlock(s32);
 extern u8 *sdfResourceRetainAddress(s32);
 extern void mnuClearPanelTransitionState(u8 *);
@@ -889,6 +890,7 @@ s32 mnuShopHasPendingFlag(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002443F8);
+
 
 void func_002444D0(s32 *record) {
     record[27] = func_002443F8(D_00368C40, 3, record);

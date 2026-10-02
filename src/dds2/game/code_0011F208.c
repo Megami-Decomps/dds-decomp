@@ -235,6 +235,7 @@ extern s32 D_00435EF8;
 
 extern void fldSetCameraMoveMode(s32 mode);
 
+
 extern void fldClearCameraMoveMode(void);
 
 extern u32 dds3ResetObjectValueCursor(u64);

@@ -9,13 +9,7 @@ typedef struct IconEntry {
 
 extern IconEntry D_0036C728[];
 extern u32 D_003BC520;
-extern void func_002BF4E0(s32, s32, s32, s32, s32, u32, s32, s32);
-extern f32 sdfSinPoly(f32);
-
-typedef struct MenuPulseIcon {
-    u8 pad0[0xB2];
-    s8 frame;
-} MenuPulseIcon;
+extern s32 func_002BF4E0(s32, s32, s32, s32, s32, u32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025DF68);
 
@@ -23,18 +17,7 @@ INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E108);
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E308);
 
-void func_0025E420(MenuPulseIcon *state, s32 amplitude, s32 drawArg) {
-    u32 resource = D_003BC520;
-    s32 alpha;
-
-    alpha = (s32)((f32)amplitude * sdfSinPoly((state->frame / 120.0f) * 6.2831853f));
-    func_002BF4E0(D_0036C728[1].x << 4, D_0036C728[1].y << 3, 0,
-                 alpha, 0, resource, D_0036C728[1].id, drawArg);
-    state->frame++;
-    if (state->frame >= 120.0f) {
-        state->frame = 0;
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E420);
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E508);
 
@@ -58,12 +41,14 @@ extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 extern void func_0025F4E0(s32, s32, s32, s32, u8 *, s32);
 
 typedef struct MenuDrawValueItem {
-    u8 pad00[0x60];
+    s32 index;
+    u8 pad04[0x5C];
     s32 value;
 } MenuDrawValueItem;
 
 typedef struct MenuDrawInner {
-    u8 pad00[0x1C];
+    u8 pad00[0x18];
+    MenuDrawValueItem *first;
     MenuDrawValueItem *item;
     s32 active;
 } MenuDrawInner;
@@ -80,6 +65,8 @@ typedef struct MenuDrawValuePanel {
     MenuDrawObject *object;
     u8 pad74[0xC];
     s32 multiplier;
+    u8 pad84[0x2F];
+    s8 unkB3;
 } MenuDrawValuePanel;
 
 /* Draw the child and its container only while the child is active. */
@@ -136,9 +123,35 @@ INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025F680);
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025F7F0);
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025FB30);
+void func_0025FB30(s32 x, s32 y, s32 z, MenuDrawValuePanel *panel, s32 option) {
+    u32 texture = D_003BC520;
+    s32 firstIndex = panel->object->inner->first->index;
+    s32 row = panel->object->inner->item->index - firstIndex;
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025FC38);
+    if (panel->unkB3 != 1) {
+        func_002BF4E0(D_0036C728[30].x << 4, (D_0036C728[30].y + row * 21) << 3,
+            0, 0x100, 0, texture, D_0036C728[30].id, option);
+    }
+    if (panel->multiplier != 1) {
+        func_002BF4E0(D_0036C728[31].x << 4, (D_0036C728[31].y + row * 21) << 3,
+            0, 0x100, 0, texture, D_0036C728[31].id, option);
+    }
+}
+
+void func_0025FC38(s32 x, s32 y, s32 z, MenuDrawValuePanel *panel, s32 scale, s32 option) {
+    u32 texture = D_003BC520;
+    s32 firstIndex = panel->object->inner->first->index;
+    s32 row = panel->object->inner->item->index - firstIndex;
+
+    if (panel->unkB3 != 1) {
+        func_002BF4E0(D_0036C728[30].x << 4, (D_0036C728[30].y + row * 21) << 3,
+            0, scale, 0, texture, D_0036C728[30].id, option);
+    }
+    if (panel->multiplier != 1) {
+        func_002BF4E0(D_0036C728[31].x << 4, (D_0036C728[31].y + row * 21) << 3,
+            0, scale, 0, texture, D_0036C728[31].id, option);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025FD50);
 

@@ -3824,14 +3824,20 @@ typedef struct MenuPageGauge {
     s32 mp;
     s32 maxHp;
     s32 maxMp;
-    u8 pad18[0xC];
+    u8 pad18[0x18];
 } MenuPageGauge;
 
-typedef struct MenuPageRecord {
-    s32 visibleCount; /* 0x00: threshold for highlighted party records */
-    u8 pad4[8];
+typedef struct MenuPageEntry {
     s32 partyIndex;
     MenuPageGauge gauge;
+} MenuPageEntry; /* 0x34-byte party row */
+
+/* Counts belong to the table header, not to every party row. */
+typedef struct MenuPageRecord {
+    s32 visibleCount;
+    s32 additionalCount;
+    u32 unk8;
+    MenuPageEntry entries[5];
 } MenuPageRecord;
 
 typedef struct MenuPageWindow {
@@ -3904,7 +3910,7 @@ void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 flag) {
     }
     for (i = 0, offset = 0; i < 5; i++, offset += 0x34) {
         MenuPageRecord *entries = menu->records;
-        if (((MenuPageRecord *)((u8 *)entries + offset))->gauge.id >= 0) {
+        if (((MenuPageEntry *)((u8 *)entries->entries + offset))->gauge.id >= 0) {
             if ((s32)i < entries->visibleCount) {
                 func_002BC690(menu, i, 1);
             } else {
@@ -4034,9 +4040,9 @@ void mnuResolveUnselectedPageHandles(MenuPageWindow *window) {
     s32 offset = 0;
     u32 i;
 
-    for (i = 0; i < 5; i++, offset += sizeof(MenuPageRecord)) {
+    for (i = 0; i < 5; i++, offset += sizeof(MenuPageEntry)) {
         if (i != selected) {
-            s32 id = ((MenuPageRecord *)((u8 *)window->records + offset))->gauge.id;
+            s32 id = ((MenuPageEntry *)((u8 *)window->records->entries + offset))->gauge.id;
 
             if (id >= 0) {
                 if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
@@ -4052,10 +4058,10 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
     s32 selected = window->selected;
     u32 i;
     s32 id;
-    MenuPageRecord *record;
+    MenuPageEntry *record;
 
     for (i = 0; i < 5; i++) {
-        record = &window->records[i];
+        record = &window->records->entries[i];
         id = record->gauge.id;
         if (id >= 0) {
             if (effHasFirstTextureHandle(window->handlesA[id]) != 0) {
@@ -4064,7 +4070,7 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
             }
         }
     }
-    record = &window->records[selected];
+    record = &window->records->entries[selected];
     id = record->gauge.id;
     if (id >= 0) {
         if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
@@ -4082,13 +4088,13 @@ void mnuSelectPage(MenuPageWindow *window, s32 selected) {
     u32 i;
     /* Required to match: retain the header-relative handle walk below. */
     u8 *handles = window->pad4;
-    MenuPageRecord *record;
+    MenuPageEntry *record;
     s32 active;
 
     for (i = 0; i < 5; i++) {
         effReleaseTextureHandlesAndResetSlots(*resource++);
     }
-    record = &window->records[selected];
+    record = &window->records->entries[selected];
     active = mnuGetSelectionFromFlags(datGameState + record->partyIndex * 0x1C4 + 0xA60);
     for (i = 0; i < 5; i++) {
         if (i == active) {

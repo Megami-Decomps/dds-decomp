@@ -349,7 +349,49 @@ s32 func_00207A80(s32 *out) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00207C28);
+/* vu0 routine: forward-cone projection to packed screen coordinates; input is vf10 */
+s32 func_00207C28(s32 out[4]) {
+    f32 distance, facing;
+    f32 *projection;
+
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(distance);
+    if (!(distance > 16.0))
+        return 0;
+
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    VU0_MOVE_MATRIX_TO_B();
+    sdfInvertRigidVuTransform();
+    VU0_MOVE_VF(vf10, vf30);
+    VU0_NORMALIZE_VF10();
+    VU0_DOT_XYZ(facing, vf10, vf11);
+    if (facing <= 0.5f)
+        return 0;
+
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_MOVE_VF(vf28, vf24);
+    VU0_MOVE_VF(vf29, vf25);
+    VU0_MOVE_VF(vf30, vf26);
+    VU0_MOVE_VF(vf31, vf27);
+    projection = sdfProjectionMatrix;
+    sdfPostmultiplyVuMatrixFromMemory(projection);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    projection += 16;
+    VU0_LOAD_VF(vf11, projection);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_0037F660);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_FTOI4(vf10, vf10);
+    VU0_STORE_VF(vf10, out);
+    out[0] -= 0x7000;
+    out[1] -= 0x7900;
+    return 1;
+}
 
 void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
     f32 pos[4];

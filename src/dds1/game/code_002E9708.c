@@ -74,35 +74,39 @@ typedef struct SdfStreamTextureHead {
     s32 resourceWord;
 } SdfStreamTextureHead;
 
-typedef struct SoundNode {
+typedef struct SdfStreamFrameNode {
     u8 pad00[8];
-    struct SoundNode *next;
+    struct SdfStreamFrameNode *next;
     u8 active;
-    u8 pad0D[7];
+    u8 pad0D[2];
+    u8 drained;
+    u8 pad10[4];
     u8 audioMode; /* 0=no audio, 1=mono, 2=stereo */
     u8 loopMode;
     u8 playbackMode;
     u8 pad17[5];
     s32 bufferSize;
     u32 buffers[2];
-    u8 pad28[0xC];
-    s32 userValue;
+    s32 textureResources[2];
+    u8 pad30[4];
+    s32 resourceWord;
     SdfStreamTextureHead *textureHead;
     u16 width;
     u16 height;
-    s32 frameHeaderWord;
-    u8 pad44[0xC];
+    s32 sourceBytes;
+    u8 pad44[8];
+    u32 unk4C;
     u8 headerReady;
     u8 done;
     u8 count;
     u8 start;
-    u32 sampleBuffer;
+    u32 scratchBuffer;
     u8 pad58[4];
-    s32 (*read)(struct SoundNode *, u32, s32, void *, s32);
+    s32 (*read)(struct SdfStreamFrameNode *, u32, s32, void *, s32);
     u32 source;
     u8 pad64[0x28];
-} SoundNode;
-typedef s32 (*SdfStreamRead)(SoundNode *, u32, s32, void *, s32);
+} SdfStreamFrameNode;
+typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, u32, s32, void *, s32);
 
 typedef struct SoundFormat {
     u8 hasAudio;
@@ -111,19 +115,19 @@ typedef struct SoundFormat {
     u8 playbackMode;
 } SoundFormat;
 
-extern SoundNode *sdfSoundNodeHead;
+extern SdfStreamFrameNode *sdfSoundNodeHead;
 extern s32 sceIpuSync(s32, s32);
 extern u32 sdfAllocateBlockBySizeThreshold(s32);
-extern void sdfSoundInitNodeFromFormat(SoundNode *, SoundFormat *);
-extern void sdfStreamOpen(SoundNode *, SoundFormat *, s32, s32);
-extern void sdfSoundInitFormattedNode(SoundNode *, SoundFormat *, SdfStreamRead, u32);
+extern void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *, SoundFormat *);
+extern void sdfStreamOpen(SdfStreamFrameNode *, SoundFormat *, s32, s32);
+extern void sdfSoundInitFormattedNode(SdfStreamFrameNode *, SoundFormat *, SdfStreamRead, u32);
 extern s32 D_003BDA9C;
 extern s32 D_003BDAA0;
 extern void func_002CF7B8(s32);
 extern s32 func_0030B5D0(s32);
 extern u64 sdfDevReadResourceWithExtraSpace(u64, u32 *, u32 *, s32);
 
-extern void func_002EB578(SoundNode *node, u8 *data, s32 size);
+extern void func_002EB578(SdfStreamFrameNode *node, u8 *data, s32 size);
 
 extern s32 sdfCreateConfiguredBufferedResourceList(s32);
 
@@ -782,9 +786,9 @@ void sdfStreamNodeAppend(SdfStreamNode *node, s32 inInterrupt) {
     }
 }
 
-void sdfSoundAppendNode(SoundNode *node) {
-    SoundNode **tail = &sdfSoundNodeHead;
-    SoundNode *current = *tail;
+void sdfSoundAppendNode(SdfStreamFrameNode *node) {
+    SdfStreamFrameNode **tail = &sdfSoundNodeHead;
+    SdfStreamFrameNode *current = *tail;
     if (current != NULL) {
         tail = &current->next;
         while ((current = *tail) != NULL) {
@@ -795,9 +799,9 @@ void sdfSoundAppendNode(SoundNode *node) {
     node->next = NULL;
 }
 
-void sdfSoundRemoveNode(SoundNode *node) {
-    SoundNode **link = &sdfSoundNodeHead;
-    SoundNode *current = *link;
+void sdfSoundRemoveNode(SdfStreamFrameNode *node) {
+    SdfStreamFrameNode **link = &sdfSoundNodeHead;
+    SdfStreamFrameNode *current = *link;
     while (current != NULL) {
         if (current == node) {
             *link = current->next;
@@ -808,7 +812,7 @@ void sdfSoundRemoveNode(SoundNode *node) {
     }
 }
 
-void sdfAllocateStreamFrameBuffers(SoundNode *node) {
+void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
     s32 channels = 4;
     s32 size;
     if (node->audioMode != 0) {
@@ -824,7 +828,7 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB578);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB650);
 
-void sdfSoundInitNodeFromFormat(SoundNode *node, SoundFormat *format) {
+void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *node, SoundFormat *format) {
     memset(node, 0, 0x8C);
     if (format->hasAudio == 0) {
         node->audioMode = 0;
@@ -841,16 +845,16 @@ typedef struct SoundFrameHeader {
     u8 pad00[8];
     u16 width;
     u16 height;
-    s32 frameHeaderWord;
+    s32 sourceBytes;
 } SoundFrameHeader;
 
-void sdfStreamOpen(SoundNode *node, SoundFormat *format, s32 source, s32 sourceSize) {
+void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 source, s32 sourceSize) {
     s32 interruptsEnabled;
     u8 *src = (u8 *)source;
 
     sdfSoundInitNodeFromFormat(node, format);
     node->width = ((SoundFrameHeader *)src)->width;
-    node->frameHeaderWord = ((SoundFrameHeader *)src)->frameHeaderWord;
+    node->sourceBytes = ((SoundFrameHeader *)src)->sourceBytes;
     node->height = ((SoundFrameHeader *)src)->height;
     sdfAllocateStreamFrameBuffers(node);
     func_002EB578(node, src + 0x10, sourceSize - 0x10);
@@ -862,17 +866,17 @@ void sdfStreamOpen(SoundNode *node, SoundFormat *format, s32 source, s32 sourceS
     func_002EC230(0);
 }
 
-void sdfSoundInitFormattedNode(SoundNode *node, SoundFormat *format, SdfStreamRead read, u32 source) {
+void sdfSoundInitFormattedNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead read, u32 source) {
     sdfSoundInitNodeFromFormat(node, format);
     node->read = read;
     node->source = source;
     node->active = 1;
-    node->sampleBuffer = sdfAllocateBlockBySizeThreshold(0x10100) + 0x100;
+    node->scratchBuffer = sdfAllocateBlockBySizeThreshold(0x10100) + 0x100;
 }
 
 extern SdfStreamTextureHead *sdfTexAllocateHeadForDimensions(s32, s32, s32, s32, s32);
 
-void sdfStreamInitializeFromHeader(SoundNode *node) {
+void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
     SoundFrameHeader header;
     s32 status;
     s32 interruptsEnabled;
@@ -887,8 +891,8 @@ void sdfStreamInitializeFromHeader(SoundNode *node) {
     node->read(node, node->source, 1, &header, sizeof(header));
     node->width = header.width;
     node->height = header.height;
-    node->frameHeaderWord = header.frameHeaderWord;
-    if (node->userValue == 0) {
+    node->sourceBytes = header.sourceBytes;
+    if (node->resourceWord == 0) {
         s32 width = node->width;
         s32 height = node->height;
         s32 format;
@@ -910,7 +914,7 @@ void sdfStreamInitializeFromHeader(SoundNode *node) {
         }
         texture = sdfTexAllocateHeadForDimensions(width, height, format, 2, 0);
         node->textureHead = texture;
-        node->userValue = texture->resourceWord;
+        node->resourceWord = texture->resourceWord;
     }
     sdfAllocateStreamFrameBuffers(node);
     interruptsEnabled = func_00312C08();
@@ -920,11 +924,54 @@ void sdfStreamInitializeFromHeader(SoundNode *node) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EBB60);
+extern u32 D_003BDAA4;
+extern void sdfFreeMemoryFromEitherHeap(void *);
+extern void sdfTexQueueResourceRelease(s32);
+extern void sdfTexQueuePendingWork(s32);
+
+void func_002EBB60(SdfStreamFrameNode *node) {
+    s32 interruptsEnabled;
+    s32 wasActive;
+    u32 dmaEnable;
+
+    interruptsEnabled = func_00312C08();
+    wasActive = 0;
+    node->drained = 1;
+    sdfSoundRemoveNode(node);
+    sdfStreamNodeUnlink((SdfStreamNode *)node, 1);
+    if (D_003BDAA4 == (u32)node) {
+        *(volatile u32 *)0x10002010 = 0x40000000;
+        sceIpuSync(0, 0);
+        dmaEnable = *(volatile u32 *)0x1000F520;
+        *(volatile u32 *)0x1000F520 = 0x10000;
+        *(volatile u32 *)0x1000B400 = 1;
+        *(volatile u32 *)0x1000B000 = 0;
+        *(volatile u32 *)0x1000F520 = dmaEnable;
+        D_003BDAA4 = 0;
+        wasActive = 1;
+    }
+    if (interruptsEnabled != 0) {
+        EIntr();
+    }
+    sdfFreeMemoryFromEitherHeap((void *)node->unk4C);
+    sdfFreeMemoryFromEitherHeap((void *)node->buffers[0]);
+    sdfFreeMemoryFromEitherHeap((void *)node->buffers[1]);
+    sdfTexQueueResourceRelease(node->textureResources[0]);
+    sdfTexQueueResourceRelease(node->textureResources[1]);
+    if (node->scratchBuffer != 0) {
+        sdfFreeMemoryFromEitherHeap((void *)(node->scratchBuffer - 0x100));
+    }
+    if (node->textureHead != 0) {
+        sdfTexQueuePendingWork((s32)node->textureHead);
+    }
+    if (wasActive != 0) {
+        func_002EC230(0);
+    }
+}
 
 extern void *memcpy(void *dst, const void *src, u32 n);
 
-void sndFillStreamFeedRing(SoundNode *feed) {
+void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
     s32 slot;
     s32 count;
     s32 got;
@@ -936,7 +983,7 @@ void sndFillStreamFeedRing(SoundNode *feed) {
         do {
             slot = feed->start;
             eof = 0;
-            dst = feed->sampleBuffer;
+            dst = feed->scratchBuffer;
             slot += count;
             if (slot >= 8) {
                 slot -= 8;
@@ -963,7 +1010,7 @@ void sndFillStreamFeedRing(SoundNode *feed) {
                 count++;
             }
             if (slot == 7) {
-                memcpy((void *)(((feed->sampleBuffer - 0x100) & 0x0FFFFFFF) | 0x20000000), (void *)(dst + 0x1F00), 0x100);
+                memcpy((void *)(((feed->scratchBuffer - 0x100) & 0x0FFFFFFF) | 0x20000000), (void *)(dst + 0x1F00), 0x100);
             }
             feed->count = count;
             if (feed->done != 0) {
@@ -1010,7 +1057,6 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC060);
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC230);
 
-extern u32 D_003BDAA4;
 extern void sceIpuStopDMA(void *);
 
 /* IPU stream worker: queued stream node plus the DMA progress counters polled by this thread. */
@@ -1137,9 +1183,9 @@ s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
 }
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC5E0);
 
-void sdfSoundInitAndAppendNode(SoundNode *node, s32 format, s32 source, s32 sourceSize, s32 value) {
+void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, s32 format, s32 source, s32 sourceSize, s32 value) {
     sdfStreamOpen(node, format, source, sourceSize);
-    node->userValue = value;
+    node->resourceWord = value;
     sdfSoundAppendNode(node);
 }
 
@@ -1156,9 +1202,9 @@ void sdfStreamCreateWithParams(s32 node, SdfStreamParams *params, s32 sourceData
     sdfSoundInitAndAppendNode(node, &local, sourceData, sourceSize, sdfTexGetPrimaryResourceWord(source));
 }
 
-void sdfSoundInitFormattedAndAppendNode(SoundNode *node, SoundFormat *format, SdfStreamRead read, u32 source, s32 value) {
+void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead read, u32 source, s32 value) {
     sdfSoundInitFormattedNode(node, format, read, source);
-    node->userValue = value;
+    node->resourceWord = value;
     sdfSoundAppendNode(node);
 }
 

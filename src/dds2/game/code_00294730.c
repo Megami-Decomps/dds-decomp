@@ -11,8 +11,6 @@ extern void func_002960F0(s32, s32, s32, s32, u8 *, s32);
 typedef struct EventSpriteObject {
     u8 pad00[8];
     s32 type;
-    u8 pad0C[0xBA];
-    s8 pulseFrame;
 } EventSpriteObject;
 
 u32 evtSelectGraphicSlotBySpriteType(EventSpriteObject *object) {
@@ -45,8 +43,7 @@ typedef struct MenuDrawResources {
 } MenuDrawResources;
 
 extern MenuDrawResources *D_00438FC8;
-extern f32 sdfSinPoly(f32);
-extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern s32 func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 struct BlendDispatchWork;
 extern void func_00294680(struct BlendDispatchWork *, s32, s32);
 
@@ -67,18 +64,7 @@ void func_00294B40(s32 x, s32 y, s32 depth, EventSpriteObject *object,
                   D_003D03F0[index][MENU_ICON_FRAME], option);
 }
 
-void func_00294C68(EventSpriteObject *object, s32 amplitude, s32 drawArg) {
-    s32 texture = D_00438FC8->textures[0];
-    s32 alpha;
-
-    alpha = (s32)((f32)amplitude * sdfSinPoly((object->pulseFrame / 120.0f) * 6.2831853f));
-    func_00306CD0(D_003D03F0[1][MENU_ICON_X] << 4, D_003D03F0[1][MENU_ICON_Y] << 3,
-                  0, alpha, 0, texture, D_003D03F0[1][MENU_ICON_FRAME], drawArg);
-    object->pulseFrame++;
-    if (object->pulseFrame >= 120.0f) {
-        object->pulseFrame = 0;
-    }
-}
+INCLUDE_ASM(const s32, "game/code_00294730", func_00294C68);
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00294D50);
 
@@ -93,12 +79,14 @@ INCLUDE_ASM(const s32, "game/code_00294730", func_002958B0);
 INCLUDE_ASM(const s32, "game/code_00294730", func_00295D38);
 
 typedef struct MenuDrawValueItem {
-    u8 pad00[0x60];
+    s32 index;
+    u8 pad04[0x5C];
     s32 value;
 } MenuDrawValueItem;
 
 typedef struct MenuDrawInner {
-    u8 pad00[0x1C];
+    u8 pad00[0x18];
+    MenuDrawValueItem *first;
     MenuDrawValueItem *item;
     s32 active;
 } MenuDrawInner;
@@ -115,6 +103,8 @@ typedef struct MenuDrawValuePanel {
     MenuDrawObject *object;
     u8 pad84[0xC];
     s32 multiplier;
+    u8 pad94[0x33];
+    s8 unkC7;
 } MenuDrawValuePanel;
 
 /* Draw the child and its container only while the child is active. */
@@ -171,9 +161,39 @@ INCLUDE_ASM(const s32, "game/code_00294730", func_00296298);
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00296430);
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_002967A0);
+void func_002967A0(s32 x, s32 y, s32 z, MenuDrawValuePanel *panel, s32 option) {
+    s32 texture = D_00438FC8->textures[0];
+    s32 firstIndex = panel->object->inner->first->index;
+    s32 row = panel->object->inner->item->index - firstIndex;
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_002968B8);
+    if (panel->unkC7 != 1) {
+        func_00306CD0(D_003D03F0[30][MENU_ICON_X] << 4,
+            (D_003D03F0[30][MENU_ICON_Y] + row * 22) << 3,
+            0, 0x100, 0, texture, D_003D03F0[30][MENU_ICON_FRAME], option);
+    }
+    if (panel->multiplier != 1) {
+        func_00306CD0(D_003D03F0[31][MENU_ICON_X] << 4,
+            (D_003D03F0[31][MENU_ICON_Y] + row * 22) << 3,
+            0, 0x100, 0, texture, D_003D03F0[31][MENU_ICON_FRAME], option);
+    }
+}
+
+void func_002968B8(s32 x, s32 y, s32 z, MenuDrawValuePanel *panel, s32 scale, s32 option) {
+    s32 texture = D_00438FC8->textures[0];
+    s32 firstIndex = panel->object->inner->first->index;
+    s32 row = panel->object->inner->item->index - firstIndex;
+
+    if (panel->unkC7 != 1) {
+        func_00306CD0(D_003D03F0[30][MENU_ICON_X] << 4,
+            (D_003D03F0[30][MENU_ICON_Y] + row * 22) << 3,
+            0, scale, 0, texture, D_003D03F0[30][MENU_ICON_FRAME], option);
+    }
+    if (panel->multiplier != 1) {
+        func_00306CD0(D_003D03F0[31][MENU_ICON_X] << 4,
+            (D_003D03F0[31][MENU_ICON_Y] + row * 22) << 3,
+            0, scale, 0, texture, D_003D03F0[31][MENU_ICON_FRAME], option);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_002969D8);
 

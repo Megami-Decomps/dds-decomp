@@ -8,14 +8,14 @@ extern u32 D_003BA720;
 extern u32 D_003BA718;
 
 extern u32 D_003BA70C;
-extern u32 D_003BA710;
+extern s32 D_003BA710;
 extern u32 D_003BA714;
 
 extern u32 D_003BD680;
 
 extern u32 D_003BA700;
 
-extern u8 D_003BA708;
+extern s8 D_003BA708;
 
 extern KwlnTask *kwlnDelayedStartTaskHead;
 extern KwlnTask *D_003BA804;
@@ -77,7 +77,7 @@ void func_00100560(u32 first, u32 second) {
     D_003BA710 = 0;
 }
 
-extern u32 D_003BA710;
+extern s32 D_003BA710;
 extern u32 D_003BA714;
 
 void func_00100588(void) {
@@ -101,7 +101,56 @@ void func_001005B8(void) {
     D_003BA709 = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00100000", func_001005C8);
+extern s16 D_003BA728;
+extern u16 D_003BA72A;
+extern s8 D_003BA734;
+extern u16 D_003BD32E;
+extern u16 D_003BD334;
+extern u16 mnuMovieTaskState;
+extern u32 func_002CF930(void);
+extern u32 sdfGetElapsedTimerTicks(u32);
+extern void sdfSleepThreadCount(s32);
+extern void sdfSetNonnegativePacketIndex(s32);
+extern void sdfPadBuildButtonStates(void);
+extern void sdfRaiseDeviceThreadPriority(void);
+extern void sdfRestoreDeviceThreadPriority(void);
+extern void LoadExecPS2(const char *, s32, char **);
+
+void func_001005C8(void) {
+    u32 startTick;
+
+    func_001001D8();
+    D_003BD680 = 0;
+    while (D_003BA708 == 0) {
+        sdfSleepThreadCount(mnuMovieTaskState);
+        sdfSetNonnegativePacketIndex(mnuMovieTaskState - 1);
+        sdfPadBuildButtonStates();
+        if (D_003BA734 != 0) {
+            sdfRaiseDeviceThreadPriority();
+        }
+        if (D_003BA70C == 0) {
+            startTick = func_002CF930();
+            func_00103B10();
+            if (kwlnTaskTickScheduler() == 0) {
+                break;
+            }
+            D_003BA700++;
+            D_003BA728 = sdfGetElapsedTimerTicks(startTick) - D_003BD334;
+            D_003BD680 ^= 1;
+            D_003BA72A = D_003BD32E;
+        } else if (D_003BA710 > 0) {
+            D_003BA710--;
+            if (D_003BA710 == 0) {
+                D_003BA70C = 0;
+            }
+        }
+        D_003BA704++;
+        if (D_003BA734 == 0) {
+            sdfRestoreDeviceThreadPriority();
+        }
+    }
+    LoadExecPS2("cdrom0:\\SLPS_999.99;1", 0, NULL);
+}
 
 /* Remove a task from the doubly linked queue of its state (1 delayed start, 2 active, 3 delayed destroy). */
 void kwlnTaskRemoveFromStateQueue(KwlnTask *task) {

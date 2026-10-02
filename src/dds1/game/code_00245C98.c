@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 
 extern void func_0025DF68(s32, s32);
 
@@ -35,7 +36,17 @@ extern s64 evtGetMessageWindowControlState(void);
 
 extern s64 func_00285670(s32, s32 *, u64, u64);
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
+
+extern s32 mnuMapPadMaskToFlags(s32);
+extern s32 mnuTickExtendedCommandPhase(s32);
+extern void mnuSetPopupEntryFlagged(s32, s32);
+extern void func_00260550(s32, u32);
+extern void func_0027C788(s32);
+extern void mnuRetreatWindowListSelection(s32);
+extern void mnuAdvanceWindowListSelection(s32);
+extern void mnuPlayInputSound(s32, s32, s32 *);
+extern u8 D_0036AAF4[];
 
 typedef struct EvtDispatchLink {
     u8 pad00[0x14];
@@ -272,7 +283,65 @@ s32 evtSelectStateActionC(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00245C98", func_002469F0);
+s64 func_002469F0(KwlnTask *task) {
+    s64 result;
+    s32 input;
+    s32 context;
+    s32 *dispatch;
+    EvtDispatchTask *node;
+    EvtDispatchTask *pending;
+
+    context = kwlnTaskGetUserValue(task);
+    input = mnuMapPadMaskToFlags(0x33);
+    dispatch = &((EvtDispatchState *)context)->dispatchState;
+    node = (EvtDispatchTask *)((EvtDispatchLink *)((EvtDispatchState *)context)->taskLink)->target;
+    result = func_00285670(context + 8, dispatch, 0, (s32)task);
+    if (result == 0) {
+        switch (mnuTickExtendedCommandPhase(context)) {
+        case -1:
+            break;
+        case 4:
+            mnuSetCommandPhase(context, 6);
+            mnuStorePendingMenuCommandValue((s32)node, 10);
+            break;
+        case 5:
+            mnuSetPopupEntryFlagged((s32)dispatch, (s32)D_0036AA68);
+            mnuStorePendingMenuCommandValue(((EvtDispatchLink *)((EvtDispatchState *)context)->menuLink)->target, 10);
+            break;
+        case 7:
+            mnuSetPopupEntryFlagged((s32)dispatch, (s32)D_0036AAF4);
+            break;
+        case 8:
+            mnuSetCommandPhase(context, 6);
+            pending = (EvtDispatchTask *)((EvtDispatchLink *)((EvtDispatchState *)context)->taskLink)->target;
+            pending->callback = (s32)func_0025ECD0;
+            mnuStorePendingMenuCommandValue((s32)pending, 0);
+            ((EvtDispatchState *)context)->substate = 10;
+            break;
+        case 6:
+            evtInstallStateTableD((EvtDispatchState *)context);
+        default:
+            if (((EvtDispatchState *)context)->dispatchState == 0) {
+                if (input & 1) {
+                    mnuSetCommandPhase(context, 7);
+                } else if (input & 2) {
+                    mnuSetCommandPhase(context, 5);
+                    func_00260550((s32)node, 4);
+                } else if ((input & 0x300000) == 0) {
+                    func_0027C788(((EvtDispatchState *)context)->taskLink);
+                } else if (input & 0x10) {
+                    mnuRetreatWindowListSelection(((EvtDispatchState *)context)->taskLink);
+                } else if (input & 0x20) {
+                    mnuAdvanceWindowListSelection(((EvtDispatchState *)context)->taskLink);
+                }
+            }
+            mnuPlayInputSound(0, input, (s32 *)((EvtDispatchLink *)((EvtDispatchState *)context)->taskLink)->target);
+            break;
+        }
+        return 0;
+    }
+    return result;
+}
 
 void evtStageDispatchStartC(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
@@ -411,7 +480,6 @@ s32 evtPlayDispatchModeCue(void) {
     return 1;
 }
 
-extern s32 kwlnTaskGetUserValue();
 
 extern u8 D_0036AA68[];
 
@@ -444,7 +512,7 @@ s64 evtSetPopupEntryWhenMessageWindowIdle(u64 argument) {
     result = func_00285670(state + 8, dispatchState, 0, argument);
     if (result == 0) {
         if ((*dispatchState == 0) && (result = evtGetMessageWindowControlState(), result == 0)) {
-            mnuSetPopupEntryFlagged(dispatchState, ((EvtDispatchState *)state)->stateTable);
+            mnuSetPopupEntryFlagged((s32)dispatchState, ((EvtDispatchState *)state)->stateTable);
         }
         result = 0;
     }

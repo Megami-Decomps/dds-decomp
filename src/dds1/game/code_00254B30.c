@@ -13,6 +13,8 @@ extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 typedef struct {
     u8 pad0[4];
     u16 unitId; /* 0x4: index into the unit-name and unit-sprite tables */
+    u8 pad06[0xE];
+    u16 level; /* 0x14: party level, displayed with the two-column level format */
 } DspEntry;
 
 typedef struct {
@@ -64,6 +66,7 @@ void itfDspDrawIndexedRecord(s32 x, s32 y, s32 layer, u32 attributes, u32 entry,
 
 extern char D_003BC458[];
 extern char D_003BC460[];
+extern char D_003BC468[];
 extern void func_003014F0(char *buffer, const char *format, ...);
 
 void func_00254EF0(s32 x, s32 y, s32 layer, s32 alpha, s32 context) {
@@ -78,7 +81,18 @@ void func_00254EF0(s32 x, s32 y, s32 layer, s32 alpha, s32 context) {
                                       0, text, 0x80000000, context);
 }
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00255010);
+extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, u32, s32, u32);
+
+void func_00255010(s32 x, s32 y, s32 layer, s32 alpha, s32 value, s32 context) {
+    u32 textColor = (u32)((f32)alpha * 0.6f) | 0xA09D7D00;
+    char text[0x20];
+
+    func_0024E260(x, y, layer, alpha, 0x21, context);
+    func_0024E260(x, y, layer, alpha, 0x11, context);
+    func_003014F0(text, D_003BC468, value);
+    itfDrawGlyphChainWithWidthQuery(x + 0xB3, y + 0x173, layer, textColor,
+                                  0, (u32)text, 0x80000000, context);
+}
 
 typedef struct MnuSpritePlacement {
     s16 resourceIndex;
@@ -116,7 +130,6 @@ typedef struct DspMantraName {
 
 extern DspUnitName *D_003BAA70;
 extern DspMantraName *D_003BAA78;
-extern char D_003BC468[];
 extern s32 fldGetSceneMetadataNode();
 extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern s32 mnuGetMantraSourceValue(s32);
@@ -313,13 +326,26 @@ void itfDspDrawStrip(s32 x, s32 y, s32 layer, s32 scale, s32 context) {
     func_0024E260(x, y, layer, scale, 0xD, context);
 }
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_002561A0);
-
 typedef struct DspUnitSpriteLookup {
     s8 spriteIndices[7];
 } DspUnitSpriteLookup;
 
 extern DspUnitSpriteLookup D_003BC478[];
+extern DspUnitSpriteLookup D_003BC470[];
+extern char D_003BC450[];
+extern s32 frFontQueueFlaggedGlyphAndMeasure(s32, s32, s32, u32, u8, u32, s32, u32);
+
+/* Draw the unit-specific display sprite and its two-column numeric level. */
+void func_002561A0(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context) {
+    DspUnitSpriteLookup lookup = D_003BC470[0];
+    char text[0x10];
+    u32 textColor = scale | 0xA09DC300;
+
+    func_0024E260(x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
+    func_003014F0(text, D_003BC450, entry->level);
+    frFontQueueFlaggedGlyphAndMeasure(x + 0x1BB, y + 0x173, layer, textColor,
+                                     4, (u32)text, 0, context);
+}
 
 /* Select the unit's display sprite; retain the complete signed-byte table copy. */
 void mnuDrawDisplayEntrySpriteFromLookup(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context) {

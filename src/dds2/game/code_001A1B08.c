@@ -340,7 +340,41 @@ void itfDrawFiveColorPanelQuads(PanelObj *panel, u64 command) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2450);
+extern u8 D_003B4670[];
+extern u8 D_003B4680[];
+extern u8 D_004365B8[8];
+extern u8 D_004365C0[8];
+
+void func_001A2450(PanelObj *panel, u64 command) {
+    PanelVert insets[3][4];
+    PanelVert *out = insets[0];
+    PanelVert *source = (PanelVert *)panel->buf;
+    PktRec *colors = panel->buf + 2;
+    s32 i;
+    s32 offset;
+
+    for (i = 0; i < 3; i++) {
+        s32 xOffset = i * 16;
+        s32 yOffset = i * 8;
+
+        out[0].x = source[0].x + xOffset;
+        out[0].y = source[0].y + yOffset;
+        out[1].x = source[1].x - xOffset;
+        out[1].y = source[1].y + yOffset;
+        out[2].x = source[2].x - xOffset;
+        out[2].y = source[2].y - yOffset;
+        out[3].x = source[3].x + xOffset;
+        out[3].y = source[3].y - yOffset;
+        out += 4;
+    }
+    itfDrawQuadFlat4(source, colors, D_004365B8, D_004365C0, panel->tail, command);
+    offset = 0;
+    for (i = 2; i >= 0; i--) {
+        itfEmitQuadListA(insets, colors, &D_003B4670[offset], &D_003B4680[offset],
+                        5, panel->tail, command);
+        offset += 5;
+    }
+}
 
 void itfDrawPanelQuadWithCommand(PanelObj *panel, u64 command) {
     PktRec *colors = panel->buf + 2;

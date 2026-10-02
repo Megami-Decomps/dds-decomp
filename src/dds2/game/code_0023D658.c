@@ -1227,6 +1227,7 @@ INCLUDE_RODATA(const s32, "game/code_0023D658", D_004219F0);
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023FF90);
 
+
 u32 evtOpSetUnitPackedRgbColor(void) {
     EvtUnit *unit;
     s32 color[4];

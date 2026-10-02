@@ -100,53 +100,48 @@ void func_0031AE48(MnuDepthObject *object) {
 
 INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031AEB8);
 
-void func_0031AF58(s32 object) {
-    *(u32 *)(object + 0x1d4) = 0;
+typedef struct ItfChoiceState {
+    u8 pad00[0x1D4];
+    s32 selectionIndex;
+} ItfChoiceState;
+
+void func_0031AF58(ItfChoiceState *object) {
+    object->selectionIndex = 0;
 }
 
 void func_0031AF60(void) {
 }
 
-typedef struct FadeSoundWork {
-    u8 pad00[0x1D4];
-    s32 cursor;
-} FadeSoundWork;
-
 typedef struct SoundSlot SoundSlot;
-
-extern s8 D_0037F510[];
 extern SoundSlot *sndClaimFreeSoundSlot(u32 sequence, u32 frames);
+extern s8 D_0037F510[];
 
-/* Step the bounded sound cursor from pad input and play the matching cue. */
-s32 func_0031AF68(FadeSoundWork *work) {
+/* Clamp cursor movement before confirm/cancel override the navigation sound. */
+s32 func_0031AF68(ItfChoiceState *object) {
     s32 result = -1;
-    s32 action = 0;
+    s32 sound = 0;
 
     if (D_0037F510[0x26] < 0) {
-        work->cursor--;
-        if (work->cursor >= 0) {
-            action = 1;
+        if (--object->selectionIndex < 0) {
+            object->selectionIndex = 0;
         } else {
-            work->cursor = 0;
+            sound = 1;
         }
     } else if (D_0037F510[0x27] < 0) {
-        work->cursor++;
-        if (work->cursor < 3) {
-            action = 1;
+        if (++object->selectionIndex < 3) {
+            sound = 1;
         } else {
-            work->cursor = 2;
+            object->selectionIndex = 2;
         }
     }
-
     if (D_0037F510[0x21] < 0) {
-        result = work->cursor;
-        action = 2;
+        result = object->selectionIndex;
+        sound = 2;
     } else if (D_0037F510[0x23] < 0) {
         result = 0;
-        action = 3;
+        sound = 3;
     }
-
-    switch (action) {
+    switch (sound) {
     case 1:
         sndClaimFreeSoundSlot(0, 0);
         break;
