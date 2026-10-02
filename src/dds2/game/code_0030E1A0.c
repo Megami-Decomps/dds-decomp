@@ -30,6 +30,8 @@ extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 
 extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
+extern f32 fldVectorLength(f32 *);
+
 extern u32 sdfReadNamedResource(const char *, void *, s32);
 
 extern u32 sdfTexAcquireResourceTexture(u32);
@@ -50,7 +52,9 @@ extern s32 D_004390B0;
 extern u32 D_004390A8;
 
 typedef struct SdfRingNode {
-    u8 pad00[0xC];
+    u32 value;                       /* 0x00 */
+    u32 argument1;                   /* 0x04 */
+    u32 argument2;                   /* 0x08 */
     s32 f0C;                        /* 0x0C */
     struct SdfRingNode *next;       /* 0x10 */
     struct SdfRingNode *prev;       /* 0x14 */
@@ -65,14 +69,17 @@ typedef struct SdfRing {
     s16 count;                      /* 0x10 */
     s16 limit;                      /* 0x12 */
     s16 pad14;                      /* 0x14 */
+    s32 callback;                   /* 0x18 */
 } SdfRing;
 
 /* The ring of nodes lives inside the same block, 0x2C past the header. */
 typedef struct SdfRingBlock {
     SdfRing header;
-    u8 pad18[0x2C];
+    u8 pad1C[0x28];
     SdfRingNode nodes[1]; /* 0x44 */
 } SdfRingBlock;
+
+typedef void (*MapRequestCallback)(u32, u32, u32, SdfRing *, SdfRingNode *, f32);
 
 extern s32 sdfAllocGeneralBlock(s32);
 
@@ -190,9 +197,99 @@ void fldSetMapRequestInterval(s32 queue, u16 interval) {
     ((MapRequestQueue *)queue)->interval = interval;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030EF90);
+/* Advance active ring nodes, retiring each node when it reaches the queue limit. */
+void func_0030EF90(SdfRing *ring) {
+    s32 remaining;
+    s32 pending;
+    u16 limit;
+    SdfRingNode *first;
+    SdfRingNode *node;
 
-INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030F038);
+    remaining = ring->count;
+    first = ring->last;
+    if (--remaining == -1) {
+        goto done;
+    }
+    if (first->f0C == 0) {
+        goto done;
+    }
+    first->f0C++;
+    pending = first->f0C < ring->limit;
+    limit = ring->limit;
+    if (!pending) {
+        node = first->next;
+        first->f0C = 0;
+        ring->last = node;
+        goto loop;
+    }
+    node = first->next;
+    goto loop;
+
+advance:
+    node = node->next;
+loop:
+    if (--remaining == -1) {
+        goto done;
+    }
+    if (node->f0C == 0) {
+        goto done;
+    }
+    node->f0C++;
+    if (node->f0C < (s16)limit) {
+        goto advance;
+    }
+    {
+        SdfRingNode *nextHead = ring->last->next;
+        node->f0C = 0;
+        node = node->next;
+        ring->last = nextHead;
+    }
+    goto loop;
+
+done:
+    return;
+}
+
+/* Report normalized progress for each active request in the ring. */
+void func_0030F038(SdfRing *ring) {
+    SdfRingNode *node;
+    s32 remaining;
+    s32 end;
+    f32 one;
+
+    node = ring->last;
+    remaining = ring->count;
+    end = -1;
+    one = 1.0f;
+    goto loop;
+
+advance:
+    node = node->next;
+loop:
+    remaining--;
+    if (remaining == end) {
+        goto done;
+    }
+    if (node->f0C == 0) {
+        goto done;
+    }
+    {
+        f32 progress;
+        MapRequestCallback callback = (MapRequestCallback)ring->callback;
+
+        progress = (f32)node->f0C / (f32)ring->limit;
+        progress = one - progress;
+        if (callback == NULL) {
+            goto advance;
+        }
+        callback(node->value, node->argument1, node->argument2, ring, node, progress);
+    }
+    node = node->next;
+    goto loop;
+
+done:
+    return;
+}
 
 s32 fldLoadMapResource(const char *name, MapResource *record) {
     u32 handle = sdfReadNamedResource(name, &record->descriptor, 0);
@@ -364,7 +461,14 @@ void sdfVec3ScaleInPlace(float factor, float *vector) {
     vector[2] = vector[2] * factor;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030F8D0);
+float func_0030F8D0(float *vector) {
+    float length = fldVectorLength(vector);
+
+    vector[0] = vector[0] / length;
+    vector[1] = vector[1] / length;
+    vector[2] = vector[2] / length;
+    return length;
+}
 
 float fldVectorLength(float *v) {
     return fsqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
