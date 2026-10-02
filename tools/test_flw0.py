@@ -2079,7 +2079,8 @@ end
                 procedure_references += len(
                     re.findall(r"\bPUSHPROC\b|\bprocedure\(", text)
                 )
-                rebuilt = flw0.parse_source(text).to_bytes()
+                source_script = flw0.parse_source(text)
+                rebuilt = source_script.to_bytes()
                 self.assertEqual(sha1(rebuilt).hexdigest(), expected)
                 script = flw0.parse(rebuilt)
                 code_words += len(script.code_words())
@@ -2116,10 +2117,13 @@ end
                             if isinstance(dialog, msg1.Selection)
                         )
                 if version == 1:
-                    self.assertEqual(flw0.render_source(script, "dds1"), text)
+                    self.assertEqual(flw0.render_source(source_script, "dds1"), text)
                 else:
                     self.assertEqual(
-                        flw0_symbolic.render(script, "dds1", structured=True), text
+                        flw0_symbolic.render(
+                            source_script, "dds1", structured=True
+                        ),
+                        text,
                     )
         self.assertEqual(versions, {1: 14, 2: 129})
         self.assertEqual(
