@@ -47,9 +47,7 @@
       "object": "build/dds1/dev/scrTraceCode.o",
       "expected_symbols": 43,
       "expected_shifted_symbols": 38,
-      "fallback_symbols": [
-        "bfOpBinaryEval"
-      ],
+      "fallback_symbols": [],
       "retained_sections": [
         {
           "section": ".data",
