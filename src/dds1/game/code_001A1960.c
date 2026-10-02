@@ -89,7 +89,8 @@ typedef struct BtlEntry {
 typedef struct EntryPair {
     s16 first;
     s16 second;
-    u8 pad4[4];
+    s16 initialValue;
+    s16 countdown;
 } EntryPair;
 
 extern EntryPair D_003583D0[];
@@ -742,10 +743,25 @@ s32 btlMatchActorEntryCode(UiObject *unit, s32 index) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A4948);
+void func_001A4948(UiObject *unit, s32 index, s16 delta) {
+    s16 code = unit->entrySlots[index].code;
+    code += delta;
 
-void btlSetActorEntryCode(s32 arg0, s32 arg1, u16 arg2) {
-    *(u16 *)(arg1 * 6 + arg0 + 0x2c6) = arg2;
+    if (code > D_003583D0[index].first) {
+        code = D_003583D0[index].first;
+    }
+    if (code < D_003583D0[index].second) {
+        code = D_003583D0[index].second;
+    }
+    if (code != 0) {
+        unit->entrySlots[index].unk02 = D_003583D0[index].initialValue;
+        unit->entrySlots[index].countdown = D_003583D0[index].countdown;
+    }
+    unit->entrySlots[index].code = code;
+}
+
+void btlSetActorEntryCode(UiObject *unit, s32 index, u16 code) {
+    unit->entrySlots[index].code = code;
 }
 
 void btlClearActorEntrySlot(UiObject *unit, s32 index) {
@@ -754,13 +770,87 @@ void btlClearActorEntrySlot(UiObject *unit, s32 index) {
     unit->entrySlots[index].countdown = -1;
 }
 
-s16 btlGetActorEntryCode(s32 arg0, s32 arg1) {
-    return *(s16 *)(arg1 * 6 + arg0 + 0x2c6);
+s16 btlGetActorEntryCode(UiObject *unit, s32 index) {
+    return unit->entrySlots[index].code;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A4A30);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A4C68);
+void func_001A4C68(UiObject *unit, u32 flags, s16 delta) {
+    if (flags == 0) {
+        return;
+    }
+    if (flags & 1) {
+        func_001A4948(unit, 0, delta);
+    }
+    if (flags & 2) {
+        func_001A4948(unit, 0, -delta);
+    }
+    if (flags & 4) {
+        func_001A4948(unit, 1, delta);
+    }
+    if (flags & 8) {
+        func_001A4948(unit, 1, -delta);
+    }
+    if (flags & 0x10) {
+        func_001A4948(unit, 2, delta);
+    }
+    if (flags & 0x20) {
+        func_001A4948(unit, 2, -delta);
+    }
+    if (flags & 0x40) {
+        func_001A4948(unit, 3, delta);
+    }
+    if (flags & 0x80) {
+        func_001A4948(unit, 3, -delta);
+    }
+    if (flags & 0x100) {
+        func_001A4948(unit, 4, delta);
+    }
+    if (flags & 0x200) {
+        func_001A4948(unit, 4, -delta);
+    }
+    if (flags & 0x400) {
+        func_001A4948(unit, 5, delta);
+    }
+    if (flags & 0x2000) {
+        func_001A4948(unit, 6, delta);
+    }
+    if (flags & 0x800) {
+        if (btlGetActorEntryCode(unit, 0) > 0) {
+            btlSetActorEntryCode(unit, 0, 0);
+        }
+        if (btlGetActorEntryCode(unit, 1) > 0) {
+            btlSetActorEntryCode(unit, 1, 0);
+        }
+        if (btlGetActorEntryCode(unit, 2) > 0) {
+            btlSetActorEntryCode(unit, 2, 0);
+        }
+        if (btlGetActorEntryCode(unit, 3) > 0) {
+            btlSetActorEntryCode(unit, 3, 0);
+        }
+        if (btlGetActorEntryCode(unit, 4) > 0) {
+            btlSetActorEntryCode(unit, 4, 0);
+        }
+    }
+    if (flags & 0x1000) {
+        if (btlGetActorEntryCode(unit, 0) < 0) {
+            btlSetActorEntryCode(unit, 0, 0);
+        }
+        if (btlGetActorEntryCode(unit, 1) < 0) {
+            btlSetActorEntryCode(unit, 1, 0);
+        }
+        if (btlGetActorEntryCode(unit, 2) < 0) {
+            btlSetActorEntryCode(unit, 2, 0);
+        }
+        if (btlGetActorEntryCode(unit, 3) < 0) {
+            btlSetActorEntryCode(unit, 3, 0);
+        }
+        if (btlGetActorEntryCode(unit, 4) < 0) {
+            btlSetActorEntryCode(unit, 4, 0);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", btlLowestSetPairIndex);
 
@@ -1315,7 +1405,35 @@ u32 btlIsActorHighStateFlagClear(s32 actor) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A8CE0);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A8DD8);
+s32 func_001A8DD8(s32 object, s32 *choices) {
+    u16 *ids = (u16 *)(object + 0x142);
+    s32 count = 0;
+    u32 i;
+
+    for (i = 0; i < 24; i++) {
+        u16 id = *ids++;
+
+        if (id < 0xA0) {
+            continue;
+        }
+        if (id >= 0xA6) {
+            if (id >= 0xB9) {
+                continue;
+            }
+            if (id < 0xB5) {
+                continue;
+            }
+        }
+        if (func_001A2B00(object, id) != 0) {
+            continue;
+        }
+        if (choices != NULL) {
+            choices[count] = id;
+        }
+        count++;
+    }
+    return count;
+}
 
 u8 btlHasAvailableOption(u32 arg0) {
     s64 temp_v0;
@@ -2389,7 +2507,27 @@ void btlReleaseMessageWindowTask(s64 task) {
     btlSetTrackedTaskHandle(9, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001B0CB8);
+u32 func_001B0CB8(UiObject *object, s32 current, s32 total, s8 mode) {
+    u32 color;
+
+    if (mode == 1 && (object->flags & 0x20) != 0) {
+        color = 0x4F4E3E40;
+    } else if ((object->statusFlags & 0x4800) != 0) {
+        color = 0x4F4E3E40;
+    } else if (current * 2 >= total) {
+        color = 0xA09DC380;
+    } else if (current <= 0) {
+        color = 0x4F4E3E40;
+    } else {
+        u32 nearColor = 0xC8747380;
+        color = 0xD1BA7180;
+        if (current * 4 < total) {
+            color = nearColor;
+        }
+    }
+    return ((color >> 24) | ((color & 0xFF00) << 8)) |
+           ((color << 24) | ((color >> 8) & 0xFF00));
+}
 
 u8 btlHasRequiredActorStatusBits(s32 arg0) {
     return (~*(u64 *)(arg0 + 0x110) & 0x201) == 0;
@@ -2623,7 +2761,22 @@ s32 sndAreSlotsEmpty(void) {
 
 extern u8 D_00359160[];
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001B53E8);
+s32 func_001B53E8(s32 arg0) {
+    s32 count;
+    s32 i;
+
+    func_001ACDF0();
+    count = func_001A3740(arg0, D_00359160);
+    if (count != 0) {
+        for (i = 0; i < count; i++) {
+            if (func_001ACD30(*(u16 *)(D_00359160 + 4 + i * 12), 2) == 0) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+    return count;
+}
 
 s64 btlGetTaskState6(void) {
     s64 task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);

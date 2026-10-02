@@ -2,6 +2,10 @@
 
 extern s32 mnuMovieMenuState;
 
+extern void func_00134CD8(void);
+extern f32 effMiscRandUnitFloat(void *);
+extern f32 sdfSinPoly(f32);
+
 extern u32 effLoadIndexedResource(const char *, const char *, u32);
 extern void effRequestResourceByMode(const char *, const char *, u32, u32 *);
 
@@ -19,7 +23,7 @@ typedef struct {
     s32 timer;            /* 0x14 */
     s32 pad18;
     s32 word1C;
-    s32 pulseFrame;
+    s32 pulseTimer;       /* 0x20 */
     s32 transitionOffset; /* 0x24 */
     s32 mode;             /* 0x28 */
     u32 linkedState;       /* 0x2C: passed to the func_0027Bxxx helpers */
@@ -38,6 +42,11 @@ extern s32 mnuListAppendNode(s32, s32);
 
 extern void func_0026D480();
 extern void sndSetSequenceVolumePan(s32, s32, s32);
+extern f32 fldVectorLength(f32 *);
+extern void sdfVec3SubtractInPlace(f32 *, f32 *);
+extern void fldRotateVectorAroundY(f32 *, f32);
+extern void sdfVec3AddInPlace(f32 *, f32 *);
+extern void sdfQuaternionNormalize(f32 *);
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", mnuDrawSprite);
 
@@ -146,9 +155,6 @@ void mnuReleaseSpriteHandle(void) {
 }
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
-extern s32 func_00134CD8(void);
-extern f32 effMiscRandUnitFloat(s32);
-extern f32 sdfSinPoly(f32);
 
 /* These entry points differ only in the selected menu sound identifier. */
 void mnuStartMovieMenuSfx16(s32 parameter) {
@@ -308,35 +314,40 @@ s32 func_0026C4B8(void) {
 }
 
 void func_0026C7E0(void) {
-    f32 wave;
+    MenuState *state;
+    f32 pulse;
 
     func_00134CD8();
-    ((MenuState *)mnuMovieMenuState)->pulseFrame++;
-    if (((MenuState *)mnuMovieMenuState)->pulseFrame >= 61) {
-        ((MenuState *)mnuMovieMenuState)->pulseFrame = 0;
-        if (((MenuState *)mnuMovieMenuState)->slideOffset == 0 && effMiscRandUnitFloat(0) < 0.1f) {
-            ((MenuState *)mnuMovieMenuState)->slideOffset = 1024;
+
+    state = (MenuState *)mnuMovieMenuState;
+    state->pulseTimer++;
+    if (state->pulseTimer >= 61) {
+        state->pulseTimer = 0;
+        if (state->slideOffset == 0 && effMiscRandUnitFloat(0) < 0.1f) {
+            ((MenuState *)mnuMovieMenuState)->slideOffset = 0x400;
         }
     }
-    wave = ((MenuState *)mnuMovieMenuState)->pulseFrame / 60.0f;
-    wave = sdfSinPoly(wave * 6.2831853f - 1.5707963f);
-    wave = (wave + 1.0f) * 0.5f;
-    mnuDrawSprite(0, 0, 0, 128, 0, 8, 0x53);
-    mnuDrawSprite(0, 0, 0, 128, 0, 12, 0x53);
-    mnuDrawSprite(0, 0, 0, 76, 0, 10, 0x53);
-    mnuDrawSprite(0, 0, 0, (s32)(wave * 64.0f), 0, 10, 0x53);
+
+    pulse = (f32)((MenuState *)mnuMovieMenuState)->pulseTimer / 60.0f;
+    pulse = (sdfSinPoly(pulse * 6.2831853f - 1.5707963f) + 1.0f) * 0.5f;
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 8, 0x53);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 0xC, 0x53);
+    mnuDrawSprite(0, 0, 0, 0x4C, 0, 0xA, 0x53);
+    mnuDrawSprite(0, 0, 0, (s32)(pulse * 64.0f), 0, 0xA, 0x53);
+
     if (((MenuState *)mnuMovieMenuState)->slideOffset > 0) {
-        ((MenuState *)mnuMovieMenuState)->slideOffset -= 32;
+        ((MenuState *)mnuMovieMenuState)->slideOffset -= 0x20;
     } else {
         ((MenuState *)mnuMovieMenuState)->slideOffset = 0;
     }
-    func_0026C350(((MenuState *)mnuMovieMenuState)->slideOffset - 512, 0, 128, 0x53);
-    mnuDrawSprite(0, 0, 0, 128, 0, 0, 0x53);
-    mnuDrawSprite(0, 0, 0, 128, 0, 2, 0x53);
-    mnuDrawSprite(0, 0, 0, 128, 0, 1, 0x53);
-    mnuDrawSprite(1, -10, 0, 128, 0, 4, 0x53);
-    mnuDrawSprite(0, 0, 0, 128, 0, 7, 0x53);
-    mnuDrawSprite(0, 0, 0, 128, 0, 11, 0x53);
+
+    func_0026C350(((MenuState *)mnuMovieMenuState)->slideOffset - 0x200, 0, 0x80, 0x53);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 0, 0x53);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 2, 0x53);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 1, 0x53);
+    mnuDrawSprite(1, -10, 0, 0x80, 0, 4, 0x53);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 7, 0x53);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 0xB, 0x53);
 }
 
 void mnuStartMovieMenuSfxGroup(void) {
@@ -365,7 +376,70 @@ void mnuSwapStateWords(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026CB10);
+void func_0026CB10(f32 *position, f32 *rotation) {
+    f32 initialRotation[4] = {-0.47f, 0.0f, 0.0f, -0.88f};
+    f32 path[3][4] = {
+        {-922.0f, -4160.0f, -3650.0f, 1.0f},
+        {-1221.0f, -3680.0f, -1050.0f, 1.0f},
+        {3313.0f, -3847.0f, 1194.0f, 1.0f},
+    };
+    s32 segmentIndex = 0;
+    s32 i;
+    s32 segmentTime;
+    f32 firstLength;
+    f32 segmentLength;
+
+    {
+        MenuState *state = (MenuState *)mnuMovieMenuState;
+        s32 transitionOffset = state->transitionOffset;
+
+        if (transitionOffset < 3600) {
+            state->transitionOffset = transitionOffset + 1;
+        } else {
+            state->transitionOffset = 0;
+        }
+    }
+
+    {
+        MenuState *state = (MenuState *)mnuMovieMenuState;
+
+        i = 0;
+        if (state->transitionOffset > (i + 1) * 3600) {
+            goto checkSegment;
+        }
+        segmentIndex = 0;
+        goto haveSegment;
+
+checkSegment:
+        i++;
+        if (i > 0) {
+            goto haveSegment;
+        }
+        if (((volatile MenuState *)state)->transitionOffset >
+            (i + 1) * 3600) {
+            goto checkSegment;
+        }
+        segmentIndex = i;
+
+haveSegment:
+        segmentTime = ((volatile MenuState *)state)->transitionOffset -
+                      segmentIndex * 3600;
+    }
+    {
+        f32 origin[4] = {1000.0f, -4160.0f, -1000.0f, 1.0f};
+
+        firstLength = fldVectorLength(path[0]);
+        segmentLength = fldVectorLength(path[segmentIndex]);
+        memcpy(position, path[segmentIndex], sizeof(path[0]));
+        sdfVec3SubtractInPlace(position, origin);
+        fldRotateVectorAroundY(position,
+                              ((f32)segmentTime / 3600.0f) * -6.28318525f *
+                                  firstLength / segmentLength);
+        sdfVec3AddInPlace(position, origin);
+    }
+    memcpy(rotation, initialRotation, sizeof(initialRotation));
+    sdfQuaternionNormalize(rotation);
+}
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026CD88);
 
@@ -429,12 +503,6 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
     }
     return 0;
 }
-
-INCLUDE_RODATA(const s32, "game/code_0026BD80", D_003AFE40);
-
-INCLUDE_RODATA(const s32, "game/code_0026BD80", D_003AFE50);
-
-INCLUDE_RODATA(const s32, "game/code_0026BD80", D_003AFE80);
 
 INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC5D8);
 
