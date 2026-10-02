@@ -1,9 +1,23 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
+/* Separately allocated 0xD0-byte inner transform, referenced by the object at +0x1C.
+ * dds3BuildVuTransformFromComponents consumes scale, quaternion rotation and position. */
+typedef struct ObjectTransform {
+    u128 matrix[4];
+    u128 position;
+    u128 rotation;
+    u128 scale;
+    u8 pad70[0x50];
+    u32 flags;
+    f32 radius; /* Used by the strict sphere-overlap test. */
+    u32 unkC8;
+    u8 padCC[4];
+} ObjectTransform;
+
 extern u32 dds3WorldCounter;
 
-extern void dds3BuildVuTransformFromComponents(u8 *, u8 *, u8 *);
+extern void dds3BuildVuTransformFromComponents(void *, void *, void *);
 
 typedef struct {
     void *worldNodes;
@@ -18,6 +32,7 @@ typedef struct {
 typedef struct {
     u8 pad0[0x18];
     WorldEntry *entry;
+    ObjectTransform *transform;
 } WorldObject;
 
 extern void dds3DestroyWorldNode(void *node);
@@ -25,16 +40,17 @@ extern void dds3DestroyWorldIndexNode(void *node);
 extern void sdfReleaseResourceAllocation(void *resource);
 extern void sdfReleaseChipBlock(void *block);
 
-void dds3LoadOrBuildObjectMatrix(u8 *arg0) {
-    u8 *obj = *(u8 **)(arg0 + 0x1C);
-    u32 flags = *(u32 *)(obj + 0xC0);
+/* Load the cached VU matrix, or rebuild and cache it when flags bit 1 is clear. */
+void dds3LoadOrBuildObjectMatrix(WorldObject *object) {
+    ObjectTransform *transform = object->transform;
+    u32 flags = transform->flags;
 
     if (flags & 2) {
-        VU0_LOAD_MATRIX(obj);
+        VU0_LOAD_MATRIX(transform->matrix);
     } else {
-        *(u32 *)(obj + 0xC0) = flags | 2;
-        dds3BuildVuTransformFromComponents(obj + 0x60, obj + 0x50, obj + 0x40);
-        VU0_STORE_MATRIX(obj);
+        transform->flags = flags | 2;
+        dds3BuildVuTransformFromComponents(&transform->scale, &transform->rotation, &transform->position);
+        VU0_STORE_MATRIX(transform->matrix);
     }
 }
 
