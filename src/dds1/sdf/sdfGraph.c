@@ -1,12 +1,17 @@
 #include "common.h"
 #include "sdf.h"
 
+#define SDF_GRAPH_AUXILIARY_BUFFER 2
+#define SDF_GRAPH_CPU_ADDRESS_MASK 0x0FFFFFFF
+#define SDF_GRAPH_UNCACHED_ALIAS 0x20000000
+#define SDF_GS_FRAMEBUFFER_PAGE_SHIFT 11
+
 typedef struct SdfGraphObj {
     s16 width;
     s16 unk2;
     s16 height;
-    u8 bufferMode;
-    u8 auxiliaryMode;
+    u8 bufferFormat;
+    u8 auxiliaryFormat;
     SdfTexResource *buffers[3];
 } SdfGraphObj;
 
@@ -24,29 +29,29 @@ void sdfGraphSetDisplayMode(s32 arg0) {
     D_003BD9DC = 1;
 }
 
-/* Release all three independently allocated image buffers before rebuilding. */
+/* Release buffers in slot order, clearing each slot immediately afterward. */
 void sdfGraphReleaseBuffers(SdfGraphObj *graph) {
     sdfUpdateTextureHeadsWithInterruptsMasked(graph->buffers[0]);
     graph->buffers[0] = NULL;
     sdfUpdateTextureHeadsWithInterruptsMasked(graph->buffers[1]);
     graph->buffers[1] = NULL;
-    sdfUpdateTextureHeadsWithInterruptsMasked(graph->buffers[2]);
-    graph->buffers[2] = NULL;
+    sdfUpdateTextureHeadsWithInterruptsMasked(graph->buffers[SDF_GRAPH_AUXILIARY_BUFFER]);
+    graph->buffers[SDF_GRAPH_AUXILIARY_BUFFER] = NULL;
 }
 
-/* The auxiliary buffer uses its own mode; both primary buffers share one mode. */
+/* Rebuild the auxiliary buffer with its own PSM; both others share a PSM. */
 void sdfGraphRecreateBuffers(SdfGraphObj *graph) {
     s16 width;
     s16 height;
-    u8 mode;
+    u8 bufferFormat;
 
     sdfGraphReleaseBuffers(graph);
     width = graph->width;
     height = graph->height;
-    graph->buffers[2] = sdfAllocImageBuffer(width, height, graph->auxiliaryMode);
-    mode = graph->bufferMode;
-    graph->buffers[0] = sdfAllocImageBuffer(width, height, mode);
-    graph->buffers[1] = sdfAllocImageBuffer(width, height, mode);
+    graph->buffers[SDF_GRAPH_AUXILIARY_BUFFER] = sdfAllocImageBuffer(width, height, graph->auxiliaryFormat);
+    bufferFormat = graph->bufferFormat;
+    graph->buffers[0] = sdfAllocImageBuffer(width, height, bufferFormat);
+    graph->buffers[1] = sdfAllocImageBuffer(width, height, bufferFormat);
 }
 
 typedef struct SdfDisplayEnv {
@@ -59,12 +64,15 @@ extern SdfDisplayEnv D_003EB820;
 extern void sceGsSetDefDispEnv(void *, s32, s32, s32, s32, s32);
 extern void sceGsPutDispEnv(void *);
 
-void sdfGraphSelectDisplayBuffer(s32 index) {
-    SdfTexResource *buffer = D_003980E0.buffers[index];
+/* Select the indexed image buffer for display; the index and pointer are unchecked. */
+void sdfGraphSelectDisplayBuffer(s32 bufferIndex) {
+    SdfTexResource *displayBuffer = D_003980E0.buffers[bufferIndex];
 
-    sceGsSetDefDispEnv((void *)(((u32)&D_003EB820 & 0x0FFFFFFF) | 0x20000000),
+    /* Initialize the environment through its uncached main-RAM alias. */
+    sceGsSetDefDispEnv((void *)(((u32)&D_003EB820 & SDF_GRAPH_CPU_ADDRESS_MASK) | SDF_GRAPH_UNCACHED_ALIAS),
                       0, D_003980E0.width, D_003980E0.height, 0, 0);
-    D_003EB820.fbp = buffer->word >> 11;
+    /* VRAM offsets are in 32-bit words; FBP counts 2048-word (8 KiB) pages. */
+    D_003EB820.fbp = displayBuffer->word >> SDF_GS_FRAMEBUFFER_PAGE_SHIFT;
     sceGsPutDispEnv(&D_003EB820);
 }
 
