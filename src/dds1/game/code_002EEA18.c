@@ -2,6 +2,19 @@
 #include "sdf.h"
 #include "pcp_vu0.h"
 
+enum {
+    SDF_TMX_MAGIC = 0x30584D54,
+    SDF_STREAM_CHUNK_BYTES = 0x4000,
+    SDF_STREAM_COMMAND_CREATE_STATE = 32,
+    SDF_STREAM_COMMAND_CONTROL = 33,
+    SDF_STREAM_COMMAND_READ = 34,
+    SDF_STREAM_COMMAND_RELEASE_STATE = 35,
+    SDF_IOP_MODULES_PER_GROUP = 2,
+    SDF_KEY_TREE_PATH_LIMIT = 32,
+    SDF_POOL_REBUILD_CHAIN = 0,
+    SDF_POOL_PUSH_FREE = 1
+};
+
 typedef struct SdfPacCounter {
     u32 count;     /* 0x0 */
     u32 progress;  /* 0x4 */
@@ -106,15 +119,16 @@ typedef struct SdfTmxHeader {
     u8 pad17[0x29];
 } SdfTmxHeader;
 
-void sdfInitializeTmxImageHeader(SdfTmxHeader *hdr, s32 width, s32 height, s32 depth, s32 flagA, s32 flagB) {
-    memset(hdr, 0, sizeof(SdfTmxHeader));
-    hdr->flagB = flagB;
-    hdr->width = width;
-    hdr->height = height;
-    hdr->depth = depth;
-    hdr->flagA = flagA;
-    hdr->magic = 0x30584D54;
-    hdr->type = 2;
+/* Initialize a zeroed TMX0 header; retain the caller-supplied flag bytes. */
+void sdfInitializeTmxImageHeader(SdfTmxHeader *header, s32 width, s32 height, s32 depth, s32 flagA, s32 flagB) {
+    memset(header, 0, sizeof(SdfTmxHeader));
+    header->flagB = flagB;
+    header->width = width;
+    header->height = height;
+    header->depth = depth;
+    header->flagA = flagA;
+    header->magic = SDF_TMX_MAGIC;
+    header->type = 2;
 }
 
 /* Device state returned by sdfDevCreateCallbackState; layout shared with the device manager. */
@@ -142,17 +156,17 @@ typedef struct DevState {
 /* Command 34 carries a buffer address and byte count after an opaque first word. */
 typedef struct SdfStreamReadRequest {
     u8 pad00[4];
-    s32 buffer;
-    s32 length;
+    s32 destinationAddress;
+    s32 byteCount;
 } SdfStreamReadRequest;
 
 typedef struct SdfStreamCfg {
-    DevState *dest;
+    DevState *deviceState;
     s32 semaphore;
     s32 readResult;
-    s32 length;
-    s32 buffer;
-    s32 transferred;
+    s32 remainingBytes;
+    s32 destinationAddress;
+    s32 transferredBytes;
 } SdfStreamCfg;
 
 extern SdfStreamCfg D_003FF340;
@@ -167,32 +181,34 @@ extern s32 sdfDevQueueActiveOperation();
 extern s32 WaitSema(s32);
 extern void func_002EF408(DevState *, s32, s32, s32, s32);
 
+/* Queue at most one staging-buffer-sized read; the completion callback advances the byte counts. */
 void sdfStreamSendChunk(void) {
-    s32 length = D_003FF340.length;
+    s32 chunkBytes = D_003FF340.remainingBytes;
 
-    if (length > 0x4000) {
-        length = 0x4000;
+    if (chunkBytes > SDF_STREAM_CHUNK_BYTES) {
+        chunkBytes = SDF_STREAM_CHUNK_BYTES;
     }
-    sdfDevQueueRead(D_003FF340.dest, D_003FF4C0, length);
+    sdfDevQueueRead(D_003FF340.deviceState, D_003FF4C0, chunkBytes);
 }
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EF408);
 
 /* Dispatch a stream command, wait for completion, and return the shared reply buffer.
- * request is a scalar argument except for command 34, which carries a read-request address. */
+ * request is a scalar argument except for a read command, which carries a read-request address.
+ * An unrecognized command leaves the shared reply unchanged. */
 s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
     SdfStreamCfg *state = &D_003FF340;
     DevState *deviceState;
     switch (command) {
-    case 32:
-        state->dest = sdfDevCreateCallbackState(request, func_002EF408, 0);
-        if (state->dest != 0) {
+    case SDF_STREAM_COMMAND_CREATE_STATE:
+        state->deviceState = sdfDevCreateCallbackState(request, func_002EF408, 0);
+        if (state->deviceState != 0) {
             WaitSema(state->semaphore);
-            deviceState = state->dest;
+            deviceState = state->deviceState;
             if (deviceState->result != 0) {
                 sdfDevReactivate(deviceState);
-                sdfDevQueueReleaseState(state->dest);
-                state->dest = 0;
+                sdfDevQueueReleaseState(state->deviceState);
+                state->deviceState = 0;
                 deviceState = 0;
             }
         } else {
@@ -200,24 +216,24 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
         }
         D_003FF480[0] = (s32)deviceState;
         break;
-    case 33:
-        sdfDevQueueControlRequest(state->dest, request, request);
+    case SDF_STREAM_COMMAND_CONTROL:
+        sdfDevQueueControlRequest(state->deviceState, request, request);
         WaitSema(state->semaphore);
         D_003FF480[0] = state->readResult;
         break;
-    case 34:
-        state->length = ((SdfStreamReadRequest *)request)->length;
-        state->transferred = 0;
-        state->buffer = ((SdfStreamReadRequest *)request)->buffer;
+    case SDF_STREAM_COMMAND_READ:
+        state->remainingBytes = ((SdfStreamReadRequest *)request)->byteCount;
+        state->transferredBytes = 0;
+        state->destinationAddress = ((SdfStreamReadRequest *)request)->destinationAddress;
         sdfStreamSendChunk();
         WaitSema(state->semaphore);
-        D_003FF480[0] = state->transferred;
+        D_003FF480[0] = state->transferredBytes;
         break;
-    case 35:
-        sdfDevQueueActiveOperation(state->dest, request, request);
+    case SDF_STREAM_COMMAND_RELEASE_STATE:
+        sdfDevQueueActiveOperation(state->deviceState, request, request);
         WaitSema(state->semaphore);
-        sdfDevQueueReleaseState(state->dest);
-        state->dest = 0;
+        sdfDevQueueReleaseState(state->deviceState);
+        state->deviceState = 0;
         D_003FF480[0] = 0;
         break;
     }
@@ -233,10 +249,11 @@ extern s32 GetThreadId(void);
 extern void SleepThread(void);
 extern s32 D_003BDAC4;
 
+/* Start the newly created worker, then record and suspend the calling thread. */
 void sdfStartAndSuspendWorkerThread(void) {
-    s32 stack = sdfCreateThreadWithAllocatedWorkspace(func_002EF698, 0x1000, 0x4C);
+    s32 workerId = sdfCreateThreadWithAllocatedWorkspace(func_002EF698, 0x1000, 0x4C);
 
-    _StartThread(stack, 0);
+    _StartThread(workerId, 0);
     D_003BDAC4 = GetThreadId();
     SleepThread();
 }
@@ -247,96 +264,99 @@ extern char *strcpy(char *, const char *);
 extern char *strcat(char *, const char *);
 extern void func_002F5E30(void);
 
-/* Load the pair of IOP modules of `group` from the directory `prefix`. */
-void sdfLoadIopModulePair(const char *prefix, s32 group) {
+/* Load the selected pair of IOP module paths from prefix; loader results are not checked. */
+void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup) {
     char path[0x100];
-    char **names = &D_00398C80[group * 2];
-    s32 i;
+    char **moduleNames = &D_00398C80[moduleGroup * SDF_IOP_MODULES_PER_GROUP];
+    s32 moduleIndex;
 
-    for (i = 0; i != 2; i++) {
+    for (moduleIndex = 0; moduleIndex != SDF_IOP_MODULES_PER_GROUP; moduleIndex++) {
         strcpy(path, prefix);
-        strcat(path, names[i]);
+        strcat(path, moduleNames[moduleIndex]);
         sceSifLoadModule(path, 0, 0);
     }
     func_002F5E30();
 }
 
 
-struct SdfTreeItem;
+struct SdfKeyTreeItem;
 
-typedef struct SdfTreeNode {
-    struct SdfTreeNode *first;   /* 0x0 */
-    struct SdfTreeNode *second;  /* 0x4 */
-    struct SdfTreeItem *item;    /* 0x8 */
+/* Larger keys use the right link, which precedes the left link in memory. */
+typedef struct SdfKeyTreeNode {
+    struct SdfKeyTreeNode *right; /* 0x0 */
+    struct SdfKeyTreeNode *left;  /* 0x4 */
+    struct SdfKeyTreeItem *item;  /* 0x8 */
     s32 balance;                 /* 0xC */
-} SdfTreeNode;
-SdfTreeNode *sdfRotateBalancedTreeSecondLink(SdfTreeNode *a, SdfTreeNode *node) {
-    SdfTreeNode *root = a;
-    SdfTreeNode *pivot;
+} SdfKeyTreeNode;
+/* Rebalance a right-heavy parent using its heavy child; return the new subtree root. */
+SdfKeyTreeNode *sdfRotateBalancedTreeSecondLink(SdfKeyTreeNode *heavyChild, SdfKeyTreeNode *parent) {
+    SdfKeyTreeNode *childRoot = heavyChild;
+    SdfKeyTreeNode *pivot;
 
-    if (root->balance < 0) {
-        pivot = root->second;
-        node->first = pivot->second;
-        root->second = pivot->first;
-        pivot->second = node;
-        pivot->first = root;
+    if (childRoot->balance < 0) {
+        pivot = childRoot->left;
+        parent->right = pivot->left;
+        childRoot->left = pivot->right;
+        pivot->left = parent;
+        pivot->right = childRoot;
         if (pivot->balance > 0) {
-            node->balance = -1;
-            root->balance = 0;
+            parent->balance = -1;
+            childRoot->balance = 0;
         } else {
-            node->balance = 0;
-            root->balance = 1;
+            parent->balance = 0;
+            childRoot->balance = 1;
         }
         pivot->balance = 0;
     } else {
-        node->balance = 0;
-        node->first = root->second;
-        root->balance = 0;
-        root->second = node;
-        pivot = root;
+        parent->balance = 0;
+        parent->right = childRoot->left;
+        childRoot->balance = 0;
+        childRoot->left = parent;
+        pivot = childRoot;
     }
     return pivot;
 }
 
-/* Balance-flag rotation: `node` takes the place under `a`'s first link; returns the new subtree root. */
-SdfTreeNode *sdfRotateBalancedTreeFirstLink(SdfTreeNode *a, SdfTreeNode *node) {
-    SdfTreeNode *root = a;
-    SdfTreeNode *pivot;
+/* Rebalance a left-heavy parent using its heavy child; return the new subtree root. */
+SdfKeyTreeNode *sdfRotateBalancedTreeFirstLink(SdfKeyTreeNode *heavyChild, SdfKeyTreeNode *parent) {
+    SdfKeyTreeNode *childRoot = heavyChild;
+    SdfKeyTreeNode *pivot;
 
-    if (root->balance > 0) {
-        pivot = root->first;
-        node->second = pivot->first;
-        root->first = pivot->second;
-        pivot->first = node;
-        pivot->second = root;
+    if (childRoot->balance > 0) {
+        pivot = childRoot->right;
+        parent->left = pivot->right;
+        childRoot->right = pivot->left;
+        pivot->right = parent;
+        pivot->left = childRoot;
         if (pivot->balance > 0) {
-            node->balance = -1;
-            root->balance = 0;
+            parent->balance = -1;
+            childRoot->balance = 0;
         } else {
-            node->balance = 0;
-            root->balance = 1;
+            parent->balance = 0;
+            childRoot->balance = 1;
         }
         pivot->balance = 0;
     } else {
-        node->balance = 0;
-        node->second = root->first;
-        root->balance = 0;
-        root->first = node;
-        pivot = root;
+        parent->balance = 0;
+        parent->left = childRoot->right;
+        childRoot->balance = 0;
+        childRoot->right = parent;
+        pivot = childRoot;
     }
     return pivot;
 }
 
-void func_002EF958(SdfTreeNode **path, s32 depth, SdfTreeNode *child,
-                   SdfTreeNode **root) {
-    SdfTreeNode *parent;
-    SdfTreeNode *replacement = NULL;
+/* Walk the insertion path upward, updating balance flags and reconnecting a rotated subtree. */
+void func_002EF958(SdfKeyTreeNode **path, s32 depth, SdfKeyTreeNode *child,
+                   SdfKeyTreeNode **root) {
+    SdfKeyTreeNode *parent;
+    SdfKeyTreeNode *replacement = NULL;
     s32 balance;
 
     if (depth > 0) {
         do {
             parent = path[--depth];
-            if (child == parent->first) {
+            if (child == parent->right) {
                 balance = ++parent->balance;
             } else {
                 balance = --parent->balance;
@@ -356,31 +376,31 @@ void func_002EF958(SdfTreeNode **path, s32 depth, SdfTreeNode *child,
         } while (depth > 0);
     }
     if (depth > 0) {
-        SdfTreeNode *ancestor = path[--depth];
-        if (ancestor->first == parent) {
-            ancestor->first = replacement;
+        SdfKeyTreeNode *ancestor = path[--depth];
+        if (ancestor->right == parent) {
+            ancestor->right = replacement;
         } else {
-            ancestor->second = replacement;
+            ancestor->left = replacement;
         }
     } else if (replacement != NULL) {
         *root = replacement;
     }
 }
 
-typedef struct SdfTreeItem {
-    struct SdfTreeItem *replaced; /* 0x0: previous item when a duplicate key replaces it */
+typedef struct SdfKeyTreeItem {
+    struct SdfKeyTreeItem *replaced; /* 0x0: previous item when a duplicate key replaces it */
     u8 pad04[8];
     f32 key;                      /* 0xC */
-} SdfTreeItem;
+} SdfKeyTreeItem;
 
 
 /* Insert `item` into the key-ordered tree; an equal key swaps the item in place. */
-void sdfInsertFloatKeyTreeItem(SdfTreeNode **tree, SdfTreeItem *item) {
-    SdfTreeNode *path[32];
+void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item) {
+    SdfKeyTreeNode *path[SDF_KEY_TREE_PATH_LIMIT];
     s32 depth = 0;
-    SdfTreeNode **link = tree;
-    SdfTreeNode *cur = *tree;
-    SdfTreeNode *node;
+    SdfKeyTreeNode **link = tree;
+    SdfKeyTreeNode *cur = *tree;
+    SdfKeyTreeNode *node;
     f32 key = item->key;
 
     while (cur != NULL) {
@@ -392,16 +412,16 @@ void sdfInsertFloatKeyTreeItem(SdfTreeNode **tree, SdfTreeItem *item) {
         path[depth] = cur;
         depth++;
         if (cur->item->key < key) {
-            link = &cur->first;
+            link = &cur->right;
         } else {
-            link = &cur->second;
+            link = &cur->left;
         }
         cur = *link;
     }
     item->replaced = NULL;
     node = sdfAllocPacketAligned(0x10);
-    node->first = NULL;
-    node->second = NULL;
+    node->right = NULL;
+    node->left = NULL;
     node->item = item;
     *link = node;
     node->balance = 0;
@@ -421,9 +441,9 @@ typedef struct SdfPool {
     u8 unk0[4];
     SdfPoolNode *head;  /* 0x04: first node of the chain */
     SdfPoolNode *tail;  /* 0x08: last node of the chain */
-    SdfPoolNode *free;
+    SdfPoolNode *freeHead;
     u8 unk10[8];
-    SdfTreeNode *sub[1]; /* 0x18: key tree root */
+    SdfKeyTreeNode *keyTree[1]; /* 0x18: key tree root */
 } SdfPool;
 
 extern void sdfInsertFloatKeyTreeItem();
@@ -432,10 +452,10 @@ extern void sdfRebuildPoolChain();
 void sdfReleasePoolNode(SdfPool *pool, SdfPoolNode *node) {
     if (node->unk4 != 0) {
         if (node->kind == SDF_POOL_FREE_KIND) {
-            node->next = pool->free;
-            pool->free = node;
+            node->next = pool->freeHead;
+            pool->freeHead = node;
         } else {
-            sdfInsertFloatKeyTreeItem(pool->sub, node);
+            sdfInsertFloatKeyTreeItem(pool->keyTree, node);
         }
     }
 }
@@ -462,16 +482,16 @@ void sdfAppendPoolNodeChain(void *first, SdfPoolNode **head, SdfPoolNode **tail)
     }
 }
 
-/* Walk a key tree depth first, applying sdfAppendPoolNodeChain to every node's item (sdfRebuildPoolChain passes the addresses of its two accumulators here). */
-void sdfKeyTreeApply(SdfTreeNode *node, SdfPoolNode **head, SdfPoolNode **tail) {
-    SdfTreeNode *next;
+/* Append items in descending key order (right, item, left). The starting node must be non-null. */
+void sdfKeyTreeApply(SdfKeyTreeNode *node, SdfPoolNode **head, SdfPoolNode **tail) {
+    SdfKeyTreeNode *next;
 
     do {
-        if (node->first != NULL) {
-            sdfKeyTreeApply(node->first, head, tail);
+        if (node->right != NULL) {
+            sdfKeyTreeApply(node->right, head, tail);
         }
         sdfAppendPoolNodeChain(node->item, head, tail);
-        next = node->second;
+        next = node->left;
         node = next;
     } while (next != NULL);
 }
@@ -481,9 +501,9 @@ void sdfRebuildPoolChain(SdfPool *pool) {
     SdfPoolNode *head = NULL;
     SdfPoolNode *tail = NULL;
 
-    sdfAppendPoolNodeChain(pool->free, &head, &tail);
-    if (pool->sub[0] != NULL) {
-        sdfKeyTreeApply(pool->sub[0], &head, &tail);
+    sdfAppendPoolNodeChain(pool->freeHead, &head, &tail);
+    if (pool->keyTree[0] != NULL) {
+        sdfKeyTreeApply(pool->keyTree[0], &head, &tail);
     }
     pool->head = head;
     pool->tail = tail;
@@ -491,13 +511,13 @@ void sdfRebuildPoolChain(SdfPool *pool) {
 
 void sdfUpdatePoolFreeListByMode(SdfPool *pool, s32 mode, SdfPoolNode *node) {
     switch (mode) {
-    case 0:
+    case SDF_POOL_REBUILD_CHAIN:
         sdfRebuildPoolChain(pool);
         break;
-    case 1:
+    case SDF_POOL_PUSH_FREE:
         if (node->unk4 != 0) {
-            node->next = pool->free;
-            pool->free = node;
+            node->next = pool->freeHead;
+            pool->freeHead = node;
         }
         break;
     }
