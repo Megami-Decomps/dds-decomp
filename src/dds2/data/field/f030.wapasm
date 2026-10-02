@@ -219,83 +219,83 @@ entry 51 kind=door area=10 name=@01d_01
   camera mode=1
 end
 
-entry 52 kind=11 area=10 name=@01d_03
-  scene args=4,0,18 primary="01pos_03" secondary="01cam_04"
+entry 52 kind=suction_warp area=10 name=@01d_03
+  scene state_selector=4 motion=18 primary="01pos_03" secondary="01cam_04"
   warp area=11 position="01pos_05"
 end
 
-entry 53 kind=11 area=10 name="01d_05"
-  scene args=4,0,18 primary="01pos_05" secondary="01cam_03"
+entry 53 kind=suction_warp area=10 name="01d_05"
+  scene state_selector=4 motion=18 primary="01pos_05" secondary="01cam_03"
   warp area=13 position="01pos_05"
 end
 
-entry 54 kind=11 area=10 name="01d_08"
-  scene args=4,0,18 primary="01pos_08" secondary="01cam_02"
+entry 54 kind=suction_warp area=10 name="01d_08"
+  scene state_selector=4 motion=18 primary="01pos_08" secondary="01cam_02"
   warp area=17 position="01pos_02"
 end
 
-entry 55 kind=11 area=10 name="01d_09"
-  scene args=4,0,18 primary="01pos_10" secondary="01cam_01"
+entry 55 kind=suction_warp area=10 name="01d_09"
+  scene state_selector=4 motion=18 primary="01pos_10" secondary="01cam_01"
   warp area=17
 end
 
-entry 57 kind=11 area=11 name=@01d_01
-  scene args=4,0,18 primary="01pos_10" secondary="01cam_01"
+entry 57 kind=suction_warp area=11 name=@01d_01
+  scene state_selector=4 motion=18 primary="01pos_10" secondary="01cam_01"
   warp area=10 position="01pos_02"
 end
 
-entry 58 kind=11 area=11 name=@01d_02
-  scene args=4,0,18 primary="01pos_15" secondary="01cam_04"
+entry 58 kind=suction_warp area=11 name=@01d_02
+  scene state_selector=4 motion=18 primary="01pos_15" secondary="01cam_04"
   warp position="01pos_06"
 end
 
-entry 59 kind=11 area=11 name=@01d_03
-  scene args=4,0,18 primary="01pos_13" secondary="01cam_03"
+entry 59 kind=suction_warp area=11 name=@01d_03
+  scene state_selector=4 motion=18 primary="01pos_13" secondary="01cam_03"
   warp area=12
 end
 
-entry 60 kind=11 area=11 name="01d_04"
-  scene args=4,0,18 primary="01pos_11" secondary="01cam_02"
+entry 60 kind=suction_warp area=11 name="01d_04"
+  scene state_selector=4 motion=18 primary="01pos_11" secondary="01cam_02"
   warp area=10 position="01pos_04"
 end
 
-entry 62 kind=11 area=12 name=@01d_02
-  scene args=4,0,18 primary="01pos_10" secondary="01cam_01"
+entry 62 kind=suction_warp area=12 name=@01d_02
+  scene state_selector=4 motion=18 primary="01pos_10" secondary="01cam_01"
   warp area=13 position="01pos_06"
 end
 
-entry 63 kind=11 area=12 name=@01d_03
-  scene args=4,0,18 primary="01pos_11" secondary="01cam_02"
+entry 63 kind=suction_warp area=12 name=@01d_03
+  scene state_selector=4 motion=18 primary="01pos_11" secondary="01cam_02"
   warp area=14
 end
 
-entry 64 kind=11 area=12 name="01d_04"
-  scene args=4,0,18 primary="01pos_12" secondary="01cam_03"
+entry 64 kind=suction_warp area=12 name="01d_04"
+  scene state_selector=4 motion=18 primary="01pos_12" secondary="01cam_03"
   warp area=14 position="01pos_02"
 end
 
-entry 66 kind=11 area=13 name=@01d_02
-  scene args=4,0,18 primary="01pos_11" secondary="01cam_02"
+entry 66 kind=suction_warp area=13 name=@01d_02
+  scene state_selector=4 motion=18 primary="01pos_11" secondary="01cam_02"
   warp area=14 position="01pos_05"
 end
 
-entry 67 kind=11 area=13 name="01d_04"
-  scene args=4,0,18 primary="01pos_10" secondary="01cam_01"
+entry 67 kind=suction_warp area=13 name="01d_04"
+  scene state_selector=4 motion=18 primary="01pos_10" secondary="01cam_01"
   warp area=10 position="01pos_06"
 end
 
-entry 69 kind=11 area=14 name=@01d_03
-  scene args=4,0,18 primary="01pos_10" secondary="01cam_01"
+entry 69 kind=suction_warp area=14 name=@01d_03
+  scene state_selector=4 motion=18 primary="01pos_10" secondary="01cam_01"
   warp area=16 position="01pos_04"
 end
 
-entry 70 kind=11 area=14 name="01d_06"
-  scene args=4,0,18 primary="01pos_12" secondary="01cam_03"
+entry 70 kind=suction_warp area=14 name="01d_06"
+  scene state_selector=4 motion=18 primary="01pos_12" secondary="01cam_03"
   warp area=13
 end
 
-entry 71 kind=11 area=14 name="01d_07"
-  scene args=4,0,18 primary="01pos_11" secondary="01cam_02"
+entry 71 kind=suction_warp area=14 name="01d_07"
+  scene state_selector=4 motion=18 primary="01pos_11" secondary="01cam_02"
   warp position="01pos_08"
 end
 
@@ -309,18 +309,18 @@ entry 74 kind=special_warp
   warp area=29 position="01pos_02"
 end
 
-entry 76 kind=11 area=16 name=@01d_01
-  scene args=4,0,18 primary="01pos_10" secondary="01cam_01"
+entry 76 kind=suction_warp area=16 name=@01d_01
+  scene state_selector=4 motion=18 primary="01pos_10" secondary="01cam_01"
   warp area=17 position="01pos_04"
 end
 
-entry 77 kind=11 area=16 name=@01d_02
-  scene args=4,0,18 primary="01pos_11" secondary="01cam_02"
+entry 77 kind=suction_warp area=16 name=@01d_02
+  scene state_selector=4 motion=18 primary="01pos_11" secondary="01cam_02"
   warp area=13 position="01pos_03"
 end
 
-entry 78 kind=11 area=16 name=@01d_03
-  scene args=4,0,18 primary="01pos_12" secondary="01cam_03"
+entry 78 kind=suction_warp area=16 name=@01d_03
+  scene state_selector=4 motion=18 primary="01pos_12" secondary="01cam_03"
   warp area=14 position="01pos_04"
 end
 
@@ -329,8 +329,8 @@ entry 79 kind=door area=16 name="01d_05"
   warp area=15
 end
 
-entry 81 kind=11 area=17 name=@01d_03
-  scene args=4,0,18 primary="01pos_10" secondary="01cam_01"
+entry 81 kind=suction_warp area=17 name=@01d_03
+  scene state_selector=4 motion=18 primary="01pos_10" secondary="01cam_01"
   warp area=10 position="01pos_07"
 end
 
@@ -339,8 +339,8 @@ entry 83 kind=door area=18 name=@01d_01
   warp area=19
 end
 
-entry 84 kind=ladder area=18 name=@01d_02
-  scene selector=1
+entry 84 kind=warp area=18 name=@01d_02
+  scene args=1,0,0
   warp area=15 position="01pos_02"
 end
 
@@ -376,8 +376,8 @@ entry 94 kind=door area=22 name=@01d_01
   warp area=28 position="01pos_02"
 end
 
-entry 96 kind=ladder area=23 name=@01d_01
-  scene selector=1
+entry 96 kind=warp area=23 name=@01d_01
+  scene args=1,0,0
   warp area=29 position="01pos_02"
 end
 
@@ -558,8 +558,8 @@ entry 143 kind=door area=35 name=@01d_01
   warp area=34
 end
 
-entry 144 kind=11 area=35 name=@01d_02
-  scene args=3,0,17 primary="01pos_04" secondary="md_01all_05"
+entry 144 kind=suction_warp area=35 name=@01d_02
+  scene state_selector=3 motion=17 primary="01pos_04" secondary="md_01all_05"
   warp area=36 position="01pos_03"
   camera mode=1
 end
@@ -570,14 +570,14 @@ entry 145 kind=side_exit area=35
   camera mode=1
 end
 
-entry 147 kind=11 area=36 name=@01d_03
-  scene args=3,0,17 primary="01pos_06" secondary="md_01d_01"
+entry 147 kind=suction_warp area=36 name=@01d_03
+  scene state_selector=3 motion=17 primary="01pos_06" secondary="md_01d_01"
   warp area=35 position="01pos_02"
   camera mode=1
 end
 
-entry 148 kind=11 area=36 name="01d_04"
-  scene args=3,0,17 primary="01pos_07" secondary="md_01d_02"
+entry 148 kind=suction_warp area=36 name="01d_04"
+  scene state_selector=3 motion=17 primary="01pos_07" secondary="md_01d_02"
   warp area=38
 end
 
@@ -593,8 +593,8 @@ entry 150 kind=special_warp
   camera mode=1
 end
 
-entry 152 kind=11 area=38 name=@01d_01
-  scene args=3,0,17 primary="01pos_04" secondary="md_01all_05"
+entry 152 kind=suction_warp area=38 name=@01d_01
+  scene state_selector=3 motion=17 primary="01pos_04" secondary="md_01all_05"
   warp area=36 position="01pos_05"
   camera mode=1 name="01cam_02"
 end
@@ -610,8 +610,8 @@ entry 155 kind=door area=39 name=@01d_01
   warp area=38 position="01pos_02"
 end
 
-entry 156 kind=11 area=39 name=@01d_02
-  scene args=3,0,17 primary="01pos_04" secondary="md_01all_05"
+entry 156 kind=suction_warp area=39 name=@01d_02
+  scene state_selector=3 motion=17 primary="01pos_04" secondary="md_01all_05"
   warp area=40
   camera mode=1
 end
@@ -622,8 +622,8 @@ entry 157 kind=side_exit area=39
   camera mode=1
 end
 
-entry 159 kind=11 area=40 name=@01d_01
-  scene args=3,0,17 primary="01pos_02" secondary="md_01d_01"
+entry 159 kind=suction_warp area=40 name=@01d_01
+  scene state_selector=3 motion=17 primary="01pos_02" secondary="md_01d_01"
   warp area=39 position="01pos_02"
   camera mode=1
 end
@@ -869,14 +869,14 @@ entry 221 kind=door area=58 name=@01d_01
   warp area=55
 end
 
-entry 223 kind=11 area=59 name=@01d_01
-  scene args=3,0,17 primary="01pos_07" secondary="md_01all_05"
+entry 223 kind=suction_warp area=59 name=@01d_01
+  scene state_selector=3 motion=17 primary="01pos_07" secondary="md_01all_05"
   warp area=61
   camera mode=1
 end
 
-entry 224 kind=11 area=59 name=@01d_02
-  scene args=3,0,17 primary="01pos_08" secondary="md_01all_06"
+entry 224 kind=suction_warp area=59 name=@01d_02
+  scene state_selector=3 motion=17 primary="01pos_08" secondary="md_01all_06"
   warp area=60
   camera mode=1
 end
@@ -902,13 +902,13 @@ entry 228 kind=side_exit area=59
   warp area=59 position="01pos_09"
 end
 
-entry 230 kind=11 area=60 name=@01d_01
-  scene args=3,0,17 primary="01pos_02" secondary="md_01d_01"
+entry 230 kind=suction_warp area=60 name=@01d_01
+  scene state_selector=3 motion=17 primary="01pos_02" secondary="md_01d_01"
   warp area=59 position="01pos_02"
 end
 
-entry 232 kind=11 area=61 name=@01d_01
-  scene args=3,0,17 primary="01pos_02" secondary="md_01d_01"
+entry 232 kind=suction_warp area=61 name=@01d_01
+  scene state_selector=3 motion=17 primary="01pos_02" secondary="md_01d_01"
   warp area=59
 end
 

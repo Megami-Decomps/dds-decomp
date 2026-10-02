@@ -69,7 +69,7 @@ entry 13 kind=door area=2 name="01d_03"
   camera table=76
 end
 
-entry 14 kind=2 area=2 name="01d_06"
+entry 14 kind=run_warp area=2 name="01d_06"
   warp area=15 position="01pos_06"
   camera table=76
   tail control=11 args=25,3,3,11,5,3,2
@@ -123,13 +123,13 @@ entry 25 kind=door area=3 name=@01d_02
   camera table=76
 end
 
-entry 26 kind=4 flag=1281 area=3 name="01d_03"
+entry 26 kind=jump_warp flag=1281 area=3 name="01d_03"
   warp area=37 position="01pos_10"
   camera table=76
   after footstep=2
 end
 
-entry 27 kind=4 flag=1281 area=3 name="01d_04"
+entry 27 kind=jump_warp flag=1281 area=3 name="01d_04"
   warp area=37 position="01pos_13"
   camera table=76
 end
@@ -146,31 +146,31 @@ entry 30 kind=door area=4 name=@01d_02
   camera table=76
 end
 
-entry 31 kind=4 flag=1283 area=4 name="01d_03"
+entry 31 kind=jump_warp flag=1283 area=4 name="01d_03"
   warp area=39 position="01pos_15"
   camera table=76
   after footstep=2
 end
 
-entry 32 kind=4 flag=1283 area=4 name="01d_04"
+entry 32 kind=jump_warp flag=1283 area=4 name="01d_04"
   warp area=39 position="01pos_12"
   camera table=76
   after footstep=2
 end
 
-entry 33 kind=4 flag=1283 area=4 name="01d_05"
+entry 33 kind=jump_warp flag=1283 area=4 name="01d_05"
   warp area=39 position="01pos_16"
   camera table=76
   after footstep=2
 end
 
-entry 34 kind=4 flag=1284 area=4 name="01d_06"
+entry 34 kind=jump_warp flag=1284 area=4 name="01d_06"
   warp area=38 position="01pos_11"
   camera table=76
   after footstep=2
 end
 
-entry 35 kind=4 flag=1284 area=4 name="01d_07"
+entry 35 kind=jump_warp flag=1284 area=4 name="01d_07"
   warp area=38 position="01pos_14"
   camera table=76
   after footstep=2
@@ -188,13 +188,13 @@ entry 38 kind=door area=5 name=@01d_02
   camera table=76
 end
 
-entry 39 kind=4 flag=1285 area=5 name="01d_03"
+entry 39 kind=jump_warp flag=1285 area=5 name="01d_03"
   warp area=41 position="01pos_10"
   camera table=76
   after footstep=2
 end
 
-entry 40 kind=4 flag=1285 area=5 name="01d_04"
+entry 40 kind=jump_warp flag=1285 area=5 name="01d_04"
   warp area=41 position="01pos_11"
   camera table=76
   after footstep=2
@@ -224,30 +224,30 @@ entry 45 kind=door area=6 name="01d_04"
   camera table=76
 end
 
-entry 46 kind=4 flag=1286 area=6 name="01d_05"
+entry 46 kind=jump_warp flag=1286 area=6 name="01d_05"
   warp area=42 position="01pos_24"
   camera table=76
 end
 
-entry 47 kind=4 flag=1286 area=6 name="01d_06"
+entry 47 kind=jump_warp flag=1286 area=6 name="01d_06"
   warp area=42 position="01pos_12"
   camera table=76
   after footstep=2
 end
 
-entry 48 kind=4 flag=1286 area=6 name="01d_07"
+entry 48 kind=jump_warp flag=1286 area=6 name="01d_07"
   warp area=42 position="01pos_13"
   camera table=76
   after footstep=2
 end
 
-entry 49 kind=4 flag=1287 area=6 name="01d_08"
+entry 49 kind=jump_warp flag=1287 area=6 name="01d_08"
   warp area=43 position="01pos_15"
   camera table=76
   after footstep=2
 end
 
-entry 50 kind=4 flag=1287 area=6 name="01d_09"
+entry 50 kind=jump_warp flag=1287 area=6 name="01d_09"
   warp area=43 position="01pos_14"
   camera table=76
   after footstep=2
@@ -259,13 +259,13 @@ entry 52 kind=door area=7 name="01d_01"
   camera table=76
 end
 
-entry 53 kind=4 flag=1288 area=7 name=@01d_02
+entry 53 kind=jump_warp flag=1288 area=7 name=@01d_02
   warp area=44 position="01pos_16"
   camera table=76
   after footstep=2
 end
 
-entry 54 kind=4 flag=1288 area=7 name="01d_03"
+entry 54 kind=jump_warp flag=1288 area=7 name="01d_03"
   warp area=44 position="01pos_17"
   camera table=76
   after footstep=2
@@ -277,31 +277,31 @@ entry 56 kind=door area=8 name="01d_01"
   camera table=76
 end
 
-entry 57 kind=4 flag=1289 area=8 name=@01d_02
+entry 57 kind=jump_warp flag=1289 area=8 name=@01d_02
   warp area=45 position="01pos_19"
   camera table=76
   after footstep=2
 end
 
-entry 58 kind=4 flag=1289 area=8 name="01d_03"
+entry 58 kind=jump_warp flag=1289 area=8 name="01d_03"
   warp area=45 position="01pos_18"
   camera table=76
   after footstep=2
 end
 
-entry 59 kind=4 flag=1289 area=8 name="01d_04"
+entry 59 kind=jump_warp flag=1289 area=8 name="01d_04"
   warp area=45 position="01pos_23"
   camera table=76
   after footstep=2
 end
 
-entry 60 kind=4 flag=1282 area=8 name="01d_05"
+entry 60 kind=jump_warp flag=1282 area=8 name="01d_05"
   warp area=40 position="01pos_21"
   camera table=76
   after footstep=2
 end
 
-entry 61 kind=4 flag=1282 area=8 name="01d_06"
+entry 61 kind=jump_warp flag=1282 area=8 name="01d_06"
   warp area=40 position="01pos_20"
   camera table=76
   after footstep=2
@@ -320,7 +320,7 @@ entry 65 kind=door area=35 name="01d_01"
   after footstep=2
 end
 
-entry 66 kind=2 area=35 name="01d_06"
+entry 66 kind=run_warp area=35 name="01d_06"
   warp area=14 position="01pos_06"
   camera table=76
   tail control=2 args=25,1,0,27,25,3,3
@@ -333,7 +333,7 @@ entry 68 kind=door area=36 name="01d_01"
   after footstep=2
 end
 
-entry 69 kind=2 area=36 name="01d_06"
+entry 69 kind=run_warp area=36 name="01d_06"
   warp area=13 position="01pos_06"
   camera table=76
   tail control=2 args=25,1,0,7,23,3,3
@@ -438,7 +438,7 @@ entry 89 kind=door area=13 name="01d_01"
   camera table=76
 end
 
-entry 90 kind=2 area=13 name="01d_06"
+entry 90 kind=run_warp area=13 name="01d_06"
   warp area=36 position="01pos_06"
   camera table=76
 end
@@ -449,7 +449,7 @@ entry 92 kind=door area=14 name="01d_01"
   camera table=76
 end
 
-entry 93 kind=2 area=14 name="01d_06"
+entry 93 kind=run_warp area=14 name="01d_06"
   warp area=35 position="01pos_06"
   camera table=76
 end
@@ -466,7 +466,7 @@ entry 96 kind=door area=15 name=@01d_02
   camera table=65
 end
 
-entry 97 kind=2 area=15 name="01d_03"
+entry 97 kind=run_warp area=15 name="01d_03"
   warp area=17
   camera table=76
   after bgm=2
@@ -485,7 +485,7 @@ entry 99 kind=door area=15 name="01d_05"
   camera table=76
 end
 
-entry 100 kind=2 area=15 name="01d_06"
+entry 100 kind=run_warp area=15 name="01d_06"
   warp area=2 position="01pos_06"
   camera table=76
 end
@@ -517,14 +517,14 @@ entry 105 kind=door area=15 name="01d_10"
   warp position="01pos_09"
 end
 
-entry 106 kind=12 area=15 name="01eve_03"
-  scene args=14,0,0
+entry 106 kind=barrier area=15 name="01eve_03"
+  scene barrier=14
   warp type=4
   tail control=61 args=0,0,2,0,0,0,0
 end
 
-entry 107 kind=12 area=15 name="01eve_02"
-  scene args=15,0,0
+entry 107 kind=barrier area=15 name="01eve_02"
+  scene barrier=15
   warp type=4
   tail control=61 args=0,0,3,0,0,0,0
 end
@@ -541,7 +541,7 @@ entry 111 kind=door area=16 name="01d_01"
   camera table=65
 end
 
-entry 113 kind=2 area=17 name="01d_01"
+entry 113 kind=run_warp area=17 name="01d_01"
   warp area=15 position="01pos_03"
   camera table=76
 end
@@ -560,7 +560,7 @@ entry 115 kind=door area=17 name="01d_03"
   after bgm=2
 end
 
-entry 116 kind=2 area=17 name="01d_06"
+entry 116 kind=run_warp area=17 name="01d_06"
   warp area=49
   camera table=76
   after bgm=2
@@ -635,7 +635,7 @@ entry 132 kind=door area=21 name="01d_01"
   after bgm=2
 end
 
-entry 134 kind=2 area=49 name="01d_01"
+entry 134 kind=run_warp area=49 name="01d_01"
   warp area=17 position="01pos_06"
   camera table=76
   after bgm=2
@@ -690,15 +690,15 @@ entry 142 kind=door area=22 name="01d_07"
   after bgm=3
 end
 
-entry 143 kind=5 area=22 name="01d_08"
+entry 143 kind=ladder area=22 name="01d_08"
   scene primary="01pos_18" secondary="01cam_08"
   warp position="01pos_09"
   camera table=78
   after bgm=3
 end
 
-entry 144 kind=5 area=22 name="01d_09"
-  scene args=1,0,0 primary="01pos_19" secondary="01cam_09"
+entry 144 kind=ladder area=22 name="01d_09"
+  scene direction=1 primary="01pos_19" secondary="01cam_09"
   warp position="01pos_08"
   camera table=78
   after bgm=3
@@ -718,43 +718,43 @@ entry 147 kind=door area=23 name="01d_03"
   after bgm=5
 end
 
-entry 148 kind=5 area=23 name="01d_07"
+entry 148 kind=ladder area=23 name="01d_07"
   scene primary="01pos_34" secondary="01cam_22"
   warp position="01pos_31"
   camera table=78
   after bgm=5
 end
 
-entry 149 kind=5 flag=1328 area=23 name="01eve_31"
-  scene args=1,0,0 primary="01pos_39" secondary="01cam_21"
+entry 149 kind=ladder flag=1328 area=23 name="01eve_31"
+  scene direction=1 primary="01pos_39" secondary="01cam_21"
   warp position="01pos_07"
   camera table=78
   after bgm=5
 end
 
-entry 150 kind=5 area=23 name="01d_08"
+entry 150 kind=ladder area=23 name="01d_08"
   scene primary="01pos_36" secondary="01cam_18"
   warp position="01pos_32"
   camera table=78
   after bgm=5
 end
 
-entry 151 kind=5 flag=1328 area=23 name="01eve_32"
-  scene args=1,0,0 primary="01pos_35" secondary="01cam_17"
+entry 151 kind=ladder flag=1328 area=23 name="01eve_32"
+  scene direction=1 primary="01pos_35" secondary="01cam_17"
   warp position="01pos_08"
   camera table=78
   after bgm=5
 end
 
-entry 152 kind=5 area=23 name="01d_09"
+entry 152 kind=ladder area=23 name="01d_09"
   scene primary="01pos_38" secondary="01cam_19"
   warp position="01pos_33"
   camera table=78
   after bgm=5
 end
 
-entry 153 kind=5 flag=1328 area=23 name="01eve_33"
-  scene args=1,0,0 primary="01pos_37" secondary="01cam_20"
+entry 153 kind=ladder flag=1328 area=23 name="01eve_33"
+  scene direction=1 primary="01pos_37" secondary="01cam_20"
   warp position="01pos_09"
   camera table=78
   after bgm=5
@@ -899,8 +899,8 @@ entry 184 kind=door area=51 name="01d_04"
   after bgm=3
 end
 
-entry 185 kind=12 area=51 name="01d_05"
-  scene args=16,0,0
+entry 185 kind=barrier area=51 name="01d_05"
+  scene barrier=16
   warp type=4
   tail control=201 args=0,0,4,0,0,0,0
 end

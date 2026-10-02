@@ -291,7 +291,7 @@ entry 61 kind=door area=16 name=@01d_01
   warp area=15 position="01pos_02"
 end
 
-entry 62 kind=2 area=16 name="01d_02"
+entry 62 kind=run_warp area=16 name="01d_02"
   warp area=17 position="01pos_02"
 end
 
@@ -300,11 +300,11 @@ entry 64 kind=door area=17 name=@01d_01
   warp area=20
 end
 
-entry 65 kind=2 area=17 name="01d_02"
+entry 65 kind=run_warp area=17 name="01d_02"
   warp area=16 position="01pos_02"
 end
 
-entry 66 kind=2 area=17 name="01d_03"
+entry 66 kind=run_warp area=17 name="01d_03"
   warp area=18 position="01pos_03"
 end
 
@@ -313,15 +313,15 @@ entry 68 kind=door area=18 name=@01d_01
   warp area=22
 end
 
-entry 69 kind=2 area=18 name="01d_02"
+entry 69 kind=run_warp area=18 name="01d_02"
   warp area=19
 end
 
-entry 70 kind=2 area=18 name="01d_03"
+entry 70 kind=run_warp area=18 name="01d_03"
   warp area=17 position="01pos_03"
 end
 
-entry 72 kind=2 area=19 name=@01d_01
+entry 72 kind=run_warp area=19 name=@01d_01
   warp area=18 position="01pos_02"
 end
 
@@ -330,23 +330,23 @@ entry 74 kind=door area=20 name=@01d_01
   warp area=17
 end
 
-entry 75 kind=2 area=20 name="01d_02"
+entry 75 kind=run_warp area=20 name="01d_02"
   warp area=21 position="01pos_03"
 end
 
-entry 76 kind=12 area=20 name="01d_03"
-  scene args=17,0,0
+entry 76 kind=barrier area=20 name="01d_03"
+  scene barrier=17
   warp type=4
   tail control=81 args=0,0,3,0,0,0,0
 end
 
-entry 77 kind=12 area=20 name="01d_04"
-  scene args=18,0,0
+entry 77 kind=barrier area=20 name="01d_04"
+  scene barrier=18
   warp type=4
   tail control=81 args=0,0,2,0,0,0,0
 end
 
-entry 79 kind=2 area=21 name="01d_03"
+entry 79 kind=run_warp area=21 name="01d_03"
   warp area=20 position="01pos_02"
 end
 
@@ -404,13 +404,13 @@ entry 93 kind=door area=26 name=@01d_01
   camera mode=1 table=72
 end
 
-entry 94 kind=11 area=26 name="01d_02"
-  scene args=0,2,6 primary="01pos_03" secondary="01cam_03"
+entry 94 kind=suction_warp area=26 name="01d_02"
+  scene map_entry=2 motion=6 primary="01pos_03" secondary="01cam_03"
   warp area=27 position="01pos_03"
 end
 
-entry 95 kind=11 area=26 name="01d_04"
-  scene args=0,2,6 primary="01pos_04" secondary="01cam_06"
+entry 95 kind=suction_warp area=26 name="01d_04"
+  scene map_entry=2 motion=6 primary="01pos_04" secondary="01cam_06"
   warp area=27 position="01pos_34"
 end
 
@@ -454,13 +454,13 @@ entry 105 kind=door area=28 name="01d_03"
   warp area=27 position="01pos_05"
 end
 
-entry 106 kind=11 area=28 name="01d_10"
-  scene args=1,3,22 primary="01pos_04" secondary="01cam_01"
+entry 106 kind=suction_warp area=28 name="01d_10"
+  scene state_selector=1 map_entry=3 motion=22 primary="01pos_04" secondary="01cam_01"
   warp area=31 position="01pos_39"
 end
 
-entry 107 kind=12 area=28 name="01d_11"
-  scene args=19,0,0
+entry 107 kind=barrier area=28 name="01d_11"
+  scene barrier=19
   warp type=4
   tail control=113 args=0,0,4,0,0,0,0
 end
@@ -480,8 +480,8 @@ entry 112 kind=door area=30 name=@01d_01
   warp area=29 position="01pos_02"
 end
 
-entry 114 kind=11 area=31 name="01eve_03"
-  scene args=1,3,22 primary="01pos_40" secondary="01cam_01"
+entry 114 kind=suction_warp area=31 name="01eve_03"
+  scene state_selector=1 map_entry=3 motion=22 primary="01pos_40" secondary="01cam_01"
   warp area=28 position="01pos_03"
 end
 
@@ -516,8 +516,8 @@ entry 122 kind=door area=33 name="01d_03"
   camera table=65
 end
 
-entry 123 kind=12 area=33 name="01d_04"
-  scene args=20,0,0
+entry 123 kind=barrier area=33 name="01d_04"
+  scene barrier=20
   warp type=4
   tail control=133 args=0,0,2,0,0,0,0
 end
@@ -564,18 +564,18 @@ entry 133 kind=door area=36 name="01d_05"
   warp area=55
 end
 
-entry 134 kind=11 area=36 name="01d_04"
-  scene args=0,4,6 primary="01pos_04" secondary="01cam_02"
+entry 134 kind=suction_warp area=36 name="01d_04"
+  scene map_entry=4 motion=6 primary="01pos_04" secondary="01cam_02"
   warp area=55 position="01pos_04"
 end
 
-entry 135 kind=11 area=36 name="01d_06"
-  scene args=0,4,6 primary="01pos_07" secondary="01cam_03"
+entry 135 kind=suction_warp area=36 name="01d_06"
+  scene map_entry=4 motion=6 primary="01pos_07" secondary="01cam_03"
   warp area=55 position="01pos_05"
 end
 
-entry 136 kind=11 area=36 name="01eve_04"
-  scene args=2,3,21 primary="01pos_06" secondary="01cam_01"
+entry 136 kind=suction_warp area=36 name="01eve_04"
+  scene state_selector=2 map_entry=3 motion=21 primary="01pos_06" secondary="01cam_01"
   warp area=27 position="01pos_33"
 end
 
@@ -620,13 +620,13 @@ entry 147 kind=door area=39 name="01d_02"
   warp area=37 position="01pos_03"
 end
 
-entry 148 kind=11 area=39 name="01d_03"
-  scene args=0,3,6 primary="01pos_04" secondary="01cam_01"
+entry 148 kind=suction_warp area=39 name="01d_03"
+  scene map_entry=3 motion=6 primary="01pos_04" secondary="01cam_01"
   warp position="01pos_03"
 end
 
-entry 149 kind=11 area=39 name="01d_04"
-  scene args=0,3,6 primary="01pos_05" secondary="01cam_02"
+entry 149 kind=suction_warp area=39 name="01d_04"
+  scene map_entry=3 motion=6 primary="01pos_05" secondary="01cam_02"
   warp position="01pos_06"
 end
 
@@ -650,8 +650,8 @@ entry 154 kind=door area=40 name="01d_03"
   warp area=42
 end
 
-entry 155 kind=12 area=40 name="01d_05"
-  scene args=21,0,0
+entry 155 kind=barrier area=40 name="01d_05"
+  scene barrier=21
   warp type=4
   tail control=161 args=0,0,3,0,0,0,0
 end
@@ -661,8 +661,8 @@ entry 157 kind=door area=41 name=@01d_01
   warp area=45 position="01pos_02"
 end
 
-entry 158 kind=11 area=41 name="01eve_01"
-  scene args=1,2,22 primary="01pos_02" secondary="01cam_01"
+entry 158 kind=suction_warp area=41 name="01eve_01"
+  scene state_selector=1 map_entry=2 motion=22 primary="01pos_02" secondary="01cam_01"
   warp area=44 position="01pos_41"
 end
 
@@ -681,8 +681,8 @@ entry 163 kind=door area=43 name=@01d_01
   warp area=42 position="01pos_02"
 end
 
-entry 165 kind=11 area=44 name="01eve_10"
-  scene args=1,2,22 primary="01pos_01" secondary="01cam_01"
+entry 165 kind=suction_warp area=44 name="01eve_10"
+  scene state_selector=1 map_entry=2 motion=22 primary="01pos_01" secondary="01cam_01"
   warp area=40 position="01pos_04"
 end
 
@@ -712,8 +712,8 @@ entry 171 kind=door area=45 name="01d_05"
   camera table=65
 end
 
-entry 172 kind=12 area=45 name="01d_06"
-  scene args=22,0,0
+entry 172 kind=barrier area=45 name="01d_06"
+  scene barrier=22
   warp type=4
   tail control=181 args=0,0,2,0,0,0,0
 end
@@ -738,33 +738,33 @@ entry 178 kind=door area=47 name="01d_02"
   warp area=46 position="01pos_02"
 end
 
-entry 179 kind=11 area=47 name="01eve_09"
-  scene args=1,2,22 primary="01pos_05" secondary="01cam_03"
+entry 179 kind=suction_warp area=47 name="01eve_09"
+  scene state_selector=1 map_entry=2 motion=22 primary="01pos_05" secondary="01cam_03"
   warp position="01pos_38"
 end
 
-entry 180 kind=11 area=47 name="01eve_05"
-  scene args=2,5,21 primary="01pos_03" secondary="01cam_05"
+entry 180 kind=suction_warp area=47 name="01eve_05"
+  scene state_selector=2 map_entry=5 motion=21 primary="01pos_03" secondary="01cam_05"
   warp area=50 position="01pos_34"
 end
 
-entry 181 kind=11 area=47 name="01eve_08"
-  scene args=1,4,22 primary="01pos_08" secondary="01cam_07"
+entry 181 kind=suction_warp area=47 name="01eve_08"
+  scene state_selector=1 map_entry=4 motion=22 primary="01pos_08" secondary="01cam_07"
   warp area=26 position="01pos_37"
 end
 
-entry 182 kind=11 area=47 name="01eve_07"
-  scene args=2,3,21 primary="01pos_07" secondary="01cam_04"
+entry 182 kind=suction_warp area=47 name="01eve_07"
+  scene state_selector=2 map_entry=3 motion=21 primary="01pos_07" secondary="01cam_04"
   warp area=26 position="01pos_38"
 end
 
-entry 183 kind=11 area=47 name="01eve_11"
-  scene args=1,3,22 primary="01pos_06" secondary="01cam_01"
+entry 183 kind=suction_warp area=47 name="01eve_11"
+  scene state_selector=1 map_entry=3 motion=22 primary="01pos_06" secondary="01cam_01"
   warp area=26 position="01pos_36"
 end
 
-entry 184 kind=11 area=47 name="01eve_10"
-  scene args=1,5,22 primary="01pos_04" secondary="01cam_06"
+entry 184 kind=suction_warp area=47 name="01eve_10"
+  scene state_selector=1 map_entry=5 motion=22 primary="01pos_04" secondary="01cam_06"
   warp area=50 position="01pos_35"
 end
 
@@ -785,8 +785,8 @@ entry 189 kind=door area=49 name=@01d_01
   camera table=65
 end
 
-entry 191 kind=11 area=50 name="01eve_06"
-  scene args=1,2,22 primary="01pos_01" secondary="01cam_01"
+entry 191 kind=suction_warp area=50 name="01eve_06"
+  scene state_selector=1 map_entry=2 motion=22 primary="01pos_01" secondary="01cam_01"
   warp area=45 position="01pos_35"
 end
 
@@ -811,78 +811,78 @@ entry 197 kind=door area=52 name="01d_02"
   warp area=54
 end
 
-entry 198 kind=11 area=52 name="01eve_01"
-  scene args=1,5,22 primary="01pos_21" secondary="01cam_01"
+entry 198 kind=suction_warp area=52 name="01eve_01"
+  scene state_selector=1 map_entry=5 motion=22 primary="01pos_21" secondary="01cam_01"
   warp position="01pos_11"
 end
 
-entry 199 kind=11 area=52 name="01eve_09"
-  scene args=2,5,21 primary="01pos_22" secondary="01cam_02"
+entry 199 kind=suction_warp area=52 name="01eve_09"
+  scene state_selector=2 map_entry=5 motion=21 primary="01pos_22" secondary="01cam_02"
   warp position="01pos_35"
 end
 
-entry 200 kind=11 area=52 name="01d_03"
-  scene args=0,2,6 primary="01pos_32" secondary="01cam_10"
+entry 200 kind=suction_warp area=52 name="01d_03"
+  scene map_entry=2 motion=6 primary="01pos_32" secondary="01cam_10"
   warp area=51 position="01pos_04"
 end
 
-entry 201 kind=11 area=52 name="01d_04"
-  scene args=0,2,6 primary="01pos_33" secondary="01cam_09"
+entry 201 kind=suction_warp area=52 name="01d_04"
+  scene map_entry=2 motion=6 primary="01pos_33" secondary="01cam_09"
   warp area=51 position="01pos_03"
 end
 
-entry 202 kind=11 area=52 name="01eve_14"
-  scene args=2,10,21 primary="01pos_23" secondary="01cam_03"
+entry 202 kind=suction_warp area=52 name="01eve_14"
+  scene state_selector=2 map_entry=10 motion=21 primary="01pos_23" secondary="01cam_03"
   warp position="01pos_12"
 end
 
-entry 203 kind=11 area=52 name="01eve_10"
-  scene args=1,10,22 primary="01pos_24" secondary="01cam_04"
+entry 203 kind=suction_warp area=52 name="01eve_10"
+  scene state_selector=1 map_entry=10 motion=22 primary="01pos_24" secondary="01cam_04"
   warp position="01pos_36"
 end
 
-entry 204 kind=11 area=52 name="01eve_03"
-  scene args=2,6,21 primary="01pos_25" secondary="01cam_05"
+entry 204 kind=suction_warp area=52 name="01eve_03"
+  scene state_selector=2 map_entry=6 motion=21 primary="01pos_25" secondary="01cam_05"
   warp position="01pos_13"
 end
 
-entry 205 kind=11 area=52 name="01eve_11"
-  scene args=1,6,22 primary="01pos_26" secondary="01cam_06"
+entry 205 kind=suction_warp area=52 name="01eve_11"
+  scene state_selector=1 map_entry=6 motion=22 primary="01pos_26" secondary="01cam_06"
   warp position="01pos_38"
 end
 
-entry 206 kind=11 area=52 name="01eve_04"
-  scene args=1,9,22 primary="01pos_34" secondary="01cam_11"
+entry 206 kind=suction_warp area=52 name="01eve_04"
+  scene state_selector=1 map_entry=9 motion=22 primary="01pos_34" secondary="01cam_11"
   warp position="01pos_14"
 end
 
-entry 207 kind=11 area=52 name="01eve_12"
-  scene args=1,7,22 primary="01pos_28" secondary="01cam_07"
+entry 207 kind=suction_warp area=52 name="01eve_12"
+  scene state_selector=1 map_entry=7 motion=22 primary="01pos_28" secondary="01cam_07"
   warp position="01pos_15"
 end
 
-entry 208 kind=11 area=52 name="01eve_05"
-  scene args=2,7,21 primary="01pos_27" secondary="01cam_08"
+entry 208 kind=suction_warp area=52 name="01eve_05"
+  scene state_selector=2 map_entry=7 motion=21 primary="01pos_27" secondary="01cam_08"
   warp position="01pos_40"
 end
 
-entry 209 kind=11 area=52 name="01eve_06"
-  scene args=1,8,22 primary="01pos_06" secondary="01cam_15"
+entry 209 kind=suction_warp area=52 name="01eve_06"
+  scene state_selector=1 map_entry=8 motion=22 primary="01pos_06" secondary="01cam_15"
   warp position="01pos_16"
 end
 
-entry 210 kind=11 area=52 name="01eve_07"
-  scene args=2,4,21 primary="01pos_30" secondary="01cam_13"
+entry 210 kind=suction_warp area=52 name="01eve_07"
+  scene state_selector=2 map_entry=4 motion=21 primary="01pos_30" secondary="01cam_13"
   warp position="01pos_17"
 end
 
-entry 211 kind=11 area=52 name="01eve_13"
-  scene args=1,4,22 primary="01pos_29" secondary="01cam_12"
+entry 211 kind=suction_warp area=52 name="01eve_13"
+  scene state_selector=1 map_entry=4 motion=22 primary="01pos_29" secondary="01cam_12"
   warp position="01pos_37"
 end
 
-entry 212 kind=11 area=52 name="01eve_08"
-  scene args=1,3,22 primary="01pos_31" secondary="01cam_14"
+entry 212 kind=suction_warp area=52 name="01eve_08"
+  scene state_selector=1 map_entry=3 motion=22 primary="01pos_31" secondary="01cam_14"
   warp position="01pos_18"
 end
 

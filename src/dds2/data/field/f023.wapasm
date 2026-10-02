@@ -249,7 +249,7 @@ entry 55 kind=door area=9 name=@01d_01
   warp area=8 position="01pos_03"
 end
 
-entry 56 kind=2 area=9 name="01d_02"
+entry 56 kind=run_warp area=9 name="01d_02"
   warp area=10 position="01pos_02"
   tail control=2 args=23,4,0,7,0,3,3
 end
@@ -273,7 +273,7 @@ entry 60 kind=door area=10 name=@01d_01
   tail control=2 args=23,4,0,2,5,13,14
 end
 
-entry 61 kind=2 area=10 name="01d_02"
+entry 61 kind=run_warp area=10 name="01d_02"
   warp area=9 position="01pos_02"
 end
 
@@ -282,12 +282,12 @@ entry 63 kind=door area=11 name=@01d_01
   warp area=10
 end
 
-entry 64 kind=2 flag=9 area=11 name="01d_02"
+entry 64 kind=run_warp flag=9 area=11 name="01d_02"
   warp area=14 position="01pos_03"
   after footstep=2
 end
 
-entry 65 kind=2 area=11 name="01d_02"
+entry 65 kind=run_warp area=11 name="01d_02"
   warp area=14 position="01pos_03"
   after footstep=2 flag=2 script=@014_kubanda_01
 end
@@ -304,17 +304,17 @@ entry 69 kind=door area=13 name=@01d_01
   after footstep=2
 end
 
-entry 71 kind=2 flag=9 area=14 name=@01d_01
+entry 71 kind=run_warp flag=9 area=14 name=@01d_01
   warp area=16 position="01pos_03"
   after footstep=2
 end
 
-entry 72 kind=2 area=14 name=@01d_01
+entry 72 kind=run_warp area=14 name=@01d_01
   warp area=16 position="01pos_03"
   after footstep=2 flag=2 script=@016_kubanda_01
 end
 
-entry 73 kind=2 area=14 name=@01d_03
+entry 73 kind=run_warp area=14 name=@01d_03
   warp area=11 position="01pos_02"
   after footstep=2
 end
@@ -325,12 +325,12 @@ entry 75 kind=door area=15 name=@01d_01
   after footstep=2
 end
 
-entry 77 kind=2 area=16 name=@01d_01
+entry 77 kind=run_warp area=16 name=@01d_01
   warp area=18 position="01pos_02"
   after footstep=2
 end
 
-entry 78 kind=2 area=16 name=@01d_03
+entry 78 kind=run_warp area=16 name=@01d_03
   warp area=14
   after footstep=2
 end
@@ -341,7 +341,7 @@ entry 80 kind=door area=17 name=@01d_01
   after footstep=2
 end
 
-entry 82 kind=2 area=18 name="01d_02"
+entry 82 kind=run_warp area=18 name="01d_02"
   warp area=16
   after footstep=2 flag=2 script=@016_kubanda_02
 end

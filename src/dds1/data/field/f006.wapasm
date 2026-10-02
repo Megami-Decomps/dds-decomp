@@ -72,8 +72,8 @@ entry 14 kind=door area=3 name=@01d_01
   camera mode=1 table=30
 end
 
-entry 15 kind=5 area=3 name=@01d_02
-  scene args=1,1,0 primary="01pos_03" secondary="01cam_02"
+entry 15 kind=ladder area=3 name=@01d_02
+  scene direction=1 direct_prompt=1 primary="01pos_03" secondary="01cam_02"
   warp field=27 area=22 position="01pos_04"
   camera table=96
 end

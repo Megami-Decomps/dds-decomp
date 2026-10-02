@@ -98,7 +98,7 @@ entry 18 kind=door area=3 name="01d_06"
   after flag=8
 end
 
-entry 30 kind=2 area=3 name="01d_01"
+entry 30 kind=run_warp area=3 name="01d_01"
   warp field=15 area=2 position="01pos_05"
   after bgm=2
 end

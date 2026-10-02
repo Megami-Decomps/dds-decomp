@@ -270,7 +270,7 @@ entry 63 kind=door area=11 name=@01d_04
   warp area=13
 end
 
-entry 64 kind=2 area=11 name="01d_05"
+entry 64 kind=run_warp area=11 name="01d_05"
   warp area=23 position="01pos_05"
 end
 
@@ -319,7 +319,7 @@ entry 77 kind=door area=15 name=@01d_04
   warp area=17 position="01pos_02"
 end
 
-entry 78 kind=2 area=15 name="01d_05"
+entry 78 kind=run_warp area=15 name="01d_05"
   warp area=18 position="01pos_04"
 end
 
@@ -353,7 +353,7 @@ entry 87 kind=door area=18 name=@01d_03
   warp area=21 position="01pos_04"
 end
 
-entry 88 kind=2 area=18 name=@01d_04
+entry 88 kind=run_warp area=18 name=@01d_04
   warp area=15 position="01pos_05"
 end
 
@@ -440,7 +440,7 @@ entry 109 kind=door area=23 name=@01d_04
   warp area=24 position="01pos_02"
 end
 
-entry 110 kind=2 area=23 name="01d_05"
+entry 110 kind=run_warp area=23 name="01d_05"
   warp area=11 position="01pos_05"
 end
 
@@ -489,7 +489,7 @@ entry 123 kind=door area=27 name=@01d_04
   warp area=31
 end
 
-entry 124 kind=2 area=27 name="01d_05"
+entry 124 kind=run_warp area=27 name="01d_05"
   warp area=34 position="01pos_05"
 end
 
@@ -594,7 +594,7 @@ entry 151 kind=door area=34 name=@01d_04
   warp area=36
 end
 
-entry 152 kind=2 area=34 name="01d_05"
+entry 152 kind=run_warp area=34 name="01d_05"
   warp area=27 position="01pos_05"
 end
 
@@ -643,7 +643,7 @@ entry 165 kind=door area=38 name=@01d_04
   warp area=40
 end
 
-entry 166 kind=2 area=38 name="01d_05"
+entry 166 kind=run_warp area=38 name="01d_05"
   warp area=42 position="01pos_05"
 end
 
@@ -702,7 +702,7 @@ entry 181 kind=door area=42 name=@01d_04
   warp area=49
 end
 
-entry 182 kind=2 area=42 name="01d_05"
+entry 182 kind=run_warp area=42 name="01d_05"
   warp area=38 position="01pos_05"
 end
 
