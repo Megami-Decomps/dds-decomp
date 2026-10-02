@@ -1,0 +1,11 @@
+fld2 1
+header version=23 magic=FLD2 type_count=0 type_table=@data_end word_1c=offset:0x30 word_20=1 word_24=@constraint_area word_28=0 word_2c=0 word_30=0 word_34=0 word_38=100 word_3c=0
+
+label constraint_area
+zeros 4
+pointer @loc_00050
+zeros 8
+label loc_00050
+bytes 30310000000000000000000000000000
+label data_end
+end_data

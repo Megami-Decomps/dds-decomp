@@ -1,0 +1,47 @@
+fld2 1
+header version=23 magic=FLD2 type_count=1 type_table=@resource_types word_1c=offset:0x30 word_20=1 word_24=@constraint_area word_28=0 word_2c=0 word_30=0 word_34=0 word_38=300 word_3c=0
+
+label constraint_area
+zeros 4
+pointer @loc_00050
+zeros 8
+label loc_00050
+bytes 30310000000000000000000000000000
+label resource_types
+type id=4 count=2 resources=@type_4_resources
+
+bytes 43616d65
+label type_4_resources
+# r_01cam_01
+resource serial=0 flags=1 type=4 name=@r_01cam_01_name reserved=0 transform=@r_01cam_01_transform area=@r_01cam_01_area link=null sblock=null data=@r_01cam_01_data
+# r_01cam_02
+resource serial=1 flags=1 type=4 name=@r_01cam_02_name reserved=0 transform=@r_01cam_02_transform area=@r_01cam_02_area link=null sblock=null data=@r_01cam_02_data
+
+zeros 8
+label r_01cam_01_name
+string16 "01cam_01"
+
+label r_01cam_01_transform
+transform position=409.732421875,-400.0,-2000.0,1.0 rotation=0.4162466824054718,0.026330096647143364,0.012059850618243217,0.9087903499603271 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_01_area
+area number=1 name="01"
+
+label r_01cam_02_name
+string16 "01cam_02"
+
+label r_01cam_02_transform
+transform position=409.732421875,-600.0,3000.0,1.0 rotation=-0.05396153777837753,-0.00785608310252428,0.00042460724944248796,0.9985120296478271 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_02_area
+area number=1 name="01"
+
+label r_01cam_01_data
+camera fovy=0.7444503307342529
+
+zeros 12
+label r_01cam_02_data
+camera fovy=0.8172757625579834
+
+label data_end
+end_data

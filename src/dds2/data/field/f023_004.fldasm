@@ -1,0 +1,436 @@
+fld2 1
+header version=23 magic=FLD2 type_count=5 type_table=@resource_types word_1c=offset:0x30 word_20=1 word_24=@constraint_area word_28=0 word_2c=0 word_30=0 word_34=@area_table word_38=0 word_3c=0
+
+label area_table
+bytes 3030345f737461727400e80300000000
+label constraint_area
+zeros 4
+pointer @loc_00060
+zeros 8
+label loc_00060
+bytes 30310000000000000000000000000000
+label resource_types
+type id=3 count=2 resources=@type_3_resources
+type id=4 count=1 resources=@type_4_resources
+type id=6 count=1 resources=@type_6_resources
+type id=9 count=1 resources=@type_9_resources
+type id=10 count=10 resources=@type_10_resources
+
+bytes 436f626a
+label type_3_resources
+# r_01all_01
+resource serial=15 flags=0 type=3 name=@r_01all_01_name reserved=0 transform=@r_01all_01_transform area=@r_01all_01_area link=null sblock=null data=@r_01all_01_data
+# r_01map_01
+resource serial=16 flags=0 type=3 name=@r_01map_01_name reserved=0 transform=@r_01map_01_transform area=@r_01map_01_area link=null sblock=null data=@r_01map_01_data
+
+zeros 8
+label r_01all_01_name
+string16 "01all_01"
+
+label r_01all_01_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01all_01_area
+area number=1 name="01"
+
+label r_01map_01_name
+string16 "01map_01"
+
+label r_01map_01_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01map_01_area
+area number=1 name="01"
+
+label r_01all_01_data
+collision vertex_count=99 face_count=44 extra_count=0 vertices=@r_01all_01_vertices faces=@r_01all_01_faces stop=@r_01all_01_stop reserved=0,0
+
+label r_01all_01_vertices
+vertex -299.9999084472656 0.0 1470.0 1.0
+vertex -299.99993896484375 -600.0 1470.0 1.0
+vertex -300.0000915527344 -600.0 -1470.0 1.0
+vertex -300.00006103515625 -3.0517578125e-05 -1470.0 1.0
+vertex 300.00006103515625 -3.0517578125e-05 1470.0 1.0
+vertex 300.00006103515625 -600.0 1470.0 1.0
+vertex 300.0 -6.103515625e-05 300.0 1.0
+vertex 300.0 -600.0000610351562 300.0 1.0
+vertex 4500.0 -0.000244140625 299.9999694824219 1.0
+vertex 4500.0 -600.000244140625 299.9999694824219 1.0
+vertex 4500.0 -0.000213623046875 1469.9998779296875 1.0
+vertex 4500.0 -600.000244140625 1469.9998779296875 1.0
+vertex 5090.0 -0.000244140625 1469.9998779296875 1.0
+vertex 5090.0 -600.000244140625 1469.9998779296875 1.0
+vertex 5090.0 -0.000274658203125 -290.00006103515625 1.0
+vertex 5090.0 -600.000244140625 -290.00006103515625 1.0
+vertex 3900.0 -0.000213623046875 -290.0000305175781 1.0
+vertex 3900.0 -600.000244140625 -290.0000305175781 1.0
+vertex 3900.0 -0.000244140625 -1470.0001220703125 1.0
+vertex 3900.0 -600.000244140625 -1470.0001220703125 1.0
+vertex 3300.0 -0.000213623046875 -1470.0 1.0
+vertex 3300.0 -600.000244140625 -1470.0 1.0
+vertex 3300.0 -0.00018310546875 -290.0000305175781 1.0
+vertex 3300.0 -600.0001831054688 -290.0000305175781 1.0
+vertex 300.0 -6.103515625e-05 -289.9999694824219 1.0
+vertex 300.0 -600.0000610351562 -289.9999694824219 1.0
+vertex 299.99993896484375 -9.1552734375e-05 -1470.0 1.0
+vertex 299.99993896484375 -600.0001220703125 -1470.0 1.0
+vertex -499.9999084472656 6.103515625e-05 1700.0 1.0
+vertex -500.00006103515625 -6.103515625e-05 -1700.0 1.0
+vertex 5900.0 -0.000213623046875 1699.9998779296875 1.0
+vertex 5900.0 -0.000335693359375 -1700.0001220703125 1.0
+vertex 300.00006103515625 -3.0517578125e-05 1300.4879150390625 1.0
+vertex 300.00006103515625 -130.00003051757812 1300.4879150390625 1.0
+vertex 260.00006103515625 -130.00003051757812 1300.4879150390625 1.0
+vertex 260.00006103515625 -3.0517578125e-05 1300.4879150390625 1.0
+vertex 210.00006103515625 -130.00001525878906 1390.4879150390625 1.0
+vertex 210.00006103515625 -3.0517578125e-05 1390.4879150390625 1.0
+vertex 190.00006103515625 -130.00001525878906 1410.4879150390625 1.0
+vertex 190.00006103515625 -3.0517578125e-05 1410.4879150390625 1.0
+vertex 160.00006103515625 -130.00001525878906 1480.4879150390625 1.0
+vertex 160.00006103515625 -3.0517578125e-05 1480.4879150390625 1.0
+vertex 300.00006103515625 -3.0517578125e-05 1390.4879150390625 1.0
+vertex 300.00006103515625 -590.0 1390.4879150390625 1.0
+vertex 260.00006103515625 -590.0 1390.4879150390625 1.0
+vertex 260.00006103515625 -3.0517578125e-05 1390.4879150390625 1.0
+vertex 260.00006103515625 -590.0 1480.4879150390625 1.0
+vertex 260.00006103515625 -3.0517578125e-05 1480.4879150390625 1.0
+vertex -261.00091552734375 0.0 1390.4879150390625 1.0
+vertex -261.00091552734375 -590.0 1390.4879150390625 1.0
+vertex -301.00091552734375 -590.0 1390.4879150390625 1.0
+vertex -301.00091552734375 0.0 1390.4879150390625 1.0
+vertex -261.00091552734375 0.0 1470.4879150390625 1.0
+vertex -261.00091552734375 -590.0 1470.4879150390625 1.0
+vertex -261.00103759765625 0.0 -1388.4906005859375 1.0
+vertex -261.00103759765625 -590.0 -1388.4906005859375 1.0
+vertex -261.00103759765625 -590.0 -1474.79345703125 1.0
+vertex -261.00103759765625 0.0 -1474.79345703125 1.0
+vertex -311.54559326171875 0.0 -1388.4906005859375 1.0
+vertex -311.54559326171875 -590.0 -1388.4906005859375 1.0
+vertex 162.00152587890625 -3.0517578125e-05 -1240.026611328125 1.0
+vertex 162.00152587890625 -590.0 -1240.026611328125 1.0
+vertex 322.54608154296875 -590.0 -1240.026611328125 1.0
+vertex 322.54608154296875 -3.0517578125e-05 -1240.026611328125 1.0
+vertex 162.00152587890625 -3.0517578125e-05 -1490.026611328125 1.0
+vertex 162.00152587890625 -590.0 -1490.026611328125 1.0
+vertex 272.00152587890625 -3.0517578125e-05 -810.026611328125 1.0
+vertex 272.00152587890625 -70.00003051757812 -810.0265502929688 1.0
+vertex 322.54608154296875 -70.00003051757812 -810.0265502929688 1.0
+vertex 322.54608154296875 -3.0517578125e-05 -810.026611328125 1.0
+vertex 242.00152587890625 -3.0517578125e-05 -1280.026611328125 1.0
+vertex 242.00152587890625 -70.00003051757812 -1280.026611328125 1.0
+vertex 3295.295654296875 -0.000152587890625 -1388.49072265625 1.0
+vertex 3295.295654296875 -590.0001220703125 -1388.49072265625 1.0
+vertex 3345.840087890625 -590.0001220703125 -1388.49072265625 1.0
+vertex 3345.840087890625 -0.000152587890625 -1388.49072265625 1.0
+vertex 3345.840087890625 -590.0001220703125 -1388.49072265625 1.0
+vertex 3345.840087890625 -0.000152587890625 -1388.49072265625 1.0
+vertex 3345.840087890625 -590.0001220703125 -1488.49072265625 1.0
+vertex 3345.840087890625 -0.000152587890625 -1488.49072265625 1.0
+vertex 3345.840087890625 -0.000152587890625 -1488.49072265625 1.0
+vertex 3855.1904296875 -0.00018310546875 -1388.49072265625 1.0
+vertex 3855.1904296875 -590.0001831054688 -1388.49072265625 1.0
+vertex 3905.7353515625 -590.0001831054688 -1388.4908447265625 1.0
+vertex 3905.7353515625 -0.00018310546875 -1388.4908447265625 1.0
+vertex 3855.1904296875 -0.00018310546875 -1496.904541015625 1.0
+vertex 3855.1904296875 -590.0001831054688 -1496.904541015625 1.0
+vertex 4537.11181640625 -0.000213623046875 1390.4876708984375 1.0
+vertex 4537.11181640625 -590.000244140625 1390.4876708984375 1.0
+vertex 4497.11181640625 -590.000244140625 1390.4876708984375 1.0
+vertex 4497.11181640625 -0.000213623046875 1390.4876708984375 1.0
+vertex 4537.11181640625 -0.000213623046875 1481.9495849609375 1.0
+vertex 4537.11181640625 -590.000244140625 1481.9495849609375 1.0
+vertex 5093.20068359375 -0.000244140625 1390.4876708984375 1.0
+vertex 5093.20068359375 -590.000244140625 1390.4876708984375 1.0
+vertex 5053.20068359375 -590.000244140625 1390.4876708984375 1.0
+vertex 5053.20068359375 -0.000244140625 1390.4876708984375 1.0
+vertex 5053.20068359375 -590.000244140625 1500.4876708984375 1.0
+vertex 5053.20068359375 -0.000244140625 1500.4876708984375 1.0
+
+label r_01all_01_faces
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=0,1,2,3 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=4,5,1,0 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=6,7,5,4 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=8,9,7,6 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=10,11,9,8 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=12,13,11,10 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=14,15,13,12 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=16,17,15,14 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=18,19,17,16 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=20,21,19,18 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=22,23,21,20 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=24,25,23,22 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=26,27,25,24 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=3,2,27,26 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=28,29,31,30 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=32,33,34,35 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=36,37,35,34 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=38,39,37,36 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=40,41,39,38 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=42,43,44,45 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=46,47,45,44 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=48,49,50,51 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=52,53,49,48 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=54,55,56,57 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=58,59,55,54 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=60,61,62,63 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=64,65,61,60 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=66,67,68,69 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=70,71,67,66 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=72,73,74,75 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=76,77,75,74 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=78,79,75,74 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=78,80,77,76 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=80,79,75,77 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=79,78,76,75 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=79,78,74,75 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=78,78,76,74 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=78,79,75,76 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=81,82,83,84 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=85,86,82,81 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=87,88,89,90 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=91,92,88,87 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=93,94,95,96 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=97,98,96,95 encounter_type=0 encounter=0 special=0,0
+
+label r_01all_01_stop
+zeros 16
+label r_01map_01_data
+collision vertex_count=4 face_count=1 extra_count=0 vertices=@r_01map_01_vertices faces=@r_01map_01_faces stop=@r_01map_01_stop reserved=0,0
+
+label r_01map_01_vertices
+vertex -500.0 -10.0 1700.0 1.0
+vertex -500.0 -10.0 -1700.0 1.0
+vertex 5900.0 -10.0 1700.0 1.0
+vertex 5900.0 -10.0 -1700.0 1.0
+
+label r_01map_01_faces
+face attributes=0x00000800 move_floor=0 sound=0 stop=0 place=0 automap=1,1 vertices=0,1,3,2 encounter_type=0 encounter=0 special=0,0
+
+zeros 12
+label r_01map_01_stop
+bytes 0000000000000000000000000000000043616d65000000000000000000000000
+label type_4_resources
+# r_01cam_01
+resource serial=0 flags=1 type=4 name=@r_01cam_01_name reserved=0 transform=@r_01cam_01_transform area=@r_01cam_01_area link=null sblock=null data=@r_01cam_01_data
+
+zeros 12
+label r_01cam_01_name
+string16 "01cam_01"
+
+label r_01cam_01_transform
+transform position=4698.69775390625,-450.0,1500.0,1.0 rotation=0.0072920979000627995,-0.98824143409729,-0.14433546364307404,0.049927737563848495 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_01_area
+area number=1 name="01"
+
+label r_01cam_01_data
+camera fovy=0.6024157404899597
+
+bytes 4576656e0000000000000000
+label type_6_resources
+# type_6_1
+resource serial=1 flags=1 type=6 name=@type_6_1_name reserved=0 transform=@type_6_1_transform area=null link=null sblock=null data=@type_6_1_data
+
+zeros 12
+label type_6_1_name
+string16 ""
+
+label type_6_1_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label type_6_1_data
+event flags=0 label=@type_6_1_event_label reserved=0,0
+
+label type_6_1_event_label
+cstring "004_01eve_01"
+
+bytes 4d6f7420000000000000000000000000000000
+label type_9_resources
+# path_hoji_04
+resource serial=18 flags=0 type=9 name=@path_hoji_04_name reserved=0 transform=null area=null link=null sblock=null data=@path_hoji_04_data
+
+zeros 12
+label path_hoji_04_name
+string16 "path_hoji_04"
+
+label path_hoji_04_data
+motion tracks=vector3:@path_hoji_04_vector3_curve,quaternion:@path_hoji_04_quaternion_curve
+
+label path_hoji_04_vector3_curve
+motion_curve count=4 values=@path_hoji_04_vector3_values keys=@path_hoji_04_vector3_keys word_0c=0
+
+label path_hoji_04_vector3_values
+vector3 0.0 0.0 0.0
+vector3 0.0 0.0 -830.0
+vector3 0.0 0.0 -2130.0
+vector3 -1200.0 0.0 -2130.0
+
+label path_hoji_04_vector3_keys
+keys 0 1 260 500
+
+label path_hoji_04_quaternion_curve
+motion_curve count=2 values=@path_hoji_04_quaternion_values keys=@path_hoji_04_quaternion_keys word_0c=0
+
+label path_hoji_04_quaternion_values
+quaternion -0.0 0.0 -0.0 1.0
+quaternion -0.0 0.0 -0.0 1.0
+
+label path_hoji_04_quaternion_keys
+keys 0 500
+
+bytes 000000000000000054617469000000000000000000000000
+label type_10_resources
+# r_01d_01
+resource serial=2 flags=1 type=10 name=@r_01d_01_name reserved=0 transform=@r_01d_01_transform area=@r_01d_01_area link=null sblock=null data=@r_01d_01_data
+# r_01d_02
+resource serial=3 flags=1 type=10 name=@r_01d_02_name reserved=0 transform=@r_01d_02_transform area=@r_01d_02_area link=null sblock=null data=@r_01d_02_data
+# r_01d_03
+resource serial=4 flags=1 type=10 name=@r_01d_03_name reserved=0 transform=@r_01d_03_transform area=@r_01d_03_area link=null sblock=null data=@r_01d_03_data
+# r_01d_04
+resource serial=5 flags=1 type=10 name=@r_01d_04_name reserved=0 transform=@r_01d_04_transform area=@r_01d_04_area link=null sblock=null data=@r_01d_04_data
+# r_01pos_01
+resource serial=6 flags=1 type=10 name=@r_01pos_01_name reserved=0 transform=@r_01pos_01_transform area=@r_01pos_01_area link=null sblock=null data=@r_01pos_01_data
+# r_01pos_02
+resource serial=7 flags=1 type=10 name=@r_01pos_02_name reserved=0 transform=@r_01pos_02_transform area=@r_01pos_02_area link=null sblock=null data=@r_01pos_02_data
+# r_01pos_03
+resource serial=8 flags=1 type=10 name=@r_01pos_03_name reserved=0 transform=@r_01pos_03_transform area=@r_01pos_03_area link=null sblock=null data=@r_01pos_03_data
+# r_01pos_04
+resource serial=9 flags=1 type=10 name=@r_01pos_04_name reserved=0 transform=@r_01pos_04_transform area=@r_01pos_04_area link=null sblock=null data=@r_01pos_04_data
+# r_01eve_01
+resource serial=10 flags=1 type=10 name=@r_01eve_01_name reserved=0 transform=@r_01eve_01_transform area=@r_01eve_01_area link=null sblock=null data=@r_01eve_01_data
+# r_01pos_05
+resource serial=11 flags=1 type=10 name=@r_01pos_05_name reserved=0 transform=@r_01pos_05_transform area=@r_01pos_05_area link=null sblock=null data=@r_01pos_05_data
+
+zeros 8
+label r_01d_01_name
+string16 "01d_01"
+
+label r_01d_01_transform
+transform position=0.0,-100.0,-1400.0,1.0 rotation=0.0,0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01d_01_area
+area number=1 name="01"
+
+label r_01d_02_name
+string16 "01d_02"
+
+label r_01d_02_transform
+transform position=0.0,-100.0,1400.0,1.0 rotation=-4.371139183945161e-08,-1.0,-4.371139183945161e-08,-7.549790126404332e-08 scale=1.0,1.0,1.0,1.0
+
+label r_01d_02_area
+area number=1 name="01"
+
+label r_01d_03_name
+string16 "01d_03"
+
+label r_01d_03_transform
+transform position=3600.0,-100.0,-1400.0,1.0 rotation=0.0,0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01d_03_area
+area number=1 name="01"
+
+label r_01d_04_name
+string16 "01d_04"
+
+label r_01d_04_transform
+transform position=4800.0,-100.0,1400.0,1.0 rotation=-4.371139183945161e-08,-1.0,-4.371139183945161e-08,-7.549790126404332e-08 scale=1.0,1.0,1.0,1.0
+
+label r_01d_04_area
+area number=1 name="01"
+
+label r_01pos_01_name
+string16 "01pos_01"
+
+label r_01pos_01_transform
+transform position=0.0,0.0,-1250.0,1.0 rotation=0.0,0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01pos_01_area
+area number=1 name="01"
+
+label r_01pos_02_name
+string16 "01pos_02"
+
+label r_01pos_02_transform
+transform position=0.0,0.0,1250.0,1.0 rotation=-4.371138828673793e-08,-1.0,-4.371138828673793e-08,-2.8786830696958532e-08 scale=1.0,1.0,1.0,1.0
+
+label r_01pos_02_area
+area number=1 name="01"
+
+label r_01pos_03_name
+string16 "01pos_03"
+
+label r_01pos_03_transform
+transform position=3600.0,0.0,-1250.0,1.0 rotation=0.0,0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01pos_03_area
+area number=1 name="01"
+
+label r_01pos_04_name
+string16 "01pos_04"
+
+label r_01pos_04_transform
+transform position=4800.0,0.0,1250.0,1.0 rotation=-4.371138828673793e-08,-1.0,-4.371138828673793e-08,-2.8786830696958532e-08 scale=1.0,1.0,1.0,1.0
+
+label r_01pos_04_area
+area number=1 name="01"
+
+label r_01eve_01_name
+string16 "01eve_01"
+
+label r_01eve_01_transform
+transform position=4800.0,-100.0,400.0,1.0 rotation=0.0,0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01eve_01_area
+area number=1 name="01"
+
+label r_01pos_05_name
+string16 "01pos_05"
+
+label r_01pos_05_transform
+transform position=4800.0,0.0,300.0,1.0 rotation=-4.371138828673793e-08,-1.0,-4.371138828673793e-08,-2.8786830696958532e-08 scale=1.0,1.0,1.0,1.0
+
+label r_01pos_05_area
+area number=1 name="01"
+
+label r_01d_01_data
+placement kind=1 event=-1 visible=0 payload=@r_01d_01_payload
+
+label r_01d_01_payload
+bytes 02000000000048430000484300004843
+label r_01d_02_data
+placement kind=1 event=-1 visible=0 payload=@r_01d_02_payload
+
+label r_01d_02_payload
+bytes 02000000000048430000484300004843
+label r_01d_03_data
+placement kind=1 event=-1 visible=0 payload=@r_01d_03_payload
+
+label r_01d_03_payload
+bytes 02000000000048430000484300004843
+label r_01d_04_data
+placement kind=1 event=-1 visible=0 payload=@r_01d_04_payload
+
+label r_01d_04_payload
+bytes 02000000000048430000484300004843
+label r_01pos_01_data
+placement kind=0 event=-1 visible=0 payload=@r_01pos_02_data
+
+label r_01pos_02_data
+placement kind=0 event=-1 visible=0 payload=@r_01pos_03_data
+
+label r_01pos_03_data
+placement kind=0 event=-1 visible=0 payload=@r_01pos_04_data
+
+label r_01pos_04_data
+placement kind=0 event=-1 visible=0 payload=@r_01eve_01_data
+
+label r_01eve_01_data
+placement kind=1 event=0 visible=0 payload=@r_01eve_01_payload
+
+label r_01eve_01_payload
+bytes 02000000000048430000484400004843
+label r_01pos_05_data
+placement kind=0 event=-1 visible=0 payload=@data_end
+
+label data_end
+end_data
