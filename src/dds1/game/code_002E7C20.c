@@ -1,6 +1,8 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
+#define EFF_QUAT_SLERP_DOT_LIMIT 0.99899996f
+
 typedef struct EffRandState
 {
     u32 x[4];
@@ -43,19 +45,20 @@ void effMiscNormalizeVU(void)
     VU0_NORMALIZE_XYZW_VF10();
 }
 
+/* Retail reduction: (x*x)*(y*y) + z*z + w*w from vf10, not the usual squared length. */
 f32 effMiscQuatLengthSqVU(void)
 {
-    f32 result;
-    VU0_LENGTH_SQ_XYZW(result, vf10);
-    return result;
+    f32 componentMetric;
+    VU0_LENGTH_SQ_XYZW(componentMetric, vf10);
+    return componentMetric;
 }
 
 /* Return the component-wise dot product of quaternions in vf10 and vf11. */
 f32 effMiscQuaternionDotVU(void)
 {
-    f32 result;
-    VU0_DOT_XYZW(result, vf10, vf11);
-    return result;
+    f32 dotProduct;
+    VU0_DOT_XYZW(dotProduct, vf10, vf11);
+    return dotProduct;
 }
 
 /* vf10 initially holds the axis; write the sine-scaled axis and cosine W. */
@@ -125,57 +128,63 @@ INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E8038);
 
 extern f32 sdfAcosTable(f32 dot);
 
-void effMiscSlerpQuaternionVu(f32 amount) {
-    f32 dot;
-    f32 w0;
-    f32 w1;
-    f32 sinTheta;
-    f32 theta;
+/* vu0 routine: blend vf10/vf11 along the shorter quaternion arc into vf10.
+ * blendAmount is used without clamping; the final step normalizes either blend. */
+void effMiscSlerpQuaternionVu(f32 blendAmount) {
+    f32 dotProduct;
+    f32 firstWeight;
+    f32 secondWeight;
+    f32 sineAngle;
+    f32 angleBetween;
 
-    VU0_DOT_XYZW(dot, vf10, vf11);
-    if (dot < 0.0f) {
-        dot = -dot;
+    VU0_DOT_XYZW(dotProduct, vf10, vf11);
+    if (dotProduct < 0.0f) {
+        dotProduct = -dotProduct;
         VU0_NEGATE_VF(vf12, vf11);
     } else {
         VU0_MOVE_VF(vf12, vf11);
     }
-    w0 = 1.0f - amount;
-    w1 = amount;
-    if (dot < 0.99899996f) {
-        theta = sdfAcosTable(dot);
-        sinTheta = sdfSinPoly(theta);
-        w0 = sdfSinPoly(w0 * theta) / sinTheta;
-        w1 = sdfSinPoly(w1 * theta) / sinTheta;
+    firstWeight = 1.0f - blendAmount;
+    secondWeight = blendAmount;
+    /* Near-identical quaternions use linear weights; normalization still follows. */
+    if (dotProduct < EFF_QUAT_SLERP_DOT_LIMIT) {
+        angleBetween = sdfAcosTable(dotProduct);
+        sineAngle = sdfSinPoly(angleBetween);
+        firstWeight = sdfSinPoly(firstWeight * angleBetween) / sineAngle;
+        secondWeight = sdfSinPoly(secondWeight * angleBetween) / sineAngle;
     }
-    VU0_SET_SCALARS_VF2_VF3(w0, w1);
+    VU0_SET_SCALARS_VF2_VF3(firstWeight, secondWeight);
     VU0_WEIGHTED_SUM_VF2X_VF3X(vf10, vf10, vf12);
     effMiscNormalizeVU();
 }
 
-/* vu0 routine: normalized lerp of quaternions vf10 and vf11 by amount (shorter arc), result in vf10 */
-void effMiscQuaternionNlerpVU(f32 amount)
+/* vu0 routine: shorter-arc linear blend of vf10/vf11 into vf10, then normalize.
+ * blendAmount is used without clamping. */
+void effMiscQuaternionNlerpVU(f32 blendAmount)
 {
-    f32 dot;
-    VU0_DOT_XYZW(dot, vf10, vf11);
-    if (dot < 0.0f) {
+    f32 dotProduct;
+    VU0_DOT_XYZW(dotProduct, vf10, vf11);
+    if (dotProduct < 0.0f) {
         VU0_NEGATE_VF(vf12, vf11);
     } else {
         VU0_MOVE_VF(vf12, vf11);
     }
     {
-        f32 remaining = 1.0f - amount;
-        VU0_SET_SCALARS_VF2_VF3(remaining, amount);
+        f32 firstWeight = 1.0f - blendAmount;
+        VU0_SET_SCALARS_VF2_VF3(firstWeight, blendAmount);
         VU0_WEIGHTED_SUM_VF2X_VF3X(vf10, vf10, vf12);
     }
     effMiscNormalizeVU();
 }
 
-/* vu0 routine: rotate D_00398380 by the quaternion matrix, atan2 of the result x and y */
+/* vu0 routine: rotate the shared reference vector by vf10's quaternion;
+ * return atan2(rotated Z, rotated X), its XZ-plane angle. */
 f32 effMiscComputeQuaternionRotatedReferenceAngle(void)
 {
-    f32 x;
-    f32 y;
+    f32 rotatedZ;
+    f32 rotatedX;
     effMiscQuaternionToMatrixVU();
+    /* PEXEW exchanges words 0 and 2: output 0 is Z, while output 1 is X. */
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf10, 0(%2)\n"
@@ -188,8 +197,8 @@ f32 effMiscComputeQuaternionRotatedReferenceAngle(void)
         "qmfc2.ni $2, vf10\n"
         "mtc1 $2, %1\n"
         ".set reorder\n"
-        : "=f"(x), "=f"(y) : "r"(D_00398380) : "memory");
-    return sdfAtan2(x, y);
+        : "=f"(rotatedZ), "=f"(rotatedX) : "r"(D_00398380) : "memory");
+    return sdfAtan2(rotatedZ, rotatedX);
 }
 
 /* Persona 4 effMiscRand @ 004BD050 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
