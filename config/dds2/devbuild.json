@@ -1,0 +1,56 @@
+{
+  "format": 1,
+  "base_sha1": "9be91ee1b4a535a4cb6ec89237b5a6ba41be2add",
+  "extension_vaddr": "0x0048E000",
+  "extension_size": "0x410",
+  "alignment": "0x1000",
+  "heap_alignment": "0x80",
+  "retail_static_end": "0x00488B30",
+  "bss_end_assertions": [
+    {
+      "hi_offset": "0x1120",
+      "lo_offset": "0x1128"
+    }
+  ],
+  "heap_address_patches": [
+    {
+      "hi_offset": "0x1180",
+      "lo_offset": "0x1188"
+    }
+  ],
+  "heap_word_offsets": [
+    "0x3105D0"
+  ],
+  "moves": [
+    {
+      "object": "build/dds2/src/dds2/game/code_0010C250.o",
+      "section": ".text",
+      "size": "0x3C8",
+      "old_vaddr": "0x0010C250",
+      "new_vaddr": "0x0048E000",
+      "expected_relocations": 17
+    }
+  ],
+  "additions": [
+    {
+      "source": "src/dds2/dev/devbuild.c",
+      "object": "build/dds2/devbuild.o",
+      "sections": [
+        ".text",
+        ".rodata",
+        ".data"
+      ],
+      "new_vaddr": "0x0048E3C8",
+      "size": "0x48",
+      "expected_relocations": 3
+    }
+  ],
+  "redirects": [
+    {
+      "symbol": "func_00101AC0",
+      "wrapper": "__wrap_func_00101AC0",
+      "old_vaddr": "0x00101AC0",
+      "expected_relocations": 1
+    }
+  ]
+}
