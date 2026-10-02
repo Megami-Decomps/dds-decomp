@@ -22,6 +22,17 @@ extern u8 D_0037C860[];
 extern char D_0037CA38[];
 extern char D_0037C9AC[];
 
+/* Prefixes of the menu list and node used to read the current page index.
+ * The primary list implementation also stores its cursor at +0x1C. */
+typedef struct MenuListNode {
+    s32 index;
+} MenuListNode;
+
+typedef struct MenuList {
+    u8 pad00[0x1C];
+    MenuListNode *cursor;
+} MenuList;
+
 typedef struct StaffImageNode {
     s32 label;
 } StaffImageNode;
@@ -68,7 +79,7 @@ typedef struct StaffImageContext {
     u8 pad12C[0x30];
     u32 windowFlags; /* 0x15C */
     u8 pad160[0x678];
-    s32 selection; /* 0x7D8 */
+    MenuList *selection; /* 0x7D8: page-selection list */
     u8 pad7DC[0x11C];
     void *panelHandle; /* 0x8F8 */
     void *spriteHandle; /* 0x8FC */
@@ -130,6 +141,7 @@ u32 func_00273C48(void) {
     return 1;
 }
 
+/* Once the popup is idle, confirmation captures the page-selection cursor index. */
 s64 mnuPollStaffValueSelectionConfirmation(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
@@ -145,7 +157,7 @@ s64 mnuPollStaffValueSelectionConfirmation(s32 callback) {
     window = (s32)&((StaffImageContext *)context)->windowFlags;
     mnuUpdateWindowListFromInput(4, window);
     if (buttons & 1) {
-        menu->currentSelection = **(s32 **)(((StaffImageContext *)context)->selection + 0x1C);
+        menu->currentSelection = ((StaffImageContext *)context)->selection->cursor->index;
         mnuSetPopupEntryFlagged(popup, D_0037CA38);
     }
     if (buttons & 2) {
@@ -260,10 +272,11 @@ s64 func_00274310(s32 callback) {
     return menuRunPanel(context, 2, callback);
 }
 
+/* Build the staff value page for the current page-selection cursor. */
 s32 mnuInitializeStaffValuePage(s32 unused) {
     s32 context = kwlnTaskGetUserValue();
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
-    s32 index = **(s32 **)(((StaffImageContext *)context)->selection + 0x1C);
+    s32 index = ((StaffImageContext *)context)->selection->cursor->index;
 
     mnuSelectPage(context + 0x15C, index);
     func_002730A0(context);
