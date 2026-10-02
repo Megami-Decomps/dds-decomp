@@ -197,7 +197,7 @@ void kwlnTaskInsertIntoOrderedStateQueue(KwlnTask *task) {
         task->listNext = NULL;
     } else {
         while (cur != NULL) {
-            if (task->unk20 < cur->unk20) {
+            if (task->priority < cur->priority) {
                 if (cur->listPrev != NULL) {
                     cur->listPrev->listNext = task;
                     task->listPrev = cur->listPrev;

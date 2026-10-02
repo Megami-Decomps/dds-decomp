@@ -2,6 +2,7 @@
 #include "btl_state.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "kwln.h"
 
 typedef struct BtlActor {
     u8 pad00[0x18];
@@ -2324,7 +2325,7 @@ void btlBindActorSlot(s32 actor, s32 option) {
     s32 task;
     s32 window;
 
-    task = scrCreateTaskForProcessId(((BtlList *)((BtlState *)battle)->scriptOwner)->count - 1, D_00435E7C, option);
+    task = scrCreateTaskForProcessId((s32)((BtlState *)battle)->scriptOwner->priority - 1, D_00435E7C, option);
     scrSetCurrentActor(task, actor);
     window = *(s32 *)(kwlnTaskGetUserValue(task) + 0xCC);
     if (window >= 0) {

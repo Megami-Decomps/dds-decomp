@@ -268,7 +268,7 @@ KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 des
         task->nameSum += name[i];
         i++;
     }
-    task->unk20 = priority;
+    task->priority = priority;
     task->flags = 1;
     task->unk2C = startDelay;
     task->unk2E = destroyDelay;
@@ -406,7 +406,7 @@ KwlnTask* kwlnTaskFindByPriority(u32 prio)
         }
         while (node != 0)
         {
-            if (node->unk20 == prio)
+            if (node->priority == prio)
             {
                 return node;
             }
