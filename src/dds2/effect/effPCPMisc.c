@@ -170,19 +170,89 @@ typedef struct EffPCPSharedTrail {
 
 extern EffPCPSharedTrail *effPcpSharedTrailWork;
 
+/* Every compact timeline precedes one variant-specific SDK parameter payload.
+   Respawn copies that payload only, not its live resource/allocation tail. */
 typedef struct {
     u8 flags;
     u8 pad01[3];
-    u32 unk04;
-    u32 unk08;
-    u32 unk0C;
-    u32 unk10;
-    u32 unk14;
-    u32 unk18;
-    u32 unk1C;
-    u32 unk20;
-    u32 unk24;
-} EffPCPCompactParams;
+    u32 duration;
+    u32 fadeIn;
+    u32 fadeOut;
+    u32 startExtent;
+    u32 endExtent;
+} EffPCPCompactTimelineParams;
+
+typedef struct {
+    u32 left, top, right, bottom;
+} EffPCPRectBounds;
+
+typedef struct {
+    u32 extent;
+    u32 centerX;
+    u32 centerY;
+    u32 color;
+    u32 blendControl;
+    EffPCPRectBounds bounds;
+} EffPCPRectParams;
+
+typedef struct {
+    u32 extent;
+    u32 color;
+    u32 blendControl;
+    f32 rotation;
+    f32 scale;
+    u32 centerX;
+    u32 centerY;
+    EffPCPRectBounds bounds;
+} EffPCPTexturedBlurParams;
+
+typedef struct {
+    s32 count;
+    s32 delaySpread;
+    f32 angleStep;
+    u32 color;
+    s32 unk10;
+    f32 unk14;
+    f32 unk18;
+    s32 x;
+    s32 y;
+    s32 positionSpread;
+    s32 size;
+} EffBlurScatterParams;
+
+typedef struct {
+    s32 count;
+    f32 phaseStep;
+    f32 spacing;
+    u32 color;
+    s32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 angleStep;
+    s32 x;
+    s32 y;
+    s32 size;
+} EffBlurScaleParams;
+
+typedef struct {
+    EffPCPCompactTimelineParams timeline;
+    EffPCPRectParams res;
+} EffPCPCompactRectParams;
+
+typedef struct {
+    EffPCPCompactTimelineParams timeline;
+    EffPCPTexturedBlurParams res;
+} EffPCPCompactTexturedBlurParams;
+
+typedef struct {
+    EffPCPCompactTimelineParams timeline;
+    EffBlurScatterParams res;
+} EffPCPCompactScatterParams;
+
+typedef struct {
+    EffPCPCompactTimelineParams timeline;
+    EffBlurScaleParams res;
+} EffPCPCompactScaleParams;
 
 /* The two compact fade variants share their 0x3C work; only the SDK
    resource payload copied during respawn differs between variants. */
@@ -191,13 +261,13 @@ typedef struct {
     u8 flags;
     u8 pad11[3];
     u32 color;
-    u32 unk18;
-    u32 unk1C;
-    u32 unk20;
-    u32 unk24;
-    u32 unk28;
-    u32 unk2C;
-    u32 unk30;
+    u32 baseColor;
+    u32 frame;
+    u32 duration;
+    u32 fadeIn;
+    u32 fadeOut;
+    u32 startExtent;
+    u32 endExtent;
     f32 unk34;
     u32 resource;
 } EffPCPCompactFadeWork;
@@ -210,14 +280,14 @@ typedef struct {
     u8 pad00[0x10];
     u8 flags;
     u8 pad11[3];
-    u32 unk14;
-    u32 unk18;
-    u32 unk1C;
-    u32 color20;
-    u32 unk24;
-    u32 unk28;
-    u32 unk2C;
-    u32 unk30;
+    u32 duration;
+    u32 fadeIn;
+    u32 fadeOut;
+    u32 color;
+    u32 baseColor;
+    u32 startExtent;
+    u32 endExtent;
+    u32 frame;
     u32 resource;
 } EffPCPCompactWork;
 
@@ -405,38 +475,6 @@ typedef struct EffPCPCrossWork {
 
 extern void func_003365B8(f32 angle);
 
-typedef struct {
-    u32 word[9];
-} EffPCPCompactRes;
-
-typedef struct {
-    u8 flags;
-    u8 pad01[3];
-    u32 unk04;
-    u32 unk08;
-    u32 unk0C;
-    u32 unk10;
-    u32 unk14;
-    EffPCPCompactRes res;
-} EffPCPCompactParams3C;
-
-
-/* Effect parameter block rebuilt on the stack from a live work area: the
- * trailing resource description (11 words) is copied by struct assignment. */
-typedef struct {
-    u32 word[11];
-} EffPCPRes44;
-
-typedef struct {
-    u8 flags;
-    u8 pad01[3];
-    u32 unk04;
-    u32 unk08;
-    u32 unk0C;
-    u32 unk10;
-    u32 unk14;
-    EffPCPRes44 res;
-} EffPCPParams44;
 
 
 /* Timer constructors copy these parameter prefixes before initializing
@@ -481,43 +519,20 @@ typedef struct EffPCPFadeTimerLong {
     s32 frame;
 } EffPCPFadeTimerLong;
 
-typedef struct {
-    u8 pad00[0x10];
-    u8 flags;
-    u8 pad11[0x3];
-    u32 unk14;
-    u32 unk18;
-    u32 unk1C;
-    u8 pad20[0x8];
-    u32 unk28;
-    u32 unk2C;
-    u8 pad30[0x4];
-    EffPCPRes44 *resource;
-} EffPCPSrcB;
-
-typedef struct {
-    u8 pad00[0x10];
-    u8 flags;
-    u8 pad11[0x3];
-    u32 unk14;
-    u32 unk18;
-    u32 unk1C;
-    u8 pad20[0x8];
-    u32 unk28;
-    u32 unk2C;
-    u8 pad30[0x4];
-    EffPCPRes44 *resource;
-} EffPCPSrcC;
 
 extern void *effPcpTripleHandleCreate(void *block0, u32 *blocks);
 
+/* Three view-relative offsets and stagger thresholds for seven handles per group. */
 typedef struct {
-    u32 word[20];
-} EffPCPBlock80;
+    f32 origin[4];
+    f32 offset[3][2];
+    u32 groupStartFrame[3];
+    u32 handleDelay[7];
+} EffPCPTripleParams;
 
 typedef struct {
-    EffPCPBlock80 head;
-    u32 unk50;
+    EffPCPTripleParams head;
+    u32 frame;
     u32 color;
     u32 handleA[7];
     u32 handleB[7];
@@ -2353,20 +2368,20 @@ void effPcpTrailSetSizeInput(EffPCPTrailWork *work, f32 val) {
     work->unk1C = val;
 }
 
-EffPCPCompactFadeWork *effPcpCompactEffectCreate(EffPCPCompactParams *params) {
+EffPCPCompactFadeWork *effPcpCompactEffectCreate(EffPCPCompactRectParams *params) {
     EffPCPCompactFadeWork *work;
 
     work = func_00328D68(0x3C);
-    work->resource = effCloneResourceTemplate(&params->unk18);
-    work->unk1C = 0;
+    work->resource = effCloneResourceTemplate(&params->res);
+    work->frame = 0;
     work->color = 0x80808080;
-    work->flags = params->flags;
-    work->unk20 = params->unk04;
-    work->unk24 = params->unk08;
-    work->unk28 = params->unk0C;
-    work->unk2C = params->unk10;
-    work->unk30 = params->unk14;
-    work->unk18 = params->unk24;
+    work->flags = params->timeline.flags;
+    work->duration = params->timeline.duration;
+    work->fadeIn = params->timeline.fadeIn;
+    work->fadeOut = params->timeline.fadeOut;
+    work->startExtent = params->timeline.startExtent;
+    work->endExtent = params->timeline.endExtent;
+    work->baseColor = params->res.color;
     return work;
 }
 
@@ -2378,16 +2393,16 @@ void effPcpCompactEffectCreateFromTable(void *args) {
 }
 
 void effPcpCompactRespawn(EffPCPCompactFadeWork *work) {
-    EffPCPCompactParams3C params;
+    EffPCPCompactRectParams params;
 
-    params.flags = work->flags;
-    params.unk04 = work->unk20;
-    params.unk08 = work->unk24;
-    params.unk0C = work->unk28;
-    params.unk10 = work->unk2C;
-    params.unk14 = work->unk30;
-    params.res = *(EffPCPCompactRes *)work->resource;
-    effPcpCompactEffectCreate((EffPCPCompactParams *)&params);
+    params.timeline.flags = work->flags;
+    params.timeline.duration = work->duration;
+    params.timeline.fadeIn = work->fadeIn;
+    params.timeline.fadeOut = work->fadeOut;
+    params.timeline.startExtent = work->startExtent;
+    params.timeline.endExtent = work->endExtent;
+    params.res = *(EffPCPRectParams *)work->resource;
+    effPcpCompactEffectCreate(&params);
 }
 
 void effPcpCompactEffectRelease(EffPCPCompactFadeWork *work) {
@@ -2409,20 +2424,20 @@ void func_001832E0(EffPCPCompactFadeWork *work, f32 val) {
     work->unk34 = val;
 }
 
-EffPCPCompactFadeWork *func_001832E8(EffPCPCompactParams *params) {
+EffPCPCompactFadeWork *func_001832E8(EffPCPCompactTexturedBlurParams *params) {
     EffPCPCompactFadeWork *work;
 
     work = func_00328D68(0x3C);
-    work->resource = effCloneBlurTemplate(&params->unk18);
-    work->unk1C = 0;
+    work->resource = effCloneBlurTemplate(&params->res);
+    work->frame = 0;
     work->color = 0x80808080;
-    work->flags = params->flags;
-    work->unk20 = params->unk04;
-    work->unk24 = params->unk08;
-    work->unk28 = params->unk0C;
-    work->unk2C = params->unk10;
-    work->unk30 = params->unk14;
-    work->unk18 = params->unk1C;
+    work->flags = params->timeline.flags;
+    work->duration = params->timeline.duration;
+    work->fadeIn = params->timeline.fadeIn;
+    work->fadeOut = params->timeline.fadeOut;
+    work->startExtent = params->timeline.startExtent;
+    work->endExtent = params->timeline.endExtent;
+    work->baseColor = params->res.color;
     return work;
 }
 
@@ -2434,16 +2449,16 @@ void func_00183378(void *args) {
 }
 
 void effPcpCompactLongRespawn(EffPCPCompactFadeWork *work) {
-    EffPCPParams44 params;
+    EffPCPCompactTexturedBlurParams params;
 
-    params.flags = work->flags;
-    params.unk04 = work->unk20;
-    params.unk08 = work->unk24;
-    params.unk0C = work->unk28;
-    params.unk10 = work->unk2C;
-    params.unk14 = work->unk30;
-    params.res = *(EffPCPRes44 *)work->resource;
-    func_001832E8((EffPCPCompactParams *)&params);
+    params.timeline.flags = work->flags;
+    params.timeline.duration = work->duration;
+    params.timeline.fadeIn = work->fadeIn;
+    params.timeline.fadeOut = work->fadeOut;
+    params.timeline.startExtent = work->startExtent;
+    params.timeline.endExtent = work->endExtent;
+    params.res = *(EffPCPTexturedBlurParams *)work->resource;
+    func_001832E8(&params);
 }
 
 void func_00183448(EffPCPCompactFadeWork *work) {
@@ -2596,20 +2611,20 @@ void effPcpLongFadeTimerSetSourceColor(EffPCPFadeTimerLong *work, u32 value) {
     work->colorFrom = value;
 }
 
-EffPCPCompactWork *effPcpCreateCompactWorkFromParams(EffPCPCompactParams *params) {
+EffPCPCompactWork *effPcpCreateCompactWorkFromParams(EffPCPCompactScatterParams *params) {
     EffPCPCompactWork *work;
 
     work = func_00328D68(0x38);
-    work->resource = func_0018EBC8(&params->unk18);
-    work->flags = params->flags;
-    work->unk14 = params->unk04;
-    work->unk18 = params->unk08;
-    work->unk1C = params->unk0C;
-    work->unk28 = params->unk10;
-    work->unk2C = params->unk14;
-    work->color20 = 0x80808080;
-    work->unk30 = 0;
-    work->unk24 = params->unk24;
+    work->resource = func_0018EBC8(&params->res);
+    work->flags = params->timeline.flags;
+    work->duration = params->timeline.duration;
+    work->fadeIn = params->timeline.fadeIn;
+    work->fadeOut = params->timeline.fadeOut;
+    work->startExtent = params->timeline.startExtent;
+    work->endExtent = params->timeline.endExtent;
+    work->color = 0x80808080;
+    work->frame = 0;
+    work->baseColor = params->res.color;
     return work;
 }
 
@@ -2622,16 +2637,16 @@ void effPcpCreateChargeWorkFromTable(void *args) {
 
 
 void effPcpChargeRespawn(EffPCPCompactWork *work) {
-    EffPCPParams44 params;
+    EffPCPCompactScatterParams params;
 
-    params.flags = work->flags;
-    params.unk04 = work->unk14;
-    params.unk08 = work->unk18;
-    params.unk0C = work->unk1C;
-    params.unk10 = work->unk28;
-    params.unk14 = work->unk2C;
-    params.res = *(EffPCPRes44 *)work->resource;
-    effPcpCreateCompactWorkFromParams((EffPCPCompactParams *)&params);
+    params.timeline.flags = work->flags;
+    params.timeline.duration = work->duration;
+    params.timeline.fadeIn = work->fadeIn;
+    params.timeline.fadeOut = work->fadeOut;
+    params.timeline.startExtent = work->startExtent;
+    params.timeline.endExtent = work->endExtent;
+    params.res = *(EffBlurScatterParams *)work->resource;
+    effPcpCreateCompactWorkFromParams(&params);
 }
 
 void effPcpReleaseCompactBlurWork(EffPCPCompactWork *work) {
@@ -2646,23 +2661,23 @@ void effPcpCopyCompactBlurVector(void *dst, void *src) {
 }
 
 void effPcpCompactSetColor(EffPCPCompactWork *work, u32 color) {
-    work->color20 = color;
+    work->color = color;
 }
 
-EffPCPCompactWork *effPcpCreateCompactResourceWork(EffPCPCompactParams *params) {
+EffPCPCompactWork *effPcpCreateCompactResourceWork(EffPCPCompactScaleParams *params) {
     EffPCPCompactWork *work;
 
     work = func_00328D68(0x38);
-    work->resource = effCloneBlurWorkWithSlots(&params->unk18);
-    work->flags = params->flags;
-    work->unk14 = params->unk04;
-    work->unk18 = params->unk08;
-    work->unk1C = params->unk0C;
-    work->unk28 = params->unk10;
-    work->unk2C = params->unk14;
-    work->color20 = 0x80808080;
-    work->unk30 = 0;
-    work->unk24 = params->unk24;
+    work->resource = effCloneBlurWorkWithSlots(&params->res);
+    work->flags = params->timeline.flags;
+    work->duration = params->timeline.duration;
+    work->fadeIn = params->timeline.fadeIn;
+    work->fadeOut = params->timeline.fadeOut;
+    work->startExtent = params->timeline.startExtent;
+    work->endExtent = params->timeline.endExtent;
+    work->color = 0x80808080;
+    work->frame = 0;
+    work->baseColor = params->res.color;
     return work;
 }
 
@@ -2674,16 +2689,16 @@ void effPcpCreateChargeResourceWorkFromTable(void *args) {
 }
 
 void effPcpChargeLongRespawn(EffPCPCompactWork *work) {
-    EffPCPParams44 params;
+    EffPCPCompactScaleParams params;
 
-    params.flags = work->flags;
-    params.unk04 = work->unk14;
-    params.unk08 = work->unk18;
-    params.unk0C = work->unk1C;
-    params.unk10 = work->unk28;
-    params.unk14 = work->unk2C;
-    params.res = *(EffPCPRes44 *)work->resource;
-    effPcpCreateCompactResourceWork((EffPCPCompactParams *)&params);
+    params.timeline.flags = work->flags;
+    params.timeline.duration = work->duration;
+    params.timeline.fadeIn = work->fadeIn;
+    params.timeline.fadeOut = work->fadeOut;
+    params.timeline.startExtent = work->startExtent;
+    params.timeline.endExtent = work->endExtent;
+    params.res = *(EffBlurScaleParams *)work->resource;
+    effPcpCreateCompactResourceWork(&params);
 }
 
 void effPcpReleaseSecondaryBlurWork(EffPCPCompactWork *work) {
@@ -2698,7 +2713,7 @@ void effPcpCopyShortThunderFadeVector(void *dst, void *src) {
 }
 
 void effPcpSetChargeResourceColor(EffPCPCompactWork *work, u32 color) {
-    work->color20 = color;
+    work->color = color;
 }
 
 void effPcpInitShortThunderFadeWork(EffPCPFadeWork *work) {
@@ -3015,8 +3030,8 @@ void *effPcpTripleHandleCreate(void *block0, u32 *blocks) {
     u32 i;
 
     work = func_00328D68(0xAC);
-    work->head = *(EffPCPBlock80 *)block0;
-    work->unk50 = 0;
+    work->head = *(EffPCPTripleParams *)block0;
+    work->frame = 0;
     work->color = 0x80808080;
     handle = work->handleA;
     for (i = 0; i < 7; i++) {
@@ -3053,7 +3068,7 @@ EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
 
     work = func_00328D68(0xAC);
     work->head = src->head;
-    work->unk50 = 0;
+    work->frame = 0;
     work->color = 0x80808080;
     from = src->handleC;
     to = work->handleC;
@@ -3295,21 +3310,21 @@ EffPCPRotateWork *effPcpRotateCreate(EffPCPRotateParams *src, u32 *blocks) {
     return work;
 }
 
-typedef struct EffPCPBlockSet18 {
+typedef struct EffPCPBlockSetInputs {
     void *head[3];
-    void *pad0C;
+    void *selectedHead; /* Replaced by the current head before each child build. */
     void *group[5];
     void *mid[3];
     void *tail[5];
     void *last;
-} EffPCPBlockSet18;
+} EffPCPBlockSetInputs;
 
 /* Gathers 17 parameter blocks from the effect table (the first goes to the
  * rotate effect as its source, the rest into an on-stack block set). */
 void effPcpRotateCreateFromTable(args)
     void *args;
 {
-    EffPCPBlockSet18 set;
+    EffPCPBlockSetInputs set;
     void **group;
     void *first;
     s32 idx;
@@ -3859,18 +3874,32 @@ void effPcpScaledEffectCreateFromTable(void *data) {
     func_00187AA8(work);
 }
 
+/* Serialized vector-thunder parameters, not the trailing live cell-system work. */
 typedef struct {
-    u32 word[19];
-} EffPCPRes76;
+    u8 pad00[0x10];
+    u16 systemParam;
+    u8 pad12[2];
+    u32 count;
+    u8 pad18[4];
+    f32 scaledFirst;
+    f32 scaledSecond;
+    f32 rotationScale;
+    u32 delayRange;
+    u32 activeRange;
+    u16 perCell;
+    u8 pad32[0xE];
+    void *dispatchArg;
+    u8 pad44[8];
+} EffThunderVectorParams;
 
 typedef struct {
-    u32 unk00;
-    u32 unk04;
-    u32 unk08;
-    u32 unk0C;
-    u32 unk10;
-    EffPCPRes76 res;
-} EffPCPParams76;
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    s32 base;
+    s32 target;
+    EffThunderVectorParams res;
+} EffPCPScaledThunderParams;
 
 typedef struct EffPCPGrowWork {
     u8 pad00[0x10];
@@ -3886,15 +3915,15 @@ typedef struct EffPCPGrowWork {
 } EffPCPGrowWork;
 
 void effPcpCreateScaledEffectFromResource(EffPCPGrowWork *work) {
-    EffPCPParams76 params;
-    EffPCPRes76 *res;
+    EffPCPScaledThunderParams params;
+    EffThunderVectorParams *res;
 
     res = func_0016B198(work->handle);
-    params.unk00 = work->duration;
-    params.unk04 = work->fadeIn;
-    params.unk08 = work->fadeOut;
-    params.unk0C = work->base;
-    params.unk10 = work->target;
+    params.duration = work->duration;
+    params.fadeIn = work->fadeIn;
+    params.fadeOut = work->fadeOut;
+    params.base = work->base;
+    params.target = work->target;
     params.res = *res;
     func_00187AA8(&params);
 }
@@ -5059,57 +5088,60 @@ void effPcpSetSpawnRangeColor(EffPCPSpawnRangeWork *work, u32 value) {
     work->color = value;
 }
 
-typedef struct EffPCPEventInitEntry {
-    u8 pad00[0x10];
-    u8 unk10;
+/* One event per model-map position: latch movement, then run its frame interval. */
+typedef struct {
+    f32 initialPosition[3];
+    u32 unk0C;
+    u8 hasMoved;
     u8 pad11[3];
-    u32 unk14;
-    u32 unk18;
+    u32 age;
+    u32 frameLimit;
     void *event;
-} EffPCPEventInitEntry;
+} EffPCPMapEventEntry;
 
-typedef struct EffPCPEventInitWork {
+/* The 0x40 owner and its separate entry allocation serve create/clone/release. */
+typedef struct {
     u8 pad00[0x18];
     f32 unk18;
-    EffPCPEventInitEntry *entries;
-    u32 handle;
+    EffPCPMapEventEntry *entries;
+    u32 entriesHandle;
     EffPCPEventOwner *owner;
-    u32 resource;
+    u32 modelResource;
     f32 scale;
-    u32 unk30;
-    u32 unk34;
+    u32 frame;
+    u32 frameLimit;
     u32 count;
     u32 color;
-} EffPCPEventInitWork;
+} EffPCPMapEventWork;
 
-typedef struct EffPCPEventModelInfo {
+typedef struct EffPCPEventMotionNode {
     u8 pad00[0x20];
     f32 unk20;
     u8 pad24[0xA];
-    u16 unk2E;
-} EffPCPEventModelInfo;
+    u16 frameCount; /* Native motion setup copies the clip's first halfword here. */
+} EffPCPEventMotionNode;
 
-typedef struct EffPCPEventModel {
+typedef struct EffPCPEventModelContext {
     u8 pad00[0x18];
-    void *unk18;
-    EffPCPEventModelInfo *info;
-} EffPCPEventModel;
+    void *inner;
+    EffPCPEventMotionNode *motion;
+} EffPCPEventModelContext;
 
-void effPcpEventWorkInitEntries(EffPCPEventInitWork *work) {
+void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
     EffPCPEventPlace place;
     u32 i = 0;
     u32 count;
-    EffPCPEventModel *model;
-    EffPCPEventInitEntry *entry;
+    EffPCPEventModelContext *model;
+    EffPCPMapEventEntry *entry;
 
-    model = effParamWorkGetData(work->resource);
-    model->info->unk20 = work->unk18;
+    model = effParamWorkGetData(work->modelResource);
+    model->motion->unk20 = work->unk18;
     mdlAddEntryPlain(model, 0, 0);
-    work->unk34 = model->info->unk2E;
-    count = sdfCountMapPositionRecords(model->unk18);
+    work->frameLimit = model->motion->frameCount;
+    count = sdfCountMapPositionRecords(model->inner);
     work->count = count;
-    work->handle = (u32)func_003292A8(count << 5);
-    entry = sdfResourceRetainAddress((void *)work->handle);
+    work->entriesHandle = (u32)func_003292A8(count << 5);
+    entry = sdfResourceRetainAddress((void *)work->entriesHandle);
     work->entries = entry;
     place.pos[0] = 0;
     place.pos[1] = 0;
@@ -5124,9 +5156,9 @@ void effPcpEventWorkInitEntries(EffPCPEventInitWork *work) {
     place.scaleD = 1.0f;
     place.color = 0x80808080;
     for (; i < count; i++) {
-        entry->unk10 = 0;
-        entry->unk14 = 0;
-        entry->unk18 = 0;
+        entry->hasMoved = 0;
+        entry->age = 0;
+        entry->frameLimit = 0;
         entry->event = (void *)func_00197D68(work->owner, 2, &place);
         entry++;
     }
@@ -5141,17 +5173,17 @@ extern EffPCPEventOwner *func_00197D38(void *params);
 
 /* Allocate an event work: copy the parameter head, clear the links, then create the resource and owner from the optional parameters. */
 void *effPcpEventWorkCreate(EffPCPEventParamHead *head, void *resourceParams, void *ownerParams) {
-    EffPCPEventInitWork *work = func_00328D68(0x40);
+    EffPCPMapEventWork *work = func_00328D68(0x40);
 
     *(EffPCPEventParamHead *)work = *head;
     work->color = 0x80808080;
     work->scale = 1.0f;
     work->owner = 0;
     work->entries = 0;
-    work->resource = 0;
-    work->unk30 = 0;
+    work->modelResource = 0;
+    work->frame = 0;
     if (resourceParams != 0) {
-        work->resource = effParamWorkCreate(3, resourceParams);
+        work->modelResource = effParamWorkCreate(3, resourceParams);
     }
     if (ownerParams != 0) {
         work->owner = func_00197D38(ownerParams);
@@ -5173,44 +5205,24 @@ void effPcpEventWorkCreateFromTable(void *data) {
     effPcpEventWorkCreate(work0, work1, work2);
 }
 
-typedef struct {
-    u8 pad00[0x24];
-    void *owner;
-    u32 resource;
-} EffPCPEventCloneWork;
 
-EffPCPEventCloneWork *effEventWorkClone(EffPCPEventCloneWork *src) {
-    EffPCPEventCloneWork *work;
+EffPCPMapEventWork *effEventWorkClone(EffPCPMapEventWork *src) {
+    EffPCPMapEventWork *work;
 
     work = effPcpEventWorkCreate(src, 0, 0);
-    work->resource = effParamWorkDuplicate(src->resource);
+    work->modelResource = effParamWorkDuplicate(src->modelResource);
     work->owner = src->owner;
     effPcpEventWorkInitEntries(work);
     return work;
 }
 
-/* Fixed-stride event entries retained by the particle effect work. */
-typedef struct {
-    u8 pad00[0x1C];
-    void *event;
-} EffPCPEventEntry32;
 
-typedef struct {
-    u8 pad00[0x1C];
-    EffPCPEventEntry32 *entries;
-    u32 handle;
-    EffPCPEventOwner *owner;
-    u32 resource;
-    u8 pad2C[0xC];
-    u32 count;
-} EffPCPEventWork32;
-
-void effDestroyParticleEvents(EffPCPEventWork32 *work) {
+void effDestroyParticleEvents(EffPCPMapEventWork *work) {
     u32 i = 0;
     u32 count;
-    EffPCPEventEntry32 *entry;
+    EffPCPMapEventEntry *entry;
 
-    effDispatchParameterDataAndFreeWork(work->resource);
+    effDispatchParameterDataAndFreeWork(work->modelResource);
     count = work->count;
     entry = work->entries;
     if (count != 0) {
@@ -5226,7 +5238,7 @@ void effDestroyParticleEvents(EffPCPEventWork32 *work) {
     if (work->owner->active == 0) {
         func_00197D50(work->owner);
     }
-    func_003297C8(work->handle);
+    func_003297C8(work->entriesHandle);
     sdfReleaseChipBlock(work);
 }
 
