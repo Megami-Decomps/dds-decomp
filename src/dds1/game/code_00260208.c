@@ -239,6 +239,39 @@ typedef struct BrsUnitExperience {
     u16 level;          /* 0x14 */
 } BrsUnitExperience;
 
+typedef struct BrsPartyUnit {
+    u16 flags;              /* 0x00: bit 0 indicates an occupied party slot */
+    u8 pad02[0xC];
+    u16 statusFlags;        /* 0x0E: bit 0x4000 enables battle rewards */
+    u32 totalExp;           /* 0x10 */
+    u16 level;              /* 0x14 */
+    u8 pad16[0x3F];
+    s8 currentProfileId;    /* 0x55 */
+    u8 pad56[0x14E];
+} BrsPartyUnit;
+
+typedef struct BrsRewardValues {
+    s32 amount;              /* 0x04 */
+    s32 experienceGain;      /* 0x08 */
+    u8 pad0C[8];
+    s32 partySlot;           /* 0x14 */
+} BrsRewardValues;
+
+typedef struct BrsRewardRow {
+    BrsPartyUnit *unit;      /* 0x00 */
+    BrsRewardValues values;  /* 0x04 */
+} BrsRewardRow;
+
+typedef struct BrsRewardBatch {
+    BrsRewardRow rows[5];    /* 0x00 */
+    s32 count;               /* 0x78 */
+} BrsRewardBatch;
+
+extern s32 datGameState;
+extern s32 *ptyGetCurrentProfileRecord(BrsPartyUnit *unit);
+extern u32 ptyAddProfilePoints(BrsPartyUnit *unit, s32 increment);
+extern void func_00262A30(u32, s32, u16, u32, s32, s32, s32);
+
 /* Cap stored EXP at the EXP required for level 99. */
 void ptyClampExp(u32 *unit) {
     u8 buf[0x1A4];
@@ -252,10 +285,60 @@ void ptyClampExp(u32 *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00260208", brsApplyPartyRewards);
+/* Snapshot the five eligible party members, then apply this battle's queued
+ * experience and profile-point rewards. */
+void brsApplyPartyRewards(u32 partyWork, BrsRewardBatch *batch) {
+    s32 partyIndex;
+    s32 partyOffset;
+    s32 rewardOffset;
+    s32 rewardIndex;
+    BrsPartyUnit *currentPartyUnit;
+    BrsPartyUnit *unit;
+    s32 profilePointGain;
+    s32 experienceGain;
+    BrsRewardValues *values;
+
+    for (partyOffset = 0, partyIndex = 0; partyIndex < 5;
+         partyIndex++, partyOffset += sizeof(BrsPartyUnit)) {
+        currentPartyUnit =
+            (BrsPartyUnit *)(datGameState + 0xA60 + partyOffset);
+
+        if ((currentPartyUnit->flags & 1) != 0 &&
+            (currentPartyUnit->statusFlags & 0x4000) != 0) {
+            unit = currentPartyUnit;
+            func_00262A30(partyWork, partyIndex, unit->level,
+                          unit->totalExp,
+                          *ptyGetCurrentProfileRecord(currentPartyUnit), 0, 0);
+        }
+    }
+
+    rewardIndex = 0;
+    if (batch->count > 0) {
+        values = &batch->rows[0].values;
+        rewardOffset = 0;
+        do {
+            unit = *(BrsPartyUnit **)((u8 *)batch + rewardOffset);
+            profilePointGain = values->amount;
+            experienceGain = values->experienceGain;
+
+            func_00262A30(partyWork, values->partySlot, unit->level,
+                          unit->totalExp, *ptyGetCurrentProfileRecord(unit),
+                          experienceGain, profilePointGain);
+            unit->totalExp += experienceGain;
+            ptyClampExp((u32 *)unit);
+            if (unit->currentProfileId != 0) {
+                ptyAddProfilePoints(unit, profilePointGain);
+            }
+            rewardIndex++;
+            values = (BrsRewardValues *)((u8 *)values + sizeof(BrsRewardRow));
+            rewardOffset += sizeof(BrsRewardRow);
+        } while (rewardIndex < batch->count);
+    }
+}
 
 /* Apply item/icon rewards before awarding the party's accumulated gains. */
-void brsApplyRewardBundle(u32 partyWork, MenuIconBatch *batch, u32 rewardState) {
+void brsApplyRewardBundle(u32 partyWork, MenuIconBatch *batch,
+                          BrsRewardBatch *rewardState) {
     gstApplyCounterDeltaTable(batch->icons);
     gstApplyBundleMacca(batch);
     brsApplyPartyRewards(partyWork, rewardState);
@@ -394,29 +477,11 @@ s32 brsAdvanceSkillPackagePanel(s32 work) {
     return 0;
 }
 
-extern s32 datGameState;
-
-/* Five party slots, followed by the number of reward rows in this batch. */
-typedef struct BrsRewardRow {
-    s32 unit;           /* 0x00 */
-    s32 amount;         /* 0x04 */
-    u8 pad08[0x10];
-} BrsRewardRow;
-
-typedef struct BrsRewardBatch {
-    BrsRewardRow rows[5]; /* 0x00 */
-    s32 count;            /* 0x78 */
-} BrsRewardBatch;
-
 typedef struct BrsPartyRow {
     s32 flags;          /* 0x00 */
     s32 amount;         /* 0x04 */
     u8 pad08[0x24];
 } BrsPartyRow;
-
-typedef struct BrsRewardUnit {
-    u16 flags;          /* 0x00: bit 0 indicates an occupied party slot */
-} BrsRewardUnit;
 
 typedef struct BrsTaskState {
     u8 pad00[0x344];
@@ -433,12 +498,12 @@ void brsMarkPartyRows(u8 *dst, u8 *state, s32 flags) {
         s32 j;
 
         for (j = 4; j >= 0; j--) {
-            if ((((BrsRewardUnit *)unit)->flags & 1) != 0) {
+            if ((((BrsPartyUnit *)unit)->flags & 1) != 0) {
                 BrsRewardRow *row = &((BrsRewardBatch *)state)->rows[i];
-                if (row->unit == (s32)unit) {
+                if (row->unit == (BrsPartyUnit *)unit) {
                     ((BrsPartyRow *)d)->flags |= flags;
                     if (flags & 2) {
-                        ((BrsPartyRow *)d)->amount = row->amount;
+                        ((BrsPartyRow *)d)->amount = row->values.amount;
                     }
                 }
             }
@@ -638,4 +703,3 @@ INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC538);
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC540);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC548);
-
