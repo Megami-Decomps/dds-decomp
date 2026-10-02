@@ -31,7 +31,6 @@ extern void sdfBuildVuRotationFromAxisAngle(f32 angle, void *orientation);
 /* Effect initializers implemented in assembly below. Each is entered both with
    and without spawn arguments, so they are declared unchecked. */
 extern void effFlashTrianglePulseCreate();
-extern void effFlashRotatingStreakCreate();
 extern void *effFlashOrbitArcCreate();
 
 typedef struct PcpFlashPulseParticle {
@@ -90,7 +89,7 @@ struct PcpFlashStreakWork {
     f32 acrossSpan;
     f32 maxScale;
     f32 initialAngleSpread;
-    u8 pad3C[0x04];
+    u32 unk3C;
     PcpFlashRotatingParticle *parts;
     s32 updateCount;
     u32 colorParam;
@@ -622,18 +621,42 @@ extern s32 sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(s32 allocation);
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern u32 effMiscRand(void *state);
-extern s32 func_0016FB08();
+extern PcpFlashDrawPool *func_0016FB08(u32 cellCount);
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", effFlashRotatingStreakCreate);
+PcpFlashStreakWork *effFlashRotatingStreakCreate(PcpFlashStreakWork *src) {
+    u32 handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashRotatingParticle) + sizeof(PcpFlashStreakWork));
+    PcpFlashStreakWork *work = (PcpFlashStreakWork *)sdfResourceRetainAddress(handle);
+    PcpFlashDrawPool *record;
+    u32 range;
+    u32 i;
+
+    memcpy(work, src, 0x40);
+    work->parts = (PcpFlashRotatingParticle *)(work + 1);
+    work->ownedBuffer = handle;
+    work->colorParam = 0x80808080;
+    work->renderScale = 1.0f;
+    work->updateCount = 0;
+    if (work->randomRange == 0) {
+        work->randomRange = 1;
+    }
+    record = func_0016FB08(work->particleCount);
+    work->resourceHandle = (u32)record;
+    record->unk50 = work->unk3C;
+    range = work->randomRange;
+    for (i = 0; i < work->particleCount; i++) {
+        work->parts[i].age = -(effMiscRand(D_0034DF38) % range);
+    }
+    return work;
+}
 
 void effFlashRotatingStreakSpawnFromTable(void *data)
 {
     effFlashRotatingStreakCreate(effParamTableGetBlock(data, 0));
 }
 
-void func_0016A878(void)
+void func_0016A878(PcpFlashStreakWork *src)
 {
-    effFlashRotatingStreakCreate();
+    effFlashRotatingStreakCreate(src);
 }
 
 void effFlashRotatingStreakDestroy(PcpFlashStreakWork *work)
