@@ -8,9 +8,11 @@ extern void _StartThread(s32, s32);
 extern s32 sdfTrackedThreadSemaphore;
 extern SdfThreadNode *sdfTrackedThreadHead;
 
-extern s32 CancelWakeupThread(u64);
+extern s32 CancelWakeupThread(s32 threadId);
 
-extern u64 GetThreadId(void);
+extern s32 GetThreadId(void);
+
+extern s32 SetAlarm(u16 delay, void (*callback)(s32 alarmId, u16 time, void *common), void *common);
 
 extern u8 D_00438A8C;
 
@@ -24,15 +26,15 @@ extern void sdfPadBuildButtonStates(void);
 
 extern void sdfTickThreadPriorityOverride(void);
 
-void sdfWakeAlarmThread(u32 unused0, u32 unused1, u32 threadId) {
-    iWakeupThread(threadId);
+void sdfWakeAlarmThread(s32 unused0, u16 unused1, void *threadId) {
+    iWakeupThread((s32)threadId);
 }
 
 /* Clear any pending wakeup before arming a 16-bit delay for this thread. */
 void sdfSleepWithAlarm(u32 delay) {
-    u64 threadId = GetThreadId();
+    s32 threadId = GetThreadId();
     CancelWakeupThread(threadId);
-    SetAlarm(delay & 0xFFFF, sdfWakeAlarmThread, threadId);
+    SetAlarm(delay & 0xFFFF, sdfWakeAlarmThread, (void *)threadId);
     SleepThread();
 }
 
@@ -75,7 +77,7 @@ void sdfStartTrackedThread(SdfThreadNode *node, s32 entry, s32 stack, s64 stackS
 
 /* A previously queued wakeup counts toward the requested sleep count. */
 void sdfSleepThreadCount(s32 count) {
-    u64 threadId;
+    s32 threadId;
     s32 cancelledWakeup;
 
     threadId = GetThreadId();
@@ -87,4 +89,29 @@ void sdfSleepThreadCount(s32 count) {
     } while (0 < count);
 }
 
-INCLUDE_ASM(const s32, "game/code_00328778", func_003289C8);
+extern void ExitDeleteThread(void);
+extern s32 TerminateThread(s32 threadId);
+extern s32 DeleteThread(s32 threadId);
+
+void func_003289C8(SdfThreadNode *node) {
+    SdfThreadNode **link;
+    SdfThreadNode *current;
+    s32 threadId;
+
+    WaitSema(sdfTrackedThreadSemaphore);
+    link = &sdfTrackedThreadHead;
+    current = *link;
+    while (current != node) {
+        link = &current->next;
+        current = current->next;
+    }
+    *link = node->next;
+    SignalSema(sdfTrackedThreadSemaphore);
+    threadId = node->threadId;
+    if (threadId == GetThreadId()) {
+        ExitDeleteThread();
+        return;
+    }
+    TerminateThread(threadId);
+    DeleteThread(threadId);
+}
