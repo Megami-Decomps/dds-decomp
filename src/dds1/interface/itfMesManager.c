@@ -310,7 +310,7 @@ extern void func_0019F6A0(void);
 
 extern struct ItfMesPoolNode *itfAcquirePoolNode();
 
-extern u32 func_002D03F8();
+extern u32 sdfAllocGeneralBlock();
 
 extern u32 sdfResourceRetainAddress();
 
@@ -527,7 +527,7 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     ItfMesState *mes;
     u32 handle;
 
-    handle = func_002D03F8(0x1E0);
+    handle = sdfAllocGeneralBlock(0x1E0);
     node->resourceHandle = handle;
     mes = (ItfMesState *)sdfResourceRetainAddress(handle);
     node->stateAddress = (s32)mes;
@@ -558,7 +558,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesStartEntry);
 
 extern s32 itfInitTextDrawArgs(s32 encodedText, s32 sub);
 
-s32 func_0019BBF8(s32 window, s32 entryIndex, s32 item) {
+s32 itfMesSelectTableItemText(s32 window, s32 entryIndex, s32 item) {
     ItfMesState *mes = itfWindowSlots[window].mes;
     ItfMesTable *table = itfMesGetEntry(mes, entryIndex)->table;
     ItfMesBlk24 *blk = &mes->blk24;
@@ -960,7 +960,7 @@ extern void btlReleaseEffectResourceHandles();
 
 extern void itfReleaseUiResourceSlotHandles(s32 *arg0);
 
-extern void func_002D0918(u32 allocation);
+extern void sdfReleaseResourceAllocation(u32 allocation);
 
 extern void itfReleasePoolNode();
 
@@ -974,7 +974,7 @@ void itfMesDestroyWindow(s32 window) {
         btlReleaseEffectResourceHandles(mes);
         itfReleaseUiResourceSlotHandles(mes->tableD0);
         mes->flags = 0;
-        func_002D0918(rec->handle);
+        sdfReleaseResourceAllocation(rec->handle);
         rec->mes = NULL;
         itfReleasePoolNode(rec, (u8 *)D_003D6EC0 - 0x10);
         *(s32 *)((u8 *)D_003D6EC0 - 0x20) -= 1;

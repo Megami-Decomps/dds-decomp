@@ -35,7 +35,7 @@ extern s32 D_00439118;
 extern SdfChipClass D_0045F0A0[];
 
 /* Fill `stats` with the chip heap's block totals and per-size-class usage. */
-void func_003290A0(SdfChipStats *stats) {
+void sdfGetChipHeapStats(SdfChipStats *stats) {
     SdfChipBlockRecord *block;
     s32 remaining;
     s32 i;
@@ -94,11 +94,11 @@ extern void *func_0035A828(u32 size);
 extern void *func_00328D68(u32 size);
 extern s32 D_004389CC;
 extern u8 D_00439128[4];
-extern void func_003297C8();
+extern void sdfReleaseResourceAllocation();
 extern void sdfInitializeSynchronizedRequest();
 
 /* Set up the general heap over a `size`-byte allocation: one free block between the two end sentinels. */
-void func_00329170(u32 size) {
+void sdfInitGeneralHeap(u32 size) {
     SdfMemHeap *heap = &D_0045F0F8;
     SdfMemBlock *block;
     u32 first;
@@ -125,7 +125,7 @@ void func_00329170(u32 size) {
     block->address = first;
     block->tag = 0;
     D_004389CC = 0;
-    sdfInitializeSynchronizedRequest(D_00439128, func_003297C8);
+    sdfInitializeSynchronizedRequest(D_00439128, sdfReleaseResourceAllocation);
 }
 
 u16 sdfGetMemoryBlockState(SdfMemBlock *block) {

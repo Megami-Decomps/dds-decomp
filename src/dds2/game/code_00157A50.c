@@ -56,7 +56,7 @@ extern EffBillResourceArchive *func_002C7FF0(const char *path);
 extern void func_002C81D0(EffBillResourceArchive *archive);
 extern void func_002C7CE8(EffBillResourceArchive *archive);
 extern u32 sdfMemoryGetBlockAddress(MemBlock *block);
-extern void func_003297C8(MemBlock *block);
+extern void sdfReleaseResourceAllocation(MemBlock *block);
 extern BillObj *billCreateIndexed(s32 kind, u32 data);
 extern void func_0035B6E0(const char *format, const char *value);
 
@@ -89,7 +89,7 @@ void effInitializeBillResourceOwners(void) {
             payload = (BillChildPayload *)billboard->entryList;
             payload->halfWidth = payload->halfWidth * *scale;
             payload->halfHeight = payload->halfHeight * *scale;
-            func_003297C8(node->blockHandle);
+            sdfReleaseResourceAllocation(node->blockHandle);
             node = node->next;
         } while (node != NULL);
     }
@@ -125,7 +125,7 @@ void effReleaseSharedTextureRecord(TexRecord *entry) {
     entry->refCount--;
     if (entry->refCount == 0) {
         sdfTexReleaseReferenceViaHandler(entry->texture);
-        func_003297C8(entry->allocation);
+        sdfReleaseResourceAllocation(entry->allocation);
     }
 }
 
@@ -162,3 +162,4 @@ INCLUDE_RODATA(const s32, "game/code_00157A50", D_00414298);
 INCLUDE_RODATA(const s32, "game/code_00157A50", D_004142B0);
 
 INCLUDE_RODATA(const s32, "game/code_00157A50", D_004142C0);
+

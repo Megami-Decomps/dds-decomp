@@ -462,7 +462,7 @@ extern s32 sdfDevCreateCommandState(u64 name);
 extern s32 sdfDevQueueControlAndWait(s32 state);
 extern void sdfDevQueueReadAndWait(s32 state, s32 buffer, s32 size);
 extern void sdfDevWaitThenReleaseCommandState(s32 state);
-extern s32 func_003292A8(s32 size);
+extern s32 sdfAllocGeneralBlock(s32 size);
 extern s32 sdfResourceRetainAddress(s32 handle);
 extern void sdfDecrementAllocationReferenceCount(s32 handle);
 
@@ -471,7 +471,7 @@ extern void sdfDecrementAllocationReferenceCount(s32 handle);
 u64 sdfDevReadResourceWithExtraSpace(u64 name, u32 *outData, u32 *outSize, s32 extra) {
     s32 state = sdfDevCreateCommandState(name);
     s32 size = sdfDevQueueControlAndWait(state);
-    s32 handle = func_003292A8(size + extra);
+    s32 handle = sdfAllocGeneralBlock(size + extra);
     s32 address = sdfResourceRetainAddress(handle);
 
     sdfDevQueueReadAndWait(state, address, size);
@@ -498,7 +498,7 @@ u64 sdfLoadNamedResourceAndReleaseLookupHandle(u64 source) {
 
     buffer = sdfReadNamedResource(source, info, 0);
     result = sdfTexAcquireResourceTexture(info[0]);
-    func_003297C8(buffer);
+    sdfReleaseResourceAllocation(buffer);
     return result;
 }
 
@@ -528,7 +528,7 @@ u64 sndLoadNamedOffsetResourceList(u64 source) {
 
     buffer = sdfReadNamedResource(source, info, 0);
     result = sndBuildResourceHandleListFromOffsets(info[0]);
-    func_003297C8(buffer);
+    sdfReleaseResourceAllocation(buffer);
     return result;
 }
 

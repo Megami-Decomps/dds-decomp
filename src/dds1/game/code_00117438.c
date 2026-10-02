@@ -70,11 +70,11 @@ extern u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed);
 extern char sdfRuntimeTaskName[];
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 mode);
 extern s32 sdfDecrementAllocationReferenceCount(s32 allocation);
-extern s32 func_002D0918(s32 allocation);
+extern s32 sdfReleaseResourceAllocation(s32 allocation);
 void func_00117808(void);
 s32 sdfBumpTickCounters(void);
 void evtResetWorldAndProfileRuntime(void);
-extern void *func_002D03F8(s32 size);
+extern void *sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(void *resource);
 extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
 
@@ -223,7 +223,7 @@ void evtLoadValueSecondaryVectorIntoVu(EvtScaledValue *value) {
 /* Allocate the 0x33600 game-state block, retain its scene allocation, zero it
  * and register the "GBWK" tick task that owns it. */
 void sdfCreateRuntimeTask(void) {
-    void *mem = func_002D03F8(0x33600);
+    void *mem = sdfAllocGeneralBlock(0x33600);
     u8 *state = (u8 *)sdfResourceRetainAddress(mem);
 
     memset(state, 0, 0x33600);
@@ -244,7 +244,7 @@ void sdfDestroyRuntimeTask(void) {
     func_00117808();
     handle = ((SdfRuntime *)datGameState)->backingAllocation;
     sdfDecrementAllocationReferenceCount(handle);
-    func_002D0918(handle);
+    sdfReleaseResourceAllocation(handle);
     datGameState = 0;
 }
 
@@ -411,7 +411,7 @@ void sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118688);
 
 extern s32 datAbilityParameters;
-extern s32 func_00119750(u32);
+extern s32 datMapFlagToStatIndex(u32);
 extern u32 func_00119520(SdfPackedValue *, s32);
 extern s32 datUnitHasSkill(SdfPackedValue *, s32);
 extern s32 effMiscRandMod(s32, s32);
@@ -455,7 +455,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
         mask = 1 << list[effMiscRandMod(0, count)];
     }
     if (mask != 0 && (SDF_BATTLE_SLOT(index)->type == 1 || SDF_BATTLE_SLOT(index)->type == 3)) {
-        kind = func_00119750(mask);
+        kind = datMapFlagToStatIndex(mask);
         if (!(SDF_BATTLE_SLOT(index)->mode == 4 && (packed->flagsAndValue & 0x7FFF) == 8)) {
             if (func_00119520(packed, kind) & 0x170000) {
                 return 0;

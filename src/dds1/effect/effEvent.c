@@ -164,16 +164,16 @@ extern void effDrawBlurRectangle(EffScreenDrawParams *arg);
 extern void effDrawBlurPixelRectWithResource(EffBlurTemplate *arg);
 extern void func_00187098(EffBlurScatterWork *arg);
 extern void func_00187598(EffBlurScaleWork *arg);
-extern void func_00187988(EffScreenDrawParams *arg);
+extern void effBlurDrawFramebufferQuad(EffScreenDrawParams *arg);
 extern void func_00187C08(EffSolidRectParams *arg);
 extern void effResourceRectDrawPixels(EffTemplate *arg);
-extern s32 func_002D03F8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 extern u8 *sdfResourceRetainAddress(s32);
 
 /* Allocate contiguous slots followed by their count and allocation handle. */
 EffArrHdr *effCreateSlotArray(u32 count) {
     s32 slotBytes = count * 0x60;
-    s32 handle = func_002D03F8(slotBytes + 0xC);
+    s32 handle = sdfAllocGeneralBlock(slotBytes + 0xC);
     EffBezierSlot *slot = (EffBezierSlot *)sdfResourceRetainAddress(handle);
     EffArrHdr *table = (EffArrHdr *)((u8 *)slot + slotBytes);
     u32 index = 0;
@@ -193,11 +193,11 @@ EffArrHdr *effCreateSlotArray(u32 count) {
 }
 
 void effReleaseSlotArrayAllocation(EffArrHdr *header) {
-    func_002D0918((u32)header->allocation);
+    sdfReleaseResourceAllocation((u32)header->allocation);
 }
 
 /* Evaluate the active slot's Bezier into out and advance it; a slot whose segment has reached 7 is finished and returns 0. A t that passes 1 clamps to 1 and moves on to the next curve segment. */
-s32 func_0018E2C0(EffArrHdr *table, s32 index, f32 *out) {
+s32 effStepActiveBezierSlot(EffArrHdr *table, s32 index, f32 *out) {
     EffBezierSlot *slot = &((EffBezierSlot *)table->slots)[index];
     u32 segment = slot->segment;
     f32 w[4];
@@ -230,7 +230,7 @@ s32 func_0018E2C0(EffArrHdr *table, s32 index, f32 *out) {
 }
 
 /* Evaluate the cubic Bezier at t into out (xyz, w = 1), advance t, and step to the next curve segment when t passes 1; returns 0 once the last segment is finished. */
-s32 func_0018E408(EffBezierSlot *slot, f32 *out) {
+s32 effStepBezierSlotSegment(EffBezierSlot *slot, f32 *out) {
     f32 w[4];
     u32 segment = slot->segment;
     f32 t = slot->t;
@@ -292,7 +292,7 @@ extern void *func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 extern void sdfProjectVuVectorToScreen();
 
 /* Draw a 32x16 box with the fixed marker colour at the screen position of `position`. */
-void func_0018E678(f32 *position) {
+void effDrawMarkerBoxAtPoint(f32 *position) {
     void *list = sdfAllocPacketAligned(0x20);
     f32 screen[4];
     s32 pixel[2]; /* written, never read; retail keeps the frame slot */
@@ -314,7 +314,7 @@ void func_0018E678(f32 *position) {
 }
 
 /* Draw a 32x16 box with the given colour at the screen position of `position`. */
-void func_0018E740(f32 *position, s32 color) {
+void effDrawColoredBoxAtPoint(f32 *position, s32 color) {
     void *list = sdfAllocPacketAligned(0x20);
     f32 screen[4];
     s32 pixel[2]; /* written, never read; retail keeps the frame slot */
@@ -338,7 +338,7 @@ void func_0018E740(f32 *position, s32 color) {
 extern void *func_0011D570(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Draw a box between the screen positions of two points in the fixed marker colour. */
-void func_0018E810(f32 *from, f32 *to) {
+void effDrawMarkerLineBetweenPoints(f32 *from, f32 *to) {
     void *list = sdfAllocPacketAligned(0x20);
     f32 start[4];
     f32 end[4];
@@ -370,7 +370,7 @@ void func_0018E810(f32 *from, f32 *to) {
 }
 
 /* Draw a box between the screen positions of two points in the given colour. */
-void func_0018E938(f32 *from, f32 *to, s32 color) {
+void effDrawColoredLineBetweenPoints(f32 *from, f32 *to, s32 color) {
     void *list = sdfAllocPacketAligned(0x20);
     f32 start[4];
     f32 end[4];
@@ -598,7 +598,7 @@ void effDispatchActive(void) {
         func_00187598(effStaggeredBlurWork);
     }
     if (D_003BB073) {
-        func_00187988(&D_00355908);
+        effBlurDrawFramebufferQuad(&D_00355908);
     }
     if (effColorRectangleEnabled) {
         func_00187C08(&effColorRectangleParameters);
@@ -700,7 +700,7 @@ EffBlurTemplateBody *effGetLoadDescB(void) {
     return &D_00355AF8;
 }
 
-void func_0018FAE8(EffBlurTemplateBody *src) {
+void effEventSetBlurTemplateParameters(EffBlurTemplateBody *src) {
     D_00355AF8 = *src;
 }
 
@@ -740,7 +740,7 @@ EffBlurScatterParams *effGetLoadDescC(void) {
     return &D_00355C70;
 }
 
-void func_0018FC18(EffBlurScatterParams *src) {
+void effEventSetScatterBlurParameters(EffBlurScatterParams *src) {
     D_00355C70 = *src;
 }
 
@@ -900,7 +900,7 @@ EffBlurScaleParams *effGetLoadDescG(void) {
     return &D_003561C8;
 }
 
-void func_00190098(EffBlurScaleParams *src) {
+void effEventSetScaleBlurParameters(EffBlurScaleParams *src) {
     D_003561C8 = *src;
 }
 
@@ -1222,7 +1222,7 @@ INCLUDE_RODATA(const s32, "effect/effEvent", D_003A12E0);
 EffEventBillSet *effEventBillSetCreate(EffEventBillParams *src) {
     u32 count = src->count;
     u32 size = count * sizeof(EffEventBillParticle);
-    u32 handle = func_002D03F8(size + sizeof(EffEventBillSet));
+    u32 handle = sdfAllocGeneralBlock(size + sizeof(EffEventBillSet));
     EffEventBillParticle *particle = (EffEventBillParticle *)sdfResourceRetainAddress(handle);
     EffEventBillSet *work = (EffEventBillSet *)((u8 *)particle + size);
     u32 i;
@@ -1259,7 +1259,7 @@ void effEventReleaseSharedResources(EffEventWork *work) {
         billDispatchByKind(D_003BB144);
         billDispatchByKind(D_003BB148);
     }
-    func_002D0918(work->resource);
+    sdfReleaseResourceAllocation(work->resource);
 }
 
 extern u32 effMiscRand(void *state);

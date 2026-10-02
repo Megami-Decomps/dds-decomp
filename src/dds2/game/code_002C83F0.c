@@ -67,7 +67,7 @@ void *memset(void *dst, s32 val, u32 len);
 
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 
-s32 func_003292A8(s32 arg0);
+s32 sdfAllocGeneralBlock(s32 arg0);
 
 s32 sdfResourceRetainAddress(s32 arg0);
 
@@ -122,7 +122,7 @@ void fileManInit(void) {
     memset(&fileManagerWork, 0, 0x40);
     fileManagerWork.unk7 = 4;
     fileManagerWork.sema = sdfCreateSemaphore(1, 0x7F, 0);
-    fileManagerWork.unk1C = sdfResourceRetainAddress(func_003292A8(0x40000));
+    fileManagerWork.unk1C = sdfResourceRetainAddress(sdfAllocGeneralBlock(0x40000));
     kwlnTaskCreate((s32)&D_00437CC8, 0x384, 1, 0, (s32)&fileMan, 0, 0);
     fileIdleUpdateCallback = fileManUpdate;
 }

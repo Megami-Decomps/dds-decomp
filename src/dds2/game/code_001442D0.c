@@ -105,7 +105,7 @@ extern s32 fldRoomEffectEntryCount;
 
 extern u32 D_00436330[];
 
-extern s32 func_001578C0(u32);
+extern s32 effCreateNodeFromDescriptor(u32);
 
 extern s32 fldObjectSlotCount;
 
@@ -207,7 +207,7 @@ extern s32 D_00436358;
 
 extern s32 D_00436360;
 
-extern void func_003297C8(s32);
+extern void sdfReleaseResourceAllocation(s32);
 
 extern void func_0014E6A8();
 
@@ -1712,7 +1712,7 @@ typedef struct FieldResourceIds {
 void fldLoadResourceByIndex(s32 index) {
     FieldResourceIds ids = *(FieldResourceIds *)D_00436330;
     fldIndexedResourceHandle = sdfReadNamedResource(ids.entries[index], &fldIndexedResourceData, 0);
-    fldIndexedResourceEffect = func_001578C0(fldIndexedResourceData);
+    fldIndexedResourceEffect = effCreateNodeFromDescriptor(fldIndexedResourceData);
 }
 
 void fldReleaseIndexedResourceEffect(void) {
@@ -1907,13 +1907,13 @@ extern s32 fldAreaDamageEffectPlaced;
 
 void fldInitializeMenuResources(void) {
     if (fldAreaState[4] < 200) {
-        D_004362DC = func_001578C0(D_004362D8);
+        D_004362DC = effCreateNodeFromDescriptor(D_004362D8);
         if (fldAreaState[4] == 26) {
-            fldAreaDamageEffect = func_001578C0(D_00438EE0);
+            fldAreaDamageEffect = effCreateNodeFromDescriptor(D_00438EE0);
         } else if (fldAreaState[4] == 29) {
-            fldAreaDamageEffect = func_001578C0(D_00438EE8);
+            fldAreaDamageEffect = effCreateNodeFromDescriptor(D_00438EE8);
         } else if (fldAreaState[4] == 30) {
-            fldAreaDamageEffect = func_001578C0(D_00438EF0);
+            fldAreaDamageEffect = effCreateNodeFromDescriptor(D_00438EF0);
         } else {
             fldAreaDamageEffect = 0;
         }
@@ -2227,12 +2227,12 @@ void fldStartTitle(s32 field, s32 arg1, s32 arg2) {
     }
     handle = sdfReadNamedResource(path, &size, 0);
     D_00436368 = sdfTexAcquireResourceTexture(size);
-    func_003297C8(handle);
+    sdfReleaseResourceAllocation(handle);
     if (field == 0xC) {
         func_0035C860(path, "/fld/f/pnl/df_b.tmx");
         handle = sdfReadNamedResource(path, &size, 0);
         D_0043636C = sdfTexAcquireResourceTexture(size);
-        func_003297C8(handle);
+        sdfReleaseResourceAllocation(handle);
     }
     if (fldTitleIsActive() == 0) {
         kwlnTaskCreate(fldTitleTaskName, 0x2B0A, 0, 1, func_0014E6A8, fldReleaseTitleTextures, 0);
@@ -2266,7 +2266,7 @@ extern void func_0014EDB8(void);
 
 extern void fldReleaseTitleMiniTexture(void);
 
-extern void func_003297C8(s32);
+extern void sdfReleaseResourceAllocation(s32);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413C80);
 
@@ -2390,7 +2390,7 @@ void fldStartMiniTitleForUnlock(s32 id) {
     func_0035C860(path, "/fld/f/pnl/ds_%03d.tmx", id);
     handle = sdfReadNamedResource(path, &data, 0);
     D_0043637C = sdfTexAcquireResourceTexture(data);
-    func_003297C8(handle);
+    sdfReleaseResourceAllocation(handle);
     if (fldTitleIsActive() == 0) {
         kwlnTaskCreate(D_00413C80, 0x2B0A, 0, 1, func_0014EDB8, fldReleaseTitleMiniTexture, 0);
     }
@@ -2744,17 +2744,58 @@ s16 func_001514B8(void) {
     return D_00389876[0];
 }
 
-extern s32 fldTargetGuideState[];
+typedef struct FieldGuidePoint {
+    u8 x;
+    u8 y;
+    u16 bearing;
+} FieldGuidePoint;
+
+typedef struct FieldGridCoordPair {
+    s16 x;
+    s16 y;
+} FieldGridCoordPair;
+
+typedef struct FieldTargetGuideState {
+    s32 mode;
+    s32 disabled;
+    f32 position[3];
+    f32 yaw;
+    u8 pad18[8];
+    s16 gridX;
+    s16 gridY;
+    s16 targetGridX;
+    s16 targetGridY;
+    s16 unk28;
+    s16 unk2A;
+    struct FieldCoordinateRecord *routeRecord;
+    FieldGuidePoint *route;
+    FieldGridCoordPair *cycleRoute;
+    s32 routeIndex;
+    s32 routeEnd;
+    s32 moveTimer;
+    f32 targetYaw;
+    f32 stepDistance;
+    s32 age;
+    s32 unk50;
+    s32 unk54;
+    u8 pad58[0xC];
+    s32 unk64;
+    u8 pad68[4];
+    s32 unk6C;
+    s32 cycleIndex;
+} FieldTargetGuideState;
+
+extern FieldTargetGuideState fldTargetGuideState;
 
 void fldResetViewState(void) {
-    fldTargetGuideState[0x6C / 4] = -1;
-    fldTargetGuideState[0x54 / 4] = 0;
-    fldTargetGuideState[0x50 / 4] = 0;
-    fldTargetGuideState[0x64 / 4] = 0;
-    fldTargetGuideState[0] = 0;
-    fldTargetGuideState[0x70 / 4] = 0;
-    fldTargetGuideState[0x34 / 4] = 0;
-    fldTargetGuideState[0x04 / 4] = 0;
+    fldTargetGuideState.unk6C = -1;
+    fldTargetGuideState.unk54 = 0;
+    fldTargetGuideState.unk50 = 0;
+    fldTargetGuideState.unk64 = 0;
+    fldTargetGuideState.mode = 0;
+    fldTargetGuideState.cycleIndex = 0;
+    fldTargetGuideState.cycleRoute = NULL;
+    fldTargetGuideState.disabled = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001514F8);
@@ -2790,7 +2831,7 @@ void fldMapGridToScreenPosition(s16 x, s16 y, f32 *outX, f32 *outY) {
     *outY = originY + (f32)(-D_004363C2) * sourceY;
 }
 
-typedef struct {
+typedef struct FieldCoordinateRecord {
     u8 x, y, z, w;
     u8 unk04[0xC];
 } FieldCoordinateRecord;
@@ -2815,9 +2856,9 @@ FieldCoordinateRecord *fldFindCoordinateRecord(s16 x, s16 y, s16 z, s16 w) {
 
 void fldCalcTargetDistanceYaw(f32 *distance, f32 *angle) {
     f32 *player = (f32 *)fldAreaState;
-    f32 *target = (f32 *)fldTargetGuideState;
-    f32 dx = player[0x14C / 4] - target[0x8 / 4];
-    f32 dz = player[0x154 / 4] - target[0x10 / 4];
+    FieldTargetGuideState *target = &fldTargetGuideState;
+    f32 dx = player[0x14C / 4] - target->position[0];
+    f32 dz = player[0x154 / 4] - target->position[2];
     f32 dist = fsqrtf(dx * dx + dz * dz);
     f32 yaw = 0.0f;
     if (!(dist < 1.0f)) {
@@ -2853,9 +2894,9 @@ void func_00151DD8(void) {
 }
 
 void fldTickTargetGuideCounter(void) {
-    s32 count = fldTargetGuideState[0x40 / 4];
+    s32 count = fldTargetGuideState.moveTimer;
     if (count > 0) {
-        fldTargetGuideState[0x40 / 4] = count - 1;
+        fldTargetGuideState.moveTimer = count - 1;
     }
 }
 
@@ -2866,10 +2907,10 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00151FF8);
 extern void func_001519E8(s32);
 
 void fldTickTargetGuideAndNotify(void) {
-    s32 count = fldTargetGuideState[0x40 / 4];
+    s32 count = fldTargetGuideState.moveTimer;
     s32 remaining = count - 1;
     if (count > 0) {
-        fldTargetGuideState[0x40 / 4] = remaining;
+        fldTargetGuideState.moveTimer = remaining;
         count = remaining;
     }
     if (count == 0) {
@@ -2877,26 +2918,53 @@ void fldTickTargetGuideAndNotify(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00152230);
+extern f32 sdfSinPoly(f32);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+
+void func_00152230(void) {
+    f32 distance, angle;
+    FieldTargetGuideState *state = &fldTargetGuideState;
+
+    if (state->age < 300) {
+        state->age++;
+    }
+    if (state->moveTimer <= 0 || --state->moveTimer <= 0) {
+        if (state->routeIndex < state->routeEnd) {
+            state->routeIndex++;
+            state->moveTimer = 80;
+        }
+        if (state->cycleRoute[state->cycleIndex + 1].x == -1) {
+            state->cycleIndex = 0;
+        } else {
+            state->cycleIndex++;
+        }
+        func_001519E8(5);
+    } else {
+        state->position[0] += sdfSinPoly(state->targetYaw * 3.14f / 180.0f) * state->stepDistance;
+        state->position[2] += sdfEvaluateCosineViaSinePhaseShift(state->targetYaw * 3.14f / 180.0f) * state->stepDistance;
+        state->yaw = fldApproachTargetAngleWithMinimumStep(state->yaw, 180.0f - state->targetYaw, 15.0f, 1.0f);
+    }
+    fldCalcTargetDistanceYaw(&distance, &angle);
+}
 
 void func_00152390(void) {
-    s32 count = fldTargetGuideState[0x40 / 4];
+    s32 count = fldTargetGuideState.moveTimer;
     if (count > 0) {
-        fldTargetGuideState[0x40 / 4] = count - 1;
+        fldTargetGuideState.moveTimer = count - 1;
     }
 }
 
 void func_001523B0(void) {
-    s32 count = fldTargetGuideState[0x40 / 4];
+    s32 count = fldTargetGuideState.moveTimer;
     if (count > 0) {
-        fldTargetGuideState[0x40 / 4] = count - 1;
+        fldTargetGuideState.moveTimer = count - 1;
     }
 }
 
 void func_001523D0(void) {
-    s32 count = fldTargetGuideState[0x40 / 4];
+    s32 count = fldTargetGuideState.moveTimer;
     if (count > 0) {
-        fldTargetGuideState[0x40 / 4] = count - 1;
+        fldTargetGuideState.moveTimer = count - 1;
     }
 }
 
@@ -2923,12 +2991,12 @@ extern void fldCalcTargetDistanceYaw(f32 *, f32 *);
 void fldUpdateViewAngle(void) {
     f32 distance;
     f32 angle;
-    f32 *state;
+    FieldTargetGuideState *state;
 
     fldCalcTargetDistanceYaw(&distance, &angle);
-    state = (f32 *)fldTargetGuideState;
-    state[0x44 / 4] = angle;
-    state[0x14 / 4] = 180.0f - angle;
+    state = &fldTargetGuideState;
+    state->targetYaw = angle;
+    state->yaw = 180.0f - angle;
 }
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00152C88);

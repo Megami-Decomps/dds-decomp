@@ -5,8 +5,8 @@
 extern volatile u8 D_00438A1D;
 extern void sdfSleepThreadCount(s32);
 extern s32 sdfDoubleBufferAllocation;
-extern s32 func_003297C8(s32);
-extern s32 func_003292A8(s32);
+extern s32 sdfReleaseResourceAllocation(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 extern s32 sdfResourceRetainAddress(s32);
 #include "sdf.h"
 
@@ -53,7 +53,7 @@ extern SdfResource *sdfResourceListHead;
 
 void sdfPrependPacketList(SdfListHead *list, SdfListHead *item);
 
-void func_0032D218();
+void sdfConnectPacketLists();
 
 void func_0032DC80();
 
@@ -375,12 +375,12 @@ void sdfResizeDoubleBuffer(s32 size) {
     s32 memory;
 
     if (sdfDoubleBufferAllocation != 0) {
-        func_003297C8(sdfDoubleBufferAllocation);
+        sdfReleaseResourceAllocation(sdfDoubleBufferAllocation);
         sdfDoubleBufferAllocation = 0;
     }
     size = (size + 0x7F) & ~0x7F;
     sdfPacketBufferSize = size;
-    sdfDoubleBufferAllocation = func_003292A8(size * 2);
+    sdfDoubleBufferAllocation = sdfAllocGeneralBlock(size * 2);
     memory = sdfResourceRetainAddress(sdfDoubleBufferAllocation);
     sdfPacketBuffers[0] = memory;
     sdfPacketBuffers[1] = memory + size;
@@ -511,7 +511,7 @@ void sdfPrependPacketList(SdfListHead *list, SdfListHead *item) {
     if (head == NULL) {
         list->last = (u32)item;
     } else {
-        func_0032D218(item, head);
+        sdfConnectPacketLists(item, head);
     }
     item->unk0 = (u32)head;
     list->first = (u32)item;
@@ -527,7 +527,7 @@ void sdfAppendPacketList(SdfListHead *list, SdfListHead *item) {
         }
         else {
             *last = (u32)item;
-            func_0032D218(last);
+            sdfConnectPacketLists(last);
         }
         list->last = (u32)item;
     }
@@ -580,7 +580,7 @@ s32 sdfLinkReferenceDmaNode(s32 previous, u32 source) {
 
 extern s32 sdfLinkReferenceDmaNode(s32 previous, u32 source);
 
-void func_0032D218(previous, item)
+void sdfConnectPacketLists(previous, item)
     SdfListHead *previous;
     SdfListHead *item;
 {
@@ -658,7 +658,7 @@ s32 sdfFlushPoolNodes(SdfPoolNode *node) {
         node->prepend(node, 0, NULL);
         if (node->first != 0) {
             if (head != 0) {
-                func_0032D218(tail, node->first);
+                sdfConnectPacketLists(tail, node->first);
             } else {
                 head = node->first;
                 sdfChainReferenceNodes((SdfListHead *)head);
@@ -1513,7 +1513,7 @@ void sdfFreeNodeLists(SdfFreeRoot *root) {
         while (node != NULL) {
             SdfFreeNode *next = node->next;
             if (node->allocation != 0) {
-                func_003297C8(node->allocation);
+                sdfReleaseResourceAllocation(node->allocation);
             } else {
                 sdfReleaseChipBlock(node);
             }

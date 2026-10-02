@@ -24,7 +24,7 @@ typedef struct SaveItemCounts {
 
 extern s8 D_00437B73;
 
-extern void func_003297C8(u32);
+extern void sdfReleaseResourceAllocation(u32);
 
 extern void *memset(void *, s32, u32);
 
@@ -685,7 +685,7 @@ u8 *mnuCreateStaffMenuWork(void) {
     u8 *work;
     u8 *effects;
 
-    handle = func_003292A8(0xB1E0);
+    handle = sdfAllocGeneralBlock(0xB1E0);
     work = (u8 *)sdfResourceRetainAddress(handle);
     memset(work, 0, 0xB1E0);
     ((CampVisualWork *)work)->allocationHandle = handle;
@@ -724,7 +724,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     mnuReleaseTitleEffectResourceGroups(work);
     movReleaseTitleEffects(work);
     func_00303D58(((CampVisualWork *)work)->menuResource);
-    func_003297C8(((CampVisualWork *)work)->allocationHandle);
+    sdfReleaseResourceAllocation(((CampVisualWork *)work)->allocationHandle);
     mnuCampTaskState = 2;
     func_003425D8();
 }

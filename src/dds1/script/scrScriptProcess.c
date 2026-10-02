@@ -81,7 +81,7 @@ s32 func_0010BD08(s32 header, s32 procedureSection, s32 procedures, s32 labels, 
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern void sdfReleaseChipBlock(void *);
 extern void itfMesDestroyWindowIfPresent(s32);
-extern void func_002D0918(void *);
+extern void sdfReleaseResourceAllocation(void *);
 extern void evtUnlinkWorkNode(void *);
 
 /* Log the process name, release its VM buffers and resource, then unlink and free it. */
@@ -97,7 +97,7 @@ void scrProcDestroyTask(ScrProcTask *process) {
         itfMesDestroyWindowIfPresent(process->resourceIndex);
     }
     if (process->scriptHandle != 0) {
-        func_002D0918(process->scriptHandle);
+        sdfReleaseResourceAllocation(process->scriptHandle);
     }
     evtUnlinkWorkNode(process);
     sdfReleaseChipBlock(process);

@@ -18,15 +18,15 @@ typedef struct {
 } FmGslWork;
 
 extern FmGslWork frFontResourceList;
-extern void func_002D0918(void *);
+extern void sdfReleaseResourceAllocation(void *);
 
 /* Release the group's handles once and clear its active-node flag. */
 s32 fmGslReleaseActiveResourceBuffers(void) {
     if (frFontResourceList.sentinel == 0) {
         return 0;
     }
-    func_002D0918(frFontResourceList.firstHandle);
-    func_002D0918(frFontResourceList.secondHandle);
+    sdfReleaseResourceAllocation(frFontResourceList.firstHandle);
+    sdfReleaseResourceAllocation(frFontResourceList.secondHandle);
     frFontResourceList.sentinel = 0;
     return 1;
 }

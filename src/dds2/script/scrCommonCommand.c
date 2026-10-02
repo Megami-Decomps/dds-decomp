@@ -19,9 +19,9 @@ f32 bfWaitReadArgFloat(s32 idx);
 
 s32 func_00107EF8(s32 arg0, s32 arg1, void *arg2);
 
-s32 func_00108138(s32 arg0, void *arg1);
+s32 kwlnSetBackgroundColorTarget(s32 arg0, void *arg1);
 
-s32 func_001081F8(s32 arg0, void *arg1);
+s32 kwlnSetDrawColorTarget(s32 arg0, void *arg1);
 
 s32 evtToggleSavedDrawVectors(s32 arg0, f32 arg1, f32 arg2);
 s32 evtSetDrawVectorTarget(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
@@ -344,7 +344,7 @@ s32 scrCmdStorePositionVector(void)
     VU0_SET_AXIS_GPR(z, z);
     VU0_SET_W_ONE(vf10);
     VU0_STORE_VF_TO(vf10, v);
-    func_00108138(scrReadIntParameter(0), &v);
+    kwlnSetBackgroundColorTarget(scrReadIntParameter(0), &v);
     return 1;
 }
 
@@ -355,7 +355,7 @@ s32 scrCmdSetPackedRgbFromFloatArgs(void)
     v.y = bfWaitReadArgFloat(2);
     v.z = bfWaitReadArgFloat(3);
     v.w = 0;
-    func_001081F8(scrReadIntParameter(0), &v);
+    kwlnSetDrawColorTarget(scrReadIntParameter(0), &v);
     return 1;
 }
 

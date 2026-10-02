@@ -114,7 +114,7 @@ void evtResetObjectPendingValue(EffectObject *obj) {
     data->pendingValue = 0;
 }
 
-s32 func_00113490(EffectObject *object) {
+s32 effObjInitializeFollowModelData(EffectObject *object) {
     EffectObjectData *data;
     void *work;
 
@@ -452,7 +452,7 @@ void func_00113E40(u32 value) {
     D_003BA9D0 = value;
 }
 
-s32 func_00113E48(EffectObject *object) {
+s32 effObjInitializeTransformData(EffectObject *object) {
     EffectTransformData *data;
     void *work;
 

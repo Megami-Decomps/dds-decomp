@@ -100,7 +100,7 @@ void func_0018FF38(EffTrackPolyWork *work) {
 }
 
 /* Per-frame update: while the model's value lies inside [unk0C, unk10] the endpoints are resampled every sampleInterval updates and the strips drawn; above the range the strips fade out, below it the track restarts. */
-void func_0018FF50(EffTrackPolyWork *work) {
+void effTrackPolyUpdate(EffTrackPolyWork *work) {
     EffTrackPolyModel *model = work->params.model;
     f32 value = model->state->value;
 
@@ -130,13 +130,13 @@ typedef struct EffTrackPolyList {
     u32 handle;               /* 0x08 */
 } EffTrackPolyList;
 
-extern u32 func_003292A8(s32 size);
+extern u32 sdfAllocGeneralBlock(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
 extern EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *params);
 
 /* Clone count tracks from one parameter block, each with its own data. */
 EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyParams *params, u32 count) {
-    u32 handle = func_003292A8(count * sizeof(EffTrackPolyWork *) + sizeof(EffTrackPolyList));
+    u32 handle = sdfAllocGeneralBlock(count * sizeof(EffTrackPolyWork *) + sizeof(EffTrackPolyList));
     EffTrackPolyList *list = (EffTrackPolyList *)sdfResourceRetainAddress(handle);
     u32 i;
 
@@ -157,7 +157,7 @@ void func_001900B8(EffTrackPolyList *list) {
         effTrackPolyRelease(list->items[i]);
         i++;
     }
-    func_003297C8(list->handle);
+    sdfReleaseResourceAllocation(list->handle);
 }
 
 void func_00190120(EffTrackPolyList *list, s32 index, void *data) {
@@ -243,7 +243,7 @@ extern void func_003332D0(void *asset, f32 scale);
 EffTrackPolyData *func_00190370(s32 historyLength, s32 steps) {
     s32 count = historyLength * steps * 2 + 4;
     s32 bytes = count * (sizeof(u128) + sizeof(u32));
-    u32 handle = func_003292A8(bytes + sizeof(EffTrackPolyData));
+    u32 handle = sdfAllocGeneralBlock(bytes + sizeof(EffTrackPolyData));
     u8 *cursor = sdfResourceRetainAddress(handle);
     EffTrackPolyData *data = (EffTrackPolyData *)(cursor + bytes);
 
@@ -267,7 +267,7 @@ EffTrackPolyData *func_00190370(s32 historyLength, s32 steps) {
 
 void effTrackPolyFreeData(EffTrackPolyData *data) {
     sdfQueueAssetRelease(data->nodeHandle);
-    func_003297C8(data->resourceHandle);
+    sdfReleaseResourceAllocation(data->resourceHandle);
 }
 
 void effTrackPolyInitData(EffTrackPolyData *data) {

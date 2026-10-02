@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u32 func_002AB598(void);
+extern u32 mtrHasEnoughOwnedMantras(void);
 
 extern s32 func_0011C0B0(s32 param0, s32 param1);
 
@@ -74,7 +74,7 @@ s32 func_0011ED10(void) {
 }
 
 s32 func_0011ED60(void) {
-    scrSetIntegerReturnValue(func_002AB598());
+    scrSetIntegerReturnValue(mtrHasEnoughOwnedMantras());
     return 1;
 }
 

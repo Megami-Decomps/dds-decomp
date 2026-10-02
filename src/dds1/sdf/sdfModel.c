@@ -18,7 +18,7 @@ extern void sdfEnsureFreeRootWorkspace(void *arg0);
 extern void func_002D83F8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_002D86E0(void *arg0, void *arg1);
 extern void sdfMultiplyVuMatrixInPlace(void);
-extern void func_002E1FF8(u32 arg0);
+extern void sdfWriteVuMatrixAndScaledRows(u32 arg0);
 extern vu8 sdfCurrentBufferIndex;
 
 /* One DMA tag followed by two VIF codes; all aliases retain the 16-byte packet layout. */
@@ -362,7 +362,7 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     VU0_STORE_MATRIX(transformed);
     address = drawNode->address;
     if (address != 0) {
-        func_002E1FF8(address + (frame << 7));
+        sdfWriteVuMatrixAndScaledRows(address + (frame << 7));
     }
     child = drawNode->children;
     if (child == 0) {

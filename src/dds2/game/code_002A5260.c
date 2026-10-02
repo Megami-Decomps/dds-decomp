@@ -81,7 +81,7 @@ void mnuResetTitlePageAndPhase(void) {
     state->selectedPage = 0;
 }
 
-s32 func_002A58E8(void) {
+s32 mnuPollMovieMenuInputAndTimeout(void) {
     MenuTitleState *state = (MenuTitleState *)mnuMovieMenuState;
     switch (state->phase) {
     case 0:
@@ -799,7 +799,7 @@ void mnuCreateStaffTask(void) {
     u32 handle;
 
     D_00435CBC = 0x80000000;
-    handle = func_003292A8(0xD8);
+    handle = sdfAllocGeneralBlock(0xD8);
     mnuMovieWork = sdfResourceRetainAddress(handle);
     memset(mnuMovieWork, 0, 0xD8);
     ((StaffTaskState *)mnuMovieWork)->handle = handle;

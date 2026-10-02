@@ -440,7 +440,7 @@ u32 func_0011C6A0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011C6A8);
 
-s32 func_0011C868(s32 *actors, s32 affinity) {
+s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity) {
     s32 *requirement = (s32 *)(datAffinityRecords + affinity * 16 - 0x1AB0);
     u32 i;
     s32 required = 0;
@@ -729,10 +729,10 @@ s32 evtPushSecondRosterSelectedStat(void) {
     return 1;
 }
 
-extern s32 func_00119F68(s32);
+extern s32 datMapFlagToStatIndex(s32);
 
 s32 evtPushFirstRosterOptionStat(void) {
-    s8 stat = func_00119F68(((EventScriptEntry *)D_0043E5C0)->index14);
+    s8 stat = datMapFlagToStatIndex(((EventScriptEntry *)D_0043E5C0)->index14);
     s32 value = 100;
 
     switch (stat) {
@@ -753,7 +753,7 @@ s32 evtPushFirstRosterOptionStat(void) {
 }
 
 s32 evtPushSecondRosterOptionStat(void) {
-    s8 stat = func_00119F68(((EventScriptEntry *)D_0043E5C0)->index14);
+    s8 stat = datMapFlagToStatIndex(((EventScriptEntry *)D_0043E5C0)->index14);
     s32 value = 100;
 
     switch (stat) {
@@ -997,10 +997,10 @@ s32 func_0011E018(void) {
     return 1;
 }
 
-extern s32 func_001197C0(s32);
+extern s32 datComputeSkillBoostedMaxHp(s32);
 
 s32 evtSelectStatGrade(void) {
-    s32 total = func_001197C0(D_0043E5C0[3]);
+    s32 total = datComputeSkillBoostedMaxHp(D_0043E5C0[3]);
     s32 current = ((Entry1A4 *)D_0043E5C0[3])->unk6;
     s32 percent = (s32)((f32)current / (f32)total * 100.0f);
     s32 grade = 0;
@@ -1073,7 +1073,7 @@ s32 evtPushRosterBaseValue(void) {
 }
 
 s32 evtSelectFineStatGrade(void) {
-    s32 total = func_001197C0(D_0043E5C0[3]);
+    s32 total = datComputeSkillBoostedMaxHp(D_0043E5C0[3]);
     s32 current = ((Entry1A4 *)D_0043E5C0[3])->unk6;
     s32 percent = (s32)((f32)current / (f32)total * 100.0f);
     s32 grade = 0;

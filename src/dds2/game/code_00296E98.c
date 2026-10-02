@@ -170,7 +170,7 @@ s32 mnuTickExtendedCommandPhase(MenuActionOwner *work) {
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00297970);
 
 /* Phase machine for phases 9-12: 9 waits for the frame counter to pass 10.0f, 10 and 12 for it to reach 10.0f, 11 reports at once. */
-s32 func_00298570(MenuActionOwner *work) {
+s32 mnuTickCommandWaitPhase(MenuActionOwner *work) {
     switch (work->mode) {
     case 9:
         work->frames = work->frames + 1;
@@ -281,15 +281,39 @@ extern s32 mnuCreatePanelGroup(s32, s32, s32);
 extern s32 mnuCreateSpriteState(s32, s32, s32);
 extern void evtStageTestInit(s32);
 
+typedef struct BrsRewardRow {
+    s32 unit;
+    s32 amount;
+    u8 pad08[0x10];
+} BrsRewardRow;
+
+typedef struct BrsRewardBatch {
+    BrsRewardRow rows[5];
+    s32 count;               /* 0x78 */
+} BrsRewardBatch;
+
+typedef struct BrsPartyRow {
+    s32 flags;
+    s32 amount;
+    u8 pad08[0x24];
+} BrsPartyRow;
 /* Battle-result panel fields used while opening its skill-package display. */
 typedef struct BrsSkillPackageWork {
-    u8 pad00[0x58];
+    s32 handle;
+    u8 pad04[4];
+    u8 transition[0x50];
     s32 fadeTarget;          /* 0x058 */
-    u8 pad5C[0x38];
+    MenuIconBatch rewards;
+    u8 pad6C[0x28];
     s32 unitHandle;          /* 0x094 */
     u8 pad98[0x1CC];
     s32 selectedRow;         /* 0x264 */
-    u8 pad268[0x2B4];
+    u8 pad268[0xC];
+    BrsRewardBatch secondaryRewards;
+    BrsRewardBatch primaryRewards;
+    u8 rewardState[0x9C];
+    BrsPartyRow partyRows[5];
+    u8 pad4E4[0x38];
     s32 panelGroup;          /* 0x51C: start of the group passed to setup */
     s32 spriteArg0;          /* 0x520 */
     s32 spriteArg1;          /* 0x524 */
@@ -300,6 +324,9 @@ typedef struct BrsSkillPackageWork {
     s32 spriteHandle;        /* 0xAD38 */
     u8 padAD3C[0x174];
     s32 teardownHandle;     /* 0xAEB0 */
+    u8 padAEB4[0x82C];
+    s32 unusedB6E0;
+    u8 padB6E4[0x20];
 } BrsSkillPackageWork;
 
 typedef struct BrsSelectedRow {
@@ -406,22 +433,6 @@ s32 brsAdvanceSkillPackagePanel(s32 work) {
 extern s32 datGameState;
 
 /* Five party slots followed by the number of rewards in this batch. */
-typedef struct BrsRewardRow {
-    s32 unit;
-    s32 amount;
-    u8 pad08[0x10];
-} BrsRewardRow;
-
-typedef struct BrsRewardBatch {
-    BrsRewardRow rows[5];
-    s32 count;               /* 0x78 */
-} BrsRewardBatch;
-
-typedef struct BrsPartyRow {
-    s32 flags;
-    s32 amount;
-    u8 pad08[0x24];
-} BrsPartyRow;
 
 typedef struct BrsRewardUnit {
     u16 flags;               /* bit 0: occupied party slot */
@@ -471,11 +482,51 @@ void brsTaskLatchPendingRows(s32 context) {
     }
 }
 
+extern s32 sdfAllocGeneralBlock(s32);
+extern void *sdfResourceRetainAddress(s32);
+extern s32 mnuAllocateValueRecord(s32);
+extern char D_003D05C8[];
+
 INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428358);
 
 INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428368);
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00299578);
+void *func_00299578(void) {
+    MenuIconBatch *rewards;
+    s32 handle;
+    BrsPartyRow *party;
+    void *rewardState;
+    BrsRewardBatch *primary;
+    BrsRewardBatch *secondary;
+    BrsSkillPackageWork *work;
+
+    handle = sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
+    work = sdfResourceRetainAddress(handle);
+    memset(work, 0, sizeof(BrsSkillPackageWork));
+    work->handle = handle;
+    mnuClearPanelTransitionState(work->transition);
+    work->fadeTarget = mnuAllocateValueRecord(1);
+    evtCreateMessageWindowIfMissing(D_003D05C8);
+    func_0026C580(200);
+    rewards = &work->rewards;
+    func_001AA400(rewards);
+    party = work->partyRows;
+    rewardState = work->rewardState;
+    func_0029D008(rewardState, rewards);
+    brsApplyRewardBundle((u32)work, rewards, (u32)rewardState);
+    primary = &work->primaryRewards;
+    func_0029D2D8(primary);
+    secondary = &work->secondaryRewards;
+    func_0029D3D8(secondary);
+    func_0029DA98(party);
+    brsMarkPartyRowsFromLists((u32)party, (u32)primary, (u32)secondary);
+    work->unusedB6E0 = 0x100;
+    brsTaskLatchPendingRows((s32)work);
+    work->teardownHandle = 0;
+    effRequestResourceByMode(D_00428358, "easy_r01.spr", 0,
+                            (s32)&work->teardownHandle);
+    return work;
+}
 
 extern s32 kwlnTaskGetUserValue();
 extern void effDestroyResourceSlotSet(s32);
@@ -484,7 +535,7 @@ extern s32 brsAdvanceSkillPackagePanel(s32);
 extern void brsCloseSkillPackagePanel(s32);
 extern void func_00303D58(s32);
 extern void dspCloseChannel(void);
-extern void func_003297C8(s32);
+extern void sdfReleaseResourceAllocation(s32);
 
 /* Release the panel and task resources, then mark the result task finished. */
 void brsStaffTaskDestroy(s32 taskArg) {
@@ -499,7 +550,7 @@ void brsStaffTaskDestroy(s32 taskArg) {
     }
     func_00303D58(((BrsSkillPackageWork *)context)->fadeTarget);
     dspCloseChannel();
-    func_003297C8(*(s32 *)context);
+    sdfReleaseResourceAllocation(*(s32 *)context);
     brsTaskState = 2;
 }
 

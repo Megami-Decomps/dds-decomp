@@ -347,13 +347,13 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7738);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7950);
 
-extern u32 func_002D03F8(s32 size);
+extern u32 sdfAllocGeneralBlock(s32 size);
 extern void *sdfMemoryGetBlockAddress(u32 handle);
 
 /* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
 MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 arg) {
     s32 size = count * 0x20 + 0x44;
-    u32 handle = func_002D03F8(size);
+    u32 handle = sdfAllocGeneralBlock(size);
     MapRequestRing *pool = (MapRequestRing *)sdfMemoryGetBlockAddress(handle);
     MapRequestState *state = &pool->header;
     MapRequestNode *node;
@@ -443,7 +443,7 @@ extern u8 D_00324660[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *src);
 
 /* vu0 routine: project a world point to the screen and return its GS grid cell. */
-void func_002C7DC0(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {
+void fldProjectPointToGridCell(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {
     f32 point[4];
     f32 screen[4];
 
@@ -611,7 +611,7 @@ float fldVec3AngleBetween(float *left, float *right) {
     return func_002FA1C0(fldNormalizedVectorDot(left, right));
 }
 
-void sdfCrossNormalizedVectors(float *out, float *left, float *right) {
+void fldNormalizedVectorCross(float *out, float *left, float *right) {
     Vector4 a;
     Vector4 b;
 

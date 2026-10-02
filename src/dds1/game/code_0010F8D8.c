@@ -21,7 +21,7 @@ extern u32 dds3WorldCounter;
 extern void dds3BuildVuTransformFromComponents(void *, void *, void *);
 extern void dds3DestroyWorldNode(void *node);
 extern void dds3DestroyWorldIndexNode(void *node);
-extern void func_002D0918(void *resource);
+extern void sdfReleaseResourceAllocation(void *resource);
 extern void sdfReleaseChipBlock(void *block);
 
 void dds3LoadOrBuildObjectMatrix(u8 *arg0) {
@@ -161,7 +161,7 @@ void func_0010FB30(WorldObject *object) {
         dds3DestroyWorldIndexNode(entry->worldIndexNodes);
     }
     if (entry->resource != NULL) {
-        func_002D0918(entry->resource);
+        sdfReleaseResourceAllocation(entry->resource);
     }
     sdfReleaseChipBlock(entry);
 }

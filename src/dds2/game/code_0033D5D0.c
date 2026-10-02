@@ -97,7 +97,7 @@ typedef struct DevRequest {
     s32 buffer;
 } DevRequest;
 
-extern s32 func_003292A8(s32 size);
+extern s32 sdfAllocGeneralBlock(s32 size);
 
 extern s32 sdfResourceRetainAddress(s32 arg0);
 
@@ -729,7 +729,7 @@ void sdfDevUnlinkAndFreeState(DevState *state) {
     sdfReleaseChipBlock(state);
 }
 
-void func_0033EDB0(DevState *state) {
+void sdfDevRecycleCompletedState(DevState *state) {
     ThreadEntry *worker;
     DevState *prev;
     DevState *next;
@@ -790,7 +790,7 @@ void sdfDevRelease(DevState *state) {
     if (resourceId >= 0) {
         func_00369DF8(resourceId);
     }
-    func_0033EDB0(state);
+    sdfDevRecycleCompletedState(state);
 }
 
 void sdfDevDeactivate(DevState *state, s32 result) {
@@ -1113,7 +1113,7 @@ DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 mode) {
     request->count = count;
     request->stride = stride;
     if (count != 0) {
-        request->handle = func_003292A8(stride * count);
+        request->handle = sdfAllocGeneralBlock(stride * count);
         request->buffer = sdfResourceRetainAddress(request->handle);
     } else {
         request->handle = 0;
@@ -1123,7 +1123,7 @@ DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 mode) {
 }
 
 void sdfDestroyDevRequest(DevRequest *request) {
-    func_003297C8(request->handle);
+    sdfReleaseResourceAllocation(request->handle);
     sdfReleaseChipBlock(request);
 }
 
@@ -1146,11 +1146,11 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 count) {
     if (request->handle == 0) {
         if (count > 0) {
             request->count = count;
-            request->handle = func_003292A8(request->stride * count);
+            request->handle = sdfAllocGeneralBlock(request->stride * count);
             request->buffer = sdfResourceRetainAddress(request->handle);
         }
     } else if (count <= 0) {
-        func_003297C8(request->handle);
+        sdfReleaseResourceAllocation(request->handle);
         request->handle = 0;
         request->flags = 0;
         request->count = 0;

@@ -137,7 +137,7 @@ u32 func_00168818(BattleEffect *effect) {
 }
 
 /* Blend toward the neutral tint over the final six frames of the ramp. */
-u32 func_00168820(u32 elapsed, u32 duration)
+u32 effBattleCalcFadeTint(u32 elapsed, u32 duration)
 {
     f32 ratio;
     u32 color[4];

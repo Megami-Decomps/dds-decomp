@@ -14,7 +14,7 @@ extern s32 mnuFindMantraDrawItemByKind(u32, u32);
 
 extern s32 func_00328D68(u32);
 
-void func_003297C8(u32 sprite);
+void sdfReleaseResourceAllocation(u32 sprite);
 
 void mnuFreeMantraSparkleEmitter(u32 sprite);
 
@@ -284,7 +284,7 @@ extern u32 mnuInitMantraUnitPanelDraw();
 extern void mnuReleaseMantraUnitPanelDraw();
 void mnuStorePanelEntry(u32, u32);
 void effDestroyResourceSlotSet(u32);
-extern u32 func_003292A8(u32);
+extern u32 sdfAllocGeneralBlock(u32);
 extern u32 sdfMemoryGetBlockAddress(u32);
 
 s32 mnuGetActiveMantraModelFlagState(void) {
@@ -488,7 +488,7 @@ s32 mnuLoadMantraSpriteTask(void) {
         for (i = 4; entry != 0; entry = entry->next, i++) {
             if (entry->kind == 1) {
                 mnuMantraSpriteSlots[i] = func_00305148(entry->handle, 0);
-                func_003297C8((u32)entry->handle);
+                sdfReleaseResourceAllocation((u32)entry->handle);
             }
         }
         func_002C7CE8(request);
@@ -705,7 +705,7 @@ void func_0026FAC8(void) {
 
 u32 mnuCreateMantraDrawPool(u32 count) {
     u32 size = count * 0x24 + 0xc;
-    u32 handle = func_003292A8(size);
+    u32 handle = sdfAllocGeneralBlock(size);
     MantraDrawPool *pool = (MantraDrawPool *)sdfMemoryGetBlockAddress(handle);
     memset(pool, 0, size);
     pool->handle = handle;
@@ -725,7 +725,7 @@ void mnuDestroyMantraDrawPool(u32 address) {
             mnuMantraSetupSlot((u32)item);
         }
     }
-    func_003297C8(pool->handle);
+    sdfReleaseResourceAllocation(pool->handle);
 }
 
 void mnuMantraSetupSlot(u32 item) {
@@ -2027,7 +2027,7 @@ MantraIconEntry *mnuSpawnMantraIcon(s32 x, s32 y, MantraIconPool *pool, u32 mode
 
 u32 mnuAllocateMantraIconPool(u32 count) {
     u32 size = count * 12 + 0x14;
-    u32 handle = func_003292A8(size);
+    u32 handle = sdfAllocGeneralBlock(size);
     u32 block = sdfMemoryGetBlockAddress(handle);
     memset((void *)block, 0, size);
     *(u32 *)block = handle;
@@ -2037,7 +2037,7 @@ u32 mnuAllocateMantraIconPool(u32 count) {
 }
 
 void mnuReleaseMantraIconSprite(u32 *sprite) {
-    func_003297C8(*sprite);
+    sdfReleaseResourceAllocation(*sprite);
 }
 
 u32 mnuClaimMantraIconEntry(u32 *pool, u32 flags) {
@@ -2572,7 +2572,7 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002799D8);
 
 void mnuReleaseMantraIconSpriteHandle(u32 *sprite) {
     if (sprite != 0) {
-        func_003297C8(*sprite);
+        sdfReleaseResourceAllocation(*sprite);
     }
 }
 
@@ -3274,7 +3274,7 @@ typedef struct MantraBurstHeader {
 } MantraBurstHeader;
 
 u32 mnuAllocateMantraPanelBurstPool(void) {
-    u32 handle = func_003292A8(0x650);
+    u32 handle = sdfAllocGeneralBlock(0x650);
     u32 block = sdfMemoryGetBlockAddress(handle);
     memset((void *)block, 0, 0x650);
     *(u32 *)block = handle;
@@ -3285,7 +3285,7 @@ u32 mnuAllocateMantraPanelBurstPool(void) {
 
 void mnuReleaseMantraPanelBurstPool(u32 *obj) {
     if (*obj != 0) {
-        func_003297C8(*obj);
+        sdfReleaseResourceAllocation(*obj);
     }
 }
 
@@ -3344,7 +3344,7 @@ MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side)
 }
 
 u32 mnuAllocateMantraBackgroundBurstPool(void) {
-    u32 handle = func_003292A8(0x650);
+    u32 handle = sdfAllocGeneralBlock(0x650);
     u32 block = sdfMemoryGetBlockAddress(handle);
     memset((void *)block, 0, 0x650);
     *(u32 *)block = handle;
@@ -3355,7 +3355,7 @@ u32 mnuAllocateMantraBackgroundBurstPool(void) {
 
 void mnuReleaseMantraBackgroundBurstPool(u32 *obj) {
     if (*obj != 0) {
-        func_003297C8(*obj);
+        sdfReleaseResourceAllocation(*obj);
     }
 }
 
@@ -3493,7 +3493,7 @@ typedef struct MantraEffectPoolHeader {
 
 u32 mnuAllocateMantraEffectSlotPool(u32 count) {
     u32 size = count * 12 + 0x28;
-    u32 handle = func_003292A8(size);
+    u32 handle = sdfAllocGeneralBlock(size);
     u32 block = sdfMemoryGetBlockAddress(handle);
     memset((void *)block, 0, size);
     ((MantraEffectPoolHeader *)block)->allocation = handle;

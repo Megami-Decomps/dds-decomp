@@ -160,7 +160,7 @@ extern s32 sceDmaSync(void *, s32, s32);
 
 extern void sdfReleaseMemorySlot(void *);
 
-extern s32 func_003292A8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 
 extern s32 sdfResourceRetainAddress(s32);
 
@@ -181,11 +181,11 @@ typedef struct SdfDrawPacket {
     u64 registerAddressC;
 } SdfDrawPacket;
 
-extern u64 func_0032B318(void *);
+extern u64 sdfTexGetPrimaryTextureState(void *);
 
-extern u64 func_0032B328(void *);
+extern u64 sdfTexGetPrimarySamplingState(void *);
 
-extern u64 func_0032B338(void *);
+extern u64 sdfTexGetPrimaryClampState(void *);
 
 extern void *sdfAllocPacketAligned(s32);
 
@@ -767,7 +767,7 @@ void sdfConsUploadDmaProgram(s32 size) {
     sceDmaSendN(chan, D_0037B080, (D_0037B610 - D_0037B080) >> 4);
     sceDmaSync(chan, 0, 0);
     sdfReleaseMemorySlot(&D_00438A40);
-    D_00438A40 = func_003292A8(size);
+    D_00438A40 = sdfAllocGeneralBlock(size);
     D_00439180 = sdfResourceRetainAddress(D_00438A40);
 }
 
@@ -781,11 +781,11 @@ SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *p, void *tex, s32 dat
     p->command = 0x50000004;
     p->reservedWord = 0;
     p->payloadHeader = 0xE;
-    p->textureWordA = func_0032B328(tex);
+    p->textureWordA = sdfTexGetPrimarySamplingState(tex);
     p->registerAddressA = data + 0x14;
-    p->textureWordB = func_0032B318(tex);
+    p->textureWordB = sdfTexGetPrimaryTextureState(tex);
     p->registerAddressB = data + 6;
-    p->textureWordC = func_0032B338(tex);
+    p->textureWordC = sdfTexGetPrimaryClampState(tex);
     p->registerAddressC = data + 8;
     return p;
 }
@@ -1057,16 +1057,16 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AC10);
 void sdfInitializeResourceQueuesAndTextureWords(void) {
     u64 v;
     func_0033AC10();
-    v = func_0032B318(D_00438A70);
+    v = sdfTexGetPrimaryTextureState(D_00438A70);
     D_0037F1B8[0] = v;
     D_00438A78 = v;
     D_0037F1B8[1] = v >> 32;
     D_00438A6C = func_0032C150(D_00372C00);
-    v = func_0032B318(D_00438A6C);
+    v = sdfTexGetPrimaryTextureState(D_00438A6C);
     D_0037F270[0] = v;
     D_0037F270[1] = v >> 32;
     D_00438A80 = func_0032C150(D_00376C40);
-    v = func_0032B318(D_00438A80);
+    v = sdfTexGetPrimaryTextureState(D_00438A80);
     D_0037F1F4[0] = v;
     D_0037F1F4[1] = v >> 32;
     sdfInitializeObjectListRequest();
@@ -1092,7 +1092,7 @@ typedef struct VuLightingPacket {
 } VuLightingPacket;
 
 /* vu0 routine: store vf28-vf31 and its rows scaled by the inverse column lengths, then the GIF tag words. */
-void func_0033AEA8(VuLightingPacket *packet) {
+void sdfWriteVuMatrixAndScaledRows(VuLightingPacket *packet) {
     VU0_STORE_MATRIX_AND_UNIT_ROWS(packet);
     packet->tag[0] = 0x04000010;
     packet->tag[1] = 0x14000000;
@@ -1108,7 +1108,7 @@ void sdfConsAppendVuPacket(s32 list, s32 (*alloc)(s32)) {
     packet = (u64 *)alloc(0x90);
     packet[0] = ((u64)((u32)(packet + 2) & 0x0FFFFFFF) << 32) | 0x20000008;
     packet[1] = 0x6C07C000ULL << 32;
-    func_0033AEA8((VuLightingPacket *)(packet + 2));
+    sdfWriteVuMatrixAndScaledRows((VuLightingPacket *)(packet + 2));
     sdfAppendPacket(list, (u32)packet);
 }
 
@@ -1481,7 +1481,7 @@ void sdfDevConsListRemove(node)
 
 void sdfDevConsNodeDestroy(ConsNode *node) {
     sdfDevConsListRemove(node);
-    func_003297C8(node->bufferHandle);
+    sdfReleaseResourceAllocation(node->bufferHandle);
     sdfReleaseChipBlock(node);
 }
 
@@ -1509,7 +1509,7 @@ ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 width, s32 height) {
     node->unk17 = 8;
     node->controlByte = 0;
     node->textAttribute = 0;
-    bufferHandle = func_003292A8((width * height) * 2);
+    bufferHandle = sdfAllocGeneralBlock((width * height) * 2);
     node->bufferHandle = bufferHandle;
     node->pixels = (u8 *)sdfResourceRetainAddress(bufferHandle);
     sdfDevConsNodeClear(node);

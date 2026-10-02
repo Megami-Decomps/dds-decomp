@@ -669,7 +669,7 @@ extern void *sceDmaGetChan(s32);
 extern void sceDmaSendN(void *, void *, s32);
 extern s32 sceDmaSync(void *, s32, s32);
 extern void sdfReleaseMemorySlot(void *);
-extern s32 func_002D03F8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 extern s32 sdfResourceRetainAddress(s32);
 
 void sdfConsUploadDmaProgram(s32 size) {
@@ -678,7 +678,7 @@ void sdfConsUploadDmaProgram(s32 size) {
     sceDmaSendN(chan, D_003200A0, (D_00320630 - D_003200A0) >> 4);
     sceDmaSync(chan, 0, 0);
     sdfReleaseMemorySlot(&D_003BD350);
-    D_003BD350 = func_002D03F8(size);
+    D_003BD350 = sdfAllocGeneralBlock(size);
     D_003BDA20 = sdfResourceRetainAddress(D_003BD350);
 }
 
@@ -703,9 +703,9 @@ typedef struct SdfDrawPacket {
     u64 registerAddressC;
 } SdfDrawPacket;
 
-extern u64 func_002D2468(void *);
-extern u64 func_002D2478(void *);
-extern u64 func_002D2488(void *);
+extern u64 sdfTexGetPrimaryTextureState(void *);
+extern u64 sdfTexGetPrimarySamplingState(void *);
+extern u64 sdfTexGetPrimaryClampState(void *);
 
 SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *p, void *tex, s32 data) {
     p->quadwords = 4;
@@ -713,11 +713,11 @@ SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *p, void *tex, s32 dat
     p->command = 0x50000004;
     p->reservedWord = 0;
     p->payloadHeader = 0xE;
-    p->textureWordA = func_002D2478(tex);
+    p->textureWordA = sdfTexGetPrimarySamplingState(tex);
     p->registerAddressA = data + 0x14;
-    p->textureWordB = func_002D2468(tex);
+    p->textureWordB = sdfTexGetPrimaryTextureState(tex);
     p->registerAddressB = data + 6;
-    p->textureWordC = func_002D2488(tex);
+    p->textureWordC = sdfTexGetPrimaryClampState(tex);
     p->registerAddressC = data + 8;
     return p;
 }
@@ -1029,16 +1029,16 @@ extern void sdfRegisterResourceQueueCallbacks(void);
 void sdfInitializeResourceQueuesAndTextureWords(void) {
     s64 value;
     func_002E1D60();
-    value = func_002D2468(D_003BD380);
+    value = sdfTexGetPrimaryTextureState(D_003BD380);
     D_003BD388 = value;
     D_003241D8[0] = value;
     D_003241D8[1] = value >> 32;
     D_003BD37C = func_002D32A0(D_00317C20);
-    value = func_002D2468(D_003BD37C);
+    value = sdfTexGetPrimaryTextureState(D_003BD37C);
     D_00324290[0] = value;
     D_00324290[1] = value >> 32;
     D_003BD390 = func_002D32A0(D_0031BC60);
-    value = func_002D2468(D_003BD390);
+    value = sdfTexGetPrimaryTextureState(D_003BD390);
     D_00324214[0] = value;
     D_00324214[1] = value >> 32;
     sdfInitializeObjectListRequest();
@@ -1068,7 +1068,7 @@ typedef struct VuLightingPacket {
 } VuLightingPacket;
 
 /* vu0 routine: store vf28-vf31 and its rows scaled by the inverse column lengths, then the GIF tag words. */
-void func_002E1FF8(VuLightingPacket *packet) {
+void sdfWriteVuMatrixAndScaledRows(VuLightingPacket *packet) {
     VU0_STORE_MATRIX_AND_UNIT_ROWS(packet);
     packet->tag[0] = 0x04000010;
     packet->tag[1] = 0x14000000;
@@ -1084,7 +1084,7 @@ void sdfConsAppendVuPacket(s32 list, s32 (*alloc)(s32)) {
     packet = (u64 *)alloc(0x90);
     packet[0] = ((u64)((u32)(packet + 2) & 0x0FFFFFFF) << 32) | 0x20000008;
     packet[1] = 0x6C07C000ULL << 32;
-    func_002E1FF8((VuLightingPacket *)(packet + 2));
+    sdfWriteVuMatrixAndScaledRows((VuLightingPacket *)(packet + 2));
     sdfAppendPacket(list, (u32)packet);
 }
 
@@ -1467,7 +1467,7 @@ void sdfDevConsListRemove(ConsNode *node) {
 
 void sdfDevConsNodeDestroy(ConsNode *node) {
     sdfDevConsListRemove(node);
-    func_002D0918(node->bufferHandle);
+    sdfReleaseResourceAllocation(node->bufferHandle);
     sdfReleaseChipBlock(node);
 }
 
@@ -1494,7 +1494,7 @@ ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 columns, s32 rows) {
     node->unk17 = 8;
     node->controlByte = 0;
     node->textAttribute = 0;
-    bufferHandle = func_002D03F8((columns * rows) * 2);
+    bufferHandle = sdfAllocGeneralBlock((columns * rows) * 2);
     node->bufferHandle = bufferHandle;
     node->cells = (u8 *)sdfResourceRetainAddress(bufferHandle);
     sdfDevConsNodeClear(node);

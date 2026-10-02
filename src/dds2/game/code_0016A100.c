@@ -131,7 +131,7 @@ extern void sdfReleaseChipBlock(void *p);
 
 extern EffDispatchEntry D_003B01B4[];
 
-extern u32 func_003292A8(s32 size);
+extern u32 sdfAllocGeneralBlock(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
 extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
@@ -511,7 +511,7 @@ EffParamWork *effParamCreateFromTable(EffParamWork *work, s32 index) {
 /* Second thunder effect: the cell sub-system is dispatched with three head
  * pointers and a perCell group divisor of four. */
 EffThunderWork4C *effCreateThunderCellSystemWork(EffThunderHead4C *src) {
-    u32 handle = func_003292A8(src->count * sizeof(EffThunderCell2C) + sizeof(EffThunderWork4C));
+    u32 handle = sdfAllocGeneralBlock(src->count * sizeof(EffThunderCell2C) + sizeof(EffThunderWork4C));
     EffThunderWork4C *work = (EffThunderWork4C *)sdfResourceRetainAddress(handle);
     u32 i;
 

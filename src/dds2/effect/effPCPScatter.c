@@ -227,7 +227,7 @@ extern u32 effParamWorkDuplicate(u32 param);
 
 extern void effPcpScatterSharePoolResource(PcpScatterPool *dst, PcpScatterPool *src);
 
-extern u32 func_003292A8(u32 size);
+extern u32 sdfAllocGeneralBlock(u32 size);
 
 extern u32 *sdfResourceRetainAddress(u32 handle);
 
@@ -327,7 +327,7 @@ PcpScatterWork1 *effPcpScatterSharedDuplicate(src)
             work->duplicatedCount = work->duplicatedCount + 1;
         }
         count = work->duplicatedCount;
-        handle = func_003292A8(count * 4);
+        handle = sdfAllocGeneralBlock(count * 4);
         buf = sdfResourceRetainAddress(handle);
         work->duplicateAllocation = handle;
         work->duplicatedHandles = buf;
@@ -350,10 +350,10 @@ void effPcpScatterReleaseParticleGroup(PcpScatterWork1 *work) {
         for (i = 0; i < count; i++) {
             effDispatchParameterDataAndFreeWork(work->duplicatedHandles[i]);
         }
-        func_003297C8(work->duplicateAllocation);
+        sdfReleaseResourceAllocation(work->duplicateAllocation);
     }
     effPcpScatterReleasePoolResources(work->childWork);
-    func_003297C8(work->ownedResource);
+    sdfReleaseResourceAllocation(work->ownedResource);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001789C0);
@@ -406,7 +406,7 @@ PcpScatterWork8 *effPcpScatterLinkedDuplicate(src)
             work->duplicatedCount = work->duplicatedCount + 1;
         }
         count = work->duplicatedCount;
-        handle = func_003292A8(count * 4);
+        handle = sdfAllocGeneralBlock(count * 4);
         buf = sdfResourceRetainAddress(handle);
         work->duplicateAllocation = handle;
         work->duplicatedHandles = buf;
@@ -426,10 +426,10 @@ void effPcpScatterReleaseSharedParticles(PcpScatterWork8 *work) {
         for (i = 0; i < count; i++) {
             effDispatchParameterDataAndFreeWork(work->duplicatedHandles[i]);
         }
-        func_003297C8(work->duplicateAllocation);
+        sdfReleaseResourceAllocation(work->duplicateAllocation);
     }
     effPcpScatterReleasePoolResources(work->childWork);
-    func_003297C8(work->ownedResource);
+    sdfReleaseResourceAllocation(work->ownedResource);
 }
 
 typedef struct PcpScatterSprite {
@@ -532,7 +532,7 @@ PcpScatterWork2Copy *effPcpScatterTableDuplicate(src)
             work->duplicatedCount = work->duplicatedCount + 1;
         }
         count = work->duplicatedCount;
-        handle = func_003292A8(count * 4);
+        handle = sdfAllocGeneralBlock(count * 4);
         buf = sdfResourceRetainAddress(handle);
         work->duplicateAllocation = handle;
         work->duplicatedHandles = buf;
@@ -552,10 +552,10 @@ void effPcpScatterReleaseLinkedParticles(PcpScatterWork2Copy *work) {
         for (i = 0; i < count; i++) {
             effDispatchParameterDataAndFreeWork(work->duplicatedHandles[i]);
         }
-        func_003297C8(work->duplicateAllocation);
+        sdfReleaseResourceAllocation(work->duplicateAllocation);
     }
     effPcpScatterReleasePoolResources(work->childWork);
-    func_003297C8(work->ownedResource);
+    sdfReleaseResourceAllocation(work->ownedResource);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A248);
@@ -586,7 +586,7 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     first = slots * 8;
     second = slots * 2;
     size = (first + second) * 4 + 0x34;
-    handle = func_003292A8(size);
+    handle = sdfAllocGeneralBlock(size);
     block = sdfResourceRetainAddress(handle);
     memset(block, 0, size);
     pool = (PcpScatterPool *)(block + (first + second));
@@ -610,7 +610,7 @@ void effPcpScatterReleasePoolResources(PcpScatterPool *pool) {
         effPcpScatterResRelease(pool->sharedResource);
     }
     sdfQueueAssetRelease(pool->resource);
-    func_003297C8(pool->buffer);
+    sdfReleaseResourceAllocation(pool->buffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017AA08);
@@ -694,7 +694,7 @@ typedef struct PcpScatterParams {
     f32 radiusJitter;
     f32 targetRadius;
     f32 targetRadiusJitter;
-    u8 padAC[4];
+    s32 colorParam;
     u32 vCount;
     u32 vTail;
     u8 padB8[0x80];
@@ -739,7 +739,7 @@ PcpScatterInstance *effPcpScatterCreateParticleInstance(src, resource)
     u32 resource;
 
 {
-    u32 allocation = func_003292A8(src->particleCount * 0x28 + 0x18C);
+    u32 allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x18C);
     PcpScatterInstance *inst = (PcpScatterInstance *)sdfResourceRetainAddress(allocation);
     PcpScatterParticle *particle;
     u32 mod;
@@ -791,7 +791,7 @@ PcpScatterInstance *effScatterCloneWithSharedObject(PcpScatterInstance *work) {
 
 void effScatterReleaseObjectAndBuffer(PcpScatterInstance *work) {
     effReleaseScatterObject(work->scatterObject);
-    func_003297C8(work->ownedBuffer);
+    sdfReleaseResourceAllocation(work->ownedBuffer);
 }
 
 
@@ -915,7 +915,58 @@ void effScatterRingUpdate(PcpScatterInstance *work, s32 index)
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B520);
+extern s32 effMultiplyPackedColors(s32 color, s32 param);
+extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
+extern void effScatterStoreSourceTransformMatrix(void *draw, void *work);
+extern void func_0017DA28(void *draw);
+void func_0017B520(PcpScatterInstance *work) {
+    s32 loop;
+    u32 i;
+    u32 count = work->params.particleCount;
+    PcpScatterDraw *draw = (PcpScatterDraw *)work->scatterObject;
+    PcpScatterParticle *particle = work->particles;
+    s32 duration = work->params.duration;
+    s32 fadeIn;
+    s32 fadeRange;
+    s32 color;
+    loop = work->params.loop;
+    fadeIn = work->params.fadeIn;
+    fadeRange = work->params.fadeRange;
+    color = effMultiplyPackedColors(work->color, work->params.colorParam);
+
+    for (i = 0; i < count; i++) {
+        s32 age = particle->age;
+        if (duration < age) {
+            draw->colors[i] = 0;
+        } else {
+            if (age == 0) {
+                effScatterRingInit(work, i);
+            } else if (age > 0) {
+                s32 remaining = duration - age;
+                f32 factor;
+                if (age < fadeIn && fadeIn != 0) {
+                    factor = (f32)age / (f32)fadeIn;
+                } else if (fadeRange >= remaining && fadeRange != 0) {
+                    factor = (f32)remaining / (f32)fadeRange;
+                } else {
+                    factor = 1.0f;
+                }
+                draw->colors[i] = effBlendColor(color & 0xFFFFFF, color, factor);
+                effScatterRingUpdate(work, i);
+            }
+            if (loop != 0 && age >= duration) {
+                particle->age = 0;
+            } else {
+                particle->age++;
+            }
+        }
+        particle++;
+    }
+    draw->scale = work->scale;
+    PCP_COPY_VECTOR(draw->origin, work->params.vec);
+    effScatterStoreSourceTransformMatrix(draw, work);
+    func_0017DA28(draw);
+}
 
 void effScatterCopyParticleParameterVector(PcpScatterInstance *work, void *src) {
     PCP_COPY_VECTOR(&work->params, src);
@@ -946,7 +997,7 @@ void *effScatterInstanceCreateB(src, resource)
     u32 resource;
 
 {
-    u32 allocation = func_003292A8(src->particleCount * 0x28 + 0x194);
+    u32 allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x194);
     PcpScatterInstanceB *inst = (PcpScatterInstanceB *)sdfResourceRetainAddress(allocation);
     PcpScatterParticle *particle;
     u32 mod;
@@ -1005,7 +1056,7 @@ PcpScatterInstanceB *effScatterCloneWithSharedResource(PcpScatterInstanceB *work
 
 void effScatterReleaseInstanceResources(PcpScatterInstanceB *work) {
     effReleaseScatterObject(work->scatterObject);
-    func_003297C8(work->ownedBuffer);
+    sdfReleaseResourceAllocation(work->ownedBuffer);
 }
 
 
@@ -1130,10 +1181,6 @@ void effScatterRingUpdateScaled(PcpScatterInstanceB *work, s32 index)
 
 
 
-extern s32 effMultiplyPackedColors(s32 color, s32 param);
-extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
-extern void effScatterStoreSourceTransformMatrix(void *draw, void *work);
-extern void func_0017DA28(void *draw);
 
 /* Per-frame update of a fading, optionally looping scatter instance. */
 void effScatterUpdateLoopedScaledRing(PcpScatterInstanceB *work) {
@@ -1232,7 +1279,7 @@ void *effScatterInstanceCreateC(src, resource)
     u32 resource;
 
 {
-    u32 allocation = func_003292A8(src->particleCount * 0x28 + 0x19C);
+    u32 allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x19C);
     PcpScatterInstanceC *inst = (PcpScatterInstanceC *)sdfResourceRetainAddress(allocation);
     PcpScatterParticle *particle;
     u32 mod;
@@ -1291,7 +1338,7 @@ PcpScatterInstanceC *effCreateScatterChildSharingParentResource(PcpScatterInstan
 
 void effReleaseScatterObjectAndOwnedBuffer(PcpScatterInstanceC *work) {
     effReleaseScatterObject(work->scatterObject);
-    func_003297C8(work->ownedBuffer);
+    sdfReleaseResourceAllocation(work->ownedBuffer);
 }
 
 
@@ -1571,7 +1618,7 @@ void *effPcpScatterCreatePlainInstance(src, resource)
     PcpScatterPlainParams *src;
     u32 resource;
 {
-    u32 allocation = func_003292A8(src->particleCount * 0x28 + 0x13C);
+    u32 allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x13C);
     PcpScatterPlainInstance *inst = (PcpScatterPlainInstance *)sdfResourceRetainAddress(allocation);
     PcpScatterPlainParticle *particle;
     u32 mod;
@@ -1626,7 +1673,7 @@ PcpScatterPlainInstance *effCloneScatterWithSharedResource(PcpScatterPlainInstan
 
 void effReleaseScatterWorkResources(PcpScatterPlainInstance *work) {
     effReleaseScatterObject(work->scatterObject);
-    func_003297C8(work->ownedBuffer);
+    sdfReleaseResourceAllocation(work->ownedBuffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017D138);
@@ -1678,4 +1725,53 @@ void effScatterFlatRingUpdate(PcpScatterPlainInstance *work, s32 index)
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017D560);
+extern void func_0017D138(PcpScatterPlainInstance *work, s32 index);
+
+void func_0017D560(PcpScatterPlainInstance *work) {
+    s32 loop;
+    u32 i;
+    u32 count = work->params.particleCount;
+    PcpScatterDraw *draw = (PcpScatterDraw *)work->scatterObject;
+    PcpScatterPlainParticle *particle = work->particles;
+    s32 duration = work->params.duration;
+    s32 fadeIn;
+    s32 fadeRange;
+    s32 color;
+    loop = work->params.loop;
+    fadeIn = work->params.fadeIn;
+    fadeRange = work->params.fadeRange;
+    color = effMultiplyPackedColors(work->color, work->params.colorParam);
+
+    for (i = 0; i < count; i++) {
+        s32 age = particle->age;
+        if (duration < age) {
+            draw->colors[i] = 0;
+        } else {
+            if (age == 0) {
+                func_0017D138(work, i);
+            } else if (age > 0) {
+                s32 remaining = duration - age;
+                f32 factor;
+                if (age < fadeIn && fadeIn != 0) {
+                    factor = (f32)age / (f32)fadeIn;
+                } else if (fadeRange >= remaining && fadeRange != 0) {
+                    factor = (f32)remaining / (f32)fadeRange;
+                } else {
+                    factor = 1.0f;
+                }
+                draw->colors[i] = effBlendColor(color & 0xFFFFFF, color, factor);
+                effScatterFlatRingUpdate(work, i);
+            }
+            if (loop != 0 && age >= duration) {
+                particle->age = 0;
+            } else {
+                particle->age++;
+            }
+        }
+        particle++;
+    }
+    draw->scale = work->scale;
+    PCP_COPY_VECTOR(draw->origin, work->params.vec);
+    effScatterStoreSourceTransformMatrix(draw, work);
+    func_0017DA28(draw);
+}

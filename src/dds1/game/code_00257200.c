@@ -13,13 +13,13 @@ typedef struct MantraPulseGrid {
 } MantraPulseGrid;
 
 extern void itfDspDrawStrip(s32, s32, s32, s32, s32);
-extern void func_00257150();
+extern void mnuDrawSelectedMantraEntry();
 extern void mnuChooseDisplaySpriteKindFromEntryFlags(s32, s32, s32);
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 
 void mnuDrawMantraPulseStripAndKind(void *object, s32 scale, s32 context) {
     itfDspDrawStrip(0, 0, 0, scale, context);
-    func_00257150(object, scale, context);
+    mnuDrawSelectedMantraEntry(object, scale, context);
     mnuChooseDisplaySpriteKindFromEntryFlags(object, scale, context);
 }
 

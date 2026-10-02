@@ -87,7 +87,7 @@ s32 func_0010BF30(s32 header, s32 procedureSection, s32 procedures, s32 labels, 
 extern void evtPrintDeveloperConsoleMessage(char *, u32);
 extern void sdfReleaseChipBlock(void *);
 extern void itfMesDestroyWindowIfPresent(s32);
-extern void func_003297C8(void *);
+extern void sdfReleaseResourceAllocation(void *);
 extern void evtUnlinkWorkNode(void *);
 
 /* DDS2 process teardown follows the same layout as DDS1's ScrProcTask. */
@@ -103,7 +103,7 @@ void scrProcDestroyTask(ScrProcTask *process) {
         itfMesDestroyWindowIfPresent(process->resourceIndex);
     }
     if (process->scriptHandle != 0) {
-        func_003297C8(process->scriptHandle);
+        sdfReleaseResourceAllocation(process->scriptHandle);
     }
     evtUnlinkWorkNode(process);
     sdfReleaseChipBlock(process);

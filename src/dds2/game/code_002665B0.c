@@ -85,7 +85,7 @@ extern void mnuReleaseStaffMenuResources(s32);
 
 extern s32 datGameState;
 
-extern s32 func_003292A8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 
 extern s32 sdfResourceRetainAddress(s32);
 
@@ -613,7 +613,7 @@ void mnuResetProgressModeFromOwner(u8 *work) {
 }
 
 s32 mnuCreateProgressHost(void) {
-    s32 heap = func_003292A8(0xa82c);
+    s32 heap = sdfAllocGeneralBlock(0xa82c);
     MenuProgressHost *host = (MenuProgressHost *)sdfResourceRetainAddress(heap);
     memset((void *)host, 0, 0xa82c);
     host->heapHandle = heap;
@@ -628,7 +628,7 @@ void mnuReleaseStaffAndTitleVisualResources(u32 *hostWords) {
     mnuReleaseStaffMenuTextureHandles(hostWords + 2);
     mnuReleaseTitleEffectSprites(hostWords + 2);
     func_00303D58(hostWords[1]);
-    func_003297C8(*hostWords);
+    sdfReleaseResourceAllocation(*hostWords);
 }
 
 s32 mnuPollTitleEffectsReady(MenuProgressHost *host) {
@@ -794,7 +794,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     u8 *obj;
     u32 i;
 
-    handle = func_003292A8(0x3F8);
+    handle = sdfAllocGeneralBlock(0x3F8);
     obj = (u8 *)sdfResourceRetainAddress(handle);
     memset(obj, 0, 0x3F8);
     *(s32 *)obj = handle;
@@ -821,7 +821,7 @@ extern void func_00266808(u32 *work);
 extern void mnuDrainPanelTransitions(u8 *state, s32 arg);
 extern void dspCloseChannel(void);
 extern void evtReleaseResourcePairHandle(u32 *record);
-extern void func_003297C8(s32 handle);
+extern void sdfReleaseResourceAllocation(s32 handle);
 extern s32 mnuCheckResourceTask(void);
 extern void mnuStopResourceTask(void);
 extern void func_001285E8(s32 a, s32 b);
@@ -838,7 +838,7 @@ void mnuReleaseTerminalWorkAndResumeField(s32 arg) {
         mnuDrainPanelTransitions((u8 *)work + 8, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle((u32 *)((u8 *)work + 0x5C));
-        func_003297C8(work->heapHandle);
+        sdfReleaseResourceAllocation(work->heapHandle);
         mnuTerminalTaskState = 2;
     }
     if (mnuCheckResourceTask() != 0) {
@@ -889,7 +889,7 @@ s32 fldPollSceneState(void) {
     return 0;
 }
 
-s64 func_002684F0(s32 callback) {
+s64 mnuPrepareTerminalPopupAndDispatch(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     mnuSetPopupEntry((s32 *)(context + 0x54), D_003CE944);

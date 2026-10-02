@@ -152,7 +152,7 @@ extern EffectConfig D_003AA884[];
 
 s32 billCreateIndexed(s32 kind, s32 index);
 
-s32 func_003292A8(s32 size);
+s32 sdfAllocGeneralBlock(s32 size);
 
 EffectBufferRecord *sdfResourceRetainAddress(s32 allocation);
 
@@ -595,7 +595,7 @@ void func_0015B290(void) {
 
 EffectBufferTail *effAllocateBuffer(s32 count) {
     s32 bytes = count * sizeof(EffectBufferRecord);
-    s32 allocation = func_003292A8(bytes + sizeof(EffectBufferTail));
+    s32 allocation = sdfAllocGeneralBlock(bytes + sizeof(EffectBufferTail));
     EffectBufferRecord *record = sdfResourceRetainAddress(allocation);
     EffectBufferTail *tail = (EffectBufferTail *)((u8 *)record + bytes);
 
@@ -614,7 +614,7 @@ EffectBufferTail *effAllocateBuffer(s32 count) {
 }
 
 void effReleaseBufferAllocation(u32 *allocationSlot) {
-    func_003297C8(*allocationSlot);
+    sdfReleaseResourceAllocation(*allocationSlot);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B330);
@@ -2356,7 +2356,7 @@ void *effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
     memset(copy, 0, 0x200);
     memcpy(copy, source, source->templateSize);
     memcpy((u8 *)copy + 0x150, (u8 *)source + source->templateSize, tailLen);
-    allocation = func_003292A8(copy->packetCount * 0x10);
+    allocation = sdfAllocGeneralBlock(copy->packetCount * 0x10);
     copy->auxiliaryAllocation = allocation;
     copy->auxiliaryData = sdfResourceRetainAddress(allocation);
     func_0015B330((s32)copy);
@@ -2365,7 +2365,7 @@ void *effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
 }
 
 void effFreeDiscAuxTemplate(u32 effect) {
-    func_003297C8(((EffTemplatePacketList *)effect)->auxiliaryAllocation);
+    sdfReleaseResourceAllocation(((EffTemplatePacketList *)effect)->auxiliaryAllocation);
     effDestroyResources(effect);
     sdfReleaseChipBlock(effect);
 }
@@ -2574,7 +2574,7 @@ s32 effCloneTemplateWithPacketDescriptors(EffTemplatePacketList *source) {
         }
         listBytes = count * 12;
         ((EffTemplatePacketList *)copy)->recordsPerPacket = perRecord;
-        ((EffTemplatePacketList *)copy)->listAllocation = func_003292A8(listBytes + perRecord * count * 16);
+        ((EffTemplatePacketList *)copy)->listAllocation = sdfAllocGeneralBlock(listBytes + perRecord * count * 16);
         addr = (s32 *)sdfResourceRetainAddress(((EffTemplatePacketList *)copy)->listAllocation);
         i = 0;
         base = (s32)addr;

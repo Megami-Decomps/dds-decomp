@@ -1,7 +1,7 @@
 #include "common.h"
 #include "mnu.h"
 
-extern s32 func_003292A8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 extern u8 *sdfResourceRetainAddress(s32);
 extern void mnuClearPanelTransitionState(u8 *);
 extern void mnuInitializeShopStatusBatches(u8 *);
@@ -100,7 +100,7 @@ extern void dspCloseChannel(void);
 
 extern void evtReleaseResourcePairHandle();
 
-extern void func_003297C8(s32);
+extern void sdfReleaseResourceAllocation(s32);
 
 extern void func_002C1B70(s32, s32);
 
@@ -128,7 +128,7 @@ extern void *memset(void *dst, s32 c, u32 n);
 
 extern void kwlnTaskCreate(void *name, s32 priority, s32 mode, s32 flags, void *update, void *destroy, void *data);
 
-extern void func_0025D8C8(void);
+extern void evtTickPackLoad(void);
 
 extern s32 func_002C54B0(s32);
 extern s32 mnuIsBulletItemId(s32);
@@ -170,7 +170,7 @@ void mnuCampCreateTask(s32 taskId) {
         memset(data, 0, 0x48);
         data->taskId = taskId;
         data->unk4 = 0;
-        kwlnTaskCreate(name, CAMP_TASK_PRIORITY, 1, 1, func_0025D8C8, evtReleaseEventPackResources, data);
+        kwlnTaskCreate(name, CAMP_TASK_PRIORITY, 1, 1, evtTickPackLoad, evtReleaseEventPackResources, data);
     }
 }
 
@@ -633,7 +633,7 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EC00);
 extern void fldCopyCameraSetting(void *setting);
 extern void fldUpdateCameraColorEffect(void *setting);
 
-void func_0025ED10(CampScene *scene, const s32 *colorSettings) {
+void fldApplyCameraColorKeyWords(CampScene *scene, const s32 *colorSettings) {
     s32 cameraSettings[0x54 / sizeof(s32)];
     u8 *cameraColorA;
     u8 *sourceColorA;
@@ -712,7 +712,7 @@ void mnuEnterCampSceneMenuState(CampScene *scene) {
     }
 }
 
-extern void func_001053F0(s32, s32, f32);
+extern void kwlnCreateHeldTextureBuffer(s32, s32, f32);
 extern void func_0025EFD8(CampScene *scene);
 extern void mnuShopSubmitDescriptor(u8 *work);
 extern void func_0025F2B0(CampScene *scene);
@@ -722,7 +722,7 @@ void mnuAdvanceShopMenuState(CampScene *scene) {
     switch (scene->menuState) {
     case 1:
         if (kwlnHeldTextureReference == 0) {
-            func_001053F0(0x200, 0xE0, 100.75f);
+            kwlnCreateHeldTextureBuffer(0x200, 0xE0, 100.75f);
         }
         scene->menuState = scene->menuState + 1;
     case 3:
@@ -1201,7 +1201,7 @@ u8 *mnuTerminalCreateContext(void) {
     s32 handle;
     u8 *obj;
 
-    handle = func_003292A8(0x38C);
+    handle = sdfAllocGeneralBlock(0x38C);
     obj = sdfResourceRetainAddress(handle);
     memset(obj, 0, 0x38C);
     ((ShopEffectScene *)obj)->resourceHandle = handle;
@@ -1228,7 +1228,7 @@ void mnuTerminalReleaseContextAndResources(s32 arg) {
         mnuDrainPanelTransitions(scene + 0xC, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(scene + 0x60);
-        func_003297C8(*(s32 *)scene);
+        sdfReleaseResourceAllocation(*(s32 *)scene);
         mnuPanelTaskCompletionState = 2;
     }
 }

@@ -156,7 +156,7 @@ typedef struct EvtViewNode {
 extern void func_00243048(u16 *from, u16 *to, u8 *out, f32 ratio);
 extern void func_00243608(s32 handle, u8 *out);
 
-void func_0022CBA0(EventViewerState *viewer, EvtViewNode *node, u16 *from, u16 *to) {
+void evtViewerApplyInterpolatedNodeKey(EventViewerState *viewer, EvtViewNode *node, u16 *from, u16 *to) {
     u8 out[0x20];
     f32 ratio = 0.0f;
 
@@ -864,7 +864,7 @@ extern void sdfQueueNonzeroResourceId();
 extern void kwlnTextureReleaseHeldReference();
 extern void evtEventViewerReleaseGroups();
 extern void evtEventViewerShutdown();
-extern void func_002D0918();
+extern void sdfReleaseResourceAllocation();
 extern void fldReleaseCameraColorEffect();
 extern void kwlnFadeSetMode();
 void evtViewerCleanupMessageWindow(s32 viewerAddr);
@@ -900,7 +900,7 @@ void evtViewerReleaseResources(viewer)
     }
     evtEventViewerReleaseGroups(viewer);
     evtEventViewerShutdown(viewer);
-    func_002D0918(viewer->resourceHandle);
+    sdfReleaseResourceAllocation(viewer->resourceHandle);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     fldReleaseCameraColorEffect();
@@ -931,7 +931,7 @@ void func_00232D48(void *unused) {
 }
 
 extern u32 D_003BA8EC;
-extern s32 func_002D03F8(s32 size);
+extern s32 sdfAllocGeneralBlock(s32 size);
 extern u32 *sdfResourceRetainAddress(s32 handle);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
@@ -943,7 +943,7 @@ void evtViewerCreateTaskWithSky(void) {
     void *viewerTask;
 
     D_003BA8EC = 0x80000000;
-    viewerHandle = func_002D03F8(0x2490);
+    viewerHandle = sdfAllocGeneralBlock(0x2490);
     viewer = sdfResourceRetainAddress(viewerHandle);
     memset(viewer, 0, 0x2490);
     *viewer = viewerHandle;

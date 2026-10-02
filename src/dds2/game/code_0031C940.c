@@ -30,7 +30,7 @@ typedef struct ModelInstanceWork {
     u32 unkC;
 } ModelInstanceWork;
 
-extern u32 func_003292A8(s32);
+extern u32 sdfAllocGeneralBlock(s32);
 extern void *sdfMemoryGetBlockAddress(u32);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
@@ -60,7 +60,7 @@ INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CF88);
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031D120);
 
-ModelInstanceWork *func_0031D260(s32 count, s32 *counts) {
+ModelInstanceWork *itfCreateModelInstanceWork(s32 count, s32 *counts) {
     s32 listBytes = count * 8;
     s32 size = listBytes + 16;
     s32 i;
@@ -71,7 +71,7 @@ ModelInstanceWork *func_0031D260(s32 count, s32 *counts) {
 
     for (i = 0; i < count; i++) size += counts[i] * sizeof(ModelInstance);
     evtPrintDeveloperConsoleMessage("SpriteWork Object Size %d\n", size);
-    handle = func_003292A8(size);
+    handle = sdfAllocGeneralBlock(size);
     work = sdfMemoryGetBlockAddress(handle);
     memset(work, 0, size);
     work->handle = handle;

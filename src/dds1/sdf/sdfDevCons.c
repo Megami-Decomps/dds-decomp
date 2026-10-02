@@ -34,7 +34,7 @@ void func_002E4228(ConsBuf *arg0);
 void func_002E42F8(DevConsState *arg0, ConsBuf *arg1);
 void func_002E4428(DevConsState *arg0, ConsBuf *arg1);
 void func_002E45D0(ConsBuf *arg0, void *arg1, s32 arg2);
-s64 func_002D2468(s32 arg0, void *arg1);
+s64 sdfTexGetPrimaryTextureState(s32 arg0, void *arg1);
 void func_00305B08(void *arg0, const char *arg1, void *arg2);
 s32 sceDmaSync(void *ch, s32 mode, s32 timeout);
 void sceDmaSendN(void *ch, void *addr, s32 size);

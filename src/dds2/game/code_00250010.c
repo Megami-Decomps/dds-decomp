@@ -1,5 +1,7 @@
 #include "common.h"
 #include "evt_world.h"
+#include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 extern u32 evtSkyOverlayEnabled;
 
@@ -173,8 +175,8 @@ typedef struct EvtPad {
     s8 confirm; /* 0x21 */
     u8 pad22;
     s8 cancel;  /* 0x23 */
-    u8 decOne;  /* 0x24 */
-    u8 incOne;  /* 0x25 */
+    s8 decOne;  /* 0x24 */
+    s8 incOne;  /* 0x25 */
     s8 decTen;  /* 0x26 */
     s8 incTen;  /* 0x27 */
     u8 decHun;  /* 0x28 */
@@ -198,7 +200,7 @@ extern s32 sdfCreateResetPacketList(void);
 extern void func_00250338(s32 list, s32 x, s32 y, s32 col, s32 rows, s32 first, s32 total, EvtRuntime *ctx,
                           EvtMenuHeaderFn header, EvtMenuRowFn row);
 extern void kwlnDrawSpriteCell(s32 list, s32 x, s32 y, s32 w, s32 h);
-extern s32 func_001036B0(s32, s32, s32, s32, s32, s32, s32 *, s32, s32 *);
+extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32, s32 *, s32, s32 *);
 
 extern void sndEnsureMidiBankResident(s32 sound);
 
@@ -565,7 +567,7 @@ s32 mnuDrawInfoWindowA(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->mode != 1) {
         return 0;
     }
-    return func_001036B0(0, 1, 0xB, 1, 0xB, 0, 0, 0, &ctx->inputA);
+    return kwlnStepTwoListCursors(0, 1, 0xB, 1, 0xB, 0, 0, 0, &ctx->inputA);
 }
 
 extern char D_004374D0[];
@@ -618,7 +620,7 @@ s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->mode != 2) {
         return 0;
     }
-    return func_001036B0(0, 1, ctx->itemCount, 1, ctx->itemCount, 0, 0, 0, &ctx->cursor);
+    return kwlnStepTwoListCursors(0, 1, ctx->itemCount, 1, ctx->itemCount, 0, 0, 0, &ctx->cursor);
 }
 
 extern char D_004374E0[];
@@ -826,7 +828,7 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *ctx) {
     if (count < 0x1D) {
         shown = count;
     }
-    return func_001036B0(0, 1, count, 1, shown, 0, &ctx->entryFirst, 0, &ctx->entryCursor);
+    return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, &ctx->entryFirst, 0, &ctx->entryCursor);
 }
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_002521C8);
@@ -980,7 +982,7 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->mode != 0xC) {
         return 0;
     }
-    return func_001036B0(0, 1, rows, 1, rows, 0, 0, 0, &ctx->inputB);
+    return kwlnStepTwoListCursors(0, 1, rows, 1, rows, 0, 0, 0, &ctx->inputB);
 }
 
 extern char D_00423EC0[]; /* "MESSAGE MENU (MESMAX %3d)" */
@@ -1244,7 +1246,48 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00255538);
 void func_00255648(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00255650);
+extern f32 sdfViewMatrix[];
+extern void effMiscAxisAngleToQuaternionVU(f32 angle);
+extern void effMiscQuaternionToMatrixVU(void);
+
+/* vu0 routine: rotate an event-viewer position about camera axes selected by the pad. */
+void func_00255650(f32 *position)
+{
+    if (D_0037F510.incOne != 0) {
+        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
+        effMiscAxisAngleToQuaternionVU(2.0f * 3.14159265f / 180.0f);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, position);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, position);
+    } else if (D_0037F510.decOne != 0) {
+        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
+        effMiscAxisAngleToQuaternionVU(-2.0f * 3.14159265f / 180.0f);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, position);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, position);
+    }
+    if (D_0037F510.incTen != 0) {
+        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
+        effMiscAxisAngleToQuaternionVU(-2.0f * 3.14159265f / 180.0f);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, position);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, position);
+    } else if (D_0037F510.decTen != 0) {
+        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
+        effMiscAxisAngleToQuaternionVU(2.0f * 3.14159265f / 180.0f);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, position);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, position);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00255818);
 

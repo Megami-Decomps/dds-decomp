@@ -259,7 +259,7 @@ extern s32 D_003BAE30;
 extern s32 D_003BAE1C;
 extern s32 fldTaskSlotCount;
 extern s16 D_003C9510[];
-extern void *func_002D03F8(s32 size);
+extern void *sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(void *p);
 extern u32 D_003BAE4C;
 extern s32 D_003BAE50;
@@ -590,7 +590,7 @@ extern u32 fldCachedRoomResourceSize, D_003BAC74, D_003BAC78, D_003BAC7C;
 void *fldLoadCachedRoomResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     if (fldAreaState[31] == area) {
         if (fldAreaState[32] == room) {
-            void *buffer = func_002D03F8(fldCachedRoomResourceSize);
+            void *buffer = sdfAllocGeneralBlock(fldCachedRoomResourceSize);
             void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)fldCachedRoomResourceData, fldCachedRoomResourceSize);
@@ -603,7 +603,7 @@ void *fldLoadCachedRoomResourceIfLocationMatches(void **destination, s32 area, s
 void *func_00127CB8(void **destination, s32 area, s32 room) {
     if (fldAreaState[31] == area) {
         if (fldAreaState[32] == room) {
-            void *buffer = func_002D03F8(D_003BAC74);
+            void *buffer = sdfAllocGeneralBlock(D_003BAC74);
             void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)D_003BAC64, D_003BAC74);
@@ -616,7 +616,7 @@ void *func_00127CB8(void **destination, s32 area, s32 room) {
 void *func_00127D30(void **destination, s32 area, s32 room) {
     if (fldAreaState[31] == area) {
         if (fldAreaState[32] == room) {
-            void *buffer = func_002D03F8(D_003BAC78);
+            void *buffer = sdfAllocGeneralBlock(D_003BAC78);
             void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)D_003BAC68, D_003BAC78);
@@ -629,7 +629,7 @@ void *func_00127D30(void **destination, s32 area, s32 room) {
 void *func_00127DA8(void **destination, s32 area, s32 room) {
     if (fldAreaState[31] == area) {
         if (fldAreaState[32] == room) {
-            void *buffer = func_002D03F8(D_003BAC7C);
+            void *buffer = sdfAllocGeneralBlock(D_003BAC7C);
             void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)D_003BAC6C, D_003BAC7C);
@@ -750,7 +750,7 @@ void fldLoadAreaPackedResources(void) {
                 sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 5:
-                fldAreaCachedResource = (u32)func_002D03F8(sdfMemoryGetBlockSize(entry->blockHandle));
+                fldAreaCachedResource = (u32)sdfAllocGeneralBlock(sdfMemoryGetBlockSize(entry->blockHandle));
                 memcpy((void *)sdfMemoryGetBlockAddress(fldAreaCachedResource),
                        (void *)sdfMemoryGetBlockAddress(entry->blockHandle),
                        sdfMemoryGetBlockSize(entry->blockHandle));
@@ -2597,9 +2597,9 @@ typedef struct {
     u8 pad8C[0x54];
 } FldLightSet; /* 0xE0 bytes */
 extern void *D_003BAD60;
-extern s32 func_001082D8(s32, void *);
+extern s32 kwlnSetDrawColorTarget(s32, void *);
 extern s32 func_00107FD8(s32, s32, void *);
-extern s32 func_00108218(s32, void *);
+extern s32 kwlnSetBackgroundColorTarget(s32, void *);
 extern s32 func_001080D8(s32, s32, void *);
 extern s32 evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
 extern void fldSetSwayMode(u32);
@@ -2622,7 +2622,7 @@ void fldApplyLightSetCurrent(void) {
     vec[1] = light->fixedVectorY * 0.00390625f;
     vec[2] = light->fixedVectorZ * 0.00390625f;
     vec[3] = 0;
-    func_001082D8(0, vec);
+    kwlnSetDrawColorTarget(0, vec);
     evtSetDrawVectorTarget(0, light->unk1C, light->unk24, light->unk20, light->unk28);
     dir[0] = light->lightDirectionAX;
     dir[1] = light->lightDirectionAY;
@@ -2658,7 +2658,7 @@ void fldApplyLightSetCurrent(void) {
     vec[1] = light->finalVectorY;
     vec[2] = light->finalVectorZ;
     vec[3] = 1.0f;
-    func_00108218(0, vec);
+    kwlnSetBackgroundColorTarget(0, vec);
 }
 
 void fldApplyLightSetIndex(s32 index) {
@@ -2681,7 +2681,7 @@ void fldApplyLightSetIndex(s32 index) {
     vec[1] = light->fixedVectorY * 0.00390625f;
     vec[2] = light->fixedVectorZ * 0.00390625f;
     vec[3] = 0;
-    func_001082D8(0, vec);
+    kwlnSetDrawColorTarget(0, vec);
     evtSetDrawVectorTarget(0, light->unk1C, light->unk24, light->unk20, light->unk28);
     dir[0] = light->lightDirectionAX;
     dir[1] = light->lightDirectionAY;
@@ -2717,7 +2717,7 @@ void fldApplyLightSetIndex(s32 index) {
     vec[1] = light->finalVectorY;
     vec[2] = light->finalVectorZ;
     vec[3] = 1.0f;
-    func_00108218(0, vec);
+    kwlnSetBackgroundColorTarget(0, vec);
 }
 
 typedef struct FldColorParams {
@@ -2877,13 +2877,13 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
 /* Keep both the resource handles and retained addresses: callers use the
  * retained storage, whereas the handles are needed at release time. */
 void fldAllocateRecordStorage(void) {
-    u8 *storage = func_002D03F8(0x72000);
+    u8 *storage = sdfAllocGeneralBlock(0x72000);
 
     fldValueRecordResource = (u32)storage;
     storage = sdfResourceRetainAddress(storage);
     fldValueRecords = (u32)storage;
     memset(storage, 0, 0x72000);
-    storage = func_002D03F8(0x4A00);
+    storage = sdfAllocGeneralBlock(0x4A00);
     fldAuxRecordResource = (u32)storage;
     storage = sdfResourceRetainAddress(storage);
     fldAuxRecordBuffer = (u32)storage;

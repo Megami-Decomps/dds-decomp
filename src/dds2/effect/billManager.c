@@ -190,7 +190,7 @@ void billReleaseSharedEntryBlock(void *arg) {
             effReleaseSharedTextureRecord(block->entries[i]);
             i++;
         }
-        func_003297C8(block->allocation);
+        sdfReleaseResourceAllocation(block->allocation);
     }
 }
 
@@ -259,7 +259,7 @@ u64 billCreateFromResource(u32 owner, u64 resource) {
 
     allocation = sdfReadNamedResource(resource, header, 0);
     billboard = billCreateIndexed(owner, header[0]);
-    func_003297C8(allocation);
+    sdfReleaseResourceAllocation(allocation);
     return billboard;
 }
 

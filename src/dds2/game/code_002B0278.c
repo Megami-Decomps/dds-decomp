@@ -380,7 +380,7 @@ extern void frFontQueueGlyphInSelectedSlot(s32);
 
 extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
-extern s32 func_003292A8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 
 extern s32 *sdfResourceRetainAddress(s32);
 
@@ -686,7 +686,7 @@ u32 mnuReleasePartySelectionResources(void) {
     mnuRefreshPartyPanelSlots(context);
     mnuDestroyPartySelectionWindow(context);
     func_002B0D70(context);
-    func_003297C8(selection->allocation);
+    sdfReleaseResourceAllocation(selection->allocation);
     return 1;
 }
 
@@ -800,7 +800,7 @@ void mnuReleaseStaffMenuTextureHandles(s32 menu) {
 
 u32 mnuCreateSelectState(u32 unused, s32 flag) {
     s32 context = kwlnTaskGetUserValue();
-    u32 handle = func_003292A8(0x30);
+    u32 handle = sdfAllocGeneralBlock(0x30);
     u32 *state = (u32 *)sdfResourceRetainAddress(handle);
     *(u32 **)(context + 0xaa48) = state;
     memset(state, 0, 0x30);
@@ -824,7 +824,7 @@ s32 mnuStaffCloseSelectionState(void) {
 
     mnuResetWorkFloats();
     mnuReleaseMenuWindowHandles(context);
-    func_003297C8(*(s32 *)party);
+    sdfReleaseResourceAllocation(*(s32 *)party);
     return 1;
 }
 
@@ -1218,7 +1218,7 @@ void mnuDestroySkillMenuWindows(s32 context) {
 
 u32 mnuCreateItemState(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    u32 handle = func_003292A8(0x3c);
+    u32 handle = sdfAllocGeneralBlock(0x3c);
     u32 *state = (u32 *)sdfResourceRetainAddress(handle);
     *(u32 **)(context + 0xaa48) = state;
     memset(state, 0, 0x3c);
@@ -1246,7 +1246,7 @@ s32 mnuCloseItemSelectionState(s32 selection) {
         mnuDestroySelectedPartyWindow(selection);
     }
     func_002B4290(context);
-    func_003297C8(menu[0]);
+    sdfReleaseResourceAllocation(menu[0]);
     return 1;
 }
 
@@ -2817,7 +2817,7 @@ void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value, s32 res, 
 /* Create an owned three-sprite bundle using the caller's slot-index array. */
 MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
                     u32 resourceHandle, s32 *indices, u32 unused) {
-    u32 allocationHandle = func_003292A8(0x18);
+    u32 allocationHandle = sdfAllocGeneralBlock(0x18);
     MenuIconSprites *bundle = (MenuIconSprites *)sdfResourceRetainAddress(allocationHandle);
     memset(bundle, 0, 0x18);
     bundle->handle = allocationHandle;
@@ -2831,7 +2831,7 @@ void mnuReleaseWindowTextures(MenuIconSprites *menu) {
         effDestroyResourceSlotSet(menu->sprite[i]);
         i++;
     } while (i < 3);
-    func_003297C8(menu->handle);
+    sdfReleaseResourceAllocation(menu->handle);
 }
 
 void func_002B9A38(void) {
@@ -3220,7 +3220,7 @@ void mnuSortItems(MenuList *menu, s32 sortKey, s32 descending) {
         mnuComparePrimaryKeyAscending, mnuCompareSecondaryKeyAscending, mnuCompareTertiaryKeyAscending
     };
     s32 count = 0;
-    s32 handle = func_003292A8(menu->count * 4);
+    s32 handle = sdfAllocGeneralBlock(menu->count * 4);
     MenuListNode **items = (MenuListNode **)sdfResourceRetainAddress(handle);
     MenuListNode **out = items;
     MenuListNode *node;
@@ -3237,7 +3237,7 @@ void mnuSortItems(MenuList *menu, s32 sortKey, s32 descending) {
     mnuRebuildListFirstFromCursor(menu);
     mnuRebuildListLastFromCursor(menu);
     mnuResetNodeLinks((s32 *)menu, 0);
-    func_003297C8(handle);
+    sdfReleaseResourceAllocation(handle);
 }
 
 void mnuAllocateListEntries(s32 *list) {

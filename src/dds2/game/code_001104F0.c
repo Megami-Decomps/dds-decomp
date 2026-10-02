@@ -122,7 +122,7 @@ u32 dds3AdvanceObjectValueCursor(WorldObject *object) {
 INCLUDE_ASM(const s32, "game/code_001104F0", dds3VisitWorldObjectValues);
 
 extern void *func_00328D68(s32 size);
-extern u32 func_003292A8(s32 size);
+extern u32 sdfAllocGeneralBlock(s32 size);
 extern void sdfReleaseChipBlock(void *block);
 extern WorldList *sdfResourceRetainAddress(u32 resource);
 
@@ -142,7 +142,7 @@ u32 dds3CreateWorldObjectData(WorldObject *object) {
         data->indexedHandle = 0;
         data->value18 = 0;
         data->value1C = 0;
-        data->resource = func_003292A8(0xD8);
+        data->resource = sdfAllocGeneralBlock(0xD8);
         if (data->resource == 0) {
             sdfReleaseChipBlock(data);
             return 0;
@@ -163,7 +163,7 @@ u32 dds3CreateWorldObjectData(WorldObject *object) {
 
 extern void dds3ClearSceneObjectState();
 extern void evtReleaseSceneResource();
-extern void func_003297C8(u32 resource);
+extern void sdfReleaseResourceAllocation(u32 resource);
 void dds3RemoveWorldObjectNode(WorldListNode *node);
 
 /* Destroy every node of every list, then release the data block and scene state. */
@@ -178,7 +178,7 @@ void dds3DestroyWorldObjectData(WorldObject *object) {
             }
         }
         if (data->resource != 0) {
-            func_003297C8(data->resource);
+            sdfReleaseResourceAllocation(data->resource);
         }
         dds3ClearSceneObjectState(object);
         evtReleaseSceneResource(object);

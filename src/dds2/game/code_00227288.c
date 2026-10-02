@@ -113,7 +113,7 @@ extern s32 kwlnHeldTextureReference;
 
 extern void sdfFreeMemoryFromEitherHeap(void *);
 
-extern void *func_003293C8(s32);
+extern void *sdfAllocGeneralBlockHigh(s32);
 
 extern void *sdfResourceRetainAddress(void *);
 
@@ -129,7 +129,7 @@ extern void func_0032EB80(void *, void *, s32, s32, s32, s32, s32, s32, s32, s32
 
 extern void sdfCreateDescriptorPacket(void *, s32, s32, s32, s32, s32, void *, s32);
 
-extern void func_001053F0(s32, s32, f32);
+extern void kwlnCreateHeldTextureBuffer(s32, s32, f32);
 
 extern s32 kwlnTextureSetReferenceFlagIfPresent(void);
 
@@ -320,7 +320,7 @@ extern char D_0041B768[];
 
 extern char D_0041B7D0[];
 
-extern void func_003297C8(s32);
+extern void sdfReleaseResourceAllocation(s32);
 
 extern void *func_0019F448(s32, s32, u32, u32, s32, s32);
 
@@ -1106,7 +1106,7 @@ void btlReleaseEventAssets(void) {
     btlReleaseEventData();
     data = battle->eventAssets;
     if (data != 0) {
-        func_003297C8(data);
+        sdfReleaseResourceAllocation(data);
         battle->eventAssets = 0;
     }
     btlBossDebugPrintf(D_0041B7D0);
@@ -1879,7 +1879,7 @@ void btlClearOverlayBuffers(void) {
     u8 *entry;
     s32 i;
     u64 clearValue;
-    func_001053F0(0x200, 0xe0, 0.0f);
+    kwlnCreateHeldTextureBuffer(0x200, 0xe0, 0.0f);
     kwlnTextureSetReferenceFlagIfPresent();
     entry = D_00380870;
     i = 0;
@@ -1894,7 +1894,7 @@ void btlClearOverlayBuffers(void) {
     btlRuntimeState.options |= 2;
 }
 
-void func_0022DEB8(void) {
+void btlResetHeldTextureState(void) {
     kwlnTextureClearReferenceFlag();
     kwlnTextureReleaseHeldReference();
 }
@@ -1903,7 +1903,7 @@ void btlInitializeGraphicsRuntime(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
     void *surface;
     void *context;
-    runtime->handle = func_003293C8(0x70000);
+    runtime->handle = sdfAllocGeneralBlockHigh(0x70000);
     runtime->resource = sdfResourceRetainAddress(runtime->handle);
     surface = sdfAllocatePacketList(0);
     context = sdfAllocPacketAligned(16);
@@ -2471,12 +2471,12 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
         sdfQueueNonzeroResourceId((void *)node->requestHandle);
         for (i = 0; i != 8; i++) {
             if (node->slots[i].resourceHandle != 0) {
-                func_003297C8(node->slots[i].resourceHandle);
+                sdfReleaseResourceAllocation(node->slots[i].resourceHandle);
             }
         }
     }
     mdlDestroyPartList(node->partList);
-    func_003297C8(node->unk_A0);
+    sdfReleaseResourceAllocation(node->unk_A0);
     sdfReleaseChipBlock(node);
 }
 

@@ -63,7 +63,7 @@ extern void dds3DestroyCallbackNodeAfterLastNotification(u32);
 
 extern void func_00321908(u32);
 extern u32 func_0035A828(s32 bytes);
-extern u8 *func_00321238(void);
+extern u8 *mnuGetResourceProgressStepState(void);
 extern u8 *mnuGetResourceRecordByIndex(s32 index);
 extern MenuWorkEntry *mnuFindUnusedWorkEntry(void);
 extern void func_00322E18(u32 node, u32 context, s32 mode, s32 x, s32 y,
@@ -430,7 +430,7 @@ u32 mnuGetWorkEntryPool(void) {
 f32 mnuEvaluateTimedValue(MenuWorkEntry *entry) {
     u8 *registry = mnuGetMenuRecordRegistryEntry(entry->tag);
     if ((((MenuRegistryTable *)((MenuRegistry *)registry)->table)->flags & 1) != 0) {
-        u8 *clock = func_00321238();
+        u8 *clock = mnuGetResourceProgressStepState();
         u8 *segment = mnuGetResourceRecordByIndex(entry->unk08);
         return entry->y0 +
             (f32)((s32)*(u16 *)(clock + 2) - *(s32 *)(segment + 0xc));

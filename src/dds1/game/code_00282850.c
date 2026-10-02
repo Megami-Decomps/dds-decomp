@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "mnu.h"
 
 typedef struct RangeEntry {
     u8 pad00;
@@ -498,17 +499,45 @@ void func_00283820(void) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283838);
 
-void func_00283BE0(s32 state, s32 value) {
-    *(s32 *)(state + 4) = value;
-    *(s32 *)state = 0;
-    *(s32 *)(state + 8) = 0;
+typedef struct MenuGradientFade {
+    s32 active;
+    s32 color;
+    s32 blend;
+} MenuGradientFade;
+
+void func_00283BE0(MenuGradientFade *state, s32 color) {
+    state->color = color;
+    state->active = 0;
+    state->blend = 0;
 }
 
 void func_00283BF0(u32 *out, u32 value) {
     *out = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00283BF8);
+extern u32 uiBlendColors(u32, u32, u32);
+extern void func_002C0F88(u32, u32, u32, u32, u32, u32, u32);
+
+void func_00283BF8(MenuGradientFade *state, s32 surface) {
+    s32 colors[4];
+    s32 color = state->color;
+
+    color = uiBlendColors(color, color & ~0xFF, state->blend);
+    panelSetVec4((u32 *)colors, 0, 0, color, color);
+
+    func_002C0F88(0, 0x700, 0, 0x2000, 0x700, (u32)colors, surface);
+    if (state->active != 0) {
+        state->blend += 0x20;
+        if (state->blend > 0x100) {
+            state->blend = 0x100;
+        }
+    } else {
+        state->blend -= 0x20;
+        if (state->blend < 0) {
+            state->blend = 0;
+        }
+    }
+}
 
 typedef struct MenuEffectPosition {
     u8 pad00[0x20];
@@ -1450,8 +1479,8 @@ typedef struct BtlPermanentBonusUnit {
     u16 mpBonus;     /* 0x1E: added by ptyComputeMaxMp */
 } BtlPermanentBonusUnit;
 
-extern s32 func_001190B0(BtlPermanentBonusUnit *);
-extern s32 func_001191B0(BtlPermanentBonusUnit *);
+extern s32 datComputeSkillBoostedMaxHp(BtlPermanentBonusUnit *);
+extern s32 datComputeSkillBoostedMaxMp(BtlPermanentBonusUnit *);
 
 /* Apply a permanent stat/capacity item and refill eligible vitals.
  * Returns 0 for other items, 1 when accepted, or 2 when capped and already full. */
@@ -1520,8 +1549,8 @@ s32 btlItemApplyPermanentBonus(u16 item, BtlPermanentBonusUnit *unit) {
         }
     }
 
-    unit->maxHp = func_001190B0(unit);
-    unit->maxMp = func_001191B0(unit);
+    unit->maxHp = datComputeSkillBoostedMaxHp(unit);
+    unit->maxMp = datComputeSkillBoostedMaxMp(unit);
     if ((unit->statusFlags & 0x4000) == 0) {
         unit->currentMp = unit->maxMp;
         unit->currentHp = unit->maxHp;
@@ -1695,7 +1724,42 @@ void func_00287220(s32 encodedIndex, f32 *out) {
     out[2] = evtStageTestState.entries[encodedIndex & 0xffff].rotation[2];
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00287258);
+extern void *memcpy(void *dest, const void *src, u32 size);
+extern u8 D_003B2520[];
+extern u8 D_003B2530[];
+extern u8 D_003B2540[];
+extern u8 D_003B2550[];
+extern void evtToggleSavedDrawVectors(s32 frames, f32 first, f32 second);
+extern void func_00107FD8(s32 mode, s32 slot, f32 *color);
+extern void func_001080D8(s32 mode, s32 slot, f32 *color);
+extern void kwlnSetBackgroundColorTarget(s32 mode, f32 *color);
+extern void kwlnSetDrawColorTarget(s32 mode, f32 *color);
+extern void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w);
+
+void func_00287258(void)
+{
+    f32 firstColor[4];
+    f32 secondColor[4];
+    f32 firstVector[4];
+    f32 secondVector[4];
+
+    memcpy(firstColor, D_003B2520, sizeof(firstColor));
+    memcpy(secondColor, D_003B2530, sizeof(secondColor));
+    memcpy(firstVector, D_003B2540, sizeof(firstVector));
+    memcpy(secondVector, D_003B2550, sizeof(secondVector));
+    evtToggleSavedDrawVectors(0, 5.0f, 0.0f);
+    func_00107FD8(0, 0, firstColor);
+    func_001080D8(0, 0, secondColor);
+    kwlnSetBackgroundColorTarget(0, firstVector);
+    kwlnSetDrawColorTarget(0, secondVector);
+    evtSetDrawVectorTarget(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
+    sdfSceneProjectionParameters[3] = 0.7551905f;
+    PCP_COPY_VECTOR(sdfViewTargetVector, D_0037CE70);
+    PCP_COPY_VECTOR(sdfViewEyeVector, D_0037CE60);
+    PCP_COPY_VECTOR(sdfViewUpVector, D_0037CE80);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    sdfConsCacheTransformedNode(sdfSceneProjectionParameters, sdfViewMatrix);
+}
 
 void func_00287420(f32 offset) {
     sdfSceneProjectionParameters[5] = 2048.0f;

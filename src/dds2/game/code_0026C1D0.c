@@ -26,7 +26,7 @@ extern s8 dspWindowStateGate;
 
 extern u32 evtDisplayValues[];
 
-void func_003297C8(u32 sprite);
+void sdfReleaseResourceAllocation(u32 sprite);
 
 typedef struct EvtResourcePair {
     u32 handle;
@@ -169,7 +169,7 @@ void evtLoadResourcePair(u32 resource, EvtResourcePair *record) {
 }
 
 void evtReleaseResourcePairHandle(EvtResourcePair *record) {
-    func_003297C8(record->handle);
+    sdfReleaseResourceAllocation(record->handle);
 }
 
 extern s32 itfMesCreateWindow(void);
@@ -384,7 +384,7 @@ s32 evtLoadTextureFromResourcePath(u32 resource) {
 
     handle = sdfReadNamedResource(resource, &buffer[0], (u32)&buffer[1]);
     result = sdfTexAcquireResourceTexture(buffer[0]);
-    func_003297C8(handle);
+    sdfReleaseResourceAllocation(handle);
     return result;
 }
 
@@ -402,7 +402,7 @@ typedef struct {
 } EvtPanelRecord;
 
 typedef struct {
-    u32 handle; /* 0x0: released by func_003297C8 */
+    u32 handle; /* 0x0: released by sdfReleaseResourceAllocation */
     s32 base;   /* 0x4: origin of a 32-byte-stride lookup */
     u32 unk8;   /* 0x8: exposed by func_0026D020 */
 } EvtLoadedRecord;
@@ -430,7 +430,7 @@ void mnuLoadMantraNodePositionTable(u32 resource) {
 }
 
 void mnuReleaseMantraNodePositionTable(void) {
-    func_003297C8(((EvtLoadedRecord *)mnuMantraNodePositionTable)->handle);
+    sdfReleaseResourceAllocation(((EvtLoadedRecord *)mnuMantraNodePositionTable)->handle);
     mnuMantraNodePositionTable = 0;
 }
 
@@ -452,7 +452,7 @@ void mnuLoadMantraPanelPositionTable(u32 resource) {
 }
 
 void mnuReleaseMantraPanelPositionTable(void) {
-    func_003297C8(((EvtLoadedRecord *)mnuMantraPanelPositionTable)->handle);
+    sdfReleaseResourceAllocation(((EvtLoadedRecord *)mnuMantraPanelPositionTable)->handle);
     mnuMantraPanelPositionTable = 0;
 }
 
@@ -460,7 +460,7 @@ s32 mnuGetMantraPanelPositionRecord(s32 index) {
     return ((EvtLoadedRecord *)mnuMantraPanelPositionTable)->base + ((index << 0x10) >> 0xb);
 }
 
-extern u32 func_003292A8(u32);
+extern u32 sdfAllocGeneralBlock(u32);
 extern void *sdfMemoryGetBlockAddress(u32);
 extern void func_0026D168(void *, s32, s32);
 typedef struct EvtMantraWork {
@@ -470,7 +470,7 @@ typedef struct EvtMantraWork {
     u8 data[0x160];
 } EvtMantraWork; /* 0x16C bytes */
 EvtMantraWork *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
-    u32 allocation = func_003292A8(0x16C);
+    u32 allocation = sdfAllocGeneralBlock(0x16C);
     EvtMantraWork *work = sdfMemoryGetBlockAddress(allocation);
 
     memset(work, 0, 0x16C);

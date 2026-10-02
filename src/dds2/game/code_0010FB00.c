@@ -22,7 +22,7 @@ typedef struct {
 
 extern void dds3DestroyWorldNode(void *node);
 extern void dds3DestroyWorldIndexNode(void *node);
-extern void func_003297C8(void *resource);
+extern void sdfReleaseResourceAllocation(void *resource);
 extern void sdfReleaseChipBlock(void *block);
 
 void dds3LoadOrBuildObjectMatrix(u8 *arg0) {
@@ -165,7 +165,7 @@ void func_0010FD58(WorldObject *object)
         dds3DestroyWorldIndexNode(entry->worldIndexNodes);
     }
     if (entry->resource != NULL) {
-        func_003297C8(entry->resource);
+        sdfReleaseResourceAllocation(entry->resource);
     }
     sdfReleaseChipBlock(entry);
 }

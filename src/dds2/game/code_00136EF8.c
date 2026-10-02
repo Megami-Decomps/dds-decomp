@@ -61,7 +61,7 @@ extern void sdfQueueNonzeroResourceId(u32 resource);
 
 extern void *memset(void *s, s32 c, u32 n);
 
-extern void *func_003292A8(s32 size);
+extern void *sdfAllocGeneralBlock(s32 size);
 
 extern void *sdfResourceRetainAddress(void *p);
 
@@ -432,13 +432,13 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
 /* Keep both the resource handles and retained addresses: callers use the
  * retained storage, whereas the handles are needed at release time. */
 void fldAllocateRecordStorage(void) {
-    u8 *storage = func_003292A8(0x72000);
+    u8 *storage = sdfAllocGeneralBlock(0x72000);
 
     fldValueRecordResource = (u32)storage;
     storage = sdfResourceRetainAddress(storage);
     fldValueRecords = (u32)storage;
     memset(storage, 0, 0x72000);
-    storage = func_003292A8(0x4A00);
+    storage = sdfAllocGeneralBlock(0x4A00);
     fldAuxRecordResource = (u32)storage;
     storage = sdfResourceRetainAddress(storage);
     fldAuxRecordBuffer = (u32)storage;

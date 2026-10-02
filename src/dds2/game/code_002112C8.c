@@ -269,7 +269,7 @@ extern void btlDebugPrintf(const char *, ...);
 
 extern s32 func_001E2E58(u8 *, s32);
 
-extern void btlSetEffectCameraKeys(u8 *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 extern void evtUnitSetStoredParameter(void *, s32);
 
@@ -2647,7 +2647,7 @@ s32 btlSpawnLinkedActionEffect(u8 *task) {
     if (((BtlLinkedEffectTask *)task)->spawned == 0) {
         if (func_001E2E58((u8 *)((BtlLinkedEffectTask *)task)->record->unit, 0x10) + 0xF <=
             ((BtlLinkedEffectTask *)task)->elapsed) {
-            btlSetEffectCameraKeys(task, -6.8f, -476.8f, -525.0f, 0.184f, 0.008f, -0.011f, 0.974f, 0.3f,
+            btlSetEffectCameraKeys((s32)task, -6.8f, -476.8f, -525.0f, 0.184f, 0.008f, -0.011f, 0.974f, 0.3f,
                           -214.2f, -1419.8f, -0.101f, 0.012f, -0.013f, 0.986f, 40.0f, 12.0f);
             ((BtlLinkedEffectTask *)task)->elapsed = 0;
             ((BtlLinkedEffectTask *)task)->spawned = 1;
@@ -3474,18 +3474,18 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_0021C0C8);
 
 void btlPrepareDefeatEffectCamera(u8 *obj) {
     btlFlagAllUnitDefeatCandidatesTask(obj);
-    btlSetEffectCameraKeys(obj, -176.6f, -137.8f, -1564.9f, -0.01f, -0.038f, -0.012f, 0.99f, -217.8f,
+    btlSetEffectCameraKeys((s32)obj, -176.6f, -137.8f, -1564.9f, -0.01f, -0.038f, -0.012f, 0.99f, -217.8f,
                   -253.6f, -2272.8f, -0.009f, -0.038f, -0.013f, 0.99f, 40.0f, 15.0f);
 }
 
 void btlSetCameraPresetForBossUnitMode(BtlEffect *fx) {
     switch (fx->task->unit->mode) {
     case 0x111:
-        btlSetEffectCameraKeys(fx, 533.4f, -167.8f, -1104.7f, -0.052f, 0.285f, -0.028f, 0.947f, 430.5f,
+        btlSetEffectCameraKeys((s32)fx, 533.4f, -167.8f, -1104.7f, -0.052f, 0.285f, -0.028f, 0.947f, 430.5f,
                       -91.7f, -1373.1f, -0.089f, 0.198f, -0.03f, 0.967f, 40.0f, 15.0f);
         break;
     case 0x112:
-        btlSetEffectCameraKeys(fx, -440.9f, -333.4f, -1307.2f, 0.026f, -0.223f, -0.017f, 0.965f, -844.6f,
+        btlSetEffectCameraKeys((s32)fx, -440.9f, -333.4f, -1307.2f, 0.026f, -0.223f, -0.017f, 0.965f, -844.6f,
                       -358.7f, -1194.1f, 0.024f, -0.346f, -0.02f, 0.928f, 40.0f, 10.0f);
         break;
     }
@@ -4687,13 +4687,13 @@ void btlChooseBrahmaIndividualCamera(u32 unit) {
     case 0:
         btlBossDebugPrintf(D_0041ACA8);
         btlFlagAllUnitDefeatCandidatesTask();
-        btlSetEffectCameraKeys(unit, -1823.5f, -270.6f, -1359.2f, -0.137f, -0.247f, 0.027f, 0.95f, -1302.8f,
+        btlSetEffectCameraKeys((s32)unit, -1823.5f, -270.6f, -1359.2f, -0.137f, -0.247f, 0.027f, 0.95f, -1302.8f,
                       -42.7f, -2059.2f, -0.123f, -0.148f, 0.011f, 0.972f, 40.0f, 30.0f);
         break;
     case 1:
         btlBossDebugPrintf(D_0041ACC0);
         btlFlagAllUnitDefeatCandidatesTask();
-        btlSetEffectCameraKeys(unit, 149.7f, -65.4f, -1514.7f, -0.168f, 0.02f, -0.011f, 0.976f, 1438.0f,
+        btlSetEffectCameraKeys((s32)unit, 149.7f, -65.4f, -1514.7f, -0.168f, 0.02f, -0.011f, 0.976f, 1438.0f,
                       -482.6f, -1234.3f, -0.099f, 0.195f, -0.027f, 0.966f, 40.0f, 30.0f);
         break;
     }
@@ -4707,12 +4707,12 @@ void btlChooseBrahmaGroupCamera(u32 unit) {
     switch (effMiscRandMod(0, 2)) {
     case 0:
         btlBossDebugPrintf("BRAHMA:ALL-0 ++++\n");
-        btlSetEffectCameraKeys(unit, 723.9f, -139.3f, -1529.8f, 0.05f, -0.176f, 0.018f, -0.973f, 677.2f,
+        btlSetEffectCameraKeys((s32)unit, 723.9f, -139.3f, -1529.8f, 0.05f, -0.176f, 0.018f, -0.973f, 677.2f,
                       -17.3f, -1980.7f, 0.098f, -0.114f, 0.02f, -0.979f, 40.0f, 30.0f);
         break;
     case 1:
         btlBossDebugPrintf("BRAHMA:ALL-1 ++++\n");
-        btlSetEffectCameraKeys(unit, -803.2f, -117.2f, -1426.5f, -0.072f, -0.187f, 0.001f, 0.971f, -738.1f,
+        btlSetEffectCameraKeys((s32)unit, -803.2f, -117.2f, -1426.5f, -0.072f, -0.187f, 0.001f, 0.971f, -738.1f,
                       -78.6f, -1749.6f, -0.1f, -0.138f, 0.001f, 0.977f, 40.0f, 20.0f);
         break;
     }
@@ -4785,7 +4785,37 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00223280);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00223350);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00223BD8);
+s32 func_00223BD8(ActionUnit *unit) {
+    s32 triggerFrame = -1;
+
+    switch (unit->action) {
+    case 0x9B:
+        triggerFrame = 0;
+        break;
+    case 0x9C:
+        triggerFrame = 0x4E;
+        break;
+    case 0x9F:
+        triggerFrame = 0x3E;
+        break;
+    }
+    if (btlHasMarkedEntry14((s32)unit) && triggerFrame >= 0) {
+        if (unit->actionTimer >= triggerFrame) {
+            btlClearRuntimeFlag2000();
+        }
+        if (unit->actionTimer == triggerFrame) {
+            btlFlagAllUnitDefeatCandidatesTask();
+            btlSetEffectCameraKeys((s32)unit,
+                                  336.8f, 60.8f, -1233.9f,
+                                  -0.157f, 0.089f, -0.028f, 0.974f,
+                                  445.5f, 171.2f, -1552.3f,
+                                  -0.157f, 0.092f, -0.028f, 0.974f,
+                                  40.0f, 25.0f);
+        }
+        unit->actionTimer++;
+    }
+    return 0;
+}
 
 s32 btlSelectActionCameraByTableFlags(ActionUnit *unit) {
     u32 flags = ((BattleActionTableEntry *)datActionAnimationRecords)[unit->action].flags;

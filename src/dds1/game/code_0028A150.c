@@ -99,7 +99,7 @@ extern u32 func_0029C230(u32);
 
 extern void *fileDuplicateJob(void *);
 
-extern s32 func_002D03F8();
+extern s32 sdfAllocGeneralBlock();
 
 extern s32 sdfResourceRetainAddress();
 
@@ -770,7 +770,7 @@ void *fileReadSlotPreviewBegin(void) {
         return NULL;
     }
     if (status == 1) {
-        fileSaveReadBufferResource = func_002D03F8(0x30);
+        fileSaveReadBufferResource = sdfAllocGeneralBlock(0x30);
         fileSaveReadBuffer = sdfResourceRetainAddress(fileSaveReadBufferResource);
         mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, 0x30);
         return fileReadSlotPreviewWait;
@@ -787,7 +787,7 @@ void *fileReadSlotPreviewWait(void) {
         mcCloseOpenFile(fileSaveFileDescriptor);
         return fileStoreSlotHeader;
     }
-    func_002D0918(fileSaveReadBufferResource);
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     return fileBeginSlotMetadataRefresh();
 }
 
@@ -799,10 +799,10 @@ void *fileStoreSlotHeader(void) {
     }
     if (status == 1) {
         memcpy(D_003DC800 + fileSlotScanIndex * 0x30, (void *)fileSaveReadBuffer, 0x30);
-        func_002D0918(fileSaveReadBufferResource);
+        sdfReleaseResourceAllocation(fileSaveReadBufferResource);
         return fileAdvanceSlotScan();
     }
-    func_002D0918(fileSaveReadBufferResource);
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     return fileBeginSlotMetadataRefresh();
 }
 
@@ -1757,7 +1757,7 @@ void *fileLoadMainBlobBegin(void) {
         return NULL;
     }
     size = fileMainBlobSize();
-    fileSaveReadBufferResource = func_002D03F8(size);
+    fileSaveReadBufferResource = sdfAllocGeneralBlock(size);
     fileSaveReadBuffer = sdfResourceRetainAddress(fileSaveReadBufferResource);
     if (status == 1) {
         mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, size);
@@ -1777,7 +1777,7 @@ void *mcHandleSetupResult(void) {
         mcCloseOpenFile(fileSaveFileDescriptor);
         return mcdHandleSaveSetupDone;
     }
-    func_002D0918(fileSaveReadBufferResource);
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     fileSetMenuFlowState(0);
     D_003BC854 = 3;
     return fileAbortSlotScanOnInput;
@@ -1795,7 +1795,7 @@ void *mcdHandleSaveSetupDone(void) {
     }
     if (status == 1) {
         fileReloadSaveBuffer();
-        func_002D0918(fileSaveReadBufferResource);
+        sdfReleaseResourceAllocation(fileSaveReadBufferResource);
         D_003BC7ED = 1;
         fileDestroyMenuTask();
         if (fileLoadStateChanged() == 0) {
@@ -1806,7 +1806,7 @@ void *mcdHandleSaveSetupDone(void) {
         fileSetMenuFlowState(13);
         return fileSetMenuCallbackAndClearResult(-1);
     }
-    func_002D0918(fileSaveReadBufferResource);
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     fileSetMenuFlowState(0);
     D_003BC854 = 3;
     return fileAbortSlotScanOnInput;
@@ -2281,7 +2281,7 @@ void fileConfigTaskDestroy(void) {
                 ((FileConfigTask *)fileConfigTaskWork)->slots[i] = 0;
             }
         }
-        func_002D0918(((FileConfigTask *)fileConfigTaskWork)->memory);
+        sdfReleaseResourceAllocation(((FileConfigTask *)fileConfigTaskWork)->memory);
         fileConfigTaskWork = 0;
         fileConfigTaskState = 0;
     }
@@ -2590,7 +2590,7 @@ void fileJobDestroy(FileJob *job) {
 void fileJobFreePrimaryBuffer(FileJob *job) {
     void *buffer = job->slots[0].allocation;
     if (buffer != NULL) {
-        func_002D0918(buffer);
+        sdfReleaseResourceAllocation(buffer);
         job->slots[0].offset = 0;
         job->slots[0].size = 0;
         job->slots[0].allocation = NULL;
@@ -2600,7 +2600,7 @@ void fileJobFreePrimaryBuffer(FileJob *job) {
 void fileJobFreeSecondaryBuffer(FileJob *job) {
     void *buffer = job->slots[1].allocation;
     if (buffer != NULL) {
-        func_002D0918(buffer);
+        sdfReleaseResourceAllocation(buffer);
         job->slots[1].offset = 0;
         job->slots[1].size = 0;
         job->slots[1].allocation = NULL;
@@ -2677,7 +2677,7 @@ void fileJobSetPrimaryData(job, src, size, option)
 {
     fileJobFreePrimaryBuffer(job);
     if (src != NULL && size > 0) {
-        job->slots[0].allocation = (void *)func_002D03F8(size);
+        job->slots[0].allocation = (void *)sdfAllocGeneralBlock(size);
         job->slots[0].offset = sdfResourceRetainAddress(job->slots[0].allocation);
         job->slots[0].size = size;
         job->option = option;
@@ -2694,12 +2694,12 @@ void fileJobCopyCommandIntoPrimaryData(u64 job, u64 state, u16 option) {
     command = sdfDevCreateCommandState(state);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        handle = func_002D03F8(size);
+        handle = sdfAllocGeneralBlock(size);
         address = sdfResourceRetainAddress(handle);
         sdfDevQueueReadAndWait(command, address, size);
         sdfDevWaitThenReleaseCommandState(command);
         fileJobSetPrimaryData(job, address, size, option);
-        func_002D0918(handle);
+        sdfReleaseResourceAllocation(handle);
         return;
     }
 }
@@ -2712,7 +2712,7 @@ void fileJobSetSecondaryData(job, src, size, selector)
 {
     fileJobFreeSecondaryBuffer(job);
     if (src != NULL && size > 0) {
-        job->slots[1].allocation = (void *)func_002D03F8(size);
+        job->slots[1].allocation = (void *)sdfAllocGeneralBlock(size);
         job->slots[1].offset = sdfResourceRetainAddress(job->slots[1].allocation);
         job->slots[1].size = size;
         job->slots[0].selector = selector;
@@ -2729,12 +2729,12 @@ void fileJobCopyCommandIntoSecondaryData(u64 job, u64 state, u16 selector) {
     command = sdfDevCreateCommandState(state);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        handle = func_002D03F8(size);
+        handle = sdfAllocGeneralBlock(size);
         address = sdfResourceRetainAddress(handle);
         sdfDevQueueReadAndWait(command, address, size);
         sdfDevWaitThenReleaseCommandState(command);
         fileJobSetSecondaryData(job, address, size, selector);
-        func_002D0918(handle);
+        sdfReleaseResourceAllocation(handle);
         return;
     }
 }
@@ -2793,12 +2793,12 @@ void *fileJobCreateFromCommandState(entry)
     command = sdfDevCreateCommandState(entry);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        handle = func_002D03F8(size);
+        handle = sdfAllocGeneralBlock(size);
         address = sdfResourceRetainAddress(handle);
         sdfDevQueueReadAndWait(command, address, size);
         sdfDevWaitThenReleaseCommandState(command);
         job = fileDuplicateJob((void *)address);
-        func_002D0918(handle);
+        sdfReleaseResourceAllocation(handle);
         return job;
     }
 }
@@ -3468,7 +3468,7 @@ void effLoadObjectDestroy(LoadObj *obj) {
         for (i = 0; i < count; i++) {
             fileJobDestroy(((FileJob **)obj->unk38)[i]);
         }
-        func_002D0918(obj->unk3C);
+        sdfReleaseResourceAllocation(obj->unk3C);
     }
     if (obj->referenceHolder != NULL) {
         effReleaseReferenceHolder((s32)obj->referenceHolder);
@@ -3516,7 +3516,7 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
             for (i = 0; i < count; i++) {
                 fileJobDestroy(((FileJob **)dst->unk38)[i]);
             }
-            func_002D0918(dst->unk3C);
+            sdfReleaseResourceAllocation(dst->unk3C);
             dst->unk38 = 0;
             dst->unk3C = 0;
         }
@@ -3524,7 +3524,7 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
         if (size == 0) {
             return;
         }
-        dst->unk3C = func_002D03F8(size);
+        dst->unk3C = sdfAllocGeneralBlock(size);
         dst->unk38 = sdfResourceRetainAddress(dst->unk3C);
         for (i = 0; i < count; i++) {
             ((FileJob **)dst->unk38)[i] = fileJobCreateChild(*(FileJob **)src->unk38);
@@ -3595,13 +3595,13 @@ void fileReplaceEffectSurfaceJobs(LoadObj *obj, FileJob *job) {
         for (i = 0; i < count; i++) {
             fileJobDestroy(((FileJob **)obj->unk38)[i]);
         }
-        func_002D0918(obj->unk3C);
+        sdfReleaseResourceAllocation(obj->unk3C);
         obj->unk38 = 0;
         obj->unk3C = 0;
     }
     size = count * 4;
     if (size != 0) {
-        obj->unk3C = func_002D03F8(size);
+        obj->unk3C = sdfAllocGeneralBlock(size);
         obj->unk38 = sdfResourceRetainAddress(obj->unk3C);
         *(FileJob **)obj->unk38 = fileJobCreateFromJob(job);
         for (i = 1; i < count; i++) {
@@ -3922,7 +3922,7 @@ void *fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
     size = slotBytes + headerSize;
     size += D_0037E550[type].slotBytes * count;
     size += dataBytes * 2;
-    handle = func_002D03F8(size);
+    handle = sdfAllocGeneralBlock(size);
     rec = sdfResourceRetainAddress(handle);
     body = (u8 *)rec + headerSize;
     rec->type = type;
@@ -3951,7 +3951,7 @@ void *fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
 }
 
 void fileReleaseGridRecordHandle(s32 record) {
-    func_002D0918(((FileRecordSlots *)record)->handle);
+    sdfReleaseResourceAllocation(((FileRecordSlots *)record)->handle);
 }
 
 void fileClearRecordReferences(FileRecordSlots *record) {

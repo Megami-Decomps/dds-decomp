@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 /* Viewer-wide state for the model viewer task (DDS1 game/code_00218B48 and
  * DDS2 game/code_00233660 share this layout field for field). Fields that are
@@ -116,7 +117,7 @@ void func_0011E080(s32, s32, s32, s32, s32, s32, s32);
 
 void effApplyNodeScale(s32, float);
 
-s32 func_0014FD20(s32);
+s32 effCreateNodeFromDescriptor(s32);
 
 void billSetChildScaleComponents(s32, float, float);
 
@@ -251,7 +252,7 @@ typedef struct MdlViewerHeader {
     s16 unk06;
 } MdlViewerHeader;
 
-extern s32 func_002D03F8(s32 size);
+extern s32 sdfAllocGeneralBlock(s32 size);
 extern void *func_002CFEB8(s32 size);
 extern u32 sdfResourceRetainAddress(s32 handle);
 extern u32 strlen(const char *);
@@ -265,13 +266,13 @@ void mdlInitializeViewerResourceTable(void) {
     char *copy;
 
     mdlReleaseViewerSlotResources();
-    D_003BBB6C = func_002D03F8(8);
+    D_003BBB6C = sdfAllocGeneralBlock(8);
     D_003BD880 = (MdlViewerHeader *)sdfResourceRetainAddress(D_003BBB6C);
     D_003BD880->kind = 5;
     D_003BD880->unk02 = 0;
     D_003BD880->unk04 = 0x1000;
     D_003BD880->unk06 = 0x3E8;
-    D_003BBB70 = func_002D03F8(0xC);
+    D_003BBB70 = sdfAllocGeneralBlock(0xC);
     D_003BD884 = (char **)sdfResourceRetainAddress(D_003BBB70);
     for (i = 0; i != 3; i++) {
         switch (i) {
@@ -556,7 +557,7 @@ void mdlAddEffectPart(MdlPartList *list, s32 index) {
 
     entry->kind = MDL_PART_EFFECT;
     entry->state = 0;
-    entry->object = func_0014FD20(index);
+    entry->object = effCreateNodeFromDescriptor(index);
     list->count += 1;
 }
 
@@ -598,7 +599,7 @@ void mdlObjDestroy(MdlObj *obj) {
     if (obj->initialized != 0) {
         func_002EBB60(obj->data);
     }
-    func_002D0918(obj->handle);
+    sdfReleaseResourceAllocation(obj->handle);
     sdfReleaseChipBlock(obj);
 }
 
@@ -984,7 +985,7 @@ extern void effCopyVectorToNodeInstance(s32 handle, f32 *pos);
 
 extern void effUpdateNode(s32 handle);
 
-extern void func_00188318(s32 handle);
+extern void effTrackPolyUpdate(s32 handle);
 
 void mdlDispatchViewerAnchorRecord(MdlResourceOwner *owner, MdlAnchorRec *rec) {
     void *chunk = owner->chunk;
@@ -1005,7 +1006,7 @@ void mdlDispatchViewerAnchorRecord(MdlResourceOwner *owner, MdlAnchorRec *rec) {
         effUpdateNode(handle);
         break;
     case 2:
-        func_00188318(rec->handle);
+        effTrackPolyUpdate(rec->handle);
         break;
     case 3:
         mdlCondInitEntry((s32)rec);
@@ -1893,7 +1894,7 @@ void mdlLoadViewerPresentationConfig(void) {
         }
         pos = i;
     }
-    func_002D0918(handle);
+    sdfReleaseResourceAllocation(handle);
 }
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E068);
@@ -1928,7 +1929,53 @@ void mdlCleanupViewerTasksAndResources(MdlViewState *view) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E450);
+typedef struct MdlRotationContext {
+    u8 pad00[8];
+    MdlPadState *pad;
+} MdlRotationContext;
+
+extern f32 sdfViewMatrix[];
+extern void effMiscAxisAngleToQuaternionVU(f32 angle);
+extern void effMiscQuaternionToMatrixVU(void);
+
+/* vu0 routine: rotate a viewer position about the camera axes selected by the pad. */
+void func_0021E450(MdlRotationContext *context, f32 *position)
+{
+    if (context->pad->stepUpA != 0) {
+        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
+        effMiscAxisAngleToQuaternionVU(2.0f * 3.14159265f / 180.0f);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, position);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, position);
+    } else if (context->pad->stepDownA != 0) {
+        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
+        effMiscAxisAngleToQuaternionVU(-2.0f * 3.14159265f / 180.0f);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, position);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, position);
+    }
+    if (context->pad->stepUpB != 0) {
+        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
+        effMiscAxisAngleToQuaternionVU(-2.0f * 3.14159265f / 180.0f);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, position);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, position);
+    } else if (context->pad->stepDownB != 0) {
+        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
+        effMiscAxisAngleToQuaternionVU(2.0f * 3.14159265f / 180.0f);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, position);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, position);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E618);
 
@@ -2210,7 +2257,6 @@ extern void effObjSetInnerSecondVec();
 
 extern void effObjFetchInnerFirstVec();
 
-extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 
 extern void effMiscQuatMultiplyVU(void);
 

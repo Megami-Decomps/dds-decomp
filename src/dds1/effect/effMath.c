@@ -6,7 +6,7 @@ typedef struct {
 } EffMathWork;
 
 void effMathReleaseWorkResource(EffMathWork *work) {
-    func_002D0918(work->resourceHandle);
+    sdfReleaseResourceAllocation(work->resourceHandle);
 }
 
 typedef struct EffMathSlot {
@@ -51,7 +51,7 @@ s32 effMathStepBezierSlot(EffMathSlots *table, s32 index, f32 *out) {
 
 INCLUDE_ASM(const s32, "effect/effMath", func_0018E0C8);
 
-void func_0018E1D8(EffMathSlots *table, s32 index) {
+void effMathResetBezierSlot(EffMathSlots *table, s32 index) {
     EffMathSlot *slot = &table->slots[index];
 
     slot->unk34 = 0.05f;

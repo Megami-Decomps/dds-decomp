@@ -19,9 +19,9 @@ extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 extern void effReleaseBattleVoiceOwner(void *);
 extern void func_00169370(void *);
-extern void func_003297C8(void *);
+extern void sdfReleaseResourceAllocation(void *);
 extern void func_00168280();
-extern void func_001053F0(s32, s32, f32);
+extern void kwlnCreateHeldTextureBuffer(s32, s32, f32);
 extern s32 kwlnTextureSetReferenceFlagIfPresent();
 extern void func_0035B6E0(const char *fmt, ...);
 extern f32 D_0037F850[];
@@ -174,7 +174,7 @@ void *effCreateSizedDrawPacket(s32 height, s32 flags) {
     return packet;
 }
 
-void func_00167480(u64 *packet, s32 primitive,
+void effWriteGouraudTexturedQuadPacket(u64 *packet, s32 primitive,
                   s32 x0, s32 y0, f32 s0, f32 t0, s32 color0,
                   s32 x1, s32 y1, f32 s1, f32 t1, s32 color1,
                   s32 x2, s32 y2, f32 s2, f32 t2, s32 color2,
@@ -202,7 +202,7 @@ void func_00167480(u64 *packet, s32 primitive,
     packet[14] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-s32 func_001675B8(s32 chain, s32 primitive,
+s32 effAppendGouraudTexturedQuadPacket(s32 chain, s32 primitive,
                  s32 x0, s32 y0, f32 s0, f32 t0, s32 color0,
                  s32 x1, s32 y1, f32 s1, f32 t1, s32 color1,
                  s32 x2, s32 y2, f32 s2, f32 t2, s32 color2,
@@ -211,7 +211,7 @@ s32 func_001675B8(s32 chain, s32 primitive,
 
     packet[0] = 0x20000008;
     packet[1] = 0x5000000810000000ULL;
-    func_00167480(packet + 2, primitive, x0, y0, s0, t0, color0,
+    effWriteGouraudTexturedQuadPacket(packet + 2, primitive, x0, y0, s0, t0, color0,
                  x1, y1, s1, t1, color1, x2, y2, s2, t2, color2,
                  x3, y3, s3, t3, color3, depth);
     return sdfAppendPacket(chain, packet);
@@ -238,7 +238,7 @@ void func_00167778(u64 *packet, s32 color, s32 primitive,
     packet[9] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-s32 func_00167838(s32 chain, s32 color, s32 primitive,
+s32 effAppendTexturedTrianglePacket(s32 chain, s32 color, s32 primitive,
                  s32 x0, s32 y0, f32 u0, f32 v0,
                  s32 x1, s32 y1, f32 u1, f32 v1,
                  s32 x2, s32 y2, f32 u2, f32 v2, s32 depth) {
@@ -283,7 +283,7 @@ void func_00167E00(s32 frames) {
         D_0037F860[1] = 0.0f;
         D_0037F860[2] = 0.0f;
         D_00435CD0 = 0x80808080;
-        func_001053F0(0x100, 0xE0, D_0037F850[0]);
+        kwlnCreateHeldTextureBuffer(0x100, 0xE0, D_0037F850[0]);
         kwlnTextureSetReferenceFlagIfPresent();
         i = 0;
         entry = D_00380870;
@@ -306,14 +306,14 @@ INCLUDE_ASM(const s32, "game/code_001670C0", func_00167EE8);
 
 INCLUDE_ASM(const s32, "game/code_001670C0", func_00168280);
 
-extern u32 func_003292A8(s32 size);
+extern u32 sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(u32 handle);
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern void func_00169230(SoundMixer *dst, SoundMixer *src);
 
 /* Clone a mixer: copy its banks, rebuild the voice state from the original and start with no voices. */
 SoundMixer *sndMixerClone(SoundMixer *src) {
-    u32 handle = func_003292A8(sizeof(SoundMixer));
+    u32 handle = sdfAllocGeneralBlock(sizeof(SoundMixer));
     SoundMixer *mixer = sdfResourceRetainAddress(handle);
 
     mixer->resource = (void *)handle;
@@ -334,7 +334,7 @@ void sndReleaseAllVoices(SoundMixer *mixer) {
         voice = next;
     }
     func_00169370(mixer);
-    func_003297C8(mixer->resource);
+    sdfReleaseResourceAllocation(mixer->resource);
 }
 
 s32 func_00168448(SoundMixer *mixer, u16 kind) {

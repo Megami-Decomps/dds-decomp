@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ee_mmi.h"
 
 extern u64 sdfFindThreadNode(u64);
 
@@ -165,7 +166,33 @@ SdfCursorNode *sdfCursorSlotAlloc(SdfCursorOwner *owner) {
     return func_00328CA0(owner, slot);
 }
 
-INCLUDE_ASM(const s32, "game/code_00328AC8", func_00328D68);
+extern SdfCursorOwner D_0045F0A0[];
+extern s32 func_0036DE70(void);
+extern void EIntr(void);
+
+/* Allocate a block of `size` bytes from the size class that covers it (classes are powers of two from 16 bytes up); each class hands out from its own slot list. */
+SdfCursorNode *func_00328D68(s32 size) {
+    s32 index = 0;
+    SdfCursorOwner *owner;
+    SdfCursorNode *result;
+    s32 interruptsDisabled;
+
+    if (size > 16) {
+        EE_MMI_PLZCW(index, size - 1);
+        index = 27 - (index & 0xFF);
+    }
+    owner = &D_0045F0A0[index];
+    interruptsDisabled = func_0036DE70();
+    if (owner->slot == NULL) {
+        result = sdfCursorSlotAlloc(owner);
+    } else {
+        result = owner->slot->handler(owner, owner->slot);
+    }
+    if (interruptsDisabled != 0) {
+        EIntr();
+    }
+    return result;
+}
 
 INCLUDE_SDATA(const s32, "game/code_00328AC8", sdfThreadWakeTick);
 

@@ -29,7 +29,7 @@ typedef struct MenuProgressParameters {
 } MenuProgressParameters;
 
 extern MenuWorkEntry D_0040ABF8;
-extern u8 *func_003211F8(void);
+extern u8 *mnuGetResourceProgressParameters(void);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern void func_0031CAE8(f32 *, s32, s32);
 extern s32 func_0031B838(void *, void *, s32, f32, f32, f32, f32);
@@ -59,7 +59,7 @@ extern void mnuResumeEffectQueueFrameAdvance(void);
 
 extern void func_00317AD0(u8 *handle);
 
-extern void *func_003292A8(s32 size);
+extern void *sdfAllocGeneralBlock(s32 size);
 
 extern void *sdfMemoryGetBlockAddress(void *block);
 
@@ -141,7 +141,7 @@ u8 func_00316ED0(void) {
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00316EF8);
 
 u8 *mdlAllocateViewerPackageWork(void) {
-    void *block = func_003292A8(0x1E0);
+    void *block = sdfAllocGeneralBlock(0x1E0);
     u8 *work = (u8 *)sdfMemoryGetBlockAddress(block);
 
     memset(work, 0, 0x1E0);
@@ -242,7 +242,7 @@ void func_00319F48(void) {
     f32 position[4];
     u8 *model;
 
-    origin = (MenuProgressParameters *)func_003211F8();
+    origin = (MenuProgressParameters *)mnuGetResourceProgressParameters();
     x = origin->x;
     y = origin->y;
     value = mnuEvaluateTimedValue(&D_0040ABF8);

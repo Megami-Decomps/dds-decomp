@@ -26,7 +26,7 @@ void mnuDestroyMantraDrawPool(MovieResourceGroup *resources) {
             sdfDestroyTaskWork(resources->tasks[i]);
         }
     }
-    func_002D0918(resources->allocation);
+    sdfReleaseResourceAllocation(resources->allocation);
 }
 
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
@@ -131,7 +131,7 @@ void mnuAdvanceLoopingFrame(s32 *frame) {
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C588);
 
-extern void func_00255FF8(s32 *, s32);
+extern void mnuGetMantraDisplayFlags(s32 *, s32);
 
 void mnuAdvanceGridSlotAnimation(s32 animationContext, s32 unusedGrid, u8 *slot) {
     s32 *counter = *(s32 **)(slot + 4);
@@ -141,7 +141,7 @@ void mnuAdvanceGridSlotAnimation(s32 animationContext, s32 unusedGrid, u8 *slot)
     if ((f32)value > 60.0f) {
         *counter = 0;
     }
-    func_00255FF8(counter, animationContext);
+    mnuGetMantraDisplayFlags(counter, animationContext);
 }
 
 typedef struct MenuAnimationSlot {

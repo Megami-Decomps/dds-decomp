@@ -10,7 +10,7 @@ extern void parReleaseCellSystem(u32 handle);
 extern void parFillSymmetricCellColors(u32 param0, u32 param1, void *cells, u32 param3);
 extern void func_0015CCD0(u32 param0, u32 param1, void *cells, u32 param3);
 extern void func_0015CDF0(u32 param0, u32 param1, void *cells, u32 param3);
-extern void func_002D0918(u32 handle);
+extern void sdfReleaseResourceAllocation(u32 handle);
 extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_0034DF38[];
@@ -97,7 +97,7 @@ void func_001634C0(void *work) {
 
 void effPCPThunderFree(EffThunderVectorWork *work) {
     parReleaseCellSystem((u32)work->system);
-    func_002D0918(work->handle);
+    sdfReleaseResourceAllocation(work->handle);
 }
 
 void func_00163508(void *dst, void *src) {
@@ -117,7 +117,7 @@ u32 func_00163540(u32 arg0) {
     return arg0;
 }
 
-extern u32 func_002D03F8(s32 size);
+extern u32 sdfAllocGeneralBlock(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
 extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void func_0015D078(void *system, u32 value);
@@ -179,7 +179,7 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00163AF8);
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00163CD0);
 
 EffThunderVectorWork *effThunderWorkCreate(EffThunderVectorParams *src) {
-    u32 handle = func_002D03F8(src->count * sizeof(EffThunderVectorCell) + sizeof(EffThunderVectorWork));
+    u32 handle = sdfAllocGeneralBlock(src->count * sizeof(EffThunderVectorCell) + sizeof(EffThunderVectorWork));
     EffThunderVectorWork *work = (EffThunderVectorWork *)sdfResourceRetainAddress(handle);
     u32 i;
 
@@ -202,7 +202,7 @@ EffThunderVectorWork *effThunderWorkCreate(EffThunderVectorParams *src) {
 
 void effPCPThunderFree2(EffThunderVectorWork *work) {
     parReleaseCellSystem((u32)work->system);
-    func_002D0918(work->handle);
+    sdfReleaseResourceAllocation(work->handle);
 }
 
 void effThunderCreateWorkFromPackedParams(void *data) {
@@ -314,7 +314,7 @@ typedef struct {
 extern void effThunderSparkInit(EffThunderSparkWork *work, s32 index);
 
 EffThunderSparkWork *effThunderSparkCreate(EffThunderSparkParams *src) {
-    u32 handle = func_002D03F8(src->sparkCount * sizeof(EffThunderSpark) + sizeof(EffThunderSparkWork));
+    u32 handle = sdfAllocGeneralBlock(src->sparkCount * sizeof(EffThunderSpark) + sizeof(EffThunderSparkWork));
     EffThunderSparkWork *work = (EffThunderSparkWork *)sdfResourceRetainAddress(handle);
     s32 spread;
     u32 i;
@@ -347,7 +347,7 @@ void effThunderDestroySubs(EffThunderSparkWork *work) {
             i++;
         } while (i < count);
     }
-    func_002D0918(work->handle);
+    sdfReleaseResourceAllocation(work->handle);
 }
 
 void func_00164A98(void *dst, void *src) {
@@ -416,7 +416,7 @@ typedef struct {
 extern void effThunderRandomizeFrag(EffThunderFragmentWork *work, s32 index);
 
 EffThunderFragmentWork *effThunderFragCreate(EffThunderFragmentParams *src) {
-    u32 handle = func_002D03F8(src->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
+    u32 handle = sdfAllocGeneralBlock(src->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
     EffThunderFragmentWork *work = (EffThunderFragmentWork *)sdfResourceRetainAddress(handle);
     u32 i;
 
@@ -436,7 +436,7 @@ EffThunderFragmentWork *effThunderFragCreate(EffThunderFragmentParams *src) {
 
 void effPCPThunderFree3(EffThunderFragmentWork *work) {
     parReleaseCellSystem((u32)work->system);
-    func_002D0918(work->handle);
+    sdfReleaseResourceAllocation(work->handle);
 }
 
 void effThunderShiftOriginByVectorDelta(u8 *p, void *src) {
@@ -487,7 +487,7 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00165D80);
 extern void effThunderRandomizeFrag2(EffThunderFragmentWork *work, s32 index);
 
 EffThunderFragmentWork *func_00165ED0(EffThunderFragmentParams *src) {
-    u32 handle = func_002D03F8(src->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
+    u32 handle = sdfAllocGeneralBlock(src->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
     EffThunderFragmentWork *work = (EffThunderFragmentWork *)sdfResourceRetainAddress(handle);
     u32 i;
 
@@ -510,7 +510,7 @@ EffThunderFragmentWork *func_00165ED0(EffThunderFragmentParams *src) {
 void effPCPThunderFree4(EffThunderFragmentWork *work) {
     parReleaseCellSystem((u32)work->state.secondarySystem);
     parReleaseCellSystem((u32)work->system);
-    func_002D0918(work->handle);
+    sdfReleaseResourceAllocation(work->handle);
 }
 
 void effThunderShiftEndpointsWithAnchor(u8 *p, void *src) {
@@ -539,7 +539,7 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_001661D8);
 
 extern void func_001661D8(EffThunderFragmentWork *, s32);
 
-void func_00166810(EffThunderFragmentWork *work) {
+void effThunderUpdateDualFragments(EffThunderFragmentWork *work) {
     s32 index = 0;
     EffThunderParSystem *firstSystem = work->state.secondarySystem;
     s32 count = work->head.fragmentCount;
@@ -610,7 +610,7 @@ typedef struct {
 extern void effThunderRandomizeCell(EffThunderCellWork *work, s32 index);
 
 EffThunderCellWork *effThunderCellCreate(EffThunderCellParams *src) {
-    u32 handle = func_002D03F8(src->cellCount * sizeof(EffThunderCell) + sizeof(EffThunderCellWork));
+    u32 handle = sdfAllocGeneralBlock(src->cellCount * sizeof(EffThunderCell) + sizeof(EffThunderCellWork));
     EffThunderCellWork *work = (EffThunderCellWork *)sdfResourceRetainAddress(handle);
     u32 i;
 
@@ -628,7 +628,7 @@ EffThunderCellWork *effThunderCellCreate(EffThunderCellParams *src) {
 
 void effPCPThunderFree5(EffThunderCellWork *work) {
     parReleaseCellSystem((u32)work->system);
-    func_002D0918(work->handle);
+    sdfReleaseResourceAllocation(work->handle);
 }
 
 void func_00166B20(void *dst, void *src) {

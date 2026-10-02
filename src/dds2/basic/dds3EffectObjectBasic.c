@@ -5,7 +5,7 @@ extern u64 func_001579C8(void);
 
 extern u64 effLoadResourceNode(void);
 
-extern u64 func_001578C0(void);
+extern u64 effCreateNodeFromDescriptor(void);
 
 extern u64 billCreateFromResource(u64, u64);
 
@@ -33,7 +33,7 @@ extern void effMagatuhiCopyHandlerRows(void *, const void *);
 
 extern void *sdfReadNamedResource(void *resource, u32 *resolvedId, s32 options);
 
-extern void *func_003297C8(void *arg);
+extern void *sdfReleaseResourceAllocation(void *arg);
 
 typedef struct {
     void *objectHandle; /* 0x0 returned by effObjGetObjectHandle */
@@ -278,15 +278,15 @@ EffectObj *effObjCreateWithBoundBill(bill, vec, extra)
 }
 
 /* Dispatch a newly allocated handle from the first parameter source. */
-void func_001151C8(u64 unused, u64 vector, u64 extra) {
+void effObjSpawnDescriptorBoundEffect(u64 unused, u64 vector, u64 extra) {
     u64 handle;
 
-    handle = func_001578C0();
+    handle = effCreateNodeFromDescriptor();
     effObjCreateWithBoundBill(handle, vector, extra);
 }
 
 /* Dispatch a newly allocated handle from the second parameter source. */
-void func_00115208(u64 unused, u64 vector, u64 extra) {
+void effObjSpawnLoadedResourceEffect(u64 unused, u64 vector, u64 extra) {
     u64 handle;
 
     handle = effLoadResourceNode();
@@ -351,7 +351,7 @@ void *effObjCreateFromResolvedResource(void *resource, void *vector, void *extra
     resolvedId = 0;
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
     created = func_00115358(resolvedId, vector, extra);
-    func_003297C8(resourceHandle);
+    sdfReleaseResourceAllocation(resourceHandle);
     return created;
 }
 
@@ -395,7 +395,7 @@ void *effObjCreateKindFromResource(s32 kind, void *resource) {
     resolvedId = 0;
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
     created = func_001156E0(kind, resolvedId);
-    func_003297C8(resourceHandle);
+    sdfReleaseResourceAllocation(resourceHandle);
     return created;
 }
 
@@ -439,7 +439,7 @@ extern void effMagatuhiInitializeInterpolatedHistory(void *bill);
 extern void effMagatuhiDispatchByKind(void *bill);
 
 /* Run the Magatuhi setup matching the ready effect's state (1 or 8). */
-func_00115BD8(EffectObj *obj) {
+effObjDispatchMagatuhiState(EffectObj *obj) {
     if (obj->kind == 7) {
         EffectData *data = obj->data;
 
@@ -457,7 +457,7 @@ func_00115BD8(EffectObj *obj) {
 }
 
 /* Copy ready vector/scalar parameters into the two- or four-row magatuhi block. */
-s32 func_00115C50(EffectObj *obj, EffectObj *first, EffectObj *second, EffectObj *third, EffectObj *fourth)
+s32 effObjCopyMagatuhiSourceParameters(EffectObj *obj, EffectObj *first, EffectObj *second, EffectObj *third, EffectObj *fourth)
 {
     EffectData *data;
     f32 *vectors;

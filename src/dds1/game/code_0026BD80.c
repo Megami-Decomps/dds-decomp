@@ -141,7 +141,7 @@ void mnuDrawMovieMenuBackgroundQuad(s32 parameter) {
     func_002C0DD8(0, 0, 0, 0x2000, 0xE00, parameter, 0x3E);
 }
 
-void func_0026C290(s32 context) {
+void mnuDrawMovieMenuSpriteLayers(s32 context) {
     func_002C0DD8(0, 0, 0, 0x2000, 0xE00, 0x80, context);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 0, context);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 2, context);
@@ -209,7 +209,7 @@ void mnuResetTitlePageAndPhase(void) {
     state->word14 = 0;
 }
 
-s32 func_0026D160(void) {
+s32 mnuPollMovieMenuInputAndTimeout(void) {
     MenuState *state = (MenuState *)mnuMovieMenuState;
     switch (state->word34) {
     case 0:

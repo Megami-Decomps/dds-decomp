@@ -4,7 +4,7 @@
 
 extern void *sdfReadNamedResource(void *resource, u32 *resolvedId, s32 options);
 extern void *sdfResourceRetainAddress(void *resource);
-extern void func_003297C8(void *arg);
+extern void sdfReleaseResourceAllocation(void *arg);
 extern s32 bfFindScriptIndexByName(void *, const char *);
 extern KwlnTask *func_00101740(const char *name);
 extern s32 scrCreateTaskForProcessId(s32, s32, s32);
@@ -56,7 +56,7 @@ void evtReleaseSceneResource(Scene *scene) {
     SceneObjectRes *object = (SceneObjectRes *)scene->object;
 
     if (object->unk18 != NULL) {
-        func_003297C8(object->unk18);
+        sdfReleaseResourceAllocation(object->unk18);
     }
     object->unk18 = NULL;
     object->unk1C = NULL;

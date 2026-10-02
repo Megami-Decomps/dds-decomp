@@ -267,8 +267,8 @@ void *frFontCloneEntryResource(u8 index, s32 option) {
     return dst;
 }
 
-extern u16 func_001971E0(s32 index);
-extern u16 func_00197200(s32 index);
+extern u16 frFontGetSlotCellWidth(s32 index);
+extern u16 frFontGetSlotCellHeight(s32 index);
 extern FrFontItem *func_00194D20(s32 first, s32 second, void *resource, s32 count);
 
 /* Return the cached item for `id` in the glyph's font slot (taking a reference),
@@ -283,7 +283,7 @@ FrFontItem *frFontRetainOrCreateCachedItem(FrFontGlyph *glyph, s32 id) {
         return item;
     }
     resource = frFontCloneEntryResource(glyph->u14.b[1], id);
-    item = func_00194D20(func_001971E0(glyph->u14.b[1]), func_00197200(glyph->u14.b[1]), resource, 1);
+    item = func_00194D20(frFontGetSlotCellWidth(glyph->u14.b[1]), frFontGetSlotCellHeight(glyph->u14.b[1]), resource, 1);
     item->index = id;
     ((FrFontItem **)entry->table)[id] = item;
     frFontWork.count++;
@@ -494,7 +494,7 @@ FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 posit
 }
 
 void frFontLoadTemporaryEntry(u32 fontData) {
-    func_001944A0(8, fontData, 0);
+    frFontBindResourceSections(8, fontData, 0);
 }
 
 void frFontFreeTemporaryEntry(void) {

@@ -127,14 +127,14 @@ s64 dspUpdateFlagEvent(s32 request) {
     return 0;
 }
 
-s64 func_0026B9D0(s32 request) {
+s64 mnuDispatchTerminalPanel(s32 request) {
     s32 state = kwlnTaskGetUserValue();
 
     func_002686F0(state);
     return menuSetHandler(state, 1, request);
 }
 
-s64 func_0026BA20(s32 request) {
+s64 mnuDispatchTerminalPanelExit(s32 request) {
     s32 state = kwlnTaskGetUserValue();
 
     func_0026C900();

@@ -160,7 +160,7 @@ extern u32 scrGetEntryLowFlags(s32 arg0, u16 index);
 extern u32 ptyGetProfileRecordCap(u16 scriptId);
 extern u32 ptyGetProfileRecordValue(u32 work, u16 scriptId);
 
-s32 func_00291288(MenuPanelSlot *slot, s32 arg1) {
+s32 mnuValidateProfileEntry(MenuPanelSlot *slot, s32 arg1) {
     u16 target = scrGetSelectedScriptEntryId(arg1) & 0xFFFF;
     u16 *dst = slot->values;
     s32 i;
@@ -378,7 +378,7 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00293FD0);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00294060);
 
-extern s32 func_003292A8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfMemoryGetBlockAddress(s32);
 extern void *memset(void *, s32, u32);
 /* Allocate twenty countdown entries for sounds attached to this panel. */
@@ -387,7 +387,7 @@ void mnuInitPanelSoundEntries(void) {
     MenuPanelEntryPool *pool;
 
     if (mnuPanelSoundEntryPool == 0) {
-        handle = func_003292A8(0xAC);
+        handle = sdfAllocGeneralBlock(0xAC);
         mnuPanelSoundEntryPool = sdfMemoryGetBlockAddress(handle);
         memset(mnuPanelSoundEntryPool, 0, 0xAC);
         pool = (MenuPanelEntryPool *)mnuPanelSoundEntryPool;
@@ -399,7 +399,7 @@ void mnuInitPanelSoundEntries(void) {
 
 void mnuReleasePanelEntryPool(void) {
     if (mnuPanelSoundEntryPool != (u32 *)0x0) {
-        func_003297C8(((MenuPanelEntryPool *)mnuPanelSoundEntryPool)->allocation);
+        sdfReleaseResourceAllocation(((MenuPanelEntryPool *)mnuPanelSoundEntryPool)->allocation);
     }
     mnuPanelSoundEntryPool = (u32 *)0x0;
 }

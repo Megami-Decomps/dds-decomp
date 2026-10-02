@@ -81,7 +81,7 @@ extern u32 D_003BC5B8;
 
 extern u64 func_002F5990();
 typedef struct MemBlock MemBlock;
-extern MemBlock *func_002D03F8(s32 size);
+extern MemBlock *sdfAllocGeneralBlock(s32 size);
 extern u32 sdfMemoryGetBlockAddress(MemBlock *block);
 extern s32 sceSifInitIopHeap(void);
 extern s32 sceSifAllocIopHeap(s32 size);
@@ -335,7 +335,7 @@ void func_002699A0(s32 words) {
     s32 bytes = words * 4;
     s32 i;
 
-    D_003BC5B8 = sdfMemoryGetBlockAddress(func_002D03F8(bytes));
+    D_003BC5B8 = sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(bytes));
     for (i = 0; i < words * 2; i++) {
         ((u16 *)D_003BC5B8)[i] = 0;
     }
@@ -475,7 +475,7 @@ extern s32 fileGetResourceHandle(u32);
 extern u32 fileGetLoadedDataAddress(u32);
 extern s32 fileGetResourceSize(u32);
 extern void filePollEntryCleanup(u32);
-extern MemBlock *func_002D0518(s32);
+extern MemBlock *sdfAllocGeneralBlockHigh(s32);
 extern void func_002F7628(u32 *);
 
 /* When the pending title-stream file is ready, copy it into a fresh block,
@@ -490,7 +490,7 @@ s32 mnuCompleteTitleStreamFileLoad(u32 *queue) {
         MemBlock *block;
 
         filePollEntryCleanup(D_003BD8D4);
-        block = func_002D0518(size);
+        block = sdfAllocGeneralBlockHigh(size);
         mnuTitleStreamStatus[5] = sdfMemoryGetBlockAddress(block);
         mnuTitleStreamStatus[8] = (u32)block;
         memcpy((void *)queue[5], (void *)data, size);
@@ -599,7 +599,7 @@ void mnuInitializeTitleSoundBuffer(void) {
 
     WaitSema(mnuTitleStreamSemaphore);
     work[7] = (u32)decoder;
-    allocation = func_002D03F8(0x1C200);
+    allocation = sdfAllocGeneralBlock(0x1C200);
     buffer = sdfMemoryGetBlockAddress(allocation);
     work[8] = (u32)allocation;
     work[4] = 2;
@@ -652,7 +652,7 @@ void mnuReleaseSoundBuffer(void) {
     if (buffer == 0) {
         return;
     }
-    func_002D0918(buffer);
+    sdfReleaseResourceAllocation(buffer);
     state[8] = 0;
 }
 

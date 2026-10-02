@@ -183,7 +183,7 @@ ResourceNode *mnuFindResourceNodeByHandle(list, handle)
 void func_003211F0(void) {
 }
 
-u8 *func_003211F8(void) {
+u8 *mnuGetResourceProgressParameters(void) {
     return D_0045C860;
 }
 
@@ -191,7 +191,7 @@ void mnuCopyResourceProgressParameters(u8 *src) {
     memcpy(D_0045C860, src, 16);
 }
 
-u8 * func_00321238(void) {
+u8 * mnuGetResourceProgressStepState(void) {
     return (u8 *)&mnuStepCounterState;
 }
 
@@ -222,7 +222,7 @@ void mnuResetResourceProgressCounters(void) {
     mnuStepCounterState.total = 0;
 }
 
-void func_00321318(u32 records, u32 count) {
+void mnuBindResourceRecordTable(u32 records, u32 count) {
     mnuResourceRecords = records;
     D_004390C4 = count;
 }

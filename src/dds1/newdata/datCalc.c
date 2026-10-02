@@ -36,7 +36,7 @@ void datClearUnitStatusBits(u8 *work, s32 mask) {
     *(u16 *)(work + 0xE) &= ~mask;
 }
 
-u32 func_001190B0(DatSkillOwner *unit) {
+u32 datComputeSkillBoostedMaxHp(DatSkillOwner *unit) {
     u32 bonus = 0;
     u32 value = ptyComputeMaxHp((s32)unit);
 
@@ -56,7 +56,7 @@ u32 func_001190B0(DatSkillOwner *unit) {
     return value;
 }
 
-u32 func_001191B0(DatSkillOwner *unit) {
+u32 datComputeSkillBoostedMaxMp(DatSkillOwner *unit) {
     u32 bonus = 0;
     u32 value = ptyComputeMaxMp((s32)unit);
 
@@ -161,7 +161,7 @@ s32 datUnitHasSkill(DatSkillOwner *unit, s32 skill) {
 }
 
 /* Raise the low half of `value` to a per-status minimum (0x12C, 0x96, 0xC8; status 4 forces 1) unless a bit in 0x70000 is set. */
-s32 func_00119448(DatUnitStatus *unit, s32 value) {
+s32 datAdjustCalculatedValueForStatus(DatUnitStatus *unit, s32 value) {
     if ((value & 0x70000) == 0) {
         switch (unit->status & 0x7FFF) {
         case 8:
@@ -198,7 +198,7 @@ u32 datReadHighHalfOfCalculatedValue(void) {
     return func_00119520() & 0xFFFF0000;
 }
 
-s32 func_00119750(s32 flag) {
+s32 datMapFlagToStatIndex(s32 flag) {
     s32 result = -1;
 
     switch (flag) {

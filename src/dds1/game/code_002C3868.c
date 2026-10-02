@@ -186,7 +186,7 @@ void func_002C3D90(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C3DB0);
 
-s32 func_002C3F78(void) {
+s32 sdfStepSelectedMapCameraTransition(void) {
     f32 t;
     s32 index = D_003BD271;
 

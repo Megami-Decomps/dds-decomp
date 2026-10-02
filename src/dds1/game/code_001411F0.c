@@ -1630,14 +1630,14 @@ extern s32 D_003BAF30, D_003BAF34, D_003BAF38;
 
 extern s32 D_003BD7F0, D_003BD7D8, D_003BD7E0, D_003BD7E8;
 
-extern s32 func_0014FD20(s32);
+extern s32 effCreateNodeFromDescriptor(s32);
 
 extern s32 sdfTexAcquireResourceTexture(s32);
 
 void fldInitializeMenuResources(void) {
     if (D_0032E3C0[0] < 200) {
-        D_003BAF4C = func_0014FD20(D_003BAF48);
-        D_003BAF3C = func_0014FD20(D_003BD7F0);
+        D_003BAF4C = effCreateNodeFromDescriptor(D_003BAF48);
+        D_003BAF3C = effCreateNodeFromDescriptor(D_003BD7F0);
         D_003BAF40 = 0;
         D_003BAF30 = sdfTexAcquireResourceTexture(D_003BD7D8);
         D_003BAF34 = sdfTexAcquireResourceTexture(D_003BD7E0);
@@ -2011,7 +2011,7 @@ void fldReleaseTitleTextureReference(void) {
 
 extern void fldTitle(void);
 
-extern void func_002D0918(s32);
+extern void sdfReleaseResourceAllocation(s32);
 
 extern u32 D_003BAFA4;
 
@@ -2037,7 +2037,7 @@ void fldStartTitle(s32 field, s32 mode, s32 option) {
     func_003014F0(path, D_003A0810, field);
     handle = sdfReadNamedResource(path, &size, 0);
     D_003BAFB4 = sdfTexAcquireResourceTexture(size);
-    func_002D0918(handle);
+    sdfReleaseResourceAllocation(handle);
     if (fldTitleIsActive() == 0) {
         kwlnTaskCreate(fldTitleTaskName, 0x2B0A, 0, 1, fldTitle, fldReleaseTitleTextureReference, 0);
     }

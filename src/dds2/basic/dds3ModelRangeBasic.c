@@ -10,7 +10,7 @@ typedef struct {
     ModelRangeData *rangeData;
 } ModelRangeObj;
 
-extern u64 func_00329930(s32);
+extern u64 sdfFindGeneralBlockByAddress(s32);
 
 void dds3ReleaseModelRangeData(ModelRangeObj *object) {
     ModelRangeData *data;
@@ -20,7 +20,7 @@ void dds3ReleaseModelRangeData(ModelRangeObj *object) {
     data = object->rangeData;
     resource = data->resourceId;
     if (resource != 0) {
-        handle = func_00329930(resource);
+        handle = sdfFindGeneralBlockByAddress(resource);
         sdfQueueNonzeroResourceId(handle);
     }
     sdfReleaseChipBlock(data);

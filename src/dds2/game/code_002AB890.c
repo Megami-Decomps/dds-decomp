@@ -4,7 +4,7 @@ extern s32 datGameState;
 
 extern s32 kwlnTaskGetUserValue();
 
-extern void func_003297C8(s32);
+extern void sdfReleaseResourceAllocation(s32);
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
@@ -33,6 +33,7 @@ extern void func_002AB690(s32, s32, s32, s32, s32, s32, s32);
 extern void func_002AB8F0(s32);
 
 extern void func_002BAF50(s32, s32);
+extern u8 func_002BDA50(s32 index);
 
 void func_002AB890(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     func_002AB690(arg0, arg1, arg2, 0, arg3, arg4, arg5);
@@ -79,7 +80,28 @@ void func_002AC660(MenuResourceOwner *object) {
     mnuDestroyWindowContainer(object->resources->fourth);
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC688);
+s32 func_002AC688(s32 previousIndex, s32 selectedIndex, MenuResourceOwner *owner) {
+    MenuStaffNode *node = ((MenuStaffList *)owner->resources->fourth)->window->head;
+    s32 index;
+
+    if (node != NULL) {
+        do {
+            index = node->entryIndex;
+            if (index == previousIndex) {
+                node->flags &= ~1;
+                if (func_002BDA50(index) != 0) {
+                    node->flags |= 4;
+                }
+            }
+            if (index == selectedIndex) {
+                node->flags |= 1;
+                node->flags &= ~4;
+            }
+            node = node->next;
+        } while (node != NULL);
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC750);
 
@@ -107,7 +129,7 @@ void func_002ACB38(s32 object) {
 
 u32 mnuInitializeWindowOwnerResourceSet(void) {
     s32 context = kwlnTaskGetUserValue();
-    s32 handle = func_003292A8(0x54);
+    s32 handle = sdfAllocGeneralBlock(0x54);
     u8 *resource = sdfResourceRetainAddress(handle);
 
     *(u8 **)(context + 0xAA48) = resource;
@@ -130,7 +152,7 @@ s32 mnuDestroyWindowOwnerResourceSet(void) {
 
     mnuDestroyResourceOwnerWindowContainers(owner);
     func_002ACB38(context);
-    func_003297C8(*(s32 *)party);
+    sdfReleaseResourceAllocation(*(s32 *)party);
     return 1;
 }
 

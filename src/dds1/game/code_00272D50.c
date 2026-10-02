@@ -7,7 +7,7 @@ extern s32 kwlnTaskGetUserValue();
 extern s32 datGameState;
 
 extern s64 func_00285670(s32, s32 *, u64, u64);
-extern s32 func_002D03F8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfResourceRetainAddress(s32);
 extern void *memset(void *, s32, u32);
 extern void func_00272D50(s32);
@@ -93,7 +93,7 @@ s32 mnuInitializeStaffDisplayResources(void) {
     s32 handle;
 
     context = (StaffDisplayContext *)kwlnTaskGetUserValue();
-    handle = func_002D03F8(0x2C);
+    handle = sdfAllocGeneralBlock(0x2C);
     resources = sdfResourceRetainAddress(handle);
     context->resources = resources;
     memset(resources, 0, 0x2C);
@@ -111,7 +111,7 @@ s32 mnuStaffFreeDisplayResources(void) {
     StaffWindowResources *resources = context->resources;
     mnuReleaseStaffPrimaryWindows(context);
     func_002733B0(context);
-    func_002D0918(resources->allocation);
+    sdfReleaseResourceAllocation(resources->allocation);
     return 1;
 }
 

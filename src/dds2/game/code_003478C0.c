@@ -31,10 +31,15 @@ extern void sdfPostmultiplyVuMatrixFromMemory();
 
 extern void func_00347D50();
 
+typedef struct DevState DevState;
+
 typedef struct SdfStreamCfg {
-    s32 dest;
-    u8 unk4[8];
+    DevState *dest;
+    s32 semaphore;
+    s32 readResult;
     s32 length;
+    s32 buffer;
+    s32 transferred;
 } SdfStreamCfg;
 
 extern SdfStreamCfg D_0047BCC0;
@@ -42,6 +47,14 @@ extern SdfStreamCfg D_0047BCC0;
 extern u8 D_0047BE40[];
 
 extern void sdfDevQueueRead();
+extern s32 D_0047BE00[];
+extern DevState *sdfDevCreateCallbackState(s32, void (*)(DevState *, s32, s32, s32, s32), s32);
+extern s32 sdfDevReactivate(DevState *);
+extern s32 sdfDevQueueReleaseState(DevState *);
+extern s32 sdfDevQueueControlRequest();
+extern s32 sdfDevQueueActiveOperation();
+extern s32 WaitSema(s32);
+extern void func_003482B0(DevState *, s32, s32, s32, s32);
 
 extern void func_00348540();
 
@@ -178,7 +191,49 @@ void sdfStreamSendChunk(void) {
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_003482B0);
 
-INCLUDE_ASM(const s32, "game/code_003478C0", func_00348408);
+s32 *func_00348408(u32 command, s32 request) {
+    SdfStreamCfg *state = &D_0047BCC0;
+    DevState *result;
+    switch (command) {
+    case 32:
+        state->dest = sdfDevCreateCallbackState(request, func_003482B0, 0);
+        if (state->dest != 0) {
+            WaitSema(state->semaphore);
+            result = state->dest;
+            if (*(s32 *)((u8 *)result + 0x2C) != 0) {
+                sdfDevReactivate(result);
+                sdfDevQueueReleaseState(state->dest);
+                state->dest = 0;
+                result = 0;
+            }
+        } else {
+            result = 0;
+        }
+        D_0047BE00[0] = (s32)result;
+        break;
+    case 33:
+        sdfDevQueueControlRequest(state->dest, request, request);
+        WaitSema(state->semaphore);
+        D_0047BE00[0] = state->readResult;
+        break;
+    case 34:
+        state->length = *(s32 *)(request + 8);
+        state->transferred = 0;
+        state->buffer = *(s32 *)(request + 4);
+        sdfStreamSendChunk();
+        WaitSema(state->semaphore);
+        D_0047BE00[0] = state->transferred;
+        break;
+    case 35:
+        sdfDevQueueActiveOperation(state->dest, request, request);
+        WaitSema(state->semaphore);
+        sdfDevQueueReleaseState(state->dest);
+        state->dest = 0;
+        D_0047BE00[0] = 0;
+        break;
+    }
+    return D_0047BE00;
+}
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00348540);
 

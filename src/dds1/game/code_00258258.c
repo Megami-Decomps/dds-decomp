@@ -37,7 +37,7 @@ INCLUDE_ASM(const s32, "game/code_00258258", func_00258FD0);
 
 extern s32 mnuSceneResourceContext;
 void func_002CB3B8(s32 arg0, s32 arg1);
-void func_00255FF8(s32 arg0, s32 arg1);
+void mnuGetMantraDisplayFlags(s32 arg0, s32 arg1);
 void func_00258B00(s32 arg0);
 void func_00258EB8(void *arg0);
 

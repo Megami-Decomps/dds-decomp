@@ -8,7 +8,7 @@ typedef struct EffModelOwner {
     void *ownedBuffer;
 } EffModelOwner;
 
-extern void func_003343E8(s32, f32);
+extern void sdfMotionSampleAtFrame(s32, f32);
 
 extern u32 sdfResourceRetainAddress();
 
@@ -94,7 +94,7 @@ extern s32 func_00232EE8(void *model);
 extern s32 func_00232EF8(void *model);
 
 /* VU0 model helpers consume vf10 directly, as in the DDS1 counterpart. */
-extern void *func_003292A8(u32);
+extern void *sdfAllocGeneralBlock(u32);
 
 void effInitModelVUState(void *model) {
 VU0_MOVE_VF(vf10, vf0);
@@ -194,7 +194,7 @@ void effRecreateModelFromSource(EffModelOwner *owner, EffModelOwner *source) {
 }
 
 void effModelAnimationStop(EffModelOwner *owner) {
-    func_003343E8(*(s32 *)(owner->model + 0x1C), 0.0f);
+    sdfMotionSampleAtFrame(*(s32 *)(owner->model + 0x1C), 0.0f);
 }
 
 void effRefreshModelLighting(void **obj) {
@@ -255,7 +255,7 @@ extern s32 func_0032B240();
 
 extern u8 *sdfTexSubmitPixelsForFormat(void *, u32, u8 *, s32);
 
-extern s32 func_0032B3F8(u32, s16, s16, u8, u8 *, s32);
+extern s32 sdfTexSubmitImageCopy(u32, s16, s16, u8, u8 *, s32);
 
 extern u32 sdfTexGetPrimaryResourceWord(void *);
 
@@ -292,7 +292,7 @@ void effUploadModelTextures(EffModelOwner *owner) {
         width = tex->width;
         height = tex->height;
         format = tex->format;
-        func_0032B3F8(sdfTexGetPrimaryResourceWord(tex), width, height, format, pixels, 1);
+        sdfTexSubmitImageCopy(sdfTexGetPrimaryResourceWord(tex), width, height, format, pixels, 1);
     } while (i < 2);
 }
 
@@ -480,7 +480,7 @@ void effDestroyResourceOwner(EffResourceOwner *owner) {
         for (i = 0; i < owner->count; i++) {
             fileQueueDestroy((s32)owner->entries[i]);
         }
-        func_003297C8((u32)owner->buffer);
+        sdfReleaseResourceAllocation((u32)owner->buffer);
     }
     sdfReleaseChipBlock(owner);
 }
@@ -527,9 +527,9 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
             for (i = 0; i < dst->count; i++) {
                 fileQueueDestroy((s32)dst->entries[i]);
             }
-            func_003297C8((u32)dst->buffer);
+            sdfReleaseResourceAllocation((u32)dst->buffer);
         }
-        dst->buffer = func_003292A8(dst->count * 4);
+        dst->buffer = sdfAllocGeneralBlock(dst->count * 4);
         dst->entries = (void **)sdfResourceRetainAddress((u32)dst->buffer);
         for (i = 0; i < dst->count; i++) {
             dst->entries[i] = fileQueueClone(*src->entries);
@@ -539,7 +539,7 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
 
 extern void fileQueueNotifyAllJobsComplete(s32);
 
-extern void func_003343E8(s32, f32);
+extern void sdfMotionSampleAtFrame(s32, f32);
 
 void func_002DD3C0(s32 *work) {
     if (work[0xBC / 4] != 0) {
@@ -554,7 +554,7 @@ void func_002DD3C0(s32 *work) {
             } while (i < count);
         }
     }
-    func_003343E8(*(s32 *)(work[0xC0 / 4] + 0x1C), 0.0f);
+    sdfMotionSampleAtFrame(*(s32 *)(work[0xC0 / 4] + 0x1C), 0.0f);
     work[1] = 0;
 }
 
@@ -608,7 +608,7 @@ void effReleaseSharedReference(RefObj *obj) {
         sdfTexReleaseReference(texture);
     }
     if (--obj->refCount == 0) {
-        func_003297C8(obj->cnt1C);
+        sdfReleaseResourceAllocation(obj->cnt1C);
     }
 }
 
@@ -656,7 +656,7 @@ void effReleaseReferenceHolder(u32 *holder) {
         for (i = 0; i < holder[1]; i++) {
             effReleaseSharedReference(((u32 *)holder[0x14 / 4])[i]);
         }
-        func_003297C8(holder[0x24 / 4]);
+        sdfReleaseResourceAllocation(holder[0x24 / 4]);
     }
 }
 

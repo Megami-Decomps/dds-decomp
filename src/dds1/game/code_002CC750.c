@@ -808,7 +808,7 @@ void func_002CEC08(void) {
 }
 
 void sdfReleaseFlagListResource(s32 context) {
-    func_002D0918(((SdfFlagListWork *)context)->resource);
+    sdfReleaseResourceAllocation(((SdfFlagListWork *)context)->resource);
 }
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CEC40);
