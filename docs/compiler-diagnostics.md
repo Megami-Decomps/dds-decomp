@@ -44,13 +44,21 @@ source whose complete expression statement is just `callee(...)` or
 `(void)callee(...)`. This proves that the source discards the result at that
 site and makes the conflict more relevant to post-call register differences.
 Assignments, returns, conditions, nested or indirect calls, declarations that
-appear after the call, and ambiguous definitions are excluded. A same-named
+appear after the call, and ambiguous definitions are excluded from the
+ignored-result classification. A same-named
 parameter or local declarator anywhere in the caller also excludes the site;
 this deliberately trades recall for avoiding function-pointer shadow false
 positives. Known function-like macros are excluded, and files containing
 conditional-compilation branches receive no call-site annotation. This remains
 source evidence only: inspect the caller's emitted data flow before changing a
 declaration.
+
+When the same visible declaration also has calls whose result is used or whose
+source form is ambiguous, the report lists them as `other_call_forms`. These
+include assignments, returns, conditions and nested calls. They are a safety
+warning, not proof of a particular use: review every listed site before even
+experimenting with the declaration. One discarded result does not make a
+callee globally safe to retype.
 
 A matching C definition is a comparison anchor, not automatically the original
 interface: old-C wrappers can preserve a return register under several source
