@@ -55,9 +55,11 @@ typedef struct MenuItemScene {
     s32 selectedExtent;
     u32 activeSlot;
     u32 slots[5];
-    u8 pad3E4[0x92C];
+    u8 pad3E4[0x29C];
+    u32 listFlags; /* 0x680: start of the embedded list state */
+    u8 pad684[0x68C];
     u32 panelGroup; /* 0xD10: passed to mnuSetPanelGroupSelection */
-    u8 padD14[4];
+    s32 secondaryPanel; /* 0xD14 */
     s32 extentExhausted; /* 0xD18: selects the exhausted-extent message. */
     u8 padD1C[0x85C];
     s32 unk1578; /* Nonzero enables the panel-group selection reset. */
@@ -197,10 +199,39 @@ void mnuDrawItemPanelBackdrop(s32 scene) {
 
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263A00);
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_00263B78);
+extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPanelListDefault();
+extern void mnuSetGroupSelection(s32, s32, s32, s32);
+extern void func_00283110(s32, s32, s32, void *, s32, s32);
+extern void func_002833B0(s32, s32, s32, void *, s32, s32);
+extern void func_00263A00(MenuItemScene *);
+extern s8 evtStageTestUpdate(s32);
+extern u8 D_00325788[];
+
+void func_00263B78(s32 context, s32 copyOptions) {
+    MenuItemScene *scene = (MenuItemScene *)context;
+    MenuItem *item = scene->selectionData->item;
+    s32 i;
+
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x19, 0x53);
+    scene->listFlags |= 0x400;
+    mnuDrawPanelListDefault(0, 0, 0, &scene->listFlags, 0x53);
+
+    for (i = 0; i < 5; i++) {
+        if (copyOptions == 0) {
+            mnuSetGroupSelection(scene->panelGroup, i, scene->slots[i], 0);
+        } else {
+            mnuSetGroupSelection(scene->panelGroup, i, scene->slots[i],
+                                 scene->slots[i]);
+        }
+    }
+    func_00283110(0xEB0, 0x518, 0, item, scene->panelGroup, 0x53);
+    func_002833B0(0, 0, 0, item, scene->secondaryPanel, 0x53);
+    func_00263A00(scene);
+    evtStageTestUpdate((s32)D_00325788);
+}
 
 extern s32 brsAdvanceSkillPackagePanel(s32);
-extern void func_00263B78(s32, s32);
 
 s64 mnuAdvanceSkillPackageToItemPanel(s32 request) {
     s32 context = kwlnTaskGetUserValue();
@@ -286,4 +317,3 @@ void mnuRefreshPartyUnitVitalsPanels(u32 unit, u32 menu) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00263148", D_003BC550);
-
