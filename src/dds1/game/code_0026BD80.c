@@ -42,6 +42,7 @@ extern s32 mnuListAppendNode(s32, s32);
 
 extern void func_0026D480();
 extern void sndSetSequenceVolumePan(s32, s32, s32);
+extern void sndStartTrackExtended(s32);
 extern f32 fldVectorLength(f32 *);
 extern void sdfVec3SubtractInPlace(f32 *, f32 *);
 extern void fldRotateVectorAroundY(f32 *, f32);
@@ -523,7 +524,14 @@ void func_0026CD88(f32 *position, f32 *rotation) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026D108);
+void func_0026D108(void) {
+    MenuState *state = (MenuState *)mnuMovieMenuState;
+
+    state->word34 = 0;
+    state->timer = 0;
+    state->word1C = 0;
+    sndStartTrackExtended(0x310000);
+}
 
 void mnuClearGlobalMenuStateFields(void) {
     MenuState *state = (MenuState *)mnuMovieMenuState;
