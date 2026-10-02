@@ -19,6 +19,7 @@ import tarfile
 import urllib.request
 from pathlib import Path
 
+from ee_as_relax import ASSEMBLER_RELATIVE_PATH, patch_assembler
 from ee_gcc_aslr import CC1_RELATIVE_PATH, patch_compiler
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -163,6 +164,9 @@ def main() -> None:
             compiler = TOOLS / "compilers" / name / CC1_RELATIVE_PATH
             changed = patch_compiler(compiler)
             print(f"{'patched' if changed else 'verified'} ASLR-stable compiler {compiler}")
+            assembler = TOOLS / "compilers" / name / ASSEMBLER_RELATIVE_PATH
+            changed = patch_assembler(assembler)
+            print(f"{'patched' if changed else 'verified'} overlap-safe assembler {assembler}")
     get_binutils(args.force)
     get_objdiff(args.force)
     get_glibc(args.force)
