@@ -665,6 +665,7 @@ the plain-C forms that were tried. Use these instead of writing the asm again.
 | `EE_MMI_LOAD_S16X4_FIXED12(vf, p)` | `ldr; ldl; pextlh; psraw 16; qmtc2.ni; vitof12` | four s16 fixed-point 4.12 keys into floats (sdf motion keys) |
 | `EE_MMI_RGBA_PACK_UNIT(out, unit)` | `qmtc2.ni unit,vf2; vmulx vf10,vf10,vf2x; vftoi0 vf10,vf10; qmfc2.ni out,vf10; ppach; ppacb`: the pack with the 128.0f scale (0x43000000) kept in a GPR across several packs; `out` is earlyclobber (event colour opcodes, two colours) |
 | `EE_MMI_RGBA_PACK_F128(out)` | `mfc1 $2,128.0f; qmtc2.ni $2,vf2; vmulx; vftoi0; qmfc2.ni out,vf10; ppach; ppacb`: same pack through `$2` (`EE_MMI_RGBA_PACK` uses `$3`); event colour opcodes, one colour |
+| `EE_MMI_STORE_VEC3_VALUE(dst, value)` | `pcpyud $2,value,$0; sdr value,0(dst); sdl value,7(dst); sw $2,8(dst)` | loaded `u128` to packed XYZ; aligned `lq` stays ordinary C (F024 compact/wide packet builders) |
 
 `include/pcp_vu0.h` (COP2 and 128-bit copies):
 
@@ -722,6 +723,30 @@ line above the definition):
   The sdf blend routines write that scratch (`mfc1 $2, %0; qmtc2.ni $2, vf2`)
   without declaring a `$2` clobber, as the Sony samples do; nothing is live in
   `$2` across those blocks, and declaring it moves gcc's next temporary to `$3`.
+
+### Loaded quadword to packed XYZ stream
+
+For an aligned four-word input and a possibly unaligned three-word output,
+load the `u128` in C and pass its value to the packed-store primitive:
+
+```c
+EE_MMI_STORE_VEC3_VALUE(cursor, positions[i]);
+cursor += 3;
+```
+
+The compiler emits the aligned `lq`; the macro covers the upper-half MMI
+extraction and packed stores. A C `u128 >> 64` is unsupported by cc1, and
+union half/word extraction spills the value instead of producing `pcpyud`.
+The macro does not pin the loaded value to `$3`; gcc chooses that register.
+
+This boundary matters in short loops. `mips_r5900_lengthen_loops` counts
+RTL instructions, not the hardware instructions inside an asm statement.
+The combined pointer-taking `EE_MMI_STORE_VEC3_FROM_QUAD` is one opaque node
+and produces two padding NOPs in F024's loop. An ordinary quadword load plus
+the value-taking store exposes a real additional node and produces retail's
+single padding NOP, with no artificial statement or flag change. The compact
+builders (`002E27D8`/`0033B688`) and wide builders (`002E3390`/`0033C240`)
+match with this form. The original SDK macro name has not been recovered.
 
 ## Float constants and strings
 
