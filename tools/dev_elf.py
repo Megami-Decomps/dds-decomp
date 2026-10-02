@@ -214,7 +214,14 @@ def _move_storage(move: dict[str, Any], index: int) -> str:
 
 def _retained_section_contract(
     entry: dict[str, Any], replacement_index: int, section_index: int
-) -> tuple[int, int | None, int | None, str | None, int | None, int | None]:
+) -> tuple[
+    int,
+    int | None,
+    int | None,
+    str | None,
+    int | None,
+    tuple[int, int] | None,
+]:
     """Parse the explicit contract for one replacement-owned retained section."""
 
     context = (
@@ -250,13 +257,17 @@ def _retained_section_contract(
         entry["expected_gp_references"],
         f"{context}.expected_gp_references",
     )
+    expected_retail_gp = _number(
+        entry.get("expected_retail_gp_references", expected_gp),
+        f"{context}.expected_retail_gp_references",
+    )
     return (
         size,
         old_vaddr,
         alignment,
         storage,
         expected_symbols,
-        expected_gp,
+        (expected_retail_gp, expected_gp),
     )
 
 
@@ -793,6 +804,66 @@ def _object_relocation_target(
     return next(iter(identities))
 
 
+def _fallback_hi16_lo16_targets(
+    body: bytes | bytearray,
+    relocations: list[tuple[int, int, str, int, int, str]],
+    sections: list[ObjectSection],
+    symbols: list[LinkedSymbol],
+) -> dict[int, set[tuple[str, int]]]:
+    """Resolve canonical object-local address pairs to logical symbols."""
+
+    active_hi: dict[
+        int, tuple[tuple[str, int, int, str], tuple[int, int, str, int, int, str]]
+    ] = {}
+    targets: dict[int, set[tuple[str, int]]] = {}
+    for relocation in sorted(relocations):
+        offset, kind, name, binding, symbol_kind, section_name = relocation
+        key = (name, binding, symbol_kind, section_name)
+        if offset + 4 > len(body):
+            continue
+        word = _unpack_word(body, offset, "fallback relocation")
+        if kind == R_MIPS_HI16:
+            if word >> 26 == 0x0F:
+                active_hi[(word >> 16) & 0x1F] = (key, relocation)
+            continue
+        if kind != R_MIPS_LO16 or word >> 26 not in ADDRESS_LOW_OPCODES:
+            continue
+        active = active_hi.get((word >> 21) & 0x1F)
+        if active is None or active[0] != key:
+            continue
+        hi = active[1]
+        try:
+            address = _decode_mips_relocation_address(body, hi[0], offset)
+        except DevElfError:
+            continue
+        # A named relocation must retain its encoded addend.  Anonymous
+        # section relocations may move when an earlier source function grows.
+        if name or symbol_kind != STT_SECTION:
+            identity = (name, address) if name else None
+        else:
+            section_indexes = {
+                section.index for section in sections
+                if section.name == section_name
+            }
+            candidates = [
+                symbol
+                for symbol in symbols
+                if symbol.name
+                and symbol.section_index in section_indexes
+                and symbol.kind in (STT_FUNC, STT_OBJECT)
+                and symbol.size
+                and symbol.value <= address < symbol.value + symbol.size
+            ]
+            identities = {
+                (symbol.name, address - symbol.value) for symbol in candidates
+            }
+            identity = next(iter(identities)) if len(identities) == 1 else None
+        if identity is not None:
+            targets.setdefault(hi[0], set()).add(identity)
+            targets.setdefault(offset, set()).add(identity)
+    return targets
+
+
 def _fallback_bytes_match(
     retail_image: bytes | bytearray,
     development_image: bytes | bytearray,
@@ -817,6 +888,12 @@ def _fallback_bytes_match(
     if retail_body == development_body:
         return True
     relocation_by_offset = {relocation[0]: relocation for relocation in relocations}
+    retail_address_targets = _fallback_hi16_lo16_targets(
+        retail_body, relocations, retail_sections, retail_symbols
+    )
+    development_address_targets = _fallback_hi16_lo16_targets(
+        development_body, relocations, development_sections, development_symbols
+    )
     differing_words = {
         offset & ~3
         for offset, (old, new) in enumerate(zip(retail_body, development_body))
@@ -826,7 +903,14 @@ def _fallback_bytes_match(
         if relative + 4 > len(retail_body):
             return False
         relocation = relocation_by_offset.get(relative)
-        if relocation is None or relocation[1] != R_MIPS_26:
+        if relocation is None:
+            return False
+        if relocation[1] in (R_MIPS_HI16, R_MIPS_LO16):
+            old_targets = retail_address_targets.get(relative)
+            if old_targets and old_targets == development_address_targets.get(relative):
+                continue
+            return False
+        if relocation[1] != R_MIPS_26:
             return False
         old_word = _unpack_word(retail_body, relative, "retail fallback relocation")
         new_word = _unpack_word(
@@ -2324,11 +2408,12 @@ def _audit_retained_sections(
     retained_symbol_count = 0
     raw_gp_count = 0
     for replacement_index, section_index, entry, contract in contracts:
-        size, old_vaddr, _, storage, expected_symbols, expected_gp = contract
+        size, old_vaddr, _, storage, expected_symbols, expected_gp_counts = contract
         assert old_vaddr is not None
         assert storage is not None
         assert expected_symbols is not None
-        assert expected_gp is not None
+        assert expected_gp_counts is not None
+        expected_retail_gp, expected_development_gp = expected_gp_counts
         end = _range_end(old_vaddr, size, "retained section")
         context = (
             f"replacements[{replacement_index}].retained_sections[{section_index}]"
@@ -2396,9 +2481,9 @@ def _audit_retained_sections(
             end,
             development_code_ranges,
         )
-        for label, raw_sites in (
-            ("retail", retail_sites),
-            ("development", development_sites),
+        for label, raw_sites, expected_gp in (
+            ("retail", retail_sites, expected_retail_gp),
+            ("development", development_sites, expected_development_gp),
         ):
             if len(raw_sites) != expected_gp:
                 raise DevElfError(
@@ -2411,7 +2496,7 @@ def _audit_retained_sections(
         development_identities = _gp_reference_identities(
             development_sites, development_symbols, f"{context} development"
         )
-        if retail_identities != development_identities:
+        if not set(development_identities).issubset(retail_identities):
             raise DevElfError(f"{context} changed its GP-reference sites")
         retained_symbol_count += len(retail_contract)
         raw_gp_count += len(development_sites)

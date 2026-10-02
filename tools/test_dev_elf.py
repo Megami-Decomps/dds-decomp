@@ -1703,6 +1703,27 @@ class DevElfTests(unittest.TestCase):
             },
         )
 
+        contracted_output = bytearray(output)
+        struct.pack_into("<I", contracted_output, 0x1014, 0)
+        retained_contract = spec["replacements"][0]["retained_sections"][0]
+        retained_contract["expected_retail_gp_references"] = 2
+        retained_contract["expected_gp_references"] = 1
+        self.assertEqual(
+            dev_elf._audit_retained_sections(
+                bytes(base),
+                bytes(contracted_output),
+                base_programs,
+                output_programs,
+                development_symbols,
+                retail_elf,
+                spec,
+                development_gp,
+            )["retained_gp_references"],
+            1,
+        )
+        del retained_contract["expected_retail_gp_references"]
+        retained_contract["expected_gp_references"] = 2
+
         drifted_output = bytearray(output)
         struct.pack_into("<I", drifted_output, 0x1014, 0)
         struct.pack_into("<I", drifted_output, 0x1018, raw_sw)
@@ -1785,7 +1806,7 @@ class DevElfTests(unittest.TestCase):
             )
 
         text_section = dev_elf.ObjectSection(
-            2, ".text", 1, 0, 0, 0, 0x20, 0, 0, 4, 0
+            2, ".text", 1, 0, 0, 0, 0x40, 0, 0, 4, 0
         )
         section_relocation = (
             4,
@@ -1813,6 +1834,68 @@ class DevElfTests(unittest.TestCase):
                 0x0C000001, section_relocation, [text_section], [new_target]
             ),
             ("callee", 0),
+        )
+
+        address_relocations = [
+            (0, dev_elf.R_MIPS_HI16, "", 0, dev_elf.STT_SECTION, ".text"),
+            (4, dev_elf.R_MIPS_LO16, "", 0, dev_elf.STT_SECTION, ".text"),
+        ]
+        old_address_body = struct.pack("<II", 0x3C050000, 0x24A50020)
+        new_address_body = struct.pack("<II", 0x3C050000, 0x24A50028)
+        old_address_target = dev_elf.LinkedSymbol(
+            1, 1, "callee", 0x20, 0x10, global_func, 0, 2
+        )
+        new_address_target = dev_elf.LinkedSymbol(
+            1, 1, "callee", 0x28, 0x10, global_func, 0, 2
+        )
+        old_targets = dev_elf._fallback_hi16_lo16_targets(
+            old_address_body,
+            address_relocations,
+            [text_section],
+            [old_address_target],
+        )
+        self.assertEqual(old_targets, {0: {("callee", 0)}, 4: {("callee", 0)}})
+        self.assertEqual(
+            dev_elf._fallback_hi16_lo16_targets(
+                new_address_body,
+                address_relocations,
+                [text_section],
+                [new_address_target],
+            ),
+            old_targets,
+        )
+        wrong_address_target = dev_elf.LinkedSymbol(
+            1, 1, "other", 0x28, 0x10, global_func, 0, 2
+        )
+        self.assertNotEqual(
+            dev_elf._fallback_hi16_lo16_targets(
+                new_address_body,
+                address_relocations,
+                [text_section],
+                [wrong_address_target],
+            ),
+            old_targets,
+        )
+        old_fallback = dev_elf.LinkedSymbol(
+            1, 2, "fallback", 0, 8, global_func, 0, 2
+        )
+        new_fallback = dev_elf.LinkedSymbol(
+            1, 2, "fallback", 0, 8, global_func, 0, 2
+        )
+        self.assertTrue(
+            dev_elf._fallback_bytes_match(
+                old_address_body,
+                new_address_body,
+                text_section,
+                text_section,
+                old_fallback,
+                new_fallback,
+                address_relocations,
+                [text_section],
+                [text_section],
+                [old_address_target, old_fallback],
+                [new_address_target, new_fallback],
+            )
         )
 
         changed_opcode = bytearray(relocated)
