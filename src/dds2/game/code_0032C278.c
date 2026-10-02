@@ -567,18 +567,44 @@ s32 sdfPrependIfMode1(SdfListHead *list, s32 mode, SdfListHead *packet) {
     }
 }
 
-typedef struct SdfPoolInit {
-    struct SdfPoolInit *next;
+/* Pool entry with a packet list and the handlers used to append/prepend lists. */
+typedef struct SdfPoolNode {
+    struct SdfPoolNode *next; /* 0x0 */
     u32 first;
     u32 last;
     u32 unkC;
-    void (*append)(SdfListHead *, SdfListHead *);
-    s32 (*prepend)(SdfListHead *, s32, SdfListHead *);
+    void (*append)(SdfListHead *, SdfListHead *);      /* 0x10 */
+    s32 (*prepend)(SdfListHead *, s32, SdfListHead *); /* 0x14 */
     u32 unk18;
     u32 unk1C;
-} SdfPoolInit;
+} SdfPoolNode;
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D0F0);
+void func_0032D0F0(SdfPoolNode *node, s32 count) {
+    node->append = sdfAppendPacketList;
+    node->prepend = sdfPrependIfMode1;
+    node->first = 0;
+    node->last = 0;
+    node->unkC = 0;
+    node->unk18 = 0;
+    count--;
+    if (count == 0) {
+        node->next = NULL;
+        return;
+    }
+next_node:
+    node->next = node + 1;
+    node++;
+    node->append = sdfAppendPacketList;
+    node->prepend = sdfPrependIfMode1;
+    node->first = 0;
+    node->last = 0;
+    node->unkC = 0;
+    node->unk18 = 0;
+    if (--count != 0) {
+        goto next_node;
+    }
+    node->next = NULL;
+}
 
 /* Make a REF DMA node for the payload following the source tag. */
 u32 sdfCreateReferenceDmaNode(u32 source) {
@@ -665,25 +691,13 @@ void sdfChainReferenceNodes(SdfListHead *list) {
     }
 }
 
-/* Pool entry made by func_0032D0F0: per-entry packet list with append/prepend handlers. */
-typedef struct SdfPoolNode {
-    struct SdfPoolNode *next; /* 0x0 */
-    u32 first;                /* 0x4: first packet */
-    u32 last;                 /* 0x8: last packet */
-    u32 unkC;
-    void (*append)(struct SdfPoolNode *, struct SdfPoolNode *);      /* 0x10 */
-    s32 (*prepend)(struct SdfPoolNode *, s32, struct SdfPoolNode *); /* 0x14 */
-    u32 unk18;
-    u32 unk1C;
-} SdfPoolNode;
-
 /* Flush every pool entry, chain the packet lists together and terminate the last. */
 s32 sdfFlushPoolNodes(SdfPoolNode *node) {
     SdfPoolNode *tail = NULL;
     s32 head = 0;
 
     for (; node != NULL; node = node->next) {
-        node->prepend(node, 0, NULL);
+        node->prepend((SdfListHead *)node, 0, NULL);
         if (node->first != 0) {
             if (head != 0) {
                 sdfConnectPacketLists(tail, node->first);
