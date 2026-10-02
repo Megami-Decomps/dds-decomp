@@ -591,7 +591,43 @@ void effPcpScatterReleaseLinkedParticles(PcpScatterWork2 *work)
     sdfReleaseResourceAllocation(work->ownedResource);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001725F0);
+typedef struct PcpScatterInitEntry {
+    /* active, state, initial value, three angles, height, phase, direction X/Z */
+    f32 values[10];
+} PcpScatterInitEntry;
+
+typedef struct PcpScatterInitWork {
+    u8 pad00[0x38];
+    f32 initialValue;
+    u8 pad3C[0x10];
+    PcpScatterInitEntry *entries;
+} PcpScatterInitWork;
+
+void func_001725F0(PcpScatterInitWork *work, s32 index)
+{
+    f32 halfTurn = 90.0f * 0.017453292f;
+    f32 quarterTurn = 45.0f * 0.017453292f;
+    f32 smallAngle = 5.0f * 0.017453292f;
+    PcpScatterInitEntry *entry = &work->entries[index];
+    f32 direction[4];
+
+    entry->values[1] = 0.0f;
+    entry->values[2] = work->initialValue;
+    entry->values[4] = halfTurn;
+    entry->values[3] = quarterTurn;
+    entry->values[5] = smallAngle;
+    entry->values[7] = effMiscRandUnitFloat(D_0034DF38) * 6.2831850051879883f;
+    entry->values[6] = 200.0f;
+
+    direction[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    direction[1] = 0.0f;
+    direction[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    VU0_NORMALIZE_PACKED_VECTOR(direction);
+
+    entry->values[8] = direction[0];
+    entry->values[0] = 0.0f;
+    entry->values[9] = direction[2];
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001726E8);
 
