@@ -333,9 +333,9 @@ INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C5F80);
 
 INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C6888);
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C6D48);
+INCLUDE_ASM(const s32, "game/code_001C48A8", btlApplyPartyEntryWeightedDelta);
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C6E88);
+INCLUDE_ASM(const s32, "game/code_001C48A8", fldStepAreaLoad);
 
 void fldMarkLinkedSceneActors(s32 context) {
     s32 *entry;
@@ -566,7 +566,7 @@ void fldCompactSceneSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C79E8);
+INCLUDE_ASM(const s32, "game/code_001C48A8", fldConsumeSceneSlotCounters);
 
 INCLUDE_ASM(const s32, "game/code_001C48A8", fldInsertSceneSlots);
 
@@ -575,7 +575,7 @@ void fldSwapSceneSlots(s32 index) {
     if (scene->flags & 0x100) {
         u8 firstId = scene->slots[0].a;
         u8 count = scene->slots[0].b;
-        func_001C79E8(index, 1);
+        fldConsumeSceneSlotCounters(index, 1);
         if (index < count) {
             if (scene->slots[1].a != 0 && scene->slots[1].a != firstId) {
                 u8 a = scene->slots[0].a;
@@ -848,7 +848,7 @@ u32 fldDispatchSceneGroupRequestWhenAllowed(s32 *arg0) {
         }
         temp_v0 = (u8)arg0[2];
     }
-    func_001C79E8(arg0[1], temp_v0);
+    fldConsumeSceneSlotCounters(arg0[1], temp_v0);
     return 1;
 }
 
@@ -955,3 +955,4 @@ store:
 INCLUDE_RODATA(const s32, "game/code_001C48A8", D_003A35A8);
 
 INCLUDE_RODATA(const s32, "game/code_001C48A8", D_003A35B8);
+

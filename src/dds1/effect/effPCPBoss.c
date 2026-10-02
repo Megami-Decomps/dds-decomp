@@ -239,7 +239,7 @@ void *src;
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_001855C8(u8 *work, s32 value) {
+void effBossTrailSetColor(u8 *work, s32 value) {
     *(s32 *)(work + 0xA0) = value;
 }
 
@@ -532,7 +532,7 @@ void func_00185BA8(void *work) {
 }
 
 void effBossApplyGroupTint(u8 *work, s32 value) {
-    func_001855C8(work, value);
+    effBossTrailSetColor(work, value);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00185BD8);

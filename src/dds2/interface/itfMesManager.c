@@ -133,6 +133,12 @@ typedef struct ItfMesBlkA4 {
     u32 unk28;           /* +0x28 */
 } ItfMesBlkA4;
 
+/* Parallel banks for replacement-text addresses and their owned heap handles. */
+typedef struct ItfMesTextSlots {
+    u32 addresses[0x20];
+    u32 handles[0x20];
+} ItfMesTextSlots;
+
 /* Message-window state behind each ItfMesSlot. */
 typedef struct ItfMesState {
     u32 flags;          /* 0x0: low half status, high half mask */
@@ -146,8 +152,8 @@ typedef struct ItfMesState {
     ItfMesBlk40 blk40;  /* 0x40 */
     u8 unk58[0x4C];     /* 0x58 */
     ItfMesBlkA4 blkA4;  /* 0xA4 */
-    u32 tableD0[1];  /* 0xD0: indexed by func_0019C568 (true length unknown) */
-    u8 unkD4[0x108]; /* 0xD4 */
+    ItfMesTextSlots textSlots;
+    u8 pad1D0[0xC];
     u32 callbackAddress; /* 0x1DC: invoked when glyph command 4 is set */
 } ItfMesState;
 
@@ -264,9 +270,15 @@ extern void func_001A76C8(void);
 
 extern struct ItfMesPoolNode *itfAcquirePoolNode();
 
-extern u32 sdfAllocGeneralBlock();
-
-extern u32 sdfResourceRetainAddress();
+typedef struct MemBlock MemBlock;
+typedef struct SdfAllocation SdfAllocation;
+extern MemBlock *sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(SdfAllocation *);
+extern void sdfReleaseResourceAllocation(SdfAllocation *);
+extern u32 strlen(const char *);
+extern void *memset(void *, s32, u32);
+extern void *memcpy(void *, const void *, u32);
+void func_001A5480();
 
 extern void itfInitializeCursorResetState();
 
@@ -514,9 +526,9 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     ItfMesState *mes;
     u32 handle;
 
-    handle = sdfAllocGeneralBlock(0x1E0);
+    handle = (u32)sdfAllocGeneralBlock(0x1E0);
     node->resourceHandle = handle;
-    mes = (ItfMesState *)sdfResourceRetainAddress(handle);
+    mes = (ItfMesState *)sdfResourceRetainAddress((SdfAllocation *)handle);
     node->stateAddress = (s32)mes;
     mes->sub = NULL;
     itfMesSetSubResource(window, sub);
@@ -529,7 +541,7 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     itfMesResetCursorState(&mes->entryBlock, 1);
     itfInitializeCursorResetState(&mes->blk40);
     itfResetWindowResourceBlock(&mes->blkA4);
-    itfClearDrawStateWords(mes->tableD0);
+    itfClearDrawStateWords(&mes->textSlots);
     itfResetBattleFadeState((u8 *)mes + 0x1D0, 0);
     itfMesWork.activeWindowCount++;
     return window;
@@ -632,7 +644,7 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
     table = entry->table;
     count = itfMesCountZeroBits(table->bitCount, blk->panelValue);
     y = blk->y - ((count - 1) * 25 << 3);
-    itfMesInitCharTable((s32 *)mes->tableD0);
+    itfMesInitCharTable((s32 *)mes->textSlots.addresses);
     if (mes->temporaryFontEntry != 0) {
         frFontLoadTemporaryEntry(mes->temporaryFontEntry);
     }
@@ -784,17 +796,17 @@ s16 itfMesGetWindowClearBitCount(s32 window) {
 }
 
 /* Return the selected table's cached item count for this window. */
-s16 func_001A4558(s32 window) {
+s16 itfMesGetWindowTableCount(s32 window) {
     return itfWindowSlots[window].mes->entryBlock.tableCount;
 }
 
 /* Return the selected item index for this window. */
-s16 func_001A4578(s32 window) {
+s16 itfMesGetWindowItemIndex(s32 window) {
     return itfWindowSlots[window].mes->entryBlock.itemIndex;
 }
 
 u32 itfMesGetWindowTableValue(s32 window, s32 index) {
-    return itfWindowSlots[window].mes->tableD0[index];
+    return itfWindowSlots[window].mes->textSlots.addresses[index];
 }
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A45C0);
@@ -859,7 +871,7 @@ s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
     if (table->count == 0) {
         return 0;
     }
-    itfMesInitCharTable((s32 *)mes->tableD0);
+    itfMesInitCharTable((s32 *)mes->textSlots.addresses);
     if (mes->temporaryFontEntry != 0) {
         frFontLoadTemporaryEntry(mes->temporaryFontEntry);
     }
@@ -874,7 +886,7 @@ s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
 }
 
 /* Set the fourth color channel used when this window's entry glyphs are built. */
-void func_001A4B98(s32 window, u8 value) {
+void itfMesSetEntryLastColorChannel(s32 window, u8 value) {
     itfWindowSlots[window].mes->entryBlock.color[3] = value;
 }
 
@@ -943,9 +955,9 @@ void itfMesDestroyWindow(s32 window) {
         itfMesCleanupWindow(window, 1);
         itfMesResetWindow(window);
         btlReleaseEffectResourceHandles(mes);
-        itfReleaseUiResourceSlotHandles(mes->tableD0);
+        itfReleaseUiResourceSlotHandles(&mes->textSlots);
         mes->flags = 0;
-        sdfReleaseResourceAllocation(rec->handle);
+        sdfReleaseResourceAllocation((SdfAllocation *)rec->handle);
         rec->mes = NULL;
         itfReleasePoolNode(rec, (u8 *)D_00452960 - 0x10);
         /* This address is itfMesWork.unk0; using the pool-array-relative address preserves the compiled access. */
@@ -1067,7 +1079,35 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
     block->glyphChain = (FrFontGlyph *)glyph;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5480);
+void func_001A5480(mes, index, source, count)
+    ItfMesState *mes;
+    s32 index;
+    const char *source;
+    s32 count;
+{
+    ItfMesTextSlots *slots = &mes->textSlots;
+    u32 *text = &slots->addresses[index];
+    s32 size;
+
+    if (*text != 0) {
+        sdfReleaseResourceAllocation((SdfAllocation *)slots->handles[index]);
+        *text = 0;
+    }
+    if (count <= 0) {
+        size = (strlen(source) + 4) & ~3;
+        slots->handles[index] = (u32)sdfAllocGeneralBlock(size);
+        *text = sdfResourceRetainAddress((SdfAllocation *)slots->handles[index]);
+        memset((void *)*text, 0, size);
+        /* String mode copies the padded span, rather than only strlen + 1. */
+        memcpy((void *)*text, source, size);
+        return;
+    }
+    size = (count + 5) & ~3;
+    slots->handles[index] = (u32)sdfAllocGeneralBlock(size);
+    *text = sdfResourceRetainAddress((SdfAllocation *)slots->handles[index]);
+    memset((void *)*text, 0, size);
+    memcpy((void *)*text, source, count);
+}
 
 extern void func_0019E8F0();
 

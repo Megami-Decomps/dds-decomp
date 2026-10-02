@@ -987,9 +987,9 @@ extern u32 D_00439030;
 extern u32 fileSaveIconRequest;
 extern char D_0042B6A8[];
 
-void func_002CAEA8(void) {
+void fileLoadIconFileAndResetSelection(void) {
     D_00439030 = 0;
-    fileSaveIconRequest = func_002C80C8(D_0042B6A8);
+    fileSaveIconRequest = fileQueueDefaultCallbackRequest(D_0042B6A8);
     fileResetSelection();
 }
 
@@ -997,9 +997,9 @@ void func_002CAED0(void) {
     fileResetSelection();
 }
 
-void func_002CAEE8(void) {
+void fileLoadIconFileAndBeginSlotReset(void) {
     D_00439030 = 0;
-    fileSaveIconRequest = func_002C80C8(D_0042B6A8);
+    fileSaveIconRequest = fileQueueDefaultCallbackRequest(D_0042B6A8);
     fileBeginSlotReset();
 }
 
@@ -4675,3 +4675,4 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E18);
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E20);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E28);
+

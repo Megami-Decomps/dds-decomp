@@ -540,7 +540,7 @@ void sdfTexSetSecondaryPacketBits(SdfTex *tex, s32 magFilter, s32 minFilter) {
 
 void sdfTexSetClampMode(SdfTex *texture, u8 value) {
     texture->clampMode = value;
-    func_0032BE60();
+    sdfTexRefreshResourcePackets();
 }
 
 u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height, u32 format, u8 *pixels, s32 borrow) {

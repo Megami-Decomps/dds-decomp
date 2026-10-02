@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl.h"
+#include "pcp_vu0.h"
 
 extern u32 btlRandomState;
 
@@ -228,11 +229,111 @@ s32 btlAiCheckStatusRollEligibility(BtlTask *task) {
     return btlRollAiBucket() < 0x46;
 }
 
+extern s32 btlSetActorEffectParameter(u8 *object, s32 index);
+extern void btlUnitGetMuzzlePosVU(BtlUnit *unit);
+extern f32 btlUnitGetTopY(BtlUnit *unit);
+extern s32 func_00207C28(s32 screen[4]);
+extern void btlBossDebugPrintf(s32 format, ...);
+
+/* vu0 routine: choose an on-screen HP/MP label anchor, leaving it in vf10. */
 INCLUDE_RODATA(const s32, "game/code_0020E850", D_00419910);
 
 INCLUDE_RODATA(const s32, "game/code_0020E850", D_00419920);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_0020EC20);
+void func_0020EC20(BtlUnit *unit) {
+    s32 screen[4] __attribute__((aligned(16)));
+    f32 baseline[4];
+    f32 candidate[4];
+    f32 distance;
+    s8 visible;
+    s32 x;
+    s32 y;
+
+    if (btlSetActorEffectParameter((u8 *)unit, 2) != 0) {
+        if (unit->stateFlags & 0x80) {
+            return;
+        }
+        VU0_STORE_VF_UNCLOBBERED(vf10, baseline);
+    } else {
+        btlUnitGetMuzzlePosVU(unit);
+        VU0_STORE_VF_UNCLOBBERED(vf10, baseline);
+        baseline[1] = -btlUnitGetTopY(unit);
+    }
+    if (unit->stateFlags & 0x80) {
+        VU0_LOAD_VF(vf10, baseline);
+        return;
+    }
+    VU0_LOAD_VF(vf10, baseline);
+    visible = func_00207C28(screen);
+    x = screen[0] >> 4;
+    y = screen[1] >> 3;
+    if (!visible || x < 12 || x >= 501 || y < 48 || y >= 324) {
+        if (btlSetActorEffectParameter((u8 *)unit, 1) != 0) {
+            VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
+            visible = func_00207C28(screen);
+            x = screen[0] >> 4;
+            y = screen[1] >> 3;
+            if (visible == 1 && !(unit->stateFlags & 0x400000) &&
+                x >= 12 && x < 501 && y >= 48 && y < 324) {
+                btlBossDebugPrintf((s32)"btl:hpmp clip 1shot\n");
+                VU0_LOAD_VF(vf10, candidate);
+                return;
+            }
+        }
+        btlUnitGetMuzzlePosVU(unit);
+        VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
+        VU0_LOAD_VF(vf11, baseline);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(distance);
+        if (distance < unit->reach * unit->scale * 4.0f) {
+            candidate[0] = baseline[0];
+            candidate[2] = baseline[2];
+            candidate[1] -= unit->height * unit->scale * 0.25f;
+            VU0_LOAD_VF(vf10, candidate);
+            visible = func_00207C28(screen);
+            x = screen[0] >> 4;
+            y = screen[1] >> 3;
+            if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
+                btlBossDebugPrintf((s32)"btl:hpmp clip height 3/4\n");
+                VU0_LOAD_VF(vf10, candidate);
+                return;
+            }
+        }
+        btlUnitGetMuzzlePosVU(unit);
+        VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
+        visible = func_00207C28(screen);
+        x = screen[0] >> 4;
+        y = screen[1] >> 3;
+        if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
+            btlBossDebugPrintf((s32)"btl:hpmp clip cylinder center\n");
+            VU0_LOAD_VF(vf10, candidate);
+            return;
+        }
+        candidate[1] += unit->height * unit->scale * 0.5f;
+        VU0_LOAD_VF(vf10, candidate);
+        visible = func_00207C28(screen);
+        x = screen[0] >> 4;
+        y = screen[1] >> 3;
+        if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
+            btlBossDebugPrintf((s32)"btl:hpmp clip cylinder bottom\n");
+            VU0_LOAD_VF(vf10, candidate);
+            return;
+        }
+        btlUnitGetMuzzlePosVU(unit);
+        VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
+        candidate[1] -= unit->height * unit->scale * 0.5f;
+        VU0_LOAD_VF(vf10, candidate);
+        visible = func_00207C28(screen);
+        x = screen[0] >> 4;
+        y = screen[1] >> 3;
+        if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
+            btlBossDebugPrintf((s32)"btl:hpmp clip cylinder top\n");
+            VU0_LOAD_VF(vf10, candidate);
+            return;
+        }
+    }
+    VU0_LOAD_VF(vf10, baseline);
+}
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F048);
 

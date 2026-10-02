@@ -42,8 +42,16 @@ typedef struct MenuSceneWork {
 } MenuSceneWork;
 
 typedef struct MenuSceneMetadata {
-    u8 pad00[0x23C];
+    u8 pad00[0x20];
+    s32 messageShadeFrames;
+    s32 attachedEffect;
+    u32 attachedEffectControl;
+    u16 entryId;
+    u8 pad02E[0x20E];
     s32 displayedCurrency;
+    u8 pad240[6];
+    s8 stageFinished;
+    s8 stageStarted;
 } MenuSceneMetadata;
 
 typedef struct DatGameCounters {
@@ -146,7 +154,51 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00253778);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00253830);
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_00253AD0);
+extern u32 mnuGetSelectedNodeValue(void);
+extern void func_0024DD78(void);
+extern void func_00255E08(MenuSceneMetadata *, s32, s32);
+extern void func_0025B0F0(s32, s32, s32, s32, MenuSceneMetadata *, s32);
+extern s32 func_00249998(void *, s32, s32);
+extern void evtStageTestSelectEntryWithoutInitialValue(u16, s32);
+extern void effUpdateAttached(s32, s32, s32, s32, s32);
+extern s32 evtStageTestUpdate(void *);
+extern s64 evtGetMessageWindowControlState(void);
+extern u8 D_00325818[];
+extern void uiDrawGradientColorRect(s32, s32, s32, s32, s32, u32 *, s32);
+
+s32 func_00253AD0(void) {
+    MenuSceneMetadata *scene = (MenuSceneMetadata *)func_002CB3B8(mnuSceneResourceContext, -1);
+    u32 colors[4];
+
+    mnuGetSelectedNodeValue();
+    fldGetSceneMetadataNode();
+    func_0024DD78();
+    func_00255E08(scene, 0x80, 0x4A);
+    func_0025B0F0(0, -27, 0, 0x80, scene, 0x53);
+    if (func_00249998(&scene->attachedEffectControl, scene->attachedEffect, 0x53) != 0) {
+        if (scene->stageStarted == 0) {
+            evtStageTestSelectEntryWithoutInitialValue(scene->entryId, 0);
+        }
+        scene->stageStarted = 1;
+    }
+    effUpdateAttached(0x1200, 0x730, 1, scene->attachedEffect, 0x53);
+    if (evtStageTestUpdate(D_00325818) >= 2) {
+        scene->stageFinished = 1;
+    }
+    if (evtGetMessageWindowControlState() != 0) {
+        if (scene->messageShadeFrames < 10) {
+            scene->messageShadeFrames++;
+        }
+    } else if (scene->messageShadeFrames > 0) {
+        scene->messageShadeFrames--;
+    }
+    if (scene->messageShadeFrames != 0) {
+        memset(colors, 0, sizeof(colors));
+        colors[3] = colors[2] = (u32)((f32)scene->messageShadeFrames / 10.0f * 112.0f);
+        uiDrawGradientColorRect(0, 0x700, 2, 0x2000, 0x700, colors, 0x53);
+    }
+    return 0;
+}
 
 typedef struct SceneMetadataNode {
     u8 pad00[0xC];

@@ -62,7 +62,7 @@ s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 struct SdfTexHead *func_002D17D8(s32 size, s32 arg1);
 void sdfUpdateTextureHeadsWithInterruptsMasked(void *block);
 void sdfTexCreateSecondPacket(void);
-void func_002D2FB0(void);
+void sdfTexRefreshResourcePackets(void);
 void sdfPendingQueuePush(void *arg0, s32 arg1);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 void *sdfAllocAndClearQuadwords(s32 size);
@@ -513,7 +513,7 @@ void sdfTexSetSecondaryPacketBits(SdfTex *tex, s32 magFilter, s32 minFilter) {
 
 void sdfTexSetClampMode(SdfTex *texture, u8 value) {
     texture->clampMode = value;
-    func_002D2FB0();
+    sdfTexRefreshResourcePackets();
 }
 
 u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height, u32 format, u8 *pixels, s32 borrow) {

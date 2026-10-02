@@ -659,7 +659,7 @@ void *brsCreateRewardTaskWork(void) {
     mnuClearPanelTransitionState(work->transition);
     work->fadeTarget = mnuAllocateValueRecord(1);
     evtCreateMessageWindowIfMissing(D_003D05C8);
-    func_0026C580(200);
+    evtRefreshActiveMessageWindow(200);
     rewards = &work->rewards;
     func_001AA400(rewards);
     party = work->partyRows;

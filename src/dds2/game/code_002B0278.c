@@ -432,7 +432,7 @@ u32 mnuEnterSelectedResourceLabel(void) {
     context = kwlnTaskGetUserValue();
     resourceOwner = ((MenuContext *)context)->party;
     func_002C1B68(context + 0xaa50, 1);
-    func_0026C918(0, D_00435E5C +
+    evtCopyEntryStringToActiveWindow(0, D_00435E5C +
                                     *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(resourceOwner + 0x18) + 0x18) + 0x1c) + 100) * 0x19);
     dspStartEntry(8);
     evtSetMessageWindowOptionWhenOpen(0);
@@ -506,7 +506,7 @@ u32 mnuEnterSlotLabel(void) {
     s32 selectedEntry;
     func_002C1B68(context + 0xaa50, 1);
     selectedEntry = mnuGetPartyEntryCurrentId(slot);
-    func_0026C918(0, D_00435E5C + selectedEntry * 0x19);
+    evtCopyEntryStringToActiveWindow(0, D_00435E5C + selectedEntry * 0x19);
     dspStartEntry(0xd);
     evtSetMessageWindowOptionWhenOpen(0);
     evtCaptureMessageWindowSoundMode(0xf);
@@ -532,7 +532,7 @@ s64 mnuPartySlotConfirmClearUpdate(s32 callback) {
     if (evtGetCapturedMessageWindowSoundMode() == 0) {
         selectedEntry = mnuGetPartyEntryCurrentId(slot);
         mnuClearPartySelectionValues(slot, selectedEntry);
-        func_0026C918(0, D_00435E5C + selectedEntry * 0x19);
+        evtCopyEntryStringToActiveWindow(0, D_00435E5C + selectedEntry * 0x19);
         dspStartEntry(0xE);
         mnuInitPartyPanelSlots(context + 0xA928);
         func_002BCAB0(context + 0x284);
@@ -2209,7 +2209,7 @@ void mnuDrawCampIconBackdrop(MenuBadgeSet *set, s32 arg) {
     func_002B7C10(set, arg);
 }
 
-void func_002B8140(u32 *flags) {
+void mnuEnableCampBadgeFade(u32 *flags) {
     *flags = *flags & 0xfffffffb;
 }
 

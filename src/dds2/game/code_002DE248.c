@@ -1210,7 +1210,7 @@ void effCreateFadeBlendWorkFromOutput(s32 work) {
 }
 
 void effReleaseFadeBlendWork(void) {
-    func_0018E8F0();
+    effReleaseBlurTemplate();
 }
 
 typedef struct EffFadeMapOut {
@@ -3873,7 +3873,7 @@ void effMenuRecordVectorSet(s32 node) {
     mnuRecordSetVector(((EffectSlotNode54 *)node)->record);
 }
 
-void func_002E96A8(s32 node) {
+void effSetSurfaceRecordSecondaryVector(s32 node) {
     fileSetRecordSecondVector(((EffectSlotNode54 *)node)->record);
 }
 
@@ -10288,9 +10288,9 @@ void effRequestResourceByMode(s32 category, s32 index, s32 mode, u32 *result) {
     func_0035C860(path, D_004387E8, category, index);
     *result = 0;
     if (mode == 1) {
-        func_002C8040(path, 0, effCompleteRetainedResourceJob, result);
+        fileCreateCallbackRequest(path, 0, effCompleteRetainedResourceJob, result);
     } else {
-        func_002C8040(path, 0, effCompleteTransientResourceJob, result);
+        fileCreateCallbackRequest(path, 0, effCompleteTransientResourceJob, result);
     }
 }
 
@@ -10323,7 +10323,7 @@ void effRequestMappedResource(s32 category, s32 index, u32 *result) {
     char path[0x80];
     func_0035C860(path, D_004387E8, category, index);
     *result = 0;
-    func_002C8040(path, 0, effCompleteMappedResourceJob, result);
+    fileCreateCallbackRequest(path, 0, effCompleteMappedResourceJob, result);
 }
 
 void *effCreateOwnerRecordList(u32 value) {

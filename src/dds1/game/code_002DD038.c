@@ -107,50 +107,50 @@ void sdfLoadAlternateMatrixVU(void *matrix) {
     VU0_LOAD_MATRIX_B(matrix);
 }
 
-void func_002DD3A8(void *matrix) {
+void sdfStorePrimaryMatrixVU(void *matrix) {
     VU0_STORE_MATRIX(matrix);
 }
 
-void func_002DD3C0(void *matrix) {
+void sdfStoreAlternateMatrixVU(void *matrix) {
     VU0_STORE_MATRIX_B(matrix);
 }
 
-void func_002DD3D8(void) {
+void sdfCopyPrimaryToAlternateMatrixVU(void) {
     VU0_MOVE_VF(vf24, vf28);
     VU0_MOVE_VF(vf25, vf29);
     VU0_MOVE_VF(vf26, vf30);
     VU0_MOVE_VF(vf27, vf31);
 }
 
-void func_002DD3F0(void) {
+void sdfCopyPrimaryToTertiaryMatrixVU(void) {
     VU0_MOVE_VF(vf20, vf28);
     VU0_MOVE_VF(vf21, vf29);
     VU0_MOVE_VF(vf22, vf30);
     VU0_MOVE_VF(vf23, vf31);
 }
 
-void func_002DD408(void) {
+void sdfCopyAlternateToPrimaryMatrixVU(void) {
     VU0_MOVE_VF(vf28, vf24);
     VU0_MOVE_VF(vf29, vf25);
     VU0_MOVE_VF(vf30, vf26);
     VU0_MOVE_VF(vf31, vf27);
 }
 
-void func_002DD420(void) {
+void sdfCopyAlternateToTertiaryMatrixVU(void) {
     VU0_MOVE_VF(vf20, vf24);
     VU0_MOVE_VF(vf21, vf25);
     VU0_MOVE_VF(vf22, vf26);
     VU0_MOVE_VF(vf23, vf27);
 }
 
-void func_002DD438(void) {
+void sdfCopyTertiaryToPrimaryMatrixVU(void) {
     VU0_MOVE_VF(vf28, vf20);
     VU0_MOVE_VF(vf29, vf21);
     VU0_MOVE_VF(vf30, vf22);
     VU0_MOVE_VF(vf31, vf23);
 }
 
-void func_002DD450(void) {
+void sdfCopyTertiaryToAlternateMatrixVU(void) {
     VU0_MOVE_VF(vf24, vf20);
     VU0_MOVE_VF(vf25, vf21);
     VU0_MOVE_VF(vf26, vf22);

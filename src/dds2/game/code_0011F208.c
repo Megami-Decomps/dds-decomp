@@ -342,7 +342,7 @@ extern s32 dds3InvokeSlot1Handler(u32 object, void *context);
 extern void fldUpdateCameraTarget(void);
 extern void func_00139EC0(f32 *position);
 
-void func_0011F208(u32 *state, u32 firstValue, u32 secondValue) {
+void fldSetPacketArgumentPair(u32 *state, u32 firstValue, u32 secondValue) {
     state[4] = firstValue;
     state[5] = secondValue;
 }

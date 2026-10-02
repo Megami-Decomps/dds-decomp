@@ -666,7 +666,7 @@ void fldDecreaseMapSelectedCount(MapSelection *selection) {
     }
 }
 
-u32 func_0030D900(s32 context) {
+u32 fldCollectMapSelectionMask(s32 context) {
     s32 task = *(s32 *)(context + 0x10);
     u32 mask = 0;
     do {

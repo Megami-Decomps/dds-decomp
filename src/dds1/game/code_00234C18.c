@@ -44,7 +44,7 @@ extern s32 sdfAllocGeneralBlock(s32 size);
 extern u32 *sdfResourceRetainAddress(s32 handle);
 extern void *memset(void *dst, s32 value, u32 size);
 extern EvtViewerWork *evtPolygonMovieAllocWork(void);
-extern s32 func_00288B48(char *path);
+extern s32 fileQueueDefaultCallbackRequest(char *path);
 extern s32 sdfPathExists(char *path);
 extern s32 kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 extern void evtViewerStartUpdate(void);
@@ -71,12 +71,12 @@ s32 evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
     work = evtPolygonMovieAllocWork();
     work->event = event;
     work->id = id;
-    work->first.request = func_00288B48(path0);
+    work->first.request = fileQueueDefaultCallbackRequest(path0);
     work->flags |= 2;
-    work->second.request = func_00288B48(path1);
+    work->second.request = fileQueueDefaultCallbackRequest(path1);
     work->flags |= 4;
     if (sdfPathExists(path2) != 0) {
-        work->third.request = func_00288B48(path2);
+        work->third.request = fileQueueDefaultCallbackRequest(path2);
         work->flags |= 0x10;
     } else {
         work->third.request = 0;

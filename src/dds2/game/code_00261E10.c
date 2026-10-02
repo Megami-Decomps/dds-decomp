@@ -32,7 +32,7 @@ extern u8 D_003CE498[];
 extern s32 D_00435E48;
 extern char D_00437840[];
 extern s32 D_003C9A20[];
-extern void func_0026C918();
+extern void evtCopyEntryStringToActiveWindow();
 extern s32 func_0035C860(char *, const char *, ...);
 extern void evtClearActiveFlag();
 extern void evtSetBoundedDisplayValue();
@@ -409,12 +409,12 @@ s32 evtGetRemainingSlotThreshold(u32 slotIndex) {
 
 s32 evtShowResultText(void) {
     char text[0x40];
-    func_0026C918(0, D_00435E48 + 0x11);
+    evtCopyEntryStringToActiveWindow(0, D_00435E48 + 0x11);
     func_0035C860(text, D_00437840, ((EvtProgressState *)datGameState)->total);
-    func_0026C918(1, text);
-    func_0026C918(2, D_003C9A20[((EvtProgressState *)datGameState)->slotIndex]);
+    evtCopyEntryStringToActiveWindow(1, text);
+    evtCopyEntryStringToActiveWindow(2, D_003C9A20[((EvtProgressState *)datGameState)->slotIndex]);
     func_0035C860(text, D_00437840, evtGetRemainingSlotThreshold(((EvtProgressState *)datGameState)->slotIndex + 1));
-    func_0026C918(3, text);
+    evtCopyEntryStringToActiveWindow(3, text);
     if (evtGetRemainingSlotThreshold(((EvtProgressState *)datGameState)->slotIndex + 1) >= 0) {
         dspStartEntry(((EvtProgressState *)datGameState)->slotIndex + 0x1a);
     } else {
@@ -804,10 +804,10 @@ s32 evtTriggerProgressFlagGate(s32 unusedContext) {
 s32 evtShowSlotText(void) {
     char text[0x40];
     if (*(s8 *)(kwlnTaskGetUserValue() + 0xcc) > 0) {
-        func_0026C918(0, D_00435E48 + 0x11);
+        evtCopyEntryStringToActiveWindow(0, D_00435E48 + 0x11);
         func_0035C860(text, D_00437840, D_003CE148[((EvtProgressState *)datGameState)->slotIndex * 3]);
-        func_0026C918(1, text);
-        func_0026C918(2, D_003C9A20[((EvtProgressState *)datGameState)->slotIndex]);
+        evtCopyEntryStringToActiveWindow(1, text);
+        evtCopyEntryStringToActiveWindow(2, D_003C9A20[((EvtProgressState *)datGameState)->slotIndex]);
         if (evtGetRemainingSlotThreshold(((EvtProgressState *)datGameState)->slotIndex + 1) >= 0) {
             dspStartEntry(0x24);
         } else {

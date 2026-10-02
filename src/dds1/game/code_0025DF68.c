@@ -10,6 +10,12 @@ typedef struct IconEntry {
 extern IconEntry D_0036C728[];
 extern u32 D_003BC520;
 extern void func_002BF4E0(s32, s32, s32, s32, s32, u32, s32, s32);
+extern f32 sdfSinPoly(f32);
+
+typedef struct MenuPulseIcon {
+    u8 pad0[0xB2];
+    s8 frame;
+} MenuPulseIcon;
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025DF68);
 
@@ -17,7 +23,18 @@ INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E108);
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E308);
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E420);
+void func_0025E420(MenuPulseIcon *state, s32 amplitude, s32 drawArg) {
+    u32 resource = D_003BC520;
+    s32 alpha;
+
+    alpha = (s32)((f32)amplitude * sdfSinPoly((state->frame / 120.0f) * 6.2831853f));
+    func_002BF4E0(D_0036C728[1].x << 4, D_0036C728[1].y << 3, 0,
+                 alpha, 0, resource, D_0036C728[1].id, drawArg);
+    state->frame++;
+    if (state->frame >= 120.0f) {
+        state->frame = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E508);
 

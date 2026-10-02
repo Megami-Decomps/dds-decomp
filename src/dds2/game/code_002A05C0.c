@@ -422,7 +422,7 @@ void mnuLoadTitleStreamFrameData(char *filePath, u32 *work) {
 }
 
 void mnuStoreTaskResult(char *audioPath) {
-    D_00438FEC = func_002C80C8(audioPath);
+    D_00438FEC = fileQueueDefaultCallbackRequest(audioPath);
     mnuTitleStreamStatus[9] = 1;
 }
 

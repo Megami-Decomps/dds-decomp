@@ -8,8 +8,8 @@ typedef struct DatSkillOwner {
     u16 skills[0x18]; /* 0x22 */
 } DatSkillOwner;
 
-extern s32 func_001188F0(s32 unit);
-extern s32 func_001189D0(s32 unit);
+extern s32 ptyComputeMaxHp(s32 unit);
+extern s32 ptyComputeMaxMp(s32 unit);
 extern s32 datUnitHasSkill(struct DatSkillOwner *unit, s32 skill);
 
 /* Two clamped cursor coordinates, each followed by its maximum. */
@@ -45,7 +45,7 @@ void datClearUnitStatusBits(u8 *work, s32 mask) {
 
 u32 datComputeSkillBoostedMaxHp(DatSkillOwner *unit) {
     u32 bonus = 0;
-    u32 value = func_001188F0((s32)unit);
+    u32 value = ptyComputeMaxHp((s32)unit);
 
     if (datUnitHasSkill(unit, 0x220)) {
         bonus = value * 10 / 100;
@@ -65,7 +65,7 @@ u32 datComputeSkillBoostedMaxHp(DatSkillOwner *unit) {
 
 u32 datComputeSkillBoostedMaxMp(DatSkillOwner *unit) {
     u32 bonus = 0;
-    u32 value = func_001189D0((s32)unit);
+    u32 value = ptyComputeMaxMp((s32)unit);
 
     if (datUnitHasSkill(unit, 0x223)) {
         bonus = value * 10 / 100;

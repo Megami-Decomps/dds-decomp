@@ -1202,7 +1202,7 @@ extern void mnuSelectFirstListNode(s32);
 
 
 
-extern void func_0026C918(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, void *);
 
 extern void dspSetActive(s32);
 
@@ -1666,7 +1666,7 @@ u32 evtPrepareSelectedMenuEntry(void) {
     if (owner->state == 1) {
         mnuSelectFirstListNode((s32)owner);
     }
-    func_0026C918(0, D_003A41A8[*selectionIndex].encodedText);
+    evtCopyEntryStringToActiveWindow(0, D_003A41A8[*selectionIndex].encodedText);
     dspSetActive(1);
     dspStartEntry(0);
     evtSetMessageWindowOptionWhenOpen(1);

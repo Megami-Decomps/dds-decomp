@@ -76,7 +76,7 @@ u32 effBattleGetCurrentFrame(BattleEffect *work) {
 }
 
 /* Read one caller-provided word without interpreting it. */
-u32 func_00160BA0(u32 *value) {
+u32 effBattleReadInputWord(u32 *value) {
     return *value;
 }
 
@@ -91,7 +91,7 @@ void effBattleSetTriggerFrameCallback(BattleEffect *work, u32 callbackAddress) {
 }
 
 /* Read the callback frame from the linked source at +0x24; keep the existing raw view. */
-s32 func_00160BB8(u8 *effectBytes) {
+s32 effBattleGetLinkedSourceValue(u8 *effectBytes) {
     return *(s32 *)(*(u8 **)(effectBytes + 0x24) + 0x48);
 }
 
@@ -125,12 +125,12 @@ u32 effBattleGetSelectedValue(BattleEffect *work) {
 }
 
 /* Store the opaque caller word without assigning it a stronger semantic role. */
-void func_00160C20(BattleEffect *work, u32 value) {
+void effBattleStoreOpaqueWord(BattleEffect *work, u32 value) {
     work->unk120 = value;
 }
 
 /* Return the same opaque caller word. */
-u32 func_00160C28(BattleEffect *work) {
+u32 effBattleReadOpaqueWord(BattleEffect *work) {
     return work->unk120;
 }
 

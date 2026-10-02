@@ -74,7 +74,7 @@ extern void evtDestroySecondaryWorldNode(void);
 extern s32 D_004388A4;
 extern s32 sdfCounterGetDisplayWordPointer(void);
 extern void func_0035C860(char *, char *, ...);
-extern void func_0026C918(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void dspStartEntry(s32);
 extern void evtCaptureMessageWindowSoundMode(s32);
@@ -482,7 +482,7 @@ void fldDisplayLocalMapCounterMessage(void) {
     char text[32];
 
     func_0035C860(text, D_004388A0, sdfCounterGetDisplayWordPointer());
-    func_0026C918(0, text);
+    evtCopyEntryStringToActiveWindow(0, text);
     evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(0);
     evtCaptureMessageWindowSoundMode(1);

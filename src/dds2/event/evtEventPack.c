@@ -46,7 +46,7 @@ extern char D_004248A0[];
 extern char D_004377E0[];
 extern s32 func_0035B6E0();
 extern char D_00453C50[];
-extern s32 func_002C80C8(char *path);
+extern s32 fileQueueDefaultCallbackRequest(char *path);
 
 /* Resolve the event's script path ("/event/eNNN/eNNN/scr/eNNN.be", grouped by tens) and start loading it. */
 void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
@@ -58,7 +58,7 @@ void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     eventId = state->eventId;
     directoryId = eventId - eventId % 10;
     func_0035C860(D_00453C50, D_004248A0, directoryId, eventId, eventId);
-    fileHandle = func_002C80C8(D_00453C50);
+    fileHandle = fileQueueDefaultCallbackRequest(D_00453C50);
     state->fileHandle = fileHandle;
     state->loaded = 1;
 }

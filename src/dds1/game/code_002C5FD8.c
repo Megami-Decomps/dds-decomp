@@ -216,7 +216,7 @@ typedef struct MapSelectionContext {
 } MapSelectionContext;
 
 /* Collect the 1-based selection ids in the linked map nodes into a bitmask. */
-s32 func_002C60F8(MapSelectionContext *context) {
+s32 fldCollectMapSelectionMask(MapSelectionContext *context) {
     MapSelectionLink *node;
     s32 mask;
 
@@ -459,3 +459,6 @@ INCLUDE_RODATA(const s32, "game/code_002C5FD8", D_003B3DC0);
 INCLUDE_RODATA(const s32, "game/code_002C5FD8", D_003B3E00);
 
 INCLUDE_RODATA(const s32, "game/code_002C5FD8", D_003B3E40);
+
+INCLUDE_SDATA(const s32, "game/code_002C5FD8", D_003BD281);
+

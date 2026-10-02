@@ -80,11 +80,11 @@ void func_00161B10(u32 unused, void *arg) {
 
 extern void btlSetActorEffectParameterOrMuzzlePosition();
 
-void func_00161B40(u32 unused, EffBattleMiscParam *param) {
+void effApplyOverrideActorEffectParameter(u32 unused, EffBattleMiscParam *param) {
     btlSetActorEffectParameterOrMuzzlePosition(effBTLFieldColorGetOverrideSelector(), param->value);
 }
 
-void func_00161B70(u32 unused, EffBattleMiscParam *param) {
+void effApplyFinalActorEffectParameter(u32 unused, EffBattleMiscParam *param) {
     btlSetActorEffectParameterOrMuzzlePosition(effBTLFieldColorGetFinalSelector(), param->value);
 }
 

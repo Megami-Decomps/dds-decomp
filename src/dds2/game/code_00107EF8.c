@@ -1225,7 +1225,7 @@ extern void func_0010B8D0(void);
 extern s32 D_00438E68;
 extern char D_004113B8[]; /* "DebugTimeGrph" */
 
-void func_0010B8D8(s8 mode) {
+void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
         D_00438E68 = kwlnTaskCreate(D_004113B8, 0x2710, 1, 1, func_0010B7B8, func_0010B8D0, NULL);
     } else if (mode == 0) {

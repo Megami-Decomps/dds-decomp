@@ -66,9 +66,6 @@ void effMiscSeedRandomFromClock(void *state) {
     effMiscSeedRandom(state, t * 0x3C + now.sec);
 }
 
-INCLUDE_SDATA(const s32, "game/code_00341240", D_00438B78);
-INCLUDE_SDATA(const s32, "game/code_00341240", D_00438B79);
-
 INCLUDE_ASM(const s32, "game/code_00341240", func_003413F0);
 
 u32 func_003414D0(s32 size) {
@@ -88,4 +85,8 @@ void sdfServiceUnblockedWorkerThread(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00341240", func_003415A8);
+
+INCLUDE_SDATA(const s32, "game/code_00341240", D_00438B78);
+
+INCLUDE_SDATA(const s32, "game/code_00341240", D_00438B79);
 

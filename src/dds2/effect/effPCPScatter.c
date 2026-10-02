@@ -919,7 +919,7 @@ extern s32 effMultiplyPackedColors(s32 color, s32 param);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 extern void effScatterStoreSourceTransformMatrix(void *draw, void *work);
 extern void func_0017DA28(void *draw);
-void func_0017B520(PcpScatterInstance *work) {
+void effScatterUpdateLoopedParticleRing(PcpScatterInstance *work) {
     s32 loop;
     u32 i;
     u32 count = work->params.particleCount;
@@ -1250,7 +1250,7 @@ void effScatterUpdateLoopedScaledRing(PcpScatterInstanceB *work) {
     func_0017DA28(draw);
 }
 
-void func_0017C250(PcpScatterInstanceB *work, void *src) {
+void effScatterSetScaledRingOrigin(PcpScatterInstanceB *work, void *src) {
     PCP_COPY_VECTOR(&work->params, src);
 }
 
@@ -1538,7 +1538,7 @@ void effScatterUpdateDualColor(PcpScatterInstanceC *work) {
     func_0017DA28(draw);
 }
 
-void func_0017CE00(PcpScatterInstanceC *work, void *src) {
+void effScatterSetDualColorOrigin(PcpScatterInstanceC *work, void *src) {
     PCP_COPY_VECTOR(&work->params, src);
 }
 
@@ -1727,7 +1727,7 @@ void effScatterFlatRingUpdate(PcpScatterPlainInstance *work, s32 index)
 
 extern void func_0017D138(PcpScatterPlainInstance *work, s32 index);
 
-void func_0017D560(PcpScatterPlainInstance *work) {
+void effScatterUpdatePlainParticleRing(PcpScatterPlainInstance *work) {
     s32 loop;
     u32 i;
     u32 count = work->params.particleCount;

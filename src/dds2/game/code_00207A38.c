@@ -1239,7 +1239,7 @@ s32 func_0020A610(void) {
     return 1;
 }
 
-s32 func_0020A6A0(void) {
+s32 btlCmdStoreBossHealthCheckChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x800000)) {
@@ -1295,7 +1295,7 @@ s32 btlCmdSelectChoiceSlot3Code1C(void) {
     return 1;
 }
 
-s32 func_0020A8E0(void) {
+s32 btlCmdStorePartyCountCheckChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x2000000)) {
@@ -1309,7 +1309,7 @@ s32 func_0020A8E0(void) {
     return 1;
 }
 
-s32 func_0020A970(void) {
+s32 btlCmdStoreActorActionMaskChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x2400000)) {
@@ -1323,7 +1323,7 @@ s32 func_0020A970(void) {
     return 1;
 }
 
-s32 func_0020AA00(void) {
+s32 btlCmdStoreEnemyActionMaskChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x2800000)) {
@@ -1356,7 +1356,7 @@ u32 btlScriptSetChoiceFlag(void) {
     return 1;
 }
 
-s32 func_0020AB38(void) {
+s32 btlCmdStorePartyActionMaskChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x3000000)) {
@@ -1452,7 +1452,7 @@ u32 func_0020AE98(void) {
     return 1;
 }
 
-u32 func_0020AF10(void) {
+u32 btlCmdReturnReadyWithoutTurnsCheck(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x6C00000)) {
         scrSetIntegerReturnValue(1);
@@ -1478,7 +1478,7 @@ s32 btlCmdRememberCounterLimit(void) {
     return 1;
 }
 
-s32 func_0020B020(void) {
+s32 btlCmdStoreCounterReachedLimitChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x5C00000)) {
@@ -1492,7 +1492,7 @@ s32 func_0020B020(void) {
     return 1;
 }
 
-u32 func_0020B0B0(void) {
+u32 btlCmdReturnLowHpActionReadiness(void) {
     s32 context;
 
     context = scrGetCurrentCommandWork();
@@ -1504,7 +1504,7 @@ u32 func_0020B0B0(void) {
     return 1;
 }
 
-u32 func_0020B100(void) {
+u32 btlCmdReturnActorEligibility(void) {
     s32 context;
 
     context = scrGetCurrentCommandWork();
@@ -1556,7 +1556,7 @@ s32 btlCmdRememberUpperElementAccess(void) {
     return 1;
 }
 
-u32 func_0020B2E0(void) {
+u32 btlCmdReturnPartyElementQueryCheck(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x12C00000)) {
         scrSetIntegerReturnValue(1);
@@ -1566,7 +1566,7 @@ u32 func_0020B2E0(void) {
     return 1;
 }
 
-u32 func_0020B350(void) {
+u32 btlCmdReturnEnemyElementQueryCheck(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13000000)) {
         scrSetIntegerReturnValue(1);
@@ -1646,7 +1646,7 @@ s32 func_0020B640(void) {
     return 1;
 }
 
-s32 func_0020B6E0(void) {
+s32 btlCmdStoreDefaultUnitActionChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xd800000)) {
@@ -1660,7 +1660,7 @@ s32 func_0020B6E0(void) {
     return 1;
 }
 
-s32 func_0020B770(void) {
+s32 btlCmdStoreAlternateUnitActionChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xdc00000)) {
@@ -1674,7 +1674,7 @@ s32 func_0020B770(void) {
     return 1;
 }
 
-s32 func_0020B800(void) {
+s32 btlCmdStorePartyEntryCheckChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xe000000)) {
@@ -1688,7 +1688,7 @@ s32 func_0020B800(void) {
     return 1;
 }
 
-s32 func_0020B890(void) {
+s32 btlCmdStoreInversePartyEntryChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xe400000)) {
@@ -1758,7 +1758,7 @@ s32 btlCmdRememberUpperEntryCodeMismatch(void) {
     return 1;
 }
 
-u32 func_0020BB60(void) {
+u32 btlCmdReturnPartyActionPresence(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13400000)) {
         scrSetIntegerReturnValue(1);
@@ -1768,7 +1768,7 @@ u32 func_0020BB60(void) {
     return 1;
 }
 
-s32 func_0020BBD0(void) {
+s32 btlCmdReturnEnemyActionPresence(void) {
     u8 *context = (u8 *)scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13800000)) {
         scrSetIntegerReturnValue(1);
@@ -1842,7 +1842,7 @@ u32 func_0020BE38(void) {
     return 1;
 }
 
-u32 func_0020BEA8(void) {
+u32 btlCmdReturnPartyMissingFlagCheck(void) {
     s32 context;
 
     context = scrGetCurrentCommandWork();
@@ -1854,7 +1854,7 @@ u32 func_0020BEA8(void) {
     return 1;
 }
 
-u32 func_0020BEF8(void) {
+u32 btlCmdReturnPartyHeldFlagCheck(void) {
     s32 context;
 
     context = scrGetCurrentCommandWork();

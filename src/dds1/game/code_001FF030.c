@@ -1269,7 +1269,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00202F90);
 
 /* Picks the target with the lowest nonzero health value among units that block the
  * element query; when none qualifies, every listed unit is a candidate. */
-s32 func_00203098(s32 actor, s32 action) {
+s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
     u32 matching;
     u32 count;
     u16 flags[12];
@@ -1408,7 +1408,7 @@ s32 btlSelectTargetsWithoutActionMask(s32 actor, s32 mask) {
     return 1;
 }
 
-s32 func_002035E0(s32 actor, s32 mode) {
+s32 btlSelectTargetsByMode(s32 actor, s32 mode) {
     u32 matching;
     u32 count;
     u16 flags[12];
@@ -1440,7 +1440,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", btlSelectLowestRankTarget);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00203BA8);
 
-s32 func_00203CA8(s32 actor) {
+s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
     void *list = btlAllocateIndexList(13);
     u32 mode;
     u32 count;
@@ -1814,7 +1814,7 @@ u32 func_00204AC0(void) {
     return 0xffffffff;
 }
 
-s32 func_00204AC8(s32 unused, s32 unit, s32 index) {
+s32 btlClassifyLinkedSkillRequest(s32 unused, s32 unit, s32 index) {
     s32 result = 0;
     if (!(((BtlUnit *)unit)->flags & 0x400)) {
         return result;
@@ -2134,7 +2134,7 @@ void btlSelectSlotEntries(void) {
     activeEntry->unk_06 = activeEntry->unk_08;
 }
 
-void func_00205420(void) {
+void btlRestoreSlotEntriesFromEffect(void) {
     s32 *effectState = (s32 *)((BtlState *)btlGetRuntime())->effect;
     BtlSlotEntry *activeEntry = NULL;
     u32 i;
@@ -3237,7 +3237,7 @@ typedef struct BtlEffectTarget {
     s32 targetId; /* 0x0C */
 } BtlEffectTarget;
 
-s32 func_00209140(BtlUnit *actor, BtlUnit *target, s32 command) {
+s32 btlCheckLinkedActionEffectTarget(BtlUnit *actor, BtlUnit *target, s32 command) {
     BtlEffectTarget *effect = (BtlEffectTarget *)((BtlState *)btlGetRuntime())->effect;
     s32 unit;
     u32 blocked;
@@ -3651,7 +3651,7 @@ s32 btlMapCommandToSkill(u32 command) {
     }
 }
 
-s32 func_0020A780(BtlUnit *unit, s32 arg1) {
+s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 arg1) {
     u8 *task;
 
     if (!(unit->flags & 0x400)) {
@@ -3702,7 +3702,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_0020A860);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020AB08);
 
-s32 func_0020ABE0(void) {
+s32 btlFadeOtherEnemyUnitsWhenSpecialModeActive(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     BtlUnit *head = unit;
     s32 result = -1;

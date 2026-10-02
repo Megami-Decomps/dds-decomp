@@ -1761,7 +1761,7 @@ void evtStageTestResetViewAndLighting(void)
     sdfConsCacheTransformedNode(sdfSceneProjectionParameters, sdfViewMatrix);
 }
 
-void func_00287420(f32 offset) {
+void mnuSetStageTestCameraOffset(f32 offset) {
     sdfSceneProjectionParameters[5] = 2048.0f;
     sdfSceneProjectionParameters[4] = offset + 2048.0f;
     evtStageTestResetViewAndLighting();
@@ -1794,7 +1794,7 @@ void evtStageTestInit(s32 mode) {
         evtStageTestState.queue.slot[i].assetOption = 0;
         evtStageTestState.queue.slot[i].flags = 0;
     }
-    func_00287420(offset);
+    mnuSetStageTestCameraOffset(offset);
 }
 
 void btlStopStage(void) {
@@ -1828,7 +1828,7 @@ void mnuForwardTableByte(s32 encodedIndex) {
     evtStageTestRequestModelAsset(slot->assetResource, evtStageTestState.entries[encodedIndex & 0xffff].modelId, 0);
 }
 
-u32 func_002875E8(u32 *flags) {
+u32 mnuHasPendingBlockFlag(u32 *flags) {
     return *flags & 1;
 }
 
@@ -2059,7 +2059,7 @@ void evtStageTestQueueMotionSegment(s32 motionIndex, f32 blendLeadFrames, f32 bl
     slot->blendDurationFrames = (s32)blendDurationFrames;
 }
 
-void func_00287FD0(void) {
+void evtStageTestForceDefaultMotion(void) {
     evtStageTestState.queue.slot[0].state = 4;
 }
 

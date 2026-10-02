@@ -104,7 +104,7 @@ extern DspUnitName *D_003BAA70;
 extern DspMantraName *D_003BAA78;
 extern char D_003BC468[];
 extern s32 fldGetSceneMetadataNode();
-extern void func_0024DD90(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern s32 mnuGetMantraSourceValue(s32);
 extern void func_003014F0(void *, void *, s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
@@ -117,11 +117,11 @@ void itfDspPopulatePrimaryLabels(void) {
     DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
     char text[16];
 
-    func_0024DD90(0, D_003BAA70[selection->entry->unitId].encodedText);
-    func_0024DD90(1, D_003BAA78[selection->mantraId].encodedText);
-    func_0024DD90(2, D_003BAA78[scene->sceneId].encodedText);
+    evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->entry->unitId].encodedText);
+    evtCopyEntryStringToActiveWindow(1, D_003BAA78[selection->mantraId].encodedText);
+    evtCopyEntryStringToActiveWindow(2, D_003BAA78[scene->sceneId].encodedText);
     func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
-    func_0024DD90(3, text);
+    evtCopyEntryStringToActiveWindow(3, text);
     evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(0);
     evtCaptureMessageWindowSoundMode(8);
@@ -133,11 +133,11 @@ void itfDspPopulateAlternateLabels(void) {
     DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
     char text[16];
 
-    func_0024DD90(0, D_003BAA70[selection->entry->unitId].encodedText);
-    func_0024DD90(1, D_003BAA78[selection->mantraId].encodedText);
-    func_0024DD90(2, D_003BAA78[scene->sceneId].encodedText);
+    evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->entry->unitId].encodedText);
+    evtCopyEntryStringToActiveWindow(1, D_003BAA78[selection->mantraId].encodedText);
+    evtCopyEntryStringToActiveWindow(2, D_003BAA78[scene->sceneId].encodedText);
     func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
-    func_0024DD90(3, text);
+    evtCopyEntryStringToActiveWindow(3, text);
     evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(1);
     evtCaptureMessageWindowSoundMode(8);
@@ -149,11 +149,11 @@ void itfDspPopulateThirdLabels(void) {
     DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
     char text[16];
 
-    func_0024DD90(0, D_003BAA70[selection->entry->unitId].encodedText);
-    func_0024DD90(1, D_003BAA78[selection->mantraId].encodedText);
-    func_0024DD90(2, D_003BAA78[scene->sceneId].encodedText);
+    evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->entry->unitId].encodedText);
+    evtCopyEntryStringToActiveWindow(1, D_003BAA78[selection->mantraId].encodedText);
+    evtCopyEntryStringToActiveWindow(2, D_003BAA78[scene->sceneId].encodedText);
     func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
-    func_0024DD90(3, text);
+    evtCopyEntryStringToActiveWindow(3, text);
     dspStartEntry(2);
 }
 

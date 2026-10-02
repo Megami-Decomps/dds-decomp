@@ -295,7 +295,7 @@ extern char D_003B26C8[];
 
 extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 
-extern u32 func_00288B48(const char *path);
+extern u32 fileQueueDefaultCallbackRequest(const char *path);
 
 extern void dds3DispatchIndexedCallback(void *callback);
 
@@ -969,17 +969,17 @@ void fileResolveAbortSlotFlow(void) {
 
 void fileLoadIconFileAndResetSelection(void) {
     D_003BD910 = 0;
-    fileSaveIconRequest = func_00288B48(D_003B2668);
+    fileSaveIconRequest = fileQueueDefaultCallbackRequest(D_003B2668);
     fileResetSelection();
 }
 
-void func_0028B6D0(void) {
+void fileResetSlotSelection(void) {
     fileResetSelection();
 }
 
 void fileLoadIconFileAndBeginSlotReset(void) {
     D_003BD910 = 0;
-    fileSaveIconRequest = func_00288B48(D_003B2668);
+    fileSaveIconRequest = fileQueueDefaultCallbackRequest(D_003B2668);
     fileBeginSlotReset();
 }
 

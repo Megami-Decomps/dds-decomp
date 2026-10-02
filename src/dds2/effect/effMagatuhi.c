@@ -684,7 +684,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193668);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001937C0);
 
-void func_00193A88(EffMagatuhiOrbitWork *work, void *src) {
+void effMagatuhiSetOrbitOrigin(EffMagatuhiOrbitWork *work, void *src) {
     PCP_COPY_VECTOR(work->head.origin, src);
 }
 
@@ -820,7 +820,7 @@ void effMagatuhiReleaseSecondaryOwnerAndBuffer(EffMagatuhiDriftWork *work) {
 }
 
 /* vu0 routine: initialize a planar particle with normalized position/drift. */
-void func_00193F10(EffMagatuhiDriftWork *work, s32 index) {
+void effMagatuhiInitializeDriftParticle(EffMagatuhiDriftWork *work, s32 index) {
     EffMagatuhiDriftParticle *particle = &work->particles[index];
     f32 direction[4];
     f32 radius;
@@ -860,7 +860,7 @@ void func_00193F10(EffMagatuhiDriftWork *work, s32 index) {
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00194100);
 
-void func_001943E0(EffMagatuhiDriftWork *work, void *src) {
+void effMagatuhiSetDriftOrigin(EffMagatuhiDriftWork *work, void *src) {
     PCP_COPY_VECTOR(work->head.origin, src);
 }
 
@@ -907,7 +907,7 @@ void effMagatuhiInitDriftParticles(EffMagatuhiCallback *arg) {
             PCP_COPY_VECTOR(origin, work->head.origin);
             VU0_LOAD_MATRIX(work->matrix);
             for (i = 0; i < count; i += 3, particle += 3) {
-                func_00193F10(work, i);
+                effMagatuhiInitializeDriftParticle(work, i);
                 delay = effMiscRand(D_003AA868) % frames;
                 particle->delay = delay;
                 /* Keep at most maxSteps samples: skip older state only when

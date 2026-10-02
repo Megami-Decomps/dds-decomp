@@ -527,7 +527,7 @@ extern void datMoveCursorX();
 
 /* Nudge every active party entry's cursor by weight * 0.05 once scene flag
  * 0x40 is clear. */
-void func_001D2798(BattleSceneWork *scene) {
+void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
     u32 i;
     f32 scale;
     i = 0;
@@ -572,7 +572,7 @@ extern s32 brsTaskPollDone();
 /* Field-load step: while loading, sends every linked scene node to state
  * 0x1F, otherwise advances loadStep (0 start, 1 polling, 2 done). Returns
  * 0xB while a load is still pending. */
-u32 func_001D28D8(BattleSceneWork *work) {
+u32 fldStepAreaLoad(BattleSceneWork *work) {
     SceneLinkedNode *node;
     s32 step;
     if (func_002998D8() == 1) {
@@ -833,7 +833,7 @@ void fldCompactSceneSlots(void) {
 
 /* Consume `amount` scene-slot time: mode 1 drains the front slot's counter
  * (popping it when empty), modes 2 and 3 drain full slots of 100 in steps of 50. */
-void func_001D3520(s32 amount, u8 mode) {
+void fldConsumeSceneSlotCounters(s32 amount, u8 mode) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
     u8 head;
     u32 i;
@@ -917,7 +917,7 @@ void fldSwapSceneSlots(s32 index) {
     if (scene->flags & 0x100) {
         u8 firstId = scene->slots[0].a;
         u8 count = scene->slots[0].b;
-        func_001D3520(index, 1);
+        fldConsumeSceneSlotCounters(index, 1);
         if (index < count) {
             if (scene->slots[1].a != 0 && scene->slots[1].a != firstId) {
                 u8 a = scene->slots[0].a;
@@ -1203,7 +1203,7 @@ u32 fldDispatchSceneGroupRequestWhenAllowed(s32 *request) {
         }
         groupIndex = (u8)request[2];
     }
-    func_001D3520(request[1], groupIndex);
+    fldConsumeSceneSlotCounters(request[1], groupIndex);
     return 1;
 }
 

@@ -634,7 +634,7 @@ void *sdfFindTaskListNodeByKey(TaskList *list, s32 key) {
     return node;
 }
 
-u32 func_002CB120(void) {
+u32 sdfReadPadDirectionMask(void) {
     u32 flags = 0;
 
     if (D_00324510[0x26] < 0) {

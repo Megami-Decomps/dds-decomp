@@ -479,7 +479,7 @@ extern void sdfGetChipHeapStats(SdfChipStats *stats);
 extern char D_00438C08[];
 
 /* Print the chip heap totals and how many cells are in use per size class (1..16, 17..32, ...). */
-void func_00343D60(void) {
+void sdfPrintChipHeapInfo(void) {
     SdfChipStats stats;
     u32 limit = 16;
     s32 i = 0;

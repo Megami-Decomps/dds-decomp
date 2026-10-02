@@ -9,7 +9,7 @@ extern void func_0029AA48(s32);
 extern void func_0029AC20(s32, s32);
 extern void func_0029B950(void *item, void *context);
 extern u8 *D_00435E48;
-extern void func_0026C918(s32 index, void *value);
+extern void evtCopyEntryStringToActiveWindow(s32 index, void *value);
 extern void *memset(void *destination, s32 value, u32 size);
 
 extern s32 evtStageTestUpdateCamera(void);
@@ -138,9 +138,9 @@ s32 func_0029B6A0(void) {
     context->crossedSteps = brsGetLevelStepCrossedBy(item->value - gain, gain);
     if (context->crossedSteps != 0) {
         func_0035C860(text, D_004379B8, D_00435E48 + item->index * 17);
-        func_0026C918(0, text);
+        evtCopyEntryStringToActiveWindow(0, text);
         func_0035C860(text, D_004379B0, brsGetLevelStepForValue(item->value));
-        func_0026C918(1, text);
+        evtCopyEntryStringToActiveWindow(1, text);
         dspSetActive(1);
         dspStartEntry(0x18);
         sndSetSequenceVolumePan(7, 0x7F, 0x3F);
@@ -216,7 +216,7 @@ u32 func_0029BB28(void) {
     func_0029B950(item, context);
     mode = *(s32 *)(context + 0xB6F4);
     if (mode != 0 && mode != 5) {
-        func_0026C918(0, D_00435E48 + *(u16 *)(item + 4) * 17);
+        evtCopyEntryStringToActiveWindow(0, D_00435E48 + *(u16 *)(item + 4) * 17);
         dspStartEntry(0x19);
     }
     memset(context + 0x3F4, 0, 0x14);

@@ -509,3 +509,4 @@ void mnuSetModelNodeVisibility(u8 *node, s8 selector) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_0031B188", D_00438950);
+

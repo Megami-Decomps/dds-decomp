@@ -2252,7 +2252,7 @@ void fldUpdateWeatherEffectNodes(void) {
     }
 }
 
-void *func_0014B648(s32 key0, s32 key1) {
+void *fldFindFieldEntryByKeyPair(s32 key0, s32 key1) {
     FldEnt110 *entry = D_003BAA48;
     s32 index = 0;
 

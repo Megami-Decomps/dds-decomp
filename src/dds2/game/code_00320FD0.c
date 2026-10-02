@@ -10,7 +10,7 @@ extern u8 D_0045C860[];
 
 extern u32 D_0043899C;
 
-extern void func_00321908(u32);
+extern void mnuFreeOptionalBlock(u32);
 
 extern void *memcpy(void *, const void *, u32);
 
@@ -243,7 +243,7 @@ void func_003214C8(u32 value) {
 
 void func_003214D0(u32 unused, s32 resource) {
     if (resource != 0) {
-        func_00321908(resource);
+        mnuFreeOptionalBlock(resource);
         return;
     }
 }

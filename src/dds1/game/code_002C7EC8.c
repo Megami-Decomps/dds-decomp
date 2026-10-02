@@ -377,4 +377,3 @@ float fldVec4ArcCosDot(float *left, float *right) {
     return func_002FA1C0(sdfQuatDot(left, right));
 }
 
-INCLUDE_SDATA(const s32, "game/code_002C7EC8", D_003BD281);

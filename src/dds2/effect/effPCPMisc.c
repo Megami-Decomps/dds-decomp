@@ -56,7 +56,8 @@ extern u32 effParamCreateFromTable(void *data, s32 index);
 
 extern u32 effParamWorkDuplicate(u32 param);
 
-extern u32 effCreateThunderCellSystemWork(void *params);
+extern void *effCreateThunderCellSystemWork(void *params);
+extern void effPCPThunderFree(void *work);
 
 extern u8 D_003B1938[];
 
@@ -319,7 +320,7 @@ extern u8 D_003B1E50[];
 extern u8 D_003B1F10[];
 
 struct EffPCPBeamWork;
-extern void func_00188198(f32 value, struct EffPCPBeamWork *work);
+extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *work);
 
 
 extern void func_00336798(f32 angle);
@@ -543,7 +544,7 @@ extern u32 effCreateNodeFromDescriptor(u32 param);
 
 extern EffPCPBlockSetWork *effPcpBuildBlockSet();
 
-extern EffPCPBlockSetWork *func_00185118(void *first, void **blocks);
+extern EffPCPBlockSetWork *effPcpCreateBlockSetWork(void *first, void **blocks);
 
 typedef struct {
     void *block1;
@@ -706,7 +707,6 @@ extern void func_00197D50();
 
 extern void effPCPThunderFree3(u32 handle);
 
-extern void func_00187AA8(void *work);
 
 /* Effect initializers implemented in assembly below (func_001708A0 lives in
    another unit). Each is entered with and without spawn arguments, so they
@@ -1990,7 +1990,7 @@ typedef struct EffPCPFadeWork {
 void effPcpInitializeThunderHandleWork(EffPCPFadeWork *work) {
     u32 handle;
 
-    handle = effCreateThunderCellSystemWork(D_003B1938);
+    handle = (u32)effCreateThunderCellSystemWork(D_003B1938);
     work->frame = 0;
     work->handle = handle;
 }
@@ -2004,7 +2004,7 @@ void *effPcpCreateThunderHandleWork(void) {
 }
 
 void effPcpReleaseThunderHandleWork(EffPCPFadeWork *work) {
-    effPCPThunderFree(work->handle);
+    effPCPThunderFree((void *)work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -2162,7 +2162,7 @@ void effPcpSetDenseConeColor(EffPCPThunderGroup *work, u32 value) {
 void effPcpInitGrowingThunderFadeWork(EffPCPFadeWork *work) {
     u32 handle;
 
-    handle = effCreateThunderCellSystemWork(D_003B19E8);
+    handle = (u32)effCreateThunderCellSystemWork(D_003B19E8);
     work->frame = 0;
     work->handle = handle;
 }
@@ -2176,7 +2176,7 @@ void *effPcpCreateGrowingThunderFadeWork(void) {
 }
 
 void effPcpReleaseGrowingThunderFadeWork(EffPCPFadeWork *work) {
-    effPCPThunderFree(work->handle);
+    effPCPThunderFree((void *)work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -2234,7 +2234,7 @@ void effPcpSetGrowingThunderFadeColor(EffPCPFadeWork *work, u32 value) {
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182B48);
 
 extern s32 D_00436438;
-extern void func_0018E8F0(u32 handle);
+extern void effReleaseBlurTemplate(u32 handle);
 
 void effPcpSharedWorkRelease(u32 *work)
 {
@@ -2242,7 +2242,7 @@ void effPcpSharedWorkRelease(u32 *work)
     if (--D_00436438 != 0) {
         return;
     }
-    func_0018E8F0((u32)effPcpSharedTrailWork->obj);
+    effReleaseBlurTemplate((u32)effPcpSharedTrailWork->obj);
     sdfReleaseChipBlock(effPcpSharedTrailWork);
 }
 
@@ -2351,7 +2351,7 @@ EffPCPTrailWork *func_00182DD8(EffPCPTrailParams *params) {
 }
 
 void effPcpTrailRelease(EffPCPTrailWork *work) {
-    func_0018E8F0((u32)work->obj);
+    effReleaseBlurTemplate((u32)work->obj);
     sdfReleaseChipBlock(work);
 }
 
@@ -2453,7 +2453,7 @@ static inline s32 effPcpInterpolateCompactExtent(s32 from, s32 to,
 }
 
 /* vu0 routine: project the compact rectangle's world-space center to screen. */
-void func_00183120(EffPCPCompactFadeWork *work) {
+void effPcpUpdateCompactBlurRect(EffPCPCompactFadeWork *work) {
     f32 projected[4];
     s32 frame = work->frame;
     s32 duration = work->duration;
@@ -2543,12 +2543,12 @@ void effPcpCompactLongRespawn(EffPCPCompactFadeWork *work) {
 }
 
 void effPcpCompactLongRelease(EffPCPCompactFadeWork *work) {
-    func_0018E8F0(work->resource);
+    effReleaseBlurTemplate(work->resource);
     sdfReleaseChipBlock(work);
 }
 
 /* vu0 routine: project the compact textured rectangle's world-space center. */
-void func_00183478(EffPCPCompactFadeWork *work) {
+void effPcpUpdateCompactTexturedBlurRect(EffPCPCompactFadeWork *work) {
     f32 projected[4];
     s32 frame = work->frame;
     s32 duration = work->duration;
@@ -2839,7 +2839,7 @@ void effPcpSetChargeResourceColor(EffPCPCompactWork *work, u32 color) {
 void effPcpInitShortThunderFadeWork(EffPCPFadeWork *work) {
     u32 handle;
 
-    handle = effCreateThunderCellSystemWork(D_003B1A38);
+    handle = (u32)effCreateThunderCellSystemWork(D_003B1A38);
     work->frame = 0;
     work->handle = handle;
 }
@@ -2853,7 +2853,7 @@ void *effPcpCreateShortThunderFadeWork(void) {
 }
 
 void effPcpReleaseShortThunderFadeWork(EffPCPFadeWork *work) {
-    effPCPThunderFree(work->handle);
+    effPCPThunderFree((void *)work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -2911,7 +2911,7 @@ void effPcpSetScalingThunderFadeColor(EffPCPFadeWork *work, u32 value) {
 void effPcpInitScalingThunderFadeWork(EffPCPFadeWork *work) {
     u32 handle;
 
-    handle = effCreateThunderCellSystemWork(D_003B1A88);
+    handle = (u32)effCreateThunderCellSystemWork(D_003B1A88);
     work->frame = 0;
     work->handle = handle;
 }
@@ -2925,7 +2925,7 @@ void *effPcpCreateScalingThunderFadeWork(void) {
 }
 
 void effPcpReleaseScalingThunderFadeWork(EffPCPFadeWork *work) {
-    effPCPThunderFree(work->handle);
+    effPCPThunderFree((void *)work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -3238,7 +3238,7 @@ typedef struct EffPCPBlockModel {
 } EffPCPBlockModel;
 
 /* Build a block-set work: copy the parameter block, then create one parameter handle per input block. */
-EffPCPBlockSetWork *func_00185118(void *first, void **blocks) {
+EffPCPBlockSetWork *effPcpCreateBlockSetWork(void *first, void **blocks) {
     EffPCPBlockSetWork *work;
     EffPCPBlockModel *model;
     u32 i;
@@ -3301,7 +3301,7 @@ EffPCPBlockSetWork *effPcpBuildBlockSet(args)
         set.tail[i] = effParamTableGetBlock(args, 10 + i);
     }
     set.block15 = effParamTableGetBlock(args, 15);
-    return func_00185118(first, &set);
+    return effPcpCreateBlockSetWork(first, &set);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00185500);
@@ -3424,7 +3424,7 @@ EffPCPRotateWork *effPcpRotateCreate(EffPCPRotateParams *src, u32 *blocks) {
     work->frame = 0;
     for (i = 0; i < 3; i++) {
         blocks[3] = blocks[i];
-        work->ids[i] = (s32)func_00185118(sub, (void **)&blocks[3]);
+        work->ids[i] = (s32)effPcpCreateBlockSetWork(sub, (void **)&blocks[3]);
         sub += 0x50;
     }
     return work;
@@ -3985,18 +3985,9 @@ void effPcpSetThunderBurstColor(EffPCPBurstWork *work, u32 value) {
     work->unk10 = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187AA8);
-
-void effPcpScaledEffectCreateFromTable(void *data) {
-    void *work;
-
-    work = effParamTableGetBlock(data, 0);
-    func_00187AA8(work);
-}
-
 /* Serialized vector-thunder parameters, not the trailing live cell-system work. */
 typedef struct {
-    u8 pad00[0x10];
+    f32 position[4];
     u16 systemParam;
     u8 pad12[2];
     u32 count;
@@ -4022,7 +4013,7 @@ typedef struct {
 } EffPCPScaledThunderParams;
 
 typedef struct EffPCPGrowWork {
-    u8 pad00[0x10];
+    f32 position[4];
     s32 duration;
     s32 fadeIn;
     s32 fadeOut;
@@ -4031,14 +4022,44 @@ typedef struct EffPCPGrowWork {
     u32 color;
     s32 frame;
     f32 scale;
-    u32 handle;
+    void *handle;
 } EffPCPGrowWork;
+
+EffPCPGrowWork *func_00187AA8(EffPCPScaledThunderParams *params) {
+    EffPCPGrowWork *work = sdfAllocSizeClassBlock(sizeof(EffPCPGrowWork));
+    void *handle;
+
+    params->res.scaledFirst = (f32)params->base;
+    params->res.scaledSecond = (f32)params->base;
+    handle = effCreateThunderCellSystemWork(&params->res);
+    work->duration = params->duration;
+    work->fadeIn = params->fadeIn;
+    work->fadeOut = params->fadeOut;
+    work->base = params->base;
+    work->target = params->target;
+    work->color = 0x80808080;
+    work->frame = 0;
+    work->scale = 1.0f;
+    work->position[0] = params->res.position[0];
+    work->position[1] = params->res.position[1];
+    work->position[2] = params->res.position[2];
+    work->handle = handle;
+    return work;
+}
+
+void effPcpScaledEffectCreateFromTable(void *data) {
+    void *work;
+
+    work = effParamTableGetBlock(data, 0);
+    func_00187AA8(work);
+}
+
 
 void effPcpCreateScaledEffectFromResource(EffPCPGrowWork *work) {
     EffPCPScaledThunderParams params;
     EffThunderVectorParams *res;
 
-    res = func_0016B198(work->handle);
+    res = func_0016B198((u32)work->handle);
     params.duration = work->duration;
     params.fadeIn = work->fadeIn;
     params.fadeOut = work->fadeOut;
@@ -4079,7 +4100,7 @@ extern void *sdfCreateAssetWithDrawEntries(void);
 extern void func_003332D0(void *asset, f32 scale);
 
 /* vu0 routine: initialize both transforms with the libvu0 identity primitive. */
-EffPCPBeamNode *func_00187E50(u32 segments) {
+EffPCPBeamNode *effPcpCreateBeamGeometryNode(u32 segments) {
     u32 count = segments * 4 + 4;
     EffPCPBeamNode *node = sdfAllocSizeClassBlock(sizeof(EffPCPBeamNode));
     void *allocation = sdfAllocGeneralBlock(count * 20);
@@ -4110,7 +4131,7 @@ void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187FC8);
 
-void func_00188198(f32 radius, EffPCPBeamWork *work) {
+void effPcpBuildConcentricBeamVertices(f32 radius, EffPCPBeamWork *work) {
     f32 direction[4];
     f32 inner[4];
     f32 first[4];
@@ -4151,7 +4172,7 @@ void func_00188198(f32 radius, EffPCPBeamWork *work) {
 }
 
 void effResetChild(EffPCPBeamWork *work) {
-    func_00188198(work->params.unk28, work);
+    effPcpBuildConcentricBeamVertices(work->params.unk28, work);
     work->unk50 = 0;
 }
 
@@ -4173,7 +4194,7 @@ u8 *effBeamEffectClone(src)
         src->segments = 3;
         segments = 3;
     }
-    node = func_00187E50(segments);
+    node = effPcpCreateBeamGeometryNode(segments);
     i = 0;
     work->node = node;
     work->vertexCount = node->vertexCount;
@@ -4337,7 +4358,7 @@ u8 *effBeamEffectCloneLarge(src)
         src->segments = 3;
         segments = 3;
     }
-    node = func_00187E50(segments);
+    node = effPcpCreateBeamGeometryNode(segments);
     i = 0;
     work->node = node;
     groups = (s32)node->vertexCount >> 2;

@@ -82,7 +82,7 @@ u32 effBattleGetCurrentFrame(BattleEffect *effect) {
 }
 
 /* Read one caller-provided word without interpreting it. */
-u32 func_00168790(u32 *value) {
+u32 effBattleReadInputWord(u32 *value) {
     return *value;
 }
 
@@ -131,12 +131,12 @@ u32 effBattleGetSelectedValue(BattleEffect *effect) {
 }
 
 /* Store the opaque caller word without assigning it a stronger semantic role. */
-void func_00168810(BattleEffect *effect, u32 value) {
+void effBattleStoreOpaqueWord(BattleEffect *effect, u32 value) {
     effect->value120 = value;
 }
 
 /* Return the same opaque caller word. */
-u32 func_00168818(BattleEffect *effect) {
+u32 effBattleReadOpaqueWord(BattleEffect *effect) {
     return effect->value120;
 }
 

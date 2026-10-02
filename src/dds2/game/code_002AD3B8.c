@@ -40,7 +40,7 @@ extern s32 D_00435E5C;
 extern s32 D_00435E48;
 extern s32 mnuGetPartyEntryMenuValue();
 extern s32 mnuGetPartyEntryCurrentId();
-extern void func_0026C918(s32, s32);
+extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern void dspStartEntry(s32);
 extern void func_0011A118();
 extern void func_002AD330();
@@ -448,9 +448,9 @@ void mnuPrepareStaffSelectionChangeDialog(s32 context, u8 *entry, s32 target) {
 
     func_002C1B68(context + 0xaa50, 1);
     if (current != target) {
-        func_0026C918(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
-        func_0026C918(1, D_00435E5C + current * 0x19);
-        func_0026C918(2, D_00435E5C + target * 0x19);
+        evtCopyEntryStringToActiveWindow(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
+        evtCopyEntryStringToActiveWindow(1, D_00435E5C + current * 0x19);
+        evtCopyEntryStringToActiveWindow(2, D_00435E5C + target * 0x19);
         dspStartEntry(0);
         if (current != 0) {
             func_0011A118(current, 1);
@@ -459,7 +459,7 @@ void mnuPrepareStaffSelectionChangeDialog(s32 context, u8 *entry, s32 target) {
         ((MenuStaffChoices *)menu)->previous = current;
         ((MenuStaffChoices *)menu)->requested = target;
     } else {
-        func_0026C918(0, D_00435E5C + current * 0x19);
+        evtCopyEntryStringToActiveWindow(0, D_00435E5C + current * 0x19);
         dspStartEntry(1);
         ((MenuStaffChoices *)menu)->previous = 0;
         ((MenuStaffChoices *)menu)->requested = 0;
@@ -598,26 +598,26 @@ void mnuStaffEntrySwapLabels(s32 context, u8 *entry, s32 target) {
 
     func_002C1B68(context + 0xaa50, 1);
     if (target == 0) {
-        func_0026C918(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
-        func_0026C918(1, D_00435E5C + current * 0x19);
+        evtCopyEntryStringToActiveWindow(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
+        evtCopyEntryStringToActiveWindow(1, D_00435E5C + current * 0x19);
         dspStartEntry(6);
         ((MenuStaffChoices *)menu)->alternatePrevious = current;
         ((MenuStaffChoices *)menu)->alternateRequested = 0;
     } else if (current != target) {
         if (current != 0) {
-            func_0026C918(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
-            func_0026C918(1, D_00435E5C + current * 0x19);
-            func_0026C918(2, D_00435E5C + target * 0x19);
+            evtCopyEntryStringToActiveWindow(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
+            evtCopyEntryStringToActiveWindow(1, D_00435E5C + current * 0x19);
+            evtCopyEntryStringToActiveWindow(2, D_00435E5C + target * 0x19);
             dspStartEntry(3);
         } else {
-            func_0026C918(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
-            func_0026C918(1, D_00435E5C + target * 0x19);
+            evtCopyEntryStringToActiveWindow(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
+            evtCopyEntryStringToActiveWindow(1, D_00435E5C + target * 0x19);
             dspStartEntry(4);
         }
         ((MenuStaffChoices *)menu)->alternatePrevious = current;
         ((MenuStaffChoices *)menu)->alternateRequested = target;
     } else {
-        func_0026C918(0, D_00435E5C + current * 0x19);
+        evtCopyEntryStringToActiveWindow(0, D_00435E5C + current * 0x19);
         dspStartEntry(5);
         ((MenuStaffChoices *)menu)->alternatePrevious = 0;
         ((MenuStaffChoices *)menu)->alternateRequested = 0;
@@ -746,13 +746,13 @@ void mnuPrepareStaffValueChangeDialog(s32 context, u8 *entry, s32 unused, s32 fl
 
     func_002C1B68(context + 0xaa50, 1);
     current = mnuGetPartyEntryCurrentId(entry);
-    func_0026C918(0, D_00435E5C + current * 0x19);
-    func_0026C918(1, D_003E7400[menu->thirdListIndex]);
+    evtCopyEntryStringToActiveWindow(0, D_00435E5C + current * 0x19);
+    evtCopyEntryStringToActiveWindow(1, D_003E7400[menu->thirdListIndex]);
     func_0035C860(buf, D_00437BD8, menu->thirdListValue);
-    func_0026C918(2, (s32)buf);
+    evtCopyEntryStringToActiveWindow(2, (s32)buf);
     base = func_002BDA50(current);
     func_0035C860(buf, D_00437BD8, func_002BDA78(current) - base);
-    func_0026C918(3, (s32)buf);
+    evtCopyEntryStringToActiveWindow(3, (s32)buf);
     if (flag == 0) {
         dspStartEntry(9);
     } else {

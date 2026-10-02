@@ -131,7 +131,23 @@ void itfDrawFadeGlyphStrip(FadeEntry *entry) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E6E0);
+void func_0031E6E0(s32 x, s32 y, s32 extent, u32 value) {
+    s32 divisor = 10000000;
+    s32 leading = 1;
+    s32 i;
+
+    for (i = 0; i < 8; i++) {
+        s32 digit = value / divisor;
+
+        if (digit > 0) {
+            leading = 0;
+        }
+        value -= divisor * digit;
+        divisor /= 10;
+        mnuDrawIndexedFadeGlyph(x, y, leading == 0 ? extent : extent / 2, digit + 11, 0x54);
+        x += 0x90;
+    }
+}
 
 void func_0031E7C8(FadeEntry *entry, u32 frame) {
     entry->frame = frame;

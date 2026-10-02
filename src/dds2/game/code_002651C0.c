@@ -38,7 +38,7 @@ extern void mdlFlagClear();
 extern void func_0026C7F8();
 extern s32 mnuCampResolveProgressTierValue();
 extern void dspSetActive();
-extern void func_0026C918();
+extern void evtCopyEntryStringToActiveWindow();
 extern void dspStartEntry();
 extern void datAddCurrencyClamped();
 extern void func_0011A118();
@@ -197,7 +197,7 @@ void mnuAwardCampProgressCurrency(void) {
     s32 index = mnuCampResolveProgressTierValue();
     dspSetActive(1);
     func_0035C860(text, D_00437840, index);
-    func_0026C918(0, text);
+    evtCopyEntryStringToActiveWindow(0, text);
     dspStartEntry(0x19);
     datAddCurrencyClamped(index);
     func_0011A118(0x81, -*(u8 *)(datGameState + 0x13c1));

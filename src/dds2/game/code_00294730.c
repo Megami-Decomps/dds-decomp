@@ -11,6 +11,8 @@ extern void func_002960F0(s32, s32, s32, s32, u8 *, s32);
 typedef struct EventSpriteObject {
     u8 pad00[8];
     s32 type;
+    u8 pad0C[0xBA];
+    s8 pulseFrame;
 } EventSpriteObject;
 
 u32 evtSelectGraphicSlotBySpriteType(EventSpriteObject *object) {
@@ -43,6 +45,8 @@ typedef struct MenuDrawResources {
 } MenuDrawResources;
 
 extern MenuDrawResources *D_00438FC8;
+extern f32 sdfSinPoly(f32);
+extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 struct BlendDispatchWork;
 extern void func_00294680(struct BlendDispatchWork *, s32, s32);
 
@@ -63,7 +67,18 @@ void func_00294B40(s32 x, s32 y, s32 depth, EventSpriteObject *object,
                   D_003D03F0[index][MENU_ICON_FRAME], option);
 }
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_00294C68);
+void func_00294C68(EventSpriteObject *object, s32 amplitude, s32 drawArg) {
+    s32 texture = D_00438FC8->textures[0];
+    s32 alpha;
+
+    alpha = (s32)((f32)amplitude * sdfSinPoly((object->pulseFrame / 120.0f) * 6.2831853f));
+    func_00306CD0(D_003D03F0[1][MENU_ICON_X] << 4, D_003D03F0[1][MENU_ICON_Y] << 3,
+                  0, alpha, 0, texture, D_003D03F0[1][MENU_ICON_FRAME], drawArg);
+    object->pulseFrame++;
+    if (object->pulseFrame >= 120.0f) {
+        object->pulseFrame = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00294D50);
 

@@ -6,7 +6,7 @@ extern u32 D_00435E80;
 extern s32 datGameState;
 
 extern s64 scrGetWorkTaskHandle(void);
-extern s32 func_00118AB0(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
+extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 extern char sdfRuntimeTaskName[]; /* "GBWK" */
 extern void kwlnTaskDestroyWithHierarchyByName(char *name, s32 flag);
 extern void func_00117A80(void);
@@ -388,7 +388,7 @@ void sdfResetChannels(void) {
 }
 
 /* Enemy vitals use their base record; party vitals use level growth and bonuses. */
-s32 func_001188F0(s32 unit) {
+s32 ptyComputeMaxHp(s32 unit) {
     s32 level;
     s32 stat;
     s32 result;
@@ -410,7 +410,7 @@ s32 func_001188F0(s32 unit) {
     return result;
 }
 
-s32 func_001189D0(s32 unit) {
+s32 ptyComputeMaxMp(s32 unit) {
     s32 level;
     s32 stat;
     s32 result;
@@ -432,7 +432,7 @@ s32 func_001189D0(s32 unit) {
     return result;
 }
 
-s32 func_00118AB0(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
     s32 result;
     u8 flags;
 
@@ -456,7 +456,7 @@ s32 func_00118AB0(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
 }
 
 void sdfDispatchCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
-    func_00118AB0(unitIndex, scriptArg, contextArg, (u8)mode);
+    sdfDispatchPrimaryUnitScript(unitIndex, scriptArg, contextArg, (u8)mode);
 }
 
 s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {

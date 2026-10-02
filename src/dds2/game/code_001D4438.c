@@ -17,7 +17,7 @@ extern s32 btlIsNamedBattleTaskRegistered(void);
 extern s32 btlHasRegisteredGuidePanelTask(void);
 extern s32 btlHasRegisteredSkillNamePanelTask(void);
 extern s32 btlHasRegisteredAphNamePanelTask(void);
-extern s32 func_001CC9C0(s32);
+extern s32 btlCreateAiWork(s32);
 extern s32 btlBossDebugPrintf(const char *, ...);
 extern u32 fldGetSceneScriptTaskUserData(void);
 extern char *D_004367B8;
@@ -1249,7 +1249,7 @@ extern u32 sndGetResourceStatus(s32);
 /* Returns nonzero when the scene is idle: frees every actor's unreferenced
  * resource node, then the caller's list node, and requires no waiting actor
  * or scene task of the listed kinds. */
-s32 func_001D46A8(s32 self) {
+s32 fldCheckSceneResourcesIdle(s32 self) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
     SceneActor *actor;
     for (actor = scene->actors; actor != 0; actor = actor->next) {
@@ -1370,7 +1370,7 @@ void func_001D4B90(s32 task) {
     ((SceneTask *)task)->flags = ((SceneTask *)task)->flags & 0xffffffef;
 }
 
-extern s32 func_001D46A8(s32);
+extern s32 fldCheckSceneResourcesIdle(s32);
 extern s32 btlBothSidesActive(s32);
 extern s32 func_0020EB40(u8 *);
 
@@ -1389,7 +1389,7 @@ void btlActionSeqCheckDispatch(u8 *task) {
                 return;
             }
         }
-        if (!(flags & 0x8000) || func_001D46A8(unit) != 0) {
+        if (!(flags & 0x8000) || fldCheckSceneResourcesIdle(unit) != 0) {
             if (btlBothSidesActive(unit) == 0) {
                 btlDispatchStateHandler(task, 0x1D);
                 return;
@@ -1430,7 +1430,7 @@ extern u8 *btlCreateLinkedEffectTask(SceneActor *, u32, s32);
 
 /* Starts the command sound tasks and the follow-up action for the acting
  * unit, chosen by its selection flags. */
-void func_001D4FE8(u8 *task) {
+void btlStartCommandAudioAndSelectedAction(u8 *task) {
     SceneActor *unit;
     s64 ownerId;
     u8 *effectTask;
@@ -1593,12 +1593,12 @@ extern s32 kwlnTaskIsRegistered();
 
 /* AI task: binds the acting unit's slot on first run, then waits for the
  * pending AI task and dispatches state 0xB or 0xC. */
-s32 func_001D5950(SceneTask *task) {
+s32 btlAiTaskUpdate(SceneTask *task) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
     u16 index;
     if (!(scene->flags & 0x20)) {
         if (sndHasActiveActor() == 0) {
-            if (func_001D46A8((s32)task->actor) != 0) {
+            if (fldCheckSceneResourcesIdle((s32)task->actor) != 0) {
                 if (!(task->flags & 0x80)) {
                     index = task->actor->kind;
                     scene->pendingTask = 0;
@@ -1766,7 +1766,7 @@ void btlProcessEligibleCommandTaskEffects(u8 *task) {
     u8 *work = (u8 *)btlGetRuntime();
     s32 owner = (s32)((SceneTask *)task)->actor;
     void (*hook)(u8 *);
-    if (func_001D46A8(owner) != 0) {
+    if (fldCheckSceneResourcesIdle(owner) != 0) {
         if (((SceneTask *)task)->actionStage == 2) {
             btlStartTask(btlCreateEffObjB(owner, ((SceneTask *)task)->effect));
         }

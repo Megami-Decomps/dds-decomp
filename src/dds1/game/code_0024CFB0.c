@@ -42,7 +42,7 @@ extern void func_0024A2D8(s32 arg0);
 extern s64 func_00285670(s32, s32 *, u64, u64);
 
 extern void func_0024DD78(void);
-extern void func_0024DD90(s32, s32);
+extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern void dspSetActive();
 extern void itfMesSetWindowHighFlags(s32, s32);
 extern void itfMesClearWindowHighFlags(s32, s32);
@@ -105,9 +105,9 @@ s32 dspStartFlagEvent(s32 context) {
                 if (mdlFlagTest(mnuSceneFlagEventEntries[i].needFlag) != 0 && mdlFlagTest(mnuSceneFlagEventEntries[i].doneFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
-                    func_0024DD90(0, D_003BAA84 + mnuSceneFlagEventEntries[i].areaIndex * 0x19);
-                    func_0024DD90(1, D_003BAA78 + mnuSceneFlagEventEntries[i].nameIndex * 0x13);
-                    func_0024DD90(2, D_003BAA74 + mnuSceneFlagEventEntries[i].dialogIndex * 0x11);
+                    evtCopyEntryStringToActiveWindow(0, D_003BAA84 + mnuSceneFlagEventEntries[i].areaIndex * 0x19);
+                    evtCopyEntryStringToActiveWindow(1, D_003BAA78 + mnuSceneFlagEventEntries[i].nameIndex * 0x13);
+                    evtCopyEntryStringToActiveWindow(2, D_003BAA74 + mnuSceneFlagEventEntries[i].dialogIndex * 0x11);
                     dspStartEntry(3);
                     mdlFlagSet(mnuSceneFlagEventEntries[i].doneFlag);
                     return 1;
@@ -119,7 +119,7 @@ s32 dspStartFlagEvent(s32 context) {
                     && mdlFlagTest(mnuPartyFlagEventEntries[slot->id].doneFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
-                    func_0024DD90(0, D_003BAA70 + slot->id * 0x11);
+                    evtCopyEntryStringToActiveWindow(0, D_003BAA70 + slot->id * 0x11);
                     dspStartEntry(4);
                     mdlFlagSet(mnuPartyFlagEventEntries[slot->id].doneFlag);
                     return 1;
@@ -406,7 +406,7 @@ s32 evtCreateMessageWindowIfMissing(s32 unused) {
     return 0;
 }
 
-s32 func_0024DA20(s32 soundMode) {
+s32 evtRefreshActiveMessageWindow(s32 soundMode) {
     if (dspWindowHandle < 0) {
         return 0;
     }
@@ -517,7 +517,7 @@ void func_0024DD78(void) {
     func_0024DC98(1);
 }
 
-void func_0024DD90(s32 entryIndex, s32 itemIndex) {
+void evtCopyEntryStringToActiveWindow(s32 entryIndex, s32 itemIndex) {
     itfMesCopyStringToWindowTableSlot(dspWindowHandle, entryIndex, itemIndex);
 }
 

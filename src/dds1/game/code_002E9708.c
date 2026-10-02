@@ -572,7 +572,7 @@ extern void sdfGetChipHeapStats(SdfChipStats *stats);
 extern char D_003BD518[];
 
 /* Print the chip heap totals and how many cells are in use per size class (1..16, 17..32, ...). */
-void func_002EAEB8(void) {
+void sdfPrintChipHeapInfo(void) {
     SdfChipStats stats;
     u32 limit = 16;
     s32 i = 0;
@@ -1189,7 +1189,7 @@ void sdfSoundInitIpuStream(void) {
     _StartThread(thread, 0);
 }
 
-s32 func_002EC900(void) {
+s32 sdfSoundShutdownIpuStreamHandlers(void) {
     if (D_003BDA9C != 0) {
         func_002CF7B8(D_003BDA9C);
         D_003BDA9C = 0;

@@ -3,15 +3,37 @@
 extern s32 kwlnTaskGetUserValue();
 
 extern void func_0024DD78(void);
+extern u8 *D_003BAA70;
+extern void evtCopyEntryStringToActiveWindow(s32, void *);
+extern u8 brsGetLevelStepCrossedBy(s32, s32);
+extern u8 brsGetLevelStepForValue(s32);
+extern s32 func_003014F0(char *, const char *, ...);
+extern void dspSetActive(s32);
+extern void dspStartEntry(s32);
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+extern char D_003BC550[];
+extern char D_003BC558[];
 
 typedef struct MenuSumBytes {
-    u8 pad00[0x16];
+    u8 pad00[4];
+    u16 itemId;
+    u8 pad06[0xE];
+    u16 level;
     s8 values[MENU_SUM_COUNT];
 } MenuSumBytes;
 
+typedef struct BrsLevelStepState {
+    MenuSumBytes *entry;
+    s32 increment;
+} BrsLevelStepState;
+
 typedef struct MenuSumTable {
-    u8 pad00[0x3D0];
+    u8 pad00[0x98];
+    BrsLevelStepState *state;
+    u8 pad9C[0x334];
     s32 values[MENU_SUM_COUNT];
+    u8 pad3E4[0x11A0];
+    u32 unk1584;
 } MenuSumTable;
 
 /* All five signed-byte plus table-word totals must meet the minimum. */
@@ -85,7 +107,25 @@ s64 func_002644F0(s32 input) {
     return menuRunPanel(context, 2, input);
 }
 
-INCLUDE_ASM(const s32, "game/code_00263EB0", func_00264538);
+u32 func_00264538(void) {
+    char text[0x20];
+    MenuSumTable *work = (MenuSumTable *)kwlnTaskGetUserValue();
+    BrsLevelStepState *state = work->state;
+    MenuSumBytes *entry = state->entry;
+    u32 step = brsGetLevelStepCrossedBy(entry->level - state->increment, state->increment);
+
+    work->unk1584 = step;
+    if (step != 0) {
+        func_003014F0(text, D_003BC558, D_003BAA70 + entry->itemId * 17);
+        evtCopyEntryStringToActiveWindow(0, text);
+        func_003014F0(text, D_003BC550, brsGetLevelStepForValue(entry->level));
+        evtCopyEntryStringToActiveWindow(1, text);
+        dspSetActive(1);
+        dspStartEntry(0x17);
+        sndSetSequenceVolumePan(7, 0x7F, 0x3F);
+    }
+    return 1;
+}
 
 u32 func_00264608(void) {
     return 1;
@@ -128,15 +168,13 @@ s64 func_002646F8(s32 input) {
     return menuRunPanel(context, 2, input);
 }
 
-extern u8 *D_003BAA70;
-extern void func_0024DD90(s32, void *);
 
 u32 func_00264740(void) {
     u8 *context = (u8 *)kwlnTaskGetUserValue();
     u8 *item = *(u8 **)(*(u8 **)(context + 0x98));
 
     if (*(s32 *)(context + 0x1588) != 0) {
-        func_0024DD90(0, D_003BAA70 + *(u16 *)(item + 4) * 17);
+        evtCopyEntryStringToActiveWindow(0, D_003BAA70 + *(u16 *)(item + 4) * 17);
         dspStartEntry(0x18);
     }
     memset(context + 0x3D0, 0, 0x14);

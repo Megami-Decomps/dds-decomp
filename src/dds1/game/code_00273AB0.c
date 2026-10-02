@@ -262,7 +262,7 @@ s32 mnuReleaseStaffValuePageResources(s32 unused) {
 }
 
 extern u16 mnuGetPartyEntryMenuValue(s32);
-extern void func_0024DD90(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern void dspStartEntry(s32);
 extern void func_00283BF0(s32, s32);
 extern void func_00119900(s32, s32);
@@ -294,9 +294,9 @@ void mnuSwapEquippedBullet(s32 scene, u8 *unit, s32 itemId) {
     func_00283BF0(scene + 0x914, 1);
     if (equipped != itemId) {
         /* Actor names use 17-byte records; item names use 25-byte records. */
-        func_0024DD90(0, D_003BAA70 + ((MnuEquipUnit *)unit)->unitId * 17);
-        func_0024DD90(1, D_003BAA84 + equipped * 25);
-        func_0024DD90(2, D_003BAA84 + itemId * 25);
+        evtCopyEntryStringToActiveWindow(0, D_003BAA70 + ((MnuEquipUnit *)unit)->unitId * 17);
+        evtCopyEntryStringToActiveWindow(1, D_003BAA84 + equipped * 25);
+        evtCopyEntryStringToActiveWindow(2, D_003BAA84 + itemId * 25);
         dspStartEntry(0);
         if (equipped != 0) {
             func_00119900(equipped, 1);
@@ -305,7 +305,7 @@ void mnuSwapEquippedBullet(s32 scene, u8 *unit, s32 itemId) {
         equipContext->previousItem = equipped;
         equipContext->selectedItem = itemId;
     } else {
-        func_0024DD90(0, D_003BAA84 + equipped * 25);
+        evtCopyEntryStringToActiveWindow(0, D_003BAA84 + equipped * 25);
         dspStartEntry(1);
         equipContext->previousItem = 0;
         equipContext->selectedItem = 0;

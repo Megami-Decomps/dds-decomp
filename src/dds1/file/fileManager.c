@@ -206,7 +206,7 @@ typedef struct FileRequestCallbackWork {
     u8 pad04[0x2C];
 } FileRequestCallbackWork;
 
-void *func_00288AD0(u32 request, u32 mode, u32 dispatch, u32 callback) {
+void *fileCreateCallbackRequest(u32 request, u32 mode, u32 dispatch, u32 callback) {
     FileRequestCallbackWork *work = sdfAllocAndClearQuadwords(sizeof(FileRequestCallbackWork));
 
     work->unk03 = mode;
@@ -214,12 +214,12 @@ void *func_00288AD0(u32 request, u32 mode, u32 dispatch, u32 callback) {
     return work;
 }
 
-void func_00288B48(u32 request) {
-    func_00288AD0(request, 0, 0, 0);
+void fileQueueDefaultCallbackRequest(u32 request) {
+    fileCreateCallbackRequest(request, 0, 0, 0);
 }
 
-void func_00288B68(u32 request) {
-    func_00288AD0(request, 1, 0, 0);
+void fileQueueAlternateCallbackRequest(u32 request) {
+    fileCreateCallbackRequest(request, 1, 0, 0);
 }
 
 u32 fileGetResourceHandle(FileWork *work) {

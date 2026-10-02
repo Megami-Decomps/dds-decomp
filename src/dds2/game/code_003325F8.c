@@ -455,13 +455,13 @@ void sdfReleaseQueuedResource(void *resource, s32 retained) {
     }
 }
 
-void func_003331F0(SdfResourceList *list) {
+void sdfGrowResourceListStorage(SdfResourceList *list) {
     sdfDevBufferedRequestGrow((struct DevRequest *)list);
 }
 
-void func_00333208(SdfResourceList *list, SdfAsset *asset) {
+void sdfAppendAssetToResourceList(SdfResourceList *list, SdfAsset *asset) {
     if (list->count >= list->capacity) {
-        func_003331F0(list);
+        sdfGrowResourceListStorage(list);
     }
     list->items[list->count] = (u32)asset;
     list->count++;
@@ -807,7 +807,7 @@ SdfResourceList *sdfAssetListParse(SdfTextParam *param, u32 *data) {
     while (count != 0) {
         SdfAsset *asset = sdfCreateAssetWithDrawEntries();
         cursor = sdfParseAssetParameterFlags((SdfTextParam *)asset, param, cursor);
-        func_00333208(list, asset);
+        sdfAppendAssetToResourceList(list, asset);
         count--;
     }
     return list;

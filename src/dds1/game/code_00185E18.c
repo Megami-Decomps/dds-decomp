@@ -293,7 +293,7 @@ EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplate *src) {
     return dst;
 }
 
-void func_00186CB8(void) {
+void effReleaseBlurTemplate(void) {
     sdfReleaseChipBlock();
 }
 
