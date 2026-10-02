@@ -73,7 +73,7 @@ s32 scrCreateTaskFromContextParameters(s32 priority, s32 header, s32 procedureSe
     return scrProcCreateTask(priority, bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, procedureIndex));
 }
 
-s32 func_0010BD08(s32 header, s32 procedureSection, s32 procedures, s32 labels, s32 instructions, s32 auxiliaryData, s32 strings)
+s32 scrCreateProcessAtFirstProcedure(s32 header, s32 procedureSection, s32 procedures, s32 labels, s32 instructions, s32 auxiliaryData, s32 strings)
 {
     return bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, 0);
 }

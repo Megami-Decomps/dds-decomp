@@ -9,7 +9,7 @@ extern void evtReloadEventViewer();
 extern void *dds3GetWorldObject(void);
 extern void dds3SetWorldCameraObject(void *, s32);
 extern f32 dds3GetCameraFieldOfView(s32);
-extern void func_001063A8(f32);
+extern void kwlnSetCameraFieldOfViewTarget(f32);
 
 extern s32 evtViewerHasUpdateFlag(s32);
 
@@ -225,7 +225,7 @@ void evtViewerApplySelectedEntry(EventViewerState *viewer) {
     }
     if (unit != 0) {
         dds3SetWorldCameraObject(dds3GetWorldObject(), unit);
-        func_001063A8(dds3GetCameraFieldOfView(unit));
+        kwlnSetCameraFieldOfViewTarget(dds3GetCameraFieldOfView(unit));
     }
 }
 
@@ -447,7 +447,7 @@ void evtViewerAdvanceGlyphTick(EventViewerState *viewer) {
 
     if ((viewer->glyphAdvancePosition < viewer->glyphAdvanceLimit - 3) && (0 < viewer->glyphTickCount))
     {
-        func_0019D518(viewer->glyph);
+        frFontDrawGlyphInDefaultMode(viewer->glyph);
         nextTick = viewer->glyphTickCount + 1;
         viewer->glyphTickCount = nextTick;
         if (0x1d < nextTick) {

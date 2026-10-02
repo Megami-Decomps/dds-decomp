@@ -214,9 +214,47 @@ void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 arg) {
     unit->flags = (unit->flags | 0x2400) & ~0x4000;
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", evtSetUnitRgbTransition);
+typedef struct MdlCtx MdlCtx;
+extern u32 mdlGetBroadcastValue(MdlCtx *);
+extern void mdlBroadcastMasked(MdlCtx *, u32);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CA60);
+void evtSetUnitRgbTransition(EvtUnit *unit, s32 duration, u32 color) {
+    u8 *work = (u8 *)unit;
+
+    *(s16 *)(work + 0x1B6) = duration;
+    *(s16 *)(work + 0x1B4) = 0;
+    if (duration == 0) {
+        mdlBroadcastMasked((MdlCtx *)unit->owner,
+            (mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFF000000) | (color & 0xFFFFFF));
+        *(u32 *)(work + 0x60) = (*(u32 *)(work + 0x60) & 0xFF000000) | (color & 0xFFFFFF);
+        unit->flags &= ~0x8000;
+    } else {
+        u32 currentRgb = mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFFFFFF;
+
+        *(u32 *)(work + 0x60) = (*(u32 *)(work + 0x60) & 0xFF000000) | currentRgb;
+        *(u32 *)(work + 0x64) = (*(u32 *)(work + 0x64) & 0xFF000000) | (color & 0xFFFFFF);
+        unit->flags |= 0x8000;
+    }
+}
+
+void func_0023CA60(EvtUnit *unit, s32 duration, u32 color) {
+    u8 *work = (u8 *)unit;
+
+    *(s16 *)(work + 0x1BA) = duration;
+    *(s16 *)(work + 0x1B8) = 0;
+    if (duration == 0) {
+        mdlBroadcastMasked((MdlCtx *)unit->owner,
+            (mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFFFFFF) | (color & 0xFF000000));
+        *(u32 *)(work + 0x60) = (*(u32 *)(work + 0x60) & 0xFFFFFF) | (color & 0xFF000000);
+        unit->flags &= ~0x10000;
+    } else {
+        u32 currentAlpha = mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFF000000;
+
+        *(u32 *)(work + 0x60) = (*(u32 *)(work + 0x60) & 0xFFFFFF) | currentAlpha;
+        *(u32 *)(work + 0x64) = (*(u32 *)(work + 0x64) & 0xFFFFFF) | (color & 0xFF000000);
+        unit->flags |= 0x10000;
+    }
+}
 
 u8 evtTestUnitStatusFlags(EvtUnit *unit) {
     return (unit->flags & 0x7800) != 0;

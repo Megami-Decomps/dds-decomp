@@ -108,7 +108,7 @@ void sceDmaSendN(void *ch, void *addr, s32 size);
 s32 sceGsSyncPath(s32 mode, s32 timeout);
 
 /* Submit the console's pending packet to the DMA channel when it holds anything, then flip to the other buffer and restart the list there. */
-void func_0033D0D8(ConsBuf *buf) {
+void sdfDevConsKickPacketDma(ConsBuf *buf) {
     s32 bytes;
     u32 *channel;
     u32 flip;

@@ -407,7 +407,7 @@ u32 func_00271FC8(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    func_00283BF8(context + 0x914, 0x53);
+    mnuDrawAndStepGradientFade(context + 0x914, 0x53);
     return 0;
 }
 

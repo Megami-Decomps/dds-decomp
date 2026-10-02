@@ -583,7 +583,7 @@ typedef struct SndPadStepper {
 } SndPadStepper;
 
 /* Step the stepper's index by pad input: one per press, ten with the fast modifier held; mirror it into the target. */
-void func_0019F9E0(SndPadStepper *stepper) {
+void sndStepIndexByPad(SndPadStepper *stepper) {
     s32 step;
 
     if (D_00324510.coarseDown & 2) {

@@ -27,7 +27,7 @@ extern void mnuReleasePartyIconBundles();
 
 extern void mnuClearEntries();
 
-extern s32 func_0019FEF8();
+extern s32 itfDrawUnderscoreTextSegment();
 
 extern s32 D_00435E54;
 
@@ -918,15 +918,15 @@ s32 mnuDestroyPanels(s32 callback) {
         ((MenuContext *)context)->panelGroup = 0;
     }
     if (((MenuContext *)context)->panelRequest != 0) {
-        func_002C1050(((MenuContext *)context)->panelRequest);
+        mnuFreeSpriteStateWork(((MenuContext *)context)->panelRequest);
         ((MenuContext *)context)->panelRequest = 0;
     }
     if (((MenuContext *)context)->panelEffects != 0) {
-        func_002C16D8(((MenuContext *)context)->panelEffects);
+        mnuFreeSimpleSpriteWork(((MenuContext *)context)->panelEffects);
         ((MenuContext *)context)->panelEffects = 0;
     }
     if (((MenuContext *)context)->resourceList != 0) {
-        func_002C3390(((MenuContext *)context)->resourceList);
+        mnuFreeProfilePanelWork(((MenuContext *)context)->resourceList);
         ((MenuContext *)context)->resourceList = 0;
     }
     mnuReleaseResourceList(menu[8]);
@@ -1025,7 +1025,7 @@ void mnuDrawSlotIcons(s32 x, s32 context) {
     s32 y = 0xb40;
     s32 handle;
     for (i = 0; i < 2; i++, y += 0xb8) {
-        handle = func_0019FEF8(0x3c0, y, 0, 0xa09dc359, D_00435E54 + *(u16 *)(slot + 4) * 45, i);
+        handle = itfDrawUnderscoreTextSegment(0x3c0, y, 0, 0xa09dc359, D_00435E54 + *(u16 *)(slot + 4) * 45, i);
         if (handle != 0) {
             func_0019D550(handle, 1, 0x53);
             frFontQueueGlyphInSelectedSlot(handle);

@@ -32,7 +32,7 @@ extern void sceSifRpcLoop(void *);
 extern u8 D_003FEAC0[];
 extern s32 func_002E99A0();
 
-extern void func_002D0B50(void *out);
+extern void sdfGetGeneralHeapStats(void *out);
 
 extern void sdfPrintFormattedDevMessage(const char *fmt, ...);
 
@@ -554,7 +554,7 @@ INCLUDE_RODATA(const s32, "game/code_002E9708", sdfGsMemoryDumpRowFormat);
 
 void sndPrintMemoryInfo(void) {
     s32 info[6];
-    func_002D0B50(info);
+    sdfGetGeneralHeapStats(info);
     sdfPrintFormattedDevMessage(" <<< memory information >>>\n             total : 0x%06X\n        free total : 0x%06X\n     max free size : 0x%06X\n     min free size : 0x%06X\n      handle total : %d\n free handle count : %d\n\n",
                     info[0], info[1], info[2], info[3], info[4], info[5]);
 }

@@ -154,7 +154,7 @@ extern s32 datComputeSkillBoostedMaxMp();
 
 extern void func_001BCB88(s32, s32);
 
-extern s32 func_00119368(s32, s32);
+extern s32 datGetStatWithStatusOverride(s32, s32);
 
 extern u64 btlAdvanceRuntimeSequenceCounter();
 
@@ -580,7 +580,7 @@ void func_001A29B8(void) {
 }
 
 u32 func_001A29D0(s32 arg0, s32 arg1) {
-    return func_00119368(arg0, arg1);
+    return datGetStatWithStatusOverride(arg0, arg1);
 }
 
 extern s32 datAbilityParameters;
@@ -1709,7 +1709,7 @@ s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 allowDisabled) {
         if ((flags & 1) != 0) {
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
                 if ((*(u16 *)(node + 0x120) & mask) != 0) {
-                    s32 value = func_00119368(node + 0x120, attribute);
+                    s32 value = datGetStatWithStatusOverride(node + 0x120, attribute);
                     count++;
                     sum += value;
                 }
@@ -8697,7 +8697,7 @@ extern void dds3SetWorldCameraObject(void *, s32);
 
 extern f32 dds3GetCameraFieldOfView(s32);
 
-extern void func_00106488(f32);
+extern void kwlnSetCameraFieldOfViewTarget(f32);
 
 void btlRefreshWorldCameraHandle(void) {
     WorldObj *object;
@@ -8713,7 +8713,7 @@ void btlRefreshWorldCameraHandle(void) {
                     handle = object->head->sub->handle;
                 }
                 dds3SetWorldCameraObject(object, handle);
-                func_00106488(dds3GetCameraFieldOfView(handle));
+                kwlnSetCameraFieldOfViewTarget(dds3GetCameraFieldOfView(handle));
             }
         }
     }

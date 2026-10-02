@@ -159,7 +159,7 @@ typedef struct FrFontSegments {
 extern void itfSplitRelativeSegments(void *block, FrFontSegments *out);
 extern void func_001A00B8(void *dst, s32 option, void *block, FrFontSegments *segments);
 
-extern FrFontGlyph *func_0019C4D0(FrFontGlyph *glyph);
+extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 
 typedef struct TextStyleNode {
     u8 pad00[4];
@@ -223,13 +223,13 @@ FrFontGlyph *frFontAdvanceOrRetainFadingGlyph(FrFontGlyph *glyph) {
     if (frFontAdvanceGlyphFade(glyph) != 0) {
         return glyph;
     }
-    return func_0019C4D0(glyph);
+    return frFontReleaseGlyphChain(glyph);
 }
 
 extern s32 itfEnqueueMemNode(void *node, s32 pool);
 
 /* Release a glyph chain, walking back along `previous`: drop each child's record reference (releasing the record once unreferenced), return the child and then the glyph itself to their node pools, and keep the live counts. */
-FrFontGlyph *func_0019C4D0(FrFontGlyph *glyph) {
+FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph) {
     FrFontGlyph *current = glyph;
     FrFontGlyph *child;
     FrFontGlyph *nextChild;
@@ -493,7 +493,7 @@ s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D288);
 
-void func_0019D518(FrFontGlyph *glyph) {
+void frFontDrawGlyphInDefaultMode(FrFontGlyph *glyph) {
     frFontDrawGlyphWithSharedFlags(glyph, 0);
 }
 
@@ -510,7 +510,7 @@ s32 frFontAdvanceSelectedGlyphSlot(void) {
     u8 *base = (u8 *)&frFontWork;
     FrFontGlyph **slot = (FrFontGlyph **)(base + selection * 4 + 0x194);
 
-    *slot = func_0019C4D0(*slot);
+    *slot = frFontReleaseGlyphChain(*slot);
     return 0;
 }
 

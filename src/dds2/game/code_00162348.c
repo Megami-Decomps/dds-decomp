@@ -243,7 +243,32 @@ extern void billSetBillboardMode(s32 id, s16 mode);
 
 extern void billMarkKindOneFlag(s32 id);
 
-INCLUDE_ASM(const s32, "game/code_00162348", func_001623D0);
+typedef struct ParKindResource {
+    s32 type;
+    s32 offset;
+    u8 pad08[8];
+} ParKindResource;
+
+extern BillObj *billCreateIndexed(s32, u32);
+
+ParObj *func_001623D0(s32 kind, ParKindResource *resource) {
+    ParObj *object = (ParObj *)((u8 *)resource + resource->offset + 0x10);
+    s32 billboard;
+
+    if (resource->type != 3 || resource->offset != 0) {
+        object->unk28 = -1;
+        object = parKindConstructorEntries[kind].func(object);
+        billboard = (s32)billCreateIndexed(resource->type, (u32)(resource + 1));
+        billSetChildScaleComponents(billboard, object->scaleX, object->scaleY);
+        billSetBillboardMode(billboard, object->billboardMode);
+        billMarkKindOneFlag(billboard);
+        object->billId = billboard;
+    } else {
+        object = parKindConstructorEntries[kind].func(object);
+    }
+    object->dispatchIndex = kind;
+    return object;
+}
 
 ParObj *parInstantiateKind(ParObj *source) {
     ParObj *particle;

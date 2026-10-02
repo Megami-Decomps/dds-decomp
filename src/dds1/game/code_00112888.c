@@ -29,7 +29,7 @@ s32 dds3GetObjectOwnedHandle(object)
     switch (object->kind - 4) {
     case 0: handle = dds3GetCameraHandle(object); break;
     case 1: handle = func_00113008(object); break;
-    case 2: handle = func_00113CD8(object); break;
+    case 2: handle = effObjGetDataHandle(object); break;
     case 3: handle = effObjGetObjectHandle(object); break;
     case 4: handle = dds3GetResourceOwnerHandle(object); break;
     case 5: handle = func_00116598(object); break;

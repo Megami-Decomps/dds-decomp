@@ -776,7 +776,7 @@ void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 mode) {
 }
 
 extern s32 func_003014F0(char *buffer, const char *fmt, ...);
-extern void func_002CB6F8();
+extern void sdfCallbackWorkOnRemove();
 
 /* Create a task resource work block with the name copied to two formatted buffers. */
 TaskWork *sdfCreateNamedTaskWork(char *name, s32 destroyCallback, u32 userData) {
@@ -787,7 +787,7 @@ TaskWork *sdfCreateNamedTaskWork(char *name, s32 destroyCallback, u32 userData) 
     work->handle = allocation;
     work->list = sdfCreateTaskHeader(userData);
     sdfSetTaskDestroyCallback(work->list, destroyCallback);
-    sdfSetTaskSecondaryCallback(work->list, (s32)func_002CB6F8);
+    sdfSetTaskSecondaryCallback(work->list, (s32)sdfCallbackWorkOnRemove);
     work->primaryTaskName = func_002CFEB8(strlen(name));
     work->secondaryTaskName = func_002CFEB8(strlen(name) + 5);
     func_003014F0(work->primaryTaskName, "%s", name);
@@ -830,7 +830,7 @@ void sdfDestroyCallbackWork(SdfCallbackWork *work) {
     }
 }
 
-void func_002CB6F8(u32 unused, SdfCallbackWork *work) {
+void sdfCallbackWorkOnRemove(u32 unused, SdfCallbackWork *work) {
     sdfDestroyCallbackWork(work);
 }
 

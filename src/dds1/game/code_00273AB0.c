@@ -86,7 +86,7 @@ extern void mnuReleasePageHandlesAndClearSelection();
 extern void mnuClearEntries();
 extern void mnuReleasePartyIconBundles();
 extern void mnuDestroyPanelGroup();
-extern void func_002832F8();
+extern void mnuFreeSpriteStateWork();
 extern void mnuReleaseStaffMenuTextureHandles();
 extern void mnuSeekListNode(s32, s32);
 extern void mnuAdvanceWindowListSelection(s32);
@@ -253,7 +253,7 @@ s32 mnuReleaseStaffValuePageResources(s32 unused) {
         ((StaffImageContext *)context)->panelHandle = 0;
     }
     if (((StaffImageContext *)context)->spriteHandle != 0) {
-        func_002832F8((s32)((StaffImageContext *)context)->spriteHandle);
+        mnuFreeSpriteStateWork((s32)((StaffImageContext *)context)->spriteHandle);
         ((StaffImageContext *)context)->spriteHandle = 0;
     }
     func_00283BF0(context + 0x914, 0);

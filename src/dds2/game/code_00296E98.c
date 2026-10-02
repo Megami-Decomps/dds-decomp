@@ -362,7 +362,7 @@ extern void mnuClearEntries();
 extern void mnuReleasePartyIconBundles();
 extern void mnuShutdownContext();
 extern void mnuDestroyPanelGroup(s32);
-extern void func_002C1050(s32);
+extern void mnuFreeSpriteStateWork(s32);
 extern void mnuDestroyEffectResources(s32);
 extern void mnuReleaseStaffMenuTextureHandles();
 extern void mnuReleaseTitleEffectSprites();
@@ -377,7 +377,7 @@ void brsCloseSkillPackagePanel(s32 work) {
     mnuReleasePartyIconBundles(panelContext);
     mnuShutdownContext(panelContext);
     mnuDestroyPanelGroup(ctx->panelHandle);
-    func_002C1050(ctx->spriteHandle);
+    mnuFreeSpriteStateWork(ctx->spriteHandle);
     mnuDestroyEffectResources(work + 0xAD40);
     mnuReleaseStaffMenuTextureHandles(work + 0x51C);
     mnuReleaseTitleEffectSprites(work + 0x51C);
@@ -491,7 +491,7 @@ INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428358);
 
 INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428368);
 
-void *func_00299578(void) {
+void *brsCreateRewardTaskWork(void) {
     MenuIconBatch *rewards;
     s32 handle;
     BrsPartyRow *party;
@@ -555,7 +555,7 @@ void brsStaffTaskDestroy(s32 taskArg) {
 }
 
 extern s32 kwlnTaskCreate(void *name, s32 flags, s32 prio, s32 stacked, void *update, void *destroy, void *data);
-extern void *func_00299578(void);
+extern void *brsCreateRewardTaskWork(void);
 extern void brsMessageInputStep(void);
 extern void mnuStaffRunPanel1(void);
 extern void mnuStaffRunPanel2(void);
@@ -563,7 +563,7 @@ extern void brsStaffTaskDestroy(s32);
 
 s32 mnuStaffCreateTasks(void) {
     s32 result;
-    void *work = func_00299578();
+    void *work = brsCreateRewardTaskWork();
 
     kwlnTaskCreate(brsStaffInputTaskName, 0x405, 1, 0, brsMessageInputStep, 0, work);
     kwlnTaskCreate(mnuStaffPrimaryPanelTaskName, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, work);

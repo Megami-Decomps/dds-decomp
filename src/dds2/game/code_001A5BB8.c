@@ -135,6 +135,12 @@ typedef struct SceneTask {
     UiObject *actor;
 } SceneTask;
 
+typedef struct BattleItemDrop {
+    u16 id;
+    u8 count;
+    u8 pad03;
+} BattleItemDrop;
+
 typedef struct BattleController {
     u8 pad_000[0x214];
     s32 frame;
@@ -146,6 +152,10 @@ typedef struct BattleController {
     u16 variant; /* 0x270 */
     u8 pad_272[0x52];
     s32 drawTask;
+    u8 pad2C8[0x14];
+    BattleItemDrop itemDrops[3];
+    u8 pad2E8[0x3F4];
+    s32 (*commandRangeOverride)(UiObject *, s32);
 } BattleController;
 
 typedef struct BattleEffect {
@@ -788,7 +798,7 @@ typedef struct SndPadStepper {
 } SndPadStepper;
 
 /* Step the stepper's index by pad input: one per press, ten with the fast modifier held; mirror it into the target. */
-void func_001A7A08(SndPadStepper *stepper) {
+void sndStepIndexByPad(SndPadStepper *stepper) {
     s32 step;
 
     if (D_0037F510.coarseDown & 2) {
@@ -1678,7 +1688,31 @@ s32 btlIsEventThresholdSatisfiedForEntry(s32 arg) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD310);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD5B0);
+void func_001AD5B0(u16 item) {
+    BattleController *controller = (BattleController *)btlGetRuntime();
+
+    if (item != 0) {
+        s32 found = 0;
+        u16 i;
+
+        for (i = 0; i < 3; i++) {
+            if (controller->itemDrops[i].id == item) {
+                found = 1;
+                controller->itemDrops[i].count++;
+                break;
+            }
+        }
+        if (!found) {
+            for (i = 0; i < 3; i++) {
+                if (controller->itemDrops[i].id == 0) {
+                    controller->itemDrops[i].id = item;
+                    controller->itemDrops[i].count = 1;
+                    break;
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD698);
 
@@ -2017,7 +2051,73 @@ f32 func_001B0B20(void) {
     return 1.5f;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B0B30);
+typedef struct EventModeSlot {
+    s8 stat;
+    s8 kind;
+} EventModeSlot;
+
+typedef struct EventRosterStat {
+    s16 base;
+    u8 alternateA;
+    u8 alternateB;
+    f32 multiplier;
+    u8 pad08[6];
+    u8 rangeMin;
+    u8 rangeMax;
+    u8 pad10[4];
+} EventRosterStat;
+
+typedef struct EventStatRecord {
+    u8 pad00[0x11];
+    u8 stat11;
+    u8 pad12[2];
+    u8 rangeMin;
+    u8 rangeMax;
+    u8 pad16[2];
+    s16 stat18;
+    u8 pad1A[2];
+    s16 stat1C;
+    u8 pad1E[7];
+    u8 stat25;
+    u8 pad26[7];
+    u8 stat2D;
+    u8 pad2E[6];
+    s16 stat34;
+    s16 stat36;
+} EventStatRecord;
+
+extern s32 datRosterDetails;
+
+u8 func_001B0B30(UiObject *unit, s32 command) {
+    BattleController *controller = (BattleController *)btlGetRuntime();
+    s32 result;
+    s32 minimum;
+    s32 maximum;
+
+    if (controller->commandRangeOverride != NULL) {
+        result = controller->commandRangeOverride(unit, command);
+        if (result > 0) {
+            return result;
+        }
+    }
+    if (command == 0) {
+        return 1;
+    }
+    if (((EventModeSlot *)datCommandSelectors)[command].kind == 5 &&
+        (unit->flags & 0x200)) {
+        minimum = ((EventRosterStat *)datRosterDetails)[unit->index].rangeMin;
+        maximum = ((EventRosterStat *)datRosterDetails)[unit->index].rangeMax;
+    } else {
+        minimum = ((EventStatRecord *)datCommandRecords)[command].rangeMin;
+        maximum = ((EventStatRecord *)datCommandRecords)[command].rangeMax;
+    }
+    if (minimum < maximum) {
+        result = minimum + effMiscRandMod(0, maximum - minimum + 1);
+    } else {
+        result = minimum;
+    }
+    return result;
+}
 
 u8 btlGetActorDisplayByteWithDefault(UiObject *object, s32 index) {
     if (index == 0) {

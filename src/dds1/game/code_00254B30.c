@@ -319,7 +319,7 @@ INCLUDE_ASM(const s32, "game/code_00254B30", func_002562E8);
 
 extern f32 sdfSinPoly(f32);
 
-s32 func_00256400(s32 frame, s32 scale, s32 context) {
+s32 mnuDrawPulsingDisplaySprites(s32 frame, s32 scale, s32 context) {
     f32 wave = (f32)frame / 60.0f;
     f32 baseScale = (f32)scale;
     s32 drawScale;
@@ -398,7 +398,7 @@ s32 itfAdvanceDisplayList(DspListHead *head, s32 scale, s32 context) {
     DspListNode *node = head->first;
     s32 index = 0;
 
-    if (func_00256400(*counter, scale, context) != 0) {
+    if (mnuDrawPulsingDisplaySprites(*counter, scale, context) != 0) {
         *counter = 0;
     } else {
         *counter = *counter + 1;

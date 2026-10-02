@@ -566,8 +566,8 @@ void mnuReleaseMenuVisualWorkResources(MenuVisualWork *work) {
     mnuClearEntries((s32)work + 400);
     mnuReleasePartyIconBundles((s32)work + 400);
     mnuDestroyPanelGroup(work->panelGroup);
-    func_00283820(work->displayResource);
-    func_00285160(work->effectResource);
+    mnuFreeSimpleSpriteWork(work->displayResource);
+    mnuFreeProfilePanelWork(work->effectResource);
 }
 
 void effUpdateAttached(s32 arg0, s32 arg1, s32 arg2, MenuVisualWork *work) {

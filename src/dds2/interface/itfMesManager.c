@@ -785,7 +785,7 @@ void itfMesClearWindowHighFlags(s32 window, u32 value) {
     mes->flags = mes->flags & (~value | 0xffff);
 }
 
-s16 func_001A4538(s32 window) {
+s16 itfMesGetWindowClearBitCount(s32 window) {
     return itfWindowSlots[window].mes->blk40.clearBitCount;
 }
 

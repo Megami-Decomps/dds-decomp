@@ -121,7 +121,7 @@ extern void *sdfAllocatePacketList(s32);
 
 extern void sdfClearLinkedPacketList(void *);
 
-extern void func_0032C768(void *, void *, s32, s32, s32, s32, void *, s32, s32, s32);
+extern void sdfCreatePatchableResourcePacket(void *, void *, s32, s32, s32, s32, void *, s32, s32, s32);
 
 extern void sdfAppendPacketChainNode(void *, void *);
 
@@ -451,7 +451,7 @@ BtlUnit *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
 
 /* Collapse three special unit modes to one display code. +0xE0 remains unnamed
  * in the canonical header, so retain this bounded read rather than a unit view. */
-s32 func_002277D8(BtlUnit *unit) {
+s32 btlGetCanonicalCombatantKind(BtlUnit *unit) {
     switch (unit->mode) {
     case 0x119:
     case 0x12E:
@@ -1908,7 +1908,7 @@ void btlInitializeGraphicsRuntime(void) {
     surface = sdfAllocatePacketList(0);
     context = sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
-    func_0032C768(surface, context, 0, 0, 0x200, 0xe0, runtime->resource, 0, 0, 0);
+    sdfCreatePatchableResourcePacket(surface, context, 0, 0, 0x200, 0xe0, runtime->resource, 0, 0, 0);
     sdfAppendPacketChainNode(D_00380860, context);
     D_00380608.invoke(&D_00380608, surface);
 }

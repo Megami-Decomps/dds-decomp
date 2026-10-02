@@ -19,7 +19,7 @@ extern void func_002B2C88(s32, s32, s32, s32);
 extern void mnuClearPageSelectionHandles(s32);
 extern void mnuClearEntries(s32);
 extern void mnuDestroyPanelGroup(s32);
-extern void func_002C1050(s32);
+extern void mnuFreeSpriteStateWork(s32);
 extern void func_002C1B68(s32, s32);
 extern void mnuReleaseStaffMenuTextureHandles(s32);
 extern void func_002C2AA8(s32, s32);
@@ -434,7 +434,7 @@ s32 mnuReleaseSelectedStaffPageResources(s32 unused) {
         ((MenuStaffContext *)context)->panelHandle = 0;
     }
     if (((MenuStaffContext *)context)->spriteHandle != 0) {
-        func_002C1050((s32)((MenuStaffContext *)context)->spriteHandle);
+        mnuFreeSpriteStateWork((s32)((MenuStaffContext *)context)->spriteHandle);
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(context + 0xaa50, 0);
@@ -584,7 +584,7 @@ s32 mnuReleaseStaffSelectionPageResources(s32 unused) {
         ((MenuStaffContext *)context)->panelHandle = 0;
     }
     if (((MenuStaffContext *)context)->spriteHandle != 0) {
-        func_002C1050((s32)((MenuStaffContext *)context)->spriteHandle);
+        mnuFreeSpriteStateWork((s32)((MenuStaffContext *)context)->spriteHandle);
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(context + 0xaa50, 0);
@@ -730,7 +730,7 @@ s32 mnuReleaseStaffValuePageResources(s32 unused) {
         ((MenuStaffContext *)context)->panelHandle = 0;
     }
     if (((MenuStaffContext *)context)->spriteHandle != 0) {
-        func_002C1050((s32)((MenuStaffContext *)context)->spriteHandle);
+        mnuFreeSpriteStateWork((s32)((MenuStaffContext *)context)->spriteHandle);
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(context + 0xaa50, 0);

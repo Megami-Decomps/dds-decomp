@@ -6,7 +6,7 @@ extern s32 func_00314990(s32, u16);
 extern s32 scrGetSelectedScriptEntryId(s32);
 extern s32 mnuGetMantraNodePositionRecord(s16);
 extern void func_0028D070(s32, s32, s32);
-extern void func_00291118(void);
+extern void mnuStoreMantraPanelFlagsToScript(void);
 extern void mnuReleaseMiddleMantraSpriteSlots(void);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void mnuMarkTitleStreamResetPending(void);
@@ -199,7 +199,7 @@ void mnuReleaseMantraMenuDrawResources(s32 object) {
 }
 
 void mnuCleanupMantraVisualsAndResetTitleStream(void) {
-    func_00291118();
+    mnuStoreMantraPanelFlagsToScript();
     mnuReleaseMiddleMantraSpriteSlots();
     kwlnFadeOutStart(0, 0, 0, 0);
     mnuMarkTitleStreamResetPending();

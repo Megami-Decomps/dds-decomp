@@ -544,7 +544,7 @@ void evtPrepareSizedDrawResource(s32 width, s32 height, u64 first, u64 second) {
     u64 resource;
 
     resource = func_0019F448(width << 4, height << 3, 0, first, second, 0);
-    func_0019D518(resource);
+    frFontDrawGlyphInDefaultMode(resource);
     frFontQueueGlyphInSelectedSlot(resource);
 }
 

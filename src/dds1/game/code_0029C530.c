@@ -106,7 +106,7 @@ extern s32 effAuxiliaryFileQueue;
 
 extern s32 btlGetRuntime(void);
 
-extern void func_00104068(s32, u8, s32);
+extern void kwlnPadStartMotor(s32, u8, s32);
 
 extern u32 effAllocateCopiedEffectPayload(u32, u32, s32);
 
@@ -435,7 +435,7 @@ extern u8 D_0038FA20[];
 
 extern u8 D_0038F938[];
 
-extern void func_002B9050(void);
+extern void effReleaseQueuedResourceName(void);
 
 extern void effQueueResource(void *, void *);
 
@@ -4663,7 +4663,7 @@ void effResetBillboardFrameInstanceCounters(u8 *work) {
     }
 }
 
-u8 *func_002AC698(u8 *config) {
+u8 *effAllocateBillFadeFrameEntries(u8 *config) {
     u8 *base = sdfAllocGeneralBlock(((EffBillConfig *)config)->frames.count * 0x30 + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((u32)base);
     u32 count = ((EffBillConfig *)config)->resourceId;
@@ -4677,7 +4677,7 @@ u8 *func_002AC698(u8 *config) {
     return (u8 *)node;
 }
 
-void func_002AC708(u8 *node, u8 *config) {
+void effFillBillFadeGradient(u8 *node, u8 *config) {
     EffectFadeConfig *cfg = (EffectFadeConfig *)config;
     EffectFadeTable *table;
     u32 *colors;
@@ -4745,20 +4745,20 @@ void func_002AC708(u8 *node, u8 *config) {
     }
 }
 
-u8 *func_002AC950(u8 *config, u32 resource) {
-    u8 *node = func_002AC698(config);
+u8 *effCreateBillFadeTable(u8 *config, u32 resource) {
+    u8 *node = effAllocateBillFadeFrameEntries(config);
 
     ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(((EffBillConfig *)config)->frames.count, ((EffBillConfig *)config)->resourceId, resource);
-    func_002AC708(node, config);
+    effFillBillFadeGradient(node, config);
     return node;
 }
 
 u8 *effCloneBillFadeTable(u8 *work) {
     u8 *config = ((EffBillFrameWork *)work)->config;
     u8 *state = ((EffBillFrameWork *)work)->frameState;
-    u8 *node = func_002AC698(config);
+    u8 *node = effAllocateBillFadeFrameEntries(config);
     ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((u32)((EffFrameState *)state)->asset);
-    func_002AC708(node, config);
+    effFillBillFadeGradient(node, config);
     return node;
 }
 
@@ -5410,7 +5410,7 @@ INCLUDE_ASM(const s32, "game/code_0029C530", func_002AF6F8);
 
 extern u32 effClampSlotCount(EffGrid *);
 
-u32 *func_002AFD10(u8 *work) {
+u32 *effCreatePrimarySlotAnimationState(u8 *work) {
     EffGrid *mapping = (EffGrid *)(work + 0x3C);
     u32 count = effClampSlotCount(mapping);
     u32 *state = effCreateAnimationState((u32)work, count);
@@ -5419,7 +5419,7 @@ u32 *func_002AFD10(u8 *work) {
     return state;
 }
 
-u32 *func_002AFD78(u8 *work) {
+u32 *effCreateAlternateSlotAnimationState(u8 *work) {
     EffGrid *mapping = (EffGrid *)(work + 0x3C);
     u32 count = effClampSlotCount(mapping);
     u32 *state = effCreateAnimationState((u32)work, count);
@@ -6489,12 +6489,12 @@ void effTickSlotVolumeFade(void) {
                 if (D_003BC9C8[i] != 0) {
                     ratio = 1.0f - ratio;
                 }
-                func_00104068(i, (u8)(D_003BC9C0[i] * ratio), 100);
+                kwlnPadStartMotor(i, (u8)(D_003BC9C0[i] * ratio), 100);
                 D_003BC9B8[i] -= 1;
             } else if (D_003BC9C8[i] == 1) {
-                func_00104068(i, D_003BC9C0[i], 100);
+                kwlnPadStartMotor(i, D_003BC9C0[i], 100);
             } else {
-                func_00104068(i, 0, 0);
+                kwlnPadStartMotor(i, 0, 0);
                 D_003BC9B0[i] = 0;
             }
         }
@@ -7039,7 +7039,7 @@ u32 effPollPrimaryFile(void) {
 }
 
 void effQueueNamedResourceRequest(void) {
-    func_002B9050();
+    effReleaseQueuedResourceName();
     effQueueResource(D_003BD088, D_003DF8D0);
 }
 
@@ -7067,7 +7067,7 @@ u32 effPollNamedFile(void) {
 }
 
 void effQueueAttachedResourceRequest(void) {
-    func_002B9050();
+    effReleaseQueuedResourceName();
     effQueueResource(D_003BD090, D_003DF8D0);
 }
 
@@ -7491,7 +7491,7 @@ u32 effFinalizeQueuedFile(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B6C00);
 
-u32 func_002B6FD8(void) {
+u32 effFlagFileQueueActive(void) {
     D_003BD955 = 1;
     effSelectLinkedFileState(0);
     return 0;
@@ -7891,7 +7891,7 @@ u32 effPollResourceQueue(void) {
     return 0x200001;
 }
 
-void func_002B9050(void) {
+void effReleaseQueuedResourceName(void) {
     if (effQueuedResourceNameRecord != 0) {
         func_001FC2E8(effQueuedResourceNameRecord);
         effQueuedResourceNameRecord = 0;

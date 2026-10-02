@@ -133,7 +133,7 @@ SdfAllocation *sdfFindGeneralBlockByAddress(void *address) {
 extern SdfAllocation *D_0045F0FC[];
 
 /* Walk the general heap's block list and write its statistics: total bytes, free bytes, largest and smallest free block, block count and free block count. */
-void func_00329A00(s32 *out) {
+void sdfGetGeneralHeapStats(s32 *out) {
     SdfAllocation *block = D_0045F0FC[0];
     s32 total = 0;
     s32 freeBytes = 0;

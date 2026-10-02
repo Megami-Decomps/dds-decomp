@@ -287,7 +287,7 @@ void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 b
                          f32 blendDurationFrames);
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *a0);
 void sdfFindMotionKeyInterval(void *arg, void *outArg, f32 frame);
-s32 func_002DB958(SdfMotionKeyInterval *a0);
+s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *a0);
 void sdfMotionBindDrawNode(void *tmp, void *src, void *tbl, s32 x);
 void sdfMotionBindIndexedTrack(Dst360 *a0, Src360 *a1, void *a2, s32 a3);
 extern void effMiscQuaternionNlerpVU(f32 amount);
@@ -638,7 +638,7 @@ void sdfMotionBlendVectorKeys(SdfMotionKeyInterval *a0) {
 }
 
 /* vu0 routine: blend the two bracketing RGBA colour keys by the key weight. */
-s32 func_002DB958(SdfMotionKeyInterval *a0) {
+s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *a0) {
     s32 color;
 
     EE_MMI_RGBA_LERP(color, *(u32 *)a0->firstKey, *(u32 *)a0->secondKey, a0->weight, 0.5f);
@@ -873,7 +873,7 @@ void func_002DC418(HasSub *a0, f32 t) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    func_002DA3D8(a0->sub, func_002DB958(&b));
+    func_002DA3D8(a0->sub, sdfMotionInterpolateKeyColor(&b));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -883,7 +883,7 @@ void func_002DC458(CmdI *a0, f32 t, f32 weight) {
     s32 color;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    key = func_002DB958(&b);
+    key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, a0->res, key, weight, 0.5f);
     func_002DA3D8(a0->sub, color);
 }
@@ -904,7 +904,7 @@ void func_002DC578(HasSub *a0, f32 t) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    func_002DA3C0(a0->sub, func_002DB958(&b));
+    func_002DA3C0(a0->sub, sdfMotionInterpolateKeyColor(&b));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -914,7 +914,7 @@ void func_002DC5B8(CmdI *a0, f32 t, f32 weight) {
     s32 color;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    key = func_002DB958(&b);
+    key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, a0->res, key, weight, 0.5f);
     func_002DA3C0(a0->sub, color);
 }
@@ -935,7 +935,7 @@ void func_002DC6D8(HasSub *a0, f32 t) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    func_002DA3F0(a0->sub, func_002DB958(&b));
+    func_002DA3F0(a0->sub, sdfMotionInterpolateKeyColor(&b));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -945,7 +945,7 @@ void func_002DC718(CmdI *a0, f32 t, f32 weight) {
     s32 color;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    key = func_002DB958(&b);
+    key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, a0->res, key, weight, 0.5f);
     func_002DA3F0(a0->sub, color);
 }
@@ -966,7 +966,7 @@ void func_002DC838(HasSub *a0, f32 t) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    func_002DA408(a0->sub, func_002DB958(&b));
+    func_002DA408(a0->sub, sdfMotionInterpolateKeyColor(&b));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -976,7 +976,7 @@ void func_002DC878(CmdI *a0, f32 t, f32 weight) {
     s32 color;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    key = func_002DB958(&b);
+    key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, a0->res, key, weight, 0.5f);
     func_002DA408(a0->sub, color);
 }
@@ -1096,7 +1096,7 @@ void sdfMotionApplyInterpolatedKey(HasSub *a0, f32 t) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    func_002DA5B0(a0->sub, func_002DB958(&b));
+    func_002DA5B0(a0->sub, sdfMotionInterpolateKeyColor(&b));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -1106,7 +1106,7 @@ void func_002DCDD0(CmdI *a0, f32 t, f32 weight) {
     s32 color;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    key = func_002DB958(&b);
+    key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, a0->res, key, weight, 0.5f);
     func_002DA5B0(a0->sub, color);
 }

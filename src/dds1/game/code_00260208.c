@@ -331,7 +331,7 @@ void brsCloseSkillPackagePanel(s32 work) {
     mnuReleasePartyIconBundles(panelContext);
     mnuShutdownContext(panelContext);
     mnuDestroyPanelGroup(ctx->panelHandle);
-    func_002832F8(ctx->spriteHandle);
+    mnuFreeSpriteStateWork(ctx->spriteHandle);
     mnuReleaseAssets(work + 0xD1C);
     mnuReleaseStaffMenuTextureHandles(work + 0x4F8);
     mnuReleaseStaffResourceGroups(work + 0x4F8);

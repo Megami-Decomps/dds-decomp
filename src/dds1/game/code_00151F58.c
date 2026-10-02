@@ -530,7 +530,7 @@ typedef struct EffPacketSink {
     void (*submit)(s32 owner, s32 packet);
 } EffPacketSink;
 
-void func_001530C0(s32 sink, s32 source) {
+void effSubmitGeneratedTexturePacket(s32 sink, s32 source) {
     s32 tmp = sdfAllocPacketAligned(0x20);
 
     sdfInitPacketList(tmp);
@@ -540,7 +540,7 @@ void func_001530C0(s32 sink, s32 source) {
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00153128);
 
-void func_00153618(s32 sink, s32 source) {
+void effSubmitCompositeGsPacket(s32 sink, s32 source) {
     s32 tmp = sdfAllocPacketAligned(0x20);
 
     sdfInitPacketList(tmp);
@@ -597,7 +597,7 @@ void effDestroyResources(effect)
         parReleaseCellSystem(owner->unk44);
         break;
     case 4:
-        func_00188480(owner->unk44);
+        effTrackPolyDestroyModelWorkList(owner->unk44);
         break;
     }
     billDispatchByKind(owner->billboard);

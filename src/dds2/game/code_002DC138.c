@@ -96,6 +96,28 @@ extern s32 func_00232EF8(void *model);
 /* VU0 model helpers consume vf10 directly, as in the DDS1 counterpart. */
 extern void *sdfAllocGeneralBlock(u32);
 
+/* Model-manager prefixes plus the effect owner's lighting attachment.
+ * Unrelated node fields and inner matrices remain opaque. */
+typedef struct MdlNode {
+    u8 pad00[0x20];
+    f32 floatValue;
+} MdlNode;
+
+typedef struct MdlInner {
+    u8 pad00[8];
+    u32 resourceHandle;
+    u8 pad0C[0x74];
+    void *lighting;
+} MdlInner;
+
+typedef struct MdlCtx {
+    u32 flags;
+    u8 pad04[0x14];
+    MdlInner *inner;
+    MdlNode *first;
+} MdlCtx;
+
+/* Initialize the VU transforms and the first node's float slot, if present. */
 void effInitModelVUState(void *model) {
 VU0_MOVE_VF(vf10, vf0);
     mdlStorePrimaryVectorVU(model);
@@ -104,11 +126,11 @@ VU0_MOVE_VF(vf10, vf0);
     VU0_SET_ONES_XYZ(vf10);
     mdlStoreTertiaryVectorVU(model);
     mdlBroadcastMasked(model, 0x80808080);
-    if (*(void **)(model + 0x1C) != NULL) {
+    if (((MdlCtx *)model)->first != NULL) {
         mdlAddEntryPlain(model, 0, 0);
-        *(float *)(*(u8 **)(model + 0x1C) + 0x20) = 1.0f;
+        ((MdlCtx *)model)->first->floatValue = 1.0f;
     }
-    *(u32 *)model &= ~1;
+    ((MdlCtx *)model)->flags &= ~1;
 }
 
 s32 func_002DC1D0(u32 kind, u32 flags) {
@@ -123,8 +145,9 @@ s32 func_002DC1D0(u32 kind, u32 flags) {
     return result;
 }
 
+/* Clear the lighting attachment before destroying its model context. */
 void effDestroyModelContext(s32 owner) {
-    *(u32 *)(*(s32 *)(owner + 0x18) + 0x80) = 0;
+    ((MdlCtx *)owner)->inner->lighting = NULL;
     mdlDestroyContext();
 }
 
@@ -140,6 +163,16 @@ void *effCloneModelWithVUState(void *sourceModel) {
     return model;
 }
 
+/* Effect file request; the instance parameter follows the secondary mode. */
+typedef struct EffFileRequest {
+    u8 pad_00[0xC];
+    u16 kind;
+    u8 pad_0E[0xE];
+    u16 secondaryMode;
+    u8 pad_1E[6];
+    u32 resourceParam;
+} EffFileRequest;
+
 EffModelOwner *effCreateModelOwner(u8 *source) {
     EffModelOwner *owner = sdfAllocAndClearQuadwords(0x10);
     owner->ownedBuffer = sdfAllocAndClearQuadwords(0xE0);
@@ -148,7 +181,7 @@ EffModelOwner *effCreateModelOwner(u8 *source) {
         *(u32 *)owner = *(u32 *)fileResolvePrimaryBuffer(source);
         data = fileResolveSecondaryBuffer(source);
         if (data != 0) {
-            owner->model = func_002DC1D0(data, *(u32 *)(source + 0x24));
+            owner->model = func_002DC1D0(data, ((EffFileRequest *)source)->resourceParam);
             VU0_SET_ONES_XYZ(vf10);
             VU0_SCALE_VF_MFC1(vf10, owner->scale);
             mdlStoreTertiaryVectorVU((void *)owner->model);
@@ -194,14 +227,19 @@ void effRecreateModelFromSource(EffModelOwner *owner, EffModelOwner *source) {
 }
 
 void effModelAnimationStop(EffModelOwner *owner) {
-    sdfMotionSampleAtFrame(*(s32 *)(owner->model + 0x1C), 0.0f);
+    sdfMotionSampleAtFrame((s32)((MdlCtx *)owner->model)->first, 0.0f);
 }
 
-void effRefreshModelLighting(void **obj) {
-    if (effComputeLightDirectionVU(obj[1], obj[2])) {
-        *(u32 *)(*(u8 **)((u8 *)obj[1] + 0x18) + 0x80) = (u32)obj[2];
+/* Attach the owner's lighting buffer when the direction update succeeds. */
+void effRefreshModelLighting(void **work) {
+    void *model;
+    if (effComputeLightDirectionVU((void *)((EffModelOwner *)work)->model, ((EffModelOwner *)work)->ownedBuffer)) {
+        model = (void *)((EffModelOwner *)work)->model;
+        ((MdlCtx *)model)->inner->lighting = ((EffModelOwner *)work)->ownedBuffer;
+    } else {
+        model = (void *)((EffModelOwner *)work)->model;
     }
-    mdlProcessContextNodesAndTransforms(obj[1], D_00380828);
+    mdlProcessContextNodesAndTransforms(model, D_00380828);
 }
 
 void effApplyModelPrimaryVector(EffModelOwner *owner, u8 *vec) {
@@ -225,7 +263,7 @@ void effApplyScaledModelTertiaryVector(s32 model, float scale) {
     t = *(float *)model * scale;
     v[0] = v[1] = v[2] = t;
     VU0_LOAD_VF(vf10, v);
-    mdlStoreTertiaryVectorVU(*(void **)(model + 4));
+    mdlStoreTertiaryVectorVU((void *)((EffModelOwner *)model)->model);
 }
 
 /* Texture record read by the floor-model setup (see SdfTex). */
@@ -264,7 +302,7 @@ extern u32 sdfTexGetSecondaryResourceWord(void *);
 void effUploadModelTextures(EffModelOwner *owner) {
     s32 i = 0;
     EffBattleTexHeaders *battle = (EffBattleTexHeaders *)btlGetRuntime();
-    EffTexTable *table = *(EffTexTable **)(*(s32 *)(owner->model + 0x18) + 8);
+    EffTexTable *table = (EffTexTable *)((MdlCtx *)owner->model)->inner->resourceHandle;
 
     do {
         EffTexture *tex = table->entries[i++];
@@ -311,8 +349,8 @@ EffModelOwner *effCreateFloorModelOwner(u8 *source) {
 }
 
 void effMarkFloorModelForDestruction(u32 *p) {
-    p[3] |= 2;
-    if (!(p[3] & 4)) {
+    ((EffectObjectFlag *)p)->flags |= 2;
+    if (!(((EffectObjectFlag *)p)->flags & 4)) {
         effDestroyModelOwner(p);
     }
 }
@@ -334,13 +372,13 @@ EffModelOwner *effDuplicateFloorModelOwner(EffModelOwner *source) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC808);
 
 void effMarkFloorModelForUpdate(u32 *p) {
-    p[3] |= 1;
-    if (!(p[3] & 4)) {
+    ((EffectObjectFlag *)p)->flags |= 1;
+    if (!(((EffectObjectFlag *)p)->flags & 4)) {
         if (!(effModelUpdateControlFlags & 1)) {
             func_002DC808(p);
         }
     } else if (effModelUpdateControlFlags & 1) {
-        p[3] |= 0x30;
+        ((EffectObjectFlag *)p)->flags |= 0x30;
     }
 }
 
@@ -460,7 +498,8 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002DCCE8);
 
 typedef struct EffResourceOwner {
     u32 count;
-    u8 pad_04[0x38];
+    u32 unk04;
+    u8 pad_08[0x34];
     u32 plainEntry; // 0x3C: add the model entry plain instead of flagged
     u8 pad_40[0x78];
     void **entries;
@@ -514,14 +553,14 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
     }
     dst->model = (u32)func_00232198(func_00232EE8((void *)src->model), func_00232EF8((void *)src->model));
     effInitModelVUState((void *)dst->model);
-    if (*(s32 *)(dst->model + 0x1C) != 0) {
+    if (((MdlCtx *)dst->model)->first != NULL) {
         if (dst->plainEntry != 0) {
             mdlAddEntryPlain(dst->model, 0, 0);
         } else {
             mdlAddEntryFlagged(dst->model, 0, 0);
         }
     }
-    dst->count = sdfCountMapPositionRecords(*(u32 *)(dst->model + 0x18));
+    dst->count = sdfCountMapPositionRecords((u32)((MdlCtx *)dst->model)->inner);
     if (src->buffer != 0) {
         if (dst->buffer != 0) {
             for (i = 0; i < dst->count; i++) {
@@ -542,10 +581,10 @@ extern void fileQueueNotifyAllJobsComplete(s32);
 extern void sdfMotionSampleAtFrame(s32, f32);
 
 void func_002DD3C0(s32 *work) {
-    if (work[0xBC / 4] != 0) {
-        u32 count = work[0];
+    if (((EffResourceOwner *)work)->buffer != NULL) {
+        u32 count = ((EffResourceOwner *)work)->count;
         u32 i = 0;
-        s32 *entries = (s32 *)work[0xB8 / 4];
+        s32 *entries = (s32 *)((EffResourceOwner *)work)->entries;
         if (count != 0) {
             do {
                 fileQueueNotifyAllJobsComplete(*entries);
@@ -554,31 +593,31 @@ void func_002DD3C0(s32 *work) {
             } while (i < count);
         }
     }
-    sdfMotionSampleAtFrame(*(s32 *)(work[0xC0 / 4] + 0x1C), 0.0f);
-    work[1] = 0;
+    sdfMotionSampleAtFrame((s32)((MdlCtx *)((EffResourceOwner *)work)->model)->first, 0.0f);
+    ((EffResourceOwner *)work)->unk04 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DD448);
 
 void effLoadModelPrimaryVector(u8 *obj, u8 *vec) {
 VU0_LOAD_VF_MEMORY(vf10, vec);
-    mdlStorePrimaryVectorVU(*(void **)(obj + 0xC0));
+    mdlStorePrimaryVectorVU((void *)((EffResourceOwner *)obj)->model);
 }
 
 void func_002DDA30(u8 *obj, u8 *vec) {
 VU0_LOAD_VF_MEMORY(vf10, vec);
-    mdlUpdateContextRotationBasisFromQuaternion(*(void **)(obj + 0xC0));
+    mdlUpdateContextRotationBasisFromQuaternion((void *)((EffResourceOwner *)obj)->model);
 }
 
 void func_002DDA50(s32 model) {
-    mdlBroadcastMasked(*(u32 *)(model + 0xc0));
+    mdlBroadcastMasked(((EffResourceOwner *)model)->model);
 }
 
 void effScaleModelVec(u8 *work, float scale) {
     u32 bits;
     VU0_SET_ONES_XYZ(vf10);
     VU0_SCALAR_OP_TMP_MEMORY(bits, scale, "vmulx.xyzw vf10, vf10, vf2x");
-    mdlStoreTertiaryVectorVU(*(void **)(work + 0xC0));
+    mdlStoreTertiaryVectorVU((void *)((EffResourceOwner *)work)->model);
 }
 
 void effObjectListCountersReset(void) {
@@ -602,8 +641,8 @@ void effReleaseSharedReference(RefObj *obj) {
     if (--effSharedTextureReferenceCount == 0) {
         u8 *texture = D_00437E40;
 
-        *(u16 *)(texture + 0xC) = 0x100;
-        *(u16 *)(texture + 0xE) = 0x100;
+        ((EffTexture *)texture)->width = 0x100;
+        ((EffTexture *)texture)->height = 0x100;
         D_00437E38 = 0xffffffff;
         sdfTexReleaseReference(texture);
     }
@@ -626,6 +665,11 @@ typedef struct EffExpandedList {
     u32 count;
     u8 pad8[8];
     u8 *entries;
+    void **handles;
+    s32 total;
+    u32 refCount;
+    s32 unk20;
+    u32 buffer;
 } EffExpandedList;
 
 s32 effCountExpandedEntries(void *work) {
@@ -652,11 +696,11 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002DDF48);
 void effReleaseReferenceHolder(u32 *holder) {
     u32 i;
 
-    if (--holder[0x1C / 4] == 0) {
-        for (i = 0; i < holder[1]; i++) {
-            effReleaseSharedReference(((u32 *)holder[0x14 / 4])[i]);
+    if (--((EffExpandedList *)holder)->refCount == 0) {
+        for (i = 0; i < ((EffExpandedList *)holder)->count; i++) {
+            effReleaseSharedReference(((RefObj **)((EffExpandedList *)holder)->handles)[i]);
         }
-        sdfReleaseResourceAllocation(holder[0x24 / 4]);
+        sdfReleaseResourceAllocation(((EffExpandedList *)holder)->buffer);
     }
 }
 
@@ -734,7 +778,7 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
 }
 
 void func_002DE218(s32 owner, u32 target, s32 indexSource) {
-    func_002DDD60(target, *(u32 *)(*(s32 *)(indexSource + 0xc) * 4 + *(s32 *)(owner + 0x14)));
+    func_002DDD60(target, (u32)((EffExpandedList *)owner)->handles[((EffAnimSample *)indexSource)->segment]);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002DC138", D_00437E2C);

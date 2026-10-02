@@ -1088,7 +1088,7 @@ s32 btlUnitHasNegativeActionQueryResult(void *unit, s32 mask) {
     return 0;
 }
 
-s32 func_00213B38(s32 unused, s32 mask) {
+s32 btlAnyEnemyHasNegativeActionResult(s32 unused, s32 mask) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((*(u64 *)&battler->flags & 0x401) == 0x401 &&
@@ -1099,7 +1099,7 @@ s32 func_00213B38(s32 unused, s32 mask) {
     return 0;
 }
 
-s32 func_00213BB8(s32 unused, s32 mask) {
+s32 btlAnyPartyUnitHasNegativeActionResult(s32 unused, s32 mask) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((*(u64 *)&battler->flags & 0x201) == 0x201 &&
@@ -1150,7 +1150,7 @@ s32 btlAnyUnitPassesCheck200(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_00213DA0(s32 unused, s32 action) {
+s32 btlCanQueryElementAgainstParty(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if (btlUnitBlocksElementQueryForGroup((u8 *)battler, action, 0x200) == 1) {
@@ -1170,7 +1170,7 @@ s32 btlAnyUnitPassesCheck400(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_00213E80(s32 unused, s32 action) {
+s32 btlCanQueryElementAgainstEnemies(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if (btlUnitBlocksElementQueryForGroup((u8 *)battler, action, 0x400) == 1) {
@@ -1285,7 +1285,7 @@ s32 func_00214230(s32 unused, s32 battler) {
     return 0;
 }
 
-s32 func_002142C0(void) {
+s32 btlAnyPartyUnitHasFullActionSet(void) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((*(u64 *)&battler->flags & 0x221) == 0x201 &&
@@ -1296,7 +1296,7 @@ s32 func_002142C0(void) {
     return 0;
 }
 
-s32 func_00214330(void) {
+s32 btlAnyEnemyHasFullActionSet(void) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((*(u64 *)&battler->flags & 0x421) == 0x401 &&

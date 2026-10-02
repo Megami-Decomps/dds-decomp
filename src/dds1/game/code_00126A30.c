@@ -1414,7 +1414,7 @@ extern void func_002D4C80(const void *, u64, s32);
 extern void func_002D4CC8(const void *, u64, s32);
 extern void sdfAppendDmaTagToList(u64, u64);
 
-void func_0012AB40(void) {
+void fldSubmitPrimaryFramePacket(void) {
     u64 command = sdfAllocPacketAligned(0x20);
     u64 texture;
     FieldBufferDescriptor *descriptor;
@@ -1426,7 +1426,7 @@ void func_0012AB40(void) {
     descriptor->open(descriptor, command);
 }
 
-void func_0012ABE0(void) {
+void fldSubmitAlternateFramePacket(void) {
     u64 command = sdfAllocPacketAligned(0x20);
     u64 texture;
     FieldBufferDescriptor *descriptor;
@@ -1645,7 +1645,7 @@ u64 second;
     u64 object;
 
     object = func_00197760(x << 4, y << 4, 0, first, second, 0);
-    func_00195868(object);
+    frFontDrawGlyphInDefaultMode(object);
     frFontQueueGlyphInSelectedSlot(object);
 }
 /* Packed quad input: geometry fields precede the live packet origin and depth.
@@ -2555,7 +2555,7 @@ void fldInitializeDisplayPointerTable(void) {
     displayPointers[1] = (u32)D_003306C0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00133960);
+INCLUDE_ASM(const s32, "game/code_00126A30", fldApplySkyLightSetToPlayerVU);
 
 /* Three directional light vectors and paired values, plus fixed-point and
  * final homogeneous vectors. The opaque light setters consume each triplet. */
@@ -3296,7 +3296,7 @@ typedef struct FldProbeActor {
 
 extern void effMiscQuaternionToMatrixVU(void);
 
-s32 func_0013AC10(s32 index, FldProbeActor *actor, f32 *position) {
+s32 fldTestActorRoomProbeCondition(s32 index, FldProbeActor *actor, f32 *position) {
     f32 dir[4];
     f32 length;
     f32 dot;

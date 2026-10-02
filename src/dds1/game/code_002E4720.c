@@ -997,7 +997,7 @@ void sdfPowerOffLoop(s32 semaphore) {
     }
 }
 
-void func_002E7210(void) {
+void sdfPowerOffInterruptCallback(void) {
     iSignalSema();
 }
 

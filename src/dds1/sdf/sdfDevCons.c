@@ -31,7 +31,7 @@ typedef struct ConsBuf {
 
 void func_002E3F58(DevConsState *arg0, s32 arg1, s32 arg2);
 void func_002E41B8(ConsBuf *arg0);
-void func_002E4228(ConsBuf *arg0);
+void sdfDevConsKickPacketDma(ConsBuf *arg0);
 void func_002E42F8(DevConsState *arg0, ConsBuf *arg1);
 void func_002E4428(DevConsState *arg0, ConsBuf *arg1);
 void func_002E45D0(ConsBuf *arg0, void *arg1, s32 arg2);
@@ -114,7 +114,7 @@ void sdfDevConsSetControlByte(DevConsState *console, u8 value) {
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E41B8);
 
 /* Submit the console's pending packet to the DMA channel when it holds anything, then flip to the other buffer and restart the list there. */
-void func_002E4228(ConsBuf *buf) {
+void sdfDevConsKickPacketDma(ConsBuf *buf) {
     s32 bytes;
     u32 *channel;
     u32 flip;

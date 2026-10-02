@@ -3,7 +3,7 @@
 
 extern void func_00266C08();
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
-extern s32 func_0026BC80();
+extern s32 mnuFirstPresentMainCharacterIndex();
 extern void evtCreateEventScriptProcess(s32);
 extern void evtClearActiveFlag(s32);
 extern void evtSetBoundedDisplayValue(s32, s32);
@@ -75,7 +75,7 @@ extern s32 kwlnTaskGetUserValue();
 
 extern s32 mnuDrawAndAdvanceProfilePanel(s32, s32, s32, s32);
 
-extern void func_002C1B70(s32, s32);
+extern void mnuDrawAndStepGradientFade(s32, s32);
 
 extern void func_002C1B68(s32, s32);
 
@@ -130,7 +130,7 @@ extern s32 mnuPercentOrHundred(u16, u16);
 extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
 
 extern s32 effDestroyPackedBatch(s32);
-extern void func_002C3390(s32);
+extern void mnuFreeProfilePanelWork(s32);
 
 typedef struct MenuResourceGroup {
     u8 pad0[0x64];
@@ -588,12 +588,12 @@ void mnuTerminalFadeOrClose(s32 flag, s32 scene) {
         if (state < 3) {
             if (state > 0) {
                 kwlnFadeOutStart(0, 0, 0, 0xF);
-            } else if (mdlFlagTest(0x429) != 0 || func_0026BC80() != 0 || func_002665C8(scene) != 0) {
+            } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || func_002665C8(scene) != 0) {
                 kwlnFadeOutStart(0, 0, 0, 0xF);
             } else {
                 evtCreateEventScriptProcess(0x322);
             }
-        } else if (mdlFlagTest(0x429) != 0 || func_0026BC80() != 0 || func_002665C8(scene) != 0) {
+        } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || func_002665C8(scene) != 0) {
             kwlnFadeOutStart(0, 0, 0, 0xF);
         } else {
             evtCreateEventScriptProcess(0x322);
@@ -660,7 +660,7 @@ void mnuEnsureProfilePanelEffect(s32 unused, MenuProgressHost *host) {
 }
 
 void mnuCloseCurrentProfilePanel(MenuProgressHost *host) {
-    func_002C3390(host->currentEffect);
+    mnuFreeProfilePanelWork(host->currentEffect);
     host->currentEffect = 0;
 }
 
@@ -850,7 +850,7 @@ void mnuReleaseTerminalWorkAndResumeField(s32 arg) {
 
 s32 mnuUpdateTerminalMessageWindowIndicator(void) {
     s32 context = kwlnTaskGetUserValue() + 0x3e8;
-    func_002C1B70(context, 0x53);
+    mnuDrawAndStepGradientFade(context, 0x53);
     if (evtGetMessageWindowControlState() != 0) {
         func_002C1B68(context, 1);
     } else {

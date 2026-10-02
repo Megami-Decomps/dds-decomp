@@ -30,7 +30,7 @@ u32 sndSendCommandPacket(u32, u32, void *, u32);
 
 extern u32 D_00438B84;
 
-extern void func_00329A00(void *out);
+extern void sdfGetGeneralHeapStats(void *out);
 
 extern void sdfPrintFormattedDevMessage(char *fmt, ...);
 
@@ -461,7 +461,7 @@ INCLUDE_RODATA(const s32, "game/code_003425B0", sdfGsMemoryDumpRowFormat);
 
 void sndPrintMemoryInfo(void) {
     s32 info[6];
-    func_00329A00(info);
+    sdfGetGeneralHeapStats(info);
     sdfPrintFormattedDevMessage(" <<< memory information >>>\n             total : 0x%06X\n        free total : 0x%06X\n     max free size : 0x%06X\n     min free size : 0x%06X\n      handle total : %d\n free handle count : %d\n\n",
                     info[0], info[1], info[2], info[3], info[4], info[5]);
 }

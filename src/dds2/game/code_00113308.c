@@ -79,7 +79,7 @@ u32 dds3GetEffectDataHandle(EffectObject *object) {
     return object->data->handle;
 }
 
-u32 func_00113318(EffectObject *object) {
+u32 effObjGetTransitionWork(EffectObject *object) {
     return (u32)object->data->transitionWork;
 }
 
@@ -334,7 +334,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     if (dds3TestObjectFlags(obj, 1)) {
         return 1;
     }
-    target = (FollowTarget *)func_00113318(obj);
+    target = (FollowTarget *)effObjGetTransitionWork(obj);
     if (dds3TestObjectFlags(obj, 0x200) && target != NULL && !(target->info->flags & 1)) {
         func_00120B88(obj);
     }
@@ -393,7 +393,7 @@ void evtEndObjectValueTransition(EffectObject *object) {
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00113D18);
 
-u32 func_00113F00(EffectObject *object) {
+u32 effObjGetDataHandle(EffectObject *object) {
     return object->data->handle;
 }
 
@@ -431,7 +431,7 @@ void func_00113FD0(void) {
     dds3RemoveWorldObjectNode();
 }
 
-void func_00113FE8(EffectObject *object, u32 value) {
+void effObjSetModelHolder(EffectObject *object, u32 value) {
     object->data->modelHolder = (EffModelHolder *)value;
 }
 

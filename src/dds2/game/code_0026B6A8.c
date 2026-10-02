@@ -223,7 +223,7 @@ u32 func_0026BC78(void) {
 }
 
 /* Index (0-3) of the lowest main character present in the party, as a bit mask over unit ids 1, 2, 5 and 8; 0 when none. */
-s32 func_0026BC80(void) {
+s32 mnuFirstPresentMainCharacterIndex(void) {
     PartySlotHeader *slot;
     u32 present = 0;
     s32 i;

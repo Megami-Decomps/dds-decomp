@@ -129,7 +129,7 @@ void *func_00328D68(s32 size);
 
 void *dds3AppendWorldIndexNode(s32 index);
 
-s32 func_00111218(WorldObjectPointer *object) {
+s32 dds3CreatePairedWorldIndexNodes(WorldObjectPointer *object) {
     u32 *p;
     u32 i;
 

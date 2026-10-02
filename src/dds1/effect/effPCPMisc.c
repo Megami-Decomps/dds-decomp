@@ -431,7 +431,7 @@ void effPcpViewAlignedRingSetPosition(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00177308(EffPCPRingWork *work, u32 val) {
+void effPcpViewAlignedRingSetOverlayColor(EffPCPRingWork *work, u32 val) {
     work->color14 = val;
 }
 
@@ -1729,7 +1729,7 @@ typedef struct EffPCPFadeTarget {
 
 extern void effPCPThunderSetParam50(u32 handle, u32 value);
 extern void func_00163508(u32 handle, void *work);
-extern void func_00163CD0(u32 handle);
+extern void effThunderUpdateVectorCells(u32 handle);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
 /* Scales the target over the first 22 frames, fades the colour out from frame 45. */
@@ -1752,7 +1752,7 @@ void effPcpThunderExpandThenFadeUpdate(EffPCPFadeWork *work) {
     }
     effPCPThunderSetParam50(work->handle, fadedColor);
     func_00163508(work->handle, work);
-    func_00163CD0(work->handle);
+    effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
 
@@ -1921,7 +1921,7 @@ void effPcpThunderUniformGrowFadeUpdate(EffPCPFadeWork *work) {
         effPCPThunderSetParam50(work->handle, work->color);
     }
     func_00163508(work->handle, work);
-    func_00163CD0(work->handle);
+    effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
 
@@ -2018,7 +2018,7 @@ void effPcpSharedTrailSetPosition(void *work, void *src) {
     PCP_COPY_VECTOR(effPcpSharedTrailWork, src);
 }
 
-void func_0017B160(u32 unused, u32 val) {
+void effPcpSharedTrailSetFlags(u32 unused, u32 val) {
     effPcpSharedTrailWork->flags = val;
 }
 
@@ -2149,7 +2149,7 @@ void func_0017B688(EffPCPCompactFadeWork *work, f32 val) {
     work->unk34 = val;
 }
 
-EffPCPCompactFadeWork *func_0017B690(EffPCPCompactTexturedBlurParams *params) {
+EffPCPCompactFadeWork *effPcpCompactLongCreate(EffPCPCompactTexturedBlurParams *params) {
     EffPCPCompactFadeWork *work;
 
     work = func_002CFEB8(0x3C);
@@ -2166,11 +2166,11 @@ EffPCPCompactFadeWork *func_0017B690(EffPCPCompactTexturedBlurParams *params) {
     return work;
 }
 
-void func_0017B720(void *args) {
+void effPcpCompactLongCreateFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    func_0017B690(param0);
+    effPcpCompactLongCreate(param0);
 }
 
 
@@ -2184,10 +2184,10 @@ void effPcpCompactLongRespawn(EffPCPCompactFadeWork *work) {
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
     params.res = *(EffPCPTexturedBlurParams *)work->resource;
-    func_0017B690(&params);
+    effPcpCompactLongCreate(&params);
 }
 
-void func_0017B7F0(EffPCPCompactFadeWork *work) {
+void effPcpCompactLongRelease(EffPCPCompactFadeWork *work) {
     func_00186CB8(work->resource);
     sdfReleaseChipBlock(work);
 }
@@ -2542,7 +2542,7 @@ void effPcpFadeUpdateShort(EffPCPFadeWork *work) {
     }
     effPCPThunderSetParam50(work->handle, fadedColor);
     func_00163508(work->handle, work);
-    func_00163CD0(work->handle);
+    effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
 
@@ -2611,7 +2611,7 @@ void effPcpThunderScaleFadeUpdate(EffPCPFadeWork *work) {
     }
     effPCPThunderSetParam50(work->handle, fadedColor);
     func_00163508(work->handle, work);
-    func_00163CD0(work->handle);
+    effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
 
@@ -2752,11 +2752,11 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
     work->frame++;
 }
 
-void func_0017CEB8(void *work, void *src) {
+void effPcpSpanSetHeadVector(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x40, src);
 }
 
-void func_0017CED0(EffPCPSpanWork *work, u32 val) {
+void effPcpSpanSetColor(EffPCPSpanWork *work, u32 val) {
     work->color = val;
 }
 
@@ -2864,7 +2864,7 @@ void effPcpCopySpanVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0017D4B8(EffPCPTripleWork *work, u32 val) {
+void effPcpTripleHandleSetColor(EffPCPTripleWork *work, u32 val) {
     work->color = val;
 }
 
@@ -3017,7 +3017,7 @@ void effPcpCopyVector60(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x60, src);
 }
 
-void func_0017E4C0(EffPCPBlockSetWork *work, u32 val) {
+void effPcpBlockSetSetColor(EffPCPBlockSetWork *work, u32 val) {
     work->color = val;
 }
 
@@ -3196,7 +3196,7 @@ void effPcpRotateSetChildValues(EffPCPRotateWork *work, u32 val) {
 
     id = work->ids;
     for (i = 0; i < 3; i++) {
-        func_0017E4C0((EffPCPBlockSetWork *)id[i], val);
+        effPcpBlockSetSetColor((EffPCPBlockSetWork *)id[i], val);
     }
 }
 

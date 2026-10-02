@@ -960,7 +960,7 @@ extern f32 D_00324980[];
 
 extern FldVec4 D_003A05D8[]; /* default camera up vectors (3 copies), the first still read by asm func_00145B18 */
 
-extern void func_00133960(void);
+extern void fldApplySkyLightSetToPlayerVU(void);
 
 extern void dds3SetWorldObjectDataValue(s32, s32);
 
@@ -984,7 +984,7 @@ void fldEnterSceneCamera(void) {
     fldClearSceneLifecycleFlags(1);
     func_00123E00();
     evtSetSolarOverlayFullyVisible();
-    func_00133960();
+    fldApplySkyLightSetToPlayerVU();
     cam->unk70 = 4;
     frFontSetSharedRenderFlags(0x54);
     dds3SetWorldObjectDataValue(dds3GetWorldObject(), 1);
@@ -1918,7 +1918,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00149B68);
 
 extern s32 fldRoomEffectEntryCount;
 
-extern s32 func_001215F8();
+extern s32 fldTestMapSlotAuxiliaryFlag();
 
 extern void dds3SetObjectFlags();
 
@@ -1927,7 +1927,7 @@ void fldFireRoomEffects(void) {
 
     for (i = 0; i < fldRoomEffectEntryCount; i++) {
         s32 room = fldRoomEffectEntries[i].unk38;
-        if (room != 0 && func_001215F8(fldAreaState[4], fldAreaState[5] + 1, room) != 0) {
+        if (room != 0 && fldTestMapSlotAuxiliaryFlag(fldAreaState[4], fldAreaState[5] + 1, room) != 0) {
             if (fldRoomEffectEntries[i].unk20 != 0) {
                 dds3SetObjectFlags(fldRoomEffectEntries[i].unk20, 1);
             }

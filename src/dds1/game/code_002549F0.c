@@ -14,7 +14,7 @@ typedef struct DspWindowContext {
 
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 
-void func_002549F0(s32 x, s32 y, s32 layer, s32 scale,
+void mnuDrawDisplayModeSprites(s32 x, s32 y, s32 layer, s32 scale,
                    DspWindowContext *window, s32 context) {
     switch (window->unit->displayMode) {
     case 3:

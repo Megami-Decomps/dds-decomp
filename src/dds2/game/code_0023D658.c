@@ -199,7 +199,7 @@ extern void dds3RemoveWorldObjectNode(void *arg0);
 
 extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
-extern void func_0035B6E0(const char *fmt, ...);
+extern s32 func_0035B6E0(const char *fmt, ...);
 
 extern u8 D_004219F0[];
 
@@ -791,7 +791,19 @@ u32 evtSetWorldUnitThirdVector(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_0023EE08);
+extern char D_00421810[];
+
+u32 func_0023EE08(void) {
+    EvtUnit *unit;
+
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
+    if (unit == NULL) {
+        return 1;
+    }
+    evtPrepareUnitMotionState(unit, scrReadIntParameter(1), scrReadIntParameter(2), scrReadIntParameter(3), 0);
+    func_0035B6E0(D_00421810);
+    return 1;
+}
 
 u32 evtOpSetUnitParams5(void) {
     EvtUnit *unit;

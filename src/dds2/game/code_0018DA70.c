@@ -68,7 +68,7 @@ void effUpdatePairedResources(PairedEffectResources *work) {
                 VU0_LERP_VF10(0.66f);
                 VU0_STORE_VF(vf10, record->twoThirds);
                 VU0_STORE_VF(vf11, record->end);
-                func_0016F020(work->resource[resourceIndex], blendColor);
+                effSetResourceBlendColor(work->resource[resourceIndex], blendColor);
                 effThunderUpdateChainSegments(work->resource[resourceIndex]);
                 resourceIndex++;
             } while (resourceIndex < 2);

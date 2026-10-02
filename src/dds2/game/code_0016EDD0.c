@@ -90,7 +90,7 @@ u32 func_0016F018(u32 arg0) {
     return arg0;
 }
 
-void func_0016F020(s32 work, u32 value) {
+void effSetResourceBlendColor(s32 work, u32 value) {
     *(u32 *)(work + 0x120) = value;
 }
 

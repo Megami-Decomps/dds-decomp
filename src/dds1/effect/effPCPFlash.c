@@ -5,7 +5,7 @@
 extern void *effParamTableGetBlock(void *data, s32 index);
 
 extern void effReleaseRecordPoolResourceAndBuffer(u32 res);
-extern void func_00170350(u32 res);
+extern void effReleaseRecordGroupResources(u32 res);
 extern void effReleaseRecordGroupAssetAndHandle(u32 res);
 extern void sdfReleaseResourceAllocation(u32 res);
 extern s32 effGetGroupIndexRecord(s32 base, s32 index);
@@ -21,7 +21,7 @@ extern f32 D_00354950[];
 extern f32 D_003548F0[];
 extern f32 D_00354970[];
 extern f32 *effGetGroupRecordByIndex(u32 handle, s32 index);
-extern f32 *func_00170538(u32 handle, s32 index);
+extern f32 *effGetRecordGroupElement(u32 handle, s32 index);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
@@ -1156,7 +1156,7 @@ void func_0016BA58(void)
 
 void effFlashAccumulatingParticleDestroy(PcpFlashAccumulatingWork *work)
 {
-    func_00170350(work->resourceHandle);
+    effReleaseRecordGroupResources(work->resourceHandle);
     sdfReleaseResourceAllocation(work->ownedBuffer);
 }
 
@@ -1174,7 +1174,7 @@ void effFlashAccumulatingParticleSetRenderScale(PcpFlashAccumulatingWork *work, 
     work->renderScale = value;
 }
 
-extern s32 func_00170548(s32 handle, s32 index);
+extern s32 effGetRecordGroupAuxEntry(s32 handle, s32 index);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016BAC0);
 
@@ -1923,7 +1923,7 @@ void func_0016DB38(void)
 
 void effFlashRadialStripDestroy(PcpFlashRadialStripWork *work)
 {
-    func_00170350(work->resourceHandle);
+    effReleaseRecordGroupResources(work->resourceHandle);
     sdfReleaseResourceAllocation(work->ownedBuffer);
 }
 
@@ -1959,7 +1959,7 @@ void effFlashSpawnStripParticle(PcpFlashRadialStripWork *work, s32 index, void *
 void effFlashRotatedStripPair(PcpFlashRadialStripWork *work, s32 index, void *view)
 {
     PcpFlashRadialStripParticle *part = &work->parts[index];
-    f32 *quad = func_00170538(work->resourceHandle, index * 2);
+    f32 *quad = effGetRecordGroupElement(work->resourceHandle, index * 2);
     f32 base[4];
     f32 size[4];
     f32 spare[4];
@@ -2022,7 +2022,7 @@ void effFlashRotatedStripPair(PcpFlashRadialStripWork *work, s32 index, void *vi
     VU0_STORE_VF(vf10, quad + 12);
     VU0_LOAD_VF(vf10, outer);
     VU0_STORE_VF(vf10, quad);
-    mirror = func_00170538(work->resourceHandle, index * 2 + 1);
+    mirror = effGetRecordGroupElement(work->resourceHandle, index * 2 + 1);
     PCP_COPY_VECTOR(mirror + 8, quad + 8);
     PCP_COPY_VECTOR(mirror + 4, quad + 4);
     PCP_COPY_VECTOR(mirror + 12, quad + 12);

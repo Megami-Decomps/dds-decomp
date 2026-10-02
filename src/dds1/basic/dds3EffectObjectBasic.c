@@ -42,7 +42,7 @@ EffectObj *effObjCreateWithBill(void *bill, void *vec, s32 extra);
 void billSetKind1Entry(void *arg);
 EffectObj *effObjCreateBillNode(void *bill, void *vec, s32 extra);
 EffectObj *effObjCreateWithBoundBill(void *bill, void *vec, s32 extra);
-EffectObj *func_00114FE0(void *bill, void *vec, s32 extra);
+EffectObj *effObjCreateBillboardInWorld(void *bill, void *vec, s32 extra);
 void *func_001150F0();
 void func_00115398(void);
 /* Old-style (K&R) callee: callers pass (kind, value) positionally. */
@@ -291,7 +291,7 @@ void effObjSpawnLoadedResourceEffect(u32 unused, void *vec, s32 extra) {
     effObjCreateWithBoundBill(handle, vec, extra);
 }
 
-EffectObj *func_00114FE0(void *bill, void *vec, s32 extra) {
+EffectObj *effObjCreateBillboardInWorld(void *bill, void *vec, s32 extra) {
     u8 vector[0x10];
     EffectObj *obj;
     EffectData *data;
@@ -327,7 +327,7 @@ void func_001150B0(u32 unused, void *vec, s32 extra) {
     void *handle;
 
     handle = func_0014FE28();
-    func_00114FE0(handle, vec, extra);
+    effObjCreateBillboardInWorld(handle, vec, extra);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001150F0);

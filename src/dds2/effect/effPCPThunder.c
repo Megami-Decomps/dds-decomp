@@ -179,7 +179,7 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016B750);
 extern void func_0016B3D8(EffThunderVectorWork *, s32);
 extern void func_0016B750(EffThunderVectorWork *, s32);
 
-void func_0016B928(EffThunderVectorWork *work) {
+void effThunderUpdateVectorCells(EffThunderVectorWork *work) {
     s32 i = 0;
     EffThunderParSystem *system = work->system;
     s32 count = work->head.count;
@@ -308,7 +308,7 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016C1F8);
 extern void func_0016BF08(EffThunderVectorWork *, s32);
 extern void func_0016C1F8(EffThunderVectorWork *, s32);
 
-void func_0016C350(EffThunderVectorWork *work) {
+void effThunderUpdateIndexedVectorCells(EffThunderVectorWork *work) {
     s32 i = 0;
     EffThunderParSystem *system = work->system;
     s32 count = work->head.count;

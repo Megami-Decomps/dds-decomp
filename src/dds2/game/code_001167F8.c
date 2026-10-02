@@ -165,7 +165,7 @@ void dds3LoadWorldTransformParams(WorldTransformOwner *object, WorldTransformPar
 }
 
 
-s32 func_00116A88(WorldUnitOwner *obj) {
+s32 dds3AllocateUnitObjectWork(WorldUnitOwner *obj) {
     obj->state = func_00328D68(0x1C);
     memset(obj->state, 0, 0x1C);
     return 1;

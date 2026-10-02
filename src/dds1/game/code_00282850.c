@@ -71,9 +71,9 @@ extern void evtStageTestAdvanceMotionQueue(void);
 extern void func_00281780(s32, s32, s32, s32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u8 fldIsFlagActive(void);
-extern u8 func_001247F0(void);
-extern void func_00124880(void);
-extern void func_001247B8(void);
+extern u8 fldTestSecondarySceneFlag(void);
+extern void fldSetPrimarySceneFlag(void);
+extern void fldSetSecondarySceneFlag(void);
 extern s32 mdlRequestAsset(s32, s32, s32);
 
 typedef struct PartyPanelSlot {
@@ -407,7 +407,7 @@ s32 mnuCreatePanelGroup(s32 parent) {
 void mnuDestroyPanelGroup(MenuPanelGroup *group) {
     s32 i;
     for (i = 0; i < 5; i++) {
-        func_00284C30(group->children[i]);
+        mnuFreePanelItemWork(group->children[i]);
     }
     sdfReleaseChipBlock(group);
 }
@@ -461,7 +461,7 @@ void *mnuCreateSpriteState(s32 x, s32 y, s32 z) {
     return item;
 }
 
-void func_002832F8(void) {
+void mnuFreeSpriteStateWork(void) {
     sdfReleaseChipBlock();
 }
 
@@ -493,7 +493,7 @@ u32 *mnuAllocateSimpleSprite(u32 x, u32 y, u32 z, u32 color, u32 texture) {
     return sprite;
 }
 
-void func_00283820(void) {
+void mnuFreeSimpleSpriteWork(void) {
     sdfReleaseChipBlock();
 }
 
@@ -518,7 +518,7 @@ void func_00283BF0(u32 *out, u32 value) {
 extern u32 uiBlendColors(u32, u32, u32);
 extern void func_002C0F88(u32, u32, u32, u32, u32, u32, u32);
 
-void func_00283BF8(MenuGradientFade *state, s32 surface) {
+void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface) {
     s32 colors[4];
     s32 color = state->color;
 
@@ -740,7 +740,7 @@ void mnuSetPanelItemOption(MenuPanelItem *item, u32 option) {
     item->option = option;
 }
 
-void func_00284C30(void) {
+void mnuFreePanelItemWork(void) {
     sdfReleaseChipBlock();
 }
 
@@ -774,7 +774,7 @@ u32 *mnuCreateProfilePanel(s32 source) {
     return item;
 }
 
-void func_00285160(void) {
+void mnuFreeProfilePanelWork(void) {
     sdfReleaseChipBlock();
 }
 
@@ -1099,7 +1099,7 @@ void mnuPlayInputSoundKind(s32 buttons, s8 kind) {
     }
 }
 
-void func_00286050(u32 buttons) {
+void mnuPlayDefaultInputSounds(u32 buttons) {
     mnuPlayInputSoundKind(buttons, 0);
 }
 
@@ -1576,15 +1576,15 @@ s32 btlItemApplyDirectEffect(s32 context, u16 item, s32 mode,
             return 2;
         }
         sndPlayPartyItemSe(57, 0);
-        func_00124880();
+        fldSetPrimarySceneFlag();
         break;
     case 58:
-        if (func_001247F0() != 0) {
+        if (fldTestSecondarySceneFlag() != 0) {
             sndPlayPartyItemSe(58, 1);
             return 2;
         }
         sndPlayPartyItemSe(58, 0);
-        func_001247B8();
+        fldSetSecondarySceneFlag();
         break;
     default:
         return 0;
@@ -1736,7 +1736,7 @@ extern void kwlnSetBackgroundColorTarget(s32 mode, f32 *color);
 extern void kwlnSetDrawColorTarget(s32 mode, f32 *color);
 extern void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w);
 
-void func_00287258(void)
+void evtStageTestResetViewAndLighting(void)
 {
     f32 firstColor[4];
     f32 secondColor[4];
@@ -1764,7 +1764,7 @@ void func_00287258(void)
 void func_00287420(f32 offset) {
     sdfSceneProjectionParameters[5] = 2048.0f;
     sdfSceneProjectionParameters[4] = offset + 2048.0f;
-    func_00287258();
+    evtStageTestResetViewAndLighting();
 }
 
 extern s8 D_0037CE90[];
@@ -1954,7 +1954,7 @@ void evtStageTestUpdateCamera(void)
     s32 slot;
 
     slot = kwlnGetDrawBufferIndex();
-    func_00287258();
+    evtStageTestResetViewAndLighting();
     PCP_COPY_VECTOR(sdfViewTargetVector, D_0037CE70);
     PCP_COPY_VECTOR(sdfViewEyeVector, D_0037CE60);
     PCP_COPY_VECTOR(sdfViewUpVector, D_0037CE80);

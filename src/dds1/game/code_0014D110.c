@@ -237,7 +237,7 @@ typedef struct FldScriptTask {
 
 void fldFireRoomEffects(void);
 
-s32 func_0014D110(void) {
+s32 fldCmdQueryActorEntrySceneStatus(void) {
     s32 world = dds3GetWorldObject();
     s32 unit = dds3GetWorldPlayerObject(world);
     void *entry;
@@ -271,7 +271,7 @@ s32 func_0014D110(void) {
     return 1;
 }
 
-s32 func_0014D1E8(void) {
+s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
     s32 world = dds3GetWorldObject();
     s32 unit = dds3GetWorldPlayerObject(world);
     void *entry;
@@ -628,7 +628,7 @@ s32 fldCmdSetFadeAndSway(void) {
     return 1;
 }
 
-extern void func_00120FA0(s32, s32, s32, s32);
+extern void fldSetRoomModeFlag(s32, s32, s32, s32);
 
 extern s64 dds3GetWorldValueCount(u64);
 
@@ -670,11 +670,11 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
     name = scrReadStringParameter(2);
     if (name == NULL) {
         for (room = 0; room < 16; room++) {
-            func_00120FA0(world, stage, room, 0);
+            fldSetRoomModeFlag(world, stage, room, 0);
         }
     } else {
         room = fldParseRoomNumberFromName(name);
-        func_00120FA0(world, stage, room, 0);
+        fldSetRoomModeFlag(world, stage, room, 0);
     }
     if (world == fldAreaState[4] && stage == fldAreaState[5] + 1) {
         list = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 6);
@@ -726,11 +726,11 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     }
     if (name == NULL) {
         for (room = 0; room < 16; room++) {
-            func_00120FA0(world, stage, room, 1);
+            fldSetRoomModeFlag(world, stage, room, 1);
         }
     } else {
         room = fldParseRoomNumberFromName(name);
-        func_00120FA0(world, stage, room, 1);
+        fldSetRoomModeFlag(world, stage, room, 1);
     }
     if (world == fldAreaState[4] && stage == fldAreaState[5] + 1) {
         list = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 6);
@@ -758,7 +758,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     return 1;
 }
 
-extern void func_001210A0(s32, s32, s32, s32);
+extern void fldSetRoomObjectModeFlag(s32, s32, s32, s32);
 
 extern void dds3SetObjectModeAndDefaultWeight(void *, s32);
 
@@ -781,10 +781,10 @@ s32 fldCmdApplyRoomObjectModeZero(void) {
     name = scrReadStringParameter(2);
     if (name == NULL) {
         for (i = 0; i < 16; i++) {
-            func_001210A0(world, stage, i, 0);
+            fldSetRoomObjectModeFlag(world, stage, i, 0);
         }
     } else {
-        func_001210A0(world, stage, fldParseRoomNumberFromName(name), 0);
+        fldSetRoomObjectModeFlag(world, stage, fldParseRoomNumberFromName(name), 0);
     }
     if (world == fldAreaState[4] && stage == fldAreaState[5] + 1) {
         id = fldFindSearchId(name);
@@ -828,10 +828,10 @@ s32 fldCmdApplyRoomObjectModeOne(void) {
     name = scrReadStringParameter(2);
     if (name == NULL) {
         for (i = 0; i < 16; i++) {
-            func_001210A0(world, stage, i, 1);
+            fldSetRoomObjectModeFlag(world, stage, i, 1);
         }
     } else {
-        func_001210A0(world, stage, fldParseRoomNumberFromName(name), 1);
+        fldSetRoomObjectModeFlag(world, stage, fldParseRoomNumberFromName(name), 1);
     }
     if (world == fldAreaState[4] && stage == fldAreaState[5] + 1) {
         id = fldFindSearchId(name);
@@ -855,7 +855,7 @@ s32 fldCmdApplyRoomObjectModeOne(void) {
 
 extern s32 D_0032E3C4[];
 
-extern void func_001211A0(s32, s32, s32, s32);
+extern void fldSetRoomSceneFlag(s32, s32, s32, s32);
 
 s32 fldCmdSetSceneBits(void) {
     s32 world;
@@ -874,10 +874,10 @@ s32 fldCmdSetSceneBits(void) {
     name = scrReadStringParameter(2);
     if (name == NULL) {
         for (i = 0; i < 16; i++) {
-            func_001211A0(world, stage, i, 0);
+            fldSetRoomSceneFlag(world, stage, i, 0);
         }
     } else {
-        func_001211A0(world, stage, fldParseRoomNumberFromName(name), 0);
+        fldSetRoomSceneFlag(world, stage, fldParseRoomNumberFromName(name), 0);
     }
     return 1;
 }
@@ -904,10 +904,10 @@ s32 fldCmdSetSceneBitsBarrierRoom(void) {
     }
     if (name == NULL) {
         for (i = 0; i < 16; i++) {
-            func_001211A0(world, stage, i, 1);
+            fldSetRoomSceneFlag(world, stage, i, 1);
         }
     } else {
-        func_001211A0(world, stage, fldParseRoomNumberFromName(name), 1);
+        fldSetRoomSceneFlag(world, stage, fldParseRoomNumberFromName(name), 1);
     }
     return 1;
 }
@@ -916,7 +916,7 @@ extern s32 D_0032E3C4[];
 
 extern s32 fldSetMapTargetFlag(s32, s32, s32, s32);
 
-extern s32 func_001213A0(s32, s32, s32, s32);
+extern s32 fldSetAlternateMapTargetFlag(s32, s32, s32, s32);
 
 s32 fldOpClearMapTargetFlag(void) {
     s32 area = scrReadIntParameter(0);
@@ -950,7 +950,7 @@ s32 func_0014E6C0(void) {
     if (floor == 0) floor = D_0032E3C4[0] + 1;
     target = scrReadIntParameter(2);
     if (target == 0) return 1;
-    func_001213A0(area, floor, target, 0);
+    fldSetAlternateMapTargetFlag(area, floor, target, 0);
     return 1;
 }
 
@@ -962,7 +962,7 @@ s32 func_0014E748(void) {
     if (floor == 0) floor = D_0032E3C4[0] + 1;
     target = scrReadIntParameter(2);
     if (target == 0) return 1;
-    func_001213A0(area, floor, target, 1);
+    fldSetAlternateMapTargetFlag(area, floor, target, 1);
     return 1;
 }
 
@@ -1017,7 +1017,7 @@ s32 fldCmdClearFloorFlag(void) {
     return 1;
 }
 
-extern void func_00121550(s32, s32, s32, s32);
+extern void fldSetMapSlotAuxiliaryFlag(s32, s32, s32, s32);
 
 s32 fldOpClearRoomStateFlags(void) {
     s32 world;
@@ -1036,10 +1036,10 @@ s32 fldOpClearRoomStateFlags(void) {
     name = scrReadStringParameter(2);
     if (name == NULL) {
         for (i = 0; i < 16; i++) {
-            func_00121550(world, stage, i, 0);
+            fldSetMapSlotAuxiliaryFlag(world, stage, i, 0);
         }
     } else {
-        func_00121550(world, stage, fldParseRoomNumberFromName(name), 0);
+        fldSetMapSlotAuxiliaryFlag(world, stage, fldParseRoomNumberFromName(name), 0);
     }
     if (world == fldAreaState[4]) {
         if (stage == fldAreaState[5] + 1) {
@@ -1066,10 +1066,10 @@ s32 fldOpSetRoomStateFlags(void) {
     name = scrReadStringParameter(2);
     if (name == NULL) {
         for (i = 0; i < 16; i++) {
-            func_00121550(world, stage, i, 1);
+            fldSetMapSlotAuxiliaryFlag(world, stage, i, 1);
         }
     } else {
-        func_00121550(world, stage, fldParseRoomNumberFromName(name), 1);
+        fldSetMapSlotAuxiliaryFlag(world, stage, fldParseRoomNumberFromName(name), 1);
     }
     if (world == fldAreaState[4]) {
         if (stage == fldAreaState[5] + 1) {
@@ -1079,7 +1079,7 @@ s32 fldOpSetRoomStateFlags(void) {
     return 1;
 }
 
-extern void func_00121650(s32, s32, s32, s32);
+extern void fldSetMapSlotValueFlag(s32, s32, s32, s32);
 
 s32 fldCmdSetSceneBitsValue(void) {
     s32 world;
@@ -1097,10 +1097,10 @@ s32 fldCmdSetSceneBitsValue(void) {
     room = scrReadIntParameter(2);
     if (room == 0) {
         for (; room < 16; room++) {
-            func_00121650(world, stage, room, scrReadIntParameter(3));
+            fldSetMapSlotValueFlag(world, stage, room, scrReadIntParameter(3));
         }
     } else {
-        func_00121650(world, stage, room, scrReadIntParameter(3));
+        fldSetMapSlotValueFlag(world, stage, room, scrReadIntParameter(3));
     }
     return 1;
 }

@@ -145,8 +145,8 @@ void frFontSubmitAndFreeGlyphOwner(GlyphOwner *owner) {
     sdfReleaseChipBlock(owner);
 }
 
-void func_0011D1A8(GlyphOwner *owner) {
-    func_00195868(owner->glyph);
+void frFontDrawOwnedGlyph(GlyphOwner *owner) {
+    frFontDrawGlyphInDefaultMode(owner->glyph);
 }
 
 Dds3Node *dds3CreateFontNode(u32 arg0, u32 arg1, u32 arg2) {
@@ -168,7 +168,7 @@ void itfConfigureOwnedGlyphChainFlag(GlyphOwner *owner, u8 value) {
     frFontSetChainFlag(owner->glyph, value);
 }
 
-void func_0011D278(void) {
+void frFontReleaseOwnerStorage(void) {
     sdfReleaseChipBlock();
 }
 

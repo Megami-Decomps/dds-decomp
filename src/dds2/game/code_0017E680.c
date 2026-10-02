@@ -59,7 +59,7 @@ typedef struct {
 } EffResourceRenderState;
 extern EffResourceRenderState D_00452080;
 
-void func_0017E680(EffResourceWork *work, f32 (*normals)[4]) {
+void effSetResourceNormalStream(EffResourceWork *work, f32 (*normals)[4]) {
     work->normals = normals;
 }
 extern void *sdfAllocPacketAligned(s32);
@@ -122,7 +122,7 @@ void effReleaseAttachedResources(u32 address) {
 }
 
 /* Emit scaled, translated triangle batches with separate vector and packed-color streams. */
-void func_0017E7E0(EffResourceWork *work) {
+void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
     f32 matrix[16] __attribute__((aligned(16)));
     void *packet;
     EffResourceEntry *entry;

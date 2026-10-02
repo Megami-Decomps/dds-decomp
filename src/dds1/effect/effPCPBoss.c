@@ -531,7 +531,7 @@ void func_00185BA8(void *work) {
     effBossSetPosition(work);
 }
 
-void func_00185BC0(u8 *work, s32 value) {
+void effBossApplyGroupTint(u8 *work, s32 value) {
     func_001855C8(work, value);
 }
 

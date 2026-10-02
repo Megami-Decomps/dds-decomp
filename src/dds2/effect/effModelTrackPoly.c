@@ -95,7 +95,7 @@ void effTrackPolySetColor(EffTrackPolyWork *work, u32 color) {
     work->data->color = color;
 }
 
-void func_0018FF38(EffTrackPolyWork *work) {
+void effTrackPolyDrawWork(EffTrackPolyWork *work) {
     effTrackPolyDrawStrips(work->data);
 }
 
@@ -149,7 +149,7 @@ EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyParams *params, u3
     return list;
 }
 
-void func_001900B8(EffTrackPolyList *list) {
+void effTrackPolyDestroyModelWorkList(EffTrackPolyList *list) {
     u32 count = list->count;
     u32 i = 0;
 
@@ -172,12 +172,12 @@ void effTrackPolySetIndexedColor(EffTrackPolyList *list, s32 index, u32 color) {
     effTrackPolySetColor(list->items[index], color);
 }
 
-void func_00190198(EffTrackPolyList *list) {
+void effTrackPolyDrawModelWorkList(EffTrackPolyList *list) {
     u32 count = list->count;
     u32 i = 0;
 
     while (i < count) {
-        func_0018FF38(list->items[i]);
+        effTrackPolyDrawWork(list->items[i]);
         i++;
     }
 }
@@ -302,7 +302,7 @@ void func_001904B0(EffTrackPolyData *data, u32 *gradientColors) {
 }
 
 /* Copy the pair of track points at the wrapped position into the two outputs. */
-void func_00190590(EffTrackPolyData *data, u128 *dst0, u128 *dst1, s32 amount) {
+void effTrackPolyCopyHistoryPointPair(EffTrackPolyData *data, u128 *dst0, u128 *dst1, s32 amount) {
     s32 pos = data->position - (data->step * (amount - 1) + amount) * 2;
     u128 *p;
 
@@ -328,7 +328,7 @@ void effTrackPolyAdvancePosition(EffTrackPolyData *data, s32 amount) {
 }
 
 /* Append a point pair at the ring position, wrapping back to the reserved pair. */
-void func_00190638(EffTrackPolyData *data, u128 *src) {
+void effTrackPolyAppendPointPair(EffTrackPolyData *data, u128 *src) {
     s32 position = data->position;
     u128 *points = data->points;
     s32 count;

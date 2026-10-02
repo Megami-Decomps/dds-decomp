@@ -4,7 +4,7 @@
 extern void func_0023D5B0(s32 output, void *data, s32 size);
 
 extern void *kwlnTaskGetUserValue();
-extern s32 func_0018FDA8(void);
+extern s32 effEventAdvanceSolidRectangleSetup(void);
 extern s32 sndFindPackedTrackLoadStatus(s32 sequence);
 extern void sndEnsureMidiBankResident(s32 sequence);
 extern s32 evtUpdateFrameVariableTask(s32 *task);
@@ -1303,7 +1303,7 @@ s32 evtPollRuntimeControlReady(void) {
     EvtRuntime *runtime;
 
     runtime = kwlnTaskGetUserValue();
-    if (func_0018FDA8() == 0) {
+    if (effEventAdvanceSolidRectangleSetup() == 0) {
         runtime->controlState = 0;
         return -1;
     }

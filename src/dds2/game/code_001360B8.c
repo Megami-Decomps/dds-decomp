@@ -138,7 +138,7 @@ extern void func_0023C870(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
 extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
 
 /* Sky lighting also supplies the player's packed colors and VU direction. */
-void func_001363D8(void) {
+void fldApplySkyLightSetToPlayerVU(void) {
     FldLightSet *light;
     f32 vec[4];
     f32 dir[4];

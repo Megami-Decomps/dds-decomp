@@ -79,7 +79,7 @@ typedef struct EffResourceDrawSurface {
 } EffResourceDrawSurface;
 extern EffResourceDrawSurface *D_00354D00[];
 
-void func_00176A28(EffResourceWork *work, f32 (*normals)[4]) {
+void effSetResourceNormalStream(EffResourceWork *work, f32 (*normals)[4]) {
     work->normals = normals;
 }
 
@@ -118,7 +118,7 @@ void effReleaseAttachedResources(u32 work) {
 }
 
 /* Emit scaled, translated triangle batches with separate vector and packed-color streams. */
-void func_00176B88(EffResourceWork *work) {
+void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
     f32 matrix[16] __attribute__((aligned(16)));
     void *packet;
     EffResourceEntry *entry;

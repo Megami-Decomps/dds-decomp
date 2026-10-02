@@ -47,7 +47,7 @@ extern f32 D_003B1280[];
 extern f32 D_003B12A0[];
 extern f32 D_003B1220[];
 extern f32 *effGetGroupRecordByIndex(u32 handle, s32 index);
-extern f32 *func_00178190(u32 handle, s32 index);
+extern f32 *effGetRecordGroupElement(u32 handle, s32 index);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
@@ -1141,7 +1141,7 @@ void func_001736B0(void) {
 }
 
 void effFlashAccumulatingParticleDestroy(PcpFlashAccumulatingWork *work) {
-    func_00177FA8(work->resourceHandle);
+    effReleaseRecordGroupResources(work->resourceHandle);
     sdfReleaseResourceAllocation(work->ownedBuffer);
 }
 
@@ -1902,7 +1902,7 @@ void func_00175790(void) {
 }
 
 void effFlashRadialStripDestroy(PcpFlashRadialStripWork *work) {
-    func_00177FA8(work->resourceHandle);
+    effReleaseRecordGroupResources(work->resourceHandle);
     sdfReleaseResourceAllocation(work->ownedBuffer);
 }
 
@@ -1937,7 +1937,7 @@ void effFlashSpawnStripParticle(PcpFlashRadialStripWork *work, s32 index, void *
 void effFlashRotatedStripPair(PcpFlashRadialStripWork *work, s32 index, void *view)
 {
     PcpFlashRadialStripParticle *part = &work->parts[index];
-    f32 *quad = func_00178190(work->resourceHandle, index * 2);
+    f32 *quad = effGetRecordGroupElement(work->resourceHandle, index * 2);
     f32 base[4];
     f32 size[4];
     f32 spare[4];
@@ -2000,7 +2000,7 @@ void effFlashRotatedStripPair(PcpFlashRadialStripWork *work, s32 index, void *vi
     VU0_STORE_VF(vf10, quad + 12);
     VU0_LOAD_VF(vf10, outer);
     VU0_STORE_VF(vf10, quad);
-    mirror = func_00178190(work->resourceHandle, index * 2 + 1);
+    mirror = effGetRecordGroupElement(work->resourceHandle, index * 2 + 1);
     PCP_COPY_VECTOR(mirror + 8, quad + 8);
     PCP_COPY_VECTOR(mirror + 4, quad + 4);
     PCP_COPY_VECTOR(mirror + 12, quad + 12);
