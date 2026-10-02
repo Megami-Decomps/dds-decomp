@@ -18,18 +18,55 @@ extern void mnuCloseCurrentProfilePanel(s32);
 
 extern void mnuReleaseMantraMenuDrawResources(void *);
 
+extern void dspCloseChannel(void);
+extern void sdfQueueNonzeroResourceId(u32);
+extern void mnuReleaseFirstMantraSpriteSlots(void);
+extern void mnuReleaseStaffAndTitleVisualResources(u32 *);
+extern void evtPrintDeveloperConsoleMessage(const char *);
+extern void func_003297C8(u32);
+extern void mnuReleasePanelEntryPool(void);
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286BA8);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286E20);
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286E98);
+extern u32 func_003292A8(s32 size);
+extern u32 sdfMemoryGetBlockAddress(void *block);
+extern u32 mnuCreateProgressHost(void);
+extern void mnuInitPanelSoundEntries(void);
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286F18);
+/* Allocate and zero the 0xC08 status resource, then wire up its host pointer,
+ * console banner and panel sound entries. */
+void *func_00286E98(void) {
+    void *handle = (void *)func_003292A8(0xC08);
+    u8 *work = (u8 *)sdfMemoryGetBlockAddress(handle);
+
+    memset(work, 0, 0xC08);
+    *(u32 *)work = (u32)handle;
+    *(u32 **)(work + 0x48) = (u32 *)mnuCreateProgressHost();
+    evtPrintDeveloperConsoleMessage("trmLoadStartStatusResource()!!!! \n");
+    evtPrintDeveloperConsoleMessage("mtrInit\n");
+    mnuInitPanelSoundEntries();
+    return work;
+}
+
+void func_00286F18(s32 arg0, s32 work) {
+    if (work != 0) {
+        dspCloseChannel();
+        sdfQueueNonzeroResourceId(*(u32 *)(work + 0x38));
+        sdfQueueNonzeroResourceId(*(u32 *)(work + 0x3C));
+        mnuReleaseFirstMantraSpriteSlots();
+        mnuReleaseStaffAndTitleVisualResources(*(u32 **)(work + 0x48));
+        evtPrintDeveloperConsoleMessage("trmDestroyStatusResource()!!!! \n");
+        func_003297C8(*(u32 *)work);
+        mnuReleasePanelEntryPool();
+    }
+    evtPrintDeveloperConsoleMessage("mtrRelease\n");
+}
 
 /* Store the task handle so the existence probe and explicit stop can
  * invalidate or destroy the same resource group. */
 void mnuCreateResourceTask(void) {
-    s32 menuData = func_00286E98();
+    void *menuData = func_00286E98();
     mnuMantraSelectionResource = sdfCreateTaskWorker(D_00426060, 0x402, 0x2B12, D_003CFCC0, func_00286F18, menuData);
 }
 
@@ -47,6 +84,8 @@ void mnuStopResourceTask(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287030);
+
+
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426060);
 

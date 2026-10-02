@@ -62,8 +62,25 @@ void datMoveCursorY(DatCalcCursor *cursor, s32 delta) {
 }
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_00119A10);
+extern s32 func_00119A10(u8 *unit);
+extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_00119A78);
+s32 func_00119A78(u8 *unit, s32 slot) {
+    s32 value;
+
+    if ((*(u16 *)(unit + 0xE) & 0x7FFF) == 0x1000) {
+        return 1;
+    }
+    value = func_00119A10(unit);
+    value += ptyGetCombinedRecordAndSlotValue(*(u16 *)(unit + 0x1B2), slot);
+    if (value < 0) {
+        value = 0;
+    }
+    if (value >= 100) {
+        value = 99;
+    }
+    return value;
+}
 
 typedef struct DatSkillOwner {
     u16 flags;        /* 0x00: 0x20 = skills live in the party table */
