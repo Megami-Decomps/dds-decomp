@@ -12,7 +12,7 @@ void scrPushString(ScrData *scr, char *str);
 void scrPushTypeFourValue(ScrData *scr, s32 val);
 s32 bfStackPopInt(ScrData *scr);
 f32 bfStackPopFloat(ScrData *scr);
-u32 bfOpBinaryEval(ScrData *scr, s32 op);
+void bfOpBinaryEval(ScrData *scr, s32 op);
 
 u32 scrPushImmediateInteger(ScrData *scr)
 {
@@ -163,7 +163,177 @@ u32 scrJumpLabel(ScrData *scr)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpBinaryEval);
+extern s32 D_003BD76C;
+extern s32 D_003BD770;
+extern s32 D_003BD774;
+extern f32 D_003BD778;
+extern f32 D_003BD77C;
+extern f32 D_003BD780;
+extern s32 D_003BD784;
+extern s32 D_003BD788;
+
+void bfOpBinaryEval(ScrData *scr, s32 op)
+{
+    D_003BD784 = scr->stackTypes[scr->sp - 1];
+    D_003BD788 = scr->stackTypes[scr->sp - 2];
+    if ((D_003BD784 == 0 || D_003BD784 == 2) && (D_003BD788 == 0 || D_003BD788 == 2)) {
+        D_003BD76C = bfStackPopInt(scr);
+        D_003BD770 = bfStackPopInt(scr);
+        switch (op) {
+        case 0:
+            D_003BD774 = D_003BD76C + D_003BD770;
+            break;
+        case 1:
+            D_003BD774 = D_003BD76C - D_003BD770;
+            break;
+        case 2:
+            D_003BD774 = D_003BD76C * D_003BD770;
+            break;
+        case 3:
+            D_003BD774 = D_003BD76C / D_003BD770;
+            break;
+        case 4:
+            if (D_003BD76C != 0 || D_003BD770 != 0) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            break;
+        case 5:
+            if (D_003BD76C != 0 && D_003BD770 != 0) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            break;
+        case 6:
+            if (D_003BD76C == D_003BD770) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            break;
+        case 7:
+            if (D_003BD76C != D_003BD770) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            break;
+        case 8:
+            if (D_003BD76C < D_003BD770) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            break;
+        case 9:
+            if (D_003BD76C > D_003BD770) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            break;
+        case 10:
+            if (D_003BD76C <= D_003BD770) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            break;
+        case 11:
+            if (D_003BD76C >= D_003BD770) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            break;
+        }
+        scrPushInteger(scr, D_003BD774);
+    } else {
+        D_003BD778 = bfStackPopFloat(scr);
+        D_003BD77C = bfStackPopFloat(scr);
+        switch (op) {
+        case 0:
+            D_003BD780 = D_003BD778 + D_003BD77C;
+            break;
+        case 1:
+            D_003BD780 = D_003BD778 - D_003BD77C;
+            break;
+        case 2:
+            D_003BD780 = D_003BD778 * D_003BD77C;
+            break;
+        case 3:
+            D_003BD780 = D_003BD778 / D_003BD77C;
+            break;
+        case 4:
+            if (D_003BD778 != 0.0 || D_003BD77C != 0.0) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            scrPushInteger(scr, D_003BD774);
+            return;
+        case 5:
+            if (D_003BD778 != 0.0 && D_003BD77C != 0.0) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            scrPushInteger(scr, D_003BD774);
+            return;
+        case 6:
+            if (D_003BD778 == D_003BD77C) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            scrPushInteger(scr, D_003BD774);
+            return;
+        case 7:
+            if (D_003BD778 != D_003BD77C) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            scrPushInteger(scr, D_003BD774);
+            return;
+        case 8:
+            if (D_003BD778 < D_003BD77C) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            scrPushInteger(scr, D_003BD774);
+            return;
+        case 9:
+            if (D_003BD778 > D_003BD77C) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            scrPushInteger(scr, D_003BD774);
+            return;
+        case 10:
+            if (D_003BD778 <= D_003BD77C) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            scrPushInteger(scr, D_003BD774);
+            return;
+        case 11:
+            if (D_003BD778 >= D_003BD77C) {
+                D_003BD774 = 1;
+            } else {
+                D_003BD774 = 0;
+            }
+            scrPushInteger(scr, D_003BD774);
+            return;
+        }
+        bfStackPushFloat(scr, D_003BD780);
+    }
+}
 
 u32 scrOpAdd(ScrData *scr)
 {
