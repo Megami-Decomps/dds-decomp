@@ -220,6 +220,39 @@ end_data
         rendered = fld.render_source(data)
         self.assertEqual(fld.encode(fld.parse_source(rendered)), data)
 
+    def test_fld1_texture_effect_and_light_round_trip(self) -> None:
+        source = """\
+fld1 1
+header version=23 magic=FLD1 type_count=3 type_table=@resource_types word_1c=0 word_20=0 word_24=0 word_28=0 word_2c=0 word_30=0 word_34=0 word_38=0 word_3c=0
+label resource_types
+type id=5 count=1 resources=@texture_resources
+type id=11 count=1 resources=@effect_resources
+type id=12 count=1 resources=@light_resources
+label texture_resources
+resource serial=0 flags=0 type=5 name=null reserved=0 transform=null area=null link=null sblock=null data=@texture_data
+label effect_resources
+resource serial=1 flags=0 type=11 name=null reserved=0 transform=null area=null link=null sblock=null data=@effect_data
+label light_resources
+resource serial=2 flags=0 type=12 name=null reserved=0 transform=null area=null link=null sblock=null data=@light_data
+label texture_data
+texture_list "f011_001.TB"
+label effect_data
+effect flags=0 type=2 selector=1 size=400,400,1 parameters=0,1,0,0,0,0
+label light_data
+light reserved=0 flags=1 animation=2 inner_radius=100 outer_radius=200 softness=3 bias=0.25 diffuse=1,0.5,0.25 ambient=0.1,0.2,0.3
+label data_end
+end_data
+"""
+        data = fld.encode(fld.parse_source(source))
+        rendered = fld.render_source(data)
+        self.assertIn('texture_list "f011_001.TB"', rendered)
+        self.assertIn("effect flags=0 type=2 selector=1", rendered)
+        self.assertIn("light reserved=0 flags=1 animation=2", rendered)
+        self.assertEqual(fld.encode(fld.parse_source(rendered)), data)
+
+        with self.assertRaisesRegex(fld.FldError, "does not match fld1 preamble"):
+            fld.parse_source(source.replace("magic=FLD1", "magic=FLD2", 1))
+
     def test_tracked_sources_are_canonical_and_exact(self) -> None:
         expected_links = {
             ("dds1", "f011_001"): fld.LinkSummary(2, 3, 1),
@@ -256,6 +289,17 @@ end_data
                         area,
                     )
                     self.assertEqual(links, expected_links[key])
+
+        for game in ("dds1", "dds2"):
+            manifest = ROOT / "config" / game / "field_fld1.sha1"
+            for line in manifest.read_text(encoding="utf-8").splitlines():
+                expected, output = line.split()
+                source = ROOT / "src" / game / "data" / "field" / (Path(output).stem + ".f1asm")
+                with self.subTest(game=game, source=source.name):
+                    text = source.read_text(encoding="utf-8")
+                    data = fld.encode(fld.parse_source(text))
+                    self.assertEqual(hashlib.sha1(data).hexdigest(), expected)
+                    self.assertEqual(fld.render_source(data), text)
 
     def test_missing_script_event_is_rejected(self) -> None:
         source = ROOT / "src/dds1/data/field/f011_001.fldasm"

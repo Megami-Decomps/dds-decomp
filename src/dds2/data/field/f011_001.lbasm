@@ -2,4 +2,4 @@ lb 1
 base sha1=99d8c73ae4dc27d28a38dd24234f64f80506e4dc size=0x142300
 entry type=1 compressed=1 user=0 extension=TBN raw_size=0xe00c0 retail_sha1=2db8c2ad7cdae9e4bc0113a1fc9f0e1cc7193052 source=base
 entry type=1 compressed=1 user=0 extension=F2 raw_size=0x9176 retail_sha1=680a5279c1f6e0430ea7e6a33d47ecdd1e8782d2 source=f011_001.f2
-entry type=1 compressed=1 user=0 extension=F1 raw_size=0x1684bd retail_sha1=82343873ecad8a14c115ad85b74ef43e7fc2cac0 source=base
+entry type=1 compressed=1 user=0 extension=F1 raw_size=0x1684bd retail_sha1=82343873ecad8a14c115ad85b74ef43e7fc2cac0 source=f011_001.f1
