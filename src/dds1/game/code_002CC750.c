@@ -567,10 +567,49 @@ u8 ptyIsCurrentProfileId(s32 operand, u32 profileId) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", prfBuildRawSkillList);
 
-INCLUDE_ASM(const s32, "game/code_002CC750", prfBuildSkillList);
+typedef struct PrfSkillList {
+    u32 flags[8];
+    s32 count;
+    u16 skills[8];
+} PrfSkillList;
+
+s32 prfBuildSkillList(ScrVmOperand *unit, u32 profile, PrfSkillList *output, s32 includeFlagged) {
+    PrfSkillList list;
+    u32 i;
+    u16 *skills;
+    u16 skill;
+    u32 state;
+    s32 selected;
+
+    memset(&list, 0, sizeof(PrfSkillList));
+    selected = unit->selectedIndex;
+    list.count = 0;
+    if (selected != 0) {
+        skills = &D_003907BC[selected * 14];
+        for (i = 0; i < 8; i++) {
+            skill = *skills++;
+            if (skill != 0) {
+                state = ptyGetSkillNibbleState(unit, skill);
+                if (state != 0 && includeFlagged == 0) {
+                    continue;
+                }
+                list.flags[list.count] = 0;
+                if (state != 0) {
+                    list.flags[list.count] |= 4;
+                }
+                list.skills[list.count] = skill;
+                list.count++;
+            }
+        }
+    }
+    if (output != NULL) {
+        *output = list;
+    }
+    return list.count;
+}
 
 u32 prfBuildSkillListState0(u32 unit, u32 profile, u32 output) {
-    return prfBuildSkillList(unit, profile, output, 0);
+    return prfBuildSkillList((ScrVmOperand *)unit, profile, (PrfSkillList *)output, 0);
 }
 
 u32 prfCountProfileList(u8 *work) {
