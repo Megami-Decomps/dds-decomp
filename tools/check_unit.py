@@ -576,7 +576,8 @@ def main():
         print(f"ASMBODY {name}: {asm} of {total} instructions are inline asm; mark it as an SDK copy "
               "or VU0 routine, or keep it as INCLUDE_ASM (docs/idioms.md, Inline asm)")
     # C functions must keep retail order (the object's text is laid out in source order).
-    order = re.findall(r'^INCLUDE_ASM\([^\n]*\b(\w+)\);|^[A-Za-z_][^;\n=]*?\b(\w+)\s*\([^;\n]*\)\s*\{?\s*$',
+    # (an implicit-int K&R definition starts with the function name itself)
+    order = re.findall(r'^INCLUDE_ASM\([^\n]*\b(\w+)\);|^(?:[A-Za-z_][^;\n=]*?\b)?([A-Za-z_]\w*)\s*\([^;\n]*\)\s*\{?\s*$',
                        unit.read_text(), re.M)
     placed = [(0, address(a or b, syms), a or b) for a, b in order if address(a or b, syms) is not None]
     for (_, a, n), (_, b, m) in zip(placed, placed[1:]):
@@ -594,7 +595,7 @@ def main():
     if full.exists() and not args.func:
         source = unit.read_text()
         for name in re.findall(r"^glabel (\w+)", full.read_text(), re.M):
-            if not re.search(rf"^INCLUDE_ASM\([^\n]*\b{name}\);|^[A-Za-z_][^;\n]*\b{name}\s*\([^;]*$", source, re.M):
+            if not re.search(rf"^INCLUDE_ASM\([^\n]*\b{name}\);|^(?:[A-Za-z_][^;\n]*\b)?{name}\s*\([^;]*$", source, re.M):
                 bad += 1
                 print(f"MISSING {name}: neither C nor INCLUDE_ASM in the unit")
     # A func_XXXXXXXX whose address symbol_addrs now names differently fails a fresh link
