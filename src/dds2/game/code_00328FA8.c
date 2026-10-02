@@ -1,10 +1,5 @@
 #include "common.h"
 
-typedef struct {
-    u8 pad00[0xC];
-    u16 state; /* 0x0C: 0 free, 1 used, 2 end marker */
-} SdfMemBlockPrefix;
-
 extern u32 D_0045F0FC[];
 
 INCLUDE_ASM(const s32, "game/code_00328FA8", func_00328FA8);
@@ -78,9 +73,62 @@ void func_003290A0(SdfChipStats *stats) {
     stats->partialBlocks = partialBlocks;
 }
 
-INCLUDE_ASM(const s32, "game/code_00328FA8", func_00329170);
+/* Heap block header: linked list node with its address, state (0 free, 1 used, 2 end marker) and tag. */
+typedef struct SdfMemBlock {
+    struct SdfMemBlock *prev; /* 0x0 */
+    struct SdfMemBlock *next; /* 0x4 */
+    u32 address; /* 0x8 */
+    u16 state; /* 0xC */
+    s16 tag; /* 0xE */
+} SdfMemBlock; /* 0x10 */
 
-u16 sdfGetMemoryBlockState(SdfMemBlockPrefix *block) {
+typedef struct SdfMemHeap {
+    SdfMemBlock head; /* 0x00: start sentinel */
+    SdfMemBlock tail; /* 0x10: end sentinel */
+    u32 base; /* 0x20 */
+    u32 size; /* 0x24 */
+} SdfMemHeap;
+
+extern SdfMemHeap D_0045F0F8;
+extern void *func_0035A828(u32 size);
+extern void *func_00328D68(u32 size);
+extern s32 D_004389CC;
+extern u8 D_00439128[4];
+extern void func_003297C8();
+extern void sdfInitializeSynchronizedRequest();
+
+/* Set up the general heap over a `size`-byte allocation: one free block between the two end sentinels. */
+void func_00329170(u32 size) {
+    SdfMemHeap *heap = &D_0045F0F8;
+    SdfMemBlock *block;
+    u32 first;
+    u32 end;
+
+    heap->base = (u32)func_0035A828(size);
+    heap->size = size;
+    block = func_00328D68(0x10);
+    first = (heap->base + 0x7F) & ~0x7F;
+    end = (heap->base + size) & ~0x7F;
+    heap->head.prev = NULL;
+    heap->head.next = block;
+    heap->head.state = 2;
+    heap->head.tag = -1;
+    heap->tail.state = 2;
+    heap->tail.tag = -1;
+    heap->tail.address = end;
+    heap->tail.prev = block;
+    heap->tail.next = NULL;
+    heap->head.address = first;
+    block->prev = &heap->head;
+    block->state = 0;
+    block->next = &heap->tail;
+    block->address = first;
+    block->tag = 0;
+    D_004389CC = 0;
+    sdfInitializeSynchronizedRequest(D_00439128, func_003297C8);
+}
+
+u16 sdfGetMemoryBlockState(SdfMemBlock *block) {
     return block->state;
 }
 
