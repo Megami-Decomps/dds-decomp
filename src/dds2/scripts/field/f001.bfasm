@@ -305,9 +305,7 @@ _9:
           goto _13
         }
       _13:
-        push 1
-        push 3
-        COMM 0x013c
+        SET_MESSAGE_RANGE(3, 1)
         if (treasure_content_kind == 1) {
           treasure_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(HOSEKI_SEL))
         } else {
@@ -319,146 +317,92 @@ _9:
         if_not (treasure_choice == 0) goto _40
         if (treasure_trap_kind == 1) {
           MARK_CURRENT_TREASURE_OPENED()
-          push treasure_amount
-          COMM 0x0166
+          SUBMIT_EVENT_IMMEDIATE(treasure_amount)
           return
         } else {
         _29:
           if (treasure_trap_kind == 2) {
             MARK_CURRENT_TREASURE_OPENED()
-            push 35
-            COMM 0x011b
-            COMM 0x011c
-            push 100
-            push 15
-            COMM 0x00ab
-            push 15
-            push 1
-            push 0
-            COMM 0x001a
-            push 15
-            push 100
-            push 1
-            COMM 0x001a
-            push 1
-            COMM 0x013a
+            START_AND_WAIT_FOR_STREAM_SOUND(35)
+            ADVANCE_STREAM_SOUND_STATE()
+            SETUP_FADE_FRAMES(15, 100)
+            SET_CONTROLLER_VIBRATION(SMALL_MOTOR, 1, 15)
+            SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 100, 15)
+            APPLY_PARTY_TRAP_EFFECT(DAMAGE_TEN_PERCENT_HP)
             MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
-            COMM 0x011f
-            COMM 0x0121
+            RESET_STREAM_PLAYBACK()
+            WAIT_FOR_STREAM_IDLE()
           } else {
           _30:
             if (treasure_trap_kind == 3) {
               MARK_CURRENT_TREASURE_OPENED()
-              push 35
-              COMM 0x011b
-              COMM 0x011c
-              push 200
-              push 20
-              COMM 0x00ab
-              push 20
-              push 1
-              push 0
-              COMM 0x001a
-              push 20
-              push 200
-              push 1
-              COMM 0x001a
-              push 2
-              COMM 0x013a
+              START_AND_WAIT_FOR_STREAM_SOUND(35)
+              ADVANCE_STREAM_SOUND_STATE()
+              SETUP_FADE_FRAMES(20, 200)
+              SET_CONTROLLER_VIBRATION(SMALL_MOTOR, 1, 20)
+              SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 200, 20)
+              APPLY_PARTY_TRAP_EFFECT(DAMAGE_HALF_HP)
               MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
-              COMM 0x011f
-              COMM 0x0121
+              RESET_STREAM_PLAYBACK()
+              WAIT_FOR_STREAM_IDLE()
             } else {
             _31:
               if (treasure_trap_kind == 4) {
                 MARK_CURRENT_TREASURE_OPENED()
-                push 35
-                COMM 0x011b
-                COMM 0x011c
-                push 200
-                push 20
-                COMM 0x00ab
-                push 20
-                push 1
-                push 0
-                COMM 0x001a
-                push 20
-                push 200
-                push 1
-                COMM 0x001a
-                push 4
-                COMM 0x013a
+                START_AND_WAIT_FOR_STREAM_SOUND(35)
+                ADVANCE_STREAM_SOUND_STATE()
+                SETUP_FADE_FRAMES(20, 200)
+                SET_CONTROLLER_VIBRATION(SMALL_MOTOR, 1, 20)
+                SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 200, 20)
+                APPLY_PARTY_TRAP_EFFECT(INFLICT_POISON)
                 MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_POISON))
-                COMM 0x011f
-                COMM 0x0121
+                RESET_STREAM_PLAYBACK()
+                WAIT_FOR_STREAM_IDLE()
               } else {
               _32:
                 if (treasure_trap_kind == 5) {
                   MARK_CURRENT_TREASURE_OPENED()
-                  push 35
-                  COMM 0x011b
-                  COMM 0x011c
-                  push 200
-                  push 20
-                  COMM 0x00ab
-                  push 20
-                  push 1
-                  push 0
-                  COMM 0x001a
-                  push 20
-                  push 200
-                  push 1
-                  COMM 0x001a
-                  push 5
-                  COMM 0x013a
+                  START_AND_WAIT_FOR_STREAM_SOUND(35)
+                  ADVANCE_STREAM_SOUND_STATE()
+                  SETUP_FADE_FRAMES(20, 200)
+                  SET_CONTROLLER_VIBRATION(SMALL_MOTOR, 1, 20)
+                  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 200, 20)
+                  APPLY_PARTY_TRAP_EFFECT(INFLICT_ACHE)
                   MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_ACHE))
-                  COMM 0x011f
-                  COMM 0x0121
+                  RESET_STREAM_PLAYBACK()
+                  WAIT_FOR_STREAM_IDLE()
                 } else {
                 _33:
                   if (treasure_trap_kind == 6) {
                     MARK_CURRENT_TREASURE_OPENED()
-                    push 35
-                    COMM 0x011b
-                    COMM 0x011c
-                    push 200
-                    push 20
-                    COMM 0x00ab
-                    push 20
-                    push 1
-                    push 0
-                    COMM 0x001a
-                    push 20
-                    push 200
-                    push 1
-                    COMM 0x001a
-                    push 6
-                    COMM 0x013a
+                    START_AND_WAIT_FOR_STREAM_SOUND(35)
+                    ADVANCE_STREAM_SOUND_STATE()
+                    SETUP_FADE_FRAMES(20, 200)
+                    SET_CONTROLLER_VIBRATION(SMALL_MOTOR, 1, 20)
+                    SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 200, 20)
+                    APPLY_PARTY_TRAP_EFFECT(INFLICT_CLOSE)
                     MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_CLOSE))
-                    COMM 0x011f
-                    COMM 0x0121
+                    RESET_STREAM_PLAYBACK()
+                    WAIT_FOR_STREAM_IDLE()
                   } else {
                   _34:
                     if (treasure_content_kind <= 1) {
                       if (treasure_content_kind == 1) {
-                        push 34
-                        COMM 0x011b
+                        START_AND_WAIT_FOR_STREAM_SOUND(34)
                       } else {
                       _20:
                         if (TEST_MODEL_FLAG(49)) {
-                          push 43
-                          COMM 0x011b
+                          START_AND_WAIT_FOR_STREAM_SOUND(43)
                         } else {
                         _18:
-                          push 33
-                          COMM 0x011b
+                          START_AND_WAIT_FOR_STREAM_SOUND(33)
                           goto _17
                         }
                       _17:
                         goto _19
                       }
                     _19:
-                      COMM 0x011c
+                      ADVANCE_STREAM_SOUND_STATE()
                       MARK_CURRENT_TREASURE_OPENED()
                       FINISH_SCRIPT_MESSAGE_WINDOW()
                       WAIT_FOR_TIMER_LIMIT(45)
@@ -481,18 +425,16 @@ _9:
                         goto _23
                       }
                     _23:
-                      COMM 0x011f
-                      COMM 0x0121
+                      RESET_STREAM_PLAYBACK()
+                      WAIT_FOR_STREAM_IDLE()
                     } else {
                     _26:
                       if (treasure_content_kind == 3) {
                         MARK_CURRENT_TREASURE_OPENED()
-                        push 32
-                        COMM 0x0214
+                        PLAY_FIELD_SE_VOLUME_PAN(32)
                         SET_MESSAGE_WINDOW_GEOMETRY(0, treasure_amount, 0)
                         MESSAGE_REQUEST_AND_POLL(message(TAKARA_MAKA_GET))
-                        push treasure_amount
-                        COMM 0x0139
+                        ADD_PARTY_CURRENCY(treasure_amount)
                       }
                     }
                   _25:
@@ -541,7 +483,7 @@ warp_label:
   RESTORE_CAMERA_NODE_MODE()
   warp_effect_mode = READ_WARP_EFFECT_MODE()
   if (warp_effect_mode == 1) {
-    COMM 0x0204
+    APPLY_CURRENT_TASK_ENTRY_TRIGGER()
     WAIT_FOR_TIMER_LIMIT(20)
     push 0
     push float32(0.12999999523162842, bits=0x3e051eb8)
@@ -569,26 +511,26 @@ warp_label:
     COMM 0x00f3
   }
 _45:
-  COMM 0x0202
+  SET_CURRENT_TASK_SCENE()
   return
   return
 doorwarp_label:
   PROC doorwarp_label
 _47:
   while (1) {
-    COMM 0x0203
+    NO_OP_FIELD_TRANSITION()
     if (ACTION_WINDOW_REQUEST_AND_POLL(2) == 1) {
       RESTORE_CAMERA_NODE_MODE()
       door_motion_duration = READ_DOOR_WARP_VALUE(MOTION_DURATION)
       door_fade_mode = READ_DOOR_WARP_VALUE(FADE_MODE)
-      COMM 0x0204
+      APPLY_CURRENT_TASK_ENTRY_TRIGGER()
       if (door_motion_duration == 40) {
         WAIT_FOR_TIMER_LIMIT(20)
       }
     _49:
       SCREEN_FADE_B(door_fade_mode, 20)
       WAIT_FOR_TIMER_LIMIT(20)
-      COMM 0x0202
+      SET_CURRENT_TASK_SCENE()
       return
     }
   _51:
@@ -603,12 +545,10 @@ _53:
     if (ACTION_WINDOW_REQUEST_AND_POLL(10) == 1) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(6)
-      COMM 0x020d
+      APPLY_CURRENT_TASK_RECORD_ENTRY()
       ACTIVATE_MESSAGE_PANEL()
       MESSAGE_REQUEST_AND_POLL(message(EXITWARP))
-      push 1
-      push 3
-      COMM 0x013c
+      SET_MESSAGE_RANGE(3, 1)
       if (MESSAGE_SELECTION_REQUEST_AND_POLL(selection(EXITWARP_SEL)) == 0) {
         FINISH_SCRIPT_MESSAGE_WINDOW()
       } else {
@@ -623,14 +563,14 @@ _53:
     _55:
       exit_motion_duration = READ_DOOR_WARP_VALUE(MOTION_DURATION)
       exit_fade_mode = READ_DOOR_WARP_VALUE(FADE_MODE)
-      COMM 0x0204
+      APPLY_CURRENT_TASK_ENTRY_TRIGGER()
       if (exit_motion_duration == 40) {
         WAIT_FOR_TIMER_LIMIT(20)
       }
     _57:
       SCREEN_FADE_B(exit_fade_mode, 45)
       WAIT_FOR_TIMER_LIMIT(45)
-      COMM 0x0202
+      SET_CURRENT_TASK_SCENE()
       return
     }
   _59:
@@ -646,9 +586,7 @@ _61:
       RESTORE_CAMERA_NODE_MODE()
       ACTIVATE_MESSAGE_PANEL()
       MESSAGE_REQUEST_AND_POLL(message(FLDHUNTEXITWARP))
-      push 1
-      push 3
-      COMM 0x013c
+      SET_MESSAGE_RANGE(3, 1)
       if (MESSAGE_SELECTION_REQUEST_AND_POLL(selection(FLDHUNTEXITWARP_SEL)) == 0) {
         FINISH_SCRIPT_MESSAGE_WINDOW()
       } else {
@@ -661,15 +599,15 @@ _61:
     _63:
       field_hunt_exit_motion_duration = READ_DOOR_WARP_VALUE(MOTION_DURATION)
       field_hunt_exit_fade_mode = READ_DOOR_WARP_VALUE(FADE_MODE)
-      COMM 0x0204
+      APPLY_CURRENT_TASK_ENTRY_TRIGGER()
       if (field_hunt_exit_motion_duration == 40) {
         WAIT_FOR_TIMER_LIMIT(20)
       }
     _65:
       SCREEN_FADE_B(field_hunt_exit_fade_mode, 45)
       WAIT_FOR_TIMER_LIMIT(45)
-      COMM 0x021a
-      COMM 0x0202
+      RESET_FIELD_AFTER_EVENT()
+      SET_CURRENT_TASK_SCENE()
       return
     }
   _67:
@@ -683,10 +621,10 @@ _69:
   while (1) {
     if (ACTION_WINDOW_REQUEST_AND_POLL(11) == 1) {
       RESTORE_CAMERA_NODE_MODE()
-      COMM 0x0204
+      APPLY_CURRENT_TASK_ENTRY_TRIGGER()
       SCREEN_FADE_B(1, 45)
       WAIT_FOR_TIMER_LIMIT(45)
-      COMM 0x0202
+      SET_CURRENT_TASK_SCENE()
       return
     }
   _71:
@@ -696,21 +634,21 @@ _70:
   return
 runwarp_label:
   PROC runwarp_label
-  COMM 0x0203
+  NO_OP_FIELD_TRANSITION()
   RESTORE_CAMERA_NODE_MODE()
-  COMM 0x0204
+  APPLY_CURRENT_TASK_ENTRY_TRIGGER()
   WAIT_FOR_TIMER_LIMIT(15)
-  COMM 0x0202
+  SET_CURRENT_TASK_SCENE()
   return
 anawarp_label:
   PROC anawarp_label
   RESTORE_CAMERA_NODE_MODE()
-  COMM 0x0203
-  COMM 0x0204
+  NO_OP_FIELD_TRANSITION()
+  APPLY_CURRENT_TASK_ENTRY_TRIGGER()
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   PREPARE_UNIT_MOTION_STATE(global_int[0], 6, 4, 4, 0)
   WAIT_FOR_UNIT_MOTION(global_int[0])
-  COMM 0x0202
+  SET_CURRENT_TASK_SCENE()
   return
 tobiwarp_label:
   PROC tobiwarp_label
@@ -718,18 +656,17 @@ _73:
   while (1) {
     if (ACTION_WINDOW_REQUEST_AND_POLL(3) == 1) {
       RESTORE_CAMERA_NODE_MODE()
-      push 37
-      COMM 0x011b
-      COMM 0x0204
+      START_AND_WAIT_FOR_STREAM_SOUND(37)
+      APPLY_CURRENT_TASK_ENTRY_TRIGGER()
       WAIT_FOR_TIMER_LIMIT(4)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       PREPARE_UNIT_MOTION_STATE(global_int[0], 5, 4, 4, 0)
       WAIT_FOR_TIMER_LIMIT(30)
-      COMM 0x011c
+      ADVANCE_STREAM_SOUND_STATE()
       WAIT_FOR_TIMER_LIMIT(30)
-      COMM 0x011f
-      COMM 0x0121
-      COMM 0x0202
+      RESET_STREAM_PLAYBACK()
+      WAIT_FOR_STREAM_IDLE()
+      SET_CURRENT_TASK_SCENE()
       return
     }
   _75:
@@ -783,8 +720,7 @@ _93:
 _78:
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(6)
-  push 36
-  COMM 0x011b
+  START_AND_WAIT_FOR_STREAM_SOUND(36)
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
   ladder_source_vector_id = READ_LADDER_TABLE_VALUE(SOURCE_VECTOR_ID)
@@ -792,7 +728,7 @@ _78:
   ADD_EFFECT_UNIT_TO_WORLD(ladder_effect_unit_id)
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], ladder_source_vector_id)
-  COMM 0x0204
+  APPLY_CURRENT_TASK_ENTRY_TRIGGER()
   if (ladder_direction == 0) {
     PREPARE_UNIT_MOTION_STATE(global_int[0], 8, 0, 0, 1)
   } else {
@@ -803,13 +739,13 @@ _78:
 _95:
   SCREEN_FADE_A(0, 15)
   WAIT_FOR_TIMER_LIMIT(11)
-  COMM 0x011c
+  ADVANCE_STREAM_SOUND_STATE()
   WAIT_FOR_TIMER_LIMIT(49)
   SCREEN_FADE_B(0, 20)
   WAIT_FOR_TIMER_LIMIT(20)
-  COMM 0x011f
-  COMM 0x0121
-  COMM 0x0202
+  RESET_STREAM_PLAYBACK()
+  WAIT_FOR_STREAM_IDLE()
+  SET_CURRENT_TASK_SCENE()
   return
 heal_label:
   PROC heal_label
@@ -819,8 +755,7 @@ _97:
       RESTORE_CAMERA_NODE_MODE()
       SCREEN_FADE_B(0, 20)
       WAIT_FOR_TIMER_LIMIT(20)
-      push 900
-      COMM 0x020f
+      RUN_FIELD_TRANSITION_SELECTOR(HEAL_FACILITY)
       return
     }
   _99:
@@ -836,8 +771,7 @@ _101:
       RESTORE_CAMERA_NODE_MODE()
       SCREEN_FADE_B(0, 20)
       WAIT_FOR_TIMER_LIMIT(20)
-      push 901
-      COMM 0x020f
+      RUN_FIELD_TRANSITION_SELECTOR(SAVE_POINT)
       return
     }
   _103:
@@ -996,7 +930,7 @@ _155:
       message_window_active = 0
     }
   _157:
-    COMM 0x020e
+    START_CURRENT_FIELD_INTERACTION_EVENT()
     return
   }
 _159:
@@ -1036,16 +970,12 @@ elvstart_label:
   SET_UNIT_VALUE(global_int[0], 2)
   ADD_EFFECT_UNIT_TO_WORLD(elevator_camera_unit_id)
   SCREEN_FADE_A(0, 15)
-  push elevator_remaining_destinations
-  push elevator_remaining_destinations
-  COMM 0x0209
+  CONFIGURE_ELEVATOR_CAMERA_MOVE(elevator_remaining_destinations, elevator_remaining_destinations)
   ACTIVATE_MESSAGE_PANEL()
   MESSAGE_REQUEST_AND_POLL(message(WARP_ELV_MSG))
   if (elevator_destination_count == 1) {
     SET_MESSAGE_WINDOW_GEOMETRY(0, elevator_destination_value_1, 4)
-    push 1
-    push 3
-    COMM 0x013c
+    SET_MESSAGE_RANGE(3, 1)
     elevator_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL1))
   } else {
   _166:
@@ -1054,9 +984,7 @@ elvstart_label:
       SET_MESSAGE_WINDOW_GEOMETRY(1, elevator_destination_value_2, 4)
       push elevator_remaining_destinations
       COMM 0x0040
-      push 2
-      push 3
-      COMM 0x013c
+      SET_MESSAGE_RANGE(3, 2)
       elevator_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL2))
     } else {
     _167:
@@ -1066,9 +994,7 @@ elvstart_label:
         SET_MESSAGE_WINDOW_GEOMETRY(2, elevator_destination_value_3, 4)
         push elevator_remaining_destinations
         COMM 0x0040
-        push 3
-        push 3
-        COMM 0x013c
+        SET_MESSAGE_RANGE(3, 3)
         elevator_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL3))
       } else {
       _168:
@@ -1079,9 +1005,7 @@ elvstart_label:
           SET_MESSAGE_WINDOW_GEOMETRY(3, elevator_destination_value_4, 4)
           push elevator_remaining_destinations
           COMM 0x0040
-          push 4
-          push 3
-          COMM 0x013c
+          SET_MESSAGE_RANGE(3, 4)
           elevator_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL4))
         } else {
         _169:
@@ -1093,9 +1017,7 @@ elvstart_label:
             SET_MESSAGE_WINDOW_GEOMETRY(4, elevator_destination_value_5, 4)
             push elevator_remaining_destinations
             COMM 0x0040
-            push 5
-            push 3
-            COMM 0x013c
+            SET_MESSAGE_RANGE(3, 5)
             elevator_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL5))
           } else {
           _170:
@@ -1108,9 +1030,7 @@ elvstart_label:
               SET_MESSAGE_WINDOW_GEOMETRY(5, elevator_destination_value_6, 4)
               push elevator_remaining_destinations
               COMM 0x0040
-              push 6
-              push 3
-              COMM 0x013c
+              SET_MESSAGE_RANGE(3, 6)
               elevator_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL6))
             }
           }
@@ -1131,11 +1051,8 @@ _165:
       PREPARE_UNIT_MOTION_STATE(global_int[0], 10, 4, 20, 0)
       WAIT_FOR_UNIT_MOTION(global_int[0])
       WAIT_FOR_TIMER_LIMIT(4)
-      push 46
-      COMM 0x0214
-      push elevator_choice
-      push elevator_remaining_destinations
-      COMM 0x0209
+      PLAY_FIELD_SE_VOLUME_PAN(46)
+      CONFIGURE_ELEVATOR_CAMERA_MOVE(elevator_remaining_destinations, elevator_choice)
       WAIT_FOR_TIMER_LIMIT(4)
       WAIT_FOR_TIMER_LIMIT(20)
       elevator_move_state = POLL_ELEVATOR_MOVE_STATE()
@@ -1144,11 +1061,9 @@ _165:
         if (elevator_move_state == 2) {
           SCREEN_FADE_B(0, 15)
           WAIT_FOR_TIMER_LIMIT(15)
-          push 46
-          COMM 0x0215
-          COMM 0x020a
-          push elevator_choice
-          COMM 0x0201
+          PLAY_FIELD_SE(46)
+          RESET_ELEVATOR_CAMERA_MOVE_TRACKING()
+          RUN_FIELD_DESTINATION_TRANSITION(elevator_choice)
           return
         }
       _174:
@@ -1157,27 +1072,22 @@ _165:
       }
     _173:
       WAIT_FOR_TIMER_LIMIT(20)
-      push 46
-      COMM 0x0215
-      push 47
-      COMM 0x0214
+      PLAY_FIELD_SE(46)
+      PLAY_FIELD_SE_VOLUME_PAN(47)
       WAIT_FOR_TIMER_LIMIT(20)
       goto _176
     }
   }
 _176:
-  push 48
-  COMM 0x0214
+  PLAY_FIELD_SE_VOLUME_PAN(48)
   MOVE_OBJECT_ALONG_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01path_01)), 0)
   MOVE_OBJECT_ALONG_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d02)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01path_02)), 0)
-  push READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01_2))
-  COMM 0x006c
+  WAIT_FOR_OBJECT_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01_2)))
   WAIT_FOR_TIMER_LIMIT(20)
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
-  COMM 0x020a
-  push elevator_choice
-  COMM 0x0201
+  RESET_ELEVATOR_CAMERA_MOVE_TRACKING()
+  RUN_FIELD_DESTINATION_TRANSITION(elevator_choice)
   return
 suikomi_label:
   PROC suikomi_label
@@ -1195,25 +1105,16 @@ suikomi_label:
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(suction_effect_unit_id)
     SCREEN_FADE_A(0, 5)
     WAIT_FOR_TIMER_LIMIT(15)
-    push 1
-    push suction_motion_id
-    push 0
-    push 0
-    COMM 0x01fd
+    APPLY_ROOM_MODE_GROUP_ONE(0, 0, suction_motion_id, 1)
     WAIT_FOR_TIMER_LIMIT(20)
-    push 97
-    COMM 0x0214
+    PLAY_FIELD_SE_VOLUME_PAN(97)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 6, 3, 15, 0)
     WAIT_FOR_UNIT_MOTION(global_int[0])
     SET_UNIT_LOW_FLAG(global_int[0])
     SCREEN_FADE_B(0, 5)
     WAIT_FOR_TIMER_LIMIT(5)
-    push 1
-    push suction_motion_id
-    push 0
-    push 0
-    COMM 0x01fc
-    COMM 0x0202
+    APPLY_ROOM_MODE_GROUP_ZERO(0, 0, suction_motion_id, 1)
+    SET_CURRENT_TASK_SCENE()
     return
   }
 _179:
@@ -1227,22 +1128,21 @@ _181:
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], suction_source_vector_id)
       if (READ_SUCTION_WARP_VALUE(5)) {
-        COMM 0x00a4
+        UPDATE_FIELD_LOOK_AT_SEGMENT()
         ADD_EFFECT_UNIT_TO_WORLD(-(1))
       }
     _183:
       SCREEN_FADE_A(0, 15)
       WAIT_FOR_TIMER_LIMIT(25)
-      COMM 0x0204
-      push 65
-      COMM 0x0214
+      APPLY_CURRENT_TASK_ENTRY_TRIGGER()
+      PLAY_FIELD_SE_VOLUME_PAN(65)
       WAIT_FOR_TIMER_LIMIT(40)
       PREPARE_UNIT_MOTION_STATE(global_int[0], 17, 3, 15, 0)
       WAIT_FOR_UNIT_MOTION(global_int[0])
       SET_UNIT_LOW_FLAG(global_int[0])
       SCREEN_FADE_B(0, 5)
       WAIT_FOR_TIMER_LIMIT(5)
-      COMM 0x0202
+      SET_CURRENT_TASK_SCENE()
       return
     }
   _185:
@@ -1263,14 +1163,13 @@ _189:
       ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(suction_effect_unit_id)
       SCREEN_FADE_A(0, 5)
       WAIT_FOR_TIMER_LIMIT(15)
-      push 66
-      COMM 0x0214
+      PLAY_FIELD_SE_VOLUME_PAN(66)
       PREPARE_UNIT_MOTION_STATE(global_int[0], 18, 3, 15, 0)
       WAIT_FOR_UNIT_MOTION(global_int[0])
       SET_UNIT_LOW_FLAG(global_int[0])
       SCREEN_FADE_B(0, 5)
       WAIT_FOR_TIMER_LIMIT(5)
-      COMM 0x0202
+      SET_CURRENT_TASK_SCENE()
       return
     }
   _191:
@@ -1307,9 +1206,7 @@ _195:
       SCREEN_FADE_B(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)
       barrier_effect_object_id = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_ICE_b_BED))
-      push barrier_source_vector_id
-      push barrier_effect_object_id
-      COMM 0x009d
+      COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(barrier_effect_object_id, barrier_source_vector_id)
       ADD_EFFECT_UNIT_TO_WORLD(barrier_effect_unit_id)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], barrier_source_vector_id)
@@ -1322,12 +1219,11 @@ _195:
       if (MESSAGE_SELECTION_REQUEST_AND_POLL(selection(FLD_ICE_BREAK_SEL)) == 0) {
         FINISH_SCRIPT_MESSAGE_WINDOW()
         WAIT_FOR_TIMER_LIMIT(10)
-        push 32
-        COMM 0x011b
+        START_AND_WAIT_FOR_STREAM_SOUND(32)
         PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
         WAIT_FOR_TIMER_LIMIT(60)
         SET_EFFECT_MODEL_CUT(barrier_effect_object_id, 0)
-        COMM 0x011c
+        ADVANCE_STREAM_SOUND_STATE()
         WAIT_FOR_TIMER_LIMIT(30)
         WAIT_FOR_TIMER_LIMIT(30)
         SCREEN_FADE_B(1, 30)
@@ -1340,11 +1236,10 @@ _195:
         WAIT_FOR_TIMER_LIMIT(30)
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
-        push barrier_effect_object_id
-        COMM 0x009b
-        COMM 0x011f
-        COMM 0x0121
-        COMM 0x00a4
+        DESTROY_WORLD_EFFECT_OBJECT(barrier_effect_object_id)
+        RESET_STREAM_PLAYBACK()
+        WAIT_FOR_STREAM_IDLE()
+        UPDATE_FIELD_LOOK_AT_SEGMENT()
         ADD_EFFECT_UNIT_TO_WORLD(-(1))
         SCREEN_FADE_A(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
@@ -1361,7 +1256,7 @@ _195:
       FINISH_SCRIPT_MESSAGE_WINDOW()
       SCREEN_FADE_B(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)
-      COMM 0x00a4
+      UPDATE_FIELD_LOOK_AT_SEGMENT()
       ADD_EFFECT_UNIT_TO_WORLD(-(1))
       SCREEN_FADE_A(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)

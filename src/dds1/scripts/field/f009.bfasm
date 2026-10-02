@@ -171,8 +171,7 @@ takarasagasi_label:
   SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[0], 3)
   SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[1], 0)
   SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[2], 1)
-  push 43
-  COMM 0x0214
+  PLAY_FIELD_SE_VOLUME_PAN(43)
   MESSAGE_REQUEST_AND_POLL(message(TAKARASAGASI))
   CHANGE_ITEM_COUNT(local_int[0], local_int[1])
   FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -239,9 +238,7 @@ _9:
           goto _11
         }
       _11:
-        push 1
-        push 3
-        COMM 0x013c
+        SET_MESSAGE_RANGE(3, 1)
         if (local_int[3] == 1) {
           local_int[8] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(HOSEKI_SEL))
         } else {
@@ -253,108 +250,57 @@ _9:
         if_not (local_int[8] == 0) goto _32
         if (local_int[6] == 1) {
           MARK_CURRENT_TREASURE_OPENED()
-          push local_int[7]
-          COMM 0x0166
+          SUBMIT_EVENT_IMMEDIATE(local_int[7])
           return
         } else {
         _23:
           if (local_int[6] == 2) {
             MARK_CURRENT_TREASURE_OPENED()
-            push 34
-            COMM 0x0214
-            push 100
-            push 15
-            COMM 0x00ab
-            push 15
-            push 1
-            push 0
-            COMM 0x001a
-            push 15
-            push 100
-            push 1
-            COMM 0x001a
-            push 1
-            COMM 0x013a
+            PLAY_FIELD_SE_VOLUME_PAN(34)
+            SETUP_FADE_FRAMES(15, 100)
+            SET_CONTROLLER_VIBRATION(SMALL_MOTOR, 1, 15)
+            SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 100, 15)
+            APPLY_PARTY_TRAP_EFFECT(DAMAGE_TEN_PERCENT_HP)
             MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
           } else {
           _24:
             if (local_int[6] == 3) {
               MARK_CURRENT_TREASURE_OPENED()
-              push 34
-              COMM 0x0214
-              push 200
-              push 20
-              COMM 0x00ab
-              push 20
-              push 1
-              push 0
-              COMM 0x001a
-              push 20
-              push 200
-              push 1
-              COMM 0x001a
-              push 2
-              COMM 0x013a
+              PLAY_FIELD_SE_VOLUME_PAN(34)
+              SETUP_FADE_FRAMES(20, 200)
+              SET_CONTROLLER_VIBRATION(SMALL_MOTOR, 1, 20)
+              SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 200, 20)
+              APPLY_PARTY_TRAP_EFFECT(DAMAGE_HALF_HP)
               MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
             } else {
             _25:
               if (local_int[6] == 4) {
                 MARK_CURRENT_TREASURE_OPENED()
-                push 34
-                COMM 0x0214
-                push 200
-                push 20
-                COMM 0x00ab
-                push 20
-                push 1
-                push 0
-                COMM 0x001a
-                push 20
-                push 200
-                push 1
-                COMM 0x001a
-                push 4
-                COMM 0x013a
+                PLAY_FIELD_SE_VOLUME_PAN(34)
+                SETUP_FADE_FRAMES(20, 200)
+                SET_CONTROLLER_VIBRATION(SMALL_MOTOR, 1, 20)
+                SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 200, 20)
+                APPLY_PARTY_TRAP_EFFECT(INFLICT_POISON)
                 MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
               } else {
               _26:
                 if (local_int[6] == 5) {
                   MARK_CURRENT_TREASURE_OPENED()
-                  push 34
-                  COMM 0x0214
-                  push 200
-                  push 20
-                  COMM 0x00ab
-                  push 20
-                  push 1
-                  push 0
-                  COMM 0x001a
-                  push 20
-                  push 200
-                  push 1
-                  COMM 0x001a
-                  push 5
-                  COMM 0x013a
+                  PLAY_FIELD_SE_VOLUME_PAN(34)
+                  SETUP_FADE_FRAMES(20, 200)
+                  SET_CONTROLLER_VIBRATION(SMALL_MOTOR, 1, 20)
+                  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 200, 20)
+                  APPLY_PARTY_TRAP_EFFECT(INFLICT_ACHE)
                   MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
                 } else {
                 _27:
                   if (local_int[6] == 6) {
                     MARK_CURRENT_TREASURE_OPENED()
-                    push 34
-                    COMM 0x0214
-                    push 200
-                    push 20
-                    COMM 0x00ab
-                    push 20
-                    push 1
-                    push 0
-                    COMM 0x001a
-                    push 20
-                    push 200
-                    push 1
-                    COMM 0x001a
-                    push 6
-                    COMM 0x013a
+                    PLAY_FIELD_SE_VOLUME_PAN(34)
+                    SETUP_FADE_FRAMES(20, 200)
+                    SET_CONTROLLER_VIBRATION(SMALL_MOTOR, 1, 20)
+                    SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 200, 20)
+                    APPLY_PARTY_TRAP_EFFECT(INFLICT_CLOSE)
                     MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
                   } else {
                   _28:
@@ -367,8 +313,7 @@ _9:
                       MESSAGE_REQUEST_AND_POLL(message(TAKARA_KARAGET))
                     } else {
                     _18:
-                      push 32
-                      COMM 0x0214
+                      PLAY_FIELD_SE_VOLUME_PAN(32)
                       SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[4], 3)
                       SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[5], 0)
                       if (local_int[4] >= 96 && local_int[4] <= 127) {
@@ -387,12 +332,10 @@ _9:
                   _20:
                     if (local_int[3] == 3) {
                       MARK_CURRENT_TREASURE_OPENED()
-                      push 32
-                      COMM 0x0214
+                      PLAY_FIELD_SE_VOLUME_PAN(32)
                       SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[7], 0)
                       MESSAGE_REQUEST_AND_POLL(message(TAKARA_MAKA_GET))
-                      push local_int[7]
-                      COMM 0x0139
+                      ADD_PARTY_CURRENCY(local_int[7])
                     }
                   _19:
                     goto _22
@@ -433,7 +376,7 @@ warp_label:
   RESTORE_CAMERA_NODE_MODE()
   local_int[9] = READ_WARP_EFFECT_MODE()
   if (local_int[9] == 1) {
-    COMM 0x0204
+    APPLY_CURRENT_TASK_ENTRY_TRIGGER()
     WAIT_FOR_TIMER_LIMIT(20)
     push 0
     push float32(0.12999999523162842, bits=0x3e051eb8)
@@ -461,26 +404,26 @@ warp_label:
     COMM 0x00f3
   }
 _37:
-  COMM 0x0202
+  SET_CURRENT_TASK_SCENE()
   return
   return
 doorwarp_label:
   PROC doorwarp_label
 _39:
   while (1) {
-    COMM 0x0203
+    NO_OP_FIELD_TRANSITION()
     if (ACTION_WINDOW_REQUEST_AND_POLL(2) == 1) {
       RESTORE_CAMERA_NODE_MODE()
       local_int[10] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
       local_int[11] = READ_DOOR_WARP_VALUE(FADE_MODE)
-      COMM 0x0204
+      APPLY_CURRENT_TASK_ENTRY_TRIGGER()
       if (local_int[10] == 40) {
         WAIT_FOR_TIMER_LIMIT(20)
       }
     _41:
       SCREEN_FADE_B(local_int[11], 20)
       WAIT_FOR_TIMER_LIMIT(20)
-      COMM 0x0202
+      SET_CURRENT_TASK_SCENE()
       return
     }
   _43:
@@ -495,12 +438,10 @@ _45:
     if (ACTION_WINDOW_REQUEST_AND_POLL(10) == 1) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(6)
-      COMM 0x020d
+      APPLY_CURRENT_TASK_RECORD_ENTRY()
       ACTIVATE_MESSAGE_PANEL()
       MESSAGE_REQUEST_AND_POLL(message(EXITWARP))
-      push 1
-      push 3
-      COMM 0x013c
+      SET_MESSAGE_RANGE(3, 1)
       if (MESSAGE_SELECTION_REQUEST_AND_POLL(selection(EXITWARP_SEL)) == 0) {
         FINISH_SCRIPT_MESSAGE_WINDOW()
       } else {
@@ -515,14 +456,14 @@ _45:
     _47:
       local_int[12] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
       local_int[13] = READ_DOOR_WARP_VALUE(FADE_MODE)
-      COMM 0x0204
+      APPLY_CURRENT_TASK_ENTRY_TRIGGER()
       if (local_int[12] == 40) {
         WAIT_FOR_TIMER_LIMIT(20)
       }
     _49:
       SCREEN_FADE_B(local_int[13], 45)
       WAIT_FOR_TIMER_LIMIT(45)
-      COMM 0x0202
+      SET_CURRENT_TASK_SCENE()
       return
     }
   _51:
@@ -536,10 +477,10 @@ _53:
   while (1) {
     if (ACTION_WINDOW_REQUEST_AND_POLL(11) == 1) {
       RESTORE_CAMERA_NODE_MODE()
-      COMM 0x0204
+      APPLY_CURRENT_TASK_ENTRY_TRIGGER()
       SCREEN_FADE_B(1, 45)
       WAIT_FOR_TIMER_LIMIT(45)
-      COMM 0x0202
+      SET_CURRENT_TASK_SCENE()
       return
     }
   _55:
@@ -549,21 +490,21 @@ _54:
   return
 runwarp_label:
   PROC runwarp_label
-  COMM 0x0203
+  NO_OP_FIELD_TRANSITION()
   RESTORE_CAMERA_NODE_MODE()
-  COMM 0x0204
+  APPLY_CURRENT_TASK_ENTRY_TRIGGER()
   WAIT_FOR_TIMER_LIMIT(15)
-  COMM 0x0202
+  SET_CURRENT_TASK_SCENE()
   return
 anawarp_label:
   PROC anawarp_label
   RESTORE_CAMERA_NODE_MODE()
-  COMM 0x0203
-  COMM 0x0204
+  NO_OP_FIELD_TRANSITION()
+  APPLY_CURRENT_TASK_ENTRY_TRIGGER()
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   PREPARE_UNIT_MOTION_STATE(global_int[0], 6, 4, 4, 0)
   WAIT_FOR_UNIT_MOTION(global_int[0])
-  COMM 0x0202
+  SET_CURRENT_TASK_SCENE()
   return
 tobiwarp_label:
   PROC tobiwarp_label
@@ -571,11 +512,11 @@ _57:
   while (1) {
     if (ACTION_WINDOW_REQUEST_AND_POLL(3) == 1) {
       RESTORE_CAMERA_NODE_MODE()
-      COMM 0x0203
+      NO_OP_FIELD_TRANSITION()
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       PREPARE_UNIT_MOTION_STATE(global_int[0], 5, 4, 4, 0)
       WAIT_FOR_TIMER_LIMIT(70)
-      COMM 0x0202
+      SET_CURRENT_TASK_SCENE()
       return
     }
   _59:
@@ -589,7 +530,7 @@ hasigo_label:
   local_int[14] = 1
 _61:
   if_not (local_int[14]) goto _62
-  COMM 0x0203
+  NO_OP_FIELD_TRANSITION()
   if_not (local_int[15] == 0) goto _68
   if (ACTION_WINDOW_REQUEST_AND_POLL(6) == 1) {
     local_int[14] = 0
@@ -618,7 +559,7 @@ _62:
   ADD_EFFECT_UNIT_TO_WORLD(local_int[17])
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[16])
-  COMM 0x0204
+  APPLY_CURRENT_TASK_ENTRY_TRIGGER()
   if (local_int[15] == 0) {
     PREPARE_UNIT_MOTION_STATE(global_int[0], 8, 0, 0, 1)
   } else {
@@ -631,7 +572,7 @@ _71:
   WAIT_FOR_TIMER_LIMIT(60)
   SCREEN_FADE_B(0, 20)
   WAIT_FOR_TIMER_LIMIT(20)
-  COMM 0x0202
+  SET_CURRENT_TASK_SCENE()
   return
 heal_label:
   PROC heal_label
@@ -641,8 +582,7 @@ _73:
       RESTORE_CAMERA_NODE_MODE()
       SCREEN_FADE_B(0, 20)
       WAIT_FOR_TIMER_LIMIT(20)
-      push 900
-      COMM 0x020f
+      RUN_FIELD_TRANSITION_SELECTOR(HEAL_FACILITY)
       return
     }
   _75:
@@ -658,8 +598,7 @@ _77:
       RESTORE_CAMERA_NODE_MODE()
       SCREEN_FADE_B(0, 20)
       WAIT_FOR_TIMER_LIMIT(20)
-      push 901
-      COMM 0x020f
+      RUN_FIELD_TRANSITION_SELECTOR(SAVE_POINT)
       return
     }
   _79:
@@ -811,7 +750,7 @@ _127:
       local_int[23] = 0
     }
   _129:
-    COMM 0x020e
+    START_CURRENT_FIELD_INTERACTION_EVENT()
     return
   }
 _131:
@@ -850,16 +789,12 @@ elvstart_label:
   PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 1)
   ADD_EFFECT_UNIT_TO_WORLD(local_int[28])
   SCREEN_FADE_A(0, 15)
-  push local_int[36]
-  push local_int[36]
-  COMM 0x0209
+  CONFIGURE_ELEVATOR_CAMERA_MOVE(local_int[36], local_int[36])
   ACTIVATE_MESSAGE_PANEL()
   MESSAGE_REQUEST_AND_POLL(message(WARP_ELV_MSG))
   if (local_int[29] == 1) {
     SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[30], 4)
-    push 1
-    push 3
-    COMM 0x013c
+    SET_MESSAGE_RANGE(3, 1)
     local_int[27] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL1))
   } else {
   _138:
@@ -868,9 +803,7 @@ elvstart_label:
       SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[31], 4)
       push local_int[36]
       COMM 0x0040
-      push 2
-      push 3
-      COMM 0x013c
+      SET_MESSAGE_RANGE(3, 2)
       local_int[27] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL2))
     } else {
     _139:
@@ -880,9 +813,7 @@ elvstart_label:
         SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[32], 4)
         push local_int[36]
         COMM 0x0040
-        push 3
-        push 3
-        COMM 0x013c
+        SET_MESSAGE_RANGE(3, 3)
         local_int[27] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL3))
       } else {
       _140:
@@ -893,9 +824,7 @@ elvstart_label:
           SET_MESSAGE_WINDOW_GEOMETRY(3, local_int[33], 4)
           push local_int[36]
           COMM 0x0040
-          push 4
-          push 3
-          COMM 0x013c
+          SET_MESSAGE_RANGE(3, 4)
           local_int[27] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL4))
         } else {
         _141:
@@ -907,9 +836,7 @@ elvstart_label:
             SET_MESSAGE_WINDOW_GEOMETRY(4, local_int[34], 4)
             push local_int[36]
             COMM 0x0040
-            push 5
-            push 3
-            COMM 0x013c
+            SET_MESSAGE_RANGE(3, 5)
             local_int[27] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL5))
           } else {
           _142:
@@ -922,9 +849,7 @@ elvstart_label:
               SET_MESSAGE_WINDOW_GEOMETRY(5, local_int[35], 4)
               push local_int[36]
               COMM 0x0040
-              push 6
-              push 3
-              COMM 0x013c
+              SET_MESSAGE_RANGE(3, 6)
               local_int[27] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL6))
             }
           }
@@ -945,11 +870,8 @@ _137:
       PREPARE_UNIT_MOTION_STATE(global_int[0], 10, 4, 20, 0)
       WAIT_FOR_UNIT_MOTION(global_int[0])
       WAIT_FOR_TIMER_LIMIT(4)
-      push 46
-      COMM 0x0214
-      push local_int[27]
-      push local_int[36]
-      COMM 0x0209
+      PLAY_FIELD_SE_VOLUME_PAN(46)
+      CONFIGURE_ELEVATOR_CAMERA_MOVE(local_int[36], local_int[27])
       WAIT_FOR_TIMER_LIMIT(4)
       WAIT_FOR_TIMER_LIMIT(20)
       local_int[37] = POLL_ELEVATOR_MOVE_STATE()
@@ -958,11 +880,9 @@ _137:
         if (local_int[37] == 2) {
           SCREEN_FADE_B(0, 15)
           WAIT_FOR_TIMER_LIMIT(15)
-          push 46
-          COMM 0x0215
-          COMM 0x020a
-          push local_int[27]
-          COMM 0x0201
+          PLAY_FIELD_SE(46)
+          RESET_ELEVATOR_CAMERA_MOVE_TRACKING()
+          RUN_FIELD_DESTINATION_TRANSITION(local_int[27])
           return
         }
       _146:
@@ -971,27 +891,22 @@ _137:
       }
     _145:
       WAIT_FOR_TIMER_LIMIT(20)
-      push 46
-      COMM 0x0215
-      push 47
-      COMM 0x0214
+      PLAY_FIELD_SE(46)
+      PLAY_FIELD_SE_VOLUME_PAN(47)
       WAIT_FOR_TIMER_LIMIT(20)
       goto _148
     }
   }
 _148:
-  push 48
-  COMM 0x0214
+  PLAY_FIELD_SE_VOLUME_PAN(48)
   MOVE_OBJECT_ALONG_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01path_01)), 0)
   MOVE_OBJECT_ALONG_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d02)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01path_02)), 0)
-  push READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01_2))
-  COMM 0x006c
+  WAIT_FOR_OBJECT_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01_2)))
   WAIT_FOR_TIMER_LIMIT(20)
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
-  COMM 0x020a
-  push local_int[27]
-  COMM 0x0201
+  RESET_ELEVATOR_CAMERA_MOVE_TRACKING()
+  RUN_FIELD_DESTINATION_TRANSITION(local_int[27])
   return
 suikomi_label:
   PROC suikomi_label
@@ -1015,7 +930,7 @@ suikomi_label:
   WAIT_FOR_TIMER_LIMIT(60)
   SCREEN_FADE_B(0, 20)
   WAIT_FOR_TIMER_LIMIT(20)
-  COMM 0x0202
+  SET_CURRENT_TASK_SCENE()
   return
   return
 baria_label:
@@ -1056,9 +971,7 @@ _151:
       SCREEN_FADE_B(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)
       local_int[49] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_ICE_BED))
-      push local_int[46]
-      push local_int[49]
-      COMM 0x009d
+      COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[49], local_int[46])
       ADD_EFFECT_UNIT_TO_WORLD(local_int[45])
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[46])
@@ -1096,9 +1009,8 @@ _151:
         WAIT_FOR_TIMER_LIMIT(30)
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
-        push local_int[49]
-        COMM 0x009b
-        COMM 0x00a4
+        DESTROY_WORLD_EFFECT_OBJECT(local_int[49])
+        UPDATE_FIELD_LOOK_AT_SEGMENT()
         ADD_EFFECT_UNIT_TO_WORLD(-(1))
         SCREEN_FADE_A(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
@@ -1112,7 +1024,7 @@ _151:
       FINISH_SCRIPT_MESSAGE_WINDOW()
       SCREEN_FADE_B(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)
-      COMM 0x00a4
+      UPDATE_FIELD_LOOK_AT_SEGMENT()
       ADD_EFFECT_UNIT_TO_WORLD(-(1))
       SCREEN_FADE_A(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)

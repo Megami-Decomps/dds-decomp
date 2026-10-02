@@ -202,66 +202,26 @@ e697_main:
   COMM 0x009e
   push global_int[26]
   COMM 0x009e
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff81))
-  push global_int[8]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff75))
-  push global_int[9]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff76))
-  push global_int[10]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff78))
-  push global_int[11]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff79))
-  push global_int[12]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff80))
-  push global_int[13]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff82))
-  push global_int[14]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff83))
-  push global_int[15]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff84))
-  push global_int[16]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff85))
-  push global_int[17]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff86))
-  push global_int[18]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff87))
-  push global_int[19]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff88))
-  push global_int[20]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff89))
-  push global_int[21]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff90))
-  push global_int[22]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff91))
-  push global_int[23]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff92))
-  push global_int[24]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff93))
-  push global_int[25]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff94))
-  push global_int[26]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff77))
-  push global_int[86]
-  COMM 0x009d
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[8], READ_SECONDARY_WORLD_ID_VALUE(string(eff81)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[9], READ_SECONDARY_WORLD_ID_VALUE(string(eff75)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[10], READ_SECONDARY_WORLD_ID_VALUE(string(eff76)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[11], READ_SECONDARY_WORLD_ID_VALUE(string(eff78)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[12], READ_SECONDARY_WORLD_ID_VALUE(string(eff79)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[13], READ_SECONDARY_WORLD_ID_VALUE(string(eff80)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[14], READ_SECONDARY_WORLD_ID_VALUE(string(eff82)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[15], READ_SECONDARY_WORLD_ID_VALUE(string(eff83)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[16], READ_SECONDARY_WORLD_ID_VALUE(string(eff84)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[17], READ_SECONDARY_WORLD_ID_VALUE(string(eff85)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[18], READ_SECONDARY_WORLD_ID_VALUE(string(eff86)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[19], READ_SECONDARY_WORLD_ID_VALUE(string(eff87)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[20], READ_SECONDARY_WORLD_ID_VALUE(string(eff88)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[21], READ_SECONDARY_WORLD_ID_VALUE(string(eff89)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[22], READ_SECONDARY_WORLD_ID_VALUE(string(eff90)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[23], READ_SECONDARY_WORLD_ID_VALUE(string(eff91)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[24], READ_SECONDARY_WORLD_ID_VALUE(string(eff92)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[25], READ_SECONDARY_WORLD_ID_VALUE(string(eff93)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[26], READ_SECONDARY_WORLD_ID_VALUE(string(eff94)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[86], READ_SECONDARY_WORLD_ID_VALUE(string(eff77)))
   push 0
   push float32(0.9860000014305115, bits=0x3f7c6a7f)
   push float32(0.0, bits=0x00000000)
@@ -334,12 +294,8 @@ e697_main:
   COMM 0x009e
   push global_int[88]
   COMM 0x009e
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff770))
-  push global_int[87]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(eff750))
-  push global_int[88]
-  COMM 0x009d
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[87], READ_SECONDARY_WORLD_ID_VALUE(string(eff770)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(global_int[88], READ_SECONDARY_WORLD_ID_VALUE(string(eff750)))
   WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e697_050), -(1)))
   SCREEN_FADE_B(1, 1)
   WAIT_FOR_TIMER_LIMIT(60)
@@ -604,44 +560,25 @@ e697_050:
   push global_int[88]
   COMM 0x009f
   WAIT_FOR_TIMER_LIMIT(40)
-  push global_int[8]
-  COMM 0x009b
-  push global_int[9]
-  COMM 0x009b
-  push global_int[10]
-  COMM 0x009b
-  push global_int[11]
-  COMM 0x009b
-  push global_int[12]
-  COMM 0x009b
-  push global_int[13]
-  COMM 0x009b
-  push global_int[14]
-  COMM 0x009b
-  push global_int[15]
-  COMM 0x009b
-  push global_int[16]
-  COMM 0x009b
-  push global_int[17]
-  COMM 0x009b
-  push global_int[18]
-  COMM 0x009b
-  push global_int[19]
-  COMM 0x009b
-  push global_int[20]
-  COMM 0x009b
-  push global_int[21]
-  COMM 0x009b
-  push global_int[22]
-  COMM 0x009b
-  push global_int[23]
-  COMM 0x009b
-  push global_int[24]
-  COMM 0x009b
-  push global_int[25]
-  COMM 0x009b
-  push global_int[26]
-  COMM 0x009b
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[8])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[9])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[10])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[11])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[12])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[13])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[14])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[15])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[16])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[17])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[18])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[19])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[20])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[21])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[22])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[23])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[24])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[25])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[26])
   push READ_SECONDARY_WORLD_ID_VALUE(string(light05))
   push 70
   push global_int[1]
