@@ -120,7 +120,23 @@ u32 dds3AdvanceObjectValueCursor(WorldObject *object) {
     return (u32)~(s32)object->cursorIndex >> 0x1f;
 }
 
-INCLUDE_ASM(const s32, "game/code_001102C8", dds3VisitWorldObjectValues);
+/* Call `callback` with every value of the object's list in order; stop and return 0 as soon as one callback returns 0. Returns 1 when the object has no values, no callback is given, or all callbacks succeeded. */
+s32 dds3VisitWorldObjectValues(WorldObject *object, s32 (*callback)(u32)) {
+    u32 more;
+
+    if (callback == NULL) {
+        return 1;
+    }
+    if (dds3GetWorldValueCount((s32)object) == 0) {
+        return 1;
+    }
+    for (more = dds3ResetObjectValueCursor(object); more != 0; more = dds3AdvanceObjectValueCursor(object)) {
+        if (callback(dds3ReadIndexedWorldObjectWord(object)) == 0) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 extern void *func_002CFEB8(s32 size);
 extern u32 sdfAllocGeneralBlock(s32 size);

@@ -904,6 +904,40 @@ computed. Natural source shapes that flip it:
    solve for the store order, and write the source in the order that produces
    it (DDS1 `func_001168F0` / DDS2 `func_00116B58`: predicted, matched first
    try). This is a derivation from the allocator, not a search.
+6. **Don't name a pointer the original only dereferenced.** A `next = block->block;`
+   local is a user-variable pseudo (`user var` in the `-dl` listing) allocated
+   in global-alloc with its own priority, so every other counter shifts one
+   register. Writing the loop as `for (; block->busy != 2; block = block->block)`
+   with `size = block->block->address - block->address;` leaves the loaded
+   pointer to cse (an expression temp the allocator places next to `size`) and
+   gives retail's counters `$12/$13/$9/$7/$11/$10`. DDS1 `func_002D0B50` / DDS2
+   `func_00329A00` (heap statistics; 28 of 41 words differed with `next`,
+   0 without). Before trying declaration orders on a register-numbering-only
+   miss, check whether a named pointer local is one retail would have left as
+   an expression.
+7. **Cursor iteration is a `for` over the cursor's own return value.** DDS2
+   `dds3VisitWorldObjectValues` / DDS1 twin: `for (more = Reset(object);
+   more != 0; more = Advance(object)) { if (callback(Read(object)) == 0)
+   return 0; } return 1;` matches. The same logic as `if (Reset() == 0)
+   return 1; do {...} while (Advance())` leaves the empty-list exit jumping
+   into the loop test (3 words off) because jump2 merges the `return 1`
+   blocks differently.
+8. **A value assigned in both arms is not the same as preset-then-override.**
+   DDS2 `func_001A7A08` / DDS1 `func_0019F9E0`: `if (a & 2) step = -1; else
+   step = (b & 2) > 0;` matches; `step = -1; if (!(a & 2)) step = ...` gives
+   the same branches but loses retail's re-materialised base address
+   (`addiu $3,$6,%lo(sym)` after the first test) and the delay-slot fill.
+   `(x & 2) > 0` is also how retail's `sltu $5,$0,$2` arises; `!= 0` gives
+   `srl/andi`.
+9. **Fixed-stride arrays in a global: index the typed array twice.** DDS2
+   `func_0026D4C8`: retail computes the entry's flag word from `state +
+   i * stride` with the array offset folded into the displacement
+   (`lhu 0xA60($2)`) and the entry pointer separately (`addiu $17,$4,0xA60`).
+   `((State *)g)->party[i].flags & 1` in the test and `slot =
+   &((State *)g)->party[i]` inside the branch reproduces both; taking
+   `slot` first and reading `slot->flags` gives one address and 37 words of
+   difference. (`func_0026BC80` shows the plain `(Slot *)(g + i * stride +
+   off)` form matches when only one address is used.)
 
 Unresolved: a saved register initialised as a copy of another holding the same
 constant (`move $16,$19` for `i` from `bestIndex = 0`, DDS1 `func_00202F90`,

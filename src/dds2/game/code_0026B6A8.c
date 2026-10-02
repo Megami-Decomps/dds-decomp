@@ -222,7 +222,39 @@ u32 func_0026BC78(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BC80);
+/* Index (0-3) of the lowest main character present in the party, as a bit mask over unit ids 1, 2, 5 and 8; 0 when none. */
+s32 func_0026BC80(void) {
+    PartySlotHeader *slot;
+    u32 present = 0;
+    s32 i;
+
+    for (i = 0; i < 5; i++) {
+        slot = (PartySlotHeader *)(datGameState + i * 0x1C4 + 0xA60);
+        if (slot->flags & 1) {
+            switch (slot->unitId) {
+            case 1:
+                present |= 1;
+                break;
+            case 2:
+                present |= 2;
+                break;
+            case 5:
+                present |= 4;
+                break;
+            case 8:
+                present |= 8;
+                break;
+            }
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (present & 1) {
+            return i;
+        }
+        present >>= 1;
+    }
+    return 0;
+}
 
 s32 func_0026BD38(s32 index) {
     return index == 1 ? 4 : 6;
