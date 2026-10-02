@@ -376,7 +376,24 @@ void polyReleaseNodeCellSystemAndBuffer(PolyArc *obj) {
     sdfReleaseResourceAllocation(obj->allocation);
 }
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_001664A8);
+/* Seed arc records with staggered inactive ages. */
+void func_001664A8(PolyArc *obj) {
+    u32 count = obj->head.entryCount;
+    PolyArcRecord *record = obj->records;
+    u32 delayStep = obj->spawnDelayStep;
+    s32 age = POLY_INACTIVE_ENTRY_AGE;
+    u32 index;
+
+    index = 0;
+    if (count != 0) {
+        do {
+            index++;
+            record->age = age;
+            age -= delayStep;
+            record++;
+        } while (index < count);
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_001664F0);
 
@@ -453,7 +470,26 @@ void polyReleaseCellBoundNodeResources(PolyRotatingBand *obj) {
     sdfReleaseResourceAllocation(obj->allocation);
 }
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_00166AE0);
+/* Seed rotating-band records, advancing the age after each delay group. */
+void func_00166AE0(PolyRotatingBand *obj) {
+    u32 count = obj->head.entryCount;
+    PolyRotatingBandRecord *record = obj->records;
+    u32 delayStep = obj->spawnDelayStep;
+    s32 age = POLY_INACTIVE_ENTRY_AGE;
+    u32 index;
+
+    index = 0;
+    if (count != 0) {
+        do {
+            record->age = age;
+            record++;
+            if ((index + 1) % obj->spawnDelayGroupSize == 0) {
+                age -= delayStep;
+            }
+            index++;
+        } while (index < count);
+    }
+}
 
 
 /* Randomize record `index`: jittered start and end radii, radius step, start angle (degrees to radians) and the phase within its delay group. */
