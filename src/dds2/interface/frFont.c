@@ -771,7 +771,42 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019DB30);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019DBA8);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019DC68);
+typedef struct FrFontPosition {
+    s32 x;
+    s32 y;
+} FrFontPosition;
+
+void func_0019DC68(FrFontPosition *position, s32 line, FrFontGlyph *glyph) {
+    s32 index = 0;
+    FrFontGlyph *node;
+    FrFontGlyph *scan;
+    s32 limit;
+    s32 currentY;
+
+    if (glyph != NULL) {
+        node = glyph->chainHead;
+        if (node != NULL) {
+            do {
+                scan = node;
+                position->x = node->x;
+                position->y = node->y;
+                currentY = node->y;
+                if (node != NULL) {
+                    limit = currentY + 0x64;
+                    if (currentY < limit) {
+                        do {
+                            scan = scan->next;
+                        } while (scan != NULL && scan->y < limit);
+                    }
+                }
+                if (index++ == line) {
+                    break;
+                }
+                node = scan;
+            } while (node != NULL);
+        }
+    }
+}
 
 void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *glyph) {
     FrFontGlyph *node;
