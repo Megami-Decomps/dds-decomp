@@ -30,9 +30,9 @@ typedef struct EffectObjectData {
     u32 word14;
     u32 word18;
     s32 pendingValue;
-    u32 timer;
+    s32 timer;
     u32 word24;
-    u32 word28;
+    f32 angle;
     f32 limitMin2C;
     f32 limitMax30;
     u32 word34;
@@ -111,7 +111,38 @@ f32 dds3ShortestAngleDelta(f32 fromDegrees, f32 toDegrees) {
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00113408);
 
-INCLUDE_ASM(const s32, "game/code_00113308", func_00113560);
+extern void dds3ClearObjectFlags(EffectObject *, s32);
+
+void func_00113560(EffectObject *object) {
+    EffectObjectData *data = object->data;
+    f32 angle;
+    f32 value;
+    f32 step;
+
+    if (data->timer > 0) {
+        data->timer--;
+    } else {
+        angle = data->angle;
+        if (angle < 0.1f && -0.1f < angle) {
+            dds3ClearObjectFlags(object, 0x2000);
+        } else {
+            value = dds3ShortestAngleDelta(angle, 0.0f);
+            step = 1.0f;
+            if ((0.0f <= value && value <= step) ||
+                (value <= 0.0f && -step <= value)) {
+                value = 0.0f;
+            } else {
+                if (value < 0.0f) {
+                    value = angle - step;
+                } else {
+                    value = angle + step;
+                }
+            }
+            data->angle = value;
+            data->word34 = 0;
+        }
+    }
+}
 
 void evtArmEffectObjectPendingValue(EffectObject *object, u32 value) {
     EffectObjectData *data;
@@ -145,7 +176,7 @@ s32 effObjInitializeFollowModelData(EffectObject *object) {
     data->word14 = -1;
     data->pendingValue = 0;
     data->timer = 0;
-    data->word28 = 0;
+    data->angle = 0.0f;
     data->limitMin2C = -45.0f;
     data->limitMax30 = 45.0f;
     data->word34 = 0;

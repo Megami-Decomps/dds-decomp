@@ -1,10 +1,73 @@
 #include "common.h"
 
+typedef struct Motion Motion;
+typedef struct SdfMotionManager SdfMotionManager;
+typedef struct MotionTable MotionTable;
+typedef struct ArrObj ArrObj;
+
+struct Motion {
+    Motion *next;
+    SdfMotionManager *owner;
+    MotionTable *motionTable;
+    s32 unkC;
+    ArrObj *request;
+    f32 blendDurationFrames;
+    f32 blendStartFrame;
+    f32 currentFrame;
+    f32 frameStep;
+    s32 unk24;
+    s32 unk28;
+    s16 motionIndex;
+    u16 frameCount;
+    u8 state;
+    u8 previousState;
+    u8 loopEnabled;
+    u8 pad33;
+};
+
+typedef struct MdlCtx {
+    u32 flags;
+    u8 unk4[8];
+    struct MdlSub *sub;
+    union {
+        u32 word;
+        struct {
+            s16 id;
+            s16 arg;
+        } h;
+    } current;
+    u32 *list14;
+    struct MdlInner *inner;
+    Motion *first;
+    Motion *slots[4];
+    struct MdlDevList *devList;
+} MdlCtx;
+
+typedef struct MnuModelNode {
+    f32 primary[4];
+    f32 rotationQuaternion[4];
+    f32 tertiary[4];
+    f32 x;
+    f32 y;
+    f32 z;
+    u32 positionFlag;
+    MdlCtx *model;
+    u32 flags;
+    u16 value48;
+    u16 value4A;
+    f32 savedModelValue;
+} MnuModelNode;
+
+typedef union MenuWorkState {
+    u32 word;
+    u8 bytes[4];
+} MenuWorkState;
+
 typedef struct MenuWorkEntry {
-    u8 pad00[4];
+    MenuWorkState state;
     u32 tag;
     s32 unk08;
-    u8 pad0C[4];
+    MnuModelNode *modelNode;
     f32 x0;
     f32 y0;
     f32 scale0;
@@ -110,6 +173,13 @@ extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern void func_0031CAE8(f32 *, s32, s32);
 extern s32 func_0031B838(void *, void *, s32, f32, f32, f32, f32);
 extern void func_00319FF0(void);
+
+typedef struct SoundSlot SoundSlot;
+extern SoundSlot *sndClaimFreeSoundSlot(u32, u32);
+extern void mdlAddEntryFlaggedEx(MdlCtx *, s32, s32, f32, f32);
+extern void sdfMotionSampleAtFrame(Motion *, f32);
+extern s32 D_00438934;
+void func_00319F48(void);
 
 extern MnuEffectRecord *D_00438930;
 
@@ -347,7 +417,28 @@ INCLUDE_ASM(const s32, "game/code_00316E08", func_00319388);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00319A58);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00319E48);
+void func_00319E48(MenuWorkEntry *record) {
+    MnuModelNode *node;
+
+    if ((record->state.bytes[1] & 0xF0) == 0x40) {
+        if (record->state.bytes[1] == 0x44) {
+            sndClaimFreeSoundSlot(0x1E00001, 0);
+        } else if ((record->state.word & 0x1E) == 4 ||
+                   (record->state.word & 0x1E) == 6) {
+            sndClaimFreeSoundSlot(0x1E00000, 0);
+        }
+    }
+    node = D_0040ABF8.modelNode;
+    if (record->state.bytes[1] == 0x44) {
+        node->model->first->frameStep = 1.0f;
+        node->savedModelValue = 1.0f;
+        mdlAddEntryFlaggedEx(node->model, 0, 2, 0.0f, 0.0f);
+        sdfMotionSampleAtFrame(node->model->first, 20.0f);
+        D_00438934 = node->model->first->frameCount - 20;
+        evtPrintDeveloperConsoleMessage("ModelFrame [%d]\n", D_00438934);
+        func_00319F48();
+    }
+}
 
 /* Acquire a record from the third effect list at the timed UI position. */
 void func_00319F48(void) {
