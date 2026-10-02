@@ -1667,8 +1667,8 @@ s32 ptySkillMenuHandlePageSwitch(s32 callback) {
  * double-dereferenced cursor load raw: the typed form does not match. */
 void mnuSeekSelectedWindowRow(s32 menu, s32 target) {
     s32 *entry = (s32 *)menu + **(s32 **)(*(s32 *)(menu + 4) + 0x1C);
-    s32 list = entry[2];
-    s32 delta = target - ((MenuList *)((MenuWindowContainer *)list)->list)->windowOffset;
+    s32 window = entry[2];
+    s32 delta = target - ((MenuWindowContainer *)window)->list->windowOffset;
     s32 dir;
     s32 n;
 
@@ -1682,15 +1682,15 @@ void mnuSeekSelectedWindowRow(s32 menu, s32 target) {
         n = delta;
         do {
             if (dir < 0) {
-                mnuReverseListSelection(list, 1);
+                mnuReverseListSelection(window, 1);
             }
             if (dir > 0) {
-                mnuAdvanceListSelection(list, 1);
+                mnuAdvanceListSelection(window, 1);
             }
             n--;
         } while (n != 0);
     }
-    mnuResetListNodeFadeCounters(((MenuWindowContainer *)list)->list);
+    mnuResetListNodeFadeCounters(((MenuWindowContainer *)window)->list);
 }
 
 s64 ptySkillMenuBrowseCandidatePages(s32 callback) {
@@ -1922,7 +1922,7 @@ s64 mnuCampMenuDrawStatus(s32 callback) {
     func_002B7588(context);
     mnuCreateStaffImageSprite(0x14);
     func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
-    label = *(u32 *)(*(s32 *)(*(s32 *)(*(s32 *)(menu + 0x24 + *(s32 *)(menu + 0x2c) * 4) + 0x18) + 0x1c) + 0x60);
+    label = ((MenuWindowContainer *)*(s32 *)(menu + 0x24 + *(s32 *)(menu + 0x2c) * 4))->list->cursor->sortKeyPrimary;
     func_002B7228(context);
     if (label != 0 && label != 0xffff) {
         label = (u16)label;

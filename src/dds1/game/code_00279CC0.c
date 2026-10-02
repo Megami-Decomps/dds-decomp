@@ -99,6 +99,47 @@ extern s32 kwlnTaskGetUserValue();
 
 extern s64 func_00285670(s32, s32 *, u64, u64);
 
+struct MenuListNode {
+    s32 index;
+    s32 value;
+    u8 pad8[0x40];
+    u32 flags48;        /* 0x48 */
+    u8 pad4C[4];
+    s32 animationTimer; /* 0x50: stepped down to zero while a list is visible */
+    u8 selectionByte54; /* 0x54: cleared on moving the list selection */
+    u8 pad55[3];
+    struct MenuListNode *next;
+    struct MenuListNode *prev;
+    u32 sortKeyPrimary;   /* 0x60 */
+    u32 sortKeySecondary; /* 0x64 */
+    u32 sortKeyTertiary;  /* 0x68 */
+    u8 pad6C[8];
+};
+struct MenuList {
+    u32 stateFlags;     /* 0x00: cursor and selection-control bits */
+    u32 flags;
+    s32 id;             /* 0x08: owner/list identifier */
+    s32 visibleCount;
+    MenuListNode *first;
+    MenuListNode *last;
+    MenuListNode *head;
+    MenuListNode *cursor;
+    s32 count;
+    s32 windowOffset;
+    s32 rowStep;        /* 0x28: constructor argument scaled by eight */
+    u8 pad2C[0x10];
+    s32 scale;          /* 0x3C: 8.8 fixed-point default */
+};
+/* Window prefix shared with the drawable container in code_0027BF00. */
+struct MenuWindowContainer {
+    s32 id;
+    u32 flags;
+    s32 width;
+    s32 height;
+    u8 pad10[4];
+    MenuList *list;
+};
+
 /* Selected child window and page of the party skill-menu runtime. */
 typedef struct MenuPartyRuntime {
     u8 pad00[4];
@@ -109,10 +150,11 @@ typedef struct MenuPartyRuntime {
     s32 selectedPage;   /* 0x2C */
 } MenuPartyRuntime;
 
+/* Shift the chosen child window to target's row; the cursor index selects its slot. */
 void mnuSeekSelectedWindowRow(s32 menu, s32 target) {
     s32 *entry = (s32 *)menu + **(s32 **)(((MenuPartyRuntime *)menu)->selectionList + 0x1C);
-    s32 list = entry[2];
-    s32 delta = target - *(s32 *)(*(s32 *)(list + 0x14) + 0x24);
+    s32 window = entry[2];
+    s32 delta = target - ((MenuWindowContainer *)window)->list->windowOffset;
     s32 dir;
     s32 n;
 
@@ -126,15 +168,15 @@ void mnuSeekSelectedWindowRow(s32 menu, s32 target) {
         n = delta;
         do {
             if (dir < 0) {
-                mnuReverseListSelection(list, 1);
+                mnuReverseListSelection(window, 1);
             }
             if (dir > 0) {
-                mnuAdvanceListSelection(list, 1);
+                mnuAdvanceListSelection(window, 1);
             }
             n--;
         } while (n != 0);
     }
-    mnuResetListNodeFadeCounters(*(s32 *)(list + 0x14));
+    mnuResetListNodeFadeCounters(((MenuWindowContainer *)window)->list);
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", ptySkillMenuBrowseCandidatePages);
@@ -142,8 +184,8 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", ptySkillMenuBrowseCandidatePages);
 s64 mnuOpenSkillDetailPanel(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *menu = *(s32 **)(context + 0x90C);
-    s32 index = **(s32 **)(menu[3] + 0x1C);
-    s32 label = *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)((s32)menu + 0x10 + (index << 2)) + 0x14) + 0x1C) + 0x60);
+    s32 index = ((MenuList *)menu[3])->cursor->index;
+    s32 label = ((MenuWindowContainer *)*(s32 *)((s32)menu + 0x10 + (index << 2)))->list->cursor->sortKeyPrimary;
     s32 window;
     ptySkillMenuCopyPageState(context);
     mnuDrawStaffCampScreen(1, callback);
@@ -154,7 +196,7 @@ s64 mnuOpenSkillDetailPanel(s32 callback) {
         func_00272668(1, 0, 0, context, 1, 0x53);
     }
     window = menu[9];
-    **(u32 **)(window + 0x14) |= 8;
+    ((MenuWindowContainer *)window)->list->stateFlags |= 8;
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, window, 0x53);
     func_002723B0(3, *(s32 *)(context + 0x78));
     return menuRunPanel(context, 1, callback);
@@ -322,7 +364,7 @@ void mnuCampMenuDrawStatus(s32 param) {
     s32 context = kwlnTaskGetUserValue();
     s32 menu = *(s32 *)(context + 0x90C);
     s32 slots;
-    s32 node;
+    MenuList *list;
     s32 label;
 
     func_00272778(param);
@@ -330,8 +372,8 @@ void mnuCampMenuDrawStatus(s32 param) {
     mnuCreateStaffImageSprite(0x10);
     slots = menu + 4;
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, *(s32 *)(slots + ((MenuPartyRuntime *)menu)->selectedPage * 4 + 0x20), 0x53);
-    node = *(s32 *)(*(s32 *)(slots + ((MenuPartyRuntime *)menu)->selectedPage * 4 + 0x20) + 0x14);
-    label = *(s32 *)(*(s32 *)(node + 0x1C) + 0x60);
+    list = ((MenuWindowContainer *)*(s32 *)(slots + ((MenuPartyRuntime *)menu)->selectedPage * 4 + 0x20))->list;
+    label = list->cursor->sortKeyPrimary;
     mnuDrawSkillMenuFrameIcons(context);
     if (label != 0) {
         if (label != 0xFFFF) {
@@ -494,21 +536,6 @@ void mnuDrawBackdrop(MenuAssets *assets, s32 option) {
     mnuDrawCampBackdropDecoration(assets, option);
 }
 
-struct MenuList {
-    u32 stateFlags;     /* 0x00: cursor and selection-control bits */
-    u32 flags;
-    s32 id;             /* 0x08: owner/list identifier */
-    s32 visibleCount;
-    MenuListNode *first;
-    MenuListNode *last;
-    MenuListNode *head;
-    MenuListNode *cursor;
-    s32 count;
-    s32 windowOffset;
-    s32 rowStep;        /* 0x28: constructor argument scaled by eight */
-    u8 pad2C[0x10];
-    s32 scale;          /* 0x3C: 8.8 fixed-point default */
-};
 
 MenuList *mnuCreateListState(s32 id, s32 visibleCount, s32 rowSpacing) {
     MenuList *item = (MenuList *)sdfAllocAndClearQuadwords(0x40);
@@ -533,22 +560,6 @@ u32 mnuDestroyListState(MenuList *list) {
     return 1;
 }
 
-struct MenuListNode {
-    s32 index;
-    s32 value;
-    u8 pad8[0x40];
-    u32 flags48;        /* 0x48 */
-    u8 pad4C[4];
-    s32 animationTimer; /* 0x50: stepped down to zero while a list is visible */
-    u8 selectionByte54; /* 0x54: cleared on moving the list selection */
-    u8 pad55[3];
-    struct MenuListNode *next;
-    struct MenuListNode *prev;
-    u32 sortKeyPrimary;   /* 0x60 */
-    u32 sortKeySecondary; /* 0x64 */
-    u32 sortKeyTertiary;  /* 0x68 */
-    u8 pad6C[8];
-};
 
 void mnuUpdateListScrollFlags(MenuList *list) {
     MenuListNode *node = list->head;
