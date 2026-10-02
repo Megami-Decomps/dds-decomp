@@ -19,7 +19,7 @@ typedef struct {
     s32 timer;            /* 0x14 */
     s32 pad18;
     s32 word1C;
-    s32 pad20;
+    s32 pulseFrame;
     s32 transitionOffset; /* 0x24 */
     s32 mode;             /* 0x28 */
     u32 linkedState;       /* 0x2C: passed to the func_0027Bxxx helpers */
@@ -146,6 +146,9 @@ void mnuReleaseSpriteHandle(void) {
 }
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
+extern s32 func_00134CD8(void);
+extern f32 effMiscRandUnitFloat(s32);
+extern f32 sdfSinPoly(f32);
 
 /* These entry points differ only in the selected menu sound identifier. */
 void mnuStartMovieMenuSfx16(s32 parameter) {
@@ -304,7 +307,37 @@ s32 func_0026C4B8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C7E0);
+void func_0026C7E0(void) {
+    f32 wave;
+
+    func_00134CD8();
+    ((MenuState *)mnuMovieMenuState)->pulseFrame++;
+    if (((MenuState *)mnuMovieMenuState)->pulseFrame >= 61) {
+        ((MenuState *)mnuMovieMenuState)->pulseFrame = 0;
+        if (((MenuState *)mnuMovieMenuState)->slideOffset == 0 && effMiscRandUnitFloat(0) < 0.1f) {
+            ((MenuState *)mnuMovieMenuState)->slideOffset = 1024;
+        }
+    }
+    wave = ((MenuState *)mnuMovieMenuState)->pulseFrame / 60.0f;
+    wave = sdfSinPoly(wave * 6.2831853f - 1.5707963f);
+    wave = (wave + 1.0f) * 0.5f;
+    mnuDrawSprite(0, 0, 0, 128, 0, 8, 0x53);
+    mnuDrawSprite(0, 0, 0, 128, 0, 12, 0x53);
+    mnuDrawSprite(0, 0, 0, 76, 0, 10, 0x53);
+    mnuDrawSprite(0, 0, 0, (s32)(wave * 64.0f), 0, 10, 0x53);
+    if (((MenuState *)mnuMovieMenuState)->slideOffset > 0) {
+        ((MenuState *)mnuMovieMenuState)->slideOffset -= 32;
+    } else {
+        ((MenuState *)mnuMovieMenuState)->slideOffset = 0;
+    }
+    func_0026C350(((MenuState *)mnuMovieMenuState)->slideOffset - 512, 0, 128, 0x53);
+    mnuDrawSprite(0, 0, 0, 128, 0, 0, 0x53);
+    mnuDrawSprite(0, 0, 0, 128, 0, 2, 0x53);
+    mnuDrawSprite(0, 0, 0, 128, 0, 1, 0x53);
+    mnuDrawSprite(1, -10, 0, 128, 0, 4, 0x53);
+    mnuDrawSprite(0, 0, 0, 128, 0, 7, 0x53);
+    mnuDrawSprite(0, 0, 0, 128, 0, 11, 0x53);
+}
 
 void mnuStartMovieMenuSfxGroup(void) {
     mnuDrawSprite(0, 0, 0, 0x80, 0, 6, 0x53);
