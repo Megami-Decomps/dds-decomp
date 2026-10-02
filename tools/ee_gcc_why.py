@@ -14,6 +14,7 @@ from typing import Any
 import ee_gcc_allocations as allocations
 import ee_gcc_compare as compare
 import ee_gcc_delay_slots as delay_slots
+import ee_gcc_schedules as schedules
 
 
 DIAGNOSTIC_CFLAG = re.compile(r"^-fsched-verbose(?:=.*)?$")
@@ -242,11 +243,20 @@ def diagnosis_for(comparison: dict[str, Any], object_report: dict[str, Any],
             "basis": ["the first captured normalized difference is delayed-branch scheduling"],
             "next_step": "compare donor availability and eligibility before pass 29; avoid cosmetic source variants",
         }
-    if number == 25:
+    if number in (17, 25):
         return {
-            "class": "post-reload-scheduling",
+            "class": (
+                "pre-reload-scheduling" if number == 17
+                else "post-reload-scheduling"
+            ),
             "basis": [f"the first normalized difference is {first}"],
-            "next_step": "compare ready instructions and dependencies at sched2; stop if the desired order has no truthful dependency",
+            "next_step": (
+                "compare ready instructions, dependencies, and register pressure at "
+                "sched1; stop if the desired order has no truthful source-level cause"
+                if number == 17 else
+                "compare ready instructions and dependencies at sched2; stop if the "
+                "desired order has no truthful dependency"
+            ),
         }
     if first == "assembly":
         return {
@@ -334,6 +344,17 @@ def analyze(left: Path, right: Path, function: str | None = None) -> dict[str, A
             except (FileNotFoundError, ValueError) as error:
                 evidence_gaps.append(str(error))
         report["delay_slots"] = paired
+    elif number in (17, 25):
+        paired = {}
+        artifact = "rtl.17.sched" if number == 17 else "rtl.25.sched2"
+        for label, directory in (("left", left), ("right", right)):
+            try:
+                paired[label] = parse_side(
+                    directory, function, artifact, schedules.parse_dump
+                )
+            except (FileNotFoundError, ValueError) as error:
+                evidence_gaps.append(str(error))
+        report["schedules"] = paired
     if evidence_gaps:
         report["evidence_gaps"] = evidence_gaps
         diagnosis["basis"].append("supporting stage evidence is incomplete")
@@ -377,6 +398,27 @@ def render(report: dict[str, Any]) -> str:
                     for slot in sequence["slots"]
                 ) or "none"
                 lines.append(f"  uid {branch['uid']} -> {donors}")
+    if "schedules" in report:
+        for side in ("left", "right"):
+            functions = report["schedules"].get(side, [])
+            count = sum(function["contested_count"] for function in functions)
+            lines.append(f"{side} sched  {count} contested selection(s)")
+            emitted = 0
+            for function in functions:
+                for block in function["blocks"]:
+                    for choice in block["contested"]:
+                        if emitted >= 4:
+                            break
+                        ready = " ".join(str(uid) for uid in choice["ready_uids"])
+                        lines.append(
+                            f"  bb {block['block']} t={choice['clock']}: "
+                            f"uid {choice['selected_uid']} from {ready}"
+                        )
+                        emitted += 1
+                    if emitted >= 4:
+                        break
+                if emitted >= 4:
+                    break
     if report["first_diff"]:
         lines.append("first diff")
         lines.extend(f"  {line}" for line in report["first_diff"])
