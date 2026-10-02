@@ -1029,7 +1029,25 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_0024A728);
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024A930);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024AB28);
+typedef struct {
+    u8 pad00[0x70];
+    MenuProgressOwner *owner;
+} MenuSelectorContext;
+
+s32 func_0024AB28(MenuSelectorContext *context) {
+    s32 value = context->owner->selectionState;
+
+    switch (value) {
+    case 2:
+        return 0x35;
+    case 3:
+        return 0x37;
+    case 4:
+        return 0x34;
+    default:
+        return 5;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024AB70);
 
