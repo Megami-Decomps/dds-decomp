@@ -1021,61 +1021,7 @@ void sdfPowerOffInterruptCallback(void) {
     iSignalSema();
 }
 
-extern u8 sdfPfsDebugMode;
-extern char D_003988C0[];
-extern char D_003988D0[];
-extern char D_003FA800[];
-extern u8 D_003BD470[];
-extern void sdfLoadDevModule(void);
-extern s32 sdfCreateThread(void (*)(s32), void *, s32, s32);
-extern void func_002F33C8(void (*)(void), s32);
-extern void func_0030E620(void);
-extern s32 func_003014F0(char *, const char *, ...);
-extern s32 func_00310C00(void *, void *, s32, s32, s32);
-
-s32 func_002E7228(char *path) {
-    char buffer[0x100];
-    s32 resident;
-    s32 result;
-    s32 semaphore;
-    s32 thread;
-
-    sdfPfsDebugMode = 0;
-    sdfLoadDevModule();
-    if (D_003BD478 == 0) {
-        return 0;
-    }
-    result = func_00312618("cdrom0:\\IRX\\ATAD.IRX;1", 0, NULL, &resident);
-    if (result < 0) {
-        return result;
-    }
-    if (resident != 0) {
-        return resident;
-    }
-    result = func_00312618("cdrom0:\\IRX\\HDD.IRX;1", 0xC, D_003988C0, &resident);
-    if (result < 0) {
-        return result;
-    }
-    if (resident != 0) {
-        return resident;
-    }
-    result = func_00312618("cdrom0:\\IRX\\PFS.IRX;1", 0x12, D_003988D0, &resident);
-    if (result < 0) {
-        return result;
-    }
-    if (resident != 0) {
-        return resident;
-    }
-    semaphore = sdfCreateSemaphore(0, 1, 0);
-    thread = sdfCreateThread(sdfPowerOffLoop, D_003FA800, 0x800, 1);
-    _StartThread(thread, semaphore);
-    func_002F33C8(sdfPowerOffInterruptCallback, semaphore);
-    func_0030E620();
-    func_003014F0(buffer, "hdd0:%s,", path);
-    result = func_00310C00(D_003BD470, buffer, 0, 0, 0);
-    sdfPfsDebugMode = 1;
-    return result;
-}
+INCLUDE_ASM(const s32, "game/code_002E4720", func_002E7228);
 
 void sdfLoadDevModule(void) {
     s32 resident;
