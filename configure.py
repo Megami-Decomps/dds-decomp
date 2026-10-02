@@ -211,8 +211,9 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     )
     n.rule(
         "dev_cc",
+        f"mkdir -p $outdir && "
         f"cpp -MM -MG -MF $out.d -MT $out -nostdinc {INCLUDES} $cdefs $in && "
-        f"{prefix}{CC1} {CC1_DEFINES} {INCLUDES} $cdefs {CC1_FLAGS} -G0 $in -o $out.s && "
+        f"{prefix}{CC1} {CC1_DEFINES} {INCLUDES} $cdefs {CC1_FLAGS} $cflags -G0 $in -o $out.s && "
         f"{sys.executable} tools/as_coproc_delay.py $out.s $out.s && "
         f"{prefix}{EE_AS} {EE_AS_FLAGS} -G0 -o $out $out.s",
         description="dev cc $in",
@@ -240,7 +241,8 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     n.rule(
         "dev_finalize",
         f"{sys.executable} tools/dev_elf.py finalize "
-        "$descriptor $retail $linked $out --reloc-elf $relocelf",
+        "$descriptor $retail $linked $out --reloc-elf $relocelf "
+        "--retail-symbol-elf $retailsym",
         description="dev ELF $out",
     )
     n.rule(
@@ -281,6 +283,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
 
     units: dict[str, list[dict]] = {}
     defaults = []
+    dev_configure_inputs: set[str] = set()
     for version in versions:
         serial = VERSIONS[version]["serial"]
         yaml = Path("config") / version / f"{serial}.yaml"
@@ -339,7 +342,66 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
 
         dev_descriptor = Path("config") / version / "devbuild.json"
         if (ROOT / dev_descriptor).exists():
+            dev_configure_inputs.add(f"config/{version}/cflags.txt")
             dev_spec = json.loads((ROOT / dev_descriptor).read_text())
+            replacement_objects = []
+            replaced_objects = set()
+            for index, replacement in enumerate(dev_spec.get("replacements", [])):
+                obj = replacement.get("object")
+                retail_obj = replacement.get("retail_object")
+                if not all(isinstance(value, str) and value for value in (obj, retail_obj)):
+                    raise SystemExit(
+                        f"{dev_descriptor}: replacements[{index}] needs object and "
+                        "retail_object"
+                    )
+                if retail_obj in replaced_objects:
+                    raise SystemExit(
+                        f"{dev_descriptor}: replacement for {retail_obj} is declared twice"
+                    )
+                if Path(retail_obj) not in objects:
+                    raise SystemExit(
+                        f"{dev_descriptor}: replacement retail object {retail_obj} "
+                        "is not in the retail link"
+                    )
+                kind, source = source_for(Path(retail_obj), version)
+                if kind != "c":
+                    raise SystemExit(
+                        f"{dev_descriptor}: replacement retail object {retail_obj} "
+                        "must come from C"
+                    )
+                source_text = (ROOT / source).read_text(errors="replace")
+                if INCLUDE_ASM.search(source_text):
+                    raise SystemExit(
+                        f"{dev_descriptor}: replacement source {source} must be fully "
+                        "compiled C"
+                    )
+                dev_configure_inputs.add(str(source))
+                flags = unit_cflags(version).get(
+                    source.relative_to(Path("src") / version)
+                    .with_suffix("")
+                    .as_posix(),
+                    "",
+                )
+                replaced_objects.add(retail_obj)
+                replacement_objects.append(obj)
+                n.build(
+                    obj,
+                    "dev_cc",
+                    str(source),
+                    implicit=[
+                        "include/macro.inc",
+                        f"config/{version}/cflags.txt",
+                        "tools/as_coproc_delay.py",
+                    ],
+                    variables={
+                        "cdefs": (
+                            f"'-DASM_ROOT=\"build/eeasm/asm/{version}/nonmatchings/\"' "
+                            f"-DVERSION_{version.upper()} -DDDS_DEV_BUILD"
+                        ),
+                        "cflags": flags,
+                        "outdir": str(Path(obj).parent),
+                    },
+                )
             dev_objects = []
             for index, addition in enumerate(dev_spec.get("additions", [])):
                 source = addition.get("source")
@@ -359,6 +421,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                             f"'-DASM_ROOT=\"build/eeasm/asm/{version}/nonmatchings/\"' "
                             f"-DVERSION_{version.upper()} -DDDS_DEV_BUILD"
                         ),
+                        "outdir": str(Path(obj).parent),
                     },
                 )
             wrap_symbols = []
@@ -383,7 +446,9 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             n.build(
                 str(dev_wrapper),
                 "dev_ld",
-                [str(obj) for obj in objects] + dev_objects,
+                [str(obj) for obj in objects if str(obj) not in replaced_objects]
+                + replacement_objects
+                + dev_objects,
                 implicit=[
                     str(dev_script),
                     f"config/{version}/undefined_syms_auto.txt",
@@ -402,12 +467,20 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 str(dev_image),
                 "dev_finalize",
                 str(dev_raw),
-                implicit=[str(stamp), str(dev_wrapper), str(dev_descriptor), "tools/dev_elf.py"],
+                implicit=[
+                    str(stamp),
+                    str(elf),
+                    str(dev_wrapper),
+                    str(dev_descriptor),
+                    *replacement_objects,
+                    "tools/dev_elf.py",
+                ],
                 variables={
                     "descriptor": str(dev_descriptor),
                     "retail": str(image),
                     "linked": str(dev_raw),
                     "relocelf": str(dev_wrapper),
+                    "retailsym": str(elf),
                 },
             )
             n.build(f"{version}-dev", "phony", str(dev_image))
@@ -671,6 +744,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     configure_inputs = ["configure.py", "config/versions.json"] + [
         f"config/{v}/{VERSIONS[v]['serial']}.yaml" for v in versions
     ] + [f"config/{v}/symbol_addrs.txt" for v in versions]
+    configure_inputs.extend(sorted(dev_configure_inputs))
     for version in versions:
         dev_descriptor = ROOT / "config" / version / "devbuild.json"
         if dev_descriptor.exists():

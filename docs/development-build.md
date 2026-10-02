@@ -2,8 +2,9 @@
 
 The `dds1-dev` and `dds2-dev` targets build separate executables whose layouts
 can grow without weakening the byte-identical retail builds. Each target
-relocates the complete `.text` and `.rodata` sections of one paired code unit
-and links development-only C code and data into an appended loadable segment:
+recompiles and replaces the complete `.text` and `.rodata` sections of one
+paired code unit, and links development-only C code and data into an appended
+loadable segment:
 
 ```sh
 ninja dds1-dev dds2-dev
@@ -20,21 +21,36 @@ relocation records. `tools/dev_elf.py` then rejects the output unless all of
 the following hold:
 
 - the input executable has the expected retail SHA-1;
-- each moved section has exactly its declared size and its old slot is zero;
-- every changed word in the retail-loaded prefix is explained by a relocation
-  to the moved address interval or by a declared heap patch;
-- direct jumps, absolute words, and common MIPS address constructions do not
-  still refer to the abandoned slot;
+- each retired section leaves an exactly sized zero-filled retail slot;
+- replacement section addresses and sizes come from linker boundary symbols,
+  rather than fixed offsets in the descriptor;
+- every nonempty global or weak `FUNC` or `OBJECT` definition in a replaced
+  span has exactly one development definition with the same name, binding,
+  type, visibility, and logical move, wholly contained in that move;
+- every changed word outside the declared old slots, ELF metadata, and heap
+  patches is explained by a relocation to the corresponding replacement
+  symbol and addend;
+- direct jumps, word-aligned absolute addresses, and common MIPS address
+  constructions do not still refer to the abandoned slot;
 - the appended `PT_LOAD` does not overlap an existing segment and fits in an
   unused program-header slot;
 - the development heap begins after the appended segment while the retail BSS
   clear boundary remains unchanged;
-- each moved section retains the expected number of relocation entries at
-  sites within its span;
-- each development-only addition occupies its declared span and retains its
-  expected number of relocation entries; and
+- each moved section contains the exact expected number of relocation entries
+  at sites within its span (21 for replacement text and 10 for read-only data
+  in each current build);
+- every allocated replacement-object section is explicitly moved or retained;
+  currently retained data and BSS sections must remain empty;
+- each development-only addition occupies its linker-derived span and retains
+  its expected number of relocation entries; and
 - each static linker redirect starts at its asserted retail target and resolves
   to its named wrapper inside the development segment.
+
+Each `replacements` entry substitutes a separately compiled object for the
+object named by its `retail_object`; its moved sections are declared in
+`moves`, while `retained_sections` accounts for allocated sections that stay
+at their retail placements. The current policy requires every retained section
+to have size zero.
 
 The descriptors for the current moves and their asserted binary sites are
 `config/dds1/devbuild.json` and `config/dds2/devbuild.json`. The checks
@@ -63,9 +79,18 @@ placing any of them in the retail link.
 
 ## Current scope
 
-These are early relocatable development builds, not general mod loaders. Each
-version moves one paired unit's code and both of its jump tables, then links
-one development entry object. Changed-size replacement units and broader data
-relocation are future work. The builds perform structural and link-closure
-validation, but emulator and hardware execution remain a separate validation
-step.
+These are relocatable development builds, not general mod loaders. Each
+version replaces one paired unit's code and both of its jump tables, then
+links one development entry object. The replacement is compiled separately
+with `-G0`: its `.text` is `0x3D0` bytes rather than the retail `0x3C8`, so two
+later function definitions move by eight bytes. Seven incoming references per
+game are verified against those shifted definitions by symbol identity and
+addend; a same-offset range mapping would point them at the wrong code.
+
+Replacement-owned code and read-only data may change size and contents. New
+allocated data, small-data, or BSS sections are rejected until their
+initialization and lifetime rules are modeled. Extending the replacement set
+is therefore a deliberate per-object operation with a fail-closed link audit,
+not a claim that arbitrary assembly, DMA data, or physical-address payloads
+are already movable. Emulator and hardware execution remain an independent
+validation step rather than a requirement for the static build capability.
