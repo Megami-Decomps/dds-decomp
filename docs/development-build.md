@@ -2,8 +2,8 @@
 
 The `dds1-dev` and `dds2-dev` targets build separate executables whose layouts
 can grow without weakening the byte-identical retail builds. Each target
-relocates the complete `.text` section of one paired code unit and links
-development-only C code and data into an appended loadable segment:
+relocates the complete `.text` and `.rodata` sections of one paired code unit
+and links development-only C code and data into an appended loadable segment:
 
 ```sh
 ninja dds1-dev dds2-dev
@@ -20,7 +20,7 @@ relocation records. `tools/dev_elf.py` then rejects the output unless all of
 the following hold:
 
 - the input executable has the expected retail SHA-1;
-- the moved section has exactly its declared size and its old slot is zero;
+- each moved section has exactly its declared size and its old slot is zero;
 - every changed word in the retail-loaded prefix is explained by a relocation
   to the moved address interval or by a declared heap patch;
 - direct jumps, absolute words, and common MIPS address constructions do not
@@ -29,8 +29,8 @@ the following hold:
   unused program-header slot;
 - the development heap begins after the appended segment while the retail BSS
   clear boundary remains unchanged;
-- the moved section retains the expected number of relocation entries at sites
-  within its span;
+- each moved section retains the expected number of relocation entries at
+  sites within its span;
 - each development-only addition occupies its declared span and retains its
   expected number of relocation entries; and
 - each static linker redirect starts at its asserted retail target and resolves
@@ -64,7 +64,8 @@ placing any of them in the retail link.
 ## Current scope
 
 These are early relocatable development builds, not general mod loaders. Each
-version moves one paired unit's code and links one development entry object.
-Changed-size replacement units and broader data relocation are future work.
-The builds perform structural and link-closure validation, but emulator and
-hardware execution remain a separate validation step.
+version moves one paired unit's code and both of its jump tables, then links
+one development entry object. Changed-size replacement units and broader data
+relocation are future work. The builds perform structural and link-closure
+validation, but emulator and hardware execution remain a separate validation
+step.

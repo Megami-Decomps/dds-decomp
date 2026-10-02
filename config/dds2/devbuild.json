@@ -2,7 +2,7 @@
   "format": 1,
   "base_sha1": "9be91ee1b4a535a4cb6ec89237b5a6ba41be2add",
   "extension_vaddr": "0x0048E000",
-  "extension_size": "0x410",
+  "extension_size": "0x450",
   "alignment": "0x1000",
   "heap_alignment": "0x80",
   "retail_static_end": "0x00488B30",
@@ -29,6 +29,14 @@
       "old_vaddr": "0x0010C250",
       "new_vaddr": "0x0048E000",
       "expected_relocations": 17
+    },
+    {
+      "object": "build/dds2/src/dds2/game/code_0010C250.o",
+      "section": ".rodata",
+      "size": "0x34",
+      "old_vaddr": "0x00412510",
+      "new_vaddr": "0x0048E3D0",
+      "expected_relocations": 10
     }
   ],
   "additions": [
@@ -40,7 +48,7 @@
         ".rodata",
         ".data"
       ],
-      "new_vaddr": "0x0048E3C8",
+      "new_vaddr": "0x0048E408",
       "size": "0x48",
       "expected_relocations": 3
     }
