@@ -1,4 +1,6 @@
 #include "common.h"
+#include "btl.h"
+#include "evt_unit.h"
 #include "pcp_vu0.h"
 
 /* Effect parameter-set dispatch tables. Every effect kind owns one 0x28-byte
@@ -118,9 +120,67 @@ typedef struct EffParamCallbackEntry {
 
 extern EffParamCallbackEntry D_00353714[];
 
+extern u32 effBattleMiscGetTableEntry(s32 index);
+extern s32 btlGetRuntime(void);
+extern void evtSetUnitRgbTransition(EvtUnit *unit, s32 duration, u32 color);
+
+typedef struct EffBattleUnitRgbCommand {
+    u32 color;
+    u32 startFrame;
+    s32 startDurationIndex;
+    u32 endFrame;
+    s32 endDurationIndex;
+} EffBattleUnitRgbCommand;
+
 INCLUDE_ASM(const s32, "game/code_001624D0", func_001624D0);
 
-INCLUDE_ASM(const s32, "game/code_001624D0", func_00162808);
+void effBattleApplyUnitRgbKeyframe(BtlUnit *unit, EffBattleUnitRgbCommand *command, s32 frame) {
+    u32 startFrame = command->startFrame;
+    u32 endFrame = command->endFrame;
+    u32 startDuration = effBattleMiscGetTableEntry(command->startDurationIndex);
+    u32 endDuration = effBattleMiscGetTableEntry(command->endDurationIndex);
+    u32 restoreFrame;
+
+    if ((unit->flags & 0xE0) != 0) {
+        return;
+    }
+    if ((unit->flags & 2) == 0) {
+        return;
+    }
+    if (startFrame >= endFrame) {
+        return;
+    }
+    if (endFrame < endDuration) {
+        return;
+    }
+    restoreFrame = endFrame - endDuration;
+    if (startFrame >= restoreFrame) {
+        return;
+    }
+    if (frame != startFrame && frame != restoreFrame) {
+        return;
+    }
+    /* Preserve the runtime touch before the event-unit color is changed. */
+    btlGetRuntime();
+    if (frame == startFrame) {
+        EvtUnit *eventUnit = (EvtUnit *)unit->ext;
+        u32 baseColor = unit->baseColor;
+        u32 blendedColor;
+
+        if ((baseColor & 0xFFFFFF) != 0x808080) {
+            u32 color = command->color;
+            u32 differentBits = color ^ baseColor;
+            u32 sharedBits = color & baseColor;
+            blendedColor = sharedBits + ((differentBits & 0xFEFEFEFE) >> 1);
+        } else {
+            blendedColor = command->color;
+        }
+        evtSetUnitRgbTransition(eventUnit, startDuration, blendedColor);
+    }
+    if (frame == restoreFrame) {
+        evtSetUnitRgbTransition((EvtUnit *)unit->ext, endDuration, unit->baseColor);
+    }
+}
 
 void func_00162948(void) {
     dds3AdminSubmitModeRequest(0, 0, 0, 0);

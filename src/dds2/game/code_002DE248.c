@@ -6227,7 +6227,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002F5EF0);
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F6000);
 
-extern void func_0023C978(s32, s32, s32);
+extern void evtSetUnitRgbTransition(s32, s32, s32);
 
 void effSyncLinkedActorChildParameter(void) {
     s32 owner = btlGetRuntime();
@@ -6242,7 +6242,7 @@ void effSyncLinkedActorChildParameter(void) {
             s32 child = entry[0x340 / 4];
             if (child != 0) {
                 ((EffLinkedActorChild *)child)->effectValue = entry[0x54 / 4];
-                func_0023C978(child, 0, entry[0x54 / 4]);
+                evtSetUnitRgbTransition(child, 0, entry[0x54 / 4]);
             }
         }
         entry = (s32 *)entry[0x364 / 4];

@@ -41,7 +41,7 @@ extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
 
 extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);
 extern void func_00221D00(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
-extern void func_00221E08(EvtUnit *unit, s32 arg, u32 color);
+extern void evtSetUnitRgbTransition(EvtUnit *unit, s32 arg, u32 color);
 extern void func_00221EF0(EvtUnit *unit, s32 arg, u32 color);
 
 extern u32 evtWindowMotionUnit;
@@ -1167,7 +1167,7 @@ u32 evtOpSetUnitPackedRgbColor(void) {
     VU0_SET_AXIS_CLEAR_W(bfWaitReadArgFloat(4), z);
     EE_MMI_RGBA_PACK_F128(packed);
     color[0] = packed;
-    func_00221E08(unit, scrReadIntParameter(1), packed);
+    evtSetUnitRgbTransition(unit, scrReadIntParameter(1), packed);
     return 1;
 }
 

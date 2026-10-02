@@ -6987,13 +6987,13 @@ void btlCopyUnitRotationQuaternion(u8 *object, void *position) {
     PCP_COPY_VECTOR(position, object + 0x70);
 }
 
-extern void func_00221E08(u32, s32, u32);
+extern void evtSetUnitRgbTransition(u32, s32, u32);
 
 void btlSetUnitColor(u8 *unit, u32 color, s32 mode) {
     if (*(u32 *)(unit + 0x110) & 2) {
         color = (color & 0xFFFFFF) | 0x80000000;
         *(u32 *)(unit + 0x54) = (*(u32 *)(unit + 0x54) & 0xFF000000) | (color & 0xFFFFFF);
-        func_00221E08(*(u32 *)(unit + 0x320), mode, color);
+        evtSetUnitRgbTransition(*(u32 *)(unit + 0x320), mode, color);
     }
 }
 
@@ -7005,7 +7005,7 @@ void btlBlendUnitColor(u8 *unit, u32 color, s32 mode) {
         base = (*(u32 *)(unit + 0x54) & 0xFFFFFF) | 0x80000000;
         blended = (base & color) + (((base ^ color) & 0xFEFEFEFE) >> 1);
         *(u32 *)(unit + 0x84) = (*(u32 *)(unit + 0x84) & 0xFF000000) | (color & 0xFFFFFF);
-        func_00221E08(*(u32 *)(unit + 0x320), mode, blended);
+        evtSetUnitRgbTransition(*(u32 *)(unit + 0x320), mode, blended);
     }
 }
 
