@@ -30,6 +30,10 @@ extern void sdfReleaseChipBlock(void *);
 extern f32 D_003AF1A0[4];
 extern f32 D_003AF190[4];
 
+typedef struct EffParamWork EffParamWork;
+extern EffParamWork *effParamWorkCreate(u16 kind, void *data);
+extern EffParamWork *effParamWorkDuplicate(EffParamWork *work);
+
 /* The source frame is compared with currentFrame by the native updater. */
 typedef struct BattleEffectValueSource {
     u8 pad00[0x48];
@@ -172,6 +176,30 @@ INCLUDE_ASM(const s32, "effect/effBattle", func_00168978);
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00169168);
 
+typedef union EffBattleParameterValue {
+    u32 sourceOffset;
+    EffParamWork *work;
+} EffBattleParameterValue;
+
+typedef struct EffBattleParameterEntry {
+    u16 kind;
+    u8 pad02[2];
+    EffBattleParameterValue value;
+    u8 pad08[8];
+    u32 zeroKindCount; /* 0x10 */
+    u32 pad14;
+} EffBattleParameterEntry; /* 0x18 */
+
+typedef struct EffBattleParameterBankHeader {
+    u8 pad00[0x74];
+    u16 entryCount; /* 0x74 */
+    u8 pad76[0xA];
+} EffBattleParameterBankHeader;
+
+typedef struct EffBattleParameterMixer {
+    u64 banks[2][0xC3]; /* Two 0x618-byte banks; each entry uses three qwords. */
+} EffBattleParameterMixer;
+
 typedef struct EffBattleEntry {
     u8 pad00[0x14];
     u8 kind;     /* 0x14 */
@@ -208,6 +236,51 @@ s32 effBattleHasActiveKind(EffBattleListOwner *owner) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00169230);
+/* Rebuild each cloned bank's parameter work, resolving shared-entry references
+ * and preserving disabled descriptors. */
+void func_00169230(void *destination, void *source) {
+    u8 *destinationBytes = destination;
+    u8 *sourceBytes = source;
+    u16 *entryCount = &((EffBattleParameterBankHeader *)destination)->entryCount;
+    u32 bankOffset = 0;
+    s32 remainingBanks = 1;
+
+    do {
+        EffBattleParameterEntry *entry = (EffBattleParameterEntry *)(destinationBytes + bankOffset + 0x80);
+        u16 entryCountForBank = *entryCount;
+
+        if (entryCountForBank != 0) {
+            s32 remainingEntries = entryCountForBank;
+
+            do {
+                if (entry->kind != 0xFFFE) {
+                    if (entry->kind == 0xFFFF) {
+                        u32 index = entry->value.sourceOffset;
+                        u32 bankIndex = index / 0x3C;
+                        u32 entryIndex = index % 0x3C;
+                        EffBattleParameterEntry *sourceEntry = (EffBattleParameterEntry *)
+                            &((EffBattleParameterMixer *)destination)
+                                 ->banks[bankIndex][0x10 + entryIndex * 3];
+                        EffParamWork *duplicatedWork = effParamWorkDuplicate(sourceEntry->value.work);
+                        u16 sourceKind = sourceEntry->kind;
+
+                        entry->value.work = duplicatedWork;
+                        entry->kind = sourceKind;
+                    } else {
+                        entry->value.work = effParamWorkCreate(entry->kind, sourceBytes + entry->value.sourceOffset);
+                    }
+                    if (entry->kind == 0) {
+                        entry->zeroKindCount++;
+                    }
+                }
+                entry++;
+                remainingEntries--;
+            } while (remainingEntries != 0);
+        }
+        entryCount = (u16 *)((u8 *)entryCount + 0x618);
+        bankOffset += 0x618;
+        remainingBanks--;
+    } while (remainingBanks >= 0);
+}
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00169370);
