@@ -1,9 +1,11 @@
 #include "mnu.h"
+#include "fpu.h"
 
 typedef struct MenuWindowContainer MenuWindowContainer;
 typedef struct MenuList MenuList;
 typedef struct MenuIconSprites MenuIconSprites;
 typedef struct MenuIconState MenuIconState;
+typedef struct MenuFadeFields MenuFadeFields;
 
 extern s32 D_00435E5C;
 
@@ -149,7 +151,7 @@ extern void mnuCreateStaffImageSprite();
 
 extern void func_002AA7A0();
 
-extern void func_002BB0E8();
+extern void func_002BB0E8(s32, s32, s32, s32, s32);
 
 extern void mnuIdleVoiceTimer();
 
@@ -2165,6 +2167,16 @@ typedef struct MenuBadgeSet {
 
 extern MenuBadgeLayout D_0042AED0;
 
+/* Windows, badges and icons share this bounded, monotonic fade step. */
+#define MNU_ADVANCE_FADE(value, amount, maximum) { \
+    if ((value) < (maximum)) { \
+        (value) += (amount); \
+    } \
+    if ((value) > (maximum)) { \
+        (value) = (maximum); \
+    } \
+}
+
 void mnuDrawBadgeFade(MenuBadgeSet *set, s32 arg) {
     MenuBadgeLayout layout = D_0042AED0;
     s32 handle;
@@ -2172,12 +2184,7 @@ void mnuDrawBadgeFade(MenuBadgeSet *set, s32 arg) {
         handle = set->handle[layout.place[0].slot];
         func_00306CD0(layout.place[0].x, layout.place[0].y, 0, set->fade, 0, set->sheet, handle, arg);
         itfGridLookupValueOrDefault(set->sheet, handle);
-        if (set->fade < 0x100) {
-            set->fade += 0x10;
-        }
-        if (set->fade > 0x100) {
-            set->fade = 0x100;
-        }
+        MNU_ADVANCE_FADE(set->fade, 0x10, 0x100);
     }
     if (!(set->flags & 2)) {
         itfDrawGridWithResolvedSlot(layout.place[1].x, layout.place[1].y, 0, 0, set->sheet, set->handle[layout.place[1].slot], arg);
@@ -3335,32 +3342,56 @@ void mnuUpdateFade(s32 *list) {
     }
 }
 
-typedef struct MenuFadeFields {
-    u8 pad00[0xB4];
-    u32 initial; /* 0xB4 */
-    u32 opacity; /* 0xB8 */
-    u32 offset;  /* 0xBC */
-    u32 step;    /* 0xC0 */
-} MenuFadeFields;
+struct MenuFadeFields {
+    MenuWindowContainer previousWindow;
+    u8 pad98[4];
+    MenuIconSprites savedResource;
+    u32 hasResourceCopy;
+    s32 previousProgress;
+    MenuWindowContainer *currentWindow;
+    s32 currentProgress;
+};
 
 /* Reset the original 0x98-byte prefix, then initialize the later fade fields. */
 void mnuInitializeWindowFadeState(MenuFadeFields *menu) {
     memset(menu, 0, 0x98);
-    menu->initial = 0;
-    menu->opacity = 0x200;
-    menu->offset = 0;
-    menu->step = 0;
+    menu->hasResourceCopy = 0;
+    menu->previousProgress = 0x200;
+    menu->currentWindow = NULL;
+    menu->currentProgress = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002BAF50);
 
 void mnuResetWindowFadeParameters(MenuFadeFields *menu) {
-    menu->offset = 0;
-    menu->opacity = 0x200;
-    menu->step = 0;
+    menu->currentWindow = NULL;
+    menu->previousProgress = 0x200;
+    menu->currentProgress = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002BB0E8);
+void func_002BB0E8(s32 x, s32 y, s32 depth, s32 work, s32 option) {
+    MenuFadeFields *menu = (MenuFadeFields *)work;
+    f32 t;
+
+    if (menu->previousProgress < 0x200) {
+        menu->previousWindow.originY = 160 * menu->previousProgress / 512;
+        mnuSetWindowContainerState(&menu->previousWindow, 256 - menu->previousProgress / 2);
+        if (menu->hasResourceCopy != 0) {
+            menu->previousWindow.resource = &menu->savedResource;
+        }
+        MNU_ADVANCE_FADE(menu->previousProgress, 100, 512);
+    }
+    if (menu->currentWindow != NULL) {
+        t = fsqrtf(40.0f) * (512 - menu->currentProgress) / 512.0f;
+        menu->currentWindow->originY = -8 * (s32)(t * t);
+        mnuSetWindowContainerState(menu->currentWindow, menu->currentProgress / 2);
+        if (menu->currentWindow->panel.fade == 0) {
+            menu->currentWindow->flags &= ~4;
+        }
+        mnuDrawWindowContainer(x, y, depth, menu->currentWindow, option);
+        MNU_ADVANCE_FADE(menu->currentProgress, 80, 512);
+    }
+}
 
 typedef struct ScrollParams {
     s32 a;
@@ -3727,14 +3758,7 @@ void mnuDrawFadeIcons(s32 a0, s32 a1, s32 a2, s32 a3, MenuFadeIcons *obj, s32 a5
     func_00306CD0(a0, a1, a2, fade, 0, obj->icon[1], 0, a5);
     func_00306CD0(a0, a1, a2, fade, 0, obj->icon[2], 0, a5);
     if (obj->fadeOut == 0) {
-        next = obj->fade;
-        if (next < 0x100) {
-            obj->fade = next + 0x10;
-            next = obj->fade;
-        }
-        if (next > 0x100) {
-            obj->fade = 0x100;
-        }
+        MNU_ADVANCE_FADE(obj->fade, 0x10, 0x100);
     } else {
         next = obj->fade;
         if (next > 0) {
