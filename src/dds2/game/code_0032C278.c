@@ -1209,7 +1209,50 @@ void sdfPatchPacketResourceReference(SdfBigPacket *packet, s32 entryIndex) {
     packet->unk30 = (packet->unk30 & ~0x3FFF) | (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->resourceIndexXor]->baseAddress >> 6);
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032EB80);
+typedef struct SdfExtendedPacketSource {
+    u8 pad00[0xC];
+    u32 resourceWord;
+    u8 pad10[4];
+    s16 formatSelector;
+    u8 pad16[2];
+    s32 pixelFormat;
+} SdfExtendedPacketSource;
+
+typedef struct SdfGraphPacketState {
+    s16 width;
+    s16 unk2;
+    s16 height;
+    u8 bufferMode;
+    u8 auxiliaryMode;
+    SdfTexResource *buffers[3];
+} SdfGraphPacketState;
+
+extern SdfGraphPacketState D_0040B290;
+
+/* Wrap an extended texture draw packet with a patchable resource header. */
+void func_0032EB80(SdfListHead *drawList, SdfListHead *linkedList,
+                   SdfExtendedPacketSource *source, s32 arg3, s32 arg4,
+                   s32 arg5, s32 arg6, s32 arg7, s32 arg_sp0,
+                   s32 arg_sp8, s32 (*allocPacket)(s32)) {
+    SdfNode *packet;
+    SdfPacket *drawPacket;
+
+    if (allocPacket == NULL) {
+        allocPacket = sdfAllocPacketAligned;
+    }
+    packet = (SdfNode *)allocPacket(0x70);
+    packet->unk8 = arg_sp8;
+    packet->unk4 = (u32)sdfPatchPacketResourceReference;
+    drawPacket = (SdfPacket *)((u8 *)packet + 0x10);
+
+    sdfInitializeExtendedDrawPacket(
+        drawPacket, source->resourceWord, source->formatSelector,
+        source->pixelFormat, arg3, arg4, D_0040B290.buffers[0]->word,
+        D_0040B290.width, D_0040B290.bufferMode, arg5, arg6, arg7,
+        arg_sp0, 2);
+    sdfAppendLinkedPacketNode(linkedList, (u32 *)packet);
+    sdfAppendPacket(drawList, (s32)drawPacket);
+}
 
 /* Pack two UV/XYZ vertex pairs after the common primitive and color. */
 void sdfBuildPacket116(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 depth) {
