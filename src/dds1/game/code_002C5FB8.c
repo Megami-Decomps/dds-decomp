@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "fpu.h"
+#include "pcp_vu0.h"
 
 extern u64 func_00197760(s32, s32, u64, u64, u64, u64);
 
@@ -435,7 +436,35 @@ u32 fldReleaseMapResource(s32 *image) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7DC0);
+extern u8 sdfViewMatrix[];
+extern u8 sdfProjectionMatrix[];
+extern u8 D_00324650[];
+extern u8 D_00324660[];
+extern void sdfPostmultiplyVuMatrixFromMemory(void *src);
+
+/* vu0 routine: project a world point to the screen and return its GS grid cell. */
+void func_002C7DC0(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {
+    f32 point[4];
+    f32 screen[4];
+
+    point[0] = x;
+    point[1] = y;
+    point[2] = z;
+    point[3] = 1.0f;
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
+    VU0_MOVE_MATRIX_TO_B();
+    VU0_LOAD_VF(vf10, point);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_LOAD_VF(vf11, D_00324650);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_00324660);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, screen);
+    *gridX = ((s32)(screen[0] * 16.0f) - 0x7000) >> 4;
+    *gridY = ((s32)(screen[1] * 16.0f) - 0x7900) >> 3;
+}
 
 void sdfCounterDrawGlyphAtGridCell(s32 gridX, s32 gridY, u64 style, u64 flags) {
     u64 glyph;
