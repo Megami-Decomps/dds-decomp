@@ -961,6 +961,26 @@ cc1 2.96 rounds decimal literals so that adjacent spellings differ by one ulp:
 compile a scratch file with several spellings (`tools/cc.sh -DSKIP_ASM x.c -o x.o`)
 and read `.lit4` with `objdump -s -j .lit4 x.o` (DDS1 `func_001725F0`, effPCPScatter).
 
+### FP register numbers in call-free blocks follow the sched1 order
+
+When a block without calls differs from retail only in FP register numbers
+($f1/$f2 swapped, a constant in a different register), do not hunt for a
+declaration order or a local that renumbers: local-alloc orders the pseudos by
+priority (refs / live length, shorter lives first, ties by pseudo number), and the
+live lengths come from where sched1 put the insns. DDS1 `func_0010F9A8`: retail has
+`lwc1 limit; abs.s; mtc1 0.0` and gives the zero `$f1`, limit `$f2` (zero's live
+range is shorter, so it is allocated first); ours has `abs.s; lwc1 limit; mtc1 0.0`
+and the tie goes to the lower pseudo (limit `$f1`, zero `$f2`). The root cause is the
+insn order, and that order is `prio` in the `-dS -fsched-verbose=5` dependence table
+(`prio` = longest latency path to the block end: `abs.s` 13 against `lwc1` 11, so
+`abs.s` issues first; the higher prio is picked first, and only an equal prio falls
+back to source order). Reordering or renaming declarations never changes a prio, so
+such residuals (DDS1 `func_0010F9A8`, `func_00152560`, `func_0017FD30`,
+`func_001725F0`, `func_00205730`) only match when the expression shape changes the
+latency chain, e.g. one more `add.s` in the limit's path that lifts the load's prio
+above the abs (the sibling `dds3TestObjectSphereOverlap` has such an add and gets
+retail's `lwc1, abs.s, lwc1` order). Check the `prio` column before trying variants.
+
 ### Alias sets stop gcse merging a reload
 
 gcse refuses to merge two MEMs with different alias sets, so a typed field access
