@@ -1,5 +1,7 @@
 #include "mnu.h"
 #include "btl.h"
+#include "btl_command.h"
+#include "pcp_vu0.h"
 
 extern s32 btlGetRuntime(void);
 
@@ -44,19 +46,27 @@ extern void func_001E2758(void *);
 typedef struct BattleActionUnit BattleActionUnit;
 
 typedef struct BattleActor {
-    u8 pad00[0x18];
+    u8 pad00[8];
+    u32 dispatchFlags;
+    u8 pad0C[0xC];
     BattleActionUnit *owner;
-    u8 pad1C[0x44];
+    u8 pad1C[8];
+    u32 commandId;
+    u8 pad28[0x38];
     u32 targetIndexList; /* 0x60: passed to btlGetIndexListCount/Entry */
 } BattleActor;
 
 struct BattleActionUnit {
     u8 pad00[8];
     u32 dispatchFlags;
-    u8 pad0C[0x104];
+    u8 pad0C[0x24];
+    f32 position[4];
+    u8 pad40[0xD0];
     u32 flags;
     BattleActor *actor;
-    u8 pad118[8];
+    u8 pad118[4];
+    u8 lookupId;
+    u8 pad11D[3];
     u16 entryFlags;
     u8 pad122[2];
     u16 kind;
@@ -74,7 +84,9 @@ typedef struct BattleActionContext {
     u32 flags;
     u8 pad220[0x2C];
     BattleActionUnit *firstUnit;
-    u8 pad250[0x20];
+    u8 pad250[0x18];
+    u16 formationMode;
+    u8 pad26A[6];
     u16 mode;
     u8 pad272[0x2E];
     s32 battleId;
@@ -88,7 +100,89 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_002251A0);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225368);
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_002254C8);
+extern BattleActionUnit *btlGetTargetUnitForLink(BattleActionUnit *);
+extern void btlSetUnitPosition(BattleActionUnit *, f32 *);
+extern void func_003364B8(f32);
+extern void func_00336818(f32);
+extern void sdfComposeVuMatrixFromRegisters(void);
+
+s32 func_002254C8(BattleActionUnit *command, BtlCamState *camera, s32 rotate) {
+    BattleActionContext *runtime = (BattleActionContext *)btlGetRuntime();
+    BattleActionUnit *unit;
+    u32 kind;
+    f32 angle;
+    f32 position[4];
+
+    if (command->actor == NULL) {
+        return 1;
+    }
+    unit = btlGetTargetUnitForLink(command);
+    if (unit == NULL) {
+        return 1;
+    }
+    if (unit->flags & 0x400) {
+        return 1;
+    }
+    if (runtime->formationMode == 3) {
+        kind = unit->lookupId;
+    } else {
+        kind = unit->lookupId == 0 ? 0 : 2;
+    }
+    btlFlagAllUnitDefeatCandidatesTask();
+    unit = runtime->firstUnit;
+    while (unit != NULL) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                if (unit->kind == 0x127) {
+                    break;
+                }
+            }
+        }
+        unit = unit->next;
+    }
+    if (unit != NULL) {
+        PCP_COPY_VECTOR(position, unit->position);
+        position[2] += 340.0f;
+        btlSetUnitPosition(unit, position);
+    }
+    switch (kind) {
+    case 0:
+        btlInitMotionTransformFromComponents((u32)camera, -612.2f, -26.6f, -1527.1f,
+            -0.098f, -0.152f, 0.001f, 0.975f, 40.0f);
+        break;
+    case 1:
+        btlInitMotionTransformFromComponents((u32)camera, 106.1f, -78.3f, -1692.6f,
+            -0.07f, 0.021f, -0.015f, 0.988f, 40.0f);
+        break;
+    case 2:
+        btlInitMotionTransformFromComponents((u32)camera, 706.1f, -25.4f, -1706.9f,
+            -0.062f, 0.156f, -0.023f, 0.977f, 40.0f);
+        break;
+    }
+    if (rotate == 1 && runtime->formationMode == 3) {
+        switch (kind) {
+        case 0:
+            func_003364B8(-0.13089969f);
+            func_00336818(0.13089969f);
+            sdfComposeVuMatrixFromRegisters();
+            break;
+        case 1:
+            func_003364B8(-0.13089969f);
+            break;
+        case 2:
+            angle = -0.13089969f;
+            func_003364B8(angle);
+            func_00336818(angle);
+            sdfComposeVuMatrixFromRegisters();
+            break;
+        }
+        /* vu0 routine: rotate the camera direction by the prepared matrix. */
+        VU0_LOAD_VF(vf10, camera->direction);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, camera->direction);
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225778);
 
@@ -217,7 +311,7 @@ s32 btlDispatchActionByResourceFlags(BattleActionUnit *unit) {
     return 0;
 }
 
-extern void func_002254C8(u32, u32, u32);
+extern s32 func_002254C8(BattleActionUnit *, BtlCamState *, s32);
 
 s32 func_002261A8(BattleActionUnit *unit) {
     u16 flags = ((BattleActionTableEntry *)datActionAnimationRecords)[unit->type].flags;
@@ -233,7 +327,7 @@ s32 func_002261A8(BattleActionUnit *unit) {
         unit->transitionState = 0;
     } else if (flags & 0x8000) {
         btlFlagAllUnitDefeatCandidatesTask();
-        func_002254C8((u32)unit, (u32)unit, 0);
+        func_002254C8(unit, (BtlCamState *)unit, 0);
     } else if (flags & 0x8) {
         if (btlGetIndexListCount(unit->actor->targetIndexList) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
@@ -302,7 +396,59 @@ u32 btlFlagBattleForSpecialAction(u32 unit, u32 actor, u32 action) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_002263D8);
+struct DatUnitStatus;
+extern s32 datGetStatWithStatusOverride(struct DatUnitStatus *, s32);
+extern void btlAppendIndexListEntry(s32, u32);
+
+s32 func_002263D8(BattleActor *actor) {
+    BattleActionContext *battle;
+    u8 *statIndex;
+    BattleActionUnit *unit;
+    BattleActionUnit *target;
+    s8 minimum;
+
+    if (!(actor->dispatchFlags & 8)) {
+        return 0;
+    }
+    if (actor->commandId != 0x108) {
+        return 0;
+    }
+    if (!(actor->owner->flags & 0x400)) {
+        return 0;
+    }
+    battle = (BattleActionContext *)btlGetRuntime();
+    statIndex = (u8 *)&battle->effect->actor;
+    if (*statIndex >= 5) {
+        return 0;
+    }
+    target = NULL;
+    minimum = 99;
+    for (unit = battle->firstUnit; unit != NULL; unit = unit->next) {
+        u32 flags = unit->flags;
+        s8 value;
+
+        if (!(flags & 1)) {
+            continue;
+        }
+        if (!(flags & 0x200)) {
+            continue;
+        }
+        if (flags & 0xE0) {
+            continue;
+        }
+        value = datGetStatWithStatusOverride(
+            (struct DatUnitStatus *)&unit->entryFlags, *statIndex);
+        if (value < minimum) {
+            minimum = value;
+            target = unit;
+        }
+    }
+    if (target == NULL) {
+        return 0;
+    }
+    btlAppendIndexListEntry(actor->targetIndexList, (u32)target);
+    return 1;
+}
 
 s32 btlCheckActionUnitResourceEligibility(BattleActionUnit *unit, s32 type) {
     s32 offset = type * 0x20;
