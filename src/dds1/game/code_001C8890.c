@@ -733,7 +733,55 @@ void btlUnitTurnEndStateSelect(u8 *task) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", fldCheckSceneResourcesIdle);
+extern s32 sndIsResourceNodeReferencedOrActive(s32);
+extern s32 sndHasResourceFlagsOneOrEight(s32);
+extern void sndFreeResourceNode(SoundResourceNode *);
+extern void sndFreeListNode(ActiveSoundNode *);
+extern u32 sndGetResourceStatus(u32 *);
+extern s32 btlCountTasksByKind(u16 kind);
+
+s32 fldCheckSceneResourcesIdle(s32 self) {
+    BtlActorWork *scene = (BtlActorWork *)btlGetRuntime();
+    BtlUnit *actor;
+
+    for (actor = scene->actorList; actor != 0; actor = actor->nextActor) {
+        if (actor->resourceNode != 0) {
+            if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != 0) {
+                if ((s32)actor == self) {
+                    return 0;
+                }
+                sndGetResourceStatus((u32 *)actor->resourceNode);
+                return 0;
+            }
+            sndFreeResourceNode((SoundResourceNode *)actor->resourceNode);
+            actor->resourceNode = 0;
+        }
+    }
+    if (((BtlUnit *)self)->listNode != 0) {
+        if (sndHasResourceFlagsOneOrEight(((BtlUnit *)self)->listNode) != 0) {
+            return 0;
+        }
+        sndFreeListNode((ActiveSoundNode *)((BtlUnit *)self)->listNode);
+        ((BtlUnit *)self)->listNode = 0;
+    }
+    for (actor = scene->actorList; actor != 0; actor = actor->nextActor) {
+        if (actor->flags & 0x200) {
+            if (actor->flags & 2) {
+                if ((actor->gunResourceFlags & 8) == 0) {
+                    return 0;
+                }
+            }
+        }
+    }
+    if (btlCountTasksByKind(0x23) != 0) return 0;
+    if (btlCountTasksByKind(0x3D) != 0) return 0;
+    if (btlCountTasksByKind(0x3E) != 0) return 0;
+    if (btlCountTasksByKind(0x3C) != 0) return 0;
+    if (btlCountTasksByKind(0x33) != 0) return 0;
+    if (btlCountTasksByKind(0x34) != 0) return 0;
+    if (btlCountTasksByKind(0x24) != 0) return 0;
+    return btlCountTasksByKind(0x2B) == 0;
+}
 
 typedef struct SceneActor {
     u8 pad_00[0x108];
