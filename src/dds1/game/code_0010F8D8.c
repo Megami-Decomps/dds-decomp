@@ -2,8 +2,13 @@
 #include "pcp_vu0.h"
 
 typedef struct {
-    u8 pad0[8];
+    void *worldNodes; /* 0x00 */
+    u32 unk04;
     u32 callbackTarget; /* 0x08: forwarded to both lifecycle helpers */
+    u32 unk0C;
+    void *resource; /* 0x10 */
+    u8 pad14[0x0C];
+    void *worldIndexNodes; /* 0x20 */
 } WorldEntry;
 
 typedef struct {
@@ -14,6 +19,10 @@ typedef struct {
 extern u32 dds3WorldCounter;
 
 extern void dds3BuildVuTransformFromComponents(void *, void *, void *);
+extern void dds3DestroyWorldNode(void *node);
+extern void dds3DestroyWorldIndexNode(void *node);
+extern void func_002D0918(void *resource);
+extern void sdfReleaseChipBlock(void *block);
 
 void dds3LoadOrBuildObjectMatrix(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x1C);
@@ -139,7 +148,23 @@ s32 dds3AllocateWorldObjectEntry(WorldObject *object) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010F8D8", func_0010FB30);
+void func_0010FB30(WorldObject *object) {
+    WorldEntry *entry = object->entry;
+
+    if (entry == NULL) {
+        return;
+    }
+    while (entry->worldNodes != NULL) {
+        dds3DestroyWorldNode(entry->worldNodes);
+    }
+    while (entry->worldIndexNodes != NULL) {
+        dds3DestroyWorldIndexNode(entry->worldIndexNodes);
+    }
+    if (entry->resource != NULL) {
+        func_002D0918(entry->resource);
+    }
+    sdfReleaseChipBlock(entry);
+}
 
 u32 func_0010FBC8(WorldObject *obj) {
     s32 callbackTarget;
