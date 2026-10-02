@@ -1,5 +1,8 @@
 #include "common.h"
 
+extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void mnuArmMantraLimitLineFlags(u32, u32);
+
 typedef struct MenuSearchState {
     u8 pad0[5];
     s8 selectedIndex;
@@ -26,6 +29,8 @@ typedef struct MenuSearchList {
 typedef struct MenuSearchObject {
     u8 pad0[4];
     MenuSearchList *list;
+    u8 pad8[0xBF8];
+    u32 drawPool;
 } MenuSearchObject;
 
 INCLUDE_ASM(const s32, "game/code_0028E350", func_0028E350);
@@ -80,9 +85,27 @@ s32 mnuSelectMatchingNode(MenuSearchObject *object, MenuSearchState *state) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_0028E350", D_00427428);
+void func_0028F7B8(MenuSearchObject *object, u16 id) {
+    u32 flags = 0;
+    u16 limitIds[18] = {
+        0x61, 0x3B, 0x5B, 0x23, 0x40, 0x62,
+        0x53, 0x5E, 0x1C, 0x5A, 0x63, 0x54,
+        0x15, 0x44, 0x64, 0x07, 0x5C, 0x0E
+    };
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_0028E350", func_0028F7B8);
+    for (i = 0; i < 18; i++) {
+        if (limitIds[i] == id) {
+            flags = 1U << i;
+            break;
+        }
+    }
+    evtPrintDeveloperConsoleMessage(
+        "-----------------------LimitLineSetting!!!!!!!!![%x]\n", flags);
+    if (flags != 0) {
+        mnuArmMantraLimitLineFlags(object->drawPool, flags);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0028E350", func_0028F8A8);
 
