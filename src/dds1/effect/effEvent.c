@@ -984,71 +984,78 @@ void effEventLoadSelectedAimPositionVu(EffAimSource *src, EffAimParams *param) {
     VU0_LOAD_VF(vf10, out);
 }
 
-/* 0x7C-byte parameter block; the counters at 0x18/0x2C/0x30 are clamped to at least 1 on create/clone. */
+/* Billboard emitter parameters (0x7C). Creation/copy clamps startDelaySpread,
+   fadeIn and fadeOut to at least one; motionDelaySpread is left unchanged. */
 typedef struct {
-    u8 pad00[0x10];
-    u32 count;            /* 0x10 particle count */
-    u8 pad14[4];
-    s32 unk18;            /* 0x18 modulus of the first delay */
-    s32 unk1C;            /* 0x1C modulus of the second delay */
-    f32 range;            /* 0x20 spawn radius */
-    u8 pad24[8];
-    s32 unk2C;
-    s32 unk30;
-    u8 pad34[4];
-    f32 f38;              /* 0x38 */
-    f32 blend3C;          /* 0x3C */
-    f32 f40;              /* 0x40 */
-    f32 f44;              /* 0x44 */
-    f32 f48;              /* 0x48 */
-    f32 f4C;              /* 0x4C */
-    f32 f50;              /* 0x50 */
-    f32 blend54;          /* 0x54 */
-    f32 f58;              /* 0x58 */
-    f32 blend5C;          /* 0x5C */
-    u8 pad60[8];
-    f32 f68;              /* 0x68 */
-    u8 pad6C[4];
-    f32 blend70;          /* 0x70 */
-    u8 pad74[8];
-} EffEventBlock7C;
+    f32 position[4];
+    u32 count;
+    s32 duration;
+    s32 startDelaySpread;
+    s32 motionDelaySpread;
+    f32 spawnRadius;
+    u32 color;
+    s16 drawMode; /* Passed to the billboard mode setter in the direct-draw path. */
+    u8 pad2A[2];
+    s32 fadeIn;
+    s32 fadeOut;
+    u8 repeat;
+    u8 pad35[3];
+    f32 baseScale;
+    f32 scaleRandomness;
+    f32 scaleAmplitudeX;
+    f32 scaleAmplitudeY;
+    f32 scalePhaseStep;
+    f32 angularSpeed;
+    f32 verticalSpeed;
+    f32 verticalSpeedRandomness;
+    f32 lateralSpeed;
+    f32 lateralSpeedRandomness;
+    f32 accelerationPercent; /* Speeds multiply by 1 + this / 100 each motion step. */
+    f32 swayPhaseStep;
+    f32 swayAmplitude;
+    f32 swayAmplitudeStep;
+    f32 swayRandomness;
+    s32 colorStartAge; /* Batched path: primary texture RGB fades from black. */
+    s32 colorTransitionFrames;
+} EffEventBillParams;
 
 typedef struct {
-    f32 pos[3];           /* 0x00 */
+    f32 position[3];
     u8 pad0C[4];
-    f32 dir[3];           /* 0x10 */
+    f32 motion[3]; /* X/Z: unit sway direction; Y: accumulated vertical offset. */
     u8 pad1C[4];
-    s32 delayA;           /* 0x20 */
-    s32 delayB;           /* 0x24 */
-    f32 f28;              /* 0x28 */
-    f32 f2C;              /* 0x2C */
-    f32 f30;              /* 0x30 */
-    f32 f34;              /* 0x34 */
-    f32 f38;              /* 0x38 */
-    f32 f3C;              /* 0x3C */
-    f32 f40;              /* 0x40 */
-    f32 f44;              /* 0x44 */
-    f32 f48;              /* 0x48 */
-    f32 f4C;              /* 0x4C */
-    f32 f50;              /* 0x50 */
-    f32 f54;              /* 0x54 */
-    f32 f58;              /* 0x58 */
+    s32 age;
+    s32 motionDelay;
+    f32 baseScale;
+    f32 scalePhaseX;
+    f32 scalePhaseStepX;
+    f32 scaleAmplitudeX;
+    f32 scalePhaseY;
+    f32 scalePhaseStepY;
+    f32 scaleAmplitudeY;
+    f32 rotation;
+    f32 angularSpeed;
+    f32 swayAmplitude;
+    f32 swayPhase;
+    f32 verticalSpeed;
+    f32 lateralSpeed;
     u8 pad5C[4];
 } EffEventBillParticle; /* 0x60 */
 
 typedef struct {
-    EffEventBlock7C head;
+    EffEventBillParams head;
     EffEventBillParticle *particles; /* 0x7C */
     u8 flag;              /* 0x80 */
     u8 pad81[3];
-    u32 handle;           /* 0x84 */
+    u32 allocationHandle; /* Owner follows its particles in this allocation. */
 } EffEventBillSet; /* 0x88 */
 
 extern void *billCreateFromResource(s32 kind, const char *path);
 
+/* Allocate particles plus their owner, copy parameters and acquire shared textures. */
 INCLUDE_RODATA(const s32, "effect/effEvent", D_003A12E0);
 
-EffEventBillSet *effEventBillSetCreate(EffEventBlock7C *src) {
+EffEventBillSet *effEventBillSetCreate(EffEventBillParams *src) {
     u32 count = src->count;
     u32 size = count * sizeof(EffEventBillParticle);
     u32 handle = func_002D03F8(size + sizeof(EffEventBillSet));
@@ -1057,17 +1064,17 @@ EffEventBillSet *effEventBillSetCreate(EffEventBlock7C *src) {
     u32 i;
 
     work->head = *src;
-    work->handle = handle;
+    work->allocationHandle = handle;
     work->particles = particle;
     work->flag = 0;
-    if (work->head.unk2C <= 0) {
-        work->head.unk2C = 1;
+    if (work->head.fadeIn <= 0) {
+        work->head.fadeIn = 1;
     }
-    if (work->head.unk30 <= 0) {
-        work->head.unk30 = 1;
+    if (work->head.fadeOut <= 0) {
+        work->head.fadeOut = 1;
     }
-    if (work->head.unk18 <= 0) {
-        work->head.unk18 = 1;
+    if (work->head.startDelaySpread <= 0) {
+        work->head.startDelaySpread = 1;
     }
     D_003BB140 = D_003BB140 + 1;
     if (D_003BB140 == 1) {
@@ -1076,7 +1083,7 @@ EffEventBillSet *effEventBillSetCreate(EffEventBlock7C *src) {
     }
     count = work->head.count;
     for (i = 0; i < count; i++) {
-        particle->delayA = 0;
+        particle->age = 0;
         particle++;
     }
     return work;
@@ -1095,51 +1102,52 @@ extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_0034DF38[];
 
-/* Randomize one billboard particle: delays, spin rates, radius and two unit direction vectors. */
+/* Randomize delays, scale oscillations, spin and motion. Scale amplitudes share
+   the base-scale random factor; motion's Y component begins as zero height. */
 void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
     EffEventBillParticle *p = &work->particles[index];
     f32 dir[4];
     f32 scale;
     f32 range;
-    s32 periodA = work->head.unk18;
-    s32 periodB = work->head.unk1C;
+    s32 startDelaySpread = work->head.startDelaySpread;
+    s32 motionDelaySpread = work->head.motionDelaySpread;
 
-    p->delayA = -(effMiscRand(D_0034DF38) % periodA);
-    p->delayB = -(effMiscRand(D_0034DF38) % periodB);
-    scale = effMiscRandUnitFloat(D_0034DF38) * work->head.blend3C + (1.0f - work->head.blend3C);
-    p->f28 = work->head.f38 * scale;
-    p->f2C = effMiscRandUnitFloat(D_0034DF38) * (3.14159265f * 2.0f);
-    p->f38 = effMiscRandUnitFloat(D_0034DF38) * (3.14159265f * 2.0f);
-    p->f30 = work->head.f48 * (effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f);
-    p->f3C = work->head.f48 * (effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f);
-    p->f34 = work->head.f40 * (effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f) * scale;
-    p->f40 = work->head.f44 * (effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f) * scale;
-    p->f44 = effMiscRandUnitFloat(D_0034DF38) * (3.14159265f * 2.0f);
+    p->age = -(effMiscRand(D_0034DF38) % startDelaySpread);
+    p->motionDelay = -(effMiscRand(D_0034DF38) % motionDelaySpread);
+    scale = effMiscRandUnitFloat(D_0034DF38) * work->head.scaleRandomness + (1.0f - work->head.scaleRandomness);
+    p->baseScale = work->head.baseScale * scale;
+    p->scalePhaseX = effMiscRandUnitFloat(D_0034DF38) * (3.14159265f * 2.0f);
+    p->scalePhaseY = effMiscRandUnitFloat(D_0034DF38) * (3.14159265f * 2.0f);
+    p->scalePhaseStepX = work->head.scalePhaseStep * (effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f);
+    p->scalePhaseStepY = work->head.scalePhaseStep * (effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f);
+    p->scaleAmplitudeX = work->head.scaleAmplitudeX * (effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f) * scale;
+    p->scaleAmplitudeY = work->head.scaleAmplitudeY * (effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f) * scale;
+    p->rotation = effMiscRandUnitFloat(D_0034DF38) * (3.14159265f * 2.0f);
     if (effMiscRand(D_0034DF38) & 1) {
-        p->f48 = work->head.f4C * (effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f);
+        p->angularSpeed = work->head.angularSpeed * (effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f);
     } else {
-        p->f48 = -(work->head.f4C * (effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f));
+        p->angularSpeed = -(work->head.angularSpeed * (effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f));
     }
-    range = work->head.range;
+    range = work->head.spawnRadius;
     dir[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
     dir[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
     dir[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, dir);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, dir);
-    p->pos[0] = range * effMiscRandUnitFloat(D_0034DF38) * dir[0];
-    p->pos[1] = range * effMiscRandUnitFloat(D_0034DF38) * dir[1];
-    p->pos[2] = range * effMiscRandUnitFloat(D_0034DF38) * dir[2];
-    p->dir[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    p->dir[1] = 0;
-    p->dir[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    VU0_LOAD_VF(vf10, p->dir);
+    p->position[0] = range * effMiscRandUnitFloat(D_0034DF38) * dir[0];
+    p->position[1] = range * effMiscRandUnitFloat(D_0034DF38) * dir[1];
+    p->position[2] = range * effMiscRandUnitFloat(D_0034DF38) * dir[2];
+    p->motion[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    p->motion[1] = 0;
+    p->motion[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    VU0_LOAD_VF(vf10, p->motion);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, p->dir);
-    p->f4C = work->head.f68 * (effMiscRandUnitFloat(D_0034DF38) * work->head.blend70 + (1.0f - work->head.blend70));
-    p->f50 = 0;
-    p->f54 = work->head.f50 * (effMiscRandUnitFloat(D_0034DF38) * work->head.blend54 + (1.0f - work->head.blend54));
-    p->f58 = work->head.f58 * (effMiscRandUnitFloat(D_0034DF38) * work->head.blend5C + (1.0f - work->head.blend5C));
+    VU0_STORE_VF(vf10, p->motion);
+    p->swayAmplitude = work->head.swayAmplitude * (effMiscRandUnitFloat(D_0034DF38) * work->head.swayRandomness + (1.0f - work->head.swayRandomness));
+    p->swayPhase = 0;
+    p->verticalSpeed = work->head.verticalSpeed * (effMiscRandUnitFloat(D_0034DF38) * work->head.verticalSpeedRandomness + (1.0f - work->head.verticalSpeedRandomness));
+    p->lateralSpeed = work->head.lateralSpeed * (effMiscRandUnitFloat(D_0034DF38) * work->head.lateralSpeedRandomness + (1.0f - work->head.lateralSpeedRandomness));
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_001910C8);
@@ -1154,20 +1162,22 @@ void effEventSetWorkFlag(EffEventWork *work, u8 value) {
     work->flag = value;
 }
 
-void func_00192030(const EffEventBlock7C *source, EffEventBlock7C *destination) {
+/* Copy the serialized emitter parameters without changing their values. */
+void func_00192030(const EffEventBillParams *source, EffEventBillParams *destination) {
     *destination = *source;
 }
 
-void func_00192110(EffEventBlock7C *destination, const EffEventBlock7C *source) {
+/* Copy parameters and normalize only start-delay spread and the two fade divisors. */
+void func_00192110(EffEventBillParams *destination, const EffEventBillParams *source) {
     *destination = *source;
-    if (destination->unk2C <= 0) {
-        destination->unk2C = 1;
+    if (destination->fadeIn <= 0) {
+        destination->fadeIn = 1;
     }
-    if (destination->unk30 <= 0) {
-        destination->unk30 = 1;
+    if (destination->fadeOut <= 0) {
+        destination->fadeOut = 1;
     }
-    if (destination->unk18 <= 0) {
-        destination->unk18 = 1;
+    if (destination->startDelaySpread <= 0) {
+        destination->startDelaySpread = 1;
     }
 }
 

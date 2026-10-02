@@ -950,6 +950,17 @@ Dumps: `cc.sh -dl -dg` on a scratch copy; `.greg` shows `regs to allocate: ...`.
    both sides of the `||` (retail loads it twice) gives the extra refs that order
    `length`/`height`.
 
+### Float literals: spelling decides the last mantissa bit
+
+A float read as `lwc1 %gp_rel(D_xxxxxxxx)` is a `.lit4` pool constant (check_unit says
+"is a .lit4 pool constant: write the float literal" and prints the expected bits).
+cc1 2.96 rounds decimal literals so that adjacent spellings differ by one ulp:
+`1.5707962f` is 0x3FC90FD9 but `1.5707963f` is 0x3FC90FDA; `6.283185f` is
+0x40C90FD9, `6.28318548f` is 0x40C90FDA, `6.2831855f` is 0x40C90FDB;
+`0.7853981f` is 0x3F490FD9; `0.08726646f` is 0x3DB2B8C1. Do not guess from the value:
+compile a scratch file with several spellings (`tools/cc.sh -DSKIP_ASM x.c -o x.o`)
+and read `.lit4` with `objdump -s -j .lit4 x.o` (DDS1 `func_001725F0`, effPCPScatter).
+
 ### Alias sets stop gcse merging a reload
 
 gcse refuses to merge two MEMs with different alias sets, so a typed field access
