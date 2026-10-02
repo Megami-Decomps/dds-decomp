@@ -38,7 +38,7 @@ extern u32 effMiscRand(void *state);
 
 extern u8 D_003AA868[];
 
-extern s32 effMathGetSlotAt(s32 *arg0, s32 arg1);
+extern s32 effMathGetSlotAt(void *slots, s32 index);
 
 extern void effJitterChannelControlPoints(EffChanWork *arg0, u32 arg1);
 
@@ -77,11 +77,13 @@ extern void effDispatchParameterDataAndFreeWork(void *handle);
 /* Header block copied into every channel work (0x168 bytes): the random record count and modulus live inside it. */
 typedef struct EffChanHead {
     f32 controlPoints[4][4];
-    u8 pad40[4];
+    u8 enabled;    /* 0x40: keep completed channels cycling */
+    u8 pad41[3];
     u32 count;      /* 0x44: number of random records */
     s32 steps;
     s32 spread;     /* 0x4C: modulus of the start delay */
-    u8 pad50[8];
+    s32 fadeIn;     /* 0x50: frames to reach full opacity */
+    s32 fadeOut;    /* 0x54: frames to fade out */
     f32 jitter[4];
     u8 pad68[0x100];
 } EffChanHead; /* 0x168 */
@@ -110,6 +112,9 @@ struct EffChanWork {
 
 extern void *effAllocSlotArray(u32 count);
 extern void *effParamWorkDuplicate(void *param);
+extern s32 effMathStepBezierSlot(void *slots, s32 index, f32 *out);
+extern void effParamWorkCallback0(void *param, void *value);
+extern void effParamWorkInvokeCallback(void *param);
 
 /* Create a channel work: clone the header, allocate the slot array, then give every record a duplicated parameter and a random negative start delay. */
 EffChanWork *effChanWorkCreate(EffChanSource *src) {
@@ -161,7 +166,7 @@ void effDestroyChannelWork(EffChanWork *work) {
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
 extern f32 effMiscRandUnitFloat(void *);
-extern void effParamWorkCallback3(void *, s32);
+extern void effParamWorkCallback3(void *param, u32 value);
 
 /* Jitter control points perpendicular to the path and camera viewing direction. */
 void effJitterChannelControlPoints(EffChanWork *work, u32 index) {
@@ -257,7 +262,63 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 index) {
     effParamWorkCallback3(record->param, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019A5D8);
+void func_0019A5D8(EffChanWork *work) {
+    EffChanRecord *record = work->records;
+    void *slots = work->slots;
+    u32 count = work->head.count;
+    u32 index = 0;
+    u8 enabled = work->head.enabled;
+    s32 steps = work->head.steps;
+    s32 modulus = work->head.spread;
+    s32 fadeIn = work->head.fadeIn;
+    s32 fadeOut = work->head.fadeOut;
+    f32 xyz[3];
+
+    (void)effMathGetSlotAt(slots, 0);
+    if (count == 0) {
+        return;
+    }
+    do {
+        s32 delay = record->delay;
+
+        if (delay == 0) {
+            effJitterChannelControlPoints(work, index);
+        }
+        if (delay > 0 && delay <= steps) {
+            f32 opacity;
+            s32 fadePhase;
+            u32 alpha;
+            u32 color;
+
+            effMathStepBezierSlot(slots, index, xyz);
+            fadePhase = fadeIn > delay;
+            if (fadePhase) {
+                opacity = (f32)delay / (f32)fadeIn;
+            } else {
+                fadePhase = steps - delay;
+                if (fadePhase <= fadeOut) {
+                    opacity = (f32)fadePhase / (f32)fadeOut;
+                } else {
+                    opacity = 1.0f;
+                }
+            }
+            alpha = (u32)(opacity * 127.0f);
+            color = (alpha << 24) | 0x00808080;
+            effParamWorkCallback3(record->param, color);
+            effParamWorkCallback0(record->param, xyz);
+            effParamWorkInvokeCallback(record->param);
+        }
+        if (delay < steps) {
+            record->delay++;
+        } else if (enabled != 0) {
+            record->delay = -(effMiscRand(D_003AA868) % modulus);
+        } else {
+            record->delay++;
+        }
+        record++;
+        index++;
+    } while (index < count);
+}
 
 /* Copy four rows of three coordinates and their separate scalar values. */
 void effCopyVertRows(EffChan *channel, f32 *source) {
@@ -489,4 +550,3 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B558);
 INCLUDE_SDATA(const s32, "game/code_0019A0C0", D_00436540);
 
 INCLUDE_SDATA(const s32, "game/code_0019A0C0", D_0043654C);
-
