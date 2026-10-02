@@ -149,7 +149,7 @@ typedef struct DevState {
     s32 resourceId;
     s32 result;
     u8 pad30[8];
-    void (*callback)(struct DevState *, s32, s32, s32, s32);
+    s32 (*callback)(struct DevState *, s32, s32, s32, s32);
     s32 callbackContext;
 } DevState;
 
@@ -173,13 +173,13 @@ extern SdfStreamCfg D_003FF340;
 extern u8 D_003FF4C0[];
 extern void sdfDevQueueRead();
 extern s32 D_003FF480[];
-extern DevState *sdfDevCreateCallbackState(s32, void (*)(DevState *, s32, s32, s32, s32), s32);
+extern DevState *sdfDevCreateCallbackState(s32, s32 (*)(DevState *, s32, s32, s32, s32), s32);
 extern s32 sdfDevReactivate(DevState *);
 extern s32 sdfDevQueueReleaseState(DevState *);
 extern s32 sdfDevQueueControlRequest();
 extern s32 sdfDevQueueActiveOperation();
 extern s32 WaitSema(s32);
-extern void func_002EF408(DevState *, s32, s32, s32, s32);
+extern s32 func_002EF408(DevState *, s32, s32, s32, s32);
 
 /* Queue at most one staging-buffer-sized read; the completion callback advances the byte counts. */
 void sdfStreamSendChunk(void) {
@@ -191,7 +191,66 @@ void sdfStreamSendChunk(void) {
     sdfDevQueueRead(D_003FF340.deviceState, D_003FF4C0, chunkBytes);
 }
 
-INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EF408);
+extern void FlushCache(s32);
+extern s32 SignalSema(s32);
+extern s32 sceSifSetDma(void *, s32);
+extern s32 sceSifDmaStat(s32);
+extern s32 func_002CF930(void);
+extern s32 sdfGetElapsedTimerTicks(s32);
+
+s32 func_002EF408(DevState *deviceState, s32 command, s32 sourceAddress,
+                  s32 byteCount, s32 callbackArg) {
+    SdfStreamCfg *stream = &D_003FF340;
+    s32 dmaId;
+    s32 timer;
+
+    switch (command) {
+    case 4:
+        stream->readResult = byteCount;
+        SignalSema(stream->semaphore);
+        break;
+    case 5: {
+        struct {
+            s32 source;
+            s32 destination;
+            s32 size;
+            s32 attributes;
+        } transfer;
+
+        FlushCache(0);
+        transfer.source = sourceAddress;
+        transfer.destination = stream->destinationAddress;
+        transfer.size = byteCount;
+        transfer.attributes = 0;
+        dmaId = sceSifSetDma(&transfer, 1);
+        while (sceSifDmaStat(dmaId) >= 0) {
+            timer = func_002CF930();
+            while (sdfGetElapsedTimerTicks(timer) <= 0) {
+            }
+        }
+        timer = func_002CF930();
+        while (sdfGetElapsedTimerTicks(timer) < 0x64) {
+        }
+        stream->destinationAddress += byteCount;
+        stream->transferredBytes += byteCount;
+        stream->remainingBytes -= byteCount;
+        if (stream->remainingBytes > 0) {
+            sdfStreamSendChunk();
+        } else {
+            SignalSema(stream->semaphore);
+        }
+        break;
+    }
+    case 2:
+    case 7:
+        SignalSema(stream->semaphore);
+        break;
+    case 0:
+        SignalSema(stream->semaphore);
+        break;
+    }
+    return 0;
+}
 
 /* Dispatch a stream command, wait for completion, and return the shared reply buffer.
  * request is a scalar argument except for a read command, which carries a read-request address.
@@ -538,4 +597,3 @@ INCLUDE_RODATA(const s32, "game/code_002EEA18", D_003B50D0);
 INCLUDE_RODATA(const s32, "game/code_002EEA18", D_003B50E0);
 
 INCLUDE_RODATA(const s32, "game/code_002EEA18", D_003B50F0);
-
