@@ -14,10 +14,18 @@ python3 tools/fld.py assemble \
 python3 tools/fld.py verify f011_001.f2
 ```
 
-The tracked corpus begins with area `f011_001` in each game. Both sources
-assemble to their retail SHA-1. `ninja dds1-field-data dds2-field-data`
-assembles them, resolves their script and warp symbols, and checks the output
-alongside the INF and WAP field data.
+The tracked DDS1 corpus contains all 591 unique version-23 sources. DDS2 begins
+with `f011_001` and uses the same codec; its complete source batch follows
+separately. `ninja dds1-field-data dds2-field-data` assembles the tracked
+sources and checks every output against its retail SHA-1 alongside the INF and
+WAP field data.
+
+`field_fld2_links` in `config/versions.json` selects areas whose event, actor,
+and destination identities have also been verified against the maintained BF
+and WAP sources. These stricter joins are explicit because field resources can
+refer to labels outside the same numbered BF, and WAP identities do not always
+belong to one area FLD2. Adding a source to the list turns those joins into a
+build error rather than a warning.
 
 `tools/fld_corpus.py` reads loose and LB-contained payloads directly from a
 disc image you own. With no output options it verifies canonical byte-exact
