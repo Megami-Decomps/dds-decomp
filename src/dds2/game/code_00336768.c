@@ -23,7 +23,7 @@ typedef struct RwMatrix
     u32 pad3;
 } RwMatrix;
 
-extern void func_00336638(f32 angle, const RwV3d* axis, RwMatrix* matrix);
+extern void sdfBuildRotationMatrixFromAxisAngle(f32 angle, const RwV3d* axis, RwMatrix* matrix);
 extern f32 func_00353040(f32 angle);
 extern f32 func_00353140(f32 angle);
 
@@ -31,7 +31,7 @@ extern f32 func_00353140(f32 angle);
 void sdfBuildVuRotationFromAxisAngle(const RwV3d* axis, f32 angle)
 {
     RwMatrix matrix;
-    func_00336638(angle, axis, &matrix);
+    sdfBuildRotationMatrixFromAxisAngle(angle, axis, &matrix);
     VU0_LOAD_MATRIX(&matrix);
 }
 
@@ -45,7 +45,7 @@ INCLUDE_ASM(const s32, "game/code_00336768", func_00336898);
 void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d* axis, f32 angle)
 {
     RwMatrix matrix;
-    func_00336638(angle, axis, &matrix);
+    sdfBuildRotationMatrixFromAxisAngle(angle, axis, &matrix);
     VU0_LOAD_MATRIX_B(&matrix);
 }
 

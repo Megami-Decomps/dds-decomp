@@ -5288,6 +5288,7 @@
 0x00336388	sdfTransposeVuMatrix	inferred	Transposes the VU matrix by interleaving matrix rows into columns. [names_reviewed10.tsv]
 0x003363D0	sdfInvertRigidVuTransform	inferred	Transposes the VU rotation basis and negates the transformed translation. [names_reviewed10.tsv]
 0x00336428	sdfInvertScaledVuTransform	inferred	Transposes and rescales the VU rotation basis then negates translation. [names_reviewed10.tsv]
+0x00336638	sdfBuildRotationMatrixFromAxisAngle	inferred	Normalizes the axis and builds the Rodrigues rotation matrix used by the named VU axis-angle wrappers.
 0x00336768	sdfBuildVuRotationFromAxisAngle	inferred	Builds a rotation matrix from an axis and angle and loads it into VU registers. [names_reviewed10.tsv]
 0x00336918	sdfVuLoadRotationMatrixFromAxisAngle	inferred	Constructs an axis-angle rotation matrix and loads it into VU matrix registers. [names_reviewed12.tsv]
 0x00336948	sdfRotateVuMatrixAboutX	inferred	Rotates the VU matrix Y and Z basis vectors by the supplied angle. [names_reviewed10.tsv]
