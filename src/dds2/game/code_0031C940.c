@@ -23,6 +23,17 @@ typedef struct ModelInstanceList {
     s32 count;
 } ModelInstanceList;
 
+typedef struct ModelInstanceWork {
+    u32 handle;
+    s32 count;
+    ModelInstanceList *lists;
+    u32 unkC;
+} ModelInstanceWork;
+
+extern u32 func_003292A8(s32);
+extern void *sdfMemoryGetBlockAddress(u32);
+extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031C940);
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CA10);
@@ -49,7 +60,32 @@ INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CF88);
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031D120);
 
-INCLUDE_ASM(const s32, "game/code_0031C940", func_0031D260);
+ModelInstanceWork *func_0031D260(s32 count, s32 *counts) {
+    s32 listBytes = count * 8;
+    s32 size = listBytes + 16;
+    s32 i;
+    u32 handle;
+    ModelInstanceWork *work;
+    ModelInstanceList *list;
+    u8 *records;
+
+    for (i = 0; i < count; i++) size += counts[i] * sizeof(ModelInstance);
+    evtPrintDeveloperConsoleMessage("SpriteWork Object Size %d\n", size);
+    handle = func_003292A8(size);
+    work = sdfMemoryGetBlockAddress(handle);
+    memset(work, 0, size);
+    work->handle = handle;
+    work->count = count;
+    work->lists = (ModelInstanceList *)(work + 1);
+    list = work->lists;
+    records = (u8 *)list + listBytes;
+    for (i = 0; i < count; i++, list++) {
+        list->items = (ModelInstance *)records;
+        list->count = counts[i];
+        records += counts[i] * sizeof(ModelInstance);
+    }
+    return work;
+}
 
 /* Clear all slots; the loop index intentionally wraps to 16 bits. */
 void itfClearModelInstances(ModelInstanceList *list) {

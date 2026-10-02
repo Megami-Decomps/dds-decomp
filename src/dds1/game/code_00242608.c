@@ -555,7 +555,46 @@ void fldResetCampSceneEntries(CampScene *scene) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243818);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00243928);
+extern void fldCopyCameraSetting(void *);
+extern void fldUpdateCameraColorEffect(void *);
+
+void func_00243928(void *work, const s32 *source) {
+    s32 setting[0x54 / 4];
+    u8 *destinationA;
+    u8 *sourceA;
+    u8 *destinationB;
+    s32 sourceOffset;
+    s32 destinationOffset;
+    s32 i;
+
+    fldCopyCameraSetting(setting);
+    setting[0x20 / 4] = source[0x10 / 4];
+    setting[0x10 / 4] = source[0];
+    setting[0x14 / 4] = source[1];
+    setting[0x18 / 4] = source[2];
+    setting[0x1C / 4] = source[3];
+    setting[0x0C / 4] = source[0x14 / 4];
+    destinationA = (u8 *)setting + 8;
+    sourceA = (u8 *)source + 0x0C;
+    destinationB = (u8 *)setting + 0x0C;
+    sourceOffset = 0x20;
+    destinationOffset = 0x20;
+    for (i = 2; i >= 0; i--) {
+        *(s32 *)(destinationA + destinationOffset) =
+            *(s32 *)(sourceA + sourceOffset);
+        *(s32 *)(destinationB + destinationOffset) =
+            *(s32 *)((u8 *)source + sourceOffset);
+        sourceOffset += 4;
+        destinationOffset += 0x10;
+    }
+    fldUpdateCameraColorEffect(setting);
+    if (source[0x0C / 4] == 0 && source[0x2C / 4] == 0 &&
+        source[0x30 / 4] == 0 && source[0x34 / 4] == 0) {
+        *(s32 *)((u8 *)work + 0x23CC) = 0;
+    } else {
+        *(s32 *)((u8 *)work + 0x23CC) = 1;
+    }
+}
 
 void func_00243A18(CampScene *scene) {
     func_00243818();
