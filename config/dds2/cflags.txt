@@ -27,3 +27,4 @@ game/code_00310BC8  -fno-optimize-sibling-calls  # 13 jal+epilogue tail calls in
 game/code_0029BFB8  -fno-optimize-sibling-calls  # jal tail calls only, no j to a function (find_nosibcall.py); whole-unit check under the flag breaks only the matched C outside this run (0x29BEB8, 0x29CC90)
 game/code_0029DF18  -fno-optimize-sibling-calls  # jal tail calls only, no j to a function (find_nosibcall.py); under the flag the matched C just outside breaks (0x29DA58, 0x2A1000)
 game/code_002A3AE8  -fno-optimize-sibling-calls  # 7 jal tail calls, 0 sibcalls in 43 functions (find_nosibcall.py); func_002A3C58 and func_002A3F28 match only with the flag
+game/code_0022A8A8  -fno-optimize-sibling-calls  # 9 functions 0x22A8A8-0x22AC10, 5 jal+epilogue tails, no sibcall; bounded by sibcall functions btlReleaseBossData and func_0022AC10; btlReleaseScriptResourceA/B match with natural s32 only with the option (twin of DDS1 code_0020F8E0)
