@@ -296,7 +296,22 @@ u32 dds3GetWorldPlayerObject(WorldObject *object) {
     return object->data->playerObject;
 }
 
-INCLUDE_ASM(const s32, "game/code_001102C8", dds3FindWorldObjectNodeByKey);
+/* Find the node with `key` in list `kind` of the object, or NULL. */
+WorldListNode *dds3FindWorldObjectNodeByKey(WorldObject *object, u32 key, s32 kind) {
+    WorldListNode *node;
+
+    if (object->data->lists[kind].count == 0) {
+        return NULL;
+    }
+    node = object->data->lists[kind].head;
+    do {
+        if (key == node->key) {
+            return node;
+        }
+        node = node->next;
+    } while (node != NULL);
+    return NULL;
+}
 
 extern void *dds3AppendWorldIndexNode(s32 index);
 extern void dds3GrowWorldValueChain();

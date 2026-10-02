@@ -14,7 +14,13 @@ typedef struct ClockTime {
     u16 year; /* 0x6 */
 } ClockTime;
 
-void func_003412D8(void *state, s32 seed);
+typedef struct EffRandState {
+    u32 x[4];
+} EffRandState;
+
+extern EffRandState D_0040BAE8;
+
+void func_003412D8(EffRandState *state, u32 seed);
 void func_003413F0(ClockTime *now);
 
 extern s8 D_004391E0;
@@ -30,7 +36,22 @@ u32 effMiscRandMod(void *state, u32 modulus) {
     return effMiscRand(state) % modulus;
 }
 
-INCLUDE_ASM(const s32, "game/code_00341240", func_003412D8);
+/* Seed the generator state (the shared effect state when `state` is NULL); each word is the previous one rotated right 8 bits and xored with a constant. */
+void func_003412D8(EffRandState *state, u32 seed) {
+    if (state == NULL) {
+        state = &D_0040BAE8;
+    }
+    seed ^= 0x0AED1A0C;
+    state->x[0] = seed;
+    seed = (seed << 24) | (seed >> 8);
+    state->x[1] = seed;
+    seed ^= 0xAA5A02FE;
+    seed = (seed << 24) | (seed >> 8);
+    state->x[2] = seed;
+    seed ^= 0x11BE81C7;
+    seed = (seed << 24) | (seed >> 8);
+    state->x[3] = seed;
+}
 
 /* Seeds the generator at `state` from the current clock (time of day in seconds since an epoch). */
 void func_00341348(void *state) {
