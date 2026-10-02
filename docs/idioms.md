@@ -1050,6 +1050,15 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     does not reproduce DDS2 `func_001525F0` (jump-table, cases `j`, default `jal`);
     default last, `case 3` sharing the default, or `return;` after it all give `j`.
     Still open: how retail gets a trailing `jal` default after `j` cases.
+16. **`addu` operand order follows how the element is reached.** A table element
+    taken as a pointer, `entry = &entries[i]; entry->a ...`, is emitted
+    `addu base, idx<<3` (base first); the same element accessed directly,
+    `entries[i].a`, gives `addu idx<<3, base` (index first), which is what retail
+    shows when every `addu` in the function has the index first (DDS2
+    `func_00110240`: 20 differing words -> 7 after replacing the `entry` pointer
+    by direct `entries[arg->unk4].field` accesses). Same function: the two-way
+    free-list push matched as `if (tail < 0) { head = x; } else { ... }`
+    (`bgezl` with the else block first), not as `if (tail >= 0) {...} else {...}`.
 
 Unresolved: a saved register initialised as a copy of another holding the same
 constant (`move $16,$19` for `i` from `bestIndex = 0`, DDS1 `func_00202F90`,
