@@ -24,7 +24,36 @@ void evtDestroySecondaryWorldNode(void) {
         return;
     }
 }
-INCLUDE_ASM(const s32, "event/evtStage", func_0023A9E0);
+
+typedef struct StageNodeChild {
+    u8 pad00[0x40];
+    s32 node; /* 0x40: first world node still attached */
+} StageNodeChild;
+
+typedef struct StageNodeParent {
+    u8 pad00[8];
+    StageNodeChild *child; /* 0x8 */
+} StageNodeParent;
+
+typedef struct StageSecondaryObject {
+    u8 pad00[0x18];
+    StageNodeParent *parent; /* 0x18 */
+} StageSecondaryObject;
+
+extern void dds3RemoveWorldObjectNode(s32 node);
+
+/* Detach every world node from the secondary object's chain. */
+void func_0023A9E0(void) {
+    StageSecondaryObject *object = (StageSecondaryObject *)dds3GetWorldSecondaryObject();
+    StageNodeParent *parent;
+
+    if (object != NULL) {
+        parent = object->parent;
+        while (parent->child->node != 0) {
+            dds3RemoveWorldObjectNode(parent->child->node);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "event/evtStage", func_0023AA30);
 

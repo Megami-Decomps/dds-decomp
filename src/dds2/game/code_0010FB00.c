@@ -57,9 +57,43 @@ s32 dds3TestObjectSphereOverlap(u8 *left, u8 *right) {
 
 INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FBD0);
 
-INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FC28);
+typedef struct WorldCallbackTable {
+    u8 pad00[8];
+    s32 (*onFirst)(void *);  /* 0x08 */
+    s32 (*onSecond)(void *); /* 0x0C */
+} WorldCallbackTable;
 
-INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FC68);
+typedef struct WorldCallbackHolder {
+    u8 pad00[0x10];
+    WorldCallbackTable *callbacks; /* 0x10 */
+} WorldCallbackHolder;
+
+/* Invoke the holder's first / second lifecycle callback when present; the result is 1 when there is nothing to call. */
+s32 func_0010FC28(WorldCallbackHolder *holder) {
+    s32 result = 1;
+
+    if (holder != NULL) {
+        WorldCallbackTable *table = holder->callbacks;
+
+        if (table != NULL && table->onFirst != NULL) {
+            result = table->onFirst(holder);
+        }
+    }
+    return result;
+}
+
+s32 func_0010FC68(WorldCallbackHolder *holder) {
+    s32 result = 1;
+
+    if (holder != NULL) {
+        WorldCallbackTable *table = holder->callbacks;
+
+        if (table != NULL && table->onSecond != NULL) {
+            result = table->onSecond(holder);
+        }
+    }
+    return result;
+}
 
 /* The stored sequence wraps at 16 bits even though its backing word is 32 bits. */
 void dds3AdvanceWorldCounter(void) {
@@ -141,7 +175,7 @@ u32 func_0010FDF0(WorldObject *obj) {
 
     callbackTarget = obj->entry->callbackTarget;
     if (callbackTarget != NULL) {
-        func_0010FC28(callbackTarget);
+        func_0010FC28((WorldCallbackHolder *)callbackTarget);
     }
     return 1;
 }
@@ -151,7 +185,7 @@ u32 dds3DispatchWorldEntryCallbackTarget(WorldObject *obj) {
 
     callbackTarget = obj->entry->callbackTarget;
     if (callbackTarget != NULL) {
-        func_0010FC68(callbackTarget);
+        func_0010FC68((WorldCallbackHolder *)callbackTarget);
     }
     return 1;
 }
