@@ -327,7 +327,8 @@ program implicitly.
 
 Node transforms, motion, and model bounds remain authoritative in FLD1 source;
 use the source directives to edit them. Bounds should be updated there when a
-geometry edit extends beyond the existing local box.
+geometry edit extends beyond the existing local box. The same packet-preserving
+engine handles standalone automap models through `tools/amb_scene_import.py`.
 
 ### Composed field export
 
