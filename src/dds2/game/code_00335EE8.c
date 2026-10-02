@@ -105,16 +105,16 @@ void sdfLoadAlternateMatrixVU(void *matrix) {
     VU0_LOAD_MATRIX_B(matrix);
 }
 
-void func_00336258(void *dst) {
+void sdfStorePrimaryMatrixVU(void *dst) {
     VU0_STORE_MATRIX(dst);
 }
 
-void func_00336270(void *dst) {
+void sdfStoreAlternateMatrixVU(void *dst) {
     VU0_STORE_MATRIX_B(dst);
 }
 
 /* vu0 routine: vf24-vf27 = vf28-vf31 */
-void func_00336288(void) {
+void sdfCopyPrimaryToAlternateMatrixVU(void) {
     VU0_MOVE_VF(vf24, vf28);
     VU0_MOVE_VF(vf25, vf29);
     VU0_MOVE_VF(vf26, vf30);
@@ -122,7 +122,7 @@ void func_00336288(void) {
 }
 
 /* vu0 routine: vf20-vf23 = vf28-vf31 */
-void func_003362A0(void) {
+void sdfCopyPrimaryToTertiaryMatrixVU(void) {
     VU0_MOVE_VF(vf20, vf28);
     VU0_MOVE_VF(vf21, vf29);
     VU0_MOVE_VF(vf22, vf30);
@@ -130,7 +130,7 @@ void func_003362A0(void) {
 }
 
 /* vu0 routine: vf28-vf31 = vf24-vf27 */
-void func_003362B8(void) {
+void sdfCopyAlternateToPrimaryMatrixVU(void) {
     VU0_MOVE_VF(vf28, vf24);
     VU0_MOVE_VF(vf29, vf25);
     VU0_MOVE_VF(vf30, vf26);
@@ -138,7 +138,7 @@ void func_003362B8(void) {
 }
 
 /* vu0 routine: vf20-vf23 = vf24-vf27 */
-void func_003362D0(void) {
+void sdfCopyAlternateToTertiaryMatrixVU(void) {
     VU0_MOVE_VF(vf20, vf24);
     VU0_MOVE_VF(vf21, vf25);
     VU0_MOVE_VF(vf22, vf26);
@@ -146,7 +146,7 @@ void func_003362D0(void) {
 }
 
 /* vu0 routine: vf28-vf31 = vf20-vf23 */
-void func_003362E8(void) {
+void sdfCopyTertiaryToPrimaryMatrixVU(void) {
     VU0_MOVE_VF(vf28, vf20);
     VU0_MOVE_VF(vf29, vf21);
     VU0_MOVE_VF(vf30, vf22);
@@ -154,7 +154,7 @@ void func_003362E8(void) {
 }
 
 /* vu0 routine: vf24-vf27 = vf20-vf23 */
-void func_00336300(void) {
+void sdfCopyTertiaryToAlternateMatrixVU(void) {
     VU0_MOVE_VF(vf24, vf20);
     VU0_MOVE_VF(vf25, vf21);
     VU0_MOVE_VF(vf26, vf22);

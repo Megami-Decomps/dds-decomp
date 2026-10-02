@@ -102,7 +102,7 @@ s32 sdfTexAcquireResourceTexture(s32 resource);
 
 void sdfReleaseMemorySlot(void *slot);
 
-s32 func_0032C150(void *resource);
+s32 sdfTexAcquireAlternateResourceTexture(void *resource);
 
 void *sdfAllocSizeClassBlock(s32 size);
 
@@ -403,7 +403,7 @@ void sdfPacSkipResourceChunk(PacState *state) {
                 return;
             }
         }
-        buffer->result = func_0032C150(buffer->cursor);
+        buffer->result = sdfTexAcquireAlternateResourceTexture(buffer->cursor);
         state->onComplete(state);
     }
 }

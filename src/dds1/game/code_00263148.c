@@ -8,7 +8,7 @@ extern s32 kwlnTaskGetUserValue();
 
 extern void dspSetActive(s32);
 
-extern void dspStartEntry(s32);
+extern s32 dspStartEntry(s32);
 
 extern s32 ptyGetCurrentProfileRecord(void *);
 
@@ -26,7 +26,9 @@ extern s64 func_00285670(s32, s32 *, u64, u64);
 
 extern void func_0024DD78(void);
 typedef struct MenuItem {
-    u8 pad00[0x16];
+    u8 pad00[4];
+    u16 kind;
+    u8 pad06[0x10];
     s8 components[5]; /* Summed when bounding the available selection extent. */
     u8 pad1B[0x3A];
     s8 selection;
@@ -55,7 +57,9 @@ typedef struct MenuItemScene {
     u32 slots[5];
     u8 pad3E4[0x92C];
     u32 panelGroup; /* 0xD10: passed to mnuSetPanelGroupSelection */
-    u8 padD14[0x864];
+    u8 padD14[4];
+    s32 extentExhausted; /* 0xD18: selects the exhausted-extent message. */
+    u8 padD1C[0x85C];
     s32 unk1578; /* Nonzero enables the panel-group selection reset. */
 } MenuItemScene;
 
@@ -141,7 +145,49 @@ u32 func_00263638(void) {
 
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263640);
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_00263728);
+typedef struct DspUnitName {
+    u8 encodedText[17];
+} DspUnitName;
+
+extern DspUnitName *D_003BAA70;
+extern char D_003BC550[];
+extern void evtCopyEntryStringToActiveWindow(s32, s32);
+extern s32 func_003014F0(char *, const char *, ...);
+extern void func_00263640(MenuItemScene *);
+
+/* Cap the available extent by the remaining capacity of five components. */
+void func_00263728(MenuItemScene *scene) {
+    char text[16];
+    MenuItem *item = scene->selectionData->item;
+    s32 available = scene->selectionData->extentFactor * 3;
+    s32 sum = 0;
+    s32 i;
+
+    for (i = 0; i < 5; i++) {
+        sum += item->components[i];
+    }
+    if (495 - sum < available) {
+        available = 495 - sum;
+    }
+    if (available == 0) {
+        scene->extentExhausted = 1;
+    } else {
+        scene->extentExhausted = 0;
+    }
+    if (item->kind == 1) {
+        evtCopyEntryStringToActiveWindow(0, (s32)D_003BAA70[item->kind].encodedText);
+        func_003014F0(text, D_003BC550, available);
+        evtCopyEntryStringToActiveWindow(1, (s32)text);
+        dspSetActive(1);
+        if (scene->extentExhausted == 0) {
+            dspStartEntry(0x12);
+        } else {
+            dspStartEntry(0x13);
+        }
+        return;
+    }
+    func_00263640(scene);
+}
 
 INCLUDE_ASM(const s32, "game/code_00263148", func_00263838);
 

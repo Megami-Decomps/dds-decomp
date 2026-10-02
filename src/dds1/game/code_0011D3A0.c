@@ -131,7 +131,7 @@ extern void fldResetTaskSlots(void);
 extern void fldSetSceneLifecycleFlags(u32);
 extern void func_00220178(void);
 
-void func_0011D3A0(u32 *packet, u32 first, u32 second) {
+void fldSetPacketArgumentPair(u32 *packet, u32 first, u32 second) {
     packet[4] = first;
     packet[5] = second;
 }

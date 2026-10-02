@@ -126,7 +126,7 @@ void sdfTexCreateSecondPacket(SdfTex *texture) {
 }
 
 /* Rebuild existing texture packets while preserving each packet's TEX0 TCC bit. */
-void func_002D2FB0(SdfTex *texture) {
+void sdfTexRefreshResourcePackets(SdfTex *texture) {
     SdfTexBuf *buffer;
 
     buffer = texture->primaryBuffer;
@@ -158,7 +158,7 @@ void sdfTexAcquireResourceTexture(void *resourceAddress) {
 }
 
 /* Process a resource address with packet variant one. */
-void func_002D32A0(void *resourceAddress) {
+void sdfTexAcquireAlternateResourceTexture(void *resourceAddress) {
     func_002D30C8(resourceAddress, 1);
 }
 

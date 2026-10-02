@@ -464,7 +464,7 @@ void mnuLoadTitleStreamFrameData(char *filePath, u32 *work) {
 }
 
 void mnuStoreTaskResult(void) {
-    D_003BD8D4 = func_00288B48();
+    D_003BD8D4 = fileQueueDefaultCallbackRequest();
     mnuTitleStreamStatus[9] = 1;
 }
 

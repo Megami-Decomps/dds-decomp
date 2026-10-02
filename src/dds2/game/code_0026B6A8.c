@@ -52,7 +52,7 @@ extern DspUnitName *D_00435E48;
 extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
 extern void evtCloseDisplayChannelAndEnsureMessageWindow(s32);
-extern void func_0026C918(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern void dspSetActive();
 
 s32 dspStartFlagEvent(s32 context) {
@@ -72,9 +72,9 @@ s32 dspStartFlagEvent(s32 context) {
                 if (mdlFlagTest(mnuSceneFlagEventEntries[i].needFlag) != 0 && mdlFlagTest(mnuSceneFlagEventEntries[i].doneFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
-                    func_0026C918(0, (void *)(D_00435E5C + mnuSceneFlagEventEntries[i].areaIndex * 0x19));
-                    func_0026C918(1, D_00435E50[mnuSceneFlagEventEntries[i].nameIndex].encodedText);
-                    func_0026C918(2, (void *)(D_00435E4C + mnuSceneFlagEventEntries[i].dialogIndex * 0x11));
+                    evtCopyEntryStringToActiveWindow(0, (void *)(D_00435E5C + mnuSceneFlagEventEntries[i].areaIndex * 0x19));
+                    evtCopyEntryStringToActiveWindow(1, D_00435E50[mnuSceneFlagEventEntries[i].nameIndex].encodedText);
+                    evtCopyEntryStringToActiveWindow(2, (void *)(D_00435E4C + mnuSceneFlagEventEntries[i].dialogIndex * 0x11));
                     dspStartEntry(3);
                     mdlFlagSet(mnuSceneFlagEventEntries[i].doneFlag);
                     return 1;
@@ -86,7 +86,7 @@ s32 dspStartFlagEvent(s32 context) {
                     && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].doneFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
-                    func_0026C918(0, D_00435E48[slot->unitId].encodedText);
+                    evtCopyEntryStringToActiveWindow(0, D_00435E48[slot->unitId].encodedText);
                     dspStartEntry(4);
                     mdlFlagSet(mnuPartyFlagEventEntries[slot->unitId].doneFlag);
                     return 1;

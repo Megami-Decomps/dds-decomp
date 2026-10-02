@@ -1279,11 +1279,11 @@ u16 btlReadCurrentUnitMp(s32 arg0) {
 }
 
 void btlComputeProfileMaxHp(void) {
-    func_001188F0();
+    ptyComputeMaxHp();
 }
 
 void btlComputeProfileMaxMp(void) {
-    func_001189D0();
+    ptyComputeMaxMp();
 }
 
 s32 btlComputeSkillAdjustedMaxHp(void *stats) {
@@ -1988,7 +1988,36 @@ s32 btlHasEnabledSpecialAbilityForSlot(s32 unit, u32 slot) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AEC18);
+f32 func_001AEC18(s32 unit) {
+    s32 stats = unit + 0x120;
+    s32 maximum;
+    s32 percentage;
+
+    if (btlCheckSpecialAbility(stats, 0x27A) == 0) {
+        return 1.0f;
+    }
+    maximum = btlComputeSkillAdjustedMaxHp((void *)stats);
+    percentage = (s32)((f32)btlReadCurrentUnitHp(stats) / (f32)maximum * 100.0f);
+    if (percentage < 6) {
+        return 3.0f;
+    }
+    if (percentage < 11) {
+        return 2.2f;
+    }
+    if (percentage < 16) {
+        return 1.7f;
+    }
+    if (percentage < 21) {
+        return 1.4f;
+    }
+    if (percentage < 26) {
+        return 1.2f;
+    }
+    if (percentage < 31) {
+        return 1.1f;
+    }
+    return 1.0f;
+}
 
 f32 btlGetClampedBattleTableValue(void) {
     u16 index = *(u16 *)(btlGetRuntime() + 0x47c);

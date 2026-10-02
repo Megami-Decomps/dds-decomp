@@ -361,12 +361,12 @@ void effSamplePrimitiveCurve(EffPrim *primitive, s32 index, f32 t)
     VU0_LOAD_VF_FROM(vf10, *(u128 *)result);
 }
 
-void func_00193130(EffPrim *primitive) {
+void effResetPrimitiveRecordCursor(EffPrim *primitive) {
     primitive->cursorIndex = 0;
     primitive->cursorPosition = 0;
 }
 
-void func_00193140(EffPrim *primitive, f32 step) {
+void effSetPrimitiveRecordCursorStep(EffPrim *primitive, f32 step) {
     primitive->cursorStep = step;
 }
 

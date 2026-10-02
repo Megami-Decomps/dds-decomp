@@ -40,7 +40,7 @@ extern u32 mnuCreateMantraIconListA();
 extern u32 mnuCreateMantraIconListB();
 extern u32 mnuCreateMantraIconListC();
 extern void mnuReleaseMantraFadeData(s32);
-s32 func_00271368();
+s32 mnuUpdateMantraLimitLineFade();
 void func_00271510();
 u32 func_002712E0(u32 list);
 void mnuMantraSetupSlot(u32);
@@ -66,27 +66,27 @@ typedef struct MantraIconPool {
     s32 count;
 } MantraIconPool;
 MantraIconEntry *mnuSpawnMantraIcon(s32, s32, MantraIconPool *, u32);
-extern s32 func_00270210();
+extern s32 mnuUpdateMantraBackgroundFade();
 extern void func_00270848();
 extern u32 mnuInitMantraBackgroundDraw();
 extern void mnuReleaseMantraBackgroundDraw();
-extern s32 func_00270DD8();
+extern s32 mnuUpdateMantraBackgroundMaskFade();
 extern s32 mnuDrawMantraBackgroundMaskPulse();
 extern u32 mnuInitMantraBackgroundMaskDraw();
 extern void mnuReleaseMantraBackgroundMaskDraw();
-extern s32 func_00272DA8();
+extern s32 mnuUpdateMantraTitleBlinkFade();
 extern void func_00272F08();
 extern u32 mnuInitMantraTitleDraw();
 extern void mnuReleaseMantraTitleDraw();
-extern s32 func_00273668();
+extern s32 mnuUpdateMantraInfoPulseFade();
 extern void func_00273828();
 extern u32 mnuInitMantraInfoDraw();
 extern void mnuReleaseMantraInfoDraw();
-extern s32 func_002741D0();
+extern s32 mnuUpdateMantraGaugeFade();
 extern s32 mnuDrawMantraGauge();
 extern u32 mnuInitMantraGaugeData();
 extern void mnuReleaseMantraGaugeData();
-extern s32 func_00274EA8();
+extern s32 mnuUpdateMantraRecordPanelFade();
 extern void func_00274FF8();
 extern u32 mnuCreateTypeOneRecord(void);
 extern void mnuReleaseMantraRecordPanelData();
@@ -278,7 +278,7 @@ s32 mnuLoadMantraSpriteTask(void);
 extern void func_0026E788(u32, u32, u32, u32, u32, u32, u32);
 void func_00284508(u32, u32, u32, u32, u32, u32);
 extern char mnuMantraSpriteTaskName[];
-extern s32 func_002748D0();
+extern s32 mnuUpdateMantraUnitPanelFade();
 extern void func_00274A70();
 extern u32 mnuInitMantraUnitPanelDraw();
 extern void mnuReleaseMantraUnitPanelDraw();
@@ -878,7 +878,7 @@ void mnuUpdateMantraDrawPool(u8 *pool) {
 }
 
 u32 mnuRegisterMantraBackgroundDraw(u32 pool) {
-    return mnuRegisterMantraDrawItem(pool, 0, func_00270210, func_00270848,
+    return mnuRegisterMantraDrawItem(pool, 0, mnuUpdateMantraBackgroundFade, func_00270848,
                          mnuInitMantraBackgroundDraw, mnuReleaseMantraBackgroundDraw, 0, 0, 0);
 }
 
@@ -950,7 +950,7 @@ typedef struct MantraCursorFade {
     /* 0x0C */ f32 value;
 } MantraCursorFade;
 
-s32 func_00270210(s32 unused, s32 item) {
+s32 mnuUpdateMantraBackgroundFade(s32 unused, s32 item) {
     MantraCursorFade *fade = (MantraCursorFade *)((MantraDrawItem *)item)->data;
 
     fade->clock += 1;
@@ -1028,7 +1028,7 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270568);
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270848);
 
 u32 mnuRegisterMantraBackgroundMaskDraw(u32 pool) {
-    return mnuRegisterMantraDrawItem(pool, 4, func_00270DD8, mnuDrawMantraBackgroundMaskPulse,
+    return mnuRegisterMantraDrawItem(pool, 4, mnuUpdateMantraBackgroundMaskFade, mnuDrawMantraBackgroundMaskPulse,
                          mnuInitMantraBackgroundMaskDraw, mnuReleaseMantraBackgroundMaskDraw, 0, 0, 0);
 }
 
@@ -1077,7 +1077,7 @@ void mnuReleaseMantraBackgroundMaskDraw(u32 obj) {
     evtPrintDeveloperConsoleMessage("BGMask Draw Release\n");
 }
 
-s32 func_00270DD8(s32 unused, s32 item) {
+s32 mnuUpdateMantraBackgroundMaskFade(s32 unused, s32 item) {
     MantraPulseFade *fade = (MantraPulseFade *)((MantraDrawItem *)item)->data;
 
     fade->cycle += 1;
@@ -1129,7 +1129,7 @@ s32 mnuDrawMantraBackgroundMaskPulse(s32 unused, s32 item) {
 }
 
 u32 mnuCreateMantraFadeDrawItem(u32 list, u32 tag, u32 category) {
-    MantraDrawItemBits *item = (MantraDrawItemBits *)mnuRegisterMantraDrawItem(list, 1, func_00271368, func_00271510,
+    MantraDrawItemBits *item = (MantraDrawItemBits *)mnuRegisterMantraDrawItem(list, 1, mnuUpdateMantraLimitLineFade, func_00271510,
                                                                     func_002712E0, mnuReleaseMantraFadeDrawData, 0, 0, tag);
     item->category = category;
     return (u32)item;
@@ -1225,7 +1225,7 @@ void mnuReleaseMantraFadeDrawData(u32 obj) {
 }
 
 
-s32 func_00271368(s32 unused, s32 item) {
+s32 mnuUpdateMantraLimitLineFade(s32 unused, s32 item) {
     MantraFadeState *fade = (MantraFadeState *)((MantraDrawItem *)item)->data;
 
     fade->clock += 1;
@@ -1285,7 +1285,7 @@ s32 func_00271368(s32 unused, s32 item) {
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00271510);
 
 u32 mnuRegisterMantraTitleDraw(u32 pool) {
-    return mnuRegisterMantraDrawItem(pool, 6, func_00272DA8, func_00272F08,
+    return mnuRegisterMantraDrawItem(pool, 6, mnuUpdateMantraTitleBlinkFade, func_00272F08,
                          mnuInitMantraTitleDraw, mnuReleaseMantraTitleDraw, 0, 0, 0);
 }
 
@@ -1373,7 +1373,7 @@ void mnuReleaseMantraTitleDraw(u32 obj) {
 }
 
 
-s32 func_00272DA8(s32 unused, s32 item) {
+s32 mnuUpdateMantraTitleBlinkFade(s32 unused, s32 item) {
     MantraBlinkState *blink = (MantraBlinkState *)((MantraDrawItem *)item)->data;
 
     blink->clock += 1;
@@ -1421,7 +1421,7 @@ s32 func_00272DA8(s32 unused, s32 item) {
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00272F08);
 
 u32 mnuRegisterMantraInfoDraw(u32 pool) {
-    return mnuRegisterMantraDrawItem(pool, 7, func_00273668, func_00273828,
+    return mnuRegisterMantraDrawItem(pool, 7, mnuUpdateMantraInfoPulseFade, func_00273828,
                          mnuInitMantraInfoDraw, mnuReleaseMantraInfoDraw, 10, 0, 0);
 }
 
@@ -1490,7 +1490,7 @@ void mnuReleaseMantraInfoDraw(u32 obj) {
 }
 
 
-s32 func_00273668(s32 unused, s32 item) {
+s32 mnuUpdateMantraInfoPulseFade(s32 unused, s32 item) {
     MantraPulseState *pulse = (MantraPulseState *)((MantraDrawItem *)item)->data;
 
     pulse->clock += 1;
@@ -1548,7 +1548,7 @@ s32 func_00273668(s32 unused, s32 item) {
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00273828);
 
 u32 mnuRegisterMantraGaugeDraw(u32 pool) {
-    return mnuRegisterMantraDrawItem(pool, 8, func_002741D0, mnuDrawMantraGauge,
+    return mnuRegisterMantraDrawItem(pool, 8, mnuUpdateMantraGaugeFade, mnuDrawMantraGauge,
                          mnuInitMantraGaugeData, mnuReleaseMantraGaugeData, 0, 0, 0);
 }
 
@@ -1633,7 +1633,7 @@ typedef struct MantraGaugeState {
 /* Overlays slot 3 of MantraGaugeState: bit 16 = reverse, bits 17..24 = countdown. */
 #define GAUGE_BITS(g) (*(u32 *)((u8 *)(g) + 8))
 
-s32 func_002741D0(s32 unused, s32 item) {
+s32 mnuUpdateMantraGaugeFade(s32 unused, s32 item) {
     MantraGaugeState *gauge = (MantraGaugeState *)((MantraDrawItem *)item)->data;
     s32 i;
 
@@ -1736,7 +1736,7 @@ typedef struct MantraLampState {
 } MantraLampState;
 
 u32 mnuRegisterMantraUnitPanelDraw(u32 pool, u32 resource) {
-    return mnuRegisterMantraDrawItem(pool, 9, func_002748D0, func_00274A70,
+    return mnuRegisterMantraDrawItem(pool, 9, mnuUpdateMantraUnitPanelFade, func_00274A70,
                          mnuInitMantraUnitPanelDraw, mnuReleaseMantraUnitPanelDraw, 10, 0, resource);
 }
 
@@ -1820,7 +1820,7 @@ void mnuReleaseMantraUnitPanelDraw(u32 obj) {
 }
 
 
-s32 func_002748D0(s32 unused, s32 item) {
+s32 mnuUpdateMantraUnitPanelFade(s32 unused, s32 item) {
     MantraLampState *lamp = (MantraLampState *)((MantraDrawItem *)item)->data;
     u32 bits;
     u16 hold;
@@ -1876,7 +1876,7 @@ s32 func_002748D0(s32 unused, s32 item) {
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00274A70);
 
 u32 mnuRegisterMantraTypeOnePanelDraw(u32 pool) {
-    return mnuRegisterMantraDrawItem(pool, 10, func_00274EA8, func_00274FF8,
+    return mnuRegisterMantraDrawItem(pool, 10, mnuUpdateMantraRecordPanelFade, func_00274FF8,
                          mnuCreateTypeOneRecord, mnuReleaseMantraRecordPanelData, 0, 0, 0);
 }
 
@@ -1910,7 +1910,7 @@ void mnuReleaseMantraRecordPanelData(u32 obj) {
     sdfReleaseChipBlock(((MantraDrawItem *)obj)->data);
 }
 
-s32 func_00274EA8(s32 unused, MantraDrawItem *item) {
+s32 mnuUpdateMantraRecordPanelFade(s32 unused, MantraDrawItem *item) {
     MantraPanelFade *fade = (MantraPanelFade *)item->data;
 
     fade->cycle += 1;
@@ -2526,7 +2526,7 @@ void mnuSetMantraIconFadePosition(s16 x, s16 y, u32 pool) {
     }
 }
 
-void func_00279848(u32 a, u32 b, u32 pool) {
+void mnuSpawnMantraVariantIconAtPosition(u32 a, u32 b, u32 pool) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 3);
     if (item != 0) {
         mnuSpawnMantraIcon(a, b, ((MantraFadeData *)item->data)->iconPool, 0x50);
@@ -2547,7 +2547,7 @@ void func_002798D8(u32 pool) {
     }
 }
 
-void func_00279910(u32 a, u32 b, u32 pool) {
+void mnuSpawnMantraShortLoopVariantIconAtPosition(u32 a, u32 b, u32 pool) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 3);
     if (item != 0) {
         mnuSpawnMantraIcon(a, b, ((MantraFadeData *)item->data)->iconPool, 0x60);
@@ -2855,7 +2855,7 @@ s32 mnuDrawMantraPulseIcon(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *obje
     return 0;
 }
 
-s32 func_0027C2F0(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
+s32 mnuDrawMantraPulseIconWithFadeState(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
     f32 scale;
 
     switch ((*(u32 *)object >> 19) & 0xF) {

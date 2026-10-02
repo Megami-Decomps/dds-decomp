@@ -250,7 +250,7 @@ void sdfQuatFromVectors(f32 *out, f32 *from, f32 *to) {
 }
 
 /* Quaternion from Euler angles: half angles are negated. */
-void func_00310EB0(f32 *out, f32 x, f32 y, f32 z) {
+void sdfQuatFromEuler(f32 *out, f32 x, f32 y, f32 z) {
     f32 half;
     f32 cx;
     f32 sx;
@@ -723,7 +723,7 @@ void *sdfFindTaskListNodeByKey(TaskList *list, s32 key) {
     return node;
 }
 
-u32 func_00312578(void) {
+u32 sdfReadPadDirectionMask(void) {
     u32 flags = 0;
 
     if (D_0037F510[0x26] < 0) {

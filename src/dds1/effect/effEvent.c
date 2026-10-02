@@ -1337,12 +1337,12 @@ void effEventSetWorkFlag(EffEventWork *work, u8 value) {
 }
 
 /* Copy the serialized emitter parameters without changing their values. */
-void func_00192030(const EffEventBillParams *source, EffEventBillParams *destination) {
+void effEventCopyParameterBlock(const EffEventBillParams *source, EffEventBillParams *destination) {
     *destination = *source;
 }
 
 /* Copy parameters and normalize only start-delay spread and the two fade divisors. */
-void func_00192110(EffEventBillParams *destination, const EffEventBillParams *source) {
+void effCopyEventBlockAndClampPositiveParameters(EffEventBillParams *destination, const EffEventBillParams *source) {
     *destination = *source;
     if (destination->fadeIn <= 0) {
         destination->fadeIn = 1;

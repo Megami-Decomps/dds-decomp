@@ -282,7 +282,7 @@ void effCompleteRetainedResourceJob(u64 job, u32 *out) {
 
 extern s32 func_003014F0(char *, const char *, ...);
 
-extern void func_00288AD0(const char *, u32, void (*)(u64, u32 *), u32 *);
+extern void fileCreateCallbackRequest(const char *, u32, void (*)(u64, u32 *), u32 *);
 
 void effRequestResourceByMode(const char *base, const char *name, u32 mode, u32 *out) {
     char path[0x80];
@@ -290,9 +290,9 @@ void effRequestResourceByMode(const char *base, const char *name, u32 mode, u32 
     func_003014F0(path, D_003BD198, base, name);
     *out = 0;
     if (mode == 1) {
-        func_00288AD0(path, 0, effCompleteRetainedResourceJob, out);
+        fileCreateCallbackRequest(path, 0, effCompleteRetainedResourceJob, out);
     } else {
-        func_00288AD0(path, 0, effCompleteTransientResourceJob, out);
+        fileCreateCallbackRequest(path, 0, effCompleteTransientResourceJob, out);
     }
 }
 
@@ -327,7 +327,7 @@ void effRequestMappedResource(const char *base, const char *name, u32 *out) {
 
     func_003014F0(path, D_003BD198, base, name);
     *out = 0;
-    func_00288AD0(path, 0, effCompleteMappedResourceJob, out);
+    fileCreateCallbackRequest(path, 0, effCompleteMappedResourceJob, out);
 }
 
 void *effCreateOwnerRecordList(void *owner) {

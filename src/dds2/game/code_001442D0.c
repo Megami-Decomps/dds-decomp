@@ -338,7 +338,7 @@ extern void fldSetFloorFlag(s32, s32, s32);
 
 extern void sdfWaitSlotReady(void);
 
-extern void func_00149CE0(void);
+extern void fldReleaseSceneDevSlotsAndTextures(void);
 
 extern void kwlnTaskDestroyWithHierarchyByName(const char *, s32);
 
@@ -1172,7 +1172,7 @@ void fldReleaseResourceSlots(void) {
 
 extern void sdfReleaseDevSlot(s32, s32, s32);
 
-void func_00149CE0(void) {
+void fldReleaseSceneDevSlotsAndTextures(void) {
     s32 i;
 
     for (i = 0; i < fldSceneRecordCount; i++) {
@@ -1368,7 +1368,7 @@ void fldLoadSceneModelsAndCamera(void) {
 void fldReleaseMenuSlotsAfterWait(void) {
     sdfWaitSlotReady();
     sdfWaitSlotReady();
-    func_00149CE0();
+    fldReleaseSceneDevSlotsAndTextures();
 }
 
 u32 fldGetSceneReadyFlag(void) {

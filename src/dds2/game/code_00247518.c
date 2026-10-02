@@ -169,6 +169,7 @@ typedef struct EvtViewGlyph {
     s16 condition; /* 0x10 */
     u8 pad12[0x1E];
     struct EvtViewGlyph *next; /* 0x30 */
+    struct EvtViewGlyph *previous; /* 0x34 */
 } EvtViewGlyph;
 
 typedef struct EvtViewNode {
@@ -179,10 +180,12 @@ typedef struct EvtViewNode {
     s16 time;                 /* 0x1C */
     u8 pad1E[6];
     s32 unk24;
-    u8 pad28[0x28];
+    s32 keyMode;              /* 0x28 */
+    u8 pad2C[0x24];
     s32 hasGlyphs;            /* 0x50 */
     EvtViewGlyph *glyphs;     /* 0x54 */
-    u8 pad58[0x24];
+    EvtViewGlyph *lastGlyph;  /* 0x58 */
+    u8 pad5C[0x20];
     struct EvtViewNode *next; /* 0x7C */
 } EvtViewNode;
 
@@ -209,7 +212,33 @@ void evtViewerApplyInterpolatedNodeKey(EventViewerState *viewer, EvtViewNode *no
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_002475C8);
+void func_002475C8(EventViewerState *viewer) {
+    EvtViewNode *node = (EvtViewNode *)viewer->groups;
+    s32 position = viewer->glyphAdvancePosition;
+
+    while (node != NULL) {
+        if (node->kind == 24) {
+            if (node->keyMode == 1) {
+                u16 *key = (u16 *)evtEventViewerGetPendingNode((s32)viewer);
+                evtViewerApplyInterpolatedNodeKey(viewer, node, key, NULL);
+            } else {
+                EvtViewGlyph *glyph = node->glyphs;
+                EvtViewGlyph *from;
+
+                while (glyph != NULL && position >= glyph->id + node->time) {
+                    glyph = glyph->next;
+                }
+                if (glyph != NULL) {
+                    from = glyph->previous;
+                } else {
+                    from = node->lastGlyph;
+                }
+                evtViewerApplyInterpolatedNodeKey(viewer, node, (u16 *)from, (u16 *)glyph);
+            }
+        }
+        node = node->next;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_002476B8);
 

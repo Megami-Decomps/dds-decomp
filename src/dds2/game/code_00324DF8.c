@@ -56,7 +56,7 @@ void func_00324DF8(u32 *lists, u32 option) {
     func_00320CE0(*lists, 0, option);
 }
 
-u32 func_00324E18(u32 *pair, u32 key, u32 value) {
+u32 mnuInsertResourceHandleAfterMatchingId(u32 *pair, u32 key, u32 value) {
     u32 node = mnuFindResourceNodeById(pair[0], key);
     if (node) {
         return func_00320D80(pair[0], node, 0, value);

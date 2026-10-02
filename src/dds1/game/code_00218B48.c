@@ -1335,7 +1335,119 @@ u32 mdlRunViewerAssetSelectionTask(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021B510);
+extern void effMiscAxisAngleToQuaternionVf11(f32 angle);
+extern void effMiscQuatMultiplyVU(void);
+extern f32 sdfViewMatrix[];
+extern void effMiscQuaternionToMatrixVU(void);
+
+/* vu0 routine: move the viewer camera or orbit it about the look-at point. */
+void func_0021B510(void) {
+    f32 speed;
+    s32 rotated;
+
+    if (sdfPadButtonStates[0xC] < 0) {
+        mdlResetViewerBasisVectors();
+        return;
+    }
+    if (sdfPadButtonStates[0] < 0) {
+        if (++mdlViewerState.labelIndexA == 2) {
+            mdlViewerState.labelIndexA = 0;
+        }
+    }
+    if (mdlViewerState.labelIndexA == 0) {
+        speed = 1.25f;
+        if (sdfPadButtonStates[1] == 0) {
+            speed = 20.0f;
+            if (sdfPadButtonStates[3] == 0) {
+                speed = 5.0f;
+            }
+        }
+        VU0_MOVE_VF(vf10, vf0);
+        EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
+        VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
+        if (sdfPadButtonStates[5] != 0) {
+            VU0_ADD(vf10, vf10, vf11);
+        } else if (sdfPadButtonStates[4] != 0) {
+            VU0_SUB(vf10, vf10, vf11);
+        }
+        EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
+        VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
+        if (sdfPadButtonStates[6] != 0) {
+            VU0_ADD(vf10, vf10, vf11);
+        } else if (sdfPadButtonStates[7] != 0) {
+            VU0_SUB(vf10, vf10, vf11);
+        }
+        EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
+        VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
+        if (sdfPadButtonStates[9] != 0) {
+            VU0_ADD(vf10, vf10, vf11);
+        } else if (sdfPadButtonStates[8] != 0) {
+            VU0_SUB(vf10, vf10, vf11);
+        }
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_LOAD_VF(vf10, &D_003D7B20);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, &D_003D7B20);
+        VU0_LOAD_VF(vf10, &D_003D7B30);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, &D_003D7B30);
+    } else {
+        speed = 0.25f * 3.14159265f / 180.0f;
+        if (sdfPadButtonStates[1] == 0) {
+            speed = 4.0f * 3.14159265f / 180.0f;
+            if (sdfPadButtonStates[3] == 0) {
+                speed = 1.0f * 3.14159265f / 180.0f;
+            }
+        }
+        rotated = 0;
+        VU0_MOVE_VF(vf10, vf0);
+        if (sdfPadButtonStates[5] != 0) {
+            EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
+            effMiscAxisAngleToQuaternionVf11(speed);
+            effMiscQuatMultiplyVU();
+            rotated = 1;
+        } else if (sdfPadButtonStates[4] != 0) {
+            EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
+            effMiscAxisAngleToQuaternionVf11(-speed);
+            effMiscQuatMultiplyVU();
+            rotated = 1;
+        }
+        if (sdfPadButtonStates[6] != 0) {
+            EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
+            effMiscAxisAngleToQuaternionVf11(speed);
+            effMiscQuatMultiplyVU();
+            rotated = 1;
+        } else if (sdfPadButtonStates[7] != 0) {
+            EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
+            effMiscAxisAngleToQuaternionVf11(-speed);
+            effMiscQuatMultiplyVU();
+            rotated = 1;
+        }
+        if (sdfPadButtonStates[8] != 0) {
+            EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
+            effMiscAxisAngleToQuaternionVf11(speed);
+            effMiscQuatMultiplyVU();
+            rotated = 1;
+        } else if (sdfPadButtonStates[9] != 0) {
+            EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
+            effMiscAxisAngleToQuaternionVf11(-speed);
+            effMiscQuatMultiplyVU();
+            rotated = 1;
+        }
+        if (rotated) {
+            effMiscQuaternionToMatrixVU();
+            VU0_LOAD_VF(vf10, &D_003D7B30);
+            VU0_LOAD_VF(vf11, &D_003D7B20);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_TRANSFORM_POINT(vf10, vf10);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, &D_003D7B30);
+            VU0_LOAD_VF(vf10, &D_003D7B40);
+            VU0_TRANSFORM_POINT(vf10, vf10);
+            VU0_STORE_VF(vf10, &D_003D7B40);
+        }
+    }
+}
 
 extern s32 D_00367B10[];
 
@@ -1357,9 +1469,6 @@ extern void mdlLoadPrimaryVectorVU(MdlCtx *context);
 extern void mdlStorePrimaryVectorVU(MdlCtx *context);
 extern void mdlLoadSecondaryVectorVU(MdlCtx *context);
 extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *context);
-extern void effMiscAxisAngleToQuaternionVf11(f32 angle);
-extern void effMiscQuatMultiplyVU(void);
-extern f32 sdfViewMatrix[];
 extern f32 D_00398380[4];
 extern f32 D_00398390[4];
 extern f32 D_003983A0[4];
@@ -1930,7 +2039,7 @@ extern char D_003BBCD8[]; /* "fog=" */
 extern MdlFogParams kwlnDrawVector;
 extern f32 sdfSceneProjectionParameters[];
 extern s32 sdfPathExists(char *path);
-extern s32 func_00288B48(char *path);
+extern s32 fileQueueDefaultCallbackRequest(char *path);
 extern void fileWaitReady(s32 file);
 extern s32 fileGetResourceHandle(s32 file);
 extern char *fileGetLoadedDataAddress(s32 file);
@@ -1961,7 +2070,7 @@ void mdlLoadViewerPresentationConfig(void) {
     if (sdfPathExists(D_00367AF8) == 0) {
         return;
     }
-    file = func_00288B48(D_00367AF8);
+    file = fileQueueDefaultCallbackRequest(D_00367AF8);
     fileWaitReady(file);
     handle = fileGetResourceHandle(file);
     data = fileGetLoadedDataAddress(file);

@@ -4,7 +4,7 @@
 
 extern s32 func_0027B888(u32);
 
-extern u8 D_003BC3E1;
+extern s8 D_003BC3E1;
 
 extern s32 dds3GetWorldObject(void);
 
@@ -48,13 +48,15 @@ typedef struct MenuTerminalWork {
     u8 pad08[0x54];
     s32 messageResources[2]; /* 0x5C: second handle opens the message window */
     s32 batch;               /* 0x64 */
-    u8 pad68[8];
+    u32 secondResource;     /* 0x68 */
+    u8 pad6C[4];
     s32 listResource;        /* 0x70 */
     MenuProgressOwner *list; /* 0x74 */
     MenuProgressOwner *owner;/* 0x78 */
     s32 mode;                /* 0x7C */
     s32 initState;           /* 0x80 */
-    u8 pad84[0x1C];
+    u8 pad84[0x18];
+    s32 panelFade;          /* 0x9C: 0..0x100 color blend weight */
     s32 effect[7];           /* 0xA0: effect batches; [4] and [5] are the pair selected via cursor */
     s32 cursor[2];           /* 0xBC: current and previous node, -1 until selected */
     u8 padC4[0x14];
@@ -844,20 +846,55 @@ void fldSaveSceneOptionsAndClearFlags(SceneOptionRecord *option) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024A2D8);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024A340);
+extern s32 D_003AF688[3][2];
+extern void func_002BF4E0(s32, s32, s32, s32, s32, u32, s32, s32);
 
-/* View of the frame countdown; the preceding scene state is not known here. */
-typedef struct {
-    u8 pad00[0x9C];
-    s32 remainingFrames; /* 0x9C */
-} SceneTimerView;
+void func_0024A340(s32 close, s32 context) {
+    MenuTerminalWork *work = (MenuTerminalWork *)context;
+    s32 positions[3][2];
+    s32 (*position)[2];
+    u32 i;
 
-s32 fldClassifyRemainingFrames(SceneTimerView *timer) {
-    s32 frames = timer->remainingFrames;
-    if (frames == 0) {
+    memcpy(positions, D_003AF688, sizeof(positions));
+    if (D_003BC3E1 != 0) {
+        if (work->reduced < 3) {
+            if (work->reduced > 0) {
+                if (close == 0) {
+                    work->panelFade = 0x100;
+                    return;
+                }
+                work->panelFade = 0;
+                return;
+            }
+        }
+        for (i = 0, position = positions; i < 3; i++, position++) {
+            func_002BF4E0((*position)[0], (*position)[1], 0, work->panelFade,
+                1, work->secondResource, i, 0x53);
+        }
+        if (close == 0) {
+            if (work->panelFade < 0x100) {
+                work->panelFade += 12;
+            }
+            if (work->panelFade > 0x100) {
+                work->panelFade = 0x100;
+            }
+        } else {
+            if (work->panelFade > 0) {
+                work->panelFade -= 17;
+            }
+            if (work->panelFade < 0) {
+                work->panelFade = 0;
+            }
+        }
+    }
+}
+
+s32 fldClassifyRemainingFrames(MenuTerminalWork *work) {
+    s32 fade = work->panelFade;
+    if (fade == 0) {
         return 0;
     }
-    return frames >= 60 ? 2 : 1;
+    return fade >= 60 ? 2 : 1;
 }
 
 void mnuTerminalConfigureEffects(u32 mode, MenuTerminalWork *state) {
@@ -1174,7 +1211,7 @@ s64 evtBHandleSelectionPanelInput(u64 input) {
     if (result != 0) {
         return result;
     }
-    frames = fldClassifyRemainingFrames((SceneTimerView *)context);
+    frames = fldClassifyRemainingFrames((MenuTerminalWork *)context);
     if (frames != 2) {
         return 0;
     }
@@ -1469,12 +1506,12 @@ s32 mnuOpenTerminalSelectionMessageWindow(void) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024C3F8);
 
-/* Per-frame panel update: once the field frames are drained, pick the transition state from the selection chain, then run the panel. */
+/* While the panel fade is nonzero, choose its transition direction from the selection chain, then run the panel. */
 s64 evtBPollSelectionChainPanel(s32 item) {
     s32 state = kwlnTaskGetUserValue();
 
     func_0024A2D8(state);
-    if (fldClassifyRemainingFrames((SceneTimerView *)state) != 0) {
+    if (fldClassifyRemainingFrames((MenuTerminalWork *)state) != 0) {
         if (((EvtBContext *)state)->selectionStep == 0) {
             func_0024A340(1, state);
         } else if (func_0024A6E8((SceneFrameOwner *)state) == 0) {
@@ -1495,7 +1532,7 @@ s64 evtBDispatchSync(s32 request) {
     return menuRunPanel(context, 2, request);
 }
 
-extern void func_0024DD90(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern void dspSetActive(s32);
 extern void dspStartEntry(s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
@@ -1510,7 +1547,7 @@ u32 evtPrepareSelectedMenuEntry(void) {
     if (((EvtBSelectionList *)owner)->mode == 1) {
         mnuSelectFirstListNode(owner);
     }
-    func_0024DD90(0, D_00347C68[*selectionIndex].encodedText);
+    evtCopyEntryStringToActiveWindow(0, D_00347C68[*selectionIndex].encodedText);
     dspSetActive(1);
     dspStartEntry(0);
     evtSetMessageWindowOptionWhenOpen(1);

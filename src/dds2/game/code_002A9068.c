@@ -48,7 +48,7 @@ extern void mnuInitPartyPanelSlots(s32);
 
 extern void mnuLoadEffectResources(u8 *);
 
-extern void func_002B8140(u8 *);
+extern void mnuEnableCampBadgeFade(u8 *);
 
 extern void evtCreateMessageWindowIfMissing(s32);
 
@@ -698,7 +698,7 @@ u8 *mnuCreateStaffMenuWork(void) {
     }
     mnuInitPartyPanelSlots((s32)work + 0xA928);
     mnuLoadEffectResources(effects);
-    func_002B8140(effects);
+    mnuEnableCampBadgeFade(effects);
     evtCreateMessageWindowIfMissing((s32)D_003E5778);
     movLoadTitleEffects(work);
     func_002A9908(work);

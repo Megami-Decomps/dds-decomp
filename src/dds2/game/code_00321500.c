@@ -61,7 +61,7 @@ extern u8 D_0045C880[];
 
 extern void dds3DestroyCallbackNodeAfterLastNotification(u32);
 
-extern void func_00321908(u32);
+extern void mnuFreeOptionalBlock(u32);
 extern u32 func_0035A828(s32 bytes);
 extern u8 *mnuGetResourceProgressStepState(void);
 extern u8 *mnuGetResourceRecordByIndex(s32 index);
@@ -156,7 +156,7 @@ u8 *mnuCreateNamedRecord(u8 *name) {
     return record;
 }
 
-void func_00321908(u32 ptr) {
+void mnuFreeOptionalBlock(u32 ptr) {
     if (ptr != 0) {
         func_0035A880(ptr);
     }

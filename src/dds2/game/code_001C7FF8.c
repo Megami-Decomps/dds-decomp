@@ -23,7 +23,7 @@ extern s32 btlHasRegisteredSkillNamePanelTask(void);
 
 extern s32 btlHasRegisteredAphNamePanelTask(void);
 
-extern s32 func_001CC9C0(s32);
+extern s32 btlCreateAiWork(s32);
 
 extern u32 fldGetSceneScriptTaskUserData(void);
 
@@ -331,7 +331,7 @@ extern char *fldGetCachedSceneActorNameAndId(s32, s16 *);
 
 /* Advance the per-kind scene counter table: refresh the slot for the current
  * scene kind, then return its value (clamped to 4 unless noClamp is set). */
-u32 func_001C83D0(s32 ctx, s8 kind, s8 noClamp) {
+u32 fldUpdateSceneKindCounter(s32 ctx, s8 kind, s8 noClamp) {
     s16 buf[8];
     u32 type = func_001C82D8(ctx, kind);
     if (type != 4) {
@@ -486,7 +486,7 @@ extern s32 func_001ABA40();
 
 /* Check helper for a pair of scene objects: the caller's own result wins,
  * then the first object's, then the second's. */
-s32 func_001CA390(s32 self, SceneCheckArgs *args) {
+s32 btlCheckScenePairResult(s32 self, SceneCheckArgs *args) {
     s32 base;
     s32 resultA = 0;
     s32 resultB = 0;
@@ -794,7 +794,7 @@ extern s32 btlFindEligibleTargetForMultiActorCommand();
 
 /* Creates the AI work object for `source`: allocates two index lists and
  * fills them according to the current scene object state. */
-s32 func_001CC9C0(s32 source) {
+s32 btlCreateAiWork(s32 source) {
     SceneAiWork *work;
     SceneObject *object;
     SceneAiOther *other;
@@ -886,7 +886,7 @@ void fldCreateSceneSpriteTask(s32 sourceTask) {
     }
     scene = (BattleSceneWork *)btlGetRuntime();
     task = kwlnTaskCreate(D_004367B8, 0x2B0E, 1, 1, (void (*)(void))fldStepSceneStateMachine,
-                          (void (*)(void))fldReleaseSceneSprite, func_001CC9C0(sourceTask));
+                          (void (*)(void))fldReleaseSceneSprite, btlCreateAiWork(sourceTask));
     func_00101968(scene->taskParent, task);
     scene->spriteObject = task;
 }

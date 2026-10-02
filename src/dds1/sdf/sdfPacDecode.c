@@ -96,7 +96,7 @@ void sdfPacBeginRelocatedPayload(PacState *state, PacHead *packet);
 void sdfPacStartAllocationList(PacState *state, PacHead *packet);
 void sdfQueueAndResetPacketWork(PacState *state, void *packet);
 void sdfAppendResourceListItem(s32 handle, s32 resource);
-s32 func_002D32A0(void *resource);
+s32 sdfTexAcquireAlternateResourceTexture(void *resource);
 s32 sdfResourceRetainAddress(s32 handle);
 s32 sdfTexAcquireResourceTexture(s32 resource);
 s32 sdfAllocGeneralBlockHigh(s32 size);
@@ -377,7 +377,7 @@ void sdfPacSkipResourceChunk(PacState *state) {
                 return;
             }
         }
-        buffer->result = func_002D32A0(buffer->cursor);
+        buffer->result = sdfTexAcquireAlternateResourceTexture(buffer->cursor);
         state->onComplete(state);
     }
 }

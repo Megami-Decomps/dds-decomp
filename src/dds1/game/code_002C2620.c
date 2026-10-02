@@ -18,7 +18,7 @@ extern u32 D_003BD974;
 extern s32 mdlFlagTest(u32);
 extern u32 sdfCounterGetDisplayWordPointer(void);
 extern void func_003014F0(char *, char *, s32);
-extern void func_0024DD90(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void dspStartEntry(s32);
 extern void evtCaptureMessageWindowSoundMode(s32);
@@ -552,7 +552,7 @@ void fldDisplayLocalMapCounterMessage(void) {
     char text[32];
 
     func_003014F0(text, D_003BD250, sdfCounterGetDisplayWordPointer());
-    func_0024DD90(0, text);
+    evtCopyEntryStringToActiveWindow(0, text);
     evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(0);
     evtCaptureMessageWindowSoundMode(1);

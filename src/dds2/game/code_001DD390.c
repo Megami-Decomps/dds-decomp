@@ -3515,7 +3515,7 @@ SoundTask *btlCreateUnitFxVectorRefreshTask(BtlUnit *unit) {
 }
 
 extern s32 btlFormatUnitBedName(BtlUnit *, char *);
-extern s32 func_002C80E8(char *);
+extern s32 fileQueueAlternateCallbackRequest(char *);
 
 void btlStartGunFinishLoad(s32 *task) {
     char filename[0x70];
@@ -3528,7 +3528,7 @@ void btlStartGunFinishLoad(s32 *task) {
         unit->gunResource = 0;
     }
     if (btlFormatUnitBedName(unit, filename)) {
-        s32 handle = func_002C80E8(filename);
+        s32 handle = fileQueueAlternateCallbackRequest(filename);
         task[1] = handle;
         btlBossDebugPrintf("btl:gun & finish load start[%s][%p]\n", filename, handle);
     }
@@ -6275,10 +6275,10 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     if (args->state == 0) {
         func_0035C860(path, "/fld/b/f%03d/f%03d_%03df.tmx", stage, stage, variant);
         result = 0;
-        args->frontHandle = (s32)func_002C80C8(path);
+        args->frontHandle = (s32)fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf("btl:load 0[%s]\n", path);
         func_0035C860(path, "/fld/b/f%03d/f%03d_%03ds.tmx", stage, stage, variant);
-        args->sideHandle = (s32)func_002C80C8(path);
+        args->sideHandle = (s32)fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf("btl:load 1[%s]\n", path);
     } else {
         if (args->frontHandle != 0) {
@@ -6691,7 +6691,7 @@ SoundTask *sndCreateTimedUnitEffectTask(u32 effect, BtlUnit *actor, u16 frames, 
     return task;
 }
 
-extern void *func_002C80C8(const char *);
+extern void *fileQueueDefaultCallbackRequest(const char *);
 
 typedef struct EffectLoadArgs {
     SoundEffectNode *effect;
@@ -6708,7 +6708,7 @@ void sndBeginEffectLoad(EffectLoadArgs *args) {
         }
         effect->flags &= ~2;
     }
-    args->loadHandle = func_002C80C8(args->name);
+    args->loadHandle = fileQueueDefaultCallbackRequest(args->name);
     effect->flags |= 1;
     btlBossDebugPrintf("btl:effect load start[%s]\n", args->name);
 }
@@ -7547,7 +7547,7 @@ typedef struct FileLoadArgs {
 
 void sndStartFileLoad(FileLoadArgs *args) {
     SoundFileNode *node = args->node;
-    args->loadHandle = func_002C80C8(args->name);
+    args->loadHandle = fileQueueDefaultCallbackRequest(args->name);
     node->flags |= 1;
     node->position = (args->frames + 0x200) << 16;
     node->mode = 2;
@@ -7737,7 +7737,7 @@ void sndLoadMotSeFiles(u32 *sound) {
             } else {
                 func_0035C860(filename, D_00419318, D_00419308, sound[2]);
             }
-            *(u32 *)(handleTable + offset) = func_002C80C8(filename);
+            *(u32 *)(handleTable + offset) = fileQueueDefaultCallbackRequest(filename);
             btlBossDebugPrintf("btl:motSE file load start[%d][%p][%s]\n", slot, sound, filename);
         }
         slot++;
@@ -7995,7 +7995,7 @@ s32 sndPollAtrac3SELoadTask(BtlAt3LoadArgs *args) {
     s32 size;
     if (args->state == 0) {
         func_0035C860(path, "/soundat3/%s.at3", D_003E0F60[args->index].fileName);
-        args->loadHandle = (s32)func_002C80C8(path);
+        args->loadHandle = (s32)fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf("btl:atrac3 SE load[%s]\n", path);
     } else if (fileIsRequestReadyInCurrentMode(args->loadHandle) != 0) {
         if (mnuGetSoundBufferStateLocked() != 0) {
@@ -8055,7 +8055,7 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
         } else {
             func_0035C860(path, D_00419318, D_00419308, unit->mode);
         }
-        args->handle = func_002C80C8(path);
+        args->handle = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf("btl:ATRAC3 dead load start[%s]\n", path);
     }
     work->earringPlaybackCount++;

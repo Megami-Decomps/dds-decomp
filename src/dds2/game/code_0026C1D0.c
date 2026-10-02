@@ -182,7 +182,7 @@ s32 evtCreateMessageWindowIfMissing(void) {
     return 0;
 }
 
-s32 func_0026C580(s32 value) {
+s32 evtRefreshActiveMessageWindow(s32 value) {
     if (dspWindowHandle < 0) {
         return 0;
     }
@@ -298,7 +298,7 @@ void func_0026C900(void) {
     func_0026C8E8(1);
 }
 
-void func_0026C918(s32 first, s32 second) {
+void evtCopyEntryStringToActiveWindow(s32 first, s32 second) {
     itfMesCopyStringToWindowTableSlot(dspWindowHandle, first, second);
 }
 

@@ -106,7 +106,7 @@ void sdfDestroyDevRequest(void *);
 void sdfTexReleaseReferenceViaHandler(u32);
 SdfAsset *sdfCreateAssetWithDrawEntries(void);
 u8 *sdfParseAssetParameterFlags(SdfAsset *, SdfTextParam *, u8 *);
-void func_002DA358(SdfResourceList *, SdfAsset *);
+void sdfAppendAssetToResourceList(SdfResourceList *, SdfAsset *);
 void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
 void sdfApplyAssetSecondaryEntry(SdfAsset *, void *);
 u8 *sdfModelFindDrawNode(void *chunk, s32 id);
@@ -433,13 +433,13 @@ void sdfReleaseQueuedResource(void *resource, s32 retained) {
     }
 }
 
-void func_002DA340(SdfResourceList *list) {
+void sdfGrowResourceListStorage(SdfResourceList *list) {
     sdfDevBufferedRequestGrow((struct DevRequest *)list);
 }
 
-void func_002DA358(SdfResourceList *list, SdfAsset *asset) {
+void sdfAppendAssetToResourceList(SdfResourceList *list, SdfAsset *asset) {
     if (list->count >= list->capacity) {
-        func_002DA340(list);
+        sdfGrowResourceListStorage(list);
     }
     list->items[list->count] = (u32)asset;
     list->count++;
@@ -783,7 +783,7 @@ SdfResourceList *sdfAssetListParse(SdfTextParam *param, u32 *data) {
     while (count != 0) {
         SdfAsset *asset = sdfCreateAssetWithDrawEntries();
         cursor = sdfParseAssetParameterFlags(asset, param, cursor);
-        func_002DA358(list, asset);
+        sdfAppendAssetToResourceList(list, asset);
         count--;
     }
     return list;

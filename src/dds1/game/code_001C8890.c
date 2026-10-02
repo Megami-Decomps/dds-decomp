@@ -733,7 +733,7 @@ void btlUnitTurnEndStateSelect(u8 *task) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001C8B00);
+INCLUDE_ASM(const s32, "game/code_001C8890", fldCheckSceneResourcesIdle);
 
 typedef struct SceneActor {
     u8 pad_00[0x108];
@@ -860,7 +860,7 @@ void btlActionSeqCheckDispatch(u8 *task) {
                 return;
             }
         }
-        if (!(flags & 0x8000) || func_001C8B00(unit) != 0) {
+        if (!(flags & 0x8000) || fldCheckSceneResourcesIdle(unit) != 0) {
             if (btlBothSidesActive((UiObject *)unit) == 0) {
                 btlDispatchStateHandler(task, 0x1C);
                 return;
@@ -1018,7 +1018,7 @@ void func_001C9C20(s32 arg0) {
     *(u32 *)(arg0 + 8) = *(u32 *)(arg0 + 8) & 0xffffff7f;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001C9C38);
+INCLUDE_ASM(const s32, "game/code_001C8890", btlAiTaskUpdate);
 
 void btlMarkSceneTaskAfterReset(s32 arg0) {
     func_001B83D8(arg0, 0, 0);
@@ -1122,7 +1122,7 @@ void btlCommandPrintAndFetchOwner(u8 *task) {
 
 void btlDispatchEffectCommandWhenActorReady(u8 *command) {
     u8 *actor = *(u8 **)(command + 0x18);
-    if (func_001C8B00(actor) == 0) {
+    if (fldCheckSceneResourcesIdle(actor) == 0) {
         return;
     }
     if (*(u16 *)(command + 0x50) == 2) {
@@ -4256,7 +4256,7 @@ void *btlCreateUnitFxVectorRefreshTask(u8 *owner) {
 
 extern void sdfFreeMemoryFromEitherHeap(s32);
 
-extern s32 func_00288B68(char *);
+extern s32 fileQueueAlternateCallbackRequest(char *);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3CA0);
 
@@ -4271,7 +4271,7 @@ void btlStartGunFinishLoad(s32 task) {
         *(s32 *)(actor + 0x30C) = 0;
     }
     if (btlFormatUnitBedName(actor, filename)) {
-        s32 handle = func_00288B68(filename);
+        s32 handle = fileQueueAlternateCallbackRequest(filename);
         *(s32 *)(task + 4) = handle;
         btlBossDebugPrintf("btl:gun & finish load start[%s][%p]\n", filename, handle);
     }
@@ -7121,7 +7121,7 @@ void sndBeginEffectLoad(EffectLoadArgs *args) {
         }
         effect->flags &= ~2;
     }
-    args->loadHandle = (void *)func_00288B48(args->name);
+    args->loadHandle = (void *)fileQueueDefaultCallbackRequest(args->name);
     effect->flags |= 1;
     btlBossDebugPrintf("btl:effect load start[%s]\n", args->name);
 }
@@ -7958,7 +7958,7 @@ typedef struct SoundFileRequest {
 void sndStartFileLoad(SoundFileRequest *request) {
     SoundLoadNode *node = request->node;
 
-    request->handle = (void *)func_00288B48(request->name);
+    request->handle = (void *)fileQueueDefaultCallbackRequest(request->name);
     node->flags |= 1;
     node->position = (request->blockIndex + 0x200) << 16;
     node->state = 2;
@@ -8157,7 +8157,7 @@ void sndLoadMotSeFiles(u32 *sound) {
             } else {
                 func_003014F0(filename, D_003A5198, D_003A5188, sound[2]);
             }
-            *(u32 *)(handleTable + offset) = func_00288B48(filename);
+            *(u32 *)(handleTable + offset) = fileQueueDefaultCallbackRequest(filename);
             btlBossDebugPrintf(D_003A51A8, slot, sound, filename);
         }
         slot++;
@@ -8393,7 +8393,7 @@ s32 sndPollAtrac3SELoadTask(BattleVoiceLoad *args) {
 
     if (args->state == 0) {
         func_003014F0(path, D_003A5328, D_00377650[args->index].fileName);
-        args->request = func_00288B48(path);
+        args->request = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A5340, path);
     } else if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
         if (mnuGetSoundBufferStateLocked() != 0) {
@@ -8690,3 +8690,4 @@ u8 *btlCreateSoundPlaybackTask(u8 *owner, u32 soundId, u32 variant, u32 channel,
 }
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5410);
+

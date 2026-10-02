@@ -1018,7 +1018,7 @@ void effCreateFadeBlendWorkFromOutput(s32 work) {
 }
 
 void effReleaseFadeBlendWork(void) {
-    func_00186CB8();
+    effReleaseBlurTemplate();
 }
 
 typedef struct EffMapOutB {
@@ -3579,7 +3579,7 @@ void effMenuRecordVectorSet(s32 node) {
     mnuRecordSetVector(((EffectSurfaceNode *)node)->record);
 }
 
-void func_002A70F0(s32 node) {
+void effSetSurfaceRecordSecondaryVector(s32 node) {
     fileSetRecordSecondVector(((EffectSurfaceNode *)node)->record);
 }
 

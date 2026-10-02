@@ -79,7 +79,7 @@ typedef struct {
     EffBlurScaleSlot *slots;
 } EffBlurScaleWork; /* 0x38 */
 
-void func_0018E8F0(void) {
+void effReleaseBlurTemplate(void) {
     sdfReleaseChipBlock();
 }
 

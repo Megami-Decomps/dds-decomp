@@ -1189,7 +1189,7 @@ INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010B590);
 void func_0010B6A8(void) {
 }
 
-void func_0010B6B0(s8 mode) {
+void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
         D_003BD768 = kwlnTaskCreate(D_0039E238, 0x2710, 1, 1, func_0010B590, func_0010B6A8, NULL);
     } else if (mode == 0) {
