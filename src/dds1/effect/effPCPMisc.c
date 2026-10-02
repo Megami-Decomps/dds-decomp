@@ -42,11 +42,11 @@ typedef struct {
 typedef struct {
     u8 flags;
     u8 pad01[3];
-    u32 duration;
-    u32 fadeIn;
-    u32 fadeOut;
-    u32 startExtent;
-    u32 endExtent;
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    s32 startExtent;
+    s32 endExtent;
 } EffPCPCompactTimelineParams;
 
 typedef struct {
@@ -139,17 +139,17 @@ typedef struct {
 /* The two compact fade variants share their 0x3C work; only the SDK
    resource payload copied during respawn differs between variants. */
 typedef struct {
-    u8 pad00[0x10];
+    f32 position[4];
     u8 flags;
     u8 pad11[3];
     u32 color;
     u32 baseColor;
-    u32 frame;
-    u32 duration;
-    u32 fadeIn;
-    u32 fadeOut;
-    u32 startExtent;
-    u32 endExtent;
+    s32 frame;
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    s32 startExtent;
+    s32 endExtent;
     f32 unk34;
     u32 resource;
 } EffPCPCompactFadeWork;
@@ -2134,8 +2134,54 @@ typedef struct EffPCPLerpObj {
 
 extern void sdfProjectVuVectorToScreen();
 extern void effResourceRectDrawPixels(EffPCPLerpObj *obj);
+/* Both compact fade renderers interpolate their extent with integer truncation. */
+static inline s32 effPcpInterpolateCompactExtent(s32 from, s32 to,
+    s32 frame, s32 duration) {
+    to -= from;
+    to = (s32)((f32)to * (f32)frame / (f32)duration);
+    return from + to;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017B4C8);
+/* vu0 routine: project the compact rectangle's world-space center to screen. */
+void func_0017B4C8(EffPCPCompactFadeWork *work) {
+    f32 projected[4];
+    s32 frame = work->frame;
+    s32 duration = work->duration;
+    EffPCPLerpObj *rect = (EffPCPLerpObj *)work->resource;
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 opacity;
+    u32 color;
+
+    if (duration >= frame) {
+        fadeIn = work->fadeIn;
+        fadeOut = work->fadeOut;
+        if (work->flags == 0) {
+            VU0_LOAD_VF(vf10, work->position);
+            sdfProjectVuVectorToScreen();
+            VU0_STORE_VF(vf10, projected);
+            rect->x = (s32)projected[0] - 2048;
+            rect->y = ((s32)projected[1] - 2048) << 1;
+        } else {
+            rect->x = 0;
+            rect->y = 0;
+        }
+        rect->size = effPcpInterpolateCompactExtent(
+            work->startExtent, work->endExtent, frame, duration);
+        if (frame < fadeIn && fadeIn != 0) {
+            opacity = (f32)frame / (f32)fadeIn;
+        } else if (duration - frame <= fadeOut && fadeOut != 0) {
+            opacity = (f32)(duration - frame) / (f32)fadeOut;
+        } else {
+            opacity = 1.0f;
+        }
+        color = work->color;
+        rect->color = effMultiplyPackedColors(
+            effBlendColor(color & 0xFFFFFF, color, opacity), work->baseColor);
+        effResourceRectDrawPixels(rect);
+        work->frame++;
+    }
+}
 
 void func_0017B670(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -2193,7 +2239,46 @@ void effPcpCompactLongRelease(EffPCPCompactFadeWork *work) {
 }
 
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017B820);
+/* vu0 routine: project the compact textured rectangle's world-space center. */
+void func_0017B820(EffPCPCompactFadeWork *work) {
+    f32 projected[4];
+    s32 frame = work->frame;
+    s32 duration = work->duration;
+    EffPCPTrailObj *rect = (EffPCPTrailObj *)work->resource;
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 opacity;
+    u32 color;
+
+    if (duration >= frame) {
+        fadeIn = work->fadeIn;
+        fadeOut = work->fadeOut;
+        if (work->flags == 0) {
+            VU0_LOAD_VF(vf10, work->position);
+            sdfProjectVuVectorToScreen();
+            VU0_STORE_VF(vf10, projected);
+            rect->x = (s32)projected[0] - 2048;
+            rect->y = ((s32)projected[1] - 2048) << 1;
+        } else {
+            rect->x = 0;
+            rect->y = 0;
+        }
+        rect->size = effPcpInterpolateCompactExtent(
+            work->startExtent, work->endExtent, frame, duration);
+        if (frame < fadeIn && fadeIn != 0) {
+            opacity = (f32)frame / (f32)fadeIn;
+        } else if (duration - frame <= fadeOut && fadeOut != 0) {
+            opacity = (f32)(duration - frame) / (f32)fadeOut;
+        } else {
+            opacity = 1.0f;
+        }
+        color = work->color;
+        rect->color = effMultiplyPackedColors(
+            effBlendColor(color & 0xFFFFFF, color, opacity), work->baseColor);
+        effDrawBlurPixelRectWithResource(rect);
+        work->frame++;
+    }
+}
 
 void func_0017B9C8(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);

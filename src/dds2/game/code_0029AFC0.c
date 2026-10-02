@@ -30,6 +30,34 @@ typedef struct MenuSumTable {
     s32 values[MENU_SUM_COUNT];
 } MenuSumTable;
 
+typedef struct MenuProgressItem {
+    u8 pad00[4];
+    u16 index;
+    u8 pad06[0xE];
+    u16 value;
+} MenuProgressItem;
+
+typedef struct MenuProgressChange {
+    MenuProgressItem *item;
+    s32 gain;
+} MenuProgressChange;
+
+typedef struct MenuProgressContext {
+    u8 pad00[0x9C];
+    MenuProgressChange *change;
+    u8 padA0[0xB650];
+    s32 crossedSteps;
+} MenuProgressContext;
+
+extern u8 brsGetLevelStepCrossedBy(s32, s32);
+extern u8 brsGetLevelStepForValue(s32);
+extern s32 func_0035C860(char *, const char *, ...);
+extern void dspSetActive(s32);
+extern s32 dspStartEntry(s32);
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+extern char D_004379B0[];
+extern char D_004379B8[];
+
 /* All five signed-byte plus table-word totals must meet the minimum. */
 s32 mnuCheckTableSums(MenuSumBytes *bytes, MenuSumTable *table) {
     s32 *tableValues = table->values;
@@ -98,7 +126,27 @@ s64 func_0029B658(s32 request) {
     return menuSetHandler(context, 2, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B6A0);
+s32 func_0029B6A0(void) {
+    char text[0x20];
+    MenuProgressContext *context;
+    MenuProgressItem *item;
+    s32 gain;
+
+    context = (MenuProgressContext *)kwlnTaskGetUserValue();
+    item = context->change->item;
+    gain = context->change->gain;
+    context->crossedSteps = brsGetLevelStepCrossedBy(item->value - gain, gain);
+    if (context->crossedSteps != 0) {
+        func_0035C860(text, D_004379B8, D_00435E48 + item->index * 17);
+        func_0026C918(0, text);
+        func_0035C860(text, D_004379B0, brsGetLevelStepForValue(item->value));
+        func_0026C918(1, text);
+        dspSetActive(1);
+        dspStartEntry(0x18);
+        sndSetSequenceVolumePan(7, 0x7F, 0x3F);
+    }
+    return 1;
+}
 
 u32 func_0029B778(void) {
     return 1;

@@ -3,7 +3,25 @@
 
 extern s32 btlGetRuntime(void);
 
-extern u8 *datCommandRecords;
+typedef struct BattleCommandRecord {
+    u8 pad00[8];
+    u8 enabled;
+    u8 pad09[0xD];
+    u16 kind;
+    u8 pad18[0x20];
+} BattleCommandRecord;
+
+extern BattleCommandRecord *datCommandRecords;
+
+typedef struct BtlParams {
+    u8 pad0[0xBF4];
+    f32 ratioScale;
+    f32 ratioMax;
+    u8 padBFC[0x10];
+    f32 specialActionScale;
+} BtlParams;
+
+extern BtlParams *datBattleParameters;
 
 extern u32 btlHasMarkedEntry14(u32);
 
@@ -250,7 +268,29 @@ s32 btlFilterActionByUnitFlags(BattleActionUnit *unit, s32 action) {
     return action;
 }
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226308);
+f32 func_00226308(BattleActionUnit *unit, s32 actor, s32 command, s32 mode) {
+    f32 scale = 1.0f;
+
+    if (mode == 1) {
+        if ((unit->flags & 0x400) != 0 && unit->kind == 0x127) {
+            switch (datCommandRecords[command].kind) {
+            case 3:
+            case 4:
+            case 5:
+            case 8:
+            case 10:
+            case 11:
+            case 13:
+                scale = 1.0f;
+                break;
+            default:
+                scale = datBattleParameters->specialActionScale;
+                break;
+            }
+        }
+    }
+    return scale;
+}
 
 u32 btlFlagBattleForSpecialAction(u32 unit, u32 actor, u32 action) {
     BattleActionContext *battle;
@@ -516,7 +556,7 @@ s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 co
     }
     if (actor->flags & 0x200) {
         if (command != 0) {
-            if (datCommandRecords[command * 0x38 + 8] == 0) {
+            if (datCommandRecords[command].enabled == 0) {
                 return 0;
             }
         }

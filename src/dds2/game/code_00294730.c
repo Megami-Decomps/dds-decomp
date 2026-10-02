@@ -27,20 +27,41 @@ INCLUDE_ASM(const s32, "game/code_00294730", func_00294758);
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00294930);
 
-extern struct {
-    u8 pad00[0xCA];
-    s16 unkCA;
-    s16 unkCC;
-    s16 unkCE;
-    s16 unkD0;
-    s16 unkD2;
-    s16 unkD4;
-    s16 unkD6;
-} D_003D03F0;
-extern u8 *D_00438FC8;
+typedef s16 MenuIconPlacement[4];
+
+enum {
+    MENU_ICON_TEXTURE,
+    MENU_ICON_FRAME,
+    MENU_ICON_X,
+    MENU_ICON_Y
+};
+
+extern MenuIconPlacement D_003D03F0[];
+typedef struct MenuDrawResources {
+    u8 pad00[0x68];
+    s32 textures[0];
+} MenuDrawResources;
+
+extern MenuDrawResources *D_00438FC8;
+struct BlendDispatchWork;
+extern void func_00294680(struct BlendDispatchWork *, s32, s32);
 
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_00294B40);
+void func_00294B40(s32 x, s32 y, s32 depth, EventSpriteObject *object,
+                   s32 scale, s32 option) {
+    u32 index;
+
+    func_00306CD0(D_003D03F0[32][MENU_ICON_X] * 16, D_003D03F0[32][MENU_ICON_Y] * 8,
+                  0, scale, 0, D_00438FC8->textures[D_003D03F0[32][MENU_ICON_TEXTURE]],
+                  D_003D03F0[32][MENU_ICON_FRAME], option);
+    func_0026BEC0(0, 0, 0, scale, (u8 *)object + 0xE8, option);
+    func_0026BEC0(0, 0xCF8, 0, scale, (u8 *)object + 0x17C, option);
+    func_00294680((struct BlendDispatchWork *)object, scale, option);
+    index = func_00294730(object);
+    func_00306CD0(D_003D03F0[index][MENU_ICON_X] * 16, D_003D03F0[index][MENU_ICON_Y] * 8,
+                  0, scale, 0, D_00438FC8->textures[D_003D03F0[index][MENU_ICON_TEXTURE]],
+                  D_003D03F0[index][MENU_ICON_FRAME], option);
+}
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00294C68);
 
@@ -56,8 +77,14 @@ INCLUDE_ASM(const s32, "game/code_00294730", func_002958B0);
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00295D38);
 
+typedef struct MenuDrawValueItem {
+    u8 pad00[0x60];
+    s32 value;
+} MenuDrawValueItem;
+
 typedef struct MenuDrawInner {
-    u8 pad00[0x20];
+    u8 pad00[0x1C];
+    MenuDrawValueItem *item;
     s32 active;
 } MenuDrawInner;
 
@@ -67,6 +94,13 @@ typedef struct MenuDrawObject {
     u8 pad08[0x10];
     MenuDrawInner *inner; /* 0x18 */
 } MenuDrawObject;
+
+typedef struct MenuDrawValuePanel {
+    u8 pad00[0x80];
+    MenuDrawObject *object;
+    u8 pad84[0xC];
+    s32 multiplier;
+} MenuDrawValuePanel;
 
 /* Draw the child and its container only while the child is active. */
 void mnuDrawIfActive(s32 x, s32 y, s32 z, MenuDrawObject *object, s32 drawArg) {
@@ -130,10 +164,10 @@ INCLUDE_ASM(const s32, "game/code_00294730", func_002969D8);
 
 void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     func_00306CD0(
-        x + D_003D03F0.unkD4 * 16,
-        y + D_003D03F0.unkD6 * 8,
-        z, scale, 0, *(s32 *)(D_00438FC8 + 0x68),
-        D_003D03F0.unkD2, option
+        x + D_003D03F0[26][MENU_ICON_X] * 16,
+        y + D_003D03F0[26][MENU_ICON_Y] * 8,
+        z, scale, 0, D_00438FC8->textures[0],
+        D_003D03F0[26][MENU_ICON_FRAME], option
     );
 }
 
@@ -150,10 +184,10 @@ void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     s32 glyph;
 
     func_00306CD0(
-        x + D_003D03F0.unkCC * 16,
-        y + D_003D03F0.unkCE * 8,
-        z, scale, 0, *(s32 *)(D_00438FC8 + 0x68),
-        D_003D03F0.unkCA, option
+        x + D_003D03F0[25][MENU_ICON_X] * 16,
+        y + D_003D03F0[25][MENU_ICON_Y] * 8,
+        z, scale, 0, D_00438FC8->textures[0],
+        D_003D03F0[25][MENU_ICON_FRAME], option
     );
     value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
     func_0035C860(text, D_00437980, 0);
@@ -163,7 +197,26 @@ void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     frFontQueueGlyphInSelectedSlot(glyph);
 }
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_00296C58);
+void func_00296C58(s32 x, s32 y, s32 depth, MenuDrawValuePanel *panel, s32 option) {
+    char text[16];
+    s32 texture = D_00438FC8->textures[0];
+    MenuDrawObject *object = panel->object;
+    MenuDrawInner *inner;
+    s32 glyph;
+
+    func_00306CD0(D_003D03F0[25][MENU_ICON_X] * 16, D_003D03F0[25][MENU_ICON_Y] * 8,
+                  0, 0x100, 0, texture, D_003D03F0[25][MENU_ICON_FRAME], option);
+    func_00306CD0(D_003D03F0[26][MENU_ICON_X] * 16, D_003D03F0[26][MENU_ICON_Y] * 8,
+                  0, 0x100, 0, texture, D_003D03F0[26][MENU_ICON_FRAME], option);
+    inner = object->inner;
+    if (inner->active != 0) {
+        func_0035C860(text, D_00437980, inner->item->value * panel->multiplier);
+        glyph = func_0019F798(0x1910, 0x290, depth, 0xA09DC380, text, 0);
+        frFontSetChainFlag(glyph, 4);
+        func_0019D550(glyph, 1, option);
+        frFontQueueGlyphInSelectedSlot(glyph);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00296D90);
 

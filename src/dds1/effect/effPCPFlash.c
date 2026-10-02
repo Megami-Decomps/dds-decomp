@@ -9,7 +9,7 @@ extern void effReleaseRecordGroupResources(u32 res);
 extern void effReleaseRecordGroupAssetAndHandle(u32 res);
 extern void sdfReleaseResourceAllocation(u32 res);
 extern s32 effGetGroupIndexRecord(s32 base, s32 index);
-extern s32 effMultiplyPackedColors(s32 color, s32 param);
+extern u32 effMultiplyPackedColors(u32 color, u32 param);
 extern u8 D_0034DF38[];
 extern f32 *effGetIndexedEffectGroupRecord(u32 handle, s32 index);
 extern f32 D_00354900[];
@@ -176,7 +176,7 @@ struct PcpFlashAccumulatingWork {
     u32 colorParam;
     f32 renderScale;
     u32 ownedBuffer;
-    u32 resourceHandle;
+    struct PcpFlashDrawPool *resourceHandle;
 };
 
 /* Shared 0x10-byte motion state: accumulator is an angle for orbit arcs and
@@ -338,7 +338,7 @@ struct PcpFlashRadialStripWork {
     u32 colorParam;
     f32 renderScale;
     u32 ownedBuffer;
-    u32 resourceHandle;
+    struct PcpFlashDrawPool *resourceHandle;
 };
 
 typedef struct PcpFlashFadingOrbitWork PcpFlashFadingOrbitWork;
@@ -1133,7 +1133,7 @@ PcpFlashAccumulatingWork *effFlashAccumulatingCreate(src)
     record = (PcpFlashDrawPool *)effRecordPoolCreate(work->particleCount * 2);
     record->renderScale = 1.0f;
     record->unk50 = work->unk4C;
-    work->resourceHandle = (u32)record;
+    work->resourceHandle = record;
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
     range = work->randomRange;
     for (i = 0; i < (u32)work->particleCount; i++) {
@@ -1174,9 +1174,28 @@ void effFlashAccumulatingParticleSetRenderScale(PcpFlashAccumulatingWork *work, 
     work->renderScale = value;
 }
 
-extern s32 effGetRecordGroupAuxEntry(s32 handle, s32 index);
+typedef struct EffRecordPool EffRecordPool;
+extern s32 effGetRecordGroupAuxEntry(EffRecordPool *, s32);
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016BAC0);
+void func_0016BAC0(PcpFlashAccumulatingWork *work, s32 index, u32 param) {
+    u32 *colors;
+    u32 colorA;
+    u32 colorB;
+    u32 *mirror;
+
+    colors = (u32 *)effGetRecordGroupAuxEntry((EffRecordPool *)work->resourceHandle, index * 2);
+    colorA = work->colorA & 0xFFFFFF;
+    colorB = work->colorB & 0xFFFFFF;
+    colors[0] = effMultiplyPackedColors(colorB | 0x80000000, param);
+    colors[1] = effMultiplyPackedColors(colorB, param);
+    colors[2] = effMultiplyPackedColors(colorA | 0x80000000, param);
+    colors[3] = effMultiplyPackedColors(colorB, param);
+    mirror = (u32 *)effGetRecordGroupAuxEntry((EffRecordPool *)work->resourceHandle, index * 2 + 1);
+    mirror[0] = colors[0];
+    mirror[1] = colors[1];
+    mirror[2] = colors[2];
+    mirror[3] = colors[3];
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016BBB0);
 
@@ -1188,7 +1207,7 @@ void effFlashAccumulatingParticleAdvance(PcpFlashAccumulatingWork *work, s32 ind
     part->accumulator += work->increment;
 }
 
-extern void func_0016BAC0(PcpFlashAccumulatingWork *, s32, s32);
+extern void func_0016BAC0(PcpFlashAccumulatingWork *, s32, u32);
 extern void func_0016BBB0(PcpFlashAccumulatingWork *, s32);
 
 void effFlashAccumulatingParticleUpdate(PcpFlashAccumulatingWork *work)
@@ -1248,7 +1267,7 @@ void effFlashAccumulatingParticleUpdate(PcpFlashAccumulatingWork *work)
         }
         part->age = part->age + 1;
     }
-    handle = (PcpFlashDrawPool *)work->resourceHandle;
+    handle = work->resourceHandle;
     handle->origin[0] = work->origin[0];
     work->unk54 = work->unk54 + 1;
     handle->origin[1] = work->origin[1];
@@ -1903,7 +1922,7 @@ PcpFlashRadialStripWork *effFlashRadialStripCreate(src)
     record = (PcpFlashDrawPool *)effRecordPoolCreate(work->particleCount * 2);
     record->renderScale = 1.0f;
     record->unk50 = work->unk4C;
-    work->resourceHandle = (u32)record;
+    work->resourceHandle = record;
     range = work->randomRange;
     for (i = 0; i < work->particleCount; i++) {
         work->parts[i].age = -(effMiscRand(D_0034DF38) % range);
@@ -1941,7 +1960,25 @@ void effFlashRadialStripSetRenderScale(PcpFlashRadialStripWork *work, f32 value)
     work->renderScale = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016DBA0);
+void func_0016DBA0(PcpFlashRadialStripWork *work, s32 index, u32 param) {
+    u32 *colors;
+    u32 colorA;
+    u32 colorB;
+    u32 *mirror;
+
+    colors = (u32 *)effGetRecordGroupAuxEntry((EffRecordPool *)work->resourceHandle, index * 2);
+    colorA = work->colorA & 0xFFFFFF;
+    colorB = work->colorB & 0xFFFFFF;
+    colors[0] = effMultiplyPackedColors(colorB | 0x80000000, param);
+    colors[1] = effMultiplyPackedColors(colorB, param);
+    colors[2] = effMultiplyPackedColors(colorA | 0x80000000, param);
+    colors[3] = effMultiplyPackedColors(colorB, param);
+    mirror = (u32 *)effGetRecordGroupAuxEntry((EffRecordPool *)work->resourceHandle, index * 2 + 1);
+    mirror[0] = colors[0];
+    mirror[1] = colors[1];
+    mirror[2] = colors[2];
+    mirror[3] = colors[3];
+}
 
 void effFlashSpawnStripParticle(PcpFlashRadialStripWork *work, s32 index, void *orientation) {
     PcpFlashRadialStripParticle *part = work->parts + index;
@@ -1959,7 +1996,7 @@ void effFlashSpawnStripParticle(PcpFlashRadialStripWork *work, s32 index, void *
 void effFlashRotatedStripPair(PcpFlashRadialStripWork *work, s32 index, void *view)
 {
     PcpFlashRadialStripParticle *part = &work->parts[index];
-    f32 *quad = effGetRecordGroupElement(work->resourceHandle, index * 2);
+    f32 *quad = effGetRecordGroupElement((u32)work->resourceHandle, index * 2);
     f32 base[4];
     f32 size[4];
     f32 spare[4];
@@ -2022,7 +2059,7 @@ void effFlashRotatedStripPair(PcpFlashRadialStripWork *work, s32 index, void *vi
     VU0_STORE_VF(vf10, quad + 12);
     VU0_LOAD_VF(vf10, outer);
     VU0_STORE_VF(vf10, quad);
-    mirror = effGetRecordGroupElement(work->resourceHandle, index * 2 + 1);
+    mirror = effGetRecordGroupElement((u32)work->resourceHandle, index * 2 + 1);
     PCP_COPY_VECTOR(mirror + 8, quad + 8);
     PCP_COPY_VECTOR(mirror + 4, quad + 4);
     PCP_COPY_VECTOR(mirror + 12, quad + 12);
@@ -2037,7 +2074,7 @@ void effFlashRadialStripAdvanceAngle(PcpFlashRadialStripWork *work, s32 index, v
     part->angle += part->increment;
 }
 
-extern void func_0016DBA0(void *, s32, s32);
+extern void func_0016DBA0(PcpFlashRadialStripWork *, s32, u32);
 
 void effFlashRadialStripUpdate(PcpFlashRadialStripWork *work) {
     s128 axis;
@@ -2116,7 +2153,7 @@ void effFlashRadialStripUpdate(PcpFlashRadialStripWork *work) {
             }
         }
     }
-    handle = (PcpFlashDrawPool *)work->resourceHandle;
+    handle = work->resourceHandle;
     handle->origin[0] = work->origin[0];
     work->updateCount = work->updateCount + 1;
     handle->origin[1] = work->origin[1];

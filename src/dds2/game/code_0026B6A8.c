@@ -256,17 +256,53 @@ s32 mnuFirstPresentMainCharacterIndex(void) {
     return 0;
 }
 
+typedef struct DspScrollingStrip {
+    void *resource;
+    s32 frameIndex;
+    s32 horizontalOffset;
+    s32 verticalOffset;
+    s32 scrollSpeed;
+} DspScrollingStrip;
+
+typedef struct DspScrollingStripState {
+    s32 unk0;
+    s32 layout;
+    s32 unk8;
+    void *resource;
+    s32 layer;
+    s32 unk14;
+    s32 unk18;
+    DspScrollingStrip strips[6];
+} DspScrollingStripState;
+
 s32 func_0026BD38(s32 index) {
     return index == 1 ? 4 : 6;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BD50);
+void func_0026BD50(DspScrollingStripState *state, s32 layout, void *resource, s32 firstFrame, s32 layer) {
+    s32 count;
+    s32 i;
+
+    memset(state, 0, sizeof(*state));
+    state->layout = layout;
+    count = func_0026BD38(layout);
+    state->resource = resource;
+    state->layer = layer;
+    state->unk8 = 0;
+    for (i = 0; i < count; i++) {
+        state->strips[i].resource = resource;
+        state->strips[i].frameIndex = firstFrame + i;
+        state->strips[i].horizontalOffset = 0;
+        state->strips[i].verticalOffset = 0;
+        state->strips[i].scrollSpeed = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BE28);
 
-void func_0026BEB0(s32 *state, s32 vertical, s32 horizontal) {
-    state[5] = vertical;
-    state[6] = horizontal;
+void func_0026BEB0(DspScrollingStripState *state, s32 vertical, s32 horizontal) {
+    state->unk14 = vertical;
+    state->unk18 = horizontal;
 }
 
 INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BEC0);
