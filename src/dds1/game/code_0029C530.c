@@ -6444,6 +6444,7 @@ void effApplyBattleStateTint(void) {
     }
 }
 
+/* Start the payload's packed-color tint transition on frame zero. */
 void effStartTintTransitionFromColors(u8 *work) {
     f32 from[3];
     f32 to[3];
@@ -6452,7 +6453,7 @@ void effStartTintTransitionFromColors(u8 *work) {
 
     btlGetRuntime();
     colors = ((EffActiveResource *)work)->payload;
-    if (*(s32 *)(work + 0x28) == 0) {
+    if ((s32)((EffActiveResource *)work)->frame == 0) {
         c = colors[0];
         from[0] = (c & 0xFF) / 255.0f;
         from[1] = ((c >> 8) & 0xFF) / 255.0f;
@@ -6693,7 +6694,7 @@ void effDispatchIndexedCallback(work)
         if (callback != NULL) {
             callback(work);
         }
-        *(s32 *)(work + 0x28) += 1;
+        ((EffActiveResource *)work)->frame = (s32)((EffActiveResource *)work)->frame + 1;
     }
 }
 
@@ -8047,6 +8048,7 @@ s32 effMapObjectWithTemporaryMappingTable(s32 request) {
 
     effMappingState.table = D_0038F7D8;
     effMappingState.count = 8;
+    /* Keep this parameter load raw: a typed member changes the table-write scheduling. */
     result = func_002B9320(object + 0x2c, object + 0x50, *(s32 *)(object + 0xb8));
     effMappingState.table = D_0038F658;
     effMappingState.count = 8;
@@ -8115,6 +8117,7 @@ s32 func_002BA230(s32 request) {
 
     effMappingState.table = D_0038F718;
     effMappingState.count = 8;
+    /* Keep this parameter load raw: a typed member changes the table-write scheduling. */
     result = func_002B9320(object, object + 0x24, *(s32 *)(object + 0x34));
     effMappingState.table = D_0038F658;
     effMappingState.count = 8;
