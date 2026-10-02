@@ -2,7 +2,7 @@
 
 #include "scr.h"
 
-void *func_00343ED0(s32 arg0, u32 *arg1, s32 arg2);
+void *sdfReadNamedResource(s32 arg0, u32 *arg1, s32 arg2);
 
 s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
@@ -23,7 +23,7 @@ s32 scrOpenProcessFromResource(s32 scriptId, s32 option)
     void *handle;
     s32 processId;
     ScrProcTask *task;
-    handle = func_00343ED0(scriptId, resourceInfo, 0);
+    handle = sdfReadNamedResource(scriptId, resourceInfo, 0);
     processId = resourceInfo[0];
     if (processId == 0)
     {

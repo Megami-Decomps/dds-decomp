@@ -17,7 +17,7 @@ typedef struct AdminDispatch {
 } AdminDispatch;
 
 extern AdminDispatch ddsAdminModeCallbacks[];
-extern u8 D_003BA848[];
+extern u8 dds3AdminTaskName[];
 
 /* Configure administrative state from three caller-supplied parameters. */
 void dds3AdminSubmitMarkedRequest(s32 value, void *data, u32 size)

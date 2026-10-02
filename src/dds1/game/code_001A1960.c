@@ -464,9 +464,9 @@ extern void func_001C45F0(void);
 
 extern void itfMesDestroyWindowIfPresent(s32);
 
-void func_001A1868(u8 *object, s32 value);
+void btlAdjustUnitHp(u8 *object, s32 value);
 
-void func_001A1880(u8 *object, s32 value);
+void btlAdjustUnitMp(u8 *object, s32 value);
 
 u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 object);
 
@@ -2015,7 +2015,7 @@ extern s32 func_002D03F8(s32);
 
 extern u32 *sdfResourceRetainAddress(s32);
 
-extern s32 func_002EB028(char *, void *, s32);
+extern s32 sdfReadNamedResource(char *, void *, s32);
 
 void btlPanelResourcesLoad(void) {
     u8 params[16];
@@ -2029,9 +2029,9 @@ void btlPanelResourcesLoad(void) {
         block->resA = 0;
         block->resB = 0;
         block->unk1C = 0;
-        btlResourceBlock->nameA = func_002EB028(D_003A21C8, params, 0);
-        btlResourceBlock->nameB = func_002EB028(D_003A21E8, params, 0);
-        btlResourceBlock->nameC = func_002EB028(D_003A2208, params, 0);
+        btlResourceBlock->nameA = sdfReadNamedResource(D_003A21C8, params, 0);
+        btlResourceBlock->nameB = sdfReadNamedResource(D_003A21E8, params, 0);
+        btlResourceBlock->nameC = sdfReadNamedResource(D_003A2208, params, 0);
         btlResourceBlockLoaded = 0;
     }
     D_003BB3E4 = 1;
@@ -2197,7 +2197,7 @@ void func_001AD1F8(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AD230);
 
-u32 func_001AD3A8(void) {
+u32 btlHasRegisteredAnalysisPanelTask(void) {
     s64 temp_v0;
 
     temp_v0 = btlGetTrackedTaskHandle(0xb);
@@ -2215,7 +2215,7 @@ u32 func_001AD3A8(void) {
 }
 
 s32 btlGetRegisteredTaskValueOrDefault(void) {
-    if (func_001AD3A8() == 0) {
+    if (btlHasRegisteredAnalysisPanelTask() == 0) {
         return 0x80;
     }
     return *(s8 *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef));
@@ -2316,7 +2316,7 @@ u32 btlHasRegisteredPsechgPanelTask(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AD758);
 
-u32 func_001AD928(void) {
+u32 btlHasRegisteredSkillNamePanelTask(void) {
     s64 temp_v0;
 
     temp_v0 = btlGetTrackedTaskHandle(1);
@@ -2335,7 +2335,7 @@ u32 func_001AD928(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AD970);
 
-u32 func_001ADB30(void) {
+u32 btlHasRegisteredAphNamePanelTask(void) {
     s64 temp_v0;
 
     temp_v0 = btlGetTrackedTaskHandle(0);
@@ -2371,11 +2371,11 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     s32 task = btlGetTrackedTaskHandle(0);
     MsgQueueTaskData *data;
 
-    if (func_001ADB30() != 0) {
+    if (btlHasRegisteredAphNamePanelTask() != 0) {
         kwlnTaskDestroyWithHierarchy(task, 0);
     }
     data = (MsgQueueTaskData *)sdfAllocAndClearQuadwords(0x40);
-    if (func_001AD928() != 0) {
+    if (btlHasRegisteredSkillNamePanelTask() != 0) {
         kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
     }
     if (btlHasRegisteredGuidePanelTask() != 0) {
@@ -3541,10 +3541,10 @@ void fldCreateSceneSpriteTask(s32 arg0) {
     if (btlHasRegisteredGuidePanelTask() != 0) {
         kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
     }
-    if (func_001AD928() != 0) {
+    if (btlHasRegisteredSkillNamePanelTask() != 0) {
         kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
     }
-    if (func_001ADB30() != 0) {
+    if (btlHasRegisteredAphNamePanelTask() != 0) {
         kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0), 0);
     }
     scene = (BattleController *)btlGetRuntime();
@@ -5897,8 +5897,8 @@ u32 btlApplyDeferredActorStats(u8 *arguments) {
         return 1;
     }
     resource = actor + 0x120;
-    func_001A1868(resource, primary);
-    func_001A1880(resource, *(s32 *)(arguments + 0x24));
+    btlAdjustUnitHp(resource, primary);
+    btlAdjustUnitMp(resource, *(s32 *)(arguments + 0x24));
     func_001D5990(actor);
     btlIsUnitDefeatTriggeredByValueDelta(actor, 0);
     return 1;
@@ -5998,7 +5998,7 @@ u32 btlApplyQueuedActorEntrySelection(u32 *arg0) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001D3510);
 
-u32 func_001D35E0(u32 *arg0) {
+u32 btlClearQueuedActorEntrySelection(u32 *arg0) {
     btlClearActorSelectedEntryIndex(*arg0);
     func_001D5990(*arg0);
     return 1;
@@ -6010,7 +6010,7 @@ void *func_001D3618(u8 *owner) {
 
     task[0] = 1;
     task[0x10] = 0;
-    *(void **)(task + 0x4C) = func_001D35E0;
+    *(void **)(task + 0x4C) = btlClearQueuedActorEntrySelection;
     *(u16 *)(task + 0x20) = 0x4B;
     *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
     *(u32 *)(task + 0x48) = 0;
@@ -6305,10 +6305,6 @@ void btlFlagTasksForUpdate(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3A40);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3A50);
-
 /* A battle task start condition: `kind` selects what is looked up and how its presence or state is tested. */
 typedef struct TaskCondition {
     u8 kind;           /* 0x00 */
@@ -6320,6 +6316,10 @@ typedef struct TaskCondition {
         u16 taskKind;  /* kinds 9-10: task kind */
     } value;           /* 0x08 */
 } TaskCondition;
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3A40);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3A50);
 
 s32 btlEvalTaskCondition(TaskCondition *condition, s32 value) {
     s32 result = 0;
@@ -9611,7 +9611,7 @@ void btlWaitForPendingWorkAndReleaseBuffers(void) {
     s64 temp_v0;
     s32 temp_v1;
 
-    func_0021FE70();
+    evtDrainSecondaryWorldNodes();
     do {
         temp_v0 = sdfCheckPendingWorkWithInterrupts();
     } while (temp_v0 != 0);
@@ -10383,7 +10383,7 @@ void *btlCreateApplyToActiveActorsTask(u32 sound) {
     return task;
 }
 
-u32 func_001F1C18(void) {
+u32 btlCancelTimedFadeTask(void) {
     func_00105888();
     return 1;
 }
@@ -10391,7 +10391,7 @@ u32 func_001F1C18(void) {
 SoundTask *btlCreateFadeStateResetTask(void) {
     SoundTask *task = (SoundTask *)btlAllocTask(0);
     task->enabled = 1;
-    task->callback.process = func_001F1C18;
+    task->callback.process = btlCancelTimedFadeTask;
     task->taskId = 0x32;
     task->status = 0;
     return task;

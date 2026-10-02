@@ -81,11 +81,11 @@ extern u32 fldPlayerObject;
 
 extern void evtSetSolarOverlayFullyVisible(void);
 
-extern s32 D_004362C8;
+extern s32 fldRoomEffectEntryCount;
 
 extern u32 D_00436330[];
 
-extern s32 D_00436320;
+extern s32 fldObjectSlotCount;
 
 extern s32 fldSceneSoundBase;
 
@@ -141,9 +141,9 @@ extern u32 D_0043623C;
 
 extern u32 fldCurrentBgmHandle;
 
-extern u32 D_00436234;
+extern u32 fldArchiveLoadPending;
 
-extern u32 D_00436238;
+extern u32 fldFixedArchiveLoadPhase;
 
 extern u32 fldSceneRecords;
 
@@ -237,17 +237,17 @@ extern s32 fldPendingSoundCount;
 
 extern s32 fldAreaState[];
 
-extern s32 D_00389798[];
+extern s32 fldCurrentBgmId[];
 
 extern s32 D_00389780[];
 
-extern s32 D_00436244;
+extern s32 fldAreaFlagIndex;
 
 extern s32 D_00436248;
 
-extern s32 D_00436340;
+extern s32 fldPrimaryEffectPositionPending;
 
-extern s32 D_00436344;
+extern s32 fldSecondaryEffectPositionPending;
 
 extern void fldResetPlayerSceneObjectState(void);
 
@@ -312,9 +312,9 @@ extern void fldSetFadeTarget(s32, s32, s32);
 
 extern void fldSetSwayMode(s32);
 
-extern s32 D_0043622C;
+extern s32 fldSceneBgmArchiveTrack;
 
-extern s32 D_00436230;
+extern s32 fldSceneBgmArchivePhase;
 
 extern s32 fldSceneRecordCount;
 
@@ -330,7 +330,7 @@ extern s32 fldGetPlayerSceneState(void);
 
 extern s32 dds3SetWorldCameraObject(s32, s32);
 
-extern void func_00113110(s32, f32 *, f32 *);
+extern void dds3TransformCameraVectorsByInnerRotation(s32, f32 *, f32 *);
 
 extern void fldUpdateCameraProjectionEndpoints(void);
 
@@ -673,7 +673,7 @@ s32 fldCmdCaptureObjectPose(void) {
         if (object == 0) {
             return 1;
         }
-        func_00113110(object, pos, rot);
+        dds3TransformCameraVectorsByInnerRotation(object, pos, rot);
         fldUpdateCameraProjectionEndpoints();
         D_0038BAD0[0] = pos[0];
         D_0038BAD0[1] = pos[1];
@@ -1571,13 +1571,13 @@ s32 func_00156C98(void) {
 }
 
 s32 fldCmdStartSceneBgm(void) {
-    D_00389798[0] = scrReadIntParameter(0);
+    fldCurrentBgmId[0] = scrReadIntParameter(0);
     fldStartSceneBgm();
     return 1;
 }
 
 s32 fldCmdStartSceneBgmAlternate(void) {
-    D_00389798[0] = scrReadIntParameter(0);
+    fldCurrentBgmId[0] = scrReadIntParameter(0);
     fldStartSceneBgmAlternate();
     return 1;
 }
@@ -1794,7 +1794,7 @@ s32 func_00157308(void) {
     return 1;
 }
 
-extern void func_00341348(void *);
+extern void effMiscSeedRandomFromClock(void *);
 
 extern void effLoadCommonTexturesAndResetRenderFlags(void);
 
@@ -1821,7 +1821,7 @@ extern u8 D_003AA868[];
 extern char D_004363F8[];
 
 void fldCreateFieldEffectTask(void) {
-    func_00341348(D_003AA868);
+    effMiscSeedRandomFromClock(D_003AA868);
     effLoadCommonTexturesAndResetRenderFlags();
     func_00157BE0();
     parSysReset();

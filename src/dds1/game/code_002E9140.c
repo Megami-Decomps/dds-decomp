@@ -117,7 +117,7 @@ s32 sndFindPackedTrackLoadStatus(s32 packed) {
 extern s32 func_003014F0();
 extern void mnuBuildSoundResourcePath();
 extern void sdfSleepWithAlarm();
-extern void (*D_003BD4A8)(void);
+extern void (*fileIdleUpdateCallback)(void);
 
 /* Make sure the MIDI bank named by the packed track id is resident, loading it if not. */
 void sndEnsureMidiBankResident(s32 packed) {
@@ -139,8 +139,8 @@ void sndEnsureMidiBankResident(s32 packed) {
     case 2:
         do {
             sdfSleepWithAlarm(2);
-            if (D_003BD4A8 != NULL) {
-                D_003BD4A8();
+            if (fileIdleUpdateCallback != NULL) {
+                fileIdleUpdateCallback();
             }
         } while (sndFindPackedTrackLoadStatus(packed) != 1);
         break;

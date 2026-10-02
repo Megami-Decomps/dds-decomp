@@ -43,7 +43,7 @@ extern u32 func_00328D68(u32);
 
 extern SdfResEntry *sdfPacketResourceEntries[];
 
-extern volatile s8 D_00438A23;
+extern volatile s8 sdfPacketSlotIndex;
 
 extern s32 D_00438A28;
 
@@ -59,9 +59,9 @@ void func_0032DC80();
 
 extern void *sdfPendingQueueHead;
 
-extern s8 D_00439164;
+extern s8 sdfPendingQueueRotationActive;
 
-extern s32 D_00439158[2];
+extern s32 sdfPendingQueueSlots[2];
 
 typedef struct SdfSynchronizedRequest {
     u32 value;
@@ -324,29 +324,29 @@ void sdfPendingQueueFlush(SdfPendingNode *node) {
 void sdfRotatePendingSlots(void) {
     u32 i;
 
-    D_00439164 = 1;
+    sdfPendingQueueRotationActive = 1;
     WaitSema(sdfPendingQueueSemaphore);
-    sdfPendingQueueFlush(D_00439158[0]);
+    sdfPendingQueueFlush(sdfPendingQueueSlots[0]);
     for (i = 0; i < 1; i++) {
-        D_00439158[i] = D_00439158[i + 1];
+        sdfPendingQueueSlots[i] = sdfPendingQueueSlots[i + 1];
     }
-    D_00439158[1] = (s32)sdfDetachQueue();
+    sdfPendingQueueSlots[1] = (s32)sdfDetachQueue();
     SignalSema(sdfPendingQueueSemaphore);
-    D_00439164 = 0;
+    sdfPendingQueueRotationActive = 0;
 }
 
 /* Test all three pending-work sources: flag, chain, and two slots. */
 u64 sdfGraphHasPendingWork(void) {
     u32 i;
     s32 *entry;
-    if (D_00439164 != 0) {
+    if (sdfPendingQueueRotationActive != 0) {
         return 1;
     }
     if (sdfPendingQueueHead != NULL) {
         return 1;
     }
     i = 0;
-    entry = D_00439158;
+    entry = sdfPendingQueueSlots;
     do {
         if (*entry != 0) {
             return 1;
@@ -876,11 +876,11 @@ void sdfInitPacketBuilder(SdfPacketBuilder *packet, s32 source, s32 data, s32 re
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DD98);
 
 void sdfSetNonnegativePacketIndex(s32 value) {
-    D_00438A23 = (value < 0) ? 0 : value;
+    sdfPacketSlotIndex = (value < 0) ? 0 : value;
 }
 
 void sdfResetPacketSlotState(void) {
-    D_00438A23 = 0;
+    sdfPacketSlotIndex = 0;
     D_0040B308[0] = 0;
     D_00438A28 = 0;
 }
@@ -1708,7 +1708,7 @@ INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A21);
 
 INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A22);
 
-INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A23);
+INCLUDE_SDATA(const s32, "game/code_0032C278", sdfPacketSlotIndex);
 
 INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A24);
 

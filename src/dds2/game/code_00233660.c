@@ -159,7 +159,7 @@ extern void kwlnDebugGraphSetEnabled(s8 mode);
 
 extern s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *pad);
 
-extern void func_0011FAB8(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep);
+extern void fldAdjustIntegerUsingMainPad(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep);
 
 extern s8 D_0037F510[];
 
@@ -168,7 +168,7 @@ extern void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s6
 
 void sdfStreamCreateWithParams(s32, s32, s32, s32, s32);
 
-void func_00157710(s32, float);
+void effApplyNodeScale(s32, float);
 
 void billSetChildScaleComponents(s32, float, float);
 
@@ -1088,7 +1088,7 @@ void mdlSetResourceFrame(s32 unused, MdlResourceItem *item, s32 frame) {
         billSetChildParameter(item->resource, frame);
         return;
     case 1:
-        func_00157800(item->resource, frame);
+        effSetNodeParameterValue(item->resource, frame);
         break;
     }
 }
@@ -1099,7 +1099,7 @@ void mdlSetResourceAmount(s32 unused, MdlResourceItem *item, float amount) {
         billSetChildScaleComponents(item->resource, amount, amount);
         return;
     case 1:
-        func_00157710(item->resource, amount);
+        effApplyNodeScale(item->resource, amount);
         break;
     }
 }
@@ -1281,6 +1281,7 @@ void mdlRotateViewList(void) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235568);
 
+
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235628);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421120);
@@ -1355,7 +1356,7 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00235970);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235C20);
 
-u32 func_00236058(void) {
+u32 mdlRunViewerAssetSelectionTask(void) {
     func_00235970();
     func_00235C20();
     return 0;
@@ -1371,7 +1372,7 @@ void mdlDrawViewerIndexedLabelOverlay(void) {
     sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C0[mdlViewerState.labelIndexA]));
 }
 
-u32 func_00236540(void) {
+u32 mdlRunViewerIndexedLabelTask(void) {
     func_00236080();
     mdlDrawViewerIndexedLabelOverlay();
     return 0;
@@ -1387,7 +1388,7 @@ void mdlDrawViewerSelectionLabel(void) {
     sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C8[mdlViewerState.labelIndexB]));
 }
 
-s32 func_002369C0(void) {
+s32 mdlRunViewerSelectionLabelTask(void) {
     func_00236568();
     if (D_00453560[0] == 0) {
         mdlDrawViewerSelectionLabel();
@@ -1554,7 +1555,7 @@ void mdlApplyViewerResourceMenuAction(void) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00237088);
 
-u32 func_002371E8(void) {
+u32 mdlRunViewerResourceMenuTask(void) {
     mdlApplyViewerResourceMenuAction();
     func_00237088();
     return 0;
@@ -1640,21 +1641,21 @@ void mdlUpdateViewerSettingsInput(void) {
         if (sdfPadButtonStates[1] < 0 || sdfPadButtonStates[3] < 0) {
             mdlViewerState.unk3E = 0;
         } else {
-            func_0011FAB8(&mdlViewerState.unk4A, 2, 1, 8, 1, 1);
+            fldAdjustIntegerUsingMainPad(&mdlViewerState.unk4A, 2, 1, 8, 1, 1);
         }
         break;
     case 3:
         if (sdfPadButtonStates[1] < 0 || sdfPadButtonStates[3] < 0) {
             mdlViewerState.unk3E = 0;
         } else {
-            func_0011FAB8(&mdlViewerState.unk4C, 2, 1, 8, 1, 1);
+            fldAdjustIntegerUsingMainPad(&mdlViewerState.unk4C, 2, 1, 8, 1, 1);
         }
         break;
     case 4:
         if (sdfPadButtonStates[1] < 0 || sdfPadButtonStates[3] < 0) {
             mdlViewerState.unk3E = 0;
         } else {
-            func_0011FAB8(&mdlViewerState.unk4E, 2, 1, 8, 1, 1);
+            fldAdjustIntegerUsingMainPad(&mdlViewerState.unk4E, 2, 1, 8, 1, 1);
         }
         break;
     }
@@ -1674,7 +1675,7 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_004213F0);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_002376F0);
 
-u32 func_002379E0(void) {
+u32 mdlRunViewerSettingsTask(void) {
     mdlUpdateViewerSettingsInput();
     func_002376F0();
     return 0;
@@ -1694,7 +1695,7 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00237B30);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00237D08);
 
-u32 func_002380D8(void) {
+u32 mdlRunViewerEffectEditorTask(void) {
     func_00237B30();
     func_00237D08();
     return 0;
@@ -1842,7 +1843,7 @@ extern char D_00437108[]; /* "fovy=" */
 extern char D_00437110[]; /* "%f" */
 extern char D_00437118[]; /* "fog=" */
 extern MdlFogParams kwlnDrawVector;
-extern f32 D_0037F5E0[];
+extern f32 sdfSceneProjectionParameters[];
 extern s32 sdfPathExists(char *path);
 extern s32 func_002C80C8(char *path);
 extern void fileWaitReady(s32 file);
@@ -1908,7 +1909,7 @@ void mdlLoadViewerPresentationConfig(void) {
             }
         } else if (memcmp(line, D_00437108, 5) == 0) {
             if (func_0035C8F8(line + 5, D_00437110, &fovy) == 1) {
-                D_0037F5E0[3] = fovy;
+                sdfSceneProjectionParameters[3] = fovy;
             }
         } else if (memcmp(line, D_00437118, 4) == 0) {
             if (func_0035C8F8(line + 4, "%d,%f,%d,%f,%x", &fogNear, &fogValue, &fogFar, &fogFarB, &color) == 5) {

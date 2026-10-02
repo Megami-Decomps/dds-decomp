@@ -54,7 +54,7 @@ extern void mdlProcessContextNodesAndTransforms(s32, s32);
 extern void mnuApplyModelCamera(s32);
 extern void evtStageTestApplyEntryRotation(s32);
 extern void evtStageTestUpdateCamera(void);
-extern s32 func_00100518(void);
+extern s32 kwlnGetDrawBufferIndex(void);
 extern void sdfCameraBuildProjection(void *);
 extern void sdfConsBuildMatrixPacket(void *packet, void *node, void *matrix);
 extern void sdfConsCacheTransformedNode(void *node, void *matrix);
@@ -132,7 +132,7 @@ extern u8 D_0037CE60[];
 
 extern u8 D_0037CE70[];
 
-extern f32 D_003245E0[];
+extern f32 sdfSceneProjectionParameters[];
 
 /* Battle stage test viewer state. Retail addresses it partly through
  * D_003DC600 (= &evtStageTestState.slot[0], hence the negative offsets), so the
@@ -1651,8 +1651,8 @@ void func_00287220(s32 encodedIndex, f32 *out) {
 INCLUDE_ASM(const s32, "game/code_00282850", func_00287258);
 
 void func_00287420(f32 offset) {
-    D_003245E0[5] = 2048.0f;
-    D_003245E0[4] = offset + 2048.0f;
+    sdfSceneProjectionParameters[5] = 2048.0f;
+    sdfSceneProjectionParameters[4] = offset + 2048.0f;
     func_00287258();
 }
 
@@ -1701,8 +1701,8 @@ void btlStopStage(void) {
 
 void mnuResetWorkFloats(void) {
     btlStopStage();
-    D_003245E0[4] = 2048.0f;
-    D_003245E0[5] = 2048.0f;
+    sdfSceneProjectionParameters[4] = 2048.0f;
+    sdfSceneProjectionParameters[5] = 2048.0f;
 }
 
 /* Remember the model asset request result for the stage viewer. */
@@ -1849,12 +1849,12 @@ void evtStageTestUpdateCamera(void)
     s128 at;
     s32 slot;
 
-    slot = func_00100518();
+    slot = kwlnGetDrawBufferIndex();
     func_00287258();
     PCP_COPY_VECTOR(sdfViewTargetVector, D_0037CE70);
     PCP_COPY_VECTOR(sdfViewEyeVector, D_0037CE60);
     PCP_COPY_VECTOR(sdfViewUpVector, D_0037CE80);
-    sdfCameraBuildProjection(D_003245E0);
+    sdfCameraBuildProjection(sdfSceneProjectionParameters);
     VU0_LOAD_VF(vf10, sdfViewEyeVector);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
@@ -1869,8 +1869,8 @@ void evtStageTestUpdateCamera(void)
     VU0_STORE_VF_UNCLOBBERED(vf10, &at);
     sdfVuBuildLookAtBasis(&eye, &at, sdfViewUpVector);
     VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
-    sdfConsBuildMatrixPacket(D_003270F0 + slot * 8000, D_003245E0, sdfViewMatrix);
-    sdfConsCacheTransformedNode(D_003245E0, sdfViewMatrix);
+    sdfConsBuildMatrixPacket(D_003270F0 + slot * 8000, sdfSceneProjectionParameters, sdfViewMatrix);
+    sdfConsCacheTransformedNode(sdfSceneProjectionParameters, sdfViewMatrix);
 }
 
 s8 evtStageTestUpdate(s32 frame) {

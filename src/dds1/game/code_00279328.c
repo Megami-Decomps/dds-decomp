@@ -132,7 +132,7 @@ s64 ptySkillMenuEnterPage(s32 callback) {
     return menuRunPanel(context, 1, callback);
 }
 
-s64 func_00279728(s32 selection) {
+s64 ptySkillMenuDispatchPageRequest(s32 selection) {
     s32 context = kwlnTaskGetUserValue();
     return menuRunPanel(context, 2, selection);
 }
@@ -227,7 +227,7 @@ s64 ptySkillMenuEnterConfirm(s32 callback) {
     return menuRunPanel(context, 1, callback);
 }
 
-s64 func_00279AF8(s32 selection) {
+s64 ptySkillMenuDispatchConfirmRequest(s32 selection) {
     s32 context = kwlnTaskGetUserValue();
     return menuRunPanel(context, 2, selection);
 }

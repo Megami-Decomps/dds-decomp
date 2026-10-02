@@ -140,7 +140,7 @@ typedef struct {
 extern BlurFilterOps D_003803E8;
 extern BlurFramePacketRecord kwlnFrameDrawPacketRecords[];
 extern void *sdfAllocPacketAligned(s32);
-extern u32 func_00100400(void);
+extern u32 kwlnGetDrawBufferIndex(void);
 extern void func_0032DB78(const void *, void *, s32);
 extern void sdfAppendDmaTagToList(void *, void *);
 
@@ -148,7 +148,7 @@ extern void sdfAppendDmaTagToList(void *, void *);
 void effDrawBlurListWithFramePacket(void *list) {
     void *packet = sdfAllocPacketAligned(0x40);
 
-    func_0032DB78(kwlnFrameDrawPacketRecords[func_00100400()].dmaPacket, packet, 1);
+    func_0032DB78(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, packet, 1);
     sdfAppendDmaTagToList(list, packet);
     D_003803E8.draw(&D_003803E8, list);
 }

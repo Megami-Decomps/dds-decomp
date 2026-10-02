@@ -1,8 +1,8 @@
 #include "common.h"
 
-extern s32 D_00436558;
+extern s32 frFontDefaultGlyphCellSize;
 
-/* Value with u16 pair read by func_001971E0/func_00197200. */
+/* Value with u16 pair read by effDisableStaggeredBlur/func_00197200. */
 typedef struct Unk6C84Val {
     u8 unk0[0x10]; /* 0x0 */
     u16 unk10;     /* 0x10 */
@@ -78,7 +78,7 @@ extern void fmGslReleaseActiveResourceBuffers(void);
 
 extern void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
 
-extern u32 D_003B2F30[];
+extern u32 frFontSlotLoadedFlags[];
 
 extern void func_003297C8(void *arg0);
 
@@ -105,7 +105,7 @@ void itfSetTextDrawLimit(s32 value) {
     if (value < 1) {
         value = 0x14;
     }
-    D_00436558 = value;
+    frFontDefaultGlyphCellSize = value;
 }
 
 void frFontSetEntryFlag(s32 index, s32 flag) {
@@ -148,7 +148,7 @@ typedef struct FrFontGsPacket {
     FrFontGsWrite writes[6];
 } FrFontGsPacket;
 
-void func_0019B968(FrFontGsPacket *packet) {
+void frFontBuildGsSetupPacket(FrFontGsPacket *packet) {
     packet->dma.value = 0;
     packet->dma.words[0] = 0x70000007;
     packet->dma.words[2] = 0;
@@ -217,7 +217,7 @@ void frFontUploadClearedTexture(void) {
     func_003297C8((void *)block);
 }
 
-extern void *func_00343ED0();
+extern void *sdfReadNamedResource();
 extern void func_0019C130(s32, s32, void *);
 
 /* Load font `index` once (index 1 uses the system's first entry buffer, other fonts load `path`) and mark it loaded. */
@@ -225,13 +225,13 @@ void frFontEnsureSlotLoaded(s32 index, s32 path) {
     s32 slot = index & 0xFF;
     FrFontSysLocal *sys = &frFontWork;
 
-    if (D_003B2F30[slot] != 1) {
+    if (frFontSlotLoadedFlags[slot] != 1) {
         if (slot == 1) {
             func_0019C130(1, 0, sys->entries[0].buffer);
         } else {
-            func_0019C130(slot, 0, func_00343ED0(path, 0, 0));
+            func_0019C130(slot, 0, sdfReadNamedResource(path, 0, 0));
         }
-        D_003B2F30[slot] = 1;
+        frFontSlotLoadedFlags[slot] = 1;
     }
 }
 
@@ -257,7 +257,7 @@ void frFontFreeEntry(s32 index) {
     if (slot < 2) {
         return;
     }
-    D_003B2F30[slot] = 0;
+    frFontSlotLoadedFlags[slot] = 0;
     entry = &frFontWork.entries[slot];
     if (entry->buffer != NULL) {
         func_003297C8(entry->buffer);

@@ -441,7 +441,7 @@ INCLUDE_ASM(const s32, "game/code_001130E0", func_001143D8);
 
 extern void effObjInnerCreate();
 extern void *func_002CFEB8(s32 size);
-extern u32 func_001117A8();
+extern u32 dds3CreateSlotResourceState();
 
 s32 evtInitializeEffectObjectData(EffectObject *obj) {
     EffectObjectData *data;
@@ -450,7 +450,7 @@ s32 evtInitializeEffectObjectData(EffectObject *obj) {
     obj->data = func_002CFEB8(0x50);
     memset(obj->data, 0, 0x50);
     data = obj->data;
-    data->handle = func_001117A8(obj);
+    data->handle = dds3CreateSlotResourceState(obj);
     dds3SetObjectFlags(obj, 0x60);
     return 1;
 }

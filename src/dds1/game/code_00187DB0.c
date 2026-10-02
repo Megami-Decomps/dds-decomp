@@ -1,6 +1,6 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "game/code_00187DB0", func_00187DB0);
+INCLUDE_ASM(const s32, "game/code_00187DB0", effResourceQuadDraw);
 
 typedef struct {
     s32 left;
@@ -40,12 +40,12 @@ void func_00188050(void) {
     sdfReleaseChipBlock();
 }
 
-INCLUDE_ASM(const s32, "game/code_00187DB0", func_00188068);
+INCLUDE_ASM(const s32, "game/code_00187DB0", effResourceRectDrawPixels);
 
-extern void func_00187DB0(void *arg, s32 value, s32 flag);
+extern void effResourceQuadDraw(void *arg, s32 value, s32 flag);
 
 /* Generate already-scaled GS coordinates; the renderer must not scale again. */
-void func_001880D8(EffResourceRectWork *work) {
+void effResourceRectDrawGsCoords(EffResourceRectWork *work) {
     f32 scaledExtent = (f32)work->params.extent * 1.4f;
     s32 x = work->params.centerX + 0x1000;
     s32 y = (work->params.centerY + 0xE00) >> 1;
@@ -61,7 +61,7 @@ void func_001880D8(EffResourceRectWork *work) {
     work->params.bounds.right = right;
     work->params.bounds.top = y;
     work->params.bounds.bottom = bottom;
-    func_00187DB0(work->params.color, work->sourceHandle, 1);
+    effResourceQuadDraw(work->params.color, work->sourceHandle, 1);
 }
 
 typedef struct EffTrackPolyModel EffTrackPolyModel;

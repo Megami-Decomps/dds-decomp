@@ -53,7 +53,7 @@ typedef struct DevState {
 #define SDF_DEV_STATE_INACTIVE 9
 
 typedef struct DevWorkerEntry {
-    s32 handle; /* 0x00: thread ID at D_00398860, semaphore ID at D_00398864 */
+    s32 handle; /* 0x00: thread ID at sdfDeviceWorkerEntries, semaphore ID at D_00398864 */
     s32 semaphore; /* 0x04 */
     struct DevState *first; /* 0x08 */
     struct DevState *last; /* 0x0C */
@@ -66,7 +66,7 @@ extern u8 D_003BD3F0;
 extern s16 D_003BD420;
 extern DevState *D_003BD424;
 extern DevState *D_003BD428;
-extern s32 D_003BD430;
+extern s32 sdfDeviceWorkerPriority;
 
 extern u32 sdfDevOperationReplyValue;
 
@@ -77,7 +77,7 @@ extern s32 sdfDevReplySemaphore;
 extern s32 func_002E5158(u32, u8 *, u32);
 extern void func_002E5D98(s32 arg0);
 
-extern s32 D_003BDA48;
+extern s32 sdfOpenDiscFileRecord;
 extern u32 sdfDiscSemaphore;
 
 extern s32 sdfDiscRequestPending;
@@ -87,7 +87,7 @@ extern u32 D_003BDA44;
 
 extern u32 D_003987E0[];
 extern char D_00398820[];
-extern DevWorkerEntry D_00398860[];
+extern DevWorkerEntry sdfDeviceWorkerEntries[];
 extern DevWorkerEntry D_00398864[];
 extern u8 sdfPfsPathPrefix[];
 extern f32 sdfNormalizedAsinSamples[];
@@ -126,7 +126,7 @@ extern void sceSifRpcLoop(void *);
 extern u8 sdfDevRpcBuffer[];
 extern void sdfSleepWithAlarm(s32);
 void sdfDevWaitForDisc(void);
-extern s32 D_003BDA38;
+extern s32 sdfDiscLoadFilename;
 extern void func_002F3F98(s32);
 extern s32 func_002F4258(void);
 extern s32 sceCdSearchFile(void *, s32);
@@ -271,7 +271,7 @@ void sdfDevWaitForDisc(void) {
         } else if (status != 18) {
             continue;
         }
-        if (sceCdSearchFile(file, D_003BDA38) != 0) {
+        if (sceCdSearchFile(file, sdfDiscLoadFilename) != 0) {
             break;
         }
     }
@@ -380,7 +380,7 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     result = -1;
     if (file != 0) {
         D_003BDA4C = *(s32 *)(file + 8);
-        D_003BDA48 = file;
+        sdfOpenDiscFileRecord = file;
         D_003BDA54 = 0;
         if (name[1] == 0x76 || name[1] == 0x56) {
             sdfDevSeekDiscWithRequestGate(request[0]);
@@ -395,11 +395,11 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5398);
 
 void sdfServicePendingOperationUnderSemaphore(void) {
-    if (D_003BDA48 != 0) {
+    if (sdfOpenDiscFileRecord != 0) {
         WaitSema(sdfDiscSemaphore);
         func_002F4620();
         SignalSema(sdfDiscSemaphore);
-        D_003BDA48 = 0;
+        sdfOpenDiscFileRecord = 0;
     }
 }
 
@@ -421,10 +421,10 @@ s32 sdfPktQuery(u32 request) {
 }
 
 s32 sdfDevGetFileSize(void) {
-    if (D_003BDA48 == 0) {
+    if (sdfOpenDiscFileRecord == 0) {
         sdfPanicHaltPrintf("file didn't open.");
     }
-    return *(s32 *)(D_003BDA48 + 8);
+    return *(s32 *)(sdfOpenDiscFileRecord + 8);
 }
 
 extern s32 func_0030E8F0();
@@ -463,7 +463,7 @@ void sdfDevStartLoad(s32 name, s32 mode) {
     u32 file[12];
     s32 heap;
 
-    D_003BDA38 = name;
+    sdfDiscLoadFilename = name;
     sdfDevLoadWholeFile(mode);
     if (sceCdSearchFile(file, name) == 0) {
         sdfPanicHaltPrintf(D_003B4578, name);
@@ -603,7 +603,7 @@ u32 sdfDevQueueOperationAndWait(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5CD8);
 
-char *func_002E5D70(void) {
+char *sdfDevGetPathBuffer(void) {
     return D_00398820;
 }
 
@@ -628,7 +628,7 @@ void sdfDevEnqueueStateAndWakeWorker(DevState *state) {
     DevState *last;
 
     interrupts = func_00312C08(state);
-    worker = &D_00398860[state->workerIndex];
+    worker = &sdfDeviceWorkerEntries[state->workerIndex];
     if (worker->handle < 0) {
         sdfEnsureDeviceWorkerThreadStarted(state->workerIndex);
     }
@@ -871,11 +871,11 @@ void sdfSetThreadPriorities(s32 priority) {
     DevWorkerEntry *worker;
     u32 index;
 
-    if (D_003BD430 == priority) {
+    if (sdfDeviceWorkerPriority == priority) {
         return;
     }
-    D_003BD430 = priority;
-    worker = D_00398860;
+    sdfDeviceWorkerPriority = priority;
+    worker = sdfDeviceWorkerEntries;
     index = 0;
     do {
         s32 threadId = worker->handle;
@@ -917,7 +917,7 @@ extern void sdfDevWorkerThread();
 
 /* Start worker thread `index` if it isn't running; slot 3 runs the alternate entry point. */
 void sdfEnsureDeviceWorkerThreadStarted(s32 index) {
-    DevWorkerEntry *worker = &D_00398860[index];
+    DevWorkerEntry *worker = &sdfDeviceWorkerEntries[index];
     void (*entry)();
     s32 thread;
 
@@ -928,7 +928,7 @@ void sdfEnsureDeviceWorkerThreadStarted(s32 index) {
         if (index != 3) {
             entry = sdfDevWorkerThread;
         }
-        D_003BD430 = 0x48;
+        sdfDeviceWorkerPriority = 0x48;
         thread = sdfCreateThreadWithAllocatedWorkspace(entry, 0x4000, 0x48);
         worker->handle = thread;
         _StartThread(thread, (s32)worker);
@@ -1254,7 +1254,7 @@ INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD42E);
 
 INCLUDE_SDATA(const s32, "game/code_002E4720", sdfDevicePriorityOverrideTicks);
 
-INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD430);
+INCLUDE_SDATA(const s32, "game/code_002E4720", sdfDeviceWorkerPriority);
 
 INCLUDE_SDATA(const s32, "game/code_002E4720", sdfDefaultDevRequestOptions);
 

@@ -9,7 +9,7 @@ typedef struct LevelStep {
     u8 value;
 } LevelStep;
 
-extern LevelStep D_00370D08[];
+extern LevelStep brsLevelStepThresholds[];
 
 extern s32 datGameState;
 
@@ -65,15 +65,15 @@ u8 brsGetLevelStepForValue(s32 value) {
     s32 i;
 
     for (i = 2; i >= 0; i--) {
-        if (value >= D_00370D08[i].threshold) {
-            return D_00370D08[i].value;
+        if (value >= brsLevelStepThresholds[i].threshold) {
+            return brsLevelStepThresholds[i].value;
         }
     }
-    return D_00370D08[0].value;
+    return brsLevelStepThresholds[0].value;
 }
 
 u8 brsGetLevelStepCrossedBy(s32 position, s32 increment) {
-    u8 *table = (u8 *)D_00370D08;
+    u8 *table = (u8 *)brsLevelStepThresholds;
     s32 i = 2;
     u8 *limit = table + 4;
     s32 nextPosition = position + increment;

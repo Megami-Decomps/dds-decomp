@@ -503,11 +503,11 @@ EffBossWork *effBossCloneWithGroups(EffBossWork *src) {
     return work;
 }
 
-void func_0018D7D0(void *work) {
+void effBossReleaseWorkCallback(void *work) {
     effBossDestroy(work);
 }
 
-void func_0018D7E8(void *work) {
+void effBossUpdateGeometryCallback(void *work) {
     func_0018C820(work);
 }
 

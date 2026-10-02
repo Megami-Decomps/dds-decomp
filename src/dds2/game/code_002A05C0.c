@@ -388,7 +388,7 @@ void mnuWriteTitleStreamStatusLocked(u32 *values) {
 void mnuLoadTitleStreamFrameData(char *filePath, u32 *work) {
     void *fileData;
     s32 frames;
-    u32 request = func_00343ED0(filePath, &fileData, 0);
+    u32 request = sdfReadNamedResource(filePath, &fileData, 0);
     s32 bytes = sdfMemoryGetBlockSize(request);
     memcpy((void *)work[5], fileData, bytes);
     frames = bytes / (s32)work[2];
@@ -531,12 +531,12 @@ void mnuResetTitleStreamLocked(void) {
     SignalSema(mnuTitleStreamSemaphore);
 }
 
-INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428650);
-
 extern u32 D_00455D98[];
 extern s32 func_003292A8(s32);
 
-void func_002A2580(void) {
+INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428650);
+
+void mnuInitializeTitleSoundBuffer(void) {
     u32 *work = mnuTitleSoundBufferState;
     u32 *decoder = D_00455D98;
     s32 allocation;

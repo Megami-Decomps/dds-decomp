@@ -158,7 +158,7 @@ typedef struct EffBattleListOwner {
 } EffBattleListOwner;
 
 /* True when any entry is of kind 2 or 3. */
-s32 func_00161600(EffBattleListOwner *owner) {
+s32 effBattleHasActiveKind(EffBattleListOwner *owner) {
     EffBattleEntryList *list = owner->list;
     s32 count = list->count;
     EffBattleEntry *entry = list->entries;

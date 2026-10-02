@@ -67,7 +67,7 @@ typedef struct SdfUnitMode {
 } SdfUnitMode;
 
 extern u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed);
-extern char D_003BA9E0[];
+extern char sdfRuntimeTaskName[];
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 mode);
 extern s32 sdfDecrementAllocationReferenceCount(s32 allocation);
 extern s32 func_002D0918(s32 allocation);
@@ -230,7 +230,7 @@ void sdfCreateRuntimeTask(void) {
     ((SdfRuntime *)state)->backingAllocation = (s32)mem;
     ((SdfRuntime *)state)->firstTick = 0;
     ((SdfRuntime *)state)->secondTick = 0;
-    kwlnTaskCreate(D_003BA9E0, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
+    kwlnTaskCreate(sdfRuntimeTaskName, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
     datGameState = (s32)state;
     evtResetWorldAndProfileRuntime();
 }
@@ -240,7 +240,7 @@ void sdfCreateRuntimeTask(void) {
 void sdfDestroyRuntimeTask(void) {
     s32 handle;
 
-    kwlnTaskDestroyWithHierarchyByName(D_003BA9E0, 0);
+    kwlnTaskDestroyWithHierarchyByName(sdfRuntimeTaskName, 0);
     func_00117808();
     handle = ((SdfRuntime *)datGameState)->backingAllocation;
     sdfDecrementAllocationReferenceCount(handle);
@@ -563,7 +563,7 @@ void sdfRaisePackedChannelValue(SdfPackedValue *item, u32 value) {
 
 INCLUDE_RODATA(const s32, "game/code_00117438", D_0039F980);
 
-INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9E0);
+INCLUDE_SDATA(const s32, "game/code_00117438", sdfRuntimeTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9E8);
 

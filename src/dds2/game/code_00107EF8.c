@@ -139,7 +139,7 @@ extern void sdfAppendPacket(void *, void *);
 
 extern u8 *sdfConsFinalizePacketHeader(void *, s32);
 
-extern s32 func_00100400(void);
+extern s32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 
@@ -331,7 +331,7 @@ void func_00108D80(void) {
     void *texture;
     sdfInitPacketList(list);
     texture = sdfAllocPacketAligned(0x40);
-    func_0032DB30(kwlnFrameDrawPacketRecords + func_00100400() * 0x1F40, texture, 0);
+    func_0032DB30(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(list, texture);
     {
         EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
@@ -344,7 +344,7 @@ void func_00108E20(void) {
     void *texture;
     sdfInitPacketList(list);
     texture = sdfAllocPacketAligned(0x40);
-    func_0032DB78(kwlnFrameDrawPacketRecords + func_00100400() * 0x1F40, texture, 0);
+    func_0032DB78(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(list, texture);
     {
         EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
@@ -888,7 +888,7 @@ void func_0010A998(void) {
     mnuCreateCampTasks();
 }
 
-u32 func_0010A9B0(void) {
+u32 evtExitCampTaskGroup(void) {
     mnuDestroyCampTasks();
     return 0;
 }

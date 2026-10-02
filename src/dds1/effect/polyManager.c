@@ -199,7 +199,7 @@ extern f32 D_0034E630[4];
 extern f32 D_0034E640[4];
 
 /* Blend two constant colour vectors by elapsed/duration (1 once elapsed reaches duration) and tint the result with the packed colour. */
-u32 func_0015DE88(u32 elapsed, u32 duration, u32 color) {
+u32 polyBlendTimedTintColor(u32 elapsed, u32 duration, u32 color) {
     f32 ratio = 1.0f;
     s32 tint[4];
     s32 blended[4]; /* never read; gcc drops the stores but keeps the frame slot */
@@ -239,7 +239,7 @@ extern u8 D_0034DF38[];
 extern f32 effMiscRandUnitFloat(void *state);
 
 /* Randomize record `index`: pick jittered start and end radii, derive the per-frame radius step, and lay the ring out. */
-void func_0015E148(PolyBand *spawner, s32 index) {
+void polyRingRandomizeRecord(PolyBand *spawner, s32 index) {
     PolyBandRecord *record = spawner->records;
     f32 spread;
     f32 start;
@@ -457,7 +457,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015EEF0);
 
 
 /* Randomize record `index`: jittered start and end radii, radius step, start angle (degrees to radians) and the phase within its delay group. */
-void func_0015EF50(PolyRotatingBand *spawner, u32 index) {
+void polyRotatingRandomizeRecord(PolyRotatingBand *spawner, u32 index) {
     PolyRotatingBandRecord *record = spawner->records;
     f32 spread;
 

@@ -85,7 +85,7 @@ extern s32 D_00436AF0;
 
 extern s32 D_00438F6C;
 
-extern s32 func_00343ED0(s32, u32 *, s32);
+extern s32 sdfReadNamedResource(s32, u32 *, s32);
 
 extern void btlBossDebugPrintf(s32, ...);
 
@@ -241,7 +241,7 @@ extern void func_003297C8(s32);
 
 void btlReplaceResourceHandle(BtlResourceDescriptor *, s32);
 
-extern s32 func_0032C138(s32);
+extern s32 sdfTexAcquireResourceTexture(s32);
 
 extern char *D_003BEA80[];
 
@@ -268,9 +268,9 @@ typedef union BtlVec4 {
     u128 q;
 } BtlVec4;
 
-extern s32 func_001AA700(void *);
+extern s32 btlReadCurrentUnitHp(void *);
 
-extern s32 func_001AA740(void *);
+extern s32 btlComputeSkillAdjustedMaxHp(void *);
 
 extern s32 D_00435E7C;
 
@@ -586,7 +586,7 @@ void btlClearActorUnitDefeatCandidates(s32 actor) {
 
 extern void func_001E22D8(u8 *, s32, s32, f32);
 
-void func_00208F78(void) {
+void btlUpdateUnitActors(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *actor = state->units;
 
@@ -866,7 +866,7 @@ void btlDrawButtonIcon(BtnSurface *surface, s32 x, s32 y, s32 topLeftColor, s32 
 
 void btlOpenButtonIconResource(void) {
     btlBossDebugPrintf((s32)"btl:[%s]\n", D_00436AF0);
-    D_00438F6C = func_00343ED0(D_00436AF0, &btlButtonIconTexture, 0);
+    D_00438F6C = sdfReadNamedResource(D_00436AF0, &btlButtonIconTexture, 0);
 }
 
 void btlRetainButtonTexture(void) {
@@ -1904,8 +1904,8 @@ u32 btlScriptReturnUnitHpRatioPercent(void) {
     while (unit != NULL) {
         if ((unit->flags & 1) && (unit->flags & mask) && !(unit->flags & 0x20) && unit->owner == id) {
             u8 *stats = (u8 *)unit + 0x120;
-            s32 current = func_001AA700(stats);
-            s32 maximum = func_001AA740(stats);
+            s32 current = btlReadCurrentUnitHp(stats);
+            s32 maximum = btlComputeSkillAdjustedMaxHp(stats);
             if (!((u32)(maximum * percent) < (u32)(current * 100))) {
                 scrSetIntegerReturnValue(1);
                 return 1;
@@ -2741,7 +2741,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) 
         sdfTexReleaseReferenceViaHandler(handle);
         resource->handle = 0;
     }
-    buffer = func_00343ED0(name, &loaded, 0);
+    buffer = sdfReadNamedResource(name, &loaded, 0);
     btlReplaceResourceHandle(resource, loaded);
     func_003297C8(buffer);
 }
@@ -2752,7 +2752,7 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) {
         sdfTexReleaseReferenceViaHandler(handle);
         resource->handle = 0;
     }
-    resource->handle = func_0032C138(name);
+    resource->handle = sdfTexAcquireResourceTexture(name);
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E1E0);

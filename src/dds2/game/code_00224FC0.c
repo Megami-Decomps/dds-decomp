@@ -136,7 +136,7 @@ typedef struct LiftUnit {
     s32 state;          /* 0x114: state-link address, as in the template */
 } LiftUnit;
 
-s32 func_002258D8(s32 object) {
+s32 btlLiftUnitForLinkedTarget(s32 object) {
     s32 state = ((LiftUnit *)object)->state;
 
     if ((((LiftUnit *)((LiftUnitState *)state)->owner)->flags & 0x200) != 0) {
@@ -383,7 +383,7 @@ u32 func_00226868(BattleActionUnit *unit) {
 
 extern void btlInitializeEffectVectorsFromSourceRecords();
 
-void func_00226900(void) {
+void btlResetUnitPlacement(void) {
     BtlUnit *unit = *(BtlUnit **)((u8 *)btlGetRuntime() + 0x24C);
 
     if (unit == NULL) {

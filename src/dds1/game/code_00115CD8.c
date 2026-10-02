@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u32 func_001117A8(u32);
+extern u32 dds3CreateSlotResourceState(u32);
 extern u32 func_002CFEB8(u32);
 
 /* The resource pointer is stored at +0x18 in both games. */
@@ -110,7 +110,7 @@ u32 dds3InitializeResourceOwner(WorldResourceOwner *object) {
     effObjInnerCreate();
     resource = (u32 *)func_002CFEB8(0x10);
     object->resource = resource;
-    handle = func_001117A8((u32)object);
+    handle = dds3CreateSlotResourceState((u32)object);
     *resource = handle;
     return 1;
 }

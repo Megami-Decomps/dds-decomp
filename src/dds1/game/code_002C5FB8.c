@@ -31,7 +31,7 @@ typedef struct MapResource {
 
 extern MapResource fldLocalMapNameTextures[10];
 
-extern MapResource D_003906F0;
+extern MapResource fldLocalMapAuxTextureResource;
 
 extern MapResource fldLocalMapTextureResource;
 
@@ -41,9 +41,9 @@ extern s32 func_003014F0(char *, const char *, ...);
 
 extern u32 fldReleaseMapResource(s32 *);
 
-extern u32 func_002EB028(const char *, void *, s32);
+extern u32 sdfReadNamedResource(const char *, void *, s32);
 
-extern u32 func_002D3288(u32);
+extern u32 sdfTexAcquireResourceTexture(u32);
 
 extern float func_002FA1C0(float);
 
@@ -259,7 +259,7 @@ s32 fldLoadLocalMapResources(void) {
         fldLoadMapResource(name, item);
         item++;
     }
-    fldLoadMapResource("/lmap/1006.tmx", &D_003906F0);
+    fldLoadMapResource("/lmap/1006.tmx", &fldLocalMapAuxTextureResource);
     fldLoadMapResource("/lmap/l_map00.tmx", &fldLocalMapTextureResource);
     return 1;
 }
@@ -272,7 +272,7 @@ s32 fldReleaseLocalMapResources(void) {
         item++;
         --i;
     } while (i >= 0);
-    fldReleaseMapResource((s32 *)&D_003906F0);
+    fldReleaseMapResource((s32 *)&fldLocalMapAuxTextureResource);
     fldReleaseMapResource((s32 *)&fldLocalMapTextureResource);
     return 1;
 }
@@ -415,10 +415,10 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7BB0);
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7C58);
 
 s32 fldLoadMapResource(const char *name, MapResource *record) {
-    u32 handle = func_002EB028(name, &record->descriptor, 0);
+    u32 handle = sdfReadNamedResource(name, &record->descriptor, 0);
     u32 descriptor = record->descriptor;
     record->handle = handle;
-    record->image = func_002D3288(descriptor);
+    record->image = sdfTexAcquireResourceTexture(descriptor);
     if (record->handle != 0) {
         sdfQueueNonzeroResourceId((void *)record->handle);
         record->handle = 0;

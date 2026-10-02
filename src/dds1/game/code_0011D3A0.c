@@ -272,7 +272,7 @@ void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, 
     }
 }
 
-void func_0011DC50(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep) {
+void fldAdjustIntegerUsingMainPad(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep) {
     fldStepIntByPad(ptr, type, min, max, step, bigStep, (s8 *)D_00324530);
 }
 
@@ -1029,7 +1029,7 @@ f32 fldSnapAngleToCompassPoint(f32 angle) {
 }
 
 /* Snap an angle in degrees to the nearest of the eight compass directions. */
-f32 func_00122498(f32 angle) {
+f32 fldSnapAngleToCompassOctant(f32 angle) {
     f32 best;
     s32 index;
     f32 diff;
@@ -1265,7 +1265,7 @@ extern void func_003003F0(void *);
 extern void fldInitDisplayObjects(void);
 extern void fldResetPlayerSceneTransformState(void);
 extern void fldResetPendingSounds(void);
-extern void func_002E8430(void *, s32);
+extern void effMiscSeedRandom(void *, s32);
 extern void fldParseMixLb(void);
 extern void func_00131A88(void);
 extern void func_001426E0(void);
@@ -1278,7 +1278,7 @@ void fldInitializeDisplayAndTables(void) {
     func_003003F0(D_003BAB80);
     fldResetPendingSounds();
     func_003003F0(D_003BAB88);
-    func_002E8430(D_0032F240, 0x1e240);
+    effMiscSeedRandom(D_0032F240, 0x1e240);
     func_003003F0(D_003BAB90);
     fldParseMixLb();
     func_003003F0(D_003BAB98);
@@ -1463,7 +1463,7 @@ u32 fldGetSceneStatusCode(void) {
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001233D0);
 
 void fldUnloadPlayerModel(void);
-extern u32 func_002EB028(const char *, u32 *, u32 *);
+extern u32 sdfReadNamedResource(const char *, u32 *, u32 *);
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FBC0);
 
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FBD0);
@@ -1482,13 +1482,13 @@ void fldLoadPlayerModel(void) {
         }
         switch (model) {
         case 0:
-            fldPlayerModelResource = func_002EB028("/model/field/player_a.PB", &D_003BAB5C, &D_003BAB64);
+            fldPlayerModelResource = sdfReadNamedResource("/model/field/player_a.PB", &D_003BAB5C, &D_003BAB64);
             break;
         case 1:
-            fldPlayerModelResource = func_002EB028("/model/field/player_b.PB", &D_003BAB5C, &D_003BAB64);
+            fldPlayerModelResource = sdfReadNamedResource("/model/field/player_b.PB", &D_003BAB5C, &D_003BAB64);
             break;
         default:
-            fldPlayerModelResource = func_002EB028("/model/field/player_l.PB", &D_003BAB5C, &D_003BAB64);
+            fldPlayerModelResource = sdfReadNamedResource("/model/field/player_l.PB", &D_003BAB5C, &D_003BAB64);
             break;
         }
         fldAreaState[79] = model;
@@ -1619,7 +1619,7 @@ extern void dds3SetCameraVector(u32, FieldVec4 *);
 extern void effObjSetInnerFloat(u32, f32);
 extern void dds3SetWorldCameraObject(u64, u32);
 
-void func_001242B8(void) {
+void fldCreateSecondaryWorldCamera(void) {
     FieldVec4 a = D_0039FC80;
     FieldVec4 b;
     FieldVec4 c;

@@ -100,105 +100,105 @@ typedef struct {
     u32 size;
 } KwlnScaleBlurParams;
 
-extern KwlnResourceRectParams D_0043E588;
+extern KwlnResourceRectParams kwlnTexturedSquareParameters;
 
-extern KwlnPixelBlurParams D_0043E3F0;
+extern KwlnPixelBlurParams kwlnTexturedBlurParameters;
 
-extern KwlnScatterBlurParams D_0043E450;
+extern KwlnScatterBlurParams kwlnFilterBlurParameters;
 
 extern u32 kwlnDistanceBlurErrorCount;
 
-extern KwlnScaleBlurParams D_0043E4B0;
+extern KwlnScaleBlurParams kwlnStaggeredBlurParameters;
 
 extern u32 kwlnRippleBlurErrorCount;
 
-extern u16 D_00438E5A;
+extern u16 kwlnTexturedSquareTargetAlpha;
 
-extern u16 D_00438E58;
+extern u16 kwlnTexturedSquareStartAlpha;
 
-extern u16 D_00438E54;
+extern u16 kwlnTexturedSquareFadeCounter;
 
-extern u16 D_00438E56;
+extern u16 kwlnTexturedSquareFadeDuration;
 
 extern void effCopyCh75Common(void *);
 
-extern void func_00197378(void);
+extern void effEnableTexturedSquare(void);
 
-extern void func_00197388(void);
+extern void effDisableTexturedSquare(void);
 
-extern u16 D_00438E1C;
+extern u16 kwlnTexturedBlurStartAlpha;
 
-extern u16 D_00438E18;
+extern u16 kwlnTexturedBlurFadeCounter;
 
-extern u16 D_00438E1E;
+extern u16 kwlnTexturedBlurTargetAlpha;
 
-extern u16 D_00438E1A;
+extern u16 kwlnTexturedBlurFadeDuration;
 
 extern void effCopyCh71Common(void *);
 
-extern void func_00197060(void);
+extern void effEnableTexturedBlur(void);
 
-extern void func_00197070(void);
+extern void effDisableTexturedBlur(void);
 
-extern u16 D_00438E28;
+extern u16 kwlnFilterBlurStartAlpha;
 
-extern u16 D_00438E24;
+extern u16 kwlnFilterBlurFadeCounter;
 
-extern u16 D_00438E2A;
+extern u16 kwlnFilterBlurTargetAlpha;
 
-extern u16 D_00438E26;
+extern u16 kwlnFilterBlurFadeDuration;
 
 extern void effCopyCh72Common(void *);
 
-extern void func_00197118(void);
+extern void effEnableFilterBlur(void);
 
-extern void func_00197128(void);
+extern void effDisableFilterBlur(void);
 
-extern u16 D_00438E36;
+extern u16 kwlnStaggeredBlurTargetAlpha;
 
-extern u16 D_00438E34;
+extern u16 kwlnStaggeredBlurStartAlpha;
 
-extern u16 D_00438E30;
+extern u16 kwlnStaggeredBlurFadeCounter;
 
-extern u16 D_00438E32;
+extern u16 kwlnStaggeredBlurFadeDuration;
 
-extern void func_001971E0(void);
+extern void effDisableStaggeredBlur(void);
 
 extern void effCopyCh76Common(void *);
 
-extern void func_001971D0(void);
+extern void effEnableStaggeredBlur(void);
 
-extern KwlnSolidRectParams D_0043E548;
+extern KwlnSolidRectParams kwlnColorRectangleParameters;
 
-extern u16 D_00438E4C;
+extern u16 kwlnColorRectangleStartAlpha;
 
-extern u16 D_00438E48;
+extern u16 kwlnColorRectangleFadeCounter;
 
-extern u16 D_00438E4E;
+extern u16 kwlnColorRectangleTargetAlpha;
 
-extern u16 D_00438E4A;
+extern u16 kwlnColorRectangleFadeDuration;
 
-extern void func_00197328(void *);
+extern void effCopyColorRectangleParameters(void *);
 
-extern void func_00197310(void);
+extern void effEnableColorRectangle(void);
 
-extern void func_00197320(void);
+extern void effDisableColorRectangle(void);
 
-extern KwlnBlurRectParams D_0043E508;
+extern KwlnBlurRectParams kwlnRectangleBlurParameters;
 
-extern u16 D_00438E40;
+extern u16 kwlnRectangleBlurStartAlpha;
 
-extern u16 D_00438E3C;
+extern u16 kwlnRectangleBlurFadeCounter;
 
-extern u16 D_00438E42;
+extern u16 kwlnRectangleBlurTargetAlpha;
 
-extern u16 D_00438E3E;
+extern u16 kwlnRectangleBlurFadeDuration;
 
-extern void func_00196FF0(void *);
+extern void effCopyRectangleBlurParameters(void *);
 
-extern void func_00196FD8(void);
+extern void effEnableRectangleBlur(void);
 
-extern void func_00196FE8(void);
+extern void effDisableRectangleBlur(void);
 
 extern u128 kwlnDefaultColorVector;
 
@@ -225,11 +225,11 @@ void kwlnDrawInitRect(KwlnRectBounds *rect) {
 }
 
 void kwlnDrawSetDc8Second(u32 value) {
-    D_0043E548.blendControl = value;
+    kwlnColorRectangleParameters.blendControl = value;
 }
 
 void kwlnDrawSetDc8First(u32 value) {
-    D_0043E548.color.rgba = value;
+    kwlnColorRectangleParameters.color.rgba = value;
 }
 
 extern KwlnSolidRectParams *effGetCh74Params(void);
@@ -237,35 +237,35 @@ extern u16 D_00438E50;
 extern u16 D_00438E52;
 
 extern KwlnSolidRectParams D_0043E530;
-/* Alias of D_0043E548.bounds; the effect setter needs the preceding header. */
+/* Alias of kwlnColorRectangleParameters.bounds; the effect setter needs the preceding header. */
 extern KwlnRectBounds D_0043E550;
 
-void func_00106460(s32 mode) {
+void kwlnDrawSnapshotSolidRect(s32 mode) {
     D_0043E530 = *effGetCh74Params();
     D_00438E50 = 0;
     D_00438E52 = mode;
     if (mode == 0) {
         kwlnDrawControlFlags &= ~0x100000;
         kwlnDrawInitRect(&D_0043E550);
-        func_00197328((void *)((u8 *)&D_0043E550 - 8));
+        effCopyColorRectangleParameters((void *)((u8 *)&D_0043E550 - 8));
     } else {
         kwlnDrawControlFlags |= 0x100000;
     }
 }
 
 void kwlnDrawSetupDc8(s32 mode) {
-    KwlnSolidRectParams *blk = &D_0043E548;
+    KwlnSolidRectParams *blk = &kwlnColorRectangleParameters;
     s32 requestedMode = mode;
 
-    D_00438E4C = 0;
-    D_00438E48 = 0;
-    D_00438E4E = blk->color.channels[3];
-    D_00438E4A = requestedMode;
+    kwlnColorRectangleStartAlpha = 0;
+    kwlnColorRectangleFadeCounter = 0;
+    kwlnColorRectangleTargetAlpha = blk->color.channels[3];
+    kwlnColorRectangleFadeDuration = requestedMode;
     if (requestedMode == 0) {
         kwlnDrawControlFlags &= ~0x80000;
         kwlnDrawInitRect(&blk->bounds);
-        func_00197328(blk);
-        func_00197310();
+        effCopyColorRectangleParameters(blk);
+        effEnableColorRectangle();
     }
     else {
         kwlnDrawControlFlags |= 0x80000;
@@ -273,14 +273,14 @@ void kwlnDrawSetupDc8(s32 mode) {
 }
 
 void kwlnDrawEnableDc8(s32 enabled) {
-    D_00438E4E = 0;
-    D_00438E4C = D_0043E548.color.channels[3];
-    D_00438E48 = 0;
-    D_00438E4A = enabled;
+    kwlnColorRectangleTargetAlpha = 0;
+    kwlnColorRectangleStartAlpha = kwlnColorRectangleParameters.color.channels[3];
+    kwlnColorRectangleFadeCounter = 0;
+    kwlnColorRectangleFadeDuration = enabled;
     if (enabled == 0) {
         kwlnDrawControlFlags &= ~0x80000;
         kwlnDrawControlFlags &= ~0x100000;
-        func_00197320();
+        effDisableColorRectangle();
     }
     else {
         kwlnDrawControlFlags |= 0x80000;
@@ -288,17 +288,17 @@ void kwlnDrawEnableDc8(s32 enabled) {
 }
 
 void kwlnDrawSetE08Fifth(u32 value) {
-    D_0043E588.blendControl = value;
+    kwlnTexturedSquareParameters.blendControl = value;
 }
 
 void kwlnDrawSetE08Fourth(u32 value) {
-    D_0043E588.color.rgba = value;
+    kwlnTexturedSquareParameters.color.rgba = value;
 }
 
 void kwlnDrawSetE08Triple(u32 first, u32 second, u32 third) {
-    D_0043E588.extent = first;
-    D_0043E588.centerX = second;
-    D_0043E588.centerY = third;
+    kwlnTexturedSquareParameters.extent = first;
+    kwlnTexturedSquareParameters.centerX = second;
+    kwlnTexturedSquareParameters.centerY = third;
 }
 
 extern KwlnResourceRectParams D_0043E560;
@@ -312,24 +312,24 @@ void kwlnDrawApplyEffectWord(s32 mode) {
     D_00438E5E = mode;
     if (mode == 0) {
         kwlnDrawControlFlags &= 0xFFBFFFFF;
-        effCopyCh75Common(&D_0043E588);
+        effCopyCh75Common(&kwlnTexturedSquareParameters);
     } else {
         kwlnDrawControlFlags |= 0x400000;
     }
 }
 
 void kwlnDrawSetupE08(s32 mode) {
-    KwlnResourceRectParams *blk = &D_0043E588;
+    KwlnResourceRectParams *blk = &kwlnTexturedSquareParameters;
     s32 requestedMode = mode;
 
-    D_00438E58 = 0;
-    D_00438E54 = 0;
-    D_00438E5A = blk->color.channels[3];
-    D_00438E56 = requestedMode;
+    kwlnTexturedSquareStartAlpha = 0;
+    kwlnTexturedSquareFadeCounter = 0;
+    kwlnTexturedSquareTargetAlpha = blk->color.channels[3];
+    kwlnTexturedSquareFadeDuration = requestedMode;
     if (requestedMode == 0) {
         kwlnDrawControlFlags &= ~0x200000;
         effCopyCh75Common(blk);
-        func_00197378();
+        effEnableTexturedSquare();
     }
     else {
         kwlnDrawControlFlags |= 0x200000;
@@ -337,14 +337,14 @@ void kwlnDrawSetupE08(s32 mode) {
 }
 
 void kwlnDrawEnableE08(s32 mode) {
-    D_00438E5A = 0;
-    D_00438E58 = D_0043E588.color.channels[3];
-    D_00438E54 = 0;
-    D_00438E56 = mode;
+    kwlnTexturedSquareTargetAlpha = 0;
+    kwlnTexturedSquareStartAlpha = kwlnTexturedSquareParameters.color.channels[3];
+    kwlnTexturedSquareFadeCounter = 0;
+    kwlnTexturedSquareFadeDuration = mode;
     if (mode == 0) {
         kwlnDrawControlFlags &= ~0x200000;
         kwlnDrawControlFlags &= ~0x400000;
-        func_00197388();
+        effDisableTexturedSquare();
     }
     else {
         kwlnDrawControlFlags |= 0x200000;
@@ -375,18 +375,18 @@ void kwlnDrawSetOffsetTransition(s32 transition, s32 x, s32 y) {
 }
 
 void kwlnDrawSetD88FloatTriple(u32 value, f32 first, f32 second) {
-    D_0043E508.rotation = first;
-    D_0043E508.scale = second;
-    D_0043E508.blendControl = value;
+    kwlnRectangleBlurParameters.rotation = first;
+    kwlnRectangleBlurParameters.scale = second;
+    kwlnRectangleBlurParameters.blendControl = value;
 }
 
 void kwlnDrawSetD88First(u32 value) {
-    D_0043E508.color.rgba = value;
+    kwlnRectangleBlurParameters.color.rgba = value;
 }
 
 void kwlnDrawSetD88Pair(u32 first, u32 second) {
-    D_0043E508.centerX = first;
-    D_0043E508.centerY = second;
+    kwlnRectangleBlurParameters.centerX = first;
+    kwlnRectangleBlurParameters.centerY = second;
 }
 
 extern KwlnBlurRectParams D_0043E4E0;
@@ -394,32 +394,32 @@ extern u16 D_00438E44;
 extern u16 D_00438E46;
 extern u32 effGetCh70Params(void);
 
-void func_001068C8(s32 mode) {
+void kwlnSetRectangleBlurParameterTransition(s32 mode) {
     D_0043E4E0 = *(KwlnBlurRectParams *)effGetCh70Params();
     D_00438E44 = 0;
     D_00438E46 = mode;
     if (mode == 0) {
         kwlnDrawControlFlags &= 0xFFFBFFFF;
-        kwlnDrawInitRect(&D_0043E508.bounds);
-        func_00196FF0(&D_0043E508);
+        kwlnDrawInitRect(&kwlnRectangleBlurParameters.bounds);
+        effCopyRectangleBlurParameters(&kwlnRectangleBlurParameters);
     } else {
         kwlnDrawControlFlags |= 0x40000;
     }
 }
 
 void kwlnDrawSetupD88(s32 mode) {
-    KwlnBlurRectParams *blk = &D_0043E508;
+    KwlnBlurRectParams *blk = &kwlnRectangleBlurParameters;
     s32 requestedMode = mode;
 
-    D_00438E40 = 0;
-    D_00438E3C = 0;
-    D_00438E42 = blk->color.channels[3];
-    D_00438E3E = requestedMode;
+    kwlnRectangleBlurStartAlpha = 0;
+    kwlnRectangleBlurFadeCounter = 0;
+    kwlnRectangleBlurTargetAlpha = blk->color.channels[3];
+    kwlnRectangleBlurFadeDuration = requestedMode;
     if (requestedMode == 0) {
         kwlnDrawControlFlags &= ~0x20000;
         kwlnDrawInitRect(&blk->bounds);
-        func_00196FF0(blk);
-        func_00196FD8();
+        effCopyRectangleBlurParameters(blk);
+        effEnableRectangleBlur();
     }
     else {
         kwlnDrawControlFlags |= 0x20000;
@@ -427,14 +427,14 @@ void kwlnDrawSetupD88(s32 mode) {
 }
 
 void kwlnDrawEnableD88(s32 enabled) {
-    D_00438E42 = 0;
-    D_00438E40 = D_0043E508.color.channels[3];
-    D_00438E3C = 0;
-    D_00438E3E = enabled;
+    kwlnRectangleBlurTargetAlpha = 0;
+    kwlnRectangleBlurStartAlpha = kwlnRectangleBlurParameters.color.channels[3];
+    kwlnRectangleBlurFadeCounter = 0;
+    kwlnRectangleBlurFadeDuration = enabled;
     if (enabled == 0) {
         kwlnDrawControlFlags &= ~0x20000;
         kwlnDrawControlFlags &= ~0x40000;
-        func_00196FE8();
+        effDisableRectangleBlur();
     }
     else {
         kwlnDrawControlFlags |= 0x20000;
@@ -442,19 +442,19 @@ void kwlnDrawEnableD88(s32 enabled) {
 }
 
 void kwlnDrawSetC70FloatTriple(u32 value, f32 first, f32 second) {
-    D_0043E3F0.source.rotation = first;
-    D_0043E3F0.source.scale = second;
-    D_0043E3F0.source.blendControl = value;
+    kwlnTexturedBlurParameters.source.rotation = first;
+    kwlnTexturedBlurParameters.source.scale = second;
+    kwlnTexturedBlurParameters.source.blendControl = value;
 }
 
 void kwlnDrawSetC70Second(u32 value) {
-    D_0043E3F0.source.color.rgba = value;
+    kwlnTexturedBlurParameters.source.color.rgba = value;
 }
 
 void kwlnDrawSetC70Triple(u32 first, u32 second, u32 third) {
-    D_0043E3F0.extent = first;
-    D_0043E3F0.source.centerX = second;
-    D_0043E3F0.source.centerY = third;
+    kwlnTexturedBlurParameters.extent = first;
+    kwlnTexturedBlurParameters.source.centerX = second;
+    kwlnTexturedBlurParameters.source.centerY = third;
 }
 
 extern KwlnPixelBlurParams D_0043E3C0;
@@ -468,24 +468,24 @@ void kwlnDrawApplyEffectBlock(s32 mode) {
     D_00438E22 = mode;
     if (mode == 0) {
         kwlnDrawControlFlags &= 0xFFFF7FFF;
-        effCopyCh71Common(&D_0043E3F0);
+        effCopyCh71Common(&kwlnTexturedBlurParameters);
     } else {
         kwlnDrawControlFlags |= 0x8000;
     }
 }
 
 void kwlnDrawSetupC70(s32 mode) {
-    KwlnPixelBlurParams *blk = &D_0043E3F0;
+    KwlnPixelBlurParams *blk = &kwlnTexturedBlurParameters;
     s32 requestedMode = mode;
 
-    D_00438E1C = 0;
-    D_00438E18 = 0;
-    D_00438E1E = blk->source.color.channels[3];
-    D_00438E1A = requestedMode;
+    kwlnTexturedBlurStartAlpha = 0;
+    kwlnTexturedBlurFadeCounter = 0;
+    kwlnTexturedBlurTargetAlpha = blk->source.color.channels[3];
+    kwlnTexturedBlurFadeDuration = requestedMode;
     if (requestedMode == 0) {
         kwlnDrawControlFlags &= ~0x1000;
         effCopyCh71Common(blk);
-        func_00197060();
+        effEnableTexturedBlur();
     }
     else {
         kwlnDrawControlFlags |= 0x1000;
@@ -493,18 +493,18 @@ void kwlnDrawSetupC70(s32 mode) {
 }
 
 void kwlnDrawSetupC70B(s32 mode) {
-    KwlnPixelBlurParams *blk = &D_0043E3F0;
+    KwlnPixelBlurParams *blk = &kwlnTexturedBlurParameters;
     s32 requestedMode = mode;
 
-    D_00438E1E = 0;
-    D_00438E18 = 0;
-    D_00438E1C = blk->source.color.channels[3];
-    D_00438E1A = requestedMode;
+    kwlnTexturedBlurTargetAlpha = 0;
+    kwlnTexturedBlurFadeCounter = 0;
+    kwlnTexturedBlurStartAlpha = blk->source.color.channels[3];
+    kwlnTexturedBlurFadeDuration = requestedMode;
     if (requestedMode == 0) {
         kwlnDrawControlFlags &= ~0x1000;
         kwlnDrawControlFlags &= ~0x8000;
         effCopyCh71Common(blk);
-        func_00197070();
+        effDisableTexturedBlur();
     }
     else {
         kwlnDrawControlFlags |= 0x1000;
@@ -517,23 +517,23 @@ void kwlnDrawSetCd0Clamped(s32 boundedValue, s32 lastWord, s32 secondWord, s32 f
         kwlnDistanceBlurErrorCount++;
         boundedValue = 0x64;
     }
-    D_0043E450.count = boundedValue;
-    D_0043E450.size = lastWord;
-    D_0043E450.delaySpread = secondWord;
-    D_0043E450.angleStep = firstFloat;
-    D_0043E450.unk14 = secondFloat;
-    D_0043E450.unk18 = thirdFloat;
-    D_0043E450.unk10 = fourthWord;
+    kwlnFilterBlurParameters.count = boundedValue;
+    kwlnFilterBlurParameters.size = lastWord;
+    kwlnFilterBlurParameters.delaySpread = secondWord;
+    kwlnFilterBlurParameters.angleStep = firstFloat;
+    kwlnFilterBlurParameters.unk14 = secondFloat;
+    kwlnFilterBlurParameters.unk18 = thirdFloat;
+    kwlnFilterBlurParameters.unk10 = fourthWord;
 }
 
 void kwlnDrawSetCd0Fourth(u32 value) {
-    D_0043E450.color.rgba = value;
+    kwlnFilterBlurParameters.color.rgba = value;
 }
 
 void kwlnDrawSetCd0Triple(u32 first, u32 second, u32 third) {
-    D_0043E450.positionSpread = first;
-    D_0043E450.x = second;
-    D_0043E450.y = third;
+    kwlnFilterBlurParameters.positionSpread = first;
+    kwlnFilterBlurParameters.x = second;
+    kwlnFilterBlurParameters.y = third;
 }
 
 extern KwlnScatterBlurParams D_0043E420;
@@ -541,47 +541,47 @@ extern u32 effGetCh72Work(void);
 extern s16 D_00438E2C;
 extern s16 D_00438E2E;
 
-void func_00106D10(s32 mode) {
+void kwlnSetFilterBlurParameterTransition(s32 mode) {
     D_0043E420 = *(KwlnScatterBlurParams *)effGetCh72Work();
     D_00438E2C = 0;
     D_00438E2E = mode;
     if (mode == 0) {
         kwlnDrawControlFlags &= 0xFFFEFFFF;
-        effCopyCh72Common(&D_0043E450);
+        effCopyCh72Common(&kwlnFilterBlurParameters);
     } else {
         kwlnDrawControlFlags |= 0x10000;
     }
 }
 
 void kwlnDrawSetupCd0(s32 mode) {
-    KwlnScatterBlurParams *blk = &D_0043E450;
+    KwlnScatterBlurParams *blk = &kwlnFilterBlurParameters;
     s32 requestedMode = mode;
 
-    D_00438E28 = 0;
-    D_00438E24 = 0;
-    D_00438E2A = blk->color.channels[3];
-    D_00438E26 = requestedMode;
+    kwlnFilterBlurStartAlpha = 0;
+    kwlnFilterBlurFadeCounter = 0;
+    kwlnFilterBlurTargetAlpha = blk->color.channels[3];
+    kwlnFilterBlurFadeDuration = requestedMode;
     if (requestedMode == 0) {
         kwlnDrawControlFlags &= ~0x2000;
         effCopyCh72Common(blk);
-        func_00197118();
+        effEnableFilterBlur();
     }
     else {
         kwlnDrawControlFlags |= 0x2000;
         effCopyCh72Common(blk);
-        func_00197128();
+        effDisableFilterBlur();
     }
 }
 
 void kwlnDrawEnableCd0(s32 mode) {
-    D_00438E2A = 0;
-    D_00438E28 = D_0043E450.color.channels[3];
-    D_00438E24 = 0;
-    D_00438E26 = mode;
+    kwlnFilterBlurTargetAlpha = 0;
+    kwlnFilterBlurStartAlpha = kwlnFilterBlurParameters.color.channels[3];
+    kwlnFilterBlurFadeCounter = 0;
+    kwlnFilterBlurFadeDuration = mode;
     if (mode == 0) {
         kwlnDrawControlFlags &= ~0x2000;
         kwlnDrawControlFlags &= ~0x10000;
-        func_00197128();
+        effDisableFilterBlur();
     }
     else {
         kwlnDrawControlFlags |= 0x2000;
@@ -594,23 +594,23 @@ void kwlnDrawSetD30Clamped(s32 boundedValue, s32 fourthWord, f32 firstFloat, f32
         kwlnRippleBlurErrorCount++;
         boundedValue = 0x28;
     }
-    D_0043E4B0.count = boundedValue;
-    D_0043E4B0.phaseStep = firstFloat;
-    D_0043E4B0.spacing = secondFloat;
-    D_0043E4B0.unk14 = thirdFloat;
-    D_0043E4B0.unk18 = fourthFloat;
-    D_0043E4B0.angleStep = fifthFloat;
-    D_0043E4B0.unk10 = fourthWord;
+    kwlnStaggeredBlurParameters.count = boundedValue;
+    kwlnStaggeredBlurParameters.phaseStep = firstFloat;
+    kwlnStaggeredBlurParameters.spacing = secondFloat;
+    kwlnStaggeredBlurParameters.unk14 = thirdFloat;
+    kwlnStaggeredBlurParameters.unk18 = fourthFloat;
+    kwlnStaggeredBlurParameters.angleStep = fifthFloat;
+    kwlnStaggeredBlurParameters.unk10 = fourthWord;
 }
 
 void kwlnDrawSetD30Fourth(u32 value) {
-    D_0043E4B0.color.rgba = value;
+    kwlnStaggeredBlurParameters.color.rgba = value;
 }
 
 void kwlnDrawSetD30Triple(u32 first, u32 second, u32 third) {
-    D_0043E4B0.size = first;
-    D_0043E4B0.x = second;
-    D_0043E4B0.y = third;
+    kwlnStaggeredBlurParameters.size = first;
+    kwlnStaggeredBlurParameters.x = second;
+    kwlnStaggeredBlurParameters.y = third;
 }
 
 extern KwlnScaleBlurParams D_0043E480;
@@ -618,47 +618,47 @@ extern u32 effGetCh76Work(void);
 extern s16 D_00438E38;
 extern s16 D_00438E3A;
 
-void func_00106F38(s32 mode) {
+void kwlnSetStaggeredBlurParameterTransition(s32 mode) {
     D_0043E480 = *(KwlnScaleBlurParams *)effGetCh76Work();
     D_00438E38 = 0;
     D_00438E3A = mode;
     if (mode == 0) {
         kwlnDrawControlFlags &= 0xFEFFFFFF;
-        effCopyCh76Common(&D_0043E4B0);
+        effCopyCh76Common(&kwlnStaggeredBlurParameters);
     } else {
         kwlnDrawControlFlags |= 0x1000000;
     }
 }
 
 void kwlnDrawSetupD30(s32 mode) {
-    KwlnScaleBlurParams *blk = &D_0043E4B0;
+    KwlnScaleBlurParams *blk = &kwlnStaggeredBlurParameters;
     s32 requestedMode = mode;
 
-    D_00438E34 = 0;
-    D_00438E30 = 0;
-    D_00438E36 = blk->color.channels[3];
-    D_00438E32 = requestedMode;
+    kwlnStaggeredBlurStartAlpha = 0;
+    kwlnStaggeredBlurFadeCounter = 0;
+    kwlnStaggeredBlurTargetAlpha = blk->color.channels[3];
+    kwlnStaggeredBlurFadeDuration = requestedMode;
     if (requestedMode == 0) {
         kwlnDrawControlFlags &= ~0x800000;
         effCopyCh76Common(blk);
-        func_001971D0();
+        effEnableStaggeredBlur();
     }
     else {
         kwlnDrawControlFlags |= 0x800000;
         effCopyCh76Common(blk);
-        func_001971E0();
+        effDisableStaggeredBlur();
     }
 }
 
 void kwlnDrawEnableD30(s32 mode) {
-    D_00438E36 = 0;
-    D_00438E34 = D_0043E4B0.color.channels[3];
-    D_00438E30 = 0;
-    D_00438E32 = mode;
+    kwlnStaggeredBlurTargetAlpha = 0;
+    kwlnStaggeredBlurStartAlpha = kwlnStaggeredBlurParameters.color.channels[3];
+    kwlnStaggeredBlurFadeCounter = 0;
+    kwlnStaggeredBlurFadeDuration = mode;
     if (mode == 0) {
         kwlnDrawControlFlags &= ~0x800000;
         kwlnDrawControlFlags &= ~0x1000000;
-        func_001971E0();
+        effDisableStaggeredBlur();
     }
     else {
         kwlnDrawControlFlags |= 0x800000;

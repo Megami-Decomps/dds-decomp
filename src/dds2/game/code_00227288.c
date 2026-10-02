@@ -143,9 +143,9 @@ extern s32 sdfCreateSemaphore(s32, s32, s32);
 
 extern u32 mdlGroupJobSemaphore;
 
-extern s32 D_003C86F0[];
+extern s32 btlGroupNodeHeads[];
 
-extern s32 D_003C8710[];
+extern s32 btlGroupIdHeads[];
 
 extern void scrSetIntegerReturnValue();
 
@@ -202,11 +202,11 @@ extern s32 kwlnTaskIsRegistered(s32);
 
 extern char D_0041B650[];
 
-extern char D_00436D00[];
+extern char btlPrimaryScriptResourceName[];
 
 extern s32 scrCreateTaskForProcessId(s32, s32, s32);
 
-extern char D_00436D08[];
+extern char btlSecondaryScriptResourceName[];
 
 extern s32 evtFindTaskResourceEntryByKey(s16, s32);
 
@@ -1002,7 +1002,7 @@ s32 btlCanStartPrimaryScriptTask(void) {
     if (battle->scriptHandle == 0) {
         return 0;
     }
-    return btlFindScriptResource(D_00436D00) != -1;
+    return btlFindScriptResource(btlPrimaryScriptResourceName) != -1;
 }
 
 void btlStartPrimaryScriptTask(void) {
@@ -1012,7 +1012,7 @@ void btlStartPrimaryScriptTask(void) {
     if (battle->eventTaskId == -1) {
         return;
     }
-    scriptId = btlFindScriptResource(D_00436D00);
+    scriptId = btlFindScriptResource(btlPrimaryScriptResourceName);
     if (scriptId == -1) {
         return;
     }
@@ -1038,7 +1038,7 @@ s32 btlHasScriptResource(void) {
     if ((battle->battleFlags & 0x800) == 0 || battle->eventReady != 1) {
         return 0;
     }
-    return btlFindScriptResource(D_00436D08) != -1;
+    return btlFindScriptResource(btlSecondaryScriptResourceName) != -1;
 }
 
 void btlStartSecondaryScriptTask(void) {
@@ -1048,7 +1048,7 @@ void btlStartSecondaryScriptTask(void) {
     if (battle->eventTaskId == -1) {
         return;
     }
-    scriptId = btlFindScriptResource(D_00436D08);
+    scriptId = btlFindScriptResource(btlSecondaryScriptResourceName);
     if (scriptId == -1) {
         return;
     }
@@ -2348,8 +2348,8 @@ void btlInitializeCommandSemaphoreSlots(void) {
 
     mdlGroupJobSemaphore = sdfCreateSemaphore(1, 0x7f, 0);
     for (i = 0; i != 8; i++) {
-        D_003C86F0[i] = 0;
-        D_003C8710[i] = 0;
+        btlGroupNodeHeads[i] = 0;
+        btlGroupIdHeads[i] = 0;
     }
 }
 
@@ -2359,7 +2359,7 @@ s32 *btlFindGroupedEntity(group, type)
     s32 type;
 
 {
-    s32 *entry = (s32 *)D_003C86F0[group];
+    s32 *entry = (s32 *)btlGroupNodeHeads[group];
     while (entry != 0) {
         if (((BattleGroupNode *)entry)->type == type) {
             break;
@@ -2370,7 +2370,7 @@ s32 *btlFindGroupedEntity(group, type)
 }
 
 s32 btlGroupContainsId(s32 group, s32 id) {
-    s32 *entry = (s32 *)D_003C8710[group];
+    s32 *entry = (s32 *)btlGroupIdHeads[group];
     while (entry != 0) {
         if (entry[1] == id) {
             return 1;
@@ -2382,7 +2382,7 @@ s32 btlGroupContainsId(s32 group, s32 id) {
 
 void btlAddGroupId(s32 group, s32 id) {
     BattleGroupIdEntry *node = func_00328D68(sizeof(BattleGroupIdEntry));
-    BattleGroupIdEntry **head = (BattleGroupIdEntry **)&D_003C8710[group];
+    BattleGroupIdEntry **head = (BattleGroupIdEntry **)&btlGroupIdHeads[group];
     node->id = id;
     node->next = *head;
     *head = node;
@@ -2392,7 +2392,7 @@ void btlRemoveGroupId(s32 group, s32 id) {
     s32 *link;
     s32 *node;
 
-    link = &D_003C8710[group];
+    link = &btlGroupIdHeads[group];
     node = (s32 *)*link;
     if (node == 0) {
         return;
@@ -2415,11 +2415,11 @@ void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 arg
     s32 i;
     btlRemoveCurrentGroupedEntity(group, type);
     node = func_00328D68(sizeof(BattleGroupNode));
-    head = (BattleGroupNode *)D_003C86F0[group];
+    head = (BattleGroupNode *)btlGroupNodeHeads[group];
     if (head != NULL) {
         head->prev = node;
     }
-    D_003C86F0[group] = (s32)node;
+    btlGroupNodeHeads[group] = (s32)node;
     node->next = head;
     node->group = group;
     node->type = type;
@@ -2452,7 +2452,7 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
     prev = node->prev;
     next = node->next;
     if (prev == NULL) {
-        D_003C86F0[node->group] = (s32)next;
+        btlGroupNodeHeads[node->group] = (s32)next;
     } else {
         prev->next = next;
     }
@@ -2489,7 +2489,7 @@ void btlRemoveCurrentGroupedEntity(void) {
 
 void btlReleaseAllEntities(void) {
     u32 i = 0;
-    s32 *head = D_003C86F0;
+    s32 *head = btlGroupNodeHeads;
     do {
         s32 *node = (s32 *)*head;
         while (node != 0) {
@@ -4473,9 +4473,9 @@ INCLUDE_RODATA(const s32, "game/code_00227288", D_00420FD8);
 
 INCLUDE_SDATA(const s32, "game/code_00227288", D_00436CF8);
 
-INCLUDE_SDATA(const s32, "game/code_00227288", D_00436D00);
+INCLUDE_SDATA(const s32, "game/code_00227288", btlPrimaryScriptResourceName);
 
-INCLUDE_SDATA(const s32, "game/code_00227288", D_00436D08);
+INCLUDE_SDATA(const s32, "game/code_00227288", btlSecondaryScriptResourceName);
 
 INCLUDE_SDATA(const s32, "game/code_00227288", D_00436D10);
 

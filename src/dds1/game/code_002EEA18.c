@@ -251,7 +251,6 @@ typedef struct SdfTreeItem {
     f32 key;                      /* 0xC */
 } SdfTreeItem;
 
-extern void *sdfAllocPacketAligned();
 extern void func_002EF958();
 
 /* Insert `item` into the key-ordered tree; an equal key swaps the item in place. */

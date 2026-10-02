@@ -142,7 +142,7 @@ s32 dds3GetObjectSlotRingOccupancy(u32 kind)
     return slots;
 }
 
-DdsSlotResourceState *func_001119D0(s32 value) {
+DdsSlotResourceState *dds3CreateSlotResourceState(s32 value) {
     DdsSlotResourceState *state = func_00328D68(sizeof(DdsSlotResourceState));
     s32 i;
     u32 node;

@@ -31,7 +31,7 @@ extern BillDispatch D_0034E060[];
 extern BillDispatch D_0034E068[];
 
 void *func_002CFEB8(s32 size);
-void *func_002EB028(s32 arg0, u32 *arg1, s32 arg2);
+void *sdfReadNamedResource(s32 arg0, u32 *arg1, s32 arg2);
 void func_002D0918(void *arg);
 void sdfReleaseChipBlock(void *arg);
 void effReleaseSharedTextureRecord(void *arg);
@@ -214,7 +214,7 @@ typedef struct BillSnapshot {
 extern BillSourceRecord *func_00151398(BillObj *obj, void *entries);
 
 /* Copy the billboard's current source record (by kind) into a snapshot. */
-void func_00151CE8(BillObj *obj, BillSnapshot *snapshot) {
+void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
     BillSourceRecord *record;
 
     if (obj->kind == 1) {
@@ -247,7 +247,7 @@ void *billCreateFromResource(s32 kind, s32 resource) {
     void *billboard;
     u32 header[4];
 
-    allocation = func_002EB028(resource, header, 0);
+    allocation = sdfReadNamedResource(resource, header, 0);
     billboard = billCreateIndexed(kind, header[0]);
     func_002D0918(allocation);
     return billboard;

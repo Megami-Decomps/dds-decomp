@@ -1,5 +1,14 @@
 #include "common.h"
 
+typedef struct MenuPanelTransition {
+    u16 frame;
+    u16 panelId;
+    u16 mode;
+    u16 action;
+} MenuPanelTransition;
+
+extern s32 func_00292478(void *, s32, s32);
+
 extern u32 D_00438FC8;
 
 extern u32 *mnuPanelSoundEntryPool;
@@ -268,11 +277,75 @@ void itfInstallDefaultMantraSelector(MenuPanelObject *object) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292CF0);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292EA8);
+INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004277A0);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292FF0);
+s32 func_00292EA8(MenuPanelObject *object) {
+    MenuPanelTransition steps[6] = {
+        {0, 0, 0, 6}, {0, 0x16, 0, 0},
+        {30, 0x16, 0, 9}, {30, 0x16, 0, 11},
+        {30, 0x16, 0, 12}, {60, 0x16, 0, 15}
+    };
+    MenuPanelTransition *step = steps;
+    MenuPanelState *state = (MenuPanelState *)((u8 *)object + 0x240);
+    u32 i;
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00293148);
+    for (i = 0; i < 6; i++, step++) {
+        if (step->frame == (u16)(state->flags >> 8)) {
+            state->flags = (state->flags & 0xF0FFFFFF) | ((step->mode & 15) << 24);
+            if (func_00292478(object, step->panelId, step->action)) {
+                return 1;
+            }
+        }
+    }
+    state->flags = (state->flags & 0xFF0000FF) | ((u16)((state->flags >> 8) + 1) << 8);
+    return 0;
+}
+
+s32 func_00292FF0(MenuPanelObject *object) {
+    MenuPanelTransition steps[7] = {
+        {0, 0, 1, 13}, {0, 15, 1, 12},
+        {30, 0, 2, 13}, {30, 0x71, 2, 12},
+        {60, 0, 0, 13}, {60, 0x16, 0, 12},
+        {100, 0x16, 0, 15}
+    };
+    MenuPanelTransition *step = steps;
+    MenuPanelState *state = (MenuPanelState *)((u8 *)object + 0x240);
+    u32 i;
+
+    for (i = 0; i < 7; i++, step++) {
+        if (step->frame == (u16)(state->flags >> 8)) {
+            state->flags = (state->flags & 0xF0FFFFFF) | ((step->mode & 15) << 24);
+            if (func_00292478(object, step->panelId, step->action)) {
+                return 1;
+            }
+        }
+    }
+    state->flags = (state->flags & 0xFF0000FF) | ((u16)((state->flags >> 8) + 1) << 8);
+    return 0;
+}
+
+s32 func_00293148(MenuPanelObject *object) {
+    MenuPanelTransition steps[8] = {
+        {0, 0, 0, 10}, {30, 1, 0, 0},
+        {60, 1, 0, 4}, {150, 1, 0, 1},
+        {180, 1, 0, 3}, {180, 1, 0, 14},
+        {280, 1, 0, 2}, {280, 0, 0, 15}
+    };
+    MenuPanelTransition *step = steps;
+    MenuPanelState *state = (MenuPanelState *)((u8 *)object + 0x240);
+    u32 i;
+
+    for (i = 0; i < 8; i++, step++) {
+        if (step->frame == (u16)(state->flags >> 8)) {
+            state->flags = (state->flags & 0xF0FFFFFF) | ((step->mode & 15) << 24);
+            if (func_00292478(object, step->panelId, step->action)) {
+                return 1;
+            }
+        }
+    }
+    state->flags = (state->flags & 0xFF0000FF) | ((u16)((state->flags >> 8) + 1) << 8);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_002932B0);
 
@@ -295,13 +368,7 @@ void mnuCollectPanelNodeValues(MenuPanelObject *object) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_002933A8);
 
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004277A0);
 
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427858);
-
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427888);
-
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004278C0);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_002933F0);
 

@@ -29,7 +29,7 @@ INCLUDE_ASM(const s32, "game/code_0014FEB0", func_0014FF28);
 INCLUDE_ASM(const s32, "game/code_0014FEB0", func_00150040);
 
 extern s32 D_003BD7F4;
-extern u32 D_003D6438[];
+extern u32 effBillResourceOwners[];
 extern void billDispatchByKind(u32);
 
 void effBillDispatchAll(void) {
@@ -37,7 +37,7 @@ void effBillDispatchAll(void) {
 
     D_003BD7F4 = 0;
     for (i = 0; i < 15; i++) {
-        billDispatchByKind(D_003D6438[i]);
+        billDispatchByKind(effBillResourceOwners[i]);
     }
 }
 

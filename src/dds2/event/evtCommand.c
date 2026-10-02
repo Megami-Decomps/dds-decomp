@@ -51,7 +51,7 @@ void func_0023AA30(s32 highPart, s32 lowPart);
 
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
-void func_0023A9E0(void);
+void evtDrainSecondaryWorldNodes(void);
 
 s32 sdfCheckPendingWorkWithInterrupts(void);
 
@@ -122,7 +122,7 @@ void evtSetWorldSlotStatusFlag();
 
 void evtClearWorldSlotStatusFlag();
 
-void func_0023AE08(s32 unit, f32 value);
+void evtScaleSlotByClampedMultiplier(s32 unit, f32 value);
 
 s32 fldParseRoomNumberFromName(char *name);
 
@@ -130,7 +130,7 @@ s32 func_001235E8(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enabled);
 
 extern u32 fldAreaState[];
 
-void func_0023AE70(void *unit, s32 value);
+void evtSetWorldSlotValue(void *unit, s32 value);
 
 s32 evtStageRelinkOwnedNodeResource(void *target, void *path);
 
@@ -485,7 +485,7 @@ u32 evtCommandSetWorldNodeUpperMode(void) {
 
 s32 evtCommandShutdownStage(void)
 {
-    func_0023A9E0();
+    evtDrainSecondaryWorldNodes();
     while (sdfCheckPendingWorkWithInterrupts()) {
     }
     evtDestroySecondaryWorldNode();
@@ -499,7 +499,7 @@ s32 evtCommandShutdownStage(void)
 
 s32 evtCommandShutdownStageAlternate(void)
 {
-    func_0023A9E0();
+    evtDrainSecondaryWorldNodes();
     while (sdfCheckPendingWorkWithInterrupts()) {
     }
     evtDestroySecondaryWorldNode();
@@ -513,7 +513,7 @@ s32 evtCommandShutdownStageAlternate(void)
 
 s32 evtCommandClearAllUnits(void)
 {
-    func_0023A9E0();
+    evtDrainSecondaryWorldNodes();
     func_0035B6E0("unit all clear !!\n");
     evtPrintDeveloperConsoleMessage("unit all clear.\n");
     return 1;
@@ -521,7 +521,7 @@ s32 evtCommandClearAllUnits(void)
 
 s32 evtCommandClearAllUnitsAndWait(void)
 {
-    func_0023A9E0();
+    evtDrainSecondaryWorldNodes();
     while (sdfCheckPendingWorkWithInterrupts()) {
     }
     func_0035B6E0("unit all clear2 !!\n");
@@ -864,7 +864,7 @@ s32 evtCommandSetUnitRoomFloatState(void) {
             return 1;
         }
     }
-    func_0023AE08(unit, bfWaitReadArgFloat(1));
+    evtScaleSlotByClampedMultiplier(unit, bfWaitReadArgFloat(1));
     owner = ((EvtWorldUnit *)unit)->roomName;
     if (owner == 0) {
         return 1;
@@ -896,7 +896,7 @@ s32 evtCommandSetUnitRoomIntegerState(void) {
             return 1;
         }
     }
-    func_0023AE70(unit, scrReadIntParameter(1));
+    evtSetWorldSlotValue(unit, scrReadIntParameter(1));
     owner = ((EvtWorldUnit *)unit)->roomName;
     if (owner == 0) {
         return 1;

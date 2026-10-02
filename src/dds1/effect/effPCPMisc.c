@@ -255,7 +255,8 @@ extern void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work);
 extern void effPcpCopyVector60(void *dst, void *src);
 extern void effPcpCopyBlockMatrix(void *dst, void *src);
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern void func_00180540(f32 value);
+struct EffPCPBeamWork;
+extern void func_00180540(f32 value, struct EffPCPBeamWork *work);
 extern void func_002DD688(f32 scale);
 extern void func_002DD968(f32 angle);
 extern void func_002DD8E8(f32 angle);
@@ -2079,7 +2080,7 @@ typedef struct EffPCPLerpObj {
 
 
 extern void sdfProjectVuVectorToScreen();
-extern void func_00188068(EffPCPLerpObj *obj);
+extern void effResourceRectDrawPixels(EffPCPLerpObj *obj);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017B4C8);
 
@@ -2634,8 +2635,8 @@ extern f32 func_001F66D8(u32 mask, f32 *maxTop, f32 *minTop);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern f32 sdfAtan2(f32 y, f32 x);
 extern void effCopyVectorToNodeInstance(s32 node, f32 *pos);
-extern void func_0014FC28(s32 node, void *mtx);
-extern void func_0014FC60(s32 node, u32 color);
+extern void effApplyNodeTransformMatrix(s32 node, void *mtx);
+extern void effSetNodeParameterValue(s32 node, u32 color);
 extern void effUpdateNode(s32 node);
 
 /* On the first frame, center the sweep on the battle group's direction.
@@ -2686,13 +2687,13 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
         }
         func_002DD688(work->angle);
         VU0_STORE_MATRIX(mtx);
-        func_0014FC28(node, mtx);
+        effApplyNodeTransformMatrix(node, mtx);
         if (fadeFrames >= remaining && fadeFrames != 0) {
             t = (f32)remaining / (f32)fadeFrames;
         } else {
             t = 1.0f;
         }
-        func_0014FC60(node, effBlendColor(work->color & 0xFFFFFF, work->color, t));
+        effSetNodeParameterValue(node, effBlendColor(work->color & 0xFFFFFF, work->color, t));
         effUpdateNode(node);
     }
     work->frame++;
@@ -3693,17 +3694,6 @@ typedef struct EffPCPBeamNode {
     u32 allocationHandle;
 } EffPCPBeamNode;
 
-void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
-    sdfQueueAssetRelease(work->assetHandle);
-    func_002D0918(work->allocationHandle);
-    sdfReleaseChipBlock(work);
-}
-
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180370);
-
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180540);
-
-
 /* The clone copies the 0x50-byte parameter prefix, then attaches a node whose
  * entries receive three colors from that prefix. */
 typedef struct EffPCPBeamParams {
@@ -3712,11 +3702,11 @@ typedef struct EffPCPBeamParams {
     u8 pad2C[4];
     u32 segments;          /* 0x30 */
     u32 drawKind;          /* 0x34 */
-    u8 pad38[0x04];
+    f32 firstWidth;
     u32 firstColor;        /* 0x3C */
-    u8 pad40[0x04];
+    f32 middleWidth;
     u32 middleColor;       /* 0x44 */
-    u8 pad48[0x04];
+    f32 lastWidth;
     u32 lastColor;         /* 0x4C */
 } EffPCPBeamParams;
 
@@ -3727,9 +3717,58 @@ typedef struct EffPCPBeamWork {
     u32 vertexCount;       /* 0x58 */
     EffPCPBeamNode *node;   /* 0x5C */
 } EffPCPBeamWork;
+void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
+    sdfQueueAssetRelease(work->assetHandle);
+    func_002D0918(work->allocationHandle);
+    sdfReleaseChipBlock(work);
+}
+
+INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180370);
+
+void func_00180540(f32 radius, EffPCPBeamWork *work) {
+    f32 direction[4];
+    f32 inner[4];
+    f32 first[4];
+    f32 middle[4];
+    f32 outer[4];
+    f32 angle = 0.0f;
+    f32 step;
+    f32 *out;
+    u32 count;
+    u32 i;
+
+    VEC3_SPLAT(inner, radius);
+    VEC3_SPLAT(first, radius + work->params.firstWidth);
+    VEC3_SPLAT(middle, first[0] + work->params.middleWidth);
+    VEC3_SPLAT(outer, middle[0] + work->params.lastWidth);
+    count = (s32)work->node->vertexCount >> 2;
+    out = work->node->points;
+    step = 3.14159265f * 2.0f / (f32)work->params.segments;
+    direction[1] = 0.0f;
+    for (i = 0; i < count; i++, out += 16) {
+        direction[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        direction[2] = sdfSinPoly(angle);
+        VU0_LOAD_VF(vf11, direction);
+        VU0_LOAD_VF(vf10, inner);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out);
+        VU0_LOAD_VF(vf10, first);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out + 4);
+        VU0_LOAD_VF(vf10, middle);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out + 8);
+        VU0_LOAD_VF(vf10, outer);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out + 12);
+        angle += step;
+    }
+}
+
+
 
 void effResetChild(EffPCPBeamWork *work) {
-    func_00180540(work->params.unk28);
+    func_00180540(work->params.unk28, work);
     work->unk50 = 0;
 }
 
@@ -4969,7 +5008,7 @@ typedef struct {
 extern u32 effParamWorkCreate(s32 kind, void *params);
 
 /* Allocate an event work: copy the parameter head, clear the links, then create the resource and owner from the optional parameters. */
-EffPCPEventWork32 *func_00183EE0(EffPCPEventParamHead *head, void *resourceParams, void *ownerParams) {
+EffPCPEventWork32 *effPcpEventWorkCreate(EffPCPEventParamHead *head, void *resourceParams, void *ownerParams) {
     EffPCPEventWork32 *work = func_002CFEB8(0x40);
 
     *(EffPCPEventParamHead *)work = *head;
@@ -4999,13 +5038,13 @@ void effPcpEventWorkCreateFromTable(void *args) {
     param0 = effParamTableGetBlock(args, 0);
     param1 = effParamTableGetBlock(args, 1);
     param2 = effParamTableGetBlock(args, 2);
-    func_00183EE0(param0, param1, param2);
+    effPcpEventWorkCreate(param0, param1, param2);
 }
 
 EffPCPEventWork32 *effEventWorkClone(EffPCPEventWork32 *src) {
     EffPCPEventWork32 *work;
 
-    work = func_00183EE0(src, 0, 0);
+    work = effPcpEventWorkCreate(src, 0, 0);
     work->resource = effParamWorkDuplicate(src->resource);
     work->owner = src->owner;
     effPcpEventWorkInitEntries(work);

@@ -3,7 +3,7 @@
 extern void fldShutdownLmapResources(void);
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
-extern char D_003B3CA0[]; /* "LmapMain" */
+extern char fldLocalMapTaskName[]; /* "LmapMain" */
 
 extern s32 kwlnTaskGetTaskByName(u32);
 
@@ -273,18 +273,18 @@ void fldStartLmapTask(s32 arg0) {
     } else {
         D_003BD23C = 1;
     }
-    kwlnTaskCreate(D_003B3CA0, 0x2AF8, 0, 0, fldLmapTaskUpdate, 0, 0);
+    kwlnTaskCreate(fldLocalMapTaskName, 0x2AF8, 0, 0, fldLmapTaskUpdate, 0, 0);
     D_003BD96C = 0;
     fldInitializeLmapState();
 }
 
 void fldStopLmapTask(void) {
     fldShutdownLmapResources();
-    kwlnTaskDestroyWithHierarchyByName(D_003B3CA0, 1);
+    kwlnTaskDestroyWithHierarchyByName(fldLocalMapTaskName, 1);
 }
 
 s32 fldLmapTaskExists(void) {
-    return kwlnTaskGetTaskByName((u32)D_003B3CA0) != 0;
+    return kwlnTaskGetTaskByName((u32)fldLocalMapTaskName) != 0;
 }
 
 void func_002C2EF8(const char *fmt, ...) {
@@ -292,7 +292,7 @@ void func_002C2EF8(const char *fmt, ...) {
 
 /* Field-map mode index -> track slot. Indices 7 and 12 are the only values in
  * range with no arm of their own, so they fall through to the default of 1. */
-INCLUDE_RODATA(const s32, "game/code_002C2620", D_003B3CA0);
+INCLUDE_RODATA(const s32, "game/code_002C2620", fldLocalMapTaskName);
 
 s32 func_002C2F40(s32 index) {
     s32 slot = 1;
@@ -379,9 +379,47 @@ INCLUDE_ASM(const s32, "game/code_002C2620", func_002C30F0);
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3220);
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3420);
+extern void func_00132010(void);
+extern void evtSetDrawSurfaceIndex(s32);
+extern void func_00108CB8(s32);
+extern void func_001093B8(s32, s32, s32, s32, u32, s32, s32, s32);
+extern void func_002C4850(s32);
+extern void func_002C7950(void);
+extern void func_002C6448(s32);
+extern s32 func_00134CD8(void);
 
-s32 func_002C3510(void) {
+void func_002C3420(void) {
+    func_00132010();
+    evtSetDrawSurfaceIndex(84);
+    func_00108CB8(0);
+    func_001093B8(0, 0, 170, 195, 0x3300101E, 0x101E, 0x101E, 0x101E);
+
+    switch (D_003BD25C) {
+    case 1:
+    case 2:
+        func_002C4850(1);
+        func_002C7950();
+        func_002C6448(0);
+        break;
+    case 3:
+        func_002C4850(0);
+        func_002C7950();
+        func_002C6448(1);
+        break;
+    case 4:
+        func_002C4850(0);
+        func_002C6448(1);
+        break;
+    case 5:
+        func_002C6448(0);
+        break;
+    }
+    if (D_003BD260 != 0) {
+        func_00134CD8();
+    }
+}
+
+s32 mdlCollectLowFlagBits(void) {
     s32 bits;
 
     bits = mdlFlagTest(0x400);

@@ -129,7 +129,7 @@ ActionObj *dds3CreateCameraObjectWithVectors(s32 slotValue, f32 value, void *inn
     return obj;
 }
 
-void func_00112E58(void) {
+void dds3ReleaseCameraWorldNode(void) {
     dds3RemoveWorldObjectNode();
 }
 
@@ -160,7 +160,7 @@ f32 dds3GetCameraValue(u8 *obj) {
 extern void effMiscQuaternionToMatrixVU(void);
 
 /* Apply the inner node's rotation to the camera vectors. */
-s32 func_00112EE8(ActionObj *obj, f32 *dst1, f32 *dst2) {
+s32 dds3TransformCameraVectorsByInnerRotation(ActionObj *obj, f32 *dst1, f32 *dst2) {
     CameraData *data = obj->data;
     CameraData *inner = (CameraData *)obj->unk1C;
 

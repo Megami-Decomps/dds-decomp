@@ -88,7 +88,7 @@ extern u32 D_003BC984;
 
 extern u32 D_003BC994;
 
-extern u32 func_002EB028(const char *, u32 *, s32);
+extern u32 sdfReadNamedResource(const char *, u32 *, s32);
 
 extern u8 D_0038E000[];
 
@@ -575,7 +575,7 @@ extern EffKindDesc D_0037E770[];
 
 extern EffKindDesc D_0037E7E8[];
 
-extern u32 func_002D3288(void *);
+extern u32 sdfTexAcquireResourceTexture(void *);
 
 extern u32 effGetResourceFirstWord(u32);
 
@@ -1356,7 +1356,7 @@ EffKindWork *effCreateKindWorkFromFile(EffFileRequest *work) {
             effect->sourceKind = kind;
             switch (kind) {
             case 1:
-                effect->target = func_002D3288(secondary);
+                effect->target = sdfTexAcquireResourceTexture(secondary);
                 break;
             case 4:
                 effect->target = effGetResourceFirstWord(secondary[0]);
@@ -1450,7 +1450,7 @@ EffKindWork *effCreateKindWorkFromFileB(EffFileRequest *work) {
             effect->sourceKind = kind;
             switch (kind) {
             case 1:
-                effect->target = func_002D3288(secondary);
+                effect->target = sdfTexAcquireResourceTexture(secondary);
                 break;
             case 4:
                 effect->target = effGetResourceFirstWord(secondary[0]);
@@ -2847,8 +2847,8 @@ INCLUDE_ASM(const s32, "game/code_0029C530", func_002A3E10);
 extern u32 D_003BC960[2];
 
 void effLoadFlashTextures(void) {
-    D_003BC960[0] = func_002EB028("/effect/flash00.tmx", &effFlashTextureHandles, 0);
-    D_003BC960[1] = func_002EB028("/effect/flash01.tmx", &effFlashTextureHandles + 1, 0);
+    D_003BC960[0] = sdfReadNamedResource("/effect/flash00.tmx", &effFlashTextureHandles, 0);
+    D_003BC960[1] = sdfReadNamedResource("/effect/flash01.tmx", &effFlashTextureHandles + 1, 0);
 }
 
 u32 effGetFlashTextureHandle(s32 index) {
@@ -4988,7 +4988,7 @@ u32 effCloneRibbonWithSharedResource(u32 work) {
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002AE498);
 
 void effLoadWindTexture(void) {
-    D_003BC984 = func_002EB028("/effect/wind00.tmx", &effWindTextureHandle, 0);
+    D_003BC984 = sdfReadNamedResource("/effect/wind00.tmx", &effWindTextureHandle, 0);
 }
 
 u32 effGetWindTextureHandle(void) {
@@ -5542,7 +5542,7 @@ u32 effAllocateStripFromWorkAndRetainTexture(u8 *work) {
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B0B70);
 
 void effLoadScalyTexture(void) {
-    D_003BC994 = func_002EB028("/effect/scaly00.tmx", &effScalyTextureHandle, 0);
+    D_003BC994 = sdfReadNamedResource("/effect/scaly00.tmx", &effScalyTextureHandle, 0);
 }
 
 u32 effGetScalyTextureHandle(void) {
@@ -7337,7 +7337,7 @@ s32 effCreateParticleTask(void) {
     return func_002B7388((s32)D_003B3968, D_0038DE70, 8);
 }
 
-s32 func_002B7740(void) {
+s32 effCreatePolyTrackControlTask(void) {
     return func_002B7388((s32)D_003B3958, D_0038DF50, 6);
 }
 

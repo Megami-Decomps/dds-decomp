@@ -12,7 +12,7 @@ typedef struct KwlnLinkNode {
     struct KwlnLinkNode *link;   /* 0x4C: intrusive link */
 } KwlnLinkNode;
 
-void func_00101B08(KwlnLinkNode *node) {
+void kwlnUnlinkListNode(KwlnLinkNode *node) {
     KwlnLinkNode *head = node->next;
 
     if (head == 0) {
@@ -69,9 +69,9 @@ extern void sdfSubmitDrawPacketGroups(u8 *, u8 *);
 extern s32 *sdfConsAllocateColumnPacket(s32);
 extern KwlnSpriteVertex *sdfConsMeasurePacketWithHeader(s32 *);
 extern s32 *sdfFlushPoolNodes(void *);
-extern s32 func_00100518(void);
+extern s32 kwlnGetDrawBufferIndex(void);
 extern void kwlnDrawBlurErrorCounters(void);
-extern void func_00106268(void);
+extern void kwlnStepBackgroundFade(void);
 extern void func_00106368(void);
 extern void kwlnFadeUpdate(void);
 extern void func_00105DD8(void);
@@ -102,7 +102,7 @@ typedef struct KwlnDrawSink {
 /* Per-frame render task: update the HUD pieces, submit the thirteen draw-packet groups of the current buffer, optionally draw the
  * screen-edge vignette, then flush the packet pools. */
 s32 kwlnRenderFrame(void) {
-    s32 buf = func_00100518();
+    s32 buf = kwlnGetDrawBufferIndex();
     u8 *target;
     u8 *block;
     u64 *list;
@@ -115,7 +115,7 @@ s32 kwlnRenderFrame(void) {
     s32 i;
 
     kwlnDrawBlurErrorCounters();
-    func_00106268();
+    kwlnStepBackgroundFade();
     func_00106368();
     kwlnFadeUpdate();
     func_00105DD8();
@@ -195,21 +195,21 @@ s32 kwlnRenderFrame(void) {
 }
 
 u32 func_00102850(void) {
-    func_0010FA00(dds3ActiveWorld);
+    dds3InvokeWorldCallbackFirst(dds3ActiveWorld);
     return 0;
 }
 
 u32 func_00102878(void) {
-    func_0010FA40(dds3ActiveWorld);
+    dds3InvokeWorldCallbackSecond(dds3ActiveWorld);
     return 0;
 }
 
-extern char D_003BA848[];
+extern char dds3AdminTaskName[];
 extern void *kwlnTaskGetTaskByName(char *);
 extern AdminWork *kwlnTaskGetUserValue(void *);
 
 AdminWork *dds3GetAdminTaskWork(void) {
-    return kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_003BA848));
+    return kwlnTaskGetUserValue(kwlnTaskGetTaskByName(dds3AdminTaskName));
 }
 
 u32 dds3GetAdminTaskValue(void) {
@@ -269,5 +269,5 @@ INCLUDE_SDATA(const s32, "game/code_00101B08", D_003BA83C);
 
 INCLUDE_SDATA(const s32, "game/code_00101B08", D_003BA844);
 
-INCLUDE_SDATA(const s32, "game/code_00101B08", D_003BA848);
+INCLUDE_SDATA(const s32, "game/code_00101B08", dds3AdminTaskName);
 

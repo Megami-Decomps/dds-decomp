@@ -36,10 +36,10 @@ extern void *memset(void *dst, s32 c, u32 n);
 extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
 extern void func_002424B0(void);
 extern void evtReleaseEventPackResources(void);
-extern f32 D_003D80F0[];
-extern f32 D_003D80E0[];
-extern f32 D_003D80D0[];
-extern s32 D_003BC380;
+extern f32 mnuShopSavedLastTransformVector[];
+extern f32 mnuShopSavedMiddleTransformVector[];
+extern f32 mnuShopSavedFirstTransformVector[];
+extern s32 mnuShopRestoreMiddleVector;
 extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
 extern u8 *effCreateStatusBatch(s32 kind);
 extern s32 effDestroyPackedBatch(s32);
@@ -685,33 +685,33 @@ void mnuShopSavePrimaryTransform(u8 *scene) {
     s32 i;
     f32 *coordinates = (f32 *)(scene + 0x2330);
     for (i = 0; i < 4; i++) {
-        D_003D80F0[i] = coordinates[i + 8];
-        D_003D80D0[i] = coordinates[i];
+        mnuShopSavedLastTransformVector[i] = coordinates[i + 8];
+        mnuShopSavedFirstTransformVector[i] = coordinates[i];
     }
-    D_003BC380 = 0;
+    mnuShopRestoreMiddleVector = 0;
 }
 
 void mnuShopSaveFullTransform(u8 *scene) {
     s32 i;
     f32 *coordinates = (f32 *)(scene + 0x2330);
     for (i = 0; i < 4; i++) {
-        D_003D80F0[i] = coordinates[i + 8];
-        D_003D80E0[i] = coordinates[i + 4];
-        D_003D80D0[i] = coordinates[i];
+        mnuShopSavedLastTransformVector[i] = coordinates[i + 8];
+        mnuShopSavedMiddleTransformVector[i] = coordinates[i + 4];
+        mnuShopSavedFirstTransformVector[i] = coordinates[i];
     }
-    D_003BC380 = 1;
+    mnuShopRestoreMiddleVector = 1;
 }
 
 void mnuShopRestoreTransform(u8 *scene) {
     s32 i;
     f32 *coordinates = (f32 *)(scene + 0x2330);
-    s32 useMiddle = D_003BC380;
+    s32 useMiddle = mnuShopRestoreMiddleVector;
     for (i = 0; i < 4; i++) {
-        coordinates[i + 8] = D_003D80F0[i];
+        coordinates[i + 8] = mnuShopSavedLastTransformVector[i];
         if (useMiddle != 0) {
-            coordinates[i + 4] = D_003D80E0[i];
+            coordinates[i + 4] = mnuShopSavedMiddleTransformVector[i];
         }
-        coordinates[i] = D_003D80D0[i];
+        coordinates[i] = mnuShopSavedFirstTransformVector[i];
     }
 }
 
@@ -1131,7 +1131,7 @@ INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF418);
 
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF428);
 
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC380);
+INCLUDE_SDATA(const s32, "game/code_00242608", mnuShopRestoreMiddleVector);
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC388);
 

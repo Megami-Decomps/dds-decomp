@@ -22,7 +22,7 @@ extern void sdfReleaseChipBlock(void *ptr);
 extern void effReleaseScatterObject(u32 res);
 extern void sdfQueueAssetRelease(u32 res);
 extern void func_002D0918(u32 res);
-extern u32 func_002D3288(u32 resId);
+extern u32 sdfTexAcquireResourceTexture(u32 resId);
 extern void sdfTexReleaseReferenceViaHandler(u32 res);
 extern void effPcpScatterResRelease(PcpScatterRes *res);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
@@ -38,7 +38,7 @@ extern void *func_00171550();
 extern void *func_00172158();
 extern void *effScatterInstanceCreateB();
 extern void *effScatterInstanceCreateC();
-extern void *func_00175230();
+extern void *effPcpScatterCreatePlainInstance();
 
 
 /* Per-effect work areas. Only the fields touched by the matched spawn,
@@ -650,7 +650,7 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
     PcpScatterRes *res;
 
     res = func_002CFEB8(8);
-    res->resourceHandle = func_002D3288(resId);
+    res->resourceHandle = sdfTexAcquireResourceTexture(resId);
     res->refCount = 1;
     return res;
 }
@@ -1561,7 +1561,7 @@ struct PcpScatterPlainInstance {
 };
 
 /* Allocate particles after the scatter work (identity matrix), then assign randomized start delays. */
-void *func_00175230(src, resource)
+void *effPcpScatterCreatePlainInstance(src, resource)
     PcpScatterPlainParams *src;
     u32 resource;
 {
@@ -1602,14 +1602,14 @@ void *func_00175230(src, resource)
 
 void func_00175420(void *data)
 {
-    func_00175230(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1));
+    effPcpScatterCreatePlainInstance(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1));
 }
 
 PcpScatterPlainInstance *effCloneScatterWithSharedResource(PcpScatterPlainInstance *work)
 {
     PcpScatterPlainInstance *child;
 
-    child = func_00175230(&work->params, NULL);
+    child = effPcpScatterCreatePlainInstance(&work->params, NULL);
     effShareScatterResource(child->scatterObject, work->scatterObject);
     return child;
 }

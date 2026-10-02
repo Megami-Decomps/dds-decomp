@@ -22,8 +22,8 @@ extern char D_003BB058[];
 extern char D_003BB060[];
 extern char *D_003557A8[];
 extern s32 func_00310320(void);
-extern u32 func_002D3288(u32);
-extern u64 func_002EB028(u64, u32 *, u64);
+extern u32 sdfTexAcquireResourceTexture(u32);
+extern u64 sdfReadNamedResource(u64, u32 *, u64);
 extern void sdfReleaseChipBlock(void *arg0);
 extern void sdfTexReleaseReferenceViaHandler(s32 arg0);
 extern void func_002D0918(u64 arg0);
@@ -43,7 +43,7 @@ extern EffHandler32 D_00355730[];
 
 extern u8 sdfViewMatrix[];
 
-extern u8 D_00324610[];
+extern u8 sdfProjectionMatrix[];
 
 extern u8 D_00324660[];
 
@@ -400,7 +400,7 @@ void effSetMsgPair(EffMsg *message, u32 first, u32 second) {
 
 /* Replace the retained texture reference, then release the temporary resource
  * returned by the loader. */
-void effSetupWorkSound(EffWork *work, u64 textureResource) {
+void effSetWorkTextureResource(EffWork *work, u64 textureResource) {
     u32 textureHandle;
     u64 loadedResource;
     u32 resourceWords[4];
@@ -409,8 +409,8 @@ void effSetupWorkSound(EffWork *work, u64 textureResource) {
         sdfTexReleaseReferenceViaHandler(work->textureHandle);
         work->textureHandle = 0;
     }
-    loadedResource = func_002EB028(textureResource, resourceWords, 0);
-    textureHandle = func_002D3288(resourceWords[0]);
+    loadedResource = sdfReadNamedResource(textureResource, resourceWords, 0);
+    textureHandle = sdfTexAcquireResourceTexture(resourceWords[0]);
     work->textureHandle = textureHandle;
     func_002D0918(loadedResource);
 }
@@ -428,7 +428,7 @@ void func_0018DBB0(void) {
 void sdfProjectVuVectorToScreen(void) {
     u8 *matrix;
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    matrix = D_00324610;
+    matrix = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_PERSPECTIVE_DIVIDE_VF10();

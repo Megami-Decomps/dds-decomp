@@ -19,9 +19,9 @@ extern s32 btlIsNamedBattleTaskRegistered(void);
 
 extern s32 btlHasRegisteredGuidePanelTask(void);
 
-extern s32 func_001B8538(void);
+extern s32 btlHasRegisteredSkillNamePanelTask(void);
 
-extern s32 func_001B8740(void);
+extern s32 btlHasRegisteredAphNamePanelTask(void);
 
 extern s32 func_001CC9C0(s32);
 
@@ -878,10 +878,10 @@ void fldCreateSceneSpriteTask(s32 sourceTask) {
     if (btlHasRegisteredGuidePanelTask() != 0) {
         kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
     }
-    if (func_001B8538() != 0) {
+    if (btlHasRegisteredSkillNamePanelTask() != 0) {
         kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
     }
-    if (func_001B8740() != 0) {
+    if (btlHasRegisteredAphNamePanelTask() != 0) {
         kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0), 0);
     }
     scene = (BattleSceneWork *)btlGetRuntime();

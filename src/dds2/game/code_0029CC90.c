@@ -71,22 +71,22 @@ void brsDecaySharedAnimCounter(void) {
     func_0029C810();
 }
 
-extern u8 D_003D9D58[];
+extern u8 brsLevelStepThresholds[];
 
 /* Read the value paired with the highest of three thresholds not above input. */
 u8 brsGetLevelStepForValue(s32 value) {
     s32 i;
 
     for (i = 2; i >= 0; i--) {
-        if (value >= D_003D9D58[i * 2]) {
-            return D_003D9D58[i * 2 + 1];
+        if (value >= brsLevelStepThresholds[i * 2]) {
+            return brsLevelStepThresholds[i * 2 + 1];
         }
     }
-    return D_003D9D58[1];
+    return brsLevelStepThresholds[1];
 }
 
 u8 brsGetLevelStepCrossedBy(s32 position, s32 increment) {
-    u8 *table = D_003D9D58;
+    u8 *table = brsLevelStepThresholds;
     s32 i = 2;
     u8 *limit = table + 4;
     s32 nextPosition = position + increment;

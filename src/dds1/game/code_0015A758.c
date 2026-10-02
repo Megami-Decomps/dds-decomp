@@ -131,7 +131,7 @@ typedef struct ParEmitDesc {
 
 extern void parControlInit();
 
-extern void func_002E84A0(void *arg);
+extern void effMiscSeedRandomFromClock(void *arg);
 
 extern u8 D_003D64B0[];
 
@@ -155,6 +155,8 @@ typedef struct ParSystem {
     s32 unk24;           /* 0x24 */
     s32 unk28;           /* 0x28 */
 } ParSystem;
+
+extern void func_0015B928(ParSystem *, s32, const u128 *);
 
 extern s32 sdfCreateAssetWithDrawEntries();
 
@@ -253,7 +255,7 @@ void parObjDispatch(ParObj *object) {
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A9A0);
 
-void func_0015ACF0(void) {
+void parRestartInstanceCallback(void) {
     parRestartKind();
 }
 
@@ -268,7 +270,7 @@ void parCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0015AD78(void) {
+void parRebuildInstanceTransforms(void) {
     parComposeEffectTransformMatrices();
 }
 
@@ -276,7 +278,7 @@ void func_0015AD90(ParObj *work, u32 value) {
     work->valueF0 = value;
 }
 
-void func_0015AD98(ParObj *work, u8 mode) {
+void parChangeInstanceMode(ParObj *work, u8 mode) {
     parObjSetMode(work, mode);
 }
 
@@ -380,7 +382,7 @@ void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color) {
     VU0_MOVE_VF(vf10, vf12);
     VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[1]);
-    func_0015B928(particle, index, axis);
+    func_0015B928((ParSystem *)particle, index, axis);
     parFadeAlphaCell(particle, index);
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
@@ -446,7 +448,7 @@ u32 func_0015B220(void) {
 void parSysReset(void) {
     parRecordListHead = 0;
     parControlInit();
-    func_002E84A0(&D_003D64B0);
+    effMiscSeedRandomFromClock(&D_003D64B0);
 }
 
 void func_0015B250(void) {
@@ -553,7 +555,30 @@ void parPrependCellNode(ParCellNode *node) {
     D_003BB014 = node;
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B928);
+void func_0015B928(ParSystem *system, s32 index, const u128 *vertices) {
+    ParCell *cell = &system->cells[index];
+    u128 *vertex;
+    s32 shiftCount;
+    s32 i;
+
+    if (cell->unk0C == 0) {
+        shiftCount = system->vertexWordCount - 2;
+        vertex = cell->history + shiftCount;
+        for (i = 0; i < shiftCount; i++) {
+            vertex--;
+            PCP_COPY_VECTOR(vertex + 2, vertex);
+        }
+        cell->unk0C = system->groupDivisor;
+        if (cell->vertexCount < shiftCount + 2) {
+            cell->vertexCount += 2;
+        }
+    } else {
+        cell->unk0C--;
+        vertex = cell->history;
+    }
+    PCP_COPY_VECTOR(vertex, vertices);
+    PCP_COPY_VECTOR(vertex + 1, vertices + 1);
+}
 
 void parTranslateCellVertices(ParSystem *system, s32 index, void *delta) {
     ParCell *cell = system->cells + index;

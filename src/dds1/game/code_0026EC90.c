@@ -2,7 +2,7 @@
 
 extern u8 D_0037B8BC[];
 
-extern u8 D_0037B888[];
+extern u8 mnuMovieDrawContext[];
 
 extern u8 D_003253C8[];
 
@@ -14,7 +14,7 @@ extern u8 D_0037B168[];
 
 extern u32 mnuMovieDrawTask;
 
-extern u16 D_003BA72C;
+extern u16 mnuMovieTaskState;
 
 extern u32 *mnuMovieWork;
 
@@ -89,7 +89,7 @@ s32 mnuStaffImageProc(void) {
 void mnuFinishStaffMovieAndFreeState(void) {
     s64 pendingWork;
 
-    D_003BA72C = 2;
+    mnuMovieTaskState = 2;
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
     func_0026F518();
@@ -107,7 +107,7 @@ void mnuReleaseMovieResourceAfterPendingWork(void) {
     func_002ECA40(0);
 }
 
-void func_0026FE10(void) {
+void mnuInitializeMovieRollViewport(void) {
     s32 i;
     u32 *movie = mnuMovieWork;
 
@@ -126,7 +126,7 @@ void func_0026FE10(void) {
 
 extern u32 D_003BA8EC;
 
-extern u16 D_003BA72C;
+extern u16 mnuMovieTaskState;
 
 extern char D_003B1168[];
 
@@ -152,7 +152,7 @@ void mnuMovieCreateTask(void) {
     movie[2] = 0;
     movie[3] = 0;
     func_0026A5F0(0x13);
-    D_003BA72C = 1;
+    mnuMovieTaskState = 1;
     kwlnTaskCreate(D_003B1168, 0x408, 0, 0, func_0026F5E8, mnuFinishStaffMovieAndFreeState, 0);
 }
 
@@ -168,13 +168,13 @@ s32 mnuStopStaffTasks(void) {
 }
 
 s32 mnuMovieDraw(void) {
-    func_002ECCF8(D_0037B888, D_003253C8);
+    func_002ECCF8(mnuMovieDrawContext, D_003253C8);
     return 0;
 }
 
 void mnuStartMovieDrawTaskForResource(u32 resource, void *data) {
     if (mnuMovieDrawTask == 0) {
-        func_002ED8D0(D_0037B888, data, resource);
+        func_002ED8D0(mnuMovieDrawContext, data, resource);
         mnuMovieDrawTask = kwlnTaskCreate(D_003B1A78, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
     }
 }
@@ -189,13 +189,13 @@ void mnuStopMovieDrawTask(void) {
     if (mnuMovieDrawTask == 0) {
         return;
     }
-    func_002EDAE0(D_0037B888);
+    func_002EDAE0(mnuMovieDrawContext);
     kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }
 
 s32 func_00270068(void) {
-    func_002EDBB8(D_0037B888);
+    func_002EDBB8(mnuMovieDrawContext);
 }
 
 s32 func_00270088(void) {

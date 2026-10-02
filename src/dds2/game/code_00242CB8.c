@@ -60,7 +60,7 @@ s32 evtIsBgmLoaded(s32 id);
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00242CB8);
 
-u32 func_00242D10(void) {
+u32 evtCreateTextureEntryChildTask(void) {
     EvtCommandWork *work;
     s32 id;
     s32 entry;

@@ -215,14 +215,14 @@ INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5988);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_001FFE30);
 
-extern s32 func_001A17F8(void *);
+extern s32 btlReadCurrentUnitHp(void *);
 
-extern s32 func_001A1838(void *);
+extern s32 btlComputeSkillAdjustedMaxHp(void *);
 
 s32 btlIsUnitAtOrBelowHealthRate(BtlUnit *unit, s32 multiplier) {
     void *stats = &unit->statBits;
-    s32 current = func_001A17F8(stats);
-    s32 maximum = func_001A1838(stats);
+    s32 current = btlReadCurrentUnitHp(stats);
+    s32 maximum = btlComputeSkillAdjustedMaxHp(stats);
     if ((u32)(maximum * multiplier) < (u32)(current * 100)) {
         return 0;
     }
@@ -308,7 +308,7 @@ s32 btlIsGroup200CountAtMost(s32 unused, u32 limit) {
 }
 
 s32 btlUnitHasActionMask(s32 unit, s32 mask) {
-    return (func_001A1938(unit + 0x120, mask) & mask) != 0;
+    return (btlReadUnitStatusMask(unit + 0x120, mask) & mask) != 0;
 }
 
 s32 btlAnyGroup400HasActionMask(s32 unused, s32 action) {
@@ -638,16 +638,16 @@ s32 btlIsReadyWithoutTurns(void) {
     return 0;
 }
 
-extern s32 func_001A1800(void *);
+extern s32 btlReadCurrentUnitMp(void *);
 
-extern s32 func_001A1850(void *);
+extern s32 btlComputeSkillAdjustedMaxMp(void *);
 
 /* Compare a unit stat with a percentage of its maximum.
  * The stat's identity is not established by these two accessors. */
 s32 btlIsUnitStatAtOrBelowRate(BtlUnit *unit, s32 percentage) {
     void *stats = &unit->statBits;
-    u32 current = func_001A1800(stats);
-    u32 scaledMaximum = func_001A1850(stats) * percentage;
+    u32 current = btlReadCurrentUnitMp(stats);
+    u32 scaledMaximum = btlComputeSkillAdjustedMaxMp(stats) * percentage;
     if (scaledMaximum < current * 100) {
         return 0;
     }
@@ -1260,7 +1260,7 @@ s32 func_00203098(s32 actor, s32 action) {
         for (i = 0; i < count; i++) {
             s32 unit = btlGetIndexListEntry((void *)list, i);
             if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 1) {
-                u16 current = func_001A17F8(&((BtlUnit *)unit)->statBits);
+                u16 current = btlReadCurrentUnitHp(&((BtlUnit *)unit)->statBits);
                 if (best >= current && current != 0) {
                     best = current;
                     found++;
@@ -1304,8 +1304,8 @@ s32 btlSelectLowestHealthRateTarget(s32 actor) {
         bestIndex = 0x20;
         for (i = 0; i < count; i++) {
             void *stats = &((BtlUnit *)btlGetIndexListEntry((void *)list, i))->statBits;
-            s32 current = func_001A17F8(stats);
-            s32 percent = current * 100 / func_001A1838(stats);
+            s32 current = btlReadCurrentUnitHp(stats);
+            s32 percent = current * 100 / btlComputeSkillAdjustedMaxHp(stats);
 
             if (best >= percent && current != 0) {
                 best = percent;

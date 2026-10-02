@@ -11,12 +11,12 @@ typedef struct FileReqEntry {
     u8 status;     /* 0x11: inspected by memory-card file request polling */
     u8 slotMetadataDirty; /* 0x12: checked before rebuilding slot metadata */
     s8 selectedSlot; /* 0x13: used to select a memory-card save directory */
-    u32 slotFlags[20]; /* 0x14: save-slot flag words, aliased by D_003DC6AC */
+    u32 slotFlags[20]; /* 0x14: save-slot flag words, aliased by fileRequestSlotFlags */
 } FileReqEntry;
 
 extern FileReqEntry fileRequestEntries[];
 /* Flag words of the entry table: entry arg0 occupies 0x19 words. */
-extern u32 D_003DC6AC[];
+extern u32 fileRequestSlotFlags[];
 extern s32 D_003BD8E8;
 
 /* Work area behind the fileMan task (fileManagerWork, 0x40 bytes). */
@@ -60,7 +60,7 @@ typedef struct FileCbNode {
 extern FileManWork fileManagerWork;
 extern char D_003BC7E0[];
 extern s32 D_003BC7D8;
-extern s32 (*D_003BD4A8)(void);
+extern s32 (*fileIdleUpdateCallback)(void);
 
 void WaitSema(s32 sema);
 void SignalSema(s32 sema);
@@ -124,7 +124,7 @@ void fileManInit(void) {
     fileManagerWork.sema = sdfCreateSemaphore(1, 0x7F, 0);
     fileManagerWork.unk1C = sdfResourceRetainAddress(func_002D03F8(0x40000));
     kwlnTaskCreate((s32)&D_003BC7E0, 0x384, 1, 0, (s32)&fileMan, 0, 0);
-    D_003BD4A8 = fileManUpdate;
+    fileIdleUpdateCallback = fileManUpdate;
 }
 
 INCLUDE_ASM(const s32, "game/code_00288E70", fileReqInit);
@@ -160,17 +160,17 @@ void fileReqMarkSlotMetadataDirty(s32 request) {
 
 void fileReqClearSlotFlags(s32 request, s32 slot) {
     slot += request * FILE_REQ_WORDS_PER_ENTRY;
-    D_003DC6AC[slot] = 0;
+    fileRequestSlotFlags[slot] = 0;
 }
 
 void fileReqSetSlotFlags(s32 request, s32 slot, s32 mask) {
     slot += request * FILE_REQ_WORDS_PER_ENTRY;
-    D_003DC6AC[slot] |= mask;
+    fileRequestSlotFlags[slot] |= mask;
 }
 
 u32 fileReqGetSlotFlags(s32 request, s32 slot) {
     slot += request * FILE_REQ_WORDS_PER_ENTRY;
-    return D_003DC6AC[slot];
+    return fileRequestSlotFlags[slot];
 }
 
 s8 fileReqGetSelectedSlot(s32 request) {

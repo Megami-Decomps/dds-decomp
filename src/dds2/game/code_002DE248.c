@@ -571,7 +571,7 @@ extern FnTbl28 D_003E9DEC[];
 
 extern u32 D_00437E6C;
 
-extern u32 func_00343ED0(const char *, u32 *, s32);
+extern u32 sdfReadNamedResource(const char *, u32 *, s32);
 
 extern FnTbl28 D_003E9E74[];
 
@@ -1689,7 +1689,7 @@ void effSetAlternateKindScale(EffKindWork *object, f32 scale) {
     object->scale = scale;
 }
 
-extern s32 func_0032C138(s32 *);
+extern s32 sdfTexAcquireResourceTexture(s32 *);
 
 extern s32 effGetResourceFirstWord(s32);
 
@@ -1705,7 +1705,7 @@ s32 *effCreateResourceHolderFromSelectedKind(s32 *source, u16 kind) {
     object[1] = 1;
     switch (kind) {
     case 1:
-        object[2] = func_0032C138(source);
+        object[2] = sdfTexAcquireResourceTexture(source);
         break;
     case 4:
         object[2] = effGetResourceFirstWord(*source);
@@ -3068,8 +3068,8 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002E5E88);
 extern u32 D_00437E48[2];
 
 void effLoadFlashTextures(void) {
-    D_00437E48[0] = func_00343ED0("/effect/flash00.tmx", &effFlashTextureHandles, 0);
-    D_00437E48[1] = func_00343ED0("/effect/flash01.tmx", &effFlashTextureHandles + 1, 0);
+    D_00437E48[0] = sdfReadNamedResource("/effect/flash00.tmx", &effFlashTextureHandles, 0);
+    D_00437E48[1] = sdfReadNamedResource("/effect/flash01.tmx", &effFlashTextureHandles + 1, 0);
 }
 
 u32 effGetFlashTextureHandle(s32 index) {
@@ -5232,7 +5232,7 @@ u8 *effCloneRibbonWithSharedResource(u32 *source) {
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F1888);
 
 void effLoadWindTexture(void) {
-    D_00437E6C = func_00343ED0("/effect/wind00.tmx", &effWindTextureHandle, 0);
+    D_00437E6C = sdfReadNamedResource("/effect/wind00.tmx", &effWindTextureHandle, 0);
 }
 
 u32 effGetWindTextureHandle(void) {
@@ -5782,7 +5782,7 @@ void effAllocateStripFromWorkAndRetainTexture(u8 *work) {
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F3F70);
 
 void effLoadScalyTexture(void) {
-    D_00437E7C = func_00343ED0("/effect/scaly00.tmx", &effScalyTextureHandle, 0);
+    D_00437E7C = sdfReadNamedResource("/effect/scaly00.tmx", &effScalyTextureHandle, 0);
 }
 
 u32 effGetScalyTextureHandle(void) {
@@ -8528,7 +8528,7 @@ extern char D_0042CED8[];
 
 extern u8 D_003FE430[];
 
-void func_002FE970(void) {
+void effCreatePolyTrackControlTask(void) {
     func_002FE5B8(D_0042CED8, D_003FE430, 7);
 }
 
@@ -10008,7 +10008,7 @@ u32 effLoadIndexedResource(s32 category, s32 index, s32 preserve) {
     u32 handle;
     u32 resource;
     func_0035C860(path, D_004387E8, category, index);
-    handle = func_00343ED0(path, &source, 0);
+    handle = sdfReadNamedResource(path, &source, 0);
     resource = func_00305148(handle, preserve);
     if (preserve == 0) {
         func_003297C8(handle);
@@ -10054,7 +10054,7 @@ u32 effLoadMappedResource(s32 category, s32 index) {
     u32 handle;
     u32 resource;
     func_0035C860(path, D_004387E8, category, index);
-    handle = func_00343ED0(path, &buffer, 0);
+    handle = sdfReadNamedResource(path, &buffer, 0);
     resource = effCreateMappedResource(buffer);
     func_003297C8(handle);
     return resource;
@@ -10415,7 +10415,7 @@ u8 *effResolveResourceSlots(EffResourceSet *owner, u8 *data, s32 release, s32 on
             if (release == 0) {
                 if (only == -1 || only == i) {
                     if (owner->slots[i] == 0) {
-                        owner->slots[i] = (void *)func_0032C138(resource);
+                        owner->slots[i] = (void *)sdfTexAcquireResourceTexture(resource);
                     }
                 } else {
                     owner->slots[i] = 0;

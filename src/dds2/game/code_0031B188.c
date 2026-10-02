@@ -218,7 +218,7 @@ void mnuClearNodeBroadcastFlag(u8 *node) {
 u32 mnuLoadNodeModelFromResource(u32 *owner, u32 resource) {
     u32 handle;
     u32 other;
-    u32 data = func_00343ED0(resource, &handle, &other);
+    u32 data = sdfReadNamedResource(resource, &handle, &other);
     *owner = func_002D4138(handle);
     fileQueueNotifyAllJobsComplete(*owner);
     func_003297C8(data);

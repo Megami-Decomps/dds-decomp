@@ -140,7 +140,13 @@ void mnuDrawMovieMenuBackgroundQuad(s32 parameter) {
     func_002C0DD8(0, 0, 0, 0x2000, 0xE00, parameter, 0x3E);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C290);
+void func_0026C290(s32 context) {
+    func_002C0DD8(0, 0, 0, 0x2000, 0xE00, 0x80, context);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 0, context);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 2, context);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 1, context);
+    mnuDrawSprite(1, -10, 0, 0x80, 0, 4, context);
+}
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C350);
 

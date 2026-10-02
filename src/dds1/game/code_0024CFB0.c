@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "kwln.h"
 
 extern s32 D_003BC410;
 
@@ -8,7 +9,7 @@ extern u8 dspWindowControlState;
 
 extern s8 dspWindowStateGate;
 
-extern s8 D_003BC414;
+extern s8 evtMessageWindowOption;
 
 extern s8 dspCapturedSoundMode;
 
@@ -28,7 +29,7 @@ typedef struct {
 
 extern EvtActiveFlagTable evtActiveEntryFlags;
 
-extern u32 func_002EB028(u32, u32 *, u32 *);
+extern u32 sdfReadNamedResource(u32, u32 *, u32 *);
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -193,7 +194,36 @@ s32 mnuStartTerminalPanelFadeOut(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D440);
+extern KwlnTask *kwlnTaskGetTaskByName(const char *);
+extern s32 kwlnFadeIsActive(void);
+extern s32 evtIsActiveFlagSet(s32);
+extern char D_003AF710[];
+extern char D_0036AE48[];
+
+s64 func_0024D440(s32 request) {
+    s32 state = kwlnTaskGetUserValue();
+    s32 *popup = (s32 *)(state + 0x54);
+    s64 result = menuRunPanel(state, 0, request);
+    s32 ready;
+
+    if (result != 0) {
+        return result;
+    }
+    if (*popup == 0) {
+        if (*(s32 *)(state + 0x7C) == 0) {
+            ready = kwlnTaskGetTaskByName(D_003AF710) == NULL;
+            if (evtIsActiveFlagSet(0) != 0) {
+                ready = 1;
+            }
+        } else {
+            ready = kwlnFadeIsActive() == 0;
+        }
+        if (ready) {
+            mnuSetPopupEntryFlagged(popup, D_0036AE48);
+        }
+    }
+    return 0;
+}
 
 s64 func_0024D500(s32 request) {
     s32 state = kwlnTaskGetUserValue();
@@ -259,11 +289,11 @@ void evtResetDrawTransitions(void) {
     kwlnDrawSetOffsetTransition(0, 0, 0);
     kwlnDrawSetupC70B(0);
     kwlnDrawEnableCd0(0);
-    func_0018F3B0();
-    func_0018F438();
-    func_0018F750();
-    func_0018F4F0();
-    func_0018F6E8();
+    effDisableRectangleBlur();
+    effDisableTexturedBlur();
+    effDisableTexturedSquare();
+    effDisableFilterBlur();
+    effDisableColorRectangle();
 }
 
 void evtShutdownStageAndResetDrawTransitions(void) {
@@ -359,7 +389,7 @@ void evtRandomSwapBytes(u8 *bytes, u32 length, s32 count) {
 void evtLoadResourcePair(u32 resourceId, u32 *record) {
     u32 handle;
 
-    handle = func_002EB028(resourceId, record + 1, 0);
+    handle = sdfReadNamedResource(resourceId, record + 1, 0);
     *record = handle;
 }
 
@@ -370,7 +400,7 @@ void evtReleaseResourcePairHandle(u32 *record) {
 s32 evtCreateMessageWindowIfMissing(s32 unused) {
     if (dspWindowHandle < 0) {
         dspWindowHandle = itfMesCreateWindow();
-        func_0019C968(dspWindowHandle, 2, 0);
+        itfMesSetWindowPageAndRefresh(dspWindowHandle, 2, 0);
         return 1;
     }
     return 0;
@@ -380,7 +410,7 @@ s32 func_0024DA20(s32 soundMode) {
     if (dspWindowHandle < 0) {
         return 0;
     }
-    func_0019C968(dspWindowHandle, 0, soundMode);
+    itfMesSetWindowPageAndRefresh(dspWindowHandle, 0, soundMode);
     return 1;
 }
 
@@ -406,12 +436,12 @@ s32 evtCaptureMessageWindowSoundMode(s32 soundMode) {
 
 void evtSetMessageWindowOptionWhenOpen(s32 option) {
     if (dspWindowHandle >= 0) {
-        D_003BC414 = option;
+        evtMessageWindowOption = option;
     }
 }
 
 s8 evtGetMessageWindowOption(void) {
-    return D_003BC414;
+    return evtMessageWindowOption;
 }
 
 s32 sndGetActiveMode(void) {
@@ -488,7 +518,7 @@ void func_0024DD78(void) {
 }
 
 void func_0024DD90(s32 entryIndex, s32 itemIndex) {
-    func_0019C838(dspWindowHandle, entryIndex, itemIndex);
+    itfMesCopyStringToWindowTableSlot(dspWindowHandle, entryIndex, itemIndex);
 }
 
 s8 dspGetWindowStateGate(void) {
@@ -563,8 +593,8 @@ s32 evtActivateCurrentFlag(void) {
 
 u32 evtLoadTextureFromResourcePath(u32 path) {
     u32 info[2];
-    u32 allocation = func_002EB028(path, info, &info[1]);
-    u32 texture = func_002D3288(info[0]);
+    u32 allocation = sdfReadNamedResource(path, info, &info[1]);
+    u32 texture = sdfTexAcquireResourceTexture(info[0]);
 
     func_002D0918(allocation);
     return texture;
@@ -590,7 +620,7 @@ INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspWindowStateGate);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC410);
 
-INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC414);
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", evtMessageWindowOption);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspCapturedSoundMode);
 

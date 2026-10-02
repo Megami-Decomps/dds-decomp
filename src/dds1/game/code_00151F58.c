@@ -59,7 +59,7 @@ extern EffectConfig D_0034DF54[];
 
 s32 billCreateIndexed(s32 kind, s32 index);
 
-extern s32 D_003D6438[];
+extern s32 effBillResourceOwners[];
 
 extern s32 effEmitterDelayRandomState[];
 
@@ -115,7 +115,7 @@ typedef struct EffResourceSet {
 /* Attach the indexed effect resource to a new billboard and increment its reference count. */
 void effRetainResource(s32 index) {
     s32 *effect = (s32 *)billCreateIndexed(D_0034DF54[index].billboardKind, 0);
-    s32 *resource = ((EffResourceOwner *)D_003D6438[index])->resource;
+    s32 *resource = ((EffResourceOwner *)effBillResourceOwners[index])->resource;
     s32 references = resource[2];
 
     effect[12] = (s32)resource;
@@ -127,7 +127,7 @@ u32 func_00151FC0(void) {
 }
 
 s32 effGetResourceFirstWord(s32 index) {
-    return *(s32 *)((EffResourceOwner *)D_003D6438[index])->resource;
+    return *(s32 *)((EffResourceOwner *)effBillResourceOwners[index])->resource;
 }
 
 void effCopyVector(void *dst, void *src) {
@@ -408,7 +408,7 @@ void billSetChildHalfExtents(s32 billboard, float width, float height) {
 }
 
 extern u8 sdfViewMatrix[];
-extern u8 D_00324610[];
+extern u8 sdfProjectionMatrix[];
 extern u8 D_00324650[];
 extern u8 D_00324660[];
 extern u8 D_0034E080[];
@@ -422,7 +422,7 @@ f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     f32 projectedOffset[4];
 
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory(D_00324610);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     VU0_LOAD_VF(vf10, position);
     VU0_MOVE_VF(vf12, vf10);
     VU0_TRANSFORM_POINT(vf10, vf10);
@@ -511,7 +511,7 @@ void effVuCopyMatrix(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
-void func_00152800(EffUnitObject *instance, s32 *values) {
+void effReadBillboardModeValues(EffUnitObject *instance, s32 *values) {
     BillObj *billboard = (BillObj *)instance->billboard;
 
     if (billboard->kind == 1) {
@@ -561,7 +561,7 @@ void func_00153618(s32 sink, s32 source) {
 }
 
 void func_00153680(void) {
-    func_002E84A0(&effEmitterDelayRandomState);
+    effMiscSeedRandomFromClock(&effEmitterDelayRandomState);
 }
 
 void func_001536A0(void) {

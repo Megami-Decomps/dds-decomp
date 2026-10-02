@@ -61,7 +61,7 @@ void sdfDevQueueWrite(void *deviceRequest, u32 transferAddress, u32 byteCount);
 
 extern char D_00437CC8[];
 
-extern s32 (*D_00438B98)(void);
+extern s32 (*fileIdleUpdateCallback)(void);
 
 void *memset(void *dst, s32 val, u32 len);
 
@@ -76,7 +76,7 @@ s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 s32 fileManUpdate(void);
 
 /* Flag words of the entry table: entry arg0 occupies 0x19 words. */
-extern u32 D_00457F7C[];
+extern u32 fileRequestSlotFlags[];
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C83F0);
 
@@ -124,7 +124,7 @@ void fileManInit(void) {
     fileManagerWork.sema = sdfCreateSemaphore(1, 0x7F, 0);
     fileManagerWork.unk1C = sdfResourceRetainAddress(func_003292A8(0x40000));
     kwlnTaskCreate((s32)&D_00437CC8, 0x384, 1, 0, (s32)&fileMan, 0, 0);
-    D_00438B98 = fileManUpdate;
+    fileIdleUpdateCallback = fileManUpdate;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqInit);
@@ -160,17 +160,17 @@ void fileReqMarkSlotMetadataDirty(s32 request) {
 
 void fileReqClearSlotFlags(s32 request, s32 slot) {
     slot += request * FILE_REQ_WORDS_PER_ENTRY;
-    D_00457F7C[slot] = 0;
+    fileRequestSlotFlags[slot] = 0;
 }
 
 void fileReqSetSlotFlags(s32 request, s32 slot, s32 mask) {
     slot += request * FILE_REQ_WORDS_PER_ENTRY;
-    D_00457F7C[slot] |= mask;
+    fileRequestSlotFlags[slot] |= mask;
 }
 
 u32 fileReqGetSlotFlags(s32 request, s32 slot) {
     slot += request * FILE_REQ_WORDS_PER_ENTRY;
-    return D_00457F7C[slot];
+    return fileRequestSlotFlags[slot];
 }
 
 s8 fileReqGetSelectedSlot(s32 request) {

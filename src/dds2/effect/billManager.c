@@ -30,7 +30,7 @@ typedef struct {
 
 extern BillObj *billCreateIndexed(s32 index, u32 data);
 
-extern u64 func_00343ED0(u64, u32 *, u64);
+extern u64 sdfReadNamedResource(u64, u32 *, u64);
 
 void *func_00328D68(s32 size);
 
@@ -220,7 +220,7 @@ typedef struct BillSnapshot {
 extern BillSourceRecord *func_00158F88(BillObj *obj, void *entries);
 
 /* Copy the billboard's current source record (by kind) into a snapshot. */
-void func_001598D8(BillObj *obj, BillSnapshot *snapshot) {
+void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
     BillSourceRecord *record;
 
     if (obj->kind == 1) {
@@ -257,7 +257,7 @@ u64 billCreateFromResource(u32 owner, u64 resource) {
     BillObj *billboard;
     u32 header[4];
 
-    allocation = func_00343ED0(resource, header, 0);
+    allocation = sdfReadNamedResource(resource, header, 0);
     billboard = billCreateIndexed(owner, header[0]);
     func_003297C8(allocation);
     return billboard;

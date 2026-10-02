@@ -1,12 +1,12 @@
 #include "common.h"
 
-extern s32 D_00438FA8;
+extern s32 evtSolarOverlayFadeCounter;
 
-extern s32 D_00438FAC;
+extern s32 evtSolarOverlayFadeDuration;
 
 void evtInitializeVisualData(s32 arg0);
 
-extern s8 D_00438FA4;
+extern s8 evtSolarOverlayFadeFlags;
 
 s32 evtGetSolarPhase(s32 object);
 
@@ -65,57 +65,57 @@ void evtAdvanceSolarOverlayFadeAndDraw(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u
     s32 mirrored;
     mirrored = (s8)evtGetMirroredSolarPhase();
     func_00245590(arg4);
-    if ((D_00438FA4 & 1) != 0) {
-        if ((D_00438FA4 & 2) != 0) {
-            if (D_00438FA8 < D_00438FAC) {
-                D_00438FA8++;
+    if ((evtSolarOverlayFadeFlags & 1) != 0) {
+        if ((evtSolarOverlayFadeFlags & 2) != 0) {
+            if (evtSolarOverlayFadeCounter < evtSolarOverlayFadeDuration) {
+                evtSolarOverlayFadeCounter++;
             } else {
-                D_00438FA4 = 0;
+                evtSolarOverlayFadeFlags = 0;
             }
-        } else if ((D_00438FA4 & 4) != 0) {
-            if (D_00438FA8 > 0) {
-                D_00438FA8--;
+        } else if ((evtSolarOverlayFadeFlags & 4) != 0) {
+            if (evtSolarOverlayFadeCounter > 0) {
+                evtSolarOverlayFadeCounter--;
             } else {
-                D_00438FA4 &= ~1;
+                evtSolarOverlayFadeFlags &= ~1;
             }
         }
-        if ((D_00438FA4 & 1) != 0) {
-            f32 ratio = (f32)D_00438FA8 / (f32)D_00438FAC;
+        if ((evtSolarOverlayFadeFlags & 1) != 0) {
+            f32 ratio = (f32)evtSolarOverlayFadeCounter / (f32)evtSolarOverlayFadeDuration;
             s32 scaled = (s32)((f32)arg3 * ratio);
             evtDrawFadingSolarOverlayFrame(arg0, arg1, arg2, scaled, mirrored, arg4, arg5);
             return;
         }
     }
-    if ((D_00438FA4 & 4) == 0) {
+    if ((evtSolarOverlayFadeFlags & 4) == 0) {
         evtDrawFadingSolarOverlayFrame(arg0, arg1, arg2, arg3, mirrored, arg4, arg5);
     }
 }
 
 s32 evtHasSolarOverlayTransitionState(void) {
-    return D_00438FA4 != 0;
+    return evtSolarOverlayFadeFlags != 0;
 }
 
 void evtBeginSolarOverlayFadeIn(s32 value) {
     if (value == 0) {
-        D_00438FA4 = 0;
-        D_00438FA8 = 0;
-        D_00438FAC = 0;
+        evtSolarOverlayFadeFlags = 0;
+        evtSolarOverlayFadeCounter = 0;
+        evtSolarOverlayFadeDuration = 0;
         return;
     }
-    D_00438FAC = (s32)value;
-    D_00438FA4 = 3;
-    D_00438FA8 = 0;
+    evtSolarOverlayFadeDuration = (s32)value;
+    evtSolarOverlayFadeFlags = 3;
+    evtSolarOverlayFadeCounter = 0;
 }
 
 void evtBeginSolarOverlayFadeOut(s32 value) {
     if (value == 0) {
-        D_00438FA4 = 5;
-        D_00438FAC = 1;
-        D_00438FA8 = 0;
+        evtSolarOverlayFadeFlags = 5;
+        evtSolarOverlayFadeDuration = 1;
+        evtSolarOverlayFadeCounter = 0;
     } else {
-        D_00438FA8 = value;
-        D_00438FA4 = 5;
-        D_00438FAC = value;
+        evtSolarOverlayFadeCounter = value;
+        evtSolarOverlayFadeFlags = 5;
+        evtSolarOverlayFadeDuration = value;
     }
 }
 

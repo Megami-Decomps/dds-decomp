@@ -67,7 +67,7 @@ typedef struct ItfMesBlk40 {
 /* Block at ItfMesState +0xA4. */
 typedef struct ItfMesBlkA4 {
     u8 unk0[4];          /* +0x0 */
-    void *unk4;          /* +0x4: released by func_0019C968 */
+    void *unk4;          /* +0x4: released by itfMesSetWindowPageAndRefresh */
     u32 panelHandle;       /* +0x8: panel handle */
     u8 unkC[0x1C];       /* +0xC */
     u32 unk28;           /* +0x28 */
@@ -232,7 +232,7 @@ void itfMesSetWindowHighFlags(s32 window, u32 value);
 
 void itfMesClearWindowHighFlags(s32 window, u32 value);
 
-void func_0019C968(s32 window, s32 arg1, s32 arg2);
+void itfMesSetWindowPageAndRefresh(s32 window, s32 arg1, s32 arg2);
 
 void itfMesFinishWindowAndClearStatus(s32 window);
 
@@ -477,7 +477,7 @@ s32 itfMesScriptSetMessageOption(void) {
     if (window < 0) {
         return 1;
     }
-    func_0019C968(window, scrReadIntParameter(0), 0);
+    itfMesSetWindowPageAndRefresh(window, scrReadIntParameter(0), 0);
     return 1;
 }
 
@@ -491,7 +491,7 @@ s32 itfMesScriptSetMessagePair(void) {
     }
     first = scrReadIntParameter(0);
     second = scrReadIntParameter(1);
-    func_0019C968(window, first, second);
+    itfMesSetWindowPageAndRefresh(window, first, second);
     return 1;
 }
 
@@ -806,7 +806,7 @@ u32 itfMesGetWindowTableValue(s32 window, s32 index) {
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C590);
 
-void func_0019C838(s32 window, u32 entryIndex, u32 itemIndex) {
+void itfMesCopyStringToWindowTableSlot(s32 window, u32 entryIndex, u32 itemIndex) {
     func_0019D460((u32)itfWindowSlots[window].mes, entryIndex, itemIndex, 0);
 }
 
@@ -839,7 +839,7 @@ u32 itfMesGetEntryTableItem(s32 window, s32 entryIndex, s32 itemIndex) {
 extern void func_0019E048(ItfMesBlkA4 *blk, s32 arg1, s32 arg2);
 extern void itfPanelReleasePrimitiveResources(void *primitive);
 
-void func_0019C968(s32 window, s32 arg1, s32 arg2) {
+void itfMesSetWindowPageAndRefresh(s32 window, s32 arg1, s32 arg2) {
     ItfMesState *mes = itfWindowSlots[window].mes;
     ItfMesBlkA4 *blk = &mes->blkA4;
 

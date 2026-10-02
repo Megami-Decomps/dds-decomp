@@ -178,7 +178,41 @@ s32 mtrMantraIdIsValid(s32 mantraId) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB598);
+typedef struct SaveItemCounts {
+    u8 pad00[0x1340];
+    u8 counts[0x100];
+} SaveItemCounts;
+
+extern SaveItemCounts *datGameState;
+extern u16 D_00437B6E;
+extern u8 D_00437B88;
+extern u16 D_003E6730[];
+extern s32 mdlFlagTest(s32);
+
+s32 func_002AB598(void) {
+    s32 owned = 0;
+    s32 required = D_00437B6E;
+    s32 i;
+
+    required -= D_00437B88;
+    required--;
+
+    if (mdlFlagTest(0xBA0) == 0) {
+        required--;
+    }
+    for (i = 0; i < D_00437B6E; i++) {
+        s32 mantraId = D_003E6730[i];
+        if (datGameState->counts[mantraId] != 0) {
+            if (mtrMantraIdIsValid(mantraId) == 0) {
+                owned++;
+            }
+        }
+    }
+    if (owned < required) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 mtrMantraFindIndex(s32 mantraId) {
     u32 i;

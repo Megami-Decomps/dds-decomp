@@ -91,23 +91,23 @@ extern s32 fldSceneRecordCount;
 
 extern s32 fldSceneRecordResource;
 
-extern u32 D_003BAEA8;
+extern u32 fldFixedArchiveLoadPhase;
 
-extern u32 D_003BAEA4;
+extern u32 fldArchiveLoadPending;
 
 extern u32 fldCurrentBgmHandle;
 
 extern s32 fldPendingSoundCount;
 
-extern s32 D_003BAEB0;
+extern s32 fldAreaFlagIndex;
 
 extern s32 D_003BAEB4;
 
 extern s32 fldAreaState[];
 
-extern s32 D_003BAF8C;
+extern s32 fldPrimaryEffectPositionPending;
 
-extern s32 D_003BAF90;
+extern s32 fldSecondaryEffectPositionPending;
 
 extern s32 dds3GetWorldObject(void);
 
@@ -155,9 +155,9 @@ extern void func_003003F0(const char *fmt, ...);
 
 extern s32 fldCurrentBgmMode;
 
-extern s32 D_003BAE9C;
+extern s32 fldSceneBgmArchiveTrack;
 
-extern s32 D_003BAEA0;
+extern s32 fldSceneBgmArchivePhase;
 
 extern s32 D_003BAEB8;
 
@@ -203,19 +203,19 @@ extern s32 D_003BAF58;
 
 extern s32 D_003BAF64;
 
-extern s32 D_003BAF2C;
+extern s32 fldRoomEffectEntryCount;
 
 extern s32 D_003BAF70;
 
 extern s32 D_003BAF7C;
 
-extern s32 D_003BAF80;
+extern s32 fldObjectSlotCount;
 
 extern f32 fldBannerColorPhase;
 
 extern f32 sdfSinPoly(f32);
 
-extern s32 D_003BAF2C;
+extern s32 fldRoomEffectEntryCount;
 
 extern int strcmp(const char *, const char *);
 
@@ -460,7 +460,7 @@ extern s32 fldGetPlayerSceneState(void);
 
 extern s32 dds3SetWorldCameraObject(s32, s32);
 
-extern void func_00112EE8(s32, f32 *, f32 *);
+extern void dds3TransformCameraVectorsByInnerRotation(s32, f32 *, f32 *);
 
 extern void fldUpdateCameraProjectionEndpoints(void);
 
@@ -488,7 +488,7 @@ s32 fldCmdCaptureObjectPose(void) {
         if (object == 0) {
             return 1;
         }
-        func_00112EE8(object, pos, rot);
+        dds3TransformCameraVectorsByInnerRotation(object, pos, rot);
         fldUpdateCameraProjectionEndpoints();
         D_00330630[0] = pos[0];
         D_00330630[1] = pos[1];
