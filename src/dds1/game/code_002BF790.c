@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 
 extern s32 itfFindGridNodeByKey(u32, u32);
 
@@ -157,14 +158,6 @@ void itfGridStorePosition(GridPosition *position, s32 x, s32 y) {
     position->y = y;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFBA8);
-
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFCE0);
-
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFE78);
-
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0038);
-
 typedef struct GridAngleTable {
     s32 divisor;  /* 0x00 */
     s32 mirrored; /* 0x04 */
@@ -183,9 +176,66 @@ typedef struct GridAngleOwner {
 } GridAngleOwner;
 
 typedef struct GridAngleOutput {
-    u8 pad00[0x24];
+    u32 unk00;
+    s32 parameters[8];
     f32 angleDegrees; /* 0x24 */
 } GridAngleOutput;
+
+typedef struct GridBoundsTransitionEntry {
+    u8 pad00[0x6C];
+    s32 bounds[4];
+    u8 pad7C[8];
+    UiQuadWords quad;
+    u8 pad94[0xC];
+} GridBoundsTransitionEntry;
+
+
+s32 func_002BFBA8(GridBoundsTransitionEntry *entry,
+                  GridAngleOutput *out, GridAngleOwner *owner) {
+    s32 delta[2];
+    s32 *parameters = out->parameters;
+    GridAngleTable *table = owner->slot->table;
+    s32 i;
+    s32 factor;
+    u32 *sourceColor;
+    s32 *destinationColor;
+
+    delta[0] = (entry->bounds[2] - entry->bounds[0]) * 16;
+    delta[1] = (entry->bounds[3] - entry->bounds[1]) * 8;
+    for (i = 0; i < 2; i++) {
+        s32 value = delta[i];
+        s32 amount = (s32)(fsqrtf((f32)value) * (f32)owner->angle *
+                           (1.0f / 65536.0f));
+        if (value > 0) {
+            parameters[i] = value - amount * amount;
+        } else {
+            parameters[i] = amount * amount + value;
+        }
+    }
+    if (table->mirrored != 0) {
+        factor = 0x10000 - owner->angle;
+    } else {
+        factor = owner->angle;
+    }
+    sourceColor = entry->quad.unk00;
+    destinationColor = parameters + 4;
+    for (i = 0; i < 4; i++) {
+        s32 component = (u8)*sourceColor;
+        u32 word = *sourceColor;
+        sourceColor++;
+        *destinationColor = (word & ~0xFF) |
+            (component * factor / 0x10000);
+        destinationColor++;
+    }
+    return 0x10000 / table->divisor;
+}
+
+INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFCE0);
+
+INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFE78);
+
+INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0038);
+
 
 s32 itfUpdateAngleAndGetCycleStep(s32 unused, u8 *out, GridAngleOwner *owner) {
     GridAngleTable *table = owner->slot->table;
