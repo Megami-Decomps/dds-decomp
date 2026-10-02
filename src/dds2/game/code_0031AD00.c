@@ -44,6 +44,8 @@ void itfDispatchObjectFadeSequenceMode(u8 *object) {
     }
 }
 
+
+
 INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031ADD8);
 
 INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031AE48);
@@ -57,7 +59,58 @@ void func_0031AF58(s32 object) {
 void func_0031AF60(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031AF68);
+typedef struct FadeSoundWork {
+    u8 pad00[0x1D4];
+    s32 cursor;
+} FadeSoundWork;
+
+typedef struct SoundSlot SoundSlot;
+
+extern s8 D_0037F510[];
+extern SoundSlot *sndClaimFreeSoundSlot(u32 sequence, u32 frames);
+
+/* Step the bounded sound cursor from pad input and play the matching cue. */
+s32 func_0031AF68(FadeSoundWork *work) {
+    s32 result = -1;
+    s32 action = 0;
+
+    if (D_0037F510[0x26] < 0) {
+        work->cursor--;
+        if (work->cursor >= 0) {
+            action = 1;
+        } else {
+            work->cursor = 0;
+        }
+    } else if (D_0037F510[0x27] < 0) {
+        work->cursor++;
+        if (work->cursor < 3) {
+            action = 1;
+        } else {
+            work->cursor = 2;
+        }
+    }
+
+    if (D_0037F510[0x21] < 0) {
+        result = work->cursor;
+        action = 2;
+    } else if (D_0037F510[0x23] < 0) {
+        result = 0;
+        action = 3;
+    }
+
+    switch (action) {
+    case 1:
+        sndClaimFreeSoundSlot(0, 0);
+        break;
+    case 2:
+        sndClaimFreeSoundSlot(8, 0);
+        break;
+    case 3:
+        sndClaimFreeSoundSlot(10, 0);
+        break;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031B080);
 
@@ -74,4 +127,3 @@ void func_0031B0F8(void) {
     dds3SetWorldCameraObject(object, D_00438944);
     func_001063A8(0.6283184886f);
 }
-
