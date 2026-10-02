@@ -14,7 +14,7 @@ typedef struct SdfTexRef {
     s32 refCount;
 } SdfTexRef;
 
-/* Texture buffer GPU command words (0x38); DDS1/2 game/code_002D10B0/00329F60.c. */
+/* Texture buffer GPU command words (0x40); DDS1/2 game/code_002D10B0/00329F60.c. */
 typedef struct SdfTexBuf {
     s32 gifTagWord; /* Low GIFtag word; NLOOP occupies bits 0-14. */
     u8 pad4[0xC];
@@ -23,6 +23,7 @@ typedef struct SdfTexBuf {
     u64 textureState; /* GS TEX0 data. */
     u64 unk28;
     u64 clampState; /* GS CLAMP data. */
+    u64 clampRegister; /* GS CLAMP_1/CLAMP_2 register selector. */
 } SdfTexBuf;
 
 /* Texture resource word at +0xC (0x10); DDS1/2 game/code_002D10B0/00329F60.c via SdfTex. */
