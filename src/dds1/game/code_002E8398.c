@@ -2,6 +2,7 @@
 
 extern s8 D_003BDA80;
 extern u16 D_00398910[];
+extern void *sceSifAllocIopHeap(s32 size);
 
 typedef struct ClockTime {
     u8 pad0;
@@ -66,8 +67,8 @@ void effMiscSeedRandomFromClock(void *state) {
 
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002E8548);
 
-void func_002E8628(void) {
-    sceSifAllocIopHeap();
+u32 func_002E8628(s32 size) {
+    return (u32)sceSifAllocIopHeap(size);
 }
 
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002E8640);

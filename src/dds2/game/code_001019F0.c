@@ -45,7 +45,40 @@ void dds3ClearScopedObjectFlags(u32 object, u32 mask, u32 scope) {
 
 INCLUDE_ASM(const s32, "game/code_001019F0", func_00101AC0);
 
-INCLUDE_ASM(const s32, "game/code_001019F0", func_00101C50);
+typedef struct KwlnDrawSink {
+    u8 pad00[0x10];
+    void (*invoke)(void *, void *); /* 0x10 */
+} KwlnDrawSink;
+extern s32 kwlnGetDrawBufferIndex(void);
+extern u8 D_003808B0[];
+extern u8 kwlnDrawSurfaces[];
+extern u8 D_00380860[];
+extern u8 D_00380870[];
+extern void sdfWaitAndSelectBuffer(void);
+extern void func_0032D0F0(void *, s32);
+extern void sdfClearPacketListHead(void *);
+extern void func_00105070(s32);
+extern void sdfInitializeDrawPacketGroups(u8 *);
+
+s32 func_00101C50(void) {
+    s32 buffer = kwlnGetDrawBufferIndex();
+    s32 i;
+    u8 *groups;
+    KwlnDrawSink *sink;
+
+    sdfWaitAndSelectBuffer();
+    func_0032D0F0(kwlnDrawSurfaces, 0x62);
+    sdfClearPacketListHead(D_00380860);
+    func_00105070(buffer);
+    groups = D_003808B0 + buffer * 0x1F40;
+    for (i = 12; i >= 0; i--) {
+        sdfInitializeDrawPacketGroups(groups);
+        groups += 0x1B0;
+    }
+    sink = (KwlnDrawSink *)kwlnDrawSurfaces;
+    sink->invoke(sink, D_00380870 + buffer * 0x1F40);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001019F0", func_00101D30);
 
@@ -72,7 +105,6 @@ extern void sdfSubmitDrawPacketGroups(u8 *, u8 *);
 extern s32 *sdfConsAllocateColumnPacket(s32);
 extern KwlnSpriteVertex *sdfConsMeasurePacketWithHeader(s32 *);
 extern s32 *sdfFlushPoolNodes(void *);
-extern s32 kwlnGetDrawBufferIndex(void);
 extern void kwlnDrawBlurErrorCounters(void);
 extern void kwlnStepBackgroundFade(void);
 extern void func_00106288(void);
@@ -83,10 +115,7 @@ extern s32 func_001200E0(void);
 extern void func_00343468(s32);
 extern void func_0032DD98(s32 *, void *);
 extern u8 D_00380788[];
-extern u8 D_003808B0[];
 extern u8 kwlnFrameDrawPacketRecords[];
-extern u8 kwlnDrawSurfaces[];
-extern u8 D_00380860[];
 extern u8 D_00380708[];
 extern u8 kwlnDrawOverlayEnabled;
 extern s16 kwlnDrawOverlayAlpha;
@@ -97,10 +126,6 @@ extern s32 *D_00435C14;
 extern u32 kwlnDrawControlFlags;
 extern s8 D_00438A20;
 
-typedef struct KwlnDrawSink {
-    u8 pad00[0x10];
-    void (*invoke)(void *, void *); /* 0x10 */
-} KwlnDrawSink;
 
 /* Per-frame render task: update the HUD pieces, submit the thirteen draw-packet groups of the current buffer, optionally draw the
  * screen-edge vignette, then flush the packet pools. */
