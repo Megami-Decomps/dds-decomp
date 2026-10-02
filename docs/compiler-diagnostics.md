@@ -39,6 +39,19 @@ historical declaration difference as cleanup work. Focused tests run with
 `python3 tools/test_ee_gcc_contracts.py`. The command exits 1 when it reports
 review findings and 0 when the selected scope has none.
 
+For a return-type conflict, the report also identifies calls in the audited
+source whose complete expression statement is just `callee(...)` or
+`(void)callee(...)`. This proves that the source discards the result at that
+site and makes the conflict more relevant to post-call register differences.
+Assignments, returns, conditions, nested or indirect calls, declarations that
+appear after the call, and ambiguous definitions are excluded. A same-named
+parameter or local declarator anywhere in the caller also excludes the site;
+this deliberately trades recall for avoiding function-pointer shadow false
+positives. Known function-like macros are excluded, and files containing
+conditional-compilation branches receive no call-site annotation. This remains
+source evidence only: inspect the caller's emitted data flow before changing a
+declaration.
+
 A matching C definition is a comparison anchor, not automatically the original
 interface: old-C wrappers can preserve a return register under several source
 return types. Confirm a finding against callers and the callee's machine-level

@@ -407,6 +407,13 @@ typedef struct {
     u32 unk8;   /* 0x8: exposed by func_0026D020 */
 } EvtLoadedRecord;
 
+typedef struct EvtMantraNodePositionRecord {
+    u8 pad00[4];
+    s16 firstKey;  /* 0x04 */
+    s16 secondKey; /* 0x06 */
+    u8 pad08[0x18];
+} EvtMantraNodePositionRecord; /* 0x20 */
+
 void evtDrawListViewportPanel(s32 x, s32 y, s32 width, EvtPanelRecord *record) {
     s32 height = mnuGetListViewportHeight(record->heightSource) + 0x80;
 
@@ -438,7 +445,27 @@ s32 mnuGetMantraNodePositionRecord(s32 index) {
     return ((EvtLoadedRecord *)mnuMantraNodePositionTable)->base + ((index << 0x10) >> 0xb);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CF88);
+s32 func_0026CF88(s32 first, s32 second) {
+    EvtLoadedRecord *loaded = (EvtLoadedRecord *)mnuMantraNodePositionTable;
+    s16 firstKey;
+    s16 secondKey;
+    EvtMantraNodePositionRecord *record;
+    s32 index;
+
+    first = (s16)first;
+    second = (s16)second;
+    firstKey = (s16)(first * 10 + ((second & 1) * 5));
+    secondKey = (s16)(second * 10);
+    record = (EvtMantraNodePositionRecord *)loaded->base;
+
+    for (index = 0; index < (s32)loaded->unk8; index++) {
+        if (record->firstKey == firstKey && record->secondKey == secondKey) {
+            return (s32)record;
+        }
+        record = (EvtMantraNodePositionRecord *)((u8 *)record + 0x20);
+    }
+    return 0;
+}
 
 u32 func_0026D020(void) {
     return ((EvtLoadedRecord *)mnuMantraNodePositionTable)->unk8;

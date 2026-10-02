@@ -3,7 +3,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from ee_gcc_contracts import _definition_index, compare, scan_source
+from ee_gcc_contracts import (
+    _definition_index,
+    annotate_ignored_result_calls,
+    compare,
+    scan_ignored_result_calls,
+    scan_source,
+)
 
 
 class ContractAuditTests(unittest.TestCase):
@@ -154,6 +160,236 @@ int ordinary(void) { return 0; }
         signatures, skipped = scan_source("extern int copyValues(int values[4]);\n", "src/dds1/a.c")
         self.assertEqual(signatures, [])
         self.assertTrue(any("unsupported parameter" in item["reason"] for item in skipped))
+
+    def test_direct_expression_calls_are_ignored_results(self):
+        source = """extern s32 consume(s32);
+extern s32 nested(s32);
+s32 caller(s32 value) {
+    consume(value);
+    (void)consume(value + nested(value));
+    value = consume(value);
+    return consume(value);
+}
+"""
+        calls = scan_ignored_result_calls(source, "src/dds1/a.c")
+        self.assertEqual(
+            [(call.name, call.caller, call.line, call.explicit_void_cast) for call in calls],
+            [("consume", "caller", 4, False), ("consume", "caller", 5, True)],
+        )
+
+    def test_control_headers_and_for_clauses_are_not_call_statements(self):
+        source = """extern s32 step(void);
+void caller(void) {
+    if (step()) { step(); }
+    while (step()) { break; }
+    for (step(); step(); step()) { }
+}
+"""
+        calls = scan_ignored_result_calls(source, "src/dds1/a.c")
+        self.assertEqual([(call.name, call.line) for call in calls], [("step", 3)])
+
+    def test_comments_strings_macros_and_nondirect_expressions_are_excluded(self):
+        source = """#define PHANTOM() ignored()
+extern s32 ignored(void);
+void caller(void) {
+    /* ignored(); */
+    const char *text = "ignored();";
+    ignored(), ignored();
+    callback ? ignored() : ignored();
+}
+"""
+        self.assertEqual(scan_ignored_result_calls(source, "src/dds1/a.c"), [])
+
+    def test_function_macro_invocations_fail_closed(self):
+        source = """extern s32 release(void);
+#define release() other()
+void caller(void) { release(); }
+"""
+        self.assertEqual(scan_ignored_result_calls(source, "src/dds1/a.c"), [])
+        header_macro = """extern s32 release(void);
+void caller(void) { release(); }
+"""
+        self.assertEqual(
+            scan_ignored_result_calls(
+                header_macro, "src/dds1/a.c", frozenset({"release"})),
+            [],
+        )
+
+    def test_conditional_compilation_file_gets_no_call_evidence(self):
+        source = """extern void release(void);
+#if 0
+extern s32 release(void);
+#endif
+void caller(void) { release(); }
+"""
+        self.assertEqual(scan_ignored_result_calls(source, "src/dds1/a.c"), [])
+
+    def test_return_conflict_gets_direct_ignored_call_evidence(self):
+        caller_source = """extern s32 release(void *);
+void caller(void *item) {
+    release(item);
+}
+"""
+        definition_source = "void release(void *item) { }\n"
+        caller_signatures, skipped = scan_source(caller_source, "src/dds1/caller.c")
+        definitions, definition_skipped = scan_source(definition_source, "src/dds1/owner.c")
+        signatures = caller_signatures + definitions
+        report = compare(signatures, skipped + definition_skipped)
+        annotate_ignored_result_calls(
+            report, signatures,
+            scan_ignored_result_calls(caller_source, "src/dds1/caller.c"),
+        )
+        call = report["conflicts"][0]["ignored_result_calls"][0]
+        self.assertEqual(call["caller"], "caller")
+        self.assertEqual(call["line"], 3)
+        self.assertEqual(call["mechanism"], "value-return declaration for void definition")
+        self.assertIn("do not change", call["disposition"])
+        self.assertEqual(report["summary"]["ignored_result_call_sites"], 1)
+
+    def test_parameter_only_conflict_does_not_get_result_evidence(self):
+        caller_source = """extern void release(s32);
+void caller(s32 item) { release(item); }
+"""
+        definition_source = "void release(void *item) { }\n"
+        caller_signatures, skipped = scan_source(caller_source, "src/dds1/caller.c")
+        definitions, definition_skipped = scan_source(definition_source, "src/dds1/owner.c")
+        signatures = caller_signatures + definitions
+        report = compare(signatures, skipped + definition_skipped)
+        annotate_ignored_result_calls(
+            report, signatures,
+            scan_ignored_result_calls(caller_source, "src/dds1/caller.c"),
+        )
+        self.assertNotIn("ignored_result_calls", report["conflicts"][0])
+        self.assertEqual(report["summary"]["ignored_result_call_sites"], 0)
+
+    def test_later_declaration_is_not_visible_at_call(self):
+        caller_source = """void caller(void *item) { release(item); }
+extern s32 release(void *);
+"""
+        definition_source = "void release(void *item) { }\n"
+        caller_signatures, skipped = scan_source(caller_source, "src/dds1/caller.c")
+        definitions, definition_skipped = scan_source(definition_source, "src/dds1/owner.c")
+        signatures = caller_signatures + definitions
+        report = compare(signatures, skipped + definition_skipped)
+        annotate_ignored_result_calls(
+            report, signatures,
+            scan_ignored_result_calls(caller_source, "src/dds1/caller.c"),
+        )
+        self.assertNotIn("ignored_result_calls", report["conflicts"][0])
+
+    def test_ambiguous_definitions_fail_closed(self):
+        caller_source = """extern s32 release(void *);
+void caller(void *item) { release(item); }
+"""
+        caller_signatures, skipped = scan_source(caller_source, "src/dds1/caller.c")
+        owner_a, skipped_a = scan_source("void release(void *item) { }\n", "src/dds1/a.c")
+        owner_b, skipped_b = scan_source("void release(void *item) { }\n", "src/dds1/b.c")
+        signatures = caller_signatures + owner_a + owner_b
+        report = compare(signatures, skipped + skipped_a + skipped_b)
+        annotate_ignored_result_calls(
+            report, signatures,
+            scan_ignored_result_calls(caller_source, "src/dds1/caller.c"),
+        )
+        self.assertTrue(report["conflicts"])
+        self.assertTrue(all("ignored_result_calls" not in row for row in report["conflicts"]))
+        self.assertEqual(report["summary"]["ignored_result_call_sites"], 0)
+
+    def test_static_contract_evidence_is_file_local(self):
+        source = """static s32 release(void *);
+static void release(void *item) { }
+void caller(void *item) { release(item); }
+"""
+        signatures, skipped = scan_source(source, "src/dds1/caller.c")
+        report = compare(signatures, skipped)
+        annotate_ignored_result_calls(
+            report, signatures,
+            scan_ignored_result_calls(source, "src/dds1/caller.c"),
+        )
+        # The definition is the most recent visible contract at the call, so
+        # the older conflicting declaration is not call-site evidence.
+        self.assertNotIn("ignored_result_calls", report["conflicts"][0])
+
+    def test_static_forward_declaration_can_supply_call_evidence(self):
+        source = """static s32 release(void *);
+void caller(void *item) { release(item); }
+static void release(void *item) { }
+"""
+        signatures, skipped = scan_source(source, "src/dds1/caller.c")
+        report = compare(signatures, skipped)
+        annotate_ignored_result_calls(
+            report, signatures,
+            scan_ignored_result_calls(source, "src/dds1/caller.c"),
+        )
+        self.assertEqual(
+            report["conflicts"][0]["ignored_result_calls"][0]["caller"],
+            "caller",
+        )
+
+    def test_label_and_indirect_or_member_calls_fail_closed(self):
+        source = """void caller(void) {
+label: direct();
+    object.method();
+    (*callback)();
+    (callback)();
+    direct() + 1;
+}
+"""
+        self.assertEqual(scan_ignored_result_calls(source, "src/dds1/a.c"), [])
+
+    def test_local_function_pointer_and_parameter_shadows_fail_closed(self):
+        source = """extern s32 release(void *);
+typedef void (*Callback)(void *);
+void pointerShadow(void *item) {
+    void (*release)(void *) = callback;
+    release(item);
+}
+void typedefShadow(void *item) {
+    Callback release = callback;
+    release(item);
+}
+void parameterShadow(void (*release)(void *), void *item) {
+    release(item);
+}
+"""
+        self.assertEqual(scan_ignored_result_calls(source, "src/dds1/a.c"), [])
+
+    def test_any_same_named_local_makes_function_fail_closed(self):
+        source = """extern s32 release(void *);
+void caller(void *item) {
+    {
+        void (*release)(void *) = callback;
+        release(item);
+    }
+    release(item);
+}
+"""
+        self.assertEqual(scan_ignored_result_calls(source, "src/dds1/a.c"), [])
+
+    def test_for_and_comma_declarator_shadows_fail_closed(self):
+        source = """extern s32 release(void);
+typedef s32 (*Callback)(void);
+void forShadow(s32 item) {
+    for (Callback release = callback; item; ) { release(); }
+    release();
+}
+void commaShadow(void) {
+    Callback other, release;
+    release();
+}
+void unbracedForShadow(s32 item) {
+    for (Callback release = callback; item; ) release();
+    release();
+}
+void controlBodyForShadow(s32 item) {
+    for (Callback release = callback; item; )
+        if (item) { other(); } else { release(); }
+}
+"""
+        calls = scan_ignored_result_calls(source, "src/dds1/a.c")
+        self.assertEqual(
+            [(call.name, call.line) for call in calls if call.name == "release"],
+            [],
+        )
 
 
 if __name__ == "__main__":
