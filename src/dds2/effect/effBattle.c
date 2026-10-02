@@ -21,8 +21,8 @@ typedef struct EffBattleVoiceOwner {
 } EffBattleVoiceOwner;
 
 extern char D_00414478[];
-extern void func_0016A620(s32);
-extern void func_0035B6E0(char *, u16, void *, s32);
+extern void effDispatchParameterDataAndFreeWork(s32);
+extern void func_0035B6E0(const char *fmt, ...);
 extern void sndUnlinkVoice(void *);
 extern void sdfReleaseChipBlock(void *);
 
@@ -48,12 +48,12 @@ typedef struct BattleEffect {
 
 /* Release each nonzero parameter-work slot, unlink the owner, then drop its active count.
  * The diagnostic observes the decremented count before the owner is freed. */
-void func_001686F0(EffBattleVoiceOwner *owner) {
+void effReleaseBattleVoiceOwner(EffBattleVoiceOwner *owner) {
     s32 workIndex;
 
     for (workIndex = 0; workIndex < EFF_BATTLE_PARAMETER_WORK_CAPACITY; workIndex++) {
         if (owner->parameterWorks[workIndex] != 0) {
-            func_0016A620(owner->parameterWorks[workIndex]);
+            effDispatchParameterDataAndFreeWork(owner->parameterWorks[workIndex]);
         }
     }
     sndUnlinkVoice(owner);
@@ -69,7 +69,7 @@ u16 effBattleGetMode(BattleEffect *effect) {
 }
 
 /* Read the frame counter that the native updater advances after callbacks. */
-u32 func_00168788(BattleEffect *effect) {
+u32 effBattleGetCurrentFrame(BattleEffect *effect) {
     return effect->currentFrame;
 }
 
@@ -79,12 +79,12 @@ u32 func_00168790(u32 *value) {
 }
 
 /* Store a callback address; native code invokes it with this work at the source frame. */
-void func_00168798(BattleEffect *effect, u32 callbackAddress) {
+void effBattleSetSourceFrameCallback(BattleEffect *effect, u32 callbackAddress) {
     effect->sourceFrameCallbackAddress = callbackAddress;
 }
 
 /* Store the callback address used when the current frame reaches triggerFrame. */
-void func_001687A0(BattleEffect *effect, u32 callbackAddress) {
+void effBattleSetTriggerFrameCallback(BattleEffect *effect, u32 callbackAddress) {
     effect->triggerFrameCallbackAddress = callbackAddress;
 }
 
@@ -144,7 +144,41 @@ INCLUDE_ASM(const s32, "effect/effBattle", func_00168978);
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00169168);
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_001691E0);
+typedef struct EffBattleEntry {
+    u8 pad00[0x14];
+    u8 kind;     /* 0x14 */
+    u8 pad15[3];
+} EffBattleEntry; /* 0x18 */
+
+typedef struct EffBattleEntryList {
+    u8 pad00[0x6C];
+    u16 count;            /* 0x6C */
+    u8 pad6E[0xA];
+    EffBattleEntry entries[1]; /* 0x78 */
+} EffBattleEntryList;
+
+typedef struct EffBattleListOwner {
+    u8 pad00[0x24];
+    EffBattleEntryList *list; /* 0x24 */
+} EffBattleListOwner;
+
+/* True when any entry is of kind 2 or 3. */
+s32 effBattleHasActiveKind(EffBattleListOwner *owner) {
+    EffBattleEntryList *list = owner->list;
+    s32 count = list->count;
+    EffBattleEntry *entry = list->entries;
+    s32 i;
+
+    for (i = 0; i < count; i++, entry++) {
+        if (entry->kind == 3) {
+            return 1;
+        }
+        if (entry->kind == 2) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00169230);
 

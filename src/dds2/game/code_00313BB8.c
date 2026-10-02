@@ -12,7 +12,7 @@ extern void effCreateSelectionFlagListFromWork();
 
 extern s32 D_00435E50;
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 extern u32 ptyGetProfileRecordCap(u16);
 
@@ -33,7 +33,7 @@ typedef struct Entry24W {
 
 extern Entry24W D_00404AA4[];
 
-extern u8 D_00405CA8[];
+extern u8 frFontColoredGlyphResource[];
 
 /* Operand block used by the script VM helpers near ptyGetProfileRecord (layout inferred from field accesses). */
 typedef struct ScrVmOperand {
@@ -122,9 +122,9 @@ extern void func_00359AC0(s32, const char *, s32, s32);
 
 extern void func_003594A8(s32);
 
-extern char D_00438908[];
+extern char sdfDebugLogAppendMode[];
 
-extern char D_00438910[];
+extern char sdfDebugLogPairFormat[];
 
 /* Party profile header; each party slot occupies 0x1A4 bytes in game state. */
 typedef struct PtyProfileUnit {
@@ -146,15 +146,15 @@ extern void func_0019D550(u32, s32, s32);
 extern void frFontQueueGlyphInSelectedSlot(u32);
 
 void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
-    s32 file = func_00359A98("debug.log", D_00438908);
+    s32 file = func_00359A98("debug.log", sdfDebugLogAppendMode);
     if (file != 0) {
-        func_00359AC0(file, D_00438910, left, right);
+        func_00359AC0(file, sdfDebugLogPairFormat, left, right);
         func_003594A8(file);
     }
 }
 
 void ptyClearProfileRecords(void) {
-    memset(D_00435DD0 + 0x17210, 0, 0x5800);
+    memset(datGameState + 0x17210, 0, 0x5800);
 }
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00313C70);
@@ -200,7 +200,7 @@ void ptyRebuildAllProfiles(void) {
     s32 offset;
 
     for (offset = 0, i = 4; i >= 0; i--) {
-        u8 *unit = (u8 *)D_00435DD0 + 0xA60 + offset;
+        u8 *unit = (u8 *)datGameState + 0xA60 + offset;
 
         if ((((PtyProfileUnit *)unit)->flags & 1) != 0) {
             s32 j;
@@ -288,7 +288,7 @@ u32 sdfSetFlagBySlotId(u8 *work, u32 id) {
 }
 
 void scrClearProfileFlagsTable(void) {
-    memset(D_00435DD0 + 0x16f10, 0, 0x300);
+    memset(datGameState + 0x16f10, 0, 0x300);
 }
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314868);
@@ -297,7 +297,7 @@ s32 func_00314990(s32 work, u16 id) {
     u32 word, shift;
     u32 *flags;
     prfDecodeFlagPair(id, &word, &shift);
-    flags = (u32 *)D_00435DD0;
+    flags = (u32 *)datGameState;
     return (flags[0x16f10 / 4 + ((ScrVmOperand *)work)->h04 * 12 + word] & (1 << shift)) != 0;
 }
 
@@ -318,7 +318,7 @@ s32 func_00314B00(s32 work, u16 id) {
     u32 word, shift;
     u32 *flags;
     prfDecodeFlagPair(id, &word, &shift);
-    flags = (u32 *)D_00435DD0;
+    flags = (u32 *)datGameState;
     return (flags[0x16f10 / 4 + ((ScrVmOperand *)work)->h04 * 12 + word] & (1 << (shift + 1))) != 0;
 }
 
@@ -327,7 +327,7 @@ u32 scrGetSelectedScriptEntryId(s32 work) {
 }
 
 u32 ptyGetProfileRecordPointer(u32 ref, u16 index) {
-    u32 entry = D_00435DD0 + ((ScrVmOperand *)ref)->h04 * 0x580;
+    u32 entry = datGameState + ((ScrVmOperand *)ref)->h04 * 0x580;
 
     return entry + (index << 3) + 0x17210;
 }
@@ -390,7 +390,7 @@ void scrResetAndSetPairedGlobalFlags(void) {
     u32 first;
     s32 last;
 
-    memset(D_00435DD0 + 0x16ef0, 0, 0x10);
+    memset(datGameState + 0x16ef0, 0, 0x10);
     first = mnuPickPairedTableValue(0x10, 0);
     last = mnuPickPairedTableValue(0x10, 1);
     for (; (s32)first < last; first = first + 1) {
@@ -407,7 +407,7 @@ void scrSetGlobalBitFlag(u32 id) {
     if (id >= 0x220) return;
     bit = id + 0xfe55;
     offset = 0x16ef0 + (bit >> 5) * 4;
-    word = (u32 *)(D_00435DD0 + offset);
+    word = (u32 *)(datGameState + offset);
     *word |= 1U << (bit & 31);
 }
 
@@ -416,7 +416,7 @@ u32 scrTestGlobalBitFlag(u16 id) {
     if (id < 0x1ab) return 0;
     if (id >= 0x220) return 0;
     id += 0xfe55;
-    return *(u32 *)(D_00435DD0 + 0x16ef0 + (id >> 5) * 4) & (1U << (id & 31));
+    return *(u32 *)(datGameState + 0x16ef0 + (id >> 5) * 4) & (1U << (id & 31));
 }
 
 void scrSetSecondaryScriptFlag(u8 *work, u16 index) {
@@ -657,7 +657,7 @@ s32 ptyAreReqProfilesInParty(u8 *operand) {
             s32 offset = 0;
             s32 remaining = 4;
             do {
-                u8 *entry = (u8 *)D_00435DD0 + 0xa60 + offset;
+                u8 *entry = (u8 *)datGameState + 0xa60 + offset;
                 offset += 0x1c4;
                 if ((*(u16 *)entry & 1) != 0) {
                     if (func_00314990((s32)entry, (u16)selected) != 0) {
@@ -683,7 +683,7 @@ s32 prfReqCheckUnitLevel(u8 *a, u8 *b) {
 }
 
 s32 prfReqCheckGlobalCounter(u8 *a) {
-    if (*(u32 *)(D_00435DD0 + 0x3C) < ((PtyReqCount *)a)->minimumCount) {
+    if (*(u32 *)(datGameState + 0x3C) < ((PtyReqCount *)a)->minimumCount) {
         return 0;
     }
     return 1;
@@ -787,14 +787,14 @@ u16 scrGetEntryLowFlags(u32 context, u16 entryId) {
 }
 
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
-    u32 handle = func_0019FC38(x, y, first, width, (u32)D_00405CA8, 0);
+    u32 handle = func_0019FC38(x, y, first, width, (u32)frFontColoredGlyphResource, 0);
     frFontSetChildColors(handle, second);
     func_0019D550(handle, 1, option);
     frFontQueueGlyphInSelectedSlot(handle);
 }
 
 u8 *frFontGetColoredGlyphResource(void) {
-    return D_00405CA8;
+    return frFontColoredGlyphResource;
 }
 
 /* Each list entry occupies two words; only its first word is reset here. */
@@ -850,9 +850,10 @@ void scrSetOperandFloatValue(ScrVmOperand *op, float value) {
 void func_00316DE0(s32 work) {
     func_002D7458(work + 0x14, work + 0x38, 0, 0);
 }
-INCLUDE_SDATA(const s32, "game/code_00313BB8", D_00438908);
 
-INCLUDE_SDATA(const s32, "game/code_00313BB8", D_00438910);
+INCLUDE_SDATA(const s32, "game/code_00313BB8", sdfDebugLogAppendMode);
+
+INCLUDE_SDATA(const s32, "game/code_00313BB8", sdfDebugLogPairFormat);
 
 INCLUDE_SDATA(const s32, "game/code_00313BB8", D_00438918);
 

@@ -1,7 +1,7 @@
 #include "common.h"
 
 
-extern u32 func_001119D0(u32);
+extern u32 dds3CreateSlotResourceState(u32);
 
 extern s32 func_00328D68(u32);
 
@@ -54,7 +54,7 @@ u32 dds3CreateWorldInnerState(WorldInnerOwner *object) {
     effObjInnerCreate();
     inner = (WorldInnerState *)func_00328D68(0x90);
     object->inner = inner;
-    handle = func_001119D0((u32)object);
+    handle = dds3CreateSlotResourceState((u32)object);
     inner->handle80 = handle;
     dds3SetObjectFlags(object, 0x62);
     inner->state88 = 0;

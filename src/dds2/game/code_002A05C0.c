@@ -10,7 +10,7 @@ extern s32 mnuPollTitleStreamStateLocked(void);
 
 extern u32 D_00437A2C;
 
-extern s32 D_00437A40;
+extern s32 mnuMovieMenuState;
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -318,29 +318,30 @@ void sndUploadStreamToBothIopBuffers(u32 source) {
     func_0034E820(1, 0x80e0, 0, 2, 0, 0);
 }
 
-typedef struct SndSampleBuf {
-    u8 pad0[0x18];
-    s16 *samples;
-} SndSampleBuf;
+/* Title-stream sample buffer. */
+typedef struct MixSource {
+    u8 pad00[0x18];
+    s16 *samples; /* 0x18 */
+} MixSource;
 
-void sndMixSampleBuffers(s16 *dst, SndSampleBuf *b, SndSampleBuf *a) {
-    s16 *src = a->samples;
+void sndMixSampleBuffers(s16 *dst, MixSource *first, MixSource *second) {
+    s16 *in = second->samples;
     s16 *out = dst;
     s32 i;
     for (i = 0; i < 0x800; i++) {
-        *out++ = *src++;
+        *out++ = *in++;
     }
-    src = b->samples;
+    in = first->samples;
     out -= 0x800;
     for (i = 0; i < 0x800; i++) {
-        s32 v = *out + *src++;
-        if (v > 0x7FFF) {
-            v = 0x7FFF;
+        s32 sample = *out + *in++;
+        if (sample > 0x7FFF) {
+            sample = 0x7FFF;
         }
-        if (v < -0x7FFF) {
-            v = -0x7FFF;
+        if (sample < -0x7FFF) {
+            sample = -0x7FFF;
         }
-        *out++ = v;
+        *out++ = sample;
     }
 }
 
@@ -355,13 +356,13 @@ void mnuRunTitleStreamThread(void) {
     }
 }
 
-extern s32 D_00438FE0;
+extern s32 mnuTitleStreamThread;
 
-extern u8 D_00456DB0[];
+extern u8 mnuTitleStreamThreadStack[];
 
 void mnuCreateTitleStreamThread(void) {
     mnuTitleStreamSemaphore = sdfCreateSemaphore(1, 0xff, 0);
-    sdfStartTrackedThread(&D_00438FE0, mnuRunTitleStreamThread, D_00456DB0,
+    sdfStartTrackedThread(&mnuTitleStreamThread, mnuRunTitleStreamThread, mnuTitleStreamThreadStack,
                   0x1000, 0x45, 0);
     sdfThreadSleepSelf();
 }
@@ -387,7 +388,7 @@ void mnuWriteTitleStreamStatusLocked(u32 *values) {
 void mnuLoadTitleStreamFrameData(char *filePath, u32 *work) {
     void *fileData;
     s32 frames;
-    u32 request = func_00343ED0(filePath, &fileData, 0);
+    u32 request = sdfReadNamedResource(filePath, &fileData, 0);
     s32 bytes = sdfMemoryGetBlockSize(request);
     memcpy((void *)work[5], fileData, bytes);
     frames = bytes / (s32)work[2];
@@ -404,7 +405,7 @@ void mnuStoreTaskResult(char *audioPath) {
 extern u32 D_00454D58[];
 extern s32 fileIsRequestReadyInCurrentMode(u32);
 extern s32 fileGetResourceHandle(u32);
-extern u32 func_002C8110(u32);
+extern u32 fileGetLoadedDataAddress(u32);
 extern s32 fileGetResourceSize(u32);
 extern void filePollEntryCleanup(u32);
 extern s32 func_003293C8(s32);
@@ -418,7 +419,7 @@ s32 mnuCompleteTitleStreamFileLoad(u32 *queue) {
 
     if (ready != 0) {
         s32 handle = fileGetResourceHandle(D_00438FEC);
-        u32 data = func_002C8110(D_00438FEC);
+        u32 data = fileGetLoadedDataAddress(D_00438FEC);
         s32 size = fileGetResourceSize(D_00438FEC);
         s32 block;
 
@@ -530,9 +531,31 @@ void mnuResetTitleStreamLocked(void) {
     SignalSema(mnuTitleStreamSemaphore);
 }
 
+extern u32 D_00455D98[];
+extern s32 func_003292A8(s32);
+
 INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428650);
 
-INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2580);
+void mnuInitializeTitleSoundBuffer(void) {
+    u32 *work = mnuTitleSoundBufferState;
+    u32 *decoder = D_00455D98;
+    s32 allocation;
+    s32 buffer;
+
+    WaitSema(mnuTitleStreamSemaphore);
+    work[7] = (u32)decoder;
+    allocation = func_003292A8(0x1C200);
+    buffer = sdfMemoryGetBlockAddress(allocation);
+    work[8] = allocation;
+    work[4] = 2;
+    ((u32 *)work[7])[2] = 2;
+    work[5] = buffer;
+    work[6] = (u32)D_00455DB0;
+    work[2] = 0xC0;
+    mnuLoadTitleStreamFrameData("/soundat3/se01-2.at3", work);
+    func_003504A8(decoder);
+    SignalSema(mnuTitleStreamSemaphore);
+}
 
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2628);
 
@@ -616,8 +639,8 @@ void mnuReleaseTitleMenuAssetsAndMarkClosed(void) {
     mnuReleaseMenuResourceSlots();
     mnuReleaseSpriteHandle();
     mnuDestroyMovieMenuSelectionList();
-    func_003297C8(*(u32 *)D_00437A40);
-    D_00437A40 = 0;
+    func_003297C8(*(u32 *)mnuMovieMenuState);
+    mnuMovieMenuState = 0;
     D_00435BB0 = 1;
 }
 

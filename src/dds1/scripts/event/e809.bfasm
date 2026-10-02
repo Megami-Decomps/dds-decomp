@@ -32,8 +32,7 @@ e809_main:
   COMM 0x011e
   PUSHREG
   POPLIX 0x0001
-  push 809
-  COMM 0x00c8
+  WAIT_FOR_CAMP_TASK(809)
   push 3
   push 809
   COMM 0x00ca
@@ -90,11 +89,7 @@ e809_main:
   push 5
   push 0
   COMM 0x0047
-  push 6
-  push 809
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x000c
+  global_int[12] = BIND_MODEL_MOTION_SOUND(809, 6)
   SET_UNIT_LOW_FLAG(global_int[12])
   push READ_SECONDARY_WORLD_ID_VALUE(string(light03))
   push 40
@@ -115,8 +110,7 @@ _1:
   goto _1
 _2:
   DESTROY_REGISTERED_TASK(global_int[15])
-  push global_int[14]
-  COMM 0x009b
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[14])
   push 1
   COMM 0x011e
   PUSHREG
@@ -134,11 +128,7 @@ _3:
   push READ_SECONDARY_WORLD_ID_VALUE(string(light04_3))
   COMM 0x00e8
   WAIT_FOR_TIMER_LIMIT(30)
-  push 12
-  push 809
-  COMM 0x00d0
-  PUSHREG
-  POPIX 0x0006
+  global_int[6] = CREATE_EVENT_BED_EFFECT(809, 12)
   push local_int[0]
   push 1
   push global_int[6]
@@ -173,17 +163,11 @@ _3:
   COMM 0x0130
   push 1
   COMM 0x00ee
-  push global_int[6]
-  COMM 0x009b
-  push global_int[7]
-  COMM 0x009b
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[6])
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[7])
   push 80
   COMM 0x0131
-  push 15
-  push 809
-  COMM 0x00d0
-  PUSHREG
-  POPIX 0x0008
+  global_int[8] = CREATE_EVENT_BED_EFFECT(809, 15)
   push 0
   push 6
   COMM 0x011e
@@ -219,8 +203,7 @@ _5:
   goto _5
 _6:
   DESTROY_REGISTERED_TASK(global_int[13])
-  push global_int[9]
-  COMM 0x009b
+  DESTROY_WORLD_EFFECT_OBJECT(global_int[9])
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
   COMM 0x0023
@@ -231,11 +214,7 @@ e809_010_1:
   COMM 0x011e
   PUSHREG
   POPLIX 0x0003
-  push 9
-  push 809
-  COMM 0x00d0
-  PUSHREG
-  POPIX 0x0009
+  global_int[9] = CREATE_EVENT_BED_EFFECT(809, 9)
   push local_int[3]
   push 1
   push global_int[9]
@@ -265,11 +244,7 @@ e809_010_2:
   COMM 0x011e
   PUSHREG
   POPLIX 0x0005
-  push 9
-  push 809
-  COMM 0x00d0
-  PUSHREG
-  POPIX 0x000e
+  global_int[14] = CREATE_EVENT_BED_EFFECT(809, 9)
   push local_int[5]
   push 1
   push global_int[14]

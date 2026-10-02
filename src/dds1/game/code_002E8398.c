@@ -13,7 +13,13 @@ typedef struct ClockTime {
     u16 year; /* 0x6 */
 } ClockTime;
 
-void func_002E8430(void *state, s32 seed);
+typedef struct EffRandState {
+    u32 x[4];
+} EffRandState;
+
+extern EffRandState D_00398938;
+
+void effMiscSeedRandom(EffRandState *state, u32 seed);
 void func_002E8548(ClockTime *now);
 
 extern u32 effMiscRand(void *state);
@@ -29,10 +35,25 @@ u32 effMiscRandMod(void *state, u32 modulus) {
     return effMiscRand(state) % modulus;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E8398", func_002E8430);
+/* Seed the generator state (the shared effect state when `state` is NULL); each word is the previous one rotated right 8 bits and xored with a constant. */
+void effMiscSeedRandom(EffRandState *state, u32 seed) {
+    if (state == NULL) {
+        state = &D_00398938;
+    }
+    seed ^= 0x0AED1A0C;
+    state->x[0] = seed;
+    seed = (seed << 24) | (seed >> 8);
+    state->x[1] = seed;
+    seed ^= 0xAA5A02FE;
+    seed = (seed << 24) | (seed >> 8);
+    state->x[2] = seed;
+    seed ^= 0x11BE81C7;
+    seed = (seed << 24) | (seed >> 8);
+    state->x[3] = seed;
+}
 
 /* Seeds the generator at `state` from the current clock (time of day in seconds since an epoch). */
-void func_002E84A0(void *state) {
+void effMiscSeedRandomFromClock(void *state) {
     ClockTime now;
     s32 t;
 
@@ -40,7 +61,7 @@ void func_002E84A0(void *state) {
     t = now.year * 0x16E + now.day + D_00398910[now.month + 7] + 0xFFF4FF83;
     t = t * 0x18 + now.hour;
     t = t * 0x3C + now.min;
-    func_002E8430(state, t * 0x3C + now.sec);
+    effMiscSeedRandom(state, t * 0x3C + now.sec);
 }
 
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002E8548);

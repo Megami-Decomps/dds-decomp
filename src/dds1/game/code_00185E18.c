@@ -30,8 +30,8 @@ extern void func_00167A78(u32 handle);
 extern void btlSetActorEffectParameterOrMuzzlePosition(u32 unit, s32 arg1);
 
 void effFreePairedResources(PairedEffectResources *pair) {
-    func_00167350(pair->resource[1]);
-    func_00167350(pair->resource[0]);
+    effThunderGroupRelease(pair->resource[1]);
+    effThunderGroupRelease(pair->resource[0]);
     sdfReleaseChipBlock(pair);
 }
 
@@ -147,9 +147,9 @@ typedef struct {
 } BlurFramePacketRecord;
 
 extern BlurFilterOps D_003253E8;
-extern BlurFramePacketRecord D_00326ED0[];
+extern BlurFramePacketRecord kwlnFrameDrawPacketRecords[];
 extern void *sdfAllocPacketAligned(s32);
-extern u32 func_00100518(void);
+extern u32 kwlnGetDrawBufferIndex(void);
 extern void func_002D4CC8(const void *, void *, s32);
 extern void sdfAppendDmaTagToList(void *, void *);
 
@@ -157,7 +157,7 @@ extern void sdfAppendDmaTagToList(void *, void *);
 void effDrawBlurListWithFramePacket(void *list) {
     void *packet = sdfAllocPacketAligned(0x40);
 
-    func_002D4CC8(D_00326ED0[func_00100518()].dmaPacket, packet, 1);
+    func_002D4CC8(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, packet, 1);
     sdfAppendDmaTagToList(list, packet);
     D_003253E8.draw(&D_003253E8, list);
 }
@@ -179,7 +179,33 @@ void effDrawBlurSource(BlurSource *source, s32 resource, u8 fixedPointCoordinate
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00185E18", effDrawBlurPixelRectangle);
+typedef struct EffBlurPixelRect {
+    s32 extent;        /* 0x00 */
+    u32 color;         /* 0x04: first word of the BlurSource */
+    s32 blendControl;  /* 0x08 */
+    f32 rotation;      /* 0x0C */
+    f32 scale;         /* 0x10 */
+    s32 centerX;       /* 0x14 */
+    s32 centerY;       /* 0x18 */
+    s32 left;          /* 0x1C */
+    s32 top;           /* 0x20 */
+    s32 right;         /* 0x24 */
+    s32 bottom;        /* 0x28 */
+} EffBlurPixelRect;
+
+extern void effDrawBlurRectangle(BlurSource *source);
+
+void effDrawBlurPixelRectangle(EffBlurPixelRect *work) {
+    s32 x = work->centerX + 0x100;
+    s32 y = work->centerY + 0xE0;
+    s32 extent = work->extent;
+
+    work->left = x - extent;
+    work->top = y - extent;
+    work->right = x + extent;
+    work->bottom = y + extent;
+    effDrawBlurRectangle((BlurSource *)&work->color);
+}
 
 typedef struct EffBlurTemplateBody {
     s32 extent;        /* 0x00 */
@@ -207,14 +233,28 @@ void func_00186CB8(void) {
     sdfReleaseChipBlock();
 }
 
-INCLUDE_ASM(const s32, "game/code_00185E18", effDrawBlurPixelRectWithResource);
-
 typedef struct BlurRect {
     s32 extent;     /* 0x00 half-size source */
     BlurSource source; /* 0x04: passed to blur packet construction */
     /* Center and bounds are part of the packet source, not a separate layout. */
     u32 resource;   /* 0x2C */
 } BlurRect;
+
+/* Pixel-coordinate variant of the fixed-point rectangle below: the extent is not halved for Y. */
+void effDrawBlurPixelRectWithResource(BlurRect *rect) {
+    s32 centerX, centerY, halfExtent;
+
+    if (func_0011E278(rect) == 0) {
+        centerX = rect->source.centerX + 0x100;
+        centerY = rect->source.centerY + 0xE0;
+        halfExtent = rect->extent;
+        rect->source.left = centerX - halfExtent;
+        rect->source.top = centerY - halfExtent;
+        rect->source.right = centerX + halfExtent;
+        rect->source.bottom = centerY + halfExtent;
+        effDrawBlurSource(&rect->source, rect->resource, 0);
+    }
+}
 
 /* GS coordinates use sixteenth-pixel X and half-height Y; extent is halved for Y. */
 void effDrawBlurFixedPointRectangle(BlurRect *rect) {

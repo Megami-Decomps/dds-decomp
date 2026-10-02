@@ -2,7 +2,7 @@
 
 extern u8 D_0037B8BC[];
 
-extern u8 D_0037B888[];
+extern u8 mnuMovieDrawContext[];
 
 extern u8 D_003253C8[];
 
@@ -12,15 +12,28 @@ extern char D_003B1168[]; /* "staffProc" */
 
 extern u8 D_0037B168[];
 
-extern u32 D_003BC62C;
+extern u32 mnuMovieDrawTask;
 
-extern u16 D_003BA72C;
+extern u16 mnuMovieTaskState;
 
 extern u32 *mnuMovieWork;
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern char D_003B1A78[]; /* "mnuMovieDraw" */
+
+typedef struct MnuMovieRollEntry {
+    u8 pad00[0xC];
+    u8 unk0C;
+    u8 pad0D[0xF];
+} MnuMovieRollEntry;
+
+extern MnuMovieRollEntry D_003DC1E0[];
+extern s32 D_003BC618;
+extern void mnuLoadMovieRollSprite(void);
+extern void func_0026E8D8(void);
+extern void func_002ECA40(s32);
+extern void sdfSetGridScaledDrawBounds(s32, s32, s32, s32, u32);
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026EC90);
 
@@ -66,8 +79,8 @@ INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1140);
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F918);
 
 s32 mnuStaffImageProc(void) {
-    func_0026E720(-10, -10, 0, 0x80, mnuMovieWork[1], 0x10, 0, 0x27);
-    func_0026E720(D_0037AFC0[D_003BC614].x - 5, D_0037AFC0[D_003BC614].y - 5, 0, 0x80, mnuMovieWork[1], D_0037AF70[mnuMovieWork[5]], 0, 0x53);
+    mnuDrawIconAlphaSprite(-10, -10, 0, 0x80, mnuMovieWork[1], 0x10, 0, 0x27);
+    mnuDrawIconAlphaSprite(D_0037AFC0[D_003BC614].x - 5, D_0037AFC0[D_003BC614].y - 5, 0, 0x80, mnuMovieWork[1], D_0037AF70[mnuMovieWork[5]], 0, 0x53);
     func_0026F230(0x53);
     func_0026F918();
     return 0;
@@ -76,7 +89,7 @@ s32 mnuStaffImageProc(void) {
 void mnuFinishStaffMovieAndFreeState(void) {
     s64 pendingWork;
 
-    D_003BA72C = 2;
+    mnuMovieTaskState = 2;
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
     func_0026F518();
@@ -94,11 +107,26 @@ void mnuReleaseMovieResourceAfterPendingWork(void) {
     func_002ECA40(0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026FE10);
+void mnuInitializeMovieRollViewport(void) {
+    s32 i;
+    u32 *movie = mnuMovieWork;
+
+    movie[4] = 0;
+    movie[5] = 0;
+    D_003BC614 = 0;
+    D_003BC618 = 4;
+    mnuLoadMovieRollSprite();
+    func_002ECA40(1);
+    sdfSetGridScaledDrawBounds(0x68, 0x69, 0x180, 0xEE, 0x80808080);
+    for (i = 0; i < 32; i++) {
+        func_0026E8D8();
+        D_003DC1E0[i].unk0C = 0;
+    }
+}
 
 extern u32 D_003BA8EC;
 
-extern u16 D_003BA72C;
+extern u16 mnuMovieTaskState;
 
 extern char D_003B1168[];
 
@@ -124,7 +152,7 @@ void mnuMovieCreateTask(void) {
     movie[2] = 0;
     movie[3] = 0;
     func_0026A5F0(0x13);
-    D_003BA72C = 1;
+    mnuMovieTaskState = 1;
     kwlnTaskCreate(D_003B1168, 0x408, 0, 0, func_0026F5E8, mnuFinishStaffMovieAndFreeState, 0);
 }
 
@@ -140,14 +168,14 @@ s32 mnuStopStaffTasks(void) {
 }
 
 s32 mnuMovieDraw(void) {
-    func_002ECCF8(D_0037B888, D_003253C8);
+    func_002ECCF8(mnuMovieDrawContext, D_003253C8);
     return 0;
 }
 
 void mnuStartMovieDrawTaskForResource(u32 resource, void *data) {
-    if (D_003BC62C == 0) {
-        func_002ED8D0(D_0037B888, data, resource);
-        D_003BC62C = kwlnTaskCreate(D_003B1A78, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
+    if (mnuMovieDrawTask == 0) {
+        func_002ED8D0(mnuMovieDrawContext, data, resource);
+        mnuMovieDrawTask = kwlnTaskCreate(D_003B1A78, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
     }
 }
 
@@ -158,16 +186,16 @@ void func_0026FFF8(s32 index) {
 }
 
 void mnuStopMovieDrawTask(void) {
-    if (D_003BC62C == 0) {
+    if (mnuMovieDrawTask == 0) {
         return;
     }
-    func_002EDAE0(D_0037B888);
-    kwlnTaskDestroyWithHierarchy(D_003BC62C, 0);
-    D_003BC62C = 0;
+    func_002EDAE0(mnuMovieDrawContext);
+    kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
+    mnuMovieDrawTask = 0;
 }
 
 s32 func_00270068(void) {
-    func_002EDBB8(D_0037B888);
+    func_002EDBB8(mnuMovieDrawContext);
 }
 
 s32 func_00270088(void) {
@@ -336,5 +364,5 @@ INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC620);
 
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC628);
 
-INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC62C);
+INCLUDE_SDATA(const s32, "game/code_0026EC90", mnuMovieDrawTask);
 

@@ -3,7 +3,7 @@
 
 extern void func_002D0918(void *);
 extern void *sdfResourceRetainAddress(void *);
-extern u32 func_002EB028(const char *, u32 *, s32);
+extern u32 sdfReadNamedResource(const char *, u32 *, s32);
 extern s32 bfFindScriptIndexByName(void *, const char *);
 extern void *kwlnTaskGetTaskByName(const char *);
 extern void kwlnTaskDestroyWithHierarchy(void *, s32);

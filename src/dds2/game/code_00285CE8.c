@@ -1,4 +1,7 @@
 #include "common.h"
+extern s32 func_003292A8(s32 size);
+extern s8 *sdfMemoryGetBlockAddress();
+
 
 extern void evtPrintDeveloperConsoleMessage();
 
@@ -18,7 +21,8 @@ extern void func_00308808(s32, s32, s32, s32, s32, s32, s32);
 
 /* Mantra record zeroed before each update call (0x1C4). */
 typedef struct {
-    u8 pad0[4];     /* 0x0 */
+    u16 flags;      /* 0x0: low bit marks an active unit */
+    u16 pad2;       /* 0x2 */
     u16 unk4;       /* 0x4 */
     u8 pad6[0x1BE]; /* 0x6 */
 } MtrRecord;
@@ -30,8 +34,8 @@ typedef struct {
     s16 unk1E;     /* 0x1E */
 } MtrGrid;
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285CE8);
 
+INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285CE8);
 INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285D78);
 
 INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285E98);
@@ -46,7 +50,29 @@ INCLUDE_ASM(const s32, "game/code_00285CE8", func_002862B0);
 
 INCLUDE_RODATA(const s32, "game/code_00285CE8", D_00425DD8);
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", mtrMantraEventBitPush);
+s32 mtrMantraEventBitPush(void) {
+    s8 *data;
+    s32 handle;
+    s32 i;
+
+    handle = func_003292A8(0x76);
+    data = sdfMemoryGetBlockAddress(handle);
+    memset(data, 0, 0x76);
+    for (i = 0; i < 0x70; i++) {
+        if (mdlFlagTest(i + 0x920)) {
+            *data = 1;
+        }
+        data++;
+    }
+    for (i = 0; i < 6; i++) {
+        if (mdlFlagTest(i + 0x9A0)) {
+            *data = 1;
+        }
+        data++;
+    }
+    evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitPush()]*****************\n");
+    return handle;
+}
 
 extern s8 *sdfMemoryGetBlockAddress(void);
 extern void func_003297C8(s32 arg);
@@ -75,7 +101,16 @@ void mtrMantraEventBitPop(s32 arg) {
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitPop()]*****************\n");
 }
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", mtrMantraBitResetUnit);
+extern void scrSetEntryLowFlags(u32 context, u16 entryId, u16 lowFlags);
+void mtrMantraBitResetUnit(MtrRecord *record) {
+    s32 i;
+
+    for (i = 0; i < 0xB0; i++) {
+        scrSetEntryLowFlags((u32)record, i, 0);
+    }
+    evtPrintDeveloperConsoleMessage(
+        "*****************[mtrMantraBitReset_Unit():[0x%x]]*****************\n", record->unk4);
+}
 
 INCLUDE_ASM(const s32, "game/code_00285CE8", mtrMantraBitReset);
 

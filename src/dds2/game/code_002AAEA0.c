@@ -73,11 +73,11 @@ INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AAF70);
 
 INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB0E0);
 
-s64 mnuFinishStaffConfigPopup(s32 arg0) {
+s64 mnuFinishStaffConfigPopup(s32 callback) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    return menuSetHandler(context, 2, arg0);
+    return menuSetHandler(context, 2, callback);
 }
 
 u32 mnuOpenCampConfigPanelTasks(void) {
@@ -113,7 +113,7 @@ s64 mnuDispatchStaffMenuWithIdlePopup(s32 callback) {
     return state;
 }
 
-s64 mnuDrawStaffImageScreen(s32 arg0) {
+s64 mnuDrawStaffImageScreen(s32 callback) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
@@ -121,14 +121,14 @@ s64 mnuDrawStaffImageScreen(s32 arg0) {
     func_002BB510(-0x10, -8, 0, ((CampVisualWork *)context)->modelHandle, 0x54);
     mnuCreateStaffImageSprite(0x18);
     func_002AA7A0(2, ((CampVisualWork *)context)->drawContext);
-    return menuSetHandler(context, 1, arg0);
+    return menuSetHandler(context, 1, callback);
 }
 
-s64 mnuFinishStaffImagePopup(s32 arg0) {
+s64 mnuFinishStaffImagePopup(s32 callback) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    return menuSetHandler(context, 2, arg0);
+    return menuSetHandler(context, 2, callback);
 }
 
 u32 func_002AB3A0(void) {
@@ -140,12 +140,12 @@ u32 func_002AB3A8(void) {
     return 1;
 }
 
-s64 mnuPollCampFieldSkillAndPopup(s32 arg0) {
+s64 mnuPollCampFieldSkillAndPopup(s32 callback) {
     s32 context;
     s64 state;
 
     context = kwlnTaskGetUserValue();
-    state = menuSetHandler(context, 0, arg0);
+    state = menuSetHandler(context, 0, callback);
     if (state != 0) {
         return state;
     }
@@ -156,35 +156,69 @@ s64 mnuPollCampFieldSkillAndPopup(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB448);
 
-s64 mnuFinishFieldSkillPopup(s32 arg0) {
+s64 mnuFinishFieldSkillPopup(s32 callback) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    return menuSetHandler(context, 2, arg0);
+    return menuSetHandler(context, 2, callback);
 }
 
 u32 func_002AB550(void) {
     return 1;
 }
 
-s32 mtrMantraIdIsValid(s32 arg0) {
+s32 mtrMantraIdIsValid(s32 mantraId) {
     u32 i;
 
     for (i = 0; i < 5; i++) {
-        if (arg0 == D_003E73F8[i]) {
+        if (mantraId == D_003E73F8[i]) {
             return 1;
         }
     }
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB598);
+typedef struct SaveItemCounts {
+    u8 pad00[0x1340];
+    u8 counts[0x100];
+} SaveItemCounts;
 
-s32 mtrMantraFindIndex(s32 arg0) {
+extern SaveItemCounts *datGameState;
+extern u16 D_00437B6E;
+extern u8 D_00437B88;
+extern u16 D_003E6730[];
+extern s32 mdlFlagTest(s32);
+
+s32 func_002AB598(void) {
+    s32 owned = 0;
+    s32 required = D_00437B6E;
+    s32 i;
+
+    required -= D_00437B88;
+    required--;
+
+    if (mdlFlagTest(0xBA0) == 0) {
+        required--;
+    }
+    for (i = 0; i < D_00437B6E; i++) {
+        s32 mantraId = D_003E6730[i];
+        if (datGameState->counts[mantraId] != 0) {
+            if (mtrMantraIdIsValid(mantraId) == 0) {
+                owned++;
+            }
+        }
+    }
+    if (owned < required) {
+        return 0;
+    }
+    return 1;
+}
+
+s32 mtrMantraFindIndex(s32 mantraId) {
     u32 i;
 
     for (i = 0; i < 0x12; i++) {
-        if (arg0 == *(u16 *)(D_003E7200 + i * 0x1C)) {
+        if (mantraId == *(u16 *)(D_003E7200 + i * 0x1C)) {
             return i + 1;
         }
     }

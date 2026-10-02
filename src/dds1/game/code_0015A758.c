@@ -8,7 +8,7 @@ typedef struct ParCellNode ParCellNode;
 
 extern ParCellNode *D_003BB014;
 
-extern ParListNode *D_003BB010;
+extern ParListNode *parRecordListHead;
 
 /* Particle object (layout mirrors effect/parManager.c ParObj, which owns
  * the type; only the fields this TU touches are named here). */
@@ -95,7 +95,7 @@ struct ParCellNode {
     ParCellNode *next;
 };
 
-extern ParDispatch D_0034E250[];
+extern ParDispatch parKindConstructorEntries[];
 
 extern s32 billCloneObjectRetainingSharedData(s32);
 
@@ -131,11 +131,11 @@ typedef struct ParEmitDesc {
 
 extern void parControlInit();
 
-extern void func_002E84A0(void *arg);
+extern void effMiscSeedRandomFromClock(void *arg);
 
 extern u8 D_003D64B0[];
 
-extern u8 D_003D64C0[];
+extern u8 parDrawControl[];
 
 extern s32 parGetRestartFlag();
 
@@ -155,6 +155,8 @@ typedef struct ParSystem {
     s32 unk24;           /* 0x24 */
     s32 unk28;           /* 0x28 */
 } ParSystem;
+
+extern void func_0015B928(ParSystem *, s32, const u128 *);
 
 extern s32 sdfCreateAssetWithDrawEntries();
 
@@ -178,21 +180,21 @@ extern f32 D_0034E5C0[];
 
 extern f32 D_0034E5D0[];
 
-extern u8 D_00324680[];
+extern u8 sdfViewEyeVector[];
 
-extern u8 D_00324690[];
+extern u8 sdfViewTargetVector[];
 
 void func_0015A758(ParObj *work, u32 value) {
     work->valueF0 = value;
 }
 
-void parObjSetMode(ParObj *work, s32 value) {
-    value &= 0xFF;
-    switch (work->dispatchIndex) {
+void parObjSetMode(ParObj *object, s32 mode) {
+    mode &= 0xFF;
+    switch (object->dispatchIndex) {
     case 1:
     case 5:
     case 11:
-        work->mode150 = value;
+        object->mode150 = mode;
         break;
     case 0:
     case 2:
@@ -203,20 +205,20 @@ void parObjSetMode(ParObj *work, s32 value) {
     case 8:
     case 10:
     case 12:
-        work->mode151 = value;
+        object->mode151 = mode;
         break;
     case 9:
         break;
     }
-    work->restartFlag = 1;
+    object->restartFlag = 1;
 }
 
-s32 parObjGetMode(ParObj *work) {
-    switch (work->dispatchIndex) {
+s32 parObjGetMode(ParObj *object) {
+    switch (object->dispatchIndex) {
     case 1:
     case 5:
     case 11:
-        return work->mode150;
+        return object->mode150;
     case 0:
     case 2:
     case 3:
@@ -226,7 +228,7 @@ s32 parObjGetMode(ParObj *work) {
     case 8:
     case 10:
     case 12:
-        return work->mode151;
+        return object->mode151;
     default:
         return 0;
     }
@@ -234,26 +236,26 @@ s32 parObjGetMode(ParObj *work) {
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A7E0);
 
-ParObj *parInstantiateKind(ParObj *work) {
-    ParObj *particle = D_0034E250[work->dispatchIndex].func();
-    particle->dispatchIndex = work->dispatchIndex;
-    if (work->unk28 == -1) {
-        s32 transform = billCloneObjectRetainingSharedData(work->billId);
-        billSetChildScaleComponents(transform, particle->scaleX, particle->scaleY);
-        billSetBillboardMode(transform, particle->billboardMode);
-        billMarkKindOneFlag(transform);
-        particle->billId = transform;
+ParObj *parInstantiateKind(ParObj *source) {
+    ParObj *particle = parKindConstructorEntries[source->dispatchIndex].func();
+    particle->dispatchIndex = source->dispatchIndex;
+    if (source->unk28 == -1) {
+        s32 billboard = billCloneObjectRetainingSharedData(source->billId);
+        billSetChildScaleComponents(billboard, particle->scaleX, particle->scaleY);
+        billSetBillboardMode(billboard, particle->billboardMode);
+        billMarkKindOneFlag(billboard);
+        particle->billId = billboard;
     }
     return particle;
 }
 
-void parObjDispatch(ParObj *work) {
-    D_0034E258[work->dispatchIndex].func(work);
+void parObjDispatch(ParObj *object) {
+    D_0034E258[object->dispatchIndex].func(object);
 }
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A9A0);
 
-void func_0015ACF0(void) {
+void parRestartInstanceCallback(void) {
     parRestartKind();
 }
 
@@ -262,15 +264,13 @@ void effParScaleComponent(float scale, ParObj *work) {
     work->scale8C *= scale;
 }
 
-s64 func_0015AD48(void) {
-    return parGetRestartFlag();
-}
+INCLUDE_ASM(const s32, "game/code_0015A758", func_0015AD48);
 
 void parCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0015AD78(void) {
+void parRebuildInstanceTransforms(void) {
     parComposeEffectTransformMatrices();
 }
 
@@ -278,13 +278,11 @@ void func_0015AD90(ParObj *work, u32 value) {
     work->valueF0 = value;
 }
 
-void func_0015AD98(ParObj *work, u8 mode) {
+void parChangeInstanceMode(ParObj *work, u8 mode) {
     parObjSetMode(work, mode);
 }
 
-s64 func_0015ADB0(ParObj *work) {
-    return parObjGetMode(work);
-}
+INCLUDE_ASM(const s32, "game/code_0015A758", func_0015ADB0);
 
 /* Kinds 2-4 keep the scale at +8 of their own record; copy it into the
  * shared vector and store the (vf10 - vf11) difference. */
@@ -310,8 +308,8 @@ void parUpdateSharedScaleAndDelta(ParScaleObj *obj) {
     default:
         return;
     }
-    VU0_LOAD_VF($vf10, D_00324680);
-    VU0_LOAD_VF($vf11, D_00324690);
+    VU0_LOAD_VF($vf10, sdfViewEyeVector);
+    VU0_LOAD_VF($vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF($vf10, D_003D6490);
 }
@@ -384,7 +382,7 @@ void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color) {
     VU0_MOVE_VF(vf10, vf12);
     VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[1]);
-    func_0015B928(particle, index, axis);
+    func_0015B928((ParSystem *)particle, index, axis);
     parFadeAlphaCell(particle, index);
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
@@ -448,9 +446,9 @@ u32 func_0015B220(void) {
 }
 
 void parSysReset(void) {
-    D_003BB010 = 0;
+    parRecordListHead = 0;
     parControlInit();
-    func_002E84A0(&D_003D64B0);
+    effMiscSeedRandomFromClock(&D_003D64B0);
 }
 
 void func_0015B250(void) {
@@ -465,8 +463,8 @@ void parReleaseAssetRecord(ParReleaseRecord *record) {
 }
 
 void parPrependRecordListNode(ParListNode *node) {
-    node->next = D_003BB010;
-    D_003BB010 = node;
+    node->next = parRecordListHead;
+    parRecordListHead = node;
 }
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B420);
@@ -476,8 +474,8 @@ void func_0015B648(ParReleaseRecord *record) {
 }
 
 void parControlInit(void) {
-    memset(D_003D64C0, 0, 0x2C);
-    *(u16 *)(D_003D64C0 + 4) = 0x4000;
+    memset(parDrawControl, 0, 0x2C);
+    *(u16 *)(parDrawControl + 4) = 0x4000;
 }
 
 ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
@@ -557,7 +555,30 @@ void parPrependCellNode(ParCellNode *node) {
     D_003BB014 = node;
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B928);
+void func_0015B928(ParSystem *system, s32 index, const u128 *vertices) {
+    ParCell *cell = &system->cells[index];
+    u128 *vertex;
+    s32 shiftCount;
+    s32 i;
+
+    if (cell->unk0C == 0) {
+        shiftCount = system->vertexWordCount - 2;
+        vertex = cell->history + shiftCount;
+        for (i = 0; i < shiftCount; i++) {
+            vertex--;
+            PCP_COPY_VECTOR(vertex + 2, vertex);
+        }
+        cell->unk0C = system->groupDivisor;
+        if (cell->vertexCount < shiftCount + 2) {
+            cell->vertexCount += 2;
+        }
+    } else {
+        cell->unk0C--;
+        vertex = cell->history;
+    }
+    PCP_COPY_VECTOR(vertex, vertices);
+    PCP_COPY_VECTOR(vertex + 1, vertices + 1);
+}
 
 void parTranslateCellVertices(ParSystem *system, s32 index, void *delta) {
     ParCell *cell = system->cells + index;
@@ -1068,7 +1089,7 @@ void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParDrawCmd *cmd) {
         sdfAppendPacket(list, func_0015FE20(&state));
     }
     if (remaining > 0) {
-        u16 *counts = (u16 *)D_003D64C0;
+        u16 *counts = (u16 *)parDrawControl;
         counts[0] = remaining / 3;
         counts[1] = remaining;
         sdfAppendPacket(list, func_0015FE20(&state));
@@ -1093,7 +1114,7 @@ ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
     return desc;
 }
 
-INCLUDE_SDATA(const s32, "game/code_0015A758", D_003BB010);
+INCLUDE_SDATA(const s32, "game/code_0015A758", parRecordListHead);
 
 INCLUDE_SDATA(const s32, "game/code_0015A758", D_003BB014);
 

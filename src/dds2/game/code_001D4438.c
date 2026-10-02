@@ -2,7 +2,7 @@
 #include "btl.h"
 #include "pcp_vu0.h"
 
-extern s32 func_001AA6F8(void);
+extern s32 btlGetRuntime(void);
 extern void btlDispatchStateHandler();
 
 extern s32 func_00101740(const char *);
@@ -14,9 +14,9 @@ extern void func_00101968(s32, s32);
 extern s32 kwlnTaskDestroyWithHierarchy(s32, s32);
 extern s32 btlGetTrackedTaskHandle(s32);
 extern s32 btlIsNamedBattleTaskRegistered(void);
-extern s32 func_001B81E8(void);
-extern s32 func_001B8538(void);
-extern s32 func_001B8740(void);
+extern s32 btlHasRegisteredGuidePanelTask(void);
+extern s32 btlHasRegisteredSkillNamePanelTask(void);
+extern s32 btlHasRegisteredAphNamePanelTask(void);
 extern s32 func_001CC9C0(s32);
 extern s32 btlBossDebugPrintf(const char *, ...);
 extern u32 fldGetSceneScriptTaskUserData(void);
@@ -28,9 +28,9 @@ typedef struct SceneWorkBuffers {
 
 extern SceneWorkBuffers D_00438F58;
 
-extern s32 D_00435DEC;
+extern s32 datEnemyRecords;
 
-extern char *D_004367BC;
+extern char *btlCommandPanelTaskNameRef;
 
 extern void func_001C7DB8(s32, s32);
 
@@ -234,8 +234,8 @@ typedef struct BattleSceneWork {
     s32 (*sceneCallback)();
 } BattleSceneWork;
 extern SceneControl *btlCommandPanelWork;
-extern s16 *D_00438F48;
-extern SceneDescriptor *D_00435E04;
+extern s16 *btlLinkedSelectionTaskBuffer;
+extern SceneDescriptor *datBattleSceneRecords;
 extern f32 D_00433724;
 extern f32 *D_0037F770[];
 extern u32 func_001C82D8(s32, s8);
@@ -280,8 +280,8 @@ typedef struct SceneParty {
     SceneEntry entry[5];
 } SceneParty;
 
-extern SceneParty *D_00435DD0;
-extern s32 D_00435E38;
+extern SceneParty *datGameState;
+extern s32 datItemSkillRecords;
 
 extern s32 func_00206090();
 extern void btlRepositionPartyAroundBattleCenter();
@@ -379,7 +379,7 @@ typedef struct BtlPanelBlock {
     BtlPanelRes *res;
 } BtlPanelBlock;
 
-extern BtlPanelBlock *D_00436804;
+extern BtlPanelBlock *btlResourceBlock;
 extern void func_00306C28(s32, s32, s32, u8 *, s32, BtlPanelRes *, s32, s32);
 
 extern s32 btlGetEffectActive();
@@ -460,11 +460,11 @@ extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 extern f32 effMiscRandUnitFloat(void *state);
 extern void mdlAddEntryPlain(void *, s32, s32);
 extern void mdlAddEntryFlagged(void *, s32, s32);
-extern u8 D_0037F550[];
+extern u8 effSharedRandomState[];
 extern void func_001EC5F0(u32);
 extern void func_001EF030(void *, void *);
 extern s32 func_001E88A8(u8 *);
-extern void func_00232390(void *, void *);
+extern void mdlProcessContextNodesAndTransforms(void *, void *);
 extern void func_001E38F0(void *, void *, s32, u8 *, u32);
 extern void dds3ClearObjectFlags(s32, s32);
 extern u8 D_00380788[];
@@ -856,7 +856,7 @@ extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 
 extern s32 func_0022F180(void);
 
-extern s32 func_001AA6F8(void);
+extern s32 btlGetRuntime(void);
 
 extern void mdlStoreTertiaryVectorVU(s32);
 
@@ -888,7 +888,7 @@ typedef struct SoundSceneEntry {
     u8 pad26[2];
 } SoundSceneEntry;
 
-extern s32 func_00342168(u32);
+extern s32 sndFindPackedTrackLoadStatus(u32);
 
 typedef struct SoundTask {
     u8 enabled;
@@ -936,9 +936,9 @@ extern SoundResourceNode *sndAllocResourceNode(void);
 
 extern void sndFormatResourceNameFromUnitMode(s32, s32);
 
-extern s32 D_00435E20;
+extern s32 datCommandRecords;
 
-extern s32 D_00435E30;
+extern s32 datActionAnimationRecords;
 
 typedef struct ActiveSoundNode {
     u32 flags;
@@ -993,7 +993,7 @@ typedef struct SoundTransition {
 
 extern s32 btlQueueTintTransitionWhenEnabled(u32 *);
 
-extern u32 D_00436AD8;
+extern u32 btlTintTransitionHoldCount;
 
 typedef struct {
     union {
@@ -1119,7 +1119,7 @@ typedef struct BattleFieldBlocks {
 
 extern f32 *D_0037F770[];
 
-extern u8 D_0037F780[];
+extern u8 kwlnDefaultColorVector[];
 
 extern void fldApplyLightSetCurrent(void);
 
@@ -1171,7 +1171,7 @@ extern u8 *fldCreateSceneGroupAction(u8 *actor, u32 owner, s32 groupIndex);
 extern void btlClearSceneTaskActiveFlag(s32 task);
 
 void btlActionSeqStateSelect(u8 *task) {
-    u8 *work = (u8 *)func_001AA6F8();
+    u8 *work = (u8 *)btlGetRuntime();
     u8 *unit = (u8 *)((SceneTask *)task)->actor;
     s32 (*hook)(u8 *);
     s32 next;
@@ -1250,7 +1250,7 @@ extern u32 sndGetResourceStatus(s32);
  * resource node, then the caller's list node, and requires no waiting actor
  * or scene task of the listed kinds. */
 s32 func_001D46A8(s32 self) {
-    BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
+    BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
     SceneActor *actor;
     for (actor = scene->actors; actor != 0; actor = actor->next) {
         if (actor->resourceNode != 0) {
@@ -1336,36 +1336,7 @@ extern s32 btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 /* Keep raw task/unit accesses: typed SceneTask/SceneActor fields change
  * instruction scheduling in this otherwise matching callback. */
-s64 btlReleaseIdleUnitSoundAndAdvanceTask(u8 *task) {
-    u8 *unit;
-    u8 *work;
-    s32 handle;
-    void (*hook)(u8 *);
-    work = (u8 *)func_001AA6F8();
-    unit = *(u8 **)(task + 0x18);
-    handle = *(s32 *)(unit + 0x318);
-    *(u32 *)(task + 8) &= ~0x100;
-    if (handle != 0 && sndIsResourceNodeReferencedOrActive(handle) == 0) {
-        sndFreeResourceNode(*(s32 *)(unit + 0x318));
-        *(s32 *)(unit + 0x318) = 0;
-    }
-    if (*(u32 *)(unit + 0x110) & 0x400) {
-        hook = *(void (**)(u8 *))(work + 0x700);
-        if (hook != 0) {
-            hook(task);
-        }
-    } else if (!(*(u16 *)(unit + 0x12E) & 0x4000)) {
-        if (*(s32 *)(unit + 0xC8) == 0x1F) {
-            func_001AA850(unit + 0x120, 0x1000);
-        }
-        *(s32 *)(unit + 0x110) = *(s32 *)(unit + 0x110) & ~0x20 & 0xF7FFFFFF;
-        btlFlagUnitDefeatCandidate(unit);
-        func_001E2758(unit);
-        btlStartTask(btlAllocateIndexedUnitEffectTask(unit, 0xE, 0, 1.0f));
-        fldAppendTaskToGroup(task);
-        btlDispatchStateHandler(task, 2);
-    }
-}
+INCLUDE_ASM(const s32, "game/code_001D4438", btlReleaseIdleUnitSoundAndAdvanceTask);
 
 void func_001D4A30(s32 task) {
     ((SceneTask *)task)->flags = (((SceneTask *)task)->flags | 0x10) & ~0x200;
@@ -1404,7 +1375,7 @@ extern s32 btlBothSidesActive(s32);
 extern s32 func_0020EB40(u8 *);
 
 void btlActionSeqCheckDispatch(u8 *task) {
-    BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
+    BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
     u32 flags = scene->flags;
     s32 unit = (s32)((SceneTask *)task)->actor;
     SceneActor *actor;
@@ -1549,7 +1520,7 @@ void func_001D4FE8(u8 *task) {
 }
 
 void func_001D5330(u32 task) {
-    func_001AA6F8();
+    btlGetRuntime();
     ((SceneTask *)task)->flags = ((SceneTask *)task)->flags & 0xfffffffb;
     func_001CAB60(task);
 }
@@ -1612,18 +1583,18 @@ typedef struct SceneAiEntry {
     u8 pad04[0x158];
 } SceneAiEntry;
 
-extern SceneAiEntry *D_00435DF4;
+extern SceneAiEntry *datEnemyAiRecords;
 extern s32 btlAllocAndCheck();
 extern void btlAssignTaskResultAndArgument();
 extern void btlBindActorSlot();
-extern void func_00210F58();
-extern s32 func_0020EBD0();
+extern void btlRunRandomWeightedAiTableAction();
+extern s32 btlAiCheckStatusRollEligibility();
 extern s32 kwlnTaskIsRegistered();
 
 /* AI task: binds the acting unit's slot on first run, then waits for the
  * pending AI task and dispatches state 0xB or 0xC. */
 s32 func_001D5950(SceneTask *task) {
-    BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
+    BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
     u16 index;
     if (!(scene->flags & 0x20)) {
         if (sndHasActiveActor() == 0) {
@@ -1631,19 +1602,19 @@ s32 func_001D5950(SceneTask *task) {
                 if (!(task->flags & 0x80)) {
                     index = task->actor->kind;
                     scene->pendingTask = 0;
-                    if (D_00435DF4[index].kind != 1 && btlAllocAndCheck(task) != 0) {
+                    if (datEnemyAiRecords[index].kind != 1 && btlAllocAndCheck(task) != 0) {
                         btlAssignTaskResultAndArgument(task);
-                    } else if (D_00435DF4[index].slot != 0) {
-                        btlBindActorSlot(task, D_00435DF4[index].slot);
+                    } else if (datEnemyAiRecords[index].slot != 0) {
+                        btlBindActorSlot(task, datEnemyAiRecords[index].slot);
                     } else {
-                        func_00210F58(task);
+                        btlRunRandomWeightedAiTableAction(task);
                     }
                     task->flags |= 0x80;
                     scene->flags &= ~0x100000;
                 }
                 if (scene->pendingTask == 0) {
                     scene->flags |= 0x100000;
-                    if (func_0020EBD0(task) != 0) {
+                    if (btlAiCheckStatusRollEligibility(task) != 0) {
                         btlDispatchStateHandler(task, 0xB);
                     } else {
                         btlDispatchStateHandler(task, 0xC);
@@ -1652,10 +1623,10 @@ s32 func_001D5950(SceneTask *task) {
                     if (task->command == -1) {
                         btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
                         btlDebugPrintf("AI script return NULL\n");
-                        func_00210F58(task);
+                        btlRunRandomWeightedAiTableAction(task);
                     }
                     scene->flags |= 0x100000;
-                    if (func_0020EBD0(task) != 0) {
+                    if (btlAiCheckStatusRollEligibility(task) != 0) {
                         btlDispatchStateHandler(task, 0xB);
                     } else {
                         btlDispatchStateHandler(task, 0xC);
@@ -1673,12 +1644,12 @@ void btlMarkSceneTaskAfterReset(s32 task) {
 }
 
 extern void func_001E0CE0(s32, s32);
-extern s32 func_0020EBD0();
+extern s32 btlAiCheckStatusRollEligibility();
 
 s32 btlCommandStateSelectB(s32 task) {
     if (sndHasActiveActor() == 0) {
         func_001E0CE0(task, task + 0x20);
-        if (func_0020EBD0(task) != 0) {
+        if (btlAiCheckStatusRollEligibility(task) != 0) {
             btlDispatchStateHandler(task, 0xB);
         } else {
             btlDispatchStateHandler(task, 0xC);
@@ -1792,7 +1763,7 @@ extern void func_00201828();
 
 void btlProcessEligibleCommandTaskEffects(u8 *task) {
     u8 *commandData = task + 0x20;
-    u8 *work = (u8 *)func_001AA6F8();
+    u8 *work = (u8 *)btlGetRuntime();
     s32 owner = (s32)((SceneTask *)task)->actor;
     void (*hook)(u8 *);
     if (func_001D46A8(owner) != 0) {
@@ -1999,7 +1970,7 @@ void btlCommandTaskReturnUpdate(BtlUnit *task) {
 }
 
 void btlStartLinkedActorEffectTask(BtlUnit *unit) {
-    BtlWork *work = (BtlWork *)func_001AA6F8();
+    BtlWork *work = (BtlWork *)btlGetRuntime();
     BtlUnit *owner = unit->link18;
     u8 *task;
     if (!(owner->flags & 0x200)) {
@@ -2033,7 +2004,7 @@ void btlStartOwnerEffectTasks(s32 *arguments) {
 INCLUDE_ASM(const s32, "game/code_001D4438", func_001DBE70);
 
 void btlRecordLinkedActorOutcome(BtlUnit *unit) {
-    BtlWork *work = (BtlWork *)func_001AA6F8();
+    BtlWork *work = (BtlWork *)btlGetRuntime();
     work->unk278 = work->unk278 + 1;
     if (func_001B2AF8(unit->link18) != 0) {
         work->battleFlags |= 0x2000;
@@ -2083,7 +2054,7 @@ void btlFinalizeLinkedActionAndAdvanceHistory(void) {
 }
 
 void btlUnitTurnEndCommit(BtlUnit *unit) {
-    void (*hook)(BtlUnit *) = ((BtlWork *)func_001AA6F8())->hook638;
+    void (*hook)(BtlUnit *) = ((BtlWork *)btlGetRuntime())->hook638;
     BtlUnit *owner = unit->link18;
     if (hook != 0) {
         hook(unit);
@@ -2121,7 +2092,7 @@ void btlRemoveEligibleActorSceneTask(BtlUnit *task) {
         btlDispatchStateHandler(task, 1);
     } else if (unit->flags & 0x400) {
         hookResult = 0;
-        work = (BtlWork *)func_001AA6F8();
+        work = (BtlWork *)btlGetRuntime();
         entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->statBits);
         if (work->hook618 != 0) {
             hookResult = work->hook618(unit);
@@ -2182,7 +2153,7 @@ void btlFlagLinkedActorActionInProgress(s32 unit) {
 }
 
 void btlRunHookAndAdvanceUnitState(BtlUnit *unit) {
-    void (*hook)(BtlUnit *) = ((BtlWork *)func_001AA6F8())->hook;
+    void (*hook)(BtlUnit *) = ((BtlWork *)btlGetRuntime())->hook;
     if (hook != 0) {
         hook(unit);
     }
@@ -2230,7 +2201,7 @@ BtlUnit *btlCreateActionSeq(void) {
     BtlWork *work;
     *(u16 *)((u8 *)seq + 4) = 1;
     btlInitBattleIndexWork((u8 *)seq + 0x20);
-    work = (BtlWork *)func_001AA6F8();
+    work = (BtlWork *)btlGetRuntime();
     seq->prev = 0;
     if (work->head != 0) {
         work->head->prev = seq;
@@ -2253,7 +2224,7 @@ void btlDestroyActionSeq(BtlUnit *unit) {
     if (unit->prev != 0) {
         unit->prev->next = unit->next;
     } else {
-        ((BtlWork *)func_001AA6F8())->head = unit->next;
+        ((BtlWork *)btlGetRuntime())->head = unit->next;
     }
     sdfReleaseChipBlock(unit);
 }
@@ -2261,7 +2232,7 @@ void btlDestroyActionSeq(BtlUnit *unit) {
 void btlUpdateActionSeqs(void) {
     BtlUnit *unit;
     BtlUnit *next;
-    for (unit = ((BtlWork *)func_001AA6F8())->head; unit != 0; unit = next) {
+    for (unit = ((BtlWork *)btlGetRuntime())->head; unit != 0; unit = next) {
         next = unit->next;
         if (unit->seqFlags & 1) {
             D_003B69D8[unit->state].update(unit);
@@ -2275,7 +2246,7 @@ void btlUpdateActionSeqs(void) {
 void btlDestroyAllActionSeqs(void) {
     BtlUnit *unit;
     BtlUnit *next;
-    for (unit = ((BtlWork *)func_001AA6F8())->head; unit != 0; unit = next) {
+    for (unit = ((BtlWork *)btlGetRuntime())->head; unit != 0; unit = next) {
         next = unit->next;
         btlDestroyActionSeq(unit);
     }
@@ -2283,7 +2254,7 @@ void btlDestroyAllActionSeqs(void) {
 
 BtlUnit *btlFindUnitByActor(BtlUnit *actor) {
     BtlUnit *unit;
-    for (unit = ((BtlWork *)func_001AA6F8())->head; unit != 0; unit = unit->next) {
+    for (unit = ((BtlWork *)btlGetRuntime())->head; unit != 0; unit = unit->next) {
         if (unit->link18 == actor) {
             return unit;
         }

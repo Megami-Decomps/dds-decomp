@@ -10,19 +10,19 @@ typedef struct SdfQuad {
 
 /* Reference-counted texture handle (0x8); DDS1 sdf/sdfTex.c and DDS1/2 SdfTex owners. */
 typedef struct SdfTexRef {
-    void *unk0;
+    void *unk0; /* Non-null suppresses primary-resource release. */
     s32 refCount;
 } SdfTexRef;
 
 /* Texture buffer GPU command words (0x38); DDS1/2 game/code_002D10B0/00329F60.c. */
 typedef struct SdfTexBuf {
-    s32 unk0;
+    s32 gifTagWord; /* Low GIFtag word; NLOOP occupies bits 0-14. */
     u8 pad4[0xC];
-    u64 unk10;
+    u64 samplingState; /* GS TEX1 data, including minification/magnification filters. */
     u64 unk18;
-    u64 unk20;
+    u64 textureState; /* GS TEX0 data. */
     u64 unk28;
-    u64 unk30;
+    u64 clampState; /* GS CLAMP data. */
 } SdfTexBuf;
 
 /* Texture resource word at +0xC (0x10); DDS1/2 game/code_002D10B0/00329F60.c via SdfTex. */
@@ -36,34 +36,34 @@ typedef struct SdfTex {
     struct SdfTex *next;
     struct SdfTex *prev;
     SdfTexRef *reference;
-    s16 unkC;
-    s16 unkE;
+    s16 width;
+    s16 height;
     SdfTexResource *primaryResource;
     SdfTexResource *secondaryResource;
     u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u16 unk1C;
+    u8 clutFormat;
+    u8 pixelFormat;
+    u8 maxMipLevel;
+    u16 lodParameters; /* Packed GS TEX1 L/K parameters. */
     u8 unk1E;
-    u8 unk1F;
+    u8 clampMode;
     s32 unk20;
     s32 unk24;
-    SdfTexBuf *unk28;
-    SdfTexBuf *unk2C;
+    SdfTexBuf *primaryBuffer;
+    SdfTexBuf *secondaryBuffer;
     u8 *data;
     s32 dataSize;
     s32 unk38;
-    void *unk3C;
+    void *auxiliaryAllocation; /* Owned heap allocation released alongside data. */
 } SdfTex;
 
 /* Semaphore ID and attached work pointers (0x14); DDS1/2 game/code_002D10B0/00329F60.c. */
 typedef struct SdfSemaObj {
-    s32 unk0; /* Semaphore ID. */
+    s32 semaphoreId;
     void *unk4;
-    void *unk8;
+    void *releaseTail;
     void *unkC;
-    s32 unk10;
+    s32 packetTail;
 } SdfSemaObj;
 
 /* DMA packet list cursors and endpoints (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
@@ -72,8 +72,8 @@ typedef struct SdfListHead {
     u32 first;
     u32 last;
     u32 unkC;
-    u32 unk10;
-    u32 unk14;
+    u32 firstReferenceSource; /* Optional first DMA reference prefix. */
+    u32 secondReferenceSource; /* Optional second DMA reference prefix. */
     u32 unk18;
     u32 unk1C;
 } SdfListHead;
@@ -88,9 +88,9 @@ typedef struct SdfPacket {
 
 /* DMA source header and trailing 64-bit field (0x10); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfDmaSrc {
-    u16 unk0;
+    u16 quadwordCount;
     u8 pad2[6];
-    u64 unk8;
+    u64 vifCommands;
 } SdfDmaSrc;
 
 /* DMA node with a 128-bit command (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
@@ -103,17 +103,17 @@ typedef struct SdfDmaNode {
 /* Resource entry with word at +0xC (0x10); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfResEntry {
     u8 pad00[0xC];
-    u32 unk0C;
+    u32 baseAddress; /* Shifted right six bits when patching a GS texture base. */
 } SdfResEntry;
 
 /* Large DMA packet fields at +0x30/+0x80 (0x88); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfBigPacket {
     u8 pad00[8];
-    s32 unk08;
+    s32 resourceIndexXor;
     u8 pad0C[0x24];
-    u64 unk30;
+    u64 unk30; /* Low 14 bits receive the indexed texture base. */
     u8 pad38[0x48];
-    u64 unk80;
+    u64 unk80; /* Low 14 bits receive the indexed texture base. */
 } SdfBigPacket;
 
 /* Two-slot packet builder and source/mode state (0x60); DDS1/2 game/code_002D33C8/0032C278.c. */
@@ -157,7 +157,7 @@ typedef struct SdfAsset {
     u32 unk20;
     u32 unk24;
     u32 unk28;
-    SdfTex *unk2C;
+    SdfTex *texture;
     u8 pad30[8];
     void *third;
     void *fourth;
@@ -186,5 +186,23 @@ typedef struct SdfThreadNode {
     struct SdfThreadNode *next; /* 0x00 */
     s32 threadId;               /* 0x04 */
 } SdfThreadNode;
+
+/* Draw-node vector slots (SdfDrawNode vectors array indices). */
+#define SDF_DRAW_TRANSLATION_VECTOR 0
+#define SDF_DRAW_SCALE_VECTOR 1
+#define SDF_DRAW_X_AXIS_VECTOR 2
+#define SDF_DRAW_Y_AXIS_VECTOR 3
+#define SDF_DRAW_Z_AXIS_VECTOR 4
+
+/* SDF chunk fourCC values (little-endian byte order). */
+#define SDF_CHUNK_UNIQUE_VALUE 0x51494e55 /* "UNIQ" in little-endian byte order */
+#define SDF_CHUNK_MAP_POSITIONS 0x534F504D /* "MPOS" in little-endian byte order */
+#define SDF_CHUNK_LOD_VALUE 0x43444f4c /* "LODC" in little-endian byte order */
+
+/* Free-list kind for SDF pools. */
+#define SDF_POOL_FREE_KIND 0xFFFF
+
+/* Alternate item setup mode for SDF model entries. */
+#define SDF_MODEL_ALTERNATE_ITEM_SETUP 4
 
 #endif /* SDF_H */

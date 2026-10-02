@@ -31,7 +31,7 @@ extern void kwlnFadeOutStart();
 extern void evtClearActiveFlag();
 extern void evtSetBoundedDisplayValue();
 extern u32 D_003CE460[];
-extern s32 D_00435DD0;
+extern s32 datGameState;
 extern char D_00437840[];
 extern void mdlFlagSet();
 extern void mdlFlagClear();
@@ -200,8 +200,19 @@ void mnuAwardCampProgressCurrency(void) {
     func_0026C918(0, text);
     dspStartEntry(0x19);
     datAddCurrencyClamped(index);
-    func_0011A118(0x81, -*(u8 *)(D_00435DD0 + 0x13c1));
+    func_0011A118(0x81, -*(u8 *)(datGameState + 0x13c1));
     mdlFlagClear(0xa01);
 }
 
-INCLUDE_ASM(const s32, "game/code_002651C0", func_00265A60);
+/* One-shot menu flag: set the object's flag the first time it is not yet set, returning 1 only then. */
+s32 func_00265A60(s32 object) {
+    u32 flag = D_003CE460[*(s32 *)(object + 8)];
+    if (flag == 0) {
+        return 0;
+    }
+    if (mdlFlagTest(flag) == 0) {
+        mdlFlagSet(flag);
+        return 1;
+    }
+    return 0;
+}

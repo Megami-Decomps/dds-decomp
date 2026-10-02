@@ -1,12 +1,15 @@
 #include "common.h"
 
+extern s32 kwlnTaskGetTaskByName(char *);
+extern s32 kwlnTaskGetUserValue();
+extern s8 brsTaskIsUiUpdateAllowed(s32);
 extern s32 func_002877A8(void);
 
 extern s32 kwlnFadeIsActive(void);
 
-extern s8 D_003BC529;
+extern s8 brsPendingRowsLatched;
 
-extern s8 D_003BC52A;
+extern s8 brsUiUpdateAllowed;
 
 extern s8 brsUpdateBlocked;
 
@@ -143,7 +146,7 @@ INCLUDE_ASM(const s32, "game/code_00260208", func_00261760);
 
 void brsTaskStart(void) {
     mnuStaffCreateTasks();
-    D_003BC52A = 0;
+    brsUiUpdateAllowed = 0;
     brsUpdateBlocked = 1;
 }
 
@@ -152,7 +155,7 @@ s8 brsTaskIsUpdateBlocked(void) {
 }
 
 u32 brsTaskAllowUpdate(void) {
-    D_003BC52A = 1;
+    brsUiUpdateAllowed = 1;
     return 1;
 }
 
@@ -161,14 +164,14 @@ void brsTaskPollDone(void) {
 }
 
 s8 brsTaskHasPendingRows(void) {
-    return D_003BC529;
+    return brsPendingRowsLatched;
 }
 
 s8 brsTaskIsUiUpdateAllowed(s32 context) {
     if (*(s32 *)(context + 0xd44) != 0) {
         brsUpdateBlocked = 0;
     }
-    return brsUpdateBlocked ? 0 : D_003BC52A;
+    return brsUpdateBlocked ? 0 : brsUiUpdateAllowed;
 }
 
 typedef struct MenuIconRef {
@@ -366,7 +369,7 @@ s32 brsAdvanceSkillPackagePanel(s32 work) {
     return 0;
 }
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 /* Five party slots, followed by the number of reward rows in this batch. */
 typedef struct BrsRewardRow {
@@ -401,7 +404,7 @@ void brsMarkPartyRows(u8 *dst, u8 *state, s32 flags) {
 
     for (i = 0; i < ((BrsRewardBatch *)state)->count; i++) {
         u8 *d = dst;
-        u8 *unit = *(u8 **)&D_003BAA00 + 0xA60;
+        u8 *unit = *(u8 **)&datGameState + 0xA60;
         s32 j;
 
         for (j = 4; j >= 0; j--) {
@@ -428,9 +431,9 @@ void brsMarkPartyRowsFromLists(u32 partyRows, u32 primaryRewards, u32 secondaryR
 /* Latch whether the battle-result task still has pending reward rows. */
 void brsTaskLatchPendingRows(s32 task) {
     if (((BrsTaskState *)task)->pendingRows == 0) {
-        D_003BC529 = 0;
+        brsPendingRowsLatched = 0;
     } else {
-        D_003BC529 = 1;
+        brsPendingRowsLatched = 1;
     }
 }
 
@@ -463,9 +466,9 @@ void brsStaffTaskDestroy(s32 arg0) {
     brsTaskState = 2;
 }
 
-extern char D_003BC530[];
-extern char D_003AFAB8[];
-extern char D_003AFAC8[];
+extern char brsStaffInputTaskName[];
+extern char mnuStaffPrimaryPanelTaskName[];
+extern char mnuStaffSecondaryPanelTaskName[];
 extern void brsMessageInputStep(void);
 extern void mnuStaffRunPanel1(void);
 extern void mnuStaffRunPanel2(void);
@@ -476,25 +479,25 @@ s32 mnuStaffCreateTasks(void) {
     s32 result;
     void *work = brsCreateTaskContext();
 
-    kwlnTaskCreate(D_003BC530, 0x405, 1, 0, brsMessageInputStep, 0, work);
-    kwlnTaskCreate(D_003AFAB8, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, work);
-    result = kwlnTaskCreate(D_003AFAC8, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, work);
+    kwlnTaskCreate(brsStaffInputTaskName, 0x405, 1, 0, brsMessageInputStep, 0, work);
+    kwlnTaskCreate(mnuStaffPrimaryPanelTaskName, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, work);
+    result = kwlnTaskCreate(mnuStaffSecondaryPanelTaskName, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, work);
     brsTaskState = 1;
     return result;
 }
 
-extern char D_003BC530[];
-extern char D_003AFAB8[];
-extern char D_003AFAC8[];
+extern char brsStaffInputTaskName[];
+extern char mnuStaffPrimaryPanelTaskName[];
+extern char mnuStaffSecondaryPanelTaskName[];
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
 u32 mnuStaffDestroyTasks(void) {
     s8 state = brsTaskState;
 
     if (state == 1) {
-        kwlnTaskDestroyWithHierarchyByName(D_003BC530, 0);
-        kwlnTaskDestroyWithHierarchyByName(D_003AFAB8, 0);
-        kwlnTaskDestroyWithHierarchyByName(D_003AFAC8, 0);
+        kwlnTaskDestroyWithHierarchyByName(brsStaffInputTaskName, 0);
+        kwlnTaskDestroyWithHierarchyByName(mnuStaffPrimaryPanelTaskName, 0);
+        kwlnTaskDestroyWithHierarchyByName(mnuStaffSecondaryPanelTaskName, 0);
         brsUpdateBlocked = state;
         return 1;
     }
@@ -523,15 +526,22 @@ u32 brsTaskTryDestroy(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_002629A8);
+s32 func_002629A8(void) {
+    s32 task = kwlnTaskGetTaskByName(mnuStaffPrimaryPanelTaskName);
+    s32 work;
 
-/* func_00262A30 @ 0x00262A30, 88 bytes.
- * Near-miss 12/13 words: retail materialises several base+offset pointers
- * (`base+0x14`, `base+0x20`, `off+0xEF0`, `off+0x1230`) and writes through
- * them; ee-gcc folds everything to `base+off` plus constant displacements.
- * Writes: base+off+{0xF10=a3, 0xF0C=a2(u16), 0x1250=a4, 0x124C=a2(u16),
- * 0xF14=a5, 0x1254=a6} with off = index*104.
- */
+    if (task == 0) {
+        return 0;
+    }
+    work = kwlnTaskGetUserValue(task);
+    if (0x100 - *(s32 *)(work + 0x1574) <= 0 &&
+        brsTaskIsUiUpdateAllowed(work) != 0 &&
+        *(s8 *)(work + 0xD3C) == 1) {
+        return 1;
+    }
+    return *(s8 *)(work + 0xD3C);
+}
+
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262A30);
 
 s32 brsTaskIsFadeIdle(void) {
@@ -555,7 +565,7 @@ void mnuStaffCopyPanelBlock(MenuPanelBlock *src, u8 *base) {
     *(MenuPanelBlock *)(base + 0x9C) = *src;
 }
 
-extern s32 D_0036D3C0[];
+extern s32 mnuStaffRollThresholds[];
 extern s32 effMiscRand(s32);
 
 s32 mnuStaffPickRoll(void) {
@@ -563,7 +573,7 @@ s32 mnuStaffPickRoll(void) {
     u32 i;
 
     for (i = 0; i < 4; i++) {
-        if ((s32)roll < D_0036D3C0[i]) {
+        if ((s32)roll < mnuStaffRollThresholds[i]) {
             return i + 1;
         }
     }
@@ -574,9 +584,9 @@ INCLUDE_ASM(const s32, "game/code_00260208", brsSelectLevelBonusMode);
 
 INCLUDE_ASM(const s32, "game/code_00260208", brsSelectNextUnit);
 
-INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAB8);
+INCLUDE_RODATA(const s32, "game/code_00260208", mnuStaffPrimaryPanelTaskName);
 
-INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAC8);
+INCLUDE_RODATA(const s32, "game/code_00260208", mnuStaffSecondaryPanelTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAD8);
 
@@ -590,13 +600,13 @@ INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC520);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", brsTaskState);
 
-INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC529);
+INCLUDE_SDATA(const s32, "game/code_00260208", brsPendingRowsLatched);
 
-INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC52A);
+INCLUDE_SDATA(const s32, "game/code_00260208", brsUiUpdateAllowed);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", brsUpdateBlocked);
 
-INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC530);
+INCLUDE_SDATA(const s32, "game/code_00260208", brsStaffInputTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC538);
 

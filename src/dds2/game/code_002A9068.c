@@ -1,20 +1,20 @@
 #include "common.h"
 
-extern u32 D_00437AE8;
+extern u32 mnuMovieShutdownCounter;
 
 extern s32 kwlnFadeIsActive(void);
 
 extern s32 kwlnTaskGetUserValue();
 
-extern char D_00437B78[]; /* "camp" */
+extern char mnuCampInputTaskName[]; /* "camp" */
 
-extern char D_0042AA08[]; /* "camp_draw" */
+extern char mnuCampDrawTaskName[]; /* "camp_draw" */
 
-extern char D_0042AA18[]; /* "camp_update" */
+extern char mnuCampOwnerTaskName[]; /* "camp_update" */
 
-extern s8 D_00437B72;
+extern s8 mnuCampTaskState;
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 /* Item quantities are byte-indexed in the shared save-state block. */
 typedef struct SaveItemCounts {
@@ -60,7 +60,7 @@ extern void func_002C1B58(u8 *, s32);
 
 extern void func_003425B0(void);
 
-/* One of five 0x1C4-byte party records at D_00435DD0 + 0xA60. */
+/* One of five 0x1C4-byte party records at datGameState + 0xA60. */
 typedef struct PartyRecord {
     u16 flags;
     u16 pad02;
@@ -127,7 +127,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
     s32 i = 4;
 
     do {
-        PartyRecord *rec = (PartyRecord *)(D_00435DD0 + offset + 0xA60);
+        PartyRecord *rec = (PartyRecord *)(datGameState + offset + 0xA60);
         offset += 0x1C4;
         if (rec->flags & 1) {
             scrClearPackedScriptFlags(rec);
@@ -136,7 +136,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
         i--;
     } while (i >= 0);
     for (i = 0xC0; i < 0x100; i++) {
-        ((SaveItemCounts *)D_00435DD0)->counts[i] = 0;
+        ((SaveItemCounts *)datGameState)->counts[i] = 0;
         mnuClearEntryBlocked(i);
     }
     mdlFlagClear(0x901);
@@ -147,7 +147,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
     ptyRebuildAllProfiles();
 }
 
-extern u32 D_00438FF8[2];
+extern u32 mnuCampResourceHandles[2];
 
 extern u32 D_003E6848[];
 
@@ -158,7 +158,7 @@ extern u32 effLoadIndexedResource(char *, u32, u32);
 void mnuLoadCampResources(void) {
     s32 i;
     for (i = 0; i < 2; i++) {
-        D_00438FF8[i] = effLoadIndexedResource(D_0042A950, D_003E6848[i * 2], 1);
+        mnuCampResourceHandles[i] = effLoadIndexedResource(D_0042A950, D_003E6848[i * 2], 1);
     }
 }
 
@@ -169,8 +169,8 @@ extern void effResolveAndReleaseResource(u32);
 void mnuSnapshotCampTextureHandles(u32 *destination) {
     s32 i;
     for (i = 0; i < 2; i++) {
-        effResolveAndReleaseResource(D_00438FF8[i]);
-        destination[i] = D_00438FF8[i];
+        effResolveAndReleaseResource(mnuCampResourceHandles[i]);
+        destination[i] = mnuCampResourceHandles[i];
     }
 }
 
@@ -178,7 +178,7 @@ void mnuReleaseCampTextureHandlesAndClearOutput(u32 *destination) {
     s32 remaining = 1;
     u32 offset = 0;
     do {
-        effReleaseTextureHandlesAndResetSlots(*(u32 *)((u8 *)D_00438FF8 + offset));
+        effReleaseTextureHandlesAndResetSlots(*(u32 *)((u8 *)mnuCampResourceHandles + offset));
         *(u32 *)((u8 *)destination + offset) = 0;
         offset += 4;
     } while (--remaining >= 0);
@@ -352,7 +352,7 @@ void movReleaseActivePartyCategoryModels(s32 list, s32 count, u8 *work) {
 
     effResolveAndReleaseResource(*(u32 *)list);
     for (i = 0; i < 5; i++) {
-        PartyRecord *slot = (PartyRecord *)(D_00435DD0 + 0xA60 + i * 0x1C4);
+        PartyRecord *slot = (PartyRecord *)(datGameState + 0xA60 + i * 0x1C4);
 
         if ((slot->flags & 1) != 0) {
             s32 index = slot->slotIndex + D_00437B73;
@@ -463,8 +463,8 @@ void movReleaseTitleEffects(u32 *state) {
 void mnuInitializeCampPanelResources(u32 container, u32 *resources, u32 unused, u32 mode) {
     func_002BCD90(container, mode, *resources, 1, resources[1], 0x2d, resources[1], 0x1d);
     func_002BC498(container, resources[1]);
-    func_002BC5D0(container, resources + 4);
-    func_002BC600(container, resources + 0xc);
+    mnuCopyPrimaryWindowHandles(container, resources + 4);
+    mnuCopySecondaryWindowHandles(container, resources + 0xc);
     mnuRegisterResourceHandles(container, resources + 0x14);
     func_002BCA98(container);
     mnuSetPanelSlotValues(container, resources[1]);
@@ -547,29 +547,17 @@ s32 movAreTitleEffectsReady(s32 mode, u32 *state) {
 
 INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9908);
 
-/* Final title-effect handles follow the four packet groups and sprite list. */
+/* Title-effect work: sprite handle list at 0x60, then the resource slot sets. */
 typedef struct TitleEffectHandles {
-    u8 pad00[0xC4];
-    u32 groupA;
-    u32 groupB;
-    u32 additional[9];
-    u32 finalGroup;
+    u8 pad00[0x60];
+    u32 sprites[25]; /* 0x60: released through mnuReleaseTitleEffectSprites */
+    u32 groupA;      /* 0xC4 */
+    u32 groupB;      /* 0xC8 */
+    u32 additional[9]; /* 0xCC */
+    u32 finalGroup;  /* 0xF0 */
 } TitleEffectHandles;
 
-/* Release the title screen's effect sprites and resource slot sets. */
-s64 mnuReleaseTitleEffectResourceGroups(u8 *work) {
-    u32 *handles;
-    s32 i;
-
-    mnuReleaseTitleEffectSprites((u32 *)(work + 0x60));
-    effDestroyResourceSlotSet(((TitleEffectHandles *)work)->groupA);
-    effDestroyResourceSlotSet(((TitleEffectHandles *)work)->groupB);
-    handles = ((TitleEffectHandles *)work)->additional;
-    for (i = 8; i >= 0; i--) {
-        effDestroyResourceSlotSet(*handles++);
-    }
-    return effDestroyResourceSlotSet(((TitleEffectHandles *)work)->finalGroup);
-}
+INCLUDE_ASM(const s32, "game/code_002A9068", mnuReleaseTitleEffectResourceGroups);
 
 INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9AB8);
 
@@ -582,9 +570,9 @@ typedef struct StaffResourceHeader {
     u32 resourceLists[3];      /* 0x104 */
 } StaffResourceHeader;
 
-void mnuDrawCampGridResourceSlot(s32 drawWork, u32 arg1, u32 arg2, s32 record, u32 unused,
+void mnuDrawCampGridResourceSlot(s32 drawWork, u32 y, u32 z, s32 record, u32 unused,
                    u32 layer) {
-    itfDrawGridWithResolvedSlot(drawWork + 0x60, arg1, arg2, 1, *(u32 *)(*(s32 *)(record + 0x30) + 100), 10,
+    itfDrawGridWithResolvedSlot(drawWork + 0x60, y, z, 1, *(u32 *)(*(s32 *)(record + 0x30) + 100), 10,
                   layer);
 }
 
@@ -737,7 +725,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     movReleaseTitleEffects(work);
     func_00303D58(((CampVisualWork *)work)->menuResource);
     func_003297C8(((CampVisualWork *)work)->allocationHandle);
-    D_00437B72 = 2;
+    mnuCampTaskState = 2;
     func_003425D8();
 }
 
@@ -749,7 +737,7 @@ u32 func_002AA278(void) {
     return 0;
 }
 
-extern u32 func_002C44E8(s32);
+extern u32 mnuMapPadMaskToFlags(s32);
 
 extern s32 func_002A9AB8(s32);
 
@@ -766,7 +754,7 @@ extern void mnuPlayInputSound();
 /* On button 8, exit the camp only when both nested guards permit it;
  * otherwise play the alternate sound without destroying its tasks. */
 s32 mnuStaffCampCancelCheck(s32 menu) {
-    u32 buttons = func_002C44E8(8);
+    u32 buttons = mnuMapPadMaskToFlags(8);
     s32 result;
 
     if (func_002A9AB8(menu) == 0) {
@@ -788,32 +776,32 @@ s32 mnuStaffCampCancelCheck(s32 menu) {
     return result;
 }
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042AA08);
+INCLUDE_RODATA(const s32, "game/code_002A9068", mnuCampDrawTaskName);
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042AA18);
+INCLUDE_RODATA(const s32, "game/code_002A9068", mnuCampOwnerTaskName);
 
 void mnuCreateCampTasks(void) {
     s32 work;
     s32 draw;
 
     work = (s32)mnuCreateStaffMenuWork();
-    kwlnTaskCreate(D_00437B78, 0x3F2, 1, 0, func_002AAF70, 0, work);
-    draw = kwlnTaskCreate(D_0042AA08, 0x2B07, 1, 0, func_002AB0E0, 0, work);
-    kwlnTaskCreate(D_0042AA18, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, work);
+    kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, func_002AAF70, 0, work);
+    draw = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, func_002AB0E0, 0, work);
+    kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, work);
     func_00101968(draw, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, func_002AA278, 0, work));
     func_00101968(draw, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, work));
     kwlnFadeOutStart(0, 0, 0, 0xF);
-    D_00437B72 = 1;
+    mnuCampTaskState = 1;
 }
 
 void mnuDestroyCampTasks(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_00437B78, 0);
-    kwlnTaskDestroyWithHierarchyByName(D_0042AA08, 0);
-    kwlnTaskDestroyWithHierarchyByName(D_0042AA18, 0);
+    kwlnTaskDestroyWithHierarchyByName(mnuCampInputTaskName, 0);
+    kwlnTaskDestroyWithHierarchyByName(mnuCampDrawTaskName, 0);
+    kwlnTaskDestroyWithHierarchyByName(mnuCampOwnerTaskName, 0);
 }
 
 s32 mnuAcknowledgeCampState(void) {
-    s8 state = D_00437B72;
+    s8 state = mnuCampTaskState;
     if (state == 1) {
         return 1;
     }
@@ -821,7 +809,7 @@ s32 mnuAcknowledgeCampState(void) {
         return 0;
     }
     if (state == 2) {
-        D_00437B72 = 0;
+        mnuCampTaskState = 0;
     }
     return 0;
 }
@@ -846,7 +834,7 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, s3
         return;
     }
     func_00306CD0((visual->titleSlide + 0x1A) << 4, 0xCB8, 0, visual->titleOpacity, 1, drawContext, 0x3F, layer);
-    func_0035C860(buffer, D_00437B80, ((CampCurrency *)D_00435DD0)->currency);
+    func_0035C860(buffer, D_00437B80, ((CampCurrency *)datGameState)->currency);
     /* Keep the RGB channels fixed while the opacity byte fades from 0x80 to zero. */
     object = func_0019F798((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
                            uiBlendColors(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);
@@ -895,12 +883,12 @@ INCLUDE_ASM(const s32, "game/code_002A9068", func_002AA9D8);
 
 extern void func_002AA9D8(u32, u32, u32, u32, u32, u32, u32, u32, u32);
 
-void func_002AAC70(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g) {
-    func_002AA9D8(a, b, c, d, e, f, 0, 0, g);
+void func_002AAC70(u32 kind, u32 labelIndex, u32 textTable, u32 context, u32 drawOption, u32 textOption, u32 layer) {
+    func_002AA9D8(kind, labelIndex, textTable, context, drawOption, textOption, 0, 0, layer);
 }
 
-void func_002AAC98(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f) {
-    func_002AAC70(a, b, c, d, e, 0, f);
+void func_002AAC98(u32 kind, u32 labelIndex, u32 textTable, u32 context, u32 drawOption, u32 layer) {
+    func_002AAC70(kind, labelIndex, textTable, context, drawOption, 0, layer);
 }
 
 typedef struct CampDrawPosition {
@@ -964,7 +952,7 @@ INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042AC40);
 
 INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042AC70);
 
-INCLUDE_SDATA(const s32, "game/code_002A9068", D_00437B78);
+INCLUDE_SDATA(const s32, "game/code_002A9068", mnuCampInputTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_002A9068", D_00437B80);
 

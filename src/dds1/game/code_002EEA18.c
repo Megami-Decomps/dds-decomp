@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "pcp_vu0.h"
 
 typedef struct SdfPacCounter {
@@ -185,7 +186,7 @@ typedef struct SdfTreeNode {
     struct SdfTreeItem *item;    /* 0x8 */
     s32 balance;                 /* 0xC */
 } SdfTreeNode;
-SdfTreeNode *func_002EF858(SdfTreeNode *a, SdfTreeNode *node) {
+SdfTreeNode *sdfRotateBalancedTreeSecondLink(SdfTreeNode *a, SdfTreeNode *node) {
     SdfTreeNode *root = a;
     SdfTreeNode *pivot;
 
@@ -250,7 +251,6 @@ typedef struct SdfTreeItem {
     f32 key;                      /* 0xC */
 } SdfTreeItem;
 
-extern void *sdfAllocPacketAligned();
 extern void func_002EF958();
 
 /* Insert `item` into the key-ordered tree; an equal key swaps the item in place. */
@@ -289,8 +289,6 @@ void sdfInsertFloatKeyTreeItem(SdfTreeNode **tree, SdfTreeItem *item) {
     }
 }
 
-#define SDF_POOL_FREE_KIND 0xFFFF
-
 typedef struct SdfPoolNode {
     struct SdfPoolNode *next;
     s32 unk4;
@@ -321,7 +319,27 @@ void sdfReleasePoolNode(SdfPool *pool, SdfPoolNode *node) {
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EFB88);
 
-INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EFBF8);
+typedef struct SdfKeyTreeNode {
+    struct SdfKeyTreeNode *child; /* 0x00 */
+    struct SdfKeyTreeNode *next;  /* 0x04 */
+    void *item;                   /* 0x08 */
+} SdfKeyTreeNode;
+
+extern void func_002EFB88(void *item, s32 first, s32 second);
+
+/* Walk a key tree depth first, applying func_002EFB88 to every node's item. */
+void sdfKeyTreeApply(SdfKeyTreeNode *node, s32 first, s32 second) {
+    SdfKeyTreeNode *next;
+
+    do {
+        if (node->child != NULL) {
+            sdfKeyTreeApply(node->child, first, second);
+        }
+        func_002EFB88(node->item, first, second);
+        next = node->next;
+        node = next;
+    } while (next != NULL);
+}
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EFC68);
 

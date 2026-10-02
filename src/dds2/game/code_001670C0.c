@@ -3,7 +3,7 @@
 #include "pcp_vu0.h"
 #include "eff.h"
 
-extern BillDispatch D_003AAF88[];
+extern BillDispatch billObjectCallbacks[];
 
 extern BillDispatch D_003AAF84[];
 
@@ -11,19 +11,19 @@ extern void (*D_003AAFB0[])();
 
 extern void (*D_003AAFC0[])();
 
-extern BillDispatch D_003AAF80[];
+extern BillDispatch effBillConstructorEntries[];
 
 extern void sdfComposeVuMatrixFromRegisters(void);
 extern void *sdfAllocPacketAligned(s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
-extern void func_001686F0(void *);
+extern void effReleaseBattleVoiceOwner(void *);
 extern void func_00169370(void *);
 extern void func_003297C8(void *);
 extern void func_00168280();
 extern void func_001053F0(s32, s32, f32);
 extern s32 kwlnTextureSetReferenceFlagIfPresent();
-extern void func_0035B6E0(const char *);
+extern void func_0035B6E0(const char *fmt, ...);
 extern f32 D_0037F850[];
 extern f32 D_0037F860[];
 extern u8 D_00380870[];
@@ -77,7 +77,7 @@ typedef struct SoundMixer {
     SoundBank banks[2];
     u8 pad0C30[8];
     void *resource;
-    u8 pad0C3C[4];
+    u32 unk0C3C;
     SoundVoice *voiceList;
 } SoundMixer;
 
@@ -89,7 +89,7 @@ struct SoundVoice {
 };
 
 void *effBillCreateDispatch(s32 index, void *arg) {
-    EffectDispatchState *effect = D_003AAF80[index].func(arg);
+    EffectDispatchState *effect = effBillConstructorEntries[index].func(arg);
 
     effect->handler = index;
     effect->valueB2 = 1;
@@ -97,7 +97,7 @@ void *effBillCreateDispatch(s32 index, void *arg) {
 }
 
 void *effCreateDispatchStateForHandler(EffectDispatchState *effect) {
-    EffectDispatchState *result = D_003AAF80[effect->handler].func();
+    EffectDispatchState *result = effBillConstructorEntries[effect->handler].func();
 
     result->handler = effect->handler;
     result->valueB2 = 1;
@@ -105,7 +105,7 @@ void *effCreateDispatchStateForHandler(EffectDispatchState *effect) {
 }
 
 void billDispatchIndexedObjectCallback(EffectDispatchState *effect) {
-    D_003AAF88[effect->handler].func();
+    billObjectCallbacks[effect->handler].func();
 }
 
 void func_001671A0(EffectDispatchState *effect) {
@@ -178,7 +178,26 @@ INCLUDE_ASM(const s32, "game/code_001670C0", func_00167480);
 
 INCLUDE_ASM(const s32, "game/code_001670C0", func_001675B8);
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_00167778);
+void func_00167778(u64 *packet, s32 color, s32 primitive, s32 x0, s32 y0,
+                   s32 x1, s32 y1, s32 x2, s32 y2, s32 depth,
+                   f32 uFirst, f32 vFirst, f32 uSecond, f32 vSecond,
+                   f32 uThird, f32 vThird) {
+    u64 depthHigh = (u64)depth << 32;
+
+    packet[0] = 0x8400000000008001ULL;
+    packet[1] = 0x52525210;
+    packet[2] = (u32)(primitive | 0x14);
+    packet[3] = (u32)color | ((u64)0xFE00 << 46);
+    ((f32 *)packet)[8] = uFirst;
+    ((f32 *)packet)[9] = vFirst;
+    packet[5] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    ((f32 *)packet)[12] = uSecond;
+    ((f32 *)packet)[13] = vSecond;
+    packet[7] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    ((f32 *)packet)[16] = uThird;
+    ((f32 *)packet)[17] = vThird;
+    packet[9] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+}
 
 INCLUDE_ASM(const s32, "game/code_001670C0", func_00167838);
 
@@ -237,7 +256,23 @@ INCLUDE_ASM(const s32, "game/code_001670C0", func_00167EE8);
 
 INCLUDE_ASM(const s32, "game/code_001670C0", func_00168280);
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_001682B0);
+extern u32 func_003292A8(s32 size);
+extern void *sdfResourceRetainAddress(u32 handle);
+extern void *memcpy(void *dst, const void *src, u32 size);
+extern void func_00169230(SoundMixer *dst, SoundMixer *src);
+
+/* Clone a mixer: copy its banks, rebuild the voice state from the original and start with no voices. */
+SoundMixer *sndMixerClone(SoundMixer *src) {
+    u32 handle = func_003292A8(sizeof(SoundMixer));
+    SoundMixer *mixer = sdfResourceRetainAddress(handle);
+
+    mixer->resource = (void *)handle;
+    memcpy(mixer, src, 0xC38);
+    func_00169230(mixer, src);
+    mixer->unk0C3C = 0;
+    mixer->voiceList = NULL;
+    return mixer;
+}
 
 void sndReleaseAllVoices(SoundMixer *mixer) {
     SoundVoice *voice = mixer->voiceList;
@@ -245,7 +280,7 @@ void sndReleaseAllVoices(SoundMixer *mixer) {
 
     while (voice != NULL) {
         next = voice->next;
-        func_001686F0(voice);
+        effReleaseBattleVoiceOwner(voice);
         voice = next;
     }
     func_00169370(mixer);

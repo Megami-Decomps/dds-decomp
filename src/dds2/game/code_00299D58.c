@@ -20,7 +20,7 @@ extern void func_0026C900(void);
 
 extern s32 kwlnTaskGetUserValue();
 
-extern void func_002C44E8(s32);
+extern void mnuMapPadMaskToFlags(s32);
 
 extern void mnuTitleRenderFadeAndPanels(s32);
 
@@ -30,7 +30,7 @@ extern void brsDecaySharedAnimCounter(s32);
 
 typedef struct MenuItem {
     u8 pad00[0x55];
-    s8 selection;
+    u8 selection;
 } MenuItem;
 
 typedef struct MenuItemScene {
@@ -38,20 +38,21 @@ typedef struct MenuItemScene {
     u32 overlayFlags;
     u8 pad08[0x90];
     MenuItem **items;
-    u8 pad9C[0x1A4];
+    MenuItem **selectedItem;
+    u8 padA0[0x1A0];
     u32 resetStateA;
     u32 selectedAction;
     u8 pad248[4];
     s32 selectionApplied;
-    u8 pad250[0x174];
+    u8 pad250[0x20];
+    u32 profileGranted;
+    u8 pad274[0x150];
     u32 resetStateB;
     s32 selectedExtent;
     u32 activeSlot;
     u32 slots[5];
 } MenuItemScene;
 
-/* Parked: build/parked/dds2/game/code_00299D58/brsMessageInputStep.c (delay-slot
-   fill differs from retail by one word; every source shape tried agrees). */
 INCLUDE_ASM(const s32, "game/code_00299D58", brsMessageInputStep);
 
 s64 mnuStaffRunPanel1(s32 input) {
@@ -82,11 +83,11 @@ u32 func_00299EF8(void) {
 
 s64 mnuStaffRunPanel0(s32 input) {
     s32 context = kwlnTaskGetUserValue();
-    func_002C44E8(0x33);
+    mnuMapPadMaskToFlags(0x33);
     return menuSetHandler(context, 0, input);
 }
 
-s64 func_00299F50(s32 input) {
+s64 mnuRefreshAndDispatchCurrentPanel(s32 input) {
     s32 context = kwlnTaskGetUserValue();
     mnuTitleRenderFadeAndPanels(context);
     return menuSetHandler(context, 1, input);
@@ -105,7 +106,26 @@ u32 func_00299FE0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00299D58", func_00299FE8);
+extern u32 *ptyGetCurrentProfileRecord(MenuItem *);
+extern u32 ptyGetProfileRecordCap(u8);
+extern s32 func_00314990(MenuItem *, u8);
+extern void func_00314868(MenuItem *, u8);
+
+void mnuApplyCompletedProfile(u32 context) {
+    MenuItemScene *state = (MenuItemScene *)context;
+    MenuItem *item = *state->selectedItem;
+    u32 *profile = ptyGetCurrentProfileRecord(item);
+
+    if (item->selection != 0 &&
+        ptyGetProfileRecordCap(item->selection) == *profile &&
+        func_00314990(item, item->selection) == 0) {
+        func_00314868(item, item->selection);
+        state->profileGranted = 1;
+        state->overlayFlags = state->overlayFlags | 1;
+        return;
+    }
+    state->profileGranted = 0;
+}
 
 /* Build the capped skill list for the currently selected menu entry. */
 u32 mnuProcessItemSelection(u32 context) {
@@ -116,7 +136,7 @@ u32 mnuProcessItemSelection(u32 context) {
     /* Keep these raw accesses: typed field accesses change the alias schedule. */
     listState = func_0029D790(**(u32 **)(scene + 0x9c), scene + 0x4e8);
     *(u32 *)(scene + 0x268) = listState;
-    func_00299FE8(context);
+    mnuApplyCompletedProfile(context);
     return 1;
 }
 

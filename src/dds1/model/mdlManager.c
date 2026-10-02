@@ -2,8 +2,8 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
-extern u8 D_003296F0[];
-extern u8 D_00324610[];
+extern u8 sdfViewMatrix[];
+extern u8 sdfProjectionMatrix[];
 extern u8 D_00324650[];
 extern u8 D_00324660[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
@@ -21,7 +21,7 @@ typedef struct MdlEntry {
     u8 unk0[0x14]; /* 0x0 */
     s16 enabled;   /* 0x14 */
     u8 pad16[0x6A];
-    f32 row0[3];   /* 0x80: basis rows eased by func_002179A8 */
+    f32 row0[3];   /* 0x80: basis rows eased by mdlBlendEntryPitchYawAndUpdate */
     u8 pad8C[4];
     f32 row1[3];   /* 0x90 */
     u8 pad9C[4];
@@ -114,7 +114,7 @@ typedef struct MdlNode {
     void *unk8;           /* 0x8: dereferenced by mdlGetNodeRefHalf */
     u8 padC[0x10];        /* 0xC */
     f32 unk1C;            /* 0x1C: read as int by mdlGetNodeInt1C */
-    f32 value;             /* 0x20: float slot of mdlGetNodeFloat20/F40 */
+    f32 floatValue;       /* 0x20: accessed as a float by mdlGet/SetNodeFloat20 */
     u8 pad24[4];           /* 0x24 */
     s16 searchId;          /* 0x28: identifies a node in list lookups */
     s16 slotIndex;         /* 0x2A: slot index used by mdlClearSlotAndRelease */
@@ -136,11 +136,11 @@ extern char *strcat(char *dst, const char *src);
 MdlNode *mdlFindNodeById(MdlCtx *ctx, s32 id);
 void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 id, s32 mode, s32 flag, f32 scaleX, f32 scaleY);
 
-extern void *func_00288B90();
+extern void *fileGetLoadedDataAddress();
 extern u32 sndBuildResourceHandleListFromOffsets(void *);
 extern void mdlSetResourceAmount(MdlCtx *ctx, u32 *node, f32 amount);
 
-extern u32 D_003BD878;
+extern u32 mdlGroupJobSemaphore;
 
 extern void *btlFindGroupedEntity();
 
@@ -186,7 +186,7 @@ typedef struct MdlSlotOwner {
 extern void func_002D0918();
 
 /* Release slot `index`: destroy its motions in every context and free the attached resource. */
-void func_00216C00(MdlSlotOwner *owner, s32 index) {
+void mdlReleaseOwnerSlotResources(MdlSlotOwner *owner, s32 index) {
     MdlCtx *ctx;
 
     if (owner != NULL) {
@@ -211,14 +211,14 @@ void mdlApplyCommandToGroupedEntity(void *unused0, void *unused1, void *command)
 
     /* Only the grouped entity and command are forwarded to the worker. */
     entity = btlFindGroupedEntity();
-    func_00216C00(entity, command);
+    mdlReleaseOwnerSlotResources(entity, command);
 }
 
-void func_00216CF8(s32 group, s32 id, u32 mode, s32 value6, s32 index, s32 value4, u32 first, u32 resource) {
+void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 value6, s32 index, s32 value4, u32 first, u32 resource) {
     MdlSlotOwner *owner = btlFindGroupedEntity(group, id);
     MdlSlot *slot;
 
-    func_00216C00(owner, index);
+    mdlReleaseOwnerSlotResources(owner, index);
     slot = &owner->slots[index];
     slot->value4 = value4;
     slot->value6 = value6;
@@ -235,14 +235,14 @@ void func_00216CF8(s32 group, s32 id, u32 mode, s32 value6, s32 index, s32 value
 
 /* Group setup record carried in the payload of an mdlRequestAsset job. */
 typedef struct MdlGroupSetup {
-    s32 unk0;   /* 0x0 */
-    s32 unk4;   /* 0x4 */
-    s32 unk8;   /* 0x8 */
-    s32 flags;  /* 0xC */
-    s32 unk10;  /* 0x10 */
-    s32 unk14;  /* 0x14 */
-    s32 unk18;  /* 0x18 */
-    s32 unk1C;  /* 0x1C */
+    s32 resourceList;  /* 0x0: 4th arg of btlCreateGroupNode */
+    s32 unk4;          /* 0x4: 5th arg of btlCreateGroupNode */
+    s32 requestHandle; /* 0x8: 6th arg of btlCreateGroupNode */
+    s32 flags;         /* 0xC */
+    s32 resource;      /* 0x10: resource of mdlConfigureGroupedEntitySlot */
+    s32 handleA;       /* 0x14: stored to MdlGroupEntity +0xA4 */
+    s32 handleB;       /* 0x18: stored to MdlGroupEntity +0xA0 */
+    s32 handleC;       /* 0x1C: stored to MdlGroupEntity +0xA8 */
 } MdlGroupSetup;
 
 typedef struct MdlGroupEntity {
@@ -257,15 +257,15 @@ extern void btlCreateGroupNode();
 void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlGroupSetup *setup) {
     MdlGroupEntity *entity;
 
-    btlCreateGroupNode(group, id, mode, setup->unk0, setup->unk4, setup->unk8);
+    btlCreateGroupNode(group, id, mode, setup->resourceList, setup->unk4, setup->requestHandle);
     if (setup->flags != 0) {
-        func_00216CF8(group, id, mode, 0, 0, 0, setup->flags, setup->unk10);
+        mdlConfigureGroupedEntitySlot(group, id, mode, 0, 0, 0, setup->flags, setup->resource);
     }
-    if (setup->unk14 != 0) {
+    if (setup->handleA != 0) {
         entity = btlFindGroupedEntity(group, id);
-        entity->unkA4 = setup->unk14;
-        entity->unkA0 = setup->unk18;
-        entity->unkA8 = setup->unk1C;
+        entity->unkA4 = setup->handleA;
+        entity->unkA0 = setup->handleB;
+        entity->unkA8 = setup->handleC;
     }
 }
 
@@ -281,22 +281,22 @@ void *mdlWaitGroupThenFind(s32 group, s32 id) {
 
 void mdlExecuteAndFreeJob(MdlPacket *packet) {
     mdlApplyGroupSetup(packet->unk0, packet->unk2, packet->unk8, packet->extra);
-    WaitSema(D_003BD878);
+    WaitSema(mdlGroupJobSemaphore);
     btlRemoveGroupId(packet->unk0, packet->unk2);
-    SignalSema(D_003BD878);
+    SignalSema(mdlGroupJobSemaphore);
     sdfReleaseChipBlock(packet);
 }
 
-void mdlRecordLoadedSizeAndReleaseHandle(void *arg0, MdlLoadReq *req) {
+void mdlRecordLoadedSizeAndReleaseHandle(void *resource, MdlLoadReq *destination) {
     void *handle;
     u32 size;
 
-    handle = func_00288B90();
+    handle = fileGetLoadedDataAddress();
     size = sndBuildResourceHandleListFromOffsets(handle);
-    req->size = size;
-    handle = fileGetResourceHandle(arg0);
+    destination->size = size;
+    handle = fileGetResourceHandle(resource);
     func_002D0918(handle);
-    filePollEntryCleanup(arg0);
+    filePollEntryCleanup(resource);
 }
 
 typedef struct MdlLoadCmd {
@@ -311,7 +311,7 @@ extern s32 sdfRelocatePackedResourcePayload();
 
 void mdlFinishLoadCmd(s32 entryId, MdlLoadCmd *cmd) {
     cmd->handle = fileGetResourceHandle(entryId);
-    cmd->size = sdfRelocatePackedResourcePayload(func_00288B90(entryId));
+    cmd->size = sdfRelocatePackedResourcePayload(fileGetLoadedDataAddress(entryId));
     filePollEntryCleanup(entryId);
     if (cmd->deferred == 0) {
         mdlExecuteAndFreeJob((MdlPacket *)cmd);
@@ -328,7 +328,7 @@ typedef struct MdlLoadJob {
 
 void mdlFinishLoadJob(s32 entryId, MdlLoadJob *job) {
     job->handle = fileGetResourceHandle(entryId);
-    job->sizeWord = sdfRelocatePackedResourceWordsFromHeader(func_00288B90(entryId));
+    job->sizeWord = sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress(entryId));
     filePollEntryCleanup(entryId);
     mdlExecuteAndFreeJob((MdlPacket *)job);
 }
@@ -340,8 +340,8 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", mdlRequestAsset);
 
-void func_00217298(u32 arg0, u32 arg1) {
-    mdlRequestAsset(arg0, arg1, 1);
+void func_00217298(u32 group, u32 id) {
+    mdlRequestAsset(group, id, 1);
 }
 
 typedef struct MdlGroup {
@@ -438,7 +438,7 @@ extern void func_002D9238();
 extern void mdlDispatchViewerAnchorRecord();
 
 /* Per-frame update: step the active slot nodes, refresh the transforms, dispatch anchor records. */
-void func_00217878(MdlCtx *ctx, s32 arg) {
+void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
     MdlNode **slot = ctx->slots;
     MdlInner *inner;
     u32 *rec;
@@ -479,8 +479,8 @@ extern void sdfSetPrimaryIdentityMatrixVU(void *);
 extern void sdfRotateVuMatrixAboutX(f32 angle);
 extern void sdfRotateVuMatrixAboutY(f32 angle);
 
-/* Same update as func_00217878, first easing the entry `index` towards a pitch/yaw rotation (degrees). */
-void func_002179A8(MdlCtx *ctx, s32 arg, s32 index, f32 pitch, f32 yaw) {
+/* Same update as mdlProcessContextNodesAndTransforms, first easing the entry `index` towards a pitch/yaw rotation (degrees). */
+void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 arg, s32 index, f32 pitch, f32 yaw) {
     MdlInner *inner;
     MdlEntry *entry = NULL;
     f32 rows[4][4];
@@ -658,7 +658,7 @@ f32 mdlGetNodeFloat20(MdlCtx *ctx, s32 id) {
     f32 r = 0.0f;
 
     if (node != NULL) {
-        r = node->value;
+        r = node->floatValue;
     }
     return r;
 }
@@ -667,7 +667,7 @@ void mdlSetNodeFloat20(MdlCtx *ctx, s32 id, f32 value) {
     MdlNode *node = mdlFindNodeById(ctx, id);
 
     if (node != NULL) {
-        node->value = value;
+        node->floatValue = value;
     }
 }
 
@@ -737,8 +737,8 @@ void mdlSetAmountOnAllContextResources(MdlCtx *ctx, f32 amount) {
 /* vu0 routine: project `point` through the camera and the model's scaled matrix, result left in vf10 */
 void mdlProjectPointVU(MdlCtx *ctx, void *point)
 {
-    VU0_LOAD_MATRIX(D_003296F0);
-    sdfPostmultiplyVuMatrixFromMemory(D_00324610);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     VU0_MOVE_VF(vf24, vf28);
     VU0_MOVE_VF(vf25, vf29);
     VU0_MOVE_VF(vf26, vf30);
@@ -763,15 +763,15 @@ void mdlProjectPoints(MdlCtx *ctx, f32 (*in)[4], f32 (*out)[4], s32 count)
     VU0_LOAD_MATRIX(&ctx->inner->vector20);
     VU0_LOAD_VF(vf10, &ctx->inner->vector70);
     VU0_SCALE_MATRIX_ROWS(vf10);
-    sdfPostmultiplyVuMatrixFromMemory(D_003296F0);
-    sdfPostmultiplyVuMatrixFromMemory(D_00324610);
+    sdfPostmultiplyVuMatrixFromMemory(sdfViewMatrix);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     for (i = 0; i < count; i++) {
         VU0_LOAD_VF(vf10, in[i]);
         VU0_TRANSFORM_POINT(vf10, vf10);
         VU0_PERSPECTIVE_DIVIDE_VF10();
-        VU0_LOAD_VF(vf11, D_00324610 + 0x40);
+        VU0_LOAD_VF(vf11, sdfProjectionMatrix + 0x40);
         VU0_MUL(vf10, vf10, vf11);
-        VU0_LOAD_VF(vf11, D_00324610 + 0x50);
+        VU0_LOAD_VF(vf11, sdfProjectionMatrix + 0x50);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF(vf10, out[i]);
     }
@@ -854,12 +854,12 @@ typedef struct MdlDoneJob {
     u16 group;         /* 0x0 */
     u16 id;            /* 0x2 */
     u32 arg;           /* 0x4 */
-    void *owner;       /* 0x8: request slot from func_002889D8 */
+    void *owner;       /* 0x8: request slot from fileAllocateDispatchRequest */
     void (*done)(u32); /* 0xC */
     u32 doneArg;       /* 0x10 */
 } MdlDoneJob;
 
-/* Request slot handed back by func_002889D8; its +0x60 word feeds the load apply. */
+/* Request slot handed back by fileAllocateDispatchRequest; its +0x60 word feeds the load apply. */
 typedef struct MdlLoadSlot {
     u8 pad00[0x60];
     u32 handle; /* 0x60 */
@@ -871,9 +871,9 @@ extern s32 func_00218768();
 void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *owner, MdlDoneJob *job) {
     job->owner = owner;
     func_00218768(owner->handle, job->group, job->id, job->arg);
-    WaitSema(D_003BD878);
+    WaitSema(mdlGroupJobSemaphore);
     btlRemoveGroupId(job->group, job->id);
-    SignalSema(D_003BD878);
+    SignalSema(mdlGroupJobSemaphore);
     if (job->done != NULL) {
         job->done(job->doneArg);
         mdlDestroyLoadRequestOwner((MdlRes *)job);
@@ -881,7 +881,7 @@ void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *owner, MdlDoneJob *job) {
 }
 
 extern void *sdfAllocAndClearQuadwords();
-extern s32 func_002889D8();
+extern s32 fileAllocateDispatchRequest();
 extern void func_00288C50();
 extern void mdlCompleteGroupedJobAndNotify();
 
@@ -894,7 +894,7 @@ s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 arg, s32 handle, void (*do
     job->arg = arg;
     job->doneArg = doneArg;
     job->done = done;
-    slot = func_002889D8(handle, 0, 0, mdlCompleteGroupedJobAndNotify, job);
+    slot = fileAllocateDispatchRequest(handle, 0, 0, mdlCompleteGroupedJobAndNotify, job);
     job->owner = slot;
     if (done == NULL) {
         func_00288C50(slot);

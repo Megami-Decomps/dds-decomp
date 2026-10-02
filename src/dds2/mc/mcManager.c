@@ -17,7 +17,7 @@ s32 mcPollStrictSuccess(void) {
     return -1;
 }
 
-void func_002C9328(u32 port, u32 request) {
+void mcChangeCurrentDirectory(u32 port, u32 request) {
     func_0034FB90(port, 0, request, 0);
 }
 
@@ -57,7 +57,7 @@ s32 mcPollWithExtendedErrors(void) {
     return 0;
 }
 
-void func_002C9400(u32 port, u32 path, u32 mode, u32 flags) {
+void mcReadDirectoryEntries(u32 port, u32 path, u32 mode, u32 flags) {
     func_0034F9B0(port, 0, path, 0, flags, mode);
 }
 
@@ -80,7 +80,7 @@ s32 mcPollNonnegativeResult(s32 *resultOut) {
     return 0;
 }
 
-void func_002C9490(u32 port, u32 request) {
+void mcDeleteFilePath(u32 port, u32 request) {
     func_0034FDA8(port, 0, request);
 }
 
@@ -97,7 +97,7 @@ s32 mcPollNormalizedCommandStatus(void) {
     return 0;
 }
 
-void func_002C9500(u32 port, u32 request, u32 buffer) {
+void mcOpenFilePath(u32 port, u32 request, u32 buffer) {
     func_0034EFE0(port, 0, request, buffer);
 }
 
@@ -119,7 +119,7 @@ s32 mcPollCommandStatusWithResult(s32 *resultOut) {
     return 0;
 }
 
-void func_002C9588(void) {
+void mcCloseOpenFile(void) {
     func_0034F150();
 }
 
@@ -136,7 +136,7 @@ s32 fileWaitCommandDone(void) {
     return 0;
 }
 
-void func_002C95F0(void) {
+void mcReadOpenFile(void) {
     func_0034F370();
 }
 

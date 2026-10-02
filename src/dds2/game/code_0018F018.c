@@ -49,7 +49,7 @@ extern void *sdfResourceRetainAddress(void *allocation);
 extern u32 effGetResourceFirstWord(s32 index);
 
 
-extern void func_0018EFE0(EffBlurWork2 *work, EffBlurSlot2 *slot);
+extern void effBlurResetScaleSlot(EffBlurWork2 *work, EffBlurSlot2 *slot);
 
 void effBlurSecondInitSlots(EffBlurWork2 *work) {
     EffBlurSlot2 *slot = work->slots;
@@ -57,7 +57,7 @@ void effBlurSecondInitSlots(EffBlurWork2 *work) {
     s32 i;
 
     for (i = 0; i < count; i++, slot++) {
-        func_0018EFE0(work, slot);
+        effBlurResetScaleSlot(work, slot);
         slot->phase = -(work->spacing * (f32)i);
     }
 }
@@ -76,7 +76,7 @@ EffBlurWork2 *effCloneBlurWorkWithSlots(EffBlurWork2 *src) {
     work->setting = effGetResourceFirstWord(3);
     slot = work->slots;
     while (i < count) {
-        func_0018EFE0(work, slot);
+        effBlurResetScaleSlot(work, slot);
         slot->phase = -(work->spacing * (f32)i);
         i++;
         slot = (EffBlurSlot2 *)((u8 *)slot + 0x30);

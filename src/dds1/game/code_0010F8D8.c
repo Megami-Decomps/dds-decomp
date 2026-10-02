@@ -11,7 +11,7 @@ typedef struct {
     WorldEntry *entry;
 } WorldObject;
 
-extern u32 D_003BA9B8;
+extern u32 dds3WorldCounter;
 
 extern void dds3BuildVuTransformFromComponents(void *, void *, void *);
 
@@ -47,13 +47,47 @@ s32 dds3TestObjectSphereOverlap(u8 *left, u8 *right) {
 
 INCLUDE_ASM(const s32, "game/code_0010F8D8", func_0010F9A8);
 
-INCLUDE_ASM(const s32, "game/code_0010F8D8", func_0010FA00);
+typedef struct WorldCallbackTable {
+    u8 pad00[8];
+    s32 (*onFirst)(void *);  /* 0x08 */
+    s32 (*onSecond)(void *); /* 0x0C */
+} WorldCallbackTable;
 
-INCLUDE_ASM(const s32, "game/code_0010F8D8", func_0010FA40);
+typedef struct WorldCallbackHolder {
+    u8 pad00[0x10];
+    WorldCallbackTable *callbacks; /* 0x10 */
+} WorldCallbackHolder;
+
+/* Invoke the holder's first / second lifecycle callback when present; the result is 1 when there is nothing to call. */
+s32 dds3InvokeWorldCallbackFirst(WorldCallbackHolder *holder) {
+    s32 result = 1;
+
+    if (holder != NULL) {
+        WorldCallbackTable *table = holder->callbacks;
+
+        if (table != NULL && table->onFirst != NULL) {
+            result = table->onFirst(holder);
+        }
+    }
+    return result;
+}
+
+s32 dds3InvokeWorldCallbackSecond(WorldCallbackHolder *holder) {
+    s32 result = 1;
+
+    if (holder != NULL) {
+        WorldCallbackTable *table = holder->callbacks;
+
+        if (table != NULL && table->onSecond != NULL) {
+            result = table->onSecond(holder);
+        }
+    }
+    return result;
+}
 
 /* The stored sequence wraps at 16 bits even though its backing word is 32 bits. */
 void dds3AdvanceWorldCounter(void) {
-    D_003BA9B8 = (D_003BA9B8 + 1) & 0xffff;
+    dds3WorldCounter = (dds3WorldCounter + 1) & 0xffff;
 }
 
 void dds3SetWorldEntryCallbackTarget(WorldEntry *entry, u32 callbackTarget) {
@@ -82,7 +116,7 @@ typedef struct WorldNode {
    The assignment order is load-bearing: ee-gcc hoists the last statement's
    store out of the independent group, so counter1C stays last and the entry
    store follows it. */
-s32 func_0010FAC0(WorldObject *object) {
+s32 dds3AllocateWorldObjectEntry(WorldObject *object) {
     WorldNode *node;
 
     node = (WorldNode *)func_002CFEB8(0x28);
@@ -112,24 +146,24 @@ u32 func_0010FBC8(WorldObject *obj) {
 
     callbackTarget = obj->entry->callbackTarget;
     if (callbackTarget != 0) {
-        func_0010FA00(callbackTarget);
+        dds3InvokeWorldCallbackFirst((WorldCallbackHolder *)callbackTarget);
     }
     return 1;
 }
 
-u32 func_0010FBF8(WorldObject *obj) {
+u32 dds3DispatchWorldEntryCallbackTarget(WorldObject *obj) {
     s32 callbackTarget;
 
     callbackTarget = obj->entry->callbackTarget;
     if (callbackTarget != 0) {
-        func_0010FA40(callbackTarget);
+        dds3InvokeWorldCallbackSecond((WorldCallbackHolder *)callbackTarget);
     }
     return 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_0010F8D8", func_0010FC28);
 
-INCLUDE_SDATA(const s32, "game/code_0010F8D8", D_003BA9B8);
+INCLUDE_SDATA(const s32, "game/code_0010F8D8", dds3WorldCounter);
 
-INCLUDE_SDATA(const s32, "game/code_0010F8D8", D_003BA9BC);
+INCLUDE_SDATA(const s32, "game/code_0010F8D8", dds3ActiveWorld);
 

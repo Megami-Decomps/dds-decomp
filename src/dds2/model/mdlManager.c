@@ -3,11 +3,11 @@
 
 extern u64 fileGetResourceHandle(u64);
 
-extern u64 func_002C8110();
+extern u64 fileGetLoadedDataAddress();
 
 extern u32 sndBuildResourceHandleListFromOffsets(u64);
 
-extern u32 D_00438F90;
+extern u32 mdlGroupJobSemaphore;
 
 extern void *btlFindGroupedEntity();
 
@@ -78,7 +78,7 @@ typedef struct MdlNode {
     void *unk8;           /* 0x8: dereferenced by func_00218410 */
     u8 padC[0x10];        /* 0xC */
     f32 unk1C;            /* 0x1C: read as int by func_00217EB0 */
-    f32 unk20;            /* 0x20: float slot of func_00217F18/F40 */
+    f32 floatValue;       /* 0x20: float slot of mdlGet/SetNodeFloat20 */
     u8 pad24[4];          /* 0x24 */
     s16 searchId;          /* 0x28: identifies a node in list lookups */
     s16 slotIndex;         /* 0x2A: slot index used by func_00216B78 */
@@ -137,7 +137,7 @@ extern void func_003297C8();
 
 /* Release slot `index`: destroy its motions in every context and free the attached resource.
    K&R definition: the caller below passes u64 values. */
-void func_00231718(owner, index)
+void mdlReleaseOwnerSlotResources(owner, index)
     MdlSlotOwner *owner;
     s32 index;
 {
@@ -164,14 +164,14 @@ void mdlApplyCommandToGroupedEntity(u64 unused0, u64 unused1, u64 command) {
     u64 entity;
 
     entity = btlFindGroupedEntity();
-    func_00231718(entity, command);
+    mdlReleaseOwnerSlotResources(entity, command);
 }
 
-void func_00231810(s32 group, s32 id, u32 mode, s32 value6, s32 index, s32 value4, u32 first, u32 resource) {
+void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 value6, s32 index, s32 value4, u32 first, u32 resource) {
     MdlSlotOwner *owner = btlFindGroupedEntity(group, id);
     MdlSlot *slot;
 
-    func_00231718(owner, index);
+    mdlReleaseOwnerSlotResources(owner, index);
     slot = &owner->slots[index];
     slot->value4 = value4;
     slot->value6 = value6;
@@ -188,14 +188,14 @@ void func_00231810(s32 group, s32 id, u32 mode, s32 value6, s32 index, s32 value
 
 /* Group setup record carried in the payload of an mdlRequestAsset job. */
 typedef struct MdlGroupSetup {
-    s32 unk0;   /* 0x0 */
-    s32 unk4;   /* 0x4 */
-    s32 unk8;   /* 0x8 */
-    s32 flags;  /* 0xC */
-    s32 unk10;  /* 0x10 */
-    s32 unk14;  /* 0x14 */
-    s32 unk18;  /* 0x18 */
-    s32 unk1C;  /* 0x1C */
+    s32 resourceList;  /* 0x0: 4th arg of btlCreateGroupNode */
+    s32 unk4;          /* 0x4: 5th arg of btlCreateGroupNode */
+    s32 requestHandle; /* 0x8: 6th arg of btlCreateGroupNode */
+    s32 flags;         /* 0xC */
+    s32 resource;      /* 0x10: resource of mdlConfigureGroupedEntitySlot */
+    s32 handleA;       /* 0x14: stored to MdlGroupEntity +0xA4 */
+    s32 handleB;       /* 0x18: stored to MdlGroupEntity +0xA0 */
+    s32 handleC;       /* 0x1C: stored to MdlGroupEntity +0xA8 */
 } MdlGroupSetup;
 
 typedef struct MdlGroupEntity {
@@ -207,20 +207,20 @@ typedef struct MdlGroupEntity {
 
 extern void btlCreateGroupNode();
 
-extern void func_00231810();
+extern void mdlConfigureGroupedEntitySlot();
 
 void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlGroupSetup *setup) {
     MdlGroupEntity *entity;
 
-    btlCreateGroupNode(group, id, mode, setup->unk0, setup->unk4, setup->unk8);
+    btlCreateGroupNode(group, id, mode, setup->resourceList, setup->unk4, setup->requestHandle);
     if (setup->flags != 0) {
-        func_00231810(group, id, mode, 0, 0, 0, setup->flags, setup->unk10);
+        mdlConfigureGroupedEntitySlot(group, id, mode, 0, 0, 0, setup->flags, setup->resource);
     }
-    if (setup->unk14 != 0) {
+    if (setup->handleA != 0) {
         entity = btlFindGroupedEntity(group, id);
-        entity->unkA4 = setup->unk14;
-        entity->unkA0 = setup->unk18;
-        entity->unkA8 = setup->unk1C;
+        entity->unkA4 = setup->handleA;
+        entity->unkA0 = setup->handleB;
+        entity->unkA8 = setup->handleC;
     }
 }
 
@@ -236,9 +236,9 @@ void mdlExecuteAndFreeJob(u32 job) {
 
     words = (u16 *)job;
     mdlApplyGroupSetup(*words, words[1], *(u32 *)(words + 4), words + 6);
-    WaitSema(D_00438F90);
+    WaitSema(mdlGroupJobSemaphore);
     btlRemoveGroupId(*words, words[1]);
-    SignalSema(D_00438F90);
+    SignalSema(mdlGroupJobSemaphore);
     sdfReleaseChipBlock(job);
 }
 
@@ -246,7 +246,7 @@ void mdlRecordLoadedSizeAndReleaseHandle(u64 resource, s32 destination) {
     u64 handle;
     u32 resolved;
 
-    handle = func_002C8110();
+    handle = fileGetLoadedDataAddress();
     resolved = sndBuildResourceHandleListFromOffsets(handle);
     *(u32 *)(destination + 0xc) = resolved;
     handle = fileGetResourceHandle(resource);

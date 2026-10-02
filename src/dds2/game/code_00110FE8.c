@@ -76,7 +76,7 @@ s32 dds3GetWorldObjectValue(WorldObjectPointer *object) {
     return *object->value;
 }
 
-WorldChainNode *func_001110F8(WorldObjectPointer *object, s32 index, const u8 *name) {
+WorldChainNode *dds3FindIndexedObjectChainNodeByName(WorldObjectPointer *object, s32 index, const u8 *name) {
     WorldChainNode *node;
     u8 *s;
     s32 i;
@@ -117,7 +117,7 @@ u32 *dds3FindObjectChainNodeByName(WorldObjectPointer *object, const u8 *name) {
         return NULL;
     }
     for (i = 0; i < 0x12; i++) {
-        node = func_001110F8(object, i, name);
+        node = dds3FindIndexedObjectChainNodeByName(object, i, name);
         if (node != NULL) {
             return node;
         }
@@ -165,7 +165,7 @@ u32 func_001112F8(void) {
     return 1;
 }
 
-s32 func_00111300(WorldObjectPointer *object) {
+s32 ddsDispatchFirstWorldIndexAreas(WorldObjectPointer *object) {
     dds3VisitWorldObjectValues(*object->value, dds3InvokeAreaCallback);
     return 1;
 }

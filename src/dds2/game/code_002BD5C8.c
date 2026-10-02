@@ -19,9 +19,24 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 arg0, s32 arg1, s32 arg2, u32 *w
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDA50);
+extern s32 datGameState;
+u8 func_002BDA50(s32 index) {
+    if (index == 0) {
+        return 0;
+    }
+    return *(u8 *)(index + datGameState + 0x20000 - 0x1910);
+}
 
-INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDA78);
+extern s32 D_00435E3C;
+
+s8 func_002BDA78(s32 value) {
+    s32 index = value - 0xC0;
+
+    if (value == 0) {
+        return 0;
+    }
+    return *(s8 *)(D_00435E3C + index * 6 + 5);
+}
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDAA8);
 
@@ -29,7 +44,33 @@ INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDC38);
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE080);
 
-INCLUDE_ASM(const s32, "game/code_002BD5C8", mnuDrawSelectedPartyProfileLabel);
+extern s32 func_00314C10(s32);
+extern s32 uiBlendColors();
+extern s32 scrGetIndexedRecordAddress(s32, s32 *);
+extern s32 func_0019F460(s32, s32, s32, s32, s32, s32);
+extern void func_0019D550(s32, s32, s32);
+extern void frFontQueueGlyphInSelectedSlot(s32);
+
+void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
+                                      s32 partyIndex, s32 param) {
+    s32 outValue;
+    s32 cost = func_00314C10(datGameState + partyIndex * 0x1C4 + 0xA60);
+    s32 code;
+    s32 texture;
+    s32 item;
+
+    texture = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
+    code = selectedCode != 0 ? selectedCode : cost;
+    if (code != 0) {
+        if (scrGetIndexedRecordAddress(code & 0xFFFF, &outValue) != 0) {
+            func_002BE080(0x16B0, 0x4B8, depth, texture, code, param);
+            return;
+        }
+        item = func_0019F460(0x16B0, 0x4B8, depth, texture, outValue, 0);
+        func_0019D550(item, 1, param);
+        frFontQueueGlyphInSelectedSlot(item);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE240);
 

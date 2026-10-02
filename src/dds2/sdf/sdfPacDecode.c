@@ -98,7 +98,7 @@ void sdfPacFinalizeRelocatedPayload(PacState *state);
 
 s32 sdfResourceRetainAddress(s32 handle);
 
-s32 func_0032C138(s32 resource);
+s32 sdfTexAcquireResourceTexture(s32 resource);
 
 void sdfReleaseMemorySlot(void *slot);
 
@@ -130,7 +130,7 @@ typedef struct PacReloc {
 
 void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 size);
 
-void func_00332F08(s32 handle, s32 resource);
+void sdfAppendResourceListItem(s32 handle, s32 resource);
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00346CF0);
 
@@ -364,7 +364,7 @@ void sdfPacCopyResourceChunk(PacState *state) {
                 return;
             }
         }
-        buffer->result = func_0032C138(sdfResourceRetainAddress(buffer->resourceSlot));
+        buffer->result = sdfTexAcquireResourceTexture(sdfResourceRetainAddress(buffer->resourceSlot));
         sdfReleaseMemorySlot(&buffer->resourceSlot);
         state->onComplete(state);
     }
@@ -380,7 +380,7 @@ void sdfPacDecodeResourceChunk(PacState *state) {
     }
     {
         PacBuf *buffer = state->buffer;
-        buffer->result = func_0032C138(sdfResourceRetainAddress(buffer->resourceSlot));
+        buffer->result = sdfTexAcquireResourceTexture(sdfResourceRetainAddress(buffer->resourceSlot));
         sdfReleaseMemorySlot(&buffer->resourceSlot);
     }
     sdfReleaseChipBlock(state->decoder);
@@ -441,7 +441,7 @@ void sdfPacResetOutputToAllocationEntry(PacState *state) {
 /* Advance the entry index and complete or request the next entry. */
 void sdfPacAdvanceAllocationEntry(PacState *state) {
     PacAlloc *allocation = state->allocation;
-    func_00332F08(state->queueTail->resourceHandle, allocation->resource);
+    sdfAppendResourceListItem(state->queueTail->resourceHandle, allocation->resource);
     {
         s32 nextIndex = allocation->entryIndex + 1;
         allocation->entryIndex = nextIndex;

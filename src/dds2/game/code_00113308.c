@@ -56,9 +56,9 @@ extern void effObjInnerCreate();
 
 extern void *func_00328D68(s32 size);
 
-extern u32 func_001119D0();
+extern u32 dds3CreateSlotResourceState();
 
-u32 func_00113308(EffectObject *object) {
+u32 dds3GetEffectDataHandle(EffectObject *object) {
     return object->data->handle;
 }
 
@@ -128,8 +128,8 @@ void evtDestroyEffectObjectData(EffectObject *object) {
         evtReleaseUnitTransitionWork(data->transitionWork);
         data->transitionWork = 0;
     }
-    func_00111D68(object);
-    func_00111A68(data->modelHolder);
+    dds3ReleaseObjectBaseResources(object);
+    dds3DestroyObjectBase(data->modelHolder);
     sdfReleaseChipBlock(object->data);
 }
 
@@ -169,7 +169,7 @@ extern void func_00113408(EffectObject *, s32);
 extern s32 func_001178B8(s32);
 
 /* Per-frame refresh of a model effect object: rebuild the child transform from the follow record (a tilt that wobbles with its angle), then run the timed callbacks. */
-s32 func_001137D8(EffectObject *obj) {
+s32 effUpdateFollowModelTransform(EffectObject *obj) {
     EffVec4 axis = D_004128B0;
     EffLocalNode node;
     EffectObjectData *data;
@@ -282,7 +282,7 @@ extern s32 sdfLoadMapRecordPositionVector(s32, s32);
 extern void func_001200E8(s32, f32, f32, f32, f32);
 extern u8 D_00380788[];
 
-s32 func_00113AB0(EffectObject *obj) {
+s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     f32 vec[4];
     FollowTarget *target;
     FollowConfig *config;
@@ -427,7 +427,7 @@ void evtReleaseEffectObjectHandleAndData(EffectObject *object) {
 
     effObjFreeInner();
     data = object->data;
-    func_00111A68(data->handle);
+    dds3DestroyObjectBase(data->handle);
     sdfReleaseChipBlock(data);
 }
 
@@ -457,7 +457,7 @@ s32 evtInitializeEffectObjectData(EffectObject *obj) {
     obj->data = func_00328D68(0x50);
     memset(obj->data, 0, 0x50);
     data = obj->data;
-    data->handle = func_001119D0(obj);
+    data->handle = dds3CreateSlotResourceState(obj);
     dds3SetObjectFlags(obj, 0x60);
     return 1;
 }

@@ -28,12 +28,12 @@ typedef struct LightSlotDesc {
 } LightSlotDesc;
 
 void effObjFreeInner(void *arg);
-void func_00111A68(s32 arg);
+void dds3DestroyObjectBase(s32 arg);
 void sdfReleaseChipBlock(void *arg);
 void func_0033A7E8(void *arg0, LightSlotDesc *desc, f32 *color);
 void *memset(void *s, s32 c, u32 n);
 extern void *D_0037F770[];
-extern void *D_0037F780[];
+extern void *kwlnDefaultColorVector[];
 
 /* Releases the light's buffer and resource before freeing the object itself. */
 void lightReleaseObject(LightObject *light) {
@@ -41,7 +41,7 @@ void lightReleaseObject(LightObject *light) {
 
     data = light->data;
     sdfReleaseChipBlock(data->buffer);
-    func_00111A68(data->resource);
+    dds3DestroyObjectBase(data->resource);
     sdfReleaseChipBlock(light->data);
     light->data = NULL;
     effObjFreeInner(light);

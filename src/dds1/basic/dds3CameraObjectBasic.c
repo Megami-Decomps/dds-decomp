@@ -72,7 +72,7 @@ void dds3DestroyCameraData(CameraObject *camera) {
 
     effObjFreeInner();
     data = camera->data;
-    func_00111840(data->handle);
+    dds3DestroyObjectBase(data->handle);
     sdfReleaseChipBlock(data);
 }
 
@@ -112,7 +112,7 @@ ActionObj *func_00112D00(s32 value, void *innerVec, u128 *vec60, u128 *vec50) {
     return obj;
 }
 
-ActionObj *func_00112D98(s32 slotValue, f32 value, void *innerVec, u128 *vec40, u128 *vec50, s32 flag84) {
+ActionObj *dds3CreateCameraObjectWithVectors(s32 slotValue, f32 value, void *innerVec, u128 *vec40, u128 *vec50, s32 flag84) {
     ActionObj *obj = dds3CreateCameraObjectWithSlotData(slotValue);
     CameraData *data = obj->data;
 
@@ -129,11 +129,11 @@ ActionObj *func_00112D98(s32 slotValue, f32 value, void *innerVec, u128 *vec40, 
     return obj;
 }
 
-void func_00112E58(void) {
+void dds3ReleaseCameraWorldNode(void) {
     dds3RemoveWorldObjectNode();
 }
 
-void func_00112E70(void *obj) {
+void dds3LoadObjectMatrixPointerIntoVu(void *obj) {
     VU0_LOAD_MATRIX(*(void **)((u8 *)obj + 0x18));
 }
 
@@ -157,7 +157,36 @@ f32 dds3GetCameraValue(u8 *obj) {
     return *(f32 *)(*(u8 **)(obj + 0x18) + 0x8C);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112EE8);
+extern void effMiscQuaternionToMatrixVU(void);
+
+/* Apply the inner node's rotation to the camera vectors. */
+s32 dds3TransformCameraVectorsByInnerRotation(ActionObj *obj, f32 *dst1, f32 *dst2) {
+    CameraData *data = obj->data;
+    CameraData *inner = (CameraData *)obj->unk1C;
+
+    VU0_LOAD_VF(vf10, &inner->vec50);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, &data->vec50);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_SET_W_ONE(vf10);
+    VU0_STORE_VF(vf10, &data->pad70);
+    if (data->unk84 == 1) {
+        VU0_LOAD_VF(vf10, &data->vec40);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_LOAD_VF(vf11, &inner->vec40);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, &data->vec60);
+    }
+    dst1[0] = ((f32 *)&data->vec60)[0];
+    dst1[1] = ((f32 *)&data->vec60)[1];
+    dst1[2] = ((f32 *)&data->vec60)[2];
+    dst1[3] = ((f32 *)&data->vec60)[3];
+    dst2[0] = ((f32 *)&inner->vec40)[0];
+    dst2[1] = ((f32 *)&inner->vec40)[1];
+    dst2[2] = ((f32 *)&inner->vec40)[2];
+    dst2[3] = ((f32 *)&inner->vec40)[3];
+}
 
 INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_0039F6F8);
 

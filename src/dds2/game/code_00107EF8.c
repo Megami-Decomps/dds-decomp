@@ -7,7 +7,7 @@ extern u32 D_00435D28;
 
 extern u64 func_0019F448(s32, s32, u64, u64, u64, u64);
 
-extern u32 D_00435CB8;
+extern u32 kwlnDrawSurfaceIndex;
 
 extern s32 func_002CE920(void);
 
@@ -29,7 +29,7 @@ extern s32 fldPollSceneState(void);
 
 extern s32 fldLmapTaskExists(void);
 
-extern s32 D_00435D30;
+extern s32 evtConsoleFontResourceChain;
 
 extern u32 kwlnDrawControlFlags;
 
@@ -57,7 +57,7 @@ extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 extern char D_00411370[];
 
-extern void func_00124D70(void);
+extern void fldStartSequenceRecord(void);
 
 typedef struct KwlnTask KwlnTask;
 
@@ -87,7 +87,7 @@ typedef struct {
     void *next;
 } B728Work;
 
-extern u8 D_00380748[];
+extern u8 kwlnPositionedTextSurface[];
 
 extern s8 D_0037F53B[];
 
@@ -106,7 +106,7 @@ typedef struct EvtDrawState {
     f32 value1C;
 } EvtDrawState;
 
-extern DrawVec4 D_0037F790;
+extern DrawVec4 kwlnDrawVector;
 
 extern DrawVec4 D_0043E3A0;
 
@@ -129,7 +129,7 @@ typedef struct EvtGsCommand {
     u64 registerId;
 } EvtGsCommand;
 
-extern EvtDrawSurface D_0037FB48[];
+extern EvtDrawSurface kwlnDrawSurfaces[];
 
 extern void *sdfAllocPacketAligned(s32);
 
@@ -139,9 +139,9 @@ extern void sdfAppendPacket(void *, void *);
 
 extern u8 *sdfConsFinalizePacketHeader(void *, s32);
 
-extern s32 func_00100400(void);
+extern s32 kwlnGetDrawBufferIndex(void);
 
-extern u8 D_00381ED0[];
+extern u8 kwlnFrameDrawPacketRecords[];
 
 extern void func_0032DB30(const void *, void *, s32);
 
@@ -155,9 +155,9 @@ extern u32 D_0037F5D0[];
 
 extern void *func_00348158(const void *, const void *, s32, s32);
 
-extern s8 D_00435D18;
+extern s8 evtSelectionStateActive;
 
-extern void *D_00438E60;
+extern void *evtSelectionState;
 
 extern void evtSelStateDestroy(void);
 
@@ -221,15 +221,15 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_001081F8);
 void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w) {
     if (mode == 0) {
         kwlnDrawControlFlags &= ~0x400;
-        D_0037F790.x = x;
-        D_0037F790.y = y;
-        D_0037F790.z = z;
-        D_0037F790.w = w;
+        kwlnDrawVector.x = x;
+        kwlnDrawVector.y = y;
+        kwlnDrawVector.z = z;
+        kwlnDrawVector.w = w;
     } else {
-        f32 previousX = D_0037F790.x;
-        f32 previousY = D_0037F790.y;
-        f32 previousZ = D_0037F790.z;
-        f32 previousW = D_0037F790.w;
+        f32 previousX = kwlnDrawVector.x;
+        f32 previousY = kwlnDrawVector.y;
+        f32 previousZ = kwlnDrawVector.z;
+        f32 previousW = kwlnDrawVector.w;
         kwlnDrawControlFlags |= 0x400;
         D_00438DFA = mode;
         D_0043E3A0.x = previousX;
@@ -273,7 +273,7 @@ void evtEnsureDrawVectorState(void) {
 }
 
 void evtSetDrawSurfaceIndex(u32 surfaceIndex) {
-    D_00435CB8 = surfaceIndex;
+    kwlnDrawSurfaceIndex = surfaceIndex;
 }
 
 void evtSubmitGsRegister47(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
@@ -287,7 +287,7 @@ void evtSubmitGsRegister47(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32
     command->registerId = 0x47;
     sdfAppendPacket(list, packet);
     {
-        EvtDrawSurface *surface = &D_0037FB48[D_00435CB8];
+        EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->submit(surface, list);
     }
 }
@@ -303,7 +303,7 @@ void evtSubmitGsRegister48(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32
     command->registerId = 0x48;
     sdfAppendPacket(list, packet);
     {
-        EvtDrawSurface *surface = &D_0037FB48[D_00435CB8];
+        EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->submit(surface, list);
     }
 }
@@ -321,7 +321,7 @@ void evtSubmitTexturePacket(s32 value) {
     command->registerId = 0x42;
     sdfAppendPacket(list, packet);
     {
-        EvtDrawSurface *surface = &D_0037FB48[D_00435CB8];
+        EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->submit(surface, list);
     }
 }
@@ -331,10 +331,10 @@ void func_00108D80(void) {
     void *texture;
     sdfInitPacketList(list);
     texture = sdfAllocPacketAligned(0x40);
-    func_0032DB30(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
+    func_0032DB30(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(list, texture);
     {
-        EvtDrawSurface *surface = &D_0037FB48[D_00435CB8];
+        EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->submit(surface, list);
     }
 }
@@ -344,10 +344,10 @@ void func_00108E20(void) {
     void *texture;
     sdfInitPacketList(list);
     texture = sdfAllocPacketAligned(0x40);
-    func_0032DB78(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
+    func_0032DB78(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(list, texture);
     {
-        EvtDrawSurface *surface = &D_0037FB48[D_00435CB8];
+        EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->submit(surface, list);
     }
 }
@@ -389,7 +389,7 @@ extern void *func_0033B050(EvtQuadDesc *);
 extern void func_003332E8(void *, u32);
 extern void sdfQueueAssetRelease(void *);
 
-void func_00109950(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32 z1, s32 i2, f32 x2, f32 y2, f32 z2, s32 i3, f32 x3, f32 y3, f32 z3, u32 bits, f32 u0, f32 v0, f32 u1, f32 v1) {
+void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32 z1, s32 i2, f32 x2, f32 y2, f32 z2, s32 i3, f32 x3, f32 y3, f32 z3, u32 bits, f32 u0, f32 v0, f32 u1, f32 v1) {
     EvtQuadDesc desc;
     f32 verts[16];
     s32 indices[4];
@@ -439,7 +439,7 @@ void func_00109950(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32 z
     uvs[6] = u1;
     uvs[7] = v0;
     sdfAppendPacket(list, func_0033B050(&desc));
-    surface = &D_0037FB48[D_00435CB8];
+    surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
     surface->submit(surface, list);
     sdfQueueAssetRelease(asset);
 }
@@ -458,7 +458,7 @@ void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u,
     sdfInitPacketList(list);
     sdfAppendPacket(list, func_00348158(D_0037F5B0, D_0037F5D0, 2, 0x80));
     {
-        EvtDrawSurface *surface = &D_0037FB48[D_00435CB8];
+        EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->submit(surface, list);
     }
 }
@@ -477,7 +477,7 @@ void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     sdfAppendPacket(list, packet);
     sdfPktInit(pkt, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
     sdfAppendPacket(list, sdfFormatSifPacket(pkt, drawArg));
-    surface = (EvtDrawSurface *)D_00380748;
+    surface = (EvtDrawSurface *)kwlnPositionedTextSurface;
     surface->submit(surface, list);
 }
 
@@ -494,31 +494,31 @@ s32 evtSelStateCreate(s32 limit, s16 frames, s32 value08, s32 value0C) {
     if (frames == 0) {
         return 0;
     }
-    if (D_00435D18 != 0) {
+    if (evtSelectionStateActive != 0) {
         evtSelStateDestroy();
     }
     node = sdfAllocAndClearQuadwords(0x28);
-    D_00438E60 = node;
+    evtSelectionState = node;
     if (limit == 0) {
         node->limit = -1;
     } else {
         node->limit = limit;
     }
-    ((EvtSelState *)D_00438E60)->unk_08 = value08;
-    ((EvtSelState *)D_00438E60)->unk_0C = value0C;
-    ((EvtSelState *)D_00438E60)->unk_10 = frames;
-    ((EvtSelState *)D_00438E60)->unk_12 = frames;
-    ((EvtSelState *)D_00438E60)->unk_14 = frames;
-    D_00435D18 = 1;
+    ((EvtSelState *)evtSelectionState)->unk_08 = value08;
+    ((EvtSelState *)evtSelectionState)->unk_0C = value0C;
+    ((EvtSelState *)evtSelectionState)->unk_10 = frames;
+    ((EvtSelState *)evtSelectionState)->unk_12 = frames;
+    ((EvtSelState *)evtSelectionState)->unk_14 = frames;
+    evtSelectionStateActive = 1;
     return 1;
 }
 
 u32 evtCheckSelectionState(void) {
     EvtSelState *sel;
-    if (D_00435D18 == 0) {
+    if (evtSelectionStateActive == 0) {
         return 0;
     }
-    sel = D_00438E60;
+    sel = evtSelectionState;
     if (sel->limit > sel->count || sel->limit == -1) {
         func_00109E60();
     } else {
@@ -535,9 +535,9 @@ void evtDestroySelectionState(void) {
 }
 
 void evtSelStateDestroy(void) {
-    if (D_00435D18 != 0) {
-        sdfReleaseChipBlock(D_00438E60);
-        D_00435D18 = 0;
+    if (evtSelectionStateActive != 0) {
+        sdfReleaseChipBlock(evtSelectionState);
+        evtSelectionStateActive = 0;
         VU0_MOVE_VF(vf10, vf0);
         VU0_CLEAR_W(vf10);
         VU0_STORE_VF(vf10, D_0037F590);
@@ -607,7 +607,7 @@ s32 evtCheckSelectionInput(void) {
     func_002CE750();
     fileReleaseMenuResources();
     if (func_002CE920() != 0) {
-        func_00124D70();
+        fldStartSequenceRecord();
         return 0;
     }
     return -1;
@@ -715,7 +715,7 @@ void evtDispatchSelectionValue(s32 source, s32 *params) {
 u32 evtCloseSkyEventTask(void) {
     D_00435BB0 = 1;
     evtDestroySkyTask();
-    func_00128658();
+    fldDispatchDeferredFieldCommand();
     return 0;
 }
 
@@ -766,7 +766,7 @@ void evtCreateStaffTasks(void) {
 }
 
 u32 evtDestroyStaffTasks(void) {
-    func_00128658();
+    fldDispatchDeferredFieldCommand();
     mnuStaffDestroyTasks();
     return 0;
 }
@@ -805,7 +805,7 @@ void evtDispatchSelectionCommand(s32 source, s32 *params) {
     }
     else {
         dds3AdminSetControlFlag();
-        func_00128658();
+        fldDispatchDeferredFieldCommand();
     }
 }
 
@@ -818,7 +818,7 @@ u32 evtEnsureSelectionTask(void) {
         return 0;
     }
     if (func_00101820(0x3FA) == NULL) {
-        func_00128658();
+        fldDispatchDeferredFieldCommand();
         return 1;
     }
     return 0;
@@ -888,7 +888,7 @@ void func_0010A998(void) {
     mnuCreateCampTasks();
 }
 
-u32 func_0010A9B0(void) {
+u32 evtExitCampTaskGroup(void) {
     mnuDestroyCampTasks();
     return 0;
 }
@@ -1087,18 +1087,18 @@ u8 evtWaitFileMenuTaskFour(void) {
 }
 
 u32 evtEnsureFontResourceChain(void) {
-    if (D_00435D30 == 0) {
-        D_00435D30 = sdfDevConsNodeCreate(0x7100, 0x7A60, 0x28, 0x14);
-        sdfDevConsSetControlByte(D_00435D30, 2);
-        sdfDevConsSetTextAttribute(D_00435D30, 7);
+    if (evtConsoleFontResourceChain == 0) {
+        evtConsoleFontResourceChain = sdfDevConsNodeCreate(0x7100, 0x7A60, 0x28, 0x14);
+        sdfDevConsSetControlByte(evtConsoleFontResourceChain, 2);
+        sdfDevConsSetTextAttribute(evtConsoleFontResourceChain, 7);
     }
     return 0;
 }
 
 void evtDestroyFontResourceChain(void) {
-    if (D_00435D30 != 0) {
-        sdfDevConsNodeDestroy(D_00435D30);
-        D_00435D30 = 0;
+    if (evtConsoleFontResourceChain != 0) {
+        sdfDevConsNodeDestroy(evtConsoleFontResourceChain);
+        evtConsoleFontResourceChain = 0;
     }
 }
 
@@ -1106,22 +1106,22 @@ extern s32 func_00360E78();
 extern void sdfDevConsPrintf();
 
 /* printf into the dev console node when one exists. */
-INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D18);
+INCLUDE_SDATA(const s32, "game/code_00107EF8", evtSelectionStateActive);
 
 INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D20);
 
 INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D28);
 
-INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D30);
+INCLUDE_SDATA(const s32, "game/code_00107EF8", evtConsoleFontResourceChain);
 
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...) {
     char buffer[0x200];
     __builtin_va_list args;
 
     __builtin_stdarg_start(args, fmt);
-    if (D_00435D30 != 0) {
+    if (evtConsoleFontResourceChain != 0) {
         func_00360E78(buffer, fmt, args);
-        sdfDevConsPrintf(D_00435D30, "%s", buffer);
+        sdfDevConsPrintf(evtConsoleFontResourceChain, "%s", buffer);
     }
 }
 
@@ -1152,7 +1152,7 @@ s32 func_0010B780(void) {
     if (D_0037F53B[0] != 0) {
         return 0;
     }
-    func_0010B650(D_00380748);
+    func_0010B650(kwlnPositionedTextSurface);
     return 0;
 }
 

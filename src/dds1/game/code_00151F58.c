@@ -45,8 +45,8 @@ typedef struct EffParticleRecord {
     f32 y;
     f32 z;
     u8 pad0C[0x14];
-    s32 unk20;
-    u32 unk24;
+    s32 frame;   /* 0x20: starts at -1; read as a countdown and incremented */
+    u32 color;   /* 0x24: packed RGBA built from the effect's colour and alpha */
     f32 speed;
     f32 angle;
     u8 pad30[0x10];
@@ -59,9 +59,9 @@ extern EffectConfig D_0034DF54[];
 
 s32 billCreateIndexed(s32 kind, s32 index);
 
-extern s32 D_003D6438[];
+extern s32 effBillResourceOwners[];
 
-extern s32 D_003D6480[];
+extern s32 effEmitterDelayRandomState[];
 
 s32 sdfAllocPacketAligned(s32 size);
 
@@ -114,8 +114,8 @@ typedef struct EffResourceSet {
 
 /* Attach the indexed effect resource to a new billboard and increment its reference count. */
 void effRetainResource(s32 index) {
-    s32 *effect = (s32 *)billCreateIndexed(D_0034DF54[index].unk00, 0);
-    s32 *resource = ((EffResourceOwner *)D_003D6438[index])->resource;
+    s32 *effect = (s32 *)billCreateIndexed(D_0034DF54[index].billboardKind, 0);
+    s32 *resource = ((EffResourceOwner *)effBillResourceOwners[index])->resource;
     s32 references = resource[2];
 
     effect[12] = (s32)resource;
@@ -127,7 +127,7 @@ u32 func_00151FC0(void) {
 }
 
 s32 effGetResourceFirstWord(s32 index) {
-    return *(s32 *)((EffResourceOwner *)D_003D6438[index])->resource;
+    return *(s32 *)((EffResourceOwner *)effBillResourceOwners[index])->resource;
 }
 
 void effCopyVector(void *dst, void *src) {
@@ -136,22 +136,22 @@ void effCopyVector(void *dst, void *src) {
 
 /* Adjust the scalar used by an existing billboard instance. */
 void billSetLengthExtent(BillObj *effect, float scale) {
-    effect->unk20 = scale;
+    effect->lengthScale = scale;
 }
 
-/* Set the two billboard coordinates stored at +0x10 and +0x14. */
+/* Set the two child scale components stored at +0x10 and +0x14. */
 void billSetChildScaleComponents(BillObj *effect, float x, float y) {
-    effect->unk10 = x;
-    effect->unk14 = y;
+    effect->childScaleX = x;
+    effect->childScaleY = y;
 }
 
 void billSetChildParameter(BillObj *effect, u32 value) {
-    effect->unk24 = value;
+    effect->childParam = value;
 }
 
 void effCopyPosition(BillObj *effect, const void *position) {
-    if (effect->unk2C == 0) {
-        memcpy((void *)((s32)effect->unk30 + 0xc), position, 16);
+    if (effect->kind == 0) {
+        memcpy((void *)((s32)effect->entryList + 0xc), position, 16);
     }
 }
 
@@ -182,7 +182,7 @@ void billSetBillboardMode(BillObj *effect, s32 mode) {
     s32 remaining;
     s32 entry;
     mode = (s16)mode;
-    switch (effect->unk2C) {
+    switch (effect->kind) {
     case 0:
     case 3:
         effect->unk2E = mode;
@@ -251,13 +251,13 @@ void billSetAllChildVariants(BillObj *effect, s32 value) {
     s32 *entry;
 
     value = (s16)value;
-    switch (effect->unk2C) {
+    switch (effect->kind) {
     case 0:
-        ((BillChildPayload *)effect->unk30)->signedVariant = value;
+        ((BillChildPayload *)effect->entryList)->signedVariant = value;
         break;
     case 1:
-        count = ((BillEntryList *)effect->unk30)->count;
-        entries = ((BillEntryList *)effect->unk30)->entries;
+        count = ((BillEntryList *)effect->entryList)->count;
+        entries = ((BillEntryList *)effect->entryList)->entries;
 
         if (count > 0) {
             entry = entries;
@@ -272,22 +272,22 @@ void billSetAllChildVariants(BillObj *effect, s32 value) {
 }
 
 s32 billGetChildValue(BillObj *effect) {
-    if (effect->unk2C == 0) {
-        return ((BillChildPayload *)effect->unk30)->value;
+    if (effect->kind == 0) {
+        return ((BillChildPayload *)effect->entryList)->value;
     }
     return 0;
 }
 
 u16 billGetKind(BillObj *effect) {
-    return effect->unk2C;
+    return effect->kind;
 }
 
 void billSetVariantValue(BillObj *effect, s32 value) {
     s32 v = value & 0xffff;
 
-    switch (effect->unk2C) {
+    switch (effect->kind) {
     case 0:
-        ((BillChildPayload *)effect->unk30)->signedVariant = v;
+        ((BillChildPayload *)effect->entryList)->signedVariant = v;
         break;
     case 1:
         effect->unk3C = v;
@@ -296,9 +296,9 @@ void billSetVariantValue(BillObj *effect, s32 value) {
 }
 
 u16 billGetVariantValue(BillObj *effect) {
-    switch (effect->unk2C) {
+    switch (effect->kind) {
     case 0:
-        return ((BillChildPayload *)effect->unk30)->variant;
+        return ((BillChildPayload *)effect->entryList)->variant;
     case 1:
         return effect->unk3C;
     default:
@@ -308,29 +308,29 @@ u16 billGetVariantValue(BillObj *effect) {
 
 /* Replace the selected list entry only when its index changes. */
 void billSetKind1Entry(BillObj *effect, u32 value) {
-    if (effect->unk2C == 1 && effect->unk58 != value) {
+    if (effect->kind == 1 && effect->unk58 != value) {
         func_001518D8(effect, value);
     }
 }
 
 /* Read the selected entry for list billboards; other kinds have none. */
 s32 billGetKindOneEntry(BillObj *effect) {
-    if (effect->unk2C == 1) {
+    if (effect->kind == 1) {
         return effect->unk58;
     }
     return 0;
 }
 
 s32 billGetLinkedChildValue(s32 billboard) {
-    if (((BillObj *)billboard)->unk2C == 1) {
-        return ((BillValueLink *)((BillObj *)billboard)->unk30)->target->value;
+    if (((BillObj *)billboard)->kind == 1) {
+        return ((BillValueLink *)((BillObj *)billboard)->entryList)->target->value;
     }
     return 0;
 }
 
 /* Start every entry's animation at the requested frame, with mode zero. */
 void billSetEntryFrameMode0(BillObj *effect, u32 time) {
-    if (effect->unk2C == 1) {
+    if (effect->kind == 1) {
         s32 count = effect->entryCount;
 
         if (count > 0) {
@@ -351,7 +351,7 @@ void billSetEntryFrameMode0(BillObj *effect, u32 time) {
 
 /* Start every entry's animation at the requested frame, with mode one. */
 void billSetEntryFrameMode1(BillObj *effect, u32 time) {
-    if (effect->unk2C == 1) {
+    if (effect->kind == 1) {
         s32 count = effect->entryCount;
 
         if (count > 0) {
@@ -372,7 +372,7 @@ void billSetEntryFrameMode1(BillObj *effect, u32 time) {
 
 /* Read the animation modulus of the first entry, if this is a list billboard. */
 s32 billGetFirstEntryFramePeriod(BillObj *effect) {
-    if (effect->unk2C == 1) {
+    if (effect->kind == 1) {
         return ((EffBillEntry *)effect->unk60)->data->period;
     }
     return 0;
@@ -380,7 +380,7 @@ s32 billGetFirstEntryFramePeriod(BillObj *effect) {
 
 /* Read the kind-one billboard's halfword at +0x50. */
 u16 billGetKindOneParameter(BillObj *effect) {
-    if (effect->unk2C == 1) {
+    if (effect->kind == 1) {
         return effect->unk50;
     }
     return 0;
@@ -401,14 +401,14 @@ void billMarkKindOneFlag(s32 billboard) {
 
 void billSetChildHalfExtents(s32 billboard, float width, float height) {
     if (((BillKindOneView *)billboard)->kind == 0) {
-        s32 tmp = (s32)((BillObj *)billboard)->unk30;
+        s32 tmp = (s32)((BillObj *)billboard)->entryList;
         ((BillChildPayload *)tmp)->halfWidth = width * 0.5f;
         ((BillChildPayload *)tmp)->halfHeight = height * 0.5f;
     }
 }
 
-extern u8 D_003296F0[];
-extern u8 D_00324610[];
+extern u8 sdfViewMatrix[];
+extern u8 sdfProjectionMatrix[];
 extern u8 D_00324650[];
 extern u8 D_00324660[];
 extern u8 D_0034E080[];
@@ -416,13 +416,13 @@ extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 extern f32 sdfAtan2(f32, f32);
 
 /* vu0 routine: computes the projected angle between two vectors */
-f32 func_00152408(const void *position, const void *offset) {
+f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     f32 delta[4];
     f32 projectedPosition[4];
     f32 projectedOffset[4];
 
-    VU0_LOAD_MATRIX(D_003296F0);
-    sdfPostmultiplyVuMatrixFromMemory(D_00324610);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     VU0_LOAD_VF(vf10, position);
     VU0_MOVE_VF(vf12, vf10);
     VU0_TRANSFORM_POINT(vf10, vf10);
@@ -511,7 +511,26 @@ void effVuCopyMatrix(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_00152800);
+void effReadBillboardModeValues(EffUnitObject *instance, s32 *values) {
+    BillObj *billboard = (BillObj *)instance->billboard;
+
+    if (billboard->kind == 1) {
+        u32 modeFlags = *(u32 *)((u8 *)billboard + 0x54);
+
+        if (modeFlags & 0x40) {
+            values[0] = 2;
+            values[2] = func_00151398((s32)billboard, (s32)billboard->unk60);
+            values[1] = func_00151398((s32)billboard, (s32)billboard->unk60 + 0x14);
+        } else if (modeFlags & 0x80) {
+            values[0] = 3;
+            values[2] = func_00151398((s32)billboard, (s32)billboard->unk60);
+            values[1] = func_00151398((s32)billboard, (s32)billboard->unk60 + 0x14);
+        } else {
+            values[0] = 0;
+            values[1] = func_00151398((s32)billboard, (s32)billboard->unk60);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_001528C0);
 
@@ -542,7 +561,7 @@ void func_00153618(s32 sink, s32 source) {
 }
 
 void func_00153680(void) {
-    func_002E84A0(&D_003D6480);
+    effMiscSeedRandomFromClock(&effEmitterDelayRandomState);
 }
 
 void func_001536A0(void) {
@@ -928,7 +947,7 @@ void effEmitterDiscSpawn(EffEmitterB *effect, u32 index) {
     packet->f34 = 0;
     packet->f38 = 0;
     packet->f3C = effect->f15C * (effMiscRandUnitFloat(D_0034DF38) * effect->jitterA + (1.0f - effect->jitterA));
-    packet->age = -(effMiscRand(D_003D6480) % (effect->spread + 1));
+    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
@@ -1204,9 +1223,9 @@ struct EffEmitterD {
     f32 f164;
 };
 
-extern u8 D_00324680[];
-extern u8 D_00324690[];
-extern u8 D_003246A0[];
+extern u8 sdfViewEyeVector[];
+extern u8 sdfViewTargetVector[];
+extern u8 sdfViewUpVector[];
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfInvertRigidVuTransform(void);
 
@@ -1218,7 +1237,7 @@ void effEmitterLookAtRingSpawn(EffEmitterD *effect, u32 index) {
     f32 jitter;
 
     packet += index;
-    sdfVuBuildLookAtBasis(D_00324680, D_00324690, D_003246A0);
+    sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
     sdfInvertRigidVuTransform();
     if (effect->mode == 0) {
         PCP_COPY_VECTOR(packet, effect->head.origin);
@@ -1273,7 +1292,7 @@ void effEmitterLookAtRingUpdate(EffEmitterD *effect) {
     s32 i;
 
     parUpdateSharedScaleAndDelta(&effect->head.sub);
-    sdfVuBuildLookAtBasis(D_00324680, D_00324690, D_003246A0);
+    sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
     sdfInvertRigidVuTransform();
     frames = effect->head.frameCount;
     spin = effect->f160 * (3.14159265f / 180.0f);
@@ -1386,7 +1405,7 @@ void effEmitterBurstSpawn(EffEmitterE *effect, u32 index) {
 
     packet += index;
     packet->color = 0;
-    packet->age = -(effMiscRand(D_003D6480) % (effect->spread + 1));
+    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     speed = effect->speed;
     jitter = effect->jitterA;
     tmp[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
@@ -1614,7 +1633,7 @@ void effEmitterSphereSpawn(EffEmitterF *effect, u32 index) {
     packet->f34 = 0;
     packet->f38 = 0;
     packet->f3C = effect->f15C * (effMiscRandUnitFloat(D_0034DF38) * effect->f170 + (1.0f - effect->f170));
-    packet->age = ~(effMiscRand(D_003D6480) % (effect->spread + 1));
+    packet->age = ~(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
@@ -1973,7 +1992,7 @@ void effEmitterConeSpawn(EffEmitterH *effect, s32 index) {
         packet->vel[2] = sinv * cone * speed;
         packet->f38 = gravity;
     }
-    packet->age = -(effMiscRand(D_003D6480) % (effect->spread + 1));
+    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
@@ -2165,9 +2184,9 @@ void effInitParticleRecord(effect)
 
     color = effect->color | (effect->alpha << 24);
     particle->x = effect->x;
-    particle->unk20 = -1;
+    particle->frame = -1;
     particle->y = effect->y;
-    particle->unk24 = color;
+    particle->color = color;
     particle->z = effect->z;
     particle->speed = 1.0f;
     particle->angle = 0;
@@ -2186,21 +2205,21 @@ extern u32 effParModulateColors(u32, u32);
 
 void effUpdateParticleRecord(EffParticle *effect) {
     EffParticleRecord *particle = (EffParticleRecord *)effect->buffer->records;
-    s32 count = particle->unk20;
+    s32 count = particle->frame;
     u32 color;
 
     if (count == 0) {
         effInitParticleRecord(effect);
-        count = particle->unk20;
+        count = particle->frame;
     }
-    particle->unk20 = count + 1;
+    particle->frame = count + 1;
     particle->x = effect->x;
     effect->unk24 = count + 2;
     particle->y = effect->y;
     color = effect->color | (effect->alpha << 24);
     particle->z = effect->z;
-    particle->unk24 = color;
-    particle->unk24 = effParModulateColors(color, effect->unkF0);
+    particle->color = color;
+    particle->color = effParModulateColors(color, effect->unkF0);
 }
 
 void effResetOffsetGravityPacketAges(EffTemplatePacketList *effect) {
@@ -2426,7 +2445,7 @@ void effEmitterDiscAuxSpawn(EffEmitterK *effect, u32 index) {
     packet->f34 = 0;
     packet->f38 = 0;
     packet->f3C = effect->f15C * (effMiscRandUnitFloat(D_0034DF38) * effect->f170 + (1.0f - effect->f170));
-    packet->age = -(effMiscRand(D_003D6480) % (effect->spread + 1));
+    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     PCP_COPY_VECTOR(packet, effect->head.origin);
     jitter = effect->head.speedJitter;

@@ -16,6 +16,7 @@ extern u8 D_003DC1C0[];
 
 extern u8 D_003DC1D0[];
 
+
 extern void *mnuTitleCameraObject;
 
 extern char D_003AFD48[]; /* "---------- AT3 --------\n", followed by 8 zero bytes no C function emits */
@@ -282,7 +283,7 @@ s32 movCheckStartupSoundState(void) {
 }
 
 u32 func_002698C0(void) {
-    func_0026A778();
+    mnuRunTitleStreamTransitionAndLogBgm();
     return 1;
 }
 
@@ -343,9 +344,10 @@ void sndUploadStreamToBothIopBuffers(u32 source) {
     func_002F5990(1, 0x80e0, 0, 2, 0, 0);
 }
 
+/* Title-stream sample buffer. */
 typedef struct MixSource {
-    u8 unk0[0x18];
-    s16 *samples;   /* 0x18 */
+    u8 pad00[0x18];
+    s16 *samples; /* 0x18 */
 } MixSource;
 
 void sndMixSampleBuffers(s16 *dst, MixSource *first, MixSource *second) {
@@ -384,13 +386,13 @@ void mnuRunTitleStreamThread(void) {
 
 extern u32 mnuTitleStreamSemaphore;
 
-extern s32 D_003BD8C8;
+extern s32 mnuTitleStreamThread;
 
-extern u8 D_003DB1C0[];
+extern u8 mnuTitleStreamThreadStack[];
 
 void mnuCreateTitleStreamThread(void) {
     mnuTitleStreamSemaphore = sdfCreateSemaphore(1, 0xff, 0);
-    sdfStartTrackedThread(&D_003BD8C8, mnuRunTitleStreamThread, D_003DB1C0,
+    sdfStartTrackedThread(&mnuTitleStreamThread, mnuRunTitleStreamThread, mnuTitleStreamThreadStack,
                   0x1000, 0x45, 0);
     sdfThreadSleepSelf();
 }
@@ -429,7 +431,7 @@ void mnuWriteTitleStreamStatusLocked(u32 *values) {
 void mnuLoadTitleStreamFrameData(char *filePath, u32 *work) {
     void *fileData;
     s32 frames;
-    u32 request = func_002EB028(filePath, &fileData, 0);
+    u32 request = sdfReadNamedResource(filePath, &fileData, 0);
     s32 bytes = sdfMemoryGetBlockSize(request);
     memcpy((void *)work[5], fileData, bytes);
     frames = bytes / (s32)work[2];
@@ -446,7 +448,7 @@ void mnuStoreTaskResult(void) {
 extern u32 D_003D9168[];
 extern s32 fileIsRequestReadyInCurrentMode(u32);
 extern s32 fileGetResourceHandle(u32);
-extern u32 func_00288B90(u32);
+extern u32 fileGetLoadedDataAddress(u32);
 extern s32 fileGetResourceSize(u32);
 extern void filePollEntryCleanup(u32);
 extern s32 func_002D0518(s32);
@@ -460,7 +462,7 @@ s32 mnuCompleteTitleStreamFileLoad(u32 *queue) {
 
     if (ready != 0) {
         s32 handle = fileGetResourceHandle(D_003BD8D4);
-        u32 data = func_00288B90(D_003BD8D4);
+        u32 data = fileGetLoadedDataAddress(D_003BD8D4);
         s32 size = fileGetResourceSize(D_003BD8D4);
         s32 block;
 
@@ -499,9 +501,24 @@ s32 mnuPollTitleStreamStateLocked(void) {
     return mnuTitleStreamStatus[9];
 }
 
+extern void fileWaitIdle(void);
+
 INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFCF0);
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A778);
+void mnuRunTitleStreamTransitionAndLogBgm(void) {
+    WaitSema(mnuTitleStreamSemaphore);
+    if (mnuUpdateTitleTransition() == 1) {
+        fileWaitIdle();
+        mnuCompleteTitleStreamFileLoad(mnuTitleStreamStatus);
+    }
+    if (mnuTitleStreamStatus[4] != 1) {
+        mnuTitleStreamStatus[4] = 0;
+        mnuTitleStreamStatus[9] = 3;
+        *(u32 *)D_003D9178 = 0;
+    }
+    func_003003F0("----------- AT3 BGM Play ------------\n");
+    SignalSema(mnuTitleStreamSemaphore);
+}
 
 void mnuMarkTitleStreamResetPending(void) {
     WaitSema(mnuTitleStreamSemaphore);
@@ -549,7 +566,29 @@ void mnuResetTitleStreamLocked(void) {
     SignalSema(mnuTitleStreamSemaphore);
 }
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A980);
+extern u32 D_003DA1A8[];
+extern s32 func_002D03F8(s32);
+
+void mnuInitializeTitleSoundBuffer(void) {
+    u32 *work = mnuTitleSoundBufferState;
+    u32 *decoder = D_003DA1A8;
+    s32 allocation;
+    s32 buffer;
+
+    WaitSema(mnuTitleStreamSemaphore);
+    work[7] = (u32)decoder;
+    allocation = func_002D03F8(0x1C200);
+    buffer = sdfMemoryGetBlockAddress(allocation);
+    work[8] = allocation;
+    work[4] = 2;
+    ((u32 *)work[7])[2] = 2;
+    work[5] = buffer;
+    work[6] = (u32)D_003DA1C0;
+    work[2] = 0xC0;
+    mnuLoadTitleStreamFrameData("/soundat3/se01-2.at3", work);
+    func_002F7628(decoder);
+    SignalSema(mnuTitleStreamSemaphore);
+}
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026AA28);
 
@@ -702,5 +741,5 @@ INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5C8);
 
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5CC);
 
-INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5D0);
+INCLUDE_SDATA(const s32, "game/code_00268AB8", mnuMovieMenuState);
 

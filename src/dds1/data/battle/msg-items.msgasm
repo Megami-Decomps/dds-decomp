@@ -1,0 +1,2865 @@
+messages msg1
+  message item_000 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_001 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore 50 HP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_002 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore 150 HP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_003 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore 300 HP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_004 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore HP (S)"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Reusable"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_005 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore HP (M)"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Reusable"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_006 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore 150 HP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Party"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_007 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore 50 MP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_008 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore 50 MP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Reusable"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_009 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore 150 MP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_00A speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore all MP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Party"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_00B speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore all HP/MP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_00C speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore all HP/MP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Party"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_00D speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore HP or MP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~???"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_00E speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Revive target"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Some HP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_00F speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Revive target"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All HP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_010 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Revive 1 ally"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All HP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Reusable"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_011 speaker=none
+    page
+      segment-start
+      text "0x011"
+      newline
+      font-slot 1
+    endpage
+  endmessage
+  message item_012 speaker=none
+    page
+      segment-start
+      text "0x012"
+      newline
+      font-slot 1
+    endpage
+  endmessage
+  message item_013 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Cure poison"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_014 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Cure ache"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_015 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Cure mute"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_016 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Cure stun"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_017 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Cure stone"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_018 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Uncurse"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_019 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Cure panic/charm/"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "sleep"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_01A speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore HP (M)"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~???"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_01B speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore HP (M)"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~???"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_01C speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore HP (M)"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~???"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_01D speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_01E speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_01F speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_020 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Repel magic"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Next turn only"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_021 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Repel phys attack"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Next turn only"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_022 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Cancel -kaja"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All enemies"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_023 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_024 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Light damage"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Fire"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_025 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Moderate damage"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Fire"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_026 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Light damage"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Ice"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_027 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Moderate damage"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Ice"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_028 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Light damage"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Electricity"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_029 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Moderate damage"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Electricity"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_02A speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Light damage"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Force"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_02B speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Moderate damage"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Force"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_02C speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Light damage"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Earth"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_02D speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Moderate damage"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Earth"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_02E speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Reduce HP by half"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Expel"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_02F speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Death"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_030 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Death (low odds)"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Reusable"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_031 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Death (high odds)"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Reusable"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_032 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_033 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_034 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Moderate damage"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Almighty"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_035 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Almighty damage"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Reusable"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_036 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Heavy damage"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Almighty"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~All"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_037 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_038 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "See enemy info"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 enemy"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Reusable"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_039 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Fewer encounters"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Temporary"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_03A speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "More encounters"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Temporary"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_03B speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Null damage zone"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Temporary"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_03C speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_03D speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_03E speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_03F speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_040 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Null fire attacks"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Party"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_041 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Null ice attacks"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Party"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_042 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Null elec attacks"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Party"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_043 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Null force attacks"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Party"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_044 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Null earth attacks"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Party"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_045 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_046 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_047 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_048 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_049 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_04A speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_04B speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_04C speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_04D speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_04E speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_04F speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_050 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore all HP/MP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Strength +2"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_051 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore all HP/MP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Vitality +2"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_052 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore all HP/MP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Magic +2"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_053 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore all HP/MP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Agility +2"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_054 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore all HP/MP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Luck +2"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_055 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore HP/MP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Max HP +10"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_056 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Restore HP/MP"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Max MP +10"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~1 ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_057 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_058 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_059 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_05A speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_05B speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_05C speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_05D speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_05E speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_05F speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_060 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_061 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Trade for Macca "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "at Vendor"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_062 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Trade for Macca "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "at Vendor"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_063 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Trade for Macca "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "at Vendor"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_064 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Trade for Macca "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "at Vendor"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_065 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Trade for Macca "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "at Vendor"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_066 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Trade for Macca "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "at Vendor"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_067 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Trade for Macca "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "at Vendor"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_068 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Trade for Macca "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "at Vendor"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_069 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Trade for Macca "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "at Vendor"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_06A speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Trade for Macca "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "at Vendor"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_06B speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Trade for Macca "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "at Vendor"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_06C speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Trade for Macca "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "at Vendor"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_06D speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_06E speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_06F speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_070 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_071 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_072 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_073 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_074 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_075 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_076 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_077 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_078 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_079 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_07A speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_07B speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_07C speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_07D speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_07E speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_07F speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_080 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Destroys "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "blue walls"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_081 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Destroys "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "yellow walls"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_082 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Destroys "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "red walls"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_083 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Records Macca "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "earned in battle"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_084 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Crimson sphere "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "of Feng Huang"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_085 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Earth sphere "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "of Gui Xian"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_086 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Azure sphere "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "of Long"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_087 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "White sphere "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "of Baihu"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_088 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Mysterious "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "gold sphere"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_089 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Tag Ring with "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "blood on it"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_08A speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Steel feather "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "of Metatron"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_08B speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Mysterious "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "black skull"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_08C speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Fine-grained "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "wooden key"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_08D speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Key made of steel"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_08E speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Key made of glass"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_08F speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Lightweight "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "white key"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_090 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Shiny silver key"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_091 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Shiny gold key"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_092 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Useful and "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "delicious!"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_093 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Ice crystal "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "of King Frost"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_094 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Key acquired in "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "the Citadel"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_095 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Key acquired in "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "the Citadel"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_096 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Useful when "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "scuba diving"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_097 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_098 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_099 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_09A speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_09B speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_09C speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_09D speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_09E speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_09F speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0A0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0A1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Bullet"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Attack power 8"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0A2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Bullet"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Shock"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Attack power 24"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0A3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Bullet"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Sleep"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Attack power 48"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0A4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Bullet"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Attack power 16"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0A5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Bullet"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Stun"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Attack power 64"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0A6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Bullet"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Freeze"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Attack power 32"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0A7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Bullet"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Attack power 40"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0A8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Bullet"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Attack power 56"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0A9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Bullet"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Charm"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Attack power 104"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0AA speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Bullet"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Attack power 80"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0AB speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Bullet"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Poison"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Attack power 88"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0AC speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0AD speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Bullet"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Attack power 96"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0AE speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Bullet"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Attack power 120"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0AF speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Bullet"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Stone"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Attack power 112"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0B0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0B1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Bullet"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "~Attack power 200"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0B2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0B3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0B4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0B5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0B6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0B7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0B8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0B9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0BA speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0BB speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0BC speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0BD speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0BE speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_0BF speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Dummy Message "
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "1234567890"
+      font-slot 1
+      conditional-newline
+      font-slot 0
+      text "123456"
+      font-slot 1
+      newline
+    endpage
+  endmessage

@@ -3,7 +3,7 @@
 
 #include "sdf.h"
 
-extern u32 D_00438A3C;
+extern u32 sdfForcedAssetTextureMode;
 
 typedef union SdfSubParam {
     struct {
@@ -63,20 +63,13 @@ typedef struct SdfMapPositionChunk {
     SdfMapPositionRecord records[1]; /* 0x10 */
 } SdfMapPositionChunk;
 
-
-
-#define SDF_CHUNK_MAP_POSITIONS 0x534F504D /* "MPOS" in little-endian byte order */
-#define SDF_CHUNK_UNIQUE_VALUE 0x51494e55 /* "UNIQ" in little-endian byte order */
-#define SDF_CHUNK_LOD_VALUE 0x43444f4c /* "LODC" in little-endian byte order */
-
-
 extern f32 D_00438A48;
 
 extern f32 D_00438A4C;
 
-extern u8 D_00439170;
+extern u8 sdfResourceReleaseQueue;
 
-extern u8 D_00439178;
+extern u8 sdfAssetReleaseQueue;
 
 void sdfInitializeSynchronizedRequest(void *request, void (*callback)(void));
 
@@ -91,7 +84,7 @@ void sdfPendingQueuePush(void *queue, s32 assetId);
 
 void sdfDestroyDevRequest(void *);
 
-extern s32 D_00438A38;
+extern s32 sdfLiveAssetCount;
 
 extern void sdfReleaseChipBlock(void *);
 
@@ -140,7 +133,7 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_003325F8);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, void *);
 extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
-extern void func_0032E5C8(void *);
+extern void sdfBuildPrimaryTestBlendPacket(void *);
 extern void sdfBuildPrimaryAlphaAdditiveDmaPacket(void *);
 extern void sdfBuildPrimaryAlphaSubtractiveDmaPacket(void *);
 typedef struct SdfPacketCommand {
@@ -158,7 +151,7 @@ void sdfInitializeDrawPacketGroups(u8 *ctx) {
     s32 i;
 
     sdfBuildPrimaryAlphaBlendDmaPacket(ctx + 0x20);
-    func_0032E5C8(ctx + 0x80);
+    sdfBuildPrimaryTestBlendPacket(ctx + 0x80);
     sdfBuildPrimaryAlphaAdditiveDmaPacket(ctx + 0xE0);
     sdfBuildPrimaryAlphaSubtractiveDmaPacket(ctx + 0x140);
     for (i = 0; i != 4; i++) {
@@ -349,8 +342,8 @@ f32 sdfGetSecondTextOverrideOrDefault(SdfTextParam *param) {
     return D_00438A4C;
 }
 
-void func_00332E50(u32 mode) {
-    D_00438A3C = mode;
+void sdfSetForcedAssetTextureMode(u32 mode) {
+    sdfForcedAssetTextureMode = mode;
 }
 
 void *sdfDevCreateBufferedRequest(s32, s32, s32);
@@ -373,7 +366,7 @@ void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
     sdfDestroyDevRequest(list);
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332F08);
+INCLUDE_ASM(const s32, "game/code_003325F8", sdfAppendResourceListItem);
 
 void sdfReduceResourceListCount(s32 listAddress, s32 newCount, s32 applyReduction) {
     s32 countCursor;
@@ -424,8 +417,8 @@ void sdfUpdateActiveResourceListScalars(SdfResourceList *list, s32 arg, f32 valu
 }
 
 void sdfRegisterResourceQueueCallbacks(void) {
-    sdfInitializeSynchronizedRequest(&D_00439170, sdfResourceListReleaseAssets);
-    sdfInitializeSynchronizedRequest(&D_00439178, sdfAssetRelease);
+    sdfInitializeSynchronizedRequest(&sdfResourceReleaseQueue, sdfResourceListReleaseAssets);
+    sdfInitializeSynchronizedRequest(&sdfAssetReleaseQueue, sdfAssetRelease);
 }
 
 SdfResourceList *sdfCreateResourceList(s32 capacity) {
@@ -446,7 +439,7 @@ void sdfReleaseQueuedResource(void *resource, s32 retained) {
         return;
     }
     if (retained != 0) {
-        sdfPendingQueuePush(&D_00439170, (s32)resource);
+        sdfPendingQueuePush(&sdfResourceReleaseQueue, (s32)resource);
     } else {
         sdfDestroyDevRequest(resource);
     }
@@ -583,7 +576,7 @@ SdfAsset *sdfCreateAssetWithDrawEntries(void) {
     u32 *entry;
     s32 i;
 
-    D_00438A38++;
+    sdfLiveAssetCount++;
     asset = sdfAllocAndClearQuadwords(0x48);
     asset->pad00[6] = 0xFF;
     for (i = 0; i != 2; i++) {
@@ -666,7 +659,7 @@ void sdfAssetRelease(SdfAsset *asset) {
     if (asset == NULL) {
         return;
     }
-    D_00438A38--;
+    sdfLiveAssetCount--;
     sdfReleaseChipBlock(asset->entries[0]);
     sdfReleaseChipBlock(asset->entries[1]);
     sdfReleaseChipBlock(asset->third);
@@ -678,7 +671,7 @@ void sdfQueueAssetRelease(s32 assetId) {
     s32 id = assetId;
 
     if (id != 0) {
-        sdfPendingQueuePush(&D_00439178, id);
+        sdfPendingQueuePush(&sdfAssetReleaseQueue, id);
     }
 }
 
@@ -698,13 +691,13 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
     entry->unk04 = asset->unk10;
     entry->unk1C = asset->unk1C;
     entry->unk08 = asset->unk14;
-    if (D_00438A3C == 1) {
+    if (sdfForcedAssetTextureMode == 1) {
         entry->unk10 = 0;
     } else {
         entry->unk10 = asset->unk20;
     }
     entry->unk14 = asset->unk28;
-    resource = asset->unk2C;
+    resource = asset->texture;
     if (resource != NULL) {
         entry->unk38 = func_0032B328(resource);
         entry->unk40 = func_0032B318(resource);
@@ -774,7 +767,7 @@ void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *asset, s32 index) {
     void *entry = asset->entries[index];
     if ((flags >> index) & 1) {
         sdfAssetCopyTextureState(asset, entry);
-    } else if (D_00438A3C != 0) {
+    } else if (sdfForcedAssetTextureMode != 0) {
         sdfAssetCopyTextureState(asset, entry);
     }
     if (flags & (4 << index)) {
@@ -838,7 +831,7 @@ void sdfCopyAssetParameterState(SdfAsset *dst, SdfAsset *src) {
     dst->unk1C = src->unk1C;
     dst->unk18 = src->unk18;
     *(u16 *)&dst->pad00[4] = *(u16 *)&src->pad00[4];
-    dst->unk2C = src->unk2C;
+    dst->texture = src->texture;
     dst->unk20 = src->unk20;
     dst->unk28 = src->unk28;
     sub = src->third;
@@ -870,7 +863,7 @@ s32 sdfDispatchAssetCommandWord(u32 context, u32 command) {
     D_0040B358[command >> 16](context, command);
 }
 
-INCLUDE_SDATA(const s32, "game/code_003325F8", D_00438A38);
+INCLUDE_SDATA(const s32, "game/code_003325F8", sdfLiveAssetCount);
 
-INCLUDE_SDATA(const s32, "game/code_003325F8", D_00438A3C);
+INCLUDE_SDATA(const s32, "game/code_003325F8", sdfForcedAssetTextureMode);
 

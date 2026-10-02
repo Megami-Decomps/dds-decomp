@@ -63,7 +63,7 @@ extern u128 *D_003EB860[][3];
 extern void *D_003BD37C;
 extern void *D_003BD380;
 extern void *D_003BD390;
-extern void *func_002D3288(void *);
+extern void *sdfTexAcquireResourceTexture(void *);
 extern void *func_002D32A0(void *);
 extern void sdfEnsureFreeRootWorkspace(u32 object);
 extern void *sdfAllocPacketAligned(s32);
@@ -321,17 +321,7 @@ void sdfVuBlendNodeXY(VuBlendNode *node) {
     while (node != NULL) {
         void *sourceA = node->sourceA;
         void *sourceB = node->sourceB;
-        __asm__ volatile (
-            ".set noreorder\n"
-            "lqc2 vf2, 0x40(%0)\n"
-            "lqc2 vf8, 0x30(%1)\n"
-            "lqc2 vf9, 0x30(%2)\n"
-            "vmulaw.xy ACC, vf8, vf0w\n"
-            "vmaddaw.xy ACC, vf9, vf2w\n"
-            "vmsubw.xy vf15, vf8, vf2w\n"
-            "sqc2 vf15, 0x30(%0)\n"
-            ".set reorder\n"
-            : : "r"(node), "r"(sourceA), "r"(sourceB) : "memory");
+        VU0_BLEND_NODE_XY(node, sourceA, sourceB);
         node = node->next;
     }
 }
@@ -374,7 +364,7 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DF128);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DF710);
 
-void func_002DFC80(work)
+void sdfVuEmitTexturedTriangleBatches(work)
     VuWork *work;
 {
     s32 remaining = work->nodeCount;
@@ -516,7 +506,7 @@ void sdfBuildChunkedVuNodeTransfer(VuWork *work, u64 a, u64 b, u64 c, u64 d, s32
 }
 
 
-void func_002E0150(work)
+void sdfVuEmitColoredTriangleBatches(work)
     VuWork *work;
 {
     s32 remaining = work->nodeCount;
@@ -558,10 +548,10 @@ void func_002E0150(work)
 
 void sdfVuEmitSelectedNodePacket(VuWork *work) {
     if ((work->selectedFlags & 0x10) != 0) {
-        func_002DFC80();
+        sdfVuEmitTexturedTriangleBatches();
         return;
     }
-    func_002E0150();
+    sdfVuEmitColoredTriangleBatches();
 }
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E02D8);
@@ -1146,13 +1136,13 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2F68);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E31A0);
 
-u32 func_002E3368(s32 count) {
+u32 sdfMeasureAlignedDrawPacketSize(s32 count) {
     return (count * 0x6c + 0x4bU) & 0xfffffff0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E3390);
 
-extern u8 D_00398620[];
+extern u8 sdfPadActuatorAlignment[];
 extern s32 func_002F2280(s32 port, s32 slot);
 extern s32 func_002F2200(s32 port, s32 slot, void *data);
 extern s32 func_002F2398(s32 port, s32 slot);
@@ -1227,7 +1217,7 @@ void sdfPadUpdatePort(F9B00Entry *entry) {
         break;
     case 3:
         if (func_002F2420(port, slot, -1, 0) != 0) {
-            if (scePadSetActAlign(port, slot, D_00398620) != 0) {
+            if (scePadSetActAlign(port, slot, sdfPadActuatorAlignment) != 0) {
                 entry->state = 4;
             }
         } else {
@@ -1320,17 +1310,17 @@ void sdfPadUpdatePorts(void) {
 
 
 
-extern s32 D_003BD2D8;
+extern s32 sdfThreadWakeTick;
 extern u16 D_003BD3A0[4];
 extern u8 sdfPadAnalogSticks[8];
-extern u16 D_00398600[16];
-extern u8 D_00398628[0x20];
+extern u16 sdfPadButtonMasks[16];
+extern u8 sdfPadButtonStates[0x20];
 extern u8 sdfPadButtonPressure[0x18];
 
 /* Build per-button held/repeat/new-press flags for both controller ports.
  * Repeat starts after 15 ticks, then recurs every four ticks. */
 void sdfPadBuildButtonStates(void) {
-    s32 now = D_003BD2D8;
+    s32 now = sdfThreadWakeTick;
     s32 i;
     s32 bit;
     for (i = 0; i != 2; i++) {
@@ -1356,7 +1346,7 @@ void sdfPadBuildButtonStates(void) {
             }
         }
         for (bit = 0; bit != 16; bit++) {
-            s32 mask = D_00398600[bit];
+            s32 mask = sdfPadButtonMasks[bit];
             s32 state = (buttons & mask) != 0;
             if (repeat & mask) {
                 state |= 2;
@@ -1364,7 +1354,7 @@ void sdfPadBuildButtonStates(void) {
             if (pressed & mask) {
                 state |= 0x80;
             }
-            D_00398628[i * 0x10 + bit] = state;
+            sdfPadButtonStates[i * 0x10 + bit] = state;
         }
         memcpy(&sdfPadAnalogSticks[i * 4], entry->stick, 4);
         memcpy(&sdfPadButtonPressure[i * 12], entry->pressure, 12);
@@ -1390,8 +1380,8 @@ void sdfDevConsSetEntryPair(s32 index, s32 small, s32 large) {
     sdfPadPorts[index].largeMotor = large & 0xFF;
 }
 
-extern u8 D_003BD398[4];
-extern u8 D_003F9900[];
+extern u8 sdfPadPortSlotPairs[4];
+extern u8 sdfPadPortBuffers[];
 extern u8 D_003BD39C;
 extern s32 func_002F1C50(s32);
 extern s32 scePadPortOpen(s32 port, s32 slot, void *buffer);
@@ -1401,11 +1391,11 @@ void sdfPadInit(void) {
 
     func_002F1C50(0);
     for (i = 0; i != 2; i++) {
-        s32 port = D_003BD398[i * 2];
-        s32 slot = D_003BD398[i * 2 + 1];
+        s32 port = sdfPadPortSlotPairs[i * 2];
+        s32 slot = sdfPadPortSlotPairs[i * 2 + 1];
         F9B00Entry *entry;
 
-        scePadPortOpen(port, slot, &D_003F9900[i * 0x100]);
+        scePadPortOpen(port, slot, &sdfPadPortBuffers[i * 0x100]);
         entry = &sdfPadPorts[i];
         entry->port = port;
         entry->slot = slot;
@@ -1417,7 +1407,7 @@ void sdfPadInit(void) {
         entry->smallMotor = 0;
         entry->largeMotor = 0;
     }
-    memset(D_00398628, 0, 0x20);
+    memset(sdfPadButtonStates, 0, 0x20);
     memset(sdfPadAnalogSticks, 0x80, 8);
     memset(sdfPadButtonPressure, 0, 0x18);
     D_003BD39C = 0;
@@ -1426,7 +1416,7 @@ void sdfPadInit(void) {
 void sdfDevConsInit(void) {
     if (D_003BD3C4 == 0) {
         D_003BD3C4 = 1;
-        D_003BDA34 = func_002D3288(D_00315BA0);
+        D_003BDA34 = sdfTexAcquireResourceTexture(D_00315BA0);
     }
 }
 
@@ -1531,7 +1521,7 @@ INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD388);
 
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD390);
 
-INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD398);
+INCLUDE_SDATA(const s32, "game/code_002DDC98", sdfPadPortSlotPairs);
 
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD39C);
 

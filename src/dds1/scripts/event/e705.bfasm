@@ -33,8 +33,7 @@ jump_label LOOP reserved=0x00000000
 code
 e705_main:
   PROC e705_main
-  push 705
-  COMM 0x00c8
+  WAIT_FOR_CAMP_TASK(705)
   push 614
   COMM 0x008d
   if (TEST_MODEL_FLAG(151) == 1) {
@@ -60,21 +59,9 @@ START:
   push 3
   push 705
   COMM 0x00ca
-  push 4
-  push 705
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0008
-  push 5
-  push 705
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0007
-  push 6
-  push 705
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0009
+  global_int[8] = BIND_MODEL_MOTION_SOUND(705, 4)
+  global_int[7] = BIND_MODEL_MOTION_SOUND(705, 5)
+  global_int[9] = BIND_MODEL_MOTION_SOUND(705, 6)
   SET_UNIT_LOW_FLAG(global_int[8])
   push float32(0.699999988079071, bits=0x3f333333)
   push float32(0.5, bits=0x3f000000)
@@ -186,14 +173,8 @@ _3:
   push 1
   push global_int[7]
   COMM 0x0095
-  push 7
-  push 705
-  COMM 0x00d0
-  PUSHREG
-  POPIX 0x000a
-  push 1
-  push global_int[10]
-  COMM 0x00ce
+  global_int[10] = CREATE_EVENT_BED_EFFECT(705, 7)
+  SET_EFFECT_MODEL_CUT(global_int[10], 1)
   push READ_SECONDARY_WORLD_ID_VALUE(string(flash_p))
   push global_int[10]
   COMM 0x00a0
@@ -326,9 +307,7 @@ _3:
     RESET_DRAW_EFFECTS()
     COMM 0x0023
     SET_MODEL_FLAG(151)
-    push 705
-    push 473
-    COMM 0x0028
+    SUBMIT_EVENT_WITH_MODE(473, 705)
     return
   }
 _5:
@@ -570,9 +549,7 @@ _7:
     RESET_DRAW_EFFECTS()
     COMM 0x0023
     SET_MODEL_FLAG(151)
-    push 705
-    push 473
-    COMM 0x0028
+    SUBMIT_EVENT_WITH_MODE(473, 705)
     return
   } else {
   _10:
@@ -671,9 +648,7 @@ _7:
       RESET_DRAW_EFFECTS()
       COMM 0x0023
       SET_MODEL_FLAG(151)
-      push 705
-      push 473
-      COMM 0x0028
+      SUBMIT_EVENT_WITH_MODE(473, 705)
       return
     } else {
     _11:
@@ -772,9 +747,7 @@ _7:
         RESET_DRAW_EFFECTS()
         COMM 0x0023
         SET_MODEL_FLAG(151)
-        push 705
-        push 473
-        COMM 0x0028
+        SUBMIT_EVENT_WITH_MODE(473, 705)
         return
       }
     }
@@ -1101,77 +1074,29 @@ LOOP:
 e705_010_1:
   PROC e705_010_1
   WAIT_FOR_TIMER_LIMIT(10)
-  push 0
-  push 1
-  push 1
-  COMM 0x001a
-  push 0
-  push 65
-  push 1
-  COMM 0x001a
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 1, 0)
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 65, 0)
   WAIT_FOR_TIMER_LIMIT(440)
-  push 10
-  push 1
-  push 1
-  COMM 0x001a
-  push 10
-  push 105
-  push 1
-  COMM 0x001a
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 1, 10)
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 105, 10)
   WAIT_FOR_TIMER_LIMIT(10)
-  push 0
-  push 1
-  push 1
-  COMM 0x001a
-  push 0
-  push 65
-  push 1
-  COMM 0x001a
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 1, 0)
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 65, 0)
   WAIT_FOR_TIMER_LIMIT(30)
-  push 0
-  push 1
-  push 1
-  COMM 0x001a
-  push 0
-  push 145
-  push 1
-  COMM 0x001a
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 1, 0)
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 145, 0)
   WAIT_FOR_TIMER_LIMIT(66)
-  push 10
-  push 1
-  push 1
-  COMM 0x001a
-  push 10
-  push 225
-  push 1
-  COMM 0x001a
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 1, 10)
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 225, 10)
   WAIT_FOR_TIMER_LIMIT(70)
-  push 15
-  push 1
-  push 1
-  COMM 0x001a
-  push 15
-  push 235
-  push 1
-  COMM 0x001a
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 1, 15)
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 235, 15)
   WAIT_FOR_TIMER_LIMIT(60)
-  push 15
-  push 1
-  push 1
-  COMM 0x001a
-  push 15
-  push 235
-  push 1
-  COMM 0x001a
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 1, 15)
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 235, 15)
   WAIT_FOR_TIMER_LIMIT(60)
-  push 15
-  push 1
-  push 1
-  COMM 0x001a
-  push 15
-  push 235
-  push 1
-  COMM 0x001a
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 1, 15)
+  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 235, 15)
   return
 end
 

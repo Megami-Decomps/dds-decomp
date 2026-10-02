@@ -26,23 +26,23 @@ extern char D_003BC658[];
 
 extern char D_003BC660[];
 
-extern u32 D_003BC62C;
+extern u32 mnuMovieDrawTask;
 
-extern s32 D_003BC630;
+extern s32 mnuMovieShutdownCounter;
 
-extern char D_003B1AC8[];
+extern char mnuMovieViewerTaskName[];
 
 extern s32 kwlnTaskGetUserValue();
 
 extern u32 D_003DC5C8[];
 
-extern char D_003BC6B8[]; /* "camp" */
+extern char mnuCampInputTaskName[]; /* "camp" */
 
-extern char D_003B20C0[]; /* "camp_draw" */
+extern char mnuCampDrawTaskName[]; /* "camp_draw" */
 
-extern char D_003B20D0[]; /* "camp_update" */
+extern char mnuCampOwnerTaskName[]; /* "camp_update" */
 
-extern s8 D_003BC6B4;
+extern s8 mnuCampTaskState;
 
 extern void effResolveAndReleaseResource(u32);
 
@@ -96,148 +96,6 @@ void mnuReleaseStaffImageHandles(u32 *resources) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1AF0);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1B00);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1B10);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1B20);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1B30);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1B48);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1B60);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1B78);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1B88);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1BA0);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1BB8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1BC8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1BE0);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1BF8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1C10);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1C28);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1C38);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1C48);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1C60);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1C78);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1C90);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1CA8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1CB8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1CC8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1CD8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1CE8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1CF8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1D08);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1D28);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1D38);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1D48);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1D58);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1D68);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1D78);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1D88);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1D98);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1DA8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1DB8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1DC8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1DD8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1DE8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1DF8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1E08);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1E18);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1E28);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1E48);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1E58);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1E68);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1E78);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1E88);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1E98);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1EA8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1EB8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1EC8);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1EE0);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1F00);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1F18);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1F30);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1F48);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1F60);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1F70);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1F80);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1F90);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1FA0);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1FB0);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1FC0);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1FD0);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1FE0);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B1FF0);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2000);
-
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2010);
-
 INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2020);
 
 void *mnuGetStaffCategoryEntries(s32 kind, s32 *count, u8 *data) {
@@ -263,7 +121,7 @@ void *mnuGetStaffCategoryEntries(s32 kind, s32 *count, u8 *data) {
     }
 }
 
-extern u8 *D_003BAA00;
+extern u8 *datGameState;
 
 extern s8 D_003BC6B5;
 
@@ -272,7 +130,7 @@ void movReleaseActivePartyCategoryModels(s32 list, s32 count, u8 *work) {
 
     effResolveAndReleaseResource(*(u32 *)list);
     for (i = 0; i < 5; i++) {
-        u8 *slot = D_003BAA00 + 0xA60 + i * 0x1A4;
+        u8 *slot = datGameState + 0xA60 + i * 0x1A4;
 
         if ((*(u16 *)slot & 1) != 0) {
             s32 index = *(u16 *)(slot + 4) + D_003BC6B5;
@@ -355,13 +213,13 @@ void mnuReleaseStaffSpriteHandles(StaffSpriteHandles *handles) {
     } while (index < 2);
 }
 
-void mnuInitializeStaffPageWindows(u32 arg0, u32 *arg1, u32 arg2, u32 arg3) {
-    mnuInitPageWindow(arg0, arg3, arg1[3], 7, arg1[4], 0, *arg1, 0x11);
-    func_0027FAA8(arg0, *arg1);
-    func_0027FBE0(arg0, arg1 + 9);
-    func_0027FC10(arg0, arg1 + 0x11);
-    mnuRegisterResourceHandles(arg0, arg1 + 0x19);
-    mnuUpdateHandleStates(arg0);
+void mnuInitializeStaffPageWindows(u32 container, u32 *resources, u32 unused, u32 mode) {
+    mnuInitPageWindow(container, mode, resources[3], 7, resources[4], 0, *resources, 0x11);
+    func_0027FAA8(container, *resources);
+    mnuCopyPrimaryWindowHandles(container, resources + 9);
+    mnuCopySecondaryWindowHandles(container, resources + 0x11);
+    mnuRegisterResourceHandles(container, resources + 0x19);
+    mnuUpdateHandleStates(container);
 }
 
 void mnuAppendCampSpriteRequests(u32 *list, u32 *state) {
@@ -482,7 +340,7 @@ INCLUDE_ASM(const s32, "game/code_00270FB0", func_00271E58);
 
 extern s32 kwlnTaskGetUserValue();
 
-extern s8 D_003BC6B4;
+extern s8 mnuCampTaskState;
 
 extern void func_002D0918(u32);
 
@@ -501,7 +359,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     mnuReleaseStaffSpriteHandles((StaffSpriteHandles *)work);
     func_002BC618(*(u32 *)(work + 0x5c));
     func_002D0918(*(u32 *)work);
-    D_003BC6B4 = 2;
+    mnuCampTaskState = 2;
     func_002E9730();
 }
 
@@ -514,7 +372,7 @@ u32 func_00271FC8(void) {
 }
 
 s32 mnuStaffCampCancelCheck(s32 menu) {
-    u32 buttons = func_00285B20(8);
+    u32 buttons = mnuMapPadMaskToFlags(8);
     s32 result;
 
     if (func_002719F0(menu) == 0) {
@@ -536,20 +394,39 @@ s32 mnuStaffCampCancelCheck(s32 menu) {
     return result;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B20C0);
+extern u8 *func_00271E58(void);
+extern void func_00272798();
+extern void func_002728F8();
+extern void func_002729C8();
+extern void func_00101A80(s32, s32);
+extern void kwlnFadeOutStart(s8, s8, s8, s32);
 
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B20D0);
+INCLUDE_RODATA(const s32, "game/code_00270FB0", mnuCampDrawTaskName);
 
-INCLUDE_ASM(const s32, "game/code_00270FB0", mnuCreateCampTasks);
+INCLUDE_RODATA(const s32, "game/code_00270FB0", mnuCampOwnerTaskName);
+
+void mnuCreateCampTasks(void) {
+    s32 work;
+    s32 draw;
+
+    work = (s32)func_00271E58();
+    kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, func_00272798, 0, work);
+    draw = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, func_002728F8, 0, work);
+    kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, func_002729C8, mnuDestroyStaffMenuTask, work);
+    func_00101A80(draw, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, func_00271FC8, 0, work));
+    func_00101A80(draw, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, work));
+    kwlnFadeOutStart(0, 0, 0, 0xF);
+    mnuCampTaskState = 1;
+}
 
 void mnuDestroyCampTasks(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_003BC6B8, 0);
-    kwlnTaskDestroyWithHierarchyByName(D_003B20C0, 0);
-    kwlnTaskDestroyWithHierarchyByName(D_003B20D0, 0);
+    kwlnTaskDestroyWithHierarchyByName(mnuCampInputTaskName, 0);
+    kwlnTaskDestroyWithHierarchyByName(mnuCampDrawTaskName, 0);
+    kwlnTaskDestroyWithHierarchyByName(mnuCampOwnerTaskName, 0);
 }
 
 s32 mnuAcknowledgeCampState(void) {
-    s8 state = D_003BC6B4;
+    s8 state = mnuCampTaskState;
     if (state == 1) {
         return 1;
     }
@@ -557,7 +434,7 @@ s32 mnuAcknowledgeCampState(void) {
         return 0;
     }
     if (state == 2) {
-        D_003BC6B4 = 0;
+        mnuCampTaskState = 0;
     }
     return 0;
 }
@@ -574,18 +451,18 @@ extern s32 func_003014F0(char *, const char *, s32);
 extern s32 func_00197A98(s32, s32, s32, u32, u32, s32);
 extern void func_001958A0(s32, s32, s32);
 extern void frFontQueueGlyphInSelectedSlot(s32);
-extern u8 *D_003BAA00;
+extern u8 *datGameState;
 extern char D_003BC6C0[];
 
 
-void func_00272280(s32 unused0, s32 unused1, s32 z, s32 firstSlot,
+void mnuDrawStaffCampSlotsAndCurrency(s32 unused0, s32 unused1, s32 z, s32 firstSlot,
                    s32 secondSlot, s32 drawFlags, s32 unused6, s32 unused7) {
     char text[0x10];
     s32 glyph;
 
     itfDrawGridWithResolvedSlot(0x150, 0xD08, 0, 1, firstSlot, 0, drawFlags);
     itfDrawGridWithResolvedSlot(0x2B0, 0xCE8, 0, 1, secondSlot, 3, drawFlags);
-    func_003014F0(text, D_003BC6C0, *(s32 *)(D_003BAA00 + 0x3C));
+    func_003014F0(text, D_003BC6C0, *(s32 *)(datGameState + 0x3C));
     glyph = func_00197A98(0x4B0, 0xCD8, z, 0x80808080, (u32)text, 0);
     func_001958A0(glyph, 1, drawFlags);
     frFontQueueGlyphInSelectedSlot(glyph);
@@ -604,37 +481,37 @@ INCLUDE_ASM(const s32, "game/code_00270FB0", func_002723B0);
 
 INCLUDE_ASM(const s32, "game/code_00270FB0", func_00272518);
 
-void func_00272668(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    func_00272518(arg0, arg1, arg2, arg3, arg4, 0, arg5);
+void func_00272668(s32 kind, s32 labelIndex, s32 textTable, s32 context, s32 drawOption, s32 layer) {
+    func_00272518(kind, labelIndex, textTable, context, drawOption, 0, layer);
 }
 
-void mnuDrawStaffCampScreen(s32 arg0, s32 arg1) {
-    u8 *menu = (u8 *)kwlnTaskGetUserValue(arg1);
+void mnuDrawStaffCampScreen(s32 kind, s32 task) {
+    u8 *menu = (u8 *)kwlnTaskGetUserValue(task);
 
     mnuDrawBackdrop(menu + 0x13C, 0x20);
-    if (func_002719F0(arg1) == 0) {
+    if (func_002719F0(task) == 0) {
         return;
     }
     func_0027E8D8(-0x10, -8, 0, (s32)((StaffSpriteHandles *)menu)->scrollPanel, 0x53);
     mnuDrawPanelListDefault(0, 0, 0, menu + 0x15C, 0x53);
-    if (arg0 == 0) {
+    if (kind == 0) {
         itfDrawGridWithResolvedSlot(0x1AB0, 0x70, 0, 1, *(s32 *)(menu + 0x64), 6, 0x53);
         itfDrawGridWithResolvedSlot(0x17A0, 0x78, 0, 1, *(s32 *)(menu + 0x60), 0xF, 0x53);
         itfDrawGridWithResolvedSlot(0x1E40, 0x78, 0, 1, *(s32 *)(menu + 0x60), 0x10, 0x53);
     }
 }
 
-void func_00272778(u32 arg0) {
-    mnuDrawStaffCampScreen(0, arg0);
+void func_00272778(u32 task) {
+    mnuDrawStaffCampScreen(0, task);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2100);
 
-INCLUDE_SDATA(const s32, "game/code_00270FB0", D_003BC6B4);
+INCLUDE_SDATA(const s32, "game/code_00270FB0", mnuCampTaskState);
 
 INCLUDE_SDATA(const s32, "game/code_00270FB0", D_003BC6B5);
 
-INCLUDE_SDATA(const s32, "game/code_00270FB0", D_003BC6B8);
+INCLUDE_SDATA(const s32, "game/code_00270FB0", mnuCampInputTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_00270FB0", D_003BC6C0);
 

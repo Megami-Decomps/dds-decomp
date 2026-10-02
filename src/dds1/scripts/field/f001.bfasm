@@ -3,6 +3,55 @@ profile dds1
 
 header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
 locals int=50 float=0
+alias treasure_content_kind = local_int[0]
+alias treasure_item_id = local_int[1]
+alias treasure_item_quantity = local_int[2]
+alias treasure_trap_kind = local_int[3]
+alias treasure_amount = local_int[4]
+alias treasure_choice = local_int[5]
+alias warp_effect_mode = local_int[6]
+alias door_motion_duration = local_int[7]
+alias door_fade_mode = local_int[8]
+alias exit_motion_duration = local_int[9]
+alias exit_fade_mode = local_int[10]
+alias ladder_prompt_active = local_int[11]
+alias ladder_direction = local_int[12]
+alias ladder_source_vector_id = local_int[13]
+alias ladder_effect_unit_id = local_int[14]
+alias ladder_uses_direct_prompt = local_int[15]
+alias interaction_choice = local_int[16]
+alias interaction_state = local_int[17]
+alias interaction_row_type = local_int[18]
+alias interaction_message_id = local_int[19]
+alias message_window_active = local_int[21]
+alias interaction_kind = local_int[22]
+alias interaction_prompt_active = local_int[23]
+alias interaction_resource_id = local_int[24]
+alias interaction_row_flag = local_int[25]
+alias elevator_choice = local_int[26]
+alias elevator_camera_unit_id = local_int[27]
+alias elevator_destination_count = local_int[28]
+alias elevator_destination_value_1 = local_int[29]
+alias elevator_destination_value_2 = local_int[30]
+alias elevator_destination_value_3 = local_int[31]
+alias elevator_destination_value_4 = local_int[32]
+alias elevator_destination_value_5 = local_int[33]
+alias elevator_destination_value_6 = local_int[34]
+alias elevator_remaining_destinations = local_int[35]
+alias elevator_move_state = local_int[36]
+alias suction_effect_unit_id = local_int[37]
+alias suction_source_vector_id = local_int[38]
+alias suction_map_entry_id = local_int[39]
+alias suction_motion_id = local_int[40]
+alias suction_state_code = local_int[41]
+alias suction_camera_viewer_id = local_int[42]
+alias barrier_model_flag = local_int[43]
+alias barrier_effect_unit_id = local_int[44]
+alias barrier_source_vector_id = local_int[45]
+alias barrier_unused_value = local_int[46]
+alias barrier_completion_flag = local_int[47]
+alias barrier_effect_object_id = local_int[48]
+alias barrier_map_entry_id = local_int[49]
 
 procedure hirakenai_label reserved=0x00000000
 procedure badkaifuku_label reserved=0x00000000
@@ -220,12 +269,12 @@ _9:
         MESSAGE_REQUEST_AND_POLL(message(TAKARA_STILLGET))
       } else {
       _36:
-        local_int[0] = READ_TREASURE_TABLE_VALUE(CONTENT_KIND)
-        local_int[1] = READ_TREASURE_TABLE_VALUE(ITEM_ID)
-        local_int[2] = READ_TREASURE_TABLE_VALUE(ITEM_QUANTITY)
-        local_int[3] = READ_TREASURE_TABLE_VALUE(TRAP_KIND)
-        local_int[4] = READ_TREASURE_TABLE_VALUE(AMOUNT)
-        if (local_int[0] == 1) {
+        treasure_content_kind = READ_TREASURE_TABLE_VALUE(CONTENT_KIND)
+        treasure_item_id = READ_TREASURE_TABLE_VALUE(ITEM_ID)
+        treasure_item_quantity = READ_TREASURE_TABLE_VALUE(ITEM_QUANTITY)
+        treasure_trap_kind = READ_TREASURE_TABLE_VALUE(TRAP_KIND)
+        treasure_amount = READ_TREASURE_TABLE_VALUE(AMOUNT)
+        if (treasure_content_kind == 1) {
           MESSAGE_REQUEST_AND_POLL(message(HOSEKI))
         } else {
         _12:
@@ -233,163 +282,108 @@ _9:
           goto _11
         }
       _11:
-        push 1
-        push 3
-        COMM 0x013c
-        if (local_int[0] == 1) {
-          local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(HOSEKI_SEL))
+        SET_MESSAGE_RANGE(3, 1)
+        if (treasure_content_kind == 1) {
+          treasure_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(HOSEKI_SEL))
         } else {
         _14:
-          local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(TAKARA_SEL))
+          treasure_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(TAKARA_SEL))
           goto _13
         }
       _13:
-        if_not (local_int[5] == 0) goto _34
-        if (local_int[3] == 1) {
+        if_not (treasure_choice == 0) goto _34
+        if (treasure_trap_kind == 1) {
           MARK_CURRENT_TREASURE_OPENED()
-          push local_int[4]
-          COMM 0x0166
+          SUBMIT_EVENT_IMMEDIATE(treasure_amount)
           return
         } else {
         _25:
-          if (local_int[3] == 2) {
+          if (treasure_trap_kind == 2) {
             MARK_CURRENT_TREASURE_OPENED()
-            push 35
-            COMM 0x011b
-            COMM 0x011c
-            push 100
-            push 15
-            COMM 0x00ab
-            push 15
-            push 1
-            push 0
-            COMM 0x001a
-            push 15
-            push 100
-            push 1
-            COMM 0x001a
-            push 1
-            COMM 0x013a
+            START_AND_WAIT_FOR_STREAM_SOUND(35)
+            ADVANCE_STREAM_SOUND_STATE()
+            SETUP_FADE_FRAMES(15, 100)
+            SET_CONTROLLER_VIBRATION(SMALL_MOTOR, 1, 15)
+            SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 100, 15)
+            APPLY_PARTY_TRAP_EFFECT(DAMAGE_TEN_PERCENT_HP)
             MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
-            COMM 0x011f
-            COMM 0x0121
+            RESET_STREAM_PLAYBACK()
+            WAIT_FOR_STREAM_IDLE()
           } else {
           _26:
-            if (local_int[3] == 3) {
+            if (treasure_trap_kind == 3) {
               MARK_CURRENT_TREASURE_OPENED()
-              push 35
-              COMM 0x011b
-              COMM 0x011c
-              push 200
-              push 20
-              COMM 0x00ab
-              push 20
-              push 1
-              push 0
-              COMM 0x001a
-              push 20
-              push 200
-              push 1
-              COMM 0x001a
-              push 2
-              COMM 0x013a
+              START_AND_WAIT_FOR_STREAM_SOUND(35)
+              ADVANCE_STREAM_SOUND_STATE()
+              SETUP_FADE_FRAMES(20, 200)
+              SET_CONTROLLER_VIBRATION(SMALL_MOTOR, 1, 20)
+              SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 200, 20)
+              APPLY_PARTY_TRAP_EFFECT(DAMAGE_HALF_HP)
               MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
-              COMM 0x011f
-              COMM 0x0121
+              RESET_STREAM_PLAYBACK()
+              WAIT_FOR_STREAM_IDLE()
             } else {
             _27:
-              if (local_int[3] == 4) {
+              if (treasure_trap_kind == 4) {
                 MARK_CURRENT_TREASURE_OPENED()
-                push 35
-                COMM 0x011b
-                COMM 0x011c
-                push 200
-                push 20
-                COMM 0x00ab
-                push 20
-                push 1
-                push 0
-                COMM 0x001a
-                push 20
-                push 200
-                push 1
-                COMM 0x001a
-                push 4
-                COMM 0x013a
+                START_AND_WAIT_FOR_STREAM_SOUND(35)
+                ADVANCE_STREAM_SOUND_STATE()
+                SETUP_FADE_FRAMES(20, 200)
+                SET_CONTROLLER_VIBRATION(SMALL_MOTOR, 1, 20)
+                SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 200, 20)
+                APPLY_PARTY_TRAP_EFFECT(INFLICT_POISON)
                 MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_POISON))
-                COMM 0x011f
-                COMM 0x0121
+                RESET_STREAM_PLAYBACK()
+                WAIT_FOR_STREAM_IDLE()
               } else {
               _28:
-                if (local_int[3] == 5) {
+                if (treasure_trap_kind == 5) {
                   MARK_CURRENT_TREASURE_OPENED()
-                  push 35
-                  COMM 0x011b
-                  COMM 0x011c
-                  push 200
-                  push 20
-                  COMM 0x00ab
-                  push 20
-                  push 1
-                  push 0
-                  COMM 0x001a
-                  push 20
-                  push 200
-                  push 1
-                  COMM 0x001a
-                  push 5
-                  COMM 0x013a
+                  START_AND_WAIT_FOR_STREAM_SOUND(35)
+                  ADVANCE_STREAM_SOUND_STATE()
+                  SETUP_FADE_FRAMES(20, 200)
+                  SET_CONTROLLER_VIBRATION(SMALL_MOTOR, 1, 20)
+                  SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 200, 20)
+                  APPLY_PARTY_TRAP_EFFECT(INFLICT_ACHE)
                   MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_ACHE))
-                  COMM 0x011f
-                  COMM 0x0121
+                  RESET_STREAM_PLAYBACK()
+                  WAIT_FOR_STREAM_IDLE()
                 } else {
                 _29:
-                  if (local_int[3] == 6) {
+                  if (treasure_trap_kind == 6) {
                     MARK_CURRENT_TREASURE_OPENED()
-                    push 35
-                    COMM 0x011b
-                    COMM 0x011c
-                    push 200
-                    push 20
-                    COMM 0x00ab
-                    push 20
-                    push 1
-                    push 0
-                    COMM 0x001a
-                    push 20
-                    push 200
-                    push 1
-                    COMM 0x001a
-                    push 6
-                    COMM 0x013a
+                    START_AND_WAIT_FOR_STREAM_SOUND(35)
+                    ADVANCE_STREAM_SOUND_STATE()
+                    SETUP_FADE_FRAMES(20, 200)
+                    SET_CONTROLLER_VIBRATION(SMALL_MOTOR, 1, 20)
+                    SET_CONTROLLER_VIBRATION(LARGE_MOTOR, 200, 20)
+                    APPLY_PARTY_TRAP_EFFECT(INFLICT_CLOSE)
                     MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_CLOSE))
-                    COMM 0x011f
-                    COMM 0x0121
+                    RESET_STREAM_PLAYBACK()
+                    WAIT_FOR_STREAM_IDLE()
                   } else {
                   _30:
-                    if (local_int[0] <= 1) {
-                      if (local_int[0] == 1) {
-                        push 34
-                        COMM 0x011b
+                    if (treasure_content_kind <= 1) {
+                      if (treasure_content_kind == 1) {
+                        START_AND_WAIT_FOR_STREAM_SOUND(34)
                       } else {
                       _16:
-                        push 33
-                        COMM 0x011b
+                        START_AND_WAIT_FOR_STREAM_SOUND(33)
                         goto _15
                       }
                     _15:
-                      COMM 0x011c
+                      ADVANCE_STREAM_SOUND_STATE()
                       MARK_CURRENT_TREASURE_OPENED()
                       FINISH_SCRIPT_MESSAGE_WINDOW()
                       WAIT_FOR_TIMER_LIMIT(45)
                       ACTIVATE_MESSAGE_PANEL()
-                      if (local_int[1] == 0) {
+                      if (treasure_item_id == 0) {
                         MESSAGE_REQUEST_AND_POLL(message(TAKARA_KARAGET))
                       } else {
                       _20:
-                        SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[1], 3)
-                        SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[2], 0)
-                        if (local_int[1] >= 96 && local_int[1] <= 127) {
+                        SET_MESSAGE_WINDOW_GEOMETRY(0, treasure_item_id, 3)
+                        SET_MESSAGE_WINDOW_GEOMETRY(1, treasure_item_quantity, 0)
+                        if (treasure_item_id >= 96 && treasure_item_id <= 127) {
                           MESSAGE_REQUEST_AND_POLL(message(TAKARA_GET2))
                         } else {
                         _18:
@@ -397,24 +391,20 @@ _9:
                           goto _17
                         }
                       _17:
-                        push local_int[2]
-                        push local_int[1]
-                        COMM 0x0070
+                        CHANGE_ITEM_COUNT(treasure_item_id, treasure_item_quantity)
                         goto _19
                       }
                     _19:
-                      COMM 0x011f
-                      COMM 0x0121
+                      RESET_STREAM_PLAYBACK()
+                      WAIT_FOR_STREAM_IDLE()
                     } else {
                     _22:
-                      if (local_int[0] == 3) {
+                      if (treasure_content_kind == 3) {
                         MARK_CURRENT_TREASURE_OPENED()
-                        push 32
-                        COMM 0x0214
-                        SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[4], 0)
+                        PLAY_FIELD_SE_VOLUME_PAN(32)
+                        SET_MESSAGE_WINDOW_GEOMETRY(0, treasure_amount, 0)
                         MESSAGE_REQUEST_AND_POLL(message(TAKARA_MAKA_GET))
-                        push local_int[4]
-                        COMM 0x0139
+                        ADD_PARTY_CURRENCY(treasure_amount)
                       }
                     }
                   _21:
@@ -428,7 +418,7 @@ _9:
       _24:
         goto _33
       _34:
-        if (local_int[0] == 1) {
+        if (treasure_content_kind == 1) {
           MESSAGE_REQUEST_AND_POLL(message(HOSEKI_NOGET))
         } else {
         _32:
@@ -454,9 +444,9 @@ _10:
 warp_label:
   PROC warp_label
   RESTORE_CAMERA_NODE_MODE()
-  local_int[6] = READ_WARP_EFFECT_MODE()
-  if (local_int[6] == 1) {
-    COMM 0x0204
+  warp_effect_mode = READ_WARP_EFFECT_MODE()
+  if (warp_effect_mode == 1) {
+    APPLY_CURRENT_TASK_ENTRY_TRIGGER()
     WAIT_FOR_TIMER_LIMIT(20)
     push 0
     push float32(0.12999999523162842, bits=0x3e051eb8)
@@ -484,26 +474,26 @@ warp_label:
     COMM 0x00f3
   }
 _39:
-  COMM 0x0202
+  SET_CURRENT_TASK_SCENE()
   return
   return
 doorwarp_label:
   PROC doorwarp_label
 _41:
   while (1) {
-    COMM 0x0203
+    NO_OP_FIELD_TRANSITION()
     if (ACTION_WINDOW_REQUEST_AND_POLL(2) == 1) {
       RESTORE_CAMERA_NODE_MODE()
-      local_int[7] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
-      local_int[8] = READ_DOOR_WARP_VALUE(FADE_MODE)
-      COMM 0x0204
-      if (local_int[7] == 40) {
+      door_motion_duration = READ_DOOR_WARP_VALUE(MOTION_DURATION)
+      door_fade_mode = READ_DOOR_WARP_VALUE(FADE_MODE)
+      APPLY_CURRENT_TASK_ENTRY_TRIGGER()
+      if (door_motion_duration == 40) {
         WAIT_FOR_TIMER_LIMIT(20)
       }
     _43:
-      SCREEN_FADE_B(local_int[8], 20)
+      SCREEN_FADE_B(door_fade_mode, 20)
       WAIT_FOR_TIMER_LIMIT(20)
-      COMM 0x0202
+      SET_CURRENT_TASK_SCENE()
       return
     }
   _45:
@@ -518,12 +508,10 @@ _47:
     if (ACTION_WINDOW_REQUEST_AND_POLL(10) == 1) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(6)
-      COMM 0x020d
+      APPLY_CURRENT_TASK_RECORD_ENTRY()
       ACTIVATE_MESSAGE_PANEL()
       MESSAGE_REQUEST_AND_POLL(message(EXITWARP))
-      push 1
-      push 3
-      COMM 0x013c
+      SET_MESSAGE_RANGE(3, 1)
       if (MESSAGE_SELECTION_REQUEST_AND_POLL(selection(EXITWARP_SEL)) == 0) {
         FINISH_SCRIPT_MESSAGE_WINDOW()
       } else {
@@ -536,16 +524,16 @@ _47:
         goto _49
       }
     _49:
-      local_int[9] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
-      local_int[10] = READ_DOOR_WARP_VALUE(FADE_MODE)
-      COMM 0x0204
-      if (local_int[9] == 40) {
+      exit_motion_duration = READ_DOOR_WARP_VALUE(MOTION_DURATION)
+      exit_fade_mode = READ_DOOR_WARP_VALUE(FADE_MODE)
+      APPLY_CURRENT_TASK_ENTRY_TRIGGER()
+      if (exit_motion_duration == 40) {
         WAIT_FOR_TIMER_LIMIT(20)
       }
     _51:
-      SCREEN_FADE_B(local_int[10], 45)
+      SCREEN_FADE_B(exit_fade_mode, 45)
       WAIT_FOR_TIMER_LIMIT(45)
-      COMM 0x0202
+      SET_CURRENT_TASK_SCENE()
       return
     }
   _53:
@@ -559,10 +547,10 @@ _55:
   while (1) {
     if (ACTION_WINDOW_REQUEST_AND_POLL(11) == 1) {
       RESTORE_CAMERA_NODE_MODE()
-      COMM 0x0204
+      APPLY_CURRENT_TASK_ENTRY_TRIGGER()
       SCREEN_FADE_B(1, 45)
       WAIT_FOR_TIMER_LIMIT(45)
-      COMM 0x0202
+      SET_CURRENT_TASK_SCENE()
       return
     }
   _57:
@@ -572,21 +560,21 @@ _56:
   return
 runwarp_label:
   PROC runwarp_label
-  COMM 0x0203
+  NO_OP_FIELD_TRANSITION()
   RESTORE_CAMERA_NODE_MODE()
-  COMM 0x0204
+  APPLY_CURRENT_TASK_ENTRY_TRIGGER()
   WAIT_FOR_TIMER_LIMIT(15)
-  COMM 0x0202
+  SET_CURRENT_TASK_SCENE()
   return
 anawarp_label:
   PROC anawarp_label
   RESTORE_CAMERA_NODE_MODE()
-  COMM 0x0203
-  COMM 0x0204
+  NO_OP_FIELD_TRANSITION()
+  APPLY_CURRENT_TASK_ENTRY_TRIGGER()
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   PREPARE_UNIT_MOTION_STATE(global_int[0], 6, 4, 4, 0)
   WAIT_FOR_UNIT_MOTION(global_int[0])
-  COMM 0x0202
+  SET_CURRENT_TASK_SCENE()
   return
 tobiwarp_label:
   PROC tobiwarp_label
@@ -594,18 +582,17 @@ _59:
   while (1) {
     if (ACTION_WINDOW_REQUEST_AND_POLL(3) == 1) {
       RESTORE_CAMERA_NODE_MODE()
-      push 37
-      COMM 0x011b
-      COMM 0x0204
+      START_AND_WAIT_FOR_STREAM_SOUND(37)
+      APPLY_CURRENT_TASK_ENTRY_TRIGGER()
       WAIT_FOR_TIMER_LIMIT(4)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       PREPARE_UNIT_MOTION_STATE(global_int[0], 5, 4, 4, 0)
       WAIT_FOR_TIMER_LIMIT(30)
-      COMM 0x011c
+      ADVANCE_STREAM_SOUND_STATE()
       WAIT_FOR_TIMER_LIMIT(30)
-      COMM 0x011f
-      COMM 0x0121
-      COMM 0x0202
+      RESET_STREAM_PLAYBACK()
+      WAIT_FOR_STREAM_IDLE()
+      SET_CURRENT_TASK_SCENE()
       return
     }
   _61:
@@ -615,43 +602,43 @@ _60:
   return
 hasigo_label:
   PROC hasigo_label
-  local_int[12] = READ_LADDER_TABLE_VALUE(DIRECTION)
-  local_int[15] = READ_LADDER_TABLE_VALUE(USE_DIRECT_ACTION_WINDOW)
-  local_int[11] = 1
+  ladder_direction = READ_LADDER_TABLE_VALUE(DIRECTION)
+  ladder_uses_direct_prompt = READ_LADDER_TABLE_VALUE(USE_DIRECT_ACTION_WINDOW)
+  ladder_prompt_active = 1
 _63:
-  if_not (local_int[11]) goto _64
-  if_not (local_int[12] == 0) goto _78
-  if_not (local_int[15] == 0) goto _70
+  if_not (ladder_prompt_active) goto _64
+  if_not (ladder_direction == 0) goto _78
+  if_not (ladder_uses_direct_prompt == 0) goto _70
   if (ACTION_WINDOW_REQUEST_AND_POLL(6) == 1) {
-    local_int[11] = 0
+    ladder_prompt_active = 0
   }
 _65:
   goto _69
 _70:
   if (ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(6) == 1) {
-    local_int[11] = 0
+    ladder_prompt_active = 0
   }
 _67:
   goto _69
 _69:
   goto _77
 _78:
-  if_not (local_int[15] == 0) goto _76
+  if_not (ladder_uses_direct_prompt == 0) goto _76
   if (ACTION_WINDOW_REQUEST_AND_POLL(7) == 1) {
-    local_int[11] = 0
+    ladder_prompt_active = 0
   }
 _71:
   goto _75
 _76:
   if (ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(7) == 1) {
-    local_int[11] = 0
+    ladder_prompt_active = 0
   }
 _73:
   goto _75
 _75:
   goto _77
 _77:
-  if (local_int[11] == 1) {
+  if (ladder_prompt_active == 1) {
     WAIT_FOR_TIMER_START()
   }
 _79:
@@ -659,17 +646,16 @@ _79:
 _64:
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(6)
-  push 36
-  COMM 0x011b
+  START_AND_WAIT_FOR_STREAM_SOUND(36)
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
-  local_int[13] = READ_LADDER_TABLE_VALUE(SOURCE_VECTOR_ID)
-  local_int[14] = READ_LADDER_TABLE_VALUE(EFFECT_UNIT_ID)
-  ADD_EFFECT_UNIT_TO_WORLD(local_int[14])
+  ladder_source_vector_id = READ_LADDER_TABLE_VALUE(SOURCE_VECTOR_ID)
+  ladder_effect_unit_id = READ_LADDER_TABLE_VALUE(EFFECT_UNIT_ID)
+  ADD_EFFECT_UNIT_TO_WORLD(ladder_effect_unit_id)
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[13])
-  COMM 0x0204
-  if (local_int[12] == 0) {
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], ladder_source_vector_id)
+  APPLY_CURRENT_TASK_ENTRY_TRIGGER()
+  if (ladder_direction == 0) {
     PREPARE_UNIT_MOTION_STATE(global_int[0], 8, 0, 0, 1)
   } else {
   _82:
@@ -679,13 +665,13 @@ _64:
 _81:
   SCREEN_FADE_A(0, 15)
   WAIT_FOR_TIMER_LIMIT(11)
-  COMM 0x011c
+  ADVANCE_STREAM_SOUND_STATE()
   WAIT_FOR_TIMER_LIMIT(49)
   SCREEN_FADE_B(0, 20)
   WAIT_FOR_TIMER_LIMIT(20)
-  COMM 0x011f
-  COMM 0x0121
-  COMM 0x0202
+  RESET_STREAM_PLAYBACK()
+  WAIT_FOR_STREAM_IDLE()
+  SET_CURRENT_TASK_SCENE()
   return
 heal_label:
   PROC heal_label
@@ -695,8 +681,7 @@ _83:
       RESTORE_CAMERA_NODE_MODE()
       SCREEN_FADE_B(0, 20)
       WAIT_FOR_TIMER_LIMIT(20)
-      push 900
-      COMM 0x020f
+      RUN_FIELD_TRANSITION_SELECTOR(HEAL_FACILITY)
       return
     }
   _85:
@@ -712,8 +697,7 @@ _87:
       RESTORE_CAMERA_NODE_MODE()
       SCREEN_FADE_B(0, 20)
       WAIT_FOR_TIMER_LIMIT(20)
-      push 901
-      COMM 0x020f
+      RUN_FIELD_TRANSITION_SELECTOR(SAVE_POINT)
       return
     }
   _89:
@@ -723,87 +707,87 @@ _88:
   return
 npctalk_label:
   PROC npctalk_label
-  local_int[22] = READ_FIELD_INTERACTION_KIND()
-  local_int[23] = 1
+  interaction_kind = READ_FIELD_INTERACTION_KIND()
+  interaction_prompt_active = 1
 _91:
-  if_not (local_int[23]) goto _92
-  if (local_int[22] == 0) {
-    local_int[23] = 0
+  if_not (interaction_prompt_active) goto _92
+  if (interaction_kind == 0) {
+    interaction_prompt_active = 0
     return
   } else {
   _110:
-    if_not (local_int[22] == 1) goto _111
+    if_not (interaction_kind == 1) goto _111
     if (ACTION_WINDOW_REQUEST_AND_POLL(1) == 1) {
-      local_int[23] = 0
+      interaction_prompt_active = 0
     }
   _93:
     goto _109
   _111:
-    if_not (local_int[22] == 2) goto _112
+    if_not (interaction_kind == 2) goto _112
     if (ACTION_WINDOW_REQUEST_AND_POLL(9) == 1) {
-      local_int[23] = 0
+      interaction_prompt_active = 0
     }
   _95:
     goto _109
   _112:
-    if_not (local_int[22] == 100) goto _113
+    if_not (interaction_kind == 100) goto _113
     if (ACTION_WINDOW_REQUEST_AND_POLL(2) == 1) {
-      local_int[23] = 0
+      interaction_prompt_active = 0
     }
   _97:
     goto _109
   _113:
-    if (local_int[22] == 101) {
-      local_int[23] = 0
+    if (interaction_kind == 101) {
+      interaction_prompt_active = 0
     } else {
     _114:
-      if_not (local_int[22] == 102) goto _115
+      if_not (interaction_kind == 102) goto _115
       if (ACTION_WINDOW_REQUEST_AND_POLL(3) == 1) {
-        local_int[23] = 0
+        interaction_prompt_active = 0
       }
     _99:
       goto _109
     _115:
-      if (local_int[22] == 103) {
-        local_int[23] = 0
+      if (interaction_kind == 103) {
+        interaction_prompt_active = 0
       } else {
       _116:
-        if_not (local_int[22] == 104) goto _117
+        if_not (interaction_kind == 104) goto _117
         if (ACTION_WINDOW_REQUEST_AND_POLL(6) == 1) {
-          local_int[23] = 0
+          interaction_prompt_active = 0
         }
       _101:
         goto _109
       _117:
-        if_not (local_int[22] == 105) goto _118
+        if_not (interaction_kind == 105) goto _118
         if (ACTION_WINDOW_REQUEST_AND_POLL(7) == 1) {
-          local_int[23] = 0
+          interaction_prompt_active = 0
         }
       _103:
         goto _109
       _118:
-        if_not (local_int[22] == 106) goto _119
+        if_not (interaction_kind == 106) goto _119
         if (ACTION_WINDOW_REQUEST_AND_POLL(10) == 1) {
-          local_int[23] = 0
+          interaction_prompt_active = 0
         }
       _105:
         goto _109
       _119:
-        if_not (local_int[22] == 107) goto _120
+        if_not (interaction_kind == 107) goto _120
         if (ACTION_WINDOW_REQUEST_AND_POLL(11) == 1) {
-          local_int[23] = 0
+          interaction_prompt_active = 0
         }
       _107:
         goto _109
       _120:
-        if (local_int[22] == 199) {
-          local_int[23] = 0
+        if (interaction_kind == 199) {
+          interaction_prompt_active = 0
         }
       }
     }
   }
 _109:
-  if (local_int[23] == 1) {
+  if (interaction_prompt_active == 1) {
     WAIT_FOR_TIMER_START()
   }
 _122:
@@ -811,76 +795,76 @@ _122:
 _92:
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(6)
-  local_int[17] = 1
-  local_int[21] = 0
-  local_int[24] = READ_CURRENT_SCENE_SELECTION_RESOURCE()
+  interaction_state = 1
+  message_window_active = 0
+  interaction_resource_id = READ_CURRENT_SCENE_SELECTION_RESOURCE()
 _124:
   if_not (1) goto _125
-  if (local_int[17] < 10) {
-    local_int[17] = ADVANCE_FIELD_INTERACTION(local_int[17], -(1))
+  if (interaction_state < 10) {
+    interaction_state = ADVANCE_FIELD_INTERACTION(interaction_state, -(1))
   } else {
   _140:
-    local_int[16] = 0
-    local_int[18] = READ_FIELD_INTERACTION_VALUE(local_int[17], ROW_TYPE)
-    local_int[25] = READ_FIELD_INTERACTION_VALUE(local_int[17], 2)
-    if_not (local_int[18] == -(1)) goto _138
-    if (local_int[21] == 1) {
+    interaction_choice = 0
+    interaction_row_type = READ_FIELD_INTERACTION_VALUE(interaction_state, ROW_TYPE)
+    interaction_row_flag = READ_FIELD_INTERACTION_VALUE(interaction_state, 2)
+    if_not (interaction_row_type == -(1)) goto _138
+    if (message_window_active == 1) {
       FINISH_SCRIPT_MESSAGE_WINDOW()
-      if (local_int[25] == 0) {
-        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[24])
+      if (interaction_row_flag == 0) {
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(interaction_resource_id)
       }
     _126:
-      local_int[21] = 0
+      message_window_active = 0
     }
   _128:
     goto _137
   _138:
-    local_int[19] = READ_FIELD_INTERACTION_VALUE(local_int[17], MESSAGE_ID)
-    if_not (local_int[21] == 0) goto _132
-    local_int[21] = 1
+    interaction_message_id = READ_FIELD_INTERACTION_VALUE(interaction_state, MESSAGE_ID)
+    if_not (message_window_active == 0) goto _132
+    message_window_active = 1
     ACTIVATE_MESSAGE_PANEL()
-    if (local_int[25] == 0) {
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[24], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01)))
+    if (interaction_row_flag == 0) {
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(interaction_resource_id, READ_SECONDARY_WORLD_ID_VALUE(string(ppos01)))
     }
   _130:
     goto _132
   _132:
-    if (local_int[18] == 0) {
-      MESSAGE_REQUEST_AND_POLL(local_int[19])
+    if (interaction_row_type == 0) {
+      MESSAGE_REQUEST_AND_POLL(interaction_message_id)
     } else {
     _135:
-      if (local_int[18] == 1) {
-        local_int[16] = MESSAGE_SELECTION_REQUEST_AND_POLL(local_int[19])
+      if (interaction_row_type == 1) {
+        interaction_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(interaction_message_id)
       }
     }
   _134:
     goto _137
   _137:
-    local_int[17] = ADVANCE_FIELD_INTERACTION(local_int[17], local_int[16])
+    interaction_state = ADVANCE_FIELD_INTERACTION(interaction_state, interaction_choice)
     WAIT_FOR_TIMER_START()
     goto _139
   }
 _139:
-  if (local_int[17] >= 200) {
+  if (interaction_state >= 200) {
     return
   }
 _141:
-  if (local_int[17] == 100) {
-    if (local_int[21] == 1) {
+  if (interaction_state == 100) {
+    if (message_window_active == 1) {
       FINISH_SCRIPT_MESSAGE_WINDOW()
-      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[24])
-      local_int[21] = 0
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(interaction_resource_id)
+      message_window_active = 0
     }
   _143:
-    COMM 0x020e
+    START_CURRENT_FIELD_INTERACTION_EVENT()
     return
   }
 _145:
-  if (local_int[17] == 0) {
-    if (local_int[21] == 1) {
+  if (interaction_state == 0) {
+    if (message_window_active == 1) {
       FINISH_SCRIPT_MESSAGE_WINDOW()
-      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[24])
-      local_int[21] = 0
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(interaction_resource_id)
+      message_window_active = 0
     }
   _147:
     SET_SOLAR_OVERLAY_MODE(7)
@@ -897,97 +881,83 @@ _125:
 elvstart_label:
   PROC elvstart_label
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
-  local_int[27] = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01))
-  local_int[28] = READ_ELEVATOR_TABLE_VALUE(DESTINATION_COUNT)
-  local_int[35] = READ_ELEVATOR_TABLE_VALUE(REMAINING_DESTINATIONS)
-  local_int[29] = READ_ELEVATOR_TABLE_VALUE(2)
-  local_int[30] = READ_ELEVATOR_TABLE_VALUE(3)
-  local_int[31] = READ_ELEVATOR_TABLE_VALUE(4)
-  local_int[32] = READ_ELEVATOR_TABLE_VALUE(5)
-  local_int[33] = READ_ELEVATOR_TABLE_VALUE(6)
-  local_int[34] = READ_ELEVATOR_TABLE_VALUE(7)
+  elevator_camera_unit_id = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01))
+  elevator_destination_count = READ_ELEVATOR_TABLE_VALUE(DESTINATION_COUNT)
+  elevator_remaining_destinations = READ_ELEVATOR_TABLE_VALUE(REMAINING_DESTINATIONS)
+  elevator_destination_value_1 = READ_ELEVATOR_TABLE_VALUE(2)
+  elevator_destination_value_2 = READ_ELEVATOR_TABLE_VALUE(3)
+  elevator_destination_value_3 = READ_ELEVATOR_TABLE_VALUE(4)
+  elevator_destination_value_4 = READ_ELEVATOR_TABLE_VALUE(5)
+  elevator_destination_value_5 = READ_ELEVATOR_TABLE_VALUE(6)
+  elevator_destination_value_6 = READ_ELEVATOR_TABLE_VALUE(7)
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(4)
   PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 1)
   SET_UNIT_VALUE(global_int[0], 2)
-  ADD_EFFECT_UNIT_TO_WORLD(local_int[27])
+  ADD_EFFECT_UNIT_TO_WORLD(elevator_camera_unit_id)
   SCREEN_FADE_A(0, 15)
-  push local_int[35]
-  push local_int[35]
-  COMM 0x0209
+  CONFIGURE_ELEVATOR_CAMERA_MOVE(elevator_remaining_destinations, elevator_remaining_destinations)
   ACTIVATE_MESSAGE_PANEL()
   MESSAGE_REQUEST_AND_POLL(message(WARP_ELV_MSG))
-  if (local_int[28] == 1) {
-    SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[29], 4)
-    push 1
-    push 3
-    COMM 0x013c
-    local_int[26] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL1))
+  if (elevator_destination_count == 1) {
+    SET_MESSAGE_WINDOW_GEOMETRY(0, elevator_destination_value_1, 4)
+    SET_MESSAGE_RANGE(3, 1)
+    elevator_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL1))
   } else {
   _152:
-    if (local_int[28] == 2) {
-      SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[29], 4)
-      SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[30], 4)
-      push local_int[35]
+    if (elevator_destination_count == 2) {
+      SET_MESSAGE_WINDOW_GEOMETRY(0, elevator_destination_value_1, 4)
+      SET_MESSAGE_WINDOW_GEOMETRY(1, elevator_destination_value_2, 4)
+      push elevator_remaining_destinations
       COMM 0x0040
-      push 2
-      push 3
-      COMM 0x013c
-      local_int[26] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL2))
+      SET_MESSAGE_RANGE(3, 2)
+      elevator_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL2))
     } else {
     _153:
-      if (local_int[28] == 3) {
-        SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[29], 4)
-        SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[30], 4)
-        SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[31], 4)
-        push local_int[35]
+      if (elevator_destination_count == 3) {
+        SET_MESSAGE_WINDOW_GEOMETRY(0, elevator_destination_value_1, 4)
+        SET_MESSAGE_WINDOW_GEOMETRY(1, elevator_destination_value_2, 4)
+        SET_MESSAGE_WINDOW_GEOMETRY(2, elevator_destination_value_3, 4)
+        push elevator_remaining_destinations
         COMM 0x0040
-        push 3
-        push 3
-        COMM 0x013c
-        local_int[26] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL3))
+        SET_MESSAGE_RANGE(3, 3)
+        elevator_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL3))
       } else {
       _154:
-        if (local_int[28] == 4) {
-          SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[29], 4)
-          SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[30], 4)
-          SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[31], 4)
-          SET_MESSAGE_WINDOW_GEOMETRY(3, local_int[32], 4)
-          push local_int[35]
+        if (elevator_destination_count == 4) {
+          SET_MESSAGE_WINDOW_GEOMETRY(0, elevator_destination_value_1, 4)
+          SET_MESSAGE_WINDOW_GEOMETRY(1, elevator_destination_value_2, 4)
+          SET_MESSAGE_WINDOW_GEOMETRY(2, elevator_destination_value_3, 4)
+          SET_MESSAGE_WINDOW_GEOMETRY(3, elevator_destination_value_4, 4)
+          push elevator_remaining_destinations
           COMM 0x0040
-          push 4
-          push 3
-          COMM 0x013c
-          local_int[26] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL4))
+          SET_MESSAGE_RANGE(3, 4)
+          elevator_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL4))
         } else {
         _155:
-          if (local_int[28] == 5) {
-            SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[29], 4)
-            SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[30], 4)
-            SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[31], 4)
-            SET_MESSAGE_WINDOW_GEOMETRY(3, local_int[32], 4)
-            SET_MESSAGE_WINDOW_GEOMETRY(4, local_int[33], 4)
-            push local_int[35]
+          if (elevator_destination_count == 5) {
+            SET_MESSAGE_WINDOW_GEOMETRY(0, elevator_destination_value_1, 4)
+            SET_MESSAGE_WINDOW_GEOMETRY(1, elevator_destination_value_2, 4)
+            SET_MESSAGE_WINDOW_GEOMETRY(2, elevator_destination_value_3, 4)
+            SET_MESSAGE_WINDOW_GEOMETRY(3, elevator_destination_value_4, 4)
+            SET_MESSAGE_WINDOW_GEOMETRY(4, elevator_destination_value_5, 4)
+            push elevator_remaining_destinations
             COMM 0x0040
-            push 5
-            push 3
-            COMM 0x013c
-            local_int[26] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL5))
+            SET_MESSAGE_RANGE(3, 5)
+            elevator_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL5))
           } else {
           _156:
-            if (local_int[28] == 6) {
-              SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[29], 4)
-              SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[30], 4)
-              SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[31], 4)
-              SET_MESSAGE_WINDOW_GEOMETRY(3, local_int[32], 4)
-              SET_MESSAGE_WINDOW_GEOMETRY(4, local_int[33], 4)
-              SET_MESSAGE_WINDOW_GEOMETRY(5, local_int[34], 4)
-              push local_int[35]
+            if (elevator_destination_count == 6) {
+              SET_MESSAGE_WINDOW_GEOMETRY(0, elevator_destination_value_1, 4)
+              SET_MESSAGE_WINDOW_GEOMETRY(1, elevator_destination_value_2, 4)
+              SET_MESSAGE_WINDOW_GEOMETRY(2, elevator_destination_value_3, 4)
+              SET_MESSAGE_WINDOW_GEOMETRY(3, elevator_destination_value_4, 4)
+              SET_MESSAGE_WINDOW_GEOMETRY(4, elevator_destination_value_5, 4)
+              SET_MESSAGE_WINDOW_GEOMETRY(5, elevator_destination_value_6, 4)
+              push elevator_remaining_destinations
               COMM 0x0040
-              push 6
-              push 3
-              COMM 0x013c
-              local_int[26] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL6))
+              SET_MESSAGE_RANGE(3, 6)
+              elevator_choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL6))
             }
           }
         }
@@ -996,118 +966,106 @@ elvstart_label:
   }
 _151:
   FINISH_SCRIPT_MESSAGE_WINDOW()
-  if (local_int[26] == local_int[28]) {
+  if (elevator_choice == elevator_destination_count) {
     WAIT_FOR_TIMER_LIMIT(4)
   } else {
   _163:
-    if (local_int[26] == local_int[35]) {
+    if (elevator_choice == elevator_remaining_destinations) {
       WAIT_FOR_TIMER_LIMIT(4)
     } else {
     _164:
       PREPARE_UNIT_MOTION_STATE(global_int[0], 10, 4, 20, 0)
       WAIT_FOR_UNIT_MOTION(global_int[0])
       WAIT_FOR_TIMER_LIMIT(4)
-      push 46
-      COMM 0x0214
-      push local_int[26]
-      push local_int[35]
-      COMM 0x0209
+      PLAY_FIELD_SE_VOLUME_PAN(46)
+      CONFIGURE_ELEVATOR_CAMERA_MOVE(elevator_remaining_destinations, elevator_choice)
       WAIT_FOR_TIMER_LIMIT(4)
       WAIT_FOR_TIMER_LIMIT(20)
-      local_int[36] = POLL_ELEVATOR_MOVE_STATE()
+      elevator_move_state = POLL_ELEVATOR_MOVE_STATE()
     _158:
-      while (local_int[36] != 1) {
-        if (local_int[36] == 2) {
+      while (elevator_move_state != 1) {
+        if (elevator_move_state == 2) {
           SCREEN_FADE_B(0, 15)
           WAIT_FOR_TIMER_LIMIT(15)
-          push 46
-          COMM 0x0215
-          COMM 0x020a
-          push local_int[26]
-          COMM 0x0201
+          PLAY_FIELD_SE(46)
+          RESET_ELEVATOR_CAMERA_MOVE_TRACKING()
+          RUN_FIELD_DESTINATION_TRANSITION(elevator_choice)
           return
         }
       _160:
         WAIT_FOR_TIMER_START()
-        local_int[36] = POLL_ELEVATOR_MOVE_STATE()
+        elevator_move_state = POLL_ELEVATOR_MOVE_STATE()
       }
     _159:
       WAIT_FOR_TIMER_LIMIT(20)
-      push 46
-      COMM 0x0215
-      push 47
-      COMM 0x0214
+      PLAY_FIELD_SE(46)
+      PLAY_FIELD_SE_VOLUME_PAN(47)
       WAIT_FOR_TIMER_LIMIT(20)
       goto _162
     }
   }
 _162:
-  push 48
-  COMM 0x0214
+  PLAY_FIELD_SE_VOLUME_PAN(48)
   MOVE_OBJECT_ALONG_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01path_01)), 0)
   MOVE_OBJECT_ALONG_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d02)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01path_02)), 0)
-  push READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01_2))
-  COMM 0x006c
+  WAIT_FOR_OBJECT_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01_2)))
   WAIT_FOR_TIMER_LIMIT(20)
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
-  COMM 0x020a
-  push local_int[26]
-  COMM 0x0201
+  RESET_ELEVATOR_CAMERA_MOVE_TRACKING()
+  RUN_FIELD_DESTINATION_TRANSITION(elevator_choice)
   return
 suikomi_label:
   PROC suikomi_label
   RESTORE_CAMERA_NODE_MODE()
   SCREEN_FADE_B(0, 6)
   WAIT_FOR_TIMER_LIMIT(6)
-  local_int[41] = READ_SUCTION_WARP_VALUE(STATE_CODE)
-  local_int[38] = READ_SUCTION_WARP_VALUE(SOURCE_VECTOR_ID)
-  local_int[37] = READ_SUCTION_WARP_VALUE(EFFECT_UNIT_ID)
-  local_int[39] = READ_SUCTION_WARP_VALUE(MAP_ENTRY_ID)
-  local_int[40] = READ_SUCTION_WARP_VALUE(MOTION_ID)
-  push 39
-  COMM 0x011b
-  COMM 0x011c
-  ENABLE_FIELD_MAP_ENTRY(0, 0, local_int[39])
+  suction_state_code = READ_SUCTION_WARP_VALUE(STATE_CODE)
+  suction_source_vector_id = READ_SUCTION_WARP_VALUE(SOURCE_VECTOR_ID)
+  suction_effect_unit_id = READ_SUCTION_WARP_VALUE(EFFECT_UNIT_ID)
+  suction_map_entry_id = READ_SUCTION_WARP_VALUE(MAP_ENTRY_ID)
+  suction_motion_id = READ_SUCTION_WARP_VALUE(MOTION_ID)
+  START_AND_WAIT_FOR_STREAM_SOUND(39)
+  ADVANCE_STREAM_SOUND_STATE()
+  ENABLE_FIELD_MAP_ENTRY(0, 0, suction_map_entry_id)
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[38])
-  PREPARE_UNIT_MOTION_STATE(global_int[0], local_int[40], 3, 25, 2)
-  ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(local_int[37])
-  local_int[42] = CREATE_LINKED_CAMERA_VIEWER(2, local_int[41])
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[42], local_int[38])
-  push local_int[42]
-  COMM 0x0124
-  PREPARE_UNIT_MOTION_STATE(local_int[42], 0, 0, 0, 2)
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], suction_source_vector_id)
+  PREPARE_UNIT_MOTION_STATE(global_int[0], suction_motion_id, 3, 25, 2)
+  ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(suction_effect_unit_id)
+  suction_camera_viewer_id = CREATE_LINKED_CAMERA_VIEWER(2, suction_state_code)
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(suction_camera_viewer_id, suction_source_vector_id)
+  CLEAR_WORLD_OBJECT_STATE_FLAGS(suction_camera_viewer_id)
+  PREPARE_UNIT_MOTION_STATE(suction_camera_viewer_id, 0, 0, 0, 2)
   SCREEN_FADE_A(0, 6)
   WAIT_FOR_TIMER_LIMIT(60)
   SCREEN_FADE_B(0, 20)
   WAIT_FOR_TIMER_LIMIT(20)
-  COMM 0x011f
-  COMM 0x0121
-  COMM 0x0202
+  RESET_STREAM_PLAYBACK()
+  WAIT_FOR_STREAM_IDLE()
+  SET_CURRENT_TASK_SCENE()
   return
   return
 baria_label:
   PROC baria_label
-  local_int[43] = READ_BARRIER_VALUE(BARRIER_MODEL_FLAG)
-  local_int[44] = READ_BARRIER_VALUE(EFFECT_UNIT_ID)
-  local_int[45] = READ_BARRIER_VALUE(SOURCE_VECTOR_ID)
-  local_int[46] = READ_BARRIER_VALUE(3)
-  local_int[46] = READ_BARRIER_VALUE(4)
-  local_int[47] = READ_BARRIER_VALUE(COMPLETION_FLAG)
-  local_int[49] = READ_BARRIER_VALUE(MAP_ENTRY_ID)
-  if_not (TEST_MODEL_FLAG(local_int[47]) == 0) goto _184
+  barrier_model_flag = READ_BARRIER_VALUE(BARRIER_MODEL_FLAG)
+  barrier_effect_unit_id = READ_BARRIER_VALUE(EFFECT_UNIT_ID)
+  barrier_source_vector_id = READ_BARRIER_VALUE(SOURCE_VECTOR_ID)
+  barrier_unused_value = READ_BARRIER_VALUE(3)
+  barrier_unused_value = READ_BARRIER_VALUE(4)
+  barrier_completion_flag = READ_BARRIER_VALUE(COMPLETION_FLAG)
+  barrier_map_entry_id = READ_BARRIER_VALUE(MAP_ENTRY_ID)
+  if_not (TEST_MODEL_FLAG(barrier_completion_flag) == 0) goto _184
 _165:
   while (1) {
     if_not (ACTION_WINDOW_REQUEST_AND_POLL(9)) goto _182
-    if (TEST_MODEL_FLAG(local_int[43]) == 0) {
+    if (TEST_MODEL_FLAG(barrier_model_flag) == 0) {
       RESTORE_CAMERA_NODE_MODE()
       ACTIVATE_MESSAGE_PANEL()
-      if (local_int[43] == 2560) {
+      if (barrier_model_flag == 2560) {
         MESSAGE_REQUEST_AND_POLL(message(FLD_BLUEICE))
       } else {
       _168:
-        if (local_int[43] == 2561) {
+        if (barrier_model_flag == 2561) {
           MESSAGE_REQUEST_AND_POLL(message(FLD_YERWICE))
         } else {
         _169:
@@ -1125,34 +1083,32 @@ _165:
       SET_SOLAR_OVERLAY_MODE(2)
       SCREEN_FADE_B(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)
-      if (local_int[43] == 2560) {
-        local_int[48] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_ICE_b_BED))
+      if (barrier_model_flag == 2560) {
+        barrier_effect_object_id = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_ICE_b_BED))
       } else {
       _171:
-        if (local_int[43] == 2561) {
-          local_int[48] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_ICE_y_BED))
+        if (barrier_model_flag == 2561) {
+          barrier_effect_object_id = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_ICE_y_BED))
         } else {
         _172:
-          local_int[48] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_ICE_r_BED))
+          barrier_effect_object_id = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_ICE_r_BED))
           goto _170
         }
       }
     _170:
-      push local_int[45]
-      push local_int[48]
-      COMM 0x009d
-      ADD_EFFECT_UNIT_TO_WORLD(local_int[44])
+      COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(barrier_effect_object_id, barrier_source_vector_id)
+      ADD_EFFECT_UNIT_TO_WORLD(barrier_effect_unit_id)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
-      ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[45])
+      ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], barrier_source_vector_id)
       PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 1)
       SCREEN_FADE_A(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)
       ACTIVATE_MESSAGE_PANEL()
-      if (local_int[43] == 2560) {
+      if (barrier_model_flag == 2560) {
         MESSAGE_REQUEST_AND_POLL(message(FLD_BLUEICE_KEYHAVE))
       } else {
       _174:
-        if (local_int[43] == 2561) {
+        if (barrier_model_flag == 2561) {
           MESSAGE_REQUEST_AND_POLL(message(FLD_YERWICE_KEYHAVE))
         } else {
         _175:
@@ -1165,14 +1121,11 @@ _165:
       if (MESSAGE_SELECTION_REQUEST_AND_POLL(selection(FLD_ICE_BREAK_SEL)) == 0) {
         FINISH_SCRIPT_MESSAGE_WINDOW()
         WAIT_FOR_TIMER_LIMIT(10)
-        push 32
-        COMM 0x011b
+        START_AND_WAIT_FOR_STREAM_SOUND(32)
         PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
         WAIT_FOR_TIMER_LIMIT(60)
-        push 0
-        push local_int[48]
-        COMM 0x00ce
-        COMM 0x011c
+        SET_EFFECT_MODEL_CUT(barrier_effect_object_id, 0)
+        ADVANCE_STREAM_SOUND_STATE()
         WAIT_FOR_TIMER_LIMIT(30)
         WAIT_FOR_TIMER_LIMIT(30)
         SCREEN_FADE_B(1, 30)
@@ -1185,17 +1138,16 @@ _165:
         WAIT_FOR_TIMER_LIMIT(30)
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
-        push local_int[48]
-        COMM 0x009b
-        COMM 0x011f
-        COMM 0x0121
-        COMM 0x00a4
+        DESTROY_WORLD_EFFECT_OBJECT(barrier_effect_object_id)
+        RESET_STREAM_PLAYBACK()
+        WAIT_FOR_STREAM_IDLE()
+        UPDATE_FIELD_LOOK_AT_SEGMENT()
         ADD_EFFECT_UNIT_TO_WORLD(-(1))
         SCREEN_FADE_A(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
-        SET_MODEL_FLAG(local_int[47])
-        if (local_int[49] != -(1)) {
-          ENABLE_FIELD_MAP_ENTRY(0, 0, local_int[49])
+        SET_MODEL_FLAG(barrier_completion_flag)
+        if (barrier_map_entry_id != -(1)) {
+          ENABLE_FIELD_MAP_ENTRY(0, 0, barrier_map_entry_id)
         }
       _176:
         RELEASE_CURRENT_OBJECT()
@@ -1206,7 +1158,7 @@ _165:
       FINISH_SCRIPT_MESSAGE_WINDOW()
       SCREEN_FADE_B(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)
-      COMM 0x00a4
+      UPDATE_FIELD_LOOK_AT_SEGMENT()
       ADD_EFFECT_UNIT_TO_WORLD(-(1))
       SCREEN_FADE_A(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)

@@ -12,7 +12,7 @@ typedef struct {
 } EffBattleMiscCtx; /* 0x114 */
 
 typedef struct {
-    u8 unk00;
+    u8 querySelector; /* 0x00 */
     u8 value; /* 0x01 */
 } EffBattleMiscParam;
 
@@ -20,9 +20,9 @@ extern u32 D_0034E720[];
 
 extern void (*D_003528D8[])();
 
-/* Look up the position provider selected by param->unk00; it leaves the vector in vf10. */
+/* Look up the position provider selected by param->querySelector; it leaves the vector in vf10. */
 void effBattleMiscQueryPosition(void *owner, EffBattleMiscParam *param, u128 *out) {
-    D_003528D8[param->unk00](owner, param);
+    D_003528D8[param->querySelector](owner, param);
     VU0_STORE_VF(vf10, out);
 }
 
@@ -161,7 +161,7 @@ f32 effBattleMiscQueryScalar(EffBattleMiscUnit *unit, EffBattleMiscParam *param)
     EffBattleMiscUnit *other;
     f32 result = 0;
 
-    switch (param->unk00) {
+    switch (param->querySelector) {
     case 0:
         result = unit->fB4 * unit->f80;
         break;
@@ -210,9 +210,9 @@ typedef struct {
     u8 sub;               /* 0x02 */
 } EffBattleMiscBasisParam;
 
-extern u8 D_00324680[];
-extern u8 D_00324690[];
-extern u8 D_003246A0[];
+extern u8 sdfViewEyeVector[];
+extern u8 sdfViewTargetVector[];
+extern u8 sdfViewUpVector[];
 extern void sdfVuBuildLookAtBasis(void *origin, void *direction, void *up);
 extern void sdfInvertRigidVuTransform(void);
 extern void func_002DD608(f32 value);
@@ -225,7 +225,7 @@ void effBattleMiscBuildBasis(EffBattleMiscBasisParam *param, u128 *out) {
     f32 tilt = 0;
 
     if (param->kind == 4 || param->sub == 9) {
-        sdfVuBuildLookAtBasis(D_00324680, D_00324690, D_003246A0);
+        sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
         sdfInvertRigidVuTransform();
         VU0_MOVE_VF(vf31, vf0);
     } else {

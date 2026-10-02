@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "pcp_vu0.h"
 
 typedef struct SdfRequest {
@@ -53,8 +54,6 @@ extern s32 GetThreadId(void);
 extern void SleepThread(void);
 
 extern s32 D_00439224;
-
-#define SDF_POOL_FREE_KIND 0xFFFF
 
 typedef struct SdfPoolNode {
     struct SdfPoolNode *next;
@@ -222,7 +221,7 @@ typedef struct SdfTreeNode {
 
 /* Balance-flag rotation on the second link: `node` takes the place under
  * `a`'s second link; returns the new subtree root. */
-SdfTreeNode *func_00348700(SdfTreeNode *a, SdfTreeNode *node) {
+SdfTreeNode *sdfRotateBalancedTreeSecondLink(SdfTreeNode *a, SdfTreeNode *node) {
     SdfTreeNode *root = a;
     SdfTreeNode *pivot;
 
@@ -339,7 +338,27 @@ void sdfReleasePoolNode(SdfPool *pool, SdfPoolNode *node) {
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00348A30);
 
-INCLUDE_ASM(const s32, "game/code_003478C0", func_00348AA0);
+typedef struct SdfKeyTreeNode {
+    struct SdfKeyTreeNode *child; /* 0x00 */
+    struct SdfKeyTreeNode *next;  /* 0x04 */
+    void *item;                   /* 0x08 */
+} SdfKeyTreeNode;
+
+extern void func_00348A30(void *item, s32 first, s32 second);
+
+/* Walk a key tree depth first, applying func_00348A30 to every node's item. */
+void sdfKeyTreeApply(SdfKeyTreeNode *node, s32 first, s32 second) {
+    SdfKeyTreeNode *next;
+
+    do {
+        if (node->child != NULL) {
+            sdfKeyTreeApply(node->child, first, second);
+        }
+        func_00348A30(node->item, first, second);
+        next = node->next;
+        node = next;
+    } while (next != NULL);
+}
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00348B10);
 

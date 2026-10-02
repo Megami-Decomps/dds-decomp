@@ -1,5 +1,19 @@
 #include "common.h"
 
+typedef struct DdsSpriteFileHeader {
+    u32 version;
+    char format[4];
+    u32 reserved[2];
+} DdsSpriteFileHeader;
+
+extern u32 *func_0031F878(u32 **);
+extern u32 *func_0031FA60(u32 **);
+extern u32 *func_00320020(u32 **);
+extern u32 *func_003201A0(u32 **);
+extern const char D_00438980[];
+extern const char D_00438988[];
+extern const char D_00438990[];
+
 extern u64 func_00325BB0(u64, u32);
 
 extern u64 func_00325AB8(u64, u32);
@@ -8,7 +22,7 @@ extern u64 func_00320AE8(u64, u64, u32 *);
 
 extern u64 func_00325790(u64, u32);
 
-extern void (*D_004389C4)(void);
+extern void (*sdfTickCallback)(void);
 
 extern void dds3DestroyCallbackNodeAfterLastNotification(u32);
 extern u32 func_0035A828(s32 bytes);
@@ -17,7 +31,7 @@ extern void func_003211F0(void);
 #define DDS_NAMED_RECORD_NAME_BYTES 0x40
 
 typedef struct DdsNamedRecord {
-    const char *name; /* 0x00: up to 0x40 bytes */
+    char *name;       /* 0x00: writable 0x40-byte name buffer */
     u32 value;        /* 0x04: packed offset or resolved address */
 } DdsNamedRecord;
 
@@ -59,7 +73,7 @@ typedef struct DdsAllocBlock {
     u32 buffer; /* 0x04 */
 } DdsAllocBlock;
 
-u64 dds3AllocateEmptyPackedValueBuffer(void) {
+DdsAllocBlock *dds3AllocateEmptyPackedValueBuffer(void) {
     DdsAllocBlock *block = (DdsAllocBlock *)func_0035A828(8);
     u32 buffer;
 
@@ -67,7 +81,7 @@ u64 dds3AllocateEmptyPackedValueBuffer(void) {
     buffer = func_0035A828(0x10000);
     block->used = 0;
     block->buffer = buffer;
-    return (u64)block;
+    return block;
 }
 
 void func_0031F138(u32 node) {
@@ -94,8 +108,8 @@ void func_0031F208(u32 unused, u32 node) {
 }
 
 
-u64 dds3AllocateAndAttachPackedValueBuffer(s32 object) {
-    u64 record;
+DdsAllocBlock *dds3AllocateAndAttachPackedValueBuffer(s32 object) {
+    DdsAllocBlock *record;
 
     record = dds3AllocateEmptyPackedValueBuffer();
     func_00320CE0(*(u32 *)(object + 4), 0, record);
@@ -116,7 +130,25 @@ void dds3ReleaseCallbackCollectionAndNodes(u32 node) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F340);
+/* Append `bytes` copies of the source data into the object's 0x10000-byte allocation blocks, moving on to a fresh block when one fills up. */
+void dds3AppendPackedBytes(DdsPackedObject *object, const void *source, u32 bytes) {
+    DdsAllocBlock *block = (DdsAllocBlock *)func_0031F270((s32)object);
+
+    if (bytes != 0) {
+        do {
+            u32 remaining = 0x10000 - block->used;
+            u32 count = remaining < bytes ? remaining : bytes;
+
+            memcpy((void *)(block->buffer + block->used), source, count);
+            bytes -= count;
+            block->used += count;
+            object->maxPackedOffset += count;
+            if (block->used > 0xffff) {
+                block = dds3AllocateAndAttachPackedValueBuffer((s32)object);
+            }
+        } while (bytes != 0);
+    }
+}
 
 void dds3WritePackedValue(destination, datum, size)
     u32 destination;
@@ -125,10 +157,29 @@ void dds3WritePackedValue(destination, datum, size)
 {
     u32 value[4];
     value[0] = datum;
-    func_0031F340((u32 *)destination, value, size);
+    dds3AppendPackedBytes((DdsPackedObject *)destination, value, size);
 }
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F430);
+extern u32 func_0031F168(void);
+extern char D_00438960[];
+extern void func_0035C860(char *dst, const char *format, ...);
+
+void dds3RegisterNamedPackedOffset(DdsPackedObject *object, const char *name) {
+    DdsNamedNode *node = ((DdsNamedList *)object->namedReferences)->first;
+    DdsNamedRecord *record;
+
+    while (node != NULL) {
+        record = node->record;
+        if (strncmp(record->name, name, DDS_NAMED_RECORD_NAME_BYTES) == 0) {
+            return;
+        }
+        node = node->next;
+    }
+    record = (DdsNamedRecord *)func_0031F168();
+    func_0035C860(record->name, D_00438960, name);
+    func_00320CE0(object->namedReferences, 0, record);
+    record->value = object->maxPackedOffset;
+}
 
 void dds3RecordNamedReference(u32 context, const char *name) {
     u32 record = func_0031F168();
@@ -209,7 +260,6 @@ u32 dds3RegisterPendingNamedReferences(u32 *object, u32 extra) {
     return object[0];
 }
 
-extern void func_0035C860(char *dst, const char *format, ...);
 extern s32 func_00359A98(const char *name, const char *path);
 extern void func_0035A648(u32 *data, s32 size, s32 flag, s32 handle);
 extern void func_003594A8(s32 handle);
@@ -259,7 +309,39 @@ u32 func_00320380(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320388);
+s32 func_00320388(const char *directory, const char *name, u32 **source) {
+    DdsSpriteFileHeader header;
+    u32 info[5];
+    char path[128];
+    u32 *packed = func_0031F878(source);
+    u32 *references;
+    s32 file;
+
+    dds3ApplyNamedRelocations(packed);
+    references = (u32 *)dds3WritePendingNamedReferenceValues((u32)packed);
+    memset(&header, 0, sizeof(header));
+    header.version = 0x1000000;
+    strncpy(header.format, D_00438980, 4);
+    memset(info, 0, sizeof(info));
+    info[0] = packed[0];
+    info[1] = (*source)[0];
+    info[2] = packed[0];
+    info[3] = references[0];
+    info[4] = 0;
+    memset(path, 0, sizeof(path));
+    func_0035C860(path, D_00438988, directory, name);
+    file = func_00359A98(path, D_00438990);
+    if (file != 0) {
+        func_0035A648((u32 *)&header, sizeof(header), 1, file);
+        func_0035A648(info, sizeof(info), 1, file);
+        dds3RegisterPendingNamedReferences(packed, file);
+        dds3RegisterPendingNamedReferences(references, file);
+        func_003594A8(file);
+    }
+    dds3ReleaseCallbackCollectionAndNodes((u32)packed);
+    dds3ReleaseCallbackCollectionAndNodes((u32)references);
+    return 1;
+}
 
 u64 func_00320510(u64 source, u64 request) {
     u64 buffer;
@@ -272,7 +354,39 @@ u64 func_00320510(u64 source, u64 request) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320560);
+s32 func_00320560(const char *directory, const char *name, u32 **source) {
+    DdsSpriteFileHeader header;
+    u32 info[5];
+    char path[128];
+    u32 *packed = func_0031FA60(source);
+    u32 *references;
+    s32 file;
+
+    dds3ApplyNamedRelocations(packed);
+    references = (u32 *)dds3WritePendingNamedReferenceValues((u32)packed);
+    memset(&header, 0, sizeof(header));
+    header.version = 0x1000000;
+    strncpy(header.format, D_00438980, 4);
+    memset(info, 0, sizeof(info));
+    info[0] = packed[0];
+    info[1] = (*source)[0];
+    info[2] = packed[0];
+    info[3] = references[0];
+    info[4] = 0;
+    memset(path, 0, sizeof(path));
+    func_0035C860(path, D_00438988, directory, name);
+    file = func_00359A98(path, D_00438990);
+    if (file != 0) {
+        func_0035A648((u32 *)&header, sizeof(header), 1, file);
+        func_0035A648(info, sizeof(info), 1, file);
+        dds3RegisterPendingNamedReferences(packed, file);
+        dds3RegisterPendingNamedReferences(references, file);
+        func_003594A8(file);
+    }
+    dds3ReleaseCallbackCollectionAndNodes((u32)packed);
+    dds3ReleaseCallbackCollectionAndNodes((u32)references);
+    return 1;
+}
 
 u64 func_003206E8(u64 source, u64 request) {
     u64 buffer;
@@ -285,7 +399,39 @@ u64 func_003206E8(u64 source, u64 request) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320738);
+s32 func_00320738(const char *directory, const char *name, u32 **source) {
+    DdsSpriteFileHeader header;
+    u32 info[5];
+    char path[128];
+    u32 *packed = func_00320020(source);
+    u32 *references;
+    s32 file;
+
+    dds3ApplyNamedRelocations(packed);
+    references = (u32 *)dds3WritePendingNamedReferenceValues((u32)packed);
+    memset(&header, 0, sizeof(header));
+    header.version = 0x1000000;
+    strncpy(header.format, D_00438980, 4);
+    memset(info, 0, sizeof(info));
+    info[0] = packed[0];
+    info[1] = (*source)[0];
+    info[2] = packed[0];
+    info[3] = references[0];
+    info[4] = 0;
+    memset(path, 0, sizeof(path));
+    func_0035C860(path, D_00438988, directory, name);
+    file = func_00359A98(path, D_00438990);
+    if (file != 0) {
+        func_0035A648((u32 *)&header, sizeof(header), 1, file);
+        func_0035A648(info, sizeof(info), 1, file);
+        dds3RegisterPendingNamedReferences(packed, file);
+        dds3RegisterPendingNamedReferences(references, file);
+        func_003594A8(file);
+    }
+    dds3ReleaseCallbackCollectionAndNodes((u32)packed);
+    dds3ReleaseCallbackCollectionAndNodes((u32)references);
+    return 1;
+}
 
 u64 func_003208C0(u64 source, u64 request) {
     u64 buffer;
@@ -298,7 +444,39 @@ u64 func_003208C0(u64 source, u64 request) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320910);
+s32 func_00320910(const char *directory, const char *name, u32 **source) {
+    DdsSpriteFileHeader header;
+    u32 info[5];
+    char path[128];
+    u32 *packed = func_003201A0(source);
+    u32 *references;
+    s32 file;
+
+    dds3ApplyNamedRelocations(packed);
+    references = (u32 *)dds3WritePendingNamedReferenceValues((u32)packed);
+    memset(&header, 0, sizeof(header));
+    header.version = 0x1000000;
+    strncpy(header.format, D_00438980, 4);
+    memset(info, 0, sizeof(info));
+    info[0] = packed[0];
+    info[1] = (*source)[0];
+    info[2] = packed[0];
+    info[3] = references[0];
+    info[4] = 0;
+    memset(path, 0, sizeof(path));
+    func_0035C860(path, D_00438988, directory, name);
+    file = func_00359A98(path, D_00438990);
+    if (file != 0) {
+        func_0035A648((u32 *)&header, sizeof(header), 1, file);
+        func_0035A648(info, sizeof(info), 1, file);
+        dds3RegisterPendingNamedReferences(packed, file);
+        dds3RegisterPendingNamedReferences(references, file);
+        func_003594A8(file);
+    }
+    dds3ReleaseCallbackCollectionAndNodes((u32)packed);
+    dds3ReleaseCallbackCollectionAndNodes((u32)references);
+    return 1;
+}
 
 u64 func_00320A98(u64 source, u64 request) {
     u64 buffer;
@@ -325,7 +503,7 @@ u32 mnuCreateCallbackNode(u32 userData) {
 void dds3DestroyCallbackNodeAfterLastNotification(u32 node) {
     if (node != 0) {
         void (*callback)(s32, u32);
-        func_00321018(node);
+        mnuClearResourceList(node);
         callback = (void (*)(s32, u32))((DdsCallbackNode *)node)->onLast;
         callback(-1, ((DdsCallbackNode *)node)->userData);
         func_0035A880(node);

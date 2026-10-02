@@ -1,0 +1,91 @@
+messages msg1
+  message DEFCOM_00 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "RESERVE"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message DEFCOM_01 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Do light phys damage to enemy"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message DEFCOM_02 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Fire gun at enemy"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message DEFCOM_03 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "End turn by expending half a turn icon"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message DEFCOM_04 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Revert to human form"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message DEFCOM_05 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Change to demon form"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message DEFCOM_06 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Replace an ally"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message DEFCOM_07 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Retreat from the front line"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message DEFCOM_08 speaker=none
+    page
+      segment-start
+      font-slot 1
+      font-slot 0
+      text "Run from battle"
+      font-slot 1
+      newline
+    endpage
+  endmessage

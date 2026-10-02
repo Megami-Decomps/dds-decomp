@@ -1,9 +1,9 @@
 #include "mnu.h"
 #include "btl.h"
 
-extern s32 func_001AA6F8(void);
+extern s32 btlGetRuntime(void);
 
-extern u8 *D_00435E20;
+extern u8 *datCommandRecords;
 
 extern u32 btlHasMarkedEntry14(u32);
 
@@ -72,9 +72,7 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225368);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002254C8);
 
-s64 func_00225778(u32 unit) {
-    return func_002254C8(unit);
-}
+INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225778);
 
 /* For a group-0x200 owner with one group-0x400 target, mark defeat candidates
  * and clear the action transition. Other owner/target combinations do nothing. */
@@ -103,8 +101,8 @@ s32 btlHandleTargetDirectionOrAction(BattleActionUnit *unit) {
     BattleActor *actor = unit->actor;
     if (actor->owner->flags & 0x200) {
         if (btlGetIndexListCount(actor->targetIndexList) == 1) {
-            s32 owner = btlGetIndexListEntry(actor->targetIndexList, 0);
-            if (((BattleActionUnit *)owner)->flags & 0x400) {
+            s32 target = btlGetIndexListEntry(actor->targetIndexList, 0);
+            if (((BattleActionUnit *)target)->flags & 0x400) {
                 if ((actor->owner->flags & 0x1000) == 0) {
                     return 0;
                 }
@@ -120,7 +118,43 @@ s32 btlHandleTargetDirectionOrAction(BattleActionUnit *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_002258D8);
+extern void func_00217470(s32, s32, f32, f32, f32);
+extern void func_001E88A8(u32);
+
+typedef struct LiftUnitState {
+    u8 pad00[0x18];
+    struct LiftUnit *owner; /* 0x18 */
+    u8 pad1C[0x44];
+    u32 targetHandle;       /* 0x60 */
+} LiftUnitState;
+
+typedef struct LiftUnit {
+    u8 pad00[0x20];
+    f32 verticalOffset; /* 0x20 */
+    u8 pad24[0xEC];
+    u32 flags;          /* 0x110 */
+    s32 state;          /* 0x114: state-link address, as in the template */
+} LiftUnit;
+
+s32 btlLiftUnitForLinkedTarget(s32 object) {
+    s32 state = ((LiftUnit *)object)->state;
+
+    if ((((LiftUnit *)((LiftUnitState *)state)->owner)->flags & 0x200) != 0) {
+        if (btlGetIndexListCount(((LiftUnitState *)state)->targetHandle) == 1) {
+            s32 owner = btlGetIndexListEntry(((LiftUnitState *)state)->targetHandle, 0);
+            if ((((LiftUnit *)owner)->flags & 0x400) != 0) {
+                if ((((LiftUnit *)((LiftUnitState *)state)->owner)->flags & 0x1000) == 0) {
+                    return 0;
+                }
+                func_00217470(object, object, 1.25f, 0.0f, 30.0f);
+                ((LiftUnit *)object)->verticalOffset += 150.0f;
+                func_001E88A8(object);
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 typedef struct BattleActionTableEntry {
     u8 pad00[3];
@@ -131,7 +165,7 @@ typedef struct BattleActionTableEntry {
     u8 pad1E[2];
 } BattleActionTableEntry;
 
-extern u8 *D_00435E30;
+extern u8 *datActionAnimationRecords;
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002259A0);
 
@@ -140,10 +174,11 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225B48);
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225BF8);
 
 s32 btlDispatchActionByResourceFlags(BattleActionUnit *unit) {
-    u16 flags = ((BattleActionTableEntry *)D_00435E30)[unit->type].flags;
+    u16 flags = ((BattleActionTableEntry *)datActionAnimationRecords)[unit->type].flags;
 
     if (flags & 0x1000) {
         btlFlagAllUnitDefeatCandidatesTask();
+        /* Both arms are identical in retail; kept as written. */
         if ((flags & 0x10) == 0) {
             func_00224F88((u32)unit);
         } else {
@@ -164,7 +199,38 @@ s32 btlDispatchActionByResourceFlags(BattleActionUnit *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_002261A8);
+extern void func_002254C8(u32, u32, u32);
+
+s32 func_002261A8(BattleActionUnit *unit) {
+    u16 flags = ((BattleActionTableEntry *)datActionAnimationRecords)[unit->type].flags;
+
+    if (flags & 0x4000) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        /* Both arms are identical in retail; kept as written. */
+        if ((flags & 0x10) == 0) {
+            func_00224F88((u32)unit);
+        } else {
+            func_00224F88((u32)unit);
+        }
+        unit->transitionState = 0;
+    } else if (flags & 0x8000) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        func_002254C8((u32)unit, (u32)unit, 0);
+    } else if (flags & 0x8) {
+        if (btlGetIndexListCount(unit->actor->targetIndexList) == 1) {
+            btlFlagAllUnitDefeatCandidatesTask();
+            func_00224EE8((u32)unit);
+            unit->transitionState = 0;
+        } else {
+            btlFlagAllUnitDefeatCandidatesTask();
+            func_00224F88((u32)unit);
+        }
+    } else {
+        return 0;
+    }
+    btlClearRuntimeFlag2000();
+    return 1;
+}
 
 s32 btlFilterActionByUnitFlags(BattleActionUnit *unit, s32 action) {
     u32 flags = unit->flags;
@@ -191,7 +257,7 @@ u32 btlFlagBattleForSpecialAction(u32 unit, u32 actor, u32 action) {
     if (action != 0x109) {
         return 0;
     }
-    battle = (BattleActionContext *)func_001AA6F8();
+    battle = (BattleActionContext *)btlGetRuntime();
     battle->flags |= 0x20000;
     return 0;
 }
@@ -207,7 +273,7 @@ s32 btlCheckActionUnitResourceEligibility(BattleActionUnit *unit, s32 type) {
     if ((unit->flags & 0x400) == 0) {
         return -1;
     }
-    resourceType = ((BattleActionTableEntry *)(offset + (s32)D_00435E30))->resourceType;
+    resourceType = ((BattleActionTableEntry *)(offset + (s32)datActionAnimationRecords))->resourceType;
     if (resourceType == 0) {
         return -1;
     }
@@ -228,7 +294,7 @@ s32 func_00226540(u32 unused1, u32 unused2, s32 action) {
 void btlSetSpecialBattleEffectActorByte(u8 value) {
     BattleActionContext *battle;
 
-    battle = (BattleActionContext *)func_001AA6F8();
+    battle = (BattleActionContext *)btlGetRuntime();
     if (battle->battleId == 0x31b) {
         /* Only the low byte at +0x00 changes; other paths use the full word as an actor. */
         ((u8 *)&battle->effect->actor)[0] = value;
@@ -265,7 +331,7 @@ s32 btlSelectDisabledCommand(BattleActionUnit *battler) {
 INCLUDE_ASM(const s32, "game/code_00224FC0", btlTrackSpecialEnemyCommandRestrictionByTurn);
 
 s32 btlClearUnitRestrictionFlag(void) {
-    BattleActionContext *battle = (BattleActionContext *)func_001AA6F8();
+    BattleActionContext *battle = (BattleActionContext *)btlGetRuntime();
     BattleActionUnit *unit;
     if (battle->mode != 2) {
         return -1;
@@ -287,7 +353,7 @@ s32 btlClearUnitRestrictionFlag(void) {
 
 s64 func_00226820(BattleActionUnit *unit) {
     if (unit->dispatchFlags & 8) {
-        return func_001AA6F8();
+        return btlGetRuntime();
     }
 }
 
@@ -315,11 +381,36 @@ u32 func_00226868(BattleActionUnit *unit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226900);
+extern void btlInitializeEffectVectorsFromSourceRecords();
+
+void btlResetUnitPlacement(void) {
+    BtlUnit *unit = *(BtlUnit **)((u8 *)btlGetRuntime() + 0x24C);
+
+    if (unit == NULL) {
+        return;
+    }
+    do {
+        if ((unit->flags & 1) != 0) {
+            if (unit->mode == 0x118) {
+                if ((unit->statBits & 0x2000) != 0) {
+                    unit->bodyOffset[0] = 0.0f;
+                    unit->bodyOffset[1] = -100.0f;
+                    unit->bodyOffset[2] = 60.0f;
+                    unit->bodyOffset[3] = 0.0f;
+                    unit->reach = 180.0f;
+                    unit->height = 220.0f;
+                } else {
+                    btlInitializeEffectVectorsFromSourceRecords(unit, 1, 0x118);
+                }
+            }
+        }
+        unit = unit->nextActor;
+    } while (unit != NULL);
+}
 
 /* Release the command restriction for each active group-0x400 unit of kind 0x118. */
 void btlClearSpecialEnemyEntryFlags(void) {
-    BattleActionUnit *unit = ((BattleActionContext *)func_001AA6F8())->firstUnit;
+    BattleActionUnit *unit = ((BattleActionContext *)btlGetRuntime())->firstUnit;
     while (unit != 0) {
         u32 flags = unit->flags;
         if (flags & 1) {
@@ -343,7 +434,7 @@ typedef struct BattleEffectUnitMask {
 /* Park this unit in the battle effect slot and drop the 0x100 and 0x8 flags. */
 void btlBindEffectUnitAndClearStateFlags(BattleActionUnit *unit) {
     BattleEffectUnitMask *view = (BattleEffectUnitMask *)unit;
-    BattleActionContext *battle = (BattleActionContext *)func_001AA6F8();
+    BattleActionContext *battle = (BattleActionContext *)btlGetRuntime();
     u32 flags = view->flags & ~0x100;
     u16 status = view->statusFlags;
 
@@ -373,7 +464,7 @@ typedef struct BattleEffectResetView {
 } BattleEffectResetView;
 
 void btlBeginEffectActorFadeOut(void) {
-    BattleEffectResetView *effect = (BattleEffectResetView *)((BattleActionContext *)func_001AA6F8())->effect;
+    BattleEffectResetView *effect = (BattleEffectResetView *)((BattleActionContext *)btlGetRuntime())->effect;
     BattleEffectUnitView *actor = effect->actor;
     if (actor != 0) {
         u32 state = actor->stateBits;
@@ -392,7 +483,7 @@ void btlBeginEffectActorFadeOut(void) {
 }
 
 void btlResetEffectState(void) {
-    BattleEffectState *state = ((BattleActionContext *)func_001AA6F8())->effect;
+    BattleEffectState *state = ((BattleActionContext *)btlGetRuntime())->effect;
     state->active = 1;
     state->speed = 20.0f;
     state->flags = 0;
@@ -419,13 +510,13 @@ s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 co
     default:
         return 0;
     }
-    effect = ((BattleActionContext *)func_001AA6F8())->effect;
+    effect = ((BattleActionContext *)btlGetRuntime())->effect;
     if (effect->active != 1) {
         return 0;
     }
     if (actor->flags & 0x200) {
         if (command != 0) {
-            if (D_00435E20[command * 0x38 + 8] == 0) {
+            if (datCommandRecords[command * 0x38 + 8] == 0) {
                 return 0;
             }
         }

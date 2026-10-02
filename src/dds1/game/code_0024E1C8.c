@@ -3,10 +3,22 @@
 extern s32 func_002CB3B8(u32, u32);
 extern void func_0024F6F0(s32, s32);
 
+extern u8 *datGameState;
+extern s32 scrGetSelectedOperandIndex(void *);
+extern u32 ptyGetProfileRecordValue(void *, u16);
+extern u32 prfGetCapValue(u16);
 
-extern u8 D_003AF7A8[];
+typedef struct MnuProfileProgress {
+    void *unit;
+    s32 profileId;
+    u32 value;
+    u32 cap;
+} MnuProfileProgress;
 
-extern u32 D_003BC4CC;
+
+extern u8 mnuResourceTaskName[];
+
+extern u32 mnuSceneResourceContext;
 extern s32 D_0036C698[];
 extern u8 D_0036C648[];
 
@@ -86,20 +98,20 @@ INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F6F0);
  * both clear it when the resource group is no longer active. */
 void mnuCreateResourceTask(void) {
     s32 data = func_0024F608();
-    D_003BC4CC = sdfCreateTaskWorker(D_003AF7A8, 0x402, 0x2B12, D_0036C648, func_0024F6F0, data);
+    mnuSceneResourceContext = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, D_0036C648, func_0024F6F0, data);
 }
 
 s32 mnuCheckResourceTask(void) {
-    if (kwlnTaskExists(D_003AF7A8) != 0) {
+    if (kwlnTaskExists(mnuResourceTaskName) != 0) {
         return 1;
     }
-    D_003BC4CC = 0;
+    mnuSceneResourceContext = 0;
     return 0;
 }
 
 void mnuStopResourceTask(void) {
-    sdfDestroyTaskWorkerTasks(D_003BC4CC);
-    D_003BC4CC = 0;
+    sdfDestroyTaskWorkerTasks(mnuSceneResourceContext);
+    mnuSceneResourceContext = 0;
 }
 
 /* One of the two 0x14-byte slots of a mantra source entry. */
@@ -136,7 +148,16 @@ s32 mnuGetMantraSourceValue(u16 index) {
     return entry->slot[slot].value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F858);
+void mnuInitializeProfileProgress(u16 index, MnuProfileProgress *progress) {
+    s32 offset = index * 0x1A4;
+    void *unit = datGameState + offset + 0xA60;
+
+    progress->unit = unit;
+    progress->profileId = scrGetSelectedOperandIndex(unit);
+    progress->value = ptyGetProfileRecordValue(datGameState + offset + 0xA60,
+                                              progress->profileId);
+    progress->cap = prfGetCapValue(progress->profileId);
+}
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F8D8);
 
@@ -160,18 +181,18 @@ typedef struct MnuResourceTask {
 u32 mnuGetSelectedNodeValue(void) {
     MnuResourceTask *taskObject;
 
-    taskObject = (MnuResourceTask *)func_002CB3B8(D_003BC4CC, 0);
+    taskObject = (MnuResourceTask *)func_002CB3B8(mnuSceneResourceContext, 0);
     return taskObject->menuList->selectionNode->selectionAddress;
 }
 
 void mnuStopResourceAnimation(void) {
-    s32 object = func_002CB3B8(D_003BC4CC, 0);
+    s32 object = func_002CB3B8(mnuSceneResourceContext, 0);
     mnuClearListFlagsOneAndTwo(((MnuResourceTask *)object)->menuList);
     mnuRetreatListCursorDefault(((MnuResourceTask *)object)->menuList);
 }
 
 void mnuResetResourceAnimation(void) {
-    s32 object = func_002CB3B8(D_003BC4CC, 0);
+    s32 object = func_002CB3B8(mnuSceneResourceContext, 0);
     mnuClearListFlagsOneAndTwo(((MnuResourceTask *)object)->menuList);
     mnuAdvanceListCursorDefault(((MnuResourceTask *)object)->menuList);
 }
@@ -216,7 +237,7 @@ typedef struct MenuCleanupOwner {
 void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
     MenuCleanupOwner *owner = (MenuCleanupOwner *)taskData[3];
     MenuCleanupNode *node = owner->first;
-    u8 *record = (u8 *)func_002CB3B8(D_003BC4CC, -1);
+    u8 *record = (u8 *)func_002CB3B8(mnuSceneResourceContext, -1);
 
     while (node != NULL) {
         sdfReleaseChipBlock(node->resource);
@@ -228,11 +249,134 @@ void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
     func_002D0918(taskData[0]);
 }
 
-INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF7A8);
+INCLUDE_RODATA(const s32, "game/code_0024E1C8", mnuResourceTaskName);
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024FBB8);
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_002501E0);
+extern void mnuDrawDisplaySpriteAndPanelMarks(s32, s32, s32);
+extern void func_002546D8(s32, s32);
+extern void func_00254758(s32, s32, s32, s32, s32);
+extern void func_00254778(s32, s32, s32, s32, s32);
+extern void func_002549F0(s32, s32, s32, s32, s32, s32);
+extern void func_00254B30(s32, s32, s32, s32, s32, s32);
+extern void itfDspInitSelectedWindow(s32, s32, s32, s32, s32, s32);
+extern void func_00254810(s32, s32, s32, s32, s32, s32);
+
+/* Scene draw state: fade phase 1..5 and its frame counter. */
+typedef struct MenuFadeWork {
+    u8 pad00[4];
+    s32 phase;      /* 0x04 */
+    s32 timer;      /* 0x08 */
+} MenuFadeWork;
+
+/* Per-phase window draw: a sprite/panel fade driven by the frame counter (phases 1/5 fade in, 2 fades out, 3 fades in reversed, 4 holds). */
+s32 func_002501E0(s32 unused, MenuFadeWork *work) {
+    f32 shade;
+    f32 elapsed;
+    f32 ratio;
+    s32 sel = func_002CB3B8(mnuSceneResourceContext, -1);
+    s32 amount;
+    s32 limit;
+
+    switch (work->phase) {
+    case 1:
+        ratio = (f32)work->timer / 10.0f;
+        shade = ratio + ratio;
+        if (shade > 1.0f) {
+            shade = 1.0f;
+        }
+        amount = (s32)(ratio * 128.0f);
+        mnuDrawDisplaySpriteAndPanelMarks(sel, amount, 0x52);
+        func_002546D8(amount, 0x52);
+        func_00254758(0, 0, 1, amount, 0x53);
+        func_00254778(0, 0, 1, amount, 0x53);
+        func_002549F0(0, 0, 1, amount, (s32)work, 0x53);
+        func_00254B30(0, (s32)((1.0f - shade) * -24.0f), 1, amount, (s32)work, 0x53);
+        if (ratio < 0.5f) {
+            shade = 0.0f;
+        } else {
+            shade = (ratio - 0.5f) * 2.0f;
+        }
+        itfDspInitSelectedWindow(0, 0, 1, (s32)(shade * 128.0f), (s32)work, 0x53);
+        func_00254810(0, 0, 1, (s32)(ratio * 128.0f), (s32)work, 0x53);
+        return 0;
+    case 5:
+        ratio = (f32)work->timer / 10.0f;
+        shade = ratio + ratio;
+        if (shade > 1.0f) {
+            shade = 1.0f;
+        }
+        mnuDrawDisplaySpriteAndPanelMarks(sel, 0x80, 0x52);
+        amount = (s32)(ratio * 128.0f);
+        func_002546D8(amount, 0x52);
+        func_00254758(0, 0, 1, 0x80, 0x53);
+        func_00254778(0, 0, 1, amount, 0x53);
+        func_002549F0(0, 0, 1, amount, (s32)work, 0x53);
+        func_00254B30(0, (s32)((1.0f - shade) * -24.0f), 1, amount, (s32)work, 0x53);
+        if (ratio < 0.5f) {
+            shade = 0.0f;
+        } else {
+            shade = (ratio - 0.5f) * 2.0f;
+        }
+        itfDspInitSelectedWindow(0, 0, 1, (s32)(shade * 128.0f), (s32)work, 0x53);
+        func_00254810(0, 0, 1, (s32)(ratio * 128.0f), (s32)work, 0x53);
+        return 0;
+    case 2:
+        limit = work->timer;
+        ratio = (f32)limit / 10.0f;
+        if (limit < 4) {
+            shade = (f32)limit * 0.25f;
+        } else {
+            shade = 1.0f;
+        }
+        mnuDrawDisplaySpriteAndPanelMarks(sel, 0x80, 0x52);
+        amount = (s32)((1.0f - ratio) * 128.0f);
+        func_002546D8(amount, 0x52);
+        func_00254758(0, 0, 1, 0x80, 0x53);
+        func_00254778(0, 0, 1, amount, 0x53);
+        func_002549F0(0, 0, 1, amount, (s32)work, 0x53);
+        func_00254B30(0, (s32)(ratio * 36.0f), 1, amount, (s32)work, 0x53);
+        itfDspInitSelectedWindow(0, 0, 1, (s32)((1.0f - shade) * 128.0f), (s32)work, 0x53);
+        func_00254810(0, 0, 1, amount, (s32)work, 0x53);
+        return 0;
+    case 3:
+        limit = work->timer;
+        elapsed = limit;
+        ratio = elapsed / 10.0f;
+        if (limit < 4) {
+            shade = elapsed * 0.25f;
+            shade = 1.0f - shade;
+        } else {
+            shade = 0.0f;
+        }
+        ratio = 1.0f - ratio;
+        amount = (s32)(ratio * 128.0f);
+        mnuDrawDisplaySpriteAndPanelMarks(sel, amount, 0x52);
+        func_002546D8(amount, 0x52);
+        func_00254758(0, 0, 1, amount, 0x53);
+        func_00254778(0, 0, 1, amount, 0x53);
+        func_002549F0(0, 0, 1, amount, (s32)work, 0x53);
+        func_00254B30(0, (s32)((1.0f - ratio) * 36.0f), 1, amount, (s32)work, 0x53);
+        itfDspInitSelectedWindow(0, 0, 1, (s32)(shade * 128.0f), (s32)work, 0x53);
+        func_00254810(0, 0, 1, amount, (s32)work, 0x53);
+        return 0;
+    case 4:
+        mnuDrawDisplaySpriteAndPanelMarks(sel, 0x80, 0x52);
+        func_002546D8(0x80, 0x52);
+        func_00254758(0, 0, 1, 0x80, 0x53);
+        func_00254778(0, 0, 1, 0x80, 0x53);
+        func_002549F0(0, 0, 1, 0x80, (s32)work, 0x53);
+        func_00254B30(0, 0, 1, 0x80, (s32)work, 0x53);
+        itfDspInitSelectedWindow(0, 0, 1, 0x80, (s32)work, 0x53);
+        func_00254810(0, 0, 1, 0x80, (s32)work, 0x53);
+        break;
+    case 0:
+    case 6:
+    case 7:
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_00250758);
 
@@ -263,7 +407,7 @@ extern void func_00253208(s32, s32, s32 *, s32 *);
 extern void *sdfGridSelectFilledCell(MnuSceneGridWork *, s32, s32);
 extern void func_002512F0(s32, s32);
 
-void func_00250978(s32 context) {
+void mnuInitializeMantraSelectionGrid(s32 context) {
     MnuSceneContext *scene = (MnuSceneContext *)context;
     s32 coordinates[2];
     s32 record;
@@ -274,7 +418,7 @@ void func_00250978(s32 context) {
     sdfSetShortPairValues(scene->grid, 1, 1);
     scene->grid->freeTaskData = mnuFreeTaskData;
     scene->grid->callback = func_0025A680;
-    record = func_002CB3B8(D_003BC4CC, 0);
+    record = func_002CB3B8(mnuSceneResourceContext, 0);
     field = *(s32 *)(*(s32 *)(record + 0xC) + 0x1C);
     func_00253208(context, *(s32 *)(field + 0x70),
                   &coordinates[0], &coordinates[1]);

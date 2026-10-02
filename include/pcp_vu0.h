@@ -512,4 +512,47 @@
 #define VU0_SET_VF10_W(f) \
     VU0_SCALAR_OP_CLOBBER(f, "vmulx.w vf10, vf0, vf2x")
 
+/* Store vf10 to base+off, recomputing the address. The tied output (no
+ * early clobber) lets gcc reuse the base register for the address. The
+ * `addiu` is part of the asm because the C form (`dst = base + off;` then a
+ * bare sqc2) was tried and picks other registers (retail addiu's into the
+ * base's register). */
+#define VU0_STORE_VF10_BASE_OFF(dst, base, off) __asm__ volatile ( \
+    ".set noreorder    \n" \
+    "addiu %0, %1, %2  \n" \
+    "sqc2 vf10, 0(%0)  \n" \
+    ".set reorder" \
+    : "=r" (dst) : "r" (base), "i" (off) : "memory")
+/* Scale the rows of the primary matrix by the full vector vf10 (no
+ * broadcast: vmul.xyz per row). This is the model root scale application
+ * both games spell out (DDS1/DDS2 sdfModelUpdateRootTransforms); it differs
+ * from VU0_SCALE_MATRIX_ROWS, which broadcasts one component per row. */
+#define VU0_MUL_MATRIX_ROWS_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyz vf28, vf28, vf10\n\tvmul.xyz vf29, vf29, vf10\n\t" \
+    "vmul.xyz vf30, vf30, vf10\n\t.set reorder" \
+    : : : "memory")
+/* Store vf28-vf31 to four C quadword lvalues in one block ("m" operands with
+ * a memory clobber, as the model root writeback spells it). */
+#define VU0_STORE_MATRIX_M(a, b, c, d) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf28, %0\n\tsqc2 vf29, %1\n\tsqc2 vf30, %2\n\tsqc2 vf31, %3\n\t" \
+    ".set reorder" \
+    : : "m" (a), "m" (b), "m" (c), "m" (d) : "memory")
+/* Blend two source rows (+0x30) by the weight at node + 0x40, writing row
+ * +0x30 back (xy lerp of sourceA toward sourceB). Shared by the DDS1/DDS2
+ * sdfVuBlendNodeXY twins. */
+#define VU0_BLEND_NODE_XY(node, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf2, 0x40(%0)\n\tlqc2 vf8, 0x30(%1)\n\tlqc2 vf9, 0x30(%2)\n\t" \
+    "vmulaw.xy ACC, vf8, vf0w\n\tvmaddaw.xy ACC, vf9, vf2w\n\tvmsubw.xy vf15, vf8, vf2w\n\t" \
+    "sqc2 vf15, 0x30(%0)\n\t.set reorder" \
+    : : "r" (node), "r" (a), "r" (b) : "memory")
+/* Load-normalize-store of one packed vector in a single block ("+m" operand
+ * with a memory clobber). Splitting this into LOAD/NORMALIZE/STORE reshapes
+ * the caller's scheduling (DDS2 effInitializeParticleDirection), so the
+ * fused form is kept. */
+#define VU0_NORMALIZE_PACKED_VECTOR(v) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf10, %0\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\t" \
+    "vmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\t" \
+    "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\tsqc2 vf10, %0\n\t.set reorder" \
+    : "+m" (v) :: "memory")
+
 #endif

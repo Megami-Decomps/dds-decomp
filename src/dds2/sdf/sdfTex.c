@@ -23,7 +23,7 @@ void *sdfTexGetSecondaryResourceWord(void *arg0);
 
 void func_0032BBF8(void *arg0, s32 arg1, s32 arg2, void *arg3, s32 arg4, void *arg5, s32 arg6, s64 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
 
-extern u8 D_00439150;
+extern u8 sdfTextureReleaseQueue;
 
 void sdfPendingQueuePush(void *arg0, void *arg1);
 
@@ -58,8 +58,8 @@ void sdfTexRelease(SdfTex *texture) {
         sdfUpdateTextureHeadsWithInterruptsMasked(texture->primaryResource);
     }
     sdfUpdateTextureHeadsWithInterruptsMasked(texture->secondaryResource);
-    sdfReleaseChipBlock(texture->unk28);
-    sdfReleaseChipBlock(texture->unk2C);
+    sdfReleaseChipBlock(texture->primaryBuffer);
+    sdfReleaseChipBlock(texture->secondaryBuffer);
     next = texture->next;
     prev = texture->prev;
     if (prev != NULL) {
@@ -71,7 +71,7 @@ void sdfTexRelease(SdfTex *texture) {
         sdfResourceListHead = prev;
     }
     sdfFreeMemoryFromEitherHeap(texture->data);
-    sdfFreeMemoryFromEitherHeap(texture->unk3C);
+    sdfFreeMemoryFromEitherHeap(texture->auxiliaryAllocation);
     sdfReleaseChipBlock(texture->reference);
     sdfReleaseChipBlock(texture);
 }
@@ -103,7 +103,7 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
         ref->refCount = count;
         if (count == 0) {
             texture->unk20 = 0;
-            sdfPendingQueuePush(&D_00439150, texture);
+            sdfPendingQueuePush(&sdfTextureReleaseQueue, texture);
         }
     }
 }
@@ -119,18 +119,18 @@ void *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
     packet = func_00328D68(0x40);
     primary = sdfTexGetPrimaryResourceWord(texture);
     secondary = sdfTexGetSecondaryResourceWord(texture);
-    func_0032BBF8(packet, texture->unkC, texture->unkE, primary, texture->unk1A, secondary, texture->unk19, 1, texture->unk1B, texture->unk1C, texture->unk1F, variant);
+    func_0032BBF8(packet, texture->width, texture->height, primary, texture->pixelFormat, secondary, texture->clutFormat, 1, texture->maxMipLevel, texture->lodParameters, texture->clampMode, variant);
     return packet;
 }
 
 /* Store the first packet on the texture. */
 void sdfTexCreateFirstPacket(SdfTex *texture) {
-    texture->unk28 = sdfTexCreateResourcePacket(texture, 0);
+    texture->primaryBuffer = sdfTexCreateResourcePacket(texture, 0);
 }
 
 /* Store the second packet on the texture. */
 void sdfTexCreateSecondPacket(SdfTex *texture) {
-    texture->unk2C = sdfTexCreateResourcePacket(texture, 1);
+    texture->secondaryBuffer = sdfTexCreateResourcePacket(texture, 1);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BE60);
@@ -138,7 +138,7 @@ INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BE60);
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BF78);
 
 /* Process a resource address with packet variant zero. */
-void func_0032C138(u32 resourceAddress) {
+void sdfTexAcquireResourceTexture(u32 resourceAddress) {
     func_0032BF78(resourceAddress, 0);
 }
 

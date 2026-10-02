@@ -23,13 +23,13 @@ extern void sdfInitPacketList(s32 packet);
 extern void itfSendTablePacket(s32 packet, s32 index, s32 flag);
 extern void func_001A0CA0(void *, void *, void *, s32, s32, s32, s32);
 
-void func_0024FEF0(void *picture) {
+void evtSubmitPictureDrawPacket(void *texture) {
     s32 packet;
 
     packet = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
     itfSendTablePacket(packet, 0, 0);
-    func_001A0CA0(D_003C9498, D_003C94A8, D_003C94B8, 0xFFF, (s32)picture, 0, packet);
+    func_001A0CA0(D_003C9498, D_003C94A8, D_003C94B8, 0xFFF, (s32)texture, 0, packet);
     D_003805A8.invoke(&D_003805A8, packet);
 }
 
@@ -40,7 +40,7 @@ s32 evtUpdatePictureWhenFlagged(void) {
     picture = kwlnTaskGetUserValue();
     if (picture->flags & 1) {
         if (picture->texture != 0) {
-            func_0024FEF0(picture->texture);
+            evtSubmitPictureDrawPacket(picture->texture);
         }
         return 0;
     }

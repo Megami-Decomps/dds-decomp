@@ -1,0 +1,2474 @@
+messages msg1
+  message item_000 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_001 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 50 HP"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_002 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 150 HP"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_003 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 300 HP"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_004 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP (S)"
+      conditional-newline
+      text "~1 ally"
+      conditional-newline
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_005 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP (M)"
+      conditional-newline
+      text "~1 ally"
+      conditional-newline
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_006 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 150 HP"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_007 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 300 HP"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_008 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore full HP"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_009 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 50 MP"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_00A speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 50 MP"
+      conditional-newline
+      text "~1 ally"
+      conditional-newline
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_00B speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 150 MP"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_00C speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore all MP"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_00D speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore all HP/MP"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_00E speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore all HP/MP"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_00F speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP or MP"
+      conditional-newline
+      text "~???"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_010 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Revive target"
+      conditional-newline
+      text "~Some HP"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_011 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Revive target"
+      conditional-newline
+      text "~All HP"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_012 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Revive 1 ally"
+      conditional-newline
+      text "~All HP"
+      conditional-newline
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_013 speaker=none
+    page
+      segment-start
+      text "??"
+      font-slot 1
+      newline
+    endpage
+  endmessage
+  message item_014 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_015 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure poison"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_016 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure ache"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_017 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure mute"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_018 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure stun"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_019 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure stone"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_01A speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Uncurse"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_01B speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure panic/charm/"
+      conditional-newline
+      text "sleep"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_01C speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP (M)"
+      conditional-newline
+      text "~???"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_01D speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP (M)"
+      conditional-newline
+      text "~???"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_01E speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP (M)"
+      conditional-newline
+      text "~???"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_01F speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_020 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_021 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_022 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repel magic"
+      conditional-newline
+      text "~Next turn only"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_023 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repel phys attack"
+      conditional-newline
+      text "~Next turn only"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_024 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cancel -kaja"
+      conditional-newline
+      text "~All enemies"
+      newline
+    endpage
+  endmessage
+  message item_025 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_026 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_027 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_028 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_029 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_02A speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Electricity"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_02B speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Electricity"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_02C speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_02D speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_02E speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_02F speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_030 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reduce HP by 1/2"
+      conditional-newline
+      text "~Expel"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text "/non-human"
+      newline
+    endpage
+  endmessage
+  message item_031 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Death"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_032 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Death (low odds)"
+      conditional-newline
+      text "~All"
+      conditional-newline
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_033 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Death (high odds)"
+      conditional-newline
+      text "~All"
+      conditional-newline
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_034 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_035 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_036 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_037 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Almighty damage(M)"
+      conditional-newline
+      text "~All"
+      conditional-newline
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_038 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_039 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_03A speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "See enemy info"
+      conditional-newline
+      text "~1 enemy"
+      conditional-newline
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_03B speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Fewer encounters"
+      conditional-newline
+      text "~Temporary"
+      newline
+    endpage
+  endmessage
+  message item_03C speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "More encounters"
+      conditional-newline
+      text "~Temporary"
+      newline
+    endpage
+  endmessage
+  message item_03D speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null damage zone"
+      conditional-newline
+      text "~Temporary"
+      newline
+    endpage
+  endmessage
+  message item_03E speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Lights up dark areas"
+      conditional-newline
+      text "~Temporary"
+      newline
+    endpage
+  endmessage
+  message item_03F speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_040 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_041 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_042 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null fire attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_043 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null ice attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_044 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null elec attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_045 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null force attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_046 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null earth attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_047 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_048 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_049 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_04A speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_04B speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_04C speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_04D speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_04E speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_04F speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_050 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Random item"
+      conditional-newline
+      text "~May contain "
+      conditional-newline
+      text "attack item"
+      newline
+    endpage
+  endmessage
+  message item_051 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Random item"
+      conditional-newline
+      text "~May contain "
+      conditional-newline
+      text "shield item"
+      newline
+    endpage
+  endmessage
+  message item_052 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Random item"
+      conditional-newline
+      text "~May contain "
+      conditional-newline
+      text "valuable item"
+      newline
+    endpage
+  endmessage
+  message item_053 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases "
+      conditional-newline
+      text "turn icons "
+      conditional-newline
+      text "by 2"
+      newline
+    endpage
+  endmessage
+  message item_054 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases blinking "
+      conditional-newline
+      text "turn icons by 4"
+      newline
+    endpage
+  endmessage
+  message item_055 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_056 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_057 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_058 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_059 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore all HP/MP"
+      conditional-newline
+      text "~Strength +2"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_05A speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore all HP/MP"
+      conditional-newline
+      text "~Vitality +2"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_05B speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore all HP/MP"
+      conditional-newline
+      text "~Magic +2"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_05C speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore all HP/MP"
+      conditional-newline
+      text "~Agility +2"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_05D speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore all HP/MP"
+      conditional-newline
+      text "~Luck +2"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_05E speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP/MP"
+      conditional-newline
+      text "~Max HP +10"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_05F speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP/MP"
+      conditional-newline
+      text "~Max MP +10"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_060 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_061 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "A four-leaf clover"
+      conditional-newline
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_062 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Small white flower"
+      conditional-newline
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_063 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bright crimson flower"
+      conditional-newline
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_064 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light purple flower"
+      conditional-newline
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_065 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Beautiful flower with thorns"
+      conditional-newline
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_066 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cherry blossom"
+      conditional-newline
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_067 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Scented white flower"
+      conditional-newline
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_068 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Known as flower of heaven"
+      conditional-newline
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_069 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Symbol of peace"
+      conditional-newline
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_06A speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "It is filled with vitality"
+      conditional-newline
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_06B speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Flower that bloomed from"
+      conditional-newline
+      control f1 11
+      text "the seed James Mason "
+      conditional-newline
+      text "gave Amelia"
+      newline
+    endpage
+  endmessage
+  message item_06C speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_06D speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+2 Strength"
+      newline
+    endpage
+  endmessage
+  message item_06E speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+3 Strength"
+      newline
+    endpage
+  endmessage
+  message item_06F speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+4 Strength"
+      newline
+    endpage
+  endmessage
+  message item_070 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+2 Vitality"
+      newline
+    endpage
+  endmessage
+  message item_071 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+3 Vitality"
+      newline
+    endpage
+  endmessage
+  message item_072 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+4 Vitality"
+      newline
+    endpage
+  endmessage
+  message item_073 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+2 Magic"
+      newline
+    endpage
+  endmessage
+  message item_074 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+3 Magic"
+      newline
+    endpage
+  endmessage
+  message item_075 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+4 Magic"
+      newline
+    endpage
+  endmessage
+  message item_076 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+2 Agility"
+      newline
+    endpage
+  endmessage
+  message item_077 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+3 Agility"
+      newline
+    endpage
+  endmessage
+  message item_078 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+4 Agility"
+      newline
+    endpage
+  endmessage
+  message item_079 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+2 Luck"
+      newline
+    endpage
+  endmessage
+  message item_07A speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+3 Luck"
+      newline
+    endpage
+  endmessage
+  message item_07B speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+4 Luck"
+      newline
+    endpage
+  endmessage
+  message item_07C speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+3 (Random) to "
+      conditional-newline
+      text "St, Vi, Ma, Ag or Lu"
+      newline
+    endpage
+  endmessage
+  message item_07D speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+4 (Random) to "
+      conditional-newline
+      text "St, Vi, Ma, Ag or Lu"
+      newline
+    endpage
+  endmessage
+  message item_07E speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enhances Karma Ring"
+      conditional-newline
+      control f1 11
+      text "+5 (Random) to "
+      conditional-newline
+      text "St, Vi, Ma, Ag or Lu"
+      newline
+    endpage
+  endmessage
+  message item_07F speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_080 speaker=none
+    page
+      segment-start
+      font-slot 1
+    endpage
+  endmessage
+  message item_081 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "A ring from the Junkyard."
+      conditional-newline
+      text "It doesn't work anymore."
+      newline
+    endpage
+  endmessage
+  message item_082 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Allows the user"
+      conditional-newline
+      text "to download Mantras."
+      newline
+    endpage
+  endmessage
+  message item_083 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Card acquired in"
+      conditional-newline
+      text "the EGG Installation."
+      newline
+    endpage
+  endmessage
+  message item_084 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Card acquired in"
+      conditional-newline
+      text "the EGG Installation."
+      newline
+    endpage
+  endmessage
+  message item_085 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Card acquired in"
+      conditional-newline
+      text "the EGG Installation,"
+      conditional-newline
+      text "labeled \"11771409\"."
+      newline
+    endpage
+  endmessage
+  message item_086 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Card acquired in"
+      conditional-newline
+      text "the EGG Installation,"
+      conditional-newline
+      text "labeled \"40051918\"."
+      newline
+    endpage
+  endmessage
+  message item_087 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Card acquired in"
+      conditional-newline
+      text "the EGG Installation,"
+      conditional-newline
+      text "labeled \"ABYSS\"."
+      newline
+    endpage
+  endmessage
+  message item_088 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Demon corpse acquired"
+      conditional-newline
+      text "in prison."
+      newline
+    endpage
+  endmessage
+  message item_089 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Canned meat made"
+      conditional-newline
+      text "from the demon"
+      conditional-newline
+      text "corpse."
+      newline
+    endpage
+  endmessage
+  message item_08A speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "3-headed spear"
+      conditional-newline
+      text "acquired"
+      conditional-newline
+      text "from Parvati."
+      newline
+    endpage
+  endmessage
+  message item_08B speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Sword acquired"
+      conditional-newline
+      text "from Narasimha."
+      newline
+    endpage
+  endmessage
+  message item_08C speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Proof of intelligence."
+      conditional-newline
+      text "It says \"You have a"
+      conditional-newline
+      text "hee-high IQ!\""
+      newline
+    endpage
+  endmessage
+  message item_08D speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Key acquired"
+      conditional-newline
+      text "from the Tribhvana."
+      newline
+    endpage
+  endmessage
+  message item_08E speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Key obtained from"
+      conditional-newline
+      text "Lokapala spy."
+      conditional-newline
+      text "Opens B1 gate."
+      newline
+    endpage
+  endmessage
+  message item_08F speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Key obtained from"
+      conditional-newline
+      text "Lokapala spy."
+      conditional-newline
+      text "Opens B2 gate."
+      newline
+    endpage
+  endmessage
+  message item_090 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Key obtained from"
+      conditional-newline
+      text "Lokapala spy."
+      conditional-newline
+      text "Opens B3 gate."
+      newline
+    endpage
+  endmessage
+  message item_091 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Label of food the"
+      conditional-newline
+      text "Jailer likes."
+      conditional-newline
+      text "It says \"Red 15\"."
+      newline
+    endpage
+  endmessage
+  message item_092 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Key acquired in prison."
+      conditional-newline
+      text "Unlocks the control"
+      conditional-newline
+      text "room."
+      newline
+    endpage
+  endmessage
+  message item_093 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "3-headed spear"
+      conditional-newline
+      text "with Shiva's power."
+      newline
+    endpage
+  endmessage
+  message item_094 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Sword with"
+      conditional-newline
+      text "Vishnu's power."
+      newline
+    endpage
+  endmessage
+  message item_095 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Key acquired in "
+      conditional-newline
+      text "the Citadel."
+      newline
+    endpage
+  endmessage
+  message item_096 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Useful when "
+      conditional-newline
+      text "scuba diving."
+      newline
+    endpage
+  endmessage
+  message item_097 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_098 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_099 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_09A speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_09B speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_09C speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_09D speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_09E speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_09F speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0A0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0A1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0A2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0A3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      conditional-newline
+      text "~Shock"
+      newline
+    endpage
+  endmessage
+  message item_0A4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      conditional-newline
+      text "~Freeze"
+      newline
+    endpage
+  endmessage
+  message item_0A5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      conditional-newline
+      text "~Panic"
+      newline
+    endpage
+  endmessage
+  message item_0A6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0A7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      conditional-newline
+      text "~Sleep"
+      newline
+    endpage
+  endmessage
+  message item_0A8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0A9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      conditional-newline
+      text "~Stun"
+      newline
+    endpage
+  endmessage
+  message item_0AA speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      conditional-newline
+      text "~Curse"
+      newline
+    endpage
+  endmessage
+  message item_0AB speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      conditional-newline
+      text "~Mute"
+      newline
+    endpage
+  endmessage
+  message item_0AC speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0AD speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      conditional-newline
+      text "~Poison"
+      newline
+    endpage
+  endmessage
+  message item_0AE speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0AF speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      conditional-newline
+      text "~Charm"
+      newline
+    endpage
+  endmessage
+  message item_0B0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      conditional-newline
+      text "~Stone"
+      newline
+    endpage
+  endmessage
+  message item_0B1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0B2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0B3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0B4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0B5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0B6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0B7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0B8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0B9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0BA speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0BB speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0BC speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0BD speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0BE speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0BF speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dummy Message"
+      conditional-newline
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0C0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve"
+      newline
+    endpage
+  endmessage
+  message item_0C1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases strength"
+      newline
+    endpage
+  endmessage
+  message item_0C2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases vitality"
+      newline
+    endpage
+  endmessage
+  message item_0C3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases magic"
+      newline
+    endpage
+  endmessage
+  message item_0C4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases agility"
+      newline
+    endpage
+  endmessage
+  message item_0C5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases luck"
+      newline
+    endpage
+  endmessage
+  message item_0C6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases strength"
+      newline
+    endpage
+  endmessage
+  message item_0C7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases vitality"
+      newline
+    endpage
+  endmessage
+  message item_0C8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases magic"
+      newline
+    endpage
+  endmessage
+  message item_0C9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases agility"
+      newline
+    endpage
+  endmessage
+  message item_0CA speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases luck"
+      newline
+    endpage
+  endmessage
+  message item_0CB speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases strength"
+      newline
+    endpage
+  endmessage
+  message item_0CC speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases vitality"
+      newline
+    endpage
+  endmessage
+  message item_0CD speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases magic"
+      newline
+    endpage
+  endmessage
+  message item_0CE speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases agility"
+      newline
+    endpage
+  endmessage
+  message item_0CF speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases luck"
+      newline
+    endpage
+  endmessage
+  message item_0D0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases strength"
+      newline
+    endpage
+  endmessage
+  message item_0D1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases vitality"
+      newline
+    endpage
+  endmessage
+  message item_0D2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases magic"
+      newline
+    endpage
+  endmessage
+  message item_0D3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases agility"
+      newline
+    endpage
+  endmessage
+  message item_0D4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases luck"
+      newline
+    endpage
+  endmessage
+  message item_0D5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases strength"
+      newline
+    endpage
+  endmessage
+  message item_0D6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases vitality"
+      newline
+    endpage
+  endmessage
+  message item_0D7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases magic"
+      newline
+    endpage
+  endmessage
+  message item_0D8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases agility"
+      newline
+    endpage
+  endmessage
+  message item_0D9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases luck"
+      newline
+    endpage
+  endmessage
+  message item_0DA speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases agility in human form"
+      newline
+    endpage
+  endmessage
+  message item_0DB speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases defense in human form"
+      newline
+    endpage
+  endmessage
+  message item_0DC speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Void/miss will end the enemy's turn"
+      newline
+    endpage
+  endmessage
+  message item_0DD speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases $ obtained after battle"
+      newline
+    endpage
+  endmessage
+  message item_0DE speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enables two consecutive actions"
+      newline
+    endpage
+  endmessage
+  message item_0DF speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Pass command will not expend a turn icon"
+      newline
+    endpage
+  endmessage
+  message item_0E0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Revert/Transform command will not expend a turn icon"
+      newline
+    endpage
+  endmessage
+  message item_0E1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Draws the enemy's attention in battle"
+      newline
+    endpage
+  endmessage
+  message item_0E2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Auto-Phys Repel when battle starts"
+      newline
+    endpage
+  endmessage
+  message item_0E3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "1st person does 2x dmg; dmg down gradually thereafter"
+      newline
+    endpage
+  endmessage
+  message item_0E4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reduces turn icons required for combos"
+      newline
+    endpage
+  endmessage
+  message item_0E5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Attack command does more damage when cursed"
+      newline
+    endpage
+  endmessage
+  message item_0E6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases HP healed when subject to healing magic"
+      newline
+    endpage
+  endmessage
+  message item_0E7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Max damage up, min damage down"
+      newline
+    endpage
+  endmessage
+  message item_0E8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Auto-Sukukaja/Tarunda when battle starts"
+      newline
+    endpage
+  endmessage
+  message item_0E9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Auto-Tarukaja/Rakunda when battle starts"
+      newline
+    endpage
+  endmessage
+  message item_0EA speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Randomizes the number of turn icons"
+      newline
+    endpage
+  endmessage
+  message item_0EB speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reduces turn icon loss from missed attacks"
+      newline
+    endpage
+  endmessage
+  message item_0EC speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reduces turn icon loss from voided attacks"
+      newline
+    endpage
+  endmessage
+  message item_0ED speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Adds one turn icon"
+      newline
+    endpage
+  endmessage
+  message item_0EE speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases all stats"
+      newline
+    endpage
+  endmessage
+  message item_0EF speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases resistance to Almighty attacks"
+      newline
+    endpage
+  endmessage
+  message item_0F0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repels Expel attacks"
+      newline
+    endpage
+  endmessage
+  message item_0F1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repels Death attacks"
+      newline
+    endpage
+  endmessage
+  message item_0F2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Nullifies Ice attacks"
+      newline
+    endpage
+  endmessage
+  message item_0F3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases all stats"
+      newline
+    endpage
+  endmessage
+  message item_0F4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Argilla's tag ring from the Junkyard"
+      newline
+    endpage
+  endmessage
+  message item_0F5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gale's tag ring from the Junkyard"
+      newline
+    endpage
+  endmessage
+  message item_0F6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cielo's tag ring from the Junkyard"
+      newline
+    endpage
+  endmessage
+  message item_0F7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Nullifies all attacks except Almighty"
+      newline
+    endpage
+  endmessage
+  message item_0F8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "All normal battles will be in Berserk state"
+      newline
+    endpage
+  endmessage
+  message item_0F9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve"
+      newline
+    endpage
+  endmessage
+  message item_0FA speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve"
+      newline
+    endpage
+  endmessage
+  message item_0FB speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve"
+      newline
+    endpage
+  endmessage
+  message item_0FC speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve"
+      newline
+    endpage
+  endmessage
+  message item_0FD speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve"
+      newline
+    endpage
+  endmessage
+  message item_0FE speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve"
+      newline
+    endpage
+  endmessage
+  message item_0FF speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve"
+      newline
+    endpage
+  endmessage

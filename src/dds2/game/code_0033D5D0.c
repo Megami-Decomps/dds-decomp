@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u8 D_00438B1F;
+extern u8 sdfDevicePriorityOverrideTicks;
 
 extern u32 D_004391A4;
 
@@ -8,7 +8,7 @@ extern s32 sdfDiscRequestPending;
 
 extern u32 sdfDiscRequestSemaphore;
 
-extern s32 D_004391A8;
+extern s32 sdfOpenDiscFileRecord;
 
 extern u32 sdfDiscSemaphore;
 
@@ -16,7 +16,7 @@ extern s32 func_0033E008(u32, u8 *, u32);
 
 extern u32 sdfDevControlReplyValue;
 
-extern u32 D_004391CC;
+extern u32 sdfDevOperationReplyValue;
 
 typedef struct SifCommand {
     s32 source;   /* 0x0 */
@@ -67,9 +67,9 @@ extern SemaEntry D_0040BA14[];
 
 extern s32 SignalSema(s32 sema);
 
-extern s32 D_00438B20;
+extern s32 sdfDeviceWorkerPriority;
 
-extern ThreadEntry D_0040BA10[];
+extern ThreadEntry sdfDeviceWorkerEntries[];
 
 extern s32 ChangeThreadPriority(s32 tid, s32 prio);
 
@@ -86,7 +86,7 @@ extern u8 D_00438B58[];
 extern void *func_00328D68(s32 size);
 
 extern u32 strlen(const char *s);
-extern f32 D_00410C6C[];
+extern f32 sdfNormalizedAsinSamples[];
 
 typedef struct DevRequest {
     s32 handle;
@@ -109,15 +109,15 @@ extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
 
 extern void sceSifRpcLoop(void *);
 
-extern u8 D_00476510[];
+extern u8 sdfDevRpcBuffer[];
 
-extern u32 D_00438AD8;
+extern u32 sdfDiscType;
 
 extern void sdfSleepWithAlarm(s32);
 
 void sdfDevWaitForDisc(void);
 
-extern s32 D_00439198;
+extern s32 sdfDiscLoadFilename;
 
 extern void func_0034CE40(s32);
 
@@ -130,12 +130,12 @@ extern DevState *sdfDevCreateCallbackState(s32 arg0,
 
 extern s32 func_0033F898(s32, void **);
 
-extern void func_0033EC48(DevState *);
+extern void sdfDevEnqueueStateAndWakeWorker(DevState *);
 
 extern DevState *sdfDevAllocState(void *, s32, s32,
                                 void (*)(DevState *, s32, s32, s32, s32), s32);
 
-extern u16 D_00438B24;
+extern u16 sdfDefaultDevRequestOptions;
 
 extern s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 
@@ -147,17 +147,17 @@ s32 sdfDevReactivate(DevState *);
 
 extern char D_0042E3A0[]; /* "cdrom0:\\IRX\\DEV9.IRX;1 resident fail.\n", followed by padding no C emits */
 
-extern u8 D_00438B67;
+extern u8 sdfDevModuleLoaded;
 
 extern u8 D_00438B68;
 
 extern s32 func_0036D880(const char *, s32, void *, s32 *);
 
-extern void func_0035B6E0(const char *);
+extern void func_0035B6E0(const char *fmt, ...);
 
 extern f32 sdfSinPoly(f32 arg0);
 
-extern void func_00328520(const char *arg0, ...) __attribute__((noreturn));
+extern void sdfPanicHaltPrintf(const char *arg0, ...) __attribute__((noreturn));
 
 extern char D_0042E288[];
 
@@ -169,7 +169,7 @@ extern s32 sceSifAllocIopHeap(s32);
 
 extern void func_0034D400(s32, s32, s32);
 
-extern void func_0033E550(s32);
+extern void sdfDevLoadWholeFile(s32);
 
 typedef struct Bytes7 {
     s8 b[7];
@@ -227,7 +227,7 @@ void sdfDevStartRpcServer(void) {
     u8 queue[0x20];
     u8 server[0x50];
     sceSifSetRpcQueue(queue, GetThreadId());
-    sceSifRegisterRpc(server, 0x32647270, sdfRpcBufHandler, D_00476510, 0, 0, queue);
+    sceSifRegisterRpc(server, 0x32647270, sdfRpcBufHandler, sdfDevRpcBuffer, 0, 0, queue);
     sceSifRpcLoop(queue);
 }
 
@@ -289,21 +289,21 @@ void sdfDevWaitForDisc(void) {
         sdfSleepWithAlarm(100);
         func_0034CE40(0);
         status = func_0034D100();
-        if (D_00438AD8 == 2) {
+        if (sdfDiscType == 2) {
             if (status != 20) {
                 continue;
             }
         } else if (status != 18) {
             continue;
         }
-        if (sceCdSearchFile(file, D_00439198) != 0) {
+        if (sceCdSearchFile(file, sdfDiscLoadFilename) != 0) {
             break;
         }
     }
     SignalSema(sdfDiscSemaphore);
 }
 
-extern u8 D_004391C0;
+extern u8 sdfDiscReadMode;
 extern s32 sdfDiscReadPosition;
 extern s32 func_0034D430(s32 arg, u8 *options);
 extern s32 sceCdStatus(void);
@@ -313,7 +313,7 @@ void sdfDevSeekDiscRequest(s32 request) {
     s32 ready;
 
     options[0] = 0;
-    if (D_004391C0 == 1) {
+    if (sdfDiscReadMode == 1) {
         options[1] = 0;
     } else {
         options[1] = 1;
@@ -348,7 +348,7 @@ void sdfDevSeekDiscWithRequestGate(s32 request) {
     s32 ready;
 
     options[0] = 0;
-    if (D_004391C0 == 1) {
+    if (sdfDiscReadMode == 1) {
         options[1] = 0;
     } else {
         options[1] = 1;
@@ -411,11 +411,11 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     s32 request[4];
     s32 file;
 
-    file = func_0033E008((u32)name, (u8 *)request, (u32)&D_004391C0);
+    file = func_0033E008((u32)name, (u8 *)request, (u32)&sdfDiscReadMode);
     result = -1;
     if (file != 0) {
         D_004391AC = *(s32 *)(file + 8);
-        D_004391A8 = file;
+        sdfOpenDiscFileRecord = file;
         D_004391B4 = 0;
         if (name[1] == 0x76 || name[1] == 0x56) {
             sdfDevSeekDiscWithRequestGate(request[0]);
@@ -430,11 +430,11 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E248);
 
 void sdfServicePendingOperationUnderSemaphore(void) {
-    if (D_004391A8 != 0) {
+    if (sdfOpenDiscFileRecord != 0) {
         WaitSema(sdfDiscSemaphore);
         func_0034D4C8();
         SignalSema(sdfDiscSemaphore);
-        D_004391A8 = 0;
+        sdfOpenDiscFileRecord = 0;
     }
 }
 
@@ -460,22 +460,42 @@ s32 sdfPktQuery(u32 index) {
 }
 
 s32 sdfDevGetFileSize(void) {
-    if (D_004391A8 == 0) {
-        func_00328520("file didn't open.");
+    if (sdfOpenDiscFileRecord == 0) {
+        sdfPanicHaltPrintf("file didn't open.");
     }
-    return *(s32 *)(D_004391A8 + 8);
+    return *(s32 *)(sdfOpenDiscFileRecord + 8);
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E550);
+extern s32 func_00369B70();
+extern s32 func_00369F78(s32, s32, s32);
+extern s32 func_0035A828(s32);
+extern s32 func_0036A1B0(s32, s32, s32);
+extern void func_00369DF8(s32);
+
+void sdfDevLoadWholeFile(s32 name) {
+    s32 fd = func_00369B70(name, 1);
+    s32 size;
+    s32 buffer;
+
+    if (fd < 0) {
+        sdfPanicHaltPrintf(D_0042E288, name);
+    }
+    size = func_00369F78(fd, 0, 2);
+    func_00369F78(fd, 0, 0);
+    buffer = func_0035A828(size);
+    D_004391A4 = buffer;
+    func_0036A1B0(fd, buffer, size);
+    func_00369DF8(fd);
+}
 
 void sdfDevStartLoad(s32 name, s32 mode) {
     u32 file[12];
     s32 heap;
 
-    D_00439198 = name;
-    func_0033E550(mode);
+    sdfDiscLoadFilename = name;
+    sdfDevLoadWholeFile(mode);
     if (sceCdSearchFile(file, name) == 0) {
-        func_00328520(D_0042E288, name);
+        sdfPanicHaltPrintf(D_0042E288, name);
     }
     D_004391A0 = file[0];
     heap = sceSifAllocIopHeap(0x28010);
@@ -488,16 +508,16 @@ void sdfInitDeviceSemaphores(void) {
     sdfDiscRequestSemaphore = sdfCreateSemaphore(0, 0xff, 0);
     sdfDiscRequestPending = 0;
     func_0034CB60(0);
-    func_0034D038(D_00438AD8);
+    func_0034D038(sdfDiscType);
 }
 
-extern char D_00438AE8[];
+extern char sdfDiscPathPrefix[];
 
 /* Convert a relative disc path to the drive's uppercase backslash form with ;1 suffix. */
 void sdfDevMakeDiscPath(char *dst, char *src) {
     s32 c;
 
-    memcpy(dst, D_00438AE8, 8);
+    memcpy(dst, sdfDiscPathPrefix, 8);
     dst += 7;
     c = *src++;
     while (c != 0) {
@@ -528,10 +548,10 @@ typedef struct Bytes6 {
     s8 b[6];
 } Bytes6;
 
-extern Bytes6 D_00438AF8[];
+extern Bytes6 sdfPfsPathPrefix[];
 
 void sdfPathPrefixCat(char *dst, char *src) {
-    *(Bytes6 *)dst = D_00438AF8[0];
+    *(Bytes6 *)dst = sdfPfsPathPrefix[0];
     strcat(dst, src);
 }
 
@@ -555,7 +575,7 @@ void sdfDevCommandReplyCallback(DevState *state, s32 event, s32 unused, s32 valu
             sdfDevControlReplyValue = value;
         }
     } else {
-        D_004391CC = value;
+        sdfDevOperationReplyValue = value;
     }
     SignalSema(sdfDevReplySemaphore);
 }
@@ -613,12 +633,12 @@ u32 sdfDevQueueControlAndWait(void) {
 u32 sdfDevQueueOperationAndWait(void) {
     sdfDevQueueOperation();
     WaitSema(sdfDevReplySemaphore);
-    return D_004391CC;
+    return sdfDevOperationReplyValue;
 }
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EB80);
 
-char *func_0033EC18(void) {
+char *sdfDevGetPathBuffer(void) {
     return D_0040B9D0;
 }
 
@@ -642,14 +662,14 @@ extern DevState *D_00438B0C;
 extern u16 D_00438B1C;
 
 /* Queue a request on the global list and on its worker's list; wake the worker when its list was empty. */
-void func_0033EC48(DevState *state) {
+void sdfDevEnqueueStateAndWakeWorker(DevState *state) {
     ThreadEntry *worker;
     s64 interrupts;
     s32 wake = 0;
     DevState *last;
 
     interrupts = func_0036DE70(state);
-    worker = &D_0040BA10[state->workerIndex];
+    worker = &sdfDeviceWorkerEntries[state->workerIndex];
     if (worker->threadId < 0) {
         sdfEnsureDeviceWorkerThreadStarted(state->workerIndex);
     }
@@ -762,7 +782,7 @@ DevState *sdfDevCreateCallbackState(s32 path, void (*callback)(DevState *, s32, 
         return NULL;
     }
     state = sdfDevAllocState(resource, id, 1, callback, context);
-    func_0033EC48(state);
+    sdfDevEnqueueStateAndWakeWorker(state);
     return state;
 }
 
@@ -776,8 +796,8 @@ DevState *sdfDevCreateModeState(s32 path, void (*callback)(DevState *, s32, s32,
         return NULL;
     }
     state = sdfDevAllocState(resource, id, 2, callback, context);
-    state->options = options != 0 ? options : D_00438B24;
-    func_0033EC48(state);
+    state->options = options != 0 ? options : sdfDefaultDevRequestOptions;
+    sdfDevEnqueueStateAndWakeWorker(state);
     return state;
 }
 
@@ -866,7 +886,7 @@ DevState *sdfDevCreateRequest(s32 path, void *data, s32 extra,
     state->requestExtra = extra;
     state->requestData = data;
     state->operationArg = 0;
-    func_0033EC48(state);
+    sdfDevEnqueueStateAndWakeWorker(state);
     return state;
 }
 
@@ -883,9 +903,9 @@ DevState *sdfDevOpenRequest(s32 path, void *data, s32 extra,
     state = sdfDevAllocState(resource, id, 9, completion, completionContext);
     state->requestExtra = extra;
     state->requestData = data;
-    state->options = options != 0 ? options : D_00438B24;
+    state->options = options != 0 ? options : sdfDefaultDevRequestOptions;
     state->operationArg = 0;
-    func_0033EC48(state);
+    sdfDevEnqueueStateAndWakeWorker(state);
     return state;
 }
 
@@ -893,11 +913,11 @@ void sdfSetThreadPriorities(s32 priority) {
     ThreadEntry *thread;
     u32 i;
 
-    if (D_00438B20 == priority) {
+    if (sdfDeviceWorkerPriority == priority) {
         return;
     }
-    D_00438B20 = priority;
-    thread = D_0040BA10;
+    sdfDeviceWorkerPriority = priority;
+    thread = sdfDeviceWorkerEntries;
     i = 0;
     do {
         s32 tid = thread->threadId;
@@ -911,7 +931,7 @@ void sdfSetThreadPriorities(s32 priority) {
 }
 
 void sdfRaiseDeviceThreadPriority(void) {
-    D_00438B1F = 3;
+    sdfDevicePriorityOverrideTicks = 3;
     sdfSetThreadPriorities(0x78);
 }
 
@@ -920,13 +940,13 @@ void sdfRestoreDeviceThreadPriority(void) {
 }
 
 void sdfTickThreadPriorityOverride(void) {
-    u8 val = D_00438B1F;
+    u8 val = sdfDevicePriorityOverrideTicks;
     u8 next;
 
     if (val == 0) {
         return;
     }
-    D_00438B1F = val - 1;
+    sdfDevicePriorityOverrideTicks = val - 1;
     next = val - 1;
     if (next != 0) {
         return;
@@ -939,7 +959,7 @@ extern void sdfDevWorkerThread();
 
 /* Start worker thread `index` if it isn't running; slot 3 runs the alternate entry point. */
 void sdfEnsureDeviceWorkerThreadStarted(s32 index) {
-    ThreadEntry *worker = &D_0040BA10[index];
+    ThreadEntry *worker = &sdfDeviceWorkerEntries[index];
     void (*entry)();
     s32 thread;
 
@@ -950,7 +970,7 @@ void sdfEnsureDeviceWorkerThreadStarted(s32 index) {
         if (index != 3) {
             entry = sdfDevWorkerThread;
         }
-        D_00438B20 = 0x48;
+        sdfDeviceWorkerPriority = 0x48;
         thread = sdfCreateThreadWithAllocatedWorkspace(entry, 0x4000, 0x48);
         worker->threadId = thread;
         _StartThread(thread, (s32)worker);
@@ -976,7 +996,7 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_003400D0);
 
 void sdfLoadDevModule(void) {
     s32 resident;
-    if (D_00438B67 == 0) {
+    if (sdfDevModuleLoaded == 0) {
         D_00438B68 = 0;
         if (func_0036D880("cdrom0:\\IRX\\DEV9.IRX;1", 0, NULL, &resident) < 0) {
             func_0035B6E0("cdrom0:\\IRX\\DEV9.IRX;1 could't load.\n");
@@ -987,7 +1007,7 @@ void sdfLoadDevModule(void) {
             return;
         }
         D_00438B68 = 1;
-        D_00438B67 = 1;
+        sdfDevModuleLoaded = 1;
     }
 }
 
@@ -1202,7 +1222,7 @@ f32 sdfAsinTable(f32 x) {
     } else {
         sign = 1.0f;
     }
-    result = x >= 1.0f ? 1.5707963f : sdfTableInterpolate(x, D_00410C6C, 128) * 1.5707963f;
+    result = x >= 1.0f ? 1.5707963f : sdfTableInterpolate(x, sdfNormalizedAsinSamples, 128) * 1.5707963f;
     return result * sign;
 }
 
@@ -1218,7 +1238,7 @@ f32 sdfAcosTable(f32 x) {
     }
     result = 0.0f;
     if (!(x >= 1.0f)) {
-        result = (1.0f - sdfTableInterpolate(x, D_00410C6C, 128)) * 1.5707963f;
+        result = (1.0f - sdfTableInterpolate(x, sdfNormalizedAsinSamples, 128)) * 1.5707963f;
     }
     return result * sign;
 }
@@ -1246,17 +1266,17 @@ INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfDiscRequestPending);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AD0);
 
-INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AD8);
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfDiscType);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AE0);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfDevReplySemaphore);
 
-INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AE8);
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfDiscPathPrefix);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AF0);
 
-INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AF8);
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfPfsPathPrefix);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B00);
 
@@ -1274,11 +1294,11 @@ INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B1C);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B1E);
 
-INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B1F);
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfDevicePriorityOverrideTicks);
 
-INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B20);
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfDeviceWorkerPriority);
 
-INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B24);
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfDefaultDevRequestOptions);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B28);
 

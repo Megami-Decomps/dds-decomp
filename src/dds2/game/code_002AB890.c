@@ -1,8 +1,6 @@
 #include "mnu.h"
 
-extern s64 func_002ACF38(void);
-
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -14,13 +12,6 @@ extern void func_002AAE80(s32);
 
 extern void mnuCreateStaffImageSprite(s32);
 
-extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
-
-extern void func_002BB0E8(s32, s32, s32, s32, s32);
-
-extern void func_002AA7A0(s32, s32);
-
-extern u8 D_003E7050[];
 
 typedef struct MenuResourceSet {
     u8 pad00[8];
@@ -61,7 +52,16 @@ void mnuDestroyResourceOwnerWindowContainers(MenuResourceOwner *object) {
     mnuDestroyWindowContainer(resources->second);
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABD08);
+extern void func_002B9720(s32);
+
+s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuResourceOwner *owner) {
+    MenuResourceSet *resources = owner->resources;
+
+    if (*(u8 *)((itemId & 0xFFFF) + datGameState + 0x1340) == 0) {
+        func_002B9720(resources->first);
+    }
+    return ((MenuStaffList *)resources->first)->window->panelActive != 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABD60);
 
@@ -89,7 +89,14 @@ void func_002ACA98(MenuResourceOwner *object) {
     mnuDestroyWindowContainer(object->resources->fifth);
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACAC0);
+s32 func_002ACAC0(s32 itemId, MenuResourceOwner *owner) {
+    MenuResourceSet *resources = owner->resources;
+
+    if (*(u8 *)(itemId + datGameState + 0x1340) == 0) {
+        func_002B9720(resources->fifth);
+    }
+    return ((MenuStaffList *)resources->fifth)->window->panelActive != 0;
+}
 
 void func_002ACB18(u32 arg0) {
     mnuSwitchCampVisualCategory(2, arg0);
@@ -98,7 +105,7 @@ void func_002ACB18(u32 arg0) {
 void func_002ACB38(s32 object) {
 }
 
-u32 func_002ACB40(void) {
+u32 mnuInitializeWindowOwnerResourceSet(void) {
     s32 context = kwlnTaskGetUserValue();
     s32 handle = func_003292A8(0x54);
     u8 *resource = sdfResourceRetainAddress(handle);
@@ -116,7 +123,7 @@ u32 func_002ACB40(void) {
 
 /* Close the staff selection state: drop the owner's window containers, run
  * the owner's teardown hook, then close the party's resource menu. */
-s32 func_002ACBF8(void) {
+s32 mnuDestroyWindowOwnerResourceSet(void) {
     s32 context = kwlnTaskGetUserValue();
     MenuResourceOwner *owner = (MenuResourceOwner *)context;
     MenuResourceSet *party = owner->resources;
@@ -129,24 +136,78 @@ s32 func_002ACBF8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACC50);
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACE58);
+extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
+extern void func_002BB0E8(s32, s32, s32, s32, s32);
+extern void func_002AA7A0(s32, s32);
+extern u8 D_003E7050[];
+
+s64 func_002ACE58(s32 callback) {
+    s32 context = kwlnTaskGetUserValue();
+    func_002AAE80(callback);
+    mnuCreateStaffImageSprite(4);
+    func_002AAC98(0,
+        ((MenuStaffContext *)context)->activeWindow->window->selectedNode->label,
+        (s32)D_003E7050, context, 1, 0x53);
+    func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    func_002AA7A0(0, ((MenuStaffContext *)context)->group);
+    return menuSetHandler(context, 1, callback);
+}
 
 s64 mnuFinishStaffReturnPopup(s32 callback) {
     return menuSetHandler(kwlnTaskGetUserValue(), 2, callback);
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACF38);
+extern s32 func_002C5A28(s32, s32, s32, s32);
+extern s32 evtGetIndexedEventRecordId(s32);
+extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
+extern void func_0011A118(s32, s32);
+extern void mnuInitPartyPanelSlots(s32);
+extern void func_002BCA98(s32);
+extern void func_002BCAB0(s32);
+
+typedef struct StaffUseSelectionList {
+    u8 pad00[0x1C];
+    s32 *selectedIndex; /* 0x1C */
+} StaffUseSelectionList;
+
+typedef struct StaffUseContext {
+    u8 pad00[0xA914];
+    StaffUseSelectionList *list; /* 0xA914 */
+} StaffUseContext;
+
+s32 mnuUseStaffItem(itemId, context)
+s32 itemId;
+s32 context;
+{
+    s32 partyPanel = context + 0x284;
+    s32 targetUnit = datGameState + *(((StaffUseContext *)context)->list->selectedIndex) * 0x1C4 + 0xA60;
+    s32 result = func_002C5A28(partyPanel, itemId & 0xFFFF, targetUnit, targetUnit);
+
+    if (result != 1) {
+        if (result == 2) {
+            return 0;
+        }
+        if (ptySkillApplyFieldUseEffect(partyPanel, evtGetIndexedEventRecordId(itemId) & 0xFFFF, targetUnit, targetUnit) == 0) {
+            return 0;
+        }
+    }
+    func_0011A118(itemId, -1);
+    mnuInitPartyPanelSlots(context + 0xA928);
+    func_002BCA98(partyPanel);
+    func_002BCAB0(partyPanel);
+    return 1;
+}
 
 /* Record the choice only while the resource is active; the follow-up runs regardless. */
 void mnuApplyResourceSelection(s32 index, s32 context) {
     MenuResourceSet *resources;
-    s64 resourceActive;
+    s32 resourceActive;
 
     resources = ((MenuResourceOwner *)context)->resources;
-    resourceActive = func_002ACF38();
+    resourceActive = mnuUseStaffItem();
     if (resourceActive != 0) {
         *(u32 *)(*(s32 *)(*(s32 *)(resources->first + 0x18) + 0x1c) + 0x60) =
-                  (u32)*(u8 *)(index + D_00435DD0 + 0x1340);
+                  (u32)*(u8 *)(index + datGameState + 0x1340);
         resources->selection = index;
     }
     func_002C1B68(context + 0xaa50, 1);

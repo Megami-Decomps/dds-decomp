@@ -25,21 +25,21 @@ typedef struct MenuWorkEntry {
     u8 pad44[4];
 } MenuWorkEntry; /* 0x48 */
 
-extern u32 D_004390D8;
+extern u32 mnuActiveEffectEntry;
 
 extern u8 *D_004389B0;
 
 extern u8 *D_004389AC;
 
-extern u8 *D_004389A8;
+extern void (*D_004389A8)(MenuWorkEntry *, s32);
 
 extern u8 *D_004389A4;
 
 extern u8 *D_004389A0;
 
-extern u32 D_004390C8;
+extern u32 mnuWorkEntryPool;
 
-extern s32 D_004390CC;
+extern s32 mnuWorkEntryPoolCount;
 
 extern u32 D_004390E4;
 
@@ -53,7 +53,7 @@ extern u32 D_004390D0;
 
 extern u32 D_004390D4;
 
-extern void (*D_004389C4)(void);
+extern void (*sdfTickCallback)(void);
 
 extern u8 D_0045C870[];
 
@@ -68,6 +68,7 @@ extern u8 *mnuGetResourceRecordByIndex(s32 index);
 extern MenuWorkEntry *mnuFindUnusedWorkEntry(void);
 extern void func_00322E18(u32 node, u32 context, s32 mode, s32 x, s32 y,
                           f32 progress);
+extern u32 mnuGetActiveEffectWorkEntry(void);
 
 typedef struct ShortRecord {
     u8 kind;
@@ -359,13 +360,13 @@ u8 *mnuFindMarkedShortListRecord(ShortRecordList2 *list) {
 INCLUDE_ASM(const s32, "game/code_00321500", func_003226D8);
 
 void mnuRegisterWorkEntryPool(u32 entries, u32 count) {
-    D_004390C8 = entries;
-    D_004390CC = count;
+    mnuWorkEntryPool = entries;
+    mnuWorkEntryPoolCount = count;
 }
 
 void mnuResetWorkEntryPool(void) {
-    if (D_004390C8 != 0) {
-        memset((void *)D_004390C8, 0, D_004390CC * 72);
+    if (mnuWorkEntryPool != 0) {
+        memset((void *)mnuWorkEntryPool, 0, mnuWorkEntryPoolCount * 72);
     }
 }
 
@@ -374,21 +375,21 @@ MenuWorkEntry *mnuFindUnusedWorkEntry(void) {
     s32 i = 0;
     MenuWorkEntry *entry;
 
-    if (D_004390CC > 0) {
-        entry = (MenuWorkEntry *)D_004390C8;
+    if (mnuWorkEntryPoolCount > 0) {
+        entry = (MenuWorkEntry *)mnuWorkEntryPool;
         do {
             if (!(entry->flags & MNU_WORK_ACTIVE)) {
                 return entry;
             }
             entry++;
             i++;
-        } while (i < D_004390CC);
+        } while (i < mnuWorkEntryPoolCount);
     }
     return NULL;
 }
 
 u32 mnuGetWorkEntryPool(void) {
-    return D_004390C8;
+    return mnuWorkEntryPool;
 }
 
 /* A flagged registry entry offsets its base value by the running clock. */
@@ -421,23 +422,34 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003232A0);
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_003233E8);
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_003236B0);
+void mnuVisitActiveWorkAndEffectEntry(s32 context) {
+    s32 i;
+
+    for (i = 0; i < mnuWorkEntryPoolCount; i++) {
+        MenuWorkEntry *entry = &((MenuWorkEntry *)mnuWorkEntryPool)[i];
+
+        if (entry->flags & MNU_WORK_ACTIVE) {
+            D_004389A8(entry, context);
+        }
+    }
+    D_004389A8((MenuWorkEntry *)mnuGetActiveEffectWorkEntry(), context);
+}
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00323748);
 
 /* Walk allocated entries; only entries carrying the active bit are visited. */
 void mnuVisitActiveRecords(s32 context) {
     s32 index = 0;
-    if ((s32)D_004390CC > 0) {
+    if ((s32)mnuWorkEntryPoolCount > 0) {
         s32 offset = 0;
         do {
-            MenuWorkEntry *entry = (MenuWorkEntry *)(D_004390C8 + offset);
+            MenuWorkEntry *entry = (MenuWorkEntry *)(mnuWorkEntryPool + offset);
             if ((entry->flags & MNU_WORK_ACTIVE) != 0) {
                 func_00323748(entry, context);
             }
             index++;
             offset += 0x48;
-        } while (index < (s32)D_004390CC);
+        } while (index < (s32)mnuWorkEntryPoolCount);
     }
 }
 
@@ -449,8 +461,8 @@ void func_00323920(u8 *records) {
     D_004389A4 = records;
 }
 
-void func_00323928(u8 *records) {
-    D_004389A8 = records;
+void mnuSetActiveWorkVisitor(void (*callback)(MenuWorkEntry *, s32)) {
+    D_004389A8 = callback;
 }
 
 void func_00323930(u8 *records) {
@@ -483,12 +495,12 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_00324070);
 extern char D_0045C890[12];
 
 /* Copy the 12-byte resource progress parameter block. */
-void func_00324238(u8 *src) {
+void mnuSetInputActionSnapshot(u8 *src) {
     memcpy(D_0045C890, src, sizeof(D_0045C890));
 }
 
 u32 mnuGetActiveEffectWorkEntry(void) {
-    return D_004390D8;
+    return mnuActiveEffectEntry;
 }
 
 void mnuInitializeActiveEffectWorkEntry(u32 node) {
@@ -498,7 +510,7 @@ void mnuInitializeActiveEffectWorkEntry(u32 node) {
     ((MenuWorkEntry *)node)->tag = 0x1000000;
     ((MenuWorkEntry *)node)->remaining = 1;
     ((MenuWorkEntry *)node)->scale0 = 1.5707963f;
-    D_004390D8 = node;
+    mnuActiveEffectEntry = node;
 }
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_003242D0);

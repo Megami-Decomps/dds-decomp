@@ -1,39 +1,9 @@
 #include "common.h"
+#include "evt_world.h"
+#include "evt_unit.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
-/* Event unit/work object shared by the setup helpers below and the
- * script opcodes. Field layout matches event/evtUnitManager's EvtUnit
- * where they overlap (value, flags, and the field at +0xBC). */
-typedef struct EvtUnit {
-    u8 pad00[0x04];     /* 0x00 */
-    s32 objectId;       /* 0x04: returned to event scripts */
-    u8 pad08[0x60];     /* 0x08 */
-    s32 endpointWorkAddress; /* 0x68 */
-    u32 value;          /* 0x6C: matches evtUnitManager */
-    s128 vector;         /* 0x70: target vector copied by the setup helpers */
-    u8 pad80[0x0C];     /* 0x80 */
-    u32 *flagWord;       /* 0x8C: status opcodes update its first bit */
-    void *linkedUnit;    /* 0x90: world unit attached by setup helpers */
-    s32 unk94;          /* 0x94 */
-    s32 unk98;          /* 0x98 */
-    s32 unk9C;          /* 0x9C */
-    s32 pathHandle;      /* 0xA0: freed and replaced when following another path */
-    f32 pathSpeed;       /* 0xA4: signed path speed */
-    u32 flags;          /* 0xA8 */
-    s16 mode;            /* 0xAC: 1 = active source, 3 = bounded transition, 4 = value transition */
-    s16 transitionSourceKind; /* 0xAE */
-    s16 motionSubmode; /* 0xB0: motion/path submode */
-    s16 motionTicks;    /* 0xB2: elapsed timed-motion ticks */
-    s16 frameCount;      /* 0xB4: transition duration in frames */
-    s16 unkB6;          /* 0xB6 */
-    u8 padB8[0x04];     /* 0xB8 */
-    u16 scriptUnitValue; /* 0xBC: set by the script unit-value command */
-    s16 statePairFirst; /* 0xBE: first world-unit state value */
-    s16 statePairSecond; /* 0xC0: second world-unit state value */
-    u8 padC2[0x2E];     /* 0xC2 */
-    s16 tableValues[1];  /* 0xF0: script-indexed entries (length not established in DDS1) */
-} EvtUnit;
 
 /* Effect slot: three vec4 at +0x08/+0x18/+0x28 (the last carries w = 1.0f),
  * then the two floats returned by evtFindUnitSlotAuxCoordinates at +0x38/+0x3C. */
@@ -101,20 +71,6 @@ typedef struct EvtLipsNode {
     struct EvtLipsNode *next; /* 0x20 */
 } EvtLipsNode;
 
-typedef struct EvtLipsList {
-    u8 pad00[0x40];
-    EvtLipsNode *head;  /* 0x40 */
-} EvtLipsList;
-
-typedef struct EvtLipsRoot {
-    u8 pad00[0x08];
-    EvtLipsList *list;  /* 0x08 */
-} EvtLipsRoot;
-
-typedef struct EvtLipsWorld {
-    u8 pad00[0x18];
-    EvtLipsRoot *root;  /* 0x18 */
-} EvtLipsWorld;
 
 extern u32 sdfGetUniqueChunkValue();
 extern s32 mdlGetNodeRefHalf();
@@ -144,7 +100,7 @@ extern void dds3SetObjectFlags(void *object, s32 flags);
 extern void dds3ClearObjectFlags(void *object, s32 flags);
 extern void evtResetObjectPendingValue(void *arg0);
 extern void evtArmEffectObjectPendingValue(void *arg0, s32 arg1);
-extern s32 func_0010D6A0(void);
+extern s32 scrGetCurrentContext(void);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern s32 func_00241E18(s32 arg0, s32 arg1);
 extern s32 evtCreateMotionSeTask(s32 arg0, s32 arg1, s32 arg2);
@@ -262,10 +218,10 @@ typedef struct EvtWorldUnitRef {
 void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
     if (frames > 0 && frames <= 100) {
         work->linkedUnit = NULL;
-        work->mode = 3;
-        PCP_COPY_VECTOR(&work->vector, vector);
-        work->frameCount = frames;
-        work->unkB6 = 0;
+        work->motionState = 3;
+        PCP_COPY_VECTOR(work->targetVector, vector);
+        work->motionParameter = frames;
+        work->directionOffset = 0;
         work->unk94 = 0;
         work->motionTicks = 0;
     }
@@ -283,12 +239,12 @@ void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
 
 void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
     work->motionSubmode = mode;
-    work->mode = 1;
+    work->motionState = 1;
     work->transitionSourceKind = 0;
     work->linkedUnit = NULL;
-    PCP_COPY_VECTOR(&work->vector, vector);
-    work->frameCount = frames;
-    work->unkB6 = valueB6;
+    PCP_COPY_VECTOR(work->targetVector, vector);
+    work->motionParameter = frames;
+    work->directionOffset = valueB6;
     work->unk94 = value94;
     work->motionTicks = 0;
 }
@@ -358,13 +314,13 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
         work->flags |= 0x10;
         break;
     }
-    work->mode = 1;
+    work->motionState = 1;
     work->transitionSourceKind = 2;
     work->linkedUnit = pathSource;
     func_00116F38(path);
-    VU0_STORE_VF($vf10, &work->vector);
-    work->frameCount = frames;
-    work->unkB6 = valueB6;
+    VU0_STORE_VF($vf10, work->targetVector);
+    work->motionParameter = frames;
+    work->directionOffset = valueB6;
     work->unk94 = 0;
     work->motionTicks = 0;
 }
@@ -375,7 +331,7 @@ s32 evtStartUnitModeWithValue(EvtUnit *work, s32 value) {
     if (value != 0) {
         work->unk94 = value;
         work->motionTicks = 0;
-        work->mode = 4;
+        work->motionState = 4;
         ret = 1;
     }
     return ret;
@@ -395,25 +351,25 @@ void evtResetUnitVectorSlots(void) {
     }
 }
 
-void evtSetSlotVectors(s32 index, s32 state, s32 id, f32 *a, f32 *b, f32 *c) {
-    if (index < 7) {
-        D_003D7BD8[index].vec[0] = a[0];
-        D_003D7BD8[index].state = state;
-        D_003D7BD8[index].vec[1] = a[1];
-        D_003D7BD8[index].vec[2] = a[2];
-        D_003D7BD8[index].vec[3] = 0;
-        D_003D7BD8[index].vec[4] = b[0];
-        D_003D7BD8[index].vec[5] = b[1];
-        D_003D7BD8[index].vec[6] = b[2];
-        D_003D7BD8[index].vec[7] = b[3];
-        D_003D7BD8[index].vec[8] = c[0];
-        D_003D7BD8[index].vec[9] = c[1];
-        D_003D7BD8[index].vec[10] = c[2];
-        D_003D7BD8[index].vec[11] = 1.0f;
-        if (state == 3) {
-            D_003D7BD8[index].id = id;
+void evtSetSlotVectors(s32 slotIndex, s32 slotState, s32 unitId, f32 *firstEndpoint, f32 *secondEndpoint, f32 *color) {
+    if (slotIndex < 7) {
+        D_003D7BD8[slotIndex].vec[0] = firstEndpoint[0];
+        D_003D7BD8[slotIndex].state = slotState;
+        D_003D7BD8[slotIndex].vec[1] = firstEndpoint[1];
+        D_003D7BD8[slotIndex].vec[2] = firstEndpoint[2];
+        D_003D7BD8[slotIndex].vec[3] = 0;
+        D_003D7BD8[slotIndex].vec[4] = secondEndpoint[0];
+        D_003D7BD8[slotIndex].vec[5] = secondEndpoint[1];
+        D_003D7BD8[slotIndex].vec[6] = secondEndpoint[2];
+        D_003D7BD8[slotIndex].vec[7] = secondEndpoint[3];
+        D_003D7BD8[slotIndex].vec[8] = color[0];
+        D_003D7BD8[slotIndex].vec[9] = color[1];
+        D_003D7BD8[slotIndex].vec[10] = color[2];
+        D_003D7BD8[slotIndex].vec[11] = 1.0f;
+        if (slotState == 3) {
+            D_003D7BD8[slotIndex].id = unitId;
         } else {
-            D_003D7BD8[index].id = 0;
+            D_003D7BD8[slotIndex].id = 0;
         }
     }
 }
@@ -555,7 +511,7 @@ u32 evtOpBindMotionSoundToModel(void) {
     s32 model;
     s32 ret;
 
-    if (func_0010D6A0() == 0) {
+    if (scrGetCurrentContext() == 0) {
         return 1;
     }
     param0 = scrReadIntParameter(0);
@@ -828,7 +784,7 @@ void evtLipsExecFunction(s32 id, s32 motion) {
     if (id == 0) {
         return;
     }
-    for (node = ((EvtLipsWorld *)dds3GetWorldObject())->root->list->head; node != NULL; node = node->next) {
+    for (node = ((EvtWorldObject *)dds3GetWorldObject())->table->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
         model = node->link->mh->model;
         if (sdfGetUniqueChunkValue(model->chunk) == id) {
             unit = node->link->unit;
@@ -856,7 +812,7 @@ void evtLipsStopFunction(void) {
     if (D_003BBDB0 == 0) {
         return;
     }
-    for (node = ((EvtLipsWorld *)dds3GetWorldObject())->root->list->head; node != NULL; node = node->next) {
+    for (node = ((EvtWorldObject *)dds3GetWorldObject())->table->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
         model = node->link->mh->model;
         if (sdfGetUniqueChunkValue(model->chunk) == D_003BBDB0) {
             unit = node->link->unit;
@@ -948,10 +904,10 @@ u32 evtOpTestUnitMotionNodeFlag(void) {
         return result;
     }
     offset = scrReadIntParameter(1);
-    if (((((u8 *)(offset + (s32)unit))[0xE0] & 1) & 0xFF) == 0) {
+    if (((unit->slotFlags[offset] & 1) & 0xFF) == 0) {
         return result;
     }
-    return mdlCheckNodeByte30(unit->flagWord, scrReadIntParameter(1)) != 0;
+    return mdlCheckNodeByte30(unit->owner, scrReadIntParameter(1)) != 0;
 }
 
 u32 evtCmdDestroySelectedWorldUnit(void) {
@@ -970,7 +926,7 @@ u32 evtCmdDestroySelectedWorldUnit(void) {
     return 1;
 }
 
-extern void func_002227C8(EvtUnit *unit);
+extern void evtUnitPrepareVerticalMoveSteps(EvtUnit *unit);
 
 u32 evtOpStartUnitTransitionTowardWorldObject(void) {
     EvtUnit *unit;
@@ -988,7 +944,7 @@ u32 evtOpStartUnitTransitionTowardWorldObject(void) {
         evtBeginUnitTransitionTowardWorldObject(unit, mode, objectId, -1, frames, valueB6, 0, 0);
     }
     if (scrReadIntParameter(2) == 1) {
-        func_002227C8(unit);
+        evtUnitPrepareVerticalMoveSteps(unit);
     }
     return 1;
 }
@@ -1038,7 +994,7 @@ u32 evtCommandSetUnitValue(void) {
     if (unit == NULL) {
         return 1;
     }
-    unit->scriptUnitValue = scrReadIntParameter(1);
+    unit->unkBC = scrReadIntParameter(1);
     return 1;
 }
 
@@ -1052,8 +1008,8 @@ u32 evtCmdSetWorldUnitStatePair(void) {
     if (unit == NULL) {
         return 1;
     }
-    unit->statePairFirst = scrReadIntParameter(1);
-    unit->statePairSecond = scrReadIntParameter(2);
+    unit->unkBE = scrReadIntParameter(1);
+    unit->unkC0 = scrReadIntParameter(2);
     return 1;
 }
 
@@ -1120,7 +1076,7 @@ u32 evtUnitClearFlagBit(void) {
     id = scrReadIntParameter(0);
     unit = evtGetWorldUnitNestedValue(id);
     if (unit != NULL) {
-        *unit->flagWord &= ~1;
+        unit->owner->flags &= ~1;
     }
     return 1;
 }
@@ -1132,7 +1088,7 @@ u32 evtUnitSetFlagBit(void) {
     id = scrReadIntParameter(0);
     unit = evtGetWorldUnitNestedValue(id);
     if (unit != NULL) {
-        *unit->flagWord |= 1;
+        unit->owner->flags |= 1;
     }
     return 1;
 }

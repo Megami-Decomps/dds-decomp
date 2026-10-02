@@ -14,7 +14,7 @@ typedef struct EffectHandler {
 extern EffectHandler D_0034DE40[];
 extern void *func_002CFEB8(s32);
 
-void *func_0014FEB0(EffectSource *source) {
+void *effCloneSourceWithTypeHandler(EffectSource *source) {
     EffectSource *copy = (EffectSource *)func_002CFEB8(0x10);
     u32 argument = source->argument;
 
@@ -28,7 +28,19 @@ INCLUDE_ASM(const s32, "game/code_0014FEB0", func_0014FF28);
 
 INCLUDE_ASM(const s32, "game/code_0014FEB0", func_00150040);
 
-INCLUDE_ASM(const s32, "game/code_0014FEB0", func_001500F0);
+extern s32 D_003BD7F4;
+extern u32 effBillResourceOwners[];
+extern void billDispatchByKind(u32);
+
+void effBillDispatchAll(void) {
+    u32 i;
+
+    D_003BD7F4 = 0;
+    for (i = 0; i < 15; i++) {
+        billDispatchByKind(effBillResourceOwners[i]);
+    }
+}
+
 INCLUDE_ASM(const s32, "game/code_0014FEB0", func_00150148);
 
 /* Texture record: +0x00 is the handle the reference is dropped from, +0x08 the

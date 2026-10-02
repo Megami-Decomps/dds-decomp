@@ -21,13 +21,13 @@ typedef struct FileWork {
 } FileWork;
 
 typedef struct FileRequest {
-    u8 pad00;
+    u8 mode; /* 0x00: mode 1 uses the conditional readiness path */
     u8 state; /* 0x01: ready when 6 */
     u8 pad02[0xA];
     u32 handle; /* 0x0C */
     s32 size; /* 0x10 */
     u8 pad14[0x54];
-    u16 unk68;
+    u16 stateRequired; /* 0x68: gate state == 6 readiness checks */
     u16 slot; /* 0x6A */
 } FileRequest;
 
@@ -43,8 +43,9 @@ typedef struct FileManWork {
     u8 nextSlot; /* 0x05 */
     u8 pad06;
     u8 freeSlots; /* 0x07 */
-    void *unk8;  /* 0x08 */
-    u8 pad0C[0xC];
+    FileNode *head; /* 0x08: queued requests, linked through +0x4 */
+    FileNode *tail; /* 0x0C */
+    u8 pad10[8];
     u32 unk18;   /* 0x18 */
     u32 buffer;  /* 0x1C */
     u8 pad20[4];
@@ -63,7 +64,10 @@ extern s32 btlDestroyStageTask(void *);
 extern void sdfDevQueueReleaseState(u32);
 extern void sdfReleaseChipBlock(void *);
 
-extern FileManWork D_003DC658;
+extern FileManWork fileManagerWork;
+
+extern s32 WaitSema(s32);
+extern s32 SignalSema(s32);
 
 
 extern s32 fileIsRequestReadyInCurrentMode(FileRequest *file);
@@ -85,7 +89,38 @@ s32 filePollEntryCleanup(FileCleanup *entry) {
 
 INCLUDE_ASM(const s32, "file/fileManager", func_00288818);
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002888C8);
+/* Clear the node from every request slot and unlink it from the queue. */
+void fileManCancelRequest(FileNode *node) {
+    FileManWork *work = &fileManagerWork;
+    FileNode *prev;
+    FileNode *cur;
+    s32 i;
+
+    WaitSema(work->sema);
+    for (i = 0; i != 4; i++) {
+        if (work->slots[i].request == (FileRequest *)node) {
+            work->slots[i].request = NULL;
+        }
+    }
+    prev = NULL;
+    cur = work->head;
+    while (cur != NULL) {
+        if (cur == node) {
+            if (cur->next == NULL) {
+                work->tail = prev;
+            }
+            if (prev == NULL) {
+                work->head = cur->next;
+            } else {
+                prev->next = cur->next;
+            }
+            break;
+        }
+        prev = cur;
+        cur = cur->next;
+    }
+    SignalSema(work->sema);
+}
 
 void filePrependNode(FileWork *list, FileNode *node) {
     node->next = list->head;
@@ -102,31 +137,43 @@ void fileUnlinkNode(FileWork *list, FileNode *node) {
     *link = node->next;
 }
 
-extern void func_002EDBD8(void *, u32);
+extern void sdfPacInitializeDispatchPacket(void *, u32);
 extern void func_002EDC40(void *);
 extern void func_00288818(void *, s32, u32, u32, u32);
 
-void *func_002889D8(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u32 arg4) {
+void *fileAllocateDispatchRequest(u32 request, u32 flags, u32 dispatch, u32 onComplete, u32 userData) {
     void *work = sdfAllocAndClearQuadwords(0x70);
-    void *data = (u8 *)work + 0x30;
+    void *packet = (u8 *)work + 0x30;
 
-    func_002EDBD8(data, arg2);
-    if (arg1 != 0) {
-        func_002EDC40(data);
+    sdfPacInitializeDispatchPacket(packet, dispatch);
+    if (flags != 0) {
+        func_002EDC40(packet);
     }
-    func_00288818(work, 1, arg0, arg3, arg4);
+    func_00288818(work, 1, request, onComplete, userData);
     return work;
 }
 
 void func_00288A80(u32 request) {
-    func_002889D8(request, 0, 0, 0, 0);
+    fileAllocateDispatchRequest(request, 0, 0, 0, 0);
 }
 
 void func_00288AA8(u32 request) {
-    func_002889D8(request, 1, 0, 0, 0);
+    fileAllocateDispatchRequest(request, 1, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "file/fileManager", func_00288AD0);
+typedef struct FileRequestCallbackWork {
+    u8 pad00[3];
+    u8 unk03;
+    u8 pad04[0x2C];
+} FileRequestCallbackWork;
+
+void *func_00288AD0(u32 request, u32 mode, u32 dispatch, u32 callback) {
+    FileRequestCallbackWork *work = sdfAllocAndClearQuadwords(sizeof(FileRequestCallbackWork));
+
+    work->unk03 = mode;
+    func_00288818(work, 0, request, dispatch, callback);
+    return work;
+}
 
 void func_00288B48(u32 request) {
     func_00288AD0(request, 0, 0, 0);
@@ -140,7 +187,7 @@ u32 fileGetResourceHandle(FileWork *work) {
     return work->resourceHandle;
 }
 
-u32 func_00288B90(FileWork *work) {
+u32 fileGetLoadedDataAddress(FileWork *work) {
     return work->unk24;
 }
 
@@ -156,9 +203,9 @@ u32 func_00288BA0(FileWork *work) {
 s32 fileIsRequestReadyInCurrentMode(FileRequest *file) {
     s32 result;
 
-    if (file->pad00 == 1) {
+    if (file->mode == 1) {
         result = 0;
-        if (file->unk68 != 0) {
+        if (file->stateRequired != 0) {
             result = file->state == 6;
         }
         return result;
@@ -168,15 +215,15 @@ s32 fileIsRequestReadyInCurrentMode(FileRequest *file) {
 
 s32 fileRequestIsReady(FileRequest *file) {
     s32 result = 0;
-    if (file->unk68 != 0) {
+    if (file->stateRequired != 0) {
         result = file->state == 6;
     }
     return result;
 }
 
 /* Keep the device scheduler and file manager running while a request finishes. */
-void fileWaitReady(u32 id) {
-    while (fileIsRequestReadyInCurrentMode(id) == 0) {
+void fileWaitReady(u32 request) {
+    while (fileIsRequestReadyInCurrentMode(request) == 0) {
         sdfRestoreDeviceThreadPriority();
         fileManUpdate();
     }
@@ -189,29 +236,46 @@ void func_00288C50(u32 id) {
 
 /* Spin until the file manager has no work left. */
 void fileWaitIdle(void) {
-    FileManWork *work = &D_003DC658;
-    while (work->unk8 != 0 || work->unk18 != 0) {
+    FileManWork *work = &fileManagerWork;
+    while (work->head != 0 || work->unk18 != 0) {
         fileManUpdate();
     }
 }
 
-INCLUDE_ASM(const s32, "file/fileManager", func_00288CB8);
+typedef struct FileWindowSlot {
+    u8 pad00[0x10];
+    s32 secondValueCopy; /* 0x10 */
+    s32 secondValue;     /* 0x14 */
+    u8 pad18[0xC];
+    s32 firstValue;      /* 0x24 */
+    s32 firstValueCopy;  /* 0x28 */
+    u8 pad2C[4];
+} FileWindowSlot; /* 0x30 */
+
+FileWindowSlot *fileWindowSlotCreate(s32 id, s32 firstValue, s32 secondValue, s32 left, s32 right) {
+    FileWindowSlot *slot = sdfAllocAndClearQuadwords(0x30);
+
+    slot->firstValue = firstValue;
+    slot->firstValueCopy = firstValue;
+    slot->secondValue = secondValue;
+    slot->secondValueCopy = secondValue;
+    func_00288818(slot, 2, id, left, right);
+    return slot;
+}
 
 void func_00288D48(a, b, c)
 s32 a;
 s32 b;
 s32 c;
 {
-    func_00288CB8(a, b, c, 0, 0);
+    fileWindowSlotCreate(a, b, c, 0, 0);
 }
 
-extern s32 WaitSema(s32);
-extern s32 SignalSema(s32);
 extern void sdfDevQueueRead(u32 handle, u32 buffer, u32 size);
 
 /* Claim the next of four read slots for a pending request and start its device read. */
 void fileQueuePendingRequestInFreeSlot(FileRequest *request) {
-    FileManWork *work = &D_003DC658;
+    FileManWork *work = &fileManagerWork;
     u8 slot;
     s32 size;
 

@@ -87,11 +87,11 @@ typedef struct FrFontSys {
     FrFontGlyph *slots[2];    /* 0x194 */
 } FrFontSys;
 
-/* Value record reached through D_003D6C84 entries. */
+/* Value record reached through frFontResourceRecords entries. */
 typedef struct FrFontRecVal {
     u8 unk0[0x10];
-    u16 unk10;
-    u16 unk12;
+    u16 cellWidth;  /* 0x10: returned by frFontGetGlyphCellWidth */
+    u16 cellHeight; /* 0x12: returned by frFontGetGlyphCellHeight */
 } FrFontRecVal;
 
 typedef struct FrFontRec {
@@ -99,11 +99,11 @@ typedef struct FrFontRec {
     u8 unk4[0x20];
 } FrFontRec;
 
-extern u32 D_003BB164;
+extern u32 frFontContextCursorSpacing;
 
-extern u8 D_003BB174;
+extern u8 frFontSharedGlyphFlags;
 
-extern u32 D_003BB178;
+extern u32 frFontSharedRenderFlags;
 
 extern u8 D_003BB180[];
 
@@ -111,9 +111,9 @@ extern FrFontSave D_003D6DC4;
 
 extern FrFontSys frFontWork;
 
-extern FrFontRec D_003D6C84[];
+extern FrFontRec frFontResourceRecords[];
 
-extern s32 D_003BB168;
+extern s32 frFontDefaultGlyphCellSize;
 
 extern FrFontGlyph *D_003D6E14[];
 
@@ -125,7 +125,7 @@ void frFontCreateContext();
 
 extern void frFontSetContextEncodedByte(FrFontCtx *ctx, s32 value);
 
-extern s32 func_00100518(void);
+extern s32 kwlnGetDrawBufferIndex(void);
 
 extern s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph);
 
@@ -137,9 +137,9 @@ extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s3
 
 extern s32 func_001958A0(FrFontGlyph *glyph, s8 mode, u32 flags);
 
-extern FrFontCtx *frFontAppendGlyphFromData(void *glyphData, s8 arg1, s8 arg2, s8 arg3, s32 previousGlyph);
+extern FrFontCtx *frFontAppendGlyphFromData(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, s32 previousGlyph);
 
-extern FrFontGlyph *func_001951C8(void *glyphData, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern FrFontGlyph *func_001951C8(void *text, s32 fontIndex, s32 firstOption, s32 secondOption, s32 existingGlyph);
 
 void frFontDrawGlyphWithSharedFlags(FrFontGlyph *glyph, s8 mode);
 
@@ -210,7 +210,7 @@ FrFontGlyph *frFontAdvanceOrRetainFadingGlyph(FrFontGlyph *glyph) {
 INCLUDE_ASM(const s32, "interface/frFont", func_00194840);
 
 s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *glyph) {
-    FrFontGlyph **slot = &D_003D6E14[func_00100518() & 0xFF];
+    FrFontGlyph **slot = &D_003D6E14[kwlnGetDrawBufferIndex() & 0xFF];
 
     *slot = frFontLinkGlyph(*slot, glyph, 0);
     return 0;
@@ -297,7 +297,7 @@ void frFontSetupGlyph(FrFontGlyph *glyph, s16 glyphId, s8 byte1, s8 byte0, s32 f
     glyph->u14.b[2] = byte2;
     glyph->u0.h = glyphId;
     glyph->u10.word = flags & ~0xFF;
-    glyph->u14.b[3] = D_003BB174;
+    glyph->u14.b[3] = frFontSharedGlyphFlags;
     glyph->x = 0;
     glyph->y = 0;
     glyph->advance = 0;
@@ -331,8 +331,9 @@ void frFontInitGlyph(FrFontGlyph *glyph) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195010);
 
-FrFontCtx *frFontAppendGlyphFromData(void *glyphData, s8 arg1, s8 arg2, s8 arg3, s32 previousGlyph) {
-    FrFontGlyph *glyph = func_001951C8(glyphData, arg1, arg2, arg3, 0);
+/* Append text glyphs; a negative fontIndex keeps the current font selection. */
+FrFontCtx *frFontAppendGlyphFromData(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, s32 previousGlyph) {
+    FrFontGlyph *glyph = func_001951C8(text, fontIndex, firstOption, secondOption, 0);
 
     if (glyph == NULL) {
         return (FrFontCtx *)previousGlyph;
@@ -407,20 +408,20 @@ void frFontSetChildColors(TextStyleNode *entry, u32 color) {
 }
 
 void frFontAddSharedGlyphFlags(s32 flags) {
-    flags |= D_003BB174;
-    D_003BB174 = flags;
+    flags |= frFontSharedGlyphFlags;
+    frFontSharedGlyphFlags = flags;
 }
 
 /* Clear flag bits from the shared font flag byte; returns the previous value. */
 u8 frFontClearFlagBits(u8 mask) {
-    u8 old = D_003BB174;
+    u8 old = frFontSharedGlyphFlags;
 
-    D_003BB174 = old & ~mask;
+    frFontSharedGlyphFlags = old & ~mask;
     return old;
 }
 
 void frFontSetSharedRenderFlags(u32 flags) {
-    D_003BB178 = flags;
+    frFontSharedRenderFlags = flags;
 }
 
 s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph) {
@@ -455,14 +456,14 @@ void func_00195868(FrFontGlyph *glyph) {
 }
 
 void frFontDrawGlyphWithSharedFlags(FrFontGlyph *glyph, s8 mode) {
-    func_001958A0(glyph, mode, D_003BB178);
+    func_001958A0(glyph, mode, frFontSharedRenderFlags);
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_001958A0);
 
 /* Advance one of two cached glyph slots, chosen by the current font index. */
 s32 frFontAdvanceSelectedGlyphSlot(void) {
-    s32 selection = (func_00100518() & 0xFF) == 0;
+    s32 selection = (kwlnGetDrawBufferIndex() & 0xFF) == 0;
     u8 *base = (u8 *)&frFontWork;
     FrFontGlyph **slot = (FrFontGlyph **)(base + selection * 4 + 0x194);
 
@@ -541,12 +542,12 @@ u32 frFontMeasureLines(FrFontGlyph *glyph) {
     for (line = glyph->chainHead; line != NULL; line = line->next) {
         node = line->firstChild;
         if (node != NULL) {
-            s8 b1 = line->u0.b.b1;
+            s8 spacing = line->u0.b.b1;
 
             do {
                 total += node->advance;
                 node = node->next;
-                total += b1;
+                total += spacing;
             } while (node != NULL);
         }
     }
@@ -560,10 +561,10 @@ u32 frFontGetGlyphCellWidth(u8 fontIndex) {
 
     if (index < 2) {
         if (index >= 0) {
-            return D_003BB168;
+            return frFontDefaultGlyphCellSize;
         }
     }
-    return D_003D6C84[index].val->unk10;
+    return frFontResourceRecords[index].val->cellWidth;
 }
 
 u32 frFontGetGlyphCellHeight(u8 fontIndex) {
@@ -571,18 +572,18 @@ u32 frFontGetGlyphCellHeight(u8 fontIndex) {
 
     if (index < 2) {
         if (index >= 0) {
-            return D_003BB168;
+            return frFontDefaultGlyphCellSize;
         }
     }
-    return D_003D6C84[index].val->unk12;
+    return frFontResourceRecords[index].val->cellHeight;
 }
 
-void func_00195E48(void) {
-    D_003BB164 = 0x15;
+void frFontResetContextCursorSpacing(void) {
+    frFontContextCursorSpacing = 0x15;
 }
 
-void func_00195E58(u32 value) {
-    D_003BB164 = value;
+void frFontSetContextCursorSpacing(u32 value) {
+    frFontContextCursorSpacing = value;
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195E60);
@@ -590,7 +591,6 @@ INCLUDE_ASM(const s32, "interface/frFont", func_00195E60);
 INCLUDE_ASM(const s32, "interface/frFont", func_00195ED8);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195FA8);
-
 void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *glyph) {
     FrFontGlyph *node;
     s32 dx;
@@ -649,24 +649,24 @@ void frFontCheckPendingGlyphState(FrFontCtx *ctx) {
 }
 
 void frFontAdvanceContextCursor(FrFontCtx *ctx) {
-    ctx->contextCursor += D_003BB164 * 8;
+    ctx->contextCursor += frFontContextCursorSpacing * 8;
     ctx->flag1C = 1;
     ctx->flag1D = 1;
 }
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB160);
 
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB164);
+INCLUDE_SDATA(const s32, "interface/frFont", frFontContextCursorSpacing);
 
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB168);
+INCLUDE_SDATA(const s32, "interface/frFont", frFontDefaultGlyphCellSize);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB16C);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB170);
 
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB174);
+INCLUDE_SDATA(const s32, "interface/frFont", frFontSharedGlyphFlags);
 
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB178);
+INCLUDE_SDATA(const s32, "interface/frFont", frFontSharedRenderFlags);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB17C);
 

@@ -1,10 +1,10 @@
 #include "common.h"
 
-extern u32 D_004390C0;
+extern u32 mnuResourceRecords;
 
 extern u32 D_004390C4;
 
-extern void (*D_004389C4)(void);
+extern void (*sdfTickCallback)(void);
 
 extern u8 D_0045C860[];
 
@@ -16,7 +16,7 @@ extern void *memcpy(void *, const void *, u32);
 
 extern void *memset(void *, s32, u32);
 
-/* Byte cursor state at D_004390B8 (8 bytes). */
+/* Byte cursor state at mnuStepCounterState (8 bytes). */
 typedef struct CursorState {
     u8 unk0[2];
     u16 total;
@@ -26,9 +26,9 @@ typedef struct CursorState {
     u8 unk7;
 } CursorState;
 
-extern CursorState D_004390B8;
+extern CursorState mnuStepCounterState;
 
-extern u16 D_0045C866[];
+extern u16 mnuStepCounterThreshold[];
 
 typedef struct ResourceNode {
     u32 id;
@@ -41,7 +41,12 @@ typedef struct ResourceNode {
 typedef struct ResourceList {
     u32 count;
     ResourceNode *first;
+    ResourceNode *last;
+    u32 unk_C;
+    void (*onRemove)(u32, u32); /* 0x10: called with each node's id and handle */
 } ResourceList;
+
+extern void func_0035A880(ResourceNode *);
 
 u32 dds3RemoveListNodeAndNotify(u32 list, u32 node);
 
@@ -54,7 +59,25 @@ u32 mnuRemoveResourceNodeById(u32 list) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321018);
+/* Notify and free every node, then reset the list. */
+void mnuClearResourceList(ResourceList *list) {
+    ResourceNode *node;
+
+    if (list != NULL) {
+        node = list->first;
+        if (node != NULL) {
+            do {
+                ResourceNode *current = node;
+                node = node->next;
+                list->onRemove(current->id, current->handle);
+                func_0035A880(current);
+            } while (node != NULL);
+        }
+        list->last = NULL;
+        list->first = NULL;
+        list->count = 0;
+    }
+}
 
 typedef struct SdfLink {
     u8 pad00[8];
@@ -68,7 +91,7 @@ typedef struct SdfLinkList {
     SdfLink *next;
 } SdfLinkList;
 
-void func_00321090(SdfLinkList *list, SdfLink *a, SdfLink *b) {
+void sdfLinkListExchangeNodes(SdfLinkList *list, SdfLink *a, SdfLink *b) {
     SdfLink *tmpNext;
     SdfLink *tmpPrev;
 
@@ -169,25 +192,25 @@ void mnuCopyResourceProgressParameters(u8 *src) {
 }
 
 u8 * func_00321238(void) {
-    return (u8 *)&D_004390B8;
+    return (u8 *)&mnuStepCounterState;
 }
 
-void mnuSetResourceProgressCadence(u8 arg0, u8 arg1) {
-    D_004390B8.limit = arg0;
-    D_004390B8.step = arg1;
+void mnuSetResourceProgressCadence(u8 limit, u8 step) {
+    mnuStepCounterState.limit = limit;
+    mnuStepCounterState.step = step;
 }
 
-void mnuResetProgressLimitAndStep(u8 arg0, u8 arg1) {
-    memset(&D_004390B8, 0, 8);
-    D_004390B8.limit = arg0;
-    D_004390B8.step = arg1;
+void mnuResetProgressLimitAndStep(u8 limit, u8 step) {
+    memset(&mnuStepCounterState, 0, 8);
+    mnuStepCounterState.limit = limit;
+    mnuStepCounterState.step = step;
 }
 
 s32 mnuAdvanceCursorStepUntilThreshold(void) {
-    if (++D_004390B8.index >= D_004390B8.limit) {
-        D_004390B8.index = 0;
-        D_004390B8.total += D_004390B8.step;
-        if (D_004390B8.total >= D_0045C866[0]) {
+    if (++mnuStepCounterState.index >= mnuStepCounterState.limit) {
+        mnuStepCounterState.index = 0;
+        mnuStepCounterState.total += mnuStepCounterState.step;
+        if (mnuStepCounterState.total >= mnuStepCounterThreshold[0]) {
             return 1;
         }
     }
@@ -195,18 +218,18 @@ s32 mnuAdvanceCursorStepUntilThreshold(void) {
 }
 
 void mnuResetResourceProgressCounters(void) {
-    D_004390B8.index = 0;
-    D_004390B8.total = 0;
+    mnuStepCounterState.index = 0;
+    mnuStepCounterState.total = 0;
 }
 
-void func_00321318(u32 arg0, u32 arg1) {
-    D_004390C0 = arg0;
-    D_004390C4 = arg1;
+void func_00321318(u32 records, u32 count) {
+    mnuResourceRecords = records;
+    D_004390C4 = count;
 }
 
 /* The externally owned table stores 28-byte records. */
 u8 *mnuGetResourceRecordByIndex(s32 recordIndex) {
-    return (u8 *)D_004390C0 + recordIndex * 28;
+    return (u8 *)mnuResourceRecords + recordIndex * 28;
 }
 
 INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321340);

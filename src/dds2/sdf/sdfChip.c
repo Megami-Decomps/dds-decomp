@@ -22,9 +22,9 @@ typedef struct SdfChipBlock {
     void *next;
 } SdfChipBlock;
 
-extern SdfCursorSlot *D_0043910C;
+extern SdfCursorSlot *sdfFreeCursorSlotHead;
 extern s32 D_00439108;
-extern s32 D_00439110;
+extern s32 sdfChipHeapStart;
 extern s32 D_00439114;
 extern u8 D_00439120;
 
@@ -43,19 +43,19 @@ void sdfAllocAndClearQuadwords(s32 size) {
     sdfClearQuadwords(allocation, (size + 0xf) >> 4);
 }
 
-void sdfReleaseChipBlock(void *arg0) {
+void sdfReleaseChipBlock(void *memory) {
     SdfCursorSlot *slot;
     SdfChipOwner *owner;
-    SdfChipBlock *block = arg0;
+    SdfChipBlock *block = memory;
     SdfCursorSlot **link;
     s32 interrupts;
     s16 count;
     s32 index;
 
-    if (arg0 == NULL) {
+    if (memory == NULL) {
         return;
     }
-    index = (s32)arg0 - D_00439110;
+    index = (s32)memory - sdfChipHeapStart;
     if (index < 0) {
         index += 0xFFF;
     }
@@ -75,8 +75,8 @@ void sdfReleaseChipBlock(void *arg0) {
             *link = slot->next;
         }
         slot->owner = NULL;
-        slot->next = D_0043910C;
-        D_0043910C = slot;
+        slot->next = sdfFreeCursorSlotHead;
+        sdfFreeCursorSlotHead = slot;
     } else {
         if (count == owner->limit) {
             slot->next = owner->next;
@@ -98,7 +98,7 @@ s32 sdfChipIsInRange(s32 address) {
     s32 withinRange;
 
     withinRange = 0;
-    if (address >= D_00439110) {
+    if (address >= sdfChipHeapStart) {
         withinRange = address < D_00439114;
     }
     return withinRange;

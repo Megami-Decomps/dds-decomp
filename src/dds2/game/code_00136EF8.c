@@ -4,13 +4,13 @@
 
 typedef struct FldColorParams {
     s32 enabled;
-    s32 unk4;
+    s32 slotIndex;  /* 0x04: stored to the effect work at +0x38 */
     s32 mode;
     s32 red;
     s32 green;
     s32 blue;
-    s32 unk18;
-    s32 unk1C;
+    s32 vectorY;    /* 0x18: copied to the effect work at +0x24 */
+    s32 vectorZ;    /* 0x1C: copied to the effect work at +0x3C */
 } FldColorParams;
 typedef struct FldCameraSetting {
     s32 unk0;
@@ -94,7 +94,7 @@ extern s32 D_004361A0;
 extern void fldResetActorSlots(void);
 
 extern u8 *fldFindActorEntryByName(const char *);
-extern s32 func_0010D8C8(void);
+extern s32 scrGetCurrentContext(void);
 extern void fldPlayMenuSound(s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeSetRGB(s32, s32, s32);
@@ -108,9 +108,9 @@ extern u8 D_00399EA0[][16];
 extern s32 fldGetCampSceneControlMode(void);
 extern s32 fldGetSceneReadyOrPendingState(void);
 extern s32 fileMenuTaskExists(void);
-extern s32 func_00127320(void);
-extern s32 func_00127348(void);
-extern s32 func_00127370(void);
+extern s32 fldHasKiretaLabelProcess(void);
+extern s32 fldHasHirakenaiLabelProcess(void);
+extern s32 fldHasBadkaifukuLabelProcess(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
 extern u32 kwlnTaskGetUserValue(void *);
 extern void func_0012DDC0(s32, s32, u32, const u8 *);
@@ -156,7 +156,7 @@ extern s32 D_004361FC;
 
 extern s32 fldRainTextureResource;
 
-extern u32 func_0032C138(void *);
+extern u32 sdfTexAcquireResourceTexture(void *);
 
 extern char D_00413350[];
 
@@ -166,7 +166,7 @@ extern u32 fldCameraSettings;
 
 extern FldFadeColor fldCameraColorParameters[];
 
-extern u32 func_00343ED0(const char *, u32 *, s32);
+extern u32 sdfReadNamedResource(const char *, u32 *, s32);
 
 extern u32 effCreateSelectionFlagListFromWork(const void *);
 
@@ -256,7 +256,7 @@ typedef struct FldRoomState {
     s32 unk13C;
 } FldRoomState; /* 0x140 bytes */
 
-extern FldRoomState D_00444B30[];
+extern FldRoomState fldRoomRecords[];
 
 extern u8 D_0038E2D0[];
 
@@ -297,7 +297,7 @@ typedef struct {
     FldRowData body;
 } FldS16Row; /* 0x20 bytes */
 
-extern FldS16Row D_003931A0[];
+extern FldS16Row fldActorWaypointRows[];
 
 /* Per-actor slot in the field's actor table; reset by fldResetActorSlots and
    scanned by fldReleaseActorTasksById. 0x5C is the stride retail uses. */
@@ -308,7 +308,7 @@ typedef struct {
     u32 unk50[3];  /* 0x50 */
 } FldActorRow; /* 0x5C bytes */
 
-extern FldActorRow D_00449B30[];
+extern FldActorRow fldActorSlots[];
 
 typedef struct FldAreaState {
     u8 pad0[0x14];
@@ -318,18 +318,18 @@ typedef struct FldAreaState {
 } FldAreaState;
 
 /* Field actor table entries are 0x6C bytes; the area index stored by the
- * field state is zero-based, whereas entry->area is one-based. */
+ * field state is zero-based, whereas entry->floor is one-based. */
 typedef struct FldActorEntry {
     /* 0x00 */ s8 kind;
     /* 0x01 */ u8 pad01;
-    /* 0x02 */ s16 modelId;
-    /* 0x04 */ s16 area;
+    /* 0x02 */ s16 requiredFlag;
+    /* 0x04 */ s16 floor;
     /* 0x06 */ char name[0xC];
-    /* 0x12 */ s16 state;
-    /* 0x14 */ s16 state2;
-    /* 0x16 */ s16 state3;
-    /* 0x18 */ u8 name0[0xC];
-    /* 0x24 */ u8 name1[0xC];
+    /* 0x12 */ s16 motion;
+    /* 0x14 */ s16 secondaryMotion;
+    /* 0x16 */ s16 sound;
+    /* 0x18 */ u8 motionName[0xC];
+    /* 0x24 */ u8 otherName[0xC];
     /* 0x30 */ s8 variantMode;
     /* 0x31 */ u8 flags31;
     /* 0x32 */ s16 variant;
@@ -341,12 +341,12 @@ typedef struct FldActorEntry {
     /* 0x46 */ char linkName[0xC];
     /* 0x52 */ s8 unk52;
     /* 0x53 */ s8 unk53;
-    /* 0x54 */ s8 unk54;
-    /* 0x55 */ char unk55[0xF];
+    /* 0x54 */ s8 flags54;
+    /* 0x55 */ char pad55[0xF];
     /* 0x64 */ u8 flags64;
     /* 0x65 */ s8 unk65;
     /* 0x66 */ s8 unk66;
-    /* 0x67 */ s8 unk67;
+    /* 0x67 */ s8 value67;
     /* 0x68 */ s8 unk68;
     /* 0x69 */ s8 unk69;
     /* 0x6A */ s8 unk6A;
@@ -366,8 +366,8 @@ typedef struct FldZone {
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00136EF8);
 
 void fldInitializeCameraColorResource(void) {
-    fldRainTextureResource = func_00343ED0(D_00413350, &fldRainTextureData, 0);
-    fldRainTextureReference = func_0032C138((void *)fldRainTextureData);
+    fldRainTextureResource = sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
+    fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
     fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
     if (fldRainTextureResource != 0) {
         sdfQueueNonzeroResourceId(fldRainTextureResource);
@@ -410,7 +410,7 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
     if (color->enabled != 0) {
         fldCameraColorParameters->colorB = fldCameraColorParameters->colorA =
             (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
-        fldCameraColorParameters->unk24 = color->unk18;
+        fldCameraColorParameters->unk24 = color->vectorY;
         switch (color->mode) {
         case 0:
             fldCameraColorParameters->unk28 = 1;
@@ -422,8 +422,8 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
             fldCameraColorParameters->unk28 = 3;
             break;
         }
-        fldCameraColorParameters->unk38 = color->unk4;
-        fldCameraColorParameters->unk3C = color->unk1C;
+        fldCameraColorParameters->unk38 = color->slotIndex;
+        fldCameraColorParameters->unk3C = color->vectorZ;
         itfCopyColorFields(fldCameraColorEffect, fldCameraColorParameters);
     }
     *fldAppliedCameraSettings = *setting;
@@ -683,37 +683,37 @@ void fldResetZoneRecordsAndActorSlots(void) {
     D_004361BC = 0;
     for (i = 0; i < 0x40; i++) {
         for (j = 0; j < 8; j++) {
-            D_00444B30[i].corner[j][0] = 0.0f;
-            D_00444B30[i].corner[j][1] = 0.0f;
-            D_00444B30[i].corner[j][2] = 0.0f;
-            D_00444B30[i].corner[j][3] = 1.0f;
+            fldRoomRecords[i].corner[j][0] = 0.0f;
+            fldRoomRecords[i].corner[j][1] = 0.0f;
+            fldRoomRecords[i].corner[j][2] = 0.0f;
+            fldRoomRecords[i].corner[j][3] = 1.0f;
         }
-        D_00444B30[i].center[0] = 0.0f;
-        D_00444B30[i].center[1] = 0.0f;
-        D_00444B30[i].center[2] = 0.0f;
-        D_00444B30[i].center[3] = 1.0f;
+        fldRoomRecords[i].center[0] = 0.0f;
+        fldRoomRecords[i].center[1] = 0.0f;
+        fldRoomRecords[i].center[2] = 0.0f;
+        fldRoomRecords[i].center[3] = 1.0f;
         for (j = 0; j < 6; j++) {
-            D_00444B30[i].plane[j][0] = 0.0f;
-            D_00444B30[i].plane[j][1] = 0.0f;
-            D_00444B30[i].plane[j][2] = 0.0f;
-            D_00444B30[i].plane[j][3] = 1.0f;
-            D_00444B30[i].limit[j] = 0.0f;
+            fldRoomRecords[i].plane[j][0] = 0.0f;
+            fldRoomRecords[i].plane[j][1] = 0.0f;
+            fldRoomRecords[i].plane[j][2] = 0.0f;
+            fldRoomRecords[i].plane[j][3] = 1.0f;
+            fldRoomRecords[i].limit[j] = 0.0f;
         }
         D_0038BD50[i] = 0;
-        D_00444B30[i].unk108 = 0;
-        D_00444B30[i].unk10C = 0.0f;
-        D_00444B30[i].unk110 = 0.0f;
-        D_00444B30[i].unk114 = 0.0f;
-        D_00444B30[i].unk118 = 0.0f;
-        D_00444B30[i].unk11C = 0.0f;
-        D_00444B30[i].unk130 = 0;
-        D_00444B30[i].roomId = -1;
-        D_00444B30[i].unk134 = -1;
-        D_00444B30[i].mode = 0;
-        D_00444B30[i].unk138 = -1;
-        D_00444B30[i].unk120 = -1;
-        D_00444B30[i].axisMode = 0;
-        D_00444B30[i].unk13C = 0;
+        fldRoomRecords[i].unk108 = 0;
+        fldRoomRecords[i].unk10C = 0.0f;
+        fldRoomRecords[i].unk110 = 0.0f;
+        fldRoomRecords[i].unk114 = 0.0f;
+        fldRoomRecords[i].unk118 = 0.0f;
+        fldRoomRecords[i].unk11C = 0.0f;
+        fldRoomRecords[i].unk130 = 0;
+        fldRoomRecords[i].roomId = -1;
+        fldRoomRecords[i].unk134 = -1;
+        fldRoomRecords[i].mode = 0;
+        fldRoomRecords[i].unk138 = -1;
+        fldRoomRecords[i].unk120 = -1;
+        fldRoomRecords[i].axisMode = 0;
+        fldRoomRecords[i].unk13C = 0;
     }
     D_00436194 = -1;
     D_00436198 = -1;
@@ -821,7 +821,7 @@ s32 func_0013D7F8(s32 index, FldProbeActor *actor, f32 *position) {
         }
         return 1;
     case 1:
-        return D_00444B30[index].unk13C == kind;
+        return fldRoomRecords[index].unk13C == kind;
     case 2:
         VU0_LOAD_VF(vf10, actor->target->quaternion);
         effMiscQuaternionToMatrixVU();
@@ -830,7 +830,7 @@ s32 func_0013D7F8(s32 index, FldProbeActor *actor, f32 *position) {
         VU0_LOAD_VF(vf10, dir);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, dir);
-        dot = fldDotVector(dir, D_00444B30[index].center);
+        dot = fldDotVector(dir, fldRoomRecords[index].center);
         if (dot < 0.5f) {
             return 0;
         }
@@ -844,7 +844,7 @@ s32 fldProbeRoomPlanes(f32 *direction, s32 index) {
     f32 planar[2];
     s32 i;
 
-    if (D_00444B30[index].axisMode == 0) {
+    if (fldRoomRecords[index].axisMode == 0) {
         probe[0] = 0.0f;
         probe[1] = direction[1];
         probe[2] = direction[2];
@@ -964,7 +964,7 @@ s32 fldFindRoomByTask(u32 task) {
 
     for (i = 0; i < fldTaskSlotCount; i++) {
         if (D_0038BD50[i] == task) {
-            return D_00444B30[i].roomId;
+            return fldRoomRecords[i].roomId;
         }
     }
     return -1;
@@ -998,7 +998,7 @@ s32 fldCheckEntryActive(s32 value) {
     if (index == -1) {
         return 0;
     }
-    if (D_00444B30[index].mode == 1 && D_00444B30[index].unk138 == value) {
+    if (fldRoomRecords[index].mode == 1 && fldRoomRecords[index].unk138 == value) {
         return 1;
     }
     return 0;
@@ -1077,9 +1077,9 @@ u8 *fldPickActorTemplateByName(const char *name) {
     }
     do {
         entry = (FldActorEntry *)(D_003932A0 + i * 108);
-        flag = entry->modelId;
+        flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
-            && entry->area == ((FldAreaState *)fldAreaState)->areaIndex + 1
+            && entry->floor == ((FldAreaState *)fldAreaState)->areaIndex + 1
             && strcmp(name, entry->name) == 0) {
             switch (entry->kind) {
             case 1:
@@ -1140,9 +1140,9 @@ u8 *fldFindActorEntryByName(const char *name) {
     }
     do {
         entry = (FldActorEntry *)(D_003932A0 + i * 108);
-        flag = entry->modelId;
+        flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
-            && entry->area == ((FldAreaState *)fldAreaState)->areaIndex + 1
+            && entry->floor == ((FldAreaState *)fldAreaState)->areaIndex + 1
             && strcmp(name, entry->name) == 0) {
             fldSelectedActorEntryIndex = i;
             switch (entry->kind) {
@@ -1194,7 +1194,7 @@ u8 *fldFindActorEntryByName(const char *name) {
 u8 *fldSelectCurrentActorOnNextFloor(void) {
     s32 index = D_00435F28;
     FldActorEntry *entry = (FldActorEntry *)(D_003932A0 + index * 108);
-    if (entry->area == D_00389784[0] + 1 && entry->kind == 10) {
+    if (entry->floor == D_00389784[0] + 1 && entry->kind == 10) {
         fldSelectedActorEntryIndex = index;
         D_004361F8 = 8;
         return D_00391F30;
@@ -1213,15 +1213,15 @@ s32 fldQuerySelectedActorMotionState(s32 mode) {
     s16 a;
     u32 result;
     if (mode == 0 && entry->kind == 1) {
-        a = entry->state;
-        if (a == 5 || entry->state2 == 5 || a == 6 || entry->state2 == 6 || a == 7 ||
-            entry->state2 == 7 || a == 8 || entry->state2 == 8) {
+        a = entry->motion;
+        if (a == 5 || entry->secondaryMotion == 5 || a == 6 || entry->secondaryMotion == 6 || a == 7 ||
+            entry->secondaryMotion == 7 || a == 8 || entry->secondaryMotion == 8) {
             return 0x28;
         }
         return 0x14;
     }
     if (mode == 1) {
-        result = (u8)entry->unk54 & 8;
+        result = (u8)entry->flags54 & 8;
         return result != 0;
     }
     return 0;
@@ -1239,7 +1239,7 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
     FldActorEntry *entry;
 
     if (useTaskRecord != 0) {
-        record = fldGetTaskRecordValue(((FldTaskRecordWork *)func_0010D8C8())->key);
+        record = fldGetTaskRecordValue(((FldTaskRecordWork *)scrGetCurrentContext())->key);
         if (record == 0) {
             return;
         }
@@ -1251,16 +1251,16 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
     entry = (FldActorEntry *)(D_003932A0 + index * 108);
     kind = entry->kind;
     if (kind == 1) {
-        if (entry->area == D_00389784[0] + 1) {
-            fldPlayMenuSound(entry->state3);
-            fldBeginNpcInteractionById(D_00449B30[index].unk00[1]);
+        if (entry->floor == D_00389784[0] + 1) {
+            fldPlayMenuSound(entry->sound);
+            fldBeginNpcInteractionById(fldActorSlots[index].unk00[1]);
             return;
         }
     } else if (kind == 2) {
-        if (entry->area == fldAreaState[5] + 1) {
+        if (entry->floor == fldAreaState[5] + 1) {
             fldAreaState[97] = 1;
-            *(f32 *)&fldAreaState[96] = D_00449B30[index].unk2C;
-            if (entry->state == 1) {
+            *(f32 *)&fldAreaState[96] = fldActorSlots[index].unk2C;
+            if (entry->motion == 1) {
                 kwlnFadeInStart(0xC0, 0xC0, 0xC0, 0xF);
                 return;
             }
@@ -1271,16 +1271,16 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
         kwlnFadeSetRGB(0, 0, 0);
         return;
     } else if (kind == 5) {
-        if (entry->state == 0) {
+        if (entry->motion == 0) {
             D_003898FC[0] = 0x64;
         } else {
             D_003898FC[0] = -0x64;
         }
     } else if (kind == 10) {
     } else if (kind == 11) {
-        if (entry->area == D_00389784[0] + 1) {
-            if (entry->state == 3) {
-                fldApplyRoomObjectModeZero(0, 0, entry->name1, 0);
+        if (entry->floor == D_00389784[0] + 1) {
+            if (entry->motion == 3) {
+                fldApplyRoomObjectModeZero(0, 0, entry->otherName, 0);
                 return;
             }
         }
@@ -1338,19 +1338,19 @@ s32 fldGetActorStat0(s32 mode) {
 
     switch (mode) {
     case 0:
-        return actor->state;
+        return actor->motion;
     case 1:
-        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->name0);
+        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->motionName);
         if (entry != NULL) {
             return entry[1];
         }
     case 2:
-        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->name1);
+        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->otherName);
         if (entry != NULL) {
             return entry[1];
         }
     case 3:
-        flags = (u16)actor->state2;
+        flags = (u16)actor->secondaryMotion;
         if (flags & 1) {
             return 1;
         }
@@ -1371,7 +1371,7 @@ s32 fldGetMappedActorStateAttribute(u32 mode) {
 
     switch (mode) {
     case 0:
-        switch (actor->state) {
+        switch (actor->motion) {
         case 0:
             return 0xC;
         case 1:
@@ -1385,20 +1385,20 @@ s32 fldGetMappedActorStateAttribute(u32 mode) {
         }
         return 0;
     case 1:
-        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->name0);
+        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->motionName);
         if (entry != NULL) {
             return entry[1];
         }
     case 2:
-        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->name1);
+        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->otherName);
         if (entry != NULL) {
             return entry[1];
         }
-        return actor->state2;
+        return actor->secondaryMotion;
     case 3:
-        return actor->state2;
+        return actor->secondaryMotion;
     case 4:
-        return actor->state3;
+        return actor->sound;
     case 5:
         return D_003897C0[0] != 1;
     }
@@ -1409,7 +1409,7 @@ s32 fldGetMappedActorStateAttribute(u32 mode) {
  * object lookups fall through to the next attribute if absent. */
 s32 fldGetActorMotionEntry(u32 kind) {
     FldActorEntry *entry = (FldActorEntry *)(D_003932A0 + fldSelectedActorEntryIndex * 108);
-    s16 index = entry->state;
+    s16 index = entry->motion;
     s32 *found;
     s32 flags;
 
@@ -1437,7 +1437,7 @@ s32 fldGetActorMotionEntry(u32 kind) {
     case 6:
         flags = entry->flags64;
         if (flags & 1) {
-            return entry->unk67;
+            return entry->value67;
         }
         return -1;
     }
@@ -1449,35 +1449,35 @@ s32 fldGetRowValue(u32 kind) {
 
     switch (kind) {
     case 0:
-        return D_003931A0[slot].count;
+        return fldActorWaypointRows[slot].count;
     case 1:
-        return D_003931A0[slot].unk4;
+        return fldActorWaypointRows[slot].unk4;
     case 2:
-        return D_003931A0[slot].body.data[0];
+        return fldActorWaypointRows[slot].body.data[0];
     case 3:
-        return D_003931A0[slot].body.data[1];
+        return fldActorWaypointRows[slot].body.data[1];
     case 4:
-        return D_003931A0[slot].body.data[2];
+        return fldActorWaypointRows[slot].body.data[2];
     case 5:
-        return D_003931A0[slot].body.data[3];
+        return fldActorWaypointRows[slot].body.data[3];
     case 6:
-        return D_003931A0[slot].body.data[4];
+        return fldActorWaypointRows[slot].body.data[4];
     case 7:
-        return D_003931A0[slot].body.data[5];
+        return fldActorWaypointRows[slot].body.data[5];
     case 8:
-        return D_003931A0[slot].body.data[6];
+        return fldActorWaypointRows[slot].body.data[6];
     case 9:
-        return D_003931A0[slot].body.data[7];
+        return fldActorWaypointRows[slot].body.data[7];
     case 10:
-        return D_003931A0[slot].body.data[8];
+        return fldActorWaypointRows[slot].body.data[8];
     case 11:
-        return D_003931A0[slot].body.data[9];
+        return fldActorWaypointRows[slot].body.data[9];
     case 12:
-        return D_003931A0[slot].body.data[10];
+        return fldActorWaypointRows[slot].body.data[10];
     case 13:
-        return D_003931A0[slot].body.data[11];
+        return fldActorWaypointRows[slot].body.data[11];
     case 14:
-        return D_003931A0[slot].count - D_004361E0 - 1;
+        return fldActorWaypointRows[slot].count - D_004361E0 - 1;
     }
     return 0;
 }
@@ -1490,28 +1490,28 @@ void fldResetActorSlots(void) {
     s32 i;
 
     for (i = 0; i < 256; i++) {
-        D_00449B30[i].unk00[0] = 0;
-        D_00449B30[i].unk00[1] = 0;
-        D_00449B30[i].unk00[2] = 0;
-        D_00449B30[i].unk00[3] = -1;
-        D_00449B30[i].unk00[4] = 0;
-        D_00449B30[i].unk00[5] = -1;
-        D_00449B30[i].unk00[6] = -1;
-        D_00449B30[i].unk00[7] = 0;
-        D_00449B30[i].unk00[8] = 0;
-        D_00449B30[i].unk00[9] = 0;
-        D_00449B30[i].unk2C = 0.0f;
-        D_00449B30[i].unk30[0] = 0;
-        D_00449B30[i].unk30[1] = 0;
-        D_00449B30[i].unk30[2] = 0;
-        D_00449B30[i].unk30[3] = 0;
-        D_00449B30[i].unk30[4] = 0;
-        D_00449B30[i].unk30[5] = 0;
-        D_00449B30[i].unk30[6] = 0;
-        D_00449B30[i].unk30[7] = 0;
-        D_00449B30[i].unk50[0] = 0;
-        D_00449B30[i].unk50[1] = 0;
-        D_00449B30[i].unk50[2] = 0;
+        fldActorSlots[i].unk00[0] = 0;
+        fldActorSlots[i].unk00[1] = 0;
+        fldActorSlots[i].unk00[2] = 0;
+        fldActorSlots[i].unk00[3] = -1;
+        fldActorSlots[i].unk00[4] = 0;
+        fldActorSlots[i].unk00[5] = -1;
+        fldActorSlots[i].unk00[6] = -1;
+        fldActorSlots[i].unk00[7] = 0;
+        fldActorSlots[i].unk00[8] = 0;
+        fldActorSlots[i].unk00[9] = 0;
+        fldActorSlots[i].unk2C = 0.0f;
+        fldActorSlots[i].unk30[0] = 0;
+        fldActorSlots[i].unk30[1] = 0;
+        fldActorSlots[i].unk30[2] = 0;
+        fldActorSlots[i].unk30[3] = 0;
+        fldActorSlots[i].unk30[4] = 0;
+        fldActorSlots[i].unk30[5] = 0;
+        fldActorSlots[i].unk30[6] = 0;
+        fldActorSlots[i].unk30[7] = 0;
+        fldActorSlots[i].unk50[0] = 0;
+        fldActorSlots[i].unk50[1] = 0;
+        fldActorSlots[i].unk50[2] = 0;
     }
     fldSelectedActorEntryIndex = -1;
 }
@@ -1521,12 +1521,12 @@ void fldLoadActorWaypointTable(s32 field) {
     char directory[32];
     u32 command;
     if (field >= 100) {
-        memset(D_003931A0, 0, 0x6D00);
+        memset(fldActorWaypointRows, 0, 0x6D00);
     } else {
         fldFormatAreaDirectory(directory, field, 1);
         func_0035C860(path, "%sF%03d.WAP", directory, field);
         command = sdfDevCreateCommandState(path);
-        sdfDevQueueReadAndWait(command, D_003931A0, 0x6D00);
+        sdfDevQueueReadAndWait(command, fldActorWaypointRows, 0x6D00);
         sdfDevWaitThenReleaseCommandState(command);
     }
 }
@@ -1536,7 +1536,7 @@ typedef struct FldWaypointBlock {
 } FldWaypointBlock;
 
 void fldCopyActorWaypointTable(FldWaypointBlock *src) {
-    *(FldWaypointBlock *)D_003931A0 = *src;
+    *(FldWaypointBlock *)fldActorWaypointRows = *src;
 }
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142B70);
@@ -1555,23 +1555,23 @@ void fldBeginNpcInteractionById(s32 id) {
     if (D_00389780[0] == 0x1D || D_00389780[0] == 0x1E) {
         for (i = 0; i < 0x100; i++) {
             actor = (FldActorEntry *)(D_003932A0 + i * 108);
-            npc = (u32 *)&D_00449B30[i];
+            npc = (u32 *)&fldActorSlots[i];
             if (npc[0] == 1 && npc[1] == id) {
-                fldApplyRoomObjectModeZero(0, 0, actor->name0, 0);
+                fldApplyRoomObjectModeZero(0, 0, actor->motionName, 0);
                 return;
             }
         }
     } else {
         for (i = 0; i < 256; i++) {
             actor = (FldActorEntry *)(D_003932A0 + i * 108);
-            npc = (u32 *)&D_00449B30[i];
+            npc = (u32 *)&fldActorSlots[i];
             if (npc[0] == 1 && npc[1] == id) {
                 npc[0] = 2;
                 npc[7] = 0;
                 npc[8] = 0;
                 npc[9] = 0;
-                if (actor->state == 5 || actor->state2 == 5 || actor->state == 6 || actor->state2 == 6
-                    || actor->state == 7 || actor->state2 == 7 || actor->state == 8 || actor->state2 == 8) {
+                if (actor->motion == 5 || actor->secondaryMotion == 5 || actor->motion == 6 || actor->secondaryMotion == 6
+                    || actor->motion == 7 || actor->secondaryMotion == 7 || actor->motion == 8 || actor->secondaryMotion == 8) {
                     npc[10] = 0x28;
                 } else {
                     npc[10] = 0x14;
@@ -1603,11 +1603,11 @@ void fldApplyCurrentAreaActorEntries(void) {
 
     for (i = 0; i < 256; i++) {
         entry = (FldActorEntry *)(D_003932A0 + i * 108);
-        if (entry->kind == 1 && entry->area == ((FldAreaState *)fldAreaState)->areaIndex + 1 && entry->state != 0) {
-            fldApplyRoomObjectModeOne(0, 0, entry->name0, 0);
+        if (entry->kind == 1 && entry->floor == ((FldAreaState *)fldAreaState)->areaIndex + 1 && entry->motion != 0) {
+            fldApplyRoomObjectModeOne(0, 0, entry->motionName, 0);
         }
-        if (entry->kind == 11 && entry->area == ((FldAreaState *)fldAreaState)->areaIndex + 1 && entry->state == 3) {
-            fldApplyRoomObjectModeOne(0, 0, entry->name1, 0);
+        if (entry->kind == 11 && entry->floor == ((FldAreaState *)fldAreaState)->areaIndex + 1 && entry->motion == 3) {
+            fldApplyRoomObjectModeOne(0, 0, entry->otherName, 0);
         }
     }
 }
@@ -1665,13 +1665,13 @@ s32 func_00144028(void *task) {
     if (fileMenuTaskExists() != 0) {
         return 0;
     }
-    if (func_00127320() != 0) {
+    if (fldHasKiretaLabelProcess() != 0) {
         return 0;
     }
-    if (func_00127348() != 0) {
+    if (fldHasHirakenaiLabelProcess() != 0) {
         return 0;
     }
-    if (func_00127370() != 0) {
+    if (fldHasBadkaifukuLabelProcess() != 0) {
         return 0;
     }
     if (fldIsEventPhaseAtLeastTwo() != 0) {
@@ -1775,5 +1775,5 @@ INCLUDE_SDATA(const s32, "game/code_00136EF8", D_004361F8);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_004361FC);
 
-INCLUDE_SDATA(const s32, "game/code_00136EF8", D_00436200);
+INCLUDE_SDATA(const s32, "game/code_00136EF8", fldFieldTaskHandle);
 

@@ -1,19 +1,29 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
-extern u32 D_00435D88;
+extern u32 dds3WorldCounter;
 
 extern void dds3BuildVuTransformFromComponents(u8 *, u8 *, u8 *);
 
 typedef struct {
-    u8 pad0[8];
+    void *worldNodes;
+    u32 unk04;
     void *callbackTarget; /* 0x08: forwarded to both lifecycle helpers */
+    u32 unk0C;
+    void *resource;
+    u8 pad14[0x0C];
+    void *worldIndexNodes;
 } WorldEntry;
 
 typedef struct {
     u8 pad0[0x18];
     WorldEntry *entry;
 } WorldObject;
+
+extern void dds3DestroyWorldNode(void *node);
+extern void dds3DestroyWorldIndexNode(void *node);
+extern void func_003297C8(void *resource);
+extern void sdfReleaseChipBlock(void *block);
 
 void dds3LoadOrBuildObjectMatrix(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x1C);
@@ -47,13 +57,47 @@ s32 dds3TestObjectSphereOverlap(u8 *left, u8 *right) {
 
 INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FBD0);
 
-INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FC28);
+typedef struct WorldCallbackTable {
+    u8 pad00[8];
+    s32 (*onFirst)(void *);  /* 0x08 */
+    s32 (*onSecond)(void *); /* 0x0C */
+} WorldCallbackTable;
 
-INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FC68);
+typedef struct WorldCallbackHolder {
+    u8 pad00[0x10];
+    WorldCallbackTable *callbacks; /* 0x10 */
+} WorldCallbackHolder;
+
+/* Invoke the holder's first / second lifecycle callback when present; the result is 1 when there is nothing to call. */
+s32 dds3InvokeWorldCallbackFirst(WorldCallbackHolder *holder) {
+    s32 result = 1;
+
+    if (holder != NULL) {
+        WorldCallbackTable *table = holder->callbacks;
+
+        if (table != NULL && table->onFirst != NULL) {
+            result = table->onFirst(holder);
+        }
+    }
+    return result;
+}
+
+s32 dds3InvokeWorldCallbackSecond(WorldCallbackHolder *holder) {
+    s32 result = 1;
+
+    if (holder != NULL) {
+        WorldCallbackTable *table = holder->callbacks;
+
+        if (table != NULL && table->onSecond != NULL) {
+            result = table->onSecond(holder);
+        }
+    }
+    return result;
+}
 
 /* The stored sequence wraps at 16 bits even though its backing word is 32 bits. */
 void dds3AdvanceWorldCounter(void) {
-    D_00435D88 = (D_00435D88 + 1) & 0xffff;
+    dds3WorldCounter = (dds3WorldCounter + 1) & 0xffff;
 }
 
 void dds3SetWorldEntryCallbackTarget(WorldEntry *entry, void *callbackTarget) {
@@ -84,7 +128,7 @@ extern void *func_00328D68(s32 size);
    The assignment order is load-bearing: ee-gcc hoists the last statement's
    store out of the independent group, so counter1C stays last and the entry
    store follows it. */
-s32 func_0010FCE8(WorldObject *object) {
+s32 dds3AllocateWorldObjectEntry(WorldObject *object) {
     WorldNode *node;
 
     node = (WorldNode *)func_00328D68(0x28);
@@ -107,31 +151,48 @@ s32 func_0010FCE8(WorldObject *object) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FD58);
+void func_0010FD58(WorldObject *object)
+{
+    WorldEntry *entry = object->entry;
+
+    if (entry == NULL) {
+        return;
+    }
+    while (entry->worldNodes != NULL) {
+        dds3DestroyWorldNode(entry->worldNodes);
+    }
+    while (entry->worldIndexNodes != NULL) {
+        dds3DestroyWorldIndexNode(entry->worldIndexNodes);
+    }
+    if (entry->resource != NULL) {
+        func_003297C8(entry->resource);
+    }
+    sdfReleaseChipBlock(entry);
+}
 
 u32 func_0010FDF0(WorldObject *obj) {
     void *callbackTarget;
 
     callbackTarget = obj->entry->callbackTarget;
     if (callbackTarget != NULL) {
-        func_0010FC28(callbackTarget);
+        dds3InvokeWorldCallbackFirst((WorldCallbackHolder *)callbackTarget);
     }
     return 1;
 }
 
-u32 func_0010FE20(WorldObject *obj) {
+u32 dds3DispatchWorldEntryCallbackTarget(WorldObject *obj) {
     void *callbackTarget;
 
     callbackTarget = obj->entry->callbackTarget;
     if (callbackTarget != NULL) {
-        func_0010FC68(callbackTarget);
+        dds3InvokeWorldCallbackSecond((WorldCallbackHolder *)callbackTarget);
     }
     return 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FE50);
 
-INCLUDE_SDATA(const s32, "game/code_0010FB00", D_00435D88);
+INCLUDE_SDATA(const s32, "game/code_0010FB00", dds3WorldCounter);
 
-INCLUDE_SDATA(const s32, "game/code_0010FB00", D_00435D8C);
+INCLUDE_SDATA(const s32, "game/code_0010FB00", dds3ActiveWorld);
 

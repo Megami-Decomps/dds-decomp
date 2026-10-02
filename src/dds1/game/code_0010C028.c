@@ -4,9 +4,9 @@ typedef struct ScriptContext {
     u8 pad0[0x18];
     s32 pc; /* 0x18 */
     s32 stackDepth; /* 0x1C: number of stack values */
-    u8 stackTypes[28]; /* 0x20 */
+    s8 stackTypes[28]; /* 0x20 */
     union {
-        u32 stackValues[28];
+        s32 stackValues[28];
         f32 stackFloats[28];
     } stack; /* 0x3C */
     u8 padAC[0x10];
@@ -45,7 +45,17 @@ void bfStepContext(void) {
     bfContextStep();
 }
 
-INCLUDE_ASM(const s32, "game/code_0010C028", bfTaskUpdate);
+s32 bfTaskUpdate(void) {
+    switch (bfContextStep(kwlnTaskGetUserValue())) {
+    case 0:
+        return -1;
+    case 2:
+        return -1;
+    case 1:
+    default:
+        return 0;
+    }
+}
 
 void scrPushInteger(ScriptContext *script, u32 value) {
     script->stackTypes[script->stackDepth] = 0;
@@ -71,9 +81,50 @@ void scrPushTypeFourValue(ScriptContext *script, u32 value) {
     script->stackDepth = script->stackDepth + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010C028", bfStackPopInt);
+typedef struct ScriptGlobals {
+    u8 pad00[0x40];
+    s32 ints[256];
+    f32 floats[256];
+} ScriptGlobals;
 
-INCLUDE_ASM(const s32, "game/code_0010C028", bfStackPopFloat);
+extern ScriptGlobals *datGameState;
+
+s32 bfStackPopInt(ScriptContext *script) {
+    s32 stackIndex = script->stackDepth;
+
+    script->stackDepth = stackIndex - 1;
+    switch (script->stackTypes[stackIndex - 1]) {
+    case 0:
+    case 4:
+        return script->stack.stackValues[script->stackDepth];
+    case 1:
+        return script->stack.stackFloats[script->stackDepth];
+    case 2:
+        return datGameState->ints[script->stack.stackValues[script->stackDepth]];
+    case 3:
+        return datGameState->floats[script->stack.stackValues[script->stackDepth]];
+    }
+    return 0;
+}
+
+f32 bfStackPopFloat(ScriptContext *script) {
+    s32 stackIndex = script->stackDepth;
+
+    script->stackDepth = stackIndex - 1;
+    switch (script->stackTypes[stackIndex - 1]) {
+    case 0:
+        return (f32)script->stack.stackValues[script->stackDepth];
+    case 4:
+        return 0.0f;
+    case 1:
+        return script->stack.stackFloats[script->stackDepth];
+    case 2:
+        return (f32)datGameState->ints[script->stack.stackValues[script->stackDepth]];
+    case 3:
+        return datGameState->floats[script->stack.stackValues[script->stackDepth]];
+    }
+    return 0.0f;
+}
 
 /* Push the word following the opcode, then advance past its operand. */
 u32 scrPushNextInstructionValue(ScriptContext *script) {

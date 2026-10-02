@@ -3,15 +3,15 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 
-extern s32 D_00435F14;
+extern s32 fldCameraModelObject;
 
 extern void fldFreeDisplayObjects(void);
 
-extern s32 D_00435F18;
+extern s32 fldSecondarySceneModelHandle;
 
-extern s32 D_00435F10;
+extern s32 fldSecondarySceneObject;
 
-extern s32 D_00435E04;
+extern s32 datBattleSceneRecords;
 
 extern u32 sdfCreateResetPacketList(void);
 
@@ -59,7 +59,7 @@ extern s32 fldRainTextureReference;
 
 extern s32 fldRainTextureResource;
 
-extern u32 D_0043610C;
+extern u32 fldSwayMode;
 
 extern u32 fldSkyDrawState;
 
@@ -75,9 +75,9 @@ extern char D_00444950[];
 
 extern s32 strcmp(const char *a, const char *b);
 
-extern u32 D_00435FD8;
+extern u32 fldAreaCachedResource;
 
-extern u32 D_00435FC4;
+extern u32 fldAreaPackedArchive;
 
 extern u8 D_00436020[];
 
@@ -85,9 +85,9 @@ extern void sdfQueueNonzeroResourceId(u32 handle);
 
 extern void func_002C7CE8(u32 handle);
 
-extern u8 D_003846F0[];
+extern u8 sdfViewMatrix[];
 
-extern u8 D_0037F610[];
+extern u8 sdfProjectionMatrix[];
 
 extern u8 D_0037F660[];
 
@@ -115,7 +115,7 @@ extern u8 D_0038A700[];
 
 extern void *sdfCreateAssetWithDrawEntries(void);
 
-extern u32 func_0032C138(void *);
+extern u32 sdfTexAcquireResourceTexture(void *);
 
 extern u32 D_004360B0;
 
@@ -123,13 +123,13 @@ extern u8 D_00444980[];
 
 extern u8 D_00444970[];
 
-extern void func_00113110(s64, void *, void *);
+extern void dds3TransformCameraVectorsByInnerRotation(s64, void *, void *);
 
 extern f32 sdfAtan2(f32 y, f32 x);
 
-extern f32 D_0038BAB0[];
+extern f32 fldLookAtNearPoint[];
 
-extern f32 D_0038BAC0[];
+extern f32 fldLookAtFarPoint[];
 
 /* Data transfer descriptor: source-relative byte offset and transfer size. */
 typedef struct FldTransferChunk {
@@ -156,7 +156,7 @@ typedef struct FldLoadRequest {
 
 extern u32 D_00444920[], D_00444930[], D_00444940[];
 extern char D_00435FD0[];
-extern u32 func_00343ED0(const char *, u32 *, s32);
+extern u32 sdfReadNamedResource(const char *, u32 *, s32);
 extern void func_001289A8(u32, u32);
 
 extern f32 D_003897DC[];
@@ -167,7 +167,7 @@ extern char D_004130D8[]; /* "%sf%03d_%03d.LB" */
 
 extern s32 func_0035C860(char *, const char *, ...);
 
-extern u32 func_002C7FF0(char *);
+extern void *func_002C7FF0(const char *path);
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
 
@@ -185,9 +185,9 @@ extern void *func_003292A8(s32 size);
 
 extern void *sdfResourceRetainAddress(void *p);
 
-extern u32 D_00435FF0, D_00435FF4, D_00435FF8, D_00435FFC;
+extern u32 fldCachedRoomResourceData, D_00435FF4, D_00435FF8, D_00435FFC;
 
-extern u32 D_00436000, D_00436004, D_00436008, D_0043600C;
+extern u32 fldCachedRoomResourceSize, D_00436004, D_00436008, D_0043600C;
 
 typedef struct {
     u32 unk0[4];
@@ -197,7 +197,7 @@ typedef struct {
 
 extern void sdfInitPacketList(u64);
 
-extern u32 D_0037FB48[];
+extern u32 kwlnDrawSurfaces[];
 
 extern void sdfInitPacketList(u64);
 
@@ -213,9 +213,9 @@ extern void sdfConsInitPacketHeader(u64, s32, s32, s32, s32);
 
 extern u64 *sdfConsMeasurePacketWithHeader(u64);
 
-extern s32 func_00100400(void);
+extern s32 kwlnGetDrawBufferIndex(void);
 
-extern u8 D_00381ED0[];
+extern u8 kwlnFrameDrawPacketRecords[];
 
 extern void func_0032DB30(const void *, u64, s32);
 
@@ -284,7 +284,7 @@ typedef struct {
     void (*invoke)(void *, s32);
 } FldGfxCallback;
 
-extern FldGfxCallback D_00380748;
+extern FldGfxCallback kwlnPositionedTextSurface;
 
 extern void sdfPktInit(void *, s32, s32, s32, s32);
 
@@ -296,7 +296,7 @@ extern u8 D_00436070[];
 
 extern u8 D_00436078[];
 
-extern s32 D_00436090;
+extern s32 fldEncounterRuntimeState;
 
 extern u32 D_0043608C;
 
@@ -310,9 +310,9 @@ extern void mdlSetNodeFloat20(s32, s32, f32);
 
 extern void mdlAddEntryFlagged(s32, s32, s32);
 
-extern f32 D_00436110;
+extern f32 fldSwayPhase;
 
-extern s32 D_00436114;
+extern s32 fldSwayOffset;
 
 extern f32 sdfSinPoly(f32);
 
@@ -443,7 +443,7 @@ extern void btlActivateRuntime(s32 mode);
 
 extern void dds3SetWorldObjectDataValue(u64, s8);
 
-extern char D_00436098[];
+extern char fldEncounterTaskName[];
 
 extern void btlClearRuntimeState(void);
 
@@ -477,7 +477,7 @@ typedef struct {
     f32 z;
 } FldCamWork;
 
-extern FldCamRow D_0038AEB0[];
+extern FldCamRow fldCameraFollowRows[];
 
 extern f32 D_0038BAF0[];
 
@@ -550,7 +550,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
             if (D_00444920[i] != 0) {
                 fldFormatAreaDirectory(directory, fldAreaState[4], fldAreaState[5] + 1);
                 func_0035C860(path, D_00435FD0, directory, D_00444920[i]);
-                D_00444930[i] = func_00343ED0(path, &D_00444940[i], 0);
+                D_00444930[i] = sdfReadNamedResource(path, &D_00444940[i], 0);
             }
         }
     }
@@ -744,10 +744,10 @@ void *fldLoadCachedRoomResourceIfLocationMatches(void **destination, s32 area, s
 
     if (state->area == area) {
         if (state->room == room) {
-            void *buffer = func_003292A8(D_00436000);
+            void *buffer = func_003292A8(fldCachedRoomResourceSize);
             void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
-            memcpy(data, (void *)D_00435FF0, D_00436000);
+            memcpy(data, (void *)fldCachedRoomResourceData, fldCachedRoomResourceSize);
             return buffer;
         }
     }
@@ -867,9 +867,9 @@ void fldLoadAreaPackedResources(void) {
     if (fldAreaState[4] < 200) {
         fldFormatAreaResourceName(name);
         strcpy(D_00444950, name);
-        D_00435FC4 = func_002C7FF0(name);
-        func_002C81D0(D_00435FC4);
-        for (entry = ((FldPackedArchive *)D_00435FC4)->entries; entry != NULL;
+        fldAreaPackedArchive = func_002C7FF0(name);
+        func_002C81D0(fldAreaPackedArchive);
+        for (entry = ((FldPackedArchive *)fldAreaPackedArchive)->entries; entry != NULL;
              entry = entry->next) {
             switch (entry->kind) {
             case 1:
@@ -889,8 +889,8 @@ void fldLoadAreaPackedResources(void) {
                 sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 5:
-                D_00435FD8 = (u32)func_003292A8(sdfMemoryGetBlockSize(entry->blockHandle));
-                memcpy((void *)sdfMemoryGetBlockAddress(D_00435FD8),
+                fldAreaCachedResource = (u32)func_003292A8(sdfMemoryGetBlockSize(entry->blockHandle));
+                memcpy((void *)sdfMemoryGetBlockAddress(fldAreaCachedResource),
                        (void *)sdfMemoryGetBlockAddress(entry->blockHandle),
                        sdfMemoryGetBlockSize(entry->blockHandle));
                 sdfQueueNonzeroResourceId(entry->blockHandle);
@@ -905,16 +905,16 @@ void fldLoadAreaPackedResources(void) {
 }
 
 void fldReleaseAreaResourceCache(void) {
-    u32 cachedResource = D_00435FD8;
+    u32 cachedResource = fldAreaCachedResource;
 
     if (cachedResource != 0) {
         sdfQueueNonzeroResourceId(cachedResource);
-        D_00435FD8 = 0;
+        fldAreaCachedResource = 0;
     }
-    cachedResource = D_00435FC4;
+    cachedResource = fldAreaPackedArchive;
     if (cachedResource != 0) {
         func_002C7CE8(cachedResource);
-        D_00435FC4 = 0;
+        fldAreaPackedArchive = 0;
     }
     D_00444950[0] = D_00436020[0];
 }
@@ -1120,12 +1120,12 @@ void fldInitDisplayObjects(void) {
         D_0043607C = (u32)object;
         *(f32 *)((u8 *)object + 0x1C) = 1.0f;
         D_00438EC8 = (u32)sdfCreateAssetWithDrawEntries();
-        fldMarkerTexture = func_0032C138(D_0038A700);
+        fldMarkerTexture = sdfTexAcquireResourceTexture(D_0038A700);
     }
 }
 
 u32 *fldGetDisplayTableRow(void) {
-    return &D_0037FB48[fldDisplayRow * 8];
+    return &kwlnDrawSurfaces[fldDisplayRow * 8];
 }
 
 typedef struct FldSpriteCorner {
@@ -1173,7 +1173,7 @@ void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 v
     sdfInitPacketList(command);
     sdfConsCreateDrawPacket(command, drawMode, 0);
     sdfAppendPacket(command, handle);
-    descriptor = (FieldBufferDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
@@ -1185,42 +1185,17 @@ void fldProjectPointSetup(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
 
-    VU0_LOAD_MATRIX_MEMORY(D_003846F0);
-    sdfPostmultiplyVuMatrixFromMemory(D_0037F610);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmove.xyzw vf24, vf28\n"
-        "vmove.xyzw vf25, vf29\n"
-        "vmove.xyzw vf26, vf30\n"
-        "vmove.xyzw vf27, vf31\n"
-        "lqc2 vf10, 0(%0)\n"
-        "vmulax.xyzw ACC, vf28, vf10x\n"
-        "vmadday.xyzw ACC, vf29, vf10y\n"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n"
-        "vmaddw.xyzw vf10, vf31, vf0w\n"
-        "vdiv Q, vf0w, vf10w\n"
-        "vmove.w vf10, vf0\n"
-        "vwaitq\n"
-        "vmulq.xyzw vf10, vf10, Q\n"
-        ".set reorder"
-        : : "r"(vec) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(D_0037F650) : "memory");
-    __asm__ volatile ("vmul.xyzw vf10, vf10, vf11");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(D_0037F660) : "memory");
-    __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(result) : "memory");
+    VU0_LOAD_MATRIX_MEMORY(sdfViewMatrix);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
+    VU0_MOVE_MATRIX_TO_B();
+    VU0_LOAD_VF_MEMORY(vf10, vec);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_LOAD_VF_MEMORY(vf11, D_0037F650);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF_MEMORY(vf11, D_0037F660);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, result);
     *dstX = result[0];
     *dstY = result[1];
 }
@@ -1231,93 +1206,39 @@ void fldProjectPointSetupAlt(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 
     VU0_LOAD_MATRIX_MEMORY(D_00384790);
     sdfPostmultiplyVuMatrixFromMemory(D_0037F9B0);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmove.xyzw vf24, vf28\n"
-        "vmove.xyzw vf25, vf29\n"
-        "vmove.xyzw vf26, vf30\n"
-        "vmove.xyzw vf27, vf31\n"
-        "lqc2 vf10, 0(%0)\n"
-        "vmulax.xyzw ACC, vf28, vf10x\n"
-        "vmadday.xyzw ACC, vf29, vf10y\n"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n"
-        "vmaddw.xyzw vf10, vf31, vf0w\n"
-        "vdiv Q, vf0w, vf10w\n"
-        "vmove.w vf10, vf0\n"
-        "vwaitq\n"
-        "vmulq.xyzw vf10, vf10, Q\n"
-        ".set reorder"
-        : : "r"(vec) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(D_0037F9F0) : "memory");
-    __asm__ volatile ("vmul.xyzw vf10, vf10, vf11");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(D_0037FA00) : "memory");
-    __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(result) : "memory");
+    VU0_MOVE_MATRIX_TO_B();
+    VU0_LOAD_VF_MEMORY(vf10, vec);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_LOAD_VF_MEMORY(vf11, D_0037F9F0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF_MEMORY(vf11, D_0037FA00);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, result);
     *dstX = result[0];
     *dstY = result[1];
 }
 
 void fldPrepareProjectionMatrix(void) {
     u8 *matrix;
-    VU0_LOAD_MATRIX_MEMORY(D_003846F0);
-    matrix = D_0037F610;
+    VU0_LOAD_MATRIX_MEMORY(sdfViewMatrix);
+    matrix = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmove.xyzw vf24, vf28\n"
-        "vmove.xyzw vf25, vf29\n"
-        "vmove.xyzw vf26, vf30\n"
-        "vmove.xyzw vf27, vf31\n"
-        ".set reorder"
-        : : : "memory");
+    VU0_MOVE_MATRIX_TO_B();
     matrix += 0x40;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(matrix) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf12, 0(%0)\n"
-        ".set reorder"
-        : : "r"(D_0037F660) : "memory");
+    VU0_LOAD_VF_MEMORY(vf11, matrix);
+    VU0_LOAD_VF_MEMORY(vf12, D_0037F660);
 }
 
 void fldProjectPointWithPreparedMatrix(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf10, 0(%0)\n"
-        "vmulax.xyzw ACC, vf28, vf10x\n"
-        "vmadday.xyzw ACC, vf29, vf10y\n"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n"
-        "vmaddw.xyzw vf10, vf31, vf0w\n"
-        "vdiv Q, vf0w, vf10w\n"
-        "vmove.w vf10, vf0\n"
-        "vwaitq\n"
-        "vmulq.xyzw vf10, vf10, Q\n"
-        "vmul.xyzw vf10, vf10, vf11\n"
-        "vadd.xyzw vf10, vf10, vf12\n"
-        ".set reorder"
-        : : "r"(vec) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(result) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, vec);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_STORE_VF(vf10, result);
     *dstX = result[0];
     *dstY = result[1];
 }
@@ -1340,7 +1261,7 @@ void fldSubmitGsCommandWord(s32 lower, s32 bits, u64 upper) {
     entry[5] = 0x3B;
     entry[4] = (u64)(bits << 15) | (upper << 32) | lower;
     sdfAppendPacket(command, packet);
-    descriptor = (FieldBufferDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
@@ -1356,7 +1277,7 @@ void fldSubmitFrameQuad(s32 flag0, s32 flag1, s32 field4, s32 field12, s32 flag1
     data[4] = (field17 << 17) | 0x10000 | (flag15 << 15) | (flag14 << 14) | (field12 << 12) | (field4 << 4) | (flag1 << 1) | flag0;
     data[5] = 0x47;
     sdfAppendPacket(command, packet);
-    descriptor = (FieldBufferDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
@@ -1395,7 +1316,7 @@ void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsW
         dst += 2;
     }
     sdfAppendPacket(command, packet);
-    descriptor = (FieldBufferDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
@@ -1432,7 +1353,7 @@ void fldSubmitGsLines(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, 
         dst += 2;
     }
     sdfAppendPacket(command, packet);
-    descriptor = (FieldBufferDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
@@ -1473,7 +1394,7 @@ void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1,
         dst += 2;
     }
     sdfAppendPacket(command, packet);
-    descriptor = (FieldBufferDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
@@ -1516,7 +1437,7 @@ void func_0012C360(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u32 g
         dst += 2;
     }
     sdfAppendPacket(command, packet);
-    descriptor = (FieldBufferDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
@@ -1557,7 +1478,7 @@ void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u
         dst += 2;
     }
     sdfAppendPacket(command, packet);
-    descriptor = (FieldBufferDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
@@ -1606,7 +1527,7 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
         dst += 2;
     }
     sdfAppendPacket(command, packet);
-    descriptor = (FieldBufferDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
@@ -1636,7 +1557,7 @@ void fldSubmitModelPacket(s32 textureId, u8 *modelData) {
     packet = sdfAllocPacketAligned(0x80);
     func_0033B530(packet, modelData, ((FldModelPacketInput *)modelData)->geometryValue, modelData + 0x10, modelData + 0x20);
     sdfAppendPacket(command, packet);
-    descriptor = (FieldBufferDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
@@ -1646,9 +1567,9 @@ void func_0012D070(void) {
     FieldBufferDescriptor *descriptor;
     sdfInitPacketList(command);
     texture = sdfAllocPacketAligned(0x40);
-    func_0032DB30(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
+    func_0032DB30(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(command, texture);
-    descriptor = (FieldBufferDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
@@ -1658,9 +1579,9 @@ void func_0012D110(void) {
     FieldBufferDescriptor *descriptor;
     sdfInitPacketList(command);
     texture = sdfAllocPacketAligned(0x40);
-    func_0032DB78(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
+    func_0032DB78(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(command, texture);
-    descriptor = (FieldBufferDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
@@ -1680,7 +1601,7 @@ void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 
     sdfInitPacketList(resource);
     record = func_00348158(D_0038A980, D_0038A9A0, 2, 0x80);
     sdfAppendPacket(resource, record);
-    descriptor = (FieldBufferDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, resource);
 }
 
@@ -1714,7 +1635,7 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     indices[1] = a1;
     indices[2] = a2;
     sdfAppendPacket(command, func_0033B050(&desc));
-    descriptor = (FieldBufferDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
@@ -1821,7 +1742,7 @@ void fldSubmitBackgroundResourcePacket(void) {
         u32 packet = sdfAllocatePacketList(0);
         FieldResourceDescriptor *descriptor;
         sdfCreateResourcePacket(packet, D_0040B2A0[0], 0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0, 0, 0);
-        descriptor = (FieldResourceDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+        descriptor = (FieldResourceDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
         descriptor->open(descriptor, packet);
     }
 }
@@ -1831,7 +1752,7 @@ void fldSubmitBackgroundDescriptorPacket(void) {
         u32 packet = sdfAllocatePacketList(0);
         FieldResourceDescriptor *descriptor;
         sdfCreateDescriptorPacket(packet, D_0040B2A0[0], 0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0);
-        descriptor = (FieldResourceDescriptor *)&D_0037FB48[fldDisplayRow * 8];
+        descriptor = (FieldResourceDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
         descriptor->open(descriptor, packet);
     }
 }
@@ -1879,7 +1800,7 @@ void fldDrawFloorQuad(s32 x, s32 y, s32 drawValue) {
     sdfPktInit(packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, 0);
     sdfAppendPacket(quad.packetList, sdfFormatSifPacket(packet, drawValue));
     fldAdvanceQuadRow(&quad);
-    D_00380748.invoke(&D_00380748, quad.packetList);
+    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, quad.packetList);
 }
 
 void fldDrawFloorQuadA(s32 x, s32 y, s32 packetField, s32 drawValue) {
@@ -2013,7 +1934,7 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012E720);
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012E958);
 
 s32 fldGetEncounterRuntimeResult(void) {
-    s32 state = D_00436090;
+    s32 state = fldEncounterRuntimeState;
     s32 result;
 
     if (state < 3) {
@@ -2033,7 +1954,7 @@ void fldSetEncounterPendingValue(u32 value) {
 }
 
 s32 fldEncProc(void) {
-    s32 state = D_00436090;
+    s32 state = fldEncounterRuntimeState;
 
     if (state < 3) {
         if (state >= 0) {
@@ -2044,7 +1965,7 @@ s32 fldEncProc(void) {
 }
 
 void fldRequestEncounterWithFade(u32 mode, s32 recordIndex) {
-    if ((recordIndex < 0x400) && ((((FldSceneFlagRecord *)D_00435E04)[recordIndex].status & 0x8000) != 0))
+    if ((recordIndex < 0x400) && ((((FldSceneFlagRecord *)datBattleSceneRecords)[recordIndex].status & 0x8000) != 0))
     {
         kwlnFadeBackgroundStartOut(0);
         fldSetEncounterMode(3);
@@ -2055,12 +1976,12 @@ void fldRequestEncounterWithFade(u32 mode, s32 recordIndex) {
 }
 
 s32 fldSetEncounterMode(s32 mode) {
-    D_00436090 = mode;
+    fldEncounterRuntimeState = mode;
     D_0043608C = 0;
     if (fldGetEncounterRuntimeResult() == 0) {
-        if (D_00436090 < 3) {
-            if (D_00436090 >= 0) {
-                btlActivateRuntime(D_00436090);
+        if (fldEncounterRuntimeState < 3) {
+            if (fldEncounterRuntimeState >= 0) {
+                btlActivateRuntime(fldEncounterRuntimeState);
                 if (dds3GetWorldObject() != 0) {
                     dds3SetWorldObjectDataValue(dds3GetWorldObject(), 1);
                 }
@@ -2074,15 +1995,15 @@ void fldResetEncounterAsyncState(void) {
 }
 
 void fldCreateEncounterTask(void) {
-    kwlnTaskCreate((s32)D_00436098, 0x2B0F, 0, 1, (s32)fldEncProc, (s32)fldResetEncounterAsyncState, 0);
+    kwlnTaskCreate((s32)fldEncounterTaskName, 0x2B0F, 0, 1, (s32)fldEncProc, (s32)fldResetEncounterAsyncState, 0);
     btlClearRuntimeState();
 }
 
 void fldUpdateLookAtSegmentDistance(void) {
     f32 *distance = D_003897DC;
-    f32 dx = D_0038BAB0[0] - D_0038BAC0[0];
-    f32 dy = D_0038BAB0[1] - D_0038BAC0[1];
-    f32 dz = D_0038BAB0[2] - D_0038BAC0[2];
+    f32 dx = fldLookAtNearPoint[0] - fldLookAtFarPoint[0];
+    f32 dy = fldLookAtNearPoint[1] - fldLookAtFarPoint[1];
+    f32 dz = fldLookAtNearPoint[2] - fldLookAtFarPoint[2];
     *distance = fsqrtf(dx * dx + dy * dy + dz * dz) - 50.0f;
 }
 
@@ -2097,13 +2018,13 @@ void fldUpdateCameraProjectionEndpoints(void) {
     f32 angle;
 
     D_0038BAF0[0] = cam->x - sdfSinPoly(cam->angle * 3.14f / 180.0f) * 80.0f;
-    D_0038BAF0[1] = cam->y + D_0038AEB0[cam->rowIdx].y;
+    D_0038BAF0[1] = cam->y + fldCameraFollowRows[cam->rowIdx].y;
     D_0038BAF0[2] = cam->z - sdfEvaluateCosineViaSinePhaseShift(cam->angle * 3.14f / 180.0f) * 80.0f;
     D_0038BAF0[3] = 1.0f;
     angle = cam->angle * 3.14f / 180.0f;
-    D_0038BB00[0] = cam->x + sdfSinPoly(angle) * D_0038AEB0[cam->rowIdx].dist;
-    D_0038BB00[1] = cam->y + D_0038AEB0[cam->rowIdx].targetY;
-    D_0038BB00[2] = cam->z + sdfEvaluateCosineViaSinePhaseShift(angle) * D_0038AEB0[cam->rowIdx].dist;
+    D_0038BB00[0] = cam->x + sdfSinPoly(angle) * fldCameraFollowRows[cam->rowIdx].dist;
+    D_0038BB00[1] = cam->y + fldCameraFollowRows[cam->rowIdx].targetY;
+    D_0038BB00[2] = cam->z + sdfEvaluateCosineViaSinePhaseShift(angle) * fldCameraFollowRows[cam->rowIdx].dist;
     D_0038BB00[3] = 1.0f;
 }
 
@@ -2131,7 +2052,7 @@ s64 fldGetUnselectedWorldEntry(void) {
 
 void fldSetCameraMoveMode(u32 value) {
     D_004360AC = value;
-    func_00113110(dds3GetWorldCameraObject(dds3GetWorldObject()), D_00444980, D_00444970);
+    dds3TransformCameraVectorsByInnerRotation(dds3GetWorldCameraObject(dds3GetWorldObject()), D_00444980, D_00444970);
     D_004360B0 = 0;
 }
 
@@ -2164,7 +2085,7 @@ void fldUpdateCameraProximity(void) {
         }
     }
     slot = *(s32 *)(dds3GetObjectOwnedHandle(fldPlayerObject) + 0x5C);
-    modelRef = *(u8 ***)(D_00435F14 + 0x18);
+    modelRef = *(u8 ***)(fldCameraModelObject + 0x18);
     if (mdlFlagTest(0x31)) {
         range = 56.0f;
         slot = 7;
@@ -2176,7 +2097,7 @@ void fldUpdateCameraProximity(void) {
         VU0_LOAD_VF(vf10, vec);
         VU0_APPLY_MATRIX(vf10, vf10);
         VU0_STORE_VF(vf10, vec);
-        if (fldPointDistance(vec[0], vec[1], vec[2], D_0038BAC0[0], D_0038BAC0[1], D_0038BAC0[2]) < range) {
+        if (fldPointDistance(vec[0], vec[1], vec[2], fldLookAtFarPoint[0], fldLookAtFarPoint[1], fldLookAtFarPoint[2]) < range) {
             fldTestSceneControlFlags(0x40);
             fldClearSceneModelColors();
             fldClearCameraObjectTransitionFlags();
@@ -2212,7 +2133,7 @@ s32 fldUpdateCameraFollow(void) {
         }
         func_0012EDB0();
         cam = (FldCamWork *)fldAreaState;
-        dds3SetCameraValue(*world, D_0038AEB0[cam->rowIdx].fov * 3.14f / 180.0f);
+        dds3SetCameraValue(*world, fldCameraFollowRows[cam->rowIdx].fov * 3.14f / 180.0f);
         switch (cam->mode) {
         case 0:
             func_0012FA58();
@@ -2238,12 +2159,12 @@ s32 fldSyncObjectFlagsB(void) {
     if (fldPlayerObject == 0) {
         return 0;
     }
-    if (D_00435F10 == 0) {
+    if (fldSecondarySceneObject == 0) {
         return 0;
     }
     result = dds3TestObjectFlags(fldPlayerObject, 1);
     if (result != 0) {
-        dds3SetObjectFlags(D_00435F10, 1);
+        dds3SetObjectFlags(fldSecondarySceneObject, 1);
         result = 0;
     }
     return result;
@@ -2259,12 +2180,12 @@ void fldResetCameraModelHandles(void) {
 void fldReleaseCameraModel(u32 enabled) {
     if (enabled == 0) {
         D_004360D0 = 0;
-        if (D_00435F14 != 0) {
-            mdlResumeAllContextMotions(D_00435F14);
+        if (fldCameraModelObject != 0) {
+            mdlResumeAllContextMotions(fldCameraModelObject);
         }
     } else {
         D_004360D0 = enabled;
-        mdlSuspendAllContextMotions(D_00435F14);
+        mdlSuspendAllContextMotions(fldCameraModelObject);
     }
 }
 
@@ -2350,7 +2271,7 @@ s32 fldUpdateCameraFrame(void) {
         func_001321F8();
         fldUpdateCameraTarget();
         func_00131B50();
-        node = ((FldCameraModel *)D_00435F14)->nodeId;
+        node = ((FldCameraModel *)fldCameraModelObject)->nodeId;
         func_00131478(node, node);
         if (fldAreaState[70] == 1) {
             func_00131000(0, 0, 6.0f);
@@ -2382,16 +2303,16 @@ u8 fldHasPendingSceneFlags(void) {
 
 void fldHideSceneModelsAndResetCamera(void) {
     dds3SetObjectFlags(fldPlayerObject, 1);
-    if (D_00435F10 != 0) {
-        dds3SetObjectFlags(D_00435F10, 1);
+    if (fldSecondarySceneObject != 0) {
+        dds3SetObjectFlags(fldSecondarySceneObject, 1);
     }
     fldSetCameraNodeModeWithZero();
 }
 
 void fldShowSceneModels(void) {
     dds3ClearObjectFlags(fldPlayerObject, 1);
-    if (D_00435F10 != 0) {
-        dds3ClearObjectFlags(D_00435F10, 1);
+    if (fldSecondarySceneObject != 0) {
+        dds3ClearObjectFlags(fldSecondarySceneObject, 1);
         return;
     }
 }
@@ -2409,25 +2330,25 @@ void fldSetCameraObjectHighlightFlag(void) {
 void fldClearSceneModelColors(void) {
     u8 hasSecondObject;
 
-    hasSecondObject = D_00435F10 != 0;
-    ((FldModelHandle *)D_00435F14)->colorState->color = 0;
+    hasSecondObject = fldSecondarySceneObject != 0;
+    ((FldModelHandle *)fldCameraModelObject)->colorState->color = 0;
     if (hasSecondObject) {
-        ((FldModelHandle *)D_00435F18)->colorState->color = 0;
+        ((FldModelHandle *)fldSecondarySceneModelHandle)->colorState->color = 0;
     }
 }
 
 void fldRestoreSceneModelColors(void) {
     u8 hasSecondObject;
 
-    hasSecondObject = D_00435F10 != 0;
-    ((FldModelHandle *)D_00435F14)->colorState->color = 0x80808080;
+    hasSecondObject = fldSecondarySceneObject != 0;
+    ((FldModelHandle *)fldCameraModelObject)->colorState->color = 0x80808080;
     if (hasSecondObject) {
-        ((FldModelHandle *)D_00435F18)->colorState->color = 0x80808080;
+        ((FldModelHandle *)fldSecondarySceneModelHandle)->colorState->color = 0x80808080;
     }
 }
 
 void fldMarkPrimaryObjectByPeerPresence(void) {
-    if (D_00435F10 != 0) {
+    if (fldSecondarySceneObject != 0) {
         dds3SetObjectFlags(fldPlayerObject, 0x400);
         return;
     }
@@ -2442,7 +2363,7 @@ void fldClearCameraObjectTransitionFlags(void) {
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133B10);
 
 void fldSetCameraNodeModeWithTen(void) {
-    s16 node = ((FldModelHandle *)D_00435F14)->node;
+    s16 node = ((FldModelHandle *)fldCameraModelObject)->node;
     if (fldGetLocationCoordinateValue(fldAreaState[4], fldAreaState[5] + 1) & 0x40) {
         func_00131000(node, 0x12, 10.0f);
         return;
@@ -2451,7 +2372,7 @@ void fldSetCameraNodeModeWithTen(void) {
 }
 
 void fldSetCameraNodeModeWithZero(void) {
-    s16 node = ((FldModelHandle *)D_00435F14)->node;
+    s16 node = ((FldModelHandle *)fldCameraModelObject)->node;
     if (fldGetLocationCoordinateValue(fldAreaState[4], fldAreaState[5] + 1) & 0x40) {
         func_00131000(node, 0x12, 0.0f);
         return;
@@ -2460,16 +2381,16 @@ void fldSetCameraNodeModeWithZero(void) {
 }
 
 s32 fldAddCameraModelEntry(s32 value) {
-    s32 object = D_00435F14;
+    s32 object = fldCameraModelObject;
     *(f32 *)(*(s32 *)(object + 0x1C) + 0x20) = 1.0f;
     return mdlAddEntryPlainEx(object, 0, value, 2.0f, 5.0f);
 }
 
 void fldAddCameraModelPair(s32 first, s32 second) {
-    mdlSetNodeFloat20(D_00435F14, 0, 1.0f);
-    mdlSetNodeFloat20(D_00435F14, 1, 1.0f);
-    mdlAddEntryFlagged(D_00435F14, 0, first);
-    mdlAddEntryFlagged(D_00435F14, 1, second);
+    mdlSetNodeFloat20(fldCameraModelObject, 0, 1.0f);
+    mdlSetNodeFloat20(fldCameraModelObject, 1, 1.0f);
+    mdlAddEntryFlagged(fldCameraModelObject, 0, first);
+    mdlAddEntryFlagged(fldCameraModelObject, 1, second);
 }
 
 void func_00133DB8(void) {
@@ -2539,13 +2460,13 @@ typedef struct FldSkyBuffer {
     u32 word[0x3800];
 } FldSkyBuffer;
 
-extern FldSkyBuffer *D_004360EC;
+extern FldSkyBuffer *fldSkyLightSetBuffer;
 
 extern u32 fldRainTextureData;
 
 extern char D_00413350[];
 
-extern u32 func_00343ED0(const char *, u32 *, s32);
+extern u32 sdfReadNamedResource(const char *, u32 *, s32);
 
 extern u32 sdfDevCreateCommandState(const char *);
 extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
@@ -2569,11 +2490,11 @@ void fldLoadSkyResource(s32 area) {
             func_0035C860(path, "%sF%03d.SKY", directory, area);
         }
         command = sdfDevCreateCommandState(path);
-        sdfDevQueueReadAndWait(command, D_004360EC, 0xE000);
+        sdfDevQueueReadAndWait(command, fldSkyLightSetBuffer, 0xE000);
         sdfDevWaitThenReleaseCommandState(command);
         if (area >= 2 && area < 100 && fldRainTextureResource == 0) {
-            fldRainTextureResource = func_00343ED0(D_00413350, &fldRainTextureData, 0);
-            fldRainTextureReference = func_0032C138((void *)fldRainTextureData);
+            fldRainTextureResource = sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
+            fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
         }
     }
 }
@@ -2596,42 +2517,42 @@ void fldReleaseSkyResources(void) {
 
 void fldUploadSkyBuffer(FldSkyBuffer *src) {
     fldSkyDrawState = 0x80;
-    *D_004360EC = *src;
+    *fldSkyLightSetBuffer = *src;
     fldReleaseSkyResources();
     if (D_00389780[0] >= 2 && D_00389780[0] < 100 && fldRainTextureResource == 0) {
-        fldRainTextureResource = func_00343ED0(D_00413350, &fldRainTextureData, 0);
-        fldRainTextureReference = func_0032C138((void *)fldRainTextureData);
+        fldRainTextureResource = sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
+        fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
     }
 }
 
 INCLUDE_RODATA(const s32, "game/code_00128FE8", D_00413350);
 
 void fldUpdateSwayOffset(void) {
-    D_00436114 = 0;
-    switch (D_0043610C) {
+    fldSwayOffset = 0;
+    switch (fldSwayMode) {
     case 1:
-        D_00436110 += 0.1f;
-        D_00436114 = sdfSinPoly(D_00436110) * 32.0f;
+        fldSwayPhase += 0.1f;
+        fldSwayOffset = sdfSinPoly(fldSwayPhase) * 32.0f;
         break;
     case 2:
-        D_00436110 += 0.2f;
-        D_00436114 = sdfSinPoly(D_00436110) * 32.0f;
+        fldSwayPhase += 0.2f;
+        fldSwayOffset = sdfSinPoly(fldSwayPhase) * 32.0f;
         break;
     case 3:
-        D_00436110 += 0.05f;
-        D_00436114 = sdfSinPoly(D_00436110) * 32.0f;
+        fldSwayPhase += 0.05f;
+        fldSwayOffset = sdfSinPoly(fldSwayPhase) * 32.0f;
         break;
     case 4:
-        D_00436110 += 0.1f;
-        D_00436114 = sdfSinPoly(D_00436110) * 48.0f;
+        fldSwayPhase += 0.1f;
+        fldSwayOffset = sdfSinPoly(fldSwayPhase) * 48.0f;
         break;
     case 5:
-        D_00436110 += 0.2f;
-        D_00436114 = sdfSinPoly(D_00436110) * 48.0f;
+        fldSwayPhase += 0.2f;
+        fldSwayOffset = sdfSinPoly(fldSwayPhase) * 48.0f;
         break;
     case 6:
-        D_00436110 += 0.05f;
-        D_00436114 = sdfSinPoly(D_00436110) * 48.0f;
+        fldSwayPhase += 0.05f;
+        fldSwayOffset = sdfSinPoly(fldSwayPhase) * 48.0f;
         break;
     }
 }
@@ -2656,9 +2577,9 @@ void fldSetFadeTarget(s32 area, s32 value, s32 duration) {
 }
 
 void fldSetSwayMode(u32 mode) {
-    D_0043610C = mode;
-    D_00436110 = 0;
-    D_00436114 = 0;
+    fldSwayMode = mode;
+    fldSwayPhase = 0;
+    fldSwayOffset = 0;
 }
 
 void fldSetSkyDrawState(u32 value) {
@@ -2728,7 +2649,7 @@ INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00435FBC);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00435FC0);
 
-INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00435FC4);
+INCLUDE_SDATA(const s32, "game/code_00128FE8", fldAreaPackedArchive);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00435FC8);
 
@@ -2736,7 +2657,7 @@ INCLUDE_SDATA(const s32, "game/code_00128FE8", fldAreaLoadRequest);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00435FD0);
 
-INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00435FD8);
+INCLUDE_SDATA(const s32, "game/code_00128FE8", fldAreaCachedResource);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00435FDC);
 
@@ -2748,7 +2669,7 @@ INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00435FE8);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00435FEC);
 
-INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00435FF0);
+INCLUDE_SDATA(const s32, "game/code_00128FE8", fldCachedRoomResourceData);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00435FF4);
 
@@ -2756,7 +2677,7 @@ INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00435FF8);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00435FFC);
 
-INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00436000);
+INCLUDE_SDATA(const s32, "game/code_00128FE8", fldCachedRoomResourceSize);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00436004);
 
@@ -2802,9 +2723,9 @@ INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00436088);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_0043608C);
 
-INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00436090);
+INCLUDE_SDATA(const s32, "game/code_00128FE8", fldEncounterRuntimeState);
 
-INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00436098);
+INCLUDE_SDATA(const s32, "game/code_00128FE8", fldEncounterTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_004360A0);
 
@@ -2844,7 +2765,7 @@ INCLUDE_SDATA(const s32, "game/code_00128FE8", D_004360E4);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_004360E8);
 
-INCLUDE_SDATA(const s32, "game/code_00128FE8", D_004360EC);
+INCLUDE_SDATA(const s32, "game/code_00128FE8", fldSkyLightSetBuffer);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_004360F0);
 
@@ -2860,11 +2781,11 @@ INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00436104);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", fldSkyDrawState);
 
-INCLUDE_SDATA(const s32, "game/code_00128FE8", D_0043610C);
+INCLUDE_SDATA(const s32, "game/code_00128FE8", fldSwayMode);
 
-INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00436110);
+INCLUDE_SDATA(const s32, "game/code_00128FE8", fldSwayPhase);
 
-INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00436114);
+INCLUDE_SDATA(const s32, "game/code_00128FE8", fldSwayOffset);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00436118);
 

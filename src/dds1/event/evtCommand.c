@@ -41,7 +41,7 @@ void func_003003F0(const char *fmt, ...);
 
 void scrDestroyAllNamedProcesses(void);
 
-void func_0021FE70(void);
+void evtDrainSecondaryWorldNodes(void);
 
 void dds3ResetWorldResourceState(void *unit);
 
@@ -73,7 +73,7 @@ s32 evtStageRelinkOwnedNodeResource(void *target, void *path);
 
 f32 bfWaitReadArgFloat(s32 idx);
 
-void func_00220298(s32 unit, f32 value);
+void evtScaleSlotByClampedMultiplier(s32 unit, f32 value);
 
 s32 fldParseRoomNumberFromName(char *name);
 
@@ -89,7 +89,7 @@ void evtSetWorldSlotStatusFlag();
 
 void evtClearWorldSlotStatusFlag();
 
-void func_00220300(void *unit, s32 value);
+void evtSetWorldSlotValue(void *unit, s32 value);
 
 void evtToggleWorldSlotScaledValueFlag(void *unit, s32 enabled);
 
@@ -97,7 +97,7 @@ u32 fldGetPlayerSceneState(void);
 
 void dds3SetWorldCameraObject(s32 world, u32 unit);
 
-s32 func_0010D6A0(void);
+s32 scrGetCurrentContext(void);
 
 s32 evtFindTaskById(s32 id);
 
@@ -194,42 +194,42 @@ s32 evtCommandEnablePathUnit(void)
 }
 
 s32 evtCommandAssignEffectObjectOwner(void) {
-    void *path = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
-    s32 found;
-    s32 i;
+    void *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    s32 owner;
+    s32 objectKind;
 
-    if (path == NULL) {
+    if (effectPath == NULL) {
         return 1;
     }
-    i = 4;
+    objectKind = 4;
     do {
-        found = (s32)evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(1));
-        i++;
-    } while (i < 10 && found == 0);
-    if (found == 0) {
+        owner = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
+        objectKind++;
+    } while (objectKind < 10 && owner == 0);
+    if (owner == 0) {
         return 1;
     }
-    effObjBindValidatedOwner(path, found);
+    effObjBindValidatedOwner(effectPath, owner);
     return 1;
 }
 
 s32 evtCommandAssignEffectObjectOwnerWithEntry(void) {
-    void *path = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
-    s32 found;
-    s32 i;
+    void *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    s32 owner;
+    s32 objectKind;
 
-    if (path == NULL) {
+    if (effectPath == NULL) {
         return 1;
     }
-    i = 4;
+    objectKind = 4;
     do {
-        found = (s32)evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(1));
-        i++;
-    } while (i < 10 && found == 0);
-    if (found == 0) {
+        owner = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
+        objectKind++;
+    } while (objectKind < 10 && owner == 0);
+    if (owner == 0) {
         return 1;
     }
-    effObjBindOwnerBillEntry(path, found, scrReadIntParameter(2));
+    effObjBindOwnerBillEntry(effectPath, owner, scrReadIntParameter(2));
     return 1;
 }
 
@@ -261,21 +261,24 @@ s32 func_00226470(void)
 }
 
 s32 evtCommandAttachLightToUnitPath(void) {
-    void *path = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
-    void *target;
+    void *effect;
+    void *path;
 
-    if (path == NULL) {
+    effect = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    if (effect == NULL) {
         evtPrintDeveloperConsoleMessage(D_003AC700);
         return 1;
     }
-    target = evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1));
-    if (target == NULL) {
+    path = evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1));
+    if (path == NULL) {
         evtPrintDeveloperConsoleMessage(D_003AC728);
         return 1;
     }
-    evtStageRelinkOwnedNodeResource(target, path);
+    evtStageRelinkOwnedNodeResource(path, effect);
     return 1;
 }
+
+extern char D_003AC750[];
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC700);
 
@@ -516,7 +519,7 @@ s32 evtCommandSetWorldNodeUpperMode(void)
 
 s32 evtCommandShutdownStage(void)
 {
-    func_0021FE70();
+    evtDrainSecondaryWorldNodes();
     while (sdfCheckPendingWorkWithInterrupts()) {
     }
     evtDestroySecondaryWorldNode();
@@ -530,7 +533,7 @@ s32 evtCommandShutdownStage(void)
 
 s32 evtCommandShutdownStageAlternate(void)
 {
-    func_0021FE70();
+    evtDrainSecondaryWorldNodes();
     while (sdfCheckPendingWorkWithInterrupts()) {
     }
     evtDestroySecondaryWorldNode();
@@ -544,7 +547,7 @@ s32 evtCommandShutdownStageAlternate(void)
 
 s32 evtCommandClearAllUnits(void)
 {
-    func_0021FE70();
+    evtDrainSecondaryWorldNodes();
     func_003003F0("unit all clear !!\n");
     evtPrintDeveloperConsoleMessage("unit all clear.\n");
     return 1;
@@ -552,7 +555,7 @@ s32 evtCommandClearAllUnits(void)
 
 s32 evtCommandClearAllUnitsAndWait(void)
 {
-    func_0021FE70();
+    evtDrainSecondaryWorldNodes();
     while (sdfCheckPendingWorkWithInterrupts()) {
     }
     func_003003F0("unit all clear2 !!\n");
@@ -709,7 +712,7 @@ s32 evtCommandSetSolarPhase(void)
 
 s32 evtCommandWaitForCampTask(void) {
     s32 id = scrReadIntParameter(0);
-    EvtCommandWork *work = (EvtCommandWork *)func_0010D6A0();
+    EvtCommandWork *work = (EvtCommandWork *)scrGetCurrentContext();
     char *msg;
 
     if (work == NULL) {
@@ -733,7 +736,7 @@ s32 evtCommandWaitForCampTask(void) {
 
 s32 evtCommandStartCampTaskIfAbsent(void) {
     s32 id = scrReadIntParameter(0);
-    EvtCommandWork *work = (EvtCommandWork *)func_0010D6A0();
+    EvtCommandWork *work = (EvtCommandWork *)scrGetCurrentContext();
 
     if (work == NULL) {
         return 1;
@@ -750,7 +753,7 @@ s32 evtCommandTestCampTaskReady(void) {
     s32 id = scrReadIntParameter(0);
     s32 ok;
 
-    if (func_0010D6A0() != 0 && evtFindTaskById(id) != 0 && evtGetTaskValueWord(id) == 2) {
+    if (scrGetCurrentContext() != 0 && evtFindTaskById(id) != 0 && evtGetTaskValueWord(id) == 2) {
         evtPrintDeveloperConsoleMessage(D_003AC968, id);
         ok = 1;
     } else {
@@ -763,7 +766,7 @@ s32 evtCommandTestCampTaskReady(void) {
 s32 evtCommandDestroyCampTask(void) {
     s32 id = scrReadIntParameter(0);
 
-    if (func_0010D6A0() == 0) {
+    if (scrGetCurrentContext() == 0) {
         return 1;
     }
     if (evtFindTaskById(id) == 0) {
@@ -775,7 +778,7 @@ s32 evtCommandDestroyCampTask(void) {
 }
 
 s32 evtCommandStartPolygonMovie(void) {
-    EvtCommandWork *work = (EvtCommandWork *)func_0010D6A0();
+    EvtCommandWork *work = (EvtCommandWork *)scrGetCurrentContext();
     s32 a;
     s32 b;
     s32 result;
@@ -808,7 +811,7 @@ s32 evtCommandClearPolygonMovieFlag(void)
 }
 
 s32 evtCommandCreatePolygonMovie(void) {
-    EvtCommandWork *work = (EvtCommandWork *)func_0010D6A0();
+    EvtCommandWork *work = (EvtCommandWork *)scrGetCurrentContext();
     s32 a;
     s32 b;
     s32 result;
@@ -880,7 +883,7 @@ s32 evtCommandSetUnitRoomFloatState(void) {
             return 1;
         }
     }
-    func_00220298(unit, bfWaitReadArgFloat(1));
+    evtScaleSlotByClampedMultiplier(unit, bfWaitReadArgFloat(1));
     owner = ((EvtWorldUnit *)unit)->roomName;
     if (owner == 0) {
         return 1;
@@ -912,7 +915,7 @@ s32 evtCommandSetUnitRoomIntegerState(void) {
             return 1;
         }
     }
-    func_00220300(unit, scrReadIntParameter(1));
+    evtSetWorldSlotValue(unit, scrReadIntParameter(1));
     owner = ((EvtWorldUnit *)unit)->roomName;
     if (owner == 0) {
         return 1;

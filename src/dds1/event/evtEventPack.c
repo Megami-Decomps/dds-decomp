@@ -35,13 +35,54 @@ void evtCreateMotionSeTask(s32 taskArg, s32 namePart1, s32 namePart2) {
     kwlnTaskCreate(taskName, 0x3EC, 0, 0, func_002420B8, evtFreeEventPackState, params);
 }
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_003AF260);
+typedef struct EvtPackLoadState {
+    s32 eventId;
+    s32 loaded;
+    s32 fileHandle;
+} EvtPackLoadState;
 
-INCLUDE_ASM(const s32, "event/evtEventPack", func_00242340);
+extern char D_003AF270[];
+extern char D_003BC370[];
+extern s32 func_003003F0();
+extern char D_003D8090[];
+extern s32 func_00288B48(char *path);
+
+/* Resolve the event's script path ("/event/eNNN/eNNN/scr/eNNN.be", grouped by tens) and start loading it. */
+void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
+    s32 eventId;
+    s32 directoryId;
+    s32 fileHandle;
+
+    func_003003F0(D_003BC370);
+    eventId = state->eventId;
+    directoryId = eventId - eventId % 10;
+    func_003014F0(D_003D8090, D_003AF270, directoryId, eventId, eventId);
+    fileHandle = func_00288B48(D_003D8090);
+    state->fileHandle = fileHandle;
+    state->loaded = 1;
+}
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_002423C8);
 
-INCLUDE_ASM(const s32, "event/evtEventPack", func_002424B0);
+extern void func_002423C8(EvtPackLoadState *state);
+
+s32 func_002424B0(void) {
+    EvtPackLoadState *state = (EvtPackLoadState *)kwlnTaskGetUserValue();
+
+    switch (state->loaded) {
+    default:
+        if (state->loaded < 2) {
+            if (state->loaded == 0) {
+                evtBeginEventPackScriptLoad(state);
+            }
+        }
+        break;
+    case 1:
+        func_002423C8(state);
+        break;
+    }
+    return 0;
+}
 
 extern void fileWaitIdle(void);
 extern void effInitCh72Id(void);
@@ -108,6 +149,10 @@ void evtReleaseEventPackResources(void) {
     }
     sdfReleaseChipBlock(state);
 }
+
+INCLUDE_RODATA(const s32, "event/evtEventPack", D_003AF260);
+
+INCLUDE_RODATA(const s32, "event/evtEventPack", D_003AF270);
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", D_003BC368);
 

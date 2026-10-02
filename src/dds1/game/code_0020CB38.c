@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl_state.h"
+#include "btl_command.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
@@ -11,11 +12,11 @@ extern char D_003BB898[];
 
 extern char D_003BB8A8[];
 
-extern s32 D_003BAA60;
+extern s32 datActionAnimationRecords;
 
 extern void func_003014F0();
 
-extern s32 func_001A17F0(void);
+extern s32 btlGetRuntime(void);
 
 extern void func_001D6300(void *, void *);
 
@@ -27,37 +28,10 @@ extern s32 func_0020B348();
 
 extern s32 func_0020DC38();
 
-extern void (*D_00360E38[])(BtlTask *, u32, s32);
+extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 
 extern s32 btlGetIndexListEntry(void *, u32);
 
-/* Paired cameras are transforms: two vectors, distance and field of view. */
-typedef struct BtlCamState {
-    f32 position[4];
-    f32 direction[4];
-    f32 distance;
-    f32 fov;
-} BtlCamState;
-
-/* Linked motion command; actionCode/state belong here, not in BtlUnit flags. */
-typedef struct BtlLinkedCommand {
-    BtlCamState camera; /* 0x00 */
-    u8 pad28[8];
-    BtlCamState frontCamera; /* 0x30 */
-    u8 pad58[0x68];
-    BtlCamState backCamera; /* 0xC0 */
-    u8 padE8[8];
-    u32 flags; /* 0xF0 */
-    BtlTask *task; /* 0xF4 */
-    BtlUnit *linkedA; /* 0xF8 */
-    BtlUnit *linkedB; /* 0xFC */
-    u8 pad100[0x10];
-    s32 state; /* 0x110 */
-    s32 actionCode; /* 0x114 */
-    u32 targetList; /* 0x118 */
-    u8 pad11C[0x14];
-    f32 motionParameter; /* 0x130 */
-} BtlLinkedCommand;
 
 extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
 
@@ -80,7 +54,7 @@ extern char D_003A5FF0[];
 
 extern char D_003A6018[];
 
-extern void func_0020AFB8();
+extern void btlChooseRandomPresetCameraKeys();
 
 extern void func_0020B190(u8 *, void *);
 
@@ -98,11 +72,11 @@ extern void btlClearRuntimeFlag2000(void);
 /* Dispatch linked-camera animation metadata; +0x110 resets command state, not
  * unit flags. Returns 1 when a camera path is handled, otherwise 0. */
 s32 btlDispatchActionAnimationB(BtlLinkedCommand *command) {
-    u16 flags = ((BtlActionTableRow *)D_003BAA60)[command->actionCode].flags;
+    u16 flags = ((BtlActionTableRow *)datActionAnimationRecords)[command->actionCode].flags;
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
         if (!(flags & 0x10)) {
-            func_0020AFB8((u8 *)command);
+            btlChooseRandomPresetCameraKeys((u8 *)command);
         } else {
             btlSetEffectCameraKeys((void *)command, 59.2f, -700.6f, -1901.2f,
                            0.092f, 0.023f, -0.009f, 0.987f,
@@ -114,14 +88,14 @@ s32 btlDispatchActionAnimationB(BtlLinkedCommand *command) {
         btlFlagAllUnitDefeatCandidatesTask();
         func_0020B348((void *)command, (void *)command, 0);
     } else if (flags & 8) {
-        if (btlGetIndexListCount(command->task->unk_60) == 1) {
-            void *other = (void *)btlGetIndexListEntry((void *)command->task->unk_60, 0);
+        if (btlGetIndexListCount(command->task->targetList) == 1) {
+            void *target = (void *)btlGetIndexListEntry((void *)command->task->targetList, 0);
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020B190((u8 *)command, other);
+            func_0020B190((u8 *)command, target);
             command->state = 0;
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020AFB8((u8 *)command);
+            btlChooseRandomPresetCameraKeys((u8 *)command);
         }
     } else {
         return 0;
@@ -162,7 +136,7 @@ void btlFormatBattleEffectResourceName(s32 record, s32 action, s32 pathBuffer) {
     if (action != 0xd5) {
         return;
     }
-    func_003014F0(pathBuffer, "%s%03X_%02X.BED", D_003BB8A8, *(u16 *)(D_003BAA60 + 0x1aa4), *(s32 *)(record + 0x38) - 0x13d);
+    func_003014F0(pathBuffer, "%s%03X_%02X.BED", D_003BB8A8, *(u16 *)(datActionAnimationRecords + 0x1aa4), *(s32 *)(record + 0x38) - 0x13d);
 }
 
 u32 func_0020D548(void) {
@@ -173,7 +147,7 @@ s32 btlGetEnabledEnemyActionResponse(BtlUnit *unit, s32 action) {
     if ((unit->flags & 0x400) == 0) {
         return -1;
     }
-    if (((BtlActionTableRow *)D_003BAA60)[action].enabled == 0) {
+    if (((BtlActionTableRow *)datActionAnimationRecords)[action].enabled == 0) {
         return -1;
     }
     if (unit->mode == 0x114) {
@@ -186,7 +160,7 @@ s32 func_0020D598(BtlUnit *unit, s32 action) {
     if ((unit->flags & 0x400) == 0) {
         return -1;
     }
-    if (((BtlActionTableRow *)D_003BAA60)[action].enabled == 0) {
+    if (((BtlActionTableRow *)datActionAnimationRecords)[action].enabled == 0) {
         return -1;
     }
     if (unit->mode == 0x111) {
@@ -220,15 +194,13 @@ s32 btlOffsetSpecialTargetPositionForAction(BtlLinkedCommand *command, s32 unuse
 
 extern s32 btlOffsetSpecialTargetPositionForAction();
 
-s64 func_0020D668(BtlLinkedCommand *command, s8 unused1, s8 unused2) {
-    return btlOffsetSpecialTargetPositionForAction(command, unused1, unused2);
-}
+INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020D668);
 
 s32 func_0020D690(BtlUnit *unit, s32 action) {
     if ((unit->flags & 0x400) == 0) {
         return -1;
     }
-    if (((BtlActionTableRow *)D_003BAA60)[action].enabled == 0) {
+    if (((BtlActionTableRow *)datActionAnimationRecords)[action].enabled == 0) {
         return -1;
     }
     if (unit->mode == 0x109) {
@@ -238,7 +210,7 @@ s32 func_0020D690(BtlUnit *unit, s32 action) {
 }
 
 s32 btlDeactivateOthersOnSpecialUnitDefeat(void) {
-    BtlUnit *unit = ((BtlState *)func_001A17F0())->units;
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     BtlUnit *head = unit;
     s32 result = -1;
     for (; unit != NULL; unit = unit->next) {
@@ -284,7 +256,7 @@ s32 btlNormalizeActionForSkill(BtlUnit *unit, s32 action) {
 }
 
 void btlRecenterUnitsOnLead(void) {
-    BtlState *work = (BtlState *)func_001A17F0();
+    BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     BtlUnit *lead = 0;
     f32 shift;
@@ -350,7 +322,7 @@ s32 func_0020D9F8(BtlUnit *unit, s32 action) {
     if ((unit->flags & 0x400) == 0) {
         return -1;
     }
-    if (((BtlActionTableRow *)D_003BAA60)[action].enabled == 0) {
+    if (((BtlActionTableRow *)datActionAnimationRecords)[action].enabled == 0) {
         return -1;
     }
     if (unit->mode == 0x113) {
@@ -376,7 +348,7 @@ void btlSelectRandomDefeatCamera(BtlLinkedCommand *command) {
     }
 }
 
-extern void func_00204838(void *, void *, void *, s32, s32, f32, f32, f32);
+extern void btlBuildLinkedCommandCameraPair(void *, void *, void *, s32, s32, f32, f32, f32);
 
 extern void func_001DB698(void *);
 
@@ -385,7 +357,7 @@ extern void func_001DB698(void *);
 void btlRaiseLinkedActionPose(BtlLinkedCommand *command) {
     BtlCamState *frontCamera = &command->frontCamera;
     BtlCamState *backCamera = &command->backCamera;
-    func_00204838(command, frontCamera, backCamera, 0, 1, 0.25f, 0.0f, 0.5f);
+    btlBuildLinkedCommandCameraPair(command, frontCamera, backCamera, 0, 1, 0.25f, 0.0f, 0.5f);
     command->motionParameter = 30.0f;
     command->flags |= 0x41;
     command->frontCamera.distance += 500.0f;
@@ -396,9 +368,7 @@ void btlRaiseLinkedActionPose(BtlLinkedCommand *command) {
 
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020DC38);
 
-s64 func_0020DE50(void) {
-    return func_0020DC38();
-}
+INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020DE50);
 
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020DE70);
 
@@ -412,8 +382,8 @@ s32 btlHandleLinkedUnitDefeatAction(BtlLinkedCommand *command) {
     BtlTask *entry = command->task;
     BtlUnit *other;
     if (entry->unit->flags & 0x200) {
-        if (btlGetIndexListCount((void *)entry->unk_60) == 1) {
-            other = (BtlUnit *)btlGetIndexListEntry((void *)entry->unk_60, 0);
+        if (btlGetIndexListCount((void *)entry->targetList) == 1) {
+            other = (BtlUnit *)btlGetIndexListEntry((void *)entry->targetList, 0);
             if ((other->flags & 0x400) == 0) {
                 return 0;
             }
@@ -429,7 +399,7 @@ s32 btlHandleLinkedUnitDefeatAction(BtlLinkedCommand *command) {
 }
 
 s32 btlApplyActionDefeatCamera(BtlLinkedCommand *command) {
-    u16 flags = ((BtlActionTableRow *)D_003BAA60)[command->actionCode].flags;
+    u16 flags = ((BtlActionTableRow *)datActionAnimationRecords)[command->actionCode].flags;
     if (flags & 0x1000) {
         btlFlagAllUnitDefeatCandidatesTask();
         if (!(flags & 0x10)) {
@@ -443,7 +413,7 @@ s32 btlApplyActionDefeatCamera(BtlLinkedCommand *command) {
         return 1;
     }
     if (flags & 0x2000) {
-        if (btlGetIndexListCount((void *)command->task->unk_60) == 1) {
+        if (btlGetIndexListCount((void *)command->task->targetList) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
             btlRaiseLinkedActionPose(command);
         } else {
@@ -461,9 +431,9 @@ INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8B0);
 
 INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8B4);
 
-INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8B8);
+INCLUDE_SDATA(const s32, "game/code_0020CB38", btlPrimaryScriptResourceName);
 
-INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8C0);
+INCLUDE_SDATA(const s32, "game/code_0020CB38", btlSecondaryScriptResourceName);
 
 INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8C8);
 

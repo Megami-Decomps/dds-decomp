@@ -140,10 +140,10 @@ typedef struct {
 } SdfObj;
 
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
+    s32 firstWord;
+    s32 work;
+    s32 thirdWord;
+    s32 fourthWord;
 } SdfMsg;
 
 typedef struct {
@@ -384,27 +384,8 @@ void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
     VU0_LOAD_MATRIX(transform);
     scale = model->scaleVector;
     VU0_LOAD_VF_MEMORY(vf10, scale);
-    __asm__ volatile (
-        ".set noreorder               \n"
-        "vmul.xyz vf28, vf28, vf10    \n"
-        "vmul.xyz vf29, vf29, vf10    \n"
-        "vmul.xyz vf30, vf30, vf10    \n"
-        ".set reorder"
-        :
-        :
-        : "memory"
-    );
-    __asm__ volatile (
-        ".set noreorder          \n"
-        "sqc2 vf28, %0           \n"
-        "sqc2 vf29, %1           \n"
-        "sqc2 vf30, %2           \n"
-        "sqc2 vf31, %3           \n"
-        ".set reorder"
-        :
-        : "m" (rootMatrix[0]), "m" (rootMatrix[1]), "m" (rootMatrix[2]), "m" (rootMatrix[3])
-        : "memory"
-    );
+    VU0_MUL_MATRIX_ROWS_VF10();
+    VU0_STORE_MATRIX_M(rootMatrix[0], rootMatrix[1], rootMatrix[2], rootMatrix[3]);
     list = model->list;
     sdfModelUpdateDrawNodeTransforms(list->entries[0], rootMatrix, frame);
 }
@@ -414,13 +395,13 @@ void sdfModelUpdateCurrentFrameTransforms(SdfModel *model) {
     sdfModelUpdateRootTransforms(model, (s8)sdfCurrentBufferIndex);
 }
 
-/* Store four message words, then notify the consumer of the second word. */
-void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *msg, s32 unk0, s32 unk4, s32 unk8, s32 unkC) {
-    msg->unkC = unkC;
-    msg->unk0 = unk0;
-    msg->unk8 = unk8;
-    msg->unk4 = unk4;
-    sdfInstallPoolNodeReleaseCallbacks(unk4);
+/* Store the message words and install release callbacks on its work pointer. */
+void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *message, s32 firstWord, s32 work, s32 thirdWord, s32 fourthWord) {
+    message->fourthWord = fourthWord;
+    message->firstWord = firstWord;
+    message->thirdWord = thirdWord;
+    message->work = work;
+    sdfInstallPoolNodeReleaseCallbacks(work);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8CB8);

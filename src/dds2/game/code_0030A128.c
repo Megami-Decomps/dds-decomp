@@ -14,7 +14,7 @@ extern s32 mdlFlagTest(u32);
 
 extern s32 func_00101740(u32);
 
-extern char D_0042D240[]; /* "LmapMain" */
+extern char fldLocalMapTaskName[]; /* "LmapMain" */
 
 extern void fldShutdownLmapResources(void);
 
@@ -48,7 +48,7 @@ typedef struct LmapList {
 extern LmapNode *sdfGridSeekFirstNode(LmapList *);
 extern LmapNode *sdfGridSeekLastNode(LmapList *);
 extern LmapNode *fldLmapAdvanceWindowStart(LmapList *);
-extern LmapNode *func_0030A160(LmapList *);
+extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
 extern void *func_003292A8(s32 size);
 extern u32 *sdfMemoryGetBlockAddress(u32 handle);
 extern s32 func_0030AAB0(s32);
@@ -94,7 +94,7 @@ LmapNode *fldLmapAdvanceWindowStart(LmapList *list) {
     return cur;
 }
 
-LmapNode *func_0030A160(LmapList *list) {
+LmapNode *fldLmapExpandWindowBackward(LmapList *list) {
     LmapNode *cur = list->cur;
     LmapNode *head = list->first;
     LmapNode *node;
@@ -165,7 +165,7 @@ LmapNode *fldLmapRewindCursor(LmapList *list) {
     list->cur = cur;
     list->count--;
     if (list->count <= 0) {
-        cur = func_0030A160(list);
+        cur = fldLmapExpandWindowBackward(list);
     }
     return cur;
 }
@@ -201,7 +201,6 @@ LmapNode *fldLmapRewindThroughWindow(LmapList *list) {
 }
 
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A3E8);
-
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A528);
 
 typedef struct LmapDrawSurface {
@@ -210,7 +209,7 @@ typedef struct LmapDrawSurface {
     u8 pad14[0xC];
 } LmapDrawSurface; /* 0x20 */
 
-extern LmapDrawSurface D_0037FB48[];
+extern LmapDrawSurface kwlnDrawSurfaces[];
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, void *);
@@ -227,7 +226,7 @@ void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 width, s32 height, s
     sdfInitPacketList(list);
     sdfPktInit(header, x + 0x7000, y + 0x7900, width, height);
     sdfAppendPacket(list, sdfFormatSifPacket(header, command));
-    target = &D_0037FB48[surface];
+    target = &kwlnDrawSurfaces[surface];
     target->submit(target, list);
 }
 
@@ -238,7 +237,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 a, s32 b, s32 c, s32 d, s
 
     sdfInitPacketList(list);
     sdfAppendPacket(list, func_0011F250(x + 0x7000, y + 0x7900, a, b * 16, c * 8, d, e));
-    target = &D_0037FB48[surface];
+    target = &kwlnDrawSurfaces[surface];
     target->submit(target, list);
 }
 
@@ -255,25 +254,25 @@ void fldStartLmapTask(s32 arg0) {
         D_00438890 = 1;
     }
     fldInitializeLmapTaskVariant((LmapTaskState *)block);
-    kwlnTaskCreate(D_0042D240, 0x2AF8, 0, 0, func_0030A8A8, 0, block);
+    kwlnTaskCreate(fldLocalMapTaskName, 0x2AF8, 0, 0, func_0030A8A8, 0, block);
 }
 
 void fldStopLmapTask(void) {
     fldShutdownLmapResources();
-    kwlnTaskDestroyWithHierarchyByName(D_0042D240, 1);
+    kwlnTaskDestroyWithHierarchyByName(fldLocalMapTaskName, 1);
 }
 
 s32 fldLmapTaskExists(void) {
-    return func_00101740((u32)D_0042D240) != 0;
+    return func_00101740((u32)fldLocalMapTaskName) != 0;
 }
 
 void func_0030AA68(const char *fmt, ...) {
 }
 
-INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D240);
-
 /* Counter kind -> timer preset. Kinds 5, 6 and 13 have no arm of their own,
  * so they fall through to the default of 1. */
+INCLUDE_RODATA(const s32, "game/code_0030A128", fldLocalMapTaskName);
+
 s32 func_0030AAB0(s32 kind) {
     s32 preset = 1;
 

@@ -9,11 +9,30 @@ typedef struct LevelStep {
     u8 value;
 } LevelStep;
 
-extern LevelStep D_00370D08[];
+extern LevelStep brsLevelStepThresholds[];
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
-INCLUDE_ASM(const s32, "game/code_002653A0", mnuTitleDrawFadeMenuEntries);
+typedef struct TitleMenuWork {
+    u8 pad00[0x1574];
+    s32 fadeProgress; /* 0x1574 */
+} TitleMenuWork;
+
+extern struct { s32 v[6]; } D_0036D4B0;
+extern u32 uiBlendColors(u32, u32, s32);
+extern void itfDrawCountText(s32, s32, s32, u32, u8 *, s32);
+extern void mnuQueueRightAlignedFormattedInfoText(s32, s32, s32, u32, u8 *, s32);
+extern void func_002650C8(s32, s32, s32, u32, u8 *, s32, u8 *);
+
+void mnuTitleDrawFadeMenuEntries(u8 *work) {
+    u8 *res = work + 0x5C;
+    s32 rowOffset = 0x80;
+    u32 color = uiBlendColors(0x80808080, 0x80808000, 0x100 - ((TitleMenuWork *)work)->fadeProgress);
+
+    itfDrawCountText(D_0036D4B0.v[0], D_0036D4B0.v[1] + rowOffset, 0, color, res, 0x53);
+    mnuQueueRightAlignedFormattedInfoText(D_0036D4B0.v[2], D_0036D4B0.v[3] + rowOffset, 0, color, res, 0x53);
+    func_002650C8(D_0036D4B0.v[4], D_0036D4B0.v[5] + rowOffset, 0, color, res, 0x53, work);
+}
 
 extern void itfUpdateFadeColor();
 extern void func_00264EF0();
@@ -46,15 +65,15 @@ u8 brsGetLevelStepForValue(s32 value) {
     s32 i;
 
     for (i = 2; i >= 0; i--) {
-        if (value >= D_00370D08[i].threshold) {
-            return D_00370D08[i].value;
+        if (value >= brsLevelStepThresholds[i].threshold) {
+            return brsLevelStepThresholds[i].value;
         }
     }
-    return D_00370D08[0].value;
+    return brsLevelStepThresholds[0].value;
 }
 
 u8 brsGetLevelStepCrossedBy(s32 position, s32 increment) {
-    u8 *table = (u8 *)D_00370D08;
+    u8 *table = (u8 *)brsLevelStepThresholds;
     s32 i = 2;
     u8 *limit = table + 4;
     s32 nextPosition = position + increment;
@@ -135,14 +154,14 @@ INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildRewardRows);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", ptyCalcLevelUps);
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 s32 mnuCountAdvancingTitleAnimations(void) {
     s32 offset = 0;
     s32 count = 0;
     s32 remaining = 4;
     do {
-        s32 step = ptyCalcLevelUps(D_003BAA00 + 0xa60 + offset);
+        s32 step = ptyCalcLevelUps(datGameState + 0xa60 + offset);
         count += step > 0;
         offset += 0x1a4;
     } while (--remaining >= 0);
@@ -235,7 +254,7 @@ void mnuSetFontChainDimensionsAndMeasure(u32 fontContext) {
 
 extern u32 uiBlendColors(u32, u32, s32);
 
-u32 func_00266168(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
+u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
     ptyGetCurrentProfileId(*(u32 *)(resource + 8));
     return uiBlendColors(0x80808080, 0x80808000, blend);
 }

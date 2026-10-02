@@ -38,7 +38,7 @@ extern u32 D_004389E8;
 
 extern SdfTex *sdfResourceListHead;
 
-extern u8 D_00439148;
+extern u8 sdfTextureUpdateQueue;
 
 void sdfPendingQueuePush(void *request, s32 value);
 
@@ -53,7 +53,7 @@ typedef struct SdfTexHead {
     s32 format; /* 0x18 */
 } SdfTexHead;
 
-extern SdfTexHead *D_00439144;
+extern SdfTexHead *sdfTextureBlockListHead;
 
 extern SdfTexHead *sdfTextureListHead;
 
@@ -71,7 +71,7 @@ extern SdfSemaObj sdfTextureQueueWork;
 
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 
-extern s8 D_004389F0[2];
+extern s8 sdfBufferSlotIndices[2];
 
 extern volatile s8 sdfBusyBufferIndex;
 
@@ -81,9 +81,9 @@ extern void sdfVuClearTransformCache(void);
 
 extern void func_0032B3F8();
 
-void sdfRequestDeferredGsImageCapture(u32 arg0, u32 arg1) {
-    D_004389E4 = arg0;
-    D_004389E8 = arg1;
+void sdfRequestDeferredGsImageCapture(u32 destination, u32 onComplete) {
+    D_004389E4 = destination;
+    D_004389E8 = onComplete;
     D_004389E0 = 1;
 }
 
@@ -92,21 +92,21 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_00329F78);
 /* Switch both references off the finished double-buffer slot before
  * publishing the slot currently in use. */
 void sdfSwapBufferSlots(s32 oldBuffer, s32 nextBuffer) {
-    if (D_004389F0[0] == oldBuffer) {
-        D_004389F0[0] = oldBuffer ^ 1;
+    if (sdfBufferSlotIndices[0] == oldBuffer) {
+        sdfBufferSlotIndices[0] = oldBuffer ^ 1;
     }
-    if (D_004389F0[1] == oldBuffer) {
-        D_004389F0[1] = oldBuffer ^ 1;
+    if (sdfBufferSlotIndices[1] == oldBuffer) {
+        sdfBufferSlotIndices[1] = oldBuffer ^ 1;
     }
     sdfBusyBufferIndex = nextBuffer;
 }
 
 void sdfSetBufferSlot(s32 singleBuffer, s32 value, s32 index) {
     if (singleBuffer == 0) {
-        D_004389F0[0] = value;
-        D_004389F0[1] = value;
+        sdfBufferSlotIndices[0] = value;
+        sdfBufferSlotIndices[1] = value;
     } else {
-        D_004389F0[index] = value;
+        sdfBufferSlotIndices[index] = value;
     }
     sdfBusyBufferIndex = -1;
 }
@@ -225,7 +225,7 @@ s32 sdfCoalesceUnusedTextureBlocks(SdfTexBlock *block) {
             if (before != NULL) {
                 prev->prev->next = block;
             } else {
-                D_00439144 = (SdfTexHead *)block;
+                sdfTextureBlockListHead = (SdfTexHead *)block;
             }
             sdfReleaseChipBlock(prev, block, prev);
             return 1;
@@ -258,7 +258,7 @@ s32 sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexBlock *block) {
 }
 
 void sdfTexQueuePendingWork(s32 value) {
-    sdfPendingQueuePush(&D_00439148, value);
+    sdfPendingQueuePush(&sdfTextureUpdateQueue, value);
 }
 
 void sdfTexInitializeLists(void) {
@@ -271,8 +271,8 @@ void sdfTexInitializeLists(void) {
     head->unk8 = NULL;
     head->unkC = NULL;
     sdfTextureListHead = head;
-    D_00439144 = head;
-    sdfInitializeSynchronizedRequest(&D_00439148, sdfUpdateTextureHeadsWithInterruptsMasked);
+    sdfTextureBlockListHead = head;
+    sdfInitializeSynchronizedRequest(&sdfTextureUpdateQueue, sdfUpdateTextureHeadsWithInterruptsMasked);
 }
 
 SdfTexHead *sdfAllocImageBuffer(s32 width, s32 height, s32 format) {
@@ -305,7 +305,7 @@ u32 sdfGetTextureListHead(void) {
 }
 
 u32 sdfGetTextureBlockListHead(void) {
-    return D_00439144;
+    return sdfTextureBlockListHead;
 }
 
 s32 sdfFormatImageSize(u32 format, s32 width, s32 height) {
@@ -344,16 +344,16 @@ void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet) {
     SdfSemaObj *obj = &sdfTextureQueueWork;
     SdfTexPacketTail *last;
 
-    WaitSema(obj->unk0);
-    last = (SdfTexPacketTail *)obj->unk10;
+    WaitSema(obj->semaphoreId);
+    last = (SdfTexPacketTail *)obj->packetTail;
     if (last != NULL) {
         last->next = 0;
         last->tag = ((u64)(address & 0x0FFFFFFF) << 32) | 0x20000000;
     } else {
         obj->unkC = (void *)address;
     }
-    obj->unk10 = (s32)packet;
-    SignalSema(obj->unk0);
+    obj->packetTail = (s32)packet;
+    SignalSema(obj->semaphoreId);
 }
 
 void sdfTexQueueResourceRelease(s32 address) {
@@ -369,22 +369,22 @@ void sdfTexQueueResourceRelease(s32 address) {
             entry->mode = 1;
             entry->handle = func_00329930(address);
         }
-        WaitSema(obj->unk0);
-        if (obj->unk8 != NULL) {
-            ((SdfTexReleaseEntry *)obj->unk8)->next = entry;
+        WaitSema(obj->semaphoreId);
+        if (obj->releaseTail != NULL) {
+            ((SdfTexReleaseEntry *)obj->releaseTail)->next = entry;
         } else {
             obj->unk4 = entry;
         }
-        obj->unk8 = entry;
-        SignalSema(obj->unk0);
+        obj->releaseTail = entry;
+        SignalSema(obj->semaphoreId);
     }
 }
 
 void sdfResetSemaphoreState(SdfSemaObj *semaphore) {
     semaphore->unk4 = NULL;
-    semaphore->unk8 = NULL;
+    semaphore->releaseTail = NULL;
     semaphore->unkC = NULL;
-    semaphore->unk10 = 0;
+    semaphore->packetTail = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AFF0);
@@ -395,44 +395,44 @@ void sdfTexInitializeSemaphore(void) {
     SdfSemaObj *obj;
 
     obj = &sdfTextureQueueWork;
-    obj->unk0 = sdfCreateSemaphore(1, 0x7F, 0);
+    obj->semaphoreId = sdfCreateSemaphore(1, 0x7F, 0);
     sdfResetSemaphoreState(obj);
 }
 
 u32 sdfTexGetPrimaryBuffer(SdfTex *texture) {
-    return (u32)texture->unk28;
+    return (u32)texture->primaryBuffer;
 }
 
 /* Size in bytes of a packed primary texture buffer: only the low 15 bits
  * contribute to its 16-byte block count. */
 s32 sdfTexGetPrimaryBufferSize(SdfTex *tex) {
-    SdfTexBuf *buf = tex->unk28;
+    SdfTexBuf *buf = tex->primaryBuffer;
 
     if (buf == NULL) {
         return 0;
     }
-    return ((buf->unk0 & 0x7FFF) + 1) << 4;
+    return ((buf->gifTagWord & 0x7FFF) + 1) << 4;
 }
 
 s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
     SdfTexBuf *buffer;
 
-    buffer = texture->unk2C;
+    buffer = texture->secondaryBuffer;
     if (buffer == NULL) {
         sdfTexCreateSecondPacket();
-        buffer = texture->unk2C;
+        buffer = texture->secondaryBuffer;
     }
     return (s32)buffer;
 }
 
 /* Mirror the primary-buffer size calculation for the secondary buffer. */
 s32 sdfTexGetSecondaryBufferSize(SdfTex *tex) {
-    SdfTexBuf *buf = tex->unk2C;
+    SdfTexBuf *buf = tex->secondaryBuffer;
 
     if (buf == NULL) {
         return 0;
     }
-    return ((buf->unk0 & 0x7FFF) + 1) << 4;
+    return ((buf->gifTagWord & 0x7FFF) + 1) << 4;
 }
 
 u8 func_0032B240(SdfTex *texture) {
@@ -470,39 +470,58 @@ s32 sdfFormatBitsPerPixelC(u32 format) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B2C0);
+s32 func_0032B2C0(s32 format) {
+    s32 size;
+
+    switch (format) {
+    case 19:
+        size = 8;
+        break;
+    case 20:
+        size = 4;
+        break;
+    case 2:
+    case 10:
+        size = 16;
+        break;
+    default:
+        size = 32;
+        break;
+    }
+    return size;
+}
 
 u64 func_0032B318(SdfTex *texture) {
-    return texture->unk28->unk20;
+    return texture->primaryBuffer->textureState;
 }
 
 u64 func_0032B328(SdfTex *texture) {
-    return texture->unk28->unk10;
+    return texture->primaryBuffer->samplingState;
 }
 
 u64 func_0032B338(SdfTex *texture) {
-    return texture->unk28->unk30;
+    return texture->primaryBuffer->clampState;
 }
 
-void sdfTexSetPrimaryBufferModeBits(SdfTex *texture, s32 firstMode, s32 secondMode) {
+void sdfTexSetPrimaryBufferModeBits(SdfTex *texture, s32 magFilter, s32 minFilter) {
     SdfTexBuf *buf;
 
-    buf = texture->unk28;
-    buf->unk10 = (buf->unk10 & ~0x1E0) | (firstMode << 5) | (secondMode << 6);
+    buf = texture->primaryBuffer;
+    buf->samplingState = (buf->samplingState & ~0x1E0) | (magFilter << 5) | (minFilter << 6);
 }
 
-void sdfTexSetSecondaryPacketBits(SdfTex *tex, s32 firstMode, s32 secondMode) {
-    SdfTexBuf *buf = tex->unk2C;
+void sdfTexSetSecondaryPacketBits(SdfTex *tex, s32 magFilter, s32 minFilter) {
+    SdfTexBuf *buf = tex->secondaryBuffer;
 
     if (buf == NULL) {
         sdfTexCreateSecondPacket();
-        buf = tex->unk2C;
+        buf = tex->secondaryBuffer;
     }
-    buf->unk10 = (secondMode << 6) | ((firstMode << 5) | (buf->unk10 & ~0x1E0));
+    buf->samplingState = (minFilter << 6) | ((magFilter << 5) | (buf->samplingState & ~0x1E0));
 }
 
 void func_0032B3E0(SdfTex *texture, u8 value) {
-    texture->unk1F = value;
+    texture->clampMode = value;
     func_0032BE60();
 }
 
@@ -512,14 +531,14 @@ void sdfTexSubmitPixelsForFormat(SdfTex *texture, s32 resourceWord, u8 *pixels, 
     s32 width;
     s32 height;
 
-    if (texture->unk1A == 0x13 || texture->unk1A == 0x1B) {
+    if (texture->pixelFormat == 0x13 || texture->pixelFormat == 0x1B) {
         width = 0x10;
         height = 0x10;
     } else {
         width = 8;
         height = 2;
     }
-    func_0032B3F8(resourceWord, width, height, texture->unk19, pixels, mode);
+    func_0032B3F8(resourceWord, width, height, texture->clutFormat, pixels, mode);
 }
 
 void sdfTexUploadSecondaryResource(SdfTex *tex) {
@@ -541,17 +560,17 @@ void sdfTexListInsert(SdfTex *texture) {
 
 extern void *sdfAllocAndClearQuadwords(s32 size);
 
-SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 arg3, s32 primary, s32 arg5, s32 arg6, s32 secondary) {
+SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, s32 primary, s32 paletteFormat, s32 arg6, s32 secondary) {
     SdfTex *tex = sdfAllocAndClearQuadwords(0x40);
     SdfTexRef *ref = sdfAllocAndClearQuadwords(8);
 
     ref->refCount = 1;
     tex->unk18 = arg6;
-    tex->unk19 = arg5;
-    tex->unkC = x;
-    tex->unkE = y;
-    tex->unk1A = pixelFormat;
-    tex->unk1B = arg3;
+    tex->clutFormat = paletteFormat;
+    tex->width = x;
+    tex->height = y;
+    tex->pixelFormat = pixelFormat;
+    tex->maxMipLevel = maxMipLevel;
     tex->secondaryResource = (SdfTexResource *)secondary;
     tex->primaryResource = (SdfTexResource *)primary;
     tex->reference = ref;
@@ -574,7 +593,7 @@ INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389E8);
 
 INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389EC);
 
-INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389F0);
+INCLUDE_SDATA(const s32, "game/code_00329F60", sdfBufferSlotIndices);
 
 INCLUDE_SDATA(const s32, "game/code_00329F60", sdfBusyBufferIndex);
 

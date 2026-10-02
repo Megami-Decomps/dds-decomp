@@ -14,7 +14,7 @@ extern void *memcpy(void *dst, const void *src, u32 size);
 extern void *func_00328D68(s32 size);
 extern EffParamWork *effParamWorkCreate(s32 kind, void *params);
 extern EffParamWork *effParamWorkDuplicate(EffParamWork *param);
-extern void func_0016A620(EffParamWork *handle);
+extern void effDispatchParameterDataAndFreeWork(EffParamWork *handle);
 extern void sdfReleaseChipBlock(void *work);
 extern u32 func_001695C8(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
@@ -33,8 +33,8 @@ typedef struct {
     u32 parameterVector[4]; /* 0x10 copied from the parameter block */
     s32 frame;      /* 0x20 counts updates */
     u32 color;      /* 0x24 set by effPCPBossSetParameter, starts 0x80808080 */
-    EffParamWork *resource28;  /* 0x28 released by func_0016A620 */
-    EffParamWork *resource2C;  /* 0x2C released by func_0016A620 */
+    EffParamWork *resource28;  /* 0x28 released by effDispatchParameterDataAndFreeWork */
+    EffParamWork *resource2C;  /* 0x2C released by effDispatchParameterDataAndFreeWork */
 } EffPCPBossWork;
 
 /* Trail effect built from a 0x8C-byte parameter head (copied verbatim on spawn),
@@ -210,7 +210,7 @@ void effBossDestroy(EffBossWork *work) {
         func_003297C8(work->groupsHandle);
     }
     parReleaseCellSystem(work->system);
-    func_0016A620(work->paramWork);
+    effDispatchParameterDataAndFreeWork(work->paramWork);
     sdfReleaseChipBlock(work);
 }
 
@@ -264,8 +264,8 @@ EffPCPBossWork *effBossBeamClone(EffPCPBossWork *src) {
 }
 
 void effPCPBossFree(EffPCPBossWork *work) {
-    func_0016A620(work->resource2C);
-    func_0016A620(work->resource28);
+    effDispatchParameterDataAndFreeWork(work->resource2C);
+    effDispatchParameterDataAndFreeWork(work->resource28);
     sdfReleaseChipBlock(work);
 }
 
@@ -503,11 +503,11 @@ EffBossWork *effBossCloneWithGroups(EffBossWork *src) {
     return work;
 }
 
-void func_0018D7D0(void *work) {
+void effBossReleaseWorkCallback(void *work) {
     effBossDestroy(work);
 }
 
-void func_0018D7E8(void *work) {
+void effBossUpdateGeometryCallback(void *work) {
     func_0018C820(work);
 }
 

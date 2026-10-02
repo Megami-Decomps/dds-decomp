@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 typedef struct EffResourceEntry {
     f32 position[3];
@@ -10,7 +11,12 @@ typedef struct EffResourceEntry {
 typedef struct EffResourceWork {
     u8 pad00[0x40];
     EffResourceEntry *entries;
-    u8 pad44[0x1C];
+    s32 count;   /* 0x44: entry count */
+    s32 unk48;   /* 0x48: 2 on creation */
+    f32 unk4C;   /* 0x4C: 1.0f on creation */
+    f32 unk50;   /* 0x50: 1.0f on creation */
+    f32 unk54;   /* 0x54: 1.0f on creation */
+    u8 pad58[8];
     u32 value60;
     u8 pad64[4];
     u32 resource68;
@@ -35,12 +41,51 @@ typedef struct EffBillboardParams {
 extern void *func_00328D68(s32 size);
 extern u32 effRetainResource(s32 kind);
 extern void billSetBillboardMode(u32 handle, s32 mode);
+extern s32 func_003292A8(s32 size);
+extern s32 sdfResourceRetainAddress(s32 handle);
+extern void *sdfCreateAssetWithDrawEntries(void);
+extern void func_003332D0(u32 asset, f32 value);
+extern u8 D_00452080[];
 
 void func_0017E680(EffResourceWork *effect, u32 value) {
     effect->value60 = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0017E680", func_0017E688);
+/* Create an effect resource work with index entries, its entry list inline at +0x74. */
+EffResourceWork *func_0017E688(s32 index) {
+    s32 handle;
+    EffResourceWork *work;
+    EffResourceEntry *entries;
+    u32 asset;
+    u32 i;
+
+    handle = func_003292A8(index * 20 + 0x74);
+    work = (EffResourceWork *)sdfResourceRetainAddress(handle);
+    work->unk48 = 2;
+    work->entries = (EffResourceEntry *)(work + 1);
+    work->resource70 = handle;
+    work->count = index;
+    work->unk4C = 1.0f;
+    work->unk50 = 1.0f;
+    work->unk54 = 1.0f;
+    work->resource68 = 0;
+    EE_MMI_UNIT_MATRIX(work);
+    asset = (u32)sdfCreateAssetWithDrawEntries();
+    work->graphics6C = asset;
+    func_003332D0(asset, 1.0f);
+    entries = work->entries;
+    i = 0;
+    if (index != 0) {
+        do {
+            i++;
+            entries->value = 0x80808080;
+            entries++;
+        } while (i < index);
+    }
+    memset(D_00452080, 0, 0x2C);
+    *(u16 *)(D_00452080 + 4) = 0x4000;
+    return work;
+}
 
 void effReleaseAttachedResources(u32 address) {
     EffResourceWork *effect = (EffResourceWork *)address;

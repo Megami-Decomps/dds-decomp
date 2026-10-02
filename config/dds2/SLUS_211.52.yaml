@@ -148,8 +148,7 @@ segments:
       - [0x91FF8, c, effect/effMagatuhi]  # Nocturne __FILE__
       - [0x95700, c, game/code_00194700]
       - [0x96BC8, c, effect/effMath]  # Nocturne __FILE__
-      - [0x96E50, c, game/code_00195E50]
-      - [0x98E40, c, effect/effEvent]  # Nocturne __FILE__
+      - [0x96E50, c, effect/effEvent]  # Nocturne __FILE__ (TU starts at 0x96E50: func_00198340 needs func_00197D50 compiled earlier)
       - [0x9B0C0, c, game/code_0019A0C0]
       - [0x9C7A8, c, interface/fmGslCont]  # Nocturne __FILE__
       - [0x9C840, c, game/code_0019B840]
@@ -168,8 +167,6 @@ segments:
       - [0x108A38, c, game/code_00207A38]
       - [0x10F850, c, game/code_0020E850]
       - [0x1122C8, c, game/code_002112C8]
-      - [0x11C5C0, c, game/code_0021B5C0]
-      - [0x11FE10, c, game/code_0021EE10]
       - [0x125FC0, c, game/code_00224FC0]
       - [0x128288, c, game/code_00227288]
       - [0x132690, c, model/mdlManager]  # Nocturne __FILE__
@@ -197,7 +194,6 @@ segments:
       - [0x166AB8, c, game/code_00265AB8]
       - [0x166AD8, c, game/code_00265AD8]
       - [0x1675B0, c, game/code_002665B0]
-      - [0x16A978, c, game/code_00269978]
       - [0x16C680, c, game/code_0026B680]
       - [0x16C6A8, c, game/code_0026B6A8]
       - [0x16D1D0, c, game/code_0026C1D0]
@@ -357,8 +353,6 @@ segments:
       - [0x31A560, .rodata, game/code_00207A38]
       - [0x31A8C0, .rodata, game/code_0020E850]
       - [0x31AA50, .rodata, game/code_002112C8]
-      - [0x31B3E0, .rodata, game/code_0021B5C0]
-      - [0x31BBC0, .rodata, game/code_0021EE10]
       - [0x31C3D0, .rodata, game/code_00224FC0]
       - [0x31C510, .rodata, game/code_00227288]
       - [0x321FF0, .rodata, game/code_00233660]
@@ -379,7 +373,6 @@ segments:
       - [0x325BF0, .rodata, game/code_00261E10]
       - [0x325D20, .rodata, game/code_00265AD8]
       - [0x325E60, .rodata, game/code_002665B0]
-      - [0x325FF8, .rodata, game/code_00269978]
       - [0x326018, .rodata, game/code_0026B6A8]
       - [0x326030, .rodata, game/code_0026C1D0]
       - [0x3260B0, .rodata, game/code_0026DBF8]
@@ -473,8 +466,7 @@ segments:
       - [0x3344F0, .lit4, effect/effMagatuhi]
       - [0x334524, .lit4, game/code_00194700]
       - [0x334528, .lit4, effect/effMath]
-      - [0x33452C, .lit4, game/code_00195E50]
-      - [0x334550, .lit4, effect/effEvent]
+      - [0x33452C, .lit4, effect/effEvent]
       - [0x33455C, .lit4, game/code_0019A0C0]
       - [0x334564, .lit4, interface/frFont]
       - [0x334568, .lit4, game/code_001A5BB8]
@@ -483,8 +475,6 @@ segments:
       - [0x33472C, .lit4, game/code_001DD390]
       - [0x334A28, .lit4, game/code_00207A38]
       - [0x334A2C, .lit4, game/code_002112C8]
-      - [0x334B58, .lit4, game/code_0021B5C0]
-      - [0x3354A0, .lit4, game/code_0021EE10]
       - [0x335F28, .lit4, game/code_00224FC0]
       - [0x336218, .lit4, game/code_00227288]
       - [0x336368, .lit4, game/code_00231A80]
@@ -561,8 +551,7 @@ segments:
       - [0x337434, .sdata, game/code_0016A100]
       - [0x337438, .sdata, effect/effPCPMisc]
       - [0x337440, .sdata, game/code_00194700]
-      - [0x337458, .sdata, game/code_00195E50]
-      - [0x337530, .sdata, effect/effEvent]
+      - [0x337458, .sdata, effect/effEvent]
       - [0x337540, .sdata, game/code_0019A0C0]
       - [0x337550, .sdata, interface/frFont]
       - [0x337584, .sdata, game/code_0019E138]  # D_00436580 is frFont's: code_0019E138 reaches it with lui/addiu, not gp_rel
@@ -576,7 +565,6 @@ segments:
       - [0x337AF0, .sdata, game/code_00207A38]
       - [0x337C78, .sdata, game/code_0020E850]
       - [0x337CC0, .sdata, game/code_002112C8]
-      - [0x337CF0, .sdata, game/code_0021EE10]
       - [0x337CF8, .sdata, game/code_00227288]
       - [0x337FA0, .sdata, game/code_00231A80]  # `/model/` (func_00231B50)
       - [0x337FAC, .sdata, game/code_00233660]

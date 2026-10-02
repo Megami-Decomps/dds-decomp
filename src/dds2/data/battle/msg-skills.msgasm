@@ -1,0 +1,6968 @@
+messages msg1
+  message skill_000 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "RESERVED"
+      newline
+      text "SKILL"
+      newline
+    endpage
+  endmessage
+  message skill_001 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_002 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_003 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_004 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_005 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_006 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_007 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_008 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_009 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_00a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_00b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_00c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_00d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_00e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_00f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_010 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~Random"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_011 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~Random"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_012 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_013 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Elec"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_014 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Elec"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_015 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Elec"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_016 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Elec"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_017 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Elec"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_018 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Elec"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_019 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Elec"
+      conditional-newline
+      text "~Random"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_01a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Elec"
+      conditional-newline
+      text "~Random"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_01b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Elec"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_01c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_01d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_01e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_01f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_020 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_021 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_022 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_023 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_024 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_025 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_026 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_027 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_028 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_029 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_02a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_02b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_02c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_02d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_02e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_02f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_030 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_031 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Drain HP"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_032 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Drain MP"
+      conditional-newline
+      text "~Mute"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_033 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Drain HP and MP"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_034 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_035 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Forfeit HP"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_036 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Forfeit HP"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_037 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Add 2 blinking"
+      conditional-newline
+      text "turn icons"
+      newline
+    endpage
+  endmessage
+  message skill_038 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Add 4 blinking"
+      conditional-newline
+      text "turn icons"
+      newline
+    endpage
+  endmessage
+  message skill_039 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Inflict ailments"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_03a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Chance of forcing"
+      conditional-newline
+      text "1 enemy to"
+      conditional-newline
+      text "revert to human"
+      newline
+    endpage
+  endmessage
+  message skill_03b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Chance of forcing"
+      conditional-newline
+      text "all enemies to"
+      conditional-newline
+      text "revert to humans"
+      newline
+    endpage
+  endmessage
+  message skill_03c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reduce HP by half"
+      conditional-newline
+      text "~Expel"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_03d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Greatly reduce HP"
+      conditional-newline
+      text "~Expel"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_03e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reduce HP by half"
+      conditional-newline
+      text "~Expel"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_03f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reduce HP greatly"
+      conditional-newline
+      text "~Expel"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_040 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Expel"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_041 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Death (low odds)"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_042 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Death (high odds)"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_043 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Death (low odds)"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_044 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Death (high odds)"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_045 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Curse"
+      conditional-newline
+      text "~Death type"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_046 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Curse"
+      conditional-newline
+      text "~Death type"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_047 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Petrify"
+      conditional-newline
+      text "~Death type"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_048 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Petrify"
+      conditional-newline
+      text "~Death type"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_049 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mute"
+      conditional-newline
+      text "~Curse"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_04a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mute"
+      conditional-newline
+      text "~Curse"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_04b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Induce sleep"
+      conditional-newline
+      text "~Nerve"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_04c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Induce sleep"
+      conditional-newline
+      text "~Nerve"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_04d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Kill all "
+      conditional-newline
+      text "sleeping enemies"
+      conditional-newline
+      text "~Nerve"
+      newline
+    endpage
+  endmessage
+  message skill_04e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Stun"
+      conditional-newline
+      text "~Nerve"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_04f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Stun"
+      conditional-newline
+      text "~Nerve"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_050 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Poison"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_051 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Poison (high odds)"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_052 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Poison"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_053 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Panic"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_054 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Panic"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_055 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Panic"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_056 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Charm"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_057 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Charm"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_058 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Damage"
+      conditional-newline
+      text "~Charm"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_059 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega dmg/ailments"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_05a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~Random"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_05b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_05c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reduce HP Greatly"
+      conditional-newline
+      text "~Expel"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_05d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_05e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Almighty/death"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_05f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_060 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Nerve/Stun"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_061 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Mute"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_062 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Curse"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_063 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dmg relative to HP"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (low HP=high dmg)"
+      newline
+    endpage
+  endmessage
+  message skill_064 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Almighty/stun"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (100% stun)"
+      newline
+    endpage
+  endmessage
+  message skill_065 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_066 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_067 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_068 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_069 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_06a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_06b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_06c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_06d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_06e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_06f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_070 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      text " (high accuracy)"
+      newline
+    endpage
+  endmessage
+  message skill_071 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Multi-hit"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      text " (high accuracy)"
+      newline
+    endpage
+  endmessage
+  message skill_072 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Multi-hit"
+      conditional-newline
+      text "~Phys/poison"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      text " (high accuracy)"
+      newline
+    endpage
+  endmessage
+  message skill_073 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Phys/poison"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_074 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Phys/panic"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_075 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Multi-hit"
+      conditional-newline
+      text "~Phys/curse"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_076 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Multi-hit"
+      conditional-newline
+      text "~Phys/stun"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_077 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~Random"
+      control f1 11
+      text " (high accuracy)"
+      newline
+    endpage
+  endmessage
+  message skill_078 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_079 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_07a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_07b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Phys/sleep"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_07c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate dmg"
+      conditional-newline
+      text "~Phys/charm"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_07d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate dmg"
+      conditional-newline
+      text "~Phys/charm"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_07e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_07f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Phys/stun"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_080 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Phys/curse"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_081 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (high crit/low acc)"
+      newline
+    endpage
+  endmessage
+  message skill_082 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dmg relative to HP"
+      conditional-newline
+      text "~Phy/mute"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_083 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dmg relative to HP"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      text " (high accuracy)"
+      newline
+    endpage
+  endmessage
+  message skill_084 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dmg relative to HP"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_085 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Phys/panic"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_086 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dmg relative to HP"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (high accuracy)"
+      newline
+    endpage
+  endmessage
+  message skill_087 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dmg relative to HP"
+      conditional-newline
+      text "~Phys/poison"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_088 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dmg relative to HP"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (low accuracy)"
+      newline
+    endpage
+  endmessage
+  message skill_089 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dmg relative to HP"
+      conditional-newline
+      text "~Phys/stone"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_08a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_08b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_08c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Phys/mute"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_08d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Almighty/def down"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_08e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Randomly counter"
+      conditional-newline
+      text "~Low odds"
+      newline
+    endpage
+  endmessage
+  message skill_08f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Randomly counter"
+      conditional-newline
+      text "~Fair odds"
+      newline
+    endpage
+  endmessage
+  message skill_090 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Randomly counter"
+      conditional-newline
+      text "~High odds"
+      newline
+    endpage
+  endmessage
+  message skill_091 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      text " (high crit/low acc)"
+      newline
+    endpage
+  endmessage
+  message skill_092 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~Random"
+      control f1 11
+      text " (all stats down)"
+      newline
+    endpage
+  endmessage
+  message skill_093 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~Multi-hit"
+      control f1 11
+      text " (100% hit)"
+      newline
+    endpage
+  endmessage
+  message skill_094 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_095 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_096 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_097 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_098 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_099 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_09a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_09b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_09c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_09d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_09e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_09f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0a0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP moderately"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0a1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP greatly"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0a2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP fully"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0a3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP moderately"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0a4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP greatly"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0a5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP fully"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0a6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure charm/sleep/"
+      conditional-newline
+      text "panic"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0a7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure charm/sleep/"
+      conditional-newline
+      text "panic"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0a8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure mute"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0a9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure poison"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0aa speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure charm"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0ab speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Revive target"
+      conditional-newline
+      text "~Some HP"
+      conditional-newline
+      text "~1 ally"
+      control f1 11
+      text " (battle only)"
+      newline
+    endpage
+  endmessage
+  message skill_0ac speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Revive target"
+      conditional-newline
+      text "~All HP"
+      conditional-newline
+      text "~1 ally"
+      control f1 11
+      text " (battle only)"
+      newline
+    endpage
+  endmessage
+  message skill_0ad speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP/MP"
+      conditional-newline
+      text "~Sacrifice"
+      conditional-newline
+      text "~Party"
+      control f1 11
+      text " (battle only)"
+      newline
+    endpage
+  endmessage
+  message skill_0ae speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP/"
+      conditional-newline
+      text "cure ailments"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0af speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Share 50 MP"
+      conditional-newline
+      text "~1 ally"
+      control f1 11
+      text " (battle only)"
+      newline
+    endpage
+  endmessage
+  message skill_0b0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Phys attack down"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0b1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Evade/acc down"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0b2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Defense down"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0b3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Magic attack down"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0b4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cancel -nda"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0b5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Phys attack up"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0b6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Evade/acc up"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0b7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Defense up"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0b8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Magic attack up"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0b9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cancel -kaja"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0ba speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Phys attack "
+      conditional-newline
+      text "greatly decreased"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0bb speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Magic attack "
+      conditional-newline
+      text "greatly decreased"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0bc speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Evade/acc "
+      conditional-newline
+      text "greatly decreased"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0bd speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Defense down/"
+      conditional-newline
+      text "phys attack up"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0be speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Attack/def/"
+      conditional-newline
+      text "evade/acc down"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0bf speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "See enemy info"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0c0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Phys atk dmg "
+      conditional-newline
+      text "more than doubles"
+      newline
+    endpage
+  endmessage
+  message skill_0c1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Magic atk dmg "
+      conditional-newline
+      text "more than doubles"
+      newline
+    endpage
+  endmessage
+  message skill_0c2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enemy skill"
+      newline
+    endpage
+  endmessage
+  message skill_0c3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enemy skill"
+      newline
+    endpage
+  endmessage
+  message skill_0c4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Encounter rate down"
+      conditional-newline
+      text "until next"
+      conditional-newline
+      text "MIN Noise"
+      newline
+    endpage
+  endmessage
+  message skill_0c5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Encounter rate up"
+      conditional-newline
+      text "until next"
+      conditional-newline
+      text "MIN Noise"
+      newline
+    endpage
+  endmessage
+  message skill_0c6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null damage zones"
+      conditional-newline
+      text "until next"
+      conditional-newline
+      text "MIN Noise"
+      newline
+    endpage
+  endmessage
+  message skill_0c7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Unlock"
+      conditional-newline
+      text "blue barriers"
+      newline
+    endpage
+  endmessage
+  message skill_0c8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Unlock"
+      conditional-newline
+      text "yellow barriers"
+      newline
+    endpage
+  endmessage
+  message skill_0c9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Unlock"
+      conditional-newline
+      text "red barriers"
+      newline
+    endpage
+  endmessage
+  message skill_0ca speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Attacks decoy"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0cb speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enemy skill"
+      newline
+    endpage
+  endmessage
+  message skill_0cc speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enemy skill"
+      newline
+    endpage
+  endmessage
+  message skill_0cd speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enemy skill"
+      newline
+    endpage
+  endmessage
+  message skill_0ce speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure ache"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0cf speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure stun"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0d0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure stone"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0d1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure madness"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0d2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure madness"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0d3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0d4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Uncurse"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0d5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0d6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0d7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0d8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0d9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0da speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0db speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0dc speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0dd speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0de speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0df speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0e0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Hunt"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0e1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Hunt"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0e2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Fatal (low odds)"
+      conditional-newline
+      text "~Hunt"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0e3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Fatal (high odds)"
+      conditional-newline
+      text "~Hunt"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0e4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Hunt"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_0e5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Hunt"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0e6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Fatal (low odds)"
+      conditional-newline
+      text "~Hunt"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0e7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Fatal at MAX Noise"
+      conditional-newline
+      text "~Hunt"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0e8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Fatal at MIN Noise"
+      conditional-newline
+      text "~Hunt"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0e9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Fatal (high odds)"
+      conditional-newline
+      text "~Hunt"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0ea speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0eb speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0ec speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0ed speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0ee speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0ef speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Hunt"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0f8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0fa speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0fb speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0fc speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0fd speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0fe speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0ff speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_100 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_101 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_102 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_103 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_104 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_105 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_106 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_107 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_108 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_109 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_10a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_10b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_10c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_10d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_10e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_10f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_110 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 50 HP"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_111 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 150 HP"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_112 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 300 HP"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_113 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 50 HP"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_114 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 150 HP"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_115 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 150 HP"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_116 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 50 MP"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_117 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore 150 MP"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_118 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore MP fully"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_119 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore all HP/MP"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_11a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore all HP/MP"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_11b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP or MP"
+      conditional-newline
+      text "~???"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_11c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure ache"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_11d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP (M)"
+      conditional-newline
+      text "~???"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_11e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP (M)"
+      conditional-newline
+      text "~???"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_11f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP (M)"
+      conditional-newline
+      text "~???"
+      conditional-newline
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_120 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_121 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_122 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_123 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_124 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_125 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_126 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_127 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_128 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_129 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_12a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_12b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_12c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_12d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_12e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_12f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_130 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_131 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      conditional-newline
+      text "~Shock"
+      newline
+    endpage
+  endmessage
+  message skill_132 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      conditional-newline
+      text "~Sleep"
+      newline
+    endpage
+  endmessage
+  message skill_133 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_134 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      conditional-newline
+      text "~Panic"
+      newline
+    endpage
+  endmessage
+  message skill_135 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      conditional-newline
+      text "~Freeze"
+      newline
+    endpage
+  endmessage
+  message skill_136 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_137 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_138 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      conditional-newline
+      text "~Charm"
+      newline
+    endpage
+  endmessage
+  message skill_139 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_13a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      conditional-newline
+      text "~Poison"
+      newline
+    endpage
+  endmessage
+  message skill_13b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      conditional-newline
+      text "~Mute"
+      newline
+    endpage
+  endmessage
+  message skill_13c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_13d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_13e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_13f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_140 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_141 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_142 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_143 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_144 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_145 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_146 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_147 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_148 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_149 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_14a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_14b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_14c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_14d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_14e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_14f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_150 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null phys attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_151 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null fire attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_152 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null ice attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_153 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null elec attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_154 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null force attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_155 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null earth attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_156 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null expel attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_157 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null death attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_158 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null charm attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_159 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null poison attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_15a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null mute attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_15b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null panic attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_15c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null nerve attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_15d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Drain phys attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_15e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Drain fire attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_15f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Drain ice attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_160 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Drain elec attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_161 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Drain force attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_162 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Drain earth attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_163 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repel phys attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_164 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repel fire attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_165 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repel ice attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_166 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repel elec attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_167 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repel force attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_168 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repel earth attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_169 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repel expel attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_16a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repel death attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_16b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Expel/death"
+      conditional-newline
+      text "protection"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_16c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repel phys attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_16d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repel magic attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_16e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Prevent enemy"
+      conditional-newline
+      text "from escaping"
+      newline
+    endpage
+  endmessage
+  message skill_16f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null ailment attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_170 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_171 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_172 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_173 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_174 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_175 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_176 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_177 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_178 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_179 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_17a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_17b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_17c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_17d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_17e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_17f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_180 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Critical attack"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_181 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Fire damage"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_182 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Critical attack"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_183 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_184 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Force damage"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_185 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Drain HP"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_186 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Drain HP"
+      conditional-newline
+      text "~Turn into bat"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_187 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Force damage"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_188 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Earth damage"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_189 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_18a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_18b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_18c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_18d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_18e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_18f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_190 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_191 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_192 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_193 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_194 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_195 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_196 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_197 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_198 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_199 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_19a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_19b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_19c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_19d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_19e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_19f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1aa speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1ab speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1ac speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Greatly reduces HP"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1ad speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1ae speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1af speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1b0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1b1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1b2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1b3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1b4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_1b5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_1b6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_1b7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_1b8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Elec"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_1b9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Elec"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_1ba speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Elec"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_1bb speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Elec"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (shock) "
+      newline
+    endpage
+  endmessage
+  message skill_1bc speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1bd speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1be speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1bf speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1c0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Light damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1c1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1c2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1c3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1c4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Inflict ailments"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1c5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reduce HP by half"
+      conditional-newline
+      text "~Expel"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_1c6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reduce HP greatly"
+      conditional-newline
+      text "~Expel"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_1c7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Expel"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_1c8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Death (low odds)"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1c9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Death (high odds)"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1ca speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Mind/panic"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1cb speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Charm"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1cc speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Curse"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1cd speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Stun"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1ce speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Petrify"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1cf speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dmg relative to HP"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1d0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (high crit)"
+      newline
+    endpage
+  endmessage
+  message skill_1d1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Dmg relative to HP"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1d2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1d3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1d4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_1d5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Force/stun"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1d6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1d7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Fatal or curse"
+      conditional-newline
+      text "~Death"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1d8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP greatly/"
+      conditional-newline
+      text "defense up"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1d9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Multiple -kaja effects"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1da speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_1db speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Phys"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_1dc speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1dd speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Almighty/def down"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1de speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reduce HP greatly"
+      conditional-newline
+      text "~Expel"
+      conditional-newline
+      text "~All"
+      control f1 11
+      text " (high odds)"
+      newline
+    endpage
+  endmessage
+  message skill_1df speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP/"
+      conditional-newline
+      text "cure ailments"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1e0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Ice damage(S)"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Ice damage(M)"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Ice damage(L)"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Fire damage(S)"
+      conditional-newline
+      text "~All"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Fire damage(M)"
+      conditional-newline
+      text "~All"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Fire damage(L)"
+      conditional-newline
+      text "~All"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Earth damage(S)"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Earth damage(M)"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Earth damage(L)"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1ea speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Force damage(S)"
+      conditional-newline
+      text "~Random"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1eb speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Force damage(M)"
+      conditional-newline
+      text "~Random"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1ec speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Force damage(L)"
+      conditional-newline
+      text "~Random"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1ed speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Elec damage(S)"
+      conditional-newline
+      text "~Random"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1ee speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Elec damage(M)"
+      conditional-newline
+      text "~Random"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1ef speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Elec damage(L)"
+      conditional-newline
+      text "~Random"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1f0 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Elec damage(S)"
+      conditional-newline
+      text "~All"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1f1 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Elec damage(M)"
+      conditional-newline
+      text "~All"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1f2 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Elec damage(L)"
+      conditional-newline
+      text "~All"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1f3 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cure panic/charm/"
+      conditional-newline
+      text "sleep"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1f4 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mute"
+      conditional-newline
+      text "~Curse"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1f5 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repel phys attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1f6 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repel magic "
+      conditional-newline
+      text "attacks"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1f7 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP moderately"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1f8 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP greatly"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1f9 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP fully"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1fa speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Attack/defense/"
+      conditional-newline
+      text "evade/acc down"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1fb speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cancel -nda"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1fc speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Cancel -kaja"
+      conditional-newline
+      text "~All enemies"
+      newline
+    endpage
+  endmessage
+  message skill_1fd speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1fe speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1ff speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_200 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Fire/def down"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_201 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Fire"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_202 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_203 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Ice"
+      conditional-newline
+      text "~Random"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_204 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega damage"
+      conditional-newline
+      text "~Elec"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_205 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Elec"
+      conditional-newline
+      text "~Random"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_206 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega dmg"
+      conditional-newline
+      text "~Force/atk down"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_207 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Force"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_208 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Mega dmg"
+      conditional-newline
+      text "~Earth/evade/acc down"
+      conditional-newline
+      text "~1"
+      control f1 11
+      text " enemy"
+      newline
+    endpage
+  endmessage
+  message skill_209 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~Earth"
+      conditional-newline
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_20a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Restore HP greatly/"
+      conditional-newline
+      text "defense up"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_20b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heals HP/status ailments/"
+      conditional-newline
+      text "revive"
+      conditional-newline
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_20c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Moderate damage"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_20d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Ice damage(S)"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_20e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Ice damage(M)"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_20f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Ice damage(L)"
+      conditional-newline
+      text "~1 enemy"
+      control f1 11
+      conditional-newline
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_210 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Heavy damage"
+      conditional-newline
+      text "~Almighty"
+      conditional-newline
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_211 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_212 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_213 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_214 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_215 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_216 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_217 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_218 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_219 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_21a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_21b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_21c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_21d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_21e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_21f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_220 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Raise MAX HP"
+      conditional-newline
+      text "by 10%"
+      newline
+    endpage
+  endmessage
+  message skill_221 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Raise MAX HP"
+      conditional-newline
+      text "by 20%"
+      newline
+    endpage
+  endmessage
+  message skill_222 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Raise MAX HP"
+      conditional-newline
+      text "by 30%"
+      newline
+    endpage
+  endmessage
+  message skill_223 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Raise MAX MP"
+      conditional-newline
+      text "by 10%"
+      newline
+    endpage
+  endmessage
+  message skill_224 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Raise MAX MP"
+      conditional-newline
+      text "by 20%"
+      newline
+    endpage
+  endmessage
+  message skill_225 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Raise MAX MP"
+      conditional-newline
+      text "by 30%"
+      newline
+    endpage
+  endmessage
+  message skill_226 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Critical hit rate"
+      conditional-newline
+      text "doubled"
+      newline
+    endpage
+  endmessage
+  message skill_227 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Critical hit rate"
+      conditional-newline
+      text "greatly increases"
+      conditional-newline
+      text "during MAX Noise"
+      newline
+    endpage
+  endmessage
+  message skill_228 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Critical hit rate"
+      conditional-newline
+      text "greatly increases"
+      conditional-newline
+      text "during MIN Noise"
+      newline
+    endpage
+  endmessage
+  message skill_229 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enemy's defense"
+      conditional-newline
+      text "decreases with"
+      conditional-newline
+      text "critical hit"
+      newline
+    endpage
+  endmessage
+  message skill_22a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enemy panics with"
+      conditional-newline
+      text "normal attack"
+      newline
+    endpage
+  endmessage
+  message skill_22b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enemy stunned"
+      conditional-newline
+      text "with normal attack"
+      newline
+    endpage
+  endmessage
+  message skill_22c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Enemy petrified"
+      conditional-newline
+      text "with normal attack"
+      newline
+    endpage
+  endmessage
+  message skill_22d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases fire"
+      conditional-newline
+      text "attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_22e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases ice"
+      conditional-newline
+      text "attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_22f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases elec"
+      conditional-newline
+      text "attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_230 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases force"
+      conditional-newline
+      text "attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_231 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases earth"
+      conditional-newline
+      text "attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_232 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Greatly increases"
+      conditional-newline
+      text "fire attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_233 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Greatly increases"
+      conditional-newline
+      text "ice attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_234 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Greatly increases"
+      conditional-newline
+      text "elec attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_235 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Greatly increases"
+      conditional-newline
+      text "force attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_236 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Greatly increases"
+      conditional-newline
+      text "earth attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_237 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Strengthens"
+      conditional-newline
+      text "repelled attacks"
+      newline
+    endpage
+  endmessage
+  message skill_238 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Doubles strength"
+      conditional-newline
+      text "of repelled attacks"
+      newline
+    endpage
+  endmessage
+  message skill_239 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Randomly counter"
+      conditional-newline
+      text "~Light damage"
+      conditional-newline
+      text "~Low odds"
+      newline
+    endpage
+  endmessage
+  message skill_23a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Randomly counter"
+      conditional-newline
+      text "~Moderate damage"
+      conditional-newline
+      text "~Fair odds"
+      newline
+    endpage
+  endmessage
+  message skill_23b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Randomly counter"
+      conditional-newline
+      text "~Heavy damage"
+      conditional-newline
+      text "~High odds"
+      newline
+    endpage
+  endmessage
+  message skill_23c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Phys attack up"
+      conditional-newline
+      text "when hungry"
+      newline
+    endpage
+  endmessage
+  message skill_23d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Absorb HP during"
+      conditional-newline
+      text "normal attacks"
+      newline
+    endpage
+  endmessage
+  message skill_23e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Normal attacks"
+      conditional-newline
+      text "hit all enemies"
+      newline
+    endpage
+  endmessage
+  message skill_23f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gain 1/2 Karma"
+      conditional-newline
+      text "when not in battle"
+      newline
+    endpage
+  endmessage
+  message skill_240 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gain full Karma"
+      conditional-newline
+      text "when not in battle"
+      newline
+    endpage
+  endmessage
+  message skill_241 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases AP"
+      conditional-newline
+      text "gained in battle"
+      control f1 11
+      conditional-newline
+      text "~Active member"
+      newline
+    endpage
+  endmessage
+  message skill_242 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Greatly increases"
+      conditional-newline
+      text "AP gained in battle"
+      control f1 11
+      conditional-newline
+      text "~Active member"
+      newline
+    endpage
+  endmessage
+  message skill_243 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases number"
+      conditional-newline
+      text "of magic fragments"
+      conditional-newline
+      text "received"
+      newline
+    endpage
+  endmessage
+  message skill_244 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Greatly increases"
+      conditional-newline
+      text "number of magic"
+      conditional-newline
+      text "fragments received"
+      newline
+    endpage
+  endmessage
+  message skill_245 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Null aches after"
+      conditional-newline
+      text "successful hunt"
+      newline
+    endpage
+  endmessage
+  message skill_246 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Encounter"
+      conditional-newline
+      text "rare demons"
+      conditional-newline
+      text "more often"
+      newline
+    endpage
+  endmessage
+  message skill_247 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Encounter"
+      conditional-newline
+      text "rare demons"
+      conditional-newline
+      text "less often"
+      newline
+    endpage
+  endmessage
+  message skill_248 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases success"
+      conditional-newline
+      text "of devouring"
+      conditional-newline
+      text "weak enemies"
+      newline
+    endpage
+  endmessage
+  message skill_249 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Some MP restored"
+      conditional-newline
+      text "after successful hunt"
+      newline
+    endpage
+  endmessage
+  message skill_24a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Some MP restored"
+      conditional-newline
+      text "after battle"
+      newline
+    endpage
+  endmessage
+  message skill_24b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "HP/MP fully restored"
+      conditional-newline
+      text "after battle"
+      newline
+    endpage
+  endmessage
+  message skill_24c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "MP restored"
+      conditional-newline
+      text "while walking"
+      conditional-newline
+      text "~Active member"
+      newline
+    endpage
+  endmessage
+  message skill_24d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Decreases surprise"
+      conditional-newline
+      text "attacks"
+      newline
+    endpage
+  endmessage
+  message skill_24e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases chance"
+      conditional-newline
+      text "of first strike"
+      newline
+    endpage
+  endmessage
+  message skill_24f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Decreases chance"
+      conditional-newline
+      text "of being critically hit"
+      newline
+    endpage
+  endmessage
+  message skill_250 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases chance"
+      conditional-newline
+      text "of escaping from battle"
+      newline
+    endpage
+  endmessage
+  message skill_251 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Escape death"
+      conditional-newline
+      text "~1 time"
+      conditional-newline
+      text "~Demon form only"
+      newline
+    endpage
+  endmessage
+  message skill_252 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases chance"
+      conditional-newline
+      text "of recovering from"
+      conditional-newline
+      text "ailments each turn"
+      newline
+    endpage
+  endmessage
+  message skill_253 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Decreases"
+      conditional-newline
+      text "vulnerability"
+      conditional-newline
+      text "when petrified"
+      newline
+    endpage
+  endmessage
+  message skill_254 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Less HP required"
+      conditional-newline
+      text "for phys attacks"
+      newline
+    endpage
+  endmessage
+  message skill_255 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Less MP required"
+      conditional-newline
+      text "for magic attacks"
+      newline
+    endpage
+  endmessage
+  message skill_256 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Delays hunger"
+      newline
+    endpage
+  endmessage
+  message skill_257 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases failure"
+      conditional-newline
+      text "rate for"
+      conditional-newline
+      text "Atma creation"
+      newline
+    endpage
+  endmessage
+  message skill_258 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Induces hunger"
+      newline
+    endpage
+  endmessage
+  message skill_259 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases"
+      conditional-newline
+      text "receptiveness to"
+      conditional-newline
+      text "healing magic"
+      newline
+    endpage
+  endmessage
+  message skill_25a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Replaced by"
+      conditional-newline
+      text "inactive member"
+      conditional-newline
+      text "if killed"
+      newline
+    endpage
+  endmessage
+  message skill_25b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases HP"
+      conditional-newline
+      text "restored after"
+      conditional-newline
+      text "attacks"
+      newline
+    endpage
+  endmessage
+  message skill_25c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases tolerance"
+      conditional-newline
+      text "to phys attacks"
+      conditional-newline
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_25d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases tolerance"
+      conditional-newline
+      text "to fire attacks"
+      conditional-newline
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_25e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases tolerance"
+      conditional-newline
+      text "to ice attacks"
+      conditional-newline
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_25f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases tolerance"
+      conditional-newline
+      text "to elec attacks"
+      conditional-newline
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_260 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases tolerance"
+      conditional-newline
+      text "to force attacks"
+      conditional-newline
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_261 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases tolerance"
+      conditional-newline
+      text "to earth attacks"
+      conditional-newline
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_262 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases tolerance"
+      conditional-newline
+      text "to expel attacks"
+      conditional-newline
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_263 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases tolerance"
+      conditional-newline
+      text "to death attacks"
+      conditional-newline
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_264 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Nulls charm attacks"
+      newline
+    endpage
+  endmessage
+  message skill_265 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Nulls poison attacks"
+      newline
+    endpage
+  endmessage
+  message skill_266 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Nulls mute attacks"
+      newline
+    endpage
+  endmessage
+  message skill_267 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Nulls panic attacks"
+      newline
+    endpage
+  endmessage
+  message skill_268 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Nulls nerve attacks"
+      newline
+    endpage
+  endmessage
+  message skill_269 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Nulls all attacks"
+      conditional-newline
+      text "except almighty"
+      newline
+    endpage
+  endmessage
+  message skill_26a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Allows evasion of"
+      conditional-newline
+      text "enemy attacks"
+      conditional-newline
+      text "while asleep"
+      newline
+    endpage
+  endmessage
+  message skill_26b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reduces power to"
+      conditional-newline
+      text "preserve enemy's"
+      conditional-newline
+      text "life (1 attack)"
+      newline
+    endpage
+  endmessage
+  message skill_26c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Increases AP gained"
+      conditional-newline
+      text "by party after"
+      conditional-newline
+      text "successful hunt"
+      newline
+    endpage
+  endmessage
+  message skill_26d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Gain AP when not"
+      conditional-newline
+      text "in battle"
+      newline
+    endpage
+  endmessage
+  message skill_26e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "50% of MP restored"
+      conditional-newline
+      text "after successful hunt"
+      newline
+    endpage
+  endmessage
+  message skill_26f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Nulls phys attacks"
+      newline
+    endpage
+  endmessage
+  message skill_270 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "MP rapidly restored"
+      conditional-newline
+      text "while walking"
+      conditional-newline
+      text "~Active member"
+      newline
+    endpage
+  endmessage
+  message skill_271 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Nulls expel attacks"
+      newline
+    endpage
+  endmessage
+  message skill_272 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Nulls death attacks"
+      newline
+    endpage
+  endmessage
+  message skill_273 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Nulls nerve/charm/"
+      conditional-newline
+      text "mute/poison/panic"
+      conditional-newline
+      text "attacks"
+      newline
+    endpage
+  endmessage
+  message skill_274 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Drains phys attacks"
+      newline
+    endpage
+  endmessage
+  message skill_275 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repels expel"
+      conditional-newline
+      text "attacks"
+      newline
+    endpage
+  endmessage
+  message skill_276 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repels death"
+      conditional-newline
+      text "attacks"
+      newline
+    endpage
+  endmessage
+  message skill_277 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Nulls fire/ice/force/"
+      conditional-newline
+      text "elec/earth attacks"
+      newline
+    endpage
+  endmessage
+  message skill_278 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Repels fire/ice/"
+      conditional-newline
+      text "force/elec/"
+      conditional-newline
+      text "earth attacks"
+      newline
+    endpage
+  endmessage
+  message skill_279 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Start battles"
+      conditional-newline
+      text "in human form"
+      newline
+    endpage
+  endmessage
+  message skill_27a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Low HP increases"
+      conditional-newline
+      text "attack power"
+      newline
+    endpage
+  endmessage
+  message skill_27b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Easier to obtain items"
+      conditional-newline
+      text "after battles"
+      conditional-newline
+      text "~Active member"
+      newline
+    endpage
+  endmessage
+  message skill_27c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Prevents loss"
+      conditional-newline
+      text "of money"
+      newline
+    endpage
+  endmessage
+  message skill_27d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "High odds of"
+      conditional-newline
+      text "level-up events"
+      newline
+    endpage
+  endmessage
+  message skill_27e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Counterattack"
+      conditional-newline
+      text "with hunt"
+      newline
+    endpage
+  endmessage
+  message skill_27f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Counterattack"
+      conditional-newline
+      text "with hunt/death"
+      newline
+    endpage
+  endmessage
+  message skill_280 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Switching consumes"
+      conditional-newline
+      text "only 1/2 turn icon"
+      newline
+    endpage
+  endmessage
+  message skill_281 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_282 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_283 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_284 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_285 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_286 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_287 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_288 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_289 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_28a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_28b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_28c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_28d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_28e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_28f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_290 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_291 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_292 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_293 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_294 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_295 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_296 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_297 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_298 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_299 speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_29a speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_29b speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_29c speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_29d speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_29e speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_29f speaker=none
+    page
+      segment-start
+      font-slot 1
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage

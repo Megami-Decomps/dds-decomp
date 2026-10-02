@@ -14,7 +14,7 @@ typedef struct EffectHandler {
 extern EffectHandler D_003AA770[];
 extern void *func_00328D68(s32);
 
-void *func_00157A50(EffectSource *source) {
+void *effCloneSourceWithTypeHandler(EffectSource *source) {
     EffectSource *copy = (EffectSource *)func_00328D68(0x10);
     u32 argument = source->argument;
 
@@ -58,7 +58,18 @@ INCLUDE_RODATA(const s32, "game/code_00157A50", D_00414298);
 
 INCLUDE_ASM(const s32, "game/code_00157A50", func_00157BE0);
 
-INCLUDE_ASM(const s32, "game/code_00157A50", func_00157CE0);
+extern s32 D_00438EFC;
+extern u32 effBillResourceOwners[];
+extern void billDispatchByKind(u32);
+
+void effBillDispatchAll(void) {
+    u32 i;
+
+    D_00438EFC = 0;
+    for (i = 0; i < 15; i++) {
+        billDispatchByKind(effBillResourceOwners[i]);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00157A50", func_00157D38);
 

@@ -2,7 +2,7 @@
 
 #include "scr.h"
 
-void *func_00343ED0(s32 arg0, u32 *arg1, s32 arg2);
+void *sdfReadNamedResource(s32 arg0, u32 *arg1, s32 arg2);
 
 s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
@@ -10,11 +10,11 @@ s32 bfTaskUpdate();
 
 s32 scrReplaceCurrentTask();
 
-extern ScrProcGlobals *D_00435DD0;
+extern ScrProcGlobals *datGameState;
 
 s32 bfParseFLW0(s32 arg0, s32 arg1);
 
-s32 bfContextCreate(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
+s32 bfContextCreate(s32 header, s32 procedureSection, s32 procedures, s32 labels, s32 instructions, s32 auxiliaryData, s32 strings, s32 procedureIndex);
 
 /* Load a script resource, create its VM process and retain its resource handle. */
 s32 scrOpenProcessFromResource(s32 scriptId, s32 option)
@@ -23,7 +23,7 @@ s32 scrOpenProcessFromResource(s32 scriptId, s32 option)
     void *handle;
     s32 processId;
     ScrProcTask *task;
-    handle = func_00343ED0(scriptId, resourceInfo, 0);
+    handle = sdfReadNamedResource(scriptId, resourceInfo, 0);
     processId = resourceInfo[0];
     if (processId == 0)
     {
@@ -51,8 +51,8 @@ void scrClearProcessGlobals(void)
     /* Countdown with a forward index; gcc keeps a single pointer (see asm). */
     for (i = 255; i >= 0; i--)
     {
-        D_00435DD0->integers[255 - i] = 0;
-        D_00435DD0->floatBits[255 - i] = 0;
+        datGameState->integers[255 - i] = 0;
+        datGameState->floatBits[255 - i] = 0;
     }
 }
 
@@ -74,14 +74,14 @@ void scrCreateTaskWithDefaultOption(u32 processId) {
     bfParseFLW0(processId, 0);
 }
 
-s32 scrCreateTaskFromContextParameters(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8)
+s32 scrCreateTaskFromContextParameters(s32 priority, s32 header, s32 procedureSection, s32 procedures, s32 labels, s32 instructions, s32 auxiliaryData, s32 strings, s32 procedureIndex)
 {
-    return scrProcCreateTask(a0, bfContextCreate(a1, a2, a3, a4, a5, a6, a7, a8));
+    return scrProcCreateTask(priority, bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, procedureIndex));
 }
 
-s32 func_0010BF30(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6)
+s32 func_0010BF30(s32 header, s32 procedureSection, s32 procedures, s32 labels, s32 instructions, s32 auxiliaryData, s32 strings)
 {
-    return bfContextCreate(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0);
+    return bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, 0);
 }
 
 extern void evtPrintDeveloperConsoleMessage(char *, u32);
@@ -113,7 +113,7 @@ void scrProcDestroyTask(ScrProcTask *process) {
 typedef struct ScriptNameNode {
     char name[1];                 /* 0x0: the name text is stored in place */
     u8 pad01[0xE3];
-    s32 unkE4;                    /* 0xE4: task id, or 0 for a plain process */
+    s32 taskId;                    /* 0xE4: task id, or 0 for a plain process */
     u8 padE8[4];
     struct ScriptNameNode *next;   /* 0xEC */
 } ScriptNameNode;
@@ -138,8 +138,8 @@ void scrDestroyAllNamedProcesses(void)
     while (1) {
         next = node->next;
         if (scrIsCurrentWorkTask(node) == 0) {
-            if (node->unkE4 != 0) {
-                kwlnTaskDestroyWithHierarchy(node->unkE4, 0);
+            if (node->taskId != 0) {
+                kwlnTaskDestroyWithHierarchy(node->taskId, 0);
             } else {
                 scrProcDestroyTask((ScrProcTask *)node);
             }

@@ -10,8 +10,8 @@ typedef struct FntNode {
 
 /* File group header: two handles to release, plus live-node count and sentinel link. */
 typedef struct {
-    void *unk0;
-    void *unk4;
+    void *firstHandle;
+    void *secondHandle;
     u8 pad8[0x10];
     s32 liveNodeCount;      /* 0x18: live-node count */
     FntNode *sentinel; /* 0x1C: sentinel link */
@@ -25,14 +25,14 @@ s32 fmGslReleaseActiveResourceBuffers(void) {
     if (frFontResourceList.sentinel == 0) {
         return 0;
     }
-    func_003297C8(frFontResourceList.unk0);
-    func_003297C8(frFontResourceList.unk4);
+    func_003297C8(frFontResourceList.firstHandle);
+    func_003297C8(frFontResourceList.secondHandle);
     frFontResourceList.sentinel = 0;
     return 1;
 }
 
 /* Unlink the first live node after the sentinel, or NULL when its slot is empty. */
-FntNode *func_0019B7F0(void) {
+FntNode *frFontDetachFirstResourceNode(void) {
     FntNode *node = frFontResourceList.sentinel->next;
 
     if (node->unk0 == NULL) {

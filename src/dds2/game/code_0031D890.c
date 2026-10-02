@@ -29,6 +29,7 @@ typedef struct CompactSlotPool {
 extern u32 func_003292A8(s32 size);
 extern void *sdfMemoryGetBlockAddress(u32 handle);
 extern void evtPrintDeveloperConsoleMessage(char *text, s32 value);
+extern char D_0042DBA0[];
 
 typedef struct SpriteWorkPool {
     u32 handle;
@@ -37,7 +38,7 @@ typedef struct SpriteWorkPool {
 } SpriteWorkPool;
 
 /* Sprite-number work pool: count 0x14-byte items plus a 0xC-byte header. */
-u32 func_0031D890(u32 count) {
+u32 itfCreateSpriteWorkPool(u32 count) {
     u32 size = count * 0x14 + 0xC;
     u32 handle = func_003292A8(size);
     SpriteWorkPool *pool = (SpriteWorkPool *)sdfMemoryGetBlockAddress(handle);
@@ -94,7 +95,19 @@ void itfReleaseWideSlot(u32 *flags) {
 
 INCLUDE_ASM(const s32, "game/code_0031D890", func_0031DA38);
 
-INCLUDE_ASM(const s32, "game/code_0031D890", func_0031DEB8);
+/* Sprite-hit-effect work pool: count 0x10-byte items plus a 0xC-byte header. */
+u32 func_0031DEB8(u32 count) {
+    u32 size = count * 0x10 + 0xC;
+    u32 handle = func_003292A8(size);
+    SpriteWorkPool *pool = (SpriteWorkPool *)sdfMemoryGetBlockAddress(handle);
+
+    memset(pool, 0, size);
+    pool->handle = handle;
+    pool->count = count;
+    pool->items = (u8 *)pool + 0xC;
+    evtPrintDeveloperConsoleMessage(D_0042DBA0, size);
+    return (u32)pool;
+}
 
 void func_0031DF48(u32 *sprite) {
     func_003297C8(*sprite);
@@ -141,7 +154,7 @@ INCLUDE_ASM(const s32, "game/code_0031D890", func_0031E020);
 
 extern void itfFadeSetTint(u32 tint);
 
-void func_0031E198(u8 *work) {
+void itfApplyWorkTintAndClearBuffers(u8 *work) {
     itfFadeSetTint(*(u32 *)(work + 0x34));
     memset(work + 0xB4, 0, 0x18);
     memset(work + 0xCC, 0, 0x1C);
@@ -155,7 +168,7 @@ void func_0031E198(u8 *work) {
 
 extern void itfFadeClearTint(void);
 
-void func_0031E240(u8 *work) {
+void itfClearTintAndWorkBuffers(u8 *work) {
     itfFadeClearTint();
     memset(work + 0xB4, 0, 0x18);
     memset(work + 0xCC, 0, 0x1C);
@@ -175,6 +188,8 @@ extern u8 D_0040B088[];
 u8 mnuGetIndexedFadeTexture(s32 index) {
     return D_0040B088[index * 12];
 }
+
+INCLUDE_RODATA(const s32, "game/code_0031D890", D_0042DBA0);
 
 INCLUDE_SDATA(const s32, "game/code_0031D890", D_00438958);
 

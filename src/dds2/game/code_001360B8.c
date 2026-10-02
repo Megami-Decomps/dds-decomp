@@ -21,10 +21,10 @@ typedef struct {
     s32 unk8;
     s32 unkC;
     u8 pad10[0xC];
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
+    s32 vectorX;     /* 0x1C: x arg of evtSetDrawVectorTarget */
+    s32 vectorZ;     /* 0x20: z arg of evtSetDrawVectorTarget */
+    s32 vectorY;     /* 0x24: y arg of evtSetDrawVectorTarget */
+    s32 vectorW;     /* 0x28: w arg of evtSetDrawVectorTarget */
     s32 unk2C;
     s32 unk30;
     s32 unk34;
@@ -66,7 +66,7 @@ extern s32 evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
 
 extern void fldSetSwayMode(u32);
 
-extern void *D_004360EC;
+extern void *fldSkyLightSetBuffer;
 
 extern s32 fldCameraColorEffect;
 
@@ -74,13 +74,13 @@ extern u32 fldCameraColorEnabled;
 
 typedef struct FldColorParams {
     s32 enabled;
-    s32 unk4;
+    s32 slotIndex;   /* 0x04: stored to the effect work at +0x38 */
     s32 mode;
     s32 red;
     s32 green;
     s32 blue;
-    s32 unk18;
-    s32 unk1C;
+    s32 vectorY;     /* 0x18: copied to the effect work at +0x24 */
+    s32 vectorZ;     /* 0x1C: copied to the effect work at +0x3C */
 } FldColorParams;
 
 typedef struct FldCameraSetting {
@@ -147,7 +147,7 @@ void fldApplyLightSetCurrent(void) {
     vec[2] = light->unk34 * 0.00390625f;
     vec[3] = 0;
     func_001081F8(0, vec);
-    evtSetDrawVectorTarget(0, light->unk1C, light->unk24, light->unk20, light->unk28);
+    evtSetDrawVectorTarget(0, light->vectorX, light->vectorY, light->vectorZ, light->vectorW);
     dir[0] = light->unk44;
     dir[1] = light->unk48;
     dir[2] = light->unk4C;
@@ -186,7 +186,7 @@ void fldApplyLightSetCurrent(void) {
 }
 
 void fldApplyLightSetIndex(s32 index) {
-    FldLightSet *light = &((FldLightSet *)D_004360EC)[index];
+    FldLightSet *light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
     f32 vec[4];
     f32 dir[4];
     s32 area;
@@ -206,7 +206,7 @@ void fldApplyLightSetIndex(s32 index) {
     vec[2] = light->unk34 * 0.00390625f;
     vec[3] = 0;
     func_001081F8(0, vec);
-    evtSetDrawVectorTarget(0, light->unk1C, light->unk24, light->unk20, light->unk28);
+    evtSetDrawVectorTarget(0, light->vectorX, light->vectorY, light->vectorZ, light->vectorW);
     dir[0] = light->unk44;
     dir[1] = light->unk48;
     dir[2] = light->unk4C;
@@ -257,7 +257,7 @@ void fldActivateCameraColorSetting(s32 enable) {
         color = &setting->color;
         if (color->enabled != 0) {
             fldCameraColorParameters->colorB = fldCameraColorParameters->colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
-            fldCameraColorParameters->unk24 = color->unk18;
+            fldCameraColorParameters->unk24 = color->vectorY;
             switch (color->mode) {
             case 0:
                 fldCameraColorParameters->unk28 = 1;
@@ -269,8 +269,8 @@ void fldActivateCameraColorSetting(s32 enable) {
                 fldCameraColorParameters->unk28 = 3;
                 break;
             }
-            fldCameraColorParameters->unk38 = color->unk4;
-            fldCameraColorParameters->unk3C = color->unk1C;
+            fldCameraColorParameters->unk38 = color->slotIndex;
+            fldCameraColorParameters->unk3C = color->vectorZ;
             fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
             setting = fldCameraSettings;
         }

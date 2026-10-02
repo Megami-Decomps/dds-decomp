@@ -1,0 +1,1717 @@
+battle-table 1 kind=skill profile=dds2
+
+action-attribute 1 attribute=2
+action-attribute 2 attribute=2
+action-attribute 3 attribute=2
+action-attribute 4 attribute=2
+action-attribute 5 attribute=2
+action-attribute 6 attribute=2
+action-attribute 7 attribute=2
+action-attribute 8 attribute=2
+action-attribute 9 attribute=2
+action-attribute 10 attribute=3
+action-attribute 11 attribute=3
+action-attribute 12 attribute=3
+action-attribute 13 attribute=3
+action-attribute 14 attribute=3
+action-attribute 15 attribute=3
+action-attribute 16 attribute=3
+action-attribute 17 attribute=3
+action-attribute 18 attribute=3
+action-attribute 19 attribute=4
+action-attribute 20 attribute=4
+action-attribute 21 attribute=4
+action-attribute 22 attribute=4
+action-attribute 23 attribute=4
+action-attribute 24 attribute=4
+action-attribute 25 attribute=4
+action-attribute 26 attribute=4
+action-attribute 27 attribute=4
+action-attribute 28 attribute=5
+action-attribute 29 attribute=5
+action-attribute 30 attribute=5
+action-attribute 31 attribute=5
+action-attribute 32 attribute=5
+action-attribute 33 attribute=5
+action-attribute 34 attribute=5
+action-attribute 35 attribute=5
+action-attribute 36 attribute=5
+action-attribute 37 attribute=6
+action-attribute 38 attribute=6
+action-attribute 39 attribute=6
+action-attribute 40 attribute=6
+action-attribute 41 attribute=6
+action-attribute 42 attribute=6
+action-attribute 43 attribute=6
+action-attribute 44 attribute=6
+action-attribute 45 attribute=6
+action-attribute 46 attribute=7
+action-attribute 47 attribute=7
+action-attribute 48 attribute=7
+action-attribute 49 attribute=7
+action-attribute 50 attribute=12
+action-attribute 51 attribute=12
+action-attribute 52 attribute=7
+action-attribute 53 attribute=7
+action-attribute 54 attribute=7
+action-attribute 55 attribute=18
+action-attribute 56 attribute=18
+action-attribute 57 attribute=7
+action-attribute 58 attribute=7
+action-attribute 59 attribute=7
+action-attribute 60 attribute=8
+action-attribute 61 attribute=8
+action-attribute 62 attribute=8
+action-attribute 63 attribute=8
+action-attribute 64 attribute=8
+action-attribute 65 attribute=9
+action-attribute 66 attribute=9
+action-attribute 67 attribute=9
+action-attribute 68 attribute=9
+action-attribute 69 attribute=9
+action-attribute 70 attribute=9
+action-attribute 71 attribute=9
+action-attribute 72 attribute=9
+action-attribute 73 attribute=12
+action-attribute 74 attribute=12
+action-attribute 75 attribute=14
+action-attribute 76 attribute=14
+action-attribute 77 attribute=14
+action-attribute 78 attribute=14
+action-attribute 79 attribute=14
+action-attribute 80 attribute=11
+action-attribute 81 attribute=11
+action-attribute 82 attribute=11
+action-attribute 83 attribute=13
+action-attribute 84 attribute=13
+action-attribute 85 attribute=13
+action-attribute 86 attribute=10
+action-attribute 87 attribute=10
+action-attribute 88 attribute=10
+action-attribute 89 attribute=7
+action-attribute 90 attribute=3
+action-attribute 91 attribute=2
+action-attribute 92 attribute=8
+action-attribute 93 attribute=7
+action-attribute 94 attribute=7
+action-attribute 95 attribute=7
+action-attribute 96 attribute=14
+action-attribute 97 attribute=12
+action-attribute 98 attribute=9
+action-attribute 99 attribute=7
+action-attribute 100 attribute=7
+action-attribute 101 attribute=-1
+action-attribute 102 attribute=-1
+action-attribute 103 attribute=-1
+action-attribute 104 attribute=-1
+action-attribute 105 attribute=1
+action-attribute 107 attribute=5
+action-attribute 108 attribute=2
+action-attribute 109 attribute=7
+action-attribute 110 attribute=18
+action-attribute 111 attribute=18
+action-attribute 141 attribute=7
+action-attribute 147 attribute=7
+action-attribute 151 attribute=-1
+action-attribute 153 attribute=18
+action-attribute 154 attribute=18
+action-attribute 155 attribute=2
+action-attribute 156 attribute=5
+action-attribute 157 attribute=6
+action-attribute 158 attribute=4
+action-attribute 159 attribute=3
+action-attribute 160 attribute=16
+action-attribute 161 attribute=16
+action-attribute 162 attribute=16
+action-attribute 163 attribute=16
+action-attribute 164 attribute=16
+action-attribute 165 attribute=16
+action-attribute 166 attribute=16
+action-attribute 167 attribute=16
+action-attribute 168 attribute=16
+action-attribute 169 attribute=16
+action-attribute 170 attribute=16
+action-attribute 171 attribute=16
+action-attribute 172 attribute=16
+action-attribute 173 attribute=16
+action-attribute 174 attribute=16
+action-attribute 175 attribute=17
+action-attribute 176 attribute=17
+action-attribute 177 attribute=17
+action-attribute 178 attribute=17
+action-attribute 179 attribute=17
+action-attribute 180 attribute=17
+action-attribute 181 attribute=17
+action-attribute 182 attribute=17
+action-attribute 183 attribute=17
+action-attribute 184 attribute=17
+action-attribute 185 attribute=17
+action-attribute 186 attribute=17
+action-attribute 187 attribute=17
+action-attribute 188 attribute=17
+action-attribute 189 attribute=17
+action-attribute 190 attribute=17
+action-attribute 191 attribute=18
+action-attribute 192 attribute=18
+action-attribute 193 attribute=18
+action-attribute 194 attribute=18
+action-attribute 195 attribute=18
+action-attribute 196 attribute=18
+action-attribute 197 attribute=18
+action-attribute 198 attribute=18
+action-attribute 199 attribute=18
+action-attribute 200 attribute=18
+action-attribute 201 attribute=18
+action-attribute 202 attribute=18
+action-attribute 203 attribute=18
+action-attribute 204 attribute=18
+action-attribute 205 attribute=18
+action-attribute 206 attribute=16
+action-attribute 207 attribute=16
+action-attribute 208 attribute=16
+action-attribute 209 attribute=16
+action-attribute 210 attribute=16
+action-attribute 211 attribute=18
+action-attribute 212 attribute=16
+action-attribute 213 attribute=18
+action-attribute 214 attribute=18
+action-attribute 215 attribute=2
+action-attribute 216 attribute=2
+action-attribute 217 attribute=3
+action-attribute 218 attribute=3
+action-attribute 219 attribute=4
+action-attribute 220 attribute=4
+action-attribute 221 attribute=5
+action-attribute 222 attribute=5
+action-attribute 223 attribute=6
+action-attribute 224 attribute=15 auxiliary=2
+action-attribute 225 attribute=15 auxiliary=2
+action-attribute 226 attribute=15 auxiliary=2
+action-attribute 227 attribute=15 auxiliary=2
+action-attribute 228 attribute=15 auxiliary=2
+action-attribute 229 attribute=15 auxiliary=2
+action-attribute 230 attribute=15 auxiliary=2
+action-attribute 231 attribute=15 auxiliary=2
+action-attribute 232 attribute=15 auxiliary=2
+action-attribute 233 attribute=15 auxiliary=2
+action-attribute 234 attribute=15 auxiliary=2
+action-attribute 235 attribute=15 auxiliary=2
+action-attribute 236 attribute=15 auxiliary=2
+action-attribute 237 attribute=15 auxiliary=2
+action-attribute 238 attribute=15 auxiliary=2
+action-attribute 239 attribute=15 auxiliary=2
+action-attribute 240 attribute=15 auxiliary=2
+action-attribute 241 attribute=15 auxiliary=2
+action-attribute 242 attribute=15 auxiliary=2
+action-attribute 243 attribute=15 auxiliary=2
+action-attribute 244 attribute=15 auxiliary=2
+action-attribute 245 attribute=15 auxiliary=2
+action-attribute 246 attribute=15 auxiliary=2
+action-attribute 247 attribute=15 auxiliary=2
+action-attribute 248 attribute=15 auxiliary=2
+action-attribute 249 attribute=15 auxiliary=2
+action-attribute 250 attribute=-1
+action-attribute 251 attribute=-1
+action-attribute 252 attribute=-1
+action-attribute 253 attribute=-1
+action-attribute 254 attribute=-1
+action-attribute 255 attribute=-1
+action-attribute 259 attribute=4
+action-attribute 260 attribute=7
+action-attribute 261 attribute=7
+action-attribute 262 attribute=7
+action-attribute 263 attribute=7
+action-attribute 264 attribute=18
+action-attribute 265 attribute=-1
+action-attribute 266 attribute=7
+action-attribute 267 attribute=7
+action-attribute 268 attribute=2
+action-attribute 272 attribute=16
+action-attribute 273 attribute=16
+action-attribute 274 attribute=16
+action-attribute 275 attribute=16
+action-attribute 276 attribute=16
+action-attribute 277 attribute=16
+action-attribute 278 attribute=16
+action-attribute 279 attribute=16
+action-attribute 280 attribute=16
+action-attribute 281 attribute=16
+action-attribute 282 attribute=16
+action-attribute 283 attribute=-1
+action-attribute 284 attribute=16
+action-attribute 285 attribute=-1
+action-attribute 286 attribute=-1
+action-attribute 287 attribute=-1
+action-attribute 288 attribute=16
+action-attribute 289 attribute=16
+action-attribute 290 attribute=6
+action-attribute 291 attribute=8
+action-attribute 292 attribute=9
+action-attribute 293 attribute=7
+action-attribute 294 attribute=-1
+action-attribute 295 attribute=-1
+action-attribute 296 attribute=-1
+action-attribute 297 attribute=-1
+action-attribute 298 attribute=-1
+action-attribute 299 attribute=3
+action-attribute 300 attribute=7
+action-attribute 301 attribute=7
+action-attribute 302 attribute=-1
+action-attribute 303 attribute=-1
+action-attribute 304 attribute=1 auxiliary=5
+action-attribute 305 attribute=1 auxiliary=5
+action-attribute 306 attribute=1 auxiliary=5
+action-attribute 307 attribute=1 auxiliary=5
+action-attribute 308 attribute=1 auxiliary=5
+action-attribute 309 attribute=1 auxiliary=5
+action-attribute 310 attribute=1 auxiliary=5
+action-attribute 311 attribute=1 auxiliary=5
+action-attribute 312 attribute=1 auxiliary=5
+action-attribute 313 attribute=1 auxiliary=5
+action-attribute 314 attribute=1 auxiliary=5
+action-attribute 315 attribute=1 auxiliary=5
+action-attribute 316 attribute=1 auxiliary=5
+action-attribute 317 attribute=1 auxiliary=5
+action-attribute 318 attribute=1 auxiliary=5
+action-attribute 319 attribute=1 auxiliary=5
+action-attribute 320 attribute=1 auxiliary=5
+action-attribute 321 attribute=1 auxiliary=5
+action-attribute 322 attribute=1 auxiliary=5
+action-attribute 323 attribute=1 auxiliary=5
+action-attribute 324 attribute=7 auxiliary=5
+action-attribute 325 attribute=-1
+action-attribute 326 attribute=-1
+action-attribute 327 attribute=-1
+action-attribute 328 attribute=-1
+action-attribute 329 attribute=-1
+action-attribute 330 attribute=-1
+action-attribute 331 attribute=-1
+action-attribute 332 attribute=-1
+action-attribute 333 attribute=-1
+action-attribute 334 attribute=-1
+action-attribute 335 attribute=-1
+action-attribute 336 attribute=-1 auxiliary=3
+action-attribute 337 attribute=-1 auxiliary=3
+action-attribute 338 attribute=-1 auxiliary=3
+action-attribute 339 attribute=-1 auxiliary=3
+action-attribute 340 attribute=-1 auxiliary=3
+action-attribute 341 attribute=-1 auxiliary=3
+action-attribute 342 attribute=-1 auxiliary=3
+action-attribute 343 attribute=-1 auxiliary=3
+action-attribute 344 attribute=-1 auxiliary=3
+action-attribute 345 attribute=-1 auxiliary=3
+action-attribute 346 attribute=-1 auxiliary=3
+action-attribute 347 attribute=-1 auxiliary=3
+action-attribute 348 attribute=-1 auxiliary=3
+action-attribute 349 attribute=-1 auxiliary=3
+action-attribute 350 attribute=-1 auxiliary=3
+action-attribute 351 attribute=-1 auxiliary=3
+action-attribute 352 attribute=-1 auxiliary=3
+action-attribute 353 attribute=-1 auxiliary=3
+action-attribute 354 attribute=-1 auxiliary=3
+action-attribute 355 attribute=-1 auxiliary=3
+action-attribute 356 attribute=-1 auxiliary=3
+action-attribute 357 attribute=-1 auxiliary=3
+action-attribute 358 attribute=-1 auxiliary=3
+action-attribute 359 attribute=-1 auxiliary=3
+action-attribute 360 attribute=-1 auxiliary=3
+action-attribute 361 attribute=-1 auxiliary=3
+action-attribute 362 attribute=-1 auxiliary=3
+action-attribute 363 attribute=-1 auxiliary=3
+action-attribute 364 attribute=-1 auxiliary=3
+action-attribute 365 attribute=-1 auxiliary=3
+action-attribute 366 attribute=-1 auxiliary=3
+action-attribute 367 attribute=-1 auxiliary=3
+action-attribute 368 attribute=18
+action-attribute 369 attribute=7
+action-attribute 370 attribute=6
+action-attribute 371 attribute=7
+action-attribute 372 attribute=7
+action-attribute 373 attribute=7
+action-attribute 374 attribute=7
+action-attribute 375 attribute=7
+action-attribute 376 attribute=17
+action-attribute 377 attribute=18
+action-attribute 378 attribute=7
+action-attribute 379 attribute=7
+action-attribute 380 attribute=18
+action-attribute 381 attribute=17
+action-attribute 382 attribute=7
+action-attribute 383 attribute=1
+action-attribute 384 attribute=2
+action-attribute 385 attribute=2
+action-attribute 386 attribute=1
+action-attribute 387 attribute=1
+action-attribute 388 attribute=5
+action-attribute 389 attribute=7
+action-attribute 390 attribute=7
+action-attribute 392 attribute=6
+action-attribute 393 attribute=18
+action-attribute 394 attribute=1
+action-attribute 395 attribute=1
+action-attribute 396 attribute=18
+action-attribute 397 attribute=5
+action-attribute 398 attribute=5
+action-attribute 399 attribute=2
+action-attribute 400 attribute=3
+action-attribute 401 attribute=5
+action-attribute 402 attribute=4
+action-attribute 403 attribute=7
+action-attribute 404 attribute=1
+action-attribute 405 attribute=1
+action-attribute 406 attribute=18
+action-attribute 407 attribute=3
+action-attribute 408 attribute=7
+action-attribute 409 attribute=18
+action-attribute 410 attribute=9
+action-attribute 411 attribute=8
+action-attribute 412 attribute=18
+action-attribute 413 attribute=17
+action-attribute 414 attribute=7
+action-attribute 415 attribute=7
+action-attribute 416 attribute=18
+action-attribute 417 attribute=6
+action-attribute 421 attribute=18
+action-attribute 422 attribute=18
+action-attribute 423 attribute=7
+action-attribute 424 attribute=7
+action-attribute 427 attribute=2 auxiliary=1
+action-attribute 428 attribute=8 auxiliary=1
+action-attribute 429 attribute=7 auxiliary=1
+action-attribute 430 attribute=2 auxiliary=1
+action-attribute 431 attribute=-1
+action-attribute 432 attribute=2 auxiliary=1
+action-attribute 433 attribute=2 auxiliary=1
+action-attribute 434 attribute=2 auxiliary=1
+action-attribute 435 attribute=2 auxiliary=1
+action-attribute 436 attribute=3 auxiliary=1
+action-attribute 437 attribute=3 auxiliary=1
+action-attribute 438 attribute=3 auxiliary=1
+action-attribute 439 attribute=3 auxiliary=1
+action-attribute 440 attribute=4 auxiliary=1
+action-attribute 441 attribute=4 auxiliary=1
+action-attribute 442 attribute=4 auxiliary=1
+action-attribute 443 attribute=4 auxiliary=1
+action-attribute 444 attribute=5 auxiliary=1
+action-attribute 445 attribute=5 auxiliary=1
+action-attribute 446 attribute=5 auxiliary=1
+action-attribute 447 attribute=5 auxiliary=1
+action-attribute 448 attribute=6 auxiliary=1
+action-attribute 449 attribute=6 auxiliary=1
+action-attribute 450 attribute=6 auxiliary=1
+action-attribute 451 attribute=6 auxiliary=1
+action-attribute 452 attribute=7 auxiliary=1
+action-attribute 453 attribute=8 auxiliary=1
+action-attribute 454 attribute=8 auxiliary=1
+action-attribute 455 attribute=8 auxiliary=1
+action-attribute 456 attribute=9 auxiliary=1
+action-attribute 457 attribute=9 auxiliary=1
+action-attribute 458 attribute=13 auxiliary=1
+action-attribute 459 attribute=10 auxiliary=1
+action-attribute 460 attribute=9 auxiliary=1
+action-attribute 461 attribute=14 auxiliary=1
+action-attribute 462 attribute=9 auxiliary=1
+action-attribute 463 auxiliary=1
+action-attribute 464 auxiliary=1
+action-attribute 465 auxiliary=1
+action-attribute 466 attribute=7 auxiliary=1
+action-attribute 467 auxiliary=1
+action-attribute 468 attribute=3 auxiliary=1
+action-attribute 469 attribute=5 auxiliary=1
+action-attribute 470 auxiliary=1
+action-attribute 471 attribute=9 auxiliary=1
+action-attribute 472 attribute=16 auxiliary=1
+action-attribute 473 attribute=17 auxiliary=1
+action-attribute 474 auxiliary=1
+action-attribute 475 auxiliary=1
+action-attribute 476 attribute=7 auxiliary=1
+action-attribute 477 attribute=7 auxiliary=1
+action-attribute 478 attribute=8 auxiliary=1
+action-attribute 479 attribute=16 auxiliary=1
+action-attribute 480 attribute=1 auxiliary=1
+action-attribute 481 attribute=3 auxiliary=1
+action-attribute 482 attribute=3 auxiliary=1
+action-attribute 483 attribute=3 auxiliary=1
+action-attribute 484 attribute=2 auxiliary=1
+action-attribute 485 attribute=2 auxiliary=1
+action-attribute 486 attribute=2 auxiliary=1
+action-attribute 487 attribute=6 auxiliary=1
+action-attribute 488 attribute=6 auxiliary=1
+action-attribute 489 attribute=6 auxiliary=1
+action-attribute 490 attribute=5 auxiliary=1
+action-attribute 491 attribute=5 auxiliary=1
+action-attribute 492 attribute=5 auxiliary=1
+action-attribute 493 attribute=4 auxiliary=1
+action-attribute 494 attribute=4 auxiliary=1
+action-attribute 495 attribute=4 auxiliary=1
+action-attribute 496 attribute=4 auxiliary=1
+action-attribute 497 attribute=4 auxiliary=1
+action-attribute 498 attribute=4 auxiliary=1
+action-attribute 499 attribute=16 auxiliary=1
+action-attribute 500 attribute=12 auxiliary=1
+action-attribute 501 attribute=17 auxiliary=1
+action-attribute 502 attribute=17 auxiliary=1
+action-attribute 503 attribute=16 auxiliary=1
+action-attribute 504 attribute=16 auxiliary=1
+action-attribute 505 attribute=16 auxiliary=1
+action-attribute 506 attribute=17 auxiliary=1
+action-attribute 507 attribute=17 auxiliary=1
+action-attribute 508 attribute=17 auxiliary=1
+action-attribute 509 attribute=7 auxiliary=1
+action-attribute 510 attribute=7 auxiliary=1
+action-attribute 511 attribute=7 auxiliary=1
+action-attribute 512 attribute=2 auxiliary=1
+action-attribute 513 attribute=2 auxiliary=1
+action-attribute 514 attribute=3 auxiliary=1
+action-attribute 515 attribute=3 auxiliary=1
+action-attribute 516 attribute=4 auxiliary=1
+action-attribute 517 attribute=4 auxiliary=1
+action-attribute 518 attribute=5 auxiliary=1
+action-attribute 519 attribute=5 auxiliary=1
+action-attribute 520 attribute=6 auxiliary=1
+action-attribute 521 attribute=6 auxiliary=1
+action-attribute 522 attribute=16 auxiliary=1
+action-attribute 523 attribute=16 auxiliary=1
+action-attribute 524 attribute=1 auxiliary=1
+action-attribute 525 attribute=3 auxiliary=1
+action-attribute 526 attribute=3 auxiliary=1
+action-attribute 527 attribute=3 auxiliary=1
+action-attribute 528 attribute=7 auxiliary=1
+action-attribute 529 attribute=4 auxiliary=1
+action-attribute 530 auxiliary=1
+action-attribute 531 attribute=-1
+action-attribute 532 attribute=-1
+action-attribute 533 attribute=-1
+action-attribute 534 attribute=-1
+action-attribute 535 attribute=-1
+action-attribute 536 attribute=-1
+action-attribute 537 attribute=-1
+action-attribute 538 attribute=-1
+action-attribute 539 attribute=-1
+action-attribute 540 attribute=-1
+action-attribute 541 attribute=-1
+action-attribute 542 attribute=-1
+action-attribute 543 attribute=-1
+action-attribute 544 attribute=18 auxiliary=4
+action-attribute 545 attribute=18 auxiliary=4
+action-attribute 546 attribute=18 auxiliary=4
+action-attribute 547 attribute=18 auxiliary=4
+action-attribute 548 attribute=18 auxiliary=4
+action-attribute 549 attribute=18 auxiliary=4
+action-attribute 550 attribute=18 auxiliary=4
+action-attribute 551 attribute=18 auxiliary=4
+action-attribute 552 attribute=18 auxiliary=4
+action-attribute 553 attribute=18 auxiliary=4
+action-attribute 554 attribute=18 auxiliary=4
+action-attribute 555 attribute=18 auxiliary=4
+action-attribute 556 attribute=18 auxiliary=4
+action-attribute 557 attribute=18 auxiliary=4
+action-attribute 558 attribute=18 auxiliary=4
+action-attribute 559 attribute=18 auxiliary=4
+action-attribute 560 attribute=18 auxiliary=4
+action-attribute 561 attribute=18 auxiliary=4
+action-attribute 562 attribute=18 auxiliary=4
+action-attribute 563 attribute=18 auxiliary=4
+action-attribute 564 attribute=18 auxiliary=4
+action-attribute 565 attribute=18 auxiliary=4
+action-attribute 566 attribute=18 auxiliary=4
+action-attribute 567 attribute=18 auxiliary=4
+action-attribute 568 attribute=18 auxiliary=4
+action-attribute 569 attribute=18 auxiliary=4
+action-attribute 570 attribute=18 auxiliary=4
+action-attribute 571 attribute=18 auxiliary=4
+action-attribute 572 attribute=18 auxiliary=4
+action-attribute 573 attribute=18 auxiliary=4
+action-attribute 574 attribute=18 auxiliary=4
+action-attribute 575 attribute=18 auxiliary=4
+action-attribute 576 attribute=18 auxiliary=4
+action-attribute 577 attribute=18 auxiliary=4
+action-attribute 578 attribute=18 auxiliary=4
+action-attribute 579 attribute=18 auxiliary=4
+action-attribute 580 attribute=18 auxiliary=4
+action-attribute 581 attribute=18 auxiliary=4
+action-attribute 582 attribute=18 auxiliary=4
+action-attribute 583 attribute=18 auxiliary=4
+action-attribute 584 attribute=18 auxiliary=4
+action-attribute 585 attribute=18 auxiliary=4
+action-attribute 586 attribute=18 auxiliary=4
+action-attribute 587 attribute=18 auxiliary=4
+action-attribute 588 attribute=18 auxiliary=4
+action-attribute 589 attribute=18 auxiliary=4
+action-attribute 590 attribute=18 auxiliary=4
+action-attribute 591 attribute=18 auxiliary=4
+action-attribute 592 attribute=18 auxiliary=4
+action-attribute 593 attribute=18 auxiliary=4
+action-attribute 594 attribute=18 auxiliary=4
+action-attribute 595 attribute=18 auxiliary=4
+action-attribute 596 attribute=18 auxiliary=4
+action-attribute 597 attribute=18 auxiliary=4
+action-attribute 598 attribute=18 auxiliary=4
+action-attribute 599 attribute=18 auxiliary=4
+action-attribute 600 attribute=18 auxiliary=4
+action-attribute 601 attribute=18 auxiliary=4
+action-attribute 602 attribute=18 auxiliary=4
+action-attribute 603 attribute=18 auxiliary=4
+action-attribute 604 attribute=18 auxiliary=4
+action-attribute 605 attribute=18 auxiliary=4
+action-attribute 606 attribute=18 auxiliary=4
+action-attribute 607 attribute=18 auxiliary=4
+action-attribute 608 attribute=18 auxiliary=4
+action-attribute 609 attribute=18 auxiliary=4
+action-attribute 610 attribute=18 auxiliary=4
+action-attribute 611 attribute=18 auxiliary=4
+action-attribute 612 attribute=18 auxiliary=4
+action-attribute 613 attribute=18 auxiliary=4
+action-attribute 614 attribute=18 auxiliary=4
+action-attribute 615 attribute=18 auxiliary=4
+action-attribute 616 attribute=18 auxiliary=4
+action-attribute 617 attribute=18 auxiliary=4
+action-attribute 618 attribute=18 auxiliary=4
+action-attribute 619 attribute=18 auxiliary=4
+action-attribute 620 attribute=18 auxiliary=4
+action-attribute 621 attribute=18 auxiliary=4
+action-attribute 622 attribute=18 auxiliary=4
+action-attribute 623 attribute=18 auxiliary=4
+action-attribute 624 attribute=18 auxiliary=4
+action-attribute 625 attribute=18 auxiliary=4
+action-attribute 626 attribute=18 auxiliary=4
+action-attribute 627 attribute=18 auxiliary=4
+action-attribute 628 attribute=18 auxiliary=4
+action-attribute 629 attribute=18 auxiliary=4
+action-attribute 630 attribute=18 auxiliary=4
+action-attribute 631 attribute=18 auxiliary=4
+action-attribute 632 attribute=18 auxiliary=4
+action-attribute 633 attribute=18 auxiliary=4
+action-attribute 634 attribute=18 auxiliary=4
+action-attribute 635 attribute=18 auxiliary=4
+action-attribute 636 attribute=18 auxiliary=4
+action-attribute 637 attribute=18 auxiliary=4
+action-attribute 638 attribute=18 auxiliary=4
+action-attribute 639 attribute=18 auxiliary=4
+action-attribute 640 attribute=18 auxiliary=4
+action-attribute 641 attribute=-1
+action-attribute 642 attribute=-1
+action-attribute 643 attribute=-1
+action-attribute 644 attribute=-1
+action-attribute 645 attribute=-1
+action-attribute 646 attribute=-1
+action-attribute 647 attribute=-1
+action-attribute 648 attribute=-1
+action-attribute 649 attribute=-1
+action-attribute 650 attribute=-1
+action-attribute 651 attribute=-1
+action-attribute 652 attribute=-1
+action-attribute 653 attribute=-1
+action-attribute 654 attribute=-1
+action-attribute 655 attribute=-1
+action-attribute 656 attribute=-1
+action-attribute 657 attribute=-1
+action-attribute 658 attribute=-1
+action-attribute 659 attribute=-1
+action-attribute 660 attribute=-1
+action-attribute 661 attribute=-1
+action-attribute 662 attribute=-1
+action-attribute 663 attribute=-1
+action-attribute 664 attribute=-1
+action-attribute 665 attribute=-1
+action-attribute 666 attribute=-1
+action-attribute 667 attribute=-1
+action-attribute 668 attribute=-1
+action-attribute 669 attribute=-1
+action-attribute 670 attribute=-1
+action-attribute 671 attribute=-1
+
+action 0 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=BASIC_ATTACK_DAMAGE hp_power=15 effect_percent=100 ailment_level=100 magic_base=5 magic_limit=31000
+action 1 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=30 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 2 use=BATTLE effect_type=MAGIC cost_type=MP cost=6 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=60 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 3 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=100 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 4 use=BATTLE effect_type=MAGIC cost_type=MP cost=8 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=25 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 5 use=BATTLE effect_type=MAGIC cost_type=MP cost=16 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=55 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 6 use=BATTLE effect_type=MAGIC cost_type=MP cost=32 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=90 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 7 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=35 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 8 use=BATTLE effect_type=MAGIC cost_type=MP cost=24 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=3 hits_max=6 hp_type=DAMAGE hp_power=60 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 9 use=BATTLE effect_type=MAGIC cost_type=MP cost=48 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=120 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 10 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=25 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=FREEZE magic_base=10 magic_limit=31000
+action 11 use=BATTLE effect_type=MAGIC cost_type=MP cost=6 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=55 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=FREEZE magic_base=10 magic_limit=31000
+action 12 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=95 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=FREEZE magic_base=10 magic_limit=31000
+action 13 use=BATTLE effect_type=MAGIC cost_type=MP cost=8 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=20 effect_percent=100 ailment_type=INFLICT ailment_level=10 base_status=FREEZE magic_base=10 magic_limit=31000
+action 14 use=BATTLE effect_type=MAGIC cost_type=MP cost=16 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=10 base_status=FREEZE magic_base=10 magic_limit=31000
+action 15 use=BATTLE effect_type=MAGIC cost_type=MP cost=32 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=80 effect_percent=100 ailment_type=INFLICT ailment_level=10 base_status=FREEZE magic_base=10 magic_limit=31000
+action 16 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=30 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=FREEZE magic_base=20 magic_limit=31000
+action 17 use=BATTLE effect_type=MAGIC cost_type=MP cost=24 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=3 hits_max=6 hp_type=DAMAGE hp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=FREEZE magic_base=20 magic_limit=31000
+action 18 use=BATTLE effect_type=MAGIC cost_type=MP cost=48 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=110 effect_percent=100 ailment_type=INFLICT ailment_level=20 base_status=FREEZE magic_base=20 magic_limit=31000
+action 19 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=25 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=SHOCK magic_base=10 magic_limit=31000
+action 20 use=BATTLE effect_type=MAGIC cost_type=MP cost=6 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=55 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=SHOCK magic_base=10 magic_limit=31000
+action 21 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=95 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=SHOCK magic_base=10 magic_limit=31000
+action 22 use=BATTLE effect_type=MAGIC cost_type=MP cost=8 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=20 effect_percent=100 ailment_type=INFLICT ailment_level=10 base_status=SHOCK magic_base=10 magic_limit=31000
+action 23 use=BATTLE effect_type=MAGIC cost_type=MP cost=16 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=10 base_status=SHOCK magic_base=10 magic_limit=31000
+action 24 use=BATTLE effect_type=MAGIC cost_type=MP cost=32 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=80 effect_percent=100 ailment_type=INFLICT ailment_level=10 base_status=SHOCK magic_base=10 magic_limit=31000
+action 25 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=30 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=SHOCK magic_base=20 magic_limit=31000
+action 26 use=BATTLE effect_type=MAGIC cost_type=MP cost=24 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=3 hits_max=6 hp_type=DAMAGE hp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=SHOCK magic_base=20 magic_limit=31000
+action 27 use=BATTLE effect_type=MAGIC cost_type=MP cost=48 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=110 effect_percent=100 ailment_type=INFLICT ailment_level=20 base_status=SHOCK magic_base=20 magic_limit=31000
+action 28 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=30 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 29 use=BATTLE effect_type=MAGIC cost_type=MP cost=6 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=60 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 30 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=100 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 31 use=BATTLE effect_type=MAGIC cost_type=MP cost=8 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=25 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 32 use=BATTLE effect_type=MAGIC cost_type=MP cost=16 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=55 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 33 use=BATTLE effect_type=MAGIC cost_type=MP cost=32 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=90 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 34 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=35 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 35 use=BATTLE effect_type=MAGIC cost_type=MP cost=24 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=3 hits_max=6 hp_type=DAMAGE hp_power=60 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 36 use=BATTLE effect_type=MAGIC cost_type=MP cost=48 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=120 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 37 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=30 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 38 use=BATTLE effect_type=MAGIC cost_type=MP cost=6 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=60 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 39 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=100 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 40 use=BATTLE effect_type=MAGIC cost_type=MP cost=8 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=25 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 41 use=BATTLE effect_type=MAGIC cost_type=MP cost=16 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=55 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 42 use=BATTLE effect_type=MAGIC cost_type=MP cost=32 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=90 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 43 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=35 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 44 use=BATTLE effect_type=MAGIC cost_type=MP cost=24 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=3 hits_max=6 hp_type=DAMAGE hp_power=60 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 45 use=BATTLE effect_type=MAGIC cost_type=MP cost=48 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=120 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 46 use=BATTLE effect_type=MAGIC cost_type=MP cost=30 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=70 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 47 use=BATTLE effect_type=MAGIC cost_type=MP cost=45 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=90 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 48 use=BATTLE effect_type=MAGIC cost_type=MP cost=60 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=120 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 49 flags=DRAIN use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DRAIN_DAMAGE hp_power=30 effect_percent=100 ailment_level=100 magic_limit=100
+action 50 flags=DRAIN use=BATTLE effect_type=MAGIC cost_type=MP cost=2 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 mp_type=DRAIN_DAMAGE mp_power=20 effect_percent=100 ailment_level=100 magic_limit=31000
+action 51 flags=DRAIN use=BATTLE effect_type=MAGIC cost_type=MP cost=15 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DRAIN_DAMAGE hp_power=25 mp_type=DRAIN_DAMAGE mp_power=20 effect_percent=100 ailment_level=100 magic_limit=31000
+action 52 use=BATTLE effect_type=MAGIC cost_type=MP cost=60 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=180 effect_percent=100 ailment_level=100 base_status=0x8000 magic_base=20 magic_limit=31000
+action 53 flags=FORFEIT_HP use=BATTLE cost_type=HP cost_base=1 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=96 hits_min=2 hits_max=5 hp_type=DAMAGE hp_power=40 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 54 flags=FORFEIT_HP use=BATTLE cost_type=HP cost_base=1 target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=68 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 55 flags=0x1 use=BATTLE effect_type=MAGIC target_area=ALLIES target_rule=USER hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_points=2 program=RAGE magic_limit=31000
+action 56 flags=0x1 use=BATTLE effect_type=MAGIC target_area=ALLIES target_rule=USER hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_points=4 program=RAGE magic_limit=31000
+action 57 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=25 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT_ONE_RANDOM ailment_level=50 base_status=SLEEP|MUTE|PANIC|POISON|CHARM support_points=99 magic_limit=31000
+action 58 flags=0x1 use=BATTLE effect_type=MAGIC target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=70 base_status=0x8000 magic_base=10 magic_limit=31000
+action 59 flags=0x1 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=50 base_status=0x8000 magic_base=10 magic_limit=31000
+action 60 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=6 target_area=ENEMIES hit_type=1 hit_level=60 hits_min=1 hits_max=1 hp_type=CURRENT_HP_PERCENT_DAMAGE hp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 61 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_area=ENEMIES hit_type=1 hit_level=60 hits_min=1 hits_max=1 hp_type=CURRENT_HP_PERCENT_DAMAGE hp_power=80 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 62 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=15 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=45 hits_min=1 hits_max=1 hp_type=CURRENT_HP_PERCENT_DAMAGE hp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 63 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=25 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=45 hits_min=1 hits_max=1 hp_type=CURRENT_HP_PERCENT_DAMAGE hp_power=80 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 64 use=BATTLE effect_type=MAGIC cost_type=MP cost=36 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=110 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 65 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=6 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=35 base_status=DEATH magic_base=10 magic_limit=31000
+action 66 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=50 base_status=DEATH magic_base=10 magic_limit=31000
+action 67 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=15 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=26 base_status=DEATH magic_base=10 magic_limit=31000
+action 68 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=25 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=38 base_status=DEATH magic_base=10 magic_limit=31000
+action 69 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=40 base_status=CURSE magic_base=10 magic_limit=31000
+action 70 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=15 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=30 base_status=CURSE magic_base=10 magic_limit=31000
+action 71 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=40 base_status=PETRIFY magic_base=10 magic_limit=31000
+action 72 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=30 base_status=PETRIFY magic_base=10 magic_limit=31000
+action 73 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=4 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=50 base_status=MUTE magic_base=10 magic_limit=31000
+action 74 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=11 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=38 base_status=MUTE magic_base=10 magic_limit=31000
+action 75 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=55 base_status=SLEEP magic_base=10 magic_limit=31000
+action 76 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=9 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=41 base_status=SLEEP magic_base=10 magic_limit=31000
+action 77 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=16 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=100 base_status=DEATH program=CALM_DEATH magic_base=10 magic_limit=31000
+action 78 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=45 base_status=PARALYSIS magic_base=10 magic_limit=31000
+action 79 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=34 base_status=PARALYSIS magic_base=10 magic_limit=31000
+action 80 use=BATTLE effect_type=MAGIC cost_type=MP cost=8 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=25 effect_percent=100 ailment_type=INFLICT ailment_level=30 base_status=POISON magic_base=10 magic_limit=31000
+action 81 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=15 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=38 base_status=POISON magic_base=10 magic_limit=31000
+action 82 use=BATTLE effect_type=MAGIC cost_type=MP cost=25 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=75 effect_percent=100 ailment_type=INFLICT ailment_level=30 base_status=POISON magic_base=10 magic_limit=31000
+action 83 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=50 base_status=PANIC magic_base=10 magic_limit=31000
+action 84 use=BATTLE effect_type=MAGIC cost_type=MP cost=24 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=60 mp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=33 base_status=PANIC magic_base=10 magic_limit=31000
+action 85 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=9 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=38 base_status=PANIC magic_base=10 magic_limit=31000
+action 86 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=45 base_status=CHARM magic_base=10 magic_limit=31000
+action 87 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=13 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=34 base_status=CHARM magic_base=10 magic_limit=31000
+action 88 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=60 effect_percent=100 ailment_type=INFLICT ailment_level=45 base_status=CHARM magic_base=10 magic_limit=31000
+action 89 use=BATTLE effect_type=MAGIC cost_type=MP cost=90 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=180 effect_percent=100 ailment_type=INFLICT_ONE_RANDOM ailment_level=100 base_status=SLEEP|MUTE|PANIC|POISON|CHARM support_points=99 magic_base=10 magic_limit=31000
+action 90 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=5 hits_max=8 hp_type=DAMAGE hp_power=35 effect_percent=100 ailment_type=INFLICT ailment_level=25 base_status=FREEZE magic_base=10 magic_limit=31000
+action 91 use=BATTLE effect_type=MAGIC cost_type=MP cost=70 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=200 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 92 use=BATTLE effect_type=MAGIC cost_type=MP cost=30 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=CURRENT_HP_PERCENT_DAMAGE hp_power=80 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 93 use=BATTLE effect_type=MAGIC cost_type=MP cost=99 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=200 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 94 use=BATTLE effect_type=MAGIC cost_type=MP cost=80 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=150 effect_percent=100 ailment_type=INFLICT ailment_level=100 base_status=DEATH magic_base=10 magic_limit=31000
+action 95 use=BATTLE effect_type=MAGIC cost_type=MP cost=75 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=5 hits_max=8 hp_type=DAMAGE hp_power=100 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 96 use=BATTLE effect_type=MAGIC cost_type=MP cost=22 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=60 effect_percent=100 ailment_type=INFLICT ailment_level=30 base_status=PARALYSIS magic_base=10 magic_limit=31000
+action 97 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=60 effect_percent=100 ailment_type=INFLICT ailment_level=33 base_status=MUTE magic_base=10 magic_limit=31000
+action 98 use=BATTLE effect_type=MAGIC cost_type=MP cost=24 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=60 effect_percent=100 ailment_type=INFLICT ailment_level=27 base_status=CURSE magic_base=10 magic_limit=31000
+action 99 use=BATTLE effect_type=MAGIC cost_type=MP cost=70 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=16 hp_power=90 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 100 use=BATTLE effect_type=MAGIC cost_type=MP cost=85 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=190 effect_percent=100 ailment_type=INFLICT ailment_level=100 base_status=PARALYSIS magic_base=10 magic_limit=31000
+action 101 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 102 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 103 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 104 use=BATTLE cost_type=HP cost=30 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=23 mp_power=50 effect_percent=100 ailment_level=100 magic_base=16 magic_limit=31000
+action 105 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=BASIC_ATTACK_DAMAGE hp_power=15 effect_percent=100 ailment_level=100 program=18 magic_base=10 magic_limit=31000
+action 106 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=BASIC_ATTACK_DAMAGE hp_power=15 effect_percent=100 ailment_type=INFLICT ailment_level=30 base_status=SHOCK program=18 magic_base=10 magic_limit=31000
+action 107 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=130 effect_percent=100 ailment_level=100 support_type=ACCURACY_DOWN|EVASION_DOWN support_points=1 magic_base=10 magic_limit=31000
+action 108 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=150 effect_percent=100 ailment_level=100 support_type=DEFENSE_DOWN support_points=1 magic_base=10 magic_limit=31000
+action 109 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT_ONE_RANDOM ailment_level=80 base_status=PANIC|CHARM magic_base=10 magic_limit=31000
+action 110 use=BATTLE effect_type=MAGIC target_area=1 target_rule=USER hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=18 magic_base=10 magic_limit=31000
+action 111 use=BATTLE target_area=1 target_rule=USER hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=18 magic_base=10 magic_limit=31000
+action 112 use=BATTLE cost_type=HP cost=10 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=18 effect_percent=100 ailment_level=100 magic_base=5 magic_limit=31000
+action 113 use=BATTLE cost_type=HP cost=10 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=6 effect_percent=100 ailment_level=100 magic_base=5 magic_limit=31000
+action 114 use=BATTLE cost_type=HP cost=12 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=6 effect_percent=100 ailment_type=INFLICT ailment_level=23 base_status=POISON magic_base=5 magic_limit=31000
+action 115 use=BATTLE cost_type=HP cost=12 target_area=ENEMIES hit_type=1 hit_level=93 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=18 effect_percent=100 ailment_type=INFLICT ailment_level=23 base_status=POISON magic_base=7 magic_limit=31000
+action 116 use=BATTLE cost_type=HP cost=12 target_area=ENEMIES hit_type=1 hit_level=93 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=19 effect_percent=100 ailment_type=INFLICT ailment_level=25 base_status=PANIC magic_base=7 magic_limit=31000
+action 117 use=BATTLE cost_type=HP cost=14 target_area=ENEMIES hit_type=1 hit_level=93 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=7 effect_percent=100 ailment_type=INFLICT ailment_level=20 base_status=CURSE magic_base=5 magic_limit=31000
+action 118 use=BATTLE cost_type=HP cost=15 target_area=ENEMIES hit_type=1 hit_level=93 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=7 effect_percent=100 ailment_type=INFLICT ailment_level=23 base_status=PARALYSIS magic_base=5 magic_limit=31000
+action 119 use=BATTLE cost_type=HP cost=15 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=11 effect_percent=100 magic_base=5 magic_limit=31000
+action 120 use=BATTLE cost_type=HP cost=17 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=90 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=12 effect_percent=100 ailment_level=25 base_status=POISON magic_base=10 magic_limit=31000
+action 121 use=BATTLE cost_type=HP cost=12 target_area=ENEMIES hit_type=1 hit_level=85 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=20 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 122 use=BATTLE cost_type=HP cost=16 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=23 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 123 use=BATTLE cost_type=HP cost=17 target_area=ENEMIES hit_type=1 hit_level=93 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=21 effect_percent=100 ailment_type=INFLICT ailment_level=28 base_status=SLEEP magic_base=7 magic_limit=31000
+action 124 use=BATTLE cost_type=HP cost=18 target_area=ENEMIES hit_type=1 hit_level=93 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=22 effect_percent=100 ailment_type=INFLICT ailment_level=23 base_status=CHARM magic_base=7 magic_limit=31000
+action 125 use=BATTLE cost_type=HP cost=23 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=93 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=19 effect_percent=100 ailment_type=INFLICT ailment_level=18 base_status=CHARM magic_base=5 magic_limit=31000
+action 126 use=BATTLE cost_type=HP cost=21 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=20 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 127 use=BATTLE cost_type=HP cost=24 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=93 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=22 effect_percent=100 ailment_type=INFLICT ailment_level=18 base_status=PARALYSIS magic_base=5 magic_limit=31000
+action 128 use=BATTLE cost_type=HP cost=22 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=93 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=19 effect_percent=100 ailment_type=INFLICT ailment_level=16 base_status=CURSE magic_base=5 magic_limit=31000
+action 129 use=BATTLE cost_type=HP cost=24 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=85 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=22 effect_percent=100 ailment_level=100 base_status=CHARM magic_base=25 magic_limit=31000
+action 130 use=BATTLE cost_type=HP cost=20 target_area=ENEMIES hit_type=1 hit_level=93 hits_min=1 hits_max=1 hp_type=MAX_HP_SCALED_DAMAGE hp_power=23 mp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=25 base_status=MUTE magic_base=10 magic_limit=31000
+action 131 use=BATTLE cost_type=HP cost=21 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=MAX_HP_SCALED_DAMAGE hp_power=24 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 132 use=BATTLE cost_type=HP cost=26 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=90 hits_min=3 hits_max=5 hp_type=MAX_HP_SCALED_DAMAGE hp_power=16 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 133 use=BATTLE cost_type=HP cost=29 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=96 hits_min=5 hits_max=8 hp_type=DAMAGE hp_power=25 effect_percent=100 ailment_type=INFLICT ailment_level=32 base_status=PANIC magic_base=10 magic_limit=31000
+action 134 use=BATTLE cost_type=HP cost=16 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=MAX_HP_SCALED_DAMAGE hp_power=14 mp_power=50 effect_percent=100 ailment_level=100 magic_base=7 magic_limit=31000
+action 135 use=BATTLE cost_type=HP cost=18 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=93 hits_min=1 hits_max=1 hp_type=MAX_HP_SCALED_DAMAGE hp_power=15 mp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=18 base_status=POISON magic_base=5 magic_limit=31000
+action 136 use=BATTLE cost_type=HP cost=27 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=85 hits_min=1 hits_max=1 hp_type=MAX_HP_SCALED_DAMAGE hp_power=24 mp_power=50 effect_percent=100 ailment_level=100 magic_base=30 magic_limit=31000
+action 137 use=BATTLE cost_type=HP cost=31 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=93 hits_min=1 hits_max=1 hp_type=MAX_HP_SCALED_DAMAGE hp_power=24 mp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=16 base_status=PETRIFY magic_base=5 magic_limit=31000
+action 138 use=BATTLE cost_type=HP cost=25 target_area=ENEMIES hit_type=1 hit_level=85 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=35 mp_power=50 effect_percent=100 ailment_level=100 magic_base=35 magic_limit=31000
+action 139 use=BATTLE cost_type=HP cost=30 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=23 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 140 use=BATTLE cost_type=HP cost=29 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=93 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=27 mp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=20 base_status=MUTE magic_base=5 magic_limit=31000
+action 141 use=BATTLE cost_type=HP cost=40 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=90 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=33 mp_power=50 effect_percent=100 ailment_level=10 support_type=DEFENSE_DOWN support_points=1 magic_base=5 magic_limit=31000
+action 142 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=15 mp_power=50 effect_percent=100 ailment_level=100 magic_base=5 magic_limit=31000
+action 143 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=20 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 144 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=25 mp_power=50 effect_percent=100 ailment_level=100 magic_base=15 magic_limit=31000
+action 145 use=BATTLE cost_type=HP cost=30 target_area=ENEMIES hit_type=1 hit_level=70 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=40 effect_percent=100 ailment_level=100 magic_base=80 magic_limit=31000
+action 146 use=BATTLE cost_type=HP cost=45 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=93 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=35 effect_percent=100 ailment_level=100 support_type=ATTACK_DOWN|MAGIC_DOWN|ACCURACY_DOWN|DEFENSE_DOWN|EVASION_DOWN support_points=1 magic_base=10 magic_limit=31000
+action 147 use=BATTLE cost_type=HP cost=45 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=100 hits_min=10 hits_max=15 hp_type=DAMAGE hp_power=20 effect_percent=100 ailment_level=100 magic_base=1 magic_limit=31000
+action 148 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=93 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=15 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=PANIC magic_base=5 magic_limit=31000
+action 149 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=93 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=15 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=PARALYSIS magic_base=5 magic_limit=31000
+action 150 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=93 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=15 effect_percent=100 ailment_type=INFLICT ailment_level=5 base_status=PETRIFY magic_base=5 magic_limit=31000
+action 151 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 152 use=BATTLE cost_type=HP cost=30 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=30 mp_power=50 effect_percent=100 ailment_level=100 magic_base=16 magic_limit=31000
+action 153 use=BATTLE target_area=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=18 magic_base=10 magic_limit=31000
+action 154 use=BATTLE target_area=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=18 magic_base=10 magic_limit=31000
+action 155 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=140 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 156 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=130 effect_percent=100 ailment_level=20 base_status=FREEZE magic_base=10 magic_limit=31000
+action 157 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=140 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 158 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=130 effect_percent=100 ailment_type=INFLICT ailment_level=20 base_status=SHOCK magic_base=10 magic_limit=31000
+action 159 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=130 effect_percent=100 ailment_type=INFLICT ailment_level=20 base_status=FREEZE magic_base=10 magic_limit=31000
+action 160 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC cost_type=MP cost=3 target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=HEAL hp_power=60 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 161 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC cost_type=MP cost=7 target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=HEAL hp_power=200 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 162 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC cost_type=MP cost=15 target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=100 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 163 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=HEAL hp_power=45 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 164 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC cost_type=MP cost=18 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=HEAL hp_power=150 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 165 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC cost_type=MP cost=36 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=100 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 166 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=50 mp_power=50 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=SLEEP|PANIC|CHARM magic_limit=31000
+action 167 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=15 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=50 mp_power=50 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=SLEEP|PANIC|CHARM magic_limit=31000
+action 168 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=50 mp_power=50 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=MUTE magic_base=10 magic_limit=31000
+action 169 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=POISON magic_base=10 magic_limit=31000
+action 170 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=CHARM magic_base=10 magic_limit=31000
+action 171 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_area=ALLIES untargetable_status=0xbfff hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=25 mp_power=50 hp_base=10 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=DEATH magic_base=10 magic_limit=31000
+action 172 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=35 target_area=ALLIES untargetable_status=0xbfff hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=100 mp_power=50 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=DEATH magic_base=10 magic_limit=31000
+action 173 flags=FORFEIT_HP|0x1 use=BATTLE effect_type=MAGIC cost_type=HP cost_base=1 target_type=ALL target_area=ALLIES target_rule=DEFEATED_ALLY hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=100 mp_type=MAX_MP_PERCENT_HEAL mp_power=100 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=DEATH magic_base=10 magic_limit=31000
+action 174 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=50 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=100 mp_power=50 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=SHOCK|FREEZE|SLEEP|MUTE|PANIC|ACHE|POISON|PARALYSIS|CHARM|CURSE|PETRIFY magic_base=10 magic_limit=31000
+action 175 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=50 target_area=ALLIES target_rule=DEFEATED_ALLY hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=50 mp_type=FIXED_HEAL mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 176 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=ATTACK_DOWN support_points=1 magic_base=10 magic_limit=31000
+action 177 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=ACCURACY_DOWN|EVASION_DOWN support_points=1 magic_base=10 magic_limit=31000
+action 178 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=DEFENSE_DOWN support_points=1 magic_base=10 magic_limit=31000
+action 179 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=MAGIC_DOWN support_points=1 magic_base=10 magic_limit=31000
+action 180 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=CANCEL_DEBUFFS support_points=1 magic_base=10 magic_limit=31000
+action 181 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=ATTACK_UP support_points=1 magic_base=10 magic_limit=31000
+action 182 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=ACCURACY_UP|EVASION_UP support_points=1 magic_base=10 magic_limit=31000
+action 183 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=DEFENSE_UP support_points=1 magic_base=10 magic_limit=31000
+action 184 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=MAGIC_UP support_points=1 magic_base=10 magic_limit=31000
+action 185 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=CANCEL_BUFFS support_points=50 magic_base=10 magic_limit=31000
+action 186 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=40 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=ATTACK_DOWN support_points=2 magic_base=10 magic_limit=31000
+action 187 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=30 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=MAGIC_DOWN support_points=2 magic_base=10 magic_limit=31000
+action 188 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=30 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=ACCURACY_DOWN|EVASION_DOWN support_points=2 magic_base=10 magic_limit=31000
+action 189 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=ATTACK_UP|DEFENSE_DOWN support_points=2 magic_base=10 magic_limit=31000
+action 190 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=48 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=ATTACK_DOWN|MAGIC_DOWN|ACCURACY_DOWN|DEFENSE_DOWN|EVASION_DOWN support_points=1 magic_base=10 magic_limit=31000
+action 191 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=2 target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=ANALYZE magic_base=10 magic_limit=31000
+action 192 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ALLIES target_rule=USER hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=POWER_CHARGE support_points=99 magic_base=10 magic_limit=31000
+action 193 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_area=ALLIES target_rule=USER hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=MIND_CHARGE support_points=99 magic_base=10 magic_limit=31000
+action 194 flags=0x1 use=BATTLE effect_type=MAGIC target_area=ALLIES target_rule=USER hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=ESCAPE magic_base=10 magic_limit=31000
+action 195 flags=0x1 use=BATTLE effect_type=MAGIC target_area=ALLIES target_rule=12 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=CALL_REINFORCEMENTS magic_base=10 magic_limit=31000
+action 196 flags=0x1 use=FIELD effect_type=MAGIC cost_type=MP cost=10 target_type=3 target_area=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=REDUCE_ENCOUNTER_RATE magic_base=10 magic_limit=31000
+action 197 flags=0x1 use=FIELD effect_type=MAGIC cost_type=MP cost=8 target_type=3 target_area=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=INCREASE_ENCOUNTER_RATE magic_base=10 magic_limit=31000
+action 198 flags=0x1 use=FIELD effect_type=MAGIC cost_type=MP cost=12 target_type=3 target_area=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=NULL_DAMAGE_ZONES magic_base=10 magic_limit=31000
+action 199 flags=0x1 use=FIELD effect_type=MAGIC cost_type=MP cost=2 target_type=3 target_area=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 200 flags=0x1 use=FIELD effect_type=MAGIC cost_type=MP cost=5 target_type=3 target_area=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 201 flags=0x1 use=FIELD effect_type=MAGIC cost_type=MP cost=10 target_type=3 target_area=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 202 flags=0x1 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 203 flags=0x1 use=BATTLE effect_type=MAGIC target_area=ALLIES target_rule=12 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=CALL_REINFORCEMENTS magic_base=10 magic_limit=31000
+action 204 flags=0x1 use=BATTLE effect_type=MAGIC target_area=ALLIES target_rule=12 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=CALL_REINFORCEMENTS magic_base=10 magic_limit=31000
+action 205 flags=0x1 use=BATTLE effect_type=MAGIC target_area=ALLIES target_rule=12 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=CALL_REINFORCEMENTS magic_base=10 magic_limit=31000
+action 206 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=ACHE magic_base=10 magic_limit=31000
+action 207 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=PARALYSIS magic_base=10 magic_limit=31000
+action 208 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=PETRIFY magic_base=10 magic_limit=31000
+action 209 flags=0x1 use=BATTLE effect_type=MAGIC target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 210 flags=0x1 use=BATTLE effect_type=MAGIC target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 211 flags=0x1 use=BATTLE effect_type=MAGIC target_area=ALLIES target_rule=12 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=CALL_REINFORCEMENTS magic_base=10 magic_limit=31000
+action 212 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=CURSE magic_base=10 magic_limit=31000
+action 213 flags=0x1 use=BATTLE effect_type=MAGIC target_area=ALLIES target_rule=12 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=CALL_REINFORCEMENTS magic_base=10 magic_limit=31000
+action 214 use=BATTLE target_area=1 target_rule=USER hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=SCATTER magic_base=10 magic_limit=31000
+action 215 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=33 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 216 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=72 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 217 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=20 effect_percent=100 ailment_type=INFLICT ailment_level=10 base_status=FREEZE magic_base=10 magic_limit=31000
+action 218 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=10 base_status=FREEZE magic_base=10 magic_limit=31000
+action 219 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=20 effect_percent=100 ailment_type=INFLICT ailment_level=10 base_status=SHOCK magic_base=10 magic_limit=31000
+action 220 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=10 base_status=SHOCK magic_base=10 magic_limit=31000
+action 221 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=25 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 222 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=55 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 223 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=25 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 224 flags=HUNT use=BATTLE cost_type=HP cost=5 target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=9 effect_percent=100 hunt_rate=25 magic_base=5 magic_limit=90
+action 225 flags=HUNT use=BATTLE cost_type=HP cost=9 target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=15 effect_percent=100 hunt_rate=10 magic_base=5 magic_limit=230
+action 226 flags=HUNT|0x1 use=BATTLE effect_type=HUNT cost_type=HP cost=10 target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 hunt_rate=20 magic_base=10 magic_limit=31000
+action 227 flags=HUNT|0x1 use=BATTLE effect_type=HUNT cost_type=HP cost=15 target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 hunt_rate=30 magic_base=10 magic_limit=31000
+action 228 flags=HUNT use=BATTLE cost_type=HP cost=10 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=96 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=6 effect_percent=100 magic_base=1 magic_limit=60
+action 229 flags=HUNT use=BATTLE cost_type=HP cost=15 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=12 effect_percent=100 magic_base=1 magic_limit=100
+action 230 flags=HUNT|0x1 use=BATTLE effect_type=HUNT cost_type=HP cost=18 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 hunt_rate=15 magic_base=10 magic_limit=31000
+action 231 flags=HUNT|0x1 use=BATTLE effect_type=HUNT cost_type=HP cost=15 target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 hunt_rate=60 magic_base=10 magic_limit=31000
+action 232 flags=HUNT|0x1 use=BATTLE effect_type=HUNT cost_type=HP cost=15 target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 hunt_rate=60 magic_base=10 magic_limit=31000
+action 233 flags=HUNT use=BATTLE effect_type=HUNT cost_type=HP cost=20 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 hunt_rate=25 magic_base=10 magic_limit=31000
+action 234 use=BATTLE effect_type=HUNT target_type=ALL target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 235 use=BATTLE effect_type=HUNT target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 236 use=BATTLE effect_type=HUNT target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 237 use=BATTLE effect_type=HUNT target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 238 use=BATTLE effect_type=HUNT target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=60 magic_base=10 magic_limit=31000
+action 239 use=BATTLE effect_type=HUNT target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=60 base_status=0x1 magic_base=10 magic_limit=31000
+action 240 use=BATTLE effect_type=HUNT target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 241 use=BATTLE effect_type=HUNT target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 242 use=BATTLE effect_type=HUNT target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 243 use=BATTLE effect_type=HUNT target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 244 use=BATTLE effect_type=HUNT target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 245 use=BATTLE effect_type=HUNT target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 246 use=BATTLE effect_type=HUNT target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 magic_base=10 magic_limit=31000
+action 247 flags=HUNT use=BATTLE cost_type=HP cost=7 target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=10 effect_percent=100 hunt_rate=10 magic_base=5 magic_limit=150
+action 248 flags=HUNT use=BATTLE target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=10 effect_percent=100 hunt_rate=25 magic_base=10 magic_limit=31000
+action 249 flags=HUNT|0x1 use=BATTLE effect_type=HUNT target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 hunt_rate=20 magic_base=10 magic_limit=31000
+action 250 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 251 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 252 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 253 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 254 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 255 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 256 use=BATTLE cost_type=HP cost=30 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=40 mp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=40 base_status=MUTE magic_base=20 magic_limit=31000
+action 257 use=BATTLE cost_type=HP cost=30 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=45 mp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=50 base_status=PARALYSIS magic_base=20 magic_limit=31000
+action 258 use=BATTLE cost=16 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=MAX_HP_SCALED_DAMAGE hp_power=30 mp_power=50 effect_percent=100 ailment_level=100 magic_base=32 magic_limit=31000
+action 259 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=660 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 260 use=BATTLE target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=100 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=20 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 261 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=16 hp_power=150 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 262 flags=0x10 use=BATTLE target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=FIXED_DAMAGE hp_power=9999 effect_percent=100 ailment_level=100 magic_limit=31000
+action 263 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=100 base_status=CHARM magic_base=10 magic_limit=31000
+action 264 flags=0x10 use=BATTLE effect_type=MAGIC target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=100 base_status=DEATH program=RETRIBUTION magic_base=10 magic_limit=31000
+action 265 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 266 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=270 effect_percent=100 ailment_type=INFLICT ailment_level=100 base_status=PARALYSIS magic_base=10 magic_limit=31000
+action 267 use=BATTLE target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=100 hits_min=10 hits_max=15 hp_type=DAMAGE hp_power=30 effect_percent=100 ailment_level=100 magic_base=15 magic_limit=31000
+action 268 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=200 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 269 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=13 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 270 use=BATTLE target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=10 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 271 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=20 mp_power=50 effect_percent=100 ailment_level=100 magic_base=15 magic_limit=31000
+action 272 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=FIXED_HEAL hp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 273 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=FIXED_HEAL hp_power=150 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 274 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=FIXED_HEAL hp_power=300 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 275 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=FIXED_HEAL hp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 276 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=FIXED_HEAL hp_power=150 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 277 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=FIXED_HEAL hp_power=150 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 278 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 mp_type=FIXED_HEAL mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 279 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 mp_type=FIXED_HEAL mp_power=150 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 280 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 mp_type=MAX_MP_PERCENT_HEAL mp_power=100 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 281 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=100 mp_type=MAX_MP_PERCENT_HEAL mp_power=100 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 282 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=100 mp_type=MAX_MP_PERCENT_HEAL mp_power=100 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 283 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=40 mp_type=MAX_MP_PERCENT_HEAL mp_power=40 effect_percent=100 ailment_type=INFLICT_ONE_RANDOM ailment_level=90 base_status=ACHE|POISON|PARALYSIS magic_base=10 magic_limit=31000
+action 284 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=ACHE magic_base=10 magic_limit=31000
+action 285 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=50 base_status=POISON magic_base=10 magic_limit=31000
+action 286 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=50 base_status=ACHE magic_base=10 magic_limit=31000
+action 287 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=50 base_status=MUTE magic_base=10 magic_limit=31000
+action 288 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=FIXED_HEAL hp_power=300 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 289 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=100 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 290 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=55 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 291 flags=0x1 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=45 hits_min=1 hits_max=1 hp_type=CURRENT_HP_PERCENT_DAMAGE hp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 292 flags=0x1 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=26 base_status=DEATH magic_base=10 magic_limit=31000
+action 293 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=70 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 294 use=FIELD target_type=3 target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=8 magic_base=10 magic_limit=31000
+action 295 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 296 use=BATTLE target_area=1 target_rule=USER hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 297 use=BATTLE target_area=1 target_rule=USER hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 298 use=BATTLE target_area=1 target_rule=USER hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 299 use=BATTLE effect_type=MAGIC target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=100 hits_min=4 hits_max=8 hp_type=DAMAGE hp_power=200 effect_percent=100 ailment_type=INFLICT ailment_level=100 base_status=FREEZE magic_base=20 magic_limit=31000
+action 300 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=65 effect_percent=100 ailment_level=100 magic_base=40 magic_limit=31000
+action 301 flags=0x10 use=BATTLE effect_type=MAGIC target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=REDUCE_TO_THRESHOLD_DAMAGE hp_power=150 effect_percent=100 ailment_level=100 program=DESERT_WIND magic_base=100 magic_limit=31000
+action 302 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 303 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 304 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=8 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 305 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=24 effect_percent=100 ailment_type=INFLICT ailment_level=40 base_status=SHOCK magic_base=10 magic_limit=31000
+action 306 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=48 effect_percent=100 ailment_type=INFLICT ailment_level=40 base_status=SLEEP magic_base=10 magic_limit=31000
+action 307 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=16 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 308 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=64 effect_percent=100 ailment_type=INFLICT ailment_level=40 base_status=PARALYSIS magic_base=10 magic_limit=31000
+action 309 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=32 effect_percent=100 ailment_type=INFLICT ailment_level=40 base_status=FREEZE magic_base=10 magic_limit=31000
+action 310 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=40 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 311 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=56 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 312 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=104 effect_percent=100 ailment_type=INFLICT ailment_level=40 base_status=CHARM magic_base=10 magic_limit=31000
+action 313 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=80 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 314 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=88 effect_percent=100 ailment_type=INFLICT ailment_level=40 base_status=POISON magic_base=10 magic_limit=31000
+action 315 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=72 effect_percent=100 ailment_type=INFLICT ailment_level=40 base_status=MUTE magic_base=10 magic_limit=31000
+action 316 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=96 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 317 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=128 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 318 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=112 effect_percent=100 ailment_type=INFLICT ailment_level=40 base_status=PETRIFY magic_base=10 magic_limit=31000
+action 319 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=160 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 320 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=200 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 321 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=36 effect_percent=100 ailment_type=INFLICT ailment_level=40 base_status=PANIC magic_base=10 magic_limit=31000
+action 322 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=64 effect_percent=100 ailment_type=INFLICT ailment_level=40 base_status=CURSE magic_base=10 magic_limit=31000
+action 323 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=300 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 324 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=1 effect_percent=100 ailment_level=100 magic_base=1 magic_limit=31000
+action 325 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 326 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 327 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 328 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 329 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 330 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 331 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 332 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 333 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 334 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 335 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 336 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=VOID_PHYS magic_base=10 magic_limit=31000
+action 337 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=VOID_FIRE magic_base=10 magic_limit=31000
+action 338 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=VOID_ICE magic_base=10 magic_limit=31000
+action 339 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=VOID_ELEC magic_base=10 magic_limit=31000
+action 340 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=VOID_FORCE magic_base=10 magic_limit=31000
+action 341 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=VOID_EARTH magic_base=10 magic_limit=31000
+action 342 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=VOID_EXPEL magic_base=10 magic_limit=31000
+action 343 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=VOID_DEATH magic_base=10 magic_limit=31000
+action 344 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=VOID_CHARM magic_base=10 magic_limit=31000
+action 345 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=VOID_POISON magic_base=10 magic_limit=31000
+action 346 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=VOID_MUTE magic_base=10 magic_limit=31000
+action 347 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=VOID_PANIC magic_base=10 magic_limit=31000
+action 348 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=VOID_NERVE magic_base=10 magic_limit=31000
+action 349 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=40 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=DRAIN_PHYS magic_base=10 magic_limit=31000
+action 350 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=DRAIN_FIRE magic_base=10 magic_limit=31000
+action 351 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=DRAIN_ICE magic_base=10 magic_limit=31000
+action 352 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=DRAIN_ELEC magic_base=10 magic_limit=31000
+action 353 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=DRAIN_FORCE magic_base=10 magic_limit=31000
+action 354 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=DRAIN_EARTH magic_base=10 magic_limit=31000
+action 355 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=30 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=REPEL_PHYS_20 magic_base=10 magic_limit=31000
+action 356 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=REPEL_FIRE magic_base=10 magic_limit=31000
+action 357 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=REPEL_ICE magic_base=10 magic_limit=31000
+action 358 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=REPEL_ELEC magic_base=10 magic_limit=31000
+action 359 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=REPEL_FORCE magic_base=10 magic_limit=31000
+action 360 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=REPEL_EARTH magic_base=10 magic_limit=31000
+action 361 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=REPEL_EXPEL magic_base=10 magic_limit=31000
+action 362 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=REPEL_DEATH magic_base=10 magic_limit=31000
+action 363 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=7 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=TETRAJA magic_base=10 magic_limit=31000
+action 364 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=30 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=REPEL_PHYS_29 magic_base=10 magic_limit=31000
+action 365 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=60 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=REPEL_MAGIC magic_base=10 magic_limit=31000
+action 366 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=32 magic_base=10 magic_limit=31000
+action 367 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=VOID_AILMENT magic_base=10 magic_limit=31000
+action 368 flags=0x1 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=REUNITE magic_base=10 magic_limit=31000
+action 369 flags=DRAIN use=BATTLE effect_type=MAGIC target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DRAIN_DAMAGE hp_power=60 effect_percent=100 ailment_level=100 magic_limit=31000
+action 370 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=28 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 371 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=100 base_status=HUNGER magic_base=10 magic_limit=31000
+action 372 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=50 base_status=HUNGER magic_base=10 magic_limit=31000
+action 373 use=BATTLE target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=16 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 374 use=BATTLE target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=16 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 375 use=BATTLE target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=16 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 376 use=BATTLE target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=ATTACK_DOWN|MAGIC_DOWN|ACCURACY_DOWN|DEFENSE_DOWN|EVASION_DOWN support_points=6 magic_base=10 magic_limit=31000
+action 377 use=BATTLE target_area=1 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 378 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=150 effect_percent=100 ailment_level=100 magic_limit=31000
+action 379 use=BATTLE effect_type=MAGIC target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=GATE_TO_ABYSS magic_base=10 magic_limit=31000
+action 380 flags=DRAIN use=BATTLE effect_type=MAGIC cost_type=MP cost=8 target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 effect_percent=100 ailment_level=100 program=REGURGITATE magic_limit=31000
+action 381 use=BATTLE target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=ATTACK_DOWN|MAGIC_DOWN|ACCURACY_DOWN|DEFENSE_DOWN|EVASION_DOWN support_points=6 magic_base=10 magic_limit=31000
+action 382 flags=0x1 use=BATTLE effect_type=MAGIC target_area=ENEMIES hit_type=1 hit_level=96 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=90 base_status=0x8000 magic_base=10 magic_limit=31000
+action 383 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=20 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 384 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=50 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 385 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=150 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 386 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=18 effect_percent=100 ailment_type=INFLICT ailment_level=30 base_status=SLEEP magic_base=10 magic_limit=31000
+action 387 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=18 effect_percent=100 ailment_type=INFLICT ailment_level=30 base_status=PARALYSIS magic_base=10 magic_limit=31000
+action 388 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=160 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 389 flags=DRAIN use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DRAIN_DAMAGE hp_power=80 effect_percent=100 ailment_level=100 magic_limit=31000
+action 390 flags=DRAIN use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DRAIN_DAMAGE hp_power=70 effect_percent=100 ailment_type=INFLICT ailment_level=100 base_status=0x1000 magic_limit=31000
+action 391 use=BATTLE target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=30 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 392 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=120 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 393 use=BATTLE effect_type=MAGIC target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=DRAGON_THRASH magic_base=10 magic_limit=31000
+action 394 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=18 effect_percent=100 ailment_type=INFLICT ailment_level=30 base_status=SHOCK magic_base=10 magic_limit=31000
+action 395 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=18 effect_percent=100 ailment_type=INFLICT ailment_level=30 base_status=POISON magic_base=10 magic_limit=31000
+action 396 flags=0x1 use=BATTLE target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=80 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 397 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=200 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 398 use=BATTLE effect_type=MAGIC target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=150 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 399 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=60 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 400 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=55 effect_percent=100 ailment_type=INFLICT ailment_level=20 base_status=FREEZE magic_base=10 magic_limit=31000
+action 401 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=60 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 402 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=55 effect_percent=100 ailment_type=INFLICT ailment_level=20 base_status=SHOCK magic_base=10 magic_limit=31000
+action 403 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DRAIN_DAMAGE hp_power=30 effect_percent=100 ailment_level=100 program=GORGE magic_base=10 magic_limit=31000
+action 404 use=BATTLE target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=4 hits_max=8 hp_type=DAMAGE hp_power=15 effect_percent=100 ailment_level=100 magic_base=5 magic_limit=31000
+action 405 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=22 effect_percent=100 ailment_level=100 magic_base=100 magic_limit=31000
+action 406 flags=0x1 use=BATTLE effect_type=MAGIC target_area=ALLIES target_rule=12 hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=CALL_REINFORCEMENTS magic_base=10 magic_limit=31000
+action 407 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=100 effect_percent=100 ailment_type=INFLICT ailment_level=35 base_status=FREEZE magic_base=10 magic_limit=31000
+action 408 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=160 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 409 use=BATTLE effect_type=MAGIC cost=1 target_type=ALL target_area=1 untargetable_status=0xbfff hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=100 mp_power=50 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=DEATH magic_base=10 magic_limit=31000
+action 410 use=BATTLE effect_type=MAGIC target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=100 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 411 use=BATTLE effect_type=MAGIC target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=100 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 412 use=BATTLE target_area=1 target_rule=USER hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 413 use=BATTLE target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=ATTACK_DOWN|MAGIC_DOWN|ACCURACY_DOWN|DEFENSE_DOWN|EVASION_DOWN support_points=6 magic_base=10 magic_limit=31000
+action 414 use=BATTLE target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=16 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 415 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=160 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 416 flags=0x1 use=BATTLE target_area=ALLIES target_rule=USER hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=ITEM_DROP magic_base=10 magic_limit=31000
+action 417 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=60 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 418 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=BASIC_ATTACK_DAMAGE hp_power=30 effect_percent=100 ailment_level=100 magic_base=30 magic_limit=31000
+action 419 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=BASIC_ATTACK_DAMAGE hp_power=30 effect_percent=100 ailment_level=100 magic_base=30 magic_limit=31000
+action 420 use=BATTLE target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=35 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 421 use=BATTLE target_area=1 target_rule=USER hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 422 flags=0x1 use=BATTLE effect_type=MAGIC target_area=ALLIES target_rule=USER hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 program=GUARD magic_base=10 magic_limit=31000
+action 423 use=BATTLE target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=1500 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 424 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=250 effect_percent=100 ailment_type=INFLICT_ONE_RANDOM ailment_level=100 base_status=SLEEP|MUTE|PANIC|POISON|CHARM support_points=99 magic_base=10 magic_limit=31000
+action 425 use=BATTLE target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=13 mp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 426 use=BATTLE target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=100 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=65 effect_percent=100 ailment_level=100 support_type=ATTACK_DOWN|MAGIC_DOWN|ACCURACY_DOWN|DEFENSE_DOWN|EVASION_DOWN support_points=1 magic_base=10 magic_limit=31000
+action 427 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=130 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 428 flags=0x1 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=CURRENT_HP_PERCENT_DAMAGE hp_power=80 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 429 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=365 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 430 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=99 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 431 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 432 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=33 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 433 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=72 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 434 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=117 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 435 use=BATTLE effect_type=MAGIC cost_type=MP cost=40 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=180 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 436 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=26 effect_percent=100 ailment_type=INFLICT ailment_level=20 base_status=FREEZE magic_base=10 magic_limit=31000
+action 437 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=65 effect_percent=100 ailment_type=INFLICT ailment_level=20 base_status=FREEZE magic_base=10 magic_limit=31000
+action 438 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=104 effect_percent=100 ailment_type=INFLICT ailment_level=20 base_status=FREEZE magic_base=10 magic_limit=31000
+action 439 use=BATTLE effect_type=MAGIC cost_type=MP cost=40 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=165 effect_percent=100 ailment_type=INFLICT ailment_level=30 base_status=FREEZE magic_base=10 magic_limit=31000
+action 440 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=26 effect_percent=100 ailment_type=INFLICT ailment_level=20 base_status=SHOCK magic_base=10 magic_limit=31000
+action 441 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=65 effect_percent=100 ailment_type=INFLICT ailment_level=20 base_status=SHOCK magic_base=10 magic_limit=31000
+action 442 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=104 effect_percent=100 ailment_type=INFLICT ailment_level=20 base_status=SHOCK magic_base=10 magic_limit=31000
+action 443 use=BATTLE effect_type=MAGIC cost_type=MP cost=40 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=165 effect_percent=100 ailment_type=INFLICT ailment_level=30 base_status=SHOCK magic_base=10 magic_limit=31000
+action 444 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=33 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 445 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=72 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 446 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=117 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 447 use=BATTLE effect_type=MAGIC cost_type=MP cost=40 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=180 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 448 use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=33 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 449 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=72 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 450 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=117 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 451 use=BATTLE effect_type=MAGIC cost_type=MP cost=40 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=180 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 452 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=15 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT_ONE_RANDOM ailment_level=60 base_status=SLEEP|MUTE|PANIC|POISON|CHARM support_points=99 magic_base=10 magic_limit=31000
+action 453 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=8 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=54 hits_min=1 hits_max=1 hp_type=CURRENT_HP_PERCENT_DAMAGE hp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 454 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=15 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=54 hits_min=1 hits_max=1 hp_type=CURRENT_HP_PERCENT_DAMAGE hp_power=80 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 455 use=BATTLE effect_type=MAGIC cost_type=MP cost=22 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=156 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 456 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=8 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=31 base_status=DEATH magic_base=10 magic_limit=31000
+action 457 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=15 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=46 base_status=DEATH magic_base=10 magic_limit=31000
+action 458 use=BATTLE effect_type=MAGIC cost_type=MP cost=15 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=91 mp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=33 base_status=PANIC magic_base=10 magic_limit=31000
+action 459 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=8 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=41 base_status=CHARM magic_base=10 magic_limit=31000
+action 460 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=36 base_status=CURSE magic_base=10 magic_limit=31000
+action 461 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=8 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=41 base_status=PARALYSIS magic_base=10 magic_limit=31000
+action 462 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=8 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=36 base_status=PETRIFY magic_base=10 magic_limit=31000
+action 463 use=BATTLE cost_type=HP cost=12 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=MAX_HP_SCALED_DAMAGE hp_power=18 mp_power=50 effect_percent=100 ailment_level=100 magic_base=15 magic_limit=31000
+action 464 use=BATTLE cost_type=HP cost=15 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=29 effect_percent=100 ailment_level=10 base_status=CHARM magic_base=30 magic_limit=31000
+action 465 use=BATTLE cost_type=HP cost=20 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=MAX_HP_SCALED_DAMAGE hp_power=30 mp_power=50 effect_percent=100 ailment_level=100 magic_base=35 magic_limit=31000
+action 466 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=45 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 467 use=BATTLE cost_type=HP cost=8 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=23 effect_percent=100 ailment_level=100 magic_base=15 magic_limit=31000
+action 468 use=BATTLE effect_type=MAGIC cost_type=MP cost=8 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=60 base_status=FREEZE magic_base=10 magic_limit=31000
+action 469 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=55 effect_percent=100 ailment_type=INFLICT ailment_level=40 base_status=PARALYSIS magic_base=10 magic_limit=31000
+action 470 use=BATTLE cost_type=HP cost=15 target_area=ENEMIES hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=45 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 471 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT_ONE_RANDOM ailment_level=60 base_status=CURSE|DEATH magic_base=10 magic_limit=31000
+action 472 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=50 effect_percent=100 ailment_level=100 support_type=DEFENSE_UP support_points=1 magic_base=10 magic_limit=31000
+action 473 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=15 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=ATTACK_UP|MAGIC_UP|ACCURACY_UP|DEFENSE_UP|EVASION_UP support_points=1 magic_base=10 magic_limit=31000
+action 474 use=BATTLE cost_type=HP cost=13 target_area=ENEMIES hit_type=1 hit_level=98 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=35 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 475 use=BATTLE cost_type=HP cost=5 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=26 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 476 use=BATTLE effect_type=MAGIC cost_type=MP cost=99 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=666 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 477 use=BATTLE cost_type=HP cost=25 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=50 effect_percent=100 ailment_level=100 support_type=ATTACK_DOWN|MAGIC_DOWN|ACCURACY_DOWN|DEFENSE_DOWN|EVASION_DOWN support_points=1 magic_base=15 magic_limit=31000
+action 478 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=13 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=70 hits_min=1 hits_max=1 hp_type=CURRENT_HP_PERCENT_DAMAGE hp_power=80 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 479 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=16 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=100 mp_power=50 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=SHOCK|FREEZE|SLEEP|MUTE|PANIC|ACHE|POISON|PARALYSIS|CHARM|CURSE|PETRIFY magic_base=10 magic_limit=31000
+action 480 flags=PHYSICAL_AMMO use=BATTLE cost_type=HP cost=10 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=30 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 481 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=25 effect_percent=100 ailment_type=INFLICT ailment_level=60 base_status=FREEZE magic_base=10 magic_limit=31000
+action 482 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=6 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=55 effect_percent=100 ailment_type=INFLICT ailment_level=60 base_status=FREEZE magic_base=10 magic_limit=31000
+action 483 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=9 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=90 effect_percent=100 ailment_type=INFLICT ailment_level=60 base_status=FREEZE magic_base=10 magic_limit=31000
+action 484 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=6 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=13 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 485 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=25 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 486 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=18 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=40 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 487 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=4 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=25 effect_percent=100 ailment_level=100 magic_base=70 magic_limit=31000
+action 488 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=8 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=55 effect_percent=100 ailment_level=100 magic_base=70 magic_limit=31000
+action 489 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=90 effect_percent=100 ailment_level=100 magic_base=70 magic_limit=31000
+action 490 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=5 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=15 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 491 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=30 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 492 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=15 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=2 hits_max=4 hp_type=DAMAGE hp_power=50 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 493 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=6 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=4 hits_max=6 hp_type=DAMAGE hp_power=10 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=SHOCK magic_base=10 magic_limit=31000
+action 494 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=4 hits_max=6 hp_type=DAMAGE hp_power=20 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=SHOCK magic_base=10 magic_limit=31000
+action 495 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=18 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=4 hits_max=6 hp_type=DAMAGE hp_power=30 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=SHOCK magic_base=10 magic_limit=31000
+action 496 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=6 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=15 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=SHOCK magic_base=10 magic_limit=31000
+action 497 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=30 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=SHOCK magic_base=10 magic_limit=31000
+action 498 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=18 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=50 effect_percent=100 ailment_type=INFLICT ailment_level=15 base_status=SHOCK magic_base=10 magic_limit=31000
+action 499 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=50 mp_power=50 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=SLEEP|PANIC|CHARM magic_limit=31000
+action 500 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=7 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_type=INFLICT ailment_level=46 base_status=MUTE magic_base=10 magic_limit=31000
+action 501 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=REPEL_PHYS_29 magic_base=10 magic_limit=31000
+action 502 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 affinity_effect=REPEL_MAGIC magic_base=10 magic_limit=31000
+action 503 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC cost_type=MP cost=8 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=HEAL hp_power=72 effect_percent=100 ailment_level=100 magic_limit=31000
+action 504 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC cost_type=MP cost=12 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=HEAL hp_power=216 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 505 flags=0x1 use=FIELD|BATTLE effect_type=MAGIC cost_type=MP cost=22 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=100 mp_power=50 effect_percent=100 ailment_level=100 magic_limit=31000
+action 506 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=17 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=ATTACK_DOWN|MAGIC_DOWN|ACCURACY_DOWN|DEFENSE_DOWN|EVASION_DOWN support_points=1 magic_base=10 magic_limit=31000
+action 507 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=6 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=CANCEL_DEBUFFS support_points=1 magic_base=10 magic_limit=31000
+action 508 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=6 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 support_type=CANCEL_BUFFS support_points=50 magic_base=10 magic_limit=31000
+action 509 use=BATTLE effect_type=MAGIC cost_type=MP cost=20 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=84 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 510 use=BATTLE effect_type=MAGIC cost_type=MP cost=30 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=108 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 511 use=BATTLE effect_type=MAGIC cost_type=MP cost=40 target_type=ALL target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=144 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 512 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=120 effect_percent=100 ailment_level=100 support_type=DEFENSE_DOWN support_points=1 magic_base=10 magic_limit=31000
+action 513 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=3 hits_max=6 hp_type=DAMAGE hp_power=78 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 514 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=110 effect_percent=100 ailment_type=INFLICT ailment_level=50 base_status=FREEZE magic_base=10 magic_limit=31000
+action 515 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=3 hits_max=6 hp_type=DAMAGE hp_power=65 effect_percent=100 ailment_type=INFLICT ailment_level=25 base_status=FREEZE magic_base=10 magic_limit=31000
+action 516 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=110 effect_percent=100 ailment_type=INFLICT ailment_level=50 base_status=SHOCK magic_base=10 magic_limit=31000
+action 517 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=3 hits_max=6 hp_type=DAMAGE hp_power=65 effect_percent=100 ailment_type=INFLICT ailment_level=25 base_status=SHOCK magic_base=10 magic_limit=31000
+action 518 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=120 effect_percent=100 ailment_level=100 support_type=ATTACK_DOWN|MAGIC_DOWN support_points=1 magic_base=10 magic_limit=31000
+action 519 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=3 hits_max=6 hp_type=DAMAGE hp_power=78 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 520 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=120 effect_percent=100 ailment_level=100 support_type=ACCURACY_DOWN|EVASION_DOWN support_points=1 magic_base=10 magic_limit=31000
+action 521 use=BATTLE effect_type=MAGIC cost_type=MP cost=10 target_type=ALL target_area=ENEMIES target_random=RANDOM_TARGETS hit_type=1 hit_level=99 hits_min=3 hits_max=6 hp_type=DAMAGE hp_power=78 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 522 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=50 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=80 effect_percent=100 ailment_level=100 support_type=DEFENSE_UP support_points=2 magic_base=10 magic_limit=31000
+action 523 flags=0x1 use=BATTLE effect_type=MAGIC cost_type=MP cost=30 target_type=ALL target_area=ALLIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=MAX_HP_PERCENT_HEAL hp_power=100 effect_percent=100 ailment_type=CURE ailment_level=100 base_status=SHOCK|FREEZE|SLEEP|MUTE|PANIC|ACHE|POISON|PARALYSIS|CHARM|CURSE|PETRIFY|DEATH magic_base=10 magic_limit=31000
+action 524 flags=PHYSICAL_AMMO use=BATTLE cost_type=HP cost=7 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=20 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 525 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=25 effect_percent=100 ailment_type=INFLICT ailment_level=60 base_status=FREEZE magic_base=10 magic_limit=31000
+action 526 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=6 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=55 effect_percent=100 ailment_type=INFLICT ailment_level=60 base_status=FREEZE magic_base=10 magic_limit=31000
+action 527 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=9 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=90 effect_percent=100 ailment_type=INFLICT ailment_level=60 base_status=FREEZE magic_base=10 magic_limit=31000
+action 528 flags=ELEMENTAL_AMMO use=BATTLE effect_type=MAGIC cost_type=MP cost=15 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=100 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 529 use=BATTLE effect_type=MAGIC target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=160 effect_percent=100 ailment_type=INFLICT ailment_level=35 base_status=PARALYSIS magic_base=10 magic_limit=31000
+action 530 use=BATTLE target_type=ALL target_area=ENEMIES hit_type=1 hit_level=100 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=35 effect_percent=100 ailment_type=INFLICT ailment_level=100 base_status=DEATH program=CONVICTION magic_base=10 magic_limit=31000
+action 531 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 532 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 533 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 534 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 535 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 536 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 537 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 538 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 539 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 540 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 541 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 542 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+action 543 use=BATTLE target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_power=1 effect_percent=100 ailment_level=100 magic_base=10 magic_limit=31000
+
+requirement 0x1ab conditions=any,any,any count=3 flags=0x2
+requirement 0x1ac conditions=any,any,none count=2 flags=0x2
+requirement 0x1ad conditions=any,any,any count=3 flags=0x2
+requirement 0x1ae conditions=any,any,none count=2 flags=0x2
+requirement 0x1af conditions=any,any,none count=2 flags=0x2
+requirement 0x1b0 conditions=group:17,group:23,none count=2
+requirement 0x1b1 conditions=group:18,group:24,none count=2
+requirement 0x1b2 conditions=skill:3,skill:30,none count=2
+requirement 0x1b3 conditions=skill:562,skill:565,group:12 count=3
+requirement 0x1b4 conditions=group:19,group:25,none count=2
+requirement 0x1b5 conditions=group:20,group:26,none count=2
+requirement 0x1b6 conditions=skill:12,skill:39,none count=2
+requirement 0x1b7 conditions=skill:563,skill:566,group:12 count=3
+requirement 0x1b8 conditions=group:21,group:19,none count=2
+requirement 0x1b9 conditions=group:22,group:20,none count=2
+requirement 0x1ba conditions=skill:21,skill:12,none count=2
+requirement 0x1bb conditions=skill:564,skill:563,group:12 count=3
+requirement 0x1bc conditions=group:23,group:21,none count=2
+requirement 0x1bd conditions=group:24,group:22,none count=2
+requirement 0x1be conditions=skill:30,skill:21,none count=2
+requirement 0x1bf conditions=skill:565,skill:564,group:12 count=3
+requirement 0x1c0 conditions=group:25,group:17,none count=2
+requirement 0x1c1 conditions=group:26,group:18,none count=2
+requirement 0x1c2 conditions=skill:39,skill:3,none count=2
+requirement 0x1c3 conditions=skill:566,skill:562,group:12 count=3
+requirement 0x1c4 conditions=group:8,group:8,none count=2
+requirement 0x1c5 conditions=group:29,group:33,none count=2
+requirement 0x1c6 conditions=group:30,group:34,none count=2
+requirement 0x1c7 conditions=skill:63,skill:165,none count=2
+requirement 0x1c8 conditions=group:31,group:35,none count=2
+requirement 0x1c9 conditions=skill:66,skill:128,none count=2
+requirement 0x1ca conditions=skill:83,group:0,none count=2
+requirement 0x1cb conditions=skill:86,group:0,none count=2
+requirement 0x1cc conditions=skill:69,group:0,none count=2
+requirement 0x1cd conditions=skill:78,group:0,none count=2
+requirement 0x1ce conditions=skill:71,group:0,none count=2
+requirement 0x1cf conditions=group:7,group:8,none count=2
+requirement 0x1d0 conditions=group:7,group:7,skill:181 count=3
+requirement 0x1d1 conditions=group:7,group:37,skill:192 count=3
+requirement 0x1d2 conditions=skill:10,skill:28,skill:37 count=3 flags=0x1
+requirement 0x1d3 conditions=group:7,group:7,group:7 count=3 flags=0x1
+requirement 0x1d4 conditions=group:14,group:1,group:1 count=3 flags=0x1
+requirement 0x1d5 conditions=group:10,group:11,group:7 count=3 flags=0x1
+requirement 0x1d6 conditions=group:7,group:7,skill:182 count=3 flags=0x1
+requirement 0x1d7 conditions=group:31,group:31,group:31 count=3 flags=0x1
+requirement 0x1d8 conditions=group:33,group:33,none count=2 flags=0x1
+requirement 0x1d9 conditions=skill:193,group:1,none count=2 flags=0x1
+requirement 0x1da conditions=group:6,group:6,group:6 count=3 flags=0x1
+requirement 0x1db conditions=none,none,none count=3 flags=0x1
+requirement 0x1dc conditions=skill:147,skill:99,skill:100 count=3 flags=0x1
+requirement 0x1dd conditions=skill:233,skill:137,skill:190 count=3 flags=0x1
+requirement 0x1de conditions=group:29,group:29,group:29 count=3 flags=0x1
+requirement 0x1df conditions=group:36,group:36,group:33 count=3 flags=0x1
+requirement 0x1e0 conditions=unit-mask:0x0,unit-mask:0x0,unit-mask:0x0 count=3 flags=0x1
+requirement 0x1e1 conditions=unit-mask:0x2,group:3,none count=2 flags=0x1
+requirement 0x1e2 conditions=unit-mask:0x2,group:5,none count=2 flags=0x1
+requirement 0x1e3 conditions=unit-mask:0x2,group:4,none count=2 flags=0x1
+requirement 0x1e4 conditions=unit-mask:0x8,group:3,none count=2 flags=0x1
+requirement 0x1e5 conditions=unit-mask:0x8,group:5,none count=2 flags=0x1
+requirement 0x1e6 conditions=unit-mask:0x8,group:4,none count=2 flags=0x1
+requirement 0x1e7 conditions=unit-mask:0x10,group:3,none count=2 flags=0x1
+requirement 0x1e8 conditions=unit-mask:0x10,group:5,none count=2 flags=0x1
+requirement 0x1e9 conditions=unit-mask:0x10,group:4,none count=2 flags=0x1
+requirement 0x1ea conditions=unit-mask:0x20,group:3,none count=2 flags=0x1
+requirement 0x1eb conditions=unit-mask:0x20,group:5,none count=2 flags=0x1
+requirement 0x1ec conditions=unit-mask:0x20,group:4,none count=2 flags=0x1
+requirement 0x1ed conditions=unit-mask:0x40,group:3,none count=2 flags=0x1
+requirement 0x1ee conditions=unit-mask:0x40,group:5,none count=2 flags=0x1
+requirement 0x1ef conditions=unit-mask:0x40,group:4,none count=2 flags=0x1
+requirement 0x1f0 conditions=unit-mask:0x80,group:3,none count=2 flags=0x1
+requirement 0x1f1 conditions=unit-mask:0x80,group:5,none count=2 flags=0x1
+requirement 0x1f2 conditions=unit-mask:0x80,group:4,none count=2 flags=0x1
+requirement 0x1f3 conditions=group:36,group:33,none count=2 flags=0x1
+requirement 0x1f4 conditions=skill:73,skill:73,none count=2 flags=0x1
+requirement 0x1f5 conditions=skill:336,skill:604,none count=2 flags=0x1
+requirement 0x1f6 conditions=skill:571,group:2,none count=2 flags=0x1
+requirement 0x1f7 conditions=group:27,group:27,none count=2 flags=0x1
+requirement 0x1f8 conditions=group:28,group:28,none count=2 flags=0x1
+requirement 0x1f9 conditions=skill:162,skill:162,none count=2 flags=0x1
+requirement 0x1fa conditions=skill:193,group:0,none count=2 flags=0x1
+requirement 0x1fb conditions=group:1,group:1,none count=2 flags=0x1
+requirement 0x1fc conditions=group:0,group:0,none count=2 flags=0x1
+requirement 0x1fd conditions=group:29,group:31,none count=2 flags=0x1
+requirement 0x1fe conditions=group:30,group:32,none count=2 flags=0x1
+requirement 0x1ff conditions=skill:63,skill:68,none count=2 flags=0x1
+requirement 0x200 conditions=skill:3,group:7,none count=2 flags=0x1
+requirement 0x201 conditions=group:13,group:12,none count=2 flags=0x1
+requirement 0x202 conditions=skill:12,group:7,none count=2 flags=0x1
+requirement 0x203 conditions=group:14,group:12,none count=2 flags=0x1
+requirement 0x204 conditions=skill:21,group:7,none count=2 flags=0x1
+requirement 0x205 conditions=group:15,group:12,none count=2 flags=0x1
+requirement 0x206 conditions=skill:30,group:7,none count=2 flags=0x1
+requirement 0x207 conditions=group:10,group:12,none count=2 flags=0x1
+requirement 0x208 conditions=skill:39,group:7,none count=2 flags=0x1
+requirement 0x209 conditions=group:16,group:12,none count=2 flags=0x1
+requirement 0x20a conditions=skill:165,skill:165,none count=2 flags=0x1
+requirement 0x20b conditions=skill:165,skill:172,none count=2 flags=0x1
+requirement 0x20c conditions=unit-mask:0x0,unit-mask:0x0,none count=2 flags=0x1
+requirement 0x20d conditions=unit-mask:0x4,group:3,none count=2 flags=0x1
+requirement 0x20e conditions=unit-mask:0x4,group:5,none count=2 flags=0x1
+requirement 0x20f conditions=unit-mask:0x4,group:4,none count=2 flags=0x1
+requirement 0x210 conditions=unit-mask:0x100,group:4,none count=2 flags=0x1
+requirement 0x211 conditions=any,any,any count=3 flags=0x2
+requirement 0x212 conditions=any,any,any count=3 flags=0x2
+requirement 0x213 conditions=none,none,none count=3 flags=0x1
+requirement 0x214 conditions=none,none,none count=3 flags=0x1
+requirement 0x215 conditions=none,none,none count=3 flags=0x1
+requirement 0x216 conditions=none,none,none count=3 flags=0x1
+requirement 0x217 conditions=none,none,none count=3 flags=0x1
+requirement 0x218 conditions=none,none,none count=3 flags=0x1
+requirement 0x219 conditions=none,none,none count=3 flags=0x1
+requirement 0x21a conditions=none,none,none count=3 flags=0x1
+requirement 0x21b conditions=none,none,none count=3 flags=0x1
+requirement 0x21c conditions=none,none,none count=3 flags=0x1
+requirement 0x21d conditions=none,none,none count=3 flags=0x1
+requirement 0x21e conditions=none,none,none count=3 flags=0x1
+requirement 0x21f conditions=none,none,none count=3 flags=0x1
+
+coefficient 0x30 value=2
+coefficient 0x38 value=0.5
+coefficient 0x40 value=0.5
+coefficient 0x48 value=1.25
+coefficient 0x68 value=1.3
+coefficient 0x70 value=1.3
+coefficient 0x78 value=1.3
+coefficient 0x80 value=1.3
+coefficient 0x88 value=1.3
+coefficient 0x90 value=1.5
+coefficient 0x98 value=1.5
+coefficient 0xa0 value=1.5
+coefficient 0xa8 value=1.5
+coefficient 0xb0 value=1.5
+coefficient 0xb8 value=1.5
+coefficient 0xc0 value=2
+coefficient 0xc8 value=0.4
+coefficient 0xd0 value=0.5
+coefficient 0xd8 value=0.6
+coefficient 0xe8 value=0.25
+coefficient 0x108 value=1.5
+coefficient 0x110 value=2
+coefficient 0x118 value=1.5
+coefficient 0x120 value=2
+coefficient 0x148 value=0.1
+coefficient 0x150 value=0.1
+coefficient 0x158 value=1
+coefficient 0x160 value=0.05
+coefficient 0x168 value=0.5
+coefficient 0x170 value=1.1
+coefficient 0x178 value=0.5
+coefficient 0x180 value=1.3
+coefficient 0x188 value=1
+coefficient 0x190 value=1.5
+coefficient 0x198 value=0.5
+coefficient 0x1a0 value=0.75
+coefficient 0x1a8 value=0.75
+coefficient 0x1c8 value=1.5
+coefficient 0x1d8 value=2
+coefficient 0x1e0 value=0.5
+coefficient 0x1e8 value=0.5
+coefficient 0x1f0 value=0.5
+coefficient 0x1f8 value=0.5
+coefficient 0x200 value=0.5
+coefficient 0x208 value=0.5
+coefficient 0x210 value=0.5
+coefficient 0x218 value=0.5
+coefficient 0x270 value=0.3
+coefficient 0x280 value=0.1
+coefficient 0x2dc bits=0x50005
+coefficient 0x2e0 value=0.1
+coefficient 0x2f0 value=0.5
+coefficient 0x2f8 value=0.5
+
+party-default 0 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 1 base_value=20 value_02=7777 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 2 base_value=20 value_02=7777 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 3 base_value=9 value_02=1375 multiplier=0.2 flags_08=0x201 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 4 base_value=15 value_02=19298 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 5 base_value=8 value_02=1376 multiplier=0.4 flags_08=0x201 flags_0a=0x100 repeat_min=2 repeat_max=4 value_10=264 value_12=1
+party-default 6 base_value=6 value_02=1375 multiplier=0.2 flags_08=0x201 flags_0a=0x100 repeat_min=4 repeat_max=6 value_10=264 value_12=1
+party-default 7 base_value=10 value_02=1375 multiplier=0.2 flags_08=0x201 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 8 base_value=22 value_02=7775 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 9 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 10 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 11 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 12 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 13 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 14 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+party-default 15 base_value=15 value_02=5200 multiplier=1 flags_08=0x200 repeat_min=1 repeat_max=1 value_10=264 value_12=1
+
+item-entry 0 flags=0x400 value=10000
+item-entry 1 flags=0x403 item=272 value=50
+item-entry 2 flags=0x403 item=273 value=250
+item-entry 3 flags=0x403 item=274 value=1000
+item-entry 4 flags=0x2 item=160 value=25000
+item-entry 5 flags=0x2 item=161 value=9464 auxiliary=1
+item-entry 6 flags=0x403 item=277 value=2500
+item-entry 7 flags=0x403 item=288 value=15000
+item-entry 8 flags=0x403 item=289 value=20000
+item-entry 9 flags=0x403 item=278 value=1500
+item-entry 10 flags=0x2 item=278 value=34464 auxiliary=1
+item-entry 11 flags=0x403 item=279 value=5000
+item-entry 12 flags=0x403 item=280 value=20000
+item-entry 13 flags=0x403 item=281 value=10000
+item-entry 14 flags=0x403 item=282 value=30000
+item-entry 15 flags=0x403 item=283 value=1000
+item-entry 16 flags=0x402 item=171 value=250
+item-entry 17 flags=0x402 item=172 value=5000
+item-entry 18 flags=0x2 item=172 value=37856 auxiliary=4
+item-entry 19 flags=0x400 value=10000
+item-entry 20 flags=0x400 value=10000
+item-entry 21 flags=0x403 item=169 value=100
+item-entry 22 flags=0x403 item=206 value=75
+item-entry 23 flags=0x403 item=168 value=75
+item-entry 24 flags=0x403 item=207 value=50
+item-entry 25 flags=0x402 item=208 value=150
+item-entry 26 flags=0x403 item=212 value=100
+item-entry 27 flags=0x402 item=166 value=75
+item-entry 28 flags=0x403 item=285 value=20
+item-entry 29 flags=0x403 item=286 value=20
+item-entry 30 flags=0x403 item=287 value=20
+item-entry 31 flags=0x400 value=10000
+item-entry 32 flags=0x400 value=10000
+item-entry 33 flags=0x400 value=10000
+item-entry 34 flags=0x402 item=365 value=2000
+item-entry 35 flags=0x402 item=364 value=2000
+item-entry 36 flags=0x402 item=185 value=3000
+item-entry 37 flags=0x400 value=10000
+item-entry 38 flags=0x402 item=4 value=200
+item-entry 39 flags=0x402 item=5 value=1000
+item-entry 40 flags=0x402 item=13 value=200
+item-entry 41 flags=0x402 item=14 value=1000
+item-entry 42 flags=0x402 item=22 value=200
+item-entry 43 flags=0x402 item=23 value=1000
+item-entry 44 flags=0x402 item=31 value=200
+item-entry 45 flags=0x402 item=32 value=1000
+item-entry 46 flags=0x402 item=40 value=200
+item-entry 47 flags=0x402 item=41 value=1000
+item-entry 48 flags=0x402 item=62 value=800
+item-entry 49 flags=0x402 item=67 value=800
+item-entry 50 flags=0x2 item=67 value=50000
+item-entry 51 flags=0x2 item=68 value=10000
+item-entry 52 flags=0x400 value=10000
+item-entry 53 flags=0x400 value=10000
+item-entry 54 flags=0x402 item=46 value=2000
+item-entry 55 flags=0x2 item=46 value=56784 auxiliary=6
+item-entry 56 flags=0x402 item=47 value=4000
+item-entry 57 flags=0x400 value=10000
+item-entry 58 flags=0x2 item=191 value=2500
+item-entry 59 flags=0x401 item=196 value=1500
+item-entry 60 flags=0x401 item=197 value=1500
+item-entry 61 flags=0x401 item=198 value=500
+item-entry 62 flags=0x401 item=294 value=500
+item-entry 63 flags=0x400 value=10000
+item-entry 64 flags=0x400 value=10000
+item-entry 65 flags=0x400 value=10000
+item-entry 66 flags=0x402 item=337 value=100
+item-entry 67 flags=0x402 item=338 value=100
+item-entry 68 flags=0x402 item=339 value=100
+item-entry 69 flags=0x402 item=340 value=100
+item-entry 70 flags=0x402 item=341 value=100
+item-entry 71 flags=0x400 value=10000
+item-entry 72 flags=0x400 value=10000
+item-entry 73 flags=0x400 value=10000
+item-entry 74 flags=0x400 value=10000
+item-entry 75 flags=0x400 value=10000
+item-entry 76 flags=0x400 value=10000
+item-entry 77 flags=0x400 value=10000
+item-entry 78 flags=0x400 value=10000
+item-entry 79 flags=0x400 value=10000
+item-entry 80 flags=0x400 value=500
+item-entry 81 flags=0x400 value=5000
+item-entry 82 flags=0x400 value=50000
+item-entry 83 flags=0x402 item=55 value=10000
+item-entry 84 flags=0x402 item=56 value=10000
+item-entry 85 flags=0x400 value=10000
+item-entry 86 flags=0x400 value=10000
+item-entry 87 flags=0x400 value=10000
+item-entry 88 flags=0x400 value=10000
+item-entry 89 flags=0x401 value=1000
+item-entry 90 flags=0x401 value=1000
+item-entry 91 flags=0x401 value=1000
+item-entry 92 flags=0x401 value=1000
+item-entry 93 flags=0x401 value=1000
+item-entry 94 flags=0x401 value=1000
+item-entry 95 flags=0x401 value=1000
+item-entry 96 flags=0x400 value=10000
+item-entry 97 flags=0x400 value=2000
+item-entry 98 flags=0x400 value=6000
+item-entry 99 flags=0x400 value=10000
+item-entry 100 flags=0x400 value=10000
+item-entry 101 flags=0x400 value=10000
+item-entry 102 flags=0x400 value=10000
+item-entry 103 flags=0x400 value=10000
+item-entry 104 flags=0x400 value=10000
+item-entry 105 flags=0x400 value=10000
+item-entry 106 flags=0x400 value=10000
+item-entry 107 flags=0x400 value=6784 auxiliary=6
+item-entry 108 flags=0x400 value=10000
+item-entry 109 flags=0x401 value=1000
+item-entry 110 flags=0x401 value=2000
+item-entry 111 flags=0x401 value=5000
+item-entry 112 flags=0x401 value=1000
+item-entry 113 flags=0x401 value=2000
+item-entry 114 flags=0x401 value=5000
+item-entry 115 flags=0x401 value=1000
+item-entry 116 flags=0x401 value=2000
+item-entry 117 flags=0x401 value=5000
+item-entry 118 flags=0x401 value=1000
+item-entry 119 flags=0x401 value=2000
+item-entry 120 flags=0x401 value=5000
+item-entry 121 flags=0x401 value=1000
+item-entry 122 flags=0x401 value=2000
+item-entry 123 flags=0x401 value=5000
+item-entry 124 flags=0x401 value=1000
+item-entry 125 flags=0x401 value=2000
+item-entry 126 flags=0x401 value=5000
+item-entry 127 flags=0x400 value=10000
+item-entry 128 flags=0xb04 value=10000
+item-entry 129 flags=0xb04 value=10000
+item-entry 130 flags=0xb04 value=10000
+item-entry 131 flags=0xb04 value=10000
+item-entry 132 flags=0xb04 value=10000
+item-entry 133 flags=0xb04 value=10000
+item-entry 134 flags=0xb04 value=10000
+item-entry 135 flags=0xb04 value=10000
+item-entry 136 flags=0xb04 value=10000
+item-entry 137 flags=0xb04 value=10000
+item-entry 138 flags=0xb04 value=10000
+item-entry 139 flags=0xb04 value=10000
+item-entry 140 flags=0xb04 value=10000
+item-entry 141 flags=0xb04 value=10000
+item-entry 142 flags=0xb04 value=10000
+item-entry 143 flags=0xb04 value=10000
+item-entry 144 flags=0xb04 value=10000
+item-entry 145 flags=0xb04 value=10000
+item-entry 146 flags=0xb04 value=10000
+item-entry 147 flags=0xb04 value=10000
+item-entry 148 flags=0xb04 value=10000
+item-entry 149 flags=0xb04 value=10000
+item-entry 150 flags=0xb04 value=10000
+item-entry 151 flags=0x400 value=10000
+item-entry 152 flags=0x400 value=10000
+item-entry 153 flags=0x400 value=10000
+item-entry 154 flags=0x400 value=10000
+item-entry 155 flags=0x400 value=10000
+item-entry 156 flags=0x400 value=10000
+item-entry 157 flags=0x400 value=10000
+item-entry 158 flags=0x400 value=10000
+item-entry 159 flags=0x400 value=10000
+item-entry 160 flags=0x400 value=10000
+item-entry 161 flags=0x401 item=304 value=500
+item-entry 162 flags=0x401 item=307 value=750
+item-entry 163 flags=0x401 item=305 value=1000
+item-entry 164 flags=0x401 item=309 value=2500
+item-entry 165 flags=0x401 item=321 value=4000
+item-entry 166 flags=0x401 item=310 value=4500
+item-entry 167 flags=0x401 item=306 value=5000
+item-entry 168 flags=0x401 item=311 value=6000
+item-entry 169 flags=0x401 item=308 value=10000
+item-entry 170 flags=0x401 item=322 value=10000
+item-entry 171 flags=0x401 item=315 value=15000
+item-entry 172 flags=0x401 item=313 value=20000
+item-entry 173 flags=0x401 item=314 value=25000
+item-entry 174 flags=0x401 item=316 value=35000
+item-entry 175 flags=0x401 item=312 value=50000
+item-entry 176 flags=0x401 item=318 value=34464 auxiliary=1
+item-entry 177 flags=0x401 item=317 value=3392 auxiliary=3
+item-entry 178 flags=0x401 item=319 value=3392 auxiliary=3
+item-entry 179 flags=0x401 item=320 value=3392 auxiliary=3
+item-entry 180 flags=0x401 item=323 value=3392 auxiliary=3
+item-entry 181 flags=0x401 item=324 value=10000
+item-entry 182 flags=0x400 value=10000
+item-entry 183 flags=0x400 value=10000
+item-entry 184 flags=0x400 value=10000
+item-entry 185 flags=0x400 value=10000
+item-entry 186 flags=0x400 value=10000
+item-entry 187 flags=0x400 value=10000
+item-entry 188 flags=0x400 value=10000
+item-entry 189 flags=0x400 value=10000
+item-entry 190 flags=0x400 value=10000
+item-entry 191 flags=0x400 value=10000
+item-entry 192 flags=0x400 value=10000
+item-entry 193 flags=0x401 value=500
+item-entry 194 flags=0x401 value=500
+item-entry 195 flags=0x401 value=1500
+item-entry 196 flags=0x401 value=1500
+item-entry 197 flags=0x401 value=500
+item-entry 198 flags=0x401 value=5000
+item-entry 199 flags=0x401 value=5000
+item-entry 200 flags=0x401 value=5000
+item-entry 201 flags=0x401 value=5000
+item-entry 202 flags=0x401 value=5000
+item-entry 203 flags=0x401 value=20000
+item-entry 204 flags=0x401 value=20000
+item-entry 205 flags=0x401 value=20000
+item-entry 206 flags=0x401 value=20000
+item-entry 207 flags=0x401 value=20000
+item-entry 208 flags=0x401 value=10000
+item-entry 209 flags=0x401 value=10000
+item-entry 210 flags=0x401 value=10000
+item-entry 211 flags=0x401 value=10000
+item-entry 212 flags=0x401 value=10000
+item-entry 213 flags=0x401 value=10000
+item-entry 214 flags=0x401 value=10000
+item-entry 215 flags=0x401 value=10000
+item-entry 216 flags=0x401 value=10000
+item-entry 217 flags=0x401 value=10000
+item-entry 218 flags=0x401 value=1500
+item-entry 219 flags=0x401 value=2500
+item-entry 220 flags=0x401 value=10000
+item-entry 221 flags=0x401 value=10000
+item-entry 222 flags=0x401 value=10000
+item-entry 223 flags=0x401 value=35000
+item-entry 224 flags=0x401 value=12500
+item-entry 225 flags=0x401 value=10000
+item-entry 226 flags=0x401 value=59464 auxiliary=1
+item-entry 227 flags=0x401 value=10000
+item-entry 228 flags=0x401 value=10000
+item-entry 229 flags=0x401 value=1750
+item-entry 230 flags=0x401 value=10000
+item-entry 231 flags=0x401 value=10000
+item-entry 232 flags=0x401 value=2500
+item-entry 233 flags=0x401 value=2500
+item-entry 234 flags=0x401 value=10000
+item-entry 235 flags=0x401 value=3392 auxiliary=3
+item-entry 236 flags=0x401 value=10000
+item-entry 237 flags=0x401 value=10000
+item-entry 238 flags=0x401 value=10000
+item-entry 239 flags=0x401 value=10000
+item-entry 240 flags=0x401 value=10000
+item-entry 241 flags=0x401 value=10000
+item-entry 242 flags=0x401 value=10000
+item-entry 243 flags=0x401 value=10000
+item-entry 244 flags=0x401 value=10000
+item-entry 245 flags=0x401 value=10000
+item-entry 246 flags=0x401 value=10000
+item-entry 247 flags=0x401 value=10000
+item-entry 248 flags=0x400 value=10000
+item-entry 249 flags=0x400 value=10000
+item-entry 250 flags=0x400 value=10000
+item-entry 251 flags=0x400 value=10000
+item-entry 252 flags=0x400 value=10000
+item-entry 253 flags=0x400 value=10000
+item-entry 254 flags=0x400 value=10000
+item-entry 255 flags=0x400 value=10000
+
+profile-bonus 0xc0 stats=0,0,0,0,0 tier=9
+profile-bonus 0xc1 stats=3,0,0,0,0 tier=3
+profile-bonus 0xc2 stats=0,3,0,0,0 tier=3
+profile-bonus 0xc3 stats=0,0,3,0,0 tier=3
+profile-bonus 0xc4 stats=0,0,0,3,0 tier=3
+profile-bonus 0xc5 stats=0,0,0,0,3 tier=3
+profile-bonus 0xc6 stats=6,0,0,0,0 tier=3
+profile-bonus 0xc7 stats=0,6,0,0,0 tier=3
+profile-bonus 0xc8 stats=0,0,6,0,0 tier=3
+profile-bonus 0xc9 stats=0,0,0,6,0 tier=3
+profile-bonus 0xca stats=0,0,0,0,6 tier=3
+profile-bonus 0xcb stats=9,0,0,0,0 tier=3
+profile-bonus 0xcc stats=0,9,0,0,0 tier=3
+profile-bonus 0xcd stats=0,0,9,0,0 tier=3
+profile-bonus 0xce stats=0,0,0,9,0 tier=3
+profile-bonus 0xcf stats=0,0,0,0,9 tier=3
+profile-bonus 0xd0 stats=20,0,0,0,0 tier=2
+profile-bonus 0xd1 stats=0,20,0,0,0 tier=2
+profile-bonus 0xd2 stats=0,0,20,0,0 tier=2
+profile-bonus 0xd3 stats=0,0,0,20,0 tier=2
+profile-bonus 0xd4 stats=0,0,0,0,20 tier=2
+profile-bonus 0xd5 stats=30,0,0,0,0 tier=2
+profile-bonus 0xd6 stats=0,30,0,0,0 tier=2
+profile-bonus 0xd7 stats=0,0,30,0,0 tier=2
+profile-bonus 0xd8 stats=0,0,0,30,0 tier=2
+profile-bonus 0xd9 stats=0,0,0,0,30 tier=2
+profile-bonus 0xda stats=0,0,1,1,0 tier=4
+profile-bonus 0xdb stats=0,2,0,0,0 tier=4
+profile-bonus 0xdc stats=0,0,0,3,0 tier=3
+profile-bonus 0xdd stats=0,0,0,0,1 tier=2
+profile-bonus 0xde stats=0,0,2,2,0 tier=2
+profile-bonus 0xdf stats=0,0,0,2,0 tier=1
+profile-bonus 0xe0 stats=0,0,0,0,2 tier=3
+profile-bonus 0xe1 stats=0,0,0,1,1 tier=4
+profile-bonus 0xe2 stats=0,0,1,0,2 tier=2
+profile-bonus 0xe3 stats=0,0,1,0,1 tier=2
+profile-bonus 0xe4 stats=0,0,0,0,1 tier=2
+profile-bonus 0xe5 stats=1,0,1,0,0 tier=4
+profile-bonus 0xe6 stats=0,0,3,0,0 tier=4
+profile-bonus 0xe7 stats=1,0,0,0,1 tier=3
+profile-bonus 0xe8 stats=0,0,0,1,1 tier=4
+profile-bonus 0xe9 stats=2,0,0,0,0 tier=3
+profile-bonus 0xea stats=1,1,1,1,1 tier=3
+profile-bonus 0xeb stats=1,1,0,0,0 tier=3
+profile-bonus 0xec stats=1,0,1,0,1 tier=3
+profile-bonus 0xed stats=0,0,0,0,0 tier=1
+profile-bonus 0xee stats=20,20,20,20,20 tier=1
+profile-bonus 0xef stats=0,1,1,1,0 tier=2
+profile-bonus 0xf0 stats=0,1,0,0,0 tier=2
+profile-bonus 0xf1 stats=0,1,2,0,0 tier=2
+profile-bonus 0xf2 stats=0,1,0,0,0 tier=2
+profile-bonus 0xf3 stats=10,10,10,10,10 tier=1
+profile-bonus 0xf4 stats=0,0,0,0,0 tier=4
+profile-bonus 0xf5 stats=0,0,0,0,0 tier=3
+profile-bonus 0xf6 stats=0,0,0,0,0 tier=2
+profile-bonus 0xf7 stats=0,0,0,0,0 tier=1
+profile-bonus 0xf8 stats=0,0,0,0,0 tier=4
+profile-bonus 0xf9 stats=0,0,0,0,0 tier=9
+profile-bonus 0xfa stats=2,0,0,1,0 tier=9
+profile-bonus 0xfb stats=0,0,2,0,1 tier=9
+profile-bonus 0xfc stats=0,2,0,1,1 tier=9
+profile-bonus 0xfd stats=1,1,1,1,1 tier=9
+profile-bonus 0xfe stats=1,1,1,1,1 tier=9
+profile-bonus 0xff stats=1,1,1,1,1 tier=9
+
+group 0 skills=176,177,178,179,186,187,188,189,190
+group 1 skills=181,182,183,184
+group 2 skills=356,357,359,358,360,361,362,365
+group 3 skills=336,337,338,339,340,341,342,343,344,345,346,347,348,367
+group 4 skills=349,350,351,352,353,354
+group 5 skills=364,356,357,358,359,360,361,362,365
+group 6 skills=224,225,226,227,228,229,230,233,231,232,247
+group 7 skills=112,113,115,116,117,118,121,122,123,124,130,131,138,114,145
+group 8 skills=69,70,71,73,74,75,76,78,79,80,83,85,86,87,84,57,72,81,82,88,96,97,98
+group 9 skills=65,66,67,68
+group 10 skills=28,31,29,32,30,33,34,35,36
+group 11 skills=78,79,118,127,96
+group 12 skills=46,47,48
+group 13 skills=1,2,3,4,5,6,7,8,9
+group 14 skills=10,11,12,13,14,15,16,17,18
+group 15 skills=19,20,21,22,23,24,25,26,27
+group 16 skills=37,38,39,40,41,42,43,44,45
+group 17 skills=1,2,3
+group 18 skills=2,3
+group 19 skills=10,11,12
+group 20 skills=11,12
+group 21 skills=19,20,21
+group 22 skills=20,21
+group 23 skills=28,29,30
+group 24 skills=29,30
+group 25 skills=37,38,39
+group 26 skills=38,39
+group 27 skills=160,161,162
+group 28 skills=161,162
+group 29 skills=60,61,62,63,64,92
+group 30 skills=61,63
+group 31 skills=65,66,67,68,69,70,71,70,71,72,98
+group 32 skills=66,68
+group 33 skills=163,164,165
+group 34 skills=164,165
+group 35 skills=117,128
+group 36 skills=166,167,168,169,206,207,208,212,171,172
+group 37 skills=126,127,128,129,134,135,136,137,139,140,141

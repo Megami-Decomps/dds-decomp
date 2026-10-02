@@ -1,14 +1,15 @@
 #include "common.h"
 #include "eff.h"
 
-extern void func_002D0918(void *arg0);
+extern void func_002D0918(void *resource);
 
-void itfPanelReleasePrimitiveResources(EffPrim *arg0) {
-    if (arg0 != NULL) {
-        if (arg0->recordCount != 0) {
-            func_002D0918(arg0->unk4);
+/* Release the resources held by the primitive's two resource slots. */
+void itfPanelReleasePrimitiveResources(EffPrim *primitive) {
+    if (primitive != NULL) {
+        if (primitive->recordCount != 0) {
+            func_002D0918(primitive->secondaryResource);
         }
-        func_002D0918(arg0->unk0);
+        func_002D0918(primitive->primaryResource);
     }
 }
 
@@ -40,32 +41,34 @@ typedef struct PanelDefinition2 {
 extern void (*D_00357A00[])(void *);
 extern void (*D_00357A28[])(void *);
 
-void itfSetPanelLayoutAndNotify(PanelDefinition *panel, s32 a10, s32 a14, s32 a18, s32 a1C, s32 a0C) {
-    panel->a0C = a0C;
-    panel->a10 = a10;
-    panel->a14 = a14;
-    panel->a18 = a18;
-    panel->a1C = a1C;
+/* `left`/`top`/`right`/`bottom` are the panel rectangle (see the sprite and frame
+   call sites in code_0019DB88.c); `depth` is the panel's own unkC. */
+void itfSetPanelLayoutAndNotify(PanelDefinition *panel, s32 left, s32 top, s32 right, s32 bottom, s32 depth) {
+    panel->a0C = depth;
+    panel->a10 = left;
+    panel->a14 = top;
+    panel->a18 = right;
+    panel->a1C = bottom;
     if (D_00357A00[panel->kind] != 0) {
         D_00357A00[panel->kind](panel->context);
     }
 }
 
-void itfAdvancePanelLayoutAndNotify(PanelDefinition *panel, s32 a10, s32 a14, s32 a18, s32 a1C, s32 a0C) {
+void itfAdvancePanelLayoutAndNotify(PanelDefinition *panel, s32 left, s32 top, s32 right, s32 bottom, s32 depth) {
     void (*handler)(void *, s32, s32, s32, s32) =
         (void (*)(void *, s32, s32, s32, s32))D_00357A00[panel->kind];
 
-    panel->a10 += a10;
-    panel->a14 += a14;
-    panel->a18 += a18;
-    panel->a1C += a1C;
-    panel->a0C += a0C;
+    panel->a10 += left;
+    panel->a14 += top;
+    panel->a18 += right;
+    panel->a1C += bottom;
+    panel->a0C += depth;
     if (handler != 0) {
         handler(panel->context, panel->a10, panel->a14, panel->a18, panel->a1C);
     }
 }
 
-void func_00199A20(PanelDefinition2 *panel, s32 a2C, s32 a30, s32 a34, s32 a38) {
+void itfPanelUpdateValuesAndNotify(PanelDefinition2 *panel, s32 a2C, s32 a30, s32 a34, s32 a38) {
     panel->a2C = a2C;
     panel->a30 = a30;
     panel->a34 = a34;
@@ -81,11 +84,11 @@ typedef struct PanelPacketDispatch {
     s32 (*handler)(s32 owner, s32 packet);
 } PanelPacketDispatch;
 
-s32 itfBuildAndSubmitPanelPacket(PanelDefinition *panel, s32 arg1) {
-    s32 work = sdfAllocPacketAligned(0x20, arg1);
+s32 itfBuildAndSubmitPanelPacket(PanelDefinition *panel, s32 owner) {
+    s32 work = sdfAllocPacketAligned(0x20, owner);
 
     sdfInitPacketList(work);
     itfAppendGsPanelStatePacket(work);
     itfPanelDispatchHandler(panel, work);
-    return ((PanelPacketDispatch *)arg1)->handler(arg1, work);
+    return ((PanelPacketDispatch *)owner)->handler(owner, work);
 }

@@ -104,9 +104,9 @@ extern s32 effGetSlotWorkOrOverride();
 
 extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
 
-extern s32 func_00100400(void);
+extern s32 kwlnGetDrawBufferIndex(void);
 
-extern u8 D_00381ED0[];
+extern u8 kwlnFrameDrawPacketRecords[];
 
 extern void func_0032DB30(const void *, void *, s32);
 
@@ -238,7 +238,7 @@ typedef struct RenderCallbackEntry {
     u8 tail[0xC];
 } RenderCallbackEntry;
 
-extern RenderCallbackEntry D_0037FB48[];
+extern RenderCallbackEntry kwlnDrawSurfaces[];
 
 extern s32 sdfAllocPacketAligned(s32);
 
@@ -257,12 +257,45 @@ GridDrawWork *itfSubmitGridPacketsAndDraw(GridDrawWork *object, u8 *data, s32 ki
     }
     itfCreateGridPacketWithDefaultFlags(object->packetHandle, object->width,
                   object->height, (s32)cursor, context);
-    entry = &D_0037FB48[kind];
+    entry = &kwlnDrawSurfaces[kind];
     entry->draw(entry, context);
     return object;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003074F0);
+typedef struct ItfGridResource {
+    u32 handle;
+    u8 pad04[0x18];
+    u32 entryCount;
+} ItfGridResource;
+
+extern u8 *sdfResourceRetainAddress(u32);
+extern void sdfDecrementAllocationReferenceCount(u32);
+
+/* Return the address of entry `index` of the resource's 8-byte-stride offset table, or NULL when out of range. */
+u8 *itfGetGridResourceEntryData(ItfGridResource *object, u32 index) {
+    u8 *base;
+    u8 *cursor;
+    u8 *result;
+    u32 count;
+    u32 i;
+
+    if (object->handle == 0) {
+        return 0;
+    }
+    cursor = sdfResourceRetainAddress(object->handle);
+    base = cursor;
+    count = object->entryCount;
+    cursor += *(u32 *)(cursor + 0xC);
+    for (i = 0; i < count; i++, cursor += 8) {
+        result = base + *(u32 *)(cursor + 4);
+        if (index == i) {
+            sdfDecrementAllocationReferenceCount(object->handle);
+            return result;
+        }
+    }
+    sdfDecrementAllocationReferenceCount(object->handle);
+    return 0;
+}
 
 /* Set the selected descriptor word's high control bits. */
 void itfSetGridDescriptorControlBit(s32 object, s32 index) {
@@ -329,7 +362,7 @@ void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     context = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(context);
     sdfAppendPacket(context, packet);
-    entry = &D_0037FB48[kind];
+    entry = &kwlnDrawSurfaces[kind];
     entry->draw(entry, context);
 }
 
@@ -354,7 +387,7 @@ void itfSubmitToggledGridWord(s32 data, s32 alternate, s32 kind) {
     context = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(context);
     sdfAppendPacket(context, packet);
-    entry = &D_0037FB48[kind];
+    entry = &kwlnDrawSurfaces[kind];
     entry->draw(entry, context);
 }
 
@@ -382,7 +415,7 @@ void sdfSubmitGsAlphaRegisterPacket(s32 data, s32 alternate, s32 kind) {
     context = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(context);
     sdfAppendPacket(context, packet);
-    entry = &D_0037FB48[kind];
+    entry = &kwlnDrawSurfaces[kind];
     entry->draw(entry, context);
 }
 
@@ -403,7 +436,7 @@ void sdfSubmitGsPabeRegisterPacket(s32 data, s32 kind) {
     context = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(context);
     sdfAppendPacket(context, packet);
-    entry = &D_0037FB48[kind];
+    entry = &kwlnDrawSurfaces[kind];
     entry->draw(entry, context);
 }
 
@@ -420,7 +453,7 @@ void sdfSubmitGsTexRegisterPacket(s32 data, s32 kind) {
     context = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(context);
     sdfAppendPacket(context, packet);
-    entry = &D_0037FB48[kind];
+    entry = &kwlnDrawSurfaces[kind];
     entry->draw(entry, context);
 }
 
@@ -475,10 +508,10 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     void *texture;
     sdfInitPacketList((s32)list);
     texture = sdfAllocPacketAligned(0x40);
-    func_0032DB30(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
+    func_0032DB30(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(list, texture);
     {
-        u8 *surface = (u8 *)D_0037FB48 + (surfaceIndex << 5);
+        u8 *surface = (u8 *)kwlnDrawSurfaces + (surfaceIndex << 5);
         (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
     }
 }
@@ -492,10 +525,10 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex)
     void *texture;
     sdfInitPacketList((s32)list);
     texture = sdfAllocPacketAligned(0x40);
-    func_0032DB78(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
+    func_0032DB78(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(list, texture);
     {
-        u8 *surface = (u8 *)D_0037FB48 + (surfaceIndex << 5);
+        u8 *surface = (u8 *)kwlnDrawSurfaces + (surfaceIndex << 5);
         (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
     }
 }
@@ -838,7 +871,7 @@ extern char *strcpy(char *, const char *);
 extern s32 func_0035C860(char *, const char *, ...);
 extern double fptodp(f32);
 
-void func_00309C00(GridTextWidget *widget, GridValueEntry *entry, char *out) {
+void itfFormatGridValueEntryText(GridTextWidget *widget, GridValueEntry *entry, char *out) {
     char text[0x100];
     char prefix[0x100];
     char format[0x100];
@@ -940,12 +973,4 @@ void sdfGridSeekFirstNode(u32 widget) {
 void sdfGridSeekLastNode(u8 *entry) {
     sdfGridSeekSelectedNodeByIndex(((GridListCursor *)entry)->count - 1, entry);
 }
-
-INCLUDE_SDATA(const s32, "game/code_00306F80", D_00438868);
-
-INCLUDE_SDATA(const s32, "game/code_00306F80", D_00438870);
-
-INCLUDE_SDATA(const s32, "game/code_00306F80", D_00438878);
-
-INCLUDE_SDATA(const s32, "game/code_00306F80", D_00438880);
 

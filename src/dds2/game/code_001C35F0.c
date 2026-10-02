@@ -26,7 +26,7 @@ extern u32 kwlnTaskGetUserValue(s64);
 
 extern s64 func_00101740(u32);
 
-extern s32 func_001AA6F8(void);
+extern s32 btlGetRuntime(void);
 
 typedef struct UiSceneNode {
     u8 pad00[0x108];
@@ -44,7 +44,7 @@ INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C35F0);
 void btlUpdateActorSlotPresentationState(UiSceneNode *object, s8 mode, s8 value) {
     s32 count = 0;
     u8 slot = 0;
-    UiSceneNode *node = *(UiSceneNode **)(func_001AA6F8() + 0x24C);
+    UiSceneNode *node = *(UiSceneNode **)(btlGetRuntime() + 0x24C);
     u8 *entry;
     UiSlotRow *slotEntry;
     s64 task;
@@ -79,7 +79,7 @@ INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3850);
 void btlResetActorSlotPresentationValue(UiSceneNode *object) {
     s32 count = 0;
     u8 slot = 0;
-    UiSceneNode *node = *(UiSceneNode **)(func_001AA6F8() + 0x24C);
+    UiSceneNode *node = *(UiSceneNode **)(btlGetRuntime() + 0x24C);
     u8 *entry;
     s32 offset;
     for (; node != 0; node = node->next) {
@@ -180,7 +180,35 @@ INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7760);
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7BA8);
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7D48);
+/* Tracked-task state: the word at +0x3C holds status flags, and its low byte is read as the signed status code. */
+typedef struct BtlTrackedState {
+    u8 pad00[0x3C];
+    union {
+        u32 flags;
+        s8 status;
+    } word; /* 0x3C */
+} BtlTrackedState;
+
+extern BtlTrackedState *btlTrackedTaskHandles;
+extern u32 btlCommandPanelTaskNameRef;
+
+s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
+    s64 first;
+    s64 second;
+
+    if (btlTrackedTaskHandles != 0) {
+        first = func_00101740(btlCommandPanelTaskNameRef);
+        second = func_00101740(D_004367CC);
+        if (first == 0 && second == 0) {
+            return -128;
+        }
+        if (btlTrackedTaskHandles->word.flags & 0x100) {
+            return 0;
+        }
+        return btlTrackedTaskHandles->word.status;
+    }
+    return -128;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7DB8);
 

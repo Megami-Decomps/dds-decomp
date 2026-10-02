@@ -69,7 +69,7 @@ u32 dds3InitializeInnerVectorEffectObject(WorldResourceOwner *object) {
     effObjInnerCreate();
     obj = (InnerVecObj *)func_00328D68(0x7C);
     object->resource = (u32 *)obj;
-    obj->handle74 = func_001119D0(object);
+    obj->handle74 = dds3CreateSlotResourceState(object);
     dds3SetObjectFlags(object, 0x62);
     obj->unk64 = 0;
     obj->pos00 = 0.7f;
