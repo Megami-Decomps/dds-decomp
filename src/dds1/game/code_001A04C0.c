@@ -148,11 +148,50 @@ extern s32 D_003BB2E0;
 
 extern u16 mnuMovieTaskState;
 
-extern s32 D_003BAAA4;
+typedef struct ItfMesTable ItfMesTable;
 
-extern s32 D_0032A520;
+typedef struct ItfMesEntry {
+    u32 itemList;
+    ItfMesTable *table;
+} ItfMesEntry;
 
-extern s32 D_0032A210;
+/* Variable-length message data consumed by itfMesCreateWindow. */
+typedef struct ItfMesSub {
+    u8 unk00[0x18];
+    u32 entryCount;
+    u8 unk1C[4];
+    ItfMesEntry entries[1];
+} ItfMesSub;
+
+typedef struct BattleInitState {
+    u8 pad000[0x1F0];
+    u32 tick;
+    u8 pad1F4[0x0C];
+    u32 unk200;
+    u8 pad204[0x20];
+    u32 listHeads[6];
+    u8 pad23C[0x1C];
+    u8 endCode;
+    u8 pad259[0x2F];
+    s16 backgroundA;
+    s16 backgroundB;
+    u32 unk28C;
+    u8 pad290[0x200];
+    u8 unk490;
+    u8 pad491[3];
+    f32 unk494;
+    s32 messageWindows[3];
+    u8 pad4A4[0xE0];
+    u8 unk584;
+    u8 pad585[3];
+    u32 unk588;
+} BattleInitState;
+
+extern ItfMesSub *D_003BAAA4;
+
+extern ItfMesSub D_0032A520;
+
+extern ItfMesSub D_0032A210;
 
 extern s8 effSharedRandomState[];
 
@@ -164,7 +203,9 @@ extern void effMiscSeedRandom(s8 *, s32);
 
 extern u32 func_00100510(void);
 
-extern s32 itfMesCreateWindow(s32);
+extern s32 itfMesCreateWindow(ItfMesSub *);
+
+extern void btlResetActorEntryState(void);
 
 extern void sndResetTransition(void);
 
@@ -186,7 +227,51 @@ extern void func_001C45F0(void);
 
 extern void func_001FB098(void);
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A0F10);
+void func_001A0F10(void) {
+    btlResetRuntimeSequenceCounter();
+    D_003BB2E0 = sdfAllocGeneralBlock(0xE10);
+    btlRuntime = (s32)sdfResourceRetainAddress(D_003BB2E0);
+    memset((void *)btlRuntime, 0, 0xE10);
+
+    ((BattleInitState *)btlRuntime)->tick = 0;
+    ((BattleInitState *)btlRuntime)->unk200 = 0;
+    ((BattleInitState *)btlRuntime)->listHeads[0] = 0;
+    ((BattleInitState *)btlRuntime)->listHeads[1] = 0;
+    ((BattleInitState *)btlRuntime)->listHeads[2] = 0;
+    ((BattleInitState *)btlRuntime)->listHeads[3] = 0;
+    ((BattleInitState *)btlRuntime)->listHeads[4] = 0;
+    ((BattleInitState *)btlRuntime)->listHeads[5] = 0;
+    mnuMovieTaskState = 2;
+    ((BattleInitState *)btlRuntime)->unk490 = 0x1E;
+    {
+        BattleInitState *state = (BattleInitState *)btlRuntime;
+        state->endCode = 0;
+        state->unk494 = 1.0f;
+    }
+    ((BattleInitState *)btlRuntime)->unk584 = 0;
+    ((BattleInitState *)btlRuntime)->unk588 = 0x80808080;
+    ((BattleInitState *)btlRuntime)->backgroundA = 0xC9;
+    ((BattleInitState *)btlRuntime)->backgroundB = 1;
+    ((BattleInitState *)btlRuntime)->unk28C = 0;
+
+    effMiscSeedRandom(effSharedRandomState, func_00100510());
+    btlResetActorEntryState();
+    ((BattleInitState *)btlRuntime)->messageWindows[0] =
+        itfMesCreateWindow(D_003BAAA4);
+    ((BattleInitState *)btlRuntime)->messageWindows[1] = itfMesCreateWindow(&D_0032A520);
+    ((BattleInitState *)btlRuntime)->messageWindows[2] = itfMesCreateWindow(&D_0032A210);
+    sndResetTransition();
+    func_001F4430();
+    btlResetDeferredTaskQueue();
+    btlResetToInitialScene();
+    fldClearSceneSlotsAndGroups();
+    btlResetFieldColorAndSweepFlags();
+    btlRefreshSoundEntries();
+    btlRetainButtonTexture();
+    func_001C45F0();
+    func_001FB098();
+    btlClearModelFlagRange();
+}
 
 extern char D_003A15A8[];
 

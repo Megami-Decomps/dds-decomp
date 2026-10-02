@@ -1182,7 +1182,125 @@ void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9B80);
+typedef struct ItfMesTable ItfMesTable;
+
+typedef struct ItfMesEntry {
+    u32 itemList;
+    ItfMesTable *table;
+} ItfMesEntry;
+
+typedef struct ItfMesSub {
+    u8 unk00[0x18];
+    u32 entryCount;
+    u8 unk1C[4];
+    ItfMesEntry entries[1];
+} ItfMesSub;
+
+typedef struct BattleInitState {
+    u8 pad000[0x214];
+    u32 tick;
+    u8 pad218[0x0C];
+    u32 unk224;
+    u8 pad228[0x20];
+    u32 listHeads[6];
+    u8 pad260[0x1C];
+    u8 endCode;
+    u8 pad27D[0x2F];
+    u16 backgroundA;
+    u16 backgroundB;
+    u32 unk2B0;
+    u8 unk2B4;
+    u8 pad2B5[0x20F];
+    u8 unk4C4;
+    u8 pad4C5[3];
+    f32 unk4C8;
+    s32 messageWindows[3];
+    u8 pad4D8[0xE0];
+    u8 unk5B8;
+    u8 pad5B9[3];
+    u32 unk5BC;
+} BattleInitState;
+
+extern s32 D_004366E0;
+extern ItfMesSub *D_00435E78;
+extern ItfMesSub D_003858D8;
+extern ItfMesSub D_00385228;
+extern u16 mnuMovieTaskState;
+extern u32 func_001003F8(void);
+extern u32 func_001B5600(void);
+extern void *sdfResourceRetainAddress(s32);
+extern void effMiscSeedRandom(void *, u32);
+extern s32 itfMesCreateWindow(ItfMesSub *);
+extern void btlResetActorEntryState(void);
+extern s32 mdlSetViewerSlotResourceHandles(s32, s32, s32, s32, s32);
+extern char D_004366F8[];
+extern s32 D_003B4D90[];
+extern s32 D_003B4DA8[];
+
+void func_001A9B80(void) {
+    s32 allocation;
+    u32 seed;
+    u8 *runtime;
+
+    btlResetRuntimeSequenceCounter();
+    allocation = sdfAllocGeneralBlock(0xFD4);
+    D_004366E0 = allocation;
+    runtime = (u8 *)sdfResourceRetainAddress(allocation);
+    btlRuntime = (s32)runtime;
+    memset(runtime, 0, 0xFD4);
+
+    ((BattleInitState *)btlRuntime)->tick = 0;
+    ((BattleInitState *)btlRuntime)->unk224 = 0;
+    ((BattleInitState *)btlRuntime)->listHeads[0] = 0;
+    ((BattleInitState *)btlRuntime)->listHeads[1] = 0;
+    ((BattleInitState *)btlRuntime)->listHeads[2] = 0;
+    ((BattleInitState *)btlRuntime)->listHeads[3] = 0;
+    ((BattleInitState *)btlRuntime)->listHeads[4] = 0;
+    ((BattleInitState *)btlRuntime)->listHeads[5] = 0;
+    mnuMovieTaskState = 2;
+    ((BattleInitState *)btlRuntime)->unk4C4 = 0x1E;
+    {
+        BattleInitState *state = (BattleInitState *)btlRuntime;
+        state->endCode = 0;
+        state->unk4C8 = 1.0f;
+    }
+    ((BattleInitState *)btlRuntime)->unk5B8 = 0;
+    ((BattleInitState *)btlRuntime)->unk5BC = 0x80808080;
+    ((BattleInitState *)btlRuntime)->backgroundA = 0xC9;
+    ((BattleInitState *)btlRuntime)->backgroundB = 1;
+    ((BattleInitState *)btlRuntime)->unk2B0 = 0;
+    ((BattleInitState *)btlRuntime)->unk2B4 = func_001B5600();
+    seed = func_001003F8();
+    effMiscSeedRandom(effSharedRandomState, seed);
+    btlResetActorEntryState();
+
+    ((BattleInitState *)btlRuntime)->messageWindows[0] =
+        itfMesCreateWindow(D_00435E78);
+    ((BattleInitState *)btlRuntime)->messageWindows[1] =
+        itfMesCreateWindow(&D_003858D8);
+    ((BattleInitState *)btlRuntime)->messageWindows[2] =
+        itfMesCreateWindow(&D_00385228);
+    sndResetTransition();
+    func_002050D0();
+    btlResetDeferredTaskQueue();
+    btlResetToInitialScene();
+    fldClearSceneSlotsAndGroups();
+    btlResetFieldColorAndSweepFlags();
+    btlRefreshSoundEntries();
+    btlRetainButtonTexture();
+    func_001CFC40();
+    func_0020D118();
+    btlClearModelFlagRange();
+    mdlFlagClear(0x82B);
+
+    if (mdlFlagTest(0x290) == 0) {
+        mdlSetViewerSlotResourceHandles(0, 1, 0, (s32)D_003B4D90, 0);
+        btlBossDebugPrintf(D_004366F8, D_003B4D90);
+    } else {
+        mdlSetViewerSlotResourceHandles(0, 1, 0, (s32)D_003B4DA8, 0);
+        btlBossDebugPrintf(D_004366F8, D_003B4DA8);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", btlExitWhenAudioAndTasksIdle);
 
@@ -3136,7 +3254,7 @@ extern BtlResBlock *btlResourceBlock;
 
 extern s32 sdfAllocGeneralBlock(s32);
 
-extern BtlResBlock *sdfResourceRetainAddress(s32);
+extern void *sdfResourceRetainAddress(s32);
 
 extern s32 sdfReadNamedResource(const char *, void *, s32);
 
