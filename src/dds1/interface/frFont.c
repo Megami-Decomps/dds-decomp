@@ -588,7 +588,57 @@ u32 frFontMeasureLines(FrFontGlyph *glyph) {
     return total;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00195CD8);
+typedef struct FrFontGlyphMeasureWork {
+    u16 code;
+    u8 pad02[0xA];
+    s32 advance;
+    u8 pad10[5];
+    u8 fontIndex;
+    u8 pad16;
+    u8 mode;
+    u8 cellWidth;
+    u8 cellHeight;
+    u8 pad1A[0x16];
+} FrFontGlyphMeasureWork;
+
+u32 frFontGetGlyphCellWidth(u8 fontIndex);
+u32 frFontGetGlyphCellHeight(u8 fontIndex);
+extern void func_001949B0(FrFontGlyphMeasureWork *work, s32 code);
+
+s32 func_00195CD8(const u8 *text, u8 fontIndex, u8 mode) {
+    FrFontGlyphMeasureWork work;
+    s32 total = 0;
+    u32 offset = 0;
+    u32 length;
+
+    work.fontIndex = fontIndex;
+    work.mode = mode;
+    work.advance = 0;
+    work.cellWidth = frFontGetGlyphCellWidth(work.fontIndex);
+    work.cellHeight = frFontGetGlyphCellHeight(work.fontIndex);
+    length = strlen((const char *)text);
+
+    while (offset < length) {
+        u32 code = text[offset];
+        s32 glyphIndex;
+
+        if (code >= 0x80) {
+            offset++;
+            code = (code << 8) | text[offset];
+        }
+        work.code = code;
+        if (code < 0x80) {
+            glyphIndex = code - 0x20;
+        } else {
+            u32 adjusted = code - 0x8080;
+            glyphIndex = ((adjusted & 0xFF00) >> 1) + (adjusted & 0x7F);
+        }
+        func_001949B0(&work, glyphIndex);
+        offset++;
+        total += work.advance;
+    }
+    return total;
+}
 
 u32 frFontGetGlyphCellWidth(u8 fontIndex) {
     s32 index = fontIndex;
