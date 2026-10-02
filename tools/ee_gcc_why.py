@@ -328,9 +328,7 @@ def analyze(left: Path, right: Path, function: str | None = None) -> dict[str, A
         paired: dict[str, Any] = {}
         for label, directory in (("left", left), ("right", right)):
             try:
-                paired[label] = parse_side(
-                    directory, function, "rtl.20.greg", allocations.parse_dump
-                )
+                paired[label] = allocations.parse_probe(directory, function)
             except (FileNotFoundError, ValueError) as error:
                 evidence_gaps.append(str(error))
         report["allocation"] = paired
