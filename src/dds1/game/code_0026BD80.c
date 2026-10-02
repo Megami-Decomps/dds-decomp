@@ -31,6 +31,7 @@ extern s32 mnuCreateListState(s32, s32, s32);
 extern s32 mnuListAppendNode(s32, s32);
 
 extern void func_0026D480();
+extern void sndSetSequenceVolumePan(s32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", mnuDrawSprite);
 
@@ -208,7 +209,49 @@ void mnuResetTitlePageAndPhase(void) {
     state->word14 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026D160);
+s32 func_0026D160(void) {
+    MenuState *state = (MenuState *)mnuMovieMenuState;
+    switch (state->word34) {
+    case 0:
+        if (mnuIsAnyMenuInputPressed() == 0) {
+            MenuState *opening = (MenuState *)mnuMovieMenuState;
+            if (opening->word14 < 30) {
+                opening->word14++;
+            } else {
+                opening->word34 = 1;
+                opening->word14 = 0;
+            }
+            return 0;
+        }
+        sndSetSequenceVolumePan(8, 127, 63);
+        return 1;
+    case 1:
+        if (state->word14 < 90) {
+            state->word14++;
+        } else {
+            state->word14 = 0;
+        }
+        if (mnuIsAnyMenuInputPressed() != 0) {
+            sndSetSequenceVolumePan(8, 127, 63);
+            return 1;
+        }
+        state = (MenuState *)mnuMovieMenuState;
+        state->word1C++;
+        if (state->word1C >= 601) {
+            state->word1C = 0;
+            return -1;
+        }
+        break;
+    case 2:
+        if (state->word14 < 0) {
+            state->word14++;
+        } else {
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0026BD80", D_003AFE40);
 

@@ -172,13 +172,27 @@ u8 *work;
 }
 
 /* The active resource category is stored in the staff task's display mode. */
-typedef struct StaffDisplayModeState {
-    u8 pad00[0x910];
+typedef struct StaffMenuWork {
+    u32 resource;
+    u8 pad04[4];
+    u8 panel[0x4C];
+    u8 pad54[8];
+    void *valueRecord;
+    u8 pad60[0xB8];
+    u32 primaryImage;
+    u32 resourceList;
+    u32 secondaryImage;
+    u32 images[3];
+    u32 extraImages[2];
+    u32 scrollPanel; /* 0x138: created panel drawn and destroyed with this task */
+    u8 background[0x6B0];
+    u8 partyPanel[0x124];
     s32 displayMode;
-} StaffDisplayModeState;
+    u8 timer[0x10];
+} StaffMenuWork;
 
 void mnuSetStaffDisplayMode(s32 next, u8 *context) {
-    s32 previous = ((StaffDisplayModeState *)context)->displayMode;
+    s32 previous = ((StaffMenuWork *)context)->displayMode;
     if (next != previous) {
         if (previous != 0) {
             mnuReleaseStaffCategoryTextureHandles(previous);
@@ -186,23 +200,13 @@ void mnuSetStaffDisplayMode(s32 next, u8 *context) {
         if (next != 0) {
             movReleaseCategoryModels(next, context);
         }
-        ((StaffDisplayModeState *)context)->displayMode = next;
+        ((StaffMenuWork *)context)->displayMode = next;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_00270FB0", func_00271368);
 
-typedef struct StaffSpriteHandles {
-    u8 pad00[0x118];
-    u32 primaryImage;
-    u32 resourceList;
-    u32 secondaryImage;
-    u32 images[3];
-    u32 extraImages[2];
-    u32 scrollPanel; /* 0x138: created panel drawn and destroyed with this task */
-} StaffSpriteHandles;
-
-void mnuReleaseStaffSpriteHandles(StaffSpriteHandles *handles) {
+void mnuReleaseStaffSpriteHandles(StaffMenuWork *handles) {
     u32 *image = handles->extraImages;
     u32 index = 0;
     effDestroyPackedBatch(handles->primaryImage);
@@ -317,7 +321,7 @@ void func_00271B48(void) {
 
 INCLUDE_ASM(const s32, "game/code_00270FB0", func_00271B50);
 
-void mnuCreateStaffPanelSet(StaffSpriteHandles *menu) {
+void mnuCreateStaffPanelSet(StaffMenuWork *menu) {
     menu->resourceList = func_0027D4A0(0, *(u32 *)((u8 *)menu + 0x6C), menu->secondaryImage);
     menu->images[0] = func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
     mnuForwardDupArg(menu->images[0], *(u32 *)((u8 *)menu + 0x74), 0, 0, 0);
@@ -327,7 +331,7 @@ void mnuCreateStaffPanelSet(StaffSpriteHandles *menu) {
     mnuSetWindowContainerState(menu->images[2], 0x100);
 }
 
-void mnuReleaseStaffSpriteAndResourceHandles(StaffSpriteHandles *handles) {
+void mnuReleaseStaffSpriteAndResourceHandles(StaffMenuWork *handles) {
     u32 *image = handles->images;
     u32 index = 0;
     do {
@@ -336,7 +340,43 @@ void mnuReleaseStaffSpriteAndResourceHandles(StaffSpriteHandles *handles) {
     mnuReleaseResourceList(handles->resourceList);
 }
 
-INCLUDE_ASM(const s32, "game/code_00270FB0", func_00271E58);
+extern u32 func_002D03F8(s32);
+extern u8 *sdfResourceRetainAddress(u32);
+extern void *memset(void *, s32, u32);
+extern void mnuClearPanelTransitionState(s32);
+extern s8 dds3AdminReadPreviousSignedSample(void);
+extern void *mnuAllocateValueRecord(void *);
+extern void mnuInitPartyPanelSlots(void *);
+extern void func_0027AD80(void *);
+extern void evtCreateMessageWindowIfMissing(s32);
+extern char D_0037B9E0[];
+extern void func_00271368(void *);
+extern void func_002717D8(void *);
+extern void func_00283BE0(void *, s32);
+extern void func_002E9708(void);
+
+StaffMenuWork *func_00271E58(void) {
+    u32 resource = func_002D03F8(sizeof(StaffMenuWork));
+    StaffMenuWork *work = (StaffMenuWork *)sdfResourceRetainAddress(resource);
+
+    memset(work, 0, sizeof(*work));
+    work->resource = resource;
+    mnuClearPanelTransitionState((s32)work->panel);
+    /* The opaque owner word selects the normal or alternate staff image table. */
+    if (dds3AdminReadPreviousSignedSample() != 0) {
+        work->valueRecord = mnuAllocateValueRecord((void *)1);
+    } else {
+        work->valueRecord = mnuAllocateValueRecord(NULL);
+    }
+    mnuInitPartyPanelSlots(work->partyPanel);
+    func_0027AD80(work->background);
+    evtCreateMessageWindowIfMissing((s32)D_0037B9E0);
+    func_00271368(work);
+    func_002717D8(work);
+    func_00283BE0(work->timer, 0x40);
+    func_002E9708();
+    return work;
+}
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -345,20 +385,20 @@ extern s8 mnuCampTaskState;
 extern void func_002D0918(u32);
 
 void mnuDestroyStaffMenuTask(u32 task) {
-    u8 *work = (u8 *)kwlnTaskGetUserValue(task);
+    StaffMenuWork *work = (StaffMenuWork *)kwlnTaskGetUserValue(task);
     if (work == NULL) {
         return;
     }
-    mnuDrainPanelTransitions(work + 8, task);
-    mnuReleaseStaffSpriteAndResourceHandles((StaffSpriteHandles *)work);
-    mnuDestroyScrollPanel(((StaffSpriteHandles *)work)->scrollPanel);
-    mnuShutdownContext(work + 0x15C);
+    mnuDrainPanelTransitions(work->panel, task);
+    mnuReleaseStaffSpriteAndResourceHandles(work);
+    mnuDestroyScrollPanel(work->scrollPanel);
+    mnuShutdownContext(work->background + 0x20);
     dspCloseChannel();
-    mnuReleaseAssets(work + 0x13C);
-    mnuReleaseStaffResourceSlotGroups(work);
-    mnuReleaseStaffSpriteHandles((StaffSpriteHandles *)work);
-    func_002BC618(*(u32 *)(work + 0x5c));
-    func_002D0918(*(u32 *)work);
+    mnuReleaseAssets(work->background);
+    mnuReleaseStaffResourceSlotGroups((u32 *)work);
+    mnuReleaseStaffSpriteHandles(work);
+    func_002BC618((u32)work->valueRecord);
+    func_002D0918(work->resource);
     mnuCampTaskState = 2;
     func_002E9730();
 }
@@ -394,7 +434,6 @@ s32 mnuStaffCampCancelCheck(s32 menu) {
     return result;
 }
 
-extern u8 *func_00271E58(void);
 extern void func_00272798();
 extern void func_002728F8();
 extern void func_002729C8();
@@ -492,7 +531,7 @@ void mnuDrawStaffCampScreen(s32 kind, s32 task) {
     if (func_002719F0(task) == 0) {
         return;
     }
-    func_0027E8D8(-0x10, -8, 0, (s32)((StaffSpriteHandles *)menu)->scrollPanel, 0x53);
+    func_0027E8D8(-0x10, -8, 0, (s32)((StaffMenuWork *)menu)->scrollPanel, 0x53);
     mnuDrawPanelListDefault(0, 0, 0, menu + 0x15C, 0x53);
     if (kind == 0) {
         itfDrawGridWithResolvedSlot(0x1AB0, 0x70, 0, 1, *(s32 *)(menu + 0x64), 6, 0x53);
