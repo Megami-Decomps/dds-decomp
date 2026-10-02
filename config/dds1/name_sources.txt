@@ -3141,6 +3141,8 @@
 0x0021FD50	mdlAttachWorldObjectToSourceVector	inferred	Copies source vector into target object and composes target quaternion with half turn. [names_reviewed7.tsv]
 0x0021FE38	evtDestroySecondaryWorldNode	inferred	Obtains the secondary world object and destroys its node when it exists.
 0x0021FE70	evtDrainSecondaryWorldNodes	inferred	M141; sources=names_pending_main.tsv; twin=0x0023A9E0, input-family pairing. [names_qp10.tsv]
+0x0021FEC0	evtCreateWorldObjectForKey	inferred	Called by evtCommandHandleChangedSecondaryWorldKey after the packed secondary-world key changes; creates and loads the stage world object for that key.
+0x0021FFE8	evtCreateWorldObjectFromResource	inferred	Called by evtEventPack with a constructed-resource record; appends a world object and attaches a handle built from its six values.
 0x00220110	evtCreateEventScriptProcess	inferred	Formats event BF script path from event ID and creates a process task for it. [names_reviewed6.tsv]
 0x00220228	evtSetWorldSlotStatusFlag	inferred	Sets the 0x8 status bit on slot-one world data when available.
 0x00220260	evtClearWorldSlotStatusFlag	inferred	Clears the 0x8 status bit on slot-one world data when available.

@@ -48,13 +48,13 @@ typedef struct {
 
 extern u64 dds3GetWorldSecondaryObject(void);
 extern s32 dds3GetWorldObjectValue(u64);
-extern void func_0023AA30(s32, s32);
+extern void evtCreateWorldObjectForKey(s32, s32);
 /* Updates the secondary world selector only when the packed pair changes. */
 void evtSwitchWorldValueIfChanged(s32 first, s32 second) {
     s32 packed = (first << 16) + second;
 
     if (dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) != packed) {
-        func_0023AA30(first, second);
+        evtCreateWorldObjectForKey(first, second);
     }
 }
 
