@@ -40,6 +40,8 @@ MOTION_KINDS = {
     5: ("light", 10),
 }
 MOTION_KIND_IDS = {name: kind for kind, (name, _) in MOTION_KINDS.items()}
+SPECIAL_POINT_KINDS = {1: "save", 2: "heal", 3: "hunt"}
+SPECIAL_POINT_KIND_IDS = {name: kind for kind, name in SPECIAL_POINT_KINDS.items()}
 
 
 class FldError(ValueError):
@@ -294,6 +296,14 @@ def _read_motion_tracks(
     return tuple(tracks)
 
 
+def _read_special_point(data: bytes, offset: int, context: str) -> tuple[int, int]:
+    _range(data, offset, 8, context)
+    kind, point_id = struct.unpack_from("<II", data, offset)
+    if kind not in SPECIAL_POINT_KINDS:
+        raise FldError(f"{context} has unknown kind {kind}")
+    return kind, point_id
+
+
 def validate(data: bytes) -> None:
     """Validate the known FLD2 object graph and semantic index domains."""
 
@@ -323,6 +333,8 @@ def validate(data: bytes) -> None:
                         raise FldError(
                             f"collision face {face_index} vertex {vertex} exceeds {vertex_count}"
                         )
+        elif resource.type_id == 4 and resource.data:
+            _range(data, resource.data, 4, "camera resource")
         elif resource.type_id == 6 and resource.data:
             _range(data, resource.data, 0x10, "event resource")
             label = _u32(data, resource.data + 4, "event label")
@@ -333,13 +345,18 @@ def validate(data: bytes) -> None:
         elif resource.type_id == 10 and resource.data:
             _range(data, resource.data, 0x10, "placement resource")
             kind, event_index = struct.unpack_from("<Ii", data, resource.data)
-            if kind > 7:
+            if kind > 8:
                 raise FldError(f"placement at 0x{resource.data:x} has kind {kind}")
             if kind == 1 and event_index >= 0 and event_index >= event_count:
                 raise FldError(
                     f"event placement at 0x{resource.data:x} references event {event_index}, "
                     f"but the file has {event_count} event resources"
                 )
+            if kind == 8:
+                payload = _u32(data, resource.data + 0xC, "special point pointer")
+                if not payload:
+                    raise FldError(f"special placement at 0x{resource.data:x} has no payload")
+                _read_special_point(data, payload, "special point")
 
 
 def validate_links(
@@ -569,6 +586,8 @@ def render_source(data: bytes) -> str:
     internal_targets: set[int] = set()
 
     def add_span(start: int, size: int, lines: list[str], context: str) -> None:
+        if size == 0:
+            return
         if start <= 0 or start + size > data_end:
             raise FldError(f"{context} lies outside the data region")
         for other_start, (other_end, _) in spans.items():
@@ -679,11 +698,9 @@ def render_source(data: bytes) -> str:
                 )
             add_span(faces, face_count * FACE_SIZE, face_lines, stem + " faces")
         elif resource.type_id == 4 and resource.data:
-            _range(data, resource.data, 0x10, stem + " camera")
+            _range(data, resource.data, 4, stem + " camera")
             fovy = struct.unpack_from("<f", data, resource.data)[0]
-            if any(data[resource.data + 4 : resource.data + 0x10]):
-                continue
-            add_span(resource.data, 0x10, [f"camera fovy={_float_text(fovy)}"], stem + " camera")
+            add_span(resource.data, 4, [f"camera fovy={_float_text(fovy)}"], stem + " camera")
         elif resource.type_id == 6 and resource.data:
             _range(data, resource.data, 0x10, stem + " event")
             flag, label, reserved0, reserved1 = struct.unpack_from("<IIII", data, resource.data)
@@ -770,6 +787,14 @@ def render_source(data: bytes) -> str:
                 [f"placement kind={kind} event={event_index} visible={visible} payload={payload_ref}"],
                 stem + " placement",
             )
+            if kind == 8:
+                special_kind, point_id = _read_special_point(data, payload, stem + " special point")
+                add_span(
+                    payload,
+                    8,
+                    [f"special_point kind={SPECIAL_POINT_KINDS[special_kind]} id={point_id}"],
+                    stem + " special point",
+                )
 
     # Internal pointer targets are emitted by their owning directive.
     for target in internal_targets:
@@ -878,9 +903,10 @@ def _operation_size(operation: Operation, offset: int) -> int:
         "collision": COLLISION_SIZE,
         "vertex": VERTEX_SIZE,
         "face": FACE_SIZE,
-        "camera": 0x10,
+        "camera": 4,
         "event": 0x10,
         "placement": 0x10,
+        "special_point": 8,
         "motion_curve": MOTION_CURVE_SIZE,
         "string16": STRING_SIZE,
         "pointer": 4,
@@ -1083,7 +1109,6 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
         elif name == "camera":
             f = checked_fields(operation, ("fovy",))
             output.extend(struct.pack("<f", _parse_float(f["fovy"])))
-            output.extend(bytes(12))
         elif name == "event":
             f = checked_fields(operation, ("flags", "label", "reserved"))
             output.extend(struct.pack("<I", _int(f["flags"])))
@@ -1120,6 +1145,14 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
             f = checked_fields(operation, ("kind", "event", "visible", "payload"))
             output.extend(struct.pack("<IiI", _int(f["kind"]), _int(f["event"]), _int(f["visible"])))
             output.extend(pointer(f["payload"]))
+        elif name == "special_point":
+            f = checked_fields(operation, ("kind", "id"))
+            kind = SPECIAL_POINT_KIND_IDS.get(f["kind"])
+            if kind is None:
+                raise FldError(
+                    f"line {operation.line}: unknown special point kind {f['kind']!r}"
+                )
+            output.extend(struct.pack("<II", kind, _int(f["id"])))
         elif name == "string16":
             if len(args) != 1:
                 raise FldError(f"line {operation.line}: string16 expects one string")
