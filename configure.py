@@ -230,7 +230,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     n.rule(
         "fld2",
         f"mkdir -p $outdir && {sys.executable} tools/fld.py assemble "
-        "--scripts $scripts --warps $warps $in $out",
+        "$links $in $out",
         description="fld2 $in",
     )
     n.rule(
@@ -422,6 +422,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             fld_source_dir = Path("src") / version / "data" / "field"
             fld_output_dir = Path("build") / version / "data" / "field"
             fld_sources = sorted((ROOT / fld_source_dir).glob("*.fldasm"))
+            linked_stems = set(VERSIONS[version].get("field_fld2_links", ()))
             fld_outputs = []
             for source in fld_sources:
                 source = source.relative_to(ROOT)
@@ -429,18 +430,27 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 field_stem = source.stem.split("_", 1)[0]
                 scripts = Path("src") / version / "scripts" / "field" / f"{field_stem}.bfasm"
                 warps = fld_source_dir / f"{field_stem}.wapasm"
+                implicit = ["tools/fld.py"]
+                links = ""
+                if source.stem in linked_stems:
+                    if not (ROOT / scripts).exists() or not (ROOT / warps).exists():
+                        raise ValueError(f"missing FLD2 link peers: {scripts}, {warps}")
+                    implicit.extend((str(scripts), str(warps)))
+                    links = f"--scripts {scripts} --warps {warps}"
                 n.build(
                     str(output),
                     "fld2",
                     str(source),
-                    implicit=["tools/fld.py", str(scripts), str(warps)],
+                    implicit=implicit,
                     variables={
                         "outdir": str(output.parent),
-                        "scripts": str(scripts),
-                        "warps": str(warps),
+                        "links": links,
                     },
                 )
                 fld_outputs.append(str(output))
+            missing_links = linked_stems - {source.stem for source in fld_sources}
+            if missing_links:
+                raise ValueError(f"missing linked FLD2 sources: {', '.join(sorted(missing_links))}")
             fld_stamp = fld_output_dir / "field_fld2.ok"
             n.build(str(fld_stamp), "check", str(fld_manifest), implicit=fld_outputs)
             version_outputs.append(str(fld_stamp))
