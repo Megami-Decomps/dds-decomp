@@ -537,7 +537,19 @@ void dds3ForEachFlagged(void) {
     } while (n >= 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011B6A8);
+void func_0011B6A8(void) {
+    s32 index;
+    for (index = 0; index < 5; index++) {
+        Entry1A4 *entry = (Entry1A4 *)(datGameState +
+            index * sizeof(Entry1A4) + 0xA60);
+        u16 active = entry->flags & 1;
+        if (active != 0) {
+            Entry1A4 *stock = (Entry1A4 *)(entry->rosterIndex *
+                sizeof(Entry1A4) + datGameState + 0x31BB0);
+            *stock = *entry;
+        }
+    }
+}
 
 void evtRandomizeEntryValue(s32 entryAddress) {
     s32 randomOffset;

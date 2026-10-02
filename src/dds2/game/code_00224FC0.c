@@ -98,9 +98,37 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_00224FC0);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002251A0);
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225368);
-
 extern BattleActionUnit *btlGetTargetUnitForLink(BattleActionUnit *);
+extern void btlClearAllUnitDefeatCandidatesTask(void);
+extern void btlFlagUnitDefeatCandidate(BattleActionUnit *);
+extern void btlApplyCombinedActorFlags(u8 *);
+extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32,
+    f32, f32, f32, f32, f32, f32, f32, f32);
+
+void func_00225368(BattleActionUnit *command) {
+    BattleActionUnit *target = btlGetTargetUnitForLink(command);
+
+    if (target == NULL) {
+        return;
+    }
+    btlClearAllUnitDefeatCandidatesTask();
+    btlFlagUnitDefeatCandidate(target);
+    btlApplyCombinedActorFlags((u8 *)command);
+    switch (target->lookupId) {
+    case 0:
+        btlSetEffectCameraKeys((s32)command,
+            464.7f, -124.1f, -797.1f, -0.11f, 0.202f, -0.039f, 0.962f, 527.6f,
+            -60.9f, -1267.3f, -0.133f, 0.15f, -0.037f, 0.968f, 40.0f, 10.0f);
+        break;
+    case 1:
+    case 2:
+        btlSetEffectCameraKeys((s32)command,
+            -350.8f, -62.0f, -962.5f, -0.079f, -0.207f, -0.001f, 0.964f, -736.7f,
+            -32.3f, -1170.6f, -0.118f, -0.248f, 0.012f, 0.95f, 40.0f, 8.0f);
+        break;
+    }
+}
+
 extern void btlSetUnitPosition(BattleActionUnit *, f32 *);
 extern void func_003364B8(f32);
 extern void func_00336818(f32);
