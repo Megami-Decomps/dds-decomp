@@ -1245,7 +1245,46 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010B190);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010B3D8);
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010B650);
+typedef struct SdfChipStats {
+    u32 totalBytes;
+    u32 freeBytes;
+    u32 blockCount;
+    u32 emptyBlocks;
+    u32 partialBlocks;
+    u32 usedCells[7];
+} SdfChipStats;
+
+extern void sdfGetGeneralHeapStats(s32 *stats);
+extern void sdfGetChipHeapStats(SdfChipStats *stats);
+extern u32 D_00435D4C;
+extern char D_00435D50[];
+extern char D_00435D58[];
+extern void func_0035C860(char *buffer, const char *format, ...);
+extern void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index,
+                                           const char *text, ...);
+extern void func_0010B3D8(void *list, s32 source, s32 end);
+
+void func_0010B650(void *owner) {
+    s32 general[6];
+    SdfChipStats chip;
+    char text[100];
+    void *list;
+    EvtDrawSurface *surface = owner;
+
+    sdfGetGeneralHeapStats(general);
+    D_00435D4C = general[0];
+    sdfGetChipHeapStats(&chip);
+    list = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    func_0010B3D8(list, 0x8AC0, 0x79C0);
+    func_0035C860(text, D_00435D50, general[1]);
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(0x86C0,
+        (D_00435D4C / (D_00435D4C >> 8)) * 8 + 0x7A00, 0x0FFFFF80, 0, text));
+    func_0035C860(text, D_00435D58, chip.freeBytes);
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(0x86C0,
+        (D_00435D4C / (D_00435D4C >> 8)) * 8 + 0x7A60, 0x0FFFFF80, 0, text));
+    surface->submit(surface, list);
+}
 
 s32 func_0010B780(void) {
     if (D_0037F53B[0] != 0) {
