@@ -555,4 +555,39 @@
     "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\tsqc2 vf10, %0\n\t.set reorder" \
     : "+m" (v) :: "memory")
 
+/*
+ * Blend two unaligned vec3 keys by weight t into vf10.xyz (vf10.w = 0):
+ *     qmtc2.ni t,vf4
+ *     ldr/ldl/lw first -> $2/$3; ldr/ldl/lw first -> $4/$5
+ *     pcpyld $2,$3,$2; pcpyld $4,$5,$4
+ *     vsubx.w vf5,vf0,vf4x          ; vf5.w = 1 - t
+ *     vmulx.xyzw vf10,vf0,vf0x      ; vf10 = 0
+ *     qmtc2.ni $2,vf2; qmtc2.ni $3,vf3
+ *     vmulaw.xyz ACC,vf2,vf5w; vmaddx.xyz vf10,vf3,vf4x
+ * This is retail's sequence verbatim, including its two slips: the second key
+ * is loaded from the first pointer again, and vf3 is fed the raw z word ($3)
+ * instead of the second packed vector ($4). The second pointer is therefore
+ * fetched (operand %1) but never read. Users: DDS1 func_002DB900, DDS2
+ * func_003347B0 (sdfMotion vec3 key blend).
+ */
+#define VU0_LERP_VEC3_KEYS(first, second, t) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmtc2.ni %2, vf4\n\t" \
+    "ldr $2, 0(%0)\n\t" \
+    "ldl $2, 7(%0)\n\t" \
+    "lw $3, 8(%0)\n\t" \
+    "ldr $4, 0(%0)\n\t" \
+    "ldl $4, 7(%0)\n\t" \
+    "lw $5, 8(%0)\n\t" \
+    "pcpyld $2, $3, $2\n\t" \
+    "pcpyld $4, $5, $4\n\t" \
+    "vsubx.w vf5, vf0, vf4x\n\t" \
+    "vmulx.xyzw vf10, vf0, vf0x\n\t" \
+    "qmtc2.ni $2, vf2\n\t" \
+    "qmtc2.ni $3, vf3\n\t" \
+    "vmulaw.xyz ACC, vf2, vf5w\n\t" \
+    "vmaddx.xyz vf10, vf3, vf4x\n\t" \
+    ".set reorder" \
+    : : "r" (first), "r" (second), "r" (t) : "$2", "$3", "$4", "$5")
+
 #endif
