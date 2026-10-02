@@ -682,7 +682,98 @@ s32 mdlIsInnerSentinel(MdlCtx *ctx) {
     return r;
 }
 
-INCLUDE_ASM(const s32, "game/code_00231A80", func_002330C8);
+typedef struct MdlGroupSetup {
+    s32 resourceList;
+    s32 unk4;
+    s32 requestHandle;
+    s32 flags;
+    s32 resource;
+    s32 handleA;
+    s32 handleB;
+    s32 handleC;
+} MdlGroupSetup;
+
+extern void mdlApplyGroupSetup(s32, s32, s32, MdlGroupSetup *);
+
+typedef struct PacWork {
+    struct PacWork *next;
+    struct PacState *owner;
+    s32 resourceHandle;
+    u8 *dataCursor;
+    u8 packet[1];
+} PacWork;
+
+typedef struct PacHead {
+    u8 command;
+    u8 flags;
+    u8 pad2[2];
+    s32 payloadSize;
+    u32 tag;
+    s32 decodedSize;
+    u8 payload[1];
+} PacHead;
+
+typedef struct MdlPartList MdlPartList;
+typedef struct MdlRecord MdlRecord;
+extern PacWork *sdfPacRemovePacket(PacWork *);
+extern u16 func_00233F58(MdlRecord *);
+extern MdlPartList *mdlCreateBufferedPartRequest(u32);
+extern void mdlAddBillboardPart(MdlPartList *, s32);
+extern void mdlAddEffectPart(MdlPartList *, s32);
+extern void sdfReleaseResourceAllocation(s32);
+extern void *memset(void *, s32, u32);
+
+PacWork *func_002330C8(PacWork *work, s32 group, s32 id, s32 mode) {
+    MdlGroupSetup setup;
+    MdlPartList *parts;
+    s32 count;
+
+    memset(&setup, 0, sizeof(setup));
+    parts = NULL;
+    while (work != NULL) {
+        switch (((PacHead *)work->packet)->command) {
+        case 1:
+            switch (((PacHead *)work->packet)->tag) {
+            case 0x30424950: /* PIB0: model part information. */
+                setup.handleA = (s32)work->dataCursor;
+                setup.handleB = work->resourceHandle;
+                count = func_00233F58((MdlRecord *)work->dataCursor);
+                if (count > 0) {
+                    parts = mdlCreateBufferedPartRequest(count);
+                    setup.handleC = (s32)parts;
+                }
+                break;
+            case 0x413250: /* P2A: billboard part. */
+                mdlAddBillboardPart(parts, (s32)work->dataCursor);
+                sdfReleaseResourceAllocation(work->resourceHandle);
+                break;
+            case 0x503344: /* D3P: effect part. */
+                mdlAddEffectPart(parts, (s32)work->dataCursor);
+                sdfReleaseResourceAllocation(work->resourceHandle);
+                break;
+            }
+            break;
+        case 9:
+            setup.resourceList = work->resourceHandle;
+            break;
+        case 6:
+            if (setup.requestHandle == 0) {
+                setup.requestHandle = work->resourceHandle;
+                setup.unk4 = (s32)work->dataCursor;
+            }
+            break;
+        case 8:
+            if (setup.resource == 0) {
+                setup.resource = work->resourceHandle;
+                setup.flags = (s32)work->dataCursor;
+            }
+            break;
+        }
+        work = sdfPacRemovePacket(work);
+    }
+    mdlApplyGroupSetup(group, id, mode, &setup);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "game/code_00231A80", func_00233280);
 

@@ -610,8 +610,11 @@ void mdlObjInit(MdlObj *obj, s32 data, s32 attributes) {
     }
 }
 
-void mdlCreateBufferedPartRequest(u32 request) {
-    sdfDevCreateBufferedRequest(request, 0x10, 4);
+typedef struct DevRequest DevRequest;
+extern DevRequest *sdfDevCreateBufferedRequest(s32, s32, s32);
+
+MdlPartList *mdlCreateBufferedPartRequest(u32 request) {
+    return (MdlPartList *)sdfDevCreateBufferedRequest(request, 0x10, 4);
 }
 
 void mdlDestroyPartList(MdlPartList *list) {

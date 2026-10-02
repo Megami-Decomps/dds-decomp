@@ -86,22 +86,39 @@ extern void vu0RotMatrixXYZFromVec3(f32 *rot);
 
 extern void effPcpScatterReleasePoolResources(PcpScatterPool *work);
 
+typedef struct PcpScatterRadialParticle {
+    f32 unk00;
+    f32 unk04;
+    f32 unk08;
+    f32 unk0C;
+    f32 radius;
+    f32 angle;
+    f32 unk18;
+} PcpScatterRadialParticle;
+
 /* func_001708A0 */
 struct PcpScatterWork1 {
     u8 pad00[0x20];
     u32 particleCount;
-    u8 pad24[0x18];
+    u32 radialSegments;
+    u8 pad28[0xC];
+    s32 duration;
+    u8 pad38[4];
     f32 unk3C;
     u32 unk40;
-    u32 unk44;
+    f32 unk44;
     u32 unk48;
     f32 unk4C;
     f32 unk50;
-    u8 pad54[0x14];
+    f32 radiusJitter;
+    f32 targetRadiusJitter;
+    f32 speedJitter;
+    u8 pad60[8];
     u8 duplicateParticles;
     u8 pad69[7];
     u32 particlesPerGroup;
-    u8 pad74[0xC];
+    PcpScatterRadialParticle *particles;
+    u8 pad78[8];
     PcpScatterPool *childWork;
     u32 ownedResource;
     u32 duplicatedCount;
@@ -337,7 +354,27 @@ void effPcpScatterReleaseParticleGroup(PcpScatterWork1 *work)
     sdfReleaseResourceAllocation(work->ownedResource);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00170D68);
+void func_00170D68(PcpScatterWork1 *work, u32 index) {
+    u32 segments = work->radialSegments;
+    PcpScatterRadialParticle *particle = &work->particles[index];
+    f32 angleStep;
+    f32 jitter;
+
+    if (segments == 0) {
+        segments = 1;
+    }
+    angleStep = 6.2831852f / segments;
+    particle->angle = angleStep * (index % segments) + angleStep * 0.5f * effMiscRandUnitFloat(D_0034DF38);
+    jitter = work->radiusJitter;
+    particle->radius = work->unk4C * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    particle->unk18 = 0.0f;
+    jitter = work->targetRadiusJitter;
+    particle->unk04 = (work->unk50 * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) - particle->radius) / work->duration;
+    jitter = work->speedJitter;
+    particle->unk0C = work->unk3C * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    particle->unk00 = 0.0f;
+    particle->unk08 = work->unk44;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00170F28);
 
