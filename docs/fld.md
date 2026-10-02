@@ -107,11 +107,10 @@ door placement resolves the matching actor row in `f011.wapasm`.
 ## Archive boundary
 
 Most field resources are stored as compressed blocks inside `.LB` archives.
-The `.fldasm` source describes the decompressed `FLD2` object. Rebuilding the
-outer archive is a separate layer: it must preserve the LB block table,
-compression contract, names, and alignment. Keeping that boundary explicit
-lets field semantics improve without coupling every edit to the container
-codec.
+The `.fldasm` source describes the decompressed `FLD2` object. `tools/lb.py`
+then places that output into the paired resource archive while retaining the
+other blocks from an extracted retail base. See [`lb.md`](lb.md) for the LB
+container, compression codec, archive source, and exact build targets.
 
 Run the codec, relocation, semantic-link, and tracked-source tests with:
 

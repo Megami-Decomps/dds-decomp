@@ -23,6 +23,7 @@ jobs:
           python3 tools/test_inf.py
           python3 tools/test_wap.py
           python3 tools/test_fld.py
+          python3 tools/test_lb.py
           python3 tools/test_battle_tbl.py
           python3 tools/test_dev_elf.py
 
