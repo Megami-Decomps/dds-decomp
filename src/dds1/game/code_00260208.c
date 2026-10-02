@@ -352,15 +352,29 @@ extern s32 mnuCreateSpriteState(s32, s32, s32);
 extern void evtStageTestInit(s32);
 extern void mnuForwardTableByte(s32);
 
-/* Fields of the battle-result panel needed while opening its skill package. */
+typedef struct BrsPartyRow {
+    s32 flags;          /* 0x00 */
+    s32 amount;         /* 0x04 */
+    u8 pad08[0x24];
+} BrsPartyRow;
+
+/* Battle-result task fields used by reward and skill-package setup. */
 typedef struct BrsSkillPackageWork {
-    u8 pad00[0x58];
+    s32 handle;
+    u8 pad04[4];
+    u8 transition[0x50];
     s32 fadeTarget;          /* 0x058 */
-    u8 pad5C[0x34];
+    MenuIconBatch rewards;   /* 0x05C */
+    u8 pad6C[0x24];
     s32 unitHandle;          /* 0x090 */
     u8 pad94[0x1AC];
     s32 selectedRow;         /* 0x240 */
-    u8 pad244[0x2B4];
+    u8 pad244[0xC];
+    BrsRewardBatch secondaryRewards; /* 0x250 */
+    BrsRewardBatch primaryRewards;   /* 0x2CC */
+    u8 rewardState[0x9C];    /* 0x348 */
+    BrsPartyRow partyRows[5]; /* 0x3E4 */
+    u8 pad4C0[0x38];
     s32 group[2];            /* 0x4F8 */
     s32 spriteArg0;          /* 0x500 */
     u8 pad504[8];
@@ -372,7 +386,13 @@ typedef struct BrsSkillPackageWork {
     u8 pad574[0x79C];
     s32 panelHandle;         /* 0xD10 */
     s32 spriteHandle;        /* 0xD14 */
+    u8 padD18[4];
     u32 assets;              /* 0xD1C */
+    u8 padD20[0x24];
+    s32 teardownHandle;      /* 0xD44 */
+    u8 padD48[0x82C];
+    s32 unused1574;          /* 0x1574 */
+    u8 pad1578[0x18];
 } BrsSkillPackageWork;
 
 typedef struct BrsSelectedRow {
@@ -477,12 +497,6 @@ s32 brsAdvanceSkillPackagePanel(s32 work) {
     return 0;
 }
 
-typedef struct BrsPartyRow {
-    s32 flags;          /* 0x00 */
-    s32 amount;         /* 0x04 */
-    u8 pad08[0x24];
-} BrsPartyRow;
-
 typedef struct BrsTaskState {
     u8 pad00[0x344];
     s32 pendingRows;    /* 0x344 */
@@ -531,7 +545,58 @@ INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA88);
 
 INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA98);
 
-INCLUDE_ASM(const s32, "game/code_00260208", brsCreateTaskContext);
+INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAA8);
+
+extern s32 sdfAllocGeneralBlock(s32);
+extern void *sdfResourceRetainAddress(s32);
+extern void mnuClearPanelTransitionState(void *);
+extern s32 mnuAllocateValueRecord(s32);
+extern void evtCreateMessageWindowIfMissing(void *);
+extern void func_0024DA20(s32);
+extern void func_001A1530(MenuIconBatch *);
+extern void brsBuildRewardRows(void *, MenuIconBatch *);
+extern void brsBuildLevelUpList(BrsRewardBatch *);
+extern void brsBuildProfileCapList(BrsRewardBatch *);
+extern void brsBuildActiveUnitProgressRows(BrsPartyRow *);
+extern char D_0036C858[];
+extern char D_003AFAA8[];
+
+void *brsCreateTaskContext(void) {
+    MenuIconBatch *rewards;
+    s32 handle;
+    BrsPartyRow *party;
+    void *rewardState;
+    BrsRewardBatch *primary;
+    BrsRewardBatch *secondary;
+    BrsSkillPackageWork *work;
+
+    handle = sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
+    work = sdfResourceRetainAddress(handle);
+    memset(work, 0, sizeof(BrsSkillPackageWork));
+    work->handle = handle;
+    mnuClearPanelTransitionState(work->transition);
+    work->fadeTarget = mnuAllocateValueRecord(1);
+    evtCreateMessageWindowIfMissing(D_0036C858);
+    func_0024DA20(200);
+    rewards = &work->rewards;
+    func_001A1530(rewards);
+    party = work->partyRows;
+    rewardState = work->rewardState;
+    brsBuildRewardRows(rewardState, rewards);
+    brsApplyRewardBundle((u32)work, rewards, (BrsRewardBatch *)rewardState);
+    primary = &work->primaryRewards;
+    brsBuildLevelUpList(primary);
+    secondary = &work->secondaryRewards;
+    brsBuildProfileCapList(secondary);
+    brsBuildActiveUnitProgressRows(party);
+    brsMarkPartyRowsFromLists((u32)party, (u32)primary, (u32)secondary);
+    work->unused1574 = 0x100;
+    brsTaskLatchPendingRows((s32)work);
+    work->teardownHandle = 0;
+    effRequestResourceByMode(D_003AFA88, D_003AFAA8, 0,
+                             (s32)&work->teardownHandle);
+    return work;
+}
 
 extern void mnuDrainPanelTransitions(s32, s32);
 extern s32 brsAdvanceSkillPackagePanel(s32);
