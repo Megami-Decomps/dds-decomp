@@ -22,6 +22,10 @@ typedef struct {
 
 typedef struct VTab {
     void (*invoke)(void);
+    void (*callback04)(void);
+    void (*sample)(void *, f32);
+    void (*callback0C)(void);
+    void (*blend)(void *, f32, f32);
 } VTab;
 
 typedef struct VObj {
@@ -363,7 +367,39 @@ void sdfMotionInitializeAtZeroTime(void *a0, s32 a1, s32 a2) {
 }
 
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB538);
+void func_002DB538(Motion *motion, f32 frame) {
+    s32 i;
+    s32 count;
+    f32 elapsed;
+    f32 duration;
+    f32 weight;
+    VObj *object;
+
+    motion->state = 4;
+    duration = motion->blendDurationFrames;
+    elapsed = frame - motion->blendStartFrame;
+    motion->currentFrame = frame;
+    if (elapsed < duration) {
+        if (elapsed < 0.0f) {
+            weight = 0.0f;
+        } else {
+            weight = elapsed / duration;
+        }
+        if (frame < 0.0f) {
+            frame = 0.0f;
+        }
+        for (i = 0; i < motion->request->objectCount; i++) {
+            object = motion->request->objects[i];
+            object->vtable->blend(object, frame, weight);
+        }
+    } else {
+        count = motion->request->objectCount;
+        for (i = 0; i < count; i++) {
+            object = motion->request->objects[i];
+            object->vtable->sample(object, frame);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB660);
 /* State 6 parks motion processing, retaining the previous state to resume. */
@@ -403,7 +439,10 @@ f32 sdfInterpolateMotionKeys(KeyOut *a0) {
     return (a + (*a0->secondKey * t)) - (a * t);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB900);
+/* vu0 routine: blend the two bracketing vec3 keys by the key weight into vf10. */
+void func_002DB900(KeyOut *a0) {
+    VU0_LERP_VEC3_KEYS(a0->firstKey, a0->secondKey, a0->weight);
+}
 
 /* vu0 routine: blend the two bracketing RGBA colour keys by the key weight. */
 s32 func_002DB958(KeyOut *a0) {
