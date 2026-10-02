@@ -3,6 +3,7 @@ from __future__ import annotations
 import struct
 import sys
 import unittest
+from dataclasses import replace
 from pathlib import Path
 
 
@@ -12,6 +13,8 @@ sys.path.insert(0, str(ROOT / "tools"))
 import fld  # noqa: E402
 import fld_model  # noqa: E402
 import fld_scene  # noqa: E402
+import field_world  # noqa: E402
+import wap  # noqa: E402
 
 
 SOURCE = """\
@@ -125,6 +128,88 @@ end_data
             meters_per_unit=1.0,
         )
         self.assertNotIn("children", document["nodes"][-1])
+        fld_model.encode_glb(document, binary)
+
+    def test_placement_retains_all_owned_wap_transitions(self) -> None:
+        table = wap.default_file(wap.PROFILES["dds1"])
+        entries = list(table.entries)
+        entries[3] = replace(
+            entries[3],
+            kind=1,
+            area=1,
+            name=wap.FixedString("01heal_01"),
+            warp_args=(24, 3, 0),
+            position=wap.FixedString("03pos_02"),
+            camera=wap.FixedString("03cam_01"),
+        )
+        entries[4] = replace(
+            entries[4],
+            kind=1,
+            area=1,
+            name=wap.FixedString("01heal_01"),
+            flag_mode=2,
+            flag=77,
+            warp_type=3,
+            warp_args=(606, 0, 12),
+            bgm=4,
+            footstep=2,
+            after_flag=8,
+            after_script=wap.FixedString("after_warp"),
+            tail=(3, 1, 2, 3, 4, 5, 6, 7),
+        )
+        entries[5] = replace(
+            entries[5],
+            kind=1,
+            area=1,
+            name=wap.FixedString("missing_actor"),
+            warp_args=(0, 2, 0),
+        )
+        table = replace(table, entries=tuple(entries))
+        transitions = field_world.area_transitions(table, 11, 1)
+
+        builder = fld_model.GltfBuilder.create()
+        document, binary = fld_scene.append_field_scene(
+            builder.document,
+            bytes(builder.binary),
+            fld.encode(fld.parse_source(SOURCE)),
+            meters_per_unit=0.01,
+            transitions=transitions,
+        )
+
+        wrapper = document["nodes"][-1]
+        children = [document["nodes"][index] for index in wrapper["children"]]
+        placement = next(node for node in children if node["name"] == "01heal_01")
+        linked = placement["extras"]["ddsTransitions"]
+        self.assertEqual([row["entry"] for row in linked], [3, 4])
+        self.assertEqual(
+            linked[0]["destination"],
+            {
+                "typeId": 0,
+                "type": "field",
+                "arguments": [24, 3, 0],
+                "position": "03pos_02",
+                "camera": {"name": "03cam_01", "mode": 0, "table": 0},
+                "field": 24,
+                "area": 3,
+            },
+        )
+        self.assertEqual(linked[1]["gate"], {"mode": 2, "flag": 77})
+        self.assertEqual(linked[1]["destination"]["event"], 606)
+        self.assertEqual(linked[1]["destination"]["alternateField"], 12)
+        self.assertEqual(
+            linked[1]["after"],
+            {"bgm": 4, "footstep": 2, "flags": 8, "script": "after_warp"},
+        )
+        self.assertEqual(
+            linked[1]["tail"],
+            {"control": 3, "arguments": [1, 2, 3, 4, 5, 6, 7]},
+        )
+        self.assertEqual(wrapper["extras"]["ddsTransitionRows"], 3)
+        self.assertEqual(wrapper["extras"]["ddsLinkedTransitionRows"], 2)
+        self.assertEqual(
+            wrapper["extras"]["ddsUnlinkedTransitionActors"],
+            [{"actor": "missing_actor", "entries": [5]}],
+        )
         fld_model.encode_glb(document, binary)
 
 
