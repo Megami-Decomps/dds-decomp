@@ -16,7 +16,7 @@ typedef struct {
     s32 spriteHandle;     /* 0x08: released through effDestroyResourceSlotSet */
     u32 secondResource;   /* 0x0C: released by mnuReleaseMenuResourceSlots */
     s32 pad10;
-    s32 word14;
+    s32 timer;            /* 0x14 */
     s32 pad18;
     s32 word1C;
     s32 pad20;
@@ -25,7 +25,7 @@ typedef struct {
     u32 linkedState;       /* 0x2C: passed to the func_0027Bxxx helpers */
     s32 pad30;
     s32 word34;
-    s32 word38;
+    s32 slideOffset;      /* 0x38 */
 } MenuState;
 
 extern s8 D_00324510[];
@@ -217,11 +217,92 @@ void func_0026C350(s32 base, s32 source, u32 alpha, s32 context) {
 void func_0026C4A8(void) {
     MenuState *state = (MenuState *)mnuMovieMenuState;
 
-    state->word14 = 0;
-    state->word38 = 0;
+    state->timer = 0;
+    state->slideOffset = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C4B8);
+s32 func_0026C4B8(void) {
+    MenuState *state;
+    s32 value;
+    s32 alpha;
+    f32 progress;
+
+    value = ((MenuState *)mnuMovieMenuState)->timer;
+    if (value < 0) {
+        value = 0;
+    }
+    progress = (f32)value / 10.0f;
+    if (1.0f < progress) {
+        progress = 1.0f;
+    }
+    alpha = (s32)(progress * 128.0f);
+    mnuDrawSprite(0, 0, 0, alpha, 0, 8, 0x53);
+    mnuDrawSprite(0, 0, 0, alpha, 0, 0xC, 0x53);
+
+    value = ((MenuState *)mnuMovieMenuState)->timer - 5;
+    if (value < 0) {
+        value = 0;
+    }
+    progress = (f32)value / 10.0f;
+    if (1.0f < progress) {
+        progress = 1.0f;
+    }
+    mnuDrawSprite(0, 0, 0, (s32)(progress * 76.8f), 0, 0xA, 0x53);
+
+    state = (MenuState *)mnuMovieMenuState;
+    if (state->timer == 5) {
+        state->slideOffset = 0x400;
+    }
+    if (state->slideOffset > 0) {
+        state->slideOffset -= 0x20;
+    } else {
+        state->slideOffset = 0;
+    }
+
+    func_0026C350(((MenuState *)mnuMovieMenuState)->slideOffset - 0x200, 0, 0x80, 0x53);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 0, 0x53);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 2, 0x53);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 1, 0x53);
+    mnuDrawSprite(1, -10, 0, 0x80, 0, 4, 0x53);
+
+    value = ((MenuState *)mnuMovieMenuState)->timer - 5;
+    if (value < 0) {
+        value = 0;
+    }
+    progress = (f32)value / 10.0f;
+    if (1.0f < progress) {
+        progress = 1.0f;
+    }
+    mnuDrawSprite(0, 0, 0, (s32)(progress * 128.0f), 0, 7, 0x53);
+
+    value = ((MenuState *)mnuMovieMenuState)->timer - 20;
+    if (value < 0) {
+        value = 0;
+    }
+    progress = (f32)value / 10.0f;
+    if (1.0f < progress) {
+        progress = 1.0f;
+    }
+    mnuDrawSprite(0, 0, 0, (s32)(progress * 128.0f), 0, 0xB, 0x53);
+
+    value = ((MenuState *)mnuMovieMenuState)->timer - 15;
+    if (value < 0) {
+        value = 0;
+    }
+    progress = (f32)value / 10.0f;
+    if (1.0f < progress) {
+        progress = 1.0f;
+    }
+    progress = 1.0f - progress;
+    mnuDrawMovieMenuBackgroundQuad((s32)(progress * 128.0f));
+
+    state = (MenuState *)mnuMovieMenuState;
+    state->timer++;
+    if (state->timer < 31) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C7E0);
 
@@ -261,7 +342,7 @@ void mnuClearGlobalMenuStateFields(void) {
     MenuState *state = (MenuState *)mnuMovieMenuState;
 
     state->word34 = 0;
-    state->word14 = 0;
+    state->timer = 0;
     state->word1C = 0;
 }
 
@@ -269,7 +350,7 @@ void mnuResetTitlePageAndPhase(void) {
     MenuState *state = (MenuState *)mnuMovieMenuState;
 
     state->word34 = 0;
-    state->word14 = 0;
+    state->timer = 0;
 }
 
 s32 mnuPollMovieMenuInputAndTimeout(void) {
@@ -278,21 +359,21 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
     case 0:
         if (mnuIsAnyMenuInputPressed() == 0) {
             MenuState *opening = (MenuState *)mnuMovieMenuState;
-            if (opening->word14 < 30) {
-                opening->word14++;
+            if (opening->timer < 30) {
+                opening->timer++;
             } else {
                 opening->word34 = 1;
-                opening->word14 = 0;
+                opening->timer = 0;
             }
             return 0;
         }
         sndSetSequenceVolumePan(8, 127, 63);
         return 1;
     case 1:
-        if (state->word14 < 90) {
-            state->word14++;
+        if (state->timer < 90) {
+            state->timer++;
         } else {
-            state->word14 = 0;
+            state->timer = 0;
         }
         if (mnuIsAnyMenuInputPressed() != 0) {
             sndSetSequenceVolumePan(8, 127, 63);
@@ -306,8 +387,8 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
         }
         break;
     case 2:
-        if (state->word14 < 0) {
-            state->word14++;
+        if (state->timer < 0) {
+            state->timer++;
         } else {
             return 1;
         }
