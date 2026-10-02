@@ -386,6 +386,21 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   0x110, 0, 0, 0); }` matches (DDS1 `func_002E9810`/`func_002E9918`/
   `func_002E94E0`/`func_002E9510`, DDS2 `func_003426B8`/`func_00342388`/
   `func_003423B8`).
+- Mixed `j` and `jal` tails inside one function (one arm `ld...; j f`, the last
+  arm `jal f` + shared `jr`) come from an explicit `return;` in an earlier arm:
+  the `return;` makes the epilogue label a jump target, so the call that jumps
+  to it stays a sibcall but a call that merely falls into the label is not.
+  A second `if (v) { f(0x58); }` after `if (v == 0) { f(0x54); return; }` gives
+  `j` then `jal` (DDS2 `func_00308F78` matches that way), but that second test is
+  redundant and folded away, so it is a codegen lever and is NOT accepted as
+  source; the function stays INCLUDE_ASM until a real shape is found. The same
+  call in `if/else` without `return;` gives `j` for both, and in a non-void
+  `if/else` without returns `jal` for both.
+  Toy results (callee extern void, 3 prior calls): early `return;` + fall-through
+  last call -> `j`,`jal`; `cond = 0;` statement after the last call -> `jal`;
+  a loop wrapped around it -> `jal`; a plain straight-line function -> `j`.
+  A file-level -fno-optimize-sibling-calls needs `jal` on EVERY tail; a unit
+  with `j` tails in other functions is not such a file.
 
 ## Pointer and loop addressing
 
