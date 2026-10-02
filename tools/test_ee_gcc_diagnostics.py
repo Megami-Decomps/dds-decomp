@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
+import hashlib
 import importlib.util
+import json
 import sys
 import tempfile
 import unittest
@@ -22,6 +24,7 @@ probe = load("ee_gcc_probe", ROOT / "tools/ee_gcc_probe.py")
 compare = load("ee_gcc_compare", ROOT / "tools/ee_gcc_compare.py")
 delay_slots = load("ee_gcc_delay_slots", ROOT / "tools/ee_gcc_delay_slots.py")
 allocations = load("ee_gcc_allocations", ROOT / "tools/ee_gcc_allocations.py")
+why = load("ee_gcc_why", ROOT / "tools/ee_gcc_why.py")
 
 
 class ProbeTests(unittest.TestCase):
@@ -42,6 +45,34 @@ class ProbeTests(unittest.TestCase):
             root = Path(directory)
             self.assertTrue(probe.inside(root / "child", root))
             self.assertFalse(probe.inside(root, root / "child"))
+
+    def test_object_record_hashes_present_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            obj = root / "candidate.o"
+            obj.write_bytes(b"object bytes")
+            self.assertEqual(
+                {
+                    "path": "candidate.o",
+                    "size": 12,
+                    "sha256": hashlib.sha256(b"object bytes").hexdigest(),
+                    "path_normalized_sha256": hashlib.sha256(b"object bytes").hexdigest(),
+                },
+                probe.object_record(obj, root),
+            )
+            self.assertIsNone(probe.object_record(root / "missing.o", root))
+
+    def test_object_record_normalizes_wrapper_scratch_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            first = root / "first.o"
+            second = root / "second.o"
+            first.write_bytes(b"prefix .8b/dds1/game/unit.c suffix")
+            second.write_bytes(b"prefix .a9/dds1/game/unit.c suffix")
+            a = probe.object_record(first, root)
+            b = probe.object_record(second, root)
+            self.assertNotEqual(a["sha256"], b["sha256"])
+            self.assertEqual(a["path_normalized_sha256"], b["path_normalized_sha256"])
 
 
 class CompareTests(unittest.TestCase):
@@ -88,6 +119,39 @@ class CompareTests(unittest.TestCase):
             )
             report = compare.compare_runs(left, right)
             self.assertIsNone(report["first_semantic_divergence"])
+
+    def test_scheduler_verbose_comments_are_observation_noise(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            left, right = root / "left", root / "right"
+            left.mkdir()
+            right.mkdir()
+            body = "\n(insn 6 0 0 (set (reg:SI 2) (const_int 1)))\n"
+            (left / "rtl.17.sched").write_text(
+                ";; Function wanted\n;; Ready list (t = 0): 6\n" + body
+            )
+            (right / "rtl.17.sched").write_text(
+                ";; Function wanted\n;; verbose dependency table\n"
+                ";; call [`renamedNameThatGCCTruncates\n" + body
+            )
+            report = compare.compare_runs(left, right)
+            self.assertIsNone(report["first_semantic_divergence"])
+            self.assertEqual("observation-noise", report["passes"][0]["status"])
+
+    def test_scheduler_rtl_difference_remains_semantic(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            left, right = root / "left", root / "right"
+            left.mkdir()
+            right.mkdir()
+            (left / "rtl.25.sched2").write_text(
+                ";; verbose text\n(insn 6 0 0 (set (reg:SI 2) (const_int 1)))\n"
+            )
+            (right / "rtl.25.sched2").write_text(
+                ";; other text\n(insn 6 0 0 (set (reg:SI 2) (const_int 2)))\n"
+            )
+            report = compare.compare_runs(left, right)
+            self.assertEqual("rtl.25.sched2", report["first_semantic_divergence"])
 
     def test_function_scope_ignores_other_functions(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -217,6 +281,186 @@ Reloads for insn # 40
         attempt = allocations.parse_dump(text, "wide")[0]["allocation_attempts"][0]
         self.assertEqual([84, 86], attempt["allocation_order"])
         self.assertEqual({"84": 2}, attempt["hard_register_widths"])
+
+
+class WhyTests(unittest.TestCase):
+    ALLOC = """;; Function wanted
+;; 1 regs to allocate: 84
+;; 84 conflicts: 84 2 28 29
+;; Register dispositions:
+84 in 4
+;; Hard regs used: 4
+"""
+
+    def make_probe(self, root, name, passes, assembly="same\n", manifest=None):
+        run = root / name
+        (run / "functions/wanted").mkdir(parents=True)
+        for artifact, text in passes.items():
+            (run / "functions/wanted" / artifact).write_text(text)
+        (run / "functions/wanted/final.s").write_text(assembly)
+        (run / "manifest.json").write_text(json.dumps(manifest or {
+            "version": "dds1",
+            "as_unit": "src/dds1/sample.c",
+            "compiler": {"sha256": "compiler"},
+            "extra_cflags": [],
+            "wrapper_returncode": 0,
+            "cc1_succeeded": True,
+            "object": {
+                "path": "candidate.o", "size": 1,
+                "sha256": name, "path_normalized_sha256": name,
+            },
+        }))
+        return run
+
+    def test_no_difference_stops_source_search(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            left = self.make_probe(root, "left", {"03.cse": "same\n"})
+            right = self.make_probe(root, "right", {"03.cse": "same\n"})
+            report = why.analyze(left, right, "wanted")
+            self.assertEqual("no-codegen-difference", report["diagnosis"]["class"])
+            self.assertIn("stop", report["diagnosis"]["next_step"])
+
+    def test_missing_requested_function_is_insufficient_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            left = self.make_probe(root, "left", {})
+            right = self.make_probe(root, "right", {})
+            report = why.analyze(left, right, "misspelled")
+            self.assertEqual("insufficient-evidence", report["diagnosis"]["class"])
+            self.assertIn("neither probe", report["diagnosis"]["basis"][0])
+
+    def test_pass20_includes_both_allocation_summaries(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            left = self.make_probe(root, "left", {
+                "19.lreg": "same\n", "20.greg": self.ALLOC + "left\n"
+            })
+            right = self.make_probe(root, "right", {
+                "19.lreg": "same\n", "20.greg": self.ALLOC + "right\n"
+            })
+            report = why.analyze(left, right, "wanted")
+            self.assertEqual("register-allocation", report["diagnosis"]["class"])
+            self.assertEqual([84], report["allocation"]["left"][0]["global_allocation_order"])
+            self.assertEqual([84], report["allocation"]["right"][0]["global_allocation_order"])
+
+    def test_pass29_includes_both_delay_slot_reports(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sample = DelaySlotTests.SAMPLE
+            left = self.make_probe(root, "left", {"28.mach": "same\n", "29.dbr": sample})
+            right = self.make_probe(
+                root, "right", {"28.mach": "same\n", "29.dbr": sample.replace("convert", "other")}
+            )
+            report = why.analyze(left, right, "wanted")
+            self.assertEqual("delay-slot-selection", report["diagnosis"]["class"])
+            self.assertEqual("convert", report["delay_slots"]["left"][0]["branch"]["target"])
+            self.assertEqual("other", report["delay_slots"]["right"][0]["branch"]["target"])
+
+    def test_whole_tu_object_difference_after_same_assembly(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            left = self.make_probe(root, "left", {})
+            right = self.make_probe(root, "right", {})
+            (left / "candidate.s").write_text("same\n")
+            (right / "candidate.s").write_text("same\n")
+            report = why.analyze(left, right)
+            self.assertEqual("object-emission", report["diagnosis"]["class"])
+            self.assertEqual("different", report["object"]["status"])
+
+    def test_failed_wrapper_makes_recorded_object_unavailable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            failed = {
+                "wrapper_returncode": 1,
+                "cc1_succeeded": True,
+                "object": {
+                    "path": "candidate.o", "size": 1,
+                    "sha256": "partial", "path_normalized_sha256": "partial",
+                },
+            }
+            left = self.make_probe(root, "left", {}, manifest=failed)
+            right = self.make_probe(root, "right", {}, manifest=failed)
+            self.assertEqual("unavailable", why.analyze(left, right, "wanted")["object"]["status"])
+
+    def test_failed_compiler_is_insufficient_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            failed = {
+                "wrapper_returncode": 1,
+                "cc1_succeeded": False,
+                "object": None,
+            }
+            left = self.make_probe(root, "left", {"03.cse": "same\n"}, manifest=failed)
+            right = self.make_probe(root, "right", {"03.cse": "same\n"}, manifest=failed)
+            report = why.analyze(left, right, "wanted")
+            self.assertEqual("insufficient-evidence", report["diagnosis"]["class"])
+
+    def test_extra_cflag_mismatch_is_warned(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            base = {
+                "version": "dds1", "as_unit": "src/dds1/sample.c",
+                "compiler": {"sha256": "compiler"},
+                "wrapper_returncode": 0, "cc1_succeeded": True,
+                "object": None,
+            }
+            left_manifest = {**base, "extra_cflags": []}
+            right_manifest = {**base, "extra_cflags": ["-fno-schedule-insns2"]}
+            left = self.make_probe(root, "left", {"03.cse": "same\n"}, manifest=left_manifest)
+            right = self.make_probe(root, "right", {"03.cse": "same\n"}, manifest=right_manifest)
+            report = why.analyze(left, right, "wanted")
+            self.assertTrue(any("extra_cflags" in warning for warning in report["warnings"]))
+            self.assertEqual("insufficient-evidence", report["diagnosis"]["class"])
+
+    def test_scheduler_verbose_mismatch_does_not_block_stop(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            base = {
+                "version": "dds1", "as_unit": "src/dds1/sample.c",
+                "compiler": {"sha256": "compiler"},
+                "wrapper_returncode": 0, "cc1_succeeded": True,
+                "object": None,
+            }
+            left = self.make_probe(
+                root, "left", {"17.sched": ";; quiet\n(insn 1)\n"},
+                manifest={**base, "extra_cflags": []},
+            )
+            right = self.make_probe(
+                root, "right", {"17.sched": ";; verbose detail\n(insn 1)\n"},
+                manifest={**base, "extra_cflags": ["-fsched-verbose=5"]},
+            )
+            report = why.analyze(left, right, "wanted")
+            self.assertEqual("no-codegen-difference", report["diagnosis"]["class"])
+
+    def test_old_manifest_flags_are_recovered_from_command(self):
+        manifest = {
+            "compiled_source": "/tmp/input.c",
+            "command": ["cc.sh", "-da", "-dumpbase", "/tmp/rtl",
+                        "-fsched-verbose=5", "/tmp/input.c", "-o", "/tmp/out.o"],
+        }
+        self.assertEqual(["-fsched-verbose=5"], why.effective_cflags(manifest))
+
+    def test_function_scope_is_inferred_from_both_manifests(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = {
+                "function": "wanted", "wrapper_returncode": 0,
+                "cc1_succeeded": True, "object": None,
+            }
+            left = self.make_probe(root, "left", {"03.cse": "same\n"}, manifest=manifest)
+            right = self.make_probe(root, "right", {"03.cse": "same\n"}, manifest=manifest)
+            report = why.analyze(left, right)
+            self.assertEqual({"function": "wanted"}, report["comparison"]["scope"])
+            self.assertTrue(any("inferred function" in item for item in report["warnings"]))
+
+    def test_function_scope_mismatch_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            left = self.make_probe(root, "left", {}, manifest={"function": "wanted"})
+            right = self.make_probe(root, "right", {}, manifest={"function": "other"})
+            with self.assertRaisesRegex(ValueError, "scope mismatch"):
+                why.analyze(left, right)
 
 
 if __name__ == "__main__":
