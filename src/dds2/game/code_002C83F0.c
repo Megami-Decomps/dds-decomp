@@ -20,6 +20,16 @@ extern s32 D_00439000;
 
 void fileReqInit(s32 request);
 
+/* Completion node drained by fileManDispatchDone. */
+typedef struct FileCbNode FileCbNode;
+struct FileCbNode {
+    u8 unk0[0x18];
+    void (*cb)(FileCbNode *node, u32 arg);
+    u32 arg;
+    u8 unk20[0xC];
+    FileCbNode *next;
+};
+
 /* Work area behind the fileMan task (D_003DC658, 0x40 bytes). */
 typedef struct FileManWork {
     s32 sema;   /* 0x00 */
@@ -29,7 +39,7 @@ typedef struct FileManWork {
     u8 unk7;    /* 0x07 */
     void *unk8; /* 0x08 */
     u32 unkC;   /* 0x0C */
-    void *unk10; /* 0x10 */
+    FileCbNode *unk10; /* 0x10: completed callbacks */
     void *unk14; /* 0x14 */
     u32 unk18;  /* 0x18 */
     s32 unk1C;  /* 0x1C */
@@ -53,7 +63,7 @@ extern FileManWork fileManagerWork;
 
 void WaitSema(s32 sema);
 
-void SignalSema(s32 sema);
+s32 SignalSema(s32 sema);
 
 void sdfDevQueueRead(void *deviceRequest, u32 transferAddress, u32 byteCount);
 
@@ -108,7 +118,23 @@ INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C8900);
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C8AC0);
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", fileManDispatchDone);
+void fileManDispatchDone(void) {
+    FileManWork *work = &fileManagerWork;
+
+    WaitSema(work->sema);
+    for (;;) {
+        FileCbNode *node = work->unk10;
+
+        if (node == NULL) {
+            break;
+        }
+        work->unk10 = node->next;
+        SignalSema(work->sema);
+        node->cb(node, node->arg);
+        WaitSema(work->sema);
+    }
+    SignalSema(work->sema);
+}
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", fileManUpdate);
 
@@ -188,4 +214,3 @@ void func_002C92D0(u32 arg0) {
 INCLUDE_SDATA(const s32, "game/code_002C83F0", D_00437CC0);
 
 INCLUDE_SDATA(const s32, "game/code_002C83F0", D_00437CC8);
-
