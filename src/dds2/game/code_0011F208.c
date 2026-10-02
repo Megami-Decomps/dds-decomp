@@ -1900,10 +1900,19 @@ s32 fldGetSceneCommandState(void) {
 typedef struct FldSceneState {
     u8 pad00[0xC];
     s32 flags;               /* 0x0C */
-    u8 pad10[0x118];
+    s32 area;
+    s32 floor;
+    u8 pad18[0x58];
+    s32 sceneMode;
+    s32 sceneState;
+    u8 pad78[0x48];
+    s32 unkC0;
+    u8 padC4[0x64];
     s16 speed;               /* 0x128 */
     u8 pad12A[2];
     s32 commandActive;       /* 0x12C */
+    u8 pad130[0x1C];
+    FieldVec4 position;
 } FldSceneState;
 
 void fldUpdateSceneCommandSpeed(void) {
@@ -2080,7 +2089,72 @@ u8 fldGetSceneReadyOrPendingState(void) {
     return fldGetSceneReadyFlag() != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00127600);
+extern void *dds3GetWorldObject(void);
+typedef struct WorldObject WorldObject;
+extern void dds3SetWorldObjectDataValue(WorldObject *, s8);
+extern void kwlnFadeStartIn(s32);
+extern void kwlnFadeInStart(s8, s8, s8, s32);
+extern void func_00149A00(void);
+extern void func_00133F08(void);
+extern s32 fldHasPendingSceneFlags(void);
+extern void fldSetCameraNodeModeWithTen(void);
+extern void func_00123B88(s32, s32, f32, f32, f32);
+
+s32 func_00127600(void) {
+    s32 pressed = 0;
+    FldSceneState *state;
+
+    if (fldGetCampSceneControlMode() != 0) {
+        return 0;
+    }
+    if (D_00389988[0x58 / 4] & fldTestSceneControlFlags(0x40)) {
+        if ((s8)D_0037F530[2] != 0) {
+            pressed = 1;
+        }
+    } else if ((s8)D_0037F530[2] < 0) {
+        pressed = 1;
+    }
+    state = (FldSceneState *)fldAreaState;
+    if (fldFindLocationCoordinateRecord(state->area, state->floor + 1)[2] <= 0) {
+        if (state->sceneMode == 0) {
+            if (fldTestSceneControlFlags(0x40) != 0 && pressed != 0) {
+                state->sceneMode = 4;
+                state->sceneState = 5;
+                fldResetPlayerSceneObjectState();
+                evtStartSceneResourceTask((u64)dds3GetWorldObject(), D_00412F58);
+            }
+        }
+    } else {
+        if (D_00435F80 > 0) {
+            D_00435F80--;
+            if (D_00435F80 == 0) {
+                dds3SetWorldObjectDataValue(dds3GetWorldObject(), 0);
+                kwlnFadeStartIn(4);
+                func_00149A00();
+            }
+            return 0;
+        }
+        if (fldGetSceneReadyOrPendingState() != 0) {
+            return 0;
+        }
+        func_00123B88(state->floor, state->unkC0, state->position.x, state->position.z, 50.0f);
+        if (state->sceneMode == 0) {
+            if (fldHasPendingSceneFlags() != 0) {
+                return 0;
+            }
+            if (fldTestSceneControlFlags(0x40) != 0 && pressed != 0 && D_00389988[0x48 / 4] == 0) {
+                state->sceneMode = 4;
+                state->sceneState = 5;
+                fldResetPlayerSceneObjectState();
+                func_00133F08();
+                kwlnFadeInStart(0, 0, 0, 4);
+                D_00435F80 = 5;
+                fldSetCameraNodeModeWithTen();
+            }
+        }
+    }
+    return 0;
+}
 
 s32 fldDispatchPendingSceneResource(void) {
     FieldPlayerSceneWork *sceneWork = &D_0038A640;
