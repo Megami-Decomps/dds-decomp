@@ -478,12 +478,14 @@ void func_001A1960() {
     datClearUnitStatusBits();
 }
 
-void btlSetActorSelectedEntryIndex(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x2f0) = arg1;
+/* Set the actor's selected entry index. */
+void btlSetActorSelectedEntryIndex(s32 actor, u32 index) {
+    ((UiObject *)actor)->selectedEntryIndex = index;
 }
 
-void btlClearActorSelectedEntryIndex(s32 arg0) {
-    *(u32 *)(arg0 + 0x2f0) = 0xffffffff;
+/* No selected entry is represented by -1. */
+void btlClearActorSelectedEntryIndex(s32 actor) {
+    ((UiObject *)actor)->selectedEntryIndex = -1;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A1990);
@@ -1125,17 +1127,17 @@ s32 btlTestActorStatusPredicate(s32 object) {
     if (predicate != 0 && predicate(object) != 0) {
         return 1;
     }
-    return (*(u16 *)(object + 0x12E) & 0x806) != 0;
+    return (((UiObject *)object)->statusFlags & 0x806) != 0;
 }
 
 s32 btlComputeStatusPenaltyFifth(s32 object) {
     s32 result = 0;
-    u16 category = *(u16 *)(object + 0x12E) & 0x7FFF;
+    u16 category = ((UiObject *)object)->statusFlags & 0x7FFF;
     switch (category) {
     case 0x80:
     case 0x400:
     case 0x2000:
-        result = -*(u16 *)(object + 0x128) / 5;
+        result = -((UiObject *)object)->maximumValue / 5;
         break;
     }
     return result;
@@ -1144,9 +1146,9 @@ s32 btlComputeStatusPenaltyFifth(s32 object) {
 s32 btlRollFearChance(s32 unused, u8 *actor, u32 flags, u32 options) {
     s32 ratio;
     if ((*(u32 *)(btlGetRuntime() + 0x1FC) & 0x80) != 0) return 0;
-    if ((*(u32 *)(actor + 0x114) & 8) != 0) return 0;
+    if ((((UiObject *)actor)->actionFlags & 8) != 0) return 0;
     if ((flags & 1) == 0) return 0;
-    if ((*(u16 *)(actor + 0x12E) & 1) != 0) return 0;
+    if ((((UiObject *)actor)->statusFlags & 1) != 0) return 0;
     ratio = 0;
     if (options & 2) {
         ratio = 30;
@@ -1167,8 +1169,8 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A6968);
 
 u8 btlGetActorDisplayByteWithDefault(s32 object, s32 index) {
     if (index == 0) {
-        if ((*(u32 *)(object + 0x110) & 0x400) != 0) {
-            return *(u8 *)(datEnemyRecords + *(u16 *)(object + 0x124) * 76 + 0x48);
+        if ((((UiObject *)object)->flags & 0x400) != 0) {
+            return *(u8 *)(datEnemyRecords + ((UiObject *)object)->index * 76 + 0x48);
         }
         return 12;
     }
@@ -1212,7 +1214,7 @@ s32 btlQueryUnitChannelFlags(s32 first, s32 second, s32 other, s32 variant, s32 
         return 0;
     }
     flags = sdfQueryChannelBits(other, first + 0x120, second + 0x120);
-    if ((*(u16 *)(second + 0x12E) & 8) != 0 && variant == 2) {
+    if ((((UiObject *)second)->statusFlags & 8) != 0 && variant == 2) {
         flags |= 8;
     }
     return flags;
@@ -1227,28 +1229,41 @@ void func_001A7AD0(void) {
 
 extern f32 func_001A7C20(u8 *, u8 *, s32);
 
+/* The 0x4C-byte enemy table supplies skills and all three reward quantities. */
+typedef struct DatEnemyRecord {
+    u32 flags;            /* 0x00 */
+    u8 pad04[0x14];
+    u16 skills[8];        /* 0x18 */
+    s32 money;            /* 0x28 */
+    u16 unk2C;
+    u16 experience;       /* 0x2E */
+    u16 huntExperience;   /* 0x30 */
+    u8 pad32[0x1A];
+} DatEnemyRecord;
+
+/* Scale the enemy's normal EP reward; flag 0x2000 multiplies it by 100. */
 s32 btlCalculateEnemyExperienceReward(u8 *acquirer, u8 *enemy) {
     s32 result = 0;
-    u8 *entry;
+    DatEnemyRecord *entry;
     f32 ratio;
     u32 ep;
 
-    if (!(*(u32 *)(enemy + 0x110) & 0x400)) {
+    if (!(((UiObject *)enemy)->flags & 0x400)) {
         return result;
     }
-    if (acquirer != 0 && !(*(u32 *)(acquirer + 0x110) & 0x200)) {
+    if (acquirer != 0 && !(((UiObject *)acquirer)->flags & 0x200)) {
         return result;
     }
-    entry = (u8 *)(datEnemyRecords + *(u16 *)(enemy + 0x124) * 76);
+    entry = &((DatEnemyRecord *)datEnemyRecords)[((UiObject *)enemy)->index];
     ratio = func_001A7C20(acquirer, enemy, 1);
-    ep = (u32)((f32)*(u16 *)(entry + 0x2E) * ratio);
-    if (*(u32 *)entry & 0x2000) {
+    ep = (u32)((f32)entry->experience * ratio);
+    if (entry->flags & 0x2000) {
         ep *= 100;
     }
     if (acquirer != 0) {
-        btlBossDebugPrintf("btl:ep=%d[%d,%.3f]\n", ep, *(u16 *)(entry + 0x2E), ratio);
+        btlBossDebugPrintf("btl:ep=%d[%d,%.3f]\n", ep, entry->experience, ratio);
     } else {
-        btlBossDebugPrintf("btl:ep=%d[%d,%.3f](acquisition)\n", ep, *(u16 *)(entry + 0x2E), ratio);
+        btlBossDebugPrintf("btl:ep=%d[%d,%.3f](acquisition)\n", ep, entry->experience, ratio);
     }
     return ep;
 }
@@ -1261,19 +1276,20 @@ extern char D_003A1BA8[];
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A7C20);
 
+/* Read the money reward with the same eligibility and 100-fold table flag. */
 s32 btlGetEnemyMoney(u8 *acquirer, u8 *enemy) {
     s32 result = 0;
     s32 money;
-    u8 *entry;
-    if (!(*(u32 *)(enemy + 0x110) & 0x400)) {
+    DatEnemyRecord *entry;
+    if (!(((UiObject *)enemy)->flags & 0x400)) {
         return result;
     }
-    if (acquirer != 0 && !(*(u32 *)(acquirer + 0x110) & 0x200)) {
+    if (acquirer != 0 && !(((UiObject *)acquirer)->flags & 0x200)) {
         return result;
     }
-    entry = (u8 *)(datEnemyRecords + *(u16 *)(enemy + 0x124) * 0x4C);
-    money = *(s32 *)(entry + 0x28);
-    if (*(u32 *)entry & 0x2000) {
+    entry = &((DatEnemyRecord *)datEnemyRecords)[((UiObject *)enemy)->index];
+    money = entry->money;
+    if (entry->flags & 0x2000) {
         money *= 100;
     }
     if (acquirer != 0) {
@@ -1286,14 +1302,15 @@ s32 btlGetEnemyMoney(u8 *acquirer, u8 *enemy) {
 
 extern f32 func_001A7C20(u8 *, u8 *, s32);
 
+/* Hunt EP uses its own table quantity and the ratio calculator's mode 0. */
 s32 btlCalculateHuntEpReward(u8 *arg0, u8 *arg1) {
-    u8 *entry = (u8 *)(datEnemyRecords + *(u16 *)(arg1 + 0x124) * 76);
+    DatEnemyRecord *entry = &((DatEnemyRecord *)datEnemyRecords)[((UiObject *)arg1)->index];
     f32 ratio = func_001A7C20(arg0, arg1, 0);
-    u32 ep = (u32)((f32)*(u16 *)(entry + 0x30) * ratio);
-    if (*(u32 *)entry & 0x2000) {
+    u32 ep = (u32)((f32)entry->huntExperience * ratio);
+    if (entry->flags & 0x2000) {
         ep *= 100;
     }
-    btlBossDebugPrintf("btl:ep=%d[%d,%.3f](hunt)\n", ep, *(u16 *)(entry + 0x30), ratio);
+    btlBossDebugPrintf("btl:ep=%d[%d,%.3f](hunt)\n", ep, entry->huntExperience, ratio);
     return ep;
 }
 
@@ -1319,9 +1336,9 @@ s32 btlCalculateAbilityRecoveryAmount(u8 *actor) {
 s32 btlIsUnitDefeatTriggeredByValueDelta(u8 *actor, s32 delta) {
     if (btlGetEntryFlagsUnlessDisabled((s32)(actor + 0x120)) & 4) return 0;
     if (btlHasEnemyRecordDefeatExemptionFlag((s32)actor)) return 0;
-    if ((*(u16 *)(actor + 0x12E) & 0x7FFF) == 0x4000) return 1;
+    if ((((UiObject *)actor)->statusFlags & 0x7FFF) == 0x4000) return 1;
     if ((*(u32 *)(btlGetRuntime() + 0x1F4) & 0x80) == 0) return 0;
-    return *(u16 *)(actor + 0x126) + delta < 1;
+    return ((UiObject *)actor)->currentValue + delta < 1;
 }
 
 s32 btlIsCurrentValueBelowQuarterThreshold(UiObject *object) {
@@ -1462,17 +1479,18 @@ s32 btlIsSelectedActorStatusAndRecordClear(s32 object) {
     if (*(s8 *)(datBattleSceneRecords + index * 40) != 0) {
         return 0;
     }
-    if ((*(u16 *)(object + 0x12E) & 0x2A0F) != 0) {
+    if ((((UiObject *)object)->statusFlags & 0x2A0F) != 0) {
         return 0;
     }
-    return datEnemyAiRecords[*(u16 *)(object + 0x124) * 0x15C] == 0;
+    return datEnemyAiRecords[((UiObject *)object)->index * 0x15C] == 0;
 }
 
-s32 btlAreUnitStatusAndEntryFlagsClear(s32 arg0) {
-    if ((*(u16 *)(arg0 + 0x12e) & 0x40) != 0) {
+/* Return true when neither actor status nor its entry flags contain bit 0x40. */
+s32 btlAreUnitStatusAndEntryFlagsClear(s32 actor) {
+    if ((((UiObject *)actor)->statusFlags & 0x40) != 0) {
         return 0;
     }
-    return (btlGetEntryFlagsUnlessDisabled(arg0 + 0x120) & 0x40) < 1;
+    return (btlGetEntryFlagsUnlessDisabled(actor + 0x120) & 0x40) < 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A8850);
@@ -1480,7 +1498,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A8850);
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A8A30);
 
 s32 btlHasAdjacentActorRecordStatus(s32 object) {
-    u8 *status = (u8 *)(datEnemyRecords + *(u16 *)(object + 0x124) * 76 + 0x3E);
+    u8 *status = (u8 *)(datEnemyRecords + ((UiObject *)object)->index * 76 + 0x3E);
     u32 i;
     for (i = 0; i < 2; i++) {
         if (*status++ != 0) {
@@ -1490,8 +1508,9 @@ s32 btlHasAdjacentActorRecordStatus(s32 object) {
     return 0;
 }
 
-u32 btlIsActorHighStateFlagClear(s32 arg0) {
-    return ((*(s32 *)(arg0 + 0x110) >> 0x1a) ^ 1U) & 1;
+/* Return 1 when bit 26 is clear, preserving the original signed word shift. */
+u32 btlIsActorHighStateFlagClear(s32 actor) {
+    return (((s32)((UiObject *)actor)->flags >> 0x1a) ^ 1U) & 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A8CE0);
@@ -1742,18 +1761,18 @@ s32 btlRollActorEligibilityWithAbilityOverride(u8 *actor) {
     u8 *battle = (u8 *)btlGetRuntime();
     s32 (*predicate)(u8 *) = *(s32 (**)(u8 *))(battle + 0x65C);
     if (predicate != 0 && predicate(actor) == 0) return 0;
-    if (*(u32 *)(actor + 0x114) & 0x2000) return 0;
-    if ((*(u16 *)(actor + 0x12E) & 0x7FFF) == 0x4000) return 0;
+    if (((UiObject *)actor)->actionFlags & 0x2000) return 0;
+    if ((((UiObject *)actor)->statusFlags & 0x7FFF) == 0x4000) return 0;
     if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x231)) return 1;
     btlBossDebugPrintf(D_003A1DA0, 5, 1.0);
     return btlRollAiBucket() < 5;
 }
 
 s32 btlHasEnemyRecordDefeatExemptionFlag(s32 object) {
-    if ((*(u32 *)(object + 0x110) & 0x400) == 0) {
+    if ((((UiObject *)object)->flags & 0x400) == 0) {
         return 0;
     }
-    return (*(s32 *)(datEnemyRecords + *(u16 *)(object + 0x124) * 76) & 0x100) > 0;
+    return ((s32)((DatEnemyRecord *)datEnemyRecords)[((UiObject *)object)->index].flags & 0x100) > 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1DA0);
