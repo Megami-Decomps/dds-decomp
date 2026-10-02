@@ -163,19 +163,53 @@ void func_00321908(u32 ptr) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00321928);
-
 typedef struct MenuStateRecord {
-    u16 flags;      /* 0x00 */
-    u8 pad02[4];
-    s16 busy;       /* 0x06 */
-    s16 value;      /* 0x08 */
-    u8 pad0A[0xC];
-    s16 limit;      /* 0x16 */
+    union {
+        u16 word;
+        struct {
+            u16 completed : 1;
+        } bits;
+    } flags;
+    u8 pad02[2];
+    u16 waitCount; /* 0x04 */
+    s16 busy;      /* 0x06 */
+    s16 value;     /* 0x08 */
+    u8 pad0A[4];
+    s16 duration;  /* 0x0E */
+    u8 pad10[4];
+    s16 waitLimit; /* 0x14 */
+    s16 limit;     /* 0x16 */
 } MenuStateRecord;
 
+s32 func_00321928(MenuStateRecord *record) {
+    if (record->flags.bits.completed) {
+        return 1;
+    }
+    if (record->flags.word & 8) {
+        if (record->waitLimit == 0) {
+            return 0;
+        }
+        if (++record->waitCount < record->waitLimit) {
+            return 0;
+        }
+        record->waitCount = 0;
+        record->flags.word &= ~8;
+        record->value = 0;
+    }
+    if (++record->busy >= record->duration) {
+        record->busy = 0;
+        if (!(record->flags.word & 2) || record->limit > record->value) {
+            record->flags.word |= 1;
+            return 1;
+        }
+        record->waitCount = 0;
+        record->flags.word |= 8;
+    }
+    return 0;
+}
+
 s32 mnuCanAdvanceIdleStateRecord(MenuStateRecord *record) {
-    if (record->busy == 0 && (!(record->flags & 2) || record->limit > record->value)) {
+    if (record->busy == 0 && (!(record->flags.word & 2) || record->limit > record->value)) {
         return 1;
     }
     return 0;

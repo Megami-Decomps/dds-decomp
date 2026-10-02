@@ -157,6 +157,7 @@ typedef struct ParSystem {
 } ParSystem;
 
 extern void func_0015B928(ParSystem *, s32, const u128 *);
+extern void func_0015BA38(ParSystem *, s32, const u128 *);
 
 extern s32 sdfCreateAssetWithDrawEntries();
 
@@ -410,7 +411,7 @@ void parUpdateBillboardCrossTriangle(s32 particle, s32 index, u32 color) {
     VU0_MOVE_VF(vf10, vf12);
     VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[2]);
-    func_0015BA38(particle, index, axis);
+    func_0015BA38((ParSystem *)particle, index, axis);
     func_0015BCE8(particle, index);
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
@@ -598,7 +599,31 @@ void parTranslateCellVertices(ParSystem *system, s32 index, void *delta) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BA38);
+void func_0015BA38(ParSystem *system, s32 index, const u128 *vertices) {
+    ParCell *cell = &system->cells[index];
+    u128 *vertex;
+    s32 shiftCount;
+    s32 i;
+
+    if (cell->unk0C == 0) {
+        shiftCount = system->vertexWordCount - 3;
+        vertex = cell->history + shiftCount;
+        for (i = 0; i < shiftCount; i++) {
+            vertex--;
+            PCP_COPY_VECTOR(vertex + 3, vertex);
+        }
+        cell->unk0C = system->groupDivisor;
+        if (cell->vertexCount < shiftCount + 3) {
+            cell->vertexCount += 3;
+        }
+    } else {
+        cell->unk0C--;
+        vertex = cell->history;
+    }
+    PCP_COPY_VECTOR(vertex, vertices);
+    PCP_COPY_VECTOR(vertex + 1, vertices + 1);
+    PCP_COPY_VECTOR(vertex + 2, vertices + 2);
+}
 
 void parTranslateCellTriangleVertices(ParSystem *system, s32 index, void *delta) {
     ParCell *cell = system->cells + index;
