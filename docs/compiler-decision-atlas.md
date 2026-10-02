@@ -56,6 +56,34 @@ preferences and final dispositions. These facts narrow an allocation problem;
 they do not map pseudo numbers to source variables or replay every hard-register
 rejection. Establish identity from the pseudo's definition and uses in RTL.
 
+### Interpreting preferences
+
+Treat pass 20's preference set as the allocator's surviving input, not as a
+record of how the preference arose. A hard-register preference can come
+directly from a `set` involving that register (including a pseudo already given
+a local hard-register home). Preference expansion can then union normal and
+full preferences across a conflict-free `set` whose dying input is another
+global allocno; copy preferences propagate only for a direct `set` from one
+register to another. Before allocation, pruning removes fixed, conflicting,
+call-used and out-of-class registers. Pass 20 does not distinguish these origins
+or show preferences that pruning removed.
+
+The allocator also tries to leave room for lower-priority conflicting allocnos
+by initially avoiding registers they prefer. This is a soft reservation, not a
+hard conflict: if the first search fails, the allocator retries without that
+reservation. Consequently, a final home outside the printed preference set can
+be ordinary first-fit after conflicts and reservations when no usable
+preference wins; it is not evidence of a hidden source-level preference.
+
+Use the final home only as the end of a causal chain. First identify the
+pseudo, then compare its defining `set`, death points, conflicts and surviving
+preferences. Test a source change only when it expresses a real lifetime,
+copy, or expression relationship and predicts which of those inputs will
+change. If the relevant lifetimes, local dispositions, global order, conflicts
+and preferences stay the same, or the required change would invent a use or
+lifetime, stop rather than permuting declarations around the selected
+register.
+
 ### Saved-role feasibility gate
 
 Use the number and lifetime of meaningful source roles as an early stop test
