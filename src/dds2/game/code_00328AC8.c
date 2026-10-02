@@ -8,6 +8,8 @@
 #define SDF_WAKE_WORKER_PRIORITY 0x3E
 #define SDF_SLEEP_THREAD_PRIORITY 0x7C
 
+s32 sdfThreadWakeTick __attribute__((section(".sdata"), aligned(8))) = 0;
+
 extern u64 sdfFindThreadNode(u64);
 
 /* The negative lookup selector selects the calling thread's tracked entry. */
@@ -36,7 +38,6 @@ s32 sdfWakeThreadOnCompletionEvent(s32 eventId) {
     return 0;
 }
 
-extern s32 sdfThreadWakeTick;
 extern void sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
 extern void func_003667E8(s32);
 extern s32 WaitSema(s32);
@@ -214,6 +215,3 @@ SdfCursorNode *sdfAllocSizeClassBlock(s32 size) {
     }
     return result;
 }
-
-INCLUDE_SDATA(const s32, "game/code_00328AC8", sdfThreadWakeTick);
-
