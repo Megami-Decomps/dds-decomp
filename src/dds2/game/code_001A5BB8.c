@@ -1691,56 +1691,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADE18);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADFE0);
 
-s32 btlLowestSetPairIndex(u32 flags) {
-    s32 pairIndex = 0;
-    s32 emptyMask = 0;
-
-    if (flags == 0) {
-        return -1;
-    }
-    if ((flags & 1) != 0) {
-        return pairIndex;
-    }
-    if ((flags & 2) != 0) {
-        return pairIndex;
-    }
-    pairIndex++;
-    if ((flags & 4) != 0) {
-        return pairIndex;
-    }
-    if ((flags & 8) != 0) {
-        return pairIndex;
-    }
-    pairIndex++;
-    if ((flags & 0x10) != 0) {
-        return pairIndex;
-    }
-    if ((flags & 0x20) != 0) {
-        return pairIndex;
-    }
-    pairIndex++;
-    if ((flags & 0x40) != 0) {
-        return pairIndex;
-    }
-    if ((flags & 0x80) != 0) {
-        return pairIndex;
-    }
-    pairIndex++;
-    if ((flags & 0x100) != 0) {
-        return pairIndex;
-    }
-    if ((flags & 0x200) != 0) {
-        return pairIndex;
-    }
-    pairIndex++;
-    if ((flags & 0x400) != 0) {
-        return pairIndex;
-    }
-    if ((flags & 0x2000) != emptyMask) {
-        return ++pairIndex;
-    }
-    return -1;
-}
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlLowestSetPairIndex);
 
 void btlTickActorEntryCountdowns(UiObject *unit) {
     s16 *entry = &unit->entrySlots[0].countdown;
@@ -3956,3 +3907,4 @@ INCLUDE_SDATA(const s32, "game/code_001A5BB8", D_00436840);
 INCLUDE_SDATA(const s32, "game/code_001A5BB8", D_00436848);
 
 INCLUDE_SDATA(const s32, "game/code_001A5BB8", D_00436850);
+
