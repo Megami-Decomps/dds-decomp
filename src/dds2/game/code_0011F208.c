@@ -32,7 +32,20 @@ extern u32 D_00435F70;
 
 extern s16 D_00389170[];
 
-extern u32 D_0038A640[];
+/* Contiguous player-scene work: saved transform, status words and deferred resource.
+ * The data also exports a label at +0x3C for separate object-slot consumers. */
+typedef struct FieldPlayerSceneWork {
+    u128 position;
+    u128 rotation;
+    u8 pad20[0x14];
+    u32 primaryState;
+    u8 pad38[0x24];
+    u32 secondaryState;
+    u8 pad60[0x20];
+    s8 resourceName[0x20];
+} FieldPlayerSceneWork;
+
+extern FieldPlayerSceneWork D_0038A640;
 
 extern u32 fldPlayerModelResource;
 
@@ -96,6 +109,7 @@ extern u8 D_00435F24;
 
 extern u8 D_00387D60[];
 
+/* Sequence command packet: the submission contract copies all 0xA0 bytes. */
 typedef struct FieldSequenceRecord {
     u8 unk_00[0x30];
     u32 unk_30;
@@ -113,7 +127,8 @@ typedef struct FieldSequenceRecord {
     u8 unk_68[8];
     char detail[16];
     char note[16];
-    u32 options; /* 0x90: record options; submission copies the padded 0xA0 packet */
+    u32 options; /* 0x90: record options */
+    u8 pad94[0xC];
 } FieldSequenceRecord;
 
 typedef struct FieldStageCoordinate {
@@ -1498,10 +1513,9 @@ void fldInitializeDisplayAndSceneSound(void) {
 }
 
 void fldResetPlayerSceneTransformState(void) {
-    u32 *buffer = D_0038A640;
-    VU0_STORE_VF(vf0, buffer);
-    buffer += 4;
-    VU0_STORE_VF(vf0, buffer);
+    FieldPlayerSceneWork *sceneWork = &D_0038A640;
+    VU0_STORE_VF(vf0, &sceneWork->position);
+    VU0_STORE_VF(vf0, &sceneWork->rotation);
     fldPlayerObject = 0;
     *fldGetPlayerSceneStateAddress() = 0;
 }
@@ -1626,24 +1640,24 @@ void fldInitializeLinkedSequence(FieldSequenceRecord *record, s32 stage, s32 kin
 }
 
 u32 fldGetSceneStatusCode(void) {
-    u32 *state = D_0038A640;
+    FieldPlayerSceneWork *sceneWork = &D_0038A640;
 
-    if (state[0xD] == 1) {
+    if (sceneWork->primaryState == 1) {
         return 1;
     }
-    if (state[0x17] == 3) {
+    if (sceneWork->secondaryState == 3) {
         return 3;
     }
-    if (state[0x17] == 4) {
+    if (sceneWork->secondaryState == 4) {
         return 4;
     }
-    if (state[0x17] == 5) {
+    if (sceneWork->secondaryState == 5) {
         return 5;
     }
-    if (state[0x17] == 6) {
+    if (sceneWork->secondaryState == 6) {
         return 2;
     }
-    return state[0xD] != 0 ? 2 : 0;
+    return sceneWork->primaryState != 0 ? 2 : 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00125380);
@@ -1697,14 +1711,14 @@ extern void effObjFetchInnerFirstVec(u32);
 extern void effObjFetchInnerSecondVecNorm(u32);
 
 void fldSnapshotAndReleasePlayerSceneObject(void) {
-    u32 *buffer;
+    FieldPlayerSceneWork *sceneWork;
     if (fldPlayerObject != 0) {
         if (dds3GetWorldSecondaryObject() != 0) {
-            buffer = D_0038A640;
+            sceneWork = &D_0038A640;
             effObjFetchInnerFirstVec(fldPlayerObject);
-            VU0_STORE_VF(vf10, buffer);
+            VU0_STORE_VF(vf10, &sceneWork->position);
             effObjFetchInnerSecondVecNorm(fldPlayerObject);
-            VU0_STORE_VF(vf10, buffer + 4);
+            VU0_STORE_VF(vf10, &sceneWork->rotation);
         }
         fldPlayerObject = 0;
         fldSecondarySceneObject = 0;
@@ -2069,7 +2083,7 @@ u8 fldGetSceneReadyOrPendingState(void) {
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00127600);
 
 s32 fldDispatchPendingSceneResource(void) {
-    u32 *buffer = D_0038A640;
+    FieldPlayerSceneWork *sceneWork = &D_0038A640;
     u32 flags;
 
     if (fldAreaState[64] == 1) {
@@ -2085,8 +2099,8 @@ s32 fldDispatchPendingSceneResource(void) {
         }
         return 1;
     }
-    if (buffer[13] == 0 && *(s8 *)((u8 *)buffer + 0x80) != 0) {
-        evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), (u8 *)buffer + 0x80);
+    if (sceneWork->primaryState == 0 && sceneWork->resourceName[0] != 0) {
+        evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), sceneWork->resourceName);
         return 1;
     }
     if (fldAreaState[1] != 0) {
