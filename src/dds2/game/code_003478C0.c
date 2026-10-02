@@ -76,10 +76,12 @@ typedef struct SdfPoolNode {
 } SdfPoolNode;
 
 typedef struct SdfPool {
-    u8 unk0[0xC];
+    u8 unk0[4];
+    SdfPoolNode *head;  /* 0x04: first node of the chain */
+    SdfPoolNode *tail;  /* 0x08: last node of the chain */
     SdfPoolNode *free;
     u8 unk10[8];
-    u8 sub[1];
+    struct SdfTreeNode *sub[1]; /* 0x18: key tree root */
 } SdfPool;
 
 extern void sdfInsertFloatKeyTreeItem();
@@ -391,31 +393,54 @@ void sdfReleasePoolNode(SdfPool *pool, SdfPoolNode *node) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003478C0", func_00348A30);
+extern void sdfConnectPacketLists(void *left, void *right);
 
-typedef struct SdfKeyTreeNode {
-    struct SdfKeyTreeNode *child; /* 0x00 */
-    struct SdfKeyTreeNode *next;  /* 0x04 */
-    void *item;                   /* 0x08 */
-} SdfKeyTreeNode;
+/* Append a pool-node chain after the list's tail, or make it the head of an empty list, then advance the tail to the chain's last node. */
+void func_00348A30(void *first, SdfPoolNode **head, SdfPoolNode **tail) {
+    SdfPoolNode *current;
+    SdfPoolNode *next;
 
-extern void func_00348A30(void *item, s32 first, s32 second);
+    if (first != NULL) {
+        if (*tail == NULL) {
+            *head = first;
+        } else {
+            sdfConnectPacketLists(*tail, first);
+        }
+        current = first;
+        while ((next = current->next) != NULL) {
+            sdfConnectPacketLists(current, next);
+            current = next;
+        }
+        *tail = current;
+    }
+}
 
-/* Walk a key tree depth first, applying func_00348A30 to every node's item. */
-void sdfKeyTreeApply(SdfKeyTreeNode *node, s32 first, s32 second) {
-    SdfKeyTreeNode *next;
+/* Walk a key tree depth first, applying func_00348A30 to every node's item (func_00348B10 passes the addresses of its two accumulators here). */
+void sdfKeyTreeApply(SdfTreeNode *node, SdfPoolNode **head, SdfPoolNode **tail) {
+    SdfTreeNode *next;
 
     do {
-        if (node->child != NULL) {
-            sdfKeyTreeApply(node->child, first, second);
+        if (node->first != NULL) {
+            sdfKeyTreeApply(node->first, head, tail);
         }
-        func_00348A30(node->item, first, second);
-        next = node->next;
+        func_00348A30(node->item, head, tail);
+        next = node->second;
         node = next;
     } while (next != NULL);
 }
 
-INCLUDE_ASM(const s32, "game/code_003478C0", func_00348B10);
+/* Rebuild the pool's chain: collect the free list's chain, then append every key tree node's chain, and store the resulting head and tail. */
+void func_00348B10(SdfPool *pool) {
+    SdfPoolNode *head = NULL;
+    SdfPoolNode *tail = NULL;
+
+    func_00348A30(pool->free, &head, &tail);
+    if (pool->sub[0] != NULL) {
+        sdfKeyTreeApply(pool->sub[0], &head, &tail);
+    }
+    pool->head = head;
+    pool->tail = tail;
+}
 
 void sdfUpdatePoolFreeListByMode(SdfPool *pool, s32 mode, SdfPoolNode *node) {
     switch (mode) {
