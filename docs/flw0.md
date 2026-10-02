@@ -132,6 +132,31 @@ can be named as `result` and read later:
   WAIT_FOR_TASK_REMOVAL(result)
 ```
 
+Maintained source may give a local slot a meaningful name. An `alias`
+declaration is source metadata and emits no instruction or data; it only maps
+an identifier to the encoded slot:
+
+```text
+locals int=6 float=0
+alias treasure_kind = local_int[0]
+alias item_id = local_int[1]
+alias item_quantity = local_int[2]
+alias choice = local_int[5]
+
+# ...
+  treasure_kind = READ_TREASURE_TABLE_VALUE(CONTENT_KIND)
+  item_id = READ_TREASURE_TABLE_VALUE(ITEM_ID)
+  item_quantity = READ_TREASURE_TABLE_VALUE(ITEM_QUANTITY)
+  choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(TAKARA_SEL))
+```
+
+Aliases work as assignment targets and in every expression position. They
+must refer to a declared integer or float local, and one slot has at most one
+name. Indexed forms such as `local_int[3]` remain valid for unknown or
+deliberately unnamed state. Parsing and rendering existing source preserves
+its aliases, while disassembling a binary alone leaves locals indexed because
+the names are not stored in FLW0.
+
 When a profiled call's result is pushed immediately, canonical source keeps it
 as an expression through its exact consumer. This works even when older values
 are already pending on the VM stack:

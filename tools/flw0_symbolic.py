@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import re
 import struct
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import flw0
 import flw0_profiles
@@ -14,12 +14,47 @@ import msg1
 
 
 _SYMBOL = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
+_ALIAS = re.compile(
+    r"alias\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*"
+    r"(local_int|local_float)\[(0[xX][0-9a-fA-F]+|\d+)\]\Z"
+)
+_ALIAS_RESERVED = {
+    "call",
+    "event",
+    "float32",
+    "global_float",
+    "global_int",
+    "goto",
+    "if",
+    "if_not",
+    "inf",
+    "int32",
+    "jump",
+    "local_float",
+    "local_int",
+    "message",
+    "nan",
+    "procedure",
+    "push",
+    "result",
+    "return",
+    "selection",
+    "string",
+    "type5",
+    "while",
+}
 _PROCEDURE_OPCODES = {7, 10, 11}
 _PROCEDURE_REFERENCE_OPCODES = _PROCEDURE_OPCODES | {
     flw0.OPCODE_IDS["PUSHIS"]
 }
 _JUMP_LABEL_OPCODES = {13, 28}
 _COMMAND_OPCODE = flw0.OPCODE_IDS["COMM"]
+_LOCAL_OPCODE_KIND = {
+    flw0.OPCODE_IDS["PUSHLIX"]: "local_int",
+    flw0.OPCODE_IDS["POPLIX"]: "local_int",
+    flw0.OPCODE_IDS["PUSHLFX"]: "local_float",
+    flw0.OPCODE_IDS["POPLFX"]: "local_float",
+}
 _STANDARD_SECTIONS = ((0, 0x20), (1, 0x20), (2, 4), (3, 1), (4, 1))
 
 
@@ -57,6 +92,59 @@ def _unique_symbol(name: str, prefix: str, index: int, used: set[str]) -> str:
         suffix += 1
     used.add(candidate)
     return candidate
+
+
+def _parse_alias(line: str, line_number: int) -> flw0.LocalAlias:
+    match = _ALIAS.fullmatch(line)
+    if match is None:
+        raise flw0.Flw0Error(
+            f"line {line_number}: expected "
+            "'alias NAME = local_int[INDEX]' or local_float"
+        )
+    name, kind, index_text = match.groups()
+    return flw0.LocalAlias(name, kind, int(index_text, 0))
+
+
+def _validate_aliases(
+    records: list[tuple[flw0.LocalAlias, int]],
+    int_count: int,
+    float_count: int,
+    declared_symbols: set[str],
+    profile: flw0_profiles.CommandProfile | None,
+) -> tuple[dict[str, flw0_semantic.Variable], dict[tuple[str, int], str]]:
+    by_name: dict[str, flw0_semantic.Variable] = {}
+    by_slot: dict[tuple[str, int], str] = {}
+    command_names = set(profile.by_name) if profile is not None else set()
+    for alias, line_number in records:
+        if (
+            alias.name in _ALIAS_RESERVED
+            or alias.name in declared_symbols
+            or alias.name.upper() in command_names
+        ):
+            raise flw0.Flw0Error(
+                f"line {line_number}: alias name {alias.name!r} is reserved"
+            )
+        if alias.name in by_name:
+            raise flw0.Flw0Error(
+                f"line {line_number}: duplicate alias name {alias.name!r}"
+            )
+        count = int_count if alias.kind == "local_int" else float_count
+        if not 0 <= alias.index < count:
+            raise flw0.Flw0Error(
+                f"line {line_number}: {alias.kind} alias index {alias.index} "
+                f"is outside the declared count {count}"
+            )
+        slot = (alias.kind, alias.index)
+        if slot in by_slot:
+            raise flw0.Flw0Error(
+                f"line {line_number}: {alias.kind}[{alias.index}] is already named "
+                f"{by_slot[slot]!r}"
+            )
+        by_name[alias.name] = flw0_semantic.Variable(
+            alias.kind, alias.index, alias.name
+        )
+        by_slot[slot] = alias.name
+    return by_name, by_slot
 
 
 def _canonical_row(row: flw0.NamedRow) -> bool:
@@ -146,6 +234,7 @@ def _render_instruction(
     string_symbols: dict[int, str],
     message_symbols: tuple[str | None, ...],
     selection_symbols: tuple[str | None, ...],
+    variable_names: dict[tuple[str, int], str] | None = None,
 ) -> tuple[str, int]:
     raw = words[pc].raw
     opcode = raw & 0xFFFF
@@ -202,6 +291,12 @@ def _render_instruction(
         command = command_profile.by_id.get(operand)
         if command is not None:
             return f"  {name} {command.name}", pc + 1
+    if opcode in _LOCAL_OPCODE_KIND:
+        kind = _LOCAL_OPCODE_KIND[opcode]
+        index = operand - 0x10000 if operand & 0x8000 else operand
+        symbol = (variable_names or {}).get((kind, index))
+        if symbol is not None:
+            return f"  {name} {symbol}", pc + 1
     if opcode == 29:
         signed_operand = operand - 0x10000 if operand & 0x8000 else operand
         return f"  {name} {signed_operand}", pc + 1
@@ -241,6 +336,13 @@ def render(
     message_data = script.section_bytes(script.sections[3])
     message_symbols = flw0._message_symbols(message_data)[0]
     selection_symbols = flw0._selection_symbols(message_data)[0]
+    _, variable_names = _validate_aliases(
+        [(alias, 1) for alias in script.local_aliases],
+        script.header.int_local_count,
+        script.header.float_local_count,
+        set(procedure_symbols) | set(jump_symbols),
+        command_profile,
+    )
     if message_data:
         try:
             message_lines = msg1.render(message_data)
@@ -269,9 +371,13 @@ def render(
                 f"word1c=0x{header.word_1c:08x}"
             ),
             f"locals int={header.int_local_count} float={header.float_local_count}",
-            "",
         ]
     )
+    lines.extend(
+        f"alias {alias.name} = {alias.kind}[{alias.index}]"
+        for alias in script.local_aliases
+    )
+    lines.append("")
     for row, symbol in zip(procedures, procedure_symbols):
         name = f" name={json.dumps(row.name)}" if row.name != symbol else ""
         lines.append(
@@ -298,6 +404,7 @@ def render(
             string_symbols,
             message_symbols,
             selection_symbols,
+            variable_names,
         )
     instruction_boundaries.add(pc)
     invalid_targets = sorted(set(symbols_at_pc) - instruction_boundaries)
@@ -326,8 +433,10 @@ def render(
                     string_symbols,
                     message_symbols,
                     selection_symbols,
+                    variable_names,
                 ),
                 structured=structured,
+                variable_names=variable_names,
             )
         )
     else:
@@ -344,6 +453,7 @@ def render(
                 string_symbols,
                 message_symbols,
                 selection_symbols,
+                variable_names,
             )
             lines.append(instruction)
         for symbol in symbols_at_pc.get(pc, ()):
@@ -406,10 +516,13 @@ def _parse_code(
     string_symbols: dict[str, int],
     message_symbols: dict[str, int],
     selection_symbols: dict[str, int],
+    aliases: dict[str, flw0_semantic.Variable],
 ) -> tuple[bytes, dict[str, int]]:
     words: list[int | SymbolReference] = []
     labels: dict[str, int] = {}
-    for line_number, line in flw0_semantic.lower_code(content, command_profile):
+    for line_number, line in flw0_semantic.lower_code(
+        content, command_profile, aliases
+    ):
         if line.endswith(":"):
             symbol = _symbol(line[:-1].strip(), line_number)
             if symbol in labels:
@@ -536,6 +649,20 @@ def _parse_code(
                 )
             words.append((command.command_id << 16) | opcode)
             continue
+        if opcode in _LOCAL_OPCODE_KIND and _SYMBOL.fullmatch(operand_text):
+            variable = aliases.get(operand_text)
+            if variable is None:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: unknown local alias {operand_text!r}"
+                )
+            expected_kind = _LOCAL_OPCODE_KIND[opcode]
+            if variable.kind != expected_kind:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: {mnemonic} requires a {expected_kind} "
+                    f"alias, found {variable.kind}"
+                )
+            words.append((variable.index << 16) | opcode)
+            continue
         if opcode in _PROCEDURE_OPCODES | _JUMP_LABEL_OPCODES and _SYMBOL.fullmatch(
             operand_text
         ):
@@ -609,6 +736,7 @@ def parse(
     header_values: dict[str, str] | None = None
     locals_values: dict[str, str] | None = None
     profile_record: tuple[str, int] | None = None
+    alias_records: list[tuple[flw0.LocalAlias, int]] = []
     procedures: list[Declaration] = []
     jump_labels: list[Declaration] = []
     blocks: dict[str, list[tuple[int, str]]] = {}
@@ -635,6 +763,10 @@ def parse(
             if locals_values is not None:
                 raise flw0.Flw0Error(f"line {line_number}: duplicate locals")
             locals_values = flw0._key_values(tokens[1:], line_number)
+            index += 1
+            continue
+        if directive == "alias":
+            alias_records.append((_parse_alias(line, line_number), line_number))
             index += 1
             continue
         if directive in ("procedure", "jump_label"):
@@ -683,6 +815,9 @@ def parse(
     if blocks.keys() != {"code", "messages", "strings"}:
         raise flw0.Flw0Error("symbolic source needs code, messages, and strings blocks")
 
+    int_locals = flw0._signed_halfword(locals_values["int"], 0)
+    float_locals = flw0._signed_halfword(locals_values["float"], 0)
+
     declarations = procedures + jump_labels
     symbols = [declaration.symbol for declaration in declarations]
     if len(symbols) != len(set(symbols)):
@@ -690,6 +825,13 @@ def parse(
 
     command_profile = _get_profile(
         *(profile_record or (None, None)), override=profile
+    )
+    aliases, _ = _validate_aliases(
+        alias_records,
+        int_locals,
+        float_locals,
+        set(symbols),
+        command_profile,
     )
     string_data, string_symbols = flw0._parse_string_payload(blocks["strings"])
     string_count = len(string_data)
@@ -718,6 +860,7 @@ def parse(
         string_symbols,
         message_symbols,
         selection_symbols,
+        aliases,
     )
     procedure_data = _named_payload(procedures, labels)
     jump_label_data = _named_payload(jump_labels, labels)
@@ -742,8 +885,6 @@ def parse(
         sections.append(flw0.Section(index, type_id, stride, element_count, offset))
         offset += len(payload)
 
-    int_locals = flw0._signed_halfword(locals_values["int"], 0)
-    float_locals = flw0._signed_halfword(locals_values["float"], 0)
     header = flw0.Header(
         flw0._unsigned(header_values["word00"], 0),
         sections[4].offset,
@@ -758,4 +899,7 @@ def parse(
         flw0.Flw0File(header, tuple(sections), b"".join(payloads)).to_bytes()
     )
     _require_standard_layout(script)
-    return script
+    return replace(
+        script,
+        local_aliases=tuple(alias for alias, _ in alias_records),
+    )
