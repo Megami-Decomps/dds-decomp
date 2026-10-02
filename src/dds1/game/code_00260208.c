@@ -15,7 +15,35 @@ extern s8 brsUpdateBlocked;
 
 extern s8 brsTaskState;
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00260208);
+typedef s16 BrsIconRecord[4];
+
+enum {
+    BRS_ICON_ID = 1,
+    BRS_ICON_X = 2,
+    BRS_ICON_Y = 3,
+};
+
+extern BrsIconRecord D_0036C728[];
+extern s32 D_003BC520;
+extern s32 func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+
+/* Draw a selected result icon and its fixed companion at the same opacity. */
+s32 func_00260208(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
+    f32 strength;
+    s32 layer;
+
+    layer = D_003BC520;
+    strength = (f32)alpha * 0.00390625f;
+    iconIndex += 3;
+    func_002BF4E0(D_0036C728[iconIndex][BRS_ICON_X] << 4,
+                  D_0036C728[iconIndex][BRS_ICON_Y] << 3, 0,
+                  (u32)(strength * 256.0f), 0, layer,
+                  D_0036C728[iconIndex][BRS_ICON_ID], option);
+    return func_002BF4E0(D_0036C728[8][BRS_ICON_X] << 4,
+                         D_0036C728[8][BRS_ICON_Y] << 3, 0,
+                         (u32)(strength * 256.0f), 0, layer,
+                         D_0036C728[8][BRS_ICON_ID], option);
+}
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00260370);
 
