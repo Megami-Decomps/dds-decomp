@@ -77,6 +77,17 @@ extern void mnuSetIndexedWindowPageSpriteFlags(s32, u32 *, s32, s32);
 extern void *mnuCreatePanelGroup(s32, s32, s32);
 extern void *mnuCreateSpriteState(s32, s32, s32);
 
+/* Prefixes of the menu list and node used to read the current page index.
+ * The primary list implementation also stores its cursor at +0x1C. */
+typedef struct MenuListNode {
+    s32 index;
+} MenuListNode;
+
+typedef struct MenuList {
+    u8 pad00[0x1C];
+    MenuListNode *cursor;
+} MenuList;
+
 typedef struct MenuSceneConfig {
     u8 pad00[0x10];
     s32 entries[5];
@@ -92,11 +103,11 @@ typedef struct MenuStaffObject {
 /* Staff menu state: selected objects, three list variants, and pending transitions. */
 typedef struct MenuStaffChoices {
     u8 pad00[8];
-    u8 *primaryObject;      /* 0x08 */
-    u8 *secondaryObject;    /* 0x0C */
-    u8 *firstList;          /* 0x10 */
-    u8 *secondList;         /* 0x14 */
-    u8 *thirdList;          /* 0x18 */
+    MenuStaffObject *primaryObject;   /* 0x08 */
+    MenuStaffObject *secondaryObject; /* 0x0C */
+    MenuStaffList *firstList;         /* 0x10 */
+    MenuStaffList *secondList;        /* 0x14 */
+    MenuStaffList *thirdList;         /* 0x18 */
     s32 currentSelection;   /* 0x1C */
     s32 thirdListEnabled;   /* 0x20 */
     s32 previous;           /* 0x24 */
@@ -112,20 +123,21 @@ typedef struct MenuStaffChoices {
     s32 thirdListReset;     /* 0x4C */
 } MenuStaffChoices;
 
+/* Prepare the primary staff object, then enter the image state. */
 s64 func_002AD3B8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
-    u8 *object;
+    MenuStaffObject *object;
 
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(5);
     func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     object = menu->primaryObject;
-    if (((MenuStaffObject *)object)->window->panelActive != 0) {
+    if (object->window->panelActive != 0) {
         func_002AD330(context, 0);
     } else {
         if (menu->secondListState == 0) {
-            func_00306CD0(0x390, 0x570, 0, ((MenuStaffObject *)object)->spriteAlpha, 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
+            func_00306CD0(0x390, 0x570, 0, object->spriteAlpha, 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         }
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
@@ -149,6 +161,7 @@ u32 func_002AD510(void) {
     return 1;
 }
 
+/* Once the popup is idle, confirmation captures the page-selection cursor index. */
 s64 mnuStaffImageInputA(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
@@ -164,7 +177,7 @@ s64 mnuStaffImageInputA(s32 callback) {
     window = (u8 *)(context + 0x284);
     func_002BD480(4, window);
     if (buttons & 1) {
-        menu->currentSelection = **(s32 **)(((MenuStaffContext *)context)->selection + 0x1C);
+        menu->currentSelection = ((MenuList *)((MenuStaffContext *)context)->selection)->cursor->index;
         mnuSetPopupEntryFlagged(popup, D_003E74F8);
     }
     if (buttons & 2) {
@@ -216,7 +229,7 @@ s64 mnuPollStaffSlotSelectionConfirmation(s32 callback) {
     window = (u8 *)(context + 0x284);
     func_002BD480(4, window);
     if (buttons & 1) {
-        menu->currentSelection = **(s32 **)(((MenuStaffContext *)context)->selection + 0x1C);
+        menu->currentSelection = ((MenuList *)((MenuStaffContext *)context)->selection)->cursor->index;
         mnuSetPopupEntryFlagged(popup, D_003E7514);
     }
     if (buttons & 2) {
@@ -268,7 +281,7 @@ s64 mnuPollStaffValueSelectionConfirmation(s32 callback) {
     window = (u8 *)(context + 0x284);
     func_002BD480(4, window);
     if (buttons & 1) {
-        menu->currentSelection = **(s32 **)(((MenuStaffContext *)context)->selection + 0x1C);
+        menu->currentSelection = ((MenuList *)((MenuStaffContext *)context)->selection)->cursor->index;
         mnuSetPopupEntryFlagged(popup, D_003E7530);
     }
     if (buttons & 2) {
@@ -312,13 +325,14 @@ u32 mnuRefreshActiveStaffWindow(void) {
     return 1;
 }
 
+/* Handle input on the secondary object; its window supplies the sound flags. */
 s64 mnuHandleSecondaryStaffObjectInput(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = mnuMapPadMaskToFlags(0xc33);
     s64 state;
-    u8 *window;
+    MenuStaffObject *object;
 
     state = func_002C4038(context + 8, popup, 0, callback);
     if (state != 0) {
@@ -330,20 +344,20 @@ s64 mnuHandleSecondaryStaffObjectInput(s32 callback) {
     if (buttons & 2) {
         mnuSetPopupEntryFlagged(popup, D_003E7434);
     }
-    window = menu->secondaryObject;
-    if (window != 0) {
+    object = menu->secondaryObject;
+    if (object != 0) {
         if (!(buttons & 0x300000)) {
-            func_002B9808((s32)window);
+            func_002B9808((s32)object);
         }
         if (buttons & 0x10) {
-            mnuRetreatWindowListSelection((s32)window);
+            mnuRetreatWindowListSelection((s32)object);
         }
         if (buttons & 0x20) {
-            mnuAdvanceWindowListSelection((s32)window);
+            mnuAdvanceWindowListSelection((s32)object);
         }
-        mnuHandlePanelListPageJumpInput(window, &buttons);
-        mnuClearWindowPanelTransitionFlag(window);
-        mnuPlayInputSound(0, buttons, (s32)((MenuStaffObject *)window)->window);
+        mnuHandlePanelListPageJumpInput(object, &buttons);
+        mnuClearWindowPanelTransitionFlag(object);
+        mnuPlayInputSound(0, buttons, (s32)object->window);
     }
     return 0;
 }
@@ -351,16 +365,16 @@ s64 mnuHandleSecondaryStaffObjectInput(s32 callback) {
 s64 mnuStaffImageEnterD(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
-    u8 *object;
+    MenuStaffObject *object;
 
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(0xD);
     func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     object = menu->secondaryObject;
-    if (((MenuStaffObject *)object)->window->panelActive != 0) {
+    if (object->window->panelActive != 0) {
         func_002AD330(context, 1);
     } else {
-        func_00306CD0(0x390, 0x570, 0, ((MenuStaffObject *)object)->spriteAlpha, 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
+        func_00306CD0(0x390, 0x570, 0, object->spriteAlpha, 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
     func_002AA7A0(2, ((MenuStaffContext *)context)->group);
@@ -377,13 +391,13 @@ INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002ADDA0);
 s64 func_002ADF90(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
-    u8 *object;
+    MenuStaffObject *object;
 
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(6);
     func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     object = menu->primaryObject;
-    if (((MenuStaffObject *)object)->window->panelActive != 0) {
+    if (object->window->panelActive != 0) {
         func_002AD330(context, 0);
     } else {
         func_002AAC98(0,
@@ -403,7 +417,7 @@ s32 mnuInitializeSelectedStaffPage(s32 unused) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     u32 *window = &context->windowFlags;
-    s32 index = **(s32 **)(context->selection + 0x1C);
+    s32 index = ((MenuList *)context->selection)->cursor->index;
 
     mnuSelectPage(window, index);
     func_002ABD60(context);
@@ -466,20 +480,21 @@ void mnuPrepareStaffSelectionChangeDialog(s32 context, u8 *entry, s32 target) {
     }
 }
 
+/* Switch pages and replay the first list's saved cursor steps. */
 s32 mnuStaffListInput(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
-    u8 *window = ((MenuStaffList *)menu->firstList)->window;
-    s32 *node = ((MenuStaffWindow *)window)->cursor;
+    MenuStaffWindow *window = menu->firstList->window;
+    s32 *node = window->cursor;
     s32 first;
     s32 count;
     s32 i;
 
     if (node != 0) {
         first = *node;
-        count = ((MenuStaffWindow *)window)->rowCount;
+        count = window->rowCount;
     } else {
         first = 0;
         count = 0;
@@ -500,13 +515,13 @@ s32 mnuStaffListInput(s32 callback) {
     }
     mnuInitializeSelectedStaffPage(callback);
     if (first != 0 || count != 0) {
-        mnuSeekListNode(first, (s32)((MenuStaffList *)menu->firstList)->window);
+        mnuSeekListNode(first, (s32)menu->firstList->window);
         if (count > 0) {
             for (i = count; i != 0; i--) {
                 mnuAdvanceWindowListSelection((s32)menu->firstList);
             }
         }
-        mnuResetListNodeFadeCounters((s32)((MenuStaffList *)menu->firstList)->window);
+        mnuResetListNodeFadeCounters((s32)menu->firstList->window);
     }
     sndSetSequenceVolumePan(4, 0x7F, 0x3F);
     return 1;
@@ -548,7 +563,7 @@ s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
     u32 *window = &context->windowFlags;
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
-    s32 index = **(s32 **)(context->selection + 0x1C);
+    s32 index = ((MenuList *)context->selection)->cursor->index;
     u8 *slot = (u8 *)context + index * 0x2138 + 0x2FC;
 
     mnuSelectPage(window, index);
@@ -629,15 +644,15 @@ s32 mnuHandleStaffSelectionListNavigation(s32 callback) {
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
-    u8 *window = ((MenuStaffList *)menu->secondList)->window;
-    s32 *node = ((MenuStaffWindow *)window)->cursor;
+    MenuStaffWindow *window = menu->secondList->window;
+    s32 *node = window->cursor;
     s32 first;
     s32 count;
     s32 i;
 
     if (node != 0) {
         first = *node;
-        count = ((MenuStaffWindow *)window)->rowCount;
+        count = window->rowCount;
     } else {
         first = 0;
         count = 0;
@@ -658,13 +673,13 @@ s32 mnuHandleStaffSelectionListNavigation(s32 callback) {
     }
     mnuInitializeStaffPageWithSlotAsset(callback);
     if (first != 0 || count != 0) {
-        mnuSeekListNode(first, (s32)((MenuStaffList *)menu->secondList)->window);
+        mnuSeekListNode(first, (s32)menu->secondList->window);
         if (count > 0) {
             for (i = count; i != 0; i--) {
                 mnuAdvanceWindowListSelection((s32)menu->secondList);
             }
         }
-        mnuResetListNodeFadeCounters((s32)((MenuStaffList *)menu->secondList)->window);
+        mnuResetListNodeFadeCounters((s32)menu->secondList->window);
     }
     sndSetSequenceVolumePan(4, 0x7F, 0x3F);
     return 1;
@@ -691,7 +706,7 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
     u32 *window = &context->windowFlags;
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
-    s32 index = **(s32 **)(context->selection + 0x1C);
+    s32 index = ((MenuList *)context->selection)->cursor->index;
     u8 *slot = (u8 *)context + index * 0x2138 + 0x2FC;
 
     mnuSelectPage(window, index);
@@ -765,15 +780,15 @@ s32 mnuHandleStaffValuePageInput(s32 callback) {
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
-    u8 *window = ((MenuStaffList *)menu->thirdList)->window;
-    s32 *node = ((MenuStaffWindow *)window)->cursor;
+    MenuStaffWindow *window = menu->thirdList->window;
+    s32 *node = window->cursor;
     s32 first;
     s32 count;
     s32 i;
 
     if (node != 0) {
         first = *node;
-        count = ((MenuStaffWindow *)window)->rowCount;
+        count = window->rowCount;
     } else {
         first = 0;
         count = 0;
@@ -794,13 +809,13 @@ s32 mnuHandleStaffValuePageInput(s32 callback) {
     }
     mnuInitializeStaffValuePage(callback);
     if (first != 0 || count != 0) {
-        mnuSeekListNode(first, (s32)((MenuStaffList *)menu->thirdList)->window);
+        mnuSeekListNode(first, (s32)menu->thirdList->window);
         if (count > 0) {
             for (i = count; i != 0; i--) {
                 mnuAdvanceWindowListSelection((s32)menu->thirdList);
             }
         }
-        mnuResetListNodeFadeCounters((s32)((MenuStaffList *)menu->thirdList)->window);
+        mnuResetListNodeFadeCounters((s32)menu->thirdList->window);
     }
     sndSetSequenceVolumePan(4, 0x7F, 0x3F);
     return 1;
