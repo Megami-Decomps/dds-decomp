@@ -97,3 +97,29 @@ Moving any labeled object updates the complete pointer graph. The codec rejects
 malformed extents, noncanonical relocation streams, misplaced relocations,
 invalid fixed strings, overlapping typed objects, invalid hierarchy or asset
 references, inconsistent draw sizes, and malformed VIF mesh packets.
+
+## Scene export
+
+`tools/amb_scene.py` turns the decoded graph into a self-contained glTF 2.0
+GLB. It accepts either a retail binary or tracked source:
+
+```sh
+python3 tools/amb_scene.py f024.amb f024.glb --meters-per-unit 0.01
+python3 tools/amb_scene.py src/dds1/data/field/f024.ambasm f024.glb \
+  --area 003 --meters-per-unit 0.01
+```
+
+The export retains every selected area's native model hierarchy, transforms,
+indexed meshes, vertex channels, draw selectors, and unresolved mesh controls.
+Area positions, sub-block names, floors, bounds, model-node links, and icon
+types are glTF metadata, along with the complete neutral asset fields. The
+matching root node is identified where the area position repeats its transform.
+Icons also receive a reusable octahedral marker;
+`--icon-marker-size 0` omits that diagnostic geometry. Native axes are
+preserved, and `--meters-per-unit` applies one explicit scale to geometry,
+transforms, bounds, positions, and markers.
+
+All 54 retail AMBs export without an alternate parser: the scene exporter
+consumes the same decoded model graph used by disassembly and reuses the FLD1
+SDF-to-glTF consumer. The complete pass emits 1,446 areas, 13,810 glTF nodes,
+3,938 meshes, and 1,625 icon markers.

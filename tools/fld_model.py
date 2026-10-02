@@ -257,6 +257,61 @@ def _mesh_geometry(
     return attributes, index_accessor, control_accessor
 
 
+def add_marker_mesh(
+    builder: GltfBuilder,
+    name: str,
+    material: int,
+    size: float,
+) -> int:
+    """Add a reusable octahedral diagnostic marker."""
+
+    positions = (
+        (size, 0.0, 0.0),
+        (-size, 0.0, 0.0),
+        (0.0, size, 0.0),
+        (0.0, -size, 0.0),
+        (0.0, 0.0, size),
+        (0.0, 0.0, -size),
+    )
+    triangles = (
+        0, 2, 4, 2, 1, 4, 1, 3, 4, 3, 0, 4,
+        2, 0, 5, 1, 2, 5, 3, 1, 5, 0, 3, 5,
+    )
+    position_accessor = builder.accessor(
+        _pack_floats(positions),
+        FLOAT,
+        "VEC3",
+        len(positions),
+        target=ARRAY_BUFFER,
+        minimum=[-size, -size, -size],
+        maximum=[size, size, size],
+    )
+    index_accessor = builder.accessor(
+        bytes(triangles),
+        UNSIGNED_BYTE,
+        "SCALAR",
+        len(triangles),
+        target=ELEMENT_ARRAY_BUFFER,
+        minimum=[0],
+        maximum=[5],
+    )
+    mesh_index = len(builder.document["meshes"])
+    builder.document["meshes"].append(
+        {
+            "name": name,
+            "primitives": [
+                {
+                    "attributes": {"POSITION": position_accessor},
+                    "indices": index_accessor,
+                    "material": material,
+                    "mode": 4,
+                }
+            ],
+        }
+    )
+    return mesh_index
+
+
 def _track_values(data: bytes, track: fld.ModelMotionTrack) -> tuple[tuple, ...]:
     _, _, width, value_kind = fld.MODEL_MOTION_VALUE_DIRECTIVES[track.format_name]
     if value_kind == "float":
@@ -391,6 +446,227 @@ def _add_animations(
             builder.document.setdefault("animations", []).append(animation)
 
 
+def _gltf_texture(
+    builder: GltfBuilder,
+    textures: tuple[tmx.Texture, ...],
+    texture_cache: dict[int, int],
+    index: int,
+    context: str,
+) -> tuple[int, bool]:
+    if index < 0 or index >= len(textures):
+        raise fld.FldError(
+            f"{context} references texture {index}, but the bundle has "
+            f"{len(textures)} textures"
+        )
+    texture = textures[index]
+    if texture.index != index:
+        raise fld.FldError(
+            f"texture bundle entry {index} has unexpected index {texture.index}"
+        )
+    gltf_index = texture_cache.get(index)
+    if gltf_index is None:
+        gltf_index = builder.texture(texture)
+        texture_cache[index] = gltf_index
+    translucent = any(alpha < 0xFF for alpha in texture.rgba[3::4])
+    return gltf_index, translucent
+
+
+def add_model_graph(
+    builder: GltfBuilder,
+    data: bytes,
+    name: str,
+    items: tuple[fld.ModelItem, ...],
+    assets: tuple[fld.ModelAsset, ...],
+    draw_roots: dict[int, tuple[int, ...]],
+    draw_lists: dict[int, fld.ModelDrawList],
+    draws: dict[int, fld.ModelDraw],
+    *,
+    meters_per_unit: float,
+    textures: tuple[tmx.Texture, ...] | None = None,
+    texture_cache: dict[int, int] | None = None,
+) -> tuple[tuple[int, ...], tuple[int, ...]]:
+    """Append one decoded SDF model graph and return its nodes and roots."""
+
+    if texture_cache is None:
+        texture_cache = {}
+    packet_cache: dict[tuple[int, int], tuple[fld.ModelMesh, ...]] = {}
+    geometry_cache: dict[tuple[int, int, int], tuple[dict[str, int], int, int]] = {}
+    mesh_cache: dict[int, int] = {}
+    material_cache: dict[tuple[int, bool], int] = {}
+
+    def material_for(
+        asset_index: int, translucent_vertices: bool, has_texcoords: bool
+    ) -> int:
+        if textures is None:
+            return 0
+        key = asset_index, has_texcoords
+        old = material_cache.get(key)
+        if old is not None:
+            if translucent_vertices:
+                builder.document["materials"][old]["alphaMode"] = "BLEND"
+            return old
+
+        asset = assets[asset_index]
+        fields = dict(asset.fields)
+        material = {
+            "name": f"{name}/asset_{asset_index}",
+            "doubleSided": True,
+            "pbrMetallicRoughness": {
+                "metallicFactor": 0.0,
+                "roughnessFactor": 1.0,
+            },
+            "extras": {"ddsAssetFlags": asset.flags},
+        }
+        translucent = translucent_vertices
+        if "resource_04" in fields:
+            source_index = int(fields["resource_04"][0])
+            material["extras"]["ddsPrimaryTexture"] = source_index
+            if source_index < 0 or source_index >= len(textures):
+                raise fld.FldError(
+                    f"model {name} asset {asset_index} references texture "
+                    f"{source_index}, but the bundle has {len(textures)} textures"
+                )
+            if has_texcoords:
+                texture_index, texture_translucent = _gltf_texture(
+                    builder,
+                    textures,
+                    texture_cache,
+                    source_index,
+                    f"model {name} asset {asset_index}",
+                )
+                material["pbrMetallicRoughness"]["baseColorTexture"] = {
+                    "index": texture_index
+                }
+                translucent |= texture_translucent
+        if "resource_20" in fields:
+            secondary, mode = fields["resource_20"]
+            if secondary < 0 or secondary >= len(textures):
+                raise fld.FldError(
+                    f"model {name} asset {asset_index} references secondary "
+                    f"texture {secondary}, but the bundle has {len(textures)} textures"
+                )
+            material["extras"]["ddsSecondaryTexture"] = int(secondary)
+            material["extras"]["ddsSecondaryTextureMode"] = int(mode)
+        if translucent:
+            material["alphaMode"] = "BLEND"
+        material_index = len(builder.document["materials"])
+        builder.document["materials"].append(material)
+        material_cache[key] = material_index
+        return material_index
+
+    def item_mesh(item: fld.ModelItem) -> int | None:
+        if not item.commands:
+            return None
+        old = mesh_cache.get(item.commands)
+        if old is not None:
+            return old
+        primitives = []
+        for list_offset in draw_roots[item.commands]:
+            draw_list = draw_lists[list_offset]
+            for draw_offset in draw_list.draws:
+                draw = draws[draw_offset]
+                packet_key = draw.packet, draw.quadwords * 0x10
+                packet_meshes = packet_cache.get(packet_key)
+                if packet_meshes is None:
+                    packet_meshes, _ = fld._read_model_mesh_packet(
+                        data,
+                        packet_key[0],
+                        packet_key[1],
+                        f"model {name} packet",
+                    )
+                    packet_cache[packet_key] = packet_meshes
+                for mesh_index, mesh in enumerate(packet_meshes):
+                    geometry_key = draw.packet, draw.quadwords, mesh_index
+                    geometry = geometry_cache.get(geometry_key)
+                    if geometry is None:
+                        geometry = _mesh_geometry(
+                            builder,
+                            mesh,
+                            meters_per_unit,
+                            f"model {name} packet 0x{draw.packet:x} mesh {mesh_index}",
+                        )
+                        geometry_cache[geometry_key] = geometry
+                    attributes, indices, controls = geometry
+                    translucent_vertices = bool(
+                        mesh.colors
+                        and any(color[3] < 0x80 for color in mesh.colors)
+                    )
+                    primitives.append(
+                        {
+                            "attributes": attributes,
+                            "indices": indices,
+                            "material": material_for(
+                                draw.asset,
+                                translucent_vertices,
+                                mesh.texcoords is not None,
+                            ),
+                            "mode": 4,
+                            "extras": {
+                                "ddsAsset": draw.asset,
+                                "ddsDrawSelector": draw_list.selector,
+                                "ddsMeshControls": list(mesh.controls),
+                                "ddsProgramAddress": mesh.program,
+                                "ddsTriangleControlAccessor": controls,
+                            },
+                        }
+                    )
+        if not primitives:
+            return None
+        mesh_index = len(builder.document["meshes"])
+        builder.document["meshes"].append(
+            {"name": f"{name}/node_{item.node_id}", "primitives": primitives}
+        )
+        mesh_cache[item.commands] = mesh_index
+        return mesh_index
+
+    node_indices = []
+    for item in items:
+        node = {
+            "name": f"{name}/node_{item.node_id}",
+            "extras": {"ddsNodeId": item.node_id},
+        }
+        translation = item.position[:3]
+        _set_transform_component(
+            node,
+            "translation",
+            translation,
+            [value * meters_per_unit for value in translation],
+        )
+        _set_transform_component(
+            node,
+            "rotation",
+            item.rotation,
+            _euler_quaternion(*item.rotation)
+            if all(math.isfinite(value) for value in item.rotation)
+            else [],
+        )
+        scale = item.scale[:3]
+        _set_transform_component(node, "scale", scale, list(scale))
+        if item.bounds:
+            bounds = struct.unpack_from("<6f", data, item.bounds)
+            if all(math.isfinite(value) for value in bounds):
+                node["extras"]["ddsBounds"] = {
+                    "minimum": [value * meters_per_unit for value in bounds[:3]],
+                    "maximum": [value * meters_per_unit for value in bounds[3:]],
+                }
+            else:
+                node["extras"]["ddsOmittedBoundsBits"] = _float_bits(bounds)
+        mesh_index = item_mesh(item)
+        if mesh_index is not None:
+            node["mesh"] = mesh_index
+        node_indices.append(len(builder.document["nodes"]))
+        builder.document["nodes"].append(node)
+
+    roots = []
+    for item_index, item in enumerate(items):
+        if item.parent < 0:
+            roots.append(node_indices[item_index])
+        else:
+            parent = builder.document["nodes"][node_indices[item.parent]]
+            parent.setdefault("children", []).append(node_indices[item_index])
+    return tuple(node_indices), tuple(roots)
+
+
 def build_gltf(
     data: bytes,
     *,
@@ -415,27 +691,6 @@ def build_gltf(
     found: set[str] = set()
     exported = 0
     texture_cache: dict[int, int] = {}
-
-    def gltf_texture(index: int, context: str) -> tuple[int, bool]:
-        if textures is None:
-            raise AssertionError("texture lookup without a bundle")
-        if index < 0 or index >= len(textures):
-            raise fld.FldError(
-                f"{context} references texture {index}, but the bundle has "
-                f"{len(textures)} textures"
-            )
-        texture = textures[index]
-        if texture.index != index:
-            raise fld.FldError(
-                f"texture bundle entry {index} has unexpected index {texture.index}"
-            )
-        gltf_index = texture_cache.get(index)
-        if gltf_index is None:
-            gltf_index = builder.texture(texture)
-            texture_cache[index] = gltf_index
-        translucent = any(alpha < 0xFF for alpha in texture.rgba[3::4])
-        return gltf_index, translucent
-
     for resource in field_resources:
         if resource.type_id != 2 or not resource.data:
             continue
@@ -470,178 +725,19 @@ def build_gltf(
             relocations,
             f"model {name}",
         )
-        packet_cache: dict[tuple[int, int], tuple[fld.ModelMesh, ...]] = {}
-        geometry_cache: dict[tuple[int, int, int], tuple[dict[str, int], int, int]] = {}
-        mesh_cache: dict[int, int] = {}
-        material_cache: dict[tuple[int, bool], int] = {}
-
-        def material_for(
-            asset_index: int, translucent_vertices: bool, has_texcoords: bool
-        ) -> int:
-            if textures is None:
-                return 0
-            key = asset_index, has_texcoords
-            old = material_cache.get(key)
-            if old is not None:
-                if translucent_vertices:
-                    builder.document["materials"][old]["alphaMode"] = "BLEND"
-                return old
-
-            asset = assets[asset_index]
-            fields = dict(asset.fields)
-            material = {
-                "name": f"{name}/asset_{asset_index}",
-                "doubleSided": True,
-                "pbrMetallicRoughness": {
-                    "metallicFactor": 0.0,
-                    "roughnessFactor": 1.0,
-                },
-                "extras": {"ddsAssetFlags": asset.flags},
-            }
-            translucent = translucent_vertices
-            if "resource_04" in fields:
-                source_index = int(fields["resource_04"][0])
-                material["extras"]["ddsPrimaryTexture"] = source_index
-                if source_index < 0 or source_index >= len(textures):
-                    raise fld.FldError(
-                        f"model {name} asset {asset_index} references texture "
-                        f"{source_index}, but the bundle has {len(textures)} textures"
-                    )
-                if has_texcoords:
-                    texture_index, texture_translucent = gltf_texture(
-                        source_index, f"model {name} asset {asset_index}"
-                    )
-                    material["pbrMetallicRoughness"]["baseColorTexture"] = {
-                        "index": texture_index
-                    }
-                    translucent |= texture_translucent
-            if "resource_20" in fields:
-                secondary, mode = fields["resource_20"]
-                if secondary < 0 or secondary >= len(textures):
-                    raise fld.FldError(
-                        f"model {name} asset {asset_index} references secondary "
-                        f"texture {secondary}, but the bundle has {len(textures)} textures"
-                    )
-                material["extras"]["ddsSecondaryTexture"] = int(secondary)
-                material["extras"]["ddsSecondaryTextureMode"] = int(mode)
-            if translucent:
-                material["alphaMode"] = "BLEND"
-            material_index = len(builder.document["materials"])
-            builder.document["materials"].append(material)
-            material_cache[key] = material_index
-            return material_index
-
-        def item_mesh(item: fld.ModelItem) -> int | None:
-            if not item.commands:
-                return None
-            old = mesh_cache.get(item.commands)
-            if old is not None:
-                return old
-            primitives = []
-            for list_offset in draw_roots[item.commands]:
-                draw_list = draw_lists[list_offset]
-                for draw_offset in draw_list.draws:
-                    draw = draws[draw_offset]
-                    packet_key = draw.packet, draw.quadwords * 0x10
-                    packet_meshes = packet_cache.get(packet_key)
-                    if packet_meshes is None:
-                        packet_meshes, _ = fld._read_model_mesh_packet(
-                            data,
-                            packet_key[0],
-                            packet_key[1],
-                            f"model {name} packet",
-                        )
-                        packet_cache[packet_key] = packet_meshes
-                    for mesh_index, mesh in enumerate(packet_meshes):
-                        geometry_key = draw.packet, draw.quadwords, mesh_index
-                        geometry = geometry_cache.get(geometry_key)
-                        if geometry is None:
-                            geometry = _mesh_geometry(
-                                builder,
-                                mesh,
-                                meters_per_unit,
-                                f"model {name} packet 0x{draw.packet:x} mesh {mesh_index}",
-                            )
-                            geometry_cache[geometry_key] = geometry
-                        attributes, indices, controls = geometry
-                        translucent_vertices = bool(
-                            mesh.colors
-                            and any(color[3] < 0x80 for color in mesh.colors)
-                        )
-                        primitives.append(
-                            {
-                                "attributes": attributes,
-                                "indices": indices,
-                                "material": material_for(
-                                    draw.asset,
-                                    translucent_vertices,
-                                    mesh.texcoords is not None,
-                                ),
-                                "mode": 4,
-                                "extras": {
-                                    "ddsAsset": draw.asset,
-                                    "ddsDrawSelector": draw_list.selector,
-                                    "ddsMeshControls": list(mesh.controls),
-                                    "ddsProgramAddress": mesh.program,
-                                    "ddsTriangleControlAccessor": controls,
-                                },
-                            }
-                        )
-            if not primitives:
-                return None
-            mesh_index = len(builder.document["meshes"])
-            builder.document["meshes"].append(
-                {"name": f"{name}/node_{item.node_id}", "primitives": primitives}
-            )
-            mesh_cache[item.commands] = mesh_index
-            return mesh_index
-
-        node_indices = []
-        for item in items:
-            node = {
-                "name": f"{name}/node_{item.node_id}",
-                "extras": {"ddsNodeId": item.node_id},
-            }
-            translation = item.position[:3]
-            _set_transform_component(
-                node,
-                "translation",
-                translation,
-                [value * meters_per_unit for value in translation],
-            )
-            _set_transform_component(
-                node,
-                "rotation",
-                item.rotation,
-                _euler_quaternion(*item.rotation)
-                if all(math.isfinite(value) for value in item.rotation)
-                else [],
-            )
-            scale = item.scale[:3]
-            _set_transform_component(node, "scale", scale, list(scale))
-            if item.bounds:
-                bounds = struct.unpack_from("<6f", data, item.bounds)
-                if all(math.isfinite(value) for value in bounds):
-                    node["extras"]["ddsBounds"] = {
-                        "minimum": [value * meters_per_unit for value in bounds[:3]],
-                        "maximum": [value * meters_per_unit for value in bounds[3:]],
-                    }
-                else:
-                    node["extras"]["ddsOmittedBoundsBits"] = _float_bits(bounds)
-            mesh_index = item_mesh(item)
-            if mesh_index is not None:
-                node["mesh"] = mesh_index
-            node_indices.append(len(builder.document["nodes"]))
-            builder.document["nodes"].append(node)
-
-        roots = []
-        for item_index, item in enumerate(items):
-            if item.parent < 0:
-                roots.append(node_indices[item_index])
-            else:
-                parent = builder.document["nodes"][node_indices[item.parent]]
-                parent.setdefault("children", []).append(node_indices[item_index])
-
+        node_indices, roots = add_model_graph(
+            builder,
+            data,
+            name,
+            items,
+            assets,
+            draw_roots,
+            draw_lists,
+            draws,
+            meters_per_unit=meters_per_unit,
+            textures=textures,
+            texture_cache=texture_cache,
+        )
         wrapper = {
             "name": name,
             "children": roots,

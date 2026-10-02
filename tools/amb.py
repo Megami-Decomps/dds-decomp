@@ -303,11 +303,21 @@ def decode(data: bytes) -> AmbFile:
             items = fld._read_model_items(
                 data, geometry, data_end, f"area {area_index} model hierarchy"
             )
+            for sblock_index, sblock in enumerate(sblock_rows):
+                if sblock.node >= len(items):
+                    raise AmbError(
+                        f"area {area_index} sub-block {sblock_index} references "
+                        f"model node {sblock.node}, but the model has {len(items)} nodes"
+                    )
             assets = fld._read_model_assets(
                 data, material, data_end, f"area {area_index} model assets"
             )
             for item_index, item in enumerate(items):
-                item_offset = geometry + fld.MODEL_ITEM_LIST_SIZE + item_index * fld.MODEL_ITEM_SIZE
+                item_offset = (
+                    geometry
+                    + fld.MODEL_ITEM_LIST_SIZE
+                    + item_index * fld.MODEL_ITEM_SIZE
+                )
                 for field_offset, value, context in (
                     (0x40, item.bounds, "bounds"),
                     (0x44, item.commands, "draw set"),
@@ -338,7 +348,8 @@ def decode(data: bytes) -> AmbFile:
                 if old is not None:
                     if old[0] != size:
                         raise AmbError(
-                            f"area {area_index} model packet at 0x{draw.packet:x} has conflicting sizes"
+                            f"area {area_index} model packet at 0x{draw.packet:x} "
+                            "has conflicting sizes"
                         )
                     continue
                 meshes, nop_count = fld._read_model_mesh_packet(
