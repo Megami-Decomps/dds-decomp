@@ -38,7 +38,10 @@ void sdfSleepWithAlarm(u32 delay) {
     SleepThread();
 }
 
-INCLUDE_ASM(const s32, "game/code_00328778", func_003287E0);
+/* Read EE timer 0's free-running count register. */
+u32 func_003287E0(void) {
+    return *(volatile u32 *)0x10000000;
+}
 
 /* EE timer 0 count register; subtraction is reduced modulo 2^16 so
  * wraparound does not make short elapsed intervals negative. */
