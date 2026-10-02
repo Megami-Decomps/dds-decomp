@@ -4796,7 +4796,56 @@ void btlChooseBrahmaGroupCamera(u32 unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00222A08);
+extern void btlClearAllUnitDefeatCandidatesTask(void);
+extern void btlApplyCombinedActorFlags(u8 *);
+
+void func_00222A08(BtlLinkedCommand *command) {
+    BtlUnit *target = btlGetTargetUnitForLink(command);
+    if (target == 0) {
+        return;
+    }
+    btlClearAllUnitDefeatCandidatesTask();
+    btlFlagUnitDefeatCandidate((u32)target);
+    btlApplyCombinedActorFlags((u8 *)command);
+    switch (target->lookupId) {
+    case 0:
+        switch (btlFindSpecialActionIndex()) {
+        case 2:
+            btlBossDebugPrintf("BRAHMA:Move-0-0[3] ++++\n");
+            btlSetEffectCameraKeys((s32)command,
+                1275.6f, -1510.8f, -1025.3f, 0.186f, 0.203f, 0.03f, 0.951f, 1610.9f,
+                -1633.2f, -1267.5f, 0.153f, 0.236f, 0.028f, 0.949f, 40.0f, 15.0f);
+            break;
+        case 3:
+            btlBossDebugPrintf("BRAHMA:Move-0-0[4] ++++\n");
+            btlSetEffectCameraKeys((s32)command,
+                1983.1f, -1391.6f, -578.2f, 0.122f, 0.373f, 0.034f, 0.906f, 2317.9f,
+                -2135.2f, -572.6f, 0.193f, 0.41f, 0.072f, 0.876f, 40.0f, 20.0f);
+            break;
+        default:
+            btlBossDebugPrintf("BRAHMA:Move-0-0[other] ++++\n");
+            btlSetEffectCameraKeys((s32)command,
+                1229.7f, 47.4f, -401.0f, -0.162f, 0.312f, -0.068f, 0.924f, 1556.3f,
+                246.0f, -564.7f, -0.189f, 0.32f, -0.079f, 0.915f, 40.0f, 15.0f);
+            break;
+        }
+        /* The initial camera continues into the shared movement camera. */
+    case 1:
+    case 2:
+        if (btlFindSpecialActionIndex() == 1) {
+            btlBossDebugPrintf("BRAHMA:Move-1-2-0[2] ++++\n");
+            btlSetEffectCameraKeys((s32)command,
+                -1178.1f, 354.6f, -585.7f, -0.232f, -0.338f, 0.079f, 0.899f, -1316.4f,
+                476.2f, -784.9f, -0.236f, -0.289f, 0.067f, 0.915f, 40.0f, 15.0f);
+        } else {
+            btlBossDebugPrintf("BRAHMA:Move-1-2-0[other] ++++\n");
+            btlSetEffectCameraKeys((s32)command,
+                -1162.6f, 91.5f, -257.2f, -0.137f, -0.349f, 0.039f, 0.916f, -1350.3f,
+                263.5f, -672.4f, -0.186f, -0.292f, 0.045f, 0.927f, 40.0f, 15.0f);
+        }
+        break;
+    }
+}
 
 u32 btlApplySingleTargetCameraOffset(ActionUnit *unit) {
     u32 actor = unit->stateFlags;
@@ -4859,7 +4908,31 @@ s32 btlLiftTowardLinkedTarget(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00222F18);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00223280);
+s32 func_00223280(BtlLinkedCommand *command) {
+    if (btlIsActorCategoryMarked((s32)command) == 0) {
+        if (command->link->unit->flags & 0x200) {
+            if (command->unk12C == 14) {
+                func_00217470(command, &command->camera, -1.4f, 0.67f, 25.0f);
+                command->camera.distance += 1250.0f;
+                return 1;
+            }
+        } else {
+            switch (command->actionCode) {
+            case 0x175:
+            case 0x176:
+            case 0x177:
+            case 0x178:
+            case 0x17D:
+            case 0x19D:
+            case 0x19E:
+            case 0x19F:
+                btlSetRuntimeFlag2000();
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00223350);
 
