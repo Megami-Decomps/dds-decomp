@@ -6110,7 +6110,41 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001E16C0);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E1CF8);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", btlActionAimUserAtTargets);
+extern void btlPrepareUnitPoseWithTiltRotation();
+
+void btlActionAimUserAtTargets(u8 *action, f32 *pose, u8 *out) {
+    typedef struct BtlActionAimLink {
+        u8 pad00[0x18];
+        BtlUnit *unit;
+    } BtlActionAimLink;
+    typedef struct BtlActionAim {
+        u8 pad00[0xF4];
+        BtlActionAimLink *link;
+        u8 padF8[0x20];
+        s32 actorIndices;
+    } BtlActionAim;
+    BtlActionAim *command = (BtlActionAim *)action;
+    s128 vec[3];
+    BtlUnit *unit = command->link->unit;
+    u32 mask = 0;
+    u32 i;
+    u32 count;
+    btlPrepareUnitPoseWithTiltRotation(command, pose, out);
+    count = btlGetIndexListCount(command->actorIndices);
+    for (i = 0; i < count; i++) {
+        mask |= ((BtlUnit *)btlGetIndexListEntry(command->actorIndices, i))->flags & 0x600;
+    }
+    if (unit->flags & 0x80000) {
+        func_001F66D8(mask, 0, 0);
+        VU0_STORE_VF(vf10, &vec[0]);
+        btlUnitGetBodyPosVU(unit);
+        VU0_STORE_VF_UNCLOBBERED(vf10, &vec[1]);
+        if (btlAimHorizontalDirectionVU(&vec[1], &vec[0]) != 0) {
+            VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
+            btlSetUnitRotation((u8 *)unit, &vec[2]);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E20C0);
 
