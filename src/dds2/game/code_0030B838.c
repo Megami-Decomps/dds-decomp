@@ -312,7 +312,37 @@ s32 sdfStepSelectedMapCameraTransition(void) {
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C0C0);
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C250);
+typedef struct WorldObjectPointer WorldObjectPointer;
+typedef struct WorldChainNode WorldChainNode;
+typedef struct EffectObject EffectObject;
+
+extern void *dds3GetWorldSecondaryObject(void);
+extern WorldChainNode *dds3FindIndexedObjectChainNodeByName(WorldObjectPointer *world, s32 type, const u8 *name);
+extern void evtSetObjectTransitionWork(EffectObject *object, u32 value);
+
+/* Fixed-width names identify the corresponding local-map model chain. */
+void func_0030C250(s32 index, s32 value) {
+    char names[7][16] = {
+        "md_01all_02",
+        "md_01all_03",
+        "md_01all_04",
+        "md_01all_02",
+        "md_01all_05",
+        "md_01all_02",
+        "md_01all_02"
+    };
+    WorldChainNode *node;
+    s32 modelIndex;
+
+    if (index != 0) {
+        modelIndex = index - 1;
+        node = dds3FindIndexedObjectChainNodeByName(dds3GetWorldSecondaryObject(), 6,
+                                                  (const u8 *)names[modelIndex]);
+        if (node != NULL) {
+            evtSetObjectTransitionWork((EffectObject *)node, value);
+        }
+    }
+}
 
 /* Create display channels for the enabled bits of the counter mask. */
 s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {

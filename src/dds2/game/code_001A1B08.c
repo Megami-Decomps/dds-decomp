@@ -35,14 +35,27 @@ typedef struct PanelRecSub {
     s8 status;     /* 0x10: status read and written by itfPanelGet/SetStatus */
 } PanelRecSub;
 
+typedef struct FrFontGlyph FrFontGlyph;
+
+/* The same option-list block used by itfMesBuildOptionList at window +0x40. */
+typedef struct PanelOptionBlock {
+    u32 x;
+    u32 y;
+    FrFontGlyph *glyphChain;
+    u32 panelValue;
+    s16 status;
+    s16 clearBitCount;
+    u16 unk14;
+    s16 rowCount;
+} PanelOptionBlock;
+
 /* Payload record referenced by the D_003D6ECC table. */
 typedef struct PanelRec {
     u8 unk0[0x24];     /* 0x0 */
     PanelRecSub sub24; /* 0x24 */
-    u8 unk35[0x1B];    /* 0x35 */
-    s16 pairFirst;    /* 0x50 */
-    s16 pairSecond;   /* 0x52 */
-    u8 unk54[0x54];    /* 0x54 */
+    u8 unk35[0xB];     /* 0x35 */
+    PanelOptionBlock options; /* 0x40 */
+    u8 unk58[0x50];    /* 0x58 */
     s32 unkA8;         /* 0xA8 */
 } PanelRec;
 
@@ -73,7 +86,7 @@ extern PanelEntry itfWindowSlots[];
 extern void itfAdvancePanelLayoutAndNotify(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern void itfMesCleanupWindow(s32 window, s32 arg1);
 extern void itfMesSetWindowPageAndRefresh(s32 window, s32 arg1, s32 arg2);
-extern s32 scrGetWindow(void);
+extern u32 scrGetWindow(void);
 extern void itfScaleVectors(s32 *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const s32 *input, s32 count);
 extern s32 itfPanelColorTemplates[];
 extern s32 D_003B4548[];
@@ -466,18 +479,69 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A3008);
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A3138);
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A31E0);
+extern u32 scrGetCommandTimer(void);
+extern void scrSetIntegerReturnValue(s32);
+extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
+extern void itfMesResetWindow(s32 window);
+extern void kwlnDrawSetDc8Second(u32);
+extern void kwlnDrawSetDc8First(u32);
+extern void kwlnDrawSetupDc8(s32);
+extern void kwlnDrawEnableDc8(s32);
+extern s32 D_00438F28;
+
+/* Fade the message page in before polling the option block for completion. */
+s32 func_001A31E0(void) {
+    s32 window;
+    s32 timer;
+    s32 entry;
+    PanelRec *record;
+    PanelOptionBlock *options;
+
+    window = scrGetWindow();
+    if (window < 0) {
+        return 1;
+    }
+    timer = scrGetCommandTimer();
+    if (scrGetCommandTimer() == 0) {
+        kwlnDrawSetDc8Second(0x44);
+        kwlnDrawSetDc8First(0x5E1C1C1C);
+        kwlnDrawSetupDc8(30);
+        D_00438F28 = -1;
+        return 0;
+    }
+    if (timer < 30) {
+        return 0;
+    }
+    if (timer == 30) {
+        itfMesSetWindowPageAndRefresh(window, 3, 0);
+    } else if (D_00438F28 == -1) {
+        record = itfWindowSlots[window].ptr;
+        entry = scrReadIntParameter(0);
+        options = &record->options;
+        if (options->status == 0) {
+            itfMesBuildOptionList(window, entry);
+        } else if (options->status < 0) {
+            options->status = 0;
+            scrSetIntegerReturnValue(options->clearBitCount);
+            itfMesResetWindow(window);
+            kwlnDrawEnableDc8(10);
+            D_00438F28 = 0;
+            return 1;
+        }
+    }
+    return 0;
+}
 
 s16 itfPanelGetPairFirst(s32 index) {
-    return itfWindowSlots[index].ptr->pairFirst;
+    return itfWindowSlots[index].ptr->options.status;
 }
 
 void itfPanelSetPairFirst(s32 index, s16 value) {
-    itfWindowSlots[index].ptr->pairFirst = value;
+    itfWindowSlots[index].ptr->options.status = value;
 }
 
 s16 itfPanelGetPairSecond(s32 index) {
-    return itfWindowSlots[index].ptr->pairSecond;
+    return itfWindowSlots[index].ptr->options.clearBitCount;
 }
 
 INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365A8);
