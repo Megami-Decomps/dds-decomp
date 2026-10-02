@@ -49,16 +49,22 @@ typedef struct ProfileCapSkillList {
 typedef struct MenuItemScene {
     u8 pad00[4];
     u32 overlayFlags;
-    u8 pad08[0x88];
+    u8 dispatchWork[0x4C];
+    s32 dispatchStatus;
+    u8 pad58[0x38];
     u32 iconSprite;
     u8 pad94[4];
     MenuItemSelectionData *selectionData;
     u8 pad9C[0x1A4];
-    u32 resetStateA;
+    s32 resetStateA;
     s32 pendingSkillCount; /* Decremented as prfCapPresentMessages presents skills. */
     s32 pendingSkillIndex;
     s32 selectionApplied;
-    u8 pad250[0x174];
+    u8 pad250[0x78];
+    s32 selectionTargetCount;
+    u8 pad2CC[0x78];
+    s32 nextPanelMode;
+    u8 pad348[0x7C];
     u32 resetStateB;
     s32 selectedExtent;
     u32 activeSlot;
@@ -157,7 +163,7 @@ s32 kwlnItemDismissOverlay(MenuItemScene *scene) {
 }
 
 /* Record the first visit to the item-selection scene. */
-u32 mnuMarkItemSelectionSceneVisited(void) {
+u32 mnuMarkItemSelectionSceneVisited(MenuItemScene *scene) {
     s64 alreadyVisited;
 
     alreadyVisited = mdlFlagTest(0x911);
@@ -167,7 +173,61 @@ u32 mnuMarkItemSelectionSceneVisited(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00263148", prfCapTaskStep);
+extern s64 evtGetMessageWindowControlState(void);
+extern void brsSelectNextUnit(MenuItemScene *, s32);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
+extern void mnuSetPopupEntryFlagged(s32 *, void *);
+extern s32 btlHasPendingRuntimeActivity(void);
+extern s32 mnuStaffInitPanel(s32);
+extern void func_002E8E50(void);
+extern char D_0036D494[];
+extern char D_0036D408[];
+
+s64 prfCapTaskStep(u64 request) {
+    s64 result;
+    MenuItemScene *scene = (MenuItemScene *)kwlnTaskGetUserValue();
+    s32 *dispatchStatus = &scene->dispatchStatus;
+
+    result = func_00285670((s32)scene->dispatchWork, dispatchStatus, 0,
+                          request);
+    if (result == 0) {
+        if (*dispatchStatus == 0 &&
+            (result = evtGetMessageWindowControlState(), result == 0)) {
+            if (scene->resetStateA < scene->selectionTargetCount ||
+                scene->pendingSkillCount > 0 ||
+                scene->selectionApplied != 0) {
+                if ((scene->pendingSkillCount == 0 ||
+                     scene->resetStateA == 0) &&
+                    scene->selectionApplied == 0) {
+                    brsSelectNextUnit(scene, 0);
+                    mnuProcessItemSelection((u32)scene);
+                }
+                prfCapPresentMessages(scene);
+                return 0;
+            }
+
+            if (mnuMarkItemSelectionSceneVisited(scene) != 0) {
+                return 0;
+            }
+            if (kwlnItemDismissOverlay(scene) != 0) {
+                return 0;
+            }
+            if (scene->nextPanelMode == 0) {
+                kwlnFadeInStart(0, 0, 0, 0xF);
+                mnuSetPopupEntryFlagged(dispatchStatus, D_0036D494);
+                return 0;
+            }
+            if (btlHasPendingRuntimeActivity() != 0) {
+                return 0;
+            }
+            mnuStaffInitPanel((s32)scene);
+            mnuSetPopupEntryFlagged(dispatchStatus, D_0036D408);
+            func_002E8E50();
+        }
+        result = 0;
+    }
+    return result;
+}
 
 s64 func_00263570(s32 request) {
     s32 context = kwlnTaskGetUserValue();
