@@ -39,7 +39,7 @@ typedef struct FileCleanup {
 extern s32 btlDestroyStageTask(void *);
 extern void sdfDevQueueReleaseState(u32);
 extern void sdfReleaseChipBlock(void *);
-extern void func_0035B6E0(const char *, ...);
+extern void func_0035B6E0(const char *fmt, ...);
 extern void *sdfAllocAndClearQuadwords(s32);
 extern void sdfPacInitializeDispatchPacket(void *, void *);
 extern void func_00346AE8(void *);
@@ -137,7 +137,7 @@ void fileUnlinkNode(FileWork *list, FileNode *node) {
     *link = node->next;
 }
 
-void *fileCreatePacLoadWork(u32 request, s32 flags, void *dispatch, s32 onComplete, s32 userData) {
+void *fileCreatePacLoadWork(const char *request, s32 flags, void *dispatch, s32 onComplete, s32 userData) {
     u8 *work;
     u8 *packet;
 
@@ -152,15 +152,15 @@ void *fileCreatePacLoadWork(u32 request, s32 flags, void *dispatch, s32 onComple
     return work;
 }
 
-void func_002C7FF0(u32 request) {
+void *func_002C7FF0(const char *request) {
     fileCreatePacLoadWork(request, 0, 0, 0, 0);
 }
 
-void func_002C8018(u32 request) {
+void func_002C8018(const char *request) {
     fileCreatePacLoadWork(request, 1, 0, 0, 0);
 }
 
-void *func_002C8040(u32 request, s32 mode, s32 dispatch, s32 onComplete) {
+void *func_002C8040(const char *request, s32 mode, s32 dispatch, s32 onComplete) {
     u8 *work;
 
     func_0035B6E0("file load %s\n", request);
@@ -170,11 +170,11 @@ void *func_002C8040(u32 request, s32 mode, s32 dispatch, s32 onComplete) {
     return work;
 }
 
-void func_002C80C8(u32 request) {
+void func_002C80C8(const char *request) {
     func_002C8040(request, 0, 0, 0);
 }
 
-void func_002C80E8(u32 request) {
+void func_002C80E8(const char *request) {
     func_002C8040(request, 1, 0, 0);
 }
 

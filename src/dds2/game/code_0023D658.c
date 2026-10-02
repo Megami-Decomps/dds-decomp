@@ -199,7 +199,7 @@ extern void dds3RemoveWorldObjectNode(void *arg0);
 
 extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
-extern void func_0035B6E0();
+extern void func_0035B6E0(const char *fmt, ...);
 
 extern u8 D_004219F0[];
 

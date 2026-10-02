@@ -23,7 +23,7 @@ extern void func_003297C8(void *);
 extern void func_00168280();
 extern void func_001053F0(s32, s32, f32);
 extern s32 kwlnTextureSetReferenceFlagIfPresent();
-extern void func_0035B6E0(const char *);
+extern void func_0035B6E0(const char *fmt, ...);
 extern f32 D_0037F850[];
 extern f32 D_0037F860[];
 extern u8 D_00380870[];

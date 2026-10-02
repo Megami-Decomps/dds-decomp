@@ -30,7 +30,7 @@ extern void* kwlnDelayedDestroyTaskCount;
 
 extern void* kwlnActiveTaskCount;
 
-extern void func_0035B6E0();
+extern void func_0035B6E0(const char *fmt, ...);
 
 extern u8 D_00435BF8[];
 

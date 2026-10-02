@@ -722,7 +722,7 @@ void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *owner, MdlDoneJob *job) {
 
 extern void *sdfAllocAndClearQuadwords();
 
-extern s32 fileCreatePacLoadWork();
+extern void *fileCreatePacLoadWork(const char *path, s32 flags, void *dispatch, s32 onComplete, s32 userData);
 
 extern void func_002C81D0();
 

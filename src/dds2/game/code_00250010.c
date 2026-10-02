@@ -206,7 +206,7 @@ extern s32 sndFindPackedTrackLoadStatus(s32 sound);
 
 extern void sndStartTrackDefault(s32 track);
 
-extern void func_0035B6E0(char *fmt, ...);
+extern void func_0035B6E0(const char *fmt, ...);
 
 extern void sndStartTrackExtended(s32 track);
 

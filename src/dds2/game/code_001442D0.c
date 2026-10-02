@@ -1805,7 +1805,7 @@ void fldUpdateMenuResourceEffects(void) {
     }
 }
 
-extern void *func_002C7FF0(const char *);
+extern void *func_002C7FF0(const char *path);
 
 extern void func_002C81D0(void *);
 
