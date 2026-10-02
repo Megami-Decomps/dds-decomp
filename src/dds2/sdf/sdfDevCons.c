@@ -1,6 +1,14 @@
 #include "common.h"
 #include "ee_mmi.h"
 
+#define SDF_DEVCONS_CELL_BYTES 2
+#define SDF_DEVCONS_TEXT_BUFFER_BYTES 0x200
+#define SDF_DEVCONS_NONEMPTY_SHIFT 3
+#define SDF_DEVCONS_GIF_TAG_BYTES 0x10
+#define SDF_DMA_QWORD_SHIFT 4
+#define SDF_DMA_CHCR_TTE 0x40
+#define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
+
 typedef struct DevConsState {
     u8 pad0[4]; /* 0x0 */
     struct DevConsState *unk4; /* 0x4 */
@@ -26,10 +34,10 @@ void func_0033CE08(DevConsState *arg0, s32 arg1, s32 arg2);
 
 void func_00360E78(void *arg0, const char *arg1, void *arg2);
 
-/* Scroll the two-byte cell grid at its last row, or advance the cursor. */
+/* Scroll only at the last row; otherwise advance it. Always reset the column. */
 void sdfDevConsAdvanceRow(DevConsState *console) {
     if (console->cursorRow == console->rows - 1) {
-        s32 rowBytes = console->columns * 2;
+        s32 rowBytes = console->columns * SDF_DEVCONS_CELL_BYTES;
         s32 copyBytes = rowBytes * console->cursorRow;
         if (console->cursorRow > 0) {
             memmove(console->cells, console->cells + rowBytes, copyBytes);
@@ -48,28 +56,28 @@ void sdfDevConsWriteCharacter(DevConsState *console, s32 character, s32 attribut
     func_0033CE08(console, character, attribute);
 }
 
-/* Format text into a fixed-size scratch buffer, then emit each character. */
-s32 sdfDevConsPrintf(DevConsState *console, const char *fmt, ...) {
-    char text[0x200];
-    __builtin_va_list args;
-    char *cursor;
-    s32 written = 0;
+/* Return the emitted character count. The formatter receives no buffer limit. */
+s32 sdfDevConsPrintf(DevConsState *console, const char *format, ...) {
+    char textBuffer[SDF_DEVCONS_TEXT_BUFFER_BYTES];
+    __builtin_va_list arguments;
+    char *textCursor;
+    s32 characterCount = 0;
     s32 character;
-    __builtin_stdarg_start(args, fmt);
-    func_00360E78(text, fmt, args);
-    character = text[0];
+    __builtin_stdarg_start(arguments, format);
+    func_00360E78(textBuffer, format, arguments);
+    character = textBuffer[0];
     if (character != 0) {
         do {
-            written++;
+            characterCount++;
             func_0033CE08(console, character, console->textAttribute);
-            cursor = text + written;
-            character = *cursor;
+            textCursor = textBuffer + characterCount;
+            character = *textCursor;
         } while (character != 0);
     }
-    return written;
+    return characterCount;
 }
 
-/* Set the cell coordinates of the next character. */
+/* Set the next cell coordinates without clamping them to the grid. */
 void sdfDevConsSetCursor(DevConsState *console, s16 column, s16 row) {
     console->cursorColumn = column;
     console->cursorRow = row;
@@ -85,21 +93,22 @@ u8 sdfDevConsGetControlByte(DevConsState *console) {
     return console->controlByte;
 }
 
-void sdfDevConsSetControlByte(DevConsState *console, u8 value) {
-    console->controlByte = value;
+/* Store the control byte unchanged; its individual bits are not decoded here. */
+void sdfDevConsSetControlByte(DevConsState *console, u8 controlByte) {
+    console->controlByte = controlByte;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033D068);
 
 typedef struct ConsBuf {
-    u8 *unk0; /* 0x0 */
-    u8 *unk4; /* 0x4 */
-    u8 *unk8; /* 0x8 */
-    void *unkC; /* 0xC */
-    s32 unk10[2]; /* 0x10 */
-    s32 unk18; /* 0x18 */
-    u16 unk1C; /* 0x1C */
-    u16 unk1E; /* 0x1E */
+    u8 *writeCursor; /* 0x0: next glyph-data write */
+    u8 *packetStart; /* 0x4: beginning of the DMA range */
+    u8 *currentTag; /* 0x8: reserved, not-yet-finalized GIF tag */
+    void *dmaChannel; /* 0xC */
+    s32 bufferAddresses[2]; /* 0x10: CPU-side addresses, kept as signed words */
+    s32 bufferBytes; /* 0x18: byte capacity of each buffer */
+    u16 activeBufferIndex; /* 0x1C */
+    u16 rowStep; /* 0x1E: added when the renderer advances to the next row */
 } ConsBuf;
 
 void func_0033D068(ConsBuf *arg0);
@@ -107,25 +116,27 @@ s32 sceDmaSync(void *ch, s32 mode, s32 timeout);
 void sceDmaSendN(void *ch, void *addr, s32 size);
 s32 sceGsSyncPath(s32 mode, s32 timeout);
 
-/* Submit the console's pending packet to the DMA channel when it holds anything, then flip to the other buffer and restart the list there. */
-void sdfDevConsKickPacketDma(ConsBuf *buf) {
-    s32 bytes;
-    u32 *channel;
-    u32 flip;
+/* Finalize the current GIF tag and submit completed packets, then rotate buffers.
+ * Keep the eight-byte pending-data test distinct from the quadword DMA count.
+ */
+void sdfDevConsKickPacketDma(ConsBuf *packetBuffers) {
+    s32 packetBytes;
+    u32 *channelRegisters;
+    u32 nextBufferIndex;
 
-    func_0033D068(buf);
-    bytes = buf->unk8 - buf->unk4;
-    if ((bytes >> 3) != 0) {
-        channel = buf->unkC;
-        sceDmaSync(channel, 0, 0);
-        *channel |= 0x40;
+    func_0033D068(packetBuffers);
+    packetBytes = packetBuffers->currentTag - packetBuffers->packetStart;
+    if ((packetBytes >> SDF_DEVCONS_NONEMPTY_SHIFT) != 0) {
+        channelRegisters = packetBuffers->dmaChannel;
+        sceDmaSync(channelRegisters, 0, 0);
+        *channelRegisters |= SDF_DMA_CHCR_TTE; /* CHCR bit 6: tag-transfer enable */
         EE_SYNC();
-        sceDmaSendN(channel, (void *)((u32)buf->unk4 & 0x0FFFFFFF), bytes >> 4);
-        flip = buf->unk1C ^ 1;
-        buf->unk1C = flip;
-        buf->unk8 = (u8 *)buf->unk10[flip];
-        buf->unk0 = buf->unk8 + 0x10;
-        buf->unk4 = buf->unk8;
+        sceDmaSendN(channelRegisters, (void *)((u32)packetBuffers->packetStart & SDF_DMA_ADDRESS_MASK), packetBytes >> SDF_DMA_QWORD_SHIFT);
+        nextBufferIndex = packetBuffers->activeBufferIndex ^ 1;
+        packetBuffers->activeBufferIndex = nextBufferIndex;
+        packetBuffers->currentTag = (u8 *)packetBuffers->bufferAddresses[nextBufferIndex];
+        packetBuffers->writeCursor = packetBuffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
+        packetBuffers->packetStart = packetBuffers->currentTag;
         sceGsSyncPath(0, 0);
     }
 }
