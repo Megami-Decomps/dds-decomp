@@ -34,6 +34,10 @@ TYPE_ALIASES = {
     "f32": "float", "f64": "double",
 }
 TOKEN_RE = re.compile(r"[A-Za-z_$][A-Za-z0-9_$]*|\.\.\.|[^\s]")
+STATEMENT_PREFIXES = {
+    "if", "else", "switch", "case", "default", "while", "do", "for",
+    "goto", "continue", "break", "return", "sizeof",
+}
 KNOWN_BASES = TYPE_WORDS | {
     "float", "double", "signed char", "unsigned char", "short int", "unsigned short int",
     "long int", "unsigned long int", "long long int", "unsigned long long int",
@@ -671,7 +675,7 @@ def _function_local_names(body: list[tuple[str, int]]) -> set[str]:
             bracket -= 1
         if token == ";" and paren == bracket == 0:
             local_prototype = None
-            if segment and segment[0] not in {"return", "goto", "break", "continue"}:
+            if segment and segment[0] not in STATEMENT_PREFIXES:
                 local_prototype, _ = _candidate(segment, ";", "", 0)
             if local_prototype is not None:
                 names.add(local_prototype.name)
