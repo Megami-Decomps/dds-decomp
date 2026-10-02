@@ -103,7 +103,49 @@ void effObjReleaseObjectData(EffectObj *obj) {
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001145C0);
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114988);
+struct BillObj;
+struct EffNode;
+
+extern void func_00115E10(EffectObj *obj);
+extern u8 dds3TestObjectFlags(void *obj, s32 flags);
+extern void effUpdateNode(struct EffNode *node);
+extern void billInvokeCallback(struct BillObj *bill);
+extern void func_00190328(void *node);
+
+s32 func_00114988(EffectObj *obj) {
+    EffectData *data;
+
+    data = obj->data;
+    func_00115E10(obj);
+    if ((data->flags & 1) == 0) {
+        return 1;
+    }
+    if (dds3TestObjectFlags(obj, 1)) {
+        return 1;
+    }
+
+    switch (data->state) {
+    case 1:
+    case 7:
+    case 8:
+        if (data->bill != NULL) {
+            effUpdateNode(data->bill);
+        }
+        break;
+    case 2:
+    case 3:
+        if (data->bill != NULL) {
+            billInvokeCallback(data->bill);
+        }
+        break;
+    case 5:
+        if (data->node != NULL) {
+            func_00190328(data->node);
+        }
+        break;
+    }
+    return 1;
+}
 
 void *effObjGetObjectHandle(EffectObj *obj) {
     return obj->data->objectHandle;
