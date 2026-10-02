@@ -65,12 +65,15 @@ typedef struct SdfRuntime {
     s32 backingAllocation; /* 0x30: handle returned by scene allocator */
     u32 firstTick;
     u32 secondTick;
-    u8 pad3C[0xA20];
+    u8 pad3C[0xA1C];
+    u32 commandFlags; /* 0xA58 */
     u32 updateMode;
 } SdfRuntime;
 
 typedef struct SdfPackedValue {
-    u8 pad00[0xE];
+    u8 pad00[6];
+    u16 hp; /* 0x06 */
+    u8 pad08[6];
     u16 flagsAndValue;
 } SdfPackedValue;
 
@@ -84,7 +87,7 @@ typedef struct SdfChannelState {
     u8 chance; /* 0x25: hit chance in percent, >= 100 always hits */
     u16 mask; /* 0x26: candidate channel bits */
     u8 pad28[8];
-    s32 mode30; /* 0x30 */
+    u32 mode30; /* 0x30 */
     u8 pad34[4];
 } SdfChannelState;
 
@@ -627,7 +630,54 @@ u32 sdfQueryChannelBits(s32 channel, s32 queryArg, SdfPackedValue *item) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00119548);
+extern s32 func_00118D60(s32 channel, s32 queryArg, SdfPackedValue *item, u32 mode, u8 vital);
+extern void datClearUnitStatusBits(void *item, s32 mask);
+extern s32 datMoveCursorX(void *item, s32 delta);
+extern s32 datMoveCursorY(void *item, s32 delta);
+void sdfRaisePackedChannelValue(SdfPackedValue *item, u32 value);
+
+s32 func_00119548(s32 channel, s32 queryArg, SdfPackedValue *item) {
+    s32 hpDelta;
+    s32 mpDelta;
+    u32 value;
+    u32 bits;
+
+    if (queryArg != 0 && item != NULL) {
+        hpDelta = func_00118D60(channel, queryArg, item, 1, 1);
+        mpDelta = func_00118D60(channel, queryArg, item, 1, 2);
+        value = sdfQueryChannelValue(channel, queryArg, item);
+        bits = sdfQueryChannelBits(channel, queryArg, item);
+        if (hpDelta == 0 && mpDelta == 0 && value == 0 && bits == 0) {
+            return 0;
+        }
+        sdfRaisePackedChannelValue(item, value);
+        datClearUnitStatusBits(item, bits);
+        if (mpDelta != 0) {
+            datMoveCursorY(item, mpDelta);
+        }
+        if (hpDelta != 0) {
+            datMoveCursorX(item, hpDelta);
+            if (item->hp == 0) {
+                sdfRaisePackedChannelValue(item, 0x4000);
+            }
+        }
+    }
+    switch (datCommandRecords[channel].mode30) {
+    case 5:
+        ((SdfRuntime *)datGameState)->commandFlags |= 1;
+        break;
+    case 6:
+        ((SdfRuntime *)datGameState)->commandFlags |= 2;
+        break;
+    case 7:
+        ((SdfRuntime *)datGameState)->commandFlags |= 4;
+        break;
+    case 8:
+        ((SdfRuntime *)datGameState)->commandFlags |= 8;
+        break;
+    }
+    return 1;
+}
 
 void sdfSetPackedValuePreservingFlag(SdfPackedValue *item, u16 value) {
     item->flagsAndValue = (item->flagsAndValue & SDF_PACKED_FLAG) | (value & SDF_PACKED_VALUE_MASK);

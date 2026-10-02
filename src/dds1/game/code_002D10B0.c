@@ -547,7 +547,7 @@ u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height, u32 format, u8
 
 extern u8 *sdfTexSubmitImageCopy();
 
-void sdfTexSubmitPixelsForFormat(SdfTex *texture, s32 resourceWord, u8 *pixels, s32 mode) {
+u8 *sdfTexSubmitPixelsForFormat(SdfTex *texture, s32 resourceWord, u8 *pixels, s32 mode) {
     s32 width;
     s32 height;
 
@@ -558,7 +558,7 @@ void sdfTexSubmitPixelsForFormat(SdfTex *texture, s32 resourceWord, u8 *pixels, 
         width = 8;
         height = 2;
     }
-    sdfTexSubmitImageCopy(resourceWord, width, height, texture->clutFormat, pixels, mode);
+    return sdfTexSubmitImageCopy(resourceWord, width, height, texture->clutFormat, pixels, mode);
 }
 
 void sdfTexUploadSecondaryResource(SdfTex *tex) {

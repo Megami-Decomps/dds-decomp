@@ -4,6 +4,24 @@
 /* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
 enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
+typedef struct SdfTextureFileHeader {
+    u8 unk00;
+    u8 flags;
+    u8 pad02[0xE];
+    u8 unk10;
+    u8 unk11;
+    s16 width;
+    s16 height;
+    u8 pixelFormat;
+    u8 clutFormat;
+    u16 lodParameters;
+    u8 unk1A;
+    u8 clampMode;
+    s32 resourceKey;
+    s32 unk20;
+    u8 pad24[0x1C];
+} SdfTextureFileHeader;
+
 extern SdfTex *sdfResourceListHead;
 extern u8 sdfTextureReleaseQueue;
 
@@ -14,7 +32,7 @@ void sdfReleaseChipBlock(void *arg0);
 void sdfFreeMemoryFromEitherHeap(void *arg0);
 void sdfPendingQueuePush(void *arg0, void *arg1);
 void *sdfTexCreateResourcePacket(SdfTex *arg0, s32 arg1);
-void *func_002D30C8(void *arg0, s32 arg1);
+SdfTex *func_002D30C8(SdfTextureFileHeader *header, s32 mode);
 void *sdfAllocSizeClassBlock(s32 arg0);
 u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
@@ -150,7 +168,62 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
     }
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_002D30C8);
+extern SdfTex *func_002D2AB8(s32, s32, u32, u32, u32, u32);
+extern u8 func_002D2390(SdfTex *);
+extern void func_002D2A58(SdfTex *);
+extern u8 *sdfTexSubmitPixelsForFormat(SdfTex *, s32, u8 *, s32);
+extern s32 sdfTexGetStorageBitsPerPixel(s32);
+extern u8 *sdfTexSubmitImageCopy(u32, s32, s32, u32, u8 *, s32);
+
+SdfTex *func_002D30C8(SdfTextureFileHeader *header, s32 mode) {
+    SdfTex *texture;
+    u8 *pixels;
+    s32 format;
+    s32 width;
+    s32 height;
+    s32 levels;
+    u32 destination;
+    s32 bits;
+    s32 key = header->resourceKey;
+
+    if (key != 0) {
+        SdfTex *existing = sdfResourceListHead;
+        while (existing != NULL) {
+            if (existing->unk20 == key) {
+                existing->reference->refCount++;
+                return existing;
+            }
+            existing = existing->prev;
+        }
+    }
+    texture = func_002D2AB8(header->width, header->height, header->pixelFormat, header->clutFormat, header->unk11, header->unk10);
+    texture->lodParameters = header->lodParameters;
+    texture->unk1E = header->unk1A;
+    texture->clampMode = header->clampMode;
+    texture->unk20 = header->resourceKey;
+    texture->unk24 = header->unk20;
+    pixels = (u8 *)header + (header->flags & 0xF0) + sizeof(*header);
+    if (func_002D2390(texture) != 0) {
+        func_002D2A58(texture);
+        sdfTexCopyImageData(texture, pixels);
+        pixels = sdfTexSubmitPixelsForFormat(texture, sdfTexGetSecondaryResourceWord(texture), pixels, mode);
+    }
+    format = texture->pixelFormat;
+    width = texture->width;
+    height = texture->height;
+    levels = texture->maxMipLevel;
+    destination = sdfTexGetPrimaryResourceWord(texture);
+    bits = sdfTexGetStorageBitsPerPixel(format);
+    do {
+        pixels = sdfTexSubmitImageCopy(destination, width, height, format, pixels, mode);
+        levels--;
+        destination += (bits * width * height) >> 5;
+        width >>= 1;
+        height >>= 1;
+    } while (levels != -1);
+    sdfTexCreateFirstPacket(texture);
+    return texture;
+}
 
 /* Process a resource address with packet variant zero. */
 void sdfTexAcquireResourceTexture(void *resourceAddress) {

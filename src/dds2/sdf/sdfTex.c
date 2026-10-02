@@ -5,6 +5,24 @@
 /* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
 enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
+typedef struct SdfTextureFileHeader {
+    u8 unk00;
+    u8 flags;
+    u8 pad02[0xE];
+    u8 unk10;
+    u8 unk11;
+    s16 width;
+    s16 height;
+    u8 pixelFormat;
+    u8 clutFormat;
+    u16 lodParameters;
+    u8 unk1A;
+    u8 clampMode;
+    s32 resourceKey;
+    s32 unk20;
+    u8 pad24[0x1C];
+} SdfTextureFileHeader;
+
 extern SdfTex *sdfResourceListHead;
 
 void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
@@ -158,16 +176,71 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
     }
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BF78);
+extern SdfTex *func_0032B968(s32, s32, u32, u32, u32, u32);
+extern u8 func_0032B240(SdfTex *);
+extern void func_0032B908(SdfTex *);
+extern u8 *sdfTexSubmitPixelsForFormat(SdfTex *, s32, u8 *, s32);
+extern s32 sdfTexGetStorageBitsPerPixel(s32);
+extern u8 *sdfTexSubmitImageCopy(u32, s32, s32, u32, u8 *, s32);
+
+SdfTex *func_0032BF78(SdfTextureFileHeader *header, s32 mode) {
+    SdfTex *texture;
+    u8 *pixels;
+    s32 format;
+    s32 width;
+    s32 height;
+    s32 levels;
+    u32 destination;
+    s32 bits;
+    s32 key = header->resourceKey;
+
+    if (key != 0) {
+        SdfTex *existing = sdfResourceListHead;
+        while (existing != NULL) {
+            if (existing->unk20 == key) {
+                existing->reference->refCount++;
+                return existing;
+            }
+            existing = existing->prev;
+        }
+    }
+    texture = func_0032B968(header->width, header->height, header->pixelFormat, header->clutFormat, header->unk11, header->unk10);
+    texture->lodParameters = header->lodParameters;
+    texture->unk1E = header->unk1A;
+    texture->clampMode = header->clampMode;
+    texture->unk20 = header->resourceKey;
+    texture->unk24 = header->unk20;
+    pixels = (u8 *)header + (header->flags & 0xF0) + sizeof(*header);
+    if (func_0032B240(texture) != 0) {
+        func_0032B908(texture);
+        sdfTexCopyImageData(texture, pixels);
+        pixels = sdfTexSubmitPixelsForFormat(texture, sdfTexGetSecondaryResourceWord(texture), pixels, mode);
+    }
+    format = texture->pixelFormat;
+    width = texture->width;
+    height = texture->height;
+    levels = texture->maxMipLevel;
+    destination = sdfTexGetPrimaryResourceWord(texture);
+    bits = sdfTexGetStorageBitsPerPixel(format);
+    do {
+        pixels = sdfTexSubmitImageCopy(destination, width, height, format, pixels, mode);
+        levels--;
+        destination += (bits * width * height) >> 5;
+        width >>= 1;
+        height >>= 1;
+    } while (levels != -1);
+    sdfTexCreateFirstPacket(texture);
+    return texture;
+}
 
 /* Process a resource address with packet variant zero. */
 void sdfTexAcquireResourceTexture(u32 resourceAddress) {
-    func_0032BF78(resourceAddress, 0);
+    func_0032BF78((SdfTextureFileHeader *)resourceAddress, 0);
 }
 
 /* Process a resource address with packet variant one. */
 void sdfTexAcquireAlternateResourceTexture(u32 resourceAddress) {
-    func_0032BF78(resourceAddress, 1);
+    func_0032BF78((SdfTextureFileHeader *)resourceAddress, 1);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032C168);

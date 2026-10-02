@@ -189,9 +189,9 @@ s32 itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1
     return func_001968C0(&args);
 }
 
-void itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
+s32 itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
                    s32 channel2, s32 channel3, s32 encodedText, s32 unusedSub) {
-    itfDrawEncodedTextStream(x, y, depth, channel0 & 0xff, channel1 & 0xff,
+    return itfDrawEncodedTextStream(x, y, depth, channel0 & 0xff, channel1 & 0xff,
                   channel2 & 0xff, channel3 & 0xff, encodedText, 0);
 }
 
@@ -373,7 +373,57 @@ void itfAttachGlyph12x16(u64 x, u64 y, s32 depth, u64 colors,
     frFontLinkGlyph(parent, glyph, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00197C40);
+extern s32 func_001961B0(u16 textId, s32 bank, s32 mode);
+extern s32 func_00195E60(s32 text);
+extern s32 func_00195ED8(s32 line, s32 text);
+extern void frFontMoveChainTo(s32 x, s32 y, s32 text);
+
+s32 func_00197C40(s32 x, s32 y, s32 depth, u16 textId, s32 bank, s32 flags) {
+    s32 text = func_001961B0(textId, bank, 0);
+    u32 mode;
+    s32 handle;
+
+    if (text == 0) {
+        return 0;
+    }
+    mode = (u16)flags;
+    switch (mode) {
+    case 1:
+        frFontClearFlagBits(4);
+        break;
+    case 2:
+        frFontAddSharedGlyphFlags(8);
+        break;
+    case 4:
+        frFontAddSharedGlyphFlags(0x20);
+        break;
+    }
+    handle = itfDrawColor(x, y, depth, 1, 0, 0, 0x80, text, 0);
+    if (flags & 0x10000) {
+        s32 maxWidth = 0;
+        s32 i;
+        s32 width;
+        for (i = 0; i < func_00195E60(handle); i++) {
+            width = func_00195ED8(i, handle);
+            if (maxWidth < width) {
+                maxWidth = width;
+            }
+        }
+        frFontMoveChainTo(x - maxWidth / 2, y, handle);
+    }
+    switch (mode) {
+    case 1:
+        frFontAddSharedGlyphFlags(4);
+        break;
+    case 2:
+        frFontClearFlagBits(8);
+        break;
+    case 4:
+        frFontClearFlagBits(0x20);
+        break;
+    }
+    return handle;
+}
 
 s32 itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 textId, s32 flags) {
     s32 result = 0;

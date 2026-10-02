@@ -407,7 +407,57 @@ void itfCopyTextSegment(char *src, char *dst, s32 segmentIndex) {
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019FA08);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019FC38);
+extern s32 func_0019DE70(u16 textId, s32 bank, s32 mode);
+extern s32 func_0019DB30(s32 text);
+extern s32 func_0019DBA8(s32 line, s32 text);
+extern void frFontMoveChainTo(s32 x, s32 y, s32 text);
+
+s32 func_0019FC38(s32 x, s32 y, s32 depth, u16 textId, s32 bank, s32 flags) {
+    s32 text = func_0019DE70(textId, bank, 0);
+    u32 mode;
+    s32 handle;
+
+    if (text == 0) {
+        return 0;
+    }
+    mode = (u16)flags;
+    switch (mode) {
+    case 1:
+        frFontClearFlagBits(4);
+        break;
+    case 2:
+        frFontAddSharedGlyphFlags(8);
+        break;
+    case 4:
+        frFontAddSharedGlyphFlags(0x20);
+        break;
+    }
+    handle = itfDrawPlainEncodedTextWithByteColors(x, y, depth, 1, 0, 0, 0x80, text, 0);
+    if (flags & 0x10000) {
+        s32 maxWidth = 0;
+        s32 i;
+        s32 width;
+        for (i = 0; i < func_0019DB30(handle); i++) {
+            width = func_0019DBA8(i, handle);
+            if (maxWidth < width) {
+                maxWidth = width;
+            }
+        }
+        frFontMoveChainTo(x - maxWidth / 2, y, handle);
+    }
+    switch (mode) {
+    case 1:
+        frFontAddSharedGlyphFlags(4);
+        break;
+    case 2:
+        frFontClearFlagBits(8);
+        break;
+    case 4:
+        frFontClearFlagBits(0x20);
+        break;
+    }
+    return handle;
+}
 
 s32 itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 textId, s32 flags) {
     s32 result = 0;
