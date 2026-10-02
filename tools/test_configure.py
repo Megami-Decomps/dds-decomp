@@ -11,7 +11,7 @@ import types
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -114,6 +114,10 @@ class ObjdiffProgressTests(unittest.TestCase):
                 version: json.loads((Path(tmp) / "build" / version / "objdiff.json").read_text())
                 for version in self.units
             }
+            self.primary_versions = {
+                version: json.loads((Path(tmp) / "build" / version / "progress" / "objdiff.json").read_text())
+                for version in self.units
+            }
 
     def test_combined_config_retains_every_unit_and_object_path(self) -> None:
         rows = [row for rows in self.units.values() for row in rows]
@@ -152,6 +156,49 @@ class ObjdiffProgressTests(unittest.TestCase):
                 )
                 self.assertEqual(actual["metadata"], {"progress_categories": [category]})
                 self.assertNotIn("complete", actual)
+
+    def test_primary_configs_keep_all_game_units_and_exclude_sdk_and_vu1(self) -> None:
+        for version, config in self.primary_versions.items():
+            self.assertEqual(config["progress_categories"], [{"id": "game", "name": "Atlus game/engine"}])
+            # Keep both C and unfinished EE game units, including VU0 helpers.
+            expected = [self.units[version][index] for index in (0, 3, 4)]
+            self.assertEqual(len(config["units"]), len(expected))
+            for actual, row in zip(config["units"], expected):
+                self.assertEqual(actual["name"], row["name"].split("/", 2)[2])
+                self.assertEqual(actual["target_path"], "../../../" + row["target"])
+                self.assertEqual(
+                    actual.get("base_path"), "../../../" + row["base"] if row["base"] else None
+                )
+                self.assertEqual(actual["metadata"], {"progress_categories": ["game"]})
+                self.assertNotIn("complete", actual)
+            self.assertEqual(len(self.versions[version]["units"]), 5)
+
+    def test_report_targets_use_matching_projects_and_object_dependencies(self) -> None:
+        writer = Mock()
+        configure.write_objdiff_reports(writer, self.units)
+        builds = {call.args[0]: call for call in writer.build.call_args_list}
+        all_objects = sorted({p for rows in self.units.values() for row in rows
+                              for p in (row["target"], row["base"]) if p})
+        self.assertEqual(builds["objdiff"].args, ("objdiff", "phony", all_objects))
+        self.assertEqual(builds["report.json"].kwargs, {
+            "implicit": all_objects + ["objdiff.json"], "variables": {"project": "."},
+        })
+        expected_reports = {"report.json"}
+        for version, rows in self.units.items():
+            for selected, project, out in (
+                (rows, f"build/{version}", f"build/{version}/report.all.json"),
+                ([rows[index] for index in (0, 3, 4)], f"build/{version}/progress", f"build/{version}/report.json"),
+            ):
+                expected_reports.add(out)
+                objects = sorted({p for row in selected for p in (row["target"], row["base"]) if p})
+                self.assertEqual(builds[out].args, (out, "report"))
+                self.assertEqual(builds[out].kwargs, {
+                    "implicit": objects + [f"{project}/objdiff.json"], "variables": {"project": project},
+                })
+        self.assertEqual(set(builds["report"].args[2]), expected_reports)
+        writer.rule.assert_called_once_with(
+            "report", f"{configure.OBJDIFF} report generate -p $project -o $out", description="objdiff report $out"
+        )
 
 
 class ProgressLabelTests(unittest.TestCase):
