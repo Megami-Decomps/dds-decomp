@@ -809,7 +809,50 @@ s32 mnuStaffPickRoll(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00260208", brsSelectLevelBonusMode);
+typedef struct BrsLevelBonusSource {
+    u8 pad00[0x16];
+    s8 unitLevels[5]; /* 0x16 */
+} BrsLevelBonusSource;
+
+typedef struct BrsLevelBonusWork {
+    u8 pad00[0x1588];
+    s32 levelBonusMode;      /* 0x1588 */
+    s32 selectedUnitIndex;   /* 0x158C */
+} BrsLevelBonusWork;
+
+void brsSelectLevelBonusMode(BrsLevelBonusSource *source, BrsLevelBonusWork *work) {
+    s32 eligible[5];
+    s32 eligibleCount;
+    s32 mode;
+    s32 i;
+
+    work->levelBonusMode = 0;
+    if ((effMiscRand(0) & 1) > 0) {
+        return;
+    }
+
+    mode = mnuStaffPickRoll();
+    work->selectedUnitIndex = -1;
+    work->levelBonusMode = mode;
+    if (mode != 4) {
+        return;
+    }
+
+    eligibleCount = 0;
+    for (i = 0; i < 5; i++) {
+        if (source->unitLevels[i] + 1 < 99) {
+            eligible[eligibleCount] = i;
+            eligibleCount++;
+        }
+    }
+
+    if (eligibleCount == 0) {
+        work->levelBonusMode = 2;
+        return;
+    }
+
+    work->selectedUnitIndex = eligible[(u32)effMiscRand(0) % (u32)eligibleCount];
+}
 
 extern void mnuClearEntries(s32 *window);
 extern void mnuReleasePartyIconBundles(s32 window);
