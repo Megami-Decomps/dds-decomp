@@ -78,7 +78,7 @@ s32 func_0010BD08(s32 header, s32 procedureSection, s32 procedures, s32 labels, 
     return bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, 0);
 }
 
-extern void evtPrintDeveloperConsoleMessage(char *, u32);
+extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern void sdfReleaseChipBlock(void *);
 extern void itfMesDestroyWindowIfPresent(s32);
 extern void func_002D0918(void *);
