@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf.h"
 
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfAllocPacketAligned(s32);
@@ -62,6 +63,7 @@ typedef struct TextStream {
     s8 unk1C;        /* 0x1C: set once an opcode has run */
     s8 unk1D;        /* 0x1D */
 } TextStream;
+extern s32 func_0019EDC0(TextStream *args);
 
 s32 itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub);
 
@@ -81,6 +83,7 @@ typedef struct MemOut {
     void *third; /* 0x8 */
 } MemOut;
 
+
 /* 8-byte node header; payload follows (func_00198248/itfEnqueueMemNode). */
 typedef struct MemNode {
     u32 index;             /* 0x0 */
@@ -89,7 +92,7 @@ typedef struct MemNode {
 
 /* Allocation handle precedes the first queue node by four bytes. */
 typedef struct MemRingHeader {
-    u32 allocation;
+    SdfAllocation *allocation;
     MemNode first;
 } MemRingHeader;
 
@@ -229,7 +232,7 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EC00);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EDC0);
 
-void itfInitTextDrawArgs(u8 *encodedText, TextSub *sub) {
+s32 itfInitTextDrawArgs(u8 *encodedText, TextSub *sub) {
     TextStream args;
     args.x = 0;
     args.y = 0;
@@ -243,7 +246,7 @@ void itfInitTextDrawArgs(u8 *encodedText, TextSub *sub) {
     args.offset = 0;
     args.unk1C = 1;
     args.unk1D = 1;
-    func_0019EDC0(&args);
+    return func_0019EDC0(&args);
 }
 
 u64 frFontBuildColoredGlyphWithSharedFlags(u64 x, u64 y, s32 depth, s32 alt, u64 measureFlag, u64 entryFlag, u64 colors, u64 source) {
@@ -584,14 +587,14 @@ u32 func_001A0098(u32 object) {
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A00B8);
 
-extern s32 sdfAllocGeneralBlock(s32);
-extern u8 *sdfResourceRetainAddress(s32);
+extern SdfAllocation *sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(SdfAllocation *);
 extern void *memcpy(void *, const void *, u32);
 
 /* The header before each payload forms a circular free-node list. */
 u8 *itfCreateMemNodeRing(s32 payload, s32 count) {
-    s32 handle = sdfAllocGeneralBlock((payload + 8) * (count + 1) + 4);
-    u8 *list = sdfResourceRetainAddress(handle);
+    SdfAllocation *handle = sdfAllocGeneralBlock((payload + 8) * (count + 1) + 4);
+    u8 *list = (u8 *)sdfResourceRetainAddress(handle);
     MemNode *node;
     MemNode *next;
     s32 i = 0;
@@ -1114,7 +1117,36 @@ void mnuReportCampProcessHalted(void) {
     func_0035B6E0(D_00414C50);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1858);
+
+extern s32 D_003B44B0[];
+
+UiSprite *func_001A1858(s32 kind, u32 value) {
+    SdfAllocation *allocation = sdfAllocGeneralBlock(sizeof(UiSprite));
+    UiSprite *work = (UiSprite *)sdfResourceRetainAddress(allocation);
+
+    work->kind = kind;
+    work->allocation = allocation;
+    allocation = sdfAllocGeneralBlock(D_003B44B0[kind]);
+    work->payloadAllocation = allocation;
+    work->payload = (u32 *)sdfResourceRetainAddress(allocation);
+    if (value != 0) {
+        switch (kind) {
+        case 6:
+            *work->payload = value;
+            break;
+        case 7:
+            *work->payload = value;
+            break;
+        case 8:
+            *work->payload = value;
+            break;
+        case 9:
+            *work->payload = value;
+            break;
+        }
+    }
+    return work;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0019E138", D_00414C50);
 
@@ -1129,3 +1161,4 @@ INCLUDE_SDATA(const s32, "game/code_0019E138", itfFontTestScriptTask);
 INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436598);
 
 INCLUDE_SDATA(const s32, "game/code_0019E138", D_004365A0);
+

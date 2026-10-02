@@ -1,5 +1,8 @@
 #include "common.h"
+#include "itf.h"
 #include "btl_state.h"
+
+extern s32 func_001ABB10(BtlUnit *, s32);
 
 typedef struct UiQuadColor {
     s32 red;
@@ -288,15 +291,6 @@ extern void itfSendTablePacket(s32 arg0, s32 arg1, s32 arg2);
 
 extern void itfQueueTextureBoundQuadPacket(void *arg0, void *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
-typedef struct UiSprite {
-    u8 pad0[0x10];
-    s32 left;
-    s32 top;
-    s32 right;
-    s32 bottom;
-    s32 unk20;
-    s32 unk24;
-} UiSprite;
 typedef struct UiPanelPlacement {
     UiSprite *frame;
     UiSprite *sprite;
@@ -322,7 +316,7 @@ typedef struct UiPanel {
     UiPanelPlacement place;
 } UiPanel;
 extern s32 func_0019DBA8();
-extern UiSprite *func_001A1858();
+extern UiSprite *func_001A1858(s32, u32);
 extern void itfSetPanelLayoutAndNotify();
 extern void itfPanelUpdateValuesAndNotify();
 
@@ -429,7 +423,7 @@ void itfMesInitializePanelPlacementSprite(UiPanel *panel) {
     }
     top = pos->y + place->bounds[1];
     itfSetPanelLayoutAndNotify(place->sprite, pos->x + place->bounds[0], top, pos->x + place->bounds[2], pos->y + place->bounds[3], panel->unkC);
-    place->sprite->unk24 = top;
+    place->sprite->screenY = top;
     itfPanelUpdateValuesAndNotify(place->sprite, place->unk1C, place->unk20, place->unk24, 0);
     panel->flags = (panel->flags & ~0x300) | 0x100;
 }
@@ -1656,7 +1650,46 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ABB10);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ABCC0);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ABDE8);
+s32 func_001ABDE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
+                  BtlUnit *third, s32 command) {
+    BtlUnit snapshot = *base;
+    s32 totalMaxHp = 0;
+    s32 count = 0;
+
+    if (first != NULL) {
+        if ((first->flags & 0x100) == 0) {
+            return 3;
+        }
+        if ((first->conditionFlags & 0x2A0E) != 0) {
+            return 3;
+        }
+        totalMaxHp = *(u16 *)&first->pad126[2];
+        count = 1;
+    }
+    if (second != NULL) {
+        if ((second->flags & 0x100) == 0) {
+            return 3;
+        }
+        if ((second->conditionFlags & 0x2A0E) != 0) {
+            return 3;
+        }
+        count++;
+        totalMaxHp += *(u16 *)&second->pad126[2];
+    }
+    if (third != NULL) {
+        if ((third->flags & 0x100) == 0) {
+            return 3;
+        }
+        if ((third->conditionFlags & 0x2A0E) != 0) {
+            return 3;
+        }
+        count++;
+        totalMaxHp += *(u16 *)&third->pad126[2];
+    }
+    /* The shared DDS2 layout leaves max HP at +0x128 in pad126. */
+    *(u16 *)&snapshot.pad126[2] = totalMaxHp / count;
+    return func_001ABB10(&snapshot, command);
+}
 
 s8 btlGetActorIndexedSignedValue(UiObject *object, s32 index) {
     if (index == 0 && (object->flags & 0x400) != 0) {
@@ -2560,6 +2593,8 @@ void func_001B1F78(void) {
 
 
 extern f32 func_001B20C8(u8 *, u8 *, s32);
+extern s32 func_001B39E8(u32);
+extern u8 *datBattleParameters;
 
 /* Scale the enemy's normal EP reward; flag 0x2000 multiplies it by 100. */
 s32 btlCalculateEnemyExperienceReward(u8 *acquirer, u8 *enemy) {
@@ -2588,7 +2623,36 @@ s32 btlCalculateEnemyExperienceReward(u8 *acquirer, u8 *enemy) {
     return ep;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B20C8);
+f32 func_001B20C8(u8 *acquirer, u8 *enemy, s32 rewardKind) {
+    s32 level;
+    s32 difference;
+    f32 factor;
+
+    if (*(u16 *)(datBattleSceneRecords +
+                ((BtlState *)btlGetRuntime())->battleMode * 40 + 0x20) & 0x400) {
+        btlBossDebugPrintf("btl:ep hosei off\n");
+        return 1.0f;
+    }
+    if (acquirer == NULL) {
+        level = func_001B39E8(4);
+    } else {
+        level = ((UiObject *)acquirer)->stat134;
+    }
+    if (level > 60) {
+        level = 60;
+    }
+    difference = level - ((UiObject *)enemy)->stat134;
+    if (difference > 15) {
+        difference = 15;
+    } else if (difference < -15) {
+        difference = -15;
+    }
+    factor = *(f32 *)(datBattleParameters + 0x974 +
+                     ((15 - difference) * 2 + rewardKind) * sizeof(f32));
+    btlBossDebugPrintf("btl:ep[lv=%.3f(%d,%d)]\n",
+                       factor, difference, rewardKind);
+    return factor;
+}
 
 /* Read the money reward with the same eligibility and 100-fold table flag. */
 s32 btlGetEnemyMoney(u8 *acquirer, u8 *enemy) {
@@ -2843,7 +2907,7 @@ s32 func_001B32F8(s32 object, s32 *choices) {
                 continue;
             }
         }
-        if (func_001ABB10(object, value) != 0) {
+        if (func_001ABB10((BtlUnit *)object, value) != 0) {
             continue;
         }
         if (choices != NULL) {
@@ -3075,8 +3139,8 @@ s32 btlAverageMaskedActorStat(s32 mask, s8 skipDown) {
     return 1;
 }
 
-void func_001B39E8(u32 arg0) {
-    btlAverageMaskedActorStat(arg0, 1);
+s32 func_001B39E8(u32 mask) {
+    return btlAverageMaskedActorStat(mask, 1);
 }
 
 void func_001B3A00(u32 arg0) {

@@ -151,11 +151,14 @@ typedef struct MnuShootingWork {
     MnuEffectWork *effectWork;
     u8 pad24[0x34];
     s32 state;
-    u8 pad5C[4];
+    s32 (*initialize)(u8 *work);
     s32 (*update)(u8 *work);
     u8 pad64[4];
     u32 unk68;
-    u8 pad6C[8];
+    u32 unk6C;
+    u32 unk70Bit0 : 1;
+    u32 initialized : 1;
+    u32 unk70Rest : 30;
     u32 unk74;
     u8 pad78[0x1E];
     u16 unk96;
@@ -186,6 +189,7 @@ extern MnuEffectRecord *D_00438930;
 extern MnuShootingWork *D_0043891C;
 
 extern s32 func_00317FE0(MnuShootingWork *);
+extern void func_00318570(MnuShootingWork *);
 
 extern u32 D_00438918;
 
@@ -194,6 +198,7 @@ extern s32 D_00435BB0;
 extern s16 mnuMovieTaskState;
 
 extern s32 (*D_0040ABF0[])(u8 *work);
+extern s32 (*D_0040ABE0[])(u8 *work);
 
 extern void mdlLoadViewerPackage(s32 source, s32 destination, s32 flags, s32 packageId, s32 variant);
 
@@ -363,7 +368,26 @@ INCLUDE_ASM(const s32, "game/code_00316E08", func_00317AD0);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317E48);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00317FE0);
+/* Advance initialization; completing state zero releases the section resources. */
+s32 func_00317FE0(MnuShootingWork *work) {
+    s32 state;
+
+    if (work->initialize((u8 *)work) != 0) {
+        state = work->state;
+        if (state == 0) {
+            func_00318570(work);
+            state = work->state;
+            work->initialized = 1;
+            work->update = D_0040ABF0[0];
+        }
+        if (state == -1) {
+            return -1;
+        }
+        work->initialize = D_0040ABE0[state];
+    }
+    return 1;
+}
+
 /* Run the current update; on a nonzero result, refresh it from the state table.
    The dispatch table keeps its original opaque byte-work callback signature. */
 u32 func_00318068(MnuShootingWork *work) {
