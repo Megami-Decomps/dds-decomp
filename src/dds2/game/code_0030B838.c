@@ -5,8 +5,17 @@
 
 extern s32 fldLocalMapCameraObject;
 
-extern SdfQuad D_00400970;
-extern SdfQuad D_00400980;
+typedef struct {
+    f32 v[4];
+} SdfCameraVector;
+
+extern SdfCameraVector D_00400970;
+extern SdfCameraVector D_00400980;
+extern f32 D_004008E0[][4];
+extern f32 D_00400920[][4];
+extern s8 D_004388C1;
+extern void sdfQuatSlerp(f32 *, f32 *, f32 *, f32);
+extern void sdfQuaternionNormalize(f32 *);
 
 extern void effObjSetInnerFirstVec(s32, void *);
 
@@ -136,8 +145,8 @@ typedef struct SdfSlotSet {
     u8 pad00[0xC];
     u32 slot[25];
 } SdfSlotSet;
-extern SdfQuad D_00400990;
-extern SdfQuad D_004009A0;
+extern SdfCameraVector D_00400990;
+extern SdfCameraVector D_004009A0;
 
 extern s32 mnuCreateListState(s32, s32, s32);
 extern void *func_00328D68(s32);
@@ -272,7 +281,34 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BCF0);
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BD10);
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BED8);
+s32 func_0030BED8(void) {
+    f32 t;
+    s32 index = D_004388C1;
+
+    if (D_004388C0 != 0) {
+        t = (45 - D_004388C0) / 45.0f;
+        t = 1.0f - t * t;
+        if (t > 1.0f) t = 1.0f;
+        D_00400970.v[0] = D_00400990.v[0] * (1.0f - t) + D_004008E0[index][0] * t;
+        D_00400970.v[1] = D_00400990.v[1] * (1.0f - t) + D_004008E0[index][1] * t;
+        D_00400970.v[2] = D_00400990.v[2] * (1.0f - t) + D_004008E0[index][2] * t;
+        D_00400970.v[3] = 1.0f;
+        sdfQuatSlerp(D_00400980.v, D_004009A0.v, D_00400920[index], t);
+        if ((s8)(D_004388C0 + 1) >= 45) D_004388C0 = 0;
+        else D_004388C0++;
+    } else {
+        D_00400970.v[0] = D_004008E0[index][0];
+        D_00400970.v[1] = D_004008E0[index][1];
+        D_00400970.v[2] = D_004008E0[index][2];
+        D_00400970.v[3] = D_004008E0[index][3];
+        sdfQuaternionNormalize(D_00400920[index]);
+        D_00400980.v[0] = D_00400920[index][0];
+        D_00400980.v[1] = D_00400920[index][1];
+        D_00400980.v[2] = D_00400920[index][2];
+        D_00400980.v[3] = D_00400920[index][3];
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C0C0);
 

@@ -78,11 +78,19 @@ extern void sdfLatchBaseVectorsForSelection(void);
 
 extern s32 fldLocalMapCameraObject;
 
-extern SdfQuad D_003900A0;
+typedef struct {
+    f32 v[4];
+} SdfCameraVector;
 
-extern SdfQuad D_003900B0;
-extern SdfQuad D_003900C0;
-extern SdfQuad D_003900D0;
+extern SdfCameraVector D_003900A0;
+extern SdfCameraVector D_003900B0;
+extern SdfCameraVector D_003900C0;
+extern SdfCameraVector D_003900D0;
+extern f32 D_00390010[][4];
+extern f32 D_00390050[][4];
+extern s8 D_003BD271;
+extern void sdfQuatSlerp(f32 *, f32 *, f32 *, f32);
+extern void sdfQuaternionNormalize(f32 *);
 
 extern void effObjSetInnerFirstVec(s32, void *);
 
@@ -178,7 +186,34 @@ void func_002C3D90(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C3DB0);
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C3F78);
+s32 func_002C3F78(void) {
+    f32 t;
+    s32 index = D_003BD271;
+
+    if (D_003BD270 != 0) {
+        t = (45 - D_003BD270) / 45.0f;
+        t = 1.0f - t * t;
+        if (t > 1.0f) t = 1.0f;
+        D_003900A0.v[0] = D_003900C0.v[0] * (1.0f - t) + D_00390010[index][0] * t;
+        D_003900A0.v[1] = D_003900C0.v[1] * (1.0f - t) + D_00390010[index][1] * t;
+        D_003900A0.v[2] = D_003900C0.v[2] * (1.0f - t) + D_00390010[index][2] * t;
+        D_003900A0.v[3] = 1.0f;
+        sdfQuatSlerp(D_003900B0.v, D_003900D0.v, D_00390050[index], t);
+        if ((s8)(D_003BD270 + 1) >= 45) D_003BD270 = 0;
+        else D_003BD270++;
+    } else {
+        D_003900A0.v[0] = D_00390010[index][0];
+        D_003900A0.v[1] = D_00390010[index][1];
+        D_003900A0.v[2] = D_00390010[index][2];
+        D_003900A0.v[3] = D_00390010[index][3];
+        sdfQuaternionNormalize(D_00390050[index]);
+        D_003900B0.v[0] = D_00390050[index][0];
+        D_003900B0.v[1] = D_00390050[index][1];
+        D_003900B0.v[2] = D_00390050[index][2];
+        D_003900B0.v[3] = D_00390050[index][3];
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4160);
 
