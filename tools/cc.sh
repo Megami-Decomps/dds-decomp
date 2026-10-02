@@ -19,13 +19,16 @@ case $in in /*) ;; *) in="$PWD/$in" ;; esac
 case $out in /*) ;; *) out="$PWD/$out" ;; esac
 version=${DDS_VERSION:-dds1}
 ee="$root/tools/compilers/ee-gcc2.96"
+cc1="$ee/lib/gcc-lib/ee/2.96-ee-001003-1/cc1"
 # Pinned 32-bit glibc (tools/download_tools.py) unless overridden.
 [ -z "$DDS_I386_LIBDIR" ] && [ -f "$root/tools/glibc32/libc.so.6" ] && DDS_I386_LIBDIR="$root/tools/glibc32"
-# ee-gcc 2.96 hashes heap addresses (CSE), so under ASLR a fragile function
-# can compile differently from run to run. Run it with a fixed address-space
-# layout (setarch -R), as configure.py's build rules do, unless DDS_ALLOW_ASLR is set.
+# download_tools.py gives GCC's garbage collector a deterministic arena under
+# normal ASLR. Keep setarch as a fallback for a manually installed compiler.
 aslr=
-[ -z "$DDS_ALLOW_ASLR" ] && command -v setarch >/dev/null && aslr="setarch $(uname -m) -R"
+patched_sha=d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1
+if ! grep -qx "$patched_sha" "$cc1.aslr-fixed" 2>/dev/null; then
+    [ -z "$DDS_ALLOW_ASLR" ] && command -v setarch >/dev/null && aslr="setarch $(uname -m) -R"
+fi
 run() {
     if [ -n "$DDS_I386_LIBDIR" ]; then
         $aslr "$DDS_I386_LIBDIR/ld-linux.so.2" --library-path "$DDS_I386_LIBDIR" "$@"
@@ -60,7 +63,7 @@ if [ -n "$canon" ]; then
     unit_flags=$(sed -n "s|^$rel[[:space:]]\{1,\}\([^#]*\).*|\1|p" "config/$version/cflags.txt" 2>/dev/null)
     flags="$flags $unit_flags"
 fi
-run "$ee/lib/gcc-lib/ee/2.96-ee-001003-1/cc1" \
+run "$cc1" \
     -D__GNUC__=2 -D__GNUC_MINOR__=96 -D__GNUC_PATCHLEVEL__=0 \
     -Dmips -DMIPSEL -DR5900 -D_mips -D_MIPSEL -D_R5900 -D__ee__ \
     -D__mips__ -D__MIPSEL__ -D__R5900__ -D__mips -D__MIPSEL -D__R5900 -D__OPTIMIZE__ \
