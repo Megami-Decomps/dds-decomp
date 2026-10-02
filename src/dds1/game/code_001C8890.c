@@ -5142,8 +5142,6 @@ void btlPrepareRandomizedActionCameraPose(CameraPoseAction *action, CameraPoseTr
     }
 }
 
-extern void func_001DB698(u8 *);
-
 void btlAimEffectPoseAtUnit(u8 *actor) {
     u8 *object = *(u8 **)(*(u8 **)(actor + 0xF4) + 0x18);
     if ((*(u32 *)(object + 0x110) & 2) != 0) {

@@ -66,8 +66,12 @@ typedef struct BattleController {
     SceneTask *groupSecondary[45];
     SceneTask *groupTertiary[15];
     SceneTask *groupHandles[8];
-    u8 pad_44C[0x164];
+    u8 pad_44C[0x40];
+    SceneTask *currentTask;
+    u8 pad_490[0x120];
     s32 (*sceneCallback)();
+    u8 pad_5B4[0x44];
+    void (*completionHook)(void);
 } BattleController;
 
 extern s32 btlCountTasksForOwner(s64);
@@ -760,7 +764,53 @@ s32 fldGetSceneGroupEntry(s32 index) {
     return *(s32 *)(fldGetSceneGroupResource(*(u8 *)(context + 0x2D4)) + index * 4);
 }
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C8330);
+extern s32 func_001A8188(void);
+extern void btlDispatchStateHandler();
+
+/* Advance one scene group task after both scene gates have opened. */
+void func_001C8330(void) {
+    BattleController *scene = (BattleController *)btlGetRuntime();
+    SceneTask *task;
+
+    if ((scene->flags & 4) != 0) {
+        if ((scene->flags & 8) != 0) {
+            if ((scene->flags & 0x800) != 0) {
+                return;
+            }
+            if ((scene->flags & 0x400) != 0) {
+                return;
+            }
+            if (func_001A8188() != 0) {
+                scene->flags |= 0x800;
+                return;
+            }
+            if (scene->completionHook != 0) {
+                scene->completionHook();
+            }
+            task = scene->groupHandles[0];
+            if (task != 0) {
+                if (task->state != 2) {
+                    return;
+                }
+                scene->currentTask = task;
+                task->flags |= 0x40;
+                btlDispatchStateHandler(task, 3);
+                scene->flags &= ~8;
+            } else if (fldAreSceneSlotsFinished() != 0) {
+                scene->flags |= 0x400;
+            } else {
+                task = *(SceneTask **)fldGetSceneGroupResource(*(u8 *)((u8 *)scene + 0x2D4));
+                if (task == 0 || (task->actor->flags & 0xE0) != 0 || task->state != 2 ||
+                    (task->actor->flags & 0x30400000) != 0) {
+                    return;
+                }
+                scene->currentTask = task;
+                btlDispatchStateHandler(task, 3);
+                scene->flags &= ~8;
+            }
+        }
+    }
+}
 
 void fldClearSceneSlotsAndGroups(void) {
     BattleController *scene = (BattleController *)btlGetRuntime();
