@@ -121,6 +121,12 @@ typedef struct GridAngleTable {
     s32 mirrored; /* 0x04 */
 } GridAngleTable;
 
+typedef struct GridFlushTable {
+    s32 fadeOutDuration; /* 0x00 */
+    s32 holdDuration;    /* 0x04 */
+    s32 fadeInDuration;  /* 0x08 */
+} GridFlushTable;
+
 typedef struct GridAngleSlot {
     u8 pad00[0x20];
     GridAngleTable *table; /* 0x20 */
@@ -380,7 +386,80 @@ s32 func_003075D8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307710);
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003078A8);
+/* Apply the FLUSH_01 three-phase color fade while contracting the grid bounds. */
+s32 func_003078A8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
+    GridFlushTable *table;
+    s32 phases[3];
+    s32 deltas[2];
+    s32 *dimensionOut = (s32 *)((u8 *)out + 4);
+    s32 totalDuration;
+    s32 numerator;
+    s32 denominator;
+    u32 *sourceColor;
+    u32 *destColor;
+    s32 i = 0;
+
+    table = (GridFlushTable *)owner->slot->table;
+    totalDuration = table->fadeOutDuration;
+    totalDuration += table->fadeInDuration;
+    totalDuration += table->holdDuration;
+    deltas[0] = (rectangle->right - rectangle->left) << 4;
+    deltas[1] = (rectangle->bottom - rectangle->top) << 3;
+    {
+        s32 fractionalMask = 0xFFFF;
+        for (; i < 2; i++) {
+            s32 delta = deltas[i];
+            s32 magnitude = delta < 0 ? -delta : delta;
+            s32 product = magnitude * owner->angle;
+            s32 negative = 0;
+            s32 scaled;
+
+            if (product < 0) {
+                negative++;
+            }
+            /* Signed fixed-point division rounds toward zero. */
+            scaled = (product + negative * fractionalMask) >> 16;
+            if (delta > 0) {
+                dimensionOut[i] = delta - scaled;
+            } else {
+                dimensionOut[i] = delta + scaled;
+            }
+        }
+    }
+
+    phases[0] = (table->fadeOutDuration << 16) / totalDuration;
+    phases[1] = (table->holdDuration << 16) / totalDuration;
+    phases[2] = (table->fadeInDuration << 16) / totalDuration;
+
+    if (phases[1] + phases[2] < owner->angle) {
+        numerator = phases[0] - (owner->angle - (phases[1] + phases[2]));
+        denominator = phases[0];
+    } else if (phases[2] < owner->angle) {
+        destColor = (u32 *)((u8 *)dimensionOut + 0x10);
+        sourceColor = rectangle->colors;
+        for (i = 3; i >= 0; i--, sourceColor++, destColor++) {
+            *destColor = *sourceColor;
+        }
+        return 0x10000 / totalDuration;
+    } else {
+        numerator = owner->angle;
+        denominator = phases[2];
+    }
+
+    destColor = (u32 *)((u8 *)dimensionOut + 0x10);
+    sourceColor = rectangle->colors;
+    {
+        s32 colorMask = -0x100;
+
+        for (i = 3; i >= 0; i--, sourceColor++, destColor++) {
+            u32 color = *sourceColor;
+            s32 lowByte = *(u8 *)sourceColor;
+
+            *destColor = (color & colorMask) | (lowByte * numerator / denominator);
+        }
+    }
+    return 0x10000 / totalDuration;
+}
 
 /* Contract the grid bounds and fade each packed color's low byte as the angle advances. */
 s32 func_00307A68(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
