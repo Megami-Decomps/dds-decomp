@@ -15,8 +15,6 @@ extern void mnuDestroyMovieMenuSelectionList(void);
 
 extern s16 D_003E3792[];
 
-/* Sprite table entry: graphic slot in the work area, draw parameter, offsets */
-typedef struct { s16 gfx; s16 unk2; s16 x; s16 y; } SprEntry;
 typedef struct { s32 unk0; s32 gfx[1]; } SprWork;
 
 /* View of the sprite work area used by the list and handle helpers. */
@@ -34,18 +32,32 @@ typedef struct SpriteMenuList {
     void (*callback)(void); /* 0x2C */
 } SpriteMenuList;
 
-extern SprEntry D_003E3790[];
+/* Sprite rows: graphic slot, draw parameter, x offset, y offset. */
+extern s16 D_003E3790[][4];
 
 s32 mnuSpriteGraphicHandle(u32 index) {
     SprWork *work = (SprWork *)mnuMovieMenuState;
-    return work->gfx[D_003E3790[index].gfx];
+    return work->gfx[D_003E3790[index][0]];
 }
 
 s16 mnuSpriteDrawParam(u32 index) {
     return D_003E3792[index * 4];
 }
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", mnuDrawSprite);
+extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
+
+void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode,
+                   s32 spriteIndex, s32 drawContext) {
+    func_00306CD0((x + D_003E3790[spriteIndex][2]) << 4,
+                  (y + D_003E3790[spriteIndex][3]) << 3,
+                  depth,
+                  (u32)((f32)alpha * 256.0f * 0.0078125f),
+                  drawMode,
+                  ((SprWork *)mnuMovieMenuState)
+                      ->gfx[D_003E3790[spriteIndex][0]],
+                  D_003E3790[spriteIndex][1],
+                  drawContext);
+}
 
 extern s32 mnuCreateListState(s32, s32, s32);
 
