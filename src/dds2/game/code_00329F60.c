@@ -626,7 +626,45 @@ SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 max
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B6B0);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B800);
+/* Allocate a texture head for a 0x20-byte (kind 0) or 0x10-byte (kind 2/10) unit; types 19/27 use unit*8 bytes and 0x20 rows, 20/36/44 use 0x40 bytes and 8 rows. */
+SdfTexHead *func_0032B800(s32 type, s32 kind) {
+    SdfTexHead *head = NULL;
+    s32 unit;
+    s32 size;
+    s16 height;
+
+    switch (kind) {
+    case 0:
+        unit = 0x20;
+        break;
+    case 2:
+    case 10:
+        unit = 0x10;
+        break;
+    default:
+        return NULL;
+    }
+    switch (type) {
+    case 19:
+    case 27:
+        size = unit * 8;
+        height = 0x20;
+        break;
+    case 20:
+    case 36:
+    case 44:
+        size = 0x40;
+        height = 8;
+        break;
+    default:
+        return head;
+    }
+    head = func_0032A7A8(size, 3);
+    head->width = 8;
+    head->height = height;
+    head->format = kind;
+    return head;
+}
 
 INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389E0);
 
