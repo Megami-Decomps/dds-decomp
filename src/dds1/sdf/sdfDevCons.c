@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ee_mmi.h"
 
 typedef struct DevConsState {
     u8 pad0[4]; /* 0x0 */
@@ -112,7 +113,28 @@ void sdfDevConsSetControlByte(DevConsState *console, u8 value) {
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E41B8);
 
-INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E4228);
+/* Submit the console's pending packet to the DMA channel when it holds anything, then flip to the other buffer and restart the list there. */
+void func_002E4228(ConsBuf *buf) {
+    s32 bytes;
+    u32 *channel;
+    u32 flip;
+
+    func_002E41B8(buf);
+    bytes = buf->unk8 - buf->unk4;
+    if ((bytes >> 3) != 0) {
+        channel = buf->unkC;
+        sceDmaSync(channel, 0, 0);
+        *channel |= 0x40;
+        EE_SYNC();
+        sceDmaSendN(channel, (void *)((u32)buf->unk4 & 0x0FFFFFFF), bytes >> 4);
+        flip = buf->unk1C ^ 1;
+        buf->unk1C = flip;
+        buf->unk8 = (u8 *)buf->unk10[flip];
+        buf->unk0 = buf->unk8 + 0x10;
+        buf->unk4 = buf->unk8;
+        sceGsSyncPath(0, 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E42F8);
 
