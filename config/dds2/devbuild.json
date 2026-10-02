@@ -85,7 +85,7 @@
       "old_size": "0x1230",
       "alignment": 8,
       "old_vaddr": "0x0010C618",
-      "expected_relocations": 101
+      "expected_relocations": 103
     },
     {
       "object": "build/dds2/src/dds2/script/scrTraceCode.o",
