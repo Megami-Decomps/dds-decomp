@@ -130,9 +130,43 @@ SdfAllocation *sdfFindGeneralBlockByAddress(void *address) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00329600", func_00329A00);
-
 extern SdfAllocation *D_0045F0FC[];
+
+/* Walk the general heap's block list and write its statistics: total bytes, free bytes, largest and smallest free block, block count and free block count. */
+void func_00329A00(s32 *out) {
+    SdfAllocation *block = D_0045F0FC[0];
+    s32 total = 0;
+    s32 freeBytes = 0;
+    s32 largest = 0;
+    s32 smallest = 0;
+    s32 blocks = 0;
+    s32 freeBlocks = 0;
+    s32 size;
+    u16 busy;
+
+    for (; block->busy != 2; block = block->block) {
+        size = block->block->address - block->address;
+        busy = block->busy;
+        blocks++;
+        total += size;
+        if (busy == 0) {
+            if (smallest == 0 || size < smallest) {
+                smallest = size;
+            }
+            if (largest < size) {
+                largest = size;
+            }
+            freeBytes += size;
+            freeBlocks++;
+        }
+    }
+    out[0] = total;
+    out[1] = freeBytes;
+    out[3] = smallest;
+    out[2] = largest;
+    out[4] = blocks;
+    out[5] = freeBlocks;
+}
 
 /* Find the used heap block that contains `address`; NULL when the end marker is reached. */
 SdfAllocation *sdfFindGeneralBlockContaining(s32 address) {

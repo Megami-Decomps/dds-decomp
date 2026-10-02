@@ -94,10 +94,13 @@ typedef struct SndPad {
     u8 pad24[2];
     s8 prev;
     s8 next;
-    u8 pad28[0xC];
+    u8 pad28[9];
+    s8 unk31;
+    u8 pad32[2];
     s8 coarseDown;
     s8 coarseUp;
-    u8 pad36[2];
+    s8 unk36;
+    s8 unk37;
     s8 fineDown;
     u8 pad39;
     s8 fineUp;
@@ -567,7 +570,44 @@ INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F770);
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F850);
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F9E0);
+typedef struct SndPadStepTarget {
+    u8 pad00[0x38];
+    s32 value; /* 0x38 */
+} SndPadStepTarget;
+
+typedef struct SndPadStepper {
+    u8 pad00[4];
+    SndPadStepTarget *target; /* 0x04 */
+    u8 pad08[0x20];
+    s32 index; /* 0x28 */
+} SndPadStepper;
+
+/* Step the stepper's index by pad input: one per press, ten with the fast modifier held; mirror it into the target. */
+void func_0019F9E0(SndPadStepper *stepper) {
+    s32 step;
+
+    if (D_00324510.coarseDown & 2) {
+        step = -1;
+    } else {
+        step = (D_00324510.coarseUp & 2) > 0;
+    }
+    if (D_00324510.unk36 & 2) {
+        step = -1;
+    } else if (D_00324510.unk37 & 2) {
+        step = 1;
+    }
+    if (D_00324510.unk31 != 0) {
+        step *= 10;
+    }
+    if (step != 0) {
+        s32 index = (stepper->index + step) & 0xFF;
+
+        stepper->index = index;
+        if (stepper->target != NULL) {
+            stepper->target->value = index;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019FA70);
 

@@ -151,12 +151,46 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291038);
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004276C0);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291118);
+extern void scrSetEntryLowFlags(u32 context, u16 entryId, u16 lowFlags);
+extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_002911D0);
+/* Write each panel slot's 0xB0 saved flag words back to its list node's script entries and log the slot number. */
+void func_00291118(MenuPanelObject *object) {
+    MenuPanelNode *node = object->list->head;
+    s32 slotIndex = 0;
+
+    for (; node != NULL; node = node->next) {
+        u32 context = node->value;
+        u16 *values = object->slots[slotIndex]->values;
+        s32 i;
+
+        for (i = 0; i < 0xB0; i++) {
+            scrSetEntryLowFlags(context, i, *values++);
+        }
+        evtPrintDeveloperConsoleMessage("[%d]Mantra Data Saved!!!!!!!!!!!!!!!!!\n", slotIndex++);
+    }
+}
+
+extern u32 scrGetEntryLowFlags(s32 arg0, u16 index);
+
+/* Read each list node's 0xB0 script entry flags into its panel slot and log the slot number. */
+void func_002911D0(MenuPanelObject *object) {
+    MenuPanelNode *node = object->list->head;
+    s32 slotIndex = 0;
+
+    for (; node != NULL; node = node->next) {
+        s32 context = node->value;
+        u16 *values = object->slots[slotIndex]->values;
+        s32 i;
+
+        for (i = 0; i < 0xB0; i++) {
+            *values++ = scrGetEntryLowFlags(context, i);
+        }
+        evtPrintDeveloperConsoleMessage("[%d]Mantra Data Load!!!!!!!!!!!!!!!!!\n", slotIndex++);
+    }
+}
 
 extern s32 scrGetSelectedScriptEntryId(s32 arg0);
-extern u32 scrGetEntryLowFlags(s32 arg0, u16 index);
 extern u32 ptyGetProfileRecordCap(u16 scriptId);
 extern u32 ptyGetProfileRecordValue(u32 work, u16 scriptId);
 

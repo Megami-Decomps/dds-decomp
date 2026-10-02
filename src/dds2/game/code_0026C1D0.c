@@ -487,7 +487,39 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", evtReleaseMantraSelectionWork);
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D168);
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D4C8);
+typedef struct PartySlotHeader {
+    u16 flags;
+    u16 pad02;
+    u16 unitId;
+    u8 pad06[0x1BE];
+} PartySlotHeader;
+
+typedef struct PartyGameState {
+    u8 pad00[0xA60];
+    PartySlotHeader party[5];
+} PartyGameState;
+
+extern u32 ptyGetProfileRecordCap(u16 scriptId);
+extern u32 ptyGetProfileRecordValue(u32 work, u16 scriptId);
+
+/* 1 when some active party member other than unit `skipId` has `scriptId` at its profile record cap. */
+s32 func_0026D4C8(u16 scriptId, u16 skipId) {
+    s32 i;
+
+    for (i = 0; i < 5; i++) {
+        PartySlotHeader *slot;
+
+        if (((PartyGameState *)datGameState)->party[i].flags & 1) {
+            slot = &((PartyGameState *)datGameState)->party[i];
+            if (slot->unitId != skipId) {
+                if (ptyGetProfileRecordCap(scriptId) == ptyGetProfileRecordValue((u32)slot, scriptId)) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D590);
 
