@@ -251,19 +251,113 @@ void effMagatuhiReleaseWideWorkResources(EffMagatuhiWideSecond *work) {
     func_003297C8(work->buffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192470);
-
 extern void *effMathGetSlotAt(void *slots, s32 index);
 extern void effMathStepBezierSlot(void *slots, s32 index, void *out);
 extern void func_00190DE0(void *owner);
-extern void func_00192470(void *work, s32 index);
 extern void func_00191450(void *valueWork, s32 index, void *out);
 
 typedef struct {
-    u8 pad00[0x30];
+    f32 controlPoints[4][3];
     f32 scale; /* 0x30 */
     f32 base;  /* 0x34 */
 } EffMagatuhiSlot;
+
+extern f32 sdfViewTargetVector[4];
+extern f32 sdfViewEyeVector[4];
+
+/* Jitter control points perpendicular to the path and camera viewing direction. */
+void func_00192470(EffMagatuhiWideSecond *work, s32 index) {
+    f32 scale[4];
+    f32 lastNormal[4];
+    f32 viewDirection[4];
+    f32 point[4];
+    EffMagatuhiSlot *slot;
+    f32 step;
+    f32 random;
+
+    VU0_LOAD_VF(vf10, sdfViewTargetVector);
+    VU0_LOAD_VF(vf11, sdfViewEyeVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, viewDirection);
+    step = 1.0f / (f32)work->head.life;
+    slot = effMathGetSlotAt(work->mathResource, index);
+    slot->scale = 0;
+    slot->base = step;
+
+    random = effMiscRandUnitFloat(D_003AA868) - 0.5f;
+    scale[0] = work->head.extra[0] * (random + random);
+    scale[1] = scale[0];
+    scale[2] = scale[0];
+    VU0_LOAD_VF(vf10, work->head.row[0]);
+    VU0_LOAD_VF(vf11, work->head.row[1]);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, viewDirection);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_LOAD_VF(vf11, scale);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_STORE_VF(vf10, point);
+    slot->controlPoints[0][0] = point[0];
+    slot->controlPoints[0][1] = point[1];
+    slot->controlPoints[0][2] = point[2];
+
+    random = effMiscRandUnitFloat(D_003AA868) - 0.5f;
+    scale[0] = work->head.extra[1] * (random + random);
+    scale[1] = scale[0];
+    scale[2] = scale[0];
+    VU0_LOAD_VF(vf10, work->head.row[1]);
+    VU0_LOAD_VF(vf11, work->head.row[2]);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, viewDirection);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_LOAD_VF(vf11, scale);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_STORE_VF(vf10, point);
+    slot->controlPoints[1][0] = point[0];
+    slot->controlPoints[1][1] = point[1];
+    slot->controlPoints[1][2] = point[2];
+
+    random = effMiscRandUnitFloat(D_003AA868) - 0.5f;
+    scale[0] = work->head.extra[2] * (random + random);
+    scale[1] = scale[0];
+    scale[2] = scale[0];
+    VU0_LOAD_VF(vf10, work->head.row[2]);
+    VU0_LOAD_VF(vf11, work->head.row[3]);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, viewDirection);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, lastNormal);
+    VU0_LOAD_VF(vf11, scale);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_STORE_VF(vf10, point);
+    slot->controlPoints[2][0] = point[0];
+    slot->controlPoints[2][1] = point[1];
+    slot->controlPoints[2][2] = point[2];
+
+    random = effMiscRandUnitFloat(D_003AA868) - 0.5f;
+    scale[0] = work->head.extra[3] * (random + random);
+    scale[1] = scale[0];
+    scale[2] = scale[0];
+    VU0_LOAD_VF(vf10, lastNormal);
+    VU0_LOAD_VF(vf11, scale);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, work->head.row[3]);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, point);
+    slot->controlPoints[3][0] = point[0];
+    slot->controlPoints[3][1] = point[1];
+    slot->controlPoints[3][2] = point[2];
+    func_001918B8(work->managedResource->valueWork, index);
+    effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192778);
 
