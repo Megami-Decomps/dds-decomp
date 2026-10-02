@@ -261,6 +261,10 @@ extern char D_0041B640[];
 
 extern char D_0041B768[];
 
+extern char D_0041B780[];
+
+extern char D_0041B7A8[];
+
 extern char D_0041B7D0[];
 
 extern void sdfReleaseResourceAllocation(s32);
@@ -332,7 +336,34 @@ void btlReleaseEventData(void) {
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B768);
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022B288);
+INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B780);
+
+INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B7A8);
+
+extern void btlCreateIndexedSoundResourceNode(s32 slotIndex, u32 handle);
+
+void func_0022B288(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 eventTaskId = battle->eventTaskId;
+    s32 index;
+
+    if (eventTaskId == -1) {
+        return;
+    }
+
+    for (index = 0; index < 0xF; index++) {
+        s32 key = index + 0x32;
+        s32 slotIndex = index + 0xB;
+        s32 resource = evtFindTaskResourceEntryByKey(battle->eventTaskId, key);
+
+        if (resource == 0) {
+            btlBossDebugPrintf(D_0041B780, slotIndex, key);
+        } else {
+            btlCreateIndexedSoundResourceNode(slotIndex, resource);
+            btlBossDebugPrintf(D_0041B7A8, slotIndex, key);
+        }
+    }
+}
 
 void btlReleaseEventAssets(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -3705,4 +3736,3 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_00420FA8);
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_00420FC0);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_00420FD8);
-
