@@ -2326,13 +2326,31 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2530);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AFF78);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlDrawThreePanelSpriteStrips);
+typedef struct BtlPanelStrip {
+    s32 x;
+    s32 y;
+    s32 texture;
+} BtlPanelStrip;
+
+extern u32 btlSetSlotLowByteClamped(BtlSlotOwner *, s32, s32, s32);
+extern void func_002BF438(s32, s32, s32, u32 *, s32, BtlSlotOwner *, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A25C0);
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A25D0);
+void btlDrawThreePanelSpriteStrips(s32 unused, s32 x, s32 y, s32 delta) {
+    BtlPanelStrip strips[3] = { {0, 0, 0x40}, {5, 0, 0x41}, {0x6B, 0, 0x42} };
+    u32 colors[4] = { 0x80808080, 0x80808080, 0x80808080, 0x80808080 };
+    s32 i, j;
+    BtlPanelStrip *strip;
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A25F8);
+    for (strip = strips, i = 0; i < 3; i++, strip++) {
+        for (j = 0; j < 4; j++) {
+            colors[j] = btlSetSlotLowByteClamped((BtlSlotOwner *)btlResourceBlock->resA, strip->texture, j, delta);
+        }
+        func_002BF438((x + strip->x) << 4, (y + strip->y) << 3,
+                     0, colors, 0, (BtlSlotOwner *)btlResourceBlock->resA, strip->texture, 0x53);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2608);
 
