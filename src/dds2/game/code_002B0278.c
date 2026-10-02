@@ -3050,7 +3050,22 @@ extern void mnuDrawIconRow6();
 
 extern void mnuDrawIconPair();
 
-INCLUDE_ASM(const s32, "game/code_002B0278", mnuDrawIconPanel);
+void mnuDrawIconPanel(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 mode, s32 arg) {
+    switch (state->kind) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+        mnuDrawIconPanelFade(x, y, z, w, state, mode, arg);
+        return;
+    case 4:
+        mnuDrawIconRow6(x, y, z, 0x100, state, arg);
+        return;
+    case 5:
+        mnuDrawIconPair(x, y, z, w, state, arg);
+        break;
+    }
+}
 
 void func_002BA7A8(u32 a0, u32 a1, u32 a2, u32 a3, MenuIconState *a4, u32 a5, u32 a6) {
     mnuDrawIconPanel(a0, a1, a2, a3, a4, a5, a6);
