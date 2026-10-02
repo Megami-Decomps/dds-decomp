@@ -1025,11 +1025,13 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     assigning `w = &G` inside each arm rematerialises per arm (4 pairs). A
     self-assigned `FileManWork *work = work;` placeholder, as in the old
     `func_002890B8` park, gives neither: it never reads the symbol.
-15. **`j callee` (tail call) needs a function with no `return;` statement; and a
+15. **`j callee` (tail call) is lost when an early `return;` skips the call; and a
     "both or neither" test is spelled out.** A void function whose last
     statement is a call is compiled to `ld regs; j callee` (sibling call) only if
-    it has no `return;` (an early `return;` creates a return label and every call
-    stays `jal`, tested with a one-call body plus one `return;`). Retail's
+    no `return;` jumps over that call to the epilogue (the early `return;` gives the
+    epilogue a second incoming path and the call stays `jal`; tested with a
+    one-call body plus one early `return;`; a `return;` AFTER a call, as in switch
+    arms, is harmless, see the switch matrix below). Retail's
     `j btlAppendIndexListEntry` in DDS2 `func_00220B20` therefore means the whole
     body is nested in `if`s, never `if (...) return;`. Same function: "exactly one
     of two flags is clear" matched only as
@@ -1039,6 +1041,15 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     each differ by 3-40 words. Also: a local that is initialised only inside the
     guarding `if` (not at its declaration) lets gcc fill the `beqz` delay slot with
     the first initialisation, as retail does.
+    Switch matrix (5 arms + default, scratch): arms written `f(); return;` give `j`
+    for every arm including a fall-off default, whatever the caller's and callees'
+    void/int types; with `break` arms an `int` or implicit-int caller makes EVERY
+    call `jal` (a void caller still `j`); a `default:` written FIRST (source order
+    first) with `break` and the others `return;` gives `jal` for that arm only
+    (`default_first`: jal, j, j, j, j), but retail emits the default last, so that
+    does not reproduce DDS2 `func_001525F0` (jump-table, cases `j`, default `jal`);
+    default last, `case 3` sharing the default, or `return;` after it all give `j`.
+    Still open: how retail gets a trailing `jal` default after `j` cases.
 
 Unresolved: a saved register initialised as a copy of another holding the same
 constant (`move $16,$19` for `i` from `bestIndex = 0`, DDS1 `func_00202F90`,
