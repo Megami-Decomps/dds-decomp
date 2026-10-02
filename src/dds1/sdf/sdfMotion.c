@@ -32,11 +32,11 @@ typedef struct VObj {
     VTab *vtable;
 } VObj;
 
-typedef struct KeyOut {
+typedef struct SdfMotionKeyInterval {
     f32 *firstKey;
     f32 *secondKey;
     f32 weight;
-} KeyOut;
+} SdfMotionKeyInterval;
 
 typedef struct {
     Pair pair;
@@ -127,27 +127,21 @@ typedef struct {
     SubU *sub;
     s8 res;
 } CmdB;
-typedef struct {
+typedef struct SdfMotionKeyTrack {
     u16 u0;
     u16 u2;
-    u16 n;
-    u16 stride;
-    u16 data[1];
-} Keys;
+    u16 keyCount;
+    u16 keyStride;
+    u16 keyFrames[1];
+} SdfMotionKeyTrack;
 
-typedef struct {
-    u8 pad[0x2E];
-    u16 unk2E;
-    u8 unk30;
-    u8 unk31;
-    u8 unk32;
-} Ctl7;
+typedef struct Motion Motion;
 
-typedef struct {
-    s32 u0;
-    Ctl7 *ctl;
-    Keys *keys;
-} Arg7;
+typedef struct SdfMotionKeyBinding {
+    void *dispatch;
+    Motion *motion;
+    SdfMotionKeyTrack *track;
+} SdfMotionKeyBinding;
 
 typedef struct {
     s32 u0;
@@ -206,7 +200,7 @@ typedef struct {
 
 /* Native motion constructor/tick layout. A blend lead starts the frame clock
  * below zero; blend callbacks normalize nonnegative elapsed frames by duration. */
-typedef struct {
+struct Motion {
     void *next;        /* 0x00: owner's intrusive motion list */
     void *owner;       /* 0x04: owner whose list head is at +0x14 */
     void *motionTable; /* 0x08: motion entries and binding-command data */
@@ -224,7 +218,7 @@ typedef struct {
     u8 previousState;
     u8 loopEnabled;   /* 0x32: wraps the frame clock instead of finishing */
     u8 pad33;
-} Motion;
+};
 
 typedef struct {
     void *unk0;
@@ -273,9 +267,9 @@ void sdfCopySecondaryTextScalars(void *a0, void *a1);
 void sdfDestroyDevRequest(void *a0);
 void sdfSetMotionPointerPair(Pair *binding, void *source, void *dispatch);
 void func_002DB3D0(Motion *a0, s32 a1, s32 a2, f32 t0, f32 t1);
-f32 sdfInterpolateMotionKeys(KeyOut *a0);
-void func_002DB7C8(void *a0, KeyOut *out, f32 t);
-s32 func_002DB958(KeyOut *a0);
+f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *a0);
+void sdfFindMotionKeyInterval(void *arg, void *outArg, f32 frame);
+s32 func_002DB958(SdfMotionKeyInterval *a0);
 void sdfMotionBindDrawNode(void *tmp, void *src, void *tbl, s32 x);
 void sdfMotionBindIndexedTrack(Dst360 *a0, Src360 *a1, void *a2, s32 a3);
 extern void effMiscQuaternionNlerpVU(f32 amount);
@@ -427,10 +421,75 @@ void func_002DB7A8(void *a0) {
 void sdfSetMotionOutputValue(Triple *a0, s32 a1) {
     a0->unk8 = a1;
 }
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB7C8);
+
+/* Find the key interval containing frame and return its interpolation weight. */
+void sdfFindMotionKeyInterval(void *arg, void *outArg, f32 frame) {
+    SdfMotionKeyBinding *binding;
+    SdfMotionKeyInterval *out;
+    SdfMotionKeyTrack *track;
+    u16 *frames;
+    u8 *keyData;
+    u8 *firstKey;
+    s32 frameNumber;
+    s32 first;
+    s32 last;
+    s32 middle;
+    s32 currentFrame;
+    s32 nextFrame;
+    s32 nextIndex;
+    s32 duration;
+    u16 stride;
+    u16 count;
+
+    binding = arg;
+    out = outArg;
+    first = 0;
+    track = binding->track;
+    count = track->keyCount;
+    frames = track->keyFrames;
+    stride = track->keyStride;
+    frameNumber = (s32)frame;
+    last = count - 1;
+    do {
+        middle = (first + last + 1) >> 1;
+        currentFrame = frames[middle];
+        if (frameNumber < currentFrame) {
+            middle--;
+            last = middle;
+        } else {
+            first = middle;
+        }
+    } while (first < last);
+
+    keyData = (u8 *)&frames[(count + 1) & ~1];
+    firstKey = keyData + middle * stride;
+    nextIndex = middle + 1;
+    currentFrame = frames[middle];
+    out->firstKey = (f32 *)firstKey;
+    if (nextIndex == count) {
+        if (binding->motion->loopEnabled == 0) {
+            out->secondKey = (f32 *)firstKey;
+            nextFrame = currentFrame;
+        } else {
+            out->secondKey = (f32 *)keyData;
+            nextFrame = binding->motion->frameCount;
+        }
+    } else {
+        nextFrame = frames[nextIndex];
+        out->secondKey = (f32 *)(firstKey + stride);
+    }
+
+    duration = nextFrame - currentFrame;
+    if (duration == 0) {
+        out->secondKey = (f32 *)firstKey;
+        out->weight = 0.0f;
+        return;
+    }
+    out->weight = (frame - currentFrame) / duration;
+}
 
 /* Blend two sampled scalar keys; preserve this expression order for matching. */
-f32 sdfInterpolateMotionKeys(KeyOut *a0) {
+f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *a0) {
     f32 t;
     f32 a;
 
@@ -440,12 +499,12 @@ f32 sdfInterpolateMotionKeys(KeyOut *a0) {
 }
 
 /* vu0 routine: blend the two bracketing vec3 keys by the key weight into vf10. */
-void func_002DB900(KeyOut *a0) {
+void func_002DB900(SdfMotionKeyInterval *a0) {
     VU0_LERP_VEC3_KEYS(a0->firstKey, a0->secondKey, a0->weight);
 }
 
 /* vu0 routine: blend the two bracketing RGBA colour keys by the key weight. */
-s32 func_002DB958(KeyOut *a0) {
+s32 func_002DB958(SdfMotionKeyInterval *a0) {
     s32 color;
 
     EE_MMI_RGBA_LERP(color, *(u32 *)a0->firstKey, *(u32 *)a0->secondKey, a0->weight, 0.5f);
@@ -465,7 +524,7 @@ void sdfMotionBlendFiveFloats(f32 *dst, f32 *src1, f32 *src2, f32 weight) {
     } while (i != 5);
 }
 
-void sdfMotionBlendFiveKeyValues(KeyOut *src, f32 *dst) {
+void sdfMotionBlendFiveKeyValues(SdfMotionKeyInterval *src, f32 *dst) {
     sdfMotionBlendFiveFloats(dst, src->firstKey, src->secondKey, src->weight);
 }
 
@@ -488,9 +547,9 @@ void *sdfMotionCreateDrawVectorBinding(void *a0, s32 a1, s32 a2) {
 
 /* vu0 routine: blend the two vec3 keys by the segment weight, store to sub+0x60 */
 void sdfMotionBlendDrawVector(HasSub *a0, f32 t) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
         VU0_LERP_VF10_W(b.weight);
@@ -499,9 +558,9 @@ void sdfMotionBlendDrawVector(HasSub *a0, f32 t) {
 
 /* vu0 routine: blend the two vec3 keys by the segment weight, then blend that with sub->vec by t2 into sub+0x60 */
 void sdfMotionBlendDrawVectorWithCurrent(HasSub *a0, f32 t1, f32 t2) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
 
-    func_002DB7C8(a0, &b, t1);
+    sdfFindMotionKeyInterval(a0, &b, t1);
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
         VU0_LERP_VF10_COPY(b.weight);
@@ -532,9 +591,9 @@ void *sdfMotionCreateScaleVectorBinding(void *a0, s32 a1, s32 a2) {
 
 /* vu0 routine: blend the two vec3 keys by the segment weight, store to sub+0x70 */
 void sdfMotionBlendScaleVector(HasSub *a0, f32 t) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
         VU0_LERP_VF10_W(b.weight);
@@ -543,9 +602,9 @@ void sdfMotionBlendScaleVector(HasSub *a0, f32 t) {
 
 /* vu0 routine: as sdfMotionBlendDrawVectorWithCurrent, stored to sub+0x70 */
 void sdfMotionBlendScaleVectorWithCurrent(HasSub *a0, f32 t1, f32 t2) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
 
-    func_002DB7C8(a0, &b, t1);
+    sdfFindMotionKeyInterval(a0, &b, t1);
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
         VU0_LERP_VF10_COPY(b.weight);
@@ -564,12 +623,12 @@ void *sdfMotionCreateQuaternionBinding(void *a0, s32 a1, s32 a2) {
 
 /* vu0 routine: nlerp the two quaternion keys by the segment weight, store quaternion and matrix rows */
 void sdfMotionBlendQuaternionToMatrix(HasSub *a0, f32 t) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
     u8 *sub;
     u8 *matrix;
     f32 *key;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     key = b.firstKey;
     EE_MMI_LOAD_S16X4_FIXED12(vf10, key);
     key = b.secondKey;
@@ -586,12 +645,12 @@ void sdfMotionBlendQuaternionToMatrix(HasSub *a0, f32 t) {
 
 /* vu0 routine: nlerp the two quaternion keys by the segment weight, nlerp that toward the quaternion at +0x10 by t2, store quaternion and matrix rows */
 void sdfMotionBlendKeyQuaternionWithBase(HasSub *a0, f32 t1, f32 t2) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
     u8 *sub;
     u8 *matrix;
     f32 *key;
 
-    func_002DB7C8(a0, &b, t1);
+    sdfFindMotionKeyInterval(a0, &b, t1);
     key = b.firstKey;
     EE_MMI_LOAD_S16X4_FIXED12(vf10, key);
     key = b.secondKey;
@@ -618,10 +677,10 @@ void *sdfMotionCreateKeyFlagBinding(void *a0, s32 a1, s32 a2) {
 }
 
 void sdfMotionUpdateKeyFlag(HasSubU *a0, f32 t) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
     SubU *s;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     s = a0->sub;
     if (*(u8 *)b.firstKey == 0) {
         s->u14 = s->u14 | 0x10;
@@ -631,10 +690,10 @@ void sdfMotionUpdateKeyFlag(HasSubU *a0, f32 t) {
 }
 
 void func_002DC258(HasSubU *a0, f32 t) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
     SubU *s;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     s = a0->sub;
     if (*(u8 *)b.firstKey == 0) {
         s->u14 = s->u14 | 0x10;
@@ -677,19 +736,19 @@ void *func_002DC3B8(void *a0, s32 a1, s32 a2) {
 }
 
 void func_002DC418(HasSub *a0, f32 t) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     func_002DA3D8(a0->sub, func_002DB958(&b));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
 void func_002DC458(CmdI *a0, f32 t, f32 weight) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
     s32 key;
     s32 color;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     key = func_002DB958(&b);
     EE_MMI_RGBA_LERP(color, a0->res, key, weight, 0.5f);
     func_002DA3D8(a0->sub, color);
@@ -708,19 +767,19 @@ void *func_002DC518(void *a0, s32 a1, s32 a2) {
 }
 
 void func_002DC578(HasSub *a0, f32 t) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     func_002DA3C0(a0->sub, func_002DB958(&b));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
 void func_002DC5B8(CmdI *a0, f32 t, f32 weight) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
     s32 key;
     s32 color;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     key = func_002DB958(&b);
     EE_MMI_RGBA_LERP(color, a0->res, key, weight, 0.5f);
     func_002DA3C0(a0->sub, color);
@@ -739,19 +798,19 @@ void *func_002DC678(void *a0, s32 a1, s32 a2) {
 }
 
 void func_002DC6D8(HasSub *a0, f32 t) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     func_002DA3F0(a0->sub, func_002DB958(&b));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
 void func_002DC718(CmdI *a0, f32 t, f32 weight) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
     s32 key;
     s32 color;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     key = func_002DB958(&b);
     EE_MMI_RGBA_LERP(color, a0->res, key, weight, 0.5f);
     func_002DA3F0(a0->sub, color);
@@ -770,19 +829,19 @@ void *func_002DC7D8(void *a0, s32 a1, s32 a2) {
 }
 
 void func_002DC838(HasSub *a0, f32 t) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     func_002DA408(a0->sub, func_002DB958(&b));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
 void func_002DC878(CmdI *a0, f32 t, f32 weight) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
     s32 key;
     s32 color;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     key = func_002DB958(&b);
     EE_MMI_RGBA_LERP(color, a0->res, key, weight, 0.5f);
     func_002DA408(a0->sub, color);
@@ -801,16 +860,16 @@ void *sdfMotionCreateFloatBinding(void *a0, s32 a1, s32 a2) {
 }
 
 void sdfMotionApplyInterpolatedFloat(HasSub *a0, f32 t) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     func_002DA420(a0->sub, sdfInterpolateMotionKeys(&b));
 }
 
 void sdfMotionBlendInterpolatedFloat(HasSubF *a0, f32 t1, f32 t2) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
 
-    func_002DB7C8(a0, &b, t1);
+    sdfFindMotionKeyInterval(a0, &b, t1);
     func_002DA420(a0->sub, (a0->capturedValue + sdfInterpolateMotionKeys(&b) * t2) - (a0->capturedValue * t2));
 }
 
@@ -828,20 +887,20 @@ void *sdfMotionCreateTextBlendBinding(void *a0, s32 a1, s32 a2) {
 }
 
 void sdfMotionApplyFiveFloatKeys(HasSub *a0, f32 t) {
-    KeyOut b0;
+    SdfMotionKeyInterval b0;
     f32 b1[5];
 
-    func_002DB7C8(a0, &b0, t);
+    sdfFindMotionKeyInterval(a0, &b0, t);
     sdfMotionBlendFiveKeyValues(&b0, b1);
     sdfCopyPrimaryTextScalars(a0->sub, b1);
 }
 
 void sdfMotionBlendFiveFloatKeys(HasArr *a0, f32 t1, f32 t2) {
-    KeyOut b0;
+    SdfMotionKeyInterval b0;
     f32 b1[5];
     f32 b2[5];
 
-    func_002DB7C8(a0, &b0, t1);
+    sdfFindMotionKeyInterval(a0, &b0, t1);
     sdfMotionBlendFiveKeyValues(&b0, b2);
     sdfMotionBlendFiveFloats(b1, a0->capturedValues, b2, t2);
     sdfCopyPrimaryTextScalars(a0->sub, b1);
@@ -864,20 +923,20 @@ void *sdfMotionCreateSecondaryTextBinding(void *a0, s32 a1, s32 a2) {
 }
 
 void sdfMotionApplySecondaryTextKeys(HasSub *a0, f32 t) {
-    KeyOut b0;
+    SdfMotionKeyInterval b0;
     f32 b1[5];
 
-    func_002DB7C8(a0, &b0, t);
+    sdfFindMotionKeyInterval(a0, &b0, t);
     sdfMotionBlendFiveKeyValues(&b0, b1);
     sdfCopySecondaryTextScalars(a0->sub, b1);
 }
 
 void sdfMotionBlendSecondaryTextKeys(HasArr *a0, f32 t1, f32 t2) {
-    KeyOut b0;
+    SdfMotionKeyInterval b0;
     f32 b1[5];
     f32 b2[5];
 
-    func_002DB7C8(a0, &b0, t1);
+    sdfFindMotionKeyInterval(a0, &b0, t1);
     sdfMotionBlendFiveKeyValues(&b0, b1);
     sdfMotionBlendFiveFloats(b2, a0->capturedValues, b1, t2);
     sdfCopySecondaryTextScalars(a0->sub, b2);
@@ -900,19 +959,19 @@ void *func_002DCD30(void *a0, s32 a1, s32 a2) {
 }
 
 void sdfMotionApplyInterpolatedKey(HasSub *a0, f32 t) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     func_002DA5B0(a0->sub, func_002DB958(&b));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
 void func_002DCDD0(CmdI *a0, f32 t, f32 weight) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
     s32 key;
     s32 color;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     key = func_002DB958(&b);
     EE_MMI_RGBA_LERP(color, a0->res, key, weight, 0.5f);
     func_002DA5B0(a0->sub, color);
@@ -931,16 +990,16 @@ void *sdfMotionCreateDirectTextKeyBinding(void *a0, s32 a1, s32 a2) {
 }
 
 void sdfMotionApplySelectedTextKey(HasSub *a0, f32 t) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     sdfCopyPrimaryTextScalars(a0->sub, b.firstKey);
 }
 
 void sdfMotionApplySampleToTarget(HasSub *a0, f32 t) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     sdfCopyPrimaryTextScalars(a0->sub, b.firstKey);
 }
 
@@ -956,15 +1015,15 @@ void *func_002DCF68(void *a0, s32 a1, s32 a2) {
 }
 
 void sdfMotionApplySampledSecondaryTextValue(HasSub *a0, f32 t) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     sdfCopySecondaryTextScalars(a0->sub, b.firstKey);
 }
 
 void sdfMotionSampleTextScalarsAtTime(HasSub *a0, f32 t) {
-    KeyOut b;
+    SdfMotionKeyInterval b;
 
-    func_002DB7C8(a0, &b, t);
+    sdfFindMotionKeyInterval(a0, &b, t);
     sdfCopySecondaryTextScalars(a0->sub, b.firstKey);
 }
