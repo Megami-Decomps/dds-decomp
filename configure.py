@@ -17,6 +17,7 @@ Pipeline per version (see README.md):
   INF (.infasm)      tools/inf.py assemble -> build/<v>/data/field/, then SHA-1 check
   WAP (.wapasm)      tools/wap.py assemble -> build/<v>/data/field/, then SHA-1 check
   FLD2 (.fldasm)     tools/fld.py assemble -> build/<v>/data/field/, then SHA-1 check
+  LB (.lbasm)        tools/lb.py assemble over an extracted base -> build/<v>/data/field/
   battle (.tblasm)   tools/battle_tbl.py assemble -> build/<v>/data/battle/, then SHA-1 check
 
 Every version is linked as a byte-identical copy of the retail executable, so any
@@ -233,6 +234,12 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         description="fld2 $in",
     )
     n.rule(
+        "lb",
+        f"mkdir -p $outdir && {sys.executable} tools/lb.py assemble "
+        "--resources $resources $in $base $out",
+        description="lb $in",
+    )
+    n.rule(
         "battle_tbl",
         f"mkdir -p $outdir && {sys.executable} tools/battle_tbl.py assemble $context $in $out",
         description="battle table $in",
@@ -441,6 +448,33 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
 
         if field_data_stamps:
             n.build(f"{version}-field-data", "phony", field_data_stamps)
+
+        lb_manifest = Path("config") / version / "field_lb.sha1"
+        if (ROOT / lb_manifest).exists():
+            lb_source_dir = Path("src") / version / "data" / "field"
+            lb_output_dir = Path("build") / version / "data" / "field"
+            lb_sources = sorted((ROOT / lb_source_dir).glob("*.lbasm"))
+            lb_outputs = []
+            for source in lb_sources:
+                source = source.relative_to(ROOT)
+                output = lb_output_dir / source.with_suffix(".LB").name
+                base = Path("orig") / version / "field" / output.name
+                resource = lb_output_dir / source.with_suffix(".f2").name
+                n.build(
+                    str(output),
+                    "lb",
+                    str(source),
+                    implicit=["tools/lb.py", str(base), str(resource)],
+                    variables={
+                        "outdir": str(output.parent),
+                        "base": str(base),
+                        "resources": str(lb_output_dir),
+                    },
+                )
+                lb_outputs.append(str(output))
+            lb_stamp = lb_output_dir / "field_lb.ok"
+            n.build(str(lb_stamp), "check", str(lb_manifest), implicit=lb_outputs)
+            n.build(f"{version}-field-archives", "phony", str(lb_stamp))
 
         battle_manifest = Path("config") / version / "battle_tables.sha1"
         if (ROOT / battle_manifest).exists():
