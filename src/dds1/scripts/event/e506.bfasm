@@ -189,9 +189,7 @@ dist_blur02:
 dist_blur03:
   PROC dist_blur03
   WAIT_FOR_TIMER_LIMIT(100)
-  push 950
-  push 100
-  COMM 0x00ab
+  SETUP_FADE_FRAMES(100, 950)
   push 0
   push float32(0.07000000029802322, bits=0x3d8f5c29)
   push float32(0.004999999888241291, bits=0x3ba3d70a)

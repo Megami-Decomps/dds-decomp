@@ -188,75 +188,29 @@ _1:
   COMM 0x00cb
   PUSHREG
   POPLIX 0x0017
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos01))
-  push local_int[1]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos02))
-  push local_int[2]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos03))
-  push local_int[3]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos06))
-  push local_int[4]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos09))
-  push local_int[5]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos22))
-  push local_int[6]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos20))
-  push local_int[7]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos18))
-  push local_int[8]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos16))
-  push local_int[9]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos10))
-  push local_int[10]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos11))
-  push local_int[11]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos24))
-  push local_int[12]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos25))
-  push local_int[13]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos26))
-  push local_int[14]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos27))
-  push local_int[15]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos05))
-  push local_int[16]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos04))
-  push local_int[17]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos07))
-  push local_int[18]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos08))
-  push local_int[19]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos17))
-  push local_int[20]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos19))
-  push local_int[21]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos14))
-  push local_int[22]
-  COMM 0x009d
-  push READ_SECONDARY_WORLD_ID_VALUE(string(pos15))
-  push local_int[23]
-  COMM 0x009d
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(pos01)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(pos02)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[3], READ_SECONDARY_WORLD_ID_VALUE(string(pos03)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[4], READ_SECONDARY_WORLD_ID_VALUE(string(pos06)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[5], READ_SECONDARY_WORLD_ID_VALUE(string(pos09)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[6], READ_SECONDARY_WORLD_ID_VALUE(string(pos22)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[7], READ_SECONDARY_WORLD_ID_VALUE(string(pos20)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[8], READ_SECONDARY_WORLD_ID_VALUE(string(pos18)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[9], READ_SECONDARY_WORLD_ID_VALUE(string(pos16)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[10], READ_SECONDARY_WORLD_ID_VALUE(string(pos10)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[11], READ_SECONDARY_WORLD_ID_VALUE(string(pos11)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[12], READ_SECONDARY_WORLD_ID_VALUE(string(pos24)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[13], READ_SECONDARY_WORLD_ID_VALUE(string(pos25)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[14], READ_SECONDARY_WORLD_ID_VALUE(string(pos26)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[15], READ_SECONDARY_WORLD_ID_VALUE(string(pos27)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[16], READ_SECONDARY_WORLD_ID_VALUE(string(pos05)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[17], READ_SECONDARY_WORLD_ID_VALUE(string(pos04)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[18], READ_SECONDARY_WORLD_ID_VALUE(string(pos07)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[19], READ_SECONDARY_WORLD_ID_VALUE(string(pos08)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[20], READ_SECONDARY_WORLD_ID_VALUE(string(pos17)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[21], READ_SECONDARY_WORLD_ID_VALUE(string(pos19)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[22], READ_SECONDARY_WORLD_ID_VALUE(string(pos14)))
+  COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[23], READ_SECONDARY_WORLD_ID_VALUE(string(pos15)))
   local_int[0] = BIND_MODEL_MOTION_SOUND(803, 4)
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_01)))
   ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01)))
@@ -290,52 +244,29 @@ _4:
   WAIT_FOR_TIMER_LIMIT(10)
   RESET_DRAW_EFFECTS()
   RESET_FIELD_EFFECTS()
-  push local_int[1]
-  COMM 0x009b
-  push local_int[2]
-  COMM 0x009b
-  push local_int[3]
-  COMM 0x009b
-  push local_int[4]
-  COMM 0x009b
-  push local_int[5]
-  COMM 0x009b
-  push local_int[6]
-  COMM 0x009b
-  push local_int[7]
-  COMM 0x009b
-  push local_int[8]
-  COMM 0x009b
-  push local_int[9]
-  COMM 0x009b
-  push local_int[10]
-  COMM 0x009b
-  push local_int[11]
-  COMM 0x009b
-  push local_int[12]
-  COMM 0x009b
-  push local_int[13]
-  COMM 0x009b
-  push local_int[14]
-  COMM 0x009b
-  push local_int[15]
-  COMM 0x009b
-  push local_int[16]
-  COMM 0x009b
-  push local_int[17]
-  COMM 0x009b
-  push local_int[18]
-  COMM 0x009b
-  push local_int[19]
-  COMM 0x009b
-  push local_int[20]
-  COMM 0x009b
-  push local_int[21]
-  COMM 0x009b
-  push local_int[22]
-  COMM 0x009b
-  push local_int[23]
-  COMM 0x009b
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[1])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[2])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[3])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[4])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[5])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[6])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[7])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[8])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[9])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[10])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[11])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[12])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[13])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[14])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[15])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[16])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[17])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[18])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[19])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[20])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[21])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[22])
+  DESTROY_WORLD_EFFECT_OBJECT(local_int[23])
   push local_int[0]
   COMM 0x0016
   COMM 0x0023

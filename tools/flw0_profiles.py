@@ -76,6 +76,17 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(
         0x019, "ADD_FLAGGED_EFFECT_UNIT_TO_WORLD", 1, writes_result=False
     ),
+    NativeCommand(
+        0x01A,
+        "SET_CONTROLLER_VIBRATION",
+        3,
+        writes_result=False,
+        argument_symbols=(
+            IntegerSymbols(((0, "SMALL_MOTOR"), (1, "LARGE_MOTOR"))),
+            None,
+            None,
+        ),
+    ),
     NativeCommand(0x01F, "FADE_BACKGROUND_IN", 1, writes_result=False),
     NativeCommand(0x027, "READ_SOLAR_PHASE", 0, writes_result=True),
     NativeCommand(0x028, "SUBMIT_EVENT_WITH_MODE", 2, writes_result=False),
@@ -96,11 +107,20 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(0x069, "CLEAR_UNIT_LOW_FLAG", 1, writes_result=False),
     NativeCommand(0x06A, "SET_UNIT_LOW_FLAG", 1, writes_result=False),
     NativeCommand(0x06B, "MOVE_OBJECT_ALONG_PATH", 3, writes_result=False),
+    NativeCommand(0x06C, "WAIT_FOR_OBJECT_PATH", 1, writes_result=False),
     NativeCommand(0x070, "CHANGE_ITEM_COUNT", 2, writes_result=False),
     NativeCommand(0x071, "SET_MESSAGE_WINDOW_GEOMETRY", 3, writes_result=False),
     NativeCommand(0x073, "PREPARE_UNIT_MOTION_STATE", 5, writes_result=False),
     NativeCommand(0x094, "READ_SECONDARY_WORLD_ID_VALUE", 1, writes_result=True),
     NativeCommand(0x099, "RESET_FIELD_EFFECTS", 0, writes_result=False),
+    NativeCommand(0x09B, "DESTROY_WORLD_EFFECT_OBJECT", 1, writes_result=False),
+    NativeCommand(
+        0x09D,
+        "COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE",
+        2,
+        writes_result=False,
+    ),
+    NativeCommand(0x0A4, "UPDATE_FIELD_LOOK_AT_SEGMENT", 0, writes_result=False),
     NativeCommand(0x0A5, "CREATE_SCRIPT_TASK", 2, writes_result=True),
     NativeCommand(0x0A6, "DESTROY_REGISTERED_TASK", 1, writes_result=False),
     NativeCommand(0x0A7, "WAIT_FOR_TASK_REMOVAL", 1, writes_result=False),
@@ -173,6 +193,36 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(
         0x116, "TEST_CURRENT_TREASURE_OPENED", 0, writes_result=True
     ),
+    NativeCommand(
+        0x11B, "START_AND_WAIT_FOR_STREAM_SOUND", 1, writes_result=False
+    ),
+    NativeCommand(0x11C, "ADVANCE_STREAM_SOUND_STATE", 0, writes_result=False),
+    NativeCommand(0x11F, "RESET_STREAM_PLAYBACK", 0, writes_result=False),
+    NativeCommand(0x121, "WAIT_FOR_STREAM_IDLE", 0, writes_result=False),
+    NativeCommand(
+        0x124, "CLEAR_WORLD_OBJECT_STATE_FLAGS", 1, writes_result=False
+    ),
+    NativeCommand(0x139, "ADD_PARTY_CURRENCY", 1, writes_result=False),
+    NativeCommand(
+        0x13A,
+        "APPLY_PARTY_TRAP_EFFECT",
+        1,
+        writes_result=False,
+        argument_symbols=(
+            IntegerSymbols(
+                (
+                    (1, "DAMAGE_TEN_PERCENT_HP"),
+                    (2, "DAMAGE_HALF_HP"),
+                    (3, "REDUCE_HP_TO_ONE"),
+                    (4, "INFLICT_POISON"),
+                    (5, "INFLICT_ACHE"),
+                    (6, "INFLICT_CLOSE"),
+                )
+            ),
+        ),
+    ),
+    NativeCommand(0x13C, "SET_MESSAGE_RANGE", 2, writes_result=False),
+    NativeCommand(0x166, "SUBMIT_EVENT_IMMEDIATE", 1, writes_result=False),
     NativeCommand(
         0x1E0, "QUEUE_WORLD_OBJECT_PENDING_VALUE", 2, writes_result=False
     ),
@@ -251,6 +301,14 @@ SHARED_DDS_COMMANDS = (
             ),
         ),
     ),
+    NativeCommand(
+        0x201, "RUN_FIELD_DESTINATION_TRANSITION", 1, writes_result=False
+    ),
+    NativeCommand(0x202, "SET_CURRENT_TASK_SCENE", 0, writes_result=False),
+    NativeCommand(0x203, "NO_OP_FIELD_TRANSITION", 0, writes_result=False),
+    NativeCommand(
+        0x204, "APPLY_CURRENT_TASK_ENTRY_TRIGGER", 0, writes_result=False
+    ),
     NativeCommand(0x205, "ADVANCE_FIELD_INTERACTION", 2, writes_result=True),
     NativeCommand(
         0x206,
@@ -279,6 +337,15 @@ SHARED_DDS_COMMANDS = (
             ),
         ),
     ),
+    NativeCommand(
+        0x209, "CONFIGURE_ELEVATOR_CAMERA_MOVE", 2, writes_result=False
+    ),
+    NativeCommand(
+        0x20A,
+        "RESET_ELEVATOR_CAMERA_MOVE_TRACKING",
+        0,
+        writes_result=False,
+    ),
     NativeCommand(0x20B, "POLL_ELEVATOR_MOVE_STATE", 0, writes_result=True),
     NativeCommand(
         0x20C,
@@ -289,6 +356,23 @@ SHARED_DDS_COMMANDS = (
             IntegerSymbols(((0, "MOTION_DURATION"), (1, "FADE_MODE"))),
         ),
     ),
+    NativeCommand(
+        0x20D, "APPLY_CURRENT_TASK_RECORD_ENTRY", 0, writes_result=False
+    ),
+    NativeCommand(
+        0x20E, "START_CURRENT_FIELD_INTERACTION_EVENT", 0, writes_result=False
+    ),
+    NativeCommand(
+        0x20F,
+        "RUN_FIELD_TRANSITION_SELECTOR",
+        1,
+        writes_result=False,
+        argument_symbols=(
+            IntegerSymbols(((900, "HEAL_FACILITY"), (901, "SAVE_POINT"))),
+        ),
+    ),
+    NativeCommand(0x214, "PLAY_FIELD_SE_VOLUME_PAN", 1, writes_result=False),
+    NativeCommand(0x215, "PLAY_FIELD_SE", 1, writes_result=False),
     NativeCommand(0x219, "READ_WARP_EFFECT_MODE", 0, writes_result=True),
     NativeCommand(
         0x21D,
@@ -296,6 +380,19 @@ SHARED_DDS_COMMANDS = (
         1,
         writes_result=True,
     ),
+)
+
+
+FIELD_RUNTIME_COMMANDS = (
+    # AICALC assigns 0x0AB to its battle-AI command table instead.
+    NativeCommand(0x0AB, "SETUP_FADE_FRAMES", 2, writes_result=False),
+)
+
+
+DDS2_FIELD_COMMANDS = (
+    NativeCommand(0x1FC, "APPLY_ROOM_MODE_GROUP_ZERO", 4, writes_result=False),
+    NativeCommand(0x1FD, "APPLY_ROOM_MODE_GROUP_ONE", 4, writes_result=False),
+    NativeCommand(0x21A, "RESET_FIELD_AFTER_EVENT", 0, writes_result=False),
 )
 
 
@@ -552,10 +649,17 @@ DDS2_EVENT_IDS = frozenset(
 )
 
 DDS1 = CommandProfile(
-    "dds1", SHARED_DDS_COMMANDS + BATTLE_RUNTIME_COMMANDS, DDS1_EVENT_IDS
+    "dds1",
+    SHARED_DDS_COMMANDS + FIELD_RUNTIME_COMMANDS + BATTLE_RUNTIME_COMMANDS,
+    DDS1_EVENT_IDS,
 )
 DDS2 = CommandProfile(
-    "dds2", SHARED_DDS_COMMANDS + BATTLE_RUNTIME_COMMANDS, DDS2_EVENT_IDS
+    "dds2",
+    SHARED_DDS_COMMANDS
+    + FIELD_RUNTIME_COMMANDS
+    + DDS2_FIELD_COMMANDS
+    + BATTLE_RUNTIME_COMMANDS,
+    DDS2_EVENT_IDS,
 )
 DDS1_AICALC = CommandProfile(
     "dds1-aicalc",
