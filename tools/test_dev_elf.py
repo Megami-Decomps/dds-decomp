@@ -168,6 +168,184 @@ def _relocation_elf(
     return bytes(image)
 
 
+def _metadata_elf(
+    symbols: list[tuple[str, int, int, int, int]],
+    relocations: list[tuple[int, int, str]],
+) -> bytes:
+    symbol_offset = 0x100
+    symbol_size = (len(symbols) + 1) * dev_elf.SYMBOL_ENTRY.size
+    relocation_offset = (symbol_offset + symbol_size + 0xF) & ~0xF
+    relocation_size = len(relocations) * dev_elf.REL_ENTRY.size
+    string_offset = (relocation_offset + relocation_size + 0xF) & ~0xF
+    strings = bytearray(b"\0")
+    name_offsets = []
+    for name, _, _, _, _ in symbols:
+        name_offsets.append(len(strings))
+        strings.extend(name.encode("ascii") + b"\0")
+    section_offset = (string_offset + len(strings) + 0xF) & ~0xF
+    image = bytearray(section_offset + 4 * dev_elf.SECTION_HEADER.size)
+    ident = b"\x7fELF" + bytes((1, 1, 1)) + bytes(9)
+    dev_elf.ELF_HEADER.pack_into(
+        image,
+        0,
+        ident,
+        2,
+        dev_elf.EM_MIPS,
+        1,
+        0,
+        dev_elf.ELF_HEADER.size,
+        section_offset,
+        0,
+        dev_elf.ELF_HEADER.size,
+        dev_elf.PROGRAM_HEADER.size,
+        0,
+        dev_elf.SECTION_HEADER.size,
+        4,
+        0,
+    )
+    indexes: dict[str, int] = {}
+    for index, ((name, value, size, info, section), name_offset) in enumerate(
+        zip(symbols, name_offsets), start=1
+    ):
+        indexes.setdefault(name, index)
+        dev_elf.SYMBOL_ENTRY.pack_into(
+            image,
+            symbol_offset + index * dev_elf.SYMBOL_ENTRY.size,
+            name_offset,
+            value,
+            size,
+            info,
+            0,
+            section,
+        )
+    for index, (offset, kind, name) in enumerate(relocations):
+        dev_elf.REL_ENTRY.pack_into(
+            image,
+            relocation_offset + index * dev_elf.REL_ENTRY.size,
+            offset,
+            (indexes[name] << 8) | kind,
+        )
+    image[string_offset : string_offset + len(strings)] = strings
+    dev_elf.SECTION_HEADER.pack_into(
+        image,
+        section_offset + dev_elf.SECTION_HEADER.size,
+        0,
+        dev_elf.SHT_SYMTAB,
+        0,
+        0,
+        symbol_offset,
+        symbol_size,
+        3,
+        0,
+        4,
+        dev_elf.SYMBOL_ENTRY.size,
+    )
+    dev_elf.SECTION_HEADER.pack_into(
+        image,
+        section_offset + 2 * dev_elf.SECTION_HEADER.size,
+        0,
+        dev_elf.SHT_REL,
+        0,
+        0,
+        relocation_offset,
+        relocation_size,
+        1,
+        0,
+        4,
+        dev_elf.REL_ENTRY.size,
+    )
+    dev_elf.SECTION_HEADER.pack_into(
+        image,
+        section_offset + 3 * dev_elf.SECTION_HEADER.size,
+        0,
+        dev_elf.SHT_STRTAB,
+        0,
+        0,
+        string_offset,
+        len(strings),
+        0,
+        0,
+        1,
+        0,
+    )
+    return bytes(image)
+
+
+def _allocated_object(sections: list[tuple[str, int, int]]) -> bytes:
+    """Create a minimal relocatable ELF with named allocated sections."""
+
+    names = bytearray(b"\0.shstrtab\0")
+    name_offsets = {".shstrtab": 1}
+    for name, _, _ in sections:
+        name_offsets[name] = len(names)
+        names.extend(name.encode("ascii") + b"\0")
+    data_offset = 0x100
+    section_offsets = []
+    cursor = data_offset
+    for _, size, section_type in sections:
+        section_offsets.append(cursor)
+        if section_type != dev_elf.SHT_NOBITS:
+            cursor += size
+    string_offset = cursor
+    cursor += len(names)
+    section_offset = (cursor + 0xF) & ~0xF
+    image = bytearray(
+        section_offset + (len(sections) + 2) * dev_elf.SECTION_HEADER.size
+    )
+    ident = b"\x7fELF" + bytes((1, 1, 1)) + bytes(9)
+    dev_elf.ELF_HEADER.pack_into(
+        image,
+        0,
+        ident,
+        1,
+        dev_elf.EM_MIPS,
+        1,
+        0,
+        dev_elf.ELF_HEADER.size,
+        section_offset,
+        0,
+        dev_elf.ELF_HEADER.size,
+        dev_elf.PROGRAM_HEADER.size,
+        0,
+        dev_elf.SECTION_HEADER.size,
+        len(sections) + 2,
+        1,
+    )
+    image[string_offset : string_offset + len(names)] = names
+    dev_elf.SECTION_HEADER.pack_into(
+        image,
+        section_offset + dev_elf.SECTION_HEADER.size,
+        name_offsets[".shstrtab"],
+        dev_elf.SHT_STRTAB,
+        0,
+        0,
+        string_offset,
+        len(names),
+        0,
+        0,
+        1,
+        0,
+    )
+    for index, ((name, size, section_type), offset) in enumerate(
+        zip(sections, section_offsets), start=2
+    ):
+        dev_elf.SECTION_HEADER.pack_into(
+            image,
+            section_offset + index * dev_elf.SECTION_HEADER.size,
+            name_offsets[name],
+            section_type,
+            dev_elf.SHF_ALLOC,
+            0,
+            offset,
+            size,
+            0,
+            0,
+            4,
+            0,
+        )
+    return bytes(image)
+
+
 class DevElfTests(unittest.TestCase):
     def test_relocation_closure_accepts_only_explained_prefix_changes(self) -> None:
         old_vaddr = 0x00100020
@@ -287,8 +465,27 @@ class DevElfTests(unittest.TestCase):
             ],
         )
 
+    def test_linked_layout_resolves_dynamic_addition_without_replacement(self) -> None:
+        symbols = [
+            ("dev_move_0_START", 0x00412000, 0, 0, 1),
+            ("dev_move_0_END", 0x00412004, 0, 0, 1),
+            ("dev_addition_0_START", 0x00412004, 0, 0, 1),
+            ("dev_addition_0_END", 0x0041200C, 0, 0, 1),
+        ]
+        spec = {
+            "moves": [{"old_vaddr": 0x00100020, "old_size": 4}],
+            "additions": [{}],
+        }
+        resolved, _ = dev_elf._resolve_linked_layout(
+            spec, _metadata_elf(symbols, [])
+        )
+        self.assertEqual(resolved["moves"][0]["new_vaddr"], 0x00412000)
+        self.assertEqual(resolved["moves"][0]["new_size"], 4)
+        self.assertEqual(resolved["additions"][0]["new_vaddr"], 0x00412004)
+        self.assertEqual(resolved["additions"][0]["size"], 8)
+
     def test_stale_reference_scan_rejects_words_and_jumps(self) -> None:
-        ranges = [(0x00100020, 0x00100040, 0x00412000, 0x00412020)]
+        ranges = [(0x00100020, 0x00100040, 0x00412000, 0x00412024)]
         image = bytearray(_elf())
         struct.pack_into("<I", image, 0x1000, 0x00100024)
         with self.assertRaisesRegex(dev_elf.DevElfError, "stale absolute word"):
@@ -403,6 +600,237 @@ class DevElfTests(unittest.TestCase):
         self.assertEqual(targets[relocations[1]], {target})
         self.assertEqual(targets[relocations[2]], {target + 4})
 
+    def test_relocation_closure_keeps_hi_active_for_multiple_lows(self) -> None:
+        old_start = 0x00100040
+        new_start = 0x00412000
+        base = bytearray(_elf())
+        old_hi, _ = _address_words(old_start)
+        new_hi, _ = _address_words(new_start)
+        struct.pack_into("<I", base, 0x1000, old_hi)
+        struct.pack_into(
+            "<I", base, 0x1004, (0x23 << 26) | (4 << 21) | (2 << 16) | 0x40
+        )
+        struct.pack_into(
+            "<I", base, 0x1008, (0x2B << 26) | (4 << 21) | (3 << 16) | 0x44
+        )
+        base[0x1040:0x1048] = bytes.fromhex("0800E00300000000")
+
+        linked = bytearray(base)
+        struct.pack_into("<I", linked, 0x1000, new_hi)
+        struct.pack_into(
+            "<I", linked, 0x1004, (0x23 << 26) | (4 << 21) | (2 << 16) | 0x2000
+        )
+        struct.pack_into(
+            "<I", linked, 0x1008, (0x2B << 26) | (4 << 21) | (3 << 16) | 0x2004
+        )
+        linked[0x1040:0x1048] = bytes(8)
+        linked.extend(bytes((-len(linked)) & 0xFFF))
+        linked.extend(bytes.fromhex("0800E00300000000"))
+        spec = {
+            "format": 1,
+            "base_sha1": hashlib.sha1(base).hexdigest(),
+            "extension_vaddr": new_start,
+            "retail_static_end": 0x0040C5F0,
+            "moves": [
+                {
+                    "old_vaddr": old_start,
+                    "new_vaddr": new_start,
+                    "size": 8,
+                    "expected_relocations": 0,
+                }
+            ],
+        }
+        output, _ = dev_elf.finalize_image(bytes(base), bytes(linked), spec)
+        relocation_elf = _relocation_elf(
+            [
+                (0x00100000, new_start, 5, "target"),
+                (0x00100004, new_start, 6, "target"),
+                (0x00100008, new_start, 6, "target"),
+            ]
+        )
+        summary = dev_elf.audit_relocation_closure(
+            bytes(base), output, relocation_elf, spec
+        )
+        self.assertEqual(summary["changed_relocation_words"], 3)
+        self.assertEqual(summary["checked_hi_lo_pairs"], 2)
+
+    def test_changed_size_replacement_maps_shifted_symbol_and_addend(self) -> None:
+        old_start = 0x00100040
+        old_tail = old_start + 8
+        new_start = 0x00412000
+        new_tail = new_start + 0xC
+        base = bytearray(_elf())
+        struct.pack_into("<I", base, 0x1000, (3 << 26) | (old_tail >> 2))
+        struct.pack_into("<I", base, 0x1004, old_tail + 4)
+        base[0x1040:0x1050] = bytes(range(1, 17))
+
+        linked = bytearray(base)
+        struct.pack_into("<I", linked, 0x1000, (3 << 26) | (new_tail >> 2))
+        struct.pack_into("<I", linked, 0x1004, new_tail + 4)
+        linked[0x1040:0x1050] = bytes(16)
+        linked.extend(bytes((-len(linked)) & 0xFFF))
+        linked.extend(bytes(range(0x14)))
+        spec = {
+            "format": 1,
+            "base_sha1": hashlib.sha1(base).hexdigest(),
+            "extension_vaddr": new_start,
+            "retail_static_end": 0x0040C5F0,
+            "expected_replacement_symbols": 2,
+            "expected_shifted_replacement_symbols": 1,
+            "expected_shifted_symbol_relocations": 2,
+            "replacements": [
+                {
+                    "retail_object": "old.o",
+                    "object": "new.o",
+                    "retained_sections": [],
+                }
+            ],
+            "moves": [
+                {
+                    "object": "old.o",
+                    "section": ".text",
+                    "old_vaddr": old_start,
+                    "old_size": 0x10,
+                    "expected_relocations": 0,
+                }
+            ],
+        }
+        output, _ = dev_elf.finalize_image(bytes(base), bytes(linked), spec)
+        global_func = (dev_elf.STB_GLOBAL << 4) | 2
+        global_notype = dev_elf.STB_GLOBAL << 4
+        development_symbols = [
+            ("dev_move_0_START", new_start, 0, global_notype, 1),
+            ("dev_move_0_END", new_start + 0x14, 0, global_notype, 1),
+            ("head", new_start, 0xC, global_func, 1),
+            ("tail", new_tail, 8, global_func, 1),
+        ]
+        relocations = [
+            (0x00100000, 4, "tail"),
+            (0x00100004, 2, "tail"),
+        ]
+        relocation_elf = _metadata_elf(development_symbols, relocations)
+        retail_symbol_elf = _metadata_elf(
+            [
+                ("head", old_start, 8, global_func, 1),
+                ("tail", old_tail, 8, global_func, 1),
+            ],
+            [],
+        )
+
+        summary = dev_elf.audit_relocation_closure(
+            bytes(base), output, relocation_elf, spec, retail_symbol_elf
+        )
+        self.assertEqual(summary["changed_relocation_words"], 2)
+        self.assertEqual(summary["replacement_symbols"], 2)
+        self.assertEqual(summary["shifted_replacement_symbols"], 1)
+        self.assertEqual(summary["shifted_symbol_relocations"], 2)
+        self.assertEqual(output[0x1040:0x1050], bytes(16))
+        self.assertEqual(struct.unpack_from("<I", output, 0x1004)[0], new_tail + 4)
+
+        with self.assertRaisesRegex(
+            dev_elf.DevElfError, "expected_shifted_replacement_symbols is 1"
+        ):
+            dev_elf.audit_relocation_closure(
+                bytes(base),
+                output,
+                relocation_elf,
+                {**spec, "expected_shifted_replacement_symbols": 3},
+                retail_symbol_elf,
+            )
+
+        missing_count = dict(spec)
+        del missing_count["expected_replacement_symbols"]
+        with self.assertRaisesRegex(
+            dev_elf.DevElfError,
+            "replacement descriptor requires expected_replacement_symbols",
+        ):
+            dev_elf.audit_relocation_closure(
+                bytes(base),
+                output,
+                relocation_elf,
+                missing_count,
+                retail_symbol_elf,
+            )
+
+        wrong = bytearray(output)
+        struct.pack_into("<I", wrong, 0x1004, new_tail)
+        with self.assertRaisesRegex(dev_elf.DevElfError, "does not match"):
+            dev_elf.audit_relocation_closure(
+                bytes(base), bytes(wrong), relocation_elf, spec, retail_symbol_elf
+            )
+
+        missing_symbols = development_symbols[:-1] + [
+            ("tail", new_tail, 0, global_func, dev_elf.SHN_UNDEF)
+        ]
+        with self.assertRaisesRegex(dev_elf.DevElfError, "tail has 0 development"):
+            dev_elf.audit_relocation_closure(
+                bytes(base),
+                output,
+                _metadata_elf(missing_symbols, relocations),
+                spec,
+                retail_symbol_elf,
+            )
+
+        ambiguous_symbols = development_symbols + [
+            ("tail", new_tail, 8, global_func, 1)
+        ]
+        with self.assertRaisesRegex(dev_elf.DevElfError, "tail has 2 development"):
+            dev_elf.audit_relocation_closure(
+                bytes(base),
+                output,
+                _metadata_elf(ambiguous_symbols, relocations),
+                spec,
+                retail_symbol_elf,
+            )
+
+    def test_replacement_object_rejects_unaccounted_allocated_section(self) -> None:
+        spec = {
+            "replacements": [
+                {
+                    "retail_object": "old.o",
+                    "object": "new.o",
+                    "retained_sections": [
+                        {"section": ".data", "size": 0},
+                        {"section": ".bss", "size": 0},
+                    ],
+                }
+            ],
+            "moves": [{"object": "old.o", "section": ".text"}],
+        }
+        replacement = _allocated_object(
+            [
+                (".text", 0x14, 1),
+                (".data", 0, 1),
+                (".bss", 0, dev_elf.SHT_NOBITS),
+                (".sdata", 4, 1),
+            ]
+        )
+        with self.assertRaisesRegex(
+            dev_elf.DevElfError, "unaccounted allocated section .sdata"
+        ):
+            dev_elf.audit_replacement_objects(spec, [replacement])
+
+    def test_replacement_object_rejects_nonempty_retained_section(self) -> None:
+        spec = {
+            "replacements": [
+                {
+                    "retail_object": "old.o",
+                    "object": "new.o",
+                    "retained_sections": [{"section": ".data", "size": 4}],
+                }
+            ],
+            "moves": [{"object": "old.o", "section": ".text"}],
+        }
+        replacement = _allocated_object([(".text", 4, 1), (".data", 4, 1)])
+        with self.assertRaisesRegex(dev_elf.DevElfError, "must remain empty"):
+            dev_elf.audit_replacement_objects(spec, [replacement])
+
+        spec["replacements"][0]["retained_sections"][0]["size"] = 0
+        with self.assertRaisesRegex(
+            dev_elf.DevElfError, "section .data has size 0x4, expected 0x0"
+        ):
+            dev_elf.audit_replacement_objects(spec, [replacement])
+
     def test_finalize_adds_segment_and_separates_heap_from_bss(self) -> None:
         retail_end = 0x0040C5F0
         base = bytearray(_elf())
@@ -510,6 +938,8 @@ SECTIONS
         self.assertEqual(result.count("build/dds1/a.o(.text);"), 1)
         self.assertIn("build/dds1/dev.o(.text);", result)
         self.assertIn("build/dds1/dev.o(.data);", result)
+        self.assertIn("dev_addition_0_START", result)
+        self.assertIn("dev_addition_0_END", result)
         self.assertIn(".dev_extension 0x412000", result)
         self.assertLess(result.index(".dev_extension"), result.index("/DISCARD/"))
 
@@ -523,6 +953,59 @@ SECTIONS
         duplicate = "SECTIONS {\n a.o(.text);\n a.o(.text);\n /DISCARD/ : {}\n}"
         with self.assertRaisesRegex(dev_elf.DevElfError, "found 2"):
             dev_elf.render_linker_script(duplicate, spec)
+
+    def test_linker_script_substitutes_dynamic_replacement(self) -> None:
+        source = """\
+SECTIONS
+{
+    .text :
+    {
+        old.o(.text);
+    }
+    .data :
+    {
+        old.o(.data);
+    }
+    .bss :
+    {
+        old.o(.bss);
+    }
+    elf_trailer_VRAM_END = .;
+    /DISCARD/ : { *(*); }
+}
+"""
+        spec = {
+            "extension_vaddr": 0x412000,
+            "replacements": [
+                {
+                    "retail_object": "old.o",
+                    "object": "new.o",
+                    "retained_sections": [
+                        {"section": ".data", "size": 0},
+                        {"section": ".bss", "size": 0},
+                    ],
+                }
+            ],
+            "moves": [
+                {
+                    "object": "old.o",
+                    "section": ".text",
+                    "old_size": 0x10,
+                    "alignment": 8,
+                }
+            ],
+        }
+        result = dev_elf.render_linker_script(source, spec)
+        self.assertIn(". += 0x10; /* development slot", result)
+        self.assertIn("dev_move_0_START", result)
+        self.assertIn("new.o(.text);", result)
+        self.assertIn("new.o(.data);", result)
+        self.assertIn("new.o(.bss);", result)
+        self.assertIn("dev_replacement_0_retained_0_START", result)
+        self.assertIn("dev_replacement_0_retained_1_END", result)
+        self.assertNotIn("old.o(.text);", result)
+        self.assertNotIn("old.o(.data);", result)
+        self.assertNotIn("old.o(.bss);", result)
 
 
 if __name__ == "__main__":
