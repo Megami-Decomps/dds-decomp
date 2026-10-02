@@ -1104,20 +1104,27 @@ area number=1 name="01"
 label r_01cam_01_data
 camera fovy=0.6024157404899597
 
+zeros 12
 label r_01cam_03_data
 camera fovy=0.6024156808853149
 
+zeros 12
 label r_01cam_02_data
 camera fovy=0.7444503307342529
 
+zeros 12
 label r_01cam_11_data
 camera fovy=0.6024157404899597
 
+zeros 12
 label r_01cam_12_data
 camera fovy=0.6024157404899597
 
+zeros 12
 label r_01cam_13_data
-bytes eb371a3f4576656e0000000000000000
+camera fovy=0.6024157404899597
+
+bytes 4576656e0000000000000000
 label type_6_resources
 # type_6_6
 resource serial=6 flags=1 type=6 name=@type_6_6_name reserved=0 transform=@type_6_6_transform area=null link=null sblock=null data=@type_6_6_data

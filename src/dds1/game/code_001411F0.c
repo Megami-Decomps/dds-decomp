@@ -61,6 +61,10 @@ extern s32 D_003BAFBC;
 
 extern s32 D_003BAFC4;
 
+extern s32 D_003BAFB8;
+
+extern s32 D_003BAFC0;
+
 extern s32 D_003BAFB4;
 
 extern u32 D_003BAFA0;
@@ -2070,7 +2074,105 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0824);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0828);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", fldStartMiniTitleForUnlock);
+extern void fldTitleMini(void);
+
+void fldStartMiniTitleForUnlock(s32 id) {
+    char path[0x20];
+    s32 data;
+    s32 handle;
+
+    switch (id) {
+    case 22:
+        if (mdlFlagTest(0x440) == 0) {
+            return;
+        }
+        break;
+    case 23:
+        if (mdlFlagTest(0x480) == 0) {
+            return;
+        }
+        break;
+    case 24:
+        if (mdlFlagTest(0x4C0) == 0) {
+            return;
+        }
+        break;
+    case 25:
+        if (mdlFlagTest(0x500) == 0) {
+            return;
+        }
+        break;
+    case 26:
+        if (mdlFlagTest(0x560) == 0) {
+            return;
+        }
+        break;
+    case 27:
+        if (mdlFlagTest(0x580) == 0) {
+            return;
+        }
+        break;
+    case 28:
+        if (mdlFlagTest(0x5A0) == 0) {
+            return;
+        }
+        break;
+    case 29:
+        if (mdlFlagTest(0x600) == 0) {
+            return;
+        }
+        break;
+    case 30:
+        if (mdlFlagTest(0x620) == 0) {
+            return;
+        }
+        break;
+    case 31:
+        if (mdlFlagTest(0x6E0) == 0) {
+            return;
+        }
+        break;
+    case 32:
+        if (mdlFlagTest(0x6E1) == 0) {
+            return;
+        }
+        break;
+    case 33:
+        if (mdlFlagTest(0x6E2) == 0) {
+            return;
+        }
+        break;
+    case 34:
+        if (mdlFlagTest(0x6E3) == 0) {
+            return;
+        }
+        break;
+    case 35:
+        if (mdlFlagTest(0x6E4) == 0) {
+            return;
+        }
+        break;
+    case 38:
+        if (mdlFlagTest(0x6E5) == 0) {
+            return;
+        }
+        break;
+    default:
+        return;
+    }
+    D_003BAFC0 = id;
+    D_003BAFB8 = 0;
+    D_003BAFBC = 0;
+    func_003014F0(path, "/fld/f/pnl/ds%03d.tmx", id);
+    handle = sdfReadNamedResource(path, &data, 0);
+    D_003BAFC4 = sdfTexAcquireResourceTexture(data);
+    sdfReleaseResourceAllocation(handle);
+    if (fldTitleIsActive() == 0) {
+        kwlnTaskCreate(D_003A0828, 0x2B0A, 0, 1, fldTitleMini, fldReleaseTitleMiniTexture, 0);
+    }
+}
+
+static const char s_fieldWeatherLimitPath[] __attribute__((aligned(16))) = "/fld/f/bin/limit_00.tmx";
 
 void fldRequestMiniTitleDismiss(void) {
     if (D_003BAFBC == 0) {
@@ -2088,7 +2190,7 @@ void fldLoadWeatherEffects(void) {
     s32 handle;
     s32 size;
 
-    handle = sdfReadNamedResource("/fld/f/bin/limit_00.tmx", &size, 0);
+    handle = sdfReadNamedResource(s_fieldWeatherLimitPath, &size, 0);
     fldWeatherLimitTexture = sdfTexAcquireResourceTexture(size);
     sdfQueueNonzeroResourceId(handle);
     fldDamEffectResource = sdfReadNamedResource("/fld/f/bin/FH_DAM_2.EPL", &fldDamEffectData, 0);
@@ -2614,4 +2716,3 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAFEC);
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAFF0);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldWeatherLimitTexture);
-

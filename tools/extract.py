@@ -17,6 +17,7 @@ import io
 import json
 import struct
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 
 import pycdlib
@@ -74,6 +75,31 @@ def _resolve_ddt(data: bytes, path: str) -> tuple[int, int]:
     if size < 0:
         raise IsADirectoryError(path)
     return relative_lsn, size
+
+
+def walk_ddt(data: bytes) -> Iterator[tuple[str, int, int]]:
+    """Yield every DDS3.DDT file as (absolute path, relative LSN, size)."""
+
+    active: set[int] = set()
+
+    def visit(offset: int, parent: str) -> Iterator[tuple[str, int, int]]:
+        if offset in active:
+            raise ValueError(f"DDS3.DDT directory cycle at entry 0x{offset:x}")
+        name_offset, location, count = _ddt_entry(data, offset)
+        name = _ddt_name(data, name_offset)
+        path = parent if not name else f"{parent}/{name}"
+        if count >= 0:
+            yield path or "/", location, count
+            return
+
+        active.add(offset)
+        try:
+            for index in range(-count):
+                yield from visit(location + index * 12, path)
+        finally:
+            active.remove(offset)
+
+    yield from visit(0, "")
 
 
 def _extract_archive_files(version: str, iso: Path, cd: pycdlib.PyCdlib, out_dir: Path) -> None:
