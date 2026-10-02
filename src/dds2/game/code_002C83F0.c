@@ -16,6 +16,7 @@ typedef struct FileReqEntry {
 
 extern FileReqEntry fileRequestEntries[];
 
+extern s32 D_00437CC0;
 extern s32 D_00439000;
 
 void fileReqInit(s32 request);
@@ -30,6 +31,11 @@ struct FileCbNode {
     FileCbNode *next;
 };
 
+typedef struct FileManSlot {
+    s32 completedBytes;
+    void *request;
+} FileManSlot;
+
 /* Work area behind the fileMan task (D_003DC658, 0x40 bytes). */
 typedef struct FileManWork {
     s32 sema;   /* 0x00 */
@@ -43,25 +49,29 @@ typedef struct FileManWork {
     void *unk14; /* 0x14 */
     u32 unk18;  /* 0x18 */
     s32 unk1C;  /* 0x1C */
-    u8 unk20[0x20]; /* 0x20 */
+    FileManSlot slots[4]; /* 0x20 */
 } FileManWork;
 
-/* Async job handled by func_00288E70 and friends. */
+/* Async job handled by func_002C83F0 and friends. */
 typedef struct FileJob {
     u8 unk0;      /* 0x00 */
     u8 state;     /* 0x01 */
     u8 unk2[2];   /* 0x02 */
-    u32 unk4;     /* 0x04 */
+    struct FileJob *unk4; /* 0x04 */
     u8 unk8[4];   /* 0x08 */
     void *deviceRequest; /* 0x0C: transfer backend dereferences mode at +0x16 */
     s32 transferBytes; /* 0x10: capped at 0x8000 for each device operation */
-    u8 unk14[0x14]; /* 0x14 */
+    s32 totalBytes; /* 0x14 */
+    u8 pad18[0x10];
     u32 transferAddress; /* 0x28: forwarded to backend request at +0x20 */
+    u8 pad2C[0x3C];
+    u16 stateRequired; /* 0x68 */
+    u16 slot; /* 0x6A */
 } FileJob;
 
 extern FileManWork fileManagerWork;
 
-void WaitSema(s32 sema);
+s32 WaitSema(s32 sema);
 
 s32 SignalSema(s32 sema);
 
@@ -88,7 +98,71 @@ s32 fileManUpdate(void);
 /* Flag words of the entry table: entry arg0 occupies 0x19 words. */
 extern u32 fileRequestSlotFlags[];
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C83F0);
+extern s32 sdfDevQueueControlRequest(void *);
+extern s32 sdfDevQueueActiveOperation(void *);
+extern s32 sdfDevQueueReleaseState(void *);
+extern void fileQueuePendingRequestInFreeSlot(FileJob *);
+extern void filePrependNode(void *, void *);
+extern void fileUnlinkNode(void *, void *);
+extern s32 func_002C8AC0(void);
+
+s32 func_002C83F0(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileJob *job) {
+    FileManWork *work = &fileManagerWork;
+    s32 saved;
+
+    switch (event) {
+    case 2:
+        job->deviceRequest = deviceRequest;
+        job->state = 2;
+        sdfDevQueueControlRequest(deviceRequest);
+        break;
+    case 4:
+        job->transferBytes = byteCount;
+        job->state = FILE_JOB_READY;
+        job->totalBytes = byteCount;
+        fileQueuePendingRequestInFreeSlot(job);
+        break;
+    case 5:
+        WaitSema(work->sema);
+        if (job->stateRequired != 0) {
+            job->state = 5;
+        } else {
+            work->slots[job->slot].completedBytes = byteCount;
+            job->transferBytes -= byteCount;
+            if (job->transferBytes == 0) {
+                job->state = 5;
+                work->unk8 = job->unk4;
+                if (job->unk4 == NULL) {
+                    work->unkC = 0;
+                }
+            } else {
+                job->state = FILE_JOB_READY;
+            }
+        }
+        work->unk6++;
+        if (job->state == 5) {
+            filePrependNode(work, job);
+            SignalSema(work->sema);
+            sdfDevQueueActiveOperation(deviceRequest);
+        } else {
+            SignalSema(work->sema);
+        }
+        saved = D_00437CC0;
+        D_00437CC0 = 1;
+        func_002C8AC0();
+        D_00437CC0 = saved;
+        break;
+    case 7:
+        WaitSema(work->sema);
+        fileUnlinkNode(work, job);
+        SignalSema(work->sema);
+        sdfDevQueueReleaseState(deviceRequest);
+        job->deviceRequest = NULL;
+        job->state = 6;
+        break;
+    }
+    return 0;
+}
 
 void fileStartChunkedReadWhenReady(FileJob *job) {
     WaitSema(fileManagerWork.sema);
@@ -210,4 +284,3 @@ void func_002C92D0(u32 arg0) {
 INCLUDE_SDATA(const s32, "game/code_002C83F0", D_00437CC0);
 
 INCLUDE_SDATA(const s32, "game/code_002C83F0", D_00437CC8);
-
