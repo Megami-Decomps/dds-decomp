@@ -856,3 +856,5 @@ s32 sdfGridSeekLastNode(s32 widget) {
     return sdfGridSeekSelectedNodeByIndex(((GridScrollControl *)widget)->count - 1, (void *)widget);
 }
 
+INCLUDE_RODATA(const s32, "game/code_002BF790", fldLocalMapTaskName);
+
