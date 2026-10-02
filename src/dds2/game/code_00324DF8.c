@@ -179,7 +179,37 @@ void func_00326158(f32 *vector, f32 angle) {
     vector[1] = rotated[1];
 }
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_003262A8);
+/* Rotate a vector about a normalized axis using an axis-angle matrix. */
+void func_003262A8(f32 *vector, f32 *axis, f32 angle) {
+    SdfVec4 normalized;
+    SdfVec4 source;
+    SdfVec4 temporary;
+    f32 matrix[9];
+
+    memset(&source, 0, sizeof(source));
+    source.x = axis[0];
+    source.y = axis[1];
+    source.z = axis[2];
+    normalized = source;
+    memset(&temporary, 0, sizeof(temporary));
+    temporary.x = vector[0];
+    temporary.y = vector[1];
+    temporary.z = vector[2];
+    source = temporary;
+    sdfVec3Normalize(&normalized.x);
+    matrix[0] = normalized.x * normalized.x * (1.0f - cos(angle)) + cos(angle);
+    matrix[1] = normalized.x * normalized.y * (1.0f - cos(angle)) - normalized.z * sin(angle);
+    matrix[2] = normalized.x * normalized.z * (1.0f - cos(angle)) + normalized.y * sin(angle);
+    matrix[3] = normalized.y * normalized.x * (1.0f - cos(angle)) + normalized.z * sin(angle);
+    matrix[4] = normalized.y * normalized.y * (1.0f - cos(angle)) + cos(angle);
+    matrix[5] = normalized.y * normalized.z * (1.0f - cos(angle)) - normalized.x * sin(angle);
+    matrix[6] = normalized.z * normalized.x * (1.0f - cos(angle)) - normalized.y * sin(angle);
+    matrix[7] = normalized.z * normalized.y * (1.0f - cos(angle)) + normalized.x * sin(angle);
+    matrix[8] = normalized.z * normalized.z * (1.0f - cos(angle)) + cos(angle);
+    vector[0] = source.x * matrix[0] + source.y * matrix[3] + source.z * matrix[6];
+    vector[1] = source.x * matrix[1] + source.y * matrix[4] + source.z * matrix[7];
+    vector[2] = source.x * matrix[2] + source.y * matrix[5] + source.z * matrix[8];
+}
 
 void sdfVectorAdd(float *vector, float *delta) {
     *vector = *vector + *delta;
