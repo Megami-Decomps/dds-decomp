@@ -35,6 +35,10 @@ ENCOUNTER_ZONE_ATTRIBUTE = 0x2000
 STRING_SIZE = 0x10
 EFFECT_SIZE = 0x30
 LIGHT_SIZE = 0x34
+MODEL_RESOURCE_SIZE = 0x24
+MODEL_ITEM_LIST_SIZE = 0x10
+MODEL_ITEM_SIZE = 0x50
+MODEL_BOUNDS_SIZE = 0x18
 MOTION_CURVE_SIZE = 0x10
 MOTION_KINDS = {
     0: ("vector3", 3),
@@ -95,6 +99,34 @@ class MotionTrack:
     values: int
     keys: int
     word_0c: int
+
+
+@dataclass(frozen=True)
+class ModelResource:
+    flags: int
+    lod_count: int
+    reserved_08: int
+    reserved_0c: int
+    items: int
+    assets: int
+    slot_count: int
+    parameter: int
+    motion: int
+
+
+@dataclass(frozen=True)
+class ModelItem:
+    command_mode: int
+    reserved_02: int
+    word_04: int
+    node_id: int
+    parent: int
+    rotation: tuple[float, float, float]
+    reserved_1c: int
+    position: tuple[float, float, float, float]
+    scale: tuple[float, float, float, float]
+    bounds: int
+    commands: int
 
 
 def _face_encounter_zone(face: tuple[int, ...], face_index: int) -> int | None:
@@ -311,6 +343,101 @@ def _read_resources(data: bytes, rows: tuple[TypeRow, ...]) -> tuple[Resource, .
     return tuple(resources)
 
 
+def _read_model_resource(
+    data: bytes, offset: int, data_end: int, context: str
+) -> tuple[ModelResource, tuple[ModelItem, ...]]:
+    _range(data, offset, MODEL_RESOURCE_SIZE, context)
+    values = struct.unpack_from("<9I", data, offset)
+    resource = ModelResource(*values)
+    if (
+        resource.flags != 0
+        or resource.lod_count != 1
+        or resource.reserved_08 != 0
+        or resource.reserved_0c != 0
+        or resource.slot_count != 0
+        or resource.parameter != 0
+    ):
+        raise FldError(f"{context} has an unsupported model-resource profile")
+    if not resource.items:
+        raise FldError(f"{context} has no model-item list")
+    if not resource.assets or not resource.motion:
+        raise FldError(f"{context} has a null asset or motion definition")
+
+    if resource.items + MODEL_ITEM_LIST_SIZE > data_end:
+        raise FldError(f"{context} model-item list lies outside the data region")
+    _range(data, resource.items, MODEL_ITEM_LIST_SIZE, context + " model-item list")
+    count, word_04, word_08, word_0c = struct.unpack_from("<4I", data, resource.items)
+    if word_04 != 0 or word_08 != 0 or word_0c != 0:
+        raise FldError(f"{context} model-item list has nonzero reserved words")
+    if resource.items + MODEL_ITEM_LIST_SIZE + count * MODEL_ITEM_SIZE > data_end:
+        raise FldError(f"{context} model items lie outside the data region")
+    _range(
+        data,
+        resource.items + MODEL_ITEM_LIST_SIZE,
+        count * MODEL_ITEM_SIZE,
+        context + " model items",
+    )
+    items = []
+    for index in range(count):
+        item_offset = resource.items + MODEL_ITEM_LIST_SIZE + index * MODEL_ITEM_SIZE
+        command_mode, reserved_02, word_04, node_id, parent = struct.unpack_from(
+            "<HHIIi", data, item_offset
+        )
+        rotation = struct.unpack_from("<3f", data, item_offset + 0x10)
+        reserved_1c = _u32(data, item_offset + 0x1C, context + " item reserved word")
+        position = struct.unpack_from("<4f", data, item_offset + 0x20)
+        scale = struct.unpack_from("<4f", data, item_offset + 0x30)
+        bounds, command_0, command_1, command_2 = struct.unpack_from(
+            "<4I", data, item_offset + 0x40
+        )
+        if (
+            command_mode != 1
+            or reserved_02 != 0
+            or word_04 != 0
+            or node_id != index
+            or reserved_1c != 0
+            or command_1 != 0
+            or command_2 != 0
+        ):
+            raise FldError(f"{context} model item {index} has an unsupported profile")
+        if parent < -1 or parent >= count:
+            raise FldError(
+                f"{context} model item {index} has parent {parent}, expected -1..{count - 1}"
+            )
+        if bounds:
+            if bounds + MODEL_BOUNDS_SIZE > data_end:
+                raise FldError(
+                    f"{context} model item {index} bounds lie outside the data region"
+                )
+            _range(data, bounds, MODEL_BOUNDS_SIZE, context + f" model item {index} bounds")
+        if bool(bounds) != bool(command_0):
+            raise FldError(
+                f"{context} model item {index} has only one of bounds and commands"
+            )
+        if command_0:
+            if command_0 + 4 > data_end:
+                raise FldError(
+                    f"{context} model item {index} commands lie outside the data region"
+                )
+            _range(data, command_0, 4, context + f" model item {index} commands")
+        items.append(
+            ModelItem(
+                command_mode,
+                reserved_02,
+                word_04,
+                node_id,
+                parent,
+                rotation,
+                reserved_1c,
+                position,
+                scale,
+                bounds,
+                command_0,
+            )
+        )
+    return resource, tuple(items)
+
+
 def _read_motion_tracks(
     data: bytes, offset: int, data_end: int, context: str
 ) -> tuple[MotionTrack, ...]:
@@ -361,7 +488,9 @@ def validate(data: bytes) -> None:
     for resource in resources:
         if resource.name:
             _fixed_string(data, resource.name, f"resource at 0x{resource.offset:x} name")
-        if resource.type_id == 3 and resource.data:
+        if resource.type_id == 2 and resource.data and data[4:8] == b"FLD1":
+            _read_model_resource(data, resource.data, data_end, "field model")
+        elif resource.type_id == 3 and resource.data:
             _range(data, resource.data, COLLISION_SIZE, "collision header")
             values = struct.unpack_from("<12I", data, resource.data)
             if values[2] != resource.data + 0x10:
@@ -706,7 +835,68 @@ def render_source(data: bytes) -> str:
     # Type-specific payloads.
     for resource in resources:
         stem = resource_names[resource.offset]
-        if resource.type_id == 3 and resource.data:
+        if resource.type_id == 2 and resource.data and data[4:8] == b"FLD1":
+            model_resource, items = _read_model_resource(
+                data, resource.data, data_end, stem + " field model"
+            )
+            _assign_label(labels, model_resource.items, f"{stem}_items")
+            _assign_label(labels, model_resource.assets, f"{stem}_assets")
+            _assign_label(labels, model_resource.motion, f"{stem}_motion")
+
+            def model_ref(value: int) -> str:
+                return "null" if value == 0 else f"@{_label_for(labels, value)}"
+
+            add_span(
+                resource.data,
+                MODEL_RESOURCE_SIZE,
+                [
+                    "model_resource "
+                    f"items={model_ref(model_resource.items)} "
+                    f"assets={model_ref(model_resource.assets)} "
+                    f"motion={model_ref(model_resource.motion)}"
+                ],
+                stem + " field model",
+            )
+
+            count, _, _, _ = struct.unpack_from(
+                "<4I", data, model_resource.items
+            )
+            node_lines = [
+                f"model_items count={count}"
+            ]
+            for index, node in enumerate(items):
+                _assign_label(labels, node.bounds, f"{stem}_node_{index}_bounds")
+                _assign_label(labels, node.commands, f"{stem}_node_{index}_commands")
+                node_lines.append(
+                    "model_item "
+                    f"node_id={node.node_id} parent={node.parent} "
+                    f"rotation={','.join(_float_text(value) for value in node.rotation)} "
+                    f"position={','.join(_float_text(value) for value in node.position)} "
+                    f"scale={','.join(_float_text(value) for value in node.scale)} "
+                    f"bounds={model_ref(node.bounds)} "
+                    f"commands={model_ref(node.commands)}"
+                )
+            add_span(
+                model_resource.items,
+                MODEL_ITEM_LIST_SIZE + len(items) * MODEL_ITEM_SIZE,
+                node_lines,
+                stem + " model items",
+            )
+            for index, node in enumerate(items):
+                if not node.bounds:
+                    continue
+                bounds = struct.unpack_from("<6f", data, node.bounds)
+                add_span(
+                    node.bounds,
+                    MODEL_BOUNDS_SIZE,
+                    [
+                        "model_bounds "
+                        f"minimum={','.join(_float_text(value) for value in bounds[:3])} "
+                        f"maximum={','.join(_float_text(value) for value in bounds[3:])}"
+                    ],
+                    f"{stem} model item {index} bounds",
+                )
+        elif resource.type_id == 3 and resource.data:
             offset = resource.data
             _range(data, offset, COLLISION_SIZE, stem + " collision")
             values = struct.unpack_from("<12I", data, offset)
@@ -1015,6 +1205,10 @@ def _operation_size(operation: Operation, offset: int) -> int:
         "texture_list": STRING_SIZE,
         "effect": EFFECT_SIZE,
         "light": LIGHT_SIZE,
+        "model_resource": MODEL_RESOURCE_SIZE,
+        "model_items": MODEL_ITEM_LIST_SIZE,
+        "model_item": MODEL_ITEM_SIZE,
+        "model_bounds": MODEL_BOUNDS_SIZE,
         "pointer": 4,
         "u32": 4 * len(args),
         "s32": 4 * len(args),
@@ -1093,6 +1287,20 @@ def _layout(operations: tuple[Operation, ...]) -> tuple[dict[str, int], int]:
         raise FldError("missing end_data")
     if labels.get("data_end") != end_data:
         raise FldError("label data_end must immediately precede end_data")
+    for index, operation in enumerate(operations):
+        if operation.name != "model_items":
+            continue
+        expected = _int(_fields(operation.args).get("count", "-1"))
+        actual = 0
+        for item in operations[index + 1 :]:
+            if item.name != "model_item":
+                break
+            actual += 1
+        if actual != expected:
+            raise FldError(
+                f"line {operation.line}: model_items count is {expected}, "
+                f"followed by {actual} model_item directives"
+            )
     return labels, end_data
 
 
@@ -1275,6 +1483,53 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
                     _parse_float(f["bias"]),
                     *_csv(f["diffuse"], 3, _parse_float),
                     *_csv(f["ambient"], 3, _parse_float),
+                )
+            )
+        elif name == "model_resource":
+            f = checked_fields(
+                operation,
+                ("items", "assets", "motion"),
+            )
+            output.extend(struct.pack("<4I", 0, 1, 0, 0))
+            output.extend(pointer(f["items"]))
+            output.extend(pointer(f["assets"]))
+            output.extend(struct.pack("<II", 0, 0))
+            output.extend(pointer(f["motion"]))
+        elif name == "model_items":
+            f = checked_fields(operation, ("count",))
+            output.extend(struct.pack("<4I", _int(f["count"]), 0, 0, 0))
+        elif name == "model_item":
+            f = checked_fields(
+                operation,
+                (
+                    "node_id", "parent", "rotation", "position", "scale", "bounds",
+                    "commands",
+                ),
+            )
+            output.extend(
+                struct.pack(
+                    "<HHIIi3fI4f4f",
+                    1,
+                    0,
+                    0,
+                    _int(f["node_id"]),
+                    _int(f["parent"]),
+                    *_csv(f["rotation"], 3, _parse_float),
+                    0,
+                    *_csv(f["position"], 4, _parse_float),
+                    *_csv(f["scale"], 4, _parse_float),
+                )
+            )
+            output.extend(pointer(f["bounds"]))
+            output.extend(pointer(f["commands"]))
+            output.extend(bytes(8))
+        elif name == "model_bounds":
+            f = checked_fields(operation, ("minimum", "maximum"))
+            output.extend(
+                struct.pack(
+                    "<6f",
+                    *_csv(f["minimum"], 3, _parse_float),
+                    *_csv(f["maximum"], 3, _parse_float),
                 )
             )
         elif name == "event":
