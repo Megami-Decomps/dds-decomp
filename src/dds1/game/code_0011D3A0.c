@@ -102,7 +102,7 @@ void fldClearSceneControlFlags(u32 arg0);
 extern u32 D_003BAB64;
 extern u32 D_003BAB60;
 extern u32 D_003BAB5C;
-extern u32 func_002D03F8(u32);
+extern u32 sdfAllocGeneralBlock(u32);
 extern void *sdfMemoryGetBlockAddress(u32);
 extern void mdlLoadViewerPackage(s32, s32, s32, void *, u32);
 void fldLoadPlayerModel(void);
@@ -1510,7 +1510,7 @@ void fldPrepareResourceBuffer(void) {
     void *buffer;
     fldLoadPlayerModel();
     D_003BAB60 = D_003BAB64;
-    D_003BAB58 = func_002D03F8(D_003BAB64);
+    D_003BAB58 = sdfAllocGeneralBlock(D_003BAB64);
     source = sdfMemoryGetBlockAddress(fldPlayerModelResource);
     buffer = sdfMemoryGetBlockAddress(D_003BAB58);
     memcpy(buffer, source, D_003BAB60);

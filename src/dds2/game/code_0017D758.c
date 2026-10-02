@@ -105,7 +105,7 @@ void effReleaseScatterObject(PcpScatterDraw *object) {
         effPcpScatterResRelease(object->sharedResource);
     }
     sdfQueueAssetRelease(object->asset);
-    func_003297C8(object->allocation);
+    sdfReleaseResourceAllocation(object->allocation);
     sdfReleaseChipBlock(object);
 }
 

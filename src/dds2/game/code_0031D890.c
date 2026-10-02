@@ -1,6 +1,6 @@
 #include "common.h"
 
-void func_003297C8(u32 sprite);
+void sdfReleaseResourceAllocation(u32 sprite);
 
 enum { SLOT_IN_USE = 1 };
 
@@ -26,7 +26,7 @@ typedef struct CompactSlotPool {
     s32 count;
 } CompactSlotPool;
 
-extern u32 func_003292A8(s32 size);
+extern u32 sdfAllocGeneralBlock(s32 size);
 extern void *sdfMemoryGetBlockAddress(u32 handle);
 extern void evtPrintDeveloperConsoleMessage(char *text, s32 value);
 extern char D_0042DBA0[];
@@ -40,7 +40,7 @@ typedef struct SpriteWorkPool {
 /* Sprite-number work pool: count 0x14-byte items plus a 0xC-byte header. */
 u32 itfCreateSpriteWorkPool(u32 count) {
     u32 size = count * 0x14 + 0xC;
-    u32 handle = func_003292A8(size);
+    u32 handle = sdfAllocGeneralBlock(size);
     SpriteWorkPool *pool = (SpriteWorkPool *)sdfMemoryGetBlockAddress(handle);
     memset(pool, 0, size);
     pool->handle = handle;
@@ -51,7 +51,7 @@ u32 itfCreateSpriteWorkPool(u32 count) {
 }
 
 void func_0031D928(u32 *sprite) {
-    func_003297C8(*sprite);
+    sdfReleaseResourceAllocation(*sprite);
 }
 
 /* Reserve the first unclaimed 0x14-byte slot in the wide pool. */
@@ -98,7 +98,7 @@ INCLUDE_ASM(const s32, "game/code_0031D890", func_0031DA38);
 /* Sprite-hit-effect work pool: count 0x10-byte items plus a 0xC-byte header. */
 u32 func_0031DEB8(u32 count) {
     u32 size = count * 0x10 + 0xC;
-    u32 handle = func_003292A8(size);
+    u32 handle = sdfAllocGeneralBlock(size);
     SpriteWorkPool *pool = (SpriteWorkPool *)sdfMemoryGetBlockAddress(handle);
 
     memset(pool, 0, size);
@@ -110,7 +110,7 @@ u32 func_0031DEB8(u32 count) {
 }
 
 void func_0031DF48(u32 *sprite) {
-    func_003297C8(*sprite);
+    sdfReleaseResourceAllocation(*sprite);
 }
 
 /* Reserve the first unclaimed 0x10-byte slot in the compact pool. */

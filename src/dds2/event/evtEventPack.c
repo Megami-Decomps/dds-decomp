@@ -67,7 +67,7 @@ INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D7E0);
 
 extern void func_0025D7E0(EvtPackLoadState *state);
 
-s32 func_0025D8C8(void) {
+s32 evtTickPackLoad(void) {
     EvtPackLoadState *state = (EvtPackLoadState *)kwlnTaskGetUserValue();
 
     switch (state->loaded) {
@@ -93,7 +93,7 @@ extern void effInitCh75Id(void);
 extern void sdfTexReleaseReferenceViaHandler(s32);
 extern void filePollEntryCleanup(s32);
 extern void sdfQueueNonzeroResourceId(s32);
-extern void func_003297C8(s32);
+extern void sdfReleaseResourceAllocation(s32);
 extern void sdfReleaseChipBlock(s32);
 
 /* Keep this task resource layout identical to DDS1's EvtPackResources. */
@@ -142,10 +142,10 @@ void evtReleaseEventPackResources(void) {
             sdfQueueNonzeroResourceId(resources->resourceHandle);
         }
         if (resources->sceneAllocation1 != 0) {
-            func_003297C8(resources->sceneAllocation1);
+            sdfReleaseResourceAllocation(resources->sceneAllocation1);
         }
         if (resources->sceneAllocation2 != 0) {
-            func_003297C8(resources->sceneAllocation2);
+            sdfReleaseResourceAllocation(resources->sceneAllocation2);
         }
     }
     sdfReleaseChipBlock(state);

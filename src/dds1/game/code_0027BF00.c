@@ -551,7 +551,7 @@ void func_0027CEE8(MenuWindowContainer *window) {
 
 INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027CF28);
 
-extern s32 func_002D03F8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 
 extern s32 *sdfResourceRetainAddress(s32);
 
@@ -564,7 +564,7 @@ typedef struct MenuWindowSpriteGroup {
 } MenuWindowSpriteGroup;
 
 u32 mnuCreateWindowState(u32 source, u32 mode, u32 variant, u32 option) {
-    s32 handle = func_002D03F8(sizeof(MenuWindowSpriteGroup));
+    s32 handle = sdfAllocGeneralBlock(sizeof(MenuWindowSpriteGroup));
     MenuWindowSpriteGroup *group = (MenuWindowSpriteGroup *)sdfResourceRetainAddress(handle);
 
     memset(group, 0, sizeof(MenuWindowSpriteGroup));
@@ -578,7 +578,7 @@ void mnuReleaseWindowTextures(MenuWindowSpriteGroup *group) {
     for (i = 0; i < 7; i++) {
         effDestroyResourceSlotSet(group->sprites[i]);
     }
-    func_002D0918(group->resourceHandle);
+    sdfReleaseResourceAllocation(group->resourceHandle);
 }
 
 void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *group, u32 target) {
@@ -831,7 +831,7 @@ void mnuSortItems(s32 menu, s32 sortKey, s32 descending) {
         mnuComparePrimaryKeyAscending, mnuCompareSecondaryKeyAscending, mnuCompareTertiaryKeyAscending
     };
     s32 count = 0;
-    s32 handle = func_002D03F8(((MenuList *)menu)->count * 4);
+    s32 handle = sdfAllocGeneralBlock(((MenuList *)menu)->count * 4);
     MenuListNode **items = (MenuListNode **)sdfResourceRetainAddress(handle);
     MenuListNode **out = items;
     MenuListNode *node;
@@ -848,7 +848,7 @@ void mnuSortItems(s32 menu, s32 sortKey, s32 descending) {
     mnuRebuildListFirstFromCursor(menu);
     mnuRebuildListLastFromCursor(menu);
     mnuResetNodeLinks((s32 *)menu, 0);
-    func_002D0918(handle);
+    sdfReleaseResourceAllocation(handle);
 }
 
 void mnuAllocateListEntries(s32 *list) {

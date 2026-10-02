@@ -67,7 +67,7 @@ typedef struct DdsCallbackCollection {
 } DdsCallbackCollection;
 
 /* Allocation block: bytes used so far and its 0x10000-byte buffer
-   (func_0031F138 frees both). */
+   (dds3ReleasePackedValueBuffer frees both). */
 typedef struct DdsAllocBlock {
     u32 used;   /* 0x00 */
     u32 buffer; /* 0x04 */
@@ -84,7 +84,7 @@ DdsAllocBlock *dds3AllocateEmptyPackedValueBuffer(void) {
     return block;
 }
 
-void func_0031F138(u32 node) {
+void dds3ReleasePackedValueBuffer(u32 node) {
     func_0035A880(*(u32 *)(node + 4));
     func_0035A880(node);
 }
@@ -99,7 +99,7 @@ void func_0031F1B8(u32 node) {
 
 
 void func_0031F1E8(u32 unused, u32 node) {
-    func_0031F138(node);
+    dds3ReleasePackedValueBuffer(node);
 }
 
 
@@ -116,7 +116,7 @@ DdsAllocBlock *dds3AllocateAndAttachPackedValueBuffer(s32 object) {
     return record;
 }
 
-u32 func_0031F270(s32 object) {
+u32 dds3GetCurrentPackedValueBuffer(s32 object) {
     return *(u32 *)(*(s32 *)(*(s32 *)(object + 4) + 8) + 0x10);
 }
 
@@ -132,7 +132,7 @@ void dds3ReleaseCallbackCollectionAndNodes(u32 node) {
 
 /* Append `bytes` copies of the source data into the object's 0x10000-byte allocation blocks, moving on to a fresh block when one fills up. */
 void dds3AppendPackedBytes(DdsPackedObject *object, const void *source, u32 bytes) {
-    DdsAllocBlock *block = (DdsAllocBlock *)func_0031F270((s32)object);
+    DdsAllocBlock *block = (DdsAllocBlock *)dds3GetCurrentPackedValueBuffer((s32)object);
 
     if (bytes != 0) {
         do {
@@ -266,7 +266,7 @@ extern void func_003594A8(s32 handle);
 extern const char D_00438968[];
 extern const char D_00438970[];
 
-s32 func_0031F778(u32 *object, s32 arg1, s32 arg2) {
+s32 dds3WritePackedReferenceFile(u32 *object, s32 arg1, s32 arg2) {
     char buffer[0x100];
     u32 record[2];
     s32 handle;

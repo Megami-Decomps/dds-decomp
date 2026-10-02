@@ -115,7 +115,7 @@ extern SdfModel *sdfModelCreateFromAssetData(void *arg0, void *arg1);
 
 extern void sdfMultiplyVuMatrixInPlace(void);
 
-extern void func_0033AEA8(u32 arg0);
+extern void sdfWriteVuMatrixAndScaledRows(u32 arg0);
 
 extern void *memcpy(void *dst, const void *src, u32 n);
 
@@ -329,7 +329,7 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     VU0_STORE_MATRIX(transformed);
     address = drawNode->address;
     if (address != 0) {
-        func_0033AEA8(address + (frame << 7));
+        sdfWriteVuMatrixAndScaledRows(address + (frame << 7));
     }
     child = drawNode->children;
     if (child == 0) {

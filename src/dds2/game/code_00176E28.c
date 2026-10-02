@@ -29,7 +29,7 @@ typedef struct EffRecordPool {
     s32 recordBase;    /* 0x60: address of stride-dependent records */
     s32 auxRecordBase; /* 0x64: address of stride-dependent auxiliary records */
     u32 resource;   /* 0x68: released by sdfQueueAssetRelease */
-    u32 buffer;     /* 0x6C: freed by func_003297C8 */
+    u32 buffer;     /* 0x6C: freed by sdfReleaseResourceAllocation */
 } EffRecordPool;
 
 typedef struct EffPacketParams {
@@ -108,7 +108,7 @@ typedef struct EffectRingBlock {
     EffectRingVertex vertices[1];   /* 0x80 */
 } EffectRingBlock;
 
-extern u32 func_003292A8(s32);
+extern u32 sdfAllocGeneralBlock(s32);
 
 extern u32 sdfResourceRetainAddress(u32);
 
@@ -138,7 +138,7 @@ EffectRing *source;
     u32 spread;
     u32 i;
 
-    handle = func_003292A8(source->count * 16 + 0x80);
+    handle = sdfAllocGeneralBlock(source->count * 16 + 0x80);
     block = (EffectRingBlock *)sdfResourceRetainAddress(handle);
     ring = &block->header;
     memcpy(ring, source, 0x58);
@@ -182,7 +182,7 @@ void func_00177098(void) {
 /* Release both the ring's matrix work and its backing allocation. */
 void effReleaseRingResources(EffectRing *ring) {
     func_001781F8(ring->matrix);
-    func_003297C8(ring->handle);
+    sdfReleaseResourceAllocation(ring->handle);
 }
 
 void effCopyRingVector(void *dst, void *src) {
@@ -317,7 +317,7 @@ INCLUDE_ASM(const s32, "game/code_00176E28", func_00177760);
 
 void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool) {
     sdfQueueAssetRelease(pool->resource);
-    func_003297C8(pool->buffer);
+    sdfReleaseResourceAllocation(pool->buffer);
 }
 
 void func_001778B0(EffRecordPool *work)
@@ -423,7 +423,7 @@ EffRecordPool *effRecordPoolCreateTriad(s32 groups) {
     first = slots * 4;
     second = slots;
     size = (first + second) * 4 + 0x70;
-    handle = func_003292A8(size);
+    handle = sdfAllocGeneralBlock(size);
     block = (u32 *)sdfResourceRetainAddress(handle);
     memset(block, 0, size);
     pool = (EffRecordPool *)(block + (first + second));
@@ -443,11 +443,11 @@ EffRecordPool *effRecordPoolCreateTriad(s32 groups) {
 
 void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool) {
     sdfQueueAssetRelease(pool->resource);
-    func_003297C8(pool->buffer);
+    sdfReleaseResourceAllocation(pool->buffer);
 }
 
 /* Submit the position/color pool in triangle batches of at most 48 vertices. */
-void func_00177CD0(EffRecordPool *pool)
+void effDrawTriangleRecordPool(EffRecordPool *pool)
 {
     f32 matrix[16];
     void *packet = sdfAllocPacketAligned(0x20);
@@ -506,7 +506,7 @@ EffRecordPool *effRecordPoolCreate(s32 groups) {
     first = groups * 16;
     second = groups * 4;
     size = (first + second) * 4 + 0x70;
-    handle = func_003292A8(size);
+    handle = sdfAllocGeneralBlock(size);
     block = (u32 *)sdfResourceRetainAddress(handle);
     memset(block, 0, size);
     pool = (EffRecordPool *)(block + (first + second));
@@ -526,11 +526,11 @@ EffRecordPool *effRecordPoolCreate(s32 groups) {
 
 void func_00177FA8(EffRecordPool *pool) {
     sdfQueueAssetRelease(pool->resource);
-    func_003297C8(pool->buffer);
+    sdfReleaseResourceAllocation(pool->buffer);
 }
 
 /* Submit the position/color pool in quad batches of at most 32 vertices. */
-void func_00177FD8(EffRecordPool *pool)
+void effDrawQuadRecordPool(EffRecordPool *pool)
 {
     f32 matrix[16];
     void *packet = sdfAllocPacketAligned(0x20);

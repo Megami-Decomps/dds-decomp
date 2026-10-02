@@ -43,13 +43,19 @@ typedef struct LmapList {
     LmapNode *lo;    /* 0x14 */
     LmapNode *cur;   /* 0x18 */
     LmapNode *hi;    /* 0x1C */
+    s32 x;
+    s32 y;
+    s32 width;
+    s32 height;
 } LmapList;
 
 extern LmapNode *sdfGridSeekFirstNode(LmapList *);
 extern LmapNode *sdfGridSeekLastNode(LmapList *);
 extern LmapNode *fldLmapAdvanceWindowStart(LmapList *);
+extern u32 itfGetGridListLinkFlags(LmapList *);
+extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
-extern void *func_003292A8(s32 size);
+extern void *sdfAllocGeneralBlock(s32 size);
 extern u32 *sdfMemoryGetBlockAddress(u32 handle);
 extern s32 func_0030AAB0(s32);
 extern void func_0030A8A8(void);
@@ -76,6 +82,29 @@ extern char D_004388A0[];
 extern s64 evtGetMessageWindowControlState(void);
 extern void func_0026C900(void);
 extern void evtFinishMessageWindowAndNotify(void);
+extern void evtCreateWorldObjectForKey(s32, s32);
+extern void dds3SetWorldObject(void *);
+extern void *dds3GetWorldSecondaryObject(void);
+extern void fldCreateLocalMapCamera(void);
+extern s32 func_0030B568(void);
+extern s32 fldCountMaskBitsBeforeOrdinal(s32, s32);
+extern s32 sdfCreateMaskedCounterChannels(s32, s32);
+extern s32 func_0030B880(s32);
+extern void func_0030BA98(s32, s32);
+extern void func_0030E880(void);
+extern u32 sdfReadNamedResource(const char *, u32 *, u32 *);
+extern void evtCreateMessageWindowIfMissing(s32);
+extern void evtSetSolarOverlayFullyVisible(void);
+extern void fldApplyLightSetIndex(s32);
+extern void fldInitializeCameraColorResource(void);
+extern void func_00316E60(void);
+extern void sndStartTrackDefault(s32);
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
+extern void sdfCounterInitializeDisplayAnimation(void);
+extern u32 kwlnDrawControlFlags;
+extern u32 D_00435CBC;
+extern s32 D_00438894;
+extern u32 D_004388A8;
 extern void fldInitializeLmapTaskVariant(LmapTaskState *task);
 
 LmapNode *fldLmapAdvanceWindowStart(LmapList *list) {
@@ -200,7 +229,29 @@ LmapNode *fldLmapRewindThroughWindow(LmapList *list) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A3E8);
+void fldLocalMapDrawScrollIndicators(s32 offsetX, s32 offsetY, s32 z, u32 color,
+                   LmapList *list, s32 channel) {
+    s32 coordinates[2][3];
+    u32 flags = itfGetGridListLinkFlags(list);
+    s32 halfWidth = list->width / 2;
+    s32 baseX = list->x + offsetX;
+    coordinates[0][0] = baseX + (halfWidth << 4);
+    coordinates[0][1] = baseX + ((halfWidth - 4) << 4);
+    coordinates[0][2] = baseX + ((halfWidth + 4) << 4);
+    if (flags & 1) {
+        s32 baseY = list->y + offsetY;
+        coordinates[1][0] = baseY - 64;
+        coordinates[1][2] = coordinates[1][1] = baseY - 24;
+        uiDrawUniformRgbRange(coordinates[0], coordinates[1], z, color, channel);
+    }
+    if (flags & 2) {
+        s32 height = list->height;
+        s32 baseY = list->y + offsetY;
+        coordinates[1][0] = baseY + ((height + 8) << 3);
+        coordinates[1][2] = coordinates[1][1] = baseY + ((height + 4) << 3);
+        uiDrawUniformRgbRange(coordinates[0], coordinates[1], z, color, channel);
+    }
+}
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A528);
 
 typedef struct LmapDrawSurface {
@@ -244,7 +295,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 a, s32 b, s32 c, s32 d, s
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A8A8);
 
 void fldStartLmapTask(s32 arg0) {
-    void *handle = func_003292A8(0x88);
+    void *handle = sdfAllocGeneralBlock(0x88);
     u32 *block = sdfMemoryGetBlockAddress((u32)handle);
 
     memset(block, 0, 0x88);
@@ -349,7 +400,49 @@ u8 func_0030ABF0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030AC10);
 
-INCLUDE_ASM(const s32, "game/code_0030A128", func_0030B078);
+void fldInitializeLocalMapScene(void) {
+    s32 mask;
+    s32 flags;
+    s32 index;
+    s32 mode = 3;
+
+    if (!mdlFlagTest(0x1C)) {
+        mode = 2;
+        if (!mdlFlagTest(0x13)) {
+            mode = 1;
+        }
+    }
+    kwlnDrawControlFlags |= 0x2000000;
+    mask = 0x3FF;
+    evtCreateWorldObjectForKey(1, mode);
+    dds3SetWorldObject(NULL);
+    fldCreateLocalMapCamera();
+    dds3SetWorldObject(dds3GetWorldSecondaryObject());
+    D_00435CBC = 0x80000000;
+    fldApplyLightSetIndex(mode);
+    flags = func_0030B568();
+    if (flags != 0) {
+        mask = flags;
+    }
+    index = fldCountMaskBitsBeforeOrdinal(mask, D_00438890);
+    D_00438894 = index;
+    sdfCreateMaskedCounterChannels(mask, index);
+    func_0030BA98(D_00438894, func_0030B880(mask));
+    func_0030E880();
+    dspCloseChannel();
+    D_004388A4 = sdfReadNamedResource("/lmap/lmpmsg.bmd", &D_004388A8, NULL);
+    evtCreateMessageWindowIfMissing(D_004388A8);
+    evtSetSolarOverlayFullyVisible();
+    fldInitializeCameraColorResource();
+    func_00316E60();
+    sndStartTrackDefault(0x400001);
+    if (mdlFlagTest(0x13)) {
+        kwlnFadeOutStart(0, 0, 0, 30);
+    } else {
+        kwlnFadeOutStart(255, 255, 255, 30);
+    }
+    sdfCounterInitializeDisplayAnimation();
+}
 
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030B1E8);
 

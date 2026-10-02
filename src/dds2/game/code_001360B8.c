@@ -1,4 +1,6 @@
 #include "common.h"
+#include "evt_unit.h"
+#include "pcp_vu0.h"
 
 extern u32 D_0038BBD8[];
 
@@ -49,16 +51,19 @@ typedef struct {
     f32 unk80;
     f32 unk84;
     f32 unk88;
-    u8 pad8C[0x54];
+    f32 unitColorA[3];
+    f32 unitLightDirection[3];
+    u8 padA4[0x30];
+    f32 unitColorB[3];
 } FldLightSet; /* 0xE0 bytes */
 
 extern void *D_004360F0;
 
-extern s32 func_001081F8(s32, void *);
+extern s32 kwlnSetDrawColorTarget(s32, void *);
 
 extern s32 func_00107EF8(s32, s32, void *);
 
-extern s32 func_00108138(s32, void *);
+extern s32 kwlnSetBackgroundColorTarget(s32, void *);
 
 extern s32 func_00107FF8(s32, s32, void *);
 
@@ -123,7 +128,100 @@ void fldInitializeDisplayPointerTable(void) {
     displayTable[1] = (u32)D_0038BB60;
 }
 
-INCLUDE_ASM(const s32, "game/code_001360B8", func_001363D8);
+extern s32 D_00389780[];
+extern s32 D_00436168;
+extern u32 fldPlayerObject;
+struct EvtUnitNode;
+extern s32 evtUnitGetNestedValue(struct EvtUnitNode *unit);
+extern void evtSetUnitStatusFlags(EvtUnit *unit);
+extern void func_0023C870(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
+extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
+
+/* Sky lighting also supplies the player's packed colors and VU direction. */
+void func_001363D8(void) {
+    FldLightSet *light;
+    f32 vec[4];
+    f32 dir[4];
+    EvtUnit *unit;
+    u32 colorA;
+    u32 colorB;
+    s32 red, green, blue;
+
+    if (D_00389780[0] != 1 && D_00389780[0] < 200) {
+        if (D_00436168 != 0) {
+            light = &((FldLightSet *)fldSkyLightSetBuffer)[D_00436168];
+        } else {
+            light = &((FldLightSet *)fldSkyLightSetBuffer)[D_00436128];
+        }
+        fldSetFadeTarget(D_00389988[13], D_00389988[15], 0);
+        fldSetSwayMode(D_00389988[16]);
+
+        vec[0] = light->unk2C * 0.00390625f;
+        vec[1] = light->unk30 * 0.00390625f;
+        vec[2] = light->unk34 * 0.00390625f;
+        vec[3] = 0.0f;
+        kwlnSetDrawColorTarget(0, vec);
+        evtSetDrawVectorTarget(0, light->vectorX, light->vectorY,
+                              light->vectorZ, light->vectorW);
+
+        dir[0] = light->unk44;
+        dir[1] = light->unk48;
+        dir[2] = light->unk4C;
+        dir[3] = 0.0f;
+        func_00107FF8(0, 0, dir);
+        vec[0] = light->unk38;
+        vec[1] = light->unk3C;
+        vec[2] = light->unk40;
+        vec[3] = 0.0f;
+        func_00107EF8(0, 0, vec);
+        dir[0] = light->unk5C;
+        dir[1] = light->unk60;
+        dir[2] = light->unk64;
+        dir[3] = 0.0f;
+        func_00107FF8(0, 1, dir);
+        vec[0] = light->unk50;
+        vec[1] = light->unk54;
+        vec[2] = light->unk58;
+        vec[3] = 0.0f;
+        func_00107EF8(0, 1, vec);
+        dir[0] = light->unk74;
+        dir[1] = light->unk78;
+        dir[2] = light->unk7C;
+        dir[3] = 0.0f;
+        func_00107FF8(0, 2, dir);
+        vec[0] = light->unk68;
+        vec[1] = light->unk6C;
+        vec[2] = light->unk70;
+        vec[3] = 0.0f;
+        func_00107EF8(0, 2, vec);
+        vec[0] = light->unk80;
+        vec[1] = light->unk84;
+        vec[2] = light->unk88;
+        vec[3] = 1.0f;
+        kwlnSetBackgroundColorTarget(0, vec);
+
+        unit = (EvtUnit *)evtUnitGetNestedValue((struct EvtUnitNode *)fldPlayerObject);
+        evtSetUnitStatusFlags(unit);
+        red = light->unitColorA[0] * 128.0f;
+        green = light->unitColorA[1] * 128.0f;
+        blue = light->unitColorA[2] * 128.0f;
+        colorA = red | (blue << 16) | (green << 8) | 0x80000000;
+        red = light->unitColorB[0] * 128.0f;
+        green = light->unitColorB[1] * 128.0f;
+        blue = light->unitColorB[2] * 128.0f;
+        colorB = red | (blue << 16) | (green << 8) | 0x80000000;
+        func_0023C870(unit, 0, colorA, colorB);
+        dir[0] = light->unitLightDirection[0];
+        dir[1] = light->unitLightDirection[1];
+        dir[2] = light->unitLightDirection[2];
+        dir[3] = 0.0f;
+        VU0_LOAD_VF(vf10, dir);
+        evtSetUnitNormalizedDirection(unit, 0);
+        /* The setter replaces vf10, so the second update reloads it. */
+        VU0_LOAD_VF(vf10, dir);
+        evtSetUnitNormalizedDirection(unit, 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001360B8", func_00136718);
 
@@ -146,7 +244,7 @@ void fldApplyLightSetCurrent(void) {
     vec[1] = light->unk30 * 0.00390625f;
     vec[2] = light->unk34 * 0.00390625f;
     vec[3] = 0;
-    func_001081F8(0, vec);
+    kwlnSetDrawColorTarget(0, vec);
     evtSetDrawVectorTarget(0, light->vectorX, light->vectorY, light->vectorZ, light->vectorW);
     dir[0] = light->unk44;
     dir[1] = light->unk48;
@@ -182,7 +280,7 @@ void fldApplyLightSetCurrent(void) {
     vec[1] = light->unk84;
     vec[2] = light->unk88;
     vec[3] = 1.0f;
-    func_00108138(0, vec);
+    kwlnSetBackgroundColorTarget(0, vec);
 }
 
 void fldApplyLightSetIndex(s32 index) {
@@ -205,7 +303,7 @@ void fldApplyLightSetIndex(s32 index) {
     vec[1] = light->unk30 * 0.00390625f;
     vec[2] = light->unk34 * 0.00390625f;
     vec[3] = 0;
-    func_001081F8(0, vec);
+    kwlnSetDrawColorTarget(0, vec);
     evtSetDrawVectorTarget(0, light->vectorX, light->vectorY, light->vectorZ, light->vectorW);
     dir[0] = light->unk44;
     dir[1] = light->unk48;
@@ -241,7 +339,7 @@ void fldApplyLightSetIndex(s32 index) {
     vec[1] = light->unk84;
     vec[2] = light->unk88;
     vec[3] = 1.0f;
-    func_00108138(0, vec);
+    kwlnSetBackgroundColorTarget(0, vec);
 }
 
 void fldActivateCameraColorSetting(s32 enable) {

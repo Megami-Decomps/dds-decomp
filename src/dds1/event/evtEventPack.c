@@ -66,7 +66,7 @@ INCLUDE_ASM(const s32, "event/evtEventPack", func_002423C8);
 
 extern void func_002423C8(EvtPackLoadState *state);
 
-s32 func_002424B0(void) {
+s32 evtTickPackLoad(void) {
     EvtPackLoadState *state = (EvtPackLoadState *)kwlnTaskGetUserValue();
 
     switch (state->loaded) {
@@ -92,7 +92,7 @@ extern void effInitCh75Id(void);
 extern void sdfTexReleaseReferenceViaHandler(s32);
 extern void filePollEntryCleanup(s32);
 extern void sdfQueueNonzeroResourceId(s32);
-extern void func_002D0918(s32);
+extern void sdfReleaseResourceAllocation(s32);
 
 /* Handles owned by the event task; +0x38..+0x44 are effect channels,
  * +0x24/+0x30 are scene allocations. */
@@ -141,10 +141,10 @@ void evtReleaseEventPackResources(void) {
             sdfQueueNonzeroResourceId(resources->resourceHandle);
         }
         if (resources->sceneAllocation1 != 0) {
-            func_002D0918(resources->sceneAllocation1);
+            sdfReleaseResourceAllocation(resources->sceneAllocation1);
         }
         if (resources->sceneAllocation2 != 0) {
-            func_002D0918(resources->sceneAllocation2);
+            sdfReleaseResourceAllocation(resources->sceneAllocation2);
         }
     }
     sdfReleaseChipBlock(state);

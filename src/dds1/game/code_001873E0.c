@@ -45,7 +45,7 @@ typedef struct {
     EffBlurScaleSlot *slots;
 } EffBlurScaleWork; /* 0x38 */
 
-extern void *func_002D03F8(s32 size);
+extern void *sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(void *allocation);
 extern u32 effGetResourceFirstWord(s32 index);
 
@@ -66,7 +66,7 @@ void effBlurSecondInitSlots(EffBlurScaleWork *work) {
 /* Allocate an owner and slot array from only the serialized parameter prefix. */
 EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *src) {
     s32 count = src->count;
-    void *allocation = func_002D03F8(count * 0x30 + 0x38);
+    void *allocation = sdfAllocGeneralBlock(count * 0x30 + 0x38);
     EffBlurScaleWork *work = (EffBlurScaleWork *)sdfResourceRetainAddress(allocation);
     EffBlurScaleSlot *slot;
     s32 i = 0;
@@ -89,7 +89,7 @@ EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *src) {
 
 /* Release the scale variant's allocation, including its inline slot array. */
 void effBlurReleaseSecondResource(EffBlurScaleWork *work) {
-    func_002D0918(work->allocation);
+    sdfReleaseResourceAllocation(work->allocation);
 }
 
 typedef struct BlurFilterOps {
@@ -122,7 +122,7 @@ INCLUDE_ASM(const s32, "game/code_001873E0", func_00187598);
 INCLUDE_ASM(const s32, "game/code_001873E0", func_00187788);
 
 /* Submit a frame-buffer quad with sampling, texture-alpha, blend and clamp packets. */
-void func_00187988(EffBlurQuad *source)
+void effBlurDrawFramebufferQuad(EffBlurQuad *source)
 {
     void *list;
     void *tag;

@@ -68,7 +68,9 @@ struct MenuStaffList {
 };
 
 struct MenuStaffWindow {
-    u8 pad00[0x18];
+    u8 pad00[0x10];
+    MenuStaffNode *head; /* 0x10 */
+    u8 pad14[4];
     s32 *cursor;
     MenuStaffNode *selectedNode; /* 0x1C */
     s32 panelActive; /* 0x20: selects the alternate panel drawing path */
@@ -76,8 +78,13 @@ struct MenuStaffWindow {
 };
 
 struct MenuStaffNode {
-    u8 pad00[0x60];
+    u8 pad00[0x48];
+    u32 flags; /* 0x48 */
+    u8 pad4C[0x0C];
+    MenuStaffNode *next; /* 0x58 */
+    u8 pad5C[4];
     s32 label;
+    s32 entryIndex; /* 0x64 */
 };
 
 #endif /* VERSION_DDS2 */

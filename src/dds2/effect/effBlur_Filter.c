@@ -141,7 +141,7 @@ void effBlurAcquireHandle(EffBlurScatterWork *work) {
     work->sourceHandle = effGetResourceFirstWord(2);
 }
 
-void func_0018EA98(EffBlurScatterWork *work, EffBlurScatterSlot *slot) {
+void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *slot) {
     EffBlurQuad *quad = &slot->quad;
     f32 spread;
     s32 halfSize;
@@ -171,7 +171,7 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EBC8);
 
 /* Release the first variant's owned effect resource. */
 void effBlurReleaseFirstResource(EffBlurScatterWork *work) {
-    func_003297C8(work->allocation);
+    sdfReleaseResourceAllocation(work->allocation);
 }
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018ECD0);

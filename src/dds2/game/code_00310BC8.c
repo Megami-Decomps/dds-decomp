@@ -4,13 +4,13 @@
 
 extern s8 D_0037F510[];
 
-extern s32 func_003292A8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 
 extern void *sdfMemoryGetBlockAddress(u32);
 
 extern void func_00313BA8();
 
-extern s32 func_003297C8(u32);
+extern s32 sdfReleaseResourceAllocation(u32);
 
 extern void sdfReleaseChipBlock();
 
@@ -145,7 +145,7 @@ typedef struct SdfGrid {
 extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 extern void sdfTransformDirectionByMatrix(f32 *, f32 *);
 extern void func_0030F8D0(f32 *);
-extern void func_0030FA28(f32 *, f32 *, f32 *);
+extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
 extern void sdfVec3ScaleInPlace(f32, f32 *);
 
 extern void func_0019D550(u64, s32, s32);
@@ -184,7 +184,7 @@ extern void func_00313BA8();
 extern u32 func_00313BA0(void);
 extern u32 func_00313BB0(void);
 
-extern s32 func_003292A8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 extern u32 strlen(const char *);
 extern s32 func_0035C860(char *buffer, const char *fmt, ...);
 extern char D_004388D8[];
@@ -241,7 +241,7 @@ void sdfQuatFromVectors(f32 *out, f32 *from, f32 *to) {
 
     func_0030F8D0(from);
     func_0030F8D0(to);
-    func_0030FA28(cross, from, to);
+    fldNormalizedVectorCross(cross, from, to);
     scale = fsqrtf(2.0f * (fldNormalizedVectorDot(from, to) + 1.0f));
     out[0] = cross[0] / scale;
     out[1] = cross[1] / scale;
@@ -536,7 +536,7 @@ s32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, u64 first, u64 second, u
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00311F20);
 
 void *sdfCreateTaskHeader(u32 userData) {
-    s32 allocation = func_003292A8(0x1C);
+    s32 allocation = sdfAllocGeneralBlock(0x1C);
     u32 *obj = sdfMemoryGetBlockAddress(allocation);
 
     memset(obj, 0, 0x1C);
@@ -551,7 +551,7 @@ s64 sdfDestroyTaskWork(SdfTaskOwner *owner) {
     if (owner != NULL) {
         sdfClearTaskList(owner);
         owner->onRemove(-1, owner->removeArg);
-        return func_003297C8(owner->handle);
+        return sdfReleaseResourceAllocation(owner->handle);
     }
 }
 
@@ -849,7 +849,7 @@ void sdfSetTaskItemMode(void *list, s32 key, u32 mode) {
 }
 
 TaskWork *sdfCreateNamedTaskWork(char *name, s32 destroyCallback, u32 userData) {
-    s32 allocation = func_003292A8(0x14);
+    s32 allocation = sdfAllocGeneralBlock(0x14);
     TaskWork *work = sdfMemoryGetBlockAddress(allocation);
 
     memset(work, 0, 0x14);
@@ -869,7 +869,7 @@ s64 sdfDestroyTaskResourceWork(TaskWork *work) {
         sdfDestroyTaskWork(work->list);
         sdfReleaseChipBlock(work->primaryTaskName);
         sdfReleaseChipBlock(work->secondaryTaskName);
-        return func_003297C8(work->handle);
+        return sdfReleaseResourceAllocation(work->handle);
     }
 }
 
@@ -993,7 +993,7 @@ s64 sdfDestroyGridWork(SdfGridOwner *owner) {
     if (owner != NULL) {
         sdfGridReleaseAllCells();
         owner->onDestroy(0, owner->destroyArg);
-        return func_003297C8(owner->handle);
+        return sdfReleaseResourceAllocation(owner->handle);
     }
 }
 
@@ -1131,7 +1131,7 @@ SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 column, u32 row) {
     return cell;
 }
 
-void func_00313898(s32 x, s32 y, s32 layer, SdfGrid *grid, s32 context) {
+void sdfGridDrawVisibleCells(s32 x, s32 y, s32 layer, SdfGrid *grid, s32 context) {
     SdfGridCell *cell = grid->viewportOrigin;
     s32 firstRow = cell->index / grid->width;
     s32 firstColumn = cell->index % grid->width;

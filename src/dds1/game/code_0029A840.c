@@ -4,7 +4,7 @@
 
 extern u32 sdfResourceRetainAddress(u32);
 
-extern void *func_002D03F8(u32);
+extern void *sdfAllocGeneralBlock(u32);
 
 extern s32 btlGetRuntime(void);
 
@@ -47,7 +47,7 @@ extern s32 func_002D2390();
 
 extern u8 *sdfTexSubmitPixelsForFormat(void *, u32, u8 *, s32);
 
-extern s32 func_002D2548(u32, s16, s16, u8, u8 *, s32);
+extern s32 sdfTexSubmitImageCopy(u32, s16, s16, u8, u8 *, s32);
 
 extern u32 sdfTexGetPrimaryResourceWord(void *);
 
@@ -100,7 +100,7 @@ typedef struct RefObj {
     s32 cnt1C;         // 0x1C
 } RefObj; // 0x20
 
-extern void func_002DB538(void *, float);
+extern void sdfMotionSampleAtFrame(void *, float);
 
 extern u32 effSharedTextureReferenceCount;
 
@@ -203,7 +203,7 @@ void effRecreateModelFromSource(u32 *work, u8 *source) {
 }
 
 void effModelAnimationStop(s32 owner) {
-    func_002DB538(*(void **)(((EffModelOwner *)owner)->model + 0x1c), 0.0f);
+    sdfMotionSampleAtFrame(*(void **)(((EffModelOwner *)owner)->model + 0x1c), 0.0f);
 }
 
 extern u8 D_00325828[];
@@ -279,7 +279,7 @@ void effUploadModelTextures(EffModelOwner *owner) {
         width = tex->width;
         height = tex->height;
         format = tex->format;
-        func_002D2548(sdfTexGetPrimaryResourceWord(tex), width, height, format, pixels, 1);
+        sdfTexSubmitImageCopy(sdfTexGetPrimaryResourceWord(tex), width, height, format, pixels, 1);
     } while (i < 2);
 }
 
@@ -484,7 +484,7 @@ void effDestroyResourceOwner(EffResourceOwner *owner) {
         for (i = 0; i < owner->count; i++) {
             fileQueueDestroy((u32)owner->entries[i]);
         }
-        func_002D0918(owner->buffer);
+        sdfReleaseResourceAllocation(owner->buffer);
     }
     sdfReleaseChipBlock(owner);
 }
@@ -527,9 +527,9 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
             for (i = 0; i < dst->count; i++) {
                 fileQueueDestroy((u32)dst->entries[i]);
             }
-            func_002D0918(dst->buffer);
+            sdfReleaseResourceAllocation(dst->buffer);
         }
-        dst->buffer = func_002D03F8(dst->count * 4);
+        dst->buffer = sdfAllocGeneralBlock(dst->count * 4);
         dst->entries = (void **)sdfResourceRetainAddress((u32)dst->buffer);
         for (i = 0; i < dst->count; i++) {
             dst->entries[i] = fileQueueClone(*src->entries);
@@ -538,7 +538,7 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
 }
 
 void func_0029B7E0(s32 work) {
-    func_002DB538(*(void **)(((EffResourceOwner *)work)->model + 0x1C), 0.0f);
+    sdfMotionSampleAtFrame(*(void **)(((EffResourceOwner *)work)->model + 0x1C), 0.0f);
     *(u32 *)(work + 4) = 0;
 }
 
@@ -597,7 +597,7 @@ void effReleaseSharedReference(RefObj *obj) {
     }
     obj->refCount--;
     if (obj->refCount == 0) {
-        func_002D0918(obj->cnt1C);
+        sdfReleaseResourceAllocation(obj->cnt1C);
     }
 }
 
@@ -651,7 +651,7 @@ void effReleaseReferenceHolder(u8 *holder) {
     for (i = 0; i < ((EffExpandedList *)holder)->count; i++) {
         effReleaseSharedReference(((RefObj **)((EffExpandedList *)holder)->handles)[i]);
     }
-    func_002D0918(((EffExpandedList *)holder)->buffer);
+    sdfReleaseResourceAllocation(((EffExpandedList *)holder)->buffer);
 }
 
 RefObj *effReferenceObjectRetain(RefObj *obj) {

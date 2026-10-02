@@ -32,7 +32,7 @@ extern BillDispatch D_0034E068[];
 
 void *func_002CFEB8(s32 size);
 void *sdfReadNamedResource(s32 arg0, u32 *arg1, s32 arg2);
-void func_002D0918(void *arg);
+void sdfReleaseResourceAllocation(void *arg);
 void sdfReleaseChipBlock(void *arg);
 void effReleaseSharedTextureRecord(void *arg);
 void func_001502B0(void *arg0, void *arg1);
@@ -184,7 +184,7 @@ void billReleaseSharedEntryBlock(void *arg) {
             effReleaseSharedTextureRecord(block->entries[i]);
             i++;
         }
-        func_002D0918(block->allocation);
+        sdfReleaseResourceAllocation(block->allocation);
     }
 }
 
@@ -249,7 +249,7 @@ void *billCreateFromResource(s32 kind, s32 resource) {
 
     allocation = sdfReadNamedResource(resource, header, 0);
     billboard = billCreateIndexed(kind, header[0]);
-    func_002D0918(allocation);
+    sdfReleaseResourceAllocation(allocation);
     return billboard;
 }
 

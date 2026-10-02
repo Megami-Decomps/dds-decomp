@@ -1,5 +1,5 @@
 #include "common.h"
-extern s32 func_003292A8(s32 size);
+extern s32 sdfAllocGeneralBlock(s32 size);
 extern s8 *sdfMemoryGetBlockAddress();
 
 
@@ -55,7 +55,7 @@ s32 mtrMantraEventBitPush(void) {
     s32 handle;
     s32 i;
 
-    handle = func_003292A8(0x76);
+    handle = sdfAllocGeneralBlock(0x76);
     data = sdfMemoryGetBlockAddress(handle);
     memset(data, 0, 0x76);
     for (i = 0; i < 0x70; i++) {
@@ -75,7 +75,7 @@ s32 mtrMantraEventBitPush(void) {
 }
 
 extern s8 *sdfMemoryGetBlockAddress(void);
-extern void func_003297C8(s32 arg);
+extern void sdfReleaseResourceAllocation(s32 arg);
 
 void mtrMantraEventBitPop(s32 arg) {
     s32 i;
@@ -97,7 +97,7 @@ void mtrMantraEventBitPop(s32 arg) {
         }
         data++;
     }
-    func_003297C8(arg);
+    sdfReleaseResourceAllocation(arg);
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitPop()]*****************\n");
 }
 

@@ -119,7 +119,7 @@ s32 effInvokeOptionalNodeInstanceCallback(EffNode *node) {
 
 extern void func_0035B6E0(const char *fmt, ...);
 extern void *sdfReadNamedResource(void *, u32 *, s32);
-extern void *func_003297C8(void *);
+extern void *sdfReleaseResourceAllocation(void *);
 
 typedef struct EffNodeDescriptor {
     u16 type;      /* 0x00 */
@@ -140,7 +140,7 @@ typedef struct EffNodeInstance {
 extern void func_00157AC8(EffNodeDescriptor *descriptor);
 
 /* Build the effect node for a resource descriptor; descriptors older than 1.03 are converted first, and ones up to 1.02 get an identity matrix. */
-EffNode *func_001578C0(EffNodeDescriptor *descriptor) {
+EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {
     EffNode *node;
     EffNodeInstance *instance;
 
@@ -177,7 +177,7 @@ void *effLoadResourceNode(void *resource) {
 
     func_0035B6E0("d3p file read...[%s]\n", resource);
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
-    node = func_001578C0(resolvedId);
-    func_003297C8(resourceHandle);
+    node = effCreateNodeFromDescriptor(resolvedId);
+    sdfReleaseResourceAllocation(resourceHandle);
     return node;
 }

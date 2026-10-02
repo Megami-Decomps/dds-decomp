@@ -140,7 +140,7 @@ extern u32 effMiscRand(void *);
 extern u16 D_003D6332[][17];
 extern s32 mdlFlagTest(s32);
 
-s32 func_0029B8B0(s32 index) {
+s32 mnuChooseWeightedItem(s32 index) {
     s32 random = (u8)effMiscRand(NULL);
     u16 *entry = D_003D6332[index];
     u32 i;

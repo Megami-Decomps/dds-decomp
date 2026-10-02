@@ -61,7 +61,7 @@ extern void effObjQuatMulInnerSecondVec(MoverTarget *, u128 *);
 extern void effObjAddInnerFirstVec(MoverTarget *, u128 *);
 
 /* Apply enabled path channels, or build a relative transform through the callback. */
-s32 func_001116A0(MoverObject *object)
+s32 dds3UpdateMoverTransform(MoverObject *object)
 {
     f32 vector[4];
     f32 pathOutput[10];

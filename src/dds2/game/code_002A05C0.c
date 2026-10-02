@@ -43,7 +43,7 @@ extern s32 WaitSema(u32);
 extern s32 SignalSema(u32);
 
 typedef struct MemBlock MemBlock;
-extern MemBlock *func_003292A8(s32 size);
+extern MemBlock *sdfAllocGeneralBlock(s32 size);
 extern u32 sdfMemoryGetBlockAddress(MemBlock *block);
 extern s32 sceSifInitIopHeap(void);
 extern s32 sceSifAllocIopHeap(s32 size);
@@ -307,7 +307,7 @@ void func_002A15B0(s32 words) {
     s32 bytes = words * 4;
     s32 i;
 
-    D_00437A28 = sdfMemoryGetBlockAddress(func_003292A8(bytes));
+    D_00437A28 = sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(bytes));
     for (i = 0; i < words * 2; i++) {
         ((u16 *)D_00437A28)[i] = 0;
     }
@@ -432,7 +432,7 @@ extern s32 fileGetResourceHandle(u32);
 extern u32 fileGetLoadedDataAddress(u32);
 extern s32 fileGetResourceSize(u32);
 extern void filePollEntryCleanup(u32);
-extern MemBlock *func_003293C8(s32);
+extern MemBlock *sdfAllocGeneralBlockHigh(s32);
 extern void func_003504A8(u32 *);
 
 /* When the pending title-stream file is ready, copy it into a fresh block,
@@ -447,7 +447,7 @@ s32 mnuCompleteTitleStreamFileLoad(u32 *queue) {
         MemBlock *block;
 
         filePollEntryCleanup(D_00438FEC);
-        block = func_003293C8(size);
+        block = sdfAllocGeneralBlockHigh(size);
         mnuTitleStreamStatus[5] = sdfMemoryGetBlockAddress(block);
         mnuTitleStreamStatus[8] = (u32)block;
         memcpy((void *)queue[5], (void *)data, size);
@@ -566,7 +566,7 @@ void mnuInitializeTitleSoundBuffer(void) {
 
     WaitSema(mnuTitleStreamSemaphore);
     work[7] = (u32)decoder;
-    allocation = func_003292A8(0x1C200);
+    allocation = sdfAllocGeneralBlock(0x1C200);
     buffer = sdfMemoryGetBlockAddress(allocation);
     work[8] = (u32)allocation;
     work[4] = 2;
@@ -651,7 +651,7 @@ extern void mnuReleaseMenuResourceSlots(void);
 
 extern void mnuDestroyMovieMenuSelectionList(void);
 
-extern void func_003297C8(u32);
+extern void sdfReleaseResourceAllocation(u32);
 
 extern u32 D_00435BB0;
 
@@ -661,7 +661,7 @@ void mnuReleaseTitleMenuAssetsAndMarkClosed(void) {
     mnuReleaseMenuResourceSlots();
     mnuReleaseSpriteHandle();
     mnuDestroyMovieMenuSelectionList();
-    func_003297C8(*(u32 *)mnuMovieMenuState);
+    sdfReleaseResourceAllocation(*(u32 *)mnuMovieMenuState);
     mnuMovieMenuState = 0;
     D_00435BB0 = 1;
 }

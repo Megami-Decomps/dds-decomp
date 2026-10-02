@@ -1,7 +1,7 @@
 #include "common.h"
 #include "dds3obj.h"
 
-extern void func_002D0918(void *);
+extern void sdfReleaseResourceAllocation(void *);
 extern void *sdfResourceRetainAddress(void *);
 extern void *sdfReadNamedResource(const char *, void **, s32);
 extern s32 bfFindScriptIndexByName(void *, const char *);
@@ -72,7 +72,7 @@ void evtReleaseSceneResource(Scene *scene) {
     SceneObjectResourceState *object = (SceneObjectResourceState *)scene->object;
 
     if (object->resourceHandle != NULL) {
-        func_002D0918(object->resourceHandle);
+        sdfReleaseResourceAllocation(object->resourceHandle);
     }
     object->resourceHandle = NULL;
     object->resourceAddress = NULL;

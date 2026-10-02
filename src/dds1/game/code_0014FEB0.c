@@ -83,7 +83,7 @@ void effReleaseSharedTextureRecord(TexRecord *entry) {
     entry->refCount--;
     if (entry->refCount == 0) {
         sdfTexReleaseReferenceViaHandler(entry->texture);
-        func_002D0918(entry->allocation);
+        sdfReleaseResourceAllocation(entry->allocation);
     }
 }
 

@@ -82,7 +82,7 @@ extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 arg0, s32 arg1);
 extern void *dds3FindWorldObjectNodeByKey(void *world, s32 objectId, s32 kind);
 extern void *dds3GetWorldPlayerObject(void *world);
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
-extern void func_00115970(void *arg0);
+extern void effObjDispatchMagatuhiState(void *arg0);
 extern void dds3RemoveWorldObjectNode(void *arg0);
 extern void *dds3GetWorldSecondaryObject(void);
 extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast);
@@ -200,7 +200,7 @@ extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 arg1, s32 arg2);
 extern s32 scrReadStringParameter(s32 idx);
 extern void *effObjCreateKindFromResource(s32 arg0, s32 arg1);
 extern void effObjSetFlags(void *object, s32 flags);
-extern void *func_00114FA0(s32 arg0, void *arg1, void *arg2);
+extern void *effObjSpawnLoadedResourceEffect(s32 arg0, void *arg1, void *arg2);
 extern u8 D_003AC520[];
 extern void *effObjCreateFromResolvedResource(s32 arg0, void *arg1, void *arg2);
 extern s32 scrSetIntegerReturnValue(s32 arg0);
@@ -1223,7 +1223,7 @@ u32 evtOpResolveAndFlagObjectFromName(void) {
     memset(buf1, 0, 0x10);
     memset(buf2, 0, 0x10);
     param0 = scrReadStringParameter(0);
-    unit = func_00114FA0(param0, buf1, buf2);
+    unit = effObjSpawnLoadedResourceEffect(param0, buf1, buf2);
     if (unit == NULL) {
         func_003003F0(D_003AC520, 1);
         func_003003F0(D_003AC550, scrReadStringParameter(0));
@@ -1377,7 +1377,7 @@ u32 func_00225D80(void) {
     id = scrReadIntParameter(0);
     obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
-        func_00115970(obj);
+        effObjDispatchMagatuhiState(obj);
     }
     return 1;
 }
@@ -1389,7 +1389,7 @@ u32 func_00225DC0(void) {
     id = scrReadIntParameter(0);
     obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
-        func_00115970(obj);
+        effObjDispatchMagatuhiState(obj);
     }
     return 1;
 }

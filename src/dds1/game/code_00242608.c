@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_002D03F8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 extern u8 *sdfResourceRetainAddress(s32);
 extern void mnuClearPanelTransitionState(u8 *);
 extern void evtLoadResourcePair(const char *, u8 *);
@@ -34,7 +34,7 @@ extern void evtFormatTaskName(s32 taskId, void *name);
 extern void *func_002CFEB8(s32 size);
 extern void *memset(void *dst, s32 c, u32 n);
 extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
-extern void func_002424B0(void);
+extern void evtTickPackLoad(void);
 extern void evtReleaseEventPackResources(void);
 extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
@@ -65,7 +65,7 @@ void mnuCampCreateTask(s32 taskId) {
         memset(data, 0, 0x48);
         data->taskId = taskId;
         data->unused4 = 0;
-        kwlnTaskCreate(name, CAMP_TASK_PRIORITY, 1, 1, func_002424B0, evtReleaseEventPackResources, data);
+        kwlnTaskCreate(name, CAMP_TASK_PRIORITY, 1, 1, evtTickPackLoad, evtReleaseEventPackResources, data);
     }
 }
 
@@ -558,7 +558,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00243818);
 extern void fldCopyCameraSetting(void *);
 extern void fldUpdateCameraColorEffect(void *);
 
-void func_00243928(void *work, const s32 *source) {
+void fldApplyCameraColorKeyWords(void *work, const s32 *source) {
     s32 setting[0x54 / 4];
     u8 *destinationA;
     u8 *sourceA;
@@ -639,7 +639,7 @@ void mnuEnterCampSceneMenuState(CampScene *scene) {
 }
 
 extern s32 kwlnHeldTextureReference;
-extern void func_001054D0(s32, s32, f32);
+extern void kwlnCreateHeldTextureBuffer(s32, s32, f32);
 extern void func_00243BF0(CampScene *scene);
 extern void mnuShopSubmitDescriptor(CampScene *scene);
 extern void func_00243EC8(CampScene *scene);
@@ -649,7 +649,7 @@ void mnuAdvanceShopMenuState(CampScene *scene) {
     switch (scene->menuState) {
     case 1:
         if (kwlnHeldTextureReference == 0) {
-            func_001054D0(0x200, 0xE0, 100.75f);
+            kwlnCreateHeldTextureBuffer(0x200, 0xE0, 100.75f);
         }
         scene->menuState = scene->menuState + 1;
     case 3:
@@ -998,7 +998,7 @@ ShopScene *mnuShopCreateScene(void) {
     s32 handle;
     ShopScene *obj;
 
-    handle = func_002D03F8(0xB4);
+    handle = sdfAllocGeneralBlock(0xB4);
     obj = (ShopScene *)sdfResourceRetainAddress(handle);
     memset(obj, 0, 0xB4);
     obj->resourceHandle = handle;
@@ -1017,7 +1017,7 @@ extern s32 kwlnTaskGetUserValue();
 extern void mnuDrainPanelTransitions();
 extern void dspCloseChannel();
 extern void evtReleaseResourcePairHandle();
-extern void func_002D0918();
+extern void sdfReleaseResourceAllocation();
 
 void mnuShopDestroyScene(s32 arg) {
     ShopScene *scene = (ShopScene *)kwlnTaskGetUserValue();
@@ -1029,7 +1029,7 @@ void mnuShopDestroyScene(s32 arg) {
         mnuDrainPanelTransitions((u8 *)scene + 8, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(scene->resourcePair);
-        func_002D0918(scene->resourceHandle);
+        sdfReleaseResourceAllocation(scene->resourceHandle);
         D_003BC39C = 2;
     }
 }

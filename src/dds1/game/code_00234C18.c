@@ -40,7 +40,7 @@ typedef struct EvtViewerWork {
 } EvtViewerWork;
 
 extern u32 D_003BA8EC;
-extern s32 func_002D03F8(s32 size);
+extern s32 sdfAllocGeneralBlock(s32 size);
 extern u32 *sdfResourceRetainAddress(s32 handle);
 extern void *memset(void *dst, s32 value, u32 size);
 extern EvtViewerWork *evtPolygonMovieAllocWork(void);
@@ -53,7 +53,7 @@ extern void func_00232D48(void *viewer);
 extern char D_003ADDB0[]; /* "(ZikkiPlayMode)EventViewer" */
 
 /* Create the event viewer task `taskId` for event `event`/scene `id` and request its movie files. */
-s32 func_00234F18(s32 taskId, s32 event, s32 id) {
+s32 evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
     char path0[0x40];
     char path1[0x40];
     char path2[0x40];
@@ -63,7 +63,7 @@ s32 func_00234F18(s32 taskId, s32 event, s32 id) {
     s32 task;
 
     D_003BA8EC = 0x80000000;
-    viewerHandle = func_002D03F8(0x2490);
+    viewerHandle = sdfAllocGeneralBlock(0x2490);
     viewer = sdfResourceRetainAddress(viewerHandle);
     memset(viewer, 0, 0x2490);
     *viewer = viewerHandle;

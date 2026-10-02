@@ -1090,14 +1090,14 @@ void btlResetIndexWork(BattleIndexWork *work) {
 
 extern void *btlAllocateIndexList(s32);
 
-extern u32 func_003292A8(s32);
+extern u32 sdfAllocGeneralBlock(s32);
 
 extern u32 sdfResourceRetainAddress(u32);
 
 void btlInitBattleIndexWork(BattleIndexWork *work) {
     u32 command;
     work->indices = btlAllocateIndexList(13);
-    command = func_003292A8(0x48EC);
+    command = sdfAllocGeneralBlock(0x48EC);
     work->device = sdfResourceRetainAddress(command);
     work->command = command;
     work->previous = 0;
@@ -1106,7 +1106,7 @@ void btlInitBattleIndexWork(BattleIndexWork *work) {
 
 void btlReleaseObjectBuffers(s32 *object) {
     if (object[0x6C / 4] != 0) {
-        func_003297C8(object[0x6C / 4]);
+        sdfReleaseResourceAllocation(object[0x6C / 4]);
         object[0x6C / 4] = 0;
     }
     if (object[0x40 / 4] != 0) {
@@ -2206,7 +2206,7 @@ f32 btlGetUnitModelValue1C(BtlUnit *unit) {
 
 void btlAdvanceUnitModelFrame(BtlUnit *unit) {
     if ((unit->flags & 2) != 0) {
-        func_003343E8((u32)unit->ext->info->data);
+        sdfMotionSampleAtFrame((u32)unit->ext->info->data);
         return;
     }
 }
@@ -2218,11 +2218,11 @@ u16 btlGetUnitModelFrameCount(BtlUnit *unit) {
     return unit->ext->info->data->s2E;
 }
 
-extern s32 func_003343E8(BtlUnitData *, f32);
+extern s32 sdfMotionSampleAtFrame(BtlUnitData *, f32);
 
 void btlSeekUnitModelFrameZero(BtlUnit *unit) {
     if (unit->flags & 2) {
-        func_003343E8(unit->ext->info->data, 0.0f);
+        sdfMotionSampleAtFrame(unit->ext->info->data, 0.0f);
     }
 }
 
@@ -2235,7 +2235,7 @@ s64 btlSeekRandomModelFrame(BtlUnit *unit) {
         count = btlGetUnitModelFrameCount(unit);
         if (count > 0) {
             amount = effMiscRandMod(0, count);
-            return func_003343E8(unit->ext->info->data, amount);
+            return sdfMotionSampleAtFrame(unit->ext->info->data, amount);
         }
     }
 }
@@ -2584,7 +2584,7 @@ void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit) {
         } else {
             mdlAddEntryPlain(unit->ext->info, 0, unit->effectIndex);
         }
-        func_003343E8(unit->ext->info->data, 0.0f);
+        sdfMotionSampleAtFrame(unit->ext->info->data, 0.0f);
     }
 }
 
@@ -3714,7 +3714,7 @@ extern s64 btlAdvanceRuntimeSequenceCounter(void);
 extern void *memset(void *, s32, u32);
 
 BtlUnit *btlCreateUnit(void) {
-    u32 handle = func_003292A8(0x368);
+    u32 handle = sdfAllocGeneralBlock(0x368);
     BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress(handle);
     BtlWork *work;
     memset(unit, 0, 0x368);
@@ -3792,7 +3792,7 @@ void btlReleaseUnitResources(BtlUnit *unit) {
     }
 }
 
-extern void func_003297C8(u32);
+extern void sdfReleaseResourceAllocation(u32);
 
 void btlDestroyUnit(BtlUnit *unit) {
     btlBossDebugPrintf("btl:unit delete[%p]\n", unit);
@@ -3805,7 +3805,7 @@ void btlDestroyUnit(BtlUnit *unit) {
     } else {
         ((BtlWork *)btlGetRuntime())->actorList = unit->nextActor;
     }
-    func_003297C8(unit->handle35C);
+    sdfReleaseResourceAllocation(unit->handle35C);
 }
 
 void btlDestroyAllUnits(void) {
@@ -4531,7 +4531,7 @@ void btlResetCameraMotion(s32 action) {
                                     limit = limit * 0.7f;
                                 }
                                 if (current < limit) {
-                                    func_003343E8(unit->ext->info->data, limit);
+                                    sdfMotionSampleAtFrame(unit->ext->info->data, limit);
                                     btlBossDebugPrintf("btl:camera mot reset[%p]\n", unit);
                                 }
                             }
@@ -6709,7 +6709,7 @@ u32 sndPollEffectLoad(s32 arg) {
     btlBossDebugPrintf("btl:effect load end[%s]\n", args->name);
     resource = fileGetResourceHandle((s32)args->loadHandle);
     effect->handle = sndMixerClone(sdfResourceRetainAddress(resource));
-    func_003297C8(resource);
+    sdfReleaseResourceAllocation(resource);
     filePollEntryCleanup((s32)args->loadHandle);
     effect->flags = (effect->flags & ~1) | 2;
     return 0;
@@ -7560,7 +7560,7 @@ u32 sndPollMotSeFileAndSpu(FileLoadArgs *request) {
         }
     } else if (sndFindPackedTrackLoadStatus(node->position) != 0) {
         btlBossDebugPrintf("btl:sound SPU load end[%X]\n", *(u16 *)((u8 *)node + 0xA));
-        func_003297C8(request->resourceHandle);
+        sdfReleaseResourceAllocation(request->resourceHandle);
         filePollEntryCleanup((s32)request->loadHandle);
         node->flags = (node->flags & ~8) | 0x10;
         return 1;
@@ -7781,7 +7781,7 @@ SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
 
 extern s32 filePollEntryCleanup(s32);
 
-extern void func_003297C8(u32);
+extern void sdfReleaseResourceAllocation(u32);
 
 void sndReleaseSlotOwner(SoundSlotOwner *owner) {
     u32 i;
@@ -7791,7 +7791,7 @@ void sndReleaseSlotOwner(SoundSlotOwner *owner) {
                 filePollEntryCleanup(owner->slot[i]);
             }
             if (owner->handle[i] != 0) {
-                func_003297C8(owner->handle[i]);
+                sdfReleaseResourceAllocation(owner->handle[i]);
             }
         }
         if (owner->next != 0) {
@@ -8050,7 +8050,7 @@ s32 sndDeadAtracPlaybackTask(u32 *args) {
 void sndFinishEarringPlaybackTask(s32 *taskArgs) {
     u8 *work = (u8 *)btlGetRuntime();
     if (taskArgs[2] != 0) {
-        func_003297C8(taskArgs[2]);
+        sdfReleaseResourceAllocation(taskArgs[2]);
     }
     ((BtlWork *)work)->earringPlaybackCount += 0xFFFF;
 }

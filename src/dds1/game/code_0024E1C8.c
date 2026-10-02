@@ -197,13 +197,13 @@ void mnuResetResourceAnimation(void) {
     mnuAdvanceListCursorDefault(((MnuResourceTask *)object)->menuList);
 }
 
-extern s32 func_002D03F8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfMemoryGetBlockAddress(s32);
 extern void *memset(void *, s32, u32);
 extern void func_0024F8D8(void *);
 
 u32 *mnuAllocateEmptyResourceListState(void) {
-    s32 handle = func_002D03F8(0x10);
+    s32 handle = sdfAllocGeneralBlock(0x10);
     u32 *block = sdfMemoryGetBlockAddress(handle);
 
     memset(block, 0, 0x10);
@@ -217,7 +217,7 @@ u32 *mnuAllocateEmptyResourceListState(void) {
 extern void sdfReleaseChipBlock(void *);
 extern void mnuDestroyListState(void *);
 extern void mnuReleaseMenuVisualWorkResources(s32);
-extern void func_002D0918(s32);
+extern void sdfReleaseResourceAllocation(s32);
 
 typedef struct MenuCleanupNode {
     u8 pad00[0x58];
@@ -246,7 +246,7 @@ void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
     sdfReleaseChipBlock(owner->resource);
     mnuDestroyListState(owner);
     mnuReleaseMenuVisualWorkResources(*(s32 *)(record + 0x24));
-    func_002D0918(taskData[0]);
+    sdfReleaseResourceAllocation(taskData[0]);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0024E1C8", mnuResourceTaskName);

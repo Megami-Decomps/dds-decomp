@@ -413,7 +413,7 @@ void effSetWorkTextureResource(EffWork *work, u64 resource) {
     allocation = sdfReadNamedResource(resource, resourceData, 0);
     textureHandle = sdfTexAcquireResourceTexture(resourceData[0]);
     work->textureHandle = textureHandle;
-    func_003297C8(allocation);
+    sdfReleaseResourceAllocation(allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_001956A8);
@@ -487,7 +487,7 @@ u32 effMultiplyPackedColors(u32 colorA, u32 colorB) {
 }
 
 /* vu0 routine: distance from `point` to the line through `origin` along the unit vector `direction`. */
-f32 func_00195AB0(f32 *direction, f32 *origin, f32 *point) {
+f32 effPointToLineDistance(f32 *direction, f32 *origin, f32 *point) {
     f32 projection[4];
     f32 offset[4];
     f32 along;
@@ -510,7 +510,7 @@ f32 func_00195AB0(f32 *direction, f32 *origin, f32 *point) {
 }
 
 void *effAllocSlotArray(s32 count) {
-    void *allocation = func_003292A8(count * 0x38 + 0xC);
+    void *allocation = sdfAllocGeneralBlock(count * 0x38 + 0xC);
     void *slotBase = sdfResourceRetainAddress(allocation);
     u32 index = 0;
     EffSlot38 *slot = slotBase;

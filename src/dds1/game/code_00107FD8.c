@@ -182,7 +182,7 @@ extern u32 D_003BD6F0;
 extern u8 kwlnDefaultColorVector[];
 
 /* vu0 routine: set the background colour target: immediately (mode 0) or blend from the default over `mode` frames. */
-void func_00108218(s32 mode, f32 *color) {
+void kwlnSetBackgroundColorTarget(s32 mode, f32 *color) {
     s32 first[4];
     s32 second[4];
     u32 packedFirst;
@@ -216,7 +216,7 @@ extern u32 D_003BD6FC;
 extern u32 D_003BD700;
 
 /* vu0 routine: set the draw colour target: immediately (mode 0) or interpolate from the previous colour. */
-void func_001082D8(s32 mode, f32 *color) {
+void kwlnSetDrawColorTarget(s32 mode, f32 *color) {
     u32 color32[4];
     u32 packed;
 

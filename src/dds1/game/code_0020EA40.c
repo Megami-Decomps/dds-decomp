@@ -418,7 +418,7 @@ void btlReleaseEventAssets(void) {
     btlReleaseEventData();
     data = battle->eventAssets;
     if (data != 0) {
-        func_002D0918(data);
+        sdfReleaseResourceAllocation(data);
         battle->eventAssets = 0;
     }
     btlBossDebugPrintf(D_003A6838);
@@ -1149,7 +1149,7 @@ void func_00213368(void) {
 
 INCLUDE_ASM(const s32, "game/code_0020EA40", func_00213370);
 
-extern void func_001054D0(s32, s32, f32);
+extern void kwlnCreateHeldTextureBuffer(s32, s32, f32);
 
 extern u8 D_00325870[];
 
@@ -1157,7 +1157,7 @@ void btlClearOverlayBuffers(void) {
     u8 *entry;
     s32 i;
     u64 clearValue;
-    func_001054D0(0x200, 0xe0, 0.0f);
+    kwlnCreateHeldTextureBuffer(0x200, 0xe0, 0.0f);
     kwlnTextureSetReferenceFlagIfPresent();
     entry = D_00325870;
     i = 0;
@@ -1182,7 +1182,7 @@ void btlReleaseRuntimeResource(void) {
     kwlnTextureReleaseHeldReference();
 }
 
-extern void *func_002D0518(s32);
+extern void *sdfAllocGeneralBlockHigh(s32);
 
 extern void *sdfResourceRetainAddress(void *);
 
@@ -1202,7 +1202,7 @@ void btlInitializeGraphicsRuntime(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
     void *surface;
     void *context;
-    runtime->handle = func_002D0518(0x70000);
+    runtime->handle = sdfAllocGeneralBlockHigh(0x70000);
     runtime->request = sdfResourceRetainAddress(runtime->handle);
     surface = sdfAllocatePacketList(0);
     context = sdfAllocPacketAligned(16);
@@ -1856,7 +1856,7 @@ extern void mdlDestroyContext(s32);
 
 extern void mdlDestroyPartList(s32);
 
-extern void func_002D0918(s32);
+extern void sdfReleaseResourceAllocation(s32);
 
 extern void sdfResourceListRelease(void *, s32);
 
@@ -1891,12 +1891,12 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
         sdfQueueNonzeroResourceId((void *)node->requestHandle);
         for (i = 0; i != 8; i++) {
             if (node->slots[i].resourceHandle != 0) {
-                func_002D0918(node->slots[i].resourceHandle);
+                sdfReleaseResourceAllocation(node->slots[i].resourceHandle);
             }
         }
     }
     mdlDestroyPartList(node->partList);
-    func_002D0918(node->unk_A0);
+    sdfReleaseResourceAllocation(node->unk_A0);
     sdfReleaseChipBlock(node);
 }
 

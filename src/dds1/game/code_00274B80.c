@@ -191,7 +191,7 @@ extern u8 D_0037CAB0[];
 extern u8 D_0037CA78[];
 extern void mnuUpdateWindowListFromInput();
 extern void mnuClearListFlags();
-extern s32 func_002D03F8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 extern s32 *sdfResourceRetainAddress(s32);
 extern void evtStageTestInit();
 extern void mnuActivatePanelAndConfigureGridResources();
@@ -337,7 +337,7 @@ s32 mnuShopReleaseResources(void) {
     mnuRefreshPartyPanelSlots(context);
     mnuDestroyPartySelectionWindow(context);
     func_00274BA0(context);
-    func_002D0918(menu->allocation);
+    sdfReleaseResourceAllocation(menu->allocation);
     return 1;
 }
 
@@ -440,7 +440,7 @@ s32 mnuStaffCloseSelectionState(void) {
     s32 menu = ((CampMenuContext *)context)->menu;
     mnuResetWorkFloats();
     mnuReleaseMenuWindowHandles(context);
-    func_002D0918(*(s32 *)menu);
+    sdfReleaseResourceAllocation(*(s32 *)menu);
     return 1;
 }
 
@@ -916,7 +916,7 @@ void mnuDestroySkillMenuWindows(s32 context) {
 
 s32 mnuCampMenuInit(void) {
     s32 context = kwlnTaskGetUserValue();
-    s32 handle = func_002D03F8(0x38);
+    s32 handle = sdfAllocGeneralBlock(0x38);
     s32 *menu = sdfResourceRetainAddress(handle);
     CampMenuContext *work = (CampMenuContext *)context;
 
@@ -948,7 +948,7 @@ s32 mnuCloseItemSelectionState(s32 contextArg) {
         mnuDestroySelectedPartyWindow(contextArg);
     }
     func_00277DF0(context);
-    func_002D0918(menu->handle);
+    sdfReleaseResourceAllocation(menu->handle);
     return 1;
 }
 

@@ -340,7 +340,7 @@ void mnuReleaseStaffSpriteAndResourceHandles(StaffMenuWork *handles) {
     mnuReleaseResourceList(handles->resourceList);
 }
 
-extern u32 func_002D03F8(s32);
+extern u32 sdfAllocGeneralBlock(s32);
 extern u8 *sdfResourceRetainAddress(u32);
 extern void *memset(void *, s32, u32);
 extern void mnuClearPanelTransitionState(s32);
@@ -355,8 +355,8 @@ extern void func_002717D8(void *);
 extern void func_00283BE0(void *, s32);
 extern void func_002E9708(void);
 
-StaffMenuWork *func_00271E58(void) {
-    u32 resource = func_002D03F8(sizeof(StaffMenuWork));
+StaffMenuWork *mnuCreateStaffCampWork(void) {
+    u32 resource = sdfAllocGeneralBlock(sizeof(StaffMenuWork));
     StaffMenuWork *work = (StaffMenuWork *)sdfResourceRetainAddress(resource);
 
     memset(work, 0, sizeof(*work));
@@ -382,7 +382,7 @@ extern s32 kwlnTaskGetUserValue();
 
 extern s8 mnuCampTaskState;
 
-extern void func_002D0918(u32);
+extern void sdfReleaseResourceAllocation(u32);
 
 void mnuDestroyStaffMenuTask(u32 task) {
     StaffMenuWork *work = (StaffMenuWork *)kwlnTaskGetUserValue(task);
@@ -398,7 +398,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     mnuReleaseStaffResourceSlotGroups((u32 *)work);
     mnuReleaseStaffSpriteHandles(work);
     func_002BC618((u32)work->valueRecord);
-    func_002D0918(work->resource);
+    sdfReleaseResourceAllocation(work->resource);
     mnuCampTaskState = 2;
     func_002E9730();
 }
@@ -448,7 +448,7 @@ void mnuCreateCampTasks(void) {
     s32 work;
     s32 draw;
 
-    work = (s32)func_00271E58();
+    work = (s32)mnuCreateStaffCampWork();
     kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, func_00272798, 0, work);
     draw = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, func_002728F8, 0, work);
     kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, func_002729C8, mnuDestroyStaffMenuTask, work);

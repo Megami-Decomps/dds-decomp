@@ -14,7 +14,7 @@ typedef struct SdfImageUploadRequest {
     u16 height;
 } SdfImageUploadRequest;
 
-extern s32 func_002D03F8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfResourceRetainAddress(s32);
 extern void func_002D1D80(SdfImageUploadRequest *);
 
@@ -67,7 +67,7 @@ void sdfPendingQueuePush(void *arg0, s32 arg1);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 void *sdfAllocAndClearQuadwords(s32 size);
 
-s32 func_002D0A80(s32 address);
+s32 sdfFindGeneralBlockByAddress(s32 address);
 
 s32 sdfChipIsInRange(s32 address);
 
@@ -358,7 +358,7 @@ void sdfTexQueueResourceRelease(s32 address) {
             entry->mode = 2;
         } else {
             entry->mode = 1;
-            entry->handle = func_002D0A80(address);
+            entry->handle = sdfFindGeneralBlockByAddress(address);
         }
         WaitSema(obj->semaphoreId);
         if (obj->releaseTail != NULL) {
@@ -461,7 +461,7 @@ s32 sdfFormatBitsPerPixelC(u32 format) {
     }
 }
 
-s32 func_002D2410(s32 format) {
+s32 sdfTexGetStorageBitsPerPixel(s32 format) {
     s32 size;
 
     switch (format) {
@@ -482,15 +482,15 @@ s32 func_002D2410(s32 format) {
     return size;
 }
 
-u64 func_002D2468(SdfTex *texture) {
+u64 sdfTexGetPrimaryTextureState(SdfTex *texture) {
     return texture->primaryBuffer->textureState;
 }
 
-u64 func_002D2478(SdfTex *texture) {
+u64 sdfTexGetPrimarySamplingState(SdfTex *texture) {
     return texture->primaryBuffer->samplingState;
 }
 
-u64 func_002D2488(SdfTex *texture) {
+u64 sdfTexGetPrimaryClampState(SdfTex *texture) {
     return texture->primaryBuffer->clampState;
 }
 
@@ -511,18 +511,18 @@ void sdfTexSetSecondaryPacketBits(SdfTex *tex, s32 magFilter, s32 minFilter) {
     buf->samplingState = (buf->samplingState & ~0x1E0) | (magFilter << 5) | (minFilter << 6);
 }
 
-void func_002D2530(SdfTex *texture, u8 value) {
+void sdfTexSetClampMode(SdfTex *texture, u8 value) {
     texture->clampMode = value;
     func_002D2FB0();
 }
 
-u8 *func_002D2548(u32 destination, s32 width, s32 height, u32 format, u8 *pixels, s32 borrow) {
+u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height, u32 format, u8 *pixels, s32 borrow) {
     SdfImageUploadRequest request;
     s32 size = sdfFormatImageSize(format, width, height) * 16;
 
     if (borrow == 0) {
         if (size > 0x400) {
-            request.allocation = func_002D03F8(size);
+            request.allocation = sdfAllocGeneralBlock(size);
             request.pixels = sdfResourceRetainAddress(request.allocation);
             request.allocationMode = 1;
         } else {
@@ -545,7 +545,7 @@ u8 *func_002D2548(u32 destination, s32 width, s32 height, u32 format, u8 *pixels
     return pixels + size;
 }
 
-extern u8 *func_002D2548();
+extern u8 *sdfTexSubmitImageCopy();
 
 void sdfTexSubmitPixelsForFormat(SdfTex *texture, s32 resourceWord, u8 *pixels, s32 mode) {
     s32 width;
@@ -558,7 +558,7 @@ void sdfTexSubmitPixelsForFormat(SdfTex *texture, s32 resourceWord, u8 *pixels, 
         width = 8;
         height = 2;
     }
-    func_002D2548(resourceWord, width, height, texture->clutFormat, pixels, mode);
+    sdfTexSubmitImageCopy(resourceWord, width, height, texture->clutFormat, pixels, mode);
 }
 
 void sdfTexUploadSecondaryResource(SdfTex *tex) {

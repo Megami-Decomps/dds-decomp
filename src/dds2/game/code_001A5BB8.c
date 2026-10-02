@@ -265,9 +265,17 @@ extern void sdfInitPacketList(s32 mem);
 
 extern void itfSendTablePacket(s32 arg0, s32 arg1, s32 arg2);
 
-extern void func_001A0CA0(void *arg0, void *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+extern void itfQueueTextureBoundQuadPacket(void *arg0, void *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
-typedef struct UiSprite { u8 pad0[0x20]; s32 unk20; s32 unk24; } UiSprite;
+typedef struct UiSprite {
+    u8 pad0[0x10];
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+    s32 unk20;
+    s32 unk24;
+} UiSprite;
 typedef struct UiPanelPlacement {
     UiSprite *frame;
     UiSprite *sprite;
@@ -356,7 +364,7 @@ typedef struct UiOwnerRef { u8 pad0[0xC]; struct UiPanel *owner; } UiOwnerRef;
 extern UiSurface kwlnDrawSurfaces[];
 extern UiOwnerRef *D_003B4778[];
 extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, UiSurface *surface);
-extern s32 func_001A7798(UiSprite *sprite);
+extern void func_001A7798(UiSprite *sprite);
 
 typedef struct BtlEntry {
     u16 flags;
@@ -375,8 +383,8 @@ typedef struct BtlEntry {
     u16 unk1B0;
     u8 pad1B2[0x12];
 } BtlEntry;
-extern s32 func_001197C0();
-extern s32 func_001198C0();
+extern s32 datComputeSkillBoostedMaxHp();
+extern s32 datComputeSkillBoostedMaxMp();
 
 /* Enable context rendering for every font object in the linked chain. */
 void frFontEnableNodeContextModes(s32 fontObject) {
@@ -530,7 +538,7 @@ void itfReleaseUiResourceSlotHandles(UiResourceSlots *slots) {
     remaining = 0x1f;
     do {
         if (*entries != 0) {
-            func_003297C8(entries[0x20]);
+            sdfReleaseResourceAllocation(entries[0x20]);
             *entries = 0;
         }
         remaining = remaining - 1;
@@ -741,7 +749,26 @@ void sndFlushMessageQueue(void) {
     itfMesWork.allocation = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A7798);
+extern SndDev D_00380708;
+extern s32 D_003B4A18[];
+extern u8 D_00436630[5];
+extern u8 D_00436638[5];
+extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, s32);
+
+void func_001A7798(UiSprite *sprite) {
+    s32 vertices[4][2] = {
+        {sprite->left, sprite->top},
+        {sprite->right, sprite->top},
+        {sprite->right, sprite->bottom},
+        {sprite->left, sprite->bottom}
+    };
+    s32 packet;
+
+    packet = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packet);
+    itfEmitQuadListA(vertices, D_003B4A18, D_00436630, D_00436638, 5, 0xFFFFFF, packet);
+    D_00380708.submitPacket(&D_00380708, packet);
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A7878);
 
@@ -807,7 +834,7 @@ s32 sndUpdateTestMsgTask(void) {
         mem = sdfAllocPacketAligned(0x20);
         sdfInitPacketList(mem);
         itfSendTablePacket(mem, 0, 0);
-        func_001A0CA0(D_003B4D08, D_003B4D18, D_003B4D28, 0xFFF, sndTestMessageTexture, 0, mem);
+        itfQueueTextureBoundQuadPacket(D_003B4D08, D_003B4D18, D_003B4D28, 0xFFF, sndTestMessageTexture, 0, mem);
         D_003805A8.submitPacket(&D_003805A8, mem);
         return 0;
     }
@@ -828,7 +855,7 @@ void func_001A8918(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A8938);
 
-s32 func_001A8A70(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep) {
+s32 itfStepFloatWithPad(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep) {
     f32 current = *value;
     s32 changed = 0;
 
@@ -1169,11 +1196,11 @@ void btlComputeProfileMaxMp(void) {
 }
 
 s32 btlComputeSkillAdjustedMaxHp(void *stats) {
-    return func_001197C0(stats);
+    return datComputeSkillBoostedMaxHp(stats);
 }
 
 s32 btlComputeSkillAdjustedMaxMp() {
-    return func_001198C0();
+    return datComputeSkillBoostedMaxMp();
 }
 
 void btlAdjustUnitHp(void) {
@@ -1265,8 +1292,8 @@ void btlSyncPlayerWork(UiObject *actor) {
         dst->flags &= ~0x4000;
     }
     dst->unk14 = src->unk14;
-    maxHp = func_001197C0(dst);
-    maxMp = func_001198C0(dst);
+    maxHp = datComputeSkillBoostedMaxHp(dst);
+    maxMp = datComputeSkillBoostedMaxMp(dst);
     dst->hp = src->hp < maxHp ? src->hp : maxHp;
     dst->mp = src->mp < maxMp ? src->mp : maxMp;
     memcpy(dst->unk16, src->unk16, 5);
@@ -1513,7 +1540,7 @@ u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
 }
 
 void func_001AD090(void) {
-    func_00119F68();
+    datMapFlagToStatIndex();
 }
 
 extern s32 datUnitHasSkill();
@@ -2851,7 +2878,7 @@ extern u8 btlResourceBlockLoaded;
 
 extern BtlResBlock *btlResourceBlock;
 
-extern s32 func_003292A8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 
 extern BtlResBlock *sdfResourceRetainAddress(s32);
 
@@ -2884,7 +2911,7 @@ void btlPanelResourcesLoad(void) {
     s32 handle;
     BtlResBlock *block;
     if (D_00436800 == 0) {
-        handle = func_003292A8(0x28);
+        handle = sdfAllocGeneralBlock(0x28);
         block = sdfResourceRetainAddress(handle);
         btlResourceBlock = block;
         block->unk0 = handle;
@@ -3357,7 +3384,7 @@ extern void func_00306C28(s32, s32, s32, u32 *, s32, BtlSlotOwner *, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004160F0);
 
-void func_001BB078(s32 unused, s32 x, s32 y, s32 delta) {
+void btlDrawThreePanelSpriteStrips(s32 unused, s32 x, s32 y, s32 delta) {
     BtlPanelStrip strips[3] = { {0, 0, 0x40}, {5, 0, 0x41}, {0x6B, 0, 0x42} };
     u32 colors[4] = { 0x80808080, 0x80808080, 0x80808080, 0x80808080 };
     s32 i, j;
@@ -3792,7 +3819,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1A68);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1F10);
 
 void btlReleaseStwrPanelResource(void) {
-    func_003297C8(*(u32 *)kwlnTaskGetUserValue());
+    sdfReleaseResourceAllocation(*(u32 *)kwlnTaskGetUserValue());
     btlSetTrackedTaskHandle(3, 0);
 }
 
@@ -3853,7 +3880,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C2EA8);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C3168);
 
 void btlReleaseTrackedTaskResource(void) {
-    func_003297C8(*(u32 *)(kwlnTaskGetUserValue(func_00101740(D_004367CC)) + 0x1200));
+    sdfReleaseResourceAllocation(*(u32 *)(kwlnTaskGetUserValue(func_00101740(D_004367CC)) + 0x1200));
     btlSetTrackedTaskHandle(8, 0);
 }
 

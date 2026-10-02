@@ -114,7 +114,7 @@ typedef struct {
 
 
 void effMagatuhiReleaseResource(EffMagatuhiValueWork *work) {
-    func_003297C8(work->resource);
+    sdfReleaseResourceAllocation(work->resource);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191010);
@@ -163,7 +163,7 @@ typedef struct {
 } EffMagatuhiRingParticle;
 
 
-extern u32 func_003292A8(s32 size);
+extern u32 sdfAllocGeneralBlock(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
 extern void *effCloneMagatuhiWithColorResource(void *block);
 extern void *effAllocSlotArray(s32 count);
@@ -175,7 +175,7 @@ extern u8 D_003AA868[];
 EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
     u32 count = src->count;
     u32 size = count * sizeof(EffMagatuhiDriftParticle);
-    u32 handle = func_003292A8(size + sizeof(EffMagatuhiWideFirst));
+    u32 handle = sdfAllocGeneralBlock(size + sizeof(EffMagatuhiWideFirst));
     EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfResourceRetainAddress(handle);
     EffMagatuhiWideFirst *work = (EffMagatuhiWideFirst *)((u8 *)particle + size);
     s32 spread;
@@ -200,7 +200,7 @@ EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
 void effMagatuhiReleaseMathOwnerAndBuffer(EffMagatuhiWideFirst *work) {
     effMathReleaseWorkResource(work->mathResource);
     effReleaseMagatuhiOwner(work->managedResource);
-    func_003297C8(work->buffer);
+    sdfReleaseResourceAllocation(work->buffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191AD0);
@@ -224,7 +224,7 @@ void effMagatuhiCopyFloatBlock(EffMagatuhiCallback *work, EffMagatuhiFloatParams
 /* Clone history parameters; signed delays follow the returned work block. */
 EffMagatuhiWideSecond *effMagatuhiCreateSecond(EffMagatuhiHeadSecond *src) {
     u32 count = src->count;
-    u32 handle = func_003292A8(count * 4 + sizeof(EffMagatuhiWideSecond));
+    u32 handle = sdfAllocGeneralBlock(count * 4 + sizeof(EffMagatuhiWideSecond));
     EffMagatuhiWideSecond *work = (EffMagatuhiWideSecond *)sdfResourceRetainAddress(handle);
     s32 *delays = (s32 *)(work + 1);
     s32 spread;
@@ -248,7 +248,7 @@ EffMagatuhiWideSecond *effMagatuhiCreateSecond(EffMagatuhiHeadSecond *src) {
 void effMagatuhiReleaseWideWorkResources(EffMagatuhiWideSecond *work) {
     effMathReleaseWorkResource(work->mathResource);
     effReleaseMagatuhiOwner(work->managedResource);
-    func_003297C8(work->buffer);
+    sdfReleaseResourceAllocation(work->buffer);
 }
 
 extern void *effMathGetSlotAt(void *slots, s32 index);
@@ -425,11 +425,14 @@ typedef struct {
     u8 pad10[4];
     s32 frames;
     s32 spread;
-    u8 pad1C[0x14];
+    u8 pad1C[8];
+    f32 initialRadius;
+    f32 initialLift;
+    f32 initialLiftRandomness;
     f32 angleStep;
-    u8 pad34[4];
+    f32 initialScale;
     f32 scaleStep;
-    u8 pad3C[4];
+    f32 initialScaleRandomness;
     u32 count;
     u32 maxSteps;
     u8 pad48[0x94];
@@ -467,7 +470,7 @@ typedef struct {
 /* Clone ring parameters; the returned work precedes its individual slots. */
 EffMagatuhiRingWork *effMagatuhiCreateFourth(EffMagatuhiRingParams *src) {
     u32 count = src->count;
-    u32 handle = func_003292A8(count * sizeof(EffMagatuhiRingParticle) + sizeof(EffMagatuhiRingWork));
+    u32 handle = sdfAllocGeneralBlock(count * sizeof(EffMagatuhiRingParticle) + sizeof(EffMagatuhiRingWork));
     EffMagatuhiRingWork *work = (EffMagatuhiRingWork *)sdfResourceRetainAddress(handle);
     EffMagatuhiRingParticle *particle = (EffMagatuhiRingParticle *)(work + 1);
     s32 spread;
@@ -492,7 +495,7 @@ EffMagatuhiRingWork *effMagatuhiCreateFourth(EffMagatuhiRingParams *src) {
 
 void effMagatuhiReleaseOwnerAndBuffer(EffMagatuhiRingWork *work) {
     effReleaseMagatuhiOwner(work->managedResource);
-    func_003297C8(work->buffer);
+    sdfReleaseResourceAllocation(work->buffer);
 }
 
 /* Initialize a ring slot and reset the history/value owned by that slot. */
@@ -649,7 +652,7 @@ typedef struct {
 /* Clone orbit parameters; the returned work precedes its individual slots. */
 EffMagatuhiOrbitWork *effMagatuhiCreateFifth(EffMagatuhiOrbitParams *src) {
     u32 count = src->count;
-    u32 handle = func_003292A8(count * sizeof(EffMagatuhiOrbitParticle) + sizeof(EffMagatuhiOrbitWork));
+    u32 handle = sdfAllocGeneralBlock(count * sizeof(EffMagatuhiOrbitParticle) + sizeof(EffMagatuhiOrbitWork));
     EffMagatuhiOrbitWork *work = (EffMagatuhiOrbitWork *)sdfResourceRetainAddress(handle);
     EffMagatuhiOrbitParticle *particle = (EffMagatuhiOrbitParticle *)(work + 1);
     s32 spread;
@@ -674,7 +677,7 @@ EffMagatuhiOrbitWork *effMagatuhiCreateFifth(EffMagatuhiOrbitParams *src) {
 
 void effMagatuhiReleaseOwnerAndExtraBuffer(EffMagatuhiOrbitWork *work) {
     effReleaseMagatuhiOwner(work->managedResource);
-    func_003297C8(work->buffer);
+    sdfReleaseResourceAllocation(work->buffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193668);
@@ -788,7 +791,7 @@ typedef struct {
 EffMagatuhiDriftWork *effMagatuhiCreateThird(EffMagatuhiDriftParams *src) {
     u32 count = src->count;
     u32 size = count * sizeof(EffMagatuhiDriftParticle);
-    u32 handle = func_003292A8(size + sizeof(EffMagatuhiDriftWork));
+    u32 handle = sdfAllocGeneralBlock(size + sizeof(EffMagatuhiDriftWork));
     EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfResourceRetainAddress(handle);
     EffMagatuhiDriftWork *work = (EffMagatuhiDriftWork *)((u8 *)particle + size);
     s32 spread;
@@ -813,10 +816,47 @@ EffMagatuhiDriftWork *effMagatuhiCreateThird(EffMagatuhiDriftParams *src) {
 
 void effMagatuhiReleaseSecondaryOwnerAndBuffer(EffMagatuhiDriftWork *work) {
     effReleaseMagatuhiOwner(work->managedResource);
-    func_003297C8(work->buffer);
+    sdfReleaseResourceAllocation(work->buffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193F10);
+/* vu0 routine: initialize a planar particle with normalized position/drift. */
+void func_00193F10(EffMagatuhiDriftWork *work, s32 index) {
+    EffMagatuhiDriftParticle *particle = &work->particles[index];
+    f32 direction[4];
+    f32 radius;
+    f32 random;
+
+    random = effMiscRandUnitFloat(D_003AA868) - 0.5f;
+    radius = work->head.initialRadius * (random + random);
+    random = effMiscRandUnitFloat(D_003AA868) - 0.5f;
+    direction[0] = random + random;
+    direction[1] = 0.0f;
+    random = effMiscRandUnitFloat(D_003AA868) - 0.5f;
+    direction[2] = random + random;
+    VU0_LOAD_VF_FROM(vf10, *(u128 *)direction);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF_TO_MEMORY(vf10, *(u128 *)direction);
+    particle->pos[0] = radius * direction[0];
+    particle->pos[1] = 0.0f;
+    particle->pos[2] = radius * direction[2];
+    random = effMiscRandUnitFloat(D_003AA868) - 0.5f;
+    particle->dir[0] = random + random;
+    particle->dir[1] = 0.0f;
+    random = effMiscRandUnitFloat(D_003AA868) - 0.5f;
+    particle->dir[2] = random + random;
+    VU0_LOAD_VF(vf10, particle->dir);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, particle->dir);
+    particle->scale = work->head.initialScale *
+        (effMiscRandUnitFloat(D_003AA868) * work->head.initialScaleRandomness +
+         (1.0f - work->head.initialScaleRandomness));
+    particle->angle = effMiscRandUnitFloat(D_003AA868) * 6.2831853f;
+    particle->liftStep = work->head.initialLift *
+        (effMiscRandUnitFloat(D_003AA868) * work->head.initialLiftRandomness +
+         (1.0f - work->head.initialLiftRandomness));
+    func_001918B8(work->managedResource->valueWork, index);
+    effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00194100);
 

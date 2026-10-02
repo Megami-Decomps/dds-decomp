@@ -354,7 +354,7 @@ void itfReleaseUiResourceSlotHandles(s32 *resourceFlags) {
     remaining = 0x1f;
     do {
         if (*resourceFlags != 0) {
-            func_002D0918(((UiResourceSlots *)resourceFlags)->handles[0]);
+            sdfReleaseResourceAllocation(((UiResourceSlots *)resourceFlags)->handles[0]);
             *resourceFlags = 0;
         }
         remaining = remaining - 1;
@@ -644,7 +644,7 @@ extern void sdfInitPacketList(s32 mem);
 
 extern void itfSendTablePacket(s32 packet, s32, s32);
 
-extern void func_00198C70(void *, void *, void *, s32, s32, s32, s32);
+extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, s32, s32, s32);
 
 s32 sndUpdateTestMsgTask(void) {
     s32 mem;
@@ -652,7 +652,7 @@ s32 sndUpdateTestMsgTask(void) {
         mem = sdfAllocPacketAligned(0x20);
         sdfInitPacketList(mem);
         itfSendTablePacket(mem, 0, 0);
-        func_00198C70(D_00358318, D_00358328, D_00358338, 0xFFF, sndTestMessageTexture, 0, mem);
+        itfQueueTextureBoundQuadPacket(D_00358318, D_00358328, D_00358338, 0xFFF, sndTestMessageTexture, 0, mem);
         D_003255A8.unk10(&D_003255A8, mem);
         return 0;
     }
@@ -675,7 +675,7 @@ void func_0019FCA8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019FCC8);
 
-s32 func_0019FE00(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep) {
+s32 itfStepFloatWithPad(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep) {
     f32 current = *value;
     s32 changed = 0;
 

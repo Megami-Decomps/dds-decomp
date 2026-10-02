@@ -68,14 +68,14 @@ void effBattleMiscQueryPosition(void *owner, EffBattleMiscParam *param, u128 *ou
 
 extern u32 effBTLFieldColorGetOverrideSelector(void);
 extern u32 effBTLFieldColorGetFinalSelector(void);
-extern void func_00161BA0();
+extern void effBattleComputeTargetPosition();
 
 void effBattleMiscCallByOwnerA(u32 unused, void *arg) {
-    func_00161BA0(effBTLFieldColorGetOverrideSelector(), arg);
+    effBattleComputeTargetPosition(effBTLFieldColorGetOverrideSelector(), arg);
 }
 
 void func_00161B10(u32 unused, void *arg) {
-    func_00161BA0(effBTLFieldColorGetFinalSelector(), arg);
+    effBattleComputeTargetPosition(effBTLFieldColorGetFinalSelector(), arg);
 }
 
 extern void btlSetActorEffectParameterOrMuzzlePosition();
@@ -89,7 +89,7 @@ void func_00161B70(u32 unused, EffBattleMiscParam *param) {
 }
 
 /* Query a unit-relative target position; camera-facing kinds use the view basis. */
-void func_00161BA0(EffBattleMiscUnit *unit, EffBattleMiscTargetParam *param) {
+void effBattleComputeTargetPosition(EffBattleMiscUnit *unit, EffBattleMiscTargetParam *param) {
     f32 out[4];
     f32 dir[4];
     f32 pos[4];

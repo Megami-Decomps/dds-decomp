@@ -1,9 +1,9 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
-extern s32 func_001190B0();
+extern s32 datComputeSkillBoostedMaxHp();
 
-extern s32 func_001191B0();
+extern s32 datComputeSkillBoostedMaxMp();
 
 extern u64 btlAdvanceRuntimeSequenceCounter();
 
@@ -156,7 +156,7 @@ extern s32 D_0032A210;
 
 extern s8 effSharedRandomState[];
 
-extern s32 func_002D03F8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 
 extern u32 *sdfResourceRetainAddress(s32);
 
@@ -240,7 +240,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     effResetSlots();
     evtSetSolarOverlayFullyTransparent();
     itfMesClearFlags(1);
-    func_002D0918(D_003BB2E0);
+    sdfReleaseResourceAllocation(D_003BB2E0);
     D_003BB2E0 = 0;
     btlRuntime = 0;
     btlBossDebugPrintf("** btlExit ***************\n");
@@ -365,11 +365,11 @@ void btlComputeProfileMaxMp(void) {
 }
 
 u32 btlComputeSkillAdjustedMaxHp(s32 object) {
-    return func_001190B0(object);
+    return datComputeSkillBoostedMaxHp(object);
 }
 
 u32 btlComputeSkillAdjustedMaxMp(s32 object) {
-    return func_001191B0(object);
+    return datComputeSkillBoostedMaxMp(object);
 }
 
 void btlAdjustUnitHp(u8 *object, s32 value) {

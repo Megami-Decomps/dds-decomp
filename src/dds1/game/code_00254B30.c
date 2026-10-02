@@ -268,7 +268,7 @@ extern u32 prfGetCapValue(u16);
 extern u32 ptyGetProfileRecordValue(u32, u16);
 extern u32 func_00250758(u16);
 
-u32 func_00255FF8(DspScene *entry, DspProfileSelection *target) {
+u32 mnuGetMantraDisplayFlags(DspScene *entry, DspProfileSelection *target) {
     u32 flags = 0;
     u32 cap;
 
@@ -425,7 +425,7 @@ extern s32 mnuGetSelectedNodeValue(void);
 
 typedef struct {
     u8 pad0[4];
-    DspScene *entry; /* 0x4: entry tested by func_00255FF8 */
+    DspScene *entry; /* 0x4: entry tested by mnuGetMantraDisplayFlags */
 } DspEntryLink;
 
 typedef struct {
@@ -445,7 +445,7 @@ void mnuChooseDisplaySpriteKindFromEntryFlags(DspDisplayObject *obj, s32 scale, 
     s32 kind;
 
     if (entry != NULL) {
-        flags = func_00255FF8(entry, target);
+        flags = mnuGetMantraDisplayFlags(entry, target);
         if (flags & 1) {
             kind = 9;
         } else if (flags & 2) {

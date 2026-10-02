@@ -201,7 +201,7 @@ SndTrackVolume *func_002E95F0(void) {
     return D_003FE0D0;
 }
 
-SndTrackVolume *func_002E9600(void) {
+SndTrackVolume *sndGetTrackSlotTable(void) {
     return sndTrackBalanceEntries;
 }
 

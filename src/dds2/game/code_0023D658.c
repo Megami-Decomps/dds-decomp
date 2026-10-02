@@ -209,7 +209,7 @@ extern s32 scrReadStringParameter(s32 idx);
 
 extern void effObjSetFlags(void *object, s32 flags);
 
-extern void *func_00115208(s32 arg0, void *arg1, void *arg2);
+extern void *effObjSpawnLoadedResourceEffect(s32 arg0, void *arg1, void *arg2);
 
 extern u8 D_00421A90[];
 
@@ -239,7 +239,7 @@ extern void effObjReplaceActiveEventNode(void *arg0, u32 arg1);
 
 extern char D_00421AF8[];
 
-extern void func_00115BD8(void *arg0);
+extern void effObjDispatchMagatuhiState(void *arg0);
 
 extern s32 scrGetCurrentContext(void);
 
@@ -1282,7 +1282,7 @@ u32 evtOpResolveAndFlagObjectFromName(void) {
     memset(buf1, 0, 0x10);
     memset(buf2, 0, 0x10);
     param0 = scrReadStringParameter(0);
-    unit = func_00115208(param0, buf1, buf2);
+    unit = effObjSpawnLoadedResourceEffect(param0, buf1, buf2);
     if (unit == NULL) {
         func_0035B6E0(D_00421A90, 1);
         func_0035B6E0(D_00421AC0, scrReadStringParameter(0));
@@ -1433,7 +1433,7 @@ u32 func_002409E0(void) {
     id = scrReadIntParameter(0);
     obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
-        func_00115BD8(obj);
+        effObjDispatchMagatuhiState(obj);
     }
     return 1;
 }
@@ -1445,7 +1445,7 @@ u32 func_00240A20(void) {
     id = scrReadIntParameter(0);
     obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
-        func_00115BD8(obj);
+        effObjDispatchMagatuhiState(obj);
     }
     return 1;
 }

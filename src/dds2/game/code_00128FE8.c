@@ -181,7 +181,7 @@ extern void fldFormatAreaDirectory(char *, s32, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
 
-extern void *func_003292A8(s32 size);
+extern void *sdfAllocGeneralBlock(s32 size);
 
 extern void *sdfResourceRetainAddress(void *p);
 
@@ -744,7 +744,7 @@ void *fldLoadCachedRoomResourceIfLocationMatches(void **destination, s32 area, s
 
     if (state->area == area) {
         if (state->room == room) {
-            void *buffer = func_003292A8(fldCachedRoomResourceSize);
+            void *buffer = sdfAllocGeneralBlock(fldCachedRoomResourceSize);
             void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)fldCachedRoomResourceData, fldCachedRoomResourceSize);
@@ -759,7 +759,7 @@ void *func_0012A270(void **destination, s32 area, s32 room) {
 
     if (state->area == area) {
         if (state->room == room) {
-            void *buffer = func_003292A8(D_00436004);
+            void *buffer = sdfAllocGeneralBlock(D_00436004);
             void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)D_00435FF4, D_00436004);
@@ -774,7 +774,7 @@ void *func_0012A2E8(void **destination, s32 area, s32 room) {
 
     if (state->area == area) {
         if (state->room == room) {
-            void *buffer = func_003292A8(D_00436008);
+            void *buffer = sdfAllocGeneralBlock(D_00436008);
             void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)D_00435FF8, D_00436008);
@@ -789,7 +789,7 @@ void *func_0012A360(void **destination, s32 area, s32 room) {
 
     if (state->area == area) {
         if (state->room == room) {
-            void *buffer = func_003292A8(D_0043600C);
+            void *buffer = sdfAllocGeneralBlock(D_0043600C);
             void *data = sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)D_00435FFC, D_0043600C);
@@ -889,7 +889,7 @@ void fldLoadAreaPackedResources(void) {
                 sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 5:
-                fldAreaCachedResource = (u32)func_003292A8(sdfMemoryGetBlockSize(entry->blockHandle));
+                fldAreaCachedResource = (u32)sdfAllocGeneralBlock(sdfMemoryGetBlockSize(entry->blockHandle));
                 memcpy((void *)sdfMemoryGetBlockAddress(fldAreaCachedResource),
                        (void *)sdfMemoryGetBlockAddress(entry->blockHandle),
                        sdfMemoryGetBlockSize(entry->blockHandle));

@@ -501,7 +501,7 @@ void mnuResetProgressModeFromOwner(u8 *work) {
     ((MenuTerminalWork *)work)->initState = *(s32 *)(*(u8 **)(owner + 0x1C) + 0x60);
 }
 
-extern s32 func_002D03F8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 
 extern s32 sdfResourceRetainAddress(s32);
 
@@ -514,7 +514,7 @@ extern void mnuInitPartyPanelSlots(s32);
 extern void mnuAppendCampSpriteRequests(s32, s32);
 
 u8 *mnuCreateWorkBlock(void) {
-    s32 handle = func_002D03F8(0x82C);
+    s32 handle = sdfAllocGeneralBlock(0x82C);
     u8 *work = (u8 *)sdfResourceRetainAddress(handle);
 
     memset(work, 0, 0x82C);
@@ -531,7 +531,7 @@ void mnuReleaseStaffMenuContextAndResources(u32 *arg0) {
     mnuReleaseStaffMenuTextureHandles(arg0 + 2);
     mnuReleaseStaffResourceGroups(arg0 + 2);
     func_002BC618(arg0[1]);
-    func_002D0918(*arg0);
+    sdfReleaseResourceAllocation(*arg0);
 }
 
 extern s32 mnuStaffSlotsAllFilled(s32, s32 *);
@@ -674,7 +674,7 @@ u8 *mnuTerminalCreateScene(reduced, slot)
     u8 *obj;
     u32 i;
 
-    handle = func_002D03F8(0x164);
+    handle = sdfAllocGeneralBlock(0x164);
     obj = (u8 *)sdfResourceRetainAddress(handle);
     memset(obj, 0, 0x164);
     ((MenuTerminalWork *)obj)->allocation = handle;
@@ -704,7 +704,7 @@ extern s32 mnuCheckResourceTask(void);
 extern void mnuStopResourceTask(void);
 extern void func_00126038(s32 a, s32 b);
 extern void fldProcessDeferredSceneCommand(void);
-extern void func_002D0918(s32 handle);
+extern void sdfReleaseResourceAllocation(s32 handle);
 extern s8 mnuTerminalTaskState;
 
 /* Tear down the terminal menu task: release its resources and effect batches, then hand the saved mode/slot to the field scene. */
@@ -718,7 +718,7 @@ void mnuReleaseTerminalWorkAndResumeField(s32 arg) {
         mnuDrainPanelTransitions((u8 *)work + 8, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle((u32 *)work->messageResources);
-        func_002D0918(work->allocation);
+        sdfReleaseResourceAllocation(work->allocation);
         mnuTerminalTaskState = 2;
     }
     if (mnuCheckResourceTask() != 0) {
@@ -750,7 +750,7 @@ extern s32 D_003BC3E4;
 extern void effConfigureWithDefaultSetting(s32, s32, s32, s32, s32, s32);
 
 extern s32 kwlnTaskCreate(const char *, s32, s32, s32, void (*)(s32), void (*)(s32), void *);
-extern s64 mnuPreparePopupAndDispatchSelection(s32);
+extern s64 mnuPrepareTerminalPopupAndDispatch(s32);
 extern s64 func_0024A138(s32);
 extern s64 func_0024A170(s32);
 extern void mnuReleaseTerminalWorkAndResumeField(s32);
@@ -759,7 +759,7 @@ s32 mnuTerminalCreateTasks(void) {
     s32 result;
     void *work = mnuTerminalCreateScene();
 
-    D_003BC3E4 = kwlnTaskCreate(D_003AF658, 0x404, 1, 1, mnuPreparePopupAndDispatchSelection, 0, work);
+    D_003BC3E4 = kwlnTaskCreate(D_003AF658, 0x404, 1, 1, mnuPrepareTerminalPopupAndDispatch, 0, work);
     kwlnTaskCreate(D_003AF668, 0x2B14, 1, 1, func_0024A138, 0, work);
     result = kwlnTaskCreate(D_003AF678, 0x5210, 1, 1, func_0024A170, mnuReleaseTerminalWorkAndResumeField, work);
     mnuTerminalTaskState = 1;
@@ -791,7 +791,7 @@ extern char D_0036ADF4[];
 
 extern void mnuSetPopupEntry(s32 *, char *);
 
-s64 mnuPreparePopupAndDispatchSelection(s32 value) {
+s64 mnuPrepareTerminalPopupAndDispatch(s32 value) {
     s32 context = kwlnTaskGetUserValue();
     s32 *state = (s32 *)(context + 0x54);
 

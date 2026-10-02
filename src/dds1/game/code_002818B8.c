@@ -23,7 +23,7 @@ typedef struct MenuPanelFade {
 extern u32 uiBlendColors(u32, u32, s32);
 extern void func_002C0F88(s32, s32, s32, s32, s32, s32 *, s32);
 
-void func_00281908(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
+void mnuDrawWidthScaledPanelGradient(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
     s32 colors[4];
     s32 width = 0x138;
     s32 color = uiBlendColors(0x14806E4D, 0x14806E00, work->blend);
@@ -43,7 +43,7 @@ void func_00281908(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
                  height, colors, surface);
 }
 
-void func_002819F8(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
+void mnuDrawHeightScaledPanelGradient(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
     s32 colors[4];
     s32 color = uiBlendColors(0x80501E80, 0x80501E00, work->blend);
     s32 height = 0x4A;

@@ -10,7 +10,7 @@ typedef struct {
     ModelRangeData *rangeData;
 } ModelRangeObj;
 
-s32 func_002D0A80(s32 arg);
+s32 sdfFindGeneralBlockByAddress(s32 arg);
 void sdfQueueNonzeroResourceId(s32 arg);
 void sdfReleaseChipBlock(void *arg);
 
@@ -21,7 +21,7 @@ void dds3ReleaseModelRangeData(ModelRangeObj *object) {
     data = object->rangeData;
     resource = data->resourceId;
     if (resource != 0) {
-        sdfQueueNonzeroResourceId(func_002D0A80(resource));
+        sdfQueueNonzeroResourceId(sdfFindGeneralBlockByAddress(resource));
     }
     sdfReleaseChipBlock(data);
 }

@@ -11,10 +11,10 @@ extern char sdfRuntimeTaskName[]; /* "GBWK" */
 extern void kwlnTaskDestroyWithHierarchyByName(char *name, s32 flag);
 extern void func_00117A80(void);
 extern void sdfDecrementAllocationReferenceCount(u32 allocation);
-extern s32 func_003297C8(u32 allocation);
+extern s32 sdfReleaseResourceAllocation(u32 allocation);
 extern struct ActionObj *dds3AppendWorldObjectNode();
 
-extern void *func_003292A8(s32 size);
+extern void *sdfAllocGeneralBlock(s32 size);
 
 extern void *sdfResourceRetainAddress(void *resource);
 
@@ -220,7 +220,7 @@ void evtLoadValueSecondaryVectorIntoVu(EvtScaledValue *value) {
 
 /* Allocate the runtime state block, zero it and register the "GBWK" tick task. */
 void sdfCreateRuntimeTask(void) {
-    void *mem = func_003292A8(0x1E840);
+    void *mem = sdfAllocGeneralBlock(0x1E840);
     u8 *state = (u8 *)sdfResourceRetainAddress(mem);
 
     memset(state, 0, 0x1E840);
@@ -239,7 +239,7 @@ void sdfDestroyRuntimeTask(void) {
     func_00117A80();
     allocation = ((SdfRuntime *)datGameState)->backingAllocation;
     sdfDecrementAllocationReferenceCount(allocation);
-    func_003297C8(allocation);
+    sdfReleaseResourceAllocation(allocation);
     datGameState = 0;
 }
 
@@ -399,7 +399,7 @@ typedef struct SdfEnemyVitals {
 } SdfEnemyVitals;
 
 extern s32 datEnemyRecords;
-extern s32 func_00119F68(u32);
+extern s32 datMapFlagToStatIndex(u32);
 extern u32 func_00119C78(SdfPackedValue *, s32);
 extern s32 datUnitHasSkill(SdfPackedValue *, s32);
 extern s32 effMiscRandMod(s32, s32);
@@ -430,7 +430,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
         mask = 1 << list[effMiscRandMod(0, count)];
     }
     if (mask != 0 && (datCommandRecords[index].mode == 1 || datCommandRecords[index].mode == 3)) {
-        kind = func_00119F68(mask);
+        kind = datMapFlagToStatIndex(mask);
         if (!(datCommandRecords[index].mode30 == 4 && (packed->flagsAndValue & 0x7FFF) == 8)) {
             if (func_00119C78(packed, kind) & 0x170000) {
                 return 0;

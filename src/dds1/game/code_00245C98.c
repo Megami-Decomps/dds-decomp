@@ -554,7 +554,7 @@ extern s32 sdfResourceRetainAddress(s32);
 extern void mdlFlagSet(s32);
 
 extern s32 mdlFlagTest(s32);
-extern s32 func_002D03F8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 
 typedef struct FlagPair {
     s32 first;
@@ -572,7 +572,7 @@ extern FlagPair mnuPartyFlagEventEntries[];
 
 /* Snapshot four primary flag pairs and sixteen extra pairs for restoration. */
 s32 mnuCreateFlagEntries(void) {
-    s32 handle = func_002D03F8(0x140);
+    s32 handle = sdfAllocGeneralBlock(0x140);
     FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
     u32 i;
 

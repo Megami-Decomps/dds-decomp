@@ -5,12 +5,61 @@ extern u64 effParamTableGetBlock(u64, u64);
 
 INCLUDE_ASM(const s32, "game/code_00167178", func_00167178);
 
+typedef struct EffThunderFragmentParams {
+    f32 start[4];
+    f32 end[4];
+    u16 systemParam;
+    u8 pad22[2];
+    u32 fragmentCount;
+    u8 pad28[8];
+    u32 fragmentFirstRange;
+    u32 fragmentSecondRange;
+    u16 halfLife;
+    u8 pad3A[6];
+    u32 arg40;
+    u8 pad44[4];
+    u32 arg48;
+    u8 pad4C[4];
+    u32 arg50;
+} EffThunderFragmentParams;
+
+typedef struct ParCell {
+    u128 *history;
+    void *vertices;
+    s32 vertexCount;
+    s32 unk0C;
+    u32 color;
+} ParCell;
+
+typedef struct EffThunderParSystem {
+    u8 pad00[0x14];
+    ParCell *cells;
+} EffThunderParSystem;
+
+typedef struct EffThunderFragmentWork {
+    EffThunderFragmentParams head;
+    void *fragments;
+    u32 color;
+    union {
+        u32 updateCount;
+        void *secondarySystem;
+    } state;
+    EffThunderParSystem *system;
+    u32 handle;
+} EffThunderFragmentWork;
+
 typedef struct EffThunderGroup {
-    u8 pad00[0xA0];
-    s32 count;         /* 0xA0 */
-    u8 pad_A4[0x54];
-    u32 handles[1];    /* 0xF8 */
+    f32 points[10][4];
+    s32 count;
+    EffThunderFragmentParams params;
+    u32 handles[10];
+    u32 color;
 } EffThunderGroup;
+
+extern s32 effMultiplyPackedColors(s32, s32);
+extern void func_00165758(void *work, s32 index);
+extern void func_001673D0(void *work, s32 index, void *seed);
+extern void parPrependCellNode(void *system);
 
 extern void effPCPThunderFree3(u32 handle);
 extern void sdfReleaseChipBlock(void *block);
@@ -36,7 +85,39 @@ void func_001673C8(u32 handle, u32 color) {
 
 INCLUDE_ASM(const s32, "game/code_00167178", func_001673D0);
 
-INCLUDE_ASM(const s32, "game/code_00167178", func_00167A78);
+void effThunderUpdateChainSegments(EffThunderGroup *group) {
+    s32 i = 0;
+    s32 segmentCount = group->count - 1;
+    s32 j;
+    s32 fragmentCount;
+    u32 color;
+    f32 (*points)[4] = group->points;
+    EffThunderFragmentWork *work;
+    EffThunderFragmentWork *previous;
+    ParCell *cell;
+
+    for (; i < segmentCount; i++) {
+        work = (EffThunderFragmentWork *)group->handles[i];
+        PCP_COPY_VECTOR(work->head.start, points[0]);
+        PCP_COPY_VECTOR(work->head.end, points[1]);
+        points++;
+        fragmentCount = work->head.fragmentCount;
+        color = effMultiplyPackedColors(group->color, work->color);
+        cell = work->system->cells;
+        for (j = 0; j < fragmentCount; j++) {
+            if (i > 0) {
+                previous = (EffThunderFragmentWork *)group->handles[i - 1];
+                func_001673D0(work, j,
+                    previous->system->cells[j].history + previous->system->cells[j].vertexCount - 5);
+            } else {
+                func_00165758(work, j);
+            }
+            cell[j].color = color;
+        }
+        work->state.updateCount++;
+        parPrependCellNode(work->system);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00167178", func_00167BF8);
 
@@ -55,7 +136,7 @@ INCLUDE_ASM(const s32, "game/code_00167178", func_00167EC0);
 typedef struct EffFragmentResources {
     u8 pad00[0x20];
     u32 resourceHandle; /* 0x20: released by sdfQueueAssetRelease */
-    u32 allocation;     /* 0x24: released by func_002D0918 */
+    u32 allocation;     /* 0x24: released by sdfReleaseResourceAllocation */
 } EffFragmentResources;
 
 typedef struct EffGroupSlot {
@@ -80,7 +161,7 @@ typedef struct EffGroup {
 extern void effReleaseEffectResources(EffFragmentResources *work);
 extern void effEventReleaseNode(void *node);
 extern void func_00190118(u32 handle);
-extern void func_002D0918(u32 allocation);
+extern void sdfReleaseResourceAllocation(u32 allocation);
 
 /* Release every slot's effect resources and event node, then the optional handle and the group allocation. */
 void effReleaseGroupSlotsAndResources(EffGroup *group) {
@@ -99,7 +180,7 @@ void effReleaseGroupSlotsAndResources(EffGroup *group) {
     if (group->hasHandle58 != 0) {
         func_00190118(group->handle58);
     }
-    func_002D0918(group->allocation);
+    sdfReleaseResourceAllocation(group->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_00167178", func_001681C0);
@@ -124,7 +205,7 @@ typedef struct EffectColorState {
 
 void effReleaseEffectResources(EffFragmentResources *work) {
     sdfQueueAssetRelease(work->resourceHandle);
-    func_002D0918(work->allocation);
+    sdfReleaseResourceAllocation(work->allocation);
 }
 
 /* Restore the neutral gray color and default effect mode before rendering. */
@@ -164,16 +245,16 @@ typedef struct EffFlashRecordWork {
     u32 resourceHandle;   /* 0x44 */
 } EffFlashRecordWork; /* 0x48 */
 
-extern u32 func_002D03F8(s32 size);
+extern u32 sdfAllocGeneralBlock(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern s32 effRecordPoolCreateTriad();
 
 /* Clone the 0x30-byte parameter block, create the record pool and clear every particle's age. */
-EffFlashRecordWork *effFlashRecordCreate(src)
+EffFlashRecordWork *effFlashTrianglePulseCreate(src)
     EffFlashRecordWork *src;
 {
-    u32 handle = func_002D03F8(src->particleCount * sizeof(EffFlashRecordPart) + sizeof(EffFlashRecordWork));
+    u32 handle = sdfAllocGeneralBlock(src->particleCount * sizeof(EffFlashRecordPart) + sizeof(EffFlashRecordWork));
     EffFlashRecordWork *work = (EffFlashRecordWork *)sdfResourceRetainAddress(handle);
     EffFlashRecordHandle *record;
     u32 i;

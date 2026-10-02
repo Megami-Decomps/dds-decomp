@@ -8,12 +8,12 @@ extern u32 D_004389BC;
 extern void (*sdfTickCallback)(void);
 
 extern void *func_00328D68();
-extern void *func_003292A8(void);
+extern void *sdfAllocGeneralBlock(void);
 extern void *sdfResourceRetainAddress(void *);
 
 void *sdfAllocateBlockBySizeThreshold(s32 size) {
     if (size >= 0x401) {
-        return sdfResourceRetainAddress(func_003292A8());
+        return sdfResourceRetainAddress(sdfAllocGeneralBlock());
     }
     return func_00328D68(size);
 }
@@ -22,7 +22,7 @@ extern s32 sdfChipIsInRange(void *);
 extern void sdfReleaseChipBlock(void *);
 extern void sdfReleaseCurrentResourceHandle(void *);
 extern void func_00328F68(void *);
-extern void *func_00329930(void *);
+extern void *sdfFindGeneralBlockByAddress(void *);
 extern void sdfQueueNonzeroResourceId(void *);
 
 void sdfFreeMemoryFromEitherHeap(void *data) {
@@ -41,7 +41,7 @@ void sdfReleaseChipOrRetainedResource(void *data) {
             func_00328F68(data);
             return;
         }
-        sdfQueueNonzeroResourceId(func_00329930(data));
+        sdfQueueNonzeroResourceId(sdfFindGeneralBlockByAddress(data));
     }
 }
 

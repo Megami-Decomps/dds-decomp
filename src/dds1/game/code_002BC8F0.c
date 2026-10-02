@@ -208,7 +208,7 @@ extern u8 *D_003BC958;
 
 extern void sdfTexReleaseReference(void *);
 
-extern void *func_002D03F8(u32);
+extern void *sdfAllocGeneralBlock(u32);
 
 extern u32 D_003BC960[2];
 
@@ -254,7 +254,7 @@ u32 effLoadIndexedResource(const char *base, const char *name, u32 retainResourc
     resource = sdfReadNamedResource(path, &handle, 0);
     result = func_002BD9C0(resource, retainResource);
     if (retainResource == 0) {
-        func_002D0918(resource);
+        sdfReleaseResourceAllocation(resource);
     }
     return result;
 }
@@ -266,7 +266,7 @@ void effCompleteTransientResourceJob(u64 job, u32 *out) {
     resource = fileGetResourceHandle();
     instance = func_002BD9C0(resource, 0);
     *out = instance;
-    func_002D0918(resource);
+    sdfReleaseResourceAllocation(resource);
     filePollEntryCleanup(job);
 }
 
@@ -305,7 +305,7 @@ u32 effLoadMappedResource(const char *base, const char *name) {
     func_003014F0(path, D_003BD198, base, name);
     resource = sdfReadNamedResource(path, &handle, 0);
     value = effCreateMappedResource(handle);
-    func_002D0918(resource);
+    sdfReleaseResourceAllocation(resource);
     return value;
 }
 
@@ -318,7 +318,7 @@ void effCompleteMappedResourceJob(u64 job, u32 *out) {
     address = sdfResourceRetainAddress(resource);
     mapped = effCreateMappedResource(address);
     *out = mapped;
-    func_002D0918(resource);
+    sdfReleaseResourceAllocation(resource);
     filePollEntryCleanup(job);
 }
 
@@ -491,7 +491,7 @@ void *func_002BD028(u8 *source, EffMappedHeader *headerOut) {
 
     memcpy(&header, source, sizeof(header));
     source += sizeof(header);
-    allocation = func_002D03F8(header.count * 0x24);
+    allocation = sdfAllocGeneralBlock(header.count * 0x24);
     records = (EffMappedRecord *)sdfResourceRetainAddress(allocation);
     for (; index < header.count; index++) {
         EffMappedRecord *record = &records[index];
@@ -540,7 +540,7 @@ u32 *effCreateStatusBatch(u32 kind) {
     void *scratch;
 
     header[0] = 1;
-    allocation = (u32)func_002D03F8(0x24);
+    allocation = (u32)sdfAllocGeneralBlock(0x24);
     header[1] = allocation;
     data = sdfResourceRetainAddress(allocation);
     header[2] = data;
@@ -573,13 +573,13 @@ u32 effDestroyPackedBatch(PackedEffectBatch *batch) {
     for (i = 0; i < batch->count; i++) {
         sdfReleaseChipBlock(batch->records[i].storage);
     }
-    func_002D0918(batch->job);
+    sdfReleaseResourceAllocation(batch->job);
     sdfReleaseChipBlock(batch);
     return 1;
 }
 
 u32 effReleaseSlotWorkAllocation(s32 work) {
-    func_002D0918(((EffectSlotSet *)work)->workAllocation);
+    sdfReleaseResourceAllocation(((EffectSlotSet *)work)->workAllocation);
     return 1;
 }
 
@@ -695,7 +695,7 @@ u8 effHasFirstTextureHandle(s32 set) {
 u32 *effCreatePayload(u32 count) {
     u32 size = count * 0x6c;
     u32 *header = func_002CFEB8(0xC);
-    u32 allocation = (u32)func_002D03F8(size);
+    u32 allocation = (u32)sdfAllocGeneralBlock(size);
     u32 data;
 
     header[1] = count;
@@ -707,7 +707,7 @@ u32 *effCreatePayload(u32 count) {
 }
 
 u32 effDestroyPayload(u32 payload) {
-    func_002D0918(*(u32 *)payload);
+    sdfReleaseResourceAllocation(*(u32 *)payload);
     sdfReleaseChipBlock(payload);
     return 1;
 }
@@ -729,9 +729,9 @@ u32 *effCreateResourceSlotSet(u32 *source, u32 slot, u32 count) {
     effect[0] = 0;
     effect[8] = 0;
     effect[2] = count;
-    effect[3] = (u32)func_002D03F8(count * 0x80);
+    effect[3] = (u32)sdfAllocGeneralBlock(count * 0x80);
     effect[4] = sdfResourceRetainAddress(effect[3]);
-    effect[5] = (u32)func_002D03F8(effect[2] * 0xA0);
+    effect[5] = (u32)sdfAllocGeneralBlock(effect[2] * 0xA0);
     effect[6] = sdfResourceRetainAddress(effect[5]);
     if (effect[2] != 0) {
         do {
@@ -749,13 +749,13 @@ u32 effDestroyResourceSlotSet(u32 work) {
 
     words = (s32 *)work;
     if (*words != 0) {
-        func_002D0918(*words);
+        sdfReleaseResourceAllocation(*words);
     }
     if (words[1] == 0) {
         effReleaseTextureHandlesAndResetSlots(work);
-        func_002D0918(words[8]);
+        sdfReleaseResourceAllocation(words[8]);
     }
-    func_002D0918(words[3]);
+    sdfReleaseResourceAllocation(words[3]);
     effReleaseSlotWorkAllocation(work);
     sdfReleaseChipBlock(work);
     return 1;

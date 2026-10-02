@@ -69,7 +69,7 @@ typedef struct MemOut {
     void *third; /* 0x8 */
 } MemOut;
 
-/* Value with u16 pair read by func_001971E0/func_00197200. */
+/* Value with u16 pair read by frFontGetSlotCellWidth/frFontGetSlotCellHeight. */
 typedef struct Unk6C84Val {
     u8 unk0[0x10]; /* 0x0 */
     u16 unk10;     /* 0x10 */
@@ -235,11 +235,11 @@ void itfInitTextDrawArgs(s32 encodedText, s32 sub) {
     func_00197068(&args);
 }
 
-u16 func_001971E0(s32 index) {
+u16 frFontGetSlotCellWidth(s32 index) {
     return frFontResourceRecords[index].unk0->unk10;
 }
 
-u16 func_00197200(s32 index) {
+u16 frFontGetSlotCellHeight(s32 index) {
     return frFontResourceRecords[index].unk0->unk12;
 }
 
@@ -439,7 +439,7 @@ u32 itfCreateMemNodeRing(s32 payloadBytes, s32 count) {
     MemNode *next;
     s32 i;
 
-    buffer = func_002D03F8((payloadBytes + 8) * (count + 1) + 4);
+    buffer = sdfAllocGeneralBlock((payloadBytes + 8) * (count + 1) + 4);
     list = (u8 *)sdfResourceRetainAddress(buffer);
     i = 0;
     memcpy(list, &buffer, 4);
@@ -481,7 +481,7 @@ s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
 }
 
 u32 itfReleaseMemNodeBuffer(u8 *payload) {
-    func_002D0918(((MemRingHeader *)(payload - 4))->allocation);
+    sdfReleaseResourceAllocation(((MemRingHeader *)(payload - 4))->allocation);
     return 1;
 }
 
@@ -490,7 +490,7 @@ void itfLoadBackgroundSprite(void) {
     u64 buffer = sdfReadNamedResource("/sprite/bg00.tmx", &resource, 0);
 
     itfBackgroundSpriteTexture = sdfTexAcquireResourceTexture(resource);
-    func_002D0918(buffer);
+    sdfReleaseResourceAllocation(buffer);
 }
 
 void itfReleaseBackgroundSpriteTexture(void) {
@@ -683,6 +683,7 @@ extern u32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void sdfConsInitPacketHeader(u64, s32, s32, s64, s32);
 extern u64 *sdfConsMeasurePacketWithHeader(u64);
 extern void sdfAppendPacket(u64, u64);
+extern s32 sdfConsCreateDrawPacket(s32 command, s32 texture, s32 context);
 extern u64 *sdfConsFinalizePacketHeader(u64, s32);
 extern u64 D_00357998[];
 
@@ -703,7 +704,7 @@ u64 itfLoadTextureFromAsset(const char *path) {
 
     fileAllocation = sdfReadNamedResource(path, assetInfo, 0);
     textureHandle = sdfTexAcquireResourceTexture(assetInfo[0]);
-    func_002D0918(fileAllocation);
+    sdfReleaseResourceAllocation(fileAllocation);
     return textureHandle;
 }
 
@@ -782,7 +783,32 @@ void itfDrawQuadTextured4(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, 
     sdfAppendPacket(command, packet);
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00198C70);
+void itfQueueTextureBoundQuadPacket(void *vertexData, void *uvData, void *colorData, s32 tail, s32 texture, s32 flag, s32 command) {
+    DrawVertex *vertices = vertexData;
+    DrawColorRec *uv = uvData;
+    DrawColorRec *colors = colorData;
+    u64 packet;
+    u64 *dst;
+    s32 x0, y0, x1, y1;
+
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
+    sdfConsInitPacketHeader(packet, (flag << 9) | 0x156, 5, 0x53531, 1);
+    x0 = vertices[0].x + 0x7000;
+    y0 = vertices[0].y + 0x7900;
+    x1 = vertices[1].x + 0x7000;
+    y1 = vertices[1].y + 0x7900;
+    dst = sdfConsMeasurePacketWithHeader(packet);
+    dst[0] = (u64)colors->word[0] | ((u64)colors->word[1] << 32);
+    dst[1] = (u64)colors->word[2] | ((u64)colors->word[3] << 32);
+    dst[2] = (u64)uv->word[0] | ((u64)uv->word[1] << 32);
+    dst[4] = (u64)(u32)x0 | ((u64)y0 << 32);
+    dst[5] = (u64)(u32)tail;
+    dst[6] = (u64)uv->word[2] | ((u64)uv->word[3] << 32);
+    dst[8] = (u64)(u32)x1 | ((u64)y1 << 32);
+    dst[9] = (u64)(u32)tail;
+    sdfConsCreateDrawPacket(command, texture, flag);
+    sdfAppendPacket(command, packet);
+}
 
 void itfQueueColoredTexturedQuadPacket(DrawVertex *vertices, DrawColorRec *uv, DrawColorRec *colors, u32 tail, s32 flag, s32 command) {
     u64 packet;

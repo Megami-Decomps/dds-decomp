@@ -431,11 +431,11 @@ typedef struct EvtViewParams {
 } EvtViewParams;
 
 extern void effObjSetFlags(s32 obj, s32 flags);
-extern s32 func_00114F60(s32 arg, f32 *vec0, f32 *vec1);
+extern s32 effObjSpawnDescriptorBoundEffect(s32 arg, f32 *vec0, f32 *vec1);
 extern s32 func_001150B0(s32 arg, f32 *vec0, f32 *vec1);
 extern s32 func_00115840(s32 mode, s32 arg);
-extern void func_00115970(s32 obj);
-extern s32 func_001159E8(s32 obj, s32 a, s32 b, s32 c, s32 d);
+extern void effObjDispatchMagatuhiState(s32 obj);
+extern s32 effObjCopyMagatuhiSourceParameters(s32 obj, s32 a, s32 b, s32 c, s32 d);
 extern void func_0022C6B0(s32 obj, s32 value, s32 type, u32 word, EvtViewer *viewer);
 
 /* Create the viewer object for a command in the first free slot; returns the slot, or -1 when full. */
@@ -463,12 +463,12 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *
     case 3:
     case 0x1A:
         if (cmd->kind == 3) {
-            handle = func_00114F60(cmd->arg, vec0, vec1);
+            handle = effObjSpawnDescriptorBoundEffect(cmd->arg, vec0, vec1);
         } else {
             handle = func_001150B0(cmd->arg, vec0, vec1);
         }
         if (params->u.a.flag != 0) {
-            func_00115970(handle);
+            effObjDispatchMagatuhiState(handle);
         }
         if (cmd->plain == 0) {
             func_0022C6B0(handle, params->u.a.value, params->u.a.type, params->word, viewer);
@@ -489,9 +489,9 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *
         n0 = evtEventViewerGetNameObject(params->u.names[0], viewer);
         n1 = evtEventViewerGetNameObject(params->u.names[1], viewer);
         n2 = evtEventViewerGetNameObject(params->u.names[2], viewer);
-        func_001159E8(handle, n0, n1, n2, evtEventViewerGetNameObject(params->u.names[3], viewer));
+        effObjCopyMagatuhiSourceParameters(handle, n0, n1, n2, evtEventViewerGetNameObject(params->u.names[3], viewer));
         if (params->unk9 != 0) {
-            func_00115970(handle);
+            effObjDispatchMagatuhiState(handle);
         }
         break;
     }

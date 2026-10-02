@@ -58,7 +58,7 @@ typedef struct {
 } EffResourceRenderState;
 
 extern EffResourceRenderState D_003D65E0;
-extern u32 func_002D03F8(u32 size);
+extern u32 sdfAllocGeneralBlock(u32 size);
 extern void *sdfResourceRetainAddress(u32 handle);
 extern u32 sdfCreateAssetWithDrawEntries(void);
 extern void func_002DA420(u32 resource, f32 scale);
@@ -84,9 +84,9 @@ void func_00176A28(EffResourceWork *work, f32 (*normals)[4]) {
 }
 
 /* Allocate the resource group and initialize its matrix, scale and entry colors. */
-EffResourceWork *func_00176A30(u32 count)
+EffResourceWork *effCreateResourceEntryWork(u32 count)
 {
-    u32 allocation = func_002D03F8(count * sizeof(EffResourceEntry) + sizeof(EffResourceWork));
+    u32 allocation = sdfAllocGeneralBlock(count * sizeof(EffResourceEntry) + sizeof(EffResourceWork));
     EffResourceWork *work = sdfResourceRetainAddress(allocation);
     EffResourceEntry *entry;
     u32 i;
@@ -114,7 +114,7 @@ EffResourceWork *func_00176A30(u32 count)
 void effReleaseAttachedResources(u32 work) {
     sdfQueueAssetRelease(((EffResourceWork *)work)->resource6C);
     effReleaseOptionalResource(work);
-    func_002D0918(((EffResourceWork *)work)->resource70);
+    sdfReleaseResourceAllocation(((EffResourceWork *)work)->resource70);
 }
 
 /* Emit scaled, translated triangle batches with separate vector and packed-color streams. */
@@ -185,7 +185,7 @@ INCLUDE_ASM(const s32, "game/code_00176A28", func_00176E20);
 
 void effReleaseOptionalResource(s32 work) {
     if (((EffResourceWork *)work)->resource68 != 0) {
-        func_002D0918(((EffResourceWork *)work)->resource68);
+        sdfReleaseResourceAllocation(((EffResourceWork *)work)->resource68);
         return;
     }
 }

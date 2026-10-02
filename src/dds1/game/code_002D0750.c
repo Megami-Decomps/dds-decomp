@@ -8,7 +8,7 @@ typedef struct SdfResource {
     s16 referenceCount;
 } SdfResource;
 
-extern SdfResource *func_002D0A80(void *address);
+extern SdfResource *sdfFindGeneralBlockByAddress(void *address);
 extern void sdfReleaseChipBlock(void *block);
 extern s32 func_00312C08(void);
 extern void EIntr(void);
@@ -25,7 +25,7 @@ void sdfSkipNextListNode(u8 *node) {
     *(u8 **)(node + 4) = next;
 }
 
-void func_002D0918(SdfResource *node) {
+void sdfReleaseResourceAllocation(SdfResource *node) {
     SdfResource *block;
     s32 lock;
 
@@ -53,8 +53,8 @@ void func_002D0918(SdfResource *node) {
 void sdfReleaseCurrentResourceHandle(void *address) {
     SdfResource *handle;
 
-    handle = func_002D0A80(address);
-    func_002D0918(handle);
+    handle = sdfFindGeneralBlockByAddress(address);
+    sdfReleaseResourceAllocation(handle);
 }
 
 void sdfReleaseMemorySlot(s32 *slot) {
@@ -63,7 +63,7 @@ void sdfReleaseMemorySlot(s32 *slot) {
     handle = *slot;
     if (handle != 0) {
         *slot = 0;
-        func_002D0918((SdfResource *)handle);
+        sdfReleaseResourceAllocation((SdfResource *)handle);
         return;
     }
 }
@@ -100,7 +100,7 @@ typedef struct SdfHeapRoot {
 extern SdfHeapRoot D_003E2748;
 
 /* Find the used heap block whose data address is `address`. */
-SdfResource *func_002D0A80(void *address) {
+SdfResource *sdfFindGeneralBlockByAddress(void *address) {
     SdfHeapRoot *heap = &D_003E2748;
     SdfResource *block;
     s32 interruptsDisabled;
@@ -127,7 +127,7 @@ INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0B50);
 extern SdfResource *D_003E274C[];
 
 /* Find the used heap block that contains `address`; NULL when the end marker is reached. */
-SdfResource *func_002D0BF8(s32 address) {
+SdfResource *sdfFindGeneralBlockContaining(s32 address) {
     SdfResource *block = D_003E274C[0];
     SdfResource *next;
 
@@ -143,15 +143,20 @@ SdfResource *func_002D0BF8(s32 address) {
     }
 }
 
-extern s32 func_002D03F8(s32 size);
+extern s32 sdfAllocGeneralBlock(s32 size);
 extern s32 func_002F4FD8(void *, s32, s32, void *, s32, void *, s32, s32, s32);
-extern u8 D_003E2770[];
+typedef struct SifRpcClientData {
+    u8 pad00[0x24];
+    void *server; /* 0x24: set once the bind succeeded */
+} SifRpcClientData;
+
+extern SifRpcClientData D_003E2770;
 
 s32 sdfSendNamedResourceRequest(char *name, s32 dataSize, void *data, s32 *outSize) {
     u8 buffer[0x50];
     s32 nameLength = strlen(name);
     s32 total = nameLength + dataSize + 0xC;
-    u32 *block = (u32 *)sdfResourceRetainAddress((SdfResource *)func_002D03F8(total));
+    u32 *block = (u32 *)sdfResourceRetainAddress((SdfResource *)sdfAllocGeneralBlock(total));
     u32 *reply;
     s32 result;
 
@@ -162,7 +167,7 @@ s32 sdfSendNamedResourceRequest(char *name, s32 dataSize, void *data, s32 *outSi
         memcpy((u8 *)block + nameLength + 9, data, dataSize);
     }
     reply = (u32 *)(((u32)buffer + 0x3F) & ~0x3F);
-    result = func_002F4FD8(D_003E2770, 1, 0, block, total, reply, 8, 0, 0);
+    result = func_002F4FD8(&D_003E2770, 1, 0, block, total, reply, 8, 0, 0);
     if (result >= 0) {
         if (outSize != NULL) {
             *outSize = reply[1];
@@ -172,6 +177,34 @@ s32 sdfSendNamedResourceRequest(char *name, s32 dataSize, void *data, s32 *outSi
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0D70);
+extern s32 sceSifLoadModule(const char *path, s32 argLen, const char *args);
+extern s32 sceSifMBindRpc(SifRpcClientData *client, s32 id, s32 mode);
+extern void func_002F4A38(s32 arg);
+extern s32 func_002CF930(void);
+extern s32 sdfGetElapsedTimerTicks(s32 start);
+
+/* Load the two IOP modules (the first optional), then bind the RPC client to its server, retrying until it answers. */
+void func_002D0D70(const char *module, const char *firstModule) {
+    s32 start;
+
+    if (firstModule != NULL) {
+        while (sceSifLoadModule(firstModule, 0, NULL) < 0) {
+        }
+    }
+    while (sceSifLoadModule(module, 0, NULL) < 0) {
+    }
+    if (firstModule != NULL) {
+        func_002F4A38(0);
+    }
+    while (1) {
+        sceSifMBindRpc(&D_003E2770, 0x6F496453, 0);
+        if (D_003E2770.server != NULL) {
+            break;
+        }
+        start = func_002CF930();
+        while (sdfGetElapsedTimerTicks(start) < 0x1ED2) {
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0E30);

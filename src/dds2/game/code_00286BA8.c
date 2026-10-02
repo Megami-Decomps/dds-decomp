@@ -23,13 +23,13 @@ extern void sdfQueueNonzeroResourceId(u32);
 extern void mnuReleaseFirstMantraSpriteSlots(void);
 extern void mnuReleaseStaffAndTitleVisualResources(u32 *);
 extern void evtPrintDeveloperConsoleMessage(const char *);
-extern void func_003297C8(u32);
+extern void sdfReleaseResourceAllocation(u32);
 extern void mnuReleasePanelEntryPool(void);
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286BA8);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286E20);
 
-extern u32 func_003292A8(s32 size);
+extern u32 sdfAllocGeneralBlock(s32 size);
 extern u32 sdfMemoryGetBlockAddress(void *block);
 extern u32 mnuCreateProgressHost(void);
 extern void mnuInitPanelSoundEntries(void);
@@ -51,7 +51,7 @@ typedef struct MnuStatusResource {
 /* Allocate and zero the 0xC08 status resource, then wire up its host pointer,
  * console banner and panel sound entries. */
 void *func_00286E98(void) {
-    u32 handle = func_003292A8(0xC08);
+    u32 handle = sdfAllocGeneralBlock(0xC08);
     MnuStatusResource *resource = (MnuStatusResource *)sdfMemoryGetBlockAddress(handle);
 
     memset(resource, 0, 0xC08);
@@ -73,7 +73,7 @@ void func_00286F18(s32 arg0, s32 work) {
         mnuReleaseFirstMantraSpriteSlots();
         mnuReleaseStaffAndTitleVisualResources(resource->progressHost);
         evtPrintDeveloperConsoleMessage("trmDestroyStatusResource()!!!! \n");
-        func_003297C8(resource->allocationHandle);
+        sdfReleaseResourceAllocation(resource->allocationHandle);
         mnuReleasePanelEntryPool();
     }
     evtPrintDeveloperConsoleMessage("mtrRelease\n");

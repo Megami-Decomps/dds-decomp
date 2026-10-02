@@ -80,7 +80,7 @@ extern void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
 
 extern u32 frFontSlotLoadedFlags[];
 
-extern void func_003297C8(void *arg0);
+extern void sdfReleaseResourceAllocation(void *arg0);
 
 void frFontListInsert(FntNode *node) {
     FntNode *head = frFontResourceList.head;
@@ -93,11 +93,11 @@ void frFontListInsert(FntNode *node) {
     next->prev = node;
 }
 
-u16 func_0019B870(s32 index) {
+u16 frFontGetSlotCellWidth(s32 index) {
     return frFontResourceRecords[index].unk0->unk10;
 }
 
-u16 func_0019B890(s32 index) {
+u16 frFontGetSlotCellHeight(s32 index) {
     return frFontResourceRecords[index].unk0->unk12;
 }
 
@@ -175,7 +175,7 @@ INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BC60);
 
 extern volatile s32 sdfGsImageUploadSemaphore; /* semaphore handle shared with the IOP/interrupt side; declared volatile */
 extern void sceGsSetDefLoadImage(void *, s16, s16, s32, s32, s32, s16, s16);
-extern s32 func_003292A8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 extern s32 sdfResourceRetainAddress(s32);
 extern void sceGsExecLoadImage(void *, s32);
 extern void sceGsSyncPath(s32, s32);
@@ -204,7 +204,7 @@ void frFontUploadClearedTexture(void) {
 
     size = frFontWork.height * frFontWork.width;
     size = (u32)size >> 1;
-    block = func_003292A8(size);
+    block = sdfAllocGeneralBlock(size);
     image = (void *)sdfResourceRetainAddress(block);
     memset(image, 0, size);
     sceGsSetDefLoadImage(loadImage, (s16)frFontWork.gsBuffer, (s16)frFontWork.gsFormat, 0x14, 0, 0,
@@ -214,11 +214,11 @@ void frFontUploadClearedTexture(void) {
     sceGsExecLoadImage(loadImage, (s32)image);
     sceGsSyncPath(0, 0);
     SignalSema(sdfGsImageUploadSemaphore);
-    func_003297C8((void *)block);
+    sdfReleaseResourceAllocation((void *)block);
 }
 
 extern void *sdfReadNamedResource();
-extern void func_0019C130(u8, u8 *, void *);
+extern void frFontBindResourceSections(u8, u8 *, void *);
 
 /* Load font `index` once (index 1 uses the system's first entry buffer, other fonts load `path`) and mark it loaded. */
 void frFontEnsureSlotLoaded(s32 index, s32 path) {
@@ -227,9 +227,9 @@ void frFontEnsureSlotLoaded(s32 index, s32 path) {
 
     if (frFontSlotLoadedFlags[slot] != 1) {
         if (slot == 1) {
-            func_0019C130(1, 0, sys->entries[0].buffer);
+            frFontBindResourceSections(1, 0, sys->entries[0].buffer);
         } else {
-            func_0019C130(slot, 0, sdfReadNamedResource(path, 0, 0));
+            frFontBindResourceSections(slot, 0, sdfReadNamedResource(path, 0, 0));
         }
         frFontSlotLoadedFlags[slot] = 1;
     }
@@ -261,7 +261,7 @@ typedef struct FrFontHeader {
     u32 lookupOffset;
 } FrFontHeader;
 
-void func_0019C130(u8 index, u8 *header, void *buffer) {
+void frFontBindResourceSections(u8 index, u8 *header, void *buffer) {
     FrFontEntry *entry;
     s32 offset;
     u32 lookup;
@@ -320,7 +320,7 @@ void frFontFreeEntry(s32 index) {
     frFontSlotLoadedFlags[slot] = 0;
     entry = &frFontWork.entries[slot];
     if (entry->buffer != NULL) {
-        func_003297C8(entry->buffer);
+        sdfReleaseResourceAllocation(entry->buffer);
         entry->unk1C = NULL;
     }
     entry->unk18 = NULL;

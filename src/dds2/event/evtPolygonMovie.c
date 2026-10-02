@@ -213,13 +213,13 @@ extern void sdfUnfreezeFloatCounter(PolyMovieClip *clip);
 extern void *func_00328D68(s32 size);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern s32 func_003292A8(s32 size);
+extern s32 sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(s32 handle);
 extern s32 itfMesCreateWindow(u8 *arg);
 extern void itfMesDestroyWindowIfPresent(s32 handle);
 extern void fileWaitIdle(void);
 extern void filePollEntryCleanup(s32 arg);
-extern void func_003297C8(s32 arg);
+extern void sdfReleaseResourceAllocation(s32 arg);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void func_002A1308(void);
 extern void func_0035B6E0(const char *fmt, ...);
@@ -861,13 +861,13 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work) {
             filePollEntryCleanup(work->res5C);
         }
         if (work->res08 != 0) {
-            func_003297C8(work->res08);
+            sdfReleaseResourceAllocation(work->res08);
         }
         if (work->res60 != 0) {
-            func_003297C8(work->res60);
+            sdfReleaseResourceAllocation(work->res60);
         }
         if (work->res6C != 0) {
-            func_003297C8(work->res6C);
+            sdfReleaseResourceAllocation(work->res6C);
         }
         if (mnuQueryTitleSoundBusy() == 1) {
             func_002A1308();
@@ -885,7 +885,7 @@ s32 evtPolygonMovieCreateHeader(void **out) {
     void *block;
 
     size = 0x40;
-    handle = func_003292A8(size);
+    handle = sdfAllocGeneralBlock(size);
     block = sdfResourceRetainAddress(handle);
     memcpy(block, header, size);
     *out = block;

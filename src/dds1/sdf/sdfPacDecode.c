@@ -99,8 +99,8 @@ void sdfAppendResourceListItem(s32 handle, s32 resource);
 s32 func_002D32A0(void *resource);
 s32 sdfResourceRetainAddress(s32 handle);
 s32 sdfTexAcquireResourceTexture(s32 resource);
-s32 func_002D0518(s32 size);
-s32 func_002D03F8(s32 size);
+s32 sdfAllocGeneralBlockHigh(s32 size);
+s32 sdfAllocGeneralBlock(s32 size);
 void sdfReleaseMemorySlot(void *slot);
 void sdfStoreWordAndSetState(void *decoder, void *destination);
 s32 func_002EEAE0(void *decoder, void *input, s32 available);
@@ -252,9 +252,9 @@ void sdfPacStartPacketPayload(PacState *state, PacHead *packet) {
         state->phase = 2;
         node = sdfPacEnqueuePacket(state, packet);
         if (state->flags & 2) {
-            node->resourceHandle = func_002D0518(allocationSize);
+            node->resourceHandle = sdfAllocGeneralBlockHigh(allocationSize);
         } else {
-            node->resourceHandle = func_002D03F8(allocationSize);
+            node->resourceHandle = sdfAllocGeneralBlock(allocationSize);
         }
         state->outputCursor = node->dataCursor = (u8 *)sdfResourceRetainAddress(node->resourceHandle);
         switch (packet->flags & 0xF) {

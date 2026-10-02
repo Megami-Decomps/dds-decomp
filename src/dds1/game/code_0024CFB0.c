@@ -159,13 +159,13 @@ s64 dspUpdateFlagEvent(s32 request) {
     return 0;
 }
 
-s64 mnuStartPanelDispatch(s32 request) {
+s64 mnuDispatchTerminalPanel(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     func_0024A2D8(state);
     return menuRunPanel(state, 1, request);
 }
 
-s64 mnuStartPanelExit(s32 request) {
+s64 mnuDispatchTerminalPanelExit(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     func_0024DD78();
     return menuRunPanel(state, 2, request);
@@ -200,7 +200,7 @@ extern s32 evtIsActiveFlagSet(s32);
 extern char D_003AF710[];
 extern char D_0036AE48[];
 
-s64 func_0024D440(s32 request) {
+s64 mnuUpdateTerminalReadyPopup(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     s32 *popup = (s32 *)(state + 0x54);
     s64 result = menuRunPanel(state, 0, request);
@@ -394,7 +394,7 @@ void evtLoadResourcePair(u32 resourceId, u32 *record) {
 }
 
 void evtReleaseResourcePairHandle(u32 *record) {
-    func_002D0918(*record);
+    sdfReleaseResourceAllocation(*record);
 }
 
 s32 evtCreateMessageWindowIfMissing(s32 unused) {
@@ -596,7 +596,7 @@ u32 evtLoadTextureFromResourcePath(u32 path) {
     u32 allocation = sdfReadNamedResource(path, info, &info[1]);
     u32 texture = sdfTexAcquireResourceTexture(info[0]);
 
-    func_002D0918(allocation);
+    sdfReleaseResourceAllocation(allocation);
     return texture;
 }
 

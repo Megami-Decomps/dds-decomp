@@ -7,7 +7,7 @@ typedef struct EffParamWork EffParamWork;
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
 extern void *effParamTableGetBlock(void *data, s32 index);
 extern void func_00184BC8(void *work);
-extern void func_001855B8();
+extern void effBossSetPosition();
 extern void func_00185BD8(void *work);
 
 extern void *memcpy(void *dst, const void *src, u32 size);
@@ -146,7 +146,7 @@ extern void mdlAddEntryPlain(void *work, s32 arg1, s32 arg2);
 extern u32 sdfCountMapPositionRecords(void *chunk);
 extern u32 parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void func_0015D078(u32 system, u32 value);
-extern u32 func_002D03F8(s32 size);
+extern u32 sdfAllocGeneralBlock(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
 extern EffBossDrawPool *func_0016FB08(u32 cellCount);
 extern u32 effGetIndexedEffectGroupRecord(EffBossDrawPool *pool, s32 index);
@@ -159,7 +159,7 @@ extern f32 D_003B9308;
 extern void func_00184630(EffBossWork *work);
 extern EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src);
 extern void effReleaseRecordGroupAssetAndHandle(EffBossDrawPool *pool);
-extern void func_002D0918(u32 handle);
+extern void sdfReleaseResourceAllocation(u32 handle);
 extern void parReleaseCellSystem(u32 system);
 
 /* Randomize geometry and initial age; the two extents remain proportional. */
@@ -223,7 +223,7 @@ void effBossDestroy(EffBossWork *work) {
         for (i = 0; i < work->groupCount; i++) {
             effReleaseRecordGroupAssetAndHandle(work->groups[i].drawPool);
         }
-        func_002D0918(work->groupsHandle);
+        sdfReleaseResourceAllocation(work->groupsHandle);
     }
     parReleaseCellSystem(work->system);
     effDispatchParameterDataAndFreeWork(work->paramWork);
@@ -232,7 +232,7 @@ void effBossDestroy(EffBossWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00184BC8);
 
-void func_001855B8(dst, src)
+void effBossSetPosition(dst, src)
 void *dst;
 void *src;
 {
@@ -528,7 +528,7 @@ void effBossUpdateGeometryCallback(void *work) {
 }
 
 void func_00185BA8(void *work) {
-    func_001855B8(work);
+    effBossSetPosition(work);
 }
 
 void func_00185BC0(u8 *work, s32 value) {

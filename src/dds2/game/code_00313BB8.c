@@ -2,7 +2,7 @@
 
 #include "fpu.h"
 
-extern s32 func_003297C8(u32);
+extern s32 sdfReleaseResourceAllocation(u32);
 
 extern void func_003154A0();
 
@@ -832,7 +832,7 @@ void func_00316648(void) {
 }
 
 void sdfReleaseFlagListResource(s32 work) {
-    func_003297C8(*(u32 *)(work + 0x54));
+    sdfReleaseResourceAllocation(*(u32 *)(work + 0x54));
 }
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00316680);

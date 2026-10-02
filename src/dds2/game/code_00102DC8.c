@@ -200,7 +200,7 @@ typedef struct KwlnNamedSlot {
 extern KwlnNamedSlot D_0043D410[];
 extern s32 D_00435C20;
 
-s32 func_00103050(const char *name) {
+s32 kwlnFindNamedSlot(const char *name) {
     s32 slot = D_00435C20;
     s32 i;
 
@@ -234,7 +234,7 @@ void func_001034E0(void) {
 extern s8 D_0037F510[];
 
 /* Move one list cursor (scroll offset + cursor row) with the up / down buttons of pad set `padSet`: a fresh press wraps around the list, a held repeat stops at the ends. The scroll pointer is NULL for a list without scrolling. */
-void func_001034E8(s32 *scroll, s32 *cursor, s32 count, s32 visible, s32 padSet, s32 downButton, s32 upButton) {
+void kwlnStepListCursor(s32 *scroll, s32 *cursor, s32 count, s32 visible, s32 padSet, s32 downButton, s32 upButton) {
     s32 up;
     s32 down;
 
@@ -305,9 +305,9 @@ void func_001034E8(s32 *scroll, s32 *cursor, s32 count, s32 visible, s32 padSet,
 }
 
 /* Step two list cursors (scroll + cursor each) from pad set `padSet`; returns 1 / -1 when the confirm / cancel button of that set is down, else 0. */
-s32 func_001036B0(s32 padSet, s32 count2, s32 count1, s32 visible2, s32 visible1, s32 *scroll2, s32 *scroll1, s32 *cursor2, s32 *cursor1) {
-    func_001034E8(scroll1, cursor1, count1, visible1, padSet, 7, 6);
-    func_001034E8(scroll2, cursor2, count2, visible2, padSet, 5, 4);
+s32 kwlnStepTwoListCursors(s32 padSet, s32 count2, s32 count1, s32 visible2, s32 visible1, s32 *scroll2, s32 *scroll1, s32 *cursor2, s32 *cursor1) {
+    kwlnStepListCursor(scroll1, cursor1, count1, visible1, padSet, 7, 6);
+    kwlnStepListCursor(scroll2, cursor2, count2, visible2, padSet, 5, 4);
     if (padSet == 0) {
         if (D_0037F510[1] < 0) {
             return 1;
@@ -640,12 +640,12 @@ extern void kwlnTextureReleaseHeldReference(void);
 extern void func_00105290(void);
 extern u32 sdfAllocImageBuffer(u32 width, u32 height, u32 mode);
 extern s32 sdfTexCreateResourceWithReference(u32 width, u32 height, u32 a, u32 b, u32 buffer, u32 c, u32 d, u32 e);
-extern void func_0032B3E0(s32 texture, s32 mode);
+extern void sdfTexSetClampMode(s32 texture, s32 mode);
 extern void sdfTexCreateFirstPacket(s32 texture);
 extern f32 D_0037F7B0[];
 
 /* Allocate a width x height image buffer and wrap it in the held texture reference; returns 1 when both exist. */
-s32 func_001053F0(u16 width, u16 height, f32 value) {
+s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
     s32 texture;
 
     if (kwlnHeldTextureReference != 0) {
@@ -663,7 +663,7 @@ s32 func_001053F0(u16 width, u16 height, f32 value) {
         return 0;
     }
     kwlnHeldTextureReference = texture;
-    func_0032B3E0(texture, 5);
+    sdfTexSetClampMode(texture, 5);
     sdfTexCreateFirstPacket(texture);
     D_0037F7B0[1] = value;
     D_0037F7B0[6] = width;

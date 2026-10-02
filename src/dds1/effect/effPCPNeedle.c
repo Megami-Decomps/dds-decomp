@@ -8,20 +8,20 @@ extern void func_001760F8(void *work);
 extern void parReleaseCellSystem(u32 handle);
 extern void effReleaseAttachedResources(u32 handle);
 extern void func_001770F8(u32 handle);
-extern void func_002D0918(u32 handle);
+extern void sdfReleaseResourceAllocation(u32 handle);
 
 /* Needle effect work: three resource handles released on free. */
 typedef struct {
     u8 unk00[0x68]; /* 0x00 */
     u32 resource68; /* 0x68 released by parReleaseCellSystem */
     u32 resource6C; /* 0x6C released by effReleaseAttachedResources/func_001770F8 */
-    u32 resource70; /* 0x70 released by func_002D0918 */
+    u32 resource70; /* 0x70 released by sdfReleaseResourceAllocation */
 } EffPCPNeedleWork;
 
 void effPCPNeedleFree(EffPCPNeedleWork *work) {
     parReleaseCellSystem(work->resource68);
     effReleaseAttachedResources(work->resource6C);
-    func_002D0918(work->resource70);
+    sdfReleaseResourceAllocation(work->resource70);
 }
 
 /* The first parameter block supplies the effect's runtime work. */

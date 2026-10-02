@@ -66,7 +66,7 @@ void WaitSema(s32 sema);
 void SignalSema(s32 sema);
 void *memset(void *dst, s32 val, u32 len);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
-s32 func_002D03F8(s32 arg0);
+s32 sdfAllocGeneralBlock(s32 arg0);
 s32 sdfResourceRetainAddress(s32 arg0);
 s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 s32 func_002F6990(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4);
@@ -122,7 +122,7 @@ void fileManInit(void) {
     memset(&fileManagerWork, 0, 0x40);
     fileManagerWork.unk7 = 4;
     fileManagerWork.sema = sdfCreateSemaphore(1, 0x7F, 0);
-    fileManagerWork.unk1C = sdfResourceRetainAddress(func_002D03F8(0x40000));
+    fileManagerWork.unk1C = sdfResourceRetainAddress(sdfAllocGeneralBlock(0x40000));
     kwlnTaskCreate((s32)&D_003BC7E0, 0x384, 1, 0, (s32)&fileMan, 0, 0);
     fileIdleUpdateCallback = fileManUpdate;
 }

@@ -104,7 +104,7 @@ void func_001005B8(void) {
 INCLUDE_ASM(const s32, "game/code_00100000", func_001005C8);
 
 /* Remove a task from the doubly linked queue of its state (1 delayed start, 2 active, 3 delayed destroy). */
-void func_001006E0(KwlnTask *task) {
+void kwlnTaskRemoveFromStateQueue(KwlnTask *task) {
     switch (task->flags & 0xF) {
     case 0:
         return;

@@ -21,7 +21,7 @@ typedef struct {
 } BlurVectorRecord;
 
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
-extern void func_0016F6D0(u32 handle);
+extern void effThunderUpdateChainSegments(u32 handle);
 extern void btlSetActorEffectParameterOrMuzzlePosition(u32 unit, s32 arg1);
 
 void effFreePairedResources(PairedEffectResources *pair) {
@@ -69,7 +69,7 @@ void effUpdatePairedResources(PairedEffectResources *work) {
                 VU0_STORE_VF(vf10, record->twoThirds);
                 VU0_STORE_VF(vf11, record->end);
                 func_0016F020(work->resource[resourceIndex], blendColor);
-                func_0016F6D0(work->resource[resourceIndex]);
+                effThunderUpdateChainSegments(work->resource[resourceIndex]);
                 resourceIndex++;
             } while (resourceIndex < 2);
         }

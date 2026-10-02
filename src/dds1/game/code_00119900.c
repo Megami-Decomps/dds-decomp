@@ -372,7 +372,7 @@ u32 func_0011B150(void) {
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011B158);
 
-s32 func_0011B308(s32 *actors, s32 affinity) {
+s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity) {
     s32 *requirement = (s32 *)(datAffinityRecords + affinity * 16 - 0x1AB0);
     u32 i;
     s32 required = 0;
@@ -607,10 +607,10 @@ s32 evtPushSecondRosterSelectedStat(void) {
     return 1;
 }
 
-extern s32 func_00119750(s32);
+extern s32 datMapFlagToStatIndex(s32);
 
 s32 evtPushFirstRosterOptionStat(void) {
-    s8 stat = func_00119750(((EvtScriptContext *)D_003C2E70)->options);
+    s8 stat = datMapFlagToStatIndex(((EvtScriptContext *)D_003C2E70)->options);
     s32 value = 100;
 
     switch (stat) {
@@ -633,7 +633,7 @@ s32 evtPushFirstRosterOptionStat(void) {
 }
 
 s32 evtPushSecondRosterOptionStat(void) {
-    s8 stat = func_00119750(((EvtScriptContext *)D_003C2E70)->options);
+    s8 stat = datMapFlagToStatIndex(((EvtScriptContext *)D_003C2E70)->options);
     s32 value = 100;
 
     switch (stat) {
@@ -871,10 +871,10 @@ void func_0011C3C0(void) {
     scrSetFloatReturnValue(*(f32 *)(datBattleParameters + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x188));
 }
 
-extern s32 func_001190B0(s32);
+extern s32 datComputeSkillBoostedMaxHp(s32);
 
 void evtSelectStatGrade(void) {
-    s32 total = func_001190B0(((EvtScriptContext *)D_003C2E70)->second);
+    s32 total = datComputeSkillBoostedMaxHp(((EvtScriptContext *)D_003C2E70)->second);
     s32 current = ((Entry1A4 *)((EvtScriptContext *)D_003C2E70)->second)->unk6;
     s32 percent = (s32)((f32)current / (f32)total * 100.0f);
     s32 grade = 0;
@@ -935,7 +935,7 @@ void evtPushRosterBaseValue(void) {
 }
 
 void evtSelectFineStatGrade(void) {
-    s32 total = func_001190B0(((EvtScriptContext *)D_003C2E70)->second);
+    s32 total = datComputeSkillBoostedMaxHp(((EvtScriptContext *)D_003C2E70)->second);
     s32 current = ((Entry1A4 *)((EvtScriptContext *)D_003C2E70)->second)->unk6;
     s32 percent = (s32)((f32)current / (f32)total * 100.0f);
     s32 grade = 0;

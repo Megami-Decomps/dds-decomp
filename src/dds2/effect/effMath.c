@@ -17,7 +17,7 @@ typedef struct EffMathSlotList {
 } EffMathSlotList;
 
 void effMathReleaseWorkResource(EffMathWork *work) {
-    func_003297C8(work->resource);
+    sdfReleaseResourceAllocation(work->resource);
 }
 
 /* Cubic Bezier control points (four xyz points) followed by the parameter t and its per-step increment. */
@@ -52,7 +52,7 @@ s32 effMathStepBezierSlot(EffMathSlotList *table, s32 index, f32 *out) {
 
 INCLUDE_ASM(const s32, "effect/effMath", func_00195D00);
 
-void func_00195E10(EffMathSlotList *list, s32 index) {
+void effMathResetBezierSlot(EffMathSlotList *list, s32 index) {
     EffMathSlot *slot = &list->slots[index];
     slot->unk34 = 0.05f;
     slot->unk30 = 0;

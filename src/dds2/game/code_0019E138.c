@@ -5,6 +5,7 @@ extern void *sdfAllocPacketAligned(s32);
 extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 extern u64 *sdfConsMeasurePacketWithHeader(void *);
 extern void sdfAppendPacket();
+extern s32 sdfConsCreateDrawPacket(s32 command, s32 texture, s32 context);
 
 extern s32 D_00435E6C;
 extern s32 D_00435E70;
@@ -468,13 +469,13 @@ u32 func_001A0098(u32 object) {
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A00B8);
 
-extern s32 func_003292A8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 extern u8 *sdfResourceRetainAddress(s32);
 extern void *memcpy(void *, const void *, u32);
 
 /* The header before each payload forms a circular free-node list. */
 u8 *itfCreateMemNodeRing(s32 payload, s32 count) {
-    s32 handle = func_003292A8((payload + 8) * (count + 1) + 4);
+    s32 handle = sdfAllocGeneralBlock((payload + 8) * (count + 1) + 4);
     u8 *list = sdfResourceRetainAddress(handle);
     MemNode *node;
     MemNode *next;
@@ -521,7 +522,7 @@ s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
 }
 
 u32 itfReleaseMemNodeBuffer(u8 *payload) {
-    func_003297C8(((MemRingHeader *)(payload - 4))->allocation);
+    sdfReleaseResourceAllocation(((MemRingHeader *)(payload - 4))->allocation);
     return 1;
 }
 
@@ -530,7 +531,7 @@ void itfLoadBackgroundSprite(void) {
     u64 buffer = sdfReadNamedResource("/sprite/bg00.tmx", &resource, 0);
 
     itfBackgroundSpriteTexture = sdfTexAcquireResourceTexture(resource);
-    func_003297C8(buffer);
+    sdfReleaseResourceAllocation(buffer);
 }
 
 void itfReleaseBackgroundSpriteTexture(void) {
@@ -723,7 +724,7 @@ u64 itfLoadTextureFromAsset(const char *path) {
 
     fileAllocation = sdfReadNamedResource(path, assetInfo, 0);
     textureHandle = sdfTexAcquireResourceTexture(assetInfo[0]);
-    func_003297C8(fileAllocation);
+    sdfReleaseResourceAllocation(fileAllocation);
     return textureHandle;
 }
 
@@ -811,7 +812,32 @@ void itfDrawQuadTextured4(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, 
     sdfAppendPacket(command, packet);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0CA0);
+void itfQueueTextureBoundQuadPacket(void *vertexData, void *uvData, void *colorData, s32 tail, s32 texture, s32 flag, s32 command) {
+    DrawVertex *vertices = vertexData;
+    DrawColorRec *uv = uvData;
+    DrawColorRec *colors = colorData;
+    void *packet;
+    u64 *dst;
+    s32 x0, y0, x1, y1;
+
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
+    sdfConsInitPacketHeader(packet, (flag << 9) | 0x156, 5, 0x53531, 1);
+    x0 = vertices[0].x + 0x7000;
+    y0 = vertices[0].y + 0x7900;
+    x1 = vertices[1].x + 0x7000;
+    y1 = vertices[1].y + 0x7900;
+    dst = sdfConsMeasurePacketWithHeader(packet);
+    dst[0] = (u64)colors->word[0] | ((u64)colors->word[1] << 32);
+    dst[1] = (u64)colors->word[2] | ((u64)colors->word[3] << 32);
+    dst[2] = (u64)uv->word[0] | ((u64)uv->word[1] << 32);
+    dst[4] = (u64)(u32)x0 | ((u64)y0 << 32);
+    dst[5] = (u64)(u32)tail;
+    dst[6] = (u64)uv->word[2] | ((u64)uv->word[3] << 32);
+    dst[8] = (u64)(u32)x1 | ((u64)y1 << 32);
+    dst[9] = (u64)(u32)tail;
+    sdfConsCreateDrawPacket(command, texture, flag);
+    sdfAppendPacket(command, packet);
+}
 
 void itfQueueColoredTexturedQuadPacket(DrawVertex *vertices, DrawColorRec *uv, DrawColorRec *colors, u32 tail, s32 flag, void *command) {
     void *packet;

@@ -136,7 +136,7 @@ void sdfVectorSubtract(float *vector, float *delta) {
     vector[2] = vector[2] - delta[2];
 }
 
-void func_00326918(float *vector, float x, float y, float z) {
+void sdfVectorAddComponents(float *vector, float x, float y, float z) {
     vector[0] += x;
     vector[1] += y;
     vector[2] += z;
@@ -181,7 +181,7 @@ f32 sdfVec3DotNormalized(void *first, void *second) {
     return firstNormalized.x * secondNormalized.x + firstNormalized.y * secondNormalized.y + firstNormalized.z * secondNormalized.z;
 }
 
-f32 func_00326AE0(void *a, void *b) {
+f32 sdfVec3AngleBetween(void *a, void *b) {
     return func_003532B8(sdfVec3DotNormalized(a, b));
 }
 

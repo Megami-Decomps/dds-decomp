@@ -40,7 +40,7 @@ extern u8 D_003AA868[];
 
 extern s32 effMathGetSlotAt(s32 *arg0, s32 arg1);
 
-extern void func_0019A2E0(EffChanWork *arg0, u32 arg1);
+extern void effJitterChannelControlPoints(EffChanWork *arg0, u32 arg1);
 
 /* Interpolated vertex (x, y, z, w) written by func_00192ED0. */
 typedef struct EffVert {
@@ -52,11 +52,11 @@ typedef struct EffVert {
 
 extern void func_0019AB08(EffVert *arg0, EffPrim *arg1, s32 arg2, f32 arg3);
 
-extern void *func_003292A8(s32 arg0);
+extern void *sdfAllocGeneralBlock(s32 arg0);
 
 extern void *sdfResourceRetainAddress(void *arg0);
 
-extern void func_0019B418(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);
+extern void effSampleChannelBezier(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);
 
 /* List header defined in game/code_00193C08 (unsized: keeps absolute access). */
 extern u8 frFontResourceList[];
@@ -64,7 +64,7 @@ extern u8 frFontResourceList[];
 /* Word at D_003D68C0+0x18 (list header defined in game/code_00193C08). */
 extern s32 D_00452378[];
 
-extern void func_003297C8(void *arg0);
+extern void sdfReleaseResourceAllocation(void *arg0);
 
 extern void func_0019AE18(void *arg0, s32 arg1, u32 arg2);
 
@@ -114,7 +114,7 @@ extern void *effParamWorkDuplicate(void *param);
 /* Create a channel work: clone the header, allocate the slot array, then give every record a duplicated parameter and a random negative start delay. */
 EffChanWork *effChanWorkCreate(EffChanSource *src) {
     u32 count = src->head.count;
-    void *handle = func_003292A8(count * sizeof(EffChanRecord) + sizeof(EffChanWork));
+    void *handle = sdfAllocGeneralBlock(count * sizeof(EffChanRecord) + sizeof(EffChanWork));
     EffChanWork *work = sdfResourceRetainAddress(handle);
     EffChanRecord *record = (EffChanRecord *)(work + 1);
     void *param;
@@ -155,7 +155,7 @@ void effDestroyChannelWork(EffChanWork *work) {
             i++;
         } while (i < count);
     }
-    func_003297C8(work->buffer);
+    sdfReleaseResourceAllocation(work->buffer);
 }
 
 extern f32 sdfViewTargetVector[4];
@@ -164,7 +164,7 @@ extern f32 effMiscRandUnitFloat(void *);
 extern void effParamWorkCallback3(void *, s32);
 
 /* Jitter control points perpendicular to the path and camera viewing direction. */
-void func_0019A2E0(EffChanWork *work, u32 index) {
+void effJitterChannelControlPoints(EffChanWork *work, u32 index) {
     f32 scale[4];
     f32 lastNormal[4];
     f32 viewDirection[4];
@@ -297,7 +297,7 @@ void effFillRandRecords(EffEmit *emitter) {
         return;
     }
     do {
-        func_0019A2E0(primitive, index);
+        effJitterChannelControlPoints(primitive, index);
         record->delay = effMiscRand(&D_003AA868) % modulus;
         keyframe = (EffRec38 *)effMathGetSlotAt(primitive->slots, index);
         index++;
@@ -315,9 +315,9 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019A900);
 void effFreeBuffers(EffPrim *primitive) {
     if (primitive != NULL) {
         if (primitive->unk14 != NULL) {
-            func_003297C8(primitive->secondaryResource);
+            sdfReleaseResourceAllocation(primitive->secondaryResource);
         }
-        func_003297C8(primitive->primaryResource);
+        sdfReleaseResourceAllocation(primitive->primaryResource);
     }
 }
 
@@ -346,7 +346,7 @@ s32 effAdvancePrimCursor(void *vertex, EffPrim *primitive) {
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AB08);
 
 /* Evaluate cubic coefficients or adjacent linear keys into the VU input vector. */
-void func_0019AC38(EffPrim *primitive, s32 index, f32 t)
+void effSamplePrimitiveCurve(EffPrim *primitive, s32 index, f32 t)
 {
     f32 result[4];
     f32 *a;
@@ -384,7 +384,7 @@ void effSetPrimitiveRecordCursorStep(EffPrim *primitive, f32 step) {
 
 /* Build a temporary record array and dispatch it through the selected path. */
 void effBuildAndDispatch(EffPrim *primitive, s32 variant) {
-    void *allocation = func_003292A8(primitive->recordCount * 12);
+    void *allocation = sdfAllocGeneralBlock(primitive->recordCount * 12);
     void *records = sdfResourceRetainAddress(allocation);
 
     func_0019AE18(records, primitive->unk10, primitive->recordCount);
@@ -393,7 +393,7 @@ void effBuildAndDispatch(EffPrim *primitive, s32 variant) {
     } else {
         func_0019B1F0(primitive, records);
     }
-    func_003297C8(allocation);
+    sdfReleaseResourceAllocation(allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AE18);
@@ -413,7 +413,7 @@ void *effCreateChannel(void *rows, u32 count) {
     if (count < 4) {
         return channel;
     }
-    allocation = func_003292A8(0x18);
+    allocation = sdfAllocGeneralBlock(0x18);
     channel = sdfResourceRetainAddress(allocation);
     cursor = channel;
     cursor->unk0 = allocation;
@@ -433,7 +433,7 @@ s32 effAdvanceChanCursor(void *vertex, EffChan *channel) {
     f32 position = channel->cursorPosition;
     u32 index = channel->cursorIndex;
 
-    func_0019B418(vertex, channel, index, position);
+    effSampleChannelBezier(vertex, channel, index, position);
     position += channel->cursorStep;
     if (position > 1.0f) {
         position -= 1.0f;
@@ -449,7 +449,7 @@ s32 effAdvanceChanCursor(void *vertex, EffChan *channel) {
     return continuing;
 }
 
-void func_0019B418(EffVert *out, EffChan *channel, s32 index, f32 t) {
+void effSampleChannelBezier(EffVert *out, EffChan *channel, s32 index, f32 t) {
     f32 weights[4];
     f32 inverse = 1.0f - t;
     f32 *p0 = channel->rows->primary + index * 3;

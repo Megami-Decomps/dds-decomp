@@ -74,7 +74,7 @@ typedef struct SdfRingBlock {
     SdfRingNode nodes[1]; /* 0x44 */
 } SdfRingBlock;
 
-extern s32 func_003292A8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 
 extern void *sdfMemoryGetBlockAddress(u32);
 
@@ -137,7 +137,7 @@ INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030ECC0);
 /* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
 SdfRing *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     s32 size = count * 0x20 + 0x44;
-    s32 allocation = func_003292A8(size);
+    s32 allocation = sdfAllocGeneralBlock(size);
     SdfRingBlock *block = (SdfRingBlock *)sdfMemoryGetBlockAddress(allocation);
     SdfRing *ring = &block->header;
     SdfRingNode *node;
@@ -222,7 +222,7 @@ extern u8 D_0037F660[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *src);
 
 /* vu0 routine: project a world point to the screen and return its GS grid cell. */
-void func_0030F1A0(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {
+void fldProjectPointToGridCell(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {
     f32 point[4];
     f32 screen[4];
 
@@ -386,7 +386,7 @@ float *b;
     return func_003532B8(fldNormalizedVectorDot(a, b));
 }
 
-void func_0030FA28(float *out, float *left, float *right) {
+void fldNormalizedVectorCross(float *out, float *left, float *right) {
     Vector4 a, b;
     a = *(Vector4 *)left;
     b = *(Vector4 *)right;

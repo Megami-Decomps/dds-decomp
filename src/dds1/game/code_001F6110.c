@@ -399,7 +399,7 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
 
 
 /* vu0 routine: returns the selected muzzle position in vf10. */
-BtlUnit *func_001F72C8(BtlUnit *reference, s32 actor) {
+BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *reference, s32 actor) {
     BtlVec4 position, selectedPosition;
     BtlUnit *selected = NULL;
     BtlUnit *unit;
@@ -1801,7 +1801,7 @@ u32 btlCommandReportEventEffectValue(void) {
     return 1;
 }
 
-u32 func_001FA670(void) {
+u32 btlCmdRunWeightedAiSelection(void) {
     btlRunRandomWeightedAiTableAction(func_0010D6A8());
     return 1;
 }
@@ -1960,37 +1960,37 @@ u32 btlAiGetFurea(void) {
     return 1;
 }
 
-u32 func_001FABE8(void) {
+u32 btlCmdReportUnsupportedCameraOrigin(void) {
     btlBossDebugPrintf(D_003A54A8);
     return 1;
 }
 
-u32 func_001FAC10(void) {
+u32 btlCmdReportUnsupportedCameraTwoShot(void) {
     btlBossDebugPrintf(D_003A54C8);
     return 1;
 }
 
-u32 func_001FAC38(void) {
+u32 btlCmdReportUnsupportedCameraBougai(void) {
     btlBossDebugPrintf(D_003A54F0);
     return 1;
 }
 
-u32 func_001FAC60(void) {
+u32 btlCmdReportUnsupportedEvent(void) {
     btlBossDebugPrintf(D_003A5518);
     return 1;
 }
 
-u32 func_001FAC88(void) {
+u32 btlCmdReportUnsupportedTaikyo(void) {
     btlBossDebugPrintf(D_003A5538);
     return 1;
 }
 
-u32 func_001FACB0(void) {
+u32 btlCmdReportUnsupportedAllTaikyo(void) {
     btlBossDebugPrintf(D_003A5558);
     return 1;
 }
 
-u32 func_001FACD8(void) {
+u32 btlCmdClearSpecialEnemyFlags(void) {
     btlClearSpecialEnemyEntryFlags();
     return 1;
 }
@@ -2510,7 +2510,7 @@ u32 btlGetResourcePathVariant(BtlResourceDescriptor *resource) {
 }
 
 extern void sdfTexReleaseReferenceViaHandler(s32);
-extern void func_002D0918(s32);
+extern void sdfReleaseResourceAllocation(s32);
 void btlReplaceResourceHandle(BtlResourceDescriptor *, s32);
 
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) {
@@ -2523,7 +2523,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) 
     }
     buffer = sdfReadNamedResource(name, &loaded, 0);
     btlReplaceResourceHandle(resource, loaded);
-    func_002D0918(buffer);
+    sdfReleaseResourceAllocation(buffer);
 }
 
 extern s32 sdfTexAcquireResourceTexture(s32);

@@ -237,7 +237,7 @@ typedef struct EffPCPSpanWork {
 } EffPCPSpanWork;
 
 extern EffPCPSpanWork *effPcpSpanCreate(void *params, void *handleParams);
-extern u32 func_0014FD20(u32 param);
+extern u32 effCreateNodeFromDescriptor(u32 param);
 extern u32 effCloneSourceWithTypeHandler(u32 handle);
 extern void effDestroyNode(s32 handle);
 extern void func_00186CB8(u32 handle);
@@ -247,7 +247,7 @@ extern u32 effCloneResourceTemplate(void *params);
 extern u32 effCloneBlurTemplate(void *params);
 extern void *effPcpTripleHandleCreate(void *block0, u32 *blocks);
 
-extern void *func_002D03F8(s32 size);
+extern void *sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(void *resource);
 extern u32 effCreateThunderCellSystemWork(void *params);
 extern u32 effParamCreateFromTable(void *data, s32 index);
@@ -961,7 +961,7 @@ void effPcpChargeInitTail(EffPCPChargeWork *work) {
 }
 
 EffPCPChargeWork *effCreateChargeWork(void *source) {
-    void *resource = func_002D03F8(0x1354);
+    void *resource = sdfAllocGeneralBlock(0x1354);
     EffPCPChargeWork *work = sdfResourceRetainAddress(resource);
     work->allocationHandle = (u32)resource;
     work->primaryHandle = effParamCreateFromTable(source, 0);
@@ -978,11 +978,11 @@ EffPCPChargeWork *effCreateChargeWork(void *source) {
 void effPcpChargeReleaseResources(EffPCPChargeWork *work) {
     effDispatchParameterDataAndFreeWork(work->primaryHandle);
     effDispatchParameterDataAndFreeWork(work->secondaryHandle);
-    func_002D0918(work->allocationHandle);
+    sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
 EffPCPChargeWork *effCopyChargeResources(EffPCPChargeWork *source) {
-    void *resource = func_002D03F8(0x1354);
+    void *resource = sdfAllocGeneralBlock(0x1354);
     EffPCPChargeWork *work = sdfResourceRetainAddress(resource);
     u32 firstHandle = source->primaryHandle;
     work->allocationHandle = (u32)resource;
@@ -2642,7 +2642,7 @@ EffPCPSpanWork *effPcpSpanCreate(void *params, void *handleParams) {
     EE_MMI_UNIT_MATRIX(work->matrix);
     work->optionalHandle = 0;
     if (handleParams != NULL) {
-        work->optionalHandle = func_0014FD20((u32)handleParams);
+        work->optionalHandle = effCreateNodeFromDescriptor((u32)handleParams);
     }
     return work;
 }
@@ -2797,7 +2797,7 @@ void *effPcpTripleHandleCreate(void *block0, u32 *blocks) {
     work->color = 0x80808080;
     handle = work->handleA;
     for (i = 0; i < 7; i++) {
-        handle[0] = func_0014FD20(blocks[i]);
+        handle[0] = effCreateNodeFromDescriptor(blocks[i]);
         handle[7] = effCloneSourceWithTypeHandler(handle[0]);
         handle[14] = effCloneSourceWithTypeHandler(handle[0]);
         handle++;
@@ -2906,7 +2906,7 @@ EffPCPBlockSetWork *func_0017D4C0(void *first, void **blocks) {
     for (i = 0; i < 3; i++) {
         if (work->params.groupSize[i] > 0) {
             n = work->count * work->params.groupSize[i];
-            work->alloc[i] = (u32)func_002D03F8(n * 4);
+            work->alloc[i] = (u32)sdfAllocGeneralBlock(n * 4);
             work->list[i] = sdfResourceRetainAddress((void *)work->alloc[i]);
             work->list[i][0] = effParamWorkCreate(0, blocks[6 + i]);
             for (j = 1; j < n; j++) {
@@ -3000,7 +3000,7 @@ void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work) {
                         effDispatchParameterDataAndFreeWork(work->list[i][j]);
                     }
                 }
-                func_002D0918(work->alloc[i]);
+                sdfReleaseResourceAllocation(work->alloc[i]);
             }
         }
         for (j = 0; j < 5; j++) {
@@ -3786,7 +3786,7 @@ typedef struct EffPCPBeamWork {
 } EffPCPBeamWork;
 void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
     sdfQueueAssetRelease(work->assetHandle);
-    func_002D0918(work->allocationHandle);
+    sdfReleaseResourceAllocation(work->allocationHandle);
     sdfReleaseChipBlock(work);
 }
 
@@ -4200,7 +4200,7 @@ typedef struct EffPCPGroupSet {
 
 EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *first, u32 *blocks) {
     u32 count = first->count;
-    void *resource = func_002D03F8(count * 0x18 + 0x180);
+    void *resource = sdfAllocGeneralBlock(count * 0x18 + 0x180);
     EffPCPGroupSet *copy = sdfResourceRetainAddress(resource);
     EffPCPGroupEntry *entry;
     u32 g;
@@ -4222,7 +4222,7 @@ EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *first, u32 *blocks) {
         u8 *flags;
 
         g = 0;
-        copy->duplicateHandle = func_002D03F8(size);
+        copy->duplicateHandle = sdfAllocGeneralBlock(size);
         flags = first->activeGroups;
         offset = 0;
         stride = count * 4;
@@ -4291,7 +4291,7 @@ EffPCPGroupSet *effBlockSetCloneWithDuplicates(EffPCPGroupSet *work) {
         group = 0;
         flags = work->head.activeGroups;
         offset = 0;
-        copy->duplicateHandle = func_002D03F8(size);
+        copy->duplicateHandle = sdfAllocGeneralBlock(size);
         copy->duplicates = sdfResourceRetainAddress(copy->duplicateHandle);
         memset(copy->duplicates, 0, size);
         for (; group < 4; group++) {
@@ -4339,9 +4339,9 @@ void effBlockSetRelease(EffPCPGroupSet *work) {
                 i++;
             } while (i < count);
         }
-        func_002D0918(work->duplicateHandle);
+        sdfReleaseResourceAllocation(work->duplicateHandle);
     }
-    func_002D0918(work->workHandle);
+    sdfReleaseResourceAllocation(work->workHandle);
 }
 
 /* Randomises entry `index` of a group set: a start delay, a jittered
@@ -4619,7 +4619,7 @@ typedef struct EffPCPDriftEventWork {
 /* Clone the source header (a longer one with 0x18-byte entries), then give every entry one event and a random negative start delay. */
 EffPCPDriftEventWork *effPcpEntryWorkBCreate(EffPCPDriftEventParams *src, void *params) {
     u32 count = src->count;
-    u32 handle = (u32)func_002D03F8(count * 24 + 0x11C);
+    u32 handle = (u32)sdfAllocGeneralBlock(count * 24 + 0x11C);
     EffPCPDriftEventWork *work = sdfResourceRetainAddress((void *)handle);
     EffPCPEventPlace place;
     EffPCPDriftEvent *entry;
@@ -4685,7 +4685,7 @@ void effPcpEventGroupRelease(EffPCPDriftEventWork *work) {
     if (work->owner->active == 0) {
         func_00190118(work->owner);
     }
-    func_002D0918(work->handle);
+    sdfReleaseResourceAllocation(work->handle);
 }
 
 
@@ -4749,7 +4749,7 @@ typedef struct EffPCPPairedEventWork {
 /* Clone the source effect header, then give every entry two events (placed at the unit scale) and a random negative start delay. */
 EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *src, void *paramsA, void *paramsB) {
     u32 count = src->count;
-    u32 handle = (u32)func_002D03F8(count * 32 + 0xA4);
+    u32 handle = (u32)sdfAllocGeneralBlock(count * 32 + 0xA4);
     EffPCPPairedEventWork *work = sdfResourceRetainAddress((void *)handle);
     EffPCPEventPlace place;
     EffPCPPairedEvent *entry;
@@ -4823,7 +4823,7 @@ void effPcpPairedEventGroupRelease(EffPCPPairedEventWork *work) {
     if (work->ownerB->active == 0) {
         func_00190118(work->ownerB);
     }
-    func_002D0918(work->handle);
+    sdfReleaseResourceAllocation(work->handle);
 }
 
 
@@ -4889,7 +4889,7 @@ typedef struct EffPCPSpawnRangeWork {
 /* Clone the source header, then give every entry one event (placed at the unit scale) and a random negative start delay. */
 EffPCPSpawnRangeWork *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *src, void *params) {
     u32 count = src->count;
-    u32 handle = (u32)func_002D03F8(count * 32 + 0xAC);
+    u32 handle = (u32)sdfAllocGeneralBlock(count * 32 + 0xAC);
     EffPCPSpawnRangeWork *work = sdfResourceRetainAddress((void *)handle);
     EffPCPEventPlace place;
     EffPCPSpawnRangeEvent *entry;
@@ -4955,7 +4955,7 @@ void effPcpEventBatchRelease(EffPCPSpawnRangeWork *work) {
     if (work->owner->active == 0) {
         func_00190118(work->owner);
     }
-    func_002D0918(work->handle);
+    sdfReleaseResourceAllocation(work->handle);
 }
 
 
@@ -5046,7 +5046,7 @@ void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
     work->frameLimit = model->motion->frameCount;
     count = sdfCountMapPositionRecords(model->inner);
     work->count = count;
-    work->entriesHandle = (u32)func_002D03F8(count << 5);
+    work->entriesHandle = (u32)sdfAllocGeneralBlock(count << 5);
     entry = sdfResourceRetainAddress((void *)work->entriesHandle);
     work->entries = entry;
     place.pos[0] = 0;
@@ -5138,7 +5138,7 @@ void effDestroyParticleEvents(EffPCPMapEventWork *work) {
     if (work->owner->active == 0) {
         func_00190118(work->owner);
     }
-    func_002D0918(work->entriesHandle);
+    sdfReleaseResourceAllocation(work->entriesHandle);
     sdfReleaseChipBlock(work);
 }
 

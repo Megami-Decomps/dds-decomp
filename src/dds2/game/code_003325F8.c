@@ -90,11 +90,11 @@ extern void sdfReleaseChipBlock(void *);
 
 void sdfAssetRelease(SdfAsset *);
 
-extern u64 func_0032B318(SdfTex *);
+extern u64 sdfTexGetPrimaryTextureState(SdfTex *);
 
-extern u64 func_0032B328(SdfTex *);
+extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 
-extern u64 func_0032B338(SdfTex *);
+extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 
 void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
 
@@ -705,9 +705,9 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
     entry->unk14 = asset->unk28;
     resource = asset->texture;
     if (resource != NULL) {
-        entry->unk38 = func_0032B328(resource);
-        entry->unk40 = func_0032B318(resource);
-        entry->unk48 = func_0032B338(resource);
+        entry->unk38 = sdfTexGetPrimarySamplingState(resource);
+        entry->unk40 = sdfTexGetPrimaryTextureState(resource);
+        entry->unk48 = sdfTexGetPrimaryClampState(resource);
     }
 }
 
@@ -738,9 +738,9 @@ void sdfApplyAssetSecondaryEntry(SdfAsset *asset, void *entryArg) {
     ((SdfDrawPacket *)entry)->mode = mode;
     ((SdfDrawPacket *)entry)->paletteValue = D_0040B348[mode];
     if (tex != NULL) {
-        ((SdfDrawPacket *)entry)->textureWords[0] = func_0032B328(tex);
-        ((SdfDrawPacket *)entry)->textureWords[1] = func_0032B318(tex);
-        ((SdfDrawPacket *)entry)->textureWords[2] = func_0032B338(tex);
+        ((SdfDrawPacket *)entry)->textureWords[0] = sdfTexGetPrimarySamplingState(tex);
+        ((SdfDrawPacket *)entry)->textureWords[1] = sdfTexGetPrimaryTextureState(tex);
+        ((SdfDrawPacket *)entry)->textureWords[2] = sdfTexGetPrimaryClampState(tex);
     }
     func_00333A30(entry + 0x80, asset->fourth);
 }

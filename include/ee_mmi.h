@@ -239,4 +239,29 @@
     ".set reorder" \
     : "=r"(out) : "f"(255.0f))
 
+/*
+ * Gather one column of four 16-byte matrix rows into a VU register.
+ * Retail: four branches each in DDS1 func_0021E450/func_0023A7A0 and DDS2
+ * func_00238FC0/func_00255650 repeat the fixed $2-$5 SDK scratch sequence:
+ * lw $2/$3/$4/$5 at 0/0x10/0x20/0x30(src); pextlw $2,$3,$2;
+ * pextlw $4,$5,$4; pcpyld $2,$4,$2; qmtc2.ni $2,vf.
+ * Plain C float gathering was compiled first: four lwc1/swc1 pairs, a
+ * 16-byte stack temporary, then lqc2, rather than this MMI packing.
+ */
+#define EE_MMI_LOAD_MATRIX_COLUMN(vf, src) __asm__ volatile ( \
+    ".set noreorder\n\tlw $2, 0(%0)\n\tlw $3, 0x10(%0)\n\t" \
+    "lw $4, 0x20(%0)\n\tlw $5, 0x30(%0)\n\t" \
+    "pextlw $2, $3, $2\n\tpextlw $4, $5, $4\n\t" \
+    "pcpyld $2, $4, $2\n\tqmtc2.ni $2, " #vf "\n\t.set reorder" \
+    : : "r" (src) : "$2", "$3", "$4", "$5", "memory")
+
+/*
+ * Count the leading sign bits (minus one) of a word: plzcw out,in. Retail:
+ * DDS1 func_002CFEB8 / DDS2 func_00328D68 (power-of-two size class of an
+ * allocation: class = 27 - (plzcw(size - 1) & 0xFF) for sizes above 16).
+ * C has no equivalent (cc1 has no clz builtin), so the instruction is
+ * written directly; `out` may be the same variable as `in`.
+ */
+#define EE_MMI_PLZCW(out, in) __asm__ volatile ("plzcw %0, %1" : "=r"(out) : "r"(in))
+
 #endif

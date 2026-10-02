@@ -48,7 +48,7 @@ void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void));
 void sdfPrependPacketList(SdfListHead *list, SdfListHead *item);
 void func_002D5A68(SdfPacket *arg0, u32 arg1, s32 arg2, s64 arg3, s64 arg4, s64 arg5, u32 arg6, s32 arg7, s32 arg_sp0, s32 arg_sp8, s32 arg_sp10, s32 arg_sp18, s32 arg_sp20, s32 arg_sp28);
 void sdfDestroyObjectList();
-void func_002D4368(SdfListHead *previous, SdfListHead *item);
+void sdfConnectPacketLists(SdfListHead *previous, SdfListHead *item);
 void func_002D35B8();
 void func_002D4DD0();
 s32 sdfAllocPacketAligned(s32 size);
@@ -310,20 +310,20 @@ u64 sdfCheckPendingWorkWithInterrupts(void) {
 }
 
 extern s32 sdfDoubleBufferAllocation;
-extern void func_002D0918(s32);
-extern s32 func_002D03F8(s32);
+extern void sdfReleaseResourceAllocation(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 extern s32 sdfResourceRetainAddress(s32);
 
 /* Reallocate two adjacent, 128-byte-aligned packet workspaces. */
 void sdfResizeDoubleBuffer(s32 size) {
     s32 memory;
     if (sdfDoubleBufferAllocation != 0) {
-        func_002D0918(sdfDoubleBufferAllocation);
+        sdfReleaseResourceAllocation(sdfDoubleBufferAllocation);
         sdfDoubleBufferAllocation = 0;
     }
     size = (size + 0x7F) & ~0x7F;
     sdfPacketBufferSize = size;
-    sdfDoubleBufferAllocation = func_002D03F8(size * 2);
+    sdfDoubleBufferAllocation = sdfAllocGeneralBlock(size * 2);
     memory = sdfResourceRetainAddress(sdfDoubleBufferAllocation);
     sdfPacketBuffers[0] = memory;
     sdfPacketBuffers[1] = memory + size;
@@ -450,7 +450,7 @@ void sdfPrependPacketList(SdfListHead *list, SdfListHead *item) {
     if (head == NULL) {
         list->last = (u32)item;
     } else {
-        func_002D4368(item, head);
+        sdfConnectPacketLists(item, head);
     }
     item->unk0 = (u32)head;
     list->first = (u32)item;
@@ -466,7 +466,7 @@ void sdfAppendPacketList(SdfListHead *list, SdfListHead *item) {
         }
         else {
             *last = (s32)item;
-            func_002D4368(last, item);
+            sdfConnectPacketLists(last, item);
         }
         list->last = (u32)item;
     }
@@ -506,7 +506,7 @@ s32 sdfLinkReferenceDmaNode(s32 previous, u32 source) {
     return packet + 0x10;
 }
 
-void func_002D4368(SdfListHead *previous, SdfListHead *item) {
+void sdfConnectPacketLists(SdfListHead *previous, SdfListHead *item) {
     u32 head = previous->last;
     u32 source;
     u32 pending;
@@ -581,7 +581,7 @@ s32 sdfFlushPoolNodes(SdfPoolNode *node) {
         node->prepend(node, 0, NULL);
         if (node->first != 0) {
             if (head != 0) {
-                func_002D4368(tail, node->first);
+                sdfConnectPacketLists(tail, node->first);
             } else {
                 head = node->first;
                 sdfChainReferenceNodes((SdfListHead *)head);
@@ -1467,7 +1467,7 @@ void sdfEnsureFreeRootWorkspace(SdfFreeRoot *root) {
     }
 }
 
-extern void func_002D0918(s32 allocation);
+extern void sdfReleaseResourceAllocation(s32 allocation);
 extern void sdfReleaseChipBlock(void *allocation);
 
 void sdfFreeNodeLists(SdfFreeRoot *root) {
@@ -1479,7 +1479,7 @@ void sdfFreeNodeLists(SdfFreeRoot *root) {
         while (node != NULL) {
             SdfFreeNode *next = node->next;
             if (node->allocation != 0) {
-                func_002D0918(node->allocation);
+                sdfReleaseResourceAllocation(node->allocation);
             } else {
                 sdfReleaseChipBlock(node);
             }

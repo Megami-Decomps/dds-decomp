@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "mnu.h"
 extern s32 D_00437C9C;
 extern s32 func_002B8E30();
 extern s32 mnuScrollListToEnd();
@@ -698,17 +699,45 @@ void func_002C16D8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C16F0);
 
-void func_002C1B58(s32 state, s32 value) {
-    *(s32 *)(state + 4) = value;
-    *(s32 *)state = 0;
-    *(s32 *)(state + 8) = 0;
+typedef struct MenuGradientFade {
+    s32 active;
+    s32 color;
+    s32 blend;
+} MenuGradientFade;
+
+void func_002C1B58(MenuGradientFade *state, s32 color) {
+    state->color = color;
+    state->active = 0;
+    state->blend = 0;
 }
 
 void func_002C1B68(u32 *out, u32 value) {
     *out = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1B70);
+extern u32 uiBlendColors(u32, u32, u32);
+extern void func_003089B8(u32, u32, u32, u32, u32, u32, u32);
+
+void func_002C1B70(MenuGradientFade *state, s32 surface) {
+    s32 colors[4];
+    s32 color = state->color;
+
+    color = uiBlendColors(color, color & ~0xFF, state->blend);
+    panelSetVec4((u32 *)colors, 0, 0, color, color);
+
+    func_003089B8(0, 0x700, 0, 0x2000, 0x700, (u32)colors, surface);
+    if (state->active != 0) {
+        state->blend += 0x20;
+        if (state->blend > 0x100) {
+            state->blend = 0x100;
+        }
+    } else {
+        state->blend -= 0x20;
+        if (state->blend < 0) {
+            state->blend = 0;
+        }
+    }
+}
 
 void mnuDrawRepeatedPanelSprites(u8 *object, s32 x, s32 y, s32 depth, s32 count, s32 drawArg, s32 variant, s32 texture) {
     s32 i;
@@ -1752,8 +1781,8 @@ typedef struct BtlPermanentBonusUnit {
     u16 mpBonus;     /* 0x1E: added by ptyComputeMaxMp */
 } BtlPermanentBonusUnit;
 
-extern s32 func_001197C0(BtlPermanentBonusUnit *);
-extern s32 func_001198C0(BtlPermanentBonusUnit *);
+extern s32 datComputeSkillBoostedMaxHp(BtlPermanentBonusUnit *);
+extern s32 datComputeSkillBoostedMaxMp(BtlPermanentBonusUnit *);
 
 /* Apply a permanent stat/capacity item and refill eligible vitals.
  * Returns 0 for other items, 1 when accepted, or 2 when capped and already full. */
@@ -1834,8 +1863,8 @@ s32 btlItemApplyPermanentBonus(u16 item, BtlPermanentBonusUnit *unit) {
         }
     }
 
-    unit->maxHp = func_001197C0(unit);
-    unit->maxMp = func_001198C0(unit);
+    unit->maxHp = datComputeSkillBoostedMaxHp(unit);
+    unit->maxMp = datComputeSkillBoostedMaxMp(unit);
     if ((unit->statusFlags & 0x4000) == 0) {
         unit->currentMp = unit->maxMp;
         unit->currentHp = unit->maxHp;
@@ -2117,7 +2146,54 @@ void func_002C6758(s32 index, f32 *out) {
     out[2] = evtStageTestState.entries[index & 0xFFFF].rotation[2];
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6790);
+extern s32 kwlnGetDrawBufferIndex(void);
+extern void sdfCameraBuildProjection(void *);
+extern void sdfConsBuildMatrixPacket(void *packet, void *node, void *matrix);
+extern void sdfConsCacheTransformedNode(void *node, void *matrix);
+extern void sdfVuBuildLookAtBasis(void *, void *, void *);
+extern u8 D_003E7960[];
+extern u8 sdfViewTargetVector[];
+extern u8 sdfViewEyeVector[];
+extern u8 sdfViewUpVector[];
+extern u8 D_0037F590[];
+extern u8 sdfViewMatrix[];
+extern u8 D_003820F0[];
+extern void *memcpy(void *dest, const void *src, u32 size);
+extern u8 D_0042B528[];
+extern u8 D_0042B538[];
+extern u8 D_0042B548[];
+extern u8 D_0042B558[];
+extern void evtToggleSavedDrawVectors(s32 frames, f32 first, f32 second);
+extern void func_00107EF8(s32 mode, s32 slot, f32 *color);
+extern void func_00107FF8(s32 mode, s32 slot, f32 *color);
+extern void kwlnSetBackgroundColorTarget(s32 mode, f32 *color);
+extern void kwlnSetDrawColorTarget(s32 mode, f32 *color);
+extern void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w);
+
+void func_002C6790(void)
+{
+    f32 firstColor[4];
+    f32 secondColor[4];
+    f32 firstVector[4];
+    f32 secondVector[4];
+
+    memcpy(firstColor, D_0042B528, sizeof(firstColor));
+    memcpy(secondColor, D_0042B538, sizeof(secondColor));
+    memcpy(firstVector, D_0042B548, sizeof(firstVector));
+    memcpy(secondVector, D_0042B558, sizeof(secondVector));
+    evtToggleSavedDrawVectors(0, 5.0f, 0.0f);
+    func_00107EF8(0, 0, firstColor);
+    func_00107FF8(0, 0, secondColor);
+    kwlnSetBackgroundColorTarget(0, firstVector);
+    kwlnSetDrawColorTarget(0, secondVector);
+    evtSetDrawVectorTarget(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
+    sdfSceneProjectionParameters[3] = 0.7551905f;
+    PCP_COPY_VECTOR(sdfViewTargetVector, D_003E7950);
+    PCP_COPY_VECTOR(sdfViewEyeVector, D_003E7940);
+    PCP_COPY_VECTOR(sdfViewUpVector, D_003E7960);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    sdfConsCacheTransformedNode(sdfSceneProjectionParameters, sdfViewMatrix);
+}
 
 void func_002C6958(f32 value) {
     sdfSceneProjectionParameters[5] = 2048.0f;
@@ -2320,18 +2396,6 @@ void evtStageTestApplyEntryRotation(s32 model) {
     mdlUpdateContextRotationBasisFromQuaternion(model);
 }
 
-extern s32 kwlnGetDrawBufferIndex(void);
-extern void sdfCameraBuildProjection(void *);
-extern void sdfConsBuildMatrixPacket(void *packet, void *node, void *matrix);
-extern void sdfConsCacheTransformedNode(void *node, void *matrix);
-extern void sdfVuBuildLookAtBasis(void *, void *, void *);
-extern u8 D_003E7960[];
-extern u8 sdfViewTargetVector[];
-extern u8 sdfViewEyeVector[];
-extern u8 sdfViewUpVector[];
-extern u8 D_0037F590[];
-extern u8 sdfViewMatrix[];
-extern u8 D_003820F0[];
 
 /* vu0 routine: copies the stage-test camera vectors into the view work area, builds the look-at basis for eye 600 units along the view direction, and hands the matrix to the model packet at the current slot */
 void evtStageTestUpdateCamera(void)

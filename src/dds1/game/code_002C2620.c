@@ -38,18 +38,39 @@ extern void sdfQueueNonzeroResourceId(s32);
 extern void evtDestroySecondaryWorldNode(void);
 extern s32 D_003BD254;
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void *, void *, void *);
-extern s32 func_002C2F40();
+extern s32 fldLocalMapTrackSlotFromMode();
 extern s32 fldLmapTaskUpdate(void);
 extern s32 D_003BD23C;
 extern s32 D_003BD96C;
 extern void fldInitializeLmapState(void);
 extern s32 fldStartAndPollLocalMapTrack(void);
-extern void func_002C30F0(void);
+extern void fldInitializeLocalMapScene(void);
 extern s32 func_002C3220(void);
 extern void func_002C3420(void);
 extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void sndEnsureMidiBankResident(s32);
 extern s32 fldLocalMapTrackState;
+extern void evtCreateWorldObjectForKey(s32, s32);
+extern void dds3SetWorldObject(void *);
+extern void *dds3GetWorldSecondaryObject(void);
+extern void fldCreateLocalMapCamera(void);
+extern s32 mdlCollectLowFlagBits(void);
+extern s32 fldCountMaskBitsBeforeOrdinal(s32, s32);
+extern s32 sdfCreateMaskedCounterChannels(s32, s32);
+extern s32 func_002C38B0(s32);
+extern void func_002C3AC8(s32, s32);
+extern s32 fldLoadLocalMapResources();
+extern void fldCreateMapRequestQueues(void);
+extern u32 sdfReadNamedResource(const char *, u32 *, u32 *);
+extern void fldApplyLightSetIndex(s32);
+extern void fldInitializeCameraColorResource(void);
+extern void func_002CF420(void);
+extern void sndStartTrackDefault(s32);
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
+extern void sdfCounterInitializeDisplayAnimation(void);
+extern u32 D_003BA8EC;
+extern s32 D_003BD240;
+extern u32 D_003BD258;
 
 /* Ring window over a doubly linked node list (prev at 0x18, next at 0x1C). */
 typedef struct LmapNode {
@@ -68,11 +89,17 @@ typedef struct LmapList {
     LmapNode *lo;    /* 0x14 */
     LmapNode *cur;   /* 0x18 */
     LmapNode *hi;    /* 0x1C */
+    s32 x;
+    s32 y;
+    s32 width;
+    s32 height;
 } LmapList;
 
 extern LmapNode *sdfGridSeekFirstNode(LmapList *);
 extern LmapNode *sdfGridSeekLastNode(LmapList *);
 extern LmapNode *fldLmapAdvanceWindowStart(LmapList *);
+extern u32 itfGetGridListLinkFlags(LmapList *);
+extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
 
 LmapNode *fldLmapAdvanceWindowStart(LmapList *list) {
@@ -197,7 +224,29 @@ LmapNode *fldLmapRewindThroughWindow(LmapList *list) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C28E0);
+void fldLocalMapDrawScrollIndicators(s32 offsetX, s32 offsetY, s32 z, u32 color,
+                   LmapList *list, s32 channel) {
+    s32 coordinates[2][3];
+    u32 flags = itfGetGridListLinkFlags(list);
+    s32 halfWidth = list->width / 2;
+    s32 baseX = list->x + offsetX;
+    coordinates[0][0] = baseX + (halfWidth << 4);
+    coordinates[0][1] = baseX + ((halfWidth - 4) << 4);
+    coordinates[0][2] = baseX + ((halfWidth + 4) << 4);
+    if (flags & 1) {
+        s32 baseY = list->y + offsetY;
+        coordinates[1][0] = baseY - 64;
+        coordinates[1][2] = coordinates[1][1] = baseY - 24;
+        uiDrawUniformRgbRange(coordinates[0], coordinates[1], z, color, channel);
+    }
+    if (flags & 2) {
+        s32 height = list->height;
+        s32 baseY = list->y + offsetY;
+        coordinates[1][0] = baseY + ((height + 8) << 3);
+        coordinates[1][2] = coordinates[1][1] = baseY + ((height + 4) << 3);
+        uiDrawUniformRgbRange(coordinates[0], coordinates[1], z, color, channel);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2A20);
 
@@ -250,7 +299,7 @@ s32 fldLmapTaskUpdate(void) {
         return 0;
     }
     if (state == 1) {
-        func_002C30F0();
+        fldInitializeLocalMapScene();
         D_003BD96C = 2;
         return 0;
     }
@@ -269,7 +318,7 @@ s32 fldLmapTaskUpdate(void) {
 
 void fldStartLmapTask(s32 arg0) {
     if (arg0 != 0) {
-        D_003BD23C = func_002C2F40();
+        D_003BD23C = fldLocalMapTrackSlotFromMode();
     } else {
         D_003BD23C = 1;
     }
@@ -294,7 +343,7 @@ void func_002C2EF8(const char *fmt, ...) {
  * range with no arm of their own, so they fall through to the default of 1. */
 INCLUDE_RODATA(const s32, "game/code_002C2620", fldLocalMapTaskName);
 
-s32 func_002C2F40(s32 index) {
+s32 fldLocalMapTrackSlotFromMode(s32 index) {
     s32 slot = 1;
 
     switch (index - 2) {
@@ -375,7 +424,42 @@ s32 fldStartAndPollLocalMapTrack(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C30F0);
+void fldInitializeLocalMapScene(void) {
+    s32 mask;
+    s32 flags;
+    s32 index;
+
+    if (mdlFlagTest(0x27)) {
+        evtCreateWorldObjectForKey(1, 2);
+    } else {
+        evtCreateWorldObjectForKey(1, 1);
+    }
+    mask = 0x3FF;
+    dds3SetWorldObject(NULL);
+    fldCreateLocalMapCamera();
+    dds3SetWorldObject(dds3GetWorldSecondaryObject());
+    D_003BA8EC = 0x80000000;
+    flags = mdlCollectLowFlagBits();
+    if (flags != 0) {
+        mask = flags;
+    }
+    index = fldCountMaskBitsBeforeOrdinal(mask, D_003BD23C);
+    D_003BD240 = index;
+    sdfCreateMaskedCounterChannels(mask, index);
+    func_002C3AC8(D_003BD240, func_002C38B0(mask));
+    fldLoadLocalMapResources(mask);
+    fldCreateMapRequestQueues();
+    dspCloseChannel();
+    D_003BD254 = sdfReadNamedResource("/lmap/lmpmsg.bmd", &D_003BD258, NULL);
+    evtCreateMessageWindowIfMissing(D_003BD258);
+    evtSetSolarOverlayFullyVisible();
+    fldApplyLightSetIndex(1);
+    fldInitializeCameraColorResource();
+    func_002CF420();
+    sndStartTrackDefault(0x400001);
+    kwlnFadeOutStart(255, 255, 255, 30);
+    sdfCounterInitializeDisplayAnimation();
+}
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3220);
 

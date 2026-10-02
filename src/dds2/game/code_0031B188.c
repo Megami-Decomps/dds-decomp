@@ -66,7 +66,7 @@ void mnuDeactivateModelNode(s32 node);
 
 extern u8 *func_00232198(s32 first, s32 second);
 extern void mdlAddEntryFlaggedEx(u8 *model, s32 entry, s32 flags, f32 x, f32 y);
-extern u32 func_003292A8(s32 bytes);
+extern u32 sdfAllocGeneralBlock(s32 bytes);
 extern u32 *sdfMemoryGetBlockAddress(u32 handle);
 
 extern u8 D_0040ABD0[];
@@ -97,7 +97,7 @@ void dds3InitSoundSlotPool(void) {
     if (dds3SoundSlotPool != 0) {
         dds3ReleaseSoundSlotPool();
     }
-    handle = func_003292A8(0x32c);
+    handle = sdfAllocGeneralBlock(0x32c);
     dds3SoundSlotPool = sdfMemoryGetBlockAddress(handle);
     memset(dds3SoundSlotPool, 0, 0x32c);
     pool = (SoundSlotPool *)dds3SoundSlotPool;
@@ -108,7 +108,7 @@ void dds3InitSoundSlotPool(void) {
 
 void dds3ReleaseSoundSlotPool(void) {
     if (dds3SoundSlotPool != (u32 *)0x0) {
-        func_003297C8(*dds3SoundSlotPool);
+        sdfReleaseResourceAllocation(*dds3SoundSlotPool);
         dds3SoundSlotPool = (u32 *)0x0;
     }
 }
@@ -170,7 +170,7 @@ void func_0031B3C8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B3D0);
 
-MnuEffectWork *func_0031B4F0(s32 count, s32 *counts) {
+MnuEffectWork *mnuCreateEffectWork(s32 count, s32 *counts) {
     s32 listBytes = count * 8;
     s32 size = listBytes + 16;
     s32 i;
@@ -181,7 +181,7 @@ MnuEffectWork *func_0031B4F0(s32 count, s32 *counts) {
 
     for (i = 0; i < count; i++) size += counts[i] * 32;
     evtPrintDeveloperConsoleMessage("EffectWork Object Size %d\n", size);
-    handle = func_003292A8(size);
+    handle = sdfAllocGeneralBlock(size);
     work = (MnuEffectWork *)sdfMemoryGetBlockAddress(handle);
     memset(work, 0, size);
     work->handle = handle;
@@ -260,7 +260,7 @@ u32 mnuLoadNodeModelFromResource(u32 *owner, u32 resource) {
     u32 data = sdfReadNamedResource(resource, &handle, &other);
     *owner = func_002D4138(handle);
     fileQueueNotifyAllJobsComplete(*owner);
-    func_003297C8(data);
+    sdfReleaseResourceAllocation(data);
     return *owner;
 }
 

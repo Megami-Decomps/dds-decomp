@@ -109,7 +109,7 @@ typedef struct ParSystem {
     s32 unk28;           /* 0x28 */
 } ParSystem;
 
-extern void func_00163518(ParSystem *, s32, const u128 *);
+extern void parUpdateCellVertexPair(ParSystem *, s32, const u128 *);
 extern void func_00163628(ParSystem *, s32, const u128 *);
 
 extern s32 parObjGetMode();
@@ -382,7 +382,7 @@ void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color) {
     VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[1]);
 ;
-    func_00163518((ParSystem *)particle, index, axis);
+    parUpdateCellVertexPair((ParSystem *)particle, index, axis);
     parFadeAlphaCell(particle, index);
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
@@ -464,7 +464,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00162E48);
 void parReleaseAssetRecord(ParReleaseRecord *record) {
     record->released = 1;
     sdfQueueAssetRelease(record->asset);
-    func_003297C8(record->allocation);
+    sdfReleaseResourceAllocation(record->allocation);
 }
 
 void parPrependRecordListNode(ParListNode *node) {
@@ -530,7 +530,7 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
     }
     total = count * perCell;
     cellsSize = (total + count) * 0x14;
-    handle = func_003292A8(cellsSize + 0x2C);
+    handle = sdfAllocGeneralBlock(cellsSize + 0x2C);
     base = sdfResourceRetainAddress(handle);
     system = (ParSystem *)(base + cellsSize);
     memset(system, 0, 0x2C);
@@ -560,7 +560,7 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
 
 void parReleaseCellSystem(ParSystem *system) {
     sdfQueueAssetRelease(system->object);
-    func_003297C8(system->handle);
+    sdfReleaseResourceAllocation(system->handle);
 }
 
 void parCellInit(ParSystem *system, s32 index) {
@@ -576,7 +576,7 @@ void parPrependCellNode(ParCellNode *node) {
     D_00436404 = node;
 }
 
-void func_00163518(ParSystem *system, s32 index, const u128 *vertices) {
+void parUpdateCellVertexPair(ParSystem *system, s32 index, const u128 *vertices) {
     ParCell *cell = &system->cells[index];
     u128 *vertex;
     s32 shiftCount;
@@ -1093,7 +1093,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00164CB0);
 ParBlock *parAllocateDrawBlock(s32 count) {
     s32 points = count * 3;
     s32 colorBytes = points * 4;
-    s32 handle = func_003292A8((colorBytes + points) * 4 + 0x18);
+    s32 handle = sdfAllocGeneralBlock((colorBytes + points) * 4 + 0x18);
     s32 base = sdfResourceRetainAddress(handle);
     u8 *vertices = (u8 *)base + points * 16;
     ParBlock *block = (ParBlock *)(vertices + colorBytes);
@@ -1109,7 +1109,7 @@ ParBlock *parAllocateDrawBlock(s32 count) {
 
 void parReleaseDrawBlock(ParBlock *block) {
     sdfQueueAssetRelease(block->object);
-    func_003297C8(block->handle);
+    sdfReleaseResourceAllocation(block->handle);
 }
 
 void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParDrawCmd *cmd) {

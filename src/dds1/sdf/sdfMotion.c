@@ -361,7 +361,7 @@ void sdfMotionInitializeAtZeroTime(void *a0, s32 a1, s32 a2) {
 }
 
 
-void func_002DB538(Motion *motion, f32 frame) {
+void sdfMotionSampleAtFrame(Motion *motion, f32 frame) {
     s32 i;
     s32 count;
     f32 elapsed;
@@ -499,7 +499,7 @@ f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *a0) {
 }
 
 /* vu0 routine: blend the two bracketing vec3 keys by the key weight into vf10. */
-void func_002DB900(SdfMotionKeyInterval *a0) {
+void sdfMotionBlendVectorKeys(SdfMotionKeyInterval *a0) {
     VU0_LERP_VEC3_KEYS(a0->firstKey, a0->secondKey, a0->weight);
 }
 

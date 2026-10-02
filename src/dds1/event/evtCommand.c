@@ -792,7 +792,7 @@ s32 evtCommandStartPolygonMovie(void) {
     }
     a = scrReadIntParameter(0);
     b = scrReadIntParameter(1);
-    result = func_00234F18(work->campTask->resource, a, b);
+    result = evtViewerCreateTask(work->campTask->resource, a, b);
     evtPrintDeveloperConsoleMessage(D_003AC9E0, scrReadIntParameter(0), scrReadIntParameter(1));
     func_00101A80((s32)work->campTask, result);
     evtPolygonMovieSetFlagBits(result, 1);
@@ -825,7 +825,7 @@ s32 evtCommandCreatePolygonMovie(void) {
     }
     a = scrReadIntParameter(0);
     b = scrReadIntParameter(1);
-    result = func_00234F18(work->campTask->resource, a, b);
+    result = evtViewerCreateTask(work->campTask->resource, a, b);
     func_00101A80((s32)work->campTask, result);
     scrSetIntegerReturnValue(result);
     return 1;

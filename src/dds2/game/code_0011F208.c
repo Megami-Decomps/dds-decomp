@@ -134,7 +134,7 @@ extern u32 D_00435F40;
 
 extern u32 D_00435F3C;
 
-extern u32 func_003292A8(u32);
+extern u32 sdfAllocGeneralBlock(u32);
 
 extern void *sdfMemoryGetBlockAddress(u32);
 
@@ -1615,7 +1615,7 @@ void fldPrepareResourceBuffer(void) {
     void *buffer;
     func_001258B8();
     D_00435F40 = D_00435F44;
-    D_00435F38 = func_003292A8(D_00435F44);
+    D_00435F38 = sdfAllocGeneralBlock(D_00435F44);
     source = sdfMemoryGetBlockAddress(fldPlayerModelResource);
     buffer = sdfMemoryGetBlockAddress(D_00435F38);
     memcpy(buffer, source, D_00435F40);

@@ -1,15 +1,15 @@
 #include "common.h"
 #include "eff.h"
 
-extern void func_002D0918(void *resource);
+extern void sdfReleaseResourceAllocation(void *resource);
 
 /* Release the resources held by the primitive's two resource slots. */
 void itfPanelReleasePrimitiveResources(EffPrim *primitive) {
     if (primitive != NULL) {
         if (primitive->recordCount != 0) {
-            func_002D0918(primitive->secondaryResource);
+            sdfReleaseResourceAllocation(primitive->secondaryResource);
         }
-        func_002D0918(primitive->primaryResource);
+        sdfReleaseResourceAllocation(primitive->primaryResource);
     }
 }
 

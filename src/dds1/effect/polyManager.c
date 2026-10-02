@@ -133,7 +133,7 @@ void parReleaseCellSystem(PolyStrip *strip);
 void parPrependCellNode(PolyStrip *strip);
 void func_0015DAA0(void);
 void sdfReleaseChipBlock(void *arg);
-void func_002D0918(u32 handle);
+void sdfReleaseResourceAllocation(u32 handle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern void func_002DD608(f32 angle);
@@ -226,7 +226,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015DFA8);
 /* Release the band's cell system and backing allocation handle, not the node itself. */
 void polyReleaseBandNodeResources(PolyBand *obj) {
     parReleaseCellSystem(obj->strip);
-    func_002D0918(obj->allocation);
+    sdfReleaseResourceAllocation(obj->allocation);
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015E100);
@@ -373,7 +373,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015E760);
 /* Release the arc's cell system and backing allocation handle, leaving the node alive. */
 void polyReleaseNodeCellSystemAndBuffer(PolyArc *obj) {
     parReleaseCellSystem(obj->strip);
-    func_002D0918(obj->allocation);
+    sdfReleaseResourceAllocation(obj->allocation);
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015E8B8);
@@ -450,7 +450,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015ED90);
 /* Release the rotating band's cell system and backing allocation handle, not the node. */
 void polyReleaseCellBoundNodeResources(PolyRotatingBand *obj) {
     parReleaseCellSystem(obj->strip);
-    func_002D0918(obj->allocation);
+    sdfReleaseResourceAllocation(obj->allocation);
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015EEF0);

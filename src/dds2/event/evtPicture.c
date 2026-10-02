@@ -21,7 +21,7 @@ extern PicturePacketDevice D_003805A8;
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(s32 packet);
 extern void itfSendTablePacket(s32 packet, s32 index, s32 flag);
-extern void func_001A0CA0(void *, void *, void *, s32, s32, s32, s32);
+extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, s32, s32, s32);
 
 void evtSubmitPictureDrawPacket(void *texture) {
     s32 packet;
@@ -29,7 +29,7 @@ void evtSubmitPictureDrawPacket(void *texture) {
     packet = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
     itfSendTablePacket(packet, 0, 0);
-    func_001A0CA0(D_003C9498, D_003C94A8, D_003C94B8, 0xFFF, (s32)texture, 0, packet);
+    itfQueueTextureBoundQuadPacket(D_003C9498, D_003C94A8, D_003C94B8, 0xFFF, (s32)texture, 0, packet);
     D_003805A8.invoke(&D_003805A8, packet);
 }
 

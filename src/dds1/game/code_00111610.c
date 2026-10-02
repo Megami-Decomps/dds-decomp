@@ -101,7 +101,7 @@ u32 dds3GetObjectResourceHandle(ObjectWithResource *object) {
 }
 
 void func_00111740(void) {
-    func_00111478();
+    dds3UpdateMoverTransform();
 }
 
 /* Number of slots a given object kind occupies in the slot ring. */

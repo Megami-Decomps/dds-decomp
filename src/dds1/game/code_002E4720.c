@@ -97,7 +97,7 @@ extern s32 SignalSema(s32 sema);
 extern s32 WaitSema(s32 sema);
 extern s32 ChangeThreadPriority(s32 tid, s32 prio);
 extern void sdfDevUnlinkAndFreeState(DevState *arg0);
-extern void func_002E5F08(DevState *arg0);
+extern void sdfDevRecycleCompletedState(DevState *arg0);
 extern DevState *sdfDevCreateCallbackState(s32 arg0,
                                 void (*callback)(DevState *, s32, s32, s32, s32), s32 arg2);
 extern s32 func_0030EB78(s32 arg0);
@@ -110,7 +110,7 @@ extern void sdfPanicHaltPrintf(const char *arg0, ...) __attribute__((noreturn));
 extern void *func_002CFEB8(s32 size);
 extern void sdfReleaseChipBlock(void *ptr);
 extern void *sdfAllocAndClearQuadwords(s32 size);
-extern s32 func_002D03F8(s32 size);
+extern s32 sdfAllocGeneralBlock(s32 size);
 extern void func_002D0750(s32 arg0, s32 arg1);
 extern s32 sdfResourceRetainAddress(s32 arg0);
 extern void sdfDecrementAllocationReferenceCount(s32 arg0);
@@ -684,7 +684,7 @@ void sdfDevUnlinkAndFreeState(DevState *state) {
 }
 
 
-void func_002E5F08(DevState *state) {
+void sdfDevRecycleCompletedState(DevState *state) {
     DevWorkerEntry *worker;
     DevState *prev;
     DevState *next;
@@ -744,7 +744,7 @@ void sdfDevRelease(DevState *state) {
     if (id >= 0) {
         func_0030EB78(id);
     }
-    func_002E5F08(state);
+    sdfDevRecycleCompletedState(state);
 }
 
 void sdfDevDeactivate(DevState *state, s32 result) {
@@ -1071,7 +1071,7 @@ DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 mode) {
     request->count = count;
     request->stride = stride;
     if (count != 0) {
-        request->handle = func_002D03F8(stride * count);
+        request->handle = sdfAllocGeneralBlock(stride * count);
         request->buffer = sdfResourceRetainAddress(request->handle);
     } else {
         request->handle = 0;
@@ -1081,7 +1081,7 @@ DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 mode) {
 }
 
 void sdfDestroyDevRequest(DevRequest *request) {
-    func_002D0918(request->handle);
+    sdfReleaseResourceAllocation(request->handle);
     sdfReleaseChipBlock(request);
 }
 
@@ -1102,11 +1102,11 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 count) {
     if (request->handle == 0) {
         if (count > 0) {
             request->count = count;
-            request->handle = func_002D03F8(request->stride * count);
+            request->handle = sdfAllocGeneralBlock(request->stride * count);
             request->buffer = sdfResourceRetainAddress(request->handle);
         }
     } else if (count <= 0) {
-        func_002D0918(request->handle);
+        sdfReleaseResourceAllocation(request->handle);
         request->handle = 0;
         request->flags = 0;
         request->count = 0;

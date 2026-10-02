@@ -189,7 +189,7 @@ extern u8 D_00437B88;
 extern u16 D_003E6730[];
 extern s32 mdlFlagTest(s32);
 
-s32 func_002AB598(void) {
+s32 mtrHasEnoughOwnedMantras(void) {
     s32 owned = 0;
     s32 required = D_00437B6E;
     s32 i;

@@ -514,14 +514,14 @@ typedef struct {
     u32 handle;
 } ParamThunderWork;
 
-extern u32 func_002D03F8(s32 size);
+extern u32 sdfAllocGeneralBlock(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
 extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void func_0015CEF8(void *system, u32 arg1, u32 arg2, u32 arg3);
 extern void func_0015D078(void *system, u32 value);
 
 ParamThunderWork *effCreateThunderCellSystemWork(ParamThunderHead *src) {
-    u32 handle = func_002D03F8(src->count * sizeof(ParamThunderCell) + sizeof(ParamThunderWork));
+    u32 handle = sdfAllocGeneralBlock(src->count * sizeof(ParamThunderCell) + sizeof(ParamThunderWork));
     ParamThunderWork *work = (ParamThunderWork *)sdfResourceRetainAddress(handle);
     u32 i;
 

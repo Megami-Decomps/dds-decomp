@@ -281,7 +281,7 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BCF0);
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BD10);
 
-s32 func_0030BED8(void) {
+s32 sdfStepSelectedMapCameraTransition(void) {
     f32 t;
     s32 index = D_004388C1;
 

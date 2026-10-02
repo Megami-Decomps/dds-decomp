@@ -268,7 +268,7 @@ void itfDrawIndexedPanelFlatQuads(PanelObj *panel, u64 command) {
     }
 }
 
-void func_0019A200(PanelObj *panel, u64 command) {
+void itfDrawSevenColorPanelQuads(PanelObj *panel, u64 command) {
     PktRec *buf = panel->buf;
     PktRec *colors = buf + 21;
     s32 alpha = panel->alpha;
@@ -286,7 +286,7 @@ void func_0019A200(PanelObj *panel, u64 command) {
     }
 }
 
-void func_0019A310(PanelObj *panel, u64 command) {
+void itfDrawFiveColorPanelQuads(PanelObj *panel, u64 command) {
     PktRec *buf = panel->buf;
     PktRec *colors = buf + 17;
     s32 alpha = panel->alpha;

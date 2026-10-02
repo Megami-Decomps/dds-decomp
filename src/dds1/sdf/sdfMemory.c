@@ -48,7 +48,7 @@ u32 sdfMemoryGetBlockAddress(MemBlock *block) {
 }
 
 /* First-fit allocation of `size` bytes (rounded up to 128) from the general heap: the first free block that is large enough is split if it is bigger than needed and marked used. Running into the end marker calls the out-of-memory hook. */
-MemBlock *func_002D03F8(s32 size) {
+MemBlock *sdfAllocGeneralBlock(s32 size) {
     MemHeap *heap = &D_003E2748;
     s32 alignedSize = (size + 0x7F) & ~0x7F;
     s32 interruptsDisabled;
@@ -91,7 +91,7 @@ MemBlock *func_002D03F8(s32 size) {
 }
 
 /* Allocation of `size` bytes (rounded up to 128) from the high end of the general heap: walk back from the tail to the first free block that is large enough and carve the request off its upper end. */
-MemBlock *func_002D0518(s32 size) {
+MemBlock *sdfAllocGeneralBlockHigh(s32 size) {
     MemHeap *heap = &D_003E2748;
     s32 alignedSize = (size + 0x7F) & ~0x7F;
     s32 interruptsDisabled;
@@ -131,8 +131,8 @@ MemBlock *func_002D0518(s32 size) {
     }
 }
 
-/* Same first-fit allocation as func_002D03F8 but without the out-of-memory hook: returns NULL when the end marker is reached. */
-MemBlock *func_002D0648(s32 size) {
+/* Same first-fit allocation as sdfAllocGeneralBlock but without the out-of-memory hook: returns NULL when the end marker is reached. */
+MemBlock *sdfTryAllocGeneralBlock(s32 size) {
     MemHeap *heap = &D_003E2748;
     s32 alignedSize = (size + 0x7F) & ~0x7F;
     s32 interruptsDisabled;

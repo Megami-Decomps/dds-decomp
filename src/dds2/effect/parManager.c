@@ -95,6 +95,17 @@ typedef struct {
 } ParObj; /* 0x150 */
 
 typedef struct {
+    s32 nextIndex;
+    s32 count;
+    f32 (*points)[3];
+} ParHistory;
+
+typedef struct {
+    ParHistory *records;
+    s32 capacity;
+} ParHistoryTable;
+
+typedef struct {
     ParObj head;
     u8 axisMode;                 /* 0x150 */
     u8 loop;                     /* 0x151: rearm expired particles */
@@ -105,7 +116,7 @@ typedef struct {
     f32 targetRadius;
     f32 initialRadiusJitter;
     f32 targetRadiusJitter;
-    u8 pad16C[8];
+    ParHistoryTable history;
     u32 childHandle;             /* 0x174: additional owned allocation */
     f32 previousOrigin[3];       /* 0x178: native updater caches origin here */
 } ParBurstEmitter; /* 0x184 */
@@ -127,7 +138,7 @@ extern ParDispatch D_003AAB88[];
 /* Release the radial emitter's extra allocation, shared resources, and block. */
 void parReleaseObject(ParBurstEmitter *obj) {
     if (obj->childHandle != 0) {
-        func_003297C8(obj->childHandle);
+        sdfReleaseResourceAllocation(obj->childHandle);
     }
     effDestroyResources(obj);
     sdfReleaseChipBlock(obj);
@@ -275,12 +286,46 @@ INCLUDE_ASM(const s32, "effect/parManager", func_001617F8);
 
 /* Release the slot table's allocation handle, not a separate node object. */
 void effParReleaseNodeResource(ParTable *table) {
-    func_003297C8(table->resource);
+    sdfReleaseResourceAllocation(table->resource);
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_001618E0);
 
-INCLUDE_ASM(const s32, "effect/parManager", func_00161958);
+void func_00161958(ParTable *table, s32 slotIndex, const f32 *origin, u32 color,
+                   ParHistoryTable *source, f32 scale) {
+    f32 localOrigin[4];
+    ParHistory *history;
+    ParSlot *slot;
+    f32 (*destination)[4];
+    s32 count;
+    s32 capacity;
+    s32 index;
+
+    PCP_COPY_VECTOR(localOrigin, origin);
+    history = &source->records[slotIndex];
+    slot = &table->slots[slotIndex];
+    count = history->count;
+    capacity = source->capacity;
+    slot->pointCount = count;
+    destination = (f32 (*)[4])slot->points;
+    index = history->nextIndex;
+    if (count > 0) {
+        f32 (*points)[3] = history->points;
+        s32 lastIndex = capacity - 1;
+        s32 remaining = count;
+
+        do {
+            --remaining;
+            index = index == 0 ? lastIndex : index - 1;
+            (*destination)[0] = localOrigin[0] + points[index][0];
+            (*destination)[1] = localOrigin[1] + points[index][1];
+            (*destination)[2] = localOrigin[2] + points[index][2];
+            ++destination;
+        } while (remaining != 0);
+    }
+    slot->color = color;
+    slot->billboardScale = scale;
+}
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00161A10);
 

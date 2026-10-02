@@ -506,7 +506,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00236180);
 
 extern void func_00236180();
 extern void func_00237130();
-extern s32 func_001037C0(s32, s32, s32, s32, s32, s32, s32, s32, u8 *);
+extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32, s32, s32, u8 *);
 
 s32 mnuDrawInfoWindowA(s32 x, s32 y, u8 *work) {
     u32 packets = sdfCreateResetPacketList();
@@ -515,7 +515,7 @@ s32 mnuDrawInfoWindowA(s32 x, s32 y, u8 *work) {
     if (((EvtRuntime *)work)->actionMode != 1) {
         return 0;
     }
-    return func_001037C0(0, 1, 0xB, 1, 0xB, 0, 0, 0, work + 0x22A8);
+    return kwlnStepTwoListCursors(0, 1, 0xB, 1, 0xB, 0, 0, 0, work + 0x22A8);
 }
 
 extern char D_003BC088[];
@@ -574,7 +574,7 @@ s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtDrawWork *work) {
     if (work->mode != 2) {
         return 0;
     }
-    return func_001037C0(0, 1, work->itemCount, 1, work->itemCount, 0, 0, 0, (u8 *)work + 0x22BC);
+    return kwlnStepTwoListCursors(0, 1, work->itemCount, 1, work->itemCount, 0, 0, 0, (u8 *)work + 0x22BC);
 }
 
 s32 evtDrawInputValueRow(s32 list, s32 x, s32 y, u8 *ctx) {
@@ -772,7 +772,7 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, u8 *work) {
     if (count < 0x1D) {
         shown = count;
     }
-    return func_001037C0(0, 1, count, 1, shown, 0, (s32)(work + 0x22F8), 0, work + 0x22F4);
+    return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, (s32)(work + 0x22F8), 0, work + 0x22F4);
 }
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00237428);
@@ -914,7 +914,7 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, u8 *work) {
     if (((EvtRuntime *)work)->actionMode != 0xC) {
         return 0;
     }
-    return func_001037C0(0, 1, rows, 1, rows, 0, 0, 0, work + 0x22B8);
+    return kwlnStepTwoListCursors(0, 1, rows, 1, rows, 0, 0, 0, work + 0x22B8);
 }
 
 typedef struct EvtMessageWindow {

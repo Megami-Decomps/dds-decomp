@@ -237,7 +237,7 @@ extern u8 D_00436C58[];
 
 extern void sdfTexReleaseReferenceViaHandler(s32);
 
-extern void func_003297C8(s32);
+extern void sdfReleaseResourceAllocation(s32);
 
 void btlReplaceResourceHandle(BtlResourceDescriptor *, s32);
 
@@ -517,7 +517,7 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
 }
 
 /* vu0 routine: returns the selected muzzle position in vf10. */
-BtlUnit *func_00208BF0(BtlUnit *reference, s32 actor) {
+BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *reference, s32 actor) {
     BtlVec4 position, selectedPosition;
     BtlUnit *selected = NULL;
     BtlUnit *unit;
@@ -2113,7 +2113,7 @@ u32 func_0020C688(void) {
     return 1;
 }
 
-u32 func_0020C690(void) {
+u32 btlCmdRunWeightedAiSelection(void) {
     btlRunRandomWeightedAiTableAction(func_0010D8D0());
     return 1;
 }
@@ -2270,37 +2270,37 @@ u32 btlAiGetFurea(void) {
     return 1;
 }
 
-u32 func_0020CC40(void) {
+u32 btlCmdReportUnsupportedCameraOrigin(void) {
     btlBossDebugPrintf(D_004195D8);
     return 1;
 }
 
-u32 func_0020CC68(void) {
+u32 btlCmdReportUnsupportedCameraTwoShot(void) {
     btlBossDebugPrintf(D_004195F8);
     return 1;
 }
 
-u32 func_0020CC90(void) {
+u32 btlCmdReportUnsupportedCameraBougai(void) {
     btlBossDebugPrintf(D_00419620);
     return 1;
 }
 
-u32 func_0020CCB8(void) {
+u32 btlCmdReportUnsupportedEvent(void) {
     btlBossDebugPrintf(D_00419648);
     return 1;
 }
 
-u32 func_0020CCE0(void) {
+u32 btlCmdReportUnsupportedTaikyo(void) {
     btlBossDebugPrintf(D_00419668);
     return 1;
 }
 
-u32 func_0020CD08(void) {
+u32 btlCmdReportUnsupportedAllTaikyo(void) {
     btlBossDebugPrintf(D_00419688);
     return 1;
 }
 
-u32 func_0020CD30(void) {
+u32 btlCmdClearSpecialEnemyFlags(void) {
     btlClearSpecialEnemyEntryFlags();
     return 1;
 }
@@ -2785,7 +2785,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) 
     }
     buffer = sdfReadNamedResource(name, &loaded, 0);
     btlReplaceResourceHandle(resource, loaded);
-    func_003297C8(buffer);
+    sdfReleaseResourceAllocation(buffer);
 }
 
 void btlReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) {

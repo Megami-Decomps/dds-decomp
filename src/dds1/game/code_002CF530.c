@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern void func_002D00B8(void *);
-extern void *func_002D0A80(void *);
+extern void *sdfFindGeneralBlockByAddress(void *);
 extern void sdfQueueNonzeroResourceId(void *);
 
 extern s32 sdfChipIsInRange(void *);
@@ -12,7 +12,7 @@ extern void (*sdfTickCallback)(void);
 
 extern void *sdfResourceRetainAddress(void *);
 
-extern void *func_002D03F8(void);
+extern void *sdfAllocGeneralBlock(void);
 
 extern void *func_002CFEB8();
 
@@ -20,7 +20,7 @@ extern u32 D_003BD2CC;
 
 void *sdfAllocateBlockBySizeThreshold(s32 size) {
     if (size >= 0x401) {
-        return sdfResourceRetainAddress(func_002D03F8());
+        return sdfResourceRetainAddress(sdfAllocGeneralBlock());
     }
     return func_002CFEB8(size);
 }
@@ -42,7 +42,7 @@ void sdfReleaseChipOrRetainedResource(void *data) {
             func_002D00B8(data);
             return;
         }
-        sdfQueueNonzeroResourceId(func_002D0A80(data));
+        sdfQueueNonzeroResourceId(sdfFindGeneralBlockByAddress(data));
     }
 }
 

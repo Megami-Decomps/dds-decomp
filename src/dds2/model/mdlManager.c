@@ -121,7 +121,7 @@ typedef struct MdlSlot {
     s16 value4;     /* 0x4 */
     s16 value6;     /* 0x6 */
     u32 first;      /* 0x8 */
-    u32 resource;   /* 0xC: released through func_003297C8 */
+    u32 resource;   /* 0xC: released through sdfReleaseResourceAllocation */
 } MdlSlot;
 
 typedef struct MdlSlotOwner {
@@ -133,7 +133,7 @@ typedef struct MdlSlotOwner {
     MdlSlot slots[1];   /* 0x20 */
 } MdlSlotOwner;
 
-extern void func_003297C8();
+extern void sdfReleaseResourceAllocation();
 
 /* Release slot `index`: destroy its motions in every context and free the attached resource.
    K&R definition: the caller below passes u64 values. */
@@ -152,7 +152,7 @@ void mdlReleaseOwnerSlotResources(owner, index)
         }
         if (owner->hasResources != 0) {
             if (owner->slots[index].resource != 0) {
-                func_003297C8(owner->slots[index].resource);
+                sdfReleaseResourceAllocation(owner->slots[index].resource);
             }
         }
         owner->slots[index].first = 0;
@@ -250,6 +250,6 @@ void mdlRecordLoadedSizeAndReleaseHandle(u64 resource, s32 destination) {
     resolved = sndBuildResourceHandleListFromOffsets(handle);
     *(u32 *)(destination + 0xc) = resolved;
     handle = fileGetResourceHandle(resource);
-    func_003297C8(handle);
+    sdfReleaseResourceAllocation(handle);
     filePollEntryCleanup(resource);
 }

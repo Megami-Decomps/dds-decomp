@@ -114,9 +114,9 @@ void sdfPacAdvanceAllocationEntry(PacState *state);
 
 void sdfPacResetOutputToAllocationEntry(PacState *state);
 
-s32 func_003293C8(s32 size);
+s32 sdfAllocGeneralBlockHigh(s32 size);
 
-s32 func_003292A8(s32 size);
+s32 sdfAllocGeneralBlock(s32 size);
 
 void sdfStoreWordAndSetState(void *decoder, void *destination);
 
@@ -278,9 +278,9 @@ void sdfPacStartPacketPayload(PacState *state, PacHead *packet) {
         state->phase = 2;
         node = sdfPacEnqueuePacket(state, packet);
         if (state->flags & 2) {
-            node->resourceHandle = func_003293C8(allocationSize);
+            node->resourceHandle = sdfAllocGeneralBlockHigh(allocationSize);
         } else {
-            node->resourceHandle = func_003292A8(allocationSize);
+            node->resourceHandle = sdfAllocGeneralBlock(allocationSize);
         }
         state->outputCursor = node->dataCursor = (u8 *)sdfResourceRetainAddress(node->resourceHandle);
         switch (packet->flags & 0xF) {

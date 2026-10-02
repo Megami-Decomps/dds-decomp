@@ -16,7 +16,7 @@ typedef struct FileWork {
     u32 size;        /* 0x14: loaded resource size */
     FileNode *head;  /* 0x18 */
     u8 unk1C[4];     /* 0x1C */
-    u32 resourceHandle; /* 0x20: released with func_002D0918 */
+    u32 resourceHandle; /* 0x20: released with sdfReleaseResourceAllocation */
     u32 unk24;       /* 0x24 */
 } FileWork;
 

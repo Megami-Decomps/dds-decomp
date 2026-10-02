@@ -141,7 +141,7 @@ s32 mnuTickExtendedCommandPhase(MenuCommandWork *work) {
 INCLUDE_ASM(const s32, "game/code_00260208", func_00260AB0);
 
 /* Phase machine for phases 9-12: 9 waits for the frame counter to pass 10.0f, 10 and 12 for it to reach 10.0f, 11 reports at once. */
-s32 func_00261688(MenuCommandWork *work) {
+s32 mnuTickCommandWaitPhase(MenuCommandWork *work) {
     switch (work->mode) {
     case 9:
         work->frames = work->frames + 1;
@@ -473,7 +473,7 @@ extern s32 brsAdvanceSkillPackagePanel(s32);
 extern void brsCloseSkillPackagePanel(s32);
 extern void func_002BC618(s32);
 extern void dspCloseChannel(void);
-extern void func_002D0918(s32);
+extern void sdfReleaseResourceAllocation(s32);
 
 void brsStaffTaskDestroy(s32 arg0) {
     s32 context = kwlnTaskGetUserValue();
@@ -487,7 +487,7 @@ void brsStaffTaskDestroy(s32 arg0) {
     }
     func_002BC618(*(s32 *)(context + 0x58));
     dspCloseChannel();
-    func_002D0918(*(s32 *)context);
+    sdfReleaseResourceAllocation(*(s32 *)context);
     brsTaskState = 2;
 }
 

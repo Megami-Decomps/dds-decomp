@@ -14,7 +14,7 @@ extern void sdfDestroyGridWork(s32);
 
 extern void mnuReleaseDisplayListNodes(s32);
 
-extern void func_002D0918(s32);
+extern void sdfReleaseResourceAllocation(s32);
 
 extern void mnuResetWorkFloats(void);
 
@@ -71,14 +71,14 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_002515F0);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_002517C0);
 
-extern s32 func_002D03F8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 extern s32 sdfMemoryGetBlockAddress(s32);
 extern void *memset(void *, s32, u32);
 extern u8 *datGameState;
 
 /* Allocate and clear scene work before registering its grid and coordinates. */
 s32 mnuCreateSceneWork(void) {
-    s32 handle = func_002D03F8(MNU_SCENE_WORK_SIZE);
+    s32 handle = sdfAllocGeneralBlock(MNU_SCENE_WORK_SIZE);
     u8 *work = (u8 *)sdfMemoryGetBlockAddress(handle);
 
     memset(work, 0, MNU_SCENE_WORK_SIZE);
@@ -95,7 +95,7 @@ void mnuReleaseSceneContext(s32 unused, s32 context) {
     func_002CB3B8(mnuSceneResourceContext, -1);
     sdfDestroyGridWork(((MenuSceneWork *)context)->gridHandle);
     mnuReleaseDisplayListNodes(context + 0x584);
-    func_002D0918(((MenuSceneWork *)context)->allocationHandle);
+    sdfReleaseResourceAllocation(((MenuSceneWork *)context)->allocationHandle);
     mnuResetWorkFloats();
 }
 

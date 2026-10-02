@@ -146,11 +146,11 @@ extern void btlUnitGetMuzzlePosVU(void *);
 
 extern s32 btlStepUnitRotationNlerp(u32 *);
 
-extern s32 func_001190B0();
+extern s32 datComputeSkillBoostedMaxHp();
 
 extern s32 btlGetEffectActive(void);
 
-extern s32 func_001191B0();
+extern s32 datComputeSkillBoostedMaxMp();
 
 extern void func_001BCB88(s32, s32);
 
@@ -443,7 +443,7 @@ extern u32 kwlnTaskCreate(u32, u32, u32, u32, s32 (*)(s64), void (*)(s64), u32);
 
 extern s8 effSharedRandomState[];
 
-extern s32 func_002D03F8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 
 extern u32 *sdfResourceRetainAddress(s32);
 
@@ -528,8 +528,8 @@ void btlSyncPlayerWork(UiObject *actor) {
         dst->flags &= ~0x4000;
     }
     dst->unk14 = src->unk14;
-    maxHp = func_001190B0(dst);
-    maxMp = func_001191B0(dst);
+    maxHp = datComputeSkillBoostedMaxHp(dst);
+    maxMp = datComputeSkillBoostedMaxMp(dst);
     dst->hp = src->hp < maxHp ? src->hp : maxHp;
     dst->mp = src->mp < maxMp ? src->mp : maxMp;
     memcpy(dst->unk16, src->unk16, 5);
@@ -770,7 +770,7 @@ u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
 }
 
 void func_001A4060(void) {
-    func_00119750();
+    datMapFlagToStatIndex();
 }
 
 s32 btlCheckSpecialAbility(s32 object, s32 flag) {
@@ -2032,7 +2032,7 @@ extern char D_003A21E8[]; /* "/battle/panel/batle_02.spr" */
 
 extern char D_003A2208[]; /* "/battle/panel/battle_03.spr" */
 
-extern s32 func_002D03F8(s32);
+extern s32 sdfAllocGeneralBlock(s32);
 
 extern u32 *sdfResourceRetainAddress(s32);
 
@@ -2043,7 +2043,7 @@ void btlPanelResourcesLoad(void) {
     s32 handle;
     BtlResBlock *block;
     if (D_003BB3E4 == 0) {
-        handle = func_002D03F8(0x28);
+        handle = sdfAllocGeneralBlock(0x28);
         block = (BtlResBlock *)sdfResourceRetainAddress(handle);
         btlResourceBlock = block;
         block->unk0 = handle;
@@ -2528,7 +2528,7 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2530);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AFF78);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001B0460);
+INCLUDE_ASM(const s32, "game/code_001A1960", btlDrawThreePanelSpriteStrips);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A25C0);
 
@@ -2951,7 +2951,7 @@ void btlReleaseStwrPanelResource(s64 arg0) {
     u32 temp_v0;
 
     temp_v0 = kwlnTaskGetUserValue(arg0);
-    func_002D0918(*(s32 *)temp_v0);
+    sdfReleaseResourceAllocation(*(s32 *)temp_v0);
     btlSetTrackedTaskHandle(3, 0);
 }
 
@@ -3017,7 +3017,7 @@ void btlReleaseTrackedTaskResource(void) {
 
     temp_v0 = kwlnTaskGetTaskByName(D_003BB3B0);
     temp_v1 = kwlnTaskGetUserValue(temp_v0);
-    func_002D0918(*(s32 *)(temp_v1 + 0x1200));
+    sdfReleaseResourceAllocation(*(s32 *)(temp_v1 + 0x1200));
     btlSetTrackedTaskHandle(8, 0);
 }
 
@@ -5844,7 +5844,7 @@ void btlInitBattleIndexWork(u8 *object) {
     u32 handle;
     u32 value;
     *(u32 *)(object + 0x40) = (u32)btlAllocateIndexList(13);
-    handle = func_002D03F8(0x836C);
+    handle = sdfAllocGeneralBlock(0x836C);
     value = sdfResourceRetainAddress(handle);
     *(u32 *)(object + 0x64) = handle;
     *(u32 *)(object + 0x60) = value;
@@ -5857,7 +5857,7 @@ extern void btlFreeIndexList();
 void btlReleaseObjectBuffers(u8 *object) {
     u32 handle = *(u32 *)(object + 0x64);
     if (handle != 0) {
-        func_002D0918(handle);
+        sdfReleaseResourceAllocation(handle);
         *(u32 *)(object + 0x64) = 0;
     }
     if (*(u32 *)(object + 0x40) != 0) {
@@ -6828,7 +6828,7 @@ f32 btlGetUnitModelValue1C(s32 arg0) {
 
 void btlAdvanceUnitModelFrame(s32 arg0) {
     if ((*(u32 *)(arg0 + 0x110) & 2) != 0) {
-        func_002DB538(*(u32 *)(*(s32 *)(*(s32 *)(arg0 + 800) + 0x8c) + 0x1c));
+        sdfMotionSampleAtFrame(*(u32 *)(*(s32 *)(*(s32 *)(arg0 + 800) + 0x8c) + 0x1c));
         return;
     }
 }
@@ -6841,12 +6841,12 @@ s32 btlGetUnitModelFrameCount(s32 arg0) {
 }
 
 void btlSeekUnitModelFrameZero(s32 arg0) {
-    extern void func_002DB538(void *, f32);
+    extern void sdfMotionSampleAtFrame(void *, f32);
 
     if ((*(u32 *)(arg0 + 0x110) & 2) == 0) {
         return;
     }
-    func_002DB538(*(void **)(*(s32 *)(*(s32 *)(arg0 + 0x320) + 0x8c) + 0x1c), 0.0f);
+    sdfMotionSampleAtFrame(*(void **)(*(s32 *)(*(s32 *)(arg0 + 0x320) + 0x8c) + 0x1c), 0.0f);
 }
 
 void btlSeekRandomModelFrame(u8 *object) {
@@ -6854,7 +6854,7 @@ void btlSeekRandomModelFrame(u8 *object) {
     u32 randomFrame;
     f32 frame;
     u8 *resource;
-    extern void func_002DB538(void *, f32);
+    extern void sdfMotionSampleAtFrame(void *, f32);
 
     if ((*(u32 *)(object + 0x110) & 2) == 0) {
         return;
@@ -6864,7 +6864,7 @@ void btlSeekRandomModelFrame(u8 *object) {
         randomFrame = (u32)effMiscRandMod(0, duration);
         frame = (f32)randomFrame;
         resource = *(u8 **)(object + 0x320);
-        func_002DB538(*(void **)(*(u8 **)(resource + 0x8C) + 0x1C),
+        sdfMotionSampleAtFrame(*(void **)(*(u8 **)(resource + 0x8C) + 0x1C),
                        frame);
     }
 }
@@ -8029,7 +8029,7 @@ void btlResetUnitLinks(u8 *actor) {
 }
 
 BtlUnit *btlCreateUnit(void) {
-    u32 handle = func_002D03F8(0x348);
+    u32 handle = sdfAllocGeneralBlock(0x348);
     BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress(handle);
     BtlActorWork *work;
     memset(unit, 0, 0x348);
@@ -8111,7 +8111,7 @@ void btlDestroyUnit(u8 *actor) {
     } else {
         *(u8 **)(btlGetRuntime() + 0x228) = *(u8 **)(actor + 0x344);
     }
-    func_002D0918(*(s32 *)(actor + 0x33C));
+    sdfReleaseResourceAllocation(*(s32 *)(actor + 0x33C));
 }
 
 void btlDestroyAllUnits(void) {
@@ -10325,7 +10325,7 @@ u32 sndPollEffectLoad(u32 *args) {
     resource = fileGetResourceHandle(args[1]);
     *(u32 *)(effect + 0x10) =
         sndMixerClone(sdfResourceRetainAddress(resource));
-    func_002D0918(resource);
+    sdfReleaseResourceAllocation(resource);
     filePollEntryCleanup(args[1]);
     *(u32 *)effect = (*(u32 *)effect & ~1) | 2;
     return 0;
@@ -11149,7 +11149,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileRequest *request) {
         }
     } else if (sndFindPackedTrackLoadStatus(node->position) != 0) {
         btlBossDebugPrintf(D_003A5138, *(u16 *)((u8 *)node + 0xA));
-        func_002D0918(request->resourceHandle);
+        sdfReleaseResourceAllocation(request->resourceHandle);
         filePollEntryCleanup(request->handle);
         node->flags = (node->flags & ~8) | 0x10;
         return 1;
@@ -11372,7 +11372,7 @@ void sndReleaseSlotOwner(u8 *node) {
                 filePollEntryCleanup(*handles);
             }
             if (*resources != 0) {
-                func_002D0918(*resources);
+                sdfReleaseResourceAllocation(*resources);
             }
         }
         if (*(u8 **)(node + 0x104) != 0) {
@@ -11591,7 +11591,7 @@ u32 sndUpdateEarringDeadPlayback(u32 *args) {
 void sndFinishEarringPlaybackTask(u32 *sound) {
     u8 *state = (u8 *)btlGetRuntime();
     if (sound[2]) {
-        func_002D0918(sound[2]);
+        sdfReleaseResourceAllocation(sound[2]);
     }
     --*(u16 *)(state + 0x260);
 }
