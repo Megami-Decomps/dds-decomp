@@ -254,11 +254,71 @@ void sdfCrossNormalizedVectors(float *out, float *left, float *right) {
     out[2] = a.x * b.y - a.y * b.x;
 }
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00326BC8);
+void func_00326BC8(SdfMat4 *matrix, f32 angle) {
+    SdfMat4 rotated;
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_003270C8);
+    rotated.m[0] = matrix->m[0];
+    rotated.m[1] = matrix->m[1];
+    rotated.m[2] = matrix->m[2];
+    rotated.m[3] = matrix->m[3];
+    rotated.m[4] = matrix->m[4] * cos(angle) + matrix->m[8] * sin(angle);
+    rotated.m[5] = matrix->m[5] * cos(angle) + matrix->m[9] * sin(angle);
+    rotated.m[6] = matrix->m[6] * cos(angle) + matrix->m[10] * sin(angle);
+    rotated.m[7] = matrix->m[7] * cos(angle) + matrix->m[11] * sin(angle);
+    rotated.m[8] = matrix->m[4] * -sin(angle) + matrix->m[8] * cos(angle);
+    rotated.m[9] = matrix->m[5] * -sin(angle) + matrix->m[9] * cos(angle);
+    rotated.m[10] = matrix->m[6] * -sin(angle) + matrix->m[10] * cos(angle);
+    rotated.m[11] = matrix->m[7] * -sin(angle) + matrix->m[11] * cos(angle);
+    rotated.m[12] = matrix->m[12];
+    rotated.m[13] = matrix->m[13];
+    rotated.m[14] = matrix->m[14];
+    rotated.m[15] = matrix->m[15];
+    *matrix = rotated;
+}
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_003275C8);
+void func_003270C8(SdfMat4 *matrix, f32 angle) {
+    SdfMat4 rotated;
+
+    rotated.m[0] = matrix->m[0] * cos(angle) + matrix->m[8] * -sin(angle);
+    rotated.m[1] = matrix->m[1] * cos(angle) + matrix->m[9] * -sin(angle);
+    rotated.m[2] = matrix->m[2] * cos(angle) + matrix->m[10] * -sin(angle);
+    rotated.m[3] = matrix->m[3] * cos(angle) + matrix->m[11] * -sin(angle);
+    rotated.m[4] = matrix->m[4];
+    rotated.m[5] = matrix->m[5];
+    rotated.m[6] = matrix->m[6];
+    rotated.m[7] = matrix->m[7];
+    rotated.m[8] = matrix->m[0] * sin(angle) + matrix->m[8] * cos(angle);
+    rotated.m[9] = matrix->m[1] * sin(angle) + matrix->m[9] * cos(angle);
+    rotated.m[10] = matrix->m[2] * sin(angle) + matrix->m[10] * cos(angle);
+    rotated.m[11] = matrix->m[3] * sin(angle) + matrix->m[11] * cos(angle);
+    rotated.m[12] = matrix->m[12];
+    rotated.m[13] = matrix->m[13];
+    rotated.m[14] = matrix->m[14];
+    rotated.m[15] = matrix->m[15];
+    *matrix = rotated;
+}
+
+void func_003275C8(SdfMat4 *matrix, f32 angle) {
+    SdfMat4 rotated;
+
+    rotated.m[0] = matrix->m[0] * cos(angle) + matrix->m[4] * sin(angle);
+    rotated.m[1] = matrix->m[1] * cos(angle) + matrix->m[5] * sin(angle);
+    rotated.m[2] = matrix->m[2] * cos(angle) + matrix->m[6] * sin(angle);
+    rotated.m[3] = matrix->m[3] * cos(angle) + matrix->m[7] * sin(angle);
+    rotated.m[4] = matrix->m[0] * -sin(angle) + matrix->m[4] * cos(angle);
+    rotated.m[5] = matrix->m[1] * -sin(angle) + matrix->m[5] * cos(angle);
+    rotated.m[6] = matrix->m[2] * -sin(angle) + matrix->m[6] * cos(angle);
+    rotated.m[7] = matrix->m[3] * -sin(angle) + matrix->m[7] * cos(angle);
+    rotated.m[8] = matrix->m[8];
+    rotated.m[9] = matrix->m[9];
+    rotated.m[10] = matrix->m[10];
+    rotated.m[11] = matrix->m[11];
+    rotated.m[12] = matrix->m[12];
+    rotated.m[13] = matrix->m[13];
+    rotated.m[14] = matrix->m[14];
+    rotated.m[15] = matrix->m[15];
+    *matrix = rotated;
+}
 
 /* Transpose through a local copy so source and destination may alias. */
 void sdfMat4Transpose(SdfMat4 *dst, SdfMat4 *src) {
