@@ -320,6 +320,11 @@
 #define VU0_TRANSFORM_POINT(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
     "vmaddaz.xyzw ACC, vf30, " #src "z\n\tvmaddw.xyzw " #dst ", vf31, vf0w\n\t.set reorder")
+/* dst = primary matrix times a point whose x/y/z scalars can come from
+ * separate vector registers (w is taken as 1). */
+#define VU0_TRANSFORM_POINT_COMPONENTS(dst, xsrc, ysrc, zsrc) __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #xsrc "x\n\tvmadday.xyzw ACC, vf29, " #ysrc "y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, " #zsrc "z\n\tvmaddw.xyzw " #dst ", vf31, vf0w\n\t.set reorder")
 /* Accumulate the xyz clip tests for a transformed vector against its w. */
 #define VU0_CLIPW_XYZ(vf) __asm__ volatile ( \
     ".set noreorder\n\tvclipw.xyz " #vf ", " #vf "w\n\t.set reorder")
