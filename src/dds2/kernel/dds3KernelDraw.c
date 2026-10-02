@@ -168,6 +168,8 @@ extern void effCopyCh76Common(void *);
 
 extern void effEnableStaggeredBlur(void);
 
+extern void effMiscNormalizeVU(void);
+
 extern KwlnSolidRectParams kwlnColorRectangleParameters;
 
 extern u16 kwlnColorRectangleStartAlpha;
@@ -667,4 +669,67 @@ void kwlnDrawEnableD30(s32 mode) {
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00107108);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00107D08);
+/* vu0 routine: shortest-arc quaternion rotating direction vf10 to vf11. */
+void func_00107D08(void) {
+    f32 identity[4];
+    f32 axis[4];
+    f32 dot;
+    f32 component;
+
+    memset(identity, 0, sizeof(identity));
+    identity[3] = 1.0f;
+
+    VU0_CLEAR_W(vf10);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf2, vf10);
+    VU0_MOVE_VF(vf10, vf11);
+    VU0_MOVE_VF(vf11, vf2);
+    VU0_CLEAR_W(vf10);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf2, vf10);
+    VU0_MOVE_VF(vf10, vf11);
+    VU0_MOVE_VF(vf11, vf2);
+
+    VU0_DOT_XYZ(dot, vf10, vf11);
+    if (dot >= 0.9999f) {
+        VU0_LOAD_VF_FROM(vf10, *(u128 *)identity);
+        return;
+    }
+
+    if (dot <= -0.9999f) {
+        VU0_GET_VF10_Y(component);
+        if (!(0.9999f <= fabsf(component))) {
+            goto choose_perpendicular;
+        }
+
+        VU0_MOVE_VF(vf10, vf0);
+        VU0_CLEAR_W(vf10);
+        VU0_SET_VF10_COMPONENT(z, -1.0f);
+        goto compose_opposite;
+
+choose_perpendicular:
+        VU0_GET_VF10_Z(component);
+        axis[0] = -component;
+        axis[1] = 0.0f;
+        VU0_GET_VF10_X(axis[2]);
+        axis[3] = 0.0f;
+        VU0_LOAD_VF(vf10, axis);
+        VU0_NORMALIZE_VF10();
+
+compose_opposite:
+        VU0_DOT_XYZ(dot, vf10, vf11);
+        VU0_CROSS_XYZ(vf10, vf10, vf11);
+        VU0_SET_VF10_W(dot);
+        return;
+    }
+
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf12);
+    VU0_DOT_XYZ(dot, vf10, vf11);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, axis);
+    VU0_SET_VF10_W(dot);
+    effMiscNormalizeVU();
+}
