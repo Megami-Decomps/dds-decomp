@@ -6,6 +6,17 @@ typedef struct FileNode {
     struct FileNode *next; /* 0x4 */
 } FileNode;
 
+/* Request fields initialized before a node joins FileManWork's queue. */
+typedef struct FileQueueEntry {
+    u8 kind;
+    u8 pad01[3];
+    FileNode *next;
+    char *name;
+    u8 pad0C[0xC];
+    void *callback;
+    void *userData;
+} FileQueueEntry;
+
 /* Work record behind the fileManager getters below. */
 typedef struct FileWork {
     u8 unk0[0x10];   /* 0x0 */
@@ -27,40 +38,6 @@ typedef struct FileRequest {
     u16 stateRequired; /* 0x68: gate state == 6 readiness checks */
     u16 slot; /* 0x6A */
 } FileRequest;
-
-typedef struct FileCleanup {
-    u8 kind;
-    u8 state;
-    u8 pad02[6];
-    void *resource;
-    u32 handle;
-} FileCleanup;
-
-extern s32 btlDestroyStageTask(void *);
-extern void sdfDevQueueReleaseState(u32);
-extern void sdfReleaseChipBlock(void *);
-extern void func_0035B6E0(const char *fmt, ...);
-extern void *sdfAllocAndClearQuadwords(s32);
-extern void sdfPacInitializeDispatchPacket(void *, void *);
-extern void func_00346AE8(void *);
-extern void func_002C7D78(void *, s32, u32, s32, s32);
-
-s32 filePollEntryCleanup(FileCleanup *entry) {
-    if (entry->kind == 1) {
-        return btlDestroyStageTask(entry);
-    }
-    if (entry->state == 6) {
-        if (entry->handle != 0) {
-            sdfDevQueueReleaseState(entry->handle);
-        }
-        sdfReleaseChipBlock(entry->resource);
-        sdfReleaseChipBlock(entry);
-        return 0;
-    }
-    return 1;
-}
-
-INCLUDE_ASM(const s32, "file/fileManager", func_002C7D78);
 
 /* Work area behind the fileMan task. */
 typedef struct FileManSlot {
@@ -85,8 +62,69 @@ typedef struct FileManWork {
 
 extern FileManWork fileManagerWork;
 
+typedef struct FileCleanup {
+    u8 kind;
+    u8 state;
+    u8 pad02[6];
+    void *resource;
+    u32 handle;
+} FileCleanup;
+
+extern s32 btlDestroyStageTask(void *);
+extern void sdfDevQueueReleaseState(u32);
+extern void sdfReleaseChipBlock(void *);
+extern void func_0035B6E0(const char *fmt, ...);
+extern void *sdfAllocAndClearQuadwords(s32);
+extern void sdfPacInitializeDispatchPacket(void *, void *);
+extern void func_00346AE8(void *);
+s32 filePollEntryCleanup(FileCleanup *entry) {
+    if (entry->kind == 1) {
+        return btlDestroyStageTask(entry);
+    }
+    if (entry->state == 6) {
+        if (entry->handle != 0) {
+            sdfDevQueueReleaseState(entry->handle);
+        }
+        sdfReleaseChipBlock(entry->resource);
+        sdfReleaseChipBlock(entry);
+        return 0;
+    }
+    return 1;
+}
+
+extern char *sdfStrDup(const char *text);
+extern s32 func_002C8AC0(void);
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
+
+void func_002C7D78(FileQueueEntry *request, s32 kind, const char *requestName,
+                   void *callback, void *userData) {
+    FileManWork *work;
+    char *duplicatedName;
+    s32 startsQueue;
+
+    work = &fileManagerWork;
+    request->kind = kind;
+    duplicatedName = sdfStrDup(requestName);
+    request->callback = callback;
+    request->name = duplicatedName;
+    request->userData = userData;
+
+    WaitSema(work->sema);
+    if (work->tail == NULL) {
+        work->head = (FileNode *)request;
+        startsQueue = 1;
+    } else {
+        work->tail->next = (FileNode *)request;
+        startsQueue = 0;
+    }
+    work->tail = (FileNode *)request;
+    SignalSema(work->sema);
+
+    if (startsQueue != 0) {
+        func_002C8AC0();
+    }
+}
 
 /* Clear the node from every request slot and unlink it from the queue. */
 void fileManCancelRequest(FileNode *node) {
