@@ -430,7 +430,7 @@ extern void effMagatuhiInitializeInterpolatedHistory(void *bill);
 extern void effMagatuhiDispatchByKind(void *bill);
 
 /* Run the Magatuhi setup matching the ready effect's state (1 or 8). */
-s32 func_00115970(EffectObj *obj) {
+func_00115970(EffectObj *obj) {
     if (obj->kind == 7) {
         EffectData *data = obj->data;
 
