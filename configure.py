@@ -211,6 +211,23 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     n.rule("objcopy", f"{OBJCOPY} -O binary $in $out", description="objcopy $out")
     n.rule("check", "sha1sum --quiet -c $in && touch $out", description="check $in")
     n.rule(
+        "dev_link_script",
+        f"{sys.executable} tools/dev_elf.py link-script $descriptor $in $out",
+        description="dev linker script $out",
+    )
+    n.rule(
+        "dev_ld",
+        f"{LD} -EL --emit-relocs -T $ldscript -T $undef_syms -T $undef_funcs "
+        "-Map $map --no-check-sections -o $out",
+        description="dev link $out",
+    )
+    n.rule(
+        "dev_finalize",
+        f"{sys.executable} tools/dev_elf.py finalize "
+        "$descriptor $retail $linked $out --reloc-elf $relocelf",
+        description="dev ELF $out",
+    )
+    n.rule(
         "flw0",
         f"mkdir -p $outdir && {sys.executable} tools/flw0.py assemble $in $out",
         description="flw0 $in",
@@ -297,6 +314,50 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         stamp = Path("build") / version / f"{serial}.ok"
         n.build(str(stamp), "check", f"config/{version}/checksum.sha1", implicit=[str(image)])
         version_outputs = [str(stamp)]
+
+        dev_descriptor = Path("config") / version / "devbuild.json"
+        if (ROOT / dev_descriptor).exists():
+            dev_script = Path("build") / version / f"{serial}.dev.ld"
+            dev_wrapper = Path("build") / version / f"{serial}.dev-link.elf"
+            dev_raw = Path("build") / version / f"{serial}.dev.raw"
+            dev_image = Path("build") / version / f"{serial}.dev"
+            n.build(
+                str(dev_script),
+                "dev_link_script",
+                str(ld_script),
+                implicit=[str(dev_descriptor), "tools/dev_elf.py"],
+                variables={"descriptor": str(dev_descriptor)},
+            )
+            n.build(
+                str(dev_wrapper),
+                "dev_ld",
+                [str(obj) for obj in objects],
+                implicit=[
+                    str(dev_script),
+                    f"config/{version}/undefined_syms_auto.txt",
+                    f"config/{version}/undefined_funcs_auto.txt",
+                ],
+                variables={
+                    "ldscript": str(dev_script),
+                    "undef_syms": f"config/{version}/undefined_syms_auto.txt",
+                    "undef_funcs": f"config/{version}/undefined_funcs_auto.txt",
+                    "map": str(dev_wrapper.with_suffix(".map")),
+                },
+            )
+            n.build(str(dev_raw), "objcopy", str(dev_wrapper))
+            n.build(
+                str(dev_image),
+                "dev_finalize",
+                str(dev_raw),
+                implicit=[str(stamp), str(dev_wrapper), str(dev_descriptor), "tools/dev_elf.py"],
+                variables={
+                    "descriptor": str(dev_descriptor),
+                    "retail": str(image),
+                    "linked": str(dev_raw),
+                    "relocelf": str(dev_wrapper),
+                },
+            )
+            n.build(f"{version}-dev", "phony", str(dev_image))
 
         all_scripts_manifest = Path("config") / version / "scripts.sha1"
         event_scripts_manifest = Path("config") / version / "event_scripts.sha1"
@@ -531,6 +592,9 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         f"config/{v}/{VERSIONS[v]['serial']}.yaml" for v in versions
     ] + [f"config/{v}/symbol_addrs.txt" for v in versions]
     for version in versions:
+        dev_descriptor = ROOT / "config" / version / "devbuild.json"
+        if dev_descriptor.exists():
+            configure_inputs.append(str(dev_descriptor.relative_to(ROOT)))
         for name in ("scripts.sha1", "event_scripts.sha1"):
             manifest = ROOT / "config" / version / name
             if manifest.exists():
