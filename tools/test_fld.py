@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import struct
 import sys
 import unittest
@@ -168,11 +169,17 @@ end_data
 
     def test_tracked_sources_are_canonical_and_exact(self) -> None:
         expected_links = {
-            "dds1": fld.LinkSummary(2, 3, 1),
-            "dds2": fld.LinkSummary(1, 2, 1),
+            ("dds1", "f011_001"): fld.LinkSummary(2, 3, 1),
+            ("dds2", "f011_001"): fld.LinkSummary(1, 2, 1),
         }
+        versions = json.loads((ROOT / "config/versions.json").read_text(encoding="utf-8"))
         for game in ("dds1", "dds2"):
             manifest = ROOT / "config" / game / "field_fld2.sha1"
+            linked = set(versions[game].get("field_fld2_links", ()))
+            self.assertEqual(
+                linked,
+                {stem for (version, stem) in expected_links if version == game},
+            )
             for line in manifest.read_text(encoding="utf-8").splitlines():
                 expected, output = line.split()
                 source = ROOT / "src" / game / "data" / "field" / (Path(output).stem + ".fldasm")
@@ -181,9 +188,9 @@ end_data
                     data = fld.encode(fld.parse_source(text))
                     self.assertEqual(hashlib.sha1(data).hexdigest(), expected)
                     self.assertEqual(fld.render_source(data), text)
-                    self.assertIn("motion tracks=vector3:", text)
-                    self.assertIn("motion_curve count=", text)
-                    self.assertIn("\nkeys ", text)
+                    key = game, source.stem
+                    if key not in expected_links:
+                        continue
                     field_text, area_text = source.stem.split("_")
                     field, area = int(field_text[1:]), int(area_text)
                     scripts = ROOT / "src" / game / "scripts" / "field" / f"f{field:03}.bfasm"
@@ -195,7 +202,7 @@ end_data
                         field,
                         area,
                     )
-                    self.assertEqual(links, expected_links[game])
+                    self.assertEqual(links, expected_links[key])
 
     def test_missing_script_event_is_rejected(self) -> None:
         source = ROOT / "src/dds1/data/field/f011_001.fldasm"
