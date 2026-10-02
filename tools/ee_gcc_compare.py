@@ -93,6 +93,20 @@ def normalize(text: str, aliases: dict[str, str] | None = None) -> str:
     return LOCAL_ASM_LABEL.sub(local_label, text)
 
 
+def normalize_artifact(text: str, artifact: str,
+                       aliases: dict[str, str] | None = None) -> str:
+    """Normalize an artifact without treating dump commentary as compiler IR."""
+    match = PASS_FILE.match(artifact)
+    if match and int(match.group(1)) in (17, 25):
+        # -fsched-verbose changes scheduler reports (ready lists, visual tables,
+        # truncated symbol names) but not the RTL forms which follow them.
+        text = "\n".join(
+            line for line in text.splitlines()
+            if line.strip() and not line.lstrip().startswith(";;")
+        ) + "\n"
+    return normalize(text, aliases)
+
+
 def assembly_functions(text: str, aliases: dict[str, str] | None = None) -> dict[str, str]:
     result: dict[str, str] = {}
     for match in ASM_FUNCTION.finditer(text):
@@ -157,12 +171,16 @@ def classify_artifact(artifact: str | None) -> dict[str, object] | None:
 
 
 def compare_text(left: Path, right: Path, left_aliases: dict[str, str] | None = None,
-                 right_aliases: dict[str, str] | None = None) -> dict[str, object]:
+                 right_aliases: dict[str, str] | None = None,
+                 artifact: str = "assembly") -> dict[str, object]:
     a = left.read_text(errors="replace")
     b = right.read_text(errors="replace")
     return {
         "raw_equal": a == b,
-        "normalized_equal": normalize(a, left_aliases) == normalize(b, right_aliases),
+        "normalized_equal": (
+            normalize_artifact(a, artifact, left_aliases)
+            == normalize_artifact(b, artifact, right_aliases)
+        ),
         "left": a,
         "right": b,
     }
@@ -183,7 +201,9 @@ def compare_runs(left: Path, right: Path, function: str | None = None) -> dict[s
         if name not in left_dumps or name not in right_dumps:
             pass_rows.append({"name": name, "status": "missing"})
             continue
-        comparison = compare_text(left_dumps[name], right_dumps[name], left_aliases, right_aliases)
+        comparison = compare_text(
+            left_dumps[name], right_dumps[name], left_aliases, right_aliases, name
+        )
         status = (
             "same" if comparison["raw_equal"] else
             "observation-noise" if comparison["normalized_equal"] else
@@ -201,7 +221,9 @@ def compare_runs(left: Path, right: Path, function: str | None = None) -> dict[s
         left_assembly = left / "candidate.s"
         right_assembly = right / "candidate.s"
     if left_assembly.is_file() and right_assembly.is_file():
-        comparison = compare_text(left_assembly, right_assembly, left_aliases, right_aliases)
+        comparison = compare_text(
+            left_assembly, right_assembly, left_aliases, right_aliases, "assembly"
+        )
         status = (
             "same" if comparison["raw_equal"] else
             "observation-noise" if comparison["normalized_equal"] else
@@ -254,8 +276,8 @@ def render_diff(left: Path, right: Path, artifact: str, limit: int,
         print(f"cannot diff missing artifact: {a} / {b}", file=sys.stderr)
         return
     lines = difflib.unified_diff(
-        normalize(a.read_text(errors="replace"), left_aliases).splitlines(),
-        normalize(b.read_text(errors="replace"), right_aliases).splitlines(),
+        normalize_artifact(a.read_text(errors="replace"), artifact, left_aliases).splitlines(),
+        normalize_artifact(b.read_text(errors="replace"), artifact, right_aliases).splitlines(),
         fromfile=str(a),
         tofile=str(b),
         lineterm="",
