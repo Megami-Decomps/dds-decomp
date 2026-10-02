@@ -134,7 +134,7 @@ typedef struct EvtRuntime {
     s32 frameCursor; /* 0x2304 */
     EvtFrameList *frameList; /* 0x2308 */
     u8 pad230C[0x4];
-    s32 value; /* 0x2310 */
+    s32 value; /* 0x2310: modes D/E pack a 12-bit number and 4-bit option */
     s32 valueMin; /* 0x2314 */
     s32 valueMax; /* 0x2318 */
     f32 fvalue; /* 0x231C */
@@ -167,7 +167,8 @@ typedef struct GsSurface {
     void (*submit)(struct GsSurface *, s32);
 } GsSurface;
 
-typedef s32 (*EvtMenuHeaderFn)(s32 list, s32 x, s32 y, EvtRuntime *ctx);
+/* Header callbacks have three-argument labels and context-aware variants. */
+typedef s32 (*EvtMenuHeaderFn)();
 typedef void (*EvtMenuRowFn)(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
 
 typedef struct EvtPad {
@@ -1046,7 +1047,7 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423F60);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423F70);
 
-void func_00253D80(s32 list, s32 x, s32 y, u32 kind, EvtRuntime *ctx) {
+void func_00253D80(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *ctx) {
     char *names[11] = {D_004376B8, D_00423EE0, D_00423EF0, D_00423F00,
         D_00423F10, D_00423F20, D_00423F30, D_00423F40, D_00423F50, D_00423F60, D_00423F70};
 
@@ -1089,7 +1090,68 @@ void func_00253D80(s32 list, s32 x, s32 y, u32 kind, EvtRuntime *ctx) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00253FF8);
+s32 func_00253FF8(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    s32 packed;
+    s32 number;
+    s32 branch;
+    s32 field;
+    s32 delta;
+    s32 handle;
+
+    list = sdfCreateResetPacketList();
+    func_00250338(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawMessageMenuLabel, func_00253D80);
+    kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
+    if (ctx->mode != 0xD) {
+        return 0;
+    }
+    packed = ctx->value;
+    number = packed & 0xFFF;
+    branch = (packed >> 12) & 0xF;
+    field = ctx->messageField;
+    if (field != 0) {
+        if (field == 1) {
+            if (D_0037F510.decOne & 2) {
+                branch = branch == 0 ? 0xA : branch - 1;
+            } else if (D_0037F510.incOne & 2) {
+                branch = branch >= 0xA ? 0 : branch + 1;
+            }
+            ctx->value &= 0xFFF;
+            ctx->value |= branch << 12;
+        }
+    } else {
+        delta = 0;
+        if (D_0037F510.decOne & 2) {
+            delta = -1;
+        } else if (D_0037F510.incOne & 2) {
+            delta = 1;
+        }
+        number += delta;
+        if (number < ctx->valueMin) {
+            number = ctx->valueMax;
+        }
+        if (number > ctx->valueMax) {
+            number = 0;
+        }
+        ctx->value = number | (branch << 12);
+    }
+    if ((D_0037F510.decTen & 2) || (D_0037F510.incTen & 2)) {
+        ctx->messageField = !field;
+    }
+    if (D_0037F510.confirm < 0) {
+        handle = ((EvtMessageWindow *)ctx->windowContext)->entryHandle;
+        if (handle != -1) {
+            if (branch == 0) {
+                if (itfMesGetWindowEntryItems(handle, number) == 0) {
+                    return 1;
+                }
+            } else if (itfMesGetWindowEntryItems(handle, number) == 1) {
+                return 1;
+            }
+        }
+    }
+    return D_0037F510.cancel >= 0 ? 0 : -1;
+}
 
 
 
@@ -1099,7 +1161,7 @@ s32 mnuDrawCutFlagLabel(s32 target, s32 x, s32 y) {
 }
 
 
-void func_00254250(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+void func_00254250(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     char *labels[11] = {D_004376C8, D_00423EE0, D_00423EF0, D_00423F00,
         D_00423F10, D_00423F20, D_00423F30, D_00423F40, D_00423F50, D_00423F60, D_00423F70};
     s32 flag;
@@ -1129,7 +1191,59 @@ void func_00254250(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00254458);
+s32 func_00254458(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    s32 packed;
+    s32 number;
+    s32 branch;
+    s32 field;
+    s32 delta;
+
+    list = sdfCreateResetPacketList();
+    func_00250338(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawCutFlagLabel, func_00254250);
+    kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
+    if (ctx->mode != 0xE) {
+        return 0;
+    }
+    packed = ctx->value;
+    number = packed & 0xFFF;
+    branch = (packed >> 12) & 0xF;
+    field = ctx->cutSel;
+    switch (field) {
+    case 0:
+        if (D_0037F510.decOne & 2) {
+            branch = branch == 0 ? 0xA : branch - 1;
+        } else if (D_0037F510.incOne & 2) {
+            branch = branch >= 0xA ? 0 : branch + 1;
+        }
+        ctx->value &= 0xFFF;
+        ctx->value |= branch << 12;
+        break;
+    case 1:
+        delta = 0;
+        if (D_0037F510.decOne & 2) {
+            delta = -1;
+        } else if (D_0037F510.incOne & 2) {
+            delta = 1;
+        }
+        number += delta;
+        if (number < ctx->valueMin) {
+            number = ctx->valueMax;
+        }
+        if (number > ctx->valueMax) {
+            number = 0;
+        }
+        ctx->value = number | (branch << 12);
+        break;
+    }
+    if ((D_0037F510.decTen & 2) || (D_0037F510.incTen & 2)) {
+        ctx->cutSel = !field;
+    }
+    if (D_0037F510.confirm < 0) {
+        return 1;
+    }
+    return D_0037F510.cancel >= 0 ? 0 : -1;
+}
 
 s32 evtIsMenuTableEntryEnabled(s32 *index) {
     return D_003C9730[*index].enabled != 0;

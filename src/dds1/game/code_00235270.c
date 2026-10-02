@@ -139,7 +139,7 @@ typedef struct EvtRuntime {
     s32 frameCursor; /* 0x2304 */
     EvtFrameList *frameList; /* 0x2308 */
     u8 pad230C[0x4];
-    s32 value; /* 0x2310 */
+    s32 value; /* 0x2310: modes D/E pack a 12-bit number and 4-bit option */
     s32 valueMin; /* 0x2314 */
     s32 valueMax; /* 0x2318 */
     f32 floatValue; /* 0x231C */
@@ -1014,7 +1014,68 @@ void func_00238ED0(s32 list, s32 x, s32 y, u32 kind, EvtRuntime *ctx) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00239148);
+s32 func_00239148(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    s32 packed;
+    s32 number;
+    s32 branch;
+    s32 field;
+    s32 delta;
+    s32 handle;
+
+    list = sdfCreateResetPacketList();
+    func_00235598(list, x, y, 0x18, 0xA, 0, 1, (u8 *)ctx, mnuDrawMessageMenuLabel, func_00238ED0);
+    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)list);
+    if (ctx->actionMode != 0xD) {
+        return 0;
+    }
+    packed = ctx->value;
+    number = packed & 0xFFF;
+    branch = (packed >> 12) & 0xF;
+    field = ctx->messageField;
+    if (field != 0) {
+        if (field == 1) {
+            if (D_00324510[0x24] & 2) {
+                branch = branch == 0 ? 0xA : branch - 1;
+            } else if (D_00324510[0x25] & 2) {
+                branch = branch >= 0xA ? 0 : branch + 1;
+            }
+            ctx->value &= 0xFFF;
+            ctx->value |= branch << 12;
+        }
+    } else {
+        delta = 0;
+        if (D_00324510[0x24] & 2) {
+            delta = -1;
+        } else if (D_00324510[0x25] & 2) {
+            delta = 1;
+        }
+        number += delta;
+        if (number < ctx->valueMin) {
+            number = ctx->valueMax;
+        }
+        if (number > ctx->valueMax) {
+            number = 0;
+        }
+        ctx->value = number | (branch << 12);
+    }
+    if ((D_00324510[0x26] & 2) || (D_00324510[0x27] & 2)) {
+        ctx->messageField = !field;
+    }
+    if (D_00324510[0x21] < 0) {
+        handle = ((EvtMessageWindow *)ctx->windowContext)->entryHandle;
+        if (handle != -1) {
+            if (branch == 0) {
+                if (itfMesGetWindowEntryItems(handle, number) == 0) {
+                    return 1;
+                }
+            } else if (itfMesGetWindowEntryItems(handle, number) == 1) {
+                return 1;
+            }
+        }
+    }
+    return D_00324510[0x23] >= 0 ? 0 : -1;
+}
 
 
 
@@ -1054,7 +1115,59 @@ void func_002393A0(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_002395A8);
+s32 func_002395A8(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    s32 packed;
+    s32 number;
+    s32 branch;
+    s32 field;
+    s32 delta;
+
+    list = sdfCreateResetPacketList();
+    func_00235598(list, x, y, 0x18, 0xA, 0, 1, (u8 *)ctx, mnuDrawCutFlagLabel, func_002393A0);
+    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)list);
+    if (ctx->actionMode != 0xE) {
+        return 0;
+    }
+    packed = ctx->value;
+    number = packed & 0xFFF;
+    branch = (packed >> 12) & 0xF;
+    field = ctx->compareField;
+    switch (field) {
+    case 0:
+        if (D_00324510[0x24] & 2) {
+            branch = branch == 0 ? 0xA : branch - 1;
+        } else if (D_00324510[0x25] & 2) {
+            branch = branch >= 0xA ? 0 : branch + 1;
+        }
+        ctx->value &= 0xFFF;
+        ctx->value |= branch << 12;
+        break;
+    case 1:
+        delta = 0;
+        if (D_00324510[0x24] & 2) {
+            delta = -1;
+        } else if (D_00324510[0x25] & 2) {
+            delta = 1;
+        }
+        number += delta;
+        if (number < ctx->valueMin) {
+            number = ctx->valueMax;
+        }
+        if (number > ctx->valueMax) {
+            number = 0;
+        }
+        ctx->value = number | (branch << 12);
+        break;
+    }
+    if ((D_00324510[0x26] & 2) || (D_00324510[0x27] & 2)) {
+        ctx->compareField = !field;
+    }
+    if (D_00324510[0x21] < 0) {
+        return 1;
+    }
+    return D_00324510[0x23] >= 0 ? 0 : -1;
+}
 
 s32 evtIsMenuTableEntryEnabled(s32 *index) {
     return D_00368950[*index].enabled != 0;
