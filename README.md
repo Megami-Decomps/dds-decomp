@@ -54,11 +54,12 @@ git clone https://github.com/Megami-Decomps/dds-decomp.git && cd dds-decomp
 python -m pip install -r requirements.txt
 python tools/download_tools.py   # ee-gcc 2.96 + ee-as, decompals binutils, objdiff-cli
 # copy your disc image(s) into the repo root or orig/, then:
-python tools/extract.py          # -> orig/dds1/SLUS_209.74, orig/dds2/SLUS_211.52 (SHA-1 checked)
+python tools/extract.py          # -> SHA-1-checked executables and selected archive inputs under orig/
 python configure.py              # split with splat, write build.ninja and objdiff.json
 ninja                            # build and verify every extracted version (or: ninja dds1)
 ninja dds1-scripts dds2-scripts  # assemble and verify the tracked script corpora
 ninja dds1-field-data dds2-field-data  # assemble and verify INF/WAP/FLD2 field data
+ninja dds1-field-archives dds2-field-archives  # rebuild FLD2 inside exact LB archives
 ninja dds1-battle-data dds2-battle-data  # assemble and verify battle tables
 python3 tools/flw0.py view src/dds1/scripts/event/e670.bfasm  # readable script view
 ```
@@ -66,7 +67,8 @@ python3 tools/flw0.py view src/dds1/scripts/event/e670.bfasm  # readable script 
 See [`docs/flw0.md`](docs/flw0.md) for script source,
 [`docs/inf.md`](docs/inf.md) for interaction tables, and
 [`docs/wap.md`](docs/wap.md) for actor, elevator, door, and transition tables.
-See [`docs/fld.md`](docs/fld.md) for relocatable FLD2 field resources and
+See [`docs/fld.md`](docs/fld.md) for relocatable FLD2 field resources,
+[`docs/lb.md`](docs/lb.md) for their compressed field archives, and
 [`docs/battle-tables.md`](docs/battle-tables.md) for encounter and battle
 content tables.
 
