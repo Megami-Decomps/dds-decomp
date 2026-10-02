@@ -16,6 +16,8 @@ typedef struct MnuProfileProgress {
 
 
 extern u8 mnuResourceTaskName[];
+extern char D_003AF758[];
+extern char D_003AF780[];
 
 extern u32 mnuSceneResourceContext;
 extern s32 D_0036C698[];
@@ -65,18 +67,29 @@ extern void mnuDestroyMantraDrawPool(void *);
 extern void mnuReleaseStaffMenuContextAndResources(u32 *);
 extern s32 dspCloseChannel(void);
 extern void sdfQueueNonzeroResourceId(s32);
-extern void sdfReleaseResourceAllocation(void *);
+extern void sdfReleaseResourceAllocation(s32);
+extern s32 sdfAllocGeneralBlock(s32);
+extern void *sdfMemoryGetBlockAddress(s32);
+extern s32 sdfReadNamedResource(const char *, u32 *, s32);
+extern void mnuMarkTitleStreamResetPending(void);
+extern void mnuResetTitleStreamLocked(void);
+extern void func_0026A5F0(s32);
+extern void mnuRunTitleStreamTransitionAndLogBgm(void);
+extern void *mnuCreateSpriteResource(s32, u8, u8);
+extern u8 *mnuCreateWorkBlock(void);
 
 typedef struct MnuResourceTaskWork {
-    void *allocation;
+    s32 allocation;
     u8 pad04[4];
     s32 messageResource1;
-    u8 pad0C[4];
+    u32 messageResourceInfo1;
     s32 messageResource2;
-    u8 pad14[0x10];
+    u32 messageResourceInfo2;
+    u8 pad18[0xC];
     u32 *staffMenuContext;
     u8 pad28[0x210];
     void *drawPool;
+    u8 pad23C[0xC];
 } MnuResourceTaskWork;
 
 s32 func_0024E1C8(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 placementIndex,
@@ -191,7 +204,7 @@ INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F338);
 extern u8 D_0036C568[];
 extern void effRequestResourceByMode(char *, void *, s32, void *);
 
-void mnuRequestMantraResources(void) {
+void mnuRequestMantraResources(MnuResourceTaskWork *work) {
     s32 i;
 
     for (i = 0; i < 14; i++) {
@@ -221,7 +234,28 @@ void mnuReleaseResourceSlots(MnuResourceTaskWork *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F608);
+MnuResourceTaskWork *func_0024F608(void) {
+    s32 allocation = sdfAllocGeneralBlock(sizeof(MnuResourceTaskWork));
+    MnuResourceTaskWork *work = sdfMemoryGetBlockAddress(allocation);
+
+    memset(work, 0, sizeof(MnuResourceTaskWork));
+    work->allocation = allocation;
+    work->messageResource1 = sdfReadNamedResource(D_003AF758,
+                                                  &work->messageResourceInfo1, 0);
+    work->messageResource2 = sdfReadNamedResource(D_003AF780,
+                                                  &work->messageResourceInfo2, 0);
+    mnuMarkTitleStreamResetPending();
+    mnuResetTitleStreamLocked();
+    func_0026A5F0(0x10);
+    mnuRunTitleStreamTransitionAndLogBgm();
+    memset(D_0036C698, 0, sizeof(s32) * 14);
+    mnuRequestMantraResources(work);
+    work->drawPool = mnuCreateSpriteResource(0x3C, 8, 0);
+    if (work->staffMenuContext == NULL) {
+        work->staffMenuContext = (u32 *)mnuCreateWorkBlock();
+    }
+    return work;
+}
 
 void func_0024F6F0(s32 unused, MnuResourceTaskWork *work) {
     if (work == NULL) {
@@ -241,7 +275,7 @@ void func_0024F6F0(s32 unused, MnuResourceTaskWork *work) {
 /* The task handle is shared by the existence probe and explicit stop;
  * both clear it when the resource group is no longer active. */
 void mnuCreateResourceTask(void) {
-    s32 data = func_0024F608();
+    s32 data = (s32)func_0024F608();
     mnuSceneResourceContext = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, D_0036C648, func_0024F6F0, data);
 }
 
@@ -389,9 +423,6 @@ void mnuResetResourceAnimation(void) {
     mnuAdvanceListCursorDefault(((MnuResourceTask *)object)->menuList);
 }
 
-extern s32 sdfAllocGeneralBlock(s32);
-extern void *sdfMemoryGetBlockAddress(s32);
-
 u32 *mnuAllocateEmptyResourceListState(void) {
     s32 handle = sdfAllocGeneralBlock(0x10);
     u32 *block = sdfMemoryGetBlockAddress(handle);
@@ -437,6 +468,10 @@ void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
     mnuReleaseMenuVisualWorkResources(*(s32 *)(record + 0x24));
     sdfReleaseResourceAllocation(taskData[0]);
 }
+
+INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF758);
+
+INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF780);
 
 INCLUDE_RODATA(const s32, "game/code_0024E1C8", mnuResourceTaskName);
 
@@ -567,11 +602,91 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_00250758);
+typedef struct MnuProfileRequirementSlot {
+    s32 status;
+    u8 pad04[8];
+    u8 requirements[8];
+} MnuProfileRequirementSlot;
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_00250820);
+typedef struct MnuProfileRequirementRecord {
+    u8 pad00[4];
+    u32 flags04;
+    u8 pad08[0x10];
+    u32 flags18;
+    u8 pad1C[0x10];
+    MnuProfileRequirementSlot slots[2];
+} MnuProfileRequirementRecord;
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_002508D8);
+s32 func_00250758(u16 index) {
+    s32 result = 0;
+    u8 *record = (u8 *)prfReqGetEntryRecord(index);
+    s32 requirementWordIndex = 0;
+    u8 *statusBase = record + 0xC;
+    s32 fieldOffset = 0x20;
+    s32 remaining = 1;
+
+    do {
+        if (*(u32 *)(statusBase + fieldOffset) & 1) {
+            u8 *requirementsBase = record + 0x18;
+            s32 requirementCount = 0;
+            if (requirementsBase[fieldOffset] != 0) {
+                s32 requirementOffset = requirementWordIndex * sizeof(s32);
+                u8 *requirements =
+                    (u8 *)(requirementOffset + (s32)requirementsBase + 0x20);
+                do {
+                    requirements++;
+                    requirementCount++;
+                } while (*requirements != 0);
+            }
+            if (requirementCount >= 2) {
+                result |= 1;
+            }
+        }
+        remaining--;
+        requirementWordIndex += 5;
+        fieldOffset += 0x14;
+    } while (remaining >= 0);
+    if ((*(u32 *)(record + 4) & 4) != 0 && (*(u32 *)(record + 0x18) & 4) != 0) {
+        result |= 2;
+    }
+    return result;
+}
+
+u8 *func_00250820(u16 index) {
+    s32 i = 0;
+    MnuProfileRequirementRecord *record;
+
+    if ((func_00250758(index) & 1) != 0) {
+        record = (MnuProfileRequirementRecord *)prfReqGetEntryRecord(index);
+        while (record->slots[i].status != 1) {
+            i++;
+            if (i >= 2) {
+                return NULL;
+            }
+        }
+        return record->slots[i].requirements;
+    }
+    return NULL;
+}
+
+s32 func_002508D8(u16 index) {
+    MnuResourceTask *task = (MnuResourceTask *)func_002CB3B8(mnuSceneResourceContext, 0);
+    MnuProfileProgress *progress =
+        (MnuProfileProgress *)task->menuList->selectionNode->selectionAddress;
+    u8 *requirements = func_00250820(index);
+
+    if (requirements == NULL) {
+        return 1;
+    }
+    if (prfGetCapValue(requirements[0]) ==
+        ptyGetProfileRecordValue(progress->unit, requirements[0])) {
+        if (prfGetCapValue(requirements[1]) ==
+            ptyGetProfileRecordValue(progress->unit, requirements[1])) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 typedef struct MnuSceneGridWork {
     u8 pad00[0x18];

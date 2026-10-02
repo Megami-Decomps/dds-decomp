@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
-"""Verify or import the complete version-23 FLD2 corpus from an owned disc.
+"""Verify or import a complete version-23 FLD1/FLD2 corpus from an owned disc.
 
     python3 tools/fld_corpus.py dds1 game.iso
     python3 tools/fld_corpus.py dds1 game.iso \
         --output-dir src/dds1/data/field \
         --manifest config/dds1/field_fld2.sha1
 
-The importer reads FLD2 payloads directly from loose files and LB archives in
+    python3 tools/fld_corpus.py dds1 game.iso --kind fld1 \
+        --output-dir src/dds1/data/field \
+        --manifest config/dds1/field_fld1.sha1
+
+The importer reads FLD payloads directly from loose files and LB archives in
 DDS3.IMG. Every emitted source is assembled again and compared byte-for-byte
 before any output is written. Identical loose/archive copies share one source.
 Older versions and non-FLD2 `.f2` payloads are reported and left for their own
@@ -31,6 +35,10 @@ import lb
 
 SECTOR_SIZE = 0x800
 VERSION = 23
+KINDS = {
+    "fld1": (".f1", "F1", b"FLD1", ".f1asm"),
+    "fld2": (".f2", "F2", b"FLD2", ".fldasm"),
+}
 
 
 @dataclass(frozen=True)
@@ -60,36 +68,39 @@ def _disc_index(version: str, iso: Path) -> tuple[bytes, int]:
         cd.close()
 
 
-def _field_files(ddt: bytes) -> tuple[tuple[str, int, int], ...]:
+def _field_files(ddt: bytes, kind: str) -> tuple[tuple[str, int, int], ...]:
+    suffix = KINDS[kind][0]
     return tuple(
         entry
         for entry in extract.walk_ddt(ddt)
         if entry[0].lower().startswith("/fld/")
-        and PurePosixPath(entry[0]).suffix.lower() in {".lb", ".f2"}
+        and PurePosixPath(entry[0]).suffix.lower() in {".lb", suffix}
     )
 
 
-def _payloads(path: str, data: bytes) -> tuple[tuple[str, bytes], ...]:
-    if path.lower().endswith(".f2"):
+def _payloads(path: str, data: bytes, kind: str) -> tuple[tuple[str, bytes], ...]:
+    suffix, extension, _, _ = KINDS[kind]
+    if path.lower().endswith(suffix):
         return ((path, data),)
     entries = tuple(
         entry
         for entry in lb.parse_archive(data).entries
-        if entry.extension.upper() == "F2"
+        if entry.extension.upper() == extension
     )
     if len(entries) > 1:
-        raise fld.FldError(f"{path} contains multiple FLD2 entries")
+        raise fld.FldError(f"{path} contains multiple {extension} entries")
     return tuple((f"{path}#{entry.index}", lb.entry_data(entry)) for entry in entries)
 
 
 def read_sources(
-    version: str, iso: Path
+    version: str, iso: Path, kind: str = "fld2"
 ) -> tuple[dict[str, Source], tuple[str, ...], int]:
+    _, _, magic, _ = KINDS[kind]
     ddt, img_lsn = _disc_index(version, iso)
     sources: dict[str, Source] = {}
     non_v23: list[str] = []
     payload_count = 0
-    files = _field_files(ddt)
+    files = _field_files(ddt, kind)
 
     with iso.open("rb") as image:
         for file_index, (path, relative_lsn, size) in enumerate(files, 1):
@@ -98,12 +109,12 @@ def read_sources(
             if len(packed) != size:
                 raise fld.FldError(f"{path} is truncated in DDS3.IMG")
 
-            for location, data in _payloads(path, packed):
+            for location, data in _payloads(path, packed, kind):
                 payload_count += 1
                 if (
                     len(data) < 8
                     or struct.unpack_from("<I", data)[0] != VERSION
-                    or data[4:8] != b"FLD2"
+                    or data[4:8] != magic
                 ):
                     non_v23.append(location)
                     continue
@@ -131,14 +142,19 @@ def read_sources(
 
 
 def write_sources(
-    version: str, sources: dict[str, Source], output_dir: Path, manifest: Path
+    version: str,
+    sources: dict[str, Source],
+    output_dir: Path,
+    manifest: Path,
+    kind: str = "fld2",
 ) -> None:
+    binary_suffix, _, _, source_suffix = KINDS[kind]
     output_dir.mkdir(parents=True, exist_ok=True)
     for stem, source in sorted(sources.items()):
-        (output_dir / f"{stem}.fldasm").write_text(source.text, encoding="utf-8")
+        (output_dir / f"{stem}{source_suffix}").write_text(source.text, encoding="utf-8")
 
     lines = [
-        f"{hashlib.sha1(source.data).hexdigest()}  build/{version}/data/field/{stem}.f2"
+        f"{hashlib.sha1(source.data).hexdigest()}  build/{version}/data/field/{stem}{binary_suffix}"
         for stem, source in sorted(sources.items())
     ]
     manifest.parent.mkdir(parents=True, exist_ok=True)
@@ -149,6 +165,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("version", choices=("dds1", "dds2"))
     parser.add_argument("iso", type=Path)
+    parser.add_argument("--kind", choices=tuple(KINDS), default="fld2")
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--manifest", type=Path)
     args = parser.parse_args()
@@ -156,9 +173,9 @@ def main() -> None:
         parser.error("--output-dir and --manifest must be supplied together")
 
     try:
-        sources, non_v23, payload_count = read_sources(args.version, args.iso)
+        sources, non_v23, payload_count = read_sources(args.version, args.iso, args.kind)
         if args.output_dir:
-            write_sources(args.version, sources, args.output_dir, args.manifest)
+            write_sources(args.version, sources, args.output_dir, args.manifest, args.kind)
     except (
         OSError,
         ValueError,
@@ -172,7 +189,7 @@ def main() -> None:
     action = "wrote" if args.output_dir else "verified"
     print(
         f"{args.version}: {action} {len(sources)} exact version-{VERSION} sources "
-        f"from {payload_count} FLD2 payloads ({duplicates} identical duplicates, "
+        f"from {payload_count} {args.kind.upper()} payloads ({duplicates} identical duplicates, "
         f"{len(non_v23)} non-v23 payloads)"
     )
     for location in non_v23:

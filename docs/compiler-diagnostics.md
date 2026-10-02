@@ -297,6 +297,26 @@ This is a classifier and an experiment guide, not a register-binding recipe.
 An allocation-driven source idiom should be documented only after natural C
 matches exactly and transfers to a function that was not used to derive it.
 
+### Check whether the required saved roles are feasible
+
+For a candidate with a broad saved-register residual, combine the existing
+reports instead of starting with declaration permutations:
+
+```sh
+python3 tools/ee_gcc_probe.py SOURCE.c --function NAME --cflag=-gstabs \
+  --out-dir /tmp/name-locations
+python3 tools/ee_gcc_source_locations.py /tmp/name-locations --function NAME
+python3 tools/ee_gcc_allocations.py /tmp/name-locations --function NAME
+```
+
+Compare the named final-home hints, pass-19/20 dispositions, emitted candidate
+data flow, and the distinct roles visible in retail. If the candidate no longer
+has enough live roles at the allocation boundary, only a real type, contract,
+later-use, or ownership fact can make the missing role allocatable. Test one
+such fact when the program supports it; otherwise park the search. See the
+[saved-role feasibility gate](compiler-decision-atlas.md#saved-role-feasibility-gate)
+for its evidence requirements and fail-closed limits.
+
 ## Explain a filled delay slot
 
 When the first divergence is pass `29`, inspect the sequence that the delayed-
