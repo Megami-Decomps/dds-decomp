@@ -120,7 +120,11 @@ extern u8 D_00436578[];
 typedef struct FrFontSys {
     FrFontEntry entries[9];   /* 0x0 */
     s32 count;                /* 0x144 */
-    u8 unk148[0x4C];          /* 0x148 */
+    s32 itemCount;            /* 0x148 */
+    s32 glyphCount;           /* 0x14C */
+    s32 itemPool;             /* 0x150 */
+    s32 glyphPool;            /* 0x154 */
+    u8 unk158[0x3C];          /* 0x158 */
     FrFontGlyph *slots[2];    /* 0x194 */
 } FrFontSys;
 
@@ -222,7 +226,37 @@ FrFontGlyph *frFontAdvanceOrRetainFadingGlyph(FrFontGlyph *glyph) {
     return func_0019C4D0(glyph);
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019C4D0);
+extern s32 itfEnqueueMemNode(void *node, s32 pool);
+
+/* Release a glyph chain, walking back along `previous`: drop each child's record reference (releasing the record once unreferenced), return the child and then the glyph itself to their node pools, and keep the live counts. */
+FrFontGlyph *func_0019C4D0(FrFontGlyph *glyph) {
+    FrFontGlyph *current = glyph;
+    FrFontGlyph *child;
+    FrFontGlyph *nextChild;
+    FrFontGlyph *previous;
+
+    if (current == NULL) {
+        return NULL;
+    }
+    do {
+        child = current->firstChild;
+        while (child != NULL) {
+            nextChild = child->next;
+            if (child->unk20 == NULL) {
+                ((FrFontRecord *)child->firstChild)->refs--;
+                frFontReleaseUnreferencedGlyphItem(child);
+            }
+            itfEnqueueMemNode(child, frFontWork.itemPool);
+            frFontWork.itemCount--;
+            child = nextChild;
+        }
+        previous = current->previous;
+        itfEnqueueMemNode(current, frFontWork.glyphPool);
+        current = previous;
+        frFontWork.glyphCount--;
+    } while (current != NULL);
+    return NULL;
+}
 
 s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *glyph) {
     FrFontGlyph **slot = &D_004528B4[kwlnGetDrawBufferIndex() & 0xFF];
