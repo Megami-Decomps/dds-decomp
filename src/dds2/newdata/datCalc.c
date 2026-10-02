@@ -1,5 +1,17 @@
 #include "common.h"
 
+typedef struct DatSkillOwner {
+    u16 flags;        /* 0x00: 0x20 = skills live in the party table */
+    u16 unk2;
+    u16 partyIndex;   /* 0x04 */
+    u8 unk6[0x1C];
+    u16 skills[0x18]; /* 0x22 */
+} DatSkillOwner;
+
+extern s32 func_001188F0(s32 unit);
+extern s32 func_001189D0(s32 unit);
+extern s32 datUnitHasSkill(struct DatSkillOwner *unit, s32 skill);
+
 /* Two clamped cursor coordinates, each followed by its maximum. */
 typedef struct DatCalcCursor {
     u8 unk0[6];
@@ -31,9 +43,45 @@ void datClearUnitStatusBits(u8 *work, s32 mask) {
     *(u16 *)(work + 0xE) &= ~mask;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_001197C0);
+u32 func_001197C0(DatSkillOwner *unit) {
+    u32 bonus = 0;
+    u32 value = func_001188F0((s32)unit);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_001198C0);
+    if (datUnitHasSkill(unit, 0x220)) {
+        bonus = value * 10 / 100;
+    }
+    if (datUnitHasSkill(unit, 0x221)) {
+        bonus += value * 20 / 100;
+    }
+    if (datUnitHasSkill(unit, 0x222)) {
+        bonus += value * 30 / 100;
+    }
+    value += bonus;
+    if (!(unit->flags & 0x20) && value >= 1000) {
+        value = 999;
+    }
+    return value;
+}
+
+u32 func_001198C0(DatSkillOwner *unit) {
+    u32 bonus = 0;
+    u32 value = func_001189D0((s32)unit);
+
+    if (datUnitHasSkill(unit, 0x223)) {
+        bonus = value * 10 / 100;
+    }
+    if (datUnitHasSkill(unit, 0x224)) {
+        bonus += value * 20 / 100;
+    }
+    if (datUnitHasSkill(unit, 0x225)) {
+        bonus += value * 30 / 100;
+    }
+    value += bonus;
+    if (!(unit->flags & 0x20) && value >= 1000) {
+        value = 999;
+    }
+    return value;
+}
 
 void datMoveCursorX(DatCalcCursor *cursor, s32 delta) {
     u32 value;
@@ -82,13 +130,6 @@ s32 func_00119A78(u8 *unit, s32 slot) {
     return value;
 }
 
-typedef struct DatSkillOwner {
-    u16 flags;        /* 0x00: 0x20 = skills live in the party table */
-    u16 unk2;
-    u16 partyIndex;   /* 0x04 */
-    u8 unk6[0x1C];
-    u16 skills[0x18]; /* 0x22 */
-} DatSkillOwner;
 
 typedef struct DatPartyMember {
     u8 unk0[0x18];
@@ -118,7 +159,38 @@ s32 datUnitHasSkill(DatSkillOwner *unit, s32 skill) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_00119BA0);
+typedef struct DatUnitStatus {
+    u8 pad00[0xE];
+    u16 status; /* 0x0E */
+} DatUnitStatus;
+
+/* Raise the low half of `value` to a per-status minimum (0x12C, 0x96, 0xC8; status 4 forces 1) unless a bit in 0x70000 is set. */
+s32 func_00119BA0(DatUnitStatus *unit, s32 value) {
+    if ((value & 0x70000) == 0) {
+        switch (unit->status & 0x7FFF) {
+        case 8:
+        case 0x100:
+            if ((u16)value < 0xC8) {
+                value = (value & 0xFFFF0000) | 0xC8;
+            }
+            break;
+        case 4:
+            value = (value & 0xFFFF0000) | 1;
+            break;
+        case 2:
+            if ((u16)value < 0x96) {
+                value = (value & 0xFFFF0000) | 0x96;
+            }
+            break;
+        case 1:
+            if ((u16)value < 0x12C) {
+                value = (value & 0xFFFF0000) | 0x12C;
+            }
+            break;
+        }
+    }
+    return value;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_00119C78);
 
