@@ -224,10 +224,10 @@ extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 
 /* Upload an image to GS memory at the given buffer, serialized by the GS semaphore. */
-void sdfUploadGsImageUnderSemaphore(s16 buffer, s32 image) {
+void sdfUploadGsImageUnderSemaphore(s32 buffer, s32 image) {
     u8 loadImage[0x60];
 
-    sceGsSetDefLoadImage(loadImage, buffer, 1, 0, 0, 0, 8, 2);
+    sceGsSetDefLoadImage(loadImage, (s16)buffer, 1, 0, 0, 0, 8, 2);
     WaitSema(sdfGsImageUploadSemaphore);
     FlushCache(0);
     sceGsExecLoadImage(loadImage, image);
