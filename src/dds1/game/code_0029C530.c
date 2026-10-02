@@ -6819,10 +6819,13 @@ extern s32 effFileQueue;
 extern void camFollowOffsetVec(u8 *, void *);
 
 typedef struct EffBattleCamera {
-    u8 pad_00[0x60];
+    u8 pad_00[0x40];
+    f32 position[3];
+    u8 pad4C[0x14];
     f32 scale;
     u32 mode;
     u32 flags; /* 0x68 */
+    u8 pad6C[0x14];
 } EffBattleCamera;
 
 /* Shared view transform contributes the scale used by camera-relative effects. */
@@ -6904,7 +6907,7 @@ void effApplyBattleCameraToObject(work)
 extern void fileJobSetPrimaryData(u32, void *, u32, u16);
 
 typedef struct EffFileJobRequest {
-    u8 pad0[4];
+    char *name;
     u16 fileKind;
     u8 pad6[2];
     u16 transferMode;
@@ -7421,17 +7424,74 @@ INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39F0);
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B59A8);
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B65C0);
-
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B6778);
-
-extern u32 D_0038F2F0[];
-
 /* Asset object slot linked to the shared effect-file state. */
 typedef struct EffQueuedFileObject {
     u8 pad00[0x34];
     u8 *linkedState; /* 0x34 */
 } EffQueuedFileObject;
+
+typedef struct EffFileJobEntry {
+    EffBattleCamera camera;
+    u8 pad80[8];
+    u8 unk88;
+    u8 unk89;
+    u8 unk8A;
+    u8 pad8B[5];
+    u32 fileHandle;
+    u8 pad94[8];
+    char filename[1];
+} EffFileJobEntry;
+
+typedef struct EffCameraCreateRequest {
+    EffFileJobRequest *resource;
+    EffQueuedFileObject *object;
+    u32 existingJob;
+    f32 position[3];
+} EffCameraCreateRequest;
+
+typedef struct FileQueue FileQueue;
+typedef struct FileJob FileJob;
+extern void fileQueueInitTransform(void *);
+extern FileJob *fileAppendJob(FileQueue *, u32);
+extern s32 fileQueueCountLinkedJobs(FileQueue *);
+extern s32 effCurrentFileQueueEntry;
+extern u32 D_003BD064;
+extern u32 D_0038F2F0[];
+
+u32 func_002B65C0(EffCameraCreateRequest *request) {
+    EffFileJobEntry *entry;
+    u32 count;
+
+    fileQueueInitTransform(D_003DF9A0);
+    entry = (EffFileJobEntry *)fileAppendJob((FileQueue *)effFileQueue, effLoadFileJobPayload(request->resource, request->existingJob));
+    effCurrentFileQueueEntry = (s32)entry;
+    strcpy(entry->filename, request->resource->name);
+    entry->camera.position[0] = request->position[0];
+    entry->camera.position[1] = request->position[1];
+    entry->camera.position[2] = request->position[2];
+    entry->unk88 = 8;
+    entry->unk89 = 0;
+    entry->unk8A = 0;
+    memcpy(D_003DF9A0, entry, 0x80);
+    effQueuedFileHandle = entry->fileHandle;
+    D_003BD064 = effCreateBattleCameraJob((u8 *)request->resource);
+    effQueuedFileObject = (s32)request->object;
+    count = fileQueueCountLinkedJobs((FileQueue *)effFileQueue);
+    if (count > 21) {
+        D_0038F2F0[3] = 20;
+        D_003BD058 = count - 21;
+    } else {
+        D_003BD058 = 0;
+        D_0038F2F0[3] = count - 1;
+    }
+    request->object->linkedState = (u8 *)D_0038F2F0;
+    effResetFileResourceManager();
+    return 0x800000;
+}
+
+INCLUDE_ASM(const s32, "game/code_0029C530", func_002B6778);
+
+
 
 extern u32 D_0038EA6C[];
 
@@ -7671,7 +7731,6 @@ u32 effPollPartResource(void) {
     return result;
 }
 
-extern s32 effCurrentFileQueueEntry;
 
 typedef struct EffectBlock128 {
     u32 word[32];
@@ -8412,12 +8471,6 @@ typedef struct EffFileResourceRecord {
     u32 allocationHandle;
 } EffFileResourceRecord;
 
-typedef struct EffFileJobEntry {
-    u8 pad0[0x90];
-    u32 fileHandle;
-    u8 pad94[8];
-    char filename[1];
-} EffFileJobEntry;
 
 s32 effPollFileRecord(char *path, s32 slot) {
     u8 record[0x110];
@@ -8492,7 +8545,6 @@ typedef struct EffectFileHeader {
     u32 length;
 } EffectFileHeader;
 
-extern u32 D_003BD064;
 
 extern void effResetFileResourceManager(void);
 
