@@ -132,9 +132,54 @@ extern s32 btlAverageAllCurrentForMask(u32 arg0);
 extern s32 func_001A94A0(u32 arg0);
 extern void *memset(void *dst, s32 c, u32 n);
 extern s32 mdlFlagTest(s32 flagIndex);
+extern void mdlFlagSet(s32 flagIndex);
 extern s32 effMiscRandMod(u32 stream, u32 modulus);
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_00119900);
+void func_00119900(s32 index, s32 delta) {
+    s32 offset;
+    s32 value;
+
+    if ((u32)(index - 0x80) >= 0x20) {
+        goto update_value;
+    }
+    mdlFlagSet(index + 0x980);
+    return;
+
+update_value:
+    offset = index + 0x12A0;
+    value = *(u8 *)(datGameState + offset);
+    value += delta;
+    if (value < 0) {
+        value = 0;
+    }
+
+    if (index >= 0xA0) {
+        goto clamp_99;
+    }
+    if (index < 0x80) {
+        goto below_80;
+    }
+    if (value >= 2) {
+        value = 1;
+    }
+    goto store_value;
+
+below_80:
+    if (index < 0x60) {
+        goto select_99;
+    }
+clamp_99:
+    if (value >= 100) {
+        value = 99;
+    }
+    goto store_value;
+
+select_99:
+    value = value < 100 ? value : 99;
+
+store_value:
+    *(u8 *)(datGameState + offset) = value;
+}
 
 s32 evtCheckValueThreshold(s32 index, s32 limit) {
     if ((u32)(index - 0x80) < 0x20) {
