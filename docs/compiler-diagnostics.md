@@ -65,6 +65,36 @@ interface: old-C wrappers can preserve a return register under several source
 return types. Confirm a finding against callers and the callee's machine-level
 data flow before changing a declaration.
 
+### Inventory old-style call boundaries
+
+Use `--old-style` when a near-match may depend on a K&R definition or an
+unspecified `name()` declaration:
+
+```sh
+python3 tools/ee_gcc_contracts.py --version dds2 --old-style \
+  --symbol fileSetRecordSecondVector
+```
+
+This opt-in report lists recognized K&R formal declarations and direct call
+sites that see an unspecified contract, including each observed argument count
+and a conservative source-expression class. It distinguishes explicit casts,
+address expressions, floating constants, default-width integer constants and
+EE 64-bit `long`/`long long` constants; other expressions remain unresolved.
+A fixed `name(void)` prototype is not an old-style boundary. Static entities
+are kept file-local, so a same-spelled external function in another unit is a
+separate row.
+
+The inventory is evidence, not a warning or an automatic mismatch. An omitted
+argument may leave an incoming register untouched, and an unspecified call can
+preserve a wide literal's front-end mode, but source text alone proves neither
+the live register contents nor the callee's historical interface. Confirm the
+call in assembly and compare pass-00 RTL before changing a declaration. Files
+with conditional-compilation branches contribute no call-site observations,
+and unsupported declarators remain fail-closed. Old-style rows do not change
+the command's exit status; fixed declaration/definition conflicts still do.
+Recognized K&R definitions remain listed as skipped by the fixed-contract
+comparison even when this separate inventory describes them.
+
 ## Capture a function
 
 The output directory must normally be outside the checkout so multi-megabyte

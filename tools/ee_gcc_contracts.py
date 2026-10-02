@@ -82,6 +82,25 @@ class NonDiscardCall:
     path: str
 
 
+@dataclass(frozen=True)
+class OldStyleDefinition:
+    name: str
+    return_type: TypeShape
+    params: tuple[tuple[str, TypeShape], ...]
+    line: int
+    path: str
+    is_static: bool
+
+
+@dataclass(frozen=True)
+class DirectCall:
+    name: str
+    caller: str
+    line: int
+    path: str
+    argument_classes: tuple[str, ...]
+
+
 def _mask_source(source: str) -> str:
     """Blank comments, strings, chars, and preprocessing lines, preserving lines."""
     out = list(source)
@@ -182,7 +201,7 @@ def _function_macro_names(source: str) -> set[str]:
 def _split_top_level(tokens: list[str], delimiter: str) -> list[list[str]]:
     pieces: list[list[str]] = []
     start = 0
-    paren = bracket = 0
+    paren = bracket = brace = 0
     for i, token in enumerate(tokens):
         if token == "(":
             paren += 1
@@ -192,7 +211,11 @@ def _split_top_level(tokens: list[str], delimiter: str) -> list[list[str]]:
             bracket += 1
         elif token == "]":
             bracket -= 1
-        elif token == delimiter and paren == 0 and bracket == 0:
+        elif token == "{":
+            brace += 1
+        elif token == "}":
+            brace -= 1
+        elif token == delimiter and paren == bracket == brace == 0:
             pieces.append(tokens[start:i])
             start = i + 1
     pieces.append(tokens[start:])
@@ -369,6 +392,218 @@ def _looks_like_knr_definition(tokens: list[str]) -> bool:
             if close < len(tokens):
                 return True
     return False
+
+
+def _matching_paren(tokens: list[str], opening: int) -> Optional[int]:
+    depth = 0
+    for index in range(opening, len(tokens)):
+        if tokens[index] == "(":
+            depth += 1
+        elif tokens[index] == ")":
+            depth -= 1
+            if depth == 0:
+                return index
+    return None
+
+
+def _parse_old_style_definition(
+    tokens: list[str], path: str, line: int,
+) -> Optional[OldStyleDefinition]:
+    """Parse the narrow K&R definition form used by the project.
+
+    This is intentionally separate from Signature: old-style definitions are
+    evidence to inventory, not fixed contracts to compare mechanically.
+    """
+    opening = next((
+        index for index, token in enumerate(tokens)
+        if token == "(" and index > 0
+        and re.fullmatch(r"[A-Za-z_$][\w$]*", tokens[index - 1])
+    ), None)
+    if opening is None:
+        return None
+    close = _matching_paren(tokens, opening)
+    if close is None or close == len(tokens) - 1:
+        return None
+    name = tokens[opening - 1]
+    formal_parts = _split_top_level(tokens[opening + 1:close], ",")
+    if (not formal_parts or any(
+            len(part) != 1
+            or not re.fullmatch(r"[A-Za-z_$][\w$]*", part[0])
+            or part[0] in TYPE_WORDS
+            for part in formal_parts)):
+        return None
+    return_tokens = tokens[:opening - 1]
+    return_type = _parse_type(
+        return_tokens, allow_abstract_declarator=False,
+        has_parameter_name=False)
+    if return_type is None:
+        return None
+    formal_names = [part[0] for part in formal_parts]
+    declarations = _split_top_level(tokens[close + 1:], ";")
+    declared: dict[str, TypeShape] = {}
+    for declaration in declarations:
+        if not declaration:
+            continue
+        matches = [name for name in formal_names if declaration.count(name) == 1]
+        if len(matches) != 1:
+            return None
+        formal = matches[0]
+        name_index = declaration.index(formal)
+        type_tokens = declaration[:name_index] + declaration[name_index + 1:]
+        shape = _parse_type(
+            type_tokens, allow_abstract_declarator=False,
+            has_parameter_name=False, is_parameter=True)
+        if shape is None or formal in declared:
+            return None
+        declared[formal] = shape
+    if set(declared) != set(formal_names):
+        return None
+    return OldStyleDefinition(
+        name=name,
+        return_type=return_type,
+        params=tuple((formal, declared[formal]) for formal in formal_names),
+        line=line,
+        path=path,
+        is_static="static" in return_tokens,
+    )
+
+
+def _argument_class(tokens: list[str]) -> str:
+    if not tokens:
+        return "masked literal or expression"
+    joined = "".join(tokens)
+    if tokens[0] == "&":
+        return "address expression"
+    if tokens[0] == "(" and (close := _matching_paren(tokens, 0)) is not None:
+        if close + 1 < len(tokens) and tokens[close + 1] == "{":
+            return "compound literal expression (type unresolved)"
+        cast = _parse_type(
+            tokens[1:close], allow_abstract_declarator=True,
+            has_parameter_name=False)
+        if cast is not None and close < len(tokens) - 1:
+            return f"explicit cast to {cast.spelling}"
+    if re.fullmatch(r"(?:0[xX][0-9A-Fa-f]+|[0-9]+)(?:[uU](?:ll|LL|l|L)?|(?:ll|LL|l|L)[uU]?)?", joined):
+        suffix = re.search(r"[uUlL]+$", joined)
+        text = suffix.group().lower() if suffix else ""
+        if "ll" in text or "l" in text:
+            return "64-bit integer literal on EE"
+        return "default-width integer literal"
+    if re.fullmatch(r"(?:[0-9]+\.[0-9]*|\.[0-9]+|[0-9]+)(?:[eE][+-]?[0-9]+)?[fF]", joined):
+        return "float literal"
+    if re.fullmatch(r"(?:[0-9]+\.[0-9]*|\.[0-9]+)(?:[eE][+-]?[0-9]+)?", joined):
+        return "double literal"
+    return "expression (type unresolved)"
+
+
+def _direct_calls_with_arguments(
+    body: list[tuple[str, int]], source: str, path: str, caller: str,
+    parameter_names: set[str], excluded_names: AbstractSet[str],
+    newlines: Optional[list[int]] = None,
+    has_conditional_compilation: bool = False,
+) -> list[DirectCall]:
+    if has_conditional_compilation:
+        return []
+    if newlines is None:
+        newlines = [index for index, char in enumerate(source) if char == "\n"]
+    shadowed = set(parameter_names) | _function_local_names(body) | excluded_names
+    excluded = ({"if", "while", "switch", "for", "sizeof", "return"}
+                | TYPE_WORDS | QUALIFIERS | STORAGE_WORDS)
+    calls: list[DirectCall] = []
+    index = 0
+    while index + 1 < len(body):
+        token, position = body[index]
+        previous = body[index - 1][0] if index else None
+        if (re.fullmatch(r"[A-Za-z_$][\w$]*", token)
+                and token not in shadowed | excluded
+                and body[index + 1][0] == "("
+                and previous not in {".", ">"}):
+            depth = 1
+            close = index + 2
+            while close < len(body) and depth:
+                if body[close][0] == "(":
+                    depth += 1
+                elif body[close][0] == ")":
+                    depth -= 1
+                close += 1
+            if depth == 0:
+                inner = [value for value, _ in body[index + 2:close - 1]]
+                raw_inner = source[body[index + 1][1] + 1:body[close - 1][1]]
+                if not inner and not raw_inner.strip():
+                    pieces: list[list[str]] = []
+                else:
+                    pieces = _split_top_level(inner, ",")
+                calls.append(DirectCall(
+                    name=token,
+                    caller=caller,
+                    line=bisect.bisect_right(newlines, position) + 1,
+                    path=path,
+                    argument_classes=tuple(_argument_class(piece) for piece in pieces),
+                ))
+        index += 1
+    return calls
+
+
+def scan_old_style_source(
+    source: str, path: str,
+    known_function_macros: AbstractSet[str] = frozenset(),
+) -> tuple[list[OldStyleDefinition], list[DirectCall]]:
+    """Collect K&R definitions and conservative direct-call observations."""
+    masked = _mask_source(source)
+    token_rows = [(match.group(), match.start()) for match in TOKEN_RE.finditer(masked)]
+    newlines = [index for index, char in enumerate(source) if char == "\n"]
+    has_conditional_compilation = bool(CONDITIONAL_DIRECTIVE_RE.search(source))
+    definitions: list[OldStyleDefinition] = []
+    calls: list[DirectCall] = []
+    segment: list[str] = []
+    segment_pos = 0
+    index = 0
+    macros = known_function_macros | _function_macro_names(source)
+    while index < len(token_rows):
+        token, position = token_rows[index]
+        if not segment:
+            segment_pos = position
+        if token == ";":
+            # K&R parameter declarations sit between the header and opening
+            # brace. Keep those semicolons; ordinary top-level declarations
+            # end the current segment.
+            trial = segment + [token]
+            if _looks_like_knr_definition(trial):
+                segment = trial
+            else:
+                segment = []
+            index += 1
+            continue
+        if token != "{":
+            segment.append(token)
+            index += 1
+            continue
+        line = source.count("\n", 0, segment_pos) + 1
+        old_style = _parse_old_style_definition(segment, path, line)
+        ordinary, _ = _candidate(segment, "{", path, line)
+        depth = 1
+        body_start = index + 1
+        index += 1
+        while index < len(token_rows) and depth:
+            if token_rows[index][0] == "{":
+                depth += 1
+            elif token_rows[index][0] == "}":
+                depth -= 1
+            index += 1
+        if depth == 0 and (old_style is not None or ordinary is not None):
+            caller = old_style.name if old_style is not None else ordinary.name
+            parameter_names = (
+                {name for name, _shape in old_style.params}
+                if old_style is not None
+                else _definition_parameter_names(segment)
+            )
+            calls.extend(_direct_calls_with_arguments(
+                token_rows[body_start:index - 1], source, path, caller,
+                parameter_names, macros, newlines,
+                has_conditional_compilation))
+            if old_style is not None:
+                definitions.append(old_style)
+        segment = []
+    return definitions, calls
 
 
 def _candidate(tokens: list[str], delimiter: str, path: str, line: int) -> tuple[Optional[Signature], Optional[str]]:
@@ -974,6 +1209,121 @@ def annotate_ignored_result_calls(
     report["summary"]["other_call_form_sites"] = other_attached
 
 
+def build_old_style_report(
+    definitions: Iterable[OldStyleDefinition],
+    signatures: Iterable[Signature],
+    calls: Iterable[DirectCall],
+    wanted: AbstractSet[str] = frozenset(),
+) -> list[dict[str, object]]:
+    """Join old-style boundaries to calls without declaring them erroneous."""
+    definition_rows = list(definitions)
+    signature_rows = list(signatures)
+    # Entity identity is external-per-title or static-per-file. Keeping it in
+    # the key prevents a same-spelled static K&R helper from authorizing calls
+    # to an unrelated external symbol in another translation unit.
+    EntityKey = tuple[str, str, str]
+    entities: dict[EntityKey, dict[str, list[object]]] = {}
+
+    def key(name: str, path: str, is_static: bool) -> EntityKey:
+        return (_game(path) or "", name, path if is_static else "")
+
+    for definition in definition_rows:
+        if wanted and definition.name not in wanted:
+            continue
+        entities.setdefault(
+            key(definition.name, definition.path, definition.is_static),
+            {"definitions": [], "declarations": [], "calls": []},
+        )["definitions"].append(definition)
+    for signature in signature_rows:
+        if (signature.kind != "declaration" or signature.params is not None
+                or (wanted and signature.name not in wanted)):
+            continue
+        entities.setdefault(
+            key(signature.name, signature.path, signature.is_static),
+            {"definitions": [], "declarations": [], "calls": []},
+        )["declarations"].append(signature)
+
+    for call in calls:
+        if wanted and call.name not in wanted:
+            continue
+        visible = [
+            signature for signature in signature_rows
+            if signature.name == call.name and signature.path == call.path
+            and signature.line < call.line
+        ]
+        latest = max(visible, key=lambda signature: signature.line) if visible else None
+        if latest is not None:
+            # The closest visible declaration is authoritative. A fixed
+            # prototype suppresses old-style evidence even when a K&R
+            # definition occurs earlier in the same file.
+            if latest.params is not None:
+                continue
+            call_key = key(call.name, call.path, latest.is_static)
+        else:
+            preceding = [
+                definition for definition in definition_rows
+                if definition.name == call.name
+                and definition.path == call.path
+                and definition.line < call.line
+            ]
+            if not preceding:
+                continue
+            closest = max(preceding, key=lambda definition: definition.line)
+            call_key = key(call.name, call.path, closest.is_static)
+        if call_key in entities:
+            entities[call_key]["calls"].append(call)
+
+    rows: list[dict[str, object]] = []
+    for (game, name, static_path), entity in sorted(entities.items()):
+        symbol_definitions = entity["definitions"]
+        unspecified = entity["declarations"]
+        evidence_calls = entity["calls"]
+        if not evidence_calls and not symbol_definitions:
+            continue
+        rows.append({
+            "name": name,
+            "game": game or None,
+            "scope": static_path or "external",
+            "definitions": [
+                {
+                    "path": definition.path,
+                    "line": definition.line,
+                    "return_type": definition.return_type.spelling,
+                    "linkage": "static" if definition.is_static else "external",
+                    "parameters": [
+                        {"name": formal, "type": shape.spelling}
+                        for formal, shape in definition.params
+                    ],
+                }
+                for definition in sorted(
+                    symbol_definitions,
+                    key=lambda item: (item.path, item.line))
+            ],
+            "unspecified_declarations": [
+                {"path": signature.path, "line": signature.line}
+                for signature in sorted(
+                    unspecified, key=lambda item: (item.path, item.line))
+            ],
+            "calls": [
+                {
+                    "path": call.path,
+                    "line": call.line,
+                    "caller": call.caller,
+                    "argument_count": len(call.argument_classes),
+                    "argument_classes": list(call.argument_classes),
+                }
+                for call in sorted(
+                    evidence_calls,
+                    key=lambda item: (item.path, item.line, item.caller))
+            ],
+            "disposition": (
+                "informational old-style boundary; confirm argument registers "
+                "and pass-00 modes before changing a declaration"
+            ),
+        })
+    return rows
+
+
 def _source_paths(args: argparse.Namespace) -> list[Path]:
     if args.paths:
         roots = [Path(path) for path in args.paths]
@@ -1018,6 +1368,18 @@ def _definition_index(focus: list[Path]) -> list[Signature]:
     return definitions
 
 
+def _old_style_definition_index(focus: list[Path]) -> list[OldStyleDefinition]:
+    games = sorted({game for path in focus if (game := _game(path))})
+    definitions: list[OldStyleDefinition] = []
+    macros = _project_function_macro_names()
+    for game in games:
+        for path in sorted((Path("src") / game).rglob("*.c")):
+            found, _calls = scan_old_style_source(
+                path.read_text(errors="replace"), str(path), macros)
+            definitions.extend(found)
+    return definitions
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("paths", nargs="*", help="C files or directories (default: src/dds1 and src/dds2)")
@@ -1025,6 +1387,9 @@ def main(argv: Optional[list[str]] = None) -> int:
                         help="limit the default whole-tree scan (repeatable)")
     parser.add_argument("--symbol", action="append", default=[],
                         help="report only this symbol (repeatable)")
+    parser.add_argument(
+        "--old-style", action="store_true",
+        help="also inventory K&R/unspecified call boundaries (informational)")
     parser.add_argument("--json", metavar="PATH", help="write stable JSON report to PATH (or - for stdout)")
     opts = parser.parse_args(argv)
     missing = [path for path in opts.paths if not Path(path).exists()]
@@ -1038,6 +1403,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     non_discard_calls: list[NonDiscardCall] = []
     known_function_macros = _project_function_macro_names()
     skipped: list[dict[str, object]] = []
+    old_style_definitions: list[OldStyleDefinition] = []
+    direct_calls: list[DirectCall] = []
     for path in focus:
         source = path.read_text(errors="replace")
         found, unsupported = scan_source(
@@ -1045,6 +1412,11 @@ def main(argv: Optional[list[str]] = None) -> int:
             non_discard_calls)
         signatures.extend(found)
         skipped.extend(unsupported)
+        if opts.old_style:
+            old_definitions, old_calls = scan_old_style_source(
+                source, str(path), known_function_macros)
+            old_style_definitions.extend(old_definitions)
+            direct_calls.extend(old_calls)
     focus_signatures = list(signatures)
     focus_signature_count = len(signatures)
     scope_declaration_count = sum(sig.kind == "declaration" for sig in focus_signatures)
@@ -1053,6 +1425,9 @@ def main(argv: Optional[list[str]] = None) -> int:
         # real definitions across the same title. Dataclass equality removes
         # definitions that were already present in a focused file.
         signatures = list(dict.fromkeys(signatures + _definition_index(focus)))
+        if opts.old_style:
+            old_style_definitions = list(dict.fromkeys(
+                old_style_definitions + _old_style_definition_index(focus)))
     if opts.symbol:
         wanted = set(opts.symbol)
         signatures = [sig for sig in signatures if sig.name in wanted]
@@ -1071,6 +1446,15 @@ def main(argv: Optional[list[str]] = None) -> int:
         "indexed_definitions": sum(sig.kind == "definition" for sig in signatures),
         "symbols_with_conflicts": len({row["name"] for row in report["conflicts"]}),
     })
+    if opts.old_style:
+        report["old_style_boundaries"] = build_old_style_report(
+            old_style_definitions, signatures, direct_calls,
+            frozenset(opts.symbol))
+        report["summary"].update({
+            "old_style_boundaries": len(report["old_style_boundaries"]),
+            "old_style_call_sites": sum(
+                len(row["calls"]) for row in report["old_style_boundaries"]),
+        })
     report["conflicts"] = sorted(report["conflicts"], key=lambda row: (row["name"], row["declaration"]["path"], row["declaration"]["line"]))
     report["skipped"] = sorted(report["skipped"], key=lambda row: (row["path"], row["line"], row["reason"]))
     if opts.json:
@@ -1093,6 +1477,24 @@ def main(argv: Optional[list[str]] = None) -> int:
                       f"{call['caller']} (review all uses before changing the declaration)")
     else:
         print("No fixed declaration/definition contract mismatches found.")
+    if opts.old_style:
+        if report["old_style_boundaries"]:
+            print("Old-style call boundaries (informational):")
+            for row in report["old_style_boundaries"]:
+                print(f"  {row['name']}:")
+                for definition in row["definitions"]:
+                    params = ", ".join(
+                        f"{item['type']} {item['name']}"
+                        for item in definition["parameters"])
+                    print(f"    K&R definition {definition['path']}:"
+                          f"{definition['line']} ({params})")
+                for call in row["calls"]:
+                    classes = ", ".join(call["argument_classes"]) or "no arguments"
+                    print(f"    call {call['path']}:{call['line']} in "
+                          f"{call['caller']}: {call['argument_count']} "
+                          f"argument(s) [{classes}]")
+        else:
+            print("No reportable old-style call boundaries found.")
     print(f"Audited {focus_declaration_count} focused declarations against "
           f"{report['summary']['indexed_definitions']} indexed definitions; "
           f"skipped {len(skipped)} unsupported or uncertain comparisons.")
