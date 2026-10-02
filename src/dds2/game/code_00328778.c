@@ -26,6 +26,23 @@ extern void sdfPadBuildButtonStates(void);
 
 extern void sdfTickThreadPriorityOverride(void);
 
+extern void func_00328FA8(u32 heapSize);
+extern void func_0032A440(u32 resourceAddress);
+extern void sdfInitGeneralHeap(u32 heapSize);
+extern void sdfTexInitializeLists(void);
+extern void sdfTexInitializeSemaphore(void);
+extern void sdfRegisterTextureReleaseRequestHandler(void);
+extern void sdfPadInit(void);
+extern s32 sdfStartQueuedThreadWakeWorker(void);
+extern void sdfInitializeResourceQueuesAndTextureWords();
+extern void sdfConsUploadDmaProgram(s32 size);
+extern void effMiscSeedRandomFromClock(void *state);
+extern void sdfStartTrackedThread(SdfThreadNode *node, s32 entry, s32 stack, s64 stackSize, s32 priority, s32 arg);
+extern void sdfRunTickWorkerThread(void);
+extern s32 D_004389C0;
+extern SdfThreadNode D_004390F0;
+extern u8 D_0045C8A0[0x2000];
+
 void sdfWakeAlarmThread(s32 unused0, u16 unused1, void *threadId) {
     iWakeupThread((s32)threadId);
 }
@@ -66,7 +83,22 @@ void sdfRunTickWorkerThread(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00328778", func_00328858);
+void func_00328858(u32 heapSize, u32 initialHeapSize, u32 resourceAddress) {
+    *(volatile u32 *)0x10000010 = 0x83;
+    *(volatile u32 *)0x10000000 = 0;
+    func_00328FA8(initialHeapSize);
+    sdfInitGeneralHeap(heapSize);
+    sdfTexInitializeLists();
+    sdfTexInitializeSemaphore();
+    sdfRegisterTextureReleaseRequestHandler();
+    sdfPadInit();
+    sdfStartQueuedThreadWakeWorker();
+    func_0032A440(resourceAddress);
+    sdfInitializeResourceQueuesAndTextureWords(0x40);
+    sdfConsUploadDmaProgram(D_004389C0);
+    effMiscSeedRandomFromClock(NULL);
+    sdfStartTrackedThread(&D_004390F0, (s32)sdfRunTickWorkerThread, (s32)&D_0045C8A0, 0x2000, 0x4C, 0);
+}
 
 /* Register the thread under the list semaphore before starting it. */
 void sdfStartTrackedThread(SdfThreadNode *node, s32 entry, s32 stack, s64 stackSize, s32 priority, s32 arg) {
