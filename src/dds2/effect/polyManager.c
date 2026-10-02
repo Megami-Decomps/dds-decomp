@@ -421,7 +421,73 @@ void effPolyScaleFourComponents(f32 scale, PolyBand *obj) {
     obj->targetRadius = obj->targetRadius * scale;
 }
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_001661C8);
+/* Advance band ages, fades, geometry, and loop completion. */
+void func_001661C8(PolyBand *obj) {
+    s32 index = 0;
+    u32 completed = 0;
+    u8 loop;
+    PolyStrip *strip;
+    s32 count;
+    PolyBandRecord *record;
+    s32 duration;
+    u32 color;
+    PolyStripEntry *entry;
+
+    strip = obj->strip;
+    count = obj->head.entryCount;
+    record = obj->records;
+    duration = obj->head.duration;
+    loop = obj->head.loop;
+    color = obj->head.color;
+    entry = strip->entries;
+
+    if (count > 0) {
+        do {
+            s32 age = record->age;
+
+            if (age == POLY_INACTIVE_ENTRY_AGE) {
+                polyRingRandomizeRecord(obj, index);
+                age = record->age;
+            }
+            if (age < 0) {
+                age++;
+            } else {
+                if ((u32)age < obj->head.startColorRampFrames) {
+                    entry->color = polyBlendTimedTintColor(age, obj->head.startColorRampFrames, color);
+                } else if (age <= duration &&
+                           (u32)age >= duration - obj->head.endColorRampFrames) {
+                    entry->color = polyBlendTimedTintColor(duration - age, obj->head.endColorRampFrames, color);
+                }
+
+                if (entry->color & 0xFF000000) {
+                    polyStripBuildScaledRing(obj, index);
+                    age++;
+                } else {
+                    entry->count = 0;
+                    age++;
+                }
+            }
+
+            if (age >= duration) {
+                if (loop != 0) {
+                    age = POLY_INACTIVE_ENTRY_AGE;
+                } else {
+                    completed++;
+                    if (completed >= (u32)count) {
+                        obj->head.active = 0;
+                    }
+                }
+                entry->count = 0;
+            }
+
+            record->age = age;
+            index++;
+            entry++;
+            record++;
+        } while (index < count);
+    }
+    parPrependCellNode(obj->strip);
+}
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166350);
 
