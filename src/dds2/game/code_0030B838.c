@@ -824,6 +824,3 @@ void sdfCounterStepDownAnimationValue(void) {
         sdfCounterAnimationValue = 0;
     }
 }
-
-INCLUDE_RODATA(const s32, "game/code_0030B838", D_0042D418);
-
