@@ -1,0 +1,244 @@
+fld2 1
+header version=23 magic=FLD2 type_count=2 type_table=@resource_types word_1c=offset:0x30 word_20=1 word_24=@constraint_area word_28=0 word_2c=0 word_30=0 word_34=@area_table word_38=0 word_3c=0
+
+label area_table
+bytes 3030315f737461727400b80b00000000
+label constraint_area
+zeros 4
+pointer @loc_00060
+zeros 8
+label loc_00060
+bytes 30310000000000000000000000000000
+label resource_types
+type id=3 count=1 resources=@type_3_resources
+type id=4 count=13 resources=@type_4_resources
+
+bytes 436f626a00000000
+label type_3_resources
+# r_01all
+resource serial=4 flags=0 type=3 name=@r_01all_name reserved=0 transform=@r_01all_transform area=@r_01all_area link=null sblock=null data=@r_01all_data
+
+zeros 12
+label r_01all_name
+string16 "01all"
+
+label r_01all_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01all_area
+area number=1 name="01"
+
+label r_01all_data
+collision vertex_count=4 face_count=1 extra_count=0 vertices=@r_01all_vertices faces=@r_01all_faces stop=@r_01all_stop reserved=0,0
+
+label r_01all_vertices
+vertex -25000.0 0.0 25000.0 1.0
+vertex -25000.0 0.0 -25000.0 1.0
+vertex 25000.0 0.0 25000.0 1.0
+vertex 25000.0 0.0 -25000.0 1.0
+
+label r_01all_faces
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=0,1,3,2 encounter_type=0 encounter=0 special=0,0
+
+zeros 12
+label r_01all_stop
+bytes 0000000000000000000000000000000043616d65000000000000000000000000
+label type_4_resources
+# r_01cam_01
+resource serial=0 flags=1 type=4 name=@r_01cam_01_name reserved=0 transform=@r_01cam_01_transform area=@r_01cam_01_area link=null sblock=null data=@r_01cam_01_data
+# r_01cam_02
+resource serial=1 flags=1 type=4 name=@r_01cam_02_name reserved=0 transform=@r_01cam_02_transform area=@r_01cam_02_area link=null sblock=null data=@r_01cam_02_data
+# r_01cam_10
+resource serial=2 flags=1 type=4 name=@r_01cam_10_name reserved=0 transform=@r_01cam_10_transform area=@r_01cam_10_area link=null sblock=null data=@r_01cam_10_data
+# r_01cam_04
+resource serial=3 flags=1 type=4 name=@r_01cam_04_name reserved=0 transform=@r_01cam_04_transform area=@r_01cam_04_area link=null sblock=null data=@r_01cam_04_data
+# r_01cam_05
+resource serial=4 flags=1 type=4 name=@r_01cam_05_name reserved=0 transform=@r_01cam_05_transform area=@r_01cam_05_area link=null sblock=null data=@r_01cam_05_data
+# r_01cam_06
+resource serial=5 flags=1 type=4 name=@r_01cam_06_name reserved=0 transform=@r_01cam_06_transform area=@r_01cam_06_area link=null sblock=null data=@r_01cam_06_data
+# r_01cam_09
+resource serial=6 flags=1 type=4 name=@r_01cam_09_name reserved=0 transform=@r_01cam_09_transform area=@r_01cam_09_area link=null sblock=null data=@r_01cam_09_data
+# r_01cam_08
+resource serial=7 flags=1 type=4 name=@r_01cam_08_name reserved=0 transform=@r_01cam_08_transform area=@r_01cam_08_area link=null sblock=null data=@r_01cam_08_data
+# r_01cam_07
+resource serial=8 flags=1 type=4 name=@r_01cam_07_name reserved=0 transform=@r_01cam_07_transform area=@r_01cam_07_area link=null sblock=null data=@r_01cam_07_data
+# r_01cam_03
+resource serial=9 flags=1 type=4 name=@r_01cam_03_name reserved=0 transform=@r_01cam_03_transform area=@r_01cam_03_area link=null sblock=null data=@r_01cam_03_data
+# r_01cam_11
+resource serial=10 flags=1 type=4 name=@r_01cam_11_name reserved=0 transform=@r_01cam_11_transform area=@r_01cam_11_area link=null sblock=null data=@r_01cam_11_data
+# r_01cam_12
+resource serial=11 flags=1 type=4 name=@r_01cam_12_name reserved=0 transform=@r_01cam_12_transform area=@r_01cam_12_area link=null sblock=null data=@r_01cam_12_data
+# r_01cam_13
+resource serial=12 flags=1 type=4 name=@r_01cam_13_name reserved=0 transform=@r_01cam_13_transform area=@r_01cam_13_area link=null sblock=null data=@r_01cam_13_data
+
+zeros 12
+label r_01cam_01_name
+string16 "01cam_01"
+
+label r_01cam_01_transform
+transform position=-2959.1640625,-3578.03759765625,-4759.673828125,1.0 rotation=0.4150291681289673,-0.11769706010818481,-0.05424317345023155,0.9005308151245117 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_01_area
+area number=1 name="01"
+
+label r_01cam_02_name
+string16 "01cam_02"
+
+label r_01cam_02_transform
+transform position=-2627.05859375,-3487.5283203125,-5311.2421875,1.0 rotation=0.4894528090953827,-0.054057974368333817,-0.0304186400026083,0.8698208928108215 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_02_area
+area number=1 name="01"
+
+label r_01cam_10_name
+string16 "01cam_10"
+
+label r_01cam_10_transform
+transform position=246.30078125,-3357.0537109375,-4434.26953125,1.0 rotation=0.3215654194355011,0.02492503821849823,0.008467947132885456,0.9465213418006897 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_10_area
+area number=1 name="01"
+
+label r_01cam_04_name
+string16 "01cam_04"
+
+label r_01cam_04_transform
+transform position=841.5390625,-3091.3076171875,-5635.41015625,1.0 rotation=0.37091436982154846,0.06113452464342117,0.024479134008288383,0.9263291954994202 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_04_area
+area number=1 name="01"
+
+label r_01cam_05_name
+string16 "01cam_05"
+
+label r_01cam_05_transform
+transform position=4091.17578125,-4231.486328125,-3509.9453125,1.0 rotation=0.3981402814388275,0.2177644819021225,0.09788865596055984,0.8857091665267944 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_05_area
+area number=1 name="01"
+
+label r_01cam_06_name
+string16 "01cam_06"
+
+label r_01cam_06_transform
+transform position=4322.68359375,-4734.02099609375,-1728.22265625,1.0 rotation=0.36429736018180847,0.20956210792064667,0.08450115472078323,0.9034548401832581 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_06_area
+area number=1 name="01"
+
+label r_01cam_09_name
+string16 "01cam_09"
+
+label r_01cam_09_transform
+transform position=-3289.3515625,-3939.574462890625,-3588.91015625,1.0 rotation=0.35918334126472473,-0.04420478269457817,-0.01703484170138836,0.93206387758255 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_09_area
+area number=1 name="01"
+
+label r_01cam_08_name
+string16 "01cam_08"
+
+label r_01cam_08_transform
+transform position=-5551.3515625,-3751.0810546875,1204.2109375,1.0 rotation=0.2851671874523163,0.11551254242658615,0.034642770886421204,0.950860857963562 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_08_area
+area number=1 name="01"
+
+label r_01cam_07_name
+string16 "01cam_07"
+
+label r_01cam_07_transform
+transform position=-2154.36328125,-3582.2314453125,2780.974609375,1.0 rotation=0.2942724823951721,0.06403697282075882,0.019766084849834442,0.9533689618110657 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_07_area
+area number=1 name="01"
+
+label r_01cam_03_name
+string16 "01cam_03"
+
+label r_01cam_03_transform
+transform position=-1215.04296875,-3488.0498046875,-5147.8671875,1.0 rotation=0.4988670349121094,-0.009784883819520473,-0.005632665473967791,0.8666050434112549 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_03_area
+area number=1 name="01"
+
+label r_01cam_11_name
+string16 "01cam_11"
+
+label r_01cam_11_transform
+transform position=-1424.0078125,-3341.8076171875,-4170.9375,1.0 rotation=0.4542449414730072,0.03592224419116974,0.01833508349955082,0.8899634480476379 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_11_area
+area number=1 name="01"
+
+label r_01cam_12_name
+string16 "01cam_12"
+
+label r_01cam_12_transform
+transform position=-643.5390625,-3053.066650390625,-4932.912109375,1.0 rotation=0.29744935035705566,0.08359111845493317,0.026153236627578735,0.9507114887237549 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_12_area
+area number=1 name="01"
+
+label r_01cam_13_name
+string16 "01cam_13"
+
+label r_01cam_13_transform
+transform position=1184.90625,-4307.3095703125,-5748.2998046875,1.0 rotation=0.3232231140136719,0.1369490772485733,0.04733412712812424,0.9351637363433838 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_13_area
+area number=1 name="01"
+
+label r_01cam_01_data
+camera fovy=0.9355684518814087
+
+zeros 12
+label r_01cam_02_data
+camera fovy=0.9355684518814087
+
+zeros 12
+label r_01cam_10_data
+camera fovy=0.9355684518814087
+
+zeros 12
+label r_01cam_04_data
+camera fovy=0.9355684518814087
+
+zeros 12
+label r_01cam_05_data
+camera fovy=0.9355684518814087
+
+zeros 12
+label r_01cam_06_data
+camera fovy=0.9355684518814087
+
+zeros 12
+label r_01cam_09_data
+camera fovy=0.9355684518814087
+
+zeros 12
+label r_01cam_08_data
+camera fovy=0.9355684518814087
+
+zeros 12
+label r_01cam_07_data
+camera fovy=0.9355684518814087
+
+zeros 12
+label r_01cam_03_data
+camera fovy=0.9355684518814087
+
+zeros 12
+label r_01cam_11_data
+camera fovy=0.9355684518814087
+
+zeros 12
+label r_01cam_12_data
+camera fovy=0.9355684518814087
+
+zeros 12
+label r_01cam_13_data
+camera fovy=0.9355684518814087
+
+label data_end
+end_data

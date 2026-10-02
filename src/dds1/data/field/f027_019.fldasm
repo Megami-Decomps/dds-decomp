@@ -1,0 +1,420 @@
+fld2 1
+header version=23 magic=FLD2 type_count=4 type_table=@resource_types word_1c=offset:0x30 word_20=1 word_24=@constraint_area word_28=0 word_2c=0 word_30=0 word_34=@area_table word_38=0 word_3c=0
+
+label area_table
+bytes 3031395f737461727400640000000000
+label constraint_area
+zeros 4
+pointer @loc_00060
+zeros 8
+label loc_00060
+bytes 30310000000000000000000000000000
+label resource_types
+type id=3 count=2 resources=@type_3_resources
+type id=4 count=2 resources=@type_4_resources
+type id=6 count=7 resources=@type_6_resources
+type id=10 count=11 resources=@type_10_resources
+
+bytes 436f626a000000000000000000000000
+label type_3_resources
+# r_01all_01
+resource serial=0 flags=0 type=3 name=@r_01all_01_name reserved=0 transform=@r_01all_01_transform area=@r_01all_01_area link=null sblock=null data=@r_01all_01_data
+# r_01map_01
+resource serial=1 flags=0 type=3 name=@r_01map_01_name reserved=0 transform=@r_01map_01_transform area=@r_01map_01_area link=null sblock=null data=@r_01map_01_data
+
+zeros 8
+label r_01all_01_name
+string16 "01all_01"
+
+label r_01all_01_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01all_01_area
+area number=1 name="01"
+
+label r_01map_01_name
+string16 "01map_01"
+
+label r_01map_01_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01map_01_area
+area number=1 name="01"
+
+label r_01all_01_data
+collision vertex_count=28 face_count=11 extra_count=0 vertices=@r_01all_01_vertices faces=@r_01all_01_faces stop=@r_01all_01_stop reserved=0,0
+
+label r_01all_01_vertices
+vertex 9000.0 -1.52587890625e-05 -0.00390625 1.0
+vertex 9000.0 1.52587890625e-05 -8000.0 1.0
+vertex 13000.0 -1.52587890625e-05 -0.00390625 1.0
+vertex 13000.0 1.52587890625e-05 -8000.0 1.0
+vertex 9528.75 6.103515625e-05 -1030.64208984375 1.0
+vertex 9528.75 -299.99993896484375 -1030.64208984375 1.0
+vertex 9528.7177734375 -300.0 -6969.1142578125 1.0
+vertex 9528.7177734375 0.0 -6969.1142578125 1.0
+vertex 9742.416015625 -99.99983978271484 -1030.6416015625 1.0
+vertex 9742.416015625 0.000244140625 -1030.6416015625 1.0
+vertex 9742.3828125 -99.99995422363281 -6969.11328125 1.0
+vertex 9742.3828125 0.0001220703125 -6969.11328125 1.0
+vertex 9988.6767578125 -299.99981689453125 -1030.64013671875 1.0
+vertex 9988.6767578125 0.00018310546875 -1030.64013671875 1.0
+vertex 9988.64453125 -299.9998779296875 -6969.1123046875 1.0
+vertex 9988.64453125 0.0001220703125 -6969.1123046875 1.0
+vertex 12470.82421875 0.0001220703125 -6969.11328125 1.0
+vertex 12470.82421875 -299.9998779296875 -6969.11328125 1.0
+vertex 12470.87890625 -299.99993896484375 -1030.4150390625 1.0
+vertex 12470.87890625 6.103515625e-05 -1030.4150390625 1.0
+vertex 12255.421875 -99.99983215332031 -6969.11328125 1.0
+vertex 12255.4228515625 0.000244140625 -6969.11328125 1.0
+vertex 12255.48046875 -99.99996185302734 -1030.4169921875 1.0
+vertex 12255.48046875 0.0001220703125 -1030.4169921875 1.0
+vertex 12008.609375 -299.9998779296875 -6969.115234375 1.0
+vertex 12008.609375 0.0001220703125 -6969.115234375 1.0
+vertex 12008.6640625 -299.99993896484375 -1030.4169921875 1.0
+vertex 12008.6640625 6.103515625e-05 -1030.4169921875 1.0
+
+label r_01all_01_faces
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=0,1,3,2 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=4,5,6,7 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=8,9,11,10 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=12,13,15,14 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=16,17,18,19 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=20,21,23,22 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=24,25,27,26 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=19,18,26,27 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=13,12,5,4 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=14,15,7,6 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=17,16,25,24 encounter_type=0 encounter=0 special=0,0
+
+zeros 4
+label r_01all_01_stop
+zeros 16
+label r_01map_01_data
+collision vertex_count=8 face_count=2 extra_count=0 vertices=@r_01map_01_vertices faces=@r_01map_01_faces stop=@r_01map_01_stop reserved=0,0
+
+label r_01map_01_vertices
+vertex 9999.9921875 -9.998698234558105 -6999.99462890625 1.0
+vertex 9999.994140625 -9.999223709106445 -999.9918212890625 1.0
+vertex 7300.0009765625 -9.998462677001953 -7000.00244140625 1.0
+vertex 7299.998046875 -9.998988151550293 -999.99853515625 1.0
+vertex 15000.0 -9.999661445617676 -999.999267578125 1.0
+vertex 12000.0078125 -9.999399185180664 -999.9732666015625 1.0
+vertex 14999.9931640625 -9.999106407165527 -7000.02392578125 1.0
+vertex 12000.0 -9.998844146728516 -6999.9990234375 1.0
+
+label r_01map_01_faces
+face attributes=0x00000800 move_floor=0 sound=0 stop=0 place=0 automap=1,5 vertices=0,1,3,2 encounter_type=0 encounter=0 special=0,0
+face attributes=0x00000800 move_floor=0 sound=0 stop=0 place=0 automap=2,5 vertices=4,5,7,6 encounter_type=0 encounter=0 special=0,0
+
+zeros 8
+label r_01map_01_stop
+bytes 0000000000000000000000000000000043616d65000000000000000000000000
+label type_4_resources
+# r_01cam_01
+resource serial=0 flags=1 type=4 name=@r_01cam_01_name reserved=0 transform=@r_01cam_01_transform area=@r_01cam_01_area link=null sblock=null data=@r_01cam_01_data
+# r_01cam_04
+resource serial=1 flags=1 type=4 name=@r_01cam_04_name reserved=0 transform=@r_01cam_04_transform area=@r_01cam_04_area link=null sblock=null data=@r_01cam_04_data
+
+zeros 8
+label r_01cam_01_name
+string16 "01cam_01"
+
+label r_01cam_01_transform
+transform position=-25938.34765625,-1100.0,-7452.03125,1.0 rotation=0.24589672684669495,-3.1620789542330385e-08,5.3117762632837184e-08,0.9692960381507874 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_01_area
+area number=1 name="01"
+
+label r_01cam_04_name
+string16 "01cam_04"
+
+label r_01cam_04_transform
+transform position=9759.03515625,-160.0,-6957.146484375,1.0 rotation=0.08403406292200089,0.16133131086826324,0.013788756914436817,0.9832193851470947 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_04_area
+area number=1 name="01"
+
+label r_01cam_01_data
+camera fovy=0.6024157404899597
+
+zeros 12
+label r_01cam_04_data
+camera fovy=0.6024157404899597
+
+bytes 4576656e0000000000000000
+label type_6_resources
+# type_6_2
+resource serial=2 flags=1 type=6 name=@type_6_2_name reserved=0 transform=@type_6_2_transform area=null link=null sblock=null data=@type_6_2_data
+# type_6_3
+resource serial=3 flags=1 type=6 name=@type_6_3_name reserved=0 transform=@type_6_3_transform area=null link=null sblock=null data=@type_6_3_data
+# type_6_4
+resource serial=4 flags=1 type=6 name=@type_6_4_name reserved=0 transform=@type_6_4_transform area=null link=null sblock=null data=@type_6_4_data
+# type_6_5
+resource serial=5 flags=1 type=6 name=@type_6_5_name reserved=0 transform=@type_6_5_transform area=null link=null sblock=null data=@type_6_5_data
+# type_6_6
+resource serial=6 flags=1 type=6 name=@type_6_6_name reserved=0 transform=@type_6_6_transform area=null link=null sblock=null data=@type_6_6_data
+# type_6_7
+resource serial=7 flags=1 type=6 name=@type_6_7_name reserved=0 transform=@type_6_7_transform area=null link=null sblock=null data=@type_6_7_data
+# type_6_8
+resource serial=8 flags=1 type=6 name=@type_6_8_name reserved=0 transform=@type_6_8_transform area=null link=null sblock=null data=@type_6_8_data
+
+zeros 4
+label type_6_2_name
+string16 ""
+
+label type_6_2_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label type_6_3_name
+string16 ""
+
+label type_6_3_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label type_6_4_name
+string16 ""
+
+label type_6_4_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label type_6_5_name
+string16 ""
+
+label type_6_5_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label type_6_6_name
+string16 ""
+
+label type_6_6_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label type_6_7_name
+string16 ""
+
+label type_6_7_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label type_6_8_name
+string16 ""
+
+label type_6_8_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label type_6_2_data
+event flags=0 label=@type_6_2_event_label reserved=0,0
+
+label type_6_3_data
+event flags=0 label=@type_6_3_event_label reserved=0,0
+
+label type_6_4_data
+event flags=0 label=@type_6_4_event_label reserved=0,0
+
+label type_6_5_data
+event flags=0 label=@type_6_5_event_label reserved=0,0
+
+label type_6_6_data
+event flags=0 label=@type_6_6_event_label reserved=0,0
+
+label type_6_7_data
+event flags=0 label=@type_6_7_event_label reserved=0,0
+
+label type_6_8_data
+event flags=0 label=@type_6_8_event_label reserved=0,0
+
+label type_6_2_event_label
+cstring "001_01eve_01"
+
+zeros 3
+label type_6_3_event_label
+cstring "001_01eve_01"
+
+zeros 3
+label type_6_4_event_label
+cstring "001_01eve_01"
+
+zeros 3
+label type_6_5_event_label
+cstring "001_01eve_01"
+
+zeros 3
+label type_6_6_event_label
+cstring "001_01eve_01"
+
+zeros 3
+label type_6_7_event_label
+cstring "001_01eve_01"
+
+zeros 3
+label type_6_8_event_label
+cstring "001_01eve_01"
+
+bytes 54617469000000000000000000000000000000
+label type_10_resources
+# r_01pos_01
+resource serial=9 flags=1 type=10 name=@r_01pos_01_name reserved=0 transform=@r_01pos_01_transform area=@r_01pos_01_area link=null sblock=null data=@r_01pos_01_data
+# r_01d_01
+resource serial=10 flags=1 type=10 name=@r_01d_01_name reserved=0 transform=@r_01d_01_transform area=@r_01d_01_area link=null sblock=null data=@r_01d_01_data
+# r_01d_02
+resource serial=11 flags=1 type=10 name=@r_01d_02_name reserved=0 transform=@r_01d_02_transform area=@r_01d_02_area link=null sblock=null data=@r_01d_02_data
+# r_01pos_02
+resource serial=12 flags=1 type=10 name=@r_01pos_02_name reserved=0 transform=@r_01pos_02_transform area=@r_01pos_02_area link=null sblock=null data=@r_01pos_02_data
+# r_01d_03
+resource serial=13 flags=1 type=10 name=@r_01d_03_name reserved=0 transform=@r_01d_03_transform area=@r_01d_03_area link=null sblock=null data=@r_01d_03_data
+# r_01pos_03
+resource serial=14 flags=1 type=10 name=@r_01pos_03_name reserved=0 transform=@r_01pos_03_transform area=@r_01pos_03_area link=null sblock=null data=@r_01pos_03_data
+# r_01d_04
+resource serial=15 flags=1 type=10 name=@r_01d_04_name reserved=0 transform=@r_01d_04_transform area=@r_01d_04_area link=null sblock=null data=@r_01d_04_data
+# r_01pos_04
+resource serial=16 flags=1 type=10 name=@r_01pos_04_name reserved=0 transform=@r_01pos_04_transform area=@r_01pos_04_area link=null sblock=null data=@r_01pos_04_data
+# r_01pos_09
+resource serial=17 flags=1 type=10 name=@r_01pos_09_name reserved=0 transform=@r_01pos_09_transform area=@r_01pos_09_area link=null sblock=null data=@r_01pos_09_data
+# r_01pos_08
+resource serial=18 flags=1 type=10 name=@r_01pos_08_name reserved=0 transform=@r_01pos_08_transform area=@r_01pos_08_area link=null sblock=null data=@r_01pos_08_data
+# r_01pos_10
+resource serial=19 flags=1 type=10 name=@r_01pos_10_name reserved=0 transform=@r_01pos_10_transform area=@r_01pos_10_area link=null sblock=null data=@r_01pos_10_data
+
+zeros 4
+label r_01pos_01_name
+string16 "01pos_01"
+
+label r_01pos_01_transform
+transform position=9645.0,0.0,-6745.8828125,1.0 rotation=0.0,-2.934634153461957e-07,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01pos_01_area
+area number=1 name="01"
+
+label r_01d_01_name
+string16 "01d_01"
+
+label r_01d_01_transform
+transform position=9645.0,-100.0,-6915.0390625,1.0 rotation=0.0,-2.5131654979304585e-07,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01d_01_area
+area number=1 name="01"
+
+label r_01d_02_name
+string16 "01d_02"
+
+label r_01d_02_transform
+transform position=12355.0,-100.0,-6915.0390625,1.0 rotation=0.0,-2.5131654979304585e-07,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01d_02_area
+area number=1 name="01"
+
+label r_01pos_02_name
+string16 "01pos_02"
+
+label r_01pos_02_transform
+transform position=12355.0,0.0,-6740.0,1.0 rotation=0.0,-2.934634153461957e-07,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01pos_02_area
+area number=1 name="01"
+
+label r_01d_03_name
+string16 "01d_03"
+
+label r_01d_03_transform
+transform position=9644.99609375,-100.0,-1085.00390625,1.0 rotation=-4.3711398944878965e-08,-1.0,-4.3711398944878965e-08,-2.5288110805377073e-07 scale=1.0,1.0,1.0,1.0
+
+label r_01d_03_area
+area number=1 name="01"
+
+label r_01pos_03_name
+string16 "01pos_03"
+
+label r_01pos_03_transform
+transform position=9644.99609375,0.0,-1260.04296875,1.0 rotation=-4.3711402497592644e-08,-1.0,-4.3711402497592644e-08,-2.9502800202863e-07 scale=1.0,1.0,1.0,1.0
+
+label r_01pos_03_area
+area number=1 name="01"
+
+label r_01d_04_name
+string16 "01d_04"
+
+label r_01d_04_transform
+transform position=12355.0,-100.0,-1085.0078125,1.0 rotation=-4.3711398944878965e-08,-1.0,-4.3711398944878965e-08,-2.5288110805377073e-07 scale=1.0,1.0,1.0,1.0
+
+label r_01d_04_area
+area number=1 name="01"
+
+label r_01pos_04_name
+string16 "01pos_04"
+
+label r_01pos_04_transform
+transform position=12355.0,0.0,-1260.046875,1.0 rotation=-4.3711402497592644e-08,-1.0,-4.3711402497592644e-08,-2.9502800202863e-07 scale=1.0,1.0,1.0,1.0
+
+label r_01pos_04_area
+area number=1 name="01"
+
+label r_01pos_09_name
+string16 "01pos_09"
+
+label r_01pos_09_transform
+transform position=9593.1162109375,0.0,-6390.734375,1.0 rotation=-4.371140605030632e-08,-1.0,-4.371140605030632e-08,-4.460238471892808e-07 scale=1.0,1.0,1.0,1.0
+
+label r_01pos_09_area
+area number=1 name="01"
+
+label r_01pos_08_name
+string16 "01pos_08"
+
+label r_01pos_08_transform
+transform position=9714.57421875,0.0,-6253.2734375,1.0 rotation=-4.371140605030632e-08,-1.0,-4.371140605030632e-08,-4.460238471892808e-07 scale=1.0,1.0,1.0,1.0
+
+label r_01pos_08_area
+area number=1 name="01"
+
+label r_01pos_10_name
+string16 "01pos_10"
+
+label r_01pos_10_transform
+transform position=9691.705078125,0.0,-6544.6484375,1.0 rotation=-4.371140605030632e-08,-1.0,-4.371140605030632e-08,-4.460238471892808e-07 scale=1.0,1.0,1.0,1.0
+
+label r_01pos_10_area
+area number=1 name="01"
+
+label r_01pos_01_data
+placement kind=0 event=0 visible=0 payload=@r_01d_01_data
+
+label r_01d_01_data
+placement kind=1 event=-1 visible=0 payload=@r_01d_01_payload
+
+label r_01d_01_payload
+bytes 02000000000048430000874300001643
+label r_01d_02_data
+placement kind=1 event=-1 visible=0 payload=@r_01d_02_payload
+
+label r_01d_02_payload
+bytes 02000000000048430000874300001643
+label r_01pos_02_data
+placement kind=0 event=1 visible=0 payload=@r_01d_03_data
+
+label r_01d_03_data
+placement kind=1 event=-1 visible=0 payload=@r_01d_03_payload
+
+label r_01d_03_payload
+bytes 02000000000048430000874300001643
+label r_01pos_03_data
+placement kind=0 event=2 visible=0 payload=@r_01d_04_data
+
+label r_01d_04_data
+placement kind=1 event=-1 visible=0 payload=@r_01d_04_payload
+
+label r_01d_04_payload
+bytes 02000000000048430000874300001643
+label r_01pos_04_data
+placement kind=0 event=3 visible=0 payload=@r_01pos_09_data
+
+label r_01pos_09_data
+placement kind=0 event=4 visible=0 payload=@r_01pos_08_data
+
+label r_01pos_08_data
+placement kind=0 event=5 visible=0 payload=@r_01pos_10_data
+
+label r_01pos_10_data
+placement kind=0 event=6 visible=0 payload=@data_end
+
+label data_end
+end_data
