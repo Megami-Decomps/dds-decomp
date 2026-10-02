@@ -65,13 +65,17 @@ def _relocation_elf(
     entries: list[tuple[int, int, int, str]],
 ) -> bytes:
     symbol_offset = 0x100
-    symbol_size = (len(entries) + 1) * dev_elf.SYMBOL_ENTRY.size
+    symbols = list(
+        dict.fromkeys((symbol_vaddr, name) for _, symbol_vaddr, _, name in entries)
+    )
+    symbol_indexes = {symbol: index for index, symbol in enumerate(symbols, start=1)}
+    symbol_size = (len(symbols) + 1) * dev_elf.SYMBOL_ENTRY.size
     relocation_offset = (symbol_offset + symbol_size + 0xF) & ~0xF
     relocation_size = len(entries) * dev_elf.REL_ENTRY.size
     string_offset = (relocation_offset + relocation_size + 0xF) & ~0xF
     strings = bytearray(b"\0")
     name_offsets = []
-    for _, _, _, name in entries:
+    for _, name in symbols:
         name_offsets.append(len(strings))
         strings.extend(name.encode("ascii") + b"\0")
     section_offset = (string_offset + len(strings) + 0xF) & ~0xF
@@ -95,8 +99,8 @@ def _relocation_elf(
         4,
         0,
     )
-    for index, ((reloc_vaddr, symbol_vaddr, kind, _), name_offset) in enumerate(
-        zip(entries, name_offsets), start=1
+    for index, ((symbol_vaddr, _), name_offset) in enumerate(
+        zip(symbols, name_offsets), start=1
     ):
         dev_elf.SYMBOL_ENTRY.pack_into(
             image,
@@ -108,11 +112,15 @@ def _relocation_elf(
             0,
             0,
         )
+    for relocation_index, (reloc_vaddr, symbol_vaddr, kind, name) in enumerate(
+        entries
+    ):
+        symbol_index = symbol_indexes[(symbol_vaddr, name)]
         dev_elf.REL_ENTRY.pack_into(
             image,
-            relocation_offset + (index - 1) * dev_elf.REL_ENTRY.size,
+            relocation_offset + relocation_index * dev_elf.REL_ENTRY.size,
             reloc_vaddr,
-            (index << 8) | kind,
+            (symbol_index << 8) | kind,
         )
     image[string_offset : string_offset + len(strings)] = strings
     dev_elf.SECTION_HEADER.pack_into(
@@ -225,6 +233,7 @@ class DevElfTests(unittest.TestCase):
             bytes(base), output, relocation_elf, spec
         )
         self.assertEqual(summary["changed_relocation_words"], 2)
+        self.assertEqual(summary["changed_payload_words"], 0)
         self.assertEqual(summary["moved_relocations"], 1)
         self.assertEqual(summary["redirect_relocations"], 1)
         self.assertEqual(summary["addition_relocations"], 0)
@@ -258,6 +267,13 @@ class DevElfTests(unittest.TestCase):
                 bytes(base), bytes(corrupted), relocation_elf, spec
             )
 
+        corrupted = bytearray(output)
+        struct.pack_into("<I", corrupted, 0x2000, 0)
+        with self.assertRaisesRegex(dev_elf.DevElfError, "differs from retail"):
+            dev_elf.audit_relocation_closure(
+                bytes(base), bytes(corrupted), relocation_elf, spec
+            )
+
     def test_linked_relocation_parser_resolves_symbol_values(self) -> None:
         relocations = dev_elf.parse_linked_relocations(
             _relocation_elf([(0x00100010, 0x00412000, 4, "target")])
@@ -281,6 +297,111 @@ class DevElfTests(unittest.TestCase):
         struct.pack_into("<I", image, 0x1000, (3 << 26) | (0x00100028 >> 2))
         with self.assertRaisesRegex(dev_elf.DevElfError, "stale JAL"):
             dev_elf.scan_stale_move_references(bytes(image), ranges)
+
+        hi, low = _address_words(0x0010002C)
+        struct.pack_into("<I", image, 0x1000, hi)
+        struct.pack_into(
+            "<I", image, 0x1004, (0x23 << 26) | (4 << 21) | (low & 0xFFFF)
+        )
+        with self.assertRaisesRegex(dev_elf.DevElfError, "stale HI16/LO16"):
+            dev_elf.scan_stale_move_references(bytes(image), ranges)
+
+    def test_relocation_closure_rejects_stale_relocation_target(self) -> None:
+        old_vaddr = 0x00100040
+        new_vaddr = 0x00412000
+        base = bytearray(_elf())
+        struct.pack_into("<I", base, 0x1040, 0x03E00008)
+        linked = bytearray(base)
+        struct.pack_into("<I", linked, 0x1000, _address_words(old_vaddr)[0])
+        struct.pack_into(
+            "<I", linked, 0x1004, (0x23 << 26) | (4 << 21) | (old_vaddr & 0xFFFF)
+        )
+        struct.pack_into("<I", linked, 0x1040, 0)
+        linked.extend(bytes((-len(linked)) & 0xFFF))
+        linked.extend(struct.pack("<I", 0x03E00008))
+        spec = {
+            "format": 1,
+            "base_sha1": hashlib.sha1(base).hexdigest(),
+            "extension_vaddr": new_vaddr,
+            "extension_size": 4,
+            "retail_static_end": 0x0040C5F0,
+            "moves": [
+                {
+                    "old_vaddr": old_vaddr,
+                    "new_vaddr": new_vaddr,
+                    "size": 4,
+                    "expected_relocations": 0,
+                }
+            ],
+        }
+        output, _ = dev_elf.finalize_image(bytes(base), bytes(linked), spec)
+        relocation_elf = _relocation_elf(
+            [
+                (0x00100000, old_vaddr, 5, "stale"),
+                (0x00100004, old_vaddr, 6, "stale"),
+            ]
+        )
+        with self.assertRaisesRegex(dev_elf.DevElfError, "still targets abandoned"):
+            dev_elf.audit_relocation_closure(
+                bytes(base), output, relocation_elf, spec
+            )
+
+    def test_moved_payload_allows_validated_relocation(self) -> None:
+        old_vaddr = 0x00100040
+        new_vaddr = 0x00412000
+        base = bytearray(_elf())
+        struct.pack_into("<I", base, 0x1040, old_vaddr)
+        linked = bytearray(base)
+        struct.pack_into("<I", linked, 0x1040, 0)
+        linked.extend(bytes((-len(linked)) & 0xFFF))
+        linked.extend(struct.pack("<I", new_vaddr))
+        spec = {
+            "format": 1,
+            "base_sha1": hashlib.sha1(base).hexdigest(),
+            "extension_vaddr": new_vaddr,
+            "extension_size": 4,
+            "retail_static_end": 0x0040C5F0,
+            "moves": [
+                {
+                    "old_vaddr": old_vaddr,
+                    "new_vaddr": new_vaddr,
+                    "size": 4,
+                    "expected_relocations": 1,
+                }
+            ],
+        }
+        output, _ = dev_elf.finalize_image(bytes(base), bytes(linked), spec)
+        relocation_elf = _relocation_elf(
+            [(new_vaddr, new_vaddr, 2, "moved_section")]
+        )
+        summary = dev_elf.audit_relocation_closure(
+            bytes(base), output, relocation_elf, spec
+        )
+        self.assertEqual(summary["changed_payload_words"], 1)
+        self.assertEqual(summary["moved_relocations"], 1)
+
+    def test_effective_targets_keep_hi_active_for_multiple_lows(self) -> None:
+        target = 0x00412020
+        image = bytearray(_elf())
+        hi, _ = _address_words(target)
+        struct.pack_into("<I", image, 0x1000, hi)
+        struct.pack_into(
+            "<I", image, 0x1004, (0x23 << 26) | (4 << 21) | (target & 0xFFFF)
+        )
+        struct.pack_into(
+            "<I", image, 0x1008, (0x2B << 26) | (4 << 21) | ((target + 4) & 0xFFFF)
+        )
+        relocations = [
+            dev_elf.LinkedRelocation(0x00100000, 5, 1, 1, target, "shared"),
+            dev_elf.LinkedRelocation(0x00100004, 6, 1, 1, target, "shared"),
+            dev_elf.LinkedRelocation(0x00100008, 6, 1, 1, target, "shared"),
+        ]
+        _, programs = dev_elf.parse_elf(image)
+        targets = dev_elf._relocation_effective_targets(
+            bytes(image), programs, relocations
+        )
+        self.assertEqual(targets[relocations[1]], {target})
+        self.assertEqual(targets[relocations[2]], {target + 4})
 
     def test_finalize_adds_segment_and_separates_heap_from_bss(self) -> None:
         retail_end = 0x0040C5F0
