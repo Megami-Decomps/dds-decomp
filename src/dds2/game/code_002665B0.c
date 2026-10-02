@@ -260,21 +260,27 @@ void mnuReleaseResourceGroupTextureHandles(u32 address) {
 extern s32 func_0019F460(s32, s32, s32, s32, s32, s32);
 extern void func_0019D550(s32, s32, s32);
 extern void frFontQueueGlyphInSelectedSlot(s32);
-extern u8 D_003A41A8[];
-extern u8 D_003A47E8[];
+/* Fixed-width text rows used by both font drawing and message substitution.
+ * The font helper decodes single-byte and two-byte characters from this data. */
+typedef struct MenuTextEntry {
+    u8 encodedText[32];
+} MenuTextEntry;
+
+extern MenuTextEntry D_003A41A8[];
+extern MenuTextEntry D_003A47E8[];
 
 /* gridX/gridY are the glyph helper's grid cell coordinates (see
    sdfCounterDrawGlyphAtGridCell); depth is its z argument. */
 void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, s8 slot, s8 alternate) {
-    u8 *entry;
+    u8 *text;
     s32 handle;
 
     if (alternate == 0) {
-        entry = D_003A41A8 + slot * 32;
+        text = D_003A41A8[slot].encodedText;
     } else {
-        entry = D_003A47E8 + slot * 32;
+        text = D_003A47E8[slot].encodedText;
     }
-    handle = func_0019F460(gridX - 0x120, gridY, depth, value, (s32)entry, 0);
+    handle = func_0019F460(gridX - 0x120, gridY, depth, value, (s32)text, 0);
     func_0019D550(handle, 1, 0x52);
     frFontQueueGlyphInSelectedSlot(handle);
 }
@@ -1191,10 +1197,6 @@ extern void func_0026A728(s32, s32);
 extern void mnuSelectFirstListNode(s32);
 
 
-typedef struct MenuEntry32 {
-    u8 data[32];
-} MenuEntry32;
-
 
 
 extern void func_0026C918(s32, void *);
@@ -1626,15 +1628,16 @@ s64 evtBDispatchSync(s32 request) {
     return menuSetHandler((s32)state, 2, request);
 }
 
+/* Bind the selected text row to message slot zero, then start the entry prompt. */
 u32 evtPrepareSelectedMenuEntry(void) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
     EventMenuOwner *owner = state->menuOwner;
-    s32 *slot = &owner->selection->entryIndex;
+    s32 *selectionIndex = &owner->selection->entryIndex;
 
     if (owner->state == 1) {
         mnuSelectFirstListNode((s32)owner);
     }
-    func_0026C918(0, D_003A41A8 + *slot * 32);
+    func_0026C918(0, D_003A41A8[*selectionIndex].encodedText);
     dspSetActive(1);
     dspStartEntry(0);
     evtSetMessageWindowOptionWhenOpen(1);

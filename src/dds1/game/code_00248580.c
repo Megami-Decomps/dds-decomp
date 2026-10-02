@@ -130,21 +130,27 @@ void mnuReleaseBothVisualResourceTextures(MenuVisualWork *work) {
 }
 
 extern s32 func_00197760(s32, s32, s32, s32, s32, s32);
-extern u8 D_00347C68[];
-extern u8 D_003482A8[];
+/* Fixed-width text rows used by both font drawing and message substitution.
+ * The font helper decodes single-byte and two-byte characters from this data. */
+typedef struct MenuTextEntry {
+    u8 encodedText[32];
+} MenuTextEntry;
+
+extern MenuTextEntry D_00347C68[];
+extern MenuTextEntry D_003482A8[];
 
 /* gridX/gridY are the glyph helper's grid cell coordinates (see
    sdfCounterDrawGlyphAtGridCell); depth is its z argument. */
 void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, s8 slot, s8 alternate) {
-    u8 *entry;
+    u8 *text;
     s32 handle;
 
     if (alternate == 0) {
-        entry = D_00347C68 + slot * 32;
+        text = D_00347C68[slot].encodedText;
     } else {
-        entry = D_003482A8 + slot * 32;
+        text = D_003482A8[slot].encodedText;
     }
-    handle = func_00197760(gridX, gridY, depth, value, (s32)entry, 0);
+    handle = func_00197760(gridX, gridY, depth, value, (s32)text, 0);
     func_001958A0(handle, 1, 0x53);
     frFontQueueGlyphInSelectedSlot(handle);
 }
@@ -654,7 +660,7 @@ extern void mnuTerminalBuildMenus(MenuTerminalWork *host);
 
 extern void evtLoadResourcePair(const char *, void *);
 
-extern void evtCreateMessageWindowIfMissing(s32);
+extern s32 evtCreateMessageWindowIfMissing(s32);
 
 INCLUDE_RODATA(const s32, "game/code_00248580", mnuTerminalMenuTemplate);
 
@@ -1445,7 +1451,21 @@ u32 evtBReleaseImagesAndQueueMenuTransition(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", mnuOpenTerminalSelectionMessageWindow);
+s32 mnuOpenTerminalSelectionMessageWindow(void) {
+    s32 context = kwlnTaskGetUserValue();
+
+    mnuResolveStaffImageHandles((u8 *)context + 0xE0);
+    func_0024A728(1, context);
+    mnuSelectTerminalCursorSlot(1, 0, (MenuTerminalWork *)context);
+    func_0024AB70(1, context);
+    evtRememberDispatchCallback((s32)func_0024ACD8, context);
+    ((EvtBContext *)context)->exitPending = 0;
+    evtCreateMessageWindowIfMissing(((MenuTerminalWork *)context)->messageResources[1]);
+    if (((EvtBContext *)context)->state7C != 0) {
+        sndStartTrackExtended(((EvtBContext *)context)->resourceHandle);
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024C3F8);
 
@@ -1475,16 +1495,13 @@ s64 evtBDispatchSync(s32 request) {
     return menuRunPanel(context, 2, request);
 }
 
-typedef struct MenuEntry32 {
-    u8 data[32];
-} MenuEntry32;
-
 extern void func_0024DD90(s32, void *);
 extern void dspSetActive(s32);
 extern void dspStartEntry(s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtCaptureMessageWindowSoundMode(s32);
 
+/* Bind the selected text row to message slot zero, then start the entry prompt. */
 u32 evtPrepareSelectedMenuEntry(void) {
     s32 state = kwlnTaskGetUserValue();
     s32 owner = ((EvtBContext *)state)->selectionList;
@@ -1493,7 +1510,7 @@ u32 evtPrepareSelectedMenuEntry(void) {
     if (((EvtBSelectionList *)owner)->mode == 1) {
         mnuSelectFirstListNode(owner);
     }
-    func_0024DD90(0, D_00347C68 + *selectionIndex * 32);
+    func_0024DD90(0, D_00347C68[*selectionIndex].encodedText);
     dspSetActive(1);
     dspStartEntry(0);
     evtSetMessageWindowOptionWhenOpen(1);
