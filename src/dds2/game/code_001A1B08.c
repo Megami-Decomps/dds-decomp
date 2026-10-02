@@ -87,6 +87,9 @@ extern void itfAdvancePanelLayoutAndNotify(s32 arg0, s32 arg1, s32 arg2, s32 arg
 extern void itfMesCleanupWindow(s32 window, s32 arg1);
 extern void itfMesSetWindowPageAndRefresh(s32 window, s32 arg1, s32 arg2);
 extern u32 scrGetWindow(void);
+extern void scrSetIntegerReturnValue(s32);
+extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
+extern void itfMesResetWindow(s32 window);
 extern void itfScaleVectors(s32 *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const s32 *input, s32 count);
 extern s32 itfPanelColorTemplates[];
 extern s32 D_003B4548[];
@@ -477,12 +480,31 @@ s32 itfCommandQueueHeldPanelEntry(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A3008);
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A3138);
+s32 func_001A3138(void) {
+    s32 window;
+    s32 entry;
+    PanelRec *record;
+    PanelOptionBlock *options;
+
+    window = scrGetWindow();
+    if (window < 0) {
+        return 1;
+    }
+    record = itfWindowSlots[window].ptr;
+    entry = scrReadIntParameter(0);
+    options = &record->options;
+    if (options->status == 0) {
+        itfMesBuildOptionList(window, entry);
+    } else if (options->status < 0) {
+        options->status = 0;
+        scrSetIntegerReturnValue(options->clearBitCount);
+        itfMesResetWindow(window);
+        return 1;
+    }
+    return 0;
+}
 
 extern u32 scrGetCommandTimer(void);
-extern void scrSetIntegerReturnValue(s32);
-extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
-extern void itfMesResetWindow(s32 window);
 extern void kwlnDrawSetDc8Second(u32);
 extern void kwlnDrawSetDc8First(u32);
 extern void kwlnDrawSetupDc8(s32);
