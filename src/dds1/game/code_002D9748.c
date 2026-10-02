@@ -117,7 +117,7 @@ void sdfPostmultiplyVuMatrixFromMemory(void *);
 void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *, s32);
 extern void func_002DAB80(u8 *, void *);
 extern u16 D_00398198[];
-extern u32 func_002D2800(u32);
+extern SdfTex *func_002D2800(SdfTex *);
 extern void func_002D33C8(u32, s32, f32);
 
 typedef struct SdfPacketCommand {
@@ -377,7 +377,8 @@ void sdfReduceResourceListCount(SdfResourceList *list, s32 count, s32 enabled) {
     sdfDevResizeBufferedRequest();
 }
 
-/* Allocate a list of cloned resource items; a null source returns null. */
+/* Clone every texture into a new buffered list; null sources return null.
+ * Entries remain address words, so bridge them explicitly at the texture API. */
 SdfResourceList *sdfResourceListClone(SdfResourceList *source) {
     s32 itemCount;
     SdfResourceList *clone;
@@ -389,7 +390,7 @@ SdfResourceList *sdfResourceListClone(SdfResourceList *source) {
     itemCount = source->count;
     clone = sdfCreateConfiguredBufferedResourceList(itemCount);
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-        clone->items[itemIndex] = func_002D2800(source->items[itemIndex]);
+        clone->items[itemIndex] = (u32)func_002D2800((SdfTex *)source->items[itemIndex]);
     }
     clone->count = itemCount;
     return clone;
