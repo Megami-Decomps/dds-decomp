@@ -1,0 +1,152 @@
+[
+  {
+    "path": "/fld/f/f001/f001_000.LB",
+    "output": "field/f001_000.LB",
+    "size": 23040,
+    "sha1": "a7d0c63e9ac9e80b0831e7256a0c396de1b792ee"
+  },
+  {
+    "path": "/fld/f/f004/f004_000.LB",
+    "output": "field/f004_000.LB",
+    "size": 67776,
+    "sha1": "337071bc9a0b3849ce7f5a8bf9983ca83d85081b"
+  },
+  {
+    "path": "/fld/f/f005/f005_000.LB",
+    "output": "field/f005_000.LB",
+    "size": 33216,
+    "sha1": "7e308a56198ed18e9868131e97c4525f5532dbfe"
+  },
+  {
+    "path": "/fld/f/f007/f007_000.LB",
+    "output": "field/f007_000.LB",
+    "size": 36736,
+    "sha1": "a8a03116b61f7a7111998005e29cc4bb8891fe7c"
+  },
+  {
+    "path": "/fld/f/f008/f008_000.LB",
+    "output": "field/f008_000.LB",
+    "size": 33792,
+    "sha1": "49819ce3877b4860151afd84728f97e80d988978"
+  },
+  {
+    "path": "/fld/f/f009/f009_000.LB",
+    "output": "field/f009_000.LB",
+    "size": 28736,
+    "sha1": "8fde15c8cfbfeebbc335252b18078135c2f88107"
+  },
+  {
+    "path": "/fld/f/f010/f010_000.LB",
+    "output": "field/f010_000.LB",
+    "size": 34048,
+    "sha1": "07003aa53d0f12cc6c05a407928676f19773af19"
+  },
+  {
+    "path": "/fld/f/f011/f011_000.LB",
+    "output": "field/f011_000.LB",
+    "size": 16064,
+    "sha1": "7be0eff3feb6fb67831da857cf20063bb56145d1"
+  },
+  {
+    "path": "/fld/f/f012/f012_000.LB",
+    "output": "field/f012_000.LB",
+    "size": 12864,
+    "sha1": "2c9d1932b78a98ace421e7734ec10236d6cd42b9"
+  },
+  {
+    "path": "/fld/f/f013/f013_000.LB",
+    "output": "field/f013_000.LB",
+    "size": 11904,
+    "sha1": "fd3b68cd9772d85c8d93227fee7cbf50e46a0d87"
+  },
+  {
+    "path": "/fld/f/f014/f014_000.LB",
+    "output": "field/f014_000.LB",
+    "size": 19456,
+    "sha1": "b3746e2d2e5f5e013d341b57793821bda6c29af4"
+  },
+  {
+    "path": "/fld/f/f015/f015_000.LB",
+    "output": "field/f015_000.LB",
+    "size": 44224,
+    "sha1": "96a610bfb45594cc1e8eb80901320f1db646a534"
+  },
+  {
+    "path": "/fld/f/f021/f021_000.LB",
+    "output": "field/f021_000.LB",
+    "size": 51840,
+    "sha1": "7f8f854b3fdb32217d64265d07fc659c079a6c91"
+  },
+  {
+    "path": "/fld/f/f022/f022_000.LB",
+    "output": "field/f022_000.LB",
+    "size": 43904,
+    "sha1": "6efb93216f9a1e878802d3bed005d5b65ed6495f"
+  },
+  {
+    "path": "/fld/f/f023/f023_000.LB",
+    "output": "field/f023_000.LB",
+    "size": 61376,
+    "sha1": "097908192cab6ca980bda552ea25b09ecd55ef65"
+  },
+  {
+    "path": "/fld/f/f023/f023_00a.LB",
+    "output": "field/f023_00a.LB",
+    "size": 61312,
+    "sha1": "0ce9df075450ffe80d3a7edbafd7a4828e6b1457"
+  },
+  {
+    "path": "/fld/f/f024/f024_000.LB",
+    "output": "field/f024_000.LB",
+    "size": 60480,
+    "sha1": "876a859a35a77df53c3a2b3e18203f0b6462007c"
+  },
+  {
+    "path": "/fld/f/f024/f024_00a.LB",
+    "output": "field/f024_00a.LB",
+    "size": 60352,
+    "sha1": "96ba9d7e1bc6638e16a7537efdba21c57398bc6f"
+  },
+  {
+    "path": "/fld/f/f025/f025_000.LB",
+    "output": "field/f025_000.LB",
+    "size": 77760,
+    "sha1": "e682993f81ccd3f09685f96d753a2cd028cf0857"
+  },
+  {
+    "path": "/fld/f/f026/f026_000.LB",
+    "output": "field/f026_000.LB",
+    "size": 74176,
+    "sha1": "5f012068fec128841e682a625178e7c92bf2da81"
+  },
+  {
+    "path": "/fld/f/f027/f027_000.LB",
+    "output": "field/f027_000.LB",
+    "size": 55552,
+    "sha1": "b2e11925d528603db702916f8ca5ddc7e2dd2f1e"
+  },
+  {
+    "path": "/fld/f/f027/f027_00a.LB",
+    "output": "field/f027_00a.LB",
+    "size": 55168,
+    "sha1": "6701b4d6cf6ca66ec269f4670a971c2218c76a96"
+  },
+  {
+    "path": "/fld/f/f028/f028_000.LB",
+    "output": "field/f028_000.LB",
+    "size": 48896,
+    "sha1": "77bd477ae0f6d31cc0912fd97c61c622d3c00be6"
+  },
+  {
+    "path": "/fld/f/f029/f029_000.LB",
+    "output": "field/f029_000.LB",
+    "size": 62720,
+    "sha1": "93d112526d757276c8fd0175deffbec50258771f"
+  },
+  {
+    "path": "/fld/f/f030/f030_000.LB",
+    "output": "field/f030_000.LB",
+    "size": 70912,
+    "sha1": "cdb94f29a922c26a165b1cd205fa24b24721a95e"
+  }
+]
