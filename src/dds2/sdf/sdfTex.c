@@ -23,6 +23,10 @@ typedef struct SdfTextureFileHeader {
     u8 pad24[0x1C];
 } SdfTextureFileHeader;
 
+/* Expand the packed 5:5:5 color channels to separate byte lanes. */
+#define SDF_TEX_EXPAND_RGB5(out, in) \
+    __asm__ volatile ("pext5 %0, %1" : "=r" (out) : "r" (in))
+
 extern SdfTex *sdfResourceListHead;
 
 void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
@@ -34,6 +38,8 @@ void sdfFreeMemoryFromEitherHeap(void *arg0);
 void *sdfTexCreateResourcePacket(SdfTex *arg0, s32 arg1);
 
 void *sdfAllocSizeClassBlock(s32 arg0);
+
+void *sdfAllocateBlockBySizeThreshold(s32 size);
 
 u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 
@@ -243,4 +249,45 @@ void sdfTexAcquireAlternateResourceTexture(u32 resourceAddress) {
     func_0032BF78((SdfTextureFileHeader *)resourceAddress, 1);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032C168);
+/* Build one intensity byte for every source pixel. */
+void func_0032C168(SdfTex *texture) {
+    s32 stride;
+    s32 count;
+    u8 *output;
+    u8 *source;
+    u32 color;
+    u32 first;
+    u32 second;
+    u32 third;
+
+    if (texture->clutFormat == 0) {
+        stride = 4;
+        count = (u32)texture->dataSize >> 2;
+    } else {
+        stride = 2;
+        count = (u32)texture->dataSize >> 1;
+    }
+    output = texture->auxiliaryAllocation;
+    if (output == NULL) {
+        output = sdfAllocateBlockBySizeThreshold(count);
+        texture->auxiliaryAllocation = output;
+    }
+    source = texture->data;
+    do {
+        if (stride == 4) {
+            color = *(u32 *)source;
+            source += 4;
+        } else {
+            u16 packed = *(u16 *)source;
+            source += 2;
+            SDF_TEX_EXPAND_RGB5(color, packed);
+            color |= (color >> 5) & 0x070707;
+        }
+        second = (color >> 8) & 0xFF;
+        first = color & 0xFF;
+        third = (color >> 16) & 0xFF;
+        count--;
+        *output = ((first * 77) >> 8) + ((second * 150) >> 8) + ((third * 29) >> 8);
+        output++;
+    } while (count != 0);
+}
