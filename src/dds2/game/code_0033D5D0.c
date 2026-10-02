@@ -1,5 +1,21 @@
 #include "common.h"
 
+#define SDF_DEV_WORKER_COUNT 4
+#define SDF_DEV_DEFAULT_PRIORITY 0x48
+#define SDF_DEV_OVERRIDE_PRIORITY 0x78
+#define SDF_DEV_PRIORITY_OVERRIDE_TICKS 3
+
+#define SDF_BCD_DIGIT_BITS 4
+#define SDF_DECIMAL_RADIX 10
+
+/* Keep the retail single-precision values; do not round or recompute them. */
+#define SDF_TRIG_INVERSE_TAU 0.15915494f
+#define SDF_TRIG_HALF_PI 1.5707963f
+#define SDF_TRIG_PI 3.1415926f
+#define SDF_TRIG_TAU 6.2831852f
+#define SDF_SINE_POLYNOMIAL_SCALE 3.9999996f
+#define SDF_ASIN_SAMPLE_COUNT 128
+
 extern u8 sdfDevicePriorityOverrideTicks;
 
 extern u32 D_004391A4;
@@ -960,46 +976,50 @@ DevState *sdfDevOpenRequest(s32 path, void *data, s32 extra,
     return state;
 }
 
+/* Update non-negative worker IDs only; skip an unchanged numeric priority. */
 void sdfSetThreadPriorities(s32 priority) {
-    ThreadEntry *thread;
-    u32 i;
+    ThreadEntry *worker;
+    u32 index;
 
     if (sdfDeviceWorkerPriority == priority) {
         return;
     }
     sdfDeviceWorkerPriority = priority;
-    thread = sdfDeviceWorkerEntries;
-    i = 0;
+    worker = sdfDeviceWorkerEntries;
+    index = 0;
     do {
-        s32 tid = thread->threadId;
+        s32 threadId = worker->threadId;
 
-        thread++;
-        if (tid >= 0) {
-            ChangeThreadPriority(tid, priority);
+        worker++;
+        if (threadId >= 0) {
+            ChangeThreadPriority(threadId, priority);
         }
-        i++;
-    } while (i < 4);
+        index++;
+    } while (index < SDF_DEV_WORKER_COUNT);
 }
 
+/* Apply the temporary numeric priority for three countdown ticks. */
 void sdfRaiseDeviceThreadPriority(void) {
-    sdfDevicePriorityOverrideTicks = 3;
-    sdfSetThreadPriorities(0x78);
+    sdfDevicePriorityOverrideTicks = SDF_DEV_PRIORITY_OVERRIDE_TICKS;
+    sdfSetThreadPriorities(SDF_DEV_OVERRIDE_PRIORITY);
 }
 
+/* Restore the default numeric priority without changing the countdown. */
 void sdfRestoreDeviceThreadPriority(void) {
-    sdfSetThreadPriorities(0x48);
+    sdfSetThreadPriorities(SDF_DEV_DEFAULT_PRIORITY);
 }
 
+/* Decrement an active override and restore the default when it expires. */
 void sdfTickThreadPriorityOverride(void) {
-    u8 val = sdfDevicePriorityOverrideTicks;
-    u8 next;
+    u8 remainingTicks = sdfDevicePriorityOverrideTicks;
+    u8 nextTicks;
 
-    if (val == 0) {
+    if (remainingTicks == 0) {
         return;
     }
-    sdfDevicePriorityOverrideTicks = val - 1;
-    next = val - 1;
-    if (next != 0) {
+    sdfDevicePriorityOverrideTicks = remainingTicks - 1;
+    nextTicks = remainingTicks - 1;
+    if (nextTicks != 0) {
         return;
     }
     sdfRestoreDeviceThreadPriority();
@@ -1092,17 +1112,20 @@ s32 sdfBcdStrToInt(s32 packedDigits) {
     return acc;
 }
 
+/* Pack positive decimal digits into nibbles; non-positive input returns zero.
+ * The original signed shifts and lack of an overflow check are retained.
+ */
 s32 sdfDecimalToPackedDigits(s32 number) {
-    s32 shift = 0;
-    s32 bcd = 0;
+    s32 digitShift = 0;
+    s32 packedDigits = 0;
 
     while (number > 0) {
-        s32 quotient = number / 10;
-        bcd |= (number - quotient * 10) << shift;
+        s32 quotient = number / SDF_DECIMAL_RADIX;
+        packedDigits |= (number - quotient * SDF_DECIMAL_RADIX) << digitShift;
         number = quotient;
-        shift += 4;
+        digitShift += SDF_BCD_DIGIT_BITS;
     }
-    return bcd;
+    return packedDigits;
 }
 
 DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 mode) {
@@ -1166,73 +1189,79 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 count) {
     }
 }
 
+/* Mirror the phase into a quarter turn, then evaluate an odd ninth-degree polynomial. */
 f32 sdfSinPoly(f32 angle) {
-    f32 x = angle * 0.15915494f;
-    f32 t;
-    f32 t2;
-    f32 t3;
-    f32 t5;
-    f32 t7;
-    f32 t9;
+    f32 phase = angle * SDF_TRIG_INVERSE_TAU;
+    f32 polynomialInput;
+    f32 inputSquared;
+    f32 inputCubed;
+    f32 inputFifthPower;
+    f32 inputSeventhPower;
+    f32 inputNinthPower;
 
-    x -= (s32)x;
-    if (x > 0.5f) {
-        x -= 1.0f;
-    } else if (x < -0.5f) {
-        x += 1.0f;
+    phase -= (s32)phase;
+    if (phase > 0.5f) {
+        phase -= 1.0f;
+    } else if (phase < -0.5f) {
+        phase += 1.0f;
     }
-    if (x > 0.25f) {
-        x = 0.5f - x;
-    } else if (x < -0.25f) {
-        x = -0.5f - x;
+    if (phase > 0.25f) {
+        phase = 0.5f - phase;
+    } else if (phase < -0.25f) {
+        phase = -0.5f - phase;
     }
-    t = x * 3.9999996f;
-    t2 = t * t;
-    t3 = t2 * t;
-    t5 = t3 * t2;
-    t7 = t5 * t2;
-    t9 = t7 * t2;
-    return t * 1.5707963f + t3 * -0.64596367f + t5 * 0.07968968f + t7 * -0.0046737656f + t9 * 0.00015148419f;
+    polynomialInput = phase * SDF_SINE_POLYNOMIAL_SCALE;
+    inputSquared = polynomialInput * polynomialInput;
+    inputCubed = inputSquared * polynomialInput;
+    inputFifthPower = inputCubed * inputSquared;
+    inputSeventhPower = inputFifthPower * inputSquared;
+    inputNinthPower = inputSeventhPower * inputSquared;
+    return polynomialInput * SDF_TRIG_HALF_PI + inputCubed * -0.64596367f + inputFifthPower * 0.07968968f + inputSeventhPower * -0.0046737656f + inputNinthPower * 0.00015148419f;
 }
 
+/* Apply a quarter-turn phase shift to the existing sine approximation. */
 f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle) {
-    return sdfSinPoly(angle + 1.5707963f);
+    return sdfSinPoly(angle + SDF_TRIG_HALF_PI);
 }
 
-/* Binary search for value in a sorted table; returns the interpolated position in 0..1. */
-f32 sdfTableInterpolate(f32 value, f32 *table, s32 count) {
-    f32 unit = 1 / count;
-    s32 lo = 0;
-    s32 hi = count;
-    s32 mid;
-    f32 lower;
-    f32 upper;
+/* Binary-search samples, using zero as the implicit lower endpoint.
+ * The step is integer 1/sampleCount converted to f32, not a float reciprocal.
+ * The caller must provide valid table bounds for the final sample index.
+ */
+f32 sdfTableInterpolate(f32 value, f32 *table, s32 sampleCount) {
+    f32 positionStep = 1 / sampleCount;
+    s32 lowerIndex = 0;
+    s32 upperIndex = sampleCount;
+    s32 sampleIndex;
+    f32 lowerValue;
+    f32 upperValue;
 
     do {
-        mid = lo + hi;
-        mid >>= 1;
-        upper = table[mid];
-        if (value < upper) {
-            hi = mid;
+        sampleIndex = lowerIndex + upperIndex;
+        sampleIndex >>= 1;
+        upperValue = table[sampleIndex];
+        if (value < upperValue) {
+            upperIndex = sampleIndex;
         } else {
-            mid++;
-            lo = mid;
+            sampleIndex++;
+            lowerIndex = sampleIndex;
         }
-    } while (lo < hi);
-    upper = table[mid];
-    lower = 0.0f;
-    if (mid != 0) {
-        lower = table[mid - 1];
+    } while (lowerIndex < upperIndex);
+    upperValue = table[sampleIndex];
+    lowerValue = 0.0f;
+    if (sampleIndex != 0) {
+        lowerValue = table[sampleIndex - 1];
     }
-    return mid * unit + (value - lower) * unit / (upper - lower);
+    return sampleIndex * positionStep + (value - lowerValue) * positionStep / (upperValue - lowerValue);
 }
 
+/* Odd fifth-degree atan approximation; the ratio is not range-checked here. */
 f32 sdfAtan2Poly(f32 ratio) {
-    f32 x2 = ratio * ratio;
-    f32 x3 = x2 * ratio;
-    f32 x5 = x2 * x3;
+    f32 ratioSquared = ratio * ratio;
+    f32 ratioCubed = ratioSquared * ratio;
+    f32 ratioFifthPower = ratioSquared * ratioCubed;
 
-    return ratio * 0.99999977f + x3 * -0.33325735f + x5 * 0.19388643f;
+    return ratio * 0.99999977f + ratioCubed * -0.33325735f + ratioFifthPower * 0.19388643f;
 }
 
 f32 sdfAtan2(f32 y, f32 x) {
@@ -1263,46 +1292,53 @@ f32 sdfAtan2(f32 y, f32 x) {
     return r;
 }
 
+/* Restore the input sign after sampling; magnitudes at or above one use half pi. */
 f32 sdfAsinTable(f32 x) {
-    f32 sign;
-    f32 result;
+    f32 inputSign;
+    f32 angleMagnitude;
 
     if (x < 0.0f) {
         x = -x;
-        sign = -1.0f;
+        inputSign = -1.0f;
     } else {
-        sign = 1.0f;
+        inputSign = 1.0f;
     }
-    result = x >= 1.0f ? 1.5707963f : sdfTableInterpolate(x, sdfNormalizedAsinSamples, 128) * 1.5707963f;
-    return result * sign;
+    angleMagnitude = x >= 1.0f ? SDF_TRIG_HALF_PI : sdfTableInterpolate(x, sdfNormalizedAsinSamples, SDF_ASIN_SAMPLE_COUNT) * SDF_TRIG_HALF_PI;
+    return angleMagnitude * inputSign;
 }
 
+/* Return the input-signed complement of the sampled angle, not standard acos(x).
+ * Magnitudes at or above one leave the angle magnitude at zero.
+ */
 f32 sdfAcosTable(f32 x) {
-    f32 sign;
-    f32 result;
+    f32 inputSign;
+    f32 angleMagnitude;
 
     if (x < 0.0f) {
         x = -x;
-        sign = -1.0f;
+        inputSign = -1.0f;
     } else {
-        sign = 1.0f;
+        inputSign = 1.0f;
     }
-    result = 0.0f;
+    angleMagnitude = 0.0f;
     if (!(x >= 1.0f)) {
-        result = (1.0f - sdfTableInterpolate(x, sdfNormalizedAsinSamples, 128)) * 1.5707963f;
+        angleMagnitude = (1.0f - sdfTableInterpolate(x, sdfNormalizedAsinSamples, SDF_ASIN_SAMPLE_COUNT)) * SDF_TRIG_HALF_PI;
     }
-    return result * sign;
+    return angleMagnitude * inputSign;
 }
 
+/* Keep the cast-plus/minus-one turn adjustment; this is not general modulo.
+ * Inputs already within the pi thresholds are returned unchanged.
+ */
 f32 sdfWrapAngle(f32 angle) {
-    s32 turns;
-    if (angle > 3.1415926f) {
-        turns = (s32)(angle / 6.2831852f) + 1;
-        return angle - (f32)turns * 6.2831852f;
+    s32 adjustedTurns;
+    if (angle > SDF_TRIG_PI) {
+        adjustedTurns = (s32)(angle / SDF_TRIG_TAU) + 1;
+        return angle - (f32)adjustedTurns * SDF_TRIG_TAU;
     }
-    if (angle < -3.1415926f) {
-        turns = (s32)(angle / 6.2831852f) - 1;
-        return angle - (f32)turns * 6.2831852f;
+    if (angle < -SDF_TRIG_PI) {
+        adjustedTurns = (s32)(angle / SDF_TRIG_TAU) - 1;
+        return angle - (f32)adjustedTurns * SDF_TRIG_TAU;
     }
     return angle;
 }
