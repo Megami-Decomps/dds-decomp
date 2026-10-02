@@ -16,12 +16,9 @@ extern u8 D_003DC1C0[];
 
 extern u8 D_003DC1D0[];
 
-
 extern void *mnuTitleCameraObject;
 
 extern char D_003AFD48[]; /* "---------- AT3 --------\n", followed by 8 zero bytes no C function emits */
-
-extern char D_003AFD80[]; /* "titleProc" */
 
 extern u32 mnuTitleSoundBufferState[];
 
@@ -63,12 +60,6 @@ extern void func_003014F0(char *dst, char *fmt, char *name, char *arg);
 
 extern s32 func_003003F0(const char *fmt, ...);
 
-extern void fldReleaseCameraColorEffect(void);
-
-extern void func_002CF430(void);
-
-extern s32 evtDestroySecondaryWorldNode(void);
-
 extern void mnuCreateTitleEffectTask(void);
 
 extern u8 D_003BC5A0[];
@@ -80,12 +71,19 @@ extern u32 D_003BC5B0[2];
 extern u32 D_003BC5B8;
 
 extern u64 func_002F5990();
+
 typedef struct MemBlock MemBlock;
+
 extern MemBlock *sdfAllocGeneralBlock(s32 size);
+
 extern u32 sdfMemoryGetBlockAddress(MemBlock *block);
+
 extern s32 sceSifInitIopHeap(void);
+
 extern s32 sceSifAllocIopHeap(s32 size);
+
 extern void Exit(s32 status);
+
 extern s32 D_003BD8C0;
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00268AB8);
@@ -430,6 +428,7 @@ typedef struct AtracInfo {
 } AtracInfo;
 
 extern s32 WaitSema(u32);
+
 extern s32 SignalSema(u32);
 
 void mnuReadTitleStreamStatusLocked(AtracInfo *out) {
@@ -470,12 +469,19 @@ void mnuStoreTaskResult(void) {
 }
 
 extern u32 D_003D9168[];
+
 extern s32 fileIsRequestReadyInCurrentMode(u32);
+
 extern s32 fileGetResourceHandle(u32);
+
 extern u32 fileGetLoadedDataAddress(u32);
+
 extern s32 fileGetResourceSize(u32);
+
 extern void filePollEntryCleanup(u32);
+
 extern MemBlock *sdfAllocGeneralBlockHigh(s32);
+
 extern void func_002F7628(u32 *);
 
 /* When the pending title-stream file is ready, copy it into a fresh block,
@@ -680,61 +686,6 @@ void mnuCreateTitleCameraWorldEntry(void) {
     effObjSetInnerFloat(mnuTitleCameraObject, 2.0f);
     dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), mnuTitleCameraObject);
 }
-
-extern void effObjSetInnerFirstVec(void *, void *);
-extern void effObjSetInnerSecondVec(void *, void *);
-
-s32 mnuApplyInnerEffectVectorsAndTickObject(void) {
-    effObjSetInnerFirstVec(mnuTitleCameraObject, D_003DC1C0);
-    effObjSetInnerSecondVec(mnuTitleCameraObject, D_003DC1D0);
-    return (*(s32 (**)(void *))(*(s32 *)((u8 *)mnuTitleCameraObject + 0x10) + 8))(mnuTitleCameraObject);
-}
-
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026AF78);
-
-s64 mnuMovieShutdownA(void) {
-    fldReleaseCameraColorEffect();
-    func_002CF430();
-    return evtDestroySecondaryWorldNode();
-}
-
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026B050);
-
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026B160);
-
-extern void func_0026CB10(void *, void *);
-
-s64 func_0026B1C0(void) {
-    func_0026CB10(D_003DC1C0, D_003DC1D0);
-    return mnuApplyInnerEffectVectorsAndTickObject();
-}
-
-INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFD80);
-
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026B1F0);
-
-u32 func_0026BCE8(void) {
-    func_0026B050();
-    return 0xffffffff;
-}
-
-s32 mnuDestroyTitleMenuTask(void) {
-    func_0026B160();
-    kwlnTaskDestroyWithHierarchyByName(D_003AFD80, 1);
-    return 0;
-}
-
-u32 func_0026BD38(void) {
-    func_0026B050(0);
-    return 0;
-}
-
-void mnuRestartRuntimeAfterViewer(void) {
-    evtDestroySecondaryWorldNode();
-    sdfDestroyRuntimeTask();
-    sdfCreateRuntimeTask();
-}
-
 INCLUDE_SDATA(const s32, "game/code_00268AB8", mnuTitleSoundTask);
 
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC58C);
@@ -762,6 +713,4 @@ INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5C4);
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5C8);
 
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5CC);
-
-INCLUDE_SDATA(const s32, "game/code_00268AB8", mnuMovieMenuState);
 

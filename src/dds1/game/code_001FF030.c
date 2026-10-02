@@ -181,13 +181,12 @@ static inline u32 btlRollTwice(void) {
 /* Rolls a bucket; if it lands within 3 of the previous one, rolls again. */
 u32 btlRollAiBucket(void) {
     u32 slot = btlRollTwice() / 0x29;
-    if (btlPreviousAiCandidateBucket < slot - 3 || btlPreviousAiCandidateBucket > slot + 3) {
-        btlPreviousAiCandidateBucket = slot;
-    } else {
+    if (btlPreviousAiCandidateBucket >= slot - 3 && btlPreviousAiCandidateBucket <= slot + 3) {
         u32 reroll = btlRollTwice();
         btlPreviousAiCandidateBucket = slot;
         return reroll / 0x29;
     }
+    btlPreviousAiCandidateBucket = slot;
     return slot;
 }
 
