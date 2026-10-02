@@ -127,7 +127,7 @@ SDF-to-glTF consumer. The complete pass emits 1,446 areas, 13,810 glTF nodes,
 ## Geometry import
 
 `tools/amb_scene_import.py` applies edited model vertex streams from an
-exported AMB or composed field GLB back to exact automap source:
+exported AMB GLB back to exact automap source:
 
 ```sh
 python3 tools/amb_scene_import.py edited-f024.glb \
