@@ -8,6 +8,16 @@ typedef struct FrFontRecord {
     void *list;  /* 0x08 */
 } FrFontRecord;
 
+typedef struct FntNode {
+    void *unk0;
+    s32 x;
+    s32 y;
+    u8 pad0C[8];
+    FrFontRecord *item;
+    struct FntNode *prev;
+    struct FntNode *next;
+} FntNode;
+
 typedef struct FrFontEntry {
     u8 unk00[4];
     void *header;      /* 0x04 */
@@ -124,7 +134,11 @@ typedef struct FrFontSys {
     s32 glyphCount;           /* 0x14C */
     s32 itemPool;             /* 0x150 */
     s32 glyphPool;            /* 0x154 */
-    u8 unk158[0x3C];          /* 0x158 */
+    u8 unk158[8];
+    s32 atlasBufferWidth;     /* 0x160 */
+    u8 unk164[0xC];
+    s32 atlasBase;            /* 0x170 */
+    u8 unk174[0x20];
     FrFontGlyph *slots[2];    /* 0x194 */
 } FrFontSys;
 
@@ -294,7 +308,51 @@ FrFontGlyph *frFontAppendClonedGlyph(FrFontGlyph *source, FrFontGlyph *destinati
     return frFontLinkGlyphAfterPrevious(destination, glyph);
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019C9D0);
+typedef struct SdfImageUploadRequest {
+    void *pixels;
+    s32 allocation;
+    u8 allocationMode;
+    u8 format;
+    u16 bufferWidth;
+    u32 destination;
+    u16 x;
+    u16 y;
+    u16 width;
+    u16 height;
+} SdfImageUploadRequest;
+
+extern FntNode *frFontDetachFirstResourceNode(void);
+extern void func_0032AC30(SdfImageUploadRequest *);
+
+FrFontRecord *func_0019C9D0(s32 width, s32 height, void *pixels, s8 owned) {
+    s32 position[2];
+    SdfImageUploadRequest request;
+    FntNode *node;
+    FrFontRecord *item;
+
+    node = frFontDetachFirstResourceNode();
+    item = node->item;
+    /* Convert fixed-point atlas placement to integer image coordinates. */
+    position[0] = node->x >> 4;
+    position[1] = node->y >> 4;
+    item->refs = 1;
+    item->list = node;
+    if (owned == 0) {
+        request.allocationMode = 0;
+    } else {
+        request.allocationMode = 2;
+    }
+    request.pixels = pixels;
+    request.format = 0x14;
+    request.width = width;
+    request.height = height;
+    request.bufferWidth = frFontWork.atlasBufferWidth;
+    request.destination = frFontWork.atlasBase << 6;
+    request.x = position[0];
+    request.y = position[1];
+    func_0032AC30(&request);
+    return item;
+}
 
 void *frFontCloneEntryResource(u8 index, s32 option) {
     FrFontEntry *entry = &frFontWork.entries[index];
@@ -308,7 +366,6 @@ void *frFontCloneEntryResource(u8 index, s32 option) {
 
 extern u16 frFontGetSlotCellWidth(s32 index);
 extern u16 frFontGetSlotCellHeight(s32 index);
-extern FrFontRecord *func_0019C9D0(s32 first, s32 second, void *resource, s32 count);
 
 /* Return the cached item for `id` in the glyph's font slot (taking a reference),
  * or clone the slot resource and create and cache a new one. */
