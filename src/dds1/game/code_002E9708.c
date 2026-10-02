@@ -34,7 +34,7 @@ extern s32 func_002E99A0();
 
 extern void func_002D0B50(void *out);
 
-extern void sdfPrintFormattedDevMessage(char *fmt, ...);
+extern void sdfPrintFormattedDevMessage(const char *fmt, ...);
 
 typedef struct MidiChannel {
     u8 pad00[0x19];
