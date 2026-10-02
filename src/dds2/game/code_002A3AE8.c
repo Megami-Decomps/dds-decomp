@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 
 /* Sliding menu bar: direction flag and 0..max position */
 typedef struct { s32 active; s32 pos; } SlideBar;
@@ -270,7 +271,16 @@ void mnuPairedSlideBarSetState(u32 *work, s32 state) {
     work[0] = state;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", mnuGetSlidePathSegmentWeight);
+s32 mnuGetSlidePathSegmentWeight(s32 segment) {
+    s32 x0 = D_003E38A0[segment + 8];
+    s32 x1 = D_003E38A0[segment + 9];
+    s32 y0 = D_003E38A0[segment + 12];
+    s32 y1 = D_003E38A0[segment + 13];
+    s32 dx = x1 - x0;
+    s32 dy = y1 - y0;
+
+    return (s32)fsqrtf((f32)(dx * dx + dy + dy));
+}
 
 s32 mnuGetSlidePathTotalWeight(void) {
     s32 index;
