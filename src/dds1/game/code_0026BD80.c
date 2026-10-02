@@ -165,8 +165,16 @@ void func_0026C1F8(s32 parameter) {
 }
 
 extern void sdfSubmitGsAlphaOneRegisterPacket(s32, s32);
-extern void sdfSubmitGsTestOneRegisterPacket(s32, s32);
+extern void sdfSubmitGsTestOneRegisterPacket();
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
+extern void uiDrawActiveSurfaceRegion(s32);
+extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
+extern void func_002CAAC8(void *, s32, u32 *, s32, s32, s32);
+
+typedef struct MenuSurfacePair {
+    s32 first;
+    s32 second;
+} MenuSurfacePair;
 
 void mnuDrawMovieMenuBackgroundQuad(s32 parameter) {
     sdfSubmitGsAlphaOneRegisterPacket(0x44, 0x3E);
@@ -182,7 +190,29 @@ void mnuDrawMovieMenuSpriteLayers(s32 context) {
     mnuDrawSprite(1, -10, 0, 0x80, 0, 4, context);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C350);
+void func_0026C350(s32 base, s32 source, u32 alpha, s32 context) {
+    u32 color = (alpha << 24) | 0x808080;
+    MenuSurfacePair surfacePairs[4] = {
+        {base, source},
+        {base + 0x20, source},
+        {base + 0x220, source + 0x1C0},
+        {base + 0x200, source + 0x1C0},
+    };
+
+    sdfSubmitGsTestOneRegisterPacket(0x30000, context);
+    uiDrawUniformColorRect(0, 0, -1, 0x2000, 0xE00, 0, context);
+    uiDrawActiveSurfaceRegion(context);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, context);
+    func_002CAAC8(surfacePairs, 0, &color, 4, 1, context);
+    sdfDispatchSurfaceWithPreparedTexturePacket(context);
+    sdfSubmitGsAlphaOneRegisterPacket(0x48, context);
+    sdfSubmitGsTestOneRegisterPacket(0x50000, context);
+    mnuDrawSprite(0, 0, 0, 0x80, 0x60, 10, context);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, context);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, context);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, context);
+    sdfSubmitGsTestOneRegisterPacket(0x5000DL, context);
+}
 
 void func_0026C4A8(void) {
     MenuState *state = (MenuState *)mnuMovieMenuState;
@@ -305,4 +335,3 @@ INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC5F8);
 INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC600);
 
 INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC608);
-
