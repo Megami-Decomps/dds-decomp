@@ -4599,7 +4599,7 @@ extern void mdlUpdateContextRotationBasisFromQuaternion(void *work);
 extern void mdlStoreTertiaryVectorVU(void *work);
 extern void sdfModelUpdateCurrentFrameTransforms(void *model);
 extern void func_003320E8(void *table, void *model);
-extern void func_00334510(void *obj);
+extern s32 sdfMotionUpdate(void *motion);
 
 /* Per-frame update: for each of `count` slots, spawn its model on its start frame, orient/scale it, refresh its children and capture the node vectors. */
 void effPcpUpdateStaggeredPulseModels(EffPCPPulseWork *work) {
@@ -4638,7 +4638,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPPulseWork *work) {
         for (j = 0; j != 4; j++) {
             child = data->child[j];
             if (child != NULL && child->active) {
-                func_00334510(child);
+                sdfMotionUpdate(child);
             }
         }
         if (!(data->flags & 1)) {

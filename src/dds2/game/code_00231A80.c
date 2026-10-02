@@ -261,7 +261,7 @@ void mdlDestroyContext(MdlCtx *ctx) {
 }
 
 extern void func_00231FD8();
-extern void func_00334510();
+extern s32 sdfMotionUpdate(void *motion);
 extern void sdfModelUpdateCurrentFrameTransforms();
 extern void func_003320E8();
 extern void mdlDispatchViewerAnchorRecord();
@@ -276,7 +276,7 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
     for (i = 0; i != 4; i++) {
         if (*slot != NULL) {
             if ((*slot)->unk30 != 0) {
-                func_00334510(*slot);
+                sdfMotionUpdate(*slot);
             }
         }
         slot++;
@@ -330,7 +330,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 arg, s32 index, f32 pitch, 
     for (i = 0; i != 4; i++) {
         if (ctx->slots[i] != NULL) {
             if (ctx->slots[i]->unk30 != 0) {
-                func_00334510(ctx->slots[i]);
+                sdfMotionUpdate(ctx->slots[i]);
             }
         }
     }

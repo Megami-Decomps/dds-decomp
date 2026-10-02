@@ -445,7 +445,48 @@ void sdfMotionSampleAtFrame(Motion *motion, f32 frame) {
     }
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB660);
+/* Apply the current motion state and report completion (1) or a loop wrap (2). */
+s32 sdfMotionUpdate(Motion *motion) {
+    s32 result;
+    f32 frame;
+    f32 frameCount;
+
+    result = 0;
+    switch (motion->state) {
+    case 0:
+    case 2:
+    case 3:
+    case 5:
+    case 6:
+        break;
+    case 1:
+        sdfMotionSampleAtFrame(motion, motion->blendStartFrame);
+        break;
+    case 4:
+        frame = motion->currentFrame + motion->frameStep;
+        frameCount = motion->frameCount;
+        if (motion->loopEnabled == 0) {
+            if (frameCount <= frame) {
+                sdfMotionSampleAtFrame(motion, frameCount);
+                motion->state = 5;
+                result = 1;
+                break;
+            }
+        } else if (frameCount <= frame) {
+            motion->blendDurationFrames = 0.0f;
+            result = 2;
+            motion->blendStartFrame = 0.0f;
+            do {
+                frame -= frameCount;
+            } while (frameCount <= frame);
+        }
+        sdfMotionSampleAtFrame(motion, frame);
+        break;
+    default:
+        break;
+    }
+    return result;
+}
 /* State 6 parks motion processing, retaining the previous state to resume. */
 void sdfMotionSuspend(Motion *motion) {
     u8 previousState;
