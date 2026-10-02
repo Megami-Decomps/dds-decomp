@@ -14,13 +14,77 @@ INCLUDE_ASM(const s32, "game/code_002ED760", func_002ED760);
 
 INCLUDE_ASM(const s32, "game/code_002ED760", func_002ED8D0);
 
-INCLUDE_ASM(const s32, "game/code_002ED760", func_002EDAE0);
+typedef struct PacOwnedBuffers {
+    void *primary;
+    u8 pad04[0x3C];
+    void *secondary;
+    u8 pad44[8];
+    void *tertiary;
+} PacOwnedBuffers;
 
-s32 func_002EDBB8(u8 *work) {
-    if (*(u8 *)(work + 0x33) == 0) {
+typedef struct PacTransferState {
+    u8 pad00[0xF];
+    u8 status0F;
+    u8 pad10[0xA];
+    u8 status1A;
+    u8 pad1B[0x3D];
+} PacTransferState;
+
+typedef struct SdfPacWork {
+    u8 active;
+    u8 phase;
+    u8 unk02;
+    u8 bufferKind;
+    u8 pad04[0xC];
+    void *operation;
+    u8 pad14[8];
+    PacOwnedBuffers *buffers;
+    u8 releaseSharedState;
+    u8 pad21[3];
+    PacTransferState decoder;
+} SdfPacWork;
+
+extern s32 sdfDevQueueActiveOperation(void *);
+extern void sdfCreateSemaphoreFromOptions(void);
+extern void sdfReleaseResourceAllocation(void *);
+extern void sdfReleaseChipBlock(void *);
+extern void func_002EBB60(void *);
+extern void func_002E98F0(void);
+
+void func_002EDAE0(SdfPacWork *job) {
+    PacOwnedBuffers *buffers;
+
+    if (job->active != 0) {
+        job->unk02 = 1;
+        if (job->phase == 5) {
+            job->phase = 7;
+            sdfDevQueueActiveOperation(job->operation);
+        }
+        while (job->phase != 6) {
+            sdfCreateSemaphoreFromOptions();
+        }
+        buffers = job->buffers;
+        if (job->bufferKind == 0) {
+            sdfReleaseResourceAllocation(buffers->primary);
+            sdfReleaseChipBlock(buffers);
+        } else {
+            sdfReleaseResourceAllocation(buffers->secondary);
+            sdfReleaseResourceAllocation(buffers->tertiary);
+            sdfReleaseChipBlock(buffers);
+        }
+        func_002EBB60(&job->decoder);
+        if (job->releaseSharedState != 0) {
+            func_002E98F0();
+        }
+        job->active = 0;
+    }
+}
+
+s32 func_002EDBB8(SdfPacWork *work) {
+    if (work->decoder.status0F == 0) {
         return 0;
     }
-    return *(u8 *)(work + 0x3E) == 0;
+    return work->decoder.status1A == 0;
 }
 
 void sdfPacInitializeDispatchPacket(SdfPacDispatchPacket *packet, void *dispatch) {

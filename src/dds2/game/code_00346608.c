@@ -12,11 +12,34 @@ typedef struct SdfPacInput {
     s32 processed;
 } SdfPacInput;
 
+typedef struct PacOwnedBuffers {
+    void *primary;
+    u8 pad04[0x3C];
+    void *secondary;
+    u8 pad44[8];
+    void *tertiary;
+} PacOwnedBuffers;
+
+typedef struct PacTransferState {
+    u8 pad00[0xF];
+    u8 status0F;
+    u8 pad10[0xA];
+    u8 status1A;
+    u8 pad1B[0x3D];
+} PacTransferState;
+
 typedef struct SdfPacWork {
-    u8 pad00[0x33];
-    u8 status33;
-    u8 pad34[0xA];
-    u8 status3E;
+    u8 active;
+    u8 phase;
+    u8 unk02;
+    u8 bufferKind;
+    u8 pad04[0xC];
+    void *operation;
+    u8 pad14[8];
+    PacOwnedBuffers *buffers;
+    u8 releaseSharedState;
+    u8 pad21[3];
+    PacTransferState decoder;
 } SdfPacWork;
 
 typedef struct SdfPacDispatchPacket {
@@ -32,13 +55,48 @@ INCLUDE_ASM(const s32, "game/code_00346608", func_00346608);
 
 INCLUDE_ASM(const s32, "game/code_00346608", func_00346778);
 
-INCLUDE_ASM(const s32, "game/code_00346608", func_00346988);
+
+extern s32 sdfDevQueueActiveOperation(void *);
+extern void sdfCreateSemaphoreFromOptions(void);
+extern void sdfReleaseResourceAllocation(void *);
+extern void sdfReleaseChipBlock(void *);
+extern void func_00344A08(void *);
+extern void func_00342798(void);
+
+void func_00346988(SdfPacWork *job) {
+    PacOwnedBuffers *buffers;
+
+    if (job->active != 0) {
+        job->unk02 = 1;
+        if (job->phase == 5) {
+            job->phase = 7;
+            sdfDevQueueActiveOperation(job->operation);
+        }
+        while (job->phase != 6) {
+            sdfCreateSemaphoreFromOptions();
+        }
+        buffers = job->buffers;
+        if (job->bufferKind == 0) {
+            sdfReleaseResourceAllocation(buffers->primary);
+            sdfReleaseChipBlock(buffers);
+        } else {
+            sdfReleaseResourceAllocation(buffers->secondary);
+            sdfReleaseResourceAllocation(buffers->tertiary);
+            sdfReleaseChipBlock(buffers);
+        }
+        func_00344A08(&job->decoder);
+        if (job->releaseSharedState != 0) {
+            func_00342798();
+        }
+        job->active = 0;
+    }
+}
 
 s32 func_00346A60(SdfPacWork *work) {
-    if (work->status33 == 0) {
+    if (work->decoder.status0F == 0) {
         return 0;
     }
-    return work->status3E == 0;
+    return work->decoder.status1A == 0;
 }
 
 void sdfPacInitializeDispatchPacket(SdfPacDispatchPacket *packet, void *dispatch) {
