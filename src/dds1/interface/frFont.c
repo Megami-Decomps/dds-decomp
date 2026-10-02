@@ -87,7 +87,13 @@ typedef struct FrFontSys {
     s32 glyphCount;           /* 0x14C */
     s32 itemPool;             /* 0x150 */
     s32 glyphPool;            /* 0x154 */
-    u8 unk158[0x3C];          /* 0x158 */
+    u8 unk158[8];
+    s32 atlasBufferWidth;     /* 0x160 */
+    u8 unk164[0xC];
+    u32 atlasBase;            /* 0x170 */
+    u8 unk174[4];
+    s32 imageBuffers[6];      /* 0x178: GS upload destinations */
+    u8 unk190[4];             /* 0x190 */
     FrFontGlyph *slots[2];    /* 0x194 */
 } FrFontSys;
 
@@ -181,7 +187,36 @@ void frFontFreeAllEntries(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_001946C8);
+extern u8 D_00356478[];
+/* This caller passes the full image-buffer word; the callee consumes its low half. */
+extern void sdfUploadGsImageUnderSemaphore(s32 buffer, s32 image);
+
+void func_001946C8(void) {
+    u32 image[16];
+    s32 batch = 0;
+    s32 sourceOffset = 0;
+    FrFontSys *work = &frFontWork;
+    s32 *buffer = work->imageBuffers;
+    u8 *sourceTable = D_00356478;
+
+    do {
+        u32 *output = image;
+        u8 *source = (u8 *)(sourceOffset * 4 + (u32)sourceTable);
+        s32 remaining = 15;
+
+        do {
+            *output = (((source[3] << 8) | source[2]) << 8 |
+                       source[1]) << 8 | source[0];
+            source += 4;
+            output++;
+            remaining--;
+        } while (remaining >= 0);
+
+        sdfUploadGsImageUnderSemaphore(*buffer++, (s32)image);
+        batch++;
+        sourceOffset += 16;
+    } while (batch < 6);
+}
 
 /* Record referenced by a glyph's first child pointer. */
 typedef struct FrFontItem {
@@ -191,6 +226,16 @@ typedef struct FrFontItem {
     u8 unk6[2];   /* 0x6 */
     void *node;   /* 0x8 */
 } FrFontItem;
+
+typedef struct FntNode {
+    void *unk0;
+    s32 x;
+    s32 y;
+    u8 pad0C[8];
+    FrFontItem *item;
+    struct FntNode *prev;
+    struct FntNode *next;
+} FntNode;
 
 void frFontReleaseUnreferencedGlyphItem(FrFontGlyph *glyph) {
     FrFontItem *item = (FrFontItem *)glyph->firstChild;
@@ -279,7 +324,51 @@ FrFontGlyph *frFontAppendClonedGlyph(FrFontGlyph *source, FrFontGlyph *destinati
     return frFontLinkGlyphAfterPrevious(destination, glyph);
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00194D20);
+typedef struct SdfImageUploadRequest {
+    void *pixels;
+    s32 allocation;
+    u8 allocationMode;
+    u8 format;
+    u16 bufferWidth;
+    u32 destination;
+    u16 x;
+    u16 y;
+    u16 width;
+    u16 height;
+} SdfImageUploadRequest;
+
+extern FntNode *frFontDetachFirstResourceNode(void);
+extern void func_002D1D80(SdfImageUploadRequest *);
+
+FrFontItem *func_00194D20(s32 width, s32 height, void *pixels, s8 owned) {
+    s32 position[2];
+    SdfImageUploadRequest request;
+    FntNode *node;
+    FrFontItem *item;
+
+    node = frFontDetachFirstResourceNode();
+    item = node->item;
+    /* Convert fixed-point atlas placement to integer image coordinates. */
+    position[0] = node->x >> 4;
+    position[1] = node->y >> 4;
+    item->refs = 1;
+    item->node = node;
+    if (owned == 0) {
+        request.allocationMode = 0;
+    } else {
+        request.allocationMode = 2;
+    }
+    request.pixels = pixels;
+    request.format = 0x14;
+    request.width = width;
+    request.height = height;
+    request.bufferWidth = frFontWork.atlasBufferWidth;
+    request.destination = frFontWork.atlasBase << 6;
+    request.x = position[0];
+    request.y = position[1];
+    func_002D1D80(&request);
+    return item;
+}
 
 typedef struct FrFontSegments {
     void *first;
@@ -303,7 +392,6 @@ void *frFontCloneEntryResource(u8 index, s32 option) {
 
 extern u16 frFontGetSlotCellWidth(s32 index);
 extern u16 frFontGetSlotCellHeight(s32 index);
-extern FrFontItem *func_00194D20(s32 first, s32 second, void *resource, s32 count);
 
 /* Return the cached item for `id` in the glyph's font slot (taking a reference),
  * or clone the slot resource and create and cache a new one. */
@@ -588,7 +676,57 @@ u32 frFontMeasureLines(FrFontGlyph *glyph) {
     return total;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00195CD8);
+typedef struct FrFontGlyphMeasureWork {
+    u16 code;
+    u8 pad02[0xA];
+    s32 advance;
+    u8 pad10[5];
+    u8 fontIndex;
+    u8 pad16;
+    u8 mode;
+    u8 cellWidth;
+    u8 cellHeight;
+    u8 pad1A[0x16];
+} FrFontGlyphMeasureWork;
+
+u32 frFontGetGlyphCellWidth(u8 fontIndex);
+u32 frFontGetGlyphCellHeight(u8 fontIndex);
+extern void func_001949B0(FrFontGlyphMeasureWork *work, s32 code);
+
+s32 func_00195CD8(const u8 *text, u8 fontIndex, u8 mode) {
+    FrFontGlyphMeasureWork work;
+    s32 total = 0;
+    u32 offset = 0;
+    u32 length;
+
+    work.fontIndex = fontIndex;
+    work.mode = mode;
+    work.advance = 0;
+    work.cellWidth = frFontGetGlyphCellWidth(work.fontIndex);
+    work.cellHeight = frFontGetGlyphCellHeight(work.fontIndex);
+    length = strlen((const char *)text);
+
+    while (offset < length) {
+        u32 code = text[offset];
+        s32 glyphIndex;
+
+        if (code >= 0x80) {
+            offset++;
+            code = (code << 8) | text[offset];
+        }
+        work.code = code;
+        if (code < 0x80) {
+            glyphIndex = code - 0x20;
+        } else {
+            u32 adjusted = code - 0x8080;
+            glyphIndex = ((adjusted & 0xFF00) >> 1) + (adjusted & 0x7F);
+        }
+        func_001949B0(&work, glyphIndex);
+        offset++;
+        total += work.advance;
+    }
+    return total;
+}
 
 u32 frFontGetGlyphCellWidth(u8 fontIndex) {
     s32 index = fontIndex;

@@ -365,6 +365,12 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         description="fld2 $in",
     )
     n.rule(
+        "field_world",
+        f"mkdir -p $outdir && {sys.executable} tools/field_world.py "
+        "--manifest $manifest --encounters $encounters && touch $out",
+        description="link field world $out",
+    )
+    n.rule(
         "lb",
         f"mkdir -p $outdir && {sys.executable} tools/lb.py assemble "
         "--resources $resources $in $base $out",
@@ -778,6 +784,28 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             n.build(str(fld_stamp), "check", str(fld_manifest), implicit=fld_outputs)
             version_outputs.append(str(fld_stamp))
             field_data_stamps.append(str(fld_stamp))
+
+            encounters = Path("build") / version / "data" / "battle" / "ENCOUNT.TBL"
+            encounter_stamp = fld_output_dir / "field_encounters.ok"
+            n.build(
+                str(encounter_stamp),
+                "field_world",
+                implicit=[
+                    "tools/field_world.py",
+                    "tools/fld.py",
+                    "tools/battle_tbl.py",
+                    str(fld_manifest),
+                    str(encounters),
+                    *fld_outputs,
+                ],
+                variables={
+                    "outdir": str(encounter_stamp.parent),
+                    "manifest": str(fld_manifest),
+                    "encounters": str(encounters),
+                },
+            )
+            version_outputs.append(str(encounter_stamp))
+            field_data_stamps.append(str(encounter_stamp))
 
         if field_data_stamps:
             n.build(f"{version}-field-data", "phony", field_data_stamps)

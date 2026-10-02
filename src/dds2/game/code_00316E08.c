@@ -48,15 +48,43 @@ typedef struct MnuEffectRecord {
     u8 pad08[0x18];
 } MnuEffectRecord;
 
-/* Shared work for the shooting task's package requests and state callbacks. */
-typedef struct MnuShootingWork {
-    u32 unk00; /* Written with the allocation handle; consumption not identified. */
-    u8 pad04[8];
+typedef struct SdfAllocation SdfAllocation;
+
+typedef struct MnuSectionObjectList {
+    SdfAllocation *allocation;
+    s32 count;
+    u8 *objects;
+} MnuSectionObjectList;
+
+typedef struct MnuSectionModelWork {
+    SdfAllocation *allocation;
+    s32 count;
+    s32 (*groups)[4];
+    u32 unkC;
+} MnuSectionModelWork;
+
+/* Package entries are walked through their first-word link by the loader. */
+typedef struct MnuPackageEntry {
+    struct MnuPackageEntry *next;
+    u8 pad04[4];
+    SdfAllocation *allocation;
     s32 unk0C;
-    u8 pad10[2];
+    u8 kind;
+    u8 pad11;
     u16 unk12;
     u8 pad14[8];
     s32 unk1C;
+} MnuPackageEntry;
+
+/* Shared work for the shooting task's package requests and state callbacks. */
+typedef struct MnuShootingWork {
+    u32 unk00; /* Written with the allocation handle; consumption not identified. */
+    MnuSectionObjectList *objects;
+    MnuSectionObjectList *playerObjects;
+    MnuSectionObjectList *mapObjects;
+    MnuSectionObjectList *drawObjects;
+    u8 pad14[8];
+    MnuSectionModelWork *modelWork;
     MnuEffectWork *effectWork;
     u8 pad24[0x34];
     s32 state;
@@ -74,6 +102,9 @@ typedef struct MnuShootingWork {
 } MnuShootingWork;
 
 extern MenuWorkEntry D_0040ABF8;
+extern void mnuDeactivateWorkEntry(MenuWorkEntry *);
+extern void sdfReleaseResourceAllocation(SdfAllocation *);
+extern void mnuDestroyAllModelNodeContexts(s32 *);
 extern u8 *mnuGetResourceProgressParameters(void);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern void func_0031CAE8(f32 *, s32, s32);
@@ -100,7 +131,7 @@ extern void kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
-extern void mnuResumeEffectQueueFrameAdvance(void);
+extern u32 mnuResumeEffectQueueFrameAdvance(void);
 
 extern void func_00317AD0(MnuShootingWork *handle);
 
@@ -183,7 +214,13 @@ u8 func_00316ED0(void) {
     return func_00101740(D_0042D4D0) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00316EF8);
+u32 func_00316EF8(void) {
+    mnuMovieTaskState = 2;
+    D_00435BB0 = 1;
+    func_00316FA8((u32)D_0043891C);
+    kwlnTaskDestroyWithHierarchyByName(D_0042D4D0, 1);
+    return mnuResumeEffectQueueFrameAdvance();
+}
 
 /* Return cleared 0x1E0-byte task work with its allocation handle and defaults. */
 MnuShootingWork *mdlAllocateViewerPackageWork(void) {
@@ -222,7 +259,7 @@ u32 mdlAdvanceViewerPackageTask(void) {
 }
 
 extern char D_0042D4E0[];
-extern void evtPrintDeveloperConsoleMessage(char *text, s32 value);
+extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern void dds3AdminSubmitModeRequest(s32 a0, s32 a1, s32 a2, s32 a3);
 extern void scrDestroyAllNamedProcesses(void);
 
@@ -240,8 +277,8 @@ INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4E0);
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317058);
 
 /* Forward the stored package-request words without interpreting their roles. */
-void mdlLoadViewerPackageFromWork(MnuShootingWork *work) {
-    mdlLoadViewerPackage(5, work->unk12, 0x101, work->unk0C, work->unk1C);
+void mdlLoadViewerPackageFromWork(MnuPackageEntry *entry) {
+    mdlLoadViewerPackage(5, entry->unk12, 0x101, entry->unk0C, entry->unk1C);
 }
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317988);
@@ -270,7 +307,35 @@ u32 func_00318068(MnuShootingWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_003180B8);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00318570);
+void func_00318570(MnuShootingWork *work) {
+    s32 i;
+
+    mnuDeactivateWorkEntry(&D_0040ABF8);
+    if (work->mapObjects != NULL) {
+        sdfReleaseResourceAllocation(work->mapObjects->allocation);
+        work->mapObjects = NULL;
+    }
+    if (work->drawObjects != NULL) {
+        sdfReleaseResourceAllocation(work->drawObjects->allocation);
+        work->drawObjects = NULL;
+    }
+    if (work->objects != NULL) {
+        sdfReleaseResourceAllocation(work->objects->allocation);
+        work->objects = NULL;
+    }
+    if (work->playerObjects != NULL) {
+        sdfReleaseResourceAllocation(work->playerObjects->allocation);
+        work->playerObjects = NULL;
+    }
+    if (work->modelWork != NULL) {
+        for (i = 0; i < work->modelWork->count; i++) {
+            mnuDestroyAllModelNodeContexts(work->modelWork->groups[i]);
+        }
+        sdfReleaseResourceAllocation(work->modelWork->allocation);
+        work->modelWork = NULL;
+    }
+    evtPrintDeveloperConsoleMessage("stgRelease_Section !!\n");
+}
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00318660);
 

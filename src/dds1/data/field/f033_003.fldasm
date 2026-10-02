@@ -441,7 +441,7 @@ vertex -2100.0009765625 -10.000015258789062 6550.0 1.0
 vertex -2100.0009765625 -9.999984741210938 2500.0 1.0
 
 label r_01enc_01_faces
-face attributes=0x00002000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=0,1,3,2 encounter_type=1 encounter=79 special=0,0
+face attributes=0x00002000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=0,1,3,2 encounter_zone=79 special=0,0
 
 zeros 12
 label r_01enc_01_stop
