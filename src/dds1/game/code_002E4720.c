@@ -140,7 +140,7 @@ extern u8 D_003BD478;
 extern s32 func_00312618(const char *, s32, void *, s32 *);
 extern void func_003003F0(const char *);
 
-extern void func_002E4720(s32 arg0, s32 arg1, void *args);
+extern void *func_002E4720(void *packet, const char *format, void *args);
 
 extern s32 func_00305B08(char *dst, const char *fmt, void *args);
 
@@ -164,20 +164,20 @@ extern s32 D_003BDA54;
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4720);
 
-void sdfFormatSifPacket(s32 packet, s32 format, ...) {
+void *sdfFormatSifPacket(void *packet, const char *format, ...) {
     __builtin_va_list args;
 
     __builtin_stdarg_start(args, format);
-    func_002E4720(packet, format, args);
+    return func_002E4720(packet, format, args);
 }
 
-void sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *fmt, ...) {
+void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *fmt, ...) {
     SifCommand packet;
     __builtin_va_list args;
 
     sdfPktInit(&packet, source, end, argument, index);
     __builtin_stdarg_start(args, fmt);
-    func_002E4720(&packet, fmt, args);
+    return func_002E4720(&packet, fmt, args);
 }
 
 void sdfPktSetCmd(SifCommand *packet, s32 index) {

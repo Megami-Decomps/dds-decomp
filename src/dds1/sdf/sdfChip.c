@@ -35,7 +35,7 @@ s32 func_00312C08(void);
 s32 EIntr(void);
 void sdfAdvanceNodeCursor(SdfChipOwner *owner);
 
-void sdfAllocAndClearQuadwords(s32 size) {
+void *sdfAllocAndClearQuadwords(s32 size) {
     return sdfClearQuadwords(sdfAllocSizeClassBlock(size), (size + 15) >> 4);
 }
 

@@ -183,23 +183,23 @@ extern char *strcat(char *, char *);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D5D0);
 
-extern void func_0033D5D0(void *packet, const char *fmt, void *args);
+extern void *func_0033D5D0(void *packet, const char *fmt, void *args);
 void sdfPktInit(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index);
 
-void sdfFormatSifPacket(void *packet, const char *fmt, ...) {
+void *sdfFormatSifPacket(void *packet, const char *fmt, ...) {
     __builtin_va_list args;
 
     __builtin_stdarg_start(args, fmt);
-    func_0033D5D0(packet, fmt, args);
+    return func_0033D5D0(packet, fmt, args);
 }
 
-void sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *fmt, ...) {
+void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *fmt, ...) {
     SifCommand packet;
     __builtin_va_list args;
 
     sdfPktInit(&packet, source, end, argument, index);
     __builtin_stdarg_start(args, fmt);
-    func_0033D5D0(&packet, fmt, args);
+    return func_0033D5D0(&packet, fmt, args);
 }
 
 void sdfPktSetCmd(SifCommand *packet, s32 index) {

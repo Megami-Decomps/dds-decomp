@@ -1,4 +1,7 @@
 #include "common.h"
+extern void frFontSetChainFlag();
+extern s32 frFontQueueGlyphInSelectedSlot();
+extern s32 func_0019D550();
 
 extern s32 func_002C4038();
 
@@ -121,7 +124,7 @@ extern u32 D_004379C8[];
 
 extern s32 func_0019F6C8();
 
-extern void func_0035C860();
+extern s32 func_0035C860();
 
 void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, u8 *res, s32 arg5, u8 *work) {
     char name[32];
@@ -142,7 +145,28 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, u8 *res, s32 arg5,
     func_00306C28(x + 0x180, y + 0x78, 0, color, 0, ((TitleMenuWork *)work)->iconResource, 0x1B, 0x53);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029CB70);
+extern s32 mdlFlagTest();
+
+void func_0029CB70(s32 x, s32 y, s32 z, u32 alpha, u8 *res, s32 arg5, u8 *work) {
+    char name[32];
+    u32 color[4];
+    s32 sprite;
+    u32 packed;
+
+    if (mdlFlagTest(0x290) != 0) {
+        packed = (alpha & 0xFF) | 0xA09DC300;
+        func_0035C860(name, D_004379C8, *(u32 *)(res + 0xC));
+        sprite = func_0019F6C8(x, y, z, packed, name, 0);
+        frFontSetChainFlag(sprite, 3);
+        func_0019D550(sprite, 1, arg5);
+        frFontQueueGlyphInSelectedSlot(sprite);
+        color[0] = alpha;
+        color[1] = alpha;
+        color[2] = alpha;
+        color[3] = alpha;
+        func_00306C28(x + 0x180, y + 0x78, 0, color, 0, ((TitleMenuWork *)work)->iconResource, 0x1B, 0x53);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_0029BFB8", D_00428410);
 
