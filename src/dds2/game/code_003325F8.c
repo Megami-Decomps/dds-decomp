@@ -5,6 +5,10 @@
 
 extern u32 sdfForcedAssetTextureMode;
 
+struct DevRequest;
+/* The list capacity occupies the buffered request's count word. */
+extern void sdfDevBufferedRequestGrow(struct DevRequest *request);
+
 typedef union SdfSubParam {
     struct {
         u64 unk0;
@@ -368,7 +372,7 @@ void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
 
 void sdfAppendResourceListItem(SdfResourceList *list, u32 item) {
     if (list->count >= list->capacity) {
-        sdfDevBufferedRequestGrow(list);
+        sdfDevBufferedRequestGrow((struct DevRequest *)list);
     }
     list->items[list->count] = item;
     list->count++;
@@ -451,11 +455,17 @@ void sdfReleaseQueuedResource(void *resource, s32 retained) {
     }
 }
 
-void func_003331F0(void) {
-    sdfDevBufferedRequestGrow();
+void func_003331F0(SdfResourceList *list) {
+    sdfDevBufferedRequestGrow((struct DevRequest *)list);
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333208);
+void func_00333208(SdfResourceList *list, SdfAsset *asset) {
+    if (list->count >= list->capacity) {
+        func_003331F0(list);
+    }
+    list->items[list->count] = (u32)asset;
+    list->count++;
+}
 
 void func_00333270(SdfTextParam *param, u32 value) {
     param->unk10 = value;
@@ -790,7 +800,6 @@ void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *asset, s32 index) {
 
 SdfAsset *sdfCreateAssetWithDrawEntries(void);
 u8 *sdfParseAssetParameterFlags(SdfTextParam *, SdfTextParam *, u8 *);
-void func_00333208(SdfResourceList *, SdfAsset *);
 SdfResourceList *sdfAssetListParse(SdfTextParam *param, u32 *data) {
     u32 count = *data;
     u8 *cursor = (u8 *)(data + 1);

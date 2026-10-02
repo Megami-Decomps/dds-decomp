@@ -78,6 +78,17 @@ extern void *sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(void *resource);
 extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
 
+extern void scrClearProcessGlobals(void);
+extern void mdlResetViewerFlagsAndSolarOverlay(void);
+extern void ptyClearProfileRecords(void);
+extern void ptyRebuildAllProfiles(void);
+extern void evtUpdateFlaggedEntries(void);
+extern void dds3ForEachEntry(void);
+extern void mdlFlagClear(s32 flag);
+extern void func_00120C08(s32 mode);
+extern void func_00117810(void);
+extern void func_00117C48(void);
+
 s32 sdfDispatchUnitScriptDefault5(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 typedef struct SdfCurveTable {
     u8 pad00[4];
@@ -277,7 +288,32 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_00117810);
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00117C48);
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00118020);
+/* A full reset preserves the scene allocation and restores the saved runtime data. */
+void func_00118020(s32 fullReset) {
+    s32 backingAllocation;
+
+    if (fullReset == 1) {
+        func_00117810();
+        backingAllocation = ((SdfRuntime *)datGameState)->backingAllocation;
+        memset((void *)datGameState, 0, 0x33600);
+        ((SdfRuntime *)datGameState)->backingAllocation = backingAllocation;
+    }
+    ((SdfRuntime *)datGameState)->firstTick = 0;
+    ((SdfRuntime *)datGameState)->secondTick = 0;
+    scrClearProcessGlobals();
+    mdlResetViewerFlagsAndSolarOverlay();
+    ((SdfRuntime *)datGameState)->updateMode = 8;
+    ptyInitRuntime();
+    mdlFlagClear(0xC0E);
+    func_00120C08(0);
+    ptyClearProfileRecords();
+    ptyRebuildAllProfiles();
+    evtUpdateFlaggedEntries();
+    dds3ForEachEntry();
+    if (fullReset == 1) {
+        func_00117C48();
+    }
+}
 
 void func_001180F8(void) {
     dds3WorkInit(D_003BAAAC);

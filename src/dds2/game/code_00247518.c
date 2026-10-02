@@ -394,7 +394,39 @@ void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00249C40);
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_00249DC8);
+typedef struct PackedPair PackedPair;
+extern void mnuUnpackNibbleFields(PackedPair *, s32 *, s32 *);
+extern u32 itfMesGetWindowEntryItems(s32, s32);
+void evtViewerMarkWindowActive(EventViewerState *);
+
+void func_00249DC8(s32 position, EventViewerState *viewer) {
+    EvtViewerGroup *group;
+    EvtViewerGlyph *glyph;
+    s32 entry;
+    s32 mode;
+
+    if (viewer->windowContext == 0) {
+        return;
+    }
+    if (((EvtWindowContext *)viewer->windowContext)->windowHandle == -1) {
+        return;
+    }
+    for (group = viewer->groups; group != NULL; group = group->next) {
+        if (group->type == 4) {
+            for (glyph = group->glyphs; glyph != NULL; glyph = glyph->next) {
+                if (glyph->x - 30 == position) {
+                    mnuUnpackNibbleFields((PackedPair *)glyph, &entry, &mode);
+                    if (itfMesGetWindowEntryItems(
+                            ((EvtWindowContext *)viewer->windowContext)->windowHandle, entry) == 1) {
+                        evtViewerMarkWindowActive(viewer);
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+    }
+}
 
 void evtViewerCountFlaggedUpdates(EventViewerState *viewer) {
     s64 active;

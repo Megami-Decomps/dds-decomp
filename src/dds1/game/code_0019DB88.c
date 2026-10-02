@@ -21,10 +21,7 @@ typedef struct UiPanelPlacement {
     UiSprite *frame;
     UiSprite *sprite;
     UiSprite *overlay;
-    s32 offsetX;
-    s32 offsetY;
-    s32 rightX;
-    s32 bottomY;
+    s32 bounds[4]; /* x, y, right, bottom */
     s32 unk1C;
     s32 unk20;
     s32 unk24;
@@ -167,8 +164,8 @@ void itfMesInitializePanelPlacementSprite(UiPanel *panel) {
             place->sprite->unk20 = panel->origin.tex->unk4 + func_00195ED8(0, panel->origin.tex);
         }
     }
-    spriteTop = pos->y + place->offsetY;
-    itfSetPanelLayoutAndNotify(place->sprite, pos->x + place->offsetX, spriteTop, pos->x + place->rightX, pos->y + place->bottomY, panel->unkC);
+    spriteTop = pos->y + place->bounds[1];
+    itfSetPanelLayoutAndNotify(place->sprite, pos->x + place->bounds[0], spriteTop, pos->x + place->bounds[2], pos->y + place->bounds[3], panel->unkC);
     place->sprite->screenY = spriteTop;
     itfPanelUpdateValuesAndNotify(place->sprite, place->unk1C, place->unk20, place->unk24, 0);
     panel->flags = (panel->flags & ~0x300) | 0x100;
@@ -568,7 +565,51 @@ void sndFlushMessageQueue(void) {
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F770);
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F850);
+void func_0019F850(UiPanelPlacement *object, s32 mode) {
+    UiSprite *sprite = object->sprite;
+    s32 *bounds;
+    s32 dx;
+    s32 dy;
+
+    if (sprite != NULL) {
+        bounds = object->bounds;
+        if (D_00324510.coarseDown & 2) {
+            dx = -16;
+        } else {
+            dx = ((u8)D_00324510.coarseUp << 3) & 0x10;
+        }
+        if (D_00324510.unk36 & 2) {
+            dy = -8;
+        } else {
+            dy = ((u8)D_00324510.unk37 << 2) & 8;
+        }
+        if (D_00324510.unk31 != 0) {
+            dx *= 8;
+            dy *= 8;
+        }
+        if (dx != 0 || dy != 0) {
+            switch (mode) {
+            case 0:
+                itfAdvancePanelLayoutAndNotify(sprite, dx, dy, 0, 0, 0);
+                bounds[0] += dx;
+                bounds[1] += dy;
+                break;
+            case 1:
+                itfAdvancePanelLayoutAndNotify(sprite, 0, 0, dx, dy, 0);
+                bounds[2] += dx;
+                bounds[3] += dy;
+                break;
+            case 2:
+                itfAdvancePanelLayoutAndNotify(sprite, dx, dy, dx, dy, 0);
+                bounds[0] += dx;
+                bounds[1] += dy;
+                bounds[2] += dx;
+                bounds[3] += dy;
+                break;
+            }
+        }
+    }
+}
 
 typedef struct SndPadStepTarget {
     u8 pad00[0x38];

@@ -18,7 +18,7 @@ typedef struct MdlViewState {
     s8 unitStepSign;  /* 0x0D: +1/-1, derived from the input keys at 0x24/0x25 */
     u8 unk0E;
     s8 unk0F;
-    s8 unk10;
+    s8 yawStepMode; /* 0x10: one yaw step per left/right button press */
     u8 pad11[3];
     s16 unk14;
     s16 resourceCount;
@@ -1352,7 +1352,120 @@ u32 mdlRunViewerIndexedLabelTask(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021B9F8);
+typedef struct MdlCtx MdlCtx;
+extern void mdlLoadPrimaryVectorVU(MdlCtx *context);
+extern void mdlStorePrimaryVectorVU(MdlCtx *context);
+extern void mdlLoadSecondaryVectorVU(MdlCtx *context);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *context);
+extern void effMiscAxisAngleToQuaternionVf11(f32 angle);
+extern void effMiscQuatMultiplyVU(void);
+extern f32 sdfViewMatrix[];
+extern f32 D_00398380[4];
+extern f32 D_00398390[4];
+extern f32 D_003983A0[4];
+
+/* vu0 routine: edit the viewer transform with translation or quaternion steps. */
+void func_0021B9F8(void) {
+    f32 speed;
+    f32 angle;
+
+    if (sdfPadButtonStates[0x11] < 0) {
+        mdlViewerState.yawStepMode ^= 1;
+    }
+    if (sdfPadButtonStates[0] < 0) {
+        mdlViewerState.labelIndexB ^= 1;
+        return;
+    }
+    if (sdfPadButtonStates[0xC] < 0) {
+        VU0_MOVE_VF(vf10, vf0);
+        mdlStorePrimaryVectorVU((MdlCtx *)mdlViewerState.resources[0]);
+        mdlUpdateContextRotationBasisFromQuaternion((MdlCtx *)mdlViewerState.resources[0]);
+        return;
+    }
+    if (mdlViewerState.yawStepMode != 0) {
+        mdlLoadSecondaryVectorVU((MdlCtx *)mdlViewerState.resources[0]);
+        if (sdfPadButtonStates[5] < 0) {
+            VU0_LOAD_VF(vf11, D_00398390);
+            angle = 5.0f * 3.14159265f / 180.0f;
+        } else if (sdfPadButtonStates[4] < 0) {
+            VU0_LOAD_VF(vf11, D_00398390);
+            angle = -5.0f * 3.14159265f / 180.0f;
+        } else {
+            return;
+        }
+        effMiscAxisAngleToQuaternionVf11(angle);
+        effMiscQuatMultiplyVU();
+        mdlUpdateContextRotationBasisFromQuaternion((MdlCtx *)mdlViewerState.resources[0]);
+    } else if (mdlViewerState.labelIndexB == 0) {
+        speed = 1.25f;
+        if (sdfPadButtonStates[1] == 0) {
+            speed = 20.0f;
+            if (sdfPadButtonStates[3] == 0) {
+                speed = 5.0f;
+            }
+        }
+        mdlLoadPrimaryVectorVU((MdlCtx *)mdlViewerState.resources[0]);
+        EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
+        VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
+        if (sdfPadButtonStates[5] != 0) {
+            VU0_ADD(vf10, vf10, vf11);
+        } else if (sdfPadButtonStates[4] != 0) {
+            VU0_SUB(vf10, vf10, vf11);
+        }
+        EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
+        VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
+        if (sdfPadButtonStates[6] != 0) {
+            VU0_ADD(vf10, vf10, vf11);
+        } else if (sdfPadButtonStates[7] != 0) {
+            VU0_SUB(vf10, vf10, vf11);
+        }
+        EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
+        VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
+        if (sdfPadButtonStates[9] != 0) {
+            VU0_ADD(vf10, vf10, vf11);
+        } else if (sdfPadButtonStates[8] != 0) {
+            VU0_SUB(vf10, vf10, vf11);
+        }
+        mdlStorePrimaryVectorVU((MdlCtx *)mdlViewerState.resources[0]);
+    } else {
+        speed = 0.5f * 3.14159265f / 180.0f;
+        if (sdfPadButtonStates[1] == 0) {
+            speed = 8.0f * 3.14159265f / 180.0f;
+            if (sdfPadButtonStates[3] == 0) {
+                speed = 2.0f * 3.14159265f / 180.0f;
+            }
+        }
+        mdlLoadSecondaryVectorVU((MdlCtx *)mdlViewerState.resources[0]);
+        if (sdfPadButtonStates[5] != 0) {
+            VU0_LOAD_VF(vf11, D_00398390);
+            effMiscAxisAngleToQuaternionVf11(speed);
+            effMiscQuatMultiplyVU();
+        } else if (sdfPadButtonStates[4] != 0) {
+            VU0_LOAD_VF(vf11, D_00398390);
+            effMiscAxisAngleToQuaternionVf11(-speed);
+            effMiscQuatMultiplyVU();
+        }
+        if (sdfPadButtonStates[6] != 0) {
+            VU0_LOAD_VF(vf11, D_00398380);
+            effMiscAxisAngleToQuaternionVf11(speed);
+            effMiscQuatMultiplyVU();
+        } else if (sdfPadButtonStates[7] != 0) {
+            VU0_LOAD_VF(vf11, D_00398380);
+            effMiscAxisAngleToQuaternionVf11(-speed);
+            effMiscQuatMultiplyVU();
+        }
+        if (sdfPadButtonStates[9] != 0) {
+            VU0_LOAD_VF(vf11, D_003983A0);
+            effMiscAxisAngleToQuaternionVf11(speed);
+            effMiscQuatMultiplyVU();
+        } else if (sdfPadButtonStates[8] != 0) {
+            VU0_LOAD_VF(vf11, D_003983A0);
+            effMiscAxisAngleToQuaternionVf11(-speed);
+            effMiscQuatMultiplyVU();
+        }
+        mdlUpdateContextRotationBasisFromQuaternion((MdlCtx *)mdlViewerState.resources[0]);
+    }
+}
 
 extern s32 D_00367B18[];
 
@@ -1934,7 +2047,6 @@ typedef struct MdlRotationContext {
     MdlPadState *pad;
 } MdlRotationContext;
 
-extern f32 sdfViewMatrix[];
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 extern void effMiscQuaternionToMatrixVU(void);
 

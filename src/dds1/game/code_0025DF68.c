@@ -40,8 +40,14 @@ INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025F138);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 extern void func_0025F4E0(s32, s32, s32, s32, u8 *, s32);
 
+typedef struct MenuDrawValueItem {
+    u8 pad00[0x60];
+    s32 value;
+} MenuDrawValueItem;
+
 typedef struct MenuDrawInner {
-    u8 pad00[0x20];
+    u8 pad00[0x1C];
+    MenuDrawValueItem *item;
     s32 active;
 } MenuDrawInner;
 
@@ -51,6 +57,13 @@ typedef struct MenuDrawObject {
     u8 pad08[0xC];
     MenuDrawInner *inner; /* 0x14 */
 } MenuDrawObject;
+
+typedef struct MenuDrawValuePanel {
+    u8 pad00[0x70];
+    MenuDrawObject *object;
+    u8 pad74[0xC];
+    s32 multiplier;
+} MenuDrawValuePanel;
 
 /* Draw the child and its container only while the child is active. */
 void mnuDrawIfActive(s32 x, s32 y, s32 z, MenuDrawObject *object, s32 drawArg) {
@@ -137,7 +150,26 @@ void mnuDrawIconFixedEntryWithBadge(s32 x, s32 y, s32 z, s32 unused, s32 scale, 
     frFontQueueGlyphInSelectedSlot(glyph);
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025FFC8);
+void func_0025FFC8(s32 x, s32 y, s32 depth, MenuDrawValuePanel *panel, s32 option) {
+    char text[16];
+    u32 texture = D_003BC520;
+    MenuDrawObject *object = panel->object;
+    MenuDrawInner *inner;
+    s32 glyph;
+
+    func_002BF4E0(D_0036C728[25].x << 4, D_0036C728[25].y << 3,
+                  0, 0x100, 0, texture, D_0036C728[25].id, option);
+    func_002BF4E0(D_0036C728[26].x << 4, D_0036C728[26].y << 3,
+                  0, 0x100, 0, texture, D_0036C728[26].id, option);
+    inner = object->inner;
+    if (inner->active != 0) {
+        func_003014F0(text, D_003BC508, inner->item->value * panel->multiplier);
+        glyph = func_00197A98(0x17C0, 0x380, depth, 0xA09DC380, text, 0);
+        frFontSetChainFlag(glyph, 4);
+        func_001958A0(glyph, 1, option);
+        frFontQueueGlyphInSelectedSlot(glyph);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_00260100);
 

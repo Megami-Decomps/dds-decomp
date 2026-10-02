@@ -17,7 +17,8 @@ extern u64 mnuSpawnPanelSlotB(u32, u64, u64, u64, u64, u64);
 
 extern u64 mnuFindPanelSlotById(u32, u64, u64);
 
-extern s32 func_002890A8(s32);
+typedef struct MenuContainer MenuContainer;
+extern u32 func_002890A8(MenuContainer *);
 
 extern void func_0026D168(s32, s32, s32);
 
@@ -43,9 +44,13 @@ typedef struct MenuPanelSlot {
     u16 *values;
 } MenuPanelSlot;
 
-typedef struct MenuPanelSelector {
-    u16 pad00;
-    s16 index;
+/* The selector also carries word-wide flags in its packed representation. */
+typedef union MenuPanelSelector {
+    u32 packed;
+    struct {
+        u16 flags;
+        s16 index;
+    } fields;
 } MenuPanelSelector;
 
 typedef struct MenuPanelEntry {
@@ -100,7 +105,43 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004275E8);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290240);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290328);
+typedef struct MenuPanelSelectorList {
+    u8 pad00[8];
+    MenuPanelSelector *entries[0];
+} MenuPanelSelectorList;
+
+s32 func_00290328(MenuPanelObject *object, MenuPanelSelectorList *list, s8 position) {
+    u16 selected;
+    MenuPanelSelector *entry;
+    u16 value;
+    s32 result;
+
+    if (list == NULL || position == -1) {
+        return -1;
+    }
+    selected = func_002890A8((MenuContainer *)object);
+    entry = list->entries[position];
+    result = 0;
+    if (entry == NULL) {
+        result = 1;
+    } else {
+        value = object->slots[selected]->values[entry->fields.index];
+        if ((value & 15) == 3) {
+            result = 2;
+        } else if ((entry->packed & 0x100) != 0 && ((value >> 8) & 8) != 0) {
+            switch (position) {
+                case 1:
+                case 4:
+                    result = 3;
+                    break;
+                default:
+                    result = 2;
+                    break;
+            }
+        }
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290410);
 
@@ -115,7 +156,7 @@ u32 mnuGetDefaultPanelSelector(MenuPanelObject *object) {
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290A78);
 
 s32 mnuUpdateSelectedPanelSlot(MenuPanelObject *object) {
-    s32 index = func_002890A8((s32)object);
+    s32 index = func_002890A8((MenuContainer *)object);
     /* Required to match: typed &object->slots[index] changes two instructions. */
     MenuPanelSlot **slot = (MenuPanelSlot **)(index * 4 + (s32)object + 0x7ac);
     s32 source = object->list->selected->value;
@@ -132,9 +173,9 @@ u16 mnuGetSelectedPanelValue(MenuPanelObject *object) {
 
     values = (s32)object->slots[object->list->selected->index]->values;
     if (object->alternateSelector != 0) {
-        return *(u16 *)(object->alternateSelector->index * 2 + values);
+        return *(u16 *)(object->alternateSelector->fields.index * 2 + values);
     }
-    return *(u16 *)(object->defaultSelector->index * 2 + values);
+    return *(u16 *)(object->defaultSelector->fields.index * 2 + values);
 }
 
 u16 mnuGetPanelValueAt(MenuPanelObject *object, s32 index) {

@@ -20,6 +20,18 @@ extern void *sdfResourceRetainAddress(void *resource);
 
 extern s32 kwlnTaskCreate(char *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
 
+extern void scrClearProcessGlobals(void);
+extern void mdlResetViewerFlagsAndSolarOverlay(void);
+extern void ptyClearProfileRecords(void);
+extern void ptyRebuildAllProfiles(void);
+extern void evtUpdateFlaggedEntries(void);
+extern void dds3ForEachEntry(void);
+extern void ptyAssignPartyRosterItemsAndMarkOwned(void);
+extern void mdlFlagClear(s32 flag);
+extern void mdlFlagSet(s32 flag);
+extern void func_00117A88(void);
+extern void func_00118008(void);
+
 s32 sdfBumpTickCounters(void);
 
 void evtResetWorldAndProfileRuntime(void);
@@ -274,7 +286,34 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00117A88);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118008);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00118598);
+/* A full reset preserves the scene allocation and restores the saved runtime data. */
+void func_00118598(s32 fullReset) {
+    s32 backingAllocation;
+
+    if (fullReset == 1) {
+        func_00117A88();
+        backingAllocation = ((SdfRuntime *)datGameState)->backingAllocation;
+        memset((void *)datGameState, 0, 0x1E840);
+        ((SdfRuntime *)datGameState)->backingAllocation = backingAllocation;
+    }
+    ((SdfRuntime *)datGameState)->firstTick = 0;
+    ((SdfRuntime *)datGameState)->secondTick = 0;
+    scrClearProcessGlobals();
+    mdlResetViewerFlagsAndSolarOverlay();
+    ((SdfRuntime *)datGameState)->updateMode = 8;
+    func_0011AB38();
+    mdlFlagClear(0xC0E);
+    mdlFlagSet(0x801);
+    func_00122B58(0);
+    ptyClearProfileRecords();
+    ptyRebuildAllProfiles();
+    evtUpdateFlaggedEntries();
+    dds3ForEachEntry();
+    ptyAssignPartyRosterItemsAndMarkOwned();
+    if (fullReset == 1) {
+        func_00118008();
+    }
+}
 
 void func_00118680(void) {
     dds3WorkInit(D_00435E80);

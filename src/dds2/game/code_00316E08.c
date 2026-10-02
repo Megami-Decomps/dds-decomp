@@ -28,6 +28,51 @@ typedef struct MenuProgressParameters {
     s32 y;
 } MenuProgressParameters;
 
+/* Same effect-list layout produced by mnuCreateEffectWork in code_0031B188. */
+typedef struct MnuEffectList {
+    u8 *records;
+    s32 count;
+} MnuEffectList;
+
+typedef struct MnuEffectWork {
+    u32 handle;
+    s32 count;
+    MnuEffectList *lists;
+    u32 unkC;
+} MnuEffectWork;
+
+/* Effect records have a 0x20-byte stride; bit 0 marks an occupied record. */
+typedef struct MnuEffectRecord {
+    u8 pad00[4];
+    u32 flags;
+    u8 pad08[0x18];
+} MnuEffectRecord;
+
+/* Shared work for the shooting task's package requests and state callbacks. */
+typedef struct MnuShootingWork {
+    u32 unk00; /* Written with the allocation handle; consumption not identified. */
+    u8 pad04[8];
+    s32 unk0C;
+    u8 pad10[2];
+    u16 unk12;
+    u8 pad14[8];
+    s32 unk1C;
+    MnuEffectWork *effectWork;
+    u8 pad24[0x34];
+    s32 state;
+    u8 pad5C[4];
+    s32 (*update)(u8 *work);
+    u8 pad64[4];
+    u32 unk68;
+    u8 pad6C[8];
+    u32 unk74;
+    u8 pad78[0x1E];
+    u16 unk96;
+    u8 pad98[0x140];
+    u16 unk1D8;
+    u8 pad1DA[6];
+} MnuShootingWork;
+
 extern MenuWorkEntry D_0040ABF8;
 extern u8 *mnuGetResourceProgressParameters(void);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
@@ -35,11 +80,11 @@ extern void func_0031CAE8(f32 *, s32, s32);
 extern s32 func_0031B838(void *, void *, s32, f32, f32, f32, f32);
 extern void func_00319FF0(void);
 
-extern s32 D_00438930;
+extern MnuEffectRecord *D_00438930;
 
-extern u8 *D_0043891C;
+extern MnuShootingWork *D_0043891C;
 
-extern s32 func_00317FE0(u8 *);
+extern s32 func_00317FE0(MnuShootingWork *);
 
 extern u32 D_00438918;
 
@@ -57,7 +102,7 @@ extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
 
 extern void mnuResumeEffectQueueFrameAdvance(void);
 
-extern void func_00317AD0(u8 *handle);
+extern void func_00317AD0(MnuShootingWork *handle);
 
 extern void *sdfAllocGeneralBlock(s32 size);
 
@@ -65,7 +110,7 @@ extern void *sdfMemoryGetBlockAddress(void *block);
 
 u32 mdlAdvanceViewerPackageTask(void);
 
-u8 *mdlAllocateViewerPackageWork(void);
+MnuShootingWork *mdlAllocateViewerPackageWork(void);
 
 /* 0xAARRGGBB color split into RGB and alpha fields. */
 typedef struct RgbAlpha {
@@ -124,7 +169,7 @@ void func_00316E70(void) {
 }
 
 void mdlCreateViewerPackageTask(void) {
-    u8 *handle;
+    MnuShootingWork *handle;
 
     D_00435BB0 = 0;
     mnuMovieTaskState = 1;
@@ -140,16 +185,17 @@ u8 func_00316ED0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00316EF8);
 
-u8 *mdlAllocateViewerPackageWork(void) {
+/* Return cleared 0x1E0-byte task work with its allocation handle and defaults. */
+MnuShootingWork *mdlAllocateViewerPackageWork(void) {
     void *block = sdfAllocGeneralBlock(0x1E0);
-    u8 *work = (u8 *)sdfMemoryGetBlockAddress(block);
+    MnuShootingWork *work = (MnuShootingWork *)sdfMemoryGetBlockAddress(block);
 
     memset(work, 0, 0x1E0);
-    *(u32 *)(work + 0x0) = (u32)block;
-    *(u32 *)(work + 0x68) = 0;
-    *(u16 *)(work + 0x1D8) = 0x80;
-    *(u16 *)(work + 0x96) = 0;
-    *(u32 *)(work + 0x74) = 0;
+    work->unk00 = (u32)block;
+    work->unk68 = 0;
+    work->unk1D8 = 0x80;
+    work->unk96 = 0;
+    work->unk74 = 0;
     return work;
 }
 
@@ -193,8 +239,9 @@ INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4E0);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317058);
 
-void mdlLoadViewerPackageFromWork(u8 *work) {
-    mdlLoadViewerPackage(5, *(u16 *)(work + 0x12), 0x101, *(s32 *)(work + 0xC), *(s32 *)(work + 0x1C));
+/* Forward the stored package-request words without interpreting their roles. */
+void mdlLoadViewerPackageFromWork(MnuShootingWork *work) {
+    mdlLoadViewerPackage(5, work->unk12, 0x101, work->unk0C, work->unk1C);
 }
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317988);
@@ -210,11 +257,13 @@ INCLUDE_ASM(const s32, "game/code_00316E08", func_00317AD0);
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317E48);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317FE0);
-u32 func_00318068(u8 *work) {
-    s32 (*update)(u8 *work) = *(s32 (**)(u8 *work))(work + 0x60);
+/* Run the current update; on a nonzero result, refresh it from the state table.
+   The dispatch table keeps its original opaque byte-work callback signature. */
+u32 func_00318068(MnuShootingWork *work) {
+    s32 (*update)(u8 *work) = work->update;
 
-    if (update(work) != 0) {
-        *(s32 (**)(u8 *work))(work + 0x60) = D_0040ABF0[*(s32 *)(work + 0x58)];
+    if (update((u8 *)work) != 0) {
+        work->update = D_0040ABF0[work->state];
     }
     return 1;
 }
@@ -235,29 +284,31 @@ INCLUDE_ASM(const s32, "game/code_00316E08", func_00319A58);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00319E48);
 
+/* Acquire a record from the third effect list at the timed UI position. */
 void func_00319F48(void) {
     MenuProgressParameters *origin;
     s32 y, x;
     f32 value;
     f32 position[4];
-    u8 *model;
+    MnuEffectList *lists;
 
     origin = (MenuProgressParameters *)mnuGetResourceProgressParameters();
     x = origin->x;
     y = origin->y;
     value = mnuEvaluateTimedValue(&D_0040ABF8);
     func_0031CAE8(position, (s32)D_0040ABF8.x0 + x, (s32)value + y - 32);
-    model = *(u8 **)(*(u8 **)(D_0043891C + 0x20) + 8);
-    D_00438930 = func_0031B838(model + 0x10, NULL, 0,
-                             position[0], position[1], position[2], 0.5f);
+    lists = D_0043891C->effectWork->lists;
+    D_00438930 = (MnuEffectRecord *)func_0031B838(lists + 2, NULL, 0,
+                                               position[0], position[1], position[2], 0.5f);
     func_00319FF0();
 }
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00319FF0);
 
+/* Mark the occupied record with flag 0x800; the flag's meaning is unresolved. */
 void func_0031A090(void) {
-    if ((D_00438930 != 0) && ((*(u32 *)(D_00438930 + 4) & 1) != 0)) {
-        *(u32 *)(D_00438930 + 4) = *(u32 *)(D_00438930 + 4) | 0x800;
+    if ((D_00438930 != 0) && ((D_00438930->flags & 1) != 0)) {
+        D_00438930->flags = D_00438930->flags | 0x800;
     }
 }
 

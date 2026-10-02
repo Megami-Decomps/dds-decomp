@@ -1,6 +1,10 @@
 #include "common.h"
 
 extern s32 func_0031CF88(f32, f32);
+extern f32 func_00353228(f32);
+extern f32 D_0037F5EC[];
+extern f32 sdfViewEyeVector[4];
+extern f32 sdfViewTargetVector[4];
 
 /* Records are 0x34 bytes; bit 0 of flags marks a claimed slot. */
 typedef struct ModelInstance {
@@ -36,7 +40,18 @@ extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031C940);
 
-INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CA10);
+void func_0031CA10(f32 *position, s32 x, s32 y) {
+    f32 halfAngle;
+    f32 depth;
+
+    halfAngle = D_0037F5EC[0] * 0.5f;
+    depth = sdfViewEyeVector[2] - sdfViewTargetVector[2];
+    position[0] = depth * func_00353228(halfAngle * 1.3f) *
+        ((f32)(x - 256) * 0.00390625f);
+    position[1] = depth * func_00353228(halfAngle) *
+        ((f32)(y - 224) / 224.0f);
+    position[2] = 0.0f;
+}
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CAE8);
 
