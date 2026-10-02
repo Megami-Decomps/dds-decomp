@@ -1,5 +1,6 @@
 #include "common.h"
 #include "mnu.h"
+#include "sdf.h"
 
 extern s32 sdfAllocGeneralBlock(s32);
 extern u8 *sdfResourceRetainAddress(s32);
@@ -34,11 +35,15 @@ extern u8 D_003CE658[];
 
 extern s32 kwlnHeldTextureReference;
 
-/* Item quantities occupy byte slots in the save-state block. */
-typedef struct SaveItemCounts {
-    u8 pad00[0x1340];
-    u8 counts[0x100];
-} SaveItemCounts;
+/* Camp reads the currency word, byte-sized inventory counts and a tier input. */
+typedef struct CampSaveState {
+    u8 pad00[0x3C];
+    s32 money;
+    u8 pad40[0x1300];
+    u8 counts[0x100]; /* 0x1340 */
+    u8 pad1440[0x1D210];
+    u32 unk1E650; /* Compared against the camp tier thresholds. */
+} CampSaveState;
 
 extern s32 sdfAllocatePacketList();
 
@@ -521,8 +526,17 @@ typedef struct CampEntryNode {
     struct CampEntryNode *next; /* 0x7C */
 } CampEntryNode;
 
+typedef struct CampOwner {
+    u8 pad00[0x104];
+    s32 handle; /* 0x104 */
+    u8 pad108[4];
+    s32 bgmId; /* 0x10C: validated event BGM ID used with registered variations */
+} CampOwner;
+
 typedef struct {
-    u8 pad00[0x2034];
+    u8 pad00[8];
+    CampOwner *owner; /* 0x08 */
+    u8 pad0C[0x2028];
     CampEntryNode *entries; /* 0x2034 */
     u8 pad2038[0x2F8];
     f32 transform[12]; /* 0x2330: three four-component vectors saved by shop */
@@ -545,11 +559,16 @@ typedef struct {
     s32 registeredIds[20]; /* 0x2448 */
 } CampScene;
 
-s32 mnuCampFindMatchingEntryIndex(u8 *entry, CampScene *scene, s32 nameIndex) {
+typedef struct CampNameLookup {
+    u8 pad00[0x7C];
+    u8 *nameTable; /* 0x7C: 32-byte names indexed by nameIndex */
+} CampNameLookup;
+
+s32 mnuCampFindMatchingEntryIndex(CampNameLookup *entry, CampScene *scene, s32 nameIndex) {
     CampEntryNode *node = scene->entries;
     while (node != NULL) {
         if (strcmp((char *)scene + (node->nameIndex << 5) + 0x24,
-                   (char *)*(u8 **)(entry + 0x7c) + (nameIndex << 5)) == 0) {
+                   (char *)entry->nameTable + (nameIndex << 5)) == 0) {
             return node->nameIndex;
         }
         node = node->next;
@@ -757,7 +776,7 @@ void mnuShopSubmitDescriptor(u8 *work) {
 
     if (((CampScene *)work)->descriptorHandle != 0) {
         packet = sdfAllocatePacketList(0);
-        sdfCreateDescriptorPacket(packet, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0x200, 0xE0, ((CampScene *)work)->descriptorHandle, 0);
+        sdfCreateDescriptorPacket(packet, (s32)((SdfTex *)kwlnHeldTextureReference)->primaryResource, 0, 0, 0x200, 0xE0, ((CampScene *)work)->descriptorHandle, 0);
         D_00380708.open(&D_00380708, packet);
     }
 }
@@ -847,6 +866,7 @@ void fldRegisterCampSceneId(CampScene *scene, s32 id) {
     }
 }
 
+/* Queue the scene's BGM ID with each registered variation, then clear the list. */
 void mnuReleaseCampSceneRegisteredIds(CampScene *scene) {
     s32 count = 0;
     if (scene->idCount > 0) {
@@ -854,7 +874,7 @@ void mnuReleaseCampSceneRegisteredIds(CampScene *scene) {
         do {
             s32 identifier = *entry++;
             count++;
-            evtQueueValidatedBgmSoundCode(*(s32 *)(*(u8 **)((u8 *)scene + 8) + 0x10c), identifier);
+            evtQueueValidatedBgmSoundCode(scene->owner->bgmId, identifier);
         } while (count < scene->idCount);
     }
     scene->idCount = 0;
@@ -882,7 +902,10 @@ typedef struct ShopEffectScene {
     u8 *objects[2];    /* 0x84 */
     u8 pad8C[0x10];
     s32 availableCount; /* 0x9C */
-    u8 padA0[0xC];
+    u16 unkA0;
+    u16 unkA2;
+    u16 unkA4;
+    u8 padA6[6];
     u32 options;        /* 0xAC */
     u8 padB0[0x34];
     s32 mode;           /* 0xE4 */
@@ -945,8 +968,14 @@ INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424AC0);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F8B8);
 
+/* The background-effect packet owns the packed animation created for it. */
+typedef struct MenuEffectResources {
+    u8 pad00[0x3C];
+    u32 animationHandle;
+} MenuEffectResources;
+
 void mnuShopDestroyNestedEffectBatch(s32 object) {
-    effDestroyPackedBatch(*(u32 *)(object + 0x3c));
+    effDestroyPackedBatch(((MenuEffectResources *)object)->animationHandle);
 }
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FA28);
@@ -998,7 +1027,7 @@ s32 mnuCampHasEligibleOwnedItems(void) {
         if (func_002C54B0(i) != 0) {
             continue;
         }
-        if (((SaveItemCounts *)datGameState)->counts[i] == 0) {
+        if (((CampSaveState *)datGameState)->counts[i] == 0) {
             continue;
         }
         if ((datItemSkillRecords[i * 8] & 3) != 0) {
@@ -1015,33 +1044,68 @@ s32 mnuCampHasEligibleOwnedItems(void) {
 
 typedef struct CampWindowContainer CampWindowContainer;
 
+/* The first payload word is list-specific (entry index or displayed value). */
+typedef struct CampWindowParams {
+    s32 value;
+    s32 id;
+    s32 price; /* Base price used for affordability and quantity-dependent discounts. */
+    s32 mode;
+} CampWindowParams;
+
+typedef struct CampWindowNode {
+    u8 pad00[0x48];
+    u32 flags;
+    u8 pad4C[0xC];
+    struct CampWindowNode *next; /* 0x58 */
+    u8 pad5C[4];
+    CampWindowParams params; /* 0x60 */
+} CampWindowNode;
+
+typedef struct CampWindowBuffer {
+    u8 pad00[0xC];
+    u16 unk0C;
+    u16 unk0E;
+    u16 unk10;
+    u8 pad12[2];
+} CampWindowBuffer;
+
 typedef struct CampWindowListData {
-    u8 pad00[0x2C];
+    u8 pad00[0x10];
+    CampWindowNode *first;
+    u8 pad14[8];
+    CampWindowNode *cursor; /* 0x1C */
+    s32 count;
+    u8 pad24[8];
     void (*callback)(void);
     void *buffer;
 } CampWindowListData;
+
+struct CampWindowContainer {
+    u8 pad00[0x18];
+    CampWindowListData *list;
+};
 
 extern void func_00295400(void);
 
 s32 mnuCreateEnabledCampEntryWindow(s32 count, s32 *enabled, u8 *settings) {
     CampWindowContainer *window;
-    s32 *storage;
+    CampWindowBuffer *storage;
     s32 i;
 
     window = (CampWindowContainer *)mnuCreateWindowContainer(0, 0x260, 0x10, count, 0x16);
     mnuSetWindowEntryParameters(0, window, 0, 8, 0xA);
     for (i = 0; i < count; i++) {
         if (enabled[i] != 0) {
-            *(s32 *)((u8 *)mnuAppendWindowListNode(window, 0) + 0x60) = i;
+            ((CampWindowNode *)mnuAppendWindowListNode(window, 0))->params.value = i;
         }
     }
-    ((CampWindowListData *)(*(s32 *)((u8 *)window + 0x18)))->callback = func_00295400;
+    window->list->callback = func_00295400;
     storage = func_00328D68(0x14);
     memset(storage, 0, 0x14);
-    ((CampWindowListData *)(*(s32 *)((u8 *)window + 0x18)))->buffer = storage;
-    *(u16 *)((u8 *)storage + 0xC) = *(u16 *)(settings + 0xA0);
-    *(u16 *)((u8 *)storage + 0xE) = *(u16 *)(settings + 0xA2);
-    *(u16 *)((u8 *)storage + 0x10) = *(u16 *)(settings + 0xA4);
+    window->list->buffer = storage;
+    storage->unk0C = ((ShopEffectScene *)settings)->unkA0;
+    storage->unk0E = ((ShopEffectScene *)settings)->unkA2;
+    storage->unk10 = ((ShopEffectScene *)settings)->unkA4;
     return (s32)window;
 }
 
@@ -1073,33 +1137,10 @@ s32 mnuCampFindActiveSlot(void) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260250);
 
-typedef struct CampCounterSlot {
-    s32 value;  /* 0x00 */
-    u8 pad04[4];
-    s32 limit;  /* 0x08 */
-} CampCounterSlot;
-
-typedef struct ShopWindowState {
-    u8 pad00[0x60];
-    CampCounterSlot counter; /* 0x60 */
-} ShopWindowState;
-
-typedef struct ShopBuf {
-    u8 pad00[0x1C];
-    ShopWindowState *state; /* 0x1C */
-    u8 pad20[0x10];
-    void *buffer;           /* 0x30 */
-} ShopBuf;
-
-typedef struct ShopSprite {
-    u8 pad00[0x18];
-    ShopBuf *data;   /* 0x18 */
-} ShopSprite;
-
 typedef struct ShopScene {
     u8 pad00[0x7C];
-    ShopSprite *sprites[1]; /* 0x7C */
-    ShopSprite *extra;      /* 0x80 */
+    CampWindowContainer *sprites[1]; /* 0x7C */
+    CampWindowContainer *extra;      /* 0x80 */
     u8 pad84[0xC];
     s32 quantity;           /* 0x90: clamped to [1, maximum] */
     u8 pad94[0x33];
@@ -1107,17 +1148,17 @@ typedef struct ShopScene {
 } ShopScene;
 
 void mnuShopReleaseWindowSprites(s32 keepExtra, ShopScene *scene) {
-    ShopSprite **slot = scene->sprites;
-    ShopSprite *sprite;
+    CampWindowContainer **slot = scene->sprites;
+    CampWindowContainer *sprite;
     u32 i;
 
     for (i = 0; i < 1; i++) {
         sprite = *slot;
         if (sprite != NULL) {
-            if (sprite->data->buffer != NULL) {
-                sdfReleaseChipBlock(sprite->data->buffer);
+            if (sprite->list->buffer != NULL) {
+                sdfReleaseChipBlock(sprite->list->buffer);
                 sprite = *slot;
-                sprite->data->buffer = NULL;
+                sprite->list->buffer = NULL;
             }
             mnuDestroyWindowContainer(sprite);
         }
@@ -1125,9 +1166,9 @@ void mnuShopReleaseWindowSprites(s32 keepExtra, ShopScene *scene) {
     }
     if (keepExtra == 0) {
         if (scene->extra != NULL) {
-            if (scene->extra->data->buffer != NULL) {
-                sdfReleaseChipBlock(scene->extra->data->buffer);
-                scene->extra->data->buffer = NULL;
+            if (scene->extra->list->buffer != NULL) {
+                sdfReleaseChipBlock(scene->extra->list->buffer);
+                scene->extra->list->buffer = NULL;
             }
             mnuDestroyWindowContainer(scene->extra);
         }
@@ -1172,10 +1213,10 @@ s32 mnuCampResolveProgressTierValue(void) {
 
     for (i = 0; i < 3; i++) {
         if (i + 1 < 3) {
-            if (D_003CE408[i].threshold > *(u32 *)(datGameState + 0x1E650)) {
+            if (D_003CE408[i].threshold > ((CampSaveState *)datGameState)->unk1E650) {
                 break;
             }
-        } else if (D_003CE408[i].threshold <= *(u32 *)(datGameState + 0x1E650)) {
+        } else if (D_003CE408[i].threshold <= ((CampSaveState *)datGameState)->unk1E650) {
             break;
         }
     }
@@ -1193,7 +1234,7 @@ void mnuCampClearListedItemCounts(void) {
         entryId = *(u16 *)entry;
         entry = (s8 *)((s32)entry + 8);
         index = index + 1;
-        *(u8 *)((u32)entryId + datGameState + 0x1340) = 0;
+        ((CampSaveState *)datGameState)->counts[(u32)entryId] = 0;
     } while (index < 3);
 }
 
@@ -1423,7 +1464,7 @@ s32 mnuCampResolveOwnedItemVariant(s32 row, s32 column) {
     u8 *entry = D_003CDA88 + column * 0xC + row * 0xC0;
     s32 id = *(s32 *)(D_003CDA88 + column * 0xC + row * 0xC0 + 4);
 
-    if (entry[1] == 0 && func_002C54B0(id) != 0 && ((SaveItemCounts *)datGameState)->counts[id] != 0) {
+    if (entry[1] == 0 && func_002C54B0(id) != 0 && ((CampSaveState *)datGameState)->counts[id] != 0) {
         id = *(u16 *)(entry + 8);
     }
     return id;
@@ -1434,20 +1475,20 @@ s32 mnuCampGetCompactEntryId(s32 row, s32 column) {
 }
 
 s32 mnuCampCountRemainingUses(s32 mode, s32 id, s32 record) {
-    s32 value = *(s32 *)(record + 0x9C);
+    s32 value = ((ShopEffectScene *)record)->availableCount;
 
     if (mode == 1) {
         value -= ptyCountBulletItem(id);
     } else if (mode == 3) {
-        value = 1 - ((SaveItemCounts *)datGameState)->counts[id];
+        value = 1 - ((CampSaveState *)datGameState)->counts[id];
     } else if (mode == 2) {
-        value = 1 - ((SaveItemCounts *)datGameState)->counts[id];
+        value = 1 - ((CampSaveState *)datGameState)->counts[id];
     } else {
-        value = 99 - ((SaveItemCounts *)datGameState)->counts[id];
+        value = 99 - ((CampSaveState *)datGameState)->counts[id];
     }
     if (mnuCampFindListedItemIndex(id) >= 0) {
         if (value >= 2) {
-            value = ((SaveItemCounts *)datGameState)->counts[id] == 0;
+            value = ((CampSaveState *)datGameState)->counts[id] == 0;
         }
     }
     return value < 0 ? 0 : value;
@@ -1457,25 +1498,27 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261198);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261290);
 
+/* Mark rows unavailable when neither currency nor inventory capacity permits a use. */
 void func_00261310(u8 *scene) {
-    u8 *node;
-    u8 *item;
+    CampWindowNode *node;
+    CampWindowParams *item;
     s32 i;
     s32 count;
     s32 remaining;
 
-    node = *(u8 **)(*(u8 **)(*(u8 **)(scene + 0x80) + 0x18) + 0x10);
-    for (i = 0; i < *(s32 *)(*(u8 **)(*(u8 **)(scene + 0x80) + 0x18) + 0x20); i++) {
-        item = node + 0x60;
-        count = *(s32 *)(datGameState + 0x3C) / *(s32 *)(item + 8);
-        remaining = mnuCampCountRemainingUses(*(s32 *)(item + 0xC), *(s32 *)(item + 4), (s32)scene);
+    node = ((ShopScene *)scene)->extra->list->first;
+    for (i = 0; i < ((ShopScene *)scene)->extra->list->count; i++) {
+        item = &node->params;
+        /* Keep the unchecked division: retail traps when the row price is zero. */
+        count = ((CampSaveState *)datGameState)->money / item->price;
+        remaining = mnuCampCountRemainingUses(item->mode, item->id, (s32)scene);
         if (remaining < count) {
             count = remaining;
         }
         if (count == 0) {
-            *(s32 *)(node + 0x48) = 1;
+            node->flags = 1;
         }
-        node = *(u8 **)(node + 0x58);
+        node = node->next;
         if (node == NULL) {
             break;
         }
@@ -1486,7 +1529,7 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_002613C8);
 
 s32 mnuCampAdvanceCounter(s32 delta, u8 *scene) {
     s32 max = func_00261198(scene);
-    CampCounterSlot *slot = &((ShopScene *)scene)->extra->data->state->counter;
+    CampWindowParams *slot = &((ShopScene *)scene)->extra->list->cursor->params;
     s32 sum = ((ShopScene *)scene)->quantity + delta;
     s32 cur;
 
@@ -1502,8 +1545,8 @@ s32 mnuCampAdvanceCounter(s32 delta, u8 *scene) {
     } else {
         ((ShopScene *)scene)->atLimit = 0;
     }
-    if (((ShopScene *)scene)->sprites[0]->data->state->counter.value == 3) {
-        slot->value = func_002613C8(cur, slot->limit);
+    if (((ShopScene *)scene)->sprites[0]->list->cursor->params.value == 3) {
+        slot->value = func_002613C8(cur, slot->price);
         cur = ((ShopScene *)scene)->quantity;
     }
     return cur;
