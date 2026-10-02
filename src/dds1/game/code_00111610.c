@@ -2,31 +2,31 @@
 
 typedef struct ObjectResource {
     u32 owner;      /* 0x00: object passed to the slot constructor */
-    u32 handle;     /* 0x04: resource released before replacement */
+    u32 pathHandle;          /* 0x04: constructed curve work released before replacement */
     u32 value;      /* 0x08 */
-    u32 resourceId; /* 0x0C: used to construct the replacement */
+    u32 sourceObjectAddress; /* 0x0C: object supplying the replacement curve table */
 } ObjectResource;
 
-typedef struct ObjectWithResource {
-    u8 pad0[0x18];
-    ObjectResource *resource;
-} ObjectWithResource;
-
-extern u32 func_00116D38(u32);
-
+/* Opaque fixed-size ring entry; this unit only selects its address. */
 typedef struct {
     u8 unk0[0x10];
 } SlotEntry;
 
-typedef struct {
-    u8 unk0[4];        /* 0x0 */
-    u32 unk4;          /* 0x4 */
-    SlotEntry *entry;     /* 0x8: slot from dds3SlotRingEntries */
-    u8 unkC[0xC];      /* 0xC */
+/* Shared slot-ring object prefix used by construction and resource accessors. */
+typedef struct ObjectWithResource {
+    u8 unk0[4];
+    u32 unk4;
+    SlotEntry *entry;         /* 0x08: selected dds3SlotRingEntries record */
+    u8 unkC[0xC];
     ObjectResource *resource; /* 0x18 */
-} SlotObjectFull;
+} ObjectWithResource;
 
-extern SlotObjectFull *dds3AppendWorldObjectNode();
+#define DDS3_SLOT_RING_ENTRY_COUNT 10
+#define DDS3_SLOT_STATE_CAPACITY 24
+
+extern u32 func_00116D38(u32);
+
+extern ObjectWithResource *dds3AppendWorldObjectNode();
 extern u32 dds3AdvanceWorldCounter();
 extern SlotEntry dds3SlotRingEntries[];
 extern s32 dds3SlotRingCursor;
@@ -38,7 +38,7 @@ typedef struct DdsSlotResourceState {
     u32 unk0C;
     s32 unk10;
     u8 pad14[0x38];
-    s32 slots[24];
+    s32 slots[DDS3_SLOT_STATE_CAPACITY];
     u32 unkAC;
     s32 currentSlot;
 } DdsSlotResourceState;
@@ -47,57 +47,62 @@ extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 extern u32 dds3AppendWorldIndexNode(s32);
 
-SlotObjectFull *dds3SpawnSlotRingObj3(u32 owner) {
-    SlotObjectFull *obj = dds3AppendWorldObjectNode(3);
-    ObjectResource *resource = obj->resource;
+/* Bind the owner, select a 16-byte ring entry, and advance the ten-entry cursor. */
+ObjectWithResource *dds3SpawnSlotRingObj3(u32 owner) {
+    ObjectWithResource *object = dds3AppendWorldObjectNode(3);
+    ObjectResource *resource = object->resource;
     u32 sequence = dds3AdvanceWorldCounter();
-    s32 slot;
+    s32 slotIndex;
 
     resource->owner = owner;
-    slot = dds3SlotRingCursor;
-    obj->unk4 = sequence;
-    obj->entry = &dds3SlotRingEntries[slot];
-    dds3SlotRingCursor = slot + 1;
-    dds3SlotRingCursor = dds3SlotRingCursor % 10;
-    return obj;
+    slotIndex = dds3SlotRingCursor;
+    object->unk4 = sequence;
+    object->entry = &dds3SlotRingEntries[slotIndex];
+    dds3SlotRingCursor = slotIndex + 1;
+    dds3SlotRingCursor = dds3SlotRingCursor % DDS3_SLOT_RING_ENTRY_COUNT;
+    return object;
 }
 
+/* Cache the opaque handler value without interpreting its bits. */
 void dds3SetSlotValue(ObjectWithResource *object, u32 value) {
     object->resource->value = value;
 }
 
-void dds3SetSlotKey(ObjectWithResource *object, u32 resourceId) {
-    object->resource->resourceId = resourceId;
+/* Cache the source object address for the next curve-work replacement. */
+void dds3SetSlotKey(ObjectWithResource *object, u32 sourceObjectAddress) {
+    object->resource->sourceObjectAddress = sourceObjectAddress;
 }
 
-/* Keep the old handle until it has been freed; the new resource is keyed
- * by resourceId rather than by the previous handle. */
+/* Free the old curve work before constructing its replacement from the stored
+ * source object address. The source is not an integer resource ID. */
 void dds3ReplaceObjectResource(ObjectWithResource *object) {
     ObjectResource *resource;
-    u32 handle;
+    u32 pathHandle;
 
     resource = object->resource;
-    if (resource->handle != 0) {
-        dds3FreePathObject(resource->handle);
+    if (resource->pathHandle != 0) {
+        dds3FreePathObject(resource->pathHandle);
     }
-    handle = func_00116D38(resource->resourceId);
-    resource->handle = handle;
+    pathHandle = func_00116D38(resource->sourceObjectAddress);
+    resource->pathHandle = pathHandle;
 }
 
+/* Release nonzero curve work and clear its handle, retaining the source address. */
 void dds3ReleaseObjectResource(ObjectWithResource *object) {
     ObjectResource *resource;
-    s32 handle;
+    s32 pathHandle;
 
     resource = object->resource;
-    handle = resource->handle;
-    if (handle != 0) {
-        dds3FreePathObject(handle);
-        resource->handle = 0;
+    pathHandle = resource->pathHandle;
+    if (pathHandle != 0) {
+        dds3FreePathObject(pathHandle);
+        resource->pathHandle = 0;
     }
 }
 
+/* Return the currently stored curve-work handle. */
 u32 dds3GetObjectResourceHandle(ObjectWithResource *object) {
-    return object->resource->handle;
+    return object->resource->pathHandle;
 }
 
 void func_00111740(void) {
@@ -139,6 +144,8 @@ s32 dds3GetObjectSlotRingOccupancy(u32 kind)
     return slots;
 }
 
+/* Initialize a kind-3 slot state and its index node.
+ * Every slot and currentSlot start unused (-1). */
 DdsSlotResourceState *dds3CreateSlotResourceState(s32 value) {
     DdsSlotResourceState *state = sdfAllocSizeClassBlock(sizeof(DdsSlotResourceState));
     s32 i;
@@ -149,7 +156,7 @@ DdsSlotResourceState *dds3CreateSlotResourceState(s32 value) {
     node = dds3AppendWorldIndexNode(0);
     state->indexNode = node;
     state->unk10 = value;
-    for (i = 0; i < 24; i++) {
+    for (i = 0; i < DDS3_SLOT_STATE_CAPACITY; i++) {
         state->slots[i] = -1;
     }
     state->currentSlot = -1;
