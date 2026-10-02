@@ -26,9 +26,29 @@ void dds3ClearSceneObjectState(Scene *scene) {
     object->state = 0;
 }
 
-/* Loads another scene's resource into this one; stays asm: a $16/$17
-   saved-register priority swap no natural declaration order produces. */
-INCLUDE_ASM(const s32, "basic/dds3SceneBasic", evtLoadSceneResourceFrom);
+/* Load another scene's named resource and give the scene object ownership. */
+s32 evtLoadSceneResourceFrom(Scene *scene, const char *resourceName) {
+    SceneObjectRes *object;
+    void *resourceHandle;
+    u32 resolvedAddress;
+    void *resourceAddress;
+
+    object = (SceneObjectRes *)scene->object;
+    if (resourceName == NULL) {
+        return 0;
+    }
+    if (object->unk18 != NULL) {
+        evtReleaseSceneResource(scene);
+    }
+    resourceHandle = sdfReadNamedResource((void *)resourceName, &resolvedAddress, 0);
+    resourceAddress = (void *)resolvedAddress;
+    if (resourceAddress == NULL) {
+        return 0;
+    }
+    object->unk18 = resourceHandle;
+    object->unk1C = resourceAddress;
+    return 1;
+}
 
 /* Retain `name` and hand its address to the scene object. */
 s32 evtRetainSceneResource(Scene *scene, void *name) {
