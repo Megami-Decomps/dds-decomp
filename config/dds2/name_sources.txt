@@ -272,6 +272,7 @@
 0x001113F0	dds3EnsureWorldNodeInSlot	inferred	src/dds2/game/code_00111388.c func_001113F0: Selects slot by node kind and appends node only if cursor search does not find it. Twin of DDS1 func_001111C8. [names_reviewed24.tsv]
 0x001114D0	dds3GetWorldSlotValue	inferred	Returns the indexed word from the pointer stored in a world object's slot field.
 0x001114E8	dds3CopyFilteredWorldSlot	inferred	src/dds2/game/code_00111388.c func_001114E8: Copies slot values accepted by optional filter into new index node; destroys empty result. Twin of DDS1 func_001112C0. [names_reviewed24.tsv]
+0x001115B0	dds3GetFirstWorldObjectNodeOfKind2	inferred	DDS1 twin 0x00111388; returns the first node in world-list kind 2 through a temporary indexed chain.
 0x00111628	dds3AllocateClearedObjectWork	inferred	Allocates and zeroes the work block attached to an object. [names_reviewed10.tsv]
 0x00111668	dds3ReleaseWorldSlotResource	inferred	Releases the object's resource, exchanges its first slot and frees the pointed-to slot allocation.
 0x001118E0	dds3ReplaceObjectResource	inferred	Releases any existing object resource and acquires a replacement by the stored resource ID.

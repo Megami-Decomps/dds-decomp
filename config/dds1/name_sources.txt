@@ -395,6 +395,7 @@
 0x00111188	evtSpawnActionObj2	inferred	constructor for type 2
 0x001111C8	dds3EnsureWorldNodeInSlot	inferred	src/dds1/game/code_00111160.c func_001111C8: Selects slot by node kind and appends node only if cursor search does not find it. [names_reviewed24.tsv]
 0x001112C0	dds3CopyFilteredWorldSlot	inferred	src/dds1/game/code_00111160.c func_001112C0: Copies slot values accepted by optional filter into new index node; destroys empty result. [names_reviewed24.tsv]
+0x00111388	dds3GetFirstWorldObjectNodeOfKind2	inferred	Returns the first node in world-list kind 2 through a temporary indexed chain.
 0x00111400	dds3AllocateClearedObjectWork	inferred	Allocates and zeroes the work block attached to an object. [names_reviewed10.tsv]
 0x00111610	dds3SpawnSlotRingObj3	inferred	type 3 object taking next slot of 10-entry ring D_00329A68
 0x00111698	dds3SetSlotValue	inferred	Stores the supplied value in the slot data word at offset 8.
