@@ -22,111 +22,92 @@ extern u32 D_00324770[4];
  * because those functions address the byte directly.
  */
 
+/* These are pending/saved parameter bodies, not the allocated effect owners.
+ * Copies exclude each owner's resource handle, allocation and slot pointers. */
+typedef union {
+    u32 rgba;
+    u8 channels[4];
+} KwlnColor;
+
 typedef struct {
+    u32 left;
+    u32 top;
+    u32 right;
+    u32 bottom;
+} KwlnRectBounds;
+
+typedef struct {
+    u32 words[5];
+} KwlnDrawVectorParams;
+
+typedef struct {
+    KwlnColor color;
+    u32 blendControl;
+    KwlnRectBounds bounds;
+} KwlnSolidRectParams;
+
+typedef struct {
+    u32 extent;
+    u32 centerX;
+    u32 centerY;
+    KwlnColor color;
+    u32 blendControl;
+    KwlnRectBounds bounds;
+} KwlnResourceRectParams;
+
+typedef struct {
+    KwlnColor color;
+    u32 blendControl;
+    f32 rotation;
+    f32 scale;
+    u32 centerX;
+    u32 centerY;
+    KwlnRectBounds bounds;
+} KwlnBlurRectParams;
+
+typedef struct {
+    u32 extent;
+    KwlnBlurRectParams source;
+} KwlnPixelBlurParams;
+
+typedef struct {
+    u32 count;
+    u32 delaySpread;
+    f32 angleStep;
+    KwlnColor color;
+    u32 unk10;
+    f32 unk14;
+    f32 unk18;
     u32 x;
     u32 y;
-    u32 w;
-    u32 h;
-} DrawRect;
+    u32 positionSpread;
+    u32 size;
+} KwlnScatterBlurParams;
 
 typedef struct {
-    u32 w[5];
-} DrawWord20;
-
-typedef struct {
-    u32 w[4];
-} DrawWord16;
-
-typedef struct {
-    union {
-        u32 w;
-        u8 b[4];
-    } u00;
-    u32 unk04;
-    DrawRect r08;
-} DrawBlkDC8;
-
-typedef struct {
-    u32 unk00;
-    u32 unk04;
-    u32 unk08;
-    union {
-        u32 w;
-        u8 b[4];
-    } u0C;
-    u32 unk10;
-} DrawBlkE08;
-
-typedef struct {
-    union {
-        u32 w;
-        u8 b[4];
-    } u00;
-    u32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    u32 unk10;
-    u32 unk14;
-    DrawRect r18;
-} DrawBlkD88;
-
-typedef struct {
-    u32 unk00;
-    union {
-        u32 w;
-        u8 b[4];
-    } u04;
-    u32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    u32 unk14;
-    u32 unk18;
-} DrawBlkC70;
-
-typedef struct {
-    u32 unk00;
-    u32 unk04;
-    f32 unk08;
-    union {
-        u32 w;
-        u8 b[4];
-    } u0C;
+    u32 count;
+    f32 phaseStep;
+    f32 spacing;
+    KwlnColor color;
     u32 unk10;
     f32 unk14;
     f32 unk18;
-    u32 unk1C;
-    u32 unk20;
-    u32 unk24;
-    u32 unk28;
-} DrawBlkCD0;
+    f32 angleStep;
+    u32 x;
+    u32 y;
+    u32 size;
+} KwlnScaleBlurParams;
 
-typedef struct {
-    u32 unk00;
-    f32 unk04;
-    f32 unk08;
-    union {
-        u32 w;
-        u8 b[4];
-    } u0C;
-    u32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u32 unk20;
-    u32 unk24;
-    u32 unk28;
-} DrawBlkD30;
-
-extern DrawBlkDC8 D_003C2DC8;
-extern DrawBlkE08 D_003C2E08;
+extern KwlnSolidRectParams D_003C2DC8;
+extern KwlnResourceRectParams D_003C2E08;
 extern u32 D_003C2E14;
 extern u32 D_003C2E18;
-extern DrawBlkD88 D_003C2D88;
-extern DrawBlkC70 D_003C2C70;
-extern DrawBlkCD0 D_003C2CD0;
-extern DrawBlkD30 D_003C2D30;
-extern DrawBlkCD0 D_003C2CA0;
-extern DrawBlkD30 D_003C2D00;
+extern KwlnBlurRectParams D_003C2D88;
+extern KwlnPixelBlurParams D_003C2C70;
+extern KwlnScatterBlurParams D_003C2CD0;
+extern KwlnScaleBlurParams D_003C2D30;
+extern KwlnScatterBlurParams D_003C2CA0;
+extern KwlnScaleBlurParams D_003C2D00;
 extern u32 D_003C2DCC;
 extern u8 D_003C2DCB;
 extern u8 D_003C2E17;
@@ -134,7 +115,7 @@ extern u8 D_003C2D8B;
 extern u8 D_003C2CDF;
 extern u8 D_003C2D3F;
 extern u128 kwlnDefaultColorVector;
-extern DrawWord20 kwlnDrawVector;
+extern KwlnDrawVectorParams kwlnDrawVector;
 extern u16 D_003BD74C;
 extern u16 D_003BD748;
 extern u16 D_003BD74E;
@@ -190,7 +171,7 @@ void kwlnDrawCopyRow128(void *src) {
     PCP_COPY_VECTOR(&kwlnDefaultColorVector, src);
 }
 
-void kwlnDrawCopyWords20(DrawWord20 *src) {
+void kwlnDrawCopyWords20(KwlnDrawVectorParams *src) {
     memcpy(&kwlnDrawVector, src, 0x14);
 }
 
@@ -199,31 +180,28 @@ void dds3DrawSetIndexedWord(u32 value, s32 index) {
 }
 
 /* Default draw viewport is 512 by 448 pixels. */
-void kwlnDrawInitRect(DrawRect *rect) {
-    rect->w = DRAW_VIEWPORT_WIDTH;
-    rect->h = DRAW_VIEWPORT_HEIGHT;
-    rect->y = 0;
-    rect->x = 0;
+void kwlnDrawInitRect(KwlnRectBounds *rect) {
+    rect->right = DRAW_VIEWPORT_WIDTH;
+    rect->bottom = DRAW_VIEWPORT_HEIGHT;
+    rect->top = 0;
+    rect->left = 0;
 }
 
 void kwlnDrawSetDc8Second(u32 value) {
-    D_003C2DC8.unk04 = value;
+    D_003C2DC8.blendControl = value;
 }
 
 void kwlnDrawSetDc8First(u32 value) {
-    D_003C2DC8.u00.w = value;
+    D_003C2DC8.color.rgba = value;
 }
 
-typedef struct {
-    u8 data[0x18];
-} DrawBlock18;
-
-extern DrawBlock18 *effGetCh74Params(void);
+extern KwlnSolidRectParams *effGetCh74Params(void);
 extern u16 D_003BD750;
 extern u16 D_003BD752;
 
-extern DrawBlock18 D_003C2DB0;
-extern DrawBlock18 D_003C2DD0;
+extern KwlnSolidRectParams D_003C2DB0;
+/* Alias of D_003C2DC8.bounds; the effect setter needs the preceding header. */
+extern KwlnRectBounds D_003C2DD0;
 
 void func_00106540(s32 mode) {
     D_003C2DB0 = *effGetCh74Params();
@@ -239,16 +217,16 @@ void func_00106540(s32 mode) {
 }
 
 void kwlnDrawSetupDc8(s32 mode) {
-    DrawBlkDC8 *blk = &D_003C2DC8;
+    KwlnSolidRectParams *blk = &D_003C2DC8;
     s32 requestedMode = mode;
 
     D_003BD74C = 0;
     D_003BD748 = 0;
-    D_003BD74E = blk->u00.b[3];
+    D_003BD74E = blk->color.channels[3];
     D_003BD74A = requestedMode;
     if (requestedMode == 0) {
         kwlnDrawControlFlags &= ~0x80000;
-        kwlnDrawInitRect(&blk->r08);
+        kwlnDrawInitRect(&blk->bounds);
         func_0018F6F0(blk);
         func_0018F6D8();
     }
@@ -259,7 +237,7 @@ void kwlnDrawSetupDc8(s32 mode) {
 
 void kwlnDrawEnableDc8(s32 enabled) {
     D_003BD74E = 0;
-    D_003BD74C = D_003C2DC8.u00.b[3];
+    D_003BD74C = D_003C2DC8.color.channels[3];
     D_003BD748 = 0;
     D_003BD74A = enabled;
     if (enabled == 0) {
@@ -273,30 +251,26 @@ void kwlnDrawEnableDc8(s32 enabled) {
 }
 
 void kwlnDrawSetE08Fifth(u32 value) {
-    D_003C2E08.unk10 = value;
+    D_003C2E08.blendControl = value;
 }
 
 void kwlnDrawSetE08Fourth(u32 value) {
-    D_003C2E08.u0C.w = value;
+    D_003C2E08.color.rgba = value;
 }
 
 void kwlnDrawSetE08Triple(u32 first, u32 second, u32 third) {
-    D_003C2E08.unk00 = first;
-    D_003C2E08.unk04 = second;
-    D_003C2E08.unk08 = third;
+    D_003C2E08.extent = first;
+    D_003C2E08.centerX = second;
+    D_003C2E08.centerY = third;
 }
 
-typedef struct {
-    u32 w[9];
-} DrawWord36;
-
-extern DrawWord36 D_003C2DE0;
+extern KwlnResourceRectParams D_003C2DE0;
 extern u16 D_003BD75C;
 extern u16 D_003BD75E;
 extern u32 effGetCh75Work(void);
 
 void kwlnDrawApplyEffectWord(s32 mode) {
-    D_003C2DE0 = *(DrawWord36 *)effGetCh75Work();
+    D_003C2DE0 = *(KwlnResourceRectParams *)effGetCh75Work();
     D_003BD75C = 0;
     D_003BD75E = mode;
     if (mode == 0) {
@@ -308,12 +282,12 @@ void kwlnDrawApplyEffectWord(s32 mode) {
 }
 
 void kwlnDrawSetupE08(s32 mode) {
-    DrawBlkE08 *blk = &D_003C2E08;
+    KwlnResourceRectParams *blk = &D_003C2E08;
     s32 requestedMode = mode;
 
     D_003BD758 = 0;
     D_003BD754 = 0;
-    D_003BD75A = blk->u0C.b[3];
+    D_003BD75A = blk->color.channels[3];
     D_003BD756 = requestedMode;
     if (requestedMode == 0) {
         kwlnDrawControlFlags &= ~0x200000;
@@ -327,7 +301,7 @@ void kwlnDrawSetupE08(s32 mode) {
 
 void kwlnDrawEnableE08(s32 enabled) {
     D_003BD75A = 0;
-    D_003BD758 = D_003C2E08.u0C.b[3];
+    D_003BD758 = D_003C2E08.color.channels[3];
     D_003BD754 = 0;
     D_003BD756 = enabled;
     if (enabled == 0) {
@@ -364,36 +338,32 @@ void kwlnDrawSetOffsetTransition(s32 transition, s32 x, s32 y) {
 }
 
 void kwlnDrawSetD88FloatTriple(u32 value, f32 first, f32 second) {
-    D_003C2D88.unk08 = first;
-    D_003C2D88.unk0C = second;
-    D_003C2D88.unk04 = value;
+    D_003C2D88.rotation = first;
+    D_003C2D88.scale = second;
+    D_003C2D88.blendControl = value;
 }
 
 void kwlnDrawSetD88First(u32 value) {
-    D_003C2D88.u00.w = value;
+    D_003C2D88.color.rgba = value;
 }
 
 void kwlnDrawSetD88Pair(u32 first, u32 second) {
-    D_003C2D88.unk10 = first;
-    D_003C2D88.unk14 = second;
+    D_003C2D88.centerX = first;
+    D_003C2D88.centerY = second;
 }
 
-typedef struct {
-    u32 w[10];
-} DrawWord40;
-
-extern DrawWord40 D_003C2D60;
+extern KwlnBlurRectParams D_003C2D60;
 extern u16 D_003BD744;
 extern u16 D_003BD746;
 extern u32 effGetCh70Params(void);
 
 void func_001069A8(s32 mode) {
-    D_003C2D60 = *(DrawWord40 *)effGetCh70Params();
+    D_003C2D60 = *(KwlnBlurRectParams *)effGetCh70Params();
     D_003BD744 = 0;
     D_003BD746 = mode;
     if (mode == 0) {
         kwlnDrawControlFlags &= 0xFFFBFFFF;
-        kwlnDrawInitRect(&D_003C2D88.r18);
+        kwlnDrawInitRect(&D_003C2D88.bounds);
         func_0018F3B8(&D_003C2D88);
     } else {
         kwlnDrawControlFlags |= 0x40000;
@@ -401,16 +371,16 @@ void func_001069A8(s32 mode) {
 }
 
 void kwlnDrawSetupD88(s32 mode) {
-    DrawBlkD88 *blk = &D_003C2D88;
+    KwlnBlurRectParams *blk = &D_003C2D88;
     s32 requestedMode = mode;
 
     D_003BD740 = 0;
     D_003BD73C = 0;
-    D_003BD742 = blk->u00.b[3];
+    D_003BD742 = blk->color.channels[3];
     D_003BD73E = requestedMode;
     if (requestedMode == 0) {
         kwlnDrawControlFlags &= ~0x20000;
-        kwlnDrawInitRect(&blk->r18);
+        kwlnDrawInitRect(&blk->bounds);
         func_0018F3B8(blk);
         func_0018F3A0();
     }
@@ -421,7 +391,7 @@ void kwlnDrawSetupD88(s32 mode) {
 
 void kwlnDrawEnableD88(s32 enabled) {
     D_003BD742 = 0;
-    D_003BD740 = D_003C2D88.u00.b[3];
+    D_003BD740 = D_003C2D88.color.channels[3];
     D_003BD73C = 0;
     D_003BD73E = enabled;
     if (enabled == 0) {
@@ -435,28 +405,28 @@ void kwlnDrawEnableD88(s32 enabled) {
 }
 
 void kwlnDrawSetC70FloatTriple(u32 value, f32 first, f32 second) {
-    D_003C2C70.unk0C = first;
-    D_003C2C70.unk10 = second;
-    D_003C2C70.unk08 = value;
+    D_003C2C70.source.rotation = first;
+    D_003C2C70.source.scale = second;
+    D_003C2C70.source.blendControl = value;
 }
 
 void kwlnDrawSetC70Second(u32 value) {
-    D_003C2C70.u04.w = value;
+    D_003C2C70.source.color.rgba = value;
 }
 
 void kwlnDrawSetC70Triple(u32 first, u32 second, u32 third) {
-    D_003C2C70.unk00 = first;
-    D_003C2C70.unk14 = second;
-    D_003C2C70.unk18 = third;
+    D_003C2C70.extent = first;
+    D_003C2C70.source.centerX = second;
+    D_003C2C70.source.centerY = third;
 }
 
-extern DrawBlkD30 D_003C2C40;
+extern KwlnPixelBlurParams D_003C2C40;
 extern u16 D_003BD720;
 extern u16 D_003BD722;
 extern u32 effGetCh71Work(void);
 
 void kwlnDrawApplyEffectBlock(s32 mode) {
-    D_003C2C40 = *(DrawBlkD30 *)effGetCh71Work();
+    D_003C2C40 = *(KwlnPixelBlurParams *)effGetCh71Work();
     D_003BD720 = 0;
     D_003BD722 = mode;
     if (mode == 0) {
@@ -468,12 +438,12 @@ void kwlnDrawApplyEffectBlock(s32 mode) {
 }
 
 void kwlnDrawSetupC70(s32 mode) {
-    DrawBlkC70 *blk = &D_003C2C70;
+    KwlnPixelBlurParams *blk = &D_003C2C70;
     s32 requestedMode = mode;
 
     D_003BD71C = 0;
     D_003BD718 = 0;
-    D_003BD71E = blk->u04.b[3];
+    D_003BD71E = blk->source.color.channels[3];
     D_003BD71A = requestedMode;
     if (requestedMode == 0) {
         kwlnDrawControlFlags &= ~0x1000;
@@ -486,12 +456,12 @@ void kwlnDrawSetupC70(s32 mode) {
 }
 
 void kwlnDrawSetupC70B(s32 mode) {
-    DrawBlkC70 *blk = &D_003C2C70;
+    KwlnPixelBlurParams *blk = &D_003C2C70;
     s32 requestedMode = mode;
 
     D_003BD71E = 0;
     D_003BD718 = 0;
-    D_003BD71C = blk->u04.b[3];
+    D_003BD71C = blk->source.color.channels[3];
     D_003BD71A = requestedMode;
     if (requestedMode == 0) {
         kwlnDrawControlFlags &= ~0x1000;
@@ -510,27 +480,27 @@ void kwlnDrawSetCd0Clamped(s32 boundedValue, s32 lastWord, s32 secondWord, s32 f
         kwlnDistanceBlurErrorCount++;
         boundedValue = 0x64;
     }
-    D_003C2CD0.unk00 = boundedValue;
-    D_003C2CD0.unk28 = lastWord;
-    D_003C2CD0.unk04 = secondWord;
-    D_003C2CD0.unk08 = firstFloat;
+    D_003C2CD0.count = boundedValue;
+    D_003C2CD0.size = lastWord;
+    D_003C2CD0.delaySpread = secondWord;
+    D_003C2CD0.angleStep = firstFloat;
     D_003C2CD0.unk14 = secondFloat;
     D_003C2CD0.unk18 = thirdFloat;
     D_003C2CD0.unk10 = fourthWord;
 }
 
 void kwlnDrawSetCd0Fourth(u32 value) {
-    D_003C2CD0.u0C.w = value;
+    D_003C2CD0.color.rgba = value;
 }
 
 void kwlnDrawSetCd0Triple(u32 first, u32 second, u32 third) {
-    D_003C2CD0.unk24 = first;
-    D_003C2CD0.unk1C = second;
-    D_003C2CD0.unk20 = third;
+    D_003C2CD0.positionSpread = first;
+    D_003C2CD0.x = second;
+    D_003C2CD0.y = third;
 }
 
 void func_00106DF0(s32 mode) {
-    D_003C2CA0 = *(DrawBlkCD0 *)effGetCh72Work();
+    D_003C2CA0 = *(KwlnScatterBlurParams *)effGetCh72Work();
     D_003BD72C = 0;
     D_003BD72E = mode;
     if (mode == 0) {
@@ -542,12 +512,12 @@ void func_00106DF0(s32 mode) {
 }
 
 void kwlnDrawSetupCd0(s32 mode) {
-    DrawBlkCD0 *blk = &D_003C2CD0;
+    KwlnScatterBlurParams *blk = &D_003C2CD0;
     s32 requestedMode = mode;
 
     D_003BD728 = 0;
     D_003BD724 = 0;
-    D_003BD72A = blk->u0C.b[3];
+    D_003BD72A = blk->color.channels[3];
     D_003BD726 = requestedMode;
     if (requestedMode == 0) {
         kwlnDrawControlFlags &= ~0x2000;
@@ -563,7 +533,7 @@ void kwlnDrawSetupCd0(s32 mode) {
 
 void kwlnDrawEnableCd0(s32 enabled) {
     D_003BD72A = 0;
-    D_003BD728 = D_003C2CD0.u0C.b[3];
+    D_003BD728 = D_003C2CD0.color.channels[3];
     D_003BD724 = 0;
     D_003BD726 = enabled;
     if (enabled == 0) {
@@ -582,27 +552,27 @@ void kwlnDrawSetD30Clamped(s32 boundedValue, s32 fourthWord, f32 firstFloat, f32
         kwlnRippleBlurErrorCount++;
         boundedValue = 0x28;
     }
-    D_003C2D30.unk00 = boundedValue;
-    D_003C2D30.unk04 = firstFloat;
-    D_003C2D30.unk08 = secondFloat;
+    D_003C2D30.count = boundedValue;
+    D_003C2D30.phaseStep = firstFloat;
+    D_003C2D30.spacing = secondFloat;
     D_003C2D30.unk14 = thirdFloat;
     D_003C2D30.unk18 = fourthFloat;
-    D_003C2D30.unk1C = fifthFloat;
+    D_003C2D30.angleStep = fifthFloat;
     D_003C2D30.unk10 = fourthWord;
 }
 
 void kwlnDrawSetD30Fourth(u32 value) {
-    D_003C2D30.u0C.w = value;
+    D_003C2D30.color.rgba = value;
 }
 
 void kwlnDrawSetD30Triple(u32 first, u32 second, u32 third) {
-    D_003C2D30.unk28 = first;
-    D_003C2D30.unk20 = second;
-    D_003C2D30.unk24 = third;
+    D_003C2D30.size = first;
+    D_003C2D30.x = second;
+    D_003C2D30.y = third;
 }
 
 void func_00107018(s32 mode) {
-    D_003C2D00 = *(DrawBlkD30 *)effGetCh76Work();
+    D_003C2D00 = *(KwlnScaleBlurParams *)effGetCh76Work();
     D_003BD738 = 0;
     D_003BD73A = mode;
     if (mode == 0) {
@@ -614,12 +584,12 @@ void func_00107018(s32 mode) {
 }
 
 void kwlnDrawSetupD30(s32 mode) {
-    DrawBlkD30 *blk = &D_003C2D30;
+    KwlnScaleBlurParams *blk = &D_003C2D30;
     s32 requestedMode = mode;
 
     D_003BD734 = 0;
     D_003BD730 = 0;
-    D_003BD736 = blk->u0C.b[3];
+    D_003BD736 = blk->color.channels[3];
     D_003BD732 = requestedMode;
     if (requestedMode == 0) {
         kwlnDrawControlFlags &= ~0x800000;
@@ -635,7 +605,7 @@ void kwlnDrawSetupD30(s32 mode) {
 
 void kwlnDrawEnableD30(s32 enabled) {
     D_003BD736 = 0;
-    D_003BD734 = D_003C2D30.u0C.b[3];
+    D_003BD734 = D_003C2D30.color.channels[3];
     D_003BD730 = 0;
     D_003BD732 = enabled;
     if (enabled == 0) {
