@@ -15,7 +15,15 @@ typedef struct SoundQueue {
 
 extern SoundQueue itfMesWork;
 
-typedef struct UiSprite { u8 pad0[0x20]; s32 unk20; s32 screenY; } UiSprite;
+typedef struct UiSprite {
+    u8 pad0[0x10];
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+    s32 unk20;
+    s32 screenY;
+} UiSprite;
 
 typedef struct UiPanelPlacement {
     UiSprite *frame;
@@ -119,7 +127,7 @@ extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, UiSurface *surface);
 
 extern void itfMesOffsetNodeChain(UiTexRef *node, s32 dx, s32 dy);
 
-extern s32 func_0019F770(UiSprite *sprite);
+extern void func_0019F770(UiSprite *sprite);
 
 extern s32 func_0019EA88();
 
@@ -563,7 +571,33 @@ void sndFlushMessageQueue(void) {
     itfMesWork.allocation = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F770);
+typedef struct KwlnDrawSink {
+    u8 unk0[0x10];
+    void (*submit)(void *, s32);
+} KwlnDrawSink;
+
+extern KwlnDrawSink D_00325708;
+extern s32 D_00358028[];
+extern u8 D_003BB230[5];
+extern u8 D_003BB238[5];
+extern s32 sdfAllocPacketAligned(s32 size);
+extern void sdfInitPacketList(s32 mem);
+extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, u64);
+
+void func_0019F770(UiSprite *sprite) {
+    s32 vertices[4][2] = {
+        {sprite->left, sprite->top},
+        {sprite->right, sprite->top},
+        {sprite->right, sprite->bottom},
+        {sprite->left, sprite->bottom}
+    };
+    s32 packet;
+
+    packet = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packet);
+    itfEmitQuadListA(vertices, D_00358028, D_003BB230, D_003BB238, 5, 0xFFFFFF, packet);
+    D_00325708.submit(&D_00325708, packet);
+}
 
 void itfAdjustPanelBoundsWithPad(UiPanelPlacement *object, s32 mode) {
     UiSprite *sprite = object->sprite;
@@ -718,10 +752,6 @@ extern u8 D_00358318[];
 extern u8 D_00358328[];
 
 extern u8 D_00358338[];
-
-extern s32 sdfAllocPacketAligned(s32 size);
-
-extern void sdfInitPacketList(s32 mem);
 
 extern void itfSendTablePacket(s32 packet, s32, s32);
 
@@ -1153,4 +1183,3 @@ INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB6A0);
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB6A8);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB6B0);
-
