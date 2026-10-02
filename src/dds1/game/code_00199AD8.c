@@ -75,6 +75,11 @@ extern s32 itfPanelGradientColorTemplate[];
 extern s32 itfPanelGradientColorPair[];
 extern s32 scrReadIntParameter(s32);
 extern s32 itfMesStartEntry(s32 window, s32 arg1, s32 arg2);
+extern u8 D_00357BF0[], D_00357C08[], D_00357C20[];
+extern u8 D_00357C38[], D_00357C50[], D_00357C68[];
+extern u8 D_003BB1A8[8], D_003BB1B0[8];
+extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, u64);
+
 
 typedef struct PanelHoldItem {
     s32 first;  /* 0x0 */
@@ -263,9 +268,41 @@ void itfDrawIndexedPanelFlatQuads(PanelObj *panel, u64 command) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A200);
+void func_0019A200(PanelObj *panel, u64 command) {
+    PktRec *buf = panel->buf;
+    PktRec *colors = buf + 21;
+    s32 alpha = panel->alpha;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A310);
+    for (i = 0; i < 7; i++, colors++) {
+        colors->unkC = alpha;
+    }
+    colors = buf + 20;
+    for (i = 0; i < 3; i++) {
+        itfEmitQuadListWide(buf, colors, &D_00357BF0[i * 8], &D_00357C08[i * 8], 8, panel->tail, command);
+    }
+    for (i = 0; i < 6; i++) {
+        itfEmitQuadListA(buf + 8 + i * 2, colors, D_003BB1A8, &D_00357C20[i * 4], 4, panel->tail, command);
+    }
+}
+
+void func_0019A310(PanelObj *panel, u64 command) {
+    PktRec *buf = panel->buf;
+    PktRec *colors = buf + 17;
+    s32 alpha = panel->alpha;
+    s32 i;
+
+    for (i = 0; i < 5; i++, colors++) {
+        colors->unkC = alpha;
+    }
+    colors = buf + 16;
+    for (i = 0; i < 3; i++) {
+        itfEmitQuadListWide(buf, colors, &D_00357C38[i * 8], &D_00357C50[i * 8], 8, panel->tail, command);
+    }
+    for (i = 0; i < 2; i++) {
+        itfEmitQuadListA(buf + 8 + i * 2, colors, D_003BB1B0, &D_00357C68[i * 4], 4, panel->tail, command);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A420);
 
