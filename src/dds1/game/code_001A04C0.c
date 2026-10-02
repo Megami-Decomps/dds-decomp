@@ -433,12 +433,27 @@ s32 btlGetRuntime(void) {
     return btlRuntime;
 }
 
-u16 btlReadCurrentUnitHp(s32 arg0) {
-    return *(u16 *)(arg0 + 6);
+/* Shared party/enemy entry prefix consumed by the HP/MP/status accessors. */
+typedef struct BtlEntry {
+    u16 flags;
+    u8 pad2[4];
+    u16 hp;     /* 0x06 */
+    u16 maxHp;  /* 0x08: cached skill-adjusted maximum */
+    u16 mp;     /* 0x0A */
+    u16 maxMp;  /* 0x0C: cached skill-adjusted maximum */
+    u16 status; /* 0x0E */
+} BtlEntry;
+
+#define BTL_ENTRY_STATUS_MASK 0x7FFF
+
+/* Read current HP from a unit-entry address. */
+u16 btlReadCurrentUnitHp(s32 entryAddress) {
+    return ((BtlEntry *)entryAddress)->hp;
 }
 
-u16 btlReadCurrentUnitMp(s32 arg0) {
-    return *(u16 *)(arg0 + 10);
+/* Read current MP from a unit-entry address. */
+u16 btlReadCurrentUnitMp(s32 entryAddress) {
+    return ((BtlEntry *)entryAddress)->mp;
 }
 
 void btlComputeProfileMaxHp(void) {
@@ -465,28 +480,33 @@ void btlAdjustUnitMp(u8 *object, s32 value) {
     datMoveCursorY(object, value);
 }
 
-u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 object) {
-    u16 maximum = btlReadCurrentUnitHp(object);
-    u32 value = btlComputeSkillAdjustedMaxHp(object);
-    *(u16 *)(object + 8) = value;
-    if (value < maximum) {
-        *(u16 *)(object + 6) = value;
+/* Cache the skill-adjusted maximum and return current HP clamped to it.
+ * The comparison uses the full-width result, not the u16 cache. */
+u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 entryAddress) {
+    u16 currentHp = btlReadCurrentUnitHp(entryAddress);
+    u32 maxHp = btlComputeSkillAdjustedMaxHp(entryAddress);
+    ((BtlEntry *)entryAddress)->maxHp = maxHp;
+    if (maxHp < currentHp) {
+        ((BtlEntry *)entryAddress)->hp = maxHp;
     }
-    return *(u16 *)(object + 6);
+    return ((BtlEntry *)entryAddress)->hp;
 }
 
-u16 btlRefreshUnitMaximumMpAndClampCurrentMp(s32 object) {
-    u16 maximum = btlReadCurrentUnitMp(object);
-    u32 value = btlComputeSkillAdjustedMaxMp(object);
-    *(u16 *)(object + 12) = value;
-    if (value < maximum) {
-        *(u16 *)(object + 10) = value;
+/* Cache the skill-adjusted maximum and return current MP clamped to it.
+ * The comparison uses the full-width result, not the u16 cache. */
+u16 btlRefreshUnitMaximumMpAndClampCurrentMp(s32 entryAddress) {
+    u16 currentMp = btlReadCurrentUnitMp(entryAddress);
+    u32 maxMp = btlComputeSkillAdjustedMaxMp(entryAddress);
+    ((BtlEntry *)entryAddress)->maxMp = maxMp;
+    if (maxMp < currentMp) {
+        ((BtlEntry *)entryAddress)->mp = maxMp;
     }
-    return *(u16 *)(object + 10);
+    return ((BtlEntry *)entryAddress)->mp;
 }
 
-u16 btlReadUnitStatusMask(s32 arg0) {
-    return *(u16 *)(arg0 + 0xe) & 0x7fff;
+/* Return the low 15 status bits; do not expose the stored high bit. */
+u16 btlReadUnitStatusMask(s32 entryAddress) {
+    return ((BtlEntry *)entryAddress)->status & BTL_ENTRY_STATUS_MASK;
 }
 
 void func_001A1948() {
