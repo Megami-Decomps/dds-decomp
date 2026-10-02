@@ -18,6 +18,7 @@ extern s32 datGameState;
 extern s32 datBattleSceneRecords;
 
 extern s32 btlGetRuntime(void);
+extern s32 btlIsCurrentValueBelowQuarterThreshold(void *);
 
 extern void btlBossDebugPrintf();
 
@@ -616,7 +617,35 @@ void func_002294B8(void) {
     func_0011AEE0(8);
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_002294D0);
+s32 func_002294D0(BtlUnit *unit, s32 action) {
+    BtlState *battle;
+    u16 *entry;
+    u32 i;
+
+    if ((unit->flags & 0x400) == 0) {
+        return action;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    i = 0;
+    entry = (u16 *)(battle->battleMode * 0x28 + datBattleSceneRecords + 6);
+    while (i < 0xB && entry[i] != unit->mode) {
+        i++;
+    }
+    if (i == 0xB) {
+        return action;
+    }
+    switch (action) {
+    case 2:
+    case 9:
+        return btlIsCurrentValueBelowQuarterThreshold(unit) ? 10 : 0;
+    case 11:
+        return 1;
+    case 13:
+        return -1;
+    default:
+        return action;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_002295D8);
 
