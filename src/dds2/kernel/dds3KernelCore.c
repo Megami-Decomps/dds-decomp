@@ -257,7 +257,7 @@ KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 des
         task->nameSum += name[i];
         i++;
     }
-    task->unk20 = priority;
+    task->priority = priority;
     task->flags = 1;
     task->unk2C = startDelay;
     task->unk2E = destroyDelay;
@@ -393,7 +393,7 @@ KwlnTask* func_00101820(u32 value)
             break;
         }
         while (node != 0) {
-            if (node->unk20 == value) {
+            if (node->priority == value) {
                 return node;
             }
             node = node->listNext;

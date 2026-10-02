@@ -12,7 +12,7 @@ struct KwlnTask {
     char name[0x18];          /* 0x00: NUL-padded task name, compared byte-wise */
     s32 nameSum;             /* 0x18 */
     u32 flags;               /* 0x1C */
-    u32 unk20;               /* Ascending task queue priority. */
+    u32 priority;            /* 0x20: ascending task queue priority. */
     u32 unk24;
     u32 timer;               /* 0x28 */
     s16 unk2C;               /* Positive ticks until activation. */

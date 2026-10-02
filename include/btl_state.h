@@ -3,6 +3,8 @@
 
 #include "btl.h"
 
+struct KwlnTask;
+
 /* Full battle-work layout for state users; unit/task-only users include btl.h. */
 #ifdef VERSION_DDS1
 
@@ -49,7 +51,7 @@ typedef struct BtlState {
     s32 battleMode; /* 0x27C */
     s32 requestArgument; /* 0x280: sign-extended script halfword */
     u8 pad284[0x18];
-    void *scriptOwner; /* 0x29C: +0x20 supplies the script process selector */
+    struct KwlnTask *scriptOwner; /* 0x29C: parent task; script tasks use its priority minus one */
     s32 scriptTask; /* 0x2A0: scheduler task handle, not another list pointer */
     s32 boundTask; /* 0x2A4: actor-slot binding task */
     u8 pad2A8[0x20C];
@@ -131,7 +133,7 @@ typedef struct BtlState {
     s32 battleMode; /* 0x2A0 */
     s32 requestArgument; /* 0x2A4 */
     u8 pad2A8[0x1C];
-    void *scriptOwner; /* 0x2C4: +0x20 supplies the script process selector */
+    struct KwlnTask *scriptOwner; /* 0x2C4: parent task; script tasks use its priority minus one */
     s32 scriptTask; /* 0x2C8: also supplies the task passed to scrSetCurrentActor */
     s32 boundTask; /* 0x2CC */
     u8 pad2D0[0x218];

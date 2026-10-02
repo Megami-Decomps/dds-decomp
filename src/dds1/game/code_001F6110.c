@@ -2,6 +2,7 @@
 #include "btl_state.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "kwln.h"
 
 extern void btlClearUnitDefeatCandidate(s32 actor);
 
@@ -2019,7 +2020,7 @@ extern s32 D_003BAAA8;
 
 void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
     BtlState *state = (BtlState *)btlGetRuntime();
-    s32 slot = scrCreateTaskForProcessId(((BtlList *)state->scriptOwner)->count - 1, D_003BAAA8, taskArg);
+    s32 slot = scrCreateTaskForProcessId((s32)state->scriptOwner->priority - 1, D_003BAAA8, taskArg);
     s32 handle;
     scrSetCurrentActor(slot, actor);
     handle = *(s32 *)((u8 *)kwlnTaskGetUserValue(slot) + 0xCC);

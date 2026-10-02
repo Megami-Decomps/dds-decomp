@@ -40,7 +40,7 @@ void btlStartSkillEventTask(u32 skill) {
     if (battle->eventTaskId == -1) {
         return;
     }
-    taskId = scrCreateTaskForProcessId((s32)((KwlnTask *)battle->scriptOwner)->unk20 - 1,
+    taskId = scrCreateTaskForProcessId((s32)battle->scriptOwner->priority - 1,
                             battle->scriptHandle, skill);
     scrSetCurrentActor(taskId, 0);
     func_00101968((s32)battle->scriptOwner, taskId);
@@ -85,7 +85,7 @@ void btlStartPrimaryScriptTask(void) {
     if (scriptId == -1) {
         return;
     }
-    taskId = scrCreateTaskForProcessId((s32)((KwlnTask *)battle->scriptOwner)->unk20 - 1,
+    taskId = scrCreateTaskForProcessId((s32)battle->scriptOwner->priority - 1,
                             battle->scriptHandle, scriptId);
     scrSetCurrentActor(taskId, 0);
     func_00101968((s32)battle->scriptOwner, taskId);
@@ -124,7 +124,7 @@ void btlStartSecondaryScriptTask(void) {
     if (scriptId == -1) {
         return;
     }
-    taskId = scrCreateTaskForProcessId((s32)((KwlnTask *)battle->scriptOwner)->unk20 - 1,
+    taskId = scrCreateTaskForProcessId((s32)battle->scriptOwner->priority - 1,
                             battle->scriptHandle, scriptId);
     scrSetCurrentActor(taskId, 0);
     func_00101968((s32)battle->scriptOwner, taskId);
