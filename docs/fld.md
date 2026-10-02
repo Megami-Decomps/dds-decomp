@@ -260,14 +260,28 @@ exported directly from source to one self-contained glTF 2.0 binary:
 
 ```sh
 python3 tools/fld_model.py src/dds2/data/field/f011_001.f1asm model.glb \
+  --texture-bundle extracted/f011_001.tbn \
   --resource md_01all_01 --meters-per-unit 0.01 --frames-per-second 30
+python3 tools/fld_model.py extracted/f011_001.LB model.glb \
+  --meters-per-unit 0.01 --frames-per-second 30
 ```
 
 `--resource` is repeatable and keeps large field files manageable. Without it,
-the exporter writes every type-2 model in the FLD1. The GLB retains the model
+the exporter writes every type-2 model in the FLD1. An LB input supplies its
+paired F1 model and TBN texture bundle directly. A loose F1 binary or source
+accepts the same bundle with `--texture-bundle`. The GLB embeds only textures
+used by exported model assets; see [`tmx.md`](tmx.md) for their physical
+format and standalone PNG decoder.
+
+The GLB retains the model
 and node hierarchy, resource and item transforms, indexed triangles, positions,
 normals, texture coordinates, vertex colors, the unclassified four-float vertex
-attribute, and the neutral mesh control values as glTF extras. Translation,
+attribute, material identities, primary texture assignments, and the neutral
+mesh control values as glTF extras. DDS vertex RGBA uses 128 as full intensity,
+so the exporter expands it to glTF's normalized 255 range. Texture and vertex
+alpha select a blending material. A draw without texture coordinates gets an
+untextured material variant because glTF requires `TEXCOORD_0` for a bound
+texture; its DDS texture identity remains in material metadata. Translation,
 scale, Euler-rotation, and packed-quaternion node tracks become glTF animation
 channels. Every motion binding and clip remains summarized on the resource
 node; asset-property tracks are not converted to animation channels because
@@ -281,6 +295,10 @@ metadata because glTF requires increasing input times. glTF also forbids
 non-finite JSON transforms. The one observed retail model with a NaN static
 translation omits that glTF component and records all three original IEEE-754
 words in the node extras instead of silently inventing coordinates.
+
+Across the archived field corpus, every one of the 150,694 primary and 3,948
+secondary material texture references resolves inside its paired TBN bundle.
+This covers 3,656 DDS1 and 3,415 DDS2 model resources.
 
 Each transform is `0x30` bytes: four position floats, four rotation floats,
 and four scale floats. Each collision object also starts with a `0x30`-byte
