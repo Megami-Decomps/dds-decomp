@@ -8,6 +8,7 @@ from ee_gcc_contracts import (
     annotate_ignored_result_calls,
     compare,
     scan_ignored_result_calls,
+    scan_non_discard_calls,
     scan_source,
 )
 
@@ -177,6 +178,27 @@ s32 caller(s32 value) {
             [("consume", "caller", 4, False), ("consume", "caller", 5, True)],
         )
 
+    def test_other_call_forms_include_result_uses_and_ambiguous_forms(self):
+        source = """extern s32 consume(s32);
+extern s32 nested(s32);
+s32 caller(s32 value) {
+    consume(value);
+    value = consume(value);
+    if (consume(value)) { consume(value); }
+    return consume(nested(value));
+}
+"""
+        calls = scan_non_discard_calls(source, "src/dds1/a.c")
+        self.assertEqual(
+            [(call.name, call.caller, call.line) for call in calls],
+            [
+                ("consume", "caller", 5),
+                ("consume", "caller", 6),
+                ("consume", "caller", 7),
+                ("nested", "caller", 7),
+            ],
+        )
+
     def test_control_headers_and_for_clauses_are_not_call_statements(self):
         source = """extern s32 step(void);
 void caller(void) {
@@ -214,6 +236,11 @@ void caller(void) { release(); }
                 header_macro, "src/dds1/a.c", frozenset({"release"})),
             [],
         )
+        self.assertEqual(
+            scan_non_discard_calls(
+                header_macro, "src/dds1/a.c", frozenset({"release"})),
+            [],
+        )
 
     def test_conditional_compilation_file_gets_no_call_evidence(self):
         source = """extern void release(void);
@@ -245,6 +272,37 @@ void caller(void *item) {
         self.assertEqual(call["mechanism"], "value-return declaration for void definition")
         self.assertIn("do not change", call["disposition"])
         self.assertEqual(report["summary"]["ignored_result_call_sites"], 1)
+        self.assertEqual(report["summary"]["other_call_form_sites"], 0)
+
+    def test_return_conflict_reports_mixed_call_forms(self):
+        caller_source = """extern s32 release(void *);
+s32 caller(void *item) {
+    release(item);
+    if (item) return release(item);
+    return 0;
+}
+"""
+        definition_source = "void release(void *item) { }\n"
+        caller_signatures, skipped = scan_source(
+            caller_source, "src/dds1/caller.c")
+        definitions, definition_skipped = scan_source(
+            definition_source, "src/dds1/owner.c")
+        signatures = caller_signatures + definitions
+        report = compare(signatures, skipped + definition_skipped)
+        annotate_ignored_result_calls(
+            report,
+            signatures,
+            scan_ignored_result_calls(caller_source, "src/dds1/caller.c"),
+            scan_non_discard_calls(caller_source, "src/dds1/caller.c"),
+        )
+        conflict = report["conflicts"][0]
+        self.assertEqual(conflict["ignored_result_calls"][0]["line"], 3)
+        self.assertEqual(
+            [(call["caller"], call["line"]) for call in conflict["other_call_forms"]],
+            [("caller", 4)],
+        )
+        self.assertIn("all uses", conflict["other_call_forms"][0]["disposition"])
+        self.assertEqual(report["summary"]["other_call_form_sites"], 1)
 
     def test_parameter_only_conflict_does_not_get_result_evidence(self):
         caller_source = """extern void release(s32);
@@ -352,6 +410,57 @@ void parameterShadow(void (*release)(void *), void *item) {
 }
 """
         self.assertEqual(scan_ignored_result_calls(source, "src/dds1/a.c"), [])
+        self.assertEqual(scan_non_discard_calls(source, "src/dds1/a.c"), [])
+
+    def test_block_scope_prototype_hides_file_scope_contract(self):
+        caller_source = """extern s32 release(void);
+void caller(void) {
+    void release(void);
+    release();
+}
+void other(void) { release(); }
+"""
+        definition_source = "void release(void) { }\n"
+        caller_signatures, skipped = scan_source(
+            caller_source, "src/dds1/caller.c")
+        definitions, definition_skipped = scan_source(
+            definition_source, "src/dds1/owner.c")
+        signatures = caller_signatures + definitions
+        ignored = scan_ignored_result_calls(
+            caller_source, "src/dds1/caller.c")
+        other = scan_non_discard_calls(
+            caller_source, "src/dds1/caller.c")
+        self.assertEqual(
+            [(call.caller, call.line) for call in ignored],
+            [("other", 6)],
+        )
+        self.assertEqual(other, [])
+        report = compare(signatures, skipped + definition_skipped)
+        annotate_ignored_result_calls(report, signatures, ignored, other)
+        self.assertEqual(
+            [(call["caller"], call["line"])
+             for call in report["conflicts"][0]["ignored_result_calls"]],
+            [("other", 6)],
+        )
+
+    def test_unbraced_else_and_do_calls_are_not_prototypes(self):
+        source = """extern s32 release(void);
+void caller(s32 condition) {
+    if (condition) { } else release();
+    do release(); while (condition);
+    release();
+}
+"""
+        ignored = scan_ignored_result_calls(source, "src/dds1/a.c")
+        other = scan_non_discard_calls(source, "src/dds1/a.c")
+        self.assertEqual(
+            [(call.name, call.line) for call in ignored],
+            [("release", 5)],
+        )
+        self.assertEqual(
+            [(call.name, call.line) for call in other],
+            [("release", 3), ("release", 4)],
+        )
 
     def test_any_same_named_local_makes_function_fail_closed(self):
         source = """extern s32 release(void *);

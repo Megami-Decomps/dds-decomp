@@ -110,7 +110,7 @@ FLD1 additionally uses these typed forms:
 
 | Type | Source form | Contents currently recovered |
 |---:|---|---|
-| `2` | `model_resource`, `model_items`, `model_item`, `model_bounds`, `model_assets`, `model_asset`, `model_draw_set`, `model_draw_list`, `model_draw`, `packet_data` | Field model hierarchy, material assets, render commands, and bounded DMA/VIF packets |
+| `2` | `model_resource`, `model_items`, `model_item`, `model_bounds`, `model_assets`, `model_asset`, `model_draw_set`, `model_draw_list`, `model_draw`, mesh directives | Field model hierarchy, material assets, render commands, and VIF mesh streams |
 | `5` | `texture_list` | Referenced field texture-list filename |
 | `11` | `effect` | Effect kind, resource selector, size, and parameters |
 | `12` | `light` | Animation mode, radii, softness, bias, diffuse RGB, and ambient RGB |
@@ -142,8 +142,21 @@ model_draw_set lists=@md_01all_02_node_2_draws_list_0
 label md_01all_02_node_2_draws_list_0
 model_draw_list selector=2 draws=@md_01all_02_node_2_draws_list_0_draw_0
 label md_01all_02_node_2_draws_list_0_draw_0
-model_draw asset=1 qwords=1009 \
+model_draw asset=1 qwords=7 \
   packet=@md_01all_02_node_2_draws_list_0_draw_0_packet
+
+label md_01all_02_node_2_draws_list_0_draw_0_packet
+mesh_header triangles=2 vertices=3 controls=0x1878,0x0360
+mesh_triangles
+triangle 0,1,2,0 0,2,1,0
+mesh_positions
+position 10,0,-20 20,0,-20 10,0,-10
+mesh_texcoords
+texcoord 0,0 1,0 0,1
+mesh_colors
+color 128,128,128,128 128,128,128,128 128,128,128,128
+mesh_program address=12
+vif_nops count=1
 ```
 
 The runtime creates one draw node per `model_item`. `node_id` is its lookup
@@ -157,9 +170,20 @@ A `model_draw_set` is the node's null-terminated sequence of command lists.
 Each `model_draw_list` supplies a rendering selector and an ordered sequence of
 draws. The retail version-23 field corpus uses opcode 1 for every one of these
 draws: `asset` selects the model's material state, `qwords` gives the exact
-size of the referenced packet, and `packet_data` retains that DMA/VIF packet
-in 16-byte units. The explicit boundary prevents packet bytes from absorbing
-padding or a neighboring object while packet semantics are recovered further.
+size of the referenced packet, and the packet contains one or more meshes.
+
+Each mesh starts with its triangle and vertex counts plus two preserved control
+words. Triangle records hold three vertex indices and a fourth byte whose role
+is not yet named. Positions are XYZ floats. A mesh may then carry XYZ normals,
+either two-float texture coordinates or an unclassified four-float vertex
+attribute, and RGBA bytes. `mesh_program` selects the VU entry address used to
+draw that mesh. The assembler derives the VIF UNPACK commands, element counts,
+VU addresses, formats, and stream flags from this structure. `vif_nops`
+preserves the zero words that align the complete packet to its 16-byte draw
+boundary.
+
+`packet_data` remains accepted for older source files containing this known
+packet profile. Newly disassembled source uses the mesh form.
 
 The variable-length asset table is also structural source:
 
@@ -179,9 +203,12 @@ asset indices, command pointers, packet sizes, and relocation sites.
 
 All 7,125 type-2 resources and 98,442 model items in the two version-23 disc
 corpora use this same profile. Together they contain 161,220 asset entries,
-86,571 draw sets, 94,520 command lists, and 140,113 typed draws. Their fixed
-control and padding words are derived by the assembler and checked by the
-parser. Model motion definitions remain ordered `bytes` and symbolic
+86,571 draw sets, 94,520 command lists, and 140,113 typed draws. The draw
+packets contain 904,770 meshes, 12,648,890 triangles, and 30,426,410 vertices.
+All DDS1 meshes select program address 12. DDS2 has 503,825 at address 12 and
+221 at address 16.
+Their fixed VIF commands, control and padding words are derived or checked by
+the parser. Model motion definitions remain ordered `bytes` and symbolic
 `pointer` directives, so they can move safely while that format is recovered.
 
 Each transform is `0x30` bytes: four position floats, four rotation floats,
