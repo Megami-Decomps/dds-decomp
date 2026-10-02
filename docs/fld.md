@@ -208,8 +208,50 @@ packets contain 904,770 meshes, 12,648,890 triangles, and 30,426,410 vertices.
 All DDS1 meshes select program address 12. DDS2 has 503,825 at address 12 and
 221 at address 16.
 Their fixed VIF commands, control and padding words are derived or checked by
-the parser. Model motion definitions remain ordered `bytes` and symbolic
-`pointer` directives, so they can move safely while that format is recovered.
+the parser.
+
+Model motion is a playbook shared by every animated node and asset in one model:
+
+```text
+model_motion_playbook clip_count=1 bindings=5 clips=@motion_clips
+model_motion_binding family=node selector=translation target=11
+model_motion_binding family=node selector=scale target=11
+model_motion_binding family=node selector=quaternion target=11
+model_motion_binding family=asset selector=2 target=46
+model_motion_binding family=asset selector=2 target=47
+
+label motion_clips
+model_motion_clip_table clips=@motion_clip_0
+
+label motion_clip_0
+model_motion_clip duration=60 reserved=0
+model_motion_track format=vector3 frames=0
+motion_vector3 140135.203125,-309.505859375,12446.6611328125
+model_motion_track format=vector3 frames=0
+motion_vector3 1.0399997234344482,1.0,0.9999998807907104
+model_motion_track format=quaternion_s16 frames=0
+motion_quaternion_s16 0,-356,0,4080
+```
+
+The high and low halves of each binding command select its target family and
+channel. Node channels have names because their runtime effects are established;
+asset selectors remain numeric where the property name is not. Each non-null
+clip contains one size-prefixed key track per binding, in binding order. The
+assembler derives the track size, key count, stride, frame padding, packed
+command word, and all playbook relocations. It checks node and asset targets
+against the model tables.
+
+Track payloads use the shape required by their binding: XYZ floats, packed
+signed-16 quaternions, byte flags, RGBA bytes, one float, or five floats. Frame
+values remain unsigned 16-bit values, matching the retail evaluator. Most are
+ordered normally, but 46 tracks start with high values such as `65535` before
+zero; source preserves those values and does not impose a false monotonicity
+rule.
+
+Across the two version-23 disc corpora, the 7,125 playbooks contain 33,877
+bindings and tracks with 165,446 keys. Every playbook has one clip, every clip
+reserved word is zero, and all nine observed binding/stride profiles agree with
+the retail dispatch handlers.
 
 Each transform is `0x30` bytes: four position floats, four rotation floats,
 and four scale floats. Each collision object also starts with a `0x30`-byte
