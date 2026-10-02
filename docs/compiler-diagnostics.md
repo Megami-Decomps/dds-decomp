@@ -98,6 +98,47 @@ Run the focused tests with:
 python3 tools/test_ee_gcc_diagnostics.py
 ```
 
+## Explain global allocation
+
+When the first target-function difference is pass `19` or `20`, summarize the
+pass-20 allocation records before investigating later scheduling:
+
+```sh
+python3 tools/ee_gcc_allocations.py /tmp/snd-candidate \
+  --function sndCreateSystemEffect \
+  --json /tmp/snd-allocations.json
+```
+
+The report separates three facts that the raw dump prints together:
+
+- `global order` is the greedy attempt order for global allocnos that remained
+  unassigned after local allocation;
+- `global/N` rows are those candidates and show their final hard register,
+  hard-register conflicts and preferences;
+- `other` rows occur in the final disposition table but are not an allocno
+  representative in the global candidate list. They can include locally
+  assigned pseudos, additional pseudos grouped into a global allocno, and
+  reload-created pseudos.
+
+The compiler can retry global allocation. The JSON report preserves every
+printed attempt and the text report calls out the retry count; the displayed
+candidate table uses the last attempt. Spill and reload instruction UIDs are
+reported as events, but the tool does not infer a spilled source variable from
+an instruction UID.
+
+Pseudo numbers are compiler-internal identities, not source-variable names,
+and can change between source forms. Identify a pseudo from its defining and
+using RTL inside each probe rather than assuming that `r84` has the same
+meaning in both. Then ask which truthful source type, lifetime or expression
+fact could change its conflicts or remove it. If pass `19` or `20` already has
+the wrong map, sched2 and delay-slot experiments are downstream: they can
+reorder the selected hard-register dataflow, but cannot repair the earlier
+allocation choice.
+
+This is a classifier and an experiment guide, not a register-binding recipe.
+An allocation-driven source idiom should be documented only after natural C
+matches exactly and transfers to a function that was not used to derive it.
+
 ## Explain a filled delay slot
 
 When the first divergence is pass `29`, inspect the sequence that the delayed-
@@ -136,3 +177,24 @@ question for a delay-slot residual: did a truthful type, expression, or layout
 fact change donor availability before pass `29`? If pass-28 RTL already has an
 ordinary eligible instruction immediately before the call, cosmetic spelling
 changes are unlikely to suppress the move naturally.
+
+## Assembler relaxation is deterministic
+
+Sony's EE GAS 2.10 keeps a provisional short instruction immediately before
+the corresponding long macro expansion. During relaxation it moves the long
+form down over the short form. The original assembler calls `memcpy` for that
+overlapping move, so modern libc implementations can corrupt the expansion in
+a process-layout-dependent way. A typical symptom is a load or store where a
+`lui` should begin the long form, even though repeated compiler runs emitted
+identical `.s` files.
+
+`tools/download_tools.py` patches the project's exact `ee-as` binary to use a
+small forward-copy helper at that one call site. The patch is hash-locked and
+fails closed on any other assembler build. It does not change the relaxation
+decision: it only makes the selected instruction sequence copy correctly.
+
+Run the focused patch tests with:
+
+```sh
+python3 tools/test_ee_as_relax.py
+```

@@ -32,6 +32,14 @@ COLLISION_SIZE = 0x30
 VERTEX_SIZE = 0x10
 FACE_SIZE = 0x24
 STRING_SIZE = 0x10
+MOTION_CURVE_SIZE = 0x10
+MOTION_KINDS = {
+    0: ("vector3", 3),
+    2: ("quaternion", 4),
+    4: ("scalar", 1),
+    5: ("light", 10),
+}
+MOTION_KIND_IDS = {name: kind for kind, (name, _) in MOTION_KINDS.items()}
 
 
 class FldError(ValueError):
@@ -72,6 +80,16 @@ class LinkSummary:
     event_procedures: int
     actor_resources: int
     destination_resources: int
+
+
+@dataclass(frozen=True)
+class MotionTrack:
+    kind: int
+    curve: int
+    count: int
+    values: int
+    keys: int
+    word_0c: int
 
 
 def _range(data: bytes, offset: int, size: int, context: str) -> None:
@@ -245,6 +263,37 @@ def _read_resources(data: bytes, rows: tuple[TypeRow, ...]) -> tuple[Resource, .
     return tuple(resources)
 
 
+def _read_motion_tracks(
+    data: bytes, offset: int, data_end: int, context: str
+) -> tuple[MotionTrack, ...]:
+    _range(data, offset, 4, context)
+    count = _u32(data, offset, context + " track count")
+    root_size = (4 + count * 8 + 0xF) & ~0xF
+    _range(data, offset, root_size, context)
+    if any(data[offset + 4 + count * 8 : offset + root_size]):
+        raise FldError(f"{context} has nonzero root padding")
+
+    tracks = []
+    for index in range(count):
+        kind, curve = struct.unpack_from("<II", data, offset + 4 + index * 8)
+        if kind not in MOTION_KINDS:
+            raise FldError(f"{context} track {index} has unknown kind {kind}")
+        if not curve:
+            raise FldError(f"{context} track {index} has a null curve")
+        _range(data, curve, MOTION_CURVE_SIZE, f"{context} track {index} curve")
+        value_count, values, keys, word_0c = struct.unpack_from("<IIII", data, curve)
+        if value_count == 0:
+            raise FldError(f"{context} track {index} has no keys")
+        width = MOTION_KINDS[kind][1]
+        _range(data, values, value_count * width * 4, f"{context} track {index} values")
+        _range(data, keys, value_count * 4, f"{context} track {index} keys")
+        frames = struct.unpack_from(f"<{value_count}I", data, keys)
+        if any(left >= right for left, right in zip(frames, frames[1:])):
+            raise FldError(f"{context} track {index} keys are not strictly increasing")
+        tracks.append(MotionTrack(kind, curve, value_count, values, keys, word_0c))
+    return tuple(tracks)
+
+
 def validate(data: bytes) -> None:
     """Validate the known FLD2 object graph and semantic index domains."""
 
@@ -279,6 +328,8 @@ def validate(data: bytes) -> None:
             label = _u32(data, resource.data + 4, "event label")
             if label:
                 _cstring(data, label, data_end, "event label")
+        elif resource.type_id == 9 and resource.data:
+            _read_motion_tracks(data, resource.data, data_end, "motion resource")
         elif resource.type_id == 10 and resource.data:
             _range(data, resource.data, 0x10, "placement resource")
             kind, event_index = struct.unpack_from("<Ii", data, resource.data)
@@ -649,6 +700,65 @@ def render_source(data: bytes) -> str:
             if label:
                 label_text, label_size = _cstring(data, label, data_end, stem + " event label")
                 add_span(label, label_size, [f"cstring {json.dumps(label_text)}"], stem + " event label")
+        elif resource.type_id == 9 and resource.data:
+            tracks = _read_motion_tracks(data, resource.data, data_end, stem + " motion")
+            root_size = (4 + len(tracks) * 8 + 0xF) & ~0xF
+            track_refs = []
+            for index, track in enumerate(tracks):
+                kind_name, width = MOTION_KINDS[track.kind]
+                suffix = kind_name
+                if sum(other.kind == track.kind for other in tracks) > 1:
+                    suffix += f"_{index}"
+                _assign_label(labels, track.curve, f"{stem}_{suffix}_curve")
+                _assign_label(labels, track.values, f"{stem}_{suffix}_values")
+                _assign_label(labels, track.keys, f"{stem}_{suffix}_keys")
+                track_refs.append(
+                    f"{kind_name}:@{_label_for(labels, track.curve)}"
+                )
+
+                add_span(
+                    track.curve,
+                    MOTION_CURVE_SIZE,
+                    [
+                        "motion_curve "
+                        f"count={track.count} values=@{_label_for(labels, track.values)} "
+                        f"keys=@{_label_for(labels, track.keys)} word_0c={track.word_0c}"
+                    ],
+                    f"{stem} {kind_name} curve",
+                )
+                value_lines = []
+                for value_index in range(track.count):
+                    values = struct.unpack_from(
+                        "<" + "f" * width,
+                        data,
+                        track.values + value_index * width * 4,
+                    )
+                    value_lines.append(
+                        f"{kind_name} " + " ".join(_float_text(value) for value in values)
+                    )
+                add_span(
+                    track.values,
+                    track.count * width * 4,
+                    value_lines,
+                    f"{stem} {kind_name} values",
+                )
+                frames = struct.unpack_from(f"<{track.count}I", data, track.keys)
+                key_lines = [
+                    "keys " + " ".join(str(frame) for frame in frames[start : start + 16])
+                    for start in range(0, len(frames), 16)
+                ]
+                add_span(
+                    track.keys,
+                    track.count * 4,
+                    key_lines,
+                    f"{stem} {kind_name} keys",
+                )
+            add_span(
+                resource.data,
+                root_size,
+                [f"motion tracks={','.join(track_refs)}"],
+                stem + " motion",
+            )
         elif resource.type_id == 10 and resource.data:
             _range(data, resource.data, 0x10, stem + " placement")
             kind, event_index, visible, payload = struct.unpack_from("<IiII", data, resource.data)
@@ -771,6 +881,7 @@ def _operation_size(operation: Operation, offset: int) -> int:
         "camera": 0x10,
         "event": 0x10,
         "placement": 0x10,
+        "motion_curve": MOTION_CURVE_SIZE,
         "string16": STRING_SIZE,
         "pointer": 4,
         "u32": 4 * len(args),
@@ -781,6 +892,23 @@ def _operation_size(operation: Operation, offset: int) -> int:
     }
     if name in fixed:
         return fixed[name]
+    if name == "motion":
+        fields = _fields(args)
+        if set(fields) != {"tracks"}:
+            raise FldError(f"line {operation.line}: motion expects tracks=...")
+        tracks = fields["tracks"].split(",") if fields["tracks"] else []
+        if not tracks:
+            raise FldError(f"line {operation.line}: motion requires at least one track")
+        return (4 + len(tracks) * 8 + 0xF) & ~0xF
+    if name in MOTION_KIND_IDS:
+        width = MOTION_KINDS[MOTION_KIND_IDS[name]][1]
+        if len(args) != width:
+            raise FldError(f"line {operation.line}: {name} expects {width} floats")
+        return width * 4
+    if name == "keys":
+        if not args:
+            raise FldError(f"line {operation.line}: keys expects at least one frame")
+        return len(args) * 4
     if name == "cstring":
         if len(args) != 1:
             raise FldError(f"line {operation.line}: cstring expects one string")
@@ -961,6 +1089,33 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
             output.extend(struct.pack("<I", _int(f["flags"])))
             output.extend(pointer(f["label"]))
             output.extend(struct.pack("<II", *_csv(f["reserved"], 2)))
+        elif name == "motion":
+            f = checked_fields(operation, ("tracks",))
+            tracks = f["tracks"].split(",") if f["tracks"] else []
+            start = len(output)
+            output.extend(struct.pack("<I", len(tracks)))
+            for track in tracks:
+                try:
+                    kind_text, curve = track.split(":", 1)
+                except ValueError as exc:
+                    raise FldError(
+                        f"line {operation.line}: motion track must be KIND:@CURVE"
+                    ) from exc
+                kind = MOTION_KIND_IDS.get(kind_text)
+                if kind is None:
+                    raise FldError(
+                        f"line {operation.line}: unknown motion kind {kind_text!r}"
+                    )
+                output.extend(struct.pack("<I", kind))
+                output.extend(pointer(curve))
+            size = (4 + len(tracks) * 8 + 0xF) & ~0xF
+            output.extend(bytes(start + size - len(output)))
+        elif name == "motion_curve":
+            f = checked_fields(operation, ("count", "values", "keys", "word_0c"))
+            output.extend(struct.pack("<I", _int(f["count"])))
+            output.extend(pointer(f["values"]))
+            output.extend(pointer(f["keys"]))
+            output.extend(struct.pack("<I", _int(f["word_0c"])))
         elif name == "placement":
             f = checked_fields(operation, ("kind", "event", "visible", "payload"))
             output.extend(struct.pack("<IiI", _int(f["kind"]), _int(f["event"]), _int(f["visible"])))
@@ -989,6 +1144,17 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
             if len(args) != 1:
                 raise FldError(f"line {operation.line}: pointer expects one label")
             output.extend(pointer(args[0]))
+        elif name in MOTION_KIND_IDS:
+            width = MOTION_KINDS[MOTION_KIND_IDS[name]][1]
+            if len(args) != width:
+                raise FldError(
+                    f"line {operation.line}: {name} expects {width} floats"
+                )
+            output.extend(struct.pack("<" + "f" * width, *(_parse_float(arg) for arg in args)))
+        elif name == "keys":
+            if not args:
+                raise FldError(f"line {operation.line}: keys expects at least one frame")
+            output.extend(struct.pack("<" + "I" * len(args), *(_int(arg) for arg in args)))
         elif name in {"u32", "s32"}:
             fmt = "<" + ("I" if name == "u32" else "i") * len(args)
             output.extend(struct.pack(fmt, *(_int(arg) for arg in args)))
