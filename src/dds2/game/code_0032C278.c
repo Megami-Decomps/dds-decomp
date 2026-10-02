@@ -10,6 +10,27 @@ extern s32 sdfAllocGeneralBlock(s32);
 extern s32 sdfResourceRetainAddress(s32);
 #include "sdf.h"
 
+typedef struct SdfPacketChain {
+    SdfListHead *head;
+    SdfListHead *tail;
+} SdfPacketChain;
+
+typedef struct SdfPacketSlot {
+    SdfListHead *list;
+    u32 unk4;
+    u8 state;
+    u8 unk9;
+    u8 pad0A[6];
+} SdfPacketSlot;
+
+extern u32 func_003287E0(void);
+extern u32 sdfGetElapsedTimerTicks(u32);
+extern s32 EIntr(void);
+extern u16 D_00438A24;
+extern s32 D_00438A30;
+extern s8 D_00439165;
+extern u8 sdfCurrentBufferIndex;
+
 #define SDF_DMA_TAG_NEXT 0x20
 #define SDF_DMA_TAG_REF 0x30
 #define SDF_DMA_TAG_CALL 0x50
@@ -27,7 +48,7 @@ extern s32 sdfCreateSemaphore(u32, u32, u32);
 
 extern u64 sdfGraphHasPendingWork(void);
 
-extern s64 func_0036DE70(void);
+extern s32 func_0036DE70(void);
 
 extern s32 sdfPacketBufferSize;
 
@@ -47,7 +68,7 @@ extern volatile s8 sdfPacketSlotIndex;
 
 extern s32 D_00438A28;
 
-extern u32 D_0040B308[];
+extern SdfPacketSlot D_0040B308[];
 
 extern SdfResource *sdfResourceListHead;
 
@@ -696,14 +717,14 @@ void sdfClearPacketListHead(SdfListHead *list) {
     list->first = 0;
 }
 
-void sdfAppendPacketChainNode(s32 *head, s32 node) {
-    if (head[1] == 0) {
-        *head = node;
+void sdfAppendPacketChainNode(SdfPacketChain *head, SdfListHead *node) {
+    if (head->tail == NULL) {
+        head->head = node;
     }
     else {
-        **(u32 **)(head[1] + 8) = *(u32 *)(node + 8);
+        *(u32 *)head->tail->last = node->last;
     }
-    head[1] = node;
+    head->tail = node;
 }
 
 void sdfInitializeDmaReferenceTag(SdfPacket *packet, s32 address) {
@@ -935,7 +956,41 @@ void sdfInitPacketBuilder(SdfPacketBuilder *packet, s32 source, s32 data, s32 re
     packet->prepare = func_0032DC80;
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DD98);
+void func_0032DD98(SdfListHead *list, SdfPacketChain *chain) {
+    u32 start = func_003287E0();
+    s32 interrupts;
+    s32 index;
+    SdfPacketSlot *slot;
+
+    while (sdfPacketSlotIndex != 0) {
+    }
+    D_00438A24 = sdfGetElapsedTimerTicks(start);
+    interrupts = func_0036DE70();
+    index = D_00438A28 + 1;
+    if (index == 3) {
+        index = 0;
+    }
+    slot = &D_0040B308[index];
+    slot->list = NULL;
+    slot->unk4 = 0;
+    slot->state = 0;
+    if (list != NULL && list->last != 0) {
+        slot->list = list;
+        if (chain != NULL) {
+            slot->unk4 = chain->head->first;
+            if (slot->unk4 != 0) {
+                *(u32 *)chain->tail->last = 0;
+            }
+        }
+        slot->unk9 = sdfCurrentBufferIndex;
+    }
+    D_00438A28 = index;
+    D_00439165 = 1;
+    D_00438A30++;
+    if (interrupts != 0) {
+        EIntr();
+    }
+}
 
 void sdfSetNonnegativePacketIndex(s32 value) {
     sdfPacketSlotIndex = (value < 0) ? 0 : value;
@@ -943,23 +998,23 @@ void sdfSetNonnegativePacketIndex(s32 value) {
 
 void sdfResetPacketSlotState(void) {
     sdfPacketSlotIndex = 0;
-    D_0040B308[0] = 0;
+    D_0040B308[0].list = NULL;
     D_00438A28 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DEC8);
 
 void sdfWaitSlotReady(void) {
-    u8 *entry;
+    SdfPacketSlot *entry;
 
     while (1) {
         while (D_00438A1D != 0) {
         }
-        entry = (u8 *)D_0040B308 + D_00438A28 * 16;
-        if (*(u32 *)entry == 0) {
+        entry = &D_0040B308[D_00438A28];
+        if (entry->list == NULL) {
             return;
         }
-        if (entry[8] >= 2) {
+        if (entry->state >= 2) {
             return;
         }
         sdfSleepThreadCount(0);

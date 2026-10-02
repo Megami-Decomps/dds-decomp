@@ -1,8 +1,9 @@
 #include "mnu.h"
+#include "kwln.h"
 
 extern void func_0024DD78(void);
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
 
 extern void func_00272778(s32);
 extern void mnuCreateStaffImageSprite(s32);
@@ -11,11 +12,12 @@ extern void mnuDrawWindowContainer(s32, s32, s32, s32, s32);
 extern void func_002BF4E0(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_002723B0(s32, s32);
 extern void func_00273A30(s32, s32);
-extern u32 mnuMapPadMaskToFlags();
+extern s32 mnuMapPadMaskToFlags();
 extern void mnuUpdateWindowListFromInput();
 extern void mnuClearListFlags();
 extern void mnuSetPopupEntryFlagged();
-extern void mnuPlayInputSound();
+extern void mnuPlayInputSound(s32, s32, s32 *);
+extern void mnuSetPopupEntry(s32, s32);
 extern u8 D_0037C860[];
 extern char D_0037CA38[];
 extern char D_0037C9AC[];
@@ -25,7 +27,8 @@ typedef struct StaffImageNode {
 } StaffImageNode;
 
 typedef struct StaffImageWindow {
-    u8 pad00[0x18];
+    s32 flags;
+    u8 pad04[0x14];
     s32 *cursor; /* 0x18 */
     StaffImageNode *selectedNode; /* 0x1C */
     s32 panelActive; /* 0x20: selects the alternate panel drawing path */
@@ -89,7 +92,10 @@ extern void mnuDestroyPanelGroup();
 extern void mnuFreeSpriteStateWork();
 extern void mnuReleaseStaffMenuTextureHandles();
 extern void mnuSeekListNode(s32, s32);
-extern void mnuAdvanceWindowListSelection(s32);
+extern void mnuAdvanceWindowListSelection(StaffImageList *);
+extern void mnuRetreatWindowListSelection(StaffImageList *);
+extern void mnuClearWindowPanelTransitionFlag(StaffImageList *);
+extern void func_0027C788(StaffImageList *);
 extern void mnuResetListNodeFadeCounters(s32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuRetreatListCursorDefault();
@@ -165,7 +171,40 @@ s64 func_00273DE8(s32 callback) {
     return menuRunPanel(context, 2, callback);
 }
 
-INCLUDE_ASM(const s32, "game/code_00273AB0", func_00273E20);
+s64 func_00273E20(s32 callback) {
+    StaffImageContext *context = (StaffImageContext *)kwlnTaskGetUserValue((KwlnTask *)callback);
+    s32 *popup = (s32 *)((u8 *)context + 0x54);
+    StaffImageChoices *menu = context->menu;
+    s32 buttons = mnuMapPadMaskToFlags(0x33);
+    s64 state;
+    StaffImageList *window;
+
+    state = func_00285670((s32)context + 8, popup, 0, callback);
+    if (state != 0) {
+        return state;
+    }
+    if (buttons & 1) {
+        buttons = 0;
+    }
+    if (buttons & 2) {
+        mnuSetPopupEntry((s32)popup, (s32)D_0037C9AC);
+    }
+    window = menu->secondaryObject;
+    if (window != NULL) {
+        if (!(buttons & 0x300000)) {
+            func_0027C788(window);
+        }
+        if (buttons & 0x10) {
+            mnuRetreatWindowListSelection(window);
+        }
+        if (buttons & 0x20) {
+            mnuAdvanceWindowListSelection(window);
+        }
+        mnuClearWindowPanelTransitionFlag(window);
+        mnuPlayInputSound(0, buttons, &window->window->flags);
+    }
+    return 0;
+}
 
 s64 mnuRunStaffImagePanelOnSecondaryObject(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
@@ -349,7 +388,7 @@ s32 mnuHandleStaffValuePageInput(s32 callback) {
         mnuSeekListNode(first, (s32)menu->list->window);
         if (count > 0) {
             for (i = count; i != 0; i--) {
-                mnuAdvanceWindowListSelection((s32)menu->list);
+                mnuAdvanceWindowListSelection(menu->list);
             }
         }
         mnuResetListNodeFadeCounters((s32)menu->list->window);

@@ -327,7 +327,45 @@ SdfTreeNode *sdfRotateBalancedTreeFirstLink(SdfTreeNode *a, SdfTreeNode *node) {
     return pivot;
 }
 
-INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EF958);
+void func_002EF958(SdfTreeNode **path, s32 depth, SdfTreeNode *child,
+                   SdfTreeNode **root) {
+    SdfTreeNode *parent;
+    SdfTreeNode *replacement = NULL;
+    s32 balance;
+
+    if (depth > 0) {
+        do {
+            parent = path[--depth];
+            if (child == parent->first) {
+                balance = ++parent->balance;
+            } else {
+                balance = --parent->balance;
+            }
+            if (balance == 0) {
+                return;
+            }
+            if (balance > 1) {
+                replacement = sdfRotateBalancedTreeSecondLink(child, parent);
+                break;
+            }
+            if (balance < -1) {
+                replacement = sdfRotateBalancedTreeFirstLink(child, parent);
+                break;
+            }
+            child = parent;
+        } while (depth > 0);
+    }
+    if (depth > 0) {
+        SdfTreeNode *ancestor = path[--depth];
+        if (ancestor->first == parent) {
+            ancestor->first = replacement;
+        } else {
+            ancestor->second = replacement;
+        }
+    } else if (replacement != NULL) {
+        *root = replacement;
+    }
+}
 
 typedef struct SdfTreeItem {
     struct SdfTreeItem *replaced; /* 0x0: previous item when a duplicate key replaces it */
@@ -335,7 +373,6 @@ typedef struct SdfTreeItem {
     f32 key;                      /* 0xC */
 } SdfTreeItem;
 
-extern void func_002EF958();
 
 /* Insert `item` into the key-ordered tree; an equal key swaps the item in place. */
 void sdfInsertFloatKeyTreeItem(SdfTreeNode **tree, SdfTreeItem *item) {
