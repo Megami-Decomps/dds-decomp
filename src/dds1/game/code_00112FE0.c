@@ -44,7 +44,7 @@ extern void dds3EnsureSlotData();
 extern void effObjSetInnerFirstVec();
 extern void effObjSetInnerSecondVec();
 extern void effObjInnerVecBackup();
-extern s32 func_00111388();
+extern void *dds3GetFirstWorldObjectNodeOfKind2(void);
 extern void dds3ExchangeSlot();
 extern void dds3InvokeSlot5Handler();
 
@@ -59,7 +59,7 @@ ActionObj *dds3SpawnCameraSlotObj5(s32 a, void *firstVector, void *secondVector)
         effObjInnerVecBackup(obj->unk1C);
         obj->state->unk0 = -1;
         obj->state->unk4 = 0;
-        dds3ExchangeSlot(obj, func_00111388(), 5);
+        dds3ExchangeSlot(obj, dds3GetFirstWorldObjectNodeOfKind2(), 5);
         dds3InvokeSlot5Handler(obj);
         return obj;
     }
