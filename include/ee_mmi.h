@@ -200,4 +200,43 @@
     ".set reorder" \
     : "=r"(out) : "r"(a), "r"(b), "f"(t), "r"(half) : "$4", "$5", "$6", "$7", "$8")
 
+/*
+ * Pack an aligned four-word vector into an unaligned three-word stream:
+ * lq $3,0(src); pcpyud $2,$3,$0; sdr $3,0(dst); sdl $3,7(dst); sw $2,8(dst).
+ * Retail: DDS1 func_0015FE20/func_002E21A0 and DDS2
+ * func_00167A10/func_0033B050, twice per builder (positions and normals).
+ * Tried u128 C extraction: cc1 rejects >>64 as an unsupported wide operation;
+ * union half/word extraction spills the quadword rather than emitting pcpyud.
+ * Stores to the macro's own destination are part of the packing idiom.
+ */
+#define EE_MMI_STORE_VEC3_FROM_QUAD(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lq $3, 0(%1)\n\t" \
+    "pcpyud $2, $3, $0\n\t" \
+    "sdr $3, 0(%0)\n\t" \
+    "sdl $3, 7(%0)\n\t" \
+    "sw $2, 8(%0)\n\t" \
+    ".set reorder" \
+    : : "r"(dst), "r"(src) : "$2", "$3", "memory")
+
+/*
+ * vf10 (floats) -> RGBA8888 word, scale 255.0f through `mfc1 $2` (the draw
+ * colour setters; EE_MMI_RGBA_PACK_F128 is the 128.0f twin):
+ *     mfc1 $2,255.0f; qmtc2.ni $2,vf2; vmulx.xyzw vf10,vf10,vf2x;
+ *     vftoi0.xyzw vf10,vf10; qmfc2.ni out,vf10; ppach out,$0,out; ppacb out,$0,out
+ * $2 is not declared clobbered, like EE_MMI_RGBA_PACK_F128. Users: DDS1
+ * func_001082D8 and DDS2 func_001081F8.
+ */
+#define EE_MMI_RGBA_PACK_F255(out) __asm__ volatile ( \
+    ".set noreorder\n" \
+    "mfc1 $2, %1\n" \
+    "qmtc2.ni $2, vf2\n" \
+    "vmulx.xyzw vf10, vf10, vf2x\n" \
+    "vftoi0.xyzw vf10, vf10\n" \
+    "qmfc2.ni %0, vf10\n" \
+    "ppach %0, $0, %0\n" \
+    "ppacb %0, $0, %0\n" \
+    ".set reorder" \
+    : "=r"(out) : "f"(255.0f))
+
 #endif

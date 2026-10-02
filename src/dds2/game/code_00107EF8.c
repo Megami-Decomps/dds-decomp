@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 extern s32 func_00316ED0(void);
 
@@ -213,9 +214,67 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00107EF8);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00107FF8);
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108138);
+extern u16 D_00438DE6;
+extern u16 D_00438DE8;
+extern u32 D_00438DEC;
+extern u32 D_00438DF0;
+extern u8 kwlnDefaultColorVector[];
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_001081F8);
+/* vu0 routine: set the background colour target: immediately (mode 0) or blend from the default over `mode` frames. */
+void func_00108138(s32 mode, f32 *color) {
+    s32 first[4];
+    s32 second[4];
+    u32 packedFirst;
+    u32 packedSecond;
+
+    if (mode == 0) {
+        kwlnDrawControlFlags &= ~0x100;
+        VU0_LOAD_VF(vf10, color);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, kwlnDefaultColorVector);
+    } else {
+        kwlnDrawControlFlags |= 0x100;
+        D_00438DE8 = mode;
+        D_00438DE6 = 0;
+        VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
+        EE_MMI_RGBA_PACK(packedFirst);
+        first[0] = packedFirst;
+        D_00438DEC = first[0];
+        VU0_LOAD_VF(vf10, color);
+        VU0_SET_W_ONE(vf10);
+        EE_MMI_RGBA_PACK(packedSecond);
+        second[0] = packedSecond;
+        D_00438DF0 = second[0];
+    }
+}
+
+extern u32 D_0037F7A0[];
+extern u16 D_00438DF4;
+extern u16 D_00438DF6;
+extern u32 D_00438DFC;
+extern u32 D_00438E00;
+
+/* vu0 routine: set the draw colour target: immediately (mode 0) or interpolate from the previous colour. */
+void func_001081F8(s32 mode, f32 *color) {
+    u32 color32[4];
+    u32 packed;
+
+    VU0_LOAD_VF(vf10, color);
+    VU0_CLEAR_W(vf10);
+    EE_MMI_RGBA_PACK_F255(packed);
+    color32[0] = packed;
+    if (mode == 0) {
+        kwlnDrawControlFlags &= ~0x200;
+        D_0037F7A0[0] = color32[0];
+    } else {
+        kwlnDrawControlFlags |= 0x200;
+        D_00438DF6 = mode;
+        D_00438E00 = color32[0];
+        D_00438DFC = D_0037F7A0[0];
+        D_00438DF4 = 0;
+    }
+}
+
 
 /* Either replace the draw vector immediately or interpolate from its prior value. */
 void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w) {

@@ -486,7 +486,28 @@ u32 effMultiplyPackedColors(u32 colorA, u32 colorB) {
     return blended[0];
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", func_00195AB0);
+/* vu0 routine: distance from `point` to the line through `origin` along the unit vector `direction`. */
+f32 func_00195AB0(f32 *direction, f32 *origin, f32 *point) {
+    f32 projection[4];
+    f32 offset[4];
+    f32 along;
+    f32 distance;
+
+    VU0_LOAD_VF(vf10, point);
+    VU0_LOAD_VF(vf11, origin);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, offset);
+    VU0_LOAD_VF(vf11, direction);
+    VU0_DOT_XYZ(along, vf10, vf11);
+    projection[0] = direction[0] * along;
+    projection[1] = direction[1] * along;
+    projection[2] = direction[2] * along;
+    VU0_LOAD_VF(vf10, offset);
+    VU0_LOAD_VF(vf11, projection);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(distance);
+    return distance;
+}
 
 void *effAllocSlotArray(s32 count) {
     void *allocation = func_003292A8(count * 0x38 + 0xC);
