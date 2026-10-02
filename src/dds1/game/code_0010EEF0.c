@@ -50,6 +50,8 @@ struct EffTransformNode {
     u32 unkC8;        /* 0xC8 */
 };
 
+void effObjInnerVecInit(EffTransformNode *node);
+
 
 u32 func_0010EEF0(void) {
     u64 context;
@@ -208,7 +210,27 @@ void effObjNodeDestroy(EffTransformNode *node) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0010EEF0", effObjInnerCreate);
+s32 effObjInnerCreate(EffTransformNode *node) {
+    EffTransformNode *inner;
+
+    if (node == NULL) {
+        return 0;
+    }
+    if (node->inner != NULL) {
+        return 0;
+    }
+    inner = sdfAllocSizeClassBlock(sizeof(EffTransformNode));
+    if (inner == NULL) {
+        return 0;
+    }
+    inner->flags = 1;
+    effObjInnerVecInit(inner);
+    VU0_STORE_VF(vf0, &inner->vecB0);
+    node->inner = inner;
+    inner->unkC8 = 0;
+    inner->scalar = 0.0f;
+    return 1;
+}
 
 void effObjFreeInner(EffTransformNode *node) {
     EffTransformNode *inner;
@@ -346,4 +368,3 @@ INCLUDE_SDATA(const s32, "game/code_0010EEF0", D_003BA9A0);
 INCLUDE_SDATA(const s32, "game/code_0010EEF0", D_003BA9A8);
 
 INCLUDE_SDATA(const s32, "game/code_0010EEF0", D_003BA9B0);
-
