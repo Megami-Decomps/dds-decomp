@@ -686,6 +686,7 @@ void fileDrawPulsingSaveHighlight(void) {
 extern void evtSetDrawSurfaceIndex(s32);
 extern void func_00108CB8(s32);
 extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, s32);
+extern void func_001093B8(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void fileCursorPulseUpdate(void);
 extern void func_00290A88(s32, s32, s32);
 extern s32 D_003BC85C;
@@ -708,9 +709,160 @@ s32 fileIsLoadStepComplete(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_0028A5E8);
+s32 func_0028A5E8(void) {
+    s32 frame;
+    s32 y;
+    s32 height;
+    s32 value;
 
-INCLUDE_ASM(const s32, "game/code_0028A150", fileShowStatusDialog);
+    evtSetDrawSurfaceIndex(0x56);
+    func_00108CB8(0);
+    evtSubmitGsRegister47(1, 0, 128, 3, 0, 0, 1, 1);
+    frame = ++D_003BC860;
+    if (frame < 4) {
+        height = frame * 72;
+        y = 224 - frame * 36;
+    } else {
+        y = 80;
+        height = 288;
+    }
+    if (frame < 4) {
+        value = frame * 20;
+    } else {
+        value = 80;
+    }
+    func_00108FA0(0, 0, 512, 448, 0, 0, 512, 448,
+                 (((value << 7) / 100) << 24) | 0x808080,
+                 (((value << 7) / 100) << 24) | 0x808080,
+                 (((value << 7) / 100) << 24) | 0x808080,
+                 (((value << 7) / 100) << 24) | 0x808080, D_003BC880);
+    if (D_003BC860 < 4) {
+        value = D_003BC860 * 70 / 4;
+    } else {
+        value = 70;
+    }
+    func_001093B8(0, y, 512, height,
+                 (((value << 7) / 100) << 24) | 0xA1000,
+                 (((value << 7) / 100) << 24) | 0xA1000,
+                 (((value << 7) / 100) << 24) | 0xA1000,
+                 (((value << 7) / 100) << 24) | 0xA1000);
+    evtSetDrawSurfaceIndex(0x53);
+    if (D_003BC860 < 7) {
+        return 0;
+    }
+    return 1;
+}
+
+extern char D_0037D6C8[];
+extern char D_0037D6E8[];
+extern char D_0037D700[];
+extern char D_0037D768[];
+extern char D_0037D7B8[];
+extern char D_0037D7D8[];
+extern char D_0037D800[];
+extern char D_0037D758[];
+extern char D_0037D948[];
+extern char D_0037D778[];
+extern char D_0037D960[];
+extern char D_0037D930[];
+extern s32 D_003BC840;
+extern void fileResetLoadContextSlide(void);
+extern char D_0037D520[];
+extern char D_0037D550[];
+extern char D_0037D570[];
+extern char D_0037D580[];
+extern char D_0037D5A8[];
+extern char D_0037D620[];
+extern char D_0037D650[];
+extern char D_0037D668[];
+extern char D_0037D690[];
+extern char D_0037D6A8[];
+extern char D_0037D788[];
+extern char D_0037D798[];
+extern char D_0037D7A8[];
+extern char D_0037D820[];
+extern char D_0037D848[];
+extern char D_0037D868[];
+extern char D_0037D880[];
+extern char D_0037D8A0[];
+extern char D_0037DB30[];
+extern char D_0037DB58[];
+extern char D_0037DB88[];
+
+static inline void fileDrawDialogLine(s32 line, u32 glyphSource) {
+    mcdCreateFontDrawHandle(86, 114 + line * 24, 0x89FEFF80U, glyphSource);
+}
+
+void fileShowStatusDialog(void) {
+    if (D_003BC854 != 0) {
+        if (D_003BC854 == 1) {
+            D_003BC844 = 0;
+            D_003BC840 = 0;
+            fileResetLoadContextSlide();
+            if (func_0028A5E8() != 0) {
+                fileDrawDialogLine(0, (u32)D_0037D520);
+                fileDrawDialogLine(1, (u32)D_0037D550);
+                fileDrawDialogLine(2, (u32)D_0037D570);
+                fileDrawDialogLine(3, (u32)D_0037D580);
+                fileDrawDialogLine(4, (u32)D_0037D5A8);
+                fileDrawPulsingSaveHighlight();
+                D_003BC810 = 0;
+            }
+        }
+        if (D_003BC854 == 2) {
+            if (func_0028A5E8() != 0) {
+                fileDrawDialogLine(0, (u32)D_0037D620);
+                fileDrawDialogLine(1, (u32)D_0037D650);
+                fileDrawDialogLine(2, (u32)D_0037D668);
+                fileDrawDialogLine(3, (u32)D_0037D690);
+                fileDrawDialogLine(4, (u32)D_0037D6A8);
+                fileDrawPulsingSaveHighlight();
+                D_003BC810 = 0;
+            }
+        }
+        if (D_003BC854 == 3) {
+            if (func_0028A5E8() != 0) {
+                fileDrawDialogLine(0, (u32)D_0037D788);
+                fileDrawPulsingSaveHighlight();
+                D_003BC810 = 0;
+            }
+        }
+        if (D_003BC854 == 4) {
+            if (func_0028A5E8() != 0) {
+                fileDrawDialogLine(0, (u32)D_0037D798);
+                fileDrawPulsingSaveHighlight();
+                D_003BC810 = 0;
+            }
+        }
+        if (D_003BC854 == 5) {
+            if (func_0028A5E8() != 0) {
+                fileDrawDialogLine(0, (u32)D_0037D820);
+                fileDrawDialogLine(1, (u32)D_0037D848);
+                fileDrawDialogLine(2, (u32)D_0037D868);
+                fileDrawDialogLine(3, (u32)D_0037D880);
+                fileDrawDialogLine(4, (u32)D_0037D8A0);
+                fileDrawPulsingSaveHighlight();
+                D_003BC810 = 0;
+            }
+        }
+        if (D_003BC854 == 6) {
+            if (func_0028A5E8() != 0) {
+                fileDrawDialogLine(0, (u32)D_0037D7A8);
+                fileDrawPulsingSaveHighlight();
+                D_003BC810 = 0;
+            }
+        }
+        if (D_003BC854 == 7) {
+            if (func_0028A5E8() != 0) {
+                fileDrawDialogLine(0, (u32)D_0037DB30);
+                fileDrawDialogLine(1, (u32)D_0037DB58);
+                fileDrawDialogLine(2, (u32)D_0037DB88);
+                fileDrawPulsingSaveHighlight();
+                D_003BC810 = 0;
+            }
+        }
+    }
+}
 
 void fileSetMenuFlowState(u32 state) {
     s32 previous;
@@ -722,7 +874,65 @@ void fileSetMenuFlowState(u32 state) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_0028AB48);
+void func_0028AB48(void) {
+    if (D_003BC850 != 0) {
+        if (D_003BC850 == 1) {
+            if (func_0028A5E8() != 0) {
+                fileDrawDialogLine(0, (u32)D_0037D6C8);
+                fileDrawDialogLine(1, (u32)D_0037D6E8);
+                fileDrawDialogLine(2, (u32)D_0037D700);
+                fileDrawSaveWindow();
+            }
+        }
+        if (D_003BC850 == 2) {
+            if (func_0028A5E8() != 0) {
+                fileDrawDialogLine(0, (u32)D_0037D768);
+                fileDrawDialogLine(1, (u32)D_0037D7B8);
+                fileDrawDialogLine(2, (u32)D_0037D7D8);
+                fileDrawDialogLine(3, (u32)D_0037D800);
+                fileDrawSaveWindow();
+            }
+        }
+        if (D_003BC850 == 3) {
+            if (func_0028A5E8() != 0) {
+                fileDrawDialogLine(0, (u32)D_0037D758);
+                fileDrawDialogLine(1, (u32)D_0037D7B8);
+                fileDrawDialogLine(2, (u32)D_0037D7D8);
+                fileDrawDialogLine(3, (u32)D_0037D800);
+                fileDrawSaveWindow();
+            }
+        }
+        if (D_003BC850 == 4) {
+            if (func_0028A5E8() != 0) {
+                fileDrawDialogLine(0, (u32)D_0037D948);
+                fileDrawPulsingSaveHighlight();
+            }
+            D_003BC81C = 1;
+        }
+        if (D_003BC850 == 5) {
+            if (func_0028A5E8() != 0) {
+                fileDrawDialogLine(0, (u32)D_0037D778);
+                fileDrawDialogLine(1, (u32)D_0037D7B8);
+                fileDrawDialogLine(2, (u32)D_0037D7D8);
+                fileDrawDialogLine(3, (u32)D_0037D800);
+                fileDrawSaveWindow();
+            }
+        }
+        if (D_003BC850 == 6) {
+            if (func_0028A5E8() != 0) {
+                fileDrawDialogLine(0, (u32)D_0037D960);
+                fileDrawPulsingSaveHighlight();
+            }
+        }
+        if (D_003BC850 == 13) {
+            if (func_0028A5E8() != 0) {
+                fileDrawDialogLine(0, (u32)D_0037D930);
+                fileDrawPulsingSaveHighlight();
+            }
+            D_003BC81C = 2;
+        }
+    }
+}
 
 void fileClearAllSlotFlags(void) {
     fileReqMarkSlotMetadataDirty(fileMemoryCardRequestContext);
