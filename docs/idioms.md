@@ -689,7 +689,7 @@ the plain-C forms that were tried. Use these instead of writing the asm again.
 | `VU0_NORMALIZE_VF10()` | `vmul.xyz vf2,vf10,vf10; vmulax.w ACC,vf0,vf2x; vmadday.w; vmaddz.w vf2; vrsqrt Q,vf0w,vf2w; vwaitq; vmulq.xyz vf10,vf10,Q` |
 | `VU0_CROSS_XYZ(dst, a, b)` / `VU0_DOT_XYZ(out, a, b)` | `vopmula.xyz ACC,a,b; vopmsub.xyz dst,b,a` / `vmul.xyz vf2,a,b; vaddy.x; vaddz.x; qmfc2.ni $2,vf2; mtc1 $2,out` (`$2` clobbered) |
 
-Soft-float libcalls: retail leaves a `nop` in the delay slot of some `jal` calls to the double compare helper (`func_002FC6C8`) where our cc1 fills it with the argument move `daddu $4,$2,$0` (`func_00292CE0`). Cause unknown (not a source shape so far); those functions stay asm.
+Soft-float libcalls: the `nop` retail leaves in the delay slot of `jal` calls to the double compare helper (`func_002FC6C8`, `func_00292CE0`) comes from assembling with `as -g`; see "Assembler version and `-g`".
 
 Uses: the colour-modulate function (`func_00151568` and copies in
 `billManager`, `parManager`, `code_0018CAC8`, `code_001FF030`, dds2 twins),
@@ -797,25 +797,27 @@ prototype in scope. Declare it unprototyped (`void f();`) and write the
 definition K&R; a full prototype turns the call into an error
 (`fileSetRecordSecondVector`, DDS2).
 
-## Assembler version
+## Assembler version and `-g`
 
-The build uses the ee-as shipped with ee-gcc 2.96. The older
-`ee-gcc2.9-991111` as keeps a `nop` in a `jal` delay slot after a
-large-offset macro, which is what a few retail functions show. It is still not
-the retail assembler: building everything with it changes both ELFs in
-thousands of places, and the text size too. Treat those functions as
-unmatched. Don't switch assemblers per file.
+The build uses the ee-as shipped with ee-gcc 2.96, invoked with `-g` (the
+build and `tools/cc.sh`). With `-g` GNU as does not move instructions into
+delay slots in `.set reorder` code, so every slot cc1 left unfilled keeps its
+`nop`. This is the retail rule:
 
-Retail's assembler also never fills a branch delay slot with the instruction
-that reads the FPR the preceding `mtc1` wrote: `mtc1 $4,$f1; cvt.s.w $f1,$f1;
-b; nop`, never `b; cvt.s.w`. The 2.96 as swaps it, and no as option or other
-ee assembler reproduces the retail rule without changing other code, so
-`tools/as_coproc_delay.py` applies it to cc1 output before `as` (in the build
-and in `tools/cc.sh`). It changes nothing that already matched.
+- call argument moves stay before the `jal` (`move $4,$18; jal cos; nop`), the
+  soft-double/libm sequences (`dpcmp`, `dpsub`, DDS2 `sdfRotateMatrixBasisX/Y/Z`);
+- the instruction reading an FPR the preceding `mtc1`/`lwc1`/`cvt.w.s` wrote
+  stays out of the branch slot (`mtc1 $4,$f1; cvt.s.w $f1,$f1; b; nop`), and
+  `li.s $f12,K; jal f; nop`;
+- the closing `addu` of an indexed `la $rd,sym($rs)` or of a large-offset memory
+  macro stays out of a following `jr`'s slot.
 
-The same holds after `cvt.w.s`/`trunc.w.s` (no `cvt.w.s $fN; jr; swc1 $fN` in
-either retail ELF), and retail never moves the closing `addu` of an indexed
-`la $rd,sym($rs)` into a following `jr`'s slot; the pre-pass handles both.
+Building both titles with and without `-g` gives the same bytes for all code
+that already matched (the earlier `as_coproc_delay.py` pre-pass emulated a
+subset of this rule and is no longer run), so an unfilled call slot in retail
+is not a source-shape problem. The older `ee-gcc2.9-991111` as is not the
+retail assembler: building everything with it changes both ELFs in thousands
+of places. Don't switch assemblers or flags per file.
 
 ## Loops, tail calls and register priority (gcc 2.95 internals)
 
@@ -991,6 +993,21 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     immediately after an ignored-result call, verify that callee's definition
     before trying declaration-order permutations. This is a targeted check,
     not a reason to rewrite unrelated declarations.
+    Three more independent DDS1 examples are `func_0018AB40` (effMagatuhi),
+    `func_00280E08` (code_0027BF00), and `func_00288E70` (code_00288E70).
+    Their genuine `s32` callees are `effMathStepBezierSlot`,
+    `frFontQueueGlyphInSelectedSlot`, and SDK `WaitSema`, respectively.
+    Each `void` declaration leaves exactly two incorrect words: the post-call
+    comparison/load and branch use `$v0` instead of retail's `$v1`. Correcting
+    that one return declaration gives whole-unit checks of **35 match, 0 differ**,
+    **110 match, 0 differ**, and **18 match, 0 differ**. The first two callees
+    have matching C definitions; `WaitSema` is also declared `s32` by the
+    kernel SDK and the file-manager units.
+    An RTL probe of `func_0018AB40` isolates the first difference to the call:
+    the corrected declaration adds `set (reg:SI 2 v0)` around its call result.
+    Allocation order stays unchanged, while comparison pseudo `r101` moves
+    from `$v0` to `$v1`. This is another application of this existing idiom,
+    not evidence for declaration-order shuffling or an invented return type.
 11. **`x / 5` always compiles with the zero check, and a source-order trap.**
     ee-gcc emits `addiu $2,$0,5; div; beql $2,$0,1f; break 7` even for a
     constant divisor, so the check is not evidence of a variable divisor
@@ -1208,8 +1225,8 @@ lever (DDS2 `func_002B40F8` stays INCLUDE_ASM).
 
 ### Float constants never in a delay slot
 
-Neither ELF has `mtc1 $1,$fN` or `mtc1 $0,$fN` in a branch slot, so
-`tools/as_coproc_delay.py` keeps every `li.s` out of the following slot
+Neither ELF has `mtc1 $1,$fN` or `mtc1 $0,$fN` in a branch slot: `li.s` is a
+`.set reorder` macro and `as -g` keeps it where cc1 put it
 (retail `li.s $f12,K; jal f; nop`, DDS2 `func_001ECC18`).
 
 ## Not allowed

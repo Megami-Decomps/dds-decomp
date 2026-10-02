@@ -72,7 +72,6 @@ run "$cc1" \
     -U__mips -D__mips=3 -D__mips64 -D__mips_eabi -D__mips_single_float \
     -Iinclude -Isrc "-DASM_ROOT=\"build/eeasm/asm/$version/nonmatchings/\"" "-DVERSION_$(echo $version | tr a-z A-Z)" \
     -quiet -O2 $flags "$cc_in" -o "$cc_out"
-python3 "$root/tools/as_coproc_delay.py" "$cc_out" "$cc_out"
 # DDS_KEEP_S=path keeps the compiler's assembly (check_unit measures inline asm).
 if [ -n "$DDS_KEEP_S" ]; then cp "$cc_out" "$DDS_KEEP_S"; fi
-run "$ee/ee/bin/as" -EL -G8 -Iinclude -o "$out" "$cc_out"
+run "$ee/ee/bin/as" -EL -G8 -g -Iinclude -o "$out" "$cc_out"
