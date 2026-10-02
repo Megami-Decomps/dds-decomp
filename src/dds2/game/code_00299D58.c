@@ -43,6 +43,12 @@ typedef struct MenuItemSelectionData {
     s32 extentFactor;
 } MenuItemSelectionData;
 
+typedef struct ProfileCapSkillList {
+    u8 pad00[0x20];
+    s32 count;
+    u16 skillIds[8];
+} ProfileCapSkillList;
+
 typedef struct MenuItemScene {
     u8 pad00[4];
     u32 overlayFlags;
@@ -50,12 +56,14 @@ typedef struct MenuItemScene {
     MenuItemSelectionData *selectionData; /* 0x9C */
     u8 padA0[0x1C4];
     u32 resetStateA; /* 0x264 */
-    u32 pendingSkillCount; /* 0x268: consumed by capped-skill message processing */
-    u8 pad26C[4];
+    s32 pendingSkillCount; /* 0x268: consumed by capped-skill message processing */
+    s32 pendingSkillIndex;
     u32 selectionApplied; /* 0x270 */
     u8 pad274[0x174];
     u32 resetStateB; /* 0x3E8 */
-    u8 pad3EC[0xA950];
+    u8 pad3EC[0xFC];
+    ProfileCapSkillList skillList;
+    u8 pad51C[0xA820];
     s32 extentExhausted; /* 0xAD3C: selects the exhausted-extent message. */
 } MenuItemScene;
 
@@ -140,13 +148,49 @@ u32 mnuProcessItemSelection(u32 context) {
     MenuItemScene *scene;
 
     scene = (MenuItemScene *)context;
-    skillCount = func_0029D790((u32)scene->selectionData->item, (s32)scene + 0x4e8);
+    skillCount = func_0029D790((u32)scene->selectionData->item,
+                               (s32)&scene->skillList);
     scene->pendingSkillCount = skillCount;
     mnuApplyCompletedProfile(context);
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00299D58", prfCapPresentMessages);
+typedef struct DspUnitName {
+    u8 encodedText[17];
+} DspUnitName;
+
+extern DspUnitName *D_00435E48;
+extern DspUnitName *D_00435E64;
+extern void evtCopyEntryStringToActiveWindow(s32, s32);
+extern s32 func_00314C10(s32);
+extern s32 scrGetIndexedRecordAddress(u16, s32 *);
+
+void prfCapPresentMessages(MenuItemScene *scene) {
+    s32 message;
+    MenuItem *item = scene->selectionData->item;
+    s32 profileId = func_00314C10((s32)item);
+    u16 skillId;
+
+    if (scene->selectionApplied != 0) {
+        evtCopyEntryStringToActiveWindow(
+            0, (s32)D_00435E48[item->kind].encodedText);
+        scrGetIndexedRecordAddress(profileId & 0xFFFF, &message);
+        evtCopyEntryStringToActiveWindow(1, message);
+        dspSetActive(1);
+        dspStartEntry(item->kind + 3);
+        scene->selectionApplied = 0;
+    } else if (scene->pendingSkillCount > 0) {
+        skillId = scene->skillList.skillIds[scene->pendingSkillIndex];
+        evtCopyEntryStringToActiveWindow(
+            0, (s32)D_00435E48[item->kind].encodedText);
+        evtCopyEntryStringToActiveWindow(
+            1, (s32)D_00435E64[skillId].encodedText);
+        dspSetActive(1);
+        dspStartEntry(0);
+        scene->pendingSkillIndex++;
+        scene->pendingSkillCount--;
+    }
+}
 
 u32 func_0029A1E0(void) {
     return 0;
@@ -228,13 +272,7 @@ u32 mnuKindIsSelectable(u32 kind) {
     return (kind ^ 8) < 1;
 }
 
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
-
-extern DspUnitName *D_00435E48;
 extern char D_004379B0[];
-extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern void func_0029A658(MenuItemScene *);
 
@@ -278,4 +316,3 @@ void func_0029A768(MenuItemScene *scene) {
 INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A898);
 
 INCLUDE_SDATA(const s32, "game/code_00299D58", D_004379B0);
-

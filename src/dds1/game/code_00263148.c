@@ -40,24 +40,38 @@ typedef struct MenuItemSelectionData {
     s32 extentFactor;
 } MenuItemSelectionData;
 
+typedef struct ProfileCapSkillList {
+    u8 pad00[0x20];
+    s32 count;
+    u16 skillIds[8];
+} ProfileCapSkillList;
+
 typedef struct MenuItemScene {
     u8 pad00[4];
     u32 overlayFlags;
-    u8 pad08[0x88];
+    u8 dispatchWork[0x4C];
+    s32 dispatchStatus;
+    u8 pad58[0x38];
     u32 iconSprite;
     u8 pad94[4];
     MenuItemSelectionData *selectionData;
     u8 pad9C[0x1A4];
-    u32 resetStateA;
-    u32 pendingSkillCount; /* Decremented as prfCapPresentMessages presents skills. */
-    u8 pad248[4];
+    s32 resetStateA;
+    s32 pendingSkillCount; /* Decremented as prfCapPresentMessages presents skills. */
+    s32 pendingSkillIndex;
     s32 selectionApplied;
-    u8 pad250[0x174];
+    u8 pad250[0x78];
+    s32 selectionTargetCount;
+    u8 pad2CC[0x78];
+    s32 nextPanelMode;
+    u8 pad348[0x7C];
     u32 resetStateB;
     s32 selectedExtent;
     u32 activeSlot;
-    u32 slots[5];
-    u8 pad3E4[0x29C];
+    s32 slots[5];
+    u8 pad3E4[0xE0];
+    ProfileCapSkillList skillList;
+    u8 pad4F8[0x188];
     u32 listFlags; /* 0x680: start of the embedded list state */
     u8 pad684[0x68C];
     u32 panelGroup; /* 0xD10: passed to mnuSetPanelGroupSelection */
@@ -94,13 +108,49 @@ u32 mnuProcessItemSelection(u32 context) {
     MenuItemScene *scene;
 
     scene = (MenuItemScene *)context;
-    skillCount = ptyBuildProfileCapSkillList((u32)scene->selectionData->item, (s32)scene + 0x4c4);
+    skillCount = ptyBuildProfileCapSkillList(
+        (u32)scene->selectionData->item, (s32)&scene->skillList);
     scene->pendingSkillCount = skillCount;
     kwlnItemApplySelection(scene);
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00263148", prfCapPresentMessages);
+typedef struct DspUnitName {
+    u8 encodedText[17];
+} DspUnitName;
+
+extern DspUnitName *D_003BAA70;
+extern DspUnitName *D_003BAA8C;
+extern void evtCopyEntryStringToActiveWindow(s32, s32);
+extern s32 ptyGetCurrentProfileId(MenuItem *);
+extern s32 func_002CD240(u16, s32 *);
+
+void prfCapPresentMessages(MenuItemScene *scene) {
+    s32 message;
+    MenuItem *item = scene->selectionData->item;
+    s32 profileId = ptyGetCurrentProfileId(item);
+    u16 skillId;
+
+    if (scene->selectionApplied != 0) {
+        evtCopyEntryStringToActiveWindow(
+            0, (s32)D_003BAA70[item->kind].encodedText);
+        func_002CD240(profileId & 0xFFFF, &message);
+        evtCopyEntryStringToActiveWindow(1, message);
+        dspSetActive(1);
+        dspStartEntry(item->kind + 2);
+        scene->selectionApplied = 0;
+    } else if (scene->pendingSkillCount > 0) {
+        skillId = scene->skillList.skillIds[scene->pendingSkillIndex];
+        evtCopyEntryStringToActiveWindow(
+            0, (s32)D_003BAA70[item->kind].encodedText);
+        evtCopyEntryStringToActiveWindow(
+            1, (s32)D_003BAA8C[skillId].encodedText);
+        dspSetActive(1);
+        dspStartEntry(0);
+        scene->pendingSkillIndex++;
+        scene->pendingSkillCount--;
+    }
+}
 
 s32 kwlnItemDismissOverlay(MenuItemScene *scene) {
     if (scene->overlayFlags & 1) {
@@ -113,7 +163,7 @@ s32 kwlnItemDismissOverlay(MenuItemScene *scene) {
 }
 
 /* Record the first visit to the item-selection scene. */
-u32 mnuMarkItemSelectionSceneVisited(void) {
+u32 mnuMarkItemSelectionSceneVisited(MenuItemScene *scene) {
     s64 alreadyVisited;
 
     alreadyVisited = mdlFlagTest(0x911);
@@ -123,7 +173,61 @@ u32 mnuMarkItemSelectionSceneVisited(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00263148", prfCapTaskStep);
+extern s64 evtGetMessageWindowControlState(void);
+extern void brsSelectNextUnit(MenuItemScene *, s32);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
+extern void mnuSetPopupEntryFlagged(s32 *, void *);
+extern s32 btlHasPendingRuntimeActivity(void);
+extern s32 mnuStaffInitPanel(s32);
+extern void func_002E8E50(void);
+extern char D_0036D494[];
+extern char D_0036D408[];
+
+s64 prfCapTaskStep(u64 request) {
+    s64 result;
+    MenuItemScene *scene = (MenuItemScene *)kwlnTaskGetUserValue();
+    s32 *dispatchStatus = &scene->dispatchStatus;
+
+    result = func_00285670((s32)scene->dispatchWork, dispatchStatus, 0,
+                          request);
+    if (result == 0) {
+        if (*dispatchStatus == 0 &&
+            (result = evtGetMessageWindowControlState(), result == 0)) {
+            if (scene->resetStateA < scene->selectionTargetCount ||
+                scene->pendingSkillCount > 0 ||
+                scene->selectionApplied != 0) {
+                if ((scene->pendingSkillCount == 0 ||
+                     scene->resetStateA == 0) &&
+                    scene->selectionApplied == 0) {
+                    brsSelectNextUnit(scene, 0);
+                    mnuProcessItemSelection((u32)scene);
+                }
+                prfCapPresentMessages(scene);
+                return 0;
+            }
+
+            if (mnuMarkItemSelectionSceneVisited(scene) != 0) {
+                return 0;
+            }
+            if (kwlnItemDismissOverlay(scene) != 0) {
+                return 0;
+            }
+            if (scene->nextPanelMode == 0) {
+                kwlnFadeInStart(0, 0, 0, 0xF);
+                mnuSetPopupEntryFlagged(dispatchStatus, D_0036D494);
+                return 0;
+            }
+            if (btlHasPendingRuntimeActivity() != 0) {
+                return 0;
+            }
+            mnuStaffInitPanel((s32)scene);
+            mnuSetPopupEntryFlagged(dispatchStatus, D_0036D408);
+            func_002E8E50();
+        }
+        result = 0;
+    }
+    return result;
+}
 
 s64 func_00263570(s32 request) {
     s32 context = kwlnTaskGetUserValue();
@@ -149,15 +253,37 @@ u32 func_00263638(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_00263640);
+typedef struct ActiveItemSlots {
+    s32 indices[5];
+    s32 values[5];
+    s32 count;
+} ActiveItemSlots;
 
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
+void func_00263640(MenuItemScene *scene) {
+    ActiveItemSlots active;
+    MenuItem *item = scene->selectionData->item;
+    s32 i;
 
-extern DspUnitName *D_003BAA70;
+    memset(&active, 0, sizeof(active));
+    for (i = 0; i < 5; i++) {
+        if (scene->slots[i] > 0) {
+            active.indices[active.count] = i;
+            active.values[active.count] = scene->slots[i];
+            active.count++;
+        }
+    }
+
+    evtCopyEntryStringToActiveWindow(0,
+                                     (s32)D_003BAA70[item->kind].encodedText);
+    dspSetActive(1);
+    if (scene->extentExhausted == 0) {
+        dspStartEntry(0x14);
+    } else {
+        dspStartEntry(0x15);
+    }
+}
+
 extern char D_003BC550[];
-extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern void func_00263640(MenuItemScene *);
 
