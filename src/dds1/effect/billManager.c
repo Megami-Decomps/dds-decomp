@@ -2,6 +2,7 @@
 #include "eff.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "sdf.h"
 
 typedef struct {
     s32 offset;    /* 0x0 offset added to the table base */
@@ -43,7 +44,67 @@ void *func_00151A88(void *arg);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_001502B0);
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00150750);
+typedef struct BillDeferredDescriptor {
+    u8 pad00[0x10];
+    void (*dispatch)(void *descriptor, u32 value);
+} BillDeferredDescriptor;
+
+typedef struct BillManagerNode BillManagerNode;
+
+struct BillManagerNode {
+    u8 pad00[0x2C];
+    SdfListHead *pendingLists[5];
+    u16 packetListIndex;
+    u8 pad42[6];
+    void *work;
+    BillManagerNode *next;
+};
+
+typedef struct BillPacketWork {
+    u8 pad00[0x3FC];
+    s32 count;
+} BillPacketWork;
+
+extern BillManagerNode *D_003BD7F4;
+extern BillDeferredDescriptor *D_0034E030[5];
+extern void sdfAppendPacket(SdfListHead *list, u32 packet);
+extern u32 func_002E27D8(void *work, void *arg1, void *arg2, void *arg3, s32 count, s32 callback);
+
+void func_00150750(void) {
+    BillManagerNode *node;
+
+    node = D_003BD7F4;
+    if (node != NULL) {
+        do {
+            BillPacketWork *work = node->work;
+            s32 count = work->count;
+            s32 i;
+
+            if (count > 0) {
+                u32 packet = func_002E27D8(work, (u8 *)work + 0xF0, (u8 *)work + 0x12C,
+                                           (u8 *)work + 0x21C, count, 0);
+                sdfAppendPacket(node->pendingLists[node->packetListIndex], packet);
+                work->count = 0;
+            }
+
+            for (i = 0; i < 5; i++) {
+                SdfListHead *value = node->pendingLists[i];
+
+                if (value != NULL) {
+                    D_0034E030[i]->dispatch(D_0034E030[i], (u32)value);
+                    node->pendingLists[i] = 0;
+                }
+            }
+
+            {
+                BillManagerNode *next = node->next;
+                node->next = node;
+                node = next;
+            }
+        } while (node != NULL);
+    }
+    D_003BD7F4 = NULL;
+}
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00150840);
 
