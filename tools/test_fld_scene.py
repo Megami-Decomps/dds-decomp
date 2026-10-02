@@ -61,6 +61,31 @@ label data_end
 end_data
 """
 
+EVENT_SOURCE = """\
+fld2 1
+header version=23 magic=FLD2 type_count=2 type_table=@types word_1c=0 word_20=0 word_24=0 word_28=0 word_2c=0 word_30=0 word_34=0 word_38=0 word_3c=0
+label types
+type id=6 count=1 resources=@event_resources
+type id=10 count=1 resources=@placement_resources
+label event_resources
+resource serial=3 flags=1 type=6 name=@event_name reserved=0 transform=null area=null link=null sblock=null data=@event
+label placement_resources
+resource serial=4 flags=1 type=10 name=@placement_name reserved=0 transform=null area=null link=null sblock=null data=@placement
+label event_name
+string16 event_resource
+label placement_name
+string16 01eve_01
+label event
+event flags=5 label=@event_label reserved=7,9
+label event_label
+cstring 001_01eve_01
+align 4
+label placement
+placement kind=1 event=0 visible=1 payload=null
+label data_end
+end_data
+"""
+
 
 class FldSceneTests(unittest.TestCase):
     def test_appends_collision_camera_and_placement(self) -> None:
@@ -79,7 +104,9 @@ class FldSceneTests(unittest.TestCase):
             {
                 "ddsCollisionResources": 1,
                 "ddsCameraResources": 1,
+                "ddsEventResources": 0,
                 "ddsPlacementResources": 1,
+                "ddsLinkedEventPlacements": 0,
             },
         )
         children = [document["nodes"][index] for index in wrapper["children"]]
@@ -98,6 +125,38 @@ class FldSceneTests(unittest.TestCase):
         self.assertEqual(indices, (0, 1, 2, 0, 2, 3))
         self.assertEqual(collision["extras"]["ddsTriangleCount"], 2)
         self.assertIn("KHR_materials_unlit", document["extensionsUsed"])
+        fld_model.encode_glb(document, binary)
+
+    def test_links_event_placement_to_exact_event_resource(self) -> None:
+        builder = fld_model.GltfBuilder.create()
+        document, binary = fld_scene.append_field_scene(
+            builder.document,
+            bytes(builder.binary),
+            fld.encode(fld.parse_source(EVENT_SOURCE)),
+            meters_per_unit=0.01,
+        )
+        wrapper = document["nodes"][-1]
+        children = [document["nodes"][index] for index in wrapper["children"]]
+        event, placement = children
+
+        self.assertEqual(event["name"], "event_resource")
+        self.assertEqual(
+            event["extras"],
+            {
+                "ddsResourceType": 6,
+                "ddsResourceSerial": 3,
+                "ddsResourceFlags": 1,
+                "ddsEventIndex": 0,
+                "ddsEventFlags": 5,
+                "ddsEventReserved": [7, 9],
+                "ddsEventLabel": "001_01eve_01",
+            },
+        )
+        self.assertEqual(placement["extras"]["ddsEventIndex"], 0)
+        self.assertEqual(placement["extras"]["ddsEventLabel"], "001_01eve_01")
+        self.assertEqual(placement["extras"]["ddsEventResourceSerial"], 3)
+        self.assertEqual(wrapper["extras"]["ddsEventResources"], 1)
+        self.assertEqual(wrapper["extras"]["ddsLinkedEventPlacements"], 1)
         fld_model.encode_glb(document, binary)
 
     def test_rejects_negative_marker_size(self) -> None:

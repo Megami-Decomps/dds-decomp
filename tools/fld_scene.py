@@ -171,7 +171,7 @@ def append_field_scene(
     placement_marker_size: float = 50.0,
     transitions: dict[str, tuple[dict, ...]] | None = None,
 ) -> tuple[dict, bytes]:
-    """Append FLD2 collision, cameras, and placements to a glTF document."""
+    """Append FLD2 collision, cameras, events, and placements to a glTF document."""
 
     if not math.isfinite(meters_per_unit) or meters_per_unit <= 0.0:
         raise fld.FldError("meters per unit must be a positive finite number")
@@ -184,16 +184,32 @@ def append_field_scene(
     resources = fld._read_resources(
         field_data, fld._read_types(field_data, words, data_end)
     )
+    events = [resource for resource in resources if resource.type_id == 6]
+    event_labels: list[str | None] = []
+    for event_index, resource in enumerate(events):
+        label = None
+        if resource.data:
+            label_pointer = struct.unpack_from("<I", field_data, resource.data + 4)[0]
+            if label_pointer:
+                label, _ = fld._cstring(
+                    field_data,
+                    label_pointer,
+                    data_end,
+                    f"event resource {event_index} label",
+                )
+        event_labels.append(label)
     builder = fld_model.GltfBuilder(document, bytearray(binary))
     scene_children = []
     collision_material = None
     marker_material = None
     marker_mesh = None
-    counts = {"collision": 0, "camera": 0, "placement": 0}
+    counts = {"collision": 0, "camera": 0, "event": 0, "placement": 0}
+    linked_event_placements = 0
     transition_actors: set[str] = set()
+    event_ordinal = 0
 
     for resource in resources:
-        if resource.type_id not in {3, 4, 10}:
+        if resource.type_id not in {3, 4, 6, 10}:
             continue
         name = _resource_name(field_data, resource)
         node = {
@@ -226,6 +242,23 @@ def append_field_scene(
                 "<f", field_data, resource.data
             )[0]
             counts["camera"] += 1
+        elif resource.type_id == 6:
+            node["extras"]["ddsEventIndex"] = event_ordinal
+            if resource.data:
+                flags, _, reserved_0, reserved_1 = struct.unpack_from(
+                    "<IIII", field_data, resource.data
+                )
+                node["extras"].update(
+                    {
+                        "ddsEventFlags": flags,
+                        "ddsEventReserved": [reserved_0, reserved_1],
+                    }
+                )
+                label = event_labels[event_ordinal]
+                if label is not None:
+                    node["extras"]["ddsEventLabel"] = label
+                counts["event"] += 1
+            event_ordinal += 1
         elif resource.type_id == 10 and resource.data:
             kind, event_index, visible, payload = struct.unpack_from(
                 "<IiII", field_data, resource.data
@@ -237,6 +270,12 @@ def append_field_scene(
                     "ddsVisible": visible,
                 }
             )
+            if kind == 1 and event_index >= 0:
+                label = event_labels[event_index]
+                if label is not None:
+                    node["extras"]["ddsEventLabel"] = label
+                node["extras"]["ddsEventResourceSerial"] = events[event_index].serial
+                linked_event_placements += 1
             if kind == 8 and payload:
                 special_kind, point_id = fld._read_special_point(
                     field_data, payload, f"placement {name}"
@@ -272,7 +311,9 @@ def append_field_scene(
         "extras": {
             "ddsCollisionResources": counts["collision"],
             "ddsCameraResources": counts["camera"],
+            "ddsEventResources": counts["event"],
             "ddsPlacementResources": counts["placement"],
+            "ddsLinkedEventPlacements": linked_event_placements,
         },
     }
     if transitions is not None:
