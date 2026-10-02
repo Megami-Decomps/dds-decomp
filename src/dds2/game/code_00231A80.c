@@ -430,12 +430,14 @@ void mdlAddEntryPlain(MdlCtx *ctx, s32 searchId, s32 motionIndex) {
 
 void mdlAddEntryFlaggedEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
                           f32 blendDurationFrames) {
-    mdlFindOrCreateMotionRecordNode(ctx, searchId, motionIndex, 1, blendLeadFrames, blendDurationFrames);
+    mdlFindOrCreateMotionRecordNode(
+        ctx, searchId, motionIndex, 1, blendLeadFrames, blendDurationFrames);
 }
 
 void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
                         f32 blendDurationFrames) {
-    mdlFindOrCreateMotionRecordNode(ctx, searchId, motionIndex, 0, blendLeadFrames, blendDurationFrames);
+    mdlFindOrCreateMotionRecordNode(
+        ctx, searchId, motionIndex, 0, blendLeadFrames, blendDurationFrames);
 }
 
 MdlNode *mdlFindNodeById(MdlCtx *ctx, s32 id) {

@@ -293,8 +293,11 @@ Motion *func_003340E0(SdfMotionManager *manager, SdfMotionCommandTable *table) {
     request = sdfDevCreateBufferedRequest(count, 4, 8);
     motion->request = request;
     request->objectCount = count;
-    for (i = 0, command = (SdfMotionCommand *)((u8 *)motion->motionTable + 8); i < count; i++, command++) {
-        motion->request->objects[i] = (void *)sdfDispatchAssetCommandWord(motion, command->command, command->argument);
+    for (i = 0, command = (SdfMotionCommand *)((u8 *)motion->motionTable + 8);
+         i < count;
+         i++, command++) {
+        motion->request->objects[i] =
+            (void *)sdfDispatchAssetCommandWord(motion, command->command, command->argument);
     }
     motion->state = 0;
     motion->frameStep = 1.0f;
