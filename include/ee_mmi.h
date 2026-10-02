@@ -262,6 +262,23 @@
     : : "r"(dst), "r"(src) : "$2", "$3", "memory")
 
 /*
+ * Pack a loaded u128 value's first three words into an unaligned stream.
+ * The aligned quadword load is ordinary C, not part of this store primitive.
+ * Retail: DDS1 func_002E27D8/func_002E3390 and DDS2
+ * func_0033B688/func_0033C240. Their short loops have one compiler padding
+ * nop; the pointer-taking primitive above has two.
+ * cc1 cannot extract the upper half with a C >>64 operation.
+ */
+#define EE_MMI_STORE_VEC3_VALUE(dst, value) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "pcpyud $2, %1, $0\n\t" \
+    "sdr %1, 0(%0)\n\t" \
+    "sdl %1, 7(%0)\n\t" \
+    "sw $2, 8(%0)\n\t" \
+    ".set reorder" \
+    : : "r"(dst), "r"(value) : "$2", "memory")
+
+/*
  * vf10 (floats) -> RGBA8888 word, scale 255.0f through `mfc1 $2` (the draw
  * colour setters; EE_MMI_RGBA_PACK_F128 is the 128.0f twin):
  *     mfc1 $2,255.0f; qmtc2.ni $2,vf2; vmulx.xyzw vf10,vf10,vf2x;
