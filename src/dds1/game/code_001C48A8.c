@@ -333,7 +333,76 @@ INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C5F80);
 
 INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C6888);
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", btlApplyPartyEntryWeightedDelta);
+typedef struct PartyDeltaEntry {
+    u16 flags;
+    u8 pad_002[6];
+    u16 weight;
+    u8 pad_00A[4];
+    u16 mask;
+    u8 pad_010[0x188];
+    s32 link;
+    u8 pad_19C[8];
+} PartyDeltaEntry;
+
+typedef struct PartyDeltaState {
+    u8 pad_000[0xA60];
+    PartyDeltaEntry entry[5];
+} PartyDeltaState;
+
+typedef struct BattleSceneDeltaState {
+    u8 pad_000[0x1F8];
+    u32 subFlags;
+    u8 pad_1FC[0x5C];
+    u8 phaseFlag;
+    u8 pad_259[0x33];
+    s32 loadStep;
+    u8 pad_290[0x40];
+    s32 alternateLink;
+} BattleSceneDeltaState;
+
+extern PartyDeltaState *datGameState;
+
+extern void itfMesClearFlags(s32);
+
+extern void brsTaskAllowUpdate(void);
+
+extern void evtBeginSolarOverlayFadeOut(s32);
+
+extern void func_001A1960();
+
+extern s32 mnuIsTitleEntryAvailable();
+
+extern void datMoveCursorX();
+
+void btlApplyPartyEntryWeightedDelta(BattleSceneDeltaState *scene) {
+    u32 i;
+    f32 scale;
+
+    i = 0;
+    itfMesClearFlags(1);
+    scale = 0.05f;
+    brsTaskAllowUpdate();
+    evtBeginSolarOverlayFadeOut(8);
+    do {
+        func_001A1960(&datGameState->entry[i], -0x45D1);
+        if (!(scene->subFlags & 0x40)) {
+            if (datGameState->entry[i].flags & 2) {
+                if (scene->phaseFlag == 1) {
+                    if (datGameState->entry[i].link != 0 || scene->alternateLink != 0) {
+                        if (!(datGameState->entry[i].mask & 0x40)) {
+                            if (mnuIsTitleEntryAvailable(&datGameState->entry[i]) == 0) {
+                                datMoveCursorX(&datGameState->entry[i],
+                                               (s32)((f32)datGameState->entry[i].weight * scale));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        i++;
+    } while (i < 5);
+    scene->loadStep = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C48A8", fldStepAreaLoad);
 
