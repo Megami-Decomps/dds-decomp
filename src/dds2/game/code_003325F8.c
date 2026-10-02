@@ -398,8 +398,9 @@ void sdfReduceResourceListCount(s32 listAddress, s32 newCount, s32 applyReductio
     sdfDevResizeBufferedRequest();
 }
 
-extern u32 func_0032B6B0(u32);
-/* Allocate a list of cloned resource items; a null source returns null. */
+extern SdfTex *func_0032B6B0(SdfTex *);
+/* Clone every texture into a new buffered list; null sources return null.
+ * Entries remain address words, so bridge them explicitly at the texture API. */
 SdfResourceList *sdfResourceListClone(SdfResourceList *source) {
     s32 itemCount;
     SdfResourceList *clone;
@@ -411,7 +412,7 @@ SdfResourceList *sdfResourceListClone(SdfResourceList *source) {
     itemCount = source->count;
     clone = sdfCreateConfiguredBufferedResourceList(itemCount);
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-        clone->items[itemIndex] = func_0032B6B0(source->items[itemIndex]);
+        clone->items[itemIndex] = (u32)func_0032B6B0((SdfTex *)source->items[itemIndex]);
     }
     clone->count = itemCount;
     return clone;
