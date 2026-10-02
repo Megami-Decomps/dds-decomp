@@ -78,7 +78,21 @@ extern void fldActivateObjectById(s32);
 extern void mdlFlagSet(s32);
 extern void func_0011B150(s32);
 void fldDispatchDeferredFieldCommand(void);
-extern u32 D_0032F1A0[];
+
+/* Contiguous player-scene work: saved transform, status words and deferred resource.
+ * The data also exports a label at +0x3C for separate object-slot consumers. */
+typedef struct FieldPlayerSceneWork {
+    u128 position;
+    u128 rotation;
+    u8 pad20[0x14];
+    u32 primaryState;
+    u8 pad38[0x24];
+    u32 secondaryState;
+    u8 pad60[0x20];
+    s8 resourceName[0x20];
+} FieldPlayerSceneWork;
+
+extern FieldPlayerSceneWork D_0032F1A0;
 extern s16 D_0032DDB0[];
 extern u8 D_0033F068[];
 extern u8 D_00342868[];
@@ -1237,8 +1251,30 @@ void fldPrepareDeferredSceneTransition(void) {
 extern s32 fileGetSelectionPendingFlag(void);
 extern void func_00120C08(s32);
 extern char D_003BAB68[];
+/* Sequence command packet: the submission contract copies all 0xA0 bytes. */
+typedef struct FieldSequenceRecord {
+    u8 unk_00[0x30];
+    u32 unk_30;
+    u32 unk_34;
+    u32 unk_38;
+    u32 unk_3c;
+    char name[16];
+    s32 stage;
+    s32 kind;
+    s32 enabled;
+    s32 mode;
+    u16 code;
+    u16 unk_62;
+    s32 link;
+    u8 unk_68[8];
+    char detail[16];
+    char note[16];
+    u32 options; /* 0x90: record options */
+    u8 pad94[0xC];
+} FieldSequenceRecord;
+
 void fldStartSequenceRecord(void) {
-    u8 buffer[0xA0];
+    FieldSequenceRecord record;
 
     if (fileGetSelectionPendingFlag() == 1) {
         return;
@@ -1252,10 +1288,9 @@ void fldStartSequenceRecord(void) {
     D_0032E570[0x44 / 4] = 1;
     mdlFlagSet(0xC0F);
     fldSetDeferredFieldCommand(0, 0);
-    fldInitializeSequenceAndResetFlags(buffer, 1, 1, D_003BAB68);
-    *(u32 *)(buffer + 0x90) = 1;
-    /* Record options at +0x90; command submission copies the padded 0xA0-byte packet. */
-    dds3AdminSubmitModeRequest(5, buffer, 0xA0, 0);
+    fldInitializeSequenceAndResetFlags(&record, 1, 1, D_003BAB68);
+    record.options = 1;
+    dds3AdminSubmitModeRequest(5, &record, 0xA0, 0);
 }
 
 extern u64 D_003BAB70[], D_003BAB78[], D_003BAB80[], D_003BAB88[], D_003BAB90[];
@@ -1291,33 +1326,14 @@ void fldInitializeDisplayAndTables(void) {
 }
 
 void fldResetPlayerSceneTransformState(void) {
-    u32 *buffer = D_0032F1A0;
+    FieldPlayerSceneWork *sceneWork = &D_0032F1A0;
 
-    VU0_STORE_VF(vf0, buffer);
-    VU0_STORE_VF(vf0, buffer + 4);
+    VU0_STORE_VF(vf0, &sceneWork->position);
+    VU0_STORE_VF(vf0, &sceneWork->rotation);
     fldPlayerObject = 0;
     *fldGetPlayerSceneStateAddress() = 0;
 }
 
-typedef struct FieldSequenceRecord {
-    u8 unk_00[0x30];
-    u32 unk_30;
-    u32 unk_34;
-    u32 unk_38;
-    u32 unk_3c;
-    char name[16];
-    s32 stage;
-    s32 kind;
-    s32 enabled;
-    s32 mode;
-    u16 code;
-    u16 unk_62;
-    s32 link;
-    u8 unk_68[8];
-    char detail[16];
-    char note[16];
-    u32 options;
-} FieldSequenceRecord;
 
 void fldInitializeSequenceAndResetFlags(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name) {
     if (kwlnTaskGetTaskByName(D_0039FBC0) != NULL) {
@@ -1440,24 +1456,24 @@ void fldInitializeLinkedSequence(FieldSequenceRecord *record, s32 stage, s32 kin
 /* Converts the field work's primary and secondary state words into a
  * compact scene status, giving the primary state precedence. */
 u32 fldGetSceneStatusCode(void) {
-    u32 *sceneWork = D_0032F1A0;
+    FieldPlayerSceneWork *sceneWork = &D_0032F1A0;
 
-    if (sceneWork[0xD] == 1) {
+    if (sceneWork->primaryState == 1) {
         return 1;
     }
-    if (sceneWork[0x17] == 3) {
+    if (sceneWork->secondaryState == 3) {
         return 3;
     }
-    if (sceneWork[0x17] == 4) {
+    if (sceneWork->secondaryState == 4) {
         return 4;
     }
-    if (sceneWork[0x17] == 5) {
+    if (sceneWork->secondaryState == 5) {
         return 5;
     }
-    if (sceneWork[0x17] == 6) {
+    if (sceneWork->secondaryState == 6) {
         return 2;
     }
-    return sceneWork[0xD] != 0 ? 2 : 0;
+    return sceneWork->primaryState != 0 ? 2 : 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001233D0);
@@ -1532,15 +1548,15 @@ void fldReleaseResources(void) {
 }
 
 void fldReleasePlayerSceneResources(void) {
-    u32 *buffer;
+    FieldPlayerSceneWork *sceneWork;
 
     if (fldPlayerObject != 0) {
         if (dds3GetWorldSecondaryObject() != 0) {
-            buffer = D_0032F1A0;
+            sceneWork = &D_0032F1A0;
             effObjFetchInnerFirstVec(fldPlayerObject);
-            VU0_STORE_VF(vf10, buffer);
+            VU0_STORE_VF(vf10, &sceneWork->position);
             effObjFetchInnerSecondVecNorm(fldPlayerObject);
-            VU0_STORE_VF(vf10, buffer + 4);
+            VU0_STORE_VF(vf10, &sceneWork->rotation);
         }
         fldPlayerObject = 0;
         fldCameraModelObject = 0;
@@ -1902,7 +1918,7 @@ extern void func_0014C468(void);
 /* Dispatch one pending field command, preferring the temporary override
  * over the scene-work buffer and its saved fallback. */
 s32 fldDispatchPendingSceneResource(void) {
-    u32 *sceneWork = D_0032F1A0;
+    FieldPlayerSceneWork *sceneWork = &D_0032F1A0;
     u32 flags;
 
     if (fldAreaState[64] == 1) {
@@ -1918,8 +1934,8 @@ s32 fldDispatchPendingSceneResource(void) {
         }
         return 1;
     }
-    if (sceneWork[13] == 0 && *(s8 *)((u8 *)sceneWork + 0x80) != 0) {
-        evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), (u8 *)sceneWork + 0x80);
+    if (sceneWork->primaryState == 0 && sceneWork->resourceName[0] != 0) {
+        evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), sceneWork->resourceName);
         return 1;
     }
     if (fldAreaState[1] != 0) {
