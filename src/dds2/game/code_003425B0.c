@@ -387,7 +387,106 @@ void sdfSoundSetTableEntry(u32 kind, u8 *src) {
     sndSendCommandPacket(0x1F0, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00342E58);
+void func_00342E58(u32 kind, u8 *dst) {
+    u8 *table;
+    u8 *src;
+    s32 i;
+
+    sndSendCommandPacket(0x200, 0, 0, 0);
+    switch (kind) {
+    case 0:
+        table = sndMidiTrackState;
+        src = table + 0x210;
+        for (i = 0; i < 0x20; i++) {
+            dst[i] = *src++;
+        }
+        return;
+    case 1:
+        table = sndMidiTrackState;
+        src = table + 0x290;
+        for (i = 0; i < 0x80; i++) {
+            dst[i] = *src++;
+        }
+        return;
+    case 2:
+        table = sndMidiTrackState;
+        src = table + 0x310;
+        for (i = 0; i < 0x80; i++) {
+            dst[i] = *src++;
+        }
+        return;
+    case 3:
+        table = sndMidiTrackState;
+        src = table + 0x390;
+        for (i = 0; i < 0x20; i++) {
+            dst[i] = *src++;
+        }
+        return;
+    case 4:
+        table = sndMidiTrackState;
+        src = table + 0x410;
+        for (i = 0; i < 0x20; i++) {
+            dst[i] = *src++;
+        }
+        return;
+    case 5:
+        table = sndMidiTrackState;
+        src = table + 0x490;
+        for (i = 0; i < 2; i++) {
+            dst[i] = *src++;
+        }
+        return;
+    case 6:
+        table = sndMidiTrackState;
+        src = table + 0x510;
+        for (i = 0; i < 2; i++) {
+            dst[i] = *src++;
+        }
+        return;
+    case 7:
+        table = sndMidiTrackState;
+        src = table + 0x590;
+        for (i = 0; i < 2; i++) {
+            dst[i] = *src++;
+        }
+        return;
+    case 8:
+        table = sndMidiTrackState;
+        src = table + 0x610;
+        for (i = 0; i < 2; i++) {
+            dst[i] = *src++;
+        }
+        return;
+    case 9:
+        table = sndMidiTrackState;
+        src = table + 0x690;
+        for (i = 0; i < 2; i++) {
+            dst[i] = *src++;
+        }
+        return;
+    case 10:
+        table = sndMidiTrackState;
+        src = table + 0x710;
+        for (i = 0; i < 2; i++) {
+            dst[i] = *src++;
+        }
+        return;
+    case 11:
+        table = sndMidiTrackState;
+        src = table + 0x790;
+        for (i = 0; i < 2; i++) {
+            dst[i] = *src++;
+        }
+        return;
+    case 12:
+        table = sndMidiTrackState;
+        src = table + 0x810;
+        for (i = 0; i < 2; i++) {
+            dst[i] = *src++;
+        }
+        return;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00343188);
 
@@ -1267,4 +1366,3 @@ INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438D1C);
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438D20);
 
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438D23);
-
