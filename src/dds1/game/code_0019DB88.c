@@ -10,7 +10,7 @@ typedef struct SoundQueue {
     u16 drawFlags;
     u16 unk0E;
     struct SoundQueueNode *head;
-    u32 unk14;
+    struct SoundQueueNode *tail;
 } SoundQueue;
 
 extern SoundQueue itfMesWork;
@@ -538,10 +538,10 @@ INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F0F8);
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F4C8);
 
 typedef struct SoundQueueNode {
-    s32 unk00;
+    struct SoundQueueNode *previous;
     struct SoundQueueNode *next; /* 0x04 */
     s32 window;                  /* 0x08: released when flushing the message queue */
-    u32 object;                  /* 0x0C: updated by the sound-queue visitor */
+    UiPanel *object;             /* 0x0C: updated by the sound-queue visitor */
 } SoundQueueNode;
 
 s32 sndVisitQueuedResources(void) {
@@ -684,7 +684,31 @@ void sndStepIndexByPad(SndPadStepper *stepper) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019FA70);
+SoundQueueNode *func_0019FA70(SoundQueueNode *node) {
+    s32 index = 0;
+    s32 count = itfMesWork.unk00;
+
+    if (count <= 0) {
+        return NULL;
+    }
+    for (;;) {
+        if (node != NULL) {
+            node = node->previous;
+        }
+        if (node == NULL) {
+            node = itfMesWork.tail;
+        }
+        if (node->object->place.sprite != NULL) {
+            break;
+        }
+        index++;
+        if (count < index) {
+            node = NULL;
+            break;
+        }
+    }
+    return node;
+}
 
 extern u32 kwlnTaskCreate(u32, u32, u32, u32, s32 (*)(s64), void (*)(s64), u32);
 

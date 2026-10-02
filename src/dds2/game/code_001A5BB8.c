@@ -243,9 +243,10 @@ extern char D_00415840[]; /* "btl:endure=%d%%[ratio=%.2f]\n" */
 extern u32 btlLinkedSelectionTaskBuffer;
 
 typedef struct SndMessageNode {
-    u32 flags;
+    struct SndMessageNode *previous;
     struct SndMessageNode *next;
     s32 message;
+    void *object;
 } SndMessageNode;
 
 typedef struct SoundQueue {
@@ -255,7 +256,7 @@ typedef struct SoundQueue {
     u16 drawFlags;
     u16 unk0E;
     SndMessageNode *head;
-    u32 unk14;
+    SndMessageNode *tail;
 } SoundQueue;
 
 extern SoundQueue itfMesWork;
@@ -875,7 +876,31 @@ void sndStepIndexByPad(SndPadStepper *stepper) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A7A98);
+SndMessageNode *func_001A7A98(SndMessageNode *node) {
+    s32 index = 0;
+    s32 count = itfMesWork.unk00;
+
+    if (count <= 0) {
+        return NULL;
+    }
+    for (;;) {
+        if (node != NULL) {
+            node = node->previous;
+        }
+        if (node == NULL) {
+            node = itfMesWork.tail;
+        }
+        if (((UiPanel *)node->object)->place.sprite != NULL) {
+            break;
+        }
+        index++;
+        if (count < index) {
+            node = NULL;
+            break;
+        }
+    }
+    return node;
+}
 
 void func_001A7B00(s32 *bounds, s32 *region, s32 x, s32 y,
                    s32 alpha, s32 texture, s32 command) {
