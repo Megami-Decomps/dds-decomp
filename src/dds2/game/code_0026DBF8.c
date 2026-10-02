@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 extern char D_00425118[];
 extern char mnuMantraNumberFormat[]; /* "%d" */
 extern char D_004378B0[]; /* "---" */
@@ -270,11 +271,12 @@ typedef struct MantraFileRequest {
 extern s32 fileRequestIsReady(void *);
 extern void func_002C7CE8(void *);
 extern u32 func_00305148(void *, u32);
-extern u32 kwlnTaskGetUserValue(void);
+extern u32 kwlnTaskGetUserValue(KwlnTask *task);
 extern void *fileQueuePlainDispatchRequest(const char *path);
-extern void *kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(void),
-                            void (*)(), void *);
-s32 mnuLoadMantraSpriteTask(void);
+extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate,
+                                TaskDestroy, u32);
+s32 mnuLoadMantraSpriteTask(KwlnTask *task);
+extern char D_004250B0[];
 extern void func_0026E788(u32, u32, u32, u32, u32, u32, u32);
 void func_00284508(u32, u32, u32, u32, u32, u32);
 extern char mnuMantraSpriteTaskName[];
@@ -459,7 +461,13 @@ void mnuReleaseMiddleMantraSpriteSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuStartMantraSpriteLoad);
+void mnuStartMantraSpriteLoad(void) {
+    if (mnuMantraSpriteSlots[4] == 0) {
+        u32 request = (u32)fileQueuePlainDispatchRequest(D_004250B0);
+        kwlnTaskCreate(mnuMantraSpriteTaskName, 0x402, 1, 1,
+                       mnuLoadMantraSpriteTask, NULL, request);
+    }
+}
 
 s32 mnuHasMantraSpriteTaskFinished(void) {
     if (mnuMantraSpriteSlots[4] != 0) {
@@ -479,8 +487,8 @@ void mnuReleaseMantraSpriteSlots(void) {
     }
 }
 
-s32 mnuLoadMantraSpriteTask(void) {
-    MantraFileRequest *request = (MantraFileRequest *)kwlnTaskGetUserValue();
+s32 mnuLoadMantraSpriteTask(KwlnTask *task) {
+    MantraFileRequest *request = (MantraFileRequest *)kwlnTaskGetUserValue(task);
     s32 result = fileRequestIsReady(request);
     if (result != 0) {
         MantraFileEntry *entry = request->entries;
@@ -529,6 +537,8 @@ typedef struct MantraCostRecord {
 } MantraCostRecord;
 
 /* Draw a button marker and a variable-width cost, shifting one-digit values right. */
+INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004250B0);
+
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", mnuMantraSpriteTaskName);
 
 void mnuDrawMantraCostBadge(s32 x, s32 y, s32 depth, u8 *record, s32 fade, s32 drawArg) {
