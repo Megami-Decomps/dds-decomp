@@ -45,7 +45,35 @@ s32 func_00260208(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
                          D_0036C728[8][BRS_ICON_ID], option);
 }
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00260370);
+s32 func_00260370(s32 unused, u32 value, s32 iconIndex, s32 option) {
+    f32 normalized;
+    f32 companionPosition;
+    s32 layer;
+    s32 companionX;
+    s32 selectedIndex;
+
+    layer = D_003BC520;
+    normalized = (f32)value * 0.00390625f;
+    selectedIndex = iconIndex + 3;
+    func_002BF4E0(D_0036C728[selectedIndex][BRS_ICON_X] << 4,
+                  D_0036C728[selectedIndex][BRS_ICON_Y] << 3, 0,
+                  (u32)(normalized * 256.0f), 0, layer,
+                  D_0036C728[selectedIndex][BRS_ICON_ID], option);
+
+    companionPosition = (normalized + normalized * normalized) * 0.5f;
+    if (normalized < 0.5f) {
+        normalized = 0.1f;
+    } else {
+        normalized = (normalized - 0.5f) * 2.0f;
+    }
+    companionX = (s32)((f32)D_0036C728[8][BRS_ICON_X] -
+                       (1.0f - companionPosition) * 128.0f);
+
+    return func_002BF4E0(companionX << 4,
+                         D_0036C728[8][BRS_ICON_Y] << 3, 0,
+                         (u32)(normalized * 256.0f), 0, layer,
+                         D_0036C728[8][BRS_ICON_ID], option);
+}
 
 typedef struct {
     u32 value;
