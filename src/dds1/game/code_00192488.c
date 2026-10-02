@@ -23,7 +23,7 @@ typedef struct EffChan {
 
 /* 0x38-byte keyframe record addressed by effMathGetSlotAt. */
 typedef struct EffRec38 {
-    u8 unk0[0x30]; /* 0x0 */
+    f32 controlPoints[4][3];
     f32 scaledRandomValue; /* 0x30 */
     f32 randomScale;       /* 0x34 */
 } EffRec38;
@@ -36,10 +36,12 @@ typedef struct EffVert {
     f32 unkC; /* 0xC */
 } EffVert;
 
+typedef struct EffChanWork EffChanWork;
+
 /* Emitter handle for effFillRandRecords: target primitive at +0x8. */
 typedef struct EffEmit {
     u8 unk0[8];    /* 0x0 */
-    EffPrim *primitive; /* 0x8: target primitive */
+    EffChanWork *primitive; /* 0x8: control-point work */
 } EffEmit;
 
 /* Word at frFontResourceList+0x18 (list header defined in game/code_00193C08). */
@@ -54,7 +56,7 @@ extern void func_001937E0(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);
 extern u32 effMiscRand(void *state);
 extern u8 D_0034DF38[];
 extern s32 effMathGetSlotAt(s32 *arg0, s32 arg1);
-extern void func_001926A8(EffPrim *arg0, u32 arg1);
+extern void func_001926A8(EffChanWork *arg0, u32 arg1);
 extern void func_001931E0(void *arg0, s32 arg1, u32 arg2);
 extern void func_001934E8(EffPrim *arg0, void *arg1);
 extern void func_001935B8(EffPrim *arg0, void *arg1);
@@ -63,11 +65,14 @@ extern void effDispatchParameterDataAndFreeWork(void *handle);
 
 /* Header block copied into every channel work (0x168 bytes): the random record count and modulus live inside it. */
 typedef struct EffChanHead {
-    u8 pad00[0x44];
+    f32 controlPoints[4][4];
+    u8 pad40[4];
     u32 count;      /* 0x44: number of random records */
-    u8 pad48[4];
+    s32 steps;
     s32 spread;     /* 0x4C: modulus of the start delay */
-    u8 pad50[0x118];
+    u8 pad50[8];
+    f32 jitter[4];
+    u8 pad68[0x100];
 } EffChanHead; /* 0x168 */
 
 typedef struct EffChanRecord {
@@ -85,12 +90,12 @@ typedef struct EffChanSource {
     EffChanSourceOwner *owner; /* 0x168 */
 } EffChanSource;
 
-typedef struct EffChanWork {
+struct EffChanWork {
     EffChanHead head;
     EffChanRecord *records; /* 0x168 */
     s32 *slots;             /* 0x16C */
     void *buffer;           /* 0x170 */
-} EffChanWork;
+};
 
 extern void *effAllocSlotArray(u32 count);
 extern void *effParamWorkDuplicate(void *param);
@@ -142,7 +147,104 @@ void effDestroyChannelWork(EffChanWork *work) {
     func_002D0918(work->buffer);
 }
 
-INCLUDE_ASM(const s32, "game/code_00192488", func_001926A8);
+extern f32 sdfViewTargetVector[4];
+extern f32 sdfViewEyeVector[4];
+extern f32 effMiscRandUnitFloat(void *);
+extern void effParamWorkCallback3(void *, s32);
+
+/* Jitter control points perpendicular to the path and camera viewing direction. */
+void func_001926A8(EffChanWork *work, u32 index) {
+    f32 scale[4];
+    f32 lastNormal[4];
+    f32 viewDirection[4];
+    f32 point[4];
+    EffChanRecord *record = work->records + index;
+    EffRec38 *slot;
+    f32 step;
+    f32 random;
+
+    VU0_LOAD_VF(vf10, sdfViewTargetVector);
+    VU0_LOAD_VF(vf11, sdfViewEyeVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, viewDirection);
+    step = 1.0f / (f32)work->head.steps;
+    slot = (EffRec38 *)effMathGetSlotAt(work->slots, index);
+    slot->scaledRandomValue = 0;
+    slot->randomScale = step;
+
+    random = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
+    scale[0] = work->head.jitter[0] * (random + random);
+    scale[1] = scale[0];
+    scale[2] = scale[0];
+    VU0_LOAD_VF(vf10, work->head.controlPoints[0]);
+    VU0_LOAD_VF(vf11, work->head.controlPoints[1]);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, viewDirection);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_LOAD_VF(vf11, scale);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_STORE_VF(vf10, point);
+    slot->controlPoints[0][0] = point[0];
+    slot->controlPoints[0][1] = point[1];
+    slot->controlPoints[0][2] = point[2];
+
+    random = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
+    scale[0] = work->head.jitter[1] * (random + random);
+    scale[1] = scale[0];
+    scale[2] = scale[0];
+    VU0_LOAD_VF(vf10, work->head.controlPoints[1]);
+    VU0_LOAD_VF(vf11, work->head.controlPoints[2]);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, viewDirection);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_LOAD_VF(vf11, scale);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_STORE_VF(vf10, point);
+    slot->controlPoints[1][0] = point[0];
+    slot->controlPoints[1][1] = point[1];
+    slot->controlPoints[1][2] = point[2];
+
+    random = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
+    scale[0] = work->head.jitter[2] * (random + random);
+    scale[1] = scale[0];
+    scale[2] = scale[0];
+    VU0_LOAD_VF(vf10, work->head.controlPoints[2]);
+    VU0_LOAD_VF(vf11, work->head.controlPoints[3]);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, viewDirection);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, lastNormal);
+    VU0_LOAD_VF(vf11, scale);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_STORE_VF(vf10, point);
+    slot->controlPoints[2][0] = point[0];
+    slot->controlPoints[2][1] = point[1];
+    slot->controlPoints[2][2] = point[2];
+
+    random = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
+    scale[0] = work->head.jitter[3] * (random + random);
+    scale[1] = scale[0];
+    scale[2] = scale[0];
+    VU0_LOAD_VF(vf10, lastNormal);
+    VU0_LOAD_VF(vf11, scale);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, work->head.controlPoints[3]);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, point);
+    slot->controlPoints[3][0] = point[0];
+    slot->controlPoints[3][1] = point[1];
+    slot->controlPoints[3][2] = point[2];
+    effParamWorkCallback3(record->param, 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_00192488", func_001929A0);
 
@@ -171,10 +273,10 @@ void effCopyVertRows(EffChan *channel, f32 *source) {
 }
 
 void effFillRandRecords(EffEmit *emitter) {
-    EffPrim *primitive = emitter->primitive;
-    u32 modulus = primitive->randomModulus;
-    u32 count = primitive->randomCount;
-    EffCntRec *record = primitive->counterRecords;
+    EffChanWork *primitive = emitter->primitive;
+    u32 modulus = primitive->head.steps;
+    u32 count = primitive->head.count;
+    EffChanRecord *record = primitive->records;
     u32 index = 0;
     EffRec38 *keyframe;
     s32 randomIndex;
@@ -185,12 +287,12 @@ void effFillRandRecords(EffEmit *emitter) {
     }
     do {
         func_001926A8(primitive, index);
-        record->randomIndex = effMiscRand(&D_0034DF38) % modulus;
-        keyframe = (EffRec38 *)effMathGetSlotAt(primitive->slotLookup, index);
+        record->delay = effMiscRand(&D_0034DF38) % modulus;
+        keyframe = (EffRec38 *)effMathGetSlotAt(primitive->slots, index);
         index++;
-        randomIndex = record->randomIndex;
+        randomIndex = record->delay;
         scale = keyframe->randomScale;
-        record->randomIndex = randomIndex + 1;
+        record->delay = randomIndex + 1;
         record++;
         keyframe->scaledRandomValue = scale * (f32)randomIndex;
     } while (index < count);
