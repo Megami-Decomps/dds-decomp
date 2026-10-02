@@ -1,5 +1,6 @@
 #include "common.h"
 #include "eff.h"
+#include "pcp_vu0.h"
 
 /* Small channel object (0x18 bytes, created by func_001936A8): float block
  * plus the channel-A cursor (count at +0x4, index at +0xC). */
@@ -242,7 +243,33 @@ s32 effAdvancePrimCursor(void *vertex, EffPrim *primitive) {
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AB08);
 
-INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AC38);
+/* Evaluate cubic coefficients or adjacent linear keys into the VU input vector. */
+void func_0019AC38(EffPrim *primitive, s32 index, f32 t)
+{
+    f32 result[4];
+    f32 *a;
+    f32 *b;
+    f32 *c;
+    f32 *d;
+
+    if (primitive->unkC == 0) {
+        a = (f32 *)primitive->unk14 + index * 3;
+        b = (f32 *)primitive->unk18 + index * 3;
+        c = (f32 *)primitive->unk1C + index * 3;
+        d = (f32 *)primitive->unk10 + index * 3;
+        result[0] = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
+        result[1] = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
+        result[2] = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
+        result[3] = 1.0f;
+    } else {
+        a = (f32 *)primitive->unk10 + index * 3;
+        b = a + 3;
+        result[0] = a[0] + (b[0] - a[0]) * t;
+        result[1] = a[1] + (b[1] - a[1]) * t;
+        result[2] = a[2] + (b[2] - a[2]) * t;
+    }
+    VU0_LOAD_VF_FROM(vf10, *(u128 *)result);
+}
 
 void effResetPrimitiveRecordCursor(EffPrim *primitive) {
     primitive->cursorIndex = 0;
@@ -320,7 +347,23 @@ s32 effAdvanceChanCursor(void *vertex, EffChan *channel) {
     return continuing;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B418);
+void func_0019B418(EffVert *out, EffChan *channel, s32 index, f32 t) {
+    f32 weights[4];
+    f32 inverse = 1.0f - t;
+    f32 *p0 = channel->rows->primary + index * 3;
+    f32 *p1 = p0 + 3;
+    f32 *p2 = p0 + 6;
+    f32 *p3 = p0 + 9;
+
+    weights[0] = inverse * inverse * inverse;
+    weights[1] = t * (inverse * inverse) * 3.0f;
+    weights[2] = t * t * inverse * 3.0f;
+    weights[3] = t * t * t;
+    out->unk0 = p0[0] * weights[0] + p1[0] * weights[1] + p2[0] * weights[2] + p3[0] * weights[3];
+    out->unk4 = p0[1] * weights[0] + p1[1] * weights[1] + p2[1] * weights[2] + p3[1] * weights[3];
+    out->unk8 = p0[2] * weights[0] + p1[2] * weights[1] + p2[2] * weights[2] + p3[2] * weights[3];
+    out->unkC = 1.0f;
+}
 
 void effClearChanCursor(EffChan *chan) {
     chan->cursorIndex = 0;

@@ -143,7 +143,9 @@ typedef struct EvtViewNode {
     u32 owner;                /* 0x10 */
     u8 pad14[8];
     s16 time;                 /* 0x1C */
-    u8 pad1E[0x32];
+    u8 pad1E[6];
+    s32 unk24;
+    u8 pad28[0x28];
     s32 hasGlyphs;            /* 0x50 */
     EvtViewGlyph *glyphs;     /* 0x54 */
     u8 pad58[0x24];
@@ -151,7 +153,27 @@ typedef struct EvtViewNode {
 } EvtViewNode;
 
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CBA0);
+extern void func_00243048(u16 *from, u16 *to, u8 *out, f32 ratio);
+extern void func_00243608(s32 handle, u8 *out);
+
+void func_0022CBA0(EventViewerState *viewer, EvtViewNode *node, u16 *from, u16 *to) {
+    u8 out[0x20];
+    f32 ratio = 0.0f;
+
+    if (from != NULL) {
+        if (to != NULL) {
+            s32 start = *from;
+            f32 span = *to - start;
+            f32 elapsed = viewer->glyphAdvancePosition - (start + node->time);
+
+            if (span != 0.0f) {
+                ratio = elapsed / span;
+            }
+        }
+        func_00243048(from, to, out, ratio);
+        func_00243608(node->unk24, out);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CC40);
 

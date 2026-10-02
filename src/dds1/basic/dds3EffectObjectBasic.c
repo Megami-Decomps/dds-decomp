@@ -84,6 +84,8 @@ extern void effObjSetInnerFirstVec(void *obj, void *vec);
 extern void effObjSetInnerSecondVec(void *obj, void *vec);
 
 extern void effObjInnerVecBackup(void *params);
+extern void effMagatuhiCopyFloatBlock(void *, const void *);
+extern void effMagatuhiCopyHandlerRows(void *, const void *);
 
 
 
@@ -446,7 +448,52 @@ func_00115970(EffectObj *obj) {
         }
     }
 }
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001159E8);
+/* Copy ready vector/scalar parameters into the two- or four-row magatuhi block. */
+s32 func_001159E8(EffectObj *obj, EffectObj *first, EffectObj *second, EffectObj *third, EffectObj *fourth)
+{
+    EffectData *data;
+    f32 *vectors;
+
+    if (obj->kind != 7) {
+        return 0;
+    }
+    data = obj->data;
+    switch (data->state) {
+    case 7:
+        vectors = data->vector;
+        if (effObjLoadReadyParameterVector(first)) {
+            VU0_STORE_VF(vf10, vectors);
+            vectors[8] = effObjGetIntParam(first);
+        }
+        if (effObjLoadReadyParameterVector(second)) {
+            VU0_STORE_VF(vf10, vectors + 4);
+            vectors[9] = effObjGetIntParam(second);
+        }
+        effMagatuhiCopyFloatBlock(data->bill, vectors);
+        return 1;
+    case 8:
+        vectors = data->vector;
+        if (effObjLoadReadyParameterVector(first)) {
+            VU0_STORE_VF(vf10, vectors);
+            vectors[16] = effObjGetIntParam(first);
+        }
+        if (effObjLoadReadyParameterVector(second)) {
+            VU0_STORE_VF(vf10, vectors + 4);
+            vectors[17] = effObjGetIntParam(second);
+        }
+        if (effObjLoadReadyParameterVector(third)) {
+            VU0_STORE_VF(vf10, vectors + 8);
+            vectors[18] = effObjGetIntParam(third);
+        }
+        if (effObjLoadReadyParameterVector(fourth)) {
+            VU0_STORE_VF(vf10, vectors + 12);
+            vectors[19] = effObjGetIntParam(fourth);
+        }
+        effMagatuhiCopyHandlerRows(data->bill, vectors);
+        return 1;
+    }
+    return 0;
+}
 
 void effObjSetFlags(EffectObj *obj, s32 flags) {
     obj->data->flags |= flags;

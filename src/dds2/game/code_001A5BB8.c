@@ -328,6 +328,13 @@ typedef struct SndPad {
     u8 pad22[4];
     s8 prev;
     s8 next;
+    u8 pad28[0xC];
+    s8 coarseDown;
+    s8 coarseUp;
+    u8 pad36[2];
+    s8 fineDown;
+    u8 pad39;
+    s8 fineUp;
 } SndPad;
 extern SndPad D_0037F510;
 extern s32 func_001A6AB8();
@@ -810,7 +817,79 @@ void func_001A8918(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A8938);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A8A70);
+s32 func_001A8A70(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep) {
+    f32 current = *value;
+    s32 changed = 0;
+
+    if (D_0037F510.coarseUp < 0) {
+        if (current < maximum) {
+            current += coarseStep;
+        } else {
+            current = minimum;
+        }
+        changed = 1;
+    } else if (D_0037F510.coarseUp & 2) {
+        if (current < maximum) {
+            current += coarseStep;
+            changed = 1;
+        }
+    } else if (D_0037F510.coarseDown < 0) {
+        if (minimum < current) {
+            current -= coarseStep;
+        } else {
+            current = maximum;
+        }
+        changed = 1;
+    } else if (D_0037F510.coarseDown & 2) {
+        if (minimum < current) {
+            current -= coarseStep;
+            changed = 1;
+        }
+    } else if (fineStep != 0.0f) {
+        if (D_0037F510.fineUp < 0) {
+            if (current < maximum) {
+                current += fineStep;
+                if (maximum < current) {
+                    current = maximum;
+                }
+            } else {
+                current = minimum;
+            }
+            changed = 1;
+        } else if (D_0037F510.fineUp & 2) {
+            if (current < maximum) {
+                current += fineStep;
+                if (maximum < current) {
+                    current = maximum;
+                }
+                changed = 1;
+            }
+        } else if (D_0037F510.fineDown < 0) {
+            if (minimum < current) {
+                current -= fineStep;
+                if (current < minimum) {
+                    current = minimum;
+                }
+            } else {
+                current = maximum;
+            }
+            changed = 1;
+        } else if (D_0037F510.fineDown & 2) {
+            if (minimum < current) {
+                current -= fineStep;
+                if (current < minimum) {
+                    current = minimum;
+                }
+                changed = 1;
+            }
+        }
+    }
+    if (changed != 0) {
+        *value = current;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A8BD0);
 
@@ -3241,13 +3320,31 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00416060);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BAB90);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB078);
+typedef struct BtlPanelStrip {
+    s32 x;
+    s32 y;
+    s32 texture;
+} BtlPanelStrip;
+
+extern u32 btlSetSlotLowByteClamped(BtlSlotOwner *, s32, s32, s32);
+extern void func_00306C28(s32, s32, s32, u32 *, s32, BtlSlotOwner *, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004160F0);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00416100);
+void func_001BB078(s32 unused, s32 x, s32 y, s32 delta) {
+    BtlPanelStrip strips[3] = { {0, 0, 0x40}, {5, 0, 0x41}, {0x6B, 0, 0x42} };
+    u32 colors[4] = { 0x80808080, 0x80808080, 0x80808080, 0x80808080 };
+    s32 i, j;
+    BtlPanelStrip *strip;
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00416128);
+    for (strip = strips, i = 0; i < 3; i++, strip++) {
+        for (j = 0; j < 4; j++) {
+            colors[j] = btlSetSlotLowByteClamped((BtlSlotOwner *)btlResourceBlock->resA, strip->texture, j, delta);
+        }
+        func_00306C28((x + strip->x) << 4, (y + strip->y) << 3,
+                     0, colors, 0, (BtlSlotOwner *)btlResourceBlock->resA, strip->texture, 0x53);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00416138);
 

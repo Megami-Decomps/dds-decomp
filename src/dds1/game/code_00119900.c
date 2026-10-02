@@ -1,5 +1,10 @@
 #include "common.h"
 
+extern s32 datAffinityRecords;
+extern u8 D_0032AF70[];
+extern s32 func_0011B158(s32, s32, u8);
+
+
 extern s32 datCommandSelectors;
 extern s32 datGameState;
 extern s32 datRosterDetails;
@@ -367,7 +372,36 @@ u32 func_0011B150(void) {
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011B158);
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011B308);
+s32 func_0011B308(s32 *actors, s32 affinity) {
+    s32 *requirement = (s32 *)(datAffinityRecords + affinity * 16 - 0x1AB0);
+    u32 i;
+    s32 required = 0;
+    u32 permutation;
+    s32 offset;
+    s32 matched;
+    u8 *order;
+    s32 *actor;
+    s32 value;
+
+    for (i = 0; i < 3; i++) {
+        if (*requirement++ != -1) {
+            required++;
+        }
+    }
+    for (permutation = 0, offset = 0; permutation < 6; permutation++, offset += 3) {
+        matched = 0;
+        for (i = 0, order = D_0032AF70 + offset, actor = actors; i < 3; i++, order++) {
+            value = *actor++;
+            if (value != 0 && func_0011B158(value, affinity, *order) != 0) {
+                matched++;
+            }
+        }
+        if (required == matched) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 void evtCopyRosterTableValue(s32 entryAddress) {
     ((Entry1A4 *)entryAddress)->tableValue = D_0032AEA8[((Entry1A4 *)entryAddress)->rosterIndex].value;

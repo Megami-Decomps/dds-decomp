@@ -537,7 +537,45 @@ void effThunderRandomizeFrag2(EffThunderFragmentWork *work, s32 index) {
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_001661D8);
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00166810);
+extern void func_001661D8(EffThunderFragmentWork *, s32);
+
+void func_00166810(EffThunderFragmentWork *work) {
+    s32 index = 0;
+    EffThunderParSystem *firstSystem = work->state.secondarySystem;
+    s32 count = work->head.fragmentCount;
+    EffThunderParSystem *secondSystem = work->system;
+    EffThunderParCell *secondCells = secondSystem->cells;
+    u32 color = work->color;
+    EffThunderFrag *frag = work->fragments;
+    EffThunderParCell *firstCells = firstSystem->cells;
+    s32 packedColor;
+
+    if (count > 0) {
+        do {
+            if (frag->delayFrames == 0) {
+                if (frag->activeFrames != 0) {
+                    func_001661D8(work, index);
+                    frag->activeFrames--;
+                } else if (frag->color & 0xFF000000) {
+                    frag->color -= 0x20000000;
+                } else {
+                    effThunderRandomizeFrag2(work, index);
+                    parCellInit(work->state.secondarySystem, index);
+                    parCellInit(work->system, index);
+                }
+            } else {
+                frag->delayFrames--;
+            }
+            packedColor = effMultiplyPackedColors(frag->color, color);
+            firstCells[index].color = packedColor;
+            secondCells[index].color = packedColor;
+            frag++;
+            index++;
+        } while (index < count);
+    }
+    parPrependCellNode(work->state.secondarySystem);
+    parPrependCellNode(work->system);
+}
 
 extern void func_0015C7A0(void *system, u32 a, u32 b, u32 c);
 

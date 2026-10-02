@@ -2,6 +2,8 @@
 
 #include "kwln.h"
 
+extern void *func_00328D68(s32);
+
 #define KWLN_TASK_STATE_MASK 0xF
 
 extern KwlnTask* kwlnActiveTaskHead;
@@ -242,7 +244,40 @@ s32 kwlnTaskTickScheduler(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskCreate);
+KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay,
+                         TaskUpdate update, TaskDestroy destroy, u32 userValue) {
+    KwlnTask *task = func_00328D68(sizeof(KwlnTask));
+    s32 i = 0;
+
+    if (task == NULL) {
+        return NULL;
+    }
+    task->nameSum = 0;
+    while ((task->name[i] = name[i]) != 0 && i < 0x18) {
+        task->nameSum += name[i];
+        i++;
+    }
+    task->unk20 = priority;
+    task->flags = 1;
+    task->unk2C = startDelay;
+    task->unk2E = destroyDelay;
+    task->update = update;
+    task->destroy = destroy;
+    task->unk38 = userValue;
+    task->name[0x17] = 0;
+    task->unk24 = 0;
+    task->timer = 0;
+    task->listNext = NULL;
+    task->listPrev = NULL;
+    task->parent = NULL;
+    task->childList = NULL;
+    task->next = NULL;
+    kwlnTaskInsertIntoOrderedStateQueue(task);
+    if (task->unk2C == 0) {
+        kwlnTaskActivate(task);
+    }
+    return task;
+}
 
 s32 kwlnTaskDestroyWithHierarchyByName(const char* name, s32 delayTicks)
 {

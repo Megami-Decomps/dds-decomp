@@ -556,7 +556,21 @@ void itfMesDestroyWindowIfPresent(s32 window) {
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesStartEntry);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019BBF8);
+extern s32 itfInitTextDrawArgs(s32 encodedText, s32 sub);
+
+s32 func_0019BBF8(s32 window, s32 entryIndex, s32 item) {
+    ItfMesState *mes = itfWindowSlots[window].mes;
+    ItfMesTable *table = itfMesGetEntry(mes, entryIndex)->table;
+    ItfMesBlk24 *blk = &mes->blk24;
+
+    blk->unk18 = item;
+    blk->unk8 = table;
+    blk->unk1A = table->count;
+    if (table->count != 0) {
+        return itfInitTextDrawArgs(itfMesGetTableItem(table, (s16)item), 0);
+    }
+    return 0;
+}
 
 void itfMesCleanupWindow(s32 window, s32 alsoSecondary) {
     ItfMesState *mes;

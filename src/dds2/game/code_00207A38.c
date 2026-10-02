@@ -516,7 +516,49 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
     return farthest;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00208BF0);
+/* vu0 routine: returns the selected muzzle position in vf10. */
+BtlUnit *func_00208BF0(BtlUnit *reference, s32 actor) {
+    BtlVec4 position, selectedPosition;
+    BtlUnit *selected = NULL;
+    BtlUnit *unit;
+    u32 i = 0;
+    u32 count = btlGetIndexListCount(actor);
+
+    for (; i < count; i++) {
+        unit = (BtlUnit *)btlGetIndexListEntry(actor, i);
+        PCP_COPY_VECTOR(&position, &unit->positionX);
+        position.f[2] += unit->positionZOffset;
+        /* The indexed DDS2 path uses the vector at 0x40 and scale at 0x50,
+         * unlike the ordinary muzzle accessor's 0x70/0x80 fields. */
+        VU0_LOAD_VF(vf10, (u8 *)unit + 0x40);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, unit->bodyOffset);
+        VU0_SET_VF2X(unit->unk50);
+        VU0_MUL_VF2X(vf10, vf10);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_LOAD_VF(vf11, &position);
+        VU0_ADD(vf10, vf10, vf11);
+        if (selected == NULL) {
+            selected = unit;
+            VU0_STORE_VF(vf10, &selectedPosition);
+        } else {
+            VU0_STORE_VF(vf10, &position);
+            if (reference->flags & 0x200) {
+                if (position.f[0] < selectedPosition.f[0]) {
+                    selected = unit;
+                    PCP_COPY_VECTOR(&selectedPosition, &position);
+                }
+            } else {
+                if (position.f[0] > selectedPosition.f[0]) {
+                    selected = unit;
+                    PCP_COPY_VECTOR(&selectedPosition, &position);
+                }
+            }
+        }
+    }
+    VU0_LOAD_VF(vf10, &selectedPosition);
+    return selected;
+}
 
 void btlFlagAllUnitsDefeatCandidate(void) {
     BtlUnit *unit;

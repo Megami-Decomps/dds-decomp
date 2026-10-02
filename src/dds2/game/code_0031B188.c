@@ -33,6 +33,20 @@ typedef struct MnuNodeList {
     s32 count;           /* 0x04 */
 } MnuNodeList;
 
+typedef struct MnuEffectList {
+    u8 *records;
+    s32 count;
+} MnuEffectList;
+
+typedef struct MnuEffectWork {
+    u32 handle;
+    s32 count;
+    MnuEffectList *lists;
+    u32 unkC;
+} MnuEffectWork;
+
+extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+
 extern void mdlBroadcastMasked();
 extern void mdlStorePrimaryVectorVU(void *model);
 extern void mdlStoreTertiaryVectorVU(void *model);
@@ -156,7 +170,32 @@ void func_0031B3C8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B3D0);
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B4F0);
+MnuEffectWork *func_0031B4F0(s32 count, s32 *counts) {
+    s32 listBytes = count * 8;
+    s32 size = listBytes + 16;
+    s32 i;
+    u32 handle;
+    MnuEffectWork *work;
+    MnuEffectList *list;
+    u8 *records;
+
+    for (i = 0; i < count; i++) size += counts[i] * 32;
+    evtPrintDeveloperConsoleMessage("EffectWork Object Size %d\n", size);
+    handle = func_003292A8(size);
+    work = (MnuEffectWork *)sdfMemoryGetBlockAddress(handle);
+    memset(work, 0, size);
+    work->handle = handle;
+    work->count = count;
+    work->lists = (MnuEffectList *)(work + 1);
+    list = work->lists;
+    records = (u8 *)list + listBytes;
+    for (i = 0; i < count; i++, list++) {
+        list->records = records;
+        list->count = counts[i];
+        records += counts[i] * 32;
+    }
+    return work;
+}
 
 void mnuClearNodeRecords(s32 *list) {
     s32 record;

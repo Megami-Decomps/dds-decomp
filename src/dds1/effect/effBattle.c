@@ -1,4 +1,6 @@
 #include "common.h"
+#include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 enum {
     EFF_BATTLE_COPY_TRIGGER_FRAME = 0,
@@ -26,6 +28,8 @@ extern void effDispatchParameterDataAndFreeWork(s32);
 extern void func_003003F0(char *, u16, void *, s32);
 extern void sndUnlinkVoice(void *);
 extern void sdfReleaseChipBlock(void *);
+extern f32 D_00352870[4];
+extern f32 D_00352860[4];
 
 
 /* Shared work area for the battle-effect helpers in this TU. */
@@ -127,7 +131,31 @@ u32 func_00160C28(BattleEffect *work) {
     return work->unk120;
 }
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00160C30);
+/* Blend toward the neutral tint over the final six frames of the ramp. */
+u32 func_00160C30(u32 elapsed, u32 duration)
+{
+    f32 ratio;
+    u32 color[4];
+
+    if (duration == 0 || elapsed >= duration) {
+        return 0x808080;
+    }
+    if (duration < 6) {
+        ratio = (f32)(duration - elapsed) / (f32)duration;
+    } else {
+        ratio = 1.0f;
+        if (elapsed > duration - 6) {
+            ratio = (f32)(duration - elapsed) / 6.0f;
+        }
+    }
+    VU0_LOAD_VF(vf10, D_00352870);
+    VU0_LOAD_VF(vf11, D_00352860);
+    VU0_SCALAR_OP(1.0f - ratio, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALAR_OP_R3(ratio, "vmulx.xyzw vf11, vf11, vf2x");
+    VU0_ADD(vf10, vf10, vf11);
+    EE_MMI_RGBA_PACK(color[0]);
+    return color[0];
+}
 
 INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0DE0);
 

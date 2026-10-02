@@ -13,9 +13,56 @@ void mnuClearPairedSpriteRecords(s32 scene, s32 groupIndex) {
     } while (-1 < remaining);
 }
 
-INCLUDE_ASM(const s32, "game/code_002818B8", func_00281908);
+typedef struct MenuPanelFade {
+    u8 pad00[8];
+    s32 compact;
+    u8 pad0C[0xC];
+    s32 blend;
+} MenuPanelFade;
 
-INCLUDE_ASM(const s32, "game/code_002818B8", func_002819F8);
+extern u32 uiBlendColors(u32, u32, s32);
+extern void func_002C0F88(s32, s32, s32, s32, s32, s32 *, s32);
+
+void func_00281908(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
+    s32 colors[4];
+    s32 width = 0x138;
+    s32 color = uiBlendColors(0x14806E4D, 0x14806E00, work->blend);
+    s32 height = 0x170;
+
+    if (work->compact == 0) {
+        x += 0x660;
+        y += 0x110;
+    } else {
+        x += 0x1A0;
+        y += 0x50;
+        height = 0x100;
+    }
+    colors[3] = colors[1] = color & 0xFFFFFF00;
+    colors[2] = colors[0] = color;
+    func_002C0F88(x, y, z, ((width * (0x200 - work->blend)) / 0x200 + 0x40) << 4,
+                 height, colors, surface);
+}
+
+void func_002819F8(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
+    s32 colors[4];
+    s32 color = uiBlendColors(0x80501E80, 0x80501E00, work->blend);
+    s32 height = 0x4A;
+    s32 extent;
+
+    if (work->compact == 0) {
+        x += 0x660;
+        y += 0x280;
+    } else {
+        x += 0x1A0;
+        y += 0x150;
+        height = 0x30;
+    }
+    colors[3] = color;
+    colors[2] = color;
+    colors[1] = colors[0] = color & 0xFFFFFF00;
+    extent = (height * (0x200 - work->blend) / 0x200) << 3;
+    func_002C0F88(x, y - extent, z, 0x1000, extent, colors, surface);
+}
 
 INCLUDE_ASM(const s32, "game/code_002818B8", func_00281AE8);
 

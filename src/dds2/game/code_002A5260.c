@@ -8,10 +8,10 @@ typedef struct MenuTitleState {
     u8 pad00[0x14];
     s32 selectedPage;  /* 0x14 */
     u8 pad18[4];
-    u32 sequenceTimer; /* 0x1C */
+    s32 sequenceTimer; /* 0x1C */
     u8 pad20[4];
     s32 overlayHandle; /* 0x24 */
-    u32 phase;         /* 0x28 */
+    s32 phase;         /* 0x28 */
     u8 pad2C[0xE0];
     u32 movieDrawActive; /* 0x10C */
     u32 drawAlpha;       /* 0x110 */
@@ -57,6 +57,8 @@ extern void func_002A50E8(s32, s32, u8);
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
 extern void *memset(void *, s32, u32);
+extern s32 mnuIsAnyMenuInputPressed(void);
+extern void sndSetSequenceVolumePan(s32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5260);
 
@@ -79,7 +81,52 @@ void mnuResetTitlePageAndPhase(void) {
     state->selectedPage = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A58E8);
+s32 func_002A58E8(void) {
+    MenuTitleState *state = (MenuTitleState *)mnuMovieMenuState;
+    switch (state->phase) {
+    case 0:
+        if (mnuIsAnyMenuInputPressed() == 0) {
+            MenuTitleState *opening = (MenuTitleState *)mnuMovieMenuState;
+            if (opening->selectedPage < 30) {
+                opening->selectedPage++;
+            } else {
+                opening->phase = 1;
+                opening->selectedPage = 0;
+            }
+            func_002A50E8(mnuMovieMenuState + 0x100, 0, 1);
+            return 0;
+        }
+        sndSetSequenceVolumePan(8, 127, 63);
+        func_002A50E8(mnuMovieMenuState + 0x100, 0, 0);
+        return 1;
+    case 1:
+        if (state->selectedPage < 90) {
+            state->selectedPage++;
+        } else {
+            state->selectedPage = 0;
+        }
+        if (mnuIsAnyMenuInputPressed() != 0) {
+            sndSetSequenceVolumePan(8, 127, 63);
+            func_002A50E8(mnuMovieMenuState + 0x100, 0, 0);
+            return 1;
+        }
+        state = (MenuTitleState *)mnuMovieMenuState;
+        state->sequenceTimer++;
+        if (state->sequenceTimer >= 601) {
+            state->sequenceTimer = 0;
+            return -1;
+        }
+        break;
+    case 2:
+        if (state->selectedPage < 0) {
+            state->selectedPage++;
+        } else {
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 void mnuUpdateTitlePageByMode(void) {
     s32 *title = (s32 *)mnuMovieMenuState;

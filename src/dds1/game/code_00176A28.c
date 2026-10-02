@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 typedef struct {
     u8 pad00[0x10];
@@ -8,9 +9,12 @@ typedef struct {
 
 /* Nested resource group released when its effect work is destroyed. */
 typedef struct {
-    u8 pad00[0x40];
+    f32 matrix[16];
     EffResourceEntry *entries;
-    u8 pad44[0x1C];
+    u32 entryCount;
+    u32 mode;
+    f32 scale[3];
+    u8 pad58[8];
     u32 value60;
     u8 pad64[4];
     u32 resource68;
@@ -37,11 +41,50 @@ extern u32 effRetainResource(s32 kind);
 extern void billSetBillboardMode(u32 handle, s32 mode);
 extern void effReleaseOptionalResource(s32 work);
 
+typedef struct {
+    u32 unk00;
+    u16 flags;
+    u8 pad06[0x26];
+} EffResourceRenderState;
+
+extern EffResourceRenderState D_003D65E0;
+extern u32 func_002D03F8(u32 size);
+extern void *sdfResourceRetainAddress(u32 handle);
+extern u32 sdfCreateAssetWithDrawEntries(void);
+extern void func_002DA420(u32 resource, f32 scale);
+extern void *memset(void *, s32, u32);
+
 void func_00176A28(s32 work, u32 value) {
     ((EffResourceWork *)work)->value60 = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00176A28", func_00176A30);
+/* Allocate the resource group and initialize its matrix, scale and entry colors. */
+EffResourceWork *func_00176A30(u32 count)
+{
+    u32 allocation = func_002D03F8(count * sizeof(EffResourceEntry) + sizeof(EffResourceWork));
+    EffResourceWork *work = sdfResourceRetainAddress(allocation);
+    EffResourceEntry *entry;
+    u32 i;
+
+    work->mode = 2;
+    work->entries = (EffResourceEntry *)(work + 1);
+    work->resource70 = allocation;
+    work->entryCount = count;
+    work->scale[0] = 1.0f;
+    work->scale[1] = 1.0f;
+    work->scale[2] = 1.0f;
+    work->resource68 = 0;
+    EE_MMI_UNIT_MATRIX(work->matrix);
+    work->resource6C = sdfCreateAssetWithDrawEntries();
+    func_002DA420(work->resource6C, 1.0f);
+    entry = work->entries;
+    for (i = 0; i < count; i++, entry++) {
+        entry->value = 0x80808080;
+    }
+    memset(&D_003D65E0, 0, sizeof(D_003D65E0));
+    D_003D65E0.flags = 0x4000;
+    return work;
+}
 
 void effReleaseAttachedResources(u32 work) {
     sdfQueueAssetRelease(((EffResourceWork *)work)->resource6C);

@@ -57,6 +57,9 @@ extern EffPacketParams D_00451FF0[];
 extern u32 D_003B12C0[];
 extern EffDrawSurface *D_003B1308[];
 extern EffDrawSurface *D_003B1388[];
+extern EffDrawSurface *D_003B1318[];
+extern EffDrawSurface *D_003B1378[];
+extern u32 D_003B1330[];
 extern EffDrawSurface D_00380248;
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
@@ -443,7 +446,46 @@ void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool) {
     func_003297C8(pool->buffer);
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_00177CD0);
+/* Submit the position/color pool in triangle batches of at most 48 vertices. */
+void func_00177CD0(EffRecordPool *pool)
+{
+    f32 matrix[16];
+    void *packet = sdfAllocPacketAligned(0x20);
+    s32 count;
+    EffDrawSurface *surface;
+
+    sdfInitPacketList(packet);
+    EE_MMI_UNIT_MATRIX(matrix);
+    matrix[0] = pool->scale;
+    matrix[5] = pool->scale;
+    matrix[10] = pool->scale;
+    matrix[12] = pool->origin[0];
+    matrix[13] = pool->origin[1];
+    matrix[14] = pool->origin[2];
+    VU0_LOAD_MATRIX(matrix);
+    sdfConsAppendVuPacket(packet, 0);
+    sdfConsAppendAssetPacket(packet, pool->resource, 0);
+    count = pool->count;
+    D_00451FF0->colors = (u32 *)pool->auxRecordBase;
+    D_00451FF0->positions = (u128 *)pool->recordBase;
+    D_00451FF0->unk08 = pool->settingB;
+    D_00451FF0->parameterCount = 0x10;
+    D_00451FF0->vertexCount = 0x30;
+    D_00451FF0->parameters = NULL;
+    while (count >= 0x30) {
+        count -= 0x30;
+        sdfAppendPacket(packet, func_00167A10(D_00451FF0));
+        D_00451FF0->positions += 0x30;
+        D_00451FF0->colors += 0x30;
+    }
+    if (count >= 3) {
+        D_00451FF0->parameterCount = count / 3;
+        D_00451FF0->vertexCount = count;
+        sdfAppendPacket(packet, func_00167A10(D_00451FF0));
+    }
+    surface = D_003B1318[pool->settingA];
+    surface->submit(surface, packet);
+}
 
 s32 effGetGroupRecordByIndex(EffRecordPool *pool, s32 index) {
     return pool->recordBase + index * 0x30;
@@ -487,7 +529,46 @@ void func_00177FA8(EffRecordPool *pool) {
     func_003297C8(pool->buffer);
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_00177FD8);
+/* Submit the position/color pool in quad batches of at most 32 vertices. */
+void func_00177FD8(EffRecordPool *pool)
+{
+    f32 matrix[16];
+    void *packet = sdfAllocPacketAligned(0x20);
+    s32 count;
+    EffDrawSurface *surface;
+
+    sdfInitPacketList(packet);
+    EE_MMI_UNIT_MATRIX(matrix);
+    matrix[0] = pool->scale;
+    matrix[5] = pool->scale;
+    matrix[10] = pool->scale;
+    matrix[12] = pool->origin[0];
+    matrix[13] = pool->origin[1];
+    matrix[14] = pool->origin[2];
+    VU0_LOAD_MATRIX(matrix);
+    sdfConsAppendVuPacket(packet, 0);
+    sdfConsAppendAssetPacket(packet, pool->resource, 0);
+    count = pool->count;
+    D_00451FF0->colors = (u32 *)pool->auxRecordBase;
+    D_00451FF0->positions = (u128 *)pool->recordBase;
+    D_00451FF0->unk08 = pool->settingB;
+    D_00451FF0->parameterCount = 0x10;
+    D_00451FF0->vertexCount = 0x20;
+    D_00451FF0->parameters = D_003B1330;
+    while (count >= 0x20) {
+        count -= 0x20;
+        sdfAppendPacket(packet, func_00167A10(D_00451FF0));
+        D_00451FF0->positions += 0x20;
+        D_00451FF0->colors += 0x20;
+    }
+    if (count >= 4) {
+        D_00451FF0->parameterCount = count / 4 * 2;
+        D_00451FF0->vertexCount = count;
+        sdfAppendPacket(packet, func_00167A10(D_00451FF0));
+    }
+    surface = D_003B1378[pool->settingA];
+    surface->submit(surface, packet);
+}
 
 s32 func_00178190(EffRecordPool *pool, s32 index) {
     return pool->recordBase + index * 0x40;

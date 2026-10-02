@@ -94,6 +94,13 @@ typedef struct SndPad {
     u8 pad24[2];
     s8 prev;
     s8 next;
+    u8 pad28[0xC];
+    s8 coarseDown;
+    s8 coarseUp;
+    u8 pad36[2];
+    s8 fineDown;
+    u8 pad39;
+    s8 fineUp;
 } SndPad;
 
 typedef struct UiSurface { u8 pad0[0x20]; } UiSurface;
@@ -668,7 +675,79 @@ void func_0019FCA8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019FCC8);
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019FE00);
+s32 func_0019FE00(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep) {
+    f32 current = *value;
+    s32 changed = 0;
+
+    if (D_00324510.coarseUp < 0) {
+        if (current < maximum) {
+            current += coarseStep;
+        } else {
+            current = minimum;
+        }
+        changed = 1;
+    } else if (D_00324510.coarseUp & 2) {
+        if (current < maximum) {
+            current += coarseStep;
+            changed = 1;
+        }
+    } else if (D_00324510.coarseDown < 0) {
+        if (minimum < current) {
+            current -= coarseStep;
+        } else {
+            current = maximum;
+        }
+        changed = 1;
+    } else if (D_00324510.coarseDown & 2) {
+        if (minimum < current) {
+            current -= coarseStep;
+            changed = 1;
+        }
+    } else if (fineStep != 0.0f) {
+        if (D_00324510.fineUp < 0) {
+            if (current < maximum) {
+                current += fineStep;
+                if (maximum < current) {
+                    current = maximum;
+                }
+            } else {
+                current = minimum;
+            }
+            changed = 1;
+        } else if (D_00324510.fineUp & 2) {
+            if (current < maximum) {
+                current += fineStep;
+                if (maximum < current) {
+                    current = maximum;
+                }
+                changed = 1;
+            }
+        } else if (D_00324510.fineDown < 0) {
+            if (minimum < current) {
+                current -= fineStep;
+                if (current < minimum) {
+                    current = minimum;
+                }
+            } else {
+                current = maximum;
+            }
+            changed = 1;
+        } else if (D_00324510.fineDown & 2) {
+            if (minimum < current) {
+                current -= fineStep;
+                if (current < minimum) {
+                    current = minimum;
+                }
+                changed = 1;
+            }
+        }
+    }
+    if (changed != 0) {
+        *value = current;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019FF60);
 

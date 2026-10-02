@@ -1,6 +1,9 @@
 #include "common.h"
 
 extern u32 effGetResourceFirstWord(u32);
+extern u32 effMiscRand(void *);
+extern f32 effMiscRandUnitFloat(void *);
+extern u8 D_003AA868[];
 
 
 /* Draw payload shared by both slot families: two words, two floats,
@@ -138,7 +141,31 @@ void effBlurAcquireHandle(EffBlurScatterWork *work) {
     work->sourceHandle = effGetResourceFirstWord(2);
 }
 
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EA98);
+void func_0018EA98(EffBlurScatterWork *work, EffBlurScatterSlot *slot) {
+    EffBlurQuad *quad = &slot->quad;
+    f32 spread;
+    s32 halfSize;
+    s32 centerX;
+    s32 centerY;
+    slot->delay = effMiscRand(D_003AA868) % (work->params.delaySpread + 1);
+    slot->angle = -3.14159265f;
+    quad->unk8 = work->params.unk14;
+    quad->color = work->params.color;
+    quad->unk4 = work->params.unk10;
+    spread = work->params.positionSpread;
+    halfSize = work->params.size;
+    quad->x = work->params.x +
+        (s32)(spread * ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f));
+    halfSize >>= 1;
+    quad->y = work->params.y +
+        (s32)(spread * ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f));
+    centerX = quad->x + 256;
+    quad->left = centerX - halfSize;
+    quad->right = centerX + halfSize;
+    centerY = quad->y + 224;
+    quad->top = centerY - halfSize;
+    quad->bottom = centerY + halfSize;
+}
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EBC8);
 
