@@ -49,6 +49,10 @@ the following hold:
 - every allocated replacement-object section is explicitly moved or retained;
   retained data and BSS sections must remain empty, and COMMON storage is
   rejected;
+- every moved writable section that overlaps the signed retail `_gp` window
+  declares exact retail and development GP-reference counts; no development
+  reference may still address its abandoned range, and any surviving sites
+  must retain their named function and intra-function offsets;
 - each development-only addition occupies its linker-derived span and retains
   its expected number of relocation entries; and
 - each static linker redirect starts at its asserted retail target and resolves
@@ -61,6 +65,12 @@ at their retail placements. The current policy requires every retained section
 to have size zero. A replacement source may contain `INCLUDE_ASM` only when its
 symbols are explicitly listed as fallbacks in source order. `INCLUDE_RODATA`
 and `INCLUDE_SDATA` remain unsupported for replacement objects.
+
+A writable move whose retail range overlaps the signed `_gp` window must set
+both `expected_retail_gp_references` and `expected_gp_references`. These counts
+cover physical GP-based address forms across the complete main text and all
+moved or development-only text, rather than only relocation records emitted by
+replacement code.
 
 The descriptors for the current moves and their asserted binary sites are
 `config/dds1/devbuild.json` and `config/dds2/devbuild.json`. The checks
