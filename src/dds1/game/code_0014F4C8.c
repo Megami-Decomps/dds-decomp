@@ -118,7 +118,7 @@ extern void effMiscSeedRandomFromClock(u8 *);
 
 extern void fileManagerResetSubsystems(void);
 
-extern void func_00150040(void);
+extern void effInitializeBillResourceOwners(void);
 
 extern void parSysReset(void);
 
@@ -145,7 +145,7 @@ extern char D_003BB008[];
 void fldCreateFieldEffectTask(void) {
     effMiscSeedRandomFromClock(D_0034DF38);
     fileManagerResetSubsystems();
-    func_00150040();
+    effInitializeBillResourceOwners();
     parSysReset();
     func_00153680();
     kwlnTaskCreate("effect_f", 0x2B04, 0, 0, func_0014F860, NULL, 0);
