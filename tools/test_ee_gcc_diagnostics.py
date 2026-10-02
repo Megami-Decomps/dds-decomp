@@ -21,6 +21,7 @@ def load(name, path):
 probe = load("ee_gcc_probe", ROOT / "tools/ee_gcc_probe.py")
 compare = load("ee_gcc_compare", ROOT / "tools/ee_gcc_compare.py")
 delay_slots = load("ee_gcc_delay_slots", ROOT / "tools/ee_gcc_delay_slots.py")
+allocations = load("ee_gcc_allocations", ROOT / "tools/ee_gcc_allocations.py")
 
 
 class ProbeTests(unittest.TestCase):
@@ -164,6 +165,58 @@ class DelaySlotTests(unittest.TestCase):
         self.assertEqual(75, sequences[0]["slots"][0]["uid"])
         self.assertEqual("load", sequences[0]["slots"][0]["operation"])
         self.assertEqual("$f14", sequences[0]["slots"][0]["destination"])
+
+
+class AllocationTests(unittest.TestCase):
+    SAMPLE = """;; Function sample
+;; 2 regs to allocate: 84 85
+;; 84 conflicts: 84 85 2 4 28 29
+;; 84 preferences: 5
+;; 85 conflicts: 84 85 2 5 28 29
+
+;; Register dispositions:
+84 in 5  85 in 4  91 in 2
+
+;; Hard regs used:  0 1 2 4 5 31 75
+Spilling for insn 40.
+Reloads for insn # 40
+"""
+
+    def test_global_candidates_are_distinct_from_other_dispositions(self):
+        report = allocations.parse_dump(self.SAMPLE, "sample")[0]
+        self.assertEqual([84, 85], report["global_allocation_order"])
+        self.assertEqual([40], report["spills"])
+        self.assertEqual([40], report["reloads"])
+        rows = {row["pseudo"]: row for row in report["pseudos"]}
+        self.assertEqual("a1", rows[84]["selected_name"])
+        self.assertEqual([2, 4, 28, 29], rows[84]["hard_conflicts"])
+        self.assertEqual("other_disposition", rows[91]["allocation_kind"])
+
+    def test_final_attempt_is_used_after_allocator_retry(self):
+        text = """;; Function retried
+;; 1 regs to allocate: 84
+;; 84 conflicts: 84 2
+;; 1 regs to allocate: 85
+;; 85 conflicts: 85 3
+;; Register dispositions:
+85 in 4
+;; Hard regs used: 4
+"""
+        report = allocations.parse_dump(text, "retried")[0]
+        self.assertEqual(1, report["retry_count"])
+        self.assertEqual([85], report["global_allocation_order"])
+        self.assertEqual(2, len(report["allocation_attempts"]))
+
+    def test_multireg_width_is_not_mistaken_for_an_allocno(self):
+        text = """;; Function wide
+;; 2 regs to allocate: 84 (2) 86
+;; Register dispositions:
+84 in 4  85 in 5  86 in 6
+;; Hard regs used: 4 5 6
+"""
+        attempt = allocations.parse_dump(text, "wide")[0]["allocation_attempts"][0]
+        self.assertEqual([84, 86], attempt["allocation_order"])
+        self.assertEqual({"84": 2}, attempt["hard_register_widths"])
 
 
 if __name__ == "__main__":

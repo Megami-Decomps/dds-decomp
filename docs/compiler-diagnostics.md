@@ -98,6 +98,47 @@ Run the focused tests with:
 python3 tools/test_ee_gcc_diagnostics.py
 ```
 
+## Explain global allocation
+
+When the first target-function difference is pass `19` or `20`, summarize the
+pass-20 allocation records before investigating later scheduling:
+
+```sh
+python3 tools/ee_gcc_allocations.py /tmp/snd-candidate \
+  --function sndCreateSystemEffect \
+  --json /tmp/snd-allocations.json
+```
+
+The report separates three facts that the raw dump prints together:
+
+- `global order` is the greedy attempt order for global allocnos that remained
+  unassigned after local allocation;
+- `global/N` rows are those candidates and show their final hard register,
+  hard-register conflicts and preferences;
+- `other` rows occur in the final disposition table but are not an allocno
+  representative in the global candidate list. They can include locally
+  assigned pseudos, additional pseudos grouped into a global allocno, and
+  reload-created pseudos.
+
+The compiler can retry global allocation. The JSON report preserves every
+printed attempt and the text report calls out the retry count; the displayed
+candidate table uses the last attempt. Spill and reload instruction UIDs are
+reported as events, but the tool does not infer a spilled source variable from
+an instruction UID.
+
+Pseudo numbers are compiler-internal identities, not source-variable names,
+and can change between source forms. Identify a pseudo from its defining and
+using RTL inside each probe rather than assuming that `r84` has the same
+meaning in both. Then ask which truthful source type, lifetime or expression
+fact could change its conflicts or remove it. If pass `19` or `20` already has
+the wrong map, sched2 and delay-slot experiments are downstream: they can
+reorder the selected hard-register dataflow, but cannot repair the earlier
+allocation choice.
+
+This is a classifier and an experiment guide, not a register-binding recipe.
+An allocation-driven source idiom should be documented only after natural C
+matches exactly and transfers to a function that was not used to derive it.
+
 ## Explain a filled delay slot
 
 When the first divergence is pass `29`, inspect the sequence that the delayed-
