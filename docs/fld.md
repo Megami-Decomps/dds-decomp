@@ -111,6 +111,18 @@ The assembler rejects an out-of-range vertex index, except for the retail
 `0xffffffff` triangle sentinel. Event placements likewise must refer to an
 event resource present in the same file.
 
+Faces that override the area's random-encounter zone use a semantic form:
+
+```text
+face attributes=0x00002000 move_floor=0 sound=0 stop=0 place=0 \
+  automap=0,0 vertices=0,1,3,2 encounter_zone=61 special=0,0
+```
+
+The assembler derives the stored `{1, zone}` tag and requires it to agree with
+attribute `0x2000`. Both game runtimes read the zone halfword when the player
+enters one of these faces. Untagged faces retain the raw zero pair because the
+two physical fields still exist.
+
 Placement kind 8 carries an eight-byte `special_point` payload. Its first word
 selects a save terminal, heal terminal, or indexed hunt marker; the second is
 the terminal or marker id. Both PS2 runtimes create `SAVE_UNIT` and
@@ -161,6 +173,14 @@ silently leave a missing target unresolved.
 For example, the `001_01eve_01` string in the DDS1 `f011_001` event resource
 resolves to the procedure of the same name in `f011.bfasm`, and its `01d_01`
 door placement resolves the matching actor row in `f011.wapasm`.
+
+The normal field-data build also links the complete FLD2 corpus to the rebuilt
+`ENCOUNT.TBL`. For an `fNNN_AAA` source, the runtime selects default map `NNN`
+and entry `AAA`, then applies either of that entry's flag-controlled alternate
+zones. A collision face with `encounter_zone=N` overrides that result. The
+linker rejects an out-of-range or empty zone, a malformed face tag, and an area
+outside the encounter map's 64 entries. This currently closes 419 DDS1 and 452
+DDS2 default-area links, plus all 40 DDS1 and 22 DDS2 face overrides.
 
 ## Archive boundary
 
