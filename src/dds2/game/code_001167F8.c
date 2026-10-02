@@ -33,7 +33,7 @@ extern ActionObj *dds3AppendWorldObjectNode();
 
 extern void dds3EnsureSlotData();
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 u32 func_001167F8(void) {
     return 1;
@@ -166,7 +166,7 @@ void dds3LoadWorldTransformParams(WorldTransformOwner *object, WorldTransformPar
 
 
 s32 dds3AllocateUnitObjectWork(WorldUnitOwner *obj) {
-    obj->state = func_00328D68(0x1C);
+    obj->state = sdfAllocSizeClassBlock(0x1C);
     memset(obj->state, 0, 0x1C);
     return 1;
 }

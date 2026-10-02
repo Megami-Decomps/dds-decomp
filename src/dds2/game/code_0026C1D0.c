@@ -392,7 +392,7 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CB98);
 
 extern s32 mnuGetListViewportHeight(s32);
 
-extern void func_00308808(s32, s32, s32, s32, s32, u32, s32);
+extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, u32, s32);
 
 extern void func_0026CB98(s32, s32, s32, s32, s32);
 
@@ -410,12 +410,12 @@ typedef struct {
 void evtDrawListViewportPanel(s32 x, s32 y, s32 width, EvtPanelRecord *record) {
     s32 height = mnuGetListViewportHeight(record->heightSource) + 0x80;
 
-    func_00308808(x, y, 0, width, height, 0x30303040, 0x53);
+    uiDrawUniformColorRect(x, y, 0, width, height, 0x30303040, 0x53);
     func_0026CB98(x + width - 0xA0, y, y + height, 8, (s32)record);
 }
 
 void evtDrawPlainPanel(u32 x, u32 y, u32 width, u32 height) {
-    func_00308808(x, y, 0, width, height, 0x30303040, 0x53);
+    uiDrawUniformColorRect(x, y, 0, width, height, 0x30303040, 0x53);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CD50);

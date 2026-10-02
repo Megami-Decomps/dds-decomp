@@ -122,7 +122,7 @@ typedef struct WorldNode {
     u32 unk20; u32 unk24;
 } WorldNode;
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 /* Allocate and clear a world node, then attach it as the object's entry.
    The assignment order is load-bearing: ee-gcc hoists the last statement's
@@ -131,7 +131,7 @@ extern void *func_00328D68(s32 size);
 s32 dds3AllocateWorldObjectEntry(WorldObject *object) {
     WorldNode *node;
 
-    node = (WorldNode *)func_00328D68(0x28);
+    node = (WorldNode *)sdfAllocSizeClassBlock(0x28);
     if (node == NULL) {
         return 0;
     }

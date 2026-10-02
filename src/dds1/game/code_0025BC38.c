@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_002CFEB8(u32);
+extern s32 sdfAllocSizeClassBlock(u32);
 
 void effDestroyResourceSlotSet(u32);
 
@@ -82,7 +82,7 @@ typedef struct {
 } MenuResourceWork;
 
 u32 mnuRequestEffectResource(u32 ctx, u32 config) {
-    MenuResourceWork *work = (MenuResourceWork *)func_002CFEB8(0x70);
+    MenuResourceWork *work = (MenuResourceWork *)sdfAllocSizeClassBlock(0x70);
     memset(work, 0, 0x70);
     effRequestResourceByMode(ctx, config, 0, (u32)&work->resourceHandle);
     return (u32)work;
@@ -199,7 +199,7 @@ void mnuDrawMantraCostIcon(s32 x, s32 y, s32 z, s32 entry, s32 arg4, s32 arg5) {
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D7F8);
 
 MenuListNode *mnuAllocateMenuListNode(void) {
-    MenuListNode *node = (MenuListNode *)func_002CFEB8(0x14);
+    MenuListNode *node = (MenuListNode *)sdfAllocSizeClassBlock(0x14);
 
     memset(node, 0, 0x14);
     return node;

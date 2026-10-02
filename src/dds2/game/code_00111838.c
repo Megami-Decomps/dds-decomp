@@ -46,7 +46,7 @@ typedef struct DdsSlotResourceState {
     s32 currentSlot;
 } DdsSlotResourceState;
 
-extern void *func_00328D68(s32);
+extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 extern u32 dds3AppendWorldIndexNode(s32);
 
@@ -143,7 +143,7 @@ s32 dds3GetObjectSlotRingOccupancy(u32 kind)
 }
 
 DdsSlotResourceState *dds3CreateSlotResourceState(s32 value) {
-    DdsSlotResourceState *state = func_00328D68(sizeof(DdsSlotResourceState));
+    DdsSlotResourceState *state = sdfAllocSizeClassBlock(sizeof(DdsSlotResourceState));
     s32 i;
     u32 node;
 

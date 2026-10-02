@@ -176,7 +176,7 @@ void sdfCycleBackward(void) {
     }
 }
 
-s8 func_002C3D88(void) {
+s8 sdfGetMapCameraTransitionFrame(void) {
     return D_003BD270;
 }
 
@@ -218,7 +218,7 @@ s32 sdfStepSelectedMapCameraTransition(void) {
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4160);
 
 extern s32 mnuCreateListState(s32, s32, s32);
-extern void *func_002CFEB8(s32);
+extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 extern s32 mdlCollectFlagBitsIntoMask(void);
 extern SdfCounterChannel *mnuListAppendNode(s32, s32);
@@ -236,14 +236,14 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
 
     count = 0;
     sdfActiveCounterRuntime = mnuCreateListState(0, 6, 0x16);
-    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer = func_002CFEB8(0x24);
+    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer = sdfAllocSizeClassBlock(0x24);
     memset(((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer, 0, 0x24);
     ((SdfCounterRuntime *)sdfActiveCounterRuntime)->draw = func_002C4C88;
     completedMask = mdlCollectFlagBitsIntoMask();
     for (i = 0; i != 10; i++) {
         if ((mask >> i) & 1) {
             channel = mnuListAppendNode(sdfActiveCounterRuntime, 0);
-            display = func_002CFEB8(0x10);
+            display = sdfAllocSizeClassBlock(0x10);
             memset(display, 0, 0x10);
             display->value = i + 1;
             display->word = (u32 *)(D_00390220 + i * 0x18);

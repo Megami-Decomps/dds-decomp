@@ -4,7 +4,7 @@ extern s32 strcmp(const char *a, const char *b);
 extern char *strcpy(char *dst, const char *src);
 extern s32 dds3GetWorldObject(void);
 extern s32 dds3FindIndexedObjectChainNodeByName(s32 world, s32 type, const char *name);
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *memset(void *dst, s32 value, u32 size);
 
 /* Node queued on an entry, linked through +0x30/+0x34, owning a buffer. */
@@ -196,7 +196,7 @@ void evtEventViewerUnlinkEntry(EvtEvEntry *entry, EvtViewer *viewer) {
 EvtEvEntry *evtEventViewerCreateEntry(s32 id, EvtViewer *viewer) {
     EvtEvEntry *entry;
 
-    entry = func_00328D68(0x84);
+    entry = sdfAllocSizeClassBlock(0x84);
     if (entry == NULL) {
         return NULL;
     }

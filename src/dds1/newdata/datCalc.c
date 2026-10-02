@@ -112,7 +112,7 @@ typedef struct DatUnitStatus {
     s8 statValues[0x100];
 } DatUnitStatus;
 
-s32 func_00119300(DatUnitStatus *unit, s32 statIndex) {
+s32 datGetClampedProfileAdjustedStat(DatUnitStatus *unit, s32 statIndex) {
     s32 value = unit->statValues[statIndex] +
                 func_002CDDB0((u16)ptyGetCurrentProfileId((u8 *)unit), statIndex);
 
@@ -128,7 +128,7 @@ s32 datGetStatWithStatusOverride(DatUnitStatus *unit, s32 statIndex) {
     if ((unit->status & 0x7FFF) == 0x1000) {
         return 1;
     }
-    return func_00119300(unit, statIndex);
+    return datGetClampedProfileAdjustedStat(unit, statIndex);
 }
 
 

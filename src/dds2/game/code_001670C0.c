@@ -18,7 +18,7 @@ extern void *sdfAllocPacketAligned(s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 extern void effReleaseBattleVoiceOwner(void *);
-extern void func_00169370(void *);
+extern void effBattleReleaseParameterBanks(void *);
 extern void sdfReleaseResourceAllocation(void *);
 extern void func_00168280();
 extern void kwlnCreateHeldTextureBuffer(s32, s32, f32);
@@ -126,7 +126,7 @@ u16 effBillGetQueuedCount(EffectDispatchState *effect) {
     return effect->valueB2;
 }
 
-void func_00167268(void *dst, void *src) {
+void billCopyDispatchWorkVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -164,7 +164,7 @@ void effBillSetEntryValue(EffectDispatchState *effect, s32 index, u32 value) {
     effect->entries[index].value = value;
 }
 
-s32 func_00167400(EffectDispatchState *effect) {
+s32 billGetWorkTransformMatrix(EffectDispatchState *effect) {
     return (s32)effect + 0x20;
 }
 
@@ -309,7 +309,7 @@ INCLUDE_ASM(const s32, "game/code_001670C0", func_00168280);
 extern u32 sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(u32 handle);
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern void func_00169230(SoundMixer *dst, SoundMixer *src);
+extern void effBattleRebuildClonedParameterBanks(SoundMixer *dst, SoundMixer *src);
 
 /* Clone a mixer: copy its banks, rebuild the voice state from the original and start with no voices. */
 SoundMixer *sndMixerClone(SoundMixer *src) {
@@ -318,7 +318,7 @@ SoundMixer *sndMixerClone(SoundMixer *src) {
 
     mixer->resource = (void *)handle;
     memcpy(mixer, src, 0xC38);
-    func_00169230(mixer, src);
+    effBattleRebuildClonedParameterBanks(mixer, src);
     mixer->unk0C3C = 0;
     mixer->voiceList = NULL;
     return mixer;
@@ -333,7 +333,7 @@ void sndReleaseAllVoices(SoundMixer *mixer) {
         effReleaseBattleVoiceOwner(voice);
         voice = next;
     }
-    func_00169370(mixer);
+    effBattleReleaseParameterBanks(mixer);
     sdfReleaseResourceAllocation(mixer->resource);
 }
 

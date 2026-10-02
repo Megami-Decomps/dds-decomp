@@ -29,7 +29,7 @@ struct PcpScatterRes {
     s32 refCount;
 };
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern u32 sdfTexAcquireResourceTexture(u32 resId);
 
@@ -641,7 +641,7 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
 {
     PcpScatterRes *res;
 
-    res = func_00328D68(8);
+    res = sdfAllocSizeClassBlock(8);
     res->resourceHandle = sdfTexAcquireResourceTexture(resId);
     res->refCount = 1;
     return res;
@@ -1552,7 +1552,7 @@ void effSetScatterWorkColor(PcpScatterInstanceC *work, u32 value) {
 }
 
 /* vu0 routine: matrix = (matrix + 0x50) * src, via the vf28-vf31 by vf24-vf27 product routine */
-void func_0017CE28(PcpScatterInstanceC *work, void *source) {
+void effScatterComposeParticleMatrix(PcpScatterInstanceC *work, void *source) {
     VU0_LOAD_MATRIX(source);
     VU0_LOAD_MATRIX_B(work->params.matrix);
     sdfComposeVuMatrixFromRegisters();

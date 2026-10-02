@@ -119,7 +119,7 @@ typedef struct DatUnitStatus {
     s8 statValues[0x100];
 } DatUnitStatus;
 
-s32 func_00119A10(DatUnitStatus *unit, s32 statIndex) {
+s32 datGetClampedProfileAdjustedStat(DatUnitStatus *unit, s32 statIndex) {
     s32 value = unit->statValues[statIndex] +
                 prfGetIndexedProfileByte((u16)func_00314C10((s32)unit), statIndex);
 
@@ -131,13 +131,13 @@ s32 func_00119A10(DatUnitStatus *unit, s32 statIndex) {
 }
 extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
 
-s32 func_00119A78(DatUnitStatus *unit, s32 slot) {
+s32 datGetStatWithStatusOverride(DatUnitStatus *unit, s32 slot) {
     s32 value;
 
     if ((unit->status & 0x7FFF) == 0x1000) {
         return 1;
     }
-    value = func_00119A10(unit, slot);
+    value = datGetClampedProfileAdjustedStat(unit, slot);
     value += ptyGetCombinedRecordAndSlotValue(
         *(u16 *)((u8 *)unit + 0x1B2), slot);
     if (value < 0) {

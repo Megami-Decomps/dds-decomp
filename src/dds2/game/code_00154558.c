@@ -1196,7 +1196,7 @@ s32 fldOpSetMapTargetFlag(void) {
     return 1;
 }
 
-s32 func_00156180(void) {
+s32 fldOpClearAlternateMapTargetFlag(void) {
     s32 area = scrReadIntParameter(0);
     s32 floor, target;
     if (area == 0) area = D_00389780[0];
@@ -1208,7 +1208,7 @@ s32 func_00156180(void) {
     return 1;
 }
 
-s32 func_00156208(void) {
+s32 fldOpSetAlternateMapTargetFlag(void) {
     s32 area = scrReadIntParameter(0);
     s32 floor, target;
     if (area == 0) area = D_00389780[0];
@@ -1725,14 +1725,14 @@ s32 fldCommandSendNamedSound(void) {
     s32 commandName;
     commandName = scrReadStringParameter(0);
     if (sdfSoundIsCommandBusy() != 0) {
-        func_00342690();
+        sdfSoundStopNamedPlayback();
     }
     sdfSoundSendNamedCommand(commandName, 0x7f);
     return 1;
 }
 
 u32 fldCommandSendSoundControl(void) {
-    func_00342690();
+    sdfSoundStopNamedPlayback();
     return 1;
 }
 

@@ -16,14 +16,14 @@ typedef struct MagatuhiEffectData {
     s32 field1C;
 } MagatuhiEffectData;
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 func_00189220(s32, s32, s32, f32, f32);
 extern void effMagatuhiFillColorTable(s32, s32, s32);
 
 void *effCloneMagatuhiWithColorResource(MagatuhiEffectData *source) {
     MagatuhiEffectData *effect;
 
-    effect = (MagatuhiEffectData *)func_002CFEB8(0x20);
+    effect = (MagatuhiEffectData *)sdfAllocSizeClassBlock(0x20);
     memcpy(effect, source, 0x1C);
     effect->field1C = func_00189220(effect->field00, effect->field04, effect->field14, effect->field08, effect->field18);
     effMagatuhiFillColorTable(effect->field1C, effect->field0C, effect->field10);

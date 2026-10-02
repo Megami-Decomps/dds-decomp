@@ -91,7 +91,7 @@ typedef struct SdfMemHeap {
 
 extern SdfMemHeap D_0045F0F8;
 extern void *func_0035A828(u32 size);
-extern void *func_00328D68(u32 size);
+extern void *sdfAllocSizeClassBlock(u32 size);
 extern s32 D_004389CC;
 extern u8 D_00439128[4];
 extern void sdfReleaseResourceAllocation();
@@ -106,7 +106,7 @@ void sdfInitGeneralHeap(u32 size) {
 
     heap->base = (u32)func_0035A828(size);
     heap->size = size;
-    block = func_00328D68(0x10);
+    block = sdfAllocSizeClassBlock(0x10);
     first = (heap->base + 0x7F) & ~0x7F;
     end = (heap->base + size) & ~0x7F;
     heap->head.prev = NULL;

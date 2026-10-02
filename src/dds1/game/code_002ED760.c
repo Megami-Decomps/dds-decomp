@@ -80,7 +80,7 @@ void func_002EDAE0(SdfPacWork *job) {
     }
 }
 
-s32 func_002EDBB8(SdfPacWork *work) {
+s32 sdfPacCheckDecoderStatus(SdfPacWork *work) {
     if (work->decoder.status0F == 0) {
         return 0;
     }

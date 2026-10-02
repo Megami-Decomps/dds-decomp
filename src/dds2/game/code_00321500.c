@@ -181,7 +181,7 @@ typedef struct MenuStateRecord {
     s16 limit;     /* 0x16 */
 } MenuStateRecord;
 
-s32 func_00321928(MenuStateRecord *record) {
+s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record) {
     if (record->flags.bits.completed) {
         return 1;
     }

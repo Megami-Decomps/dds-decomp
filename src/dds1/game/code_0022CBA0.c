@@ -27,7 +27,7 @@ void dds3SetWorldCameraObject(s32 arg0, u32 arg1);
 f32 dds3GetCameraFieldOfView(s32 arg0);
 s32 func_00106488(f32 arg0);
 void mnuStopMovieDrawTask(void);
-void func_00270068(void);
+void mnuCheckMovieDecoderStatus(void);
 
 /* Handles retained by the viewer and by its owning task context. */
 typedef struct EvtWindowContext {
@@ -358,7 +358,7 @@ s32 evtViewerUpdateTimedAction(EventViewerState *viewer) {
             viewer->timedStart = 0;
             viewer->timedEnd = 0;
         } else if (viewer->timedEnd == -1) {
-            func_00270068();
+            mnuCheckMovieDecoderStatus();
         } else if (viewer->glyphAdvancePosition >= viewer->timedEnd) {
             mnuStopMovieDrawTask();
             viewer->timedActive = 0;
@@ -856,7 +856,7 @@ extern void mnuReleaseCampSceneRegisteredIds();
 extern void evtResetUnitVectorSlots();
 extern void mnuCampLinkFontGlyph();
 extern void func_0014A298();
-extern void func_00105888();
+extern void kwlnCancelConfiguredFadeFrames();
 extern void mnuStopMovieDrawTask();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
@@ -877,7 +877,7 @@ void evtViewerReleaseResources(viewer)
     evtViewerCleanupMessageWindow((s32)viewer);
     mnuCampLinkFontGlyph(viewer);
     func_0014A298(0);
-    func_00105888();
+    kwlnCancelConfiguredFadeFrames();
     D_00324590[0] = D_00324590[1] = D_00324590[2] = D_00324590[3] = 0.0f;
     if (viewer->timedActive == 1) {
         mnuStopMovieDrawTask();

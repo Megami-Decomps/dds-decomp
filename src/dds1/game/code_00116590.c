@@ -22,7 +22,7 @@ typedef struct WorldUnitOwner {
     WorldUnitState *state;
 } WorldUnitOwner;
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 typedef struct ObjWithWork {
     u8 unk0[0x18];
@@ -170,7 +170,7 @@ void dds3LoadWorldTransformParams(WorldTransformOwner *object, WorldTransformPar
 }
 
 u32 dds3AllocateUnitObjectWork(ObjWithWork *obj) {
-    void *work = func_002CFEB8(0x1C);
+    void *work = sdfAllocSizeClassBlock(0x1C);
 
     obj->work = work;
     memset(work, 0, 0x1C);

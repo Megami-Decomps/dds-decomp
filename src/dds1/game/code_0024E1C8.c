@@ -187,7 +187,7 @@ typedef struct MnuPartyRecord {
 
 extern MnuResourceList *mnuCreateListState(s32, s32, s32);
 extern MnuResourceSelectionNode *mnuListAppendNode(MnuResourceList *, s32);
-extern void *func_002CFEB8(s32);
+extern void *sdfAllocSizeClassBlock(s32);
 extern void func_00254C68();
 extern void *memset(void *, s32, u32);
 
@@ -198,7 +198,7 @@ void mnuBuildMantraPartyList(MnuResourceTask *task) {
     MnuResourceList *list = mnuCreateListState(0, 6, 0x1A);
 
     list->drawCallback = func_00254C68;
-    list->drawValues = func_002CFEB8(8);
+    list->drawValues = sdfAllocSizeClassBlock(8);
     memset(list->drawValues, 0, 8);
     memset(partyOrder, 0, sizeof(partyOrder));
     do {
@@ -215,7 +215,7 @@ void mnuBuildMantraPartyList(MnuResourceTask *task) {
     do {
         if (*order != 0) {
             MnuResourceSelectionNode *node = mnuListAppendNode(list, 0);
-            MnuProfileProgress *progress = func_002CFEB8(sizeof(MnuProfileProgress));
+            MnuProfileProgress *progress = sdfAllocSizeClassBlock(sizeof(MnuProfileProgress));
             node->selectionAddress = (u32)progress;
             mnuInitializeProfileProgress(*order - 1, progress);
         }

@@ -565,7 +565,7 @@ void sndFlushMessageQueue(void) {
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F770);
 
-void func_0019F850(UiPanelPlacement *object, s32 mode) {
+void itfAdjustPanelBoundsWithPad(UiPanelPlacement *object, s32 mode) {
     UiSprite *sprite = object->sprite;
     s32 *bounds;
     s32 dx;
@@ -668,9 +668,9 @@ extern void itfMesSetWindowCallbackAddress(s32, void (*)(void));
 
 extern void sndCycleTestMessageResource(void);
 
-extern s32 func_0019FBD8(void);
+extern s32 itfUpdateTestMessageResourceInput(void);
 
-extern void func_0019FCA8(void);
+extern void itfPrintTestMessageCallback(void);
 
 extern s32 sndUpdateTestMsgTask(void);
 
@@ -683,8 +683,8 @@ typedef struct TestMessageTaskData {
 void sndCreateTestMsgTasks(void) {
     D_003BA8EC = 0x80FFFFFF;
     sndCycleTestMessageResource();
-    itfMesSetWindowCallbackAddress(((TestMessageTaskData *)kwlnTaskGetUserValue(scrCreateTaskForProcessId(0x3E8, D_00358038, 0)))->window, func_0019FCA8);
-    kwlnTaskCreate((u32)D_003A14F0, 0x3EF, 0, 0, (s32 (*)(s64))func_0019FBD8, 0, 0);
+    itfMesSetWindowCallbackAddress(((TestMessageTaskData *)kwlnTaskGetUserValue(scrCreateTaskForProcessId(0x3E8, D_00358038, 0)))->window, itfPrintTestMessageCallback);
+    kwlnTaskCreate((u32)D_003A14F0, 0x3EF, 0, 0, (s32 (*)(s64))itfUpdateTestMessageResourceInput, 0, 0);
     kwlnTaskCreate((u32)D_003A1500, 0x2AFE, 0, 0, (s32 (*)(s64))sndUpdateTestMsgTask, 0, 0);
 }
 
@@ -699,7 +699,7 @@ void sndCycleTestMessageResource(void) {
     }
 }
 
-s32 func_0019FBD8(void) {
+s32 itfUpdateTestMessageResourceInput(void) {
     if (D_00324530[0] < 0) {
         sndCycleTestMessageResource();
     }
@@ -750,7 +750,7 @@ INCLUDE_RODATA(const s32, "game/code_0019DB88", D_003A1528);
 
 INCLUDE_RODATA(const s32, "game/code_0019DB88", D_003A1540);
 
-void func_0019FCA8(void) {
+void itfPrintTestMessageCallback(void) {
     func_003003F0("********* AAAA ********\n");
 }
 

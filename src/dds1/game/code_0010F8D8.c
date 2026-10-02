@@ -128,7 +128,7 @@ typedef struct WorldNode {
 s32 dds3AllocateWorldObjectEntry(WorldObject *object) {
     WorldNode *node;
 
-    node = (WorldNode *)func_002CFEB8(0x28);
+    node = (WorldNode *)sdfAllocSizeClassBlock(0x28);
     if (node == NULL) {
         return 0;
     }

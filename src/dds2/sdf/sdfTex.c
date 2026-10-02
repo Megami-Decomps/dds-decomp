@@ -15,7 +15,7 @@ void sdfFreeMemoryFromEitherHeap(void *arg0);
 
 void *sdfTexCreateResourcePacket(SdfTex *arg0, s32 arg1);
 
-void *func_00328D68(s32 arg0);
+void *sdfAllocSizeClassBlock(s32 arg0);
 
 u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 
@@ -116,7 +116,7 @@ void *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
     u32 primary;
     u32 secondary;
 
-    packet = func_00328D68(0x40);
+    packet = sdfAllocSizeClassBlock(0x40);
     primary = sdfTexGetPrimaryResourceWord(texture);
     secondary = sdfTexGetSecondaryResourceWord(texture);
     func_0032BBF8(packet, texture->width, texture->height, primary, texture->pixelFormat, secondary, texture->clutFormat, 1, texture->maxMipLevel, texture->lodParameters, texture->clampMode, variant);

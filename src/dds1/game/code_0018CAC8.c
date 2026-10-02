@@ -31,7 +31,7 @@ extern void dds3AdminSubmitModeRequest(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 extern void func_003101B8(void);
 extern void func_003014F0();
 extern s32 sceDopen(void *arg0);
-extern void *func_002CFEB8(s32 arg0);
+extern void *sdfAllocSizeClassBlock(s32 arg0);
 extern void sdfInitPacketList(s32 arg0);
 extern void sdfConsCreateDrawPacket(s32 arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern void *sdfConsMeasurePacketWithHeader(s32 arg0);
@@ -51,7 +51,7 @@ extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 
 EffResult *effAllocDispatch(s32 type, s32 handlerArg) {
-    EffResult *result = func_002CFEB8(8);
+    EffResult *result = sdfAllocSizeClassBlock(8);
     s32 handlerResult = D_00355730[type].handler(handlerArg);
 
     result->unk0 = type;
@@ -334,7 +334,7 @@ typedef struct EffResourceDescriptor {
 
 /* Build a resource descriptor with the list's count and head. */
 EffResourceDescriptor *effCreateResourceListDescriptor(EffResourceList *list) {
-    EffResourceDescriptor *resource = func_002CFEB8(0x44);
+    EffResourceDescriptor *resource = sdfAllocSizeClassBlock(0x44);
 
     resource->word00 = 0;
     resource->word04 = 0xC8;

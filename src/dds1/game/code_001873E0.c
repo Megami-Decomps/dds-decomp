@@ -113,7 +113,7 @@ extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendDmaPrimary(void *, const void *, void *);
 extern void *effCreateSizedDrawPacket();
-extern void *func_0015F810();
+extern void *billGetWorkTransformMatrix();
 extern void func_00187788();
 extern void sdfAppendPacket();
 
@@ -175,7 +175,7 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
         clampPacket[5] = 8;
         sdfAppendPacket(list, clampPacket);
         drawPacket = effCreateSizedDrawPacket(1, 0);
-        func_00187788(source, func_0015F810(drawPacket), 0);
+        func_00187788(source, billGetWorkTransformMatrix(drawPacket), 0);
         sdfAppendPacket(list, drawPacket);
         D_003253E8.draw(&D_003253E8, list);
     }

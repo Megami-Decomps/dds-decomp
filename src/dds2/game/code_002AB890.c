@@ -83,7 +83,7 @@ void func_002AC660(MenuStaffContext *object) {
     mnuDestroyWindowContainer(((MenuResourceSet *)object->menu)->fourth);
 }
 
-s32 func_002AC688(s32 previousIndex, s32 selectedIndex, MenuStaffContext *owner) {
+s32 mnuUpdateStaffEntrySelectionFlags(s32 previousIndex, s32 selectedIndex, MenuStaffContext *owner) {
     MenuStaffNode *node = ((MenuStaffList *)((MenuResourceSet *)owner->menu)->fourth)->window->head;
     s32 index;
 

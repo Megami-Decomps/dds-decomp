@@ -83,7 +83,7 @@ extern u8 D_00438B50[];
 
 extern u8 D_00438B58[];
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern u32 strlen(const char *s);
 extern f32 sdfNormalizedAsinSamples[];
@@ -1074,7 +1074,7 @@ char *sdfStrDup(const char *text) {
         return NULL;
     }
     length = strlen(text);
-    copy = func_00328D68(length + 1);
+    copy = sdfAllocSizeClassBlock(length + 1);
     memcpy(copy, text, length);
     copy[length] = 0;
     return copy;
@@ -1106,7 +1106,7 @@ s32 sdfDecimalToPackedDigits(s32 number) {
 }
 
 DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 mode) {
-    DevRequest *request = func_00328D68(sizeof(*request));
+    DevRequest *request = sdfAllocSizeClassBlock(sizeof(*request));
 
     request->mode = mode;
     request->flags = 0;

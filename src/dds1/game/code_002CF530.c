@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void func_002D00B8(void *);
+extern void sdfQueuePendingChipValue(void *);
 extern void *sdfFindGeneralBlockByAddress(void *);
 extern void sdfQueueNonzeroResourceId(void *);
 
@@ -14,7 +14,7 @@ extern void *sdfResourceRetainAddress(void *);
 
 extern void *sdfAllocGeneralBlock(void);
 
-extern void *func_002CFEB8();
+extern void *sdfAllocSizeClassBlock();
 
 extern u32 D_003BD2CC;
 
@@ -22,7 +22,7 @@ void *sdfAllocateBlockBySizeThreshold(s32 size) {
     if (size >= 0x401) {
         return sdfResourceRetainAddress(sdfAllocGeneralBlock());
     }
-    return func_002CFEB8(size);
+    return sdfAllocSizeClassBlock(size);
 }
 
 void sdfFreeMemoryFromEitherHeap(void *data) {
@@ -39,7 +39,7 @@ void sdfFreeMemoryFromEitherHeap(void *data) {
 void sdfReleaseChipOrRetainedResource(void *data) {
     if (data != NULL) {
         if (sdfChipIsInRange(data)) {
-            func_002D00B8(data);
+            sdfQueuePendingChipValue(data);
             return;
         }
         sdfQueueNonzeroResourceId(sdfFindGeneralBlockByAddress(data));

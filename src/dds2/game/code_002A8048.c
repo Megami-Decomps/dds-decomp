@@ -74,11 +74,11 @@ extern void sdfCreatePacketA(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern s32 mnuMovieViewer();
 
-void func_002A7AF0();
+void mnuRequestIndexedMovieResource();
 
 void mnuStopMovieDrawTask(void);
 
-s32 func_002A8008(void);
+s32 mnuCheckMovieDecoderStatus(void);
 
 s32 mnuSetFrameDivisor(void) {
     func_00345488(0x3c / mnuMovieTaskState);
@@ -94,7 +94,7 @@ u32 mnuScriptRequestMovieByIndex(void) {
     u64 value;
 
     value = scrReadIntParameter(0);
-    func_002A7AF0(value);
+    mnuRequestIndexedMovieResource(value);
     mnuMovieShutdownCounter = 0;
     return 1;
 }
@@ -130,7 +130,7 @@ s32 mnuUpdateMovieDrawShutdownCountdown(void) {
         }
         mnuMovieShutdownCounter = mnuMovieShutdownCounter + 1;
     }
-    scrSetIntegerReturnValue(func_002A8008() == 0);
+    scrSetIntegerReturnValue(mnuCheckMovieDecoderStatus() == 0);
     return 1;
 }
 
@@ -221,7 +221,7 @@ extern s32 D_00457E58[];
 
 void mnuDrawMovieProgressCounter(void) {
     s32 list;
-    if (func_002A8008() == 0) {
+    if (mnuCheckMovieDecoderStatus() == 0) {
         list = D_00457E58[0];
         sdfAppendPacket(list, func_0011F250(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
         sdfAppendPacket(list, sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", ((MovieStatus *)mnuMovieDrawContext)->current, ((MovieStatus *)mnuMovieDrawContext)->total));

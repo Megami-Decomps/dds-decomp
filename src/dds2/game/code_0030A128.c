@@ -86,7 +86,7 @@ extern void evtCreateWorldObjectForKey(s32, s32);
 extern void dds3SetWorldObject(void *);
 extern void *dds3GetWorldSecondaryObject(void);
 extern void fldCreateLocalMapCamera(void);
-extern s32 func_0030B568(void);
+extern s32 fldPackLocalMapFlagStates(void);
 extern s32 fldCountMaskBitsBeforeOrdinal(s32, s32);
 extern s32 sdfCreateMaskedCounterChannels(s32, s32);
 extern s32 func_0030B880(s32);
@@ -420,7 +420,7 @@ void fldInitializeLocalMapScene(void) {
     dds3SetWorldObject(dds3GetWorldSecondaryObject());
     D_00435CBC = 0x80000000;
     fldApplyLightSetIndex(mode);
-    flags = func_0030B568();
+    flags = fldPackLocalMapFlagStates();
     if (flags != 0) {
         mask = flags;
     }
@@ -448,7 +448,7 @@ INCLUDE_ASM(const s32, "game/code_0030A128", func_0030B1E8);
 
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030B470);
 
-s32 func_0030B568(void) {
+s32 fldPackLocalMapFlagStates(void) {
     s32 bits;
 
     bits = mdlFlagTest(0x400);

@@ -94,7 +94,7 @@ void kwlnPadResetMotorLevelsAndOutput(void);
 EvtEvNode *evtEventViewerGetPendingNode(EvtViewer *viewer);
 void func_0022BF00(EvtViewer *viewer);
 void dds3RemoveWorldObjectNode(void *ptr);
-void *func_002CFEB8(s32 size);
+void *sdfAllocSizeClassBlock(s32 size);
 void *memset(void *dst, s32 value, u32 size);
 s32 dds3GetWorldObject(void);
 s32 dds3FindIndexedObjectChainNodeByName(s32 world, s32 type, const char *name);
@@ -210,7 +210,7 @@ EvtEvEntry *evtEventViewerCreateEntry(s32 id, EvtViewer *viewer)
 {
     EvtEvEntry *entry;
 
-    entry = func_002CFEB8(0x84);
+    entry = sdfAllocSizeClassBlock(0x84);
     if (entry == NULL) {
         return NULL;
     }

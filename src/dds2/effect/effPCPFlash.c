@@ -767,7 +767,7 @@ void effRotateFlashParticlePosition(PcpFlashStreakWork *work, s32 index, void *o
 
 extern u32 effMiscRand(void *);
 extern s32 effBlendColor(s32, s32, f32);
-extern void func_001778B0(void *);
+extern void effDrawScaledRecordPool(void *);
 extern u8 D_003AA868[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
@@ -849,7 +849,7 @@ void effFlashUpdateStreak(PcpFlashStreakWork *work) {
     handle->origin[1] = work->origin[1];
     handle->origin[2] = work->origin[2];
     handle->renderScale = work->renderScale;
-    func_001778B0(handle);
+    effDrawScaledRecordPool(handle);
 }
 
 extern s32 func_00177760();
@@ -1088,7 +1088,7 @@ void effFlashOrbitScalingUpdate(PcpFlashScalingOrbitWork *work) {
     handle->origin[1] = work->origin[1];
     handle->origin[2] = work->origin[2];
     handle->renderScale = work->renderScale;
-    func_001778B0(handle);
+    effDrawScaledRecordPool(handle);
 }
 
 extern s32 effRecordPoolCreate();
@@ -1684,7 +1684,7 @@ void effFlashRotatingQuadUpdate(PcpFlashRotatingQuadWork *work) {
     handle->origin[1] = work->origin[1];
     handle->origin[2] = work->origin[2];
     handle->renderScale = work->renderScale;
-    func_001778B0(handle);
+    effDrawScaledRecordPool(handle);
 }
 
 extern PcpFlashDrawPool *effRecordPoolCreateTriad(s32 count);
@@ -2382,7 +2382,7 @@ void effFlashFadingOrbitUpdate(PcpFlashFadingOrbitWork *work) {
     handle->origin[1] = work->origin[1];
     handle->origin[2] = work->origin[2];
     handle->renderScale = work->renderScale;
-    func_001778B0(handle);
+    effDrawScaledRecordPool(handle);
 }
 
 PcpFlashOffsetRadialWork *effFlashOffsetRadialTriangleCreate(src)

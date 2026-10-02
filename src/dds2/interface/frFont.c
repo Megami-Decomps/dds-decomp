@@ -148,7 +148,7 @@ extern s32 frFontDefaultGlyphCellSize;
 
 extern FrFontGlyph *func_0019CE78(void *text, s32 fontIndex, s32 firstOption, s32 secondOption, s32 existingGlyph);
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 typedef struct FrFontSegments {
     void *first;
@@ -298,7 +298,7 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019C9D0);
 
 void *frFontCloneEntryResource(u8 index, s32 option) {
     FrFontEntry *entry = &frFontWork.entries[index];
-    void *dst = func_00328D68(0x120);
+    void *dst = sdfAllocSizeClassBlock(0x120);
     FrFontSegments segments;
 
     itfSplitRelativeSegments(entry->first, &segments);

@@ -87,7 +87,7 @@ void effSampleTrackPolyEndpoints(EffTrackPolyWork *work) {
     func_001906B0(work->data, points);
 }
 
-void func_0018FF10(EffTrackPolyWork *work, void *data) {
+void effTrackPolyPushWorkEndpoints(EffTrackPolyWork *work, void *data) {
     func_001906B0(work->data);
 }
 
@@ -160,8 +160,8 @@ void effTrackPolyDestroyModelWorkList(EffTrackPolyList *list) {
     sdfReleaseResourceAllocation(list->handle);
 }
 
-void func_00190120(EffTrackPolyList *list, s32 index, void *data) {
-    func_0018FF10(list->items[index], data);
+void effTrackPolyPushIndexedWorkEndpoints(EffTrackPolyList *list, s32 index, void *data) {
+    effTrackPolyPushWorkEndpoints(list->items[index], data);
 }
 
 void effTrackPolyResetIndexedWork(EffTrackPolyList *list, s32 index) {
@@ -240,7 +240,7 @@ extern u8 D_003B2000[];
 extern void *sdfCreateAssetWithDrawEntries(void);
 extern void func_003332D0(void *asset, f32 scale);
 
-EffTrackPolyData *func_00190370(s32 historyLength, s32 steps) {
+EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) {
     s32 count = historyLength * steps * 2 + 4;
     s32 bytes = count * (sizeof(u128) + sizeof(u32));
     u32 handle = sdfAllocGeneralBlock(bytes + sizeof(EffTrackPolyData));
@@ -277,13 +277,13 @@ void effTrackPolyInitData(EffTrackPolyData *data) {
 }
 
 /* Select the draw target on the data created by the track constructor. */
-void func_001904A8(EffTrackPolyData *data, u32 kind) {
+void effTrackPolySetDrawKind(EffTrackPolyData *data, u32 kind) {
     data->kind = kind;
 }
 
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
-void func_001904B0(EffTrackPolyData *data, u32 *gradientColors) {
+void effTrackPolyFillGradientColors(EffTrackPolyData *data, u32 *gradientColors) {
     f32 t = 0.0f;
     u32 count = data->count >> 1;
     f32 step = 1.0f / count;

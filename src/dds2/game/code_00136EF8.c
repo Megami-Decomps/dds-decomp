@@ -1056,7 +1056,7 @@ typedef struct FldSaveBlock {
     u32 word[0xEE0]; /* 0x3B80 bytes */
 } FldSaveBlock;
 
-void func_00140180(FldSaveBlock *src) {
+void fldCopyInfoTable(FldSaveBlock *src) {
     *(FldSaveBlock *)D_0038E2D0 = *src;
 }
 
@@ -1692,11 +1692,11 @@ s32 func_00144028(void *task) {
     return 0;
 }
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern void kwlnTaskSetUserValue(s32, void *);
 
 void *fldInitializeTitleBannerTask(s32 task) {
-    s16 *node = func_00328D68(8);
+    s16 *node = sdfAllocSizeClassBlock(8);
     node[1] = 1;
     node[0] = 0;
     node[2] = 0;

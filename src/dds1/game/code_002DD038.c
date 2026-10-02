@@ -7,7 +7,7 @@ extern s32 (*D_003982D0[])(void *a0, s32 a1);
 extern s32 (*D_00398360[])(void *a0, s32 a1);
 extern u8 D_00398368[];
 
-extern s32 func_002CFEB8(s32);
+extern s32 sdfAllocSizeClassBlock(s32);
 
 void func_002DD038(void) {
 }
@@ -51,7 +51,7 @@ typedef struct MotionKeySample {
 extern void sdfFindMotionKeyInterval(void *, void *);
 
 s32 sdfAllocateBoundMotionPointerEntry(s32 source, s32 unused, s32 entryIndex) {
-    s32 entry = func_002CFEB8(0x20);
+    s32 entry = sdfAllocSizeClassBlock(0x20);
 
     sdfSelectMotionPointerEntry(entry, source, D_00398368, entryIndex);
     return entry;
@@ -99,11 +99,11 @@ void sdfCopyPoseRecord(MotionKeyWork *motion) {
 /* Matrix registers: vf28-vf31 are the primary matrix, vf24-vf27 its
  * alternate bank, and vf20-vf23 a third bank copied between the two. */
 
-void func_002DD378(void *matrix) {
+void sdfLoadPrimaryMatrixVU(void *matrix) {
     VU0_LOAD_MATRIX(matrix);
 }
 
-void func_002DD390(void *matrix) {
+void sdfLoadAlternateMatrixVU(void *matrix) {
     VU0_LOAD_MATRIX_B(matrix);
 }
 

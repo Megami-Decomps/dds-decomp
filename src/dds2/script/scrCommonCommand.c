@@ -172,7 +172,7 @@ s32 scrCommandTestIndexedCodeBit(void)
     return 1;
 }
 
-s32 func_0010DD18(void)
+s32 scrCommandStartPadMotor(void)
 {
     s32 p0;
     s32 p1;
@@ -298,9 +298,9 @@ s32 scrCommandSetupFadeFrames(void)
     return 1;
 }
 
-s32 func_0010E000(void)
+s32 scrCommandCancelConfiguredFrameFade(void)
 {
-    func_001057A8();
+    kwlnCancelConfiguredFadeFrames();
     return 1;
 }
 

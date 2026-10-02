@@ -949,9 +949,9 @@ typedef struct ActiveSoundNode {
 
 extern void btlRunTask(SoundTask *);
 
-extern s32 func_00232EE8(s32);
+extern s32 mdlGetContextResourceGroup(s32);
 
-extern s32 func_00232EF8(s32);
+extern s32 mdlGetContextResourceId(s32);
 
 extern f32 func_00208000(s32, s32, s32);
 

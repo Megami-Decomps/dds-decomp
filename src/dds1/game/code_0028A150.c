@@ -357,7 +357,7 @@ extern void fileQueueInitTransform(void *queue);
 extern void func_00293158(void *src);
 
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern void *sdfAllocAndClearQuadwords(s32 size);
 
@@ -2541,7 +2541,7 @@ INCLUDE_ASM(const s32, "game/code_0028A150", func_00293158);
 
 FileJob *fileCreateJob(u16 type) {
     u16 kind = type;
-    FileJob *job = func_002CFEB8(0x2C);
+    FileJob *job = sdfAllocSizeClassBlock(0x2C);
     memset(job, 0, 0x2C);
     job->unk0 = 200;
     job->type = kind;
@@ -2899,7 +2899,7 @@ void fileQueueRemove(FileQueue *queue, FileJob *job) {
 }
 
 FileQueue *fileQueueCreate(void) {
-    FileQueue *queue = func_002CFEB8(0x90);
+    FileQueue *queue = sdfAllocSizeClassBlock(0x90);
     memset(queue, 0, 0x90);
     queue->count = 0;
     queue->unk84 = 0;
@@ -2908,7 +2908,7 @@ FileQueue *fileQueueCreate(void) {
 }
 
 FileJob *fileJobCreate(void) {
-    FileJob *job = func_002CFEB8(0xC0);
+    FileJob *job = sdfAllocSizeClassBlock(0xC0);
     memset(job, 0, 0xC0);
     fileJobResetAndInitTransform(job);
     return job;

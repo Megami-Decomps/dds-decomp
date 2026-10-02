@@ -32,7 +32,7 @@ extern char D_003AF418[]; /* "camp_draw" */
 extern char D_003AF428[]; /* "camp_update" */
 
 extern void evtFormatTaskName(s32 taskId, void *name);
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *memset(void *dst, s32 c, u32 n);
 extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
 extern void evtTickPackLoad(void);
@@ -62,7 +62,7 @@ void mnuCampCreateTask(s32 taskId) {
 
     if (evtFindTaskById() == 0) {
         evtFormatTaskName(taskId, name);
-        data = func_002CFEB8(0x48);
+        data = sdfAllocSizeClassBlock(0x48);
         memset(data, 0, 0x48);
         data->taskId = taskId;
         data->unused4 = 0;

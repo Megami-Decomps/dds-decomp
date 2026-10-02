@@ -67,7 +67,7 @@ u32 dds3InitializeInnerVectorEffectObject(WorldResourceOwner *object) {
     InnerVecObj *obj;
 
     effObjInnerCreate();
-    obj = (InnerVecObj *)func_00328D68(0x7C);
+    obj = (InnerVecObj *)sdfAllocSizeClassBlock(0x7C);
     object->resource = (u32 *)obj;
     obj->handle74 = dds3CreateSlotResourceState(object);
     dds3SetObjectFlags(object, 0x62);
@@ -88,7 +88,7 @@ u32 dds3InitializeInnerVectorEffectObject(WorldResourceOwner *object) {
     obj->unk10 = 0;
     obj->unk1C = 0;
     obj->unk5C = 0;
-    obj->extra78 = func_00328D68(0xE0);
+    obj->extra78 = sdfAllocSizeClassBlock(0xE0);
     return 1;
 }
 

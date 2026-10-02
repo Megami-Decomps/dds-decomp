@@ -390,7 +390,7 @@ extern s32 fileLoadStateChanged(void);
 
 extern void fileCacheSlotFlagsFromState(void);
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 typedef struct FileJobBufferSlot {
     u32 offset;
@@ -2919,7 +2919,7 @@ INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D31C0);
 
 FileJob *fileCreateJob(u16 type) {
     u16 kind = type;
-    FileJob *job = func_00328D68(0x2C);
+    FileJob *job = sdfAllocSizeClassBlock(0x2C);
     memset(job, 0, 0x2C);
     job->unk0 = 200;
     job->type = kind;
@@ -3270,7 +3270,7 @@ void fileQueueRemove(FileQueue *queue, FileJob *job) {
 }
 
 FileQueue *fileQueueCreate(void) {
-    FileQueue *queue = func_00328D68(0x90);
+    FileQueue *queue = sdfAllocSizeClassBlock(0x90);
     memset(queue, 0, 0x90);
     queue->count = 0;
     queue->unk84 = 0;
@@ -3279,7 +3279,7 @@ FileQueue *fileQueueCreate(void) {
 }
 
 FileJob *fileJobCreate(void) {
-    FileJob *job = func_00328D68(0xC0);
+    FileJob *job = sdfAllocSizeClassBlock(0xC0);
     memset(job, 0, 0xC0);
     fileJobResetAndInitTransform(job);
     return job;

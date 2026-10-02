@@ -780,7 +780,7 @@ void func_001A7798(UiSprite *sprite) {
     D_00380708.submitPacket(&D_00380708, packet);
 }
 
-void func_001A7878(UiPanelPlacement *object, s32 mode) {
+void itfAdjustPanelBoundsWithPad(UiPanelPlacement *object, s32 mode) {
     UiSprite *sprite = object->sprite;
     s32 *bounds;
     s32 dx;
@@ -883,9 +883,9 @@ extern s32 D_00435CBC;
 
 extern s32 kwlnTaskCreate(s32 name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 
-extern void func_001A8918();
+extern void itfPrintTestMessageCallback();
 
-extern s32 func_001A8848();
+extern s32 itfUpdateTestMessageResourceInput();
 
 extern u8 D_003B4A28[];
 
@@ -896,8 +896,8 @@ extern void itfMesSetWindowCallbackAddress();
 void sndCreateTestMsgTasks(void) {
     D_00435CBC = 0x80FFFFFF;
     sndCycleTestMessageResource();
-    itfMesSetWindowCallbackAddress(*(s32 *)(kwlnTaskGetUserValue(scrCreateTaskForProcessId(0x3E8, D_003B4A28, 0)) + 0xCC), func_001A8918);
-    kwlnTaskCreate((s32)"TestMsgMngC", 0x3EF, 0, 0, func_001A8848, 0, 0);
+    itfMesSetWindowCallbackAddress(*(s32 *)(kwlnTaskGetUserValue(scrCreateTaskForProcessId(0x3E8, D_003B4A28, 0)) + 0xCC), itfPrintTestMessageCallback);
+    kwlnTaskCreate((s32)"TestMsgMngC", 0x3EF, 0, 0, itfUpdateTestMessageResourceInput, 0, 0);
     kwlnTaskCreate((s32)"TestMsgMngD", 0x2AFE, 0, 0, sndUpdateTestMsgTask, 0, 0);
 }
 
@@ -912,7 +912,7 @@ void sndCycleTestMessageResource(void) {
     }
 }
 
-s32 func_001A8848(void) {
+s32 itfUpdateTestMessageResourceInput(void) {
     if (D_0037F530[0] < 0) {
         sndCycleTestMessageResource();
     }
@@ -940,7 +940,7 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414EC8);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414EE0);
 
-void func_001A8918(void) {
+void itfPrintTestMessageCallback(void) {
     func_0035B6E0("********* AAAA ********\n");
 }
 
@@ -1042,7 +1042,7 @@ u64 *btlCreateGsAlphaRegisterPacket(u64 owner, s32 alternative) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9798);
 
-void func_001A9910(void) {
+void btlResetRuntimeSequenceCounter(void) {
     D_004366E8 = 1;
 }
 
@@ -1432,11 +1432,11 @@ s32 btlGetEntryFlagsUnlessDisabled(s32 entry) {
 }
 
 void func_001AB8C0(void) {
-    func_00119A10();
+    datGetClampedProfileAdjustedStat();
 }
 
 void func_001AB8D8(void) {
-    func_00119A78();
+    datGetStatWithStatusOverride();
 }
 
 s32 btlApplyCommandAbilityMultiplier(s32 battler, s32 command) {
@@ -2721,7 +2721,7 @@ s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 skipDown) {
         if ((flags & 1) != 0) {
             if (skipDown == 0 || (flags & 0x20) == 0) {
                 if ((unit->entryMask & mask) != 0) {
-                    s32 value = func_00119A78((s32)&unit->entryMask, attribute);
+                    s32 value = datGetStatWithStatusOverride((s32)&unit->entryMask, attribute);
                     count++;
                     sum += value;
                 }

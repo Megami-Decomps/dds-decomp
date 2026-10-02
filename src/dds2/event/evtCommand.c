@@ -214,7 +214,7 @@ s32 evtCmdResetWorldResourceState(void)
     return 1;
 }
 
-s32 func_002410D0(void)
+s32 evtCommandClearSelectedEffectNode(void)
 {
     s32 id;
     void *unit;
@@ -677,12 +677,12 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00242100);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_002422A8);
 
-u32 func_00242368(void) {
+u32 evtCommandEnableSolarAdvance(void) {
     evtEnableSolarPhaseAdvance();
     return 1;
 }
 
-u32 func_00242388(void) {
+u32 evtCommandDisableSolarAdvance(void) {
     evtDisableSolarPhaseAdvance();
     return 1;
 }

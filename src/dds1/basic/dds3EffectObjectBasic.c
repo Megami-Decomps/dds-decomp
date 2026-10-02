@@ -165,7 +165,7 @@ EffectObj *effObjCreateWithBill(void *bill, void *vec, s32 extra) {
 }
 
 /* Resolve the object's billboard and forward its vector and extra argument. */
-void func_00114BF0(EffectObj *obj, void *vec, s32 extra) {
+void effObjSpawnSharedBillClone(EffectObj *obj, void *vec, s32 extra) {
     void *handle;
 
     handle = billCloneObjectRetainingSharedData(obj->data->bill);
@@ -224,7 +224,7 @@ EffectObj *effObjCreateBillNode(void *bill, void *vec, s32 extra) {
     return obj;
 }
 
-void func_00114DB8(EffectObj *obj, void *vec, s32 extra) {
+void effObjSpawnSharedBillNodeClone(EffectObj *obj, void *vec, s32 extra) {
     void *handle;
 
     handle = billCloneObjectRetainingSharedData(obj->data->bill);

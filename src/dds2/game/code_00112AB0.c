@@ -3,7 +3,7 @@
 
 extern u32 dds3CreateSlotResourceState(u32);
 
-extern s32 func_00328D68(u32);
+extern s32 sdfAllocSizeClassBlock(u32);
 
 typedef struct WorldInnerState {
     u8 pad00[0x44];
@@ -52,7 +52,7 @@ u32 dds3CreateWorldInnerState(WorldInnerOwner *object) {
     u32 handle;
 
     effObjInnerCreate();
-    inner = (WorldInnerState *)func_00328D68(0x90);
+    inner = (WorldInnerState *)sdfAllocSizeClassBlock(0x90);
     object->inner = inner;
     handle = dds3CreateSlotResourceState((u32)object);
     inner->handle80 = handle;

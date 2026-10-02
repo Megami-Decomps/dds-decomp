@@ -17,7 +17,7 @@ extern void func_00290E48(s32 arg);
 
 extern void func_00286BA8(void *record);
 
-extern void func_00308808(s32, s32, s32, s32, s32, s32, s32);
+extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 
 /* Mantra record zeroed before each update call (0x1C4). */
 typedef struct {
@@ -43,7 +43,7 @@ INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285E98);
 INCLUDE_ASM(const s32, "game/code_00285CE8", func_002860D8);
 
 void mnuDrawCellScaledGrid(s32 arg0, s32 arg1, s32 arg2, s32 arg3, MtrGrid *arg4, s32 arg5, s32 arg6) {
-    func_00308808(arg0 << 4, arg1 << 3, arg2, arg4->unk1C << 4, arg4->unk1E << 3, arg3 | 0x80808000, arg6);
+    uiDrawUniformColorRect(arg0 << 4, arg1 << 3, arg2, arg4->unk1C << 4, arg4->unk1E << 3, arg3 | 0x80808000, arg6);
 }
 
 INCLUDE_ASM(const s32, "game/code_00285CE8", func_002862B0);

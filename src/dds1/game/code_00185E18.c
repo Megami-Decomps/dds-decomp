@@ -110,7 +110,7 @@ typedef struct {
 } BlurSource;
 
 extern void *effCreateSizedDrawPacket();
-extern void *func_0015F810();
+extern void *billGetWorkTransformMatrix();
 extern void effBuildBlurUnitTextureQuad();
 extern void effBuildBlurTransformedQuad();
 extern void sdfAppendPacket();
@@ -195,7 +195,7 @@ void effDrawBlurRectangle(BlurSource *source)
         clampPacket[5] = 8;
         sdfAppendPacket(list, clampPacket);
         drawPacket = effCreateSizedDrawPacket(1, 0);
-        effBuildBlurTransformedQuad(source, func_0015F810(drawPacket), 0);
+        effBuildBlurTransformedQuad(source, billGetWorkTransformMatrix(drawPacket), 0);
         sdfAppendPacket(list, drawPacket);
         D_003253E8.draw(&D_003253E8, list);
     }
@@ -209,10 +209,10 @@ void effAppendBlurRectanglePackets(void *list, BlurSource *source, u8 fixedPoint
     void *packet;
 
     packet = effCreateSizedDrawPacket(1, 0x200);
-    effBuildBlurUnitTextureQuad(source, func_0015F810(packet), fixedPointCoordinates);
+    effBuildBlurUnitTextureQuad(source, billGetWorkTransformMatrix(packet), fixedPointCoordinates);
     sdfAppendPacket(list, packet);
     packet = effCreateSizedDrawPacket(1, 0);
-    effBuildBlurTransformedQuad(source, func_0015F810(packet), fixedPointCoordinates);
+    effBuildBlurTransformedQuad(source, billGetWorkTransformMatrix(packet), fixedPointCoordinates);
     sdfAppendPacket(list, packet);
 }
 
@@ -281,12 +281,12 @@ typedef struct EffBlurTemplate {
     u32 resourceWord;          /* 0x2C */
 } EffBlurTemplate;
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 effGetResourceFirstWord(s32 index);
 
 /* Clone a blur template into a fresh allocation. */
 EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplate *src) {
-    EffBlurTemplate *dst = func_002CFEB8(sizeof(EffBlurTemplate));
+    EffBlurTemplate *dst = sdfAllocSizeClassBlock(sizeof(EffBlurTemplate));
 
     dst->resourceWord = effGetResourceFirstWord(2);
     dst->body = src->body;

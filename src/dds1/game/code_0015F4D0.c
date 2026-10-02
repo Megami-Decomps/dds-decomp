@@ -13,7 +13,7 @@ extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void (*D_0034E680[])();
 extern void (*D_0034E690[])();
 extern void effReleaseBattleVoiceOwner(void *);
-extern void func_00161790(void *);
+extern void effBattleReleaseParameterBanks(void *);
 extern void sdfReleaseResourceAllocation(void *);
 extern void func_00160690();
 extern void kwlnCreateHeldTextureBuffer(s32, s32, f32);
@@ -120,7 +120,7 @@ u16 effBillGetQueuedCount(BillWork *work) {
     return work->queuedCount;
 }
 
-void func_0015F678(void *dst, void *src) {
+void billCopyDispatchWorkVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -158,7 +158,7 @@ void effBillSetEntryValue(BillEntryOwner *owner, s32 index, u32 value) {
     owner->entries[index].value = value;
 }
 
-s32 func_0015F810(s32 arg0) {
+s32 billGetWorkTransformMatrix(s32 arg0) {
     return arg0 + 0x20;
 }
 
@@ -304,7 +304,7 @@ INCLUDE_ASM(const s32, "game/code_0015F4D0", func_00160690);
 extern u32 sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(u32 handle);
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern void func_00161650(SoundMixer *dst, SoundMixer *src);
+extern void effBattleRebuildClonedParameterBanks(SoundMixer *dst, SoundMixer *src);
 
 /* Clone a mixer: copy its banks, rebuild the voice state from the original and start with no voices. */
 SoundMixer *sndMixerClone(SoundMixer *src) {
@@ -313,7 +313,7 @@ SoundMixer *sndMixerClone(SoundMixer *src) {
 
     mixer->resource = (void *)handle;
     memcpy(mixer, src, 0xC38);
-    func_00161650(mixer, src);
+    effBattleRebuildClonedParameterBanks(mixer, src);
     mixer->unk0C3C = 0;
     mixer->voiceList = NULL;
     return mixer;
@@ -328,7 +328,7 @@ void sndReleaseAllVoices(SoundMixer *mixer) {
         effReleaseBattleVoiceOwner(voice);
         voice = next;
     }
-    func_00161790(mixer);
+    effBattleReleaseParameterBanks(mixer);
     sdfReleaseResourceAllocation(mixer->resource);
 }
 

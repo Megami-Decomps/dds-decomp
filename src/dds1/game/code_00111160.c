@@ -102,7 +102,7 @@ void *dds3GetFirstWorldObjectNodeOfKind2(void) {
     return node;
 }
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 typedef struct ObjWithWork {
     u8 unk0[0x18];
@@ -110,7 +110,7 @@ typedef struct ObjWithWork {
 } ObjWithWork;
 
 s32 dds3AllocateClearedObjectWork(ObjWithWork *obj) {
-    obj->work = func_002CFEB8(0x10);
+    obj->work = sdfAllocSizeClassBlock(0x10);
     memset(obj->work, 0, 0x10);
     return 1;
 }

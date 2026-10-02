@@ -972,7 +972,7 @@ void btlLoadModelPack(s32 kind, s32 id) {
         mdlRequestAsset(kind, id, 0);
         if (sndFindListNodeForChannel(kind, id) == 0) {
             btlFormatModelResourcePath(kind, id, path);
-            entry->resource = (void *)func_00288A80(path);
+            entry->resource = (void *)fileQueuePlainDispatchRequest(path);
             btlBossDebugPrintf("btl:pack load start[%s][%X,%X]\n", path, kind, id);
         } else {
             entry->resource = 0;
@@ -1066,7 +1066,7 @@ extern f32 func_002F9F60(f32);
 
 extern f32 func_002FA060(f32);
 
-extern void *func_002CFEB8(s32);
+extern void *sdfAllocSizeClassBlock(s32);
 
 void btlInitVisibilityGrid(void) {
     f32 angle = 3.1415927f / 6.0f; /* 30 degrees */
@@ -1076,7 +1076,7 @@ void btlInitVisibilityGrid(void) {
     btlRuntimeState.cellHeight = (func_002FA060(angle) * 16.0f + 16.0f + 2.5f) * 0.5f;
     btlRuntimeState.gridWidth = 0x200 / (btlRuntimeState.cellWidth * 2) + 1;
     btlRuntimeState.gridHeight = 0x1C0 / (btlRuntimeState.cellHeight * 2) + 1;
-    btlRuntimeState.ownedData = func_002CFEB8(btlRuntimeState.gridWidth * btlRuntimeState.gridHeight);
+    btlRuntimeState.ownedData = sdfAllocSizeClassBlock(btlRuntimeState.gridWidth * btlRuntimeState.gridHeight);
     btlRuntimeState.unk_3C[0] = 0;
     for (y = 0; y < btlRuntimeState.gridHeight; y++) {
         for (x = 0; x < btlRuntimeState.gridWidth; x++) {
@@ -1758,7 +1758,7 @@ s32 btlGroupContainsId(s32 group, s32 id) {
     return 0;
 }
 
-extern void *func_002CFEB8(s32);
+extern void *sdfAllocSizeClassBlock(s32);
 
 typedef struct BattleGroupIdEntry {
     struct BattleGroupIdEntry *next;
@@ -1766,7 +1766,7 @@ typedef struct BattleGroupIdEntry {
 } BattleGroupIdEntry;
 
 void btlAddGroupId(s32 group, s32 id) {
-    BattleGroupIdEntry *node = func_002CFEB8(sizeof(BattleGroupIdEntry));
+    BattleGroupIdEntry *node = sdfAllocSizeClassBlock(sizeof(BattleGroupIdEntry));
     BattleGroupIdEntry **head = (BattleGroupIdEntry **)&btlGroupIdHeads[group];
     node->id = id;
     node->next = *head;
@@ -1825,7 +1825,7 @@ void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 arg
     BattleGroupNode *head;
     s32 i;
     btlRemoveCurrentGroupedEntity(group, type);
-    node = func_002CFEB8(sizeof(BattleGroupNode));
+    node = sdfAllocSizeClassBlock(sizeof(BattleGroupNode));
     head = (BattleGroupNode *)btlGroupNodeHeads[group];
     if (head != NULL) {
         head->prev = node;

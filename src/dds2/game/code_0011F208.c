@@ -236,7 +236,7 @@ extern s32 D_00389780[];
 
 extern void mdlFlagSet(s32);
 
-extern void func_00118598(s32);
+extern void sdfResetGameRuntime(s32);
 
 extern s32 fileLoadStateChanged(void);
 
@@ -1431,9 +1431,9 @@ void fldToggleWorldNodeState(s64 mode) {
 
 void fldPrepareDeferredSceneTransition(void) {
     if (*(s16 *)(datGameState + 0xe) != 0) {
-        func_00118598(1);
+        sdfResetGameRuntime(1);
     } else {
-        func_00118598(0);
+        sdfResetGameRuntime(0);
     }
     if (fileLoadStateChanged() == 0) {
         fileCacheSlotFlagsFromState();

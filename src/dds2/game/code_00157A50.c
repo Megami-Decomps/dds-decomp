@@ -13,10 +13,10 @@ typedef struct EffectHandler {
 } EffectHandler;
 
 extern EffectHandler D_003AA770[];
-extern void *func_00328D68(s32);
+extern void *sdfAllocSizeClassBlock(s32);
 
 void *effCloneSourceWithTypeHandler(EffectSource *source) {
-    EffectSource *copy = (EffectSource *)func_00328D68(0x10);
+    EffectSource *copy = (EffectSource *)sdfAllocSizeClassBlock(0x10);
     u32 argument = source->argument;
 
     copy->type = source->type;
@@ -52,7 +52,7 @@ extern BillObj *effBillResourceOwners[];
 extern EffBillResourceInit D_003AA880[];
 extern char D_004142B0[];
 extern char D_004142C0[];
-extern EffBillResourceArchive *func_002C7FF0(const char *path);
+extern EffBillResourceArchive *fileQueuePlainDispatchRequest(const char *path);
 extern void func_002C81D0(EffBillResourceArchive *archive);
 extern void func_002C7CE8(EffBillResourceArchive *archive);
 extern u32 sdfMemoryGetBlockAddress(MemBlock *block);
@@ -72,7 +72,7 @@ void effInitializeBillResourceOwners(void) {
     u32 configOffset;
 
     D_00438EFC = 0;
-    archive = func_002C7FF0(D_004142B0);
+    archive = fileQueuePlainDispatchRequest(D_004142B0);
     func_002C81D0(archive);
     node = archive->nodes;
     if (node != NULL) {

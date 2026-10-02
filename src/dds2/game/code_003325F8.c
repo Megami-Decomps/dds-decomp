@@ -82,7 +82,7 @@ void sdfResourceListReleaseAssets(SdfResourceList *);
 
 extern SdfSubParam *sdfSubParamCreate(void);
 
-void *func_00328D68(s32 size);
+void *sdfAllocSizeClassBlock(s32 size);
 
 void sdfPendingQueuePush(void *queue, s32 assetId);
 
@@ -500,7 +500,7 @@ void func_003332E8(SdfTextParam *param, u32 value) {
 SdfSubParam *sdfSubParamCreate(void) {
     SdfSubParam *temp;
 
-    temp = func_00328D68(0x18);
+    temp = sdfAllocSizeClassBlock(0x18);
     temp->packed.unk8 = (((u64)0x3F800000 << 16 | 0x3F80) << 16);
     temp->packed.unk0 = 0;
     temp->packed.unk10 = 0;
@@ -596,7 +596,7 @@ SdfAsset *sdfCreateAssetWithDrawEntries(void) {
     asset = sdfAllocAndClearQuadwords(0x48);
     asset->pad00[6] = 0xFF;
     for (i = 0; i != 2; i++) {
-        entry = func_00328D68(0xA0);
+        entry = sdfAllocSizeClassBlock(0xA0);
         asset->entries[i] = entry;
         entry[0] = 0x6E05C000;
         entry[0x18 / 4] = 0x6005C005;

@@ -26,7 +26,7 @@ void mnuDrawPanelWithPackedColorPattern(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0) 
     arr[3] = v;
     a1 += 0x32;
     a1 *= 8;
-    func_002C0F88(a0 * 16, a1, a2, 0x2000, 0xC70, arr, t0);
+    uiDrawGradientColorRect(a0 * 16, a1, a2, 0x2000, 0xC70, arr, t0);
 }
 
 /* Fill-level dispatch: direct, inverted, or sin-pulsed, then the shared layers. */

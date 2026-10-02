@@ -526,9 +526,9 @@ extern void btlRunTask(SoundTask *);
 
 extern s32 btlBossDebugPrintf(const char *, ...);
 
-extern s32 func_00232EE8(s32);
+extern s32 mdlGetContextResourceGroup(s32);
 
-extern s32 func_00232EF8(s32);
+extern s32 mdlGetContextResourceId(s32);
 
 extern f32 func_00208000(s32, s32, s32);
 
@@ -1968,8 +1968,8 @@ s32 btlHasMatchingModel(s32 effect, s32 model) {
         if ((unit->flags & 2) != 0 &&
             unit->ext != NULL &&
             unit->unk328 != 0 &&
-            func_00232EE8((s32)unit->ext->info) == effect &&
-            func_00232EF8((s32)unit->ext->info) == model) {
+            mdlGetContextResourceGroup((s32)unit->ext->info) == effect &&
+            mdlGetContextResourceId((s32)unit->ext->info) == model) {
             return 1;
         }
         unit = unit->nextActor;
@@ -6806,7 +6806,7 @@ SoundTask *btlCreateApplyToActiveActorsTask(u32 value) {
 }
 
 u32 btlCancelTimedFadeTask(void) {
-    func_001057A8();
+    kwlnCancelConfiguredFadeFrames();
     return 1;
 }
 
@@ -7273,7 +7273,7 @@ INCLUDE_RODATA(const s32, "game/code_001DD390", D_00419170);
 
 void sndLoadSysEffLb(void) {
     const char *path = "/battle/SYSEFF.LB";
-    s32 archive = func_002C7FF0(path);
+    s32 archive = fileQueuePlainDispatchRequest(path);
     s32 node;
     u32 i;
 

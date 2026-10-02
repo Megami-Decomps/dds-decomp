@@ -15,7 +15,7 @@ void sdfFreeMemoryFromEitherHeap(void *arg0);
 void sdfPendingQueuePush(void *arg0, void *arg1);
 void *sdfTexCreateResourcePacket(SdfTex *arg0, s32 arg1);
 void *func_002D30C8(void *arg0, s32 arg1);
-void *func_002CFEB8(s32 arg0);
+void *sdfAllocSizeClassBlock(s32 arg0);
 u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
 void func_002D2D48(void *arg0, s32 arg1, s32 arg2, u32 arg3, s32 arg4, u32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
@@ -108,7 +108,7 @@ void *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
     u32 primary;
     u32 secondary;
 
-    packet = func_002CFEB8(0x40);
+    packet = sdfAllocSizeClassBlock(0x40);
     primary = sdfTexGetPrimaryResourceWord(texture);
     secondary = sdfTexGetSecondaryResourceWord(texture);
     func_002D2D48(packet, texture->width, texture->height, primary, texture->pixelFormat, secondary, texture->clutFormat, 1, texture->maxMipLevel, texture->lodParameters, texture->clampMode, variant);

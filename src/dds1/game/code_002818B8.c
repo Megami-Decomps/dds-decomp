@@ -21,7 +21,7 @@ typedef struct MenuPanelFade {
 } MenuPanelFade;
 
 extern u32 uiBlendColors(u32, u32, s32);
-extern void func_002C0F88(s32, s32, s32, s32, s32, s32 *, s32);
+extern void uiDrawGradientColorRect(s32, s32, s32, s32, s32, s32 *, s32);
 
 void mnuDrawWidthScaledPanelGradient(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
     s32 colors[4];
@@ -39,7 +39,7 @@ void mnuDrawWidthScaledPanelGradient(s32 x, s32 y, s32 z, MenuPanelFade *work, s
     }
     colors[3] = colors[1] = color & 0xFFFFFF00;
     colors[2] = colors[0] = color;
-    func_002C0F88(x, y, z, ((width * (0x200 - work->blend)) / 0x200 + 0x40) << 4,
+    uiDrawGradientColorRect(x, y, z, ((width * (0x200 - work->blend)) / 0x200 + 0x40) << 4,
                  height, colors, surface);
 }
 
@@ -61,7 +61,7 @@ void mnuDrawHeightScaledPanelGradient(s32 x, s32 y, s32 z, MenuPanelFade *work, 
     colors[2] = color;
     colors[1] = colors[0] = color & 0xFFFFFF00;
     extent = (height * (0x200 - work->blend) / 0x200) << 3;
-    func_002C0F88(x, y - extent, z, 0x1000, extent, colors, surface);
+    uiDrawGradientColorRect(x, y - extent, z, 0x1000, extent, colors, surface);
 }
 
 INCLUDE_ASM(const s32, "game/code_002818B8", func_00281AE8);

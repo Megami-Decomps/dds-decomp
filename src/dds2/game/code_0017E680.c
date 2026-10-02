@@ -37,7 +37,7 @@ typedef struct EffBillboardParams {
     s32 mode; /* 0x00: billboard mode for the new set */
 } EffBillboardParams;
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 effRetainResource(s32 kind);
 extern void billSetBillboardMode(u32 handle, s32 mode);
 extern s32 sdfAllocGeneralBlock(s32 size);
@@ -221,7 +221,7 @@ void func_0017ED50(void *dst, void *src) {
 
 /* Create the shared billboard set with its default colour and scale. */
 EffBillboardWork *effCreateBillboardResourceWork(EffBillboardParams *params) {
-    EffBillboardWork *billboard = (EffBillboardWork *)func_00328D68(0x20);
+    EffBillboardWork *billboard = (EffBillboardWork *)sdfAllocSizeClassBlock(0x20);
 
     billboard->mode = params->mode;
     billboard->handle = effRetainResource(2);

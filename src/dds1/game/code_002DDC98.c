@@ -57,7 +57,7 @@ extern F9B00Entry sdfPadPorts[];
 extern u32 D_00398660[];
 extern u128 D_003F9890;
 extern f32 D_003BDA30;
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern u8 D_003F98A0[];
 extern u128 *D_003EB860[][3];
 extern void *D_003BD37C;
@@ -1123,7 +1123,7 @@ void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix) {
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2680);
 
-s32 func_002E27C8(s32 count) {
+s32 sdfMeasureVertexAttributePacketBytes(s32 count) {
     return count * 0x40 + 0x40;
 }
 
@@ -1486,7 +1486,7 @@ ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 columns, s32 rows) {
     u32 bufferHandle;
 
     sdfDevConsInit();
-    node = func_002CFEB8(0x20);
+    node = sdfAllocSizeClassBlock(0x20);
     node->unk8 = first;
     node->unkA = second;
     node->columns = columns;

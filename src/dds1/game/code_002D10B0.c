@@ -57,7 +57,7 @@ extern u8 D_003BD2F0;
 extern u32 D_003BD2F4;
 extern u32 D_003BD2F8;
 
-void *func_002CFEB8(s32 size);
+void *sdfAllocSizeClassBlock(s32 size);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 struct SdfTexHead *func_002D17D8(s32 size, s32 arg1);
 void sdfUpdateTextureHeadsWithInterruptsMasked(void *block);
@@ -255,7 +255,7 @@ void sdfTexQueuePendingWork(s32 value) {
 void sdfTexInitializeLists(void) {
     SdfTexHead *head;
 
-    head = func_002CFEB8(0x1C);
+    head = sdfAllocSizeClassBlock(0x1C);
     head->unk10 = 0x100000;
     head->next = NULL;
     head->prev = NULL;
@@ -526,7 +526,7 @@ u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height, u32 format, u8
             request.pixels = sdfResourceRetainAddress(request.allocation);
             request.allocationMode = 1;
         } else {
-            request.pixels = func_002CFEB8(size);
+            request.pixels = sdfAllocSizeClassBlock(size);
             request.allocationMode = 2;
         }
         memcpy(request.pixels, pixels, size);

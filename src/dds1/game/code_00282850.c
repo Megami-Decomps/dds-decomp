@@ -121,7 +121,7 @@ extern s32 mnuLookupRangeEntry(u16);
 
 extern u32 func_0027D4A0(u32);
 
-extern s32 func_002CFEB8(u32);
+extern s32 sdfAllocSizeClassBlock(u32);
 
 extern s32 func_002877A8(void);
 
@@ -332,7 +332,7 @@ typedef struct MenuPanelState {
 } MenuPanelState;
 
 void *mnuCreatePanelState(s32 width, s32 height) {
-    MenuPanelState *panel = func_002CFEB8(0x64);
+    MenuPanelState *panel = sdfAllocSizeClassBlock(0x64);
     memset(panel, 0, 0x64);
     panel->width = width;
     panel->height = height;
@@ -392,7 +392,7 @@ void mnuSetPanelState(MenuPanelState *panel, u32 state) {
 INCLUDE_ASM(const s32, "game/code_00282850", func_00282DA0);
 
 s32 mnuCreatePanelGroup(s32 parent) {
-    MenuPanelGroup *group = func_002CFEB8(0x28);
+    MenuPanelGroup *group = sdfAllocSizeClassBlock(0x28);
     s32 i;
     for (i = 0; i < 5; i++) {
         s32 child = mnuCreatePanelItem();
@@ -452,7 +452,7 @@ typedef struct MenuSpriteState {
 } MenuSpriteState;
 
 void *mnuCreateSpriteState(s32 x, s32 y, s32 z) {
-    MenuSpriteState *item = func_002CFEB8(0x20);
+    MenuSpriteState *item = sdfAllocSizeClassBlock(0x20);
     memset(item, 0, 0x20);
     item->x = x;
     item->y = y;
@@ -482,7 +482,7 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
 INCLUDE_ASM(const s32, "game/code_00282850", func_002833B0);
 
 u32 *mnuAllocateSimpleSprite(u32 x, u32 y, u32 z, u32 color, u32 texture) {
-    u32 *sprite = func_002CFEB8(0x28);
+    u32 *sprite = sdfAllocSizeClassBlock(0x28);
     memset(sprite, 0, 0x28);
     sprite[4] = x;
     sprite[5] = y;
@@ -505,7 +505,7 @@ typedef struct MenuGradientFade {
     s32 blend;
 } MenuGradientFade;
 
-void func_00283BE0(MenuGradientFade *state, s32 color) {
+void mnuResetGradientFadeColor(MenuGradientFade *state, s32 color) {
     state->color = color;
     state->active = 0;
     state->blend = 0;
@@ -516,7 +516,7 @@ void func_00283BF0(u32 *out, u32 value) {
 }
 
 extern u32 uiBlendColors(u32, u32, u32);
-extern void func_002C0F88(u32, u32, u32, u32, u32, u32, u32);
+extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, u32, u32);
 
 void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface) {
     s32 colors[4];
@@ -525,7 +525,7 @@ void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface) {
     color = uiBlendColors(color, color & ~0xFF, state->blend);
     panelSetVec4((u32 *)colors, 0, 0, color, color);
 
-    func_002C0F88(0, 0x700, 0, 0x2000, 0x700, (u32)colors, surface);
+    uiDrawGradientColorRect(0, 0x700, 0, 0x2000, 0x700, (u32)colors, surface);
     if (state->active != 0) {
         state->blend += 0x20;
         if (state->blend > 0x100) {
@@ -692,7 +692,7 @@ typedef struct MenuPanelItem {
 } MenuPanelItem;
 
 s32 mnuCreatePanelItem(void) {
-    MenuPanelItem *item = func_002CFEB8(0x90);
+    MenuPanelItem *item = sdfAllocSizeClassBlock(0x90);
     memset(item, 0, 0x90);
     item->value14 = 0x63;
     item->value10 = 0x8c;
@@ -763,7 +763,7 @@ void mnuSetProfilePanelValues(s32 item, s32 value, s32 option) {
 }
 
 u32 *mnuCreateProfilePanel(s32 source) {
-    u32 *item = (u32 *)func_002CFEB8(0x3c);
+    u32 *item = (u32 *)sdfAllocSizeClassBlock(0x3c);
     s32 first;
     u32 second;
     memset(item, 0, 0x3c);

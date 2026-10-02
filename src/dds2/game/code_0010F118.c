@@ -143,7 +143,7 @@ s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
     return 0;
 }
 
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern EffTransformOwner *D_003849D8[];
 void effObjNodeDestroy(EffTransformNode *node);
 
@@ -155,7 +155,7 @@ EffTransformNode *dds3CreateWorldNodeForKind(u32 kind) {
     if (kind >= 0x12) {
         return NULL;
     }
-    node = func_00328D68(0x44);
+    node = sdfAllocSizeClassBlock(0x44);
     if (node == NULL) {
         return NULL;
     }

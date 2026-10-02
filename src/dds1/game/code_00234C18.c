@@ -4,13 +4,13 @@ extern u32 itfLoadTextureFromAsset(u32);
 
 extern u32 kwlnTaskGetUserValue(void);
 
-extern u32 func_002CFEB8(u32);
+extern u32 sdfAllocSizeClassBlock(u32);
 
 INCLUDE_ASM(const s32, "game/code_00234C18", func_00234C18);
 
 s32 func_003014F0(char *output, const char *format, ...);
 
-s32 func_00234CA8(s32 event, s32 id, char *path1, char *path2, char *path3) {
+s32 evtFormatPolygonMoviePaths(s32 event, s32 id, char *path1, char *path2, char *path3) {
     func_003014F0(path1, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM1",
                   event / 10 * 10, event, event, id, event, id);
     func_003014F0(path2, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
@@ -67,7 +67,7 @@ s32 evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
     viewer = sdfResourceRetainAddress(viewerHandle);
     memset(viewer, 0, 0x2490);
     *viewer = viewerHandle;
-    func_00234CA8(event, id, path0, path1, path2);
+    evtFormatPolygonMoviePaths(event, id, path0, path1, path2);
     work = evtPolygonMovieAllocWork();
     work->event = event;
     work->id = id;
@@ -115,7 +115,7 @@ void evtDestroyTaskHierarchy(u32 task) {
 /* The owner argument is part of the allocator callback signature; the
  * returned context starts with both words clear. */
 EventContext *evtAllocateContext(s32 *owner) {
-    EventContext *context = (EventContext *)func_002CFEB8(8);
+    EventContext *context = (EventContext *)sdfAllocSizeClassBlock(8);
     context->flags = 0;
     context->value = 0;
     return context;

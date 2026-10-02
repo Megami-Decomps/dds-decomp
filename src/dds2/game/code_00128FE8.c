@@ -167,7 +167,7 @@ extern char D_004130D8[]; /* "%sf%03d_%03d.LB" */
 
 extern s32 func_0035C860(char *, const char *, ...);
 
-extern void *func_002C7FF0(const char *path);
+extern void *fileQueuePlainDispatchRequest(const char *path);
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
 
@@ -628,7 +628,7 @@ s32 fldLoadAreaResource(void) {
         ((FldAreaResourceState *)fldAreaState)->room = floor;
         fldFormatAreaDirectory(directory, area, 1);
         func_0035C860(path, D_004130D8, directory, area, floor);
-        fldAreaLoadRequest = func_002C7FF0(path);
+        fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
         ((FldAreaResourceState *)fldAreaState)->resourceFlag = 1;
         return 1;
     }
@@ -666,7 +666,7 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
     D_00435BB4 = 1;
     fldFormatAreaDirectory(directory, area, 1);
     func_0035C860(path, D_004130D8, directory, area, room);
-    fldAreaLoadRequest = func_002C7FF0(path);
+    fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
     ((FldAreaResourceState *)fldAreaState)->resourceFlag = 1;
     return 1;
 }
@@ -844,7 +844,7 @@ typedef struct FldPackedArchive {
 
 extern void func_002C81D0(u32);
 
-extern void func_00140180(u32);
+extern void fldCopyInfoTable(u32);
 
 extern void fldSetNpcPalette(u32);
 
@@ -867,13 +867,13 @@ void fldLoadAreaPackedResources(void) {
     if (fldAreaState[4] < 200) {
         fldFormatAreaResourceName(name);
         strcpy(D_00444950, name);
-        fldAreaPackedArchive = func_002C7FF0(name);
+        fldAreaPackedArchive = fileQueuePlainDispatchRequest(name);
         func_002C81D0(fldAreaPackedArchive);
         for (entry = ((FldPackedArchive *)fldAreaPackedArchive)->entries; entry != NULL;
              entry = entry->next) {
             switch (entry->kind) {
             case 1:
-                func_00140180(entry->payload);
+                fldCopyInfoTable(entry->payload);
                 sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 2:

@@ -59,7 +59,7 @@ u32 func_001575C8(void) {
 }
 
 EffNode *effCreateNode(u16 type, u16 arg, s32 param) {
-    EffNode *node = (EffNode *)func_00328D68(0x10);
+    EffNode *node = (EffNode *)sdfAllocSizeClassBlock(0x10);
 
     node->type = type;
     node->unkC = 1.03f;

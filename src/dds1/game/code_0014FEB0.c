@@ -13,7 +13,7 @@ typedef struct EffectHandler {
 } EffectHandler;
 
 extern EffectHandler D_0034DE40[];
-extern void *func_002CFEB8(s32);
+extern void *sdfAllocSizeClassBlock(s32);
 extern s32 D_003BD7F4;
 extern BillObj *effBillResourceOwners[];
 extern BillObj *billCreateFromResource(s32 kind, s32 resource);
@@ -29,7 +29,7 @@ typedef struct EffBillResourceInit {
 extern EffBillResourceInit effBillResourceInitTable[];
 
 void *effCloneSourceWithTypeHandler(EffectSource *source) {
-    EffectSource *copy = (EffectSource *)func_002CFEB8(0x10);
+    EffectSource *copy = (EffectSource *)sdfAllocSizeClassBlock(0x10);
     u32 argument = source->argument;
 
     copy->type = source->type;

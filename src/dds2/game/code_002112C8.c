@@ -757,7 +757,7 @@ s32 btlUnitHasAllTenActions(void *actor) {
     return 1;
 }
 
-s32 func_00212F20(s32 unused, s32 action) {
+s32 btlAnyPartyMeetsEntryCodeCondition(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if (((*(u64 *)&battler->flags) & 0x221) == 0x201 &&
@@ -768,7 +768,7 @@ s32 func_00212F20(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_00212FA0(s32 unused, s32 action) {
+s32 btlAnyEnemyMeetsEntryCodeCondition(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((*(u64 *)&battler->flags & 0x421) == 0x401 &&
@@ -793,7 +793,7 @@ u8 btlCheckUnitActionModeOne(u32 unit, u32 action) {
     return result != 0;
 }
 
-s32 func_00213060(s32 unused, s32 action) {
+s32 btlAnyPartyPassesEntryCheck(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((*(u64 *)&battler->flags & 0x221) == 0x201 &&
@@ -804,7 +804,7 @@ s32 func_00213060(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_002130E8(s32 unused, s32 action) {
+s32 btlAnyPartyPassesInverseEntryCheck(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((*(u64 *)&battler->flags & 0x221) == 0x201 &&
@@ -815,7 +815,7 @@ s32 func_002130E8(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_00213170(s32 unused, s32 action) {
+s32 btlAnyEnemyPassesEntryCheck(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((*(u64 *)&battler->flags & 0x421) == 0x401 &&
@@ -826,7 +826,7 @@ s32 func_00213170(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_002131F8(s32 unused, s32 action) {
+s32 btlAnyEnemyPassesInverseEntryCheck(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((*(u64 *)&battler->flags & 0x421) == 0x401 &&
@@ -837,7 +837,7 @@ s32 func_002131F8(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_00213280(s32 unused, s32 action) {
+s32 btlAnyPartyFailsEntryCheck(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((*(u64 *)&battler->flags & 0x221) == 0x201 &&
@@ -848,7 +848,7 @@ s32 func_00213280(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_00213308(s32 unused, s32 action) {
+s32 btlAnyEnemyFailsEntryCheck(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((*(u64 *)&battler->flags & 0x421) == 0x401 &&

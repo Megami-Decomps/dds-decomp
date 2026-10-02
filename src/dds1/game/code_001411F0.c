@@ -157,7 +157,7 @@ extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
 
 extern void sndStartTrackDefault(s32 arg0);
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern void kwlnTaskSetUserValue(s32 arg0, void *arg1);
 
@@ -261,7 +261,7 @@ s32 fldFieldTaskUpdate(void) {
 void *fldFieldTaskCreate(s32 task) {
     s32 *work;
 
-    work = func_002CFEB8(0x10);
+    work = sdfAllocSizeClassBlock(0x10);
     work[0] = 0;
     work[1] = 0;
     work[2] = 0;
@@ -1503,7 +1503,7 @@ void fldUpdateMenuResourceEffects(void) {
     }
 }
 
-extern void *func_00288A80(const char *);
+extern void *fileQueuePlainDispatchRequest(const char *);
 
 extern void func_00288C50(void *);
 
@@ -1549,7 +1549,7 @@ void fldParseMixLb(void) {
     s32 value;
 
     index = 0;
-    lb = func_00288A80("/fld/f/bin/fldmix.LB");
+    lb = fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
     func_00288C50(lb);
     for (node = lb->nodes; node != NULL; node = node->next, index++) {
         switch (index) {
@@ -2066,6 +2066,8 @@ void fldReleaseTitleMiniTexture(void) {
     }
 }
 
+extern void fldTitleMini(void);
+
 INCLUDE_RODATA(const s32, "game/code_001411F0", fldTitleTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0810);
@@ -2073,8 +2075,6 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0810);
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0824);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0828);
-
-extern void fldTitleMini(void);
 
 void fldStartMiniTitleForUnlock(s32 id) {
     char path[0x20];
@@ -2716,3 +2716,4 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAFEC);
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAFF0);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldWeatherLimitTexture);
+

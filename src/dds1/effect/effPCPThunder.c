@@ -257,7 +257,7 @@ void func_00164038(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00164048(EffThunderVectorWork *work, u32 value) {
+void effThunderSetVectorCellColor(EffThunderVectorWork *work, u32 value) {
     work->color = value;
 }
 
@@ -424,7 +424,7 @@ void effThunderDestroySubs(EffThunderSparkWork *work) {
     sdfReleaseResourceAllocation(work->handle);
 }
 
-void func_00164A98(void *dst, void *src) {
+void effThunderCopySparkVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -539,7 +539,7 @@ void func_00165668(EffThunderFragmentWork *work) {
     func_0015CDF0((u32)work->system, work->head.arg40, (void *)work->head.arg48, work->head.arg50);
 }
 
-void func_00165690(EffThunderFragmentWork *work) {
+void effThunderApplyFragmentColorBands(EffThunderFragmentWork *work) {
     parFillSymmetricCellColors((u32)work->system, work->head.arg40, (void *)work->head.arg48, work->head.arg50);
 }
 
@@ -597,7 +597,7 @@ void effThunderShiftEndpointsWithAnchor(u8 *p, void *src) {
         VU0_STORE_VF(vf10, p);
 }
 
-void func_00166130(EffThunderFragmentWork *work, u32 value) {
+void effThunderSetDualFragmentColor(EffThunderFragmentWork *work, u32 value) {
     work->color = value;
 }
 
@@ -705,7 +705,7 @@ void effPCPThunderFree5(EffThunderCellWork *work) {
     sdfReleaseResourceAllocation(work->handle);
 }
 
-void func_00166B20(void *dst, void *src) {
+void effThunderCopyCellVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 

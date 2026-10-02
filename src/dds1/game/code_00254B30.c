@@ -4,7 +4,7 @@ extern void dspStartEntry(s32 signal);
 
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 
-extern s32 func_002CFEB8(u32);
+extern s32 sdfAllocSizeClassBlock(u32);
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00254B30);
 
@@ -353,7 +353,7 @@ typedef struct {
 } DspListHead;
 
 DspListNode *mnuAllocateDisplayListNode(void) {
-    DspListNode *node = (DspListNode *)func_002CFEB8(0x14);
+    DspListNode *node = (DspListNode *)sdfAllocSizeClassBlock(0x14);
 
     memset(node, 0, 0x14);
     return node;

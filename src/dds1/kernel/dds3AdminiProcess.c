@@ -5,7 +5,7 @@ extern AdminWork* dds3GetAdminTaskWork(void);
 extern void dds3AdminSubmitModeRequest(s32 a0, s32 a1, s32 a2, s32 a3);
 extern void* kwlnTaskGetUserValue(void* task);
 extern void kwlnTaskSetUserValue(void* task, u32 value);
-extern void* func_002CFEB8(s32 a0);
+extern void* sdfAllocSizeClassBlock(s32 a0);
 extern void sdfReleaseChipBlock(void* ptr);
 extern void* memcpy(void* dst, void* src, s32 n);
 /* One dispatch row per mode: three function pointers, 12 bytes each. The three

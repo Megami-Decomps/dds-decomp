@@ -28,7 +28,7 @@ extern s32 sdfChipHeapStart;
 extern s32 D_003BD9B4;
 extern u8 D_003BD9C0;
 
-void *func_002CFEB8(s32 arg0);
+void *sdfAllocSizeClassBlock(s32 arg0);
 void *sdfClearQuadwords(void *arg0, s32 arg1);
 void sdfPendingQueuePush(void *arg0, s32 arg1);
 s32 func_00312C08(void);
@@ -36,7 +36,7 @@ s32 EIntr(void);
 void sdfAdvanceNodeCursor(SdfChipOwner *owner);
 
 void sdfAllocAndClearQuadwords(s32 size) {
-    return sdfClearQuadwords(func_002CFEB8(size), (size + 15) >> 4);
+    return sdfClearQuadwords(sdfAllocSizeClassBlock(size), (size + 15) >> 4);
 }
 
 void sdfReleaseChipBlock(void *memory) {
@@ -86,7 +86,7 @@ void sdfReleaseChipBlock(void *memory) {
     }
 }
 
-void func_002D00B8(s32 value) {
+void sdfQueuePendingChipValue(s32 value) {
     sdfPendingQueuePush(&D_003BD9C0, value);
 }
 

@@ -97,7 +97,7 @@ extern s32 func_002C8AC0(void);
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 
-void func_002C7D78(FileQueueEntry *request, s32 kind, const char *requestName,
+void fileManQueueNamedRequest(FileQueueEntry *request, s32 kind, const char *requestName,
                    void *callback, void *userData) {
     FileManWork *work;
     char *duplicatedName;
@@ -186,15 +186,15 @@ void *fileCreatePacLoadWork(const char *request, s32 flags, void *dispatch, s32 
     if (flags != 0) {
         func_00346AE8(packet);
     }
-    func_002C7D78(work, 1, request, onComplete, userData);
+    fileManQueueNamedRequest(work, 1, request, onComplete, userData);
     return work;
 }
 
-void *func_002C7FF0(const char *request) {
+void *fileQueuePlainDispatchRequest(const char *request) {
     fileCreatePacLoadWork(request, 0, 0, 0, 0);
 }
 
-void func_002C8018(const char *request) {
+void fileQueueFlaggedDispatchRequest(const char *request) {
     fileCreatePacLoadWork(request, 1, 0, 0, 0);
 }
 
@@ -204,7 +204,7 @@ void *func_002C8040(const char *request, s32 mode, s32 dispatch, s32 onComplete)
     func_0035B6E0("file load %s\n", request);
     work = sdfAllocAndClearQuadwords(0x30);
     work[3] = mode;
-    func_002C7D78(work, 0, request, dispatch, onComplete);
+    fileManQueueNamedRequest(work, 0, request, dispatch, onComplete);
     return work;
 }
 
@@ -295,11 +295,11 @@ FileWindowSlot *fileWindowSlotCreate(s32 id, s32 firstValue, s32 secondValue, s3
     slot->firstValueCopy = firstValue;
     slot->secondValue = secondValue;
     slot->secondValueCopy = secondValue;
-    func_002C7D78(slot, 2, id, left, right);
+    fileManQueueNamedRequest(slot, 2, id, left, right);
     return slot;
 }
 
-void func_002C82C8(a, b, c)
+void fileQueueWindowSlotRequest(a, b, c)
 s32 a;
 s32 b;
 s32 c;

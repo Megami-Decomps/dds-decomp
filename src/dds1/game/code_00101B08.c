@@ -219,7 +219,7 @@ u32 dds3GetAdminTaskValue(void) {
     return context->value;
 }
 
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 
 /* Replace the admin task's attached data block (copied, max 0x100 bytes) and set
  * its mode byte and flags. The outer guard skips everything when data is NULL or
@@ -248,7 +248,7 @@ void dds3AdminSubmitModeRequest(s32 value, void *data, u32 size, s32 flag) {
             work->unk20 = 0;
         }
         if (data != NULL) {
-            work->unk1C = func_002CFEB8(size);
+            work->unk1C = sdfAllocSizeClassBlock(size);
             memcpy(work->unk1C, data, size);
             work->unk20 = size;
         } else {

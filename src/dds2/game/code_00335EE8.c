@@ -8,7 +8,7 @@ extern s32 (*D_0040B510[])(void *a0, s32 a1);
 
 extern u8 D_0040B518[];
 
-extern s32 func_00328D68(s32);
+extern s32 sdfAllocSizeClassBlock(s32);
 
 typedef struct MotionKey {
     s32 id;
@@ -52,7 +52,7 @@ void sdfSelectMotionPointerEntry(s32 destination, s32 source, void *unused, s32 
 }
 
 s32 sdfAllocateBoundMotionPointerEntry(s32 source, s32 unused, s32 entryIndex) {
-    s32 entry = func_00328D68(0x20);
+    s32 entry = sdfAllocSizeClassBlock(0x20);
 
     sdfSelectMotionPointerEntry(entry, source, D_0040B518, entryIndex);
     return entry;
@@ -97,11 +97,11 @@ void sdfCopyPoseRecord(MotionKeyWork *motion) {
     motion->previous = *motion->current;
 }
 
-void func_00336228(void *matrix) {
+void sdfLoadPrimaryMatrixVU(void *matrix) {
     VU0_LOAD_MATRIX(matrix);
 }
 
-void func_00336240(void *matrix) {
+void sdfLoadAlternateMatrixVU(void *matrix) {
     VU0_LOAD_MATRIX_B(matrix);
 }
 

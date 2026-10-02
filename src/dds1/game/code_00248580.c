@@ -68,7 +68,7 @@ typedef struct MenuTerminalWork {
 
 extern s32 mnuCreateDualPercentPanel(s32, s32);
 
-extern s32 func_002CFEB8(s32);
+extern s32 sdfAllocSizeClassBlock(s32);
 
 extern s32 mnuPercentOrHundred(u16, u16);
 
@@ -224,7 +224,7 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00248810);
 
 
 s32 mnuCreateDualPercentPanel(s32 resource, s32 context) {
-    s32 panel = func_002CFEB8(0xa8);
+    s32 panel = sdfAllocSizeClassBlock(0xa8);
     mnuDrawPanelSequenceByRow(panel, 0, 0, 0x1e,
         mnuPercentOrHundred(*(u16 *)(resource + 6), *(u16 *)(resource + 8)),
         *(s32 *)(context + 0xe0));

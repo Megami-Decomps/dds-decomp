@@ -287,7 +287,7 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00117A88);
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118008);
 
 /* A full reset preserves the scene allocation and restores the saved runtime data. */
-void func_00118598(s32 fullReset) {
+void sdfResetGameRuntime(s32 fullReset) {
     s32 backingAllocation;
 
     if (fullReset == 1) {

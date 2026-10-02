@@ -210,7 +210,7 @@ typedef struct PolyMovieWork {
 extern void evtScaleValueByMultiplier(PolyMovieClip *clip, f32 multiplier);
 extern void sdfFreezeFloatCounter(PolyMovieClip *clip);
 extern void sdfUnfreezeFloatCounter(PolyMovieClip *clip);
-extern void *func_00328D68(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern s32 sdfAllocGeneralBlock(s32 size);
@@ -221,7 +221,7 @@ extern void fileWaitIdle(void);
 extern void filePollEntryCleanup(s32 arg);
 extern void sdfReleaseResourceAllocation(s32 arg);
 extern s32 mnuQueryTitleSoundBusy(void);
-extern void func_002A1308(void);
+extern void mnuStopTitleVoicePlayback(void);
 extern void func_0035B6E0(const char *fmt, ...);
 extern void sdfReleaseChipBlock(void *ptr);
 
@@ -628,7 +628,7 @@ void evtSetMovieClipPositionClampedToDuration(PolyMovieObject *movie, s32 unused
 void *evtPolygonMovieAllocWork(void) {
     void *work;
 
-    work = func_00328D68(0x11C);
+    work = sdfAllocSizeClassBlock(0x11C);
     if (work == NULL) {
         return work;
     }
@@ -644,7 +644,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
     }
     work->unk_114 = 0;
     work->handle = -1;
-    work->buffer = func_00328D68(0x1FC);
+    work->buffer = sdfAllocSizeClassBlock(0x1FC);
     for (i = 0; i < 0x7F; i++) {
         work->buffer[i] = 0;
     }
@@ -870,7 +870,7 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work) {
             sdfReleaseResourceAllocation(work->res6C);
         }
         if (mnuQueryTitleSoundBusy() == 1) {
-            func_002A1308();
+            mnuStopTitleVoicePlayback();
         }
         func_0035B6E0("sound stop all. \n");
         sdfReleaseChipBlock(work);

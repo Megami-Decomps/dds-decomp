@@ -352,7 +352,7 @@ extern void evtCreateMessageWindowIfMissing(s32);
 extern char D_0037B9E0[];
 extern void func_00271368(void *);
 extern void func_002717D8(void *);
-extern void func_00283BE0(void *, s32);
+extern void mnuResetGradientFadeColor(void *, s32);
 extern void func_002E9708(void);
 
 StaffMenuWork *mnuCreateStaffCampWork(void) {
@@ -373,7 +373,7 @@ StaffMenuWork *mnuCreateStaffCampWork(void) {
     evtCreateMessageWindowIfMissing((s32)D_0037B9E0);
     func_00271368(work);
     func_002717D8(work);
-    func_00283BE0(work->timer, 0x40);
+    mnuResetGradientFadeColor(work->timer, 0x40);
     func_002E9708();
     return work;
 }

@@ -107,7 +107,7 @@ extern void EIntr(void);
 extern void sceCdPowerOff(void *arg0);
 extern s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 extern void sdfPanicHaltPrintf(const char *arg0, ...) __attribute__((noreturn));
-extern void *func_002CFEB8(s32 size);
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock(void *ptr);
 extern void *sdfAllocAndClearQuadwords(s32 size);
 extern s32 sdfAllocGeneralBlock(s32 size);
@@ -1032,7 +1032,7 @@ char *sdfStrDup(const char *text) {
         return NULL;
     }
     length = strlen(text);
-    copy = func_002CFEB8(length + 1);
+    copy = sdfAllocSizeClassBlock(length + 1);
     memcpy(copy, text, length);
     copy[length] = 0;
     return copy;
@@ -1064,7 +1064,7 @@ s32 sdfDecimalToPackedDigits(s32 number) {
 }
 
 DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 mode) {
-    DevRequest *request = func_002CFEB8(sizeof(*request));
+    DevRequest *request = sdfAllocSizeClassBlock(sizeof(*request));
 
     request->mode = mode;
     request->flags = 0;

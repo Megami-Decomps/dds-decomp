@@ -448,7 +448,7 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_0024A020);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024A158);
 
-extern void func_002A8008(void);
+extern void mnuCheckMovieDecoderStatus(void);
 extern void mnuStopMovieDrawTask(void);
 /* Advance or stop the timed viewer action according to the current position. */
 s32 evtViewerUpdateTimedAction(EventViewerState *viewer) {
@@ -459,7 +459,7 @@ s32 evtViewerUpdateTimedAction(EventViewerState *viewer) {
             viewer->timedStart = 0;
             viewer->timedEnd = 0;
         } else if (viewer->timedEnd < 0) {
-            func_002A8008();
+            mnuCheckMovieDecoderStatus();
         } else if (viewer->glyphAdvancePosition >= viewer->timedEnd) {
             mnuStopMovieDrawTask();
             viewer->timedActive = 0;
@@ -981,7 +981,7 @@ extern f32 D_0037F590[];
 extern void evtResetUnitVectorSlots();
 extern void mnuCampLinkFontGlyph();
 extern void func_0014E668();
-extern void func_001057A8();
+extern void kwlnCancelConfiguredFadeFrames();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
 extern void sdfQueueNonzeroResourceId();
@@ -1004,7 +1004,7 @@ void evtViewerRelease(viewer)
     evtViewerCleanupMessageWindow((s32)viewer);
     mnuCampLinkFontGlyph(viewer);
     func_0014E668(0);
-    func_001057A8();
+    kwlnCancelConfiguredFadeFrames();
     D_0037F590[0] = D_0037F590[1] = D_0037F590[2] = D_0037F590[3] = 0.0f;
     if (viewer->timedActive == 1) {
         if (viewer->timedEnd != -2 || evtViewerHasUpdateFlag((s32)viewer) == 1) {

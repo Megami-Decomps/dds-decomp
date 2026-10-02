@@ -2,7 +2,7 @@
 
 extern u32 dds3CreateSlotResourceState(u32);
 
-extern u32 func_00328D68(u32);
+extern u32 sdfAllocSizeClassBlock(u32);
 
 /* The resource pointer is stored at +0x18 in both games. */
 typedef struct WorldResourceOwner {
@@ -109,7 +109,7 @@ u32 dds3InitializeResourceOwner(WorldResourceOwner *object) {
     u32 handle;
 
     effObjInnerCreate();
-    resource = (u32 *)func_00328D68(0x10);
+    resource = (u32 *)sdfAllocSizeClassBlock(0x10);
     object->resource = resource;
     handle = dds3CreateSlotResourceState((u32)object);
     *resource = handle;

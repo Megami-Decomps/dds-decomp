@@ -6,7 +6,7 @@ extern World *dds3ActiveWorld;
 void sdfReleaseChipBlock(void *arg);
 void effObjNodeDestroy(void *arg);
 void *dds3CreateWorldNodeForKind(s32 arg);
-void *func_002CFEB8(s32 arg);
+void *sdfAllocSizeClassBlock(s32 arg);
 void dds3GrowWorldValueChain(void *arg, s32 arg1);
 void func_00110120(IndexObj *arg);
 void func_00110018(IndexObj *arg);
@@ -118,7 +118,7 @@ void *dds3AppendWorldIndexNode(s32 index) {
     if (info->unk1E < index) {
         return NULL;
     }
-    node = func_002CFEB8(0x10);
+    node = sdfAllocSizeClassBlock(0x10);
     if (node == NULL) {
         return NULL;
     }
