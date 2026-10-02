@@ -16,9 +16,12 @@ extern void effReleaseBattleVoiceOwner(void *);
 extern void effBattleReleaseParameterBanks(void *);
 extern void sdfReleaseResourceAllocation(void *);
 extern void func_00160690();
+extern const char D_003A0D70[];
 extern void kwlnCreateHeldTextureBuffer(s32, s32, f32);
 extern s32 kwlnTextureSetReferenceFlagIfPresent();
-extern void func_003003F0(const char *);
+extern void kwlnTextureClearReferenceFlag(void);
+extern void kwlnTextureReleaseHeldReference(void);
+extern void func_003003F0(const char *, ...);
 extern f32 D_00324850[];
 extern f32 D_00324860[];
 extern u8 D_00325870[];
@@ -299,7 +302,12 @@ void dds3StartCrossfade(s32 frames) {
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_001602F8);
 
-INCLUDE_ASM(const s32, "game/code_0015F4D0", func_00160690);
+void func_00160690(void) {
+    kwlnTextureClearReferenceFlag();
+    kwlnTextureReleaseHeldReference();
+    D_003BB018 = 0;
+    func_003003F0(D_003A0D70);
+}
 
 extern u32 sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(u32 handle);
@@ -362,6 +370,8 @@ void sndUnlinkVoice(SoundVoice *voice) {
         link = &cur->next;
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_0015F4D0", D_003A0D70);
 
 INCLUDE_ASM(const s32, "game/code_0015F4D0", func_00160958);
 

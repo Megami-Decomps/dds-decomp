@@ -241,7 +241,9 @@ void func_00342798(void) {
     sndSendCommandPacket(0x100, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_003427C0);
+void func_003427C0(u8 channel) {
+    sndSendCommandPacket(((channel >> 3) & 0xF) | 0x110, 0, 0, 0);
+}
 
 extern void FlushCache(s32);
 extern s32 SignalSema(s32);

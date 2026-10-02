@@ -298,7 +298,25 @@ void func_0026BD50(DspScrollingStripState *state, s32 layout, void *resource, s3
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BE28);
+extern u32 effMiscRand(void *state);
+
+/* Give each scrolling strip a random speed in the requested range. */
+void func_0026BE28(DspScrollingStripState *state, s32 negate, s32 minimum, s32 maximum) {
+    /* scrollSpeed is the final word in each five-word strip record. */
+    s32 *offsets = &state->strips[0].scrollSpeed;
+    s32 range = maximum - minimum;
+    s32 i = 5;
+
+    for (; i >= 0; i--) {
+        s32 offset = effMiscRand(NULL) % range + minimum;
+        if (negate == 0) {
+            *offsets = offset;
+        } else {
+            *offsets = -offset;
+        }
+        offsets += 5;
+    }
+}
 
 void func_0026BEB0(DspScrollingStripState *state, s32 vertical, s32 horizontal) {
     state->unk14 = vertical;

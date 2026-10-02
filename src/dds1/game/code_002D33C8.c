@@ -1153,7 +1153,50 @@ void sdfPatchPacketResourceReference(SdfBigPacket *packet, s32 entryIndex) {
     packet->unk30 = (packet->unk30 & ~0x3FFF) | (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->resourceIndexXor]->baseAddress >> 6);
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D5CD0);
+typedef struct SdfExtendedPacketSource {
+    u8 pad00[0xC];
+    u32 resourceWord;
+    u8 pad10[4];
+    s16 formatSelector;
+    u8 pad16[2];
+    s32 pixelFormat;
+} SdfExtendedPacketSource;
+
+typedef struct SdfGraphPacketState {
+    s16 width;
+    s16 unk2;
+    s16 height;
+    u8 bufferMode;
+    u8 auxiliaryMode;
+    SdfTexResource *buffers[3];
+} SdfGraphPacketState;
+
+extern SdfGraphPacketState D_003980E0;
+
+/* Wrap an extended texture draw packet with a patchable resource header. */
+void func_002D5CD0(SdfListHead *drawList, SdfListHead *linkedList,
+                   SdfExtendedPacketSource *source, s32 arg3, s32 arg4,
+                   s32 arg5, s32 arg6, s32 arg7, s32 arg_sp0,
+                   s32 arg_sp8, s32 (*allocPacket)(s32)) {
+    SdfNode *packet;
+    SdfPacket *drawPacket;
+
+    if (allocPacket == NULL) {
+        allocPacket = sdfAllocPacketAligned;
+    }
+    packet = (SdfNode *)allocPacket(0x70);
+    packet->unk8 = arg_sp8;
+    packet->unk4 = (u32)sdfPatchPacketResourceReference;
+    drawPacket = (SdfPacket *)((u8 *)packet + 0x10);
+
+    sdfInitializeExtendedDrawPacket(
+        drawPacket, source->resourceWord, source->formatSelector,
+        source->pixelFormat, arg3, arg4, D_003980E0.buffers[0]->word,
+        D_003980E0.width, D_003980E0.bufferMode, arg5, arg6, arg7,
+        arg_sp0, 2);
+    sdfAppendLinkedPacketNode(linkedList, (u32 *)packet);
+    sdfAppendPacket(drawList, (s32)drawPacket);
+}
 
 /* Pack two UV/XYZ vertex pairs after the common primitive and color. */
 void sdfBuildPacket116(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 depth) {
@@ -1547,7 +1590,34 @@ void sdfInitializeObjectListRequest(void) {
     sdfInitializeSynchronizedRequest(&sdfObjectListReleaseQueue, sdfDestroyObjectList);
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D7830);
+typedef struct SdfModelNodeDefaults {
+    void *next;
+    void *previous;
+    u8 pad08[0x0E];
+    s16 index;
+    u8 pad18[4];
+    u32 color;
+    u8 pad20[0x30];
+    u128 zeroRotation;
+    u128 zeroPosition;
+    u128 unitScale;
+    u128 unitMatrix[4];
+} SdfModelNodeDefaults;
+
+SdfModelNodeDefaults *func_002D7830(void) {
+    SdfModelNodeDefaults *node = sdfAllocAndClearQuadwords(0x100);
+
+    node->color = 0x80808080;
+    node->index = -1;
+    node->next = node;
+    node->previous = node;
+    VU0_STORE_VF($vf0, &node->zeroRotation);
+    VU0_STORE_VF($vf0, &node->zeroPosition);
+    VU0_SET_ONES_XYZ($vf10);
+    VU0_STORE_VF($vf10, &node->unitScale);
+    EE_MMI_UNIT_MATRIX(node->unitMatrix);
+    return node;
+}
 
 typedef struct SdfFreeNode {
     struct SdfFreeNode *next;

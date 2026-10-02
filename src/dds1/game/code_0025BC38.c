@@ -236,9 +236,26 @@ void mnuReleaseListNodes(MenuListHead *head) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", mnuDrawMantraSineFade);
+extern f32 sdfSinPoly(f32);
 
-extern s32 mnuDrawMantraSineFade(s32);
+s32 mnuDrawMantraSineFade(s32 frame, s32 amount, s32 drawArg) {
+    f32 wave = (f32)frame / 60.0f;
+    s32 shown;
+    s32 halfShown;
+
+    wave = sdfSinPoly(wave * 3.14159265f);
+    shown = (f32)amount * (wave * 0.5f + 0.5f);
+    func_0024E260(-27, 52, 0, shown, 0x16, drawArg);
+    func_0024E260(-27, 52, 0, shown, 0x17, drawArg);
+    halfShown = (f32)amount * 0.5f;
+    func_0024E260(-27, 52, 0, halfShown, 0x18, drawArg);
+    func_0024E260(-27, 52, 0, halfShown, 0x19, drawArg);
+    if (frame < 60) {
+        return 0;
+    }
+    return 1;
+}
+
 extern s32 func_0025D7F8(MenuListNode *, s32, s32);
 
 s32 mnuAdvanceDisplayList(s32 arg0, s32 arg1, s32 arg2) {
@@ -247,7 +264,7 @@ s32 mnuAdvanceDisplayList(s32 arg0, s32 arg1, s32 arg2) {
     MenuListNode *node = head->first;
     s32 index = 0;
 
-    if (mnuDrawMantraSineFade(*counter) != 0) {
+    if (mnuDrawMantraSineFade(*counter, arg1, arg2) != 0) {
         *counter = 0;
     } else {
         *counter = *counter + 1;

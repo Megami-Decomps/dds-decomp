@@ -215,9 +215,70 @@ void effInitializeColorState(EffectColorState *state) {
     state->valueC = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00167178", func_00169B90);
+typedef struct EffThunderPointHistory {
+    u8 pad00[8];
+    s32 count; /* 0x08: history slots */
+    s32 activePointCount; /* 0x0C: populated point slots */
+    s32 position; /* 0x10: next point index */
+    u8 pad14[4];
+    u128 *points; /* 0x18 */
+    u32 *colors; /* 0x1C */
+} EffThunderPointHistory;
 
-INCLUDE_ASM(const s32, "game/code_00167178", func_00169D78);
+extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
+
+void func_00169B90(EffThunderPointHistory *history, u32 *gradientColors) {
+    f32 t = 0.0f;
+    u32 count = history->count / 3;
+    u32 alphaCount = count >> 1;
+    f32 step = 1.0f / count;
+    f32 alpha = 0.0f;
+    f32 alphaStep = 1.0f / alphaCount;
+    u32 *colors = history->colors;
+    u32 innerStart = gradientColors[0] & 0xFFFFFF;
+    u32 innerEnd = gradientColors[2] & 0xFFFFFF;
+    u32 outerStart = gradientColors[1];
+    u32 outerEnd = gradientColors[3];
+    u32 i = 0;
+
+    if (count != 0) {
+        do {
+            u32 alphaMask = (u32)(alpha * 2147483648.0f) & 0xFF000000;
+
+            colors[0] = effBlendColor(outerEnd, outerStart, t);
+            colors[1] = effBlendColor(innerEnd, innerStart, t) | alphaMask;
+            colors[2] = colors[0];
+            t += step;
+            if (i < alphaCount) {
+                alpha += alphaStep;
+            }
+            i++;
+            colors += 3;
+        } while (i < count);
+    }
+}
+
+void func_00169D78(EffThunderPointHistory *history, u128 *source) {
+    s32 position = history->position;
+    u128 *points = history->points;
+    s32 count;
+
+    PCP_COPY_VECTOR(&points[position], source);
+    PCP_COPY_VECTOR(&points[position + 1], source + 1);
+    PCP_COPY_VECTOR(&points[position + 2], source + 2);
+    position += 3;
+    count = history->count;
+    history->position = position;
+    if (position == count) {
+        PCP_COPY_VECTOR(&points[0], source);
+        PCP_COPY_VECTOR(&points[1], source + 1);
+        PCP_COPY_VECTOR(&points[2], source + 2);
+        history->position = 3;
+    }
+    if (history->activePointCount < count - 3) {
+        history->activePointCount += 3;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00167178", func_00169E10);
 

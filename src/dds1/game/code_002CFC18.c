@@ -131,27 +131,42 @@ SdfCursorNode *sdfAdvanceCursorWalk(SdfCursorState *state, SdfCursorWalk *walk) 
     }
     return node;
 }
-INCLUDE_ASM(const s32, "game/code_002CFC18", func_002CFDF0);
-
-
 typedef struct SdfCursorSlot {
     struct SdfCursorSlot *next;
-    u8 unk4[4];
+    SdfCursorNode *base;
     SdfCursorNode *(*handler)();
     struct SdfCursorOwner *owner;
     SdfCursorNode *node;
-    s16 count;
-    u16 limit;
+    u16 count;
+    s16 limit;
+    s16 visited;
 } SdfCursorSlot;
 
 typedef struct SdfCursorOwner {
     SdfCursorSlot *slot;
-    u8 unk4[6];
-    u16 limit;
+    SdfCursorSlot *next;
+    s16 stride;
+    s16 limit;
 } SdfCursorOwner;
 
 extern SdfCursorSlot *sdfFreeCursorSlotHead;
-extern SdfCursorNode *func_002CFDF0();
+SdfCursorNode *func_002CFDF0(SdfCursorOwner *owner, SdfCursorSlot *slot) {
+    s16 ownerLimit = owner->limit;
+    s32 count = slot->count + 1;
+    s32 remaining = slot->limit;
+    SdfCursorNode *node;
+
+    slot->count = count;
+    node = (SdfCursorNode *)((u8 *)slot->base + (ownerLimit - remaining) * owner->stride);
+    slot->limit = remaining - 1;
+    if (slot->limit == 0) {
+        slot->handler = (SdfCursorNode *(*)())sdfAdvanceCursorWalk;
+        if ((s16)count == ownerLimit) {
+            sdfAdvanceNodeCursor((SdfNodeCursor *)owner);
+        }
+    }
+    return node;
+}
 
 SdfCursorNode *sdfCursorSlotAlloc(SdfCursorOwner *owner) {
     SdfCursorSlot *slot = sdfFreeCursorSlotHead;
