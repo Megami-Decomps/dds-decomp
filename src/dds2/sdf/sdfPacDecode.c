@@ -5,7 +5,13 @@ enum {
     PAC_COMMAND_ALLOCATION_LIST = 2,
     PAC_COMMAND_END = 0xFF,
     PAC_ENCODING_RAW = 0,
-    PAC_ENCODING_COMPRESSED = 1
+    PAC_ENCODING_COMPRESSED = 1,
+    PAC_HEADER_BYTES = 0x10,
+    PAC_WORK_BASE_BYTES = 0x20,
+    PAC_EXTENSION_BYTES_MASK = 0xF0,
+    PAC_ENCODING_MASK = 0xF,
+    PAC_STATE_USE_PACKET_MEMORY = 1,
+    PAC_STATE_ALLOCATE_HIGH = 2
 };
 
 typedef struct PacHead {
@@ -44,7 +50,7 @@ typedef struct PacBuf {
     s32 result; /* 0x0 */
     s32 resourceSlot; /* 0x4 */
     u8 *cursor; /* 0x8 */
-    s32 remaining; /* 0xC */
+    s32 remainingBytes; /* 0xC */
 } PacBuf;
 
 typedef struct PacState {
@@ -60,7 +66,7 @@ typedef struct PacState {
     u8 *outputCursor; /* 0x1C */
     s32 pendingBytes; /* 0x20 */
     PacBuf *decoder; /* 0x24 */
-    PacBuf *buffer; /* 0x28 */
+    PacBuf *resourceBuffer; /* 0x28 */
     PacAlloc *allocation; /* 0x2C: current allocation-entry list */
     PacWork *queueHead; /* 0x30 */
     PacWork *queueTail; /* 0x34 */
@@ -122,8 +128,8 @@ void sdfStoreWordAndSetState(void *decoder, void *destination);
 
 /* Relocation record embedded in the work item's data stream. */
 typedef struct PacReloc {
-    s32 offset; /* 0x00: displacement from the payload */
-    s32 count;  /* 0x04: number of relocation bytes */
+    s32 tableOffset; /* 0x00: relocation table displacement from the payload */
+    s32 tableBytes;  /* 0x04: zero after the table has been applied */
     u8 pad08[8];
     u8 payload[1]; /* 0x10 */
 } PacReloc;
@@ -136,10 +142,10 @@ INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00346CF0);
 
 /* Queue a private copy of the packet header and any extension bytes. */
 PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet) {
-    s32 extensionBytes = packet->flags & 0xF0;
-    PacWork *node = sdfAllocAndClearQuadwords(extensionBytes + 0x20);
+    s32 extensionBytes = packet->flags & PAC_EXTENSION_BYTES_MASK;
+    PacWork *node = sdfAllocAndClearQuadwords(extensionBytes + PAC_WORK_BASE_BYTES);
     node->owner = state;
-    memcpy(node->packet, packet, extensionBytes + 0x10);
+    memcpy(node->packet, packet, extensionBytes + PAC_HEADER_BYTES);
     if (state->queueTail == NULL) {
         state->queueHead = node;
     } else {
@@ -149,28 +155,28 @@ PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet) {
     return node;
 }
 
-/* Unlink a queued packet and return the following work item. */
+/* Remove an item already in its owner's queue, free it, and return its successor. */
 PacWork *sdfPacRemovePacket(PacWork *work) {
     PacState *state = work->owner;
     /* Keep a node-shaped link so the queue head can be unlinked like any next pointer. */
-    PacWork *link = (PacWork *)&state->queueHead;
-    PacWork *cur = state->queueHead;
-    PacWork *prev = NULL;
-    PacWork *next;
-    if (cur != work) {
+    PacWork *unlinkLink = (PacWork *)&state->queueHead;
+    PacWork *current = state->queueHead;
+    PacWork *previous = NULL;
+    PacWork *nextWork;
+    if (current != work) {
         do {
-            prev = cur;
-            cur = prev->next;
-            link = prev;
-        } while (cur != work);
+            previous = current;
+            current = previous->next;
+            unlinkLink = previous;
+        } while (current != work);
     }
-    next = work->next;
-    link->next = next;
+    nextWork = work->next;
+    unlinkLink->next = nextWork;
     if (state->queueTail == work) {
-        state->queueTail = prev;
+        state->queueTail = previous;
     }
     sdfReleaseChipBlock(work);
-    return next;
+    return nextWork;
 }
 
 /* Dispatch recognized PAC commands; one marks end-of-stream. */
@@ -203,8 +209,8 @@ s32 sdfPacDispatchPacket(PacState *state, s32 status, PacHead *packet) {
 
 /* Return the extension payload only when its high-nibble length is nonzero. */
 void *sdfPacGetExtensionData(PacExtensionHeader *header) {
-    s32 extensionSize = header->extensionFlags & 0xF0;
-    if (extensionSize <= 0) {
+    s32 extensionBytes = header->extensionFlags & PAC_EXTENSION_BYTES_MASK;
+    if (extensionBytes <= 0) {
         return NULL;
     }
     return header->data;
@@ -212,19 +218,20 @@ void *sdfPacGetExtensionData(PacExtensionHeader *header) {
 
 /* Incrementally copy raw payload bytes, invoking completion at zero remaining. */
 void sdfPacCopyPendingBytes(PacState *state) {
-    s32 count = state->pendingBytes;
-    s32 available = state->inputAvailable;
-    if (available < count) {
-        count = available;
+    s32 copyBytes = state->pendingBytes;
+    s32 inputBytes = state->inputAvailable;
+    if (inputBytes < copyBytes) {
+        copyBytes = inputBytes;
     }
-    if (count != 0) {
-        memcpy(state->outputCursor, state->inputCursor, count);
-        sdfPacAdvanceInput(state, count);
-        state->outputCursor += count;
+    /* Completion is tested only after consuming a nonzero chunk. */
+    if (copyBytes != 0) {
+        memcpy(state->outputCursor, state->inputCursor, copyBytes);
+        sdfPacAdvanceInput(state, copyBytes);
+        state->outputCursor += copyBytes;
         {
-            s32 remaining = state->pendingBytes - count;
-            state->pendingBytes = remaining;
-            if (remaining != 0) {
+            s32 bytesRemaining = state->pendingBytes - copyBytes;
+            state->pendingBytes = bytesRemaining;
+            if (bytesRemaining != 0) {
                 return;
             }
         }
@@ -234,9 +241,9 @@ void sdfPacCopyPendingBytes(PacState *state) {
 
 /* Feed compressed input to the active decoder until it finishes. */
 void sdfPacDecodePendingBytes(PacState *state) {
-    s32 available = state->inputAvailable;
-    s32 finished = func_00347988(state->decoder, state->inputCursor, available);
-    sdfPacAdvanceInput(state, available - state->decoder->remaining);
+    s32 inputBytes = state->inputAvailable;
+    s32 finished = func_00347988(state->decoder, state->inputCursor, inputBytes);
+    sdfPacAdvanceInput(state, inputBytes - state->decoder->remainingBytes);
     if (finished == 0) {
         return;
     }
@@ -246,16 +253,16 @@ void sdfPacDecodePendingBytes(PacState *state) {
 
 /* Consume a packet's bytes without allocating its decoded payload. */
 void sdfPacSkipPendingBytes(PacState *state) {
-    s32 count = state->pendingBytes;
-    if (state->inputAvailable < count) {
-        count = state->inputAvailable;
+    s32 skipBytes = state->pendingBytes;
+    if (state->inputAvailable < skipBytes) {
+        skipBytes = state->inputAvailable;
     }
-    if (count != 0) {
-        sdfPacAdvanceInput(state, count);
+    if (skipBytes != 0) {
+        sdfPacAdvanceInput(state, skipBytes);
         {
-            s32 remaining = state->pendingBytes - count;
-            state->pendingBytes = remaining;
-            if (remaining != 0) {
+            s32 bytesRemaining = state->pendingBytes - skipBytes;
+            state->pendingBytes = bytesRemaining;
+            if (bytesRemaining != 0) {
                 return;
             }
         }
@@ -267,9 +274,9 @@ void sdfPacSkipPendingBytes(PacState *state) {
 void sdfPacStartPacketPayload(PacState *state, PacHead *packet) {
     s32 allocationSize = packet->decodedSize;
     if (allocationSize == 0) {
-        allocationSize = packet->payloadSize + (packet->flags & 0xF0) - 0x10;
+        allocationSize = packet->payloadSize + (packet->flags & PAC_EXTENSION_BYTES_MASK) - PAC_HEADER_BYTES;
     }
-    if (state->flags & 1) {
+    if (state->flags & PAC_STATE_USE_PACKET_MEMORY) {
         PacWork *node = sdfPacEnqueuePacket(state, packet);
         node->dataCursor = packet->payload;
         state->onInput = sdfPacSkipPendingBytes;
@@ -277,13 +284,13 @@ void sdfPacStartPacketPayload(PacState *state, PacHead *packet) {
         PacWork *node;
         state->phase = 2;
         node = sdfPacEnqueuePacket(state, packet);
-        if (state->flags & 2) {
+        if (state->flags & PAC_STATE_ALLOCATE_HIGH) {
             node->resourceHandle = sdfAllocGeneralBlockHigh(allocationSize);
         } else {
             node->resourceHandle = sdfAllocGeneralBlock(allocationSize);
         }
         state->outputCursor = node->dataCursor = (u8 *)sdfResourceRetainAddress(node->resourceHandle);
-        switch (packet->flags & 0xF) {
+        switch (packet->flags & PAC_ENCODING_MASK) {
         case PAC_ENCODING_RAW:
             state->onInput = sdfPacCopyPendingBytes;
             break;
@@ -311,11 +318,11 @@ void sdfPacRelocateQueuedPayload(PacState *state) {
     PacWork *work = state->queueTail;
     PacReloc *record = (PacReloc *)work->dataCursor;
     u8 *payload = record->payload;
-    s32 count = record->count;
+    s32 tableBytes = record->tableBytes;
     work->dataCursor = payload;
-    if (count != 0) {
-        sdfRelocatePackedResourceWords(payload, payload, payload + record->offset, count);
-        record->count = 0;
+    if (tableBytes != 0) {
+        sdfRelocatePackedResourceWords(payload, payload, payload + record->tableOffset, tableBytes);
+        record->tableBytes = 0;
     }
     sdfDecodePacNodeAndAdvanceTail(state);
 }
@@ -331,11 +338,11 @@ void sdfPacFinalizeRelocatedPayload(PacState *state) {
     PacWork *work = state->queueTail;
     PacReloc *record = (PacReloc *)work->dataCursor;
     u8 *payload = record->payload;
-    s32 count = record->count;
+    s32 tableBytes = record->tableBytes;
     work->dataCursor = payload;
-    if (count != 0) {
-        sdfRelocatePackedResourceWords(payload, payload, payload + record->offset, count);
-        record->count = 0;
+    if (tableBytes != 0) {
+        sdfRelocatePackedResourceWords(payload, payload, payload + record->tableOffset, tableBytes);
+        record->tableBytes = 0;
     }
     sdfDecodePacNodeAndAdvanceTail(state);
 }
@@ -348,40 +355,41 @@ void sdfPacBeginRelocatedPayload(PacState *state, PacHead *packet) {
 
 /* Incrementally copy a resource chunk before processing its resource slot. */
 void sdfPacCopyResourceChunk(PacState *state) {
-    PacBuf *buffer = state->buffer;
-    s32 count = buffer->remaining;
-    if (state->inputAvailable < count) {
-        count = state->inputAvailable;
+    PacBuf *resourceBuffer = state->resourceBuffer;
+    s32 copyBytes = resourceBuffer->remainingBytes;
+    if (state->inputAvailable < copyBytes) {
+        copyBytes = state->inputAvailable;
     }
-    if (count != 0) {
-        memcpy(buffer->cursor, state->inputCursor, count);
-        sdfPacAdvanceInput(state, count);
-        buffer->cursor += count;
+    if (copyBytes != 0) {
+        memcpy(resourceBuffer->cursor, state->inputCursor, copyBytes);
+        sdfPacAdvanceInput(state, copyBytes);
+        resourceBuffer->cursor += copyBytes;
         {
-            s32 remaining = buffer->remaining - count;
-            buffer->remaining = remaining;
-            if (remaining != 0) {
+            s32 bytesRemaining = resourceBuffer->remainingBytes - copyBytes;
+            resourceBuffer->remainingBytes = bytesRemaining;
+            if (bytesRemaining != 0) {
                 return;
             }
         }
-        buffer->result = sdfTexAcquireResourceTexture(sdfResourceRetainAddress(buffer->resourceSlot));
-        sdfReleaseMemorySlot(&buffer->resourceSlot);
+        resourceBuffer->result = sdfTexAcquireResourceTexture(sdfResourceRetainAddress(resourceBuffer->resourceSlot));
+        sdfReleaseMemorySlot(&resourceBuffer->resourceSlot);
         state->onComplete(state);
     }
 }
 
 /* Decode a chunk before processing and releasing its resource slot. */
 void sdfPacDecodeResourceChunk(PacState *state) {
-    s32 count = state->pendingBytes;
-    s32 finished = func_00347988(state->decoder, state->inputCursor, count);
-    sdfPacAdvanceInput(state, count - state->decoder->remaining);
+    /* This handler offers pendingBytes, unlike the packet-level decoder. */
+    s32 inputBytes = state->pendingBytes;
+    s32 finished = func_00347988(state->decoder, state->inputCursor, inputBytes);
+    sdfPacAdvanceInput(state, inputBytes - state->decoder->remainingBytes);
     if (finished == 0) {
         return;
     }
     {
-        PacBuf *buffer = state->buffer;
-        buffer->result = sdfTexAcquireResourceTexture(sdfResourceRetainAddress(buffer->resourceSlot));
-        sdfReleaseMemorySlot(&buffer->resourceSlot);
+        PacBuf *resourceBuffer = state->resourceBuffer;
+        resourceBuffer->result = sdfTexAcquireResourceTexture(sdfResourceRetainAddress(resourceBuffer->resourceSlot));
+        sdfReleaseMemorySlot(&resourceBuffer->resourceSlot);
     }
     sdfReleaseChipBlock(state->decoder);
     state->onComplete(state);
@@ -389,21 +397,21 @@ void sdfPacDecodeResourceChunk(PacState *state) {
 
 /* Skip the remaining resource chunk and process its existing cursor. */
 void sdfPacSkipResourceChunk(PacState *state) {
-    PacBuf *buffer = state->buffer;
-    s32 count = buffer->remaining;
-    if (state->inputAvailable < count) {
-        count = state->inputAvailable;
+    PacBuf *resourceBuffer = state->resourceBuffer;
+    s32 skipBytes = resourceBuffer->remainingBytes;
+    if (state->inputAvailable < skipBytes) {
+        skipBytes = state->inputAvailable;
     }
-    if (count != 0) {
-        sdfPacAdvanceInput(state, count);
+    if (skipBytes != 0) {
+        sdfPacAdvanceInput(state, skipBytes);
         {
-            s32 remaining = buffer->remaining - count;
-            buffer->remaining = remaining;
-            if (remaining != 0) {
+            s32 bytesRemaining = resourceBuffer->remainingBytes - skipBytes;
+            resourceBuffer->remainingBytes = bytesRemaining;
+            if (bytesRemaining != 0) {
                 return;
             }
         }
-        buffer->result = sdfTexAcquireAlternateResourceTexture(buffer->cursor);
+        resourceBuffer->result = sdfTexAcquireAlternateResourceTexture(resourceBuffer->cursor);
         state->onComplete(state);
     }
 }
@@ -454,17 +462,18 @@ void sdfPacAdvanceAllocationEntry(PacState *state) {
     }
 }
 
-/* Discard pending input until the next allocation entry can start. */
+/* Discard pending input until the next allocation entry can start; check the
+   boundary even when no bytes are consumed. */
 void sdfPacSkipAllocationEntryBytes(PacState *state) {
-    s32 available = state->inputAvailable;
-    if (state->pendingBytes < available) {
-        available = state->pendingBytes;
+    s32 skipBytes = state->inputAvailable;
+    if (state->pendingBytes < skipBytes) {
+        skipBytes = state->pendingBytes;
     }
-    sdfPacAdvanceInput(state, available);
+    sdfPacAdvanceInput(state, skipBytes);
     {
-        s32 remaining = state->pendingBytes - available;
-        state->pendingBytes = remaining;
-        if (remaining != 0) {
+        s32 bytesRemaining = state->pendingBytes - skipBytes;
+        state->pendingBytes = bytesRemaining;
+        if (bytesRemaining != 0) {
             return;
         }
     }
