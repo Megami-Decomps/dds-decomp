@@ -8,15 +8,15 @@ extern f32 sdfViewTargetVector[4];
 
 /* Records are 0x34 bytes; bit 0 of flags marks a claimed slot. */
 typedef struct ModelInstance {
-    f32 vector0[3];
+    f32 position[3];
     u32 valueC;
-    f32 vector10[3];
+    f32 positionStep[3];
     u8 pad1C[4];
     u32 flags;
-    u16 firstValue;
-    u16 secondValue;
-    u16 elapsed;
-    u16 duration;
+    u16 remainingLifetime; /* decremented by each unpaused timed update */
+    u16 initialLifetime; /* retained as the draw ratio denominator; zero disables timed motion */
+    u16 animationFrame;
+    u16 animationLength;
     u8 pad2C[8];
 } ModelInstance;
 
@@ -40,16 +40,17 @@ extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031C940);
 
-void func_0031CA10(f32 *position, s32 x, s32 y) {
-    f32 halfAngle;
-    f32 depth;
+/* Map a screen point onto the view plane using the eye/target Z separation. */
+void func_0031CA10(f32 *position, s32 screenX, s32 screenY) {
+    f32 halfViewAngle;
+    f32 eyeTargetDepth;
 
-    halfAngle = D_0037F5EC[0] * 0.5f;
-    depth = sdfViewEyeVector[2] - sdfViewTargetVector[2];
-    position[0] = depth * func_00353228(halfAngle * 1.3f) *
-        ((f32)(x - 256) * 0.00390625f);
-    position[1] = depth * func_00353228(halfAngle) *
-        ((f32)(y - 224) / 224.0f);
+    halfViewAngle = D_0037F5EC[0] * 0.5f;
+    eyeTargetDepth = sdfViewEyeVector[2] - sdfViewTargetVector[2];
+    position[0] = eyeTargetDepth * func_00353228(halfViewAngle * 1.3f) *
+        ((f32)(screenX - 256) * 0.00390625f);
+    position[1] = eyeTargetDepth * func_00353228(halfViewAngle) *
+        ((f32)(screenY - 224) / 224.0f);
     position[2] = 0.0f;
 }
 
@@ -75,29 +76,30 @@ INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CF88);
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031D120);
 
-ModelInstanceWork *itfCreateModelInstanceWork(s32 count, s32 *counts) {
-    s32 listBytes = count * 8;
-    s32 size = listBytes + 16;
+/* Allocate list headers and all instance records in one contiguous work block. */
+ModelInstanceWork *itfCreateModelInstanceWork(s32 listCount, s32 *instanceCounts) {
+    s32 listBytes = listCount * 8;
+    s32 allocationSize = listBytes + 16;
     s32 i;
     u32 handle;
     ModelInstanceWork *work;
     ModelInstanceList *list;
     u8 *records;
 
-    for (i = 0; i < count; i++) size += counts[i] * sizeof(ModelInstance);
-    evtPrintDeveloperConsoleMessage("SpriteWork Object Size %d\n", size);
-    handle = sdfAllocGeneralBlock(size);
+    for (i = 0; i < listCount; i++) allocationSize += instanceCounts[i] * sizeof(ModelInstance);
+    evtPrintDeveloperConsoleMessage("SpriteWork Object Size %d\n", allocationSize);
+    handle = sdfAllocGeneralBlock(allocationSize);
     work = sdfMemoryGetBlockAddress(handle);
-    memset(work, 0, size);
+    memset(work, 0, allocationSize);
     work->handle = handle;
-    work->count = count;
+    work->count = listCount;
     work->lists = (ModelInstanceList *)(work + 1);
     list = work->lists;
     records = (u8 *)list + listBytes;
-    for (i = 0; i < count; i++, list++) {
+    for (i = 0; i < listCount; i++, list++) {
         list->items = (ModelInstance *)records;
-        list->count = counts[i];
-        records += counts[i] * sizeof(ModelInstance);
+        list->count = instanceCounts[i];
+        records += instanceCounts[i] * sizeof(ModelInstance);
     }
     return work;
 }
@@ -146,7 +148,7 @@ void itfDeactivateModelInstances(ModelInstanceList *list) {
     }
 }
 
-/* Return the first unclaimed record after resetting its time and value pair. */
+/* Claim a slot with a fresh animation cycle and no timed fade/motion yet. */
 s32 itfClaimFreeModelInstance(ModelInstanceList *list) {
     ModelInstance *item;
     s32 index;
@@ -156,11 +158,11 @@ s32 itfClaimFreeModelInstance(ModelInstanceList *list) {
     if (0 < list->count) {
         do {
             if ((item->flags & 1) == 0) {
-                item->duration = 10;
+                item->animationLength = 10;
                 item->flags = item->flags | 1;
-                item->elapsed = 0;
-                item->firstValue = 0;
-                item->secondValue = 0;
+                item->animationFrame = 0;
+                item->remainingLifetime = 0;
+                item->initialLifetime = 0;
                 return (s32)item;
             }
             index = index + 1;
@@ -174,48 +176,51 @@ void itfDeactivateModelInstance(ModelInstance *item) {
     item->flags = item->flags & 0xfffffffe;
 }
 
-void itfSetModelInstanceValuePair(ModelInstance *model, s32 value) {
-    value &= 0xFFFF;
-    model->firstValue = value;
-    model->secondValue = value;
+/* Store both the live countdown and its initial value for timed draw/motion updates. */
+void itfSetModelInstanceValuePair(ModelInstance *model, s32 lifetime) {
+    lifetime &= 0xFFFF;
+    model->remainingLifetime = lifetime;
+    model->initialLifetime = lifetime;
 }
 
-/* Write the second three-component vector without changing its other state. */
+/* Set the per-update position increment without restarting the timed motion. */
 void itfSetModelInstanceSecondaryVector(ModelInstance *model, f32 x, f32 y, f32 z) {
-    model->vector10[0] = x;
-    model->vector10[1] = y;
-    model->vector10[2] = z;
+    model->positionStep[0] = x;
+    model->positionStep[1] = y;
+    model->positionStep[2] = z;
 }
 
-/* Write the first vector and reset its associated word at +0x0C. */
+/* Set the draw position and reset its associated, otherwise unknown word. */
 void itfSetModelInstancePrimaryVector(ModelInstance *model, f32 x, f32 y, f32 z) {
-    model->vector0[0] = x;
-    model->vector0[1] = y;
-    model->vector0[2] = z;
+    model->position[0] = x;
+    model->position[1] = y;
+    model->position[2] = z;
     model->valueC = 0;
 }
 
+/* Draw each active instance first; bit 0 skips its subsequent aging and movement.
+ * The final position increment still occurs after its countdown deactivates it. */
 void func_0031D558(ModelInstanceWork *work, u32 flags) {
-    s32 i = 0;
-    s32 j;
+    s32 listIndex = 0;
+    s32 instanceIndex;
     ModelInstanceList *list = work->lists;
     ModelInstance *item;
 
-    for (; i < work->count; i++, list++) {
+    for (; listIndex < work->count; listIndex++, list++) {
         item = list->items;
-        for (j = 0; j < list->count; j++, item++) {
+        for (instanceIndex = 0; instanceIndex < list->count; instanceIndex++, item++) {
             if (item->flags & 1) {
                 func_0031D680(item);
                 if ((flags & 1) == 0) {
-                    item->elapsed++;
+                    item->animationFrame++;
                 }
-                if (item->secondValue != 0 && (flags & 1) == 0) {
-                    if (--item->firstValue == 0) {
+                if (item->initialLifetime != 0 && (flags & 1) == 0) {
+                    if (--item->remainingLifetime == 0) {
                         itfDeactivateModelInstance(item);
                     }
-                    item->vector0[0] += item->vector10[0];
-                    item->vector0[1] += item->vector10[1];
-                    item->vector0[2] += item->vector10[2];
+                    item->position[0] += item->positionStep[0];
+                    item->position[1] += item->positionStep[1];
+                    item->position[2] += item->positionStep[2];
                 }
             }
         }

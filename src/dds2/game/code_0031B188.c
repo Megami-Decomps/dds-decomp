@@ -15,7 +15,7 @@ typedef struct SoundSlotPool {
 /* Nodes passed to the menu model helpers are 0x50-byte records. */
 typedef struct MnuModelNode {
     f32 primary[4];  /* 0x00 */
-    f32 secondary[4]; /* 0x10 */
+    f32 rotationQuaternion[4]; /* 0x10; supplied to the model basis update */
     f32 tertiary[4]; /* 0x20 */
     f32 x;           /* 0x30 */
     f32 y;           /* 0x34 */
@@ -25,7 +25,7 @@ typedef struct MnuModelNode {
     u32 flags;       /* 0x44 */
     u16 value48;     /* 0x48 */
     u16 value4A;     /* 0x4A */
-    f32 modelZ;      /* 0x4C */
+    f32 savedModelValue; /* 0x4C; restored to the model entry's scalar */
 } MnuModelNode;
 
 typedef struct MnuNodeList {
@@ -64,9 +64,9 @@ void mnuClearNodeBroadcastFlag(u8 *node);
 void dds3ReleaseSoundSlotPool(void);
 void mnuCreateNodeModelEntry(MnuModelNode *, s32, s32, s32, f32, f32, f32);
 
-void mnuDeactivateModelNode(s32 node);
+void mnuDeactivateModelNode(s32 nodeAddress);
 
-extern u8 *func_00232198(s32 first, s32 second);
+extern u8 *func_00232198(s32 resourceGroup, s32 resourceId);
 extern void mdlAddEntryFlaggedEx(u8 *model, s32 entry, s32 flags, f32 x, f32 y);
 extern u32 sdfAllocGeneralBlock(s32 bytes);
 extern u32 *sdfMemoryGetBlockAddress(u32 handle);
@@ -78,19 +78,21 @@ extern s32 D_00438944;
 extern void dds3SetCameraVector(s32 object, void *vector);
 extern void effObjSetInnerFirstVec(void *node, u128 *vector);
 
+/* Reload the camera vectors, invoke its update callback, then restore both copies
+ * of the final vector in the camera data. */
 void func_0031B188(void) {
-    u8 *object;
-    void (*update)(void *);
-    u8 *data;
+    u8 *cameraObject;
+    void (*updateCamera)(void *);
+    u8 *cameraData;
 
     dds3SetCameraVector(D_00438944, D_0040ABD0);
     effObjSetInnerFirstVec((void *)D_00438944, (u128 *)D_0040ABC0);
-    object = (u8 *)D_00438944;
-    update = *(void (**)(void *))(*(u8 **)(object + 0x10) + 8);
-    update(object);
-    data = *(u8 **)((u8 *)D_00438944 + 0x18);
-    PCP_COPY_VECTOR(data + 0x50, D_0040ABB0);
-    PCP_COPY_VECTOR(data + 0x70, D_0040ABB0);
+    cameraObject = (u8 *)D_00438944;
+    updateCamera = *(void (**)(void *))(*(u8 **)(cameraObject + 0x10) + 8);
+    updateCamera(cameraObject);
+    cameraData = *(u8 **)((u8 *)D_00438944 + 0x18);
+    PCP_COPY_VECTOR(cameraData + 0x50, D_0040ABB0);
+    PCP_COPY_VECTOR(cameraData + 0x70, D_0040ABB0);
 }
 
 void dds3InitSoundSlotPool(void) {
@@ -159,12 +161,12 @@ void dds3UpdateSoundSlots(void) {
     }
 }
 
-void func_0031B3B0(s32 arg0) {
-    *(u16 *)(arg0 + 0x1da) = 0;
+void func_0031B3B0(s32 objectAddress) {
+    *(u16 *)(objectAddress + 0x1da) = 0;
 }
 
-void func_0031B3B8(s32 arg0) {
-    *(u16 *)(arg0 + 0x1da) = 1;
+void func_0031B3B8(s32 objectAddress) {
+    *(u16 *)(objectAddress + 0x1da) = 1;
 }
 
 void func_0031B3C8(void) {
@@ -172,44 +174,46 @@ void func_0031B3C8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B3D0);
 
-MnuEffectWork *mnuCreateEffectWork(s32 count, s32 *counts) {
-    s32 listBytes = count * 8;
-    s32 size = listBytes + 16;
+/* Allocate the list descriptors and their 0x20-byte records as one work block. */
+MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts) {
+    s32 listBytes = listCount * 8;
+    s32 allocationSize = listBytes + 16;
     s32 i;
     u32 handle;
     MnuEffectWork *work;
     MnuEffectList *list;
     u8 *records;
 
-    for (i = 0; i < count; i++) size += counts[i] * 32;
-    evtPrintDeveloperConsoleMessage("EffectWork Object Size %d\n", size);
-    handle = sdfAllocGeneralBlock(size);
+    for (i = 0; i < listCount; i++) allocationSize += recordCounts[i] * 32;
+    evtPrintDeveloperConsoleMessage("EffectWork Object Size %d\n", allocationSize);
+    handle = sdfAllocGeneralBlock(allocationSize);
     work = (MnuEffectWork *)sdfMemoryGetBlockAddress(handle);
-    memset(work, 0, size);
+    memset(work, 0, allocationSize);
     work->handle = handle;
-    work->count = count;
+    work->count = listCount;
     work->lists = (MnuEffectList *)(work + 1);
     list = work->lists;
     records = (u8 *)list + listBytes;
-    for (i = 0; i < count; i++, list++) {
+    for (i = 0; i < listCount; i++, list++) {
         list->records = records;
-        list->count = counts[i];
-        records += counts[i] * 32;
+        list->count = recordCounts[i];
+        records += recordCounts[i] * 32;
     }
     return work;
 }
 
+/* Clear each record while preserving the traversal's 16-bit index wrap. */
 void mnuClearNodeRecords(s32 *list) {
-    s32 record;
+    s32 recordAddress;
     u32 index;
 
     index = 0;
-    record = *list;
+    recordAddress = *list;
     if (0 < list[1]) {
         do {
-            memset(record, 0, 0x20);
+            memset(recordAddress, 0, 0x20);
             index = (index + 1) & 0xffff;
-            record = record + 0x20;
+            recordAddress = recordAddress + 0x20;
         } while ((s32)index < list[1]);
     }
 }
@@ -325,12 +329,12 @@ void mnuDestroyAllModelNodeContexts(s32 *list) {
     }
 }
 
-void func_0031C280(MnuNodeList *list, s32 first, s32 second, s32 flag, f32 x, f32 y, f32 z) {
+void func_0031C280(MnuNodeList *list, s32 resourceGroup, s32 resourceId, s32 entryFlags, f32 x, f32 y, f32 z) {
     MnuModelNode *node = list->nodes;
     s32 i;
 
     for (i = 0; i < list->count; i++, node++) {
-        mnuCreateNodeModelEntry(node, first, second, flag, x, y, z);
+        mnuCreateNodeModelEntry(node, resourceGroup, resourceId, entryFlags, x, y, z);
     }
 }
 
@@ -376,7 +380,7 @@ void mnuSetActiveNodeModelVisibility(s32 *list, s8 value) {
     }
 }
 
-/* Set the model Z of every active node. */
+/* Override the model-entry scalar of every active node without changing its saved value. */
 void mnuOverrideActiveNodeModelDepth(MnuNodeList *list, f32 z) {
     MnuModelNode *node = list->nodes;
     s32 i;
@@ -391,7 +395,7 @@ void mnuOverrideActiveNodeModelDepth(MnuNodeList *list, f32 z) {
     }
 }
 
-/* Restore each active node's model Z from its saved modelZ. */
+/* Restore the model-entry scalar saved when each active node was initialized. */
 void mnuRestoreActiveNodeModelDepth(MnuNodeList *list) {
     MnuModelNode *node = list->nodes;
     s32 i;
@@ -400,24 +404,26 @@ void mnuRestoreActiveNodeModelDepth(MnuNodeList *list) {
         u32 active = node->flags & 1;
 
         if (active == 1) {
-            *(f32 *)(*(u8 **)((u8 *)node->model + 0x1c) + 0x20) = node->modelZ;
+            *(f32 *)(*(u8 **)((u8 *)node->model + 0x1c) + 0x20) = node->savedModelValue;
         }
         node++;
     }
 }
 
-void mnuCreateNodeModelEntry(MnuModelNode *node, s32 first, s32 second, s32 flag, f32 x, f32 y, f32 z) {
-    u8 *model = func_00232198(first, second);
+/* Create the resource-backed model; -1 omits flagged-entry setup and scalar saving. */
+void mnuCreateNodeModelEntry(MnuModelNode *node, s32 resourceGroup, s32 resourceId, s32 entryFlags, f32 x, f32 y, f32 z) {
+    u8 *model = func_00232198(resourceGroup, resourceId);
     node->model = (u32 *)model;
-    if (flag != -1) {
+    if (entryFlags != -1) {
         *(f32 *)(*(u8 **)(model + 0x1c) + 0x20) = z;
-        node->modelZ = z;
-        mdlAddEntryFlaggedEx(model, 0, flag, x, y);
+        node->savedModelValue = z;
+        mdlAddEntryFlaggedEx(model, 0, entryFlags, x, y);
     }
 }
 
-void mnuDeactivateModelNode(s32 arg0) {
-    MnuModelNode *node = (MnuModelNode *)arg0;
+/* Release the node's active state and set bit 0 in its model's flag word. */
+void mnuDeactivateModelNode(s32 nodeAddress) {
+    MnuModelNode *node = (MnuModelNode *)nodeAddress;
     node->flags = 0;
     *node->model = *node->model | 1;
 }
@@ -437,36 +443,37 @@ void mnuSetNodePosition(u8 *node, f32 x, f32 y, f32 z) {
 
 /* Set the primary (0x00) vector and load it into the model. */
 void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z) {
-    MnuModelNode *n = (MnuModelNode *)node;
+    MnuModelNode *modelNode = (MnuModelNode *)node;
 
-    n->primary[0] = x;
-    n->primary[1] = y;
-    n->primary[2] = z;
-    n->primary[3] = 0;
-    VU0_LOAD_VF(vf10, n->primary);
-    mdlStorePrimaryVectorVU(n->model);
+    modelNode->primary[0] = x;
+    modelNode->primary[1] = y;
+    modelNode->primary[2] = z;
+    modelNode->primary[3] = 0;
+    VU0_LOAD_VF(vf10, modelNode->primary);
+    mdlStorePrimaryVectorVU(modelNode->model);
 }
 
 /* Translate the primary (0x00) vector and load it into the model. */
 void mnuTranslateNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z) {
-    MnuModelNode *n = (MnuModelNode *)node;
+    MnuModelNode *modelNode = (MnuModelNode *)node;
 
-    n->primary[3] = 0;
-    n->primary[0] += x;
-    n->primary[1] += y;
-    n->primary[2] += z;
-    VU0_LOAD_VF(vf10, n->primary);
-    mdlStorePrimaryVectorVU(n->model);
+    modelNode->primary[3] = 0;
+    modelNode->primary[0] += x;
+    modelNode->primary[1] += y;
+    modelNode->primary[2] += z;
+    VU0_LOAD_VF(vf10, modelNode->primary);
+    mdlStorePrimaryVectorVU(modelNode->model);
 }
 
+/* Cache the source quaternion and use it to rebuild the model's rotation basis. */
 void mnuRefreshNodeSecondaryVector(u8 *node) {
-    f32 vec[4];
+    f32 quaternion[4];
 
-    func_00328160(vec);
-    ((MnuModelNode *)node)->secondary[0] = vec[0];
-    ((MnuModelNode *)node)->secondary[1] = vec[1];
-    ((MnuModelNode *)node)->secondary[2] = vec[2];
-    ((MnuModelNode *)node)->secondary[3] = vec[3];
+    func_00328160(quaternion);
+    ((MnuModelNode *)node)->rotationQuaternion[0] = quaternion[0];
+    ((MnuModelNode *)node)->rotationQuaternion[1] = quaternion[1];
+    ((MnuModelNode *)node)->rotationQuaternion[2] = quaternion[2];
+    ((MnuModelNode *)node)->rotationQuaternion[3] = quaternion[3];
     VU0_LOAD_VF(vf10, node + 0x10);
     mdlUpdateContextRotationBasisFromQuaternion((u32)((MnuModelNode *)node)->model);
 }
@@ -475,14 +482,14 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C688);
 
 /* Fill the tertiary (0x20) vector with one value and load it into the model. */
 void mnuSetNodeScaleVector(u8 *node, f32 value) {
-    MnuModelNode *n = (MnuModelNode *)node;
+    MnuModelNode *modelNode = (MnuModelNode *)node;
 
-    n->tertiary[0] = value;
-    n->tertiary[1] = value;
-    n->tertiary[2] = value;
-    n->tertiary[3] = 0;
-    VU0_LOAD_VF(vf10, n->tertiary);
-    mdlStoreTertiaryVectorVU(n->model);
+    modelNode->tertiary[0] = value;
+    modelNode->tertiary[1] = value;
+    modelNode->tertiary[2] = value;
+    modelNode->tertiary[3] = 0;
+    VU0_LOAD_VF(vf10, modelNode->tertiary);
+    mdlStoreTertiaryVectorVU(modelNode->model);
 }
 
 void mnuBroadcastNodeModelState(u8 *node) {
@@ -493,10 +500,11 @@ void mnuBroadcastNodeModelState(u8 *node) {
 void mnuSetModelNodeBroadcastAlpha(void) {
 }
 
-void mnuSetNodeModelBroadcastByte(u8 *node, u8 value) {
-    u32 broadcast = mdlGetBroadcastValue((u32)((MnuModelNode *)node)->model) & 0xFFFFFF;
+/* Replace only the high byte of the model's broadcast word. */
+void mnuSetNodeModelBroadcastByte(u8 *node, u8 highByte) {
+    u32 broadcastLowBytes = mdlGetBroadcastValue((u32)((MnuModelNode *)node)->model) & 0xFFFFFF;
 
-    mdlBroadcastMasked((u32)((MnuModelNode *)node)->model, broadcast | ((u32)value << 24));
+    mdlBroadcastMasked((u32)((MnuModelNode *)node)->model, broadcastLowBytes | ((u32)highByte << 24));
 }
 
 void mnuSetModelNodeVisibility(u8 *node, s8 selector) {
