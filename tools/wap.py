@@ -417,20 +417,28 @@ def _fixed_from_fields(
 
 _ENTRY_KINDS = {
     "door": 1,
+    "run_warp": 2,
+    "hole_warp": 3,
+    "jump_warp": 4,
+    "ladder": 5,
     "elevator_exit": 6,
     "side_exit": 7,
     "battle_exit": 8,
     "special_warp": 9,
-    "ladder": 10,
+    "warp": 10,
+    "suction_warp": 11,
+    "barrier": 12,
 }
 
 _SCENE_ARG_NAMES: dict[int, tuple[str | None, str | None, str | None]] = {
     1: ("motion", "secondary_motion", "sound"),
+    5: ("direction", "direct_prompt", None),
     6: ("elevator", "floor", None),
     7: ("exit_mode", "selector", None),
     8: ("event", None, None),
     9: ("id", None, None),
-    10: ("selector", "floor_flag", None),
+    11: ("state_selector", "map_entry", "motion"),
+    12: ("barrier", None, None),
 }
 _SCENE_NAMED_FIELDS = frozenset(
     name for names in _SCENE_ARG_NAMES.values() for name in names if name is not None
