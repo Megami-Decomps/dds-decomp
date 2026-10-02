@@ -161,7 +161,42 @@ typedef struct {
     EventListNode *first; /* 0x54 */
     EventListNode *last;  /* 0x58 */
 } EventList;
-INCLUDE_ASM(const s32, "game/code_00244F00", func_00245F88);
+void func_00245F88(EventList *owner, EventListNode *node) {
+    EventListNode *current = owner->first;
+
+    if (current == 0) {
+        owner->first = node;
+        owner->last = node;
+        node->next = 0;
+        node->prev = 0;
+    } else {
+        while (current != 0) {
+            if (node->orderKey < current->orderKey) {
+                if (current->prev == 0) {
+                    owner->first = node;
+                    current->prev = node;
+                    node->next = current;
+                    node->prev = 0;
+                } else {
+                    current->prev->next = node;
+                    node->prev = current->prev;
+                    node->next = current;
+                    current->prev = node;
+                }
+                break;
+            }
+            current = current->next;
+        }
+        if (current == 0) {
+            EventListNode *last = owner->last;
+            last->next = node;
+            node->prev = owner->last;
+            node->next = 0;
+            owner->last = node;
+        }
+    }
+    owner->count++;
+}
 
 void evtUnlinkListNode(EventList *owner, EventListNode *node) {
     EventListNode *next = node->next;

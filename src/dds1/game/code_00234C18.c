@@ -6,7 +6,37 @@ extern u32 kwlnTaskGetUserValue(void);
 
 extern u32 sdfAllocSizeClassBlock(u32);
 
-INCLUDE_ASM(const s32, "game/code_00234C18", func_00234C18);
+typedef struct EvtMovieResourceSpec {
+    u32 unk00;
+    u32 unk04;
+    char format[4];
+    u32 unk0C;
+    u32 unk10;
+    s32 type;
+    u32 unk18;
+    u32 unk1C;
+} EvtMovieResourceSpec;
+
+extern char D_003BBF78[];
+extern s32 sdfAllocGeneralBlock(s32 size);
+extern u32 *sdfResourceRetainAddress(s32 handle);
+extern void *memset(void *dst, s32 value, u32 size);
+extern void *copyResourceBytes(void *dst, const void *src, u32 size) __asm__("memcpy");
+
+s32 func_00234C18(void **address) {
+    EvtMovieResourceSpec spec;
+    s32 handle;
+    u32 *resource;
+
+    memset(&spec, 0, sizeof(spec));
+    memcpy(spec.format, D_003BBF78, sizeof(spec.format));
+    spec.type = 9;
+    handle = sdfAllocGeneralBlock(sizeof(spec));
+    resource = sdfResourceRetainAddress(handle);
+    copyResourceBytes(resource, &spec, sizeof(spec));
+    *address = resource;
+    return handle;
+}
 
 s32 func_003014F0(char *output, const char *format, ...);
 
