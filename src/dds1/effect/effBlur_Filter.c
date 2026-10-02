@@ -135,7 +135,18 @@ void effBlurSecondUpdateSlotRect(EffBlurScaleWork *work, EffBlurScaleSlot *slot)
     slot->quad.bottom = cy + s;
 }
 
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_001873A8);
+/* Reset a slot for a new burst: zero phase and angle, then copy the colour, the two spare fields and the centre from the work parameters. */
+void func_001873A8(EffBlurScaleWork *work, EffBlurScaleSlot *slot) {
+    EffBlurQuad *quad = &slot->quad;
+
+    slot->phase = 0.0f;
+    slot->angle = 0.0f;
+    quad->color = work->params.color;
+    quad->unk4 = work->params.unk10;
+    quad->unk8 = work->params.unk14;
+    quad->x = work->params.x;
+    quad->y = work->params.y;
+}
 
 INCLUDE_RODATA(const s32, "effect/effBlur_Filter", D_003A0F00);
 

@@ -164,9 +164,31 @@ INCLUDE_ASM(const s32, "game/code_002437F0", func_002446C8);
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_00244828);
 
-INCLUDE_ASM(const s32, "game/code_002437F0", func_00244988);
+/* Activate the first inactive solar point. */
+void func_00244988(SolarOverlayWork *overlay) {
+    SolarPoint *points = overlay->points;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_002437F0", func_002449E0);
+    for (i = 0; i < 8; i++) {
+        if (points[i].active == 0) {
+            points[i].active = 1;
+            break;
+        }
+    }
+}
+
+/* Deactivate the last active solar point. */
+void func_002449E0(SolarOverlayWork *overlay) {
+    SolarPoint *points = overlay->points;
+    s32 i;
+
+    for (i = 7; i >= 0; i--) {
+        if (points[i].active == 1) {
+            points[i].active = 0;
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_00244A38);
 

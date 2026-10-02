@@ -22,7 +22,7 @@ typedef struct EffBattleVoiceOwner {
 
 extern char D_00414478[];
 extern void effDispatchParameterDataAndFreeWork(s32);
-extern void func_0035B6E0(char *, u16, void *, s32);
+extern void func_0035B6E0(const char *fmt, ...);
 extern void sndUnlinkVoice(void *);
 extern void sdfReleaseChipBlock(void *);
 
@@ -144,7 +144,41 @@ INCLUDE_ASM(const s32, "effect/effBattle", func_00168978);
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00169168);
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_001691E0);
+typedef struct EffBattleEntry {
+    u8 pad00[0x14];
+    u8 kind;     /* 0x14 */
+    u8 pad15[3];
+} EffBattleEntry; /* 0x18 */
+
+typedef struct EffBattleEntryList {
+    u8 pad00[0x6C];
+    u16 count;            /* 0x6C */
+    u8 pad6E[0xA];
+    EffBattleEntry entries[1]; /* 0x78 */
+} EffBattleEntryList;
+
+typedef struct EffBattleListOwner {
+    u8 pad00[0x24];
+    EffBattleEntryList *list; /* 0x24 */
+} EffBattleListOwner;
+
+/* True when any entry is of kind 2 or 3. */
+s32 func_001691E0(EffBattleListOwner *owner) {
+    EffBattleEntryList *list = owner->list;
+    s32 count = list->count;
+    EffBattleEntry *entry = list->entries;
+    s32 i;
+
+    for (i = 0; i < count; i++, entry++) {
+        if (entry->kind == 3) {
+            return 1;
+        }
+        if (entry->kind == 2) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00169230);
 
