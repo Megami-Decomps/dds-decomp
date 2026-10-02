@@ -103,7 +103,62 @@ void func_001005B8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00100000", func_001005C8);
 
-INCLUDE_ASM(const s32, "game/code_00100000", func_001006E0);
+/* Remove a task from the doubly linked queue of its state (1 delayed start, 2 active, 3 delayed destroy). */
+void func_001006E0(KwlnTask *task) {
+    switch (task->flags & 0xF) {
+    case 0:
+        return;
+    case 1:
+    case 2:
+    case 3:
+        break;
+    default:
+        return;
+    }
+    if (task->listPrev != NULL) {
+        task->listPrev->listNext = task->listNext;
+    } else {
+        switch (task->flags & 0xF) {
+        case 1:
+            kwlnDelayedStartTaskHead = task->listNext;
+            break;
+        case 2:
+            kwlnActiveTaskHead = task->listNext;
+            break;
+        case 3:
+            kwlnDelayedDestroyTaskHead = task->listNext;
+            break;
+        }
+    }
+    if (task->listNext != NULL) {
+        task->listNext->listPrev = task->listPrev;
+    } else {
+        switch (task->flags & 0xF) {
+        case 1:
+            D_003BA804 = task->listPrev;
+            break;
+        case 2:
+            D_003BA81C = task->listPrev;
+            break;
+        case 3:
+            D_003BA810 = task->listPrev;
+            break;
+        }
+    }
+    task->listNext = NULL;
+    task->listPrev = NULL;
+    switch (task->flags & 0xF) {
+    case 1:
+        kwlnDelayedStartTaskCount--;
+        break;
+    case 2:
+        kwlnActiveTaskCount--;
+        break;
+    case 3:
+        kwlnDelayedDestroyTaskCount--;
+        break;
+    }
+}
 
 void kwlnTaskInsertIntoOrderedStateQueue(KwlnTask *task) {
     KwlnTask *cur;
