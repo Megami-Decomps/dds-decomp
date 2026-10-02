@@ -16,7 +16,7 @@ extern f32 sdfVec3Normalize();
 
 extern u64 sdfAllocateBlockBySizeThreshold(u64);
 
-extern u64 func_0035A828(u64);
+extern void *func_0035A828(u64);
 
 extern u64 func_00325BB0(u64, u32);
 
@@ -44,6 +44,20 @@ typedef struct ResourceList {
     u32 count;
     ResourceNode *first;
 } ResourceList;
+
+typedef struct SdfResourceInfo {
+    u32 word[4];
+} SdfResourceInfo;
+
+typedef struct SdfResourceRecord {
+    u8 unk00[0xE];
+    u16 count;
+    u32 *items;
+    SdfResourceInfo *info;
+} SdfResourceRecord;
+
+extern u32 *func_00324D50(void);
+extern void *memcpy(void *, const void *, u32);
 
 s32 dds3RemoveListNodeAndNotify(u32 list, u32 node);
 
@@ -88,11 +102,11 @@ void func_00324F38(ResourceList **list) {
     mnuFindResourceNodeById(*list);
 }
 
-u64 func_00324F50(s32 owner, u64 resource) {
-    u64 handle;
+void *func_00324F50(s32 owner, u64 resource) {
+    void *handle;
 
     handle = func_0035A828(resource);
-    func_00320CE0(*(u32 *)(owner + 4), 0, handle);
+    func_00320CE0(*(u32 *)(owner + 4), 0, (u32)handle);
     return handle;
 }
 
@@ -106,7 +120,25 @@ INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325398);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_003255A0);
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325688);
+u32 *func_00325688(const SdfResourceRecord *source, s32 count) {
+    u32 *owner = func_00324D50();
+
+    if (count != 0) {
+        do {
+            SdfResourceRecord *copy = (SdfResourceRecord *)func_00324F50((s32)owner, sizeof(*copy));
+
+            *copy = *source;
+            copy->items = (u32 *)func_00324F50((s32)owner, copy->count * sizeof(*copy->items));
+            memcpy(copy->items, source->items, copy->count * sizeof(*copy->items));
+            copy->info = (SdfResourceInfo *)func_00324F50((s32)owner, sizeof(*copy->info));
+            *copy->info = *source->info;
+            func_00324DF8(owner, (u32)copy);
+            source++;
+            count--;
+        } while (count != 0);
+    }
+    return owner;
+}
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325790);
 

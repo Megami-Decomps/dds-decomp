@@ -39,7 +39,7 @@ extern u32 sdfReadNamedResource(const char *, void *, s32);
 
 extern u32 sdfTexAcquireResourceTexture(u32);
 
-extern u32 D_003BD984;
+extern s32 D_003BD984;
 
 typedef struct MapRequestNode {
     u32 value;
@@ -73,6 +73,9 @@ typedef struct MapRequestRing {
 extern MapRequestState *D_003BD988;
 
 extern MapRequestState *D_003BD98C;
+extern void func_002C7C58(MapRequestState *);
+extern f32 sdfCounterGetScaledValue(void);
+extern const f32 D_0038FE30[][4];
 
 extern u32 D_003DFED0[];
 
@@ -415,7 +418,23 @@ void sdfCommitPendingVectorAndMarkChanged(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C7738);
 
-INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C7950);
+void func_002C7950(void) {
+    s32 x;
+    s32 y;
+    s8 index = sdfCounterGetDisplayValue() - 1;
+    f32 opacity = 1.0f;
+    f32 remaining = 1.0f - sdfCounterGetScaledValue();
+
+    if (D_003BD984 != 0) {
+        opacity = (f32)D_003BD984 / 7.0f;
+    }
+    if (remaining > 0.0f) {
+        opacity = remaining;
+    }
+    func_002C7C58(D_003BD98C);
+    fldProjectPointToGridCell(&x, &y, D_0038FE30[index][0], D_0038FE30[index][1], D_0038FE30[index][2]);
+    func_002C7080(x, y, MAP_GREY_COLOR(opacity * 32.0f), 5.0f);
+}
 
 extern u32 sdfAllocGeneralBlock(s32 size);
 
