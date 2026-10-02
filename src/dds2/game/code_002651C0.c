@@ -2,7 +2,7 @@
 
 extern s32 mdlFlagTest(u32);
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
 
 extern void func_0026C900(void);
 
@@ -15,8 +15,19 @@ extern s32 evtGetMessageWindowControlState(void);
 extern void mnuSetPopupEntryFlagged(s32 *, char *);
 
 extern char D_003CE63C[];
-extern u8 D_003CE1A8[];
-extern s32 D_00435E5C;
+typedef struct EvtSlotReward {
+    u8 kind;
+    s32 id;
+} EvtSlotReward;
+
+typedef struct EvtSlot {
+    u32 threshold;
+    s32 flag;
+    EvtSlotReward sub[8];
+} EvtSlot;
+
+extern EvtSlot D_003CE1A8[];
+extern char (*D_00435E5C)[25];
 extern char D_00437850[];
 extern s32 func_00265038();
 extern s32 evtGetCapturedMessageWindowSoundMode();
@@ -38,11 +49,15 @@ extern void mdlFlagClear();
 extern void func_0026C7F8();
 extern s32 mnuCampResolveProgressTierValue();
 extern void dspSetActive();
-extern void evtCopyEntryStringToActiveWindow();
-extern void dspStartEntry();
+extern void evtCopyEntryStringToActiveWindow(s32, s32);
+extern s32 dspStartEntry(s32);
 extern void datAddCurrencyClamped();
 extern void func_0011A118();
 extern s32 func_0035C860(char *, const char *, ...);
+extern s32 evtIsLastSlot(s32);
+extern void evtSetMessageWindowOptionWhenOpen(s32);
+extern s32 evtCaptureMessageWindowSoundMode(s32);
+struct KwlnTask;
 
 /* Selection chain used by the event UI. Only accessed offsets are described. */
 typedef struct EvtSelectionNode {
@@ -75,9 +90,42 @@ typedef struct EvtMenuContext {
     EvtSelectionOwner *selection; /* 0x7C */
     u8 pad80[0x26];
     u16 selectedSlot;             /* 0xA6 */
+    u8 padA8[0x25];
+    s8 unkCD;
 } EvtMenuContext;
 
-INCLUDE_ASM(const s32, "game/code_002651C0", func_002651C0);
+s32 func_002651C0(struct KwlnTask *task) {
+    EvtMenuContext *context = (EvtMenuContext *)kwlnTaskGetUserValue(task);
+    s32 slotIndex = func_00265038();
+    s32 i;
+    EvtSlotReward *reward;
+    char text[0x40];
+
+    if (context->unkCD != 0) {
+        if (slotIndex >= 0) {
+            i = 0;
+            reward = D_003CE1A8[slotIndex].sub;
+            do {
+                s32 id = reward->id;
+                if ((reward++)->kind == 0) {
+                    evtCopyEntryStringToActiveWindow(i, (s32)D_00435E5C[id]);
+                } else {
+                    func_0035C860(text, D_00437850, id);
+                    evtCopyEntryStringToActiveWindow(i, (s32)text);
+                }
+                i++;
+            } while (i < 3);
+            if (evtIsLastSlot(slotIndex) == 0) {
+                dspStartEntry(0x26);
+            } else {
+                dspStartEntry(0x2A);
+            }
+            evtSetMessageWindowOptionWhenOpen(0);
+            evtCaptureMessageWindowSoundMode(0x27);
+        }
+    }
+    return 1;
+}
 
 u32 func_002652D8(void) {
     return 1;
@@ -197,7 +245,7 @@ void mnuAwardCampProgressCurrency(void) {
     s32 index = mnuCampResolveProgressTierValue();
     dspSetActive(1);
     func_0035C860(text, D_00437840, index);
-    evtCopyEntryStringToActiveWindow(0, text);
+    evtCopyEntryStringToActiveWindow(0, (s32)text);
     dspStartEntry(0x19);
     datAddCurrencyClamped(index);
     func_0011A118(0x81, -*(u8 *)(datGameState + 0x13c1));
