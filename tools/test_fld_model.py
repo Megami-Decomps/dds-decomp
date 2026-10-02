@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 import fld  # noqa: E402
 import fld_model  # noqa: E402
+import tmx  # noqa: E402
 
 
 SOURCE = """\
@@ -118,6 +119,48 @@ class FldModelTests(unittest.TestCase):
             fld_model.build_gltf(self.data, resources={"missing"})
         with self.assertRaisesRegex(fld.FldError, "positive finite"):
             fld_model.build_gltf(self.data, meters_per_unit=0.0)
+
+    def test_embeds_referenced_texture_and_expands_ps2_vertex_color(self) -> None:
+        source = SOURCE.replace(
+            "model_asset index=0",
+            "model_asset index=0 resource_04=0 resource_20=0,1",
+        ).replace("model_draw asset=0 qwords=4", "model_draw asset=0 qwords=7").replace(
+            "mesh_program address=12",
+            "mesh_texcoords\n"
+            "texcoord 0,0 1,0 0,1\n"
+            "mesh_colors\n"
+            "color 128,64,0,64 128,64,0,128 128,64,0,128\n"
+            "mesh_program address=12\n"
+            "vif_nops count=1",
+        )
+        texture = tmx.Texture(0, 8, 8, 0x01, bytes((10, 20, 30, 0xFF)) * 64)
+        document, binary = fld_model.build_gltf(
+            fld.encode(fld.parse_source(source)), textures=(texture,)
+        )
+        primitive = document["meshes"][0]["primitives"][0]
+        material = document["materials"][primitive["material"]]
+        self.assertEqual(material["pbrMetallicRoughness"]["baseColorTexture"], {"index": 0})
+        self.assertEqual(material["alphaMode"], "BLEND")
+        self.assertEqual(material["extras"]["ddsSecondaryTextureMode"], 1)
+        image_view = document["bufferViews"][document["images"][0]["bufferView"]]
+        image_header = binary[
+            image_view["byteOffset"] : image_view["byteOffset"] + 8
+        ]
+        self.assertEqual(image_header, b"\x89PNG\r\n\x1a\n")
+        color_accessor = document["accessors"][primitive["attributes"]["COLOR_0"]]
+        color_view = document["bufferViews"][color_accessor["bufferView"]]
+        self.assertEqual(
+            binary[color_view["byteOffset"] : color_view["byteOffset"] + 4],
+            bytes((0xFF, 0x80, 0, 0x80)),
+        )
+
+    def test_rejects_missing_asset_texture(self) -> None:
+        source = SOURCE.replace("model_asset index=0", "model_asset index=0 resource_04=1")
+        texture = tmx.Texture(0, 8, 8, 0x01, bytes((0, 0, 0, 0xFF)) * 64)
+        with self.assertRaisesRegex(fld.FldError, "references texture 1"):
+            fld_model.build_gltf(
+                fld.encode(fld.parse_source(source)), textures=(texture,)
+            )
 
     def test_euler_conversion_matches_engine_convention(self) -> None:
         self.assertEqual(fld_model._euler_quaternion(0.0, 0.0, 0.0), [0.0, 0.0, 0.0, 1.0])
