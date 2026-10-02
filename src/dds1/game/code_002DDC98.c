@@ -2,6 +2,28 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
+#define SDF_PAD_ENTRY_COUNT 2
+#define SDF_PAD_REPLY_BUFFER_BYTES 0x20
+#define SDF_PAD_ACTUATOR_BYTES 6
+#define SDF_PAD_REPLY_DIGITAL 0x41
+#define SDF_PAD_REPLY_ANALOG 0x73
+#define SDF_PAD_REPLY_PRESSURE 0x79
+#define SDF_PAD_STICK_COUNT 4
+#define SDF_PAD_PRESSURE_COUNT 12
+#define SDF_PAD_STICK_CENTER 0x80
+#define SDF_PAD_BUTTON_COUNT 16
+#define SDF_PAD_BUTTON_TRIGGER_BIT 2
+#define SDF_PAD_BUTTON_NEW_PRESS_BIT 0x80
+#define SDF_PAD_REPEAT_DELAY 15
+#define SDF_PAD_REPEAT_STEP 4
+#define SDF_PAD_MOTOR_VALUE_MASK 0xFF
+#define SDF_PAD_PORT_BUFFER_BYTES 0x100
+#define SDF_PAD_BUTTON_STATE_BYTES 0x20
+#define SDF_PAD_STICK_STATE_BYTES 8
+#define SDF_PAD_PRESSURE_STATE_BYTES 0x18
+#define SDF_CONSOLE_CELL_BYTES 2
+#define SDF_CONSOLE_NODE_BYTES 0x20
+
 
 extern void *D_003BDA34;
 
@@ -30,7 +52,7 @@ typedef struct ConsNode {
     /* 0x1C */ u8 *cells;
 } ConsNode;
 
-/* Per-port pad state, sdfPadPorts[2] (0x28 bytes each). */
+/* Logical pad entries, sdfPadPorts[2] (0x28 bytes each). */
 typedef struct F9B00Entry {
     /* 0x00 */ u8 port;
     /* 0x01 */ u8 slot;
@@ -41,7 +63,7 @@ typedef struct F9B00Entry {
     /* 0x06 */ u16 buttons;
     /* 0x08 */ u16 prevButtons;
     /* 0x0A */ u8 pad0A[2];
-    /* 0x0C */ u32 repeatTime;
+    /* 0x0C */ u32 repeatDeadline;
     /* 0x10 */ u8 stick[4];
     /* 0x14 */ u8 pressure[12];
     /* 0x20 */ s16 smallMotor;
@@ -1336,28 +1358,30 @@ extern s32 func_002F2850(s32 port, s32 slot, void *actData);
 extern s32 scePadSetMainMode(s32 port, s32 slot, s32 offs, s32 lock);
 extern s32 scePadSetActAlign(s32 port, s32 slot, void *data);
 
+/* Drive mode/actuator setup and normalize this pad's latest reply.
+ * Motor requests are sent only when their cached values change. */
 void sdfPadUpdatePort(F9B00Entry *entry) {
-    u8 data[0x20];
-    u8 act[6];
+    u8 reply[SDF_PAD_REPLY_BUFFER_BYTES];
+    u8 actuatorData[SDF_PAD_ACTUATOR_BYTES];
     s32 port = entry->port;
     s32 slot = entry->slot;
     s32 padState;
     s32 hasButtons;
     s32 hasAnalog;
     s32 hasPressure;
-    s32 result;
-    s32 mode;
-    s32 small;
-    s32 large;
-    data[0] = -1;
+    s32 alignmentStatus;
+    s32 requestedMode;
+    s32 smallMotor;
+    s32 largeMotor;
+    reply[0] = -1;
     padState = func_002F2280(port, slot);
     switch (entry->state) {
     case 0:
         if (padState == 2 || padState == 6) {
             entry->lastSmallMotor = -1;
             entry->lastLargeMotor = -1;
-            mode = entry->mode = entry->requestedMode;
-            switch (mode) {
+            requestedMode = entry->mode = entry->requestedMode;
+            switch (requestedMode) {
             case 0:
                 entry->state = 3;
                 break;
@@ -1410,9 +1434,9 @@ void sdfPadUpdatePort(F9B00Entry *entry) {
         }
         break;
     case 4:
-        result = func_002F2398(port, slot);
-        if (result != 0) {
-            if (result == 1) {
+        alignmentStatus = func_002F2398(port, slot);
+        if (alignmentStatus != 0) {
+            if (alignmentStatus == 1) {
                 entry->state = 3;
             }
         } else {
@@ -1425,15 +1449,15 @@ void sdfPadUpdatePort(F9B00Entry *entry) {
         } else if (entry->mode != entry->requestedMode) {
             entry->state = 0;
         } else {
-            func_002F2200(port, slot, data);
-            small = entry->smallMotor;
-            large = entry->largeMotor;
-            if (small != entry->lastSmallMotor || large != entry->lastLargeMotor) {
-                entry->lastSmallMotor = small;
-                entry->lastLargeMotor = large;
-                act[0] = small;
-                act[1] = large;
-                func_002F2850(port, slot, act);
+            func_002F2200(port, slot, reply);
+            smallMotor = entry->smallMotor;
+            largeMotor = entry->largeMotor;
+            if (smallMotor != entry->lastSmallMotor || largeMotor != entry->lastLargeMotor) {
+                entry->lastSmallMotor = smallMotor;
+                entry->lastLargeMotor = largeMotor;
+                actuatorData[0] = smallMotor;
+                actuatorData[1] = largeMotor;
+                func_002F2850(port, slot, actuatorData);
             }
         }
         break;
@@ -1443,16 +1467,16 @@ void sdfPadUpdatePort(F9B00Entry *entry) {
     hasAnalog = 0;
     hasPressure = 0;
     hasButtons = 0;
-    if (data[0] == 0) {
-        switch (data[1]) {
-        case 0x41:
+    if (reply[0] == 0) {
+        switch (reply[1]) {
+        case SDF_PAD_REPLY_DIGITAL:
             hasButtons = 1;
             break;
-        case 0x73:
+        case SDF_PAD_REPLY_ANALOG:
             hasButtons = 1;
             hasAnalog = 1;
             break;
-        case 0x79:
+        case SDF_PAD_REPLY_PRESSURE:
             hasButtons = 1;
             hasAnalog = 1;
             hasPressure = 1;
@@ -1460,36 +1484,37 @@ void sdfPadUpdatePort(F9B00Entry *entry) {
         }
     }
     if (hasButtons) {
-        memset(entry->pressure, 0, 12);
-        entry->buttons = ~(data[3] | (data[2] << 8));
+        memset(entry->pressure, 0, SDF_PAD_PRESSURE_COUNT);
+        entry->buttons = ~(reply[3] | (reply[2] << 8));
     } else {
         entry->buttons = 0;
     }
     if (hasAnalog) {
-        entry->stick[0] = data[4];
-        entry->stick[1] = data[5];
-        entry->stick[2] = data[6];
-        entry->stick[3] = data[7];
+        entry->stick[0] = reply[4];
+        entry->stick[1] = reply[5];
+        entry->stick[2] = reply[6];
+        entry->stick[3] = reply[7];
     } else {
-        entry->stick[0] = 0x80;
-        entry->stick[1] = 0x80;
-        entry->stick[2] = 0x80;
-        entry->stick[3] = 0x80;
+        entry->stick[0] = SDF_PAD_STICK_CENTER;
+        entry->stick[1] = SDF_PAD_STICK_CENTER;
+        entry->stick[2] = SDF_PAD_STICK_CENTER;
+        entry->stick[3] = SDF_PAD_STICK_CENTER;
     }
     if (hasPressure) {
-        memcpy(entry->pressure, &data[8], 12);
+        memcpy(entry->pressure, &reply[8], SDF_PAD_PRESSURE_COUNT);
     } else {
-        memset(entry->pressure, 0, 12);
+        memset(entry->pressure, 0, SDF_PAD_PRESSURE_COUNT);
     }
 }
 
 
 extern void sdfPadUpdatePort(F9B00Entry *entry);
 
+/* Update each configured logical pad entry. */
 void sdfPadUpdatePorts(void) {
-    s32 i;
-    for (i = 0; i != 2; i++) {
-        sdfPadUpdatePort(&sdfPadPorts[i]);
+    s32 padIndex;
+    for (padIndex = 0; padIndex != SDF_PAD_ENTRY_COUNT; padIndex++) {
+        sdfPadUpdatePort(&sdfPadPorts[padIndex]);
     }
 }
 
@@ -1502,67 +1527,72 @@ extern u16 sdfPadButtonMasks[16];
 extern u8 sdfPadButtonStates[0x20];
 extern u8 sdfPadButtonPressure[0x18];
 
-/* Build per-button held/repeat/new-press flags for both controller ports.
- * Repeat starts after 15 ticks, then recurs every four ticks. */
+/* Emit held bit 0, press/repeat trigger bit 1, and new-press bit 7 per button.
+ * Changes arm a 15-tick deadline; repeats set it to current tick + lateness + 4,
+ * retaining the original extra delay when a deadline is missed. */
 void sdfPadBuildButtonStates(void) {
-    s32 now = sdfThreadWakeTick;
-    s32 i;
-    s32 bit;
-    for (i = 0; i != 2; i++) {
-        F9B00Entry *entry = &sdfPadPorts[i];
-        s32 buttons = entry->buttons;
-        s32 prev = entry->prevButtons;
-        s32 pressed;
-        s32 repeat;
-        D_003BD3A0[i] = buttons;
-        entry->prevButtons = buttons;
-        pressed = (buttons ^ prev) & buttons;
-        if (buttons != prev) {
-            entry->repeatTime = now + 15;
-            repeat = pressed;
+    s32 currentTick = sdfThreadWakeTick;
+    s32 padIndex;
+    s32 buttonIndex;
+    for (padIndex = 0; padIndex != SDF_PAD_ENTRY_COUNT; padIndex++) {
+        F9B00Entry *entry = &sdfPadPorts[padIndex];
+        s32 heldButtons = entry->buttons;
+        s32 previousButtons = entry->prevButtons;
+        s32 newPressMask;
+        s32 triggerMask;
+        D_003BD3A0[padIndex] = heldButtons;
+        entry->prevButtons = heldButtons;
+        newPressMask = (heldButtons ^ previousButtons) & heldButtons;
+        if (heldButtons != previousButtons) {
+            entry->repeatDeadline = currentTick + SDF_PAD_REPEAT_DELAY;
+            triggerMask = newPressMask;
         } else {
-            repeat = 0;
-            if (buttons != 0) {
-                s32 late = now - entry->repeatTime;
-                if (late >= 0) {
-                    repeat = buttons;
-                    entry->repeatTime = now + late + 4;
+            triggerMask = 0;
+            if (heldButtons != 0) {
+                s32 ticksLate = currentTick - entry->repeatDeadline;
+                if (ticksLate >= 0) {
+                    triggerMask = heldButtons;
+                    entry->repeatDeadline = currentTick + ticksLate + SDF_PAD_REPEAT_STEP;
                 }
             }
         }
-        for (bit = 0; bit != 16; bit++) {
-            s32 mask = sdfPadButtonMasks[bit];
-            s32 state = (buttons & mask) != 0;
-            if (repeat & mask) {
-                state |= 2;
+        for (buttonIndex = 0; buttonIndex != SDF_PAD_BUTTON_COUNT; buttonIndex++) {
+            s32 buttonMask = sdfPadButtonMasks[buttonIndex];
+            s32 buttonState = (heldButtons & buttonMask) != 0;
+            if (triggerMask & buttonMask) {
+                buttonState |= SDF_PAD_BUTTON_TRIGGER_BIT;
             }
-            if (pressed & mask) {
-                state |= 0x80;
+            if (newPressMask & buttonMask) {
+                buttonState |= SDF_PAD_BUTTON_NEW_PRESS_BIT;
             }
-            sdfPadButtonStates[i * 0x10 + bit] = state;
+            sdfPadButtonStates[padIndex * SDF_PAD_BUTTON_COUNT + buttonIndex] = buttonState;
         }
-        memcpy(&sdfPadAnalogSticks[i * 4], entry->stick, 4);
-        memcpy(&sdfPadButtonPressure[i * 12], entry->pressure, 12);
+        memcpy(&sdfPadAnalogSticks[padIndex * SDF_PAD_STICK_COUNT], entry->stick, SDF_PAD_STICK_COUNT);
+        memcpy(&sdfPadButtonPressure[padIndex * SDF_PAD_PRESSURE_COUNT], entry->pressure, SDF_PAD_PRESSURE_COUNT);
     }
 }
 
 
+/* Store a mode request for the indexed logical pad; setup applies it later. */
 void sdfPadRequestMode(s32 padIndex, u8 mode) {
     sdfPadPorts[padIndex].requestedMode = mode;
 }
 
+/* Store the small-motor request without validating the logical pad index. */
 void sdfPadSetSmallMotor(s32 padIndex, u16 strength) {
     sdfPadPorts[padIndex].smallMotor = strength;
 }
 
+/* Store the large-motor request without validating the logical pad index. */
 void sdfPadSetLargeMotor(s32 padIndex, u8 strength) {
     sdfPadPorts[padIndex].largeMotor = strength;
 }
 
-void sdfDevConsSetEntryPair(s32 index, s32 small, s32 large) {
-    F9B00Entry *entry = &sdfPadPorts[index];
-    entry->smallMotor = small & 0xFF;
-    sdfPadPorts[index].largeMotor = large & 0xFF;
+/* Despite the legacy console-prefixed name, set both pad motor low bytes. */
+void sdfDevConsSetEntryPair(s32 padIndex, s32 smallMotor, s32 largeMotor) {
+    F9B00Entry *entry = &sdfPadPorts[padIndex];
+    entry->smallMotor = smallMotor & SDF_PAD_MOTOR_VALUE_MASK;
+    sdfPadPorts[padIndex].largeMotor = largeMotor & SDF_PAD_MOTOR_VALUE_MASK;
 }
 
 extern u8 sdfPadPortSlotPairs[4];
@@ -1571,17 +1601,18 @@ extern u8 D_003BD39C;
 extern s32 func_002F1C50(s32);
 extern s32 scePadPortOpen(s32 port, s32 slot, void *buffer);
 
+/* Open both configured port/slot pairs and reset the public input arrays. */
 void sdfPadInit(void) {
-    s32 i;
+    s32 padIndex;
 
     func_002F1C50(0);
-    for (i = 0; i != 2; i++) {
-        s32 port = sdfPadPortSlotPairs[i * 2];
-        s32 slot = sdfPadPortSlotPairs[i * 2 + 1];
+    for (padIndex = 0; padIndex != SDF_PAD_ENTRY_COUNT; padIndex++) {
+        s32 port = sdfPadPortSlotPairs[padIndex * 2];
+        s32 slot = sdfPadPortSlotPairs[padIndex * 2 + 1];
         F9B00Entry *entry;
 
-        scePadPortOpen(port, slot, &sdfPadPortBuffers[i * 0x100]);
-        entry = &sdfPadPorts[i];
+        scePadPortOpen(port, slot, &sdfPadPortBuffers[padIndex * SDF_PAD_PORT_BUFFER_BYTES]);
+        entry = &sdfPadPorts[padIndex];
         entry->port = port;
         entry->slot = slot;
         entry->state = 0;
@@ -1592,12 +1623,13 @@ void sdfPadInit(void) {
         entry->smallMotor = 0;
         entry->largeMotor = 0;
     }
-    memset(sdfPadButtonStates, 0, 0x20);
-    memset(sdfPadAnalogSticks, 0x80, 8);
-    memset(sdfPadButtonPressure, 0, 0x18);
+    memset(sdfPadButtonStates, 0, SDF_PAD_BUTTON_STATE_BYTES);
+    memset(sdfPadAnalogSticks, SDF_PAD_STICK_CENTER, SDF_PAD_STICK_STATE_BYTES);
+    memset(sdfPadButtonPressure, 0, SDF_PAD_PRESSURE_STATE_BYTES);
     D_003BD39C = 0;
 }
 
+/* Acquire and cache the shared console texture on first use. */
 void sdfDevConsInit(void) {
     if (D_003BD3C4 == 0) {
         D_003BD3C4 = 1;
@@ -1605,6 +1637,7 @@ void sdfDevConsInit(void) {
     }
 }
 
+/* Ensure initialization and return the cached console texture. */
 void *sdfDevConsGetResourceHandle(void) {
     sdfDevConsInit();
     return D_003BDA34;
@@ -1614,53 +1647,61 @@ u32 *func_002E3D38(void) {
     return D_00398660;
 }
 
+/* Append to the next-linked list and move its stored tail to this node. */
 void sdfDevConsListInsert(ConsNode *node) {
-    ConsNode *head = D_003BD3C0;
+    ConsNode *previousTail = D_003BD3C0;
 
     node->next = NULL;
-    node->prev = head;
-    if (head != NULL) {
-        head->next = node;
+    node->prev = previousTail;
+    if (previousTail != NULL) {
+        previousTail->next = node;
     }
     D_003BD3C0 = node;
 }
 
+/* Unlink this node, moving the stored tail when its next link is NULL. */
 void sdfDevConsListRemove(ConsNode *node) {
-    ConsNode *next = node->next;
-    ConsNode *prev = node->prev;
+    ConsNode *nextNode = node->next;
+    ConsNode *previousNode = node->prev;
 
-    if (next != NULL) {
-        next->prev = prev;
+    if (nextNode != NULL) {
+        nextNode->prev = previousNode;
     } else {
-        D_003BD3C0 = prev;
+        D_003BD3C0 = previousNode;
     }
-    if (prev != NULL) {
-        prev->next = next;
+    if (previousNode != NULL) {
+        previousNode->next = nextNode;
     }
 }
 
+/* Unlink the console, release its cell-buffer handle, then free the node. */
 void sdfDevConsNodeDestroy(ConsNode *node) {
     sdfDevConsListRemove(node);
     sdfReleaseResourceAllocation(node->bufferHandle);
     sdfReleaseChipBlock(node);
 }
 
+/* Reset both cursor coordinates and clear the two-byte character-cell grid. */
 void sdfDevConsNodeClear(ConsNode *node) {
     node->cursorColumn = 0;
     node->cursorRow = 0;
-    memset(node->cells, 0, node->columns * node->rows * 2);
+    memset(node->cells, 0, node->columns * node->rows * SDF_CONSOLE_CELL_BYTES);
 }
 
+/* Reset a console through the existing clear operation. */
 void sdfDevConsResetNode(ConsNode *node) {
     sdfDevConsNodeClear(node);
 }
 
+/* Allocate a two-byte character grid and link it for cleanup.
+ * Allocation uses the supplied dimensions; clearing uses their stored s16
+ * values. Dimensions and the two opaque halfword inputs are not validated. */
 ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 columns, s32 rows) {
     ConsNode *node;
     u32 bufferHandle;
 
     sdfDevConsInit();
-    node = sdfAllocSizeClassBlock(0x20);
+    node = sdfAllocSizeClassBlock(SDF_CONSOLE_NODE_BYTES);
     node->unk8 = first;
     node->unkA = second;
     node->columns = columns;
@@ -1668,7 +1709,7 @@ ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 columns, s32 rows) {
     node->unk17 = 8;
     node->controlByte = 0;
     node->textAttribute = 0;
-    bufferHandle = sdfAllocGeneralBlock((columns * rows) * 2);
+    bufferHandle = sdfAllocGeneralBlock((columns * rows) * SDF_CONSOLE_CELL_BYTES);
     node->bufferHandle = bufferHandle;
     node->cells = (u8 *)sdfResourceRetainAddress(bufferHandle);
     sdfDevConsNodeClear(node);
