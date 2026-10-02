@@ -1,6 +1,7 @@
 #include "common.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "fpu.h"
 #include "eff.h"
 
 /* Directory entry filled by the effect data directory iterator. */
@@ -46,6 +47,8 @@ extern u8 sdfViewMatrix[];
 extern u8 sdfProjectionMatrix[];
 
 extern u8 D_00324660[];
+extern u8 sdfViewTargetVector[];
+extern u8 sdfViewUpVector[];
 
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
@@ -439,7 +442,41 @@ void sdfProjectVuVectorToScreen(void) {
     VU0_ADD(vf10, vf10, vf11);
 }
 
-INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018DC58);
+/* Project a point and its camera-right offset, returning their rounded screen distance. */
+s32 func_0018DC58(f32 scale) {
+    volatile f32 scaleVector[4];
+    f32 projectedEnd[4];
+    f32 projectedStart[4];
+    f32 original[4];
+    f32 dx;
+    f32 dy;
+
+    VU0_STORE_VF_UNCLOBBERED(vf10, original);
+    sdfProjectVuVectorToScreen();
+    VU0_STORE_VF(vf10, projectedStart);
+
+    scaleVector[0] = scale;
+    scaleVector[2] = scale;
+    scaleVector[1] = scale;
+    VU0_LOAD_VF(vf10, original);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, sdfViewUpVector);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_LOAD_VF(vf11, scaleVector);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf11, vf12);
+    VU0_ADD(vf10, vf10, vf11);
+
+    sdfProjectVuVectorToScreen();
+    VU0_STORE_VF(vf10, projectedEnd);
+    dx = projectedEnd[0] - projectedStart[0];
+    dy = projectedEnd[1] - projectedStart[1];
+    VU0_LOAD_VF(vf10, projectedStart);
+    return (s32)fsqrtf(dx * dx + dy * dy);
+}
 
 /* vu0 routine: blend two RGBA8888 colours by t (lerp in float, packed back to RGBA8888) */
 u32 effBlendColor(u32 colorA, u32 colorB, f32 t) {
