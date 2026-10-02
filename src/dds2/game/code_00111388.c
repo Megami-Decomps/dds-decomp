@@ -69,6 +69,8 @@ extern void *dds3AppendWorldIndexNode();
 extern u32 dds3ReadIndexedWorldObjectWord();
 extern u32 dds3AdvanceObjectValueCursor();
 extern void dds3DestroyWorldIndexNode();
+extern void *dds3GetWorldSecondaryObject(void);
+extern void *dds3CopyWorldListToValueChain(void *object, s32 kind);
 
 /* Copy the slot's world-object words (optionally filtered) into a fresh index node. */
 void *dds3CopyFilteredWorldSlot(s32 object, s32 index, s32 (*filter)(u32)) {
@@ -95,7 +97,22 @@ void *dds3CopyFilteredWorldSlot(s32 object, s32 index, s32 (*filter)(u32)) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_00111388", func_001115B0);
+void *dds3GetFirstWorldObjectNodeOfKind2(void) {
+    void *indexObject;
+    void *node;
+
+    indexObject = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 2);
+    if (indexObject == NULL) {
+        return NULL;
+    }
+    if (dds3GetWorldValueCount(indexObject) == 0) {
+        return NULL;
+    }
+    dds3ResetObjectValueCursor(indexObject);
+    node = (void *)dds3ReadIndexedWorldObjectWord(indexObject);
+    dds3DestroyWorldIndexNode(indexObject);
+    return node;
+}
 
 s32 dds3AllocateClearedObjectWork(ObjWithWork *obj) {
     obj->work = func_00328D68(0x10);
