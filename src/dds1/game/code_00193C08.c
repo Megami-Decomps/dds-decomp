@@ -93,7 +93,18 @@ void frFontSetEntryFlag(s32 index, s32 value) {
     entry->flagBytes[1] = value + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00193C08", func_00193C70);
+u32 func_00193C70(u32 value) {
+    u32 upperMiddle = value >> 8;
+    u32 lowerMiddle = value & 0x0000FF00;
+    u32 highByte = value << 24;
+
+    value >>= 24;
+    upperMiddle &= 0x0000FF00;
+    lowerMiddle <<= 8;
+    highByte |= value;
+    upperMiddle |= lowerMiddle;
+    return highByte | upperMiddle;
+}
 
 /* Return the one-based highest set bit, wrapped to a byte; zero stays zero. */
 s32 frFontHighestSetBitIndex(u32 value) {
