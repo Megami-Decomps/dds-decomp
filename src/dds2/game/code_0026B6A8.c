@@ -30,15 +30,24 @@ typedef struct PartyFlagPair {
 typedef struct PartySlotHeader {
     u16 flags;
     u16 pad02;
-    u16 id;
+    u16 unitId;
 } PartySlotHeader;
+
+/* Encoded name-table rows; keep byte storage and the retail table strides. */
+typedef struct DspUnitName {
+    u8 encodedText[17];
+} DspUnitName;
+
+typedef struct DspMantraName {
+    u8 encodedText[19];
+} DspMantraName;
 
 extern SceneFlagEntry mnuSceneFlagEventEntries[4];
 extern PartyFlagPair mnuPartyFlagEventEntries[];
 extern s32 D_00435E5C;
-extern s32 D_00435E50;
+extern DspMantraName *D_00435E50;
 extern s32 D_00435E4C;
-extern s32 D_00435E48;
+extern DspUnitName *D_00435E48;
 
 extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
@@ -64,7 +73,7 @@ s32 dspStartFlagEvent(s32 context) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
                     func_0026C918(0, (void *)(D_00435E5C + mnuSceneFlagEventEntries[i].areaIndex * 0x19));
-                    func_0026C918(1, (void *)(D_00435E50 + mnuSceneFlagEventEntries[i].nameIndex * 0x13));
+                    func_0026C918(1, D_00435E50[mnuSceneFlagEventEntries[i].nameIndex].encodedText);
                     func_0026C918(2, (void *)(D_00435E4C + mnuSceneFlagEventEntries[i].dialogIndex * 0x11));
                     dspStartEntry(3);
                     mdlFlagSet(mnuSceneFlagEventEntries[i].doneFlag);
@@ -73,13 +82,13 @@ s32 dspStartFlagEvent(s32 context) {
             }
             for (i = 0; i < 5; i++) {
                 slot = (PartySlotHeader *)(datGameState + i * 0x1C4 + 0xA60);
-                if ((slot->flags & 1) != 0 && mdlFlagTest(mnuPartyFlagEventEntries[slot->id].needFlag) != 0
-                    && mdlFlagTest(mnuPartyFlagEventEntries[slot->id].doneFlag) == 0) {
+                if ((slot->flags & 1) != 0 && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].needFlag) != 0
+                    && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].doneFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
-                    func_0026C918(0, (void *)(D_00435E48 + slot->id * 0x11));
+                    func_0026C918(0, D_00435E48[slot->unitId].encodedText);
                     dspStartEntry(4);
-                    mdlFlagSet(mnuPartyFlagEventEntries[slot->id].doneFlag);
+                    mdlFlagSet(mnuPartyFlagEventEntries[slot->unitId].doneFlag);
                     return 1;
                 }
             }

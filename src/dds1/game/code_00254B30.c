@@ -12,7 +12,7 @@ extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
 typedef struct {
     u8 pad0[4];
-    u16 index; /* 0x4: index into the display label or marker table */
+    u16 unitId; /* 0x4: index into the unit-name and unit-sprite tables */
 } DspEntry;
 
 typedef struct {
@@ -24,7 +24,7 @@ typedef struct {
 
 typedef struct {
     DspEntry *entry;   /* 0x0: selected display entry */
-    s32 alternate; /* 0x4: index for the alternate label table */
+    s32 mantraId; /* 0x4: index into the mantra-name table */
 } DspSelection;
 
 typedef struct {
@@ -91,16 +91,17 @@ INCLUDE_ASM(const s32, "game/code_00254B30", mnuDrawMantraCostCounter);
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255368);
 
-typedef struct MenuSlot17 {
-    u8 b[17];
-} MenuSlot17;
+/* Encoded name-table rows; keep byte storage and the retail table strides. */
+typedef struct DspUnitName {
+    u8 encodedText[17];
+} DspUnitName;
 
-typedef struct MenuSlot19 {
-    u8 b[19];
-} MenuSlot19;
+typedef struct DspMantraName {
+    u8 encodedText[19];
+} DspMantraName;
 
-extern MenuSlot17 *D_003BAA70;
-extern MenuSlot19 *D_003BAA78;
+extern DspUnitName *D_003BAA70;
+extern DspMantraName *D_003BAA78;
 extern char D_003BC468[];
 extern s32 fldGetSceneMetadataNode();
 extern void func_0024DD90(s32, void *);
@@ -110,15 +111,15 @@ extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void dspStartEntry(s32);
 extern void evtCaptureMessageWindowSoundMode(s32);
 
-/* Populate four menu labels from the current selection and scene metadata. */
+/* Populate the unit and both mantra labels, plus the selected mantra's cost. */
 void itfDspPopulatePrimaryLabels(void) {
     DspSelection *selection = (DspSelection *)mnuGetSelectedNodeValue();
     DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
     char text[16];
 
-    func_0024DD90(0, &D_003BAA70[selection->entry->index]);
-    func_0024DD90(1, &D_003BAA78[selection->alternate]);
-    func_0024DD90(2, &D_003BAA78[scene->sceneId]);
+    func_0024DD90(0, D_003BAA70[selection->entry->unitId].encodedText);
+    func_0024DD90(1, D_003BAA78[selection->mantraId].encodedText);
+    func_0024DD90(2, D_003BAA78[scene->sceneId].encodedText);
     func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     func_0024DD90(3, text);
     evtSetMessageWindowOptionWhenOpen(0);
@@ -132,9 +133,9 @@ void itfDspPopulateAlternateLabels(void) {
     DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
     char text[16];
 
-    func_0024DD90(0, &D_003BAA70[selection->entry->index]);
-    func_0024DD90(1, &D_003BAA78[selection->alternate]);
-    func_0024DD90(2, &D_003BAA78[scene->sceneId]);
+    func_0024DD90(0, D_003BAA70[selection->entry->unitId].encodedText);
+    func_0024DD90(1, D_003BAA78[selection->mantraId].encodedText);
+    func_0024DD90(2, D_003BAA78[scene->sceneId].encodedText);
     func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     func_0024DD90(3, text);
     evtSetMessageWindowOptionWhenOpen(0);
@@ -148,9 +149,9 @@ void itfDspPopulateThirdLabels(void) {
     DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
     char text[16];
 
-    func_0024DD90(0, &D_003BAA70[selection->entry->index]);
-    func_0024DD90(1, &D_003BAA78[selection->alternate]);
-    func_0024DD90(2, &D_003BAA78[scene->sceneId]);
+    func_0024DD90(0, D_003BAA70[selection->entry->unitId].encodedText);
+    func_0024DD90(1, D_003BAA78[selection->mantraId].encodedText);
+    func_0024DD90(2, D_003BAA78[scene->sceneId].encodedText);
     func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     func_0024DD90(3, text);
     dspStartEntry(2);
@@ -301,16 +302,17 @@ void itfDspDrawStrip(s32 x, s32 y, s32 layer, s32 scale, s32 context) {
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_002561A0);
 
-typedef struct Bytes7 {
-    s8 b[7];
-} Bytes7;
+typedef struct DspUnitSpriteLookup {
+    s8 spriteIndices[7];
+} DspUnitSpriteLookup;
 
-extern Bytes7 D_003BC478[];
+extern DspUnitSpriteLookup D_003BC478[];
 
+/* Select the unit's display sprite; retain the complete signed-byte table copy. */
 void mnuDrawDisplayEntrySpriteFromLookup(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context) {
-    Bytes7 table = D_003BC478[0];
+    DspUnitSpriteLookup lookup = D_003BC478[0];
 
-    func_0024E260(x, y, layer, scale, table.b[entry->index], context);
+    func_0024E260(x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_002562E8);
