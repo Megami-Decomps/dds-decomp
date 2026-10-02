@@ -125,3 +125,14 @@ slot under `.set reorder`. Consequently, `-fno-delayed-branch` is a diagnostic
 experiment, not evidence that final object code will contain a `nop`. Compare
 the pass-28 and pass-29 dumps first, and confirm the assembled object before
 attributing a residual to source semantics.
+
+The exact `mnuRefreshPartyPanelSlots` twins provide a natural control. DDS1
+passes `context + 0x7ec`; that signed-immediate `addiu` is a single donor, and
+the explainer reports it in the initialization call slot. DDS2 passes
+`context + 0xa928`; materializing the out-of-range positive offset takes two
+instructions before the call, so pass `29` has no corresponding sequence and
+the slot remains `nop`. Both C functions are exact. This is the useful source
+question for a delay-slot residual: did a truthful type, expression, or layout
+fact change donor availability before pass `29`? If pass-28 RTL already has an
+ordinary eligible instruction immediately before the call, cosmetic spelling
+changes are unlikely to suppress the move naturally.
