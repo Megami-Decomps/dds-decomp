@@ -527,6 +527,8 @@ extern s32 fileMenuTaskExists(void);
 
 extern s32 D_00435EE0;
 
+extern void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y);
+
 s32 fldFieldTaskUpdate(void) {
     if (fldGetCampSceneControlMode() != 0) {
         return 0;
@@ -2073,7 +2075,65 @@ s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldDrawAnimatedFieldBanner);
+extern void fldSelectDisplayBuffer(u32);
+extern void func_0012BE18(s32);
+extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32,
+                                u32, u32);
+extern s32 ptyAnyUnitFlagMatch(s32, s32);
+extern f32 sdfSinPoly(f32);
+extern void func_0012B690(s32, s32, s32, s32, s32, s32, s32, s32, u32,
+                          u32, u32, u32, u32);
+extern f32 D_0043634C;
+
+void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
+    u32 color;
+
+    if (fldAreaState[0x118 / 4] != 1 && fldAreaState[0x114 / 4] != 1) {
+        fldSelectDisplayBuffer(0x53);
+        func_0012BE18(0);
+        fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
+        fldSubmitSpriteRect(x + 0x140, y + 0x10, 0x12, 0x19,
+                            0x26, 3, 0x12, 0x19, 0x80808080,
+                            fldAreaState[0x1F0 / 4]);
+        fldSubmitSpriteRect(x + 0x152, y + 0x10, 0x90, 0x19,
+                            0x36, 3, 1, 0x19, 0x80808080,
+                            fldAreaState[0x1F0 / 4]);
+        fldSubmitSpriteRect(x + 0x1E2, y - 1, 0x20, 0x39,
+                            1, 2, 0x20, 0x39, 0x80808080,
+                            fldAreaState[0x1F0 / 4]);
+        if (ptyAnyUnitFlagMatch(0x5D0, 0) != 0) {
+            fldSubmitSpriteRect(x + 0x1B6, y + 0x2E, 0x23, 0xB,
+                                0x3B, 0x25, 0x23, 0xB, 0x80808080,
+                                fldAreaState[0x208 / 4]);
+            fldSubmitSpriteRect(x + 0x1D8, y + 0x26, 0x1B, 0x21,
+                                0x64, 2, 0x1B, 0x21, 0x80808080,
+                                fldAreaState[0x208 / 4]);
+            color = 0x808080;
+            if (D_0043634C < 45.0f) {
+                color = (s32)(sdfSinPoly(D_0043634C * 4.0f * 3.14f / 180.0f) *
+                              128.0f) + 0x80;
+                color |= (color << 8) | (color << 16);
+            }
+            func_0012BE18(1);
+            func_0012B690(x + 0x1B6, y + 0x2E, 0x23, 0xB,
+                          0x3B, 0x25, 0x23, 0xB,
+                          color | 0x30000000, color | 0x30000000,
+                          color | 0x30000000, color | 0x30000000,
+                          fldAreaState[0x208 / 4]);
+            func_0012B690(x + 0x1D8, y + 0x26, 0x1B, 0x21,
+                          0x64, 2, 0x1B, 0x21,
+                          color | 0x5A000000, color | 0x5A000000,
+                          color | 0x5A000000, color | 0x5A000000,
+                          fldAreaState[0x208 / 4]);
+            D_0043634C += 1.0f;
+            if (D_0043634C > 90.0f) {
+                D_0043634C = 0.0f;
+            }
+        }
+        func_0012BE18(0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014DB50);
 
