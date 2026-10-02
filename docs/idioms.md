@@ -958,6 +958,21 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     `sndPollAtrac3SELoadTask` a CONTEXT flip. Correct only the callee the
     failing function calls: correcting every `void` prototype of a unit at
     once broke functions that had matched.
+    This can also explain a one-register shift *after* an ignored-result call.
+    A wrongly value-returning declaration can create a dead `$v0` result whose
+    live range overlaps the next local-allocation quantity. The allocator then
+    skips `$v0` and first-fits that quantity in `$v1`. In DDS1
+    `prfBuildRawSkillList`, an implicit-`int` declaration of `memset` keeps
+    `$v0` live across the row-index quantity; the unit's `extern void memset()`
+    removes that result and reproduces retail's four-word `$v0` index chain.
+    In DDS1 `btlUnitFadeInTask`, declaring the genuinely `void`
+    `func_00221EF0` and `mdlBroadcastMasked` as value-returning similarly swaps
+    the `$v0`/`$v1` quantities used by the flag update; their real `void`
+    declarations restore the retail assignment.
+    Therefore, when a near-match shifts one temporary from `$v0` to `$v1`
+    immediately after an ignored-result call, verify that callee's definition
+    before trying declaration-order permutations. This is a targeted check,
+    not a reason to rewrite unrelated declarations.
 11. **`x / 5` always compiles with the zero check, and a source-order trap.**
     ee-gcc emits `addiu $2,$0,5; div; beql $2,$0,1f; break 7` even for a
     constant divisor, so the check is not evidence of a variable divisor
