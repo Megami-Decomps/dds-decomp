@@ -8673,7 +8673,7 @@ extern WorldMotionData *dds3GetWorldCameraObject(void *);
 
 extern void dds3SetWorldCameraObject(void *, s32);
 
-extern f32 dds3GetCameraValue(s32);
+extern f32 dds3GetCameraFieldOfView(s32);
 
 extern void func_00106488(f32);
 
@@ -8691,7 +8691,7 @@ void btlRefreshWorldCameraHandle(void) {
                     handle = object->head->sub->handle;
                 }
                 dds3SetWorldCameraObject(object, handle);
-                func_00106488(dds3GetCameraValue(handle));
+                func_00106488(dds3GetCameraFieldOfView(handle));
             }
         }
     }

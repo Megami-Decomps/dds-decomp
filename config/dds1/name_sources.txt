@@ -427,13 +427,18 @@
 0x00112930	dds3SetOwnedWorldInnerValue	inferred	Stores a value in the owned inner world-object state. [names_reviewed10.tsv]
 0x00112958	dds3CreateWorldInnerState	inferred	Allocates 0x90-byte inner state, stores owner handle and initializes flags.
 0x001129B8	dds3DestroyCameraData	inferred	Releases the camera data handle then frees the camera data allocation.
+0x001129F8	dds3UpdateCameraObject	inferred	Updates a changed camera transform, publishes the selected camera vectors, and applies a pending field-of-view change.
+0x00112AE8	dds3RebuildCameraBasis	inferred	Transforms the camera eye and up vectors through its inner node and rebuilds the look-at basis.
 0x00112BB0	dds3GetCameraHandle	inferred	Returns the handle at camera data offset 0x80.
 0x00112BC0	dds3CreateCameraObjectWithSlotData	inferred	Creates a camera object, stores its supplied value and ensures backing slot data. [names_reviewed10.tsv]
+0x00112C08	dds3CreateCameraObject	inferred	Creates the default camera object from a target position and rotation, with a 36-degree field of view.
 0x00112D98	dds3CreateCameraObjectWithVectors	inferred	confidence=medium; src/dds1/basic/dds3CameraObjectBasic.c:func_00112D98; Creates a camera object from slot data, installs and backs up vectors, and initializes its data vectors and flag. [names_qp9.tsv]
 0x00112E58	dds3ReleaseCameraWorldNode	inferred	confidence=high; matched-C; src/dds1/basic/dds3CameraObjectBasic.c:132:func_00112E58; Camera lifecycle callback removes world object node.; twin=0x00113080, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00112E70	dds3LoadObjectMatrixPointerIntoVu	inferred	confidence=high; src/dds1/basic/dds3CameraObjectBasic.c:func_00112E70; Loads the matrix from the pointer stored in the object into VU registers. [names_qp9.tsv]
 0x00112E90	dds3SetCameraVector	inferred	Copies source vector into camera object data at the same location read by the existing dds3LoadCameraVectorVU. [names_reviewed19.tsv]
 0x00112EA8	dds3LoadCameraVectorVU	inferred	Loads camera object's nested vector into VU register vf10. [names_reviewed6.tsv]
+0x00112EC0	dds3SetCameraFieldOfView	inferred	Stores the camera field of view in radians and marks it for publication by the camera update callback.
+0x00112ED8	dds3GetCameraFieldOfView	inferred	Returns the camera field of view in radians.
 0x00112EE8	dds3TransformCameraVectorsByInnerRotation	inferred	confidence=high; matched-C; src/dds1/basic/dds3CameraObjectBasic.c:163:func_00112EE8; Transforms camera directions with inner quaternion rotation and optional rotated/translated position.; twin=0x00113110, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00112FE0	dds3GetCameraMode	inferred	Returns camera data's word at offset 0x84, also written by the neighboring setter.
 0x00112FF0	dds3SetCameraMode	inferred	Stores the supplied mode at camera data offset 0x84 only when changed.
@@ -6207,7 +6212,7 @@
 0x003BD8A0	evtActiveEntryFlags	inferred	high confidence; src/dds1/game/code_0024CFB0.c evtClearActiveFlag(): D_003BD8A0.flags[flagIndex] = 0; Entry-indexed active flags cleared and queried by the event display helpers. [names_reviewed26.tsv]
 0x003BD8C8	mnuTitleStreamThread	inferred	confidence=high; src/dds1/game/code_00268AB8.c:mnuCreateTitleStreamThread; Tracked thread node passed to the title stream thread starter. [names_qp9.tsv]
 0x003BD8D0	mnuTitleStreamSemaphore	inferred	high confidence; src/dds1/game/code_00268AB8.c mnuCreateTitleStreamThread(): D_003BD8D0 = sdfCreateSemaphore(1, 0xff, 0); Semaphore protects title-stream updates and status reads/writes. [names_reviewed26.tsv]
-0x003BD8E0	mnuTitleCameraObject	inferred	high confidence; src/dds1/game/code_00268AB8.c mnuCreateTitleCameraWorldEntry(): D_003BD8E0 = func_00112C08(dds3AdvanceWorldCounter(), (f32 *)D_003DC1C0, (f32 *)D_003DC1D0); World camera object created with the retail title_camera callback label. [names_reviewed26.tsv]
+0x003BD8E0	mnuTitleCameraObject	inferred	high confidence; src/dds1/game/code_00268AB8.c mnuCreateTitleCameraWorldEntry(): D_003BD8E0 = dds3CreateCameraObject(dds3AdvanceWorldCounter(), (f32 *)D_003DC1C0, (f32 *)D_003DC1D0); World camera object created with the retail title_camera callback label. [names_reviewed26.tsv]
 0x003BD8FC	fileMenuStateHandler	inferred	confidence=high; src/dds1/game/code_0028A150.c:fileRunMenuState; Current state callback invoked and replaced as the file-menu state runner advances. [names_qp9.tsv]
 0x003BD900	fileWaitContinuation	inferred	confidence=high; src/dds1/game/code_0028A150.c:D_003BD900; type=void* (*)(void); refs=fileBeginWait,fileUpdateWait; Wait setup saves a callback, invoked without arguments once the countdown has expired. [names_qp9.tsv]
 0x003BD91C	fileSaveFileDescriptor	inferred	confidence=high; matched_users=src/dds1/game/code_0028A150.c:fileFinishRequest, src/dds1/game/code_0028A150.c:fileLoadMainBlobBegin; Memory-card command polling fills this descriptor; subsequent save read/write operations use it. [names_qp9.tsv]
