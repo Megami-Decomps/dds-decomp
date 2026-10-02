@@ -79,28 +79,34 @@ Each of the 256 repeated rows has the following common `0x64`-byte layout:
 | `0x54` | `u8` | `after flag` | Post-transition action flags |
 | `0x55` | `char[15]` | `after script` | Post-transition procedure name |
 
-Six actor/door kinds have matching dispatch behavior in both games and use
-symbolic names:
+The actor kind selects one of the procedures bundled with each field script.
+The executable uses the same dispatch in both games (kind `12` is only present
+in the tracked DDS1 data):
 
 | Value | Source name | Runtime selection |
 |---:|---|---|
 | `1` | `door` | Named door actor and ordinary transfer |
+| `2` | `run_warp` | Running field transition (`runwarp_label`) |
+| `3` | `hole_warp` | Falling transition (`anawarp_label`) |
+| `4` | `jump_warp` | Jumping transition (`tobiwarp_label`) |
+| `5` | `ladder` | Ladder interaction (`hasigo_label`) |
 | `6` | `elevator_exit` | Elevator return selected by elevator and floor |
 | `7` | `side_exit` | Return selected by cached exit mode and selector |
 | `8` | `battle_exit` | Post-battle return selected by event number |
 | `9` | `special_warp` | Explicit warp selected by numeric ID |
-| `10` | `ladder` | Ladder actor/return context |
-
-The other observed kind values (`2..5`, `11`, and DDS1-only `12`) remain
-numeric. Their runtime branches are real, but the available names do not yet
-establish one stable gameplay role for each value.
+| `10` | `warp` | Generic scripted transition (`warp_label`) |
+| `11` | `suction_warp` | Suction transition (`suikomi_label`) |
+| `12` | `barrier` | Barrier interaction (`baria_label`) |
 
 The `scene` group names arguments according to the selected kind. Door rows
 use `motion`, `secondary_motion`, and `sound`; elevator exits use `elevator`
 and `floor`; side exits use `exit_mode` and `selector`; battle exits use
-`event`; special warps use `id`; and ladder rows expose `selector` and
-`floor_flag`. A generic `args=A,B,C` triple remains available for unknown
-kinds or noncanonical payloads.
+`event`; and special warps use `id`. Ladder rows expose `direction` and the
+`direct_prompt` flag; their primary and secondary resources resolve the source
+vector and effect unit. Suction rows expose `state_selector`, `map_entry`, and
+`motion`, with the same two resources resolving the source vector and effect
+unit. Barrier rows select a separate barrier definition with `barrier`. A
+generic `args=A,B,C` triple remains available for unlabelled payloads.
 
 Warp types `field`, `elevator`, `facility`, and `event` encode the verified
 values `0..3`. Field transfers name their destination `field` and `area`,
