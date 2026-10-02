@@ -604,9 +604,36 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_00250758);
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_00250820);
+typedef struct MnuProfileRequirementSlot {
+    s32 status;
+    u8 pad04[8];
+    u8 requirements[2];
+    u8 pad0E[6];
+} MnuProfileRequirementSlot;
 
-extern u8 *func_00250820(u16);
+typedef struct MnuProfileRequirementRecord {
+    u8 pad00[0x2C];
+    MnuProfileRequirementSlot slots[2];
+} MnuProfileRequirementRecord;
+
+extern s32 func_00250758(u16);
+
+u8 *func_00250820(u16 index) {
+    s32 i = 0;
+    MnuProfileRequirementRecord *record;
+
+    if ((func_00250758(index) & 1) != 0) {
+        record = (MnuProfileRequirementRecord *)prfReqGetEntryRecord(index);
+        while (record->slots[i].status != 1) {
+            i++;
+            if (i >= 2) {
+                return NULL;
+            }
+        }
+        return record->slots[i].requirements;
+    }
+    return NULL;
+}
 
 s32 func_002508D8(u16 index) {
     MnuResourceTask *task = (MnuResourceTask *)func_002CB3B8(mnuSceneResourceContext, 0);
