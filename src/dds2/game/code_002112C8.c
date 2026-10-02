@@ -225,11 +225,19 @@ typedef struct BattleActorHandle {
 
 /* Action and sound tasks both carry their mutable control word at +0x28. */
 typedef struct BattleTaskControl {
-    u8 pad00[0x28];
+    u8 enabled;
+    u8 pad01[7];
+    u64 owner;
+    u8 pad10[0x18];
     u32 control;
-    u8 pad2C[0x14];
+    u8 pad2C[0xC];
+    u64 result; /* 0x38: returned by the model-load task starter */
     u64 targetId; /* 0x40 */
 } BattleTaskControl;
+
+typedef struct SoundTask SoundTask;
+extern SoundTask *sndCreateStationedSeTask(u32);
+extern u32 btlCreateScriptResourceTask(u32, u32);
 
 extern s32 btlFindUnitByActor(BtlUnit *);
 
@@ -329,7 +337,10 @@ extern s32 btlAnyUnitHasActionInSlots();
 
 extern s32 func_001B3200(s32);
 
-extern s32 func_00213F58(s32, s32, s32);
+extern s32 func_00213F58(s32, s16, s8);
+extern s8 *datCommandSelectors;
+
+extern s32 datCommandRecords;
 
 extern s32 btlUnitBlocksElementQuery(s32, s32, s32);
 
@@ -1182,7 +1193,36 @@ s32 btlCheckActorEligibilityWithDebug(s32 actor) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00213F58);
+s32 func_00213F58(s32 mask, s16 actionId, s8 force) {
+    s32 i;
+    s32 value;
+
+    if (mask & 0x100000) {
+        for (i = 0; i < 0x13; i++) {
+            value = btlElementToBitIndex(mask, i);
+            if (value != 0x80) {
+                if (datCommandSelectors[actionId * 2] == value) {
+                    if (force != 0) {
+                        return 1;
+                    }
+                    if ((u8)(*(u8 *)(datCommandRecords + actionId * 0x38 + 9) - 1) < 2) {
+                        return 1;
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+    if (datCommandSelectors[actionId * 2] == mask) {
+        if (force != 0) {
+            return 1;
+        }
+        if ((u8)(*(u8 *)(datCommandRecords + actionId * 0x38 + 9) - 1) < 2) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 s32 btlAnyUnitHasActionInSlots(mask, action)
     s32 mask;
@@ -1267,9 +1307,6 @@ s32 func_00214330(void) {
     return 0;
 }
 
-extern s8 *datCommandSelectors;
-
-extern s32 datCommandRecords;
 
 /* Scan active group-0x200 actors for a queued action whose table entry has
  * nonzero byte 8 and class byte 9 equal to 2. */
@@ -2124,7 +2161,43 @@ void btlStartUnitActionIfPairedSelected(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00217EB8);
+void func_00217EB8(BattleActorHandle *action) {
+    BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
+    s8 *state = (s8 *)scene->state;
+    ActionUnit *unit;
+    BattleTaskControl *task;
+    BattleTaskControl *sound;
+
+    if (*state == 0) {
+        unit = scene->units;
+        if (unit != 0) {
+            while (unit != 0) {
+                if (unit->flags & 1) {
+                    if (unit->flags & 0x400) {
+                        if (unit->mode == 0x101) {
+                            break;
+                        }
+                    }
+                }
+                unit = unit->next;
+            }
+            if (unit != 0) {
+                if (unit->flags & 0xE0) {
+                    task = (BattleTaskControl *)btlCreateScriptResourceTask((u32)unit, 0x64);
+                    task->targetId = action->unit->owner;
+                    task->control = 0xE;
+                    btlStartTask(task);
+                    sound = (BattleTaskControl *)sndCreateStationedSeTask(scene->soundSequence);
+                    sound->enabled = 5;
+                    sound->owner = task->result;
+                    btlStartTask(sound);
+                    action->flags &= ~8;
+                    *state = 1;
+                }
+            }
+        }
+    }
+}
 
 u32 btlGetSelectionEmptyValue(void) {
     s32 battle;
@@ -2583,15 +2656,6 @@ s32 btlSpawnLinkedActionEffect(u8 *task) {
     return 1;
 }
 
-/* The sound and model-load tasks both store their caller-supplied owner at +8. */
-typedef struct BtlOwnedTask {
-    u8 pad00[8];
-    u64 owner;
-    u8 pad10[0x28];
-    u64 result; /* 0x38: returned by the model-load task starter */
-} BtlOwnedTask;
-
-extern u8 *sndCreateStationedSeTask(s32);
 
 void btlStartActionRecordSoundTask(BattleActionRecord *record, u64 owner, s32 controlBase) {
     BtlUnit *unit;
@@ -2600,8 +2664,8 @@ void btlStartActionRecordSoundTask(BattleActionRecord *record, u64 owner, s32 co
         unit = record->unit;
         if (unit->flags & 0x400) {
             if (unit->mode == 0x108) {
-                task = sndCreateStationedSeTask(((BattleWork *)btlGetRuntime())->soundTaskBase + 6);
-                ((BtlOwnedTask *)task)->owner = owner;
+                task = (u8 *)sndCreateStationedSeTask(((BattleWork *)btlGetRuntime())->soundTaskBase + 6);
+                ((BattleTaskControl *)task)->owner = owner;
                 task[0] = 4;
                 ((BattleTaskControl *)task)->control = controlBase + 0x28;
                 btlStartTask(task);
@@ -3231,11 +3295,11 @@ s64 btlEnsureHeroUnitTask(u64 owner) {
     func_001AA898(*slot + 0x120, 0x110);
     task = btlCreateModelLoadPollTask(*slot, 1, 0x110, 0);
     if (owner != 0) {
-        ((BtlOwnedTask *)task)->owner = owner;
+        ((BattleTaskControl *)task)->owner = owner;
         task[0] = 4;
     }
     btlStartTask(task);
-    return ((BtlOwnedTask *)task)->result;
+    return ((BattleTaskControl *)task)->result;
 }
 
 
@@ -4122,7 +4186,6 @@ s32 btlSelectMarkedActorAndClearEntryFlags(ActionUnit *unit, u32 *entry) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00220B20);
 
-extern u8 *btlCreateScriptResourceTask(ActionUnit *, s32);
 void btlQueueSelectedActorResourceAndSound(ActionUnit *unit) {
     BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
     ActionUnit **slot = (ActionUnit **)scene->state;
@@ -4130,11 +4193,11 @@ void btlQueueSelectedActorResourceAndSound(ActionUnit *unit) {
     u8 *sound;
 
     if (*slot != 0) {
-        task = btlCreateScriptResourceTask(*slot, (*slot)->mode == 0x10E ? 0x61 : 0x62);
+        task = (u8 *)btlCreateScriptResourceTask((u32)*slot, (*slot)->mode == 0x10E ? 0x61 : 0x62);
         ((BattleActionTask *)task)->resourceOwner = ((ActionUnit *)unit->parentUnit)->ownerId;
         ((BattleActionTask *)task)->delay = 0xE;
         btlStartTask(task);
-        sound = sndCreateStationedSeTask(scene->soundSequence + ((*slot)->mode == 0x10E ? 3 : 2));
+        sound = (u8 *)sndCreateStationedSeTask(scene->soundSequence + ((*slot)->mode == 0x10E ? 3 : 2));
         sound[0] = 5;
         *(u64 *)(sound + 8) = *(u64 *)(task + 0x38);
         btlStartTask(sound);
@@ -4789,7 +4852,7 @@ void btlSpawnBrahmaActionEffectTasks(ActionUnit *unit, u32 action, u32 unused, u
     s64 value;
 
     if (action == 0x19F) {
-        state = *(s32 **)((u8 *)btlGetRuntime() + 0x718);
+        state = (s32 *)((BattleWork *)btlGetRuntime())->sub;
         switch (state[3]) {
         case 0:
             kind = 0xF8;
@@ -4920,17 +4983,18 @@ s32 btlLiftLinkedTargetAndUpdateMotion(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002242F8);
 
+/* Update linked motion only for a group-0x200 owner with request 0xE; return 1 on update. */
 s32 func_00224500(s32 object) {
     s32 state;
     s32 battler;
 
     if (btlIsActorCategoryMarked(object) == 0) {
-        state = *(s32 *)(object + 0x114);
-        battler = *(s32 *)(state + 0x18);
-        if ((*(u32 *)(battler + 0x110) & 0x200) != 0) {
-            if (*(u16 *)(object + 0x12C) == 0xE) {
+        state = (s32)((BtlLinkedCommand *)object)->link;
+        battler = (s32)((ActionStateLink *)state)->unit;
+        if ((((BtlUnit *)battler)->flags & 0x200) != 0) {
+            if (((BtlLinkedCommand *)object)->unk12C == 0xE) {
                 func_00217470((BtlLinkedCommand *)object, (BtlCamState *)object, -0.8f, 0.225f, 35.0f);
-                *(f32 *)(object + 0x20) += 500.0f;
+                ((BtlLinkedCommand *)object)->camera.distance += 500.0f;
                 func_001E88A8(object);
                 return 1;
             }
