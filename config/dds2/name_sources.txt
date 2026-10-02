@@ -739,6 +739,7 @@
 0x00157878	effInvokeOptionalNodeInstanceCallback	inferred	Invokes node-type callback with instance when available; otherwise returns success directly. [names_reviewed19.tsv]
 0x001579E8	effLoadResourceNode	inferred	confidence=high; src/dds2/effect/effManager.c:func_001579E8; Logs d3p file read, loads the requested resource, creates the resolved node, and releases the temporary resource handle. [names_qp9.tsv]
 0x00157A50	effCloneSourceWithTypeHandler	inferred	confidence=high; src/dds2/game/code_00157A50.c:func_00157A50; Allocates an effect-source copy, copies type and metadata, and clones its argument through the type-selected handler. [names_qp9.tsv]
+0x00157BE0	effInitializeBillResourceOwners	inferred	Loads BILL.LB entries, constructs the configured billboards, scales their half extents, and fills effBillResourceOwners.
 0x00157CE0	effBillDispatchAll	inferred	Dispatches every entry in the bill-kind table; DDS1 twin. [names_qp9.tsv]
 0x00157E50	effReleaseSharedTextureRecord	inferred	src/dds2/game/code_00157A50.c func_00157E50: Decrements reference count and releases texture reference plus allocation on final reference. Twin of DDS1 func_00150260. [names_reviewed24.tsv]
 0x00158E00	billReleaseChild	inferred	Releases the billboard's child at offset 0x30 when present, then frees the billboard.
