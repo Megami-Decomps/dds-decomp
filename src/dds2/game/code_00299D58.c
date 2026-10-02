@@ -29,28 +29,30 @@ extern s32 brsTaskIsUiUpdateAllowed(s32);
 extern void brsDecaySharedAnimCounter(s32);
 
 typedef struct MenuItem {
-    u8 pad00[0x55];
+    u8 pad00[0x16];
+    s8 components[5]; /* Summed when bounding the available selection extent. */
+    u8 pad1B[0x3A];
     u8 selection;
 } MenuItem;
+
+/* The selected item and the multiplier used to derive its available extent. */
+typedef struct MenuItemSelectionData {
+    MenuItem *item;
+    s32 extentFactor;
+} MenuItemSelectionData;
 
 typedef struct MenuItemScene {
     u8 pad00[4];
     u32 overlayFlags;
-    u8 pad08[0x90];
-    MenuItem **items;
-    MenuItem **selectedItem;
-    u8 padA0[0x1A0];
-    u32 resetStateA;
-    u32 selectedAction;
-    u8 pad248[4];
-    s32 selectionApplied;
-    u8 pad250[0x20];
-    u32 profileGranted;
-    u8 pad274[0x150];
-    u32 resetStateB;
-    s32 selectedExtent;
-    u32 activeSlot;
-    u32 slots[5];
+    u8 pad08[0x94];
+    MenuItemSelectionData *selectionData; /* 0x9C */
+    u8 padA0[0x1C4];
+    u32 resetStateA; /* 0x264 */
+    u32 pendingSkillCount; /* 0x268: consumed by capped-skill message processing */
+    u8 pad26C[4];
+    u32 selectionApplied; /* 0x270 */
+    u8 pad274[0x174];
+    u32 resetStateB; /* 0x3E8 */
 } MenuItemScene;
 
 INCLUDE_ASM(const s32, "game/code_00299D58", brsMessageInputStep);
@@ -111,31 +113,31 @@ extern u32 ptyGetProfileRecordCap(u8);
 extern s32 func_00314990(MenuItem *, u8);
 extern void func_00314868(MenuItem *, u8);
 
+/* Apply a capped selected profile and record whether the selection was applied. */
 void mnuApplyCompletedProfile(u32 context) {
     MenuItemScene *state = (MenuItemScene *)context;
-    MenuItem *item = *state->selectedItem;
+    MenuItem *item = state->selectionData->item;
     u32 *profile = ptyGetCurrentProfileRecord(item);
 
     if (item->selection != 0 &&
         ptyGetProfileRecordCap(item->selection) == *profile &&
         func_00314990(item, item->selection) == 0) {
         func_00314868(item, item->selection);
-        state->profileGranted = 1;
+        state->selectionApplied = 1;
         state->overlayFlags = state->overlayFlags | 1;
         return;
     }
-    state->profileGranted = 0;
+    state->selectionApplied = 0;
 }
 
-/* Build the capped skill list for the currently selected menu entry. */
+/* Build the capped skill list and cache its pending count; return 1. */
 u32 mnuProcessItemSelection(u32 context) {
-    u32 listState;
-    s32 scene;
+    u32 skillCount;
+    MenuItemScene *scene;
 
-    scene = (s32)context;
-    /* Keep these raw accesses: typed field accesses change the alias schedule. */
-    listState = func_0029D790(**(u32 **)(scene + 0x9c), scene + 0x4e8);
-    *(u32 *)(scene + 0x268) = listState;
+    scene = (MenuItemScene *)context;
+    skillCount = func_0029D790((u32)scene->selectionData->item, (s32)scene + 0x4e8);
+    scene->pendingSkillCount = skillCount;
     mnuApplyCompletedProfile(context);
     return 1;
 }
@@ -201,11 +203,11 @@ s64 func_0029A5D8(s32 request) {
     return menuSetHandler(context, 2, request);
 }
 
+/* Clear the scene's two selection-processing markers; return 1. */
 s32 mnuResetItemSelectionMarkers(void) {
-    s32 *context = (s32 *)kwlnTaskGetUserValue();
-
-    context[0x99] = 0;
-    context[0xFA] = 0;
+    MenuItemScene *scene = (MenuItemScene *)kwlnTaskGetUserValue();
+    scene->resetStateA = 0;
+    scene->resetStateB = 0;
     return 1;
 }
 
