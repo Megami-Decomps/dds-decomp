@@ -52,9 +52,9 @@ extern s32 D_0038989C[];
 
 void fldClearFieldTransitionFlag(void);
 
-void func_00126A28(void);
+void fldClearSecondarySceneFlag(void);
 
-void func_00126AF0(void);
+void fldClearPrimarySceneFlag(void);
 
 extern char D_00412F30[];
 
@@ -320,6 +320,12 @@ extern void fldDestroyPanelTaskIfPresent(void), evtSetSolarOverlayFullyTranspare
 extern void effBlurReleaseFirstResource(s32), mnuDestroyCampTasks(void), scrDestroyAllNamedProcesses(void);
 
 extern void fldReleaseMenuSlotsAfterWait(void);
+
+void fldSetSceneControlFlags(u32 mask);
+u32 func_001266D8(void);
+extern s32 dds3InvokeSlot1Handler(u32 object, void *context);
+extern void fldUpdateCameraTarget(void);
+extern void func_00139EC0(f32 *position);
 
 void func_0011F208(u32 *state, u32 firstValue, u32 secondValue) {
     state[4] = firstValue;
@@ -708,7 +714,7 @@ typedef struct FieldMapSlot {
 
 #define FIELD_MAP_SLOT_OFFSET 0x1450
 
-void func_00122F38(s32 map, s32 slot, s32 bit, s32 enabled) {
+void fldSetRoomModeFlag(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
@@ -723,7 +729,7 @@ void func_00122F38(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_00122FE0(s32 map, u32 slot, u32 bit) {
+u8 fldTestRoomModeFlag(s32 map, u32 slot, u32 bit) {
     s32 mapIndex;
     u8 *slotBase;
     u32 flags;
@@ -738,7 +744,7 @@ u8 func_00122FE0(s32 map, u32 slot, u32 bit) {
     return 0;
 }
 
-void func_00123038(s32 map, s32 slot, s32 bit, s32 enabled) {
+void fldSetRoomObjectModeFlag(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
@@ -751,7 +757,7 @@ void func_00123038(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_001230E0(s32 map, u32 slot, u32 bit) {
+u8 fldTestRoomObjectModeFlag(s32 map, u32 slot, u32 bit) {
     s32 mapIndex;
     u8 *slotBase;
     u32 flags;
@@ -766,7 +772,7 @@ u8 func_001230E0(s32 map, u32 slot, u32 bit) {
     return 0;
 }
 
-void func_00123138(s32 map, s32 slot, s32 bit, s32 enabled) {
+void fldSetRoomSceneFlag(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
@@ -779,7 +785,7 @@ void func_00123138(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_001231E0(s32 map, u32 slot, u32 bit) {
+u8 fldTestRoomSceneFlag(s32 map, u32 slot, u32 bit) {
     s32 mapIndex;
     u8 *slotBase;
     u32 flags;
@@ -822,7 +828,7 @@ u8 fldTestMapTargetFlag(s32 map, u32 slot, u32 bit) {
     return 0;
 }
 
-void func_00123338(s32 map, s32 slot, s32 bit, s32 enabled) {
+void fldSetAlternateMapTargetFlag(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
@@ -835,7 +841,7 @@ void func_00123338(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_001233E0(s32 map, u32 slot, u32 bit) {
+u8 fldTestAlternateMapTargetFlag(s32 map, u32 slot, u32 bit) {
     s32 mapIndex;
     u8 *slotBase;
     u32 flags;
@@ -872,7 +878,7 @@ s32 fldGetMapSlotByte(s32 map, u32 slot, s32 offset) {
     return value == 0xff ? -1 : value;
 }
 
-void func_001234E8(s32 map, s32 slot, s32 bit, s32 enabled) {
+void fldSetMapSlotAuxiliaryFlag(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
@@ -885,7 +891,7 @@ void func_001234E8(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_00123590(s32 map, u32 slot, u32 bit) {
+u8 fldTestMapSlotAuxiliaryFlag(s32 map, u32 slot, u32 bit) {
     s32 mapIndex;
     u8 *slotBase;
     u32 flags;
@@ -900,7 +906,7 @@ u8 func_00123590(s32 map, u32 slot, u32 bit) {
     return 0;
 }
 
-void func_001235E8(s32 map, s32 slot, s32 bit, s32 enabled) {
+void fldSetMapSlotValueFlag(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
@@ -913,7 +919,7 @@ void func_001235E8(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_00123690(s32 map, u32 slot, u32 bit) {
+u8 fldTestMapSlotValueFlag(s32 map, u32 slot, u32 bit) {
     s32 mapIndex;
     u8 *slotBase;
     u32 flags;
@@ -1679,7 +1685,28 @@ u32 fldGetPlayerSceneState(void) {
     return *fldGetPlayerSceneStateAddress();
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00125F58);
+void func_00125F58(void) {
+    f32 position[4];
+
+    if (fldPlayerObject != 0) {
+        fldSetSceneControlFlags(0x40);
+        dds3InvokeSlot1Handler(fldPlayerObject, func_001266D8);
+    }
+    fldAreaState[0x3A] = 4;
+    if (fldAreaState[0x1C] < 4) {
+        fldAreaState[0x1C] = 4;
+    }
+    if (fldAreaState[0x1D] < 5) {
+        fldAreaState[0x1D] = 5;
+    }
+    fldAreaState[0x24] = -1;
+    fldAreaState[0x25] = -1;
+    fldUpdateCameraTarget();
+    effObjFetchInnerFirstVec(fldPlayerObject);
+    VU0_STORE_VF(vf10, position);
+    position[1] += 10.0f;
+    func_00139EC0(position);
+}
 
 void fldResetPlayerSceneObjectState(void) {
     if (fldPlayerObject != 0) {
@@ -1731,7 +1758,7 @@ typedef struct FieldVec4 {
 extern FieldVec4 D_00412F10;
 extern FieldVec4 D_00412F20;
 extern char D_00435F58[];
-extern u32 func_00112F28(void *, FieldVec4 *, FieldVec4 *, FieldVec4 *);
+extern u32 dds3CreateConfiguredCameraObject(void *, FieldVec4 *, FieldVec4 *, FieldVec4 *);
 extern void dds3SetCameraVector(u32, FieldVec4 *);
 extern void effObjSetInnerFloat(u32, f32);
 extern void dds3SetWorldCameraObject(u64, u32);
@@ -1745,7 +1772,7 @@ void fldCreateSecondaryWorldCamera(void) {
     memset(&b, 0, sizeof(b));
     b.w = 1.0f;
     c = D_00412F20;
-    object = func_00112F28(dds3AdvanceWorldCounter(), &b, &c, &a);
+    object = dds3CreateConfiguredCameraObject(dds3AdvanceWorldCounter(), &b, &c, &a);
     *world = object;
     dds3SetWorldEntryCallbackTarget((void *)object, D_00435F58);
     dds3SetCameraVector(*world, &c);
@@ -1868,42 +1895,42 @@ u8 fldTestFieldTransitionFlag(void) {
     return flags != 0;
 }
 
-void func_001269E0(void) {
+void fldConsumeSecondarySceneFlag(void) {
     if ((((FldWorkFlags *)datGameState)->fieldFlags & 2) != 0) {
-        func_00126A28();
+        fldClearSecondarySceneFlag();
         fldAreaState[3] |= 4;
     }
 }
 
-void func_00126A28(void) {
+void fldClearSecondarySceneFlag(void) {
     ((FldWorkFlags *)datGameState)->fieldFlags &= ~2;
     fldAreaState[3] &= ~4;
 }
 
-void func_00126A58(void) {
+void fldSetSecondarySceneFlag(void) {
     ((FldWorkFlags *)datGameState)->fieldFlags = (((FldWorkFlags *)datGameState)->fieldFlags | 2) & ~1;
     fldAreaState[3] &= ~4;
 }
 
-u8 func_00126A90(void) {
+u8 fldTestSecondarySceneFlag(void) {
     s32 flags = ((FldWorkFlags *)datGameState)->fieldFlags;
     flags &= 2;
     return flags != 0;
 }
 
-void func_00126AA8(void) {
+void fldConsumePrimarySceneFlag(void) {
     if ((((FldWorkFlags *)datGameState)->fieldFlags & 1) != 0) {
-        func_00126AF0();
+        fldClearPrimarySceneFlag();
         fldAreaState[3] |= 8;
     }
 }
 
-void func_00126AF0(void) {
+void fldClearPrimarySceneFlag(void) {
     ((FldWorkFlags *)datGameState)->fieldFlags &= ~1;
     fldAreaState[3] &= ~8;
 }
 
-void func_00126B20(void) {
+void fldSetPrimarySceneFlag(void) {
     ((FldWorkFlags *)datGameState)->fieldFlags = (((FldWorkFlags *)datGameState)->fieldFlags | 1) & ~2;
     fldAreaState[3] &= ~8;
 }
@@ -2101,7 +2128,7 @@ void func_001285E8(void) {
 
 extern void fldDispatchDeferredFieldCommand(void);
 
-void func_00128600(void) {
+void fldStopSceneBgm(void) {
     fldStopCurrentBgm();
 }
 

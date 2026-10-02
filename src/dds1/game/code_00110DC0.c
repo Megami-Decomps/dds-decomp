@@ -132,7 +132,7 @@ u32 *dds3FindObjectChainNodeByName(WorldObjectPointer *object, const u8 *name) {
     return NULL;
 }
 
-s32 func_00110FF0(WorldObjectPointer *object) {
+s32 dds3CreatePairedWorldIndexNodes(WorldObjectPointer *object) {
     u32 *p;
     u32 i;
 

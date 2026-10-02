@@ -189,7 +189,7 @@ extern u32 strlen(const char *);
 extern s32 func_0035C860(char *buffer, const char *fmt, ...);
 extern char D_004388D8[];
 extern char D_004388E0[];
-extern void func_00312B50();
+extern void sdfCallbackWorkOnRemove();
 
 extern s32 sdfTaskWorkRunAllEntries(void);
 extern s32 sdfTaskWorkRunAll(void);
@@ -856,7 +856,7 @@ TaskWork *sdfCreateNamedTaskWork(char *name, s32 destroyCallback, u32 userData) 
     work->handle = allocation;
     work->list = sdfCreateTaskHeader(userData);
     sdfSetTaskDestroyCallback((s32)work->list, destroyCallback);
-    sdfSetTaskSecondaryCallback((s32)work->list, (s32)func_00312B50);
+    sdfSetTaskSecondaryCallback((s32)work->list, (s32)sdfCallbackWorkOnRemove);
     work->primaryTaskName = func_00328D68(strlen(name));
     work->secondaryTaskName = func_00328D68(strlen(name) + 5);
     func_0035C860(work->primaryTaskName, D_004388D8, name);
@@ -883,7 +883,7 @@ void sdfDestroyCallbackWork(SdfTaskEntry *entry) {
     }
 }
 
-void func_00312B50(u32 unused, SdfTaskEntry *entry) {
+void sdfCallbackWorkOnRemove(u32 unused, SdfTaskEntry *entry) {
     sdfDestroyCallbackWork(entry);
 }
 

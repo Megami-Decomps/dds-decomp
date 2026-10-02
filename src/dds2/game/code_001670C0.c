@@ -217,7 +217,7 @@ s32 effAppendGouraudTexturedQuadPacket(s32 chain, s32 primitive,
     return sdfAppendPacket(chain, packet);
 }
 
-void func_00167778(u64 *packet, s32 color, s32 primitive,
+void billWriteFloatTextureTrianglePacket(u64 *packet, s32 color, s32 primitive,
                   s32 x0, s32 y0, f32 uFirst, f32 vFirst,
                   s32 x1, s32 y1, f32 uSecond, f32 vSecond,
                   s32 x2, s32 y2, f32 uThird, f32 vThird, s32 depth) {
@@ -246,7 +246,7 @@ s32 effAppendTexturedTrianglePacket(s32 chain, s32 color, s32 primitive,
 
     packet[0] = 0x20000005;
     packet[1] = 0x5000000510000000ULL;
-    func_00167778(packet + 2, color, primitive, x0, y0, u0, v0,
+    billWriteFloatTextureTrianglePacket(packet + 2, color, primitive, x0, y0, u0, v0,
                  x1, y1, u1, v1, x2, y2, u2, v2, depth);
     return sdfAppendPacket(chain, packet);
 }
@@ -267,7 +267,7 @@ u64 *effBuildDrawPacketWithFlags(u32 flags) {
 
 INCLUDE_ASM(const s32, "game/code_001670C0", func_00167A10);
 
-void func_00167E00(s32 frames) {
+void dds3StartCrossfade(s32 frames) {
     u8 *entry;
     s32 i;
     u64 clearValue;

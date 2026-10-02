@@ -174,7 +174,7 @@ void sdfPatchPacketResourceField(SdfBigPacket *packet, s32 entryIndex) {
     packet->unk80 = (packet->unk80 & ~0x3FFF) | (u64)(u32)(sdfPacketResourceEntries[entryIndex]->baseAddress >> 6);
 }
 
-void func_0032C768(SdfListHead *list, SdfListHead *linkedList, s32 arg2, s32 arg3,
+void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfListHead *linkedList, s32 arg2, s32 arg3,
                    s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8,
                    s32 (*alloc)(s32)) {
     s32 packet;
@@ -727,7 +727,41 @@ void sdfBuildDmaReferenceChain(u64 *packet, u32 address, s32 count) {
     packet[7] = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D528);
+void func_0032D528(SdfPacket *packet, s32 frameAddress, s32 width, s32 height,
+                  s32 frameFormat, s32 depthAddress, s32 depthFormat,
+                  s32 fieldOffset, s32 context) {
+    s64 frameRegister;
+    s64 depthRegister;
+    s64 offsetRegister;
+    s64 scissorRegister;
+    s32 x;
+    s32 y;
+
+    if (context == 0) {
+        frameRegister = 0x4C;
+        depthRegister = 0x4E;
+        offsetRegister = 0x18;
+        scissorRegister = 0x40;
+    } else {
+        frameRegister = 0x4D;
+        depthRegister = 0x4F;
+        offsetRegister = 0x19;
+        scissorRegister = 0x41;
+    }
+    packet[1].unk18 = scissorRegister;
+    y = (0x1000 - height) << 3;
+    x = (0x1000 - width) << 3;
+    packet[0].unk0 = (s64)(frameFormat << 24) | (s64)(((width + 63) >> 6) << 16) | (s64)(frameAddress >> 11);
+    if (fieldOffset != 0) {
+        y += 8;
+    }
+    packet[0].unk8 = frameRegister;
+    packet[0].unk10 = (s64)(depthFormat << 24) | (s64)(depthAddress >> 11);
+    packet[0].unk18 = depthRegister;
+    packet[1].unk8 = offsetRegister;
+    packet[1].unk10 = ((s64)(height - 1) << 48) | ((s64)(width - 1) << 16);
+    packet[1].unk0 = x | ((s64)y << 32);
+}
 
 void sdfBuildCenteredViewBoundsPacket(u64 *packet, s32 x, s32 y, s32 unused0, s32 unused1) {
     u32 low = ((0x1000 - y) << 19) | ((0x1000 - x) << 3);
@@ -1162,7 +1196,7 @@ void sdfBuildTriPacket104(s32 address, s32 color, s32 primitive, s32 x0, s32 y0,
     packet[6] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-void func_0032EF30(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
+void sdfQueueFlatTriangle(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
                    s32 y1, s32 x2, s32 y2, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
@@ -1233,7 +1267,7 @@ void sdfBuildPacketF(s32 list, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1
 }
 
 /* Four vertices each carry their own color, with a common Z value. */
-void func_0032F428(s32 address, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1, s32 y1, s32 color1, s32 x2, s32 y2, s32 color2, s32 x3, s32 y3, s32 color3, s32 depth) {
+void sdfWriteGouraudQuadPacket(s32 address, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1, s32 y1, s32 color1, s32 x2, s32 y2, s32 color2, s32 x3, s32 y3, s32 color3, s32 depth) {
     u64 *packet = (u64 *)address;
     u64 depthHigh = (u64)depth << 32;
 
@@ -1250,7 +1284,7 @@ void func_0032F428(s32 address, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x
     packet[10] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-void func_0032F540(s32 list, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1,
+void sdfQueueGouraudQuad(s32 list, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1,
                    s32 y1, s32 color1, s32 x2, s32 y2, s32 color2, s32 x3,
                    s32 y3, s32 color3, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
@@ -1260,7 +1294,7 @@ void func_0032F540(s32 list, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1,
     packet = (SdfPacket *)alloc(0x70);
     packet->unk0 = 0x20000006;
     packet->unk8 = (((u64)0x50000006 << 16) | 0x1000) << 16;
-    func_0032F428((s32)&packet->unk10, primitive, x0, y0, color0, x1, y1, color1, x2, y2, color2, x3, y3, color3, depth);
+    sdfWriteGouraudQuadPacket((s32)&packet->unk10, primitive, x0, y0, color0, x1, y1, color1, x2, y2, color2, x3, y3, color3, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
@@ -1281,7 +1315,7 @@ void sdfBuildPacket114(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s3
     packet[9] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-void func_0032F788(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
+void sdfQueueTexturedTriangle(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
                    s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2,
                    s32 u2, s32 v2, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
@@ -1296,7 +1330,7 @@ void func_0032F788(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
 }
 
 /* Pack four textured vertices with a common color and depth. */
-void func_0032F8F0(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
+void sdfWriteTexturedQuadPacket(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
                    s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2, s32 u2, s32 v2,
                    s32 x3, s32 y3, s32 u3, s32 v3, s32 depth) {
     u64 *packet = (u64 *)address;
@@ -1316,7 +1350,7 @@ void func_0032F8F0(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0
     packet[11] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-void func_0032FA48(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
+void sdfQueueTexturedQuad(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
                    s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2,
                    s32 u2, s32 v2, s32 x3, s32 y3, s32 u3, s32 v3, s32 depth,
                    s32 (*alloc)(s32)) {
@@ -1327,12 +1361,12 @@ void func_0032FA48(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
     packet = (SdfPacket *)alloc(0x70);
     packet->unk0 = 0x20000006;
     packet->unk8 = (((u64)0x50000006 << 16) | 0x1000) << 16;
-    func_0032F8F0((s32)&packet->unk10, color, primitive, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2, x3, y3, u3, v3, depth);
+    sdfWriteTexturedQuadPacket((s32)&packet->unk10, color, primitive, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2, x3, y3, u3, v3, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
 /* Three vertices each carry UV and color plus a shared Z value. */
-void func_0032FBF0(s32 address, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
+void sdfWriteGouraudTexturedTrianglePacket(s32 address, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
                    s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2,
                    s32 u2, s32 v2, s32 color2, s32 depth) {
     u64 *packet = (u64 *)address;
@@ -1352,7 +1386,7 @@ void func_0032FBF0(s32 address, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s
     packet[11] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-void func_0032FD30(s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
+void sdfQueueGouraudTexturedTriangle(s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
                    s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
                    s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 depth,
                    s32 (*alloc)(s32)) {
@@ -1363,12 +1397,12 @@ void func_0032FD30(s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
     packet = (SdfPacket *)alloc(0x70);
     packet->unk0 = 0x20000006;
     packet->unk8 = (((u64)0x50000006 << 16) | 0x1000) << 16;
-    func_0032FBF0((s32)&packet->unk10, primitive, x0, y0, u0, v0, color0, x1, y1, u1, v1, color1, x2, y2, u2, v2, color2, depth);
+    sdfWriteGouraudTexturedTrianglePacket((s32)&packet->unk10, primitive, x0, y0, u0, v0, color0, x1, y1, u1, v1, color1, x2, y2, u2, v2, color2, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
 /* Pack four vertices with individual UV and color and a common depth. */
-void func_0032FEB8(s32 address, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
+void sdfWriteGouraudTexturedQuadPacket(s32 address, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
                    s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2, s32 u2,
                    s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3, s32 depth) {
     u64 *packet = (u64 *)address;
@@ -1391,7 +1425,7 @@ void func_0032FEB8(s32 address, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s
     packet[14] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-void func_00330068(s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
+void sdfQueueGouraudTexturedQuad(s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
                    s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
                    s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 x3, s32 y3,
                    s32 u3, s32 v3, s32 color3, s32 depth, s32 (*alloc)(s32)) {
@@ -1402,7 +1436,7 @@ void func_00330068(s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
     packet = (SdfPacket *)alloc(0x90);
     packet->unk0 = 0x20000008;
     packet->unk8 = (((u64)0x50000008 << 16) | 0x1000) << 16;
-    func_0032FEB8((s32)&packet->unk10, primitive, x0, y0, u0, v0, color0, x1, y1, u1, v1, color1, x2, y2, u2, v2, color2, x3, y3, u3, v3, color3, depth);
+    sdfWriteGouraudTexturedQuadPacket((s32)&packet->unk10, primitive, x0, y0, u0, v0, color0, x1, y1, u1, v1, color1, x2, y2, u2, v2, color2, x3, y3, u3, v3, color3, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
@@ -1547,7 +1581,7 @@ typedef struct SdfDevSlot {
 } SdfDevSlot;
 
 /* Allocate a dev slot and seed its unit matrix, unit scale and colour. */
-SdfDevSlot *func_00330870(void) {
+SdfDevSlot *sdfCreateBufferedTransformSlot(void) {
     SdfDevSlot *slot;
 
     slot = sdfAllocAndClearQuadwords(0x9C);
@@ -1591,7 +1625,7 @@ void sdfReleaseDevSlot(SdfDevSlot *slot, s32 recycle, s32 release) {
     }
 }
 
-void func_00330A00(u32 *handle) {
+void sdfResizeBufferedSlotRequest(u32 *handle) {
     sdfDevResizeBufferedRequest(*handle);
 }
 

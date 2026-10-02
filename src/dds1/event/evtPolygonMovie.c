@@ -29,9 +29,9 @@ typedef struct PolyMovieObject {
 
 /* Polygon-movie event parameter blocks blended by the functions below.
  * Each field is named for how the blend functions use it:
- *   lerpN  -> func_00232FB0, the float lerp
- *   valueN -> func_00233020, the u32 lerp
- *   v, m   -> func_00232FE0, the s32 lerp over a 2-vector and a 2x2 matrix
+ *   lerpN  -> evtMovieInterpolateFloatIfEnabled, the float lerp
+ *   valueN -> evtMovieInterpolateUintIfEnabled, the u32 lerp
+ *   v, m   -> evtMovieInterpolateIntIfEnabled, the s32 lerp over a 2-vector and a 2x2 matrix
  *   flagWord is copied from the source record and never blended. */
 typedef struct EvtBlendA {
     u32 color;    /* 0x00 */
@@ -197,7 +197,7 @@ typedef struct PolyMovieWork {
     s32 *buffer;       /* 0x118 */
 } PolyMovieWork;
 
-extern ObjectFlagsTarget *func_001130F0(PolyMovieObject *obj);
+extern ObjectFlagsTarget *effObjGetTransitionWork(PolyMovieObject *obj);
 extern void dds3SetObjectFlags(PolyMovieObject *obj, s32 flags);
 extern void dds3ClearObjectFlags(PolyMovieObject *obj, s32 flags);
 extern void evtScaleValueByMultiplier(PolyMovieClip *clip, f32 multiplier);
@@ -242,7 +242,7 @@ s32 evtPolygonMovieTestFlag(void)
     return set;
 }
 
-f32 func_00232FB0(s32 enable, f32 t, f32 a, f32 b)
+f32 evtMovieInterpolateFloatIfEnabled(s32 enable, f32 t, f32 a, f32 b)
 {
     if (enable) {
         return a * (1.0f - t) + b * t;
@@ -250,7 +250,7 @@ f32 func_00232FB0(s32 enable, f32 t, f32 a, f32 b)
     return a;
 }
 
-s32 func_00232FE0(s32 enable, f32 t, s32 a, s32 b)
+s32 evtMovieInterpolateIntIfEnabled(s32 enable, f32 t, s32 a, s32 b)
 {
     s32 result = a;
 
@@ -260,7 +260,7 @@ s32 func_00232FE0(s32 enable, f32 t, s32 a, s32 b)
     return result;
 }
 
-u32 func_00233020(s32 enable, f32 t, u32 a, u32 b)
+u32 evtMovieInterpolateUintIfEnabled(s32 enable, f32 t, u32 a, u32 b)
 {
     if (enable) {
         return (u32)((f32)a * (1.0f - t) + (f32)b * t);
@@ -361,14 +361,14 @@ void evtBlendParamsA(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *o
     }
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
     out->flagWord = a->flagWord;
-    out->lerp0 = func_00232FB0(enable, t, a->lerp0, b->lerp0);
-    out->lerp1 = func_00232FB0(enable, t, a->lerp1, b->lerp1);
+    out->lerp0 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp0, b->lerp0);
+    out->lerp1 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp1, b->lerp1);
     for (i = 0; i < 2; i++) {
-        out->v[i] = func_00232FE0(enable, t, a->v[i], b->v[i]);
+        out->v[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->v[i], b->v[i]);
     }
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            out->m[i][j] = func_00232FE0(enable, t, a->m[i][j], b->m[i][j]);
+            out->m[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->m[i][j], b->m[i][j]);
         }
     }
 }
@@ -387,17 +387,17 @@ void evtBlendParamsB(s32 enable, f32 t, EvtBlendB *a, EvtBlendB *b, EvtBlendB *o
     if (b == NULL) {
         b = &D_003685C0;
     }
-    out->value0 = func_00233020(enable, t, a->value0, b->value0);
+    out->value0 = evtMovieInterpolateUintIfEnabled(enable, t, a->value0, b->value0);
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
     out->flagWord = a->flagWord;
-    out->lerp0 = func_00232FB0(enable, t, a->lerp0, b->lerp0);
-    out->lerp1 = func_00232FB0(enable, t, a->lerp1, b->lerp1);
+    out->lerp0 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp0, b->lerp0);
+    out->lerp1 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp1, b->lerp1);
     for (i = 0; i < 2; i++) {
-        out->v[i] = func_00232FE0(enable, t, a->v[i], b->v[i]);
+        out->v[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->v[i], b->v[i]);
     }
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            out->m[i][j] = func_00232FE0(enable, t, a->m[i][j], b->m[i][j]);
+            out->m[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->m[i][j], b->m[i][j]);
         }
     }
 }
@@ -418,7 +418,7 @@ void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, EvtBlendG *a, EvtBlendG 
     }
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            out->m[i][j] = func_00232FE0(enable, t, a->m[i][j], b->m[i][j]);
+            out->m[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->m[i][j], b->m[i][j]);
         }
     }
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
@@ -438,9 +438,9 @@ void evtBlendParamsD(s32 enable, f32 t, EvtBlendD *a, EvtBlendD *b, EvtBlendD *o
     if (b == NULL) {
         b = &D_00368610;
     }
-    out->value0 = func_00233020(enable, t, a->value0, b->value0);
+    out->value0 = evtMovieInterpolateUintIfEnabled(enable, t, a->value0, b->value0);
     for (i = 0; i < 2; i++) {
-        out->v[i] = func_00232FE0(enable, t, a->v[i], b->v[i]);
+        out->v[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->v[i], b->v[i]);
     }
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
     out->flagWord = a->flagWord;
@@ -459,18 +459,18 @@ void evtBlendParamsE(s32 enable, f32 t, EvtBlendE *a, EvtBlendE *b, EvtBlendE *o
     if (b == NULL) {
         b = &D_00368640;
     }
-    out->value0 = func_00233020(enable, t, a->value0, b->value0);
-    out->value1 = func_00233020(enable, t, a->value1, b->value1);
-    out->lerp0 = func_00232FB0(enable, t, a->lerp0, b->lerp0);
+    out->value0 = evtMovieInterpolateUintIfEnabled(enable, t, a->value0, b->value0);
+    out->value1 = evtMovieInterpolateUintIfEnabled(enable, t, a->value1, b->value1);
+    out->lerp0 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp0, b->lerp0);
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
     out->flagWord = a->flagWord;
-    out->lerp1 = func_00232FB0(enable, t, a->lerp1, b->lerp1);
-    out->lerp2 = func_00232FB0(enable, t, a->lerp2, b->lerp2);
-    out->value2 = func_00233020(enable, t, a->value2, b->value2);
+    out->lerp1 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp1, b->lerp1);
+    out->lerp2 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp2, b->lerp2);
+    out->value2 = evtMovieInterpolateUintIfEnabled(enable, t, a->value2, b->value2);
     for (i = 0; i < 2; i++) {
-        out->v[i] = func_00232FE0(enable, t, a->v[i], b->v[i]);
+        out->v[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->v[i], b->v[i]);
     }
-    out->value3 = func_00233020(enable, t, a->value3, b->value3);
+    out->value3 = evtMovieInterpolateUintIfEnabled(enable, t, a->value3, b->value3);
 }
 
 void evtBlendParamsF(s32 enable, f32 t, EvtBlendF *a, EvtBlendF *b, EvtBlendF *out)
@@ -486,18 +486,18 @@ void evtBlendParamsF(s32 enable, f32 t, EvtBlendF *a, EvtBlendF *b, EvtBlendF *o
     if (b == NULL) {
         b = &D_00368670;
     }
-    out->value0 = func_00233020(enable, t, a->value0, b->value0);
-    out->lerp0 = func_00232FB0(enable, t, a->lerp0, b->lerp0);
-    out->lerp1 = func_00232FB0(enable, t, a->lerp1, b->lerp1);
+    out->value0 = evtMovieInterpolateUintIfEnabled(enable, t, a->value0, b->value0);
+    out->lerp0 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp0, b->lerp0);
+    out->lerp1 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp1, b->lerp1);
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
     out->flagWord = a->flagWord;
-    out->lerp2 = func_00232FB0(enable, t, a->lerp2, b->lerp2);
-    out->lerp3 = func_00232FB0(enable, t, a->lerp3, b->lerp3);
-    out->lerp4 = func_00232FB0(enable, t, a->lerp4, b->lerp4);
+    out->lerp2 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp2, b->lerp2);
+    out->lerp3 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp3, b->lerp3);
+    out->lerp4 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp4, b->lerp4);
     for (i = 0; i < 2; i++) {
-        out->v[i] = func_00232FE0(enable, t, a->v[i], b->v[i]);
+        out->v[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->v[i], b->v[i]);
     }
-    out->value1 = func_00233020(enable, t, a->value1, b->value1);
+    out->value1 = evtMovieInterpolateUintIfEnabled(enable, t, a->value1, b->value1);
 }
 
 void evtBlendParamsG(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *out)
@@ -516,14 +516,14 @@ void evtBlendParamsG(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *o
     }
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
     out->flagWord = a->flagWord;
-    out->lerp0 = func_00232FB0(enable, t, a->lerp0, b->lerp0);
-    out->lerp1 = func_00232FB0(enable, t, a->lerp1, b->lerp1);
+    out->lerp0 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp0, b->lerp0);
+    out->lerp1 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp1, b->lerp1);
     for (i = 0; i < 2; i++) {
-        out->v[i] = func_00232FE0(enable, t, a->v[i], b->v[i]);
+        out->v[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->v[i], b->v[i]);
     }
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            out->m[i][j] = func_00232FE0(enable, t, a->m[i][j], b->m[i][j]);
+            out->m[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->m[i][j], b->m[i][j]);
         }
     }
 }
@@ -535,15 +535,15 @@ void evtBlendParamsH(s32 enable, f32 t, EvtBlendH *a, EvtBlendH *b, EvtBlendH *o
     if (enable == 0) {
         t = 0.0f;
     }
-    out->x = func_00232FE0(enable, t, a->x, b->x);
-    out->w[0] = func_00232FE0(enable, t, a->w[0], b->w[0]);
-    out->w[1] = func_00232FE0(enable, t, a->w[1], b->w[1]);
-    out->w[2] = func_00232FE0(enable, t, a->w[2], b->w[2]);
-    out->w[3] = func_00232FE0(enable, t, a->w[3], b->w[3]);
+    out->x = evtMovieInterpolateIntIfEnabled(enable, t, a->x, b->x);
+    out->w[0] = evtMovieInterpolateIntIfEnabled(enable, t, a->w[0], b->w[0]);
+    out->w[1] = evtMovieInterpolateIntIfEnabled(enable, t, a->w[1], b->w[1]);
+    out->w[2] = evtMovieInterpolateIntIfEnabled(enable, t, a->w[2], b->w[2]);
+    out->w[3] = evtMovieInterpolateIntIfEnabled(enable, t, a->w[3], b->w[3]);
     out->flagWord = a->flagWord;
     for (i = 0; i < 3; i++) {
-        out->y[i] = func_00232FE0(enable, t, a->y[i], b->y[i]);
-        out->z[i] = func_00232FE0(enable, t, a->z[i], b->z[i]);
+        out->y[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->y[i], b->y[i]);
+        out->z[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->z[i], b->z[i]);
     }
 }
 
@@ -551,10 +551,10 @@ void evtPolygonMovieSetObjectMode(PolyMovieObject *obj, u32 mode, s32 setFlags, 
 {
     switch (mode) {
     case 0:
-        *func_001130F0(obj)->flags &= ~1;
+        *effObjGetTransitionWork(obj)->flags &= ~1;
         break;
     case 1:
-        *func_001130F0(obj)->flags |= 1;
+        *effObjGetTransitionWork(obj)->flags |= 1;
         break;
     case 2:
         dds3ClearObjectFlags(obj, 0x400);

@@ -519,15 +519,15 @@ void effInitCh76Id(void) {
     effStaggeredBlurWork->sourceHandle = effGetResourceFirstWord(3);
 }
 
-void func_0018F650(void) {
+void effEnableFramebufferQuad(void) {
     D_003BB073 = 1;
 }
 
-void func_0018F660(void) {
+void effDisableFramebufferQuad(void) {
     D_003BB073 = 0;
 }
 
-void func_0018F668(void *src) {
+void effCopyFramebufferQuadParameters(void *src) {
     memcpy(&D_00355908, src, 0x28);
 }
 
@@ -667,7 +667,7 @@ void func_0018F9C0(void *src) {
 extern ChState D_00355C30;
 extern s8 D_003BB0CD;
 
-s32 func_0018FA20(void) {
+s32 effEventAdvanceBlurTemplateSetup(void) {
     u8 ready = D_003BB0CD;
 
     if (D_003BB0CD == 0) {
@@ -707,7 +707,7 @@ void effEventSetBlurTemplateParameters(EffBlurTemplateBody *src) {
 extern ChState D_00355E08;
 extern s8 D_003BB0FF;
 
-s32 func_0018FB50(void) {
+s32 effEventAdvanceScatterBlurSetup(void) {
     u8 ready = D_003BB0FF;
 
     if (D_003BB0FF == 0) {
@@ -787,7 +787,7 @@ void func_0018FD48(void *src) {
 extern ChState D_00356048;
 extern s8 D_003BB127;
 
-s32 func_0018FDA8(void) {
+s32 effEventAdvanceSolidRectangleSetup(void) {
     u8 ready = D_003BB127;
 
     if (D_003BB127 == 0) {
@@ -820,7 +820,7 @@ EffSolidRectParams *effGetLoadDescE(void) {
     return &D_00355F88;
 }
 
-void func_0018FE70(EffSolidRectParams *src) {
+void effEventSetSolidRectangleParameters(EffSolidRectParams *src) {
     D_00355F88 = *src;
 }
 
@@ -860,7 +860,7 @@ EffTemplateBody *effGetLoadDescF(void) {
     return &D_00356088;
 }
 
-void func_0018FF78(EffTemplateBody *src) {
+void effEventSetResourceTemplateParameters(EffTemplateBody *src) {
     D_00356088 = *src;
 }
 

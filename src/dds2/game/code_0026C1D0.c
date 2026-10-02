@@ -503,7 +503,7 @@ extern u32 ptyGetProfileRecordCap(u16 scriptId);
 extern u32 ptyGetProfileRecordValue(u32 work, u16 scriptId);
 
 /* 1 when some active party member other than unit `skipId` has `scriptId` at its profile record cap. */
-s32 func_0026D4C8(u16 scriptId, u16 skipId) {
+s32 ptyAnyActivePartyMemberAtProfileCap(u16 scriptId, u16 skipId) {
     s32 i;
 
     for (i = 0; i < 5; i++) {

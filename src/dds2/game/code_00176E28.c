@@ -119,7 +119,7 @@ extern u8 *effAllocateIdentityMatrixWork(u32);
 extern s32 effMiscRand(void *);
 
 extern u8 D_003AA868[];
-extern s32 func_001784B0(EffRecordPool *pool, s32 index);
+extern s32 effGetExtendedGroupElement(EffRecordPool *pool, s32 index);
 extern f32 D_003B12B0[];
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
@@ -216,7 +216,7 @@ void effFlashWriteRingColorSlots(u8 *work, s32 index, s32 param) {
     s32 rgb1;
     s32 rgb2;
 
-    slot = (EffRingColorSlot *)func_001784C8(((EffectRing *)work)->matrix, index);
+    slot = (EffRingColorSlot *)effGetExtendedGroupAuxEntry(((EffectRing *)work)->matrix, index);
     rgb1 = ((EffectRing *)work)->firstColor & 0xFFFFFF;
     rgb2 = ((EffectRing *)work)->secondColor & 0xFFFFFF;
     slot->colors[0] = effMultiplyPackedColors(rgb2, param);
@@ -253,7 +253,7 @@ typedef struct {
 /* vu0 routine: billboard corner offsets for an arc particle */
 void effBuildOrbitingArcQuadPoints(EffectArcQuadWork *work, s32 index) {
     EffectArcQuadPart *part = &work->parts[index];
-    f32 *quad = (f32 *)func_001784B0(work->resourceHandle, index);
+    f32 *quad = (f32 *)effGetExtendedGroupElement(work->resourceHandle, index);
     f32 offset[4];
     f32 unit[4];
     f32 scaleA[4];
@@ -532,7 +532,7 @@ EffRecordPool *effRecordPoolCreate(s32 groups) {
     return pool;
 }
 
-void func_00177FA8(EffRecordPool *pool) {
+void effReleaseRecordGroupResources(EffRecordPool *pool) {
     sdfQueueAssetRelease(pool->resource);
     sdfReleaseResourceAllocation(pool->buffer);
 }
@@ -578,11 +578,11 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
     surface->submit(surface, packet);
 }
 
-s32 func_00178190(EffRecordPool *pool, s32 index) {
+s32 effGetRecordGroupElement(EffRecordPool *pool, s32 index) {
     return pool->recordBase + index * 0x40;
 }
 
-s32 func_001781A0(EffRecordPool *pool, s32 index) {
+s32 effGetRecordGroupAuxEntry(EffRecordPool *pool, s32 index) {
     return pool->auxRecordBase + index * 0x10;
 }
 
@@ -661,11 +661,11 @@ void func_00178210(EffRecordPool *work)
     }
 }
 
-s32 func_001784B0(EffRecordPool *pool, s32 index) {
+s32 effGetExtendedGroupElement(EffRecordPool *pool, s32 index) {
     return pool->recordBase + index * 0x50;
 }
 
-s32 func_001784C8(EffRecordPool *pool, s32 index) {
+s32 effGetExtendedGroupAuxEntry(EffRecordPool *pool, s32 index) {
     return pool->auxRecordBase + index * 0x14;
 }
 

@@ -124,7 +124,7 @@ s32 func_00119300(DatUnitStatus *unit, s32 statIndex) {
 }
 
 /* Units with the 0x1000 status bypass the normal stat eligibility test. */
-s32 func_00119368(DatUnitStatus *unit, s32 statIndex) {
+s32 datGetStatWithStatusOverride(DatUnitStatus *unit, s32 statIndex) {
     if ((unit->status & 0x7FFF) == 0x1000) {
         return 1;
     }

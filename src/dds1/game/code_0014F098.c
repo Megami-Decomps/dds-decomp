@@ -171,7 +171,7 @@ s32 fldCommandStartTitle(void) {
     return 1;
 }
 
-s32 func_0014F3E0(void) {
+s32 fldCmdSetDefaultEncounterId(void) {
     s32 value;
 
     value = scrReadIntParameter(0);

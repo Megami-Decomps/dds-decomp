@@ -25,7 +25,7 @@ void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 dds3GetWorldObject(void);
 void dds3SetWorldCameraObject(s32 arg0, u32 arg1);
 f32 dds3GetCameraFieldOfView(s32 arg0);
-s32 func_00106488(f32 arg0);
+s32 kwlnSetCameraFieldOfViewTarget(f32 arg0);
 void mnuStopMovieDrawTask(void);
 void func_00270068(void);
 
@@ -84,7 +84,7 @@ typedef struct EventViewerState {
     u8 pad23C8[0x28];
     s32 glyphTickCount; /* 0x23F0 */
     u8 pad23F4[0x1C];
-    u32 glyph; /* 0x2410: FrFontGlyph passed to func_00195868 */
+    u32 glyph; /* 0x2410: FrFontGlyph passed to frFontDrawGlyphInDefaultMode */
     s32 timedActive; /* 0x2414: gated time interval */
     s32 timedStart;  /* 0x2418 */
     s32 timedEnd;    /* 0x241C: negative is an open endpoint */
@@ -193,7 +193,7 @@ void evtViewerApplySelectedEntry(EventViewerState *viewer) {
         return;
     }
     dds3SetWorldCameraObject(dds3GetWorldObject(), entry);
-    func_00106488(dds3GetCameraFieldOfView(entry));
+    kwlnSetCameraFieldOfViewTarget(dds3GetCameraFieldOfView(entry));
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CED0);
@@ -379,7 +379,7 @@ void evtViewerAdvanceGlyphTick(EventViewerState *viewer) {
 
     if ((viewer->glyphAdvancePosition < viewer->glyphAdvanceLimit - 3) && (0 < viewer->glyphTickCount))
     {
-        func_00195868(viewer->glyph);
+        frFontDrawGlyphInDefaultMode(viewer->glyph);
         nextTick = viewer->glyphTickCount + 1;
         viewer->glyphTickCount = nextTick;
         if (0x1d < nextTick) {

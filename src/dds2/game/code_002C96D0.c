@@ -2536,18 +2536,18 @@ void fileRestoreSlotFlagsToState(void) {
     ((FileSaveState *)datGameState)->slotFlags = fileSavedSlotFlags;
 }
 
-extern void func_00103F58(s32, u8, s32);
+extern void kwlnPadStartMotor(s32, u8, s32);
 
 s32 fileToggleSlotFlagsBit(u32 kind, s32 *flags) {
     switch (kind) {
     case 0:
         *flags ^= 2;
         if (fileTestSlotFlagsBit(kind, flags) != 0) {
-            func_00103F58(0, 1, 0xF);
-            func_00103F58(1, 0x80, 0xF);
+            kwlnPadStartMotor(0, 1, 0xF);
+            kwlnPadStartMotor(1, 0x80, 0xF);
         } else {
-            func_00103F58(0, 0, 0xF);
-            func_00103F58(1, 0, 0xF);
+            kwlnPadStartMotor(0, 0, 0xF);
+            kwlnPadStartMotor(1, 0, 0xF);
         }
         return 1;
     case 1:

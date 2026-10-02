@@ -266,7 +266,7 @@ extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
 
 /* Jitter control points perpendicular to the path and camera viewing direction. */
-void func_0018A838(EffMagatuhiWideSecond *work, s32 index) {
+void effMagatuhiBuildBezierControlPointsVU(EffMagatuhiWideSecond *work, s32 index) {
     f32 scale[4];
     f32 lastNormal[4];
     f32 viewDirection[4];
@@ -391,7 +391,7 @@ void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiCallback *arg) {
     EffMagatuhiSlot *slot;
 
     for (i = 0; i < count; i += 4) {
-        func_0018A838(work, i);
+        effMagatuhiBuildBezierControlPointsVU(work, i);
         *delays = effMiscRand(D_0034DF38) % life;
         slot = effMathGetSlotAt(work->mathResource, i);
         if (duration < *delays) {

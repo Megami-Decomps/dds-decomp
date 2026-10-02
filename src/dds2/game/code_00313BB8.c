@@ -602,7 +602,7 @@ s32 func_00315388(u16 profile, PrfSkillList *output) {
     return list.count;
 }
 
-s32 func_003154A0(ScriptFlagWork *unit, u32 profile, PrfSkillList *output, s32 includeFlagged) {
+s32 prfBuildSkillList(ScriptFlagWork *unit, u32 profile, PrfSkillList *output, s32 includeFlagged) {
     PrfSkillList list;
     u32 i;
     u16 *skills;
@@ -642,7 +642,7 @@ s32 a;
 s32 b;
 s32 c;
 {
-    func_003154A0((ScriptFlagWork *)a, b, (PrfSkillList *)c, 0);
+    prfBuildSkillList((ScriptFlagWork *)a, b, (PrfSkillList *)c, 0);
 }
 
 /* The +8 threshold is compared with counts or a global counter. */
@@ -789,7 +789,7 @@ u32 scrGetEntryState(u16 index) {
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00316020);
 
 /* Index of the first active table entry whose requirements are met and whose flag is not yet set; -1 when there is none. Only entry 0 is ever visited: the loop bound is one. */
-s32 func_00316118(u32 start) {
+s32 sdfFindUnmetRequirementIndex(u32 start) {
     u32 i;
 
     for (i = start; i < 1; i++) {
@@ -830,7 +830,7 @@ void sdfSetAllFlagsFromTable(void) {
     s32 index = 0;
 
     do {
-        index = func_00316118(index);
+        index = sdfFindUnmetRequirementIndex(index);
         if (index >= 0) {
             s32 flag = prfReq18GetWord3234(index);
             if (flag != 0) {

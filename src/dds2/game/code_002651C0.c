@@ -25,7 +25,7 @@ extern void func_00260020();
 extern s32 mnuCampHasEligibleOwnedItems();
 extern void mnuAdvanceListCursorDefault();
 extern void func_0025FC08();
-extern s32 func_0026BC80();
+extern s32 mnuFirstPresentMainCharacterIndex();
 extern void evtCreateEventScriptProcess();
 extern void kwlnFadeOutStart();
 extern void evtClearActiveFlag();
@@ -155,7 +155,7 @@ s32 evtStartFadeByState(void) {
     func_0025FC08(context);
     switch (((EvtMenuContext *)context)->mode) {
     case 2:
-        if (mdlFlagTest(0x42a) == 0 && func_0026BC80() == 0) {
+        if (mdlFlagTest(0x42a) == 0 && mnuFirstPresentMainCharacterIndex() == 0) {
             evtCreateEventScriptProcess(0x323);
         } else {
             kwlnFadeOutStart(0, 0, 0, 0xf);

@@ -44,7 +44,7 @@ extern u32 kwlnTaskGetTimer(void);
 
 extern s32 effMiscRandMod(s32, s32);
 
-extern void func_00103F58(u32, u8, s32);
+extern void kwlnPadStartMotor(u32, u8, s32);
 
 extern void *sdfAllocPacketAligned(s32);
 
@@ -338,8 +338,8 @@ void kwlnDrawSpriteCellZ(void *list, s32 col, s32 row, s32 cols, s32 rows, s32 z
 
 s32 kwlnDebugPulseColors(void) {
     if (kwlnTaskGetTimer() % 0x4650 == 0) {
-        func_00103F58(0, 1, 0xF);
-        func_00103F58(1, (u8)(effMiscRandMod(0, 150) + 100), 30);
+        kwlnPadStartMotor(0, 1, 0xF);
+        kwlnPadStartMotor(1, (u8)(effMiscRandMod(0, 150) + 100), 30);
     }
     return 0;
 }
@@ -375,7 +375,7 @@ extern void sdfPadSetSmallMotor(s32 padIndex, u16 strength);
 extern void sdfPadSetLargeMotor(s32 padIndex, u8 strength);
 
 /* Start rumble on pad motor 0 (small, on/off) or 1 (large, stepped toward the target) with `level` for `duration`. */
-void func_00103F58(u32 motor, u8 level, s32 duration) {
+void kwlnPadStartMotor(u32 motor, u8 level, s32 duration) {
     if (fileTestSavedSlotFlags(0) == 0) {
         return;
     }
@@ -996,7 +996,7 @@ void kwlnStepBackgroundFade(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00106288);
 
-void func_001063A8(f32 value) {
+void kwlnSetCameraFieldOfViewTarget(f32 value) {
     D_0037F5EC[0] = value;
 }
 

@@ -239,7 +239,7 @@ void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     entry->draw(entry, context);
 }
 
-void func_002C0858(u8 value, u32 kind) {
+void itfSetPrimaryFramebufferAlphaFlag(u8 value, u32 kind) {
     itfGridDrawBooleanDescriptor(value, 0, kind);
 }
 

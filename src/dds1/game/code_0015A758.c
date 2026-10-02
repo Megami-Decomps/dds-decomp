@@ -235,7 +235,33 @@ s32 parObjGetMode(ParObj *object) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A7E0);
+typedef struct ParKindResource {
+    s32 type;
+    s32 offset;
+    u8 pad08[8];
+} ParKindResource;
+
+typedef struct BillObj BillObj;
+extern BillObj *billCreateIndexed(s32, u32);
+
+ParObj *func_0015A7E0(s32 kind, ParKindResource *resource) {
+    ParObj *object = (ParObj *)((u8 *)resource + resource->offset + 0x10);
+    s32 billboard;
+
+    if (resource->type != 3 || resource->offset != 0) {
+        object->unk28 = -1;
+        object = parKindConstructorEntries[kind].func(object);
+        billboard = (s32)billCreateIndexed(resource->type, (u32)(resource + 1));
+        billSetChildScaleComponents(billboard, object->scaleX, object->scaleY);
+        billSetBillboardMode(billboard, object->billboardMode);
+        billMarkKindOneFlag(billboard);
+        object->billId = billboard;
+    } else {
+        object = parKindConstructorEntries[kind].func(object);
+    }
+    object->dispatchIndex = kind;
+    return object;
+}
 
 ParObj *parInstantiateKind(ParObj *source) {
     ParObj *particle = parKindConstructorEntries[source->dispatchIndex].func();

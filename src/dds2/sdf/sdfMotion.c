@@ -587,7 +587,7 @@ void sdfMotionBlendVectorKeys(SdfMotionKeyInterval *a0) {
 }
 
 /* vu0 routine: blend the two bracketing RGBA colour keys by the key weight. */
-s32 func_00334808(SdfMotionKeyInterval *a0) {
+s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *a0) {
     s32 color;
 
     EE_MMI_RGBA_LERP(color, *(u32 *)a0->firstKey, *(u32 *)a0->secondKey, a0->weight, 0.5f);
@@ -823,7 +823,7 @@ extern void func_00333288();
 void func_003352C8(u8 *motion, f32 t1) {
     u8 buffer[16];
     sdfFindMotionKeyInterval(motion, buffer, t1);
-    func_00333288(*(s32 *)(motion + 0xC), func_00334808(buffer));
+    func_00333288(*(s32 *)(motion + 0xC), sdfMotionInterpolateKeyColor(buffer));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -833,7 +833,7 @@ void func_00335308(SdfMotionBinding *binding, f32 t, f32 weight) {
     s32 color;
 
     sdfFindMotionKeyInterval(binding, &b, t);
-    key = func_00334808(&b);
+    key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, binding->current.word, key, weight, 0.5f);
     func_00333288(binding->track, color);
 }
@@ -855,7 +855,7 @@ extern void func_00333270();
 void func_00335428(u8 *motion, f32 t1) {
     u8 buffer[16];
     sdfFindMotionKeyInterval(motion, buffer, t1);
-    func_00333270(*(s32 *)(motion + 0xC), func_00334808(buffer));
+    func_00333270(*(s32 *)(motion + 0xC), sdfMotionInterpolateKeyColor(buffer));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -865,7 +865,7 @@ void func_00335468(SdfMotionBinding *binding, f32 t, f32 weight) {
     s32 color;
 
     sdfFindMotionKeyInterval(binding, &b, t);
-    key = func_00334808(&b);
+    key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, binding->current.word, key, weight, 0.5f);
     func_00333270(binding->track, color);
 }
@@ -887,7 +887,7 @@ extern void func_003332A0();
 void func_00335588(u8 *motion, f32 t1) {
     u8 buffer[16];
     sdfFindMotionKeyInterval(motion, buffer, t1);
-    func_003332A0(*(s32 *)(motion + 0xC), func_00334808(buffer));
+    func_003332A0(*(s32 *)(motion + 0xC), sdfMotionInterpolateKeyColor(buffer));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -897,7 +897,7 @@ void func_003355C8(SdfMotionBinding *binding, f32 t, f32 weight) {
     s32 color;
 
     sdfFindMotionKeyInterval(binding, &b, t);
-    key = func_00334808(&b);
+    key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, binding->current.word, key, weight, 0.5f);
     func_003332A0(binding->track, color);
 }
@@ -919,7 +919,7 @@ extern void func_003332B8();
 void func_003356E8(u8 *motion, f32 t1) {
     u8 buffer[16];
     sdfFindMotionKeyInterval(motion, buffer, t1);
-    func_003332B8(*(s32 *)(motion + 0xC), func_00334808(buffer));
+    func_003332B8(*(s32 *)(motion + 0xC), sdfMotionInterpolateKeyColor(buffer));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -929,7 +929,7 @@ void func_00335728(SdfMotionBinding *binding, f32 t, f32 weight) {
     s32 color;
 
     sdfFindMotionKeyInterval(binding, &b, t);
-    key = func_00334808(&b);
+    key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, binding->current.word, key, weight, 0.5f);
     func_003332B8(binding->track, color);
 }
@@ -1053,7 +1053,7 @@ extern void func_00333460();
 void sdfMotionApplyInterpolatedKey(u8 *motion, f32 t1) {
     u8 buffer[16];
     sdfFindMotionKeyInterval(motion, buffer, t1);
-    func_00333460(*(s32 *)(motion + 0xC), func_00334808(buffer));
+    func_00333460(*(s32 *)(motion + 0xC), sdfMotionInterpolateKeyColor(buffer));
 }
 
 /* vu0 routine: blend the captured output colour toward the keyed colour by weight. */
@@ -1063,7 +1063,7 @@ void func_00335C80(SdfMotionOutput *output, f32 t, f32 weight) {
     s32 color;
 
     sdfFindMotionKeyInterval(output, &b, t);
-    key = func_00334808(&b);
+    key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, output->capturedValue, key, weight, 0.5f);
     func_00333460(output->target, color);
 }

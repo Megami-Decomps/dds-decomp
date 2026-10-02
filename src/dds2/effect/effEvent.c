@@ -540,15 +540,15 @@ void effInitCh76Id(void) {
     effStaggeredBlurWork->sourceHandle = effGetResourceFirstWord(3);
 }
 
-void func_00197288(void) {
+void effEnableFramebufferQuad(void) {
     D_00436463 = 1;
 }
 
-void func_00197298(void) {
+void effDisableFramebufferQuad(void) {
     D_00436463 = 0;
 }
 
-void func_001972A0(void *src) {
+void effCopyFramebufferQuadParameters(void *src) {
     memcpy(&D_003B2238, src, 0x28);
 }
 
@@ -681,7 +681,7 @@ void func_001975F8(void *src) {
 extern EffLoader D_003B2560;
 extern s8 D_004364BD;
 
-s8 func_00197658(void) {
+s8 effEventAdvanceBlurTemplateSetup(void) {
     if (D_004364BD == 0) {
         if (D_003B2560.load != 0) {
             *D_003B2560.result = D_003B2560.load(&D_003B2428);
@@ -714,7 +714,7 @@ void effEventSetBlurTemplateParameters(EffBlurTemplateBody *src) {
 extern EffLoader D_003B2738;
 extern s8 D_004364EF;
 
-s8 func_00197788(void) {
+s8 effEventAdvanceScatterBlurSetup(void) {
     if (D_004364EF == 0) {
         if (D_003B2738.load != 0) {
             *D_003B2738.result = D_003B2738.load(&D_003B25A0);
@@ -780,7 +780,7 @@ void func_00197980(void *src) {
 extern EffLoader D_003B2978;
 extern s8 D_00436517;
 
-s8 func_001979E0(void) {
+s8 effEventAdvanceSolidRectangleSetup(void) {
     if (D_00436517 == 0) {
         if (D_003B2978.load != 0) {
             *D_003B2978.result = D_003B2978.load(D_003B2978.source);
@@ -806,7 +806,7 @@ EffSolidRectParams *effGetLoadDescE(void) {
     return &D_003B28B8;
 }
 
-void func_00197AA8(EffSolidRectParams *src) {
+void effEventSetSolidRectangleParameters(EffSolidRectParams *src) {
     D_003B28B8 = *src;
 }
 
@@ -839,7 +839,7 @@ EffTemplateBody *effGetLoadDescF(void) {
     return &D_003B29B8;
 }
 
-void func_00197BB0(EffTemplateBody *src) {
+void effEventSetResourceTemplateParameters(EffTemplateBody *src) {
     D_003B29B8 = *src;
 }
 

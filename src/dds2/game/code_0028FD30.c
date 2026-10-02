@@ -149,13 +149,13 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290E48);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291038);
 
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004276C0);
-
 extern void scrSetEntryLowFlags(u32 context, u16 entryId, u16 lowFlags);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
 /* Write each panel slot's 0xB0 saved flag words back to its list node's script entries and log the slot number. */
-void func_00291118(MenuPanelObject *object) {
+INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004276C0);
+
+void mnuStoreMantraPanelFlagsToScript(MenuPanelObject *object) {
     MenuPanelNode *node = object->list->head;
     s32 slotIndex = 0;
 
@@ -174,7 +174,7 @@ void func_00291118(MenuPanelObject *object) {
 extern u32 scrGetEntryLowFlags(s32 arg0, u16 index);
 
 /* Read each list node's 0xB0 script entry flags into its panel slot and log the slot number. */
-void func_002911D0(MenuPanelObject *object) {
+void mnuLoadMantraPanelFlagsFromScript(MenuPanelObject *object) {
     MenuPanelNode *node = object->list->head;
     s32 slotIndex = 0;
 

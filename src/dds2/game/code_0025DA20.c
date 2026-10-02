@@ -102,7 +102,7 @@ extern void evtReleaseResourcePairHandle();
 
 extern void sdfReleaseResourceAllocation(s32);
 
-extern void func_002C1B70(s32, s32);
+extern void mnuDrawAndStepGradientFade(s32, s32);
 
 extern void func_002C1B68(s32, s32);
 
@@ -695,14 +695,14 @@ void mnuCampLinkFontGlyph(CampScene *scene) {
     scene->fontDrawHandle = 0;
 }
 
-extern void func_00329A00(s32 *);
+extern void sdfGetGeneralHeapStats(s32 *);
 
 /* Retail keeps only the divide-by-zero check (break 7) of a division whose result is never used. */
 void mnuCampCheckClockDivisor(void) {
     s32 info[8];
     s32 quotient;
 
-    func_00329A00(info);
+    sdfGetGeneralHeapStats(info);
     quotient = 1 / info[0];
 }
 
@@ -1235,7 +1235,7 @@ void mnuTerminalReleaseContextAndResources(s32 arg) {
 
 s32 mnuTerminalSyncMessageWindowControl(void) {
     s32 state = kwlnTaskGetUserValue() + 0x37C;
-    func_002C1B70(state, 0x53);
+    mnuDrawAndStepGradientFade(state, 0x53);
     if (evtGetMessageWindowControlState() != 0) {
         func_002C1B68(state, 1);
     } else {
@@ -1457,7 +1457,30 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261198);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261290);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261310);
+void func_00261310(u8 *scene) {
+    u8 *node;
+    u8 *item;
+    s32 i;
+    s32 count;
+    s32 remaining;
+
+    node = *(u8 **)(*(u8 **)(*(u8 **)(scene + 0x80) + 0x18) + 0x10);
+    for (i = 0; i < *(s32 *)(*(u8 **)(*(u8 **)(scene + 0x80) + 0x18) + 0x20); i++) {
+        item = node + 0x60;
+        count = *(s32 *)(datGameState + 0x3C) / *(s32 *)(item + 8);
+        remaining = mnuCampCountRemainingUses(*(s32 *)(item + 0xC), *(s32 *)(item + 4), (s32)scene);
+        if (remaining < count) {
+            count = remaining;
+        }
+        if (count == 0) {
+            *(s32 *)(node + 0x48) = 1;
+        }
+        node = *(u8 **)(node + 0x58);
+        if (node == NULL) {
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_002613C8);
 

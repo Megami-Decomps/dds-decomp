@@ -70,7 +70,7 @@ extern FrFontSysLocal frFontWork;
 
 extern void frFontFreeAllEntries(void);
 
-extern void *func_0019C4D0(void *arg0);
+extern void *frFontReleaseGlyphChain(void *arg0);
 
 extern u32 itfReleaseMemNodeBuffer(s32 arg0);
 
@@ -239,8 +239,8 @@ INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BEB8);
 
 void frFontReleaseAll(void) {
     frFontFreeAllEntries();
-    func_0019C4D0(frFontWork.glyphSlots[0]);
-    func_0019C4D0(frFontWork.glyphSlots[1]);
+    frFontReleaseGlyphChain(frFontWork.glyphSlots[0]);
+    frFontReleaseGlyphChain(frFontWork.glyphSlots[1]);
     itfReleaseMemNodeBuffer(frFontWork.unk150);
     itfReleaseMemNodeBuffer(frFontWork.unk154);
     fmGslReleaseActiveResourceBuffers();

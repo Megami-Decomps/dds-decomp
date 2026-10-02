@@ -169,7 +169,7 @@ void dds3LoadWorldTransformParams(WorldTransformOwner *object, WorldTransformPar
     data->scaleW = 1.0f;
 }
 
-u32 func_00116820(ObjWithWork *obj) {
+u32 dds3AllocateUnitObjectWork(ObjWithWork *obj) {
     void *work = func_002CFEB8(0x1C);
 
     obj->work = work;

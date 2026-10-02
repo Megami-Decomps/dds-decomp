@@ -430,7 +430,7 @@ s32 itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 te
 
 extern s64 func_0019F460(s64, s64, s32, s64, const void *, s32);
 
-s64 func_0019FEF8(x, y, depth, color, text, segmentIndex)
+s64 itfDrawUnderscoreTextSegment(x, y, depth, color, text, segmentIndex)
     s64 x;
     s64 y;
     s32 depth;

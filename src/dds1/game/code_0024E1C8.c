@@ -191,7 +191,7 @@ extern void *func_002CFEB8(s32);
 extern void func_00254C68();
 extern void *memset(void *, s32, u32);
 
-void func_0024F8D8(MnuResourceTask *task) {
+void mnuBuildMantraPartyList(MnuResourceTask *task) {
     u16 partyOrder[32];
     s32 i = 0;
     u16 *order;
@@ -254,7 +254,7 @@ u32 *mnuAllocateEmptyResourceListState(void) {
 
     memset(block, 0, 0x10);
     block[0] = handle;
-    func_0024F8D8((MnuResourceTask *)block);
+    mnuBuildMantraPartyList((MnuResourceTask *)block);
     block[1] = 0;
     block[2] = 0;
     return block;
@@ -303,7 +303,7 @@ extern void mnuDrawDisplaySpriteAndPanelMarks(s32, s32, s32);
 extern void func_002546D8(s32, s32);
 extern void func_00254758(s32, s32, s32, s32, s32);
 extern void func_00254778(s32, s32, s32, s32, s32);
-extern void func_002549F0(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawDisplayModeSprites(s32, s32, s32, s32, s32, s32);
 extern void func_00254B30(s32, s32, s32, s32, s32, s32);
 extern void itfDspInitSelectedWindow(s32, s32, s32, s32, s32, s32);
 extern void func_00254810(s32, s32, s32, s32, s32, s32);
@@ -336,7 +336,7 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
         func_002546D8(amount, 0x52);
         func_00254758(0, 0, 1, amount, 0x53);
         func_00254778(0, 0, 1, amount, 0x53);
-        func_002549F0(0, 0, 1, amount, (s32)work, 0x53);
+        mnuDrawDisplayModeSprites(0, 0, 1, amount, (s32)work, 0x53);
         func_00254B30(0, (s32)((1.0f - shade) * -24.0f), 1, amount, (s32)work, 0x53);
         if (ratio < 0.5f) {
             shade = 0.0f;
@@ -357,7 +357,7 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
         func_002546D8(amount, 0x52);
         func_00254758(0, 0, 1, 0x80, 0x53);
         func_00254778(0, 0, 1, amount, 0x53);
-        func_002549F0(0, 0, 1, amount, (s32)work, 0x53);
+        mnuDrawDisplayModeSprites(0, 0, 1, amount, (s32)work, 0x53);
         func_00254B30(0, (s32)((1.0f - shade) * -24.0f), 1, amount, (s32)work, 0x53);
         if (ratio < 0.5f) {
             shade = 0.0f;
@@ -380,7 +380,7 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
         func_002546D8(amount, 0x52);
         func_00254758(0, 0, 1, 0x80, 0x53);
         func_00254778(0, 0, 1, amount, 0x53);
-        func_002549F0(0, 0, 1, amount, (s32)work, 0x53);
+        mnuDrawDisplayModeSprites(0, 0, 1, amount, (s32)work, 0x53);
         func_00254B30(0, (s32)(ratio * 36.0f), 1, amount, (s32)work, 0x53);
         itfDspInitSelectedWindow(0, 0, 1, (s32)((1.0f - shade) * 128.0f), (s32)work, 0x53);
         func_00254810(0, 0, 1, amount, (s32)work, 0x53);
@@ -401,7 +401,7 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
         func_002546D8(amount, 0x52);
         func_00254758(0, 0, 1, amount, 0x53);
         func_00254778(0, 0, 1, amount, 0x53);
-        func_002549F0(0, 0, 1, amount, (s32)work, 0x53);
+        mnuDrawDisplayModeSprites(0, 0, 1, amount, (s32)work, 0x53);
         func_00254B30(0, (s32)((1.0f - ratio) * 36.0f), 1, amount, (s32)work, 0x53);
         itfDspInitSelectedWindow(0, 0, 1, (s32)(shade * 128.0f), (s32)work, 0x53);
         func_00254810(0, 0, 1, amount, (s32)work, 0x53);
@@ -411,7 +411,7 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
         func_002546D8(0x80, 0x52);
         func_00254758(0, 0, 1, 0x80, 0x53);
         func_00254778(0, 0, 1, 0x80, 0x53);
-        func_002549F0(0, 0, 1, 0x80, (s32)work, 0x53);
+        mnuDrawDisplayModeSprites(0, 0, 1, 0x80, (s32)work, 0x53);
         func_00254B30(0, 0, 1, 0x80, (s32)work, 0x53);
         itfDspInitSelectedWindow(0, 0, 1, 0x80, (s32)work, 0x53);
         func_00254810(0, 0, 1, 0x80, (s32)work, 0x53);

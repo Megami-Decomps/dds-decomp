@@ -203,7 +203,7 @@ extern s32 kwlnTaskGetUserValue();
 extern s32 datGameState;
 
 extern s32 D_003BAA7C;
-extern s32 func_00197EC8();
+extern s32 itfDrawUnderscoreTextSegment();
 extern s32 D_003BAA70;
 extern void func_00283110();
 extern void func_002833B0();
@@ -535,9 +535,9 @@ extern void btlStopStage();
 extern void mnuClearEntries();
 extern void mnuReleasePartyIconBundles();
 extern void mnuDestroyPanelGroup();
-extern void func_002832F8();
-extern void func_00283820();
-extern void func_00285160();
+extern void mnuFreeSpriteStateWork();
+extern void mnuFreeSimpleSpriteWork();
+extern void mnuFreeProfilePanelWork();
 extern void mnuReleaseResourceList();
 extern void mnuStoreScrollPanelSelectionAndGridPosition();
 
@@ -557,15 +557,15 @@ s32 mnuStaffReleasePanelScene(s32 unused) {
         work->sceneGroup = 0;
     }
     if (work->sprite != 0) {
-        func_002832F8(work->sprite);
+        mnuFreeSpriteStateWork(work->sprite);
         work->sprite = 0;
     }
     if (work->effect != 0) {
-        func_00283820(work->effect);
+        mnuFreeSimpleSpriteWork(work->effect);
         work->effect = 0;
     }
     if (work->extraResource != 0) {
-        func_00285160(work->extraResource);
+        mnuFreeProfilePanelWork(work->extraResource);
         work->extraResource = 0;
     }
     mnuReleaseResourceList(menu->resourceList);
@@ -673,7 +673,7 @@ void mnuDrawSlotIcons(s32 x, s32 context) {
     x = x * 8;
     y = x + 0xbc0;
     for (i = 0; i < 3; i++, y += 0xa8) {
-        handle = func_00197EC8(0x190, y, 0, 0xa09dc359, D_003BAA7C + ((PartyEntryCopy *)slot)->displayId * 45, i);
+        handle = itfDrawUnderscoreTextSegment(0x190, y, 0, 0xa09dc359, D_003BAA7C + ((PartyEntryCopy *)slot)->displayId * 45, i);
         if (handle != 0) {
             func_001958A0(handle, 1, 0x53);
             frFontQueueGlyphInSelectedSlot(handle);

@@ -778,7 +778,7 @@ s32 btlUnitHasNegativeActionQueryResult(void *unit, s32 mask) {
 
 extern s32 btlUnitHasNegativeActionQueryResult(void *, s32);
 
-s32 func_002014E8(s32 unused, s32 action) {
+s32 btlAnyEnemyHasNegativeActionResult(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((*(u64 *)&unit->flags & 0x401) == 0x401) {
@@ -791,7 +791,7 @@ s32 func_002014E8(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_00201568(s32 unused, s32 action) {
+s32 btlAnyPartyUnitHasNegativeActionResult(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((*(u64 *)&unit->flags & 0x201) == 0x201) {
@@ -843,7 +843,7 @@ s32 btlAnyUnitPassesCheck200(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_00201748(s32 unused, s32 action) {
+s32 btlCanQueryElementAgainstParty(s32 unused, s32 action) {
     s32 unit = (s32)((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 1) {
@@ -865,7 +865,7 @@ s32 btlAnyUnitPassesCheck400(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_00201828(s32 unused, s32 action) {
+s32 btlCanQueryElementAgainstEnemies(s32 unused, s32 action) {
     s32 unit = (s32)((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if (btlUnitBlocksElementQueryForGroup(unit, action, 0x400) == 1) {
@@ -993,7 +993,7 @@ s32 func_00201BD8(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_00201C60(void) {
+s32 btlAnyPartyUnitHasFullActionSet(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
@@ -1006,7 +1006,7 @@ s32 func_00201C60(void) {
     return 0;
 }
 
-s32 func_00201CD0(void) {
+s32 btlAnyEnemyHasFullActionSet(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((*(u64 *)&unit->flags & 0x421) == 0x401) {
@@ -3015,7 +3015,7 @@ s32 btlRemapSpecialUnitCommandIndex(u8 *unit, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00208860);
 
-void func_002089F0(s32 unit) {
+void btlTriggerSpecialUnitActionAndResetPose(s32 unit) {
     if (((BtlUnit *)unit)->mode != 0x10d) {
         return;
     }

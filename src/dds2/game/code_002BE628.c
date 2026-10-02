@@ -111,7 +111,7 @@ extern StageCameraTarget *evtCreateWorldObjectAtTransform(f32 *, f32 *);
 
 extern u8 D_00437CB0[];
 
-extern void func_002C2AD0();
+extern void mnuFreePanelItemWork();
 
 extern void sdfReleaseChipBlock();
 
@@ -591,7 +591,7 @@ void mnuDestroyPanelGroup(MenuPanelGroup *group) {
     s32 i;
 
     for (i = 0; i < 5; i++) {
-        func_002C2AD0(group->entries[i]);
+        mnuFreePanelItemWork(group->entries[i]);
     }
     sdfReleaseChipBlock(group);
 }
@@ -668,7 +668,7 @@ void *mnuCreateSpriteState(s32 x, s32 y, s32 z) {
     return item;
 }
 
-void func_002C1050(void) {
+void mnuFreeSpriteStateWork(void) {
     sdfReleaseChipBlock();
 }
 
@@ -693,7 +693,7 @@ void *mnuAllocateSimpleSprite(s32 x, s32 y, s32 z) {
     return item;
 }
 
-void func_002C16D8(void) {
+void mnuFreeSimpleSpriteWork(void) {
     sdfReleaseChipBlock();
 }
 
@@ -718,7 +718,7 @@ void func_002C1B68(u32 *out, u32 value) {
 extern u32 uiBlendColors(u32, u32, u32);
 extern void func_003089B8(u32, u32, u32, u32, u32, u32, u32);
 
-void func_002C1B70(MenuGradientFade *state, s32 surface) {
+void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface) {
     s32 colors[4];
     s32 color = state->color;
 
@@ -952,7 +952,7 @@ void mnuSetPanelItemOption(MenuPanelItem *item, u32 option) {
     item->option = option;
 }
 
-void func_002C2AD0(void) {
+void mnuFreePanelItemWork(void) {
     sdfReleaseChipBlock();
 }
 
@@ -982,7 +982,7 @@ u32 *mnuCreateProfilePanel(s32 source) {
     return item;
 }
 
-void func_002C3390(void) {
+void mnuFreeProfilePanelWork(void) {
     sdfReleaseChipBlock();
 }
 
@@ -1352,7 +1352,7 @@ void mnuPlayInputSoundKind(s32 buttons, s8 kind) {
     }
 }
 
-void func_002C4B40(u32 buttons) {
+void mnuPlayDefaultInputSounds(u32 buttons) {
     mnuPlayInputSoundKind(buttons, 0);
 }
 
@@ -2170,7 +2170,7 @@ extern void kwlnSetBackgroundColorTarget(s32 mode, f32 *color);
 extern void kwlnSetDrawColorTarget(s32 mode, f32 *color);
 extern void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w);
 
-void func_002C6790(void)
+void evtStageTestResetViewAndLighting(void)
 {
     f32 firstColor[4];
     f32 secondColor[4];
@@ -2198,7 +2198,7 @@ void func_002C6790(void)
 void func_002C6958(f32 value) {
     sdfSceneProjectionParameters[5] = 2048.0f;
     sdfSceneProjectionParameters[4] = value + 2048.0f;
-    func_002C6790();
+    evtStageTestResetViewAndLighting();
 }
 
 void evtStageTestInit(s32 mode) {
@@ -2405,7 +2405,7 @@ void evtStageTestUpdateCamera(void)
     s32 slot;
 
     slot = kwlnGetDrawBufferIndex();
-    func_002C6790();
+    evtStageTestResetViewAndLighting();
     PCP_COPY_VECTOR(sdfViewTargetVector, D_003E7950);
     PCP_COPY_VECTOR(sdfViewEyeVector, D_003E7940);
     PCP_COPY_VECTOR(sdfViewUpVector, D_003E7960);

@@ -293,7 +293,7 @@ void effObjSpawnLoadedResourceEffect(u64 unused, u64 vector, u64 extra) {
     effObjCreateWithBoundBill(handle, vector, extra);
 }
 
-EffectObj *func_00115248(bill, vec, extra)
+EffectObj *effObjCreateBillboardInWorld(bill, vec, extra)
     void *bill;
     void *vec;
     s32 extra;
@@ -334,7 +334,7 @@ void func_00115318(u64 unused, u64 vector, u64 extra) {
     u64 handle;
 
     handle = func_001579C8();
-    func_00115248(handle, vector, extra);
+    effObjCreateBillboardInWorld(handle, vector, extra);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115358);

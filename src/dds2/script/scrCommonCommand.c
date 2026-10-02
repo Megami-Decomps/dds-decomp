@@ -178,12 +178,12 @@ s32 func_0010DD18(void)
     s32 p1;
     p0 = scrReadIntParameter(0);
     p1 = scrReadIntParameter(1);
-    func_00103F58(p0, p1 & 0xFF, scrReadIntParameter(2));
+    kwlnPadStartMotor(p0, p1 & 0xFF, scrReadIntParameter(2));
     return 1;
 }
 
 extern char D_00412668[];
-s32 func_001063A8(f32 arg0);
+s32 kwlnSetCameraFieldOfViewTarget(f32 arg0);
 
 s32 scrCommandSetCameraFov(void)
 {
@@ -195,7 +195,7 @@ s32 scrCommandSetCameraFov(void)
         evtPrintDeveloperConsoleMessage(D_00412668, fovy);
         return 1;
     }
-    func_001063A8(fovy);
+    kwlnSetCameraFieldOfViewTarget(fovy);
     return 1;
 }
 
@@ -830,7 +830,7 @@ s32 scrCommandResetDrawEffects(void)
     kwlnDrawSetupC70B(0);
     kwlnDrawEnableCd0(0);
     kwlnDrawEnableD30(0);
-    func_00197298();
+    effDisableFramebufferQuad();
     return 1;
 }
 

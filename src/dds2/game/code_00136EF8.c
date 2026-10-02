@@ -784,7 +784,7 @@ typedef struct FldProbeActor {
 
 extern void effMiscQuaternionToMatrixVU(void);
 
-s32 func_0013D7F8(s32 index, FldProbeActor *actor, f32 *position) {
+s32 fldTestActorRoomProbeCondition(s32 index, FldProbeActor *actor, f32 *position) {
     f32 dir[4];
     f32 length;
     f32 dot;

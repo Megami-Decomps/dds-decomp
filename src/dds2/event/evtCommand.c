@@ -126,7 +126,7 @@ void evtScaleSlotByClampedMultiplier(s32 unit, f32 value);
 
 s32 fldParseRoomNumberFromName(char *name);
 
-s32 func_001235E8(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enabled);
+s32 fldSetMapSlotValueFlag(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enabled);
 
 extern u32 fldAreaState[];
 
@@ -872,9 +872,9 @@ s32 evtCommandSetUnitRoomFloatState(void) {
     count = fldParseRoomNumberFromName(owner);
     if (count > 0) {
         if (bfWaitReadArgFloat(1) > 0.5f) {
-            func_001235E8(fldAreaState[4], fldAreaState[5] + 1, count, 1);
+            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, count, 1);
         } else {
-            func_001235E8(fldAreaState[4], fldAreaState[5] + 1, count, 0);
+            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, count, 0);
         }
     }
     return 1;
@@ -904,9 +904,9 @@ s32 evtCommandSetUnitRoomIntegerState(void) {
     count = fldParseRoomNumberFromName(owner);
     if (count > 0) {
         if (scrReadIntParameter(1) == 0) {
-            func_001235E8(fldAreaState[4], fldAreaState[5] + 1, count, 1);
+            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, count, 1);
         } else {
-            func_001235E8(fldAreaState[4], fldAreaState[5] + 1, count, 0);
+            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, count, 0);
         }
     }
     return 1;

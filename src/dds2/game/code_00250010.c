@@ -41,7 +41,7 @@ extern s8 D_003C9732[];
 
 extern void *kwlnTaskGetUserValue();
 
-extern s32 func_001979E0(void);
+extern s32 effEventAdvanceSolidRectangleSetup(void);
 
 typedef struct EvtRuntimeChild {
     u16 unk00;
@@ -1426,7 +1426,7 @@ s32 evtPollRuntimeControlReady(void) {
     void *runtime;
 
     runtime = kwlnTaskGetUserValue();
-    if (func_001979E0() == 0) {
+    if (effEventAdvanceSolidRectangleSetup() == 0) {
         ((EvtRuntime *)runtime)->busy = 0;
         return -1;
     }

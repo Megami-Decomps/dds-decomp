@@ -396,7 +396,7 @@ extern void func_002F1888(u8 *, void *);
 
 extern void sdfMotionSampleAtFrame(s32, f32);
 
-extern void func_00103F58(s32, u8, s32);
+extern void kwlnPadStartMotor(s32, u8, s32);
 
 extern s32 D_00437E98[2];
 
@@ -4907,7 +4907,7 @@ void effResetBillboardFrameInstanceCounters(u8 *p) {
     }
 }
 
-u8 *func_002EFA78(u8 *config) {
+u8 *effAllocateBillFadeFrameEntries(u8 *config) {
     u8 *base = sdfAllocGeneralBlock(((EffBillConfig *)config)->frames.count * 0x30 + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((u32)base);
     u32 count = ((EffBillConfig *)config)->resourceId;
@@ -4921,7 +4921,7 @@ u8 *func_002EFA78(u8 *config) {
     return (u8 *)node;
 }
 
-void func_002EFAE8(u8 *node, u8 *config) {
+void effFillBillFadeGradient(u8 *node, u8 *config) {
     EffectFadeConfig *cfg = (EffectFadeConfig *)config;
     EffectFadeTable *table;
     u32 *colors;
@@ -4989,19 +4989,19 @@ void func_002EFAE8(u8 *node, u8 *config) {
     }
 }
 
-u32 *func_002EFD30(u8 *p, u32 a1) {
-    u32 *buf = (u32 *)func_002EFA78(p);
+u32 *effCreateBillFadeTable(u8 *p, u32 a1) {
+    u32 *buf = (u32 *)effAllocateBillFadeFrameEntries(p);
     buf[1] = effCreateRibbonWithSharedResource(((EffBillConfig *)p)->frames.count, ((EffBillConfig *)p)->resourceId, a1);
-    func_002EFAE8(buf, p);
+    effFillBillFadeGradient(buf, p);
     return buf;
 }
 
 u32 *effCloneBillFadeTable(u8 *p) {
     u8 *dst = ((EffBillFrameWork *)p)->config;
     u32 *src = (u32 *)((EffBillFrameWork *)p)->frameState;
-    u32 *buf = (u32 *)func_002EFA78(dst);
+    u32 *buf = (u32 *)effAllocateBillFadeFrameEntries(dst);
     buf[1] = effCloneRibbonWithSharedResource((u32 *)((EffFrameState *)src)->asset);
-    func_002EFAE8(buf, dst);
+    effFillBillFadeGradient(buf, dst);
     return buf;
 }
 
@@ -5644,7 +5644,7 @@ void effSynchronizeFileTransform(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F2AE8);
 
-u32 *func_002F3100(u8 *work) {
+u32 *effCreatePrimarySlotAnimationState(u8 *work) {
     u8 *mapping = work + 0x3C;
     u32 count = effClampSlotCount(mapping);
     u32 *state = effCreateAnimationState((u32)work, count);
@@ -5653,7 +5653,7 @@ u32 *func_002F3100(u8 *work) {
     return state;
 }
 
-u32 *func_002F3168(u8 *work) {
+u32 *effCreateAlternateSlotAnimationState(u8 *work) {
     u8 *mapping = work + 0x3C;
     u32 count = effClampSlotCount(mapping);
     u32 *state = effCreateAnimationState((u32)work, count);
@@ -6761,12 +6761,12 @@ void effTickSlotVolumeFade(void) {
                 if (D_00437EB0[i] != 0) {
                     ratio = 1.0f - ratio;
                 }
-                func_00103F58(i, (u8)(D_00437EA8[i] * ratio), 100);
+                kwlnPadStartMotor(i, (u8)(D_00437EA8[i] * ratio), 100);
                 D_00437EA0[i] -= 1;
             } else if (D_00437EB0[i] == 1) {
-                func_00103F58(i, D_00437EA8[i], 100);
+                kwlnPadStartMotor(i, D_00437EA8[i], 100);
             } else {
-                func_00103F58(i, 0, 0);
+                kwlnPadStartMotor(i, 0, 0);
                 D_00437E98[i] = 0;
             }
         }
@@ -8163,7 +8163,7 @@ s32 effPollPrimaryFile(void) {
 }
 
 void effQueueNamedResourceRequest(void) {
-    func_003002A8();
+    effReleaseQueuedResourceName();
     effQueueResource(D_004386E0, D_0045C1A0);
 }
 
@@ -8187,7 +8187,7 @@ s32 effPollNamedFile(void) {
 }
 
 void effQueueAttachedResourceRequest(void) {
-    func_003002A8();
+    effReleaseQueuedResourceName();
     effQueueResource(D_004386E8, D_0045C1A0);
 }
 
@@ -8678,7 +8678,7 @@ u32 effFinalizeQueuedFile(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002FDDD8);
 
-u32 func_002FE208(void) {
+u32 effFlagFileQueueActive(void) {
     D_00439075 = 1;
     effSelectLinkedFileState(0);
     return 0;
@@ -9096,7 +9096,7 @@ u32 effPollResourceQueue(void) {
     return 0x200001;
 }
 
-void func_003002A8(void) {
+void effReleaseQueuedResourceName(void) {
     if (effQueuedResourceNameRecord != 0) {
         func_0020E368(effQueuedResourceNameRecord);
         effQueuedResourceNameRecord = 0;

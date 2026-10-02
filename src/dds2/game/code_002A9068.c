@@ -733,7 +733,7 @@ u32 func_002AA278(void) {
     s32 work;
 
     work = kwlnTaskGetUserValue();
-    func_002C1B70(work + 0xaa50, 0x53);
+    mnuDrawAndStepGradientFade(work + 0xaa50, 0x53);
     return 0;
 }
 

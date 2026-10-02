@@ -305,3 +305,4 @@ void func_00161790(EffBattleParameterMixer *mixer) {
 }
 
 INCLUDE_SDATA(const s32, "effect/effBattle", effFieldColorFlags);
+

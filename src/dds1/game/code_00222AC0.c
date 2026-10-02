@@ -108,7 +108,7 @@ extern s32 evtFindTaskById(s32 taskId);
 extern void func_00101A80(s32 arg0, s32 arg1);
 extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
-extern void func_003003F0();
+extern s32 func_003003F0();
 extern u8 D_003AC480[];
 extern void evtSetUnitValueTransition(EvtUnit *unit, void *target, s32 arg2);
 extern s32 mdlCheckNodeByte30(u32 *arg0, s32 arg1);
@@ -731,7 +731,17 @@ u32 evtSetWorldUnitThirdVector(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00222AC0", func_002241D0);
+u32 func_002241D0(void) {
+    EvtUnit *unit;
+
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
+    if (unit == NULL) {
+        return 1;
+    }
+    evtPrepareUnitMotionState(unit, scrReadIntParameter(1), scrReadIntParameter(2), scrReadIntParameter(3), 0);
+    func_003003F0(D_003AC2A0);
+    return 1;
+}
 
 u32 evtOpSetUnitParams5(void) {
     EvtUnit *unit;

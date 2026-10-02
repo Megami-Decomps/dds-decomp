@@ -114,6 +114,28 @@ extern void mdlStorePrimaryVectorVU(void *);
 
 extern void mdlUpdateContextRotationBasisFromQuaternion(void *);
 
+/* Model-manager prefixes plus the effect owner's lighting attachment.
+ * Unrelated node fields and inner matrices remain opaque. */
+typedef struct MdlNode {
+    u8 pad00[0x20];
+    f32 floatValue;
+} MdlNode;
+
+typedef struct MdlInner {
+    u8 pad00[8];
+    u32 resourceHandle;
+    u8 pad0C[0x74];
+    void *lighting;
+} MdlInner;
+
+typedef struct MdlCtx {
+    u32 flags;
+    u8 pad04[0x14];
+    MdlInner *inner;
+    MdlNode *first;
+} MdlCtx;
+
+/* Initialize the VU transforms and the first node's float slot, if present. */
 void effInitModelVUState(void *model) {
     VU0_MOVE_VF(vf10, vf0);
     mdlStorePrimaryVectorVU(model);
@@ -122,11 +144,11 @@ void effInitModelVUState(void *model) {
     VU0_SET_ONES_XYZ(vf10);
     mdlStoreTertiaryVectorVU(model);
     mdlBroadcastMasked(model, 0x80808080);
-    if (*(void **)(model + 0x1C) != NULL) {
+    if (((MdlCtx *)model)->first != NULL) {
         mdlAddEntryPlain(model, 0, 0);
-        *(float *)(*(u8 **)(model + 0x1C) + 0x20) = 1.0f;
+        ((MdlCtx *)model)->first->floatValue = 1.0f;
     }
-    *(u32 *)model &= ~1;
+    ((MdlCtx *)model)->flags &= ~1;
 }
 
 extern u16 D_003BC944;
@@ -146,8 +168,9 @@ void *effLoadViewerModelWithVUState(u32 first, u32 second) {
     return model;
 }
 
+/* Clear the lighting attachment before destroying its model context. */
 void effDestroyModelContext(s32 model) {
-    *(u32 *)(*(s32 *)(model + 0x18) + 0x80) = 0;
+    ((MdlCtx *)model)->inner->lighting = NULL;
     mdlDestroyContext();
 }
 
@@ -203,7 +226,7 @@ void effRecreateModelFromSource(u32 *work, u8 *source) {
 }
 
 void effModelAnimationStop(s32 owner) {
-    sdfMotionSampleAtFrame(*(void **)(((EffModelOwner *)owner)->model + 0x1c), 0.0f);
+    sdfMotionSampleAtFrame(((MdlCtx *)((EffModelOwner *)owner)->model)->first, 0.0f);
 }
 
 extern u8 D_00325828[];
@@ -212,11 +235,12 @@ extern s64 effComputeLightDirectionVU(void *, void *);
 
 extern void mdlProcessContextNodesAndTransforms(void *, void *);
 
+/* Attach the owner's lighting buffer when the direction update succeeds. */
 void effRefreshModelLighting(u8 *work) {
     void *model;
     if (effComputeLightDirectionVU((void *)((EffModelOwner *)work)->model, ((EffModelOwner *)work)->ownedBuffer) != 0) {
         model = (void *)((EffModelOwner *)work)->model;
-        *(void **)(*(u8 **)((u8 *)model + 0x18) + 0x80) = ((EffModelOwner *)work)->ownedBuffer;
+        ((MdlCtx *)model)->inner->lighting = ((EffModelOwner *)work)->ownedBuffer;
     } else {
         model = (void *)((EffModelOwner *)work)->model;
     }
@@ -251,7 +275,7 @@ void effApplyScaledModelTertiaryVector(s32 model, float scale) {
 void effUploadModelTextures(EffModelOwner *owner) {
     s32 i = 0;
     EffBattleTexHeaders *battle = (EffBattleTexHeaders *)btlGetRuntime();
-    EffTexTable *table = *(EffTexTable **)(*(s32 *)(owner->model + 0x18) + 8);
+    EffTexTable *table = (EffTexTable *)((MdlCtx *)owner->model)->inner->resourceHandle;
 
     do {
         EffTexture *tex = table->entries[i++];
@@ -466,7 +490,8 @@ extern void fileQueueDestroy(u32);
 /* DDS1 resource owner: same lifetime fields as DDS2, with a shorter payload. */
 typedef struct EffResourceOwner {
     u32 count;
-    u8 pad_04[0x38];
+    u32 unk04;
+    u8 pad_08[0x34];
     u32 plainEntry; // 0x3C: add the model entry plain instead of flagged
     u8 pad_40[4];
     void **entries;
@@ -514,14 +539,14 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
     }
     dst->model = (u32)func_00217680(func_002183D0(src->model), func_002183E0(src->model));
     effInitModelVUState((void *)dst->model);
-    if (*(s32 *)(dst->model + 0x1C) != 0) {
+    if (((MdlCtx *)dst->model)->first != NULL) {
         if (dst->plainEntry != 0) {
             mdlAddEntryPlain(dst->model, 0, 0);
         } else {
             mdlAddEntryFlagged(dst->model, 0, 0);
         }
     }
-    dst->count = sdfCountMapPositionRecords(*(u32 *)(dst->model + 0x18));
+    dst->count = sdfCountMapPositionRecords((u32)((MdlCtx *)dst->model)->inner);
     if (src->buffer != 0) {
         if (dst->buffer != 0) {
             for (i = 0; i < dst->count; i++) {
@@ -538,8 +563,8 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
 }
 
 void func_0029B7E0(s32 work) {
-    sdfMotionSampleAtFrame(*(void **)(((EffResourceOwner *)work)->model + 0x1C), 0.0f);
-    *(u32 *)(work + 4) = 0;
+    sdfMotionSampleAtFrame(((MdlCtx *)((EffResourceOwner *)work)->model)->first, 0.0f);
+    ((EffResourceOwner *)work)->unk04 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029B818);
@@ -578,7 +603,7 @@ u32 effCloneSharedReferenceWithValue(u32 source, u32 value) {
     void *copy;
 
     copy = func_0029BD90((void *)source);
-    *(u32 *)((s32)copy + 0x18) = value;
+    ((RefObj *)copy)->unk18 = value;
     return (u32)copy;
 }
 
@@ -590,8 +615,8 @@ void effReleaseSharedReference(RefObj *obj) {
     effSharedTextureReferenceCount--;
     if (effSharedTextureReferenceCount == 0) {
         u8 *graphics = D_003BC958;
-        *(u16 *)(graphics + 0xC) = 0x100;
-        *(u16 *)(graphics + 0xE) = 0x100;
+        ((EffTexture *)graphics)->width = 0x100;
+        ((EffTexture *)graphics)->height = 0x100;
         D_003BC950 = -1;
         sdfTexReleaseReference(graphics);
     }
@@ -727,7 +752,7 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
 }
 
 void func_0029C500(s32 owner, u32 target, s32 indexSource) {
-    func_0029C048(target, *(u32 *)(*(s32 *)(indexSource + 0xc) * 4 + *(s32 *)(owner + 0x14)));
+    func_0029C048(target, (u32)((EffExpandedList *)owner)->handles[((EffAnimSample *)indexSource)->segment]);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B2AA0);

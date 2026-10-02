@@ -5,7 +5,7 @@
 
 
 
-extern void func_00104068(s32, u8, s32);
+extern void kwlnPadStartMotor(s32, u8, s32);
 extern s32 D_003BC87C;
 
 
@@ -2160,11 +2160,11 @@ s32 fileToggleSlotFlagsBit(u32 kind, s32 *flags) {
     case 0:
         *flags ^= 2;
         if (fileTestSlotFlagsBit(kind, flags) != 0) {
-            func_00104068(0, 1, 0xF);
-            func_00104068(1, 0x80, 0xF);
+            kwlnPadStartMotor(0, 1, 0xF);
+            kwlnPadStartMotor(1, 0x80, 0xF);
         } else {
-            func_00104068(0, 0, 0xF);
-            func_00104068(1, 0, 0xF);
+            kwlnPadStartMotor(0, 0, 0xF);
+            kwlnPadStartMotor(1, 0, 0xF);
         }
         return 1;
     case 1:

@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u64 func_00312810(u32, u64);
+extern s32 func_00312810(u32, s32);
 
 extern u32 mnuMantraSelectionResource;
 
@@ -106,7 +106,7 @@ INCLUDE_RODATA(const s32, "game/code_00286BA8", mnuResourceTaskName);
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287078);
 
 s32 mtrUnitSelectInit(void) {
-    u64 selected = func_00312810(mnuMantraSelectionResource, 0xffffffffffffffff);
+    u64 selected = func_00312810(mnuMantraSelectionResource, -1);
 
     func_002885E8(selected);
     evtPrintDeveloperConsoleMessage("mtrUnitSelectInit\n");
@@ -114,7 +114,7 @@ s32 mtrUnitSelectInit(void) {
 }
 
 void mtrUnitSelectRelease(void) {
-    u64 selected = func_00312810(mnuMantraSelectionResource, 0xffffffffffffffff);
+    u64 selected = func_00312810(mnuMantraSelectionResource, -1);
 
     mnuReleaseSelectionWorkResources(selected);
     evtPrintDeveloperConsoleMessage("mtrUnitSelectRelease\n");
@@ -127,13 +127,13 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287670);
 u64 func_00287768(void) {
     u64 selected;
 
-    selected = func_00312810(mnuMantraSelectionResource, 0xffffffffffffffff);
+    selected = func_00312810(mnuMantraSelectionResource, -1);
     func_00288920(selected);
     return 0;
 }
 
 s32 mtrMantraSelectInit(void) {
-    u64 selected = func_00312810(mnuMantraSelectionResource, 0xffffffffffffffff);
+    u64 selected = func_00312810(mnuMantraSelectionResource, -1);
 
     mnuEnableTerminalTrackMode(0);
     mnuOpenMantraSelectionAndLoadTitleStream(selected);
@@ -143,12 +143,35 @@ s32 mtrMantraSelectInit(void) {
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", mtrMantraSelectRelease);
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287848);
+struct TaskWork;
+struct SdfTaskItemDesc;
+extern struct SdfTaskItemDesc D_003CFCFC;
+extern void mnuTickPanelSoundEntries(void);
+extern s32 func_0028A1D0(MnuStatusResource *);
+extern void sdfAttachTaskItem(struct TaskWork *, struct SdfTaskItemDesc *);
+extern void sdfSetTaskItemMode(void *, s32, u32);
+
+s32 func_00287848(s32 key) {
+    mnuTickPanelSoundEntries();
+    switch (func_0028A1D0((MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1))) {
+    case 1:
+        break;
+    case 2:
+        sdfAttachTaskItem((struct TaskWork *)mnuMantraSelectionResource, &D_003CFCFC);
+        sdfSetTaskItemMode((void *)mnuMantraSelectionResource, key, 2);
+    case 3:
+        break;
+    case 4:
+        sdfSetTaskItemMode((void *)mnuMantraSelectionResource, 1, 1);
+        return -1;
+    }
+    return 0;
+}
 
 u64 func_00287900(void) {
     u64 selected;
 
-    selected = func_00312810(mnuMantraSelectionResource, 0xffffffffffffffff);
+    selected = func_00312810(mnuMantraSelectionResource, -1);
     func_0028B1B0(selected);
     return 0;
 }

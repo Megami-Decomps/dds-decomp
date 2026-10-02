@@ -1192,7 +1192,7 @@ extern void *sdfAllocPacketAligned(s32);
 
 extern void sdfClearLinkedPacketList(void *);
 
-extern void func_002D38B8(void *, void *, s32, s32, s32, s32, void *, s32, s32, s32);
+extern void sdfCreatePatchableResourcePacket(void *, void *, s32, s32, s32, s32, void *, s32, s32, s32);
 
 extern void sdfAppendPacketChainNode(void *, void *);
 
@@ -1207,7 +1207,7 @@ void btlInitializeGraphicsRuntime(void) {
     surface = sdfAllocatePacketList(0);
     context = sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
-    func_002D38B8(surface, context, 0, 0, 0x200, 0xe0, runtime->request, 0, 0, 0);
+    sdfCreatePatchableResourcePacket(surface, context, 0, 0, 0x200, 0xe0, runtime->request, 0, 0, 0);
     sdfAppendPacketChainNode(D_00325860, context);
     D_00325708.invoke(&D_00325708, surface);
 }

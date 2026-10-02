@@ -114,7 +114,7 @@ extern void scrSetFloatReturnValue(f32 value);
 extern Entry1A4 *dds3FindEntry(s32 rosterIndex);
 extern void func_00119900(s32 arg0, s32 arg1);
 extern void ptyMergeStockSkills(Entry1A4 *unit);
-extern s32 func_00119368(s32 arg0, s32 arg1);
+extern s32 datGetStatWithStatusOverride(s32 arg0, s32 arg1);
 extern u8 btlIsRuntimeAllocated(void);
 extern f32 func_001A4598(void);
 extern u32 func_001A4630(void);
@@ -658,14 +658,14 @@ s32 evtPushSecondRosterOptionStat(void) {
 s32 evtPushFirstRosterStatEligibility(void) {
     s32 val = scrReadIntParameter(0);
 
-    scrSetIntegerReturnValue(func_00119368(D_003C2E78[0], val));
+    scrSetIntegerReturnValue(datGetStatWithStatusOverride(D_003C2E78[0], val));
     return 1;
 }
 
 s32 evtPushSecondRosterStatEligibility(void) {
     s32 val = scrReadIntParameter(0);
 
-    scrSetIntegerReturnValue(func_00119368(D_003C2E7C[0], val));
+    scrSetIntegerReturnValue(datGetStatWithStatusOverride(D_003C2E7C[0], val));
     return 1;
 }
 

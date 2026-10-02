@@ -1,12 +1,12 @@
 #include "common.h"
 extern s32 dds3AdvanceWorldCounter(void);
-extern s32 func_00112F28(s32 arg0, void *arg1, void *arg2, void *arg3);
+extern s32 dds3CreateConfiguredCameraObject(s32 arg0, void *arg1, void *arg2, void *arg3);
 extern void dds3SetWorldEntryCallbackTarget(s32 arg0, void *arg1);
 extern void dds3SetCameraVector(s32 arg0, void *arg1);
 extern void effObjSetInnerFloat(s32 arg0, f32 arg1);
 extern s32 dds3GetWorldSecondaryObject(void);
 extern void dds3SetWorldCameraObject(s32 arg0, s32 arg1);
-extern void func_001063A8(f32 arg0);
+extern void kwlnSetCameraFieldOfViewTarget(f32 arg0);
 extern u8 D_0040ABC0[];
 extern u8 D_0040ABB0[];
 extern u8 D_0040ABD0[];
@@ -65,13 +65,13 @@ void func_0031B0F8(void) {
     s32 object;
     u8 *vector = D_0040ABD0;
 
-    object = func_00112F28(dds3AdvanceWorldCounter(), D_0040ABC0, vector, D_0040ABB0);
+    object = dds3CreateConfiguredCameraObject(dds3AdvanceWorldCounter(), D_0040ABC0, vector, D_0040ABB0);
     D_00438944 = object;
     dds3SetWorldEntryCallbackTarget(object, D_00438938);
     dds3SetCameraVector(D_00438944, vector);
     effObjSetInnerFloat(D_00438944, 2.0f);
     object = dds3GetWorldSecondaryObject();
     dds3SetWorldCameraObject(object, D_00438944);
-    func_001063A8(0.6283184886f);
+    kwlnSetCameraFieldOfViewTarget(0.6283184886f);
 }
 

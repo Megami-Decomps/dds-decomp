@@ -557,7 +557,7 @@ typedef struct {
 
 extern void effPcpCopyVectorAF0(void *dst, void *src);
 
-extern void func_00184B10(void *dst, void *src);
+extern void effPcpSpanSetHeadVector(void *dst, void *src);
 
 
 
@@ -782,7 +782,7 @@ void effPcpViewAlignedRingSetPosition(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0017EF60(EffPCPRingWork *work, u32 value) {
+void effPcpViewAlignedRingSetOverlayColor(EffPCPRingWork *work, u32 value) {
     work->color14 = value;
 }
 
@@ -2027,7 +2027,7 @@ typedef struct EffPCPFadeTarget {
 extern void *func_0016B198(u32 handle);
 extern void effPCPThunderSetParam50(u32 handle, u32 value);
 extern void func_0016B160(u32 handle, void *work);
-extern void func_0016B928(u32 handle);
+extern void effThunderUpdateVectorCells(u32 handle);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
 /* Scales the target over the first 22 frames, fades the colour out from frame 45. */
@@ -2050,7 +2050,7 @@ void effPcpThunderExpandThenFadeUpdate(EffPCPFadeWork *work) {
     }
     effPCPThunderSetParam50(work->handle, fadedColor);
     func_0016B160(work->handle, work);
-    func_0016B928(work->handle);
+    effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
 
@@ -2216,7 +2216,7 @@ void effPcpThunderUniformGrowFadeUpdate(EffPCPFadeWork *work) {
         effPCPThunderSetParam50(work->handle, work->color);
     }
     func_0016B160(work->handle, work);
-    func_0016B928(work->handle);
+    effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
 
@@ -2316,7 +2316,7 @@ void effPcpSharedTrailSetPosition(void *work, void *src) {
     PCP_COPY_VECTOR(effPcpSharedTrailWork, src);
 }
 
-void func_00182DB8(u32 unused, u32 val) {
+void effPcpSharedTrailSetFlags(u32 unused, u32 val) {
     effPcpSharedTrailWork->flags = val;
 }
 
@@ -2424,7 +2424,7 @@ void func_001832E0(EffPCPCompactFadeWork *work, f32 val) {
     work->unk34 = val;
 }
 
-EffPCPCompactFadeWork *func_001832E8(EffPCPCompactTexturedBlurParams *params) {
+EffPCPCompactFadeWork *effPcpCompactLongCreate(EffPCPCompactTexturedBlurParams *params) {
     EffPCPCompactFadeWork *work;
 
     work = func_00328D68(0x3C);
@@ -2441,11 +2441,11 @@ EffPCPCompactFadeWork *func_001832E8(EffPCPCompactTexturedBlurParams *params) {
     return work;
 }
 
-void func_00183378(void *args) {
+void effPcpCompactLongCreateFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    func_001832E8(param0);
+    effPcpCompactLongCreate(param0);
 }
 
 void effPcpCompactLongRespawn(EffPCPCompactFadeWork *work) {
@@ -2458,10 +2458,10 @@ void effPcpCompactLongRespawn(EffPCPCompactFadeWork *work) {
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
     params.res = *(EffPCPTexturedBlurParams *)work->resource;
-    func_001832E8(&params);
+    effPcpCompactLongCreate(&params);
 }
 
-void func_00183448(EffPCPCompactFadeWork *work) {
+void effPcpCompactLongRelease(EffPCPCompactFadeWork *work) {
     func_0018E8F0(work->resource);
     sdfReleaseChipBlock(work);
 }
@@ -2772,7 +2772,7 @@ void effPcpFadeUpdateShort(EffPCPFadeWork *work) {
     }
     effPCPThunderSetParam50(work->handle, fadedColor);
     func_0016B160(work->handle, work);
-    func_0016B928(work->handle);
+    effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
 
@@ -2841,7 +2841,7 @@ void effPcpThunderScaleFadeUpdate(EffPCPFadeWork *work) {
     }
     effPCPThunderSetParam50(work->handle, fadedColor);
     func_0016B160(work->handle, work);
-    func_0016B928(work->handle);
+    effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
 
@@ -3007,11 +3007,11 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
     work->frame++;
 }
 
-void func_00184B10(void *work, void *src) {
+void effPcpSpanSetHeadVector(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x40, src);
 }
 
-void func_00184B28(EffPCPSpanWork *work, u32 value) {
+void effPcpSpanSetColor(EffPCPSpanWork *work, u32 value) {
     work->color = value;
 }
 
@@ -3101,7 +3101,7 @@ void effPcpCopySpanVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00185110(EffPCPTripleWork *work, u32 value) {
+void effPcpTripleHandleSetColor(EffPCPTripleWork *work, u32 value) {
     work->color = value;
 }
 
@@ -3242,7 +3242,7 @@ void effPcpCopyVector60(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x60, src);
 }
 
-void func_00186118(EffPCPBlockSetWork *work, u32 value) {
+void effPcpBlockSetSetColor(EffPCPBlockSetWork *work, u32 value) {
     work->color = value;
 }
 
@@ -3419,7 +3419,7 @@ void effPcpRotateSetChildValues(EffPCPRotateWork *work, u32 val) {
 
     id = work->ids;
     for (i = 0; i < 3; i++) {
-        func_00186118((EffPCPBlockSetWork *)id[i], val);
+        effPcpBlockSetSetColor((EffPCPBlockSetWork *)id[i], val);
     }
 }
 

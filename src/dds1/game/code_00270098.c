@@ -82,7 +82,7 @@ extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, char *, ...);
 
 extern void sdfAppendPacket(s32, s32);
 
-extern void func_002D6080(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void sdfQueueFlatTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern s32 mnuMovieViewer();
 
@@ -220,10 +220,10 @@ void mnuDrawMovieList(void) {
         sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, D_003BC648, (i == selected) ? '>' : ' ', node->path));
     }
     if (mnuMovieList.top != 0) {
-        func_002D6080(packets, 0x8000A0C0, 0, 0x7900, 0x7978, 0x7840, 0x79A8, 0x79C0, 0x79A8, 0xFF0080, 0);
+        sdfQueueFlatTriangle(packets, 0x8000A0C0, 0, 0x7900, 0x7978, 0x7840, 0x79A8, 0x79C0, 0x79A8, 0xFF0080, 0);
     }
     if (node != NULL) {
-        func_002D6080(packets, 0x8000A0C0, 0, 0x7840, 0x7CD8, 0x79C0, 0x7CD8, 0x7900, 0x7D08, 0xFF0080, 0);
+        sdfQueueFlatTriangle(packets, 0x8000A0C0, 0, 0x7840, 0x7CD8, 0x79C0, 0x7CD8, 0x7900, 0x7D08, 0xFF0080, 0);
     }
 }
 

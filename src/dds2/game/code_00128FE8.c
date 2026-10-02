@@ -1561,7 +1561,7 @@ void fldSubmitModelPacket(s32 textureId, u8 *modelData) {
     descriptor->open(descriptor, command);
 }
 
-void func_0012D070(void) {
+void fldSubmitPrimaryFramePacket(void) {
     u64 command = sdfAllocPacketAligned(0x20);
     u64 texture;
     FieldBufferDescriptor *descriptor;
@@ -1573,7 +1573,7 @@ void func_0012D070(void) {
     descriptor->open(descriptor, command);
 }
 
-void func_0012D110(void) {
+void fldSubmitAlternateFramePacket(void) {
     u64 command = sdfAllocPacketAligned(0x20);
     u64 texture;
     FieldBufferDescriptor *descriptor;
@@ -1761,7 +1761,7 @@ void func_0012DDC0(s32 x, s32 y, u64 firstPayload, u64 secondPayload) {
     u64 object;
 
     object = func_0019F460(x << 4, y << 4, 0, firstPayload, secondPayload, 0);
-    func_0019D518(object);
+    frFontDrawGlyphInDefaultMode(object);
     frFontQueueGlyphInSelectedSlot(object);
 }
 
