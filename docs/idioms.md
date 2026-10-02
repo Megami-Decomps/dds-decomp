@@ -541,6 +541,15 @@ Black, SOTN). They are worth trying, but not yet confirmed here:
 - the address of a local or parameter is taken, or arguments go on the stack;
 - the whole file was built with `-fno-optimize-sibling-calls` (see
   `config/dds1/cflags.txt`; `tools/find_nosibcall.py` finds such files).
+- the caller returns a value (non-`void`) but ends in a call to a `void`
+  callee, falling off the end: the callee's call is `jal` + epilogue, not a
+  sibcall (DDS1 `func_00115970`, DDS2 `func_00115BD8`: a `switch` of
+  `void` Magatuhi setup calls). If no C caller uses a result there is no
+  evidence for a return type, so write the definition in era-plausible
+  implicit-int style with NO type keyword, `func_00115970(EffectObj *obj) {`;
+  codegen is identical to `s32` and no made-up type is introduced
+  (`tools/check_unit.py` accepts a name at column 0). If a C caller does use
+  the result, give the real type instead.
 
 Plain `void w(void) { f(0); }` always sibcalls, whatever f returns. Don't try
 to "fix" a jal tail in a normal file with dummy code; park it
