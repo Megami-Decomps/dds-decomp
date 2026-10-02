@@ -160,6 +160,7 @@ segments:
       - [0x9EB88, c, game/code_0019DB88]
       - [0xA14C0, c, game/code_001A04C0]
       - [0xA2960, c, game/code_001A1960]
+      - [0xC5F48, c, game/code_001C4F48]
       - [0xF70E8, c, game/code_001F60E8]  # P4 transfer
       - [0xF7110, c, game/code_001F6110]
       - [0xFD7D8, c, game/code_001FC7D8]
@@ -337,6 +338,7 @@ segments:
       - [0x2A24F0, .rodata, game/code_0019DB88]
       - [0x2A2598, .rodata, game/code_001A04C0]
       - [0x2A2700, .rodata, game/code_001A1960]
+      - [0x2A4380, .rodata, game/code_001C4F48]
       - [0x2A6430, .rodata, game/code_001F6110]
       - [0x2A6790, .rodata, game/code_001FC7D8]
       - [0x2A6950, .rodata, game/code_001FF030]
@@ -450,6 +452,7 @@ segments:
       - [0x2BA3A8, .lit4, game/code_0019DB88]
       - [0x2BA3B4, .lit4, game/code_001A04C0]
       - [0x2BA3C0, .lit4, game/code_001A1960]
+      - [0x2BA3FC, .lit4, game/code_001C4F48]
       - [0x2BA644, .lit4, game/code_001F6110]
       - [0x2BA648, .lit4, game/code_001FF030]
       - [0x2BAD80, .lit4, game/code_0020CB38]
