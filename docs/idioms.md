@@ -344,6 +344,22 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   `ldl/ldr`) lets the integer store go first and matches (DDS1 `func_00183EE0`,
   DDS2 `func_0018BB38`). When two heap stores come out in the wrong order, try
   the other scalar type for the copied block.
+- Equal-priority stores that read registers: sched1's `rank_for_schedule` prefers
+  the insn with the smaller `INSN_REG_WEIGHT` (a register that dies at the insn
+  counts -1) before it falls back to source order (lowest LUID first). The LAST
+  use of a value therefore issues before earlier stores of the same priority:
+  with `cosine` stored twice (`matrix[5]` and `matrix[10]`), whichever statement
+  comes later in the source carries the REG_DEAD note and is emitted first.
+  Measured on DDS1 `func_002DD608` (cos/sin rotation cells, three stores of
+  prio 1 plus the `neg.s` store that is not ready for 4 cycles): source order
+  [5],[6],[9],[10] gives 0x28,0x14,0x18,0x24; [10],[5],[9],[6] gives
+  0x14,0x18,0x28,0x24; [9],[6],[10],[5] gives 0x18,0x14,0x28,0x24 (the dying
+  store goes first, ties by source order, and a free memory slot while the
+  `neg.s` result is in flight is filled by any ready store). Retail's
+  0x14,0x18,0x24,0x28 needs the 0x28 store to be unavailable until the `neg.s`
+  store has issued; no source order, pointer/2-D indexing, local, or
+  unit-matrix macro variant (memory clobber removed, `"=m"` operand, non-volatile)
+  reproduced that, so the 12 rotation builders stay in `build/parked/`.
 - A walking pointer that is the call-result variable itself, plus a second
   variable for the unmoved base: `cursor = f(h); base = cursor; cursor +=
   *(u32 *)(cursor + 0xC); for (...; cursor += 8) { r = base + *(u32 *)(cursor + 4);`.
