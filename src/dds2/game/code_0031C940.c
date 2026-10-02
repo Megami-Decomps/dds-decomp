@@ -195,6 +195,31 @@ void itfSetModelInstancePrimaryVector(ModelInstance *model, f32 x, f32 y, f32 z)
     model->valueC = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031C940", func_0031D558);
+void func_0031D558(ModelInstanceWork *work, u32 flags) {
+    s32 i = 0;
+    s32 j;
+    ModelInstanceList *list = work->lists;
+    ModelInstance *item;
+
+    for (; i < work->count; i++, list++) {
+        item = list->items;
+        for (j = 0; j < list->count; j++, item++) {
+            if (item->flags & 1) {
+                func_0031D680(item);
+                if ((flags & 1) == 0) {
+                    item->elapsed++;
+                }
+                if (item->secondValue != 0 && (flags & 1) == 0) {
+                    if (--item->firstValue == 0) {
+                        itfDeactivateModelInstance(item);
+                    }
+                    item->vector0[0] += item->vector10[0];
+                    item->vector0[1] += item->vector10[1];
+                    item->vector0[2] += item->vector10[2];
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031D680);
