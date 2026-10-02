@@ -629,7 +629,16 @@ s32 evtIsAllowedId(s32 id) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_00263F50);
+s32 func_00263F50(s32 delta) {
+    if (delta == 0) {
+        delta = 1;
+    }
+    ((EvtProgressState *)datGameState)->total += delta;
+    if ((u32)((EvtProgressState *)datGameState)->total > 999999U) {
+        ((EvtProgressState *)datGameState)->total = 999999;
+    }
+    return ((EvtProgressState *)datGameState)->total;
+}
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00263FB0);
 
