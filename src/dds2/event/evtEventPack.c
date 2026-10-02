@@ -36,10 +36,38 @@ void evtCreateMotionSeTask(s32 taskArg, s32 namePart1, s32 namePart2) {
     kwlnTaskCreate(taskName, 0x3EC, 0, 0, func_0025D4D0, evtFreeEventPackState, params);
 }
 
+typedef struct EvtPackScriptEntry {
+    s32 kind;
+    u8 pad04[8];
+    u32 dataOffset;
+    u8 pad10[0x10];
+} EvtPackScriptEntry;
+
+typedef struct EvtPackScriptHeader {
+    u8 pad00[0x10];
+    s32 entryCount;
+    u8 pad14[0xC];
+    EvtPackScriptEntry entries[0];
+} EvtPackScriptHeader;
+
 typedef struct EvtPackLoadState {
     s32 eventId;
     s32 loaded;
     s32 fileHandle;
+    s32 resourceHandle;
+    u8 *data;
+    EvtPackScriptHeader *header;
+    EvtPackScriptEntry *entries;
+    u8 *entryPoint;
+    u8 pad20[4];
+    s32 sceneAllocation1;
+    u8 pad28[8];
+    s32 sceneAllocation2;
+    u8 pad34[4];
+    s32 effect72;
+    s32 effect71;
+    s32 effect76;
+    s32 effect75;
 } EvtPackLoadState;
 
 extern char D_004248A0[];
@@ -63,9 +91,42 @@ void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     state->loaded = 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D7E0);
+struct SdfAllocation;
+struct FileRequest;
+struct FileWork;
+struct FileCleanup;
+extern s32 fileIsRequestReadyInCurrentMode(struct FileRequest *);
+extern u32 fileGetResourceHandle(struct FileWork *);
+extern s32 filePollEntryCleanup(struct FileCleanup *);
+extern u32 sdfResourceRetainAddress(struct SdfAllocation *);
+extern char D_004377E8[];
 
-extern void func_0025D7E0(EvtPackLoadState *state);
+void func_0025D7E0(EvtPackLoadState *state) {
+    EvtPackScriptHeader *header;
+    s32 i;
+
+    if (state->fileHandle != 0) {
+        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)state->fileHandle) != 0) {
+            state->resourceHandle = fileGetResourceHandle((struct FileWork *)state->fileHandle);
+            filePollEntryCleanup((struct FileCleanup *)state->fileHandle);
+            state->fileHandle = 0;
+            header = (EvtPackScriptHeader *)sdfResourceRetainAddress(
+                (struct SdfAllocation *)state->resourceHandle);
+            state->data = (u8 *)header;
+            state->header = header;
+            state->entries = header->entries;
+            for (i = 0; i < state->header->entryCount; i++) {
+                if (state->entries[i].kind == 0) {
+                    state->entryPoint = state->data + state->entries[i].dataOffset;
+                    break;
+                }
+            }
+        }
+    } else {
+        func_0035B6E0(D_004377E8);
+        state->loaded = 2;
+    }
+}
 
 s32 evtTickPackLoad(void) {
     EvtPackLoadState *state = (EvtPackLoadState *)kwlnTaskGetUserValue();
@@ -91,31 +152,15 @@ extern void effInitCh71Id(void);
 extern void effInitCh76Id(void);
 extern void effInitCh75Id(void);
 extern void sdfTexReleaseReferenceViaHandler(s32);
-extern void filePollEntryCleanup(s32);
 extern void sdfQueueNonzeroResourceId(s32);
 extern void sdfReleaseResourceAllocation(s32);
 extern void sdfReleaseChipBlock(s32);
 
-/* Keep this task resource layout identical to DDS1's EvtPackResources. */
-typedef struct EvtPackResources {
-    u8 pad00[8];
-    s32 objectHandle;        /* 0x08 */
-    s32 resourceHandle;      /* 0x0C */
-    u8 pad10[0x14];
-    s32 sceneAllocation1;    /* 0x24 */
-    u8 pad28[8];
-    s32 sceneAllocation2;    /* 0x30 */
-    u8 pad34[4];
-    s32 effect72;            /* 0x38 */
-    s32 effect71;            /* 0x3C */
-    s32 effect76;            /* 0x40 */
-    s32 effect75;            /* 0x44 */
-} EvtPackResources;
 
 /* Release the event task's owned handles, then free its state. */
 void evtReleaseEventPackResources(void) {
     s32 state = kwlnTaskGetUserValue();
-    EvtPackResources *resources = (EvtPackResources *)state;
+    EvtPackLoadState *resources = (EvtPackLoadState *)state;
 
     fileWaitIdle();
     if (state != 0) {
@@ -135,8 +180,8 @@ void evtReleaseEventPackResources(void) {
             effInitCh75Id();
             sdfTexReleaseReferenceViaHandler(resources->effect75);
         }
-        if (resources->objectHandle != 0) {
-            filePollEntryCleanup(resources->objectHandle);
+        if (resources->fileHandle != 0) {
+            filePollEntryCleanup((struct FileCleanup *)resources->fileHandle);
         }
         if (resources->resourceHandle != 0) {
             sdfQueueNonzeroResourceId(resources->resourceHandle);

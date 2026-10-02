@@ -10,20 +10,12 @@ extern s32 dds3GetWorldObject(void);
 
 extern s32 mdlFlagTest(u32);
 
-typedef struct {
-    u8 pad00[0x64];
-    u32 firstResource;   /* 0x64 */
-    u32 secondResource;  /* 0x68 */
-    u8 pad6C[0x7B4];
-    u32 panelGroup;      /* 0x820 */
-    u32 displayResource; /* 0x824 */
-    u32 effectResource;  /* 0x828 */
-} MenuVisualWork;
 
 extern s32 datGameState;
 
 typedef struct MenuProgressNode {
-    u8 pad00[0x48];
+    s32 index;
+    u8 pad04[0x44];
     u32 flags;
     u8 pad4C[0xC];
     struct MenuProgressNode *next;
@@ -41,6 +33,39 @@ typedef struct {
     MenuProgressNode *selectedNode;      /* 0x1C */
     s32 selectionState;                   /* 0x20 */
 } MenuProgressOwner;
+
+typedef struct MenuVisualWork {
+    u8 pad00[8];
+    u32 color;           /* 0x08 */
+    u8 pad0C[4];
+    u32 y;               /* 0x10 */
+    u32 z;               /* 0x14 */
+    u8 pad18[4];
+    u32 x;               /* 0x1C */
+    u8 pad20[4];
+    u32 texture;         /* 0x24 */
+    u32 grid;            /* 0x28 */
+    u8 pad2C[0x38];
+    u32 firstResource;   /* 0x64 */
+    u32 secondResource;  /* 0x68 */
+    u8 pad6C[0x124];
+    u8 window[0x67C];    /* 0x190: window prefix before its list pointers */
+    MenuProgressOwner *windowList; /* 0x80C */
+    u8 pad810[0x10];
+    u32 panelGroup;      /* 0x820 */
+    u32 displayResource; /* 0x824 */
+    u32 effectResource;  /* 0x828 */
+} MenuVisualWork;
+
+extern s32 mnuFindMatchingPartyEntryIndex(s32);
+extern s32 mnuSeekListNode(s32, MenuProgressOwner *);
+extern void mnuSetWindowResource(s32, s32, s32, s32);
+extern void mnuAttachPartyIconBundle(s32, s32, u32);
+extern s32 mnuCreatePanelGroup(s32);
+extern u32 *mnuAllocateSimpleSprite(u32, u32, u32, u32, u32);
+extern u32 *mnuCreateProfilePanel(s32);
+extern void mnuCacheProfilePanelGridPositions(s32, u32, u32, u32, u32);
+extern void func_00276720(s32, s32, s32, s32);
 
 typedef struct MenuTerminalWork {
     s32 allocation;          /* 0x00 */
@@ -106,6 +131,8 @@ typedef struct EffectPair {
 extern EffectPair D_003BC400[];
 extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern void func_0024BF48(s32, s32);
+extern char D_003BC3F0[];
+extern u32 func_001979C8(s32, s32, s32, s32, char *, s32);
 
 typedef struct EffectInner {
     u8 pad00[0x20];
@@ -562,7 +589,20 @@ s32 mnuTickInitState(u8 *work) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00249850);
+void func_00249850(s32 source, MenuVisualWork *work) {
+    s32 window = (s32)work->window;
+    s32 index;
+
+    mnuSeekListNode(mnuFindMatchingPartyEntryIndex(source), work->windowList);
+    index = work->windowList->selectedNode->index;
+    mnuSetWindowResource(index, window, work->texture, work->grid);
+    mnuAttachPartyIconBundle(index, window, work->texture);
+    work->panelGroup = mnuCreatePanelGroup(work->texture);
+    work->displayResource = (u32)mnuAllocateSimpleSprite(work->x, work->y, work->z, work->color, work->texture);
+    work->effectResource = (u32)mnuCreateProfilePanel(source);
+    mnuCacheProfilePanelGridPositions(work->effectResource, work->grid, 5, 14, 15);
+    func_00276720(window, 1, 1, 1);
+}
 
 void mnuReleaseMenuVisualWorkResources(MenuVisualWork *work) {
     mnuClearEntries((s32)work + 400);
@@ -975,7 +1015,9 @@ typedef struct {
 typedef struct {
     u8 pad00[0x64];
     SceneFrameTable *frameTable; /* 0x64 */
-    u8 pad68[0x74];
+    u8 pad68[0xC];
+    struct EvtBSelectionList *list; /* 0x74 */
+    u8 pad78[0x64];
     s32 mode; /* 0xDC */
 } SceneFrameOwner;
 
@@ -1427,7 +1469,24 @@ u32 evtBEnterStateA(void) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024BDB8);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024BF48);
+void func_0024BF48(s32 fading, s32 context) {
+    SceneFrameOwner *scene = (SceneFrameOwner *)context;
+    char text[16];
+    s32 index;
+    s32 color;
+    u32 sprite;
+
+    index = fldGetModeFrameRecordIndex(scene);
+    func_003014F0(text, D_003BC3F0, *(s32 *)(datGameState + 0x3C));
+    if (fading == 0) {
+        color = scene->frameTable->records[index].unk14 | 0xA09DC300;
+    } else {
+        color = uiBlendColors(0xA09DC380, 0xA09DC300, scene->list->scale);
+    }
+    sprite = func_001979C8(0x1740, 0x210, 0, color, text, 0);
+    func_001958A0(sprite, 1, 0x53);
+    frFontQueueGlyphInSelectedSlot(sprite);
+}
 
 extern void func_0024BF48(s32, s32);
 
@@ -1577,7 +1636,36 @@ u32 func_0024C6F8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024C700);
+extern s32 evtGetCapturedMessageWindowSoundMode(void);
+extern u8 D_0036ADD8[];
+
+s64 func_0024C700(u64 input) {
+    EvtBContext *context;
+    s32 *state;
+    s64 result;
+
+    context = (EvtBContext *)kwlnTaskGetUserValue();
+    state = &context->dispatchState;
+    result = func_00285670((s32)context + 8, state, 0, input);
+    if (result == 0) {
+        if (*state == 0) {
+            result = evtGetMessageWindowControlState();
+            if (result == 0) {
+                if (evtGetCapturedMessageWindowSoundMode() == 0) {
+                    mnuResetProgressModeFromOwner((u8 *)context);
+                    mnuSetPopupEntryFlagged(state, D_0036ADD8);
+                } else if (((EvtBSelectionList *)context->selectionList)->mode >= 2) {
+                    context->transitionPending = 1;
+                    mnuSetPopupEntryFlagged(state, D_0036AD30);
+                } else {
+                    mnuSetPopupEntryFlagged(state, D_0036ACF8);
+                }
+            }
+        }
+        result = 0;
+    }
+    return result;
+}
 
 s64 func_0024C7E8(s32 item) {
     s32 state = kwlnTaskGetUserValue();

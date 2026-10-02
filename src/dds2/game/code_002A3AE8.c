@@ -160,7 +160,28 @@ void mnuSlideBarSetState(u32 *work, s32 state) {
     work[0] = state;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3FE0);
+extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
+
+void func_002A3FE0(SlideBar *bar, s32 value) {
+    s32 offset;
+
+    if (bar->active != 0 || bar->pos != 0) {
+        offset = bar->pos / 4;
+        mnuDrawSprite(0, 0, 0, offset, 0, 0, value);
+        mnuDrawSprite(0, 0, 0, offset, 0, 3, value);
+        if (bar->active != 0) {
+            bar->pos += 27;
+        } else {
+            bar->pos -= 27;
+        }
+        if (bar->pos < 0) {
+            bar->pos = 0;
+        }
+        if (bar->pos > 512) {
+            bar->pos = 512;
+        }
+    }
+}
 
 void mnuSlideBarSetStateB(u32 *state, u32 mode) {
     switch (mode) {
@@ -170,7 +191,6 @@ void mnuSlideBarSetStateB(u32 *state, u32 mode) {
     state[0] = mode;
 }
 
-extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
 void mnuDrawSlideBarAtOffset(SlideBar *bar, s32 value) {
     if (bar->active == 0 && bar->pos == 0) {

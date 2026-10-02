@@ -135,6 +135,7 @@ typedef struct EvtViewGlyph {
     s16 condition; /* 0x10 */
     u8 pad12[0x1E];
     struct EvtViewGlyph *next; /* 0x30 */
+    struct EvtViewGlyph *previous; /* 0x34 */
 } EvtViewGlyph;
 
 typedef struct EvtViewNode {
@@ -145,10 +146,12 @@ typedef struct EvtViewNode {
     s16 time;                 /* 0x1C */
     u8 pad1E[6];
     s32 unk24;
-    u8 pad28[0x28];
+    s32 keyMode;              /* 0x28: mode 1 uses the viewer's pending key */
+    u8 pad2C[0x24];
     s32 hasGlyphs;            /* 0x50 */
     EvtViewGlyph *glyphs;     /* 0x54 */
-    u8 pad58[0x24];
+    EvtViewGlyph *lastGlyph;  /* 0x58 */
+    u8 pad5C[0x20];
     struct EvtViewNode *next; /* 0x7C */
 } EvtViewNode;
 
@@ -175,7 +178,33 @@ void evtViewerApplyInterpolatedNodeKey(EventViewerState *viewer, EvtViewNode *no
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CC40);
+void func_0022CC40(EventViewerState *viewer) {
+    EvtViewNode *node = viewer->nodes;
+    s32 position = viewer->glyphAdvancePosition;
+
+    while (node != NULL) {
+        if (node->kind == 24) {
+            if (node->keyMode == 1) {
+                u16 *key = (u16 *)evtEventViewerGetPendingNode((s32)viewer);
+                evtViewerApplyInterpolatedNodeKey(viewer, node, key, NULL);
+            } else {
+                EvtViewGlyph *glyph = node->glyphs;
+                EvtViewGlyph *from;
+
+                while (glyph != NULL && position >= glyph->id + node->time) {
+                    glyph = glyph->next;
+                }
+                if (glyph != NULL) {
+                    from = glyph->previous;
+                } else {
+                    from = node->lastGlyph;
+                }
+                evtViewerApplyInterpolatedNodeKey(viewer, node, (u16 *)from, (u16 *)glyph);
+            }
+        }
+        node = node->next;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CD30);
 
@@ -327,7 +356,40 @@ void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F038);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F1C0);
+struct CampPacked;
+extern void mnuUnpackNibbleFields(struct CampPacked *, s32 *, s32 *);
+extern u32 itfMesGetWindowEntryItems(s32, s32);
+void evtViewerMarkWindowActive(EventViewerState *viewer);
+
+void func_0022F1C0(s32 id, EventViewerState *viewer) {
+    s32 low;
+    s32 high;
+    EvtViewNode *node;
+    EvtViewGlyph *glyph;
+
+    if (viewer->windowContext != 0) {
+        if (((EvtWindowContext *)viewer->windowContext)->windowHandle != -1) {
+            for (node = viewer->nodes; node != NULL; node = node->next) {
+                if (node->kind != 4) {
+                    continue;
+                }
+                for (glyph = node->glyphs; glyph != NULL; glyph = glyph->next) {
+                    if (glyph->id - 30 != id) {
+                        continue;
+                    }
+                    mnuUnpackNibbleFields((struct CampPacked *)glyph, &low, &high);
+                    if (itfMesGetWindowEntryItems(
+                            ((EvtWindowContext *)viewer->windowContext)->windowHandle, low) != 1) {
+                        continue;
+                    }
+                    evtViewerMarkWindowActive(viewer);
+                    break;
+                }
+                break;
+            }
+        }
+    }
+}
 
 void evtViewerCountFlaggedUpdates(EventViewerState *viewer) {
     s64 active;
