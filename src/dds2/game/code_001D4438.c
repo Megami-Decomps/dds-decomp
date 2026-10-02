@@ -3,7 +3,7 @@
 #include "pcp_vu0.h"
 
 extern s32 btlGetRuntime(void);
-extern void btlDispatchStateHandler();
+extern void btlDispatchStateHandler(s32 *obj, s32 kind);
 
 extern s32 func_00101740(const char *);
 
@@ -1412,12 +1412,12 @@ void func_001D4FE0(void) {
 }
 
 extern s32 btlCreateEffObjB();
-extern s32 btlStartTask();
-extern s32 sndHasActiveActor();
+extern u64 btlStartTask(SoundTask *);
+extern s32 sndHasActiveActor(void);
 extern s64 btlAdvanceRuntimeSequenceCounter(void);
-extern s32 btlCreateCommandSoundUpdateTask(void);
-extern s32 btlCreateSecondaryCommandSoundTask(void);
-extern s32 btlCreateCommandSoundTask();
+extern SoundTask *btlCreateCommandSoundUpdateTask(void);
+extern SoundTask *btlCreateSecondaryCommandSoundTask(void);
+extern SoundTask *btlCreateCommandSoundTask(s32, s32);
 extern void func_00211360();
 extern s32 func_0020F200();
 
@@ -1525,7 +1525,42 @@ void func_001D5330(u32 task) {
     func_001CAB60(task);
 }
 
-INCLUDE_ASM(const s32, "game/code_001D4438", func_001D5368);
+extern s32 fldGetSceneObjectState(void);
+extern void fldSetSceneObjectAndGroupStates(void);
+extern s32 btlIsSupportedCommandKind(s32 *);
+extern s32 btlAiCheckStatusRollEligibility(BtlTask *);
+
+void func_001D5368(SceneTask *task) {
+    BattleSceneWork *work = (BattleSceneWork *)btlGetRuntime();
+    s32 sceneObjectState;
+
+    if (work->flags & 0x20) {
+        return;
+    }
+    if ((task->flags & 4) == 0 && sndHasActiveActor() == 0 && btlCountTasksByKind(0x2E) == 0) {
+        btlStartTask(btlCreateCommandSoundUpdateTask());
+        btlStartTask(btlCreateSecondaryCommandSoundTask());
+        btlStartTask(btlCreateCommandSoundTask((s32)task, 9));
+        task->flags |= 4;
+    }
+
+    sceneObjectState = fldGetSceneObjectState();
+    if (sceneObjectState == 3 || sceneObjectState == 8) {
+        if (btlIsSupportedCommandKind(&task->command) != 0) {
+            btlDispatchStateHandler((s32 *)task, 7);
+        } else {
+            fldSetSceneObjectAndGroupStates();
+            if (btlAiCheckStatusRollEligibility((BtlTask *)task) != 0) {
+                btlDispatchStateHandler((s32 *)task, 0xB);
+            } else {
+                btlDispatchStateHandler((s32 *)task, 0xC);
+            }
+        }
+    } else if (work->flags & 0x8000) {
+        fldSetSceneObjectAndGroupStates();
+        btlDispatchStateHandler((s32 *)task, 9);
+    }
+}
 
 void btlCommandResultEffectSelect(u8 *task) {
     s32 selection;
