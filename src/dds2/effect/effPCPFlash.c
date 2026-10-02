@@ -80,7 +80,7 @@ struct PcpFlashStreakWork {
     f32 acrossSpan;
     f32 maxScale;
     f32 initialAngleSpread;
-    u8 pad3C[0x04];
+    u32 unk3C;
     PcpFlashRotatingParticle *parts;
     s32 updateCount;
     u32 colorParam;
@@ -600,7 +600,37 @@ void effFlashTrianglePulseUpdate(PcpFlashTrianglePulseWork *work) {
     effDrawTriangleRecordPool(handle);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", effFlashRotatingStreakCreate);
+extern u32 effMiscRand(void *);
+extern u8 D_003AA868[];
+extern PcpFlashDrawPool *func_00177760(u32 cellCount);
+
+PcpFlashStreakWork *effFlashRotatingStreakCreate(src)
+    PcpFlashStreakWork *src;
+{
+    u32 handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashRotatingParticle) + sizeof(PcpFlashStreakWork));
+    PcpFlashStreakWork *work = (PcpFlashStreakWork *)sdfResourceRetainAddress(handle);
+    PcpFlashDrawPool *record;
+    u32 range;
+    u32 i;
+
+    memcpy(work, src, 0x40);
+    work->parts = (PcpFlashRotatingParticle *)(work + 1);
+    work->ownedBuffer = handle;
+    work->colorParam = 0x80808080;
+    work->renderScale = 1.0f;
+    work->updateCount = 0;
+    if (work->randomRange == 0) {
+        work->randomRange = 1;
+    }
+    record = func_00177760(work->particleCount);
+    work->resourceHandle = (u32)record;
+    record->unk50 = work->unk3C;
+    range = work->randomRange;
+    for (i = 0; i < work->particleCount; i++) {
+        work->parts[i].age = -(effMiscRand(D_003AA868) % range);
+    }
+    return work;
+}
 
 void effFlashRotatingStreakSpawnFromTable(u64 table) {
     u64 effectParams;
@@ -609,8 +639,8 @@ void effFlashRotatingStreakSpawnFromTable(u64 table) {
     effFlashRotatingStreakCreate(effectParams);
 }
 
-void func_001724D0(void) {
-    effFlashRotatingStreakCreate();
+void func_001724D0(PcpFlashStreakWork *src) {
+    effFlashRotatingStreakCreate(src);
 }
 
 void effFlashRotatingStreakDestroy(PcpFlashStreakWork *work) {
@@ -765,7 +795,6 @@ void effRotateFlashParticlePosition(PcpFlashStreakWork *work, s32 index, void *o
     part->position[2] = position[2];
 }
 
-extern u32 effMiscRand(void *);
 extern s32 effBlendColor(s32, s32, f32);
 extern void effDrawScaledRecordPool(void *);
 extern u8 D_003AA868[];
@@ -852,7 +881,7 @@ void effFlashUpdateStreak(PcpFlashStreakWork *work) {
     effDrawScaledRecordPool(handle);
 }
 
-extern s32 func_00177760();
+extern PcpFlashDrawPool *func_00177760(u32 cellCount);
 
 PcpFlashScalingOrbitWork *effFlashOrbitScalingCreate(src)
     PcpFlashScalingOrbitWork *src;
@@ -1266,7 +1295,7 @@ typedef struct PcpFlashOrbitArcBlock {
     PcpFlashMotionParticle parts[1];
 } PcpFlashOrbitArcBlock;
 
-extern s32 func_00177760();
+extern PcpFlashDrawPool *func_00177760(u32 cellCount);
 
 PcpFlashOrbitArcWork *effFlashOrbitArcCreate(source)
 PcpFlashOrbitArcWork *source;
