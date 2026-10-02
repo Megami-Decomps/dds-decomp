@@ -40,6 +40,12 @@ typedef struct MenuItemSelectionData {
     s32 extentFactor;
 } MenuItemSelectionData;
 
+typedef struct ProfileCapSkillList {
+    u8 pad00[0x20];
+    s32 count;
+    u16 skillIds[8];
+} ProfileCapSkillList;
+
 typedef struct MenuItemScene {
     u8 pad00[4];
     u32 overlayFlags;
@@ -49,15 +55,17 @@ typedef struct MenuItemScene {
     MenuItemSelectionData *selectionData;
     u8 pad9C[0x1A4];
     u32 resetStateA;
-    u32 pendingSkillCount; /* Decremented as prfCapPresentMessages presents skills. */
-    u8 pad248[4];
+    s32 pendingSkillCount; /* Decremented as prfCapPresentMessages presents skills. */
+    s32 pendingSkillIndex;
     s32 selectionApplied;
     u8 pad250[0x174];
     u32 resetStateB;
     s32 selectedExtent;
     u32 activeSlot;
     s32 slots[5];
-    u8 pad3E4[0x29C];
+    u8 pad3E4[0xE0];
+    ProfileCapSkillList skillList;
+    u8 pad4F8[0x188];
     u32 listFlags; /* 0x680: start of the embedded list state */
     u8 pad684[0x68C];
     u32 panelGroup; /* 0xD10: passed to mnuSetPanelGroupSelection */
@@ -94,13 +102,49 @@ u32 mnuProcessItemSelection(u32 context) {
     MenuItemScene *scene;
 
     scene = (MenuItemScene *)context;
-    skillCount = ptyBuildProfileCapSkillList((u32)scene->selectionData->item, (s32)scene + 0x4c4);
+    skillCount = ptyBuildProfileCapSkillList(
+        (u32)scene->selectionData->item, (s32)&scene->skillList);
     scene->pendingSkillCount = skillCount;
     kwlnItemApplySelection(scene);
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00263148", prfCapPresentMessages);
+typedef struct DspUnitName {
+    u8 encodedText[17];
+} DspUnitName;
+
+extern DspUnitName *D_003BAA70;
+extern DspUnitName *D_003BAA8C;
+extern void evtCopyEntryStringToActiveWindow(s32, s32);
+extern s32 ptyGetCurrentProfileId(MenuItem *);
+extern s32 func_002CD240(u16, s32 *);
+
+void prfCapPresentMessages(MenuItemScene *scene) {
+    s32 message;
+    MenuItem *item = scene->selectionData->item;
+    s32 profileId = ptyGetCurrentProfileId(item);
+    u16 skillId;
+
+    if (scene->selectionApplied != 0) {
+        evtCopyEntryStringToActiveWindow(
+            0, (s32)D_003BAA70[item->kind].encodedText);
+        func_002CD240(profileId & 0xFFFF, &message);
+        evtCopyEntryStringToActiveWindow(1, message);
+        dspSetActive(1);
+        dspStartEntry(item->kind + 2);
+        scene->selectionApplied = 0;
+    } else if (scene->pendingSkillCount > 0) {
+        skillId = scene->skillList.skillIds[scene->pendingSkillIndex];
+        evtCopyEntryStringToActiveWindow(
+            0, (s32)D_003BAA70[item->kind].encodedText);
+        evtCopyEntryStringToActiveWindow(
+            1, (s32)D_003BAA8C[skillId].encodedText);
+        dspSetActive(1);
+        dspStartEntry(0);
+        scene->pendingSkillIndex++;
+        scene->pendingSkillCount--;
+    }
+}
 
 s32 kwlnItemDismissOverlay(MenuItemScene *scene) {
     if (scene->overlayFlags & 1) {
@@ -154,13 +198,6 @@ typedef struct ActiveItemSlots {
     s32 values[5];
     s32 count;
 } ActiveItemSlots;
-
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
-
-extern DspUnitName *D_003BAA70;
-extern void evtCopyEntryStringToActiveWindow(s32, s32);
 
 void func_00263640(MenuItemScene *scene) {
     ActiveItemSlots active;
