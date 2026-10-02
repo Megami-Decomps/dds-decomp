@@ -6254,6 +6254,7 @@ fileRequestEntries = 0x00457F68;
 fileRequestSlotFlags = 0x00457F7C;
 sdfInstalledSpriteSlots = 0x0045C7C0;
 mnuStepCounterThreshold = 0x0045C866;
+sdfGeneralHeap = 0x0045F0F8;
 sdfTextureQueueWork = 0x004681F8;
 sdfPadPorts = 0x00476480;
 sndMidiTrackState = 0x0047AA40;
