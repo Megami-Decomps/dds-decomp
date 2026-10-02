@@ -77,7 +77,7 @@ INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F190);
 extern s32 dds3GetObjectOwnedHandle(void *object);
 extern void *sdfCreateFormattedSifCommand(s32 x, s32 y, s32 flags, s32 mode, const char *format, ...);
 extern void sdfAppendPacket(void *list, void *packet);
-const char D_00412778[0x18] = "FLAG  : 0x%08X";
+extern const char D_00412778[]; /* "FLAG  : 0x%08X" */
 
 u32 func_0010F490(void *object, s32 x, s32 y, void *list) {
     void *handle;
@@ -331,6 +331,8 @@ void effObjMulInnerThirdVec(EffTransformNode *node, u128 *vector) {
     VU0_MUL(vf10, vf10, vf11);
     VU0_STORE_VF($vf10, &inner->vec60);
 }
+
+INCLUDE_RODATA(const s32, "game/code_0010F118", D_00412778);
 
 INCLUDE_SDATA(const s32, "game/code_0010F118", D_00435D70);
 
