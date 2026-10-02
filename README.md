@@ -156,8 +156,9 @@ the other automatically (`tools/shared_funcs.py`).
 **Can I mod the game with this?**
 Not comfortably yet. The experimental `dds1-dev` target can relocate one
 complete code unit's `.text` into an appended loadable segment without
-changing the exact retail targets, but convenient added code, broader data
-relocation, and DDS2 support are still future work.
+changing the exact retail targets. It also links a development-only C entry
+hook and state block. Changed-size replacement units, broader data relocation,
+and DDS2 support are still future work.
 
 ## Names
 
