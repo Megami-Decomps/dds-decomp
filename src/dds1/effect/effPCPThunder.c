@@ -176,7 +176,44 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00163780);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00163AF8);
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00163CD0);
+extern void func_00163780(EffThunderVectorWork *, s32);
+extern void func_00163AF8(EffThunderVectorWork *, s32);
+
+void func_00163CD0(EffThunderVectorWork *work) {
+    s32 i = 0;
+    EffThunderParSystem *system = work->system;
+    s32 count = work->head.count;
+    u32 color = work->color;
+    EffThunderVectorCell *cell = work->cells;
+    EffThunderParCell *particles = system->cells;
+    u32 *particleColor;
+
+    if (count > 0) {
+        particleColor = &particles->color;
+        do {
+            if (cell->delayFrames == 0) {
+                if (cell->activeFrames != 0) {
+                    func_00163780(work, i);
+                    func_00163AF8(work, i);
+                    cell->activeFrames--;
+                } else if (cell->color & 0xFF000000) {
+                    cell->color += 0xE0000000;
+                    func_00163AF8(work, i);
+                } else {
+                    effThunderCellRestart(work, i);
+                    parCellInit(work->system, i);
+                }
+            } else {
+                cell->delayFrames--;
+            }
+            *particleColor = effMultiplyPackedColors(cell->color, color);
+            i++;
+            cell++;
+            particleColor = (u32 *)((u8 *)particleColor + sizeof(EffThunderParCell));
+        } while (i < count);
+    }
+    parPrependCellNode(work->system);
+}
 
 EffThunderVectorWork *effThunderWorkCreate(EffThunderVectorParams *src) {
     u32 handle = sdfAllocGeneralBlock(src->count * sizeof(EffThunderVectorCell) + sizeof(EffThunderVectorWork));
@@ -268,7 +305,44 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_001642B0);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_001645A0);
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_001646F8);
+extern void func_001642B0(EffThunderVectorWork *, s32);
+extern void func_001645A0(EffThunderVectorWork *, s32);
+
+void func_001646F8(EffThunderVectorWork *work) {
+    s32 i = 0;
+    EffThunderParSystem *system = work->system;
+    s32 count = work->head.count;
+    u32 color = work->color;
+    EffThunderVectorCell *cell = work->cells;
+    EffThunderParCell *particles = system->cells;
+    u32 *particleColor;
+
+    if (count > 0) {
+        particleColor = &particles->color;
+        do {
+            if (cell->delayFrames == 0) {
+                if (cell->activeFrames != 0) {
+                    func_001642B0(work, i);
+                    func_001645A0(work, i);
+                    cell->activeFrames--;
+                } else if (cell->color & 0xFF000000) {
+                    cell->color += 0xE0000000;
+                    func_001645A0(work, i);
+                } else {
+                    effThunderRestartIndexedCell(work, i);
+                    parCellInit(work->system, i);
+                }
+            } else {
+                cell->delayFrames--;
+            }
+            *particleColor = effMultiplyPackedColors(cell->color, color);
+            i++;
+            cell++;
+            particleColor = (u32 *)((u8 *)particleColor + sizeof(EffThunderParCell));
+        } while (i < count);
+    }
+    parPrependCellNode(work->system);
+}
 
 /* Parameter head (0xA4 bytes) of the spark effect, copied verbatim into the work. */
 typedef struct {
