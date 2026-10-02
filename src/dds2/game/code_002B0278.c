@@ -179,6 +179,77 @@ typedef struct MenuSlot {
     u16 flags;
 } MenuSlot;
 
+typedef struct MenuSprites {
+    u8 unk0[0x10];
+    void *icon[5];
+    void *item[11];
+    void *cursor[4];
+    s32 fade;
+    u8 pad64[0x10];
+    u8 unk74;
+    u8 unk75;
+} MenuSprites;
+typedef struct MenuPageGauge {
+    s32 resourceIndex; /* Negative values have no entry in the window's resource banks. */
+    u8 pad4[4];
+    s32 hp;
+    s32 mp;
+    s32 maxHp;
+    s32 maxMp;
+    u8 pad18[0x18];
+} MenuPageGauge;
+
+typedef struct MenuPageEntry {
+    s32 partyIndex;
+    MenuPageGauge gauge;
+} MenuPageEntry; /* 0x34-byte party row */
+
+/* Counts belong to the table header, not to every party row. */
+typedef struct MenuPageRecord {
+    s32 visibleCount;
+    s32 additionalCount;
+    u32 unk8;
+    MenuPageEntry entries[5];
+} MenuPageRecord;
+
+/* HP/MP display record; the trailing reset values have no named read here. */
+typedef struct MenuPageBar {
+    u8 pad00[0x10];
+    s32 percentage;
+    u8 pad14[0x30];
+    u32 unk44;
+    u32 unk48;
+    u8 pad4C[4];
+} MenuPageBar;
+
+/* A DDS2 party slot contains both stat displays and its owned sprite sets. */
+typedef struct MenuPageSlot {
+    s32 kind;
+    u32 flags;
+    u8 pad08[8];
+    u32 icon[3];
+    MenuPageBar hp;
+    MenuPageBar mp;
+    u32 frame[8];
+    MenuSprites *windowSprites;
+    u32 iconBundle;
+    u8 padE4[0x2138 - 0xE4];
+} MenuPageSlot;
+
+typedef struct MenuPageWindow {
+    u32 flags;
+    u8 pad4[4];
+    MenuPageRecord *records;
+    u8 padC[0x18];
+    s32 handlesA[8];
+    s32 handlesB[8];
+    s32 handlesC[5];
+    MenuPageSlot slots[5];
+    MenuList *lists[2];
+    s32 selected;
+    u32 unkA69C;
+    s32 fade;
+} MenuPageWindow;
 /* Menu runtime fields shared by the party, panel and resource handlers. */
 typedef struct MenuContext {
     u8 pad00[0x54];
@@ -196,14 +267,7 @@ typedef struct MenuContext {
     u8 pad110[8];
     s32 panelHandle;       /* 0x118 */
     u8 pad11C[0x168];
-    u32 actionFlags;       /* 0x284 */
-    u8 pad288[0xA408];
-    MenuList *selectedPartyList; /* 0xA690 */
-    MenuList *secondPartyList;   /* 0xA694 */
-    u8 padA698[0x27C];
-    MenuList *selectionList;     /* 0xA914 */
-    MenuList *targetList;        /* 0xA918 */
-    u8 padA91C[0xC];
+    MenuPageWindow partyWindow; /* 0x284: lists, page slots and selection */
     s32 partyPanelActive;  /* 0xA928 */
     s32 partyPanelLast;    /* 0xA92C */
     u8 padA930[0x104];
@@ -401,14 +465,6 @@ typedef struct MenuListDefaults {
 
 extern MenuListDefaults D_0042AF00;
 
-typedef struct MenuLink {
-    u8 unk0[0x48];
-    u32 flags;
-    u8 unk4C[0xC];
-    struct MenuLink *next;
-    u8 unk5C[4];
-    u16 id;
-} MenuLink;
 
 extern void func_002B0278(s32);
 
@@ -451,7 +507,7 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B06A8);
 s64 mnuUpdatePartySlotAssignmentPopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *popup = ((MenuContext *)context)->popupState;
-    s32 slot = datGameState + ((MenuContext *)context)->selectionList->cursor->index * 0x1c4 + 0xa60;
+    s32 slot = datGameState + ((MenuContext *)context)->partyWindow.lists[0]->cursor->index * 0x1c4 + 0xa60;
     u8 *menu = (u8 *)((MenuContext *)context)->party;
     s64 state = func_002C4038(context + 8, popup, 0, callback);
     s32 label;
@@ -504,7 +560,7 @@ void mnuClearPartySelectionValues(u32 context, s32 selection) {
 
 u32 mnuEnterSlotLabel(void) {
     s32 context = kwlnTaskGetUserValue();
-    s32 slot = datGameState + ((MenuContext *)context)->selectionList->cursor->index * 0x1c4 + 0xa60;
+    s32 slot = datGameState + ((MenuContext *)context)->partyWindow.lists[0]->cursor->index * 0x1c4 + 0xa60;
     s32 selectedEntry;
     func_002C1B68(context + 0xaa50, 1);
     selectedEntry = mnuGetPartyEntryCurrentId(slot);
@@ -522,7 +578,7 @@ u32 func_002B0B88(void) {
 s64 mnuPartySlotConfirmClearUpdate(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *popup = ((MenuContext *)context)->popupState;
-    s32 slot = datGameState + ((MenuContext *)context)->selectionList->cursor->index * 0x1c4 + 0xa60;
+    s32 slot = datGameState + ((MenuContext *)context)->partyWindow.lists[0]->cursor->index * 0x1c4 + 0xa60;
     s64 state = func_002C4038(context + 8, popup, 0, callback);
     s32 selectedEntry;
     if (state != 0) {
@@ -861,7 +917,7 @@ s64 mnuStaffPopupUpdate(s32 callback) {
         window = (u8 *)(context + 0x284);
         func_002BD480(4, window);
         if (buttons & 1) {
-            ((MenuPartyRuntime *)menu)->staffSelection = ((MenuContext *)context)->selectionList->cursor->index;
+            ((MenuPartyRuntime *)menu)->staffSelection = ((MenuContext *)context)->partyWindow.lists[0]->cursor->index;
             mnuSetPopupEntry(popup, D_003E75E0);
             *(s32 *)(menu + 0x24) = 1;
         }
@@ -936,9 +992,7 @@ s32 mnuDestroyPanels(s32 callback) {
 }
 
 void mnuResetSelectedPanelOpacity(s32 context) {
-    *(u32 *)
-      (*(s32 *)(((MenuContext *)context)->selectionList->cursor->index * 0x2138 + context + 0x3d8) + 0x60) =
-              0x100;
+    ((MenuContext *)context)->partyWindow.slots[((MenuContext *)context)->partyWindow.lists[0]->cursor->index].windowSprites->fade = 0x100;
 }
 
 s32 mnuStaffSwitchPartyPage(s32 callback) {
@@ -948,15 +1002,15 @@ s32 mnuStaffSwitchPartyPage(s32 callback) {
     u32 buttons = mnuMapPadMaskToFlags(0x300);
     if (buttons & 0x100) {
         mnuDestroyPanels(callback);
-        mnuRetreatListCursorDefault(((MenuContext *)context)->selectionList);
+        mnuRetreatListCursorDefault(((MenuContext *)context)->partyWindow.lists[0]);
         changed = 1;
     }
     if ((buttons & 0x200) && changed == 0) {
         mnuDestroyPanels(callback);
-        mnuAdvanceListCursorDefault(((MenuContext *)context)->selectionList);
+        mnuAdvanceListCursorDefault(((MenuContext *)context)->partyWindow.lists[0]);
         changed = 1;
     }
-    mnuClearListFlagsOneAndTwo(((MenuContext *)context)->selectionList);
+    mnuClearListFlagsOneAndTwo(((MenuContext *)context)->partyWindow.lists[0]);
     if (changed != 0) {
         mnuCreatePanels(callback);
         sndSetSequenceVolumePan(4, 0x7F, 0x3F);
@@ -1022,7 +1076,7 @@ s64 mnuStaffBrowsePartyUpdate(s32 callback) {
 }
 
 void mnuDrawSlotIcons(s32 x, s32 context) {
-    s32 slot = datGameState + ((MenuContext *)context)->selectedPartyList->cursor->index * 0x1c4 + 0xa60;
+    s32 slot = datGameState + ((MenuPageWindow *)context)->lists[0]->cursor->index * 0x1c4 + 0xa60;
     s32 i;
     s32 y = 0xb40;
     s32 handle;
@@ -1038,8 +1092,7 @@ void mnuDrawSlotIcons(s32 x, s32 context) {
 void mnuDrawSelectedPartySlotMarkers(s32 context, u32 *handles) {
     s32 alpha;
 
-    alpha = 0x100 - *(s32 *)(*(s32 *)(((MenuContext *)context)->selectedPartyList->cursor->index * 0x2138 + context
-                                                                      + 0x154) + 0x60);
+    alpha = 0x100 - ((MenuPageWindow *)context)->slots[((MenuPageWindow *)context)->lists[0]->cursor->index].windowSprites->fade;
     func_00306CD0(0xa0, 0xa30, 0, alpha, 1, handles[1], 0x55, 0x53);
     func_00306CD0(0x30, 0xaf8, 0, alpha, 1, *handles, 0x1a, 0x53);
 }
@@ -1387,7 +1440,7 @@ void ptySkillMenuHandleSlotReorder(s32 callback) {
     s32 menu = ((MenuContext *)context)->party;
     u32 input = mnuMapPadMaskToFlags(0x37);
     MenuWindowContainer *window = ((MenuPartyRuntime *)menu)->selectedWindow;
-    s32 slot = datGameState + ((MenuContext *)context)->selectionList->cursor->index * 0x1c4 + 0xa60;
+    s32 slot = datGameState + ((MenuContext *)context)->partyWindow.lists[0]->cursor->index * 0x1c4 + 0xa60;
     MenuList *list = window->list;
 
     list->stateFlags &= ~8;
@@ -1538,8 +1591,8 @@ s32 ptySkillMenuApplyFieldUseAndCost(id, context)
     s32 context;
 {
     s32 window = context + 0x284;
-    s32 slotA = datGameState + ((MenuContext *)context)->selectionList->cursor->index * 0x1c4 + 0xa60;
-    s32 slotB = datGameState + ((MenuContext *)context)->targetList->cursor->index * 0x1c4 + 0xa60;
+    s32 slotA = datGameState + ((MenuContext *)context)->partyWindow.lists[0]->cursor->index * 0x1c4 + 0xa60;
+    s32 slotB = datGameState + ((MenuContext *)context)->partyWindow.lists[1]->cursor->index * 0x1c4 + 0xa60;
     if (mnuIsEntryCostUnaffordable(id, slotA) != 0) {
         return 0;
     }
@@ -1553,13 +1606,15 @@ s32 ptySkillMenuApplyFieldUseAndCost(id, context)
     return 0;
 }
 
+/* Mark entries whose field-use cost cannot be paid by the selected party member. */
 void mnuFlagMatchingEntries(s32 context) {
-    s32 slot = datGameState + ((MenuContext *)context)->selectionList->cursor->index * 0x1c4 + 0xa60;
-    MenuLink *link = (MenuLink *)((MenuPartyRuntime *)((MenuContext *)context)->party)->selectedWindow->list->first;
+    s32 slot = datGameState + ((MenuContext *)context)->partyWindow.lists[0]->cursor->index * 0x1c4 + 0xa60;
+    MenuListNode *link = ((MenuPartyRuntime *)((MenuContext *)context)->party)->selectedWindow->list->first;
     if (link != NULL) {
         do {
-            if (mnuIsEntryCostUnaffordable(link->id, slot)) {
-                link->flags |= 1;
+            /* Cost lookup uses the low halfword of the list key. */
+            if (mnuIsEntryCostUnaffordable((u16)link->sortKeyPrimary, slot)) {
+                link->flags48 |= 1;
             }
             link = link->next;
         } while (link != NULL);
@@ -1582,10 +1637,10 @@ s64 ptySkillMenuHandleFieldUse(s32 callback) {
     label = ((MenuPartyRuntime *)menu)->selectedWindow->list->cursor->sortKeyPrimary;
     code = label;
     if (mnuGetAbilityByteCategory(code) == 2) {
-        ((MenuContext *)context)->actionFlags |= 0x10;
+        ((MenuContext *)context)->partyWindow.flags |= 0x10;
     }
     if (mnuGetAbilityByteCategory(code) == 3) {
-        ((MenuContext *)context)->actionFlags |= 0x20;
+        ((MenuContext *)context)->partyWindow.flags |= 0x20;
     }
     window = (u8 *)(context + 0x284);
     func_002BD480(8, window);
@@ -1623,8 +1678,8 @@ s32 ptySkillMenuOpenPartyPage(s32 callback) {
     s32 party = ((MenuContext *)context)->party;
     MenuWindowContainer *window;
 
-    mnuSelectPage(context + 0x284, ((MenuContext *)context)->selectionList->cursor->index);
-    ((MenuContext *)context)->actionFlags |= 0x200;
+    mnuSelectPage(&((MenuContext *)context)->partyWindow, ((MenuContext *)context)->partyWindow.lists[0]->cursor->index);
+    ((MenuContext *)context)->partyWindow.flags |= 0x200;
     func_002B3E80(0, callback);
     func_002B4848(context);
     window = ((MenuPartyRuntime *)party)->selectedWindow;
@@ -1648,15 +1703,15 @@ s32 ptySkillMenuHandlePageSwitch(s32 callback) {
     u32 buttons = mnuMapPadMaskToFlags(0x300);
     if (buttons & 0x100) {
         ptySkillMenuClosePartyPage(callback);
-        mnuRetreatListCursorDefault(((MenuContext *)context)->selectionList);
+        mnuRetreatListCursorDefault(((MenuContext *)context)->partyWindow.lists[0]);
         changed = 1;
     }
     if ((buttons & 0x200) && changed == 0) {
         ptySkillMenuClosePartyPage(callback);
-        mnuAdvanceListCursorDefault(((MenuContext *)context)->selectionList);
+        mnuAdvanceListCursorDefault(((MenuContext *)context)->partyWindow.lists[0]);
         changed = 1;
     }
-    mnuClearListFlagsOneAndTwo(((MenuContext *)context)->selectionList);
+    mnuClearListFlagsOneAndTwo(((MenuContext *)context)->partyWindow.lists[0]);
     if (changed != 0) {
         ptySkillMenuOpenPartyPage(callback);
         sndSetSequenceVolumePan(4, 0x7F, 0x3F);
@@ -3556,22 +3611,14 @@ void mnuReleasePartyPanelTextures(s32 menu) {
     } while (index < 5);
 }
 
-typedef struct MenuPartySlotValues {
-    u8 pad00[0x60];
-    u32 mainScale; /* 0x60 */
-    u32 mainFade;  /* 0x64 */
-    u8 pad68[0x48];
-    u32 backScale; /* 0xB0 */
-    u32 backFade;  /* 0xB4 */
-} MenuPartySlotValues;
 
 void mnuResetPartyPanelFade(u8 *menu, s32 index, u32 unused, u32 preserve) {
-    u8 *entry = menu + index * 0x2138 + 0x78;
-    ((MenuPartySlotValues *)entry)->mainFade = 0;
-    ((MenuPartySlotValues *)entry)->backFade = 0;
+    MenuPageSlot *entry = &((MenuPageWindow *)menu)->slots[index];
+    entry->hp.unk48 = 0;
+    entry->mp.unk48 = 0;
     if (preserve == 0) {
-        ((MenuPartySlotValues *)entry)->mainScale = 0x100;
-        ((MenuPartySlotValues *)entry)->backScale = 0x100;
+        entry->hp.unk44 = 0x100;
+        entry->mp.unk44 = 0x100;
     }
 }
 
@@ -3616,12 +3663,6 @@ extern s32 effDestroyResourceSlotSet();
 
 extern void sdfReleaseChipBlock();
 
-typedef struct MenuSprites {
-    u8 unk0[0x10];
-    void *icon[5];
-    void *item[11];
-    void *cursor[4];
-} MenuSprites;
 
 void mnuFreeIconSprites(MenuSprites *menu) {
     u32 i;
@@ -3643,63 +3684,46 @@ void mnuFreeIconSprites(MenuSprites *menu) {
 
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 
-typedef struct MenuIconSet {
-    u8 pad0[0x10];
-    s32 icon[5];
-    u8 pad24[0x3C];
-    s32 sprite;
-} MenuIconSet;
 
-void mnuDrawIconRow(s32 a0, s32 a1, s32 x, s32 skip, MenuIconSet *set, s32 arg) {
+void mnuDrawIconRow(s32 unusedA, s32 unusedB, s32 depth, s32 skip, MenuSprites *set, s32 drawArg) {
     u32 i;
     if (skip == 0) {
         for (i = 0; i < 5; i++) {
-            func_00306CD0(0xBC0, 0x3C8, x, set->sprite, 0, set->icon[i], 0, arg);
+            func_00306CD0(0xBC0, 0x3C8, depth, set->fade, 0, (s32)set->icon[i], 0, drawArg);
         }
     }
 }
 
 extern void *func_002BBA38();
 
-typedef struct MenuWindow {
-    u8 unk0[0x154 - 0x78];
-    void *handle;
-    u8 unk158[0x2138 - 0xDC - 4];
-} MenuWindow;
 
-typedef struct MenuWindows {
-    u32 flags;
-    u8 unk4[0x74];
-    MenuWindow win[5];
-} MenuWindows;
-
-void mnuSetWindowResource(s32 index, MenuWindows *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6) {
-    mnuSelectPage(menu, index);
-    menu->win[index].handle = func_002BBA38(0, a2, a3, a4, a5, a6);
-    menu->flags |= 0x80;
+void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6) {
+    mnuSelectPage((MenuPageWindow *)menu, index);
+    ((MenuPageWindow *)menu)->slots[index].windowSprites = func_002BBA38(0, a2, a3, a4, a5, a6);
+    ((MenuPageWindow *)menu)->flags |= 0x80;
 }
 
 void mnuSetIndexedWindowPageSpriteFlags(s32 index, u8 *menu, u32 first, u32 second) {
-    u8 **slot = (u8 **)(menu + index * 0x2138 + 0x154);
+    MenuSprites **slot = &((MenuPageWindow *)menu)->slots[index].windowSprites;
     if (*slot != NULL) {
-        (*slot)[0x74] = first;
-        (*slot)[0x75] = second;
+        (*slot)->unk74 = first;
+        (*slot)->unk75 = second;
     }
 }
 
 void mnuClearEntries(u8 *menu) {
-    u8 *entry = menu + 0x154;
+    MenuSprites **entry = &((MenuPageWindow *)menu)->slots[0].windowSprites;
     u32 i = 0;
     mnuClearPageSelectionHandles(menu);
     do {
-        if (*(u32 *)entry != 0) {
-            mnuFreeIconSprites(*(u32 *)entry);
-            *(u32 *)entry = 0;
+        if (*entry != NULL) {
+            mnuFreeIconSprites(*entry);
+            *entry = NULL;
         }
         i++;
-        entry += 0x2138;
+        entry += sizeof(MenuPageSlot) / sizeof(*entry);
     } while (i < 5);
-    *(u32 *)menu &= ~0x80;
+    ((MenuPageWindow *)menu)->flags &= ~0x80;
 }
 
 extern void itfSetGridEntryQuantizedAndRefresh();
@@ -3714,10 +3738,12 @@ typedef struct MenuIconLayout {
     MenuIconEntry entry[3];
 } MenuIconLayout;
 
+/* The allocated three-icon bundle also owns its draw fade and fade direction. */
 typedef struct MenuIconBundle {
     u32 unk0[3];
     void *sprite[3];
-    u32 unk18[2];
+    s32 fade;
+    s32 fadeOut;
 } MenuIconBundle;
 
 extern MenuIconLayout D_0042AFD8;
@@ -3735,28 +3761,22 @@ u32 mnuCreateIconBundle(u32 resource) {
     return (u32)set;
 }
 
-void mnuReleaseIconBundleAndSprites(u32 *menu) {
+void mnuReleaseIconBundleAndSprites(MenuIconBundle *menu) {
     u32 i = 0;
     do {
-        effDestroyResourceSlotSet(menu[i + 3]);
+        effDestroyResourceSlotSet((u32)menu->sprite[i]);
         i++;
     } while (i < 3);
     sdfReleaseChipBlock(menu);
 }
 
-typedef struct MenuFadeIcons {
-    u8 unk0[0xC];
-    s32 icon[3];
-    s32 fade;
-    s32 fadeOut;
-} MenuFadeIcons;
 
-void mnuDrawFadeIcons(s32 a0, s32 a1, s32 a2, s32 a3, MenuFadeIcons *obj, s32 a5) {
+void mnuDrawFadeIcons(s32 x, s32 y, s32 depth, s32 unused, MenuIconBundle *obj, s32 drawArg) {
     s32 fade = obj->fade;
     s32 next;
-    func_00306CD0(a0, a1, a2, fade, 0, obj->icon[0], 0, a5);
-    func_00306CD0(a0, a1, a2, fade, 0, obj->icon[1], 0, a5);
-    func_00306CD0(a0, a1, a2, fade, 0, obj->icon[2], 0, a5);
+    func_00306CD0(x, y, depth, fade, 0, (s32)obj->sprite[0], 0, drawArg);
+    func_00306CD0(x, y, depth, fade, 0, (s32)obj->sprite[1], 0, drawArg);
+    func_00306CD0(x, y, depth, fade, 0, (s32)obj->sprite[2], 0, drawArg);
     if (obj->fadeOut == 0) {
         MNU_ADVANCE_FADE(obj->fade, 0x10, 0x100);
     } else {
@@ -3771,30 +3791,25 @@ void mnuDrawFadeIcons(s32 a0, s32 a1, s32 a2, s32 a3, MenuFadeIcons *obj, s32 a5
     }
 }
 
-/* DDS2 party panels use a 0x2138-byte slot, unlike DDS1's 0x134-byte slot. */
-typedef struct MenuPartyIconSlot {
-    u32 bundle;
-    u8 pad04[0x2134];
-} MenuPartyIconSlot;
 
 void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource) {
     u32 bundle;
 
     bundle = mnuCreateIconBundle(resource);
-    ((MenuPartyIconSlot *)(menu + 0x158))[index].bundle = bundle;
+    ((MenuPageWindow *)menu)->slots[index].iconBundle = bundle;
 }
 
 void mnuReleasePartyIconBundles(u8 *menu) {
-    MenuPartyIconSlot *slot = (MenuPartyIconSlot *)(menu + 0x158);
+    u32 *bundle = &((MenuPageWindow *)menu)->slots[0].iconBundle;
     u32 i = 0;
     do {
-        u32 resource = slot->bundle;
+        u32 resource = *bundle;
         i++;
         if (resource != 0) {
-            mnuReleaseIconBundleAndSprites((u32 *)resource);
-            slot->bundle = 0;
+            mnuReleaseIconBundleAndSprites((MenuIconBundle *)resource);
+            *bundle = 0;
         }
-        slot++;
+        bundle += sizeof(MenuPageSlot) / sizeof(*bundle);
     } while (i < 5);
 }
 
@@ -3817,40 +3832,7 @@ void mnuReleasePartyPanelSpriteTextures(u8 *menu) {
     } while (i < 5);
 }
 
-typedef struct MenuPageGauge {
-    s32 id;
-    u8 pad4[4];
-    s32 hp;
-    s32 mp;
-    s32 maxHp;
-    s32 maxMp;
-    u8 pad18[0x18];
-} MenuPageGauge;
 
-typedef struct MenuPageEntry {
-    s32 partyIndex;
-    MenuPageGauge gauge;
-} MenuPageEntry; /* 0x34-byte party row */
-
-/* Counts belong to the table header, not to every party row. */
-typedef struct MenuPageRecord {
-    s32 visibleCount;
-    s32 additionalCount;
-    u32 unk8;
-    MenuPageEntry entries[5];
-} MenuPageRecord;
-
-typedef struct MenuPageWindow {
-    u32 flags;
-    u8 pad4[4];
-    MenuPageRecord *records;
-    u8 padC[0x18];
-    s32 handlesA[8];
-    s32 handlesB[8];
-    s32 handlesC[5];
-    u8 pad78[0xA698 - 0x78];
-    s32 selected;
-} MenuPageWindow;
 
 /* Copy eight resource handles into the window's primary handle bank. */
 void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, u32 *source) {
@@ -3910,7 +3892,7 @@ void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 flag) {
     }
     for (i = 0, offset = 0; i < 5; i++, offset += 0x34) {
         MenuPageRecord *entries = menu->records;
-        if (((MenuPageEntry *)((u8 *)entries->entries + offset))->gauge.id >= 0) {
+        if (((MenuPageEntry *)((u8 *)entries->entries + offset))->gauge.resourceIndex >= 0) {
             if ((s32)i < entries->visibleCount) {
                 func_002BC690(menu, i, 1);
             } else {
@@ -3931,24 +3913,24 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002BCAB0);
 extern char D_00437C30[];
 
 /* Create both party-panel lists and append their shared row labels. */
-void mnuInitScrollLists(MenuContext *menu, s32 *counts) {
+void mnuInitScrollLists(MenuPageWindow *menu, s32 *counts) {
     s32 i = 0;
-    menu->selectedPartyList = mnuCreateListState(0, 1, 1);
-    menu->secondPartyList = mnuCreateListState(0, 1, 1);
+    menu->lists[0] = mnuCreateListState(0, 1, 1);
+    menu->lists[1] = mnuCreateListState(0, 1, 1);
     if (counts[0] + counts[1] > 0) {
         do {
-            mnuListAppendNode(menu->selectedPartyList, D_00437C30);
+            mnuListAppendNode(menu->lists[0], D_00437C30);
             i++;
-            mnuListAppendNode(menu->secondPartyList, D_00437C30);
+            mnuListAppendNode(menu->lists[1], D_00437C30);
         } while (i < counts[0] + counts[1]);
     }
 }
 
 void mnuDestroyWindowOwnedLists(context)
-    MenuContext *context;
+    MenuPageWindow *context;
 {
-    mnuDestroyListState(context->selectedPartyList);
-    mnuDestroyListState(context->secondPartyList);
+    mnuDestroyListState(context->lists[0]);
+    mnuDestroyListState(context->lists[1]);
 }
 
 void mnuRebuildScrollLists(u32 context, u32 counts) {
@@ -3958,9 +3940,9 @@ void mnuRebuildScrollLists(u32 context, u32 counts) {
 
 typedef struct MenuSlotWindow {
     u8 unk0[0xC0];
-    u32 fieldC0;
+    u32 unkC0;
     u8 unkC4[0x110 - 0xC4];
-    u32 field110;
+    u32 unk110;
     u8 unk114[0x2138 - 0x114];
 } MenuSlotWindow;
 
@@ -3975,8 +3957,8 @@ typedef struct MenuWindowSet {
 void mnuClearPageSelection(MenuWindowSet *set) {
     if (set->selected >= 0) {
         MenuSlotWindow *slots = set->slots;
-        slots[set->selected].fieldC0 = 0x100;
-        slots[set->selected].field110 = 0x100;
+        slots[set->selected].unkC0 = 0x100;
+        slots[set->selected].unk110 = 0x100;
         set->selected = -1;
     }
     set->flags &= ~0x200;
@@ -3984,14 +3966,8 @@ void mnuClearPageSelection(MenuWindowSet *set) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002BCD90);
 
-typedef struct MenuWindowSprites {
-    u8 unk0[0x10];
-    u32 icon[3];
-    u8 unk1C[0xBC - 0x1C];
-    u32 frame[8];
-} MenuWindowSprites;
 
-void mnuFreeWindowSprites(MenuWindowSprites *win) {
+void mnuFreeWindowSprites(MenuPageSlot *win) {
     u32 i;
     for (i = 0; i < 3; i++) {
         if (win->icon[i] != 0) {
@@ -4025,9 +4001,9 @@ void mnuFreeWindowSprites(MenuWindowSprites *win) {
 }
 
 void mnuShutdownContext(u8 *ctx) {
-    u8 *slot = ctx + 0x78;
+    MenuPageSlot *slot = ((MenuPageWindow *)ctx)->slots;
     u32 i;
-    for (i = 0; i < 5; i++, slot += 0x2138) {
+    for (i = 0; i < 5; i++, slot++) {
         mnuFreeWindowSprites(slot);
     }
     mnuReleasePartyPanelSpriteTextures(ctx);
@@ -4042,7 +4018,7 @@ void mnuResolveUnselectedPageHandles(MenuPageWindow *window) {
 
     for (i = 0; i < 5; i++, offset += sizeof(MenuPageEntry)) {
         if (i != selected) {
-            s32 id = ((MenuPageEntry *)((u8 *)window->records->entries + offset))->gauge.id;
+            s32 id = ((MenuPageEntry *)((u8 *)window->records->entries + offset))->gauge.resourceIndex;
 
             if (id >= 0) {
                 if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
@@ -4062,7 +4038,7 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
 
     for (i = 0; i < 5; i++) {
         record = &window->records->entries[i];
-        id = record->gauge.id;
+        id = record->gauge.resourceIndex;
         if (id >= 0) {
             if (effHasFirstTextureHandle(window->handlesA[id]) != 0) {
                 effReleaseTextureHandlesAndResetSlots(window->handlesA[id]);
@@ -4071,7 +4047,7 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
         }
     }
     record = &window->records->entries[selected];
-    id = record->gauge.id;
+    id = record->gauge.resourceIndex;
     if (id >= 0) {
         if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
             effResolveAndReleaseResource(window->handlesA[id]);
