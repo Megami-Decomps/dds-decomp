@@ -646,7 +646,66 @@ s32 func_00307D70(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
     return 0x10000 / table->cycleDivisor;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00307EF8);
+/* Apply the angle-driven grid contraction and mirrored packed-color fade. */
+s32 func_00307EF8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
+    GridAngleTable *table = owner->slot->table;
+    s32 deltas[2];
+    s32 *dimensionOut = (s32 *)((u8 *)out + 4);
+    s32 colorFactor;
+    u32 *sourceColor;
+    u32 *destColor;
+    s32 i = 0;
+
+    deltas[0] = (rectangle->right - rectangle->left) << 4;
+    deltas[1] = (rectangle->bottom - rectangle->top) << 3;
+    {
+        s32 fractionalMask = 0xFFFF;
+
+        for (; i < 2; i++) {
+            s32 delta = deltas[i];
+            s32 magnitude = delta < 0 ? -delta : delta;
+            s32 product = magnitude * owner->angle;
+            s32 negative = 0;
+            s32 scaled;
+
+            if (product < 0) {
+                negative++;
+            }
+            scaled = (product + negative * fractionalMask) >> 16;
+            if (delta > 0) {
+                dimensionOut[i] = delta - scaled;
+            } else {
+                dimensionOut[i] = delta + scaled;
+            }
+        }
+    }
+
+    if (table->mirrored != 0) {
+        colorFactor = 0x10000 - owner->angle;
+    } else {
+        colorFactor = owner->angle;
+    }
+    sourceColor = rectangle->colors;
+    destColor = (u32 *)((u8 *)dimensionOut + 0x10);
+    {
+        s32 colorMask = -0x100;
+        s32 fractionalMask = 0xFFFF;
+
+        for (i = 3; i >= 0; i--, sourceColor++, destColor++) {
+            u32 color = *sourceColor;
+            s32 alpha = *(u8 *)sourceColor;
+            s32 product = alpha * colorFactor;
+            s32 negative = 0;
+
+            if (product < 0) {
+                negative++;
+            }
+            *destColor = (color & colorMask) |
+                         ((product + negative * fractionalMask) >> 16);
+        }
+    }
+    return 0x10000 / table->divisor;
+}
 
 /* Unpack four 8-bit channels into the low and high halves of two 64-bit words. */
 void itfGridUnpackColorChannels(u64 *channels, u32 color) {
