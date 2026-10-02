@@ -12,6 +12,18 @@ typedef struct SoundSlotPool {
     s32 count;
 } SoundSlotPool;
 
+/* Model fields shared with the mdlManager context and node records. */
+typedef struct MdlNode {
+    u8 pad00[0x20];
+    f32 floatValue;
+} MdlNode;
+
+typedef struct MdlCtx {
+    u32 flags;
+    u8 pad04[0x18];
+    MdlNode *first;
+} MdlCtx;
+
 /* Nodes passed to the menu model helpers are 0x50-byte records. */
 typedef struct MnuModelNode {
     f32 primary[4];  /* 0x00 */
@@ -21,7 +33,7 @@ typedef struct MnuModelNode {
     f32 y;           /* 0x34 */
     f32 z;           /* 0x38 */
     u32 positionFlag; /* 0x3C */
-    u32 *model;      /* 0x40 */
+    MdlCtx *model;   /* 0x40 */
     u32 flags;       /* 0x44 */
     u16 value48;     /* 0x48 */
     u16 value4A;     /* 0x4A */
@@ -32,6 +44,36 @@ typedef struct MnuNodeList {
     MnuModelNode *nodes; /* 0x00 */
     s32 count;           /* 0x04 */
 } MnuNodeList;
+typedef struct ShortRecord {
+    u8 kind;
+    u8 pad01;
+    s16 parameters[3];
+} ShortRecord;
+
+typedef struct ShortRecordList {
+    s32 count;
+    ShortRecord *records;
+} ShortRecordList;
+
+typedef struct MenuRegistryRecord {
+    u8 pad00[4];
+    u16 firstCount;
+    u16 secondCount;
+    ShortRecordList *lists;
+    ShortRecordList *secondLists;
+} MenuRegistryRecord;
+
+typedef struct MenuWorkEntry {
+    u8 pad00[0xC];
+    MnuModelNode *modelNode;
+    u8 pad10[0x2A];
+    u16 elapsed;
+    u8 pad3C[0xC];
+} MenuWorkEntry;
+
+extern u32 mnuResolveTaggedRegistryRecord(u32 taggedRecord);
+extern ShortRecord *func_003225C0(ShortRecordList *list);
+
 
 typedef struct FileQueue FileQueue;
 
@@ -84,7 +126,7 @@ void mnuCreateNodeModelEntry(MnuModelNode *, s32, s32, s32, f32, f32, f32);
 void mnuDeactivateModelNode(s32 nodeAddress);
 
 extern u8 *func_00232198(s32 resourceGroup, s32 resourceId);
-extern void mdlAddEntryFlaggedEx(u8 *model, s32 entry, s32 flags, f32 x, f32 y);
+extern void mdlAddEntryFlaggedEx(MdlCtx *model, s32 searchId, s32 motionIndex, f32 blendLeadFrames, f32 blendDurationFrames);
 extern u32 sdfAllocGeneralBlock(s32 bytes);
 extern u32 *sdfMemoryGetBlockAddress(u32 handle);
 
@@ -189,7 +231,45 @@ void func_0031B3B8(s32 objectAddress) {
 void func_0031B3C8(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B3D0);
+s32 func_0031B3D0(MenuWorkEntry *work) {
+    MenuRegistryRecord *registry;
+    ShortRecordList *list;
+    ShortRecord *record;
+    MnuModelNode *node;
+    MdlCtx *model;
+    s16 frame;
+    s32 i;
+
+    registry = (MenuRegistryRecord *)mnuResolveTaggedRegistryRecord((u32)work);
+    if (registry != NULL) {
+        if (registry->secondLists != NULL) {
+            for (i = 0, list = registry->secondLists;
+                 i < registry->secondCount; i++, list++) {
+                record = NULL;
+                if (list->records != NULL) {
+                    record = func_003225C0(list);
+                }
+                if (record != NULL) {
+                    frame = work->elapsed;
+                    if (frame == record->parameters[0]) {
+                        evtPrintDeveloperConsoleMessage("%d:%d:%d:%d\n", frame,
+                            record->parameters[0], record->parameters[1],
+                            record->parameters[2]);
+                        node = work->modelNode;
+                        if (node != NULL) {
+                            model = node->model;
+                            model->first->floatValue = 0.5f;
+                            node->savedModelValue = 0.5f;
+                            mdlAddEntryFlaggedEx(model, 0, record->parameters[1],
+                                                0.0f, record->parameters[2]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 /* Allocate the list descriptors and their 0x20-byte records as one work block. */
 MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts) {
@@ -405,9 +485,9 @@ u8 *mnuAcquireUnusedModelNode(u32 *group) {
         do {
             MnuModelNode *entry = (MnuModelNode *)node;
             if ((entry->flags & 1) == 0) {
-                u32 *model = entry->model;
+                MdlCtx *model = entry->model;
                 if (model != 0) {
-                    *model &= ~1U;
+                    model->flags &= ~1U;
                     entry->value48 = 0;
                     entry->value4A = 0;
                     entry->flags = 1;
@@ -448,7 +528,7 @@ void mnuOverrideActiveNodeModelDepth(MnuNodeList *list, f32 z) {
         u32 active = node->flags & 1;
 
         if (active == 1) {
-            *(f32 *)(*(u8 **)((u8 *)node->model + 0x1c) + 0x20) = z;
+            node->model->first->floatValue = z;
         }
         node++;
     }
@@ -463,7 +543,7 @@ void mnuRestoreActiveNodeModelDepth(MnuNodeList *list) {
         u32 active = node->flags & 1;
 
         if (active == 1) {
-            *(f32 *)(*(u8 **)((u8 *)node->model + 0x1c) + 0x20) = node->savedModelValue;
+            node->model->first->floatValue = node->savedModelValue;
         }
         node++;
     }
@@ -471,10 +551,10 @@ void mnuRestoreActiveNodeModelDepth(MnuNodeList *list) {
 
 /* Create the resource-backed model; -1 omits flagged-entry setup and scalar saving. */
 void mnuCreateNodeModelEntry(MnuModelNode *node, s32 resourceGroup, s32 resourceId, s32 entryFlags, f32 x, f32 y, f32 z) {
-    u8 *model = func_00232198(resourceGroup, resourceId);
-    node->model = (u32 *)model;
+    MdlCtx *model = (MdlCtx *)func_00232198(resourceGroup, resourceId);
+    node->model = model;
     if (entryFlags != -1) {
-        *(f32 *)(*(u8 **)(model + 0x1c) + 0x20) = z;
+        model->first->floatValue = z;
         node->savedModelValue = z;
         mdlAddEntryFlaggedEx(model, 0, entryFlags, x, y);
     }
@@ -484,7 +564,7 @@ void mnuCreateNodeModelEntry(MnuModelNode *node, s32 resourceGroup, s32 resource
 void mnuDeactivateModelNode(s32 nodeAddress) {
     MnuModelNode *node = (MnuModelNode *)nodeAddress;
     node->flags = 0;
-    *node->model = *node->model | 1;
+    node->model->flags = node->model->flags | 1;
 }
 
 void mnuSetNodePairValue(u8 *node, s32 value) {
@@ -569,9 +649,9 @@ void mnuSetNodeModelBroadcastByte(u8 *node, u8 highByte) {
 void mnuSetModelNodeVisibility(u8 *node, s8 selector) {
     MnuModelNode *entry = (MnuModelNode *)node;
     if (selector == 1) {
-        *entry->model &= ~1U;
+        entry->model->flags &= ~1U;
     } else {
-        *entry->model |= 1U;
+        entry->model->flags |= 1U;
     }
 }
 

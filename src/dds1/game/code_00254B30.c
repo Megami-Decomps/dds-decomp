@@ -62,7 +62,21 @@ void itfDspDrawIndexedRecord(s32 x, s32 y, s32 layer, u32 attributes, u32 entry,
     frFontDrawStyledGlyphChainAndMeasure(x + 0x35, y + 0x136, layer, tag, 4, buffer, 0x80000000, context);
 }
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00254EF0);
+extern char D_003BC458[];
+extern char D_003BC460[];
+extern void func_003014F0(char *buffer, const char *format, ...);
+
+void func_00254EF0(s32 x, s32 y, s32 layer, s32 alpha, s32 context) {
+    u32 textColor = (u32)((f32)alpha * 0.6f) | 0xA09D7D00;
+    char text[0x20];
+
+    func_0024E260(x, y, layer, alpha, 0x21, context);
+    func_0024E260(x, y, layer, alpha, 0x11, context);
+    func_003014F0(text, "%s %s %s", D_003BC458, D_003BC458, D_003BC458);
+    func_003014F0(text, D_003BC460);
+    frFontDrawStyledGlyphChainAndMeasure(x + 0xB3, y + 0x171, layer, textColor,
+                                      0, text, 0x80000000, context);
+}
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255010);
 
@@ -106,7 +120,6 @@ extern char D_003BC468[];
 extern s32 fldGetSceneMetadataNode();
 extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern s32 mnuGetMantraSourceValue(s32);
-extern void func_003014F0(void *, void *, s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void dspStartEntry(s32);
 extern void evtCaptureMessageWindowSoundMode(s32);
