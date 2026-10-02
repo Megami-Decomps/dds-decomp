@@ -473,7 +473,25 @@ u32 kwlnTaskGetUserValue(KwlnTask* task)
 void func_00101A78(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101A80);
+void func_00101A80(KwlnTask* parent, KwlnTask* child)
+{
+    KwlnTask* tail;
+
+    if (child->parent != NULL) {
+        kwlnUnlinkListNode(child);
+    }
+
+    if (parent->childList != NULL) {
+        tail = parent->childList;
+        while (tail->next != NULL) {
+            tail = tail->next;
+        }
+        tail->next = child;
+    } else {
+        parent->childList = child;
+    }
+    child->parent = parent;
+}
 
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DE88);
 

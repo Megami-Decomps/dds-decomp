@@ -63,7 +63,7 @@ extern s32 D_003BC7D8;
 extern s32 (*fileIdleUpdateCallback)(void);
 
 void WaitSema(s32 sema);
-void SignalSema(s32 sema);
+s32 SignalSema(s32 sema);
 void *memset(void *dst, s32 val, u32 len);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 s32 sdfAllocGeneralBlock(s32 arg0);
@@ -108,7 +108,19 @@ INCLUDE_ASM(const s32, "game/code_00288E70", func_00289380);
 
 INCLUDE_ASM(const s32, "game/code_00288E70", func_00289540);
 
-INCLUDE_ASM(const s32, "game/code_00288E70", fileManDispatchDone);
+void fileManDispatchDone(void) {
+    FileManWork *work = &fileManagerWork;
+    FileCbNode *node;
+
+    WaitSema(work->sema);
+    while ((node = work->unk10) != NULL) {
+        work->unk10 = node->next;
+        SignalSema(work->sema);
+        node->cb(node, node->arg);
+        WaitSema(work->sema);
+    }
+    SignalSema(work->sema);
+}
 
 INCLUDE_ASM(const s32, "game/code_00288E70", fileManUpdate);
 

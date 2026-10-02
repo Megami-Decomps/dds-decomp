@@ -145,7 +145,35 @@ s32 func_00296E98(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
                          D_003D03F0[8][BRS_ICON_ID], option);
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00297000);
+s32 func_00297000(s32 unused, u32 value, s32 entryIndex, s32 drawArg) {
+    f32 normalized;
+    f32 companionPosition;
+    s32 layer;
+    s32 companionX;
+    s32 selectedIndex;
+
+    layer = *(s32 *)(D_00438FC8 + 0x68);
+    normalized = (f32)value * 0.00390625f;
+    selectedIndex = entryIndex + 3;
+    func_00306CD0(D_003D03F0[selectedIndex][BRS_ICON_X] << 4,
+                  D_003D03F0[selectedIndex][BRS_ICON_Y] << 3, 0,
+                  (u32)(normalized * 256.0f), 0, layer,
+                  D_003D03F0[selectedIndex][BRS_ICON_ID], drawArg);
+
+    companionPosition = (normalized + normalized * normalized) * 0.5f;
+    if (normalized < 0.5f) {
+        normalized = 0.1f;
+    } else {
+        normalized = (normalized - 0.5f) * 2.0f;
+    }
+    companionX = (s32)((f32)D_003D03F0[8][BRS_ICON_X] -
+                       (1.0f - companionPosition) * 128.0f);
+
+    return func_00306CD0(companionX << 4,
+                         D_003D03F0[8][BRS_ICON_Y] << 3, 0,
+                         (u32)(normalized * 256.0f), 0, layer,
+                         D_003D03F0[8][BRS_ICON_ID], drawArg);
+}
 
 void mnuStorePendingMenuCommandValue(MenuActionOwner *owner, u32 value) {
     MenuAction *action;
@@ -192,7 +220,34 @@ void mnuSetCommandPhase(MenuActionOwner *owner, u32 value) {
     owner->frames = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00297250);
+s32 func_00297250(MenuActionOwner *owner) {
+    switch (owner->mode) {
+    case 0:
+    case 14:
+        owner->frames = owner->frames + 1;
+        if ((f32)owner->frames > 10.0f) {
+            return 0;
+        }
+        return -1;
+    case 15:
+        owner->frames = owner->frames + 1;
+        if ((f32)owner->frames > 10.0f) {
+            return 1;
+        }
+        return -1;
+    case 1:
+        return 1;
+    case 2:
+        owner->frames = owner->frames + 1;
+        if ((f32)owner->frames > 10.0f) {
+            return 2;
+        }
+        return -1;
+    case 3:
+        return 3;
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00297320);
 

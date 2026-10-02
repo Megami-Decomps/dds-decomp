@@ -11,6 +11,39 @@ the evidence, source lever and stop rule worth testing.
 The diagnostics are read-only. They do not alter the compiler, select a
 matching result, or make an unnatural source form acceptable.
 
+## Audit call contracts
+
+`ee_gcc_contracts.py` finds fixed function declarations that disagree with a
+definition in the same title's source tree. It honors file-local `static`
+linkage and audits file-scope declarations. With no paths it scans `src/dds1`
+and `src/dds2`; an explicit file or directory narrows the declarations under
+review while the tool still indexes real definitions across that title. Use
+`--symbol` for a single suspicious call boundary:
+
+```sh
+python3 tools/ee_gcc_contracts.py src/dds1/script/scrScriptProcess.c \
+  --symbol sdfReadNamedResource
+python3 tools/ee_gcc_contracts.py --version dds1 --symbol sdfReadNamedResource
+python3 tools/ee_gcc_contracts.py --json /tmp/contracts.json
+```
+
+The scanner uses only source declarations and real definitions. It ignores
+`INCLUDE_ASM`, leaves C89 `name()` declarations unspecified rather than
+assuming zero parameters, and skips K&R or unsupported declarators. Uncertain
+typedef identity is listed as skipped evidence instead of a proven mismatch. A
+reported pointer/integer mismatch is representation-sensitive evidence for
+review, not an automatic claim that the generated ABI differs. JSON output is
+sorted for stable review. A whole-tree run is a broad review inventory; start
+with the unit or callee involved in a near-match rather than treating every
+historical declaration difference as cleanup work. Focused tests run with
+`python3 tools/test_ee_gcc_contracts.py`. The command exits 1 when it reports
+review findings and 0 when the selected scope has none.
+
+A matching C definition is a comparison anchor, not automatically the original
+interface: old-C wrappers can preserve a return register under several source
+return types. Confirm a finding against callers and the callee's machine-level
+data flow before changing a declaration.
+
 ## Capture a function
 
 The output directory must normally be outside the checkout so multi-megabyte
