@@ -334,7 +334,23 @@ void effParamInitWork(EffInitWork *work) {
     work->flags &= ~1u;
 }
 
-INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A990);
+extern u16 D_00436434;
+extern s32 btlFindGroupedEntity();
+extern void mdlLoadViewerPackage();
+
+/* Create a viewer-package effect object from `package` (header word, data from +0x10) under the next free id of group 7. */
+void *func_0016A990(s32 *package) {
+    void *work;
+
+    while (btlFindGroupedEntity(7, D_00436434) != 0) {
+        D_00436434++;
+    }
+    mdlLoadViewerPackage(7, D_00436434, 0x101, package + 4, package[0]);
+    work = func_00232198((void *)7, (void *)D_00436434);
+    effParamInitWork(work);
+    D_00436434++;
+    return work;
+}
 
 void effParamInitFromGlobal(void *work) {
     mdlProcessContextNodesAndTransforms(work, &D_00380828);

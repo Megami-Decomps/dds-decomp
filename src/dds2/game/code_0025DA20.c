@@ -19,7 +19,7 @@ extern s8 mnuCampListedItems[34];
 extern void func_00246950();
 
 typedef struct CampFlagRow {
-    u8 pad00[4];
+    s32 messageSet;  /* 0x00: shop message resource number */
     s16 flag[8];     /* 0x04 */
     u8 value[9];     /* 0x14: [0] default, [i + 1] for flag[i] */
     u8 pad1D[3];
@@ -980,7 +980,38 @@ void mnuShopDestroyNestedEffectBatch(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FA28);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FC08);
+/* DDS2 shop scene fields used while choosing the message resource. */
+typedef struct ShopMessageScene {
+    u8 pad00[8];
+    s32 messageSet;     /* 0x08 */
+    u8 pad0C[0x54];
+    u8 resourcePair[4]; /* 0x60 */
+    s32 pairedHandle;   /* 0x64 */
+    u8 pad68[0x24];
+    s32 shopRow;        /* 0x8C */
+} ShopMessageScene;
+
+extern void evtLoadResourcePair();
+extern void evtCreateMessageWindowIfMissing();
+
+void func_0025FC08(ShopMessageScene *scene) {
+    scene->messageSet = D_003C9A40[scene->shopRow].messageSet;
+    switch (scene->messageSet) {
+    case 0:
+        evtLoadResourcePair("/facility/msg/shop/mes_01.bmd", scene->resourcePair);
+        break;
+    case 1:
+        evtLoadResourcePair("/facility/msg/shop/mes_02.bmd", scene->resourcePair);
+        break;
+    case 2:
+        evtLoadResourcePair("/facility/msg/shop/mes_03.bmd", scene->resourcePair);
+        break;
+    case 3:
+        evtLoadResourcePair("/facility/msg/shop/mes_04.bmd", scene->resourcePair);
+        break;
+    }
+    evtCreateMessageWindowIfMissing(scene->pairedHandle);
+}
 
 typedef struct ShopSceneCleanup {
     u8 pad00[8];
