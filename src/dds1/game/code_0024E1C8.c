@@ -26,9 +26,15 @@ extern u8 D_0036C648[];
 typedef s16 MnuSpritePlacement[4];
 
 typedef struct MnuSpriteWork {
-    u8 pad00[0x24];
+    u8 pad00[0xC];
+    s32 width;
+    s32 height;
+    u8 pad14[0x10];
     f32 rotation;
-    u8 pad28[0x78];
+    u8 pad28[0x54];
+    s32 nativeWidth;
+    s32 nativeHeight;
+    u8 pad84[0x1C];
 } MnuSpriteWork;
 
 typedef struct MnuSpriteResource {
@@ -157,7 +163,52 @@ void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex
         ->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].rotation = 0.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024E5A0);
+void func_0024E5A0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                   s32 context, f32 scaleX, f32 scaleY) {
+    {
+        MnuSpriteResource *resource =
+            (MnuSpriteResource *)D_0036C698[
+                D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+
+        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].width =
+            (s32)(scaleX *
+                  (f32)resource
+                      ->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                      .nativeWidth)
+            << 4;
+        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].height =
+            (s32)(scaleY *
+                  (f32)resource
+                      ->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                      .nativeHeight)
+            << 3;
+    }
+    func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+                  (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  0,
+                  D_0036C698[D_0036B510[placementIndex]
+                                         [MNU_SPRITE_RESOURCE_INDEX]],
+                  D_0036B510[placementIndex][MNU_SPRITE_INDEX],
+                  context);
+
+    {
+        /* Reload the resource after drawing before restoring native size. */
+        MnuSpriteResource *resource =
+            (MnuSpriteResource *)D_0036C698[
+                D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+
+        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].width =
+            resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                .nativeWidth
+            << 4;
+        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].height =
+            resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                .nativeHeight
+            << 3;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024E728);
 
