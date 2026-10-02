@@ -31,6 +31,7 @@ AREA_SIZE = 0x20
 COLLISION_SIZE = 0x30
 VERTEX_SIZE = 0x10
 FACE_SIZE = 0x24
+ENCOUNTER_ZONE_ATTRIBUTE = 0x2000
 STRING_SIZE = 0x10
 MOTION_CURVE_SIZE = 0x10
 MOTION_KINDS = {
@@ -92,6 +93,48 @@ class MotionTrack:
     values: int
     keys: int
     word_0c: int
+
+
+def _face_encounter_zone(face: tuple[int, ...], face_index: int) -> int | None:
+    tagged = bool(face[0] & ENCOUNTER_ZONE_ATTRIBUTE)
+    encounter_type, zone = face[11], face[12]
+    if tagged:
+        if encounter_type != 1 or zone < 0:
+            raise FldError(
+                f"collision face {face_index} encounter-zone tag is "
+                f"{{{encounter_type}, {zone}}}, expected {{1, nonnegative zone}}"
+            )
+        return zone
+    if encounter_type != 0 or zone != 0:
+        raise FldError(
+            f"collision face {face_index} has encounter values "
+            f"{{{encounter_type}, {zone}}} without attribute "
+            f"0x{ENCOUNTER_ZONE_ATTRIBUTE:x}"
+        )
+    return None
+
+
+def encounter_zone_overrides(data: bytes) -> tuple[int, ...]:
+    """Return collision-face encounter zones after validating their tag pair."""
+
+    words, data_end, _ = _read_header(data)
+    resources = _read_resources(data, _read_types(data, words, data_end))
+    zones: list[int] = []
+    for resource in resources:
+        if resource.type_id != 3 or not resource.data:
+            continue
+        _range(data, resource.data, COLLISION_SIZE, "collision header")
+        values = struct.unpack_from("<12I", data, resource.data)
+        face_count, faces = values[5], values[8]
+        _range(data, faces, face_count * FACE_SIZE, "collision faces")
+        for face_index in range(face_count):
+            face = struct.unpack_from(
+                "<IBBH HBB 4I hhhh", data, faces + face_index * FACE_SIZE
+            )
+            zone = _face_encounter_zone(face, face_index)
+            if zone is not None:
+                zones.append(zone)
+    return tuple(zones)
 
 
 def _range(data: bytes, offset: int, size: int, context: str) -> None:
@@ -333,6 +376,7 @@ def validate(data: bytes) -> None:
                         raise FldError(
                             f"collision face {face_index} vertex {vertex} exceeds {vertex_count}"
                         )
+                _face_encounter_zone(face, face_index)
         elif resource.type_id == 4 and resource.data:
             _range(data, resource.data, 4, "camera resource")
         elif resource.type_id == 6 and resource.data:
@@ -688,12 +732,16 @@ def render_source(data: bytes) -> str:
             _range(data, faces, face_count * FACE_SIZE, stem + " faces")
             for index in range(face_count):
                 values = struct.unpack_from("<IBBH HBB 4I hhhh", data, faces + index * FACE_SIZE)
+                if values[0] & ENCOUNTER_ZONE_ATTRIBUTE:
+                    encounter = f"encounter_zone={values[12]}"
+                else:
+                    encounter = f"encounter_type={values[11]} encounter={values[12]}"
                 face_lines.append(
                     "face "
                     f"attributes=0x{values[0]:08x} move_floor={values[1]} sound={values[2]} "
                     f"stop={values[3]} place={values[4]} automap={values[5]},{values[6]} "
                     f"vertices={values[7]},{values[8]},{values[9]},{values[10]} "
-                    f"encounter_type={values[11]} encounter={values[12]} "
+                    f"{encounter} "
                     f"special={values[13]},{values[14]}"
                 )
             add_span(faces, face_count * FACE_SIZE, face_lines, stem + " faces")
@@ -1098,12 +1146,30 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
                 raise FldError(f"line {operation.line}: vertex expects four floats")
             output.extend(struct.pack("<4f", *(_parse_float(arg) for arg in args)))
         elif name == "face":
-            f = checked_fields(operation, ("attributes", "move_floor", "sound", "stop", "place", "automap", "vertices", "encounter_type", "encounter", "special"))
+            f = _fields(operation.args)
+            common = {
+                "attributes", "move_floor", "sound", "stop", "place",
+                "automap", "vertices", "special",
+            }
+            if "encounter_zone" in f:
+                required = common | {"encounter_zone"}
+                encounter_type, encounter_zone = 1, _int(f["encounter_zone"])
+            else:
+                required = common | {"encounter_type", "encounter"}
+                encounter_type = _int(f["encounter_type"])
+                encounter_zone = _int(f["encounter"])
+            if set(f) != required:
+                missing = required - set(f)
+                extra = set(f) - required
+                raise FldError(
+                    f"line {operation.line}: fields differ; "
+                    f"missing={sorted(missing)} extra={sorted(extra)}"
+                )
             output.extend(
                 struct.pack(
                     "<IBBH HBB 4I hhhh",
                     _int(f["attributes"]), _int(f["move_floor"]), _int(f["sound"]), _int(f["stop"]), _int(f["place"]),
-                    *_csv(f["automap"], 2), *_csv(f["vertices"], 4), _int(f["encounter_type"]), _int(f["encounter"]), *_csv(f["special"], 2),
+                    *_csv(f["automap"], 2), *_csv(f["vertices"], 4), encounter_type, encounter_zone, *_csv(f["special"], 2),
                 )
             )
         elif name == "camera":
