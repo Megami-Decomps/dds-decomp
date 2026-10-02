@@ -455,7 +455,65 @@ s32 itfUpdateAngleAndGetCycleStep(s32 unused, u8 *out, GridAngleOwner *owner) {
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0200);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0340);
+/* Apply linear ZOOM easing to the adjustment bounds and fade their alpha. */
+s32 func_002C0340(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
+    GridAngleTable *table;
+    s32 scaled[2];
+    s32 deltas[2];
+    s32 previous[2];
+    s32 scaledWidth;
+    s32 scaledHeight;
+    s32 widthAdjustment;
+    s32 heightAdjustment;
+    s32 angle;
+    u32 *sourceColor;
+    u32 *destColor;
+    s32 colorMask;
+    s32 fractionalMask;
+    s32 i;
+
+    table = owner->slot->table;
+    colorMask = -0x100;
+    fractionalMask = 0xFFFF;
+    deltas[0] = table->divisor << 4;
+    deltas[1] = (((table->mirrored << 12) / 640) * rectangle->ratioHeight) / rectangle->ratioWidth;
+    angle = owner->angle;
+    previous[0] = out->dimensions[0];
+    previous[1] = out->dimensions[1];
+    scaledWidth = deltas[0] * angle;
+    if (scaledWidth < 0) {
+        scaledWidth += 0xFFFF;
+    }
+    scaled[0] = scaledWidth >> 16;
+    widthAdjustment = -((deltas[0] - scaled[0]) / 2);
+    out->dimensions[0] = widthAdjustment;
+    out->anchors[0] += (previous[0] - widthAdjustment) * 2;
+
+    scaledHeight = deltas[1] * angle;
+    if (scaledHeight < 0) {
+        scaledHeight += 0xFFFF;
+    }
+    scaled[1] = scaledHeight >> 16;
+    heightAdjustment = -((deltas[1] - scaled[1]) / 2);
+    out->dimensions[1] = heightAdjustment;
+    out->anchors[1] += (previous[1] - heightAdjustment) * 2;
+
+    sourceColor = rectangle->colors;
+    destColor = out->colors;
+    i = 3;
+    for (; i >= 0; i--, sourceColor++, destColor++) {
+        u32 color = *sourceColor;
+        s32 alpha = *(u8 *)sourceColor;
+        s32 colorProduct = alpha * owner->angle;
+        s32 negative = 0;
+
+        if (colorProduct < 0) {
+            negative++;
+        }
+        *destColor = (color & colorMask) | ((colorProduct + negative * fractionalMask) >> 16);
+    }
+    return 0x10000 / table->cycleDivisor;
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C04C8);
 
