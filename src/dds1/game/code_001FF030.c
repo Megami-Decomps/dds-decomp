@@ -3822,7 +3822,71 @@ void btlChooseRandomPresetCameraKeys(unit)
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020B190);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020B348);
+extern void btlInitMotionTransformFromComponents(BtlCamState *, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void func_002DD608(f32);
+extern void func_002DD968(f32);
+extern void sdfComposeVuMatrixFromRegisters(void);
+
+s32 func_0020B348(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+    u16 *runtime = (u16 *)btlGetRuntime();
+    BtlUnit *unit;
+    u32 kind;
+    f32 angle;
+
+    if (command->task == NULL) {
+        return 1;
+    }
+    unit = btlGetTargetUnitForLink(command);
+    if (unit == NULL) {
+        return 1;
+    }
+    if (unit->flags & 0x400) {
+        return 1;
+    }
+    if (runtime[0x122] == 3) {
+        kind = unit->lookupId;
+    } else {
+        kind = unit->lookupId == 0 ? 0 : 2;
+    }
+    btlFlagAllUnitDefeatCandidatesTask();
+    switch (kind) {
+    case 0:
+        btlInitMotionTransformFromComponents(camera, -869.5f, -67.11f, -1933.83f,
+            -0.08f, -0.16f, 0.0f, 0.98f, 40.0f);
+        break;
+    case 1:
+        btlInitMotionTransformFromComponents(camera, 167.34f, -68.93f, -1994.86f,
+            -0.1f, 0.05f, -0.02f, 0.99f, 40.0f);
+        break;
+    case 2:
+        btlInitMotionTransformFromComponents(camera, 976.31f, -67.47f, -1885.64f,
+            -0.08f, 0.2f, -0.03f, 0.97f, 40.0f);
+        break;
+    }
+    if (rotate == 1 && runtime[0x122] == 3) {
+        switch (kind) {
+        case 0:
+            func_002DD608(-0.13089969f);
+            func_002DD968(0.13089969f);
+            sdfComposeVuMatrixFromRegisters();
+            break;
+        case 1:
+            func_002DD608(-0.13089969f);
+            break;
+        case 2:
+            angle = -0.13089969f;
+            func_002DD608(angle);
+            func_002DD968(angle);
+            sdfComposeVuMatrixFromRegisters();
+            break;
+        }
+        /* vu0 routine: rotate the camera direction by the prepared matrix. */
+        VU0_LOAD_VF(vf10, camera->direction);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, camera->direction);
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020B560);
 
