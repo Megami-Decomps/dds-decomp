@@ -16,17 +16,17 @@ extern void *memcpy(void *, const void *, u32);
 
 extern void *memset(void *, s32, u32);
 
-/* Byte cursor state at mnuStepCounterState (8 bytes). */
-typedef struct CursorState {
+/* Cadence phase and accumulated progress at mnuStepCounterState (8 bytes). */
+typedef struct MenuProgressState {
     u8 unk0[2];
-    u16 total;
-    u8 index;
-    u8 limit;
-    u8 step;
+    u16 progress;
+    u8 cadenceCount;
+    u8 cadenceLimit;
+    u8 progressStep;
     u8 unk7;
-} CursorState;
+} MenuProgressState;
 
-extern CursorState mnuStepCounterState;
+extern MenuProgressState mnuStepCounterState;
 
 extern u16 mnuStepCounterThreshold[];
 
@@ -91,40 +91,41 @@ typedef struct SdfLinkList {
     SdfLink *next;
 } SdfLinkList;
 
-void sdfLinkListExchangeNodes(SdfLinkList *list, SdfLink *a, SdfLink *b) {
-    SdfLink *tmpNext;
-    SdfLink *tmpPrev;
+/* Rewire non-null nodes and endpoints; neighbor writes precede saving links. */
+void sdfLinkListExchangeNodes(SdfLinkList *list, SdfLink *firstNode, SdfLink *secondNode) {
+    SdfLink *savedNext;
+    SdfLink *savedPrev;
 
-    if (a != NULL && b != NULL) {
-        if (a->prev != NULL) {
-            a->prev->next = b;
+    if (firstNode != NULL && secondNode != NULL) {
+        if (firstNode->prev != NULL) {
+            firstNode->prev->next = secondNode;
         }
-        if (a->next != NULL) {
-            a->next->prev = b;
+        if (firstNode->next != NULL) {
+            firstNode->next->prev = secondNode;
         }
-        if (b->prev != NULL) {
-            b->prev->next = a;
+        if (secondNode->prev != NULL) {
+            secondNode->prev->next = firstNode;
         }
-        if (b->next != NULL) {
-            b->next->prev = a;
+        if (secondNode->next != NULL) {
+            secondNode->next->prev = firstNode;
         }
-        tmpNext = a->next;
-        a->next = b->next;
-        tmpPrev = a->prev;
-        a->prev = b->prev;
-        b->next = tmpNext;
-        b->prev = tmpPrev;
-        if (a->next == NULL) {
-            list->prev = a;
+        savedNext = firstNode->next;
+        firstNode->next = secondNode->next;
+        savedPrev = firstNode->prev;
+        firstNode->prev = secondNode->prev;
+        secondNode->next = savedNext;
+        secondNode->prev = savedPrev;
+        if (firstNode->next == NULL) {
+            list->prev = firstNode;
         }
-        if (a->prev == NULL) {
-            list->next = a;
+        if (firstNode->prev == NULL) {
+            list->next = firstNode;
         }
-        if (b->next == NULL) {
-            list->prev = b;
+        if (secondNode->next == NULL) {
+            list->prev = secondNode;
         }
-        if (b->prev == NULL) {
-            list->next = b;
+        if (secondNode->prev == NULL) {
+            list->next = secondNode;
         }
     }
 }
@@ -187,39 +188,43 @@ u8 *mnuGetResourceProgressParameters(void) {
     return D_0045C860;
 }
 
-void mnuCopyResourceProgressParameters(u8 *src) {
-    memcpy(D_0045C860, src, 16);
+void mnuCopyResourceProgressParameters(u8 *parameters) {
+    memcpy(D_0045C860, parameters, 16);
 }
 
 u8 * mnuGetResourceProgressStepState(void) {
     return (u8 *)&mnuStepCounterState;
 }
 
-void mnuSetResourceProgressCadence(u8 limit, u8 step) {
-    mnuStepCounterState.limit = limit;
-    mnuStepCounterState.step = step;
+/* Change the cadence without resetting its phase or accumulated progress. */
+void mnuSetResourceProgressCadence(u8 cadenceLimit, u8 progressStep) {
+    mnuStepCounterState.cadenceLimit = cadenceLimit;
+    mnuStepCounterState.progressStep = progressStep;
 }
 
-void mnuResetProgressLimitAndStep(u8 limit, u8 step) {
+/* Clear all state bytes before installing the new cadence. */
+void mnuResetProgressLimitAndStep(u8 cadenceLimit, u8 progressStep) {
     memset(&mnuStepCounterState, 0, 8);
-    mnuStepCounterState.limit = limit;
-    mnuStepCounterState.step = step;
+    mnuStepCounterState.cadenceLimit = cadenceLimit;
+    mnuStepCounterState.progressStep = progressStep;
 }
 
+/* Only a cadence boundary adds progress and checks the completion threshold. */
 s32 mnuAdvanceCursorStepUntilThreshold(void) {
-    if (++mnuStepCounterState.index >= mnuStepCounterState.limit) {
-        mnuStepCounterState.index = 0;
-        mnuStepCounterState.total += mnuStepCounterState.step;
-        if (mnuStepCounterState.total >= mnuStepCounterThreshold[0]) {
+    if (++mnuStepCounterState.cadenceCount >= mnuStepCounterState.cadenceLimit) {
+        mnuStepCounterState.cadenceCount = 0;
+        mnuStepCounterState.progress += mnuStepCounterState.progressStep;
+        if (mnuStepCounterState.progress >= mnuStepCounterThreshold[0]) {
             return 1;
         }
     }
     return 0;
 }
 
+/* Reset the counters while preserving the configured limit and step. */
 void mnuResetResourceProgressCounters(void) {
-    mnuStepCounterState.index = 0;
-    mnuStepCounterState.total = 0;
+    mnuStepCounterState.cadenceCount = 0;
+    mnuStepCounterState.progress = 0;
 }
 
 void mnuBindResourceRecordTable(u32 records, u32 count) {

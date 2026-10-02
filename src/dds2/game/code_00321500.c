@@ -4,6 +4,11 @@
 #define MNU_WORK_UPDATED  2
 #define MNU_WORK_FINISHED 4
 
+#define MNU_STATE_COMPLETED    1
+#define MNU_STATE_VALUE_GATED  2
+#define MNU_STATE_WAIT_PENDING 8
+#define MNU_REGISTRY_TAG_PREFIX 0x02010000
+
 typedef struct MenuWorkEntry {
     u8 pad00[4];
     u32 tag;        /* 0x04 */
@@ -145,14 +150,14 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003216A8);
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321798);
 
 /* Allocate a zeroed 0x22-byte record with an eight-byte tag at offset 0xA. */
-u8 *mnuCreateNamedRecord(u8 *name) {
+u8 *mnuCreateNamedRecord(u8 *tagData) {
     u8 *record;
-    if (name == 0) {
+    if (tagData == 0) {
         return 0;
     }
     record = (u8 *)func_0035A828(0x22);
     memset(record, 0, 0x22);
-    memcpy(record + 0xa, name, 8);
+    memcpy(record + 0xa, tagData, 8);
     return record;
 }
 
@@ -172,7 +177,7 @@ typedef struct MenuStateRecord {
     } flags;
     u8 pad02[2];
     u16 waitCount; /* 0x04 */
-    s16 busy;      /* 0x06 */
+    s16 elapsedCount; /* 0x06: advances toward duration, then resets */
     s16 value;     /* 0x08 */
     u8 pad0A[4];
     s16 duration;  /* 0x0E */
@@ -181,11 +186,13 @@ typedef struct MenuStateRecord {
     s16 limit;     /* 0x16 */
 } MenuStateRecord;
 
+/* Advance optional wait and active counters; completion stays latched. */
 s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record) {
     if (record->flags.bits.completed) {
         return 1;
     }
-    if (record->flags.word & 8) {
+    if (record->flags.word & MNU_STATE_WAIT_PENDING) {
+        /* A zero wait limit leaves the pending wait stalled. */
         if (record->waitLimit == 0) {
             return 0;
         }
@@ -193,23 +200,25 @@ s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record) {
             return 0;
         }
         record->waitCount = 0;
-        record->flags.word &= ~8;
+        record->flags.word &= ~MNU_STATE_WAIT_PENDING;
         record->value = 0;
     }
-    if (++record->busy >= record->duration) {
-        record->busy = 0;
-        if (!(record->flags.word & 2) || record->limit > record->value) {
-            record->flags.word |= 1;
+    if (++record->elapsedCount >= record->duration) {
+        record->elapsedCount = 0;
+        if (!(record->flags.word & MNU_STATE_VALUE_GATED) || record->limit > record->value) {
+            record->flags.word |= MNU_STATE_COMPLETED;
             return 1;
         }
+        /* A failed value gate rearms the wait instead of marking completion. */
         record->waitCount = 0;
-        record->flags.word |= 8;
+        record->flags.word |= MNU_STATE_WAIT_PENDING;
     }
     return 0;
 }
 
+/* Test the idle counter and value gate; the pending-wait bit is not checked. */
 s32 mnuCanAdvanceIdleStateRecord(MenuStateRecord *record) {
-    if (record->busy == 0 && (!(record->flags.word & 2) || record->limit > record->value)) {
+    if (record->elapsedCount == 0 && (!(record->flags.word & MNU_STATE_VALUE_GATED) || record->limit > record->value)) {
         return 1;
     }
     return 0;
@@ -267,25 +276,25 @@ void func_00322418(void) {
 
 /* Include the 0x10-byte header and both variable-length record blocks. */
 s32 dds3MeasureMenuRecord(MenuLengthData *data) {
-    s32 length = dds3MeasureRecordBlock(data->firstRecords, data->firstCount) + 0x10;
-    return length + dds3MeasureRecordBlock(data->secondRecords, data->secondCount);
+    s32 byteSize = dds3MeasureRecordBlock(data->firstRecords, data->firstCount) + 0x10;
+    return byteSize + dds3MeasureRecordBlock(data->secondRecords, data->secondCount);
 }
 
 /* Each entry has an eight-byte header followed by its eight-byte subentries. */
 s32 dds3MeasureRecordBlock(s32 *records, s32 count) {
-    s32 entryCount;
-    s32 length;
+    s32 subentryCount;
+    s32 byteSize;
 
-    length = count << 3;
+    byteSize = count << 3;
     if (0 < count) {
         do {
-            entryCount = *records;
+            subentryCount = *records;
             records = records + 2;
             count = count - 1;
-            length = length + entryCount * 8;
+            byteSize = byteSize + subentryCount * 8;
         } while (count != 0);
     }
-    return length;
+    return byteSize;
 }
 
 void func_003224B0(void) {
@@ -353,27 +362,27 @@ ShortRecord *func_003225C0(ShortRecordList *list) {
     return NULL;
 }
 
-u32 mnuResolveTaggedRegistryRecord(u32 record) {
-    u32 registry;
-    u32 table;
-    if ((((MenuTaggedRecord *)record)->tag & 0xffff0000) != 0x2010000) {
+u32 mnuResolveTaggedRegistryRecord(u32 taggedRecord) {
+    u32 registryEntry;
+    u32 registryTable;
+    if ((((MenuTaggedRecord *)taggedRecord)->tag & 0xffff0000) != MNU_REGISTRY_TAG_PREFIX) {
         return 0;
     }
-    registry = (u32)mnuGetMenuRecordRegistryEntry(((MenuTaggedRecord *)record)->tag);
-    if (registry == 0) {
+    registryEntry = (u32)mnuGetMenuRecordRegistryEntry(((MenuTaggedRecord *)taggedRecord)->tag);
+    if (registryEntry == 0) {
         return 0;
     }
-    table = (u32)((MenuRegistry *)registry)->table;
-    return ((MenuRegistryTable *)table)->recordBase + ((MenuTaggedRecord *)record)->recordIndex * 16;
+    registryTable = (u32)((MenuRegistry *)registryEntry)->table;
+    return ((MenuRegistryTable *)registryTable)->recordBase + ((MenuTaggedRecord *)taggedRecord)->recordIndex * 16;
 }
 
-typedef struct ShortRecordList2 {
+typedef struct MenuByteRecordList {
     s32 count;         /* 0x00 */
     u8 *records;       /* 0x04 */
-} ShortRecordList2;
+} MenuByteRecordList;
 
-u8 *mnuFindMarkedShortListRecord(ShortRecordList2 *list) {
-    s32 i;
+u8 *mnuFindMarkedShortListRecord(MenuByteRecordList *list) {
+    s32 recordIndex;
     u8 *record;
 
     if (list != NULL) {
@@ -381,7 +390,7 @@ u8 *mnuFindMarkedShortListRecord(ShortRecordList2 *list) {
         if (record == NULL) {
             return NULL;
         }
-        for (i = 0; i < list->count; i++) {
+        for (recordIndex = 0; recordIndex < list->count; recordIndex++) {
             if ((*record & 0xF0) == 0x10) {
                 return record;
             }
@@ -405,8 +414,9 @@ void mnuResetWorkEntryPool(void) {
 }
 
 
+/* An entry is reusable whenever its active bit is clear, regardless of other flags. */
 MenuWorkEntry *mnuFindUnusedWorkEntry(void) {
-    s32 i = 0;
+    s32 entryIndex = 0;
     MenuWorkEntry *entry;
 
     if (mnuWorkEntryPoolCount > 0) {
@@ -416,8 +426,8 @@ MenuWorkEntry *mnuFindUnusedWorkEntry(void) {
                 return entry;
             }
             entry++;
-            i++;
-        } while (i < mnuWorkEntryPoolCount);
+            entryIndex++;
+        } while (entryIndex < mnuWorkEntryPoolCount);
     }
     return NULL;
 }
@@ -426,14 +436,14 @@ u32 mnuGetWorkEntryPool(void) {
     return mnuWorkEntryPool;
 }
 
-/* A flagged registry entry offsets its base value by the running clock. */
+/* A flagged registry entry offsets its base value by accumulated resource progress. */
 f32 mnuEvaluateTimedValue(MenuWorkEntry *entry) {
     u8 *registry = mnuGetMenuRecordRegistryEntry(entry->tag);
     if ((((MenuRegistryTable *)((MenuRegistry *)registry)->table)->flags & 1) != 0) {
-        u8 *clock = mnuGetResourceProgressStepState();
-        u8 *segment = mnuGetResourceRecordByIndex(entry->unk08);
+        u8 *progressState = mnuGetResourceProgressStepState();
+        u8 *resourceRecord = mnuGetResourceRecordByIndex(entry->unk08);
         return entry->y0 +
-            (f32)((s32)*(u16 *)(clock + 2) - *(s32 *)(segment + 0xc));
+            (f32)((s32)*(u16 *)(progressState + 2) - *(s32 *)(resourceRecord + 0xc));
     }
     return entry->y0;
 }
@@ -457,10 +467,10 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003232A0);
 INCLUDE_ASM(const s32, "game/code_00321500", func_003233E8);
 
 void mnuVisitActiveWorkAndEffectEntry(s32 context) {
-    s32 i;
+    s32 entryIndex;
 
-    for (i = 0; i < mnuWorkEntryPoolCount; i++) {
-        MenuWorkEntry *entry = &((MenuWorkEntry *)mnuWorkEntryPool)[i];
+    for (entryIndex = 0; entryIndex < mnuWorkEntryPoolCount; entryIndex++) {
+        MenuWorkEntry *entry = &((MenuWorkEntry *)mnuWorkEntryPool)[entryIndex];
 
         if (entry->flags & MNU_WORK_ACTIVE) {
             D_004389A8(entry, context);
@@ -473,17 +483,17 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_00323748);
 
 /* Walk allocated entries; only entries carrying the active bit are visited. */
 void mnuVisitActiveRecords(s32 context) {
-    s32 index = 0;
+    s32 entryIndex = 0;
     if ((s32)mnuWorkEntryPoolCount > 0) {
-        s32 offset = 0;
+        s32 byteOffset = 0;
         do {
-            MenuWorkEntry *entry = (MenuWorkEntry *)(mnuWorkEntryPool + offset);
+            MenuWorkEntry *entry = (MenuWorkEntry *)(mnuWorkEntryPool + byteOffset);
             if ((entry->flags & MNU_WORK_ACTIVE) != 0) {
                 func_00323748(entry, context);
             }
-            index++;
-            offset += 0x48;
-        } while (index < (s32)mnuWorkEntryPoolCount);
+            entryIndex++;
+            byteOffset += 0x48;
+        } while (entryIndex < (s32)mnuWorkEntryPoolCount);
     }
 }
 
@@ -507,6 +517,7 @@ void func_00323938(u8 *records) {
     D_004389B0 = records;
 }
 
+/* Remaining is interpreted as signed 16-bit; updated/finished flags stay latched. */
 u32 mnuAdvanceWorkEntry(MenuWorkEntry *entry, s32 elapsed) {
     if ((s16)entry->remaining - elapsed < 1) {
         entry->remaining = 0;
@@ -537,14 +548,14 @@ u32 mnuGetActiveEffectWorkEntry(void) {
     return mnuActiveEffectEntry;
 }
 
-void mnuInitializeActiveEffectWorkEntry(u32 node) {
-    memset((void *)node, 0, 0x48);
-    func_003242D0(node, 0);
-    ((MenuWorkEntry *)node)->flags |= 0x4010;
-    ((MenuWorkEntry *)node)->tag = 0x1000000;
-    ((MenuWorkEntry *)node)->remaining = 1;
-    ((MenuWorkEntry *)node)->scale0 = 1.5707963f;
-    mnuActiveEffectEntry = node;
+void mnuInitializeActiveEffectWorkEntry(u32 entry) {
+    memset((void *)entry, 0, 0x48);
+    func_003242D0(entry, 0);
+    ((MenuWorkEntry *)entry)->flags |= 0x4010;
+    ((MenuWorkEntry *)entry)->tag = 0x1000000;
+    ((MenuWorkEntry *)entry)->remaining = 1;
+    ((MenuWorkEntry *)entry)->scale0 = 1.5707963f;
+    mnuActiveEffectEntry = entry;
 }
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_003242D0);
@@ -552,27 +563,27 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003242D0);
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324840);
 
 void mnuInitializeEffectContext(MenuWorkEntry *context) {
-    MenuInitialTag tag;
+    MenuInitialTag initialTag;
     /* Retail only initializes bytes 1 through 7 of this tag. */
-    tag.flags = 0;
-    tag.group = 0;
-    tag.kind = 2;
-    tag.index = 0;
+    initialTag.flags = 0;
+    initialTag.group = 0;
+    initialTag.kind = 2;
+    initialTag.index = 0;
     memset(context, 0, 0x48);
     context->callback = mnuCreateReleaseCallbackNode();
     func_00320CE0(context->callback, 0,
-                   (u32)mnuCreateNamedRecord((u8 *)&tag));
+                   (u32)mnuCreateNamedRecord((u8 *)&initialTag));
 }
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324B28);
 
 u32 mnuCreateAnimatedEffect(u32 context, f32 x, f32 y, f32 progress) {
-    u32 node = (u32)mnuFindUnusedWorkEntry();
-    if (node != 0) {
-        func_00322E18(node, context, 0, (s32)x, (s32)y, progress);
-        ((MenuWorkEntry *)node)->flags |= 0x10;
+    u32 entry = (u32)mnuFindUnusedWorkEntry();
+    if (entry != 0) {
+        func_00322E18(entry, context, 0, (s32)x, (s32)y, progress);
+        ((MenuWorkEntry *)entry)->flags |= 0x10;
     }
-    return node;
+    return entry;
 }
 
 void func_00324D28(u32 unused, u32 ptr) {
