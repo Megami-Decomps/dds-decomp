@@ -158,7 +158,21 @@ void kwlnTaskAdvanceDestroyDelays(void)
     }
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100FC8);
+void func_00100FC8(s32 setFlags, KwlnTask* task, u32 flags)
+{
+    KwlnTask* child;
+
+    if (setFlags != 0) {
+        task->flags |= flags & 0x0FFFFFF0;
+    } else {
+        task->flags &= ~(flags & 0x0FFFFFF0);
+    }
+    child = task->childList;
+    while (child != 0) {
+        func_00100FC8(setFlags, child, flags);
+        child = child->next;
+    }
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101060);
 

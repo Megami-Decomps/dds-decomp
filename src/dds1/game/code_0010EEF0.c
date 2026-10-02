@@ -75,7 +75,25 @@ u32 func_0010EF38(void) {
 
 INCLUDE_ASM(const s32, "game/code_0010EEF0", func_0010EF68);
 
-INCLUDE_ASM(const s32, "game/code_0010EEF0", func_0010F268);
+extern s32 dds3GetObjectOwnedHandle(void *object);
+extern void *sdfCreateFormattedSifCommand(s32 x, s32 y, s32 flags, s32 mode, const char *format, ...);
+extern void sdfAppendPacket(void *list, void *packet);
+const char D_0039F5F8[0x18] = "FLAG  : 0x%08X";
+
+u32 func_0010F268(void *object, s32 x, s32 y, void *list) {
+    void *handle;
+    void *command;
+
+    handle = (void *)dds3GetObjectOwnedHandle(object);
+    command = sdfCreateFormattedSifCommand((x * 3 << 6) + 0x7000,
+                                           (y * 3 << 5) + 0x7900,
+                                           0xFEFFFF,
+                                           0,
+                                           D_0039F5F8,
+                                           *(u32 *)handle);
+    sdfAppendPacket(list, command);
+    return 1;
+}
 
 typedef struct DrawOps {
     u8 pad00[0x10];
@@ -88,7 +106,6 @@ extern s32 dds3ContainsNodeInAnyObjectChain();
 extern void *sdfAllocPacketAligned();
 extern void sdfInitPacketList();
 extern s32 func_0010EF68();
-extern s32 func_0010F268();
 extern void kwlnDrawSpriteCell();
 extern DrawOps D_00325708;
 extern s8 D_00324543[];

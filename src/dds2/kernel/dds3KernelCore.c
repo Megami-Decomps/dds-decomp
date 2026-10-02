@@ -142,7 +142,21 @@ void kwlnTaskAdvanceDestroyDelays(void)
     }
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100EB0);
+void func_00100EB0(s32 setFlags, KwlnTask* task, u32 flags)
+{
+    KwlnTask* child;
+
+    if (setFlags != 0) {
+        task->flags |= flags & 0x0FFFFFF0;
+    } else {
+        task->flags &= ~(flags & 0x0FFFFFF0);
+    }
+    child = task->childList;
+    while (child != 0) {
+        func_00100EB0(setFlags, child, flags);
+        child = child->next;
+    }
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100F48);
 
@@ -279,7 +293,34 @@ s32 kwlnTaskGetRegisteredState(KwlnTask* task)
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101740);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101820);
+KwlnTask* func_00101820(u32 value)
+{
+    s32 state;
+    KwlnTask* node;
+
+    node = 0;
+    state = 0;
+    for (; state < 3; state++) {
+        switch (state) {
+        case 0:
+            node = kwlnDelayedStartTaskHead;
+            break;
+        case 1:
+            node = kwlnActiveTaskHead;
+            break;
+        case 2:
+            node = kwlnDelayedDestroyTaskHead;
+            break;
+        }
+        while (node != 0) {
+            if (node->unk20 == value) {
+                return node;
+            }
+            node = node->listNext;
+        }
+    }
+    return 0;
+}
 
 /* Persona 4 func_00452490 @ 00452490 (src/Kernel/sdkTask.c), recompiled unchanged */
 s32 kwlnTaskIsRegistered(KwlnTask* target)

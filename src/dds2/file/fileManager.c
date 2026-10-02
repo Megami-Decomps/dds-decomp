@@ -160,7 +160,15 @@ void func_002C8018(u32 request) {
     fileCreatePacLoadWork(request, 1, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002C8040);
+void *func_002C8040(u32 request, s32 mode, s32 dispatch, s32 onComplete) {
+    u8 *work;
+
+    func_0035B6E0("file load %s\n", request);
+    work = sdfAllocAndClearQuadwords(0x30);
+    work[3] = mode;
+    func_002C7D78(work, 0, request, dispatch, onComplete);
+    return work;
+}
 
 void func_002C80C8(u32 request) {
     func_002C8040(request, 0, 0, 0);
