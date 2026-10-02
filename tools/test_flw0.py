@@ -1261,6 +1261,7 @@ end
             "ADD_EFFECT_UNIT_TO_WORLD": (0x012, 1, False),
             "CREATE_LINKED_CAMERA_VIEWER": (0x015, 2, True),
             "ADD_FLAGGED_EFFECT_UNIT_TO_WORLD": (0x019, 1, False),
+            "SET_CONTROLLER_VIBRATION": (0x01A, 3, False),
             "FADE_BACKGROUND_IN": (0x01F, 1, False),
             "READ_SOLAR_PHASE": (0x027, 0, True),
             "SUBMIT_EVENT_WITH_MODE": (0x028, 2, False),
@@ -1277,15 +1278,20 @@ end
             "CLEAR_UNIT_LOW_FLAG": (0x069, 1, False),
             "SET_UNIT_LOW_FLAG": (0x06A, 1, False),
             "MOVE_OBJECT_ALONG_PATH": (0x06B, 3, False),
+            "WAIT_FOR_OBJECT_PATH": (0x06C, 1, False),
             "CHANGE_ITEM_COUNT": (0x070, 2, False),
             "SET_MESSAGE_WINDOW_GEOMETRY": (0x071, 3, False),
             "PREPARE_UNIT_MOTION_STATE": (0x073, 5, False),
             "READ_SECONDARY_WORLD_ID_VALUE": (0x094, 1, True),
             "RESET_FIELD_EFFECTS": (0x099, 0, False),
+            "DESTROY_WORLD_EFFECT_OBJECT": (0x09B, 1, False),
+            "COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE": (0x09D, 2, False),
+            "UPDATE_FIELD_LOOK_AT_SEGMENT": (0x0A4, 0, False),
             "CREATE_SCRIPT_TASK": (0x0A5, 2, True),
             "DESTROY_REGISTERED_TASK": (0x0A6, 1, False),
             "WAIT_FOR_TASK_REMOVAL": (0x0A7, 1, False),
             "CREATE_POLYGON_MOVIE": (0x0AA, 2, True),
+            "SETUP_FADE_FRAMES": (0x0AB, 2, False),
             "SET_SOLAR_OVERLAY_MODE": (0x0C3, 1, False),
             "WAIT_FOR_CAMP_TASK": (0x0C8, 1, False),
             "BIND_MODEL_MOTION_SOUND": (0x0C9, 2, True),
@@ -1326,6 +1332,15 @@ end
             "READ_TREASURE_TABLE_VALUE": (0x114, 1, True),
             "MARK_CURRENT_TREASURE_OPENED": (0x115, 0, False),
             "TEST_CURRENT_TREASURE_OPENED": (0x116, 0, True),
+            "START_AND_WAIT_FOR_STREAM_SOUND": (0x11B, 1, False),
+            "ADVANCE_STREAM_SOUND_STATE": (0x11C, 0, False),
+            "RESET_STREAM_PLAYBACK": (0x11F, 0, False),
+            "WAIT_FOR_STREAM_IDLE": (0x121, 0, False),
+            "CLEAR_WORLD_OBJECT_STATE_FLAGS": (0x124, 1, False),
+            "ADD_PARTY_CURRENCY": (0x139, 1, False),
+            "APPLY_PARTY_TRAP_EFFECT": (0x13A, 1, False),
+            "SET_MESSAGE_RANGE": (0x13C, 2, False),
+            "SUBMIT_EVENT_IMMEDIATE": (0x166, 1, False),
             "QUEUE_WORLD_OBJECT_PENDING_VALUE": (0x1E0, 2, False),
             "CLEAR_WORLD_OBJECT_PENDING_VALUE": (0x1E1, 1, False),
             "CLEAR_PROCESS_CONTROL_FLAG": (0x1E7, 0, False),
@@ -1335,12 +1350,23 @@ end
             "READ_CURRENT_SCENE_SELECTION_RESOURCE": (0x1FE, 0, True),
             "FIND_FIELD_EFFECT_BY_NAME": (0x1FF, 1, True),
             "READ_ELEVATOR_TABLE_VALUE": (0x200, 1, True),
+            "RUN_FIELD_DESTINATION_TRANSITION": (0x201, 1, False),
+            "SET_CURRENT_TASK_SCENE": (0x202, 0, False),
+            "NO_OP_FIELD_TRANSITION": (0x203, 0, False),
+            "APPLY_CURRENT_TASK_ENTRY_TRIGGER": (0x204, 0, False),
             "ADVANCE_FIELD_INTERACTION": (0x205, 2, True),
             "READ_FIELD_INTERACTION_VALUE": (0x206, 2, True),
             "READ_FIELD_INTERACTION_KIND": (0x207, 0, True),
             "READ_LADDER_TABLE_VALUE": (0x208, 1, True),
+            "CONFIGURE_ELEVATOR_CAMERA_MOVE": (0x209, 2, False),
+            "RESET_ELEVATOR_CAMERA_MOVE_TRACKING": (0x20A, 0, False),
             "POLL_ELEVATOR_MOVE_STATE": (0x20B, 0, True),
             "READ_DOOR_WARP_VALUE": (0x20C, 1, True),
+            "APPLY_CURRENT_TASK_RECORD_ENTRY": (0x20D, 0, False),
+            "START_CURRENT_FIELD_INTERACTION_EVENT": (0x20E, 0, False),
+            "RUN_FIELD_TRANSITION_SELECTOR": (0x20F, 1, False),
+            "PLAY_FIELD_SE_VOLUME_PAN": (0x214, 1, False),
+            "PLAY_FIELD_SE": (0x215, 1, False),
             "READ_WARP_EFFECT_MODE": (0x219, 0, True),
             "ACTION_WINDOW_REQUEST_AND_POLL_DIRECT": (0x21D, 1, True),
             "AI_COUNTER_REACHED_LIMIT": (0x0DF, 1, True),
@@ -1398,6 +1424,11 @@ end
         dds2_only = {
             "CALC_MONEY_BASE": (0x05A, 0, True),
             "CALC_MONEY_LEVEL_FACTOR": (0x162, 0, True),
+        }
+        dds2_field_only = {
+            "APPLY_ROOM_MODE_GROUP_ZERO": (0x1FC, 4, False),
+            "APPLY_ROOM_MODE_GROUP_ONE": (0x1FD, 4, False),
+            "RESET_FIELD_AFTER_EVENT": (0x21A, 0, False),
         }
         ai_expected = {
             "AI_SELECT_BASIC_ATTACK": (0x030, 0, False),
@@ -1508,6 +1539,10 @@ end
             name: contract for name, contract in expected.items()
             if name.startswith("CALC_")
         }
+        aicalc_shared_expected = {
+            name: contract for name, contract in shared_expected.items()
+            if name != "SETUP_FADE_FRAMES"
+        }
         for profile in (flw0_profiles.DDS1, flw0_profiles.DDS2):
             with self.subTest(profile=profile.name):
                 commands = {
@@ -1518,7 +1553,10 @@ end
                     )
                     for command in profile.commands
                 }
-                self.assertEqual(commands, shared_expected)
+                profile_expected = shared_expected.copy()
+                if profile.name == "dds2":
+                    profile_expected.update(dds2_field_only)
+                self.assertEqual(commands, profile_expected)
                 treasure_fields = profile.by_name[
                     "READ_TREASURE_TABLE_VALUE"
                 ].symbols_for_argument(0)
@@ -1534,6 +1572,18 @@ end
                     },
                 )
                 selector_domains = {
+                    "SET_CONTROLLER_VIBRATION": {
+                        0: "SMALL_MOTOR",
+                        1: "LARGE_MOTOR",
+                    },
+                    "APPLY_PARTY_TRAP_EFFECT": {
+                        1: "DAMAGE_TEN_PERCENT_HP",
+                        2: "DAMAGE_HALF_HP",
+                        3: "REDUCE_HP_TO_ONE",
+                        4: "INFLICT_POISON",
+                        5: "INFLICT_ACHE",
+                        6: "INFLICT_CLOSE",
+                    },
                     "CONSUME_FIELD_SKILL_END_NOTICE": {
                         0: "LIGHTOMA",
                         1: "LIFTOMA",
@@ -1568,6 +1618,10 @@ end
                         0: "MOTION_DURATION",
                         1: "FADE_MODE",
                     },
+                    "RUN_FIELD_TRANSITION_SELECTOR": {
+                        900: "HEAL_FACILITY",
+                        901: "SAVE_POINT",
+                    },
                 }
                 for command_name, expected_symbols in selector_domains.items():
                     with self.subTest(command=command_name):
@@ -1600,7 +1654,7 @@ end
                 }
                 self.assertEqual(
                     commands,
-                    shared_expected
+                    aicalc_shared_expected
                     | battle_expected
                     | (dds2_only if profile.name == "dds2-aicalc" else {})
                     | ai_expected
@@ -1895,7 +1949,7 @@ end
                         )
         self.assertEqual(type5_uses, 7863)
         self.assertEqual(command_uses, 53389)
-        self.assertEqual(profiled_command_uses, 45795)
+        self.assertEqual(profiled_command_uses, 50317)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -1949,8 +2003,8 @@ end
     def test_semantic_view_handles_both_tracked_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (143, 84333, 10874),
-            "dds2": (140, 64462, 6719),
+            "dds1": (143, 79894, 6435),
+            "dds2": (140, 61315, 3572),
         }
         for game, expected_counts in expected.items():
             files = 0
@@ -2131,7 +2185,7 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53389, 45795)
+            (code_words, commands, profiled_commands), (168829, 53389, 50317)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
@@ -2260,7 +2314,7 @@ end
                 totals["message_references"],
                 totals["selection_references"],
             ),
-            (33283, 1910, 287),
+            (36729, 1910, 287),
         )
         self.assertEqual(totals["event_references"], 43)
         self.assertEqual(totals["procedure_references"], 463)
