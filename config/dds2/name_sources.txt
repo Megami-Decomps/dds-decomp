@@ -59,7 +59,6 @@
 0x00106108	kwlnFadeIsBackgroundOverlayActive	inferred	Tests background fade flags or overlay presence; shortened without claiming transition stage. [names_reviewed11.tsv]
 0x00106160	kwlnFadeSetMode	inferred	stores D_00435CFC mode; mode 0 clears the two counters, otherwise sets alpha byte 0x80 [names_reviewed2.tsv]
 0x00106188	kwlnStepBackgroundFade	inferred	M141; sources=names_pending_main.tsv; twin=0x00106268, input-family pairing. [names_qp10.tsv]
-0x001063A8	kwlnSetCameraFieldOfViewTarget	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:999:func_001063A8; Stores the projection field-of-view scalar passed by the active camera update when its fieldOfView update-pending flag is set; no unit conversion or interpolation is performed.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00106460	kwlnDrawSnapshotSolidRect	inferred	confidence=high; func_00106460 saves the current solid rectangle parameters and stages or immediately applies pending parameters.; sources=names_R_Structs54.tsv; twin=0x00106540, input-family pairing. [names_qp10.tsv]
 0x00106658	kwlnDrawApplyEffectWord	inferred	Corrected: replaces E08/Ch75 IDs; source copies a DrawWord36 channel word and applies common effect settings; DDS1 twin. [names_qp9.tsv]
 0x00106810	kwlnDrawSetOffsetTransition	inferred	Sets two drawing offsets immediately or queues an interpolation from their previous values.

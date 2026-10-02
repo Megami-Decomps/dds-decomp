@@ -961,7 +961,7 @@ void kwlnStepBackgroundFade(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00106368);
 
-void kwlnSetCameraFieldOfViewTarget(f32 value) {
+void func_00106488(f32 value) {
     D_003245EC[0] = value;
 }
 

@@ -947,6 +947,14 @@ computed. Natural source shapes that flip it:
     s32 pool);` gives retail's `$3` and a full match. Before touching
     registers, check each callee's definition (the `grep` for its real
     definition is one command) and copy its return type.
+    More cases found by re-running every park with each callee's declaration
+    corrected one at a time: the debug printers (`func_003003F0` in DDS1,
+    `func_0035B6E0` / `func_0035C860` in DDS2) return `s32`; declaring them
+    `void` cost DDS1 `func_002241D0` / DDS2 `func_0023EE08` (a result-ignoring
+    printf tail after an arg-fetch call) their full match and made DDS2
+    `sndPollAtrac3SELoadTask` a CONTEXT flip. Correct only the callee the
+    failing function calls: correcting every `void` prototype of a unit at
+    once broke functions that had matched.
 11. **`x / 5` always compiles with the zero check, and a source-order trap.**
     ee-gcc emits `addiu $2,$0,5; div; beql $2,$0,1f; break 7` even for a
     constant divisor, so the check is not evidence of a variable divisor
@@ -955,6 +963,19 @@ computed. Natural source shapes that flip it:
     in source order (tag header store first, then the buffer fields):
     putting the buffer stores first makes sched1 issue them between `div` and
     its check (14/28 words), the tag-first order gets to 5/28.
+12. **`bne` with a filled slot vs annulled `bnel`: the callee must be C-defined
+    earlier in the same unit.** `if (a >= 200) return; if (b == 1) f();` (jal
+    tail, `ld $31` slot) compiles to `bnel`/`ld ra` when `f` is only declared
+    or is an `INCLUDE_ASM` function, and to retail's plain `bne` + `ld ra` slot
+    when `f` is a C definition earlier in the same translation unit (scratch
+    test: declared `void`/`s32`/K&R, defined later, or any other function
+    defined earlier: all `bnel`; only the callee defined above the caller
+    gives `bne`). DDS1 `fldCheckSceneReady` (1 of 15 words) and the
+    effEvent `func_00190708` residual are this: they stay one word short until
+    the callee (`func_001462D8`, 429 asm lines) is itself decompiled. Do not
+    fight it with source shapes; park it as "blocked by callee" and revisit
+    when the callee lands. Not every plain-`bne` residual is this: DDS2
+    `func_0021B4C0` calls `btlGetRuntime`, which lives in another unit.
 
 Unresolved: a saved register initialised as a copy of another holding the same
 constant (`move $16,$19` for `i` from `bestIndex = 0`, DDS1 `func_00202F90`,

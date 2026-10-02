@@ -6,7 +6,7 @@ extern void dds3SetCameraVector(s32 arg0, void *arg1);
 extern void effObjSetInnerFloat(s32 arg0, f32 arg1);
 extern s32 dds3GetWorldSecondaryObject(void);
 extern void dds3SetWorldCameraObject(s32 arg0, s32 arg1);
-extern void kwlnSetCameraFieldOfViewTarget(f32 arg0);
+extern void func_001063A8(f32 arg0);
 extern u8 D_0040ABC0[];
 extern u8 D_0040ABB0[];
 extern u8 D_0040ABD0[];
@@ -72,6 +72,6 @@ void func_0031B0F8(void) {
     effObjSetInnerFloat(D_00438944, 2.0f);
     object = dds3GetWorldSecondaryObject();
     dds3SetWorldCameraObject(object, D_00438944);
-    kwlnSetCameraFieldOfViewTarget(0.6283184886f);
+    func_001063A8(0.6283184886f);
 }
 

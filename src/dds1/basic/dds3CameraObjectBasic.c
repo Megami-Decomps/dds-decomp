@@ -76,7 +76,7 @@ extern s32 dds3GetWorldCameraObject(s32 world);
 extern void *dds3GetWorldSecondaryObject(void);
 extern s32 effObjTestNodeFlags(void *node, s32 flags);
 extern void effObjClearNodeFlags(void *node, s32 flags);
-extern void kwlnSetCameraFieldOfViewTarget(f32 value);
+extern void func_00106488(f32 value);
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
@@ -107,7 +107,7 @@ s32 dds3UpdateCameraObject(ActionObj *camera) {
         PCP_COPY_VECTOR(sdfViewEyeVector, &data->worldEye);
         PCP_COPY_VECTOR(sdfViewUpVector, &data->worldUp);
         if (data->fovUpdatePending & 1) {
-            kwlnSetCameraFieldOfViewTarget(data->fieldOfView);
+            func_00106488(data->fieldOfView);
             data->fovUpdatePending &= ~1;
         }
     }
