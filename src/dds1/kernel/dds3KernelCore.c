@@ -337,7 +337,52 @@ s32 kwlnTaskGetRegisteredState(KwlnTask* task)
     return (state < 4) ? state : 0;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskGetTaskByName);
+KwlnTask* kwlnTaskGetTaskByName(const char* name)
+{
+    s32 nameLength;
+    s32 nameSum;
+    s32 queueIndex;
+    s32 i;
+    KwlnTask* task;
+
+    task = NULL;
+    nameSum = 0;
+    nameLength = 0;
+    while (name[nameLength] != '\0') {
+        nameSum += name[nameLength];
+        nameLength++;
+    }
+
+    queueIndex = 0;
+    for (; queueIndex < 3; queueIndex++) {
+        switch (queueIndex) {
+        case 0:
+            task = kwlnDelayedStartTaskHead;
+            break;
+        case 1:
+            task = kwlnActiveTaskHead;
+            break;
+        case 2:
+            task = kwlnDelayedDestroyTaskHead;
+            break;
+        }
+
+        while (task != NULL) {
+            if (task->nameSum == nameSum) {
+                for (i = nameLength; ; i--) {
+                    if (name[i] != task->name[i]) {
+                        break;
+                    }
+                    if (i == 0) {
+                        return task;
+                    }
+                }
+            }
+            task = task->listNext;
+        }
+    }
+    return NULL;
+}
 
 KwlnTask* kwlnTaskFindByPriority(u32 prio)
 {
