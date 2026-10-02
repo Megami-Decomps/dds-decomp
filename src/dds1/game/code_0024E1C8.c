@@ -35,6 +35,22 @@ typedef struct MnuSpriteResource {
     MnuSpriteWork *sprites;
 } MnuSpriteResource;
 
+typedef union MnuVariantSpritePlacement {
+    struct {
+        u8 pad00[4];
+        s16 x;
+        s16 y;
+        s16 spriteGroups;
+        u16 flags;
+    } fields;
+    s16 values[6];
+} MnuVariantSpritePlacement;
+
+enum {
+    MNU_VARIANT_X_OFFSET = 2,
+    MNU_VARIANT_Y_OFFSET,
+};
+
 enum {
     MNU_SPRITE_RESOURCE_INDEX,
     MNU_SPRITE_INDEX,
@@ -43,6 +59,8 @@ enum {
 };
 
 extern MnuSpritePlacement D_0036B510[];
+extern MnuVariantSpritePlacement D_0036B7F0[];
+extern s32 D_0036C6AC[];
 extern s32 func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 
 s32 func_0024E1C8(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 placementIndex,
@@ -126,16 +144,36 @@ INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024EF68);
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F0D0);
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F210);
+INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF720);
+
+void func_0024F210(s32 x, s32 y, s32 z, s32 alpha, s32 groupPlacementIndex,
+                   s32 coordinatePlacementIndex, s32 selector, s32 flags,
+                   f32 scaleX, f32 scaleY, s32 context) {
+    s8 spriteMap[12] = { -1, 12, 26, 27, 13, 14, 15, 16, 20, 21, 23, 24 };
+    s32 sprite;
+
+    selector += 2;
+    sprite = spriteMap[((groupPlacementIndex + D_0036B7F0)->fields.spriteGroups >>
+                        (selector * 4)) & 0xF];
+    if (sprite == -1) {
+        return;
+    }
+    func_002BF4E0((s32)((f32)(x + D_0036B7F0[coordinatePlacementIndex]
+                                              .values[MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
+                  (s32)((f32)(y + D_0036B7F0[coordinatePlacementIndex]
+                                              .values[MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  flags,
+                  D_0036C6AC[0],
+                  sprite,
+                  context);
+}
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F338);
 
 extern u8 D_0036C568[];
 extern void effRequestResourceByMode(char *, void *, s32, void *);
-
-INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF720);
-
-INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF730);
 
 void mnuRequestMantraResources(void) {
     s32 i;
