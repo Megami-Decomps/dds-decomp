@@ -68,7 +68,7 @@ extern void sdfReleaseResourceAllocation(void *arg0);
 
 extern void func_0019AE18(void *arg0, s32 arg1, u32 arg2);
 
-extern void func_0019B120(EffPrim *arg0, void *arg1);
+extern void func_0019B120(EffPrim *arg0, f32 *arg1);
 
 extern void func_0019B1F0(EffPrim *arg0, void *arg1);
 extern void effMathReleaseWorkResource(void *work);
@@ -461,9 +461,59 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AE18);
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AFA0);
 
-INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B120);
+void func_0019B120(EffPrim *primitive, f32 *tangents) {
+    f32 *cubic = primitive->unk14;
+    f32 *quadratic = primitive->unk18;
+    f32 *linear = primitive->unk1C;
+    f32 *points = (f32 *)primitive->unk10;
+    s32 count = primitive->recordCount;
+    s32 segment;
+    for (segment = 0; segment < count - 1; segment++) {
+        s32 component;
+        for (component = 0; component < 3; component++) {
+            f32 next = points[segment * 3 + component + 3];
+            f32 current = points[segment * 3 + component];
+            f32 startTangent = tangents[component * count + segment];
+            f32 endTangent = tangents[component * count + segment + 1];
+            cubic[segment * 3 + component] = 2.0f * (current - next) +
+                (startTangent + endTangent);
+            quadratic[segment * 3 + component] = (next - current) * 3.0f -
+                (2.0f * startTangent + endTangent);
+            linear[segment * 3 + component] = startTangent;
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B1F0);
+void func_0019B1F0(EffPrim *prim, void *tangentData) {
+    f32 *tangents = tangentData;
+    f32 *a = prim->unk14;
+    f32 *b = prim->unk18;
+    f32 *c = prim->unk1C;
+    f32 *points = (f32 *)prim->unk10;
+    s32 count = prim->recordCount;
+    s32 i;
+    s32 j;
+
+    for (i = 0; i < count - 1; i++) {
+        for (j = 0; j < 3; j++) {
+            f32 p0 = points[i * 3 + j];
+            f32 p1 = points[i * 3 + j + 3];
+
+            if (p0 == p1) {
+                a[i * 3 + j] = 0.0f;
+                b[i * 3 + j] = 0.0f;
+                c[i * 3 + j] = 0.0f;
+            } else {
+                f32 t0 = tangents[j * count + i];
+                f32 t1 = tangents[j * count + i + 1];
+
+                a[i * 3 + j] = 2.0f * (p0 - p1) + (t0 + t1);
+                b[i * 3 + j] = (p1 - p0) * 3.0f - (2.0f * t0 + t1);
+                c[i * 3 + j] = t0;
+            }
+        }
+    }
+}
 
 /* Create a channel only when there are enough records for interpolation. */
 void *effCreateChannel(void *rows, u32 count) {
@@ -550,3 +600,4 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B558);
 INCLUDE_SDATA(const s32, "game/code_0019A0C0", D_00436540);
 
 INCLUDE_SDATA(const s32, "game/code_0019A0C0", D_0043654C);
+

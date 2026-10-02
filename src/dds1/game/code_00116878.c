@@ -1,6 +1,12 @@
 #include "common.h"
 
 extern s32 dds3AppendWorldObjectNode(s32 kind);
+typedef struct Motion Motion;
+typedef struct SdfMotionManager SdfMotionManager;
+typedef struct SdfMotionCommandTable SdfMotionCommandTable;
+
+extern Motion *func_002DB230(SdfMotionManager *, SdfMotionCommandTable *);
+extern void sdfMotionInitializeAtZeroTime(void *, s32, s32);
 
 /* Script object header (0x1C). */
 typedef struct ScriptObj {
@@ -66,7 +72,20 @@ u32 evtCreateModelFromObject(ObjWithWork *obj) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_00116878", evtAttachScriptToObject);
+Motion *evtAttachScriptToObject(ScriptObj *object, SdfMotionManager *owner) {
+    Motion *motion = NULL;
+    ObjWork *work;
+
+    if (owner == NULL) {
+        return NULL;
+    }
+    work = object->work;
+    if (work->unk8 != NULL) {
+        motion = func_002DB230(owner, work->unk8);
+        sdfMotionInitializeAtZeroTime(motion, 0, 1);
+    }
+    return motion;
+}
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
