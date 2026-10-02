@@ -10,7 +10,15 @@
 #define MNU_REGISTRY_TAG_PREFIX 0x02010000
 
 typedef struct MenuWorkEntry {
-    u8 pad00[4];
+    union {
+        u32 word;
+        struct {
+            u32 unused00 : 8;
+            u32 countdownEnabled : 1;
+            u32 countdown : 8;
+            u32 unused17 : 15;
+        } bits;
+    } control;
     u32 tag;        /* 0x04 */
     s32 unk08;      /* 0x08 */
     u8 pad0C[4];
@@ -21,10 +29,13 @@ typedef struct MenuWorkEntry {
     f32 x1;         /* 0x20 */
     f32 y1;         /* 0x24 */
     f32 scale1;     /* 0x28 */
-    u8 pad2C[8];
+    s16 recordIndex;
+    s16 shortListIndex;
+    u8 pad30[4];
     u16 unk34;      /* 0x34 */
     u16 remaining;  /* 0x36: decreased until the completion flag is set */
-    u8 pad38[4];
+    u16 unk38;
+    u16 elapsed;
     u32 callback;   /* 0x3C */
     u32 flags;      /* 0x40 */
     u8 pad44[4];
@@ -85,6 +96,13 @@ typedef struct ShortRecordList {
     ShortRecord *records;
 } ShortRecordList;
 
+typedef struct MenuRegistryRecord {
+    u8 pad00[8];
+    ShortRecordList *lists;
+    u8 pad0C[4];
+} MenuRegistryRecord;
+
+
 typedef struct MenuInitialTag {
     u8 reserved;
     u8 flags;
@@ -119,16 +137,18 @@ typedef struct MenuTaggedRecord {
     s16 recordIndex;  /* 0x2C: indexes 16-byte records */
 } MenuTaggedRecord;
 
+typedef struct MenuRegistryTable MenuRegistryTable;
+
 typedef struct MenuRegistry {
     u8 pad00[0xC];
-    u32 *table; /* 0x0C */
+    MenuRegistryTable *table; /* 0x0C */
 } MenuRegistry;
 
-typedef struct MenuRegistryTable {
+struct MenuRegistryTable {
     u32 flags;
     u8 pad04[0xC];
-    u32 recordBase; /* 0x10 */
-} MenuRegistryTable;
+    MenuRegistryRecord *recordBase; /* 0x10 */
+};
 
 void func_003214D0(u32, s32);
 s32 dds3MeasureRecordBlock(s32 *entries, s32 count);
@@ -373,7 +393,7 @@ u32 mnuResolveTaggedRegistryRecord(u32 taggedRecord) {
         return 0;
     }
     registryTable = (u32)((MenuRegistry *)registryEntry)->table;
-    return ((MenuRegistryTable *)registryTable)->recordBase + ((MenuTaggedRecord *)taggedRecord)->recordIndex * 16;
+    return (u32)((MenuRegistryTable *)registryTable)->recordBase + ((MenuTaggedRecord *)taggedRecord)->recordIndex * 16;
 }
 
 typedef struct MenuByteRecordList {
@@ -439,7 +459,7 @@ u32 mnuGetWorkEntryPool(void) {
 /* A flagged registry entry offsets its base value by accumulated resource progress. */
 f32 mnuEvaluateTimedValue(MenuWorkEntry *entry) {
     u8 *registry = mnuGetMenuRecordRegistryEntry(entry->tag);
-    if ((((MenuRegistryTable *)((MenuRegistry *)registry)->table)->flags & 1) != 0) {
+    if ((((MenuRegistry *)registry)->table->flags & 1) != 0) {
         u8 *progressState = mnuGetResourceProgressStepState();
         u8 *resourceRecord = mnuGetResourceRecordByIndex(entry->unk08);
         return entry->y0 +
@@ -458,7 +478,47 @@ void mnuDeactivateWorkEntry(MenuWorkEntry *entry) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00322F48);
+extern void func_003226D8(MenuWorkEntry *, ShortRecordList *, ShortRecord *);
+extern s32 func_003230A0(MenuWorkEntry *, MenuRegistryTable *, MenuRegistryRecord *, ShortRecord *);
+extern void func_00321528(u32, MenuRegistryRecord *);
+
+/* Tick the packed countdown and dispatch the row's fixed-kind record. */
+s32 func_00322F48(MenuWorkEntry *entry) {
+    MenuRegistryTable *table;
+    MenuRegistryRecord *row;
+    ShortRecordList *list;
+    ShortRecord *record;
+    ShortRecord empty;
+
+    table = ((MenuRegistry *)mnuGetMenuRecordRegistryEntry(entry->tag))->table;
+    row = &table->recordBase[entry->recordIndex];
+    list = &row->lists[entry->shortListIndex];
+    if (entry->control.bits.countdownEnabled) {
+        if (entry->control.bits.countdown > 0) {
+            entry->control.bits.countdown--;
+            if (entry->control.bits.countdown == 0) {
+                entry->control.bits.countdownEnabled = 0;
+            }
+        }
+    }
+    record = mnuFindFirstFixedKindShortRecord(list);
+    if (record == NULL) {
+        memset(&empty, 0, sizeof(empty));
+        record = &empty;
+    }
+    func_003226D8(entry, list, record);
+    entry->elapsed++;
+    switch (func_003230A0(entry, table, row, record)) {
+    case 1:
+        func_00321528(entry->callback, &table->recordBase[entry->recordIndex]);
+        return 0;
+    case 2:
+        entry->flags |= 0x8;
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_003230A0);
 
