@@ -805,7 +805,32 @@ void fldConsumeSceneSlotCounters(s32 amount, u8 mode) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", fldInsertSceneSlots);
+void fldInsertSceneSlots(s32 count) {
+    BattleController *scene = (BattleController *)btlGetRuntime();
+    s32 kind;
+    s32 used;
+    s32 i;
+
+    kind = scene->variant == 1 ? 1 : 2;
+    used = fldCountSceneSlots();
+    if (used + count >= 8) {
+        count = 8 - used;
+    }
+    if (count <= 0) {
+        return;
+    }
+    for (i = used + count - 1; i != count - 1; i--) {
+        scene->slots[i].a = scene->slots[i - count].a;
+        scene->slots[i].b = scene->slots[i - count].b;
+        scene->slots[i].id = i + 1;
+    }
+    for (; i != -1; i--) {
+        scene->slots[i].a = kind;
+        scene->slots[i].b = 0x32;
+        scene->slots[i].id = i + 1;
+    }
+    fldInitSceneFadeRecords();
+}
 
 void fldSwapSceneSlots(s32 index) {
     BattleController *scene = (BattleController *)btlGetRuntime();
