@@ -16,6 +16,7 @@ Pipeline per version (see README.md):
   FLW0 (.bfasm)      tools/flw0.py assemble -> build/<v>/scripts/, then SHA-1 check
   INF (.infasm)      tools/inf.py assemble -> build/<v>/data/field/, then SHA-1 check
   WAP (.wapasm)      tools/wap.py assemble -> build/<v>/data/field/, then SHA-1 check
+  AMB (.ambasm)      tools/amb.py assemble -> build/<v>/data/field/, then SHA-1 check
   NPL (.nplasm)      tools/npl.py assemble -> build/<v>/data/field/, then SHA-1 check
   SKY (.skyasm)      tools/sky.py assemble -> build/<v>/data/field/, then SHA-1 check
   FLD2 (.fldasm)     tools/fld.py assemble -> build/<v>/data/field/, then SHA-1 check
@@ -381,6 +382,11 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         "fld1",
         f"mkdir -p $outdir && {sys.executable} tools/fld.py assemble $in $out",
         description="fld1 $in",
+    )
+    n.rule(
+        "amb",
+        f"mkdir -p $outdir && {sys.executable} tools/amb.py assemble $in $out",
+        description="amb $in",
     )
     n.rule(
         "field_world",
@@ -793,6 +799,28 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             version_outputs.append(str(environment_stamp))
             field_data_stamps.append(str(environment_stamp))
 
+        amb_manifest = Path("config") / version / "field_amb.sha1"
+        if (ROOT / amb_manifest).exists():
+            amb_source_dir = Path("src") / version / "data" / "field"
+            amb_output_dir = Path("build") / version / "data" / "field"
+            amb_sources = sorted((ROOT / amb_source_dir).glob("*.ambasm"))
+            amb_outputs = []
+            for source in amb_sources:
+                source = source.relative_to(ROOT)
+                output = amb_output_dir / source.with_suffix(".amb").name
+                n.build(
+                    str(output),
+                    "amb",
+                    str(source),
+                    implicit=["tools/amb.py", "tools/reloc.py"],
+                    variables={"outdir": str(output.parent)},
+                )
+                amb_outputs.append(str(output))
+            amb_stamp = amb_output_dir / "field_amb.ok"
+            n.build(str(amb_stamp), "check", str(amb_manifest), implicit=amb_outputs)
+            version_outputs.append(str(amb_stamp))
+            field_data_stamps.append(str(amb_stamp))
+
         fld_manifest = Path("config") / version / "field_fld2.sha1"
         if (ROOT / fld_manifest).exists():
             fld_source_dir = Path("src") / version / "data" / "field"
@@ -806,7 +834,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 field_stem = source.stem.split("_", 1)[0]
                 scripts = Path("src") / version / "scripts" / "field" / f"{field_stem}.bfasm"
                 warps = fld_source_dir / f"{field_stem}.wapasm"
-                implicit = ["tools/fld.py"]
+                implicit = ["tools/fld.py", "tools/reloc.py"]
                 links = ""
                 if source.stem in linked_stems:
                     if not (ROOT / scripts).exists() or not (ROOT / warps).exists():
@@ -867,7 +895,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     str(output),
                     "fld1",
                     str(source),
-                    implicit=["tools/fld.py"],
+                    implicit=["tools/fld.py", "tools/reloc.py"],
                     variables={"outdir": str(output.parent)},
                 )
                 fld1_outputs.append(str(output))
@@ -1004,6 +1032,9 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             environment_manifest = ROOT / "config" / version / f"field_{kind}.sha1"
             if environment_manifest.exists():
                 configure_inputs.append(str(environment_manifest.relative_to(ROOT)))
+        amb_manifest = ROOT / "config" / version / "field_amb.sha1"
+        if amb_manifest.exists():
+            configure_inputs.append(str(amb_manifest.relative_to(ROOT)))
         fld_manifest = ROOT / "config" / version / "field_fld2.sha1"
         if fld_manifest.exists():
             configure_inputs.append(str(fld_manifest.relative_to(ROOT)))
