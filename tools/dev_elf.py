@@ -35,6 +35,18 @@ SHT_REL = 9
 PF_X = 1
 PF_W = 2
 PF_R = 4
+ADDRESS_LOW_OPCODES = {
+    0x08,  # ADDI
+    0x09,  # ADDIU
+    0x0D,  # ORI
+    0x18,  # DADDI
+    0x19,  # DADDIU
+    0x1A,  # LDL
+    0x1B,  # LDR
+    0x1E,  # LQ
+    0x1F,  # SQ
+    *range(0x20, 0x40),  # load/store, CACHE, and PREF forms
+}
 
 
 class DevElfError(ValueError):
@@ -410,18 +422,29 @@ def _relocation_effective_targets(
             continue
         if relocation.kind == 6:
             symbol_key = (relocation.symbol_table_index, relocation.symbol_index)
-            for hi in pending_hi.pop(symbol_key, []):
+            candidates = pending_hi.get(symbol_key, [])
+            matched: list[LinkedRelocation] = []
+            unmatched: list[LinkedRelocation] = []
+            for hi in candidates:
                 hi_file = _file_offset_for_vaddr(programs, hi.offset)
                 if hi_file is None or file_offset is None:
+                    unmatched.append(hi)
                     continue
                 try:
                     target = _decode_mips_relocation_address(
                         image, hi_file, file_offset
                     )
                 except DevElfError:
+                    unmatched.append(hi)
                     continue
+                matched.append(hi)
                 targets.setdefault(hi, set()).add(target)
                 targets.setdefault(relocation, set()).add(target)
+            if matched:
+                # One LUI may feed several load/store or arithmetic low halves.
+                # Keep the most recent matching HI active for the next LO while
+                # retaining pending HIs that use a different register.
+                pending_hi[symbol_key] = unmatched + [matched[-1]]
             continue
         if file_offset is None:
             continue
@@ -463,6 +486,111 @@ def _mapped_move_address(
         if source_start <= address < source_end:
             return target_start + address - source_start
     return None
+
+
+def _audit_moved_payloads(
+    base: bytes,
+    output: bytes,
+    base_programs: list[ProgramHeader],
+    output_programs: list[ProgramHeader],
+    relocations: list[LinkedRelocation],
+    effective_targets: dict[LinkedRelocation, set[int]],
+    ranges: list[tuple[int, int, int, int]],
+) -> int:
+    """Require each moved byte to equal retail, except validated relocations."""
+
+    old_relocations: list[LinkedRelocation] = []
+    old_for_new: dict[LinkedRelocation, LinkedRelocation] = {}
+    relocations_by_offset: dict[int, list[LinkedRelocation]] = {}
+    for relocation in relocations:
+        relocations_by_offset.setdefault(relocation.offset, []).append(relocation)
+        old_offset = _mapped_move_address(relocation.offset, ranges, reverse=True)
+        if old_offset is None:
+            continue
+        old_symbol_value = _mapped_move_address(
+            relocation.symbol_value, ranges, reverse=True
+        )
+        old_relocation = LinkedRelocation(
+            old_offset,
+            relocation.kind,
+            relocation.symbol_table_index,
+            relocation.symbol_index,
+            relocation.symbol_value if old_symbol_value is None else old_symbol_value,
+            relocation.symbol_name,
+        )
+        old_relocations.append(old_relocation)
+        old_for_new[relocation] = old_relocation
+    old_targets = _relocation_effective_targets(
+        base, base_programs, old_relocations
+    )
+
+    changed_words = 0
+    for index, (old_start, old_end, new_start, new_end) in enumerate(ranges):
+        size = old_end - old_start
+        if new_end - new_start != size:
+            raise DevElfError(f"moves[{index}] is not a same-size relocation")
+        old_file = _file_offset_for_vaddr(base_programs, old_start)
+        new_file = _file_offset_for_vaddr(output_programs, new_start)
+        if (
+            old_file is None
+            or new_file is None
+            or _file_offset_for_vaddr(base_programs, old_end - 1) is None
+            or _file_offset_for_vaddr(output_programs, new_end - 1) is None
+        ):
+            raise DevElfError(f"moves[{index}] payload is not wholly file-backed")
+
+        differing_words = {
+            relative & ~3
+            for relative, (old_byte, new_byte) in enumerate(
+                zip(
+                    base[old_file : old_file + size],
+                    output[new_file : new_file + size],
+                )
+            )
+            if old_byte != new_byte
+        }
+        for relative in sorted(differing_words):
+            if relative + 4 > size:
+                raise DevElfError(
+                    f"moves[{index}] has a changed partial word at +0x{relative:X}"
+                )
+            new_vaddr = new_start + relative
+            old_word = _unpack_word(base, old_file + relative, "moved retail word")
+            new_word = _unpack_word(output, new_file + relative, "moved output word")
+            valid = False
+            for relocation in relocations_by_offset.get(new_vaddr, []):
+                old_relocation = old_for_new.get(relocation)
+                if old_relocation is None or relocation.kind not in (2, 4, 5, 6):
+                    continue
+                if relocation.kind == 4:
+                    encoding_valid = (
+                        old_word >> 26 in (2, 3)
+                        and new_word >> 26 == old_word >> 26
+                    )
+                elif relocation.kind in (5, 6):
+                    encoding_valid = (
+                        old_word & 0xFFFF0000
+                    ) == (
+                        new_word & 0xFFFF0000
+                    )
+                else:
+                    encoding_valid = True
+                if not encoding_valid:
+                    continue
+                if any(
+                    _mapped_move_address(old_target, ranges) == new_target
+                    for old_target in old_targets.get(old_relocation, ())
+                    for new_target in effective_targets.get(relocation, ())
+                ):
+                    valid = True
+                    break
+            if not valid:
+                raise DevElfError(
+                    f"moves[{index}] word at +0x{relative:X} differs from retail "
+                    "without a validated relocation"
+                )
+            changed_words += 1
+    return changed_words
 
 
 def _jump_target(word: int, pc: int) -> int:
@@ -508,9 +636,14 @@ def scan_stale_move_references(
                     break
                 low_word = _unpack_word(image, low_offset, "stale HI16/LO16 scan")
                 low_opcode = low_word >> 26
-                if low_opcode not in (0x09, 0x0D) or (low_word >> 21) & 0x1F != register:
+                if (
+                    low_opcode not in ADDRESS_LOW_OPCODES
+                    or (low_word >> 21) & 0x1F != register
+                ):
                     continue
-                address = _decode_mips_address(image, file_offset, low_offset)
+                address = _decode_mips_relocation_address(
+                    image, file_offset, low_offset
+                )
                 if _mapped_move_address(address, ranges) is not None:
                     raise DevElfError(
                         f"stale HI16/LO16 construction at 0x{vaddr:X}/"
@@ -593,6 +726,29 @@ def audit_relocation_closure(
     effective_targets = _relocation_effective_targets(
         output, output_programs, relocations
     )
+    changed_payload_words = _audit_moved_payloads(
+        base,
+        output,
+        base_programs,
+        output_programs,
+        relocations,
+        effective_targets,
+        ranges,
+    )
+    stale_relocations = [
+        (relocation, target)
+        for relocation, targets in effective_targets.items()
+        for target in targets
+        if _mapped_move_address(target, ranges) is not None
+    ]
+    if stale_relocations:
+        relocation, target = min(
+            stale_relocations, key=lambda item: (item[0].offset, item[1])
+        )
+        raise DevElfError(
+            f"relocation at 0x{relocation.offset:X} still targets abandoned "
+            f"move address 0x{target:X}"
+        )
     moved_relocations = [
         relocation
         for relocation in relocations
@@ -789,6 +945,7 @@ def audit_relocation_closure(
     scanned_words = scan_stale_move_references(output, ranges)
     return {
         "changed_relocation_words": len(explained_words),
+        "changed_payload_words": changed_payload_words,
         "moved_relocations": len(moved_relocations),
         "redirect_relocations": len(redirect_relocations),
         "extension_relocations": extension_relocations,
