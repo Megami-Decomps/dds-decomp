@@ -349,10 +349,19 @@ typedef struct PartyDeltaState {
     PartyDeltaEntry entry[5];
 } PartyDeltaState;
 
+typedef struct SceneLoadNode {
+    s32 state;
+    u8 pad_004[0x168];
+    struct SceneLoadNode *next;
+} SceneLoadNode;
+
 typedef struct BattleSceneDeltaState {
-    u8 pad_000[0x1F8];
+    u8 pad_000[0x1F4];
+    u32 flags;
     u32 subFlags;
-    u8 pad_1FC[0x5C];
+    u8 pad_1FC[0x28];
+    SceneLoadNode *linkedNodes;
+    u8 pad_228[0x30];
     u8 phaseFlag;
     u8 pad_259[0x33];
     s32 loadStep;
@@ -404,7 +413,70 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneDeltaState *scene) {
     scene->loadStep = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", fldStepAreaLoad);
+extern s32 func_002629A8();
+
+extern void btlDispatchStateHandler();
+
+extern s32 fldLoadAreaResource();
+
+extern void btlReleaseEventAssets();
+
+extern void btlReleaseBossData();
+
+extern void fldPollAreaResourceLoad();
+
+extern s32 fldGetResourceReadyFlag();
+
+extern s32 btlBossDebugPrintf();
+
+extern s32 brsTaskPollDone();
+
+u32 fldStepAreaLoad(BattleSceneDeltaState *work) {
+    SceneLoadNode *node;
+    s32 step;
+
+    if (func_002629A8() == 1) {
+        work->subFlags |= 0x20;
+        if (work->linkedNodes != 0) {
+            for (node = work->linkedNodes; node != 0; node = node->next) {
+                if (node->state != 0x1E) {
+                    btlDispatchStateHandler(node, 0x1E);
+                }
+            }
+        } else {
+            switch (work->loadStep) {
+            case 0:
+                work->flags &= ~0x10;
+                if (fldLoadAreaResource() != 0) {
+                    work->loadStep = 1;
+                } else {
+                    work->loadStep = 2;
+                }
+                btlReleaseEventAssets();
+                btlReleaseBossData();
+                break;
+            case 1:
+                fldPollAreaResourceLoad();
+                if (fldGetResourceReadyFlag() == 0) {
+                    work->loadStep = 2;
+                    btlBossDebugPrintf("btl:field loding end\n");
+                }
+                break;
+            case 2:
+                break;
+            }
+        }
+    }
+    step = work->loadStep;
+    if (step < 3) {
+        if (step > 0) {
+            if (brsTaskPollDone() == 0) {
+                return 0xB;
+            }
+        }
+    }
+    return 0;
+}
 
 void fldMarkLinkedSceneActors(s32 context) {
     s32 *entry;
