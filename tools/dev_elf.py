@@ -31,14 +31,19 @@ EM_MIPS = 8
 PT_LOAD = 1
 SHT_SYMTAB = 2
 SHT_STRTAB = 3
+SHT_RELA = 4
 SHT_NOBITS = 8
 SHT_REL = 9
 SHF_ALLOC = 2
 SHN_UNDEF = 0
+SHN_MIPS_ACOMMON = 0xFF00
+SHN_MIPS_SCOMMON = 0xFF03
+SHN_COMMON = 0xFFF2
 STB_GLOBAL = 1
 STB_WEAK = 2
 STT_OBJECT = 1
 STT_FUNC = 2
+STT_SECTION = 3
 PF_X = 1
 PF_W = 2
 PF_R = 4
@@ -98,6 +103,12 @@ class LinkedRelocation:
     symbol_index: int
     symbol_value: int
     symbol_name: str
+    symbol_info: int = 0
+    symbol_section_index: int = SHN_UNDEF
+
+    @property
+    def symbol_kind(self) -> int:
+        return self.symbol_info & 0xF
 
 
 @dataclass(frozen=True)
@@ -118,6 +129,21 @@ class LinkedSymbol:
     @property
     def kind(self) -> int:
         return self.info & 0xF
+
+
+@dataclass(frozen=True)
+class ObjectSection:
+    index: int
+    name: str
+    kind: int
+    flags: int
+    address: int
+    offset: int
+    size: int
+    link: int
+    info: int
+    alignment: int
+    entry_size: int
 
 
 def _number(value: Any, context: str) -> int:
@@ -276,6 +302,8 @@ def parse_linked_relocations(image: bytes | bytearray) -> list[LinkedRelocation]
                     symbol_index,
                     symbol[1],
                     bytes(image[name_start:name_end]).decode("ascii", errors="replace"),
+                    symbol[3],
+                    symbol[5],
                 )
             )
     if not relocations:
@@ -350,8 +378,8 @@ def parse_linked_symbols(image: bytes | bytearray) -> list[LinkedSymbol]:
     return result
 
 
-def parse_allocated_sections(image: bytes | bytearray) -> dict[str, int]:
-    """Return allocated input-section names and sizes from an ELF32 object."""
+def _object_sections(image: bytes | bytearray) -> list[ObjectSection]:
+    """Parse named section headers from a little-endian MIPS ELF32 object."""
 
     if len(image) < ELF_HEADER.size:
         raise DevElfError("replacement object is smaller than an ELF32 header")
@@ -362,6 +390,8 @@ def parse_allocated_sections(image: bytes | bytearray) -> dict[str, int]:
         raise DevElfError("replacement object must be little-endian ELF32")
     if header.machine != EM_MIPS:
         raise DevElfError("replacement object is not MIPS")
+    if header.ehsize != ELF_HEADER.size:
+        raise DevElfError("replacement object has an invalid ELF-header size")
     if header.shentsize != SECTION_HEADER.size:
         raise DevElfError("replacement object has an invalid section-header size")
     table_end = header.shoff + header.shnum * header.shentsize
@@ -376,17 +406,20 @@ def parse_allocated_sections(image: bytes | bytearray) -> dict[str, int]:
     strings = sections[header.shstrndx]
     if strings[1] != SHT_STRTAB or strings[4] + strings[5] > len(image):
         raise DevElfError("replacement object section-name table is invalid")
-    result: dict[str, int] = {}
+    result = []
     for section_index, section in enumerate(sections):
-        name_offset, section_type, flags, offset, size = (
+        name_offset, section_type, flags, address, offset, size, link, info, alignment, entry_size = (
             section[0],
             section[1],
             section[2],
+            section[3],
             section[4],
             section[5],
+            section[6],
+            section[7],
+            section[8],
+            section[9],
         )
-        if not flags & SHF_ALLOC:
-            continue
         if section_type != SHT_NOBITS and offset + size > len(image):
             raise DevElfError(
                 f"replacement object section {section_index} is outside the file"
@@ -398,21 +431,256 @@ def parse_allocated_sections(image: bytes | bytearray) -> dict[str, int]:
         if name_end < 0:
             raise DevElfError("replacement object section name is not terminated")
         name = bytes(image[name_start:name_end]).decode("ascii", errors="replace")
-        if name in result:
-            raise DevElfError(f"replacement object has duplicate section {name}")
-        result[name] = size
+        result.append(
+            ObjectSection(
+                section_index,
+                name,
+                section_type,
+                flags,
+                address,
+                offset,
+                size,
+                link,
+                info,
+                alignment,
+                entry_size,
+            )
+        )
     return result
 
 
+def parse_allocated_sections(image: bytes | bytearray) -> dict[str, int]:
+    """Return allocated input-section names and sizes from an ELF32 object."""
+
+    result: dict[str, int] = {}
+    for section in _object_sections(image):
+        if not section.flags & SHF_ALLOC:
+            continue
+        if section.name in result:
+            raise DevElfError(
+                f"replacement object has duplicate section {section.name}"
+            )
+        result[section.name] = section.size
+    return result
+
+
+def _object_symbols(
+    image: bytes | bytearray, sections: list[ObjectSection]
+) -> list[LinkedSymbol]:
+    """Return symbols from a relocatable object without requiring program headers."""
+
+    result = []
+    for table in sections:
+        if table.kind != SHT_SYMTAB:
+            continue
+        if table.entry_size != SYMBOL_ENTRY.size or table.size % table.entry_size:
+            raise DevElfError(
+                f"replacement object symbol table {table.index} has an invalid entry size"
+            )
+        if table.link >= len(sections) or sections[table.link].kind != SHT_STRTAB:
+            raise DevElfError(
+                f"replacement object symbol table {table.index} has no string table"
+            )
+        strings = sections[table.link]
+        for symbol_index, entry_offset in enumerate(
+            range(table.offset, table.offset + table.size, table.entry_size)
+        ):
+            name_offset, value, size, info, other, section_index = (
+                SYMBOL_ENTRY.unpack_from(image, entry_offset)
+            )
+            if name_offset >= strings.size:
+                raise DevElfError(
+                    "replacement object symbol name is outside its string table"
+                )
+            name_start = strings.offset + name_offset
+            name_end = image.find(b"\0", name_start, strings.offset + strings.size)
+            if name_end < 0:
+                raise DevElfError("replacement object symbol name is not terminated")
+            result.append(
+                LinkedSymbol(
+                    table.index,
+                    symbol_index,
+                    bytes(image[name_start:name_end]).decode(
+                        "ascii", errors="replace"
+                    ),
+                    value,
+                    size,
+                    info,
+                    other,
+                    section_index,
+                )
+            )
+    if not result:
+        raise DevElfError("replacement object contains no symbol table")
+    return result
+
+
+def _fallback_symbol(
+    symbols: list[LinkedSymbol], name: str, context: str
+) -> LinkedSymbol:
+    matching = [
+        symbol
+        for symbol in symbols
+        if symbol.name == name and symbol.section_index != SHN_UNDEF
+    ]
+    if len(matching) != 1:
+        raise DevElfError(
+            f"{context} fallback symbol {name} has {len(matching)} definitions, expected one"
+        )
+    symbol = matching[0]
+    if symbol.kind != STT_FUNC or symbol.size == 0:
+        raise DevElfError(f"{context} fallback symbol {name} is not a sized function")
+    return symbol
+
+
+def _fallback_relocations(
+    image: bytes | bytearray,
+    sections: list[ObjectSection],
+    symbols: list[LinkedSymbol],
+    function: LinkedSymbol,
+) -> list[tuple[int, int, str, int, int, str]]:
+    """Describe a fallback's REL entries relative to the function start."""
+
+    symbol_tables = {
+        symbol.table_index: {} for symbol in symbols
+    }
+    for symbol in symbols:
+        symbol_tables[symbol.table_index][symbol.symbol_index] = symbol
+    result = []
+    for relocation_section in sections:
+        if relocation_section.info != function.section_index:
+            continue
+        if relocation_section.kind == SHT_RELA and relocation_section.size:
+            raise DevElfError("replacement fallback uses unsupported RELA relocations")
+        if relocation_section.kind != SHT_REL:
+            continue
+        if (
+            relocation_section.entry_size != REL_ENTRY.size
+            or relocation_section.size % relocation_section.entry_size
+        ):
+            raise DevElfError("replacement fallback relocation table is malformed")
+        table = symbol_tables.get(relocation_section.link)
+        if table is None:
+            raise DevElfError("replacement fallback relocation has no symbol table")
+        for entry_offset in range(
+            relocation_section.offset,
+            relocation_section.offset + relocation_section.size,
+            relocation_section.entry_size,
+        ):
+            offset, info = REL_ENTRY.unpack_from(image, entry_offset)
+            if not function.value <= offset < function.value + function.size:
+                continue
+            target = table.get(info >> 8)
+            if target is None:
+                raise DevElfError(
+                    "replacement fallback relocation references an invalid symbol"
+                )
+            if target.section_index < len(sections):
+                target_section = sections[target.section_index].name
+            else:
+                target_section = f"0x{target.section_index:X}"
+            result.append(
+                (
+                    offset - function.value,
+                    info & 0xFF,
+                    target.name,
+                    target.binding,
+                    target.kind,
+                    target_section,
+                )
+            )
+    return sorted(result)
+
+
+def _audit_fallback_symbols(
+    replacement_index: int,
+    replacement: dict[str, Any],
+    retail_image: bytes,
+    development_image: bytes,
+) -> int:
+    names = replacement.get("fallback_symbols", [])
+    if not isinstance(names, list) or not all(
+        isinstance(name, str) and name for name in names
+    ):
+        raise DevElfError(
+            f"replacements[{replacement_index}].fallback_symbols must be a list of names"
+        )
+    if len(names) != len(set(names)):
+        raise DevElfError(
+            f"replacements[{replacement_index}].fallback_symbols contains a duplicate"
+        )
+    if not names:
+        return 0
+
+    retail_sections = _object_sections(retail_image)
+    development_sections = _object_sections(development_image)
+    retail_symbols = _object_symbols(retail_image, retail_sections)
+    development_symbols = _object_symbols(development_image, development_sections)
+    for name in names:
+        context = f"replacements[{replacement_index}]"
+        old_symbol = _fallback_symbol(retail_symbols, name, f"{context} retail")
+        new_symbol = _fallback_symbol(
+            development_symbols, name, f"{context} development"
+        )
+        if (
+            old_symbol.size != new_symbol.size
+            or old_symbol.binding != new_symbol.binding
+            or old_symbol.kind != new_symbol.kind
+            or (old_symbol.other & 3) != (new_symbol.other & 3)
+        ):
+            raise DevElfError(f"{context} fallback symbol {name} changed its contract")
+        if (
+            old_symbol.section_index >= len(retail_sections)
+            or new_symbol.section_index >= len(development_sections)
+        ):
+            raise DevElfError(f"{context} fallback symbol {name} has no input section")
+        old_section = retail_sections[old_symbol.section_index]
+        new_section = development_sections[new_symbol.section_index]
+        if old_section.name != ".text" or new_section.name != ".text":
+            raise DevElfError(f"{context} fallback symbol {name} is not in .text")
+        old_start = old_section.offset + old_symbol.value
+        new_start = new_section.offset + new_symbol.value
+        old_end = old_start + old_symbol.size
+        new_end = new_start + new_symbol.size
+        if old_end > old_section.offset + old_section.size:
+            raise DevElfError(f"{context} retail fallback symbol {name} exceeds .text")
+        if new_end > new_section.offset + new_section.size:
+            raise DevElfError(
+                f"{context} development fallback symbol {name} exceeds .text"
+            )
+        if retail_image[old_start:old_end] != development_image[new_start:new_end]:
+            raise DevElfError(f"{context} fallback symbol {name} changed bytes")
+        old_relocations = _fallback_relocations(
+            retail_image, retail_sections, retail_symbols, old_symbol
+        )
+        new_relocations = _fallback_relocations(
+            development_image,
+            development_sections,
+            development_symbols,
+            new_symbol,
+        )
+        if old_relocations != new_relocations:
+            raise DevElfError(
+                f"{context} fallback symbol {name} changed its relocation contract"
+            )
+    return len(names)
+
+
 def audit_replacement_objects(
-    spec: dict[str, Any], objects: list[bytes]
-) -> None:
+    spec: dict[str, Any], objects: list[bytes], retail_objects: list[bytes] | None = None
+) -> dict[str, int]:
     replacements = spec.get("replacements", [])
     if len(objects) != len(replacements):
         raise DevElfError(
             f"received {len(objects)} replacement objects for "
             f"{len(replacements)} declarations"
         )
+    if retail_objects is not None and len(retail_objects) != len(replacements):
+        raise DevElfError(
+            f"received {len(retail_objects)} retail objects for "
+            f"{len(replacements)} replacement declarations"
+        )
+    fallback_count = 0
     for index, (replacement, image) in enumerate(zip(replacements, objects)):
         retail_obj = replacement.get("retail_object")
         expected: dict[str, int | None] = {}
@@ -461,6 +729,29 @@ def audit_replacement_objects(
                     f"replacements[{index}] section {section} has size "
                     f"0x{actual[section]:X}, expected 0x{expected_size:X}"
                 )
+        symbols = _object_symbols(image, _object_sections(image))
+        common = [
+            symbol
+            for symbol in symbols
+            if symbol.size
+            and symbol.section_index
+            in (SHN_MIPS_ACOMMON, SHN_MIPS_SCOMMON, SHN_COMMON)
+        ]
+        if common:
+            raise DevElfError(
+                f"replacements[{index}] symbol {common[0].name or '<anonymous>'} "
+                "uses COMMON storage"
+            )
+        fallback_symbols = replacement.get("fallback_symbols", [])
+        if fallback_symbols and retail_objects is None:
+            raise DevElfError(
+                f"replacements[{index}] fallback audit requires the retail object"
+            )
+        if retail_objects is not None:
+            fallback_count += _audit_fallback_symbols(
+                index, replacement, retail_objects[index], image
+            )
+    return {"fallback_symbols": fallback_count}
 
 
 def _unique_defined_symbol(
@@ -671,6 +962,190 @@ def _replacement_symbol_shifted_within_move(
     return old_symbol.value - old_start != new_symbol.value - new_start
 
 
+def _map_replacement_target(
+    old_target: int,
+    symbols: dict[str, tuple[LinkedSymbol, LinkedSymbol]],
+    ranges: list[tuple[int, int, int, int]],
+) -> int | None:
+    """Map an old target by containing symbol, then by a same-size move."""
+
+    matching = []
+    for old_symbol, new_symbol in symbols.values():
+        addend = old_target - old_symbol.value
+        if 0 <= addend < old_symbol.size and addend < new_symbol.size:
+            matching.append(new_symbol.value + addend)
+    if len(matching) > 1:
+        raise DevElfError(
+            f"old replacement target 0x{old_target:X} is contained by multiple symbols"
+        )
+    if matching:
+        return matching[0]
+    return _mapped_move_address(old_target, ranges)
+
+
+def _replacement_target_follows(
+    relocation: LinkedRelocation,
+    old_target: int,
+    new_target: int,
+    symbols: dict[str, tuple[LinkedSymbol, LinkedSymbol]],
+    ranges: list[tuple[int, int, int, int]],
+    replacement_moves: set[int],
+) -> bool:
+    if relocation.symbol_name in symbols:
+        return _replacement_target_matches(
+            relocation.symbol_name, old_target, new_target, symbols
+        )
+    move_index = _range_index_for_address(old_target, ranges)
+    if move_index in replacement_moves:
+        return (
+            relocation.symbol_kind == STT_SECTION
+            and _map_replacement_target(old_target, symbols, ranges) == new_target
+        )
+    return _mapped_move_address(old_target, ranges) == new_target
+
+
+def repair_stale_replacement_relocations(
+    output: bytes,
+    relocation_elf: bytes,
+    spec: dict[str, Any],
+    retail_symbol_elf: bytes,
+) -> tuple[bytes, int]:
+    """Repair section-symbol REL addends that the linker cannot retarget."""
+
+    resolved, development_symbols = _resolve_linked_layout(spec, relocation_elf)
+    ranges = _move_ranges(resolved)
+    replacement_moves = _replacement_move_indexes(resolved)
+    if not replacement_moves:
+        return output, 0
+    symbols = _replacement_symbol_map(
+        retail_symbol_elf,
+        development_symbols,
+        ranges,
+        replacement_moves,
+    )
+    _, programs = parse_elf(output)
+    relocations = parse_linked_relocations(relocation_elf)
+    original = bytes(output)
+    effective_targets = _relocation_effective_targets(
+        original, programs, relocations
+    )
+    patches: dict[int, int] = {}
+
+    def stage_patch(file_offset: int, word: int, context: str) -> None:
+        prior = patches.get(file_offset)
+        if prior is not None and prior != word:
+            raise DevElfError(f"{context} requires conflicting relocation repairs")
+        patches[file_offset] = word
+
+    for relocation in relocations:
+        if relocation.kind not in (2, 4):
+            continue
+        stale_targets = [
+            target
+            for target in effective_targets.get(relocation, ())
+            if _address_in_move(target, ranges)
+        ]
+        if not stale_targets:
+            continue
+        if relocation.symbol_kind != STT_SECTION:
+            continue
+        if len(stale_targets) != 1:
+            raise DevElfError(
+                f"relocation at 0x{relocation.offset:X} has ambiguous stale targets"
+            )
+        old_target = stale_targets[0]
+        new_target = _map_replacement_target(old_target, symbols, ranges)
+        if new_target is None:
+            raise DevElfError(
+                f"relocation at 0x{relocation.offset:X} targets unmapped "
+                f"replacement address 0x{old_target:X}"
+            )
+        file_offset = _file_offset_for_vaddr(programs, relocation.offset)
+        if file_offset is None:
+            raise DevElfError(
+                f"relocation repair site 0x{relocation.offset:X} is not file-backed"
+            )
+        word = _unpack_word(original, file_offset, "replacement relocation repair")
+        if relocation.kind == 2:
+            if word != old_target:
+                raise DevElfError(
+                    f"R_MIPS_32 repair at 0x{relocation.offset:X} has "
+                    "an inconsistent addend"
+                )
+            new_word = new_target
+        else:
+            if word >> 26 not in (2, 3) or _jump_target(
+                word, relocation.offset
+            ) != old_target:
+                raise DevElfError(
+                    f"R_MIPS_26 repair at 0x{relocation.offset:X} has "
+                    "an inconsistent encoding"
+                )
+            if new_target & 3 or (
+                (relocation.offset + 4) & 0xF0000000
+            ) != (new_target & 0xF0000000):
+                raise DevElfError(
+                    f"R_MIPS_26 repair at 0x{relocation.offset:X} cannot encode "
+                    f"0x{new_target:X}"
+                )
+            new_word = (word & 0xFC000000) | ((new_target >> 2) & 0x03FFFFFF)
+        stage_patch(file_offset, new_word, f"relocation at 0x{relocation.offset:X}")
+
+    for hi, lo, old_target in _hi16_lo16_pairs(
+        original, programs, relocations
+    ):
+        if not _address_in_move(old_target, ranges):
+            continue
+        if hi.symbol_kind != STT_SECTION or lo.symbol_kind != STT_SECTION:
+            continue
+        new_target = _map_replacement_target(old_target, symbols, ranges)
+        if new_target is None:
+            raise DevElfError(
+                f"HI16/LO16 repair at 0x{hi.offset:X}/0x{lo.offset:X} "
+                f"targets unmapped replacement address 0x{old_target:X}"
+            )
+        hi_file = _file_offset_for_vaddr(programs, hi.offset)
+        lo_file = _file_offset_for_vaddr(programs, lo.offset)
+        if hi_file is None or lo_file is None:
+            raise DevElfError("HI16/LO16 repair site is not file-backed")
+        hi_word = _unpack_word(original, hi_file, "HI16 repair")
+        lo_word = _unpack_word(original, lo_file, "LO16 repair")
+        if lo_word >> 26 == 0x0D:
+            high = (new_target >> 16) & 0xFFFF
+        else:
+            high = ((new_target + 0x8000) >> 16) & 0xFFFF
+        stage_patch(
+            hi_file,
+            (hi_word & 0xFFFF0000) | high,
+            f"HI16 relocation at 0x{hi.offset:X}",
+        )
+        stage_patch(
+            lo_file,
+            (lo_word & 0xFFFF0000) | (new_target & 0xFFFF),
+            f"LO16 relocation at 0x{lo.offset:X}",
+        )
+
+    repaired = bytearray(output)
+    for file_offset, word in patches.items():
+        struct.pack_into("<I", repaired, file_offset, word)
+    repaired_targets = _relocation_effective_targets(
+        bytes(repaired), programs, relocations
+    )
+    stale = [
+        (relocation.offset, target)
+        for relocation, targets in repaired_targets.items()
+        for target in targets
+        if _address_in_move(target, ranges)
+    ]
+    if stale:
+        offset, target = min(stale)
+        raise DevElfError(
+            f"relocation repair left 0x{offset:X} targeting abandoned "
+            f"address 0x{target:X}"
+        )
+    return bytes(repaired), len(patches)
+
+
 def _unpack_word(image: bytes | bytearray, offset: int, context: str) -> int:
     if offset < 0 or offset + 4 > len(image):
         raise DevElfError(f"{context} word at 0x{offset:X} is outside the file")
@@ -839,6 +1314,57 @@ def _vaddr_for_file_offset(programs: list[ProgramHeader], offset: int) -> int | 
     return None
 
 
+def _hi16_lo16_pairs(
+    image: bytes,
+    programs: list[ProgramHeader],
+    relocations: list[LinkedRelocation],
+) -> list[tuple[LinkedRelocation, LinkedRelocation, int]]:
+    """Pair HI16/LO16 relocations using the live LUI destination register."""
+
+    active_hi: dict[
+        int, tuple[tuple[int, int], LinkedRelocation]
+    ] = {}
+    pairs = []
+    for relocation in sorted(relocations, key=lambda entry: entry.offset):
+        file_offset = _file_offset_for_vaddr(programs, relocation.offset)
+        if relocation.kind == 5:
+            if file_offset is None:
+                continue
+            word = _unpack_word(image, file_offset, "HI16 relocation")
+            if word >> 26 != 0x0F:
+                raise DevElfError(
+                    f"HI16 relocation at 0x{relocation.offset:X} is not LUI"
+                )
+            register = (word >> 16) & 0x1F
+            active_hi[register] = (
+                (relocation.symbol_table_index, relocation.symbol_index),
+                relocation,
+            )
+            continue
+        if relocation.kind == 6:
+            if file_offset is None:
+                continue
+            low_word = _unpack_word(image, file_offset, "LO16 relocation")
+            register = (low_word >> 21) & 0x1F
+            active = active_hi.get(register)
+            symbol_key = (relocation.symbol_table_index, relocation.symbol_index)
+            if active is None or active[0] != symbol_key:
+                continue
+            hi = active[1]
+            hi_file = _file_offset_for_vaddr(programs, hi.offset)
+            if hi_file is None:
+                continue
+            try:
+                target = _decode_mips_relocation_address(
+                    image, hi_file, file_offset
+                )
+            except DevElfError:
+                continue
+            # Keep the HI active so one LUI may feed multiple low-half users.
+            pairs.append((hi, relocation, target))
+    return pairs
+
+
 def _relocation_effective_targets(
     image: bytes,
     programs: list[ProgramHeader],
@@ -847,39 +1373,12 @@ def _relocation_effective_targets(
     """Resolve addends encoded at REL sites into their final linked targets."""
 
     targets: dict[LinkedRelocation, set[int]] = {}
-    pending_hi: dict[tuple[int, int], list[LinkedRelocation]] = {}
+    for hi, lo, target in _hi16_lo16_pairs(image, programs, relocations):
+        targets.setdefault(hi, set()).add(target)
+        targets.setdefault(lo, set()).add(target)
     for relocation in relocations:
         file_offset = _file_offset_for_vaddr(programs, relocation.offset)
-        if relocation.kind == 5:
-            pending_hi.setdefault(
-                (relocation.symbol_table_index, relocation.symbol_index), []
-            ).append(relocation)
-            continue
-        if relocation.kind == 6:
-            symbol_key = (relocation.symbol_table_index, relocation.symbol_index)
-            candidates = pending_hi.get(symbol_key, [])
-            matched: list[LinkedRelocation] = []
-            unmatched: list[LinkedRelocation] = []
-            for hi in candidates:
-                hi_file = _file_offset_for_vaddr(programs, hi.offset)
-                if hi_file is None or file_offset is None:
-                    unmatched.append(hi)
-                    continue
-                try:
-                    target = _decode_mips_relocation_address(
-                        image, hi_file, file_offset
-                    )
-                except DevElfError:
-                    unmatched.append(hi)
-                    continue
-                matched.append(hi)
-                targets.setdefault(hi, set()).add(target)
-                targets.setdefault(relocation, set()).add(target)
-            if matched:
-                # One LUI may feed several load/store or arithmetic low halves.
-                # Keep the most recent matching HI active for the next LO while
-                # retaining pending HIs that use a different register.
-                pending_hi[symbol_key] = unmatched + [matched[-1]]
+        if relocation.kind in (5, 6):
             continue
         if file_offset is None:
             continue
@@ -998,6 +1497,8 @@ def _audit_moved_payloads(
             relocation.symbol_index,
             relocation.symbol_value if old_symbol_value is None else old_symbol_value,
             relocation.symbol_name,
+            relocation.symbol_info,
+            relocation.symbol_section_index,
         )
         old_relocations.append(old_relocation)
         old_for_new[relocation] = old_relocation
@@ -1119,6 +1620,8 @@ def scan_stale_move_references(
                     break
                 low_word = _unpack_word(image, low_offset, "stale HI16/LO16 scan")
                 low_opcode = low_word >> 26
+                if low_opcode == 0x0F and (low_word >> 16) & 0x1F == register:
+                    break
                 if (
                     low_opcode not in ADDRESS_LOW_OPCODES
                     or (low_word >> 21) & 0x1F != register
@@ -1172,6 +1675,40 @@ def audit_relocation_closure(
             replacement_moves,
         )
     }
+    moves = spec.get("moves", [])
+    for replacement_index, replacement in enumerate(
+        spec.get("replacements", [])
+    ):
+        retail_object = replacement.get("retail_object")
+        object_move_indexes = {
+            index
+            for index, move in enumerate(moves)
+            if move.get("object") == retail_object
+        }
+        object_symbols = {
+            name
+            for name, (old_symbol, _) in replacement_symbols.items()
+            if _range_index_for_address(old_symbol.value, ranges)
+            in object_move_indexes
+        }
+        object_shifted = object_symbols & internally_shifted_symbols
+        for field, actual in (
+            ("expected_symbols", len(object_symbols)),
+            ("expected_shifted_symbols", len(object_shifted)),
+        ):
+            if len(spec.get("replacements", [])) > 1 and field not in replacement:
+                raise DevElfError(
+                    f"replacements[{replacement_index}] requires {field}"
+                )
+            if field in replacement:
+                expected = _number(
+                    replacement[field], f"replacements[{replacement_index}].{field}"
+                )
+                if expected != actual:
+                    raise DevElfError(
+                        f"replacements[{replacement_index}].{field} is {actual}, "
+                        f"expected {expected}"
+                    )
 
     allowed_bytes: set[int] = set(range(44, 46))
     old_header, _ = parse_elf(base)
@@ -1277,6 +1814,40 @@ def audit_relocation_closure(
         )
         for relocation in relocations
     )
+    cross_replacement_relocations = 0
+    for relocation in relocations:
+        source_index = _range_index_for_address(
+            relocation.offset, ranges, new=True
+        )
+        if source_index not in replacement_moves:
+            continue
+        source_object = moves[source_index].get("object")
+        crosses = False
+        for target in effective_targets.get(relocation, ()):
+            target_index = _range_index_for_address(target, ranges, new=True)
+            if (
+                target_index in replacement_moves
+                and moves[target_index].get("object") != source_object
+            ):
+                crosses = True
+                break
+        cross_replacement_relocations += crosses
+    if len(spec.get("replacements", [])) > 1 and (
+        "expected_cross_replacement_relocations" not in spec
+    ):
+        raise DevElfError(
+            "multiple replacements require expected_cross_replacement_relocations"
+        )
+    if "expected_cross_replacement_relocations" in spec:
+        expected_cross = _number(
+            spec["expected_cross_replacement_relocations"],
+            "expected_cross_replacement_relocations",
+        )
+        if expected_cross != cross_replacement_relocations:
+            raise DevElfError(
+                "expected_cross_replacement_relocations is "
+                f"{cross_replacement_relocations}, expected {expected_cross}"
+            )
     replacement_counts = {
         "expected_replacement_symbols": len(replacement_symbols),
         "expected_shifted_replacement_symbols": len(internally_shifted_symbols),
@@ -1324,24 +1895,22 @@ def audit_relocation_closure(
                         and new_target == relocation.symbol_value
                     )
                 else:
-                    valid = (
-                        _mapped_move_address(old_target, ranges) == new_target
-                        or _replacement_target_matches(
-                            relocation.symbol_name,
-                            old_target,
-                            new_target,
-                            replacement_symbols,
-                        )
+                    valid = _replacement_target_follows(
+                        relocation,
+                        old_target,
+                        new_target,
+                        replacement_symbols,
+                        ranges,
+                        replacement_moves,
                     )
             elif relocation.kind == 2:
-                valid = (
-                    _mapped_move_address(old_word, ranges) == new_word
-                    or _replacement_target_matches(
-                        relocation.symbol_name,
-                        old_word,
-                        new_word,
-                        replacement_symbols,
-                    )
+                valid = _replacement_target_follows(
+                    relocation,
+                    old_word,
+                    new_word,
+                    replacement_symbols,
+                    ranges,
+                    replacement_moves,
                 )
             elif relocation.kind in (5, 6):
                 # Paired HI16/LO16 encodings are checked together below.
@@ -1369,12 +1938,13 @@ def audit_relocation_closure(
         if file_offset is None or file_offset not in hi_lo_words:
             continue
         valid = any(
-            _mapped_move_address(old_target, ranges) == new_target
-            or _replacement_target_matches(
-                relocation.symbol_name,
+            _replacement_target_follows(
+                relocation,
                 old_target,
                 new_target,
                 replacement_symbols,
+                ranges,
+                replacement_moves,
             )
             for old_target in retail_effective_targets.get(relocation, ())
             for new_target in effective_targets.get(relocation, ())
@@ -1504,6 +2074,7 @@ def audit_relocation_closure(
         "replacement_symbols": len(replacement_symbols),
         "shifted_replacement_symbols": len(internally_shifted_symbols),
         "shifted_symbol_relocations": shifted_symbol_relocations,
+        "cross_replacement_relocations": cross_replacement_relocations,
         "stale_reference_words_scanned": scanned_words,
     }
 
@@ -1598,9 +2169,12 @@ def render_linker_script(base: str, spec: dict[str, Any]) -> str:
             )
         original = matching[0]
         indent = original[: len(original) - len(original.lstrip())]
-        slot = (
-            f"{indent}. += 0x{old_size:X}; "
-            f"/* development slot for {obj}({section}) */"
+        slot = "\n".join(
+            [
+                f"{indent}. = ALIGN(0x{alignment:X});",
+                f"{indent}. += 0x{old_size:X}; "
+                f"/* development slot for {obj}({section}) */",
+            ]
         )
         text = text.replace(original, slot, 1)
         linked_obj = replacement_by_retail.get(obj, (0, {}))[1].get("object", obj)
@@ -1808,16 +2382,46 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "link-script":
             _write(args.output, render_linker_script(args.input.read_text(), spec))
         else:
-            audit_replacement_objects(
+            object_summary = audit_replacement_objects(
                 spec,
                 [
                     Path(replacement["object"]).read_bytes()
+                    for replacement in spec.get("replacements", [])
+                ],
+                [
+                    Path(replacement["retail_object"]).read_bytes()
                     for replacement in spec.get("replacements", [])
                 ],
             )
             output, summary = finalize_image(
                 args.retail.read_bytes(), args.linked.read_bytes(), spec
             )
+            if args.retail_symbol_elf is not None:
+                output, repaired_words = repair_stale_replacement_relocations(
+                    output,
+                    args.reloc_elf.read_bytes(),
+                    spec,
+                    args.retail_symbol_elf.read_bytes(),
+                )
+            else:
+                repaired_words = 0
+            if repaired_words and "expected_repaired_relocation_words" not in spec:
+                raise DevElfError(
+                    "replacement relocation repairs require "
+                    "expected_repaired_relocation_words"
+                )
+            if "expected_repaired_relocation_words" in spec:
+                expected_repairs = _number(
+                    spec["expected_repaired_relocation_words"],
+                    "expected_repaired_relocation_words",
+                )
+                if expected_repairs != repaired_words:
+                    raise DevElfError(
+                        f"repaired relocation words are {repaired_words}, "
+                        f"expected {expected_repairs}"
+                    )
+            summary.update(object_summary)
+            summary["repaired_relocation_words"] = repaired_words
             summary.update(
                 audit_relocation_closure(
                     args.retail.read_bytes(),
