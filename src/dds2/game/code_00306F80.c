@@ -117,8 +117,9 @@ extern void func_0032DB30(const void *, void *, s32);
 extern void sdfAppendDmaTagToList(void *, void *);
 
 typedef struct GridAngleTable {
-    s32 divisor;  /* 0x00 */
-    s32 mirrored; /* 0x04 */
+    s32 divisor;      /* 0x00 */
+    s32 mirrored;     /* 0x04 */
+    s32 cycleDivisor; /* 0x08 */
 } GridAngleTable;
 
 typedef struct GridFlushTable {
@@ -322,14 +323,15 @@ typedef struct GridAngleRectangle {
     s32 top;        /* 0x70 */
     s32 right;      /* 0x74 */
     s32 bottom;     /* 0x78 */
-    u8 pad7C[8];
+    s32 ratioWidth;  /* 0x7C */
+    s32 ratioHeight; /* 0x80 */
     u32 colors[4];  /* 0x84 */
 } GridAngleRectangle;
 
 typedef struct GridAngleAdjustment {
     u8 pad00[4];
     s32 dimensions[2]; /* 0x04 */
-    u8 pad0C[8];
+    s32 anchors[2];    /* 0x0C */
     u32 colors[4];     /* 0x14 */
 } GridAngleAdjustment;
 
@@ -384,7 +386,58 @@ s32 func_003075D8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
     return 0x10000 / table->divisor;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00307710);
+/* Apply the ZOOM_01 easing to the adjustment bounds and fade their alpha. */
+s32 func_00307710(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
+    GridAngleTable *table;
+    s32 squares[2];
+    s32 deltas[2];
+    s32 previous[2];
+    s32 scaledWidth;
+    s32 scaledHeight;
+    s32 widthAdjustment;
+    s32 heightAdjustment;
+    u32 *sourceColor;
+    u32 *destColor;
+    s32 colorMask;
+    s32 fractionalMask;
+    s32 i;
+
+    table = owner->slot->table;
+    colorMask = -0x100;
+    fractionalMask = 0xFFFF;
+    deltas[0] = table->divisor << 4;
+    deltas[1] = (((table->mirrored << 12) / 640) * rectangle->ratioHeight) / rectangle->ratioWidth;
+    previous[0] = out->dimensions[0];
+    previous[1] = out->dimensions[1];
+    scaledWidth = (s32)(fsqrtf((f32)deltas[0]) * (f32)owner->angle * (1.0f / 65536.0f));
+    squares[0] = scaledWidth * scaledWidth;
+    widthAdjustment = -((deltas[0] - squares[0]) / 2);
+    scaledHeight = (s32)(fsqrtf((f32)deltas[1]) * (f32)owner->angle * (1.0f / 65536.0f));
+    squares[1] = scaledHeight * scaledHeight;
+    heightAdjustment = -((deltas[1] - squares[1]) / 2);
+
+    out->dimensions[0] = widthAdjustment;
+    out->anchors[0] += (previous[0] - widthAdjustment) * 2;
+    out->dimensions[1] = heightAdjustment;
+    out->anchors[1] += (previous[1] - heightAdjustment) * 2;
+
+    sourceColor = rectangle->colors;
+    destColor = out->colors;
+    i = 3;
+
+    for (; i >= 0; i--, sourceColor++, destColor++) {
+        u32 color = *sourceColor;
+        s32 alpha = *(u8 *)sourceColor;
+        s32 product = alpha * owner->angle;
+        s32 negative = 0;
+
+        if (product < 0) {
+            negative++;
+        }
+        *destColor = (color & colorMask) | ((product + negative * fractionalMask) >> 16);
+    }
+    return 0x10000 / table->cycleDivisor;
+}
 
 /* Apply the FLUSH_01 three-phase color fade while contracting the grid bounds. */
 s32 func_003078A8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
