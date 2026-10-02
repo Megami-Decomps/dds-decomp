@@ -366,7 +366,13 @@ void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
     sdfDestroyDevRequest(list);
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", sdfAppendResourceListItem);
+void sdfAppendResourceListItem(SdfResourceList *list, u32 item) {
+    if (list->count >= list->capacity) {
+        sdfDevBufferedRequestGrow(list);
+    }
+    list->items[list->count] = item;
+    list->count++;
+}
 
 void sdfReduceResourceListCount(s32 listAddress, s32 newCount, s32 applyReduction) {
     s32 countCursor;
