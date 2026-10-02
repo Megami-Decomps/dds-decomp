@@ -29,8 +29,8 @@ entry 5 kind=door area=1 name="01d_03"
   camera mode=3 name="01cam_03"
 end
 
-entry 6 kind=5 area=1 name="01d_04"
-  scene args=1,0,0 primary="01pos_05" secondary="01cam_02"
+entry 6 kind=ladder area=1 name="01d_04"
+  scene direction=1 primary="01pos_05" secondary="01cam_02"
   warp field=22 area=18 position="01pos_06"
 end
 

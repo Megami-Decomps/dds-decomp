@@ -89,7 +89,7 @@ entry 16 kind=door area=2 name="01d_03"
   after flag=2 script="002_03_warpscr"
 end
 
-entry 17 kind=2 area=2 name="01d_04"
+entry 17 kind=run_warp area=2 name="01d_04"
   warp area=23 position="01pos_02"
 end
 
@@ -127,7 +127,7 @@ entry 25 kind=elevator_exit
   warp area=4 position="01pos_02"
 end
 
-entry 26 kind=2 area=4 name="01d_03"
+entry 26 kind=run_warp area=4 name="01d_03"
   warp area=6
   tail control=2 args=26,8,0,8,33,5,3
 end
@@ -150,7 +150,7 @@ entry 30 kind=door area=5 name="01d_03"
   after footstep=3
 end
 
-entry 32 kind=2 area=6 name=@01d_01
+entry 32 kind=run_warp area=6 name=@01d_01
   warp area=4 position="01pos_03"
   tail control=2 args=26,8,0,8,33,5,3
 end
@@ -231,7 +231,7 @@ entry 48 kind=door area=8 name=@01d_01
   after footstep=3
 end
 
-entry 49 kind=2 area=8 name="01d_02"
+entry 49 kind=run_warp area=8 name="01d_02"
   warp area=9
   camera table=93
   after footstep=3
@@ -249,7 +249,7 @@ entry 51 kind=side_exit area=8
   after footstep=3
 end
 
-entry 53 kind=2 area=9 name=@01d_01
+entry 53 kind=run_warp area=9 name=@01d_01
   warp area=8 position="01pos_02"
   after footstep=3
 end
@@ -589,7 +589,7 @@ entry 124 kind=door area=23 name=@01d_01
   after footstep=3
 end
 
-entry 125 kind=2 flag=1391 area=23 name="01d_02"
+entry 125 kind=run_warp flag=1391 area=23 name="01d_02"
   warp area=2 position="01pos_04"
 end
 

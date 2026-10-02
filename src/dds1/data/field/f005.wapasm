@@ -29,14 +29,14 @@ entry 6 kind=door area=2 name="01d_01"
   after flag=8
 end
 
-entry 7 kind=5 area=2 name=@01d_02
+entry 7 kind=ladder area=2 name=@01d_02
   scene primary="01pos_05" secondary="01cam_05"
   warp position="01pos_03"
   camera mode=1 table=27 name="01cam_03"
 end
 
-entry 8 kind=5 area=2 name=@01d_03
-  scene args=1,0,0 primary="01pos_06" secondary="01cam_06"
+entry 8 kind=ladder area=2 name=@01d_03
+  scene direction=1 primary="01pos_06" secondary="01cam_06"
   warp position="01pos_02"
   camera mode=1 table=26
 end

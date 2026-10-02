@@ -65,7 +65,7 @@ entry 14 kind=door area=1 name=@01d_01
   warp field=21 area=30 position="01pos_02"
 end
 
-entry 15 kind=2 area=1 name="01d_02"
+entry 15 kind=run_warp area=1 name="01d_02"
   warp area=2
   camera mode=1 table=21
 end
@@ -87,7 +87,7 @@ entry 18 kind=side_exit area=1
   camera mode=1 table=20
 end
 
-entry 20 kind=2 area=2 name=@01d_01
+entry 20 kind=run_warp area=2 name=@01d_01
   warp area=1 position="01pos_02"
   camera mode=1 table=20
 end

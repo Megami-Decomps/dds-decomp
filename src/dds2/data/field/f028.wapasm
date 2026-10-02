@@ -125,7 +125,7 @@ entry 28 kind=door area=1 name=@01d_01
   camera mode=1 table=10
 end
 
-entry 29 kind=2 area=1 name=@01d_02
+entry 29 kind=run_warp area=1 name=@01d_02
   warp area=2
   camera table=79
 end
@@ -135,17 +135,17 @@ entry 30 kind=door area=1 name=@01d_03
   warp area=4 position="01pos_02"
 end
 
-entry 32 kind=2 area=2 name=@01d_01
+entry 32 kind=run_warp area=2 name=@01d_01
   warp area=1 position="01pos_02"
   camera table=79
 end
 
-entry 33 kind=2 flag=1545 area=2 name=@01d_02
+entry 33 kind=run_warp flag=1545 area=2 name=@01d_02
   warp area=3
   camera table=79
 end
 
-entry 34 kind=2 area=2 name=@01d_02
+entry 34 kind=run_warp area=2 name=@01d_02
   warp area=3 position="01pos_08"
   camera table=79
   after flag=2 script=@warpscr_002_02
@@ -156,22 +156,22 @@ entry 35 kind=door area=2 name=@01d_03
   warp area=4
 end
 
-entry 37 kind=2 area=3 name=@01d_01
+entry 37 kind=run_warp area=3 name=@01d_01
   warp area=2 position="01pos_02"
   camera table=79
 end
 
-entry 38 kind=2 area=3 name=@01d_02
+entry 38 kind=run_warp area=3 name=@01d_02
   warp area=5
   camera table=79
 end
 
-entry 39 kind=2 area=3 name=@01d_03
+entry 39 kind=run_warp area=3 name=@01d_03
   warp area=31 position="01pos_03"
   camera table=79
 end
 
-entry 40 kind=2 area=3 name=@01d_04
+entry 40 kind=run_warp area=3 name=@01d_04
   warp area=31 position="01pos_02"
   camera table=79
 end
@@ -204,12 +204,12 @@ entry 46 kind=door area=4 name=@01d_05
   warp area=7
 end
 
-entry 48 kind=2 area=5 name=@01d_01
+entry 48 kind=run_warp area=5 name=@01d_01
   warp area=3 position="01pos_02"
   camera table=79
 end
 
-entry 49 kind=2 area=5 name=@01d_02
+entry 49 kind=run_warp area=5 name=@01d_02
   warp area=6
   camera table=79
 end
@@ -219,12 +219,12 @@ entry 50 kind=door area=5 name=@01d_03
   warp area=4 position="01pos_03"
 end
 
-entry 52 kind=2 area=6 name=@01d_01
+entry 52 kind=run_warp area=6 name=@01d_01
   warp area=5 position="01pos_02"
   camera table=79
 end
 
-entry 53 kind=2 area=6 name=@01d_02
+entry 53 kind=run_warp area=6 name=@01d_02
   warp area=32 position="01pos_03"
   camera table=79
 end
@@ -272,37 +272,37 @@ entry 64 kind=door area=9 name=@01d_01
   warp area=7 position="01pos_03"
 end
 
-entry 65 kind=2 area=9 name=@01d_02
+entry 65 kind=run_warp area=9 name=@01d_02
   warp area=33 position="01pos_05"
   camera mode=1 table=78
   tail control=2 args=28,3,0,31,6,2,1
 end
 
-entry 66 kind=2 area=9 name=@01d_03
+entry 66 kind=run_warp area=9 name=@01d_03
   warp area=33 position="01pos_06"
   camera mode=1 table=78
   tail control=2 args=28,3,0,31,6,2,1
 end
 
-entry 67 kind=2 area=9 name=@01d_04
+entry 67 kind=run_warp area=9 name=@01d_04
   warp area=33 position="01pos_07"
   camera mode=1 table=78
   tail control=2 args=28,3,0,31,6,3,1
 end
 
-entry 68 kind=2 area=9 name=@01d_05
+entry 68 kind=run_warp area=9 name=@01d_05
   warp area=33 position="01pos_08"
   camera mode=1 table=78
   tail control=2 args=28,3,0,31,6,3,1
 end
 
-entry 69 kind=2 area=9 name="01d_06"
+entry 69 kind=run_warp area=9 name="01d_06"
   warp area=33 position="01pos_09"
   camera mode=1 table=78
   tail control=2 args=28,3,0,32,6,2,1
 end
 
-entry 70 kind=2 area=9 name="01d_07"
+entry 70 kind=run_warp area=9 name="01d_07"
   warp area=33 position="01pos_10"
   camera mode=1 table=78
   tail control=2 args=28,3,0,32,6,2,1
@@ -313,7 +313,7 @@ entry 72 kind=door area=10 name=@01d_01
   warp area=7 position="01pos_04"
 end
 
-entry 73 kind=2 area=10 name=@01d_02
+entry 73 kind=run_warp area=10 name=@01d_02
   warp area=37 position="01pos_04"
 end
 
@@ -342,7 +342,7 @@ entry 79 kind=door area=11 name=@01d_02
   warp area=12 position="01pos_02"
 end
 
-entry 81 kind=2 area=12 name=@01d_01
+entry 81 kind=run_warp area=12 name=@01d_01
   warp area=37 position="01pos_02"
 end
 
@@ -368,7 +368,7 @@ entry 85 kind=door area=12 name=@01d_05
   tail control=2 args=28,2,0,46,23,8,8
 end
 
-entry 86 kind=2 area=12 name="01d_06"
+entry 86 kind=run_warp area=12 name="01d_06"
   warp area=44 position="01pos_02"
 end
 
@@ -377,22 +377,22 @@ entry 88 kind=door area=13 name=@01d_01
   warp attributes=4 area=12 position="01pos_05"
 end
 
-entry 90 kind=2 area=14 name=@01d_01
+entry 90 kind=run_warp area=14 name=@01d_01
   warp area=17
   camera table=79
 end
 
-entry 91 kind=2 area=14 name=@01d_02
+entry 91 kind=run_warp area=14 name=@01d_02
   warp area=36 position="01pos_02"
   camera table=79
 end
 
-entry 92 kind=2 area=14 name=@01d_03
+entry 92 kind=run_warp area=14 name=@01d_03
   warp area=36 position="01pos_03"
   camera table=79
 end
 
-entry 94 kind=2 area=15 name=@01d_01
+entry 94 kind=run_warp area=15 name=@01d_01
   warp area=16 position="01pos_02"
   camera table=79
 end
@@ -402,12 +402,12 @@ entry 95 kind=door area=15 name=@01d_02
   warp area=20
 end
 
-entry 97 kind=2 area=16 name=@01d_01
+entry 97 kind=run_warp area=16 name=@01d_01
   warp area=17 position="01pos_03"
   camera table=79
 end
 
-entry 98 kind=2 area=16 name=@01d_02
+entry 98 kind=run_warp area=16 name=@01d_02
   warp area=15
   camera table=79
 end
@@ -422,17 +422,17 @@ entry 100 kind=door area=16 name=@01d_04
   warp area=20 position="01pos_04"
 end
 
-entry 102 kind=2 area=17 name=@01d_01
+entry 102 kind=run_warp area=17 name=@01d_01
   warp area=14
   camera table=79
 end
 
-entry 103 kind=2 area=17 name=@01d_02
+entry 103 kind=run_warp area=17 name=@01d_02
   warp area=18
   camera table=79
 end
 
-entry 104 kind=2 area=17 name=@01d_03
+entry 104 kind=run_warp area=17 name=@01d_03
   warp area=16
   camera table=79
 end
@@ -442,7 +442,7 @@ entry 105 kind=door area=17 name=@01d_04
   warp area=22
 end
 
-entry 107 kind=2 area=18 name=@01d_01
+entry 107 kind=run_warp area=18 name=@01d_01
   warp area=17 position="01pos_02"
   camera table=79
 end
@@ -467,7 +467,7 @@ entry 112 kind=door area=19 name=@01d_03
   warp area=48
 end
 
-entry 113 kind=2 area=19 name=@01d_04
+entry 113 kind=run_warp area=19 name=@01d_04
   warp area=24 position="01pos_04"
 end
 
@@ -499,7 +499,7 @@ entry 119 kind=door area=20 name=@01d_05
   warp area=21
 end
 
-entry 120 kind=2 area=20 name="01d_06"
+entry 120 kind=run_warp area=20 name="01d_06"
   warp area=38
 end
 
@@ -530,7 +530,7 @@ entry 127 kind=door area=22 name=@01d_01
   camera table=79
 end
 
-entry 128 kind=2 area=22 name=@01d_02
+entry 128 kind=run_warp area=22 name=@01d_02
   warp area=38 position="01pos_04"
 end
 
@@ -564,29 +564,29 @@ entry 136 kind=door area=24 name=@01d_01
   warp area=22 position="01pos_05"
 end
 
-entry 137 kind=2 area=24 name=@01d_02
+entry 137 kind=run_warp area=24 name=@01d_02
   warp area=25
   camera mode=1
 end
 
-entry 138 kind=2 area=24 name=@01d_03
+entry 138 kind=run_warp area=24 name=@01d_03
   warp area=25 position="01pos_02"
   camera mode=1
 end
 
-entry 139 kind=2 area=24 name=@01d_04
+entry 139 kind=run_warp area=24 name=@01d_04
   warp area=19 position="01pos_04"
 end
 
-entry 141 kind=2 area=25 name=@01d_01
+entry 141 kind=run_warp area=25 name=@01d_01
   warp area=24 position="01pos_02"
 end
 
-entry 142 kind=2 area=25 name=@01d_02
+entry 142 kind=run_warp area=25 name=@01d_02
   warp area=24 position="01pos_03"
 end
 
-entry 144 kind=2 area=26 name=@01d_01
+entry 144 kind=run_warp area=26 name=@01d_01
   warp area=45 position="01pos_04"
 end
 
@@ -618,7 +618,7 @@ entry 151 kind=door area=28 name=@01d_01
   warp area=29
 end
 
-entry 152 kind=2 area=28 name=@01d_02
+entry 152 kind=run_warp area=28 name=@01d_02
   warp area=49
   camera table=79
 end
@@ -629,98 +629,98 @@ entry 154 kind=door area=29 name=@01d_01
   camera table=79
 end
 
-entry 155 kind=2 area=29 name=@01d_02
+entry 155 kind=run_warp area=29 name=@01d_02
   warp area=30
   camera mode=1
   tail control=2 args=28,2,0,52,73,6,6
 end
 
-entry 157 kind=2 area=30 name=@01d_01
+entry 157 kind=run_warp area=30 name=@01d_01
   warp area=29 position="01pos_02"
 end
 
-entry 159 kind=2 area=31 name=@01d_01
+entry 159 kind=run_warp area=31 name=@01d_01
   warp area=32
   camera table=79
 end
 
-entry 160 kind=2 area=31 name=@01d_02
+entry 160 kind=run_warp area=31 name=@01d_02
   warp area=3 position="01pos_04"
   camera table=79
 end
 
-entry 161 kind=2 area=31 name=@01d_03
+entry 161 kind=run_warp area=31 name=@01d_03
   warp area=3 position="01pos_03"
   camera table=79
 end
 
-entry 163 kind=2 area=32 name=@01d_01
+entry 163 kind=run_warp area=32 name=@01d_01
   warp area=31
   camera table=79
 end
 
-entry 164 kind=2 area=32 name=@01d_02
+entry 164 kind=run_warp area=32 name=@01d_02
   warp area=33
   camera mode=1 table=78
 end
 
-entry 165 kind=2 area=32 name=@01d_03
+entry 165 kind=run_warp area=32 name=@01d_03
   warp area=6 position="01pos_02"
   camera table=79
 end
 
-entry 167 kind=2 area=33 name=@01d_01
+entry 167 kind=run_warp area=33 name=@01d_01
   warp area=32 position="01pos_02"
   camera table=79
 end
 
-entry 168 kind=2 area=33 name=@01d_02
+entry 168 kind=run_warp area=33 name=@01d_02
   warp area=34
   camera table=79
 end
 
-entry 169 kind=2 area=33 name=@01d_05
+entry 169 kind=run_warp area=33 name=@01d_05
   warp area=9 position="01pos_02"
   camera table=79
   tail control=2 args=28,3,0,31,6,2,1
 end
 
-entry 170 kind=2 area=33 name="01d_06"
+entry 170 kind=run_warp area=33 name="01d_06"
   warp area=9 position="01pos_03"
   camera table=79
   tail control=2 args=28,3,0,31,6,2,1
 end
 
-entry 171 kind=2 area=33 name="01d_07"
+entry 171 kind=run_warp area=33 name="01d_07"
   warp area=9 position="01pos_04"
   camera table=79
   tail control=2 args=28,3,0,31,6,3,1
 end
 
-entry 172 kind=2 area=33 name=@01d_08
+entry 172 kind=run_warp area=33 name=@01d_08
   warp area=9 position="01pos_05"
   camera table=79
   tail control=2 args=28,3,0,31,6,3,1
 end
 
-entry 173 kind=2 area=33 name="01d_09"
+entry 173 kind=run_warp area=33 name="01d_09"
   warp area=9 position="01pos_06"
   camera table=79
   tail control=2 args=28,3,0,32,6,2,1
 end
 
-entry 174 kind=2 area=33 name="01d_10"
+entry 174 kind=run_warp area=33 name="01d_10"
   warp area=9 position="01pos_07"
   camera table=79
   tail control=2 args=28,3,0,32,6,2,1
 end
 
-entry 176 kind=2 area=34 name=@01d_01
+entry 176 kind=run_warp area=34 name=@01d_01
   warp area=33 position="01pos_02"
   camera mode=1 table=78
 end
 
-entry 177 kind=2 area=34 name=@01d_02
+entry 177 kind=run_warp area=34 name=@01d_02
   warp area=35
   camera table=79
 end
@@ -730,12 +730,12 @@ entry 178 kind=door area=34 name=@01d_03
   warp area=37
 end
 
-entry 180 kind=2 area=35 name=@01d_01
+entry 180 kind=run_warp area=35 name=@01d_01
   warp area=34 position="01pos_02"
   camera table=79
 end
 
-entry 181 kind=2 area=35 name=@01d_02
+entry 181 kind=run_warp area=35 name=@01d_02
   warp area=36
   camera table=79
 end
@@ -745,18 +745,18 @@ entry 182 kind=door area=35 name=@01d_03
   warp area=37 position="01pos_03"
 end
 
-entry 184 kind=2 area=36 name=@01d_01
+entry 184 kind=run_warp area=36 name=@01d_01
   warp area=35 position="01pos_02"
   camera table=79
 end
 
-entry 185 kind=2 area=36 name=@01d_02
+entry 185 kind=run_warp area=36 name=@01d_02
   warp area=14 position="01pos_02"
   camera table=79
   tail control=59 args=28,2,3,56,27,2,1
 end
 
-entry 186 kind=2 area=36 name=@01d_03
+entry 186 kind=run_warp area=36 name=@01d_03
   warp area=14 position="01pos_03"
   camera table=79
   tail control=59 args=28,2,3,56,27,2,1
@@ -768,7 +768,7 @@ entry 188 kind=door area=37 name=@01d_01
   camera table=79
 end
 
-entry 189 kind=2 area=37 name=@01d_02
+entry 189 kind=run_warp area=37 name=@01d_02
   warp area=12
 end
 
@@ -785,11 +785,11 @@ entry 191 kind=door area=37 name=@01d_03
   after flag=2 script=@037_battle_035
 end
 
-entry 192 kind=2 area=37 name=@01d_04
+entry 192 kind=run_warp area=37 name=@01d_04
   warp area=10 position="01pos_02"
 end
 
-entry 194 kind=2 area=38 name=@01d_01
+entry 194 kind=run_warp area=38 name=@01d_01
   warp area=20 position="01pos_06"
 end
 
@@ -803,7 +803,7 @@ entry 196 kind=door area=38 name=@01d_03
   warp area=39
 end
 
-entry 197 kind=2 area=38 name=@01d_04
+entry 197 kind=run_warp area=38 name=@01d_04
   warp area=22 position="01pos_02"
 end
 
@@ -882,7 +882,7 @@ entry 218 kind=door area=44 name=@01d_01
   warp area=42 position="01pos_04"
 end
 
-entry 219 kind=2 area=44 name=@01d_02
+entry 219 kind=run_warp area=44 name=@01d_02
   warp area=12 position="01pos_06"
 end
 
@@ -911,7 +911,7 @@ entry 225 kind=door area=45 name=@01d_03
   warp area=47 position="01pos_02"
 end
 
-entry 226 kind=2 area=45 name=@01d_04
+entry 226 kind=run_warp area=45 name=@01d_04
   warp area=26
 end
 
@@ -940,7 +940,7 @@ entry 234 kind=door area=48 name=@01d_02
   warp area=19 position="01pos_02"
 end
 
-entry 236 kind=2 area=49 name=@01d_01
+entry 236 kind=run_warp area=49 name=@01d_01
   warp area=28 position="01pos_02"
   camera table=79
 end

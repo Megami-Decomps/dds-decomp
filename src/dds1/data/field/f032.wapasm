@@ -5,7 +5,7 @@ entry 0 kind=battle_exit
   warp area=16 position="01pos_07"
 end
 
-entry 2 kind=5 area=1 name="01d_01"
+entry 2 kind=ladder area=1 name="01d_01"
   scene primary="01pos_07" secondary="01cam_01"
   warp field=24 area=33 position="01pos_02"
   camera mode=1 table=88 name="01cam_02"
@@ -53,7 +53,7 @@ entry 12 kind=door area=4 name="01d_02"
   warp area=1 position="01pos_06"
 end
 
-entry 13 kind=2 area=4 name="01d_03"
+entry 13 kind=run_warp area=4 name="01d_03"
   warp area=8 position="01pos_02"
 end
 
@@ -67,33 +67,33 @@ entry 16 kind=door area=5 name="01d_02"
   warp area=1 position="01pos_02"
 end
 
-entry 17 kind=5 area=5 name="01d_03"
+entry 17 kind=ladder area=5 name="01d_03"
   scene primary="01pos_16" secondary="01cam_06"
   warp position="01pos_04"
 end
 
-entry 18 kind=5 area=5 name=@01d_04
-  scene args=1,0,0 primary="01pos_15" secondary="01cam_05"
+entry 18 kind=ladder area=5 name=@01d_04
+  scene direction=1 primary="01pos_15" secondary="01cam_05"
   warp position="01pos_03"
 end
 
-entry 19 kind=5 area=5 name=@01d_05
+entry 19 kind=ladder area=5 name=@01d_05
   scene primary="01pos_14" secondary="01cam_04"
   warp position="01pos_06"
 end
 
-entry 20 kind=5 area=5 name="01d_06"
-  scene args=1,0,0 primary="01pos_13" secondary="01cam_03"
+entry 20 kind=ladder area=5 name="01d_06"
+  scene direction=1 primary="01pos_13" secondary="01cam_03"
   warp position="01pos_05"
 end
 
-entry 21 kind=5 area=5 name="01d_07"
+entry 21 kind=ladder area=5 name="01d_07"
   scene primary="01pos_11" secondary="01cam_01"
   warp position="01pos_08"
 end
 
-entry 22 kind=5 area=5 name="01d_08"
-  scene args=1,0,0 primary="01pos_12" secondary="01cam_02"
+entry 22 kind=ladder area=5 name="01d_08"
+  scene direction=1 primary="01pos_12" secondary="01cam_02"
   warp position="01pos_07"
 end
 
@@ -107,33 +107,33 @@ entry 25 kind=door area=6 name="01d_02"
   warp area=1 position="01pos_03"
 end
 
-entry 26 kind=5 area=6 name="01d_03"
+entry 26 kind=ladder area=6 name="01d_03"
   scene primary="01pos_16" secondary="01cam_06"
   warp position="01pos_04"
 end
 
-entry 27 kind=5 area=6 name=@01d_04
-  scene args=1,0,0 primary="01pos_15" secondary="01cam_05"
+entry 27 kind=ladder area=6 name=@01d_04
+  scene direction=1 primary="01pos_15" secondary="01cam_05"
   warp position="01pos_03"
 end
 
-entry 28 kind=5 area=6 name=@01d_05
+entry 28 kind=ladder area=6 name=@01d_05
   scene primary="01pos_14" secondary="01cam_04"
   warp position="01pos_06"
 end
 
-entry 29 kind=5 area=6 name="01d_06"
-  scene args=1,0,0 primary="01pos_13" secondary="01cam_03"
+entry 29 kind=ladder area=6 name="01d_06"
+  scene direction=1 primary="01pos_13" secondary="01cam_03"
   warp position="01pos_05"
 end
 
-entry 30 kind=5 area=6 name="01d_07"
+entry 30 kind=ladder area=6 name="01d_07"
   scene primary="01pos_11" secondary="01cam_01"
   warp position="01pos_08"
 end
 
-entry 31 kind=5 area=6 name="01d_08"
-  scene args=1,0,0 primary="01pos_12" secondary="01cam_02"
+entry 31 kind=ladder area=6 name="01d_08"
+  scene direction=1 primary="01pos_12" secondary="01cam_02"
   warp position="01pos_07"
 end
 
@@ -147,13 +147,13 @@ entry 34 kind=door area=7 name="01d_02"
   warp area=3 position="01pos_04"
 end
 
-entry 35 kind=5 area=7 name="01d_03"
+entry 35 kind=ladder area=7 name="01d_03"
   scene primary="01pos_06" secondary="01cam_01"
   warp position="01pos_04"
 end
 
-entry 36 kind=5 area=7 name=@01d_04
-  scene args=1,0,0 primary="01pos_05" secondary="01cam_02"
+entry 36 kind=ladder area=7 name=@01d_04
+  scene direction=1 primary="01pos_05" secondary="01cam_02"
   warp position="01pos_03"
 end
 
@@ -162,7 +162,7 @@ entry 38 kind=door area=8 name="01d_01"
   warp area=9
 end
 
-entry 39 kind=2 area=8 name="01d_02"
+entry 39 kind=run_warp area=8 name="01d_02"
   warp area=4 position="01pos_03"
   camera mode=1
 end
@@ -193,7 +193,7 @@ entry 45 kind=side_exit area=9
   warp area=9 position="01pos_05"
 end
 
-entry 47 kind=5 area=11 name="01d_01"
+entry 47 kind=ladder area=11 name="01d_01"
   scene primary="01pos_10" secondary="01cam_09"
   warp area=9 position="01pos_04"
 end
@@ -246,7 +246,7 @@ entry 57 kind=special_warp
   after flag=2 script=@014_13kara
 end
 
-entry 58 kind=5 area=20 name="01d_01"
+entry 58 kind=ladder area=20 name="01d_01"
   scene primary="01pos_10" secondary="01cam_09"
   warp area=15 position="01pos_02"
 end
@@ -314,7 +314,7 @@ entry 73 kind=side_exit area=16
   warp area=16 position="01pos_02"
 end
 
-entry 74 kind=5 area=16 name=@01d_04
+entry 74 kind=ladder area=16 name=@01d_04
   scene primary="01pos_05" secondary="01cam_01"
   warp field=28 area=34 position="01pos_02"
   after footstep=2
@@ -331,46 +331,46 @@ entry 77 kind=door area=17 name="01d_02"
   warp area=7
 end
 
-entry 78 kind=5 area=17 name="01d_03"
+entry 78 kind=ladder area=17 name="01d_03"
   scene primary="01pos_11" secondary="01cam_01"
   warp position="01pos_04"
 end
 
-entry 79 kind=5 area=17 name=@01d_04
-  scene args=1,0,0 primary="01pos_12" secondary="01cam_02"
+entry 79 kind=ladder area=17 name=@01d_04
+  scene direction=1 primary="01pos_12" secondary="01cam_02"
   warp position="01pos_03"
 end
 
-entry 80 kind=5 area=17 name=@01d_05
+entry 80 kind=ladder area=17 name=@01d_05
   scene primary="01pos_16" secondary="01cam_06"
   warp position="01pos_06"
 end
 
-entry 81 kind=5 area=17 name="01d_06"
-  scene args=1,0,0 primary="01pos_15" secondary="01cam_05"
+entry 81 kind=ladder area=17 name="01d_06"
+  scene direction=1 primary="01pos_15" secondary="01cam_05"
   warp position="01pos_05"
 end
 
-entry 84 kind=12 area=1 name="01d_07"
-  scene args=37,0,0
+entry 84 kind=barrier area=1 name="01d_07"
+  scene barrier=37
   warp type=4
   tail control=5 args=32,0,3,0,0,0,0
 end
 
-entry 85 kind=12 area=1 name="01d_08"
-  scene args=38,0,0
+entry 85 kind=barrier area=1 name="01d_08"
+  scene barrier=38
   warp type=4
   tail control=5 args=32,0,3,0,0,0,0
 end
 
-entry 86 kind=12 area=1 name="01d_09"
-  scene args=40,0,0
+entry 86 kind=barrier area=1 name="01d_09"
+  scene barrier=40
   warp type=4
   tail control=5 args=32,0,5,0,0,0,0
 end
 
-entry 87 kind=12 area=1 name="01d_10"
-  scene args=39,0,0
+entry 87 kind=barrier area=1 name="01d_10"
+  scene barrier=39
   warp type=4
   tail control=5 args=32,0,4,0,0,0,0
 end

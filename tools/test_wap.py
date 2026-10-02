@@ -165,26 +165,38 @@ entry 4 kind=special_warp
 end
 
 entry 5 kind=ladder
-  scene selector=1 floor_flag=88
+  scene direction=1 direct_prompt=1 primary=01pos_02 secondary=01cam_02
 end
 
-entry 6
-  warp type=facility action=shop selection=4 floor_flag=12
+entry 6 kind=suction_warp
+  scene state_selector=3 map_entry=5 motion=17 primary=01pos_03 secondary=md_01all_05
 end
 
-entry 7
-  warp type=facility action=terminal slot=9 floor_flag=2
+entry 7 kind=barrier
+  scene barrier=57
 end
 
-entry 8
-  warp type=facility action=save slot=-1
+entry 8 kind=warp
+  scene args=1,0,0
 end
 
 entry 9
-  warp type=facility action=heal slot=1
+  warp type=facility action=shop selection=4 floor_flag=12
 end
 
 entry 10
+  warp type=facility action=terminal slot=9 floor_flag=2
+end
+
+entry 11
+  warp type=facility action=save slot=-1
+end
+
+entry 12
+  warp type=facility action=heal slot=1
+end
+
+entry 13
   warp type=facility args=2,7,8
 end
 """
@@ -196,13 +208,23 @@ end
         self.assertEqual(model.entries[2].scene_args, (5, 9, 0))
         self.assertEqual(model.entries[3].scene_args, (606, 0, 0))
         self.assertEqual(model.entries[4].warp_args, (607, 0, 12))
-        self.assertEqual(model.entries[5].scene_args, (1, 88, 0))
-        self.assertEqual(model.entries[6].warp_args, (0, 4, 12))
-        self.assertEqual(model.entries[7].warp_args, (3, 9, 2))
-        self.assertEqual(model.entries[8].warp_args, (4, -1, 0))
-        self.assertEqual(model.entries[9].warp_args, (5, 1, 0))
-        self.assertEqual(model.entries[10].warp_args, (2, 7, 8))
+        self.assertEqual(model.entries[5].scene_args, (1, 1, 0))
+        self.assertEqual(model.entries[6].scene_args, (3, 5, 17))
+        self.assertEqual(model.entries[7].scene_args, (57, 0, 0))
+        self.assertEqual(model.entries[8].scene_args, (1, 0, 0))
+        self.assertEqual(model.entries[9].warp_args, (0, 4, 12))
+        self.assertEqual(model.entries[10].warp_args, (3, 9, 2))
+        self.assertEqual(model.entries[11].warp_args, (4, -1, 0))
+        self.assertEqual(model.entries[12].warp_args, (5, 1, 0))
+        self.assertEqual(model.entries[13].warp_args, (2, 7, 8))
         rendered = wap.render_source(model)
+        self.assertIn("kind=ladder", rendered)
+        self.assertIn("direction=1 direct_prompt=1", rendered)
+        self.assertIn("kind=suction_warp", rendered)
+        self.assertIn("state_selector=3 map_entry=5 motion=17", rendered)
+        self.assertIn("kind=barrier", rendered)
+        self.assertIn("scene barrier=57", rendered)
+        self.assertIn("kind=warp", rendered)
         self.assertIn("action=terminal slot=9 floor_flag=2", rendered)
         self.assertIn("type=facility args=2,7,8", rendered)
         self.assertEqual(wap.parse_source(rendered), model)

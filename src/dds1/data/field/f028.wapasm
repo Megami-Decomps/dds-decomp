@@ -81,14 +81,14 @@ entry 13 kind=side_exit area=28
   after footstep=2
 end
 
-entry 14 kind=12 area=21 name=@01d_04
-  scene args=3,0,0
+entry 14 kind=barrier area=21 name=@01d_04
+  scene barrier=3
   warp type=4
   tail control=85 args=28,0,3,0,0,0,0
 end
 
-entry 15 kind=12 area=16 name=@01d_03
-  scene args=56,0,0
+entry 15 kind=barrier area=16 name=@01d_03
+  scene barrier=56
   warp type=4
   tail control=65 args=28,0,3,0,0,0,0
 end
@@ -164,7 +164,7 @@ entry 27 kind=door area=1 name=@01d_02
   after flag=3 script=@038_start
 end
 
-entry 28 kind=ladder flag=1480 area=38
+entry 28 kind=warp flag=1480 area=38
   warp area=8 position="01pos_03"
 end
 
@@ -174,7 +174,7 @@ entry 29 kind=door flag=1505 area=1 name=@01d_03
   after flag=3 script=@038_start
 end
 
-entry 30 kind=ladder flag=1481 area=38
+entry 30 kind=warp flag=1481 area=38
   warp area=4 position="01pos_09"
 end
 
@@ -205,7 +205,7 @@ entry 35 kind=door flag=1507 area=1 name=@01d_05
   after flag=3 script=@038_start
 end
 
-entry 36 kind=ladder flag=1482 area=38
+entry 36 kind=warp flag=1482 area=38
   warp area=10 position="01pos_05"
 end
 
@@ -235,7 +235,7 @@ entry 41 kind=door area=1 name=@01d_06
   after flag=3 script=@038_start
 end
 
-entry 42 kind=ladder flag=1483 area=38
+entry 42 kind=warp flag=1483 area=38
   warp area=13
 end
 
@@ -272,7 +272,7 @@ entry 51 kind=door flag=1507 area=4 name=@01d_01
   after flag=3 script=@006_start
 end
 
-entry 52 kind=ladder flag=1485 area=6
+entry 52 kind=warp flag=1485 area=6
   warp area=1 position="01pos_04"
   camera table=91
 end
@@ -315,7 +315,7 @@ entry 59 kind=door area=4 name=@01d_08
   after flag=3 script=@006_start
 end
 
-entry 60 kind=ladder flag=1486 area=6
+entry 60 kind=warp flag=1486 area=6
   warp area=1 position="01pos_03"
   camera table=91
 end
@@ -331,7 +331,7 @@ entry 62 kind=door area=4 name=@01d_09
   after flag=3 script=@006_start
 end
 
-entry 63 kind=ladder flag=1487 area=6
+entry 63 kind=warp flag=1487 area=6
   warp area=4 position="01pos_08"
 end
 
@@ -355,7 +355,7 @@ entry 69 kind=door area=7 name=@01d_01
   warp area=10
 end
 
-entry 70 kind=2 area=7 name=@01d_02
+entry 70 kind=run_warp area=7 name=@01d_02
   warp area=22 position="01pos_02"
 end
 
@@ -371,7 +371,7 @@ entry 73 kind=door area=8 name=@01d_01
   after flag=3 script=@006_start
 end
 
-entry 74 kind=ladder flag=1489 area=6
+entry 74 kind=warp flag=1489 area=6
   warp area=1 position="01pos_06"
   camera table=91
 end
@@ -392,7 +392,7 @@ entry 77 kind=door area=8 name=@01d_03
   after flag=3 script=@006_start
 end
 
-entry 78 kind=ladder flag=1490 area=6
+entry 78 kind=warp flag=1490 area=6
   warp area=10 position="01pos_04"
 end
 
@@ -408,7 +408,7 @@ entry 80 kind=door flag=1507 area=8 name=@01d_05
   after flag=3 script=@006_start
 end
 
-entry 81 kind=ladder flag=1491 area=6
+entry 81 kind=warp flag=1491 area=6
   warp area=1 position="01pos_05"
   camera table=91
 end
@@ -451,7 +451,7 @@ entry 90 kind=door area=10 name=@01d_01
   after flag=3 script=@006_start
 end
 
-entry 91 kind=ladder flag=1492 area=6
+entry 91 kind=warp flag=1492 area=6
   warp area=1 position="01pos_02"
   camera table=91
 end
@@ -477,7 +477,7 @@ entry 95 kind=door area=10 name=@01d_04
   after flag=3 script=@006_start
 end
 
-entry 96 kind=ladder flag=1493 area=6
+entry 96 kind=warp flag=1493 area=6
   warp area=10
 end
 
@@ -493,7 +493,7 @@ entry 98 kind=door area=10 name=@01d_05
   after flag=3 script=@006_start
 end
 
-entry 99 kind=ladder flag=1494 area=6
+entry 99 kind=warp flag=1494 area=6
   warp area=4
 end
 
@@ -513,7 +513,7 @@ entry 104 kind=door area=12 name=@01d_01
   camera table=91
 end
 
-entry 105 kind=2 area=12 name=@01d_02
+entry 105 kind=run_warp area=12 name=@01d_02
   warp area=18 position="01pos_02"
 end
 
@@ -522,7 +522,7 @@ entry 106 kind=door area=12 name=@01d_03
   warp area=4 position="01pos_09"
 end
 
-entry 107 kind=2 area=12 name=@01d_04
+entry 107 kind=run_warp area=12 name=@01d_04
   warp area=27 position="01pos_02"
   after footstep=2
 end
@@ -538,7 +538,7 @@ entry 110 kind=door area=13 name=@01d_01
   after flag=3 script=@006_start
 end
 
-entry 111 kind=ladder flag=1497 area=6
+entry 111 kind=warp flag=1497 area=6
   warp area=8
 end
 
@@ -594,7 +594,7 @@ entry 123 kind=door area=15 name=@01d_01
   camera table=91
 end
 
-entry 124 kind=2 area=15 name=@01d_02
+entry 124 kind=run_warp area=15 name=@01d_02
   warp area=20 position="01pos_02"
 end
 
@@ -634,7 +634,7 @@ entry 134 kind=door area=18 name=@01d_01
   warp area=17 position="01pos_02"
 end
 
-entry 135 kind=2 area=18 name=@01d_02
+entry 135 kind=run_warp area=18 name=@01d_02
   warp area=12 position="01pos_02"
 end
 
@@ -658,7 +658,7 @@ entry 141 kind=door area=20 name=@01d_01
   warp area=19
 end
 
-entry 142 kind=2 area=20 name=@01d_02
+entry 142 kind=run_warp area=20 name=@01d_02
   warp area=15 position="01pos_02"
 end
 
@@ -682,7 +682,7 @@ entry 148 kind=door area=22 name=@01d_01
   warp area=21
 end
 
-entry 149 kind=2 area=22 name=@01d_02
+entry 149 kind=run_warp area=22 name=@01d_02
   warp area=7 position="01pos_02"
 end
 
@@ -703,7 +703,7 @@ entry 154 kind=door area=24 name=@01d_01
   warp area=23
 end
 
-entry 155 kind=2 area=24 name=@01d_02
+entry 155 kind=run_warp area=24 name=@01d_02
   warp area=25 position="01pos_04"
 end
 
@@ -716,11 +716,11 @@ entry 158 kind=door area=25 name=@01d_02
   scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
 end
 
-entry 159 kind=2 area=25 name=@01d_03
+entry 159 kind=run_warp area=25 name=@01d_03
   warp area=26 position="01pos_03"
 end
 
-entry 160 kind=2 area=25 name=@01d_04
+entry 160 kind=run_warp area=25 name=@01d_04
   warp area=24 position="01pos_02"
 end
 
@@ -733,11 +733,11 @@ entry 163 kind=door area=26 name=@01d_02
   scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
 end
 
-entry 164 kind=2 area=26 name=@01d_03
+entry 164 kind=run_warp area=26 name=@01d_03
   warp area=25 position="01pos_03"
 end
 
-entry 165 kind=2 area=26 name=@01d_04
+entry 165 kind=run_warp area=26 name=@01d_04
   warp area=29 position="01pos_04"
   after footstep=2
 end
@@ -748,7 +748,7 @@ entry 167 kind=door area=27 name=@01d_01
   after footstep=2
 end
 
-entry 168 kind=2 area=27 name=@01d_02
+entry 168 kind=run_warp area=27 name=@01d_02
   warp area=12 position="01pos_04"
 end
 
@@ -769,12 +769,12 @@ entry 173 kind=door area=29 name=@01d_02
   after footstep=2
 end
 
-entry 174 kind=2 area=29 name=@01d_03
+entry 174 kind=run_warp area=29 name=@01d_03
   warp area=30 position="01pos_03"
   after footstep=2
 end
 
-entry 175 kind=2 area=29 name=@01d_04
+entry 175 kind=run_warp area=29 name=@01d_04
   warp area=26 position="01pos_04"
 end
 
@@ -789,12 +789,12 @@ entry 178 kind=door area=30 name=@01d_02
   after footstep=2
 end
 
-entry 179 kind=2 area=30 name=@01d_03
+entry 179 kind=run_warp area=30 name=@01d_03
   warp area=29 position="01pos_03"
   after footstep=2
 end
 
-entry 180 kind=2 area=30 name=@01d_04
+entry 180 kind=run_warp area=30 name=@01d_04
   warp area=31 position="01pos_04"
   after footstep=2
 end
@@ -810,12 +810,12 @@ entry 183 kind=door area=31 name=@01d_02
   after footstep=2
 end
 
-entry 184 kind=2 area=31 name=@01d_03
+entry 184 kind=run_warp area=31 name=@01d_03
   warp area=32 position="01pos_03"
   after footstep=2
 end
 
-entry 185 kind=2 area=31 name=@01d_04
+entry 185 kind=run_warp area=31 name=@01d_04
   warp area=30 position="01pos_04"
   after footstep=2
 end
@@ -831,12 +831,12 @@ entry 188 kind=door area=32 name=@01d_02
   after footstep=2
 end
 
-entry 189 kind=2 area=32 name=@01d_03
+entry 189 kind=run_warp area=32 name=@01d_03
   warp area=31 position="01pos_03"
   after footstep=2
 end
 
-entry 190 kind=2 area=32 name=@01d_04
+entry 190 kind=run_warp area=32 name=@01d_04
   warp area=33 position="01pos_02"
   after footstep=2
 end
@@ -847,7 +847,7 @@ entry 192 kind=door area=33 name=@01d_01
   after footstep=2
 end
 
-entry 193 kind=2 area=33 name=@01d_02
+entry 193 kind=run_warp area=33 name=@01d_02
   warp area=32 position="01pos_04"
   after footstep=2
 end
@@ -858,8 +858,8 @@ entry 195 kind=door area=34 name=@01d_01
   after footstep=2
 end
 
-entry 196 kind=5 area=34 name=@01d_02
-  scene args=1,0,0 primary="01pos_03" secondary="01cam_01"
+entry 196 kind=ladder area=34 name=@01d_02
+  scene direction=1 primary="01pos_03" secondary="01cam_01"
   warp field=32 area=16 position="01pos_04"
 end
 

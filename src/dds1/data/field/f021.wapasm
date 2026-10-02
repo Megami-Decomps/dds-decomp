@@ -209,13 +209,13 @@ entry 39 kind=door area=8 name="01d_05"
   after footstep=4
 end
 
-entry 40 kind=12 area=8 name="01d_06"
+entry 40 kind=barrier area=8 name="01d_06"
   warp type=4
   tail control=33 args=21,0,3,0,0,0,0
 end
 
-entry 41 kind=12 area=8 name="01d_07"
-  scene args=57,0,0
+entry 41 kind=barrier area=8 name="01d_07"
+  scene barrier=57
   warp type=4
   tail control=33 args=21,0,3,0,0,0,0
 end
@@ -258,8 +258,8 @@ entry 50 kind=door area=14 name=@01d_01
   after flag=8
 end
 
-entry 51 kind=12 area=14 name="01d_02"
-  scene args=55,0,0
+entry 51 kind=barrier area=14 name="01d_02"
+  scene barrier=55
   warp type=4
   tail control=57 args=21,0,3,0,0,0,0
 end
@@ -309,8 +309,8 @@ entry 60 kind=door area=16 name=@01d_01
   after footstep=4
 end
 
-entry 61 kind=5 area=16 name="01d_02"
-  scene args=1,0,0 primary="01pos_05" secondary="01cam_02"
+entry 61 kind=ladder area=16 name="01d_02"
+  scene direction=1 primary="01pos_05" secondary="01cam_02"
   warp field=33 area=17 position="01pos_04"
 end
 
@@ -321,8 +321,8 @@ entry 62 kind=door area=16 name=@01d_03
   after flag=8
 end
 
-entry 63 kind=12 area=16 name=@01d_04
-  scene args=1,0,0
+entry 63 kind=barrier area=16 name=@01d_04
+  scene barrier=1
   warp type=4
   tail control=65 args=21,0,3,0,0,0,0
 end
