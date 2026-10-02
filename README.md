@@ -105,7 +105,7 @@ python configure.py              # split with splat, write build.ninja and objdi
 ninja                            # build and verify every extracted version (or: ninja dds1)
 ninja dds1-dev dds2-dev          # build the relocatable development ELFs
 ninja dds1-scripts dds2-scripts  # assemble and verify the tracked script corpora
-ninja dds1-field-data dds2-field-data  # assemble and verify INF/WAP/FLD1/FLD2 field data
+ninja dds1-field-data dds2-field-data  # assemble and verify field tables, models, palettes, and lighting
 ninja dds1-field-archives dds2-field-archives  # rebuild field resources inside exact LB archives
 ninja dds1-battle-data dds2-battle-data  # assemble and verify battle tables
 python3 tools/flw0.py view src/dds1/scripts/event/e670.bfasm  # readable script view
@@ -115,6 +115,8 @@ See [`docs/flw0.md`](docs/flw0.md) for script source,
 [`docs/inf.md`](docs/inf.md) for interaction tables, and
 [`docs/wap.md`](docs/wap.md) for actor, elevator, door, and transition tables.
 See [`docs/fld.md`](docs/fld.md) for relocatable FLD1/FLD2 field resources,
+[`docs/field-environment.md`](docs/field-environment.md) for NPL palettes and
+SKY light sets,
 [`docs/lb.md`](docs/lb.md) for their compressed field archives, and
 [`docs/tmx.md`](docs/tmx.md) for field texture bundles and PNG decoding. See
 [`docs/battle-tables.md`](docs/battle-tables.md) for encounter and battle
@@ -170,6 +172,7 @@ docs/CONTRIBUTING.md        how to decompile, verify, name and share a function
 docs/compiler-decision-atlas.md route mismatches to compiler evidence and stop rules
 docs/idioms.md              source shapes confirmed against retail codegen
 docs/inf.md                 field interaction layout and editable source format
+docs/field-environment.md   field NPC palette and sky-light source formats
 docs/tu-names.md            where unit names come from (Nocturne __FILE__ strings)
 tools/                      build, checking, splitting and analysis tools
 asm/ assets/ build/ orig/   generated or extracted locally (git-ignored)
