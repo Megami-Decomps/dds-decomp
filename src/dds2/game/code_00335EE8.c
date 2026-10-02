@@ -15,16 +15,26 @@ typedef struct MotionKey {
     f32 value;
 } MotionKey;
 
+typedef struct MotionKeyPair {
+    MotionKey keys[2];
+} MotionKeyPair; /* 0x10 */
+
+/* Bound entries allocate 0x20 bytes. Sampling uses the header's source and
+ * keyframe table; blending updates current, while the snapshot retains both
+ * keys for the next transition's weighted merge. */
+typedef struct MotionKeyWork {
+    u32 unk00;
+    void *source;             /* 0x04: supplies duration and loop settings */
+    void *keyframes;          /* 0x08: times followed by fixed-stride key data */
+    MotionKeyPair *current;   /* 0x0C */
+    MotionKeyPair previous;   /* 0x10 */
+} MotionKeyWork; /* 0x20 */
+
 typedef struct MotionKeySample {
     MotionKey *first;
     MotionKey *second;
     f32 weight;
 } MotionKeySample;
-
-typedef struct MotionBlend {
-    u8 pad00[0xC];
-    MotionKey *out;
-} MotionBlend;
 
 extern void func_00334678(void *, void *);
 
@@ -38,7 +48,7 @@ s32 sdfDispatchMotionCommand(void *object, s32 command) {
 /* Select a 16-byte entry from the source object's motion pointer table. */
 void sdfSelectMotionPointerEntry(s32 destination, s32 source, void *unused, s32 entryIndex) {
     sdfSetMotionPointerPair();
-    *(s32 *)(destination + 0xc) = *(s32 *)(*(s32 *)(*(s32 *)(source + 4) + 0x10) + 0xc) + entryIndex * 0x10;
+    ((MotionKeyWork *)destination)->current = (MotionKeyPair *)(*(s32 *)(*(s32 *)(*(s32 *)(source + 4) + 0x10) + 0xc) + entryIndex * 0x10);
 }
 
 s32 sdfAllocateBoundMotionPointerEntry(s32 source, s32 unused, s32 entryIndex) {
@@ -48,7 +58,8 @@ s32 sdfAllocateBoundMotionPointerEntry(s32 source, s32 unused, s32 entryIndex) {
     return entry;
 }
 
-void sdfBlendMotionKeys(MotionBlend *motion) {
+/* Interpolate the sampled values, retaining separate keys when their IDs differ. */
+void sdfBlendMotionKeys(MotionKeyWork *motion) {
     MotionKeySample sample;
     MotionKey *out;
     s32 firstId;
@@ -65,7 +76,7 @@ void sdfBlendMotionKeys(MotionBlend *motion) {
     secondValue = sample.second->value;
     weight = sample.weight;
     inverse = 1.0f - weight;
-    out = motion->out;
+    out = motion->current->keys;
     if (firstId == secondId) {
         out[0].id = firstId;
         out[0].value = firstValue * inverse + secondValue * weight;
@@ -81,18 +92,9 @@ void sdfBlendMotionKeys(MotionBlend *motion) {
 
 INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336068);
 
-typedef struct Block16 {
-    u8 data[0x10];
-} Block16;
-
-typedef struct PoseCopy {
-    u8 pad00[0xC];
-    Block16 *src;
-    Block16 dst;
-} PoseCopy;
-
-void sdfCopyPoseRecord(PoseCopy *pose) {
-    pose->dst = *pose->src;
+/* Preserve the complete current pair for the next weighted transition. */
+void sdfCopyPoseRecord(MotionKeyWork *motion) {
+    motion->previous = *motion->current;
 }
 
 void func_00336228(void *matrix) {
