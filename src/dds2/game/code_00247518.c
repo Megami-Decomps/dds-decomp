@@ -94,7 +94,13 @@ typedef struct EventViewerState {
     } history[8];
     s32 historyCount;
     u32 currentId;
-    u8 pad2284[0x24];
+    u8 pad2284[0xC];
+    s32 blurRectangleEnabled; /* 0x2290 */
+    s32 texturedBlurEnabled;  /* 0x2294 */
+    s32 filterBlurEnabled;    /* 0x2298 */
+    s32 colorRectangleEnabled; /* 0x229C */
+    s32 texturedSquareEnabled; /* 0x22A0 */
+    s32 staggeredBlurEnabled; /* 0x22A4 */
     s32 selectionMode; /* 0x22A8: command mode zero, one or two */
     s32 unk22AC;
     u8 pad22B0[4];
@@ -118,7 +124,9 @@ typedef struct EventViewerState {
     u8 windowActive;
     u8 pad23C6[0x2A];
     s32 glyphTickCount;
-    u8 pad23F4[0x1C];
+    u8 pad23F4[4];
+    s32 framebufferQuadEnabled; /* 0x23F8 */
+    u8 pad23FC[0x14];
     u32 glyph;
     s32 timedActive; /* 0x2414: gated time interval */
     s32 timedStart;  /* 0x2418 */
@@ -266,7 +274,60 @@ void func_002475C8(EventViewerState *viewer) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_002476B8);
+typedef struct EffScreenDrawParams EffScreenDrawParams;
+extern EffScreenDrawParams *effGetLoadDescA(void);
+extern void effDrawBlurRectangle(EffScreenDrawParams *);
+extern void effEnableTexturedBlur(void);
+extern void effDisableTexturedBlur(void);
+extern void effEnableTexturedSquare(void);
+extern void effDisableTexturedSquare(void);
+extern void effEnableFilterBlur(void);
+extern void effDisableFilterBlur(void);
+extern void effEnableStaggeredBlur(void);
+extern void effDisableStaggeredBlur(void);
+extern void effEnableFramebufferQuad(void);
+extern void effDisableFramebufferQuad(void);
+extern void effEnableColorRectangle(void);
+extern void effDisableColorRectangle(void);
+extern void func_0025EE00(EventViewerState *);
+
+void func_002476B8(EventViewerState *viewer) {
+    if (viewer->blurRectangleEnabled != 0) {
+        effDrawBlurRectangle(effGetLoadDescA());
+    }
+    if (viewer->texturedBlurEnabled != 0) {
+        effEnableTexturedBlur();
+    } else {
+        effDisableTexturedBlur();
+    }
+    if (viewer->texturedSquareEnabled != 0) {
+        effEnableTexturedSquare();
+    } else {
+        effDisableTexturedSquare();
+    }
+    if (viewer->filterBlurEnabled != 0) {
+        effEnableFilterBlur();
+    } else {
+        effDisableFilterBlur();
+    }
+    if (viewer->staggeredBlurEnabled != 0) {
+        effEnableStaggeredBlur();
+    } else {
+        effDisableStaggeredBlur();
+    }
+    if (viewer->framebufferQuadEnabled != 0) {
+        effEnableFramebufferQuad();
+    } else {
+        effDisableFramebufferQuad();
+    }
+    if (viewer->colorRectangleEnabled != 0) {
+        effEnableColorRectangle();
+    } else {
+        effDisableColorRectangle();
+    }
+    func_0025EE00(viewer);
+    func_002475C8(viewer);
+}
 
 /* Select the active entry (or fallback) and sync world selection and camera. */
 void evtViewerApplySelectedEntry(EventViewerState *viewer) {
@@ -1307,4 +1368,3 @@ INCLUDE_SDATA(const s32, "game/code_00247518", D_004373A0);
 INCLUDE_SDATA(const s32, "game/code_00247518", D_004373A8);
 
 INCLUDE_SDATA(const s32, "game/code_00247518", D_004373B0);
-
