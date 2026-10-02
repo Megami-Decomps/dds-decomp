@@ -40,7 +40,7 @@ extern void func_00196088(s32, s32, s32);
 
 extern void func_001958A0(s32, s32, s32);
 
-extern void frFontQueueGlyphInSelectedSlot(s32);
+extern s32 frFontQueueGlyphInSelectedSlot(s32);
 
 extern s32 datGameState;
 
@@ -1186,7 +1186,11 @@ void mnuResetPartyPanelFade(s32 menu, s32 index, s32 unused, s32 retainScale) {
 }
 
 typedef struct MenuPageMotion {
-    u8 unk0[0x40];
+    u8 pad00[0x14];
+    s32 primarySprite;
+    u8 pad18[0x1C];
+    s32 overlaySprites[2];
+    u8 pad3C[4];
     s32 field40;
     s32 field44;
     s32 field48;
@@ -1739,7 +1743,71 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unused
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_00280E08);
+extern s32 mnuGetPartyEntryMenuValue(s32);
+extern u16 evtGetIndexedEventRecordId(s32);
+extern s32 func_001978E8(s32, s32, s32, s32, s32, s32);
+extern s32 func_003014F0(char *, const char *, ...);
+extern char *D_003BAA84;
+extern u8 *datCommandRecords;
+extern char D_003BC720[];
+extern char D_003BC730[];
+extern char D_003BC738[];
+
+void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuPageMotion *page, s32 param) {
+    char text[0x20];
+    s32 *sprite = page->overlaySprites;
+    u32 i = 0;
+    s32 value;
+    s32 alpha;
+    s32 color;
+    s32 item;
+
+    value = mnuGetPartyEntryMenuValue(datGameState + partyIndex * 0x1A4 + 0xA60);
+    alpha = page->field40;
+    color = uiBlendColors(0xA09DC380, 0xA09DC300, alpha);
+    x += page->field48 * 16;
+    func_002BF4E0(x, y, z, alpha, 0, page->primarySprite, 0, param);
+    do {
+        func_002BF4E0(x, y, z, alpha, 0, *sprite++, 0, param);
+        i++;
+    } while (i < 2);
+    if (value != 0) {
+        item = func_00197760(x + 0x6F0, y + 0x330, z, color, (s32)(D_003BAA84 + value * 25), 0);
+        func_003014F0(text, D_003BC720, *(s16 *)(datCommandRecords + evtGetIndexedEventRecordId(value) * 0x38 + 0x18));
+        item = func_001978E8(x + 0xF70, y + 0x348, z, color, (s32)text, item);
+    } else {
+        item = func_00197760(x + 0x6F0, y + 0x330, z, color, (s32)D_003BC730, 0);
+        item = func_001978E8(x + 0xF70, y + 0x348, z, color, (s32)D_003BC738, item);
+    }
+    func_001958A0(item, 1, param);
+    frFontQueueGlyphInSelectedSlot(item);
+    if (page->field44 == 0) {
+        if (page->field40 < 256) {
+            page->field40 += 16;
+        }
+        if (page->field40 > 256) {
+            page->field40 = 256;
+        }
+        page->field48 -= page->field4C / 256;
+        if (page->field48 < 0) {
+            page->field48 = 0;
+        }
+        if (page->field48 != 0) {
+            page->field4C *= 1.5f;
+        }
+    } else {
+        if (page->field40 > 0) {
+            page->field40 -= 32;
+        }
+        if (page->field40 < 0) {
+            page->field40 = 0;
+        }
+        page->field48 += page->field4C / 256;
+        if (page->field48 != 0) {
+            page->field4C /= 1.5f;
+        }
+    }
+}
 
 extern void func_002CD0D8(u32 textId, s32 arg1, char *out);
 
