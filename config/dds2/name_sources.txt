@@ -5764,9 +5764,9 @@
 0x003456C0	sdfSoundInitFormattedAndAppendNode	inferred	Byte-identical DDS1 counterpart: Initializes a formatted sound node, stores the caller value, and appends it to the active-node list.
 0x003456F8	sdfSoundInitIpuStream	inferred	sceIpuInit, IPU_CMD write, registers DMA handlers 3/4 and starts thread
 0x003458F0	sdfSetGridScaledDrawBounds	inferred	Stores grid-scaled draw bounds and the supplied mode. [names_reviewed10.tsv]
-0x00346A60	sdfPacCheckDecoderStatus	inferred	confidence=medium; matched-C; src/dds2/game/code_00346608.c:95:func_00346A60; Checks the decoder status pair: the first byte must be nonzero and the second zero; called by movie playback status polling without claiming exact flag meanings.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
-0x00346A80	sdfPacInitializeDispatchPacket	inferred	confidence=high; src/dds2/game/code_00346608.c:func_00346A80; Clears the PAC dispatch packet, sets status to minus one, and chooses a supplied dispatch callback or the default. [names_qp9.tsv]
-0x00346B68	sdfPacAdvanceCallbackBoundary	inferred	confidence=high; src/dds2/game/code_00346608.c:func_00346B68; Handles 64-byte consumption boundaries, advances input, invokes the callback, and updates activity/remainder according to callback results. [names_qp9.tsv]
+0x00346A60	sdfPacCheckDecoderStatus	inferred	confidence=medium; matched-C; src/dds2/game/code_003465E8.c:95:func_00346A60; Checks the decoder status pair: the first byte must be nonzero and the second zero; called by movie playback status polling without claiming exact flag meanings.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x00346A80	sdfPacInitializeDispatchPacket	inferred	confidence=high; src/dds2/game/code_003465E8.c:func_00346A80; Clears the PAC dispatch packet, sets status to minus one, and chooses a supplied dispatch callback or the default. [names_qp9.tsv]
+0x00346B68	sdfPacAdvanceCallbackBoundary	inferred	confidence=high; src/dds2/game/code_003465E8.c:func_00346B68; Handles 64-byte consumption boundaries, advances input, invokes the callback, and updates activity/remainder according to callback results. [names_qp9.tsv]
 0x00346C40	sdfDecodePacNodeAndAdvanceTail	inferred	Reads the next PAC node, links it into decoder tail, and processes read completion codes. [names_reviewed21.tsv]
 0x00346E08	sdfPacEnqueuePacket	inferred	Allocates and copies a PAC packet, then appends it to the decoder's packet queue.
 0x00346E90	sdfPacRemovePacket	inferred	Unlinks a specified packet from its owner's queue, frees it, and returns its successor.
