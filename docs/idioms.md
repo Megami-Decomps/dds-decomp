@@ -209,6 +209,32 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   in the caller reproduces the bytes, but it is a codegen lever, not the
   source. The definition form of the callee (`static`, return type,
   prototype) makes no difference.
+  Mechanism (gdb on cc1, `fill_slots_from_thread`): when the delay slot comes
+  from the branch target, the insn stays unannulled only if it sets nothing
+  in `opposite_needed`, the registers `mark_target_live_regs` reports live at
+  the fall-through. That set is a forward simulation from the start of the
+  extended block (REG_DEAD regs only die at the next label) and
+  `find_dead_or_set_registers` then stops at the first throwing call. So a
+  fall-through that starts with an extern call keeps the slot register
+  "live" and the branch becomes `beqzl`/`bnel`; with the callee compiled
+  earlier in the unit the scan runs on, sees the call clobber the register and
+  the branch stays plain. Toy-verified on `func_00190708` (callee
+  `func_00190118`, defined in the unit before `effEvent`), DDS2
+  `func_00224500` (callee `func_00217470`) and `func_00183EE0` (callee
+  `effPcpEventWorkInitEntries`, same unit: the branch matches once the C
+  function is visible, no unit change needed). For `func_00190708` and
+  `func_00224500` the callee sits in another unit, i.e. those units are one
+  translation unit in retail.
+  Quick test without touching the repo: copy the unit to a scratch file, put
+  a K&R stub (`void callee() { }`, or `s32 callee() { return 0; }` when the
+  result is used) before the caller, and run
+  `check_unit.py <unit> --source <copy>`. If the caller then reports OK the
+  callee must be compiled earlier in the same TU (merge the units or match
+  the callee first); the reverse test (replace an earlier C callee by an
+  `extern` prototype) finds the opposite evidence, a unit that has to be
+  split (`func_00280978`: `mnuClearListFlagsOneAndTwo`/`mnuTestListFlagTwo`
+  must be opaque). A ternary `t = c ? a : b;` also adds a jump to the join
+  label, which stops cse's skip-block path (see "Float constants").
 - A `"memory"` clobber on a COP2 save/restore asm stops gcc reusing `$4`
   across it; retail's code has none.
 - `(n * 6 + 1) << 16` gives retail's `lui $1; addu` large-immediate add.
@@ -287,6 +313,94 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   (`func_002D62D8`).
 - `size = a + b; size += c; size += d;` preserves each add in retail
   order, where one sum expression gets reassociated (`func_0029A5E0`).
+- Order of independent stores after a call: when two stores have the same
+  priority (e.g. `li $3,1; sw $3,4(p)` and `sw $2,8(p)` where `$2` is the
+  call result), sched1 breaks the tie towards the LATER source statement.
+  To get `sw 4; sw 8` in the asm, write `state->fileHandle = h;` first and
+  `state->loaded = 1;` second (`func_00242340` / DDS2 `func_0025D758`; the
+  natural order gave `sw 8; sw 4`). The rule only applies to equal
+  priority: a store fed by a constant that needs `lui/ori` or `lui/mtc1`
+  has a longer chain and is emitted first regardless of order, and moving a
+  statement also changes the live ranges seen by global alloc (sched1 runs
+  before it), so callee-saved assignments can shift (DDS1 `func_00183EE0`).
+- Reading the scheduler: `tools/cc.sh -DSKIP_ASM -dS -fsched-verbose=5 file.c -o x.o`
+  (compile the unit copy outside `src/`, so the dump files stay in its
+  directory; `-dR` for sched2) writes `file.c.NN.sched`/`.sched2` with, per
+  function, the dependence table (`prio`, `cost`, forward dependents) and
+  every `Ready list (t = N)` with the insn picked. The list is sorted so the
+  LAST entry is issued first. Ties on priority and dependent count keep the
+  previous pass's order (sched2 sees sched1's output), which is why two
+  independent stores come out in an order unrelated to the source once their
+  operand chains differ in length. An insn with an alias-set conflict against
+  an earlier store (e.g. a `u32` field store after a struct copy that ends in a
+  `u32` word) gets an anti-dependence on it and becomes ready later than a
+  float-field store, so it is emitted after it (DDS1 `func_00183EE0`).
+- The member types of a block-copied struct decide which later stores may be
+  hoisted above the copy: gcc gives the struct copy the struct's alias set, and a
+  later store to a field whose type occurs inside that struct is ordered after
+  the copy. `typedef struct { u32 word[7]; } Head;` made the `u32 color` store
+  wait for the copy and come out after the float `scale` store, while retail has
+  `sw color` first; declaring the head as `f32 word[7]` (the copy is still
+  `ldl/ldr`) lets the integer store go first and matches (DDS1 `func_00183EE0`,
+  DDS2 `func_0018BB38`). When two heap stores come out in the wrong order, try
+  the other scalar type for the copied block.
+- A walking pointer that is the call-result variable itself, plus a second
+  variable for the unmoved base: `cursor = f(h); base = cursor; cursor +=
+  *(u32 *)(cursor + 0xC); for (...; cursor += 8) { r = base + *(u32 *)(cursor + 4);`.
+  Retail then shows `daddu $3,$2,$0` (cursor = return value), `daddu $6,$3,$0`
+  (base copy, scheduled after the 0xC load) and `addu $3,$3,$2` advancing the same
+  register. Two separate pointers (`base = f(h); entry = base + ...`) merge the
+  call-result copy into one pseudo and give a different register split
+  (DDS2 `func_003074F0`; ~10 words off with every two-pointer variant).
+- A stack frame with no (or fewer) stack accesses than the C needs is an unread
+  local in the original source. gcc 2.96 deletes stores to a local array that
+  nothing reads but keeps its frame slot:
+  `float w[4]; w[0] = t * t; w[1] = t * t * t; return t + 1.0f;` compiles to
+  `addiu sp,-16 ... addiu sp,16` with no `swc1`. Use it only when retail has such
+  a frame, name/type it from the sibling (`f32 w[4];` like `effMathStepBezierSlot`,
+  `s32 blended[4];` like `effParModulateColors`), and comment it
+  `/* never read; gcc drops the stores but keeps the frame slot */`
+  (DDS1 `func_0018E548` frame 0x10 and `func_0015DE88` frame 0x20 with one
+  store, plus DDS2 twins). Not a way to change register allocation.
+- A single shared failure exit (`goto fail;` ... `fail: return 0;`) is ordinary
+  developer C (several guards jumping to one failure exit). Use it only when
+  plain `return 0;` provably differs: plain returns hoist `$2 = 0` to function
+  entry and let reorg steal the epilogue's first `ld` into annulled `bnezl`/`beqzl`
+  slots (two return labels), and merged guard chains lose the per-branch
+  `daddu $2,$0,$0` slot copies that retail has. Name the label for its meaning
+  (`fail`, `notFound`), never for the epilogue (DDS1/DDS2
+  `btlFindEligibleTargetForMultiActorCommand`).
+- A void function whose last call sits inside `if (cond) { ... }` sibcalls it
+  (`j`, epilogue duplicated). When retail keeps `jal` plus one shared epilogue,
+  write the guard as an early `if (!cond) { return; }` followed by the body; the
+  `return;` makes the final call a normal call (DDS1 `func_00119F08` / DDS2
+  `func_0011A808`: nested form gave `j datMoveCursorY`, early return gives the
+  retail `jal`). Returning the callee's result through a local instead only adds
+  `daddu` moves.
+- A `dsrl $4,$4,N` (64-bit shift) feeding a 32-bit `andi`/`ori`/call argument is
+  a shift of a narrow (`u8`/`u16`/`s8`/`s16`) parameter: the register is already
+  zero/sign-extended, so cc1 emits `dsrl` and the mask drops the extension. A
+  `u64` parameter gives the same `dsrl` but then needs `dsll32/dsra32` before a
+  `u32` argument, and a 64-bit `or` with an immediate becomes `li` + `or`;
+  `u32`/`s32` give `srl`/`sra`. `void f(u8 channel) { snd(((channel >> 3) & 0xF) |
+  0x110, 0, 0, 0); }` matches (DDS1 `func_002E9810`/`func_002E9918`/
+  `func_002E94E0`/`func_002E9510`, DDS2 `func_003426B8`/`func_00342388`/
+  `func_003423B8`).
+- Mixed `j` and `jal` tails inside one function (one arm `ld...; j f`, the last
+  arm `jal f` + shared `jr`) come from an explicit `return;` in an earlier arm:
+  the `return;` makes the epilogue label a jump target, so the call that jumps
+  to it stays a sibcall but a call that merely falls into the label is not.
+  A second `if (v) { f(0x58); }` after `if (v == 0) { f(0x54); return; }` gives
+  `j` then `jal` (DDS2 `func_00308F78` matches that way), but that second test is
+  redundant and folded away, so it is a codegen lever and is NOT accepted as
+  source; the function stays INCLUDE_ASM until a real shape is found. The same
+  call in `if/else` without `return;` gives `j` for both, and in a non-void
+  `if/else` without returns `jal` for both.
+  Toy results (callee extern void, 3 prior calls): early `return;` + fall-through
+  last call -> `j`,`jal`; `cond = 0;` statement after the last call -> `jal`;
+  a loop wrapped around it -> `jal`; a plain straight-line function -> `j`.
+  A file-level -fno-optimize-sibling-calls needs `jal` on EVERY tail; a unit
+  with `j` tails in other functions is not such a file.
 
 ## Pointer and loop addressing
 
@@ -582,6 +696,22 @@ line above the definition):
 - Reuse one `f32 wave` across `(f32)frame / 60` and `f(wave * pi)`
   to keep both live ranges in `$f20` across the call; separate locals
   change the FPR assignment (`func_0026EEE8`).
+- ee-as emits one `.lit4` word per `li.s` and never merges equal values. Two
+  pool entries holding the same float therefore mean cc1 loaded the constant
+  twice. `t = 0.0f; if (c) t = a / b;` is a branch around a block, so cse
+  (`skip_blocks`) keeps a constant loaded before it for the code after it: one
+  entry, and the register survives the next call in a callee-saved FPR.
+  `t = c ? a / b : 0.0f;` expands with a jump over the then-arm, the join
+  label has two uses while cse runs, the path stops there and the constant is
+  reloaded: two entries (`func_0025AA20` family, `3.14159265f` twice).
+- cc1 truncates decimal float literals: `0.2f` is 0x3E4CCCCC, `0.1f` is
+  0x3DCCCCCC, `3.14159265f` is 0x40490FDA, and `3.1415925f` is 0x40490FD9.
+  Retail's "0.19999999" / "0.099999994" are `0.2f` / `0.1f`; write what the
+  programmer wrote, not the shortest decimal of the retail bits.
+- A call result scaled right away, `t = sdfSinPoly(x) * 0.2f + 0.1f;`,
+  keeps `t` in `$f0`; `t = sdfSinPoly(x);` followed by a use of `t` lets cse
+  forward `$f0` into the multiply, and `t` then takes the preference of the
+  `(x - 5.0f) / 40.0f` numerator's register (`$f1`) instead.
 - Float arguments to an unprototyped callee are promoted to double and go
   through soft-float helper calls (extra `jal`s). Give the callee a
   prototype with `f32` parameters.
@@ -821,3 +951,10 @@ These are fakes, and check_unit reports them as `TRICK`:
 - asm used for anything but COP2/MMI under the rules in "Inline asm: COP2 and
   MMI" (check_unit reports mostly-asm functions as `ASMBODY`);
 - dummy variables or `volatile` added only to steer codegen.
+
+Reusing one local for several values is fine when a single type and a neutral
+name fit every use (`i` across loops, `t`/`factor`/`n` for successive
+calculations), as C89 code with all declarations at the top often does. It is a
+fake when the reuse only reads correctly under a misleading name (a `column`
+counter holding a row bound), or when the variable exists only to steer
+register allocation.

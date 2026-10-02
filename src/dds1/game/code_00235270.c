@@ -1,10 +1,11 @@
 #include "common.h"
+#include "evt_world.h"
 
 extern void func_0023D5B0(s32 output, void *data, s32 size);
 
 extern void *kwlnTaskGetUserValue();
 extern s32 func_0018FDA8(void);
-extern s32 func_002E92C0(s32 sequence);
+extern s32 sndFindPackedTrackLoadStatus(s32 sequence);
 extern void sndEnsureMidiBankResident(s32 sequence);
 extern s32 evtUpdateFrameVariableTask(s32 *task);
 extern s32 evtAllocateContext(void);
@@ -41,8 +42,8 @@ extern s32 sdfCreateFormattedSifCommand();
 extern u32 itfMesGetEntryCount(s32 window);
 extern void evtViewerDispatchFlagMode();
 extern void func_0022E5A0();
-extern u8 D_003BBF80[];
-extern u8 D_003BBF90[];
+extern u8 evtPictureTaskName[];
+extern u8 evtSkyTaskName[];
 extern u8 D_003BC360[];
 extern char D_003BC058[]; /* "     %d" */
 extern char D_003BC0A8[]; /* " EVENT" */
@@ -50,10 +51,10 @@ extern char D_003BC0B0[]; /* "%3d" */
 extern char D_003BC0B8[]; /* "   CUT" */
 extern char D_003BC0C0[]; /* "%03d" */
 extern char D_003BC098[];
-extern u16 D_003BD898;
-extern u16 D_003BD89A;
-extern s16 D_003BD89C;
-extern s16 D_003BD89E;
+extern u16 evtSkyTransitionFrame;
+extern u16 evtSkyTransitionDuration;
+extern s16 evtSkyTransitionStartValue;
+extern s16 evtSkyTransitionTargetValue;
 
 
 typedef struct EvtRuntimeChild {
@@ -100,7 +101,9 @@ typedef struct EvtFrameNode {
 
 typedef struct EvtFrameList {
     s32 kind;           /* 0x00 */
-    u8 pad04[0x4C];
+    u8 pad04[0xC];
+    struct EvtModelOwner *owner; /* 0x10 */
+    u8 pad14[0x3C];
     s32 count;          /* 0x50 */
     EvtFrameNode *head; /* 0x54 */
 } EvtFrameList;
@@ -142,7 +145,9 @@ typedef struct EvtRuntime {
     f32 floatValue; /* 0x231C */
     f32 floatMin; /* 0x2320 */
     f32 floatMax; /* 0x2324 */
-    u8 pad2328[0xA0];
+    u8 pad2328[0x70];
+    s32 fieldIndex; /* 0x2398: selected column of the motion editor row */
+    u8 pad239C[0x2C];
     s32 tableColumn; /* 0x23C8 */
     u8 pad23CC[0x14];
     s32 selectedEntry; /* 0x23E0 */
@@ -182,7 +187,7 @@ void evtCreateTask(s32 taskId, s32 value) {
 
     data = evtAllocateContext();
     evtSetConvertedContextValue(data, value);
-    kwlnTaskCreate(D_003BBF80, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, (void *)data);
+    kwlnTaskCreate(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, (void *)data);
 }
 
 typedef struct EvtTaskData {
@@ -197,7 +202,7 @@ void evtCreateTaskWithValue(s32 taskId, s32 value) {
 
     data = (EvtTaskData *)evtAllocateContext();
     data->value = value;
-    kwlnTaskCreate(D_003BBF80, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, data);
+    kwlnTaskCreate(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, data);
 }
 
 void evtSetSkyOverlayEnabled(u32 enabled) {
@@ -214,11 +219,11 @@ void evtBeginSkyParameterTransition(s32 duration, s32 target) {
             func_00132B80(target);
             evtSkyTransitionActive = 0;
         } else {
-            D_003BD89A = duration;
-            D_003BD89C = current;
-            D_003BD89E = target;
+            evtSkyTransitionDuration = duration;
+            evtSkyTransitionStartValue = current;
+            evtSkyTransitionTargetValue = target;
             evtSkyTransitionActive = 1;
-            D_003BD898 = 0;
+            evtSkyTransitionFrame = 0;
         }
     }
 }
@@ -229,9 +234,9 @@ u16 evtIsSkyTransitionActive(void) {
 
 void evtAdvanceSkyTransition(void) {
     if (evtSkyTransitionActive != 0) {
-        D_003BD898 += 1;
-        func_00132B80(D_003BD89C + (s32)((f32)(D_003BD89E - D_003BD89C) * ((f32)D_003BD898 / (f32)D_003BD89A)));
-        if (D_003BD898 >= D_003BD89A) {
+        evtSkyTransitionFrame += 1;
+        func_00132B80(evtSkyTransitionStartValue + (s32)((f32)(evtSkyTransitionTargetValue - evtSkyTransitionStartValue) * ((f32)evtSkyTransitionFrame / (f32)evtSkyTransitionDuration)));
+        if (evtSkyTransitionFrame >= evtSkyTransitionDuration) {
             evtSkyTransitionActive = 0;
         }
     }
@@ -255,7 +260,7 @@ void evtResetSkyTaskFlags(void) {
 void evtDestroySkyTask(void) {
     s32 task;
 
-    task = kwlnTaskGetTaskByName(D_003BBF90);
+    task = kwlnTaskGetTaskByName(evtSkyTaskName);
     if (task != 0) {
         kwlnTaskDestroyWithHierarchy(task, 1);
     }
@@ -266,7 +271,7 @@ void evtCreateSkyTask(void) {
     fldSetSkyDrawState(0x80);
     func_00132B80(0);
     fldSetFadeTarget(0, 1, 0);
-    kwlnTaskCreate(D_003BBF90, 0x2B0E, 1, 1, evtUpdateSkyTask, evtResetSkyTaskFlags, 0);
+    kwlnTaskCreate(evtSkyTaskName, 0x2B0E, 1, 1, evtUpdateSkyTask, evtResetSkyTaskFlags, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00235270", evtUpdateFrameVariableTask);
@@ -290,7 +295,7 @@ typedef struct MenuGfxCallback {
     u8 unknown[0x10];
     void (*invoke)(void *, void *);
 } MenuGfxCallback;
-extern MenuGfxCallback D_00325748;
+extern MenuGfxCallback kwlnPositionedTextSurface;
 extern u32 sdfCreateResetPacketList(void);
 extern void func_00235598(u32, s32, s32, s32, s32, s32, s32, u8 *, void *, void *);
 extern s8 D_00324510[];
@@ -302,7 +307,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
 
     list = sdfCreateResetPacketList();
     func_00235598(list, x, y, 0x16, 9, 0, 1, (u8 *)ctx, evtAppendValueChangeDebugLabel, func_002357B8);
-    D_00325748.invoke(&D_00325748, (void *)list);
+    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)list);
     if (ctx->actionMode != 8) {
         return 0;
     }
@@ -333,7 +338,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     return 0;
 }
 
-s32 func_00235AE0(s32 list, s32 x, s32 y) {
+s32 evtDrawValueChangeNoticeRow(s32 list, s32 x, s32 y) {
     sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
@@ -375,8 +380,8 @@ s32 evtUpdateValueChangeDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 step;
 
     list = sdfCreateResetPacketList();
-    func_00235598(list, x, y, 0x16, 9, 0, 1, (u8 *)ctx, func_00235AE0, evtDrawValueChangeInstructionRow);
-    D_00325748.invoke(&D_00325748, (void *)list);
+    func_00235598(list, x, y, 0x16, 9, 0, 1, (u8 *)ctx, evtDrawValueChangeNoticeRow, evtDrawValueChangeInstructionRow);
+    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)list);
     if (ctx->actionMode != 7) {
         return 0;
     }
@@ -450,7 +455,7 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
 
     list = sdfCreateResetPacketList();
     func_00235598(list, x, y, 0x16, 0xB, 0, 1, (u8 *)ctx, mnuDrawFrameChangeLabel, evtViewerDrawFrameChangeRow);
-    D_00325748.invoke(&D_00325748, (void *)list);
+    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)list);
     if (ctx->actionMode != 6) {
         return 0;
     }
@@ -506,7 +511,7 @@ extern s32 func_001037C0(s32, s32, s32, s32, s32, s32, s32, s32, u8 *);
 s32 mnuDrawInfoWindowA(s32 x, s32 y, u8 *work) {
     u32 packets = sdfCreateResetPacketList();
     func_00235598(packets, x, y, 0xF, 0xB, 0, 0xB, work, 0, func_00236180);
-    D_00325748.invoke(&D_00325748, (void *)packets);
+    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)packets);
     if (((EvtRuntime *)work)->actionMode != 1) {
         return 0;
     }
@@ -565,7 +570,7 @@ s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtDrawWork *work) {
         }
     }
     func_00235598(packets, x, y, width, work->itemCount + 3, 0, work->itemCount, (u8 *)work, evtDrawStringEntry, evtDrawSelectableTextRow);
-    D_00325748.invoke(&D_00325748, (void *)packets);
+    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)packets);
     if (work->mode != 2) {
         return 0;
     }
@@ -615,7 +620,7 @@ s32 evtDrawEventFileNameRow(s32 list, s32 x, s32 y) {
     return 2;
 }
 
-void func_00236AC8(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+void evtDrawEventCutSelectRow(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     s32 color = 0;
 
     if (ctx->charRow == index) {
@@ -648,13 +653,13 @@ void func_00236AC8(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     }
 }
 
-s32 func_00236D80(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     u32 num;
 
     list = sdfCreateResetPacketList();
-    func_00235598(list, x, y, 0x12, 0xB, 0, 8, (u8 *)ctx, evtDrawEventFileNameRow, func_00236AC8);
-    D_00325748.invoke(&D_00325748, (void *)list);
+    func_00235598(list, x, y, 0x12, 0xB, 0, 8, (u8 *)ctx, evtDrawEventFileNameRow, evtDrawEventCutSelectRow);
+    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)list);
     if (ctx->actionMode != 9) {
         return 0;
     }
@@ -755,7 +760,7 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, u8 *work) {
     s32 shown;
 
     func_00235598(packets, x, y, 8, 0x1D, ((EvtRuntime *)work)->entryFirst, ((EvtRuntime *)work)->entryCount, work, 0, func_00237130);
-    D_00325748.invoke(&D_00325748, (void *)packets);
+    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)packets);
     if (((EvtRuntime *)work)->actionMode != 4) {
         return 0;
     }
@@ -827,21 +832,6 @@ typedef struct EvtWorldNode {
     struct EvtWorldNode *next; /* 0x20 */
 } EvtWorldNode;
 
-typedef struct EvtWorldSlot {
-    u8 pad00[4];
-    EvtWorldNode *head; /* 0x04 */
-    u8 pad08[4];
-} EvtWorldSlot; /* 0xC bytes */
-
-typedef struct EvtWorldTable {
-    u8 pad00[8];
-    EvtWorldSlot *slots; /* 0x08 */
-} EvtWorldTable;
-
-typedef struct EvtWorldObject {
-    u8 pad00[0x18];
-    EvtWorldTable *table; /* 0x18 */
-} EvtWorldObject;
 
 extern EvtWorldObject *dds3GetWorldObject();
 
@@ -861,7 +851,7 @@ void evtViewerDrawWorldNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ct
     }
     count = 0;
     for (i = 0; i < 0x12; i++) {
-        if (i != 3) {
+        if (i != EVT_WORLD_SLOT_MOVIE) {
             for (node = dds3GetWorldObject()->table->slots[i].head; node != NULL; node = node->next) {
                 if (node->name != NULL) {
                     count++;
@@ -920,7 +910,7 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, u8 *work) {
         return -1;
     }
     func_00235598(packets, x, y, 0x1C, rows, 0, rows, work, 0, evtViewerDrawPendingNodeRow);
-    D_00325748.invoke(&D_00325748, (void *)packets);
+    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)packets);
     if (((EvtRuntime *)work)->actionMode != 0xC) {
         return 0;
     }
@@ -1005,9 +995,145 @@ s32 mnuDrawMotionChangeLabel(s32 target, s32 x, s32 y) {
     return 2;
 }
 
+typedef struct EvtMotionBits {
+    s32 group : 8;
+    s32 motion : 8;
+    s32 loop : 8;
+    s32 hokan : 8;
+} EvtMotionBits;
+
+typedef union EvtMotionValue {
+    s32 word;
+    EvtMotionBits bits;
+} EvtMotionValue;
+
+typedef struct EvtModelRef {
+    u8 pad00[0xC];
+    s32 handle; /* 0xC */
+} EvtModelRef;
+
+typedef struct EvtModelSlot {
+    u8 pad00[0xC];
+    EvtModelRef *ref; /* 0xC */
+} EvtModelSlot;
+
+struct EvtModelOwner {
+    u8 pad00[0x18];
+    EvtModelSlot *slot; /* 0x18 */
+};
+
+typedef struct EvtMotionData {
+    u8 pad00[4];
+    s32 **frames; /* 0x4 */
+} EvtMotionData;
+
+typedef struct EvtMotionNode {
+    u8 pad00[8];
+    EvtMotionData *data; /* 0x8 */
+} EvtMotionNode;
+
+extern EvtMotionNode *mdlFindNodeById(s32 model, s32 index);
+extern s32 mdlGetNodeRefHalf(s32 model, s32 index);
+
 INCLUDE_ASM(const s32, "game/code_00235270", func_00239E30);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023A0D0);
+extern void func_00239E30();
+
+/* Motion editor row: ctx->value packs group (byte 0), motion number (byte 1), loop flag (byte 2) and interpolation (byte 3). */
+s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    s32 model;
+    s32 count;
+    EvtMotionValue packed;
+
+    list = sdfCreateResetPacketList();
+    model = ctx->frameList->owner->slot->ref->handle;
+    func_00235598(list, x, y, 0x14, 0xA, 0, 1, (u8 *)ctx, mnuDrawMotionChangeLabel, func_00239E30);
+    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)list);
+    if (ctx->actionMode != 0x10) {
+        return 0;
+    }
+    if (D_00324510[0x26] & 2) {
+        if (ctx->fieldIndex == 0) {
+            ctx->fieldIndex = 3;
+        } else {
+            ctx->fieldIndex = ctx->fieldIndex - 1;
+        }
+    } else if (D_00324510[0x27] & 2) {
+        if (ctx->fieldIndex == 3) {
+            ctx->fieldIndex = 0;
+        } else {
+            ctx->fieldIndex = ctx->fieldIndex + 1;
+        }
+    }
+    packed.word = ctx->value;
+    count = mdlGetNodeRefHalf(model, packed.bits.group);
+    switch (ctx->fieldIndex) {
+    case 0:
+        if (D_00324510[0x25] & 2) {
+            do {
+                if (packed.bits.group < 3) {
+                    packed.bits.group = packed.bits.group + 1;
+                } else {
+                    packed.bits.group = 0;
+                }
+            } while (mdlFindNodeById(model, packed.bits.group) == NULL);
+        } else if (D_00324510[0x24] & 2) {
+            do {
+                if (packed.bits.group > 0) {
+                    packed.bits.group = packed.bits.group - 1;
+                } else {
+                    packed.bits.group = 3;
+                }
+            } while (mdlFindNodeById(model, packed.bits.group) == NULL);
+        }
+        if (packed.bits.motion >= mdlGetNodeRefHalf(model, packed.bits.group)) {
+            packed.bits.motion = 0;
+        }
+        break;
+    case 1:
+        if (D_00324510[0x25] & 2) {
+            if (packed.bits.motion >= count - 1) {
+                packed.bits.motion = 0;
+            } else {
+                packed.bits.motion = packed.bits.motion + 1;
+            }
+        } else if (D_00324510[0x24] & 2) {
+            if (packed.bits.motion > 0) {
+                packed.bits.motion = packed.bits.motion - 1;
+            } else {
+                packed.bits.motion = count - 1;
+            }
+        }
+        break;
+    case 2:
+        if ((D_00324510[0x25] & 2) || (D_00324510[0x24] & 2)) {
+            packed.bits.loop = packed.bits.loop == 0;
+        }
+        break;
+    case 3:
+        if (D_00324510[0x25] & 2) {
+            if (packed.bits.hokan < 0x64) {
+                packed.bits.hokan = packed.bits.hokan + 1;
+            } else {
+                packed.bits.hokan = 0;
+            }
+        }
+        if (D_00324510[0x24] & 2) {
+            if (packed.bits.hokan > 0) {
+                packed.bits.hokan = packed.bits.hokan - 1;
+            } else {
+                packed.bits.hokan = 0x64;
+            }
+        }
+        break;
+    }
+    ctx->value = packed.word;
+    if (D_00324510[0x21] < 0 && mdlFindNodeById(model, packed.bits.group)->data->frames[packed.bits.motion] != NULL) {
+        return 1;
+    }
+    return D_00324510[0x23] >= 0 ? 0 : -1;
+}
 
 extern char D_003BC288[]; /* "DISABLE" */
 extern char D_003BC280[]; /* "ALL" */
@@ -1078,7 +1204,7 @@ s32 mnuDrawTimedPrompt(s32 x, s32 y, u8 *work) {
     u32 packets = sdfCreateResetPacketList();
     s32 count;
     func_00235598(packets, x, y, 0x19, 2, 0, 1, work, 0, evtDrawOptionalPromptText);
-    D_00325748.invoke(&D_00325748, (void *)packets);
+    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)packets);
     if (((EvtRuntime *)work)->actionMode != 0x14) {
         return 0;
     }
@@ -1224,7 +1350,7 @@ s32 evtAssignRuntimeChildSequenceAndCount(EvtRuntime *runtime) {
     return index;
 }
 
-s32 func_0023D630(EvtRuntime *runtime) {
+s32 evtIndexGroupTypeElevenChildren(EvtRuntime *runtime) {
     s32 index = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -1238,7 +1364,7 @@ s32 func_0023D630(EvtRuntime *runtime) {
     return index;
 }
 
-s32 func_0023D698(EvtRuntime *runtime) {
+s32 evtIndexGroupTypeThirteenChildren(EvtRuntime *runtime) {
     s32 index = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -1252,7 +1378,7 @@ s32 func_0023D698(EvtRuntime *runtime) {
     return index;
 }
 
-s32 func_0023D700(EvtRuntime *runtime) {
+s32 evtIndexGroupTypeFourteenChildren(EvtRuntime *runtime) {
     s32 index = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -1266,7 +1392,7 @@ s32 func_0023D700(EvtRuntime *runtime) {
     return index;
 }
 
-s32 func_0023D768(EvtRuntime *runtime) {
+s32 evtIndexGroupTypeFifteenChildren(EvtRuntime *runtime) {
     s32 index = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -1280,7 +1406,7 @@ s32 func_0023D768(EvtRuntime *runtime) {
     return index;
 }
 
-s32 func_0023D7D0(EvtRuntime *runtime) {
+s32 evtIndexGroupTypeTwentyThreeChildren(EvtRuntime *runtime) {
     s32 index = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -1294,7 +1420,7 @@ s32 func_0023D7D0(EvtRuntime *runtime) {
     return index;
 }
 
-s32 func_0023D838(EvtRuntime *runtime) {
+s32 evtIndexGroupTypeTwentySevenChildren(EvtRuntime *runtime) {
     s32 index = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -1308,7 +1434,7 @@ s32 func_0023D838(EvtRuntime *runtime) {
     return index;
 }
 
-s32 func_0023D8A0(EvtRuntime *runtime) {
+s32 evtIndexGroupTypeSixteenChildren(EvtRuntime *runtime) {
     s32 index = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -1322,7 +1448,7 @@ s32 func_0023D8A0(EvtRuntime *runtime) {
     return index;
 }
 
-s32 func_0023D908(EvtRuntime *runtime) {
+s32 evtIndexGroupTypeSeventeenChildren(EvtRuntime *runtime) {
     s32 index = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -1336,7 +1462,7 @@ s32 func_0023D908(EvtRuntime *runtime) {
     return index;
 }
 
-s32 func_0023D970(EvtRuntime *runtime) {
+s32 evtIndexGroupTypeTwentyFiveChildren(EvtRuntime *runtime) {
     s32 index = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -1415,7 +1541,7 @@ void evtCopyRuntimeChildPayloadsToBuffer(s32 output, EvtRuntime *runtime) {
     }
 }
 
-void func_0023E2B0(s32 output, EvtRuntime *runtime) {
+void evtEmitGroupTypeElevenPayloads(s32 output, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xB) {
@@ -1427,7 +1553,7 @@ void func_0023E2B0(s32 output, EvtRuntime *runtime) {
     }
 }
 
-void func_0023E338(s32 output, EvtRuntime *runtime) {
+void evtEmitGroupTypeThirteenPayloads(s32 output, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xD) {
@@ -1439,7 +1565,7 @@ void func_0023E338(s32 output, EvtRuntime *runtime) {
     }
 }
 
-void func_0023E3C0(s32 output, EvtRuntime *runtime) {
+void evtEmitGroupTypeFourteenPayloads(s32 output, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xE) {
@@ -1451,7 +1577,7 @@ void func_0023E3C0(s32 output, EvtRuntime *runtime) {
     }
 }
 
-void func_0023E448(s32 output, EvtRuntime *runtime) {
+void evtEmitGroupTypeFifteenPayloads(s32 output, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xF) {
@@ -1463,7 +1589,7 @@ void func_0023E448(s32 output, EvtRuntime *runtime) {
     }
 }
 
-void func_0023E4D0(s32 output, EvtRuntime *runtime) {
+void evtEmitGroupTypeTwentyThreePayloads(s32 output, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x17) {
@@ -1475,7 +1601,7 @@ void func_0023E4D0(s32 output, EvtRuntime *runtime) {
     }
 }
 
-void func_0023E558(s32 output, EvtRuntime *runtime) {
+void evtEmitGroupTypeTwentySevenPayloads(s32 output, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x1B) {
@@ -1487,7 +1613,7 @@ void func_0023E558(s32 output, EvtRuntime *runtime) {
     }
 }
 
-void func_0023E5E0(s32 output, EvtRuntime *runtime) {
+void evtEmitGroupTypeSixteenPayloads(s32 output, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x10) {
@@ -1499,7 +1625,7 @@ void func_0023E5E0(s32 output, EvtRuntime *runtime) {
     }
 }
 
-void func_0023E668(s32 output, EvtRuntime *runtime) {
+void evtEmitGroupTypeSeventeenPayloads(s32 output, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x11) {
@@ -1525,7 +1651,7 @@ void evtWriteGroupMetadata(s32 output, EvtRuntime *runtime) {
     }
 }
 
-void func_0023E770(s32 output, EvtRuntime *runtime) {
+void evtEmitGroupTypeTwentyFivePayloads(s32 output, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x19) {
@@ -1734,7 +1860,7 @@ s32 evtIsBgmLoaded(s32 id) {
     if ((u32)(id - 0x258) >= 0x100) {
         return 1;
     }
-    return func_002E92C0(evtEncodeBgmSoundCode(id, 0)) == 1;
+    return sndFindPackedTrackLoadStatus(evtEncodeBgmSoundCode(id, 0)) == 1;
 }
 
 s32 evtPlayBgm(s32 id, s32 fade) {
@@ -1878,7 +2004,7 @@ s32 evtFindTaskResourceEntryByKey(u32 taskId, s32 key) {
 }
 
 extern void sdfTexReleaseReferenceViaHandler(s32 handle);
-extern s32 func_002D3288(s32 resource);
+extern s32 sdfTexAcquireResourceTexture(s32 resource);
 extern void effSetCh72Id(s32 id);
 
 void evtRefreshTaskData(s32 taskId, s32 key) {
@@ -1890,7 +2016,7 @@ void evtRefreshTaskData(s32 taskId, s32 key) {
             sdfTexReleaseReferenceViaHandler(old);
             data->effectHandle = 0;
         }
-        resource = func_002D3288(resource);
+        resource = sdfTexAcquireResourceTexture(resource);
         effSetCh72Id(resource);
         data->effectHandle = resource;
     }
@@ -1941,13 +2067,13 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
     return found;
 }
 
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BBF80);
+INCLUDE_SDATA(const s32, "game/code_00235270", evtPictureTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", evtSkyTransitionActive);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", evtSkyOverlayEnabled);
 
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BBF90);
+INCLUDE_SDATA(const s32, "game/code_00235270", evtSkyTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BBFA0);
 

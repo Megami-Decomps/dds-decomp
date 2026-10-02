@@ -1,5 +1,5 @@
 #include "common.h"
 
-void func_001132F0(void) {
+void ddsReleaseUnitObject(void) {
     dds3RemoveWorldObjectNode();
 }

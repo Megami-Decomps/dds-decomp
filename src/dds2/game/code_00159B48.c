@@ -8,8 +8,8 @@ extern void func_003332A0(void *, u32);
 extern void *sdfCreateAssetWithDrawEntries();
 extern void func_003332D0(void *, f32);
 extern void func_001594C8();
-extern s32 D_00451F20[];
-extern void func_00341348();
+extern s32 effEmitterDelayRandomState[];
+extern void effMiscSeedRandomFromClock();
 #include "eff.h"
 
 typedef struct EffResourceOwner {
@@ -60,8 +60,8 @@ typedef struct EffParticleRecord {
     f32 y;              /* 0x04 */
     f32 z;              /* 0x08 */
     u8 pad0C[0x14];
-    s32 unk20;
-    u32 unk24;
+    s32 frame;   /* 0x20: starts at -1; read as a countdown and incremented */
+    u32 color;   /* 0x24: packed RGBA built from the effect's colour and alpha */
     f32 speed;
     f32 angle;
     u8 pad30[0x10];
@@ -128,7 +128,7 @@ typedef struct EffBillEntry {
     u8 pad10[4];
 } EffBillEntry; /* 0x14 */
 
-extern s32 D_00451EE0[];
+extern s32 effBillResourceOwners[];
 
 s32 sdfAllocPacketAligned(s32 size);
 
@@ -165,8 +165,8 @@ typedef struct EffResourceRef {
 } EffResourceRef;
 
 void effRetainResource(s32 index) {
-    s32 *effect = (s32 *)billCreateIndexed(D_003AA884[index].unk00, 0);
-    s32 *resource = ((EffResourceRef *)D_00451EE0[index])->resource;
+    s32 *effect = (s32 *)billCreateIndexed(D_003AA884[index].billboardKind, 0);
+    s32 *resource = ((EffResourceRef *)effBillResourceOwners[index])->resource;
     s32 references = resource[2];
 
     effect[12] = (s32)resource;
@@ -178,7 +178,7 @@ u32 func_00159BB0(void) {
 }
 
 s32 effGetResourceFirstWord(s32 index) {
-    return *(s32 *)((EffResourceRef *)D_00451EE0[index])->resource;
+    return *(s32 *)((EffResourceRef *)effBillResourceOwners[index])->resource;
 }
 
 void effCopyVector(dst, src)
@@ -189,21 +189,21 @@ void *src;
 }
 
 void billSetLengthExtent(BillObj *effect, float scale) {
-    effect->unk20 = scale;
+    effect->lengthScale = scale;
 }
 
 void billSetChildScaleComponents(BillObj *effect, float x, float y) {
-    effect->unk10 = x;
-    effect->unk14 = y;
+    effect->childScaleX = x;
+    effect->childScaleY = y;
 }
 
 void billSetChildParameter(BillObj *effect, u32 value) {
-    effect->unk24 = value;
+    effect->childParam = value;
 }
 
 void effCopyPosition(BillObj *effect, const void *position) {
-    if (effect->unk2C == 0) {
-        memcpy((void *)((s32)effect->unk30 + 0xc), position, 16);
+    if (effect->kind == 0) {
+        memcpy((void *)((s32)effect->entryList + 0xc), position, 16);
     }
 }
 
@@ -212,7 +212,7 @@ void billSetBillboardMode(BillObj *effect, s32 mode) {
     s32 remaining;
     s32 entry;
     mode = (s16)mode;
-    switch (effect->unk2C) {
+    switch (effect->kind) {
     case 0:
     case 3:
         effect->unk2E = mode;
@@ -255,12 +255,12 @@ typedef struct EffSlotList {
 } EffSlotList;
 
 void billSetAllChildVariants(BillObj *effect, s16 value) {
-    switch (effect->unk2C) {
+    switch (effect->kind) {
     case 0:
-        ((EffSlot *)effect->unk30)->value = value;
+        ((EffSlot *)effect->entryList)->value = value;
         break;
     case 1: {
-        EffSlotList *list = effect->unk30;
+        EffSlotList *list = effect->entryList;
         s32 count = list->count;
         EffSlot **slots = list->slots;
         EffSlot **slot;
@@ -278,22 +278,22 @@ void billSetAllChildVariants(BillObj *effect, s16 value) {
 }
 
 s32 billGetChildValue(BillObj *effect) {
-    if (effect->unk2C == 0) {
-        return *(s32 *)effect->unk30;
+    if (effect->kind == 0) {
+        return *(s32 *)effect->entryList;
     }
     return 0;
 }
 
 u16 billGetKind(BillObj *effect) {
-    return effect->unk2C;
+    return effect->kind;
 }
 
 void billSetVariantValue(BillObj *effect, s32 value) {
     s32 v = value & 0xffff;
 
-    switch (effect->unk2C) {
+    switch (effect->kind) {
     case 0:
-        ((EffSlot *)effect->unk30)->value = v;
+        ((EffSlot *)effect->entryList)->value = v;
         break;
     case 1:
         effect->unk3C = v;
@@ -302,9 +302,9 @@ void billSetVariantValue(BillObj *effect, s32 value) {
 }
 
 u16 billGetVariantValue(BillObj *effect) {
-    switch (effect->unk2C) {
+    switch (effect->kind) {
     case 0:
-        return ((EffSlot *)effect->unk30)->variant;
+        return ((EffSlot *)effect->entryList)->variant;
     case 1:
         return effect->unk3C;
     default:
@@ -314,14 +314,14 @@ u16 billGetVariantValue(BillObj *effect) {
 
 /* Replace the selected list entry only when its index changes. */
 void billSetKind1Entry(BillObj *effect, u32 value) {
-    if (effect->unk2C == 1 && effect->unk58 != value) {
+    if (effect->kind == 1 && effect->unk58 != value) {
         func_001594C8(effect, value);
     }
 }
 
 /* Read the selected entry for list billboards; other kinds have none. */
 s32 billGetKindOneEntry(BillObj *effect) {
-    if (effect->unk2C == 1) {
+    if (effect->kind == 1) {
         return effect->unk58;
     }
     return 0;
@@ -339,15 +339,15 @@ typedef struct BillValueLink {
 } BillValueLink;
 
 s32 billGetLinkedChildValue(s32 billboard) {
-    if (((BillObj *)billboard)->unk2C == 1) {
-        return ((BillValueLink *)((BillObj *)billboard)->unk30)->target->value;
+    if (((BillObj *)billboard)->kind == 1) {
+        return ((BillValueLink *)((BillObj *)billboard)->entryList)->target->value;
     }
     return 0;
 }
 
 /* Start every entry's animation at the requested frame, with mode zero. */
 void billSetEntryFrameMode0(BillObj *effect, u32 time) {
-    if (effect->unk2C == 1) {
+    if (effect->kind == 1) {
         s32 count = effect->entryCount;
 
         if (count > 0) {
@@ -368,7 +368,7 @@ void billSetEntryFrameMode0(BillObj *effect, u32 time) {
 
 /* Start every entry's animation at the requested frame, with mode one. */
 void billSetEntryFrameMode1(BillObj *effect, u32 time) {
-    if (effect->unk2C == 1) {
+    if (effect->kind == 1) {
         s32 count = effect->entryCount;
 
         if (count > 0) {
@@ -389,14 +389,14 @@ void billSetEntryFrameMode1(BillObj *effect, u32 time) {
 
 /* Read the animation modulus of the first entry, if this is a list billboard. */
 s32 billGetFirstEntryFramePeriod(BillObj *effect) {
-    if (effect->unk2C == 1) {
+    if (effect->kind == 1) {
         return ((EffBillEntry *)effect->unk60)->data->period;
     }
     return 0;
 }
 
 u16 billGetKindOneParameter(BillObj *effect) {
-    if (effect->unk2C == 1) {
+    if (effect->kind == 1) {
         return effect->unk50;
     }
     return 0;
@@ -432,14 +432,14 @@ void billMarkKindOneFlag(s32 billboard) {
 
 void billSetChildHalfExtents(s32 billboard, float width, float height) {
     if (((BillKindOneView *)billboard)->kind == 0) {
-        s32 tmp = (s32)((BillObj *)billboard)->unk30;
+        s32 tmp = (s32)((BillObj *)billboard)->entryList;
         ((BillChildPayload *)tmp)->halfWidth = width * 0.5f;
         ((BillChildPayload *)tmp)->halfHeight = height * 0.5f;
     }
 }
 
-extern u8 D_003846F0[];
-extern u8 D_0037F610[];
+extern u8 sdfViewMatrix[];
+extern u8 sdfProjectionMatrix[];
 extern u8 D_0037F650[];
 extern u8 D_0037F660[];
 extern u8 D_003AA9B0[];
@@ -447,13 +447,13 @@ extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 extern f32 sdfAtan2(f32, f32);
 
 /* vu0 routine: computes the projected angle between two vectors */
-f32 func_00159FF8(const void *position, const void *offset) {
+f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     f32 delta[4];
     f32 projectedPosition[4];
     f32 projectedOffset[4];
 
-    VU0_LOAD_MATRIX(D_003846F0);
-    sdfPostmultiplyVuMatrixFromMemory(D_0037F610);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     VU0_LOAD_VF(vf10, position);
     VU0_MOVE_VF(vf12, vf10);
     VU0_TRANSFORM_POINT(vf10, vf10);
@@ -544,7 +544,26 @@ void effVuCopyMatrix(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A3F0);
+void effReadBillboardModeValues(EffInstance *instance, s32 *values) {
+    BillObj *billboard = instance->billboard;
+
+    if (billboard->kind == 1) {
+        u32 modeFlags = *(u32 *)((u8 *)billboard + 0x54);
+
+        if (modeFlags & 0x40) {
+            values[0] = 2;
+            values[2] = func_00158F88((s32)billboard, (s32)billboard->unk60);
+            values[1] = func_00158F88((s32)billboard, (s32)billboard->unk60 + 0x14);
+        } else if (modeFlags & 0x80) {
+            values[0] = 3;
+            values[2] = func_00158F88((s32)billboard, (s32)billboard->unk60);
+            values[1] = func_00158F88((s32)billboard, (s32)billboard->unk60 + 0x14);
+        } else {
+            values[0] = 0;
+            values[1] = func_00158F88((s32)billboard, (s32)billboard->unk60);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A4B0);
 
@@ -575,7 +594,7 @@ void func_0015B208(s32 sink, s32 source) {
 }
 
 void func_0015B270(void) {
-    func_00341348(D_00451F20);
+    effMiscSeedRandomFromClock(effEmitterDelayRandomState);
 }
 
 void func_0015B290(void) {
@@ -952,7 +971,7 @@ void effEmitterDiscSpawn(EffEmitterB *effect, u32 index) {
     packet->f34 = 0;
     packet->f38 = 0;
     packet->f3C = effect->f15C * (effMiscRandUnitFloat(D_003AA868) * effect->jitterA + (1.0f - effect->jitterA));
-    packet->age = -(effMiscRand(D_00451F20) % (effect->spread + 1));
+    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
@@ -1230,9 +1249,9 @@ struct EffEmitterD {
     f32 f164;
 };
 
-extern u8 D_0037F680[];
-extern u8 D_0037F690[];
-extern u8 D_0037F6A0[];
+extern u8 sdfViewEyeVector[];
+extern u8 sdfViewTargetVector[];
+extern u8 sdfViewUpVector[];
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfInvertRigidVuTransform(void);
 
@@ -1244,7 +1263,7 @@ void effEmitterLookAtRingSpawn(EffEmitterD *effect, u32 index) {
     f32 jitter;
 
     packet += index;
-    sdfVuBuildLookAtBasis(D_0037F680, D_0037F690, D_0037F6A0);
+    sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
     sdfInvertRigidVuTransform();
     if (effect->mode == 0) {
         PCP_COPY_VECTOR(packet, effect->head.origin);
@@ -1299,7 +1318,7 @@ void effEmitterLookAtRingUpdate(EffEmitterD *effect) {
     s32 i;
 
     parUpdateSharedScaleAndDelta(&effect->head.sub);
-    sdfVuBuildLookAtBasis(D_0037F680, D_0037F690, D_0037F6A0);
+    sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
     sdfInvertRigidVuTransform();
     frames = effect->head.frameCount;
     spin = effect->f160 * (3.14159265f / 180.0f);
@@ -1411,7 +1430,7 @@ void effEmitterBurstSpawn(EffEmitterE *effect, u32 index) {
 
     packet += index;
     packet->color = 0;
-    packet->age = -(effMiscRand(D_00451F20) % (effect->spread + 1));
+    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     speed = effect->speed;
     jitter = effect->jitterA;
     tmp[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
@@ -1638,7 +1657,7 @@ void effEmitterSphereSpawn(EffEmitterF *effect, u32 index) {
     packet->f34 = 0;
     packet->f38 = 0;
     packet->f3C = effect->f15C * (effMiscRandUnitFloat(D_003AA868) * effect->f170 + (1.0f - effect->f170));
-    packet->age = ~(effMiscRand(D_00451F20) % (effect->spread + 1));
+    packet->age = ~(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
@@ -1995,7 +2014,7 @@ void effEmitterConeSpawn(EffEmitterH *effect, s32 index) {
         packet->vel[2] = sinv * cone * speed;
         packet->f38 = gravity;
     }
-    packet->age = -(effMiscRand(D_00451F20) % (effect->spread + 1));
+    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
@@ -2153,9 +2172,9 @@ void effInitParticleRecord(effect)
 
     color = effect->color | (effect->alpha << 24);
     particle->x = effect->x;
-    particle->unk20 = -1;
+    particle->frame = -1;
     particle->y = effect->y;
-    particle->unk24 = color;
+    particle->color = color;
     particle->z = effect->z;
     particle->speed = 1.0f;
     particle->angle = 0;
@@ -2174,17 +2193,17 @@ void effUpdateParticleRecord(EffParticle *effect) {
     EffParticleRecord *record = (EffParticleRecord *)effect->buffer->records;
     u32 color;
 
-    if (record->unk20 == 0) {
+    if (record->frame == 0) {
         effInitParticleRecord(effect);
     }
-    record->unk20 = record->unk20 + 1;
+    record->frame = record->frame + 1;
     record->x = effect->x;
     record->y = effect->y;
     color = effect->color | (effect->alpha << 24);
-    effect->unk24 = record->unk20 + 1;
-    record->unk24 = color;
+    effect->unk24 = record->frame + 1;
+    record->color = color;
     record->z = effect->z;
-    record->unk24 = effParModulateColors(color, effect->unkF0);
+    record->color = effParModulateColors(color, effect->unkF0);
 }
 
 void effResetOffsetGravityPacketAges(EffTemplatePacketList *effect) {
@@ -2408,7 +2427,7 @@ void effEmitterDiscAuxSpawn(EffEmitterK *effect, u32 index) {
     packet->f34 = 0;
     packet->f38 = 0;
     packet->f3C = effect->f15C * (effMiscRandUnitFloat(D_003AA868) * effect->f170 + (1.0f - effect->f170));
-    packet->age = -(effMiscRand(D_00451F20) % (effect->spread + 1));
+    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     PCP_COPY_VECTOR(packet, effect->head.origin);
     jitter = effect->head.speedJitter;

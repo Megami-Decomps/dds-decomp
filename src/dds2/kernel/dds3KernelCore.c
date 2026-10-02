@@ -4,11 +4,11 @@
 
 #define KWLN_TASK_STATE_MASK 0xF
 
-extern KwlnTask* D_00435BE8;
+extern KwlnTask* kwlnActiveTaskHead;
 
 extern void func_001005C8(KwlnTask* task);
 
-extern void func_00100740(KwlnTask* task);
+extern void kwlnTaskInsertIntoOrderedStateQueue(KwlnTask* task);
 
 extern void kwlnTaskActivate(KwlnTask* task);
 
@@ -24,13 +24,13 @@ extern void kwlnTaskAdvanceDestroyDelays(void);
 
 extern KwlnTask* kwlnDelayedDestroyTaskHead;
 
-extern void* D_00435BD8;
+extern void* kwlnDelayedStartTaskCount;
 
-extern void* D_00435BE4;
+extern void* kwlnDelayedDestroyTaskCount;
 
-extern void* D_00435BF0;
+extern void* kwlnActiveTaskCount;
 
-extern void func_0035B6E0();
+extern void func_0035B6E0(const char *fmt, ...);
 
 extern u8 D_00435BF8[];
 
@@ -46,9 +46,9 @@ extern void func_00100C28(void);
 
 extern s32 kwlnTaskIsRegistered(KwlnTask* target);
 
-extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 arg1);
+extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 delayTicks);
 
-extern void func_001019F0(KwlnTask* task);
+extern void kwlnUnlinkListNode(KwlnTask* task);
 
 extern void sdfReleaseChipBlock(void* ptr);
 
@@ -58,7 +58,7 @@ void kwlnTaskActivate(KwlnTask* task)
 {
     func_001005C8(task);
     task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 2;
-    func_00100740(task);
+    kwlnTaskInsertIntoOrderedStateQueue(task);
     task->unk24 = 0;
     task->timer = 0;
 }
@@ -101,7 +101,7 @@ void kwlnTaskFinalizeDestroy(KwlnTask* task)
         task->destroy(task);
     }
     task->flags &= ~KWLN_TASK_STATE_MASK;
-    func_001019F0(task);
+    kwlnUnlinkListNode(task);
     sdfReleaseChipBlock(task);
 }
 
@@ -118,7 +118,7 @@ void kwlnTaskRequestDestroy(KwlnTask* task)
     }
     func_001005C8(task);
     task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 3;
-    func_00100740(task);
+    kwlnTaskInsertIntoOrderedStateQueue(task);
     if (task->unk2E == 0) {
         kwlnTaskFinalizeDestroy(task);
     }
@@ -142,7 +142,21 @@ void kwlnTaskAdvanceDestroyDelays(void)
     }
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100EB0);
+void func_00100EB0(s32 setFlags, KwlnTask* task, u32 flags)
+{
+    KwlnTask* child;
+
+    if (setFlags != 0) {
+        task->flags |= flags & 0x0FFFFFF0;
+    } else {
+        task->flags &= ~(flags & 0x0FFFFFF0);
+    }
+    child = task->childList;
+    while (child != 0) {
+        func_00100EB0(setFlags, child, flags);
+        child = child->next;
+    }
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100F48);
 
@@ -150,11 +164,11 @@ void* kwlnTaskGetStateList(u32 state)
 {
     switch (state & KWLN_TASK_STATE_MASK) {
     case 1:
-        return D_00435BD8;
+        return kwlnDelayedStartTaskCount;
     case 2:
-        return D_00435BF0;
+        return kwlnActiveTaskCount;
     case 3:
-        return D_00435BE4;
+        return kwlnDelayedDestroyTaskCount;
     default:
         return 0;
     }
@@ -162,7 +176,7 @@ void* kwlnTaskGetStateList(u32 state)
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101100);
 
-void func_00101198(KwlnTask* task, void* arg1)
+void func_00101198(KwlnTask* task, void* unused)
 {
     if (task == 0) {
         return;
@@ -172,17 +186,17 @@ void func_00101198(KwlnTask* task, void* arg1)
     } while (task != 0);
 }
 
-void func_001011D0(void)
+void kwlnPrintTaskQueueDiagnostics(void)
 {
     u8* tmp;
 
     func_00101198(kwlnDelayedStartTaskHead, D_00411008);
     tmp = D_00411038;
-    func_0035B6E0(tmp, D_00435BD8);
-    func_00101198(D_00435BE8, D_00411048);
-    func_0035B6E0(tmp, D_00435BF0);
+    func_0035B6E0(tmp, kwlnDelayedStartTaskCount);
+    func_00101198(kwlnActiveTaskHead, D_00411048);
+    func_0035B6E0(tmp, kwlnActiveTaskCount);
     func_00101198(kwlnDelayedDestroyTaskHead, D_00411078);
-    func_0035B6E0(tmp, D_00435BE4);
+    func_0035B6E0(tmp, kwlnDelayedDestroyTaskCount);
     func_0035B6E0(D_00435BF8);
 }
 
@@ -206,7 +220,7 @@ void func_00101328(void)
             func_00101250(task, 0);
         }
     }
-    for (task = D_00435BE8; task != NULL; task = task->listNext) {
+    for (task = kwlnActiveTaskHead; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
             D_004393C8[0] = 0;
             func_00101250(task, 0);
@@ -230,7 +244,7 @@ s32 kwlnTaskTickScheduler(void)
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskCreate);
 
-s32 kwlnTaskDestroyWithHierarchyByName(const char* name, s32 arg1)
+s32 kwlnTaskDestroyWithHierarchyByName(const char* name, s32 delayTicks)
 {
     KwlnTask* task;
 
@@ -238,7 +252,7 @@ s32 kwlnTaskDestroyWithHierarchyByName(const char* name, s32 arg1)
     if (task == 0) {
         return 0;
     }
-    return kwlnTaskDestroyWithHierarchy(task, arg1);
+    return kwlnTaskDestroyWithHierarchy(task, delayTicks);
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskDestroyWithHierarchy);
@@ -250,7 +264,7 @@ void kwlnTaskMarkDestroyPending(KwlnTask* task)
     }
     func_001005C8(task);
     task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 3;
-    func_00100740(task);
+    kwlnTaskInsertIntoOrderedStateQueue(task);
 }
 
 void kwlnTaskSetDestroyDelay(KwlnTask* task, s32 delayTicks)
@@ -279,7 +293,34 @@ s32 kwlnTaskGetRegisteredState(KwlnTask* task)
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101740);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101820);
+KwlnTask* func_00101820(u32 value)
+{
+    s32 state;
+    KwlnTask* node;
+
+    node = 0;
+    state = 0;
+    for (; state < 3; state++) {
+        switch (state) {
+        case 0:
+            node = kwlnDelayedStartTaskHead;
+            break;
+        case 1:
+            node = kwlnActiveTaskHead;
+            break;
+        case 2:
+            node = kwlnDelayedDestroyTaskHead;
+            break;
+        }
+        while (node != 0) {
+            if (node->unk20 == value) {
+                return node;
+            }
+            node = node->listNext;
+        }
+    }
+    return 0;
+}
 
 /* Persona 4 func_00452490 @ 00452490 (src/Kernel/sdkTask.c), recompiled unchanged */
 s32 kwlnTaskIsRegistered(KwlnTask* target)
@@ -296,7 +337,7 @@ s32 kwlnTaskIsRegistered(KwlnTask* target)
             node = kwlnDelayedStartTaskHead;
             break;
         case 1:
-            node = D_00435BE8;
+            node = kwlnActiveTaskHead;
             break;
         case 2:
             node = kwlnDelayedDestroyTaskHead;

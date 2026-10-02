@@ -23,7 +23,7 @@ typedef struct BtlTask {
     s32 result;              /* +0x20 */
     s32 arg;                 /* +0x24 */
     u8 unk_28[0x38];
-    s32 unk_60;
+    s32 targetList; /* Selected unit/ID index list consumed by battle commands. */
     u8 unk_64[0x108];
     struct BtlTask *next;   /* +0x16C */
 } BtlTask;

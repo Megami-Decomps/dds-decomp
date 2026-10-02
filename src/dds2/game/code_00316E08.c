@@ -2,17 +2,17 @@
 
 extern s32 D_00438930;
 
-extern u32 D_0043891C;
+extern u8 *D_0043891C;
 
-extern s32 func_00317FE0(u32);
+extern s32 func_00317FE0(u8 *);
 
 extern u32 D_00438918;
 
 extern s32 D_00435BB0;
 
-extern s16 D_00435BAC;
+extern s16 mnuMovieTaskState;
 
-extern u8 D_0040ABF0[];
+extern s32 (*D_0040ABF0[])(u8 *work);
 
 extern void mdlLoadViewerPackage(s32 source, s32 destination, s32 flags, s32 packageId, s32 variant);
 
@@ -22,11 +22,11 @@ extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
 
 extern void mnuResumeEffectQueueFrameAdvance(void);
 
-extern void func_00317AD0(u32 handle);
+extern void func_00317AD0(u8 *handle);
 
 extern void *func_003292A8(s32 size);
 
-extern u32 sdfMemoryGetBlockAddress(void *block);
+extern void *sdfMemoryGetBlockAddress(void *block);
 
 u32 mdlAdvanceViewerPackageTask(void);
 
@@ -89,10 +89,10 @@ void func_00316E70(void) {
 }
 
 void mdlCreateViewerPackageTask(void) {
-    u32 handle;
+    u8 *handle;
 
     D_00435BB0 = 0;
-    D_00435BAC = 1;
+    mnuMovieTaskState = 1;
     handle = mdlAllocateViewerPackageWork();
     D_0043891C = handle;
     func_00317AD0(handle);
@@ -130,7 +130,7 @@ u32 mdlAdvanceViewerPackageTask(void) {
 
     status = func_00317FE0(D_0043891C);
     if (status == -1) {
-        func_00128658();
+        fldDispatchDeferredFieldCommand();
         result = 0xffffffff;
     }
     else {
@@ -140,9 +140,21 @@ u32 mdlAdvanceViewerPackageTask(void) {
     return result;
 }
 
+extern char D_0042D4E0[];
+extern void evtPrintDeveloperConsoleMessage(char *text, s32 value);
+extern void dds3AdminSubmitModeRequest(s32 a0, s32 a1, s32 a2, s32 a3);
+extern void scrDestroyAllNamedProcesses(void);
+
+s32 evtCallShooting(void) {
+    evtPrintDeveloperConsoleMessage(D_0042D4E0, 0);
+    dds3AdminSubmitModeRequest(0x1D, 0, 0, 0);
+    scrDestroyAllNamedProcesses();
+    return 1;
+}
+
 INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4D0);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00317010);
+INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4E0);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317058);
 
@@ -163,8 +175,14 @@ INCLUDE_ASM(const s32, "game/code_00316E08", func_00317AD0);
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317E48);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317FE0);
+u32 func_00318068(u8 *work) {
+    s32 (*update)(u8 *work) = *(s32 (**)(u8 *work))(work + 0x60);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00318068);
+    if (update(work) != 0) {
+        *(s32 (**)(u8 *work))(work + 0x60) = D_0040ABF0[*(s32 *)(work + 0x58)];
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_003180B8);
 
@@ -206,7 +224,7 @@ INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438934);
 
 INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438938);
 
-INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438940);
+INCLUDE_SDATA(const s32, "game/code_00316E08", dds3SoundSlotPool);
 
 INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438944);
 

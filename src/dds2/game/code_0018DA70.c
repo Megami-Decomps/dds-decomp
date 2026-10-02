@@ -25,8 +25,8 @@ extern void func_0016F6D0(u32 handle);
 extern void btlSetActorEffectParameterOrMuzzlePosition(u32 unit, s32 arg1);
 
 void effFreePairedResources(PairedEffectResources *pair) {
-    func_0016EFA8(pair->resource[1]);
-    func_0016EFA8(pair->resource[0]);
+    effThunderGroupRelease(pair->resource[1]);
+    effThunderGroupRelease(pair->resource[0]);
     sdfReleaseChipBlock(pair);
 }
 
@@ -138,9 +138,9 @@ typedef struct {
 } BlurFramePacketRecord;
 
 extern BlurFilterOps D_003803E8;
-extern BlurFramePacketRecord D_00381ED0[];
+extern BlurFramePacketRecord kwlnFrameDrawPacketRecords[];
 extern void *sdfAllocPacketAligned(s32);
-extern u32 func_00100400(void);
+extern u32 kwlnGetDrawBufferIndex(void);
 extern void func_0032DB78(const void *, void *, s32);
 extern void sdfAppendDmaTagToList(void *, void *);
 
@@ -148,7 +148,7 @@ extern void sdfAppendDmaTagToList(void *, void *);
 void effDrawBlurListWithFramePacket(void *list) {
     void *packet = sdfAllocPacketAligned(0x40);
 
-    func_0032DB78(D_00381ED0[func_00100400()].dmaPacket, packet, 1);
+    func_0032DB78(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, packet, 1);
     sdfAppendDmaTagToList(list, packet);
     D_003803E8.draw(&D_003803E8, list);
 }
@@ -170,7 +170,33 @@ void effDrawBlurSource(BlurSource *source, s32 resource, u8 fixedPointCoordinate
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0018DA70", effDrawBlurPixelRectangle);
+typedef struct EffBlurPixelRect {
+    s32 extent;        /* 0x00 */
+    u32 color;         /* 0x04: first word of the BlurSource */
+    s32 blendControl;  /* 0x08 */
+    f32 rotation;      /* 0x0C */
+    f32 scale;         /* 0x10 */
+    s32 centerX;       /* 0x14 */
+    s32 centerY;       /* 0x18 */
+    s32 left;          /* 0x1C */
+    s32 top;           /* 0x20 */
+    s32 right;         /* 0x24 */
+    s32 bottom;        /* 0x28 */
+} EffBlurPixelRect;
+
+extern void effDrawBlurRectangle(BlurSource *source);
+
+void effDrawBlurPixelRectangle(EffBlurPixelRect *work) {
+    s32 x = work->centerX + 0x100;
+    s32 y = work->centerY + 0xE0;
+    s32 extent = work->extent;
+
+    work->left = x - extent;
+    work->top = y - extent;
+    work->right = x + extent;
+    work->bottom = y + extent;
+    effDrawBlurRectangle((BlurSource *)&work->color);
+}
 
 typedef struct EffBlurTemplateBody {
     s32 extent;        /* 0x00 */

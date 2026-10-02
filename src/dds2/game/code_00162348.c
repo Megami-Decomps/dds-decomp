@@ -61,9 +61,9 @@ extern f32 D_00451F30[];
 
 extern f32 D_00451F40[];
 
-extern u8 D_0037F680[];
+extern u8 sdfViewEyeVector[];
 
-extern u8 D_0037F690[];
+extern u8 sdfViewTargetVector[];
 
 extern f32 D_003AAEC0[];
 
@@ -73,7 +73,7 @@ extern f32 D_003AAEF0[];
 
 extern f32 D_003AAF00[];
 
-extern ParListNode *D_00436400;
+extern ParListNode *parRecordListHead;
 
 extern ParCellNode *D_00436404;
 
@@ -108,6 +108,8 @@ typedef struct ParSystem {
     s32 unk24;           /* 0x24 */
     s32 unk28;           /* 0x28 */
 } ParSystem;
+
+extern void func_00163518(ParSystem *, s32, const u128 *);
 
 extern s32 parObjGetMode();
 
@@ -230,7 +232,7 @@ s32 parObjGetMode(ParObj *object) {
     }
 }
 
-extern BillDispatch D_003AAB80[];
+extern BillDispatch parKindConstructorEntries[];
 
 extern s32 billCloneObjectRetainingSharedData(s32 id);
 
@@ -242,20 +244,20 @@ extern void billMarkKindOneFlag(s32 id);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001623D0);
 
-ParObj *parInstantiateKind(ParObj *src) {
-    ParObj *obj;
-    s32 bill;
+ParObj *parInstantiateKind(ParObj *source) {
+    ParObj *particle;
+    s32 billboard;
 
-    obj = D_003AAB80[src->dispatchIndex].func();
-    obj->dispatchIndex = src->dispatchIndex;
-    if (src->unk28 == -1) {
-        bill = billCloneObjectRetainingSharedData(src->billId);
-        billSetChildScaleComponents(bill, obj->scaleX, obj->scaleY);
-        billSetBillboardMode(bill, obj->billboardMode);
-        billMarkKindOneFlag(bill);
-        obj->billId = bill;
+    particle = parKindConstructorEntries[source->dispatchIndex].func();
+    particle->dispatchIndex = source->dispatchIndex;
+    if (source->unk28 == -1) {
+        billboard = billCloneObjectRetainingSharedData(source->billId);
+        billSetChildScaleComponents(billboard, particle->scaleX, particle->scaleY);
+        billSetBillboardMode(billboard, particle->billboardMode);
+        billMarkKindOneFlag(billboard);
+        particle->billId = billboard;
     }
-    return obj;
+    return particle;
 }
 
 void parObjDispatch(ParObj *object) {
@@ -264,7 +266,7 @@ void parObjDispatch(ParObj *object) {
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00162590);
 
-void func_001628E0(void) {
+void parRestartInstanceCallback(void) {
     parRestartKind();
 }
 
@@ -273,15 +275,13 @@ void effParScaleComponent(float scale, ParObj *work) {
     work->scale8C = work->scale8C * scale;
 }
 
-s64 func_00162938(void) {
-    return parGetRestartFlag();
-}
+INCLUDE_ASM(const s32, "game/code_00162348", func_00162938);
 
 void parCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00162968(void) {
+void parRebuildInstanceTransforms(void) {
     parComposeEffectTransformMatrices();
 }
 
@@ -289,13 +289,11 @@ void func_00162980(ParObj *work, u32 value) {
     work->valueF0 = value;
 }
 
-void func_00162988(ParObj *work, u8 mode) {
+void parChangeInstanceMode(ParObj *work, u8 mode) {
     parObjSetMode(work, mode);
 }
 
-s64 func_001629A0(ParObj *work) {
-    return parObjGetMode(work);
-}
+INCLUDE_ASM(const s32, "game/code_00162348", func_001629A0);
 
 /* Kinds 2-4 keep the scale at +8 of their own record; copy it into the
  * shared vector and store the (vf10 - vf11) difference. */
@@ -321,8 +319,8 @@ void parUpdateSharedScaleAndDelta(ParScaleObj *obj) {
     default:
         return;
     }
-    VU0_LOAD_VF($vf10, D_0037F680);
-    VU0_LOAD_VF($vf11, D_0037F690);
+    VU0_LOAD_VF($vf10, sdfViewEyeVector);
+    VU0_LOAD_VF($vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF($vf10, D_00451F30);
 }
@@ -383,7 +381,7 @@ void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color) {
     VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[1]);
 ;
-    func_00163518(particle, index, axis);
+    func_00163518((ParSystem *)particle, index, axis);
     parFadeAlphaCell(particle, index);
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
@@ -449,12 +447,12 @@ u32 func_00162E10(void) {
 
 extern u8 D_00451F50[];
 
-extern void func_00341348();
+extern void effMiscSeedRandomFromClock();
 
 void parSysReset(void) {
-    D_00436400 = 0;
+    parRecordListHead = 0;
     parControlInit();
-    func_00341348(D_00451F50);
+    effMiscSeedRandomFromClock(D_00451F50);
 }
 
 void func_00162E40(void) {
@@ -469,8 +467,8 @@ void parReleaseAssetRecord(ParReleaseRecord *record) {
 }
 
 void parPrependRecordListNode(ParListNode *node) {
-    node->next = D_00436400;
-    D_00436400 = node;
+    node->next = parRecordListHead;
+    parRecordListHead = node;
 }
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163010);
@@ -481,9 +479,9 @@ void func_00163238(ParReleaseRecord *record) {
 
 /* Draw parameter block filled per strip by func_00164CB0. */
 typedef struct ParDrawState {
-    s16 width;    /* 0x00 */
-    s16 height;   /* 0x02 */
-    s16 flags;    /* 0x04 */
+    u16 width;    /* 0x00 */
+    u16 height;   /* 0x02 */
+    u16 flags;    /* 0x04 */
     u8 pad06[2];
     s32 unk08;
     void *unk0C;
@@ -493,11 +491,11 @@ typedef struct ParDrawState {
     u8 pad24[8];
 } ParDrawState;
 
-extern ParDrawState D_00451F60;
+extern ParDrawState parDrawControl;
 
 void parControlInit(void) {
-    memset(&D_00451F60, 0, 0x2C);
-    D_00451F60.flags = 0x4000;
+    memset(&parDrawControl, 0, 0x2C);
+    parDrawControl.flags = 0x4000;
 }
 
 ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
@@ -577,7 +575,30 @@ void parPrependCellNode(ParCellNode *node) {
     D_00436404 = node;
 }
 
-INCLUDE_ASM(const s32, "game/code_00162348", func_00163518);
+void func_00163518(ParSystem *system, s32 index, const u128 *vertices) {
+    ParCell *cell = &system->cells[index];
+    u128 *vertex;
+    s32 shiftCount;
+    s32 i;
+
+    if (cell->unk0C == 0) {
+        shiftCount = system->vertexWordCount - 2;
+        vertex = cell->history + shiftCount;
+        for (i = 0; i < shiftCount; i++) {
+            vertex--;
+            PCP_COPY_VECTOR(vertex + 2, vertex);
+        }
+        cell->unk0C = system->groupDivisor;
+        if (cell->vertexCount < shiftCount + 2) {
+            cell->vertexCount += 2;
+        }
+    } else {
+        cell->unk0C--;
+        vertex = cell->history;
+    }
+    PCP_COPY_VECTOR(vertex, vertices);
+    PCP_COPY_VECTOR(vertex + 1, vertices + 1);
+}
 
 void parTranslateCellVertices(ParSystem *system, s32 index, void *delta) {
     ParCell *cell = system->cells + index;
@@ -1085,7 +1106,7 @@ void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParDrawCmd *cmd) {
         sdfAppendPacket(list, func_00167A10(&state));
     }
     if (remaining > 0) {
-        u16 *counts = (u16 *)&D_00451F60;
+        u16 *counts = (u16 *)&parDrawControl;
         counts[0] = remaining / 3;
         counts[1] = remaining;
         sdfAppendPacket(list, func_00167A10(&state));
@@ -1110,7 +1131,7 @@ ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
     return desc;
 }
 
-INCLUDE_SDATA(const s32, "game/code_00162348", D_00436400);
+INCLUDE_SDATA(const s32, "game/code_00162348", parRecordListHead);
 
 INCLUDE_SDATA(const s32, "game/code_00162348", D_00436404);
 

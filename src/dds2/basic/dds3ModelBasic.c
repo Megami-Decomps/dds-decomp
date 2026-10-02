@@ -1,5 +1,10 @@
 #include "common.h"
 
-void dds3ReleaseModelAllocation(s32 arg0) {
-    sdfReleaseChipBlock(*(u32 *)(arg0 + 0x18));
+typedef struct {
+    u8 pad[0x18];
+    void *allocation;
+} ModelObj;
+
+void dds3ReleaseModelAllocation(ModelObj *model) {
+    sdfReleaseChipBlock(model->allocation);
 }

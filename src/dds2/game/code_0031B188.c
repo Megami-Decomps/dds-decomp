@@ -37,7 +37,7 @@ extern void mdlBroadcastMasked();
 extern void mdlStorePrimaryVectorVU(void *model);
 extern void mdlStoreTertiaryVectorVU(void *model);
 
-extern u32 *D_00438940;
+extern u32 *dds3SoundSlotPool;
 
 extern u32 mdlGetBroadcastValue(u32 model);
 
@@ -55,37 +55,76 @@ extern void mdlAddEntryFlaggedEx(u8 *model, s32 entry, s32 flags, f32 x, f32 y);
 extern u32 func_003292A8(s32 bytes);
 extern u32 *sdfMemoryGetBlockAddress(u32 handle);
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B188);
+extern u8 D_0040ABD0[];
+extern u8 D_0040ABC0[];
+extern u8 D_0040ABB0[];
+extern s32 D_00438944;
+extern void dds3SetCameraVector(s32 object, void *vector);
+extern void effObjSetInnerFirstVec(void *node, u128 *vector);
+
+void func_0031B188(void) {
+    u8 *object;
+    void (*update)(void *);
+    u8 *data;
+
+    dds3SetCameraVector(D_00438944, D_0040ABD0);
+    effObjSetInnerFirstVec((void *)D_00438944, (u128 *)D_0040ABC0);
+    object = (u8 *)D_00438944;
+    update = *(void (**)(void *))(*(u8 **)(object + 0x10) + 8);
+    update(object);
+    data = *(u8 **)((u8 *)D_00438944 + 0x18);
+    PCP_COPY_VECTOR(data + 0x50, D_0040ABB0);
+    PCP_COPY_VECTOR(data + 0x70, D_0040ABB0);
+}
 
 void dds3InitSoundSlotPool(void) {
     u32 handle;
     SoundSlotPool *pool;
-    if (D_00438940 != 0) {
+    if (dds3SoundSlotPool != 0) {
         dds3ReleaseSoundSlotPool();
     }
     handle = func_003292A8(0x32c);
-    D_00438940 = sdfMemoryGetBlockAddress(handle);
-    memset(D_00438940, 0, 0x32c);
-    pool = (SoundSlotPool *)D_00438940;
+    dds3SoundSlotPool = sdfMemoryGetBlockAddress(handle);
+    memset(dds3SoundSlotPool, 0, 0x32c);
+    pool = (SoundSlotPool *)dds3SoundSlotPool;
     pool->handle = handle;
     pool->slots = (SoundSlot *)(pool + 1);
     pool->count = 100;
 }
 
 void dds3ReleaseSoundSlotPool(void) {
-    if (D_00438940 != (u32 *)0x0) {
-        func_003297C8(*D_00438940);
-        D_00438940 = (u32 *)0x0;
+    if (dds3SoundSlotPool != (u32 *)0x0) {
+        func_003297C8(*dds3SoundSlotPool);
+        dds3SoundSlotPool = (u32 *)0x0;
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B290);
+SoundSlot *sndFindFreeSoundSlot(void) {
+    SoundSlotPool *pool = (SoundSlotPool *)dds3SoundSlotPool;
+    SoundSlot *slot = pool->slots;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B2E0);
+    for (i = 0; i < pool->count; i++, slot++) {
+        if (slot->sequence == 0) {
+            return slot;
+        }
+    }
+    return 0;
+}
+
+SoundSlot *sndClaimFreeSoundSlot(u32 sequence, u32 frames) {
+    SoundSlot *slot = sndFindFreeSoundSlot();
+
+    if (slot != NULL) {
+        slot->sequence = sequence;
+        slot->remainingFrames = frames;
+    }
+    return slot;
+}
 
 /* Returns occupied sound slots to their default volume and pan when they expire. */
 void dds3UpdateSoundSlots(void) {
-    SoundSlotPool *pool = (SoundSlotPool *)D_00438940;
+    SoundSlotPool *pool = (SoundSlotPool *)dds3SoundSlotPool;
     if (pool != 0) {
         s32 index = 0;
         SoundSlot *slot = pool->slots;
@@ -99,7 +138,7 @@ void dds3UpdateSoundSlots(void) {
                 }
                 index++;
                 slot++;
-            } while (index < (s32)D_00438940[2]);
+            } while (index < (s32)dds3SoundSlotPool[2]);
         }
     }
 }
@@ -179,7 +218,7 @@ void mnuClearNodeBroadcastFlag(u8 *node) {
 u32 mnuLoadNodeModelFromResource(u32 *owner, u32 resource) {
     u32 handle;
     u32 other;
-    u32 data = func_00343ED0(resource, &handle, &other);
+    u32 data = sdfReadNamedResource(resource, &handle, &other);
     *owner = func_002D4138(handle);
     fileQueueNotifyAllJobsComplete(*owner);
     func_003297C8(data);

@@ -17,7 +17,7 @@ typedef struct FntList {
 /* 0x24-byte table entry in the frFontWork font system (one per index & 0xFF). */
 typedef struct FrFontEntry {
     void *buffer;  /* 0x0: released by frFontFreeEntry */
-    void *unk4;  /* 0x4: value record (u16 pair read via D_003D6C84 view) */
+    void *unk4;  /* 0x4: value record (u16 pair read via frFontResourceRecords view) */
     u32 unk8;    /* 0x8 */
     u32 unkC;    /* 0xC */
     u8 *flagBytes; /* 0x10: first byte enables entry, second byte stores value + 1 */
@@ -49,7 +49,7 @@ typedef struct FrFontSysLocal {
 
 extern FntList frFontResourceList;
 extern FrFontSysLocal frFontWork;
-extern u32 D_003565F8[];
+extern u32 frFontSlotLoadedFlags[];
 extern void frFontFreeAllEntries(void);
 extern void *func_00194840(void *arg0);
 extern u32 itfReleaseMemNodeBuffer(s32 arg0);
@@ -91,13 +91,49 @@ s32 frFontHighestSetBitIndex(u32 value) {
     return (count + 0xFF) & 0xFF;
 }
 
-INCLUDE_ASM(const s32, "game/code_00193C08", func_00193CD8);
+typedef union FrFontDmaTag {
+    u128 value;
+    u32 words[4];
+} FrFontDmaTag;
+
+typedef struct FrFontGsWrite {
+    u64 value;
+    u64 reg;
+} FrFontGsWrite;
+
+typedef struct FrFontGsPacket {
+    FrFontDmaTag dma;
+    u64 gifTag;
+    u64 gifRegisters;
+    FrFontGsWrite writes[6];
+} FrFontGsPacket;
+
+void frFontBuildGsSetupPacket(FrFontGsPacket *packet) {
+    packet->dma.value = 0;
+    packet->dma.words[0] = 0x70000007;
+    packet->dma.words[2] = 0;
+    packet->dma.words[3] = 0x50000007;
+    packet->gifTag = 0x1000000000008006ULL;
+    packet->gifRegisters = 0xE;
+    packet->writes[0].value = 0;
+    packet->writes[0].reg = 0x3F;
+    packet->writes[1].value = 0x44;
+    packet->writes[1].reg = 0x42;
+    packet->writes[2].value = 0;
+    packet->writes[2].reg = 0x49;
+    packet->writes[3].value = 0x8080;
+    packet->writes[3].reg = 0x3B;
+    packet->writes[4].value = 0;
+    packet->writes[4].reg = 0x4A;
+    packet->writes[5].value = 0x517ED;
+    packet->writes[5].reg = 0x47;
+}
 
 INCLUDE_ASM(const s32, "game/code_00193C08", func_00193D70);
 
 INCLUDE_ASM(const s32, "game/code_00193C08", func_00193FD0);
 
-extern volatile s32 D_003BD2EC; /* semaphore handle shared with the IOP/interrupt side; declared volatile */
+extern volatile s32 sdfGsImageUploadSemaphore; /* semaphore handle shared with the IOP/interrupt side; declared volatile */
 extern void sceGsSetDefLoadImage(void *, s16, s16, s32, s32, s32, s16, s16);
 extern s32 func_002D03F8(s32);
 extern s32 sdfResourceRetainAddress(s32);
@@ -112,15 +148,15 @@ void sdfUploadGsImageUnderSemaphore(s16 buffer, s32 image) {
     u8 loadImage[0x60];
 
     sceGsSetDefLoadImage(loadImage, buffer, 1, 0, 0, 0, 8, 2);
-    WaitSema(D_003BD2EC);
+    WaitSema(sdfGsImageUploadSemaphore);
     FlushCache(0);
     sceGsExecLoadImage(loadImage, image);
     sceGsSyncPath(0, 0);
-    SignalSema(D_003BD2EC);
+    SignalSema(sdfGsImageUploadSemaphore);
 }
 
 /* Upload the font's bitmap: clear a (width * height / 2)-byte block and load it to GS memory under the GS semaphore. */
-void func_001940B8(void) {
+void frFontUploadClearedTexture(void) {
     u8 loadImage[0x60];
     s32 size;
     s32 block;
@@ -133,15 +169,15 @@ void func_001940B8(void) {
     memset(image, 0, size);
     sceGsSetDefLoadImage(loadImage, (s16)frFontWork.gsBuffer, (s16)frFontWork.gsFormat, 0x14, 0, 0,
                          (s16)frFontWork.width, (s16)frFontWork.height);
-    WaitSema(D_003BD2EC);
+    WaitSema(sdfGsImageUploadSemaphore);
     FlushCache(0);
     sceGsExecLoadImage(loadImage, (s32)image);
     sceGsSyncPath(0, 0);
-    SignalSema(D_003BD2EC);
+    SignalSema(sdfGsImageUploadSemaphore);
     func_002D0918((void *)block);
 }
 
-extern void *func_002EB028();
+extern void *sdfReadNamedResource();
 extern void func_001944A0(s32, s32, void *);
 
 /* Load font `index` once (index 1 uses the system's first entry buffer, other fonts load `path`) and mark it loaded. */
@@ -149,13 +185,13 @@ void frFontEnsureSlotLoaded(s32 index, s32 path) {
     s32 slot = index & 0xFF;
     FrFontSysLocal *sys = &frFontWork;
 
-    if (D_003565F8[slot] != 1) {
+    if (frFontSlotLoadedFlags[slot] != 1) {
         if (slot == 1) {
             func_001944A0(1, 0, sys->entries[0].buffer);
         } else {
-            func_001944A0(slot, 0, func_002EB028(path, 0, 0));
+            func_001944A0(slot, 0, sdfReadNamedResource(path, 0, 0));
         }
-        D_003565F8[slot] = 1;
+        frFontSlotLoadedFlags[slot] = 1;
     }
 }
 
@@ -181,7 +217,7 @@ void frFontFreeEntry(s32 index) {
     if (slot < 2) {
         return;
     }
-    D_003565F8[slot] = 0;
+    frFontSlotLoadedFlags[slot] = 0;
     entry = &frFontWork.entries[slot];
     if (entry->buffer != NULL) {
         func_002D0918(entry->buffer);

@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "kwln.h"
 
 extern s32 D_003BC410;
 
@@ -8,11 +9,11 @@ extern u8 dspWindowControlState;
 
 extern s8 dspWindowStateGate;
 
-extern s8 D_003BC414;
+extern s8 evtMessageWindowOption;
 
 extern s8 dspCapturedSoundMode;
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 typedef struct EvtActiveFlagTable {
     s32 unk0;
@@ -28,7 +29,7 @@ typedef struct {
 
 extern EvtActiveFlagTable evtActiveEntryFlags;
 
-extern u32 func_002EB028(u32, u32 *, u32 *);
+extern u32 sdfReadNamedResource(u32, u32 *, u32 *);
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -79,12 +80,12 @@ typedef struct PartySlotHeader {
     u16 id;
 } PartySlotHeader;
 
-extern SceneFlagEntry D_0036ABB8[4];
-extern PartyFlagPair D_0036ABF8[];
+extern SceneFlagEntry mnuSceneFlagEventEntries[4];
+extern PartyFlagPair mnuPartyFlagEventEntries[];
 
-void evtCloseDisplayChannelAndEnsureMessageWindow(s32 arg0) {
+void evtCloseDisplayChannelAndEnsureMessageWindow(void *context) {
     dspCloseChannel();
-    evtCreateMessageWindowIfMissing(*(u32 *)(arg0 + 0x60));
+    evtCreateMessageWindowIfMissing(*(u32 *)((u8 *)context + 0x60));
 }
 
 s32 dspStartFlagEvent(s32 context) {
@@ -100,27 +101,27 @@ s32 dspStartFlagEvent(s32 context) {
                 mdlFlagSet(0x907);
                 return 1;
             }
-            for (i = 0; i < sizeof(D_0036ABB8) / sizeof(D_0036ABB8[0]); i++) {
-                if (mdlFlagTest(D_0036ABB8[i].needFlag) != 0 && mdlFlagTest(D_0036ABB8[i].doneFlag) == 0) {
+            for (i = 0; i < sizeof(mnuSceneFlagEventEntries) / sizeof(mnuSceneFlagEventEntries[0]); i++) {
+                if (mdlFlagTest(mnuSceneFlagEventEntries[i].needFlag) != 0 && mdlFlagTest(mnuSceneFlagEventEntries[i].doneFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
-                    func_0024DD90(0, D_003BAA84 + D_0036ABB8[i].areaIndex * 0x19);
-                    func_0024DD90(1, D_003BAA78 + D_0036ABB8[i].nameIndex * 0x13);
-                    func_0024DD90(2, D_003BAA74 + D_0036ABB8[i].dialogIndex * 0x11);
+                    func_0024DD90(0, D_003BAA84 + mnuSceneFlagEventEntries[i].areaIndex * 0x19);
+                    func_0024DD90(1, D_003BAA78 + mnuSceneFlagEventEntries[i].nameIndex * 0x13);
+                    func_0024DD90(2, D_003BAA74 + mnuSceneFlagEventEntries[i].dialogIndex * 0x11);
                     dspStartEntry(3);
-                    mdlFlagSet(D_0036ABB8[i].doneFlag);
+                    mdlFlagSet(mnuSceneFlagEventEntries[i].doneFlag);
                     return 1;
                 }
             }
             for (i = 0; i < 5; i++) {
-                slot = (PartySlotHeader *)(D_003BAA00 + i * 0x1A4 + 0xA60);
-                if ((slot->flags & 1) != 0 && mdlFlagTest(D_0036ABF8[slot->id].needFlag) != 0
-                    && mdlFlagTest(D_0036ABF8[slot->id].doneFlag) == 0) {
+                slot = (PartySlotHeader *)(datGameState + i * 0x1A4 + 0xA60);
+                if ((slot->flags & 1) != 0 && mdlFlagTest(mnuPartyFlagEventEntries[slot->id].needFlag) != 0
+                    && mdlFlagTest(mnuPartyFlagEventEntries[slot->id].doneFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
                     func_0024DD90(0, D_003BAA70 + slot->id * 0x11);
                     dspStartEntry(4);
-                    mdlFlagSet(D_0036ABF8[slot->id].doneFlag);
+                    mdlFlagSet(mnuPartyFlagEventEntries[slot->id].doneFlag);
                     return 1;
                 }
             }
@@ -132,7 +133,7 @@ s32 dspStartFlagEvent(s32 context) {
 s32 mnuPrepareTerminalPanelState(void) {
     s32 *state = (s32 *)kwlnTaskGetUserValue();
 
-    func_00249DD0(state);
+    mnuSelectTerminalResourceBank(state);
     mnuApplyFadeTrackMode(0, state);
     return 1;
 }
@@ -193,7 +194,36 @@ s32 mnuStartTerminalPanelFadeOut(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024D440);
+extern KwlnTask *kwlnTaskGetTaskByName(const char *);
+extern s32 kwlnFadeIsActive(void);
+extern s32 evtIsActiveFlagSet(s32);
+extern char D_003AF710[];
+extern char D_0036AE48[];
+
+s64 func_0024D440(s32 request) {
+    s32 state = kwlnTaskGetUserValue();
+    s32 *popup = (s32 *)(state + 0x54);
+    s64 result = menuRunPanel(state, 0, request);
+    s32 ready;
+
+    if (result != 0) {
+        return result;
+    }
+    if (*popup == 0) {
+        if (*(s32 *)(state + 0x7C) == 0) {
+            ready = kwlnTaskGetTaskByName(D_003AF710) == NULL;
+            if (evtIsActiveFlagSet(0) != 0) {
+                ready = 1;
+            }
+        } else {
+            ready = kwlnFadeIsActive() == 0;
+        }
+        if (ready) {
+            mnuSetPopupEntryFlagged(popup, D_0036AE48);
+        }
+    }
+    return 0;
+}
 
 s64 func_0024D500(s32 request) {
     s32 state = kwlnTaskGetUserValue();
@@ -240,7 +270,7 @@ u32 func_0024D608(void) {
 }
 
 s32 evtCopyWorldObjectEntryValue(s32 id, s32 dst) {
-    s32 src = func_00110ED0(dds3GetWorldSecondaryObject(), 9, id);
+    s32 src = dds3FindIndexedObjectChainNodeByName(dds3GetWorldSecondaryObject(), 9, id);
     if (src != 0) {
         *(s32 *)(*(s32 *)(dst + 0x18) + 0x80) = *(s32 *)(*(s32 *)(src + 0x18) + 0x78);
         return 1;
@@ -259,11 +289,11 @@ void evtResetDrawTransitions(void) {
     kwlnDrawSetOffsetTransition(0, 0, 0);
     kwlnDrawSetupC70B(0);
     kwlnDrawEnableCd0(0);
-    func_0018F3B0();
-    func_0018F438();
-    func_0018F750();
-    func_0018F4F0();
-    func_0018F6E8();
+    effDisableRectangleBlur();
+    effDisableTexturedBlur();
+    effDisableTexturedSquare();
+    effDisableFilterBlur();
+    effDisableColorRectangle();
 }
 
 void evtShutdownStageAndResetDrawTransitions(void) {
@@ -297,13 +327,13 @@ s32 evtDestroyRegisteredTaskIfPresent(s32 task) {
     }
 }
 
-s32 evtReplaceScriptProcessTask(s32 arg0, s32 arg1, s32 *slot) {
+s32 evtReplaceScriptProcessTask(s32 processId, s32 value, s32 *slot) {
     s32 task;
 
     if (slot != 0) {
         evtDestroyRegisteredTaskIfPresent(*slot);
     }
-    task = scrCreateTaskForProcessId(0x7D0, arg0, arg1);
+    task = scrCreateTaskForProcessId(0x7D0, processId, value);
     evtClearActiveFlag(0);
     if (slot != 0) {
         *slot = task;
@@ -315,7 +345,7 @@ void evtCollectActiveGameIndices(ActiveList *list) {
     s32 i;
     list->count = 0;
     for (i = 1; i < 0xC0; i++) {
-        if (*(u8 *)(i + D_003BAA00 + 0x12A0) != 0) {
+        if (*(u8 *)(i + datGameState + 0x12A0) != 0) {
             s32 count = list->count++;
             list->indices[count] = i;
         }
@@ -359,7 +389,7 @@ void evtRandomSwapBytes(u8 *bytes, u32 length, s32 count) {
 void evtLoadResourcePair(u32 resourceId, u32 *record) {
     u32 handle;
 
-    handle = func_002EB028(resourceId, record + 1, 0);
+    handle = sdfReadNamedResource(resourceId, record + 1, 0);
     *record = handle;
 }
 
@@ -370,17 +400,17 @@ void evtReleaseResourcePairHandle(u32 *record) {
 s32 evtCreateMessageWindowIfMissing(s32 unused) {
     if (dspWindowHandle < 0) {
         dspWindowHandle = itfMesCreateWindow();
-        func_0019C968(dspWindowHandle, 2, 0);
+        itfMesSetWindowPageAndRefresh(dspWindowHandle, 2, 0);
         return 1;
     }
     return 0;
 }
 
-s32 func_0024DA20(s32 arg0) {
+s32 func_0024DA20(s32 soundMode) {
     if (dspWindowHandle < 0) {
         return 0;
     }
-    func_0019C968(dspWindowHandle, 0, arg0);
+    itfMesSetWindowPageAndRefresh(dspWindowHandle, 0, soundMode);
     return 1;
 }
 
@@ -395,23 +425,23 @@ s32 dspStartEntry(s32 entry) {
     return 1;
 }
 
-s32 evtCaptureMessageWindowSoundMode(s32 arg0) {
+s32 evtCaptureMessageWindowSoundMode(s32 soundMode) {
     if (dspWindowHandle < 0) {
         return 0;
     }
-    D_003BC410 = arg0;
+    D_003BC410 = soundMode;
     dspCapturedSoundMode = sndGetActiveMode();
     return 1;
 }
 
-void evtSetMessageWindowOptionWhenOpen(s32 arg0) {
+void evtSetMessageWindowOptionWhenOpen(s32 option) {
     if (dspWindowHandle >= 0) {
-        D_003BC414 = arg0;
+        evtMessageWindowOption = option;
     }
 }
 
-s8 func_0024DB00(void) {
-    return D_003BC414;
+s8 evtGetMessageWindowOption(void) {
+    return evtMessageWindowOption;
 }
 
 s32 sndGetActiveMode(void) {
@@ -487,11 +517,11 @@ void func_0024DD78(void) {
     func_0024DC98(1);
 }
 
-void func_0024DD90(s32 arg0, s32 arg1) {
-    func_0019C838(dspWindowHandle, arg0, arg1);
+void func_0024DD90(s32 entryIndex, s32 itemIndex) {
+    itfMesCopyStringToWindowTableSlot(dspWindowHandle, entryIndex, itemIndex);
 }
 
-s8 func_0024DDB8(void) {
+s8 dspGetWindowStateGate(void) {
     return dspWindowStateGate;
 }
 
@@ -563,8 +593,8 @@ s32 evtActivateCurrentFlag(void) {
 
 u32 evtLoadTextureFromResourcePath(u32 path) {
     u32 info[2];
-    u32 allocation = func_002EB028(path, info, &info[1]);
-    u32 texture = func_002D3288(info[0]);
+    u32 allocation = sdfReadNamedResource(path, info, &info[1]);
+    u32 texture = sdfTexAcquireResourceTexture(info[0]);
 
     func_002D0918(allocation);
     return texture;
@@ -578,8 +608,8 @@ void evtDrawListViewportPanel(s32 x, s32 y, s32 width, s32 record) {
     func_0024E010(x + width - 0xA0, y, y + height, 8, record);
 }
 
-void evtDrawPlainPanel(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
-    func_002C0DD8(arg0, arg1, 0, arg2, arg3, 0x30303040, 0x53);
+void evtDrawPlainPanel(u32 x, u32 y, u32 width, u32 height) {
+    func_002C0DD8(x, y, 0, width, height, 0x30303040, 0x53);
 }
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspWindowHandle);
@@ -590,7 +620,7 @@ INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspWindowStateGate);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC410);
 
-INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC414);
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", evtMessageWindowOption);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspCapturedSoundMode);
 

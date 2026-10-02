@@ -1,14 +1,14 @@
 #include "common.h"
 
-extern s32 D_0043789C;
+extern s32 mnuMantraPanelPositionTable;
 
-extern s32 D_00437898;
+extern s32 mnuMantraNodePositionTable;
 
 extern s32 func_0026CD50(u32);
 
 extern s32 evtGetMessageWindowControlState(void);
 
-extern u32 func_00343ED0(u32, u32 *, u32);
+extern u32 sdfReadNamedResource(u32, u32 *, u32);
 
 extern s32 dspWindowHandle;
 
@@ -20,7 +20,7 @@ extern s32 D_00437888;
 
 extern s8 dspCapturedSoundMode;
 
-extern s8 D_0043788C;
+extern s8 evtMessageWindowOption;
 
 extern s8 dspWindowStateGate;
 
@@ -33,7 +33,7 @@ typedef struct EvtResourcePair {
     u32 input;
 } EvtResourcePair;
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 typedef struct {
     u8 pad0[0x1340];
@@ -62,11 +62,11 @@ void evtResetDrawTransitions(void) {
     kwlnDrawSetOffsetTransition(0, 0, 0);
     kwlnDrawSetupC70B(0);
     kwlnDrawEnableCd0(0);
-    func_00196FE8();
-    func_00197070();
-    func_00197388();
-    func_00197128();
-    func_00197320();
+    effDisableRectangleBlur();
+    effDisableTexturedBlur();
+    effDisableTexturedSquare();
+    effDisableFilterBlur();
+    effDisableColorRectangle();
 }
 
 void evtShutdownStageAndResetDrawTransitions(void) {
@@ -92,13 +92,13 @@ s32 evtDestroyRegisteredTaskIfPresent(s32 task) {
 }
 
 extern s32 scrCreateTaskForProcessId();
-s32 evtReplaceScriptProcessTask(s32 first, s32 second, s32 *taskSlot) {
+s32 evtReplaceScriptProcessTask(s32 processId, s32 value, s32 *taskSlot) {
     s32 task;
 
     if (taskSlot != NULL) {
         evtDestroyRegisteredTaskIfPresent(*taskSlot);
     }
-    task = scrCreateTaskForProcessId(0x7D0, first, second);
+    task = scrCreateTaskForProcessId(0x7D0, processId, value);
     evtClearActiveFlag(0);
     if (taskSlot != NULL) {
         *taskSlot = task;
@@ -111,7 +111,7 @@ void evtCollectActiveGameIndices(ActiveList *list) {
     s32 index;
     list->count = 0;
     for (index = 1; index < 0x100; index++) {
-        if (((EvtGameEntries *)D_00435DD0)->active[index] != 0) {
+        if (((EvtGameEntries *)datGameState)->active[index] != 0) {
             s32 count = list->count++;
             list->indices[count] = index;
         }
@@ -164,7 +164,7 @@ void evtRandomSwapBytes(u8 *buffer, u32 length, s32 count) {
 void evtLoadResourcePair(u32 resource, EvtResourcePair *record) {
     u32 value;
 
-    value = func_00343ED0(resource, &record->input, 0);
+    value = sdfReadNamedResource(resource, &record->input, 0);
     record->handle = value;
 }
 
@@ -176,7 +176,7 @@ extern s32 itfMesCreateWindow(void);
 s32 evtCreateMessageWindowIfMissing(void) {
     if (dspWindowHandle < 0) {
         dspWindowHandle = itfMesCreateWindow();
-        func_001A4988(dspWindowHandle, 2, 0);
+        itfMesSetWindowPageAndRefresh(dspWindowHandle, 2, 0);
         return 1;
     }
     return 0;
@@ -186,7 +186,7 @@ s32 func_0026C580(s32 value) {
     if (dspWindowHandle < 0) {
         return 0;
     }
-    func_001A4988(dspWindowHandle, 0, value);
+    itfMesSetWindowPageAndRefresh(dspWindowHandle, 0, value);
     return 1;
 }
 
@@ -215,12 +215,12 @@ s32 evtCaptureMessageWindowSoundMode(s32 value) {
 
 void evtSetMessageWindowOptionWhenOpen(s32 value) {
     if (dspWindowHandle >= 0) {
-        D_0043788C = value;
+        evtMessageWindowOption = value;
     }
 }
 
-s8 func_0026C660(void) {
-    return D_0043788C;
+s8 evtGetMessageWindowOption(void) {
+    return evtMessageWindowOption;
 }
 
 s32 sndGetActiveMode(void) {
@@ -299,10 +299,10 @@ void func_0026C900(void) {
 }
 
 void func_0026C918(s32 first, s32 second) {
-    func_001A4858(dspWindowHandle, first, second);
+    itfMesCopyStringToWindowTableSlot(dspWindowHandle, first, second);
 }
 
-s8 func_0026C940(void) {
+s8 dspGetWindowStateGate(void) {
     return dspWindowStateGate;
 }
 
@@ -376,14 +376,14 @@ s32 evtActivateCurrentFlag(void) {
     return 1;
 }
 
-extern s32 func_0032C138(u32);
+extern s32 sdfTexAcquireResourceTexture(u32);
 s32 evtLoadTextureFromResourcePath(u32 resource) {
     u32 buffer[2];
     u32 handle;
     s32 result;
 
-    handle = func_00343ED0(resource, &buffer[0], (u32)&buffer[1]);
-    result = func_0032C138(buffer[0]);
+    handle = sdfReadNamedResource(resource, &buffer[0], (u32)&buffer[1]);
+    result = sdfTexAcquireResourceTexture(buffer[0]);
     func_003297C8(handle);
     return result;
 }
@@ -423,41 +423,41 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CD50);
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CE90);
 
 void mnuLoadMantraNodePositionTable(u32 resource) {
-    if (D_00437898 != 0) {
+    if (mnuMantraNodePositionTable != 0) {
         mnuReleaseMantraNodePositionTable();
     }
-    D_00437898 = func_0026CD50(resource);
+    mnuMantraNodePositionTable = func_0026CD50(resource);
 }
 
 void mnuReleaseMantraNodePositionTable(void) {
-    func_003297C8(((EvtLoadedRecord *)D_00437898)->handle);
-    D_00437898 = 0;
+    func_003297C8(((EvtLoadedRecord *)mnuMantraNodePositionTable)->handle);
+    mnuMantraNodePositionTable = 0;
 }
 
 s32 mnuGetMantraNodePositionRecord(s32 index) {
-    return ((EvtLoadedRecord *)D_00437898)->base + ((index << 0x10) >> 0xb);
+    return ((EvtLoadedRecord *)mnuMantraNodePositionTable)->base + ((index << 0x10) >> 0xb);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CF88);
 
 u32 func_0026D020(void) {
-    return ((EvtLoadedRecord *)D_00437898)->unk8;
+    return ((EvtLoadedRecord *)mnuMantraNodePositionTable)->unk8;
 }
 
 void mnuLoadMantraPanelPositionTable(u32 resource) {
-    if (D_0043789C != 0) {
+    if (mnuMantraPanelPositionTable != 0) {
         mnuReleaseMantraPanelPositionTable();
     }
-    D_0043789C = func_0026CD50(resource);
+    mnuMantraPanelPositionTable = func_0026CD50(resource);
 }
 
 void mnuReleaseMantraPanelPositionTable(void) {
-    func_003297C8(((EvtLoadedRecord *)D_0043789C)->handle);
-    D_0043789C = 0;
+    func_003297C8(((EvtLoadedRecord *)mnuMantraPanelPositionTable)->handle);
+    mnuMantraPanelPositionTable = 0;
 }
 
 s32 mnuGetMantraPanelPositionRecord(s32 index) {
-    return ((EvtLoadedRecord *)D_0043789C)->base + ((index << 0x10) >> 0xb);
+    return ((EvtLoadedRecord *)mnuMantraPanelPositionTable)->base + ((index << 0x10) >> 0xb);
 }
 
 extern u32 func_003292A8(u32);
@@ -483,11 +483,7 @@ EvtMantraWork *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
     return work;
 }
 
-s64 evtReleaseMantraSelectionWork(u32 *p) {
-    if (p != NULL) {
-        func_003297C8((void *)*p);
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0026C1D0", evtReleaseMantraSelectionWork);
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D168);
 
@@ -525,9 +521,7 @@ void func_0026DB20(void) {
 
 extern s32 scrClearEntryFlag();
 
-s64 func_0026DB28(u32 context, u32 entry) {
-    return scrClearEntryFlag(context, entry & 0xFF, 0xF);
-}
+INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DB28);
 
 void func_0026DB48(u32 context, u8 entry) {
     scrTestEntryFlag(context, entry, 0xf);
@@ -536,9 +530,7 @@ void func_0026DB48(u32 context, u8 entry) {
 void func_0026DB68(void) {
 }
 
-s64 func_0026DB70(u32 context) {
-    return scrClearEntryFlag(context, 0, 0);
-}
+INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DB70);
 
 void func_0026DB90(u32 context) {
     scrTestEntryFlag(context, 0, 0);
@@ -547,9 +539,7 @@ void func_0026DB90(u32 context) {
 void func_0026DBB0(void) {
 }
 
-s64 func_0026DBB8(u32 context) {
-    return scrClearEntryFlag(context, 0, 1);
-}
+INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DBB8);
 
 void func_0026DBD8(u32 context) {
     scrTestEntryFlag(context, 0, 1);
@@ -563,13 +553,13 @@ INCLUDE_SDATA(const s32, "game/code_0026C1D0", dspWindowStateGate);
 
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", D_00437888);
 
-INCLUDE_SDATA(const s32, "game/code_0026C1D0", D_0043788C);
+INCLUDE_SDATA(const s32, "game/code_0026C1D0", evtMessageWindowOption);
 
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", dspCapturedSoundMode);
 
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", D_00437890);
 
-INCLUDE_SDATA(const s32, "game/code_0026C1D0", D_00437898);
+INCLUDE_SDATA(const s32, "game/code_0026C1D0", mnuMantraNodePositionTable);
 
-INCLUDE_SDATA(const s32, "game/code_0026C1D0", D_0043789C);
+INCLUDE_SDATA(const s32, "game/code_0026C1D0", mnuMantraPanelPositionTable);
 

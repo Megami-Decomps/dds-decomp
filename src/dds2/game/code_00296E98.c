@@ -2,7 +2,7 @@
 
 typedef struct MenuActionOwner MenuActionOwner;
 
-extern u8 D_0043798A;
+extern u8 brsUiUpdateAllowed;
 
 extern s32 kwlnFadeIsActive(void);
 
@@ -16,7 +16,7 @@ extern void mnuStorePendingMenuCommandValue(MenuActionOwner *, u32);
 
 extern s8 brsUpdateBlocked;
 
-extern s8 D_00437989;
+extern s8 brsPendingRowsLatched;
 
 extern s8 brsTaskState;
 
@@ -63,17 +63,17 @@ typedef struct MenuIconBatch {
 
 extern void func_0011A118(s32, s32);
 
-extern char D_00437990[];
+extern char brsStaffInputTaskName[];
 
-extern char D_00428388[];
+extern char mnuStaffPrimaryPanelTaskName[];
 
-extern char D_00428398[];
+extern char mnuStaffSecondaryPanelTaskName[];
 
-extern char D_00437990[];
+extern char brsStaffInputTaskName[];
 
-extern char D_00428388[];
+extern char mnuStaffPrimaryPanelTaskName[];
 
-extern char D_00428398[];
+extern char mnuStaffSecondaryPanelTaskName[];
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
@@ -175,7 +175,7 @@ INCLUDE_ASM(const s32, "game/code_00296E98", func_00298648);
 
 void brsTaskStart(void) {
     mnuStaffCreateTasks();
-    D_0043798A = 0;
+    brsUiUpdateAllowed = 0;
     brsUpdateBlocked = 1;
 }
 
@@ -184,7 +184,7 @@ s8 brsTaskIsUpdateBlocked(void) {
 }
 
 u32 brsTaskAllowUpdate(void) {
-    D_0043798A = 1;
+    brsUiUpdateAllowed = 1;
     return 1;
 }
 
@@ -193,14 +193,14 @@ void brsTaskPollDone(void) {
 }
 
 s8 brsTaskHasPendingRows(void) {
-    return D_00437989;
+    return brsPendingRowsLatched;
 }
 
 s8 brsTaskIsUiUpdateAllowed(s32 context) {
     if (*(s32 *)(context + 0xAEB0) != 0) {
         brsUpdateBlocked = 0;
     }
-    return brsUpdateBlocked ? 0 : D_0043798A;
+    return brsUpdateBlocked ? 0 : brsUiUpdateAllowed;
 }
 
 void gstApplyCounterDeltaTable(MenuIconRef *refs) {
@@ -268,7 +268,9 @@ typedef struct BrsSkillPackageWork {
     s32 panelGroup;          /* 0x51C: start of the group passed to setup */
     s32 spriteArg0;          /* 0x520 */
     s32 spriteArg1;          /* 0x524 */
-    u8 pad528[0xA80C];
+    u8 pad528[0x58];
+    s32 setupState;          /* 0x580 */
+    u8 pad584[0xA7B0];
     s32 panelHandle;         /* 0xAD34 */
     s32 spriteHandle;        /* 0xAD38 */
     u8 padAD3C[0x174];
@@ -303,7 +305,32 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
         (((BrsSelectedRow *)((u8 *)work + 0x2F0))[work->selectedRow].unit))->unitId);
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00299280);
+extern void effDestroyResourceSlotSet(s32);
+extern void mnuClearEntries();
+extern void mnuReleasePartyIconBundles();
+extern void mnuShutdownContext();
+extern void mnuDestroyPanelGroup(s32);
+extern void func_002C1050(s32);
+extern void mnuDestroyEffectResources(s32);
+extern void mnuReleaseStaffMenuTextureHandles();
+extern void mnuReleaseTitleEffectSprites();
+extern void mnuResetWorkFloats(void);
+
+void brsCloseSkillPackagePanel(s32 work) {
+    BrsSkillPackageWork *ctx = (BrsSkillPackageWork *)work;
+    s32 panelContext = work + 0x690;
+
+    effDestroyResourceSlotSet(ctx->unitHandle);
+    mnuClearEntries(panelContext);
+    mnuReleasePartyIconBundles(panelContext);
+    mnuShutdownContext(panelContext);
+    mnuDestroyPanelGroup(ctx->panelHandle);
+    func_002C1050(ctx->spriteHandle);
+    mnuDestroyEffectResources(work + 0xAD40);
+    mnuReleaseStaffMenuTextureHandles(work + 0x51C);
+    mnuReleaseTitleEffectSprites(work + 0x51C);
+    mnuResetWorkFloats();
+}
 
 s32 brsStartPartyPanelResourcesOnce(s32 work) {
     if (*(s32 *)(work + 0x580) != 0) {
@@ -320,9 +347,38 @@ s32 brsStartPartyPanelResourcesOnce(s32 work) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_002993D0);
+extern s32 movAreTitleEffectsReady(s32, s32);
+extern s32 mnuBindCampEffectWhenLoaded(s32);
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
-extern s32 D_00435DD0;
+s32 brsAdvanceSkillPackagePanel(s32 work) {
+    BrsSkillPackageWork *ctx = (BrsSkillPackageWork *)work;
+
+    if (ctx->setupState == 0) {
+        return 1;
+    }
+    if (ctx->setupState == 2) {
+        return 0;
+    }
+    if (movAreTitleEffectsReady(ctx->fadeTarget, work + 0x51C) == 0) {
+        return 1;
+    }
+    if (func_002C6CE8() == 1) {
+        return 1;
+    }
+    if (ctx->unitHandle == 0) {
+        return 1;
+    }
+    if (mnuBindCampEffectWhenLoaded(work + 0xAD40) == 0) {
+        return 1;
+    }
+    brsOpenSkillPackagePanel(ctx);
+    ctx->setupState = 2;
+    kwlnFadeOutStart(0, 0, 0, 15);
+    return 0;
+}
+
+extern s32 datGameState;
 
 /* Five party slots followed by the number of rewards in this batch. */
 typedef struct BrsRewardRow {
@@ -357,7 +413,7 @@ void brsMarkPartyRows(u8 *dst, u8 *state, s32 flags) {
 
     for (i = 0; i < ((BrsRewardBatch *)state)->count; i++) {
         u8 *d = dst;
-        u8 *unit = *(u8 **)&D_00435DD0 + 0xA60;
+        u8 *unit = *(u8 **)&datGameState + 0xA60;
         s32 j;
 
         for (j = 4; j >= 0; j--) {
@@ -384,9 +440,9 @@ void brsMarkPartyRowsFromLists(u32 partyRows, u32 primaryRewards, u32 secondaryR
 /* Latch whether the result task still has pending reward rows. */
 void brsTaskLatchPendingRows(s32 context) {
     if (((BrsTaskState *)context)->pendingRows == 0) {
-        D_00437989 = 0;
+        brsPendingRowsLatched = 0;
     } else {
-        D_00437989 = 1;
+        brsPendingRowsLatched = 1;
     }
 }
 
@@ -396,11 +452,11 @@ INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428368);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299578);
 
-extern s32 kwlnTaskGetUserValue(void);
+extern s32 kwlnTaskGetUserValue();
 extern void effDestroyResourceSlotSet(s32);
 extern void mnuDrainPanelTransitions(s32, s32);
-extern s32 func_002993D0(s32);
-extern void func_00299280(s32);
+extern s32 brsAdvanceSkillPackagePanel(s32);
+extern void brsCloseSkillPackagePanel(s32);
 extern void func_00303D58(s32);
 extern void dspCloseChannel(void);
 extern void func_003297C8(s32);
@@ -413,8 +469,8 @@ void brsStaffTaskDestroy(s32 taskArg) {
         effDestroyResourceSlotSet(((BrsSkillPackageWork *)context)->teardownHandle);
     }
     mnuDrainPanelTransitions(context + 8, taskArg);
-    if (func_002993D0(context) == 0) {
-        func_00299280(context);
+    if (brsAdvanceSkillPackagePanel(context) == 0) {
+        brsCloseSkillPackagePanel(context);
     }
     func_00303D58(((BrsSkillPackageWork *)context)->fadeTarget);
     dspCloseChannel();
@@ -433,9 +489,9 @@ s32 mnuStaffCreateTasks(void) {
     s32 result;
     void *work = func_00299578();
 
-    kwlnTaskCreate(D_00437990, 0x405, 1, 0, brsMessageInputStep, 0, work);
-    kwlnTaskCreate(D_00428388, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, work);
-    result = kwlnTaskCreate(D_00428398, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, work);
+    kwlnTaskCreate(brsStaffInputTaskName, 0x405, 1, 0, brsMessageInputStep, 0, work);
+    kwlnTaskCreate(mnuStaffPrimaryPanelTaskName, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, work);
+    result = kwlnTaskCreate(mnuStaffSecondaryPanelTaskName, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, work);
     brsTaskState = 1;
     return result;
 }
@@ -444,9 +500,9 @@ u32 mnuStaffDestroyTasks(void) {
     s8 state = brsTaskState;
 
     if (state == 1) {
-        kwlnTaskDestroyWithHierarchyByName(D_00437990, 0);
-        kwlnTaskDestroyWithHierarchyByName(D_00428388, 0);
-        kwlnTaskDestroyWithHierarchyByName(D_00428398, 0);
+        kwlnTaskDestroyWithHierarchyByName(brsStaffInputTaskName, 0);
+        kwlnTaskDestroyWithHierarchyByName(mnuStaffPrimaryPanelTaskName, 0);
+        kwlnTaskDestroyWithHierarchyByName(mnuStaffSecondaryPanelTaskName, 0);
         brsUpdateBlocked = state;
         return 1;
     }
@@ -475,7 +531,23 @@ u32 brsTaskTryDestroy(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_002998D8);
+s32 func_002998D8(void) {
+    extern s32 func_00101740(const char *);
+    s32 task;
+    u8 *work;
+
+    task = func_00101740(mnuStaffPrimaryPanelTaskName);
+    if (task == 0) {
+        return task;
+    }
+    work = (u8 *)kwlnTaskGetUserValue(task);
+    if (256 - *(s32 *)(work + 0xB6E0) <= 0 && brsTaskIsUiUpdateAllowed((s32)work) != 0) {
+        if (*(s8 *)(work + 0xAEA8) == 1) {
+            return 1;
+        }
+    }
+    return *(s8 *)(work + 0xAEA8);
+}
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299988);
 
@@ -514,9 +586,9 @@ s32 mnuStaffPickRollByMode(u32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299B98);
 
-INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428388);
+INCLUDE_RODATA(const s32, "game/code_00296E98", mnuStaffPrimaryPanelTaskName);
 
-INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428398);
+INCLUDE_RODATA(const s32, "game/code_00296E98", mnuStaffSecondaryPanelTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_00296E98", D_004283B0);
 
@@ -524,13 +596,13 @@ INCLUDE_RODATA(const s32, "game/code_00296E98", D_004283C0);
 
 INCLUDE_SDATA(const s32, "game/code_00296E98", brsTaskState);
 
-INCLUDE_SDATA(const s32, "game/code_00296E98", D_00437989);
+INCLUDE_SDATA(const s32, "game/code_00296E98", brsPendingRowsLatched);
 
-INCLUDE_SDATA(const s32, "game/code_00296E98", D_0043798A);
+INCLUDE_SDATA(const s32, "game/code_00296E98", brsUiUpdateAllowed);
 
 INCLUDE_SDATA(const s32, "game/code_00296E98", brsUpdateBlocked);
 
-INCLUDE_SDATA(const s32, "game/code_00296E98", D_00437990);
+INCLUDE_SDATA(const s32, "game/code_00296E98", brsStaffInputTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_00296E98", D_00437998);
 

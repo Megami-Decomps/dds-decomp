@@ -419,17 +419,7 @@ void sdfVuBlendNodeXY(VuBlendNode *node) {
     while (node != NULL) {
         void *sourceA = node->sourceA;
         void *sourceB = node->sourceB;
-        __asm__ volatile (
-            ".set noreorder\n"
-            "lqc2 vf2, 0x40(%0)\n"
-            "lqc2 vf8, 0x30(%1)\n"
-            "lqc2 vf9, 0x30(%2)\n"
-            "vmulaw.xy ACC, vf8, vf0w\n"
-            "vmaddaw.xy ACC, vf9, vf2w\n"
-            "vmsubw.xy vf15, vf8, vf2w\n"
-            "sqc2 vf15, 0x30(%0)\n"
-            ".set reorder\n"
-            : : "r"(node), "r"(sourceA), "r"(sourceB) : "memory");
+        VU0_BLEND_NODE_XY(node, sourceA, sourceB);
         node = node->next;
     }
 }
@@ -472,7 +462,7 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_00337FD8);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_003385C0);
 
-void func_00338B30(work)
+void sdfVuEmitTexturedTriangleBatches(work)
     VuWork *work;
 {
     s32 remaining = work->nodeCount;
@@ -618,7 +608,7 @@ void sdfBuildChunkedVuNodeTransfer(VuWork *work, u64 a, u64 b, u64 c, u64 d, s32
     }
 }
 
-void func_00339000(work)
+void sdfVuEmitColoredTriangleBatches(work)
     VuWork *work;
 {
     s32 remaining = work->nodeCount;
@@ -661,10 +651,10 @@ void func_00339000(work)
 
 void sdfVuEmitSelectedNodePacket(s32 workAddress) {
     if ((*(u32 *)(workAddress + 0x44) & 0x10) != 0) {
-        func_00338B30();
+        sdfVuEmitTexturedTriangleBatches();
         return;
     }
-    func_00339000();
+    sdfVuEmitColoredTriangleBatches();
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00339188);
@@ -1165,13 +1155,13 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_0033BE18);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C050);
 
-u32 func_0033C218(s32 count) {
+u32 sdfMeasureAlignedDrawPacketSize(s32 count) {
     return (count * 0x6c + 0x4bU) & 0xfffffff0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033C240);
 
-extern u8 D_0040B7D0[];
+extern u8 sdfPadActuatorAlignment[];
 extern s32 func_0034B128(s32 port, s32 slot);
 extern s32 func_0034B0A8(s32 port, s32 slot, void *data);
 extern s32 func_0034B240(s32 port, s32 slot);
@@ -1246,7 +1236,7 @@ void sdfPadUpdatePort(F9B00Entry *entry) {
         break;
     case 3:
         if (func_0034B2C8(port, slot, -1, 0) != 0) {
-            if (scePadSetActAlign(port, slot, D_0040B7D0) != 0) {
+            if (scePadSetActAlign(port, slot, sdfPadActuatorAlignment) != 0) {
                 entry->state = 4;
             }
         } else {
@@ -1334,17 +1324,17 @@ void sdfPadUpdatePorts(void) {
     }
 }
 
-extern s32 D_004389C8;
+extern s32 sdfThreadWakeTick;
 extern u16 D_00438A90[4];
 extern u8 sdfPadAnalogSticks[8];
 extern u16 D_0040B7B0[16];
-extern u8 D_0040B7D8[0x20];
+extern u8 sdfPadButtonStates[0x20];
 extern u8 sdfPadButtonPressure[0x18];
 
 /* Build per-button held/repeat/new-press flags for both controller ports.
  * Repeat starts after 15 ticks, then recurs every four ticks. */
 void sdfPadBuildButtonStates(void) {
-    s32 now = D_004389C8;
+    s32 now = sdfThreadWakeTick;
     s32 i;
     s32 bit;
     for (i = 0; i != 2; i++) {
@@ -1378,7 +1368,7 @@ void sdfPadBuildButtonStates(void) {
             if (pressed & mask) {
                 state |= 0x80;
             }
-            D_0040B7D8[i * 0x10 + bit] = state;
+            sdfPadButtonStates[i * 0x10 + bit] = state;
         }
         memcpy(&sdfPadAnalogSticks[i * 4], entry->stick, 4);
         memcpy(&sdfPadButtonPressure[i * 12], entry->pressure, 12);
@@ -1404,7 +1394,7 @@ void sdfDevConsSetEntryPair(s32 index, s32 small, s32 large) {
 }
 
 extern u8 D_00438A88[4];
-extern u8 D_00476280[];
+extern u8 sdfPadPortBuffers[];
 extern u8 D_00438A8C;
 extern s32 func_0034AAF8(s32);
 extern s32 scePadPortOpen(s32 port, s32 slot, void *buffer);
@@ -1418,7 +1408,7 @@ void sdfPadInit(void) {
         s32 slot = D_00438A88[i * 2 + 1];
         F9B00Entry *entry;
 
-        scePadPortOpen(port, slot, &D_00476280[i * 0x100]);
+        scePadPortOpen(port, slot, &sdfPadPortBuffers[i * 0x100]);
         entry = &sdfPadPorts[i];
         entry->port = port;
         entry->slot = slot;
@@ -1430,7 +1420,7 @@ void sdfPadInit(void) {
         entry->smallMotor = 0;
         entry->largeMotor = 0;
     }
-    memset(D_0040B7D8, 0, 0x20);
+    memset(sdfPadButtonStates, 0, 0x20);
     memset(sdfPadAnalogSticks, 0x80, 8);
     memset(sdfPadButtonPressure, 0, 0x18);
     D_00438A8C = 0;
@@ -1439,7 +1429,7 @@ void sdfPadInit(void) {
 void sdfDevConsInit(void) {
     if (D_00438AB4 == 0) {
         D_00438AB4 = 1;
-        D_00439194 = func_0032C138(D_00370B80);
+        D_00439194 = sdfTexAcquireResourceTexture(D_00370B80);
     }
 }
 

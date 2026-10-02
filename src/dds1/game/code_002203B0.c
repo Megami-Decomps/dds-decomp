@@ -1,4 +1,6 @@
 #include "common.h"
+#include "evt_world.h"
+#include "evt_unit.h"
 #include "pcp_vu0.h"
 
 extern void *dds3GetSlot(void *obj, s32 index);
@@ -103,26 +105,12 @@ typedef struct EvtWorldNode {
     struct EvtWorldNode *next; /* 0x20 */
 } EvtWorldNode;
 
-typedef struct EvtWorldList {
-    u8 pad00[0x4C];
-    EvtWorldNode *head; /* 0x4C */
-} EvtWorldList;
 
-typedef struct EvtWorldRoot {
-    u8 pad00[0x08];
-    EvtWorldList *list; /* 0x08 */
-} EvtWorldRoot;
-
-typedef struct EvtWorldObj {
-    u8 pad00[0x18];
-    EvtWorldRoot *root; /* 0x18 */
-} EvtWorldObj;
-
-extern EvtWorldObj *dds3GetWorldObject(void);
+extern EvtWorldObject *dds3GetWorldObject(void);
 extern void dds3SetObjectModeAndDefaultWeight(void *node, s32 value);
 
 s32 evtApplyIndexValueToWorldNodes(s32 index, s32 base) {
-    EvtWorldObj *world = dds3GetWorldObject();
+    EvtWorldObject *world = dds3GetWorldObject();
     EvtWorldNode *node;
     s32 value;
 
@@ -130,29 +118,12 @@ s32 evtApplyIndexValueToWorldNodes(s32 index, s32 base) {
         return 0;
     }
     value = index * 3 + base;
-    for (node = world->root->list->head; node != NULL; node = node->next) {
+    for (node = world->table->slots[6].head; node != NULL; node = node->next) {
         dds3SetObjectModeAndDefaultWeight(node, value);
     }
     return 1;
 }
 
-typedef struct EvtMoveTarget {
-    u8 pad00[0x1C];
-    u8 *data;           /* 0x1C */
-} EvtMoveTarget;
-
-typedef struct EvtMoveUnit {
-    u8 pad00[0x70];
-    s128 vector;        /* 0x70 */
-    EvtMoveTarget *target; /* 0x80 */
-    u8 pad84[0x1C];     /* 0x84 */
-    void *scaled;       /* 0xA0 */
-    f32 delta;          /* 0xA4 */
-    u32 flags;          /* 0xA8 */
-    s16 mode;           /* 0xAC */
-    s16 state;          /* 0xAE */
-    s16 range;          /* 0xB0 */
-} EvtMoveUnit;
 
 extern void effMiscQuaternionToMatrixVU(void);
 
@@ -165,10 +136,10 @@ void evtComputeHorizontalDisplacementVu(f32 *a, f32 *b) {
 }
 
 /* vf10 = the unit's rotated y axis flattened to the ground plane, negated */
-void evtComputePlanarTargetDirectionVu(EvtMoveUnit *unit) {
+void evtComputePlanarTargetDirectionVu(EvtUnit *unit) {
     f32 v[4];
 
-    VU0_LOAD_VF(vf10, unit->target->data + 0x50);
+    VU0_LOAD_VF(vf10, unit->effObj->data->orientation);
     effMiscQuaternionToMatrixVU();
     VU0_STORE_VF(vf30, v);
     v[1] = 0.0f;
@@ -183,18 +154,18 @@ INCLUDE_ASM(const s32, "game/code_002203B0", func_00220678);
 extern void evtScaleValueByMultiplier(void *value, f32 multiplier);
 extern void func_00116F38(void *value);
 
-s32 evtUnitStepScaledValue(EvtMoveUnit *unit) {
+s32 evtUnitStepScaledValue(EvtUnit *unit) {
     f32 t;
 
-    if (unit->mode != 1) {
+    if (unit->motionState != 1) {
         return 0;
     }
-    switch (unit->state) {
+    switch (unit->transitionSourceKind) {
     case 0:
     case 1:
         break;
     case 2:
-        t = evtGetValueScaleFactor(unit->scaled);
+        t = evtGetValueScaleFactor((void *)unit->pathHandle);
         if (unit->flags & 4) {
             if (t == 0.0f) {
                 return 0;
@@ -204,16 +175,16 @@ s32 evtUnitStepScaledValue(EvtMoveUnit *unit) {
                 return 0;
             }
         }
-        t += unit->delta;
+        t += unit->pathSpeed;
         if (t < 0.0f) {
             t = 0.0f;
         }
         if (1.0f < t) {
             t = 1.0f;
         }
-        evtScaleValueByMultiplier(unit->scaled, t);
-        func_00116F38(unit->scaled);
-        VU0_STORE_VF($vf10, &unit->vector);
+        evtScaleValueByMultiplier((void *)unit->pathHandle, t);
+        func_00116F38((void *)unit->pathHandle);
+        VU0_STORE_VF($vf10, unit->targetVector);
         return 1;
     }
     return 0;

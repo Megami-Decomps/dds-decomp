@@ -3,7 +3,7 @@
 
 extern u64 func_001579C8(void);
 
-extern u64 func_001579E8(void);
+extern u64 effLoadResourceNode(void);
 
 extern u64 func_001578C0(void);
 
@@ -29,7 +29,7 @@ extern void effObjSetInnerSecondVec(void *obj, void *vec);
 
 extern void effObjInnerVecBackup(void *params);
 
-extern void *func_00343ED0(void *resource, u32 *resolvedId, s32 options);
+extern void *sdfReadNamedResource(void *resource, u32 *resolvedId, s32 options);
 
 extern void *func_003297C8(void *arg);
 
@@ -75,7 +75,7 @@ void effObjReleaseObjectData(u32 object) {
     data = obj->data;
     func_00114640(data);
     effObjFreeInner(object);
-    func_00111A68((u32)data->objectHandle);
+    dds3DestroyObjectBase((u32)data->objectHandle);
     sdfReleaseChipBlock((u32)obj->data);
     obj->data = NULL;
 }
@@ -111,28 +111,67 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
     return obj;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114D80);
+extern u32 dds3AdvanceWorldCounter(void);
+extern void *func_001115B0(void);
+extern void effCopyVector(void *source, void *destination);
+extern void effCopyVectorToNodeInstance(void *source, void *destination);
+
+EffectObj *effObjCreateWithBill(bill, vec, extra)
+    void *bill;
+    void *vec;
+    s32 extra;
+{
+    u8 vector[0x10];
+    EffectObj *obj;
+    EffectData *data;
+    void *handle;
+    void *id;
+
+    memset(vector, 0, sizeof(vector));
+    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), vec, (void *)extra);
+    if (obj == NULL) {
+        return NULL;
+    }
+    VU0_LOAD_VF(vf10, vec);
+    VU0_STORE_VF(vf10, vector);
+    effCopyVector(bill, vector);
+    data = obj->data;
+    data->bill = bill;
+    data->flags = 0;
+    data->state = 2;
+    data->owner = NULL;
+    data->entryId = 0;
+    data->ownerKind = 0;
+    handle = effObjGetObjectHandle(obj);
+    *(s32 *)((u8 *)handle + 8) = 2;
+    id = func_001115B0();
+    if (id != NULL) {
+        *(void **)((u8 *)handle + 0x24) = id;
+        dds3EnsureWorldNodeInSlot(id, obj);
+    }
+    return obj;
+}
 
 /* Resolve the object's billboard and forward its two draw arguments. */
 void func_00114E58(EffectObj *obj, u64 vector, u64 extra) {
     u64 bill;
 
     bill = billCloneObjectRetainingSharedData((u32)obj->data->bill);
-    func_00114D80(bill, vector, extra);
+    effObjCreateWithBill(bill, vector, extra);
 }
 /* Create an indexed billboard of kind one and dispatch it. */
 void effObjCreateIndexedKindOne(u64 billId, u64 vector, u64 extra) {
     u64 bill;
 
     bill = billCreateIndexed(1, billId);
-    func_00114D80(bill, vector, extra);
+    effObjCreateWithBill(bill, vector, extra);
 }
 /* Create a resource-backed billboard of kind one and dispatch it. */
 void effObjCreateResourceKindOne(u64 resourceId, u64 vector, u64 extra) {
     u64 bill;
 
     bill = billCreateFromResource(1, resourceId);
-    func_00114D80(bill, vector, extra);
+    effObjCreateWithBill(bill, vector, extra);
 }
 
 /* Select the billboard object's kind-one entry. */
@@ -140,12 +179,7 @@ void func_00114F30(EffectObj *obj) {
     billSetKind1Entry((u32)obj->data->bill);
 }
 
-extern u32 dds3AdvanceWorldCounter(void);
-extern void *func_001115B0(void);
-extern void effCopyVector(void *source, void *destination);
-extern void func_00157790(void *source, void *destination);
-
-EffectObj *func_00114F50(bill, vec, extra)
+EffectObj *effObjCreateBillNode(bill, vec, extra)
     void *bill;
     void *vec;
     s32 extra;
@@ -186,7 +220,7 @@ void func_00115020(EffectObj *obj, u64 vector, u64 extra) {
     u64 bill;
 
     bill = billCloneObjectRetainingSharedData((u32)obj->data->bill);
-    func_00114F50(bill, vector, extra);
+    effObjCreateBillNode(bill, vector, extra);
 }
 
 /* Create an indexed billboard of kind zero for the second handler. */
@@ -194,7 +228,7 @@ void effObjCreateIndexedKindZero(u64 billId, u64 vector, u64 extra) {
     u64 bill;
 
     bill = billCreateIndexed(0, billId);
-    func_00114F50(bill, vector, extra);
+    effObjCreateBillNode(bill, vector, extra);
 }
 
 /* Create a resource-backed billboard of kind zero for the second handler. */
@@ -202,10 +236,10 @@ void effObjCreateResourceKindZero(u64 resourceId, u64 vector, u64 extra) {
     u64 bill;
 
     bill = billCreateFromResource(0, resourceId);
-    func_00114F50(bill, vector, extra);
+    effObjCreateBillNode(bill, vector, extra);
 }
 
-EffectObj *func_001150F8(bill, vec, extra)
+EffectObj *effObjCreateWithBoundBill(bill, vec, extra)
     void *bill;
     void *vec;
     s32 extra;
@@ -223,7 +257,7 @@ EffectObj *func_001150F8(bill, vec, extra)
     }
     VU0_LOAD_VF(vf10, vec);
     VU0_STORE_VF(vf10, vector);
-    func_00157790(bill, vector);
+    effCopyVectorToNodeInstance(bill, vector);
     data = obj->data;
     data->state = 1;
     data->bill = bill;
@@ -246,15 +280,15 @@ void func_001151C8(u64 unused, u64 vector, u64 extra) {
     u64 handle;
 
     handle = func_001578C0();
-    func_001150F8(handle, vector, extra);
+    effObjCreateWithBoundBill(handle, vector, extra);
 }
 
 /* Dispatch a newly allocated handle from the second parameter source. */
 void func_00115208(u64 unused, u64 vector, u64 extra) {
     u64 handle;
 
-    handle = func_001579E8();
-    func_001150F8(handle, vector, extra);
+    handle = effLoadResourceNode();
+    effObjCreateWithBoundBill(handle, vector, extra);
 }
 
 EffectObj *func_00115248(bill, vec, extra)
@@ -275,7 +309,7 @@ EffectObj *func_00115248(bill, vec, extra)
     }
     VU0_LOAD_VF(vf10, vec);
     VU0_STORE_VF(vf10, vector);
-    func_00157790(bill, vector);
+    effCopyVectorToNodeInstance(bill, vector);
     data = obj->data;
     data->state = 1;
     data->bill = bill;
@@ -313,7 +347,7 @@ void *effObjCreateFromResolvedResource(void *resource, void *vector, void *extra
     void *created;
 
     resolvedId = 0;
-    resourceHandle = func_00343ED0(resource, &resolvedId, 0);
+    resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
     created = func_00115358(resolvedId, vector, extra);
     func_003297C8(resourceHandle);
     return created;
@@ -357,7 +391,7 @@ void *effObjCreateKindFromResource(s32 kind, void *resource) {
     void *created;
 
     resolvedId = 0;
-    resourceHandle = func_00343ED0(resource, &resolvedId, 0);
+    resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
     created = func_001156E0(kind, resolvedId);
     func_003297C8(resourceHandle);
     return created;
@@ -399,7 +433,26 @@ s32 effObjGetIntParam(EffectObj *obj) {
     return (s32)parameters->parameter;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115BD8);
+extern void effMagatuhiInitializeInterpolatedHistory(void *bill);
+extern void effMagatuhiDispatchByKind(void *bill);
+
+/* Run the Magatuhi setup matching the ready effect's state (1 or 8). */
+s32 func_00115BD8(EffectObj *obj) {
+    if (obj->kind == 7) {
+        EffectData *data = obj->data;
+
+        switch (data->state) {
+        case 7:
+            break;
+        case 8:
+            effMagatuhiInitializeInterpolatedHistory(data->bill);
+            break;
+        case 1:
+            effMagatuhiDispatchByKind(data->bill);
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115C50);
 

@@ -48,7 +48,35 @@ void evtDestroySecondaryWorldNode(void)
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtStage", func_0021FE70);
+typedef struct StageNodeChild {
+    u8 pad00[0x40];
+    s32 node; /* 0x40: first world node still attached */
+} StageNodeChild;
+
+typedef struct StageNodeParent {
+    u8 pad00[8];
+    StageNodeChild *child; /* 0x8 */
+} StageNodeParent;
+
+typedef struct StageSecondaryObject {
+    u8 pad00[0x18];
+    StageNodeParent *parent; /* 0x18 */
+} StageSecondaryObject;
+
+extern void dds3RemoveWorldObjectNode(s32 node);
+
+/* Detach every world node from the secondary object's chain. */
+void evtDrainSecondaryWorldNodes(void) {
+    StageSecondaryObject *object = (StageSecondaryObject *)dds3GetWorldSecondaryObject();
+    StageNodeParent *parent;
+
+    if (object != NULL) {
+        parent = object->parent;
+        while (parent->child->node != 0) {
+            dds3RemoveWorldObjectNode(parent->child->node);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "event/evtStage", func_0021FEC0);
 
@@ -56,11 +84,11 @@ INCLUDE_ASM(const s32, "event/evtStage", func_0021FFE8);
 
 extern void func_003014F0(char *, char *, s32, s32, s32);
 extern void scrCreateProcessTaskFromResource(s32, void *, s32);
-extern char D_003D7B98[];
+extern char evtScriptResourcePathBuffer[];
 
 void evtCreateEventScriptProcess(s32 eventId) {
-    func_003014F0(D_003D7B98, "/event/e%03d/e%03d/scr/e%03d.bf", eventId - eventId % 10, eventId, eventId);
-    scrCreateProcessTaskFromResource(0x3EB, D_003D7B98, 0);
+    func_003014F0(evtScriptResourcePathBuffer, "/event/e%03d/e%03d/scr/e%03d.bf", eventId - eventId % 10, eventId, eventId);
+    scrCreateProcessTaskFromResource(0x3EB, evtScriptResourcePathBuffer, 0);
 }
 
 INCLUDE_ASM(const s32, "event/evtStage", func_00220178);
@@ -85,26 +113,42 @@ void evtClearWorldSlotStatusFlag(void)
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtStage", func_00220298);
+extern void evtScaleValueByMultiplier(s32 slotData, f32 multiplier);
 
-void func_00220300(s32 arg0, void *arg1) {
+/* Scale the slot data by a multiplier clamped to [0, 1]. */
+void evtScaleSlotByClampedMultiplier(f32 multiplier) {
     s32 slotData;
 
     slotData = dds3GetSlot1Data();
     if (slotData != 0) {
-        func_00117568(slotData, arg1);
+        if (multiplier < 0.0f) {
+            multiplier = 0.0f;
+        }
+        if (multiplier > 1.0f) {
+            multiplier = 1.0f;
+        }
+        evtScaleValueByMultiplier(slotData, multiplier);
     }
 }
 
-/* Attach the object to the node its owned handle points at. */
-s32 evtStageRelinkOwnedNodeResource(void *object, void *arg1) {
+void evtSetWorldSlotValue(s32 unused, void *data) {
+    s32 slotData;
+
+    slotData = dds3GetSlot1Data();
+    if (slotData != 0) {
+        func_00117568(slotData, data);
+    }
+}
+
+/* Attach object to the node referenced by owner's owned handle. */
+s32 evtStageRelinkOwnedNodeResource(void *object, void *owner) {
     StageNodeRef *ref;
     void *node;
 
     if (object == NULL) {
         return 0;
     }
-    ref = (StageNodeRef *)dds3GetObjectOwnedHandle(arg1);
+    ref = (StageNodeRef *)dds3GetObjectOwnedHandle(owner);
     if (ref == NULL) {
         return 0;
     }

@@ -3,7 +3,7 @@
 #include "ee_mmi.h"
 
 extern f32 *D_0037F770[];
-extern u8 D_0037F780[];
+extern u8 kwlnDefaultColorVector[];
 
 typedef struct WorldUnitState {
     u8 pad00[8];
@@ -11,7 +11,7 @@ typedef struct WorldUnitState {
     u8 pad0C[0x58];
     u32 flags;
     u32 colorA;          /* 0x68 packed from D_0037F770 */
-    u32 colorB;          /* 0x6C packed from D_0037F780 */
+    u32 colorB;          /* 0x6C packed from kwlnDefaultColorVector */
     s16 unk70;           /* 0x70 */
     u8 pad72[2];
     u32 value74; /* Meaning unknown; exposed by func_00116800. */
@@ -51,11 +51,11 @@ ActionObj *evtSpawnActionObj9(s32 value) {
     return obj;
 }
 
-void func_00116858(void) {
+void evtReleaseActionWorldNode(void) {
     dds3RemoveWorldObjectNode();
 }
 
-void func_00116870(WorldUnitOwner *object, s32 value) {
+void evtBeginUnitValueColorTransition(WorldUnitOwner *object, s32 value) {
     WorldUnitState *state = object->state;
     s32 color1[4];
     s32 color2[4];
@@ -72,7 +72,7 @@ void func_00116870(WorldUnitOwner *object, s32 value) {
         EE_MMI_RGBA_PACK_F128(packed1);
         color1[0] = packed1;
         state->colorA = color1[0];
-        VU0_LOAD_VF(vf10, D_0037F780);
+        VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
         EE_MMI_RGBA_PACK(packed2);
         color2[0] = packed2;
         state->colorB = color2[0];
@@ -91,9 +91,78 @@ void evtEndUnitValueTransitionForObject(WorldUnitOwner *object) {
     evtEndUnitValueTransition(object->state->unit);
 }
 
-INCLUDE_ASM(const s32, "game/code_001167F8", func_00116978);
+typedef struct WorldTransformParams {
+    f32 rotation[4];    /* 0x00 */
+    f32 position[3];    /* 0x10 */
+    f32 scale[3];       /* 0x1C */
+} WorldTransformParams;
 
-INCLUDE_ASM(const s32, "game/code_001167F8", func_00116A20);
+typedef struct WorldTransformData {
+    f32 position[3];    /* 0x00 */
+    f32 positionW;      /* 0x0C */
+    u8 pad10[0x30];
+    f32 scale[3];       /* 0x40 */
+    f32 scaleW;         /* 0x4C */
+    f32 rotation[4];    /* 0x50 */
+    u32 mode;           /* 0x60 */
+    u32 flags;          /* 0x64 */
+} WorldTransformData;
+
+typedef struct WorldTransformSetup {
+    u8 pad00[4];
+    u32 flags;                      /* 0x04: bit 0 -> 1, bit 1 -> 4 in the object's flags */
+    u32 mode;                       /* 0x08 */
+    WorldTransformParams transform; /* 0x0C */
+} WorldTransformSetup;
+
+typedef struct WorldTransformOwner {
+    u8 pad00[0x18];
+    WorldTransformData *data;
+} WorldTransformOwner;
+
+/* Load flags, mode and the transform block from a setup record. */
+void dds3LoadWorldTransformSetup(WorldTransformOwner *object, WorldTransformSetup *setup) {
+    WorldTransformData *data = object->data;
+
+    data->flags = 0;
+    if (setup->flags & 1) {
+        data->flags = 1;
+    }
+    if (setup->flags & 2) {
+        data->flags |= 4;
+    }
+    data->rotation[0] = setup->transform.rotation[0];
+    data->mode = setup->mode;
+    data->rotation[1] = setup->transform.rotation[1];
+    data->rotation[2] = setup->transform.rotation[2];
+    data->rotation[3] = setup->transform.rotation[3];
+    data->position[0] = setup->transform.position[0];
+    data->position[1] = setup->transform.position[1];
+    data->position[2] = setup->transform.position[2];
+    data->positionW = 0.0f;
+    data->scale[0] = setup->transform.scale[0];
+    data->scale[1] = setup->transform.scale[1];
+    data->scale[2] = setup->transform.scale[2];
+    data->scaleW = 1.0f;
+}
+
+/* Load rotation, position and scale from a parameter block. */
+void dds3LoadWorldTransformParams(WorldTransformOwner *object, WorldTransformParams *params) {
+    WorldTransformData *data = object->data;
+
+    data->rotation[0] = params->rotation[0];
+    data->rotation[1] = params->rotation[1];
+    data->rotation[2] = params->rotation[2];
+    data->rotation[3] = params->rotation[3];
+    data->position[0] = params->position[0];
+    data->position[1] = params->position[1];
+    data->position[2] = params->position[2];
+    data->positionW = 0.0f;
+    data->scale[0] = params->scale[0];
+    data->scale[1] = params->scale[1];
+    data->scale[2] = params->scale[2];
+    data->scaleW = 1.0f;
+}
 
 
 s32 func_00116A88(WorldUnitOwner *obj) {

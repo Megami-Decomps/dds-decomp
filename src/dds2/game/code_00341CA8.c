@@ -12,7 +12,7 @@ u32 func_00341650(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
 void sndEnsureMidiBankResident(s32 arg0);
 
-u32 func_003417A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+u32 sndSendCommandPacket(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
 void func_00341CA8(void) {
     func_00341650(0x1a0, 0, 0, 0);
@@ -35,16 +35,20 @@ void sndDispatchCommandWithoutPayload(u32 command) {
 u32 sndSubmitTextCommandPayload(s32 command, char *text) {
     u32 length = strlen(text);
 
-    return func_003417A8(command | 0x70, 0, text, length);
+    return sndSendCommandPacket(command | 0x70, 0, text, length);
 }
 
 u32 func_00341D90(s32 command, char *text) {
     u32 length = strlen(text);
 
-    return func_003417A8(command | 0x60, 0, text, length);
+    return sndSendCommandPacket(command | 0x60, 0, text, length);
 }
 
-INCLUDE_ASM(const s32, "game/code_00341CA8", func_00341DD8);
+u32 func_00341DD8(s32 command, char *text) {
+    s32 cmd = command;
+    u32 len = strlen(text);
+    return sndSendCommandPacket(cmd | 0x80, 0, text, len);
+}
 
 /* Send a 12-byte sequence command; the trailing struct word is not transmitted. */
 void sndSetSequenceVolumePan(s32 trackId, s32 volume, s32 pan) {

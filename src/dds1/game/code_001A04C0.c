@@ -11,9 +11,9 @@ extern void btlUpdateScene(void);
 
 extern s32 mdlFlagTest(u32);
 
-extern s32 func_001A17F0(void);
+extern s32 btlGetRuntime(void);
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 extern s32 btlRuntime;
 
@@ -146,7 +146,7 @@ void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
 
 extern s32 D_003BB2E0;
 
-extern u16 D_003BA72C;
+extern u16 mnuMovieTaskState;
 
 extern s32 D_003BAAA4;
 
@@ -154,13 +154,13 @@ extern s32 D_0032A520;
 
 extern s32 D_0032A210;
 
-extern s8 D_00324550[];
+extern s8 effSharedRandomState[];
 
 extern s32 func_002D03F8(s32);
 
 extern u32 *sdfResourceRetainAddress(s32);
 
-extern void func_002E8430(s8 *, s32);
+extern void effMiscSeedRandom(s8 *, s32);
 
 extern u32 func_00100510(void);
 
@@ -283,7 +283,7 @@ s32 btlHasPendingRuntimeActivity(void) {
 
 void btlResetActorEntryState(void) {
     s32 context = btlRuntime;
-    s32 *entries = (s32 *)(D_003BAA00 + 0xBF8);
+    s32 *entries = (s32 *)(datGameState + 0xBF8);
     u32 i;
     *(s32 *)(context + 0x2C0) = 0;
     *(s32 *)(context + 0x2C4) = 0;
@@ -344,45 +344,45 @@ s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
     return 0;
 }
 
-s32 func_001A17F0(void) {
+s32 btlGetRuntime(void) {
     return btlRuntime;
 }
 
-u16 func_001A17F8(s32 arg0) {
+u16 btlReadCurrentUnitHp(s32 arg0) {
     return *(u16 *)(arg0 + 6);
 }
 
-u16 func_001A1800(s32 arg0) {
+u16 btlReadCurrentUnitMp(s32 arg0) {
     return *(u16 *)(arg0 + 10);
 }
 
-void func_001A1808(void) {
+void btlComputeProfileMaxHp(void) {
     ptyComputeMaxHp();
 }
 
-void func_001A1820(void) {
+void btlComputeProfileMaxMp(void) {
     ptyComputeMaxMp();
 }
 
-u32 func_001A1838(s32 object) {
+u32 btlComputeSkillAdjustedMaxHp(s32 object) {
     return func_001190B0(object);
 }
 
-u32 func_001A1850(s32 object) {
+u32 btlComputeSkillAdjustedMaxMp(s32 object) {
     return func_001191B0(object);
 }
 
-void func_001A1868(u8 *object, s32 value) {
+void btlAdjustUnitHp(u8 *object, s32 value) {
     datMoveCursorX(object, value);
 }
 
-void func_001A1880(u8 *object, s32 value) {
+void btlAdjustUnitMp(u8 *object, s32 value) {
     datMoveCursorY(object, value);
 }
 
 u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 object) {
-    u16 maximum = func_001A17F8(object);
-    u32 value = func_001A1838(object);
+    u16 maximum = btlReadCurrentUnitHp(object);
+    u32 value = btlComputeSkillAdjustedMaxHp(object);
     *(u16 *)(object + 8) = value;
     if (value < maximum) {
         *(u16 *)(object + 6) = value;
@@ -391,8 +391,8 @@ u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 object) {
 }
 
 u16 btlRefreshUnitMaximumMpAndClampCurrentMp(s32 object) {
-    u16 maximum = func_001A1800(object);
-    u32 value = func_001A1850(object);
+    u16 maximum = btlReadCurrentUnitMp(object);
+    u32 value = btlComputeSkillAdjustedMaxMp(object);
     *(u16 *)(object + 12) = value;
     if (value < maximum) {
         *(u16 *)(object + 10) = value;
@@ -400,7 +400,7 @@ u16 btlRefreshUnitMaximumMpAndClampCurrentMp(s32 object) {
     return *(u16 *)(object + 10);
 }
 
-u16 func_001A1938(s32 arg0) {
+u16 btlReadUnitStatusMask(s32 arg0) {
     return *(u16 *)(arg0 + 0xe) & 0x7fff;
 }
 

@@ -20,14 +20,14 @@ typedef struct PanelRect {
 typedef struct PanelObj {
     u8 unk0[8];     /* 0x0 */
     PktRec *buf;    /* 0x8: packet buffer */
-    s32 unkC;       /* 0xC */
+    s32 tail;    /* 0xC: tail arg of itfDrawQuadFlat4 */
     PanelRect rect; /* 0x10 */
     u8 unk20[0x18]; /* 0x20 */
-    s32 unk38;      /* 0x38 */
+    s32 alpha;   /* 0x38: copied to a colour record's alpha */
     u8 handlerIndex; /* 0x3C: index into the panel handler table */
 } PanelObj;
 
-extern void (*D_003B4448[])(PanelObj *);
+extern void (*itfPanelHandlers[])(PanelObj *);
 
 /* Flag byte reached as rec+0x24+0x10 (i.e. byte 0x34 of the record). */
 typedef struct PanelRecSub {
@@ -61,24 +61,24 @@ typedef struct PanelHoldItem {
 typedef struct PanelHold {
     s32 window;
     s16 unk4;
-    s16 unk6;
+    s16 count;   /* 0x6: entries used in items[] */
     s32 unk8;
-    PanelHoldItem items[0x40]; /* 0xC: queued entries, unk6 counts them */
+    PanelHoldItem items[0x40]; /* 0xC: queued entries, count bounds them */
 } PanelHold;
 
-extern PanelHold D_003B4780;
+extern PanelHold itfHeldPanelCursor;
 
 extern PanelEntry itfWindowSlots[];
 
 extern void itfAdvancePanelLayoutAndNotify(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern void itfMesCleanupWindow(s32 window, s32 arg1);
-extern void func_001A4988(s32 window, s32 arg1, s32 arg2);
+extern void itfMesSetWindowPageAndRefresh(s32 window, s32 arg1, s32 arg2);
 extern s32 scrGetWindow(void);
 extern void itfScaleVectors(s32 *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const s32 *input, s32 count);
-extern s32 D_003B44E8[];
+extern s32 itfPanelColorTemplates[];
 extern s32 D_003B4548[];
-extern s32 D_003B4588[];
-extern s32 D_003B4598[];
+extern s32 itfPanelGradientColorTemplate[];
+extern s32 itfPanelGradientColorPair[];
 extern void itfDrawQuadFlat4(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, u64 command);
 extern u8 D_004365C8[8];
 extern u8 D_004365D0[8];
@@ -93,6 +93,11 @@ extern u64 *sdfConsFinalizePacketHeader(void *, s32);
 extern void sdfAppendPacket(void *, void *);
 extern s32 scrReadIntParameter(s32);
 extern s32 itfMesStartEntry(s32 window, s32 arg1, s32 arg2);
+extern u8 D_003B45E8[], D_003B4600[], D_003B4618[];
+extern u8 D_003B4630[], D_003B4648[], D_003B4660[];
+extern u8 D_004365A8[8], D_004365B0[8];
+extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, u64);
+
 
 typedef struct PanelVert {
     s32 x;
@@ -100,7 +105,7 @@ typedef struct PanelVert {
 } PanelVert;
 
 void itfPanelDispatchHandler(PanelObj *panel) {
-    D_003B4448[panel->handlerIndex](panel);
+    itfPanelHandlers[panel->handlerIndex](panel);
 }
 
 void itfPanelSetFourColumnVertices(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
@@ -206,7 +211,7 @@ void itfSetPanelColorAndAlphaVectors(u8 *base, u32 red, u32 green, u32 blue, u32
     panelSetVec4(vec, red, green, blue, 1);
     vec = (u32 *)(base + 0x150);
     panelSetVec4(vec, red, green, blue, alpha);
-    itfScaleVectors((s32 *)(base + 0x160), red, green, blue, alpha, D_003B44E8, 6);
+    itfScaleVectors((s32 *)(base + 0x160), red, green, blue, alpha, itfPanelColorTemplates, 6);
 }
 
 void itfSetPanelColorVectors(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
@@ -222,8 +227,8 @@ void itfSetPanelGradientColor(u8 *base, u32 red, u32 green, u32 blue, u32 alpha)
     u32 *vec = (u32 *)(base + 0x20);
 
     panelSetVec4(vec, red, green, blue, alpha);
-    itfScaleVectors((s32 *)(base + 0x30), red, green, blue, alpha, D_003B4588, 1);
-    itfScaleVectors((s32 *)(base + 0x40), red, green, blue, 0x80, D_003B4598, 2);
+    itfScaleVectors((s32 *)(base + 0x30), red, green, blue, alpha, itfPanelGradientColorTemplate, 1);
+    itfScaleVectors((s32 *)(base + 0x40), red, green, blue, 0x80, itfPanelGradientColorPair, 2);
 }
 
 void itfPanelSetRectSpan(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
@@ -277,32 +282,64 @@ void itfDrawIndexedPanelFlatQuads(PanelObj *panel, u64 command) {
     PktRec *colors = buf + 4;
     s32 i;
 
-    colors[1].unkC = panel->unk38;
+    colors[1].unkC = panel->alpha;
     for (i = 0; i < 3; i++) {
-        itfDrawQuadFlat4(buf, colors, &D_003B45C8[i * 4], &D_003B45D8[i * 4], panel->unkC, command);
+        itfDrawQuadFlat4(buf, colors, &D_003B45C8[i * 4], &D_003B45D8[i * 4], panel->tail, command);
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2230);
+void func_001A2230(PanelObj *panel, u64 command) {
+    PktRec *buf = panel->buf;
+    PktRec *colors = buf + 21;
+    s32 alpha = panel->alpha;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2340);
+    for (i = 0; i < 7; i++, colors++) {
+        colors->unkC = alpha;
+    }
+    colors = buf + 20;
+    for (i = 0; i < 3; i++) {
+        itfEmitQuadListWide(buf, colors, &D_003B45E8[i * 8], &D_003B4600[i * 8], 8, panel->tail, command);
+    }
+    for (i = 0; i < 6; i++) {
+        itfEmitQuadListA(buf + 8 + i * 2, colors, D_004365A8, &D_003B4618[i * 4], 4, panel->tail, command);
+    }
+}
+
+void func_001A2340(PanelObj *panel, u64 command) {
+    PktRec *buf = panel->buf;
+    PktRec *colors = buf + 17;
+    s32 alpha = panel->alpha;
+    s32 i;
+
+    for (i = 0; i < 5; i++, colors++) {
+        colors->unkC = alpha;
+    }
+    colors = buf + 16;
+    for (i = 0; i < 3; i++) {
+        itfEmitQuadListWide(buf, colors, &D_003B4630[i * 8], &D_003B4648[i * 8], 8, panel->tail, command);
+    }
+    for (i = 0; i < 2; i++) {
+        itfEmitQuadListA(buf + 8 + i * 2, colors, D_004365B0, &D_003B4660[i * 4], 4, panel->tail, command);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2450);
 
 void itfDrawPanelQuadWithCommand(PanelObj *panel, u64 command) {
     PktRec *colors = panel->buf + 2;
 
-    colors->unkC = panel->unk38;
-    itfDrawQuadFlat4(panel->buf, colors, D_004365C8, D_004365D0, panel->unkC, command);
+    colors->unkC = panel->alpha;
+    itfDrawQuadFlat4(panel->buf, colors, D_004365C8, D_004365D0, panel->tail, command);
 }
 
 void itfEmitPanelQuadPacket(PanelObj *panel, u64 command) {
     PktRec *buf = panel->buf;
     PktRec *colors = buf + 3;
 
-    colors[1].unkC = panel->unk38;
+    colors[1].unkC = panel->alpha;
     itfSendTablePacket(command, 2, 0);
-    itfEmitQuadListWide(buf, colors, D_004365D8, D_004365E0, 6, panel->unkC, command);
+    itfEmitQuadListWide(buf, colors, D_004365D8, D_004365E0, 6, panel->tail, command);
     itfSendTablePacket(command, 0, 0);
 }
 
@@ -315,12 +352,12 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2AF0);
 void itfDrawTintedPanelRect(PanelObj *panel, u64 command) {
     PanelRect rect;
 
-    D_003B4760[3] = panel->unk38 * 0x67 / 128;
+    D_003B4760[3] = panel->alpha * 0x67 / 128;
     rect.x0 = panel->rect.x0;
     rect.y0 = panel->rect.y0;
     rect.x1 = panel->rect.x1;
     rect.y1 = panel->rect.y1;
-    func_001A09C0(&rect, D_003B4760, panel->unkC, 0x240, command);
+    func_001A09C0(&rect, D_003B4760, panel->tail, 0x240, command);
 }
 
 void itfAppendGsPanelStatePacket(void *list) {
@@ -379,17 +416,17 @@ s32 itfPanelAcquireHold(void) {
     if (window < 0) {
         return 1;
     }
-    hold = &D_003B4780;
+    hold = &itfHeldPanelCursor;
     hold->window = window;
     hold->unk4 = -1;
     hold->unk8 = -1;
-    hold->unk6 = 0;
-    func_001A4988(window, 3, 0);
+    hold->count = 0;
+    itfMesSetWindowPageAndRefresh(window, 3, 0);
     return 1;
 }
 
 s32 itfPanelReleaseHold(void) {
-    PanelHold *hold = &D_003B4780;
+    PanelHold *hold = &itfHeldPanelCursor;
 
     if (hold->window < 0) {
         return 1;
@@ -398,13 +435,13 @@ s32 itfPanelReleaseHold(void) {
     hold->window = -1;
     hold->unk4 = -1;
     hold->unk8 = -1;
-    hold->unk6 = 0;
+    hold->count = 0;
     return 1;
 }
 
 /* Queue one (first, second, third) entry from the script parameters; ignored when no hold is active or the queue is full. */
 s32 itfCommandQueueHeldPanelEntry(void) {
-    PanelHold *cursor = &D_003B4780;
+    PanelHold *cursor = &itfHeldPanelCursor;
     s32 first;
     s32 second;
     s32 third;
@@ -412,16 +449,16 @@ s32 itfCommandQueueHeldPanelEntry(void) {
     if (cursor->window < 0) {
         return 1;
     }
-    if (cursor->unk6 >= 0x40) {
+    if (cursor->count >= 0x40) {
         return 1;
     }
     first = scrReadIntParameter(0);
     second = scrReadIntParameter(1);
     third = scrReadIntParameter(2);
-    cursor->items[cursor->unk6].second = first;
-    cursor->items[cursor->unk6].first = second;
-    cursor->items[cursor->unk6].third = third;
-    cursor->unk6++;
+    cursor->items[cursor->count].second = first;
+    cursor->items[cursor->count].first = second;
+    cursor->items[cursor->count].third = third;
+    cursor->count++;
     return 1;
 }
 

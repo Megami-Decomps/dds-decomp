@@ -12,15 +12,13 @@ extern void mnuUnpackNibbleFields();
 
 extern u8 D_00368C40[];
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 extern s8 D_003BC39C;
 
 extern s32 kwlnTaskFindByPriority(u32);
 
 extern s64 evtFindTaskById(void);
-
-s32 effDestroyResourceSlotSet(u32 sprite);
 
 extern s32 func_00285670(s32, s32 *, u64, u64);
 
@@ -38,10 +36,10 @@ extern void *memset(void *dst, s32 c, u32 n);
 extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
 extern void func_002424B0(void);
 extern void evtReleaseEventPackResources(void);
-extern f32 D_003D80F0[];
-extern f32 D_003D80E0[];
-extern f32 D_003D80D0[];
-extern s32 D_003BC380;
+extern f32 mnuShopSavedLastTransformVector[];
+extern f32 mnuShopSavedMiddleTransformVector[];
+extern f32 mnuShopSavedFirstTransformVector[];
+extern s32 mnuShopRestoreMiddleVector;
 extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
 extern u8 *effCreateStatusBatch(s32 kind);
 extern s32 effDestroyPackedBatch(s32);
@@ -608,7 +606,7 @@ extern void mnuShopSubmitDescriptor(CampScene *scene);
 extern void func_00243EC8(CampScene *scene);
 
 /* Camp scene opening steps 1..5, each falling into the next; stages 0 and 2 do nothing, other values advance by one. */
-void func_00243B28(CampScene *scene) {
+void mnuAdvanceShopMenuState(CampScene *scene) {
     switch (scene->menuState) {
     case 1:
         if (kwlnHeldTextureReference == 0) {
@@ -687,33 +685,33 @@ void mnuShopSavePrimaryTransform(u8 *scene) {
     s32 i;
     f32 *coordinates = (f32 *)(scene + 0x2330);
     for (i = 0; i < 4; i++) {
-        D_003D80F0[i] = coordinates[i + 8];
-        D_003D80D0[i] = coordinates[i];
+        mnuShopSavedLastTransformVector[i] = coordinates[i + 8];
+        mnuShopSavedFirstTransformVector[i] = coordinates[i];
     }
-    D_003BC380 = 0;
+    mnuShopRestoreMiddleVector = 0;
 }
 
 void mnuShopSaveFullTransform(u8 *scene) {
     s32 i;
     f32 *coordinates = (f32 *)(scene + 0x2330);
     for (i = 0; i < 4; i++) {
-        D_003D80F0[i] = coordinates[i + 8];
-        D_003D80E0[i] = coordinates[i + 4];
-        D_003D80D0[i] = coordinates[i];
+        mnuShopSavedLastTransformVector[i] = coordinates[i + 8];
+        mnuShopSavedMiddleTransformVector[i] = coordinates[i + 4];
+        mnuShopSavedFirstTransformVector[i] = coordinates[i];
     }
-    D_003BC380 = 1;
+    mnuShopRestoreMiddleVector = 1;
 }
 
 void mnuShopRestoreTransform(u8 *scene) {
     s32 i;
     f32 *coordinates = (f32 *)(scene + 0x2330);
-    s32 useMiddle = D_003BC380;
+    s32 useMiddle = mnuShopRestoreMiddleVector;
     for (i = 0; i < 4; i++) {
-        coordinates[i + 8] = D_003D80F0[i];
+        coordinates[i + 8] = mnuShopSavedLastTransformVector[i];
         if (useMiddle != 0) {
-            coordinates[i + 4] = D_003D80E0[i];
+            coordinates[i + 4] = mnuShopSavedMiddleTransformVector[i];
         }
-        coordinates[i] = D_003D80D0[i];
+        coordinates[i] = mnuShopSavedFirstTransformVector[i];
     }
 }
 
@@ -816,16 +814,14 @@ void mnuShopLoadSpriteAssets(ShopScene *scene) {
     *resource = effLoadIndexedResource("/facility/spr/shop/", D_0036AA60[0], 0);
 }
 
-s64 func_00244360(ShopScene *scene) {
-    return effDestroyResourceSlotSet(scene->spriteResource);
-}
+INCLUDE_ASM(const s32, "game/code_00242608", mnuReleaseShopSceneSpriteResources);
 
-extern s32 D_003BAA00;
-extern u8 *D_003BAA68;
+extern s32 datGameState;
+extern u8 *datItemSkillRecords;
 
 s32 mnuShopHasPendingFlag(void) {
-    u8 *flags = (u8 *)(D_003BAA00 + 0x12A0);
-    u8 *entry = D_003BAA68;
+    u8 *flags = (u8 *)(datGameState + 0x12A0);
+    u8 *entry = datItemSkillRecords;
     s32 found = 0;
     s32 i;
 
@@ -949,7 +945,7 @@ s32 mnuCountActivePartyEntries(void) {
 
     count = 0;
     remaining = 4;
-    entry = (u16 *)(D_003BAA00 + 0xa60);
+    entry = (u16 *)(datGameState + 0xa60);
     do {
         flags = *entry;
         entry += 0xd2;
@@ -989,7 +985,7 @@ void mnuShopDestroyScene(s32 arg) {
 
     if (scene != NULL) {
         mnuShopReleaseSprites(scene);
-        func_00244360(scene);
+        mnuReleaseShopSceneSpriteResources(scene);
         mnuShopReleaseSceneObjects(scene);
         mnuDrainPanelTransitions((u8 *)scene + 8, arg);
         dspCloseChannel();
@@ -1135,7 +1131,7 @@ INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF418);
 
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF428);
 
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC380);
+INCLUDE_SDATA(const s32, "game/code_00242608", mnuShopRestoreMiddleVector);
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC388);
 

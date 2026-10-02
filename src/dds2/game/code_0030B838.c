@@ -1,12 +1,21 @@
 #include "common.h"
 #include "fpu.h"
+#include "gs_packet.h"
 #include "sdf.h"
 
-extern s32 D_004388B4;
+extern s32 fldLocalMapCameraObject;
 
-extern SdfQuad D_00400970;
+typedef struct {
+    f32 v[4];
+} SdfCameraVector;
 
-extern SdfQuad D_00400980;
+extern SdfCameraVector fldLocalMapFirstCameraVector;
+extern SdfCameraVector fldLocalMapSecondCameraVector;
+extern f32 D_004008E0[][4];
+extern f32 D_00400920[][4];
+extern s8 D_004388C1;
+extern void sdfQuatSlerp(f32 *, f32 *, f32 *, f32);
+extern void sdfQuaternionNormalize(f32 *);
 
 extern void effObjSetInnerFirstVec(s32, void *);
 
@@ -82,7 +91,7 @@ extern u32 D_004390A0;
 
 extern s32 sdfCounterGetDisplayValue(void);
 
-extern s32 D_004388BC;
+extern s32 sdfCounterSelectionCount;
 
 extern void sdfLatchBaseVectorsForSelection(void);
 
@@ -103,11 +112,11 @@ typedef struct MapResource {
     u32 unkC;
 } MapResource;
 
-extern MapResource D_00401280[10];
+extern MapResource fldLocalMapNameTextures[10];
 
-extern MapResource D_00401260;
+extern MapResource fldLocalMapAuxTextureResource;
 
-extern MapResource D_00401270;
+extern MapResource fldLocalMapTextureResource;
 
 extern u32 fldReleaseMapResource(s32 *);
 
@@ -130,14 +139,14 @@ typedef struct {
     s32 maxCount;      /* 0x20 */
 } MapSelection;
 
-extern u32 D_0045C7C0[];
+extern u32 sdfInstalledSpriteSlots[];
 
 typedef struct SdfSlotSet {
     u8 pad00[0xC];
     u32 slot[25];
 } SdfSlotSet;
-extern SdfQuad D_00400990;
-extern SdfQuad D_004009A0;
+extern SdfCameraVector D_00400990;
+extern SdfCameraVector D_004009A0;
 
 extern s32 mnuCreateListState(s32, s32, s32);
 extern void *func_00328D68(s32);
@@ -160,6 +169,10 @@ extern void sdfUpdateCounterSelectionFade(void);
 extern void mnuCallInitWide();
 
 extern void func_001094F8(s32, s32, s32, s32, u32, u32, u32, u32);
+
+extern s32 frMeasureAndQueueCounterText();
+
+extern void evtPrepareSizedDrawResource();
 
 extern void sdfCounterDrawGlyphAtGridCell(s32, s32, u32, u8 *);
 
@@ -202,7 +215,7 @@ extern SdfSpritePlace D_00400DF0[];
 extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
 extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, u32, s32, s32, s32);
 
-#define SDF_SPRITE(index) (((SdfSpriteSet *)D_0045C7C0[D_00400DF0[index].bank])->entries + D_00400DF0[index].slot)
+#define SDF_SPRITE(index) (((SdfSpriteSet *)sdfInstalledSpriteSlots[D_00400DF0[index].bank])->entries + D_00400DF0[index].slot)
 
 static inline s32 sprPlaceBank(SdfSpritePlace *p) { return p->bank; }
 static inline s32 sprPlaceSlot(SdfSpritePlace *p) { return p->slot; }
@@ -214,9 +227,9 @@ extern s32 fldLoadMapResource(const char *, MapResource *);
 
 
 void sdfInitInnerVectors(void) {
-    effObjSetInnerFirstVec(D_004388B4, &D_00400970);
-    effObjSetInnerSecondVec(D_004388B4, &D_00400980);
-    ((EffObjHeader *)D_004388B4)->vtbl->refresh(D_004388B4);
+    effObjSetInnerFirstVec(fldLocalMapCameraObject, &fldLocalMapFirstCameraVector);
+    effObjSetInnerSecondVec(fldLocalMapCameraObject, &fldLocalMapSecondCameraVector);
+    ((EffObjHeader *)fldLocalMapCameraObject)->vtbl->refresh(fldLocalMapCameraObject);
 }
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030B880);
@@ -228,8 +241,8 @@ extern void sdfCommitPendingVectorAndMarkChanged();
 /* Latch the base vectors into the pending pair and flag the change. */
 void sdfLatchBaseVectorsForSelection(void) {
     D_004388C0 = 1;
-    D_00400990 = D_00400970;
-    D_004009A0 = D_00400980;
+    D_00400990 = fldLocalMapFirstCameraVector;
+    D_004009A0 = fldLocalMapSecondCameraVector;
     sdfCommitPendingVectorAndMarkChanged();
 }
 
@@ -240,7 +253,7 @@ void sdfSetSelectedIndex(u32 index) {
 }
 
 void sdfCycleForward(void) {
-    if ((s32)sdfSelectedCounterIndex < D_004388BC - 1) {
+    if ((s32)sdfSelectedCounterIndex < sdfCounterSelectionCount - 1) {
         sdfLatchBaseVectorsForSelection();
         sdfSelectedCounterIndex = sdfSelectedCounterIndex + 1;
     } else {
@@ -256,7 +269,7 @@ void sdfCycleBackward(void) {
         sdfSelectedCounterIndex = sdfSelectedCounterIndex - 1;
     } else {
         sdfLatchBaseVectorsForSelection();
-        sdfSelectedCounterIndex = D_004388BC - 1;
+        sdfSelectedCounterIndex = sdfCounterSelectionCount - 1;
     }
 }
 
@@ -264,13 +277,38 @@ s8 func_0030BCE8(void) {
     return D_004388C0;
 }
 
-s64 func_0030BCF0(void) {
-    return func_0030BD10();
-}
+INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BCF0);
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BD10);
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BED8);
+s32 func_0030BED8(void) {
+    f32 t;
+    s32 index = D_004388C1;
+
+    if (D_004388C0 != 0) {
+        t = (45 - D_004388C0) / 45.0f;
+        t = 1.0f - t * t;
+        if (t > 1.0f) t = 1.0f;
+        fldLocalMapFirstCameraVector.v[0] = D_00400990.v[0] * (1.0f - t) + D_004008E0[index][0] * t;
+        fldLocalMapFirstCameraVector.v[1] = D_00400990.v[1] * (1.0f - t) + D_004008E0[index][1] * t;
+        fldLocalMapFirstCameraVector.v[2] = D_00400990.v[2] * (1.0f - t) + D_004008E0[index][2] * t;
+        fldLocalMapFirstCameraVector.v[3] = 1.0f;
+        sdfQuatSlerp(fldLocalMapSecondCameraVector.v, D_004009A0.v, D_00400920[index], t);
+        if ((s8)(D_004388C0 + 1) >= 45) D_004388C0 = 0;
+        else D_004388C0++;
+    } else {
+        fldLocalMapFirstCameraVector.v[0] = D_004008E0[index][0];
+        fldLocalMapFirstCameraVector.v[1] = D_004008E0[index][1];
+        fldLocalMapFirstCameraVector.v[2] = D_004008E0[index][2];
+        fldLocalMapFirstCameraVector.v[3] = D_004008E0[index][3];
+        sdfQuaternionNormalize(D_00400920[index]);
+        fldLocalMapSecondCameraVector.v[0] = D_00400920[index][0];
+        fldLocalMapSecondCameraVector.v[1] = D_00400920[index][1];
+        fldLocalMapSecondCameraVector.v[2] = D_00400920[index][2];
+        fldLocalMapSecondCameraVector.v[3] = D_00400920[index][3];
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C0C0);
 
@@ -396,7 +434,26 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030CA38);
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030CC68);
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030CEF0);
+/* Draw one counter channel's label plate at (x, y): a shaded frame whose alpha follows the timer fraction, then the channel's text centred in it. */
+void sdfCounterDrawChannelPlate(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt, SdfCounterChannel *channel) {
+    f32 fade = (f32)rt->timer->value / 10.0f;
+    s32 base = 0;
+    s32 width;
+
+    if (channel->index == rt->channel->index) {
+        base = 0x40;
+    }
+    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    func_001094F8(x + 1, y + 1, 0x80, 0x16,
+                  PACK(base + 0x40, base + 0x40, base + 0x40, (u32)(fade * 32.0f)),
+                  PACK(base, base, base, (u32)((f32)(base + 0x10) * fade)),
+                  PACK(base + 0x30, base + 0x30, base + 0x30, (u32)(fade * 64.0f)),
+                  PACK(base + 0x60, base + 0x60, base + 0x60, (u32)((f32)(base + 0x70) * fade)));
+    width = frMeasureAndQueueCounterText(channel->display->word);
+    evtPrepareSizedDrawResource(x + (0x80 - width) / 2 + 1, y + 1,
+                                PACK((u32)(fade * 128.0f), (u32)(fade * 128.0f), (u32)((f32)(base + 0x80) * fade), (u32)(fade * 128.0f)),
+                                channel->display->word);
+}
 
 void sdfCounterIncrease(void) {
     s32 currentValue;
@@ -532,7 +589,7 @@ void sdfCounterDrawSelectedTimerFade(s32 arg0, s32 x, f32 fade) {
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
-                  D_00401270.image);
+                  fldLocalMapTextureResource.image);
     func_00108BD8(0);
 }
 
@@ -650,14 +707,14 @@ void sdfInstallNonzeroSpriteSlots(SdfSlotSet *set) {
     s32 i;
     for (i = 0; i < 25; i++) {
         if (set->slot[i] != 0) {
-            D_0045C7C0[i] = set->slot[i];
+            sdfInstalledSpriteSlots[i] = set->slot[i];
         }
     }
 }
 
 void sdfReleaseAllSpriteSlots(void) {
     s32 remaining = 24;
-    u32 *slot = D_0045C7C0;
+    u32 *slot = sdfInstalledSpriteSlots;
     do {
         if (*slot != 0) {
             effDestroyResourceSlotSet(*slot);
@@ -672,36 +729,34 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030DBF0);
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030DE08);
 
-s64 sdfDrawUniformlyScaledSlotImage(f32 x) {
-    return func_0030DE08(x, x);
-}
+INCLUDE_ASM(const s32, "game/code_0030B838", sdfDrawUniformlyScaledSlotImage);
 
 /* Load the ten numbered "sname" tiles plus the two fixed local-map images. */
 s32 fldLoadLocalMapResources(void) {
     char name[32];
     s32 i;
-    MapResource *item = D_00401280;
+    MapResource *item = fldLocalMapNameTextures;
 
     for (i = 0; i < 10; i++) {
         func_0035C860(name, "/lmap/sname_%02d.tmx", i + 1);
         fldLoadMapResource(name, item);
         item++;
     }
-    fldLoadMapResource("/lmap/1006.tmx", &D_00401260);
-    fldLoadMapResource("/lmap/l_map00.tmx", &D_00401270);
+    fldLoadMapResource("/lmap/1006.tmx", &fldLocalMapAuxTextureResource);
+    fldLoadMapResource("/lmap/l_map00.tmx", &fldLocalMapTextureResource);
     return 1;
 }
 
 s32 fldReleaseLocalMapResources(void) {
     s32 i = 9;
-    MapResource *item = D_00401280;
+    MapResource *item = fldLocalMapNameTextures;
     do {
         fldReleaseMapResource((s32 *)item);
         item++;
         --i;
     } while (i >= 0);
-    fldReleaseMapResource((s32 *)&D_00401260);
-    fldReleaseMapResource((s32 *)&D_00401270);
+    fldReleaseMapResource((s32 *)&fldLocalMapAuxTextureResource);
+    fldReleaseMapResource((s32 *)&fldLocalMapTextureResource);
     return 1;
 }
 

@@ -3,7 +3,7 @@
 extern void fldShutdownLmapResources(void);
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
-extern char D_003B3CA0[]; /* "LmapMain" */
+extern char fldLocalMapTaskName[]; /* "LmapMain" */
 
 extern s32 kwlnTaskGetTaskByName(u32);
 
@@ -47,9 +47,9 @@ extern s32 fldStartAndPollLocalMapTrack(void);
 extern void func_002C30F0(void);
 extern s32 func_002C3220(void);
 extern void func_002C3420(void);
-extern s32 func_002E92C0(s32);
+extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void sndEnsureMidiBankResident(s32);
-extern s32 D_003BD248;
+extern s32 fldLocalMapTrackState;
 
 /* Ring window over a doubly linked node list (prev at 0x18, next at 0x1C). */
 typedef struct LmapNode {
@@ -73,7 +73,7 @@ typedef struct LmapList {
 extern LmapNode *sdfGridSeekFirstNode(LmapList *);
 extern LmapNode *sdfGridSeekLastNode(LmapList *);
 extern LmapNode *fldLmapAdvanceWindowStart(LmapList *);
-extern LmapNode *func_002C2658(LmapList *);
+extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
 
 LmapNode *fldLmapAdvanceWindowStart(LmapList *list) {
     LmapNode *cur = list->cur;
@@ -91,7 +91,7 @@ LmapNode *fldLmapAdvanceWindowStart(LmapList *list) {
     return cur;
 }
 
-LmapNode *func_002C2658(LmapList *list) {
+LmapNode *fldLmapExpandWindowBackward(LmapList *list) {
     LmapNode *cur = list->cur;
     LmapNode *head = list->first;
     LmapNode *node;
@@ -162,7 +162,7 @@ LmapNode *fldLmapRewindCursor(LmapList *list) {
     list->cur = cur;
     list->count--;
     if (list->count <= 0) {
-        cur = func_002C2658(list);
+        cur = fldLmapExpandWindowBackward(list);
     }
     return cur;
 }
@@ -207,7 +207,7 @@ typedef struct LmapDrawSurface {
     u8 pad14[0xC];
 } LmapDrawSurface; /* 0x20 */
 
-extern LmapDrawSurface D_00324B48[];
+extern LmapDrawSurface kwlnDrawSurfaces[];
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, void *);
@@ -224,7 +224,7 @@ void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 width, s32 height, s
     sdfInitPacketList(list);
     sdfPktInit(header, x + 0x7000, y + 0x7900, width, height);
     sdfAppendPacket(list, sdfFormatSifPacket(header, command));
-    target = &D_00324B48[surface];
+    target = &kwlnDrawSurfaces[surface];
     target->submit(target, list);
 }
 
@@ -235,7 +235,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 a, s32 b, s32 c, s32 d, s
 
     sdfInitPacketList(list);
     sdfAppendPacket(list, func_0011D3E8(x + 0x7000, y + 0x7900, a, b * 16, c * 8, d, e));
-    target = &D_00324B48[surface];
+    target = &kwlnDrawSurfaces[surface];
     target->submit(target, list);
 }
 
@@ -273,27 +273,27 @@ void fldStartLmapTask(s32 arg0) {
     } else {
         D_003BD23C = 1;
     }
-    kwlnTaskCreate(D_003B3CA0, 0x2AF8, 0, 0, fldLmapTaskUpdate, 0, 0);
+    kwlnTaskCreate(fldLocalMapTaskName, 0x2AF8, 0, 0, fldLmapTaskUpdate, 0, 0);
     D_003BD96C = 0;
     fldInitializeLmapState();
 }
 
 void fldStopLmapTask(void) {
     fldShutdownLmapResources();
-    kwlnTaskDestroyWithHierarchyByName(D_003B3CA0, 1);
+    kwlnTaskDestroyWithHierarchyByName(fldLocalMapTaskName, 1);
 }
 
 s32 fldLmapTaskExists(void) {
-    return kwlnTaskGetTaskByName((u32)D_003B3CA0) != 0;
+    return kwlnTaskGetTaskByName((u32)fldLocalMapTaskName) != 0;
 }
 
 void func_002C2EF8(const char *fmt, ...) {
 }
 
-INCLUDE_RODATA(const s32, "game/code_002C2620", D_003B3CA0);
-
 /* Field-map mode index -> track slot. Indices 7 and 12 are the only values in
  * range with no arm of their own, so they fall through to the default of 1. */
+INCLUDE_RODATA(const s32, "game/code_002C2620", fldLocalMapTaskName);
+
 s32 func_002C2F40(s32 index) {
     s32 slot = 1;
 
@@ -356,20 +356,20 @@ void fldShutdownLmapResources(void) {
 }
 
 s32 fldStartAndPollLocalMapTrack(void) {
-    if (D_003BD248 == 1) {
-        if (func_002E92C0(0x400000) == 0) {
+    if (fldLocalMapTrackState == 1) {
+        if (sndFindPackedTrackLoadStatus(0x400000) == 0) {
             sndEnsureMidiBankResident(0x400000);
-            D_003BD248 = 2;
+            fldLocalMapTrackState = 2;
         } else {
-            D_003BD248 = 0xFF;
+            fldLocalMapTrackState = 0xFF;
         }
-    } else if (D_003BD248 == 2) {
-        if (func_002E92C0(0x400000) == 1) {
-            D_003BD248 = 0xFF;
+    } else if (fldLocalMapTrackState == 2) {
+        if (sndFindPackedTrackLoadStatus(0x400000) == 1) {
+            fldLocalMapTrackState = 0xFF;
         }
     }
-    if (D_003BD248 == 0xFF) {
-        D_003BD248 = 1;
+    if (fldLocalMapTrackState == 0xFF) {
+        fldLocalMapTrackState = 1;
         return 1;
     }
     return 0;
@@ -379,9 +379,61 @@ INCLUDE_ASM(const s32, "game/code_002C2620", func_002C30F0);
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3220);
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3420);
+extern void func_00132010(void);
+extern void evtSetDrawSurfaceIndex(s32);
+extern void func_00108CB8(s32);
+extern void func_001093B8(s32, s32, s32, s32, u32, s32, s32, s32);
+extern void func_002C4850(s32);
+extern void func_002C7950(void);
+extern void func_002C6448(s32);
+extern s32 func_00134CD8(void);
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3510);
+void func_002C3420(void) {
+    func_00132010();
+    evtSetDrawSurfaceIndex(84);
+    func_00108CB8(0);
+    func_001093B8(0, 0, 170, 195, 0x3300101E, 0x101E, 0x101E, 0x101E);
+
+    switch (D_003BD25C) {
+    case 1:
+    case 2:
+        func_002C4850(1);
+        func_002C7950();
+        func_002C6448(0);
+        break;
+    case 3:
+        func_002C4850(0);
+        func_002C7950();
+        func_002C6448(1);
+        break;
+    case 4:
+        func_002C4850(0);
+        func_002C6448(1);
+        break;
+    case 5:
+        func_002C6448(0);
+        break;
+    }
+    if (D_003BD260 != 0) {
+        func_00134CD8();
+    }
+}
+
+s32 mdlCollectLowFlagBits(void) {
+    s32 bits;
+
+    bits = mdlFlagTest(0x400);
+    bits |= mdlFlagTest(0x401) << 1;
+    bits |= mdlFlagTest(0x402) << 2;
+    bits |= mdlFlagTest(0x403) << 3;
+    bits |= mdlFlagTest(0x404) << 4;
+    bits |= mdlFlagTest(0x405) << 5;
+    bits |= mdlFlagTest(0x406) << 6;
+    bits |= mdlFlagTest(0x407) << 7;
+    bits |= mdlFlagTest(0x408) << 8;
+    bits |= mdlFlagTest(0x409) << 9;
+    return bits;
+}
 
 s32 mdlCollectFlagBitsIntoMask(void) {
     s32 bits;
@@ -436,7 +488,36 @@ s32 fldLmapToggleOverlay(void) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3738);
+extern s32 sdfCounterGetDisplayValue(void);
+extern void mdlFlagClear(s32 flag);
+extern void mdlFlagSet(s32 flag);
+
+void sdfClearCounterDisplayFlags(void) {
+    u32 flags = 1 << (sdfCounterGetDisplayValue() - 1);
+
+    if (flags & 8) {
+        mdlFlagClear(0x40A);
+    }
+    if (flags & 0x20) {
+        mdlFlagClear(0x40B);
+        mdlFlagSet(0x23A);
+        mdlFlagClear(0x23C);
+    }
+    if (flags & 0x40) {
+        mdlFlagClear(0x40C);
+    }
+    if (flags & 0x80) {
+        mdlFlagClear(0x40D);
+    }
+    if (flags & 0x100) {
+        mdlFlagClear(0x40E);
+        mdlFlagSet(0x23B);
+        mdlFlagClear(0x239);
+    }
+    if (flags & 0x200) {
+        mdlFlagClear(0x40F);
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD238);
 
@@ -444,7 +525,7 @@ INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD23C);
 
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD240);
 
-INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD248);
+INCLUDE_SDATA(const s32, "game/code_002C2620", fldLocalMapTrackState);
 
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD250);
 

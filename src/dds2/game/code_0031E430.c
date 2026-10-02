@@ -1,8 +1,8 @@
 #include "common.h"
 
-extern u32 D_0043895C;
+extern u32 itfFadeTint;
 
-extern void (*D_004389C4)(void);
+extern void (*sdfTickCallback)(void);
 
 /* Fade width is in half-pixels; the glyph renderer doubles it at draw time. */
 #define FADE_MAX_EXTENT 0x80
@@ -34,15 +34,15 @@ s32 mnuDrawIndexedFadeGlyph(s32 x, s32 y, s32 width, s32 index, s32 effect) {
     s32 texture = mnuGetIndexedFadeTexture(index);
     return func_00306CD0(x + D_0040B088[index].x,
                          y + D_0040B088[index].y,
-                         0, width * 2, 0, D_0043895C, texture, effect);
+                         0, width * 2, 0, itfFadeTint, texture, effect);
 }
 
 void itfFadeSetTint(u32 tint) {
-    D_0043895C = tint;
+    itfFadeTint = tint;
 }
 
 void itfFadeClearTint(void) {
-    D_0043895C = 0;
+    itfFadeTint = 0;
 }
 
 /* Set a fade direction; a completed step snaps directly to its endpoint. */
@@ -283,13 +283,13 @@ void itfDrawFadeGlyphForFrame(FadeEntry *entry) {
     }
     mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 6, 0x54);
     if (entry->frame != 1) {
-        if (entry->frame != 2) goto LAB_0031f0c4;
+        if (entry->frame != 2) goto update;
         mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 5, 0x54);
     }
     mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 4, 0x54);
-LAB_0031f0c4:
+update:
     itfUpdateFade(entry);
 }
 
-INCLUDE_SDATA(const s32, "game/code_0031E430", D_0043895C);
+INCLUDE_SDATA(const s32, "game/code_0031E430", itfFadeTint);
 

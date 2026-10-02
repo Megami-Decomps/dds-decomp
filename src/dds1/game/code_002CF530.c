@@ -8,7 +8,7 @@ extern s32 sdfChipIsInRange(void *);
 extern void sdfReleaseChipBlock(void *);
 extern void sdfReleaseCurrentResourceHandle(void *);
 
-extern void (*D_003BD2D4)(void);
+extern void (*sdfTickCallback)(void);
 
 extern void *sdfResourceRetainAddress(void *);
 
@@ -18,12 +18,11 @@ extern void *func_002CFEB8();
 
 extern u32 D_003BD2CC;
 
-s64 sdfAllocateBlockBySizeThreshold(s64 size) {
+void *sdfAllocateBlockBySizeThreshold(s32 size) {
     if (size >= 0x401) {
-        sdfResourceRetainAddress(func_002D03F8());
-    } else {
-        func_002CFEB8(size);
+        return sdfResourceRetainAddress(func_002D03F8());
     }
+    return func_002CFEB8(size);
 }
 
 void sdfFreeMemoryFromEitherHeap(void *data) {
@@ -61,7 +60,10 @@ void sdfFreeMemorySlotFromEitherHeap(void **slot) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002CF530", func_002CF670);
+void sdfPanicHaltPrintf(const char *format, ...) {
+    for (;;) {
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002CF530", sdfAddHandler);
 

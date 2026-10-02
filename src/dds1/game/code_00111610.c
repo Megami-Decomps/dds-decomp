@@ -21,15 +21,31 @@ typedef struct {
 typedef struct {
     u8 unk0[4];        /* 0x0 */
     u32 unk4;          /* 0x4 */
-    SlotEntry *entry;     /* 0x8: slot from D_00329A68 */
+    SlotEntry *entry;     /* 0x8: slot from dds3SlotRingEntries */
     u8 unkC[0xC];      /* 0xC */
     ObjectResource *resource; /* 0x18 */
 } SlotObjectFull;
 
 extern SlotObjectFull *dds3AppendWorldObjectNode();
 extern u32 dds3AdvanceWorldCounter();
-extern SlotEntry D_00329A68[];
-extern s32 D_003BA9C0;
+extern SlotEntry dds3SlotRingEntries[];
+extern s32 dds3SlotRingCursor;
+
+typedef struct DdsSlotResourceState {
+    u32 unk00;
+    u32 indexNode;
+    s32 kind;
+    u32 unk0C;
+    s32 unk10;
+    u8 pad14[0x38];
+    s32 slots[24];
+    u32 unkAC;
+    s32 currentSlot;
+} DdsSlotResourceState;
+
+extern void *func_002CFEB8(s32);
+extern void *memset(void *, s32, u32);
+extern u32 dds3AppendWorldIndexNode(s32);
 
 SlotObjectFull *dds3SpawnSlotRingObj3(u32 owner) {
     SlotObjectFull *obj = dds3AppendWorldObjectNode(3);
@@ -38,11 +54,11 @@ SlotObjectFull *dds3SpawnSlotRingObj3(u32 owner) {
     s32 slot;
 
     resource->owner = owner;
-    slot = D_003BA9C0;
+    slot = dds3SlotRingCursor;
     obj->unk4 = sequence;
-    obj->entry = &D_00329A68[slot];
-    D_003BA9C0 = slot + 1;
-    D_003BA9C0 = D_003BA9C0 % 10;
+    obj->entry = &dds3SlotRingEntries[slot];
+    dds3SlotRingCursor = slot + 1;
+    dds3SlotRingCursor = dds3SlotRingCursor % 10;
     return obj;
 }
 
@@ -123,7 +139,22 @@ s32 dds3GetObjectSlotRingOccupancy(u32 kind)
     return slots;
 }
 
-INCLUDE_ASM(const s32, "game/code_00111610", func_001117A8);
+DdsSlotResourceState *dds3CreateSlotResourceState(s32 value) {
+    DdsSlotResourceState *state = func_002CFEB8(sizeof(DdsSlotResourceState));
+    s32 i;
+    u32 node;
 
-INCLUDE_SDATA(const s32, "game/code_00111610", D_003BA9C0);
+    memset(state, 0, sizeof(DdsSlotResourceState));
+    state->kind = 3;
+    node = dds3AppendWorldIndexNode(0);
+    state->indexNode = node;
+    state->unk10 = value;
+    for (i = 0; i < 24; i++) {
+        state->slots[i] = -1;
+    }
+    state->currentSlot = -1;
+    return state;
+}
+
+INCLUDE_SDATA(const s32, "game/code_00111610", dds3SlotRingCursor);
 

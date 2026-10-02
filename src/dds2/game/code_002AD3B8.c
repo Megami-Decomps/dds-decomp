@@ -35,7 +35,7 @@ extern void frFontSetChainFlag(s32, s32);
 extern s32 func_0019D550(s32, s32, s32);
 extern void frFontQueueGlyphInSelectedSlot(s32);
 extern s32 evtGetIndexedEventRecordId(s32);
-extern s32 D_00435E20;
+extern s32 datCommandRecords;
 extern s32 D_00435E5C;
 extern s32 D_00435E48;
 extern s32 mnuGetPartyEntryMenuValue();
@@ -49,7 +49,7 @@ extern char D_003E74F8[];
 extern char D_003E7514[];
 extern char D_003E7530[];
 extern char D_003E7434[];
-extern u32 func_002C44E8();
+extern u32 mnuMapPadMaskToFlags();
 extern void func_002BD480();
 extern void mnuSetPopupEntryFlagged();
 extern void mnuClearActionFlags();
@@ -81,52 +81,6 @@ typedef struct MenuSceneConfig {
     u8 pad00[0x10];
     s32 entries[5];
 } MenuSceneConfig;
-
-typedef struct MenuStaffWindow MenuStaffWindow;
-typedef struct MenuStaffNode MenuStaffNode;
-typedef struct MenuStaffList MenuStaffList;
-
-typedef struct MenuStaffContext {
-    u8 pad00[0x60];
-    s32 group;            /* 0x60 */
-    s32 spriteArg0;       /* 0x64 */
-    s32 spriteArg1;       /* 0x68 */
-    s32 unk6C;
-    u8 pad70[0x54];
-    s32 spriteArg2;       /* 0xC4 */
-    u8 padC8[0x40];
-    MenuStaffList *activeWindow; /* 0x108: window used by staff image states */
-    u8 pad10C[0x178];
-    u32 windowFlags;      /* 0x284 */
-    u8 pad288[0xA68C];
-    s32 selection;        /* 0xA914 */
-    u8 padA918[0x11C];
-    void *panelHandle;    /* 0xAA34 */
-    void *spriteHandle;   /* 0xAA38 */
-    u8 padAA3C[0xC];
-    u8 *menu;             /* 0xAA48 */
-    u8 padAA4C[0x6C0];
-    u8 tail[4];           /* 0xB10C */
-} MenuStaffContext;
-
-/* Each staff list owns a cursor-bearing window at +0x18. */
-struct MenuStaffList {
-    u8 pad00[0x18];
-    MenuStaffWindow *window;
-};
-
-struct MenuStaffWindow {
-    u8 pad00[0x18];
-    s32 *cursor;
-    MenuStaffNode *selectedNode; /* 0x1C */
-    s32 panelActive; /* 0x20: selects the alternate panel drawing path */
-    s32 rowCount; /* 0x24 */
-};
-
-struct MenuStaffNode {
-    u8 pad00[0x60];
-    s32 label;
-};
 
 typedef struct MenuStaffObject {
     u8 pad00[0x18];
@@ -199,7 +153,7 @@ s64 mnuStaffImageInputA(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
-    u32 buttons = func_002C44E8(3);
+    u32 buttons = mnuMapPadMaskToFlags(3);
     s64 state;
     u8 *window;
 
@@ -251,7 +205,7 @@ s64 mnuPollStaffSlotSelectionConfirmation(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
-    u32 buttons = func_002C44E8(3);
+    u32 buttons = mnuMapPadMaskToFlags(3);
     s64 state;
     u8 *window;
 
@@ -303,7 +257,7 @@ s64 mnuPollStaffValueSelectionConfirmation(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
-    u32 buttons = func_002C44E8(3);
+    u32 buttons = mnuMapPadMaskToFlags(3);
     s64 state;
     u8 *window;
 
@@ -362,7 +316,7 @@ s64 mnuHandleSecondaryStaffObjectInput(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
-    u32 buttons = func_002C44E8(0xc33);
+    u32 buttons = mnuMapPadMaskToFlags(0xc33);
     s64 state;
     u8 *window;
 
@@ -454,7 +408,7 @@ s32 mnuInitializeSelectedStaffPage(s32 unused) {
     mnuSelectPage(window, index);
     func_002ABD60(context);
     mnuReleaseStaffMenuResources(&context->group);
-    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->unk6C, 0, 0);
+    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, 0, 0);
     mnuSetIndexedWindowPageSpriteFlags(index, window, 1, 0);
     context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, 0);
     context->spriteHandle = mnuCreateSpriteState(context->spriteArg0, context->spriteArg1, context->group);
@@ -516,7 +470,7 @@ s32 mnuStaffListInput(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
-    u32 buttons = func_002C44E8(0x300);
+    u32 buttons = mnuMapPadMaskToFlags(0x300);
     u8 *window = ((MenuStaffList *)menu->firstList)->window;
     s32 *node = ((MenuStaffWindow *)window)->cursor;
     s32 first;
@@ -566,7 +520,7 @@ void mnuDrawStaffCaption(s32 id, u8 *panel) {
 
     itfDrawGridWithResolvedSlot(0x1C0, 0xA10, 0, 0, ((MenuStaffContext *)panel)->spriteArg2, 2, 0x53);
     if (id != 0) {
-        func_0035C860(buf, D_00437BD0, *(s16 *)(evtGetIndexedEventRecordId(id) * 0x38 + D_00435E20 + 0x18));
+        func_0035C860(buf, D_00437BD0, *(s16 *)(evtGetIndexedEventRecordId(id) * 0x38 + datCommandRecords + 0x18));
         handle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)buf, 0);
         frFontSetChainFlag(handle, 4);
         func_0019D550(handle, 1, 0x53);
@@ -600,7 +554,7 @@ s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
     mnuSelectPage(window, index);
     func_002AC408(context);
     mnuReleaseStaffMenuResources(&context->group);
-    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->unk6C, context->spriteArg0,
+    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, context->spriteArg0,
                          context->spriteArg2);
     mnuSetIndexedWindowPageSpriteFlags(index, window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
@@ -674,7 +628,7 @@ s32 mnuHandleStaffSelectionListNavigation(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
-    u32 buttons = func_002C44E8(0x300);
+    u32 buttons = mnuMapPadMaskToFlags(0x300);
     u8 *window = ((MenuStaffList *)menu->secondList)->window;
     s32 *node = ((MenuStaffWindow *)window)->cursor;
     s32 first;
@@ -743,7 +697,7 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
     mnuSelectPage(window, index);
     func_002AC8F0(context);
     mnuReleaseStaffMenuResources(&context->group);
-    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->unk6C, context->spriteArg0,
+    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, context->spriteArg0,
                          context->spriteArg2);
     mnuSetIndexedWindowPageSpriteFlags(index, window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
@@ -810,7 +764,7 @@ s32 mnuHandleStaffValuePageInput(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
-    u32 buttons = func_002C44E8(0x300);
+    u32 buttons = mnuMapPadMaskToFlags(0x300);
     u8 *window = ((MenuStaffList *)menu->thirdList)->window;
     s32 *node = ((MenuStaffWindow *)window)->cursor;
     s32 first;

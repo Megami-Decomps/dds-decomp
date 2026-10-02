@@ -2,81 +2,94 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
-/* Small work area: type id and count, an id block, a result table plus an
- * object released on cleanup. */
+/* Render/history buffer, created by the Magatuhi owner factory (0x38).
+ * This is not the callback input: its +8 word is a float, not an effect pointer. */
 typedef struct {
-    s32   type;         /* 0x00 effect type (== 3 in effMagatuhiDispatchByKind) */
-    u16   count04;      /* 0x04 loop count */
-    u8    pad06[2];     /* 0x06 */
-    void *ptr08;        /* 0x08 id block / source block */
-    u8    pad0C[0x0C];  /* 0x0C */
-    u32  *out18;        /* 0x18 result table */
-    u8    pad1C[4];     /* 0x1C */
-    u32  *values;       /* 0x20: indexed value table */
-    u8    pad24[0x10];  /* 0x24 */
-    void *resource;     /* 0x34 released by effMagatuhiReleaseResource */
-} EffMagatuhiWork; /* 0x38 */
+    s32 count;
+    u16 historyCount;
+    u8 pad06[2];
+    f32 unk08;
+    f32 unk0C;
+    u32 unk10;
+    f32 (*positions)[4];
+    u32 *colorTable;
+    f32 *unk1C;
+    u32 *values;
+    u16 *writeIndices;
+    u16 *validCounts;
+    f32 (*unk2C)[4];
+    u32 texture;
+    void *resource;
+} EffMagatuhiValueWork;
+
+/* Callback input prefix; type 3 contains an effect-dispatch object at +8. */
+typedef struct {
+    s32 type;
+    u8 pad04[4];
+    void *effect;
+} EffMagatuhiCallback;
 
 extern void *effGetHandlerArg(void *arg);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
-/* Four matrix rows (three floats each) plus four floats, copied by effMagatuhiCopyHandlerRows. */
+/* Four rows; the copy updates only xyz and preserves each destination w. */
 typedef struct {
     f32 row[4][4];
     f32 extra[4];
 } EffMagatuhiRowsSrc;
 
-typedef struct {
-    f32 row[4][4];
-    u8 pad40[0x14];
-    f32 extra[4];
-} EffMagatuhiRowsDst;
 
 
-/* The two resource slots select different owners during each variant's teardown. */
-typedef struct {
-    u8   pad_0x000[0x120]; /* 0x000 */
-    void *firstResource;   /* 0x120 */
-    void *secondResource;  /* 0x124 */
-    void *buffer;          /* 0x128 */
-    void *extraBuffer;     /* 0x12C */
-} EffMagatuhiMidWork; /* 0x130 */
 
-/* The first and second teardown paths use different offsets for the trio. */
+typedef struct EffMagatuhiOwner EffMagatuhiOwner;
+
 /* Parameter head of the first family: particles of 0x30 bytes precede the work. */
 typedef struct {
-    u8 pad00[0x28];
+    f32 unk00, unk04, unk08;
+    u8 pad0C[4];
+    f32 unk10, unk14, unk18;
+    u8 pad1C[0xC];
     s32 spread;            /* 0x28 modulus of the particle delay */
-    u8 pad2C[0x34];
+    u8 pad2C[8];
+    f32 unk34;
+    u8 pad38[0x18];
+    f32 unk50;
+    u8 pad54[0xC];
     u32 count;             /* 0x60 */
     u8 pad64[0x118];
 } EffMagatuhiHeadFirst; /* 0x17C */
 
+/* A 0x30-byte position/direction state, shared by the first and drift families. */
 typedef struct {
-    u8 pad00[0x20];
-    s32 delay;             /* 0x20 */
-    u8 pad24[0xC];
-} EffMagatuhiParticleFirst; /* 0x30 */
+    f32 pos[3];
+    u8 pad0C[4];
+    f32 dir[3];
+    u8 pad1C[4];
+    s32 delay;
+    f32 scale;
+    f32 angle;
+    f32 liftStep;
+} EffMagatuhiDriftParticle;
 
 typedef struct {
     EffMagatuhiHeadFirst head;
-    EffMagatuhiParticleFirst *particles; /* 0x17C */
+    EffMagatuhiDriftParticle *particles; /* 0x17C */
     void *mathResource;    /* 0x180 */
     u8 pad184[8];
-    void *managedResource; /* 0x18C */
+    EffMagatuhiOwner *managedResource; /* 0x18C */
     void *buffer;          /* 0x190 */
 } EffMagatuhiWideFirst;
 
 /* Parameter head of the second family: `count` particles, delay spread at 0x48. */
 typedef struct {
-    u8 pad00[0x40];
+    f32 row[4][4];
     u8 respawn;            /* 0x40 restart finished particles */
     u8 pad41[3];
     s32 life;              /* 0x44 frames a particle lives */
     s32 spread;            /* 0x48 modulus of the particle delay */
     s32 fadeIn;            /* 0x4C */
     s32 fadeOut;           /* 0x50 */
-    u8 pad54[0x10];
+    f32 extra[4];          /* 0x54 */
     u32 count;             /* 0x64 */
     u32 duration;          /* 0x68 */
     u8 pad6C[0x114];
@@ -86,31 +99,21 @@ typedef struct {
     EffMagatuhiHeadSecond head;
     s32 *delays;           /* 0x180 */
     void *mathResource;    /* 0x184 */
-    void *managedResource; /* 0x188 */
+    EffMagatuhiOwner *managedResource; /* 0x188 */
     void *buffer;          /* 0x18C */
 } EffMagatuhiWideSecond;
 
 /* Float source block read by effMagatuhiCopyFloatBlock. */
-typedef struct EffMagatuhiSrc {
-    f32 f00, f04, f08;
+typedef struct {
+    f32 unk00, unk04, unk08;
     u8 pad0C[4];
-    f32 f10, f14, f18;
+    f32 unk10, unk14, unk18;
     u8 pad1C[4];
-    f32 f20, f24;
-} EffMagatuhiSrc; /* 0x28 */
+    f32 unk20, unk24;
+} EffMagatuhiFloatParams; /* 0x28 */
 
-/* Float destination block written by effMagatuhiCopyFloatBlock. */
-typedef struct EffMagatuhiDst {
-    f32 f00, f04, f08;
-    u8 pad0C[4];
-    f32 f10, f14, f18;
-    u8 pad1C[0x18];
-    f32 f34;
-    u8 pad38[0x18];
-    f32 f50;
-} EffMagatuhiDst; /* 0x54 */
 
-void effMagatuhiReleaseResource(EffMagatuhiWork *work) {
+void effMagatuhiReleaseResource(EffMagatuhiValueWork *work) {
     func_003297C8(work->resource);
 }
 
@@ -118,15 +121,15 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191010);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191450);
 
-void effMagatuhiSetValue(EffMagatuhiWork *work, s32 index, u32 value) {
+void effMagatuhiSetValue(EffMagatuhiValueWork *work, s32 index, u32 value) {
     work->values[index] = value;
 }
 
-/* Fill the result table with `count04` blends from colorA to colorB. */
-void effMagatuhiFillColorTable(EffMagatuhiWork *work, u32 colorA, u32 colorB) {
+/* Fill the history palette; the final sample is (count - 1) / count, not 1. */
+void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 colorB) {
     f32 t = 0.0f;
-    u32 count = work->count04;
-    u32 *out = work->out18;
+    u32 count = work->historyCount;
+    u32 *out = work->colorTable;
     f32 step = 1.0f / count;
     u32 i;
 
@@ -140,40 +143,25 @@ extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_003AA868[];
 
 /* Owner of the value table an effect variant's particles write through. */
-typedef struct {
+struct EffMagatuhiOwner {
     u8 pad00[0x1C];
-    EffMagatuhiWork *valueWork; /* 0x1C */
-} EffMagatuhiOwner;
+    EffMagatuhiValueWork *valueWork; /* 0x1C */
+};
 
 void func_001918B8(void *valueWork, s32 index) {
     func_00190DF8(valueWork, index);
 }
 
-/* Particle records of the first variant family (0x18 bytes each). */
+/* Ring state is one 0x18-byte slot; replay visits every third slot. */
 typedef struct {
-    u32 unk00;
-    f32 f04;
-    f32 f08;
-    f32 f0C;
-    f32 f10;
-    f32 f14;
-} EffMagatuhiElemA; /* 0x18 */
+    s32 delay;
+    f32 height;
+    f32 angle;
+    f32 angleStep;
+    f32 radius;
+    f32 radiusStep;
+} EffMagatuhiRingParticle;
 
-typedef struct {
-    u8 pad00[0x54];
-    s32 frames;          /* 0x54 */
-    u8 pad58[0xC];
-    f32 f64;             /* 0x64 */
-    f32 blend68;         /* 0x68 */
-    f32 f6C;             /* 0x6C */
-    f32 f70;             /* 0x70 */
-    f32 f74;             /* 0x74 */
-    f32 blend78;         /* 0x78 */
-    f32 blend7C;         /* 0x7C */
-    u8 pad80[0x9C];
-    EffMagatuhiElemA *elems; /* 0x11C */
-    EffMagatuhiOwner *owner; /* 0x120 */
-} EffMagatuhiFamilyA;
 
 extern u32 func_003292A8(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
@@ -182,11 +170,13 @@ extern void *effAllocSlotArray(s32 count);
 extern u32 effMiscRand(void *state);
 extern u8 D_003AA868[];
 
+/* Clone the first-family parameters; return the work after its state array.
+ * Clamp only the copied delay modulus, leaving the caller's parameters intact. */
 EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
     u32 count = src->count;
-    u32 size = count * sizeof(EffMagatuhiParticleFirst);
+    u32 size = count * sizeof(EffMagatuhiDriftParticle);
     u32 handle = func_003292A8(size + sizeof(EffMagatuhiWideFirst));
-    EffMagatuhiParticleFirst *particle = (EffMagatuhiParticleFirst *)sdfResourceRetainAddress(handle);
+    EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfResourceRetainAddress(handle);
     EffMagatuhiWideFirst *work = (EffMagatuhiWideFirst *)((u8 *)particle + size);
     s32 spread;
     u32 i;
@@ -217,19 +207,21 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191AD0);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191CD0);
 
-void effMagatuhiCopyFloatBlock(EffMagatuhiWork *work, EffMagatuhiSrc *src) {
-    EffMagatuhiDst *dst = effGetHandlerArg(work->ptr08);
+/* Update the first family's scattered float parameters without touching gaps. */
+void effMagatuhiCopyFloatBlock(EffMagatuhiCallback *work, EffMagatuhiFloatParams *src) {
+    EffMagatuhiWideFirst *dst = effGetHandlerArg(work->effect);
 
-    dst->f00 = src->f00;
-    dst->f04 = src->f04;
-    dst->f08 = src->f08;
-    dst->f34 = src->f20;
-    dst->f10 = src->f10;
-    dst->f14 = src->f14;
-    dst->f18 = src->f18;
-    dst->f50 = src->f24;
+    dst->head.unk00 = src->unk00;
+    dst->head.unk04 = src->unk04;
+    dst->head.unk08 = src->unk08;
+    dst->head.unk34 = src->unk20;
+    dst->head.unk10 = src->unk10;
+    dst->head.unk14 = src->unk14;
+    dst->head.unk18 = src->unk18;
+    dst->head.unk50 = src->unk24;
 }
 
+/* Clone history parameters; signed delays follow the returned work block. */
 EffMagatuhiWideSecond *effMagatuhiCreateSecond(EffMagatuhiHeadSecond *src) {
     u32 count = src->count;
     u32 handle = func_003292A8(count * 4 + sizeof(EffMagatuhiWideSecond));
@@ -262,7 +254,7 @@ void effMagatuhiReleaseWideWorkResources(EffMagatuhiWideSecond *work) {
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192470);
 
 extern void *effMathGetSlotAt(void *slots, s32 index);
-extern void func_00195BE0(void *slots, s32 index, void *out);
+extern void effMathStepBezierSlot(void *slots, s32 index, void *out);
 extern void func_00190DE0(void *owner);
 extern void func_00192470(void *work, s32 index);
 extern void func_00191450(void *valueWork, s32 index, void *out);
@@ -275,21 +267,21 @@ typedef struct {
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192778);
 
-void effMagatuhiCopyHandlerRows(EffMagatuhiWork *work, EffMagatuhiRowsSrc *src) {
-    EffMagatuhiRowsDst *dst = effGetHandlerArg(work->ptr08);
+void effMagatuhiCopyHandlerRows(EffMagatuhiCallback *work, EffMagatuhiRowsSrc *src) {
+    EffMagatuhiWideSecond *dst = effGetHandlerArg(work->effect);
     u32 i;
 
     for (i = 0; i < 4; i++) {
-        dst->row[i][0] = src->row[i][0];
-        dst->row[i][1] = src->row[i][1];
-        dst->row[i][2] = src->row[i][2];
-        dst->extra[i] = src->extra[i];
+        dst->head.row[i][0] = src->row[i][0];
+        dst->head.row[i][1] = src->row[i][1];
+        dst->head.row[i][2] = src->row[i][2];
+        dst->head.extra[i] = src->extra[i];
     }
 }
 
-void func_00192A10(EffMagatuhiWork *arg) {
-    EffMagatuhiWideSecond *work = effGetHandlerArg(arg->ptr08);
-    EffMagatuhiWork *valueWork = ((EffMagatuhiOwner *)work->managedResource)->valueWork;
+void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiCallback *arg) {
+    EffMagatuhiWideSecond *work = effGetHandlerArg(arg->effect);
+    EffMagatuhiValueWork *valueWork = work->managedResource->valueWork;
     u32 duration = work->head.duration;
     s32 life = work->head.life;
     u32 count = work->head.count;
@@ -316,9 +308,9 @@ void func_00192A10(EffMagatuhiWork *arg) {
             span = duration - *delays;
         }
         t = 0.0f;
-        func_00195BE0(work->mathResource, i, from);
+        effMathStepBezierSlot(work->mathResource, i, from);
         slot->scale = slot->base * (f32)*delays;
-        func_00195BE0(work->mathResource, i, to);
+        effMathStepBezierSlot(work->mathResource, i, to);
         step = 1.0f / (f32)span;
         for (j = 0; j < span; j++) {
             VU0_LOAD_VF(vf10, from);
@@ -333,119 +325,57 @@ void func_00192A10(EffMagatuhiWork *arg) {
     }
 }
 
-/* Parameter head shared by the third and fourth families (copied to 0x40 inside the work). */
+/* Drift parameters are not ring parameters despite their equal size (0xDC). */
 typedef struct {
-    u8 pad00[0x18];
-    s32 spread;            /* 0x18 modulus of the particle delay */
-    u8 pad1C[0x24];
-    u32 count;             /* 0x40 */
-    u8 pad44[0x98];
-} EffMagatuhiHeadThird; /* 0xDC */
-
-/* Fourth family: work first, 0x18-byte particles after it. */
-typedef struct {
-    u8 matrix[0x40];       /* 0x00 identity */
-    EffMagatuhiHeadThird head; /* 0x40 */
-    EffMagatuhiElemA *particles; /* 0x11C */
-    void *managedResource; /* 0x120 */
-    u32 color;             /* 0x124 */
-    void *buffer;          /* 0x128 */
-} EffMagatuhiWideFourth;
-
-EffMagatuhiWideFourth *effMagatuhiCreateFourth(EffMagatuhiHeadThird *src) {
-    u32 count = src->count;
-    u32 handle = func_003292A8(count * sizeof(EffMagatuhiElemA) + sizeof(EffMagatuhiWideFourth));
-    EffMagatuhiWideFourth *work = (EffMagatuhiWideFourth *)sdfResourceRetainAddress(handle);
-    EffMagatuhiElemA *particle = (EffMagatuhiElemA *)(work + 1);
+    f32 origin[4];
+    u8 pad10[4];
+    s32 frames;
     s32 spread;
-    u32 i;
+    u8 pad1C[0x14];
+    f32 angleStep;
+    u8 pad34[4];
+    f32 scaleStep;
+    u8 pad3C[4];
+    u32 count;
+    u32 maxSteps;
+    u8 pad48[0x94];
+} EffMagatuhiDriftParams;
 
-    work->head = *src;
-    work->particles = particle;
-    work->color = 0x80808080;
-    work->buffer = (void *)handle;
-    EE_MMI_UNIT_MATRIX(work->matrix);
-    if (work->head.spread <= 0) {
-        work->head.spread = 1;
-    }
-    work->managedResource = effCloneMagatuhiWithColorResource(&work->head.count);
-    spread = work->head.spread;
-    for (i = 0; i < count; i++) {
-        particle->unk00 = -(effMiscRand(D_003AA868) % spread);
-        particle++;
-    }
-    return work;
-}
-
-void effMagatuhiReleaseOwnerAndBuffer(EffMagatuhiMidWork *work) {
-    effReleaseMagatuhiOwner(work->firstResource);
-    func_003297C8(work->buffer);
-}
-
-void effMagatuhiInitParticleA(EffMagatuhiFamilyA *work, s32 index) {
-    EffMagatuhiElemA *elem = &work->elems[index];
-    f32 blend;
-    f32 t;
-
-    elem->unk00 = 0;
-    elem->f04 = -work->f6C * effMiscRandUnitFloat(D_003AA868);
-    elem->f08 = effMiscRandUnitFloat(D_003AA868) * (3.14159265f * 2.0f);
-    blend = work->blend68;
-    elem->f0C = work->f64 * (effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend));
-    blend = work->blend78;
-    elem->f10 = work->f70 * (effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend));
-    blend = work->blend7C;
-    t = effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend);
-    elem->f14 = (work->f74 * t - elem->f10) / (f32)work->frames;
-    func_001918B8(work->owner->valueWork, index);
-    effMagatuhiSetValue(work->owner->valueWork, index, 0);
-}
-
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192F80);
-
-void effMagatuhiCopyWorkVector(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x40, src);
-}
-
-void effMagatuhiSetSecondResource(EffMagatuhiMidWork *work, void *value) {
-    work->secondResource = value;
-}
-
-/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effMagatuhiCopyVecs(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
-    VU0_COPY_MATRIX(dst, src);
-}
-
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193280);
-
-/* Fifth family head: 0xE0 bytes, count at 0x44. */
+/* Ring parameters copied verbatim into the work at +0x40 (0xDC). */
 typedef struct {
-    u8 pad00[0x18];
-    s32 spread;            /* 0x18 modulus of the particle delay */
-    u8 pad1C[0x28];
-    u32 count;             /* 0x44 */
-    u8 pad48[0x98];
-} EffMagatuhiHeadFifth; /* 0xE0 */
+    f32 origin[4];
+    u8 pad10[4];
+    s32 frames;
+    s32 spread;
+    u8 pad1C[8];
+    f32 angleStep;
+    f32 angleJitter;
+    f32 heightSpread;
+    f32 startRadius;
+    f32 endRadius;
+    f32 startJitter;
+    f32 endJitter;
+    u32 count;
+    u32 maxSteps;
+    u8 pad48[0x94];
+} EffMagatuhiRingParams;
 
+/* Work precedes its array of 0x18-byte ring states (0x12C). */
 typedef struct {
-    u32 delay;             /* 0x00 */
-    u8 pad04[0x18];
-} EffMagatuhiParticleFifth; /* 0x1C */
+    f32 matrix[16];
+    EffMagatuhiRingParams head;
+    EffMagatuhiRingParticle *particles;
+    EffMagatuhiOwner *managedResource;
+    u32 color;
+    void *buffer;
+} EffMagatuhiRingWork;
 
-typedef struct {
-    u8 matrix[0x40];       /* 0x00 identity */
-    EffMagatuhiHeadFifth head; /* 0x40 */
-    EffMagatuhiParticleFifth *particles; /* 0x120 */
-    void *managedResource; /* 0x124 */
-    u32 color;             /* 0x128 */
-    void *buffer;          /* 0x12C */
-} EffMagatuhiWideFifth;
-
-EffMagatuhiWideFifth *effMagatuhiCreateFifth(EffMagatuhiHeadFifth *src) {
+/* Clone ring parameters; the returned work precedes its individual slots. */
+EffMagatuhiRingWork *effMagatuhiCreateFourth(EffMagatuhiRingParams *src) {
     u32 count = src->count;
-    u32 handle = func_003292A8(count * sizeof(EffMagatuhiParticleFifth) + sizeof(EffMagatuhiWideFifth));
-    EffMagatuhiWideFifth *work = (EffMagatuhiWideFifth *)sdfResourceRetainAddress(handle);
-    EffMagatuhiParticleFifth *particle = (EffMagatuhiParticleFifth *)(work + 1);
+    u32 handle = func_003292A8(count * sizeof(EffMagatuhiRingParticle) + sizeof(EffMagatuhiRingWork));
+    EffMagatuhiRingWork *work = (EffMagatuhiRingWork *)sdfResourceRetainAddress(handle);
+    EffMagatuhiRingParticle *particle = (EffMagatuhiRingParticle *)(work + 1);
     s32 spread;
     u32 i;
 
@@ -466,52 +396,211 @@ EffMagatuhiWideFifth *effMagatuhiCreateFifth(EffMagatuhiHeadFifth *src) {
     return work;
 }
 
-void effMagatuhiReleaseOwnerAndExtraBuffer(EffMagatuhiMidWork *work) {
-    effReleaseMagatuhiOwner(work->secondResource);
-    func_003297C8(work->extraBuffer);
+void effMagatuhiReleaseOwnerAndBuffer(EffMagatuhiRingWork *work) {
+    effReleaseMagatuhiOwner(work->managedResource);
+    func_003297C8(work->buffer);
+}
+
+/* Initialize a ring slot and reset the history/value owned by that slot. */
+void effMagatuhiInitParticleA(EffMagatuhiRingWork *work, s32 index) {
+    EffMagatuhiRingParticle *elem = &work->particles[index];
+    f32 blend;
+    f32 t;
+
+    elem->delay = 0;
+    elem->height = -work->head.heightSpread * effMiscRandUnitFloat(D_003AA868);
+    elem->angle = effMiscRandUnitFloat(D_003AA868) * (3.14159265f * 2.0f);
+    blend = work->head.angleJitter;
+    elem->angleStep = work->head.angleStep * (effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend));
+    blend = work->head.startJitter;
+    elem->radius = work->head.startRadius * (effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend));
+    blend = work->head.endJitter;
+    t = effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend);
+    elem->radiusStep = (work->head.endRadius * t - elem->radius) / (f32)work->head.frames;
+    func_001918B8(work->managedResource->valueWork, index);
+    effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
+}
+
+INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192F80);
+
+void effMagatuhiCopyWorkVector(EffMagatuhiRingWork *work, void *src) {
+    PCP_COPY_VECTOR(work->head.origin, src);
+}
+
+/* The historical symbol names a resource, but this slot is packed color. */
+void effMagatuhiSetSecondResource(EffMagatuhiRingWork *work, u32 value) {
+    work->color = value;
+}
+
+/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
+void effMagatuhiCopyVecs(EffMagatuhiRingWork *dst, void *src) {
+    VU0_COPY_MATRIX(dst->matrix, src);
+}
+
+
+extern u32 func_001947F8(void *block);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+extern f32 sdfSinPoly(f32 angle);
+
+/* Replay the first slot of each three-slot group from a random age. */
+void effMagatuhiInitRingParticles(EffMagatuhiCallback *arg) {
+    u32 k;
+    EffMagatuhiRingWork *work;
+    EffMagatuhiValueWork *valueWork;
+    EffMagatuhiRingParticle *particle;
+    u32 count;
+    s32 frames;
+    u32 maxSteps;
+    u32 i;
+    u32 steps;
+    s32 delay; /* random start delay; afterwards the part of it that is replayed */
+    f32 out[4];
+    f32 origin[4];
+    f32 height;
+    f32 angle;
+    f32 radius;
+    f32 angleStep;
+    f32 radiusStep;
+
+    if (arg->type == 3) {
+        if (func_001947F8(arg->effect) == 2) {
+            work = effGetHandlerArg(arg->effect);
+            count = work->head.count;
+            valueWork = work->managedResource->valueWork;
+            maxSteps = work->head.maxSteps;
+            frames = work->head.frames;
+            particle = work->particles;
+            PCP_COPY_VECTOR(origin, work->head.origin);
+            VU0_LOAD_MATRIX(work->matrix);
+            for (i = 0; i < count; i += 3, particle += 3) {
+                effMagatuhiInitParticleA(work, i);
+                delay = effMiscRand(D_003AA868) % frames;
+                particle->delay = delay;
+                /* Keep at most maxSteps samples: skip older state only when
+                 * the random age exceeds that window; otherwise start at zero. */
+                if (maxSteps < delay) {
+                    steps = maxSteps;
+                    delay -= steps;
+                } else {
+                    steps = maxSteps - delay;
+                    delay = 0;
+                }
+                angleStep = particle->angleStep;
+                radiusStep = particle->radiusStep;
+                height = particle->height;
+                angle = particle->angle + angleStep * (f32)delay;
+                radius = particle->radius + radiusStep * (f32)delay;
+                out[3] = 0;
+                for (k = 0; k < steps; k++) {
+                    out[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+                    out[1] = height;
+                    out[2] = sdfSinPoly(angle) * radius;
+                    VU0_LOAD_VF(vf11, origin);
+                    VU0_LOAD_VF(vf10, out);
+                    VU0_APPLY_MATRIX(vf10, vf10);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF(vf10, out);
+                    func_00191450(valueWork, i, out);
+                    angle += angleStep;
+                    radius += radiusStep;
+                }
+                particle->radius = radius;
+                particle->angle = angle;
+            }
+        }
+    }
+}
+
+/* Orbit parameters have an independent height step (0xE0). */
+typedef struct {
+    f32 origin[4];
+    u8 pad10[4];
+    s32 frames;
+    s32 spread;
+    u8 pad1C[8];
+    f32 angleStep;
+    f32 angleJitter;
+    f32 heightStep;
+    f32 heightJitter;
+    f32 startRadius;
+    f32 endRadius;
+    f32 startJitter;
+    f32 endJitter;
+    u32 count;
+    u32 maxSteps;
+    u8 pad4C[0x94];
+} EffMagatuhiOrbitParams;
+
+/* One 0x1C-byte orbit slot; replay visits the first slot in each triplet. */
+typedef struct {
+    s32 delay;
+    f32 height;
+    f32 heightStep;
+    f32 angle;
+    f32 angleStep;
+    f32 radius;
+    f32 radiusStep;
+} EffMagatuhiOrbitParticle;
+
+/* Work precedes the orbit slots (0x130). */
+typedef struct {
+    f32 matrix[16];
+    EffMagatuhiOrbitParams head;
+    EffMagatuhiOrbitParticle *particles;
+    EffMagatuhiOwner *managedResource;
+    u32 color;
+    void *buffer;
+} EffMagatuhiOrbitWork;
+
+/* Clone orbit parameters; the returned work precedes its individual slots. */
+EffMagatuhiOrbitWork *effMagatuhiCreateFifth(EffMagatuhiOrbitParams *src) {
+    u32 count = src->count;
+    u32 handle = func_003292A8(count * sizeof(EffMagatuhiOrbitParticle) + sizeof(EffMagatuhiOrbitWork));
+    EffMagatuhiOrbitWork *work = (EffMagatuhiOrbitWork *)sdfResourceRetainAddress(handle);
+    EffMagatuhiOrbitParticle *particle = (EffMagatuhiOrbitParticle *)(work + 1);
+    s32 spread;
+    u32 i;
+
+    work->head = *src;
+    work->particles = particle;
+    work->color = 0x80808080;
+    work->buffer = (void *)handle;
+    EE_MMI_UNIT_MATRIX(work->matrix);
+    if (work->head.spread <= 0) {
+        work->head.spread = 1;
+    }
+    work->managedResource = effCloneMagatuhiWithColorResource(&work->head.count);
+    spread = work->head.spread;
+    for (i = 0; i < count; i++) {
+        particle->delay = -(effMiscRand(D_003AA868) % spread);
+        particle++;
+    }
+    return work;
+}
+
+void effMagatuhiReleaseOwnerAndExtraBuffer(EffMagatuhiOrbitWork *work) {
+    effReleaseMagatuhiOwner(work->managedResource);
+    func_003297C8(work->buffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193668);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001937C0);
 
-void func_00193A88(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x40, src);
+void func_00193A88(EffMagatuhiOrbitWork *work, void *src) {
+    PCP_COPY_VECTOR(work->head.origin, src);
 }
 
-void effMagatuhiSetWorkBuffer(EffMagatuhiMidWork *work, void *value) {
-    work->buffer = value;
+/* This callback sets the packed orbit color, not an allocation handle. */
+void effMagatuhiSetWorkBuffer(EffMagatuhiOrbitWork *work, u32 value) {
+    work->color = value;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effMagatuhiCopyVecs2(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
-    VU0_COPY_MATRIX(dst, src);
+void effMagatuhiCopyVecs2(EffMagatuhiOrbitWork *dst, void *src) {
+    VU0_COPY_MATRIX(dst->matrix, src);
 }
 
-/* One orbiting particle (0x54 bytes): height, angle and radius each advance by a per-frame step. */
-typedef struct {
-    s32 delay;      /* 0x00 */
-    f32 height;     /* 0x04 */
-    f32 heightStep; /* 0x08 */
-    f32 angle;      /* 0x0C */
-    f32 angleStep;  /* 0x10 */
-    f32 radius;     /* 0x14 */
-    f32 radiusStep; /* 0x18 */
-    u8 pad1C[0x38];
-} EffMagatuhiOrbitParticle; /* 0x54 */
-
-typedef struct {
-    u8 matrix[0x40];       /* 0x00 */
-    f32 origin[4];         /* 0x40 */
-    u8 pad50[4];
-    s32 spread;            /* 0x54 modulus of the particle delay */
-    u8 pad58[0x2C];
-    u32 count;             /* 0x84 */
-    u32 maxSteps;          /* 0x88 */
-    u8 pad8C[0x94];
-    EffMagatuhiOrbitParticle *particles; /* 0x120 */
-    void *managedResource; /* 0x124 */
-} EffMagatuhiOrbitWork;
 
 extern u32 func_001947F8(void *block);
 extern void func_00193668(void *work, u32 index);
@@ -519,13 +608,13 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
 /* Advance the orbiting-particle family: each group of three slots is replayed from a random delay, one orbit step at a time, into the value table. */
-void func_00193AD0(EffMagatuhiWork *arg) {
+void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *arg) {
     u32 k;
     EffMagatuhiOrbitWork *work;
-    EffMagatuhiWork *valueWork;
+    EffMagatuhiValueWork *valueWork;
     EffMagatuhiOrbitParticle *particle;
     u32 count;
-    s32 spread;
+    s32 frames;
     u32 maxSteps;
     u32 i;
     u32 steps;
@@ -540,19 +629,21 @@ void func_00193AD0(EffMagatuhiWork *arg) {
     f32 radiusStep;
 
     if (arg->type == 3) {
-        if (func_001947F8(arg->ptr08) == 3) {
-            work = effGetHandlerArg(arg->ptr08);
-            count = work->count;
-            valueWork = ((EffMagatuhiOwner *)work->managedResource)->valueWork;
-            maxSteps = work->maxSteps;
-            spread = work->spread;
+        if (func_001947F8(arg->effect) == 3) {
+            work = effGetHandlerArg(arg->effect);
+            count = work->head.count;
+            valueWork = work->managedResource->valueWork;
+            maxSteps = work->head.maxSteps;
+            frames = work->head.frames;
             particle = work->particles;
-            PCP_COPY_VECTOR(origin, work->origin);
-            VU0_LOAD_MATRIX(work);
-            for (i = 0; i < count; i += 3, particle++) {
+            PCP_COPY_VECTOR(origin, work->head.origin);
+            VU0_LOAD_MATRIX(work->matrix);
+            for (i = 0; i < count; i += 3, particle += 3) {
                 func_00193668(work, i);
-                delay = effMiscRand(D_003AA868) % spread;
+                delay = effMiscRand(D_003AA868) % frames;
                 particle->delay = delay;
+                /* Keep at most maxSteps samples: skip older state only when
+                 * the random age exceeds that window; otherwise start at zero. */
                 if (maxSteps < delay) {
                     steps = maxSteps;
                     delay -= steps;
@@ -589,21 +680,23 @@ void func_00193AD0(EffMagatuhiWork *arg) {
     }
 }
 
+/* The 0x30-byte states precede this 0x12C-byte work allocation. */
 typedef struct {
-    u8 matrix[0x40];       /* 0x00 identity */
-    EffMagatuhiHeadThird head; /* 0x40 */
-    EffMagatuhiParticleFirst *particles; /* 0x11C */
-    u32 color;             /* 0x120 */
-    void *managedResource; /* 0x124 */
-    void *buffer;          /* 0x128 */
-} EffMagatuhiWideThird;
+    f32 matrix[16];
+    EffMagatuhiDriftParams head;
+    EffMagatuhiDriftParticle *particles;
+    u32 color;
+    EffMagatuhiOwner *managedResource;
+    void *buffer;
+} EffMagatuhiDriftWork;
 
-EffMagatuhiWideThird *effMagatuhiCreateThird(EffMagatuhiHeadThird *src) {
+/* Clone drift parameters; return the work after its 0x30-byte state array. */
+EffMagatuhiDriftWork *effMagatuhiCreateThird(EffMagatuhiDriftParams *src) {
     u32 count = src->count;
-    u32 size = count * sizeof(EffMagatuhiParticleFirst);
-    u32 handle = func_003292A8(size + sizeof(EffMagatuhiWideThird));
-    EffMagatuhiParticleFirst *particle = (EffMagatuhiParticleFirst *)sdfResourceRetainAddress(handle);
-    EffMagatuhiWideThird *work = (EffMagatuhiWideThird *)((u8 *)particle + size);
+    u32 size = count * sizeof(EffMagatuhiDriftParticle);
+    u32 handle = func_003292A8(size + sizeof(EffMagatuhiDriftWork));
+    EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfResourceRetainAddress(handle);
+    EffMagatuhiDriftWork *work = (EffMagatuhiDriftWork *)((u8 *)particle + size);
     s32 spread;
     u32 i;
 
@@ -624,8 +717,8 @@ EffMagatuhiWideThird *effMagatuhiCreateThird(EffMagatuhiHeadThird *src) {
     return work;
 }
 
-void effMagatuhiReleaseSecondaryOwnerAndBuffer(EffMagatuhiMidWork *work) {
-    effReleaseMagatuhiOwner(work->secondResource);
+void effMagatuhiReleaseSecondaryOwnerAndBuffer(EffMagatuhiDriftWork *work) {
+    effReleaseMagatuhiOwner(work->managedResource);
     func_003297C8(work->buffer);
 }
 
@@ -633,39 +726,113 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193F10);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00194100);
 
-void func_001943E0(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x40, src);
+void func_001943E0(EffMagatuhiDriftWork *work, void *src) {
+    PCP_COPY_VECTOR(work->head.origin, src);
 }
 
-void effMagatuhiSetFirstResource(EffMagatuhiMidWork *work, void *value) {
-    work->firstResource = value;
+/* This callback sets packed drift color; +0x120 is not an owner pointer. */
+void effMagatuhiSetFirstResource(EffMagatuhiDriftWork *work, u32 value) {
+    work->color = value;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effMagatuhiCopyVecs3(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
-    VU0_COPY_MATRIX(dst, src);
+void effMagatuhiCopyVecs3(EffMagatuhiDriftWork *dst, void *src) {
+    VU0_COPY_MATRIX(dst->matrix, src);
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00194428);
+
+/* Replay the first slot of each three-slot drift group from a random age. */
+void effMagatuhiInitDriftParticles(EffMagatuhiCallback *arg) {
+    u32 k;
+    EffMagatuhiDriftWork *work;
+    EffMagatuhiValueWork *valueWork;
+    EffMagatuhiDriftParticle *particle;
+    u32 count;
+    s32 frames;
+    u32 maxSteps;
+    u32 i;
+    u32 steps;
+    s32 delay; /* random start delay; afterwards the part of it that is replayed */
+    f32 out[4];
+    f32 origin[4];
+    f32 lift;
+    f32 angle;
+    f32 scale;
+    f32 liftStep;
+    f32 angleStep;
+    f32 scaleStep;
+
+    if (arg->type == 3) {
+        if (func_001947F8(arg->effect) == 4) {
+            work = effGetHandlerArg(arg->effect);
+            count = work->head.count;
+            valueWork = work->managedResource->valueWork;
+            maxSteps = work->head.maxSteps;
+            frames = work->head.frames;
+            particle = work->particles;
+            PCP_COPY_VECTOR(origin, work->head.origin);
+            VU0_LOAD_MATRIX(work->matrix);
+            for (i = 0; i < count; i += 3, particle += 3) {
+                func_00193F10(work, i);
+                delay = effMiscRand(D_003AA868) % frames;
+                particle->delay = delay;
+                /* Keep at most maxSteps samples: skip older state only when
+                 * the random age exceeds that window; otherwise start at zero. */
+                if (maxSteps < delay) {
+                    steps = maxSteps;
+                    delay -= steps;
+                } else {
+                    steps = maxSteps - delay;
+                    delay = 0;
+                }
+                angleStep = work->head.angleStep;
+                scaleStep = work->head.scaleStep;
+                liftStep = particle->liftStep;
+                angle = particle->angle + angleStep * (f32)delay;
+                scale = particle->scale + scaleStep * (f32)delay;
+                lift = particle->dir[1] + liftStep * (f32)delay;
+                out[3] = 0;
+                for (k = 0; k < steps; k++) {
+                    lift += liftStep;
+                    sdfSinPoly(angle);
+                    out[0] = particle->pos[0] + particle->dir[0] * scale;
+                    out[1] = particle->pos[1] + lift;
+                    out[2] = particle->pos[2] + particle->dir[2] * scale;
+                    VU0_LOAD_VF(vf11, origin);
+                    VU0_LOAD_VF(vf10, out);
+                    VU0_APPLY_MATRIX(vf10, vf10);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF(vf10, out);
+                    func_00191450(valueWork, i, out);
+                    scale += scaleStep;
+                    angle += angleStep;
+                }
+                particle->scale = scale;
+                particle->angle = angle;
+                particle->dir[1] = lift;
+            }
+        }
+    }
+}
 
 extern u32 func_001947F8(void *block);
 
-s32 effMagatuhiDispatchByKind(EffMagatuhiWork *work) {
+s32 effMagatuhiDispatchByKind(EffMagatuhiCallback *work) {
     if (work->type == 3) {
-        switch (func_001947F8(work->ptr08)) {
+        switch (func_001947F8(work->effect)) {
         case 0:
             break;
         case 1:
-            func_00192A10(work);
+            effMagatuhiInitializeInterpolatedHistory(work);
             break;
         case 2:
-            func_00193280(work);
+            effMagatuhiInitRingParticles(work);
             break;
         case 3:
-            func_00193AD0(work);
+            effMagatuhiReplayOrbitStartDelays(work);
             break;
         case 4:
-            func_00194428(work);
+            effMagatuhiInitDriftParticles(work);
             break;
         }
     }

@@ -2,7 +2,7 @@
 
 extern u32 func_0029D790();
 
-extern u8 *D_00435DD0;
+extern u8 *datGameState;
 
 typedef struct {
     u8 pad0[6];
@@ -71,22 +71,22 @@ void brsDecaySharedAnimCounter(void) {
     func_0029C810();
 }
 
-extern u8 D_003D9D58[];
+extern u8 brsLevelStepThresholds[];
 
 /* Read the value paired with the highest of three thresholds not above input. */
 u8 brsGetLevelStepForValue(s32 value) {
     s32 i;
 
     for (i = 2; i >= 0; i--) {
-        if (value >= D_003D9D58[i * 2]) {
-            return D_003D9D58[i * 2 + 1];
+        if (value >= brsLevelStepThresholds[i * 2]) {
+            return brsLevelStepThresholds[i * 2 + 1];
         }
     }
-    return D_003D9D58[1];
+    return brsLevelStepThresholds[1];
 }
 
 u8 brsGetLevelStepCrossedBy(s32 position, s32 increment) {
-    u8 *table = D_003D9D58;
+    u8 *table = brsLevelStepThresholds;
     s32 i = 2;
     u8 *limit = table + 4;
     s32 nextPosition = position + increment;
@@ -154,7 +154,7 @@ s32 mnuCountAdvancingTitleAnimations(void) {
     s32 count = 0;
     s32 remaining = 4;
     do {
-        s32 step = ptyCalcLevelUps(D_00435DD0 + 0xa60 + offset);
+        s32 step = ptyCalcLevelUps(datGameState + 0xa60 + offset);
         count += step > 0;
         offset += 0x1c4;
     } while (--remaining >= 0);
@@ -238,7 +238,7 @@ void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
         ptyGetProfileRecordCap(func_00314C10((s32)entry) & 0xFFFF));
 }
 
-u32 func_0029DA58(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
+u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
     func_00314C10(*(u32 *)(resource + 8));
     return uiBlendColors(0x80808080, 0x80808000, blend);
 }

@@ -58,7 +58,7 @@ u32 func_0010F118(void) {
     return 1;
 }
 
-u32 func_0010F140(void) {
+u32 ptyScriptRestoreEntireParty(void) {
     ptyRecoverAllUnits();
     return 1;
 }
@@ -74,7 +74,25 @@ u32 func_0010F160(void) {
 
 INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F190);
 
-INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F490);
+extern s32 dds3GetObjectOwnedHandle(void *object);
+extern void *sdfCreateFormattedSifCommand(s32 x, s32 y, s32 flags, s32 mode, const char *format, ...);
+extern void sdfAppendPacket(void *list, void *packet);
+extern const char D_00412778[]; /* "FLAG  : 0x%08X" */
+
+u32 dds3DrawObjectFlagDiagnostic(void *object, s32 x, s32 y, void *list) {
+    void *handle;
+    void *command;
+
+    handle = (void *)dds3GetObjectOwnedHandle(object);
+    command = sdfCreateFormattedSifCommand((x * 3 << 6) + 0x7000,
+                                           (y * 3 << 5) + 0x7900,
+                                           0xFEFFFF,
+                                           0,
+                                           D_00412778,
+                                           *(u32 *)handle);
+    sdfAppendPacket(list, command);
+    return 1;
+}
 
 typedef struct DrawOps {
     u8 pad00[0x10];
@@ -87,14 +105,13 @@ extern s32 dds3ContainsNodeInAnyObjectChain();
 extern void *sdfAllocPacketAligned();
 extern void sdfInitPacketList();
 extern s32 func_0010F190();
-extern s32 func_0010F490();
 extern void kwlnDrawSpriteCell();
 extern DrawOps D_00380708;
 extern s8 D_0037F543[];
 extern void func_002458B8();
 
 /* Draw the task's status panel; the returned value is the follow-up handler (or -1 / 0). */
-s32 func_0010F518(void *task) {
+s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
     s32 width;
     u8 *node;
     void *list;
@@ -112,7 +129,7 @@ s32 func_0010F518(void *task) {
     width = func_0010F190(node, 3, 0xA, list) + 0xB;
     if (node[0xF] < 0xA) {
         if (node[0xF] >= 4) {
-            width += func_0010F490(node, 3, width, list);
+            width += dds3DrawObjectFlagDiagnostic(node, 3, width, list);
         }
     }
     spriteList = sdfAllocPacketAligned(0x20);
@@ -131,7 +148,7 @@ extern EffTransformOwner *D_003849D8[];
 void effObjNodeDestroy(EffTransformNode *node);
 
 /* Allocate a node of `kind`, link its owner and run the owner's create hook. */
-EffTransformNode *func_0010F640(u32 kind) {
+EffTransformNode *dds3CreateWorldNodeForKind(u32 kind) {
     EffTransformNode *node;
     EffTransformOwner *owner;
 
@@ -314,6 +331,8 @@ void effObjMulInnerThirdVec(EffTransformNode *node, u128 *vector) {
     VU0_MUL(vf10, vf10, vf11);
     VU0_STORE_VF($vf10, &inner->vec60);
 }
+
+INCLUDE_RODATA(const s32, "game/code_0010F118", D_00412778);
 
 INCLUDE_SDATA(const s32, "game/code_0010F118", D_00435D70);
 

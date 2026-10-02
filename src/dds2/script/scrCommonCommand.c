@@ -1,6 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "scr.h"
+
 s32 kwlnDrawSetCd0Clamped(s32 arg0, s32 arg1, s32 arg2, f32 farg0, f32 farg1, f32 farg2, s32 arg3);
 s32 kwlnDrawSetD30Clamped(s32 arg0, f32 farg0, f32 farg1, f32 farg2, f32 farg3, f32 farg4, s32 arg1);
 
@@ -12,7 +13,7 @@ extern char D_00412648[];
 
 extern char D_00412658[];
 
-extern s8 D_0040B7D8[];
+extern s8 sdfPadButtonStates[];
 
 f32 bfWaitReadArgFloat(s32 idx);
 
@@ -39,7 +40,7 @@ s32 kwlnDrawSetD88FloatTriple(f32 arg0, f32 arg1, s32 arg2);
 extern char D_004126F0[];
 extern char D_004126B0[];
 
-extern ScrComGlobals *D_00435DD0;
+extern ScrComGlobals *datGameState;
 
 s32 scrCommandStoreRandomCondition(void)
 {
@@ -161,13 +162,13 @@ s32 scrCommandJumpToIndexedLabel(void)
 
 s32 scrCommandTestIndexedCodeNegative(void)
 {
-    scrSetIntegerReturnValue(D_0040B7D8[scrReadIntParameter(0)] < 0);
+    scrSetIntegerReturnValue(sdfPadButtonStates[scrReadIntParameter(0)] < 0);
     return 1;
 }
 
 s32 scrCommandTestIndexedCodeBit(void)
 {
-    scrSetIntegerReturnValue(D_0040B7D8[scrReadIntParameter(0)] & 1);
+    scrSetIntegerReturnValue(sdfPadButtonStates[scrReadIntParameter(0)] & 1);
     return 1;
 }
 
@@ -214,7 +215,7 @@ typedef struct BfWaitContext {
     BfTaskRecord *record; /* 0xE4 */
 } BfWaitContext;
 
-s32 func_0010D8C8(void);
+s32 scrGetCurrentContext(void);
 s32 scrCreateTaskFromContextParameters(s32 a0, void *a1, void *a2, void *a3, void *a4, void *a5, void *a6, void *a7, s32 a8);
 
 s32 bfWaitCbCreateTask(void)
@@ -223,7 +224,7 @@ s32 bfWaitCbCreateTask(void)
     BfWaitContext *ctx;
 
     index = scrReadIntParameter(0);
-    ctx = (BfWaitContext *)func_0010D8C8();
+    ctx = (BfWaitContext *)scrGetCurrentContext();
     if (ctx == NULL)
     {
         return 1;
@@ -435,7 +436,7 @@ s32 scrCmdSetPackedDrawComponentBytes(void)
     return 1;
 }
 
-s32 func_0010E508(void)
+s32 scrCmdSetTexturedBlurIntegerParameters(void)
 {
     s32 p0;
     s32 p1;
@@ -445,25 +446,25 @@ s32 func_0010E508(void)
     return 1;
 }
 
-s32 func_0010E560(void)
+s32 scrCmdSetTexturedBlurTransitionMode(void)
 {
-    func_00106AE8(scrReadIntParameter(0));
+    kwlnDrawApplyEffectBlock(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010E588(void)
+s32 scrCmdBeginTexturedBlurActivation(void)
 {
     kwlnDrawSetupC70(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010E5B0(void)
+s32 scrCmdBeginTexturedBlurDeactivation(void)
 {
     kwlnDrawSetupC70B(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010E5D8(void)
+s32 scrCmdConfigureFilterBlur(void)
 {
     s32 p2;
     s32 p1;
@@ -498,7 +499,7 @@ s32 func_0010E5D8(void)
     return 1;
 }
 
-s32 func_0010E6C0(void)
+s32 scrCmdSetFilterBlurPackedColor(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
     s32 p2;
@@ -513,7 +514,7 @@ s32 func_0010E6C0(void)
     return 1;
 }
 
-s32 func_0010E748(void)
+s32 scrCmdSetFilterBlurIntegerParameters(void)
 {
     s32 p0;
     s32 p1;
@@ -523,25 +524,25 @@ s32 func_0010E748(void)
     return 1;
 }
 
-s32 func_0010E7A0(void)
+s32 scrCmdSetFilterBlurTransitionMode(void)
 {
-    func_00106D10(scrReadIntParameter(0));
+    kwlnSetFilterBlurParameterTransition(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010E7C8(void)
+s32 scrCmdBeginFilterBlurActivation(void)
 {
     kwlnDrawSetupCd0(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010E7F0(void)
+s32 scrCmdBeginFilterBlurDeactivation(void)
 {
     kwlnDrawEnableCd0(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010E818(void)
+s32 scrCmdConfigureStaggeredBlur(void)
 {
     s32 p0;
     s32 mode;
@@ -576,7 +577,7 @@ s32 func_0010E818(void)
     return 1;
 }
 
-s32 func_0010E900(void)
+s32 scrCmdSetStaggeredBlurPackedColor(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
     s32 p2;
@@ -591,7 +592,7 @@ s32 func_0010E900(void)
     return 1;
 }
 
-s32 func_0010E988(void)
+s32 scrCmdSetStaggeredBlurIntegerParameters(void)
 {
     s32 p0;
     s32 p1;
@@ -601,25 +602,25 @@ s32 func_0010E988(void)
     return 1;
 }
 
-s32 func_0010E9E0(void)
+s32 scrCmdSetStaggeredBlurTransitionMode(void)
 {
-    func_00106F38(scrReadIntParameter(0));
+    kwlnSetStaggeredBlurParameterTransition(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010EA08(void)
+s32 scrCmdBeginStaggeredBlurActivation(void)
 {
     kwlnDrawSetupD30(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010EA30(void)
+s32 scrCmdBeginStaggeredBlurDeactivation(void)
 {
     kwlnDrawEnableD30(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010EA58(void)
+s32 scrCmdConfigureRectangleBlur(void)
 {
     s32 mode;
     s32 sel;
@@ -649,7 +650,7 @@ s32 func_0010EA58(void)
     return 1;
 }
 
-s32 func_0010EAF8(void)
+s32 scrCmdSetRectangleBlurPackedColor(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
     s32 p2;
@@ -664,7 +665,7 @@ s32 func_0010EAF8(void)
     return 1;
 }
 
-s32 func_0010EB80(void)
+s32 scrCmdSetRectangleBlurIntegerPair(void)
 {
     s32 p0;
     p0 = scrReadIntParameter(0);
@@ -672,19 +673,19 @@ s32 func_0010EB80(void)
     return 1;
 }
 
-s32 func_0010EBC0(void)
+s32 scrCmdSetRectangleBlurTransitionMode(void)
 {
-    func_001068C8(scrReadIntParameter(0));
+    kwlnSetRectangleBlurParameterTransition(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010EBE8(void)
+s32 scrCmdBeginRectangleBlurActivation(void)
 {
     kwlnDrawSetupD88(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010EC10(void)
+s32 scrCmdBeginRectangleBlurDeactivation(void)
 {
     kwlnDrawEnableD88(scrReadIntParameter(0));
     return 1;
@@ -718,7 +719,7 @@ s32 scrCmdSetIndexedDrawMode(void)
     return 1;
 }
 
-s32 func_0010ECB8(void)
+s32 scrCmdSetColorRectanglePackedColor(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
     s32 p2;
@@ -733,25 +734,25 @@ s32 func_0010ECB8(void)
     return 1;
 }
 
-s32 func_0010ED40(void)
+s32 scrCmdSetColorRectangleTransitionMode(void)
 {
-    func_00106460(scrReadIntParameter(0));
+    kwlnDrawSnapshotSolidRect(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010ED68(void)
+s32 scrCmdBeginColorRectangleActivation(void)
 {
     kwlnDrawSetupDc8(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010ED90(void)
+s32 scrCmdBeginColorRectangleDeactivation(void)
 {
     kwlnDrawEnableDc8(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010EDB8(void)
+s32 scrCmdSetTexturedSquareDrawMode(void)
 {
     s32 p0;
     s32 mode;
@@ -779,7 +780,7 @@ s32 func_0010EDB8(void)
     return 1;
 }
 
-s32 func_0010EE38(void)
+s32 scrCmdSetTexturedSquarePackedColor(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
     s32 p2;
@@ -794,7 +795,7 @@ s32 func_0010EE38(void)
     return 1;
 }
 
-s32 func_0010EEC0(void)
+s32 scrCmdSetTexturedSquareIntegerParameters(void)
 {
     s32 p0;
     s32 p1;
@@ -804,19 +805,19 @@ s32 func_0010EEC0(void)
     return 1;
 }
 
-s32 func_0010EF18(void)
+s32 scrCmdSetTexturedSquareTransitionMode(void)
 {
-    func_00106658(scrReadIntParameter(0));
+    kwlnDrawApplyEffectWord(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010EF40(void)
+s32 scrCmdBeginTexturedSquareActivation(void)
 {
     kwlnDrawSetupE08(scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010EF68(void)
+s32 scrCmdBeginTexturedSquareDeactivation(void)
 {
     kwlnDrawEnableE08(scrReadIntParameter(0));
     return 1;
@@ -846,19 +847,19 @@ s32 scrCommandResetFieldEffects(void)
 
 s32 scrCommandClearProcessControlFlag(void)
 {
-    D_00435DD0->unk388 = 0;
+    datGameState->unk388 = 0;
     return 1;
 }
 
 s32 scrCommandSetProcessControlFlag(void)
 {
-    D_00435DD0->unk388 = 1;
+    datGameState->unk388 = 1;
     return 1;
 }
 
 s32 scrCommandIsProcessControlFlagClear(void)
 {
-    return D_00435DD0->unk388 == 0;
+    return datGameState->unk388 == 0;
 }
 
 s32 func_0010F068(void)

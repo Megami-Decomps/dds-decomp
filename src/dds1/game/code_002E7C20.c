@@ -40,20 +40,7 @@ void effMiscInvertQuaternionVU(void)
 /* Persona 4 effMiscNormalizeVU @ 004BCE80 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 void effMiscNormalizeVU(void)
 {
-    __asm__ volatile (
-        ".set noreorder            \n"
-        "vmul.xyzw vf2, vf10, vf10 \n"
-        "vaddax.w ACC, vf2, vf2    \n"
-        "vmadday.w ACC, vf0, vf2   \n"
-        "vmaddz.w vf3, vf0, vf2    \n"
-        "vrsqrt Q, vf0w, vf3w      \n"
-        "vwaitq                    \n"
-        "vmulq.xyzw vf10, vf10, Q  \n"
-        ".set reorder"
-        :
-        :
-        : "memory"
-    );
+    VU0_NORMALIZE_XYZW_VF10();
 }
 
 f32 effMiscQuatLengthSqVU(void)

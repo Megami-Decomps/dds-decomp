@@ -50,21 +50,21 @@ extern void func_00284108(s32, s32, s32, s32, s32, s32, s32 *);
 
 extern void evtStageTestCreateModelEffect(s32);
 extern void btlUpdateJobPositionFromModel(s32);
-extern void func_00217878(s32, s32);
+extern void mdlProcessContextNodesAndTransforms(s32, s32);
 extern void mnuApplyModelCamera(s32);
 extern void evtStageTestApplyEntryRotation(s32);
 extern void evtStageTestUpdateCamera(void);
-extern s32 func_00100518(void);
+extern s32 kwlnGetDrawBufferIndex(void);
 extern void sdfCameraBuildProjection(void *);
 extern void sdfConsBuildMatrixPacket(void *packet, void *node, void *matrix);
 extern void sdfConsCacheTransformedNode(void *node, void *matrix);
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
-extern u8 D_00324690[];
-extern u8 D_00324680[];
-extern u8 D_003246A0[];
+extern u8 sdfViewTargetVector[];
+extern u8 sdfViewEyeVector[];
+extern u8 sdfViewUpVector[];
 extern u8 D_00324590[];
 extern u8 D_0037CE80[];
-extern u8 D_003296F0[];
+extern u8 sdfViewMatrix[];
 extern u8 D_003270F0[];
 extern void evtStageTestAdvanceMotionQueue(void);
 
@@ -80,7 +80,7 @@ typedef struct PartyPanel {
     s32 unk4;
     PartyPanelSlot slots[5];
 } PartyPanel;
-extern s32 D_003BAA00;
+extern s32 datGameState;
 extern void func_00285960(u8 *entry, s32 arg1, u32 index, PartyPanel *panel);
 
 typedef struct AffinityRow {
@@ -103,9 +103,9 @@ extern void func_002878D8(s32 arg0);
 
 extern s32 D_003BC7B4;
 
-extern s32 D_003BAA4C;
+extern s32 datCommandSelectors;
 
-extern s32 D_003BAA50;
+extern s32 datCommandRecords;
 
 extern u32 effCreateStatusBatch(u32);
 
@@ -132,10 +132,10 @@ extern u8 D_0037CE60[];
 
 extern u8 D_0037CE70[];
 
-extern f32 D_003245E0[];
+extern f32 sdfSceneProjectionParameters[];
 
 /* Battle stage test viewer state. Retail addresses it partly through
- * D_003DC600 (= &D_003DC5E8.slot[0], hence the negative offsets), so the
+ * D_003DC600 (= &evtStageTestState.slot[0], hence the negative offsets), so the
  * D_003DC5EC..D_003DC654 symbols are all interior fields of this one object. */
 typedef struct StageTestEntry {
     u8 modelId;      /* 0x00 */
@@ -174,7 +174,7 @@ typedef struct StageTestState {
     s32 pendingEffect;       /* 0x6C */
 } StageTestState;
 
-extern StageTestState D_003DC5E8;
+extern StageTestState evtStageTestState;
 
 extern void btlStopStage(void);
 
@@ -254,6 +254,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     }
     x += menu->scrollOffset * 0x10;
     menu->scrollOffset = (s32)((f32)menu->scrollOffset / 1.19999993f);
+    /* Both arms are identical in retail; kept as written. */
     if (menu->flags & 0x100) {
         mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selectedPanel, param);
     } else {
@@ -284,8 +285,9 @@ void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, MenuStageTestS
     mnuAdvancePanelTransition((s32)menu);
 }
 
-void mnuDrawPanelListDefault(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    mnuDrawStageTestList(arg0, arg1, arg2, 0, arg3, arg4);
+/* Same as mnuDrawStageTestList with no override value; arg5 is unused. */
+void mnuDrawPanelListDefault(s32 x, s32 y, s32 z, MenuStageTestState *menu, s32 param, s32 unused) {
+    mnuDrawStageTestList(x, y, z, 0, menu, param);
 }
 
 typedef struct MenuPoint {
@@ -834,7 +836,7 @@ void mnuInitPartyPanelSlots(PartyPanel *panel) {
     panel->unk0 = 0;
     panel->unk4 = 0;
     for (i = 0; i < 5; i++) {
-        entry = (u8 *)(D_003BAA00 + offset + 0xA60);
+        entry = (u8 *)(datGameState + offset + 0xA60);
         offset += 0x1A4;
         if (*(u16 *)entry & 1) {
             func_00285960(entry, 0, i, panel);
@@ -845,7 +847,147 @@ void mnuInitPartyPanelSlots(PartyPanel *panel) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00285B20);
+extern s8 D_00324510[];
+extern u8 D_00324530[];
+
+/* Translate a mask of pad buttons into held/pressed flags: low bits test each digital button (sign bit or pressure bit), the high bits
+ * report the same inputs as plain non-zero tests. Select (bit 0) overrides everything else. */
+s32 mnuMapPadMaskToFlags(s32 buttons) {
+    s32 out = 0;
+
+    if (buttons & 0x1) {
+        if (D_00324510[0x21] < 0) {
+            out = 1;
+        }
+    }
+    if (buttons & 0x2) {
+        if (D_00324510[0x23] < 0) {
+            out |= 0x2;
+        }
+    }
+    if (buttons & 0x10) {
+        if (D_00324530[6] & 2) {
+            out |= 0x10;
+        }
+    }
+    if (buttons & 0x20) {
+        if (D_00324530[7] & 2) {
+            out |= 0x20;
+        }
+    }
+    if (buttons & 0x40) {
+        if (D_00324530[4] & 2) {
+            out |= 0x40;
+        }
+    }
+    if (buttons & 0x80) {
+        if (D_00324530[5] & 2) {
+            out |= 0x80;
+        }
+    }
+    if (buttons & 0x4) {
+        if (D_00324510[0x22] < 0) {
+            out |= 0x4;
+        }
+    }
+    if (buttons & 0x8) {
+        if (D_00324510[0x20] < 0) {
+            out |= 0x8;
+        }
+    }
+    if (buttons & 0x200) {
+        if (D_00324530[0xA] & 2) {
+            out |= 0x200;
+        }
+    }
+    if (buttons & 0x100) {
+        if (D_00324530[8] & 2) {
+            out |= 0x100;
+        }
+    }
+    if (buttons & 0x800) {
+        if (D_00324530[0xB] & 2) {
+            out |= 0x800;
+        }
+    }
+    if (buttons & 0x400) {
+        if (D_00324530[9] & 2) {
+            out |= 0x400;
+        }
+    }
+    if (buttons & 0x1000) {
+        if (D_00324510[0x2C] < 0) {
+            out |= 0x1000;
+        }
+    }
+    if (buttons & 0x2000) {
+        if (D_00324510[0x2D] < 0) {
+            out |= 0x2000;
+        }
+    }
+    if (buttons & 0x20000) {
+        if (D_00324510[0x2A] < 0) {
+            out |= 0x20000;
+        }
+    }
+    if (buttons & 0x10000) {
+        if (D_00324510[0x28] < 0) {
+            out |= 0x10000;
+        }
+    }
+    if (buttons & 0x80000) {
+        if (D_00324510[0x2B] < 0) {
+            out |= 0x80000;
+        }
+    }
+    if (buttons & 0x40000) {
+        if (D_00324510[0x29] < 0) {
+            out |= 0x40000;
+        }
+    }
+    if (buttons & 0x10) {
+        if (D_00324510[0x26] != 0) {
+            out |= 0x100000;
+        }
+    }
+    if (buttons & 0x20) {
+        if (D_00324510[0x27] != 0) {
+            out |= 0x200000;
+        }
+    }
+    if (buttons & 0x40) {
+        if (D_00324510[0x24] != 0) {
+            out |= 0x400000;
+        }
+    }
+    if (buttons & 0x80) {
+        if (D_00324510[0x25] != 0) {
+            out |= 0x800000;
+        }
+        if (D_00324510[0x2A] != 0) {
+            out |= 0x1000000;
+        }
+    }
+    if (buttons & 0x40) {
+        if (D_00324510[0x28] != 0) {
+            out |= 0x2000000;
+        }
+    }
+    if (buttons & 0x80) {
+        if (D_00324510[0x2B] != 0) {
+            out |= 0x4000000;
+        }
+    }
+    if (buttons & 0x40) {
+        if (D_00324510[0x29] != 0) {
+            out |= 0x8000000;
+        }
+    }
+    if (out & 1) {
+        out = out & 1;
+    }
+    return out;
+}
 
 void mnuPlayInputSound(s32 unused, s32 buttons, s32 *state) {
     if (buttons & 0x8000) {
@@ -929,10 +1071,10 @@ typedef struct MenuPanelEntry {
     u8 pad54[0x150];
 } MenuPanelEntry;
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 s32 mnuFindMatchingPartyEntryIndex(s32 object) {
     s32 i;
-    u8 *entry = (u8 *)(D_003BAA00 + 0xA60);
+    u8 *entry = (u8 *)(datGameState + 0xA60);
     for (i = 0; i < 5; i++, entry += 0x1A4) {
         if ((((MenuPanelEntry *)entry)->flags & 1) &&
             ((MenuPanelEntry *)object)->tableIndex == ((MenuPanelEntry *)entry)->tableIndex) {
@@ -1005,7 +1147,7 @@ u16 mnuLookupPartyTableValue(u32 count, s32 base, s32 which) {
 
 /* Only secondary-kind-2 entries expose the paired value. */
 u16 mnuGetSecondaryValueIfKind2(s32 entryId) {
-    RangeEntry *entry = (RangeEntry *)((entryId & 0xffff) * 56 + D_003BAA50);
+    RangeEntry *entry = (RangeEntry *)((entryId & 0xffff) * 56 + datCommandRecords);
 
     if (entry->secondaryKind != 2) {
         return 0;
@@ -1014,11 +1156,11 @@ u16 mnuGetSecondaryValueIfKind2(s32 entryId) {
 }
 
 u8 mnuGetRangeEntryKind(u32 id) {
-    return ((RangeEntry *)((id & 0xffff) * 0x38 + D_003BAA50))->kind;
+    return ((RangeEntry *)((id & 0xffff) * 0x38 + datCommandRecords))->kind;
 }
 
 u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
-    RangeEntry *entry = (RangeEntry *)((id & 0xFFFF) * 0x38 + D_003BAA50);
+    RangeEntry *entry = (RangeEntry *)((id & 0xFFFF) * 0x38 + datCommandRecords);
     u16 base = entry->value;
     u16 addition = entry->addition;
     if (mnuGetRangeEntryKind(id & 0xFFFF) == 1) {
@@ -1029,14 +1171,14 @@ u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
 
 u16 mnuGetAdjustedPartyRangeValue(s32 id) {
     s32 index = id & 0xFFFF;
-    RangeEntry *record = (RangeEntry *)(index * 0x38 + D_003BAA50);
+    RangeEntry *record = (RangeEntry *)(index * 0x38 + datCommandRecords);
     u16 scale = record->value;
     u16 addition = record->addition;
 
     if (mnuGetRangeEntryKind(index) == 1) {
         s32 count = 0;
         s32 sum = 0;
-        u16 *entry = (u16 *)(D_003BAA00 + 0xA60);
+        u16 *entry = (u16 *)(datGameState + 0xA60);
         s32 i;
 
         for (i = 0; i < 5; i++) {
@@ -1057,7 +1199,7 @@ u16 mnuGetAdjustedPartyRangeValue(s32 id) {
 }
 
 s32 mnuCanAffordEntryCost(u16 id, s32 item) {
-    u16 minimum = ((RangeEntry *)D_003BAA50)[id].value;
+    u16 minimum = ((RangeEntry *)datCommandRecords)[id].value;
     s32 kind = mnuGetRangeEntryKind(id);
 
     switch (kind) {
@@ -1079,7 +1221,7 @@ s32 mnuGetEntryUseStatus(s32 object, u16 id) {
     if (mnuCanAffordEntryCost(id, object) == 0) {
         return -1;
     }
-    if (!(((RangeEntry *)D_003BAA50)[id].flags & 1)) {
+    if (!(((RangeEntry *)datCommandRecords)[id].flags & 1)) {
         return 1;
     }
     if (id < 0x200) {
@@ -1089,8 +1231,8 @@ s32 mnuGetEntryUseStatus(s32 object, u16 id) {
 }
 
 s32 mnuIsEntryCostUnaffordable(u16 id, s32 object) {
-    s32 kind = ((RangeEntry *)D_003BAA50)[id].kind;
-    u16 value = ((RangeEntry *)D_003BAA50)[id].value;
+    s32 kind = ((RangeEntry *)datCommandRecords)[id].kind;
+    u16 value = ((RangeEntry *)datCommandRecords)[id].value;
 
     switch (kind) {
     case 1:
@@ -1108,7 +1250,7 @@ s32 mnuIsEntryCostUnaffordable(u16 id, s32 object) {
 }
 
 s32 mnuConsumeEntryCost(s32 id, u8 *cursor) {
-    RangeEntry *record = (RangeEntry *)((id & 0xFFFF) * 0x38 + D_003BAA50);
+    RangeEntry *record = (RangeEntry *)((id & 0xFFFF) * 0x38 + datCommandRecords);
     u16 amount = record->value;
 
     switch (record->kind) {
@@ -1134,7 +1276,7 @@ s32 mnuGetAbilityByteCategory(u16 ability) {
     if (ability == 0) {
         return 1;
     }
-    value = *(u8 *)(D_003BAA50 + ability * 56 + 8);
+    value = *(u8 *)(datCommandRecords + ability * 56 + 8);
     switch (value) {
     case 0:
         return 1;
@@ -1157,13 +1299,13 @@ u32 func_002866C8(void) {
 INCLUDE_ASM(const s32, "game/code_00282850", ptySkillApplyFieldUseEffect);
 
 u8 mnuIsAbilityValueMarked(u32 id) {
-    return *(s8 *)((id & 0xffff) * 2 + D_003BAA4C) == '\x01';
+    return *(s8 *)((id & 0xffff) * 2 + datCommandSelectors) == '\x01';
 }
 
-extern u32 D_003BAA54;
+extern u32 datAffinityRecords;
 
 s32 ptyGetAffinityKind(s32 affinityId, s32 index) {
-    s32 flags = ((AffinityRow *)D_003BAA54)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
+    s32 flags = ((AffinityRow *)datAffinityRecords)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
 
     if (flags == -1) {
         return -1;
@@ -1196,7 +1338,7 @@ s32 ptyGetAffinityKind(s32 affinityId, s32 index) {
 }
 
 s32 ptyGetAffinityFlagsWithoutOverride(s32 affinityId, s32 index) {
-    s32 value = ((AffinityRow *)D_003BAA54)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
+    s32 value = ((AffinityRow *)datAffinityRecords)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
     if (value == -1) {
         return 0;
     }
@@ -1239,9 +1381,9 @@ s32 ptyCountBulletItem(s32 bulletId) {
     if (bulletId >= 0xBF) {
         return 0;
     }
-    count = ((PtyBulletInventory *)D_003BAA00)->itemCount[bulletId];
+    count = ((PtyBulletInventory *)datGameState)->itemCount[bulletId];
     for (i = 0; i < 5; i++) {
-        if (bulletId == mnuGetPartyEntryMenuValue(D_003BAA00 + i * 0x1A4 + 0xA60)) {
+        if (bulletId == mnuGetPartyEntryMenuValue(datGameState + i * 0x1A4 + 0xA60)) {
             count++;
         }
     }
@@ -1393,7 +1535,7 @@ s32 mnuGetSelectionFromFlags(s32 entry) {
 
 s32 mnuGetMatchingPartyEntryMask(s32 object) {
     s32 i;
-    u8 *entry = (u8 *)(D_003BAA00 + 0xA60);
+    u8 *entry = (u8 *)(datGameState + 0xA60);
     for (i = 0; i < 5; i++, entry += 0x1A4) {
         if ((((MenuPanelEntry *)entry)->flags & 1) &&
             ((MenuPanelEntry *)entry)->tableIndex == ((MenuPanelEntry *)object)->tableIndex) {
@@ -1424,18 +1566,18 @@ u8 func_00286F48(void) {
 
 void evtStageTestSetModelScalingEnabled(s32 enabled) {
     if (enabled == 0) {
-        D_003DC5E8.flag = 0;
+        evtStageTestState.flag = 0;
     } else {
-        D_003DC5E8.flag = 1;
+        evtStageTestState.flag = 1;
     }
 }
 
 u32 evtStageTestGetActiveModel(void) {
-    return D_003DC5E8.model;
+    return evtStageTestState.model;
 }
 
 u32 evtStageTestGetSlotModelId(void) {
-    return D_003DC5E8.slot[0].modelId;
+    return evtStageTestState.slot[0].modelId;
 }
 
 /* Clamp the motion selector to the loaded model's available motions. */
@@ -1444,10 +1586,10 @@ void evtStageTestSetEntryIndex(s32 encodedIndex, s32 value) {
     if (value < 0) {
         value = 0;
     }
-    if (D_003DC5E8.model != 0 && value >= mdlGetNodeRefHalf(D_003DC5E8.model, 0)) {
-        value = mdlGetNodeRefHalf(D_003DC5E8.model, 0) - 1;
+    if (evtStageTestState.model != 0 && value >= mdlGetNodeRefHalf(evtStageTestState.model, 0)) {
+        value = mdlGetNodeRefHalf(evtStageTestState.model, 0) - 1;
     }
-    D_003DC5E8.entries[index].motionIndex = value;
+    evtStageTestState.entries[index].motionIndex = value;
     func_002878D8(-1);
 }
 
@@ -1456,17 +1598,17 @@ void evtStageTestAddEntryValue(s32 encodedIndex, f32 delta) {
     s32 index = encodedIndex & 0xFFFF;
     StageTestEntry *entry;
 
-    if (delta < 0.0f && ((StageTestEntry *)(index * 60 + (s32)D_003DC5E8.entries))->frame - delta < 0.0f) {
+    if (delta < 0.0f && ((StageTestEntry *)(index * 60 + (s32)evtStageTestState.entries))->frame - delta < 0.0f) {
         return;
     }
-    entry = (StageTestEntry *)(index * 60 + (s32)D_003DC5E8.entries);
+    entry = (StageTestEntry *)(index * 60 + (s32)evtStageTestState.entries);
     entry->frame += delta;
     func_002878D8(-1);
 }
 
 void mnuOffsetPanelPosition(s32 index, s32 dx, s32 dy, s32 dz) {
     s32 offset = (index & 0xFFFF) * sizeof(StageTestEntry);
-    StageTestEntry *entry = (StageTestEntry *)(offset + (s32)D_003DC5E8.entries);
+    StageTestEntry *entry = (StageTestEntry *)(offset + (s32)evtStageTestState.entries);
     f32 x = entry->position[0] + (f32)dx;
     f32 y = entry->position[1] + (f32)dy;
     f32 z = entry->position[2] + (f32)dz;
@@ -1477,7 +1619,7 @@ void mnuOffsetPanelPosition(s32 index, s32 dx, s32 dy, s32 dz) {
 
 void mnuOffsetPanelTarget(s32 index, s32 dx, s32 dy, s32 dz) {
     s32 offset = (index & 0xFFFF) * sizeof(StageTestEntry);
-    StageTestEntry *entry = (StageTestEntry *)(offset + (s32)D_003DC5E8.entries);
+    StageTestEntry *entry = (StageTestEntry *)(offset + (s32)evtStageTestState.entries);
     f32 x = entry->rotation[0] + (f32)dx;
     f32 y = entry->rotation[1] + (f32)dy;
     f32 z = entry->rotation[2] + (f32)dz;
@@ -1487,30 +1629,30 @@ void mnuOffsetPanelTarget(s32 index, s32 dx, s32 dy, s32 dz) {
 }
 
 u8 func_00287198(s32 encodedIndex) {
-    return D_003DC5E8.entries[encodedIndex & 0xffff].motionIndex;
+    return evtStageTestState.entries[encodedIndex & 0xffff].motionIndex;
 }
 
 f32 func_002871C0(s32 encodedIndex) {
-    return D_003DC5E8.entries[encodedIndex & 0xffff].frame;
+    return evtStageTestState.entries[encodedIndex & 0xffff].frame;
 }
 
 void func_002871E8(s32 encodedIndex, f32 *out) {
-    out[0] = D_003DC5E8.entries[encodedIndex & 0xffff].position[0];
-    out[1] = D_003DC5E8.entries[encodedIndex & 0xffff].position[1];
-    out[2] = D_003DC5E8.entries[encodedIndex & 0xffff].position[2];
+    out[0] = evtStageTestState.entries[encodedIndex & 0xffff].position[0];
+    out[1] = evtStageTestState.entries[encodedIndex & 0xffff].position[1];
+    out[2] = evtStageTestState.entries[encodedIndex & 0xffff].position[2];
 }
 
 void func_00287220(s32 encodedIndex, f32 *out) {
-    out[0] = D_003DC5E8.entries[encodedIndex & 0xffff].rotation[0];
-    out[1] = D_003DC5E8.entries[encodedIndex & 0xffff].rotation[1];
-    out[2] = D_003DC5E8.entries[encodedIndex & 0xffff].rotation[2];
+    out[0] = evtStageTestState.entries[encodedIndex & 0xffff].rotation[0];
+    out[1] = evtStageTestState.entries[encodedIndex & 0xffff].rotation[1];
+    out[2] = evtStageTestState.entries[encodedIndex & 0xffff].rotation[2];
 }
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00287258);
 
 void func_00287420(f32 offset) {
-    D_003245E0[5] = 2048.0f;
-    D_003245E0[4] = offset + 2048.0f;
+    sdfSceneProjectionParameters[5] = 2048.0f;
+    sdfSceneProjectionParameters[4] = offset + 2048.0f;
     func_00287258();
 }
 
@@ -1522,56 +1664,56 @@ void evtStageTestInit(s32 mode) {
     s32 i;
     s32 value;
 
-    D_003DC5E8.mode = mode;
-    D_003DC5E8.assetRequest = 0;
-    D_003DC5E8.model = 0;
-    D_003DC5E8.flag = 0;
+    evtStageTestState.mode = mode;
+    evtStageTestState.assetRequest = 0;
+    evtStageTestState.model = 0;
+    evtStageTestState.flag = 0;
     if (mode == 0) {
-        D_003DC5E8.entries = (StageTestEntry *)D_0037CE98;
+        evtStageTestState.entries = (StageTestEntry *)D_0037CE98;
         offset = -140.0f;
     } else {
-        D_003DC5E8.entries = NULL;
+        evtStageTestState.entries = NULL;
         offset = 140.0f;
     }
     value = D_0037CE90[mode];
-    D_003DC5E8.flags = 0;
+    evtStageTestState.flags = 0;
     for (i = 0; i < 2; i++) {
-        D_003DC5E8.slot[i].assetResource = value;
-        D_003DC5E8.slot[i].modelId = -1;
-        D_003DC5E8.slot[i].unk0C = 0;
-        D_003DC5E8.slot[i].flags = 0;
+        evtStageTestState.slot[i].assetResource = value;
+        evtStageTestState.slot[i].modelId = -1;
+        evtStageTestState.slot[i].unk0C = 0;
+        evtStageTestState.slot[i].flags = 0;
     }
     func_00287420(offset);
 }
 
 void btlStopStage(void) {
-    if (D_003DC5E8.mode != 1) {
-        D_003DC5E8.pendingEffect = -1;
-        if (D_003DC5E8.effect != 0) {
+    if (evtStageTestState.mode != 1) {
+        evtStageTestState.pendingEffect = -1;
+        if (evtStageTestState.effect != 0) {
             evtStageTestDestroyModelEffect();
         }
-        if (D_003DC5E8.model != 0) {
-            mdlDestroyContext(D_003DC5E8.model);
-            D_003DC5E8.model = 0;
+        if (evtStageTestState.model != 0) {
+            mdlDestroyContext(evtStageTestState.model);
+            evtStageTestState.model = 0;
         }
     }
 }
 
 void mnuResetWorkFloats(void) {
     btlStopStage();
-    D_003245E0[4] = 2048.0f;
-    D_003245E0[5] = 2048.0f;
+    sdfSceneProjectionParameters[4] = 2048.0f;
+    sdfSceneProjectionParameters[5] = 2048.0f;
 }
 
 /* Remember the model asset request result for the stage viewer. */
 void evtStageTestRequestModelAsset(s32 resource, s32 modelId, s32 option) {
-    D_003DC5E8.assetRequest = mdlRequestAsset();
+    evtStageTestState.assetRequest = mdlRequestAsset();
 }
 
 void mnuForwardTableByte(s32 encodedIndex) {
-    StageTestSlot *slot = D_003DC5E8.slot;
+    StageTestSlot *slot = evtStageTestState.slot;
 
-    evtStageTestRequestModelAsset(slot->assetResource, D_003DC5E8.entries[encodedIndex & 0xffff].modelId, 0);
+    evtStageTestRequestModelAsset(slot->assetResource, evtStageTestState.entries[encodedIndex & 0xffff].modelId, 0);
 }
 
 u32 func_002875E8(u32 *flags) {
@@ -1598,7 +1740,7 @@ s32 mnuCommitPendingBlock(u8 *object) {
 }
 
 void evtStageTestClearPendingFlag(void) {
-    D_003DC5E8.flags &= ~1;
+    evtStageTestState.flags &= ~1;
 }
 
 s32 evtStageTestSelectEntry(s32 encodedIndex, s32 initialValue, s32 option) {
@@ -1606,22 +1748,22 @@ s32 evtStageTestSelectEntry(s32 encodedIndex, s32 initialValue, s32 option) {
     s32 bank;
     StageTestSlot *slot;
 
-    if (D_003DC5E8.model != 0 && D_003DC5E8.slot[0].modelId == (s32)D_003DC5E8.entries[index].modelId) {
+    if (evtStageTestState.model != 0 && evtStageTestState.slot[0].modelId == (s32)evtStageTestState.entries[index].modelId) {
         return 0;
     }
     btlStopStage();
     bank = 0;
-    if (D_003DC5E8.flags & 2) {
+    if (evtStageTestState.flags & 2) {
         bank = 1;
     }
-    D_003DC5E8.flags |= 2;
-    D_003DC5E8.flags &= ~4;
+    evtStageTestState.flags |= 2;
+    evtStageTestState.flags &= ~4;
     if (bank) {
-        D_003DC5E8.flags |= 1;
+        evtStageTestState.flags |= 1;
     }
-    slot = &D_003DC5E8.slot[bank];
+    slot = &evtStageTestState.slot[bank];
     slot->entryIndex = index;
-    slot->modelId = D_003DC5E8.entries[index].modelId;
+    slot->modelId = evtStageTestState.entries[index].modelId;
     slot->unk0C = option;
     slot->unk10 = initialValue;
     slot->state = 0;
@@ -1644,7 +1786,7 @@ f32 mnuSetModelScaleVector(void *model, s32 useTable) {
     f32 vector[4];
 
     if (useTable != 0) {
-        scale = *(f32 *)(D_003BAA20 + D_003DC5E8.slot[0].modelId * 624 + 0x10);
+        scale = *(f32 *)(D_003BAA20 + evtStageTestState.slot[0].modelId * 624 + 0x10);
     }
     vector[0] = scale;
     vector[1] = scale;
@@ -1673,16 +1815,16 @@ void mnuApplyModelCamera(s32 model) {
 
     memset(vec, 0, sizeof(vec));
     vec[3] = 1.0f;
-    entry = (StageTestEntry *)(D_003DC5E8.slot[0].entryIndex * 60 + (s32)D_003DC5E8.entries);
+    entry = (StageTestEntry *)(evtStageTestState.slot[0].entryIndex * 60 + (s32)evtStageTestState.entries);
     vec[0] = entry->position[0];
     vec[1] = entry->position[1];
-    if (D_003DC5E8.flag != 1) {
+    if (evtStageTestState.flag != 1) {
         mnuSetModelScaleVector((void *)model, 0);
-        vec[2] = ((StageTestEntry *)(D_003DC5E8.slot[0].entryIndex * 60 + (s32)D_003DC5E8.entries))->position[2];
+        vec[2] = ((StageTestEntry *)(evtStageTestState.slot[0].entryIndex * 60 + (s32)evtStageTestState.entries))->position[2];
         mnuResetWorkPair();
     } else {
         scale = mnuSetModelScaleVector((void *)model, 1);
-        entry = (StageTestEntry *)(D_003DC5E8.slot[0].entryIndex * 60 + (s32)D_003DC5E8.entries);
+        entry = (StageTestEntry *)(evtStageTestState.slot[0].entryIndex * 60 + (s32)evtStageTestState.entries);
         vec[0] -= entry->position[0] - entry->position[0] * scale;
         vec[1] -= entry->position[1] - entry->position[1] * scale;
         vec[2] = 0.0f;
@@ -1693,7 +1835,7 @@ void mnuApplyModelCamera(s32 model) {
 }
 
 void evtStageTestApplyEntryRotation(s32 model) {
-    StageTestEntry *entry = (StageTestEntry *)(D_003DC5E8.slot[0].entryIndex * 60 + (s32)D_003DC5E8.entries);
+    StageTestEntry *entry = (StageTestEntry *)(evtStageTestState.slot[0].entryIndex * 60 + (s32)evtStageTestState.entries);
 
     func_002E7F20(entry->rotation[0] * 3.14159265f / 180.0f, entry->rotation[1] * 3.14159265f / 180.0f,
                   entry->rotation[2] * 3.14159265f / 180.0f);
@@ -1707,14 +1849,14 @@ void evtStageTestUpdateCamera(void)
     s128 at;
     s32 slot;
 
-    slot = func_00100518();
+    slot = kwlnGetDrawBufferIndex();
     func_00287258();
-    PCP_COPY_VECTOR(D_00324690, D_0037CE70);
-    PCP_COPY_VECTOR(D_00324680, D_0037CE60);
-    PCP_COPY_VECTOR(D_003246A0, D_0037CE80);
-    sdfCameraBuildProjection(D_003245E0);
-    VU0_LOAD_VF(vf10, D_00324680);
-    VU0_LOAD_VF(vf11, D_00324690);
+    PCP_COPY_VECTOR(sdfViewTargetVector, D_0037CE70);
+    PCP_COPY_VECTOR(sdfViewEyeVector, D_0037CE60);
+    PCP_COPY_VECTOR(sdfViewUpVector, D_0037CE80);
+    sdfCameraBuildProjection(sdfSceneProjectionParameters);
+    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
@@ -1722,13 +1864,13 @@ void evtStageTestUpdateCamera(void)
     VU0_LOAD_VF(vf11, D_00324590);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, &eye);
-    VU0_LOAD_VF(vf10, D_00324690);
+    VU0_LOAD_VF(vf10, sdfViewTargetVector);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, &at);
-    sdfVuBuildLookAtBasis(&eye, &at, D_003246A0);
-    VU0_STORE_MATRIX_UNCLOBBERED(D_003296F0);
-    sdfConsBuildMatrixPacket(D_003270F0 + slot * 8000, D_003245E0, D_003296F0);
-    sdfConsCacheTransformedNode(D_003245E0, D_003296F0);
+    sdfVuBuildLookAtBasis(&eye, &at, sdfViewUpVector);
+    VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
+    sdfConsBuildMatrixPacket(D_003270F0 + slot * 8000, sdfSceneProjectionParameters, sdfViewMatrix);
+    sdfConsCacheTransformedNode(sdfSceneProjectionParameters, sdfViewMatrix);
 }
 
 s8 evtStageTestUpdate(s32 frame) {
@@ -1737,19 +1879,19 @@ s8 evtStageTestUpdate(s32 frame) {
     if (result == 1) {
         return 1;
     }
-    if (D_003DC5E8.mode != 1) {
-        if (D_003DC5E8.model != 0) {
-            mnuApplyModelCamera(D_003DC5E8.model);
-            evtStageTestApplyEntryRotation(D_003DC5E8.model);
+    if (evtStageTestState.mode != 1) {
+        if (evtStageTestState.model != 0) {
+            mnuApplyModelCamera(evtStageTestState.model);
+            evtStageTestApplyEntryRotation(evtStageTestState.model);
             evtStageTestUpdateCamera();
-            if (D_003DC5E8.pendingEffect >= 0) {
-                evtStageTestCreateModelEffect(D_003DC5E8.pendingEffect);
-                D_003DC5E8.pendingEffect = -1;
+            if (evtStageTestState.pendingEffect >= 0) {
+                evtStageTestCreateModelEffect(evtStageTestState.pendingEffect);
+                evtStageTestState.pendingEffect = -1;
             }
-            if (D_003DC5E8.effect != 0) {
-                btlUpdateJobPositionFromModel(D_003DC5E8.effect);
+            if (evtStageTestState.effect != 0) {
+                btlUpdateJobPositionFromModel(evtStageTestState.effect);
             }
-            func_00217878(D_003DC5E8.model, frame);
+            mdlProcessContextNodesAndTransforms(evtStageTestState.model, frame);
             evtStageTestAdvanceMotionQueue();
         }
     }
@@ -1757,7 +1899,7 @@ s8 evtStageTestUpdate(s32 frame) {
 }
 
 s32 evtStageTestCountFlags(s32 mode) {
-    StageTestSlot *slot = D_003DC5E8.slot;
+    StageTestSlot *slot = evtStageTestState.slot;
     s32 index = slot->entryIndex;
     s32 count = 0;
     u32 i;
@@ -1766,9 +1908,9 @@ s32 evtStageTestCountFlags(s32 mode) {
         u8 flag;
 
         if (mode == 0) {
-            flag = *(D_003DC5E8.entries[index].column[0] + i);
+            flag = *(evtStageTestState.entries[index].column[0] + i);
         } else {
-            flag = *(D_003DC5E8.entries[index].column[1] + i);
+            flag = *(evtStageTestState.entries[index].column[1] + i);
         }
         if (flag) {
             count++;
@@ -1779,7 +1921,7 @@ s32 evtStageTestCountFlags(s32 mode) {
 
 /* Queue a motion from the selected entry's column, with a 15-frame blend. */
 void evtStageTestQueueMotion(s32 kind, u32 index) {
-    StageTestSlot *slot = D_003DC5E8.slot;
+    StageTestSlot *slot = evtStageTestState.slot;
     f32 blendLeadFrames = 0.0f;
     s32 motionIndex;
 
@@ -1787,14 +1929,14 @@ void evtStageTestQueueMotion(s32 kind, u32 index) {
         switch (kind) {
         default:
             blendLeadFrames = 15.0f;
-            motionIndex = *(D_003DC5E8.entries[slot->entryIndex].column[0] + index);
+            motionIndex = *(evtStageTestState.entries[slot->entryIndex].column[0] + index);
             break;
         case 1:
-            motionIndex = *(D_003DC5E8.entries[slot->entryIndex].column[1] + index);
+            motionIndex = *(evtStageTestState.entries[slot->entryIndex].column[1] + index);
             slot->flags &= ~1;
             break;
         case 2:
-            motionIndex = *(D_003DC5E8.entries[slot->entryIndex].column[1] + index);
+            motionIndex = *(evtStageTestState.entries[slot->entryIndex].column[1] + index);
             slot->flags |= 1;
             break;
         }
@@ -1805,7 +1947,7 @@ void evtStageTestQueueMotion(s32 kind, u32 index) {
 /* Queue a motion and its blend timing; inputs are truncated to whole frames.
  * The lead shifts initial motion time backwards, not to a start-frame endpoint. */
 void evtStageTestQueueMotionSegment(s32 motionIndex, f32 blendLeadFrames, f32 blendDurationFrames) {
-    StageTestSlot *slot = D_003DC5E8.slot;
+    StageTestSlot *slot = evtStageTestState.slot;
 
     slot->state = 1;
     slot->motionIndex = motionIndex;
@@ -1814,11 +1956,11 @@ void evtStageTestQueueMotionSegment(s32 motionIndex, f32 blendLeadFrames, f32 bl
 }
 
 void func_00287FD0(void) {
-    D_003DC5E8.slot[0].state = 4;
+    evtStageTestState.slot[0].state = 4;
 }
 
 s32 evtStageTestHasPendingMotion(void) {
-    s32 state = D_003DC5E8.slot[0].state;
+    s32 state = evtStageTestState.slot[0].state;
 
     if ((state == 0) || (state == 3)) {
         return 0;
@@ -1829,7 +1971,7 @@ s32 evtStageTestHasPendingMotion(void) {
 /* Play the queued motion once, then start the entry's fallback unless suppressed.
  * State 4 also permits the fallback before the active motion finishes. */
 void evtStageTestAdvanceMotionQueue(void) {
-    StageTestSlot *slot = D_003DC5E8.slot;
+    StageTestSlot *slot = evtStageTestState.slot;
     s32 index;
     s32 node;
 
@@ -1842,7 +1984,7 @@ void evtStageTestAdvanceMotionQueue(void) {
                 slot->state = 2;
             }
         } else if (!(slot->flags & 1) && (*(u8 *)(*(s32 *)(node + 0x1C) + 0x30) == 5 || slot->state == 4)) {
-            index = D_003DC5E8.entries[slot->entryIndex].motionIndex;
+            index = evtStageTestState.entries[slot->entryIndex].motionIndex;
 
             if (index < mdlGetNodeRefHalf(node, 0)) {
                 mdlAddEntryFlaggedEx(node, 0, index, (s32)slot->blendLeadFrames, (s32)slot->blendDurationFrames);
@@ -1853,14 +1995,14 @@ void evtStageTestAdvanceMotionQueue(void) {
 }
 
 void evtStageTestCreateModelEffect(s32 unused) {
-    if (D_003DC5E8.effect != 0) {
+    if (evtStageTestState.effect != 0) {
         evtStageTestDestroyModelEffect();
     }
-    D_003DC5E8.effect = sndCreateSystemEffectHandle(D_003DC5E8.model, 0x30);
+    evtStageTestState.effect = sndCreateSystemEffectHandle(evtStageTestState.model, 0x30);
 }
 
 void evtStageTestDestroyModelEffect(void) {
-    StageTestState *stage = &D_003DC5E8;
+    StageTestState *stage = &evtStageTestState;
     u32 effectHandle = stage->effect;
 
     if (effectHandle == 0) {
@@ -1871,11 +2013,11 @@ void evtStageTestDestroyModelEffect(void) {
 }
 
 void evtStageTestSetPendingEffect(u32 effect) {
-    D_003DC5E8.pendingEffect = effect;
+    evtStageTestState.pendingEffect = effect;
 }
 
 s32 evtStageTestHasModelEffect(void) {
-    return D_003DC5E8.effect != 0;
+    return evtStageTestState.effect != 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2520);
@@ -1909,7 +2051,6 @@ typedef struct StageGraphicsCallback {
     void (*invoke)(void *, void *);
 } StageGraphicsCallback;
 extern StageGraphicsCallback D_00325708;
-extern s8 D_00324510[];
 extern s32 D_003BC7D0;
 extern s32 D_003BC7D4;
 extern void *sdfAllocPacketAligned(s32);

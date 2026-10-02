@@ -1,5 +1,5 @@
 #include "common.h"
-
+#include "eff.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -19,19 +19,52 @@ typedef struct EffVectorWork {
 } EffVectorWork;
 
 typedef struct EffRecordPool {
-    u8 pad00[0x50];
+    f32 matrix[16];
+    f32 origin[3];
+    u8 pad4C[4];
     u32 settingA;  /* 0x50 */
     u32 settingB;  /* 0x54 */
-    u8 pad58[8];
+    s32 count;     /* 0x58 */
+    f32 scale;     /* 0x5C */
     s32 recordBase;    /* 0x60: address of stride-dependent records */
     s32 auxRecordBase; /* 0x64: address of stride-dependent auxiliary records */
     u32 resource;   /* 0x68: released by sdfQueueAssetRelease */
     u32 buffer;     /* 0x6C: freed by func_003297C8 */
 } EffRecordPool;
 
-#define EFFECT_RING_START_ANGLE (-1.5707963f)
+typedef struct EffPacketParams {
+    s16 parameterCount;
+    s16 vertexCount;
+    u16 primitive;
+    u16 mask;
+    u32 unk08;
+    u32 *parameters;
+    u128 *positions;
+    u128 *normals;
+    u32 *texcoords;
+    u32 *extraTexcoords;
+    u32 *colors;
+    void *(*allocate)(s32);
+    f32 depth;
+} EffPacketParams;
 
-#define EFFECT_RING_FULL_TURN (6.2831853f)
+typedef struct EffDrawSurface {
+    u8 pad00[0x10];
+    void (*submit)(struct EffDrawSurface *, void *);
+} EffDrawSurface;
+
+extern EffPacketParams D_00451FF0[];
+extern u32 D_003B12C0[];
+extern EffDrawSurface *D_003B1308[];
+extern EffDrawSurface *D_003B1388[];
+extern EffDrawSurface D_00380248;
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(void *);
+extern void sdfAppendPacket(void *, void *);
+extern void sdfConsAppendVuPacket(void *, s32);
+extern void sdfConsAppendAssetPacket(void *, u32, s32);
+extern void *func_00167A10(EffPacketParams *);
+
 
 /* Ring (fan) effect: a copy of the 0x58-byte parameter block followed by
  * `count` vertices spread evenly around the circle from -pi/2. */
@@ -207,7 +240,7 @@ typedef struct {
 } EffectArcQuadWork;
 
 /* vu0 routine: billboard corner offsets for an arc particle */
-void func_00177220(EffectArcQuadWork *work, s32 index) {
+void effBuildOrbitingArcQuadPoints(EffectArcQuadWork *work, s32 index) {
     EffectArcQuadPart *part = &work->parts[index];
     f32 *quad = (f32 *)func_001784B0(work->resourceHandle, index);
     f32 offset[4];
@@ -284,7 +317,71 @@ void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool) {
     func_003297C8(pool->buffer);
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_001778B0);
+void func_001778B0(EffRecordPool *work)
+{
+    f32 matrix[16] __attribute__((aligned(16)));
+    void *list;
+    s32 remaining;
+    s32 chunk;
+    u64 *packet;
+    void *clearList;
+
+    list = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    EE_MMI_UNIT_MATRIX(matrix);
+    matrix[0] = work->scale;
+    matrix[5] = work->scale;
+    matrix[10] = work->scale;
+    matrix[12] = work->origin[0];
+    matrix[13] = work->origin[1];
+    matrix[14] = work->origin[2];
+    VU0_LOAD_MATRIX(matrix);
+    sdfConsAppendVuPacket(list, 0);
+    sdfConsAppendAssetPacket(list, work->resource, 0);
+    remaining = work->count;
+    D_00451FF0->colors = (u32 *)work->auxRecordBase;
+    D_00451FF0->positions = (u128 *)work->recordBase;
+    D_00451FF0->unk08 = work->settingB;
+    D_00451FF0->parameterCount = 0xF;
+    D_00451FF0->vertexCount = 0x19;
+    D_00451FF0->parameters = D_003B12C0;
+    while (remaining >= 0x19) {
+        remaining -= 0x19;
+        sdfAppendPacket(list, func_00167A10(D_00451FF0));
+        D_00451FF0->positions += 0x19;
+        D_00451FF0->colors += 0x19;
+    }
+    if (remaining >= 5) {
+        chunk = remaining / 5;
+        D_00451FF0->vertexCount = remaining;
+        D_00451FF0->parameterCount = chunk * 3;
+        sdfAppendPacket(list, func_00167A10(D_00451FF0));
+    }
+    if (work->settingA < 4) {
+        D_003B1308[work->settingA]->submit(D_003B1308[work->settingA], list);
+    } else {
+        clearList = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(clearList);
+        packet = sdfAllocPacketAligned(0x30);
+        packet[4] = 6;
+        packet[0] = 2;
+        packet[1] = 0x5000000210000000ULL;
+        packet[2] = 0x1000000000008001ULL;
+        packet[3] = 0xE;
+        packet[5] = 0x42;
+        sdfAppendPacket(clearList, packet);
+        D_00380248.submit(&D_00380248, clearList);
+        packet = sdfAllocPacketAligned(0x30);
+        packet[0] = 2;
+        packet[1] = 0x5000000210000000ULL;
+        packet[2] = 0x1000000000008001ULL;
+        packet[3] = 0xE;
+        packet[4] = 0x42;
+        packet[5] = 0x42;
+        sdfAppendPacket(list, packet);
+        D_00380248.submit(&D_00380248, list);
+    }
+}
 
 s32 effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index) {
     return pool->recordBase + index * 0x50;
@@ -306,7 +403,40 @@ void func_00177BA0(u8 *work, f32 value) {
     *(f32 *)(work + 0x5C) = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_00177BA8);
+extern void *memset(void *dst, s32 value, u32 size);
+extern u32 sdfCreateAssetWithDrawEntries(void);
+extern void func_003332D0(u32 asset, f32 value);
+
+EffRecordPool *effRecordPoolCreateTriad(s32 groups) {
+    EffRecordPool *pool;
+    u32 handle;
+    u32 *block;
+    s32 slots;
+    s32 first;
+    s32 second;
+    u32 size;
+
+    slots = groups * 3;
+    first = slots * 4;
+    second = slots;
+    size = (first + second) * 4 + 0x70;
+    handle = func_003292A8(size);
+    block = (u32 *)sdfResourceRetainAddress(handle);
+    memset(block, 0, size);
+    pool = (EffRecordPool *)(block + (first + second));
+    pool->recordBase = (s32)block;
+    pool->auxRecordBase = (s32)(block + first);
+    pool->settingB = 0x80808080;
+    pool->settingA = 2;
+    pool->count = second;
+    pool->buffer = handle;
+    pool->scale = 1.0f;
+    pool->resource = sdfCreateAssetWithDrawEntries();
+    func_003332D0(pool->resource, 1.0f);
+    memset(D_00451FF0, 0, 0x2C);
+    D_00451FF0->primitive = 0x4000;
+    return pool;
+}
 
 void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool) {
     sdfQueueAssetRelease(pool->resource);
@@ -323,7 +453,34 @@ s32 effGetGroupIndexRecord(EffRecordPool *pool, s32 index) {
     return pool->auxRecordBase + index * 0xc;
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_00177EA8);
+EffRecordPool *effRecordPoolCreate(s32 groups) {
+    EffRecordPool *pool;
+    u32 handle;
+    u32 *block;
+    s32 first;
+    s32 second;
+    u32 size;
+
+    first = groups * 16;
+    second = groups * 4;
+    size = (first + second) * 4 + 0x70;
+    handle = func_003292A8(size);
+    block = (u32 *)sdfResourceRetainAddress(handle);
+    memset(block, 0, size);
+    pool = (EffRecordPool *)(block + (first + second));
+    pool->recordBase = (s32)block;
+    pool->settingA = 2;
+    pool->auxRecordBase = (s32)(block + first);
+    pool->count = second;
+    pool->buffer = handle;
+    pool->scale = 1.0f;
+    pool->settingB = 0x80808080;
+    pool->resource = sdfCreateAssetWithDrawEntries();
+    func_003332D0(pool->resource, 1.0f);
+    memset(D_00451FF0, 0, 0x2C);
+    D_00451FF0->primitive = 0x4000;
+    return pool;
+}
 
 void func_00177FA8(EffRecordPool *pool) {
     sdfQueueAssetRelease(pool->resource);
@@ -352,7 +509,68 @@ void func_001781F8(void *work) {
     effReleaseRecordGroupAssetAndHandle(work);
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_00178210);
+void func_00178210(EffRecordPool *work)
+{
+    f32 matrix[16] __attribute__((aligned(16)));
+    void *list;
+    s32 remaining;
+    s32 chunk;
+    u64 *packet;
+    void *clearList;
+
+    list = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    VU0_COPY_MATRIX(matrix, work->matrix);
+    matrix[12] = work->origin[0];
+    matrix[13] = work->origin[1];
+    matrix[14] = work->origin[2];
+    VU0_LOAD_MATRIX(matrix);
+    sdfConsAppendVuPacket(list, 0);
+    sdfConsAppendAssetPacket(list, work->resource, 0);
+    remaining = work->count;
+    D_00451FF0->colors = (u32 *)work->auxRecordBase;
+    D_00451FF0->positions = (u128 *)work->recordBase;
+    D_00451FF0->unk08 = work->settingB;
+    D_00451FF0->parameterCount = 0xF;
+    D_00451FF0->vertexCount = 0x19;
+    D_00451FF0->parameters = D_003B12C0;
+    while (remaining >= 0x19) {
+        remaining -= 0x19;
+        sdfAppendPacket(list, func_00167A10(D_00451FF0));
+        D_00451FF0->positions += 0x19;
+        D_00451FF0->colors += 0x19;
+    }
+    if (remaining >= 5) {
+        chunk = remaining / 5;
+        D_00451FF0->vertexCount = remaining;
+        D_00451FF0->parameterCount = chunk * 3;
+        sdfAppendPacket(list, func_00167A10(D_00451FF0));
+    }
+    if (work->settingA < 4) {
+        D_003B1388[work->settingA]->submit(D_003B1388[work->settingA], list);
+    } else {
+        clearList = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(clearList);
+        packet = sdfAllocPacketAligned(0x30);
+        packet[4] = 6;
+        packet[0] = 2;
+        packet[1] = 0x5000000210000000ULL;
+        packet[2] = 0x1000000000008001ULL;
+        packet[3] = 0xE;
+        packet[5] = 0x42;
+        sdfAppendPacket(clearList, packet);
+        D_00380248.submit(&D_00380248, clearList);
+        packet = sdfAllocPacketAligned(0x30);
+        packet[0] = 2;
+        packet[1] = 0x5000000210000000ULL;
+        packet[2] = 0x1000000000008001ULL;
+        packet[3] = 0xE;
+        packet[4] = 0x42;
+        packet[5] = 0x42;
+        sdfAppendPacket(list, packet);
+        D_00380248.submit(&D_00380248, list);
+    }
+}
 
 s32 func_001784B0(EffRecordPool *pool, s32 index) {
     return pool->recordBase + index * 0x50;

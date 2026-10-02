@@ -1,8 +1,757 @@
 #include "common.h"
+#include "eff.h"
 #include "pcp_vu0.h"
+
+
+
+/* Packet-source layouts and concrete blur owners mirror their constructors.
+ * Equal-sized parameter prefixes do not make the blur variants interchangeable. */
+typedef struct BlurSource {
+    u8 color[4];
+    s32 blendControl;
+    f32 rotation;
+    f32 scale;
+    s32 centerX;
+    s32 centerY;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+} BlurSource;
+
+typedef struct EffScreenDrawParams {
+    BlurSource source;
+    u8 pad28[8];
+} EffScreenDrawParams;
+
+typedef struct EffSolidRectParams {
+    u32 color;
+    s32 blendControl;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+} EffSolidRectParams;
+
+typedef struct EffBlurTemplateBody {
+    s32 extent;
+    BlurSource source;
+} EffBlurTemplateBody;
+
+typedef struct EffBlurTemplate {
+    EffBlurTemplateBody body;
+    u32 resourceWord;
+} EffBlurTemplate;
+
+typedef struct EffBlurScatterParams {
+    s32 count;
+    s32 delaySpread;
+    f32 angleStep;
+    u32 color;
+    s32 unk10;
+    f32 unk14;
+    f32 unk18;
+    s32 x;
+    s32 y;
+    s32 positionSpread;
+    s32 size;
+} EffBlurScatterParams;
+
+typedef struct EffBlurScatterSlot EffBlurScatterSlot;
+typedef struct EffBlurScatterWork {
+    EffBlurScatterParams params;
+    u32 sourceHandle;
+    u32 allocation;
+    EffBlurScatterSlot *slots;
+} EffBlurScatterWork;
+
+typedef struct EffBlurScaleParams {
+    s32 count;
+    f32 phaseStep;
+    f32 spacing;
+    u32 color;
+    s32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 angleStep;
+    s32 x;
+    s32 y;
+    s32 size;
+} EffBlurScaleParams;
+
+typedef struct EffBlurScaleSlot EffBlurScaleSlot;
+typedef struct EffBlurScaleWork {
+    EffBlurScaleParams params;
+    u32 sourceHandle;
+    u32 allocation;
+    EffBlurScaleSlot *slots;
+} EffBlurScaleWork;
+
+typedef struct EffTemplateBody {
+    u32 words[9];
+} EffTemplateBody;
+
+typedef struct EffTemplate {
+    EffTemplateBody body;
+    u32 resourceWord;
+} EffTemplate;
+
+typedef struct EffBezierPoint {
+    f32 x;
+    f32 y;
+    f32 z;
+} EffBezierPoint;
+
+/* Each slot has a 0x60-byte stride: seven control points, the current segment, the curve parameter t and its step. */
+typedef struct EffBezierSlot {
+    EffBezierPoint point[7];
+    s32 segment; /* 0x54 */
+    f32 t;       /* 0x58 */
+    f32 step;    /* 0x5C */
+} EffBezierSlot;
+
+
+
+extern EffScreenDrawParams effBlurRectangleParameters;
+extern EffScreenDrawParams D_00355908;
+extern EffSolidRectParams effColorRectangleParameters;
+extern EffScreenDrawParams D_003559A0;
+extern EffBlurTemplateBody D_00355AF8;
+extern EffBlurScatterParams D_00355C70;
+extern EffScreenDrawParams D_00355E48;
+extern EffSolidRectParams D_00355F88;
+extern EffTemplateBody D_00356088;
+extern EffBlurScaleParams D_003561C8;
+extern void *memcpy(void *, const void *, u32);
+
+extern EffTemplate *effTexturedSquareWork;
+
+extern s8 effTexturedSquareEnabled;
+
+extern s8 effColorRectangleEnabled;
+
+extern s8 D_003BB073;
+
+extern EffBlurScaleWork *effStaggeredBlurWork;
+
+extern s8 effStaggeredBlurEnabled;
+
+extern EffBlurScatterWork *effFilterBlurWork;
+
+extern s8 effFilterBlurEnabled;
+
+extern EffBlurTemplate *effBlurPixelWork;
+
+extern s8 effTexturedBlurEnabled;
+
+extern s8 effRectangleBlurEnabled;
+extern u32 effGetResourceFirstWord(s32 arg);
+extern u8 D_003558D8[];
+extern u8 D_003558A8[];
+extern u8 D_00355948[];
+extern u8 D_00355970[];
+extern u8 kwlnPositionedTextSurface[];
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(void *);
+extern void sdfAppendPacket();
+extern s32 sdfCreateFormattedSifCommand();
+
+extern EffBlurTemplate *effCloneBlurTemplate(void *arg);
+extern EffBlurScatterWork *func_00186F90(void *arg);
+extern EffTemplate *effCloneResourceTemplate(void *arg);
+extern EffBlurScaleWork *effCloneBlurWorkWithSlots(void *arg);
+extern void effDrawBlurRectangle(EffScreenDrawParams *arg);
+extern void effDrawBlurPixelRectWithResource(EffBlurTemplate *arg);
+extern void func_00187098(EffBlurScatterWork *arg);
+extern void func_00187598(EffBlurScaleWork *arg);
+extern void func_00187988(EffScreenDrawParams *arg);
+extern void func_00187C08(EffSolidRectParams *arg);
+extern void effResourceRectDrawPixels(EffTemplate *arg);
+extern s32 func_002D03F8(s32);
+extern u8 *sdfResourceRetainAddress(s32);
+
+/* Allocate contiguous slots followed by their count and allocation handle. */
+EffArrHdr *effCreateSlotArray(u32 count) {
+    s32 slotBytes = count * 0x60;
+    s32 handle = func_002D03F8(slotBytes + 0xC);
+    EffBezierSlot *slot = (EffBezierSlot *)sdfResourceRetainAddress(handle);
+    EffArrHdr *table = (EffArrHdr *)((u8 *)slot + slotBytes);
+    u32 index = 0;
+    table->allocation = (void *)handle;
+    table->slots = slot;
+    table->unk4 = count; /* The shared array header's slot count. */
+    if (count != 0) {
+        do {
+            index++;
+            slot->segment = 0;
+            slot->t = 0;
+            slot->step = 0.05f;
+            slot++;
+        } while (index < count);
+    }
+    return table;
+}
+
+void effReleaseSlotArrayAllocation(EffArrHdr *header) {
+    func_002D0918((u32)header->allocation);
+}
+
+INCLUDE_ASM(const s32, "effect/effEvent", func_0018E2C0);
+
+INCLUDE_ASM(const s32, "effect/effEvent", func_0018E408);
+
+/* Evaluate the cubic Bezier made of control points segment..segment+3 at t into out (xyz, w = 1). */
+void effEvaluateSlotBezierPosition(EffBezierSlot *slot, f32 *out) {
+    EffBezierPoint *p = &slot->point[slot->segment];
+    f32 t = slot->t;
+    f32 u = 1.0f - t;
+    f32 w[4]; /* never read; gcc drops the stores but keeps the frame slot */
+    f32 w0 = u * u * u;
+    f32 w1 = t * (u * u) * 3.0f;
+    f32 w2 = t * t * u * 3.0f;
+    f32 w3 = t * t * t;
+
+    out[0] = p[0].x * w0 + p[1].x * w1 + p[2].x * w2 + p[3].x * w3;
+    out[1] = p[0].y * w0 + p[1].y * w1 + p[2].y * w2 + p[3].y * w3;
+    out[2] = p[0].z * w0 + p[1].z * w1 + p[2].z * w2 + p[3].z * w3;
+    out[3] = 1.0f;
+}
+
+void effInitSlotTail(EffArrHdr *table, s32 index) {
+    EffBezierSlot *slot = &((EffBezierSlot *)table->slots)[index];
+
+    slot->step = 0.05f;
+    slot->segment = slot->t = 0;
+}
+
+s32 effGetSlotAt(EffArrHdr *table, s32 index) {
+    return (s32)&((EffBezierSlot *)table->slots)[index];
+}
+
+INCLUDE_ASM(const s32, "effect/effEvent", func_0018E678);
+
+INCLUDE_ASM(const s32, "effect/effEvent", func_0018E740);
+
+INCLUDE_ASM(const s32, "effect/effEvent", func_0018E810);
+
+INCLUDE_ASM(const s32, "effect/effEvent", func_0018E938);
+
+void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
+    void *task = sdfAllocPacketAligned(0x20);
+    u8 *scene;
+
+    sdfInitPacketList(task);
+    sdfAppendPacket(task, sdfCreateFormattedSifCommand((x << 4) + 0x7000, (y << 3) + 0x7900, 0xFF0000, arg2, arg3));
+    scene = kwlnPositionedTextSurface;
+    (*(void (**)(void *, void *))(scene + 0x10))(scene, task);
+}
+
+INCLUDE_ASM(const s32, "effect/effEvent", func_0018EB08);
+
+INCLUDE_ASM(const s32, "effect/effEvent", func_0018ED80);
+
+INCLUDE_ASM(const s32, "effect/effEvent", func_0018EED0);
+
+extern void *func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
+
+void effSubmitSizedDrawPacket(s32 x, s32 y, s32 w, s32 h, s32 arg4, s32 arg5) {
+    void *list = sdfAllocPacketAligned(0x20);
+    u8 *scene;
+
+    sdfInitPacketList(list);
+    sdfAppendPacket(list, func_0011D3E8(x * 0x10 + 0x7000, y * 8 + 0x7900, 0xFF0000, w * 0x10, h * 8, arg4, arg5));
+    scene = kwlnPositionedTextSurface;
+    (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
+}
+
+void effEnableRectangleBlur(void) {
+    effRectangleBlurEnabled = 1;
+}
+
+void effDisableRectangleBlur(void) {
+    effRectangleBlurEnabled = 0;
+}
+
+void effCopyRectangleBlurParameters(void *src) {
+    memcpy(&effBlurRectangleParameters, src, 0x28);
+}
+
+EffScreenDrawParams *effGetCh70Params(void) {
+    return &effBlurRectangleParameters;
+}
+
+void effEnableTexturedBlur(void) {
+    effTexturedBlurEnabled = 1;
+}
+
+void effDisableTexturedBlur(void) {
+    effTexturedBlurEnabled = 0;
+}
+
+/* Copy the pixel rectangle only; retain its selected source resource. */
+void effCopyCh71Common(EffBlurTemplateBody *src) {
+    effBlurPixelWork->body = *src;
+}
+
+EffBlurTemplate *effGetCh71Work(void) {
+    return effBlurPixelWork;
+}
+
+void effSetCh71Id(u32 id) {
+    effBlurPixelWork->resourceWord = id;
+}
+
+void effInitCh71Id(void) {
+    effBlurPixelWork->resourceWord = effGetResourceFirstWord(2);
+}
+
+void effEnableFilterBlur(void) {
+    effFilterBlurEnabled = 1;
+}
+
+void effDisableFilterBlur(void) {
+    effFilterBlurEnabled = 0;
+}
+
+/* Update scatter parameters without replacing the owned allocation or slots. */
+void effCopyCh72Common(EffBlurScatterParams *src) {
+    effFilterBlurWork->params = *src;
+}
+
+EffBlurScatterWork *effGetCh72Work(void) {
+    return effFilterBlurWork;
+}
+
+void effSetCh72Id(u32 id) {
+    effFilterBlurWork->sourceHandle = id;
+}
+
+void effInitCh72Id(void) {
+    effFilterBlurWork->sourceHandle = effGetResourceFirstWord(2);
+}
+
+void effEnableStaggeredBlur(void) {
+    effStaggeredBlurEnabled = 1;
+}
+
+void effDisableStaggeredBlur(void) {
+    effStaggeredBlurEnabled = 0;
+}
+
+/* Update scale parameters without replacing the owned allocation or slots. */
+void effCopyCh76Common(EffBlurScaleParams *src) {
+    effStaggeredBlurWork->params = *src;
+}
+
+EffBlurScaleWork *effGetCh76Work(void) {
+    return effStaggeredBlurWork;
+}
+
+void effSetCh76Id(u32 id) {
+    effStaggeredBlurWork->sourceHandle = id;
+}
+
+void effInitCh76Id(void) {
+    effStaggeredBlurWork->sourceHandle = effGetResourceFirstWord(3);
+}
+
+void func_0018F650(void) {
+    D_003BB073 = 1;
+}
+
+void func_0018F660(void) {
+    D_003BB073 = 0;
+}
+
+void func_0018F668(void *src) {
+    memcpy(&D_00355908, src, 0x28);
+}
+
+EffScreenDrawParams *effGetCh73Params(void) {
+    return &D_00355908;
+}
+
+void effEnableColorRectangle(void) {
+    effColorRectangleEnabled = 1;
+}
+
+void effDisableColorRectangle(void) {
+    effColorRectangleEnabled = 0;
+}
+
+void effCopyColorRectangleParameters(EffSolidRectParams *src) {
+    effColorRectangleParameters = *src;
+}
+
+EffSolidRectParams *effGetCh74Params(void) {
+    return &effColorRectangleParameters;
+}
+
+void effEnableTexturedSquare(void) {
+    effTexturedSquareEnabled = 1;
+}
+
+void effDisableTexturedSquare(void) {
+    effTexturedSquareEnabled = 0;
+}
+
+/* Copy the resource template body while preserving its selected resource. */
+void effCopyCh75Common(EffTemplateBody *src) {
+    effTexturedSquareWork->body = *src;
+}
+
+EffTemplate *effGetCh75Work(void) {
+    return effTexturedSquareWork;
+}
+
+void effSetCh75Id(u32 id) {
+    effTexturedSquareWork->resourceWord = id;
+}
+
+void effInitCh75Id(void) {
+    effTexturedSquareWork->resourceWord = effGetResourceFirstWord(0);
+}
+
+void effInitWorks(void) {
+    effBlurPixelWork = effCloneBlurTemplate(D_003558D8);
+    effFilterBlurWork = func_00186F90(D_003558A8);
+    effTexturedSquareWork = effCloneResourceTemplate(D_00355948);
+    effStaggeredBlurWork = effCloneBlurWorkWithSlots(D_00355970);
+    effGetCh76Work()->params.count = 4;
+}
+
+void effDispatchActive(void) {
+    if (effRectangleBlurEnabled) {
+        effDrawBlurRectangle(&effBlurRectangleParameters);
+    }
+    if (effTexturedBlurEnabled) {
+        effDrawBlurPixelRectWithResource(effBlurPixelWork);
+    }
+    if (effFilterBlurEnabled) {
+        func_00187098(effFilterBlurWork);
+    }
+    if (effStaggeredBlurEnabled) {
+        func_00187598(effStaggeredBlurWork);
+    }
+    if (D_003BB073) {
+        func_00187988(&D_00355908);
+    }
+    if (effColorRectangleEnabled) {
+        func_00187C08(&effColorRectangleParameters);
+    }
+    if (effTexturedSquareEnabled) {
+        effResourceRectDrawPixels(effTexturedSquareWork);
+    }
+}
+
+typedef struct ChState {
+    u8 pad00[0x1C];
+    void *src;
+    void *dst;
+    u32 size;
+    u8 pad28[4];
+    s32 (*getter)(void *);
+    u8 pad30[8];
+    s32 *result;
+} ChState;
+
+extern ChState D_00355AB8;
+extern s8 D_003BB0BD;
+extern s8 D_0039862B[];
+extern void func_0018CDD0(void *);
+extern void func_0018CDF8(void);
+extern void func_0018CDF0(void *);
+extern void func_0018CE00(void);
+
+s32 effUpdateCh72Params(void) {
+    u8 ready = D_003BB0BD;
+
+    if (D_003BB0BD == 0) {
+        ChState *state = &D_00355AB8;
+
+        if (state->getter != NULL) {
+            *state->result = state->getter(state->src);
+        }
+        if (state->dst != NULL) {
+            if (state->src != NULL) {
+                memcpy(state->dst, state->src, state->size);
+            }
+        }
+        ready = 1;
+        D_003BB0BD = ready;
+    }
+    if (ready != 0) {
+        func_0018CDD0(&D_00355AB8);
+        func_0018CDF8();
+        func_0018CDF0(&D_00355AB8);
+        func_0018CE00();
+    }
+    if (D_0039862B[0] < 0) {
+        D_003BB0BD = 0;
+    }
+    return D_003BB0BD;
+}
+
+EffScreenDrawParams *effGetLoadDescA(void) {
+    return &D_003559A0;
+}
+
+void func_0018F9C0(void *src) {
+    memcpy(&D_003559A0, src, 0x28);
+}
+
+extern ChState D_00355C30;
+extern s8 D_003BB0CD;
+
+s32 func_0018FA20(void) {
+    u8 ready = D_003BB0CD;
+
+    if (D_003BB0CD == 0) {
+        ChState *state = &D_00355C30;
+
+        if (state->getter != NULL) {
+            *state->result = state->getter(&D_00355AF8);
+        }
+        if (state->dst != NULL) {
+            if (state->src != NULL) {
+                memcpy(state->dst, state->src, state->size);
+            }
+        }
+        ready = 1;
+        D_003BB0CD = ready;
+    }
+    if (ready != 0) {
+        func_0018CDD0(&D_00355C30);
+        func_0018CDF8();
+        func_0018CDF0(&D_00355C30);
+        func_0018CE00();
+    }
+    if (D_0039862B[0] < 0) {
+        D_003BB0CD = 0;
+    }
+    return D_003BB0CD;
+}
+
+EffBlurTemplateBody *effGetLoadDescB(void) {
+    return &D_00355AF8;
+}
+
+void func_0018FAE8(EffBlurTemplateBody *src) {
+    D_00355AF8 = *src;
+}
+
+extern ChState D_00355E08;
+extern s8 D_003BB0FF;
+
+s32 func_0018FB50(void) {
+    u8 ready = D_003BB0FF;
+
+    if (D_003BB0FF == 0) {
+        ChState *state = &D_00355E08;
+
+        if (state->getter != NULL) {
+            *state->result = state->getter(&D_00355C70);
+        }
+        if (state->dst != NULL) {
+            if (state->src != NULL) {
+                memcpy(state->dst, state->src, state->size);
+            }
+        }
+        ready = 1;
+        D_003BB0FF = ready;
+    }
+    if (ready != 0) {
+        func_0018CDD0(&D_00355E08);
+        func_0018CDF8();
+        func_0018CDF0(&D_00355E08);
+        func_0018CE00();
+    }
+    if (D_0039862B[0] < 0) {
+        D_003BB0FF = 0;
+    }
+    return D_003BB0FF;
+}
+
+EffBlurScatterParams *effGetLoadDescC(void) {
+    return &D_00355C70;
+}
+
+void func_0018FC18(EffBlurScatterParams *src) {
+    D_00355C70 = *src;
+}
+
+extern ChState D_00355F48;
+extern s8 D_003BB114;
+
+s32 func_0018FC80(void) {
+    u8 ready = D_003BB114;
+
+    if (D_003BB114 == 0) {
+        ChState *state = &D_00355F48;
+
+        if (state->getter != NULL) {
+            *state->result = state->getter(state->src);
+        }
+        if (state->dst != NULL) {
+            if (state->src != NULL) {
+                memcpy(state->dst, state->src, state->size);
+            }
+        }
+        ready = 1;
+        D_003BB114 = ready;
+    }
+    if (ready != 0) {
+        func_0018CDD0(&D_00355F48);
+        func_0018CDF8();
+        func_0018CDF0(&D_00355F48);
+        func_0018CE00();
+    }
+    if (D_0039862B[0] < 0) {
+        D_003BB114 = 0;
+    }
+    return D_003BB114;
+}
+
+EffScreenDrawParams *effGetLoadDescD(void) {
+    return &D_00355E48;
+}
+
+void func_0018FD48(void *src) {
+    memcpy(&D_00355E48, src, 0x28);
+}
+
+extern ChState D_00356048;
+extern s8 D_003BB127;
+
+s32 func_0018FDA8(void) {
+    u8 ready = D_003BB127;
+
+    if (D_003BB127 == 0) {
+        ChState *state = &D_00356048;
+
+        if (state->getter != NULL) {
+            *state->result = state->getter(state->src);
+        }
+        if (state->dst != NULL) {
+            if (state->src != NULL) {
+                memcpy(state->dst, state->src, state->size);
+            }
+        }
+        ready = 1;
+        D_003BB127 = ready;
+    }
+    if (ready != 0) {
+        func_0018CDD0(&D_00356048);
+        func_0018CDF8();
+        func_0018CDF0(&D_00356048);
+        func_0018CE00();
+    }
+    if (D_0039862B[0] < 0) {
+        D_003BB127 = 0;
+    }
+    return D_003BB127;
+}
+
+EffSolidRectParams *effGetLoadDescE(void) {
+    return &D_00355F88;
+}
+
+void func_0018FE70(EffSolidRectParams *src) {
+    D_00355F88 = *src;
+}
+
+extern ChState D_00356188;
+extern s8 D_003BB12C;
+
+s32 func_0018FEB0(void) {
+    u8 ready = D_003BB12C;
+
+    if (D_003BB12C == 0) {
+        ChState *state = &D_00356188;
+
+        if (state->getter != NULL) {
+            *state->result = state->getter(&D_00356088);
+        }
+        if (state->dst != NULL) {
+            if (state->src != NULL) {
+                memcpy(state->dst, state->src, state->size);
+            }
+        }
+        ready = 1;
+        D_003BB12C = ready;
+    }
+    if (ready != 0) {
+        func_0018CDD0(&D_00356188);
+        func_0018CDF8();
+        func_0018CDF0(&D_00356188);
+        func_0018CE00();
+    }
+    if (D_0039862B[0] < 0) {
+        D_003BB12C = 0;
+    }
+    return D_003BB12C;
+}
+
+EffTemplateBody *effGetLoadDescF(void) {
+    return &D_00356088;
+}
+
+void func_0018FF78(EffTemplateBody *src) {
+    D_00356088 = *src;
+}
+
+extern ChState D_00356360;
+extern s8 D_003BB13F;
+
+s32 effAdvancePendingChannelState(void) {
+    u8 ready = D_003BB13F;
+
+    if (D_003BB13F == 0) {
+        ChState *state = &D_00356360;
+
+        if (state->getter != NULL) {
+            *state->result = state->getter(&D_003561C8);
+        }
+        if (state->dst != NULL) {
+            if (state->src != NULL) {
+                memcpy(state->dst, state->src, state->size);
+            }
+        }
+        ready = 1;
+        D_003BB13F = ready;
+    }
+    if (ready != 0) {
+        func_0018CDD0(&D_00356360);
+        func_0018CDF8();
+        func_0018CDF0(&D_00356360);
+        func_0018CE00();
+    }
+    if (D_0039862B[0] < 0) {
+        D_003BB13F = 0;
+    }
+    return D_003BB13F;
+}
+
+EffBlurScaleParams *effGetLoadDescG(void) {
+    return &D_003561C8;
+}
+
+void func_00190098(EffBlurScaleParams *src) {
+    D_003561C8 = *src;
+}
+
+u32 func_00190100() {
+    return sndMixerClone();
+}
+
+void func_00190118() {
+    sndReleaseAllVoices();
+}
+INCLUDE_ASM(const s32, "effect/effEvent", func_00190130);
+
+
 extern u8 D_003563F0[];
 
-extern u32 func_00190100();
 extern void func_00190118();
 extern void *func_002CFEB8(s32 size);
 
@@ -31,7 +780,7 @@ typedef struct {
 
 /* Release the attached effect before freeing the event work. */
 void effEventReleaseNode(EffEventWork *work) {
-    func_00160B00(work->effect);
+    effReleaseBattleVoiceOwner(work->effect);
     sdfReleaseChipBlock(work);
 }
 
@@ -54,7 +803,6 @@ void effEventSetState(EffEventWork *work, u32 value) {
 INCLUDE_ASM(const s32, "effect/effEvent", func_00190328);
 
 struct EffEventWork;
-
 /* Init block of the event holder (0x30 bytes, copied to the event's owner record). */
 typedef struct {
     f32 pos[3];           /* 0x00 */
@@ -69,6 +817,7 @@ typedef struct {
     u32 color;            /* 0x2C */
 } __attribute__((packed)) EffEventInit; /* 0x30 */
 
+
 /* 0x3C-byte event holder: a handle, the event it owns, an init block copied to the event. */
 typedef struct EffEventLight {
     u32 handle;           /* 0x00 */
@@ -76,8 +825,9 @@ typedef struct EffEventLight {
     EffEventInit init;    /* 0x08 */
     u8 active;            /* 0x38 */
 } EffEventLight; /* 0x3C */
-
 extern struct EffEventWork *func_00190130();
+
+
 
 EffEventLight *effEventLightCreate(u32 arg, f32 param) {
     EffEventLight *work = func_002CFEB8(sizeof(EffEventLight));
@@ -100,7 +850,13 @@ EffEventLight *effEventLightCreate(u32 arg, f32 param) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_00190708);
+void effEventLightDestroy(EffEventLight *work) {
+    effEventReleaseNode(work->owner);
+    if (work->active != 0) {
+        func_00190118(work->handle);
+    }
+    sdfReleaseChipBlock(work);
+}
 
 EffEventLight *effEventLightClone(EffEventLight *src) {
     EffEventInit *block = &src->init;
@@ -148,8 +904,8 @@ typedef struct EffAimParams {
 
 extern f32 D_003563A0[];
 extern f32 D_003563B8[];
-extern u8 D_00324690[];
-extern u8 D_003246A0[];
+extern u8 sdfViewTargetVector[];
+extern u8 sdfViewUpVector[];
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfInvertRigidVuTransform(void);
 extern void effMiscQuaternionToMatrixVU(void);
@@ -157,7 +913,7 @@ extern void func_002DD968(f32 angle);
 extern void sdfComposeVuMatrixFromRegisters(void);
 
 /* vu0 routine: vf10 = the aimed offset point computed from the source and parameters */
-void func_001908A0(EffAimSource *src, EffAimParams *param) {
+void effEventLoadSelectedAimPositionVu(EffAimSource *src, EffAimParams *param) {
     f32 out[4];
     f32 dir[4];
     f32 pos[4];
@@ -196,7 +952,7 @@ void func_001908A0(EffAimSource *src, EffAimParams *param) {
         dir[2] = half < radius ? -radius : -half;
         dir[0] = dir[1] = 0.0f;
         pos[1] = y;
-        sdfVuBuildLookAtBasis(pos, D_00324690, D_003246A0);
+        sdfVuBuildLookAtBasis(pos, sdfViewTargetVector, sdfViewUpVector);
         sdfInvertRigidVuTransform();
         VU0_LOAD_VF(vf10, dir);
         VU0_CLEAR_W(vf10);
@@ -288,8 +1044,6 @@ typedef struct {
     u32 handle;           /* 0x84 */
 } EffEventBillSet; /* 0x88 */
 
-extern u32 func_002D03F8(s32 size);
-extern u8 *sdfResourceRetainAddress(u32 handle);
 extern void *billCreateFromResource(s32 kind, const char *path);
 
 INCLUDE_RODATA(const s32, "effect/effEvent", D_003A12E0);
@@ -433,6 +1187,78 @@ void effEventParticleSetCreateFromTable(void *data) {
 
     func_00192250(block0, effParamTableGetWord2(data, 1), block1);
 }
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB068);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB06C);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", effRectangleBlurEnabled);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", effTexturedBlurEnabled);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", effFilterBlurEnabled);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB073);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", effColorRectangleEnabled);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", effTexturedSquareEnabled);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", effStaggeredBlurEnabled);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB078);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB080);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB088);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB090);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB098);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0A0);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0A8);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0B0);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0B8);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0C0);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0C8);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0D0);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0D8);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0E0);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0E8);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0F0);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0F8);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB100);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB108);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB110);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB114);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB118);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB120);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB128);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB12C);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB130);
+
+INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB138);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB140);
 

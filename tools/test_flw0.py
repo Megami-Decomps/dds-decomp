@@ -603,6 +603,103 @@ class Flw0Tests(unittest.TestCase):
             flw0.parse_source(labelled_source).to_bytes(), labelled_result.to_bytes()
         )
 
+    def test_symbolic_local_aliases_are_exact_and_survive_rendering(self) -> None:
+        source = """\
+flw0 2
+profile dds1
+header word00=0 word0c=0 word18=0 word1c=0
+locals int=2 float=1
+alias counter = local_int[0]
+alias limit = local_int[1]
+alias fade = local_float[0]
+procedure main
+code
+main:
+  PROC main
+  counter = 1
+  limit = counter + 2
+  fade = float32(1.5)
+  WAIT_FOR_TIMER_LIMIT(limit)
+  return
+end
+messages
+end
+strings
+end
+"""
+        indexed = """\
+flw0 2
+profile dds1
+header word00=0 word0c=0 word18=0 word1c=0
+locals int=2 float=1
+procedure main
+code
+main:
+  PROC main
+  local_int[0] = 1
+  local_int[1] = local_int[0] + 2
+  local_float[0] = float32(1.5)
+  WAIT_FOR_TIMER_LIMIT(local_int[1])
+  return
+end
+messages
+end
+strings
+end
+"""
+        script = flw0.parse_source(source)
+        self.assertEqual(
+            script.local_aliases,
+            (
+                flw0.LocalAlias("counter", "local_int", 0),
+                flw0.LocalAlias("limit", "local_int", 1),
+                flw0.LocalAlias("fade", "local_float", 0),
+            ),
+        )
+        self.assertEqual(script.to_bytes(), flw0.parse_source(indexed).to_bytes())
+
+        rendered = flw0_symbolic.render(script, "dds1", semantic=True)
+        self.assertIn("alias counter = local_int[0]", rendered)
+        self.assertIn("counter = 1", rendered)
+        self.assertIn("limit = counter + 2", rendered)
+        self.assertIn("WAIT_FOR_TIMER_LIMIT(limit)", rendered)
+        self.assertNotIn("local_int[0] =", rendered)
+        reparsed = flw0.parse_source(rendered)
+        self.assertEqual(reparsed.local_aliases, script.local_aliases)
+        self.assertEqual(reparsed.to_bytes(), script.to_bytes())
+
+        assembly = source.replace(
+            "  counter = 1\n"
+            "  limit = counter + 2\n"
+            "  fade = float32(1.5)\n"
+            "  WAIT_FOR_TIMER_LIMIT(limit)\n",
+            "  PUSHLIX counter\n"
+            "  POPLIX limit\n"
+            "  PUSHLFX fade\n"
+            "  POPLFX fade\n",
+        )
+        assembly_script = flw0.parse_source(assembly)
+        assembly_rendered = flw0_symbolic.render(assembly_script, "dds1")
+        self.assertIn("  PUSHLIX counter", assembly_rendered)
+        self.assertIn("  POPLFX fade", assembly_rendered)
+        self.assertEqual(
+            flw0.parse_source(assembly_rendered).to_bytes(),
+            assembly_script.to_bytes(),
+        )
+
+        invalid_aliases = {
+            "duplicate alias name": "alias counter = local_int[1]",
+            "already named 'counter'": "alias other = local_int[0]",
+            "outside the declared count 2": "alias other = local_int[2]",
+            "alias name 'result' is reserved": "alias result = local_int[0]",
+            "alias name 'main' is reserved": "alias main = local_int[0]",
+        }
+        for error, declaration in invalid_aliases.items():
+            malformed = source.replace("procedure main", f"{declaration}\nprocedure main")
+            with self.subTest(declaration=declaration):
+                with self.assertRaisesRegex(flw0.Flw0Error, error):
+                    flw0.parse_source(malformed)
+
     def test_semantic_source_compiles_canonical_if_else_and_while(self) -> None:
         self.assertEqual(
             flw0_semantic.lower_code(
@@ -710,7 +807,7 @@ end
     def test_structured_source_renderer_round_trips_both_symbolic_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (129, 4079, 736),
+            "dds1": (129, 4079, 738),
             "dds2": (126, 3416, 1190),
         }
         for game, expected_counts in expected.items():
@@ -759,6 +856,14 @@ end
         content = [(index, line.strip()) for index, line in enumerate(rendered[1:], 1)]
         self.assertEqual(msg1.parse_source(content), binary)
 
+        semantic = msg1.render(binary, semantic=True)
+        self.assertIn("      segment-start", semantic)
+        self.assertIn("      stream-end", semantic)
+        semantic_content = [
+            (index, line.strip()) for index, line in enumerate(semantic[1:], 1)
+        ]
+        self.assertEqual(msg1.parse_source(semantic_content), binary)
+
         edited = [line.replace('text "Hello"', 'text "A longer greeting"') for line in rendered]
         edited_content = [(index, line.strip()) for index, line in enumerate(edited[1:], 1)]
         edited_binary = msg1.parse_source(edited_content)
@@ -799,6 +904,38 @@ end
         ]
         with self.assertRaisesRegex(msg1.Msg1Error, "not in the DDS1 MSG1 map"):
             msg1.parse_source(bad)
+
+    def test_msg1_semantic_controls_preserve_native_operands(self) -> None:
+        controls = bytes.fromhex(
+            "f208ffff f20602ff f20205ff f20901ff f20781ff "
+            "f20301ff f10f f104"
+        )
+        bank = msg1.Bank((msg1.Message("CONTROL", 0xFFFF, (controls,)),), ())
+        binary = msg1.encode(bank)
+        source = msg1.render(binary, semantic=True)
+        expected = {
+            "      segment-start",
+            "      font-slot 1",
+            "      text-attribute 1 4",
+            "      text-attribute 2 0",
+            "      text-attribute 3 128",
+            "      token 0",
+            "      conditional-newline",
+            "      stream-end",
+        }
+        self.assertTrue(expected.issubset(source))
+        content = [(index, line.strip()) for index, line in enumerate(source[1:], 1)]
+        self.assertEqual(msg1.parse_source(content), binary)
+
+        invalid = [
+            (1, "message BAD speaker=none"),
+            (2, "page"),
+            (3, "text-attribute 4 0"),
+            (4, "endpage"),
+            (5, "endmessage"),
+        ]
+        with self.assertRaisesRegex(msg1.Msg1Error, "slot must be 1, 2, or 3"):
+            msg1.parse_source(invalid)
 
     def test_symbolic_source_resolves_names_and_relayouts(self) -> None:
         source = """\
@@ -1116,6 +1253,7 @@ end
             "TEST_MODEL_FLAG": (0x007, 1, True),
             "SET_MODEL_FLAG": (0x008, 1, False),
             "CLEAR_MODEL_FLAG": (0x009, 1, False),
+            "RANDOM_ONE_TO": (0x00A, 1, True),
             "WAIT_FOR_TIMER_START": (0x00D, 0, False),
             "WAIT_FOR_TIMER_LIMIT": (0x00E, 1, False),
             "SCREEN_FADE_A": (0x00F, 2, False),
@@ -1123,6 +1261,10 @@ end
             "ADD_EFFECT_UNIT_TO_WORLD": (0x012, 1, False),
             "CREATE_LINKED_CAMERA_VIEWER": (0x015, 2, True),
             "ADD_FLAGGED_EFFECT_UNIT_TO_WORLD": (0x019, 1, False),
+            "SET_CONTROLLER_VIBRATION": (0x01A, 3, False),
+            "FADE_BACKGROUND_IN": (0x01F, 1, False),
+            "READ_SOLAR_PHASE": (0x027, 0, True),
+            "SUBMIT_EVENT_WITH_MODE": (0x028, 2, False),
             "RESET_DRAW_EFFECTS": (0x043, 0, False),
             "RETURN_TO_TITLE": (0x046, 0, False),
             "WAIT_FOR_UNIT_MOTION": (0x049, 1, False),
@@ -1136,16 +1278,41 @@ end
             "CLEAR_UNIT_LOW_FLAG": (0x069, 1, False),
             "SET_UNIT_LOW_FLAG": (0x06A, 1, False),
             "MOVE_OBJECT_ALONG_PATH": (0x06B, 3, False),
+            "WAIT_FOR_OBJECT_PATH": (0x06C, 1, False),
+            "CHANGE_ITEM_COUNT": (0x070, 2, False),
             "SET_MESSAGE_WINDOW_GEOMETRY": (0x071, 3, False),
             "PREPARE_UNIT_MOTION_STATE": (0x073, 5, False),
             "READ_SECONDARY_WORLD_ID_VALUE": (0x094, 1, True),
             "RESET_FIELD_EFFECTS": (0x099, 0, False),
+            "DESTROY_WORLD_EFFECT_OBJECT": (0x09B, 1, False),
+            "COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE": (0x09D, 2, False),
+            "UPDATE_FIELD_LOOK_AT_SEGMENT": (0x0A4, 0, False),
             "CREATE_SCRIPT_TASK": (0x0A5, 2, True),
             "DESTROY_REGISTERED_TASK": (0x0A6, 1, False),
             "WAIT_FOR_TASK_REMOVAL": (0x0A7, 1, False),
             "CREATE_POLYGON_MOVIE": (0x0AA, 2, True),
+            "SETUP_FADE_FRAMES": (0x0AB, 2, False),
             "SET_SOLAR_OVERLAY_MODE": (0x0C3, 1, False),
+            "WAIT_FOR_CAMP_TASK": (0x0C8, 1, False),
+            "BIND_MODEL_MOTION_SOUND": (0x0C9, 2, True),
+            "CREATE_EVENT_TEXTURE_TASK": (0x0CC, 2, True),
             "CREATE_FLAGGED_EFFECT_OBJECT": (0x0CD, 1, True),
+            "SET_EFFECT_MODEL_CUT": (0x0CE, 2, False),
+            "SET_EFFECT_MODEL_ROTATION": (0x0CF, 4, False),
+            "CREATE_EVENT_BED_EFFECT": (0x0D0, 2, True),
+            "ATTACH_EFFECT_TO_PATH": (0x0D1, 2, False),
+            "WAIT_FOR_EFFECT_PATH": (0x0D2, 1, False),
+            "CREATE_MG1_EFFECT": (0x0D3, 1, True),
+            "CREATE_EVENT_MG1_EFFECT": (0x0D4, 2, True),
+            "CREATE_MG2_EFFECT": (0x0D5, 1, True),
+            "CREATE_EVENT_MG2_EFFECT": (0x0D6, 2, True),
+            "SET_MG1_EFFECT_POINTS": (0x0D7, 3, False),
+            "SET_MG2_EFFECT_POINTS": (0x0D8, 5, False),
+            "START_EVENT_BGM": (0x0D9, 2, False),
+            "SET_WORLD_NODE_BASE_MODE": (0x0DB, 1, False),
+            "DESTROY_EFFECT_OBJECT": (0x0E3, 1, False),
+            "START_CAMP_TASK_IF_ABSENT": (0x0F7, 1, False),
+            "CAMP_TASK_READY": (0x0F8, 1, True),
             "REQUEST_ALTERNATE_FIELD_SEQUENCE": (0x100, 2, False),
             "SET_FIELD_ENVIRONMENT": (0x101, 2, False),
             "ENABLE_FIELD_MODELS": (0x103, 4, False),
@@ -1165,6 +1332,15 @@ end
             "READ_TREASURE_TABLE_VALUE": (0x114, 1, True),
             "MARK_CURRENT_TREASURE_OPENED": (0x115, 0, False),
             "TEST_CURRENT_TREASURE_OPENED": (0x116, 0, True),
+            "START_AND_WAIT_FOR_STREAM_SOUND": (0x11B, 1, False),
+            "ADVANCE_STREAM_SOUND_STATE": (0x11C, 0, False),
+            "RESET_STREAM_PLAYBACK": (0x11F, 0, False),
+            "WAIT_FOR_STREAM_IDLE": (0x121, 0, False),
+            "CLEAR_WORLD_OBJECT_STATE_FLAGS": (0x124, 1, False),
+            "ADD_PARTY_CURRENCY": (0x139, 1, False),
+            "APPLY_PARTY_TRAP_EFFECT": (0x13A, 1, False),
+            "SET_MESSAGE_RANGE": (0x13C, 2, False),
+            "SUBMIT_EVENT_IMMEDIATE": (0x166, 1, False),
             "QUEUE_WORLD_OBJECT_PENDING_VALUE": (0x1E0, 2, False),
             "CLEAR_WORLD_OBJECT_PENDING_VALUE": (0x1E1, 1, False),
             "CLEAR_PROCESS_CONTROL_FLAG": (0x1E7, 0, False),
@@ -1174,14 +1350,198 @@ end
             "READ_CURRENT_SCENE_SELECTION_RESOURCE": (0x1FE, 0, True),
             "FIND_FIELD_EFFECT_BY_NAME": (0x1FF, 1, True),
             "READ_ELEVATOR_TABLE_VALUE": (0x200, 1, True),
+            "RUN_FIELD_DESTINATION_TRANSITION": (0x201, 1, False),
+            "SET_CURRENT_TASK_SCENE": (0x202, 0, False),
+            "NO_OP_FIELD_TRANSITION": (0x203, 0, False),
+            "APPLY_CURRENT_TASK_ENTRY_TRIGGER": (0x204, 0, False),
             "ADVANCE_FIELD_INTERACTION": (0x205, 2, True),
             "READ_FIELD_INTERACTION_VALUE": (0x206, 2, True),
             "READ_FIELD_INTERACTION_KIND": (0x207, 0, True),
             "READ_LADDER_TABLE_VALUE": (0x208, 1, True),
+            "CONFIGURE_ELEVATOR_CAMERA_MOVE": (0x209, 2, False),
+            "RESET_ELEVATOR_CAMERA_MOVE_TRACKING": (0x20A, 0, False),
             "POLL_ELEVATOR_MOVE_STATE": (0x20B, 0, True),
             "READ_DOOR_WARP_VALUE": (0x20C, 1, True),
+            "APPLY_CURRENT_TASK_RECORD_ENTRY": (0x20D, 0, False),
+            "START_CURRENT_FIELD_INTERACTION_EVENT": (0x20E, 0, False),
+            "RUN_FIELD_TRANSITION_SELECTOR": (0x20F, 1, False),
+            "PLAY_FIELD_SE_VOLUME_PAN": (0x214, 1, False),
+            "PLAY_FIELD_SE": (0x215, 1, False),
             "READ_WARP_EFFECT_MODE": (0x219, 0, True),
             "ACTION_WINDOW_REQUEST_AND_POLL_DIRECT": (0x21D, 1, True),
+            "AI_COUNTER_REACHED_LIMIT": (0x0DF, 1, True),
+            "AI_SELECT_ACTION_BY_KIND": (0x0E2, 2, False),
+            "TRACE_BATTLE_RETREAT": (0x0E4, 0, False),
+            "TRACE_BATTLE_ALL_RETREAT": (0x0E5, 0, False),
+            "AI_RESET_COMMAND_CONTEXT": (0x0E6, 0, False),
+            "AI_SELECT_LOWEST_HP_TARGET_BLOCKING_ELEMENT": (0x0E7, 1, False),
+            "AI_MOVE_CAMERA": (0x0F4, 7, False),
+            "TRACE_BATTLE_CAMERA_ORIGINAL": (0x0F5, 0, False),
+            "AI_ENABLE_COMMAND_STATE_FLAG": (0x0F6, 0, False),
+            "AI_QUEUE_ACTOR_COMMAND_SOUND": (0x0FA, 0, False),
+            "TRACE_BATTLE_CAMERA_TWO_SHOT": (0x0FB, 0, False),
+            "TRACE_BATTLE_CAMERA_OBSTRUCTION": (0x0FC, 0, False),
+            "CALC_SET_RESULT": (0x16C, 1, False),
+            "CALC_SOURCE_LEVEL": (0x16D, 0, True),
+            "CALC_TARGET_LEVEL": (0x16E, 0, True),
+            "CALC_SOURCE_STAT": (0x16F, 1, True),
+            "CALC_TARGET_STAT": (0x170, 1, True),
+            "CALC_ACTION_HIT_LEVEL": (0x171, 0, True),
+            "CALC_ACTION_AILMENT_LEVEL": (0x172, 0, True),
+            "CALC_ACTION_POWER": (0x173, 0, True),
+            "CALC_ACTION_MAGIC_BASE": (0x174, 0, True),
+            "CALC_SOURCE_FLAG_20_CLEAR": (0x175, 0, True),
+            "CALC_SOURCE_ACTION_AFFINITY": (0x176, 0, True),
+            "CALC_TARGET_ACTION_AFFINITY": (0x177, 0, True),
+            "CALC_SOURCE_ATTACK_AFFINITY": (0x178, 0, True),
+            "CALC_TARGET_ATTACK_AFFINITY": (0x179, 0, True),
+            "CALC_RANDOM_SCALE": (0x17A, 1, True),
+            "CALC_CURRENT_RESULT": (0x17B, 0, True),
+            "CALC_ACTION_MAGIC_LIMIT": (0x17C, 0, True),
+            "CALC_GROUP_AVERAGE_LEVEL": (0x17D, 1, True),
+            "CALC_GROUP_AVERAGE_STAT": (0x17E, 2, True),
+            "CALC_ENCOUNTER_ZONE_FACTOR": (0x17F, 0, True),
+            "CALC_ESCAPE_BONUS_COUNTER": (0x180, 0, True),
+            "CALC_SOURCE_HP": (0x181, 0, True),
+            "CALC_TARGET_HP": (0x182, 0, True),
+            "CALC_SOURCE_MAX_HP": (0x183, 0, True),
+            "CALC_TARGET_MAX_HP": (0x184, 0, True),
+            "CALC_LEVEL_MAX_HP_FACTOR": (0x186, 0, True),
+            "CALC_LEVEL_MAX_MP_FACTOR": (0x187, 0, True),
+            "CALC_TARGET_HP_BAND_FACTOR": (0x188, 0, True),
+            "CALC_LEVEL_FACTOR_360": (0x189, 0, True),
+            "CALC_LEVEL_FACTOR_4EC": (0x18A, 0, True),
+            "CALC_ROLL_TARGET_FLAG_RESULT": (0x18B, 0, True),
+            "CALC_ACTION_DEATH_TYPE": (0x18C, 0, True),
+            "CALC_LEVEL_CRITICAL_FACTOR": (0x18D, 0, True),
+            "CALC_LEVEL_RECOVERY_FACTOR": (0x18E, 0, True),
+            "CALC_SOURCE_ROSTER_BASE": (0x195, 0, True),
+            "CALC_TARGET_HP_FINE_FACTOR": (0x1A5, 0, True),
+            "CALC_SOURCE_ATTACK_POWER": (0x1D0, 0, True),
+            "CALC_GROUP_AVERAGE_MAX_HP": (0x1D2, 1, True),
+            "CALC_GROUP_AVERAGE_HP": (0x1D3, 1, True),
+        }
+        dds2_only = {
+            "CALC_MONEY_BASE": (0x05A, 0, True),
+            "CALC_MONEY_LEVEL_FACTOR": (0x162, 0, True),
+        }
+        dds2_field_only = {
+            "APPLY_ROOM_MODE_GROUP_ZERO": (0x1FC, 4, False),
+            "APPLY_ROOM_MODE_GROUP_ONE": (0x1FD, 4, False),
+            "RESET_FIELD_AFTER_EVENT": (0x21A, 0, False),
+        }
+        ai_expected = {
+            "AI_SELECT_BASIC_ATTACK": (0x030, 0, False),
+            "AI_SELECT_ESCAPE": (0x031, 0, False),
+            "AI_SELECT_WAIT": (0x032, 0, False),
+            "AI_SELECT_SKILL": (0x033, 1, False),
+            "AI_SELECT_ACTION_TARGETS": (0x034, 0, False),
+            "AI_SELECT_LOWEST_HP_TARGET": (0x035, 0, False),
+            "AI_SELECT_TARGETS_WITH_ACTION_MASK": (0x036, 1, False),
+            "AI_SELECT_TARGET_BY_ID": (0x037, 1, False),
+            "AI_ANY_PLAYER_HAS_ACTION": (0x039, 1, True),
+            "AI_ANY_ENEMY_HAS_ACTION": (0x03A, 1, True),
+            "AI_SET_BATTLE_REQUEST_ARGUMENT": (0x03B, 1, False),
+            "AI_SELECT_TABLE_ACTION": (0x03D, 0, False),
+            "AI_CLEAR_SCENE_TRANSITION": (0x03E, 0, False),
+            "AI_BEGIN_SCENE_TRANSITION": (0x03F, 0, False),
+            "AI_UNIT_HP_AT_OR_BELOW_RATE": (0x07B, 1, True),
+            "AI_BOSS_HP_AT_OR_BELOW_RATE": (0x07C, 1, True),
+            "AI_SELECT_LOWEST_HP_RATE_TARGET": (0x07D, 0, False),
+            "AI_PLAYER_COUNT_AT_MOST": (0x07F, 1, True),
+            "AI_HAS_OTHER_ENEMY_UNIT_MODE": (0x085, 1, True),
+            "AI_ANY_PLAYER_PASSES_ACTION_CHECK": (0x086, 1, True),
+            "AI_ANY_ENEMY_PASSES_ACTION_CHECK": (0x087, 1, True),
+            "AI_NO_PLAYER_BLOCKS_QUERY": (0x089, 1, True),
+            "AI_UNIT_PASSES_ACTION_TEN_CHECK": (0x08C, 0, True),
+            "START_SCREEN_QUAKE": (0x0AB, 2, False),
+            "AI_ACTOR_HISTORY_COUNTER": (0x14C, 0, True),
+            "AI_SELECT_LOWEST_LEVEL_TARGET": (0x15B, 0, False),
+            "AI_ANY_PLAYER_PASSES_QUERY": (0x19A, 1, True),
+            "AI_ANY_ENEMY_PASSES_QUERY": (0x19B, 1, True),
+            "AI_ALL_PLAYERS_PASS_QUERY": (0x19C, 1, True),
+            "AI_ALL_ENEMIES_PASS_QUERY": (0x19D, 1, True),
+            "AI_ACTOR_AVAILABLE_WITH_STAT_FLAG_2000": (0x1A0, 0, True),
+            "AI_BATTLE_READY_WITH_ZERO_TURNS": (0x1A2, 0, True),
+            "AI_CONTEXT_FLAG_TWO_SET": (0x1A3, 0, True),
+            "AI_SPECIAL_MODE_EFFECT_VALUE": (0x1A6, 0, True),
+            "AI_UNIT_ACTION_MODE_ZERO": (0x1A7, 1, True),
+            "AI_ANY_PLAYER_ACTION_MODE_ZERO": (0x1A9, 1, True),
+            "AI_ANY_ENEMY_ACTION_MODE_ZERO": (0x1AB, 1, True),
+            "AI_SELECT_PLAYER_TARGET_WITHOUT_FLAG_1000": (0x1AF, 0, False),
+            "AI_APPEND_SELF_TO_TARGETS": (0x1B0, 0, False),
+            "AI_SELECT_OTHER_TARGET_OR_SELF": (0x1B1, 0, False),
+            "AI_EFFECT_ACTIVE": (0x1B6, 0, True),
+            "AI_BATTLE_PHASE": (0x1B7, 0, True),
+            "AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO": (0x1B8, 1, True),
+            "AI_SELECT_TARGETS_WITHOUT_ACTION_MASK": (0x1BA, 1, False),
+            "AI_EFFECT_VALUE": (0x1BD, 0, True),
+            "AI_SCENE_FADE_COUNT": (0x1BE, 0, True),
+            "AI_ALL_PLAYERS_LACK_FLAG_1000": (0x1BF, 0, True),
+            "AI_ALL_PLAYERS_HAVE_FLAG_1000": (0x1C0, 0, True),
+            "AI_SELECT_PLAYER_TARGET_WITH_FLAG_1000": (0x1C1, 0, False),
+            "AI_APPEND_EFFECT_ACTOR_TO_TARGETS": (0x1C4, 0, False),
+            "AI_GLOBAL_HISTORY_COUNTER": (0x1C5, 0, True),
+            "AI_ANY_PLAYER_BLOCKS_ELEMENT": (0x1C6, 1, True),
+            "AI_SELECT_TARGETS_BLOCKING_ELEMENT": (0x1C7, 1, False),
+            "AI_ANY_ENEMY_HAS_QUEUED_ACTION": (0x1C8, 1, True),
+            "AI_ANY_PLAYER_HAS_QUEUED_ACTION": (0x1C9, 1, True),
+            "AI_SET_ACTOR_UNIT_PARAMETER": (0x1CA, 1, False),
+            "AI_SELECT_HIGHEST_MP_TARGET": (0x1CB, 0, False),
+            "AI_SELECT_TARGET_PASSING_QUERY": (0x1CC, 1, False),
+            "AI_CLEAR_SPECIAL_ENEMY_ENTRY_FLAGS": (0x1D1, 0, False),
+            "AI_QUEUE_UNBOUND_COMMAND_SOUND": (0x1D4, 0, False),
+            "AI_SET_CAMERA_BLEND_START": (0x1D5, 7, False),
+            "AI_SET_CAMERA_BLEND_END": (0x1D6, 7, False),
+            "AI_RUN_CAMERA_BLEND": (0x1D7, 2, False),
+        }
+        dds1_ai_expected = {
+            "AI_ENEMY_COUNT_AT_MOST": (0x07E, 1, True),
+            "AI_ANY_ENEMY_HAS_ACTION_MASK": (0x081, 1, True),
+            "AI_ANY_PLAYER_HAS_ACTION_MASK": (0x082, 1, True),
+            "AI_ALL_PLAYERS_HAVE_ACTION_MASK": (0x083, 1, True),
+            "AI_UNIT_MP_AT_OR_BELOW_RATE": (0x14B, 1, True),
+            "AI_ENEMY_HAS_ACTION": (0x19E, 1, True),
+            "AI_ANY_ENEMY_CURRENT_ACTION_MATCHES": (0x1AD, 1, True),
+            "AI_ANY_PLAYER_CURRENT_ACTION_MATCHES": (0x1BB, 1, True),
+        }
+        dds2_ai_expected = {
+            "AI_SELECT_WEIGHTED_TABLE_ENTRY": (0x01D, 1, False),
+            "AI_HAS_UNIT_OR_SLOT_ACTION_MASK": (0x020, 2, True),
+            "AI_SET_CONTEXT_FLAG_ONE": (0x05B, 0, False),
+            "AI_ACTOR_CAN_USE_ACTION": (0x05C, 1, True),
+            "AI_ENEMY_COUNT_AT_MOST": (0x07E, 1, True),
+            "AI_UNIT_HAS_ACTION_MASK": (0x080, 1, True),
+            "AI_ANY_PLAYER_HAS_ACTION_MASK": (0x082, 1, True),
+            "AI_ALL_PLAYERS_HAVE_ACTION_MASK": (0x083, 1, True),
+            "AI_HAS_PLAYER_UNIT_MODE": (0x084, 1, True),
+            "AI_TURN_COUNT": (0x0E0, 0, True),
+            "AI_SELECT_DIRECT_ACTION": (0x0E1, 1, False),
+            "AI_LINKED_ACTION_SCENE_ACTIVE": (0x122, 0, True),
+            "AI_HAS_ELIGIBLE_QUEUED_SPECIAL_ACTION": (0x141, 0, True),
+            "AI_HAS_FLAG_800000": (0x151, 1, True),
+            "AI_ROLL_ONE_BASED_BUCKET": (0x15A, 0, True),
+            "AI_ANY_PLAYER_LACKS_FLAG_1000": (0x1AE, 0, True),
+            "AI_ANY_ENEMY_NOT_ACTION_MODE_ZERO": (0x1B9, 1, True),
+            "AI_ACTIVE_SUBTASK": (0x1D8, 0, True),
+            "AI_SUBTASK_TARGET_MODE": (0x1D9, 0, True),
+            "AI_SELECT_TARGETS_BY_UNIT_MODE": (0x1DA, 1, False),
+            "AI_SPECIAL_BATTLE_OBJECT_VALUE": (0x1DB, 0, True),
+            "AI_APPEND_CURRENT_UNIT_TO_TARGETS": (0x1DC, 0, False),
+            "AI_MARKED_ACTION_SCENE_ACTIVE": (0x1DE, 0, True),
+            "AI_SET_SPECIAL_EFFECT_ACTOR_BYTE": (0x1E9, 1, False),
+        }
+        shared_expected = {
+            name: contract for name, contract in expected.items()
+            if not name.startswith("CALC_")
+        }
+        battle_expected = {
+            name: contract for name, contract in expected.items()
+            if name.startswith("CALC_")
+        }
+        aicalc_shared_expected = {
+            name: contract for name, contract in shared_expected.items()
+            if name != "SETUP_FADE_FRAMES"
         }
         for profile in (flw0_profiles.DDS1, flw0_profiles.DDS2):
             with self.subTest(profile=profile.name):
@@ -1193,7 +1553,10 @@ end
                     )
                     for command in profile.commands
                 }
-                self.assertEqual(commands, expected)
+                profile_expected = shared_expected.copy()
+                if profile.name == "dds2":
+                    profile_expected.update(dds2_field_only)
+                self.assertEqual(commands, profile_expected)
                 treasure_fields = profile.by_name[
                     "READ_TREASURE_TABLE_VALUE"
                 ].symbols_for_argument(0)
@@ -1209,6 +1572,18 @@ end
                     },
                 )
                 selector_domains = {
+                    "SET_CONTROLLER_VIBRATION": {
+                        0: "SMALL_MOTOR",
+                        1: "LARGE_MOTOR",
+                    },
+                    "APPLY_PARTY_TRAP_EFFECT": {
+                        1: "DAMAGE_TEN_PERCENT_HP",
+                        2: "DAMAGE_HALF_HP",
+                        3: "REDUCE_HP_TO_ONE",
+                        4: "INFLICT_POISON",
+                        5: "INFLICT_ACHE",
+                        6: "INFLICT_CLOSE",
+                    },
                     "CONSUME_FIELD_SKILL_END_NOTICE": {
                         0: "LIGHTOMA",
                         1: "LIFTOMA",
@@ -1243,6 +1618,10 @@ end
                         0: "MOTION_DURATION",
                         1: "FADE_MODE",
                     },
+                    "RUN_FIELD_TRANSITION_SELECTOR": {
+                        900: "HEAL_FACILITY",
+                        901: "SAVE_POINT",
+                    },
                 }
                 for command_name, expected_symbols in selector_domains.items():
                     with self.subTest(command=command_name):
@@ -1258,6 +1637,32 @@ end
                 self.assertEqual(
                     field_info_columns.by_value,
                     {0: "ROW_TYPE", 1: "MESSAGE_ID"},
+                )
+
+        for profile in (
+            flw0_profiles.DDS1_AICALC,
+            flw0_profiles.DDS2_AICALC,
+        ):
+            with self.subTest(profile=profile.name):
+                commands = {
+                    command.name: (
+                        command.command_id,
+                        command.stack_pop,
+                        command.writes_result,
+                    )
+                    for command in profile.commands
+                }
+                self.assertEqual(
+                    commands,
+                    aicalc_shared_expected
+                    | battle_expected
+                    | (dds2_only if profile.name == "dds2-aicalc" else {})
+                    | ai_expected
+                    | (
+                        dds2_ai_expected
+                        if profile.name == "dds2-aicalc"
+                        else dds1_ai_expected
+                    ),
                 )
 
     def test_dds_event_namespaces_match_maintained_sources(self) -> None:
@@ -1544,7 +1949,7 @@ end
                         )
         self.assertEqual(type5_uses, 7863)
         self.assertEqual(command_uses, 53389)
-        self.assertEqual(profiled_command_uses, 45297)
+        self.assertEqual(profiled_command_uses, 50317)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -1598,8 +2003,8 @@ end
     def test_semantic_view_handles_both_tracked_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (143, 85008, 11549),
-            "dds2": (140, 64968, 7225),
+            "dds1": (143, 79894, 6435),
+            "dds2": (140, 61315, 3572),
         }
         for game, expected_counts in expected.items():
             files = 0
@@ -1728,7 +2133,8 @@ end
                 procedure_references += len(
                     re.findall(r"\bPUSHPROC\b|\bprocedure\(", text)
                 )
-                rebuilt = flw0.parse_source(text).to_bytes()
+                source_script = flw0.parse_source(text)
+                rebuilt = source_script.to_bytes()
                 self.assertEqual(sha1(rebuilt).hexdigest(), expected)
                 script = flw0.parse(rebuilt)
                 code_words += len(script.code_words())
@@ -1765,10 +2171,13 @@ end
                             if isinstance(dialog, msg1.Selection)
                         )
                 if version == 1:
-                    self.assertEqual(flw0.render_source(script, "dds1"), text)
+                    self.assertEqual(flw0.render_source(source_script, "dds1"), text)
                 else:
                     self.assertEqual(
-                        flw0_symbolic.render(script, "dds1", structured=True), text
+                        flw0_symbolic.render(
+                            source_script, "dds1", structured=True
+                        ),
+                        text,
                     )
         self.assertEqual(versions, {1: 14, 2: 129})
         self.assertEqual(
@@ -1776,7 +2185,7 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53389, 45297)
+            (code_words, commands, profiled_commands), (168829, 53389, 50317)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
@@ -1905,7 +2314,7 @@ end
                 totals["message_references"],
                 totals["selection_references"],
             ),
-            (32983, 1910, 287),
+            (36729, 1910, 287),
         )
         self.assertEqual(totals["event_references"], 43)
         self.assertEqual(totals["procedure_references"], 463)

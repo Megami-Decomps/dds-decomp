@@ -8,7 +8,16 @@ extern u32 func_002CFEB8(u32);
 
 INCLUDE_ASM(const s32, "game/code_00234C18", func_00234C18);
 
-INCLUDE_ASM(const s32, "game/code_00234C18", func_00234CA8);
+s32 func_003014F0(char *output, const char *format, ...);
+
+s32 func_00234CA8(s32 event, s32 id, char *path1, char *path2, char *path3) {
+    func_003014F0(path1, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM1",
+                  event / 10 * 10, event, event, id, event, id);
+    func_003014F0(path2, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
+                  event / 10 * 10, event, event, id, event, id);
+    return func_003014F0(path3, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
+                         event / 10 * 10, event, event, id, event, id);
+}
 
 INCLUDE_ASM(const s32, "game/code_00234C18", func_00234DA8);
 

@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 D_003BC5D0;
+extern s32 mnuMovieMenuState;
 
 extern void func_0026C7E0();
 
@@ -38,31 +38,31 @@ void mnuRecreateMenuSelectionList(void) {
     s32 i;
     s32 node;
 
-    if (((MenuState *)D_003BC5D0)->linkedState != 0) {
-        mnuDestroyListState(((MenuState *)D_003BC5D0)->linkedState);
+    if (((MenuState *)mnuMovieMenuState)->linkedState != 0) {
+        mnuDestroyListState(((MenuState *)mnuMovieMenuState)->linkedState);
     }
     node = mnuCreateListState(0, 3, 0);
-    ((MenuState *)D_003BC5D0)->linkedState = node;
+    ((MenuState *)mnuMovieMenuState)->linkedState = node;
     ((MenuState *)node)->linkedState = (s32)func_0026D480;
     for (i = 0; i < 3; i++) {
-        mnuListAppendNode(((MenuState *)D_003BC5D0)->linkedState, 0);
+        mnuListAppendNode(((MenuState *)mnuMovieMenuState)->linkedState, 0);
     }
 }
 
-s64 mnuDestroyMovieMenuSelectionList(void) {
-    return mnuDestroyListState(((MenuState *)D_003BC5D0)->linkedState);
+u32 mnuDestroyMovieMenuSelectionList(void) {
+    return mnuDestroyListState(((MenuState *)mnuMovieMenuState)->linkedState);
 }
 
 u32 func_0026BED0(void) {
-    return **(u32 **)(((MenuState *)D_003BC5D0)->linkedState + 0x1c);
+    return **(u32 **)(((MenuState *)mnuMovieMenuState)->linkedState + 0x1c);
 }
 
 void mnuSelectMenuListCursorByAdvance(s32 advanceCount) {
-    mnuSelectFirstListNode(((MenuState *)D_003BC5D0)->linkedState);
+    mnuSelectFirstListNode(((MenuState *)mnuMovieMenuState)->linkedState);
     if (0 < advanceCount) {
         do {
             advanceCount = advanceCount - 1;
-            mnuAdvanceListCursorDefault(((MenuState *)D_003BC5D0)->linkedState);
+            mnuAdvanceListCursorDefault(((MenuState *)mnuMovieMenuState)->linkedState);
         } while (advanceCount != 0);
     }
 }
@@ -85,15 +85,15 @@ u32 func_0026C040(void) {
 }
 
 void mnuReleaseMenuResourceSlots(void) {
-    MenuState *state = (MenuState *)D_003BC5D0;
+    MenuState *state = (MenuState *)mnuMovieMenuState;
     if (state->firstResource != 0) {
         effDestroyResourceSlotSet(state->firstResource);
-        state = (MenuState *)D_003BC5D0;
+        state = (MenuState *)mnuMovieMenuState;
         state->firstResource = 0;
     }
     if (state->secondResource != 0) {
         effDestroyResourceSlotSet(state->secondResource);
-        state = (MenuState *)D_003BC5D0;
+        state = (MenuState *)mnuMovieMenuState;
         state->secondResource = 0;
     }
 }
@@ -101,51 +101,57 @@ void mnuReleaseMenuResourceSlots(void) {
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C098);
 
 u8 mnuHasSpriteHandle(void) {
-    return ((MenuState *)D_003BC5D0)->spriteHandle != 0;
+    return ((MenuState *)mnuMovieMenuState)->spriteHandle != 0;
 }
 
 void mnuReleaseSpriteHandle(void) {
-    if (((MenuState *)D_003BC5D0)->spriteHandle != 0) {
-        effDestroyResourceSlotSet(((MenuState *)D_003BC5D0)->spriteHandle);
-        ((MenuState *)D_003BC5D0)->spriteHandle = 0;
+    if (((MenuState *)mnuMovieMenuState)->spriteHandle != 0) {
+        effDestroyResourceSlotSet(((MenuState *)mnuMovieMenuState)->spriteHandle);
+        ((MenuState *)mnuMovieMenuState)->spriteHandle = 0;
     }
 }
 
-extern s32 mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
 /* These entry points differ only in the selected menu sound identifier. */
-s64 mnuStartMovieMenuSfx16(s32 parameter) {
-    return mnuDrawSprite(0, 0, 0, parameter, 0, 0x16, 0x53);
+void mnuStartMovieMenuSfx16(s32 parameter) {
+    mnuDrawSprite(0, 0, 0, parameter, 0, 0x16, 0x53);
 }
 
-s64 mnuStartMovieMenuSfx17(s32 parameter) {
-    return mnuDrawSprite(0, 0, 0, parameter, 0, 0x17, 0x53);
+void mnuStartMovieMenuSfx17(s32 parameter) {
+    mnuDrawSprite(0, 0, 0, parameter, 0, 0x17, 0x53);
 }
 
-s64 mnuStartMovieMenuSfx18(s32 parameter) {
-    return mnuDrawSprite(0, 0, 0, parameter, 0, 0x18, 0x53);
+void mnuStartMovieMenuSfx18(s32 parameter) {
+    mnuDrawSprite(0, 0, 0, parameter, 0, 0x18, 0x53);
 }
 
-s64 func_0026C1F8(s32 parameter) {
-    return mnuDrawSprite(0, 0, 0, parameter, 0, 0x1A, 0x53);
+void func_0026C1F8(s32 parameter) {
+    mnuDrawSprite(0, 0, 0, parameter, 0, 0x1A, 0x53);
 }
 
 extern void sdfSubmitGsAlphaOneRegisterPacket(s32, s32);
 extern void sdfSubmitGsTestOneRegisterPacket(s32, s32);
-extern s32 func_002C0DD8(s32, s32, s32, s32, s32, s32, s32);
+extern void func_002C0DD8(s32, s32, s32, s32, s32, s32, s32);
 
-s64 mnuDrawMovieMenuBackgroundQuad(s32 parameter) {
+void mnuDrawMovieMenuBackgroundQuad(s32 parameter) {
     sdfSubmitGsAlphaOneRegisterPacket(0x44, 0x3E);
     sdfSubmitGsTestOneRegisterPacket(0x3000D, 0x3E);
-    return func_002C0DD8(0, 0, 0, 0x2000, 0xE00, parameter, 0x3E);
+    func_002C0DD8(0, 0, 0, 0x2000, 0xE00, parameter, 0x3E);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C290);
+void func_0026C290(s32 context) {
+    func_002C0DD8(0, 0, 0, 0x2000, 0xE00, 0x80, context);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 0, context);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 2, context);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 1, context);
+    mnuDrawSprite(1, -10, 0, 0x80, 0, 4, context);
+}
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C350);
 
 void func_0026C4A8(void) {
-    MenuState *state = (MenuState *)D_003BC5D0;
+    MenuState *state = (MenuState *)mnuMovieMenuState;
 
     state->word14 = 0;
     state->word38 = 0;
@@ -155,11 +161,11 @@ INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C4B8);
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C7E0);
 
-s64 mnuStartMovieMenuSfxGroup(void) {
+void mnuStartMovieMenuSfxGroup(void) {
     mnuDrawSprite(0, 0, 0, 0x80, 0, 6, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 0xD, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 0xE, 0x53);
-    return mnuDrawSprite(0, 0, 0, 0x80, 0, 0xF, 0x53);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 0xF, 0x53);
 }
 
 void func_0026CAB0(void) {
@@ -167,7 +173,7 @@ void func_0026CAB0(void) {
 }
 
 void mnuSwapStateWords(void) {
-    MenuState *state = (MenuState *)D_003BC5D0;
+    MenuState *state = (MenuState *)mnuMovieMenuState;
 
     switch (state->mode) {
     case 0:
@@ -188,7 +194,7 @@ INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026CD88);
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026D108);
 
 void mnuClearGlobalMenuStateFields(void) {
-    MenuState *state = (MenuState *)D_003BC5D0;
+    MenuState *state = (MenuState *)mnuMovieMenuState;
 
     state->word34 = 0;
     state->word14 = 0;
@@ -196,7 +202,7 @@ void mnuClearGlobalMenuStateFields(void) {
 }
 
 void mnuResetTitlePageAndPhase(void) {
-    MenuState *state = (MenuState *)D_003BC5D0;
+    MenuState *state = (MenuState *)mnuMovieMenuState;
 
     state->word34 = 0;
     state->word14 = 0;

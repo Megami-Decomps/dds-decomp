@@ -23,7 +23,7 @@ s32 func_002EDBB8(u8 *work) {
     return *(u8 *)(work + 0x3E) == 0;
 }
 
-void func_002EDBD8(SdfPacDispatchPacket *packet, void *dispatch) {
+void sdfPacInitializeDispatchPacket(SdfPacDispatchPacket *packet, void *dispatch) {
     memset(packet, 0, sizeof(*packet));
     packet->status = -1;
     if (dispatch != NULL) {
@@ -86,7 +86,7 @@ typedef union PacCallbackState {
     } work;
 } PacCallbackState;
 
-void func_002EDCC0(PacCallbackState *state) {
+void sdfPacAdvanceCallbackBoundary(PacCallbackState *state) {
     PacCursorBuffer *input;
     u32 cursor;
     u32 available;

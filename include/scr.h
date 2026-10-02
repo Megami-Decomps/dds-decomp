@@ -109,4 +109,8 @@ typedef struct {
 
 /* ScrVmOperand is intentionally local: DDS1's +0x04 is u16, DDS2's is u8. */
 
+/* Script VM stack value types. */
+#define SCR_STACK_TYPE_STRING 5
+#define SCR_STACK_RET 27
+
 #endif /* SCR_H */

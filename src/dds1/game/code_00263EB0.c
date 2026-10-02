@@ -4,9 +4,6 @@ extern s32 kwlnTaskGetUserValue();
 
 extern void func_0024DD78(void);
 
-#define MENU_SUM_MINIMUM 99
-#define MENU_SUM_COUNT 5
-
 typedef struct MenuSumBytes {
     u8 pad00[0x16];
     s8 values[MENU_SUM_COUNT];
@@ -131,7 +128,20 @@ s64 func_002646F8(s32 input) {
     return menuRunPanel(context, 2, input);
 }
 
-INCLUDE_ASM(const s32, "game/code_00263EB0", func_00264740);
+extern u8 *D_003BAA70;
+extern void func_0024DD90(s32, void *);
+
+u32 func_00264740(void) {
+    u8 *context = (u8 *)kwlnTaskGetUserValue();
+    u8 *item = *(u8 **)(*(u8 **)(context + 0x98));
+
+    if (*(s32 *)(context + 0x1588) != 0) {
+        func_0024DD90(0, D_003BAA70 + *(u16 *)(item + 4) * 17);
+        dspStartEntry(0x18);
+    }
+    memset(context + 0x3D0, 0, 0x14);
+    return 1;
+}
 
 u32 func_002647B0(void) {
     evtFinishMessageWindowAndNotify();

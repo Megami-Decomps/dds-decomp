@@ -1,8 +1,17 @@
 #include "common.h"
 
+typedef struct MenuPanelTransition {
+    u16 frame;
+    u16 panelId;
+    u16 mode;
+    u16 action;
+} MenuPanelTransition;
+
+extern s32 func_00292478(void *, s32, s32);
+
 extern u32 D_00438FC8;
 
-extern u32 *D_00437960;
+extern u32 *mnuPanelSoundEntryPool;
 
 extern u64 mnuSpawnPanelSlotB(u32, u64, u64, u64, u64, u64);
 
@@ -146,7 +155,31 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291118);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_002911D0);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291288);
+extern s32 scrGetSelectedScriptEntryId(s32 arg0);
+extern u32 scrGetEntryLowFlags(s32 arg0, u16 index);
+extern u32 ptyGetProfileRecordCap(u16 scriptId);
+extern u32 ptyGetProfileRecordValue(u32 work, u16 scriptId);
+
+s32 func_00291288(MenuPanelSlot *slot, s32 arg1) {
+    u16 target = scrGetSelectedScriptEntryId(arg1) & 0xFFFF;
+    u16 *dst = slot->values;
+    s32 i;
+
+    for (i = 0; i < 0xB0; i++) {
+        u32 flags = scrGetEntryLowFlags(arg1, i);
+
+        *dst++ = flags;
+        if (i == target) {
+            if (((flags >> 8) & 1) != 0) {
+                target = 0;
+            }
+        }
+    }
+    if (target != 0 && ptyGetProfileRecordCap(target) == ptyGetProfileRecordValue(arg1, target)) {
+        return target;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291338);
 
@@ -244,11 +277,75 @@ void itfInstallDefaultMantraSelector(MenuPanelObject *object) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292CF0);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292EA8);
+INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004277A0);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292FF0);
+s32 func_00292EA8(MenuPanelObject *object) {
+    MenuPanelTransition steps[6] = {
+        {0, 0, 0, 6}, {0, 0x16, 0, 0},
+        {30, 0x16, 0, 9}, {30, 0x16, 0, 11},
+        {30, 0x16, 0, 12}, {60, 0x16, 0, 15}
+    };
+    MenuPanelTransition *step = steps;
+    MenuPanelState *state = (MenuPanelState *)((u8 *)object + 0x240);
+    u32 i;
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00293148);
+    for (i = 0; i < 6; i++, step++) {
+        if (step->frame == (u16)(state->flags >> 8)) {
+            state->flags = (state->flags & 0xF0FFFFFF) | ((step->mode & 15) << 24);
+            if (func_00292478(object, step->panelId, step->action)) {
+                return 1;
+            }
+        }
+    }
+    state->flags = (state->flags & 0xFF0000FF) | ((u16)((state->flags >> 8) + 1) << 8);
+    return 0;
+}
+
+s32 func_00292FF0(MenuPanelObject *object) {
+    MenuPanelTransition steps[7] = {
+        {0, 0, 1, 13}, {0, 15, 1, 12},
+        {30, 0, 2, 13}, {30, 0x71, 2, 12},
+        {60, 0, 0, 13}, {60, 0x16, 0, 12},
+        {100, 0x16, 0, 15}
+    };
+    MenuPanelTransition *step = steps;
+    MenuPanelState *state = (MenuPanelState *)((u8 *)object + 0x240);
+    u32 i;
+
+    for (i = 0; i < 7; i++, step++) {
+        if (step->frame == (u16)(state->flags >> 8)) {
+            state->flags = (state->flags & 0xF0FFFFFF) | ((step->mode & 15) << 24);
+            if (func_00292478(object, step->panelId, step->action)) {
+                return 1;
+            }
+        }
+    }
+    state->flags = (state->flags & 0xFF0000FF) | ((u16)((state->flags >> 8) + 1) << 8);
+    return 0;
+}
+
+s32 func_00293148(MenuPanelObject *object) {
+    MenuPanelTransition steps[8] = {
+        {0, 0, 0, 10}, {30, 1, 0, 0},
+        {60, 1, 0, 4}, {150, 1, 0, 1},
+        {180, 1, 0, 3}, {180, 1, 0, 14},
+        {280, 1, 0, 2}, {280, 0, 0, 15}
+    };
+    MenuPanelTransition *step = steps;
+    MenuPanelState *state = (MenuPanelState *)((u8 *)object + 0x240);
+    u32 i;
+
+    for (i = 0; i < 8; i++, step++) {
+        if (step->frame == (u16)(state->flags >> 8)) {
+            state->flags = (state->flags & 0xF0FFFFFF) | ((step->mode & 15) << 24);
+            if (func_00292478(object, step->panelId, step->action)) {
+                return 1;
+            }
+        }
+    }
+    state->flags = (state->flags & 0xFF0000FF) | ((u16)((state->flags >> 8) + 1) << 8);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_002932B0);
 
@@ -271,13 +368,7 @@ void mnuCollectPanelNodeValues(MenuPanelObject *object) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_002933A8);
 
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004277A0);
 
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427858);
-
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427888);
-
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004278C0);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_002933F0);
 
@@ -295,11 +386,11 @@ void mnuInitPanelSoundEntries(void) {
     s32 handle;
     MenuPanelEntryPool *pool;
 
-    if (D_00437960 == 0) {
+    if (mnuPanelSoundEntryPool == 0) {
         handle = func_003292A8(0xAC);
-        D_00437960 = sdfMemoryGetBlockAddress(handle);
-        memset(D_00437960, 0, 0xAC);
-        pool = (MenuPanelEntryPool *)D_00437960;
+        mnuPanelSoundEntryPool = sdfMemoryGetBlockAddress(handle);
+        memset(mnuPanelSoundEntryPool, 0, 0xAC);
+        pool = (MenuPanelEntryPool *)mnuPanelSoundEntryPool;
         pool->entries = (MenuPanelEntry *)((u8 *)pool + 0xC);
         pool->count = 0x14;
         pool->allocation = handle;
@@ -307,18 +398,18 @@ void mnuInitPanelSoundEntries(void) {
 }
 
 void mnuReleasePanelEntryPool(void) {
-    if (D_00437960 != (u32 *)0x0) {
-        func_003297C8(((MenuPanelEntryPool *)D_00437960)->allocation);
+    if (mnuPanelSoundEntryPool != (u32 *)0x0) {
+        func_003297C8(((MenuPanelEntryPool *)mnuPanelSoundEntryPool)->allocation);
     }
-    D_00437960 = (u32 *)0x0;
+    mnuPanelSoundEntryPool = (u32 *)0x0;
 }
 
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 void mnuTickPanelSoundEntries(void) {
     s32 i;
-    MenuPanelEntry *entry = ((MenuPanelEntryPool *)D_00437960)->entries;
+    MenuPanelEntry *entry = ((MenuPanelEntryPool *)mnuPanelSoundEntryPool)->entries;
 
-    for (i = 0; i < ((MenuPanelEntryPool *)D_00437960)->count; i++, entry++) {
+    for (i = 0; i < ((MenuPanelEntryPool *)mnuPanelSoundEntryPool)->count; i++, entry++) {
         if (entry->soundHandle != 0) {
             if (entry->framesRemaining == 0) {
                 sndSetSequenceVolumePan(entry->soundHandle, 0x7F, 0x3F);
@@ -332,7 +423,7 @@ void mnuTickPanelSoundEntries(void) {
 }
 
 MenuPanelEntry *mnuFindFreePanelEntry(void) {
-    MenuPanelEntryPool *pool = (MenuPanelEntryPool *)D_00437960;
+    MenuPanelEntryPool *pool = (MenuPanelEntryPool *)mnuPanelSoundEntryPool;
     s32 count = pool->count;
     MenuPanelEntry *entry = pool->entries;
     s32 index;
@@ -361,5 +452,5 @@ INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437950);
 
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437958);
 
-INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437960);
+INCLUDE_SDATA(const s32, "game/code_0028FD30", mnuPanelSoundEntryPool);
 

@@ -15,15 +15,15 @@ extern EffHandler D_00355738[];
 extern EffHandler D_0035573C[];
 extern EffHandler D_00355740[];
 extern EffHandler D_00355744[];
-extern u8 D_003BD476;
+extern u8 sdfPfsDebugMode;
 extern s8 D_003BB04D;
-extern u32 D_003BD800;
+extern u32 effDataDirectoryIndex;
 extern char D_003BB058[];
 extern char D_003BB060[];
 extern char *D_003557A8[];
 extern s32 func_00310320(void);
-extern u32 func_002D3288(u32);
-extern u64 func_002EB028(u64, u32 *, u64);
+extern u32 sdfTexAcquireResourceTexture(u32);
+extern u64 sdfReadNamedResource(u64, u32 *, u64);
 extern void sdfReleaseChipBlock(void *arg0);
 extern void sdfTexReleaseReferenceViaHandler(s32 arg0);
 extern void func_002D0918(u64 arg0);
@@ -41,9 +41,9 @@ extern void sdfAppendPacket(s32 arg0, s32 arg1);
 
 extern EffHandler32 D_00355730[];
 
-extern u8 D_003296F0[];
+extern u8 sdfViewMatrix[];
 
-extern u8 D_00324610[];
+extern u8 sdfProjectionMatrix[];
 
 extern u8 D_00324660[];
 
@@ -60,16 +60,16 @@ EffResult *effAllocDispatch(s32 type, s32 handlerArg) {
 }
 
 void effTypeDispatch(EffWork *work) {
-    D_00355734[work->type].handler(work->unk4);
+    D_00355734[work->type].handler(work->payload);
 }
 
 void effTypeDispatchFree(EffWork *work) {
-    D_00355738[work->type].handler(work->unk4);
+    D_00355738[work->type].handler(work->payload);
     sdfReleaseChipBlock(work);
 }
 
 u32 effGetHandlerArg(EffWork *work) {
-    return (u32)work->unk4;
+    return (u32)work->payload;
 }
 
 u32 func_0018CBC0(u32 *value) {
@@ -87,7 +87,7 @@ void effTypeDispatchGuardedA(EffWork *work) {
     void (*handler)(void *) = D_0035573C[work->type].handler;
 
     if (handler != NULL) {
-        handler(work->unk4);
+        handler(work->payload);
     }
 }
 
@@ -95,7 +95,7 @@ void effTypeDispatchGuardedB(EffWork *work) {
     void (*handler)(void *) = D_00355744[work->type].handler;
 
     if (handler != NULL) {
-        handler(work->unk4);
+        handler(work->payload);
     }
 }
 
@@ -103,7 +103,7 @@ void effTypeDispatchGuardedC(EffWork *work) {
     void (*handler)(void *) = D_00355740[work->type].handler;
 
     if (handler != NULL) {
-        handler(work->unk4);
+        handler(work->payload);
     }
 }
 
@@ -115,19 +115,19 @@ void effSetSubSlot(EffWork *work, s32 slotValue) {
 
     switch (type) {
     case 0:
-        ((EffSub *)work->unk4)->unk20 = value;
+        ((EffSub *)work->payload)->unk20 = value;
         return;
     case 1:
-        ((EffSub *)work->unk4)->unk40 = value;
+        ((EffSub *)work->payload)->unk40 = value;
         return;
     case 2:
-        ((EffSub *)work->unk4)->unk50 = value;
+        ((EffSub *)work->payload)->unk50 = value;
         return;
     case 3:
-        ((EffSub *)work->unk4)->unk50 = value;
+        ((EffSub *)work->payload)->unk50 = value;
         return;
     case 4:
-        ((EffSub *)work->unk4)->unk50 = value;
+        ((EffSub *)work->payload)->unk50 = value;
         return;
     default:
         return;
@@ -140,15 +140,15 @@ u32 effGetSubSlot(EffWork *work, s32 unusedSlotValue) {
 
     switch (type) {
     case 0:
-        return ((EffSub *)work->unk4)->unk20;
+        return ((EffSub *)work->payload)->unk20;
     case 1:
-        return ((EffSub *)work->unk4)->unk40;
+        return ((EffSub *)work->payload)->unk40;
     case 2:
-        return ((EffSub *)work->unk4)->unk50;
+        return ((EffSub *)work->payload)->unk50;
     case 3:
-        return ((EffSub *)work->unk4)->unk50;
+        return ((EffSub *)work->payload)->unk50;
     case 4:
-        return ((EffSub *)work->unk4)->unk50;
+        return ((EffSub *)work->payload)->unk50;
     default:
         break;
     }
@@ -161,19 +161,19 @@ void effAllocSubWork(EffWork *work) {
 
     switch (type) {
     case 0:
-        handlerArg = work->unk4;
+        handlerArg = work->payload;
         break;
     case 1:
-        handlerArg = work->unk4;
+        handlerArg = work->payload;
         break;
     case 2:
-        handlerArg = work->unk4 + 0x40;
+        handlerArg = work->payload + 0x40;
         break;
     case 3:
-        handlerArg = work->unk4 + 0x40;
+        handlerArg = work->payload + 0x40;
         break;
     case 4:
-        handlerArg = work->unk4 + 0x40;
+        handlerArg = work->payload + 0x40;
         break;
     default:
         break;
@@ -260,18 +260,18 @@ s32 func_0018CE68(void) {
 s32 effOpenDataDir(void *name) {
     u8 path[0x70];
 
-    if (D_003BD476 != 0) {
+    if (sdfPfsDebugMode != 0) {
         func_003014F0(path, D_003BB058, name);
         return sceDopen(path);
     } else {
-        D_003BD800 = 0;
+        effDataDirectoryIndex = 0;
         return 0;
     }
 }
 
 
 void effRunIfEnabled(void) {
-    if (D_003BD476 != 0) {
+    if (sdfPfsDebugMode != 0) {
         func_003101B8();
     }
 }
@@ -279,15 +279,15 @@ void effRunIfEnabled(void) {
 /* In built-in mode the name table supplies entries instead of the
  * directory iterator; clearing 0x1000 marks a synthesized entry. */
 s32 effNextDataDirEntry(s32 unused, EffDirEnt *entry) {
-    if (D_003BD476 != 0) {
+    if (sdfPfsDebugMode != 0) {
         return func_00310320();
     }
-    if ((u32)D_003BD800 >= 0x2F) {
+    if ((u32)effDataDirectoryIndex >= 0x2F) {
         return 0;
     }
-    strcpy(entry->name, D_003557A8[D_003BD800]);
+    strcpy(entry->name, D_003557A8[effDataDirectoryIndex]);
     entry->flags &= ~0x1000;
-    D_003BD800++;
+    effDataDirectoryIndex++;
     return strlen(entry->name);
 }
 
@@ -297,16 +297,16 @@ INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018CF98);
 /* The root's +8 points to the first node; each node's +0x38 points to the
  * next. The root also owns the separate allocation stored at +4. */
 void effFreeWorkList(EffWork *root) {
-    EffWork *node = (EffWork *)root->unk8;
+    EffWork *node = (EffWork *)root->listHead;
 
     if (node != NULL) {
         do {
-            EffWork *next = node->unk38;
+            EffWork *next = node->next;
             sdfReleaseChipBlock(node);
             node = next;
         } while (node != NULL);
     }
-    sdfReleaseChipBlock(root->unk4);
+    sdfReleaseChipBlock(root->payload);
     sdfReleaseChipBlock(root);
 }
 
@@ -333,7 +333,7 @@ typedef struct EffResourceDescriptor {
 } EffResourceDescriptor;
 
 /* Build a resource descriptor with the list's count and head. */
-EffResourceDescriptor *func_0018D428(EffResourceList *list) {
+EffResourceDescriptor *effCreateResourceListDescriptor(EffResourceList *list) {
     EffResourceDescriptor *resource = func_002CFEB8(0x44);
 
     resource->word00 = 0;
@@ -359,9 +359,9 @@ EffResourceDescriptor *func_0018D428(EffResourceList *list) {
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018D4B8);
 
 void effFreeWork(EffWork *work) {
-    if (work->unk3C != 0) {
-        sdfTexReleaseReferenceViaHandler(work->unk3C);
-        work->unk3C = 0;
+    if (work->textureHandle != 0) {
+        sdfTexReleaseReferenceViaHandler(work->textureHandle);
+        work->textureHandle = 0;
     }
     sdfReleaseChipBlock(work);
 }
@@ -377,12 +377,12 @@ u32 effGetWorkParam(EffWork *work) {
 }
 
 u32 effGetWorkLink(EffWork *work) {
-    return work->unk8;
+    return work->listHead;
 }
 
 u32 effFormatMsgNames(EffMsg *message, void *destination) {
-    func_003014F0(destination, D_003BB060, message->unk40[1], message->unk34 + 1);
-    return *message->unk34;
+    func_003014F0(destination, D_003BB060, message->prefixRecord[1], message->nameRecord + 1);
+    return *message->nameRecord;
 }
 
 void effSetWorkFirst(EffWork *work, u32 value) {
@@ -398,20 +398,20 @@ void effSetMsgPair(EffMsg *message, u32 first, u32 second) {
     message->unk2C = second;
 }
 
-/* Replace the work's sound handle, keeping the newly acquired voice handle
- * but releasing the temporary resource returned by the loader. */
-void effSetupWorkSound(EffWork *work, u64 soundResource) {
-    u32 voiceHandle;
+/* Replace the retained texture reference, then release the temporary resource
+ * returned by the loader. */
+void effSetWorkTextureResource(EffWork *work, u64 textureResource) {
+    u32 textureHandle;
     u64 loadedResource;
     u32 resourceWords[4];
 
-    if (work->unk3C != 0) {
-        sdfTexReleaseReferenceViaHandler(work->unk3C);
-        work->unk3C = 0;
+    if (work->textureHandle != 0) {
+        sdfTexReleaseReferenceViaHandler(work->textureHandle);
+        work->textureHandle = 0;
     }
-    loadedResource = func_002EB028(soundResource, resourceWords, 0);
-    voiceHandle = func_002D3288(resourceWords[0]);
-    work->unk3C = voiceHandle;
+    loadedResource = sdfReadNamedResource(textureResource, resourceWords, 0);
+    textureHandle = sdfTexAcquireResourceTexture(resourceWords[0]);
+    work->textureHandle = textureHandle;
     func_002D0918(loadedResource);
 }
 
@@ -427,21 +427,11 @@ void func_0018DBB0(void) {
 
 void sdfProjectVuVectorToScreen(void) {
     u8 *matrix;
-    VU0_LOAD_MATRIX(D_003296F0);
-    matrix = D_00324610;
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    matrix = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmulax.xyzw ACC, vf28, vf10x\n"
-        "vmadday.xyzw ACC, vf29, vf10y\n"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n"
-        "vmaddw.xyzw vf10, vf31, vf0w\n"
-        "vdiv Q, vf0w, vf10w\n"
-        "vmove.w vf10, vf0\n"
-        "vwaitq\n"
-        "vmulq.xyzw vf10, vf10, Q\n"
-        ".set reorder"
-        : : : "memory");
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
     matrix += 0x40;
     VU0_LOAD_VF_MEMORY(vf11, matrix);
     VU0_MUL(vf10, vf10, vf11);
@@ -503,8 +493,8 @@ void *effAllocSlotArray(s32 count) {
     EffSlot38 *slot = retainedAddress;
     u8 *headerAddress = (u8 *)slot + count * 0x38;
 
-    ((EffArrHdr *)headerAddress)->unk8 = allocation;
-    ((EffArrHdr *)headerAddress)->unk0 = retainedAddress;
+    ((EffArrHdr *)headerAddress)->allocation = allocation;
+    ((EffArrHdr *)headerAddress)->slots = retainedAddress;
     ((EffArrHdr *)headerAddress)->unk4 = count;
     if (count != 0) {
         do {

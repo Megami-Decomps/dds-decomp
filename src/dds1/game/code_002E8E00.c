@@ -8,7 +8,7 @@ typedef struct SequenceVolumePanPacket {
     /* 0xC */ u32 unkC;
 } SequenceVolumePanPacket;
 
-u32 func_002E8900(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+u32 sndSendCommandPacket(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
 u32 func_002E87A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
@@ -35,19 +35,19 @@ void sndDispatchCommandWithoutPayload(u32 command) {
 u32 sndSubmitTextCommandPayload(s32 command, char *text) {
     u32 length = strlen(text);
 
-    return func_002E8900(command | 0x70, 0, text, length);
+    return sndSendCommandPacket(command | 0x70, 0, text, length);
 }
 
 u32 func_002E8EE8(s32 command, char *text) {
     u32 length = strlen(text);
 
-    return func_002E8900(command | 0x60, 0, text, length);
+    return sndSendCommandPacket(command | 0x60, 0, text, length);
 }
 
 u32 func_002E8F30(s32 command, char *text) {
     u32 length = strlen(text);
 
-    return func_002E8900(command | 0x80, 0, text, length);
+    return sndSendCommandPacket(command | 0x80, 0, text, length);
 }
 
 /* Send a 12-byte sequence command; the trailing struct word is not transmitted. */

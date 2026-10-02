@@ -67,7 +67,7 @@ typedef struct ItfMesBlk40 {
 /* Block at ItfMesState +0xA4. */
 typedef struct ItfMesBlkA4 {
     u8 unk0[4];          /* +0x0 */
-    void *unk4;          /* +0x4: released by func_0019C968 */
+    void *unk4;          /* +0x4: released by itfMesSetWindowPageAndRefresh */
     u32 panelHandle;       /* +0x8: panel handle */
     u8 unkC[0x1C];       /* +0xC */
     u32 unk28;           /* +0x28 */
@@ -214,7 +214,7 @@ extern ItfMesGlobals itfMesWork;
 
 extern ItfMesZero D_00357D80;
 
-extern u32 D_003BB1E8;
+extern u32 itfMessageFlags;
 
 s32 scrGetWindow(void);
 
@@ -232,11 +232,11 @@ void itfMesSetWindowHighFlags(s32 window, u32 value);
 
 void itfMesClearWindowHighFlags(s32 window, u32 value);
 
-void func_0019C968(s32 window, s32 arg1, s32 arg2);
+void itfMesSetWindowPageAndRefresh(s32 window, s32 arg1, s32 arg2);
 
 void itfMesFinishWindowAndClearStatus(s32 window);
 
-void itfMesCleanupWindow(s32 window, s32 arg1);
+void itfMesCleanupWindow(s32 window, s32 alsoSecondary);
 
 void itfMesResetWindow(s32 window);
 
@@ -328,7 +328,7 @@ extern s32 func_00199828();
 
 extern void itfSetPanelLayoutAndNotify();
 
-extern void func_00199A20();
+extern void itfPanelUpdateValuesAndNotify();
 
 s32 itfMesScriptSetPanelValue(void) {
     s32 window = scrGetWindow();
@@ -477,7 +477,7 @@ s32 itfMesScriptSetMessageOption(void) {
     if (window < 0) {
         return 1;
     }
-    func_0019C968(window, scrReadIntParameter(0), 0);
+    itfMesSetWindowPageAndRefresh(window, scrReadIntParameter(0), 0);
     return 1;
 }
 
@@ -491,7 +491,7 @@ s32 itfMesScriptSetMessagePair(void) {
     }
     first = scrReadIntParameter(0);
     second = scrReadIntParameter(1);
-    func_0019C968(window, first, second);
+    itfMesSetWindowPageAndRefresh(window, first, second);
     return 1;
 }
 
@@ -514,11 +514,11 @@ u32 itfMesGetGlobalWindowValue(void) {
 }
 
 void itfMesSetFlags(u32 flags) {
-    D_003BB1E8 |= flags;
+    itfMessageFlags |= flags;
 }
 
 void itfMesClearFlags(u32 flags) {
-    D_003BB1E8 &= ~flags;
+    itfMessageFlags &= ~flags;
 }
 
 s32 itfMesCreateWindow(ItfMesSub *sub) {
@@ -558,7 +558,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesStartEntry);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019BBF8);
 
-void itfMesCleanupWindow(s32 window, s32 arg1) {
+void itfMesCleanupWindow(s32 window, s32 alsoSecondary) {
     ItfMesState *mes;
     ItfMesBlk24 *blk24;
     ItfMesBlk14 *blk14;
@@ -576,7 +576,7 @@ void itfMesCleanupWindow(s32 window, s32 arg1) {
     itfMesResetCursorState(blk24, 0);
     mes->flags &= ~7;
     mes->flags &= 0xFFFDFFFF;
-    if (arg1 == 0) {
+    if (alsoSecondary == 0) {
         return;
     }
     if (blk14->glyphChain != NULL) {
@@ -611,7 +611,7 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     rect[3] = 0x530 + height;
     blkA4->panelHandle = func_00199828(9, itfMesWork.windowTexture);
     itfSetPanelLayoutAndNotify(blkA4->panelHandle, rect[0], rect[1], rect[2], rect[3], mes->renderValue);
-    func_00199A20(blkA4->panelHandle, 0, 0, 0, 0);
+    itfPanelUpdateValuesAndNotify(blkA4->panelHandle, 0, 0, 0, 0);
     mes->flags = (mes->flags & ~0xC00) | 0x400;
 }
 
@@ -806,8 +806,8 @@ u32 itfMesGetWindowTableValue(s32 window, s32 index) {
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C590);
 
-void func_0019C838(s32 window, u32 arg1, u32 arg2) {
-    func_0019D460((u32)itfWindowSlots[window].mes, arg1, arg2, 0);
+void itfMesCopyStringToWindowTableSlot(s32 window, u32 entryIndex, u32 itemIndex) {
+    func_0019D460((u32)itfWindowSlots[window].mes, entryIndex, itemIndex, 0);
 }
 
 void func_0019C868(s32 window) {
@@ -832,22 +832,39 @@ ItfMesSub *itfMesSetSubResource(s32 window, ItfMesSub *sub) {
     return previous;
 }
 
-u32 itfMesGetEntryTableItem(s32 window, s32 arg1, s32 arg2) {
-    return itfMesGetTableItem(itfMesGetEntry(itfWindowSlots[window].mes, arg1)->table, arg2);
+u32 itfMesGetEntryTableItem(s32 window, s32 entryIndex, s32 itemIndex) {
+    return itfMesGetTableItem(itfMesGetEntry(itfWindowSlots[window].mes, entryIndex)->table, itemIndex);
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C968);
+extern void func_0019E048(ItfMesBlkA4 *blk, s32 arg1, s32 arg2);
+extern void itfPanelReleasePrimitiveResources(void *primitive);
+
+void itfMesSetWindowPageAndRefresh(s32 window, s32 arg1, s32 arg2) {
+    ItfMesState *mes = itfWindowSlots[window].mes;
+    ItfMesBlkA4 *blk = &mes->blkA4;
+
+    if ((mes->flags & 0x3300) == 0) {
+        if (mes->unk12 != arg1 || blk->unk28 != arg2) {
+            mes->unk12 = arg1;
+            func_0019E048(blk, arg1, arg2);
+            if (blk->unk4 != NULL) {
+                itfPanelReleasePrimitiveResources(blk->unk4);
+                blk->unk4 = NULL;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C9F0);
 
-s32 itfMesMeasureEntryItem(s32 window, s32 arg1, s32 arg2) {
+s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
     ItfMesState *mes = itfWindowSlots[window].mes;
     ItfMesTable *table;
     u32 item;
     ItfMesNode *glyph;
     s32 extent;
 
-    table = itfMesGetEntry(mes, arg1)->table;
+    table = itfMesGetEntry(mes, entryIndex)->table;
     if (table->count == 0) {
         return 0;
     }
@@ -855,7 +872,7 @@ s32 itfMesMeasureEntryItem(s32 window, s32 arg1, s32 arg2) {
     if (mes->temporaryFontEntry != 0) {
         frFontLoadTemporaryEntry(mes->temporaryFontEntry);
     }
-    item = itfMesGetTableItem(table, arg2);
+    item = itfMesGetTableItem(table, itemIndex);
     if (item == 0) {
         return item;
     }
@@ -1236,7 +1253,7 @@ void itfMesEnableUnflaggedNodeContexts(ItfMesNode *node) {
     }
 }
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", D_003BB1E8);
+INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMessageFlags);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_003BB1F0);
 

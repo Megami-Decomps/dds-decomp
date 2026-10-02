@@ -1,11 +1,13 @@
 #include "common.h"
+#include "evt_world.h"
+#include "evt_unit.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
 extern u32 evtWindowMotionUnit;
 extern s32 D_004371F0;
 
-/* Event lip-sync registry: world -> root -> list -> unit links. */
+/* Slot-specific lip-sync node/model chain within the world's unit lists. */
 typedef struct EvtLipsModel {
     u8 pad00[0x18];
     void *chunk;        /* 0x18 */
@@ -29,58 +31,10 @@ typedef struct EvtLipsNode {
     struct EvtLipsNode *next; /* 0x20 */
 } EvtLipsNode;
 
-typedef struct EvtLipsList {
-    u8 pad00[0x40];
-    EvtLipsNode *head;  /* 0x40 */
-} EvtLipsList;
-
-typedef struct EvtLipsRoot {
-    u8 pad00[0x08];
-    EvtLipsList *list;  /* 0x08 */
-} EvtLipsRoot;
-
-typedef struct EvtLipsWorld {
-    u8 pad00[0x18];
-    EvtLipsRoot *root;  /* 0x18 */
-} EvtLipsWorld;
 
 extern u32 sdfGetUniqueChunkValue();
 extern s32 mdlGetNodeRefHalf();
 
-/* Event work layout overlaps event/evtUnitManager's EvtUnit at
- * value, flags, and the field at +0xBC. */
-typedef struct EvtUnit {
-    u8 pad00[0x04];     /* 0x00 */
-    s32 objectId;       /* 0x04: returned to event scripts */
-    u8 pad08[0x60];     /* 0x08 */
-    s32 endpointWorkAddress; /* 0x68 */
-    u32 value;          /* 0x6C: matches evtUnitManager */
-    s128 vector;        /* 0x70: 16-byte vector copied by the setup helpers */
-    u8 pad80[0x0C];     /* 0x80 */
-    u32 *flagWord;      /* 0x8C: status opcodes update its first bit */
-    void *linkedUnit;   /* 0x90: matching secondary-world unit */
-    s32 unk94;          /* 0x94 */
-    s32 unk98;          /* 0x98 */
-    s32 unk9C;          /* 0x9C */
-    s32 pathHandle;     /* 0xA0: freed and replaced when following another path */
-    f32 pathSpeed;      /* 0xA4: signed path speed */
-    u32 flags;          /* 0xA8 */
-    s16 mode;           /* 0xAC */
-    s16 transitionSourceKind; /* 0xAE */
-    s16 motionSubmode; /* 0xB0: motion/path submode */
-    s16 motionTicks;    /* 0xB2: elapsed timed-motion ticks */
-    s16 frameCount;      /* 0xB4: transition duration in frames */
-    s16 unkB6;          /* 0xB6 */
-    u8 padB8[0x04];     /* 0xB8 */
-    u16 scriptUnitValue; /* 0xBC: set by the script unit-value command */
-    s16 statePairFirst; /* 0xBE: first world-unit state value */
-    s16 statePairSecond; /* 0xC0: second world-unit state value */
-    u8 padC2[0x2E];     /* 0xC2 */
-    s16 tableValues[12]; /* 0xF0: script-indexed entries */
-    s16 unk108[12];     /* 0x108 */
-    s16 unk120[12];     /* 0x120 */
-    f32 unk138[12];     /* 0x138 */
-} EvtUnit;
 
 /* World lookup results carry the address of their vector-bearing data at +0x18. */
 typedef struct EvtWorldUnitRef {
@@ -123,7 +77,7 @@ typedef struct {
     f32 vec[14];        /* 0x08 */
 } EvtSlot;
 
-extern EvtSlot D_004536D8[10];
+extern EvtSlot evtUnitVectorSlots[10];
 
 typedef struct EvtSlotEnds {
     f32 (*points)[4];
@@ -245,7 +199,7 @@ extern void dds3RemoveWorldObjectNode(void *arg0);
 
 extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
-extern void func_0035B6E0();
+extern void func_0035B6E0(const char *fmt, ...);
 
 extern u8 D_004219F0[];
 
@@ -287,7 +241,7 @@ extern char D_00421AF8[];
 
 extern void func_00115BD8(void *arg0);
 
-extern s32 func_0010D8C8(void);
+extern s32 scrGetCurrentContext(void);
 
 extern s32 func_0025D230(s32 arg0, s32 arg1);
 
@@ -309,7 +263,7 @@ extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 arg1, s32 arg2);
 
 extern void evtActivateStoredUnitMotionSlot(u32 arg0);
 
-extern void func_0023D360(EvtUnit *unit);
+extern void evtUnitPrepareVerticalMoveSteps(EvtUnit *unit);
 
 extern f32 evtComputeClampedModelScale(s32);
 
@@ -317,14 +271,14 @@ extern void func_00197F40(void *, f32);
 
 /* Start a bounded vector transition; detach any previous secondary-world source. */
 void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
-    s128 *destination = &work->vector;
+    f32 *destination = work->targetVector;
 
     if ((u32)(frames - 1) < 100) {
         work->linkedUnit = NULL;
-        work->mode = 3;
+        work->motionState = 3;
         PCP_COPY_VECTOR(destination, vector);
-        work->frameCount = frames;
-        work->unkB6 = 0;
+        work->motionParameter = frames;
+        work->directionOffset = 0;
         work->unk94 = 0;
         work->motionTicks = 0;
     }
@@ -343,15 +297,15 @@ void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
 
 /* Configure a mode-one vector transition, without retaining a world source. */
 void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
-    s128 *destination = &work->vector;
+    f32 *destination = work->targetVector;
 
     work->motionSubmode = mode;
-    work->mode = 1;
+    work->motionState = 1;
     work->transitionSourceKind = 0;
     work->linkedUnit = NULL;
     PCP_COPY_VECTOR(destination, vector);
-    work->frameCount = frames;
-    work->unkB6 = valueB6;
+    work->motionParameter = frames;
+    work->directionOffset = valueB6;
     work->unk94 = value94;
     work->motionTicks = 0;
 }
@@ -422,13 +376,13 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
         work->flags |= 0x10;
         break;
     }
-    work->mode = 1;
+    work->motionState = 1;
     work->transitionSourceKind = 2;
     work->linkedUnit = pathSource;
     func_001171A0(path);
-    VU0_STORE_VF($vf10, &work->vector);
-    work->frameCount = frames;
-    work->unkB6 = valueB6;
+    VU0_STORE_VF($vf10, work->targetVector);
+    work->motionParameter = frames;
+    work->directionOffset = valueB6;
     work->unk94 = 0;
     work->motionTicks = 0;
 }
@@ -439,7 +393,7 @@ s32 evtStartUnitModeWithValue(EvtUnit *eventUnit, s32 value) {
     if (value != 0) {
         eventUnit->unk94 = value;
         eventUnit->motionTicks = 0;
-        eventUnit->mode = 4;
+        eventUnit->motionState = 4;
         result = 1;
     }
     return result;
@@ -451,31 +405,31 @@ void evtResetUnitVectorSlots(void) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        mnuInitializeCampPanelVisualDefaults(&D_004536D8[i].vec[0], &D_004536D8[i].vec[4], &D_004536D8[i].vec[8], &D_004536D8[i].vec[12], &D_004536D8[i].vec[13]);
-        D_004536D8[i].state = 0;
-        D_004536D8[i].id = 0;
+        mnuInitializeCampPanelVisualDefaults(&evtUnitVectorSlots[i].vec[0], &evtUnitVectorSlots[i].vec[4], &evtUnitVectorSlots[i].vec[8], &evtUnitVectorSlots[i].vec[12], &evtUnitVectorSlots[i].vec[13]);
+        evtUnitVectorSlots[i].state = 0;
+        evtUnitVectorSlots[i].id = 0;
     }
 }
 
-void evtSetSlotVectors(s32 index, s32 state, s32 id, f32 *a, f32 *b, f32 *c) {
-    if (index < 10) {
-        D_004536D8[index].vec[0] = a[0];
-        D_004536D8[index].state = state;
-        D_004536D8[index].vec[1] = a[1];
-        D_004536D8[index].vec[2] = a[2];
-        D_004536D8[index].vec[3] = 0;
-        D_004536D8[index].vec[4] = b[0];
-        D_004536D8[index].vec[5] = b[1];
-        D_004536D8[index].vec[6] = b[2];
-        D_004536D8[index].vec[7] = b[3];
-        D_004536D8[index].vec[8] = c[0];
-        D_004536D8[index].vec[9] = c[1];
-        D_004536D8[index].vec[10] = c[2];
-        D_004536D8[index].vec[11] = 1.0f;
-        if (state == 3) {
-            D_004536D8[index].id = id;
+void evtSetSlotVectors(s32 slotIndex, s32 slotState, s32 unitId, f32 *firstEndpoint, f32 *secondEndpoint, f32 *color) {
+    if (slotIndex < 10) {
+        evtUnitVectorSlots[slotIndex].vec[0] = firstEndpoint[0];
+        evtUnitVectorSlots[slotIndex].state = slotState;
+        evtUnitVectorSlots[slotIndex].vec[1] = firstEndpoint[1];
+        evtUnitVectorSlots[slotIndex].vec[2] = firstEndpoint[2];
+        evtUnitVectorSlots[slotIndex].vec[3] = 0;
+        evtUnitVectorSlots[slotIndex].vec[4] = secondEndpoint[0];
+        evtUnitVectorSlots[slotIndex].vec[5] = secondEndpoint[1];
+        evtUnitVectorSlots[slotIndex].vec[6] = secondEndpoint[2];
+        evtUnitVectorSlots[slotIndex].vec[7] = secondEndpoint[3];
+        evtUnitVectorSlots[slotIndex].vec[8] = color[0];
+        evtUnitVectorSlots[slotIndex].vec[9] = color[1];
+        evtUnitVectorSlots[slotIndex].vec[10] = color[2];
+        evtUnitVectorSlots[slotIndex].vec[11] = 1.0f;
+        if (slotState == 3) {
+            evtUnitVectorSlots[slotIndex].id = unitId;
         } else {
-            D_004536D8[index].id = 0;
+            evtUnitVectorSlots[slotIndex].id = 0;
         }
     }
 }
@@ -488,14 +442,14 @@ s32 func_0023E350(s32 id, f32 *out) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (D_004536D8[i].state == 3 && D_004536D8[i].id == id) {
+        if (evtUnitVectorSlots[i].state == 3 && evtUnitVectorSlots[i].id == id) {
             found = i;
             break;
         }
     }
     if (found == -1) {
         for (i = 0; i < 10; i++) {
-            if (D_004536D8[i].state == 2) {
+            if (evtUnitVectorSlots[i].state == 2) {
                 found = i;
                 break;
             }
@@ -504,9 +458,9 @@ s32 func_0023E350(s32 id, f32 *out) {
             return 0;
         }
     }
-    out[0] = D_004536D8[found].vec[4];
-    out[1] = D_004536D8[found].vec[5];
-    out[2] = D_004536D8[found].vec[6];
+    out[0] = evtUnitVectorSlots[found].vec[4];
+    out[1] = evtUnitVectorSlots[found].vec[5];
+    out[2] = evtUnitVectorSlots[found].vec[6];
     return 1;
 }
 
@@ -519,14 +473,14 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (D_004536D8[i].state == 3 && D_004536D8[i].id == (s32)unit) {
+        if (evtUnitVectorSlots[i].state == 3 && evtUnitVectorSlots[i].id == (s32)unit) {
             found = i;
             break;
         }
     }
     if (found == -1) {
         for (i = 0; i < 10; i++) {
-            if (D_004536D8[i].state == 2) {
+            if (evtUnitVectorSlots[i].state == 2) {
                 found = i;
                 break;
             }
@@ -535,17 +489,17 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
             return;
         }
     }
-    ends[0][0] = D_004536D8[found].vec[0];
-    ends[0][1] = D_004536D8[found].vec[1];
-    ends[0][2] = D_004536D8[found].vec[2];
+    ends[0][0] = evtUnitVectorSlots[found].vec[0];
+    ends[0][1] = evtUnitVectorSlots[found].vec[1];
+    ends[0][2] = evtUnitVectorSlots[found].vec[2];
     ends[0][3] = 0;
-    ends[1][0] = D_004536D8[found].vec[4];
-    ends[1][1] = D_004536D8[found].vec[5];
-    ends[1][2] = D_004536D8[found].vec[6];
+    ends[1][0] = evtUnitVectorSlots[found].vec[4];
+    ends[1][1] = evtUnitVectorSlots[found].vec[5];
+    ends[1][2] = evtUnitVectorSlots[found].vec[6];
     ends[1][3] = 0;
-    color[0] = D_004536D8[found].vec[8];
-    color[1] = D_004536D8[found].vec[9];
-    color[2] = D_004536D8[found].vec[10];
+    color[0] = evtUnitVectorSlots[found].vec[8];
+    color[1] = evtUnitVectorSlots[found].vec[9];
+    color[2] = evtUnitVectorSlots[found].vec[10];
     color[3] = 1.0f;
     for (i = 0; i < 3; i++) {
         if (color[i] > 1.0f) {
@@ -561,16 +515,16 @@ s32 evtFindUnitSlotAuxCoordinates(s32 id, f32 *outX, f32 *outY) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (D_004536D8[i].state == 3 && D_004536D8[i].id == id) {
-            *outX = D_004536D8[i].vec[12];
-            *outY = D_004536D8[i].vec[13];
+        if (evtUnitVectorSlots[i].state == 3 && evtUnitVectorSlots[i].id == id) {
+            *outX = evtUnitVectorSlots[i].vec[12];
+            *outY = evtUnitVectorSlots[i].vec[13];
             return 1;
         }
     }
     for (i = 0; i < 10; i++) {
-        if (D_004536D8[i].state == 2) {
-            *outX = D_004536D8[i].vec[12];
-            *outY = D_004536D8[i].vec[13];
+        if (evtUnitVectorSlots[i].state == 2) {
+            *outX = evtUnitVectorSlots[i].vec[12];
+            *outY = evtUnitVectorSlots[i].vec[13];
             return 1;
         }
     }
@@ -617,7 +571,7 @@ u32 evtOpBindMotionSoundToModel(void) {
     s32 model;
     s32 ret;
 
-    if (func_0010D8C8() == 0) {
+    if (scrGetCurrentContext() == 0) {
         return 1;
     }
     param0 = scrReadIntParameter(0);
@@ -888,7 +842,7 @@ void evtLipsExecFunction(s32 id, s32 motion) {
     if (id == 0) {
         return;
     }
-    for (node = ((EvtLipsWorld *)dds3GetWorldObject())->root->list->head; node != NULL; node = node->next) {
+    for (node = ((EvtWorldObject *)dds3GetWorldObject())->table->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
         model = node->link->mh->model;
         if (sdfGetUniqueChunkValue(model->chunk) == id) {
             unit = node->link->unit;
@@ -916,7 +870,7 @@ void evtLipsStopFunction(void) {
     if (D_004371F0 == 0) {
         return;
     }
-    for (node = ((EvtLipsWorld *)dds3GetWorldObject())->root->list->head; node != NULL; node = node->next) {
+    for (node = ((EvtWorldObject *)dds3GetWorldObject())->table->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
         model = node->link->mh->model;
         if (sdfGetUniqueChunkValue(model->chunk) == D_004371F0) {
             unit = node->link->unit;
@@ -1008,10 +962,10 @@ u32 evtOpTestUnitMotionNodeFlag(void) {
         return ret;
     }
     off = scrReadIntParameter(1);
-    if (((((u8 *)(off + (s32)unit))[0xE0] & 1) & 0xFF) == 0) {
+    if (((unit->slotFlags[off] & 1) & 0xFF) == 0) {
         return ret;
     }
-    return mdlCheckNodeByte30(unit->flagWord, scrReadIntParameter(1)) != 0;
+    return mdlCheckNodeByte30(unit->owner, scrReadIntParameter(1)) != 0;
 }
 
 u32 evtCmdDestroySelectedWorldUnit(void) {
@@ -1046,7 +1000,7 @@ u32 evtOpStartUnitTransitionTowardWorldObject(void) {
         evtBeginUnitTransitionTowardWorldObject(unit, mode, objectId, -1, frames, valueB6, 0, 0);
     }
     if (scrReadIntParameter(2) == 1) {
-        func_0023D360(unit);
+        evtUnitPrepareVerticalMoveSteps(unit);
     }
     return 1;
 }
@@ -1099,7 +1053,7 @@ u32 evtCommandSetUnitValue(void) {
     if (unit == NULL) {
         return 1;
     }
-    unit->scriptUnitValue = scrReadIntParameter(1);
+    unit->unkBC = scrReadIntParameter(1);
     return 1;
 }
 
@@ -1113,8 +1067,8 @@ u32 evtCmdSetWorldUnitStatePair(void) {
     if (unit == NULL) {
         return 1;
     }
-    unit->statePairFirst = scrReadIntParameter(1);
-    unit->statePairSecond = scrReadIntParameter(2);
+    unit->unkBE = scrReadIntParameter(1);
+    unit->unkC0 = scrReadIntParameter(2);
     return 1;
 }
 
@@ -1181,7 +1135,7 @@ u32 evtUnitClearFlagBit(void) {
     id = scrReadIntParameter(0);
     unit = evtGetWorldUnitNestedValue(id);
     if (unit != NULL) {
-        *unit->flagWord &= ~1;
+        unit->owner->flags &= ~1;
     }
     return 1;
 }
@@ -1193,7 +1147,7 @@ u32 evtUnitSetFlagBit(void) {
     id = scrReadIntParameter(0);
     unit = evtGetWorldUnitNestedValue(id);
     if (unit != NULL) {
-        *unit->flagWord |= 1;
+        unit->owner->flags |= 1;
     }
     return 1;
 }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_world.h"
 extern u16 D_004372B0;
 extern u16 D_004372B2;
 extern u8 D_00423050[];
@@ -12,7 +13,7 @@ extern void func_001063A8(f32);
 
 extern s32 evtViewerHasUpdateFlag(s32);
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 s32 evtEventViewerGetPendingNode(s32 arg0);
 
@@ -114,7 +115,7 @@ typedef struct EventViewerState {
     s32 pendingWork; /* 0x2428: reset when pendingResource is released */
     s32 pendingResource; /* 0x242C */
     u8 pad2430[0x10];
-    s32 unk2440;   /* 0x2440 */
+    s32 titleStreamWaitFrames; /* 0x2440 */
     u8 pad2444[0x78]; /* allocated as 0x24BC bytes */
 } EventViewerState;
 
@@ -153,7 +154,7 @@ typedef struct EvtViewEntry {
 
 u16 evtViewerPopHistory(EventViewerState *viewer);
 
-extern char D_004230D0[]; /* "EventViewer" */
+extern char evtViewerTaskName[]; /* "EventViewer" */
 
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
@@ -252,24 +253,6 @@ s32 evtViewFindGlyphAtOrBefore(EventViewerState *viewer) {
 extern s32 dds3GetSlot(s32 owner, s32 kind);
 extern void evtSetMovieClipPositionClampedToDuration(s32 object, s32 arg1, s32 start, s32 end, s32 extra);
 
-/* The viewer follows two lists within the same world layer. These partial
- * layouts name only offsets traversed here; the owning world remains opaque. */
-typedef struct EvtWorldRoot {
-    u8 pad0[0x18];
-    s32 scene; /* 0x18 */
-} EvtWorldRoot;
-
-typedef struct EvtWorldScene {
-    u8 pad0[8];
-    s32 layer; /* 0x08 */
-} EvtWorldScene;
-
-typedef struct EvtWorldLayer {
-    u8 pad0[0x28];
-    s32 movieObjects; /* 0x28 */
-    u8 pad2C[0x14];
-    s32 groupObjects; /* 0x40 */
-} EvtWorldLayer;
 
 typedef struct EvtWorldLink {
     u8 pad0[0x20];
@@ -277,8 +260,8 @@ typedef struct EvtWorldLink {
 } EvtWorldLink;
 
 void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
-    s32 scene;
-    s32 world;
+    s32 table;
+    s32 slots;
     s32 object;
     EvtViewNode *node;
     s32 time;
@@ -286,11 +269,11 @@ void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
     EvtViewGlyph *glyph;
 
     if (dds3GetWorldObject() != 0) {
-        scene = ((EvtWorldRoot *)dds3GetWorldObject())->scene;
-        if (scene != 0) {
-            world = ((EvtWorldScene *)scene)->layer;
-            if (world != 0) {
-                object = ((EvtWorldLayer *)world)->movieObjects;
+        table = (s32)((EvtWorldObject *)dds3GetWorldObject())->table;
+        if (table != 0) {
+            slots = (s32)((EvtWorldTable *)table)->slots;
+            if (slots != 0) {
+                object = (s32)((EvtWorldSlot *)slots)[EVT_WORLD_SLOT_MOVIE].head;
                 if (object != 0) {
                     do {
                         node = (EvtViewNode *)viewer->groups;
@@ -331,7 +314,7 @@ void evtViewerSyncWorldGroups(u32 position, EventViewerState *viewer) {
     EvtViewNode *found;
 
     if (dds3GetWorldObject() != 0) {
-        list = (u8 *)((EvtWorldLayer *)((EvtWorldScene *)((EvtWorldRoot *)dds3GetWorldObject())->scene)->layer)->groupObjects;
+        list = (u8 *)((EvtWorldObject *)dds3GetWorldObject())->table->slots[EVT_WORLD_SLOT_UNIT].head;
         while (list != 0) {
             found = 0;
             for (node = (EvtViewNode *)viewer->groups; node != 0; node = node->next) {
@@ -625,7 +608,7 @@ s32 evtViewerTestIndexedCondition(u32 encodedId) {
     if (idx == 0) {
         return 1;
     }
-    return (*(s32 *)(D_00435DD0 + idx * 4 + 0x35c) ^ lo) == 0;
+    return (*(s32 *)(datGameState + idx * 4 + 0x35c) ^ lo) == 0;
 }
 
 u32 func_0024B078(void) {
@@ -904,25 +887,25 @@ s32 func_0024D760(u8 *ctx) {
 void *evtViewerAdvanceUpdate(void) {
     EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue();
     EvtWindowContext *window;
-    s32 flags;
+    s32 windowFlags;
 
     func_0024DBB8(viewer->windowContext);
     window = (EvtWindowContext *)viewer->windowContext;
-    flags = window->flags;
-    if ((flags & 8) == 0) {
+    windowFlags = window->flags;
+    if ((windowFlags & 8) == 0) {
         kwlnDrawControlFlags |= 0x2000000;
         return 0;
     } else {
-        if ((flags & 1) != 0) {
+        if ((windowFlags & 1) != 0) {
             kwlnDrawControlFlags |= 0x2000000;
             return 0;
         }
         if (func_0024D760((u8 *)window) == 0) {
             if ((u32)(mnuPollTitleStreamStateLocked() - 3) < 2) {
-                if (viewer->unk2440 == 0x78) {
+                if (viewer->titleStreamWaitFrames == 0x78) {
                     mnuMarkTitleStreamResetPending();
                 }
-                viewer->unk2440++;
+                viewer->titleStreamWaitFrames++;
                 kwlnDrawControlFlags |= 0x2000000;
                 return 0;
             }
@@ -1025,27 +1008,27 @@ extern u32 *sdfResourceRetainAddress(s32 handle);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 void evtViewerCreateTaskWithSky(void) {
-    u32 *state;
-    s32 handle;
-    void *task;
+    u32 *viewer;
+    s32 viewerHandle;
+    void *viewerTask;
 
     D_00435CBC = 0x80000000;
-    handle = func_003292A8(0x24BC);
-    state = sdfResourceRetainAddress(handle);
-    memset(state, 0, 0x24BC);
-    *state = handle;
-    task = kwlnTaskCreate(D_004230D0, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, func_0024DAA0, state);
-    func_00101968((s32)task, evtCreateSkyTask());
-    func_0024DAE0(state);
+    viewerHandle = func_003292A8(0x24BC);
+    viewer = sdfResourceRetainAddress(viewerHandle);
+    memset(viewer, 0, 0x24BC);
+    *viewer = viewerHandle;
+    viewerTask = kwlnTaskCreate(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, func_0024DAA0, viewer);
+    func_00101968((s32)viewerTask, evtCreateSkyTask());
+    func_0024DAE0(viewer);
 }
 
 void evtEventViewerDestroyTask(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_004230D0, 1);
+    kwlnTaskDestroyWithHierarchyByName(evtViewerTaskName, 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024DBB8);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_004230D0);
+INCLUDE_RODATA(const s32, "game/code_00247518", evtViewerTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_00247518", D_004372B0);
 

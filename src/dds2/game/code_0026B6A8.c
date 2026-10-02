@@ -8,7 +8,7 @@ extern void func_0026C900(void);
 
 extern s64 evtGetMessageWindowControlState(void);
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 extern char D_003CE848[];
 
@@ -33,8 +33,8 @@ typedef struct PartySlotHeader {
     u16 id;
 } PartySlotHeader;
 
-extern SceneFlagEntry D_003CE6E8[4];
-extern PartyFlagPair D_003CE728[];
+extern SceneFlagEntry mnuSceneFlagEventEntries[4];
+extern PartyFlagPair mnuPartyFlagEventEntries[];
 extern s32 D_00435E5C;
 extern s32 D_00435E50;
 extern s32 D_00435E4C;
@@ -59,27 +59,27 @@ s32 dspStartFlagEvent(s32 context) {
                 mdlFlagSet(0x916);
                 return 1;
             }
-            for (i = 0; i < sizeof(D_003CE6E8) / sizeof(D_003CE6E8[0]); i++) {
-                if (mdlFlagTest(D_003CE6E8[i].needFlag) != 0 && mdlFlagTest(D_003CE6E8[i].doneFlag) == 0) {
+            for (i = 0; i < sizeof(mnuSceneFlagEventEntries) / sizeof(mnuSceneFlagEventEntries[0]); i++) {
+                if (mdlFlagTest(mnuSceneFlagEventEntries[i].needFlag) != 0 && mdlFlagTest(mnuSceneFlagEventEntries[i].doneFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
-                    func_0026C918(0, (void *)(D_00435E5C + D_003CE6E8[i].areaIndex * 0x19));
-                    func_0026C918(1, (void *)(D_00435E50 + D_003CE6E8[i].nameIndex * 0x13));
-                    func_0026C918(2, (void *)(D_00435E4C + D_003CE6E8[i].dialogIndex * 0x11));
+                    func_0026C918(0, (void *)(D_00435E5C + mnuSceneFlagEventEntries[i].areaIndex * 0x19));
+                    func_0026C918(1, (void *)(D_00435E50 + mnuSceneFlagEventEntries[i].nameIndex * 0x13));
+                    func_0026C918(2, (void *)(D_00435E4C + mnuSceneFlagEventEntries[i].dialogIndex * 0x11));
                     dspStartEntry(3);
-                    mdlFlagSet(D_003CE6E8[i].doneFlag);
+                    mdlFlagSet(mnuSceneFlagEventEntries[i].doneFlag);
                     return 1;
                 }
             }
             for (i = 0; i < 5; i++) {
-                slot = (PartySlotHeader *)(D_00435DD0 + i * 0x1C4 + 0xA60);
-                if ((slot->flags & 1) != 0 && mdlFlagTest(D_003CE728[slot->id].needFlag) != 0
-                    && mdlFlagTest(D_003CE728[slot->id].doneFlag) == 0) {
+                slot = (PartySlotHeader *)(datGameState + i * 0x1C4 + 0xA60);
+                if ((slot->flags & 1) != 0 && mdlFlagTest(mnuPartyFlagEventEntries[slot->id].needFlag) != 0
+                    && mdlFlagTest(mnuPartyFlagEventEntries[slot->id].doneFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
                     func_0026C918(0, (void *)(D_00435E48 + slot->id * 0x11));
                     dspStartEntry(4);
-                    mdlFlagSet(D_003CE728[slot->id].doneFlag);
+                    mdlFlagSet(mnuPartyFlagEventEntries[slot->id].doneFlag);
                     return 1;
                 }
             }
@@ -92,7 +92,7 @@ s32 dspStartFlagEvent(s32 context) {
 s32 mnuPrepareTerminalPanelState(void) {
     s32 *state = (s32 *)kwlnTaskGetUserValue();
 
-    func_002680E0(state);
+    mnuSelectTerminalResourceBank(state);
     mnuApplyFadeTrackMode(0, state);
     return 1;
 }
@@ -132,11 +132,11 @@ s64 func_0026BA20(s32 request) {
     return menuSetHandler(state, 2, request);
 }
 
-u32 func_0026BA68(void) {
+u32 mnuStartTaskFadeIn(void) {
     s32 state;
 
     state = kwlnTaskGetUserValue();
-    /* Keep both branches: this control-flow shape is required to match. */
+    /* Both arms are identical in retail; kept as written. */
     if (*(s32 *)(state + 0xe4) == 0) {
         kwlnFadeInStart(0, 0, 0, 0xf);
     }
@@ -235,7 +235,7 @@ u32 func_0026C168(void) {
 }
 
 s32 evtCopyWorldObjectEntryValue(s32 id, s32 dst) {
-    s32 src = func_001110F8(dds3GetWorldSecondaryObject(), 9, id);
+    s32 src = dds3FindIndexedObjectChainNodeByName(dds3GetWorldSecondaryObject(), 9, id);
     if (src != 0) {
         *(s32 *)(*(s32 *)(dst + 0x18) + 0x80) = *(s32 *)(*(s32 *)(src + 0x18) + 0x78);
         return 1;

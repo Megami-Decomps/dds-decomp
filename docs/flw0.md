@@ -132,6 +132,31 @@ can be named as `result` and read later:
   WAIT_FOR_TASK_REMOVAL(result)
 ```
 
+Maintained source may give a local slot a meaningful name. An `alias`
+declaration is source metadata and emits no instruction or data; it only maps
+an identifier to the encoded slot:
+
+```text
+locals int=6 float=0
+alias treasure_kind = local_int[0]
+alias item_id = local_int[1]
+alias item_quantity = local_int[2]
+alias choice = local_int[5]
+
+# ...
+  treasure_kind = READ_TREASURE_TABLE_VALUE(CONTENT_KIND)
+  item_id = READ_TREASURE_TABLE_VALUE(ITEM_ID)
+  item_quantity = READ_TREASURE_TABLE_VALUE(ITEM_QUANTITY)
+  choice = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(TAKARA_SEL))
+```
+
+Aliases work as assignment targets and in every expression position. They
+must refer to a declared integer or float local, and one slot has at most one
+name. Indexed forms such as `local_int[3]` remain valid for unknown or
+deliberately unnamed state. Parsing and rendering existing source preserves
+its aliases, while disassembling a binary alone leaves locals indexed because
+the names are not stored in FLW0.
+
 When a profiled call's result is pushed immediately, canonical source keeps it
 as an expression through its exact consumer. This works even when older values
 are already pending on the VM stack:
@@ -208,11 +233,11 @@ speaker references, and the separate speaker table:
 messages msg1
   message MSG_START_00 speaker=0
     page
-      control f2 08 ff ff
-      control f2 07 07 ff
+      segment-start
+      text-attribute 3 6
       font "から"
       newline
-      control f1 04
+      stream-end
     endpage
   endmessage
   select CHOICE
@@ -238,10 +263,15 @@ assembly remain byte-exact. `glyphs` is also the fallback for a code missing
 from the current map. DDS2 reuses the mapped code range; sequel-only or
 otherwise unmapped codes remain explicit `glyphs` values.
 
-`newline` emits byte `0x0A`, and `control` preserves a complete DDS control
-sequence. The lead byte determines the control length, so the assembler can
-reject a truncated sequence. `bytes` remains available inside a page, option,
-or speaker when a stream does not fit those forms. NUL terminators, record
+`newline` emits byte `0x0A`. The semantic message view also names the paired
+renderer behavior established by the native handlers: `segment-start`,
+`stream-end`, `conditional-newline`, `token SLOT`, `font-slot SLOT`, and
+`text-attribute SLOT VALUE`. Text-attribute slots 1 through 3 are kept neutral
+until their display roles are established; the operands are the decoded values
+stored by the renderer. `control` preserves every other complete DDS control
+sequence. The lead byte determines its length, so the assembler can reject a
+truncated sequence. `bytes` remains available inside a page, option, or speaker
+when a stream does not fit those forms. NUL terminators, record
 offsets, text lengths, alignment, and the packed relocation table are derived.
 Changing message text in symbolic source therefore moves every later record
 and pointer automatically. A selection may declare `ext`, `pattern`,
@@ -400,9 +430,9 @@ profile dds1
   COMM WAIT_FOR_TASK_REMOVAL
 ```
 
-The DDS1 and DDS2 profiles contain a reviewed shared command set. Each ID,
-handler, stack read, and result write was checked against both PS2 command
-tables and both implementations:
+The DDS1 and DDS2 profiles contain a reviewed command set. Each ID, handler,
+stack read, and result write was checked against the applicable PS2 command
+table and native implementation; shared commands were checked in both games:
 
 | Source name | ID | Stack values consumed | Verified handler behavior |
 |---|---:|---:|---|
@@ -413,6 +443,7 @@ tables and both implementations:
 | `TEST_MODEL_FLAG` | `0x007` | 1 | Tests a model flag and returns the result |
 | `SET_MODEL_FLAG` | `0x008` | 1 | Sets a model flag |
 | `CLEAR_MODEL_FLAG` | `0x009` | 1 | Clears a model flag |
+| `RANDOM_ONE_TO` | `0x00A` | 1 | Returns a random integer from one through the supplied limit |
 | `WAIT_FOR_TIMER_START` | `0x00D` | 0 | Waits until the current command timer becomes nonzero |
 | `WAIT_FOR_TIMER_LIMIT` | `0x00E` | 1 | Waits until the command timer reaches a limit |
 | `SCREEN_FADE_A` | `0x00F` | 2 | Starts the selected screen fade when its timer reaches zero |
@@ -420,6 +451,10 @@ tables and both implementations:
 | `ADD_EFFECT_UNIT_TO_WORLD` | `0x012` | 1 | Adds the selected player object or effect-unit ID to the active world |
 | `CREATE_LINKED_CAMERA_VIEWER` | `0x015` | 2 | Creates the linked-camera viewer object and returns its fixed object ID |
 | `ADD_FLAGGED_EFFECT_UNIT_TO_WORLD` | `0x019` | 1 | Adds the selected player object, or marks and adds an effect-unit ID |
+| `SET_CONTROLLER_VIBRATION` | `0x01A` | 3 | Sets the `SMALL_MOTOR` or `LARGE_MOTOR` vibration strength and duration |
+| `FADE_BACKGROUND_IN` | `0x01F` | 1 | Starts the background fade-in with the supplied duration |
+| `READ_SOLAR_PHASE` | `0x027` | 0 | Returns the current solar phase |
+| `SUBMIT_EVENT_WITH_MODE` | `0x028` | 2 | Submits an event request with its execution mode |
 | `RESET_DRAW_EFFECTS` | `0x043` | 0 | Clears draw transitions and effect enables |
 | `RETURN_TO_TITLE` | `0x046` | 0 | Requests the title scene |
 | `WAIT_FOR_UNIT_MOTION` | `0x049` | 1 | Waits until the selected unit's motion is idle or in its timed mode |
@@ -433,16 +468,41 @@ tables and both implementations:
 | `CLEAR_UNIT_LOW_FLAG` | `0x069` | 1 | Clears the selected unit's low flag bit |
 | `SET_UNIT_LOW_FLAG` | `0x06A` | 1 | Sets the selected unit's low flag bit |
 | `MOVE_OBJECT_ALONG_PATH` | `0x06B` | 3 | Binds the selected object to a path and applies its movement mode |
+| `WAIT_FOR_OBJECT_PATH` | `0x06C` | 1 | Waits for the selected object's path state to finish |
+| `CHANGE_ITEM_COUNT` | `0x070` | 2 | Adjusts the selected item or flag count and applies its range limit |
 | `SET_MESSAGE_WINDOW_GEOMETRY` | `0x071` | 3 | Applies three geometry values to the current message window |
 | `PREPARE_UNIT_MOTION_STATE` | `0x073` | 5 | Looks up an event unit and applies four motion-state values |
 | `READ_SECONDARY_WORLD_ID_VALUE` | `0x094` | 1 | Looks up a named secondary-world ID and returns its value or zero |
 | `RESET_FIELD_EFFECTS` | `0x099` | 0 | Resets field draw, sway, sky, and fade state |
+| `DESTROY_WORLD_EFFECT_OBJECT` | `0x09B` | 1 | Removes the selected world effect object |
+| `COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE` | `0x09D` | 2 | Copies a source vector's position and rotation to an effect object |
+| `UPDATE_FIELD_LOOK_AT_SEGMENT` | `0x0A4` | 0 | Rebuilds the field camera's look-at segment and clears its highlight state |
 | `CREATE_SCRIPT_TASK` | `0x0A5` | 2 | Creates a task at a local procedure with a relative priority and returns its handle |
 | `DESTROY_REGISTERED_TASK` | `0x0A6` | 1 | Destroys a registered task and its hierarchy; an absent handle is ignored |
 | `WAIT_FOR_TASK_REMOVAL` | `0x0A7` | 1 | Waits until a task ID leaves the task queues |
 | `CREATE_POLYGON_MOVIE` | `0x0AA` | 2 | Creates an EventViewer task and returns its task ID |
+| `SETUP_FADE_FRAMES` | `0x0AB` | 2 | Configures the fade frame range used by the field effect sequence |
 | `SET_SOLAR_OVERLAY_MODE` | `0x0C3` | 1 | Selects the solar-overlay opacity mode |
+| `WAIT_FOR_CAMP_TASK` | `0x0C8` | 1 | Starts or waits for the selected camp task |
+| `BIND_MODEL_MOTION_SOUND` | `0x0C9` | 2 | Binds motion sound to a model and returns the resolved model ID |
+| `CREATE_EVENT_TEXTURE_TASK` | `0x0CC` | 2 | Creates a texture task from an event resource and returns its task handle |
 | `CREATE_FLAGGED_EFFECT_OBJECT` | `0x0CD` | 1 | Creates and flags an effect object from a resource name, returning its object ID or zero |
+| `SET_EFFECT_MODEL_CUT` | `0x0CE` | 2 | Selects one of an effect model's three event cuts |
+| `SET_EFFECT_MODEL_ROTATION` | `0x0CF` | 4 | Applies three angle values to an effect model |
+| `CREATE_EVENT_BED_EFFECT` | `0x0D0` | 2 | Creates and flags a BED effect from an event resource, returning its object ID or zero |
+| `ATTACH_EFFECT_TO_PATH` | `0x0D1` | 2 | Attaches an effect object to a path object |
+| `WAIT_FOR_EFFECT_PATH` | `0x0D2` | 1 | Waits for an effect object's path movement to finish |
+| `CREATE_MG1_EFFECT` | `0x0D3` | 1 | Creates and flags an MG1 effect from a resource name, returning its object ID or zero |
+| `CREATE_EVENT_MG1_EFFECT` | `0x0D4` | 2 | Creates and flags an MG1 effect from an event resource, returning its object ID or zero |
+| `CREATE_MG2_EFFECT` | `0x0D5` | 1 | Creates and flags an MG2 effect from a resource name, returning its object ID or zero |
+| `CREATE_EVENT_MG2_EFFECT` | `0x0D6` | 2 | Creates and flags an MG2 effect from an event resource, returning its object ID or zero |
+| `SET_MG1_EFFECT_POINTS` | `0x0D7` | 3 | Sets the two control objects used by an MG1 effect |
+| `SET_MG2_EFFECT_POINTS` | `0x0D8` | 5 | Sets the four control objects used by an MG2 effect |
+| `START_EVENT_BGM` | `0x0D9` | 2 | Starts an event BGM from its sound ID and fade value |
+| `SET_WORLD_NODE_BASE_MODE` | `0x0DB` | 1 | Applies the selected base-mode value to world nodes |
+| `DESTROY_EFFECT_OBJECT` | `0x0E3` | 1 | Destroys the selected effect object |
+| `START_CAMP_TASK_IF_ABSENT` | `0x0F7` | 1 | Starts the selected camp task when it is not already running |
+| `CAMP_TASK_READY` | `0x0F8` | 1 | Returns whether the selected camp task is ready |
 | `REQUEST_ALTERNATE_FIELD_SEQUENCE` | `0x100` | 2 | Starts an alternate field sequence from a mode and resource name |
 | `SET_FIELD_ENVIRONMENT` | `0x101` | 2 | Applies a field-environment selector and value |
 | `ENABLE_FIELD_MODELS` | `0x103` | 4 | Enables the selected field model set and applies its transition mode |
@@ -462,23 +522,71 @@ tables and both implementations:
 | `READ_TREASURE_TABLE_VALUE` | `0x114` | 1 | Returns `CONTENT_KIND`, `ITEM_ID`, `ITEM_QUANTITY`, `TRAP_KIND`, or `AMOUNT` from the current room's treasure table |
 | `MARK_CURRENT_TREASURE_OPENED` | `0x115` | 0 | Marks the current task's treasure object as opened |
 | `TEST_CURRENT_TREASURE_OPENED` | `0x116` | 0 | Returns whether the current task's treasure object is already open |
+| `START_AND_WAIT_FOR_STREAM_SOUND` | `0x11B` | 1 | Starts the selected stream sound and waits through its startup state |
+| `ADVANCE_STREAM_SOUND_STATE` | `0x11C` | 0 | Advances the stream-sound transition state |
+| `RESET_STREAM_PLAYBACK` | `0x11F` | 0 | Resets the stream playback commands |
+| `WAIT_FOR_STREAM_IDLE` | `0x121` | 0 | Waits until stream playback is idle |
+| `CLEAR_WORLD_OBJECT_STATE_FLAGS` | `0x124` | 1 | Clears both transient state flags on a selected world object |
+| `ADD_PARTY_CURRENCY` | `0x139` | 1 | Adds a clamped amount to party currency |
+| `APPLY_PARTY_TRAP_EFFECT` | `0x13A` | 1 | Applies a named HP-loss or status effect to the party |
+| `SET_MESSAGE_RANGE` | `0x13C` | 2 | Sets the active message range for the current window |
+| `SUBMIT_EVENT_IMMEDIATE` | `0x166` | 1 | Submits the selected event immediately |
 | `QUEUE_WORLD_OBJECT_PENDING_VALUE` | `0x1E0` | 2 | Arms a selected world object with a pending value |
 | `CLEAR_WORLD_OBJECT_PENDING_VALUE` | `0x1E1` | 1 | Clears a selected world object's pending value and starts its reset timer |
 | `CLEAR_PROCESS_CONTROL_FLAG` | `0x1E7` | 0 | Clears the script-process control flag |
 | `CONSUME_FIELD_SKILL_END_NOTICE` | `0x1F1` | 1 | Clears and reports a pending Lightoma, Liftoma, Riberama, or Estoma expiration notice |
 | `READ_SUCTION_WARP_VALUE` | `0x1FA` | 1 | Returns a state, object, map-entry, or motion value for the selected suction warp |
 | `READ_BARRIER_VALUE` | `0x1FB` | 1 | Returns a model flag, object, completion flag, or map entry for the selected barrier |
+| `APPLY_ROOM_MODE_GROUP_ZERO` | `0x1FC` | 4 | Applies DDS2 room-object transition modes from group zero |
+| `APPLY_ROOM_MODE_GROUP_ONE` | `0x1FD` | 4 | Applies DDS2 room-object transition modes from group one |
 | `READ_CURRENT_SCENE_SELECTION_RESOURCE` | `0x1FE` | 0 | Returns the resource attached to the selected scene entry, or zero |
 | `FIND_FIELD_EFFECT_BY_NAME` | `0x1FF` | 1 | Finds a field effect by its type-5 name and returns its handle |
 | `READ_ELEVATOR_TABLE_VALUE` | `0x200` | 1 | Returns a value from the selected elevator-destination row |
+| `RUN_FIELD_DESTINATION_TRANSITION` | `0x201` | 1 | Runs the field transition selected by a destination index |
+| `SET_CURRENT_TASK_SCENE` | `0x202` | 0 | Selects the scene attached to the current field task |
+| `NO_OP_FIELD_TRANSITION` | `0x203` | 0 | Preserves a retail field-transition command whose paired handlers do nothing |
+| `APPLY_CURRENT_TASK_ENTRY_TRIGGER` | `0x204` | 0 | Applies the actor-entry trigger attached to the current field task |
 | `ADVANCE_FIELD_INTERACTION` | `0x205` | 2 | Selects and applies the next field-interaction row for a line and choice |
 | `READ_FIELD_INTERACTION_VALUE` | `0x206` | 2 | Returns the row type, message ID, or flag from a field-interaction row |
 | `READ_FIELD_INTERACTION_KIND` | `0x207` | 0 | Classifies the current field interaction for the shared action-window loop |
 | `READ_LADDER_TABLE_VALUE` | `0x208` | 1 | Returns the direction, object IDs, or action-window mode for the selected ladder warp |
+| `CONFIGURE_ELEVATOR_CAMERA_MOVE` | `0x209` | 2 | Configures elevator camera movement between two destination indices |
+| `RESET_ELEVATOR_CAMERA_MOVE_TRACKING` | `0x20A` | 0 | Resets elevator camera-move tracking |
 | `POLL_ELEVATOR_MOVE_STATE` | `0x20B` | 0 | Returns the tracked elevator camera-move state and starts its final move when ready |
 | `READ_DOOR_WARP_VALUE` | `0x20C` | 1 | Returns the motion duration or fade mode for the selected door warp |
+| `APPLY_CURRENT_TASK_RECORD_ENTRY` | `0x20D` | 0 | Applies the record entry attached to the current field task |
+| `START_CURRENT_FIELD_INTERACTION_EVENT` | `0x20E` | 0 | Starts the script event selected by the current field interaction |
+| `RUN_FIELD_TRANSITION_SELECTOR` | `0x20F` | 1 | Runs the field transition selected by its script ID; the shared `HEAL_FACILITY` and `SAVE_POINT` IDs are named |
+| `PLAY_FIELD_SE_VOLUME_PAN` | `0x214` | 1 | Plays a field sound effect through its volume-and-pan path |
+| `PLAY_FIELD_SE` | `0x215` | 1 | Plays a field sound effect |
 | `READ_WARP_EFFECT_MODE` | `0x219` | 0 | Returns the warp-effect selector; both DDS implementations return zero |
+| `RESET_FIELD_AFTER_EVENT` | `0x21A` | 0 | Resets DDS2 field state after an event |
 | `ACTION_WINDOW_REQUEST_AND_POLL_DIRECT` | `0x21D` | 1 | Requests or polls an action-window message without the actor-entry precheck and returns `-1`, `0`, or `1` |
+
+The standard profiles also contain the paired battle-runtime commands used by
+the negotiation script and AICALC programs:
+
+| Source name | ID | Stack values consumed | Verified handler behavior |
+|---|---:|---:|---|
+| `AI_COUNTER_REACHED_LIMIT` | `0x0DF` | 1 | Tests the native battle counter against a limit and returns the result |
+| `AI_SELECT_ACTION_BY_KIND` | `0x0E2` | 2 | Selects an action kind and value in the battle command context |
+| `TRACE_BATTLE_RETREAT` | `0x0E4` | 0 | Emits the retail `BTL_TAIKYO` battle-debug trace |
+| `TRACE_BATTLE_ALL_RETREAT` | `0x0E5` | 0 | Emits the retail `BTL_ALLTAIKYO` battle-debug trace |
+| `AI_RESET_COMMAND_CONTEXT` | `0x0E6` | 0 | Resets the battle command context and sets its state flag |
+| `AI_SELECT_LOWEST_HP_TARGET_BLOCKING_ELEMENT` | `0x0E7` | 1 | Selects the lowest-HP target that blocks the supplied element |
+| `AI_MOVE_CAMERA` | `0x0F4` | 7 | Starts a seven-value battle camera move and schedules context reset |
+| `TRACE_BATTLE_CAMERA_ORIGINAL` | `0x0F5` | 0 | Emits the retail `BTL_CAM_ORG` battle-debug trace |
+| `AI_ENABLE_COMMAND_STATE_FLAG` | `0x0F6` | 0 | Sets bit one in the battle command-context flags |
+| `AI_QUEUE_ACTOR_COMMAND_SOUND` | `0x0FA` | 0 | Queues the actor command-sound tasks |
+| `TRACE_BATTLE_CAMERA_TWO_SHOT` | `0x0FB` | 0 | Emits the retail `BTL_CAM_2SHOT` battle-debug trace |
+| `TRACE_BATTLE_CAMERA_OBSTRUCTION` | `0x0FC` | 0 | Emits the retail `BTL_CAM_BOUGAI` battle-debug trace |
+
+The four `TRACE_` handlers call only the battle-debug printer. In particular,
+`0x0F5` does not restore camera state. Command `0x0DE` reaches a related
+counter predicate through a different packed-action path, but the distinction
+between the two paths is not established, so it remains numeric. These
+profiles therefore resolve every other native call in both negotiation
+scripts.
 
 The assembler resolves these names to numeric operands. `COMM 0xNNNN` remains
 valid for commands outside the reviewed profile. A name is rejected when the
@@ -499,8 +607,8 @@ row flag, but its full role is not yet established, so it remains numeric.
 `READ_WARP_EFFECT_MODE` is retained by the shared warp procedure even though
 both DDS handlers are stubs that return zero.
 
-The reviewed set names 45,297 of 53,389 native calls in the complete DDS1
-corpus and 32,983 of 38,839 calls in the complete DDS2 corpus. It also makes
+The reviewed set names 50,317 of 53,389 native calls in the complete DDS1
+corpus and 36,729 of 38,839 calls in the complete DDS2 corpus. It also makes
 the adjacent message-command pattern safe to recognize, producing 188 symbolic
 DDS1 message references in the original event slice, 2,368 across complete
 DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic

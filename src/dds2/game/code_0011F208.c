@@ -20,7 +20,7 @@ extern s64 evtGetObjectTransitionWork(u64);
 
 extern u64 sdfAllocPacketAligned(u64);
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 extern u32 D_00435F60;
 
@@ -34,7 +34,7 @@ extern s16 D_00389170[];
 
 extern u32 D_0038A640[];
 
-extern u32 D_00435F34;
+extern u32 fldPlayerModelResource;
 
 extern u32 D_003898B8[];
 
@@ -287,7 +287,7 @@ typedef struct FldEncEntry {
     s16 result;
 } FldEncEntry;
 
-extern FldEncEntry *D_00435E10;
+extern FldEncEntry *fldEncounterRollTable;
 
 extern s32 mdlFlagTest();
 
@@ -478,7 +478,7 @@ void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, 
 }
 
 
-void func_0011FAB8(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep) {
+void fldAdjustIntegerUsingMainPad(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep) {
     fldStepIntByPad(ptr, type, min, max, step, bigStep, (s8 *)D_0037F530);
 }
 
@@ -546,8 +546,8 @@ s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *pad) {
 }
 
 
-void fldStepColorChannelByCurrentPad(u32 *arg0, s32 arg1) {
-    fldStepColorChannelByPad(arg0, arg1, (s8 *)D_0037F530);
+void fldStepColorChannelByCurrentPad(u32 *color, s32 channel) {
+    fldStepColorChannelByPad(color, channel, (s8 *)D_0037F530);
 }
 
 void fldFormatSecondsText(f32 value, char *out) {
@@ -713,26 +713,26 @@ void func_00122F38(s32 map, s32 slot, s32 bit, s32 enabled) {
         s32 index = map % 100;
         if (enabled != 0) {
             s32 byteOffset = slot * 30 + index * 1920 + FIELD_MAP_SLOT_OFFSET;
-            u16 *flags = &((FieldMapSlot *)(D_00435DD0 + byteOffset))->flagBanks[0];
+            u16 *flags = &((FieldMapSlot *)(datGameState + byteOffset))->flagBanks[0];
             *flags |= 1 << bit;
         } else {
             s32 byteOffset = slot * 30 + index * 1920 + FIELD_MAP_SLOT_OFFSET;
-            u16 *flags = &((FieldMapSlot *)(D_00435DD0 + byteOffset))->flagBanks[0];
+            u16 *flags = &((FieldMapSlot *)(datGameState + byteOffset))->flagBanks[0];
             *flags &= ~(1 << bit);
         }
     }
 }
 
 u8 func_00122FE0(s32 map, u32 slot, u32 bit) {
-    s32 index;
-    u8 *entry;
+    s32 mapIndex;
+    u8 *slotBase;
     u32 flags;
 
     if (map < 0x28) {
-        index = map % 100;
-        entry = (u8 *)(slot * 30 + index * 1920);
-        entry += D_00435DD0;
-        flags = ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->flagBanks[0];
+        mapIndex = map % 100;
+        slotBase = (u8 *)(slot * 30 + mapIndex * 1920);
+        slotBase += datGameState;
+        flags = ((FieldMapSlot *)(slotBase + FIELD_MAP_SLOT_OFFSET))->flagBanks[0];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -742,25 +742,25 @@ void func_00123038(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
-            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[1];
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[1];
             *flags |= 1 << bit;
         } else {
-            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[1];
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[1];
             *flags &= ~(1 << bit);
         }
     }
 }
 
 u8 func_001230E0(s32 map, u32 slot, u32 bit) {
-    s32 index;
-    u8 *entry;
+    s32 mapIndex;
+    u8 *slotBase;
     u32 flags;
 
     if (map < 0x28) {
-        index = map % 100;
-        entry = (u8 *)(slot * 30 + index * 1920);
-        entry += D_00435DD0;
-        flags = ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->flagBanks[1];
+        mapIndex = map % 100;
+        slotBase = (u8 *)(slot * 30 + mapIndex * 1920);
+        slotBase += datGameState;
+        flags = ((FieldMapSlot *)(slotBase + FIELD_MAP_SLOT_OFFSET))->flagBanks[1];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -770,25 +770,25 @@ void func_00123138(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
-            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[2];
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[2];
             *flags |= 1 << bit;
         } else {
-            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[2];
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[2];
             *flags &= ~(1 << bit);
         }
     }
 }
 
 u8 func_001231E0(s32 map, u32 slot, u32 bit) {
-    s32 index;
-    u8 *entry;
+    s32 mapIndex;
+    u8 *slotBase;
     u32 flags;
 
     if (map < 0x28) {
-        index = map % 100;
-        entry = (u8 *)(slot * 30 + index * 1920);
-        entry += D_00435DD0;
-        flags = ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->flagBanks[2];
+        mapIndex = map % 100;
+        slotBase = (u8 *)(slot * 30 + mapIndex * 1920);
+        slotBase += datGameState;
+        flags = ((FieldMapSlot *)(slotBase + FIELD_MAP_SLOT_OFFSET))->flagBanks[2];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -798,25 +798,25 @@ void fldSetMapTargetFlag(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
-            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[3];
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[3];
             *flags |= 1 << bit;
         } else {
-            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[3];
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[3];
             *flags &= ~(1 << bit);
         }
     }
 }
 
 u8 fldTestMapTargetFlag(s32 map, u32 slot, u32 bit) {
-    s32 index;
-    u8 *entry;
+    s32 mapIndex;
+    u8 *slotBase;
     u32 flags;
 
     if (map < 0x28) {
-        index = map % 100;
-        entry = (u8 *)(slot * 30 + index * 1920);
-        entry += D_00435DD0;
-        flags = ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->flagBanks[3];
+        mapIndex = map % 100;
+        slotBase = (u8 *)(slot * 30 + mapIndex * 1920);
+        slotBase += datGameState;
+        flags = ((FieldMapSlot *)(slotBase + FIELD_MAP_SLOT_OFFSET))->flagBanks[3];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -826,25 +826,25 @@ void func_00123338(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
-            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[4];
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[4];
             *flags |= 1 << bit;
         } else {
-            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[4];
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[4];
             *flags &= ~(1 << bit);
         }
     }
 }
 
 u8 func_001233E0(s32 map, u32 slot, u32 bit) {
-    s32 index;
-    u8 *entry;
+    s32 mapIndex;
+    u8 *slotBase;
     u32 flags;
 
     if (map < 0x28) {
-        index = map % 100;
-        entry = (u8 *)(slot * 30 + index * 1920);
-        entry += D_00435DD0;
-        flags = ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->flagBanks[4];
+        mapIndex = map % 100;
+        slotBase = (u8 *)(slot * 30 + mapIndex * 1920);
+        slotBase += datGameState;
+        flags = ((FieldMapSlot *)(slotBase + FIELD_MAP_SLOT_OFFSET))->flagBanks[4];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -855,7 +855,7 @@ void fldSetMapSlotByte(s32 map, u32 slot, s32 offset, s32 value) {
         s32 index = map % 100;
         s32 displacement = offset + index * 1920;
         u8 *entry = (u8 *)(slot * 30 + displacement);
-        entry += D_00435DD0;
+        entry += datGameState;
         ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->values[0] = value;
     }
 }
@@ -866,7 +866,7 @@ s32 fldGetMapSlotByte(s32 map, u32 slot, s32 offset) {
         s32 index = map % 100;
         s32 displacement = offset + index * 1920;
         u8 *entry = (u8 *)(slot * 30 + displacement);
-        entry += D_00435DD0;
+        entry += datGameState;
         value = ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->values[0];
     }
     return value == 0xff ? -1 : value;
@@ -876,25 +876,25 @@ void func_001234E8(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
-            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[0];
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + datGameState + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[0];
             *flags |= 1 << bit;
         } else {
-            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[0];
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + datGameState + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[0];
             *flags &= ~(1 << bit);
         }
     }
 }
 
 u8 func_00123590(s32 map, u32 slot, u32 bit) {
-    s32 index;
-    u8 *entry;
+    s32 mapIndex;
+    u8 *slotBase;
     u32 flags;
 
     if (map < 0x28) {
-        index = map % 100;
-        entry = (u8 *)(slot * 30 + index * 1920);
-        entry += D_00435DD0;
-        flags = ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[0];
+        mapIndex = map % 100;
+        slotBase = (u8 *)(slot * 30 + mapIndex * 1920);
+        slotBase += datGameState;
+        flags = ((FieldMapSlot *)(slotBase + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[0];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -904,10 +904,10 @@ void func_001235E8(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
-            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[1];
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + datGameState + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[1];
             *flags |= 1 << bit;
         } else {
-            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[1];
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + datGameState + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[1];
             *flags &= ~(1 << bit);
         }
     }
@@ -915,14 +915,14 @@ void func_001235E8(s32 map, s32 slot, s32 bit, s32 enabled) {
 
 u8 func_00123690(s32 map, u32 slot, u32 bit) {
     s32 mapIndex;
-    u8 *flagsAddress;
+    u8 *slotBase;
     u32 flags;
 
     if (map < 0x28) {
         mapIndex = map % 100;
-        flagsAddress = (u8 *)(slot * 30 + mapIndex * 1920);
-        flagsAddress += D_00435DD0;
-        flags = ((FieldMapSlot *)(flagsAddress + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[1];
+        slotBase = (u8 *)(slot * 30 + mapIndex * 1920);
+        slotBase += datGameState;
+        flags = ((FieldMapSlot *)(slotBase + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[1];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -942,7 +942,7 @@ extern void func_0011C6A0(s32);
 
 void fldActivateFlaggedObject(s32 flagIndex) {
     s32 byteOffset = (flagIndex >> 3) + FIELD_ACTIVATION_FLAGS_OFFSET;
-    u8 *byte = (u8 *)(D_00435DD0 + byteOffset);
+    u8 *byte = (u8 *)(datGameState + byteOffset);
     FieldActivationRecord *entry;
     *byte |= 1 << (flagIndex & 7);
     fldActivateObjectById(flagIndex);
@@ -957,7 +957,7 @@ void fldActivateFlaggedObject(s32 flagIndex) {
 
 
 u8 fldTestObjectActivationFlag(u32 arg0) {
-    return (*(u8 *)(((s32)arg0 >> 3) + D_00435DD0 + 0x110d0) >> (arg0 & 7)) & 1;
+    return (*(u8 *)(((s32)arg0 >> 3) + datGameState + 0x110d0) >> (arg0 & 7)) & 1;
 }
 
 s32 func_001237B0(s32 a, s32 b) {
@@ -1101,14 +1101,106 @@ f32 fldAngleDifference(f32 a, f32 b) {
     return b - a;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00124110);
-
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412CA8);
 
-INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412CF0);
+f32 fldSnapAngleToCompassPoint(f32 angle) {
+    f32 compass[16] = {0.0f, 22.5f, 45.0f, 67.5f, 90.0f, 112.5f, 135.0f, 157.5f, 180.0f, 202.5f, 225.0f, 247.5f, 270.0f, 292.5f, 315.0f, 337.5f};
+    f32 best;
+    s32 index;
+    f32 diff;
+
+    while (angle >= 360.0f) {
+        angle -= 360.0f;
+    }
+    while (angle < 0.0f) {
+        angle += 360.0f;
+    }
+    best = 900.0f;
+    index = -1;
+    diff = fabsf(fldAngleDifference(0.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 0;
+    }
+    diff = fabsf(fldAngleDifference(22.5f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 1;
+    }
+    diff = fabsf(fldAngleDifference(45.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 2;
+    }
+    diff = fabsf(fldAngleDifference(67.5f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 3;
+    }
+    diff = fabsf(fldAngleDifference(90.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 4;
+    }
+    diff = fabsf(fldAngleDifference(112.5f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 5;
+    }
+    diff = fabsf(fldAngleDifference(135.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 6;
+    }
+    diff = fabsf(fldAngleDifference(157.5f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 7;
+    }
+    diff = fabsf(fldAngleDifference(180.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 8;
+    }
+    diff = fabsf(fldAngleDifference(202.5f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 9;
+    }
+    diff = fabsf(fldAngleDifference(225.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 10;
+    }
+    diff = fabsf(fldAngleDifference(247.5f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 11;
+    }
+    diff = fabsf(fldAngleDifference(270.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 12;
+    }
+    diff = fabsf(fldAngleDifference(292.5f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 13;
+    }
+    diff = fabsf(fldAngleDifference(315.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 14;
+    }
+    diff = fabsf(fldAngleDifference(337.5f, angle));
+    if (diff < best) {
+        index = 15;
+    }
+    return compass[index];
+}
 
 /* Snap an angle in degrees to the nearest of the eight compass directions. */
-f32 func_001244A8(f32 angle) {
+f32 fldSnapAngleToCompassOctant(f32 angle) {
     f32 best;
     s32 index;
     f32 diff;
@@ -1284,7 +1376,7 @@ void fldToggleWorldNodeState(s64 mode) {
 }
 
 void fldPrepareDeferredSceneTransition(void) {
-    if (*(s16 *)(D_00435DD0 + 0xe) != 0) {
+    if (*(s16 *)(datGameState + 0xe) != 0) {
         func_00118598(1);
     } else {
         func_00118598(0);
@@ -1305,11 +1397,35 @@ void fldPrepareDeferredSceneTransition(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00124D70);
+extern u32 fileGetSelectionPendingFlag(void);
+extern void func_00122B58();
+extern char D_00435F48[];
+
+void fldStartSequenceRecord(void) {
+    FieldSequenceRecord record;
+    u32 mode;
+
+    if (fileGetSelectionPendingFlag() == 1) {
+        return;
+    }
+    if (*(s16 *)(datGameState + 0xE) != 0) {
+        mode = 1;
+        dds3AdminSubmitModeRequest(0x1E, &mode, 4, 0);
+        return;
+    }
+    func_00122B58(1);
+    D_00389988[0x4C / 4] = 0;
+    D_00389988[0x44 / 4] = 1;
+    mdlFlagSet(0xC0F);
+    fldSetDeferredFieldCommand(0, 0);
+    fldInitializeSequenceAndResetFlags(&record, 1, 1, D_00435F48);
+    record.options = 1;
+    dds3AdminSubmitModeRequest(5, &record, 0xA0, 0);
+}
 
 extern void fldInitDisplayObjects();
 extern void fldResetPendingSounds();
-extern void func_003412D8();
+extern void effMiscSeedRandom();
 extern void fldParseMixLb();
 extern void func_001343E8();
 extern void func_00145818();
@@ -1320,7 +1436,7 @@ void fldInitializeDisplayAndSceneSound(void) {
     fldInitDisplayObjects();
     fldResetPlayerSceneTransformState();
     fldResetPendingSounds();
-    func_003412D8(D_0038A6E0, 0x1E240);
+    effMiscSeedRandom(D_0038A6E0, 0x1E240);
     fldParseMixLb();
     func_001343E8();
     func_00145818();
@@ -1485,9 +1601,9 @@ INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412D60);
 INCLUDE_ASM(const s32, "game/code_0011F208", func_001258B8);
 
 void fldUnloadPlayerModel(void) {
-    if (D_00435F34 != 0) {
-        sdfQueueNonzeroResourceId(D_00435F34);
-        D_00435F34 = 0;
+    if (fldPlayerModelResource != 0) {
+        sdfQueueNonzeroResourceId(fldPlayerModelResource);
+        fldPlayerModelResource = 0;
         D_003898B8[0] = 0;
     }
 }
@@ -1500,7 +1616,7 @@ void fldPrepareResourceBuffer(void) {
     func_001258B8();
     D_00435F40 = D_00435F44;
     D_00435F38 = func_003292A8(D_00435F44);
-    source = sdfMemoryGetBlockAddress(D_00435F34);
+    source = sdfMemoryGetBlockAddress(fldPlayerModelResource);
     buffer = sdfMemoryGetBlockAddress(D_00435F38);
     memcpy(buffer, source, D_00435F40);
     D_00435F3C = (u32)buffer;
@@ -1520,9 +1636,9 @@ void fldReleaseResources(void) {
     }
 }
 
-extern u32 D_00435F10;
-extern u32 D_00435F14;
-extern u32 D_00435F18;
+extern u32 fldSecondarySceneObject;
+extern u32 fldCameraModelObject;
+extern u32 fldSecondarySceneModelHandle;
 extern void effObjFetchInnerFirstVec(u32);
 extern void effObjFetchInnerSecondVecNorm(u32);
 
@@ -1537,9 +1653,9 @@ void fldSnapshotAndReleasePlayerSceneObject(void) {
             VU0_STORE_VF(vf10, buffer + 4);
         }
         fldPlayerObject = 0;
-        D_00435F10 = 0;
-        D_00435F14 = 0;
-        D_00435F18 = 0;
+        fldSecondarySceneObject = 0;
+        fldCameraModelObject = 0;
+        fldSecondarySceneModelHandle = 0;
         *fldGetPlayerSceneStateAddress() = 0;
         fldReleaseResources();
     }
@@ -1605,7 +1721,37 @@ INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412EF0);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00126110);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_001265D0);
+typedef struct FieldVec4 {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} FieldVec4;
+
+extern FieldVec4 D_00412F10;
+extern FieldVec4 D_00412F20;
+extern char D_00435F58[];
+extern u32 func_00112F28(void *, FieldVec4 *, FieldVec4 *, FieldVec4 *);
+extern void dds3SetCameraVector(u32, FieldVec4 *);
+extern void effObjSetInnerFloat(u32, f32);
+extern void dds3SetWorldCameraObject(u64, u32);
+
+void fldCreateSecondaryWorldCamera(void) {
+    FieldVec4 a = D_00412F10;
+    FieldVec4 b;
+    FieldVec4 c;
+    u32 *world = &D_00435F60;
+    u32 object;
+    memset(&b, 0, sizeof(b));
+    b.w = 1.0f;
+    c = D_00412F20;
+    object = func_00112F28(dds3AdvanceWorldCounter(), &b, &c, &a);
+    *world = object;
+    dds3SetWorldEntryCallbackTarget((void *)object, D_00435F58);
+    dds3SetCameraVector(*world, &c);
+    effObjSetInnerFloat(*world, 2.0f);
+    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), *world);
+}
 
 u32 func_001266D8(void) {
     return 0;
@@ -1616,7 +1762,7 @@ u32 func_001266E0(void) {
 }
 
 void fldConsumeSceneCommandFlag(void) {
-    if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 8) != 0) {
+    if ((((FldWorkFlags *)datGameState)->fieldFlags & 8) != 0) {
         fldClearSceneCommandFlag();
         fldAreaState[3] |= 1;
     }
@@ -1626,7 +1772,7 @@ extern void mdlFlagClear(s32);
 extern void evtClearSolarOverlayControl(void);
 
 void fldClearSceneCommandFlag(void) {
-    ((FldWorkFlags *)D_00435DD0)->fieldFlags &= ~8;
+    ((FldWorkFlags *)datGameState)->fieldFlags &= ~8;
     fldAreaState[3] &= ~1;
     mdlFlagClear(0x818);
     evtClearSolarOverlayControl();
@@ -1639,13 +1785,13 @@ extern void func_001360B8(s16, s32);
 void fldActivatePendingSceneCommand(void) {
     u32 value;
     if (fldAreaState[0x4B] != 0) {
-        if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 8) == 0) {
+        if ((((FldWorkFlags *)datGameState)->fieldFlags & 8) == 0) {
             fldPlayMenuSound(0x29);
         }
         mdlFlagSet(0x818);
         value = func_001266E0();
         ((s16 *)fldAreaState)[0x94] = value;
-        ((FldWorkFlags *)D_00435DD0)->fieldFlags |= 8;
+        ((FldWorkFlags *)datGameState)->fieldFlags |= 8;
         fldAreaState[3] &= ~1;
         func_001360B8(value, 0);
     }
@@ -1653,7 +1799,7 @@ void fldActivatePendingSceneCommand(void) {
 
 
 s32 fldGetSceneCommandState(void) {
-    if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 8) != 0) {
+    if ((((FldWorkFlags *)datGameState)->fieldFlags & 8) != 0) {
         return 1;
     }
     if (D_0038989C[0] != 0) {
@@ -1679,7 +1825,7 @@ void fldUpdateSceneCommandSpeed(void) {
             scene->speed = 0;
             func_001360B8(0, 0);
         }
-    } else if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 8) != 0) {
+    } else if ((((FldWorkFlags *)datGameState)->fieldFlags & 8) != 0) {
         if (scene->speed == 0) {
             value = func_001266E0();
             scene->speed = value;
@@ -1696,7 +1842,7 @@ void fldUpdateSceneCommandSpeed(void) {
 
 
 void fldConsumeFieldTransitionFlag(void) {
-    if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 4) != 0) {
+    if ((((FldWorkFlags *)datGameState)->fieldFlags & 4) != 0) {
         fldClearFieldTransitionFlag();
         fldAreaState[3] |= 2;
     }
@@ -1705,65 +1851,65 @@ void fldConsumeFieldTransitionFlag(void) {
 extern void func_00243320(void);
 
 void fldClearFieldTransitionFlag(void) {
-    ((FldWorkFlags *)D_00435DD0)->fieldFlags &= ~4;
+    ((FldWorkFlags *)datGameState)->fieldFlags &= ~4;
     fldAreaState[3] &= ~2;
     func_00243320();
 }
 
 
 void fldSetFieldTransitionFlag(void) {
-    ((FldWorkFlags *)D_00435DD0)->fieldFlags |= 4;
+    ((FldWorkFlags *)datGameState)->fieldFlags |= 4;
     fldAreaState[3] &= ~2;
 }
 
 u8 fldTestFieldTransitionFlag(void) {
-    s32 flags = ((FldWorkFlags *)D_00435DD0)->fieldFlags;
+    s32 flags = ((FldWorkFlags *)datGameState)->fieldFlags;
     flags &= 4;
     return flags != 0;
 }
 
 void func_001269E0(void) {
-    if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 2) != 0) {
+    if ((((FldWorkFlags *)datGameState)->fieldFlags & 2) != 0) {
         func_00126A28();
         fldAreaState[3] |= 4;
     }
 }
 
 void func_00126A28(void) {
-    ((FldWorkFlags *)D_00435DD0)->fieldFlags &= ~2;
+    ((FldWorkFlags *)datGameState)->fieldFlags &= ~2;
     fldAreaState[3] &= ~4;
 }
 
 void func_00126A58(void) {
-    ((FldWorkFlags *)D_00435DD0)->fieldFlags = (((FldWorkFlags *)D_00435DD0)->fieldFlags | 2) & ~1;
+    ((FldWorkFlags *)datGameState)->fieldFlags = (((FldWorkFlags *)datGameState)->fieldFlags | 2) & ~1;
     fldAreaState[3] &= ~4;
 }
 
 u8 func_00126A90(void) {
-    s32 flags = ((FldWorkFlags *)D_00435DD0)->fieldFlags;
+    s32 flags = ((FldWorkFlags *)datGameState)->fieldFlags;
     flags &= 2;
     return flags != 0;
 }
 
 void func_00126AA8(void) {
-    if ((((FldWorkFlags *)D_00435DD0)->fieldFlags & 1) != 0) {
+    if ((((FldWorkFlags *)datGameState)->fieldFlags & 1) != 0) {
         func_00126AF0();
         fldAreaState[3] |= 8;
     }
 }
 
 void func_00126AF0(void) {
-    ((FldWorkFlags *)D_00435DD0)->fieldFlags &= ~1;
+    ((FldWorkFlags *)datGameState)->fieldFlags &= ~1;
     fldAreaState[3] &= ~8;
 }
 
 void func_00126B20(void) {
-    ((FldWorkFlags *)D_00435DD0)->fieldFlags = (((FldWorkFlags *)D_00435DD0)->fieldFlags | 1) & ~2;
+    ((FldWorkFlags *)datGameState)->fieldFlags = (((FldWorkFlags *)datGameState)->fieldFlags | 1) & ~2;
     fldAreaState[3] &= ~8;
 }
 
 u8 fldIsFlagActive(void) {
-    s32 flags = ((FldWorkFlags *)D_00435DD0)->fieldFlags;
+    s32 flags = ((FldWorkFlags *)datGameState)->fieldFlags;
     flags &= 1;
     if (flags == 0) return 0;
     return 1;
@@ -1778,14 +1924,14 @@ s16 fldRollEncounter(void) {
     s32 enabled;
 
     for (i = 0; i < 16; i++) {
-        if (D_00435E10[i].stage == fldAreaState[4]) {
+        if (fldEncounterRollTable[i].stage == fldAreaState[4]) {
             enabled = 1;
-            if (D_00435E10[i].flag != -1) {
-                enabled = mdlFlagTest(D_00435E10[i].flag) != 0;
+            if (fldEncounterRollTable[i].flag != -1) {
+                enabled = mdlFlagTest(fldEncounterRollTable[i].flag) != 0;
             }
             if (enabled != 0) {
-                if ((u32)effMiscRand(0) % 100U < (u32)D_00435E10[i].chance) {
-                    return D_00435E10[i].result;
+                if ((u32)effMiscRand(0) % 100U < (u32)fldEncounterRollTable[i].chance) {
+                    return fldEncounterRollTable[i].result;
                 }
             }
         }
@@ -1814,15 +1960,15 @@ s32 fldAdvanceToNextScene(void) {
     return -1;
 }
 
-u8 func_00127320(void) {
+u8 fldHasKiretaLabelProcess(void) {
     return scrFindNamedProcessNode(D_00412F30) != 0;
 }
 
-u8 func_00127348(void) {
+u8 fldHasHirakenaiLabelProcess(void) {
     return scrFindNamedProcessNode(D_00412F58) != 0;
 }
 
-u8 func_00127370(void) {
+u8 fldHasBadkaifukuLabelProcess(void) {
     return scrFindNamedProcessNode(D_00412F40) != 0;
 }
 
@@ -1953,13 +2099,15 @@ void func_001285E8(void) {
     fldSelectActorFromSceneIndexTables();
 }
 
+extern void fldDispatchDeferredFieldCommand(void);
+
 void func_00128600(void) {
     fldStopCurrentBgm();
 }
 
 void fldProcessDeferredSceneCommand(void) {
     if (fldDeferredCommand != 0) {
-        func_00128658();
+        fldDispatchDeferredFieldCommand();
         return;
     }
     func_00141898();
@@ -1970,7 +2118,24 @@ void fldSetDeferredFieldCommand(u32 arg0, u32 arg1) {
     fldDeferredCommandParameter = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00128658);
+extern s32 dds3AdminGetRequestedMode(void);
+extern s32 dds3AdminReadPreviousUnsignedSample(void);
+extern s32 func_00141CF0(s32, u32);
+
+void fldDispatchDeferredFieldCommand(void) {
+    if (fldDeferredCommand == 0) {
+        return;
+    }
+    if (dds3AdminGetRequestedMode() > 0) {
+        return;
+    }
+    if (dds3AdminGetRequestedMode() < 0 && (dds3AdminReadPreviousUnsignedSample() & 1) != 0) {
+        return;
+    }
+    if (func_00141CF0(fldDeferredCommand, fldDeferredCommandParameter) == 0) {
+        fldDeferredCommand = 0;
+    }
+}
 
 void fldSetPendingSceneAction(u32 command) {
     D_00435F70 = command;
@@ -2053,11 +2218,11 @@ INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F08);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", fldPlayerObject);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F10);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldSecondarySceneObject);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F14);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldCameraModelObject);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F18);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldSecondarySceneModelHandle);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F1C);
 
@@ -2069,7 +2234,7 @@ INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F28);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F30);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F34);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldPlayerModelResource);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F38);
 

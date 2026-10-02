@@ -18,6 +18,8 @@ typedef struct {
 typedef struct {
     u8 pad0[0xC];
     u16 sceneId; /* 0xC: label lookup and displayed scene identifier */
+    u8 pad0E[6];
+    s32 state;
 } DspScene;
 
 typedef struct {
@@ -64,7 +66,26 @@ INCLUDE_ASM(const s32, "game/code_00254B30", func_00254EF0);
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255010);
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00255118);
+typedef struct MnuSpritePlacement {
+    s16 resourceIndex;
+    s16 spriteIndex;
+    s16 x;
+    s16 y;
+} MnuSpritePlacement;
+
+extern MnuSpritePlacement D_0036B510[];
+extern s32 D_0036C698[];
+extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+
+void mnuDrawMantraPanelSprite(s32 x, s32 y, s32 z, s32 alpha) {
+    s32 resource = D_0036C698[D_0036B510[41].resourceIndex];
+
+    func_002BF4E0((x + D_0036B510[41].x) << 4,
+                  (y + D_0036B510[41].y) << 3, z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f), 0,
+                  resource,
+                  D_0036B510[41].spriteIndex, 0x53);
+}
 
 INCLUDE_ASM(const s32, "game/code_00254B30", mnuDrawMantraCostCounter);
 
@@ -237,7 +258,37 @@ void itfDspDrawMarksB(s32 scale, s32 context) {
     func_0024E260(0, 0, 0, scale, 0x12, context);
 }
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00255FF8);
+typedef struct DspProfileSelection {
+    u32 unit;
+    s32 profileId;
+} DspProfileSelection;
+
+extern u32 prfGetCapValue(u16);
+extern u32 ptyGetProfileRecordValue(u32, u16);
+extern u32 func_00250758(u16);
+
+u32 func_00255FF8(DspScene *entry, DspProfileSelection *target) {
+    u32 flags = 0;
+    u32 cap;
+
+    if (entry->sceneId == target->profileId) {
+        flags |= 1;
+    }
+    cap = prfGetCapValue(entry->sceneId);
+    if (cap == ptyGetProfileRecordValue(target->unit, entry->sceneId)) {
+        flags |= 2;
+    }
+    if (entry->state == 1) {
+        flags |= 4;
+    } else if (entry->state == 2) {
+        flags |= 8;
+    } else if ((func_00250758(entry->sceneId) & 2) != 0) {
+        flags |= 0x20;
+    } else {
+        flags |= 0x10;
+    }
+    return flags;
+}
 
 void itfDspDrawStrip(s32 x, s32 y, s32 layer, s32 scale, s32 context) {
     func_0024E260(x, y, layer, scale, 4, context);
@@ -369,11 +420,10 @@ void func_00256E88(void) {
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00256E90);
 
 extern s32 mnuGetSelectedNodeValue(void);
-extern u32 func_00255FF8(u8 *, s32);
 
 typedef struct {
     u8 pad0[4];
-    u8 *entry; /* 0x4: entry tested by func_00255FF8 */
+    DspScene *entry; /* 0x4: entry tested by func_00255FF8 */
 } DspEntryLink;
 
 typedef struct {
@@ -387,8 +437,8 @@ typedef struct {
 } DspDisplayObject;
 
 void mnuChooseDisplaySpriteKindFromEntryFlags(DspDisplayObject *obj, s32 scale, s32 context) {
-    s32 target = mnuGetSelectedNodeValue();
-    u8 *entry = obj->entries->link->entry;
+    DspProfileSelection *target = (DspProfileSelection *)mnuGetSelectedNodeValue();
+    DspScene *entry = obj->entries->link->entry;
     u32 flags;
     s32 kind;
 

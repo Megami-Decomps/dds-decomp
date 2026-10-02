@@ -22,25 +22,25 @@ void func_00111258(void *slot, void *owner);
 void dds3RemoveWorldObjectNode(void *node);
 void dds3DestroyWorldIndexNode(u32 node);
 void sdfReleaseChipBlock(void *block);
-void func_00111B40(World *world);
+void dds3ReleaseObjectBaseResources(World *world);
 
 /* ObjBase plus the runtime fields past 0x38. */
 typedef struct ObjBaseFull {
     u32 flags;
-    u32 unk4;
-    u32 unk8;
-    u32 unkC;
+    u32 worldIndexNode;
+    u32 resourceState;
+    u32 resourceHandle;
     void *slots[8];
     void *extData;
-    s32 unk34;
-    void *unk38;
+    s32 devSlot; /* 0x34: released by sdfReleaseDevSlot */
+    void *motion; /* 0x38: released by sdfDestroyMotion */
     s32 mode;    /* 0x3C */
     f32 weight;  /* 0x40 */
     u32 unk44;
 } ObjBaseFull;
 
 /* Free an object base: owner, the slot nodes, its devices and finally the block itself. */
-void func_00111840(ObjBaseFull *base) {
+void dds3DestroyObjectBase(ObjBaseFull *base) {
     void *owner;
     void *slot;
     s32 i;
@@ -59,11 +59,11 @@ void func_00111840(ObjBaseFull *base) {
             }
         }
     }
-    func_00111B40(owner);
-    if (base->unk34 != 0) {
-        sdfReleaseDevSlot(base->unk34, 1, 1);
+    dds3ReleaseObjectBaseResources(owner);
+    if (base->devSlot != 0) {
+        sdfReleaseDevSlot(base->devSlot, 1, 1);
     }
-    dds3DestroyWorldIndexNode(base->unk4);
+    dds3DestroyWorldIndexNode(base->worldIndexNode);
     sdfReleaseChipBlock(base);
 }
 
@@ -88,7 +88,13 @@ u8 dds3TestObjectFlags(void *obj, s32 flags) {
     return (base->flags & flags) != 0;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001119A0);
+void dds3SetExtData(void *obj, void *data) {
+    ObjBase *base;
+
+    base = dds3GetObjectOwnedHandle(obj);
+    dds3GetExtData(obj);
+    base->extData = data;
+}
 
 void *dds3GetExtData(void *obj) {
     return dds3GetObjectOwnedHandle(obj)->extData;
@@ -122,15 +128,15 @@ u32 dds3GetUnk0C(void *obj) {
 }
 
 /* Tear down the model/context behind an object's primary handle and mark it released (state 3). */
-void func_00111B40(World *world) {
+void dds3ReleaseObjectBaseResources(World *world) {
     ObjBaseFull *base;
     WorldInfo *info;
 
     base = (ObjBaseFull *)dds3GetObjectOwnedHandle(world);
-    if (base->unkC != 0) {
-        if (base->unk8 != 1) {
-            if (base->unk8 == 0) {
-                mdlDestroyContext(base->unkC);
+    if (base->resourceHandle != 0) {
+        if (base->resourceState != 1) {
+            if (base->resourceState == 0) {
+                mdlDestroyContext(base->resourceHandle);
                 info = world->info;
                 if (info->primaryObject != NULL) {
                     evtReleaseUnitTransitionWork(info->primaryObject);
@@ -138,11 +144,11 @@ void func_00111B40(World *world) {
                 }
             }
         } else {
-            sdfReleaseDevSlot(base->unkC, 1, 1);
-            sdfDestroyMotion(base->unk38);
+            sdfReleaseDevSlot(base->resourceHandle, 1, 1);
+            sdfDestroyMotion(base->motion);
         }
-        base->unkC = 0;
-        base->unk8 = 3;
+        base->resourceHandle = 0;
+        base->resourceState = 3;
     }
 }
 
@@ -222,9 +228,7 @@ void dds3EnsureSlotData(void *object) {
     }
 }
 
-s64 func_001127A0(void) {
-    return dds3InvokeSlot1Handler();
-}
+INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001127A0);
 
 s32 dds3InvokeSlot1Handler(void *obj, void *context) {
     void *handler;

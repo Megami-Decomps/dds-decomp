@@ -1,4 +1,18 @@
 #include "common.h"
+extern s32 dds3AdvanceWorldCounter(void);
+extern s32 func_00112F28(s32 arg0, void *arg1, void *arg2, void *arg3);
+extern void dds3SetWorldEntryCallbackTarget(s32 arg0, void *arg1);
+extern void dds3SetCameraVector(s32 arg0, void *arg1);
+extern void effObjSetInnerFloat(s32 arg0, f32 arg1);
+extern s32 dds3GetWorldSecondaryObject(void);
+extern void dds3SetWorldCameraObject(s32 arg0, s32 arg1);
+extern void func_001063A8(f32 arg0);
+extern u8 D_0040ABC0[];
+extern u8 D_0040ABB0[];
+extern u8 D_0040ABD0[];
+extern u8 D_00438938[];
+extern s32 D_00438944;
+extern f32 D_00435A7C;
 
 extern void itfSetFadeMode(void *, s32, s32);
 extern void itfQueueFadeMode(void *, u32, u32, u32);
@@ -6,7 +20,7 @@ extern void func_0031EEE8(void *, u32);
 extern void mnuDrawFadeSequenceOffset(void *);
 extern void itfDrawFadeGlyphTriplet(void *);
 extern void mnuDrawFadeSequenceTwo(void *);
-void func_0031AD00(u8 *object) {
+void itfDispatchObjectFadeSequenceMode(u8 *object) {
     s16 mode = *(s16 *)(object + 0x98);
 
     switch (mode) {
@@ -47,5 +61,17 @@ INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031AF68);
 
 INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031B080);
 
-INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031B0F8);
+void func_0031B0F8(void) {
+    s32 object;
+    u8 *vector = D_0040ABD0;
+
+    object = func_00112F28(dds3AdvanceWorldCounter(), D_0040ABC0, vector, D_0040ABB0);
+    D_00438944 = object;
+    dds3SetWorldEntryCallbackTarget(object, D_00438938);
+    dds3SetCameraVector(D_00438944, vector);
+    effObjSetInnerFloat(D_00438944, 2.0f);
+    object = dds3GetWorldSecondaryObject();
+    dds3SetWorldCameraObject(object, D_00438944);
+    func_001063A8(0.6283184886f);
+}
 

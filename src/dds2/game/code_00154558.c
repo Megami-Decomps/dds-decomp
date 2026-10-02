@@ -81,15 +81,15 @@ extern u32 fldPlayerObject;
 
 extern void evtSetSolarOverlayFullyVisible(void);
 
-extern s32 D_004362C8;
+extern s32 fldRoomEffectEntryCount;
 
 extern u32 D_00436330[];
 
-extern s32 D_00436320;
+extern s32 fldObjectSlotCount;
 
 extern s32 fldSceneSoundBase;
 
-extern f32 D_0038BAC0[];
+extern f32 fldLookAtFarPoint[];
 
 extern s32 D_00436228;
 
@@ -131,19 +131,19 @@ extern s32 D_00436368;
 
 extern s32 D_0043636C;
 
-extern u32 D_00436324;
+extern u32 fldIndexedResourceHandle;
 
-extern u32 D_00436328;
+extern u32 fldIndexedResourceData;
 
-extern s32 D_0043632C;
+extern s32 fldIndexedResourceEffect;
 
 extern u32 D_0043623C;
 
 extern u32 fldCurrentBgmHandle;
 
-extern u32 D_00436234;
+extern u32 fldArchiveLoadPending;
 
-extern u32 D_00436238;
+extern u32 fldFixedArchiveLoadPhase;
 
 extern u32 fldSceneRecords;
 
@@ -237,17 +237,17 @@ extern s32 fldPendingSoundCount;
 
 extern s32 fldAreaState[];
 
-extern s32 D_00389798[];
+extern s32 fldCurrentBgmId[];
 
 extern s32 D_00389780[];
 
-extern s32 D_00436244;
+extern s32 fldAreaFlagIndex;
 
 extern s32 D_00436248;
 
-extern s32 D_00436340;
+extern s32 fldPrimaryEffectPositionPending;
 
-extern s32 D_00436344;
+extern s32 fldSecondaryEffectPositionPending;
 
 extern void fldResetPlayerSceneObjectState(void);
 
@@ -263,7 +263,7 @@ extern s32 D_003897C8[];
 
 extern s32 D_00389988[];
 
-extern s32 func_0010D8C8(void);
+extern s32 scrGetCurrentContext(void);
 
 extern s32 fldGetActorStat0(s32);
 
@@ -302,9 +302,9 @@ extern s32 effMiscRandMod(s32, s32);
 
 extern s32 evtGetMirroredSolarPhase(void);
 
-extern s32 D_003AA720[];
+extern s32 fldMirroredSolarThresholds[];
 
-extern char D_004363E8[];
+extern char fldRoomNameSentinel[];
 
 extern s32 func_0035D600(char *, const char *);
 
@@ -312,9 +312,9 @@ extern void fldSetFadeTarget(s32, s32, s32);
 
 extern void fldSetSwayMode(s32);
 
-extern s32 D_0043622C;
+extern s32 fldSceneBgmArchiveTrack;
 
-extern s32 D_00436230;
+extern s32 fldSceneBgmArchivePhase;
 
 extern s32 fldSceneRecordCount;
 
@@ -330,7 +330,7 @@ extern s32 fldGetPlayerSceneState(void);
 
 extern s32 dds3SetWorldCameraObject(s32, s32);
 
-extern void func_00113110(s32, f32 *, f32 *);
+extern void dds3TransformCameraVectorsByInnerRotation(s32, f32 *, f32 *);
 
 extern void fldUpdateCameraProjectionEndpoints(void);
 
@@ -372,15 +372,15 @@ extern s32 D_00436268;
 
 extern s32 D_00436240;
 
-extern s32 D_00436348;
+extern s32 mnuPositionedResourceCursor;
 
 extern u32 D_004362D8;
 
 extern u32 D_004362DC;
 
-extern u32 D_004362CC;
+extern u32 fldAreaDamageEffect;
 
-extern s32 D_004362D0;
+extern s32 fldAreaDamageEffectPlaced;
 
 extern u32 D_004362DC;
 
@@ -388,9 +388,9 @@ extern u32 D_004362E8;
 
 extern u32 D_004362F4;
 
-extern u32 D_004362CC;
+extern u32 fldAreaDamageEffect;
 
-extern s32 D_004362D0;
+extern s32 fldAreaDamageEffectPlaced;
 
 extern s32 strcmp(const char *, const char *);
 
@@ -434,7 +434,7 @@ s32 func_00154558(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId(((EffCmdWork *)func_0010D8C8())->key), 0x11);
+    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId(((EffCmdWork *)scrGetCurrentContext())->key), 0x11);
     if (entry == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
@@ -468,7 +468,7 @@ s32 func_00154628(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId(((EffCmdWork *)func_0010D8C8())->key), 0x11);
+    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId(((EffCmdWork *)scrGetCurrentContext())->key), 0x11);
     if (entry == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
@@ -523,7 +523,7 @@ s32 fldCmdTestActorEntryCondition(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId(((EffCmdWork *)func_0010D8C8())->key), 0x11);
+    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId(((EffCmdWork *)scrGetCurrentContext())->key), 0x11);
     if (entry == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
@@ -613,7 +613,7 @@ typedef struct FldVec3 {
     f32 z;
 } FldVec3;
 
-extern f32 D_0038BAB0[];
+extern f32 fldLookAtNearPoint[];
 
 extern f32 sdfSinPoly(f32);
 
@@ -638,12 +638,12 @@ s32 fldUpdateLookAtSegment(void) {
     far.x = cam->x + sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     far.y = cam->y - 200.0f - 10.0f + 60.0f;
     far.z = cam->z + sdfEvaluateCosineViaSinePhaseShift(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
-    D_0038BAB0[0] = near.x;
-    D_0038BAB0[1] = near.y;
-    D_0038BAB0[2] = near.z;
-    D_0038BAC0[0] = far.x;
-    D_0038BAC0[1] = far.y;
-    D_0038BAC0[2] = far.z;
+    fldLookAtNearPoint[0] = near.x;
+    fldLookAtNearPoint[1] = near.y;
+    fldLookAtNearPoint[2] = near.z;
+    fldLookAtFarPoint[0] = far.x;
+    fldLookAtFarPoint[1] = far.y;
+    fldLookAtFarPoint[2] = far.z;
     func_00133B10();
     fldClearCameraObjectHighlightFlag();
     func_0012F078();
@@ -673,7 +673,7 @@ s32 fldCmdCaptureObjectPose(void) {
         if (object == 0) {
             return 1;
         }
-        func_00113110(object, pos, rot);
+        dds3TransformCameraVectorsByInnerRotation(object, pos, rot);
         fldUpdateCameraProjectionEndpoints();
         D_0038BAD0[0] = pos[0];
         D_0038BAD0[1] = pos[1];
@@ -767,7 +767,7 @@ s32 fldFindSearchId(const char *name) {
 
 s32 fldParseRoomNumberFromName(char *name) {
     s32 index;
-    if (func_0035D600(name, D_004363E8) == 0) return 0;
+    if (func_0035D600(name, fldRoomNameSentinel) == 0) return 0;
     for (index = 0; index < 32; index++) {
         if (name[index] == '\0') {
             if (index < 4) return 0;
@@ -1394,7 +1394,7 @@ INCLUDE_RODATA(const s32, "game/code_00154558", D_00414090);
 s32 fldCmdPushSceneParam(void) {
     s32 room;
 
-    room = fldFindRoomByTask(((EffCmdWork *)func_0010D8C8())->key);
+    room = fldFindRoomByTask(((EffCmdWork *)scrGetCurrentContext())->key);
     switch (scrReadIntParameter(0)) {
     case 0:
         scrSetIntegerReturnValue(D_003A8EB0[room].unk0);
@@ -1419,14 +1419,14 @@ u32 fldCmdActivateTaskRoomObject(void) {
     s32 task;
     u64 room;
 
-    task = func_0010D8C8();
+    task = scrGetCurrentContext();
     room = fldFindRoomByTask(((EffCmdWork *)task)->key);
     fldActivateFlaggedObject(room);
     return 1;
 }
 
 u32 fldCmdTestTaskRoomObjectActive(void) {
-    if (fldTestObjectActivationFlag(fldFindRoomByTask(((EffCmdWork *)func_0010D8C8())->key)) != 0) {
+    if (fldTestObjectActivationFlag(fldFindRoomByTask(((EffCmdWork *)scrGetCurrentContext())->key)) != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1441,7 +1441,7 @@ u32 fldCmdSetCurrentTaskScene(void) {
         func_00140BC8(0);
         return 1;
     }
-    scene = fldGetTaskRecordValue(((EffCmdWork *)func_0010D8C8())->key);
+    scene = fldGetTaskRecordValue(((EffCmdWork *)scrGetCurrentContext())->key);
     if (scene) {
         func_00140BC8(scene);
     }
@@ -1535,7 +1535,7 @@ u32 fldCmdUpdateTaskRecordScene(void) {
     if (fldIsSceneStateEight()) {
         scene = 0;
     } else {
-        scene = fldFindTaskRecordId(((EffCmdWork *)func_0010D8C8())->key);
+        scene = fldFindTaskRecordId(((EffCmdWork *)scrGetCurrentContext())->key);
     }
     fldApplyActorEntryTrigger(scene);
     return 1;
@@ -1571,13 +1571,13 @@ s32 func_00156C98(void) {
 }
 
 s32 fldCmdStartSceneBgm(void) {
-    D_00389798[0] = scrReadIntParameter(0);
+    fldCurrentBgmId[0] = scrReadIntParameter(0);
     fldStartSceneBgm();
     return 1;
 }
 
 s32 fldCmdStartSceneBgmAlternate(void) {
-    D_00389798[0] = scrReadIntParameter(0);
+    fldCurrentBgmId[0] = scrReadIntParameter(0);
     fldStartSceneBgmAlternate();
     return 1;
 }
@@ -1644,7 +1644,7 @@ s32 func_00156EB8(void) {
 }
 
 s32 fldCmdApplyTaskRecordEntry(void) {
-    EffCmdWork *work = func_0010D8C8();
+    EffCmdWork *work = scrGetCurrentContext();
     void *entry = fldGetTaskRecordValue(work->key);
 
     if (entry != NULL) {
@@ -1653,7 +1653,7 @@ s32 fldCmdApplyTaskRecordEntry(void) {
     return 1;
 }
 
-s32 func_00156F18(void) {
+s32 fldScriptReturnSelectedActorMotionId(void) {
     scrSetIntegerReturnValue(fldGetSelectedActorMotionId());
     return 1;
 }
@@ -1711,7 +1711,7 @@ s32 fldCommandClearSelectedFlag(void) {
 
 /* Roll against the threshold associated with the mirrored solar phase. */
 s32 fldCmdRollMirroredSolarThreshold(void) {
-    s32 solarPhaseThreshold = D_003AA720[evtGetMirroredSolarPhase()];
+    s32 solarPhaseThreshold = fldMirroredSolarThresholds[evtGetMirroredSolarPhase()];
     if (solarPhaseThreshold >= effMiscRandMod(0, 100)) {
         scrSetIntegerReturnValue(1);
     } else {
@@ -1794,7 +1794,7 @@ s32 func_00157308(void) {
     return 1;
 }
 
-extern void func_00341348(void *);
+extern void effMiscSeedRandomFromClock(void *);
 
 extern void effLoadCommonTexturesAndResetRenderFlags(void);
 
@@ -1821,7 +1821,7 @@ extern u8 D_003AA868[];
 extern char D_004363F8[];
 
 void fldCreateFieldEffectTask(void) {
-    func_00341348(D_003AA868);
+    effMiscSeedRandomFromClock(D_003AA868);
     effLoadCommonTexturesAndResetRenderFlags();
     func_00157BE0();
     parSysReset();
@@ -1833,7 +1833,7 @@ void fldCreateFieldEffectTask(void) {
     effBTLFieldColorResetFlags();
 }
 
-INCLUDE_SDATA(const s32, "game/code_00154558", D_004363E8);
+INCLUDE_SDATA(const s32, "game/code_00154558", fldRoomNameSentinel);
 
 INCLUDE_SDATA(const s32, "game/code_00154558", D_004363F0);
 

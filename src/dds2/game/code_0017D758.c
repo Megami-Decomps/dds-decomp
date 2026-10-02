@@ -1,65 +1,110 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
-extern u32 effPcpScatterResCreate(u32);
+typedef struct PcpScatterRes PcpScatterRes;
 
-extern u32 effPcpScatterResAddRef(u32);
+extern PcpScatterRes *effPcpScatterResCreate(u32);
+extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *);
+extern void effPcpScatterResRelease(PcpScatterRes *);
 
-typedef struct ScatterObject {
-    u8 pad00[0x5C];
+/* Drawable allocation is 0x80 bytes; its resource and geometry arrays are
+ * independent of the effect instance that supplies the transform and scale. */
+typedef struct PcpScatterDraw {
+    f32 origin[4];
+    f32 matrix[16];
+    u32 unk50;
+    u32 color;
+    u32 particleCount;
     s32 stride;
-    u8 pad60[4];
-    s32 wideBlocks;
-    s32 narrowBlocks;
-    u8 pad6C[4];
-    u32 *entries;
-    u32 graphics;
+    f32 scale;
+    f32 *points;
+    f32 *uv;
+    u32 *vertexColors;
+    u32 *colors;
+    u32 asset;
     u32 allocation;
-    u32 sharedResource;
-    u8 pad80[0xAC];
-    f32 value12C;
-    u32 value130;
-} ScatterObject;
+    PcpScatterRes *sharedResource;
+} PcpScatterDraw;
 
-typedef struct PcpScatterWork4 PcpScatterWork4;
+typedef struct PcpScatterPlainParams {
+    f32 vec[4];
+    u32 unk10;
+    u8 loop;
+    u8 pad15[3];
+    s32 duration;
+    u32 particleCount;
+    u32 unk20;
+    u32 randomDelayRange;
+    s32 fadeIn;
+    s32 fadeRange;
+    f32 angleStepBase;
+    f32 angleStepJitter;
+    f32 heightBase;
+    f32 heightJitter;
+    f32 angularSpeed;
+    f32 angularDamping;
+    f32 radiusBase;
+    f32 radiusJitter;
+    f32 radialSpeed;
+    f32 radialDamping;
+    s32 radialDecayStart;
+    s32 colorParam;
+    u32 vCount;
+    u32 vTail;
+    u8 pad68[0x80];
+} PcpScatterPlainParams;
 
-/* func_001730D0 */
-struct PcpScatterWork4 {
-    u8 pad00[0x40];
-    s128 unk40;
-    u8 pad50[0x12C];
-    f32 unk17C;
-    u32 unk180;
+typedef struct PcpScatterPlainParticle {
+    f32 rot[3];
+    s32 age;
+    f32 angle;
+    f32 angularSpeed;
+    f32 angleStep;
+    f32 radius;
+    f32 radialSpeed;
+    f32 height;
+} PcpScatterPlainParticle;
+
+/* The four setter callbacks belong to the flat-ring effect's 0x13C-byte
+ * instance, not to the drawable used by the resource helpers below. */
+typedef struct PcpScatterPlainInstance {
+    f32 matrix[16];
+    PcpScatterPlainParams params;
+    PcpScatterPlainParticle *particles;
+    f32 scale;
+    u32 color;
     u32 scatterObject;
     u32 ownedBuffer;
-};
+} PcpScatterPlainInstance;
 
-void func_0017D758(void *dst, void *src) {
-    PCP_COPY_VECTOR((u8 *)dst + 0x40, src);
+/* Copy the flat effect's source vector; the renderer reads the embedded copy. */
+void effScatterCopyFlatParameterVector(PcpScatterPlainInstance *work, void *src) {
+    PCP_COPY_VECTOR(work->params.vec, src);
 }
 
-/* Store the float parameter beside the scatter object's trailing control word. */
-void func_0017D770(ScatterObject *object, f32 value) {
-    object->value12C = value;
+/* Set the instance scale that its update forwards to the drawable. */
+void effScatterSetFlatInstanceScale(PcpScatterPlainInstance *work, f32 value) {
+    work->scale = value;
 }
 
-void func_0017D778(ScatterObject *object, u32 value) {
-    object->value130 = value;
+/* Set the instance color used by the particle fade pass. */
+void effScatterSetFlatInstanceColor(PcpScatterPlainInstance *work, u32 value) {
+    work->color = value;
 }
 
 /* vu0 routine: copy a 4x4 matrix through vf28-vf31 */
-void func_0017D780(void *dst, void *src) {
-    VU0_COPY_MATRIX(dst, src);
+void effScatterCopyFlatInstanceMatrix(PcpScatterPlainInstance *work, void *src) {
+    VU0_COPY_MATRIX(work->matrix, src);
 }
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D7A8);
 
 /* Release the shared scatter resource before the object's private assets. */
-void effReleaseScatterObject(ScatterObject *object) {
+void effReleaseScatterObject(PcpScatterDraw *object) {
     if (object->sharedResource != 0) {
         effPcpScatterResRelease(object->sharedResource);
     }
-    sdfQueueAssetRelease(object->graphics);
+    sdfQueueAssetRelease(object->asset);
     func_003297C8(object->allocation);
     sdfReleaseChipBlock(object);
 }
@@ -67,39 +112,39 @@ void effReleaseScatterObject(ScatterObject *object) {
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017DA28);
 
 /* Give this object its own reference to a newly created scatter resource. */
-void effCreateScatterResource(ScatterObject *object, u32 resource) {
-    u32 shared;
+void effCreateScatterResource(PcpScatterDraw *object, u32 resource) {
+    PcpScatterRes *shared;
 
     shared = effPcpScatterResCreate(resource);
     object->sharedResource = shared;
 }
 
 /* Share another object's scatter resource while retaining a separate reference. */
-void effShareScatterResource(ScatterObject *object, ScatterObject *source) {
-    u32 shared;
+void effShareScatterResource(PcpScatterDraw *object, PcpScatterDraw *source) {
+    PcpScatterRes *shared;
 
     shared = effPcpScatterResAddRef(source->sharedResource);
     object->sharedResource = shared;
 }
 
 /* Compute the address of a 16-byte-wide block within the stride. */
-s32 effGetScatterWideBlock(ScatterObject *object, s32 index) {
-    return object->wideBlocks + index * object->stride * 0x10;
+s32 effGetScatterWideBlock(PcpScatterDraw *object, s32 index) {
+    return (s32)object->points + index * object->stride * 0x10;
 }
 
 /* Compute the address of an 8-byte-wide block within the stride. */
-s32 effGetScatterNarrowBlock(ScatterObject *object, s32 index) {
-    return object->narrowBlocks + index * object->stride * 8;
+s32 effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index) {
+    return (s32)object->uv + index * object->stride * 8;
 }
 
-u32 effGetScatterEntry(ScatterObject *object, s32 index) {
-    return object->entries[index];
+u32 effGetScatterEntry(PcpScatterDraw *object, s32 index) {
+    return object->colors[index];
 }
 
 /* vu0 routine: copy a 4x4 matrix into the destination's second slot */
-void effScatterStoreSourceTransformMatrix(void *dst, void *src) {
+void effScatterStoreSourceTransformMatrix(PcpScatterDraw *object, void *src) {
     VU0_LOAD_MATRIX(src);
-    VU0_STORE_MATRIX((u8 *)dst + 0x10);
+    VU0_STORE_MATRIX(object->matrix);
 }
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017DD50);

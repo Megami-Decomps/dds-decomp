@@ -11,7 +11,7 @@ typedef struct {
 } EventObj;
 
 void effObjFreeInner(void *arg);
-void func_00111840(s32 arg);
+void dds3DestroyObjectBase(s32 arg);
 void sdfReleaseChipBlock(void *arg);
 s32 effObjTestNodeFlags(void *arg, s32 arg1);
 void effObjClearNodeFlags(void *arg, s32 arg1);
@@ -23,7 +23,7 @@ void dds3ReleaseEventData(EventObj *event) {
 
     effObjFreeInner(event);
     data = event->eventData;
-    func_00111840(data->handle);
+    dds3DestroyObjectBase(data->handle);
     sdfReleaseChipBlock(data);
 }
 

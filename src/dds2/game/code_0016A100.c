@@ -22,11 +22,11 @@ typedef struct EffParamWork {
     void *data;   /* 0x04 parameter block */
 } EffParamWork; /* 0x08 */
 
-extern EffDispatchEntry D_003B0040[];
+extern EffDispatchEntry effParamWorkFactories[];
 
 extern void *func_00328D68(s32 size);
 
-extern EffDispatchEntry D_003B004C[];
+extern EffDispatchEntry effParamWorkDuplicators[];
 
 extern EffDispatchEntry D_003B0050[];
 
@@ -109,9 +109,9 @@ extern void billSetChildScaleComponents(f32 arg0, f32 arg1);
 
 extern u8 D_00380828[];
 
-extern void func_00232390(void *arg0, void *arg1);
+extern void mdlProcessContextNodesAndTransforms(void *arg0, void *arg1);
 
-extern EffDispatchEntry D_003B01B8[];
+extern EffDispatchEntry effParamWorkReleaseCallbacks[];
 
 extern void sdfReleaseChipBlock(void *p);
 
@@ -186,11 +186,11 @@ EffParamWork *effParamWorkCreate(u16 id, void *data) {
 
     work = func_00328D68(8);
     work->id = id;
-    work->data = D_003B0040[id].func(data);
+    work->data = effParamWorkFactories[id].func(data);
     return work;
 }
 
-void func_0016A620(EffParamWork *work) {
+void effDispatchParameterDataAndFreeWork(EffParamWork *work) {
     D_003B0048[work->id].cb(work->data);
     sdfReleaseChipBlock(work);
 }
@@ -207,7 +207,7 @@ EffParamWork *effParamWorkDuplicate(EffParamWork *src) {
 
     work = func_00328D68(8);
     work->id = src->id;
-    work->data = D_003B004C[src->id].func(src->data);
+    work->data = effParamWorkDuplicators[src->id].func(src->data);
     return work;
 }
 
@@ -277,7 +277,7 @@ void effParamInitWork(EffInitWork *work) {
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A990);
 
 void effParamInitFromGlobal(void *work) {
-    func_00232390(work, &D_00380828);
+    mdlProcessContextNodesAndTransforms(work, &D_00380828);
 }
 
 void func_0016AA38(void) {
@@ -329,7 +329,7 @@ void func_0016AB30(void) {
     mdlBroadcastMasked();
 }
 
-extern EffDispatchEntry D_003B01B0[];
+extern EffDispatchEntry effParameterWorkOperations[];
 extern void **D_003AFFD0[];
 extern u32 func_0016AEA0(u32 *word);
 extern u32 func_0016AEA8(s32 address);
@@ -340,16 +340,16 @@ EffParamWorkEx *effCreateDispatchedParameterWork(u32 *source) {
     work = func_00328D68(0xC);
     work->id = func_0016AEA0(source);
     work->unk04 = func_0016AEA8((s32)source);
-    if (D_003B01B0[work->id].altFunc == NULL) {
-        work->data = D_003B01B0[work->id].func(D_003AFFD0[work->id][work->unk04]);
+    if (effParameterWorkOperations[work->id].altFunc == NULL) {
+        work->data = effParameterWorkOperations[work->id].func(D_003AFFD0[work->id][work->unk04]);
     } else {
-        work->data = D_003B01B0[work->id].func(source);
+        work->data = effParameterWorkOperations[work->id].func(source);
     }
     return work;
 }
 
 void effReleaseDispatchedParameterWork(EffParamWorkEx *work) {
-    ((void (*)(void *))D_003B01B8[work->id].func)(work->data);
+    ((void (*)(void *))effParamWorkReleaseCallbacks[work->id].func)(work->data);
     sdfReleaseChipBlock(work);
 }
 
@@ -363,10 +363,10 @@ EffParamWorkEx *effCloneDispatchedParameterWork(EffParamWorkEx *src) {
     work = func_00328D68(0xC);
     work->id = src->id;
     work->unk04 = src->unk04;
-    if (D_003B01B0[work->id].altFunc == NULL) {
-        work->data = D_003B01B0[work->id].func(D_003AFFD0[work->id][work->unk04]);
+    if (effParameterWorkOperations[work->id].altFunc == NULL) {
+        work->data = effParameterWorkOperations[work->id].func(D_003AFFD0[work->id][work->unk04]);
     } else {
-        work->data = D_003B01B0[work->id].altFunc(src->data);
+        work->data = effParameterWorkOperations[work->id].altFunc(src->data);
     }
     return work;
 }
@@ -450,7 +450,7 @@ EffParamWork *effParamCreateFromTable(EffParamWork *work, s32 index) {
 
 /* Second thunder effect: the cell sub-system is dispatched with three head
  * pointers and a perCell group divisor of four. */
-EffThunderWork4C *func_0016AF38(EffThunderHead4C *src) {
+EffThunderWork4C *effCreateThunderCellSystemWork(EffThunderHead4C *src) {
     u32 handle = func_003292A8(src->count * sizeof(EffThunderCell2C) + sizeof(EffThunderWork4C));
     EffThunderWork4C *work = (EffThunderWork4C *)sdfResourceRetainAddress(handle);
     u32 i;

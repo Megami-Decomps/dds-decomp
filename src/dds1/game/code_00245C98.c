@@ -3,7 +3,7 @@
 extern void func_0025DF68(s32, s32);
 
 extern void func_00261760(s32);
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 extern void mnuStorePendingMenuCommandValue(s32, u32);
 extern void func_0025ECD0();
@@ -105,7 +105,7 @@ s32 evtInitializeActiveMenuState(void) {
     }
     window = ((EvtDispatchTask *)((EvtDispatchLink *)((EvtDispatchState *)state)->menuLink)->target)->window;
     pending = mnuShopHasPendingFlag(state);
-    ((EvtDispatchState *)state)->savedValue = *(s32 *)(D_003BAA00 + 0x3C);
+    ((EvtDispatchState *)state)->savedValue = *(s32 *)(datGameState + 0x3C);
     *(s16 *)(window + 0xE) = pending;
     ((EvtDispatchState *)state)->pendingSelection = pending;
     return 1;
@@ -378,7 +378,7 @@ void evtAccumulateStateScore(s32 state) {
     s32 score = *(s32 *)(((EvtDispatchLink *)((EvtDispatchState *)state)->taskLink)->target + 0x1C) + 0x60;
 
     if ((u32)(*(s32 *)(score + 4) - 0x60) < 0x20) {
-        *(s32 *)(D_003BAA00 + 0xA50) += *(s32 *)score * ((EvtDispatchState *)state)->scoreFactor;
+        *(s32 *)(datGameState + 0xA50) += *(s32 *)score * ((EvtDispatchState *)state)->scoreFactor;
     }
 }
 
@@ -567,8 +567,8 @@ typedef struct FlagSource {
     s32 pad[2];
 } FlagSource;
 
-extern FlagSource D_0036ABB8[];
-extern FlagPair D_0036ABF8[];
+extern FlagSource mnuSceneFlagEventEntries[];
+extern FlagPair mnuPartyFlagEventEntries[];
 
 /* Snapshot four primary flag pairs and sixteen extra pairs for restoration. */
 s32 mnuCreateFlagEntries(void) {
@@ -577,15 +577,15 @@ s32 mnuCreateFlagEntries(void) {
     u32 i;
 
     for (i = 0; i < 4; i++) {
-        entries[i].firstFlag = D_0036ABB8[i].first;
+        entries[i].firstFlag = mnuSceneFlagEventEntries[i].first;
         entries[i].firstOn = mdlFlagTest(entries[i].firstFlag);
-        entries[i].secondFlag = D_0036ABB8[i].second;
+        entries[i].secondFlag = mnuSceneFlagEventEntries[i].second;
         entries[i].secondOn = mdlFlagTest(entries[i].secondFlag);
     }
     for (i = 0; i < 16; i++) {
-        entries[4 + i].firstFlag = D_0036ABF8[i].first;
+        entries[4 + i].firstFlag = mnuPartyFlagEventEntries[i].first;
         entries[4 + i].firstOn = mdlFlagTest(entries[4 + i].firstFlag);
-        entries[4 + i].secondFlag = D_0036ABF8[i].second;
+        entries[4 + i].secondFlag = mnuPartyFlagEventEntries[i].second;
         entries[4 + i].secondOn = mdlFlagTest(entries[4 + i].secondFlag);
     }
     return handle;

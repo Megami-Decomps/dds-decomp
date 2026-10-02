@@ -16,9 +16,6 @@ extern void mnuSetPopupEntryFlagged(s32 *, char *);
 
 extern char D_003D64C8[];
 
-#define MENU_SUM_MINIMUM 99
-#define MENU_SUM_COUNT 5
-
 typedef struct MenuSumBytes {
     u8 pad00[0x16];
     s8 values[MENU_SUM_COUNT];
@@ -65,7 +62,7 @@ s64 func_0029B378(s32 request) {
     return menuSetHandler(context, 2, request);
 }
 
-u32 func_0029B3C0(void) {
+u32 mnuResetGroupSelectionAndStartMessage(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();

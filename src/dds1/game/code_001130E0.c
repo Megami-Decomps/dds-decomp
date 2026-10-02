@@ -39,7 +39,7 @@ extern u64 dds3GetWorldSecondaryObject(void);
 
 extern s32 dds3FindWorldObjectNodeByKey(u64, u64, u64);
 
-u32 func_001130E0(EffectObject *obj) {
+u32 dds3GetEffectDataHandle(EffectObject *obj) {
     return obj->data->handle;
 }
 
@@ -109,8 +109,8 @@ void evtDestroyEffectObjectData(EffectObject *obj) {
         evtReleaseUnitTransitionWork(data->transitionWork);
         data->transitionWork = 0;
     }
-    func_00111B40(obj);
-    func_00111840(data->modelHolder);
+    dds3ReleaseObjectBaseResources(obj);
+    dds3DestroyObjectBase(data->modelHolder);
     sdfReleaseChipBlock(obj->data);
 }
 
@@ -150,7 +150,7 @@ extern void func_001131E0(EffectObject *, s32);
 extern s32 func_00117650(s32);
 
 /* Per-frame refresh of a model effect object: rebuild the child transform from the follow record (a tilt that wobbles with its angle), then run the timed callbacks. */
-s32 func_001135B0(EffectObject *obj) {
+s32 effUpdateFollowModelTransform(EffectObject *obj) {
     EffVec4 axis = D_0039F730;
     EffLocalNode node;
     EffectObjectData *data;
@@ -263,7 +263,7 @@ extern s32 sdfLoadMapRecordPositionVector(s32, s32);
 extern void func_0011E280(s32, f32, f32, f32, f32);
 extern u8 D_00325788[];
 
-s32 func_00113888(EffectObject *obj) {
+s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     f32 vec[4];
     FollowTarget *target;
     FollowConfig *config;
@@ -416,7 +416,7 @@ void evtReleaseEffectObjectHandleAndData(EffectObject *obj) {
 
     effObjFreeInner();
     data = obj->data;
-    func_00111840(data->handle);
+    dds3DestroyObjectBase(data->handle);
     sdfReleaseChipBlock(data);
 }
 
@@ -441,7 +441,7 @@ INCLUDE_ASM(const s32, "game/code_001130E0", func_001143D8);
 
 extern void effObjInnerCreate();
 extern void *func_002CFEB8(s32 size);
-extern u32 func_001117A8();
+extern u32 dds3CreateSlotResourceState();
 
 s32 evtInitializeEffectObjectData(EffectObject *obj) {
     EffectObjectData *data;
@@ -450,7 +450,7 @@ s32 evtInitializeEffectObjectData(EffectObject *obj) {
     obj->data = func_002CFEB8(0x50);
     memset(obj->data, 0, 0x50);
     data = obj->data;
-    data->handle = func_001117A8(obj);
+    data->handle = dds3CreateSlotResourceState(obj);
     dds3SetObjectFlags(obj, 0x60);
     return 1;
 }

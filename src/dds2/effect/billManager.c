@@ -30,7 +30,7 @@ typedef struct {
 
 extern BillObj *billCreateIndexed(s32 index, u32 data);
 
-extern u64 func_00343ED0(u64, u32 *, u64);
+extern u64 sdfReadNamedResource(u64, u32 *, u64);
 
 void *func_00328D68(s32 size);
 
@@ -54,13 +54,13 @@ INCLUDE_ASM(const s32, "effect/billManager", func_00158C00);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00158D68);
 
-BillObj *billAllocChild(void *arg0) {
+BillObj *billAllocChild(void *resourceData) {
     BillObj *obj;
 
     obj = func_00328D68(0x34);
-    obj->unk30 = NULL;
-    if (arg0 != NULL) {
-        obj->unk30 = func_00157D38(arg0);
+    obj->entryList = NULL;
+    if (resourceData != NULL) {
+        obj->entryList = func_00157D38(resourceData);
     }
     return obj;
 }
@@ -68,7 +68,7 @@ BillObj *billAllocChild(void *arg0) {
 void billReleaseChild(BillObj *obj) {
     s32 child;
 
-    child = (s32)obj->unk30;
+    child = (s32)obj->entryList;
     if (child != 0) {
         effReleaseSharedTextureRecord(child);
     }
@@ -76,21 +76,21 @@ void billReleaseChild(BillObj *obj) {
 }
 
 void billProcessChild(BillObj *obj) {
-    func_00157EA0(obj, obj->unk30);
+    func_00157EA0(obj, obj->entryList);
 }
 
-BillObj *billAllocList(void *arg0) {
+BillObj *billAllocList(void *resourceData) {
     BillData *data;
     BillObj *newobj;
     s32 n;
 
     data = NULL;
-    if (arg0 != NULL) {
-        data = func_00159678(arg0);
+    if (resourceData != NULL) {
+        data = func_00159678(resourceData);
     }
     n = data->entryCount;
     newobj = func_00328D68(n * 20 + 0x6C);
-    newobj->unk30 = data;
+    newobj->entryList = data;
     newobj->unk60 = (u8 *)newobj + 0x6C;
     newobj->unk50 = 1;
     newobj->unk48 = 0;
@@ -105,11 +105,11 @@ BillObj *billCloneList(BillObj *obj) {
     s32 n;
     BillObj *newobj;
 
-    data = obj->unk30;
+    data = obj->entryList;
     n = data->entryCount;
-    data->unk14 = data->unk14 + 1;
+    data->listRefCount = data->listRefCount + 1;
     newobj = func_00328D68(n * 20 + 0x6C);
-    newobj->unk30 = data;
+    newobj->entryList = data;
     newobj->unk60 = (u8 *)newobj + 0x6C;
     newobj->unk50 = 1;
     newobj->unk48 = 0;
@@ -119,7 +119,7 @@ BillObj *billCloneList(BillObj *obj) {
 }
 
 void billReleaseList(BillObj *obj) {
-    billReleaseSharedEntryBlock(obj->unk30);
+    billReleaseSharedEntryBlock(obj->entryList);
     sdfReleaseChipBlock(obj);
 }
 
@@ -194,7 +194,49 @@ void billReleaseSharedEntryBlock(void *arg) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", func_001598D8);
+typedef struct BillVec4 {
+    f32 v[4];
+} BillVec4;
+
+typedef struct BillSourceRecord {
+    u32 unk00;          /* 0x00 */
+    u8 pad04[8];
+    BillVec4 vector;    /* 0x0C */
+    f32 x;              /* 0x1C */
+    f32 y;              /* 0x20 */
+    f32 z;              /* 0x24 */
+    f32 w;              /* 0x28 */
+} BillSourceRecord;
+
+typedef struct BillSnapshot {
+    f32 x;              /* 0x00 */
+    f32 y;              /* 0x04 */
+    f32 z;              /* 0x08 */
+    f32 w;              /* 0x0C */
+    u32 unk10;          /* 0x10 */
+    BillVec4 vector;    /* 0x14 */
+} BillSnapshot;
+
+extern BillSourceRecord *func_00158F88(BillObj *obj, void *entries);
+
+/* Copy the billboard's current source record (by kind) into a snapshot. */
+void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
+    BillSourceRecord *record;
+
+    if (obj->kind == 1) {
+        record = func_00158F88(obj, obj->unk60);
+    } else if (obj->kind == 0 || obj->kind == 3) {
+        record = obj->entryList;
+    } else {
+        return;
+    }
+    snapshot->x = record->x;
+    snapshot->unk10 = record->unk00;
+    snapshot->y = record->y;
+    snapshot->z = record->z;
+    snapshot->w = record->w;
+    snapshot->vector = record->vector;
+}
 
 extern BillDispatch D_003AA990[];
 
@@ -205,8 +247,8 @@ BillObj *billCreateIndexed(s32 index, u32 data) {
 
     newobj = D_003AA990[index].func(data);
     func_00158D68(newobj);
-    newobj->unk2C = index;
-    newobj->unk28 = D_003AA990[index].unk4;
+    newobj->kind = index;
+    newobj->callback = D_003AA990[index].callback;
     return newobj;
 }
 
@@ -215,7 +257,7 @@ u64 billCreateFromResource(u32 owner, u64 resource) {
     BillObj *billboard;
     u32 header[4];
 
-    allocation = func_00343ED0(resource, header, 0);
+    allocation = sdfReadNamedResource(resource, header, 0);
     billboard = billCreateIndexed(owner, header[0]);
     func_003297C8(allocation);
     return billboard;
@@ -226,27 +268,27 @@ BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
     BillObj *copy;
     BillData *data;
 
-    if (source->unk2C == 1) {
+    if (source->kind == 1) {
         copy = billCloneList(source);
         func_00158D68(copy);
-        copy->unk2C = source->unk2C;
-        copy->unk28 = source->unk28;
+        copy->kind = source->kind;
+        copy->callback = source->callback;
     } else {
         copy = billAllocChild(NULL);
         func_00158D68(copy);
-        copy->unk2C = source->unk2C;
-        copy->unk28 = source->unk28;
-        data = source->unk30;
-        data->unk8 = data->unk8 + 1;
-        copy->unk30 = data;
+        copy->kind = source->kind;
+        copy->callback = source->callback;
+        data = source->entryList;
+        data->childRefCount = data->childRefCount + 1;
+        copy->entryList = data;
     }
     return copy;
 }
 
 void billDispatchByKind(BillObj *obj) {
-    D_003AA998[obj->unk2C].func();
+    D_003AA998[obj->kind].func();
 }
 
 void billInvokeCallback(BillObj *obj) {
-    obj->unk28();
+    obj->callback();
 }

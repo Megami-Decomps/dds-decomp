@@ -1,9 +1,9 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
-extern u8 D_003846F0[];
+extern u8 sdfViewMatrix[];
 
-extern u8 D_0037F610[];
+extern u8 sdfProjectionMatrix[];
 
 extern u8 D_0037F650[];
 
@@ -26,7 +26,7 @@ typedef struct MdlEntry {
     u8 unk0[0x14]; /* 0x0 */
     s16 enabled;   /* 0x14 */
     u8 pad16[0x6A];
-    f32 row0[3];   /* 0x80: basis rows eased by func_002324C0 */
+    f32 row0[3];   /* 0x80: basis rows eased by mdlBlendEntryPitchYawAndUpdate */
     u8 pad8C[4];
     f32 row1[3];   /* 0x90 */
     u8 pad9C[4];
@@ -96,7 +96,7 @@ typedef struct MdlNode {
     void *unk8;           /* 0x8: dereferenced by func_00218410 */
     u8 padC[0x10];        /* 0xC */
     f32 unk1C;            /* 0x1C: read as int by func_00217EB0 */
-    f32 unk20;            /* 0x20: float slot of func_00217F18/F40 */
+    f32 floatValue;       /* 0x20: accessed as a float by mdlGet/SetNodeFloat20 */
     u8 pad24[4];          /* 0x24 */
     s16 searchId;          /* 0x28: identifies a node in list lookups */
     s16 slotIndex;         /* 0x2A: slot index used by func_00216B78 */
@@ -148,13 +148,13 @@ typedef struct MdlLoadCmd {
 } MdlLoadCmd;
 
 extern u32 fileGetResourceHandle(u32);
-extern u64 func_002C8110();
+extern u64 fileGetLoadedDataAddress();
 extern void filePollEntryCleanup();
 extern void mdlExecuteAndFreeJob(void *job);
 
 void mdlFinishLoadCmd(s32 entryId, MdlLoadCmd *cmd) {
     cmd->handle = fileGetResourceHandle(entryId);
-    cmd->size = sdfRelocatePackedResourcePayload(func_002C8110(entryId));
+    cmd->size = sdfRelocatePackedResourcePayload(fileGetLoadedDataAddress(entryId));
     filePollEntryCleanup(entryId);
     if (cmd->deferred == 0) {
         mdlExecuteAndFreeJob(cmd);
@@ -171,7 +171,7 @@ typedef struct MdlLoadJob {
 
 void mdlFinishLoadJob(s32 entryId, MdlLoadJob *job) {
     job->handle = fileGetResourceHandle(entryId);
-    job->sizeWord = sdfRelocatePackedResourceWordsFromHeader(func_002C8110(entryId));
+    job->sizeWord = sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress(entryId));
     filePollEntryCleanup(entryId);
     mdlExecuteAndFreeJob(job);
 }
@@ -183,8 +183,8 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
 
 INCLUDE_ASM(const s32, "game/code_00231A80", mdlRequestAsset);
 
-void func_00231DB0(u32 arg0, u32 arg1) {
-    mdlRequestAsset(arg0, arg1, 1);
+void func_00231DB0(u32 group, u32 id) {
+    mdlRequestAsset(group, id, 1);
 }
 
 void mdlUnlinkGroupEntry(MdlLink *link) {
@@ -266,7 +266,7 @@ extern void func_003320E8();
 extern void mdlDispatchViewerAnchorRecord();
 
 /* Per-frame update: step the active slot nodes, refresh the transforms, dispatch anchor records. */
-void func_00232390(MdlCtx *ctx, s32 arg) {
+void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
     MdlNode **slot = ctx->slots;
     MdlInner *inner;
     u32 *rec;
@@ -307,8 +307,8 @@ extern void sdfSetPrimaryIdentityMatrixVU(void *);
 extern void sdfRotateVuMatrixAboutX(f32 angle);
 extern void sdfRotateVuMatrixAboutY(f32 angle);
 
-/* Same update as func_00232390, first easing the entry `index` towards a pitch/yaw rotation (degrees). */
-void func_002324C0(MdlCtx *ctx, s32 arg, s32 index, f32 pitch, f32 yaw) {
+/* Same update as mdlProcessContextNodesAndTransforms, first easing the entry `index` towards a pitch/yaw rotation (degrees). */
+void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 arg, s32 index, f32 pitch, f32 yaw) {
     MdlInner *inner;
     MdlEntry *entry = NULL;
     f32 rows[4][4];
@@ -481,13 +481,13 @@ f32 mdlGetNodeFloat20(MdlCtx *ctx, s32 id) {
     if (node == NULL) {
         return 0.0f;
     }
-    return node->unk20;
+    return node->floatValue;
 }
 
 void mdlSetNodeFloat20(MdlCtx *ctx, s32 id, f32 value) {
     MdlNode *node = (MdlNode *)mdlFindNodeById(ctx, id);
     if (node != NULL) {
-        node->unk20 = value;
+        node->floatValue = value;
     }
 }
 
@@ -574,8 +574,8 @@ void mdlSetAmountOnAllContextResources(MdlCtx *ctx, f32 amount) {
 /* vu0 routine: project `point` through the camera and the model's scaled matrix, result left in vf10 */
 void mdlProjectPointVU(MdlCtx *ctx, void *point)
 {
-    VU0_LOAD_MATRIX(D_003846F0);
-    sdfPostmultiplyVuMatrixFromMemory(D_0037F610);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     VU0_MOVE_VF(vf24, vf28);
     VU0_MOVE_VF(vf25, vf29);
     VU0_MOVE_VF(vf26, vf30);
@@ -600,15 +600,15 @@ void mdlProjectPoints(MdlCtx *ctx, f32 (*in)[4], f32 (*out)[4], s32 count)
     VU0_LOAD_MATRIX(&ctx->inner->vector20);
     VU0_LOAD_VF(vf10, &ctx->inner->vector70);
     VU0_SCALE_MATRIX_ROWS(vf10);
-    sdfPostmultiplyVuMatrixFromMemory(D_003846F0);
-    sdfPostmultiplyVuMatrixFromMemory(D_0037F610);
+    sdfPostmultiplyVuMatrixFromMemory(sdfViewMatrix);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     for (i = 0; i < count; i++) {
         VU0_LOAD_VF(vf10, in[i]);
         VU0_TRANSFORM_POINT(vf10, vf10);
         VU0_PERSPECTIVE_DIVIDE_VF10();
-        VU0_LOAD_VF(vf11, D_0037F610 + 0x40);
+        VU0_LOAD_VF(vf11, sdfProjectionMatrix + 0x40);
         VU0_MUL(vf10, vf10, vf11);
-        VU0_LOAD_VF(vf11, D_0037F610 + 0x50);
+        VU0_LOAD_VF(vf11, sdfProjectionMatrix + 0x50);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF(vf10, out[i]);
     }
@@ -680,9 +680,9 @@ INCLUDE_ASM(const s32, "game/code_00231A80", func_002330C8);
 
 INCLUDE_ASM(const s32, "game/code_00231A80", func_00233280);
 
-void mdlDestroyLoadRequestOwner(u32 arg0) {
-    func_002C7CE8(*(u32 *)((s32)arg0 + 8));
-    sdfReleaseChipBlock(arg0);
+void mdlDestroyLoadRequestOwner(u32 res) {
+    func_002C7CE8(*(u32 *)((s32)res + 8));
+    sdfReleaseChipBlock(res);
 }
 
 /* Completion job created by mdlRequestLoadWithCallback and run by mdlCompleteGroupedJobAndNotify. */
@@ -690,18 +690,18 @@ typedef struct MdlDoneJob {
     u16 group;         /* 0x0 */
     u16 id;            /* 0x2 */
     u32 arg;           /* 0x4 */
-    void *owner;       /* 0x8: request slot from func_002C7F38 */
+    void *owner;       /* 0x8: request slot from fileCreatePacLoadWork */
     void (*done)(u32); /* 0xC */
     u32 doneArg;       /* 0x10 */
 } MdlDoneJob;
 
-/* Request slot handed back by func_002C7F38; its +0x60 word feeds the load apply. */
+/* Request slot handed back by fileCreatePacLoadWork; its +0x60 word feeds the load apply. */
 typedef struct MdlLoadSlot {
     u8 pad00[0x60];
     u32 handle; /* 0x60 */
 } MdlLoadSlot;
 
-extern u32 D_00438F90;
+extern u32 mdlGroupJobSemaphore;
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 extern void btlRemoveGroupId(s32, s32);
@@ -711,9 +711,9 @@ extern s32 func_00233280();
 void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *owner, MdlDoneJob *job) {
     job->owner = owner;
     func_00233280(owner->handle, job->group, job->id, job->arg);
-    WaitSema(D_00438F90);
+    WaitSema(mdlGroupJobSemaphore);
     btlRemoveGroupId(job->group, job->id);
-    SignalSema(D_00438F90);
+    SignalSema(mdlGroupJobSemaphore);
     if (job->done != NULL) {
         job->done(job->doneArg);
         mdlDestroyLoadRequestOwner((u32)job);
@@ -722,7 +722,7 @@ void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *owner, MdlDoneJob *job) {
 
 extern void *sdfAllocAndClearQuadwords();
 
-extern s32 func_002C7F38();
+extern void *fileCreatePacLoadWork(const char *path, s32 flags, void *dispatch, s32 onComplete, s32 userData);
 
 extern void func_002C81D0();
 
@@ -737,7 +737,7 @@ s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 arg, s32 handle, void (*do
     job->arg = arg;
     job->doneArg = doneArg;
     job->done = done;
-    slot = func_002C7F38(handle, 0, 0, mdlCompleteGroupedJobAndNotify, job);
+    slot = fileCreatePacLoadWork(handle, 0, 0, mdlCompleteGroupedJobAndNotify, job);
     job->owner = slot;
     if (done == NULL) {
         func_002C81D0(slot);

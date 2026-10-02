@@ -22,7 +22,7 @@ void dds3ReleaseEventData(EventObj *event) {
 
     effObjFreeInner();
     data = event->eventData;
-    func_00111A68(data->handle);
+    dds3DestroyObjectBase(data->handle);
     sdfReleaseChipBlock(data);
 }
 
