@@ -12,7 +12,7 @@ typedef struct {
     s32 dispatchStatus;     /* 0x54 */
 } PanelDispatchContext;
 
-s64 itfRunPanelMode1(u64 request) {
+s32 itfRunPanelMode1(u64 request) {
     s32 context = kwlnTaskGetUserValue();
     PanelDispatchContext *panel = (PanelDispatchContext *)context;
 
@@ -26,7 +26,7 @@ extern s32 kwlnTaskGetUserValue();
 
 extern void func_0024DC98(s32);
 
-s64 itfRunPanelMode2(u64 request) {
+s32 itfRunPanelMode2(u64 request) {
     s32 context = kwlnTaskGetUserValue();
     PanelDispatchContext *panel = (PanelDispatchContext *)context;
 
