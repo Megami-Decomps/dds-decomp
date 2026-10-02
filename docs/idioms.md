@@ -874,11 +874,14 @@ stack arguments, nested `return;`.
 
 ### Saved-register order: global-alloc priority
 
-global.c `allocno_compare`: priority = `floor_log2(n_refs) * n_refs / live_length`.
-Higher priority allocates first and takes the lowest free callee-saved register;
-ties go to the lower pseudo number (parameters in declaration order).
+This compiler's `allocno_compare` uses `floor_log2(n_refs) * n_refs *
+hard_register_width * 10000 / live_length`, truncated to an integer. Higher
+priority allocates first and takes the first legal hard register in target
+order; ties go to the lower allocno number. The width is the number of
+consecutive hard registers, normally one, not the pseudo's byte size.
+`calls_crossed`, pointer and user-variable flags are not part of this score.
 `cc.sh -dl` prints `used N times across L insns` per pseudo, so the order can be
-computed. Natural source shapes that flip it:
+computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
 
 1. **End a live range earlier.** DDS1 `func_00276B38`: `changed = 1;` after the
    calls in each `if` block (not before them) shortens `input`'s live length and

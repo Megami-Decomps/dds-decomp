@@ -19,6 +19,24 @@ assemble to their retail SHA-1. `ninja dds1-field-data dds2-field-data`
 assembles them, resolves their script and warp symbols, and checks the output
 alongside the INF and WAP field data.
 
+`tools/fld_corpus.py` reads loose and LB-contained payloads directly from a
+disc image you own. With no output options it verifies canonical byte-exact
+round trips. Supplying both paths writes the deduplicated source set and its
+build manifest only after the complete pass succeeds:
+
+```sh
+python3 tools/fld_corpus.py dds1 /path/to/game.iso
+python3 tools/fld_corpus.py dds1 /path/to/game.iso \
+  --output-dir src/dds1/data/field \
+  --manifest config/dds1/field_fld2.sha1
+```
+
+The complete disc profile contains 591 unique version-23 sources in DDS1 and
+621 in DDS2. All reconstruct exactly. DDS2 also has 20 byte-identical loose
+copies of archived payloads, which share their source names. Two exceptional
+DDS1 files use version 21, and one `.f2` file has another format; the importer
+reports these without treating them as version 23.
+
 ## Object and relocation model
 
 An `FLD2` file has a `0x40`-byte header, a data region, and a packed
@@ -65,10 +83,10 @@ objects without freezing their offsets.
 | Type | Source form | Contents currently recovered |
 |---:|---|---|
 | `3` | `collision`, `vertex`, `face` | Collision, automap, and placement meshes |
-| `4` | `camera` | Named camera field of view |
+| `4` | `camera` | Named camera field of view (four-byte payload) |
 | `6` | `event` | Event flags and field-script procedure name |
 | `9` | `motion`, `motion_curve`, typed values, `keys` | Keyed vector, quaternion, scalar, and light motion curves |
-| `10` | `placement` | Named positions, doors, and event placements |
+| `10` | `placement`, `special_point` | Named positions, actors, events, facilities, and hunt markers |
 
 Each transform is `0x30` bytes: four position floats, four rotation floats,
 and four scale floats. Each collision object also starts with a `0x30`-byte
@@ -86,6 +104,13 @@ face attributes=0x00000800 move_floor=0 sound=0 stop=0 place=0 \
 The assembler rejects an out-of-range vertex index, except for the retail
 `0xffffffff` triangle sentinel. Event placements likewise must refer to an
 event resource present in the same file.
+
+Placement kind 8 carries an eight-byte `special_point` payload. Its first word
+selects a save terminal, heal terminal, or indexed hunt marker; the second is
+the terminal or marker id. Both PS2 runtimes create `SAVE_UNIT` and
+`HEAL_UNIT` objects for the first two values. The third stores an indexed pair
+of transform vectors, and its retail resources are consistently named as hunt
+markers across both games.
 
 ## Motion and path curves
 

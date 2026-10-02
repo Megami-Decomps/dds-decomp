@@ -16,9 +16,9 @@ void sdfPendingQueuePush(void *arg0, void *arg1);
 void *sdfTexCreateResourcePacket(SdfTex *arg0, s32 arg1);
 void *func_002D30C8(void *arg0, s32 arg1);
 void *func_002CFEB8(s32 arg0);
-void *sdfTexGetPrimaryResourceWord();
-void *sdfTexGetSecondaryResourceWord(void *arg0);
-void func_002D2D48(void *arg0, s32 arg1, s32 arg2, void *arg3, s32 arg4, void *arg5, s32 arg6, s64 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
+u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
+u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
+void func_002D2D48(void *arg0, s32 arg1, s32 arg2, u32 arg3, s32 arg4, u32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
 /* Return palette bytes: 8-bit indices use 256 colors, other indices 16. */
 s32 sdfTexGetPaletteByteSize(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
     s32 bytesPerColor = (paletteFormat == SDF_PSMCT32) ? 4 : 2;
@@ -105,8 +105,8 @@ INCLUDE_ASM(const s32, "sdf/sdfTex", func_002D2D48);
 /* Allocate and populate one of the two resource packet variants. */
 void *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
     void *packet;
-    void *primary;
-    void *secondary;
+    u32 primary;
+    u32 secondary;
 
     packet = func_002CFEB8(0x40);
     primary = sdfTexGetPrimaryResourceWord(texture);
@@ -125,7 +125,30 @@ void sdfTexCreateSecondPacket(SdfTex *texture) {
     texture->secondaryBuffer = sdfTexCreateResourcePacket(texture, 1);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_002D2FB0);
+/* Rebuild existing texture packets while preserving each packet's TEX0 TCC bit. */
+void func_002D2FB0(SdfTex *texture) {
+    SdfTexBuf *buffer;
+
+    buffer = texture->primaryBuffer;
+    if (buffer != NULL) {
+        func_002D2D48(buffer, texture->width, texture->height,
+                     sdfTexGetPrimaryResourceWord(texture), texture->pixelFormat,
+                     sdfTexGetSecondaryResourceWord(texture), texture->clutFormat,
+                     (buffer->textureState >> 34) & 1,
+                     texture->maxMipLevel, texture->lodParameters,
+                     texture->clampMode, 0);
+    }
+
+    buffer = texture->secondaryBuffer;
+    if (buffer != NULL) {
+        func_002D2D48(buffer, texture->width, texture->height,
+                     sdfTexGetPrimaryResourceWord(texture), texture->pixelFormat,
+                     sdfTexGetSecondaryResourceWord(texture), texture->clutFormat,
+                     (buffer->textureState >> 34) & 1,
+                     texture->maxMipLevel, texture->lodParameters,
+                     texture->clampMode, 1);
+    }
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_002D30C8);
 
