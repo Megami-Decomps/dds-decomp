@@ -938,6 +938,23 @@ computed. Natural source shapes that flip it:
    `slot` first and reading `slot->flags` gives one address and 37 words of
    difference. (`func_0026BC80` shows the plain `(Slot *)(g + i * stride +
    off)` form matches when only one address is used.)
+10. **Declare an ignored-result call with the callee's real return type.** A
+    call to a function that returns a value (`s32 itfEnqueueMemNode(void *,
+    MemNode *)`) declared `void` in the caller's unit changes the temp
+    registers around it: DDS2 `func_0019C4D0` / DDS1 `func_00194840` (frFont
+    glyph chain release) had every structure right and the two counter
+    decrements in `$2` (6 words); `extern s32 itfEnqueueMemNode(void *node,
+    s32 pool);` gives retail's `$3` and a full match. Before touching
+    registers, check each callee's definition (the `grep` for its real
+    definition is one command) and copy its return type.
+11. **`x / 5` always compiles with the zero check, and a source-order trap.**
+    ee-gcc emits `addiu $2,$0,5; div; beql $2,$0,1f; break 7` even for a
+    constant divisor, so the check is not evidence of a variable divisor
+    (checked on a scratch file). In DDS1 `func_002E41B8` (GIF tag closer) the
+    stores that depend on the quotient must follow the division expression
+    in source order (tag header store first, then the buffer fields):
+    putting the buffer stores first makes sched1 issue them between `div` and
+    its check (14/28 words), the tag-first order gets to 5/28.
 
 Unresolved: a saved register initialised as a copy of another holding the same
 constant (`move $16,$19` for `i` from `bestIndex = 0`, DDS1 `func_00202F90`,
