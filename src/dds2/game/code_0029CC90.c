@@ -1,6 +1,19 @@
 #include "common.h"
 
 extern u32 func_0029D790();
+typedef struct PrfSkillList {
+    u32 flags[8];
+    s32 count;
+    u16 skills[8];
+} PrfSkillList;
+
+extern u32 *ptyGetCurrentProfileRecord(s32);
+extern u32 ptyGetProfileRecordCap(u16);
+extern s32 func_00314990(s32, u16);
+extern void prfBuildSkillListState0();
+extern void scrClearAllSecondaryScriptFlags(u8 *);
+extern s32 scrSetFlag(u8 *, u16);
+extern void scrSetSecondaryScriptFlag(u8 *, u16);
 
 extern u8 *datGameState;
 
@@ -189,7 +202,35 @@ s32 btlAddBaseStats(u8 *src, TitleSeq *seq) {
 
 INCLUDE_ASM(const s32, "game/code_0029CC90", ptyAccumulateStatGains);
 
-INCLUDE_ASM(const s32, "game/code_0029CC90", func_0029D790);
+u32 func_0029D790(u8 *entry, PrfSkillList *out) {
+    PrfSkillList result;
+    u32 applied = 0;
+    u32 *slot;
+
+    memset(&result, 0, 0x34);
+    slot = ptyGetCurrentProfileRecord((s32)entry);
+    if (entry[0x55] != 0 && ptyGetProfileRecordCap(entry[0x55]) == *slot && func_00314990((s32)entry, entry[0x55]) == 0) {
+        prfBuildSkillListState0(entry, slot, &result);
+        applied = result.count;
+        if (applied != 0) {
+            u32 i = 0;
+            u16 *p = result.skills;
+
+            scrClearAllSecondaryScriptFlags(entry);
+            if (result.count != 0) {
+                do {
+                    u16 flag = p[i];
+
+                    i++;
+                    scrSetFlag(entry, flag);
+                    scrSetSecondaryScriptFlag(entry, flag);
+                } while (i < result.count);
+            }
+        }
+    }
+    *out = result;
+    return applied;
+}
 
 void mnuTitleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u32 fourth) {
     memset(state, 0, 0x10);

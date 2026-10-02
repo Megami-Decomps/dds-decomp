@@ -1,6 +1,15 @@
 #include "common.h"
 #include "btl_state.h"
 
+typedef struct UiQuadColor {
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 alpha;
+} UiQuadColor;
+
+extern const UiQuadColor D_00414D50;
+
 extern u32 D_004367F8;
 
 extern u32 D_004367CC;
@@ -868,7 +877,23 @@ void sndStepIndexByPad(SndPadStepper *stepper) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A7A98);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A7B00);
+void func_001A7B00(s32 *bounds, s32 *region, s32 x, s32 y,
+                   s32 alpha, s32 texture, s32 command) {
+    s32 positions[4];
+    s32 uv[4];
+    UiQuadColor color = D_00414D50;
+
+    positions[0] = (bounds[0] + x) << 4;
+    positions[1] = (bounds[1] + y) << 3;
+    positions[2] = (bounds[2] + x) << 4;
+    positions[3] = (bounds[3] + y) << 3;
+    uv[0] = region[0] << 4;
+    uv[1] = region[1] << 4;
+    uv[2] = (region[0] + region[2]) << 4;
+    uv[3] = (region[1] + region[3]) << 4;
+    color.alpha = alpha;
+    itfQueueTextureBoundQuadPacket(positions, uv, &color, 0, texture, 0, command);
+}
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414D50);
 
@@ -2556,7 +2581,35 @@ u32 btlIsActorHighStateFlagClear(s32 actor) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B3200);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B32F8);
+s32 func_001B32F8(s32 object, s32 *choices) {
+    s32 count = 0;
+    u32 i;
+    u16 *entry = (u16 *)(object + 0x142);
+    u16 value;
+
+    for (i = 0; i < 0x18; i++) {
+        value = entry[i];
+        if (value < 0xA0) {
+            continue;
+        }
+        if (value >= 0xA6) {
+            if (value >= 0xB9) {
+                continue;
+            }
+            if (value < 0xB5) {
+                continue;
+            }
+        }
+        if (func_001ABB10(object, value) != 0) {
+            continue;
+        }
+        if (choices != NULL) {
+            choices[count] = value;
+        }
+        count++;
+    }
+    return count;
+}
 
 u8 btlHasAvailableOption(u32 arg0) {
     s64 temp_v0;
