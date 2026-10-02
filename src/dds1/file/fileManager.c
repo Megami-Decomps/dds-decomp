@@ -9,6 +9,17 @@ typedef struct FileNode {
     u32 unk14;             /* 0x14 */
 } FileNode;
 
+/* Request fields initialized before a node joins FileManWork's queue. */
+typedef struct FileQueueEntry {
+    u8 kind;
+    u8 pad01[3];
+    FileNode *next;
+    char *name;
+    u8 pad0C[0xC];
+    void *callback;
+    void *userData;
+} FileQueueEntry;
+
 /* Work record behind the fileManager getters below. */
 typedef struct FileWork {
     u8 unk0[0x10];   /* 0x0 */
@@ -87,7 +98,37 @@ s32 filePollEntryCleanup(FileCleanup *entry) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "file/fileManager", func_00288818);
+extern char *sdfStrDup(const char *text);
+extern s32 func_00289540(void);
+
+void func_00288818(FileQueueEntry *request, s32 kind, const char *requestName,
+                   void *callback, void *userData) {
+    FileManWork *work;
+    char *duplicatedName;
+    s32 startsQueue;
+
+    work = &fileManagerWork;
+    request->kind = kind;
+    duplicatedName = sdfStrDup(requestName);
+    request->callback = callback;
+    request->name = duplicatedName;
+    request->userData = userData;
+
+    WaitSema(work->sema);
+    if (work->tail == NULL) {
+        work->head = (FileNode *)request;
+        startsQueue = 1;
+    } else {
+        work->tail->next = (FileNode *)request;
+        startsQueue = 0;
+    }
+    work->tail = (FileNode *)request;
+    SignalSema(work->sema);
+
+    if (startsQueue != 0) {
+        func_00289540();
+    }
+}
 
 /* Clear the node from every request slot and unlink it from the queue. */
 void fileManCancelRequest(FileNode *node) {
@@ -139,8 +180,6 @@ void fileUnlinkNode(FileWork *list, FileNode *node) {
 
 extern void sdfPacInitializeDispatchPacket(void *, u32);
 extern void func_002EDC40(void *);
-extern void func_00288818(void *, s32, u32, u32, u32);
-
 void *fileAllocateDispatchRequest(u32 request, u32 flags, u32 dispatch, u32 onComplete, u32 userData) {
     void *work = sdfAllocAndClearQuadwords(0x70);
     void *packet = (u8 *)work + 0x30;
