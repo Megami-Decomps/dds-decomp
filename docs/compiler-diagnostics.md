@@ -39,6 +39,11 @@ historical declaration difference as cleanup work. Focused tests run with
 `python3 tools/test_ee_gcc_contracts.py`. The command exits 1 when it reports
 review findings and 0 when the selected scope has none.
 
+A matching C definition is a comparison anchor, not automatically the original
+interface: old-C wrappers can preserve a return register under several source
+return types. Confirm a finding against callers and the callee's machine-level
+data flow before changing a declaration.
+
 ## Capture a function
 
 The output directory must normally be outside the checkout so multi-megabyte
