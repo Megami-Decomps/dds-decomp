@@ -566,6 +566,13 @@ Black, SOTN). They are worth trying, but not yet confirmed here:
   codegen is identical to `s32` and no made-up type is introduced
   (`tools/check_unit.py` accepts a name at column 0). If a C caller does use
   the result, give the real type instead.
+  This only holds when a join point follows the call (a `switch`/`if-else`
+  merge before the return). A straight-line `f() { ...; v(); }` or `{ ...; g(r); }`
+  in an implicit-int or `int` function still sibcalls (`j`): scratch-tested on
+  void/int callees, with loops, `while` waits and `if`, none gives `jal`
+  (DDS2 `func_0026CE90`, DDS1 `btlAnyGroup200HasAction`). A wrapper whose only
+  `jal` form is `s64` (it matches byte-exact with `s64 btlAnyGroup200HasAction`
+  returning the s32 call) needs evidence for the wide return before use.
 
 Plain `void w(void) { f(0); }` always sibcalls, whatever f returns. Don't try
 to "fix" a jal tail in a normal file with dummy code; park it
@@ -980,6 +987,25 @@ such residuals (DDS1 `func_0010F9A8`, `func_00152560`, `func_0017FD30`,
 latency chain, e.g. one more `add.s` in the limit's path that lifts the load's prio
 above the abs (the sibling `dds3TestObjectSphereOverlap` has such an add and gets
 retail's `lwc1, abs.s, lwc1` order). Check the `prio` column before trying variants.
+
+### `la $rd,sym($rs)` (`lui $1; addiu $1; addu`) and constant register order
+
+- cc1 always prints an indexed table address as the macro `la $rd,sym($rs)`;
+  the assembler expands it to `lui $rd,..; addiu $rd,..; addu $rd,$rd,$rs`,
+  but when `rd == rs` it needs the temporary and prints `lui $1; addiu $1; addu
+  $2,$1,$2` (retail DDS1 `func_002D0E30`). The pointer therefore has to be
+  allocated into the offset register, which happens when it is live across a
+  branch and the field loads go into locals assigned after the branch (so the
+  loaded temps do not need `$2`): `extern u8 tbl[]; entry = (E *)(tbl + i * 12);`
+  first, then `if (c) { ...clear... }`, then `x = entry->x; ... result->x = x;`.
+- Hoisted constant stores (packet words `packet[k] = 0x...`) take callee-saved
+  registers in order of local-alloc priority, and priority falls with live
+  length: the constant with the longest live range gets the highest register.
+  Writing its store first in the first block and last in the last block makes it
+  `$22` instead of `$18` (DDS1 `func_0014F860`).
+- `xori $r,$r,0` ahead of `movz/movn` is cc1's `x != y` with `y` folded to 0 only
+  after expansion. `(m & 0x2000) != 0`, `?:`, `if`, `== 0`, u64/u16/s16 params
+  never produce it (15 scratch spellings, `btlLowestSetPairIndex` tail).
 
 ### Alias sets stop gcse merging a reload
 
