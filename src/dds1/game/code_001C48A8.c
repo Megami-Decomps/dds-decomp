@@ -707,7 +707,58 @@ void fldCompactSceneSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", fldConsumeSceneSlotCounters);
+void fldConsumeSceneSlotCounters(s32 amount, u8 mode) {
+    BattleController *scene = (BattleController *)btlGetRuntime();
+    u8 head;
+    u32 i;
+
+    if (scene->flags & 0x100) {
+        head = scene->slots[0].a;
+        switch (mode) {
+        case 0:
+            break;
+        case 1:
+            if (amount < 100) {
+                if (amount < scene->slots[0].b) {
+                    scene->slots[0].b -= amount;
+                } else {
+                    scene->slots[0].b = 0;
+                    fldCompactSceneSlots();
+                }
+            } else {
+                while (amount > 0) {
+                    scene->slots[0].b = 0;
+                    fldCompactSceneSlots();
+                    if (scene->slots[0].a != head) {
+                        return;
+                    }
+                    if (scene->slots[0].b == 0) {
+                        break;
+                    }
+                    amount -= 100;
+                }
+            }
+            break;
+        case 2:
+        case 3:
+            while (amount > 0) {
+                for (i = 0; i < 8; i++) {
+                    if (scene->slots[i].a == head && scene->slots[i].b == 100) {
+                        break;
+                    }
+                }
+                if (i < 8) {
+                    scene->slots[i].b -= 50;
+                } else {
+                    scene->slots[0].b = 0;
+                    fldCompactSceneSlots();
+                }
+                amount -= 50;
+            }
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001C48A8", fldInsertSceneSlots);
 
@@ -1096,4 +1147,3 @@ store:
 INCLUDE_RODATA(const s32, "game/code_001C48A8", D_003A35A8);
 
 INCLUDE_RODATA(const s32, "game/code_001C48A8", D_003A35B8);
-
