@@ -244,7 +244,7 @@ extern void effReleaseBlurTemplate(u32 handle);
 extern u32 effCloneBlurWorkWithSlots(void *params);
 extern u32 func_00186F90(void *params);
 extern u32 effCloneResourceTemplate(void *params);
-extern u32 effCloneBlurTemplate(void *params);
+extern void *effCloneBlurTemplate(void *params);
 extern void *effPcpTripleHandleCreate(void *block0, u32 *blocks);
 
 extern void *sdfAllocGeneralBlock(s32 size);
@@ -342,11 +342,11 @@ extern void effParamWorkCallback3(u32 handle, u32 value);
 extern u8 D_00325828[];
 extern void mdlBroadcastMasked(void *obj, u32 mask);
 extern void *func_00163540(u32 handle);
-extern u8 *func_00165638(u32 handle);
+extern u32 func_00165638(u32 handle);
 extern void func_00165D80(u32 handle);
-extern void effPCPThunderSetParam58(u32 handle, u32 value);
-extern s32 func_001619E8();
-extern void *effBTLFieldColorGetVariantSelector(void);
+extern void effPCPThunderSetParam58(void *work, u32 value);
+extern u32 func_001619E8(void);
+extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(void *unit);
 extern u32 sdfCountMapPositionRecords(void *model);
 extern u32 func_00190130(EffPCPEventOwner *owner, s32 kind, void *place);
@@ -1204,7 +1204,7 @@ static inline void effPcpShiftThunderHandles(EffPCPThunderGroup *work, s32 count
     s32 i;
 
     for (i = 0; i < count; i++) {
-        obj = func_00165638(work->handles[i]);
+        obj = (u8 *)func_00165638(work->handles[i]);
         VU0_LOAD_VF($vf10, obj + 0x10);
         VU0_STORE_VF($vf10, &saved[1]);
         VU0_LOAD_VF($vf11, work);
@@ -1938,9 +1938,44 @@ void effPcpSetGrowingThunderFadeColor(EffPCPFadeWork *work, u32 val) {
     work->color = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017AEF0);
+typedef struct EffPCPTrailParams {
+    u32 count;
+    u32 colors[2];
+    f32 scale;
+    s32 minSize;
+    EffPCPTexturedBlurParams res;
+} EffPCPTrailParams;
 
-void effPcpSharedWorkRelease(u32 *work)
+typedef struct {
+    u32 frame;
+} EffPCPSharedTrailRef;
+
+EffPCPSharedTrailRef *func_0017AEF0(EffPCPTrailParams *params) {
+    EffPCPSharedTrailRef *ref = sdfAllocSizeClassBlock(sizeof(*ref));
+
+    ref->frame = 0;
+    if (D_003BB048 == 0) {
+        effPcpSharedTrailWork = sdfAllocSizeClassBlock(sizeof(EffPCPSharedTrail));
+        effPcpSharedTrailWork->obj = effCloneBlurTemplate(&params->res);
+        effPcpSharedTrailWork->color = params->res.color;
+        effPcpSharedTrailWork->frame = 0;
+        effPcpSharedTrailWork->flags = 0x80808080;
+        effPcpSharedTrailWork->pos[0] = 0;
+        effPcpSharedTrailWork->pos[1] = 0;
+        effPcpSharedTrailWork->pos[2] = 0;
+        effPcpSharedTrailWork->unk1C = 0;
+        effPcpSharedTrailWork->limit = params->count;
+        effPcpSharedTrailWork->unk24 = params->count;
+        effPcpSharedTrailWork->colors[0] = params->colors[0];
+        effPcpSharedTrailWork->colors[1] = params->colors[1];
+        effPcpSharedTrailWork->scale = params->scale;
+        effPcpSharedTrailWork->minSize = params->minSize;
+    }
+    D_003BB048++;
+    return ref;
+}
+
+void effPcpSharedWorkRelease(EffPCPSharedTrailRef *work)
 {
     sdfReleaseChipBlock(work);
     if (--D_003BB048 != 0) {
@@ -1979,26 +2014,26 @@ extern void effDrawBlurPixelRectWithResource(EffPCPTrailObj *obj);
 #define EFF_SHARED_TRAIL ((EffPCPSharedTrail *)effPcpSharedTrailWork)
 
 void effPcpUpdateSharedTrail(ref)
-    u32 *ref;
+    EffPCPSharedTrailRef *ref;
 {
     EffPCPSharedTrail *work;
     EffPCPTrailObj *obj;
     f32 pos[4];
 
-    if (*ref == 0) {
+    if (ref->frame == 0) {
         EFF_SHARED_TRAIL->frame &= 1;
         if (EFF_SHARED_TRAIL->frame != 0) {
             EFF_SHARED_TRAIL->limit = EFF_SHARED_TRAIL->unk24 + 1;
         }
-        *ref = EFF_SHARED_TRAIL->frame;
+        ref->frame = EFF_SHARED_TRAIL->frame;
     }
     work = EFF_SHARED_TRAIL;
-    if (*ref != work->frame) {
-        *ref = work->frame;
+    if (ref->frame != work->frame) {
+        ref->frame = work->frame;
         return;
     }
     obj = work->obj;
-    *ref = *ref + 1;
+    ref->frame = ref->frame + 1;
     if (work->frame < work->limit) {
         work->color = work->colors[work->frame & 1];
         VU0_LOAD_VF($vf10, work);
@@ -2027,13 +2062,6 @@ void effSetSharedScale(u32 unused, f32 value) {
     effPcpSharedTrailWork->unk1C = value;
 }
 
-typedef struct EffPCPTrailParams {
-    u32 count;
-    u32 colors[2];
-    f32 scale;
-    s32 minSize;
-    EffPCPTexturedBlurParams res;
-} EffPCPTrailParams;
 
 EffPCPTrailWork *func_0017B180(EffPCPTrailParams *params) {
     EffPCPTrailWork *work = sdfAllocSizeClassBlock(sizeof(EffPCPTrailWork));
@@ -2216,7 +2244,7 @@ EffPCPCompactFadeWork *effPcpCompactLongCreate(EffPCPCompactTexturedBlurParams *
     EffPCPCompactFadeWork *work;
 
     work = sdfAllocSizeClassBlock(0x3C);
-    work->resource = effCloneBlurTemplate(&params->res);
+    work->resource = (u32)effCloneBlurTemplate(&params->res);
     work->frame = 0;
     work->color = 0x80808080;
     work->flags = params->timeline.flags;
@@ -3747,7 +3775,46 @@ void effPcpThunderBurstRelease(EffPCPBurstWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017FD30);
+/* vu0 routine: normalize the muzzle direction for the thunder ray. */
+void func_0017FD30(EffPCPBurstWork *work) {
+    f32 point[4] __attribute__((aligned(16)));
+    f32 direction[4] __attribute__((aligned(16)));
+    f32 dirX;
+    f32 dirY;
+    f32 dirZ;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 distance;
+    u8 *params;
+
+    if (func_001619E8() != 0) {
+        btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetVariantSelector());
+        VU0_LOAD_VF(vf11, work->pos);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, direction);
+        params = (u8 *)func_00165638(work->handle);
+        distance = work->startDistance;
+        dirX = direction[0];
+        dirY = direction[1];
+        dirZ = direction[2];
+        x = work->pos[0] + dirX * distance;
+        y = work->pos[1] + dirY * distance;
+        z = work->pos[2] + dirZ * distance;
+        point[0] = x;
+        point[1] = y;
+        point[2] = z;
+        PCP_COPY_VECTOR(params, point);
+        distance = work->length;
+        point[0] = x + dirX * distance;
+        point[1] = y + dirY * distance;
+        point[2] = z + dirZ * distance;
+        PCP_COPY_VECTOR(params + 0x10, point);
+        effPCPThunderSetParam58((void *)work->handle, work->unk10);
+        func_00165D80(work->handle);
+    }
+}
 
 void effPcpCopyThunderBurstVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -5151,26 +5218,32 @@ void effPcpSetSpawnRangeColor(EffPCPSpawnRangeWork *work, u32 val) {
 
 /* One event per model-map position: latch movement, then run its frame interval. */
 typedef struct {
-    f32 initialPosition[3];
-    u32 unk0C;
+    f32 initialPosition[4];
     u8 hasMoved;
     u8 pad11[3];
-    u32 age;
-    u32 frameLimit;
+    s32 age;
+    s32 frameLimit;
     void *event;
 } EffPCPMapEventEntry;
 
+/* Serialized model placement and fade parameters (0x1C bytes). */
+typedef struct {
+    f32 position[4];
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 unk18;
+} EffPCPEventParamHead;
+
 /* The 0x40 owner and its separate entry allocation serve create/clone/release. */
 typedef struct {
-    u8 pad00[0x18];
-    f32 unk18;
+    EffPCPEventParamHead params;
     EffPCPMapEventEntry *entries;
     u32 entriesHandle;
     EffPCPEventOwner *owner;
     u32 modelResource;
     f32 scale;
-    u32 frame;
-    u32 frameLimit;
+    s32 frame;
+    s32 frameLimit;
     u32 count;
     u32 color;
 } EffPCPMapEventWork;
@@ -5196,7 +5269,7 @@ void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
     EffPCPMapEventEntry *entry;
 
     model = effParamWorkGetData(work->modelResource);
-    model->motion->unk20 = work->unk18;
+    model->motion->unk20 = work->params.unk18;
     mdlAddEntryPlain(model, 0, 0);
     work->frameLimit = model->motion->frameCount;
     count = sdfCountMapPositionRecords(model->inner);
@@ -5225,10 +5298,6 @@ void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
     }
 }
 
-/* Leading float block of an event work, copied verbatim from its parameter block. */
-typedef struct {
-    f32 word[7];
-} EffPCPEventParamHead;
 
 extern u32 effParamWorkCreate(s32 kind, void *params);
 
@@ -5236,7 +5305,7 @@ extern u32 effParamWorkCreate(s32 kind, void *params);
 EffPCPMapEventWork *effPcpEventWorkCreate(EffPCPEventParamHead *head, void *resourceParams, void *ownerParams) {
     EffPCPMapEventWork *work = sdfAllocSizeClassBlock(0x40);
 
-    *(EffPCPEventParamHead *)work = *head;
+    work->params = *head;
     work->color = 0x80808080;
     work->scale = 1.0f;
     work->owner = 0;
@@ -5269,7 +5338,7 @@ void effPcpEventWorkCreateFromTable(void *args) {
 EffPCPMapEventWork *effEventWorkClone(EffPCPMapEventWork *src) {
     EffPCPMapEventWork *work;
 
-    work = effPcpEventWorkCreate(src, 0, 0);
+    work = effPcpEventWorkCreate(&src->params, 0, 0);
     work->modelResource = effParamWorkDuplicate(src->modelResource);
     work->owner = src->owner;
     effPcpEventWorkInitEntries(work);
@@ -5297,7 +5366,106 @@ void effDestroyParticleEvents(EffPCPMapEventWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00184130);
+extern void func_00190308(void *event, f32 scale);
+extern void effEventCopyFileRecordHeader(void *dst, const void *src);
+extern void func_00190328(void *event);
+
+/* vu0 routine: latch map-node motion, then place and fade each event. */
+void func_00184130(EffPCPMapEventWork *work) {
+    EffPCPEventPlace place;
+    f32 position[4] __attribute__((aligned(16)));
+    f32 initialPosition[4] __attribute__((aligned(16)));
+    f32 scale[4] __attribute__((aligned(16)));
+    s32 frame = work->frame;
+    s32 frameLimit = work->frameLimit;
+    u32 mapHandle;
+    s32 fadeIn;
+    s32 fadeOut;
+    u32 color;
+    u32 count;
+    u32 i;
+    EffPCPMapSource *model;
+    EffPCPMapEventEntry *entry;
+    f32 distance;
+    f32 t;
+
+    VEC3_SPLAT(scale, work->scale);
+    scale[3] = 0;
+    place.pos[4] = 0;
+    place.pos[5] = 0;
+    place.pos[6] = 0;
+    place.scaleA = 1.0f;
+    place.pos[3] = 0;
+    place.scaleB = 100.0f;
+    place.scaleC = 100.0f;
+    place.scaleD = 1.0f;
+    if (frameLimit >= frame) {
+        model = effParamWorkGetData(work->modelResource);
+        mapHandle = model->mapHandle;
+        VU0_LOAD_VF(vf10, work->params.position);
+        mdlStorePrimaryVectorVU(model);
+        VU0_LOAD_VF(vf10, scale);
+        mdlStoreTertiaryVectorVU(model);
+        mdlProcessContextNodesAndTransforms(model, D_00325828);
+        count = work->count;
+        fadeIn = work->params.fadeIn;
+        fadeOut = work->params.fadeOut;
+        color = work->color;
+        entry = work->entries;
+        for (i = 0; i < count; i++, entry++) {
+            if (frame == 0) {
+                func_00190308(entry->event, work->scale);
+            }
+            if (frame >= 0) {
+                sdfLoadMapRecordPositionVector(mapHandle, i);
+                VU0_STORE_VF(vf10, position);
+                if (frame == 0) {
+                    entry->initialPosition[0] = position[0];
+                    entry->initialPosition[1] = position[1];
+                    entry->initialPosition[2] = position[2];
+                    entry->initialPosition[3] = 0;
+                } else {
+                    s32 age;
+                    s32 ageLimit;
+
+                    if (entry->hasMoved == 0) {
+                        initialPosition[0] = entry->initialPosition[0];
+                        initialPosition[1] = entry->initialPosition[1];
+                        initialPosition[2] = entry->initialPosition[2];
+                        initialPosition[3] = 0;
+                        VU0_LOAD_VF(vf10, position);
+                        VU0_LOAD_VF(vf11, initialPosition);
+                        VU0_SUB(vf10, vf10, vf11);
+                        VU0_LENGTH_VF10(distance);
+                        if (distance > 1.0f) {
+                            entry->frameLimit = frameLimit - frame;
+                            entry->hasMoved = 1;
+                        }
+                    }
+                    age = entry->age;
+                    ageLimit = entry->frameLimit;
+                    if (entry->hasMoved && age < ageLimit) {
+                        if (age < fadeIn && fadeIn != 0) {
+                            t = (f32)age / (f32)fadeIn;
+                        } else if (frameLimit - frame <= fadeOut && fadeOut != 0) {
+                            t = (f32)(ageLimit - age) / (f32)fadeOut;
+                        } else {
+                            t = 1.0f;
+                        }
+                        place.color = effBlendColor(color & 0xFFFFFF, color, t);
+                        place.pos[0] = position[0];
+                        place.pos[1] = position[1];
+                        place.pos[2] = position[2];
+                        effEventCopyFileRecordHeader(entry->event, &place);
+                        func_00190328(entry->event);
+                        entry->age++;
+                    }
+                }
+            }
+        }
+        work->frame++;
+    }
+}
 
 INCLUDE_RODATA(const s32, "effect/effPCPMisc", D_003A0EF0);
 
