@@ -2209,8 +2209,8 @@ s32 fileTestSlotFlagsBit(kind, flags)
     }
 }
 
-void fileTestSavedSlotFlags(u32 kind) {
-    fileTestSlotFlagsBit(kind, datGameState + 0xa54);
+s32 fileTestSavedSlotFlags(u32 kind) {
+    return fileTestSlotFlagsBit(kind, datGameState + 0xa54);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2920);
