@@ -13,51 +13,24 @@ typedef struct {
     f32 fieldOfView;       /* 0x8C: radians */
 } CameraData;
 
-typedef struct {
-    u8 pad0[0x18];
-    CameraData *data;
+/* Inner-node prefix consumed by camera code. Generic node routines retain
+ * responsibility for the allocation, links, flags, and vector backups. */
+typedef struct CameraTransformNode {
+    u8 pad00[0x40];
+    u128 position; /* 0x40: world-space look-at target */
+    u128 rotation; /* 0x50: quaternion applied to local eye/up vectors */
+} CameraTransformNode;
+
+/* Camera-specific world-object prefix; shared by construction and accessors. */
+typedef struct CameraObject {
+    u8 unk0[4];
+    s32 unk4;
+    u8 unk8[0x10];
+    CameraData *data;            /* 0x18 */
+    CameraTransformNode *inner;  /* 0x1C */
 } CameraObject;
 
-typedef struct EEF0Node EEF0Node;
-
-typedef struct {
-    u8 pad00[0x4];              /* 0x00 */
-    void (*notify)(EEF0Node *); /* 0x04 called with the node being destroyed */
-} EEF0Owner;
-
-/* Transform node (0xD0 bytes). The links at 0x10/0x20/0x24 tie a node into
- * its owner's list; inner points at a child node whose vectors live in VU
- * registers between calls (loaded with lqc2, stored with sqc2).
- */
-struct EEF0Node {
-    u8 pad00[0x10];   /* 0x00 */
-    EEF0Owner *owner; /* 0x10 */
-    u8 pad14[0x8];    /* 0x14 */
-    EEF0Node *inner;  /* 0x1C */
-    EEF0Node *prev;   /* 0x20 */
-    EEF0Node *next;   /* 0x24 */
-    u8 pad28[0x18];   /* 0x28 */
-    u128 vec40;       /* 0x40 */
-    u128 vec50;       /* 0x50 */
-    u128 vec60;       /* 0x60 */
-    u8 pad70[0x10];   /* 0x70 */
-    u128 vec80;       /* 0x80 copy of vec40 */
-    u128 vec90;       /* 0x90 copy of vec50 */
-    u128 vecA0;       /* 0xA0 copy of vec60 */
-    u8 vecB0[0x10];   /* 0xB0 cleared on alloc */
-    u32 flags;        /* 0xC0 bit0 set, bit1 cleared on vector write */
-    f32 unkC4;        /* 0xC4 */
-    u32 unkC8;        /* 0xC8 */
-};
-
-typedef struct ActionObj {
-    u8 unk0[4];      /* 0x0 */
-    s32 unk4;        /* 0x4 */
-    u8 unk8[0x10];   /* 0x8 */
-    CameraData *data; /* 0x18 */
-    s32 unk1C;       /* 0x1C */
-} ActionObj;
-
+/* Release the camera's inner node, base handle, and owned data block. */
 void dds3DestroyCameraData(CameraObject *camera) {
     CameraData *data;
 
@@ -72,17 +45,19 @@ void *dds3GetWorldSecondaryObject(void);
 s32 effObjTestNodeFlags(void *node, s32 flags);
 void effObjClearNodeFlags(void *node, s32 flags);
 extern void effObjInnerVecBackup(s32 inner);
-extern void dds3RebuildCameraBasis(ActionObj *obj);
+extern void dds3RebuildCameraBasis(CameraObject *obj);
 extern void func_001063A8(f32 value);
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
 
-s32 dds3UpdateCameraObject(ActionObj *camera) {
-    EEF0Node *inner;
+/* Rebuild dirty vectors and publish only the active world's camera; return 1.
+ * A pending field-of-view update is consumed only while this camera is active. */
+s32 dds3UpdateCameraObject(CameraObject *camera) {
+    CameraTransformNode *inner;
     CameraData *data;
 
-    inner = (EEF0Node *)camera->unk1C;
+    inner = camera->inner;
     data = camera->data;
     if (effObjTestNodeFlags(inner, 1) == 1) {
         effObjClearNodeFlags(inner, 1);
@@ -90,7 +65,7 @@ s32 dds3UpdateCameraObject(ActionObj *camera) {
         effObjInnerVecBackup((s32)inner);
     }
     if (dds3GetWorldCameraObject((s32)dds3GetWorldSecondaryObject()) == (s32)camera) {
-        PCP_COPY_VECTOR(sdfViewTargetVector, &inner->vec40);
+        PCP_COPY_VECTOR(sdfViewTargetVector, &inner->position);
         PCP_COPY_VECTOR(sdfViewEyeVector, &data->worldEye);
         PCP_COPY_VECTOR(sdfViewUpVector, &data->worldUp);
         if (data->fovUpdatePending & 1) {
@@ -110,11 +85,11 @@ extern void sdfVuBuildLookAtBasis(void *eye, void *target, void *up);
 
 /* Transform the local eye/up vectors through the inner node and rebuild the
  * world-space look-at basis. */
-void dds3RebuildCameraBasis(ActionObj *obj) {
+void dds3RebuildCameraBasis(CameraObject *obj) {
     CameraData *data = obj->data;
-    u8 *inner = (u8 *)obj->unk1C;
+    CameraTransformNode *inner = obj->inner;
 
-    VU0_LOAD_VF(vf10, inner + 0x50);
+    VU0_LOAD_VF(vf10, &inner->rotation);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, &data->localUp);
     VU0_APPLY_MATRIX(vf10, vf10);
@@ -123,26 +98,27 @@ void dds3RebuildCameraBasis(ActionObj *obj) {
     if (data->eyeIsRelative == 1) {
         VU0_LOAD_VF(vf10, &data->localEyeOffset);
         VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_LOAD_VF(vf11, inner + 0x40);
+        VU0_LOAD_VF(vf11, &inner->position);
         VU0_ADD(vf10, vf10, vf11);
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, &data->worldEye);
     }
-    sdfVuBuildLookAtBasis(&data->worldEye, inner + 0x40, &data->worldUp);
+    sdfVuBuildLookAtBasis(&data->worldEye, &inner->position, &data->worldUp);
     VU0_STORE_MATRIX(data->matrix);
 }
 
+/* Return the base handle owned by the camera data. */
 u32 dds3GetCameraHandle(CameraObject *camera) {
     return camera->data->handle;
 }
 
-extern ActionObj *dds3AppendWorldObjectNode();
+extern CameraObject *dds3AppendWorldObjectNode();
 
 extern void dds3EnsureSlotData();
-extern void effObjSetInnerFirstVec(ActionObj *obj, void *vec);
-extern void effObjSetInnerSecondVec(ActionObj *obj, void *vec);
+extern void effObjSetInnerFirstVec(CameraObject *obj, void *vec);
+extern void effObjSetInnerSecondVec(CameraObject *obj, void *vec);
 extern void effObjInnerVecBackup(s32 inner);
-extern void dds3RebuildCameraBasis(ActionObj *obj);
+extern void dds3RebuildCameraBasis(CameraObject *obj);
 extern u8 D_00412878[];
 extern u8 D_00412888[];
 
@@ -150,18 +126,20 @@ typedef struct {
     f32 components[4];
 } CameraVector;
 
-ActionObj *dds3CreateCameraObjectWithSlotData(s32 value) {
-    ActionObj *obj = dds3AppendWorldObjectNode(4);
+/* Append a camera-kind world object, store its scalar, and allocate slot data. */
+CameraObject *dds3CreateCameraObjectWithSlotData(s32 value) {
+    CameraObject *obj = dds3AppendWorldObjectNode(4);
 
     obj->unk4 = value;
     dds3EnsureSlotData(obj);
     return obj;
 }
 
-ActionObj *dds3CreateCameraObject(s32 counter, void *position, void *rotation) {
+/* Create a camera with the default local eye/up vectors and relative eye mode. */
+CameraObject *dds3CreateCameraObject(s32 counter, void *targetPosition, void *rotation) {
     CameraVector initialUp;
     CameraVector initialEyeOffset;
-    ActionObj *camera;
+    CameraObject *camera;
     CameraData *data;
 
     initialUp = *(CameraVector *)D_00412878;
@@ -171,40 +149,43 @@ ActionObj *dds3CreateCameraObject(s32 counter, void *position, void *rotation) {
     data->eyeIsRelative = 1;
     data->fieldOfView = 0.6283185f;
     effObjSetInnerSecondVec(camera, rotation);
-    effObjSetInnerFirstVec(camera, position);
-    effObjInnerVecBackup(camera->unk1C);
+    effObjSetInnerFirstVec(camera, targetPosition);
+    effObjInnerVecBackup((s32)camera->inner);
     PCP_COPY_VECTOR(&data->localUp, &initialUp);
     PCP_COPY_VECTOR(&data->localEyeOffset, &initialEyeOffset);
     dds3RebuildCameraBasis(camera);
     return camera;
 }
 
-ActionObj *dds3CreateConfiguredCameraObject(s32 value, void *innerVec, u128 *vec60, u128 *vec50) {
-    ActionObj *obj = dds3CreateCameraObjectWithSlotData(value);
+/* Create a camera with an explicit world eye and an up vector rotated by its node. */
+CameraObject *dds3CreateConfiguredCameraObject(s32 value, void *targetPosition, u128 *worldEye, u128 *localUp) {
+    CameraObject *obj = dds3CreateCameraObjectWithSlotData(value);
     CameraData *data = obj->data;
 
     data->fieldOfView = 0.6283185f;
     data->eyeIsRelative = 0;
-    effObjSetInnerFirstVec(obj, innerVec);
-    effObjInnerVecBackup(obj->unk1C);
-    PCP_COPY_VECTOR(&data->localUp, vec50);
-    PCP_COPY_VECTOR(&data->worldEye, vec60);
+    effObjSetInnerFirstVec(obj, targetPosition);
+    effObjInnerVecBackup((s32)obj->inner);
+    PCP_COPY_VECTOR(&data->localUp, localUp);
+    PCP_COPY_VECTOR(&data->worldEye, worldEye);
     dds3RebuildCameraBasis(obj);
     return obj;
 }
 
-ActionObj *dds3CreateCameraObjectWithVectors(s32 slotValue, f32 value, void *innerVec, u128 *vec40, u128 *vec50, s32 eyeIsRelative) {
-    ActionObj *obj = dds3CreateCameraObjectWithSlotData(slotValue);
+/* Store the eye vector as a local offset; flag 0 also seeds the world eye.
+ * The basis rebuild transforms that offset only when eyeIsRelative is 1. */
+CameraObject *dds3CreateCameraObjectWithVectors(s32 slotValue, f32 fieldOfView, void *targetPosition, u128 *eyeVector, u128 *localUp, s32 eyeIsRelative) {
+    CameraObject *obj = dds3CreateCameraObjectWithSlotData(slotValue);
     CameraData *data = obj->data;
 
-    data->fieldOfView = value;
+    data->fieldOfView = fieldOfView;
     data->eyeIsRelative = eyeIsRelative;
-    effObjSetInnerFirstVec(obj, innerVec);
-    effObjInnerVecBackup(obj->unk1C);
-    PCP_COPY_VECTOR(&data->localUp, vec50);
-    PCP_COPY_VECTOR(&data->localEyeOffset, vec40);
+    effObjSetInnerFirstVec(obj, targetPosition);
+    effObjInnerVecBackup((s32)obj->inner);
+    PCP_COPY_VECTOR(&data->localUp, localUp);
+    PCP_COPY_VECTOR(&data->localEyeOffset, eyeVector);
     if (eyeIsRelative == 0) {
-        PCP_COPY_VECTOR(&data->worldEye, vec40);
+        PCP_COPY_VECTOR(&data->worldEye, eyeVector);
     }
     dds3RebuildCameraBasis(obj);
     return obj;
@@ -245,12 +226,13 @@ f32 dds3GetCameraFieldOfView(CameraObject *camera) {
 
 extern void effMiscQuaternionToMatrixVU(void);
 
-/* vu0 routine: transform the data vectors by the inner quaternion matrix. */
-s32 dds3TransformCameraVectorsByInnerRotation(ActionObj *obj, f32 *dst1, f32 *dst2) {
+/* vu0 routine: update world up and the relative eye, then copy world eye and
+ * target position into the four-component output buffers. */
+void dds3TransformCameraVectorsByInnerRotation(CameraObject *obj, f32 *worldEyeOut, f32 *targetPositionOut) {
     CameraData *data = obj->data;
-    EEF0Node *inner = (EEF0Node *)obj->unk1C;
+    CameraTransformNode *inner = obj->inner;
 
-    VU0_LOAD_VF(vf10, &inner->vec50);
+    VU0_LOAD_VF(vf10, &inner->rotation);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, &data->localUp);
     VU0_APPLY_MATRIX(vf10, vf10);
@@ -259,19 +241,19 @@ s32 dds3TransformCameraVectorsByInnerRotation(ActionObj *obj, f32 *dst1, f32 *ds
     if (data->eyeIsRelative == 1) {
         VU0_LOAD_VF(vf10, &data->localEyeOffset);
         VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_LOAD_VF(vf11, &inner->vec40);
+        VU0_LOAD_VF(vf11, &inner->position);
         VU0_ADD(vf10, vf10, vf11);
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, &data->worldEye);
     }
-    dst1[0] = ((f32 *)&data->worldEye)[0];
-    dst1[1] = ((f32 *)&data->worldEye)[1];
-    dst1[2] = ((f32 *)&data->worldEye)[2];
-    dst1[3] = ((f32 *)&data->worldEye)[3];
-    dst2[0] = ((f32 *)&inner->vec40)[0];
-    dst2[1] = ((f32 *)&inner->vec40)[1];
-    dst2[2] = ((f32 *)&inner->vec40)[2];
-    dst2[3] = ((f32 *)&inner->vec40)[3];
+    worldEyeOut[0] = ((f32 *)&data->worldEye)[0];
+    worldEyeOut[1] = ((f32 *)&data->worldEye)[1];
+    worldEyeOut[2] = ((f32 *)&data->worldEye)[2];
+    worldEyeOut[3] = ((f32 *)&data->worldEye)[3];
+    targetPositionOut[0] = ((f32 *)&inner->position)[0];
+    targetPositionOut[1] = ((f32 *)&inner->position)[1];
+    targetPositionOut[2] = ((f32 *)&inner->position)[2];
+    targetPositionOut[3] = ((f32 *)&inner->position)[3];
 }
 
 INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_00412878);
