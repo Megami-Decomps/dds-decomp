@@ -4,7 +4,7 @@
 typedef struct SdfAllocation {
     struct SdfAllocation *peer;
     struct SdfAllocation *block;
-    u32 address;
+    s32 address;
     u16 busy;
     union {
         s16 referenceCount;
@@ -97,11 +97,59 @@ void sdfDecrementAllocationReferenceCount(SdfAllocation *allocation) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00329600", func_00329930);
+typedef struct SdfHeapRoot {
+    s32 unk0; /* 0x0 */
+    SdfAllocation *first; /* 0x4: first block record */
+    s32 unk8; /* 0x8 */
+    s32 unkC; /* 0xC */
+    SdfAllocation *last; /* 0x10: end marker */
+} SdfHeapRoot;
+
+extern SdfHeapRoot D_0045F0F8;
+
+/* Find the used heap block whose data address is `address`. */
+SdfAllocation *func_00329930(void *address) {
+    SdfHeapRoot *heap = &D_0045F0F8;
+    SdfAllocation *block;
+    s32 interruptsDisabled;
+
+    interruptsDisabled = func_0036DE70();
+    for (block = heap->first;; block = block->block) {
+        if (block->busy != 1) {
+            if (block->busy == 2) {
+                if (interruptsDisabled != 0) {
+                    EIntr();
+                }
+            }
+        } else if (block->address == (u32)address) {
+            if (interruptsDisabled != 0) {
+                EIntr();
+            }
+            return block;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00329600", func_00329A00);
 
-INCLUDE_ASM(const s32, "game/code_00329600", func_00329AA8);
+extern SdfAllocation *D_0045F0FC[];
+
+/* Find the used heap block that contains `address`; NULL when the end marker is reached. */
+SdfAllocation *func_00329AA8(s32 address) {
+    SdfAllocation *block = D_0045F0FC[0];
+    SdfAllocation *next;
+
+    for (;; block = next) {
+        next = block->block;
+        if (block->busy != 1) {
+            if (block->busy == 2) {
+                return NULL;
+            }
+        } else if (address >= block->address && address < next->address) {
+            return block;
+        }
+    }
+}
 
 extern s32 func_003292A8(s32 size);
 extern s32 func_0034DE68(void *, s32, s32, void *, s32, void *, s32, s32, s32);
