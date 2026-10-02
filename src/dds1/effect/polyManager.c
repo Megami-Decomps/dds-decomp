@@ -267,7 +267,24 @@ void polyReleaseBandNodeResources(PolyBand *obj) {
     sdfReleaseResourceAllocation(obj->allocation);
 }
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_0015E100);
+/* Seed band records with staggered inactive ages. */
+void func_0015E100(PolyBand *obj) {
+    u32 count = obj->head.entryCount;
+    PolyBandRecord *record = obj->records;
+    u32 delayStep = obj->spawnDelayStep;
+    s32 age = POLY_INACTIVE_ENTRY_AGE;
+    u32 index;
+
+    index = 0;
+    if (count != 0) {
+        do {
+            index++;
+            record->age = age;
+            age -= delayStep;
+            record++;
+        } while (index < count);
+    }
+}
 
 
 void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius);
