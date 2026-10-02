@@ -333,10 +333,54 @@ controls remain authoritative in the FLD2 source, while mesh extras record
 face and triangle counts. Unit conversion is shared with the model exporter,
 so both layers stay in the same coordinate space and DDS axes remain intact.
 
+`--warps` adds the area's WAP transition graph to its placement nodes. Field,
+elevator, facility, and event destinations retain both their typed values and
+the original three argument words; destination position and camera identities,
+conditional flag gates, DDS-tail actions, and nondefault post-transition state
+remain attached to each row. A placement can own several conditional rows, so
+`ddsTransitions` is always a list. Rows whose named actor is absent from that
+FLD2 remain visible in `ddsUnlinkedTransitionActors` on the field wrapper
+instead of being dropped. Tracked `.wapasm` inputs automatically use their
+paired INF and field-script sources to resolve exact symbols.
+
+Across field areas present in the tracked FLD2 corpus, 2,731 of 2,780 named WAP
+rows resolve to placement nodes: 1,552 of 1,582 in DDS1 and 1,179 of 1,198 in
+DDS2. Sixty DDS1 and 43 DDS2 placement identities own more than one row; the
+exporter preserves every alternative and its gate.
+
 The scene layer validates all 1,232 supported FLD2 payload occurrences across
 both games: 5,533 collision resources and 167,623 output triangles, 1,551
 cameras, and 10,222 placements. The paired DDS1 and DDS2 composed fields pass
 the Khronos glTF validator without errors or warnings.
+
+### Collision geometry and transform import
+
+`tools/fld_scene_import.py` applies edited collision vertices and static
+transforms from a composed GLB back to FLD2 source:
+
+```sh
+python3 tools/fld_scene_import.py edited-field.glb \
+  src/dds1/data/field/f011_001.fldasm edited-f011_001.fldasm
+```
+
+Collision, camera, and placement nodes are identified by their FLD2 resource
+type, serial, flags, and exact name. Translation is converted back through the
+GLB's recorded unit scale; quaternion rotations are normalized; and
+three-component scale is copied directly. Collision `POSITION` edits use the
+same unit conversion and preserve each native vertex's unrepresented fourth
+float. The importer verifies the vertex count, triangle topology, collision
+metadata, and channel layout against the source, so glTF cannot silently alter
+the face controls that carry automap, encounter, sound, floor, and other game
+semantics.
+
+The importer requires native DDS axes and editable TRS properties, rejects
+matrix nodes and identity mismatches, and validates the rebuilt FLD2 before
+writing. Coordinates and transform components that still equal the exported
+values retain their original float bits, including signed zero and
+unrepresented fourth components. An unchanged scene imports byte-identically
+across all 591 DDS1 and 621 DDS2 FLD2 sources, covering 5,533 collision
+resources and 17,282 collision, camera, and placement transforms. Empty
+collision resources remain identity-bearing nodes without invented geometry.
 
 Each transform is `0x30` bytes: four position floats, four rotation floats,
 and four scale floats. Each collision object also starts with a `0x30`-byte

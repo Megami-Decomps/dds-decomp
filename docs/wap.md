@@ -177,6 +177,12 @@ an after-script name exactly matches a BF procedure. Assembly verifies both
 links against the paired source and rejects a missing target. Other names stay
 quoted strings; no fuzzy or cross-field guess is made.
 
+`tools/fld_scene.py --warps` projects these rows onto the matching FLD2
+placement nodes in a composed GLB. Each node retains every owned conditional
+transition and its typed destination. The field wrapper reports unlinked named
+rows explicitly, which makes incomplete or exceptional resource relationships
+inspectable without weakening the exact WAP or FLD2 codecs.
+
 Run the codec and complete-corpus regression tests with:
 
 ```sh
