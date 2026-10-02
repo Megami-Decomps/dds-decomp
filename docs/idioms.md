@@ -989,6 +989,31 @@ computed. Natural source shapes that flip it:
     `SdfTreeNode`; `pool->sub` became `SdfTreeNode *sub[1]`.
     A 1-3 word residual in a function whose locals or fields are typed
     `s32`/`void *` is a type problem before it is a scheduling problem.
+14. **A symbol address used before and after a join (loop, `if`/`else`): three
+    shapes, and which source form gives which.** Scratch matrix (symbol `A` as a
+    call argument, then a loop that walks it; relocations counted):
+    - Only calls between the two uses, or a one-armed `if`: one `lui`/`addiu`
+      pair held in a callee-saved register (whole address shared).
+    - A loop or an `if`/`else` between them and the second use written through a
+      **pointer local** (`p = (T *)A; ... p->x`): `lui` shared in a saved
+      register and `addiu %lo` re-derived at the second use (`hi lo lo`). This is
+      retail's "`lui $19` kept across the loop, `addiu $3,$19,lo` for the remainder"
+      (DDS1 `func_00101368`, `func_002878D8`, `func_0016FC58`).
+    - The same join with the second use written as an **indexed access of the
+      symbol** (`((T *)A)[i].x` in the loop body, no pointer local): the whole
+      pair is rematerialised (`hi lo hi lo`), nothing held in a saved register.
+    So match the retail shape by choosing the second use's form. DDS2
+    `func_00122828` (field table loader; the seventeenth read passes `D_00389170`,
+    a loop later walks it): `record = (FieldStageCoordinate *)D_00389170` kept the
+    address in a saved register (0x20 frame instead of 0x10);
+    `((FieldStageCoordinate *)D_00389170)[i].x` gives retail's frame and a full
+    match (with two separate `if (id > 0) { if (id < 0x1F)` tests, since
+    `id > 0 && id < 0x1F` folds to one unsigned range compare). A saved register
+    can also be absent for another reason: if retail keeps other values in the
+    callee-saved registers (slot addresses instead of re-read handles) the
+    address pseudo loses the allocation and is rematerialised; that is a
+    liveness question, not an address-form one. Volatile `asm` between the uses
+    does not break the sharing (tested).
 
 Unresolved: a saved register initialised as a copy of another holding the same
 constant (`move $16,$19` for `i` from `bestIndex = 0`, DDS1 `func_00202F90`,
