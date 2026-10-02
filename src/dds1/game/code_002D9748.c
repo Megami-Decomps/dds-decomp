@@ -2,6 +2,9 @@
 #include "sdf.h"
 #include "pcp_vu0.h"
 
+#define SDF_CHUNK_NAMED_IDS 0x4D4E444E
+#define SDF_ASSET_LIST_MIN_CAPACITY 0x20
+
 typedef union SdfSubParam {
     struct {
         u64 unk0;
@@ -91,7 +94,7 @@ extern void sdfBuildPrimaryAlphaAdditiveDmaPacket(void *);
 
 extern void sdfBuildPrimaryAlphaSubtractiveDmaPacket(void *);
 
-void *sdfChunkFindById(SdfChunk *chunk, s32 id);
+void *sdfChunkFindById(SdfChunk *chunk, s32 chunkId);
 void *sdfAllocSizeClassBlock(s32 size);
 void *sdfAllocAndClearQuadwords(s32 size);
 void *sdfChunkFindRecordById(SdfTextParam *, s32);
@@ -163,7 +166,8 @@ void sdfSubmitDrawPacketGroups(SdfPacketOwner **owners, u8 *packets) {
     owners[3]->sync(owners[3], packets + 0x180);
 }
 
-void *sdfChunkFindById(SdfChunk *chunk, s32 id) {
+/* Follow chunk byte extents until the requested ID or the zero-ID terminator is reached. */
+void *sdfChunkFindById(SdfChunk *chunk, s32 chunkId) {
     u32 currentId;
 
     if (chunk == NULL) {
@@ -171,7 +175,7 @@ void *sdfChunkFindById(SdfChunk *chunk, s32 id) {
     }
     currentId = chunk->id;
     while (currentId != 0) {
-        if (currentId == id) {
+        if (currentId == chunkId) {
             return (void *)chunk;
         }
         chunk = (SdfChunk *)((u8 *)chunk + chunk->size);
@@ -184,25 +188,26 @@ void *sdfChunkFindByTag(SdfTextParam *param, s32 tag) {
     return sdfChunkFindById(param->chunkTable, tag);
 }
 
+/* Names are followed by a four-byte-aligned ID word; missing chunks/names return -1. */
 s32 sdfNamedChunkFindId(SdfTextParam *param, const char *name) {
-    SdfChunk *chunk = sdfChunkFindByTag(param, 0x4D4E444E);
-    u8 *entry;
-    u8 *end;
-    u32 length;
-    if (chunk == NULL) {
+    SdfChunk *namesChunk = sdfChunkFindByTag(param, SDF_CHUNK_NAMED_IDS);
+    u8 *entryName;
+    u8 *chunkEnd;
+    u32 nameLength;
+    if (namesChunk == NULL) {
         return -1;
     }
-    entry = (u8 *)chunk + 8;
-    end = (u8 *)chunk + chunk->size;
-    length = strlen(name);
+    entryName = (u8 *)namesChunk + 8;
+    chunkEnd = (u8 *)namesChunk + namesChunk->size;
+    nameLength = strlen(name);
     do {
-        u32 entryLength = strlen((char *)entry);
-        u8 *next = (u8 *)(((u32)(entry + entryLength + 4)) & ~3U);
-        if (entryLength == length && memcmp(entry, name, length) == 0) {
-            return *(s32 *)next;
+        u32 entryNameLength = strlen((char *)entryName);
+        u8 *idWord = (u8 *)(((u32)(entryName + entryNameLength + 4)) & ~3U);
+        if (entryNameLength == nameLength && memcmp(entryName, name, nameLength) == 0) {
+            return *(s32 *)idWord;
         }
-        entry = next + 4;
-    } while (entry < end);
+        entryName = idWord + 4;
+    } while (entryName < chunkEnd);
     return -1;
 }
 
@@ -249,20 +254,21 @@ void sdfVuTransformMapRecordPosition(SdfTextParam *param, void *resource) {
     VU0_TRANSFORM_POINT(vf10, vf10);
 }
 
-void *sdfChunkFindRecordById(SdfTextParam *param, s32 id) {
-    SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_MAP_POSITIONS);
-    SdfMapPositionRecord *entry;
-    u8 *end;
-    if (chunk == NULL) {
+/* Search the fixed-size map-position records within the chunk's declared byte extent. */
+void *sdfChunkFindRecordById(SdfTextParam *param, s32 recordId) {
+    SdfChunk *positionsChunk = sdfChunkFindByTag(param, SDF_CHUNK_MAP_POSITIONS);
+    SdfMapPositionRecord *record;
+    u8 *chunkEnd;
+    if (positionsChunk == NULL) {
         return NULL;
     }
-    entry = (SdfMapPositionRecord *)((u8 *)chunk + 0x10);
-    end = (u8 *)chunk + chunk->size;
-    while ((u8 *)entry < end) {
-        if (entry->id == id) {
-            return entry;
+    record = (SdfMapPositionRecord *)((u8 *)positionsChunk + 0x10);
+    chunkEnd = (u8 *)positionsChunk + positionsChunk->size;
+    while ((u8 *)record < chunkEnd) {
+        if (record->id == recordId) {
+            return record;
         }
-        entry++;
+        record++;
     }
     return NULL;
 }
@@ -334,16 +340,17 @@ SdfResourceList *sdfCreateConfiguredBufferedResourceList(u32 capacity) {
     return sdfDevCreateBufferedRequest(capacity, 4, 4);
 }
 
-void sdfResourceListRelease(SdfResourceList *list, s32 freeItems) {
-    s32 i;
-    s32 count;
+/* Optionally release item references before destroying the buffered list; null lists are ignored. */
+void sdfResourceListRelease(SdfResourceList *list, s32 releaseItems) {
+    s32 itemIndex;
+    s32 itemCount;
     if (list == NULL) {
         return;
     }
-    if (freeItems != 0) {
-        count = list->count;
-        for (i = 0; i < count; i++) {
-            sdfTexReleaseReferenceViaHandler(list->items[i]);
+    if (releaseItems != 0) {
+        itemCount = list->count;
+        for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
+            sdfTexReleaseReferenceViaHandler(list->items[itemIndex]);
         }
     }
     sdfDestroyDevRequest(list);
@@ -370,36 +377,38 @@ void sdfReduceResourceListCount(SdfResourceList *list, s32 count, s32 enabled) {
     sdfDevResizeBufferedRequest();
 }
 
-SdfResourceList *sdfResourceListClone(SdfResourceList *list) {
-    s32 count;
-    SdfResourceList *copy;
-    s32 i;
+/* Allocate a list of cloned resource items; a null source returns null. */
+SdfResourceList *sdfResourceListClone(SdfResourceList *source) {
+    s32 itemCount;
+    SdfResourceList *clone;
+    s32 itemIndex;
 
-    if (list == NULL) {
+    if (source == NULL) {
         return NULL;
     }
-    count = list->count;
-    copy = sdfCreateConfiguredBufferedResourceList(count);
-    for (i = 0; i < count; i++) {
-        copy->items[i] = func_002D2800(list->items[i]);
+    itemCount = source->count;
+    clone = sdfCreateConfiguredBufferedResourceList(itemCount);
+    for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
+        clone->items[itemIndex] = func_002D2800(source->items[itemIndex]);
     }
-    copy->count = count;
-    return copy;
+    clone->count = itemCount;
+    return clone;
 }
 
+/* Apply the scalar update only to assets whose byte at 0x18 is nonzero. */
 void sdfUpdateActiveResourceListScalars(SdfResourceList *list, s32 arg, f32 value) {
-    s32 i;
-    s32 count;
+    s32 itemIndex;
+    s32 itemCount;
 
     if (list == NULL) {
         return;
     }
-    count = list->count;
-    for (i = 0; i < count; i++) {
-        SdfAsset *item = (SdfAsset *)list->items[i];
+    itemCount = list->count;
+    for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
+        SdfAsset *asset = (SdfAsset *)list->items[itemIndex];
 
-        if (*((u8 *)item + 0x18) != 0) {
-            func_002D33C8((u32)item, arg, value);
+        if (*((u8 *)asset + 0x18) != 0) {
+            func_002D33C8((u32)asset, arg, value);
         }
     }
 }
@@ -413,11 +422,12 @@ SdfResourceList *sdfCreateResourceList(s32 capacity) {
     return sdfDevCreateBufferedRequest(capacity, 4, 8);
 }
 
+/* Release every asset, then destroy its buffered list. */
 void sdfResourceListReleaseAssets(SdfResourceList *list) {
-    s32 i;
+    s32 itemIndex;
 
-    for (i = 0; i < list->count; i++) {
-        sdfAssetRelease((SdfAsset *)list->items[i]);
+    for (itemIndex = 0; itemIndex < list->count; itemIndex++) {
+        sdfAssetRelease((SdfAsset *)list->items[itemIndex]);
     }
     sdfDestroyDevRequest(list);
 }
@@ -776,36 +786,39 @@ void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *asset, s32 index) {
     asset->pad00[6] = flags & (0x55 << (index ^ 1));
 }
 
-SdfResourceList *sdfAssetListParse(SdfTextParam *param, u32 *data) {
-    u32 count = *data;
-    u8 *cursor = (u8 *)(data + 1);
-    SdfResourceList *list = sdfCreateResourceList(count >= 0x20 ? count : 0x20);
-    while (count != 0) {
+/* Parse the declared number of variable-sized assets, reserving at least the minimum capacity. */
+SdfResourceList *sdfAssetListParse(SdfTextParam *lookup, u32 *data) {
+    u32 remainingAssets = *data;
+    u8 *parameterCursor = (u8 *)(data + 1);
+    SdfResourceList *list = sdfCreateResourceList(remainingAssets >= SDF_ASSET_LIST_MIN_CAPACITY ? remainingAssets : SDF_ASSET_LIST_MIN_CAPACITY);
+    while (remainingAssets != 0) {
         SdfAsset *asset = sdfCreateAssetWithDrawEntries();
-        cursor = sdfParseAssetParameterFlags(asset, param, cursor);
+        parameterCursor = sdfParseAssetParameterFlags(asset, lookup, parameterCursor);
         sdfAppendAssetToResourceList(list, asset);
-        count--;
+        remainingAssets--;
     }
     return list;
 }
 
-void sdfResourceListApplyEntryChanges(SdfResourceList *list, s32 index) {
-    s32 i;
-    s32 count = list->count;
-    u32 *items = list->items;
+/* Apply one entry index to every asset in the list. */
+void sdfResourceListApplyEntryChanges(SdfResourceList *list, s32 entryIndex) {
+    s32 itemIndex;
+    s32 itemCount = list->count;
+    u32 *assetItems = list->items;
 
-    for (i = 0; i < count; i++) {
-        sdfAssetApplyEntryChanges((SdfAsset *)items[i], index);
+    for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
+        sdfAssetApplyEntryChanges((SdfAsset *)assetItems[itemIndex], entryIndex);
     }
 }
 
-void sdfApplyResourceListEntriesWithForcedTexture(SdfResourceList *list, s32 index) {
-    s32 i;
-    s32 count = list->count;
-    u32 *items = list->items;
+/* Apply the selected entry to each asset using the forced-texture variant. */
+void sdfApplyResourceListEntriesWithForcedTexture(SdfResourceList *list, s32 entryIndex) {
+    s32 itemIndex;
+    s32 itemCount = list->count;
+    u32 *assetItems = list->items;
 
-    for (i = 0; i < count; i++) {
-        sdfApplyAssetEntryChangesWithForcedTexture((SdfAsset *)items[i], index);
+    for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
+        sdfApplyAssetEntryChangesWithForcedTexture((SdfAsset *)assetItems[itemIndex], entryIndex);
     }
 }
 
@@ -813,45 +826,48 @@ typedef struct SdfSubParamWords {
     u32 word[6];
 } SdfSubParamWords;
 
-void sdfCopyAssetParameterState(SdfAsset *dst, SdfAsset *src) {
-    SdfSubParamWords *sub;
+/* Copy base state; only present source subparameters overwrite destination subparameter blocks. */
+void sdfCopyAssetParameterState(SdfAsset *destination, SdfAsset *source) {
+    SdfSubParamWords *subParameters;
 
-    dst->pad00[6] = 0xFF;
-    dst->unk10 = src->unk10;
-    dst->unk14 = src->unk14;
-    dst->unk1C = src->unk1C;
-    dst->unk18 = src->unk18;
-    *(u16 *)&dst->pad00[4] = *(u16 *)&src->pad00[4];
-    dst->texture = src->texture;
-    dst->unk20 = src->unk20;
-    dst->unk28 = src->unk28;
-    sub = src->third;
-    if (sub != NULL) {
-        *(SdfSubParamWords *)sdfEnsurePrimaryTextSubParam((SdfTextParam *)dst) = *sub;
+    destination->pad00[6] = 0xFF;
+    destination->unk10 = source->unk10;
+    destination->unk14 = source->unk14;
+    destination->unk1C = source->unk1C;
+    destination->unk18 = source->unk18;
+    *(u16 *)&destination->pad00[4] = *(u16 *)&source->pad00[4];
+    destination->texture = source->texture;
+    destination->unk20 = source->unk20;
+    destination->unk28 = source->unk28;
+    subParameters = source->third;
+    if (subParameters != NULL) {
+        *(SdfSubParamWords *)sdfEnsurePrimaryTextSubParam((SdfTextParam *)destination) = *subParameters;
     }
-    sub = src->fourth;
-    if (sub != NULL) {
-        *(SdfSubParamWords *)sdfEnsureSecondaryTextSubParam((SdfTextParam *)dst) = *sub;
+    subParameters = source->fourth;
+    if (subParameters != NULL) {
+        *(SdfSubParamWords *)sdfEnsureSecondaryTextSubParam((SdfTextParam *)destination) = *subParameters;
     }
-    dst->unk40 = src->unk40;
-    dst->unk44 = src->unk44;
+    destination->unk40 = source->unk40;
+    destination->unk44 = source->unk44;
 }
 
-void sdfCopyAssetListParameterState(SdfResourceList *first, SdfResourceList *second) {
-    s32 i;
-    s32 count = first->count;
-    u32 *secondItems = second->items;
-    u32 *firstItems = first->items;
+/* Copy paired items using the destination count; source must contain at least that many items. */
+void sdfCopyAssetListParameterState(SdfResourceList *destination, SdfResourceList *source) {
+    s32 itemIndex;
+    s32 itemCount = destination->count;
+    u32 *sourceItems = source->items;
+    u32 *destinationItems = destination->items;
 
-    for (i = 0; i < count; i++) {
-        sdfCopyAssetParameterState(firstItems[i], secondItems[i]);
+    for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
+        sdfCopyAssetParameterState(destinationItems[itemIndex], sourceItems[itemIndex]);
     }
 }
 
 extern s32 (*D_003981A8[])(u32, u32);
 
-s32 sdfDispatchAssetCommandWord(u32 context, u32 command) {
-    D_003981A8[command >> 16](context, command);
+/* The high halfword selects the handler, which receives the complete command word unchanged. */
+s32 sdfDispatchAssetCommandWord(u32 context, u32 commandWord) {
+    D_003981A8[commandWord >> 16](context, commandWord);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002D9748", sdfLiveAssetCount);
