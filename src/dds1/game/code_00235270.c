@@ -1,5 +1,7 @@
 #include "common.h"
 #include "evt_world.h"
+#include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 extern void func_0023D5B0(s32 output, void *data, s32 size);
 
@@ -1369,7 +1371,49 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023A688);
 void func_0023A798(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023A7A0);
+extern s8 D_00324510[];
+extern f32 sdfViewMatrix[];
+extern void effMiscAxisAngleToQuaternionVU(f32 angle);
+extern void effMiscQuaternionToMatrixVU(void);
+
+/* vu0 routine: apply the selected camera-axis rotations to a position. */
+void func_0023A7A0(f32 *position)
+{
+    if (D_00324510[0x25] != 0) {
+        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
+        effMiscAxisAngleToQuaternionVU(2.0f * 3.14159265f / 180.0f);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, position);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, position);
+    } else if (D_00324510[0x24] != 0) {
+        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
+        effMiscAxisAngleToQuaternionVU(-2.0f * 3.14159265f / 180.0f);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, position);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, position);
+    }
+    if (D_00324510[0x27] != 0) {
+        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
+        effMiscAxisAngleToQuaternionVU(-2.0f * 3.14159265f / 180.0f);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, position);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, position);
+    } else if (D_00324510[0x26] != 0) {
+        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
+        effMiscAxisAngleToQuaternionVU(2.0f * 3.14159265f / 180.0f);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, position);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, position);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023A968);
 

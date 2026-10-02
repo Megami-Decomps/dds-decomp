@@ -252,7 +252,7 @@ void effMagatuhiReleaseWideWorkResources(EffMagatuhiWideSecond *work) {
 }
 
 extern void *effMathGetSlotAt(void *slots, s32 index);
-extern void effMathStepBezierSlot(void *slots, s32 index, void *out);
+extern s32 effMathStepBezierSlot(void *slots, s32 index, void *out);
 extern void func_00190DE0(void *owner);
 extern void func_00191450(void *valueWork, s32 index, void *out);
 
@@ -359,7 +359,48 @@ void effMagatuhiBuildBezierControlPointsVU(EffMagatuhiWideSecond *work, s32 inde
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00192778);
+void func_00192778(EffMagatuhiWideSecond *work) {
+    void *slots = work->mathResource;
+    EffMagatuhiValueWork *valueWork = work->managedResource->valueWork;
+    s32 *delays = work->delays;
+    u8 respawn = work->head.respawn;
+    u32 count = work->head.count;
+    s32 life = work->head.life;
+    s32 spread = work->head.spread;
+    s32 fadeIn = work->head.fadeIn;
+    s32 fadeOut = work->head.fadeOut;
+    f32 out[4];
+    f32 fade;
+    s32 frame;
+    u32 i;
+
+    effMathGetSlotAt(slots, 0);
+    for (i = 0; i < count; i++) {
+        frame = *delays;
+        if (frame == 0) {
+            effMagatuhiBuildBezierControlPointsVU(work, i);
+        }
+        if (frame > 0 && frame <= life) {
+            effMathStepBezierSlot(slots, i, out);
+            if (fadeIn > frame) {
+                fade = (f32)frame / (f32)fadeIn;
+            } else if (life - frame <= fadeOut) {
+                fade = (f32)(life - frame) / (f32)fadeOut;
+            } else {
+                fade = 1.0f;
+            }
+            effMagatuhiSetValue(valueWork, i, ((u32)(fade * 127.0f) << 24) | 0x808080);
+            func_00191450(valueWork, i, out);
+        }
+        if (frame >= life && respawn) {
+            *delays = -(effMiscRand(D_003AA868) % spread);
+        } else {
+            (*delays)++;
+        }
+        delays++;
+    }
+    func_00190DE0(work->managedResource);
+}
 
 void effMagatuhiCopyHandlerRows(EffMagatuhiCallback *work, EffMagatuhiRowsSrc *src) {
     EffMagatuhiWideSecond *dst = effGetHandlerArg(work->effect);
