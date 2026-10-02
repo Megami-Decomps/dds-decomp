@@ -58,7 +58,7 @@ python tools/extract.py          # -> orig/dds1/SLUS_209.74, orig/dds2/SLUS_211.
 python configure.py              # split with splat, write build.ninja and objdiff.json
 ninja                            # build and verify every extracted version (or: ninja dds1)
 ninja dds1-scripts dds2-scripts  # assemble and verify the tracked script corpora
-ninja dds1-field-data dds2-field-data  # assemble and verify INF/WAP field data
+ninja dds1-field-data dds2-field-data  # assemble and verify INF/WAP/FLD2 field data
 ninja dds1-battle-data dds2-battle-data  # assemble and verify battle tables
 python3 tools/flw0.py view src/dds1/scripts/event/e670.bfasm  # readable script view
 ```
@@ -66,7 +66,8 @@ python3 tools/flw0.py view src/dds1/scripts/event/e670.bfasm  # readable script 
 See [`docs/flw0.md`](docs/flw0.md) for script source,
 [`docs/inf.md`](docs/inf.md) for interaction tables, and
 [`docs/wap.md`](docs/wap.md) for actor, elevator, door, and transition tables.
-See [`docs/battle-tables.md`](docs/battle-tables.md) for encounter and battle
+See [`docs/fld.md`](docs/fld.md) for relocatable FLD2 field resources and
+[`docs/battle-tables.md`](docs/battle-tables.md) for encounter and battle
 content tables.
 
 `ninja`'s last step runs `sha1sum --quiet -c` on each built ELF
@@ -112,7 +113,7 @@ config/<v>/name_sources.txt provenance of every curated name (evidence / inferre
 config/<v>/cflags.txt       per-file compiler options, with evidence
 src/<v>/<dir>/<unit>.c      C units; INCLUDE_ASM marks functions not decompiled yet
 src/<v>/scripts/            exact, editable source for decompiled game scripts
-src/<v>/data/field/         exact, editable source for field interaction tables
+src/<v>/data/field/         exact, editable source for field resources and interaction tables
 include/                    common.h, include_asm.h, fpu.h, macro.inc
 docs/CONTRIBUTING.md        how to decompile, verify, name and share a function
 docs/idioms.md              source shapes confirmed against retail codegen
