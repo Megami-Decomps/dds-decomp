@@ -630,7 +630,49 @@ void fldResetCampSceneEntries(CampScene *scene) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EC00);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025ED10);
+extern void fldCopyCameraSetting(void *setting);
+extern void fldUpdateCameraColorEffect(void *setting);
+
+void func_0025ED10(CampScene *scene, const s32 *colorSettings) {
+    s32 cameraSettings[0x54 / sizeof(s32)];
+    u8 *cameraColorA;
+    u8 *sourceColorA;
+    u8 *cameraColorB;
+    s32 sourceOffset;
+    s32 cameraOffset;
+    s32 i;
+
+    fldCopyCameraSetting(cameraSettings);
+    cameraSettings[0x20 / sizeof(s32)] = colorSettings[0x10 / sizeof(s32)];
+    cameraSettings[0x10 / sizeof(s32)] = colorSettings[0];
+    cameraSettings[0x14 / sizeof(s32)] = colorSettings[1];
+    cameraSettings[0x18 / sizeof(s32)] = colorSettings[2];
+    cameraSettings[0x1C / sizeof(s32)] = colorSettings[3];
+    cameraSettings[0x0C / sizeof(s32)] = colorSettings[0x14 / sizeof(s32)];
+    cameraColorA = (u8 *)cameraSettings + 8;
+    sourceColorA = (u8 *)colorSettings + 0x0C;
+    cameraColorB = (u8 *)cameraSettings + 0x0C;
+    sourceOffset = 0x20;
+    cameraOffset = 0x20;
+    /* Copy the three color rows into the camera setting's 0x10-byte slots. */
+    for (i = 2; i >= 0; i--) {
+        *(s32 *)(cameraColorA + cameraOffset) =
+            *(s32 *)(sourceColorA + sourceOffset);
+        *(s32 *)(cameraColorB + cameraOffset) =
+            *(s32 *)((u8 *)colorSettings + sourceOffset);
+        sourceOffset += 4;
+        cameraOffset += 0x10;
+    }
+    fldUpdateCameraColorEffect(cameraSettings);
+    if (colorSettings[0x0C / sizeof(s32)] == 0 &&
+        colorSettings[0x2C / sizeof(s32)] == 0 &&
+        colorSettings[0x30 / sizeof(s32)] == 0 &&
+        colorSettings[0x34 / sizeof(s32)] == 0) {
+        scene->sceneMode = 0;
+    } else {
+        scene->sceneMode = 1;
+    }
+}
 
 void func_0025EE00(CampScene *scene) {
     func_0025EC00();
