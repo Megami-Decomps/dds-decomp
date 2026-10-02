@@ -220,7 +220,34 @@ void mnuSetCommandPhase(MenuActionOwner *owner, u32 value) {
     owner->frames = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00297250);
+s32 func_00297250(MenuActionOwner *owner) {
+    switch (owner->mode) {
+    case 0:
+    case 14:
+        owner->frames = owner->frames + 1;
+        if ((f32)owner->frames > 10.0f) {
+            return 0;
+        }
+        return -1;
+    case 15:
+        owner->frames = owner->frames + 1;
+        if ((f32)owner->frames > 10.0f) {
+            return 1;
+        }
+        return -1;
+    case 1:
+        return 1;
+    case 2:
+        owner->frames = owner->frames + 1;
+        if ((f32)owner->frames > 10.0f) {
+            return 2;
+        }
+        return -1;
+    case 3:
+        return 3;
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00297320);
 
