@@ -54,11 +54,12 @@ extern f32 func_002FA060(f32);
 
 extern s32 kwlnTaskGetTaskByName(u32);
 
-typedef struct ShortPair2C {
-    u8 pad_0x00[0x2C]; // 0x00
-    s16 h2C;           // 0x2C
-    s16 h2E;           // 0x2E
-} ShortPair2C; // 0x30
+/* Grid prefix through the two margins used by the viewport-follow routine. */
+typedef struct SdfGridMarginPrefix {
+    u8 pad00[0x2C];    // 0x00
+    s16 columnMargin;  // 0x2C
+    s16 rowMargin;     // 0x2E
+} SdfGridMarginPrefix; // 0x30
 
 extern u32 func_002CB5F0(u32 *);
 
@@ -681,7 +682,7 @@ typedef struct TaskWork {
     char *primaryTaskName;
     char *secondaryTaskName;
     TaskList *list;
-    u32 firstItemHandle;
+    u32 firstItemHandle; /* Address of the next list node to visit, not an allocation handle. */
 } TaskWork;
 
 extern s32 sdfTaskWorkRunAllEntries(void);
@@ -815,18 +816,19 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB5F0);
 
 typedef struct SdfCallbackWork {
     u8 pad00[4];
-    u32 firstArg;                  /* 0x04 */
+    u32 key;                      /* 0x04 */
     u8 pad08[4];
     void (*destroy)(u32, u32);   /* 0x0C */
     u8 pad10[8];
-    u32 secondArg;                 /* 0x18 */
+    u32 initResult;               /* 0x18 */
 } SdfCallbackWork;
 
-void sdfDestroyCallbackWork(SdfCallbackWork *work) {
-    if (work != NULL) {
-        void (*destroy)(u32, u32) = work->destroy;
-        destroy(work->firstArg, work->secondArg);
-        sdfReleaseChipBlock(work);
+/* Pass the entry key and saved init result to its destructor, then release it. */
+void sdfDestroyCallbackWork(SdfCallbackWork *entry) {
+    if (entry != NULL) {
+        void (*destroy)(u32, u32) = entry->destroy;
+        destroy(entry->key, entry->initResult);
+        sdfReleaseChipBlock(entry);
     }
 }
 
@@ -834,18 +836,22 @@ void sdfCallbackWorkOnRemove(u32 unused, SdfCallbackWork *work) {
     sdfDestroyCallbackWork(work);
 }
 
+/* Low flag bits: 0 update, 1 callback, 2 initialize once, 15 pending removal.
+ * The high word selects active, suspended, or pending-activation dispatch modes. */
 typedef struct SdfTaskEntry {
     u32 flags;                   /* 0x00 */
-    s32 arg0;                    /* 0x04 */
+    s32 key;                     /* 0x04 */
     s32 (*init)(void);           /* 0x08 */
     u8 pad0C[4];
     s32 (*update)(s32, s32);     /* 0x10 */
     void (*callback)(s32, s32);  /* 0x14 */
-    s32 arg1;                    /* 0x18 */
+    s32 initResult;              /* 0x18 */
 } SdfTaskEntry;
 
 extern void *kwlnTaskGetUserValue(void);
 
+/* Visit one entry: initialize, remove if pending, otherwise update.
+ * An update result of -1 queues removal for its next visit. Returns 0 at pass end. */
 s32 sdfTaskWorkStepEntry(TaskWork *work) {
     TaskListNode *node = (TaskListNode *)work->firstItemHandle;
     SdfTaskEntry *entry;
@@ -860,18 +866,19 @@ s32 sdfTaskWorkStepEntry(TaskWork *work) {
     work->firstItemHandle = (u32)node->next;
     switch (flags & 0xFFFF0000) {
     case 0x100000:
+        /* DDS1 activates this pending mode in the update pass and falls through. */
         flags = entry->flags = (flags & 0xFFEFFFFF) | 0x10000;
     case 0x10000:
         if (flags & 4) {
-            entry->arg1 = entry->init();
+            entry->initResult = entry->init();
             flags = entry->flags &= ~4;
         }
         if (flags & 0x8000) {
-            sdfRemoveTaskItem(work, entry->arg0);
+            sdfRemoveTaskItem(work, entry->key);
             return 1;
         }
         if (flags & 1) {
-            if (entry->update(entry->arg0, entry->arg1) == -1) {
+            if (entry->update(entry->key, entry->initResult) == -1) {
                 entry->flags |= 0x8000;
             }
         }
@@ -882,7 +889,7 @@ s32 sdfTaskWorkStepEntry(TaskWork *work) {
     return 1;
 }
 
-/* Advance the work's cursor one node and run the node's callback when flagged. */
+/* Run one entry's callback phase; return 0 after resetting the cursor at pass end. */
 s32 sdfTaskWorkStep(TaskWork *work) {
     TaskListNode *node = (TaskListNode *)work->firstItemHandle;
     SdfTaskEntry *entry;
@@ -898,12 +905,13 @@ s32 sdfTaskWorkStep(TaskWork *work) {
     switch (flags & 0xFFFF0000) {
     case 0x10000:
         if (flags & 2) {
-            entry->callback(entry->arg0, entry->arg1);
+            entry->callback(entry->key, entry->initResult);
         }
         break;
     case 0x20000:
         break;
     case 0x100000:
+        /* Pending-mode activation belongs to the update pass in DDS1. */
         break;
     }
     return 1;
@@ -940,9 +948,10 @@ void func_002CB9B8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB9C0);
 
-void sdfSetShortPairValues(ShortPair2C *p, s32 a, s32 b) {
-    p->h2C = a;
-    p->h2E = b;
+/* Set horizontal/vertical cursor margins without changing the viewport itself. */
+void sdfSetShortPairValues(SdfGridMarginPrefix *grid, s32 columnMargin, s32 rowMargin) {
+    grid->columnMargin = columnMargin;
+    grid->rowMargin = rowMargin;
 }
 
 void sdfDestroyGridWork(u8 *work) {
@@ -991,10 +1000,11 @@ SdfGridCell *sdfGridGetCell(SdfGrid *grid, s32 column, s32 row) {
     return &grid->cells[cellIndex];
 }
 
-void sdfGridGetCursorCoordinates(SdfGrid *grid, u32 *mod, u32 *div) {
+/* Return the cursor's zero-based column and row; the grid width must be nonzero. */
+void sdfGridGetCursorCoordinates(SdfGrid *grid, u32 *column, u32 *row) {
     SdfGridCell *cell = grid->cursor;
-    *mod = cell->index % grid->width;
-    *div = cell->index / grid->width;
+    *column = cell->index % grid->width;
+    *row = cell->index / grid->width;
 }
 
 u32 sdfGridGetCellValue(SdfGrid *grid, s32 column, s32 row) {
@@ -1111,7 +1121,8 @@ SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 column, u32 row) {
     return cell;
 }
 
-void sdfGridDrawVisibleCells(s32 x, s32 y, s32 layer, SdfGrid *grid, s32 context) {
+/* Draw the viewport's rectangular cell range relative to the supplied origin. */
+void sdfGridDrawVisibleCells(s32 originX, s32 originY, s32 layer, SdfGrid *grid, s32 drawContext) {
     SdfGridCell *cell = grid->viewportOrigin;
     s32 firstRow = cell->index / grid->width;
     s32 firstColumn = cell->index % grid->width;
@@ -1122,31 +1133,32 @@ void sdfGridDrawVisibleCells(s32 x, s32 y, s32 layer, SdfGrid *grid, s32 context
     for (row = firstRow; row < endRow; row++) {
         cell = grid->cells + row * grid->width + firstColumn;
         for (column = firstColumn; column < firstColumn + grid->visibleColumns; column++) {
-            grid->drawCell(x + (column - firstColumn) * grid->cellWidth,
-                           y + (row - firstRow) * grid->cellHeight,
-                           layer, grid, cell, context);
+            grid->drawCell(originX + (column - firstColumn) * grid->cellWidth,
+                           originY + (row - firstRow) * grid->cellHeight,
+                           layer, grid, cell, drawContext);
             cell++;
         }
     }
 }
 
+/* Restore row-major cell indices and release each nonzero cell value. */
 void sdfGridReleaseAllCells(SdfGrid *grid) {
-    u32 i = 0;
-    SdfGridCell *cells = grid->cells;
+    u32 cellIndex = 0;
+    SdfGridCell *firstCell = grid->cells;
     SdfGridCell *cell;
 
     if (grid->cellCount != 0) {
-        cell = cells;
+        cell = firstCell;
         do {
-            u32 value = cell->value;
-            cell->index = i;
-            if (value != 0) {
-                grid->releaseCell(i, value);
+            u32 cellValue = cell->value;
+            cell->index = cellIndex;
+            if (cellValue != 0) {
+                grid->releaseCell(cellIndex, cellValue);
                 cell->value = 0;
             }
-            i++;
+            cellIndex++;
             cell++;
-        } while (i < grid->cellCount);
+        } while (cellIndex < grid->cellCount);
     }
 }
 
