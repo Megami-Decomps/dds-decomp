@@ -1227,6 +1227,7 @@
 0x00162338	effBattleMiscDirectionTo	inferred	normalized (muzzle|effect pos - queried pos) [names_M61_EffVu.tsv]
 0x001623C0	effBattleMiscBuildBasis	inferred	4x4 basis: look-at or table-driven rotation [names_M61_EffVu.tsv]
 0x001624B8	effBattleMiscGetTableEntry	inferred	Returns the indexed word in the battle-misc table.
+0x00162808	effBattleApplyUnitRgbKeyframe	inferred	Applies the command RGB transition at its start keyframe and restores the unit base color at its end keyframe
 0x00162980	effParamWorkCreate	inferred	allocs 8-byte work, stores kind id, builds data through the D_00353710 create slot
 0x001629F0	effDispatchParameterDataAndFreeWork	inferred	confidence=high; src/dds1/game/code_001624D0.c:func_001629F0; Dispatches the work-selected operation on its parameter data, then releases the work allocation. [names_qp9.tsv]
 0x00162A70	effParamWorkDuplicate	inferred	allocs a new work copying the kind id, rebuilds data through the D_0035371C clone slot
@@ -3160,6 +3161,7 @@
 0x00221CB8	evtUnitSetValueAndFlag	inferred	Byte-identical dds2 twin 0x0023C828; Writes a unit value at offset 0x6c and sets the 0x20000 flag. [names_conflicts.tsv]
 0x00221CD0	evtClearUnitValueChangeFlag	inferred	Clears the unit's value-change bit before updating the unit.
 0x00221D98	evtSetUnitNormalizedDirection	inferred	Normalizes VU direction into unit vector, copies another vector, and adjusts unit flags. [names_reviewed6.tsv]
+0x00221E08	evtSetUnitRgbTransition	inferred	Updates the evt-unit RGB transition counters and applies or queues the low 24-bit model color
 0x00221FD8	evtTestUnitStatusFlags	inferred	Tests whether any of the unit's 0x7800 flag bits are set.
 0x00221FE8	evtSetUnitStatusFlags	inferred	Sets unit flag bits 0x300.
 0x00221FF8	evtConfigureUnitTransition	inferred	Clears transition flags for zero or initializes direction and transition flags otherwise. [names_reviewed6.tsv]
