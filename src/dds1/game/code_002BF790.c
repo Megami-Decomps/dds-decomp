@@ -57,7 +57,7 @@ typedef struct GridEntryOwner {
     u8 pad00[0x10];
     u8 *quantizedEntries; /* 0x10: 0x80-byte entries */
     u8 pad14[4];
-    u8 *records;          /* 0x18: 0xA0-byte entries */
+    u8 *renderEntries;    /* 0x18: 0xA0-byte entries */
     u8 pad1C[0xC];
     s32 defaultValue;     /* 0x28 */
 } GridEntryOwner;
@@ -79,9 +79,10 @@ extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfInitPacketList(s32);
 
-void itfDrawGridWithResolvedSlot(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
-    s32 entry = effGetSlotWorkOrOverride(e, f);
-    func_002BF400(a, b, c, d, e, f, entry, g);
+/* Resolve the indexed render entry before applying position, depth, and draw flags. */
+void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags, s32 object, s32 index, s32 surfaceIndex) {
+    s32 renderEntry = effGetSlotWorkOrOverride(object, index);
+    func_002BF400(offsetX, offsetY, z, drawFlags, object, index, renderEntry, surfaceIndex);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF828);
@@ -118,7 +119,7 @@ void itfSetGridEntryQuantizedAndRefresh(u8 *object, s32 index, s32 x, s32 y, s32
 void itfGridSetQuantizedBounds(u8 *object, s32 index, s32 x, s32 y,
                    s32 width, s32 height) {
     GridQuantizedEntry *entry = (GridQuantizedEntry *)(((GridEntryOwner *)object)->quantizedEntries + index * 0x80);
-    u32 *destination = (u32 *)(((GridEntryOwner *)object)->records + index * 0xA0 + 0x6C);
+    u32 *destination = (u32 *)(((GridEntryOwner *)object)->renderEntries + index * 0xA0 + 0x6C);
     u32 *source;
     s32 remaining = 3;
     entry->x = x >> 4;
@@ -131,8 +132,8 @@ void itfGridSetQuantizedBounds(u8 *object, s32 index, s32 x, s32 y,
     } while (--remaining >= 0);
 }
 
-void itfGridSetBounds(s32 a, s32 b, s32 x, s32 y, s32 width, s32 height) {
-    GridWidget *widget = (GridWidget *)effGetSlotWorkOrOverride(a, b);
+void itfGridSetBounds(s32 object, s32 index, s32 x, s32 y, s32 width, s32 height) {
+    GridWidget *widget = (GridWidget *)effGetSlotWorkOrOverride(object, index);
     widget->x = x;
     widget->y = y;
     widget->width = width;
@@ -144,7 +145,7 @@ void itfGridCopyEntryQuad(s32 owner, s32 index) {
     s32 remaining;
 
     remaining = 3;
-    destination = (u32 *)(index * 0xa0 + (s32)((GridEntryOwner *)owner)->records + 0x14);
+    destination = (u32 *)(index * 0xa0 + (s32)((GridEntryOwner *)owner)->renderEntries + 0x14);
     do {
         remaining = remaining - 1;
         *destination = destination[0x1c];
@@ -459,12 +460,12 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0340);
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C04C8);
 
-/* Unpack four 8-bit channels into the low and high halves of two 64-bit words. */
+/* Unpack engine RGBA order into GS packed R/G and B/A word pairs. */
 void itfGridUnpackColorChannels(u64 *channels, u32 color) {
-    u64 green;
+    u64 blueBits;
     channels[0] = (color >> 24) | ((u64)((color >> 16) & 0xFF) << 32);
-    green = color & 0xFF00;
-    channels[1] = (green >> 8) | ((u64)(color & 0xFF) << 32);
+    blueBits = color & 0xFF00;
+    channels[1] = (blueBits >> 8) | ((u64)(color & 0xFF) << 32);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0628);
@@ -590,26 +591,28 @@ void uiFillQuadColorWords(UiQuadWords *quad, u32 value) {
     quad->unk00[3] = value;
 }
 
-void uiDrawUniformRgbRange(u32 a, u32 b, u32 c, u32 value, u32 e, u32 f, u32 g, u32 h) {
-    u32 rgb[3] = {value, value, value};
-    func_002C0C20(a, b, c, rgb, e, f, g, h);
+/* Draw a triangle with the same packed color at all three vertices. */
+void uiDrawUniformRgbRange(u32 xCoordinates, u32 yCoordinates, u32 z, u32 color, u32 surfaceIndex, u32 extraA, u32 extraB, u32 extraC) {
+    u32 vertexColors[3] = {color, color, color};
+    func_002C0C20(xCoordinates, yCoordinates, z, vertexColors, surfaceIndex, extraA, extraB, extraC);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0C20);
 
-void uiDrawUniformRgbaRange(u32 a, u32 b, u32 c, u32 d, u32 e, u32 value, u32 g, u32 h) {
-    u32 rgba[4] = {value, value, value, value};
-    func_002C0DF8(a, b, c, d, e, rgba, g, h);
+/* Draw a rectangle as a four-vertex triangle strip with one packed color. */
+void uiDrawUniformRgbaRange(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 gsContext, u32 surfaceIndex) {
+    u32 vertexColors[4] = {color, color, color, color};
+    func_002C0DF8(x, y, z, width, height, vertexColors, gsContext, surfaceIndex);
 }
 
-void uiDrawUniformColorRect(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g) {
-    uiDrawUniformRgbaRange(a, b, c, d, e, f, 0, g);
+void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex) {
+    uiDrawUniformRgbaRange(x, y, z, width, height, color, 0, surfaceIndex);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0DF8);
 
-void uiDrawGradientColorRect(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g) {
-    func_002C0DF8(a, b, c, d, e, f, 0, g);
+void uiDrawGradientColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 vertexColors, u32 surfaceIndex) {
+    func_002C0DF8(x, y, z, width, height, vertexColors, 0, surfaceIndex);
 }
 
 /* Draw four frame edges; the bottom edge extends 16 units beyond the right side. */
@@ -620,9 +623,9 @@ void uiDrawFrameEdges(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32
     uiDrawUniformColorLine(x, y + height, z, x + width + 0x10, y + height, z, color, context);
 }
 
-void uiDrawUniformColorLine(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 value, u32 context) {
-    u32 range[2] = {value, value};
-    func_002C10C0(a, b, c, d, e, f, range, context);
+void uiDrawUniformColorLine(u32 startX, u32 startY, u32 startZ, u32 endX, u32 endY, u32 endZ, u32 color, u32 surfaceIndex) {
+    u32 vertexColors[2] = {color, color};
+    func_002C10C0(startX, startY, startZ, endX, endY, endZ, vertexColors, surfaceIndex);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C10C0);
@@ -676,16 +679,16 @@ void uiDrawSurfaceAtNearDepth(u32 surface) {
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xe00, 0, surface);
 }
 
-/* Scale the top three bytes of a packed color by scale / 256; the low byte is kept. */
-u32 uiScaleColorRgb(u32 color, u32 scale) {
-    u32 a = color >> 24;
-    u32 b = (color >> 16) & 0xFF;
-    u32 c = (color & 0xFF00) >> 8;
-    u32 d = color & 0xFF;
-    a = (a * scale) >> 8;
-    b = (b * scale) >> 8;
-    c = (c * scale) >> 8;
-    return (a << 24) | (b << 16) | (c << 8) | d;
+/* Scale packed RGB by a Q8 factor, preserving the low alpha byte. */
+u32 uiScaleColorRgb(u32 color, u32 scaleFactor) {
+    u32 red = color >> 24;
+    u32 green = (color >> 16) & 0xFF;
+    u32 blue = (color & 0xFF00) >> 8;
+    u32 alpha = color & 0xFF;
+    red = (red * scaleFactor) >> 8;
+    green = (green * scaleFactor) >> 8;
+    blue = (blue * scaleFactor) >> 8;
+    return (red << 24) | (green << 16) | (blue << 8) | alpha;
 }
 
 /* Blend two packed 8-bit-channel colors: weight t (mirrored above 0x100) for the first, 0x100 - t for the second. */
@@ -729,34 +732,36 @@ s32 itfActivateGridTextWidget(s32 widget) {
     return 1;
 }
 
-s32 itfSetWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
-    s32 child;
-    if (object == 0) {
+/* Apply parent flags and enable bit 1 on the linked child widget, if present. */
+s32 itfSetWidgetFlagsAndActivateChild(u8 *widget, u32 flags) {
+    s32 childLink;
+    if (widget == 0) {
         return 0;
     }
-    ((GridTextWidget *)object)->flags = (((GridTextWidget *)object)->flags & ~2) | flags;
-    child = (s32)((GridTextWidget *)object)->children;
-    if (child != 0) {
-        s32 node = (s32)((GridChildLink *)child)->child;
-        if (node != 0) {
-            ((GridTextWidget *)node)->flags |= 2;
+    ((GridTextWidget *)widget)->flags = (((GridTextWidget *)widget)->flags & ~2) | flags;
+    childLink = (s32)((GridTextWidget *)widget)->children;
+    if (childLink != 0) {
+        s32 childWidget = (s32)((GridChildLink *)childLink)->child;
+        if (childWidget != 0) {
+            ((GridTextWidget *)childWidget)->flags |= 2;
         }
     }
     return 1;
 }
 
+/* Own a NUL-terminated text copy; store X scaled by 16 and Y scaled by 8. */
 GridTextWidget *itfCreateGridTextWidget(const char *text, s32 x, s32 y, s32 columns, s32 rows,
                                u32 reference) {
     GridTextWidget *widget = (GridTextWidget *)sdfAllocSizeClassBlock(0x40);
-    u32 length;
-    char *copy;
+    u32 textBytes;
+    char *textCopy;
 
     memset(widget, 0, 0x40);
-    length = strlen(text) + 1;
-    copy = (char *)sdfAllocSizeClassBlock(length);
-    widget->textLength = length;
-    widget->text = copy;
-    memcpy(copy, text, length);
+    textBytes = strlen(text) + 1;
+    textCopy = (char *)sdfAllocSizeClassBlock(textBytes);
+    widget->textLength = textBytes;
+    widget->text = textCopy;
+    memcpy(textCopy, text, textBytes);
     widget->unk10 = NULL;
     widget->x = x << 4;
     widget->y = y << 3;
@@ -773,16 +778,17 @@ GridTextWidget *itfCreateGridTextWidget(const char *text, s32 x, s32 y, s32 colu
     return widget;
 }
 
-void itfSetGridDimensions(GridTextWidget *work, s32 columns, s32 rows) {
+/* A zero column or row count leaves that dimension unchanged. */
+void itfSetGridDimensions(GridTextWidget *widget, s32 columns, s32 rows) {
     s32 columnWidth = columns * 12 + 6;
     s32 rowHeight = rows * 14 + 6;
 
     if (columns != 0) {
-        work->width = columnWidth;
+        widget->width = columnWidth;
     }
     if (rows != 0) {
-        work->height = rowHeight;
-        work->rows = rows;
+        widget->height = rowHeight;
+        widget->rows = rows;
     }
 }
 
@@ -800,19 +806,19 @@ u32 itfDestroyGridTextWidget(GridTextWidget *widget) {
 typedef struct GridIndexedNode {
     u8 pad00[6];
     u16 key;                     /* 0x06 */
-    struct GridScrollBounds *bounds; /* 0x08 */
+    struct GridScrollRange *range; /* 0x08 */
     f32 position;                /* 0x0C */
     u8 pad10[0xC];
     struct GridIndexedNode *next; /* 0x1C */
     struct GridTextWidget *child; /* 0x20 */
 } GridIndexedNode;
 
-typedef struct GridScrollBounds {
+typedef struct GridScrollRange {
     u8 pad00[4];
-    f32 start; /* 0x04 */
-    f32 end;   /* 0x08 */
+    f32 minimum; /* 0x04 */
+    f32 maximum; /* 0x08 */
     f32 step;  /* 0x0C */
-} GridScrollBounds;
+} GridScrollRange;
 
 typedef struct GridScrollControl {
     u8 pad00[6];
@@ -827,36 +833,38 @@ typedef struct GridScrollControl {
     s32 keyOffset;          /* 0x3C */
 } GridScrollControl;
 
+/* Destroy linked child widgets recursively before releasing the parent widget. */
 u32 itfDestroyGridTextWidgetTree(GridTextWidget *widget) {
-    u32 list;
+    u32 childLink;
 
     sdfReleaseChipBlock(widget->text);
-    list = (u32)widget->children;
-    if (list != 0) {
+    childLink = (u32)widget->children;
+    if (childLink != 0) {
         do {
-            u32 child = (u32)((GridIndexedNode *)list)->child;
-            if (child != 0) {
-                itfDestroyGridTextWidgetTree((GridTextWidget *)child);
+            u32 childWidget = (u32)((GridIndexedNode *)childLink)->child;
+            if (childWidget != 0) {
+                itfDestroyGridTextWidgetTree((GridTextWidget *)childWidget);
             }
-            list = func_002C1B30(widget);
-        } while (list != 0);
+            childLink = func_002C1B30(widget);
+        } while (childLink != 0);
     }
     sdfReleaseChipBlock(widget);
     return 1;
 }
 
-void itfExpandWidgetColumnWidth(s32 columns, GridTextWidget *work) {
-    s32 flags = work->flags;
-    s32 width;
+/* Grow only; numbered prefixes reserve four columns, plus two for hexadecimal. */
+void itfExpandWidgetColumnWidth(s32 columns, GridTextWidget *widget) {
+    s32 flags = widget->flags;
+    s32 requiredWidth;
     if (flags & 0x100) {
         columns += 4;
         if (flags & 0x200) {
             columns += 2;
         }
     }
-    width = columns * 12 + 6;
-    if (work->width < width) {
-        work->width = width;
+    requiredWidth = columns * 12 + 6;
+    if (widget->width < requiredWidth) {
+        widget->width = requiredWidth;
     }
 }
 
@@ -898,43 +906,45 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1A30);
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1B30);
 
+/* Replace the owned text and grow the optional parent column to fit its byte length. */
 void itfReplaceGridTextAndExpandColumn(GridTextWidget *widget, u8 *node, const char *text) {
-    s32 length;
-    s32 allocation;
-    char *copy;
+    s32 textLength;
+    s32 textBytes;
+    char *textCopy;
 
     sdfReleaseChipBlock(((GridTextWidget *)node)->text);
-    length = strlen(text);
-    allocation = length + 1;
-    copy = (char *)sdfAllocSizeClassBlock(allocation);
-    ((GridTextWidget *)node)->textLength = allocation;
-    ((GridTextWidget *)node)->text = copy;
-    memcpy(copy, text, allocation);
+    textLength = strlen(text);
+    textBytes = textLength + 1;
+    textCopy = (char *)sdfAllocSizeClassBlock(textBytes);
+    ((GridTextWidget *)node)->textLength = textBytes;
+    ((GridTextWidget *)node)->text = textCopy;
+    memcpy(textCopy, text, textBytes);
     if (widget != NULL) {
-        itfExpandWidgetColumnWidth(length, widget);
+        itfExpandWidgetColumnWidth(textLength, widget);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1D78);
 
+/* Advance by at least one configured step; crossing the maximum wraps to minimum. */
 void itfAdvanceGridScrollPosition(u32 widget, u32 key, s32 steps) {
-    s32 bounds;
-    s32 node;
+    s32 range;
+    s32 entry;
     float *position;
-    float increment;
-    float previousPosition;
+    float delta;
+    float previous;
 
-    node = itfFindGridNodeByKey(key, widget);
-    bounds = (s32)((GridIndexedNode *)node)->bounds;
-    position = &((GridIndexedNode *)node)->position;
-    increment = ((GridScrollBounds *)bounds)->step;
+    entry = itfFindGridNodeByKey(key, widget);
+    range = (s32)((GridIndexedNode *)entry)->range;
+    position = &((GridIndexedNode *)entry)->position;
+    delta = ((GridScrollRange *)range)->step;
     if (1 < steps) {
-        increment = increment * (float)(s32)steps;
+        delta = delta * (float)(s32)steps;
     }
-    previousPosition = *position;
-    *position = previousPosition + increment;
-    if (((GridScrollBounds *)bounds)->end < previousPosition + increment) {
-        *position = ((GridScrollBounds *)bounds)->start;
+    previous = *position;
+    *position = previous + delta;
+    if (((GridScrollRange *)range)->maximum < previous + delta) {
+        *position = ((GridScrollRange *)range)->minimum;
     }
 }
 
@@ -949,24 +959,25 @@ void itfAdvanceSelectedGridScroll(u32 widget, u32 steps) {
     }
 }
 
+/* Reverse by at least one configured step; crossing the minimum wraps to maximum. */
 void itfReverseGridScrollPosition(u32 widget, u32 key, s32 steps) {
-    s32 bounds;
-    s32 node;
+    s32 range;
+    s32 entry;
     float *position;
-    float increment;
-    float previousPosition;
+    float delta;
+    float previous;
 
-    node = itfFindGridNodeByKey(key, widget);
-    bounds = (s32)((GridIndexedNode *)node)->bounds;
-    position = &((GridIndexedNode *)node)->position;
-    increment = ((GridScrollBounds *)bounds)->step;
+    entry = itfFindGridNodeByKey(key, widget);
+    range = (s32)((GridIndexedNode *)entry)->range;
+    position = &((GridIndexedNode *)entry)->position;
+    delta = ((GridScrollRange *)range)->step;
     if (1 < steps) {
-        increment = increment * (float)(s32)steps;
+        delta = delta * (float)(s32)steps;
     }
-    previousPosition = *position;
-    *position = previousPosition - increment;
-    if (previousPosition - increment < ((GridScrollBounds *)bounds)->start) {
-        *position = ((GridScrollBounds *)bounds)->end;
+    previous = *position;
+    *position = previous - delta;
+    if (previous - delta < ((GridScrollRange *)range)->minimum) {
+        *position = ((GridScrollRange *)range)->maximum;
     }
 }
 
@@ -1109,3 +1120,4 @@ s32 sdfGridSeekLastNode(s32 widget) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_002BF790", fldLocalMapTaskName);
+
