@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 
 typedef struct EffectSource {
     u32 type;
@@ -13,6 +14,19 @@ typedef struct EffectHandler {
 
 extern EffectHandler D_0034DE40[];
 extern void *func_002CFEB8(s32);
+extern s32 D_003BD7F4;
+extern BillObj *effBillResourceOwners[];
+extern BillObj *billCreateFromResource(s32 kind, s32 resource);
+extern void billDispatchByKind(BillObj *billboard);
+
+typedef struct EffBillResourceInit {
+    s32 resource;
+    s16 kind;
+    s16 pad06;
+    f32 scale;
+} EffBillResourceInit;
+
+extern EffBillResourceInit effBillResourceInitTable[];
 
 void *effCloneSourceWithTypeHandler(EffectSource *source) {
     EffectSource *copy = (EffectSource *)func_002CFEB8(0x10);
@@ -26,11 +40,22 @@ void *effCloneSourceWithTypeHandler(EffectSource *source) {
 
 INCLUDE_ASM(const s32, "game/code_0014FEB0", func_0014FF28);
 
-INCLUDE_ASM(const s32, "game/code_0014FEB0", func_00150040);
+void effInitializeBillResourceOwners(void) {
+    u32 i;
+    BillObj *billboard;
+    BillChildPayload *payload;
 
-extern s32 D_003BD7F4;
-extern u32 effBillResourceOwners[];
-extern void billDispatchByKind(u32);
+    D_003BD7F4 = 0;
+    i = 0;
+    do {
+        billboard = billCreateFromResource(effBillResourceInitTable[i].kind, effBillResourceInitTable[i].resource);
+        effBillResourceOwners[i] = billboard;
+        payload = (BillChildPayload *)billboard->entryList;
+        payload->halfWidth *= effBillResourceInitTable[i].scale;
+        payload->halfHeight *= effBillResourceInitTable[i].scale;
+        i++;
+    } while (i < 15);
+}
 
 void effBillDispatchAll(void) {
     u32 i;
