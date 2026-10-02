@@ -66,7 +66,10 @@ CC1_DEFINES = (
 CC1_FLAGS = "-quiet -O2"
 INCLUDES = "-Iinclude -Isrc"
 AS_FLAGS = "-EL -march=r5900 -mabi=eabi -G8 -Iinclude"
-EE_AS_FLAGS = "-EL -G8 -Iinclude"
+# Retail was assembled with -g: GNU as then leaves `.set reorder` code where cc1
+# put it, so every delay slot cc1 did not fill keeps its `nop` (soft-double and
+# libm call argument moves, mtc1/lwc1/cvt dependents, indexed la/memory macros).
+EE_AS_FLAGS = "-EL -G8 -g -Iinclude"
 
 
 def i386_prefix() -> str:
@@ -300,7 +303,6 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         "cc",
         f"cpp -MM -MG -MF $out.d -MT $out -nostdinc {INCLUDES} $cdefs $in && "
         f"{prefix}{CC1} {CC1_DEFINES} {INCLUDES} $cdefs {CC1_FLAGS} $cflags $in -o $out.s && "
-        f"{sys.executable} tools/as_coproc_delay.py $out.s $out.s && "
         f"{prefix}{EE_AS} {EE_AS_FLAGS} -o $out $out.s",
         description="cc $in",
         depfile="$out.d",
@@ -311,7 +313,6 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         f"mkdir -p $outdir && "
         f"cpp -MM -MG -MF $out.d -MT $out -nostdinc {INCLUDES} $cdefs $in && "
         f"{prefix}{CC1} {CC1_DEFINES} {INCLUDES} $cdefs {CC1_FLAGS} $cflags -G0 $in -o $out.s && "
-        f"{sys.executable} tools/as_coproc_delay.py $out.s $out.s && "
         f"{prefix}{EE_AS} {EE_AS_FLAGS} -G0 -o $out $out.s",
         description="dev cc $in",
         depfile="$out.d",
@@ -419,8 +420,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     eeasm.append(str(out))
                 cdefs = f"'-DASM_ROOT=\"build/eeasm/{nonmatchings}/\"' -DVERSION_{version.upper()}"
                 flags = unit_cflags(version).get(src.relative_to(Path("src") / version).with_suffix("").as_posix(), "")
-                n.build(str(obj), "cc", str(src), implicit=eeasm + ["include/macro.inc", f"config/{version}/cflags.txt",
-                                                                      "tools/as_coproc_delay.py"],
+                n.build(str(obj), "cc", str(src), implicit=eeasm + ["include/macro.inc", f"config/{version}/cflags.txt"],
                         variables={"cdefs": cdefs, "cflags": flags})
                 # objdiff base: the same unit without its INCLUDE_ASM fallbacks, so only C counts.
                 base = Path("build") / version / "base" / src.with_suffix(".o")
@@ -538,7 +538,6 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     implicit=[
                         "include/macro.inc",
                         f"config/{version}/cflags.txt",
-                        "tools/as_coproc_delay.py",
                         *eeasm,
                     ],
                     variables={
@@ -567,7 +566,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     obj,
                     "dev_cc",
                     source,
-                    implicit=["include/macro.inc", "tools/as_coproc_delay.py"],
+                    implicit=["include/macro.inc"],
                     variables={
                         "cdefs": (
                             f"'-DASM_ROOT=\"build/eeasm/asm/{version}/nonmatchings/\"' "
