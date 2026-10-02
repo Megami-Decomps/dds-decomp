@@ -17,11 +17,11 @@ void *sdfTexCreateResourcePacket(SdfTex *arg0, s32 arg1);
 
 void *func_00328D68(s32 arg0);
 
-void *sdfTexGetPrimaryResourceWord();
+u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 
-void *sdfTexGetSecondaryResourceWord(void *arg0);
+u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
 
-void func_0032BBF8(void *arg0, s32 arg1, s32 arg2, void *arg3, s32 arg4, void *arg5, s32 arg6, s64 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
+void func_0032BBF8(void *arg0, s32 arg1, s32 arg2, u32 arg3, s32 arg4, u32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
 
 extern u8 sdfTextureReleaseQueue;
 
@@ -113,8 +113,8 @@ INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BBF8);
 /* Allocate and populate one of the two resource packet variants. */
 void *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
     void *packet;
-    void *primary;
-    void *secondary;
+    u32 primary;
+    u32 secondary;
 
     packet = func_00328D68(0x40);
     primary = sdfTexGetPrimaryResourceWord(texture);
@@ -133,7 +133,30 @@ void sdfTexCreateSecondPacket(SdfTex *texture) {
     texture->secondaryBuffer = sdfTexCreateResourcePacket(texture, 1);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BE60);
+/* Rebuild existing texture packets while preserving each packet's TEX0 TCC bit. */
+void func_0032BE60(SdfTex *texture) {
+    SdfTexBuf *buffer;
+
+    buffer = texture->primaryBuffer;
+    if (buffer != NULL) {
+        func_0032BBF8(buffer, texture->width, texture->height,
+                     sdfTexGetPrimaryResourceWord(texture), texture->pixelFormat,
+                     sdfTexGetSecondaryResourceWord(texture), texture->clutFormat,
+                     (buffer->textureState >> 34) & 1,
+                     texture->maxMipLevel, texture->lodParameters,
+                     texture->clampMode, 0);
+    }
+
+    buffer = texture->secondaryBuffer;
+    if (buffer != NULL) {
+        func_0032BBF8(buffer, texture->width, texture->height,
+                     sdfTexGetPrimaryResourceWord(texture), texture->pixelFormat,
+                     sdfTexGetSecondaryResourceWord(texture), texture->clutFormat,
+                     (buffer->textureState >> 34) & 1,
+                     texture->maxMipLevel, texture->lodParameters,
+                     texture->clampMode, 1);
+    }
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BF78);
 
