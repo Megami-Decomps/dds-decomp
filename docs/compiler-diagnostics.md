@@ -53,6 +53,8 @@ python3 tools/ee_gcc_probe.py /tmp/code_001A04C0.c \
 specific evidence-driven flag test. `--replace OLD=NEW` performs a controlled
 token rename in a temporary input and records the alias in the manifest; it
 is intended for translation-unit context experiments, not bulk source search.
+For scheduler decision evidence, pass `--cflag=-fsched-verbose=5` (the equals
+form keeps the leading dash unambiguous to the command-line parser).
 
 ## Locate the first divergence
 
@@ -142,6 +144,35 @@ Run the focused tests with:
 ```sh
 python3 tools/test_ee_gcc_diagnostics.py
 ```
+
+## Explain a contested scheduler choice
+
+When the first difference is sched1 or sched2, recapture with
+`--cflag=-fsched-verbose=5` and summarize the selected instruction and every
+instruction that was ready at the same clock:
+
+```sh
+python3 tools/ee_gcc_schedules.py /tmp/snd-candidate \
+  --function sndCreateSystemEffect --stage sched2 \
+  --json /tmp/snd-schedule.json
+```
+
+The report attaches each ready UID to the priority, cost, incoming dependency
+count, forward-dependent count, functional unit, and printed table order in
+GCC's own scheduler report. It also prints a clearly labeled heuristic showing
+how those visible fields narrow the choice. This is not the comparator order:
+the old scheduler considers inputs the text table does not expose, including
+the previous instruction's dependency class and, before reload, register
+pressure. The report flags choices that the printed-field heuristic does not
+explain, without asserting which unprinted input caused the selection.
+
+This is enough to distinguish two useful outcomes. If the desired order has a
+truthful dependency, lifetime, or register-use fact that changes the ready set
+or a leading metric, test that one fact. If independent instructions remain
+simultaneously ready and differ only in compiler tie-breaking, park the source
+search rather than adding a fake dependency. `ee_gcc_why.py` includes these
+paired summaries automatically when pass 17 or 25 is the first divergence; without
+verbose records it reports the missing evidence and tells you to recapture.
 
 ## Explain global allocation
 

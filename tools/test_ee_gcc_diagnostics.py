@@ -24,6 +24,7 @@ probe = load("ee_gcc_probe", ROOT / "tools/ee_gcc_probe.py")
 compare = load("ee_gcc_compare", ROOT / "tools/ee_gcc_compare.py")
 delay_slots = load("ee_gcc_delay_slots", ROOT / "tools/ee_gcc_delay_slots.py")
 allocations = load("ee_gcc_allocations", ROOT / "tools/ee_gcc_allocations.py")
+schedules = load("ee_gcc_schedules", ROOT / "tools/ee_gcc_schedules.py")
 why = load("ee_gcc_why", ROOT / "tools/ee_gcc_why.py")
 
 
@@ -283,6 +284,117 @@ Reloads for insn # 40
         self.assertEqual({"84": 2}, attempt["hard_register_widths"])
 
 
+class ScheduleTests(unittest.TestCase):
+    SAMPLE = """;; Function wanted
+;;   -- basic block 0 from 1 to 9 -- after reload
+;;      insn  code    bb   dep  prio  cost   blockage units
+;;      ----  ----    --   ---  ----  ----   -------- -----
+;;       35   148     0     3    10     2    0 -  0   memory : 91 85 60 40
+;;       37   148     0     3    10     2    0 -  0   memory : 91 88 85 61 40
+;;       39   148     0     3    10     2    0 -  0   memory : 91 88 85 61 40
+;; Ready list (t =  4):    35  39  37
+;; --> scheduling insn <<<37>>> on unit memory
+;; Ready list (t =  5):    35  39
+;; --> scheduling insn <<<39>>> on unit memory
+(insn 37)
+"""
+
+    def test_contested_ready_set_and_visible_narrowing(self):
+        report = schedules.parse_dump(self.SAMPLE, "wanted")[0]
+        self.assertEqual(2, report["contested_count"])
+        first = report["blocks"][0]["contested"][0]
+        self.assertEqual(37, first["selected_uid"])
+        self.assertEqual([35, 39, 37], first["ready_uids"])
+        self.assertEqual([39, 37], first["printed_field_heuristic"][1]["uids"])
+        self.assertEqual([37], first["printed_field_heuristic"][2]["uids"])
+
+    def test_missing_verbose_records_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "fsched-verbose"):
+            schedules.parse_dump(
+                ";; Function wanted\n"
+                ";; -- basic block 0 from 1 to 2 -- after reload\n"
+                "(insn 1)\n",
+                "wanted",
+            )
+
+    def test_incomplete_ready_set_is_rejected(self):
+        sample = self.SAMPLE.replace(
+            ";; Ready list (t =  4):    35  39  37",
+            ";; Ready list (t =  4):    35  39  99  37",
+        )
+        with self.assertRaisesRegex(ValueError, "absent from"):
+            schedules.parse_dump(sample, "wanted")
+
+    def test_unmatched_selection_is_rejected(self):
+        sample = self.SAMPLE.replace(
+            ";; --> scheduling insn <<<37>>> on unit memory",
+            ";; --> scheduling insn <<<99>>> on unit memory",
+        )
+        with self.assertRaisesRegex(ValueError, "without a matching ready"):
+            schedules.parse_dump(sample, "wanted")
+
+    def test_partial_multiblock_records_are_rejected(self):
+        sample = (
+            self.SAMPLE
+            + "\n;; -- basic block 1 from 10 to 11 -- after reload\n(insn 10)\n"
+        )
+        with self.assertRaisesRegex(ValueError, "fsched-verbose"):
+            schedules.parse_dump(sample, "wanted")
+
+    def test_resolved_instruction_joins_current_ready_set(self):
+        sample = """;; Function wanted
+;; -- basic block 0 from 1 to 4 -- after reload
+;; 1 188 0 0 2 1 0 - 0 alu : 4
+;; 2 188 0 0 2 1 0 - 0 alu : 4
+;; 4 188 0 1 1 1 0 - 0 alu :
+;; Ready list (t = 0): 1 2
+;; --> scheduling insn <<<2>>> on unit alu
+;; dependences resolved: insn 4 /b1 into ready
+;; --> scheduling insn <<<4>>> on unit alu
+(insn 4)
+"""
+        report = schedules.parse_dump(sample, "wanted")[0]
+        self.assertEqual(2, report["contested_count"])
+        second = report["blocks"][0]["contested"][1]
+        self.assertEqual(4, second["selected_uid"])
+        self.assertEqual([1, 4], second["ready_uids"])
+
+    def test_sched1_interblock_candidate_marker_is_parsed(self):
+        sample = self.SAMPLE.replace(
+            ";;       35   148",
+            ";;   +   35   148",
+        )
+        first = schedules.parse_dump(sample, "wanted")[0]["blocks"][0]["contested"][0]
+        self.assertEqual([35, 39, 37], first["ready_uids"])
+
+    def test_sched1_ready_block_suffix_is_not_a_uid(self):
+        sample = self.SAMPLE.replace(
+            ";; Ready list (t =  4):    35  39  37",
+            ";; Ready list (t =  4):    35/b1  39/b1  37/b0",
+        )
+        first = schedules.parse_dump(sample, "wanted")[0]["blocks"][0]["contested"][0]
+        self.assertEqual([35, 39, 37], first["ready_uids"])
+
+    def test_whole_dump_skips_function_without_scheduler_records(self):
+        sample = ";; Function empty\n(note 1)\n" + self.SAMPLE
+        reports = schedules.parse_dump(sample)
+        self.assertEqual(["wanted"], [report["function"] for report in reports])
+
+    def test_hidden_comparator_can_override_printed_order(self):
+        sample = """;; Function wanted
+;; -- basic block 0 from 1 to 2 -- after reload
+;; 48 188 0 1 4 2 0 - 0 memory : 90 91
+;; 50 188 0 1 4 2 0 - 0 memory : 90 91
+;; Ready list (t = 1): 48 50
+;; --> scheduling insn <<<50>>> on unit memory
+(insn 50)
+"""
+        choice = schedules.parse_dump(sample, "wanted")[0]["blocks"][0]["contested"][0]
+        final = choice["printed_field_heuristic"][-1]
+        self.assertEqual("table_order", final["field"])
+        self.assertFalse(final["selected_survives"])
+
+
 class WhyTests(unittest.TestCase):
     ALLOC = """;; Function wanted
 ;; 1 regs to allocate: 84
@@ -356,6 +468,43 @@ class WhyTests(unittest.TestCase):
             self.assertEqual("delay-slot-selection", report["diagnosis"]["class"])
             self.assertEqual("convert", report["delay_slots"]["left"][0]["branch"]["target"])
             self.assertEqual("other", report["delay_slots"]["right"][0]["branch"]["target"])
+
+    def test_pass25_includes_both_scheduler_reports(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            left = self.make_probe(root, "left", {
+                "22.ce2": "same\n", "25.sched2": ScheduleTests.SAMPLE + "left\n"
+            })
+            right = self.make_probe(root, "right", {
+                "22.ce2": "same\n", "25.sched2": ScheduleTests.SAMPLE + "right\n"
+            })
+            report = why.analyze(left, right, "wanted")
+            self.assertEqual("post-reload-scheduling", report["diagnosis"]["class"])
+            self.assertEqual(2, report["schedules"]["left"][0]["contested_count"])
+
+    def test_pass17_includes_both_scheduler_reports(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sample = ScheduleTests.SAMPLE.replace("after reload", "before reload")
+            left = self.make_probe(root, "left", {
+                "14.combine": "same\n", "17.sched": sample + "left\n"
+            })
+            right = self.make_probe(root, "right", {
+                "14.combine": "same\n", "17.sched": sample + "right\n"
+            })
+            report = why.analyze(left, right, "wanted")
+            self.assertEqual("pre-reload-scheduling", report["diagnosis"]["class"])
+            self.assertEqual(2, report["schedules"]["left"][0]["contested_count"])
+
+    def test_pass25_without_verbose_records_reports_evidence_gap(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            block = ";; Function wanted\n;; -- basic block 0 from 1 to 2 -- after reload\n"
+            left = self.make_probe(root, "left", {"25.sched2": block + "(insn 1)\n"})
+            right = self.make_probe(root, "right", {"25.sched2": block + "(insn 2)\n"})
+            report = why.analyze(left, right, "wanted")
+            self.assertIn("evidence_gaps", report)
+            self.assertEqual({}, report["schedules"])
 
     def test_whole_tu_object_difference_after_same_assembly(self):
         with tempfile.TemporaryDirectory() as directory:
