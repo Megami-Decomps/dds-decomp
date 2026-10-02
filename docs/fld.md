@@ -110,7 +110,7 @@ FLD1 additionally uses these typed forms:
 
 | Type | Source form | Contents currently recovered |
 |---:|---|---|
-| `2` | `model_resource`, `model_items`, `model_item`, `model_bounds` | Field model hierarchy, transforms, bounds, assets, and command-list references |
+| `2` | `model_resource`, `model_items`, `model_item`, `model_bounds`, `model_assets`, `model_asset`, `model_draw_set`, `model_draw_list`, `model_draw`, `packet_data` | Field model hierarchy, material assets, render commands, and bounded DMA/VIF packets |
 | `5` | `texture_list` | Referenced field texture-list filename |
 | `11` | `effect` | Effect kind, resource selector, size, and parameters |
 | `12` | `light` | Animation mode, radii, softness, bias, diffuse RGB, and ambient RGB |
@@ -131,11 +131,19 @@ model_item node_id=0 parent=-1 rotation=0,-1.57079637,-0 \
 model_item node_id=2 parent=1 rotation=0,0.210236,0 \
   position=-54240.1171875,30,-290.3564453125,1 scale=1,1,1,0 \
   bounds=@md_01all_02_node_2_bounds \
-  commands=@md_01all_02_node_2_commands
+  commands=@md_01all_02_node_2_draws
 
 label md_01all_02_node_2_bounds
 model_bounds minimum=-2138.26513671875,0.0000457763671875,-7423.814453125 \
   maximum=4551.91259765625,103.9683609008789,6058.49365234375
+
+label md_01all_02_node_2_draws
+model_draw_set lists=@md_01all_02_node_2_draws_list_0
+label md_01all_02_node_2_draws_list_0
+model_draw_list selector=2 draws=@md_01all_02_node_2_draws_list_0_draw_0
+label md_01all_02_node_2_draws_list_0_draw_0
+model_draw asset=1 qwords=1009 \
+  packet=@md_01all_02_node_2_draws_list_0_draw_0_packet
 ```
 
 The runtime creates one draw node per `model_item`. `node_id` is its lookup
@@ -145,12 +153,36 @@ scale become its local transform. `model_bounds` stores two local XYZ box
 corners used by clipping. The `commands` pointer is compiled into the two
 rendering slots for that node.
 
+A `model_draw_set` is the node's null-terminated sequence of command lists.
+Each `model_draw_list` supplies a rendering selector and an ordered sequence of
+draws. The retail version-23 field corpus uses opcode 1 for every one of these
+draws: `asset` selects the model's material state, `qwords` gives the exact
+size of the referenced packet, and `packet_data` retains that DMA/VIF packet
+in 16-byte units. The explicit boundary prevents packet bytes from absorbing
+padding or a neighboring object while packet semantics are recovered further.
+
+The variable-length asset table is also structural source:
+
+```text
+model_assets count=24
+model_asset index=0 word_01=0x80969696 word_02=0x80969696
+model_asset index=1 word_02=0x20808080 resource_04=0 \
+  values_08=0,0,1,0.5,0 word_10=0x207f7f7f resource_20=0,1 \
+  values_40=0,0,0.5,1,0 scalar_200=0.9
+```
+
+An asset's optional field suffix is its serialized flag bit. `resource_04`
+indexes the resource list supplied by the model owner; `resource_20` stores
+that index with its associated 16-bit value. The assembler derives the flag mask
+from the fields present. It also derives the zero reserved words and checks
+asset indices, command pointers, packet sizes, and relocation sites.
+
 All 7,125 type-2 resources and 98,442 model items in the two version-23 disc
-corpora use this same profile. Their fixed control and padding words are
-derived by the assembler and checked by the parser. The nested asset,
-command-list, and motion payloads remain ordered `bytes` and symbolic
-`pointer` directives, so they can move safely while those formats are
-recovered.
+corpora use this same profile. Together they contain 161,220 asset entries,
+86,571 draw sets, 94,520 command lists, and 140,113 typed draws. Their fixed
+control and padding words are derived by the assembler and checked by the
+parser. Model motion definitions remain ordered `bytes` and symbolic
+`pointer` directives, so they can move safely while that format is recovered.
 
 Each transform is `0x30` bytes: four position floats, four rotation floats,
 and four scale floats. Each collision object also starts with a `0x30`-byte
