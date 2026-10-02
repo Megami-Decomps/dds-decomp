@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 extern s32 sdfAllocGeneralBlock(s32);
 extern u8 *sdfResourceRetainAddress(s32);
@@ -392,6 +393,8 @@ void mnuFindCampKeyTrackNeighbors(CampKeyTrack *track, s32 value, CampKeyNode **
 typedef struct CampOwner {
     u8 pad00[0x104];
     s32 handle; /* 0x104 */
+    u8 pad108[4];
+    s32 bgmId; /* 0x10C: validated event BGM ID used with registered variations */
 } CampOwner;
 
 typedef struct CampWorld {
@@ -444,10 +447,14 @@ typedef struct CampEntryNode {
 } CampEntryNode;
 
 typedef struct {
-    u8 pad00[0x2034];
+    u8 pad00[8];
+    CampOwner *owner; /* 0x08 */
+    u8 pad0C[0x2028];
     CampEntryNode *entries; /* 0x2034 */
-    u8 pad2038[0x394];
-    s32 dispatchMode; /* 0x23CC: checked after func_00243818 */
+    u8 pad2038[0x2F8];
+    f32 transform[12]; /* 0x2330: three four-component vectors saved by shop */
+    u8 pad2360[0x6C];
+    s32 sceneMode; /* 0x23CC: checked after func_00243818 */
     u8 pad23D0[0x10];
     s32 pendingValue; /* 0x23E0 */
     u8 pad23E4[0x28];
@@ -590,15 +597,15 @@ void fldApplyCameraColorKeyWords(void *work, const s32 *source) {
     fldUpdateCameraColorEffect(setting);
     if (source[0x0C / 4] == 0 && source[0x2C / 4] == 0 &&
         source[0x30 / 4] == 0 && source[0x34 / 4] == 0) {
-        *(s32 *)((u8 *)work + 0x23CC) = 0;
+        ((CampScene *)work)->sceneMode = 0;
     } else {
-        *(s32 *)((u8 *)work + 0x23CC) = 1;
+        ((CampScene *)work)->sceneMode = 1;
     }
 }
 
 void func_00243A18(CampScene *scene) {
     func_00243818();
-    if (scene->dispatchMode == 1) {
+    if (scene->sceneMode == 1) {
         func_00134CD8();
         return;
     }
@@ -688,7 +695,7 @@ void mnuShopSubmitDescriptor(CampScene *scene) {
 
     if (scene->descriptorResource != 0) {
         packet = sdfAllocatePacketList(0);
-        sdfCreateDescriptorPacket(packet, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0x200, 0xE0, scene->descriptorResource, 0);
+        sdfCreateDescriptorPacket(packet, (s32)((SdfTex *)kwlnHeldTextureReference)->primaryResource, 0, 0, 0x200, 0xE0, scene->descriptorResource, 0);
         D_00325708.open(&D_00325708, packet);
     }
 }
@@ -722,7 +729,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00243F48);
 
 void mnuShopSavePrimaryTransform(u8 *scene) {
     s32 i;
-    f32 *coordinates = (f32 *)(scene + 0x2330);
+    f32 *coordinates = ((CampScene *)scene)->transform;
     for (i = 0; i < 4; i++) {
         mnuShopSavedLastTransformVector[i] = coordinates[i + 8];
         mnuShopSavedFirstTransformVector[i] = coordinates[i];
@@ -732,7 +739,7 @@ void mnuShopSavePrimaryTransform(u8 *scene) {
 
 void mnuShopSaveFullTransform(u8 *scene) {
     s32 i;
-    f32 *coordinates = (f32 *)(scene + 0x2330);
+    f32 *coordinates = ((CampScene *)scene)->transform;
     for (i = 0; i < 4; i++) {
         mnuShopSavedLastTransformVector[i] = coordinates[i + 8];
         mnuShopSavedMiddleTransformVector[i] = coordinates[i + 4];
@@ -743,7 +750,7 @@ void mnuShopSaveFullTransform(u8 *scene) {
 
 void mnuShopRestoreTransform(u8 *scene) {
     s32 i;
-    f32 *coordinates = (f32 *)(scene + 0x2330);
+    f32 *coordinates = ((CampScene *)scene)->transform;
     s32 useMiddle = mnuShopRestoreMiddleVector;
     for (i = 0; i < 4; i++) {
         coordinates[i + 8] = mnuShopSavedLastTransformVector[i];
@@ -773,6 +780,7 @@ void mnuShopRegisterSceneObject(CampScene *scene, s32 identifier) {
     }
 }
 
+/* Queue the scene's BGM ID with each registered variation, then clear the list. */
 void mnuReleaseCampSceneRegisteredIds(CampScene *scene) {
     s32 count = 0;
     if (scene->registeredCount > 0) {
@@ -780,7 +788,7 @@ void mnuReleaseCampSceneRegisteredIds(CampScene *scene) {
         do {
             s32 identifier = *entry++;
             count++;
-            evtQueueValidatedBgmSoundCode(*(s32 *)(*(u8 **)((u8 *)scene + 8) + 0x10c), identifier);
+            evtQueueValidatedBgmSoundCode(scene->owner->bgmId, identifier);
         } while (count < scene->registeredCount);
     }
     scene->registeredCount = 0;
