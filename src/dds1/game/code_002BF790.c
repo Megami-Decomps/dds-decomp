@@ -163,7 +163,22 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFCE0);
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFE78);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0038);
+typedef struct GridAngleRectangle {
+    u8 pad00[0x6C];
+    s32 left;       /* 0x6C */
+    s32 top;        /* 0x70 */
+    s32 right;      /* 0x74 */
+    s32 bottom;     /* 0x78 */
+    u8 pad7C[8];
+    u32 colors[4];  /* 0x84 */
+} GridAngleRectangle;
+
+typedef struct GridAngleAdjustment {
+    u8 pad00[4];
+    s32 dimensions[2]; /* 0x04 */
+    u8 pad0C[8];
+    u32 colors[4];     /* 0x14 */
+} GridAngleAdjustment;
 
 typedef struct GridAngleTable {
     s32 divisor;  /* 0x00 */
@@ -181,6 +196,61 @@ typedef struct GridAngleOwner {
     u8 pad08[8];
     GridAngleSlot *slot; /* 0x10 */
 } GridAngleOwner;
+
+/* Contract the grid bounds and fade each packed color's low byte as the angle advances. */
+s32 func_002C0038(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
+    GridAngleTable *table = owner->slot->table;
+    s32 deltas[2];
+    s32 *dimensionOut = (s32 *)((u8 *)out + 4);
+    s32 factor;
+    u32 *sourceColor;
+    u32 *destColor;
+    s32 i = 0;
+
+    deltas[0] = (rectangle->right - rectangle->left) << 4;
+    deltas[1] = (rectangle->bottom - rectangle->top) << 3;
+    {
+        s32 fractionalMask = 0xFFFF;
+        for (; i < 2; i++) {
+            s32 delta = deltas[i];
+            s32 magnitude = delta < 0 ? -delta : delta;
+            s32 product = magnitude * owner->angle;
+            s32 negative = 0;
+            s32 scaled;
+
+            /* Signed fixed-point division rounds toward zero. */
+            if (product < 0) {
+                negative++;
+            }
+            scaled = (product + negative * fractionalMask) >> 16;
+
+            if (delta > 0) {
+                dimensionOut[i] = delta - scaled;
+            } else {
+                dimensionOut[i] = delta + scaled;
+            }
+        }
+    }
+
+    destColor = (u32 *)((u8 *)dimensionOut + 0x10);
+    factor = ((100 - table->mirrored) << 16) / 100;
+    sourceColor = rectangle->colors;
+    {
+        s32 colorMask = -0x100;
+
+        for (i = 3; i >= 0; i--, destColor++, sourceColor++) {
+            if (owner->angle < factor) {
+                u32 color = *sourceColor;
+                s32 lowByte = *(u8 *)sourceColor;
+
+                *destColor = (color & colorMask) | (lowByte * owner->angle / factor);
+            } else {
+                *destColor = *sourceColor;
+            }
+        }
+    }
+    return 0x10000 / table->divisor;
+}
 
 typedef struct GridAngleOutput {
     u8 pad00[0x24];
@@ -857,4 +927,3 @@ s32 sdfGridSeekLastNode(s32 widget) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_002BF790", fldLocalMapTaskName);
-
