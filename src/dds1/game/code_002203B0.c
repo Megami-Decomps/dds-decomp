@@ -56,11 +56,11 @@ void evtToggleWorldSlotScaledValueFlag(void *obj, s32 flag) {
 }
 
 extern s32 dds3AdvanceWorldCounter();
-extern s32 func_00112C08(s32 world, f32 *pos, f32 *rot);
+extern s32 dds3CreateCameraObject(s32 world, f32 *pos, f32 *rot);
 extern void effObjSetInnerFloat(s32 obj, f32 value);
 
 s32 evtCreateWorldObjectAtTransform(f32 *pos, f32 *rot) {
-    s32 obj = func_00112C08(dds3AdvanceWorldCounter(), pos, rot);
+    s32 obj = dds3CreateCameraObject(dds3AdvanceWorldCounter(), pos, rot);
 
     if (obj == 0) {
         return obj;
