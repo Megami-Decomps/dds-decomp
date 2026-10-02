@@ -47,6 +47,12 @@ extern void sdfVec3SubtractInPlace(f32 *, f32 *);
 extern void fldRotateVectorAroundY(f32 *, f32);
 extern void sdfVec3AddInPlace(f32 *, f32 *);
 extern void sdfQuaternionNormalize(f32 *);
+extern void sdfQuatForwardVector(f32 *, f32 *);
+extern f32 func_002C84F0(f32 *);
+extern void sdfQuatFromEuler(f32 *, f32, f32, f32);
+extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
+extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
+extern void func_002C9948(f32 *, f32, f32, f32, f32);
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", mnuDrawSprite);
 
@@ -441,7 +447,81 @@ haveSegment:
     sdfQuaternionNormalize(rotation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026CD88);
+void func_0026CD88(f32 *position, f32 *rotation) {
+    f32 delta[4];
+    f32 forward[4];
+    f32 axis[4];
+
+    if (D_00324510[0x36] != 0) {
+        sdfQuatForwardVector(rotation, forward);
+        func_002C84F0(forward);
+        position[0] += forward[0] * 20.0f;
+        position[2] += forward[2] * 20.0f;
+    }
+    if (D_00324510[0x37] != 0) {
+        sdfQuatForwardVector(rotation, forward);
+        func_002C84F0(forward);
+        position[0] -= forward[0] * 20.0f;
+        position[2] -= forward[2] * 20.0f;
+    }
+    if (D_00324510[0x34] != 0) {
+        sdfQuatFromEuler(delta, 0.0f, -0.017453293f, 0.0f);
+        sdfQuatMultiply(rotation, rotation, delta);
+        sdfQuaternionNormalize(rotation);
+    }
+    if (D_00324510[0x35] != 0) {
+        sdfQuatFromEuler(delta, 0.0f, 0.017453293f, 0.0f);
+        sdfQuatMultiply(rotation, rotation, delta);
+        sdfQuaternionNormalize(rotation);
+    }
+
+    if (D_00324510[0x33] != 0) {
+        if (D_00324510[0x38] != 0) {
+            position[1] -= 20.0f;
+        }
+        if (D_00324510[0x3a] != 0) {
+            position[1] += 20.0f;
+        }
+    } else {
+        if (D_00324510[0x38] != 0) {
+            sdfQuatForwardVector(rotation, forward);
+            axis[0] = 0.0f;
+            axis[1] = -1.0f;
+            axis[2] = 0.0f;
+            fldNormalizedVectorCross(axis, axis, forward);
+            position[0] += axis[0] * 20.0f;
+            position[2] += axis[2] * 20.0f;
+        }
+        if (D_00324510[0x3a] != 0) {
+            sdfQuatForwardVector(rotation, forward);
+            axis[0] = 0.0f;
+            axis[1] = -1.0f;
+            axis[2] = 0.0f;
+            fldNormalizedVectorCross(axis, axis, forward);
+            position[0] -= axis[0] * 20.0f;
+            position[2] -= axis[2] * 20.0f;
+        }
+    }
+
+    if (D_00324510[0x39] != 0) {
+        sdfQuatForwardVector(rotation, forward);
+        memcpy(axis, forward, sizeof(axis));
+        axis[1] += -10.0f;
+        fldNormalizedVectorCross(axis, axis, forward);
+        func_002C9948(delta, axis[0], axis[1], axis[2], 0.017453293f);
+        sdfQuatMultiply(rotation, rotation, delta);
+        sdfQuaternionNormalize(rotation);
+    }
+    if (D_00324510[0x3b] != 0) {
+        sdfQuatForwardVector(rotation, forward);
+        memcpy(axis, forward, sizeof(axis));
+        axis[1] += 10.0f;
+        fldNormalizedVectorCross(axis, axis, forward);
+        func_002C9948(delta, axis[0], axis[1], axis[2], 0.017453293f);
+        sdfQuatMultiply(rotation, rotation, delta);
+        sdfQuaternionNormalize(rotation);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026D108);
 
