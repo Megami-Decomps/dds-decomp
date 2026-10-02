@@ -103,7 +103,13 @@ def walk_ddt(data: bytes) -> Iterator[tuple[str, int, int]]:
 
 
 def _extract_archive_files(version: str, iso: Path, cd: pycdlib.PyCdlib, out_dir: Path) -> None:
-    files = VERSIONS[version].get("archive_files", ())
+    files = list(VERSIONS[version].get("archive_files", ()))
+    manifest = ROOT / "config" / version / "field_archives.json"
+    if manifest.exists():
+        extra = json.loads(manifest.read_text(encoding="utf-8"))
+        if not isinstance(extra, list) or not all(isinstance(item, dict) for item in extra):
+            raise SystemExit(f"{manifest.relative_to(ROOT)} must contain a JSON list of archive records")
+        files.extend(extra)
     if not files:
         return
     ddt_buffer = io.BytesIO()

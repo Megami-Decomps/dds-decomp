@@ -157,7 +157,30 @@ class LbCodecTests(unittest.TestCase):
                 source = lb.parse_source(path.read_text(encoding="utf-8"))
                 self.assertEqual(source.base_sha1, digest)
                 self.assertEqual([entry.extension for entry in source.entries], ["TBN", "F2", "F1"])
-                self.assertEqual(source.entries[1].source, "f011_001.f2")
+                self.assertEqual(source.entries[0].source, "base")
+                self.assertEqual(source.entries[1].source, "data/field/f011_001.f2")
+
+    def test_shared_field_archives_author_every_entry(self) -> None:
+        expected_counts = {"dds1": 31, "dds2": 25}
+        extensions = ["INF", "NPL", "SKY", "WAP", "BF", "AMB"]
+        for game, expected_count in expected_counts.items():
+            directory = ROOT / "src" / game / "data" / "field"
+            paths = sorted(directory.glob("f???_00[0a-d].lbasm"))
+            with self.subTest(game=game):
+                self.assertEqual(len(paths), expected_count)
+            for path in paths:
+                source = lb.parse_source(path.read_text(encoding="utf-8"))
+                with self.subTest(game=game, archive=path.name):
+                    self.assertEqual([entry.extension for entry in source.entries], extensions)
+                    self.assertNotIn("base", [entry.source for entry in source.entries])
+                    self.assertEqual(source.entries[4].source.split("/", 1)[0], "scripts")
+                    self.assertTrue(
+                        all(
+                            entry.source.startswith("data/field/")
+                            for index, entry in enumerate(source.entries)
+                            if index != 4
+                        )
+                    )
 
 
 if __name__ == "__main__":

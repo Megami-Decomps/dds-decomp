@@ -1,0 +1,188 @@
+[
+  {
+    "path": "/fld/f/f001/f001_000.LB",
+    "output": "field/f001_000.LB",
+    "size": 22528,
+    "sha1": "d830c39d3f260e4b0078f6441e866c12a40c6cdb"
+  },
+  {
+    "path": "/fld/f/f002/f002_000.LB",
+    "output": "field/f002_000.LB",
+    "size": 41792,
+    "sha1": "bfd6567f4b7eee401ffbd8c9f611986a8779df8c"
+  },
+  {
+    "path": "/fld/f/f003/f003_000.LB",
+    "output": "field/f003_000.LB",
+    "size": 42304,
+    "sha1": "6efad1f73274679ff4dbcbec1b7925494d824aeb"
+  },
+  {
+    "path": "/fld/f/f004/f004_000.LB",
+    "output": "field/f004_000.LB",
+    "size": 35072,
+    "sha1": "035e8ac3fa440bff2047ebeb1e34784dbe82a81d"
+  },
+  {
+    "path": "/fld/f/f005/f005_000.LB",
+    "output": "field/f005_000.LB",
+    "size": 33408,
+    "sha1": "8efdfffa951c0640c2df5301bb4e53f969186a8a"
+  },
+  {
+    "path": "/fld/f/f006/f006_000.LB",
+    "output": "field/f006_000.LB",
+    "size": 33216,
+    "sha1": "ead07a8ccafc9ba50ffd436e85449b2058844f9e"
+  },
+  {
+    "path": "/fld/f/f007/f007_000.LB",
+    "output": "field/f007_000.LB",
+    "size": 39936,
+    "sha1": "9004d69f16c50997d32fe5b42a089373449cf29f"
+  },
+  {
+    "path": "/fld/f/f008/f008_000.LB",
+    "output": "field/f008_000.LB",
+    "size": 27456,
+    "sha1": "c567519d0d6e7e2459861d6a491605836c350e0a"
+  },
+  {
+    "path": "/fld/f/f010/f010_000.LB",
+    "output": "field/f010_000.LB",
+    "size": 25728,
+    "sha1": "c70afaacb30ead5819dfe43a1bf09f646d10af30"
+  },
+  {
+    "path": "/fld/f/f011/f011_000.LB",
+    "output": "field/f011_000.LB",
+    "size": 20672,
+    "sha1": "b6e9db32143bf86b3ef6a9ade4ed4d53d2d7f2a8"
+  },
+  {
+    "path": "/fld/f/f012/f012_000.LB",
+    "output": "field/f012_000.LB",
+    "size": 16064,
+    "sha1": "061bbb879dd36654a73673952b9af64b025b41a6"
+  },
+  {
+    "path": "/fld/f/f021/f021_000.LB",
+    "output": "field/f021_000.LB",
+    "size": 31488,
+    "sha1": "58bc066a6072eff9f74dd00471d709d27a769859"
+  },
+  {
+    "path": "/fld/f/f022/f022_000.LB",
+    "output": "field/f022_000.LB",
+    "size": 53312,
+    "sha1": "f04abdc4a966a4c97f7d279c3ca6cb2484b95c59"
+  },
+  {
+    "path": "/fld/f/f023/f023_000.LB",
+    "output": "field/f023_000.LB",
+    "size": 46656,
+    "sha1": "2bbc2226db441b78f6580964c48d4a75ab851e79"
+  },
+  {
+    "path": "/fld/f/f024/f024_000.LB",
+    "output": "field/f024_000.LB",
+    "size": 70464,
+    "sha1": "3fb07985109056e3288d9417994b5decd47f01c4"
+  },
+  {
+    "path": "/fld/f/f025/f025_000.LB",
+    "output": "field/f025_000.LB",
+    "size": 115840,
+    "sha1": "d12cc91be21278976e0532175a8478ebb1ebce99"
+  },
+  {
+    "path": "/fld/f/f026/f026_000.LB",
+    "output": "field/f026_000.LB",
+    "size": 54848,
+    "sha1": "460b0658a46f1f578786a69eba290a34f54be413"
+  },
+  {
+    "path": "/fld/f/f027/f027_000.LB",
+    "output": "field/f027_000.LB",
+    "size": 59520,
+    "sha1": "4544956ff73d031ee1bcf11fc1d678fc95d9161a"
+  },
+  {
+    "path": "/fld/f/f027/f027_00a.LB",
+    "output": "field/f027_00a.LB",
+    "size": 66624,
+    "sha1": "488cffb2e9fe03599fb846f1e802296cdedcc030"
+  },
+  {
+    "path": "/fld/f/f027/f027_00b.LB",
+    "output": "field/f027_00b.LB",
+    "size": 56704,
+    "sha1": "e8c24d72a81bd507c17e9cc9897b51771021c93a"
+  },
+  {
+    "path": "/fld/f/f027/f027_00c.LB",
+    "output": "field/f027_00c.LB",
+    "size": 64768,
+    "sha1": "fde326ce2bdccf7b9775e818ec0460c204d5bb5f"
+  },
+  {
+    "path": "/fld/f/f027/f027_00d.LB",
+    "output": "field/f027_00d.LB",
+    "size": 65216,
+    "sha1": "ba217958ac10a12a5f438ad68deeeef3c193efd4"
+  },
+  {
+    "path": "/fld/f/f028/f028_000.LB",
+    "output": "field/f028_000.LB",
+    "size": 31040,
+    "sha1": "b05eda7a60c5c5b83ca697dd5558a46b8f61dae7"
+  },
+  {
+    "path": "/fld/f/f028/f028_00a.LB",
+    "output": "field/f028_00a.LB",
+    "size": 30784,
+    "sha1": "3ae37cc8bc7748e580a9192ca197e5ff13bf86ea"
+  },
+  {
+    "path": "/fld/f/f028/f028_00b.LB",
+    "output": "field/f028_00b.LB",
+    "size": 33664,
+    "sha1": "a1d4eacb1989731202ae7210fdfa30caa0fdcc8b"
+  },
+  {
+    "path": "/fld/f/f028/f028_00c.LB",
+    "output": "field/f028_00c.LB",
+    "size": 33536,
+    "sha1": "b6652a286432e4ce6d95d4f77ea7e3d01915239f"
+  },
+  {
+    "path": "/fld/f/f028/f028_00d.LB",
+    "output": "field/f028_00d.LB",
+    "size": 33536,
+    "sha1": "583d8d53e1b2f5c4c20e41a2866c4bfcbf0f066c"
+  },
+  {
+    "path": "/fld/f/f030/f030_000.LB",
+    "output": "field/f030_000.LB",
+    "size": 80192,
+    "sha1": "803731e36897f4576e1b787973a3dbce8ae3cca3"
+  },
+  {
+    "path": "/fld/f/f031/f031_000.LB",
+    "output": "field/f031_000.LB",
+    "size": 52928,
+    "sha1": "21b4a76205074e7e308ad3df1cdea0dd06489a1f"
+  },
+  {
+    "path": "/fld/f/f032/f032_000.LB",
+    "output": "field/f032_000.LB",
+    "size": 56704,
+    "sha1": "2f9302799b68ab2ec798402779e02e7d518c86fe"
+  },
+  {
+    "path": "/fld/f/f033/f033_000.LB",
+    "output": "field/f033_000.LB",
+    "size": 38464,
+    "sha1": "9171a6a877e1162a129f0e7654243a1483e8b54b"
+  }
+]

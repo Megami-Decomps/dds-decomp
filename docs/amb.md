@@ -9,9 +9,9 @@ python3 tools/amb.py verify f011.amb
 ```
 
 The tracked corpus contains all 32 DDS1 and 22 DDS2 resources. Together they
-define 1,446 named map areas, 3,780 sub-blocks, and 1,625 icons. The normal
-`dds1-field-data` and `dds2-field-data` targets assemble every source and check
-its retail SHA-1.
+define 1,446 named map areas, 3,780 sub-blocks, 1,625 icons, 10,739 model
+nodes, and 6,143 meshes. The normal `dds1-field-data` and `dds2-field-data`
+targets assemble every source and check its retail SHA-1.
 
 `tools/amb_corpus.py` verifies the complete AMB set directly from a disc image
 you own. Supplying both output options imports the sources and manifest only
@@ -37,7 +37,8 @@ header -> areas -> name
                 -> sub-blocks -> name
                               -> icons -> position
                               -> minimum/maximum bounds
-                -> model root -> geometry and material object graphs
+                -> model root -> node hierarchy -> bounds and draw graph
+                              -> material assets  -> VIF mesh packets
                 -> position
 ```
 
@@ -63,18 +64,36 @@ Some zero-count icon lists retain a non-null pointer, and some sub-blocks omit
 one or both bounds. Source preserves those distinctions because they are part
 of the original object graph.
 
-The nested geometry and material formats are not yet fully classified. Their
-bytes remain explicit, while each relocated word is emitted as
-`pointer @label`. This keeps unknown structures lossless and relocatable:
+The model root uses the same SDF node, asset, draw, and mesh structures as
+FLD1 model resources, without the FLD1 resource wrapper or motion playbook.
+AMB source therefore shares the established model vocabulary:
 
 ```text
 label area_001_geometry
-bytes 08000000000000000000000000000000
-pointer @loc_00400
-pointer @loc_00418
+model_items count=8
+model_item node_id=0 parent=-1 rotation=0,-1.57079637,-0 \
+  position=0,-0,0,1 scale=1,1,1,0 bounds=null commands=null
+model_item node_id=4 parent=3 rotation=-0,-0,-0 \
+  position=39100,-0,-16238.109375,1 scale=1,1,1,0 \
+  bounds=@area_001_node_4_bounds commands=@area_001_node_4_draws
+
+label area_001_node_4_draws_list_0_draw_0_packet
+mesh_header triangles=2 vertices=4 controls=0x0048,0x0060
+mesh_triangles
+triangle 0,1,2,0 3,2,1,0
+mesh_positions
+position -1300,0,-5299.9814453125 -1300,0,-6100 \
+  1100,0,-5299.9814453125 1100,0,-6100
+mesh_program address=12
 ```
 
-Moving any labeled object updates typed and unresolved pointers alike. The
-codec rejects malformed extents, noncanonical relocation streams, misplaced
-relocations, invalid fixed strings, overlapping typed objects, and pointer
-targets inside typed records that source could not represent.
+The complete corpus contains 4,883 material assets, 5,399 draws and packets,
+35,528 triangles, and 60,629 vertices. Every object is typed: canonical source
+has no residual `bytes` or generic `pointer` directives. Names remain neutral
+for the two mesh control halfwords and asset selectors whose rendering roles
+are not yet established.
+
+Moving any labeled object updates the complete pointer graph. The codec rejects
+malformed extents, noncanonical relocation streams, misplaced relocations,
+invalid fixed strings, overlapping typed objects, invalid hierarchy or asset
+references, inconsistent draw sizes, and malformed VIF mesh packets.

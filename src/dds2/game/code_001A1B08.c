@@ -113,6 +113,10 @@ extern u8 D_003B45E8[], D_003B4600[], D_003B4618[];
 extern u8 D_003B4630[], D_003B4648[], D_003B4660[];
 extern u8 D_004365A8[8], D_004365B0[8];
 extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, u64);
+extern u8 D_003B4670[];
+extern u8 D_003B4680[];
+extern u8 D_004365B8[8];
+extern u8 D_004365C0[8];
 
 
 typedef struct PanelVert {
@@ -340,39 +344,31 @@ void itfDrawFiveColorPanelQuads(PanelObj *panel, u64 command) {
     }
 }
 
-extern u8 D_003B4670[];
-extern u8 D_003B4680[];
-extern u8 D_004365B8[8];
-extern u8 D_004365C0[8];
-
 void func_001A2450(PanelObj *panel, u64 command) {
-    PanelVert insets[3][4];
-    PanelVert *out = insets[0];
-    PanelVert *source = (PanelVert *)panel->buf;
-    PktRec *colors = panel->buf + 2;
+    PanelVert vertices[12];
+    PktRec *buf = panel->buf;
+    PktRec *colors = buf + 2;
+    PanelVert *input = (PanelVert *)buf;
     s32 i;
-    s32 offset;
 
     for (i = 0; i < 3; i++) {
         s32 xOffset = i * 16;
         s32 yOffset = i * 8;
+        PanelVert *out = &vertices[i * 4];
 
-        out[0].x = source[0].x + xOffset;
-        out[0].y = source[0].y + yOffset;
-        out[1].x = source[1].x - xOffset;
-        out[1].y = source[1].y + yOffset;
-        out[2].x = source[2].x - xOffset;
-        out[2].y = source[2].y - yOffset;
-        out[3].x = source[3].x + xOffset;
-        out[3].y = source[3].y - yOffset;
-        out += 4;
+        out[0].x = input[0].x + xOffset;
+        out[0].y = input[0].y + yOffset;
+        out[1].x = input[1].x - xOffset;
+        out[1].y = input[1].y + yOffset;
+        out[2].x = input[2].x - xOffset;
+        out[2].y = input[2].y - yOffset;
+        out[3].x = input[3].x + xOffset;
+        out[3].y = input[3].y - yOffset;
     }
-    itfDrawQuadFlat4(source, colors, D_004365B8, D_004365C0, panel->tail, command);
-    offset = 0;
-    for (i = 2; i >= 0; i--) {
-        itfEmitQuadListA(insets, colors, &D_003B4670[offset], &D_003B4680[offset],
-                        5, panel->tail, command);
-        offset += 5;
+
+    itfDrawQuadFlat4(buf, colors, D_004365B8, D_004365C0, panel->tail, command);
+    for (i = 0; i < 3; i++) {
+        itfEmitQuadListA(vertices, colors, &D_003B4670[i * 5], &D_003B4680[i * 5], 5, panel->tail, command);
     }
 }
 
