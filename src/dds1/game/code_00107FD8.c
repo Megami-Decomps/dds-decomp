@@ -1317,7 +1317,64 @@ INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E238);
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", bfContextCreate);
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", bfParseFLW0);
+typedef struct BfFlw0Section {
+    s32 type;
+    s32 unk04;
+    s32 count;
+    s32 offset;
+} BfFlw0Section;
+
+typedef struct BfFlw0Header {
+    u8 pad00[8];
+    u32 magic;
+    u8 pad0C[4];
+    s32 sectionCount;
+    u8 pad14[0xC];
+    BfFlw0Section sections[1];
+} BfFlw0Header;
+
+extern s32 bfContextCreate(s32 header, s32 sectionTable, s32 procedures, s32 labels,
+                           s32 instructions, s32 auxiliaryData, s32 strings, s32 procedureIndex);
+
+s32 bfParseFLW0(BfFlw0Header *header, s32 procedureIndex) {
+    BfFlw0Section *sections;
+    s32 procedures = 0;
+    s32 labels = 0;
+    s32 instructions = 0;
+    s32 auxiliaryData = 0;
+    s32 strings = 0;
+    s32 i;
+
+    sections = header->sections;
+    if (header->magic != 0x30574C46) {
+        return 0;
+    }
+    for (i = 0; i < header->sectionCount; i++) {
+        switch (sections[i].type) {
+            case 0:
+                procedures = (s32)((u8 *)header + sections[i].offset);
+                break;
+            case 1:
+                labels = (s32)((u8 *)header + sections[i].offset);
+                break;
+            case 2:
+                instructions = (s32)((u8 *)header + sections[i].offset);
+                break;
+            case 3:
+                if (sections[i].count != 0) {
+                    auxiliaryData = (s32)((u8 *)header + sections[i].offset);
+                }
+                break;
+            case 4:
+                strings = (s32)((u8 *)header + sections[i].offset);
+                break;
+            default:
+                return 0;
+        }
+    }
+    return bfContextCreate((s32)header, (s32)sections, procedures, labels, instructions,
+                           auxiliaryData, strings, procedureIndex);
+}
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA970);
 
@@ -1334,4 +1391,3 @@ INCLUDE_SDATA(const s32, "game/code_00107FD8", scrNamedProcessCount);
 INCLUDE_SDATA(const s32, "game/code_00107FD8", scrNamedProcessHead);
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", scrNamedProcessTail);
-
