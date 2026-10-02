@@ -181,6 +181,19 @@ class FldModelImportTests(unittest.TestCase):
                 self.data, self.document, bytes(self.binary)
             )
 
+    def test_tracked_fld1_sources_round_trip_unchanged(self) -> None:
+        for version in ("dds1", "dds2"):
+            paths = sorted(
+                (ROOT / "src" / version / "data" / "field").glob("*.f1asm")
+            )
+            for path in paths:
+                data = fld.encode(fld.parse_source(path.read_text(encoding="utf-8")))
+                document, binary = fld_model.build_gltf(data)
+                rebuilt, _ = fld_model_import.import_geometry(
+                    data, document, binary
+                )
+                self.assertEqual(rebuilt, data, path.name)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -93,20 +93,16 @@ class AmbSceneImportTests(unittest.TestCase):
                 self.data, self.document, bytes(self.binary)
             )
 
-    def test_imports_from_a_composed_scene(self) -> None:
-        builder = fld_model.GltfBuilder.create()
-        marker = fld_model.add_marker_mesh(builder, "existing", 0, 1.0)
-        builder.document["nodes"].append({"name": "existing", "mesh": marker})
-        builder.document["scenes"][0]["nodes"].append(0)
-        document, binary = amb_scene.append_automap_scene(
-            builder.document,
-            bytes(builder.binary),
-            self.data,
-            meters_per_unit=0.01,
-            icon_marker_size=0.0,
+    def test_imports_from_a_scene_with_unrelated_geometry(self) -> None:
+        builder = fld_model.GltfBuilder(self.document, self.binary)
+        marker = fld_model.add_marker_mesh(builder, "unrelated", 0, 1.0)
+        builder.document["nodes"].append({"name": "unrelated", "mesh": marker})
+        builder.document["scenes"][0]["nodes"].append(
+            len(builder.document["nodes"]) - 1
         )
+        builder.document["buffers"] = [{"byteLength": len(builder.binary)}]
         rebuilt, summary = amb_scene_import.import_geometry(
-            self.data, document, binary
+            self.data, builder.document, bytes(builder.binary)
         )
         self.assertEqual(rebuilt, self.data)
         self.assertEqual(summary.models, 1)
