@@ -340,8 +340,8 @@ vertex 5000.001953125 -10.000030517578125 2099.998046875 1.0
 vertex 4000.00390625 -10.0 2099.984375 1.0
 
 label r_01enc_01_faces
-face attributes=0x00002000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=0,1,3,2 encounter_type=1 encounter=80 special=0,0
-face attributes=0x00002000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=4,5,7,6 encounter_type=1 encounter=80 special=0,0
+face attributes=0x00002000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=0,1,3,2 encounter_zone=80 special=0,0
+face attributes=0x00002000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=4,5,7,6 encounter_zone=80 special=0,0
 
 zeros 8
 label r_01enc_01_stop

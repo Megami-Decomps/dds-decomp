@@ -478,10 +478,10 @@ vertex 2100.0 -10.0 3999.999755859375 1.0
 vertex 2100.0 -10.0 6199.99951171875 1.0
 
 label r_01enc_01_faces
-face attributes=0x00002000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=0,1,2,3 encounter_type=1 encounter=75 special=0,0
-face attributes=0x00002000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=1,4,5,2 encounter_type=1 encounter=75 special=0,0
-face attributes=0x00002000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=6,7,8,9 encounter_type=1 encounter=75 special=0,0
-face attributes=0x00002000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=10,0,3,11 encounter_type=1 encounter=75 special=0,0
+face attributes=0x00002000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=0,1,2,3 encounter_zone=75 special=0,0
+face attributes=0x00002000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=1,4,5,2 encounter_zone=75 special=0,0
+face attributes=0x00002000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=6,7,8,9 encounter_zone=75 special=0,0
+face attributes=0x00002000 move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=10,0,3,11 encounter_zone=75 special=0,0
 
 label r_01enc_01_stop
 bytes 0000000000000000000000000000000043616d65000000000000000000000000

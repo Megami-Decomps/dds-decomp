@@ -8,6 +8,7 @@ import json
 import struct
 import sys
 import unittest
+from dataclasses import replace
 from pathlib import Path
 
 
@@ -16,10 +17,35 @@ ROOT = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
+import battle_tbl  # noqa: E402
 import fld  # noqa: E402
+import field_world  # noqa: E402
 
 
 class FldCodecTests(unittest.TestCase):
+    @staticmethod
+    def _encounter_field(attributes: int = 0x2000, zone: int = 7) -> bytes:
+        source = f"""\
+fld2 1
+header version=23 magic=FLD2 type_count=1 type_table=@resource_types word_1c=0 word_20=0 word_24=0 word_28=0 word_2c=0 word_30=0 word_34=0 word_38=0 word_3c=0
+label resource_types
+type id=3 count=1 resources=@resources
+label resources
+resource serial=0 flags=0 type=3 name=null reserved=0 transform=null area=null link=null sblock=null data=@collision_data
+label collision_data
+collision vertex_count=4 face_count=1 extra_count=0 vertices=@vertices faces=@faces stop=null reserved=0,0
+label vertices
+vertex 0 0 0 1
+vertex 1 0 0 1
+vertex 1 0 1 1
+vertex 0 0 1 1
+label faces
+face attributes={attributes:#010x} move_floor=0 sound=0 stop=0 place=0 automap=0,0 vertices=0,1,2,3 encounter_zone={zone} special=0,0
+label data_end
+end_data
+"""
+        return fld.encode(fld.parse_source(source))
+
     def test_packed_relocations_cover_all_forms_and_runs(self) -> None:
         locations = [
             0x08,
@@ -59,6 +85,33 @@ end_data
         self.assertEqual(struct.unpack_from("<I", shifted, 0x4C)[0], 0x50)
         self.assertEqual(struct.unpack_from("<I", original, 0x50)[0], 0x4C)
         self.assertEqual(struct.unpack_from("<I", shifted, 0x54)[0], 0x50)
+
+    def test_encounter_zone_has_semantic_source_and_tag_invariant(self) -> None:
+        data = self._encounter_field()
+        self.assertEqual(fld.encounter_zone_overrides(data), (7,))
+        self.assertIn("encounter_zone=7", fld.render_source(data))
+        with self.assertRaisesRegex(fld.FldError, "without attribute"):
+            self._encounter_field(attributes=0)
+
+    def test_field_world_links_default_and_override_zones(self) -> None:
+        profile = battle_tbl.ENCOUNT_PROFILES["dds1"]
+        table = battle_tbl.default_encount(profile)
+        entries = list(table.default_maps[0].entries)
+        entries[45] = battle_tbl.Selector(value=3, flag_a=-1, flag_b=-1)
+        maps = list(table.default_maps)
+        maps[0] = battle_tbl.SelectorMap(22, tuple(entries))
+        zones = list(table.zones)
+        zones[3] = replace(zones[3], bgm=5)
+        zones[7] = replace(zones[7], bgm=5)
+        table = replace(table, default_maps=tuple(maps), zones=tuple(zones))
+
+        summary = field_world.validate_encounter_links(
+            (("f022_045", self._encounter_field()),), table
+        )
+        self.assertEqual(
+            summary,
+            field_world.EncounterLinkSummary(1, 1, 1, 1, 2),
+        )
 
     def test_invalid_event_placement_is_rejected(self) -> None:
         source = """\
