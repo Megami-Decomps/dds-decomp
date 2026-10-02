@@ -62,6 +62,7 @@ extern void mdlUpdateContextRotationBasisFromQuaternion(u32 model);
 
 void mnuClearNodeBroadcastFlag(u8 *node);
 void dds3ReleaseSoundSlotPool(void);
+void mnuCreateNodeModelEntry(MnuModelNode *, s32, s32, s32, f32, f32, f32);
 
 void mnuDeactivateModelNode(s32 node);
 
@@ -324,7 +325,14 @@ void mnuDestroyAllModelNodeContexts(s32 *list) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C280);
+void func_0031C280(MnuNodeList *list, s32 first, s32 second, s32 flag, f32 x, f32 y, f32 z) {
+    MnuModelNode *node = list->nodes;
+    s32 i;
+
+    for (i = 0; i < list->count; i++, node++) {
+        mnuCreateNodeModelEntry(node, first, second, flag, x, y, z);
+    }
+}
 
 /* Claims the first inactive node whose model pointer is already populated. */
 u8 *mnuAcquireUnusedModelNode(u32 *group) {
@@ -398,12 +406,12 @@ void mnuRestoreActiveNodeModelDepth(MnuNodeList *list) {
     }
 }
 
-void mnuCreateNodeModelEntry(u8 *node, s32 first, s32 second, s32 flag, f32 x, f32 y, f32 z) {
+void mnuCreateNodeModelEntry(MnuModelNode *node, s32 first, s32 second, s32 flag, f32 x, f32 y, f32 z) {
     u8 *model = func_00232198(first, second);
-    ((MnuModelNode *)node)->model = (u32 *)model;
+    node->model = (u32 *)model;
     if (flag != -1) {
         *(f32 *)(*(u8 **)(model + 0x1c) + 0x20) = z;
-        ((MnuModelNode *)node)->modelZ = z;
+        node->modelZ = z;
         mdlAddEntryFlaggedEx(model, 0, flag, x, y);
     }
 }

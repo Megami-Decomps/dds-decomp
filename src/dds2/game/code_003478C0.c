@@ -31,7 +31,34 @@ extern void sdfPostmultiplyVuMatrixFromMemory();
 
 extern void func_00347D50();
 
-typedef struct DevState DevState;
+/* Device state returned by sdfDevCreateCallbackState; layout shared with the device manager. */
+typedef struct DevState {
+    struct DevState *next;
+    struct DevState *previous;
+    struct DevState *workerNext;
+    struct DevState *workerPrev;
+    void *resource;
+    u8 workerIndex;
+    u8 operation;
+    s8 state;
+    u8 pad17;
+    s32 operationArg;
+    s32 requestExtra;
+    void *requestData;
+    s32 options;
+    s32 resourceId;
+    s32 result;
+    u8 pad30[8];
+    void (*callback)(struct DevState *, s32, s32, s32, s32);
+    s32 callbackContext;
+} DevState;
+
+/* Command 34 carries a buffer address and byte count after an opaque first word. */
+typedef struct SdfStreamReadRequest {
+    u8 pad00[4];
+    s32 buffer;
+    s32 length;
+} SdfStreamReadRequest;
 
 typedef struct SdfStreamCfg {
     DevState *dest;
@@ -193,25 +220,27 @@ void sdfStreamSendChunk(void) {
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_003482B0);
 
+/* Dispatch a stream command, wait for completion, and return the shared reply buffer.
+ * request is a scalar argument except for command 34, which carries a read-request address. */
 s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
     SdfStreamCfg *state = &D_0047BCC0;
-    DevState *result;
+    DevState *deviceState;
     switch (command) {
     case 32:
         state->dest = sdfDevCreateCallbackState(request, func_003482B0, 0);
         if (state->dest != 0) {
             WaitSema(state->semaphore);
-            result = state->dest;
-            if (*(s32 *)((u8 *)result + 0x2C) != 0) {
-                sdfDevReactivate(result);
+            deviceState = state->dest;
+            if (deviceState->result != 0) {
+                sdfDevReactivate(deviceState);
                 sdfDevQueueReleaseState(state->dest);
                 state->dest = 0;
-                result = 0;
+                deviceState = 0;
             }
         } else {
-            result = 0;
+            deviceState = 0;
         }
-        D_0047BE00[0] = (s32)result;
+        D_0047BE00[0] = (s32)deviceState;
         break;
     case 33:
         sdfDevQueueControlRequest(state->dest, request, request);
@@ -219,9 +248,9 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
         D_0047BE00[0] = state->readResult;
         break;
     case 34:
-        state->length = *(s32 *)(request + 8);
+        state->length = ((SdfStreamReadRequest *)request)->length;
         state->transferred = 0;
-        state->buffer = *(s32 *)(request + 4);
+        state->buffer = ((SdfStreamReadRequest *)request)->buffer;
         sdfStreamSendChunk();
         WaitSema(state->semaphore);
         D_0047BE00[0] = state->transferred;
