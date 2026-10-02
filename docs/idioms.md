@@ -806,6 +806,17 @@ prototype in scope. Declare it unprototyped (`void f();`) and write the
 definition K&R; a full prototype turns the call into an error
 (`fileSetRecordSecondVector`, DDS2).
 
+An old-style declaration can also preserve an argument's width when the
+argument count is correct. With `void f();`, an `L`-suffixed integer argument
+keeps its `long` type and reaches pass 00 as `DImode`; a fixed `f(s32, s32)`
+prototype converts it to `SImode`. For the GS TEST packet calls this is the
+difference between retail's `dli $a0,0x5100d` with the other argument in the
+call delay slot and `li $a0,0x50000` followed by `ori $a0,$a0,0x100d` in that
+slot (`evtPrepareSolarOverlayTestState` in both games, `func_0026C350`). Use
+this only when the callee really has a K&R definition and retail supports the
+wide literal; if the argument mode is unchanged in `.00.rtl`, the call
+contract is not the cause.
+
 ## Assembler version and `-g`
 
 The build uses the ee-as shipped with ee-gcc 2.96, invoked with `-g` (the

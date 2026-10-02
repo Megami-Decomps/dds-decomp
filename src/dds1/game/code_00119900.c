@@ -12,6 +12,7 @@ extern s32 datEnemyRecords;
 extern s32 datCommandRecords;
 extern s32 datItemSkillRecords;
 extern s32 datBattleParameters;
+extern s32 datBattleSceneRecords;
 extern s32 D_003BAAB8;
 
 typedef struct TableEntry32 {
@@ -24,6 +25,14 @@ typedef struct Entry4 {
     u8 unk2; /* 0x2 */
     u8 pad3; /* 0x3 */
 } Entry4;
+
+typedef struct CommandValueRecord {
+    u8 pad0[3];
+    u8 mode;
+    u16 percentage;
+    u16 base;
+    u8 pad8[0x30];
+} CommandValueRecord;
 
 typedef struct Entry1A4 {
     u16 flags; /* 0x0: active and flagged-entry bits */
@@ -74,7 +83,7 @@ typedef struct EventSelector {
 } EventSelector; /* 0x02 */
 
 typedef struct RosterFlagValue {
-    u8 pad0[4];
+    u32 flags;          /* 0x00: battle availability flags */
     u8 value;          /* 0x04 */
     u8 pad5[0x47];
 } RosterFlagValue; /* 0x4C */
@@ -282,7 +291,31 @@ s32 evtHasMatchingFlaggedEntry(s32 mask) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011A158);
+s32 func_0011A158(Entry1A4 *entry, s32 value) {
+    s32 command = value;
+    CommandValueRecord *records = (CommandValueRecord *)datCommandRecords;
+
+    value = 0;
+    switch (records[command].mode) {
+    case 1:
+        if (entry->flags & 0x20) {
+            return 0;
+        }
+        value = entry->unk8 * records[command].percentage / 100 + records[command].base;
+        if (value <= 0) {
+            value = 1;
+        }
+        break;
+    case 2:
+        if ((entry->flags & 0x20) &&
+            (((RosterFlagValue *)datEnemyRecords)[entry->rosterIndex].flags & 0x10)) {
+            return 0;
+        }
+        value = records[command].percentage;
+        break;
+    }
+    return value;
+}
 
 INCLUDE_ASM(const s32, "game/code_00119900", ptyInitRuntime);
 
@@ -993,7 +1026,68 @@ s32 evtTestSolarPhaseOrModelFlag(u32 flags) {
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011C790);
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011C990);
+s32 func_0011C990(s32 sceneIndex) {
+    s32 result = 0;
+    s32 enemyTotal;
+    s32 levelAddress;
+    s32 count;
+    s32 remaining;
+    s32 cursor;
+    s32 enemyRecordsBase;
+    s32 entryAddress;
+    s32 partyTotal;
+    s32 average;
+    s32 sceneOffset;
+    u16 value;
+
+    if (sceneIndex != 0) {
+        enemyTotal = 0;
+        sceneOffset = sceneIndex * 0x28;
+        cursor = sceneOffset + datBattleSceneRecords + 6;
+        enemyRecordsBase = datEnemyRecords;
+        count = 0;
+        remaining = 10;
+        do {
+            value = *(u16 *)cursor;
+            cursor += 2;
+            if (value != 0) {
+                count++;
+                enemyTotal += *(u8 *)(enemyRecordsBase + value * 0x4C + 5);
+            }
+            remaining--;
+        } while (remaining >= 0);
+        result = 0;
+        if (count != 0) {
+            average = enemyTotal / count;
+            partyTotal = 0;
+            count = 0;
+            remaining = 4;
+            levelAddress = datGameState + 0xA74;
+            entryAddress = datGameState + 0xA60;
+            do {
+                value = *(u16 *)entryAddress;
+                entryAddress += 0x1A4;
+                if (value & 1) {
+                    if (value & 4) {
+                        if (value & 2) {
+                            count++;
+                            partyTotal += *(u16 *)levelAddress;
+                        }
+                    }
+                }
+                remaining--;
+                levelAddress += 0x1A4;
+            } while (remaining >= 0);
+            result = 0;
+            if (count != 0) {
+                partyTotal = partyTotal / count;
+                result = average + partyTotal / 4 < partyTotal;
+                result = result == 0;
+            }
+        }
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011CAB0);
 

@@ -5,6 +5,7 @@ extern u64 scrReadIntParameter(u64);
 
 extern u64 func_0011A318(u64);
 
+extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock(void *p);
 
 typedef struct EffTransformNode EffTransformNode;
@@ -49,6 +50,7 @@ struct EffTransformNode {
 
 extern void effMiscNormalizeVU(void);
 extern void effMiscQuatMultiplyVU(void);
+void effObjInnerVecInit(EffTransformNode *node);
 
 u32 func_0010F118(void) {
     u64 id;
@@ -208,7 +210,27 @@ void effObjNodeDestroy(EffTransformNode *node) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0010F118", effObjInnerCreate);
+s32 effObjInnerCreate(EffTransformNode *node) {
+    EffTransformNode *inner;
+
+    if (node == NULL) {
+        return 0;
+    }
+    if (node->inner != NULL) {
+        return 0;
+    }
+    inner = sdfAllocSizeClassBlock(sizeof(EffTransformNode));
+    if (inner == NULL) {
+        return 0;
+    }
+    inner->flags = 1;
+    effObjInnerVecInit(inner);
+    VU0_STORE_VF(vf0, &inner->vecB0);
+    node->inner = inner;
+    inner->unkC8 = 0;
+    inner->scalar = 0.0f;
+    return 1;
+}
 
 void effObjFreeInner(EffTransformNode *node) {
     EffTransformNode *inner;
@@ -339,4 +361,3 @@ INCLUDE_SDATA(const s32, "game/code_0010F118", D_00435D70);
 INCLUDE_SDATA(const s32, "game/code_0010F118", D_00435D78);
 
 INCLUDE_SDATA(const s32, "game/code_0010F118", D_00435D80);
-

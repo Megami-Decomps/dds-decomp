@@ -143,7 +143,14 @@ void sdfVec3ScaleInPlace(float scale, float *dst) {
     dst[2] = dst[2] * scale;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C7EC8", func_002C84F0);
+float func_002C84F0(float *vector) {
+    float length = fldVectorLength(vector);
+
+    vector[0] = vector[0] / length;
+    vector[1] = vector[1] / length;
+    vector[2] = vector[2] / length;
+    return length;
+}
 
 float fldVectorLength(float *vector) {
     return fsqrtf(vector[0] * vector[0] + vector[1] * vector[1] +
@@ -382,4 +389,3 @@ float sdfSumCrossProductComponents(float *left, float *right) {
 float fldVec4ArcCosDot(float *left, float *right) {
     return func_002FA1C0(sdfQuatDot(left, right));
 }
-
