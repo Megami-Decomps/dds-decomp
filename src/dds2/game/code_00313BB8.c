@@ -4,8 +4,6 @@
 
 extern s32 sdfReleaseResourceAllocation(u32);
 
-extern void func_003154A0();
-
 extern s32 fileResolvePrimaryBuffer();
 
 extern void effCreateSelectionFlagListFromWork();
@@ -18,10 +16,15 @@ extern u32 ptyGetProfileRecordCap(u16);
 
 extern u32 ptyGetProfileRecordPointer(u32, u16);
 
-/* 24-byte table entries (full layout unknown; stride inferred from index math). */
+/* 24-byte requirement table entries: an active byte, two (stat id, minimum) pairs and a flag id. */
 typedef struct Entry24B {
-    u8 v0;            // 0x00
-    u8 pad_0x01[0x17]; // 0x01
+    u8 active;         // 0x00
+    u8 pad_0x01[3];    // 0x01
+    struct {
+        s32 id;        // 0x00
+        s32 minimum;   // 0x04
+    } requirement[2];  // 0x04
+    u32 flagId;        // 0x14
 } Entry24B; // 0x18
 
 extern Entry24B D_00404A90[];
@@ -571,14 +574,53 @@ u8 scrIsSelectedScriptEntryId(s32 work, u16 id) {
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00315388);
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_003154A0);
+typedef struct PrfSkillList {
+    u32 flags[8];
+    s32 count;
+    u16 skills[8];
+} PrfSkillList;
+
+s32 func_003154A0(ScriptFlagWork *unit, u32 profile, PrfSkillList *output, s32 includeFlagged) {
+    PrfSkillList list;
+    u32 i;
+    u16 *skills;
+    u16 skill;
+    u32 state;
+    s32 selected;
+
+    memset(&list, 0, sizeof(PrfSkillList));
+    selected = unit->scriptId;
+    list.count = 0;
+    if (selected != 0) {
+        skills = &D_00401332[selected * 18];
+        for (i = 0; i < 8; i++) {
+            skill = *skills++;
+            if (skill != 0) {
+                state = ptyGetSkillNibbleState((u8 *)unit, skill);
+                if (state != 0 && includeFlagged == 0) {
+                    continue;
+                }
+                list.flags[list.count] = 0;
+                if (state != 0) {
+                    list.flags[list.count] |= 4;
+                }
+                list.skills[list.count] = skill;
+                list.count++;
+            }
+        }
+    }
+    if (output != NULL) {
+        *output = list;
+    }
+    return list.count;
+}
 
 void prfBuildSkillListState0(a, b, c)
 s32 a;
 s32 b;
 s32 c;
 {
-    func_003154A0(a, b, c, 0);
+    func_003154A0((ScriptFlagWork *)a, b, (PrfSkillList *)c, 0);
 }
 
 /* The +8 threshold is compared with counts or a global counter. */
@@ -724,10 +766,36 @@ u32 scrGetEntryState(u16 index) {
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00316020);
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00316118);
+/* Index of the first active table entry whose requirements are met and whose flag is not yet set; -1 when there is none. Only entry 0 is ever visited: the loop bound is one. */
+s32 func_00316118(u32 start) {
+    u32 i;
+
+    for (i = start; i < 1; i++) {
+        if (D_00404A90[i].active != 0) {
+            s32 met = 1;
+            u32 j;
+            u32 flagId = D_00404A90[i].flagId;
+
+            for (j = 0; j < 2; j++) {
+                s32 id = D_00404A90[i].requirement[j].id;
+                s32 minimum = D_00404A90[i].requirement[j].minimum;
+
+                if (id != 0) {
+                    if (*(u8 *)(id + datGameState + 0x1340) < minimum) {
+                        met = 0;
+                    }
+                }
+            }
+            if (met != 0 && mdlFlagTest(flagId) == 0) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
 
 u8 prfReq18GetWord3220(s32 i) {
-    return D_00404A90[i].v0;
+    return D_00404A90[i].active;
 }
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", prfReqGetPair);
