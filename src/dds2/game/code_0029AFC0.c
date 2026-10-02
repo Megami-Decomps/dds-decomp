@@ -7,6 +7,10 @@ extern void func_0026C900(void);
 extern void func_0029AA48(s32);
 
 extern void func_0029AC20(s32, s32);
+extern void func_0029B950(void *item, void *context);
+extern u8 *D_00435E48;
+extern void func_0026C918(s32 index, void *value);
+extern void *memset(void *destination, s32 value, u32 size);
 
 extern s32 evtStageTestUpdateCamera(void);
 
@@ -132,18 +136,50 @@ s64 func_0029B868(s32 request) {
     return menuSetHandler(context, 2, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B8B0);
+extern u32 effMiscRand(void *);
+extern u16 D_003D6332[][17];
+extern s32 mdlFlagTest(s32);
+
+s32 func_0029B8B0(s32 index) {
+    s32 random = (u8)effMiscRand(NULL);
+    u16 *entry = D_003D6332[index];
+    u32 i;
+
+    for (i = 0; i < 8; i++, entry += 2) {
+        if (random < entry[1]) {
+            s32 item = entry[0];
+
+            if (mdlFlagTest(0x990) == 0 && (u32)(item - 0x6D) < 0x13) {
+                item = 9;
+            }
+            return item;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B950);
 
-INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029BB28);
+u32 func_0029BB28(void) {
+    u8 *context = (u8 *)kwlnTaskGetUserValue();
+    u8 *item = **(u8 ***)(context + 0x9C);
+    s32 mode;
+
+    func_0029B950(item, context);
+    mode = *(s32 *)(context + 0xB6F4);
+    if (mode != 0 && mode != 5) {
+        func_0026C918(0, D_00435E48 + *(u16 *)(item + 4) * 17);
+        dspStartEntry(0x19);
+    }
+    memset(context + 0x3F4, 0, 0x14);
+    return 1;
+}
 
 u32 func_0029BBC0(void) {
     evtFinishMessageWindowAndNotify();
     return 1;
 }
 
-extern s32 mdlFlagTest(s32);
 
 s32 mnuSelectEventFlagCode(void) {
     if (mdlFlagTest(0x31)) return 8;

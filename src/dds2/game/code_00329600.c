@@ -1,16 +1,21 @@
 #include "common.h"
 
-extern u64 func_00329930(void);
 
 typedef struct SdfAllocation {
-    u8 pad00[8];
+    struct SdfAllocation *peer;
+    struct SdfAllocation *block;
     u32 address;
-    u8 pad0C[2];
+    u16 busy;
     union {
         s16 referenceCount;
         u16 unsignedReferenceCount;
     };
 } SdfAllocation;
+
+extern SdfAllocation *func_00329930(void *address);
+extern void sdfReleaseChipBlock(void *block);
+extern s32 func_0036DE70(void);
+extern void EIntr(void);
 
 typedef struct SdfListNode {
     struct SdfListNode *previous;
@@ -29,12 +34,35 @@ void sdfSkipNextListNode(SdfListNode *node) {
     node->next = next;
 }
 
-INCLUDE_ASM(const s32, "game/code_00329600", func_003297C8);
+void func_003297C8(SdfAllocation *node) {
+    SdfAllocation *block;
+    s32 lock;
 
-void sdfReleaseCurrentResourceHandle(void) {
-    u64 resource;
+    if (node == NULL) {
+        return;
+    }
+    lock = func_0036DE70();
+    block = node->block;
+    if (block->busy == 0) {
+        sdfSkipNextListNode((SdfListNode *)node);
+        sdfReleaseChipBlock(block);
+    }
+    if (node->peer->busy == 0) {
+        sdfSkipNextListNode((SdfListNode *)node->peer);
+        sdfReleaseChipBlock(node);
+    } else {
+        node->busy = 0;
+        node->referenceCount = 0;
+    }
+    if (lock != 0) {
+        EIntr();
+    }
+}
 
-    resource = func_00329930();
+void sdfReleaseCurrentResourceHandle(void *address) {
+    SdfAllocation *resource;
+
+    resource = func_00329930(address);
     func_003297C8(resource);
 }
 
@@ -44,7 +72,7 @@ void sdfReleaseMemorySlot(s32 *slot) {
     resource = *slot;
     if (resource != 0) {
         *slot = 0;
-        func_003297C8(resource);
+        func_003297C8((SdfAllocation *)resource);
         return;
     }
 }

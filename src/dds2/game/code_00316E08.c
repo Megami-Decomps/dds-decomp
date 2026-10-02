@@ -1,5 +1,40 @@
 #include "common.h"
 
+typedef struct MenuWorkEntry {
+    u8 pad00[4];
+    u32 tag;
+    s32 unk08;
+    u8 pad0C[4];
+    f32 x0;
+    f32 y0;
+    f32 scale0;
+    u8 pad1C[4];
+    f32 x1;
+    f32 y1;
+    f32 scale1;
+    u8 pad2C[8];
+    u16 unk34;
+    u16 remaining;
+    u8 pad38[4];
+    u32 callback;
+    u32 flags;
+    u8 pad44[4];
+} MenuWorkEntry;
+
+typedef struct MenuProgressParameters {
+    u32 word00;
+    u32 word04;
+    s32 x;
+    s32 y;
+} MenuProgressParameters;
+
+extern MenuWorkEntry D_0040ABF8;
+extern u8 *func_003211F8(void);
+extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
+extern void func_0031CAE8(f32 *, s32, s32);
+extern s32 func_0031B838(void *, void *, s32, f32, f32, f32, f32);
+extern void func_00319FF0(void);
+
 extern s32 D_00438930;
 
 extern u8 *D_0043891C;
@@ -200,7 +235,23 @@ INCLUDE_ASM(const s32, "game/code_00316E08", func_00319A58);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00319E48);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00319F48);
+void func_00319F48(void) {
+    MenuProgressParameters *origin;
+    s32 y, x;
+    f32 value;
+    f32 position[4];
+    u8 *model;
+
+    origin = (MenuProgressParameters *)func_003211F8();
+    x = origin->x;
+    y = origin->y;
+    value = mnuEvaluateTimedValue(&D_0040ABF8);
+    func_0031CAE8(position, (s32)D_0040ABF8.x0 + x, (s32)value + y - 32);
+    model = *(u8 **)(*(u8 **)(D_0043891C + 0x20) + 8);
+    D_00438930 = func_0031B838(model + 0x10, NULL, 0,
+                             position[0], position[1], position[2], 0.5f);
+    func_00319FF0();
+}
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00319FF0);
 

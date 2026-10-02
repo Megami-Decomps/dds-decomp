@@ -105,6 +105,11 @@ typedef struct ItfMesBlk24 {
     ItfMesTable *unk8;   /* +0x8 */
     FrFontGlyph *glyphChain; /* +0xC: current entry's glyphs */
     u32 unk10;           /* +0x10 */
+    u8 unk14;
+    u8 unk15;
+    u8 unk16[2];
+    s16 unk18;
+    s16 unk1A;
 } ItfMesBlk24;
 
 /* Block at ItfMesState +0x40. */
@@ -138,11 +143,6 @@ typedef struct ItfMesState {
     s16 unk12;          /* 0x12 */
     ItfMesBlk14 blk14;    /* 0x14: passed to func_0019DDA8 */
     ItfMesBlk24 blk24;    /* 0x24: passed to func_0019DDD0 */
-    u8 unk38;             /* 0x38 */
-    u8 unk39;           /* 0x39: set by func_0019CB78 */
-    u8 unk3A[2];        /* 0x3A */
-    s16 unk3C;          /* 0x3C: read by func_0019C548 */
-    s16 unk3E;          /* 0x3E: read by func_0019C528 */
     ItfMesBlk40 blk40;  /* 0x40 */
     u8 unk58[0x4C];     /* 0x58 */
     ItfMesBlkA4 blkA4;  /* 0xA4 */
@@ -550,7 +550,21 @@ void itfMesDestroyWindowIfPresent(s32 window) {
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesStartEntry);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3C28);
+extern s32 itfInitTextDrawArgs(s32 encodedText, s32 sub);
+
+s32 func_001A3C28(s32 window, s32 entryIndex, s32 item) {
+    ItfMesState *mes = itfWindowSlots[window].mes;
+    ItfMesTable *table = itfMesGetEntry(mes, entryIndex)->table;
+    ItfMesBlk24 *blk = &mes->blk24;
+
+    blk->unk18 = item;
+    blk->unk8 = table;
+    blk->unk1A = table->count;
+    if (table->count != 0) {
+        return itfInitTextDrawArgs(itfMesGetTableItem(table, (s16)item), 0);
+    }
+    return 0;
+}
 
 void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock) {
     ItfMesState *mes;
@@ -776,11 +790,11 @@ s16 func_001A4538(s32 window) {
 }
 
 s16 func_001A4558(s32 window) {
-    return itfWindowSlots[window].mes->unk3E;
+    return itfWindowSlots[window].mes->blk24.unk1A;
 }
 
 s16 func_001A4578(s32 window) {
-    return itfWindowSlots[window].mes->unk3C;
+    return itfWindowSlots[window].mes->blk24.unk18;
 }
 
 u32 itfMesGetWindowTableValue(s32 window, s32 index) {
@@ -864,7 +878,7 @@ s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
 }
 
 void func_001A4B98(s32 window, u8 value) {
-    itfWindowSlots[window].mes->unk39 = value;
+    itfWindowSlots[window].mes->blk24.unk15 = value;
 }
 
 void itfMesSetWindowCallbackAddress(s32 window, u32 value) {

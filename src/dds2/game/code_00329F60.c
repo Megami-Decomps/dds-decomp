@@ -2,6 +2,24 @@
 
 #include "sdf.h"
 
+typedef struct SdfImageUploadRequest {
+    void *pixels;
+    s32 allocation;
+    u8 allocationMode;
+    u8 format;
+    u16 bufferWidth;
+    u32 destination;
+    u16 x;
+    u16 y;
+    u16 width;
+    u16 height;
+} SdfImageUploadRequest;
+
+extern s32 func_003292A8(s32);
+extern void *sdfResourceRetainAddress(s32);
+extern void func_0032AC30(SdfImageUploadRequest *);
+
+
 typedef struct SdfTexPacketTail {
     u64 tag;      /* 0x00 */
     u64 next;     /* 0x08 */
@@ -79,7 +97,7 @@ extern vu8 sdfCurrentBufferIndex;
 
 extern void sdfVuClearTransformCache(void);
 
-extern void func_0032B3F8();
+extern u8 *func_0032B3F8();
 
 void sdfRequestDeferredGsImageCapture(u32 destination, u32 onComplete) {
     D_004389E4 = destination;
@@ -525,7 +543,34 @@ void func_0032B3E0(SdfTex *texture, u8 value) {
     func_0032BE60();
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B3F8);
+u8 *func_0032B3F8(u32 destination, s32 width, s32 height, u32 format, u8 *pixels, s32 borrow) {
+    SdfImageUploadRequest request;
+    s32 size = sdfFormatImageSize(format, width, height) * 16;
+
+    if (borrow == 0) {
+        if (size > 0x400) {
+            request.allocation = func_003292A8(size);
+            request.pixels = sdfResourceRetainAddress(request.allocation);
+            request.allocationMode = 1;
+        } else {
+            request.pixels = func_00328D68(size);
+            request.allocationMode = 2;
+        }
+        memcpy(request.pixels, pixels, size);
+    } else {
+        request.pixels = pixels;
+        request.allocationMode = 0;
+    }
+    request.format = format;
+    request.destination = destination;
+    request.bufferWidth = width;
+    request.width = width;
+    request.height = height;
+    request.x = 0;
+    request.y = 0;
+    func_0032AC30(&request);
+    return pixels + size;
+}
 
 void sdfTexSubmitPixelsForFormat(SdfTex *texture, s32 resourceWord, u8 *pixels, s32 mode) {
     s32 width;

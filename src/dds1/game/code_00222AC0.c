@@ -1257,7 +1257,6 @@ u32 evtOpCreateAndFlagObjectFromResourceName(void) {
     return 1;
 }
 
-
 INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC508);
 
 INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC520);

@@ -127,18 +127,18 @@ typedef struct SdfGrid {
     u32 allocation;        /* 0x00 */
     SdfGridCell *cells;    /* 0x04 */
     SdfGridCell *cursor;   /* 0x08 */
-    u32 pad0C;
+    SdfGridCell *viewportOrigin; /* 0x0C */
     u32 cellCount;         /* 0x10 */
     u32 width;             /* 0x14 */
-    u32 pad18;
+    void (*drawCell)(s32, s32, s32, struct SdfGrid *, SdfGridCell *, s32); /* 0x18 */
     void (*releaseCell)(u32, u32); /* 0x1C */
     void (*onSelect)();    /* 0x20 */
-    s16 rows;              /* 0x24 */
-    s16 visibleX;          /* 0x26 */
-    s16 visibleY;          /* 0x28 */
-    s16 pageSize;          /* 0x2A */
-    s16 scrollX;           /* 0x2C */
-    s16 scrollY;           /* 0x2E */
+    u16 cellWidth;         /* 0x24 */
+    u16 cellHeight;        /* 0x26 */
+    u16 visibleColumns;    /* 0x28 */
+    u16 visibleRows;       /* 0x2A */
+    u16 columnMargin;      /* 0x2C */
+    u16 rowMargin;         /* 0x2E */
     u32 userData;          /* 0x30 */
 } SdfGrid;
 
@@ -1131,7 +1131,24 @@ SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 column, u32 row) {
     return cell;
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00313898);
+void func_00313898(s32 x, s32 y, s32 layer, SdfGrid *grid, s32 context) {
+    SdfGridCell *cell = grid->viewportOrigin;
+    s32 firstRow = cell->index / grid->width;
+    s32 firstColumn = cell->index % grid->width;
+    s32 endRow = firstRow + grid->visibleRows;
+    s32 row;
+    s32 column;
+
+    for (row = firstRow; row < endRow; row++) {
+        cell = grid->cells + row * grid->width + firstColumn;
+        for (column = firstColumn; column < firstColumn + grid->visibleColumns; column++) {
+            grid->drawCell(x + (column - firstColumn) * grid->cellWidth,
+                           y + (row - firstRow) * grid->cellHeight,
+                           layer, grid, cell, context);
+            cell++;
+        }
+    }
+}
 
 void sdfGridReleaseAllCells(SdfGrid *grid) {
     u32 i = 0;

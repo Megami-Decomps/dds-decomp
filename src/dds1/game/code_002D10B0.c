@@ -1,6 +1,24 @@
 #include "common.h"
 #include "sdf.h"
 
+typedef struct SdfImageUploadRequest {
+    void *pixels;
+    s32 allocation;
+    u8 allocationMode;
+    u8 format;
+    u16 bufferWidth;
+    u32 destination;
+    u16 x;
+    u16 y;
+    u16 width;
+    u16 height;
+} SdfImageUploadRequest;
+
+extern s32 func_002D03F8(s32);
+extern void *sdfResourceRetainAddress(s32);
+extern void func_002D1D80(SdfImageUploadRequest *);
+
+
 typedef struct SdfTexHead {
     SdfTex *next; /* 0x0: SdfTex-compatible linked-list prefix */
     SdfTex *prev; /* 0x4 */
@@ -498,9 +516,36 @@ void func_002D2530(SdfTex *texture, u8 value) {
     func_002D2FB0();
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2548);
+u8 *func_002D2548(u32 destination, s32 width, s32 height, u32 format, u8 *pixels, s32 borrow) {
+    SdfImageUploadRequest request;
+    s32 size = sdfFormatImageSize(format, width, height) * 16;
 
-extern void func_002D2548();
+    if (borrow == 0) {
+        if (size > 0x400) {
+            request.allocation = func_002D03F8(size);
+            request.pixels = sdfResourceRetainAddress(request.allocation);
+            request.allocationMode = 1;
+        } else {
+            request.pixels = func_002CFEB8(size);
+            request.allocationMode = 2;
+        }
+        memcpy(request.pixels, pixels, size);
+    } else {
+        request.pixels = pixels;
+        request.allocationMode = 0;
+    }
+    request.format = format;
+    request.destination = destination;
+    request.bufferWidth = width;
+    request.width = width;
+    request.height = height;
+    request.x = 0;
+    request.y = 0;
+    func_002D1D80(&request);
+    return pixels + size;
+}
+
+extern u8 *func_002D2548();
 
 void sdfTexSubmitPixelsForFormat(SdfTex *texture, s32 resourceWord, u8 *pixels, s32 mode) {
     s32 width;

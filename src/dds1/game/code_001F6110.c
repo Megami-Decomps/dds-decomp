@@ -398,7 +398,38 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F72C8);
+/* vu0 routine: returns the selected muzzle position in vf10. */
+BtlUnit *func_001F72C8(BtlUnit *reference, s32 actor) {
+    BtlVec4 position, selectedPosition;
+    BtlUnit *selected = NULL;
+    BtlUnit *unit;
+    u32 i = 0;
+    u32 count = btlGetIndexListCount(actor);
+
+    for (; i < count; i++) {
+        unit = (BtlUnit *)btlGetIndexListEntry(actor, i);
+        btlUnitGetMuzzlePosVU(unit);
+        if (selected == NULL) {
+            selected = unit;
+            VU0_STORE_VF(vf10, &selectedPosition);
+        } else {
+            VU0_STORE_VF(vf10, &position);
+            if (reference->flags & 0x200) {
+                if (position.f[0] < selectedPosition.f[0]) {
+                    selected = unit;
+                    PCP_COPY_VECTOR(&selectedPosition, &position);
+                }
+            } else {
+                if (position.f[0] > selectedPosition.f[0]) {
+                    selected = unit;
+                    PCP_COPY_VECTOR(&selectedPosition, &position);
+                }
+            }
+        }
+    }
+    VU0_LOAD_VF(vf10, &selectedPosition);
+    return selected;
+}
 
 void btlFlagAllUnitsDefeatCandidate(void) {
     BtlUnit *unit;

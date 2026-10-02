@@ -580,7 +580,35 @@ s32 sdfLinkReferenceDmaNode(s32 previous, u32 source) {
 
 extern s32 sdfLinkReferenceDmaNode(s32 previous, u32 source);
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D218);
+void func_0032D218(previous, item)
+    SdfListHead *previous;
+    SdfListHead *item;
+{
+    u32 head = previous->last;
+    u32 source;
+    u32 pending;
+
+    source = previous->firstReferenceSource;
+    pending = item->firstReferenceSource;
+    if (source != pending) {
+        if (pending != 0) {
+            head = sdfLinkReferenceDmaNode(head, pending);
+        } else {
+            item->firstReferenceSource = source;
+        }
+    }
+    source = previous->secondReferenceSource;
+    pending = item->secondReferenceSource;
+    if (source != pending) {
+        if (pending != 0) {
+            head = sdfLinkReferenceDmaNode(head, pending);
+        } else {
+            item->secondReferenceSource = source;
+        }
+    }
+    ((SdfDmaTagHeader *)head)->kind = SDF_DMA_TAG_NEXT;
+    ((SdfDmaTagHeader *)head)->address = item->first & 0x0FFFFFFF;
+}
 
 typedef struct SdfRefNode {
     u8 pad00[0x10];

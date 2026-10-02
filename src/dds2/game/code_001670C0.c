@@ -174,14 +174,53 @@ void *effCreateSizedDrawPacket(s32 height, s32 flags) {
     return packet;
 }
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_00167480);
+void func_00167480(u64 *packet, s32 primitive,
+                  s32 x0, s32 y0, f32 s0, f32 t0, s32 color0,
+                  s32 x1, s32 y1, f32 s1, f32 t1, s32 color1,
+                  s32 x2, s32 y2, f32 s2, f32 t2, s32 color2,
+                  s32 x3, s32 y3, f32 s3, f32 t3, s32 color3, s32 depth) {
+    u64 depthHigh = (u64)depth << 32;
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_001675B8);
+    packet[0] = 0xE400000000008001ULL;
+    packet[1] = 0xF5125125125120ULL;
+    packet[2] = (u32)(primitive | 0x1C);
+    ((f32 *)packet)[6] = s0;
+    ((f32 *)packet)[7] = t0;
+    packet[4] = (u32)color0 | ((u64)0xFE00 << 46);
+    packet[5] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    ((f32 *)packet)[12] = s1;
+    ((f32 *)packet)[13] = t1;
+    packet[7] = (u32)color1 | ((u64)0xFE00 << 46);
+    packet[8] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    ((f32 *)packet)[18] = s2;
+    ((f32 *)packet)[19] = t2;
+    packet[10] = (u32)color2 | ((u64)0xFE00 << 46);
+    packet[11] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    ((f32 *)packet)[24] = s3;
+    ((f32 *)packet)[25] = t3;
+    packet[13] = (u32)color3 | ((u64)0xFE00 << 46);
+    packet[14] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
+}
 
-void func_00167778(u64 *packet, s32 color, s32 primitive, s32 x0, s32 y0,
-                   s32 x1, s32 y1, s32 x2, s32 y2, s32 depth,
-                   f32 uFirst, f32 vFirst, f32 uSecond, f32 vSecond,
-                   f32 uThird, f32 vThird) {
+s32 func_001675B8(s32 chain, s32 primitive,
+                 s32 x0, s32 y0, f32 s0, f32 t0, s32 color0,
+                 s32 x1, s32 y1, f32 s1, f32 t1, s32 color1,
+                 s32 x2, s32 y2, f32 s2, f32 t2, s32 color2,
+                 s32 x3, s32 y3, f32 s3, f32 t3, s32 color3, s32 depth) {
+    u64 *packet = sdfAllocPacketAligned(0x90);
+
+    packet[0] = 0x20000008;
+    packet[1] = 0x5000000810000000ULL;
+    func_00167480(packet + 2, primitive, x0, y0, s0, t0, color0,
+                 x1, y1, s1, t1, color1, x2, y2, s2, t2, color2,
+                 x3, y3, s3, t3, color3, depth);
+    return sdfAppendPacket(chain, packet);
+}
+
+void func_00167778(u64 *packet, s32 color, s32 primitive,
+                  s32 x0, s32 y0, f32 uFirst, f32 vFirst,
+                  s32 x1, s32 y1, f32 uSecond, f32 vSecond,
+                  s32 x2, s32 y2, f32 uThird, f32 vThird, s32 depth) {
     u64 depthHigh = (u64)depth << 32;
 
     packet[0] = 0x8400000000008001ULL;
@@ -199,7 +238,18 @@ void func_00167778(u64 *packet, s32 color, s32 primitive, s32 x0, s32 y0,
     packet[9] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_00167838);
+s32 func_00167838(s32 chain, s32 color, s32 primitive,
+                 s32 x0, s32 y0, f32 u0, f32 v0,
+                 s32 x1, s32 y1, f32 u1, f32 v1,
+                 s32 x2, s32 y2, f32 u2, f32 v2, s32 depth) {
+    u64 *packet = sdfAllocPacketAligned(0x60);
+
+    packet[0] = 0x20000005;
+    packet[1] = 0x5000000510000000ULL;
+    func_00167778(packet + 2, color, primitive, x0, y0, u0, v0,
+                 x1, y1, u1, v1, x2, y2, u2, v2, depth);
+    return sdfAppendPacket(chain, packet);
+}
 
 u64 *effBuildDrawPacketWithFlags(u32 flags) {
     u64 *packet = sdfAllocPacketAligned(0x80);

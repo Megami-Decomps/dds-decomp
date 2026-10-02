@@ -618,7 +618,7 @@ void func_002E5D98(s32 value) {
 
 extern DevState *D_003BD418;
 extern DevState *D_003BD41C;
-extern u16 D_003BD42C;
+extern s16 D_003BD42C;
 
 /* Queue a request on the global list and on its worker's list; wake the worker when its list was empty. */
 void sdfDevEnqueueStateAndWakeWorker(DevState *state) {
@@ -684,7 +684,58 @@ void sdfDevUnlinkAndFreeState(DevState *state) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5F08);
+void func_002E5F08(DevState *state) {
+    DevWorkerEntry *worker;
+    DevState *prev;
+    DevState *next;
+    s64 interrupts;
+
+    interrupts = func_00312C08(state);
+    prev = state->previous;
+    next = state->next;
+    if (prev == NULL) {
+        D_003BD418 = next;
+    } else {
+        prev->next = next;
+    }
+    if (next == NULL) {
+        D_003BD41C = prev;
+    } else {
+        next->previous = prev;
+    }
+    worker = &sdfDeviceWorkerEntries[state->workerIndex];
+    prev = state->workerPrev;
+    next = state->workerNext;
+    if (prev == NULL) {
+        worker->first = next;
+    } else {
+        prev->workerNext = next;
+    }
+    if (next == NULL) {
+        worker->last = prev;
+    } else {
+        next->workerPrev = prev;
+    }
+    state->previous = D_003BD428;
+    if (D_003BD428 == NULL) {
+        D_003BD424 = state;
+    } else {
+        D_003BD428->next = state;
+    }
+    D_003BD428 = state;
+    state->next = NULL;
+    D_003BD420++;
+    D_003BD42C--;
+    if (interrupts != 0) {
+        EIntr();
+    }
+    if (D_003BD420 >= 9) {
+        sdfDevUnlinkAndFreeState(D_003BD424);
+    }
+    if (worker->first != NULL) {
+        SignalSema(worker->semaphore);
+    }
+}
 
 void sdfDevRelease(DevState *state) {
     s32 id = state->resourceId;

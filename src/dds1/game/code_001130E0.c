@@ -25,7 +25,23 @@ typedef struct EffectObjectData {
     u32 word18;
     s32 pendingValue;
     u32 timer;
+    u32 word24;
+    u32 word28;
+    f32 limitMin2C;
+    f32 limitMax30;
+    u32 word34;
+    f32 limitMin38;
+    f32 limitMax3C;
 } EffectObjectData;
+
+typedef struct EffectTransformData {
+    void *resourceState;
+    u32 flags;
+    s32 opacityMode;
+    s32 activeId;
+    f32 offset[4];
+    f32 position[4];
+} EffectTransformData;
 
 typedef struct EffectObject {
     u8 pad00[0x18];
@@ -38,6 +54,10 @@ extern u32 D_003BA9D0;
 extern u64 dds3GetWorldSecondaryObject(void);
 
 extern s32 dds3FindWorldObjectNodeByKey(u64, u64, u64);
+extern void effObjInnerCreate();
+extern void *func_002CFEB8(s32 size);
+extern void *dds3CreateSlotResourceState();
+extern void dds3SetObjectFlags(EffectObject *, s32);
 
 u32 dds3GetEffectDataHandle(EffectObject *obj) {
     return obj->data->handle;
@@ -94,7 +114,30 @@ void evtResetObjectPendingValue(EffectObject *obj) {
     data->pendingValue = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001130E0", func_00113490);
+s32 func_00113490(EffectObject *object) {
+    EffectObjectData *data;
+    void *work;
+
+    effObjInnerCreate(object);
+    work = func_002CFEB8(sizeof(EffectObjectData));
+    object->data = work;
+    memset(work, 0, sizeof(EffectObjectData));
+    data = object->data;
+    data->modelHolder = (EffModelHolder *)dds3CreateSlotResourceState(object);
+    data->transitionWork = NULL;
+    data->activeId = -1;
+    data->word14 = -1;
+    data->pendingValue = 0;
+    data->timer = 0;
+    data->word28 = 0;
+    data->limitMin2C = -45.0f;
+    data->limitMax30 = 45.0f;
+    data->word34 = 0;
+    data->limitMin38 = -45.0f;
+    data->limitMax3C = 45.0f;
+    dds3SetObjectFlags(object, 0x42);
+    return 1;
+}
 
 void evtDestroyEffectObjectData(EffectObject *obj) {
     EffectObjectData *data;
@@ -409,14 +452,37 @@ void func_00113E40(u32 value) {
     D_003BA9D0 = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_001130E0", func_00113E48);
+s32 func_00113E48(EffectObject *object) {
+    EffectTransformData *data;
+    void *work;
+
+    effObjInnerCreate(object);
+    work = func_002CFEB8(sizeof(EffectTransformData));
+    object->data = work;
+    memset(work, 0, sizeof(EffectTransformData));
+    data = (EffectTransformData *)object->data;
+    data->resourceState = dds3CreateSlotResourceState(object);
+    data->flags = 0;
+    data->opacityMode = 0;
+    data->activeId = -1;
+    data->offset[0] = 0.0f;
+    data->offset[1] = 0.0f;
+    data->offset[2] = 0.0f;
+    data->offset[3] = 1.0f;
+    data->position[0] = 0.0f;
+    data->position[1] = 0.0f;
+    data->position[2] = 0.0f;
+    data->position[3] = 1.0f;
+    dds3SetObjectFlags(object, 0xE2);
+    return 1;
+}
 
 void evtReleaseEffectObjectHandleAndData(EffectObject *obj) {
-    EffectObjectData *data;
+    EffectTransformData *data;
 
     effObjFreeInner();
-    data = obj->data;
-    dds3DestroyObjectBase(data->handle);
+    data = (EffectTransformData *)obj->data;
+    dds3DestroyObjectBase(data->resourceState);
     sdfReleaseChipBlock(data);
 }
 
@@ -439,9 +505,6 @@ void dds3RefreshStoredVec3(WorldObj *obj) {
 
 INCLUDE_ASM(const s32, "game/code_001130E0", func_001143D8);
 
-extern void effObjInnerCreate();
-extern void *func_002CFEB8(s32 size);
-extern u32 dds3CreateSlotResourceState();
 
 s32 evtInitializeEffectObjectData(EffectObject *obj) {
     EffectObjectData *data;
@@ -450,7 +513,7 @@ s32 evtInitializeEffectObjectData(EffectObject *obj) {
     obj->data = func_002CFEB8(0x50);
     memset(obj->data, 0, 0x50);
     data = obj->data;
-    data->handle = dds3CreateSlotResourceState(obj);
+    data->handle = (u32)dds3CreateSlotResourceState(obj);
     dds3SetObjectFlags(obj, 0x60);
     return 1;
 }

@@ -160,8 +160,8 @@ typedef struct StageTestSlot {
     s32 entryIndex; /* 0x00 */
     s32 assetResource; /* 0x04: mode-selected resource for the model request */
     s32 modelId;    /* 0x08 */
-    s32 unk0C;
-    s32 unk10;
+    s32 assetOption; /* 0x0C: third argument forwarded to mdlRequestAsset */
+    s32 initialMotionIndex; /* 0x10: negative uses the entry's motionIndex */
     u32 flags;      /* 0x14: bit 0 suppresses the fallback motion */
     s32 state;      /* 0x18: 0 idle, 1 queued, 2 playing, 3 fallback started, 4 forced fallback */
     s32 motionIndex; /* 0x1C */
@@ -174,7 +174,7 @@ typedef struct StageTestSlot {
 typedef struct StageTestQueue {
     u32 flags; /* bit 0: pending slot; bit 1: request in progress; bit 2: setup complete */
     StageTestSlot slot[2]; /* 0x04 and 0x2C */
-} StageTestQueue;
+} StageTestQueue; /* 0x54 */
 
 typedef struct StageTestState {
     s32 mode;                /* 0x00 */
@@ -1727,7 +1727,7 @@ void evtStageTestInit(s32 mode) {
     for (i = 0; i < 2; i++) {
         evtStageTestState.queue.slot[i].assetResource = value;
         evtStageTestState.queue.slot[i].modelId = -1;
-        evtStageTestState.queue.slot[i].unk0C = 0;
+        evtStageTestState.queue.slot[i].assetOption = 0;
         evtStageTestState.queue.slot[i].flags = 0;
     }
     func_00287420(offset);
@@ -1783,7 +1783,7 @@ void evtStageTestClearPendingFlag(void) {
     evtStageTestState.queue.flags &= ~1;
 }
 
-s32 evtStageTestSelectEntry(s32 encodedIndex, s32 initialValue, s32 option) {
+s32 evtStageTestSelectEntry(s32 encodedIndex, s32 initialMotionIndex, s32 assetOption) {
     s32 index = encodedIndex & 0xFFFF;
     s32 bank;
     StageTestSlot *slot;
@@ -1804,8 +1804,8 @@ s32 evtStageTestSelectEntry(s32 encodedIndex, s32 initialValue, s32 option) {
     slot = &evtStageTestState.queue.slot[bank];
     slot->entryIndex = index;
     slot->modelId = evtStageTestState.entries[index].modelId;
-    slot->unk0C = option;
-    slot->unk10 = initialValue;
+    slot->assetOption = assetOption;
+    slot->initialMotionIndex = initialMotionIndex;
     slot->state = 0;
     return 1;
 }

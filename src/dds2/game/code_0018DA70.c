@@ -86,14 +86,6 @@ void effSetPairedResourceColor(PairedEffectResources *pair, u32 colorWithAlpha) 
     pair->colorWithAlpha = colorWithAlpha;
 }
 
-INCLUDE_ASM(const s32, "game/code_0018DA70", effBuildBlurTransformedQuad);
-
-INCLUDE_ASM(const s32, "game/code_0018DA70", effBuildBlurUnitTextureQuad);
-
-INCLUDE_ASM(const s32, "game/code_0018DA70", effDrawBlurRectangle);
-
-INCLUDE_ASM(const s32, "game/code_0018DA70", effAppendBlurRenderState);
-
 /* Packet builders read RGBA, a blend control word, and a rotated/scaled rectangle. */
 typedef struct {
     u8 color[4];      /* 0x00: individual RGBA channels */
@@ -114,18 +106,6 @@ extern void effBuildBlurUnitTextureQuad();
 extern void effBuildBlurTransformedQuad();
 extern void sdfAppendPacket();
 
-/* Build the two draw packets for `source` and append them to `list`. */
-void effAppendBlurRectanglePackets(void *list, BlurSource *source, u8 fixedPointCoordinates) {
-    void *packet;
-
-    packet = effCreateSizedDrawPacket(1, 0x200);
-    effBuildBlurUnitTextureQuad(source, func_00167400(packet), fixedPointCoordinates);
-    sdfAppendPacket(list, packet);
-    packet = effCreateSizedDrawPacket(1, 0);
-    effBuildBlurTransformedQuad(source, func_00167400(packet), fixedPointCoordinates);
-    sdfAppendPacket(list, packet);
-}
-
 typedef struct BlurFilterOps {
     u8 pad00[0x10];
     void (*draw)(struct BlurFilterOps *self, void *list); /* 0x10 */
@@ -143,6 +123,90 @@ extern void *sdfAllocPacketAligned(s32);
 extern u32 kwlnGetDrawBufferIndex(void);
 extern void func_0032DB78(const void *, void *, s32);
 extern void sdfAppendDmaTagToList(void *, void *);
+
+extern s32 func_001200E0();
+extern s32 kwlnFadeIsBackgroundOverlayActive(void);
+extern void sdfInitPacketList(void *);
+extern void sdfAppendDmaPrimary(void *, const void *, void *);
+
+INCLUDE_ASM(const s32, "game/code_0018DA70", effBuildBlurTransformedQuad);
+
+INCLUDE_ASM(const s32, "game/code_0018DA70", effBuildBlurUnitTextureQuad);
+
+void effDrawBlurRectangle(BlurSource *source)
+{
+    void *list;
+    void *tag;
+    u64 *samplingPacket, *textureAlphaPacket, *blendPacket, *clampPacket;
+    void *drawPacket;
+
+    if (func_001200E0() == 0) {
+        list = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        tag = sdfAllocPacketAligned(0x20);
+        sdfAppendDmaPrimary(list, kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, tag);
+        samplingPacket = sdfAllocPacketAligned(0x30);
+        samplingPacket[0] = 2;
+        samplingPacket[1] = 0x5000000210000000ULL;
+        samplingPacket[2] = 0x1000000000008001ULL;
+        samplingPacket[3] = 0xE;
+        samplingPacket[4] = 0x61;
+        samplingPacket[5] = 0x14;
+        sdfAppendPacket(list, samplingPacket);
+        textureAlphaPacket = sdfAllocPacketAligned(0x40);
+        textureAlphaPacket[0] = 3;
+        textureAlphaPacket[1] = 0x5000000310000000ULL;
+        textureAlphaPacket[2] = 0x1000000000008002ULL;
+        textureAlphaPacket[3] = 0xE;
+        textureAlphaPacket[4] = 0x8000000080ULL;
+        textureAlphaPacket[5] = 0x3B;
+        textureAlphaPacket[6] = 0;
+        textureAlphaPacket[7] = 0x3F;
+        sdfAppendPacket(list, textureAlphaPacket);
+        blendPacket = sdfAllocPacketAligned(0x40);
+        blendPacket[0] = 3;
+        blendPacket[1] = 0x5000000310000000ULL;
+        blendPacket[2] = 0x1000000000008002ULL;
+        blendPacket[3] = 0xE;
+        blendPacket[4] = 0x31001;
+        blendPacket[5] = 0x47;
+        blendPacket[6] = source->blendControl;
+        blendPacket[7] = 0x42;
+        sdfAppendPacket(list, blendPacket);
+        clampPacket = sdfAllocPacketAligned(0x30);
+        clampPacket[0] = 2;
+        clampPacket[1] = 0x5000000210000000ULL;
+        clampPacket[2] = 0x1000000000008001ULL;
+        clampPacket[3] = 0xE;
+        if (kwlnFadeIsBackgroundOverlayActive() != 0) {
+            clampPacket[4] = 0x2DC19000009ULL;
+        } else {
+            clampPacket[4] = 0x37C00000009ULL;
+        }
+        clampPacket[5] = 8;
+        sdfAppendPacket(list, clampPacket);
+        drawPacket = effCreateSizedDrawPacket(1, 0);
+        effBuildBlurTransformedQuad(source, func_00167400(drawPacket), 0);
+        sdfAppendPacket(list, drawPacket);
+        D_003803E8.draw(&D_003803E8, list);
+    }
+}
+
+INCLUDE_ASM(const s32, "game/code_0018DA70", effAppendBlurRenderState);
+
+
+/* Build the two draw packets for `source` and append them to `list`. */
+void effAppendBlurRectanglePackets(void *list, BlurSource *source, u8 fixedPointCoordinates) {
+    void *packet;
+
+    packet = effCreateSizedDrawPacket(1, 0x200);
+    effBuildBlurUnitTextureQuad(source, func_00167400(packet), fixedPointCoordinates);
+    sdfAppendPacket(list, packet);
+    packet = effCreateSizedDrawPacket(1, 0);
+    effBuildBlurTransformedQuad(source, func_00167400(packet), fixedPointCoordinates);
+    sdfAppendPacket(list, packet);
+}
+
 
 /* Queue a 0x40-byte textured packet for the current frame buffer onto `list`, then let the filter ops draw it. */
 void effDrawBlurListWithFramePacket(void *list) {

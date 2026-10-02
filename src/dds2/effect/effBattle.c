@@ -1,4 +1,6 @@
 #include "common.h"
+#include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 enum {
     EFF_BATTLE_COPY_TRIGGER_FRAME = 0,
@@ -25,6 +27,8 @@ extern void effDispatchParameterDataAndFreeWork(s32);
 extern void func_0035B6E0(const char *fmt, ...);
 extern void sndUnlinkVoice(void *);
 extern void sdfReleaseChipBlock(void *);
+extern f32 D_003AF1A0[4];
+extern f32 D_003AF190[4];
 
 /* The source frame is compared with currentFrame by the native updater. */
 typedef struct BattleEffectValueSource {
@@ -132,7 +136,31 @@ u32 func_00168818(BattleEffect *effect) {
     return effect->value120;
 }
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00168820);
+/* Blend toward the neutral tint over the final six frames of the ramp. */
+u32 func_00168820(u32 elapsed, u32 duration)
+{
+    f32 ratio;
+    u32 color[4];
+
+    if (duration == 0 || elapsed >= duration) {
+        return 0x808080;
+    }
+    if (duration < 6) {
+        ratio = (f32)(duration - elapsed) / (f32)duration;
+    } else {
+        ratio = 1.0f;
+        if (elapsed > duration - 6) {
+            ratio = (f32)(duration - elapsed) / 6.0f;
+        }
+    }
+    VU0_LOAD_VF(vf10, D_003AF1A0);
+    VU0_LOAD_VF(vf11, D_003AF190);
+    VU0_SCALAR_OP(1.0f - ratio, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALAR_OP_R3(ratio, "vmulx.xyzw vf11, vf11, vf2x");
+    VU0_ADD(vf10, vf10, vf11);
+    EE_MMI_RGBA_PACK(color[0]);
+    return color[0];
+}
 
 INCLUDE_RODATA(const s32, "effect/effBattle", D_004144A0);
 

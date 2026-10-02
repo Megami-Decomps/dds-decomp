@@ -218,7 +218,7 @@ void frFontUploadClearedTexture(void) {
 }
 
 extern void *sdfReadNamedResource();
-extern void func_0019C130(s32, s32, void *);
+extern void func_0019C130(u8, u8 *, void *);
 
 /* Load font `index` once (index 1 uses the system's first entry buffer, other fonts load `path`) and mark it loaded. */
 void frFontEnsureSlotLoaded(s32 index, s32 path) {
@@ -248,7 +248,67 @@ void frFontReleaseAll(void) {
     sdfUpdateTextureHeadsWithInterruptsMasked(frFontWork.unk15C);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019B840", func_0019C130);
+typedef struct FrFontHeader {
+    u32 tableOffset;
+    u8 pad04[6];
+    u8 tableCount;
+    u8 pad0B[3];
+    u16 widthCount;
+    u8 pad10[6];
+    u8 hasExtra;
+    u8 pad17;
+    u8 pad18[8];
+    u32 lookupOffset;
+} FrFontHeader;
+
+void func_0019C130(u8 index, u8 *header, void *buffer) {
+    FrFontEntry *entry;
+    s32 offset;
+    u32 lookup;
+
+    if (header == NULL) {
+        if (buffer != NULL) {
+            header = (u8 *)sdfResourceRetainAddress((s32)buffer);
+        }
+    }
+    entry = &frFontWork.entries[index];
+    entry->buffer = buffer;
+    entry->unk4 = header;
+    offset = ((FrFontHeader *)header)->tableOffset + (((FrFontHeader *)header)->tableCount << 6);
+    if (((FrFontHeader *)header)->hasExtra != 0) {
+        s32 *flags = (s32 *)(header + offset);
+        s32 flagSize = *flags;
+        s32 *values;
+        s32 valueSize;
+        s32 flagBlockSize;
+        s32 valueBlockSize;
+
+        entry->flagBytes = (u8 *)(flags + 1);
+        entry->unk8 = flagSize;
+        flagBlockSize = flagSize + 4;
+        offset += flagBlockSize;
+        values = (s32 *)(header + offset);
+        valueSize = *values;
+        entry->unk14 = values + 1;
+        entry->unkC = valueSize;
+        valueBlockSize = valueSize + 4;
+        offset += valueBlockSize;
+    } else {
+        entry->flagBytes = NULL;
+        entry->unk14 = NULL;
+        entry->unk8 = 0;
+        entry->unkC = 0;
+    }
+    entry->unk18 = header + offset;
+    offset += ((FrFontHeader *)entry->unk4)->widthCount * 4;
+    entry->unk1C = header + offset;
+    lookup = ((FrFontHeader *)entry->unk4)->lookupOffset;
+    if (lookup != 0) {
+        entry->unk20 = (u32)(header + lookup);
+    } else {
+        entry->unk20 = 0;
+    }
+}
 
 void frFontFreeEntry(s32 index) {
     u32 slot = index & 0xFF;
