@@ -603,6 +603,103 @@ class Flw0Tests(unittest.TestCase):
             flw0.parse_source(labelled_source).to_bytes(), labelled_result.to_bytes()
         )
 
+    def test_symbolic_local_aliases_are_exact_and_survive_rendering(self) -> None:
+        source = """\
+flw0 2
+profile dds1
+header word00=0 word0c=0 word18=0 word1c=0
+locals int=2 float=1
+alias counter = local_int[0]
+alias limit = local_int[1]
+alias fade = local_float[0]
+procedure main
+code
+main:
+  PROC main
+  counter = 1
+  limit = counter + 2
+  fade = float32(1.5)
+  WAIT_FOR_TIMER_LIMIT(limit)
+  return
+end
+messages
+end
+strings
+end
+"""
+        indexed = """\
+flw0 2
+profile dds1
+header word00=0 word0c=0 word18=0 word1c=0
+locals int=2 float=1
+procedure main
+code
+main:
+  PROC main
+  local_int[0] = 1
+  local_int[1] = local_int[0] + 2
+  local_float[0] = float32(1.5)
+  WAIT_FOR_TIMER_LIMIT(local_int[1])
+  return
+end
+messages
+end
+strings
+end
+"""
+        script = flw0.parse_source(source)
+        self.assertEqual(
+            script.local_aliases,
+            (
+                flw0.LocalAlias("counter", "local_int", 0),
+                flw0.LocalAlias("limit", "local_int", 1),
+                flw0.LocalAlias("fade", "local_float", 0),
+            ),
+        )
+        self.assertEqual(script.to_bytes(), flw0.parse_source(indexed).to_bytes())
+
+        rendered = flw0_symbolic.render(script, "dds1", semantic=True)
+        self.assertIn("alias counter = local_int[0]", rendered)
+        self.assertIn("counter = 1", rendered)
+        self.assertIn("limit = counter + 2", rendered)
+        self.assertIn("WAIT_FOR_TIMER_LIMIT(limit)", rendered)
+        self.assertNotIn("local_int[0] =", rendered)
+        reparsed = flw0.parse_source(rendered)
+        self.assertEqual(reparsed.local_aliases, script.local_aliases)
+        self.assertEqual(reparsed.to_bytes(), script.to_bytes())
+
+        assembly = source.replace(
+            "  counter = 1\n"
+            "  limit = counter + 2\n"
+            "  fade = float32(1.5)\n"
+            "  WAIT_FOR_TIMER_LIMIT(limit)\n",
+            "  PUSHLIX counter\n"
+            "  POPLIX limit\n"
+            "  PUSHLFX fade\n"
+            "  POPLFX fade\n",
+        )
+        assembly_script = flw0.parse_source(assembly)
+        assembly_rendered = flw0_symbolic.render(assembly_script, "dds1")
+        self.assertIn("  PUSHLIX counter", assembly_rendered)
+        self.assertIn("  POPLFX fade", assembly_rendered)
+        self.assertEqual(
+            flw0.parse_source(assembly_rendered).to_bytes(),
+            assembly_script.to_bytes(),
+        )
+
+        invalid_aliases = {
+            "duplicate alias name": "alias counter = local_int[1]",
+            "already named 'counter'": "alias other = local_int[0]",
+            "outside the declared count 2": "alias other = local_int[2]",
+            "alias name 'result' is reserved": "alias result = local_int[0]",
+            "alias name 'main' is reserved": "alias main = local_int[0]",
+        }
+        for error, declaration in invalid_aliases.items():
+            malformed = source.replace("procedure main", f"{declaration}\nprocedure main")
+            with self.subTest(declaration=declaration):
+                with self.assertRaisesRegex(flw0.Flw0Error, error):
+                    flw0.parse_source(malformed)
+
     def test_semantic_source_compiles_canonical_if_else_and_while(self) -> None:
         self.assertEqual(
             flw0_semantic.lower_code(
