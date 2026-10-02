@@ -1195,8 +1195,8 @@ f32 sdfSinPoly(f32 angle) {
     return t * 1.5707963f + t3 * -0.64596367f + t5 * 0.07968968f + t7 * -0.0046737656f + t9 * 0.00015148419f;
 }
 
-void sdfEvaluateCosineViaSinePhaseShift(f32 angle) {
-    sdfSinPoly(angle + 1.5707963f);
+f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle) {
+    return sdfSinPoly(angle + 1.5707963f);
 }
 
 /* Binary search for value in a sorted table; returns the interpolated position in 0..1. */
