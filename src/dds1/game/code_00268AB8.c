@@ -80,6 +80,13 @@ extern u32 D_003BC5B0[2];
 extern u32 D_003BC5B8;
 
 extern u64 func_002F5990();
+typedef struct MemBlock MemBlock;
+extern MemBlock *func_002D03F8(s32 size);
+extern u32 sdfMemoryGetBlockAddress(MemBlock *block);
+extern s32 sceSifInitIopHeap(void);
+extern s32 sceSifAllocIopHeap(s32 size);
+extern void Exit(s32 status);
+extern s32 D_003BD8C0;
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00268AB8);
 
@@ -324,7 +331,24 @@ s32 sndCopyWordsToIopSynchronously(u32 source, u32 destination, u32 words) {
     return request;
 }
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_002699A0);
+void func_002699A0(s32 words) {
+    s32 bytes = words * 4;
+    s32 i;
+
+    D_003BC5B8 = sdfMemoryGetBlockAddress(func_002D03F8(bytes));
+    for (i = 0; i < words * 2; i++) {
+        ((u16 *)D_003BC5B8)[i] = 0;
+    }
+    sceSifInitIopHeap();
+    D_003BD8C0 = sceSifAllocIopHeap(words * 8);
+    if (D_003BD8C0 <= 0) {
+        Exit(0);
+    }
+    D_003BC5B0[0] = D_003BD8C0;
+    D_003BC5B0[1] = D_003BD8C0 + bytes;
+    sndCopyWordsToIopSynchronously(D_003BC5B8, D_003BC5B0[0], words);
+    sndCopyWordsToIopSynchronously(D_003BC5B8, D_003BC5B0[1], words);
+}
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269A68);
 
@@ -451,8 +475,7 @@ extern s32 fileGetResourceHandle(u32);
 extern u32 fileGetLoadedDataAddress(u32);
 extern s32 fileGetResourceSize(u32);
 extern void filePollEntryCleanup(u32);
-extern s32 func_002D0518(s32);
-extern s32 sdfMemoryGetBlockAddress(s32);
+extern MemBlock *func_002D0518(s32);
 extern void func_002F7628(u32 *);
 
 /* When the pending title-stream file is ready, copy it into a fresh block,
@@ -464,12 +487,12 @@ s32 mnuCompleteTitleStreamFileLoad(u32 *queue) {
         s32 handle = fileGetResourceHandle(D_003BD8D4);
         u32 data = fileGetLoadedDataAddress(D_003BD8D4);
         s32 size = fileGetResourceSize(D_003BD8D4);
-        s32 block;
+        MemBlock *block;
 
         filePollEntryCleanup(D_003BD8D4);
         block = func_002D0518(size);
         mnuTitleStreamStatus[5] = sdfMemoryGetBlockAddress(block);
-        mnuTitleStreamStatus[8] = block;
+        mnuTitleStreamStatus[8] = (u32)block;
         memcpy((void *)queue[5], (void *)data, size);
         queue[0] = size / (s32)queue[2];
         queue[1] = 0;
@@ -567,19 +590,18 @@ void mnuResetTitleStreamLocked(void) {
 }
 
 extern u32 D_003DA1A8[];
-extern s32 func_002D03F8(s32);
 
 void mnuInitializeTitleSoundBuffer(void) {
     u32 *work = mnuTitleSoundBufferState;
     u32 *decoder = D_003DA1A8;
-    s32 allocation;
+    MemBlock *allocation;
     s32 buffer;
 
     WaitSema(mnuTitleStreamSemaphore);
     work[7] = (u32)decoder;
     allocation = func_002D03F8(0x1C200);
     buffer = sdfMemoryGetBlockAddress(allocation);
-    work[8] = allocation;
+    work[8] = (u32)allocation;
     work[4] = 2;
     ((u32 *)work[7])[2] = 2;
     work[5] = buffer;
