@@ -105,10 +105,25 @@ kinds or noncanonical payloads.
 Warp types `field`, `elevator`, `facility`, and `event` encode the verified
 values `0..3`. Field transfers name their destination `field` and `area`,
 elevator transfers name their `table` and `floor`, and event transfers name
-their `event` and optional `alternate_field`. Facility arguments and unknown
-warp types remain numeric because their values are still overloaded. The
-grouped source therefore reads according to the native dispatch while keeping
-unresolved values visible:
+their `event` and optional `alternate_field`.
+
+Facility transfers dispatch on their first argument. The native transition
+handler stores the second argument as the initial selection for a shop or as
+the terminal slot used by the other actions. Every action applies the third
+argument as a floor flag before it enters the menu system:
+
+| Value | Source action | Second argument | Runtime action |
+|---:|---|---|---|
+| `0` | `shop` | `selection` | Open the shop scene at its initial selection |
+| `3` | `terminal` | `slot` | Open the full terminal |
+| `4` | `save` | `slot` | Open the terminal's save function |
+| `5` | `heal` | `slot` | Open the terminal's healing function |
+
+The terminal slot is also used to select the matching `side_exit` when play
+returns to the field. A generic `args=A,B,C` triple remains available for an
+unrecognized facility action or a noncanonical payload. The grouped source
+therefore reads according to the native dispatch while keeping unresolved
+values visible:
 
 ```text
 entry 5 kind=door area=1 name=@01d_03
@@ -121,6 +136,10 @@ entry 18 kind=battle_exit
   scene event=606
   warp area=2 position="02pos_03"
   after flag=2 script=@battle_return
+end
+
+entry 22
+  warp type=facility action=terminal slot=8 floor_flag=3
 end
 ```
 
