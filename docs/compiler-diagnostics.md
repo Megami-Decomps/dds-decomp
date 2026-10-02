@@ -349,8 +349,19 @@ python3 tools/ee_gcc_delay_slots.py /tmp/snd-candidate \
 ```
 
 The report names the call or jump UID and each donor UID placed in its slot.
-It also identifies common load destinations and source locations. Use
-`--json REPORT.json` when another tool needs the result.
+It also identifies common load destinations and source locations. For jumps,
+`annulled` means pass 29 selected a branch-likely form. Each slot then reports
+whether its donor came from the branch target and whether it executes on the
+taken path, the untaken path, or both. Use `--json REPORT.json` when another
+tool needs the result.
+
+These facts come directly from GCC's RTL flags: `/u` on the jump records an
+annulled branch, while `/s` on a delay-slot instruction records a donor copied
+from the branch target. An annulled target donor executes only when the branch
+is taken; an annulled non-target donor executes only when it is not taken. An
+ordinary branch reports `executes=always`. This distinction is often the whole
+cause of a `bne` versus `bnel` residual: inspect which value the donor sets and
+why the opposite path still needs it before changing source control flow.
 
 EE GCC fills non-jump slots, including calls, before jump slots. For a call it
 scans backward over ordinary instructions, checks resource conflicts, then
