@@ -1,9 +1,8 @@
 # LB field archives
 
 `tools/lb.py` reads and rebuilds the `.LB` resource archives used by DDS and
-Nocturne. The tracked `f011_001.lbasm` sources place the rebuilt FLD2 resource
-from `f011_001.fldasm` back beside the area's retained texture and FLD1
-resources. Run:
+Nocturne. The tracked `f011_001.lbasm` sources place rebuilt FLD2 and FLD1
+resources back beside the area's retained texture resource. Run:
 
 ```sh
 python3 tools/extract.py
@@ -70,12 +69,13 @@ lb 1
 base sha1=3937f9b1d070d83657220806c3abd6a90b21e4b4 size=0xf5ac0
 entry type=1 compressed=1 user=0 extension=TBN raw_size=0xc0780 retail_sha1=9cd61610692ef06b49476f3568f4608db3d23866 source=base
 entry type=1 compressed=1 user=0 extension=F2 raw_size=0x659f retail_sha1=48fdfb28d35f6d61d1d759f463ec1e750b967a9b source=f011_001.f2
+entry type=1 compressed=1 user=0 extension=F1 raw_size=0xbb747 retail_sha1=f4ade60ad1620927f43f60eb2be55a2272ac2cc8 source=f011_001.f1
 ```
 
 `source=base` retains a resource that has not yet been reconstructed.
 Any other relative name is loaded from `--resources`; the normal build points
-that directory at `build/<version>/data/field`, where the FLD2 assembler writes
-the rebuilt `.f2` file.
+that directory at `build/<version>/data/field`, where the FLD assembler writes
+the rebuilt `.f1` and `.f2` files.
 
 Useful standalone commands are:
 

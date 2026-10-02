@@ -56,6 +56,36 @@ preferences and final dispositions. These facts narrow an allocation problem;
 they do not map pseudo numbers to source variables or replay every hard-register
 rejection. Establish identity from the pseudo's definition and uses in RTL.
 
+### Saved-role feasibility gate
+
+Use the number and lifetime of meaningful source roles as an early stop test
+for allocation residuals. If retail keeps several values separately preserved,
+but a behaviorally correct candidate has already combined, ended, or omitted
+those roles by passes 19 and 20, declaration order and later scheduling cannot
+manufacture the missing allocation topology.
+
+Require all of the following evidence before applying the gate:
+
+- retail assembly visibly gives the values separate roles across the relevant
+  calls or control-flow edges;
+- the candidate's emitted data flow and pass-19/20 report have fewer distinct
+  live roles at the allocation boundary; and
+- source-location records, where available, agree with that reading.
+
+Then test at most one real source fact capable of creating the missing
+lifetime: a correct type or prototype, a caller/callee contract, a genuine
+later use, or an ownership/alias boundary. If no such fact is supported, or it
+does not change the predicted allocation input, park the function. Renaming or
+reordering declarations, adding dummy uses, and trying to repair the final
+delay slot are not evidence for a missing role.
+
+This is a one-way feasibility test, not a proof of original source. STABS homes
+are final compiler hints, not pseudo identities or location timelines. Missing,
+duplicate, or ambiguous records make the result inconclusive. A candidate with
+the right number of roles can still differ because of conflicts, preferences,
+reload, or scheduling; continue with the ordinary allocation report in that
+case.
+
 The transferable source shapes discovered so far are catalogued in
 [Matching C idioms](idioms.md). Treat their stated preconditions as part of the
 idiom: a shape that worked for one mechanism is not a generic permutation rule.

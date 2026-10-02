@@ -365,6 +365,11 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         description="fld2 $in",
     )
     n.rule(
+        "fld1",
+        f"mkdir -p $outdir && {sys.executable} tools/fld.py assemble $in $out",
+        description="fld1 $in",
+    )
+    n.rule(
         "field_world",
         f"mkdir -p $outdir && {sys.executable} tools/field_world.py "
         "--manifest $manifest --encounters $encounters && touch $out",
@@ -807,6 +812,28 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             version_outputs.append(str(encounter_stamp))
             field_data_stamps.append(str(encounter_stamp))
 
+        fld1_manifest = Path("config") / version / "field_fld1.sha1"
+        if (ROOT / fld1_manifest).exists():
+            fld1_source_dir = Path("src") / version / "data" / "field"
+            fld1_output_dir = Path("build") / version / "data" / "field"
+            fld1_sources = sorted((ROOT / fld1_source_dir).glob("*.f1asm"))
+            fld1_outputs = []
+            for source in fld1_sources:
+                source = source.relative_to(ROOT)
+                output = fld1_output_dir / source.with_suffix(".f1").name
+                n.build(
+                    str(output),
+                    "fld1",
+                    str(source),
+                    implicit=["tools/fld.py"],
+                    variables={"outdir": str(output.parent)},
+                )
+                fld1_outputs.append(str(output))
+            fld1_stamp = fld1_output_dir / "field_fld1.ok"
+            n.build(str(fld1_stamp), "check", str(fld1_manifest), implicit=fld1_outputs)
+            version_outputs.append(str(fld1_stamp))
+            field_data_stamps.append(str(fld1_stamp))
+
         if field_data_stamps:
             n.build(f"{version}-field-data", "phony", field_data_stamps)
 
@@ -821,11 +848,15 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 output = lb_output_dir / source.with_suffix(".LB").name
                 base = Path("orig") / version / "field" / output.name
                 resource = lb_output_dir / source.with_suffix(".f2").name
+                resource_f1 = lb_output_dir / source.with_suffix(".f1").name
+                resources = ["tools/lb.py", str(base), str(resource)]
+                if (ROOT / fld1_manifest).exists():
+                    resources.append(str(resource_f1))
                 n.build(
                     str(output),
                     "lb",
                     str(source),
-                    implicit=["tools/lb.py", str(base), str(resource)],
+                    implicit=resources,
                     variables={
                         "outdir": str(output.parent),
                         "base": str(base),
@@ -930,6 +961,9 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         fld_manifest = ROOT / "config" / version / "field_fld2.sha1"
         if fld_manifest.exists():
             configure_inputs.append(str(fld_manifest.relative_to(ROOT)))
+        fld1_manifest = ROOT / "config" / version / "field_fld1.sha1"
+        if fld1_manifest.exists():
+            configure_inputs.append(str(fld1_manifest.relative_to(ROOT)))
         battle_manifest = ROOT / "config" / version / "battle_tables.sha1"
         if battle_manifest.exists():
             configure_inputs.append(str(battle_manifest.relative_to(ROOT)))

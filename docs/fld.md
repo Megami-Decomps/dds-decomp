@@ -1,9 +1,10 @@
-# Relocatable field resources (`FLD2`)
+# Relocatable field resources (`FLD1` and `FLD2`)
 
-`tools/fld.py` converts decompressed `FLD2` resources to editable `.fldasm`
-source and back. `FLD2` holds the spatial side of a field area: collision and
-automap meshes, cameras, event triggers, named placements, and related
-resources.
+`tools/fld.py` converts decompressed field resources to editable source and
+back. `FLD1` holds field models, texture-list references, effects, lights, and
+some shared collision and motion data. `FLD2` holds collision and automap
+meshes, cameras, event triggers, named placements, and related resources. Both
+formats use the same object and relocation layer.
 
 ```sh
 python3 tools/fld.py disassemble f011_001.f2 f011_001.fldasm
@@ -12,11 +13,15 @@ python3 tools/fld.py assemble \
   --warps src/dds1/data/field/f011.wapasm \
   src/dds1/data/field/f011_001.fldasm f011_001.f2
 python3 tools/fld.py verify f011_001.f2
+python3 tools/fld.py disassemble f011_001.f1 f011_001.f1asm
+python3 tools/fld.py assemble f011_001.f1asm f011_001.f1
 ```
 
-The tracked corpora contain all 591 unique DDS1 and 621 unique DDS2 version-23
-sources. `ninja dds1-field-data dds2-field-data` assembles them and checks every
-output against its retail SHA-1 alongside the INF and WAP field data.
+The tracked FLD2 corpora contain all 591 unique DDS1 and 621 unique DDS2
+version-23 sources. The paired `f011_001.f1asm` sources establish exact FLD1
+assembly for both games and are inserted into the tracked LB archives.
+`ninja dds1-field-data dds2-field-data` checks every output against its retail
+SHA-1 alongside the INF and WAP field data.
 
 `field_fld2_links` in `config/versions.json` selects areas whose event, actor,
 and destination identities have also been verified against the maintained BF
@@ -35,6 +40,7 @@ python3 tools/fld_corpus.py dds1 /path/to/game.iso
 python3 tools/fld_corpus.py dds1 /path/to/game.iso \
   --output-dir src/dds1/data/field \
   --manifest config/dds1/field_fld2.sha1
+python3 tools/fld_corpus.py dds1 /path/to/game.iso --kind fld1
 ```
 
 The complete disc profile contains 591 unique version-23 sources in DDS1 and
@@ -43,9 +49,15 @@ copies of archived payloads, which share their source names. Two exceptional
 DDS1 files use version 21, and one `.f2` file has another format; the importer
 reports these without treating them as version 23.
 
+For FLD1, the importer verifies 554 version-23 source identities in DDS1 and
+568 in DDS2. DDS1 has two version-21 files and one unrelated `.f1` payload;
+DDS2 has 20 byte-identical loose/archive occurrences. The paired sources are
+tracked first because most of the roughly 830 MiB decompressed corpus is model
+data whose inner structures are still being recovered.
+
 ## Object and relocation model
 
-An `FLD2` file has a `0x40`-byte header, a data region, and a packed
+An `FLD1` or `FLD2` file has a `0x40`-byte header, a data region, and a packed
 relocation stream. Pointers in the data region are file-relative byte offsets.
 At load time, the game walks the relocation stream and adds the allocation
 base to each pointer word.
@@ -93,6 +105,20 @@ objects without freezing their offsets.
 | `6` | `event` | Event flags and field-script procedure name |
 | `9` | `motion`, `motion_curve`, typed values, `keys` | Keyed vector, quaternion, scalar, and light motion curves |
 | `10` | `placement`, `special_point` | Named positions, actors, events, facilities, and hunt markers |
+
+FLD1 additionally uses these typed forms:
+
+| Type | Source form | Contents currently recovered |
+|---:|---|---|
+| `2` | resource descriptors plus relocatable raw data | Field model resources |
+| `5` | `texture_list` | Referenced field texture-list filename |
+| `11` | `effect` | Effect kind, resource selector, size, and parameters |
+| `12` | `light` | Animation mode, radii, softness, bias, diffuse RGB, and ambient RGB |
+
+Types `3` and `9` use the same collision and motion forms in both files.
+Unrecovered model internals remain ordered `bytes` and symbolic `pointer`
+directives, so their offsets can still move safely as their structures are
+recovered.
 
 Each transform is `0x30` bytes: four position floats, four rotation floats,
 and four scale floats. Each collision object also starts with a `0x30`-byte
@@ -185,10 +211,11 @@ DDS2 default-area links, plus all 40 DDS1 and 22 DDS2 face overrides.
 ## Archive boundary
 
 Most field resources are stored as compressed blocks inside `.LB` archives.
-The `.fldasm` source describes the decompressed `FLD2` object. `tools/lb.py`
-then places that output into the paired resource archive while retaining the
-other blocks from an extracted retail base. See [`lb.md`](lb.md) for the LB
-container, compression codec, archive source, and exact build targets.
+The `.fldasm` and `.f1asm` sources describe the decompressed field objects.
+`tools/lb.py` then places those outputs into the paired resource archive while
+retaining any remaining blocks from an extracted retail base. See
+[`lb.md`](lb.md) for the LB container, compression codec, archive source, and
+exact build targets.
 
 Run the codec, relocation, semantic-link, and tracked-source tests with:
 
