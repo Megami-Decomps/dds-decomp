@@ -82,7 +82,7 @@ typedef struct {
 /* Parameter block as read by effBossCreateWithGroups: two words follow the head. */
 typedef struct {
     EffBossHead head;
-    u32 rotationStartAge;
+    s32 rotationStartAge;
     f32 angularSpeed;
 } EffBossParams;
 
@@ -103,8 +103,8 @@ typedef struct {
     EffBossDrawPool *drawPool;
     f32 direction[3]; /* Unit Y initially; mode 2 refreshes it from the model. */
     u8 pad10[4];
-    u32 rotationAngleBits; /* Initialized as a word; native update uses float bits. */
-    u32 rotationStartAge;
+    f32 rotationAngle;
+    s32 rotationStartAge;
     f32 angularSpeed;
     EffBossCell *cells; /* 0x20 */
 } EffBossGroup; /* 0x24 */
@@ -494,9 +494,9 @@ EffBossWork *effBossCreateWithGroups(EffBossParams *src, void *param1) {
 
     work = effBossCreate(src, param1);
     for (i = 0; i < work->groupCount; i++) {
-        work->groups[i].angularSpeed = src->angularSpeed;
         work->groups[i].rotationStartAge = src->rotationStartAge;
-        work->groups[i].rotationAngleBits = 0;
+        work->groups[i].rotationAngle = 0.0f;
+        work->groups[i].angularSpeed = src->angularSpeed;
     }
     return work;
 }
@@ -517,9 +517,9 @@ EffBossWork *effBossCloneWithGroups(EffBossWork *src) {
 
     work = effBossCloneWorkAndParameters(src);
     for (i = 0; i < work->groupCount; i++) {
-        work->groups[i].angularSpeed = src->groups[i].angularSpeed;
         work->groups[i].rotationStartAge = src->groups[i].rotationStartAge;
-        work->groups[i].rotationAngleBits = 0;
+        work->groups[i].rotationAngle = 0.0f;
+        work->groups[i].angularSpeed = src->groups[i].angularSpeed;
     }
     return work;
 }
