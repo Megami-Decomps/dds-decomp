@@ -13,8 +13,16 @@ extern void func_002AAE80(s32);
 extern void mnuCreateStaffImageSprite(s32);
 
 
+/* Inventory quantities are byte entries indexed by each caller's original item ID. */
+typedef struct SaveItemCounts {
+    u8 pad00[0x1340];
+    u8 counts[0x100];
+} SaveItemCounts;
+
+/* The menu buffer carries its allocation ID and five owned window handles. */
 typedef struct MenuResourceSet {
-    u8 pad00[8];
+    s32 allocation;
+    u8 pad04[4];
     u32 first;
     u32 second;
     u32 third;
@@ -23,11 +31,6 @@ typedef struct MenuResourceSet {
     u8 pad1C[0x1C];
     s32 selection;
 } MenuResourceSet;
-
-typedef struct MenuResourceOwner {
-    u8 pad00[0xAA48];
-    MenuResourceSet *resources;
-} MenuResourceOwner;
 
 extern void func_002AB690(s32, s32, s32, s32, s32, s32, s32);
 extern void func_002AB8F0(s32);
@@ -45,20 +48,20 @@ void func_002AB8C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AB8F0);
 
-void mnuDestroyResourceOwnerWindowContainers(MenuResourceOwner *object) {
+void mnuDestroyResourceOwnerWindowContainers(MenuStaffContext *object) {
     MenuResourceSet *resources;
 
-    resources = object->resources;
+    resources = (MenuResourceSet *)object->menu;
     mnuDestroyWindowContainer(resources->first);
     mnuDestroyWindowContainer(resources->second);
 }
 
 extern void func_002B9720(s32);
 
-s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuResourceOwner *owner) {
-    MenuResourceSet *resources = owner->resources;
+s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuStaffContext *owner) {
+    MenuResourceSet *resources = (MenuResourceSet *)owner->menu;
 
-    if (*(u8 *)((itemId & 0xFFFF) + datGameState + 0x1340) == 0) {
+    if (((SaveItemCounts *)datGameState)->counts[itemId & 0xFFFF] == 0) {
         func_002B9720(resources->first);
     }
     return ((MenuStaffList *)resources->first)->window->panelActive != 0;
@@ -66,8 +69,8 @@ s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuResourceOwner *owner) {
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABD60);
 
-void func_002ABEB0(MenuResourceOwner *object) {
-    mnuDestroyWindowContainer(object->resources->third);
+void func_002ABEB0(MenuStaffContext *object) {
+    mnuDestroyWindowContainer(((MenuResourceSet *)object->menu)->third);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABED8);
@@ -76,12 +79,12 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC050);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC408);
 
-void func_002AC660(MenuResourceOwner *object) {
-    mnuDestroyWindowContainer(object->resources->fourth);
+void func_002AC660(MenuStaffContext *object) {
+    mnuDestroyWindowContainer(((MenuResourceSet *)object->menu)->fourth);
 }
 
-s32 func_002AC688(s32 previousIndex, s32 selectedIndex, MenuResourceOwner *owner) {
-    MenuStaffNode *node = ((MenuStaffList *)owner->resources->fourth)->window->head;
+s32 func_002AC688(s32 previousIndex, s32 selectedIndex, MenuStaffContext *owner) {
+    MenuStaffNode *node = ((MenuStaffList *)((MenuResourceSet *)owner->menu)->fourth)->window->head;
     s32 index;
 
     if (node != NULL) {
@@ -107,14 +110,14 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC750);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC8F0);
 
-void func_002ACA98(MenuResourceOwner *object) {
-    mnuDestroyWindowContainer(object->resources->fifth);
+void func_002ACA98(MenuStaffContext *object) {
+    mnuDestroyWindowContainer(((MenuResourceSet *)object->menu)->fifth);
 }
 
-s32 func_002ACAC0(s32 itemId, MenuResourceOwner *owner) {
-    MenuResourceSet *resources = owner->resources;
+s32 func_002ACAC0(s32 itemId, MenuStaffContext *owner) {
+    MenuResourceSet *resources = (MenuResourceSet *)owner->menu;
 
-    if (*(u8 *)(itemId + datGameState + 0x1340) == 0) {
+    if (((SaveItemCounts *)datGameState)->counts[itemId] == 0) {
         func_002B9720(resources->fifth);
     }
     return ((MenuStaffList *)resources->fifth)->window->panelActive != 0;
@@ -128,18 +131,19 @@ void func_002ACB38(s32 object) {
 }
 
 u32 mnuInitializeWindowOwnerResourceSet(void) {
-    s32 context = kwlnTaskGetUserValue();
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
     s32 handle = sdfAllocGeneralBlock(0x54);
-    u8 *resource = sdfResourceRetainAddress(handle);
+    MenuResourceSet *resource = sdfResourceRetainAddress(handle);
 
-    *(u8 **)(context + 0xAA48) = resource;
+    context->menu = (u8 *)resource;
     memset(resource, 0, 0x54);
-    *(s32 *)resource = handle;
-    func_002ACB18(context);
-    func_002AB8F0(context);
-    mnuConfigurePanelResource(*(s32 *)(context + 0x118), *(s32 *)(context + 0xC4), 0, 0);
-    func_002BAF50(*(s32 *)(context + 0x108), context + 0xB10C);
-    mnuSeekListNode(0, *(u8 **)(*(u8 **)(context + 0x108) + 0x18));
+    resource->allocation = handle;
+    func_002ACB18((u32)context);
+    func_002AB8F0((s32)context);
+    /* This input word at +0x118 is not identified in the shared context yet. */
+    mnuConfigurePanelResource(*(s32 *)((u8 *)context + 0x118), context->spriteArg2, 0, 0);
+    func_002BAF50((s32)context->activeWindow, (s32)context->tail);
+    mnuSeekListNode(0, context->activeWindow->window);
     return 1;
 }
 
@@ -147,12 +151,12 @@ u32 mnuInitializeWindowOwnerResourceSet(void) {
  * the owner's teardown hook, then close the party's resource menu. */
 s32 mnuDestroyWindowOwnerResourceSet(void) {
     s32 context = kwlnTaskGetUserValue();
-    MenuResourceOwner *owner = (MenuResourceOwner *)context;
-    MenuResourceSet *party = owner->resources;
+    MenuStaffContext *owner = (MenuStaffContext *)context;
+    MenuResourceSet *party = (MenuResourceSet *)owner->menu;
 
     mnuDestroyResourceOwnerWindowContainers(owner);
     func_002ACB38(context);
-    sdfReleaseResourceAllocation(*(s32 *)party);
+    sdfReleaseResourceAllocation(party->allocation);
     return 1;
 }
 
@@ -220,16 +224,16 @@ s32 context;
     return 1;
 }
 
-/* Record the choice only while the resource is active; the follow-up runs regardless. */
+/* On successful item use, publish the remaining count and record the selected item. */
 void mnuApplyResourceSelection(s32 index, s32 context) {
     MenuResourceSet *resources;
-    s32 resourceActive;
+    s32 consumed;
 
-    resources = ((MenuResourceOwner *)context)->resources;
-    resourceActive = mnuUseStaffItem();
-    if (resourceActive != 0) {
-        *(u32 *)(*(s32 *)(*(s32 *)(resources->first + 0x18) + 0x1c) + 0x60) =
-                  (u32)*(u8 *)(index + datGameState + 0x1340);
+    resources = (MenuResourceSet *)((MenuStaffContext *)context)->menu;
+    consumed = mnuUseStaffItem();
+    if (consumed != 0) {
+        ((MenuStaffList *)resources->first)->window->selectedNode->label =
+                  (u32)((SaveItemCounts *)datGameState)->counts[index];
         resources->selection = index;
     }
     func_002C1B68(context + 0xaa50, 1);
@@ -239,7 +243,7 @@ u32 func_002AD0A8(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    func_002BAF50(((MenuResourceOwner *)context)->resources->first, context + 0xb10c);
+    func_002BAF50(((MenuResourceSet *)((MenuStaffContext *)context)->menu)->first, context + 0xb10c);
     return 1;
 }
 
@@ -247,7 +251,7 @@ u32 func_002AD0E8(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    func_002BAF50(*(u32 *)(context + 0x108), context + 0xb10c);
+    func_002BAF50((u32)((MenuStaffContext *)context)->activeWindow, (s32)((MenuStaffContext *)context)->tail);
     return 1;
 }
 
