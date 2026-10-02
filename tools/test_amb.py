@@ -25,7 +25,7 @@ area name=@area_name sblocks=@sblocks count=1 model=@model position=@area_positi
 label area_name
 string16 "001"
 label sblocks
-sblock name=@sblock_name node=4 icons=@icons count=1 floor=-2 bounds=null,@bound_max
+sblock name=@sblock_name node=0 icons=@icons count=1 floor=-2 bounds=null,@bound_max
 label sblock_name
 string16 "s01"
 label icons
@@ -80,6 +80,13 @@ class AmbCodecTests(unittest.TestCase):
         struct.pack_into("<I", data, 0x10, len(packed))
         data[data_end:] = packed
         with self.assertRaisesRegex(amb.AmbError, "relocation does not agree"):
+            amb.validate(bytes(data))
+
+    def test_subblock_model_node_is_validated(self) -> None:
+        data = bytearray(amb.encode(amb.parse_source(SOURCE)))
+        decoded = amb.decode(data)
+        struct.pack_into("<I", data, decoded.sblocks[0][0].offset + 4, 1)
+        with self.assertRaisesRegex(amb.AmbError, "references model node 1"):
             amb.validate(bytes(data))
 
     def test_tracked_corpus_is_canonical(self) -> None:
