@@ -124,7 +124,9 @@ typedef struct FrFontSys {
     s32 glyphCount;           /* 0x14C */
     s32 itemPool;             /* 0x150 */
     s32 glyphPool;            /* 0x154 */
-    u8 unk158[0x3C];          /* 0x158 */
+    u8 unk158[0x20];          /* 0x158 */
+    s32 imageBuffers[6];      /* 0x178: GS upload destinations */
+    u8 unk190[4];             /* 0x190 */
     FrFontGlyph *slots[2];    /* 0x194 */
 } FrFontSys;
 
@@ -205,7 +207,36 @@ void frFontFreeAllEntries(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019C358);
+extern u8 D_003B2DA8[];
+/* This caller passes the full image-buffer word; the callee consumes its low half. */
+extern void sdfUploadGsImageUnderSemaphore(s32 buffer, s32 image);
+
+void func_0019C358(void) {
+    u32 image[16];
+    s32 batch = 0;
+    s32 sourceOffset = 0;
+    FrFontSys *work = &frFontWork;
+    s32 *buffer = work->imageBuffers;
+    u8 *sourceTable = D_003B2DA8;
+
+    do {
+        u32 *output = image;
+        u8 *source = (u8 *)(sourceOffset * 4 + (u32)sourceTable);
+        s32 remaining = 15;
+
+        do {
+            *output = (((source[3] << 8) | source[2]) << 8 |
+                       source[1]) << 8 | source[0];
+            source += 4;
+            output++;
+            remaining--;
+        } while (remaining >= 0);
+
+        sdfUploadGsImageUnderSemaphore(*buffer++, (s32)image);
+        batch++;
+        sourceOffset += 16;
+    } while (batch < 6);
+}
 
 void frFontReleaseUnreferencedGlyphItem(FrFontGlyph *glyph) {
     FrFontRecord *item = (FrFontRecord *)glyph->firstChild;
