@@ -20,6 +20,7 @@ def load(name, path):
 
 probe = load("ee_gcc_probe", ROOT / "tools/ee_gcc_probe.py")
 compare = load("ee_gcc_compare", ROOT / "tools/ee_gcc_compare.py")
+delay_slots = load("ee_gcc_delay_slots", ROOT / "tools/ee_gcc_delay_slots.py")
 
 
 class ProbeTests(unittest.TestCase):
@@ -129,6 +130,40 @@ class CompareTests(unittest.TestCase):
             report = compare.compare_runs(left, right)
             self.assertEqual("assembly", report["first_semantic_divergence"])
             self.assertEqual("final emission", report["classification"]["stage"])
+
+
+class DelaySlotTests(unittest.TestCase):
+    SAMPLE = '''
+(insn 138 75 80 (sequence[
+            (call_insn:TI 76 75 80 (parallel[
+                        (call (mem:SI (symbol_ref:SI ("convert")) 0)
+                            (const_int 0))
+                        (clobber (reg:SI 31 ra))
+                    ] ) 321 (nil)
+                (nil)
+                (nil))
+            (insn:TI 75 73 76 (set (reg:SF 46 $f14)
+                    (mem/s:SF (plus:SI (reg:SI 29 sp)
+                            (const_int 24)) 22)) 205 (nil)
+                (nil))
+        ] ) -1 (nil)
+    (nil))
+'''
+
+    def test_balanced_form_ignores_parentheses_in_strings(self):
+        text = '(insn 1 0 0 (asm_input ("text ) ( text")) -1) trailing'
+        form, end = delay_slots.balanced_form(text, 0)
+        self.assertEqual('(insn 1 0 0 (asm_input ("text ) ( text")) -1)', form)
+        self.assertEqual(" trailing", text[end:])
+
+    def test_analyze_delay_sequence(self):
+        sequences = delay_slots.analyze_dump(self.SAMPLE)
+        self.assertEqual(1, len(sequences))
+        self.assertEqual(138, sequences[0]["wrapper_uid"])
+        self.assertEqual("convert", sequences[0]["branch"]["target"])
+        self.assertEqual(75, sequences[0]["slots"][0]["uid"])
+        self.assertEqual("load", sequences[0]["slots"][0]["operation"])
+        self.assertEqual("$f14", sequences[0]["slots"][0]["destination"])
 
 
 if __name__ == "__main__":
