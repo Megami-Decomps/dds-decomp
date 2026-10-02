@@ -28,15 +28,41 @@ reads like the source the developers wrote.
 
 ## Versions
 
-| Version | Game | Serial | ELF SHA-1 | Functions in C | Code bytes in C |
-|---|---|---|---|---|---|
-| `dds1` | Digital Devil Saga (USA) | `SLUS_209.74` | `6d18898e2724bf1d145392766e8ba1e678487419` | 4,924 / 9,595 (51.3%) | 14.1% |
-| `dds2` | Digital Devil Saga 2 (USA) | `SLUS_211.52` | `9be91ee1b4a535a4cb6ec89237b5a6ba41be2add` | 4,360 / 10,877 (40.1%) | 9.0% |
+| Version | Game | Serial | ELF SHA-1 |
+|---|---|---|---|
+| `dds1` | Digital Devil Saga (USA) | `SLUS_209.74` | `6d18898e2724bf1d145392766e8ba1e678487419` |
+| `dds2` | Digital Devil Saga 2 (USA) | `SLUS_211.52` | `9be91ee1b4a535a4cb6ec89237b5a6ba41be2add` |
 
-Both builds are byte-identical at every commit: `ninja` fails when a SHA-1
-doesn't match. Run `python tools/progress.py` for current numbers. The Sony
-SDK libraries are prebuilt archives in the original game too; they stay
-assembly and are not counted.
+`ninja` verifies each rebuilt executable against its retail SHA-1. The build
+includes assembly fallbacks for unfinished functions, so a byte-identical
+executable does not mean all its code has been decompiled.
+
+### Reading progress
+
+- `python tools/progress.py` reports current **source coverage** after splitting:
+  game functions and their retail code bytes that no longer use `INCLUDE_ASM`.
+  This inventory does not compile or independently verify the functions.
+- [decomp.dev][progress] uses the generated **objdiff comparison reports**.
+  Exact matching credits only functions with a 100% comparison result; fuzzy
+  matching also gives partial credit for similar instructions. These are
+  different measures from source coverage.
+- Select **Atlus game/engine** for the game-code category. **Sony SDK / C
+  runtime** contains prebuilt library code that remains assembly. **VU1
+  microcode (binary)** contains the binary `.vutext` program, which splat
+  exposes as a text unit rather than individual EE functions. **All** retains
+  all three categories; SDK and VU1 are excluded from `tools/progress.py`.
+- The reports do not currently set objdiff's **complete/linked** metadata.
+  A zero there is not a measurement of source coverage or build success.
+
+There is a known comparison-context limitation: objdiff bases are compiled
+separately with `-DSKIP_ASM`. ee-gcc 2.96 can select different instructions
+when the surrounding source or compiler pathnames change, so an accepted C
+function can score below 100% in that comparison. `tools/check_unit.py` also
+checks the full build context and recognizes these as-built matches. See
+[the matching workflow](docs/CONTRIBUTING.md#3-verify) and
+[compiler context](docs/idioms.md#code-that-changes-with-unrelated-text-context).
+The reporting-context discrepancy remains open; use the unit checks and
+retail checksum build when validating a match.
 
 ## Quickstart
 

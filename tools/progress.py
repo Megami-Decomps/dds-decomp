@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Decompilation progress per version: functions and code bytes in C.
+"""Source coverage per version: functions and code bytes in C.
 
     python3 tools/progress.py [dds1 dds2] [--markdown]
 
 Every retail function of a game unit is either C in src/<v>/ or an
 INCLUDE_ASM line. Sizes come from the split assembly (asm/<v>/, so run
-configure.py first). Library code outside src/ is not counted.
+configure.py first). Library code outside src/ and binary VU1 microcode are
+not counted. This source inventory does not compile or verify matching;
+use check_unit.py and the retail checksum build for that.
 """
 import re
 import sys
@@ -48,7 +50,8 @@ def main():
         if md:
             print(f"| `{v}` | {cf:,} / {f:,} ({100 * cf / f:.1f}%) | {cs:,} / {s:,} ({100 * cs / s:.1f}%) |")
         else:
-            print(f"{v}: {cf}/{f} functions ({100 * cf / f:.1f}%), {cs}/{s} bytes ({100 * cs / s:.1f}%)")
+            print(f"{v}: {cf}/{f} functions in C ({100 * cf / f:.1f}%), "
+                  f"{cs}/{s} code bytes in C ({100 * cs / s:.1f}%)")
 
 
 if __name__ == "__main__":
