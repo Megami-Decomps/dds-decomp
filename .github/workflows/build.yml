@@ -71,10 +71,30 @@ jobs:
       - name: Progress reports
         if: steps.orig.outputs.available == 'true'
         run: |
-          ninja build/dds1/report.json build/dds2/report.json
+          ninja build/dds1/report.json build/dds2/report.json build/dds1/report.all.json build/dds2/report.all.json
           python3 tools/progress.py
 
-      # decomp.dev reads one artifact per version, named <version>_report.
+      - name: Check report scope
+        if: steps.orig.outputs.available == 'true'
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          for version in ("dds1", "dds2"):
+              root = Path("build") / version
+              primary = json.loads((root / "report.json").read_text())
+              audit = json.loads((root / "report.all.json").read_text())
+              game_units = [unit for unit in audit["units"]
+                            if "game" in unit.get("metadata", {}).get("progress_categories", [])]
+              game_measures = next(category["measures"] for category in audit["categories"]
+                                   if category["id"] == "game")
+              assert primary["units"] == game_units, f"{version}: primary game units changed"
+              assert primary["measures"] == game_measures, f"{version}: primary game totals changed"
+              print(f"{version}: primary report equals full-binary audit's game scope")
+          PY
+
+      # decomp.dev reads the game-code reports, named <version>_report.
       - name: Upload dds1 report
         if: steps.orig.outputs.available == 'true'
         uses: actions/upload-artifact@v5
@@ -88,3 +108,14 @@ jobs:
         with:
           name: dds2_report
           path: build/dds2/report.json
+
+      # Keep SDK/VU1/game totals auditable without importing extra site versions.
+      # This name intentionally does not match decomp.dev's *_report pattern.
+      - name: Upload full-binary audit
+        if: steps.orig.outputs.available == 'true'
+        uses: actions/upload-artifact@v5
+        with:
+          name: build-audit
+          path: |
+            build/dds1/report.all.json
+            build/dds2/report.all.json

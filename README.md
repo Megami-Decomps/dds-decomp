@@ -1,11 +1,17 @@
 # Shin Megami Tensei: Digital Devil Saga 1 & 2
 
-[![Build Status]][actions] [![dds1]][progress] [![dds2]][progress]
+[![Build Status]][actions]
+[![dds1-code]][dds1-progress] [![dds1-functions]][dds1-progress]
+[![dds2-code]][dds2-progress] [![dds2-functions]][dds2-progress]
 
 [Build Status]: https://github.com/Megami-Decomps/dds-decomp/actions/workflows/build.yml/badge.svg
 [actions]: https://github.com/Megami-Decomps/dds-decomp/actions/workflows/build.yml
-[dds1]: https://decomp.dev/Megami-Decomps/dds-decomp/dds1.svg?mode=shield&label=dds1
-[dds2]: https://decomp.dev/Megami-Decomps/dds-decomp/dds2.svg?mode=shield&label=dds2
+[dds1-code]: https://decomp.dev/Megami-Decomps/dds-decomp/dds1.svg?mode=shield&category=game&measure=matched_code_percent&label=dds1%20code%20bytes
+[dds1-functions]: https://decomp.dev/Megami-Decomps/dds-decomp/dds1.svg?mode=shield&category=game&measure=matched_functions_percent&label=dds1%20functions
+[dds2-code]: https://decomp.dev/Megami-Decomps/dds-decomp/dds2.svg?mode=shield&category=game&measure=matched_code_percent&label=dds2%20code%20bytes
+[dds2-functions]: https://decomp.dev/Megami-Decomps/dds-decomp/dds2.svg?mode=shield&category=game&measure=matched_functions_percent&label=dds2%20functions
+[dds1-progress]: https://decomp.dev/Megami-Decomps/dds-decomp/dds1?category=game
+[dds2-progress]: https://decomp.dev/Megami-Decomps/dds-decomp/dds2?category=game
 [progress]: https://decomp.dev/Megami-Decomps/dds-decomp
 
 A work-in-progress **matching decompilation** of *Shin Megami Tensei: Digital
@@ -46,11 +52,17 @@ executable does not mean all its code has been decompiled.
   Exact matching credits only functions with a 100% comparison result; fuzzy
   matching also gives partial credit for similar instructions. These are
   different measures from source coverage.
-- Select **Atlus game/engine** for the game-code category. **Sony SDK / C
-  runtime** contains prebuilt library code that remains assembly. **VU1
-  microcode (binary)** contains the binary `.vutext` program, which splat
-  exposes as a text unit rather than individual EE functions. **All** retains
-  all three categories; SDK and VU1 are excluded from `tools/progress.py`.
+- The primary reports cover **Atlus game/engine EE code**, the C reconstruction
+  target. Their overall totals and **Atlus game/engine** category contain the
+  same units, including unfinished game functions. The headline and code-byte
+  badges measure matching bytes; the separate function badges measure matching
+  function counts. A short function and a large function contribute equally
+  only to the latter.
+- **Sony SDK / C runtime** code was linked from prebuilt libraries and remains
+  assembly. **VU1 microcode (binary)** is the binary `.vutext` program, which
+  splat exposes as a text unit rather than individual EE functions. These are
+  outside the primary game-code denominator and `tools/progress.py`, but stay
+  in the full-binary audit reports and local objdiff configurations.
 - The reports do not currently set objdiff's **complete/linked** metadata.
   A zero there is not a measurement of source coverage or build success.
 
@@ -63,6 +75,14 @@ checks the full build context and recognizes these as-built matches. See
 [compiler context](docs/idioms.md#code-that-changes-with-unrelated-text-context).
 The reporting-context discrepancy remains open; use the unit checks and
 retail checksum build when validating a match.
+
+`ninja report` generates both views: `build/<v>/report.json` is the primary
+game-code report, and `build/<v>/report.all.json` retains game, SDK/runtime,
+and VU1 units with their separate categories. The root `report.json` combines
+both games' full-binary reports. CI publishes the primary files as
+`dds1_report` and `dds2_report` for decomp.dev and the full-binary files in the
+separate **build-audit** artifact on [the build run][actions]. objdiff computes
+each report's totals from its included units; no match results are rewritten.
 
 ## Quickstart
 
