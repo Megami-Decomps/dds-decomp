@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 
 extern s32 func_00309638(u32);
 
@@ -309,12 +310,6 @@ void itfSetGridDescriptorControlBit(s32 object, s32 index) {
     *(u64 *)(descriptor + 0x20) = (*(u64 *)(descriptor + 0x20) & 0x1fffffffffffffff) | 0x4000000000000000;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003075D8);
-
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00307710);
-
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003078A8);
-
 typedef struct GridAngleRectangle {
     u8 pad00[0x6C];
     s32 left;       /* 0x6C */
@@ -331,6 +326,61 @@ typedef struct GridAngleAdjustment {
     u8 pad0C[8];
     u32 colors[4];     /* 0x14 */
 } GridAngleAdjustment;
+
+/* Apply the MOVE_01 easing to the bounds and packed colors, then return its cycle step. */
+s32 func_003075D8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
+    GridAngleTable *table = owner->slot->table;
+    s32 deltas[2];
+    s32 *dimensionOut = (s32 *)((u8 *)out + 4);
+    u32 *sourceColor;
+    u32 *destColor;
+    s32 colorFactor;
+    s32 i = 0;
+
+    deltas[0] = (rectangle->right - rectangle->left) << 4;
+    deltas[1] = (rectangle->bottom - rectangle->top) << 3;
+    for (; i < 2; i++) {
+        s32 delta = deltas[i];
+        s32 scaled = (s32)(fsqrtf((f32)delta) * (f32)owner->angle * (1.0f / 65536.0f));
+
+        if (delta > 0) {
+            dimensionOut[i] = delta - scaled * scaled;
+        } else {
+            dimensionOut[i] = scaled * scaled + delta;
+        }
+    }
+
+    if (table->mirrored != 0) {
+        colorFactor = 0x10000 - owner->angle;
+    } else {
+        colorFactor = owner->angle;
+    }
+    sourceColor = rectangle->colors;
+    destColor = (u32 *)((u8 *)dimensionOut + 0x10);
+    {
+        s32 colorMask = -0x100;
+        s32 fractionalMask = 0xFFFF;
+
+        for (i = 3; i >= 0; i--, sourceColor++, destColor++) {
+            u32 color = *sourceColor;
+            s32 lowByte = *(u8 *)sourceColor;
+            s32 product = lowByte * colorFactor;
+            s32 negative = 0;
+
+            /* Signed fixed-point division rounds toward zero. */
+            if (product < 0) {
+                negative++;
+            }
+            *destColor = (color & colorMask) |
+                         ((product + negative * fractionalMask) >> 16);
+        }
+    }
+    return 0x10000 / table->divisor;
+}
+
+INCLUDE_ASM(const s32, "game/code_00306F80", func_00307710);
+
+INCLUDE_ASM(const s32, "game/code_00306F80", func_003078A8);
 
 /* Contract the grid bounds and fade each packed color's low byte as the angle advances. */
 s32 func_00307A68(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
