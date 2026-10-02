@@ -11,6 +11,12 @@ typedef struct {
     PathState *state;
 } PathObject;
 
+typedef struct Dds3PathKeyframes {
+    u32 count;
+    f32 *data;
+    u32 *frames;
+} Dds3PathKeyframes;
+
 extern u64 dds3GetWorldSecondaryObject(void);
 extern s32 dds3FindWorldObjectNodeByKey(u64, u64, u64);
 
@@ -64,7 +70,22 @@ u32 dds3GetPathState(PathObject *path) {
     return (u32)path->state;
 }
 
-INCLUDE_ASM(const s32, "game/code_00116A90", func_00116B80);
+void func_00116B80(u32 *segment, f32 *weight, Dds3PathKeyframes *keys, f32 frame) {
+    u32 count = keys->count;
+    u32 i;
+    u32 *frames = keys->frames;
+
+    for (i = 0; i < count - 1; i++) {
+        if ((f32)frames[i] <= frame && frame < (f32)frames[i + 1]) {
+            *weight = 1.0f / (f32)(frames[i + 1] - frames[i]);
+            *segment = i;
+            *weight *= frame - (f32)frames[i];
+            return;
+        }
+    }
+    *segment = count - 2;
+    *weight = 1.0f;
+}
 
 ActionObj *evtSpawnActionObj10(s32 a, void *work, s32 c) {
     ActionObj *obj = dds3AppendWorldObjectNode(0x10);
@@ -74,12 +95,6 @@ ActionObj *evtSpawnActionObj10(s32 a, void *work, s32 c) {
     obj->unk18 = work;
     return obj;
 }
-
-typedef struct Dds3PathKeyframes {
-    u32 count;
-    f32 *data;
-    u32 *frames;
-} Dds3PathKeyframes;
 
 typedef struct Dds3PathCurveEntry {
     u32 kind;
@@ -154,4 +169,3 @@ Dds3PathCurveWork *func_00116D38(ActionObj *object) {
     }
     return work;
 }
-
