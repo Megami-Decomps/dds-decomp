@@ -110,14 +110,46 @@ FLD1 additionally uses these typed forms:
 
 | Type | Source form | Contents currently recovered |
 |---:|---|---|
-| `2` | resource descriptors plus relocatable raw data | Field model resources |
+| `2` | `model_resource`, `model_items`, `model_item`, `model_bounds` | Field model hierarchy, transforms, bounds, assets, and command-list references |
 | `5` | `texture_list` | Referenced field texture-list filename |
 | `11` | `effect` | Effect kind, resource selector, size, and parameters |
 | `12` | `light` | Animation mode, radii, softness, bias, diffuse RGB, and ambient RGB |
 
 Types `3` and `9` use the same collision and motion forms in both files.
-Unrecovered model internals remain ordered `bytes` and symbolic `pointer`
-directives, so their offsets can still move safely as their structures are
+
+Each type-2 resource owns a model-item list and refers to its shared asset and
+motion definitions:
+
+```text
+model_resource items=@md_01all_02_items \
+  assets=@md_01all_02_assets motion=@md_01all_02_motion
+
+label md_01all_02_items
+model_items count=131
+model_item node_id=0 parent=-1 rotation=0,-1.57079637,-0 \
+  position=0,0,0,1 scale=1,1,1,0 bounds=null commands=null
+model_item node_id=2 parent=1 rotation=0,0.210236,0 \
+  position=-54240.1171875,30,-290.3564453125,1 scale=1,1,1,0 \
+  bounds=@md_01all_02_node_2_bounds \
+  commands=@md_01all_02_node_2_commands
+
+label md_01all_02_node_2_bounds
+model_bounds minimum=-2138.26513671875,0.0000457763671875,-7423.814453125 \
+  maximum=4551.91259765625,103.9683609008789,6058.49365234375
+```
+
+The runtime creates one draw node per `model_item`. `node_id` is its lookup
+identity, `parent` selects the parent draw node (`-1` is a root), the three
+rotation values are Euler angles converted to a quaternion, and position and
+scale become its local transform. `model_bounds` stores two local XYZ box
+corners used by clipping. The `commands` pointer is compiled into the two
+rendering slots for that node.
+
+All 7,125 type-2 resources and 98,442 model items in the two version-23 disc
+corpora use this same profile. Their fixed control and padding words are
+derived by the assembler and checked by the parser. The nested asset,
+command-list, and motion payloads remain ordered `bytes` and symbolic
+`pointer` directives, so they can move safely while those formats are
 recovered.
 
 Each transform is `0x30` bytes: four position floats, four rotation floats,
