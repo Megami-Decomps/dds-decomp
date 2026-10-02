@@ -411,6 +411,27 @@ class WhyTests(unittest.TestCase):
             right = self.make_probe(root, "right", {"03.cse": "same\n"}, manifest=right_manifest)
             report = why.analyze(left, right, "wanted")
             self.assertTrue(any("extra_cflags" in warning for warning in report["warnings"]))
+            self.assertEqual("insufficient-evidence", report["diagnosis"]["class"])
+
+    def test_scheduler_verbose_mismatch_does_not_block_stop(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            base = {
+                "version": "dds1", "as_unit": "src/dds1/sample.c",
+                "compiler": {"sha256": "compiler"},
+                "wrapper_returncode": 0, "cc1_succeeded": True,
+                "object": None,
+            }
+            left = self.make_probe(
+                root, "left", {"17.sched": ";; quiet\n(insn 1)\n"},
+                manifest={**base, "extra_cflags": []},
+            )
+            right = self.make_probe(
+                root, "right", {"17.sched": ";; verbose detail\n(insn 1)\n"},
+                manifest={**base, "extra_cflags": ["-fsched-verbose=5"]},
+            )
+            report = why.analyze(left, right, "wanted")
+            self.assertEqual("no-codegen-difference", report["diagnosis"]["class"])
 
     def test_old_manifest_flags_are_recovered_from_command(self):
         manifest = {
