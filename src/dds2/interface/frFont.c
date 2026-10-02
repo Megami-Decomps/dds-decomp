@@ -125,6 +125,9 @@ void frFontCreateContext();
 
 extern u8 D_00436578[];
 
+typedef struct MemNode MemNode;
+extern void *itfDequeueMemNode(MemNode *);
+
 /* Font system at frFontWork (see game/code_0019B840.c); the two glyph slots
  * at +0x194/+0x198 are selected by func_00195B10. */
 typedef struct FrFontSys {
@@ -132,8 +135,8 @@ typedef struct FrFontSys {
     s32 count;                /* 0x144 */
     s32 itemCount;            /* 0x148 */
     s32 glyphCount;           /* 0x14C */
-    s32 itemPool;             /* 0x150 */
-    s32 glyphPool;            /* 0x154 */
+    MemNode *itemPool;        /* 0x150 */
+    MemNode *glyphPool;       /* 0x154 */
     u8 unk158[8];
     s32 atlasBufferWidth;     /* 0x160 */
     u8 unk164[0xC];
@@ -192,7 +195,11 @@ typedef struct TextStyleNode {
 
 extern s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph);
 
-extern FrFontGlyph *func_0019C850(FrFontGlyph *glyph, s32 option);
+extern FrFontGlyph *func_0019C850(FrFontGlyph *source, FrFontGlyph *destination);
+void frFontSetupGlyph(FrFontGlyph *, s16, s8, s8, s32, s8);
+void frFontInitGlyph(FrFontGlyph *);
+u32 frFontGetGlyphCellWidth(u8);
+u32 frFontGetGlyphCellHeight(u8);
 
 FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *previous, FrFontGlyph *next);
 
@@ -271,7 +278,7 @@ FrFontGlyph *frFontAdvanceOrRetainFadingGlyph(FrFontGlyph *glyph) {
     return frFontReleaseGlyphChain(glyph);
 }
 
-extern s32 itfEnqueueMemNode(void *node, s32 pool);
+extern s32 itfEnqueueMemNode(void *node, MemNode *pool);
 
 /* Release a glyph chain, walking back along `previous`: drop each child's record reference (releasing the record once unreferenced), return the child and then the glyph itself to their node pools, and keep the live counts. */
 FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph) {
@@ -328,7 +335,39 @@ u32 func_0019C638(void) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C640);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019C850);
+extern s8 D_003B2DA0[];
+
+/* Append a source-glyph reference, allocating a chain head when absent. */
+FrFontGlyph *func_0019C850(FrFontGlyph *source, FrFontGlyph *destination) {
+    FrFontGlyph *glyph;
+    FrFontGlyph *previous;
+
+    if (destination == NULL) {
+        destination = itfDequeueMemNode(frFontWork.glyphPool);
+        frFontWork.glyphCount++;
+        frFontInitGlyph(destination);
+    }
+    glyph = itfDequeueMemNode(frFontWork.itemPool);
+    previous = destination->unk20;
+    frFontWork.itemCount++;
+    frFontSetupGlyph(glyph, 0, 0, 0, 0xA09DC300, 0);
+    if (previous == NULL) {
+        destination->firstChild = glyph;
+    } else {
+        previous->next = glyph;
+    }
+    glyph->unk20 = source;
+    glyph->advance = D_003B2DA0[0];
+    glyph->unk18.b[0] = frFontGetGlyphCellWidth(0);
+    glyph->unk18.b[1] = frFontGetGlyphCellHeight(0);
+    glyph->previous = previous;
+    destination->unk20 = glyph;
+    destination->unk18.w++;
+    destination->advance += glyph->advance;
+    destination->u10.half[0] = glyph->unk18.b[0];
+    destination->u10.half[1] = glyph->unk18.b[1];
+    return destination;
+}
 
 FrFontGlyph *frFontAppendClonedGlyph(FrFontGlyph *source, FrFontGlyph *destination) {
     FrFontGlyph *glyph = func_0019C850(source, 0);
@@ -698,8 +737,6 @@ typedef struct FrFontGlyphMeasureWork {
     u8 pad1A[0x16];
 } FrFontGlyphMeasureWork;
 
-u32 frFontGetGlyphCellWidth(u8 fontIndex);
-u32 frFontGetGlyphCellHeight(u8 fontIndex);
 extern void func_0019C640(FrFontGlyphMeasureWork *work, s32 code);
 
 s32 func_0019D9A8(const u8 *text, u8 fontIndex, u8 mode) {

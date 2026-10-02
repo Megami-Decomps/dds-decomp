@@ -168,7 +168,36 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C8D0);
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025CA50);
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025CFA0);
+typedef struct MnuProfileIdList {
+    s8 ids[22];
+} MnuProfileIdList;
+
+typedef struct MnuProfileOwner {
+    u32 unit;
+} MnuProfileOwner;
+
+extern const MnuProfileIdList D_003AFA00;
+extern u32 prfGetCapValue(u16);
+extern u32 ptyGetProfileRecordValue(u32, u16);
+extern void func_0025C1C8(s32, s32, s32, s32, s32, s32, s32);
+
+/* Draw cap markers, with a second marker for the first four profiles. */
+void func_0025CFA0(s32 x, s32 y, s32 depth, s32 alpha,
+                   MnuProfileOwner *owner, s32 context) {
+    MnuProfileIdList profiles = D_003AFA00;
+    s32 i;
+    u32 cap;
+
+    for (i = 0; i < 22; i++) {
+        cap = prfGetCapValue(profiles.ids[i]);
+        if (cap == ptyGetProfileRecordValue(owner->unit, profiles.ids[i])) {
+            func_0025C1C8(x, y, depth, alpha, i + 0x10, 0, context);
+            if (i < 4) {
+                func_0025C1C8(x, y, depth, alpha, i + 0x2B, 0x20, context);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D100);
 

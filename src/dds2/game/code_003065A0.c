@@ -4,7 +4,35 @@ extern s32 effGetSlotWorkOrOverride(s32, s32);
 
 extern void func_00306970(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_003065A0", func_003065A0);
+/* 0x80 leaves the copied corner words unchanged. */
+void func_003065A0(u32 *source, u32 *destination, u8 *edgeValues, u32 edge) {
+    u8 value = edgeValues[edge];
+
+    destination[0] = source[0];
+    destination[1] = source[1];
+    destination[2] = source[2];
+    destination[3] = source[3];
+    if (value != 0x80) {
+        switch (edge) {
+        case 0:
+            destination[0] = (destination[0] & ~0xFF) | value;
+            destination[1] = (destination[1] & ~0xFF) | value;
+            break;
+        case 1:
+            destination[2] = (destination[2] & ~0xFF) | value;
+            destination[3] = (destination[3] & ~0xFF) | value;
+            break;
+        case 2:
+            destination[0] = (destination[0] & ~0xFF) | value;
+            destination[2] = (destination[2] & ~0xFF) | value;
+            break;
+        case 3:
+            destination[1] = (destination[1] & ~0xFF) | value;
+            destination[3] = (destination[3] & ~0xFF) | value;
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_003065A0", func_00306678);
 
