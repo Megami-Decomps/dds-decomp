@@ -126,7 +126,7 @@ typedef struct SdfCounterRuntime {
     SdfCounterTimer *timer;         /* 0x30 */
 } SdfCounterRuntime;
 
-void func_002C5FB8(u32 arg0);
+s32 func_002C5FB8(u32 arg0);
 
 s32 fldCountMaskBitsBeforeOrdinal(s32 mask, s32 ordinal) {
     s32 bitIndex = 0;
@@ -230,7 +230,29 @@ s32 fldCollectMapSelectionMask(MapSelectionContext *context) {
     return mask;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C6130);
+extern SdfCounterRuntime *sdfActiveCounterRuntime;
+extern void func_001093B8(s32, s32, s32, s32, u32, u32, u32, u32);
+extern void sdfCounterDrawGlyphAtGridCell(s32, s32, u32, const u8 *);
+
+void func_002C6130(s32 x, s32 y) {
+    SdfCounterDisplay *display = sdfActiveCounterRuntime->channel->display;
+    f32 fade = 1.0f;
+    s32 color;
+    s32 width;
+    u32 style;
+
+    fade -= (f32)sdfActiveCounterRuntime->timer->value / 10.0f;
+    func_001093B8(0, 0x120, 0x200, 0xA0, 0, 0,
+                 (s32)(fade * 64.0f) << 24, (s32)(fade * 64.0f) << 24);
+    fade *= 128.0f;
+    color = ((s32)(fade * 0.3f) << 24) | 0x5A3335;
+    func_001093B8(0, 0x17E, 0x100, 0x1A, 0x5A3335, color, color, 0x5A3335);
+    func_001093B8(0x100, 0x17E, 0x100, 0x1A, color, 0x5A3335, 0x5A3335, color);
+    width = func_002C5FB8((u32)display->info);
+    x = (s32)((f32)x - (f32)width * 0.5f);
+    style = ((u32)fade & 0xFF) | 0x80808000;
+    sdfCounterDrawGlyphAtGridCell(x, y, style, display->info);
+}
 
 /* Load the ten numbered "sname" tiles plus the two fixed local-map images. */
 s32 fldLoadLocalMapResources(void) {
