@@ -872,6 +872,24 @@ only for this is a lever and is not accepted (DDS2 `func_002A5F80`,
 Other causes: varargs, struct return, converted return, address-taken locals,
 stack arguments, nested `return;`.
 
+### Per-TU `-fno-optimize-sibling-calls`: boundary evidence and its limits
+
+The flag does more than turn `j` into `jal`: it also changes basic-block order
+(`cleanup_cfg`), so a function whose source was found under -O2 may stop matching
+under it and the other way round. Check every function of a candidate run
+under both flag sets (`check_unit --cflags=-fno-optimize-sibling-calls`) before
+calling it a run. Examples: DDS1/DDS2 `btlRollAiBucket` matches under both only as
+`if (prev >= slot - 3 && prev <= slot + 3) { reroll; return reroll / 0x29; }
+prev = slot; return slot;` (the `<`/`||`/`else` spelling is -O2-only);
+`btlUnitBlocksElementQueryForGroup` (both games) needs -O2 under any shape tried.
+A TU that starts with a looping function can also change how a LATER function
+compiles (DDS1 `func_0020A780` came out 232 instead of 224 bytes when
+`btlUnitBlocksElementQueryForGroup` was the first C function of its TU; any
+earlier C function cured it). If a proposed boundary fails only that way, the
+boundary is wrong: retail has a C function before the first one tested.
+A fully-C unit has no `INCLUDE_RODATA` step: a string a function names through
+`extern char D_X[]` is lost from the link; write the literal in the C.
+
 ### Saved-register order: global-alloc priority
 
 This compiler's `allocno_compare` uses `floor_log2(n_refs) * n_refs *

@@ -321,6 +321,21 @@ def cmd_units(args):
 KNR_HEADER = re.compile(r"^[A-Za-z_][\w \t\*]*\b\w+\s*\(\s*\w+(\s*,\s*\w+)*\s*\)\s*$")
 
 
+def first_code_line(lines):
+    """First line of an item outside its leading comment: the header of a
+    commented old-style (K&R) definition."""
+    in_comment = False
+    for line in lines:
+        stripped = line.strip()
+        if in_comment:
+            in_comment = "*/" not in stripped
+        elif stripped.startswith("/*"):
+            in_comment = "*/" not in stripped
+        elif stripped and not stripped.startswith("//"):
+            return line
+    return ""
+
+
 def blocks(text):
     """Top-level items: each declaration, definition, INCLUDE_ASM or preprocessor line,
     with any comment lines directly above it. Several declarations on consecutive lines
@@ -364,7 +379,7 @@ def blocks(text):
         depth += code.count("{") - code.count("}")
         # An old-style (K&R) definition declares its parameters between the
         # header and the body: those `type name;` lines belong to the function.
-        knr_params = depth == 0 and code.endswith(";") and KNR_HEADER.match(cur[0]) is not None \
+        knr_params = depth == 0 and code.endswith(";") and KNR_HEADER.match(first_code_line(cur)) is not None \
             and "{" not in "".join(cur)
         if depth == 0 and not in_comment and code.endswith((";", "}")) and not knr_params:
             flush()
