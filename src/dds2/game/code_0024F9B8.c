@@ -13,7 +13,16 @@ typedef struct {
 
 INCLUDE_ASM(const s32, "game/code_0024F9B8", func_0024F9B8);
 
-INCLUDE_ASM(const s32, "game/code_0024F9B8", func_0024FA48);
+extern s32 func_0035C860(char *output, const char *format, ...);
+
+s32 func_0024FA48(s32 event, s32 id, char *path1, char *path2, char *path3) {
+    func_0035C860(path1, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM1",
+                  event / 10 * 10, event, event, id, event, id);
+    func_0035C860(path2, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
+                  event / 10 * 10, event, event, id, event, id);
+    return func_0035C860(path3, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
+                         event / 10 * 10, event, event, id, event, id);
+}
 
 INCLUDE_ASM(const s32, "game/code_0024F9B8", func_0024FB48);
 
