@@ -1,7 +1,6 @@
 #include "common.h"
 
 extern s32 func_002CB3B8(u32, u32);
-extern void func_0024F6F0(s32, s32);
 
 extern u8 *datGameState;
 extern s32 scrGetSelectedOperandIndex(void *);
@@ -35,6 +34,22 @@ typedef struct MnuSpriteResource {
     MnuSpriteWork *sprites;
 } MnuSpriteResource;
 
+typedef union MnuVariantSpritePlacement {
+    struct {
+        u8 pad00[4];
+        s16 x;
+        s16 y;
+        s16 spriteGroups;
+        u16 flags;
+    } fields;
+    s16 values[6];
+} MnuVariantSpritePlacement;
+
+enum {
+    MNU_VARIANT_X_OFFSET = 2,
+    MNU_VARIANT_Y_OFFSET,
+};
+
 enum {
     MNU_SPRITE_RESOURCE_INDEX,
     MNU_SPRITE_INDEX,
@@ -43,7 +58,26 @@ enum {
 };
 
 extern MnuSpritePlacement D_0036B510[];
+extern MnuVariantSpritePlacement D_0036B7F0[];
+extern s32 D_0036C6AC[];
 extern s32 func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void mnuDestroyMantraDrawPool(void *);
+extern void mnuReleaseStaffMenuContextAndResources(u32 *);
+extern s32 dspCloseChannel(void);
+extern void sdfQueueNonzeroResourceId(s32);
+extern void sdfReleaseResourceAllocation(void *);
+
+typedef struct MnuResourceTaskWork {
+    void *allocation;
+    u8 pad04[4];
+    s32 messageResource1;
+    u8 pad0C[4];
+    s32 messageResource2;
+    u8 pad14[0x10];
+    u32 *staffMenuContext;
+    u8 pad28[0x210];
+    void *drawPool;
+} MnuResourceTaskWork;
 
 s32 func_0024E1C8(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 placementIndex,
                   s32 flags, s32 context) {
@@ -126,16 +160,36 @@ INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024EF68);
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F0D0);
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F210);
+INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF720);
+
+void func_0024F210(s32 x, s32 y, s32 z, s32 alpha, s32 groupPlacementIndex,
+                   s32 coordinatePlacementIndex, s32 selector, s32 flags,
+                   f32 scaleX, f32 scaleY, s32 context) {
+    s8 spriteMap[12] = { -1, 12, 26, 27, 13, 14, 15, 16, 20, 21, 23, 24 };
+    s32 sprite;
+
+    selector += 2;
+    sprite = spriteMap[((groupPlacementIndex + D_0036B7F0)->fields.spriteGroups >>
+                        (selector * 4)) & 0xF];
+    if (sprite == -1) {
+        return;
+    }
+    func_002BF4E0((s32)((f32)(x + D_0036B7F0[coordinatePlacementIndex]
+                                              .values[MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
+                  (s32)((f32)(y + D_0036B7F0[coordinatePlacementIndex]
+                                              .values[MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  flags,
+                  D_0036C6AC[0],
+                  sprite,
+                  context);
+}
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F338);
 
 extern u8 D_0036C568[];
 extern void effRequestResourceByMode(char *, void *, s32, void *);
-
-INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF720);
-
-INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF730);
 
 void mnuRequestMantraResources(void) {
     s32 i;
@@ -157,7 +211,7 @@ s32 mnuAreResourceSlotsOccupied(void) {
     return 1;
 }
 
-void mnuReleaseResourceSlots(void) {
+void mnuReleaseResourceSlots(MnuResourceTaskWork *work) {
     s32 i;
     for (i = 0; i < 14; ++i) {
         if (D_0036C698[i] != 0) {
@@ -169,7 +223,20 @@ void mnuReleaseResourceSlots(void) {
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F608);
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F6F0);
+void func_0024F6F0(s32 unused, MnuResourceTaskWork *work) {
+    if (work == NULL) {
+        return;
+    }
+    mnuReleaseResourceSlots(work);
+    mnuDestroyMantraDrawPool(work->drawPool);
+    if (work->staffMenuContext != NULL) {
+        mnuReleaseStaffMenuContextAndResources(work->staffMenuContext);
+    }
+    dspCloseChannel();
+    sdfQueueNonzeroResourceId(work->messageResource1);
+    sdfQueueNonzeroResourceId(work->messageResource2);
+    sdfReleaseResourceAllocation(work->allocation);
+}
 
 /* The task handle is shared by the existence probe and explicit stop;
  * both clear it when the resource group is no longer active. */
@@ -340,7 +407,6 @@ u32 *mnuAllocateEmptyResourceListState(void) {
 extern void sdfReleaseChipBlock(void *);
 extern void mnuDestroyListState(void *);
 extern void mnuReleaseMenuVisualWorkResources(s32);
-extern void sdfReleaseResourceAllocation(s32);
 
 typedef struct MenuCleanupNode {
     u8 pad00[0x58];
