@@ -99,7 +99,9 @@ void func_0029C800(void) {
 void func_0029C808(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029C810);
+void func_0029C810(TitleMenuWork *work) {
+    work->fadeProgress = (s32)((f32)work->fadeProgress / 1.19999998f);
+}
 
 /* Getter/clear pair for one word at byte offset 0xB6E0 of the work block. */
 s32 func_0029C848(s32 *work) {
