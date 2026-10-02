@@ -44,7 +44,7 @@ extern u32 kwlnTaskGetTimer(void);
 
 extern s32 effMiscRandMod(s32, s32);
 
-extern void func_00103F58(s32, u8, s32);
+extern void func_00103F58(u32, u8, s32);
 
 extern void *sdfAllocPacketAligned(s32);
 
@@ -368,9 +368,39 @@ void kwlnPadStepLargeMotorLevel(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103F58);
-
+extern u8 D_00438D98[2];
 extern u32 D_00438DA0[2];
+extern s32 fileTestSavedSlotFlags();
+extern void sdfPadSetSmallMotor(s32 padIndex, u16 strength);
+extern void sdfPadSetLargeMotor(s32 padIndex, u8 strength);
+
+/* Start rumble on pad motor 0 (small, on/off) or 1 (large, stepped toward the target) with `level` for `duration`. */
+void func_00103F58(u32 motor, u8 level, s32 duration) {
+    if (fileTestSavedSlotFlags(0) == 0) {
+        return;
+    }
+    if (motor == 0) {
+        if (level != 0) {
+            level = 1;
+        }
+    } else if (motor >= 2) {
+        motor = 1;
+    }
+    if (motor == 0) {
+        D_00438D98[0] = level;
+        kwlnPadMotorLevels[0] = level;
+    } else {
+        D_00438D98[motor] = level;
+        kwlnPadStepLargeMotorLevel();
+    }
+    D_00438DA0[motor] = duration;
+    if (motor == 0) {
+        sdfPadSetSmallMotor(0, level);
+    } else {
+        sdfPadSetLargeMotor(0, kwlnPadMotorLevels[motor]);
+    }
+}
+
 extern void sdfDevConsSetEntryPair(s32, s32, s32);
 
 void kwlnPadResetMotorLevelsAndOutput(void) {
