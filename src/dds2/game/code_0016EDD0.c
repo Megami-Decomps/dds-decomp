@@ -214,7 +214,37 @@ void effInitializeColorState(EffectColorState *state) {
 
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_001717E8);
 
-INCLUDE_ASM(const s32, "game/code_0016EDD0", func_001719D0);
+typedef struct EffThunderPointHistory {
+    u8 pad00[8];
+    s32 count; /* 0x08: history slots */
+    s32 activePointCount; /* 0x0C: populated point slots */
+    s32 position; /* 0x10: next point index */
+    u8 pad14[4];
+    u128 *points; /* 0x18 */
+} EffThunderPointHistory;
+
+void func_001719D0(EffThunderPointHistory *history, u128 *source) {
+    s32 position = history->position;
+    u128 *points = history->points;
+    s32 count;
+
+    PCP_COPY_VECTOR(&points[position], source);
+    PCP_COPY_VECTOR(&points[position + 1], source + 1);
+    PCP_COPY_VECTOR(&points[position + 2], source + 2);
+    position += 3;
+    count = history->count;
+    history->position = position;
+    if (position == count) {
+        PCP_COPY_VECTOR(&points[0], source);
+        PCP_COPY_VECTOR(&points[1], source + 1);
+        PCP_COPY_VECTOR(&points[2], source + 2);
+        history->position = 3;
+    }
+    if (history->activePointCount < count - 3) {
+        history->activePointCount += 3;
+    }
+}
+
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_00171A68);
 
 typedef struct EffFlashRecordPart {
