@@ -4,12 +4,15 @@ extern s32 func_00309638(u32);
 
 extern s32 itfFindGridNodeByKey(u32, u32);
 
-typedef struct QuadU32 {
-    u32 x; // 0x00
-    u32 y; // 0x04
-    u32 z; // 0x08
-    u32 w; // 0x0C
-} QuadU32; // 0x10
+typedef struct GridPosition {
+    s32 x; // 0x00
+    s32 y; // 0x04
+} GridPosition; // 0x08
+
+/* Four words filled together; their corner/channel interpretation is unknown. */
+typedef struct UiQuadWords {
+    u32 unk00[4];
+} UiQuadWords; // 0x10
 
 typedef struct GridWidget {
     u8 pad0[0x50];
@@ -204,9 +207,10 @@ void itfGridCopyEntryQuad(s32 object, s32 index) {
     } while (-1 < remaining);
 }
 
-void itfGridStorePosition(s32 *position, s32 x, s32 y) {
-    position[0] = x;
-    position[1] = y;
+/* Store the two grid position coordinates. */
+void itfGridStorePosition(GridPosition *position, s32 x, s32 y) {
+    position->x = x;
+    position->y = y;
 }
 
 void itfCreateGridPacketWithDefaultFlags(u32 packetHandle, u32 width, u32 height, u32 data, u32 context) {
@@ -457,11 +461,12 @@ void sdfSubmitGsTexRegisterPacket(s32 data, s32 kind) {
     entry->draw(entry, context);
 }
 
-void uiFillQuadColorWords(QuadU32 *q, u32 value) {
-    q->x = value;
-    q->y = value;
-    q->z = value;
-    q->w = value;
+/* Fill all four words with value without assigning a corner or channel order. */
+void uiFillQuadColorWords(UiQuadWords *quad, u32 value) {
+    quad->unk00[0] = value;
+    quad->unk00[1] = value;
+    quad->unk00[2] = value;
+    quad->unk00[3] = value;
 }
 
 void uiDrawUniformRgbRange(u32 a, u32 b, u32 c, u32 value, u32 e, u32 f, u32 g, u32 h) {
