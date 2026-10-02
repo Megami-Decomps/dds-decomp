@@ -622,7 +622,7 @@ def main():
     # undefined_*_auto lists, a splat label, or C in this game's tree) links only
     # against a stale build tree. Real names count too: a mistyped or other-game
     # name compiles and matches (relocations are compared by address) yet fails the link.
-    known = set(syms) | set(re.findall(r"^(\w+)\s*=", "".join(
+    known = set(syms) | set(re.findall(r"^\s*(?:PROVIDE\s*\(\s*)?(\w+)\s*=", "".join(
         p.read_text() for p in (ROOT / "config" / version).glob("undefined_*_auto.txt")), re.M))
     wanted = undefined - known
     if wanted:

@@ -680,7 +680,26 @@ void effMagatuhiReleaseOwnerAndExtraBuffer(EffMagatuhiOrbitWork *work) {
     sdfReleaseResourceAllocation(work->buffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193668);
+void func_00193668(EffMagatuhiOrbitWork *work, s32 index) {
+    EffMagatuhiOrbitParticle *elem = &work->particles[index];
+    f32 blend;
+    f32 t;
+
+    elem->delay = 0;
+    elem->height = 0;
+    blend = work->head.heightJitter;
+    elem->heightStep = work->head.heightStep * (effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend));
+    elem->angle = effMiscRandUnitFloat(D_003AA868) * (3.14159265f * 2.0f);
+    blend = work->head.angleJitter;
+    elem->angleStep = work->head.angleStep * (effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend));
+    blend = work->head.startJitter;
+    elem->radius = work->head.startRadius * (effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend));
+    blend = work->head.endJitter;
+    t = effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend);
+    elem->radiusStep = (work->head.endRadius * t - elem->radius) / (f32)work->head.frames;
+    func_001918B8(work->managedResource->valueWork, index);
+    effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001937C0);
 
@@ -700,7 +719,6 @@ void effMagatuhiCopyVecs2(EffMagatuhiOrbitWork *dst, void *src) {
 
 
 extern u32 func_001947F8(void *block);
-extern void func_00193668(void *work, u32 index);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
