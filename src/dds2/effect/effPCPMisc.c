@@ -561,7 +561,6 @@ extern void effPcpSpanSetHeadVector(void *dst, void *src);
 
 
 
-extern u8 *func_00187E50(u32);
 
 
 /* Both beam clones own this node. The color array, point array, two
@@ -2324,7 +2323,32 @@ void effSetSharedScale(u32 unused, f32 value) {
     effPcpSharedTrailWork->unk1C = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182DD8);
+typedef struct EffPCPTrailParams {
+    u32 count;
+    u32 colors[2];
+    f32 scale;
+    s32 minSize;
+    EffPCPTexturedBlurParams res;
+} EffPCPTrailParams;
+
+EffPCPTrailWork *func_00182DD8(EffPCPTrailParams *params) {
+    EffPCPTrailWork *work = sdfAllocSizeClassBlock(sizeof(EffPCPTrailWork));
+
+    work->obj = (EffPCPTrailObj *)effCloneBlurTemplate(&params->res);
+    work->color = params->res.color;
+    work->frame = 0;
+    work->flags = 0x80808080;
+    work->pos[0] = 0.0f;
+    work->pos[1] = 0.0f;
+    work->pos[2] = 0.0f;
+    work->unk1C = 0.0f;
+    work->count = params->count;
+    work->colors[0] = params->colors[0];
+    work->colors[1] = params->colors[1];
+    work->scale = params->scale;
+    work->minSize = params->minSize;
+    return work;
+}
 
 void effPcpTrailRelease(EffPCPTrailWork *work) {
     func_0018E8F0((u32)work->obj);
@@ -4043,7 +4067,40 @@ void effPcpSetScaledThunderScale(EffPCPGrowWork *work, f32 val) {
     work->scale = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00187E50);
+/* Shared draw-request parameters are cleared before creating a beam. */
+typedef struct EffPCPBeamDrawParams {
+    u32 unk00;
+    u16 unk04;
+    u8 pad06[0x26];
+} EffPCPBeamDrawParams;
+
+extern EffPCPBeamDrawParams D_004520B0;
+extern void *sdfCreateAssetWithDrawEntries(void);
+extern void func_003332D0(void *asset, f32 scale);
+
+/* vu0 routine: initialize both transforms with the libvu0 identity primitive. */
+EffPCPBeamNode *func_00187E50(u32 segments) {
+    u32 count = segments * 4 + 4;
+    EffPCPBeamNode *node = sdfAllocSizeClassBlock(sizeof(EffPCPBeamNode));
+    void *allocation = sdfAllocGeneralBlock(count * 20);
+    f32 *points = sdfResourceRetainAddress(allocation);
+
+    memset(points, 0, count * 20);
+    node->points = points;
+    node->drawKind = 2;
+    node->colors = (u32 *)(points + count * 4);
+    node->vertexCount = count;
+    node->color = 0x80808080;
+    node->allocationHandle = (u32)allocation;
+    node->scale = 1.0f;
+    node->assetHandle = (u32)sdfCreateAssetWithDrawEntries();
+    func_003332D0((void *)node->assetHandle, 1.0f);
+    EE_MMI_UNIT_MATRIX(node->localMatrix);
+    EE_MMI_UNIT_MATRIX(node->matrix);
+    memset(&D_004520B0, 0, sizeof(D_004520B0));
+    D_004520B0.unk04 = 0x4000;
+    return node;
+}
 
 void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
     sdfQueueAssetRelease(work->assetHandle);
@@ -4116,7 +4173,7 @@ u8 *effBeamEffectClone(src)
         src->segments = 3;
         segments = 3;
     }
-    node = (EffPCPBeamNode *)func_00187E50(segments);
+    node = func_00187E50(segments);
     i = 0;
     work->node = node;
     work->vertexCount = node->vertexCount;
@@ -4280,7 +4337,7 @@ u8 *effBeamEffectCloneLarge(src)
         src->segments = 3;
         segments = 3;
     }
-    node = (EffPCPBeamNode *)func_00187E50(segments);
+    node = func_00187E50(segments);
     i = 0;
     work->node = node;
     groups = (s32)node->vertexCount >> 2;
