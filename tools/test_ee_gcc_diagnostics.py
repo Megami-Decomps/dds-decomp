@@ -216,6 +216,21 @@ class DelaySlotTests(unittest.TestCase):
     (nil))
 '''
 
+    ANNULLED_SAMPLE = '''
+(insn 122 40 50 (sequence[
+            (jump_insn/u:TI 41 40 106 (set (pc)
+                    (if_then_else (ne:SI (reg:SI 3 v1)
+                            (const_int 0))
+                        (label_ref 50)
+                        (pc))) 336 (nil)
+                (nil))
+            (insn/s 106 41 50 (set (reg:DI 16 s0)
+                    (mem:DI (reg:SI 4 a0) 0)) 178 (nil)
+                (nil))
+        ] ) -1 (nil)
+    (nil))
+'''
+
     def test_balanced_form_ignores_parentheses_in_strings(self):
         text = '(insn 1 0 0 (asm_input ("text ) ( text")) -1) trailing'
         form, end = delay_slots.balanced_form(text, 0)
@@ -230,6 +245,24 @@ class DelaySlotTests(unittest.TestCase):
         self.assertEqual(75, sequences[0]["slots"][0]["uid"])
         self.assertEqual("load", sequences[0]["slots"][0]["operation"])
         self.assertEqual("$f14", sequences[0]["slots"][0]["destination"])
+        self.assertFalse(sequences[0]["branch"].get("annulled", False))
+        self.assertEqual("always", sequences[0]["slots"][0]["executes_when"])
+
+    def test_analyze_annulled_target_donor(self):
+        sequences = delay_slots.analyze_dump(self.ANNULLED_SAMPLE)
+        self.assertEqual(1, len(sequences))
+        self.assertEqual(122, sequences[0]["wrapper_uid"])
+        self.assertTrue(sequences[0]["branch"]["annulled"])
+        self.assertTrue(sequences[0]["slots"][0]["from_target"])
+        self.assertEqual("taken", sequences[0]["slots"][0]["executes_when"])
+        self.assertIn("annulled", delay_slots.render(sequences))
+        self.assertIn("executes=taken origin=target", delay_slots.render(sequences))
+
+    def test_analyze_annulled_fallthrough_donor(self):
+        sample = self.ANNULLED_SAMPLE.replace("(insn/s 106", "(insn 106")
+        sequences = delay_slots.analyze_dump(sample)
+        self.assertFalse(sequences[0]["slots"][0]["from_target"])
+        self.assertEqual("not_taken", sequences[0]["slots"][0]["executes_when"])
 
 
 class AllocationTests(unittest.TestCase):
