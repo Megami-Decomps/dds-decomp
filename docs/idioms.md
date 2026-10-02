@@ -976,6 +976,19 @@ computed. Natural source shapes that flip it:
     fight it with source shapes; park it as "blocked by callee" and revisit
     when the callee lands. Not every plain-`bne` residual is this: DDS2
     `func_0021B4C0` calls `btlGetRuntime`, which lives in another unit.
+13. **Give accumulator locals and fields their real pointer type, not `void *`
+    or `s32`.** Load/store ordering in sched1 depends on type-based aliasing.
+    DDS1 `func_002EFC68` / DDS2 `func_00348B10` (pool chain rebuild) sat at
+    2 of 25 words ("`lw $4,0xC(pool)` after `sw $0,0($sp)`") with the two
+    accumulators written as `s32` and then `void *`; typing them
+    `SdfPoolNode *` (the chain really is pool nodes: the callee follows
+    `node->next`, the pool fields `head/tail` become `SdfPoolNode *`) gave a
+    full match, and the callees `func_002EFB88` / `func_00348A30` matched at
+    the same time. Also unify duplicate views of one structure: the key-tree
+    walker used a private `SdfKeyTreeNode` while the unit already has
+    `SdfTreeNode`; `pool->sub` became `SdfTreeNode *sub[1]`.
+    A 1-3 word residual in a function whose locals or fields are typed
+    `s32`/`void *` is a type problem before it is a scheduling problem.
 
 Unresolved: a saved register initialised as a copy of another holding the same
 constant (`move $16,$19` for `i` from `bestIndex = 0`, DDS1 `func_00202F90`,
