@@ -56,7 +56,7 @@ typedef struct MenuItemScene {
     u32 resetStateB;
     s32 selectedExtent;
     u32 activeSlot;
-    u32 slots[5];
+    s32 slots[5];
     u8 pad3E4[0x29C];
     u32 listFlags; /* 0x680: start of the embedded list state */
     u8 pad684[0x68C];
@@ -149,15 +149,44 @@ u32 func_00263638(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_00263640);
+typedef struct ActiveItemSlots {
+    s32 indices[5];
+    s32 values[5];
+    s32 count;
+} ActiveItemSlots;
 
 typedef struct DspUnitName {
     u8 encodedText[17];
 } DspUnitName;
 
 extern DspUnitName *D_003BAA70;
-extern char D_003BC550[];
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
+
+void func_00263640(MenuItemScene *scene) {
+    ActiveItemSlots active;
+    MenuItem *item = scene->selectionData->item;
+    s32 i;
+
+    memset(&active, 0, sizeof(active));
+    for (i = 0; i < 5; i++) {
+        if (scene->slots[i] > 0) {
+            active.indices[active.count] = i;
+            active.values[active.count] = scene->slots[i];
+            active.count++;
+        }
+    }
+
+    evtCopyEntryStringToActiveWindow(0,
+                                     (s32)D_003BAA70[item->kind].encodedText);
+    dspSetActive(1);
+    if (scene->extentExhausted == 0) {
+        dspStartEntry(0x14);
+    } else {
+        dspStartEntry(0x15);
+    }
+}
+
+extern char D_003BC550[];
 extern s32 func_003014F0(char *, const char *, ...);
 extern void func_00263640(MenuItemScene *);
 
