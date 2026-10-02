@@ -643,6 +643,8 @@ extern s32 D_0039A0C8[];
 
 extern s32 D_0039A0D0[];
 
+extern const char D_00413700[];
+
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_004136C0);
 
 s32 fldResolveSpecialBgmTrack(s32 id) {
@@ -1031,7 +1033,27 @@ void fldCacheMapLabelLengths(s32 world) {
     D_00438ED8 = strlen(D_0039A1D0[i].s);
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00145698);
+void func_00145698(void) {
+    typedef struct {
+        u8 pad00[4];
+        s32 rows;
+        s32 count;
+    } SceneHeader;
+    char path[0x80];
+    char directory[0x40];
+    s32 resourceHandle;
+    s32 transferStart;
+    s32 header;
+
+    fldFormatAreaDirectory(directory, fldAreaState[4], 1);
+    func_0035C860(path, (const char *)D_00413700, directory, fldAreaState[4]);
+    fldSceneRecordResource = sdfReadNamedResource(path, &resourceHandle, 0);
+    transferStart = resourceHandle + 8;
+    fldRelocatePackedTransferChunk(resourceHandle, transferStart);
+    header = func_00129D60(transferStart);
+    fldSceneRecords = ((SceneHeader *)header)->rows;
+    fldSceneRecordCount = ((SceneHeader *)header)->count;
+}
 
 void fldSetSceneRecordChunk(s32 chunk, s32 resourceId) {
     /* Descriptor from func_00129D60 precedes the 0x14-byte scene rows. */
@@ -1137,6 +1159,8 @@ s32 fldGetMaxItemValue(void) {
     }
     return max + 1;
 }
+
+INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413700);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00146250);
 
