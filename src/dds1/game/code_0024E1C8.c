@@ -606,7 +606,26 @@ INCLUDE_ASM(const s32, "game/code_0024E1C8", func_00250758);
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_00250820);
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_002508D8);
+extern u8 *func_00250820(u16);
+
+s32 func_002508D8(u16 index) {
+    MnuResourceTask *task = (MnuResourceTask *)func_002CB3B8(mnuSceneResourceContext, 0);
+    MnuProfileProgress *progress =
+        (MnuProfileProgress *)task->menuList->selectionNode->selectionAddress;
+    u8 *requirements = func_00250820(index);
+
+    if (requirements == NULL) {
+        return 1;
+    }
+    if (prfGetCapValue(requirements[0]) ==
+        ptyGetProfileRecordValue(progress->unit, requirements[0])) {
+        if (prfGetCapValue(requirements[1]) ==
+            ptyGetProfileRecordValue(progress->unit, requirements[1])) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 typedef struct MnuSceneGridWork {
     u8 pad00[0x18];
