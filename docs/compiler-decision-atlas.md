@@ -43,12 +43,19 @@ ordering. Its numeric priority is:
 floor_log2(references) * references * hard_register_width * 10000 / live_length
 ```
 
-The result is truncated to an integer; higher values allocate first and exact
-ties use the lower allocno number. Hard-register width comes from pass 20's
-parenthesized width and is normally one; it is not the byte size printed by
-pass 19. `calls_crossed`, pointer and user-variable flags are useful allocation
-context, but are not part of this ordering formula. Local allocation happens
-before this global order and uses its own related quantity model.
+The comparator also contains a dormant first tier for compiler-created
+`range_copy` pseudos. The only code that sets that bit is reached through the
+unreferenced `live_range` entry: the shipped compiler has no code or runtime
+data reference to that entry, and its address occurs only in debug/symbol
+records. Ordinary project compilations therefore have no such tier and use the
+numeric score directly. Do not use the dormant bit to explain an apparent
+ordering inversion. The score is truncated to an integer, higher values
+allocate first and exact ties use the lower allocno number. Hard-register width
+comes from pass 20's parenthesized width and is normally one; it is not the byte
+size printed by pass 19. `calls_crossed`, pointer and user-variable flags are
+useful allocation context, but are not part of this ordering formula. Local
+allocation happens before this global order and uses its own related quantity
+model.
 
 `ee_gcc_allocations.py` pairs pass 19 with pass 20 and prints
 `refs/live/width/priority`, local assignments, global attempt order, conflicts,

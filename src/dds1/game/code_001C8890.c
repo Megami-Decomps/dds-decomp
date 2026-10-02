@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_task.h"
 #include "pcp_vu0.h"
 
 #define VU_LOAD10(p) __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(p))
@@ -1011,7 +1012,42 @@ void func_001C9628(u32 arg0) {
     func_001BF4C0(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001C9660);
+extern s32 fldGetSceneObjectState(void);
+extern void fldSetSceneObjectAndGroupStates(void);
+extern s32 btlAiCheckStatusRollEligibility(BtlTask *task);
+
+void func_001C9660(BtlTask *task) {
+    BattleController *scene = (BattleController *)btlGetRuntime();
+    s32 state;
+
+    if (scene->flags & 0x20) {
+        return;
+    }
+    if (!(task->flags & 4) && sndHasActiveActor() == 0 &&
+        btlCountTasksByKind(0x2B) == 0) {
+        btlStartTask(btlCreateCommandSoundUpdateTask());
+        btlStartTask(btlCreateSecondaryCommandSoundTask());
+        btlStartTask(btlCreateCommandSoundTask((s32)task, 9));
+        task->flags |= 4;
+    }
+
+    state = fldGetSceneObjectState();
+    if (state == 3 || state == 8) {
+        if (btlIsSupportedCommandKind(&task->result) != 0) {
+            btlDispatchStateHandler((s32)task, 7);
+        } else {
+            fldSetSceneObjectAndGroupStates();
+            if (btlAiCheckStatusRollEligibility(task) != 0) {
+                btlDispatchStateHandler((s32)task, 0xB);
+            } else {
+                btlDispatchStateHandler((s32)task, 0xC);
+            }
+        }
+    } else if (scene->flags & 0x8000) {
+        fldSetSceneObjectAndGroupStates();
+        btlDispatchStateHandler((s32)task, 9);
+    }
+}
 
 void btlCommandResultEffectSelect(u8 *task) {
     s32 sel;
