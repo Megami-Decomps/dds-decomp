@@ -65,6 +65,17 @@ MESH_PACKET_DIRECTIVES = (
     | MESH_SECTION_DIRECTIVES
     | set(MESH_DATA_DIRECTIVES)
 )
+STATIC_MODEL_DIRECTIVES = {
+    "model_items",
+    "model_item",
+    "model_bounds",
+    "model_assets",
+    "model_asset",
+    "model_draw_set",
+    "model_draw_list",
+    "model_draw",
+    "packet_data",
+} | MESH_PACKET_DIRECTIVES
 MODEL_ASSET_FIELDS = (
     (0x001, "word_01", "u32", 1),
     (0x002, "word_02", "u32", 1),
@@ -447,23 +458,31 @@ def _read_model_resource(
     if not resource.assets or not resource.motion:
         raise FldError(f"{context} has a null asset or motion definition")
 
-    if resource.items + MODEL_ITEM_LIST_SIZE > data_end:
+    return resource, _read_model_items(data, resource.items, data_end, context)
+
+
+def _read_model_items(
+    data: bytes, offset: int, data_end: int, context: str
+) -> tuple[ModelItem, ...]:
+    """Read the shared SDF model hierarchy rooted at a model-item list."""
+
+    if offset + MODEL_ITEM_LIST_SIZE > data_end:
         raise FldError(f"{context} model-item list lies outside the data region")
-    _range(data, resource.items, MODEL_ITEM_LIST_SIZE, context + " model-item list")
-    count, word_04, word_08, word_0c = struct.unpack_from("<4I", data, resource.items)
+    _range(data, offset, MODEL_ITEM_LIST_SIZE, context + " model-item list")
+    count, word_04, word_08, word_0c = struct.unpack_from("<4I", data, offset)
     if word_04 != 0 or word_08 != 0 or word_0c != 0:
         raise FldError(f"{context} model-item list has nonzero reserved words")
-    if resource.items + MODEL_ITEM_LIST_SIZE + count * MODEL_ITEM_SIZE > data_end:
+    if offset + MODEL_ITEM_LIST_SIZE + count * MODEL_ITEM_SIZE > data_end:
         raise FldError(f"{context} model items lie outside the data region")
     _range(
         data,
-        resource.items + MODEL_ITEM_LIST_SIZE,
+        offset + MODEL_ITEM_LIST_SIZE,
         count * MODEL_ITEM_SIZE,
         context + " model items",
     )
     items = []
     for index in range(count):
-        item_offset = resource.items + MODEL_ITEM_LIST_SIZE + index * MODEL_ITEM_SIZE
+        item_offset = offset + MODEL_ITEM_LIST_SIZE + index * MODEL_ITEM_SIZE
         command_mode, reserved_02, word_04, node_id, parent = struct.unpack_from(
             "<HHIIi", data, item_offset
         )
@@ -519,7 +538,7 @@ def _read_model_resource(
                 command_0,
             )
         )
-    return resource, tuple(items)
+    return tuple(items)
 
 
 def _read_model_assets(
@@ -2492,6 +2511,13 @@ def _layout(operations: tuple[Operation, ...]) -> tuple[dict[str, int], int]:
         raise FldError("missing end_data")
     if labels.get("data_end") != end_data:
         raise FldError("label data_end must immediately precede end_data")
+    _validate_model_source_blocks(operations)
+    return labels, end_data
+
+
+def _validate_model_source_blocks(operations: tuple[Operation, ...]) -> None:
+    """Check counts and packet extents shared by FLD1 and AMB model source."""
+
     label_operations = {
         operation.args[0]: index
         for index, operation in enumerate(operations)
@@ -2540,7 +2566,155 @@ def _layout(operations: tuple[Operation, ...]) -> tuple[dict[str, int], int]:
                 f"line {operation.line}: model_draw declares {expected_size} packet bytes, "
                 f"but @{packet_name} contains {actual_size}"
             )
-    return labels, end_data
+
+
+def _encode_static_model_operation(
+    operation: Operation,
+    operation_index: int,
+    output: bytearray,
+    write_pointer,
+    mesh_codes: dict[int, int],
+) -> bool:
+    """Encode one directive from the SDF model vocabulary shared with AMB."""
+
+    name = operation.name
+    if name not in STATIC_MODEL_DIRECTIVES:
+        return False
+
+    def checked_fields(required: tuple[str, ...]) -> dict[str, str]:
+        fields = _fields(operation.args)
+        if set(fields) != set(required):
+            missing = set(required) - set(fields)
+            extra = set(fields) - set(required)
+            raise FldError(
+                f"line {operation.line}: fields differ; "
+                f"missing={sorted(missing)} extra={sorted(extra)}"
+            )
+        return fields
+
+    if name == "model_items":
+        fields = checked_fields(("count",))
+        output.extend(struct.pack("<4I", _int(fields["count"]), 0, 0, 0))
+    elif name == "model_item":
+        fields = checked_fields(
+            ("node_id", "parent", "rotation", "position", "scale", "bounds", "commands")
+        )
+        output.extend(
+            struct.pack(
+                "<HHIIi3fI4f4f",
+                1,
+                0,
+                0,
+                _int(fields["node_id"]),
+                _int(fields["parent"]),
+                *_csv(fields["rotation"], 3, _parse_float),
+                0,
+                *_csv(fields["position"], 4, _parse_float),
+                *_csv(fields["scale"], 4, _parse_float),
+            )
+        )
+        write_pointer(fields["bounds"])
+        write_pointer(fields["commands"])
+        output.extend(bytes(8))
+    elif name == "model_bounds":
+        fields = checked_fields(("minimum", "maximum"))
+        output.extend(
+            struct.pack(
+                "<6f",
+                *_csv(fields["minimum"], 3, _parse_float),
+                *_csv(fields["maximum"], 3, _parse_float),
+            )
+        )
+    elif name == "model_assets":
+        fields = checked_fields(("count",))
+        output.extend(struct.pack("<I", _int(fields["count"])))
+    elif name == "model_asset":
+        fields = _model_asset_source_fields(operation)
+        flags = sum(
+            bit
+            for bit, field_name, _, _ in MODEL_ASSET_FIELDS
+            if field_name in fields
+        )
+        output.extend(struct.pack("<IHH", _int(fields["index"]), 0, flags))
+        for _, field_name, kind, width in MODEL_ASSET_FIELDS:
+            if field_name not in fields:
+                continue
+            if kind == "u32":
+                output.extend(
+                    struct.pack("<" + "I" * width, *_csv(fields[field_name], width))
+                )
+            elif kind == "float":
+                output.extend(
+                    struct.pack(
+                        "<" + "f" * width,
+                        *_csv(fields[field_name], width, _parse_float),
+                    )
+                )
+            elif kind == "resource":
+                output.extend(struct.pack("<HH", _int(fields[field_name]), 0))
+            elif kind == "resource_pair":
+                output.extend(struct.pack("<HH", *_csv(fields[field_name], width)))
+            else:
+                raise AssertionError(kind)
+    elif name == "model_draw_set":
+        fields = checked_fields(("lists",))
+        for reference in _references(fields["lists"]):
+            write_pointer(reference)
+        output.extend(bytes(4))
+    elif name == "model_draw_list":
+        fields = checked_fields(("selector", "draws"))
+        references = _references(fields["draws"])
+        selector = _int(fields["selector"])
+        if len(references) > 0xFFFF or not 0 <= selector <= 0xFFFF:
+            raise FldError(
+                f"line {operation.line}: draw count or selector exceeds u16"
+            )
+        output.extend(struct.pack("<I", len(references) | selector << 16))
+        for reference in references:
+            write_pointer(reference)
+    elif name == "model_draw":
+        fields = checked_fields(("asset", "qwords", "packet"))
+        asset, quadwords = _int(fields["asset"]), _int(fields["qwords"])
+        if not 0 <= asset <= 0xFFFF or not 0 <= quadwords <= 0xFFFF:
+            raise FldError(
+                f"line {operation.line}: asset index or quadword count exceeds u16"
+            )
+        output.extend(struct.pack("<II", 1, quadwords | asset << 16))
+        write_pointer(fields["packet"])
+        output.extend(bytes(4))
+    elif name == "mesh_header":
+        fields = checked_fields(("triangles", "vertices", "controls"))
+        output.extend(
+            struct.pack(
+                "<I4H",
+                mesh_codes[operation_index],
+                _int(fields["triangles"]),
+                _int(fields["vertices"]),
+                *_csv(fields["controls"], 2),
+            )
+        )
+    elif name in MESH_SECTION_DIRECTIVES or name == "mesh_program":
+        output.extend(struct.pack("<I", mesh_codes[operation_index]))
+    elif name in MESH_DATA_DIRECTIVES:
+        _, width = MESH_DATA_DIRECTIVES[name]
+        if name in {"triangle", "color"}:
+            for argument in operation.args:
+                output.extend(struct.pack(f"<{width}B", *_csv(argument, width)))
+        else:
+            for argument in operation.args:
+                output.extend(
+                    struct.pack(
+                        f"<{width}f", *_csv(argument, width, _parse_float)
+                    )
+                )
+    elif name == "vif_nops":
+        fields = checked_fields(("count",))
+        output.extend(bytes(_int(fields["count"]) * 4))
+    elif name == "packet_data":
+        output.extend(bytes.fromhex(operation.args[0]))
+    else:
+        raise AssertionError(name)
+    return True
 
 
 def encode(operations: tuple[Operation, ...]) -> bytes:
@@ -2568,6 +2742,9 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
         if target:
             relocations.append(location)
         return struct.pack("<I", target)
+
+    def write_pointer(text: str) -> None:
+        output.extend(pointer(text))
 
     def checked_fields(operation: Operation, required: tuple[str, ...]) -> dict[str, str]:
         fields = _fields(operation.args)
@@ -2735,102 +2912,10 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
             output.extend(pointer(f["assets"]))
             output.extend(struct.pack("<II", 0, 0))
             output.extend(pointer(f["motion"]))
-        elif name == "model_items":
-            f = checked_fields(operation, ("count",))
-            output.extend(struct.pack("<4I", _int(f["count"]), 0, 0, 0))
-        elif name == "model_item":
-            f = checked_fields(
-                operation,
-                (
-                    "node_id", "parent", "rotation", "position", "scale", "bounds",
-                    "commands",
-                ),
-            )
-            output.extend(
-                struct.pack(
-                    "<HHIIi3fI4f4f",
-                    1,
-                    0,
-                    0,
-                    _int(f["node_id"]),
-                    _int(f["parent"]),
-                    *_csv(f["rotation"], 3, _parse_float),
-                    0,
-                    *_csv(f["position"], 4, _parse_float),
-                    *_csv(f["scale"], 4, _parse_float),
-                )
-            )
-            output.extend(pointer(f["bounds"]))
-            output.extend(pointer(f["commands"]))
-            output.extend(bytes(8))
-        elif name == "model_bounds":
-            f = checked_fields(operation, ("minimum", "maximum"))
-            output.extend(
-                struct.pack(
-                    "<6f",
-                    *_csv(f["minimum"], 3, _parse_float),
-                    *_csv(f["maximum"], 3, _parse_float),
-                )
-            )
-        elif name == "model_assets":
-            f = checked_fields(operation, ("count",))
-            output.extend(struct.pack("<I", _int(f["count"])))
-        elif name == "model_asset":
-            f = _model_asset_source_fields(operation)
-            flags = sum(
-                bit
-                for bit, field_name, _, _ in MODEL_ASSET_FIELDS
-                if field_name in f
-            )
-            output.extend(struct.pack("<IHH", _int(f["index"]), 0, flags))
-            for _, field_name, kind, width in MODEL_ASSET_FIELDS:
-                if field_name not in f:
-                    continue
-                if kind == "u32":
-                    output.extend(
-                        struct.pack("<" + "I" * width, *_csv(f[field_name], width))
-                    )
-                elif kind == "float":
-                    output.extend(
-                        struct.pack(
-                            "<" + "f" * width,
-                            *_csv(f[field_name], width, _parse_float),
-                        )
-                    )
-                elif kind == "resource":
-                    output.extend(struct.pack("<HH", _int(f[field_name]), 0))
-                elif kind == "resource_pair":
-                    output.extend(
-                        struct.pack("<HH", *_csv(f[field_name], width))
-                    )
-                else:
-                    raise AssertionError(kind)
-        elif name == "model_draw_set":
-            f = checked_fields(operation, ("lists",))
-            for reference in _references(f["lists"]):
-                output.extend(pointer(reference))
-            output.extend(bytes(4))
-        elif name == "model_draw_list":
-            f = checked_fields(operation, ("selector", "draws"))
-            references = _references(f["draws"])
-            selector = _int(f["selector"])
-            if len(references) > 0xFFFF or not 0 <= selector <= 0xFFFF:
-                raise FldError(
-                    f"line {operation.line}: draw count or selector exceeds u16"
-                )
-            output.extend(struct.pack("<I", len(references) | selector << 16))
-            for reference in references:
-                output.extend(pointer(reference))
-        elif name == "model_draw":
-            f = checked_fields(operation, ("asset", "qwords", "packet"))
-            asset, quadwords = _int(f["asset"]), _int(f["qwords"])
-            if not 0 <= asset <= 0xFFFF or not 0 <= quadwords <= 0xFFFF:
-                raise FldError(
-                    f"line {operation.line}: asset index or quadword count exceeds u16"
-                )
-            output.extend(struct.pack("<II", 1, quadwords | asset << 16))
-            output.extend(pointer(f["packet"]))
-            output.extend(bytes(4))
+        elif _encode_static_model_operation(
+            operation, operation_index, output, write_pointer, mesh_codes
+        ):
+            pass
         elif name == "model_motion_playbook":
             f = checked_fields(operation, ("clip_count", "bindings", "clips"))
             clip_count, binding_count = _int(f["clip_count"]), _int(f["bindings"])

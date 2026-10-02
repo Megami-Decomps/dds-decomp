@@ -35,8 +35,13 @@ vec3 1.0 -0.0 3.5
 label bound_max
 vec3 10.0 20.0 30.0
 label model
-model geometry=@geometry material=null
+model geometry=@geometry material=@material
 label geometry
+model_items count=1
+model_item node_id=0 parent=-1 rotation=0,0,0 position=0,0,0,1 scale=1,1,1,0 bounds=null commands=null
+label material
+model_assets count=0
+label opaque
 u32 0x12345678
 pointer @payload
 label payload
@@ -54,7 +59,8 @@ class AmbCodecTests(unittest.TestCase):
         rendered = amb.render_source(data)
         self.assertIn("area name=@area_001_name", rendered)
         self.assertIn("floor=-2 bounds=null,@area_001_s01_bound_max", rendered)
-        self.assertIn("model geometry=@area_001_geometry material=null", rendered)
+        self.assertIn("model geometry=@area_001_geometry material=@area_001_material", rendered)
+        self.assertIn("model_items count=1", rendered)
         self.assertEqual(amb.encode(amb.parse_source(rendered)), data)
 
     def test_labels_relocate_the_complete_object_graph(self) -> None:
@@ -83,6 +89,7 @@ class AmbCodecTests(unittest.TestCase):
                 continue
             for path in paths:
                 source = path.read_text(encoding="utf-8")
+                self.assertNotRegex(source, r"(?m)^(?:bytes|pointer) ", path.name)
                 data = amb.encode(amb.parse_source(source))
                 self.assertEqual(amb.render_source(data), source, path.name)
 
