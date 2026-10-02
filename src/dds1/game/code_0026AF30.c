@@ -1,8 +1,8 @@
 #include "common.h"
 
-extern u8 D_003DC1C0[];
+extern f32 D_003DC1C0[4];
 
-extern u8 D_003DC1D0[];
+extern f32 D_003DC1D0[4];
 
 extern void *mnuTitleCameraObject;
 
@@ -16,13 +16,48 @@ extern void effObjSetInnerFirstVec(void *, void *);
 
 extern void effObjSetInnerSecondVec(void *, void *);
 
+extern s32 evtCreateWorldObjectForKey(s32, s32);
+
+extern void dds3SetWorldObject(void *);
+
+extern void *dds3GetWorldSecondaryObject(void);
+
+extern void mnuCreateTitleCameraWorldEntry(void);
+
+extern u32 D_003BA8EC;
+
+extern void fldInitializeCameraColorResource(void);
+
+extern void func_002CF420(void);
+
+extern void fldApplyLightSetIndex(s32);
+
 s32 mnuApplyInnerEffectVectorsAndTickObject(void) {
     effObjSetInnerFirstVec(mnuTitleCameraObject, D_003DC1C0);
     effObjSetInnerSecondVec(mnuTitleCameraObject, D_003DC1D0);
     return (*(s32 (**)(void *))(*(s32 *)((u8 *)mnuTitleCameraObject + 0x10) + 8))(mnuTitleCameraObject);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026AF30", func_0026AF78);
+void func_0026AF78(void) {
+    evtCreateWorldObjectForKey(1, 1);
+    dds3SetWorldObject(NULL);
+    mnuCreateTitleCameraWorldEntry();
+    dds3SetWorldObject(dds3GetWorldSecondaryObject());
+
+    D_003BA8EC = 0x80000000;
+    D_003DC1C0[0] = 0.0f;
+    D_003DC1C0[1] = -4000.0f;
+    D_003DC1C0[2] = -4000.0f;
+    D_003DC1C0[3] = 1.0f;
+    D_003DC1D0[0] = -0.32f;
+    D_003DC1D0[1] = 0.0f;
+    D_003DC1D0[2] = 0.0f;
+    D_003DC1D0[3] = -0.94f;
+
+    fldInitializeCameraColorResource();
+    func_002CF420();
+    fldApplyLightSetIndex(1);
+}
 
 void mnuMovieShutdownA(void) {
     fldReleaseCameraColorEffect();
