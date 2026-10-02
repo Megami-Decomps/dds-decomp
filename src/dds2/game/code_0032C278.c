@@ -62,6 +62,8 @@ extern u32 sdfCreateReferenceDmaNode(u32);
 
 extern u32 sdfAllocSizeClassBlock(u32);
 
+extern void *sdfAllocAndClearQuadwords(s32);
+
 extern SdfResEntry *sdfPacketResourceEntries[];
 
 extern volatile s8 sdfPacketSlotIndex;
@@ -1582,7 +1584,34 @@ void sdfInitializeObjectListRequest(void) {
     sdfInitializeSynchronizedRequest(&sdfObjectListReleaseQueue, (u32)sdfDestroyObjectList);
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_003306E0);
+typedef struct SdfModelNodeDefaults {
+    void *next;
+    void *previous;
+    u8 pad08[0x0E];
+    s16 index;
+    u8 pad18[4];
+    u32 color;
+    u8 pad20[0x30];
+    u128 zeroRotation;
+    u128 zeroPosition;
+    u128 unitScale;
+    u128 unitMatrix[4];
+} SdfModelNodeDefaults;
+
+SdfModelNodeDefaults *func_003306E0(void) {
+    SdfModelNodeDefaults *node = sdfAllocAndClearQuadwords(0x100);
+
+    node->color = 0x80808080;
+    node->index = -1;
+    node->next = node;
+    node->previous = node;
+    VU0_STORE_VF($vf0, &node->zeroRotation);
+    VU0_STORE_VF($vf0, &node->zeroPosition);
+    VU0_SET_ONES_XYZ($vf10);
+    VU0_STORE_VF($vf10, &node->unitScale);
+    EE_MMI_UNIT_MATRIX(node->unitMatrix);
+    return node;
+}
 
 void sdfEnsureFreeRootWorkspace(SdfFreeRoot *root) {
     u32 workspace;
