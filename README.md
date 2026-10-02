@@ -120,6 +120,7 @@ src/<v>/scripts/            exact, editable source for decompiled game scripts
 src/<v>/data/field/         exact, editable source for field resources and interaction tables
 include/                    common.h, include_asm.h, fpu.h, macro.inc
 docs/CONTRIBUTING.md        how to decompile, verify, name and share a function
+docs/compiler-decision-atlas.md route mismatches to compiler evidence and stop rules
 docs/idioms.md              source shapes confirmed against retail codegen
 docs/inf.md                 field interaction layout and editable source format
 docs/tu-names.md            where unit names come from (Nocturne __FILE__ strings)
