@@ -52,6 +52,7 @@ extern void mdlStorePrimaryVectorVU(void *model);
 extern void mdlStoreTertiaryVectorVU(void *model);
 
 extern u32 *dds3SoundSlotPool;
+extern u32 fileClearRenderFlag(u32 mask);
 
 extern u32 mdlGetBroadcastValue(u32 model);
 
@@ -273,8 +274,8 @@ void mnuPauseEffectQueueFrameAdvance(void) {
 }
 
 
-void mnuResumeEffectQueueFrameAdvance(void) {
-    fileClearRenderFlag(2);
+u32 mnuResumeEffectQueueFrameAdvance(void) {
+    return fileClearRenderFlag(2);
 }
 
 
@@ -500,4 +501,3 @@ void mnuSetModelNodeVisibility(u8 *node, s8 selector) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_0031B188", D_00438950);
-
