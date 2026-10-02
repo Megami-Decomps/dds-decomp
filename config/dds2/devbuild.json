@@ -4,9 +4,11 @@
   "extension_vaddr": "0x0048E000",
   "alignment": "0x1000",
   "heap_alignment": "0x80",
-  "expected_replacement_symbols": 12,
-  "expected_shifted_replacement_symbols": 2,
-  "expected_shifted_symbol_relocations": 7,
+  "expected_replacement_symbols": 55,
+  "expected_shifted_replacement_symbols": 40,
+  "expected_shifted_symbol_relocations": 1036,
+  "expected_cross_replacement_relocations": 35,
+  "expected_repaired_relocation_words": 0,
   "retail_static_end": "0x00488B30",
   "bss_end_assertions": [
     {
@@ -27,6 +29,28 @@
     {
       "retail_object": "build/dds2/src/dds2/game/code_0010C250.o",
       "object": "build/dds2/dev/code_0010C250.o",
+      "expected_symbols": 12,
+      "expected_shifted_symbols": 2,
+      "retained_sections": [
+        {
+          "section": ".data",
+          "size": 0
+        },
+        {
+          "section": ".bss",
+          "size": 0
+        }
+      ]
+    },
+    {
+      "retail_object": "build/dds2/src/dds2/script/scrTraceCode.o",
+      "object": "build/dds2/dev/scrTraceCode.o",
+      "expected_symbols": 43,
+      "expected_shifted_symbols": 38,
+      "fallback_symbols": [
+        "bfOpWaitDispatch",
+        "bfOpBinaryEval"
+      ],
       "retained_sections": [
         {
           "section": ".data",
@@ -55,6 +79,22 @@
       "alignment": 16,
       "old_vaddr": "0x00412510",
       "expected_relocations": 10
+    },
+    {
+      "object": "build/dds2/src/dds2/script/scrTraceCode.o",
+      "section": ".text",
+      "old_size": "0x1230",
+      "alignment": 8,
+      "old_vaddr": "0x0010C618",
+      "expected_relocations": 101
+    },
+    {
+      "object": "build/dds2/src/dds2/script/scrTraceCode.o",
+      "section": ".rodata",
+      "old_size": "0xF4",
+      "alignment": 16,
+      "old_vaddr": "0x00412550",
+      "expected_relocations": 49
     }
   ],
   "additions": [
