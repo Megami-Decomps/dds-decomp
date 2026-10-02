@@ -3,7 +3,9 @@
 
 extern u8 D_003BD39C;
 
-extern void (*sdfTickCallback)(void);
+extern void func_00100000(void);
+s32 D_003BD2D0 __attribute__((section(".sdata"), aligned(8))) = (s32)func_00100000;
+void (*sdfTickCallback)(void) __attribute__((section(".sdata"))) = NULL;
 
 extern void sdfSleepThreadCount(s32);
 
@@ -26,7 +28,6 @@ extern void sdfConsUploadDmaProgram(s32 size);
 extern void effMiscSeedRandomFromClock(void *state);
 extern void sdfStartTrackedThread(SdfThreadNode *node, s32 entry, s32 stack, s64 stackSize, s32 priority, s32 arg);
 extern void sdfRunTickWorkerThread(void);
-extern s32 D_003BD2D0;
 extern SdfThreadNode D_003BD990;
 extern u8 D_003DFEF0[0x2000];
 
@@ -148,7 +149,3 @@ void func_002CFB18(SdfThreadNode *node) {
     TerminateThread(threadId);
     DeleteThread(threadId);
 }
-INCLUDE_SDATA(const s32, "game/code_002CF8C8", D_003BD2D0);
-
-INCLUDE_SDATA(const s32, "game/code_002CF8C8", sdfTickCallback);
-
