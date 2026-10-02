@@ -4284,6 +4284,7 @@ typedef struct EffScaleRange {
     u8 *entries;
     f32 start;
     f32 delta;
+    struct MemBlock *allocation;
 } EffScaleRange;
 
 typedef struct EffScaleRangeConfig {
@@ -4299,7 +4300,8 @@ typedef struct EffScaleRangeConfig {
 
 /* The seed is initialized to one of eight negative sentinel values. */
 typedef struct EffScaleRangeEntry {
-    u8 pad_00[0x14];
+    EffPointSet *set;
+    u8 pad04[0x10];
     s32 negativeSeed;
     u8 pad_18[0x18];
 } EffScaleRangeEntry;
@@ -4338,7 +4340,67 @@ void effSeedBillScaleRange(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002EBF40);
+EffScaleRange *func_002EBF40(EffPointSetTableSource *src) {
+    u32 count = src->count;
+    struct MemBlock *allocation;
+    EffScaleRange *table;
+    EffScaleRangeEntry *row;
+    u32 i;
+    u32 alphaA;
+    u32 alphaB;
+    u32 alphaC;
+    u32 lowA;
+    u32 lowB;
+    u32 lowC;
+    s32 rampIn;
+    s32 rampOut;
+
+    allocation = sdfAllocGeneralBlock(count * sizeof(EffScaleRangeEntry) + sizeof(EffScaleRange));
+    table = (EffScaleRange *)sdfResourceRetainAddress((u32)allocation);
+    table->allocation = allocation;
+    table->entries = (u8 *)(table + 1);
+    if ((u32)src->layers < 3) {
+        src->layers = 3;
+    }
+    lowA = src->colorA & 0xFFFFFF;
+    lowB = src->colorB & 0xFFFFFF;
+    lowC = src->colorC & 0xFFFFFF;
+    alphaA = src->colorA >> 24;
+    alphaB = src->colorB >> 24;
+    alphaC = src->colorC >> 24;
+    rampIn = (s32)(src->unk68 * (f32)(src->layers + 1));
+    rampOut = (s32)(src->unk6C * (f32)(src->layers + 1));
+    row = (EffScaleRangeEntry *)table->entries;
+    for (i = 0; i < count; i++) {
+        EffPointSet *set = effCreatePointSet5(src->layers);
+        u32 n;
+        u32 *rec;
+        u32 j;
+
+        row->set = set;
+        n = set->rows / 5;
+        rec = (u32 *)set->tail;
+        for (j = 0; j < n; j++) {
+            f32 ratio;
+            if (j < rampIn) {
+                ratio = (f32)j / (f32)rampIn;
+            } else if (j <= rampOut) {
+                ratio = 1.0f;
+            } else {
+                ratio = (f32)(n - j) / (f32)(n - rampOut);
+            }
+            rec[0] = lowC | ((u32)((f32)alphaC * ratio) << 24);
+            rec[1] = lowB | ((u32)((f32)alphaB * ratio) << 24);
+            rec[2] = lowA | ((u32)((f32)alphaA * ratio) << 24);
+            rec[3] = rec[1];
+            rec[4] = rec[0];
+            rec += 5;
+        }
+        row->negativeSeed = ~(i * 4);
+        row++;
+    }
+    return table;
+}
 
 void effReleaseBillPointEntries(u8 *work) {
     u32 *header = (u32 *)((EffBillFrameWork *)work)->frameState;
@@ -4347,10 +4409,10 @@ void effReleaseBillPointEntries(u8 *work) {
     u32 i;
 
     for (i = 0; i < count; i++) {
-        effReleasePointSetAsset(*entry);
+        effReleasePointSetAsset((s32)((EffScaleRangeEntry *)entry)->set);
         entry += 12;
     }
-    sdfReleaseResourceAllocation(((EffClassDrawState *)header)->allocation);
+    sdfReleaseResourceAllocation((u32)((EffScaleRange *)header)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002EC370);
@@ -6384,7 +6446,7 @@ s32 effCollectModelEffectActors(struct EffActor **out, u32 kind) {
     if (mask != 0) {
         u8 *link;
 
-        for (link = *(u8 **)(state + 0x24C); link != NULL; link = (u8 *)((EffActor *)link)->next) {
+        for (link = (u8 *)((EffBattleState *)state)->units; link != NULL; link = (u8 *)((EffActor *)link)->next) {
             u32 flags = ((EffActor *)link)->flags;
 
             if (flags & 1) {
@@ -6629,7 +6691,7 @@ typedef struct EffActiveResource {
 void effReportResourceStatus(u8 *work) {
     u32 status;
 
-    if (*(s32 *)(work + 0x28) > 0) {
+    if ((s32)((EffActiveResource *)work)->frame > 0) {
         return;
     }
     status = *(u32 *)((EffActiveResource *)work)->payload;
@@ -6654,6 +6716,7 @@ void effApplyBattleStateTint(void) {
     }
 }
 
+/* Start the payload's packed-color tint transition on frame zero. */
 void effStartTintTransitionFromColors(u8 *work) {
     f32 from[3];
     f32 to[3];
@@ -6662,7 +6725,7 @@ void effStartTintTransitionFromColors(u8 *work) {
 
     btlGetRuntime();
     colors = ((EffActiveResource *)work)->payload;
-    if (*(s32 *)(work + 0x28) == 0) {
+    if ((s32)((EffActiveResource *)work)->frame == 0) {
         c = colors[0];
         from[0] = (c & 0xFF) / 255.0f;
         from[1] = ((c >> 8) & 0xFF) / 255.0f;
@@ -6747,7 +6810,7 @@ void effUpdateEffectSlotTransitions(s32 work) {
 
     index = 0;
     btlGetRuntime();
-    elapsed = *(s32 *)(work + 0x28);
+    elapsed = (s32)((EffActiveResource *)work)->frame;
     slotColor = (u8 *)((EffActiveResource *)work)->payload + 0x18;
     slotData = (u32 *)((u8 *)((EffActiveResource *)work)->payload + 0x10);
     do {
@@ -6788,7 +6851,7 @@ void effUpdateSlotTimerPair(u8 *work) {
     btlGetRuntime();
     slot = ((EffActiveResource *)work)->payload;
     first = slot[0];
-    phase = *(s32 *)(work + 0x28);
+    phase = (s32)((EffActiveResource *)work)->frame;
     if (first < slot[3]) {
         return;
     }
@@ -7676,6 +7739,7 @@ void effReplaceEffectSlotModelAndDeviceResources(EffectSlotNode80 *work, u32 kin
         work->deviceSlot = 0;
     }
     model = func_002DC1D0(kind, config);
+    /* Keep the header load raw: it must precede the parent model-pointer store. */
     modelData = (EffModelAssetData *)*(s32 *)(model + 0xc);
     work->model = model;
     deviceSlot = sdfModelCreateWithAlternateItems(modelData->unk14, modelData->unk18);
@@ -7818,10 +7882,11 @@ typedef struct EffSharedEffectWork {
     u32 allocation;        // 0x47C
 } EffSharedEffectWork;
 
+/* Release this work; only the final reference releases the shared backing resources. */
 void effReleaseSharedResourceReference(s32 *work) {
     s32 *resource = (s32 *)((EffSharedEffectWork *)work)->resource;
-    u32 references = *(u16 *)((u8 *)resource + 0x10) + 0xFFFF;
-    *(u16 *)((u8 *)resource + 0x10) = references;
+    u32 references = ((EffSharedEffectResource *)resource)->references + 0xFFFF;
+    ((EffSharedEffectResource *)resource)->references = references;
     if ((u16)references == 0) {
         s32 data = ((EffSharedEffectResource *)resource)->data;
         if (data != 0) {
@@ -7857,7 +7922,8 @@ s32 effCloneEffectRequest(u8 *src) {
 
 void effShareReferenceCountedEffectObject(s32 target, s32 source) {
     ((EffSharedEffectWork *)target)->resource = ((EffSharedEffectWork *)source)->resource;
-    *(s16 *)(*(s32 *)(source + 0x478) + 0x10) = *(s16 *)(*(s32 *)(source + 0x478) + 0x10) + 1;
+    ((EffSharedEffectResource *)((EffSharedEffectWork *)source)->resource)->references =
+        (s16)((EffSharedEffectResource *)((EffSharedEffectWork *)source)->resource)->references + 1;
 }
 
 void func_002FB968(s32 *work) {
@@ -9171,6 +9237,7 @@ s32 effMapObjectWithTemporaryMappingTable(s32 request) {
 
     effMappingState.table = D_003FFF58;
     effMappingState.count = 8;
+    /* Keep this parameter load raw: a typed member changes the table-write scheduling. */
     result = func_00300578(object + 0x2c, object + 0x50, *(s32 *)(object + 0xb8));
     effMappingState.table = D_003FFDD8;
     effMappingState.count = 8;
@@ -9241,6 +9308,7 @@ s32 func_00301488(s32 request) {
 
     effMappingState.table = D_003FFE98;
     effMappingState.count = 8;
+    /* Keep this parameter load raw: a typed member changes the table-write scheduling. */
     result = func_00300578(object, object + 0x24, *(s32 *)(object + 0x34));
     effMappingState.table = D_003FFDD8;
     effMappingState.count = 8;
