@@ -813,7 +813,7 @@ s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EventViewerState *viewer) {
 extern char D_003ADA98[]; /* "E%3d_%03d" */
 extern u16 D_003BBE78;
 extern u16 D_003BBE7A;
-extern void func_003014F0();
+extern s32 func_003014F0(char *buffer, const char *format, ...);
 extern void func_0023E7F8(s32 slot, EventViewerState *viewer);
 extern void evtReloadEventViewer(s32 slot, EventViewerState *viewer);
 
@@ -911,7 +911,26 @@ void *evtViewerAdvanceUpdate(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerStartUpdate);
+void *evtViewerStartUpdate(void) {
+    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue();
+    u8 *context;
+    u16 eventId;
+    u16 sceneId;
+
+    fldInitializeCameraColorResource();
+    context = (u8 *)viewer->windowContext;
+    eventId = *(u16 *)(context + 0x10C);
+    sceneId = *(u16 *)(context + 0x110);
+    D_003BBE78 = eventId;
+    D_003BBE7A = sceneId;
+    func_003014F0((u8 *)viewer + 0x22E8, D_003ADA98, D_003BBE78, D_003BBE7A);
+    viewer->flags = 1;
+    evtViewerDispatchFlagMode((u32)viewer);
+    *(s32 *)((u8 *)viewer + 0x2238) = 0;
+    viewer->flags |= 8;
+    kwlnDrawControlFlags |= 0x2000000;
+    return evtViewerAdvanceUpdate;
+}
 
 extern f32 D_00324590[];
 extern void mnuReleaseCampSceneRegisteredIds();

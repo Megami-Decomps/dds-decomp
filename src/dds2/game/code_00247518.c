@@ -3,7 +3,7 @@
 extern u16 D_004372B0;
 extern u16 D_004372B2;
 extern u8 D_00423050[];
-extern void func_0035C860();
+extern s32 func_0035C860(char *buffer, const char *format, ...);
 extern void func_00259AE8();
 extern void evtReloadEventViewer();
 extern void *dds3GetWorldObject(void);
@@ -1041,7 +1041,26 @@ void *evtViewerAdvanceUpdate(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", evtViewerStartUpdate);
+void *evtViewerStartUpdate(void) {
+    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue();
+    u8 *context;
+    u16 eventId;
+    u16 sceneId;
+
+    fldInitializeCameraColorResource();
+    context = (u8 *)viewer->windowContext;
+    eventId = *(u16 *)(context + 0x10C);
+    sceneId = *(u16 *)(context + 0x110);
+    D_004372B0 = eventId;
+    D_004372B2 = sceneId;
+    func_0035C860((u8 *)viewer + 0x22E8, D_00423050, D_004372B0, D_004372B2);
+    viewer->flags = 1;
+    evtViewerDispatchFlagMode((u32)viewer);
+    *(s32 *)((u8 *)viewer + 0x2238) = 0;
+    viewer->flags |= 8;
+    kwlnDrawControlFlags |= 0x2000000;
+    return evtViewerAdvanceUpdate;
+}
 
 u8 func_0024D908(s32 task) {
     return ((EvtTaskContext *)task)->taskId == 0x263;
