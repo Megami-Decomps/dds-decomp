@@ -5315,14 +5315,15 @@ typedef struct EffPCPSpawnRangeWork {
     u8 unk9C;
     u8 pad9D[3];
     f32 scale;
-    u32 color, handle;
+    u32 color;
+    void *handle;
 } EffPCPSpawnRangeWork;
 
 /* Clone the source header, then give every entry one event (placed at the unit scale) and a random negative start delay. */
 EffPCPSpawnRangeWork *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *src, void *params) {
     u32 count = src->count;
-    u32 handle = (u32)sdfAllocGeneralBlock(count * 32 + 0xAC);
-    EffPCPSpawnRangeWork *work = sdfResourceRetainAddress((void *)handle);
+    void *handle = sdfAllocGeneralBlock(count * 32 + 0xAC);
+    EffPCPSpawnRangeWork *work = sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
     EffPCPSpawnRangeEvent *entry;
     s32 life;
@@ -5370,7 +5371,47 @@ void effPcpSlotEffectCreateFromTable(void *args) {
     effPcpCreateDelayedEventEntries(param0, param1);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183740);
+EffPCPSpawnRangeWork *func_00183740(EffPCPSpawnRangeWork *src) {
+    u32 count = src->params.count;
+    void *handle = sdfAllocGeneralBlock(count * 32 + 0xAC);
+    EffPCPSpawnRangeWork *work = sdfResourceRetainAddress(handle);
+    EffPCPEventPlace place;
+    EffPCPSpawnRangeEvent *entry;
+    s32 life;
+    u32 i;
+
+    work->params = src->params;
+    entry = (EffPCPSpawnRangeEvent *)((u8 *)work + 0xAC);
+    work->handle = handle;
+    work->color = 0x80808080;
+    work->unk9C = 0;
+    work->entries = entry;
+    work->scale = 1.0f;
+    work->owner = src->owner;
+    place.pos[0] = 0;
+    place.pos[1] = 0;
+    place.pos[2] = 0;
+    place.pos[3] = 0;
+    place.pos[4] = 0;
+    place.pos[5] = 0;
+    place.pos[6] = 0;
+    place.scaleA = 1.0f;
+    place.scaleB = 100.0f;
+    place.scaleC = 100.0f;
+    place.scaleD = 1.0f;
+    place.color = 0x80808080;
+    life = work->params.delaySpread;
+    for (i = 0; i < count; i++) {
+        entry->event = (void *)func_00190130(work->owner, 2, &place);
+        if (life > 0) {
+            entry->delay = -(effMiscRand(D_0034DF38) % life);
+        } else {
+            entry->delay = 0;
+        }
+        entry++;
+    }
+    return work;
+}
 
 void effPcpEventBatchRelease(EffPCPSpawnRangeWork *work) {
     u32 i = 0;
