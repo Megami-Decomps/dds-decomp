@@ -54,5 +54,3 @@ void sdfMovieProcessPendingData(MovObj *movie) {
 INCLUDE_ASM(const s32, "sdf/sdfMovie", func_002ED230);
 
 INCLUDE_ASM(const s32, "sdf/sdfMovie", func_002ED5C0);
-
-INCLUDE_ASM(const s32, "sdf/sdfMovie", func_002ED740);
