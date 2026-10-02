@@ -46,6 +46,24 @@ typedef struct FrFontEntry {
     u32 unk20;   /* 0x20 */
 } FrFontEntry;
 
+/* Glyph fields consumed by the low-level packet submission wrapper. */
+typedef struct FrFontDrawGlyph {
+    u8 pad00[4];
+    s32 x;
+    s32 y;
+    s32 advance;
+    u32 flags;
+    union {
+        u32 word;
+        u8 bytes[4];
+    } style;
+    union {
+        u32 word;
+        u8 bytes[4];
+    } size;
+    struct FrFontDrawGlyph *firstChild;
+} FrFontDrawGlyph;
+
 /* Font system at D_003D6C80: 9 entries followed by shared control words. */
 typedef struct FrFontSysLocal {
     FrFontEntry entries[9]; /* 0x0 */
@@ -171,7 +189,18 @@ void frFontBuildGsSetupPacket(FrFontGsPacket *packet) {
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BA00);
 
-INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BC60);
+extern u8 D_00452880[];
+extern s32 func_0019BA00(s32 x, s32 y, u8 width, u8 halfHeight, u8 style,
+                         s32 flags, s32 color, s32 enabled, s32 sourceY,
+                         void *table, s32 drawFlags);
+
+s32 func_0019BC60(s32 x, s32 y, s32 color, FrFontDrawGlyph *glyph,
+                  s32 drawFlags) {
+    return func_0019BA00(x + glyph->x, y + glyph->y,
+                         glyph->size.bytes[0], glyph->size.bytes[1] >> 1,
+                         glyph->style.bytes[0], glyph->flags, color, 1,
+                         glyph->firstChild->y + 4, D_00452880, drawFlags);
+}
 
 extern volatile s32 sdfGsImageUploadSemaphore; /* semaphore handle shared with the IOP/interrupt side; declared volatile */
 extern void sceGsSetDefLoadImage(void *, s16, s16, s32, s32, s32, s16, s16);
