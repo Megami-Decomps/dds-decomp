@@ -97,3 +97,31 @@ Run the focused tests with:
 ```sh
 python3 tools/test_ee_gcc_diagnostics.py
 ```
+
+## Explain a filled delay slot
+
+When the first divergence is pass `29`, inspect the sequence that the delayed-
+branch pass built:
+
+```sh
+python3 tools/ee_gcc_delay_slots.py /tmp/snd-candidate \
+  --function sndCreateSystemEffect
+```
+
+The report names the call or jump UID and each donor UID placed in its slot.
+It also identifies common load destinations and source locations. Use
+`--json REPORT.json` when another tool needs the result.
+
+EE GCC fills non-jump slots, including calls, before jump slots. For a call it
+scans backward over ordinary instructions, checks resource conflicts, then
+applies the MIPS instruction attributes. A label, jump, barrier, delay
+sequence, or inline-assembly instruction stops that backward search. A normal
+one-word argument load can be eligible: the architectural delay slot executes
+before the callee reads the argument register.
+
+There are two independent schedulers to keep in mind. Pass `29` constructs an
+explicit RTL delay sequence, while the MIPS assembler may fill an unprotected
+slot under `.set reorder`. Consequently, `-fno-delayed-branch` is a diagnostic
+experiment, not evidence that final object code will contain a `nop`. Compare
+the pass-28 and pass-29 dumps first, and confirm the assembled object before
+attributing a residual to source semantics.
