@@ -636,4 +636,10 @@
     ".set at\n\t.set reorder" \
     : : "r" (dst) : "$1", "$2", "$f0", "$f2", "memory")
 
+/* dst.xyz = a.xyz + b.xyz, retaining dst.w.
+ * Retail: vadd.xyz dst,a,b; DDS1 func_00180370 and DDS2 func_00187FC8
+ * add a beam position to the primary matrix's translation row. */
+#define VU0_ADD_XYZ(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvadd.xyz " #dst ", " #a ", " #b "\n\t.set reorder")
+
 #endif
