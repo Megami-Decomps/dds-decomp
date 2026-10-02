@@ -73,7 +73,31 @@ u32 func_00112D08(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112D10);
+extern void effMiscQuaternionToMatrixVU(void);
+extern void sdfVuBuildLookAtBasis(void *eye, void *target, void *up);
+
+/* vu0 routine: rebuild the camera basis from the inner node's rotation (+0x50): the up vector, and the eye (+0x60) when mode 1 adds the inner node's position, then look-at. */
+void func_00112D10(ActionObj *obj) {
+    CameraData *data = obj->data;
+    u8 *inner = (u8 *)obj->unk1C;
+
+    VU0_LOAD_VF(vf10, inner + 0x50);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, &data->vec50);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_SET_W_ONE(vf10);
+    VU0_STORE_VF(vf10, data->pad70);
+    if (data->unk84 == 1) {
+        VU0_LOAD_VF(vf10, &data->vec40);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_LOAD_VF(vf11, inner + 0x40);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, &data->vec60);
+    }
+    sdfVuBuildLookAtBasis(&data->vec60, inner + 0x40, data->pad70);
+    VU0_STORE_MATRIX(data);
+}
 
 u32 dds3GetCameraHandle(CameraObject *camera) {
     return camera->data->handle;
