@@ -22,14 +22,64 @@ extern u32 mnuSceneResourceContext;
 extern s32 D_0036C698[];
 extern u8 D_0036C648[];
 
+typedef s16 MnuSpritePlacement[4];
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024E1C8);
+enum {
+    MNU_SPRITE_RESOURCE_INDEX,
+    MNU_SPRITE_INDEX,
+    MNU_SPRITE_X_OFFSET,
+    MNU_SPRITE_Y_OFFSET,
+};
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024E260);
+extern MnuSpritePlacement D_0036B510[];
+extern s32 func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024E310);
+s32 func_0024E1C8(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 placementIndex,
+                  s32 flags, s32 context) {
+    return func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+                         (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
+                         z,
+                         (u32)((f32)(alpha << 8) * 0.0078125f),
+                         flags,
+                         sprite,
+                         D_0036B510[placementIndex][MNU_SPRITE_INDEX],
+                         context);
+}
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024E3C0);
+s32 func_0024E260(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context) {
+    return func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+                         (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
+                         z,
+                         (u32)((f32)(alpha << 8) * 0.0078125f),
+                         0,
+                         D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                         D_0036B510[placementIndex][MNU_SPRITE_INDEX],
+                         context);
+}
+
+s32 func_0024E310(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 mode,
+                  s32 context) {
+    return func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+                         (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
+                         z,
+                         (u32)((f32)(alpha << 8) * 0.0078125f),
+                         0,
+                         D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                         mode,
+                         context);
+}
+
+s32 func_0024E3C0(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex,
+                  s32 context) {
+    return func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+                         (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
+                         z,
+                         (u32)((f32)(alpha << 8) * 0.0078125f),
+                         flags,
+                         D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                         D_0036B510[placementIndex][MNU_SPRITE_INDEX],
+                         context);
+}
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024E470);
 
@@ -475,4 +525,3 @@ void mnuInitializeMantraSelectionGrid(s32 context) {
     scene->cursorY = 0;
     func_002512F0(context, 1);
 }
-

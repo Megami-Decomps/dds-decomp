@@ -2761,8 +2761,11 @@ void fileSetRenderFlag(u32 mask) {
     effModelUpdateControlFlags = effModelUpdateControlFlags | mask;
 }
 
-void fileClearRenderFlag(u32 mask) {
-    effModelUpdateControlFlags = effModelUpdateControlFlags & ~mask;
+u32 fileClearRenderFlag(u32 mask) {
+    u32 flags = effModelUpdateControlFlags & ~mask;
+
+    effModelUpdateControlFlags = flags;
+    return flags;
 }
 
 void fileResetRenderFlags(void) {
@@ -4672,4 +4675,3 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E18);
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E20);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E28);
-

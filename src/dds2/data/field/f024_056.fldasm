@@ -1,0 +1,198 @@
+fld2 1
+header version=23 magic=FLD2 type_count=4 type_table=@resource_types word_1c=offset:0x30 word_20=1 word_24=@constraint_area word_28=0 word_2c=0 word_30=0 word_34=0 word_38=150 word_3c=0
+
+label constraint_area
+zeros 4
+pointer @loc_00050
+zeros 8
+label loc_00050
+bytes 30310000000000000000000000000000
+label resource_types
+type id=3 count=3 resources=@type_3_resources
+type id=4 count=2 resources=@type_4_resources
+type id=9 count=3 resources=@type_9_resources
+type id=10 count=1 resources=@type_10_resources
+
+bytes 436f626a000000000000000000000000
+label type_3_resources
+# r_01_all
+resource serial=3 flags=0 type=3 name=@r_01_all_name reserved=0 transform=@r_01_all_transform area=@r_01_all_area link=null sblock=null data=@r_01_all_data
+# r_01all_d01
+resource serial=4 flags=0 type=3 name=@r_01all_d01_name reserved=0 transform=@r_01all_d01_transform area=@r_01all_d01_area link=@r_01all_d01_link sblock=null data=@r_01all_d01_data
+# r_01all_d02
+resource serial=5 flags=0 type=3 name=@r_01all_d02_name reserved=0 transform=@r_01all_d02_transform area=@r_01all_d02_area link=@r_01all_d02_link sblock=null data=@r_01all_d02_data
+
+zeros 4
+label r_01_all_name
+string16 "01_all"
+
+label r_01_all_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01_all_area
+area number=1 name="01"
+
+label r_01all_d01_name
+string16 "01all_d01"
+
+label r_01all_d01_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01all_d01_area
+area number=1 name="01"
+
+label r_01all_d01_link
+bytes 0100000001000000
+pointer @loc_001e0
+zeros 4
+label loc_001e0
+bytes 6d645f3031616c6c5f64303100000000
+label r_01all_d02_name
+string16 "01all_d02"
+
+label r_01all_d02_transform
+transform position=0.0,0.0,0.0,1.0 rotation=0.0,-0.0,0.0,1.0 scale=1.0,1.0,1.0,1.0
+
+label r_01all_d02_area
+area number=1 name="01"
+
+label r_01all_d02_link
+bytes 0100000001000000
+pointer @loc_00260
+zeros 4
+label loc_00260
+bytes 6d645f3031616c6c5f64303200000000
+label r_01_all_data
+collision vertex_count=0 face_count=0 extra_count=0 vertices=@r_01_all_vertices faces=@r_01_all_vertices stop=@r_01_all_vertices reserved=0,0
+
+label r_01_all_vertices
+zeros 16
+label r_01all_d01_data
+collision vertex_count=0 face_count=0 extra_count=0 vertices=@r_01all_d01_vertices faces=@r_01all_d01_vertices stop=@r_01all_d01_vertices reserved=0,0
+
+label r_01all_d01_vertices
+zeros 16
+label r_01all_d02_data
+collision vertex_count=0 face_count=0 extra_count=0 vertices=@r_01all_d02_vertices faces=@r_01all_d02_vertices stop=@r_01all_d02_vertices reserved=0,0
+
+label r_01all_d02_vertices
+bytes 0000000000000000000000000000000043616d65000000000000000000000000
+label type_4_resources
+# r_01cam_02
+resource serial=0 flags=1 type=4 name=@r_01cam_02_name reserved=0 transform=@r_01cam_02_transform area=@r_01cam_02_area link=null sblock=null data=@r_01cam_02_data
+# r_01cam_01
+resource serial=1 flags=1 type=4 name=@r_01cam_01_name reserved=0 transform=@r_01cam_01_transform area=@r_01cam_01_area link=null sblock=null data=@r_01cam_01_data
+
+zeros 8
+label r_01cam_02_name
+string16 "01cam_02"
+
+label r_01cam_02_transform
+transform position=-246.6240234375,-208.63026428222656,314.9912109375,1.0 rotation=0.0205976702272892,-0.9727555513381958,-0.21035614609718323,0.09525028616189957 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_02_area
+area number=1 name="01"
+
+label r_01cam_01_name
+string16 "01cam_01"
+
+label r_01cam_01_transform
+transform position=-246.6240234375,-208.63026428222656,314.9912109375,1.0 rotation=0.0205976702272892,-0.9727555513381958,-0.21035614609718323,0.09525028616189957 scale=1.0,1.0,1.0,1.0
+
+label r_01cam_01_area
+area number=1 name="01"
+
+label r_01cam_02_data
+camera fovy=0.8172757625579834
+
+zeros 12
+label r_01cam_01_data
+camera fovy=0.8172757625579834
+
+bytes 4d6f74200000000000000000
+label type_9_resources
+# r_01cam_01_MOTION
+resource serial=7 flags=0 type=9 name=@r_01cam_01_MOTION_name reserved=0 transform=null area=null link=null sblock=null data=@r_01cam_01_MOTION_data
+# r_01path_02
+resource serial=8 flags=0 type=9 name=@r_01path_02_name reserved=0 transform=null area=null link=null sblock=null data=@r_01path_02_data
+# r_01path_01
+resource serial=9 flags=0 type=9 name=@r_01path_01_name reserved=0 transform=null area=null link=null sblock=null data=@r_01path_01_data
+
+zeros 4
+label r_01cam_01_MOTION_name
+string16 "01cam_01_MOTION"
+
+label r_01path_02_name
+string16 "01path_02"
+
+label r_01path_01_name
+string16 "01path_01"
+
+label r_01cam_01_MOTION_data
+motion tracks=vector3:@r_01cam_01_MOTION_vector3_curve
+
+label r_01cam_01_MOTION_vector3_curve
+motion_curve count=6 values=@r_01cam_01_MOTION_vector3_values keys=@r_01cam_01_MOTION_vector3_keys word_0c=1
+
+label r_01cam_01_MOTION_vector3_values
+vector3 -246.62399291992188 -208.6300048828125 314.9909973144531
+vector3 -246.62399291992188 -205.6300048828125 314.9909973144531
+vector3 -246.62399291992188 -205.6300048828125 314.9909973144531
+vector3 -246.62399291992188 -193.6300048828125 314.9909973144531
+vector3 -246.62399291992188 -188.6300048828125 314.9909973144531
+vector3 -246.62399291992188 -193.6300048828125 314.9909973144531
+
+zeros 8
+label r_01cam_01_MOTION_vector3_keys
+keys 0 5 10 110 115 120
+
+zeros 8
+label r_01path_02_data
+motion tracks=vector3:@r_01path_02_vector3_curve
+
+label r_01path_02_vector3_curve
+motion_curve count=2 values=@r_01path_02_vector3_values keys=@r_01path_02_vector3_keys word_0c=0
+
+label r_01path_02_vector3_values
+vector3 0.0 0.0 0.0
+vector3 200.0 0.0 0.0
+
+zeros 8
+label r_01path_02_vector3_keys
+keys 0 40
+
+zeros 8
+label r_01path_01_data
+motion tracks=vector3:@r_01path_01_vector3_curve
+
+label r_01path_01_vector3_curve
+motion_curve count=2 values=@r_01path_01_vector3_values keys=@r_01path_01_vector3_keys word_0c=0
+
+label r_01path_01_vector3_values
+vector3 0.0 0.0 0.0
+vector3 -200.0 0.0 0.0
+
+zeros 8
+label r_01path_01_vector3_keys
+keys 0 40
+
+bytes 000000000000000054617469000000000000000000000000
+label type_10_resources
+# r_01pos_01
+resource serial=2 flags=1 type=10 name=@r_01pos_01_name reserved=0 transform=@r_01pos_01_transform area=@r_01pos_01_area link=null sblock=null data=@r_01pos_01_data
+
+zeros 12
+label r_01pos_01_name
+string16 "01pos_01"
+
+label r_01pos_01_transform
+transform position=-240.00146484375,4.99993896484375,49.99139404296875,1.0 rotation=-7.549790126404332e-08,-1.0,-7.549790126404332e-08,2.185570302515316e-08 scale=1.0,1.0,1.0,1.0
+
+label r_01pos_01_area
+area number=1 name="01"
+
+label r_01pos_01_data
+placement kind=0 event=-1 visible=0 payload=@data_end
+
+label data_end
+end_data

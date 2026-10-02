@@ -323,6 +323,23 @@ typedef struct BrsRewardBatch {
     s32 count;               /* 0x78 */
 } BrsRewardBatch;
 
+typedef struct BrsPanelMotion {
+    u8 pad00[0x40];
+    s32 values[4];
+} BrsPanelMotion;
+
+typedef struct BrsPanelPage {
+    u8 pad00[8];
+    BrsPanelMotion *motion;
+    struct BrsPanelPageContext *context;
+    u8 pad10[0x124];
+} BrsPanelPage;
+
+typedef struct BrsPanelPageContext {
+    u8 pad00[0x1C];
+    s32 value;
+} BrsPanelPageContext;
+
 extern s32 datGameState;
 extern s32 *ptyGetCurrentProfileRecord(BrsPartyUnit *unit);
 extern u32 ptyAddProfilePoints(BrsPartyUnit *unit, s32 increment);
@@ -423,9 +440,13 @@ typedef struct BrsSkillPackageWork {
     MenuIconBatch rewards;   /* 0x05C */
     u8 pad6C[0x24];
     s32 unitHandle;          /* 0x090 */
-    u8 pad94[0x1AC];
+    u8 pad94[4];
+    BrsRewardRow *selectedRewardRow; /* 0x098 */
+    u8 pad9C[0x1A4];
     s32 selectedRow;         /* 0x240 */
-    u8 pad244[0xC];
+    u8 pad244[4];
+    s32 selectionMode;       /* 0x248 */
+    u8 pad24C[4];
     BrsRewardBatch secondaryRewards; /* 0x250 */
     BrsRewardBatch primaryRewards;   /* 0x2CC */
     u8 rewardState[0x9C];    /* 0x348 */
@@ -437,9 +458,12 @@ typedef struct BrsSkillPackageWork {
     s32 spriteArg1;          /* 0x50C */
     u8 pad510[4];
     s32 panelGroup;          /* 0x514 */
-    u8 pad518[0x58];
+    s32 panelOption;         /* 0x518 */
+    u8 pad51C[0x54];
     s32 setupState;          /* 0x570 */
-    u8 pad574[0x79C];
+    u8 pad574[0x25C];
+    BrsPanelPage panelPages[4]; /* 0x7D0 */
+    u8 padCA0[0x70];
     s32 panelHandle;         /* 0xD10 */
     s32 spriteHandle;        /* 0xD14 */
     u8 padD18[4];
@@ -787,7 +811,65 @@ s32 mnuStaffPickRoll(void) {
 
 INCLUDE_ASM(const s32, "game/code_00260208", brsSelectLevelBonusMode);
 
-INCLUDE_ASM(const s32, "game/code_00260208", brsSelectNextUnit);
+extern void mnuClearEntries(s32 *window);
+extern void mnuReleasePartyIconBundles(s32 window);
+extern void mnuSelectPage(void *window, s32 index);
+extern void mnuResetPartyPanelFade(s32 window, s32 index, s32 unused,
+                                   s32 retainScale);
+extern void mnuSetWindowResource(s32 index, s32 window, s32 resource,
+                                 s32 option);
+extern void mnuSetPageParams(BrsPanelMotion *motion, s32 mode);
+extern void mnuAttachPartyIconBundle(s32 index, s32 window, u32 resource);
+extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
+extern void evtStageTestQueueMotion(s32 kind, u32 index);
+extern void func_002E8DD0(u32 sequence);
+extern void sndStartTrackDefault(s32 track);
+
+void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
+    if (selectLevelUp == 0) {
+        s32 *selectedIndex = &work->selectedRow;
+        BrsRewardRow *row = &work->secondaryRewards.rows[(*selectedIndex)++];
+
+        work->selectionMode = 0;
+        work->selectedRewardRow = row;
+    } else {
+        s32 selectedRow = work->selectedRow;
+        s32 window = (s32)work + 0x680;
+        s32 page = work->primaryRewards.rows[selectedRow].values.experienceGain;
+        u8 *panelState = (u8 *)work + 0xC;
+        s32 *selectedIndex = &work->selectedRow;
+
+        mnuClearEntries((s32 *)window);
+        mnuReleasePartyIconBundles(window);
+        mnuSelectPage((void *)window, page);
+        mnuResetPartyPanelFade(window, page, 0, 0);
+        mnuSetWindowResource(page, window, work->panelGroup,
+                             work->panelOption);
+        mnuSetPageParams(work->panelPages[page].motion, 2);
+        mnuAttachPartyIconBundle(page, window, work->panelGroup);
+
+        work->panelPages[page].context->value = 0x100;
+        *(s32 *)window |= 0x400;
+
+        work->selectedRewardRow = &work->primaryRewards.rows[(*selectedIndex)++];
+        brsSelectLevelBonusMode((s32)work->selectedRewardRow->unit,
+                                (s32)work);
+        evtStageTestSelectEntryWithoutInitialValue(
+            ((BrsRowUnit *)work->selectedRewardRow->unit)->unitId, 0);
+        evtStageTestQueueMotion(1, 0);
+
+        if (*selectedIndex < work->primaryRewards.count) {
+            mnuForwardTableByte(((BrsRowUnit *)
+                ((BrsRewardRow *)(panelState + 0x2C0) + *selectedIndex)->unit)
+                    ->unitId);
+        }
+        func_002E8DD0(0x50001);
+        sndStartTrackDefault(0x50001);
+    }
+
+    mnuStaffCopyPanelBlock((MenuPanelBlock *)work->selectedRewardRow->unit,
+                           (u8 *)work);
+}
 
 INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA88);
 
