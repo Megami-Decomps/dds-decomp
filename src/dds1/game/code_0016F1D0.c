@@ -36,11 +36,11 @@ extern f32 sdfSinPoly(f32 angle);
 
 /* Record pool header: the allocation holds the 0x10-byte and 0x4-byte record
  * arrays first, then this 0x70-byte header whose first 0x50 bytes are cleared. */
-typedef struct EffectPool {
+typedef struct EffRecordPool {
     f32 matrix[16];
     f32 origin[3];
     u8 pad4C[4];
-    u32 kind;          /* 0x50: 2 on creation */
+    u32 drawMode;      /* 0x50: selects the packet submission surface */
     u32 color;         /* 0x54: 0x80808080 on creation */
     s32 count;         /* 0x58 */
     f32 scale;         /* 0x5C: 1.0f on creation */
@@ -48,7 +48,7 @@ typedef struct EffectPool {
     s32 auxRecordBase; /* 0x64 */
     u32 resource;      /* 0x68 */
     u32 buffer;        /* 0x6C */
-} EffectPool;
+} EffRecordPool;
 
 typedef struct EffPacketParams {
     s16 parameterCount;
@@ -104,13 +104,15 @@ typedef struct EffectRing {
     u32 count;
     u8 pad14[8];
     s32 spread;
-    u8 pad20[0x10];
+    u8 pad20[8];
+    u32 firstColor;
+    u32 secondColor;
     f32 param30;
     f32 param34;
     f32 param38;
     u8 pad3C[0x14];
     u32 unk50;
-    u32 unk54;
+    u32 drawMode;
     EffectRingVertex *vertices;
     s32 unk5C;
     u32 color;
@@ -165,8 +167,8 @@ EffectRing *source;
     }
     angle = EFFECT_RING_START_ANGLE;
     ring->matrix = effAllocateIdentityMatrixWork(ring->count);
-    *(f32 *)(ring->matrix + 0x5C) = 1.0f;
-    *(u32 *)(ring->matrix + 0x50) = ring->unk54;
+    ((EffRecordPool *)ring->matrix)->scale = 1.0f;
+    ((EffRecordPool *)ring->matrix)->drawMode = ring->drawMode;
     step = EFFECT_RING_FULL_TURN / ring->count;
     spread = ring->spread;
     for (i = 0; i < ring->count; i++) {
@@ -189,47 +191,53 @@ void func_0016F440(EffectRing *ring) {
     effCreateRingFan(ring);
 }
 
-void effReleaseRingResources(EffectRecordGroup *group) {
-    func_001705A0(group->handle7C);
-    sdfReleaseResourceAllocation(group->handle78);
+void effReleaseRingResources(EffectRing *ring) {
+    func_001705A0((u32)ring->matrix);
+    sdfReleaseResourceAllocation(ring->handle);
 }
 
 void effCopyRingVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void effSetRingColor(EffectRecordGroup *group, u32 records) {
-    group->records = (u8 *)records;
+void effSetRingColor(EffectRing *ring, u32 color) {
+    ring->color = color;
 }
 
 void func_0016F4A0(u8 *work, f32 value) {
-    *(f32 *)(work + 0x64) = value;
+    ((EffectRing *)work)->scale = value;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effCopyRingTransformMatrix(void *work, void *src) {
     VU0_LOAD_MATRIX(src);
-    VU0_STORE_MATRIX(*(void **)((u8 *)work + 0x7C));
+    VU0_STORE_MATRIX(((EffectRing *)work)->matrix);
 }
 
+/* Each five-vertex fan group has one packed color word per vertex. */
+typedef struct EffRingColorSlot {
+    s32 colors[5];
+} EffRingColorSlot;
+
+/* Fill five fan-vertex colors; odd and even groups use different alpha values. */
 void effFlashWriteRingColorSlots(u8 *work, s32 index, s32 param) {
-    s32 slot;
+    EffRingColorSlot *slot;
     s32 rgb1;
     s32 rgb2;
 
-    slot = func_00170870(*(void **)(work + 0x7C), index);
-    rgb1 = *(u32 *)(work + 0x28) & 0xFFFFFF;
-    rgb2 = *(u32 *)(work + 0x2C) & 0xFFFFFF;
-    *(s32 *)(slot + 0) = effMultiplyPackedColors(rgb2, param);
-    *(s32 *)(slot + 4) = effMultiplyPackedColors(rgb2, param);
+    slot = (EffRingColorSlot *)func_00170870(((EffectRing *)work)->matrix, index);
+    rgb1 = ((EffectRing *)work)->firstColor & 0xFFFFFF;
+    rgb2 = ((EffectRing *)work)->secondColor & 0xFFFFFF;
+    slot->colors[0] = effMultiplyPackedColors(rgb2, param);
+    slot->colors[1] = effMultiplyPackedColors(rgb2, param);
     if (index & 1) {
-        *(s32 *)(slot + 8) = effMultiplyPackedColors(0x80000000, param);
-        *(s32 *)(slot + 0xC) = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
-        *(s32 *)(slot + 0x10) = effMultiplyPackedColors(0x80000000, param);
+        slot->colors[2] = effMultiplyPackedColors(0x80000000, param);
+        slot->colors[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
+        slot->colors[4] = effMultiplyPackedColors(0x80000000, param);
     } else {
-        *(s32 *)(slot + 8) = effMultiplyPackedColors(0xFF000000, param);
-        *(s32 *)(slot + 0xC) = effMultiplyPackedColors(rgb1 | 0x40000000, param);
-        *(s32 *)(slot + 0x10) = effMultiplyPackedColors(0xFF000000, param);
+        slot->colors[2] = effMultiplyPackedColors(0xFF000000, param);
+        slot->colors[3] = effMultiplyPackedColors(rgb1 | 0x40000000, param);
+        slot->colors[4] = effMultiplyPackedColors(0xFF000000, param);
     }
 }
 
@@ -329,7 +337,7 @@ void effReleaseRecordGroupAssetAndHandle(EffectRecordGroup *group) {
     sdfReleaseResourceAllocation(group->handle6C);
 }
 
-void func_0016FC58(EffectPool *work)
+void func_0016FC58(EffRecordPool *work)
 {
     f32 matrix[16] __attribute__((aligned(16)));
     void *list;
@@ -369,8 +377,8 @@ void func_0016FC58(EffectPool *work)
         D_003D6550->parameterCount = chunk * 3;
         sdfAppendPacket(list, func_0015FE20(D_003D6550));
     }
-    if (work->kind < 4) {
-        D_003549D8[work->kind]->submit(D_003549D8[work->kind], list);
+    if (work->drawMode < 4) {
+        D_003549D8[work->drawMode]->submit(D_003549D8[work->drawMode], list);
     } else {
         clearList = sdfAllocPacketAligned(0x20);
         sdfInitPacketList(clearList);
@@ -412,7 +420,7 @@ void func_0016FF40(EffectRecordGroup *group, u32 value) {
 }
 
 void func_0016FF48(u8 *work, f32 value) {
-    *(f32 *)(work + 0x5C) = value;
+    ((EffRecordPool *)work)->scale = value;
 }
 
 
@@ -420,8 +428,8 @@ extern void *memset(void *dst, s32 value, u32 size);
 extern u32 sdfCreateAssetWithDrawEntries(void);
 extern void func_002DA420(u32 asset, f32 value);
 
-EffectPool *effRecordPoolCreateTriad(s32 groups) {
-    EffectPool *pool;
+EffRecordPool *effRecordPoolCreateTriad(s32 groups) {
+    EffRecordPool *pool;
     u32 handle;
     u32 *block;
     s32 slots;
@@ -436,11 +444,11 @@ EffectPool *effRecordPoolCreateTriad(s32 groups) {
     handle = sdfAllocGeneralBlock(size);
     block = (u32 *)sdfResourceRetainAddress(handle);
     memset(block, 0, size);
-    pool = (EffectPool *)(block + (first + second));
+    pool = (EffRecordPool *)(block + (first + second));
     pool->recordBase = (s32)block;
     pool->auxRecordBase = (s32)(block + first);
     pool->color = 0x80808080;
-    pool->kind = 2;
+    pool->drawMode = 2;
     pool->count = second;
     pool->buffer = handle;
     pool->scale = 1.0f;
@@ -457,7 +465,7 @@ void effReleaseRecordPoolResourceAndBuffer(EffectRecordGroup *group) {
 }
 
 /* Submit the position/color pool in triangle batches of at most 48 vertices. */
-void effDrawTriangleRecordPool(EffectPool *pool)
+void effDrawTriangleRecordPool(EffRecordPool *pool)
 {
     f32 matrix[16];
     void *packet = sdfAllocPacketAligned(0x20);
@@ -493,7 +501,7 @@ void effDrawTriangleRecordPool(EffectPool *pool)
         D_003D6550->vertexCount = count;
         sdfAppendPacket(packet, func_0015FE20(D_003D6550));
     }
-    surface = D_003549E8[pool->kind];
+    surface = D_003549E8[pool->drawMode];
     surface->submit(surface, packet);
 }
 
@@ -505,8 +513,8 @@ s32 effGetGroupIndexRecord(EffectRecordGroup *group, s32 index) {
     return (s32)group->indices + index * 0xc;
 }
 
-EffectPool *effRecordPoolCreate(s32 groups) {
-    EffectPool *pool;
+EffRecordPool *effRecordPoolCreate(s32 groups) {
+    EffRecordPool *pool;
     u32 handle;
     u32 *block;
     s32 first;
@@ -519,9 +527,9 @@ EffectPool *effRecordPoolCreate(s32 groups) {
     handle = sdfAllocGeneralBlock(size);
     block = (u32 *)sdfResourceRetainAddress(handle);
     memset(block, 0, size);
-    pool = (EffectPool *)(block + (first + second));
+    pool = (EffRecordPool *)(block + (first + second));
     pool->recordBase = (s32)block;
-    pool->kind = 2;
+    pool->drawMode = 2;
     pool->auxRecordBase = (s32)(block + first);
     pool->count = second;
     pool->buffer = handle;
@@ -540,7 +548,7 @@ void func_00170350(EffectRecordGroup *group) {
 }
 
 /* Submit the position/color pool in quad batches of at most 32 vertices. */
-void effDrawQuadRecordPool(EffectPool *pool)
+void effDrawQuadRecordPool(EffRecordPool *pool)
 {
     f32 matrix[16];
     void *packet = sdfAllocPacketAligned(0x20);
@@ -576,7 +584,7 @@ void effDrawQuadRecordPool(EffectPool *pool)
         D_003D6550->vertexCount = count;
         sdfAppendPacket(packet, func_0015FE20(D_003D6550));
     }
-    surface = D_00354A48[pool->kind];
+    surface = D_00354A48[pool->drawMode];
     surface->submit(surface, packet);
 }
 
@@ -599,7 +607,7 @@ void func_001705A0(u32 id) {
     effReleaseRecordGroupAssetAndHandle(id);
 }
 
-void func_001705B8(EffectPool *work)
+void func_001705B8(EffRecordPool *work)
 {
     f32 matrix[16] __attribute__((aligned(16)));
     void *list;
@@ -636,8 +644,8 @@ void func_001705B8(EffectPool *work)
         D_003D6550->parameterCount = chunk * 3;
         sdfAppendPacket(list, func_0015FE20(D_003D6550));
     }
-    if (work->kind < 4) {
-        D_00354A58[work->kind]->submit(D_00354A58[work->kind], list);
+    if (work->drawMode < 4) {
+        D_00354A58[work->drawMode]->submit(D_00354A58[work->drawMode], list);
     } else {
         clearList = sdfAllocPacketAligned(0x20);
         sdfInitPacketList(clearList);
@@ -670,16 +678,18 @@ s32 func_00170870(EffectRecordGroup *group, s32 index) {
     return (s32)group->indices + index * 0x14;
 }
 
-void func_00170888(s32 slot, u32 color) {
-    *(u32 *)(slot + 0x50) = color;
+/* Select the record pool's packet submission mode. */
+void func_00170888(s32 slot, u32 mode) {
+    ((EffRecordPool *)slot)->drawMode = mode;
 }
 
+/* Set the packed color word passed to the pool's packet builder. */
 void func_00170890(s32 slot, u32 color) {
-    *(u32 *)(slot + 0x54) = color;
+    ((EffRecordPool *)slot)->color = color;
 }
 
 void func_00170898(u8 *work, f32 value) {
-    *(f32 *)(work + 0x5C) = value;
+    ((EffRecordPool *)work)->scale = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_001708A0);
