@@ -11,6 +11,7 @@ from pathlib import Path
 
 import battle_tbl
 import fld
+import wap
 
 
 class FieldWorldError(ValueError):
@@ -24,6 +25,88 @@ class EncounterLinkSummary:
     default_zone_references: int
     override_faces: int
     zones: int
+
+
+def _transition_destination(entry: wap.Entry, current_field: int) -> dict:
+    """Describe one WAP destination without discarding its physical arguments."""
+
+    first, second, third = entry.warp_args
+    destination = {
+        "typeId": entry.warp_type,
+        "type": wap.WARP_TYPE_NAMES.get(entry.warp_type, "unknown"),
+        "arguments": [first, second, third],
+        "position": entry.position.value,
+        "camera": {
+            "name": entry.camera.value,
+            "mode": entry.camera_mode,
+            "table": entry.camera_table,
+        },
+    }
+    if entry.warp_type == 0:
+        destination.update(
+            {
+                "field": first or current_field,
+                "area": second,
+            }
+        )
+    elif entry.warp_type == 1:
+        destination.update({"table": first, "floor": second})
+    elif entry.warp_type == 2:
+        destination.update(
+            {
+                "actionId": first,
+                "action": wap.FACILITY_ACTION_NAMES.get(first, "unknown"),
+            }
+        )
+        names = wap.FACILITY_ARGUMENT_NAMES.get(first)
+        if names is not None:
+            destination[names[0]] = second
+            destination["floorFlag"] = third
+    elif entry.warp_type == 3:
+        destination.update({"event": first, "alternateField": third})
+    return destination
+
+
+def area_transitions(
+    table: wap.WapFile,
+    current_field: int,
+    current_area: int,
+) -> dict[str, tuple[dict, ...]]:
+    """Group the named WAP transition rows owned by one field area."""
+
+    result: dict[str, list[dict]] = {}
+    default = wap.default_entry(table.profile)
+    for entry_index, entry in enumerate(table.entries):
+        if entry.kind == 0 or entry.area != current_area or not entry.name.value:
+            continue
+        transition = {
+            "entry": entry_index,
+            "kindId": entry.kind,
+            "kind": wap.ENTRY_KIND_NAMES.get(entry.kind, "unknown"),
+            "destination": _transition_destination(entry, current_field),
+        }
+        if entry.flag_mode or entry.flag:
+            transition["gate"] = {"mode": entry.flag_mode, "flag": entry.flag}
+        if entry.attributes:
+            transition["attributes"] = entry.attributes
+        after = {}
+        if entry.bgm != default.bgm:
+            after["bgm"] = entry.bgm
+        if entry.footstep != default.footstep:
+            after["footstep"] = entry.footstep
+        if entry.after_flag:
+            after["flags"] = entry.after_flag
+        if entry.after_script.value:
+            after["script"] = entry.after_script.value
+        if after:
+            transition["after"] = after
+        if entry.tail != default.tail:
+            transition["tail"] = {
+                "control": entry.tail[0],
+                "arguments": list(entry.tail[1:]),
+            }
+        result.setdefault(entry.name.value, []).append(transition)
+    return {name: tuple(rows) for name, rows in result.items()}
 
 
 def _populated_zone(table: battle_tbl.EncountTable, zone: int, context: str) -> None:

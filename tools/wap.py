@@ -429,6 +429,7 @@ _ENTRY_KINDS = {
     "suction_warp": 11,
     "barrier": 12,
 }
+ENTRY_KIND_NAMES = {number: name for name, number in _ENTRY_KINDS.items()}
 
 _SCENE_ARG_NAMES: dict[int, tuple[str | None, str | None, str | None]] = {
     1: ("motion", "secondary_motion", "sound"),
@@ -445,6 +446,7 @@ _SCENE_NAMED_FIELDS = frozenset(
 )
 
 _WARP_TYPES = {"field": 0, "elevator": 1, "facility": 2, "event": 3}
+WARP_TYPE_NAMES = {number: name for name, number in _WARP_TYPES.items()}
 
 _WARP_ARG_NAMES: dict[int, tuple[str | None, str | None, str | None]] = {
     0: ("field", "area", None),
@@ -457,7 +459,10 @@ _FACILITY_ACTIONS = {
     "save": 4,
     "heal": 5,
 }
-_FACILITY_ARG_NAMES: dict[int, tuple[str, str]] = {
+FACILITY_ACTION_NAMES = {
+    number: name for name, number in _FACILITY_ACTIONS.items()
+}
+FACILITY_ARGUMENT_NAMES: dict[int, tuple[str, str]] = {
     0: ("selection", "floor_flag"),
     3: ("slot", "floor_flag"),
     4: ("slot", "floor_flag"),
@@ -467,7 +472,7 @@ _WARP_NAMED_FIELDS = frozenset(
     name for names in _WARP_ARG_NAMES.values() for name in names if name is not None
 ) | frozenset(
     {"action"}
-    | {name for names in _FACILITY_ARG_NAMES.values() for name in names}
+    | {name for names in FACILITY_ARGUMENT_NAMES.values() for name in names}
 )
 
 
@@ -510,7 +515,7 @@ def _facility_args(
         if "action" in fields
         else base[0]
     )
-    names = _FACILITY_ARG_NAMES.get(action)
+    names = FACILITY_ARGUMENT_NAMES.get(action)
     valid_fields = {"action", *(names or ())}
     invalid_fields = named_fields - valid_fields
     if invalid_fields:
@@ -885,17 +890,15 @@ def _format_list(values: tuple[int, ...]) -> str:
 
 
 def _format_kind(value: int) -> str:
-    return {number: name for name, number in _ENTRY_KINDS.items()}.get(value, str(value))
+    return ENTRY_KIND_NAMES.get(value, str(value))
 
 
 def _format_warp_type(value: int) -> str:
-    return {number: name for name, number in _WARP_TYPES.items()}.get(value, str(value))
+    return WARP_TYPE_NAMES.get(value, str(value))
 
 
 def _format_facility_action(value: int) -> str:
-    return {number: name for name, number in _FACILITY_ACTIONS.items()}.get(
-        value, str(value)
-    )
+    return FACILITY_ACTION_NAMES.get(value, str(value))
 
 
 def _format_named_args(
@@ -922,7 +925,7 @@ def _format_warp_args(
         _format_named_args(fields, values, _WARP_ARG_NAMES.get(warp_type))
         return
 
-    names = _FACILITY_ARG_NAMES.get(values[0])
+    names = FACILITY_ARGUMENT_NAMES.get(values[0])
     if names is None:
         if any(values):
             fields.append(f"args={_format_list(values)}")
