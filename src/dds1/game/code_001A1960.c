@@ -252,6 +252,19 @@ extern s32 datCommandSelectors;
 
 extern s32 datCommandRecords;
 
+extern s32 datRosterDetails;
+
+extern s32 fldCountSceneSlots(void);
+
+extern s32 effMiscRandMod(s32, s32);
+
+extern char D_003A1A40[];
+
+typedef struct BattleFearState {
+    u8 pad_000[0x1FC];
+    u32 flags;
+} BattleFearState;
+
 extern s32 datGameState;
 
 extern s32 datAffinityRecords;
@@ -1049,13 +1062,123 @@ s32 btlRollFearChance(s32 unused, u8 *actor, u32 flags, u32 options) {
     return btlRollAiBucket() < ratio;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A6828);
+s32 func_001A6828(s32 unused, UiObject *unit, u32 flags, s32 unusedFlags,
+                  u8 useSelectedAction) {
+    s32 actionThreshold;
+    s32 statusThreshold;
+    s32 threshold;
+    u32 category;
+
+    if (((BattleFearState *)btlGetRuntime())->flags & 0x80) {
+        return 0;
+    }
+    actionThreshold = 0;
+    statusThreshold = 0;
+    if (useSelectedAction != 0) {
+        if (unit->selectedEntryIndex == -1) {
+            return 0;
+        }
+        category = btlGetActionRecordLookupValue(unit->selectedEntryIndex);
+        switch (category) {
+        case 0x20000:
+        case 0x40000:
+            actionThreshold = 40;
+            break;
+        case 0x10000:
+            actionThreshold = 30;
+            if (fldCountSceneSlots() >= 3) {
+                actionThreshold = 0;
+            }
+            break;
+        }
+    }
+    if (flags & 0x60000) {
+        statusThreshold = 40;
+    } else if (flags & 0x10000) {
+        statusThreshold = 30;
+        if (fldCountSceneSlots() >= 3) {
+            statusThreshold = 0;
+        }
+    }
+    threshold = statusThreshold < actionThreshold ? actionThreshold : statusThreshold;
+    btlBossDebugPrintf(D_003A1A40, threshold);
+    return btlRollAiBucket() < threshold;
+}
 
 f32 func_001A6958(void) {
     return 1.5f;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A6968);
+typedef struct BattleCommandRangeContext {
+    u8 pad_000[0x690];
+    s32 (*commandRangeOverride)(UiObject *, s32);
+} BattleCommandRangeContext;
+
+typedef struct EventModeSlot {
+    s8 stat;
+    s8 kind;
+} EventModeSlot;
+
+typedef struct EventRosterStat {
+    s16 base;
+    u8 alternateA;
+    u8 alternateB;
+    f32 multiplier;
+    u8 pad08[6];
+    u8 rangeMin;
+    u8 rangeMax;
+    u8 pad10[4];
+} EventRosterStat;
+
+typedef struct EventStatRecord {
+    u8 pad00[0x11];
+    u8 stat11;
+    u8 pad12[2];
+    u8 rangeMin;
+    u8 rangeMax;
+    u8 pad16[2];
+    s16 stat18;
+    u8 pad1A[2];
+    s16 stat1C;
+    u8 pad1E[7];
+    u8 stat25;
+    u8 pad26[7];
+    u8 stat2D;
+    u8 pad2E[6];
+    s16 stat34;
+    s16 stat36;
+} EventStatRecord;
+
+u8 func_001A6968(UiObject *unit, s32 command) {
+    BattleCommandRangeContext *context = (BattleCommandRangeContext *)btlGetRuntime();
+    s32 result;
+    s32 minimum;
+    s32 maximum;
+
+    if (context->commandRangeOverride != NULL) {
+        result = context->commandRangeOverride(unit, command);
+        if (result > 0) {
+            return result;
+        }
+    }
+    if (command == 0) {
+        return 1;
+    }
+    if (((EventModeSlot *)datCommandSelectors)[command].kind == 5 &&
+        (unit->flags & 0x200) != 0) {
+        minimum = ((EventRosterStat *)datRosterDetails)[unit->index].rangeMin;
+        maximum = ((EventRosterStat *)datRosterDetails)[unit->index].rangeMax;
+    } else {
+        minimum = ((EventStatRecord *)datCommandRecords)[command].rangeMin;
+        maximum = ((EventStatRecord *)datCommandRecords)[command].rangeMax;
+    }
+    if (minimum < maximum) {
+        result = minimum + effMiscRandMod(0, maximum - minimum + 1);
+    } else {
+        result = minimum;
+    }
+    return result;
+}
 
 u8 btlGetActorDisplayByteWithDefault(s32 object, s32 index) {
     if (index == 0) {
@@ -1070,6 +1193,8 @@ u8 btlGetActorDisplayByteWithDefault(s32 object, s32 index) {
 extern u8 D_00358490[];
 
 extern char D_003A1A58[]; /* "btl:delay=%d\n" */
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1A40);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A6AA0);
 
