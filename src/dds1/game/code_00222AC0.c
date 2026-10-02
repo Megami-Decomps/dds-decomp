@@ -88,7 +88,7 @@ extern void *dds3GetWorldSecondaryObject(void);
 extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast);
 extern void dds3FreePathObject(s32);
 extern s32 func_00116D38(void *);
-extern void func_00116F38(s32);
+extern void dds3PreparePathPositionVector(s32);
 extern f32 evtMeasurePathTrajectoryLength(s32);
 extern void evtScaleValueByMultiplier(s32, f32);
 extern void func_00117568(s32, s32);
@@ -317,7 +317,7 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
     work->motionState = 1;
     work->transitionSourceKind = 2;
     work->linkedUnit = pathSource;
-    func_00116F38(path);
+    dds3PreparePathPositionVector(path);
     VU0_STORE_VF($vf10, work->targetVector);
     work->motionParameter = frames;
     work->directionOffset = valueB6;

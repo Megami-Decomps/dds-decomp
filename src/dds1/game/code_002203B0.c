@@ -152,7 +152,7 @@ void evtComputePlanarTargetDirectionVu(EvtUnit *unit) {
 INCLUDE_ASM(const s32, "game/code_002203B0", func_00220678);
 
 extern void evtScaleValueByMultiplier(void *value, f32 multiplier);
-extern void func_00116F38(void *value);
+extern void dds3PreparePathPositionVector(void *value);
 
 s32 evtUnitStepScaledValue(EvtUnit *unit) {
     f32 t;
@@ -183,7 +183,7 @@ s32 evtUnitStepScaledValue(EvtUnit *unit) {
             t = 1.0f;
         }
         evtScaleValueByMultiplier((void *)unit->pathHandle, t);
-        func_00116F38((void *)unit->pathHandle);
+        dds3PreparePathPositionVector((void *)unit->pathHandle);
         VU0_STORE_VF($vf10, unit->targetVector);
         return 1;
     }
