@@ -102,18 +102,30 @@ void datMoveCursorY(DatCalcCursor *cursor, s32 delta) {
     cursor->y = (s16)value;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_00119300);
-
-extern s32 func_00119300(u8 *, s32);
+extern s8 ptyGetCurrentProfileId(u8 *unit);
+extern s32 func_002CDDB0(u16 profileId, s32 statIndex);
 
 typedef struct DatUnitStatus {
     u8 pad00[0xE];
     u16 status;          /* 0x0E */
+    u8 pad10[6];
+    s8 statValues[0x100];
 } DatUnitStatus;
 
+s32 func_00119300(DatUnitStatus *unit, s32 statIndex) {
+    s32 value = unit->statValues[statIndex] +
+                func_002CDDB0((u16)ptyGetCurrentProfileId((u8 *)unit), statIndex);
+
+    if (value <= 0) {
+        value = 1;
+    }
+    if (value >= 100) value = 99;
+    return value;
+}
+
 /* Units with the 0x1000 status bypass the normal stat eligibility test. */
-s32 func_00119368(u8 *unit, s32 statIndex) {
-    if ((((DatUnitStatus *)unit)->status & 0x7FFF) == 0x1000) {
+s32 func_00119368(DatUnitStatus *unit, s32 statIndex) {
+    if ((unit->status & 0x7FFF) == 0x1000) {
         return 1;
     }
     return func_00119300(unit, statIndex);
