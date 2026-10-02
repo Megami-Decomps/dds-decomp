@@ -1,13 +1,20 @@
 #include "common.h"
 #include "ee_mmi.h"
 
+#define SDF_CURRENT_THREAD_SELECTOR 0xffffffffffffffff
+#define SDF_THREAD_COMPLETION_EVENT 2
+#define SDF_WAKE_WORKER_STACK_BYTES 0x800
+#define SDF_WAKE_WORKER_PRIORITY 0x3E
+#define SDF_SLEEP_THREAD_PRIORITY 0x7C
+
 extern u64 sdfFindThreadNode(u64);
 
+/* The negative lookup selector selects the calling thread's tracked entry. */
 void sdfUnlinkAndDeleteCurrentThread(void) {
-    u64 thread;
+    u64 threadNode;
 
-    thread = sdfFindThreadNode(0xffffffffffffffff);
-    func_002CFB18(thread);
+    threadNode = sdfFindThreadNode(SDF_CURRENT_THREAD_SELECTOR);
+    func_002CFB18(threadNode);
 }
 
 extern s32 sdfSleepThreadId;
@@ -18,8 +25,9 @@ extern s32 ChangeThreadPriority(s32, s32);
 extern s32 iWakeupThread(s32);
 extern s32 SleepThread(void);
 
-s32 sdfWakeThreadOnCompletionEvent(s32 event) {
-    if (event == 2) {
+/* Wake the worker only for its registered event; the byte counter never underflows. */
+s32 sdfWakeThreadOnCompletionEvent(s32 eventId) {
+    if (eventId == SDF_THREAD_COMPLETION_EVENT) {
         iWakeupThread(sdfThreadWakeWorkerId);
         if (D_003BD480 != 0) {
             D_003BD480--;
@@ -28,32 +36,32 @@ s32 sdfWakeThreadOnCompletionEvent(s32 event) {
     return 0;
 }
 
-typedef struct ThreadWaiter {
-    struct ThreadWaiter *next; /* 0x0 */
-    s32 thread;                /* 0x4 */
-} ThreadWaiter;
+typedef struct SdfTrackedThreadEntry {
+    struct SdfTrackedThreadEntry *next; /* 0x0 */
+    s32 threadId;                       /* 0x4 */
+} SdfTrackedThreadEntry;
 
 extern s32 sdfThreadWakeTick;
 extern s32 sdfTrackedThreadSemaphore;
-extern ThreadWaiter *sdfTrackedThreadHead;
+extern SdfTrackedThreadEntry *sdfTrackedThreadHead;
 extern void sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
 extern void func_0030B568(s32);
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 extern s32 WakeupThread(s32);
 
-/* Completion thread: each wake-up wakes every thread registered on the waiter list. */
+/* Each wake-up broadcasts to every tracked thread under the list semaphore. */
 void sdfWakeQueuedThreadWaiters(void) {
-    ThreadWaiter *waiter;
+    SdfTrackedThreadEntry *threadEntry;
 
-    sdfAddHandler(0, 2, sdfWakeThreadOnCompletionEvent, -1, 0);
-    func_0030B568(2);
+    sdfAddHandler(0, SDF_THREAD_COMPLETION_EVENT, sdfWakeThreadOnCompletionEvent, -1, 0);
+    func_0030B568(SDF_THREAD_COMPLETION_EVENT);
     for (;;) {
         SleepThread();
         sdfThreadWakeTick++;
         WaitSema(sdfTrackedThreadSemaphore);
-        for (waiter = sdfTrackedThreadHead; waiter != NULL; waiter = waiter->next) {
-            WakeupThread(waiter->thread);
+        for (threadEntry = sdfTrackedThreadHead; threadEntry != NULL; threadEntry = threadEntry->next) {
+            WakeupThread(threadEntry->threadId);
         }
         SignalSema(sdfTrackedThreadSemaphore);
     }
@@ -65,23 +73,25 @@ extern s32 sdfCreateThread(void (*)(void), void *, s32, s32);
 extern char D_003E1EF0[];
 extern s32 _StartThread(s32, s32);
 
+/* Initialize the tracked-thread list and its semaphore before starting the wake worker. */
 s32 sdfStartQueuedThreadWakeWorker(void) {
-    s32 thread;
+    s32 threadId;
 
     func_0030B7F8();
     sdfThreadWakeTick = 0;
     sdfTrackedThreadHead = NULL;
     sdfTrackedThreadSemaphore = sdfCreateSemaphore(1, 1, 0);
-    thread = sdfCreateThread(sdfWakeQueuedThreadWaiters, D_003E1EF0, 0x800, 0x3E);
-    sdfThreadWakeWorkerId = thread;
-    return _StartThread(thread, 0);
+    threadId = sdfCreateThread(sdfWakeQueuedThreadWaiters, D_003E1EF0, SDF_WAKE_WORKER_STACK_BYTES, SDF_WAKE_WORKER_PRIORITY);
+    sdfThreadWakeWorkerId = threadId;
+    return _StartThread(threadId, 0);
 }
 
+/* Record the calling thread, set its sleep priority, then return the SDK sleep result. */
 s32 sdfThreadSleepSelf(void) {
-    s32 thread = GetThreadId();
+    s32 threadId = GetThreadId();
 
-    sdfSleepThreadId = thread;
-    ChangeThreadPriority(thread, 0x7C);
+    sdfSleepThreadId = threadId;
+    ChangeThreadPriority(threadId, SDF_SLEEP_THREAD_PRIORITY);
     return SleepThread();
 }
 
@@ -94,14 +104,15 @@ typedef struct {
     SdfNode *next;
 } SdfNodeCursor;
 
+/* Promote the next list node to current; an empty list clears current. */
 void sdfAdvanceNodeCursor(SdfNodeCursor *cursor) {
-    SdfNode *next;
+    SdfNode *nextNode;
 
-    next = cursor->next;
-    if (next != (SdfNode *)0x0) {
-        cursor->next = next->next;
+    nextNode = cursor->next;
+    if (nextNode != (SdfNode *)0x0) {
+        cursor->next = nextNode->next;
     }
-    cursor->current = next;
+    cursor->current = nextNode;
 }
 
 typedef struct SdfCursorNode {
@@ -121,15 +132,16 @@ typedef struct SdfCursorWalk {
     s16 visited;
 } SdfCursorWalk;
 
-SdfCursorNode *sdfAdvanceCursorWalk(SdfCursorState *state, SdfCursorWalk *walk) {
-    SdfCursorNode *node = walk->node;
+/* Pop a recycled block, count it live, and advance the size-class cursor when this slot fills. */
+SdfCursorNode *sdfAdvanceCursorWalk(SdfCursorState *sizeClassState, SdfCursorWalk *slotState) {
+    SdfCursorNode *freeBlock = slotState->node;
 
-    walk->visited++;
-    walk->node = node->next;
-    if (walk->visited == state->limit) {
-        sdfAdvanceNodeCursor(&state->cursor);
+    slotState->visited++;
+    slotState->node = freeBlock->next;
+    if (slotState->visited == sizeClassState->limit) {
+        sdfAdvanceNodeCursor(&sizeClassState->cursor);
     }
-    return node;
+    return freeBlock;
 }
 typedef struct SdfCursorSlot {
     struct SdfCursorSlot *next;
