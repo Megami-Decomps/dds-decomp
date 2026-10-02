@@ -37,11 +37,66 @@ def provenance(manifest: dict[str, Any]) -> dict[str, Any]:
         "as_unit": manifest.get("as_unit"),
         "source_sha256": manifest.get("source_sha256"),
         "compiler_sha256": compiler_hash,
-        "extra_cflags": manifest.get("extra_cflags"),
+        "extra_cflags": effective_cflags(manifest),
         "wrapper_returncode": manifest.get("wrapper_returncode"),
         "cc1_succeeded": manifest.get("cc1_succeeded"),
         "object": manifest.get("object"),
     }
+
+
+def effective_cflags(manifest: dict[str, Any]) -> list[str] | None:
+    """Read probe flags, recovering them from older manifests when possible."""
+    recorded = manifest.get("extra_cflags")
+    if isinstance(recorded, list):
+        return [str(flag) for flag in recorded]
+    command = manifest.get("command")
+    if not isinstance(command, list):
+        return None
+    args = [str(item) for item in command]
+    try:
+        start = args.index("-dumpbase") + 2
+    except (ValueError, IndexError):
+        return None
+    source = manifest.get("compiled_source") or manifest.get("source")
+    try:
+        end = args.index(str(source), start) if source else args.index("-o", start)
+    except ValueError:
+        return None
+    return args[start:end]
+
+
+def resolve_function_scope(left: Path, right: Path,
+                           left_manifest: dict[str, Any],
+                           right_manifest: dict[str, Any],
+                           requested: str | None) -> tuple[str | None, bool]:
+    """Infer a shared extracted function, or reject an ambiguous scope."""
+    left_function = left_manifest.get("function")
+    right_function = right_manifest.get("function")
+    left_aliases = compare.replacement_aliases(left)
+    right_aliases = compare.replacement_aliases(right)
+
+    def canonical(value: Any, aliases: dict[str, str]) -> str | None:
+        return compare.canonical_name(value, aliases) if isinstance(value, str) and value else None
+
+    left_name = canonical(left_function, left_aliases)
+    right_name = canonical(right_function, right_aliases)
+    if requested:
+        wanted_left = canonical(requested, left_aliases)
+        wanted_right = canonical(requested, right_aliases)
+        if left_name is not None and left_name != wanted_left:
+            raise ValueError(f"left probe extracted {left_function!r}, not {requested!r}")
+        if right_name is not None and right_name != wanted_right:
+            raise ValueError(f"right probe extracted {right_function!r}, not {requested!r}")
+        return requested, False
+    if left_name is None and right_name is None:
+        return None, False
+    if left_name is None or right_name is None:
+        raise ValueError("probe scope mismatch: only one manifest records an extracted function")
+    if left_name != right_name:
+        raise ValueError(
+            f"probe scope mismatch: {left_function!r} != {right_function!r}"
+        )
+    return left_name, True
 
 
 def object_comparison(left: dict[str, Any], right: dict[str, Any]) -> dict[str, Any]:
@@ -94,8 +149,12 @@ def normalized_diff(left: Path, right: Path, function: str | None,
     left_aliases = compare.replacement_aliases(left)
     right_aliases = compare.replacement_aliases(right)
     lines = list(difflib.unified_diff(
-        compare.normalize(a.read_text(errors="replace"), left_aliases).splitlines(),
-        compare.normalize(b.read_text(errors="replace"), right_aliases).splitlines(),
+        compare.normalize_artifact(
+            a.read_text(errors="replace"), artifact, left_aliases
+        ).splitlines(),
+        compare.normalize_artifact(
+            b.read_text(errors="replace"), artifact, right_aliases
+        ).splitlines(),
         fromfile="left/" + a.name,
         tofile="right/" + b.name,
         lineterm="",
@@ -198,6 +257,11 @@ def analyze(left: Path, right: Path, function: str | None = None) -> dict[str, A
     left_manifest, left_error = read_manifest(left)
     right_manifest, right_error = read_manifest(right)
     warnings = [error for error in (left_error, right_error) if error]
+    function, inferred_scope = resolve_function_scope(
+        left, right, left_manifest, right_manifest, function
+    )
+    if inferred_scope:
+        warnings.append(f"inferred function scope from both manifests: {function}")
     left_provenance = provenance(left_manifest)
     right_provenance = provenance(right_manifest)
     for field in ("version", "as_unit", "compiler_sha256", "extra_cflags"):
@@ -306,7 +370,7 @@ def main(argv: list[str] | None = None) -> int:
             parser.error(f"probe directory not found: {directory}")
     try:
         report = analyze(args.left, args.right, args.function)
-    except (OSError, json.JSONDecodeError) as error:
+    except (OSError, ValueError, json.JSONDecodeError) as error:
         print(f"cannot compare probes: {error}", file=sys.stderr)
         return 2
     if args.json:
