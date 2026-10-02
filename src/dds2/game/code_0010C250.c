@@ -45,7 +45,17 @@ void bfStepContext(void) {
     bfContextStep();
 }
 
-INCLUDE_ASM(const s32, "game/code_0010C250", bfTaskUpdate);
+s32 bfTaskUpdate(void) {
+    switch (bfContextStep(kwlnTaskGetUserValue())) {
+    case 0:
+        return -1;
+    case 2:
+        return -1;
+    case 1:
+    default:
+        return 0;
+    }
+}
 
 void scrPushInteger(ScriptContext *script, u32 value) {
     script->stackTypes[script->stackDepth] = 0;
