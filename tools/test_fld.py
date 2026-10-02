@@ -274,9 +274,21 @@ model_draw_set lists=@draw_list
 label draw_list
 model_draw_list selector=2 draws=@draw
 label draw
-model_draw asset=0 qwords=2 packet=@packet
+model_draw asset=0 qwords=10 packet=@packet
 label packet
-packet_data 000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f
+mesh_header triangles=1 vertices=3 controls=0x1878,0x0360
+mesh_triangles
+triangle 0,1,2,0
+mesh_positions
+position 0,0,0 1,0,0 0,1,0
+mesh_normals
+normal 0,0,1 0,0,1 0,0,1
+mesh_texcoords
+texcoord 0,0 1,0 0,1
+mesh_colors
+color 128,128,128,128 128,128,128,128 128,128,128,128
+mesh_program address=16
+vif_nops count=3
 label assets
 model_assets count=1
 model_asset index=0 word_01=0x80969696 resource_04=3 values_08=0,0,1,0.5,0 scalar_200=0.9
@@ -292,15 +304,31 @@ end_data
         self.assertIn("model_bounds minimum=-1.0,-2.0,-3.0", rendered)
         self.assertIn("model_asset index=0 word_01=0x80969696", rendered)
         self.assertIn("model_draw_list selector=2", rendered)
-        self.assertIn("model_draw asset=0 qwords=2", rendered)
+        self.assertIn("model_draw asset=0 qwords=10", rendered)
+        self.assertIn("mesh_header triangles=1 vertices=3", rendered)
+        self.assertIn("triangle 0,1,2,0", rendered)
+        self.assertIn("position 0.0,0.0,0.0 1.0,0.0,0.0 0.0,1.0,0.0", rendered)
+        self.assertIn("normal 0.0,0.0,1.0 0.0,0.0,1.0 0.0,0.0,1.0", rendered)
+        self.assertIn("texcoord 0.0,0.0 1.0,0.0 0.0,1.0", rendered)
+        self.assertIn("color 128,128,128,128", rendered)
+        self.assertIn("mesh_program address=16", rendered)
+        self.assertIn("vif_nops count=3", rendered)
         self.assertEqual(fld.encode(fld.parse_source(rendered)), data)
 
         with self.assertRaisesRegex(fld.FldError, "has parent 2"):
             fld.encode(fld.parse_source(source.replace("node_id=1 parent=0", "node_id=1 parent=2")))
         with self.assertRaisesRegex(fld.FldError, "followed by 2 model_item"):
             fld.encode(fld.parse_source(source.replace("model_items count=2", "model_items count=1")))
-        with self.assertRaisesRegex(fld.FldError, "contains 32"):
-            fld.encode(fld.parse_source(source.replace("qwords=2", "qwords=1")))
+        with self.assertRaisesRegex(fld.FldError, "contains 160"):
+            fld.encode(fld.parse_source(source.replace("qwords=10", "qwords=1")))
+        with self.assertRaisesRegex(fld.FldError, "outside 3 vertices"):
+            fld.render_source(
+                fld.encode(fld.parse_source(source.replace("0,1,2,0", "0,1,3,0")))
+            )
+        with self.assertRaisesRegex(fld.FldError, "followed by 1 triangle records"):
+            fld.encode(
+                fld.parse_source(source.replace("triangles=1", "triangles=2", 1))
+            )
         with self.assertRaisesRegex(fld.FldError, "only 1 assets exist"):
             fld.encode(fld.parse_source(source.replace("model_draw asset=0", "model_draw asset=1")))
 

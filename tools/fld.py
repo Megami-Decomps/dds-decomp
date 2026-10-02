@@ -41,6 +41,28 @@ MODEL_ITEM_LIST_SIZE = 0x10
 MODEL_ITEM_SIZE = 0x50
 MODEL_BOUNDS_SIZE = 0x18
 MODEL_DRAW_SIZE = 0x10
+MESH_RECORDS_PER_LINE = 8
+MESH_DATA_DIRECTIVES = {
+    "triangle": (4, 4),
+    "position": (12, 3),
+    "normal": (12, 3),
+    "texcoord": (8, 2),
+    "attribute": (16, 4),
+    "color": (4, 4),
+}
+MESH_SECTION_DIRECTIVES = {
+    "mesh_triangles",
+    "mesh_positions",
+    "mesh_normals",
+    "mesh_texcoords",
+    "mesh_attributes",
+    "mesh_colors",
+}
+MESH_PACKET_DIRECTIVES = (
+    {"mesh_header", "mesh_program", "vif_nops"}
+    | MESH_SECTION_DIRECTIVES
+    | set(MESH_DATA_DIRECTIVES)
+)
 MODEL_ASSET_FIELDS = (
     (0x001, "word_01", "u32", 1),
     (0x002, "word_02", "u32", 1),
@@ -167,6 +189,18 @@ class ModelDrawList:
     offset: int
     selector: int
     draws: tuple[int, ...]
+
+
+@dataclass(frozen=True)
+class ModelMesh:
+    triangles: tuple[tuple[int, int, int, int], ...]
+    positions: tuple[tuple[float, float, float], ...]
+    normals: tuple[tuple[float, float, float], ...] | None
+    texcoords: tuple[tuple[float, float], ...] | None
+    attributes: tuple[tuple[float, float, float, float], ...] | None
+    colors: tuple[tuple[int, int, int, int], ...] | None
+    controls: tuple[int, int]
+    program: int
 
 
 def _face_encounter_zone(face: tuple[int, ...], face_index: int) -> int | None:
@@ -638,6 +672,141 @@ def _read_model_draw_graph(
     return roots, lists, draws
 
 
+def _vif_unpack_code(format_id: int, count: int, address: int) -> int:
+    """Build the canonical masked, unsigned, double-buffered VIF UNPACK word."""
+
+    if not 1 <= count <= 0x100:
+        raise FldError(f"VIF UNPACK count {count} is outside 1..256")
+    if not 0 <= address <= 0x3FF:
+        raise FldError(f"VIF UNPACK address {address} exceeds 10 bits")
+    return (
+        (0x60 | format_id) << 24
+        | (count & 0xFF) << 16
+        | 0xC000
+        | address
+    )
+
+
+def _read_model_mesh_packet(
+    data: bytes, offset: int, size: int, context: str
+) -> tuple[tuple[ModelMesh, ...], int]:
+    """Decode the VIF mesh stream used by retail FLD1 model draws."""
+
+    if size <= 0 or size % 0x10:
+        raise FldError(f"{context} size must be a positive multiple of 16")
+    _range(data, offset, size, context)
+    cursor, end = offset, offset + size
+    meshes: list[ModelMesh] = []
+
+    def word(expected_context: str) -> int:
+        nonlocal cursor
+        if cursor + 4 > end:
+            raise FldError(f"{context} ends before {expected_context}")
+        value = struct.unpack_from("<I", data, cursor)[0]
+        cursor += 4
+        return value
+
+    def expect_unpack(format_id: int, count: int, address: int, label: str) -> None:
+        actual = word(label)
+        expected = _vif_unpack_code(format_id, count, address)
+        if actual != expected:
+            raise FldError(
+                f"{context} {label} is 0x{actual:08x}, expected 0x{expected:08x}"
+            )
+
+    def records(count: int, format_text: str, label: str) -> tuple[tuple, ...]:
+        nonlocal cursor
+        record_size = struct.calcsize(format_text)
+        byte_count = count * record_size
+        if cursor + byte_count > end:
+            raise FldError(f"{context} ends inside {label}")
+        values = tuple(
+            struct.unpack_from(format_text, data, cursor + index * record_size)
+            for index in range(count)
+        )
+        cursor += byte_count
+        return values
+
+    while cursor < end and struct.unpack_from("<I", data, cursor)[0] != 0:
+        mesh_index = len(meshes)
+        prefix = f"mesh {mesh_index}"
+        expect_unpack(0xD, 1, 0, prefix + " header command")
+        triangle_count, vertex_count, control_0, control_1 = records(
+            1, "<4H", prefix + " header"
+        )[0]
+        if not triangle_count or not vertex_count:
+            raise FldError(f"{context} {prefix} has an empty triangle or vertex array")
+
+        address = 1
+        expect_unpack(0xE, triangle_count, address, prefix + " triangle command")
+        triangles = records(triangle_count, "<4B", prefix + " triangles")
+        for triangle_index, triangle in enumerate(triangles):
+            if any(index >= vertex_count for index in triangle[:3]):
+                raise FldError(
+                    f"{context} {prefix} triangle {triangle_index} indexes "
+                    f"outside {vertex_count} vertices"
+                )
+        address += triangle_count
+
+        expect_unpack(0x8, vertex_count, address, prefix + " position command")
+        positions = records(vertex_count, "<3f", prefix + " positions")
+        address += vertex_count
+
+        normals = None
+        if cursor + 4 <= end and struct.unpack_from("<I", data, cursor)[0] == _vif_unpack_code(
+            0x8, vertex_count, address
+        ):
+            cursor += 4
+            normals = records(vertex_count, "<3f", prefix + " normals")
+            address += vertex_count
+
+        texcoords = None
+        attributes = None
+        if cursor + 4 <= end:
+            next_word = struct.unpack_from("<I", data, cursor)[0]
+            if next_word == _vif_unpack_code(0x4, vertex_count, address):
+                cursor += 4
+                texcoords = records(vertex_count, "<2f", prefix + " texture coordinates")
+                address += vertex_count
+            elif next_word == _vif_unpack_code(0xC, vertex_count, address):
+                cursor += 4
+                attributes = records(vertex_count, "<4f", prefix + " attributes")
+                address += vertex_count
+
+        colors = None
+        if cursor + 4 <= end and struct.unpack_from("<I", data, cursor)[0] == _vif_unpack_code(
+            0xE, vertex_count, address
+        ):
+            cursor += 4
+            colors = records(vertex_count, "<4B", prefix + " colors")
+
+        program_word = word(prefix + " program command")
+        if program_word & 0xFFFF0000 != 0x14000000:
+            raise FldError(
+                f"{context} {prefix} program command is 0x{program_word:08x}"
+            )
+        meshes.append(
+            ModelMesh(
+                triangles,
+                positions,
+                normals,
+                texcoords,
+                attributes,
+                colors,
+                (control_0, control_1),
+                program_word & 0xFFFF,
+            )
+        )
+
+    tail_size = end - cursor
+    if tail_size % 4 or any(data[cursor:end]):
+        raise FldError(f"{context} has nonzero or partial trailing VIF words")
+    nop_count = tail_size // 4
+    if nop_count > 3:
+        raise FldError(f"{context} has {nop_count} trailing NOPs, expected at most 3")
+    return tuple(meshes), nop_count
+
+
 def _read_motion_tracks(
     data: bytes, offset: int, data_end: int, context: str
 ) -> tuple[MotionTrack, ...]:
@@ -699,7 +868,7 @@ def validate(data: bytes) -> None:
                 data_end,
                 "field model assets",
             )
-            _read_model_draw_graph(
+            _, _, draws = _read_model_draw_graph(
                 data,
                 items,
                 len(assets),
@@ -707,6 +876,18 @@ def validate(data: bytes) -> None:
                 relocations,
                 "field model",
             )
+            packets: dict[int, int] = {}
+            for draw in draws.values():
+                size = draw.quadwords * 0x10
+                old_size = packets.setdefault(draw.packet, size)
+                if old_size != size:
+                    raise FldError(
+                        f"field model packet at 0x{draw.packet:x} has conflicting sizes"
+                    )
+            for packet, size in packets.items():
+                _read_model_mesh_packet(
+                    data, packet, size, f"field model packet at 0x{packet:x}"
+                )
         elif resource.type_id == 3 and resource.data:
             _range(data, resource.data, COLLISION_SIZE, "collision header")
             values = struct.unpack_from("<12I", data, resource.data)
@@ -968,6 +1149,50 @@ def _name_part(value: str, fallback: str) -> str:
     if not value or value[0].isdigit():
         value = f"r_{value}" if value else fallback
     return value
+
+
+def _model_mesh_source(meshes: tuple[ModelMesh, ...], nop_count: int) -> list[str]:
+    lines: list[str] = []
+
+    def emit_records(name: str, values: tuple[tuple, ...], floats: bool) -> None:
+        rendered = [
+            ",".join(_float_text(value) for value in record)
+            if floats
+            else ",".join(str(value) for value in record)
+            for record in values
+        ]
+        for start in range(0, len(rendered), MESH_RECORDS_PER_LINE):
+            lines.append(f"{name} " + " ".join(rendered[start : start + MESH_RECORDS_PER_LINE]))
+
+    for mesh_index, mesh in enumerate(meshes):
+        if lines:
+            lines.append("")
+        lines.append(f"# mesh {mesh_index}")
+        lines.append(
+            "mesh_header "
+            f"triangles={len(mesh.triangles)} vertices={len(mesh.positions)} "
+            f"controls=0x{mesh.controls[0]:04x},0x{mesh.controls[1]:04x}"
+        )
+        lines.append("mesh_triangles")
+        emit_records("triangle", mesh.triangles, False)
+        lines.append("mesh_positions")
+        emit_records("position", mesh.positions, True)
+        if mesh.normals is not None:
+            lines.append("mesh_normals")
+            emit_records("normal", mesh.normals, True)
+        if mesh.texcoords is not None:
+            lines.append("mesh_texcoords")
+            emit_records("texcoord", mesh.texcoords, True)
+        elif mesh.attributes is not None:
+            lines.append("mesh_attributes")
+            emit_records("attribute", mesh.attributes, True)
+        if mesh.colors is not None:
+            lines.append("mesh_colors")
+            emit_records("color", mesh.colors, False)
+        lines.append(f"mesh_program address={mesh.program}")
+    if nop_count:
+        lines.append(f"vif_nops count={nop_count}")
+    return lines
 
 
 def render_source(data: bytes) -> str:
@@ -1239,11 +1464,13 @@ def render_source(data: bytes) -> str:
                         f"{stem} packet at 0x{draw.packet:x} has conflicting sizes"
                     )
             for packet, packet_size in packet_sizes.items():
-                packet_lines = [
-                    "packet_data "
-                    + data[start : min(start + 0x100, packet + packet_size)].hex()
-                    for start in range(packet, packet + packet_size, 0x100)
-                ]
+                meshes, nop_count = _read_model_mesh_packet(
+                    data,
+                    packet,
+                    packet_size,
+                    stem + " model draw packet",
+                )
+                packet_lines = _model_mesh_source(meshes, nop_count)
                 add_span(
                     packet,
                     packet_size,
@@ -1545,6 +1772,142 @@ def parse_source(source: str) -> tuple[Operation, ...]:
     return tuple(operations)
 
 
+def _model_mesh_source_codes(operations: tuple[Operation, ...]) -> dict[int, int]:
+    """Validate semantic mesh blocks and return their generated VIF words."""
+
+    codes: dict[int, int] = {}
+
+    def fields(operation: Operation, required: set[str]) -> dict[str, str]:
+        values = _fields(operation.args)
+        if set(values) != required:
+            missing = required - set(values)
+            extra = set(values) - required
+            raise FldError(
+                f"line {operation.line}: fields differ; "
+                f"missing={sorted(missing)} extra={sorted(extra)}"
+            )
+        return values
+
+    def section(
+        index: int,
+        marker: str,
+        record: str,
+        count: int,
+        format_id: int,
+        address: int,
+    ) -> tuple[int, int]:
+        if index >= len(operations) or operations[index].name != marker:
+            line = operations[index - 1].line if index else 1
+            raise FldError(f"line {line}: expected {marker}")
+        if operations[index].args:
+            raise FldError(f"line {operations[index].line}: {marker} takes no arguments")
+        codes[index] = _vif_unpack_code(format_id, count, address)
+        index += 1
+        actual = 0
+        while index < len(operations) and operations[index].name == record:
+            actual += len(operations[index].args)
+            index += 1
+        if actual != count:
+            raise FldError(
+                f"line {operations[index - 1].line}: {marker} declares {count} "
+                f"records, followed by {actual} {record} records"
+            )
+        return index, address + count
+
+    index = 0
+    while index < len(operations):
+        operation = operations[index]
+        if operation.name == "vif_nops":
+            values = fields(operation, {"count"})
+            count = _int(values["count"])
+            if not 1 <= count <= 3:
+                raise FldError(
+                    f"line {operation.line}: vif_nops count must be in 1..3"
+                )
+            index += 1
+            continue
+        if operation.name != "mesh_header":
+            if operation.name in MESH_PACKET_DIRECTIVES:
+                raise FldError(
+                    f"line {operation.line}: {operation.name} appears outside a mesh block"
+                )
+            index += 1
+            continue
+
+        values = fields(operation, {"triangles", "vertices", "controls"})
+        triangle_count = _int(values["triangles"])
+        vertex_count = _int(values["vertices"])
+        controls = _csv(values["controls"], 2)
+        if not all(0 <= value <= 0xFFFF for value in controls):
+            raise FldError(f"line {operation.line}: mesh controls exceed u16")
+        codes[index] = _vif_unpack_code(0xD, 1, 0)
+        index += 1
+        address = 1
+        index, address = section(
+            index,
+            "mesh_triangles",
+            "triangle",
+            triangle_count,
+            0xE,
+            address,
+        )
+        index, address = section(
+            index,
+            "mesh_positions",
+            "position",
+            vertex_count,
+            0x8,
+            address,
+        )
+        if index < len(operations) and operations[index].name == "mesh_normals":
+            index, address = section(
+                index,
+                "mesh_normals",
+                "normal",
+                vertex_count,
+                0x8,
+                address,
+            )
+        if index < len(operations) and operations[index].name == "mesh_texcoords":
+            index, address = section(
+                index,
+                "mesh_texcoords",
+                "texcoord",
+                vertex_count,
+                0x4,
+                address,
+            )
+        elif index < len(operations) and operations[index].name == "mesh_attributes":
+            index, address = section(
+                index,
+                "mesh_attributes",
+                "attribute",
+                vertex_count,
+                0xC,
+                address,
+            )
+        if index < len(operations) and operations[index].name == "mesh_colors":
+            index, address = section(
+                index,
+                "mesh_colors",
+                "color",
+                vertex_count,
+                0xE,
+                address,
+            )
+        if index >= len(operations) or operations[index].name != "mesh_program":
+            raise FldError(f"line {operation.line}: mesh block has no mesh_program")
+        program_values = fields(operations[index], {"address"})
+        program = _int(program_values["address"])
+        if not 0 <= program <= 0xFFFF:
+            raise FldError(
+                f"line {operations[index].line}: mesh program address exceeds u16"
+            )
+        codes[index] = 0x14000000 | program
+        index += 1
+    return codes
+
+
 def _operation_size(operation: Operation, offset: int) -> int:
     name, args = operation.name, operation.args
     fixed = {
@@ -1571,6 +1934,14 @@ def _operation_size(operation: Operation, offset: int) -> int:
         "model_bounds": MODEL_BOUNDS_SIZE,
         "model_assets": 4,
         "model_draw": MODEL_DRAW_SIZE,
+        "mesh_header": 12,
+        "mesh_triangles": 4,
+        "mesh_positions": 4,
+        "mesh_normals": 4,
+        "mesh_texcoords": 4,
+        "mesh_attributes": 4,
+        "mesh_colors": 4,
+        "mesh_program": 4,
         "pointer": 4,
         "u32": 4 * len(args),
         "s32": 4 * len(args),
@@ -1580,6 +1951,24 @@ def _operation_size(operation: Operation, offset: int) -> int:
     }
     if name in fixed:
         return fixed[name]
+    if name in MESH_DATA_DIRECTIVES:
+        record_size, width = MESH_DATA_DIRECTIVES[name]
+        if not args:
+            raise FldError(f"line {operation.line}: {name} expects records")
+        integer_record = name in {"triangle", "color"}
+        for arg in args:
+            values = _csv(arg, width, _int if integer_record else _parse_float)
+            if integer_record and any(not 0 <= value <= 0xFF for value in values):
+                raise FldError(f"line {operation.line}: {name} component exceeds u8")
+        return record_size * len(args)
+    if name == "vif_nops":
+        fields = _fields(args)
+        if set(fields) != {"count"}:
+            raise FldError(f"line {operation.line}: vif_nops expects count=...")
+        count = _int(fields["count"])
+        if not 1 <= count <= 3:
+            raise FldError(f"line {operation.line}: vif_nops count must be in 1..3")
+        return count * 4
     if name == "model_asset":
         fields = _model_asset_source_fields(operation)
         size = 8
@@ -1657,6 +2046,7 @@ def _operation_size(operation: Operation, offset: int) -> int:
 
 
 def _layout(operations: tuple[Operation, ...]) -> tuple[dict[str, int], int]:
+    _model_mesh_source_codes(operations)
     labels: dict[str, int] = {}
     offset = 0
     end_data: int | None = None
@@ -1718,7 +2108,8 @@ def _layout(operations: tuple[Operation, ...]) -> tuple[dict[str, int], int]:
         actual_size = 0
         while (
             packet_index < len(operations)
-            and operations[packet_index].name == "packet_data"
+            and operations[packet_index].name
+            in MESH_PACKET_DIRECTIVES | {"packet_data"}
         ):
             actual_size += _operation_size(operations[packet_index], 0)
             packet_index += 1
@@ -1732,6 +2123,7 @@ def _layout(operations: tuple[Operation, ...]) -> tuple[dict[str, int], int]:
 
 def encode(operations: tuple[Operation, ...]) -> bytes:
     labels, data_end = _layout(operations)
+    mesh_codes = _model_mesh_source_codes(operations)
     output = bytearray()
     relocations: list[int] = []
     header_offset: int | None = None
@@ -1765,7 +2157,7 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
             )
         return fields
 
-    for operation in operations:
+    for operation_index, operation in enumerate(operations):
         name, args = operation.name, operation.args
         if name in {"label", "end_data"}:
             continue
@@ -2017,6 +2409,36 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
             output.extend(struct.pack("<II", 1, quadwords | asset << 16))
             output.extend(pointer(f["packet"]))
             output.extend(bytes(4))
+        elif name == "mesh_header":
+            f = checked_fields(operation, ("triangles", "vertices", "controls"))
+            triangles, vertices = _int(f["triangles"]), _int(f["vertices"])
+            controls = _csv(f["controls"], 2)
+            output.extend(
+                struct.pack(
+                    "<I4H",
+                    mesh_codes[operation_index],
+                    triangles,
+                    vertices,
+                    *controls,
+                )
+            )
+        elif name in MESH_SECTION_DIRECTIVES or name == "mesh_program":
+            output.extend(struct.pack("<I", mesh_codes[operation_index]))
+        elif name in MESH_DATA_DIRECTIVES:
+            _, width = MESH_DATA_DIRECTIVES[name]
+            if name in {"triangle", "color"}:
+                for arg in args:
+                    output.extend(struct.pack(f"<{width}B", *_csv(arg, width)))
+            else:
+                for arg in args:
+                    output.extend(
+                        struct.pack(
+                            f"<{width}f", *_csv(arg, width, _parse_float)
+                        )
+                    )
+        elif name == "vif_nops":
+            f = checked_fields(operation, ("count",))
+            output.extend(bytes(_int(f["count"]) * 4))
         elif name == "packet_data":
             output.extend(bytes.fromhex(args[0]))
         elif name == "event":
