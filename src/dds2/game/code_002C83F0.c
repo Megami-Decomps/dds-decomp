@@ -120,14 +120,10 @@ INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C8AC0);
 
 void fileManDispatchDone(void) {
     FileManWork *work = &fileManagerWork;
+    FileCbNode *node;
 
     WaitSema(work->sema);
-    for (;;) {
-        FileCbNode *node = work->unk10;
-
-        if (node == NULL) {
-            break;
-        }
+    while ((node = work->unk10) != NULL) {
         work->unk10 = node->next;
         SignalSema(work->sema);
         node->cb(node, node->arg);
