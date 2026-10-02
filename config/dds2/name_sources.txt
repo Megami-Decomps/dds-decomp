@@ -934,6 +934,7 @@
 0x00169EA0	effBattleMiscQueryScalar	inferred	switch on param type -> unit height scale / func_001F6970 [names_M61_EffVu.tsv]
 0x00169F68	effBattleMiscDirectionTo	inferred	normalized (muzzle|effect pos - queried pos) [names_M61_EffVu.tsv]
 0x00169FF0	effBattleMiscBuildBasis	inferred	4x4 basis: look-at or table-driven rotation [names_M61_EffVu.tsv]
+0x0016A438	effBattleApplyUnitRgbKeyframe	inferred	Byte-identical DDS1 twin; applies and restores the command RGB transition at its two keyframes
 0x0016A5A0	effParamWorkGetData	inferred	Returns the parameter-work data pointer from offset four.
 0x0016A5A8	effParamWorkGetId	inferred	Returns the parameter-work kind ID at offset zero.
 0x0016A668	effParamWorkInvokeCallback	inferred	Invokes the per-kind callback on the 8-byte parameter work item's data pointer.
@@ -2769,6 +2770,7 @@
 0x0023C568	evtLoadUnitDirectionVectorVU	inferred	Chooses unit direction vector or default direction and loads VU register vf10. [names_reviewed6.tsv]
 0x0023C828	evtUnitSetValueAndFlag	inferred	Writes a unit value at offset 0x6c and sets the 0x20000 flag.
 0x0023C908	evtSetUnitNormalizedDirection	inferred	Normalizes VU direction into unit vector, copies another vector, and adjusts unit flags. [names_reviewed6.tsv]
+0x0023C978	evtSetUnitRgbTransition	inferred	Byte-identical DDS1 twin; updates the evt-unit RGB transition counters and applies or queues the low 24-bit model color
 0x0023CB48	evtTestUnitStatusFlags	inferred	Byte-identical dds1 twin 0x00221FD8; Tests whether any of the unit's 0x7800 flag bits are set. [names_conflicts.tsv]
 0x0023CB58	evtSetUnitStatusFlags	inferred	Byte-identical dds1 twin 0x00221FE8; Sets unit flag bits 0x300. [names_conflicts.tsv]
 0x0023CB68	evtConfigureUnitTransition	inferred	Clears transition flags for zero or initializes direction and transition flags otherwise. [names_reviewed6.tsv]
