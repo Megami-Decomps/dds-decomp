@@ -1,0 +1,5261 @@
+amb 1
+header version=3 magic=ATMP areas=@areas count=27
+
+label areas
+# 001
+area name=@area_001_name sblocks=@area_001_sblocks count=7 model=@area_001_model position=@area_001_position
+# 002
+area name=@area_002_name sblocks=@area_002_sblocks count=6 model=@area_002_model position=@area_002_position
+# 003
+area name=@area_003_name sblocks=@area_003_sblocks count=2 model=@area_003_model position=@area_003_position
+# 004
+area name=@area_004_name sblocks=@area_004_sblocks count=7 model=@area_004_model position=@area_004_position
+# 005
+area name=@area_005_name sblocks=@area_005_sblocks count=9 model=@area_005_model position=@area_005_position
+# 006
+area name=@area_006_name sblocks=@area_006_sblocks count=2 model=@area_006_model position=@area_006_position
+# 007
+area name=@area_007_name sblocks=@area_007_sblocks count=0 model=@area_007_model position=@area_007_position
+# 008
+area name=@area_008_name sblocks=@area_007_sblocks count=2 model=@area_008_model position=@area_008_position
+# 009
+area name=@area_009_name sblocks=@area_009_sblocks count=3 model=@area_009_model position=@area_009_position
+# 010
+area name=@area_010_name sblocks=@area_010_sblocks count=4 model=@area_010_model position=@area_010_position
+# 011
+area name=@area_011_name sblocks=@area_011_sblocks count=3 model=@area_011_model position=@area_011_position
+# 012
+area name=@area_012_name sblocks=@area_012_sblocks count=6 model=@area_012_model position=@area_012_position
+# 013
+area name=@area_013_name sblocks=@area_013_sblocks count=2 model=@area_013_model position=@area_013_position
+# 014
+area name=@area_014_name sblocks=@area_014_sblocks count=1 model=@area_014_model position=@area_014_position
+# 015
+area name=@area_015_name sblocks=@area_015_sblocks count=4 model=@area_015_model position=@area_015_position
+# 016
+area name=@area_016_name sblocks=@area_016_sblocks count=2 model=@area_016_model position=@area_016_position
+# 017
+area name=@area_017_name sblocks=@area_017_sblocks count=2 model=@area_017_model position=@area_017_position
+# 018
+area name=@area_018_name sblocks=@area_018_sblocks count=1 model=@area_018_model position=@area_018_position
+# 019
+area name=@area_019_name sblocks=@area_019_sblocks count=2 model=@area_019_model position=@area_019_position
+# 020
+area name=@area_020_name sblocks=@area_020_sblocks count=2 model=@area_020_model position=@area_020_position
+# 021
+area name=@area_021_name sblocks=@area_021_sblocks count=2 model=@area_021_model position=@area_021_position
+# 022
+area name=@area_022_name sblocks=@area_022_sblocks count=1 model=@area_022_model position=@area_022_position
+# 023
+area name=@area_023_name sblocks=@area_023_sblocks count=2 model=@area_023_model position=@area_023_position
+# 024
+area name=@area_024_name sblocks=@area_024_sblocks count=4 model=@area_024_model position=@area_024_position
+# 025
+area name=@area_025_name sblocks=@area_025_sblocks count=1 model=@area_025_model position=@area_025_position
+# 026
+area name=@area_026_name sblocks=@area_026_sblocks count=2 model=@area_026_model position=@area_026_position
+# 027
+area name=@area_027_name sblocks=@area_027_sblocks count=2 model=@area_027_model position=@area_027_position
+zeros 4
+
+label area_001_name
+string16 "001"
+
+label area_002_name
+string16 "002"
+
+label area_003_name
+string16 "003"
+
+label area_004_name
+string16 "004"
+
+label area_005_name
+string16 "005"
+
+label area_006_name
+string16 "006"
+
+label area_007_name
+string16 "007"
+
+label area_008_name
+string16 "008"
+
+label area_009_name
+string16 "009"
+
+label area_010_name
+string16 "010"
+
+label area_011_name
+string16 "011"
+
+label area_012_name
+string16 "012"
+
+label area_013_name
+string16 "013"
+
+label area_014_name
+string16 "014"
+
+label area_015_name
+string16 "015"
+
+label area_016_name
+string16 "016"
+
+label area_017_name
+string16 "017"
+
+label area_018_name
+string16 "018"
+
+label area_019_name
+string16 "019"
+
+label area_020_name
+string16 "020"
+
+label area_021_name
+string16 "021"
+
+label area_022_name
+string16 "022"
+
+label area_023_name
+string16 "023"
+
+label area_024_name
+string16 "024"
+
+label area_025_name
+string16 "025"
+
+label area_026_name
+string16 "026"
+
+label area_027_name
+string16 "027"
+
+label area_001_sblocks
+sblock name=@area_001_s01_name node=0 icons=@area_001_s01_icons count=1 floor=0 bounds=@area_001_s01_bound_min,@area_001_s01_bound_max
+sblock name=@area_001_s02_name node=1 icons=@area_001_s02_icons count=1 floor=1 bounds=@area_001_s02_bound_min,@area_001_s02_bound_max
+sblock name=@area_001_s03_name node=2 icons=@area_001_s03_icons count=1 floor=0 bounds=null,null
+sblock name=@area_001_s04_name node=3 icons=@area_001_s04_icons count=1 floor=1 bounds=@area_001_s04_bound_min,@area_001_s04_bound_max
+sblock name=@area_001_s05_name node=4 icons=@area_001_s05_icons count=0 floor=0 bounds=@area_001_s05_bound_min,@area_001_s05_bound_max
+sblock name=@area_001_s06_name node=5 icons=@area_001_s05_icons count=1 floor=0 bounds=@area_001_s06_bound_min,@area_001_s06_bound_max
+sblock name=@area_001_s07_name node=6 icons=@area_001_s01_bound_min count=0 floor=0 bounds=@area_001_s07_bound_min,@area_001_s07_bound_max
+zeros 12
+
+label area_001_s01_name
+string16 "s01"
+
+label area_001_s02_name
+string16 "s02"
+
+label area_001_s03_name
+string16 "s03"
+
+label area_001_s04_name
+string16 "s04"
+
+label area_001_s05_name
+string16 "s05"
+
+label area_001_s06_name
+string16 "s06"
+
+label area_001_s07_name
+string16 "s07"
+
+label area_001_s01_icons
+icon type=5 position=@area_001_s01_icon_1_position
+zeros 8
+
+label area_001_s01_icon_1_position
+vec3 0.0 0.0 -1400.0
+zeros 4
+
+label area_001_s02_icons
+icon type=3 position=@area_001_s02_icon_1_position
+zeros 8
+
+label area_001_s02_icon_1_position
+vec3 -2100.0 -1000.0 5200.0
+zeros 4
+
+label area_001_s03_icons
+icon type=7 position=@area_001_s03_icon_1_position
+zeros 8
+
+label area_001_s03_icon_1_position
+vec3 1100.0 0.0 1300.0
+zeros 4
+
+label area_001_s04_icons
+icon type=10 position=@area_001_s04_icon_1_position
+zeros 8
+
+label area_001_s04_icon_1_position
+vec3 1200.0 -1000.0 7900.0
+zeros 4
+
+label area_001_s05_icons
+icon type=2 position=@area_001_s06_icon_1_position
+zeros 8
+
+label area_001_s06_icon_1_position
+vec3 -2100.0 0.0 5350.0
+zeros 4
+
+label area_001_s01_bound_min
+vec3 -750.0 0.0 -1100.0
+zeros 4
+
+label area_001_s02_bound_min
+vec3 -2900.0 -1000.0 5300.0
+zeros 4
+
+label area_001_s04_bound_min
+vec3 100.0 -1000.0 6400.0
+zeros 4
+
+label area_001_s05_bound_min
+vec3 -4200.0 0.0 3400.0
+zeros 4
+
+label area_001_s06_bound_min
+vec3 -2400.0 0.0 4000.0
+zeros 4
+
+label area_001_s07_bound_min
+vec3 -2650.0 0.0 5800.0
+zeros 4
+
+label area_001_s01_bound_max
+vec3 600.0 0.0 6300.0
+zeros 4
+
+label area_001_s02_bound_max
+vec3 -1900.0 -1000.0 8200.0
+zeros 4
+
+label area_001_s04_bound_max
+vec3 1450.0 -1000.0 8200.0
+zeros 4
+
+label area_001_s05_bound_max
+vec3 -800.0 0.0 4000.0
+zeros 4
+
+label area_001_s06_bound_max
+vec3 -1700.0 0.0 5250.0
+zeros 4
+
+label area_001_s07_bound_max
+vec3 -100.0 0.0 8200.0
+zeros 4
+
+label area_002_sblocks
+sblock name=@area_002_s01_name node=0 icons=@area_002_s01_icons count=1 floor=1 bounds=@area_002_s01_bound_min,@area_002_s01_bound_max
+sblock name=@area_002_s02_name node=1 icons=@area_002_s02_icons count=4 floor=0 bounds=@area_002_s02_bound_min,@area_002_s02_bound_max
+sblock name=@area_002_s03_name node=2 icons=@area_002_s03_icons count=2 floor=2 bounds=@area_002_s03_bound_min,@area_002_s03_bound_max
+sblock name=@area_002_s04_name node=3 icons=@area_002_s04_icons count=1 floor=1 bounds=@area_002_s04_bound_min,@area_002_s04_bound_max
+sblock name=@area_002_s05_name node=4 icons=@area_002_s05_icons count=0 floor=1 bounds=@area_002_s05_bound_min,@area_002_s05_bound_max
+sblock name=@area_002_s06_name node=5 icons=@area_002_s05_icons count=2 floor=1 bounds=@area_002_s06_bound_min,@area_002_s06_bound_max
+zeros 8
+
+label area_002_s01_name
+string16 "s01"
+
+label area_002_s02_name
+string16 "s02"
+
+label area_002_s03_name
+string16 "s03"
+
+label area_002_s04_name
+string16 "s04"
+
+label area_002_s05_name
+string16 "s05"
+
+label area_002_s06_name
+string16 "s06"
+
+label area_002_s01_icons
+icon type=3 position=@area_002_s01_icon_1_position
+zeros 8
+
+label area_002_s01_icon_1_position
+vec3 5200.0 -1000.0 6700.0
+zeros 4
+
+label area_002_s02_icons
+icon type=2 position=@area_002_s02_icon_1_position
+icon type=8 position=@area_002_s02_icon_2_position
+icon type=10 position=@area_002_s02_icon_3_position
+icon type=2 position=@area_002_s02_icon_4_position
+
+label area_002_s02_icon_1_position
+vec3 5000.0 0.0 6700.0
+zeros 4
+
+label area_002_s02_icon_2_position
+vec3 5700.0 0.0 13300.0
+zeros 4
+
+label area_002_s02_icon_3_position
+vec3 5100.0 0.0 12100.0
+zeros 4
+
+label area_002_s02_icon_4_position
+vec3 6900.0 0.0 9450.0
+zeros 4
+
+label area_002_s03_icons
+icon type=3 position=@area_002_s03_icon_1_position
+icon type=3 position=@area_002_s03_icon_2_position
+
+label area_002_s03_icon_1_position
+vec3 7100.0 -2000.0 10300.0
+zeros 4
+
+label area_002_s03_icon_2_position
+vec3 5700.0 -2000.0 10100.0
+zeros 4
+
+label area_002_s04_icons
+icon type=2 position=@area_002_s04_icon_1_position
+zeros 8
+
+label area_002_s04_icon_1_position
+vec3 5700.0 -1000.0 9900.0
+zeros 4
+
+label area_002_s05_icons
+icon type=3 position=@area_002_s06_icon_1_position
+icon type=2 position=@area_002_s06_icon_2_position
+
+label area_002_s06_icon_1_position
+vec3 6900.0 -1000.0 9000.0
+zeros 4
+
+label area_002_s06_icon_2_position
+vec3 7300.0 -1000.0 10300.0
+zeros 4
+
+label area_002_s01_bound_min
+vec3 1550.0 -1000.0 6400.0
+zeros 4
+
+label area_002_s02_bound_min
+vec3 4550.0 0.0 6400.0
+zeros 4
+
+label area_002_s03_bound_min
+vec3 5400.0 -2000.0 8200.0
+zeros 4
+
+label area_002_s04_bound_min
+vec3 5400.0 -1000.0 10000.0
+zeros 4
+
+label area_002_s05_bound_min
+vec3 4300.0 -1000.0 12400.0
+zeros 4
+
+label area_002_s06_bound_min
+vec3 6000.0 -1000.0 9100.0
+zeros 4
+
+label area_002_s01_bound_max
+vec3 5100.0 -1000.0 7600.0
+zeros 4
+
+label area_002_s02_bound_max
+vec3 7200.0 0.0 13600.0
+zeros 4
+
+label area_002_s03_bound_max
+vec3 8400.0 -2000.0 11800.0
+zeros 4
+
+label area_002_s04_bound_max
+vec3 6000.0 -1000.0 11800.0
+zeros 4
+
+label area_002_s05_bound_max
+vec3 4700.0 -1000.0 13600.0
+zeros 4
+
+label area_002_s06_bound_max
+vec3 7200.0 -1000.0 13600.0
+zeros 4
+
+label area_003_sblocks
+sblock name=@area_003_s01_name node=0 icons=@area_003_s01_icons count=0 floor=0 bounds=@area_003_s01_icons,@area_003_s01_bound_max
+sblock name=@area_003_s02_name node=1 icons=@area_003_s01_icons count=0 floor=0 bounds=@area_003_s02_bound_min,@area_003_s02_bound_max
+zeros 8
+
+label area_003_s01_name
+string16 "s01"
+
+label area_003_s02_name
+string16 "s02"
+
+label area_003_s01_icons
+vec3 1200.0 0.0 13600.0
+zeros 4
+
+label area_003_s02_bound_min
+vec3 600.0 0.0 9400.0
+zeros 4
+
+label area_003_s01_bound_max
+vec3 2400.0 0.0 14800.0
+zeros 4
+
+label area_003_s02_bound_max
+vec3 4800.0 0.0 13600.0
+zeros 4
+
+label area_004_sblocks
+sblock name=@area_004_s01_name node=0 icons=@area_004_s01_icons count=1 floor=0 bounds=@area_004_s01_bound_min,@area_004_s01_bound_max
+sblock name=@area_004_s02_name node=1 icons=@area_004_s02_icons count=0 floor=2 bounds=@area_004_s02_bound_min,@area_004_s02_bound_max
+sblock name=@area_004_s03_name node=2 icons=@area_004_s02_icons count=1 floor=2 bounds=@area_004_s03_bound_min,@area_004_s03_bound_max
+sblock name=@area_004_s04_name node=3 icons=@area_004_s04_icons count=1 floor=0 bounds=@area_004_s04_bound_min,@area_004_s04_bound_max
+sblock name=@area_004_s05_name node=4 icons=@area_004_s05_icons count=0 floor=0 bounds=@area_004_s05_bound_min,@area_004_s05_bound_max
+sblock name=@area_004_s06_name node=5 icons=@area_004_s05_icons count=0 floor=2 bounds=null,null
+sblock name=@area_004_s07_name node=6 icons=@area_004_s05_icons count=1 floor=2 bounds=@area_004_s07_bound_min,@area_004_s07_bound_max
+zeros 12
+
+label area_004_s01_name
+string16 "s01"
+
+label area_004_s02_name
+string16 "s02"
+
+label area_004_s03_name
+string16 "s03"
+
+label area_004_s04_name
+string16 "s04"
+
+label area_004_s05_name
+string16 "s05"
+
+label area_004_s06_name
+string16 "s06"
+
+label area_004_s07_name
+string16 "s07"
+
+label area_004_s01_icons
+icon type=8 position=@area_004_s01_icon_1_position
+zeros 8
+
+label area_004_s01_icon_1_position
+vec3 -5100.0 0.0 15700.0
+zeros 4
+
+label area_004_s02_icons
+icon type=3 position=@area_004_s03_icon_1_position
+zeros 8
+
+label area_004_s03_icon_1_position
+vec3 -2300.0 -2000.0 12700.0
+zeros 4
+
+label area_004_s04_icons
+icon type=2 position=@area_004_s04_icon_1_position
+zeros 8
+
+label area_004_s04_icon_1_position
+vec3 -2500.0 0.0 12700.0
+zeros 4
+
+label area_004_s05_icons
+icon type=10 position=@area_004_s07_icon_1_position
+zeros 8
+
+label area_004_s07_icon_1_position
+vec3 -5100.0 -2000.0 16000.0
+zeros 4
+
+label area_004_s01_bound_min
+vec3 -5400.0 0.0 14700.0
+zeros 4
+
+label area_004_s02_bound_min
+vec3 -4800.0 -2000.0 10600.0
+zeros 4
+
+label area_004_s03_bound_min
+vec3 -3600.0 -2000.0 11800.0
+zeros 4
+
+label area_004_s04_bound_min
+vec3 -2400.0 0.0 12400.0
+zeros 4
+
+label area_004_s05_bound_min
+vec3 -5400.0 0.0 10000.0
+zeros 4
+
+label area_004_s07_bound_min
+vec3 -5400.0 -2000.0 12400.0
+zeros 4
+
+label area_004_s01_bound_max
+vec3 -600.0 0.0 16250.0
+zeros 4
+
+label area_004_s02_bound_max
+vec3 -1200.0 -2000.0 12400.0
+zeros 4
+
+label area_004_s03_bound_max
+vec3 -600.0 -2000.0 14200.0
+zeros 4
+
+label area_004_s04_bound_max
+vec3 -1200.0 0.0 13000.0
+zeros 4
+
+label area_004_s05_bound_max
+vec3 -1200.0 0.0 14600.0
+zeros 4
+
+label area_004_s07_bound_max
+vec3 -4200.0 -2000.0 16100.0
+zeros 4
+
+label area_005_sblocks
+sblock name=@area_005_s01_name node=0 icons=@area_005_s01_icons count=2 floor=0 bounds=@area_005_s01_bound_min,@area_005_s01_bound_max
+sblock name=@area_005_s02_name node=1 icons=@area_005_s02_icons count=1 floor=1 bounds=@area_005_s02_bound_min,@area_005_s02_bound_max
+sblock name=@area_005_s03_name node=2 icons=@area_005_s03_icons count=1 floor=2 bounds=@area_005_s03_bound_min,@area_005_s03_bound_max
+sblock name=@area_005_s04_name node=3 icons=@area_005_s04_icons count=1 floor=1 bounds=@area_005_s04_bound_min,@area_005_s04_bound_max
+sblock name=@area_005_s05_name node=4 icons=@area_005_s05_icons count=0 floor=0 bounds=@area_005_s05_bound_min,@area_005_s05_bound_max
+sblock name=@area_005_s06_name node=5 icons=@area_005_s05_icons count=0 floor=0 bounds=@area_005_s06_bound_min,@area_005_s06_bound_max
+sblock name=@area_005_s07_name node=6 icons=@area_005_s05_icons count=0 floor=0 bounds=@area_005_s07_bound_min,@area_005_s07_bound_max
+sblock name=@area_005_s08_name node=7 icons=@area_005_s05_icons count=0 floor=2 bounds=@area_005_s08_bound_min,@area_005_s08_bound_max
+sblock name=@area_005_s09_name node=8 icons=@area_005_s05_icons count=2 floor=2 bounds=@area_005_s09_bound_min,@area_005_s09_bound_max
+zeros 4
+
+label area_005_s01_name
+string16 "s01"
+
+label area_005_s02_name
+string16 "s02"
+
+label area_005_s03_name
+string16 "s03"
+
+label area_005_s04_name
+string16 "s04"
+
+label area_005_s05_name
+string16 "s05"
+
+label area_005_s06_name
+string16 "s06"
+
+label area_005_s07_name
+string16 "s07"
+
+label area_005_s08_name
+string16 "s08"
+
+label area_005_s09_name
+string16 "s09"
+
+label area_005_s01_icons
+icon type=2 position=@area_005_s01_icon_1_position
+icon type=6 position=@area_005_s01_icon_2_position
+
+label area_005_s01_icon_1_position
+vec3 -5550.0 0.0 17550.0
+zeros 4
+
+label area_005_s01_icon_2_position
+vec3 -3900.0 0.0 17500.0
+zeros 4
+
+label area_005_s02_icons
+icon type=3 position=@area_005_s02_icon_1_position
+zeros 8
+
+label area_005_s02_icon_1_position
+vec3 -5400.0 -1000.0 17550.0
+zeros 4
+
+label area_005_s03_icons
+icon type=3 position=@area_005_s03_icon_1_position
+zeros 8
+
+label area_005_s03_icon_1_position
+vec3 -8150.0 -2000.0 16100.0
+zeros 4
+
+label area_005_s04_icons
+icon type=2 position=@area_005_s04_icon_1_position
+zeros 8
+
+label area_005_s04_icon_1_position
+vec3 -8150.0 -1000.0 15950.0
+zeros 4
+
+label area_005_s05_icons
+icon type=8 position=@area_005_s09_icon_1_position
+icon type=3 position=@area_005_s09_icon_2_position
+
+label area_005_s09_icon_1_position
+vec3 -7500.0 -2000.0 11500.0
+zeros 4
+
+label area_005_s09_icon_2_position
+vec3 -8100.0 -2000.0 11100.0
+zeros 4
+
+label area_005_s01_bound_min
+vec3 -8400.0 0.0 14200.0
+zeros 4
+
+label area_005_s02_bound_min
+vec3 -7900.0 -1000.0 17300.0
+zeros 4
+
+label area_005_s03_bound_min
+vec3 -8400.0 -2000.0 14200.0
+zeros 4
+
+label area_005_s04_bound_min
+vec3 -8400.0 -1000.0 16050.0
+zeros 4
+
+label area_005_s05_bound_min
+vec3 -7200.0 0.0 14200.0
+zeros 4
+
+label area_005_s06_bound_min
+vec3 -9250.0 0.0 13000.0
+zeros 4
+
+label area_005_s07_bound_min
+vec3 -6600.0 0.0 13000.0
+zeros 4
+
+label area_005_s08_bound_min
+vec3 -6600.0 -2000.0 14800.0
+zeros 4
+
+label area_005_s09_bound_min
+vec3 -8400.0 -2000.0 11200.0
+zeros 4
+
+label area_005_s01_bound_max
+vec3 -3600.0 0.0 17800.0
+zeros 4
+
+label area_005_s02_bound_max
+vec3 -5500.0 -1000.0 17800.0
+zeros 4
+
+label area_005_s03_bound_max
+vec3 -6600.0 -2000.0 16000.0
+zeros 4
+
+label area_005_s04_bound_max
+vec3 -7900.0 -1000.0 17800.0
+zeros 4
+
+label area_005_s05_bound_max
+vec3 -6000.0 0.0 14800.0
+zeros 4
+
+label area_005_s06_bound_max
+vec3 -7800.0 0.0 14200.0
+zeros 4
+
+label area_005_s07_bound_max
+vec3 -5400.0 0.0 14200.0
+zeros 4
+
+label area_005_s08_bound_max
+vec3 -6000.0 -2000.0 15400.0
+zeros 4
+
+label area_005_s09_bound_max
+vec3 -6600.0 -2000.0 14200.0
+zeros 4
+
+label area_006_sblocks
+sblock name=@area_006_s01_name node=0 icons=@area_006_s01_icons count=1 floor=0 bounds=@area_006_s01_bound_min,@area_006_s01_bound_max
+sblock name=@area_006_s02_name node=1 icons=@area_006_s02_icons count=3 floor=0 bounds=@area_006_s02_bound_min,@area_006_s02_bound_max
+zeros 8
+
+label area_006_s01_name
+string16 "s01"
+
+label area_006_s02_name
+string16 "s02"
+
+label area_006_s01_icons
+icon type=2 position=@area_006_s01_icon_1_position
+zeros 8
+
+label area_006_s01_icon_1_position
+vec3 -8100.0 0.0 11300.0
+zeros 4
+
+label area_006_s02_icons
+icon type=10 position=@area_006_s02_icon_1_position
+icon type=8 position=@area_006_s02_icon_2_position
+icon type=10 position=@area_006_s02_icon_3_position
+zeros 8
+
+label area_006_s02_icon_1_position
+vec3 -7500.0 0.0 5200.0
+zeros 4
+
+label area_006_s02_icon_2_position
+vec3 -5670.0 0.0 5500.0
+zeros 4
+
+label area_006_s02_icon_3_position
+vec3 -3600.0 0.0 6700.0
+zeros 4
+
+label area_006_s01_bound_min
+vec3 -8400.0 0.0 8200.0
+zeros 4
+
+label area_006_s02_bound_min
+vec3 -8400.0 0.0 4950.0
+zeros 4
+
+label area_006_s01_bound_max
+vec3 -3600.0 0.0 11200.0
+zeros 4
+
+label area_006_s02_bound_max
+vec3 -2750.0 0.0 8800.0
+zeros 4
+
+label area_007_sblocks
+sblock name=@area_008_s01_name node=0 icons=@area_008_s01_icons count=1 floor=0 bounds=@area_008_s01_bound_min,@area_008_s01_bound_max
+sblock name=@area_008_s02_name node=1 icons=@area_008_s01_bound_min count=0 floor=0 bounds=@area_008_s02_bound_min,@area_008_s02_bound_max
+zeros 8
+
+label area_008_s01_name
+string16 "s01"
+
+label area_008_s02_name
+string16 "s02"
+
+label area_008_s01_icons
+icon type=10 position=@area_008_s01_icon_1_position
+zeros 8
+
+label area_008_s01_icon_1_position
+vec3 -9300.0 0.0 1300.0
+zeros 4
+
+label area_008_s01_bound_min
+vec3 -9500.0 0.0 -200.0
+zeros 4
+
+label area_008_s02_bound_min
+vec3 -4200.0 0.0 400.0
+zeros 4
+
+label area_008_s01_bound_max
+vec3 -4200.0 0.0 4850.0
+zeros 4
+
+label area_008_s02_bound_max
+vec3 -2400.0 0.0 1000.0
+zeros 4
+
+label area_009_sblocks
+sblock name=@area_009_s01_name node=0 icons=@area_009_s01_icons count=0 floor=0 bounds=@area_009_s01_bound_min,@area_009_s01_bound_max
+sblock name=@area_009_s02_name node=1 icons=@area_009_s01_icons count=2 floor=2 bounds=@area_009_s02_bound_min,@area_009_s02_bound_max
+sblock name=@area_009_s03_name node=2 icons=@area_009_s03_icons count=1 floor=0 bounds=@area_009_s03_bound_min,@area_009_s03_bound_max
+zeros 12
+
+label area_009_s01_name
+string16 "s01"
+
+label area_009_s02_name
+string16 "s02"
+
+label area_009_s03_name
+string16 "s03"
+
+label area_009_s01_icons
+icon type=3 position=@area_009_s02_icon_1_position
+icon type=3 position=@area_009_s02_icon_2_position
+
+label area_009_s02_icon_1_position
+vec3 -9700.0 -2000.0 6100.0
+zeros 4
+
+label area_009_s02_icon_2_position
+vec3 -12300.0 -2000.0 7100.0
+zeros 4
+
+label area_009_s03_icons
+icon type=2 position=@area_009_s03_icon_1_position
+zeros 8
+
+label area_009_s03_icon_1_position
+vec3 -9500.0 0.0 6100.0
+zeros 4
+
+label area_009_s01_bound_min
+vec3 -10800.0 0.0 1600.0
+zeros 4
+
+label area_009_s02_bound_min
+vec3 -12600.0 -2000.0 4600.0
+zeros 4
+
+label area_009_s03_bound_min
+vec3 -11400.0 0.0 4000.0
+zeros 4
+
+label area_009_s01_bound_max
+vec3 -9000.0 0.0 4600.0
+zeros 4
+
+label area_009_s02_bound_max
+vec3 -8400.0 -2000.0 7000.0
+zeros 4
+
+label area_009_s03_bound_max
+vec3 -9600.0 0.0 7000.0
+zeros 4
+
+label area_010_sblocks
+sblock name=@area_010_s01_name node=0 icons=@area_010_s01_icons count=2 floor=0 bounds=@area_010_s01_bound_min,@area_010_s01_bound_max
+sblock name=@area_010_s02_name node=1 icons=@area_010_s02_icons count=1 floor=0 bounds=@area_010_s02_bound_min,@area_010_s02_bound_max
+sblock name=@area_010_s03_name node=2 icons=@area_010_s03_icons count=1 floor=2 bounds=@area_010_s03_bound_min,@area_010_s03_bound_max
+sblock name=@area_010_s04_name node=3 icons=@area_010_s04_icons count=1 floor=0 bounds=@area_010_s04_bound_min,@area_010_s04_bound_max
+
+label area_010_s01_name
+string16 "s01"
+
+label area_010_s02_name
+string16 "s02"
+
+label area_010_s03_name
+string16 "s03"
+
+label area_010_s04_name
+string16 "s04"
+
+label area_010_s01_icons
+icon type=2 position=@area_010_s01_icon_1_position
+icon type=2 position=@area_010_s01_icon_2_position
+
+label area_010_s01_icon_1_position
+vec3 -12300.0 0.0 6900.0
+zeros 4
+
+label area_010_s01_icon_2_position
+vec3 -9500.0 0.0 9700.0
+zeros 4
+
+label area_010_s02_icons
+icon type=10 position=@area_010_s02_icon_1_position
+zeros 8
+
+label area_010_s02_icon_1_position
+vec3 -9700.0 0.0 12700.0
+zeros 4
+
+label area_010_s03_icons
+icon type=3 position=@area_010_s03_icon_1_position
+zeros 8
+
+label area_010_s03_icon_1_position
+vec3 -9700.0 -2000.0 9700.0
+zeros 4
+
+label area_010_s04_icons
+icon type=8 position=@area_010_s04_icon_1_position
+zeros 8
+
+label area_010_s04_icon_1_position
+vec3 -9900.0 0.0 13900.0
+zeros 4
+
+label area_010_s01_bound_min
+vec3 -12600.0 0.0 7000.0
+zeros 4
+
+label area_010_s02_bound_min
+vec3 -10800.0 0.0 11800.0
+zeros 4
+
+label area_010_s03_bound_min
+vec3 -9600.0 -2000.0 9400.0
+zeros 4
+
+label area_010_s04_bound_min
+vec3 -12000.0 0.0 13051.0
+zeros 4
+
+label area_010_s01_bound_max
+vec3 -9600.0 0.0 13600.0
+zeros 4
+
+label area_010_s02_bound_max
+vec3 -9600.0 0.0 12950.0
+zeros 4
+
+label area_010_s03_bound_max
+vec3 -7800.0 -2000.0 10000.0
+zeros 4
+
+label area_010_s04_bound_max
+vec3 -9350.0 0.0 14200.0
+zeros 4
+
+label area_011_sblocks
+sblock name=@area_011_s01_name node=0 icons=@area_011_s01_icons count=0 floor=1 bounds=@area_011_s01_bound_min,@area_011_s01_bound_max
+sblock name=@area_011_s02_name node=1 icons=@area_011_s01_icons count=0 floor=0 bounds=@area_011_s02_bound_min,@area_011_s02_bound_max
+sblock name=@area_011_s03_name node=2 icons=@area_011_s01_icons count=1 floor=0 bounds=null,null
+zeros 12
+
+label area_011_s01_name
+string16 "s01"
+
+label area_011_s02_name
+string16 "s02"
+
+label area_011_s03_name
+string16 "s03"
+
+label area_011_s01_icons
+icon type=4 position=@area_011_s03_icon_1_position
+zeros 8
+
+label area_011_s03_icon_1_position
+vec3 -1500.0 0.0 2000.0
+zeros 4
+
+label area_011_s01_bound_min
+vec3 -3000.0 -1000.0 8300.0
+zeros 4
+
+label area_011_s02_bound_min
+vec3 -2300.0 0.0 400.0
+zeros 4
+
+label area_011_s01_bound_max
+vec3 1200.0 -1000.0 9400.0
+zeros 4
+
+label area_011_s02_bound_max
+vec3 -700.0 0.0 1500.0
+zeros 4
+
+label area_012_sblocks
+sblock name=@area_012_s01_name node=0 icons=@area_012_s01_icons count=0 floor=1 bounds=@area_012_s01_bound_min,@area_012_s01_bound_max
+sblock name=@area_012_s02_name node=1 icons=@area_012_s01_icons count=0 floor=1 bounds=@area_012_s02_bound_min,@area_012_s02_bound_max
+sblock name=@area_012_s03_name node=2 icons=@area_012_s01_icons count=0 floor=1 bounds=@area_012_s03_bound_min,@area_012_s03_bound_max
+sblock name=@area_012_s04_name node=3 icons=@area_012_s01_icons count=0 floor=1 bounds=@area_012_s04_bound_min,@area_012_s04_bound_max
+sblock name=@area_012_s05_name node=4 icons=@area_012_s01_icons count=1 floor=1 bounds=null,null
+sblock name=@area_012_s06_name node=5 icons=@area_012_s06_icons count=1 floor=1 bounds=null,null
+zeros 8
+
+label area_012_s01_name
+string16 "s01"
+
+label area_012_s02_name
+string16 "s02"
+
+label area_012_s03_name
+string16 "s03"
+
+label area_012_s04_name
+string16 "s04"
+
+label area_012_s05_name
+string16 "s05"
+
+label area_012_s06_name
+string16 "s06"
+
+label area_012_s01_icons
+icon type=13 position=@area_012_s05_icon_1_position
+zeros 8
+
+label area_012_s05_icon_1_position
+vec3 8100.0 -1000.0 12350.0
+zeros 4
+
+label area_012_s06_icons
+icon type=13 position=@area_012_s06_icon_1_position
+zeros 8
+
+label area_012_s06_icon_1_position
+vec3 9550.0 -1000.0 14500.0
+zeros 4
+
+label area_012_s01_bound_min
+vec3 4200.0 -1000.0 13700.0
+zeros 4
+
+label area_012_s02_bound_min
+vec3 7300.0 -1000.0 12300.0
+zeros 4
+
+label area_012_s03_bound_min
+vec3 7800.0 -1000.0 10100.0
+zeros 4
+
+label area_012_s04_bound_min
+vec3 9100.0 -1000.0 14200.0
+zeros 4
+
+label area_012_s01_bound_max
+vec3 6600.0 -1000.0 15300.0
+zeros 4
+
+label area_012_s02_bound_max
+vec3 8400.0 -1000.0 13000.0
+zeros 4
+
+label area_012_s03_bound_max
+vec3 12000.0 -1000.0 15300.0
+zeros 4
+
+label area_012_s04_bound_max
+vec3 9500.0 -1000.0 14800.0
+zeros 4
+
+label area_013_sblocks
+sblock name=@area_013_s01_name node=0 icons=@area_013_s01_icons count=0 floor=1 bounds=@area_013_s01_icons,@area_013_s01_bound_max
+sblock name=@area_013_s02_name node=1 icons=@area_013_s01_icons count=0 floor=1 bounds=@area_013_s02_bound_min,@area_013_s02_bound_max
+zeros 8
+
+label area_013_s01_name
+string16 "s01"
+
+label area_013_s02_name
+string16 "s02"
+
+label area_013_s01_icons
+vec3 -10100.0 -1000.0 17900.0
+zeros 4
+
+label area_013_s02_bound_min
+vec3 -9600.0 -1000.0 16600.0
+zeros 4
+
+label area_013_s01_bound_max
+vec3 -6000.0 -1000.0 19500.0
+zeros 4
+
+label area_013_s02_bound_max
+vec3 -8500.0 -1000.0 18400.0
+zeros 4
+
+label area_014_sblocks
+sblock name=@area_014_s01_name node=0 icons=@area_014_s01_icons count=0 floor=0 bounds=@area_014_s01_icons,@area_014_s01_bound_max
+zeros 4
+
+label area_014_s01_name
+string16 "s01"
+
+label area_014_s01_icons
+vec3 -13700.0 0.0 14800.0
+zeros 4
+
+label area_014_s01_bound_max
+vec3 -8500.0 0.0 19500.0
+zeros 4
+
+label area_015_sblocks
+sblock name=@area_015_s01_name node=0 icons=@area_015_s01_icons count=0 floor=0 bounds=@area_015_s01_bound_min,@area_015_s01_bound_max
+sblock name=@area_015_s02_name node=1 icons=@area_015_s01_icons count=0 floor=0 bounds=@area_015_s02_bound_min,@area_015_s02_bound_max
+sblock name=@area_015_s03_name node=2 icons=@area_015_s01_icons count=1 floor=0 bounds=null,null
+sblock name=@area_015_s04_name node=3 icons=@area_015_s01_bound_min count=0 floor=0 bounds=@area_015_s04_bound_min,@area_015_s04_bound_max
+
+label area_015_s01_name
+string16 "s01"
+
+label area_015_s02_name
+string16 "s02"
+
+label area_015_s03_name
+string16 "s03"
+
+label area_015_s04_name
+string16 "s04"
+
+label area_015_s01_icons
+icon type=13 position=@area_015_s03_icon_1_position
+zeros 8
+
+label area_015_s03_icon_1_position
+vec3 -12650.0 0.0 4300.0
+zeros 4
+
+label area_015_s01_bound_min
+vec3 -13100.0 0.0 400.0
+zeros 4
+
+label area_015_s02_bound_min
+vec3 -16200.0 0.0 4000.0
+zeros 4
+
+label area_015_s04_bound_min
+vec3 -12600.0 0.0 400.0
+zeros 4
+
+label area_015_s01_bound_max
+vec3 -11500.0 0.0 6400.0
+zeros 4
+
+label area_015_s02_bound_max
+vec3 -12700.0 0.0 6900.0
+zeros 4
+
+label area_015_s04_bound_max
+vec3 -10200.0 0.0 1500.0
+zeros 4
+
+label area_016_sblocks
+sblock name=@area_016_s01_name node=0 icons=@area_016_s01_icons count=2 floor=0 bounds=@area_016_s01_bound_min,@area_016_s01_bound_max
+sblock name=@area_016_s02_name node=1 icons=@area_016_s01_bound_min count=0 floor=0 bounds=@area_016_s02_bound_min,@area_016_s02_bound_max
+zeros 8
+
+label area_016_s01_name
+string16 "s01"
+
+label area_016_s02_name
+string16 "s02"
+
+label area_016_s01_icons
+icon type=8 position=@area_016_s01_icon_1_position
+icon type=6 position=@area_016_s01_icon_2_position
+
+label area_016_s01_icon_1_position
+vec3 -6250.0 0.0 -1400.0
+zeros 4
+
+label area_016_s01_icon_2_position
+vec3 -6950.0 0.0 -1400.0
+zeros 4
+
+label area_016_s01_bound_min
+vec3 -7200.0 0.0 -1700.0
+zeros 4
+
+label area_016_s02_bound_min
+vec3 -5700.0 -1000.0 3100.0
+zeros 4
+
+label area_016_s01_bound_max
+vec3 -6000.0 0.0 -300.0
+zeros 4
+
+label area_016_s02_bound_max
+vec3 -4300.0 1000.0 4300.0
+zeros 4
+
+label area_017_sblocks
+sblock name=@area_017_s01_name node=0 icons=@area_017_s01_icons count=0 floor=1 bounds=@area_017_s01_icons,@area_017_s01_bound_max
+sblock name=@area_017_s02_name node=1 icons=@area_017_s01_icons count=0 floor=1 bounds=@area_017_s02_bound_min,@area_017_s02_bound_max
+zeros 8
+
+label area_017_s01_name
+string16 "s01"
+
+label area_017_s02_name
+string16 "s02"
+
+label area_017_s01_icons
+vec3 7500.0 -1000.0 8600.0
+zeros 4
+
+label area_017_s02_bound_min
+vec3 7600.0 -1000.0 13900.0
+zeros 4
+
+label area_017_s01_bound_max
+vec3 8700.0 -1000.0 10000.0
+zeros 4
+
+label area_017_s02_bound_max
+vec3 9000.0 -1000.0 15100.0
+zeros 4
+
+label area_018_sblocks
+sblock name=@area_018_s01_name node=0 icons=@area_018_s01_icons count=0 floor=0 bounds=@area_018_s01_icons,@area_018_s01_bound_max
+zeros 4
+
+label area_018_s01_name
+string16 "s01"
+
+label area_018_s01_icons
+vec3 -16500.0 0.0 3800.0
+zeros 4
+
+label area_018_s01_bound_max
+vec3 -15300.0 0.0 5200.0
+zeros 4
+
+label area_019_sblocks
+sblock name=@area_019_s01_name node=0 icons=@area_019_s01_icons count=0 floor=0 bounds=@area_019_s01_icons,@area_019_s01_bound_max
+sblock name=@area_019_s02_name node=1 icons=@area_019_s01_icons count=0 floor=1 bounds=@area_019_s02_bound_min,@area_019_s02_bound_max
+zeros 8
+
+label area_019_s01_name
+string16 "s01"
+
+label area_019_s02_name
+string16 "s02"
+
+label area_019_s01_icons
+vec3 -300.0 0.0 16600.0
+zeros 4
+
+label area_019_s02_bound_min
+vec3 5700.0 -1000.0 15400.0
+zeros 4
+
+label area_019_s01_bound_max
+vec3 900.0 0.0 18000.0
+zeros 4
+
+label area_019_s02_bound_max
+vec3 6900.0 -1000.0 16800.0
+zeros 4
+
+label area_020_sblocks
+sblock name=@area_020_s01_name node=0 icons=@area_020_s01_icons count=0 floor=0 bounds=@area_020_s01_icons,@area_020_s01_bound_max
+sblock name=@area_020_s02_name node=1 icons=@area_020_s01_icons count=0 floor=0 bounds=@area_020_s02_bound_min,@area_020_s02_bound_max
+zeros 8
+
+label area_020_s01_name
+string16 "s01"
+
+label area_020_s02_name
+string16 "s02"
+
+label area_020_s01_icons
+vec3 -8100.0 0.0 6500.0
+zeros 4
+
+label area_020_s02_bound_min
+vec3 -6900.0 0.0 11500.0
+zeros 4
+
+label area_020_s01_bound_max
+vec3 -6900.0 0.0 7900.0
+zeros 4
+
+label area_020_s02_bound_max
+vec3 -5700.0 0.0 12900.0
+zeros 4
+
+label area_021_sblocks
+sblock name=@area_021_s01_name node=0 icons=@area_021_s01_icons count=0 floor=0 bounds=@area_021_s01_icons,@area_021_s01_bound_max
+sblock name=@area_021_s02_name node=1 icons=@area_021_s01_icons count=0 floor=1 bounds=@area_021_s02_bound_min,@area_021_s02_bound_max
+zeros 8
+
+label area_021_s01_name
+string16 "s01"
+
+label area_021_s02_name
+string16 "s02"
+
+label area_021_s01_icons
+vec3 -7100.0 0.0 15100.0
+zeros 4
+
+label area_021_s02_bound_min
+vec3 -6900.0 -1000.0 19600.0
+zeros 4
+
+label area_021_s01_bound_max
+vec3 -5700.0 0.0 16300.0
+zeros 4
+
+label area_021_s02_bound_max
+vec3 -5700.0 -1000.0 21000.0
+zeros 4
+
+label area_022_sblocks
+sblock name=@area_022_s01_name node=0 icons=@area_022_s01_icons count=0 floor=0 bounds=@area_022_s01_icons,@area_022_s01_bound_max
+zeros 4
+
+label area_022_s01_name
+string16 "s01"
+
+label area_022_s01_icons
+vec3 -15200.0 0.0 14500.0
+zeros 4
+
+label area_022_s01_bound_max
+vec3 -13800.0 0.0 15700.0
+zeros 4
+
+label area_023_sblocks
+sblock name=@area_023_s01_name node=0 icons=@area_023_s01_icons count=1 floor=0 bounds=@area_023_s01_bound_min,@area_023_s01_bound_max
+sblock name=@area_023_s02_name node=1 icons=@area_023_s02_icons count=2 floor=0 bounds=null,null
+zeros 8
+
+label area_023_s01_name
+string16 "s01"
+
+label area_023_s02_name
+string16 "s02"
+
+label area_023_s01_icons
+icon type=5 position=@area_023_s01_icon_1_position
+zeros 8
+
+label area_023_s01_icon_1_position
+vec3 6400.0 0.0 -300.0
+zeros 4
+
+label area_023_s02_icons
+icon type=3 position=@area_023_s02_icon_1_position
+icon type=5 position=@area_023_s02_icon_2_position
+
+label area_023_s02_icon_1_position
+vec3 5500.0 0.0 3200.0
+zeros 4
+
+label area_023_s02_icon_2_position
+vec3 5500.0 0.0 3000.0
+zeros 4
+
+label area_023_s01_bound_min
+vec3 5000.0 0.0 0.0
+zeros 4
+
+label area_023_s01_bound_max
+vec3 7400.0 0.0 3800.0
+zeros 4
+
+label area_024_sblocks
+sblock name=@area_024_s01_name node=0 icons=@area_024_s01_icons count=0 floor=0 bounds=@area_024_s01_bound_min,@area_024_s01_bound_max
+sblock name=@area_024_s02_name node=1 icons=@area_024_s01_icons count=0 floor=0 bounds=@area_024_s02_bound_min,@area_024_s02_bound_max
+sblock name=@area_024_s03_name node=2 icons=@area_024_s01_icons count=0 floor=0 bounds=@area_024_s03_bound_min,@area_024_s03_bound_max
+sblock name=@area_024_s04_name node=3 icons=@area_024_s01_icons count=1 floor=0 bounds=null,null
+
+label area_024_s01_name
+string16 "s01"
+
+label area_024_s02_name
+string16 "s02"
+
+label area_024_s03_name
+string16 "s03"
+
+label area_024_s04_name
+string16 "s04"
+
+label area_024_s01_icons
+icon type=13 position=@area_024_s04_icon_1_position
+zeros 8
+
+label area_024_s04_icon_1_position
+vec3 -300.0 0.0 12350.0
+zeros 4
+
+label area_024_s01_bound_min
+vec3 -500.0 0.0 14900.0
+zeros 4
+
+label area_024_s02_bound_min
+vec3 -1100.0 0.0 12300.0
+zeros 4
+
+label area_024_s03_bound_min
+vec3 -1100.0 0.0 10600.0
+zeros 4
+
+label area_024_s01_bound_max
+vec3 2400.0 0.0 16500.0
+zeros 4
+
+label area_024_s02_bound_max
+vec3 500.0 0.0 13000.0
+zeros 4
+
+label area_024_s03_bound_max
+vec3 0.0 0.0 12300.0
+zeros 4
+
+label area_025_sblocks
+sblock name=@area_025_s01_name node=0 icons=@area_025_s01_icons count=0 floor=1 bounds=@area_025_s01_icons,@area_025_s01_bound_max
+zeros 4
+
+label area_025_s01_name
+string16 "s01"
+
+label area_025_s01_icons
+vec3 11100.0 -1000.0 15400.0
+zeros 4
+
+label area_025_s01_bound_max
+vec3 12300.0 -1000.0 16800.0
+zeros 4
+
+label area_026_sblocks
+sblock name=@area_026_s01_name node=0 icons=@area_026_s01_icons count=0 floor=0 bounds=@area_026_s01_icons,@area_026_s01_bound_max
+sblock name=@area_026_s02_name node=1 icons=@area_026_s01_icons count=0 floor=0 bounds=@area_026_s02_bound_min,@area_026_s02_bound_max
+zeros 8
+
+label area_026_s01_name
+string16 "s01"
+
+label area_026_s02_name
+string16 "s02"
+
+label area_026_s01_icons
+vec3 -14700.0 0.0 7000.0
+zeros 4
+
+label area_026_s02_bound_min
+vec3 -14600.0 0.0 1900.0
+zeros 4
+
+label area_026_s01_bound_max
+vec3 -13500.0 0.0 8400.0
+zeros 4
+
+label area_026_s02_bound_max
+vec3 -13200.0 0.0 3100.0
+zeros 4
+
+label area_027_sblocks
+sblock name=@area_027_s01_name node=0 icons=@area_027_s01_icons count=0 floor=0 bounds=@area_027_s01_icons,@area_027_s01_bound_max
+sblock name=@area_027_s02_name node=1 icons=@area_027_s01_icons count=0 floor=1 bounds=@area_027_s02_bound_min,@area_027_s02_bound_max
+zeros 8
+
+label area_027_s01_name
+string16 "s01"
+
+label area_027_s02_name
+string16 "s02"
+
+label area_027_s01_icons
+vec3 -13500.0 0.0 19600.0
+zeros 4
+
+label area_027_s02_bound_min
+vec3 -11600.0 -1000.0 18100.0
+zeros 4
+
+label area_027_s01_bound_max
+vec3 -12300.0 0.0 21000.0
+zeros 4
+
+label area_027_s02_bound_max
+vec3 -10200.0 -1000.0 19300.0
+zeros 4
+
+label area_001_model
+model geometry=@area_001_geometry material=@area_001_material
+zeros 8
+
+label area_001_geometry
+bytes 13000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 000000000000008000007ac50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 000000800000008000000080000000000000204100007ac400007ac50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000000000000000080000000800000008000000000
+bytes 0000a0410000008000007ac50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000400000000000000
+bytes 000000800000008000000080000000000000f04100007ac400007ac50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000050000000000000000000080000000800000008000000000
+bytes 000020420000008000007ac50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000600000000000000
+bytes 00000080000000800000008000000000000048420000008000007ac50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000070000000000000000000080000000800000008000000000
+bytes 000070420000008000007ac50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000800000007000000
+bytes 00000080000000800000008000000000000070c20000008000706e450000803f
+bytes 0000803f0000803f0000803f00000000
+pointer @loc_02730
+pointer @loc_02748
+bytes 0000000000000000010000000000000009000000060000000000008000000080
+bytes 0000008000000000000048c20000008000706e450000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_02a30
+pointer @loc_02a48
+bytes 000000000000000001000000000000000a000000060000000000008000000080
+bytes 0000008000000000006006c500000080001812460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 0b0000000500000000000080000000800000008000000000000020c200000080
+bytes 00706e450000803f0000803f0000803f0000803f00000000
+pointer @loc_02cd0
+pointer @loc_02ce8
+bytes 000000000000000001000000000000000c000000040000000000008000000080
+bytes 0000008000000000004092440000008000f039460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 0d0000000400000000000080000000800000008000000000002005c500000080
+bytes 006416460000803f0000803f0000803f0000803f00000000
+pointer @loc_02dc0
+pointer @loc_02dd8
+bytes 000000000000000001000000000000000e000000030000000000008000000080
+bytes 0000008000000000000087440000008000a0a5450000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 0f000000020000000000008000000080000000800000000000e003c500000080
+bytes 006416460000803f0000803f0000803f0000803f00000000
+pointer @loc_02f30
+pointer @loc_02f48
+bytes 0000000000000000010000000000000010000000020000000000008000000080
+bytes 000000800000000000e003c50000008000c00f460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 1100000001000000000000800000008000000080000000000000000000000080
+bytes 00706e450000803f0000803f0000803f0000803f00000000
+pointer @loc_03120
+pointer @loc_03138
+bytes 0000000000000000010000000000000012000000010000000000008000000080
+bytes 00000080000000000000000000000080008022450000803f0000803f0000803f
+bytes 0000803f0000000000000000000000000000000000000000
+
+label loc_02730
+bytes 00a025c5000000000008bb450000c8c20000000000040346
+
+label loc_02748
+pointer @loc_02750
+zeros 4
+
+label loc_02750
+bytes 02000000
+pointer @loc_02760
+pointer @loc_029d0
+zeros 4
+
+label loc_02760
+bytes 0100000026000000
+pointer @loc_02770
+zeros 4
+
+label loc_02770
+bytes 00c0016d100020004800600001c0106e00010200030201000405060007060500
+bytes 08090a000b0a09000c0d0e000f0e0d0010111200131211001415160017161500
+bytes 18191a001b1a19001c1d1e001f1e1d0011c02068008022c40000000000a8ca45
+bytes 008022c4000000000028be45000016c40000000000a8ca45000016c400000000
+bytes 0028be4500803bc40000000000a8ca4500803bc4000000000028be4500002fc4
+bytes 0000000000a8ca4500002fc4000000000028be45008054c40000000000a8ca45
+bytes 008054c4000000000028be45000048c40000000000a8ca45000048c400000000
+bytes 0028be4500806dc40000000000a8ca4500806dc4000000000028be45000061c4
+bytes 0000000000a8ca45000061c4000000000028be45004083c40000000000a8ca45
+bytes 004083c4000000000028be4500007ac40000000000a8ca4500007ac400000000
+bytes 0028be4500c08fc40000000000a8ca4500c08fc4000000000028be45008089c4
+bytes 0000000000a8ca45008089c4000000000028be450080edc40000000000040346
+bytes 0080edc4000000000008bb45000096c40000000000040346000096c400000000
+bytes 0008bb4500a025c50000000000a8fc4500a025c50000000000e8e94500401cc5
+bytes 0000000000a8fc4500401cc50000000000e8e9450c00001400c0016d04000800
+bytes 4800600001c0046e0001020003020100040506000706050005c0086800401cc5
+bytes 000000000004034600401cc5000000000088e0450080edc40000000000040346
+bytes 0080edc4000000000088e045000096c40000000000040346000096c400000000
+bytes 0048f3450000c8c200000000000403460000c8c2000000000048f3450c000014
+
+label loc_029d0
+bytes 0100000005000100
+pointer @loc_029e0
+zeros 4
+
+label loc_029e0
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800a025c5
+bytes 0000000000a8fc4500a025c50000000000e8e94500601fc50000000000a8fc45
+bytes 00601fc50000000000e8e9450c000014
+
+label loc_02a30
+bytes 000016c50000000000c882450080d4c40000000000d8a945
+
+label loc_02a48
+pointer @loc_02a50
+zeros 4
+
+label loc_02a50
+bytes 01000000
+pointer @loc_02a60
+zeros 8
+
+label loc_02a60
+bytes 0100000026000000
+pointer @loc_02a70
+zeros 4
+
+label loc_02a70
+bytes 00c0016d100020004800600001c0106e00010200030201000405060007060500
+bytes 08090a000b0a09000c0d0e000f0e0d0010111200131211001415160017161500
+bytes 18191a001b1a19001c1d1e001f1e1d0011c02068000016c50000000000488f45
+bytes 000016c50000000000c882450080d4c40000000000488f450080d4c400000000
+bytes 00c8824500c00fc50000000000d8904500c00fc50000000000488f450080edc4
+bytes 0000000000d890450080edc40000000000488f4500c00fc50000000000f89345
+bytes 00c00fc500000000006892450080edc40000000000f893450080edc400000000
+bytes 0068924500c00fc5000000000018974500c00fc500000000008895450080edc4
+bytes 00000000001897450080edc4000000000088954500c00fc50000000000389a45
+bytes 00c00fc50000000000a898450080edc40000000000389a450080edc400000000
+bytes 00a8984500c00fc50000000000589d4500c00fc50000000000c89b450080edc4
+bytes 0000000000589d450080edc40000000000c89b4500c00fc5000000000078a045
+bytes 00c00fc50000000000e89e450080edc4000000000078a0450080edc400000000
+bytes 00e89e4500c00fc5000000000098a34500c00fc5000000000008a2450080edc4
+bytes 000000000098a3450080edc4000000000008a2450c00001400c0016d04000800
+bytes 4800600001c0046e0001020003020100040506000706050005c0086800c00fc5
+bytes 0000000000b8a64500c00fc5000000000028a5450080edc40000000000b8a645
+bytes 0080edc4000000000028a54500c00fc50000000000d8a94500c00fc500000000
+bytes 0048a8450080edc40000000000d8a9450080edc4000000000048a8450c000014
+
+label loc_02cd0
+bytes 004083c50000000000106045000048c40000000000c88245
+
+label loc_02ce8
+pointer @loc_02cf0
+zeros 4
+
+label loc_02cf0
+bytes 02000000
+pointer @loc_02d00
+pointer @loc_02d60
+zeros 4
+
+label loc_02d00
+bytes 0100000005000000
+pointer @loc_02d10
+zeros 4
+
+label loc_02d10
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468004083c5
+bytes 0000000000c88245004083c50000000000106045000048c40000000000c88245
+bytes 000048c400000000001060450c000014
+
+label loc_02d60
+bytes 0100000005000100
+pointer @loc_02d70
+zeros 4
+
+label loc_02d70
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468004083c5
+bytes 0000000000507f45004083c50000000000506645002080c50000000000507f45
+bytes 002080c500000000005066450c000014
+
+label loc_02dc0
+bytes 0080094500007a4400c0414400e05d4500007a4400f02045
+
+label loc_02dd8
+pointer @loc_02de0
+zeros 4
+
+label loc_02de0
+bytes 02000000
+pointer @loc_02df0
+pointer @loc_02e90
+zeros 4
+
+label loc_02df0
+bytes 0100000009000000
+pointer @loc_02e00
+zeros 4
+
+label loc_02e00
+bytes 00c0016d040008004800600001c0046e00010200030201000405060007060500
+bytes 05c008680080094500007a4400f020450080094500007a4400c0414400805445
+bytes 00007a4400f020450080544500007a4400c041440080544500007a440060d144
+bytes 0080544500007a440060864400e05d4500007a440060d14400e05d4500007a44
+bytes 006086440c0000140000000000000000
+
+label loc_02e90
+bytes 0100000009000100
+pointer @loc_02ea0
+zeros 4
+
+label loc_02ea0
+bytes 00c0016d040008004800600001c0046e00010200030201000405060007060500
+bytes 05c0086800002f4500007a4400b01a450000484500007a4400b01a4500002f45
+bytes 00007a4400f020450000484500007a4400f0204500a0574500007a440060d144
+bytes 00a0574500007a440060864400e05d4500007a440060d14400e05d4500007a44
+bytes 006086440c0000140000000000000000
+
+label loc_02f30
+bytes 000048c400007a440080a2c30000484300007a4400f02045
+
+label loc_02f48
+pointer @loc_02f50
+zeros 4
+
+label loc_02f50
+bytes 02000000
+pointer @loc_02f60
+pointer @loc_030c0
+zeros 4
+
+label loc_02f60
+bytes 0100000015000000
+pointer @loc_02f70
+zeros 4
+
+label loc_02f70
+bytes 00c0016d0c0016004800600001c00c6e00010200030201000405060007060500
+bytes 08090a000b0a09000c0d0e000f0e0d0010111200021211001310140015141000
+bytes 0dc01668000048c300007a4400c07344000048c300007a440000c8c100004843
+bytes 00007a4400c073440000484300007a440000c8c1000048c300007a44008089c3
+bytes 000048c300007a440080a2c30000484300007a44008089c30000484300007a44
+bytes 0080a2c3000048c300007a4400002fc3000048c300007a44000061c300004843
+bytes 00007a4400002fc30000484300007a44000061c3000048c300007a44000096c2
+bytes 000048c300007a440000fac20000484300007a44000096c20000484300007a44
+bytes 0000fac2000048c400007a4400e0ab44000048c400007a4400c0734400004843
+bytes 00007a4400e0ab44000048c400007a4400f020450000c8c300007a4400f02045
+bytes 0000c8c300007a4400e0ab440c000014
+
+label loc_030c0
+bytes 0100000005000100
+pointer @loc_030d0
+zeros 4
+
+label loc_030d0
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000048c4
+bytes 00007a4400b01a450000c8c300007a4400b01a45000048c400007a4400f02045
+bytes 0000c8c300007a4400f020450c000014
+
+label loc_03120
+bytes 00803bc40000000000c064c4000016440000000000a8ca45
+
+label loc_03138
+pointer @loc_03140
+zeros 4
+
+label loc_03140
+bytes 02000000
+pointer @loc_03150
+pointer @loc_03410
+zeros 4
+
+label loc_03150
+bytes 010000002b000000
+pointer @loc_03160
+zeros 4
+
+label loc_03160
+bytes 00c0016d10001d004800600001c0106e00010200030201000405060007060500
+bytes 08090a000b0a09000c080d000e0d08000f1011000d11100012130f00140f1300
+bytes 1516170018171600191a1b001c1b1a0011c01d68000096c30000000000c032c4
+bytes 000096c30000000000c04bc4000096430000000000c032c40000964300000000
+bytes 00c04bc4000016c40000000000903a45000016c40000000000c032c400001644
+bytes 0000000000903a45000016440000000000c032c4000048c30000000000106045
+bytes 000048c30000000000903a450000484300000000001060450000484300000000
+bytes 00903a45000048c30000000000c88245000016440000000000c8824500001644
+bytes 00000000001060450000c8c30000000000a8ca450000c8c30000000000c88245
+bytes 000016440000000000a8ca45000016c40000000000a8ca45000016c400000000
+bytes 0028be450000c8c3000000000028be4500007ac30000000000507f4500007ac3
+bytes 0000000000506645000048c30000000000507f45000048c30000000000506645
+bytes 0000afc30000000000507f450000afc30000000000506645000096c300000000
+bytes 00507f45000096c300000000005066450c00001400c0016d0800100048006000
+bytes 01c0086e0001020003020100040506000706050008090a000b0a09000c0d0e00
+bytes 0f0e0d0009c010680000e1c30000000000507f450000e1c30000000000506645
+bytes 0000c8c30000000000507f450000c8c30000000000506645008009c400000000
+bytes 00507f45008009c400000000005066450000fac30000000000507f450000fac3
+bytes 0000000000506645008022c40000000000507f45008022c40000000000506645
+bytes 000016c40000000000507f45000016c4000000000050664500803bc400000000
+bytes 00507f4500803bc4000000000050664500002fc40000000000507f4500002fc4
+bytes 00000000005066450c00001400000000
+
+label loc_03410
+bytes 010000000c000100
+pointer @loc_03420
+zeros 4
+
+label loc_03420
+bytes 00c0016d06000c004800600001c0066e00010200030201000405060007060500
+bytes 08090a000b0a090007c00c68000016c40000000000a08744000016c400000000
+bytes 00402b440000fac30000000000a087440000fac30000000000402b440000fa43
+bytes 0000000000a0d2440000fa430000000000a0a044000016440000000000a0d244
+bytes 000016440000000000a0a044000096c30000000000c064c40000964300000000
+bytes 00c064c4000096c30000000000c04bc4000096430000000000c04bc40c000014
+
+label area_002_model
+model geometry=@area_002_geometry material=@area_001_material
+zeros 8
+
+label area_002_geometry
+bytes 17000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 0000000000007ac400a07ac50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 00000080000000800000008000000000000020410000008000a07ac50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000000000000000080000000800000008000000000
+bytes 0000a0410000fac400a07ac50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000400000000000000
+bytes 000000800000008000000080000000000000f04100007ac400a07ac50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000050000000000000000000080000000800000008000000000
+bytes 0000204200007ac400a07ac50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000600000000000000
+bytes 000000800000008000000080000000000000a04100007ac400a07ac50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000070000000600000000000080000000800000008000000000
+bytes 0000d7450000008000484b460000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000800000006000000
+bytes 000000800000008000000080000000000080e3450000008000985f460000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000090000000600000000000080000000800000008000000000
+bytes 00a011450000008000082c460000803f0000803f0000803f0000803f00000000
+pointer @loc_03c30
+pointer @loc_03c48
+bytes 000000000000000001000000000000000a000000050000000000008000000080
+bytes 0000008000000000006010450000008000082c460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_03fb0
+pointer @loc_03fc8
+bytes 000000000000000001000000000000000b000000040000000000008000000080
+bytes 0000008000000000000011450000008000082c460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_040a0
+pointer @loc_040b8
+bytes 000000000000000001000000000000000c000000040000000000008000000080
+bytes 00000080000000000030b14500000080005859460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 0d00000003000000000000800000008000000080000000000020f34500000080
+bytes 00f868460000803f0000803f0000803f0000803f00000000
+pointer @loc_04130
+pointer @loc_04148
+bytes 000000000000000001000000000000000e000000030000000000008000000080
+bytes 00000080000000000040dd450000008000985f460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 0f00000003000000000000800000008000000080000000000080b14500000080
+bytes 00785c460000803f0000803f0000803f0000803f000000000000000000000000
+bytes 0000000000000000010000000000000010000000020000000000008000000080
+bytes 00000080000000000030bb4500000080005827460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_04260
+pointer @loc_04278
+bytes 0000000000000000010000000000000011000000020000000000008000000080
+bytes 000000800000000000f09b4500000080005827460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 12000000020000000000008000000080000000800000000000d0b14500000080
+bytes 003c87460000803f0000803f0000803f0000803f000000000000000000000000
+bytes 0000000000000000010000000000000013000000020000000000008000000080
+bytes 000000800000000000109f450000008000b87b460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 1400000002000000000000800000008000000080000000000050d74500000080
+bytes 005052460000803f0000803f0000803f0000803f000000000000000000000000
+bytes 0000000000000000010000000000000015000000010000000000008000000080
+bytes 000000800000000000e012450000008000082c460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_04550
+pointer @loc_04568
+bytes 0000000000000000010000000000000016000000010000000000008000000080
+bytes 00000080000000000080a24500000080005827460000803f0000803f0000803f
+bytes 0000803f0000000000000000000000000000000000000000
+
+label loc_03c30
+bytes 0020644500007a44004003450090974500007a440040ce45
+
+label loc_03c48
+pointer @loc_03c50
+zeros 4
+
+label loc_03c50
+bytes 02000000
+pointer @loc_03c60
+pointer @loc_03f10
+zeros 4
+
+label loc_03c60
+bytes 010000002a000000
+pointer @loc_03c70
+zeros 4
+
+label loc_03c70
+bytes 00c0016d100020004800600001c0106e00010200030201000405060007060500
+bytes 08090a000b0a09000c0d0e000f0e0d0010111200131211001415160017161500
+bytes 18191a001b1a19001c1d1e001f1e1d0011c0206800d0844500007a4400c0a845
+bytes 00d0844500007a4400803b450090974500007a4400c0a8450090974500007a44
+bytes 00803b4500f0874500007a440060064500f0874500007a440040034500709445
+bytes 00007a44006006450070944500007a440040034500f0874500007a4400a00c45
+bytes 00f0874500007a44008009450070944500007a4400a00c450070944500007a44
+bytes 0080094500f0874500007a4400e0124500f0874500007a4400c00f4500709445
+bytes 00007a4400e012450070944500007a4400c00f4500f0874500007a4400201945
+bytes 00f0874500007a44000016450070944500007a44002019450070944500007a44
+bytes 0000164500f0874500007a4400601f4500f0874500007a4400401c4500709445
+bytes 00007a4400601f450070944500007a4400401c4500f0874500007a4400a02545
+bytes 00f0874500007a44008022450070944500007a4400a025450070944500007a44
+bytes 0080224500f0874500007a4400e02b4500f0874500007a4400c0284500709445
+bytes 00007a4400e02b450070944500007a4400c028450c00001400c0016d06000c00
+bytes 4800600001c0066e0001020003020100040506000706050008090a000b0a0900
+bytes 07c00c6800f0874500007a440020324500f0874500007a4400002f4500709445
+bytes 00007a44002032450070944500007a4400002f4500f0874500007a4400603845
+bytes 00f0874500007a44004035450070944500007a44006038450070944500007a44
+bytes 004035450020644500007a440040ce450020644500007a4400c0a84500909745
+bytes 00007a440040ce450090974500007a4400c0a8450c0000140000000000000000
+
+label loc_03f10
+bytes 0100000009000100
+pointer @loc_03f20
+zeros 4
+
+label loc_03f20
+bytes 00c0016d040008004800600001c0046e00010200030201000405060007060500
+bytes 05c0086800606a4500007a440040ce4500606a4500007a440020cb4500b08145
+bytes 00007a440040ce4500b0814500007a440020cb450070944500007a440060b845
+bytes 0070944500007a4400e0ab450090974500007a440060b8450090974500007a44
+bytes 00e0ab450c0000140000000000000000
+
+label loc_03fb0
+bytes 00c0f34400007a4400c0a84500e0124500007a440040ce45
+
+label loc_03fc8
+pointer @loc_03fd0
+zeros 4
+
+label loc_03fd0
+bytes 02000000
+pointer @loc_03fe0
+pointer @loc_04040
+zeros 4
+
+label loc_03fe0
+bytes 0100000005000000
+pointer @loc_03ff0
+zeros 4
+
+label loc_03ff0
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800c0f344
+bytes 00007a440040ce4500c0f34400007a4400c0a84500e0124500007a440040ce45
+bytes 00e0124500007a4400c0a8450c000014
+
+label loc_04040
+bytes 0100000005000100
+pointer @loc_04050
+zeros 4
+
+label loc_04050
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800c0f344
+bytes 00007a440040ce4500c0f34400007a440020cb4500e0124500007a440040ce45
+bytes 00e0124500007a440020cb450c000014
+
+label loc_040a0
+bytes 00a03e4500007a4400803b450020644500007a4400009645
+
+label loc_040b8
+pointer @loc_040c0
+zeros 4
+
+label loc_040c0
+bytes 01000000
+pointer @loc_040d0
+zeros 8
+
+label loc_040d0
+bytes 0100000005000000
+pointer @loc_040e0
+zeros 4
+
+label loc_040e0
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800a03e45
+bytes 00007a440000964500a03e4500007a4400803b450020644500007a4400009645
+bytes 0020644500007a4400803b450c000014
+
+label loc_04130
+bytes 000016c50000fa4400c028c5000016440000fa4400006144
+
+label loc_04148
+pointer @loc_04150
+zeros 4
+
+label loc_04150
+bytes 01000000
+pointer @loc_04160
+zeros 8
+
+label loc_04160
+bytes 010000000f000000
+pointer @loc_04170
+zeros 4
+
+label loc_04170
+bytes 00c0016d08000f004800600001c0086e00010200030201000104050006050400
+bytes 070809000a0908000b0c0d000e0d0c0009c00f68000016c40000fa4400006144
+bytes 000016c40000fa44000061c4000016440000fa4400006144000016440000fa44
+bytes 000061c4000016c40000fa4400c028c5000000000000fa44000061c400000000
+bytes 0000fa4400c028c5000016c50000fa44000061c4000016c50000fa4400c028c5
+bytes 0000e1c40000fa44000061c40000e1c40000fa4400c028c50000e1c40000fa44
+bytes 008009c50000e1c40000fa44008022c5000016c40000fa44008009c5000016c4
+bytes 0000fa44008022c50c00001400000000
+
+label loc_04260
+bytes 0040b5c400000000000096c3000096440000000000a0d745
+
+label loc_04278
+pointer @loc_04280
+zeros 4
+
+label loc_04280
+bytes 02000000
+pointer @loc_04290
+pointer @loc_044f0
+zeros 4
+
+label loc_04290
+bytes 0100000025000000
+pointer @loc_042a0
+zeros 4
+
+label loc_042a0
+bytes 00c0016d100020004800600001c0106e00010200030201000405060007060500
+bytes 08090a000b0a09000c0d0e000f0e0d0010111200131211001415160002161500
+bytes 17141800191a1b001c1b1a001d1e1f0011c02068000061c40000000000009643
+bytes 000061c400000000000096c30000164400000000000096430000164400000000
+bytes 000096c300001644000000000040034500001644000000000080bb4400009644
+bytes 000000000040034500009644000000000080bb4400002f440000000000600645
+bytes 00002f4400000000004003450080894400000000006006450080894400000000
+bytes 0040034500002f440000000000a00c4500002f44000000000080094500808944
+bytes 0000000000a00c4500808944000000000080094500002f440000000000e01245
+bytes 00002f440000000000c00f45008089440000000000e012450080894400000000
+bytes 00c00f4500000000000000000020b24500000000000000000000964300001644
+bytes 000000000020b245000000000000000000609f45000016c40000000000609f45
+bytes 0040b5c4000000000040ce450040b5c4000000000080bb450080a2c400000000
+bytes 0040ce450080a2c4000000000080bb45000096c40000000000a0d745000096c4
+bytes 0000000000609f45000000000000000000a0d7450c00001400c0016d03000700
+bytes 4800600001c0036e00010200030405000605040004c007680000000000000000
+bytes 00609f45000000000000000000a0d745000096c40000000000609f450080a2c4
+bytes 0000000000a0d7450080a2c4000000000020b245000096c40000000000a0d745
+bytes 000096c4000000000020b2450c000014
+
+label loc_044f0
+bytes 0100000005000100
+pointer @loc_04500
+zeros 4
+
+label loc_04500
+bytes 00c0016d020004004800600001c0026e000102000302010003c004680040b5c4
+bytes 000000000040ce450040b5c4000000000080bb4500c0a8c4000000000040ce45
+bytes 00c0a8c4000000000080bb450c000014
+
+label loc_04550
+bytes 000048c400007a44000016c400e02b4500007a4400001644
+
+label loc_04568
+pointer @loc_04570
+zeros 4
+
+label loc_04570
+bytes 02000000
+pointer @loc_04580
+pointer @loc_04650
+zeros 4
+
+label loc_04580
+bytes 010000000c000000
+pointer @loc_04590
+zeros 4
+
+label loc_04590
+bytes 00c0016d06000b004800600001c0066e00010200030201000405060007060500
+bytes 080309000a09030007c00b68008022c400007a4400001644008022c400007a44
+bytes 000016c40040e74400007a44000016440040e74400007a44000016c4000048c4
+bytes 00007a4400009643000048c400007a44000096c3008022c400007a4400009643
+bytes 008022c400007a44000096c30040e74400007a440000000000e02b4500007a44
+bytes 0000000000e02b4500007a44000016c40c000014000000000000000000000000
+
+label loc_04650
+bytes 0100000005000100
+pointer @loc_04660
+zeros 4
+
+label loc_04660
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000048c4
+bytes 00007a4400009643000048c400007a44000096c300002fc400007a4400009643
+bytes 00002fc400007a44000096c30c000014
+
+label area_003_model
+model geometry=@area_003_geometry material=@area_001_material
+zeros 8
+
+label area_003_geometry
+bytes 05000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 000000000000008000407bc50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 00000080000000800000008000000000000020410000008000407bc50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000200000000000080000000800000008000000000
+bytes 006888450000008000f884460000803f0000803f0000803f0000803f00000000
+pointer @loc_04860
+pointer @loc_04878
+bytes 0000000000000000010000000000000004000000010000000000008000000080
+bytes 000000800000000000b888450000008000f884460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_04dd0
+pointer @loc_04de8
+zeros 8
+
+label loc_04860
+bytes 00f06bc500000000000061c50080d4430000000000001644
+
+label loc_04878
+pointer @loc_04880
+zeros 4
+
+label loc_04880
+bytes 02000000
+pointer @loc_04890
+pointer @loc_04d30
+zeros 4
+
+label loc_04890
+bytes 0100000049000000
+pointer @loc_048a0
+zeros 4
+
+label loc_048a0
+bytes 00c0016d10001f004800600001c0106e00010200030201000405060007060500
+bytes 060809000a0908000b0c0d000e0d0c000f101100121110001314150016151400
+bytes 171819001a1918001b1c1d001e1d1c0011c01f68000096c20000000000009643
+bytes 000096c200000000000096c30000964200000000000096430000964200000000
+bytes 000096c300e0abc4000000000000164400e0abc400000000000096c400002fc3
+bytes 000000000000164400002fc300000000000096c400002fc300000000000016c4
+bytes 000096c20000000000001644000096c200000000000016c4009030c500000000
+bytes 00401cc5009030c500000000004035c500702dc50000000000401cc500702dc5
+bytes 00000000004035c500f020c500000000000016c500f020c500000000000061c5
+bytes 00e0f6c400000000000016c500e0f6c400000000000061c500a0d7c400000000
+bytes 00c041c500a0d7c40000000000c05ac50060d1c40000000000c041c50060d1c4
+bytes 0000000000c05ac50020e4c40000000000c041c50020e4c40000000000c05ac5
+bytes 00e0ddc40000000000c041c500e0ddc40000000000c05ac500a0f0c400000000
+bytes 00c041c500a0f0c40000000000c05ac50060eac40000000000c041c50060eac4
+bytes 0000000000c05ac50c00001400c0016d10001e004800600001c0106e00010200
+bytes 03020100040506000706050008090a000b0a09000c0d0e000f0e0d0010111200
+bytes 13121100141516001716150018191a001b1a19001c0c1d00191d0c0011c01e68
+bytes 001024c50000000000401cc5001024c500000000004035c500f020c500000000
+bytes 00401cc500f020c500000000004035c500502ac50000000000401cc500502ac5
+bytes 00000000004035c5003027c50000000000401cc5003027c500000000004035c5
+bytes 005043c50000000000401cc5005043c500000000004035c5003040c500000000
+bytes 00401cc5003040c500000000004035c500f06bc500000000000096c400f06bc5
+bytes 0000000000803bc5007046c500000000000096c4007046c50000000000803bc5
+bytes 00d036c50000000000401cc500d036c500000000004035c500b033c500000000
+bytes 00401cc500b033c500000000004035c500103dc50000000000401cc500103dc5
+bytes 00000000004035c500f039c50000000000401cc500f039c500000000004035c5
+bytes 00f020c500000000000016c400f020c500000000000096c400e0abc400000000
+bytes 000016c400e0abc400000000000096c400f06bc5000000000000164400f020c5
+bytes 00000000000016440c00001400c0016d080010004800600001c0086e00010200
+bytes 03020100040506000706050008090a000b0a09000c0d0e000f0e0d0009c01068
+bytes 0020cbc40000000000c041c50020cbc40000000000c05ac500e0c4c400000000
+bytes 00c041c500e0c4c40000000000c05ac500e0abc40000000000803bc500e0abc4
+bytes 00000000000061c50080d4430000000000803bc50080d44300000000000061c5
+bytes 0020b2c40000000000c041c50020b2c40000000000c05ac500e0abc400000000
+bytes 00c041c500e0abc40000000000c05ac500a0bec40000000000c041c500a0bec4
+bytes 0000000000c05ac50060b8c40000000000c041c50060b8c40000000000c05ac5
+bytes 0c000014000000000000000000000000
+
+label loc_04d30
+bytes 0100000009000100
+pointer @loc_04d40
+zeros 4
+
+label loc_04d40
+bytes 00c0016d040008004800600001c0046e00010200030201000405060007060500
+bytes 05c0086800f06bc5000000000000c8c200f06bc5000000000000fac300b065c5
+bytes 000000000000c8c200b065c5000000000000fac30000c8c10000000000009643
+bytes 0000c8c100000000000096c30000964200000000000096430000964200000000
+bytes 000096c30c0000140000000000000000
+
+label loc_04dd0
+bytes 007046c5000000000000164400e0f6c4000000000000e144
+
+label loc_04de8
+pointer @loc_04df0
+zeros 4
+
+label loc_04df0
+bytes 02000000
+pointer @loc_04e00
+pointer @loc_04e60
+zeros 4
+
+label loc_04e00
+bytes 0100000005000000
+pointer @loc_04e10
+zeros 4
+
+label loc_04e10
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468007046c5
+bytes 000000000000e144007046c5000000000000164400e0f6c4000000000000e144
+bytes 00e0f6c400000000000016440c000014
+
+label loc_04e60
+bytes 0100000005000100
+pointer @loc_04e70
+zeros 4
+
+label loc_04e70
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800b01ac5
+bytes 000000000000e14400b01ac5000000000080d44400b001c5000000000000e144
+bytes 00b001c5000000000080d4440c000014
+
+label area_004_model
+model geometry=@area_004_geometry material=@area_001_material
+zeros 8
+
+label area_004_geometry
+bytes 12000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 000000000000008000e07bc50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 00000080000000800000008000000000000020410000fac400e07bc50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000000000000000080000000800000008000000000
+bytes 0000a0410000fac400e07bc50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000400000000000000
+bytes 000000800000008000000080000000000000f0410000008000e07bc50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000050000000000000000000080000000800000008000000000
+bytes 000020420000008000e07bc50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000600000000000000
+bytes 00000080000000800000008000000000000048420000fac400e07bc50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000070000000000000000000080000000800000008000000000
+bytes 000070420000fac400e07bc50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000800000007000000
+bytes 000000800000008000000080000000000040a1c50000008000de94460000803f
+bytes 0000803f0000803f0000803f00000000
+pointer @loc_05480
+pointer @loc_05498
+bytes 0000000000000000010000000000000009000000070000000000008000000080
+bytes 00000080000000000040a1c500000080007c9c460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 0a000000050000000000008000000080000000800000000000006bc400000080
+bytes 007495460000803f0000803f0000803f0000803f00000000
+pointer @loc_056e0
+pointer @loc_056f8
+bytes 000000000000000001000000000000000b000000040000000000008000000080
+bytes 0000008000000000008068c400000080007495460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_05840
+pointer @loc_05858
+bytes 000000000000000001000000000000000c000000040000000000008000000080
+bytes 000000800000000000201ec50000008000b482460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 0d00000003000000000000800000008000000080000000000000a0c500000080
+bytes 00de94460000803f0000803f0000803f0000803f00000000
+pointer @loc_05930
+pointer @loc_05948
+bytes 000000000000000001000000000000000e000000030000000000008000000080
+bytes 0000008000000000000011c50000008000b482460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 0f000000020000000000008000000080000000800000000000b09fc500000080
+bytes 00de94460000803f0000803f0000803f0000803f00000000
+pointer @loc_05a30
+pointer @loc_05a48
+bytes 0000000000000000010000000000000010000000010000000000008000000080
+bytes 0000008000000000000061c400000080007495460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_05ba0
+pointer @loc_05bb8
+bytes 0000000000000000010000000000000011000000010000000000008000000080
+bytes 000000800000000000609fc50000008000249a460000803f0000803f0000803f
+bytes 0000803f0000000000000000000000000000000000000000
+
+label loc_05480
+bytes 000096c30000fa44001024c5000061440000fa4400608644
+
+label loc_05498
+pointer @loc_054a0
+zeros 4
+
+label loc_054a0
+bytes 01000000
+pointer @loc_054b0
+zeros 8
+
+label loc_054b0
+bytes 0100000022000000
+pointer @loc_054c0
+zeros 4
+
+label loc_054c0
+bytes 00c0016d10001f004800600001c0106e00010200030201000405060007060500
+bytes 08090a000b0a09000c0d0e000f0e0d0006101100121110001314150016151400
+bytes 171819001a1918001b1c1d001e1d1c0011c01f68000048c30000fa440000c841
+bytes 000048c30000fa440000c8c1000048430000fa440000c841000048430000fa44
+bytes 0000c8c1000096c30000fa44000061c3000096c30000fa4400404ec400009643
+bytes 0000fa44000061c3000096430000fa4400404ec4000048c30000fa4400002fc3
+bytes 000048c30000fa44000061c3000048430000fa4400002fc3000048430000fa44
+bytes 000061c3000048c30000fa44000096c2000048c30000fa440000fac200004843
+bytes 0000fa44000096c2000048430000fa440000fac2000096430000fa44001024c5
+bytes 000061440000fa44000061c3000061440000fa44001024c5000048c30000fa44
+bytes 00608644000048c30000fa440080bb43000048430000fa440060864400004843
+bytes 0000fa440080bb43000048c30000fa440000fa42000048c30000fa4400009642
+bytes 000048430000fa440000fa42000048430000fa4400009642000048c30000fa44
+bytes 00006143000048c30000fa4400002f43000048430000fa440000614300004843
+bytes 0000fa4400002f430c00001400c0016d020004004800600001c0026e00010200
+bytes 0302010003c00468000048c30000fa440080a243000048c30000fa4400808943
+bytes 000048430000fa440080a243000048430000fa44008089430c00001400000000
+
+label loc_056e0
+bytes 00a08cc50000000000609fc5000096c3000000000000fac3
+
+label loc_056f8
+pointer @loc_05700
+zeros 4
+
+label loc_05700
+bytes 02000000
+pointer @loc_05710
+pointer @loc_057e0
+zeros 4
+
+label loc_05710
+bytes 010000000c000000
+pointer @loc_05720
+zeros 4
+
+label loc_05720
+bytes 00c0016d06000c004800600001c0066e00010200030201000405060007060500
+bytes 08090a000b0a090007c00c6800a08cc50000000000c028c500a08cc500000000
+bytes 00404ec500404ec50000000000c028c500404ec50000000000404ec500404ec5
+bytes 000000000000fac300404ec50000000000a08cc500c028c5000000000000fac3
+bytes 00c028c50000000000a08cc500c028c50000000000c073c500c028c500000000
+bytes 00609fc5000096c30000000000c073c5000096c30000000000609fc50c000014
+
+label loc_057e0
+bytes 0100000005000100
+pointer @loc_057f0
+zeros 4
+
+label loc_057f0
+bytes 00c0016d020004004800600001c0026e000102000302010003c004680000c8c3
+bytes 0000000000007ac50000c8c300000000008089c5000096c30000000000007ac5
+bytes 000096c300000000008089c50c000014
+
+label loc_05840
+bytes 0080bbc40000000000c028c5000096c300000000004003c5
+
+label loc_05858
+pointer @loc_05860
+zeros 4
+
+label loc_05860
+bytes 02000000
+pointer @loc_05870
+pointer @loc_058d0
+zeros 4
+
+label loc_05870
+bytes 0100000005000000
+pointer @loc_05880
+zeros 4
+
+label loc_05880
+bytes 00c0016d020004004800600001c0026e000102000302010003c004680080bbc4
+bytes 00000000004003c50080bbc40000000000c028c5000096c300000000004003c5
+bytes 000096c30000000000c028c50c000014
+
+label loc_058d0
+bytes 0100000005000100
+pointer @loc_058e0
+zeros 4
+
+label loc_058e0
+bytes 00c0016d020004004800600001c0026e000102000302010003c004680000c8c3
+bytes 00000000008009c50000c8c300000000008022c5000096c300000000008009c5
+bytes 000096c300000000008022c50c000014
+
+label loc_05930
+bytes 0080bb440000fa44009049c500a08c450000fa4400404ec4
+
+label loc_05948
+pointer @loc_05950
+zeros 4
+
+label loc_05950
+bytes 01000000
+pointer @loc_05960
+zeros 8
+
+label loc_05960
+bytes 010000000c000000
+pointer @loc_05970
+zeros 4
+
+label loc_05970
+bytes 00c0016d06000c004800600001c0066e00010200030201000405060007060500
+bytes 08090a000b0a090007c00c6800c073450000fa440020b2c400c073450000fa44
+bytes 009049c500a08c450000fa440020b2c400a08c450000fa44009049c50080bb44
+bytes 0000fa440020b2c40080bb440000fa44001024c500c028450000fa440020b2c4
+bytes 00c028450000fa44001024c500c028450000fa4400404ec400c028450000fa44
+bytes 0020fdc400c073450000fa4400404ec400c073450000fa440020fdc40c000014
+
+label loc_05a30
+bytes 000096430000fa4400488ac500c073450000fa44001024c5
+
+label loc_05a48
+pointer @loc_05a50
+zeros 4
+
+label loc_05a50
+bytes 01000000
+pointer @loc_05a60
+zeros 8
+
+label loc_05a60
+bytes 0100000013000000
+pointer @loc_05a70
+zeros 4
+
+label loc_05a70
+bytes 00c0016d0a0013004800600001c00a6e00010200030201000405060007060500
+bytes 08090a000b0a09000c0d0e000f0e0d00100b110012110b000bc013680000c843
+bytes 0000fa44001024c50000c8430000fa44009049c5000048440000fa44001024c5
+bytes 000048440000fa44009049c5000096430000fa44009049c5000096430000fa44
+bytes 00488ac5000061440000fa44009049c5000061440000fa4400488ac50080bb44
+bytes 0000fa44009049c50080bb440000fa4400106fc500404e450000fa44009049c5
+bytes 00404e450000fa4400106fc50080bb440000fa4400d04fc5000061440000fa44
+bytes 00d04fc50080bb440000fa4400d068c5000061440000fa4400d068c500404e45
+bytes 0000fa44001024c500c073450000fa44001024c500c073450000fa4400106fc5
+bytes 0c000014000000000000000000000000
+
+label loc_05ba0
+bytes 00a08cc5000000000000c8c3000096430000000000c08f44
+
+label loc_05bb8
+pointer @loc_05bc0
+zeros 4
+
+label loc_05bc0
+bytes 02000000
+pointer @loc_05bd0
+pointer @loc_05d30
+zeros 4
+
+label loc_05bd0
+bytes 0100000015000000
+pointer @loc_05be0
+zeros 4
+
+label loc_05be0
+bytes 00c0016d0c0016004800600001c00c6e00010200030201000405060002060500
+bytes 070809000a0908000b0c04000d040c000e0f100011100f001213140015141300
+bytes 0dc01668000096c30000000000009643000096c300000000000096c300009643
+bytes 00000000000096430000964300000000000096c30080bbc40000000000006144
+bytes 0080bbc40000000000009643000096430000000000006144000061c500000000
+bytes 00c08f44000061c50000000000007a4400803bc50000000000c08f4400803bc5
+bytes 0000000000007a4400a08cc5000000000000614400a08cc500000000000096c3
+bytes 0080bbc400000000000096c300c073c50000000000007a4400c073c500000000
+bytes 0000614400c028c50000000000007a4400c028c5000000000000614400404ec5
+bytes 00000000000096c3143e4ec5000000000000c8c300c028c500000000000096c3
+bytes 13be28c5000000000000c8c30c000014
+
+label loc_05d30
+bytes 0100000009000100
+pointer @loc_05d40
+zeros 4
+
+label loc_05d40
+bytes 00c0016d040008004800600001c0046e00010200030201000405060007060500
+bytes 05c0086800004843000000000000484400004843000000000000c84300009643
+bytes 000000000000484400009643000000000000c843000061c50000000000c08f44
+bytes 000061c5000000000040834400803bc50000000000c08f4400803bc500000000
+bytes 004083440c0000140000000000000000
+
+label area_005_model
+model geometry=@area_005_geometry material=@area_001_material
+zeros 8
+
+label area_005_geometry
+bytes 1a000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 000000000000008000807cc50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 000000800000008000000080000000000000204100007ac400807cc50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000000000000000080000000800000008000000000
+bytes 0000a0410000fac400807cc50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000400000000000000
+bytes 000000800000008000000080000000000000f04100007ac400807cc50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000050000000000000000000080000000800000008000000000
+bytes 000020420000008000807cc50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000600000000000000
+bytes 00000080000000800000008000000000000048420000008000807cc50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000070000000000000000000080000000800000008000000000
+bytes 000070420000008000807cc50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000800000000000000
+bytes 0000008000000080000000800000000000008c420000fac400807cc50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000090000000000000000000080000000800000008000000000
+bytes 0000a0420000fac400807cc50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000a00000009000000
+bytes 000000800000008000000080000000000040f6c500000080005096460000803f
+bytes 0000803f0000803f0000803f00000000
+pointer @loc_06610
+pointer @loc_06628
+bytes 000000000000000001000000000000000b000000090000000000008000000080
+bytes 000000800000000000e0ecc50000008000d072460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 0c000000090000000000008000000080000000800000000000a0ffc500000080
+bytes 00906c460000803f0000803f0000803f0000803f000000000000000000000000
+bytes 000000000000000001000000000000000d000000080000000000008000000080
+bytes 000000800000000000f0f5c500000080005096460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_066e0
+pointer @loc_066f8
+bytes 000000000000000001000000000000000e000000070000000000008000000080
+bytes 0000008000000000002085c500000080008ca5460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_06770
+pointer @loc_06788
+bytes 000000000000000001000000000000000f000000060000000000008000000080
+bytes 000000800000000000d084c500000080008ca5460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_06890
+pointer @loc_068a8
+bytes 0000000000000000010000000000000010000000050000000000008000000080
+bytes 0000008000000000008084c500000080008ca5460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_069c0
+pointer @loc_069d8
+bytes 0000000000000000010000000000000011000000040000000000008000000080
+bytes 00000080000000000018d3c5000000800048a8460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_06a50
+pointer @loc_06a68
+bytes 0000000000000000010000000000000012000000040000000000008000000080
+bytes 000000800000000000a0ffc500000080002c9c460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 1300000003000000000000800000008000000080000000000060f4c500000080
+bytes 005096460000803f0000803f0000803f0000803f00000000
+pointer @loc_06c90
+pointer @loc_06ca8
+bytes 0000000000000000010000000000000014000000030000000000008000000080
+bytes 00000080000000000050ffc50000008000589d460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 1500000002000000000000800000008000000080000000000078d2c500000080
+bytes 0048a8460000803f0000803f0000803f0000803f00000000
+pointer @loc_06f00
+pointer @loc_06f18
+bytes 0000000000000000010000000000000016000000020000000000008000000080
+bytes 00000080000000000010a9c50000008000aca8460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 170000000100000000000080000000800000008000000000004083c500000080
+bytes 008ca5460000803f0000803f0000803f0000803f00000000
+pointer @loc_07140
+pointer @loc_07158
+bytes 0000000000000000010000000000000018000000010000000000008000000080
+bytes 00000080000000000070adc50000008000aca8460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 19000000010000000000008000000080000000800000000000c073c500000080
+bytes 0048a8460000803f0000803f0000803f0000803f000000000000000000000000
+bytes 0000000000000000
+
+label loc_06610
+bytes 000016c40000fa4400007ac5000096440000fa4400007ac4
+
+label loc_06628
+pointer @loc_06630
+zeros 4
+
+label loc_06630
+bytes 01000000
+pointer @loc_06640
+zeros 8
+
+label loc_06640
+bytes 0100000009000000
+pointer @loc_06650
+zeros 4
+
+label loc_06650
+bytes 00c0016d040008004800600001c0046e00010200030201000405060007060500
+bytes 05c00868000000000000fa4400007ac4000000000000fa44008009c500009644
+bytes 0000fa4400007ac4000096440000fa44008009c5000016c40000fa44008009c5
+bytes 000016c40000fa4400007ac5000016440000fa44008009c5000016440000fa44
+bytes 00007ac50c0000140000000000000000
+
+label loc_066e0
+bytes 000096440000fa440000c8c30000e1440000fa4400004843
+
+label loc_066f8
+pointer @loc_06700
+zeros 4
+
+label loc_06700
+bytes 01000000
+pointer @loc_06710
+zeros 8
+
+label loc_06710
+bytes 0100000005000000
+pointer @loc_06720
+zeros 4
+
+label loc_06720
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800009644
+bytes 0000fa4400004843000096440000fa440000c8c30000e1440000fa4400004843
+bytes 0000e1440000fa440000c8c30c000014
+
+label loc_06770
+bytes 000016c50000000000b081c5000096c400000000006038c5
+
+label loc_06788
+pointer @loc_06790
+zeros 4
+
+label loc_06790
+bytes 02000000
+pointer @loc_067a0
+pointer @loc_06830
+zeros 4
+
+label loc_067a0
+bytes 0100000008000000
+pointer @loc_067b0
+zeros 4
+
+label loc_067b0
+bytes 00c0016d040007004800600001c0046e00010200030201000405060001060500
+bytes 05c007680000e1c40000000000e05dc50000e1c40000000000b081c5000096c4
+bytes 0000000000e05dc5000096c40000000000b081c5000016c500000000006038c5
+bytes 000016c50000000000b081c50000e1c400000000006038c50c00001400000000
+
+label loc_06830
+bytes 0100000005000100
+pointer @loc_06840
+zeros 4
+
+label loc_06840
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800c00fc5
+bytes 0000000000207dc500c00fc50000000000b081c50080edc40000000000207dc5
+bytes 0080edc40000000000b081c50c000014
+
+label loc_06890
+bytes 00d09dc50000000000b081c5000061c500000000006038c5
+
+label loc_068a8
+pointer @loc_068b0
+zeros 4
+
+label loc_068b0
+bytes 02000000
+pointer @loc_068c0
+pointer @loc_06960
+zeros 4
+
+label loc_068c0
+bytes 0100000009000000
+pointer @loc_068d0
+zeros 4
+
+label loc_068d0
+bytes 00c0016d040008004800600001c0046e00010200030201000405060007060500
+bytes 05c0086800d09dc50000000000204bc500d09dc50000000000a070c5002099c5
+bytes 0000000000204bc5002099c50000000000a070c5002099c500000000006038c5
+bytes 002099c50000000000b081c5000061c500000000006038c5000061c500000000
+bytes 00b081c50c0000140000000000000000
+
+label loc_06960
+bytes 0100000005000100
+pointer @loc_06970
+zeros 4
+
+label loc_06970
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800d09dc5
+bytes 0000000000204bc500d09dc50000000000a070c500b09ac50000000000204bc5
+bytes 00b09ac50000000000a070c50c000014
+
+label loc_069c0
+bytes 00803bc500000000006038c50000e1c40000000000e012c5
+
+label loc_069d8
+pointer @loc_069e0
+zeros 4
+
+label loc_069e0
+bytes 01000000
+pointer @loc_069f0
+zeros 8
+
+label loc_069f0
+bytes 0100000005000000
+pointer @loc_06a00
+zeros 4
+
+label loc_06a00
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800803bc5
+bytes 0000000000e012c500803bc500000000006038c50000e1c40000000000e012c5
+bytes 0000e1c400000000006038c50c000014
+
+label loc_06a50
+bytes 0060d1c400007a440040b5c400e092c400007a4400009643
+
+label loc_06a68
+pointer @loc_06a70
+zeros 4
+
+label loc_06a70
+bytes 02000000
+pointer @loc_06a80
+pointer @loc_06c30
+zeros 4
+
+label loc_06a80
+bytes 010000001a000000
+pointer @loc_06a90
+zeros 4
+
+label loc_06a90
+bytes 00c0016d0e001c004800600001c00e6e00010200030201000405060007060500
+bytes 08090a000b0a09000c0d0e000f0e0d0010111200131211001415160017161500
+bytes 18191a001b1a19000fc01c680020cbc400007a440000afc40020cbc400007a44
+bytes 0040b5c4002099c400007a440000afc4002099c400007a440040b5c40060d1c4
+bytes 00007a44000096430060d1c400007a44000061c400e092c400007a4400009643
+bytes 00e092c400007a44000061c40020cbc400007a44000061c40020cbc400007a44
+bytes 00806dc4002099c400007a44000061c4002099c400007a4400806dc40020cbc4
+bytes 00007a4400007ac40020cbc400007a44004083c4002099c400007a4400007ac4
+bytes 002099c400007a44004083c40020cbc400007a44008089c40020cbc400007a44
+bytes 00c08fc4002099c400007a44008089c4002099c400007a4400c08fc40020cbc4
+bytes 00007a44000096c40020cbc400007a4400409cc4002099c400007a44000096c4
+bytes 002099c400007a4400409cc40020cbc400007a440080a2c40020cbc400007a44
+bytes 00c0a8c4002099c400007a440080a2c4002099c400007a4400c0a8c40c000014
+
+label loc_06c30
+bytes 0100000005000100
+pointer @loc_06c40
+zeros 4
+
+label loc_06c40
+bytes 00c0016d020004004800600001c0026e000102000302010003c004680060d1c4
+bytes 00007a440000c8c30060d1c400007a44000048c400e0c4c400007a440000c8c3
+bytes 00e0c4c400007a44000048c40c000014
+
+label loc_06c90
+bytes 000016c40000fa4400007ac4000096440000fa4400004844
+
+label loc_06ca8
+pointer @loc_06cb0
+zeros 4
+
+label loc_06cb0
+bytes 01000000
+pointer @loc_06cc0
+zeros 8
+
+label loc_06cc0
+bytes 0100000023000000
+pointer @loc_06cd0
+zeros 4
+
+label loc_06cd0
+bytes 00c0016d100020004800600001c0106e00010200030201000405060007060500
+bytes 08090a000b0a09000c0d0e000f0e0d0010111200131211001415160017161500
+bytes 18191a001b1a19001c1d1e001f1e1d0011c02068000016c40000fa4400004843
+bytes 000016c40000fa44000048c3000016440000fa4400004843000016440000fa44
+bytes 000048c3008009c40000fa4400004844008009c40000fa4400803b44000016c3
+bytes 0000fa4400004844000016c30000fa4400803b44008009c40000fa4400002f44
+bytes 008009c40000fa4400802244000016c30000fa4400002f44000016c30000fa44
+bytes 00802244008009c40000fa4400001644008009c40000fa4400800944000016c3
+bytes 0000fa4400001644000016c30000fa4400800944008009c40000fa440000fa43
+bytes 008009c40000fa440000e143000016c30000fa440000fa43000016c30000fa44
+bytes 0000e143008009c40000fa440000c843008009c40000fa440000af43000016c3
+bytes 0000fa440000c843000016c30000fa440000af43008009c40000fa4400009643
+bytes 008009c40000fa4400007a43000016c30000fa4400009643000016c30000fa44
+bytes 00007a4300002f440000fa440000c8c300002f440000fa4400007ac400808944
+bytes 0000fa440000c8c3008089440000fa4400007ac40c00001400c0016d02000400
+bytes 4800600001c0026e000102000302010003c00468000016440000fa4400004843
+bytes 000016440000fa440000c8c3000096440000fa4400004843000096440000fa44
+bytes 0000c8c30c0000140000000000000000
+
+label loc_06f00
+bytes 00e092c400007a44000048c30020994400007a4400009643
+
+label loc_06f18
+pointer @loc_06f20
+zeros 4
+
+label loc_06f20
+bytes 02000000
+pointer @loc_06f30
+pointer @loc_070e0
+zeros 4
+
+label loc_06f30
+bytes 010000001a000000
+pointer @loc_06f40
+zeros 4
+
+label loc_06f40
+bytes 00c0016d0e001c004800600001c00e6e00010200030201000405060007060500
+bytes 08090a000b0a09000c0d0e000f0e0d0010111200131211001415160017161500
+bytes 18191a001b1a19000fc01c6800c05a4400007a4400007a4300c05a4400007a44
+bytes 000016c30040674400007a4400007a430040674400007a44000016c300c04144
+bytes 00007a4400007a4300c0414400007a44000016c300404e4400007a4400007a43
+bytes 00404e4400007a44000016c300c0284400007a4400007a4300c0284400007a44
+bytes 000016c30040354400007a4400007a430040354400007a44000016c300e092c4
+bytes 00007a440000964300e092c400007a44000048c300401c4400007a4400009643
+bytes 00401c4400007a44000048c300c0734400007a4400007a4300c0734400007a44
+bytes 000016c30020804400007a4400007a430020804400007a44000016c300e09244
+bytes 00007a4400007a4300e0924400007a44000016c30020994400007a4400007a43
+bytes 0020994400007a44000016c30060864400007a4400007a430060864400007a44
+bytes 000016c300a08c4400007a4400007a4300a08c4400007a44000016c30c000014
+
+label loc_070e0
+bytes 0100000005000100
+pointer @loc_070f0
+zeros 4
+
+label loc_070f0
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800006143
+bytes 00007a44000096430000614300007a440000484300401c4400007a4400009643
+bytes 00401c4400007a44000048430c000014
+
+label loc_07140
+bytes 004083c500000000006038c5000016440000000000802244
+
+label loc_07158
+pointer @loc_07160
+zeros 4
+
+label loc_07160
+bytes 02000000
+pointer @loc_07170
+pointer @loc_07420
+zeros 4
+
+label loc_07170
+bytes 010000002a000000
+pointer @loc_07180
+zeros 4
+
+label loc_07180
+bytes 00c0016d100020004800600001c0106e00010200030201000405060007060500
+bytes 08090a000b0a09000c0d0e000f0e0d0010111200131211001415160017161500
+bytes 18191a001b1a19001c1d1e001f1e1d0011c0206800002fc40000000000802244
+bytes 00002fc400000000008022c40000164400000000008022440000164400000000
+bytes 008022c4000096c300000000008022c4000096c300000000000048c400009643
+bytes 00000000008022c40000964300000000000048c400803bc40000000000001644
+bytes 00803bc4000000000000484300002fc4000000000000164400002fc400000000
+bytes 00004843008054c40000000000001644008054c40000000000004843000048c4
+bytes 0000000000001644000048c4000000000000484300806dc40000000000001644
+bytes 00806dc40000000000004843000061c40000000000001644000061c400000000
+bytes 00004843004083c40000000000001644004083c4000000000000484300007ac4
+bytes 000000000000164400007ac4000000000000484300c08fc40000000000001644
+bytes 00c08fc40000000000004843008089c40000000000001644008089c400000000
+bytes 0000484300409cc4000000000000164400409cc40000000000004843000096c4
+bytes 0000000000001644000096c400000000000048430c00001400c0016d08000c00
+bytes 4800600001c0086e000102000302010004050600070605000108090006090800
+bytes 050a07000b070a0009c00c68004067c50000000000001643004067c500000000
+bytes 008009c400002fc4000000000000164300002fc400000000008009c4004083c5
+bytes 0000000000c0dac4004083c50000000000e012c500803bc50000000000c0dac4
+bytes 00803bc50000000000e012c5004067c50000000000c0dac400803bc500000000
+bytes 008009c4004083c500000000006038c500803bc500000000006038c50c000014
+
+label loc_07420
+bytes 010000000c000100
+pointer @loc_07430
+zeros 4
+
+label loc_07430
+bytes 00c0016d06000c004800600001c0066e00010200030201000405060007060500
+bytes 08090a000b0a090007c00c68000096c30000000000002fc4000096c300000000
+bytes 000048c4000096430000000000002fc40000964300000000000048c400c041c5
+bytes 0000000000409cc400c041c5000000000040cec400803bc50000000000409cc4
+bytes 00803bc5000000000040cec4004083c5000000000040e7c4004083c500000000
+bytes 00a00cc5002080c5000000000040e7c4002080c50000000000a00cc50c000014
+
+label area_006_model
+model geometry=@area_006_geometry material=@area_001_material
+zeros 8
+
+label area_006_geometry
+bytes 09000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 000000000000008000207dc50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 00000080000000800000008000000000000020410000008000207dc50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000200000000000080000000800000008000000000
+bytes 0090cec500000080009869460000803f0000803f0000803f0000803f00000000
+pointer @loc_077e0
+pointer @loc_077f8
+bytes 0000000000000000010000000000000004000000020000000000008000000080
+bytes 000000800000000000b0eac500000080008810460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 0500000002000000000000800000008000000080000000000080b1c500000080
+bytes 003815460000803f0000803f0000803f0000803f000000000000000000000000
+bytes 0000000000000000010000000000000006000000020000000000008000000080
+bytes 000000800000000000a061c50000008000f827460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 0700000001000000000000800000008000000080000000000040cec500000080
+bytes 009869460000803f0000803f0000803f0000803f00000000
+pointer @loc_07af0
+pointer @loc_07b08
+bytes 0000000000000000010000000000000008000000010000000000008000000080
+bytes 00000080000000000020fdc50000008000d86f460000803f0000803f0000803f
+bytes 0000803f0000000000000000000000000000000000000000
+
+label loc_077e0
+bytes 0000e1c40000000000f0b9c500a0704500000000004003c5
+
+label loc_077f8
+pointer @loc_07800
+zeros 4
+
+label loc_07800
+bytes 02000000
+pointer @loc_07810
+pointer @loc_07a20
+zeros 4
+
+label loc_07810
+bytes 0100000020000000
+pointer @loc_07820
+zeros 4
+
+label loc_07820
+bytes 00c0016d10001c004800600001c0106e00010200030201000405060007060500
+bytes 080709000a0907000b080c000d0c08000e0f100011100f00121314000f141300
+bytes 131516001716150018191a001b1a190011c01c68004067450000000000803bc5
+bytes 0040674500000000000061c500a070450000000000803bc500a0704500000000
+bytes 000061c50000164500000000004003c5000016450000000000a08cc500803b45
+bytes 00000000004003c500803b450000000000a08cc500803b450000000000c073c5
+bytes 00c041450000000000c073c500c041450000000000a08cc500803b4500000000
+bytes 00c028c5004067450000000000c028c5004067450000000000c073c500000000
+bytes 0000000000c073c500000000000000000020b2c5000016450000000000c073c5
+bytes 00001645000000000020b2c5000096c40000000000609fc5000096c400000000
+bytes 0020b2c5000000000000000000609fc5000096c4000000000040b5c500001644
+bytes 000000000020b2c500001644000000000040b5c5000096c3000000000040b5c5
+bytes 000096c30000000000f0b9c500004843000000000040b5c50000484300000000
+bytes 00f0b9c50c00001400c0016d020004004800600001c0026e0001020003020100
+bytes 03c004680000e1c40000000000a08cc50000e1c40000000000609fc500000000
+bytes 0000000000a08cc5000000000000000000609fc50c0000140000000000000000
+
+label loc_07a20
+bytes 010000000c000100
+pointer @loc_07a30
+zeros 4
+
+label loc_07a30
+bytes 00c0016d06000c004800600001c0066e00010200030201000405060007060500
+bytes 08090a000b0a090007c00c6800606a450000000000803bc500606a4500000000
+bytes 000061c500a070450000000000803bc500a0704500000000000061c5008089c4
+bytes 0000000000a08cc5008089c40000000000c08fc500002fc40000000000a08cc5
+bytes 00002fc40000000000c08fc5000096c30000000000d0b6c5000096c300000000
+bytes 00f0b9c5000048430000000000d0b6c5000048430000000000f0b9c50c000014
+
+label loc_07af0
+bytes 0000e1c40000000000c028c500803b450000000000009643
+
+label loc_07b08
+pointer @loc_07b10
+zeros 4
+
+label loc_07b10
+bytes 01000000
+pointer @loc_07b20
+zeros 8
+
+label loc_07b20
+bytes 010000000e000000
+pointer @loc_07b30
+zeros 4
+
+label loc_07b30
+bytes 00c0016d08000e004800600001c0086e00010200030201000405000006000500
+bytes 07080300090308000a0b0c000d0c0b0009c00e68000096c40000000000009643
+bytes 000096c400000000000096c30000964400000000000096430000964400000000
+bytes 000096c30000e1c400000000000096430000e1c400000000000061c4000096c4
+bytes 00000000000061c40000164400000000000096c3000016440000000000c028c5
+bytes 000096440000000000c028c500009644000000000080bbc40000964400000000
+bytes 004003c500803b45000000000080bbc400803b4500000000004003c50c000014
+
+label area_007_model
+model geometry=@area_007_geometry material=@area_001_material
+zeros 8
+
+label area_007_geometry
+bytes 01000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+
+label area_008_model
+model geometry=@area_008_geometry material=@area_001_material
+zeros 8
+
+label area_008_geometry
+bytes 06000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 000000000000008000607ec50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 00000080000000800000008000000000000020410000008000607ec50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000200000000000080000000800000008000000000
+bytes 00840fc6000000800018c4450000803f0000803f0000803f0000803f00000000
+pointer @loc_07e80
+pointer @loc_07e98
+bytes 0000000000000000010000000000000004000000010000000000008000000080
+bytes 0000008000000000005c0fc6000000800018c4450000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_07f70
+pointer @loc_07f88
+bytes 0000000000000000010000000000000005000000010000000000008000000080
+bytes 0000008000000000005011c60000008000d0a7450000803f0000803f0000803f
+bytes 0000803f0000000000000000000000000000000000000000
+
+label loc_07e80
+bytes 00789b450000000000a0e1c400b8d3450000000000a096c4
+
+label loc_07e98
+pointer @loc_07ea0
+zeros 4
+
+label loc_07ea0
+bytes 02000000
+pointer @loc_07eb0
+pointer @loc_07f10
+zeros 4
+
+label loc_07eb0
+bytes 0100000005000000
+pointer @loc_07ec0
+zeros 4
+
+label loc_07ec0
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800789b45
+bytes 0000000000a096c400789b450000000000a0e1c400b8d3450000000000a096c4
+bytes 00b8d3450000000000a0e1c40c000014
+
+label loc_07f10
+bytes 0100000005000100
+pointer @loc_07f20
+zeros 4
+
+label loc_07f20
+bytes 00c0016d020004004800600001c0026e000102000302010003c004680098d045
+bytes 000000000020a3c40098d045000000000020d5c400b8d345000000000020a3c4
+bytes 00b8d345000000000020d5c40c000014
+
+label loc_07f70
+bytes 0080a2c300000000005016c500789b450000000000502545
+
+label loc_07f88
+pointer @loc_07f90
+zeros 4
+
+label loc_07f90
+bytes 02000000
+pointer @loc_07fa0
+pointer @loc_081e0
+zeros 4
+
+label loc_07fa0
+bytes 0100000023000000
+pointer @loc_07fb0
+zeros 4
+
+label loc_07fb0
+bytes 00c0016d100020004800600001c0106e00010200030201000405060007060500
+bytes 08090a000b0a09000c0d0e000f0e0d0010111200131211001415160017161500
+bytes 18191a001b1a19001c1d1e001f1e1d0011c02068000096c20000000000809343
+bytes 000096c200000000008098c30000964200000000008093430000964200000000
+bytes 008098c300e0f6440000000000f01b4500e0f64400000000005016c500704645
+bytes 0000000000f01b450070464500000000005016c5000096420000000000c01444
+bytes 0000964200000000004017c400e0f6440000000000c0144400e0f64400000000
+bytes 004017c4007046450000000000c014440070464500000000004017c400789b45
+bytes 0000000000c0144400789b4500000000004017c400300e450000000000502545
+bytes 00300e450000000000f01b4500702d45000000000050254500702d4500000000
+bytes 00f01b45000096420000000000c03cc4000096420000000000e083c400002f43
+bytes 0000000000c03cc400002f430000000000e083c40080a2c300000000004030c4
+bytes 0080a2c30000000000208ac40000964200000000004030c40000964200000000
+bytes 00208ac400002f4300000000004017c400002f430000000000a096c400c04144
+bytes 00000000004017c400c041440000000000a096c40c00001400c0016d02000400
+bytes 4800600001c0026e000102000302010003c0046800b8884500000000004017c4
+bytes 00b888450000000000a0e1c400789b4500000000004017c400789b4500000000
+bytes 00a0e1c40c0000140000000000000000
+
+label loc_081e0
+bytes 010000000c000100
+pointer @loc_081f0
+zeros 4
+
+label loc_081f0
+bytes 00c0016d06000c004800600001c0066e00010200030201000405060007060500
+bytes 08090a000b0a090007c00c6800300e45000000000050254500300e4500000000
+bytes 00101f4500702d45000000000050254500702d450000000000101f45000096c2
+bytes 0000000000809343000096c200000000008098c30000c8410000000000809343
+bytes 0000c84100000000008098c30070144500000000001010c50070144500000000
+bytes 005016c500702d4500000000001010c500702d4500000000005016c50c000014
+
+label area_009_model
+model geometry=@area_009_geometry material=@area_001_material
+zeros 8
+
+label area_009_geometry
+bytes 0a000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 000000000000008000007fc50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 00000080000000800000008000000000000020410000fac400007fc50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000000000000000080000000800000008000000000
+bytes 0000a0410000008000007fc50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000400000003000000
+bytes 00000080000000800000008000000000009413c6000000800040c4450000803f
+bytes 0000803f0000803f0000803f00000000
+pointer @loc_085f0
+pointer @loc_08608
+bytes 0000000000000000010000000000000005000000030000000000008000000080
+bytes 000000800000000000c014c60000008000101f460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 06000000020000000000008000000080000000800000000000982dc600000080
+bytes 00b015460000803f0000803f0000803f0000803f00000000
+pointer @loc_08740
+pointer @loc_08758
+bytes 0000000000000000010000000000000007000000020000000000008000000080
+bytes 000000800000000000b817c60000008000101f460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 080000000200000000000080000000800000008000000000005840c600000080
+bytes 00b02e460000803f0000803f0000803f0000803f000000000000000000000000
+bytes 0000000000000000010000000000000009000000010000000000008000000080
+bytes 0000008000000000004413c6000000800040c4450000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_08880
+pointer @loc_08898
+zeros 8
+
+label loc_085f0
+bytes 00e0f6c4000000000000e14400002fc30000000000009645
+
+label loc_08608
+pointer @loc_08610
+zeros 4
+
+label loc_08610
+bytes 02000000
+pointer @loc_08620
+pointer @loc_086e0
+zeros 4
+
+label loc_08620
+bytes 010000000b000000
+pointer @loc_08630
+zeros 4
+
+label loc_08630
+bytes 00c0016d06000a004800600001c0066e00010200030201000405060007060500
+bytes 080009000509000007c00a6800e0f6c4000000000000614500e0f6c400000000
+bytes 0000e14400e0abc4000000000000614500e0abc4000000000000e14400c041c4
+bytes 000000000000964500c041c4000000000000614500002fc30000000000009645
+bytes 00002fc3000000000000614500e0f6c4000000000040834500c041c400000000
+bytes 004083450c0000140000000000000000
+
+label loc_086e0
+bytes 0100000005000100
+pointer @loc_086f0
+zeros 4
+
+label loc_086f0
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800e0f6c4
+bytes 000000000020804500e0f6c400000000004067450060eac40000000000208045
+bytes 0060eac400000000004067450c000014
+
+label loc_08740
+bytes 0080bbc40000fa44000061c400c028450000fa440080bb44
+
+label loc_08758
+pointer @loc_08760
+zeros 4
+
+label loc_08760
+bytes 01000000
+pointer @loc_08770
+zeros 8
+
+label loc_08770
+bytes 0100000010000000
+pointer @loc_08780
+zeros 4
+
+label loc_08780
+bytes 00c0016d080010004800600001c0086e00010200030201000405060007060500
+bytes 08090a000b0a09000c0d0e000f0e0d0009c01068000096c30000fa4400004843
+bytes 000096c30000fa44000048c3000096430000fa4400004843000096430000fa44
+bytes 000048c3000096430000fa4400009643000096430000fa44000061c400400345
+bytes 0000fa4400009643004003450000fa44000061c40080bbc40000fa440080bb44
+bytes 0080bbc40000fa44000096c3000096c30000fa440080bb44000096c30000fa44
+bytes 000096c30080bb440000fa440080bb440080bb440000fa440000964300c02845
+bytes 0000fa440080bb4400c028450000fa44000096430c0000140000000000000000
+
+label loc_08880
+bytes 00e0abc400000000000016c40080d4430000000000001645
+
+label loc_08898
+pointer @loc_088a0
+zeros 4
+
+label loc_088a0
+bytes 02000000
+pointer @loc_088b0
+pointer @loc_089a0
+zeros 4
+
+label loc_088b0
+bytes 010000000e000000
+pointer @loc_088c0
+zeros 4
+
+label loc_088c0
+bytes 00c0016d08000e004800600001c0086e00010200030201000405060007060500
+bytes 080409000a090400090b0c000d0c0b0009c00e68000096c20000000000009643
+bytes 000096c200000000000096c30000964200000000000096430000964200000000
+bytes 000096c300e0abc4000000000000164400e0abc400000000000016c4000096c2
+bytes 0000000000001644000096c200000000000016c400e0abc40000000000001645
+bytes 00c041c4000000000000164500c041c4000000000000164400c041c400000000
+bytes 0000e1440080d44300000000000016450080d443000000000000e1440c000014
+
+label loc_089a0
+bytes 0100000009000100
+pointer @loc_089b0
+zeros 4
+
+label loc_089b0
+bytes 00c0016d040008004800600001c0046e00010200030201000405060007060500
+bytes 05c008680000c8c100000000000096430000c8c100000000000096c300009642
+bytes 00000000000096430000964200000000000096c300609fc4000000000000fac3
+bytes 00609fc400000000000016c400c05ac4000000000000fac300c05ac400000000
+bytes 000016c40c0000140000000000000000
+
+label area_010_model
+model geometry=@area_010_geometry material=@area_001_material
+zeros 8
+
+label area_010_geometry
+bytes 0e000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 000000000000008000a07fc50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 00000080000000800000008000000000000020410000008000a07fc50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000000000000000080000000800000008000000000
+bytes 0000a0410000fac400a07fc50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000400000000000000
+bytes 000000800000008000000080000000000000f0410000008000a07fc50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000050000000400000000000080000000800000008000000000
+bytes 00f83bc60000008000a836460000803f0000803f0000803f0000803f00000000
+pointer @loc_08ec0
+pointer @loc_08ed8
+bytes 0000000000000000010000000000000006000000040000000000008000000080
+bytes 000000800000000000281bc600000080008c8c460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 070000000300000000000080000000800000008000000000004008c600000080
+bytes 007857460000803f0000803f0000803f0000803f00000000
+pointer @loc_09020
+pointer @loc_09038
+bytes 0000000000000000010000000000000008000000030000000000008000000080
+bytes 000000800000000000e017c600000080007857460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 09000000020000000000008000000080000000800000000000a83bc600000080
+bytes 00a836460000803f0000803f0000803f0000803f00000000
+pointer @loc_090b0
+pointer @loc_090c8
+bytes 000000000000000001000000000000000a000000020000000000008000000080
+bytes 000000800000000000b817c600000080002c83460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 0b000000010000000000008000000080000000800000000000803bc600000080
+bytes 00a836460000803f0000803f0000803f0000803f00000000
+pointer @loc_09190
+pointer @loc_091a8
+bytes 000000000000000001000000000000000c000000010000000000008000000080
+bytes 0000008000000000003040c60000008000b82b460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 0d0000000100000000000080000000800000008000000000007014c600000080
+bytes 007857460000803f0000803f0000803f0000803f000000000000000000000000
+bytes 0000000000000000
+
+label loc_08ec0
+bytes 00000000000000000058aa4500a02545000000000040ce45
+
+label loc_08ed8
+pointer @loc_08ee0
+zeros 4
+
+label loc_08ee0
+bytes 02000000
+pointer @loc_08ef0
+pointer @loc_08fc0
+zeros 4
+
+label loc_08ef0
+bytes 010000000c000000
+pointer @loc_08f00
+zeros 4
+
+label loc_08f00
+bytes 00c0016d06000b004800600001c0066e00010200030201000405060007060500
+bytes 080709000a09070007c00b6800401c450000000000e0c44500401c4500000000
+bytes 0020b24500a025450000000000e0c44500a02545000000000020b24500000000
+bytes 000000000080bb4500000000000000000058aa450000e144000000000080bb45
+bytes 0000e144000000000058aa450000e144000000000040ce4500401c4500000000
+bytes 0040ce4500401c45000000000058aa450c000014000000000000000000000000
+
+label loc_08fc0
+bytes 0100000005000100
+pointer @loc_08fd0
+zeros 4
+
+label loc_08fd0
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800601f45
+bytes 0000000000e0c44500601f45000000000020b24500a025450000000000e0c445
+bytes 00a02545000000000020b2450c000014
+
+label loc_09020
+bytes 000061c40000fa44000096c3000061440000fa4400009643
+
+label loc_09038
+pointer @loc_09040
+zeros 4
+
+label loc_09040
+bytes 01000000
+pointer @loc_09050
+zeros 8
+
+label loc_09050
+bytes 0100000005000000
+pointer @loc_09060
+zeros 4
+
+label loc_09060
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000061c4
+bytes 0000fa4400009643000061c40000fa44000096c3000061440000fa4400009643
+bytes 000061440000fa44000096c30c000014
+
+label loc_090b0
+bytes 00009644000000000040834500001645000000000030a745
+
+label loc_090c8
+pointer @loc_090d0
+zeros 4
+
+label loc_090d0
+bytes 01000000
+pointer @loc_090e0
+zeros 8
+
+label loc_090e0
+bytes 010000000a000000
+pointer @loc_090f0
+zeros 4
+
+label loc_090f0
+bytes 00c0016d060009004800600001c0066e00010200030201000405060007060500
+bytes 080004000204000007c00968000096440000000000a08c450000964400000000
+bytes 004083450000e1440000000000a08c450000e14400000000004083450000e144
+bytes 000000000030a7450000e144000000000000964500001645000000000030a745
+bytes 00001645000000000000964500009644000000000030a7450c00001400000000
+
+label loc_09190
+bytes 000016c400000000000016c400001645000000000080bb45
+
+label loc_091a8
+pointer @loc_091b0
+zeros 4
+
+label loc_091b0
+bytes 01000000
+pointer @loc_091c0
+zeros 8
+
+label loc_091c0
+bytes 0100000019000000
+pointer @loc_091d0
+zeros 4
+
+label loc_091d0
+bytes 00c0016d10001a004800600001c0106e00010200030201000204050006050400
+bytes 070809000a0908000b0607000c0706000d0e0b000f0b0e00100d110012110d00
+bytes 1113140015141300161718001918170011c01a68000016c40000000000001644
+bytes 000016c400000000000016c40000164400000000000016440000164400000000
+bytes 000016c400001644000000000000000000009644000000000000164400009644
+bytes 00000000000000000000e14400000000000016450000e1440000000000009644
+bytes 0000164500000000000016450000164500000000000096440000964400000000
+bytes 000016450000e144000000000000000000000000000000000000164500000000
+bytes 000000000000e14400009644000000000000e144000000000000000000408345
+bytes 0000164400000000004083450000164400000000000016450000164400000000
+bytes 000061450000e14400000000004083450000e1440000000000006145000016c4
+bytes 000000000080bb45000016c4000000000000614500000000000000000080bb45
+bytes 0000000000000000000061450c000014
+
+label area_011_model
+model geometry=@area_011_geometry material=@area_001_material
+zeros 8
+
+label area_011_geometry
+bytes 07000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 0000000000007ac4002080c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 000000800000008000000080000000000000204100000080002080c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000000000000000080000000800000008000000000
+bytes 0000a04100000080002080c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000400000003000000
+bytes 000000800000008000000080000000000000bec40000008000a0be450000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000050000000200000000000080000000800000008000000000
+bytes 00c0bcc400000080000096450000803f0000803f0000803f0000803f00000000
+pointer @loc_095b0
+pointer @loc_095c8
+bytes 0000000000000000010000000000000006000000010000000000008000000080
+bytes 000000800000000000c028c50000008000584a460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_09750
+pointer @loc_09768
+zeros 8
+
+label loc_095b0
+bytes 000048c400000000000096c3000048440000000000004844
+
+label loc_095c8
+pointer @loc_095d0
+zeros 4
+
+label loc_095d0
+bytes 02000000
+pointer @loc_095e0
+pointer @loc_09680
+zeros 4
+
+label loc_095e0
+bytes 0100000009000000
+pointer @loc_095f0
+zeros 4
+
+label loc_095f0
+bytes 00c0016d040008004800600001c0046e00010200030201000405060007060500
+bytes 05c00868000048c40000000000009643000048c400000000000096c300004844
+bytes 00000000000096430000484400000000000096c3000096c30000000000004844
+bytes 000096c300000000000096c30000964300000000000048440000964300000000
+bytes 000096c30c0000140000000000000000
+
+label loc_09680
+bytes 010000000c000100
+pointer @loc_09690
+zeros 4
+
+label loc_09690
+bytes 00c0016d06000c004800600001c0066e00010200030201000405060007060500
+bytes 08090a000b0a090007c00c6800002f44000000000000484300002f4400000000
+bytes 000048c30000484400000000000048430000484400000000000048c3000048c4
+bytes 0000000000004843000048c400000000000048c300002fc40000000000004843
+bytes 00002fc400000000000048c3000048c30000000000004844000048c300000000
+bytes 00002f44000048430000000000004844000048430000000000002f440c000014
+
+label loc_09750
+bytes 000096c300007a44008009c400c0734500007a4400800944
+
+label loc_09768
+pointer @loc_09770
+zeros 4
+
+label loc_09770
+bytes 02000000
+pointer @loc_09780
+pointer @loc_09840
+zeros 4
+
+label loc_09780
+bytes 010000000b000000
+pointer @loc_09790
+zeros 4
+
+label loc_09790
+bytes 00c0016d06000a004800600001c0066e00010200030201000204050006050400
+bytes 070806000906080007c00a68000096c300007a4400800944000096c300007a44
+bytes 008009c40000964300007a44008009440000964300007a44008009c400009643
+bytes 00007a44000048c200c0734500007a440080094400c0734500007a44000048c2
+bytes 00404e4500007a44000048c200404e4500007a44008009c400c0734500007a44
+bytes 008009c40c0000140000000000000000
+
+label loc_09840
+bytes 0100000009000100
+pointer @loc_09850
+zeros 4
+
+label loc_09850
+bytes 00c0016d040008004800600001c0046e00010200030201000405060007060500
+bytes 05c00868000048c300007a440000e1c3000048c300007a44008009c400004843
+bytes 00007a440000e1c30000484300007a44008009c40080544500007a440000e1c3
+bytes 0080544500007a44008009c400806d4500007a440000e1c300806d4500007a44
+bytes 008009c40c0000140000000000000000
+
+label area_012_model
+model geometry=@area_012_geometry material=@area_001_material
+zeros 8
+
+label area_012_geometry
+bytes 0f000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 0000000000007ac4007080c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 000000800000008000000080000000000000204100007ac4007080c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000000000000000080000000800000008000000000
+bytes 0000a04100007ac4007080c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000400000000000000
+bytes 000000800000008000000080000000000000f04100007ac4007080c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000050000000000000000000080000000800000008000000000
+bytes 0000204200007ac4007080c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000600000000000000
+bytes 000000800000008000000080000000000000484200007ac4007080c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000070000000600000000000080000000800000008000000000
+bytes 0070144600000080006491460000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000800000005000000
+bytes 0000008000000080000000800000000000e0fb4500000080009880460000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000090000000400000000000080000000800000008000000000
+bytes 0060f44500000080005483460000803f0000803f0000803f0000803f00000000
+pointer @loc_09db0
+pointer @loc_09dc8
+bytes 000000000000000001000000000000000a000000030000000000008000000080
+bytes 000000800000000000b0f44500000080005483460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_09ea0
+pointer @loc_09eb8
+bytes 000000000000000001000000000000000b000000030000000000008000000080
+bytes 000000800000000000b0f44500000080005483460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0a090
+pointer @loc_0a0a8
+bytes 000000000000000001000000000000000c000000020000000000008000000080
+bytes 00000080000000000000f54500000080005483460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0a120
+pointer @loc_0a138
+bytes 000000000000000001000000000000000d000000020000000000008000000080
+bytes 00000080000000000000f54500000080005483460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0a210
+pointer @loc_0a228
+bytes 000000000000000001000000000000000e000000010000000000008000000080
+bytes 000000800000000000e0c4450000008000c891460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0a2a0
+pointer @loc_0a2b8
+zeros 8
+
+label loc_09db0
+bytes 00409c4400007a440080bb440040ce4400007a4400400345
+
+label loc_09dc8
+pointer @loc_09dd0
+zeros 4
+
+label loc_09dd0
+bytes 02000000
+pointer @loc_09de0
+pointer @loc_09e40
+zeros 4
+
+label loc_09de0
+bytes 0100000005000000
+pointer @loc_09df0
+zeros 4
+
+label loc_09df0
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800409c44
+bytes 00007a440040034500409c4400007a440080bb440040ce4400007a4400400345
+bytes 0040ce4400007a440080bb440c000014
+
+label loc_09e40
+bytes 0100000005000100
+pointer @loc_09e50
+zeros 4
+
+label loc_09e50
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800409c44
+bytes 00007a440000fa4400409c4400007a440000c84400c0a84400007a440000fa44
+bytes 00c0a84400007a440000c8440c000014
+
+label loc_09ea0
+bytes 000048c200007a44008022c500b0814500007a4400802245
+
+label loc_09eb8
+pointer @loc_09ec0
+zeros 4
+
+label loc_09ec0
+bytes 02000000
+pointer @loc_09ed0
+pointer @loc_09ff0
+zeros 4
+
+label loc_09ed0
+bytes 0100000011000000
+pointer @loc_09ee0
+zeros 4
+
+label loc_09ee0
+bytes 00c0016d0a0011004800600001c00a6e00010200030201000405060007060500
+bytes 080709000a0907000b0c0d000e0d0c000f080e00100e08000bc01168000048c2
+bytes 00007a440000c8c3000048c200007a44008022c50080094400007a440000c8c3
+bytes 0080094400007a44008022c50080094400007a440080bbc40080094400007a44
+bytes 004003c500c0da4400007a440080bbc400c0da4400007a44004003c500c0da44
+bytes 00007a440080bb4400e0124500007a440080bb4400e0124500007a44004003c5
+bytes 00e05d4500007a440080224500e05d4500007a440040034500b0814500007a44
+bytes 0080224500b0814500007a440040034500c0da4400007a440040034500b08145
+bytes 00007a440080bb440c00001400000000
+
+label loc_09ff0
+bytes 0100000009000100
+pointer @loc_0a000
+zeros 4
+
+label loc_0a000
+bytes 00c0016d040008004800600001c0046e00010200030201000405060007060500
+bytes 05c008680000484200007a4400401cc50000484200007a44008022c50000e143
+bytes 00007a4400401cc50000e14300007a44008022c50020644500007a4400802245
+bytes 0020644500007a4400401c4500207d4500007a440080224500207d4500007a44
+bytes 00401c450c0000140000000000000000
+
+label loc_0a090
+bytes 0040ce4400007a440080bb4400c0da4400007a4400400345
+
+label loc_0a0a8
+pointer @loc_0a0b0
+zeros 4
+
+label loc_0a0b0
+bytes 01000000
+pointer @loc_0a0c0
+zeros 8
+
+label loc_0a0c0
+bytes 0100000005000300
+pointer @loc_0a0d0
+zeros 4
+
+label loc_0a0d0
+bytes 00c0016d020004004800600001c0026e000102000302010003c004680040ce44
+bytes 00007a44004003450040ce4400007a440080bb4400c0da4400007a4400400345
+bytes 00c0da4400007a440080bb440c000014
+
+label loc_0a120
+bytes 008009c400007a44000096c30080094400007a4400009643
+
+label loc_0a138
+pointer @loc_0a140
+zeros 4
+
+label loc_0a140
+bytes 02000000
+pointer @loc_0a150
+pointer @loc_0a1b0
+zeros 4
+
+label loc_0a150
+bytes 0100000005000000
+pointer @loc_0a160
+zeros 4
+
+label loc_0a160
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468008009c4
+bytes 00007a4400009643008009c400007a44000096c30080094400007a4400009643
+bytes 0080094400007a44000096c30c000014
+
+label loc_0a1b0
+bytes 0100000005000100
+pointer @loc_0a1c0
+zeros 4
+
+label loc_0a1c0
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468008009c4
+bytes 00007a4400004843008009c400007a44000048c30000e1c300007a4400004843
+bytes 0000e1c300007a44000048c30c000014
+
+label loc_0a210
+bytes 000048c200007a440000c8c30080094400007a44000096c3
+
+label loc_0a228
+pointer @loc_0a230
+zeros 4
+
+label loc_0a230
+bytes 01000000
+pointer @loc_0a240
+zeros 8
+
+label loc_0a240
+bytes 0100000005000200
+pointer @loc_0a250
+zeros 4
+
+label loc_0a250
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000048c2
+bytes 00007a44000096c3000048c200007a440000c8c30080094400007a44000096c3
+bytes 0080094400007a440000c8c30c000014
+
+label loc_0a2a0
+bytes 004003c500007a44008054c40000964300007a4400803b44
+
+label loc_0a2b8
+pointer @loc_0a2c0
+zeros 4
+
+label loc_0a2c0
+bytes 02000000
+pointer @loc_0a2d0
+pointer @loc_0a3a0
+zeros 4
+
+label loc_0a2d0
+bytes 010000000c000000
+pointer @loc_0a2e0
+zeros 4
+
+label loc_0a2e0
+bytes 00c0016d06000b004800600001c0066e00010200030201000405060007060500
+bytes 050809000a09080007c00b68000096c300007a4400803b44000096c300007a44
+bytes 008054c40000964300007a4400803b440000964300007a44008054c4004003c5
+bytes 00007a4400007a43004003c500007a440000afc3000096c300007a4400007a43
+bytes 000096c300007a440000afc3004003c500007a44008054c40080bbc400007a44
+bytes 0000afc30080bbc400007a44008054c40c000014000000000000000000000000
+
+label loc_0a3a0
+bytes 010000000c000100
+pointer @loc_0a3b0
+zeros 4
+
+label loc_0a3b0
+bytes 00c0016d06000c004800600001c0066e00010200030201000405060007060500
+bytes 08090a000b0a090007c00c68000048c300007a4400803b44000048c300007a44
+bytes 008022440000484300007a4400803b440000484300007a4400802244000048c3
+bytes 00007a4400803bc4000048c300007a44008054c40000484300007a4400803bc4
+bytes 0000484300007a44008054c40000fac400007a4400803bc40000fac400007a44
+bytes 008054c40000c8c400007a4400803bc40000c8c400007a44008054c40c000014
+
+label area_013_model
+model geometry=@area_013_geometry material=@area_001_material
+zeros 8
+
+label area_013_geometry
+bytes 05000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 0000000000007ac400c080c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 000000800000008000000080000000000000204100007ac400c080c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000200000000000080000000800000008000000000
+bytes 0030c5c50000008000acb2460000803f0000803f0000803f0000803f00000000
+pointer @loc_0a620
+pointer @loc_0a638
+bytes 0000000000000000010000000000000004000000010000000000008000000080
+bytes 000000800000000000e0c4c50000008000acb2460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0a740
+pointer @loc_0a758
+zeros 8
+
+label loc_0a620
+bytes 00404ec500007a44006006c5008009c500007a440000afc3
+
+label loc_0a638
+pointer @loc_0a640
+zeros 4
+
+label loc_0a640
+bytes 02000000
+pointer @loc_0a650
+pointer @loc_0a6e0
+zeros 4
+
+label loc_0a650
+bytes 0100000008000000
+pointer @loc_0a660
+zeros 4
+
+label loc_0a660
+bytes 00c0016d040007004800600001c0046e00010200030201000403050006050300
+bytes 05c0076800404ec500007a440000afc300404ec500007a44006006c500c028c5
+bytes 00007a440000afc300c028c500007a44006006c500c028c500007a4400c0c1c4
+bytes 008009c500007a4400c0c1c4008009c500007a44006006c50c00001400000000
+
+label loc_0a6e0
+bytes 0100000005000100
+pointer @loc_0a6f0
+zeros 4
+
+label loc_0a6f0
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800c00fc5
+bytes 00007a440040cec400c00fc500007a44002000c5008009c500007a440040cec4
+bytes 008009c500007a44002000c50c000014
+
+label loc_0a740
+bytes 00806dc500007a44008054c40000964300007a4400803b44
+
+label loc_0a758
+pointer @loc_0a760
+zeros 4
+
+label loc_0a760
+bytes 02000000
+pointer @loc_0a770
+pointer @loc_0a810
+zeros 4
+
+label loc_0a770
+bytes 0100000009000000
+pointer @loc_0a780
+zeros 4
+
+label loc_0a780
+bytes 00c0016d040008004800600001c0046e00010200030201000405060007060500
+bytes 05c00868000096c300007a4400803b44000096c300007a44008054c400009643
+bytes 00007a4400803b440000964300007a44008054c400806dc500007a4400007a43
+bytes 00806dc500007a440000afc3000096c300007a4400007a43000096c300007a44
+bytes 0000afc30c0000140000000000000000
+
+label loc_0a810
+bytes 010000000c000100
+pointer @loc_0a820
+zeros 4
+
+label loc_0a820
+bytes 00c0016d06000c004800600001c0066e00010200030201000405060007060500
+bytes 08090a000b0a090007c00c68000048c300007a4400803b44000048c300007a44
+bytes 008022440000484300007a4400803b440000484300007a4400802244000048c3
+bytes 00007a4400803bc4000048c300007a44008054c40000484300007a4400803bc4
+bytes 0000484300007a44008054c400806dc500007a440000164300806dc500007a44
+bytes 00007ac3004067c500007a4400001643004067c500007a4400007ac30c000014
+
+label area_014_model
+model geometry=@area_014_geometry material=@area_001_material
+zeros 8
+
+label area_014_geometry
+bytes 03000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 0000000000000080001081c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000001000000
+bytes 0000008000000080000000800000000000c816c600000080003c96460000803f
+bytes 0000803f0000803f0000803f00000000
+pointer @loc_0a9f0
+pointer @loc_0aa08
+zeros 8
+
+label loc_0a9f0
+bytes 00207dc500000000000096c300c08f440000000000808945
+
+label loc_0aa08
+pointer @loc_0aa10
+zeros 4
+
+label loc_0aa10
+bytes 02000000
+pointer @loc_0aa20
+pointer @loc_0ab60
+zeros 4
+
+label loc_0aa20
+bytes 0100000013000400
+pointer @loc_0aa30
+zeros 4
+
+label loc_0aa30
+bytes 00c0016d0c0013004800600001c00c6e00010200030201000405060001060500
+bytes 070809000a090800080b04000c040b000b0d0e000f0e0d0010110f00120f1100
+bytes 0dc0136800c08fc4000000000000964300c08fc400000000000096c300c08f44
+bytes 000000000000964300c08f4400000000000096c300c0dac40000000000400345
+bytes 00c0dac400000000000096c300c08fc4000000000040034500e05dc500000000
+bytes 0080894500e05dc50000000000400345006038c50000000000808945006038c5
+bytes 000000000040034500e05dc5000000000080bb4400c0dac4000000000080bb44
+bytes 00e05dc50000000000009643006038c5000000000080bb44006038c500000000
+bytes 0000964300207dc5000000000000964300207dc500000000000096c3006038c5
+bytes 00000000000096c30c00001400000000
+
+label loc_0ab60
+bytes 010000000c000100
+pointer @loc_0ab70
+zeros 4
+
+label loc_0ab70
+bytes 00c0016d06000c004800600001c0066e00010200030201000405060007060500
+bytes 08090a000b0a090007c00c680040834400000000000048430040834400000000
+bytes 000048c300c08f44000000000000484300c08f4400000000000048c300207dc5
+bytes 000000000000484300207dc500000000000048c300e076c50000000000004843
+bytes 00e076c500000000000048c300a057c5000000000080894500a057c500000000
+bytes 0060864500a03ec5000000000080894500a03ec500000000006086450c000014
+
+label area_015_model
+model geometry=@area_015_geometry material=@area_001_material
+zeros 8
+
+label area_015_geometry
+bytes 0a000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 0000000000000080006081c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 000000800000008000000080000000000000204100000080006081c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000000000000000080000000800000008000000000
+bytes 0000a04100000080006081c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000400000000000000
+bytes 000000800000008000000080000000000000f04100000080006081c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000050000000400000000000080000000800000008000000000
+bytes 00e878c60000008000d815460000803f0000803f0000803f0000803f00000000
+pointer @loc_0af70
+pointer @loc_0af88
+bytes 0000000000000000010000000000000006000000030000000000008000000080
+bytes 000000800000000000f845c60000008000e003460000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 070000000200000000000080000000800000008000000000009878c600000080
+bytes 00d815460000803f0000803f0000803f0000803f00000000
+pointer @loc_0b090
+pointer @loc_0b0a8
+bytes 0000000000000000010000000000000008000000010000000000008000000080
+bytes 0000008000000000007078c60000008000d815460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0b250
+pointer @loc_0b268
+bytes 0000000000000000010000000000000009000000010000000000008000000080
+bytes 0000008000000000007078c60000008000d815460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0b3f0
+pointer @loc_0b408
+zeros 8
+
+label loc_0af70
+bytes 00404e450000000000d09dc50020b2450000000000e076c5
+
+label loc_0af88
+pointer @loc_0af90
+zeros 4
+
+label loc_0af90
+bytes 02000000
+pointer @loc_0afa0
+pointer @loc_0b030
+zeros 4
+
+label loc_0afa0
+bytes 0100000008000000
+pointer @loc_0afb0
+zeros 4
+
+label loc_0afb0
+bytes 00c0016d040007004800600001c0046e00010200030201000405060001060500
+bytes 05c0076800609f450000000000e076c500609f450000000000d09dc50020b245
+bytes 0000000000e076c50020b2450000000000d09dc500404e450000000000108bc5
+bytes 00404e450000000000d09dc500609f450000000000108bc50c00001400000000
+
+label loc_0b030
+bytes 0100000005000100
+pointer @loc_0b040
+zeros 4
+
+label loc_0b040
+bytes 00c0016d020004004800600001c0026e000102000302010003c004680080a245
+bytes 0000000000e076c50080a2450000000000207dc50000af450000000000e076c5
+bytes 0000af450000000000207dc50c000014
+
+label loc_0b090
+bytes 000096c3000000000040b5c400004845000000000040b544
+
+label loc_0b0a8
+pointer @loc_0b0b0
+zeros 4
+
+label loc_0b0b0
+bytes 02000000
+pointer @loc_0b0c0
+pointer @loc_0b1b0
+zeros 4
+
+label loc_0b0c0
+bytes 010000000e000000
+pointer @loc_0b0d0
+zeros 4
+
+label loc_0b0d0
+bytes 00c0016d08000e004800600001c0086e00010200030201000400050006050000
+bytes 070809000a0908000b0a0c000d0c0a0009c00e68000096c3000000000000af43
+bytes 000096c300000000000016c300009643000000000000af430000964300000000
+bytes 000016c3000096c30000000000806d440080bb440000000000806d440080bb44
+bytes 000000000000af430080bb44000000000040b5440080bb44000000000040b5c4
+bytes 00400345000000000040b54400400345000000000040b5c40040034500000000
+bytes 008054c40000484500000000008054c400004845000000000040b5c40c000014
+
+label loc_0b1b0
+bytes 0100000009000100
+pointer @loc_0b1c0
+zeros 4
+
+label loc_0b1c0
+bytes 00c0016d040008004800600001c0046e00010200030201000405060007060500
+bytes 05c00868000048c300000000000048c2000048c300000000000016c300004843
+bytes 00000000000048c20000484300000000000016c30000c844000000000040b544
+bytes 0000c8440000000000c0a8440000fa44000000000040b5440000fa4400000000
+bytes 00c0a8440c0000140000000000000000
+
+label loc_0b250
+bytes 00002f450000000000d09dc5008089450000000000806d44
+
+label loc_0b268
+pointer @loc_0b270
+zeros 4
+
+label loc_0b270
+bytes 02000000
+pointer @loc_0b280
+pointer @loc_0b350
+zeros 4
+
+label loc_0b280
+bytes 010000000c000000
+pointer @loc_0b290
+zeros 4
+
+label loc_0b290
+bytes 00c0016d06000b004800600001c0066e00010200030201000405060007060500
+bytes 020809000a09080007c00b6800404e450000000000806d4400404e4500000000
+bytes 00d09dc500c073450000000000806d4400c073450000000000d09dc500002f45
+bytes 0000000000a025c500002f450000000000204bc500404e450000000000a025c5
+bytes 00404e450000000000204bc500c07345000000000000af430080894500000000
+bytes 00806d4400808945000000000000af430c000014000000000000000000000000
+
+label loc_0b350
+bytes 0100000009000100
+pointer @loc_0b360
+zeros 4
+
+label loc_0b360
+bytes 00c0016d040008004800600001c0046e00010200030201000405060007060500
+bytes 05c0086800002f450000000000e02bc500002f450000000000e044c500403545
+bytes 0000000000e02bc5004035450000000000e044c5006086450000000000805444
+bytes 00608645000000000000e1430080894500000000008054440080894500000000
+bytes 0000e1430c0000140000000000000000
+
+label loc_0b3f0
+bytes 00004845000000000040b5c400404e4500000000008054c4
+
+label loc_0b408
+pointer @loc_0b410
+zeros 4
+
+label loc_0b410
+bytes 01000000
+pointer @loc_0b420
+zeros 8
+
+label loc_0b420
+bytes 0100000005000300
+pointer @loc_0b430
+zeros 4
+
+label loc_0b430
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800004845
+bytes 00000000008054c400004845000000000040b5c400404e4500000000008054c4
+bytes 00404e45000000000040b5c40c000014
+
+label area_016_model
+model geometry=@area_016_geometry material=@area_001_material
+zeros 8
+
+label area_016_geometry
+bytes 07000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 000000000000008000b081c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 00000080000000800000008000000000000020410000008000b081c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000200000000000080000000800000008000000000
+bytes 00909cc500007ac40050f5450000803f0000803f0000803f0000803f00000000
+pointer @loc_0b6d0
+pointer @loc_0b6e8
+bytes 0000000000000000010000000000000004000000010000000000008000000080
+bytes 00000080000000000040cec50000008000e044450000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0b7c0
+pointer @loc_0b7d8
+bytes 0000000000000000010000000000000005000000010000000000008000000080
+bytes 00000080000000000050c3c50000008000e02b450000803f0000803f0000803f
+bytes 0000803f00000000000000000000000000000000000000000100000000000000
+bytes 0600000001000000000000800000008000000080000000000030d9c500000080
+bytes 00e02b450000803f0000803f0000803f0000803f000000000000000000000000
+bytes 0000000000000000
+
+label loc_0b6d0
+bytes 00002fc400007a44000016c400002f4400007a4400001644
+
+label loc_0b6e8
+pointer @loc_0b6f0
+zeros 4
+
+label loc_0b6f0
+bytes 02000000
+pointer @loc_0b700
+pointer @loc_0b760
+zeros 4
+
+label loc_0b700
+bytes 0100000005000000
+pointer @loc_0b710
+zeros 4
+
+label loc_0b710
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800002fc4
+bytes 00007a440000164400002fc400007a44000016c400002f4400007a4400001644
+bytes 00002f4400007a44000016c40c000014
+
+label loc_0b760
+bytes 0100000005000100
+pointer @loc_0b770
+zeros 4
+
+label loc_0b770
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800001644
+bytes 00007a44000048430000164400007a44000048c300002f4400007a4400004843
+bytes 00002f4400007a44000048c30c000014
+
+label loc_0b7c0
+bytes 000016c40000000000002fc4000016440000000000002f44
+
+label loc_0b7d8
+pointer @loc_0b7e0
+zeros 4
+
+label loc_0b7e0
+bytes 02000000
+pointer @loc_0b7f0
+pointer @loc_0b850
+zeros 4
+
+label loc_0b7f0
+bytes 0100000005000000
+pointer @loc_0b800
+zeros 4
+
+label loc_0b800
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000016c4
+bytes 0000000000002f44000016c40000000000002fc4000016440000000000002f44
+bytes 000016440000000000002fc40c000014
+
+label loc_0b850
+bytes 0100000005000100
+pointer @loc_0b860
+zeros 4
+
+label loc_0b860
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000048c3
+bytes 0000000000002f44000048c30000000000001644000048430000000000002f44
+bytes 0000484300000000000016440c000014
+
+label area_017_model
+model geometry=@area_017_geometry material=@area_001_material
+zeros 8
+
+label area_017_geometry
+bytes 05000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 0000000000007ac4000082c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 000000800000008000000080000000000000204100007ac4000082c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000200000000000080000000800000008000000000
+bytes 008801460000008000c891460000803f0000803f0000803f0000803f00000000
+pointer @loc_0ba60
+pointer @loc_0ba78
+bytes 0000000000000000010000000000000004000000010000000000008000000080
+bytes 00000080000000000020fd4500000080005052460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0bb50
+pointer @loc_0bb68
+zeros 8
+
+label loc_0ba60
+bytes 00002fc400007a44000016c400002f4400007a4400001644
+
+label loc_0ba78
+pointer @loc_0ba80
+zeros 4
+
+label loc_0ba80
+bytes 02000000
+pointer @loc_0ba90
+pointer @loc_0baf0
+zeros 4
+
+label loc_0ba90
+bytes 0100000005000000
+pointer @loc_0baa0
+zeros 4
+
+label loc_0baa0
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800002fc4
+bytes 00007a440000164400002fc400007a44000016c400002f4400007a4400001644
+bytes 00002f4400007a44000016c40c000014
+
+label loc_0baf0
+bytes 0100000005000100
+pointer @loc_0bb00
+zeros 4
+
+label loc_0bb00
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800001644
+bytes 00007a44000048430000164400007a44000048c300002f4400007a4400004843
+bytes 00002f4400007a44000048c30c000014
+
+label loc_0bb50
+bytes 000016c400007a4400002fc40000164400007a4400002f44
+
+label loc_0bb68
+pointer @loc_0bb70
+zeros 4
+
+label loc_0bb70
+bytes 02000000
+pointer @loc_0bb80
+pointer @loc_0bbe0
+zeros 4
+
+label loc_0bb80
+bytes 0100000005000000
+pointer @loc_0bb90
+zeros 4
+
+label loc_0bb90
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000016c4
+bytes 00007a4400002f44000016c400007a4400002fc40000164400007a4400002f44
+bytes 0000164400007a4400002fc40c000014
+
+label loc_0bbe0
+bytes 0100000005000100
+pointer @loc_0bbf0
+zeros 4
+
+label loc_0bbf0
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000048c3
+bytes 00007a4400002f44000048c300007a44000016440000484300007a4400002f44
+bytes 0000484300007a44000016440c000014
+
+label area_018_model
+model geometry=@area_018_geometry material=@area_001_material
+zeros 8
+
+label area_018_geometry
+bytes 03000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 0000000000000080005082c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000001000000
+bytes 00000080000000800000008000000000007078c600000080007807460000803f
+bytes 0000803f0000803f0000803f00000000
+pointer @loc_0bd50
+pointer @loc_0bd68
+zeros 8
+
+label loc_0bd50
+bytes 000016c40000000000002fc4000016440000000000002f44
+
+label loc_0bd68
+pointer @loc_0bd70
+zeros 4
+
+label loc_0bd70
+bytes 02000000
+pointer @loc_0bd80
+pointer @loc_0bde0
+zeros 4
+
+label loc_0bd80
+bytes 0100000005000000
+pointer @loc_0bd90
+zeros 4
+
+label loc_0bd90
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000016c4
+bytes 0000000000002f44000016c40000000000002fc4000016440000000000002f44
+bytes 000016440000000000002fc40c000014
+
+label loc_0bde0
+bytes 0100000005000100
+pointer @loc_0bdf0
+zeros 4
+
+label loc_0bdf0
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000048c3
+bytes 0000000000002f44000048c30000000000001644000048430000000000002f44
+bytes 0000484300000000000016440c000014
+
+label area_019_model
+model geometry=@area_019_geometry material=@area_001_material
+zeros 8
+
+label area_019_geometry
+bytes 05000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 000000000000008000a082c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 000000800000008000000080000000000000204100007ac400a082c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000200000000000080000000800000008000000000
+bytes 0090c4450000008000709e460000803f0000803f0000803f0000803f00000000
+pointer @loc_0bff0
+pointer @loc_0c008
+bytes 0000000000000000010000000000000004000000010000000000008000000080
+bytes 0000008000000000000096430000008000d0a7460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0c0e0
+pointer @loc_0c0f8
+zeros 8
+
+label loc_0bff0
+bytes 000016c400007a4400002fc40000164400007a4400002f44
+
+label loc_0c008
+pointer @loc_0c010
+zeros 4
+
+label loc_0c010
+bytes 02000000
+pointer @loc_0c020
+pointer @loc_0c080
+zeros 4
+
+label loc_0c020
+bytes 0100000005000000
+pointer @loc_0c030
+zeros 4
+
+label loc_0c030
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000016c4
+bytes 00007a4400002f44000016c400007a4400002fc40000164400007a4400002f44
+bytes 0000164400007a4400002fc40c000014
+
+label loc_0c080
+bytes 0100000005000100
+pointer @loc_0c090
+zeros 4
+
+label loc_0c090
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000048c3
+bytes 00007a44000016c4000048c300007a4400002fc40000484300007a44000016c4
+bytes 0000484300007a4400002fc40c000014
+
+label loc_0c0e0
+bytes 000016c40000000000002fc4000016440000000000002f44
+
+label loc_0c0f8
+pointer @loc_0c100
+zeros 4
+
+label loc_0c100
+bytes 02000000
+pointer @loc_0c110
+pointer @loc_0c170
+zeros 4
+
+label loc_0c110
+bytes 0100000005000000
+pointer @loc_0c120
+zeros 4
+
+label loc_0c120
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000016c4
+bytes 0000000000002f44000016c40000000000002fc4000016440000000000002f44
+bytes 000016440000000000002fc40c000014
+
+label loc_0c170
+bytes 0100000005000100
+pointer @loc_0c180
+zeros 4
+
+label loc_0c180
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000048c3
+bytes 00000000000016c4000048c30000000000002fc40000484300000000000016c4
+bytes 000048430000000000002fc40c000014
+
+label area_020_model
+model geometry=@area_020_geometry material=@area_001_material
+zeros 8
+
+label area_020_geometry
+bytes 05000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 000000000000008000f082c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 00000080000000800000008000000000000020410000008000f082c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000200000000000000db0fc9bf0000008000000000
+bytes 0030c5c500000080000c80460000803f0000803f0000803f0000803f00000000
+pointer @loc_0c380
+pointer @loc_0c398
+bytes 0000000000000000010000000000000004000000010000000000008000000080
+bytes 00000080000000000060eac50000008000f831460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0c470
+pointer @loc_0c488
+zeros 8
+
+label loc_0c380
+bytes 00002fc400000000000016c400002f440000000000001644
+
+label loc_0c398
+pointer @loc_0c3a0
+zeros 4
+
+label loc_0c3a0
+bytes 02000000
+pointer @loc_0c3b0
+pointer @loc_0c410
+zeros 4
+
+label loc_0c3b0
+bytes 0100000005000000
+pointer @loc_0c3c0
+zeros 4
+
+label loc_0c3c0
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800002fc4
+bytes 000000000000164400002fc400000000000016c400002f440000000000001644
+bytes 00002f4400000000000016c40c000014
+
+label loc_0c410
+bytes 0100000005000100
+pointer @loc_0c420
+zeros 4
+
+label loc_0c420
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800001644
+bytes 00000000000048430000164400000000000048c300002f440000000000004843
+bytes 00002f4400000000000048c30c000014
+
+label loc_0c470
+bytes 000016c40000000000002fc4000016440000000000002f44
+
+label loc_0c488
+pointer @loc_0c490
+zeros 4
+
+label loc_0c490
+bytes 02000000
+pointer @loc_0c4a0
+pointer @loc_0c500
+zeros 4
+
+label loc_0c4a0
+bytes 0100000005000000
+pointer @loc_0c4b0
+zeros 4
+
+label loc_0c4b0
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000016c4
+bytes 0000000000002f44000016c40000000000002fc4000016440000000000002f44
+bytes 000016440000000000002fc40c000014
+
+label loc_0c500
+bytes 0100000005000100
+pointer @loc_0c510
+zeros 4
+
+label loc_0c510
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000048c3
+bytes 00000000000016c4000048c30000000000002fc40000484300000000000016c4
+bytes 000048430000000000002fc40c000014
+
+label area_021_model
+model geometry=@area_021_geometry material=@area_001_material
+zeros 8
+
+label area_021_geometry
+bytes 05000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 0000000000000080004083c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 000000800000008000000080000000000000204100007ac4004083c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000200000000000080000000800000008000000000
+bytes 0030c5c5000000800068bf460000803f0000803f0000803f0000803f00000000
+pointer @loc_0c710
+pointer @loc_0c728
+bytes 0000000000000000010000000000000004000000010000000000008000000080
+bytes 00000080000000000000c8c50000008000789b460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0c800
+pointer @loc_0c818
+zeros 8
+
+label loc_0c710
+bytes 000016c400007a4400002fc40000164400007a4400002f44
+
+label loc_0c728
+pointer @loc_0c730
+zeros 4
+
+label loc_0c730
+bytes 02000000
+pointer @loc_0c740
+pointer @loc_0c7a0
+zeros 4
+
+label loc_0c740
+bytes 0100000005000000
+pointer @loc_0c750
+zeros 4
+
+label loc_0c750
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000016c4
+bytes 00007a4400002f44000016c400007a4400002fc40000164400007a4400002f44
+bytes 0000164400007a4400002fc40c000014
+
+label loc_0c7a0
+bytes 0100000005000100
+pointer @loc_0c7b0
+zeros 4
+
+label loc_0c7b0
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000048c3
+bytes 00007a44000016c4000048c300007a4400002fc40000484300007a44000016c4
+bytes 0000484300007a4400002fc40c000014
+
+label loc_0c800
+bytes 00002fc400000000000016c400002f440000000000001644
+
+label loc_0c818
+pointer @loc_0c820
+zeros 4
+
+label loc_0c820
+bytes 02000000
+pointer @loc_0c830
+pointer @loc_0c890
+zeros 4
+
+label loc_0c830
+bytes 0100000005000000
+pointer @loc_0c840
+zeros 4
+
+label loc_0c840
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800002fc4
+bytes 000000000000164400002fc400000000000016c400002f440000000000001644
+bytes 00002f4400000000000016c40c000014
+
+label loc_0c890
+bytes 0100000005000100
+pointer @loc_0c8a0
+zeros 4
+
+label loc_0c8a0
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800002fc4
+bytes 000000000000484300002fc400000000000048c3000016c40000000000004843
+bytes 000016c400000000000048c30c000014
+
+label area_022_model
+model geometry=@area_022_geometry material=@area_001_material
+zeros 8
+
+label area_022_geometry
+bytes 03000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 0000000000000080009083c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000001000000
+bytes 00000080000000800000008000000000009062c60000008000dc96460000803f
+bytes 0000803f0000803f0000803f00000000
+pointer @loc_0ca00
+pointer @loc_0ca18
+zeros 8
+
+label loc_0ca00
+bytes 00002fc400000000000016c400002f440000000000001644
+
+label loc_0ca18
+pointer @loc_0ca20
+zeros 4
+
+label loc_0ca20
+bytes 02000000
+pointer @loc_0ca30
+pointer @loc_0ca90
+zeros 4
+
+label loc_0ca30
+bytes 0100000005000400
+pointer @loc_0ca40
+zeros 4
+
+label loc_0ca40
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800002fc4
+bytes 000000000000164400002fc400000000000016c400002f440000000000001644
+bytes 00002f4400000000000016c40c000014
+
+label loc_0ca90
+bytes 0100000005000100
+pointer @loc_0caa0
+zeros 4
+
+label loc_0caa0
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800001644
+bytes 00000000000048430000164400000000000048c300002f440000000000004843
+bytes 00002f4400000000000048c30c000014
+
+label area_023_model
+model geometry=@area_023_geometry material=@area_001_material
+zeros 8
+
+label area_023_geometry
+bytes 07000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 000000000000008000e083c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 00000080000000800000008000000000000020410000008000e083c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000200000000000080000000800000008000000000
+bytes 0090ab450000008000e0e7450000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000400000002000000
+bytes 000000800000008000000080000000000090ab450000008000a0e1450000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000050000000100000000000080000000800000008000000000
+bytes 0000c84500000080009088450000803f0000803f0000803f0000803f00000000
+pointer @loc_0cd40
+pointer @loc_0cd58
+bytes 0000000000000000010000000000000006000000010000000000008000000080
+bytes 00000080000000000000c84500000080000075450000803f0000803f0000803f
+bytes 0000803f0000000000000000000000000000000000000000
+
+label loc_0cd40
+bytes 0000afc400000000000016c300007a440000000000206445
+
+label loc_0cd58
+pointer @loc_0cd60
+zeros 4
+
+label loc_0cd60
+bytes 02000000
+pointer @loc_0cd70
+pointer @loc_0d180
+zeros 4
+
+label loc_0cd70
+bytes 0100000040000000
+pointer @loc_0cd80
+zeros 4
+
+label loc_0cd80
+bytes 00c0016d100020004800600001c0106e00010200030201000405060007060500
+bytes 08090a000b0a09000c0d0e000f0e0d0010111200131211001415160017161500
+bytes 18191a001b1a19001c1d1e001f1e1d0011c02068000096c30000000000004842
+bytes 000096c300000000000048c20000964300000000000048420000964300000000
+bytes 000048c20000fac300000000008022440000fac300000000000048420000fa43
+bytes 00000000008022440000fa4300000000000048420000c8c3000000000000e144
+bytes 0000c8c30000000000c0da440000c843000000000000e1440000c84300000000
+bytes 00c0da440000c8c30000000000002f440000c8c300000000008022440000c843
+bytes 0000000000002f440000c84300000000008022440000c8c30000000000004844
+bytes 0000c8c30000000000803b440000c84300000000000048440000c84300000000
+bytes 00803b440000c8c300000000000061440000c8c300000000008054440000c843
+bytes 00000000000061440000c84300000000008054440000c8c30000000000007a44
+bytes 0000c8c30000000000806d440000c8430000000000007a440000c84300000000
+bytes 00806d440000c8c300000000008089440000c8c300000000004083440000c843
+bytes 00000000008089440000c84300000000004083440c00001400c0016d10001f00
+bytes 4800600001c0106e0001020003020100040506000706050008090a000b0a0900
+bytes 0c0d0e000f0e0d001011120013121100141516001716150018191a001b1a1900
+bytes 191c1d001e1d1c0011c01f680000c8c300000000000096440000c8c300000000
+bytes 00c08f440000c84300000000000096440000c8430000000000c08f440000c8c3
+bytes 000000000080a2440000c8c30000000000409c440000c843000000000080a244
+bytes 0000c8430000000000409c440000c8c3000000000000af440000c8c300000000
+bytes 00c0a8440000c843000000000000af440000c8430000000000c0a8440000c8c3
+bytes 000000000080bb440000c8c3000000000040b5440000c843000000000080bb44
+bytes 0000c843000000000040b5440000c8c3000000000000c8440000c8c300000000
+bytes 00c0c1440000c843000000000000c8440000c8430000000000c0c1440000c8c3
+bytes 000000000080d4440000c8c3000000000040ce440000c843000000000080d444
+bytes 0000c843000000000040ce440000fac300000000002064450000fac300000000
+bytes 00a03e450000c84300000000002064450000c8430000000000a03e450000fac3
+bytes 000000000040e74400007a440000000000a03e4500007a44000000000040e744
+bytes 0c00001400c0016d020004004800600001c0026e000102000302010003c00468
+bytes 0000afc400000000002064450000afc400000000002019450000fac300000000
+bytes 002064450000fac300000000002019450c000014000000000000000000000000
+
+label loc_0d180
+bytes 0100000005000100
+pointer @loc_0d190
+zeros 4
+
+label loc_0d190
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000096c3
+bytes 00000000000048c2000096c300000000000016c30000964300000000000048c2
+bytes 0000964300000000000016c30c000014
+
+label area_024_model
+model geometry=@area_024_geometry material=@area_001_material
+zeros 8
+
+label area_024_geometry
+bytes 0a000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 0000000000000080003084c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 000000800000008000000080000000000000204100000080003084c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000000000000000080000000800000008000000000
+bytes 0000a04100000080003084c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000400000000000000
+bytes 000000800000008000000080000000000000f04100000080003084c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000050000000400000000000080000000800000008000000000
+bytes 0000a5c300000080008881460000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000600000003000000
+bytes 000000800000008000000080000000000000a0c300000080004484460000803f
+bytes 0000803f0000803f0000803f00000000
+pointer @loc_0d520
+pointer @loc_0d538
+bytes 0000000000000000010000000000000007000000020000000000008000000080
+bytes 000000800000000000009bc300000080004484460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0d640
+pointer @loc_0d658
+bytes 0000000000000000010000000000000008000000020000000000008000000080
+bytes 000000800000000000009bc300000080004484460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0d770
+pointer @loc_0d788
+bytes 0000000000000000010000000000000009000000010000000000008000000080
+bytes 0000008000000000004003450000008000c099460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0d800
+pointer @loc_0d818
+zeros 8
+
+label loc_0d520
+bytes 000048c400000000004003c500009643000000000000c8c3
+
+label loc_0d538
+pointer @loc_0d540
+zeros 4
+
+label loc_0d540
+bytes 02000000
+pointer @loc_0d550
+pointer @loc_0d5e0
+zeros 4
+
+label loc_0d550
+bytes 0100000008000000
+pointer @loc_0d560
+zeros 4
+
+label loc_0d560
+bytes 00c0016d040007004800600001c0046e00010200030201000405060001060500
+bytes 05c00768000096c3000000000000c8c3000096c300000000004003c500009643
+bytes 000000000000c8c30000964300000000004003c5000048c4000000000080bbc4
+bytes 000048c400000000004003c5000096c3000000000080bbc40c00001400000000
+
+label loc_0d5e0
+bytes 0100000005000100
+pointer @loc_0d5f0
+zeros 4
+
+label loc_0d5f0
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000048c4
+bytes 000000000000c8c4000048c4000000000000fac400002fc4000000000000c8c4
+bytes 00002fc4000000000000fac40c000014
+
+label loc_0d640
+bytes 000048c400000000000096c3000048440000000000009643
+
+label loc_0d658
+pointer @loc_0d660
+zeros 4
+
+label loc_0d660
+bytes 02000000
+pointer @loc_0d670
+pointer @loc_0d6d0
+zeros 4
+
+label loc_0d670
+bytes 0100000005000000
+pointer @loc_0d680
+zeros 4
+
+label loc_0d680
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000048c4
+bytes 0000000000009643000048c400000000000096c3000048440000000000009643
+bytes 0000484400000000000096c30c000014
+
+label loc_0d6d0
+bytes 0100000009000100
+pointer @loc_0d6e0
+zeros 4
+
+label loc_0d6e0
+bytes 00c0016d040008004800600001c0046e00010200030201000405060007060500
+bytes 05c00868000048c40000000000004843000048c400000000000048c300002fc4
+bytes 000000000000484300002fc400000000000048c300002f440000000000004843
+bytes 00002f4400000000000048c30000484400000000000048430000484400000000
+bytes 000048c30c0000140000000000000000
+
+label loc_0d770
+bytes 000096c3000000000000c8c30000964300000000000096c3
+
+label loc_0d788
+pointer @loc_0d790
+zeros 4
+
+label loc_0d790
+bytes 01000000
+pointer @loc_0d7a0
+zeros 8
+
+label loc_0d7a0
+bytes 0100000005000200
+pointer @loc_0d7b0
+zeros 4
+
+label loc_0d7b0
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000096c3
+bytes 00000000000096c3000096c3000000000000c8c30000964300000000000096c3
+bytes 00009643000000000000c8c30c000014
+
+label loc_0d800
+bytes 008022c500000000008009c4000096430000000000408344
+
+label loc_0d818
+pointer @loc_0d820
+zeros 4
+
+label loc_0d820
+bytes 02000000
+pointer @loc_0d830
+pointer @loc_0d900
+zeros 4
+
+label loc_0d830
+bytes 010000000c000000
+pointer @loc_0d840
+zeros 4
+
+label loc_0d840
+bytes 00c0016d06000b004800600001c0066e00010200030201000405000006000500
+bytes 070809000a09080007c00b68000096c30000000000800944000096c300000000
+bytes 008009c40000964300000000008009440000964300000000008009c4008022c5
+bytes 0000000000800944008022c500000000000048c2000096c300000000000048c2
+bytes 004003c50000000000408344004003c500000000008009440080bbc400000000
+bytes 004083440080bbc400000000008009440c000014000000000000000000000000
+
+label loc_0d900
+bytes 010000000c000100
+pointer @loc_0d910
+zeros 4
+
+label loc_0d910
+bytes 00c0016d06000c004800600001c0066e00010200030201000405060007060500
+bytes 08090a000b0a090007c00c68000048c3000000000000e1c3000048c300000000
+bytes 008009c400004843000000000000e1c30000484300000000008009c40000fac4
+bytes 00000000004083440000fac40000000000806d440000c8c40000000000408344
+bytes 0000c8c40000000000806d44008022c5000000000000e143008022c500000000
+bytes 0000484200401cc5000000000000e14300401cc500000000000048420c000014
+
+label area_025_model
+model geometry=@area_025_geometry material=@area_001_material
+zeros 8
+
+label area_025_geometry
+bytes 03000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 0000000000007ac4008084c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000001000000
+bytes 0000008000000080000000800000000000d036460000008000e89e460000803f
+bytes 0000803f0000803f0000803f00000000
+pointer @loc_0dae0
+pointer @loc_0daf8
+zeros 8
+
+label loc_0dae0
+bytes 000016c400007a4400002fc40000164400007a4400002f44
+
+label loc_0daf8
+pointer @loc_0db00
+zeros 4
+
+label loc_0db00
+bytes 02000000
+pointer @loc_0db10
+pointer @loc_0db70
+zeros 4
+
+label loc_0db10
+bytes 0100000005000000
+pointer @loc_0db20
+zeros 4
+
+label loc_0db20
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000016c4
+bytes 00007a4400002f44000016c400007a4400002fc40000164400007a4400002f44
+bytes 0000164400007a4400002fc40c000014
+
+label loc_0db70
+bytes 0100000005000100
+pointer @loc_0db80
+zeros 4
+
+label loc_0db80
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000048c3
+bytes 00007a44000016c4000048c300007a4400002fc40000484300007a44000016c4
+bytes 0000484300007a4400002fc40c000014
+
+label area_026_model
+model geometry=@area_026_geometry material=@area_001_material
+zeros 8
+
+label area_026_geometry
+bytes 05000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 000000000000008000d084c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 00000080000000800000008000000000000020410000008000d084c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000200000000000080000000800000008000000000
+bytes 005859c60000008000f0d2450000803f0000803f0000803f0000803f00000000
+pointer @loc_0dd80
+pointer @loc_0dd98
+bytes 0000000000000000010000000000000004000000010000000000008000000080
+bytes 000000800000000000505cc60000008000b83a460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0de70
+pointer @loc_0de88
+zeros 8
+
+label loc_0dd80
+bytes 00002fc400000000000016c400002f440000000000001644
+
+label loc_0dd98
+pointer @loc_0dda0
+zeros 4
+
+label loc_0dda0
+bytes 02000000
+pointer @loc_0ddb0
+pointer @loc_0de10
+zeros 4
+
+label loc_0ddb0
+bytes 0100000005000000
+pointer @loc_0ddc0
+zeros 4
+
+label loc_0ddc0
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800002fc4
+bytes 000000000000164400002fc400000000000016c400002f440000000000001644
+bytes 00002f4400000000000016c40c000014
+
+label loc_0de10
+bytes 0100000005000100
+pointer @loc_0de20
+zeros 4
+
+label loc_0de20
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800001644
+bytes 00000000000048430000164400000000000048c300002f440000000000004843
+bytes 00002f4400000000000048c30c000014
+
+label loc_0de70
+bytes 000016c40000000000002fc4000016440000000000002f44
+
+label loc_0de88
+pointer @loc_0de90
+zeros 4
+
+label loc_0de90
+bytes 02000000
+pointer @loc_0dea0
+pointer @loc_0df00
+zeros 4
+
+label loc_0dea0
+bytes 0100000005000000
+pointer @loc_0deb0
+zeros 4
+
+label loc_0deb0
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000016c4
+bytes 0000000000002f44000016c40000000000002fc4000016440000000000002f44
+bytes 000016440000000000002fc40c000014
+
+label loc_0df00
+bytes 0100000005000100
+pointer @loc_0df10
+zeros 4
+
+label loc_0df10
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000048c3
+bytes 00000000000016c4000048c30000000000002fc40000484300000000000016c4
+bytes 000048430000000000002fc40c000014
+
+label area_027_model
+model geometry=@area_027_geometry material=@area_001_material
+zeros 8
+
+label area_027_geometry
+bytes 05000000000000000000000000000000010000000000000000000000ffffffff
+bytes 000000800000008000000080000000000000000000000080000000000000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000010000000000000000000080000000800000008000000000
+bytes 0000000000000080002085c50000803f0000803f0000803f0000803f00000000
+bytes 0000000000000000000000000000000001000000000000000200000000000000
+bytes 000000800000008000000080000000000000204100007ac4002085c50000803f
+bytes 0000803f0000803f0000803f0000000000000000000000000000000000000000
+bytes 0100000000000000030000000200000000000080000000800000008000000000
+bytes 00782ac6000000800060b3460000803f0000803f0000803f0000803f00000000
+pointer @loc_0e110
+pointer @loc_0e128
+bytes 0000000000000000010000000000000004000000010000000000008000000080
+bytes 0000008000000000009049c60000008000e0bf460000803f0000803f0000803f
+bytes 0000803f00000000
+pointer @loc_0e200
+pointer @loc_0e218
+zeros 8
+
+label loc_0e110
+bytes 00002fc400007a44000016c400002f4400007a4400001644
+
+label loc_0e128
+pointer @loc_0e130
+zeros 4
+
+label loc_0e130
+bytes 02000000
+pointer @loc_0e140
+pointer @loc_0e1a0
+zeros 4
+
+label loc_0e140
+bytes 0100000005000000
+pointer @loc_0e150
+zeros 4
+
+label loc_0e150
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800002fc4
+bytes 00007a440000164400002fc400007a44000016c400002f4400007a4400001644
+bytes 00002f4400007a44000016c40c000014
+
+label loc_0e1a0
+bytes 0100000005000100
+pointer @loc_0e1b0
+zeros 4
+
+label loc_0e1b0
+bytes 00c0016d020004004800600001c0026e000102000302010003c0046800001644
+bytes 00007a44000048430000164400007a44000048c300002f4400007a4400004843
+bytes 00002f4400007a44000048c30c000014
+
+label loc_0e200
+bytes 000016c40000000000002fc4000016440000000000002f44
+
+label loc_0e218
+pointer @loc_0e220
+zeros 4
+
+label loc_0e220
+bytes 02000000
+pointer @loc_0e230
+pointer @loc_0e290
+zeros 4
+
+label loc_0e230
+bytes 0100000005000400
+pointer @loc_0e240
+zeros 4
+
+label loc_0e240
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000016c4
+bytes 0000000000002f44000016c40000000000002fc4000016440000000000002f44
+bytes 000016440000000000002fc40c000014
+
+label loc_0e290
+bytes 0100000005000100
+pointer @loc_0e2a0
+zeros 4
+
+label loc_0e2a0
+bytes 00c0016d020004004800600001c0026e000102000302010003c00468000048c3
+bytes 00000000000016c4000048c30000000000002fc40000484300000000000016c4
+bytes 000048430000000000002fc40c000014
+
+label area_001_material
+bytes 050000000000000000000202404045800000803f0100000000000202aface980
+bytes 0000803f020000000000020256c0b5800000803f0300000000000202a5c05680
+bytes 0000803f040000000000020249123b800000803f000000000000000000000000
+
+label area_001_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_002_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_003_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_004_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_005_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_006_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_007_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_008_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_009_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_010_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_011_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_012_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_013_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_014_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_015_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_016_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_017_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_018_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_019_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_020_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_021_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_022_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_023_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_024_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_025_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_026_position
+vec3 0.0 -0.0 0.0
+zeros 4
+
+label area_027_position
+vec3 0.0 -0.0 0.0
+
+label data_end
+end_data

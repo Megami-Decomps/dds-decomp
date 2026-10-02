@@ -23,6 +23,8 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+import reloc
+
 
 HEADER_SIZE = 0x40
 TYPE_SIZE = 0x0C
@@ -345,92 +347,17 @@ def _s32(data: bytes, offset: int, context: str) -> int:
 
 def _decode_relocations(data: bytes) -> tuple[int, ...]:
     """Decode the field runtime's packed u32-word delta stream."""
-
-    cursor = 0
-    index = 0
-    locations: list[int] = []
-    while index < len(data):
-        code = data[index]
-        index += 1
-        if not code & 1:
-            delta = code >> 1
-        elif not code & 2:
-            if index >= len(data):
-                raise FldError("truncated two-byte relocation")
-            delta = (code | data[index] << 8) >> 2
-            index += 1
-        elif not code & 4:
-            if index + 1 >= len(data):
-                raise FldError("truncated three-byte relocation")
-            delta = (code | data[index] << 8 | data[index + 1] << 16) >> 3
-            index += 2
-        else:
-            count = (code >> 3) + 2
-            for _ in range(count):
-                cursor += 1
-                locations.append(cursor * 4)
-            continue
-        cursor += delta
-        locations.append(cursor * 4)
-    if locations != sorted(set(locations)):
-        raise FldError("relocation locations are not strictly ordered")
-    return tuple(locations)
+    try:
+        return reloc.decode(data)
+    except reloc.RelocationError as exc:
+        raise FldError(str(exc)) from exc
 
 
 def _encode_relocations(locations: list[int]) -> bytes:
-    if locations != sorted(set(locations)):
-        raise FldError("relocation locations are not strictly ordered")
-    if any(location & 3 for location in locations):
-        raise FldError("relocation location is not u32-aligned")
-
-    words = [location // 4 for location in locations]
-    output = bytearray()
-    previous = 0
-    index = 0
-
-    def emit_delta(delta: int) -> None:
-        if delta < 0:
-            raise FldError("negative relocation delta")
-        if delta <= 0x7F:
-            output.append(delta << 1)
-        elif delta < 0x4000:
-            value = (delta << 2) | 1
-            output.extend((value & 0xFF, value >> 8))
-        elif delta < 0x200000:
-            value = (delta << 3) | 3
-            output.extend((value & 0xFF, (value >> 8) & 0xFF, value >> 16))
-        else:
-            raise FldError("relocation delta is too large")
-
-    def emit_run(count: int) -> None:
-        nonlocal index, previous
-        while count:
-            chunk = min(count, 33)
-            output.append(((chunk - 2) << 3) | 7)
-            previous += chunk
-            index += chunk
-            count -= chunk
-
-    while index < len(words):
-        if words[index] - previous == 1:
-            end = index + 1
-            while end < len(words) and words[end] == words[end - 1] + 1:
-                end += 1
-            if end - index >= 2:
-                emit_run(end - index)
-                continue
-
-        emit_delta(words[index] - previous)
-        previous = words[index]
-        index += 1
-
-        end = index
-        while end < len(words) and words[end] == previous + end - index + 1:
-            end += 1
-        if end - index >= 2:
-            emit_run(end - index)
-
-    return bytes(output)
+    try:
+        return reloc.encode(locations)
+    except reloc.RelocationError as exc:
+        raise FldError(str(exc)) from exc
 
 
 def _read_header(data: bytes) -> tuple[list[int], int, tuple[int, ...]]:
