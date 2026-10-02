@@ -115,6 +115,57 @@ end_data
         rendered = fld.render_source(data)
         self.assertEqual(fld.encode(fld.parse_source(rendered)), data)
 
+    def test_special_point_round_trip(self) -> None:
+        source = """\
+fld2 1
+header version=23 magic=FLD2 type_count=1 type_table=@resource_types word_1c=0 word_20=0 word_24=0 word_28=0 word_2c=0 word_30=0 word_34=0 word_38=0 word_3c=0
+label resource_types
+type id=10 count=1 resources=@resources
+label resources
+resource serial=0 flags=0 type=10 name=null reserved=0 transform=null area=null link=null sblock=null data=@placement_data
+label placement_data
+placement kind=8 event=-1 visible=0 payload=@special
+label special
+special_point kind=heal id=3
+label data_end
+end_data
+"""
+        data = fld.encode(fld.parse_source(source))
+        fld.validate(data)
+        rendered = fld.render_source(data)
+        self.assertIn("special_point kind=heal id=3", rendered)
+        self.assertEqual(fld.encode(fld.parse_source(rendered)), data)
+
+    def test_empty_resource_type_round_trip(self) -> None:
+        source = """\
+fld2 1
+header version=23 magic=FLD2 type_count=1 type_table=@resource_types word_1c=0 word_20=0 word_24=0 word_28=0 word_2c=0 word_30=0 word_34=0 word_38=0 word_3c=0
+label resource_types
+type id=99 count=0 resources=@data_end
+label data_end
+end_data
+"""
+        data = fld.encode(fld.parse_source(source))
+        rendered = fld.render_source(data)
+        self.assertEqual(fld.encode(fld.parse_source(rendered)), data)
+
+    def test_compact_camera_round_trip(self) -> None:
+        source = """\
+fld2 1
+header version=23 magic=FLD2 type_count=1 type_table=@resource_types word_1c=0 word_20=0 word_24=0 word_28=0 word_2c=0 word_30=0 word_34=0 word_38=0 word_3c=0
+label resource_types
+type id=4 count=1 resources=@resources
+label resources
+resource serial=0 flags=0 type=4 name=null reserved=0 transform=null area=null link=null sblock=null data=@camera_data
+label camera_data
+camera fovy=0.6024157404899597
+label data_end
+end_data
+"""
+        data = fld.encode(fld.parse_source(source))
+        rendered = fld.render_source(data)
+        self.assertEqual(fld.encode(fld.parse_source(rendered)), data)
+
     def test_tracked_sources_are_canonical_and_exact(self) -> None:
         expected_links = {
             "dds1": fld.LinkSummary(2, 3, 1),
