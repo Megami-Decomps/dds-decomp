@@ -18,10 +18,6 @@ extern u64 sdfAllocateBlockBySizeThreshold(u64);
 
 extern void *func_0035A828(u64);
 
-extern u64 func_00325BB0(u64, u32);
-
-extern u64 func_00325AB8(u64, u32);
-
 extern u64 func_00325790(u64, u32);
 
 extern s32 CreateSema(void *);
@@ -59,6 +55,15 @@ typedef struct SdfResourceRecord {
     u32 *items;
     SdfResourceInfo *info;
 } SdfResourceRecord;
+
+typedef struct SdfResourceVectorRecord1C {
+    u8 data[0x1C];
+} SdfResourceVectorRecord1C;
+
+typedef struct SdfResourceVectorRecord30 {
+    u8 data[0x2C];
+    SdfVec4 *vector;
+} SdfResourceVectorRecord30;
 
 extern u32 *func_00324D50(void);
 extern void *memcpy(void *, const void *, u32);
@@ -146,9 +151,45 @@ u32 *func_00325688(const SdfResourceRecord *source, s32 count) {
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325790);
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325AB8);
+u32 *func_00325AB8(const SdfResourceVectorRecord1C *source, s32 count) {
+    u32 *owner = func_00324D50();
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325BB0);
+    while (count != 0) {
+        SdfResourceVectorRecord1C *copy =
+            (SdfResourceVectorRecord1C *)func_00324F50((s32)owner, sizeof(*copy) + sizeof(SdfVec4));
+        SdfVec4 *vector;
+
+        memset(copy, 0, sizeof(*copy) + sizeof(*vector));
+        *copy = *source;
+        vector = (SdfVec4 *)(copy + 1);
+        *(SdfVec4 **)((u8 *)copy + 0x18) = vector;
+        *vector = **(SdfVec4 **)((u8 *)source + 0x18);
+        func_00324DF8(owner, (u32)copy);
+        source++;
+        count--;
+    }
+    return owner;
+}
+
+u32 *func_00325BB0(const SdfResourceVectorRecord30 *source, s32 count) {
+    u32 *owner = func_00324D50();
+
+    while (count != 0) {
+        SdfResourceVectorRecord30 *copy =
+            (SdfResourceVectorRecord30 *)func_00324F50((s32)owner, sizeof(*copy) + sizeof(SdfVec4));
+        SdfVec4 *vector;
+
+        memset(copy, 0, sizeof(*copy) + sizeof(*vector));
+        *copy = *source;
+        vector = (SdfVec4 *)(copy + 1);
+        copy->vector = vector;
+        *vector = *source->vector;
+        func_00324DF8(owner, (u32)copy);
+        source++;
+        count--;
+    }
+    return owner;
+}
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325CC8);
 
@@ -179,7 +220,37 @@ void func_00326158(f32 *vector, f32 angle) {
     vector[1] = rotated[1];
 }
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_003262A8);
+/* Rotate a vector about a normalized axis using an axis-angle matrix. */
+void func_003262A8(f32 *vector, f32 *axis, f32 angle) {
+    SdfVec4 normalized;
+    SdfVec4 source;
+    SdfVec4 temporary;
+    f32 matrix[9];
+
+    memset(&source, 0, sizeof(source));
+    source.x = axis[0];
+    source.y = axis[1];
+    source.z = axis[2];
+    normalized = source;
+    memset(&temporary, 0, sizeof(temporary));
+    temporary.x = vector[0];
+    temporary.y = vector[1];
+    temporary.z = vector[2];
+    source = temporary;
+    sdfVec3Normalize(&normalized.x);
+    matrix[0] = normalized.x * normalized.x * (1.0f - cos(angle)) + cos(angle);
+    matrix[1] = normalized.x * normalized.y * (1.0f - cos(angle)) - normalized.z * sin(angle);
+    matrix[2] = normalized.x * normalized.z * (1.0f - cos(angle)) + normalized.y * sin(angle);
+    matrix[3] = normalized.y * normalized.x * (1.0f - cos(angle)) + normalized.z * sin(angle);
+    matrix[4] = normalized.y * normalized.y * (1.0f - cos(angle)) + cos(angle);
+    matrix[5] = normalized.y * normalized.z * (1.0f - cos(angle)) - normalized.x * sin(angle);
+    matrix[6] = normalized.z * normalized.x * (1.0f - cos(angle)) - normalized.y * sin(angle);
+    matrix[7] = normalized.z * normalized.y * (1.0f - cos(angle)) + normalized.x * sin(angle);
+    matrix[8] = normalized.z * normalized.z * (1.0f - cos(angle)) + cos(angle);
+    vector[0] = source.x * matrix[0] + source.y * matrix[3] + source.z * matrix[6];
+    vector[1] = source.x * matrix[1] + source.y * matrix[4] + source.z * matrix[7];
+    vector[2] = source.x * matrix[2] + source.y * matrix[5] + source.z * matrix[8];
+}
 
 void sdfVectorAdd(float *vector, float *delta) {
     *vector = *vector + *delta;
@@ -442,4 +513,3 @@ INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389BC);
 INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389C0);
 
 INCLUDE_SDATA(const s32, "game/code_00324DF8", sdfTickCallback);
-
