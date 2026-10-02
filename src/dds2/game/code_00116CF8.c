@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 
 extern u64 dds3GetWorldSecondaryObject(void);
 
@@ -75,4 +76,83 @@ ActionObj *evtSpawnActionObj10(s32 a, void *work, s32 c) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_00116CF8", func_00116FA0);
+typedef struct Dds3PathKeyframes {
+    u32 count;
+    f32 *data;
+    u32 *frames;
+} Dds3PathKeyframes;
+
+typedef struct Dds3PathCurveEntry {
+    u32 kind;
+    Dds3PathKeyframes *keys;
+} Dds3PathCurveEntry;
+
+typedef struct Dds3PathCurveTable {
+    u32 count;
+    Dds3PathCurveEntry entries[1];
+} Dds3PathCurveTable;
+
+typedef struct Dds3PathCurveWork {
+    s32 state;
+    u32 flags;
+    f32 duration;
+    f32 time;
+    EffPrim *unk10;
+    Dds3PathKeyframes *unk14;
+    Dds3PathKeyframes *unk18;
+    Dds3PathKeyframes *unk1C;
+    Dds3PathKeyframes *unk20;
+} Dds3PathCurveWork;
+
+extern void *sdfAllocSizeClassBlock(s32 bytes);
+extern void *memset(void *destination, s32 value, u32 bytes);
+extern EffPrim *func_0019A900(f32 *data, u32 count, s32 mode);
+
+Dds3PathCurveWork *func_00116FA0(ActionObj *object) {
+    Dds3PathCurveTable *table = object->unk18;
+    Dds3PathCurveEntry *entry;
+    Dds3PathKeyframes *keys;
+    Dds3PathCurveWork *work;
+    u32 i;
+
+    if (table->count == 0) {
+        return NULL;
+    }
+    entry = table->entries;
+    work = sdfAllocSizeClassBlock(sizeof(*work));
+    i = 0;
+    memset(work, 0, sizeof(*work));
+    work->state = 0;
+    work->time = 0.0f;
+    work->duration = 0.0f;
+    for (; i < table->count; i++, entry++) {
+        u32 lastFrame;
+
+        keys = entry->keys;
+        switch (entry->kind) {
+        case 4:
+            work->unk1C = keys;
+            work->flags |= 4;
+            break;
+        case 0:
+            work->flags |= 1;
+            work->unk14 = keys;
+            work->unk10 = func_0019A900(keys->data, keys->count, 1);
+            break;
+        case 2:
+            work->unk18 = keys;
+            work->flags |= 2;
+            break;
+        case 5:
+            work->unk20 = keys;
+            work->flags |= 0x10;
+            break;
+        }
+        lastFrame = keys->frames[keys->count - 1];
+        if (work->duration < (f32)lastFrame) {
+            work->duration = (f32)lastFrame;
+        }
+    }
+    return work;
+}
+
