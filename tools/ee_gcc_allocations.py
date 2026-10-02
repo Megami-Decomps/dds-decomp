@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Explain register-allocation records in an EE GCC 2.96 pass-20 dump."""
+"""Explain register-allocation records in EE GCC 2.96 pass-19/20 dumps."""
 
 from __future__ import annotations
 
@@ -35,6 +35,14 @@ DISPOSITION = re.compile(r"(\d+) in (-?\d+)")
 HARD_USED = re.compile(r"(?m)^;; Hard regs used:\s*(.*)$")
 SPILL = re.compile(r"(?m)^Spilling for insn (\d+)\.$")
 RELOAD = re.compile(r"(?m)^Reloads for insn # (\d+)\s*$")
+LREG_SUMMARY = re.compile(
+    r"(?m)^Register (\d+) used (\d+) times across (\d+) insns"
+    r"(?: in block (\d+))?; set (\d+) times?;(.*?)\.$"
+)
+LREG_LOCAL = re.compile(r"(?m)^;; Register (\d+) in (-?\d+)\.$")
+CALLS_CROSSED = re.compile(r"\bcrosses (\d+) calls?\b")
+SIZE_BYTES = re.compile(r"\b(\d+) bytes\b")
+PREFERRED_CLASS = re.compile(r"(?:^|; )(?:pref )?([A-Z][A-Z0-9_]+)(?:, else ([A-Z][A-Z0-9_]+)| or none)(?:;|$)")
 
 
 def register_name(regno: int | None) -> str | None:
@@ -52,6 +60,56 @@ def split_functions(text: str) -> list[tuple[str, str]]:
                               if index + 1 < len(matches) else len(text)])
         for index, match in enumerate(matches)
     ]
+
+
+def allocation_priority(refs: int, live_length: int,
+                        hard_register_width: int) -> int | None:
+    """Return allocno_compare's numeric priority."""
+    if refs <= 0 or live_length <= 0 or hard_register_width <= 0:
+        return None
+    floor_log2 = refs.bit_length() - 1
+    return floor_log2 * refs * 10_000 * hard_register_width // live_length
+
+
+def parse_lreg_function(name: str, text: str) -> dict[str, Any]:
+    summaries: dict[int, dict[str, Any]] = {}
+    for match in LREG_SUMMARY.finditer(text):
+        pseudo = int(match.group(1))
+        tail = match.group(6).strip()
+        calls = CALLS_CROSSED.search(tail)
+        size = SIZE_BYTES.search(tail)
+        classes = PREFERRED_CLASS.search(tail)
+        refs = int(match.group(2))
+        live_length = int(match.group(3))
+        size_bytes = int(size.group(1)) if size else None
+        summaries[pseudo] = {
+            "references": refs,
+            "live_length": live_length,
+            "single_block": int(match.group(4)) if match.group(4) else None,
+            "set_count": int(match.group(5)),
+            "calls_crossed": int(calls.group(1)) if calls else 0,
+            "size_bytes": size_bytes,
+            "preferred_class": classes.group(1) if classes else None,
+            "alternate_class": classes.group(2) if classes else None,
+            "user_variable": "user var" in tail.split("; "),
+            "pointer": "pointer" in tail.split("; "),
+            "hard_register_width": None,
+            "allocation_priority": None,
+        }
+    local = {
+        int(pseudo): int(hard_reg)
+        for pseudo, hard_reg in LREG_LOCAL.findall(text)
+    }
+    return {"function": name, "summaries": summaries, "local_dispositions": local}
+
+
+def parse_lreg_dump(text: str, function: str | None = None) -> list[dict[str, Any]]:
+    sections = split_functions(text)
+    if function is not None:
+        sections = [section for section in sections if section[0] == function]
+        if not sections:
+            raise ValueError(f"function not found in dump: {function}")
+    return [parse_lreg_function(name, section) for name, section in sections]
 
 
 def allocation_entries(text: str) -> list[tuple[int, int]]:
@@ -127,6 +185,7 @@ def parse_function(name: str, text: str) -> dict[str, Any]:
             "pseudo_conflicts": [value for value in conflicts if value >= FIRST_PSEUDO_REGISTER],
             "hard_preferences": [value for value in preferences if value < FIRST_PSEUDO_REGISTER],
             "pseudo_preferences": [value for value in preferences if value >= FIRST_PSEUDO_REGISTER],
+            "priority_inputs": None,
         })
 
     return {
@@ -152,6 +211,40 @@ def parse_dump(text: str, function: str | None = None) -> list[dict[str, Any]]:
     return [parse_function(name, section) for name, section in sections]
 
 
+def enrich_with_lreg(functions: list[dict[str, Any]], lreg_text: str,
+                     function: str | None = None) -> list[dict[str, Any]]:
+    lreg_by_name = {
+        record["function"]: record
+        for record in parse_lreg_dump(lreg_text, function)
+    }
+    enriched = []
+    for report in functions:
+        lreg = lreg_by_name.get(report["function"])
+        if lreg:
+            final_attempt = (
+                report["allocation_attempts"][-1]
+                if report["allocation_attempts"] else None
+            )
+            widths = final_attempt["hard_register_widths"] if final_attempt else {}
+            for row in report["pseudos"]:
+                pseudo = row["pseudo"]
+                summary = lreg["summaries"].get(pseudo)
+                if summary:
+                    summary = dict(summary)
+                    if row["global_order"] is not None:
+                        width = widths.get(str(pseudo), 1)
+                        summary["hard_register_width"] = width
+                        summary["allocation_priority"] = allocation_priority(
+                            summary["references"], summary["live_length"], width
+                        )
+                row["priority_inputs"] = summary
+                if (row["allocation_kind"] == "other_disposition"
+                        and pseudo in lreg["local_dispositions"]):
+                    row["allocation_kind"] = "local_assignment"
+        enriched.append(report)
+    return enriched
+
+
 def resolve_dump(probe: Path, function: str | None) -> Path:
     if probe.is_file():
         return probe
@@ -167,6 +260,40 @@ def resolve_dump(probe: Path, function: str | None) -> Path:
     raise FileNotFoundError(f"no pass-20 dump found under: {probe}")
 
 
+def resolve_lreg(probe: Path, function: str | None) -> Path | None:
+    if probe.is_file():
+        names = ["19.lreg"]
+        if probe.name == "rtl.20.greg":
+            names.insert(0, "rtl.19.lreg")
+        for name in names:
+            sibling = probe.with_name(name)
+            if sibling.is_file():
+                return sibling
+        return None
+    if function:
+        extracted = probe / "functions" / function / "19.lreg"
+        if extracted.is_file():
+            return extracted
+    whole = probe / "rtl.19.lreg"
+    return whole if whole.is_file() else None
+
+
+def parse_probe(probe: Path, function: str | None = None) -> list[dict[str, Any]]:
+    greg = resolve_dump(probe, function)
+    # Extracted files contain one function. Its printed name may intentionally
+    # differ after a controlled rename, while its directory keeps the alias.
+    parsed_function = None if not probe.is_file() and greg.name == "20.greg" else function
+    functions = parse_dump(greg.read_text(errors="replace"), parsed_function)
+    lreg = resolve_lreg(probe, function)
+    if lreg:
+        try:
+            enrich_with_lreg(functions, lreg.read_text(errors="replace"), parsed_function)
+        except ValueError:
+            # Non-verbose pass-19 captures do not contain the summary records.
+            pass
+    return functions
+
+
 def format_registers(regnos: list[int]) -> str:
     return ",".join(register_name(regno) or str(regno) for regno in regnos) or "-"
 
@@ -178,12 +305,27 @@ def render(report: dict[str, Any]) -> str:
         lines.append(f"allocator attempts  {len(attempts)} ({report['retry_count']} retries)")
     order = report["global_allocation_order"]
     lines.append("global order  " + (" ".join(f"r{pseudo}" for pseudo in order) or "(none)"))
-    lines.append("pseudo\tkind/order\tselected\thard conflicts\thard preferences")
+    lines.append(
+        "pseudo\tkind/order\tselected\trefs/live/width/priority\t"
+        "hard conflicts\thard preferences"
+    )
     for row in report["pseudos"]:
         selected = row["selected_name"] or row["selected"] or "-"
-        kind = "other" if row["global_order"] is None else f"global/{row['global_order']}"
+        if row["global_order"] is not None:
+            kind = f"global/{row['global_order']}"
+        elif row["allocation_kind"] == "local_assignment":
+            kind = "local"
+        else:
+            kind = "other"
+        inputs = row["priority_inputs"]
+        priority = (
+            f"{inputs['references']}/{inputs['live_length']}/"
+            f"{inputs['hard_register_width'] or '-'}/"
+            f"{inputs['allocation_priority'] if inputs['allocation_priority'] is not None else '-'}"
+            if inputs else "-"
+        )
         lines.append(
-            f"r{row['pseudo']}\t{kind}\t{selected}\t"
+            f"r{row['pseudo']}\t{kind}\t{selected}\t{priority}\t"
             f"{format_registers(row['hard_conflicts'])}\t"
             f"{format_registers(row['hard_preferences'])}"
         )
@@ -206,15 +348,15 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     try:
         dump = resolve_dump(args.probe, args.function)
-        functions = parse_dump(dump.read_text(errors="replace"), args.function)
+        functions = parse_probe(args.probe, args.function)
     except (FileNotFoundError, ValueError) as error:
         print(error, file=sys.stderr)
         return 2
     report = {
-        "schema": 1,
+        "schema": 2,
         "format": "ee-gcc-2.96-rtl",
         "stage": "20.greg",
-        "dump": str(dump),
+        "dump": dump.name,
         "functions": functions,
     }
     if args.json:

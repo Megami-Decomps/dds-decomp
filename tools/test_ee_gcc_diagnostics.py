@@ -283,6 +283,54 @@ Reloads for insn # 40
         self.assertEqual([84, 86], attempt["allocation_order"])
         self.assertEqual({"84": 2}, attempt["hard_register_widths"])
 
+    def test_lreg_inputs_explain_priority_and_local_assignments(self):
+        lreg = """;; Function sample
+Register 84 used 3 times across 12 insns; set 2 times; user var; crosses 2 calls; 4 bytes; GR_REGS or none.
+Register 85 used 4 times across 10 insns; set 1 time; 8 bytes; pref GR_REGS, else AP_AND_GR_REGS; pointer.
+Register 91 used 2 times across 2 insns in block 1; set 1 time; 4 bytes; GR_REGS or none.
+;; Register 91 in 2.
+"""
+        report = allocations.parse_dump(self.SAMPLE, "sample")
+        allocations.enrich_with_lreg(report, lreg, "sample")
+        rows = {row["pseudo"]: row for row in report[0]["pseudos"]}
+        self.assertEqual(2500, rows[84]["priority_inputs"]["allocation_priority"])
+        self.assertEqual(2, rows[84]["priority_inputs"]["calls_crossed"])
+        self.assertEqual(8000, rows[85]["priority_inputs"]["allocation_priority"])
+        self.assertEqual(8, rows[85]["priority_inputs"]["size_bytes"])
+        self.assertEqual(1, rows[85]["priority_inputs"]["hard_register_width"])
+        self.assertTrue(rows[85]["priority_inputs"]["pointer"])
+        self.assertEqual("AP_AND_GR_REGS", rows[85]["priority_inputs"]["alternate_class"])
+        self.assertEqual("local_assignment", rows[91]["allocation_kind"])
+        self.assertIsNone(rows[91]["priority_inputs"]["allocation_priority"])
+
+    def test_priority_uses_integer_floor_log2_and_truncates(self):
+        self.assertEqual(6000, allocations.allocation_priority(3, 10, 2))
+        self.assertIsNone(allocations.allocation_priority(3, 0, 1))
+
+    def test_probe_directory_pairs_pass19_and_pass20(self):
+        lreg = """;; Function renamed_sample
+Register 84 used 3 times across 12 insns; set 2 times; 4 bytes; GR_REGS or none.
+Register 91 used 2 times across 2 insns in block 1; set 1 time; 4 bytes; GR_REGS or none.
+;; Register 91 in 2.
+"""
+        greg = self.SAMPLE.replace(
+            ";; Function sample\n;; 2 regs to allocate: 84 85",
+            ";; Function renamed_sample\n;; 2 regs to allocate: 84 (2) 85",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            probe_dir = Path(directory)
+            extracted = probe_dir / "functions" / "sample"
+            extracted.mkdir(parents=True)
+            (extracted / "19.lreg").write_text(lreg)
+            (extracted / "20.greg").write_text(greg)
+            report = allocations.parse_probe(probe_dir, "sample")[0]
+
+        rows = {row["pseudo"]: row for row in report["pseudos"]}
+        self.assertEqual("renamed_sample", report["function"])
+        self.assertEqual(2, rows[84]["priority_inputs"]["hard_register_width"])
+        self.assertEqual(5000, rows[84]["priority_inputs"]["allocation_priority"])
+        self.assertEqual("local_assignment", rows[91]["allocation_kind"])
+
 
 class ScheduleTests(unittest.TestCase):
     SAMPLE = """;; Function wanted

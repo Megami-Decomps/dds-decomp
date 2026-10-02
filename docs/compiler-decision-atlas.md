@@ -1,0 +1,76 @@
+# EE GCC decision atlas
+
+This atlas maps a matching symptom to the earliest compiler decision that can
+cause it. It is a routing guide, not a list of syntax tricks. First compare two
+truthful source forms with the [compiler diagnostics](compiler-diagnostics.md),
+then use the row for the first changed target-function pass. A late assembly
+difference does not prove that a late pass caused it.
+
+`ee_gcc_why.py` explains what changed between two compiler probes. It does not
+compare a candidate's RTL directly with retail RTL, so its result establishes
+causality for the source experiment, not by itself the origin of a retail
+mismatch.
+
+| Decision family | Evidence to require | Truthful lever to test | Stop rule |
+| --- | --- | --- | --- |
+| Type and ABI lowering (pass 00) | Signed/unsigned operations, argument and return registers, callee definition and callers | Correct parameter, return, field or expression type; real prototype | Stop when the proposed type conflicts with the interface or leaves pass 00 unchanged |
+| CFG and branch topology (passes 00-12) | Candidate and retail block edges, compare order, branch polarity, shared returns and jump-table entries | Natural `switch`, separate cases, accumulator or early-return structure supported by behavior | Stop when CFGs agree and the residual begins in allocation or scheduling |
+| CSE and translation-unit context (pass 03) | First changed expression, symbol/alias inputs and a whole-unit comparison | A real type, prototype, global declaration or translation-unit boundary | Stop on declaration/name/address perturbations with no semantic or unit evidence |
+| Pseudo liveness and allocation (passes 13, 19, 20) | Def/use RTL, live ranges, local dispositions, global order, conflicts and preferences | End a real lifetime earlier, remove a redundant use, or preserve a real expression instead of naming a temporary | Stop when the needed lifetime or use change would misstate behavior, or identical inputs still select differently |
+| Memory dependence and sched1 (pass 17) | Aliasing/dependence edges and verbose ready-set priorities | Correct member types, source order or a real dependency | Park when independent instructions stay tied and the desired order has no truthful dependency |
+| Sched2 and delay donation (passes 25-29) | Verbose ready choices, donor eligibility and the pass-29 delay sequence | Real argument expression/type, call visibility or prototype that changes donor availability | Stop when the same donor is already eligible and truthful forms do not change the choice |
+| Assembly/object emission | Compiler assembly agrees but object words differ | Project assembler compatibility fix with an independently characterized rule | Do not distort C to compensate for an assembler-only difference |
+
+## High-value order of operations
+
+1. Confirm that the candidate behavior, types and translation-unit identity are
+   credible.
+2. Find the first semantic divergence between two controlled probes.
+3. Inspect the evidence named in the corresponding row before editing C again.
+4. Test one semantic lever. Record whether it changed the predicted pass.
+5. Keep a source idiom only after an exact natural-C result transfers to another
+   function. Otherwise record a justified park and move on.
+
+A correct park is useful output. It prevents repeated searches for a source
+lever when the visible compiler inputs do not support one.
+
+## Allocation decisions in this compiler
+
+Passes 19 and 20 together report the inputs that explain the global allocator's
+ordering. Its numeric priority is:
+
+```text
+floor_log2(references) * references * hard_register_width * 10000 / live_length
+```
+
+The result is truncated to an integer; higher values allocate first and exact
+ties use the lower allocno number. Hard-register width comes from pass 20's
+parenthesized width and is normally one; it is not the byte size printed by
+pass 19. `calls_crossed`, pointer and user-variable flags are useful allocation
+context, but are not part of this ordering formula. Local allocation happens
+before this global order and uses its own related quantity model.
+
+`ee_gcc_allocations.py` pairs pass 19 with pass 20 and prints
+`refs/live/width/priority`, local assignments, global attempt order, conflicts,
+preferences and final dispositions. These facts narrow an allocation problem;
+they do not map pseudo numbers to source variables or replay every hard-register
+rejection. Establish identity from the pseudo's definition and uses in RTL.
+
+The transferable source shapes discovered so far are catalogued in
+[Matching C idioms](idioms.md). Treat their stated preconditions as part of the
+idiom: a shape that worked for one mechanism is not a generic permutation rule.
+
+## Evidence standard for new mechanisms
+
+A reusable compiler claim should include:
+
+- the earliest pass where a controlled source change takes effect;
+- the decision inputs visible in that pass;
+- one natural source fact that changes the expected input;
+- an exact result on the discovery case and a separately chosen transfer case;
+- a negative condition that tells the next worker when to stop.
+
+Parser fixtures and familiar examples validate tooling, but do not count as a
+held-out transfer. Measure acceleration with new released blockers: time to the
+correct mechanism, number of compile hypotheses, exact matches, correct parks
+and false actionable diagnoses.

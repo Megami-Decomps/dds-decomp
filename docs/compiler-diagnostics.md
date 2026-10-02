@@ -5,6 +5,8 @@ wrapper can capture those dumps with the same canonical translation-unit path
 used by a normal build. This is useful when two plausible C forms produce
 different assembly: find the first pass where they differ, then investigate
 that mechanism instead of treating the final instruction diff as one problem.
+The [EE GCC decision atlas](compiler-decision-atlas.md) maps that first pass to
+the evidence, source lever and stop rule worth testing.
 
 The diagnostics are read-only. They do not alter the compiler, select a
 matching result, or make an unnatural source form acceptable.
@@ -185,10 +187,14 @@ python3 tools/ee_gcc_allocations.py /tmp/snd-candidate \
   --json /tmp/snd-allocations.json
 ```
 
-The report separates three facts that the raw dump prints together:
+When a pass-19 dump is available, the report combines it with pass 20 and
+separates facts that the raw dumps print apart:
 
 - `global order` is the greedy attempt order for global allocnos that remained
   unassigned after local allocation;
+- `refs/live/width/priority` shows the numeric inputs and result used to order
+  global allocnos;
+- `local` rows were assigned before global allocation;
 - `global/N` rows are those candidates and show their final hard register,
   hard-register conflicts and preferences;
 - `other` rows occur in the final disposition table but are not an allocno
@@ -201,6 +207,14 @@ printed attempt and the text report calls out the retry count; the displayed
 candidate table uses the last attempt. Spill and reload instruction UIDs are
 reported as events, but the tool does not infer a spilled source variable from
 an instruction UID.
+
+The global numeric priority is
+`floor_log2(refs) * refs * hard_register_width * 10000 / live_length`, truncated
+to an integer. Higher numeric priority sorts first, with allocno number breaking
+exact ties. Hard-register width is pass 20's parenthesized width, normally one;
+it is not pass 19's byte size. The pass-19 `calls_crossed`, pointer and
+user-variable fields are not part of this ordering formula. The report exposes
+them in JSON along with set count and register class.
 
 Pseudo numbers are compiler-internal identities, not source-variable names,
 and can change between source forms. Identify a pseudo from its defining and
