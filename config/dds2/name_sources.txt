@@ -5226,6 +5226,7 @@
 0x003340A8	sdfInvokeMotionObjectCallback	inferred	Invokes the callback in the first pointer of a motion object's callback table.
 0x003340D0	sdfSetMotionPointerPair	inferred	Stores the two supplied pointers into the pair in reverse argument order.
 0x003341B8	sdfDestroyMotion	inferred	DDS1 twin func_002DB308 [names_M68_VuRest.tsv]
+0x00334280	sdfMotionInitialize	inferred	Selects a motion-table entry, initializes blend lead/duration and loop state, and dispatches its size-prefixed binding setup records; paired with DDS1 0x002DB3D0.
 0x003343C8	sdfMotionInitializeAtZeroTime	inferred	Passes two zero time values to motion initializer; rest pose is not established. [names_reviewed6.tsv]
 0x003343E8	sdfMotionSampleAtFrame	inferred	confidence=high; matched-C; src/dds2/sdf/sdfMotion.c:292:func_003343E8; Sets the current motion frame/state and calls each object blend callback with a lead-in-clamped weight until the blend interval ends; calls sample callbacks afterward.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00334618	sdfMotionSuspend	inferred	Saves the previous motion mode before switching to mode six.

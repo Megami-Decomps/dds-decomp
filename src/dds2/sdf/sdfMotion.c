@@ -4,9 +4,9 @@
 
 typedef struct VTab {
     void (*invoke)(void);
-    void (*callback04)(void);
+    void (*callback04)(void *, void *);
     void (*sample)(void *, f32);
-    void (*callback0C)(void);
+    void (*callback0C)(void *);
     void (*blend)(void *, f32, f32);
 } VTab;
 
@@ -143,12 +143,23 @@ typedef struct {
     void **objects; /* 0x0C: binding objects, each beginning with a callback table */
 } ArrObj;
 
+typedef struct MotionEntry {
+    u16 frameCount;
+    u16 unk02;
+    u32 bindingData[1];
+} MotionEntry;
+
+typedef struct MotionTable {
+    s32 unk00;
+    MotionEntry **entries;
+} MotionTable;
+
 /* Native motion constructor/tick layout. A blend lead starts the frame clock
  * below zero; blend callbacks normalize nonnegative elapsed frames by duration. */
 struct Motion {
     void *next;        /* 0x00: owner's intrusive motion list */
     void *owner;       /* 0x04: owner whose list head is at +0x14 */
-    void *motionTable; /* 0x08: motion entries and binding-command data */
+    MotionTable *motionTable; /* 0x08: motion entries and binding-command data */
     s32 unkC;
     ArrObj *request;        /* 0x10 */
     f32 blendDurationFrames; /* 0x14 */
@@ -165,7 +176,8 @@ struct Motion {
     u8 pad33;
 };
 
-void func_00334280(Motion *a0, s32 a1, s32 a2, f32 t0, f32 t1);
+void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 blendLeadFrames,
+                         f32 blendDurationFrames);
 
 typedef struct {
     Pair pair;
@@ -298,11 +310,49 @@ void sdfDestroyMotion(MotionNode *node)
     sdfReleaseChipBlock(node);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334280);
+/* Select a motion entry, initialize its timing and state, and bind its setup records. */
+void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 blendLeadFrames,
+                         f32 blendDurationFrames) {
+    s32 i;
+    MotionEntry *entry;
+    u8 *bindingData;
+    VObj *object;
+
+    motion->motionIndex = motionIndex;
+    if (blendDurationFrames > 0.0f) {
+        motion->blendDurationFrames = blendDurationFrames;
+        motion->blendStartFrame = -blendLeadFrames;
+        for (i = 0; i < motion->request->objectCount; i++) {
+            object = motion->request->objects[i];
+            object->vtable->callback0C(object);
+        }
+    } else {
+        motion->blendDurationFrames = 0.0f;
+        motion->blendStartFrame = 0.0f;
+    }
+
+    motion->loopEnabled = loopEnabled;
+    motion->state = 1;
+    motion->currentFrame = motion->blendStartFrame;
+    entry = motion->motionTable->entries[motionIndex];
+    if (entry == NULL) {
+        motion->frameCount = 0;
+        motion->state = 5;
+        return;
+    }
+
+    motion->frameCount = entry->frameCount;
+    bindingData = (u8 *)entry->bindingData;
+    for (i = 0; i < motion->request->objectCount; i++) {
+        object = motion->request->objects[i];
+        object->vtable->callback04(object, bindingData);
+        bindingData += *(u32 *)bindingData;
+    }
+}
 
 /* Select a motion with no lead-in and no blend duration. */
 void sdfMotionInitializeAtZeroTime(void *a0, s32 a1, s32 a2) {
-    func_00334280(a0, a1, a2, 0.0f, 0.0f);
+    sdfMotionInitialize(a0, a1, a2, 0.0f, 0.0f);
 }
 
 void sdfMotionSampleAtFrame(Motion *motion, f32 frame) {

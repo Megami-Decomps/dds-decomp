@@ -119,7 +119,8 @@ extern u8 D_00436FA0[];
 
 extern char *strcat(char *dst, const char *src);
 
-void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 id, s32 mode, s32 flag, f32 scaleX, f32 scaleY);
+void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 id, s32 motionIndex, s32 loopEnabled,
+                                     f32 blendLeadFrames, f32 blendDurationFrames);
 
 typedef struct MdlGroup {
     u8 unk0[0xC];
@@ -388,13 +389,14 @@ void mdlEnableAllEntries(MdlCtx *ctx) {
 }
 
 extern struct MdlNode *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
-extern void func_00334280(struct MdlNode *, s32, s32, f32, f32);
+extern void sdfMotionInitialize(struct MdlNode *, s32, s32, f32, f32);
 extern void mdlRemoveResourceSubtype(MdlCtx *, s32);
 extern void mdlApplyResourceEntries(MdlCtx *, s32, s32);
 
 /* Select (or create) the node for `id`, make it the current node of its slot
  * and apply its resource entries. */
-void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 id, s32 mode, s32 flag, f32 scaleX, f32 scaleY) {
+void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 id, s32 motionIndex, s32 loopEnabled,
+                                     f32 blendLeadFrames, f32 blendDurationFrames) {
     MdlNode *node;
     s16 slot;
 
@@ -411,27 +413,29 @@ void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 id, s32 mode, s32 flag, f3
     if (slot == 0) {
         ctx->first = node;
     }
-    func_00334280(node, mode, flag, scaleX, scaleY);
+    sdfMotionInitialize(node, motionIndex, loopEnabled, blendLeadFrames, blendDurationFrames);
     ctx->current.h.id = id;
-    ctx->current.h.arg = mode;
+    ctx->current.h.arg = motionIndex;
     mdlRemoveResourceSubtype(ctx, slot);
-    mdlApplyResourceEntries(ctx, mode, slot);
+    mdlApplyResourceEntries(ctx, motionIndex, slot);
 }
 
-void mdlAddEntryFlagged(MdlCtx *ctx, s32 searchId, s32 mode) {
-    mdlFindOrCreateMotionRecordNode(ctx, searchId, mode, 1, 0.0f, 0.0f);
+void mdlAddEntryFlagged(MdlCtx *ctx, s32 searchId, s32 motionIndex) {
+    mdlFindOrCreateMotionRecordNode(ctx, searchId, motionIndex, 1, 0.0f, 0.0f);
 }
 
-void mdlAddEntryPlain(MdlCtx *ctx, s32 searchId, s32 mode) {
-    mdlFindOrCreateMotionRecordNode(ctx, searchId, mode, 0, 0.0f, 0.0f);
+void mdlAddEntryPlain(MdlCtx *ctx, s32 searchId, s32 motionIndex) {
+    mdlFindOrCreateMotionRecordNode(ctx, searchId, motionIndex, 0, 0.0f, 0.0f);
 }
 
-void mdlAddEntryFlaggedEx(MdlCtx *ctx, s32 searchId, s32 mode, f32 scaleX, f32 scaleY) {
-    mdlFindOrCreateMotionRecordNode(ctx, searchId, mode, 1, scaleX, scaleY);
+void mdlAddEntryFlaggedEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
+                          f32 blendDurationFrames) {
+    mdlFindOrCreateMotionRecordNode(ctx, searchId, motionIndex, 1, blendLeadFrames, blendDurationFrames);
 }
 
-void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 mode, f32 scaleX, f32 scaleY) {
-    mdlFindOrCreateMotionRecordNode(ctx, searchId, mode, 0, scaleX, scaleY);
+void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
+                        f32 blendDurationFrames) {
+    mdlFindOrCreateMotionRecordNode(ctx, searchId, motionIndex, 0, blendLeadFrames, blendDurationFrames);
 }
 
 MdlNode *mdlFindNodeById(MdlCtx *ctx, s32 id) {
