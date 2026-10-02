@@ -58,7 +58,9 @@ typedef struct {
     u8 pad65[3];
     u32 startColorRampFrames;      /* 0x68 */
     u32 endColorRampFrames;        /* 0x6C */
-    u8 pad70[0x50];
+    u8 pad70[0x42];
+    u16 active;                    /* 0xB2: cleared when all entries finish */
+    u8 padB4[0xC];
 } PolyRingHead; /* 0xC0 */
 
 /* +4 is the per-update radius delta, not an absolute radius. */
@@ -468,7 +470,72 @@ void polyScaleTransformFirstComponent(f32 scale, PolyArc *obj) {
     obj->radius = obj->radius * scale;
 }
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_0015EC08);
+void func_0015EC08(PolyArc *obj) {
+    s32 index = 0;
+    u32 completed = 0;
+    u8 loop;
+    PolyStrip *strip;
+    s32 count;
+    PolyArcRecord *record;
+    s32 duration;
+    u32 color;
+    PolyStripEntry *entry;
+
+    strip = obj->strip;
+    count = obj->head.entryCount;
+    record = obj->records;
+    duration = obj->head.duration;
+    loop = obj->head.loop;
+    color = obj->head.color;
+    entry = strip->entries;
+
+    if (count > 0) {
+        do {
+            s32 age = record->age;
+
+            if (age == POLY_INACTIVE_ENTRY_AGE) {
+                func_0015E900(obj, index);
+                age = record->age;
+            }
+            if (age < 0) {
+                age++;
+            } else {
+                if ((u32)age < obj->head.startColorRampFrames) {
+                    entry->color = polyBlendTimedTintColor(age, obj->head.startColorRampFrames, color);
+                } else if (age <= duration &&
+                           (u32)age >= duration - obj->head.endColorRampFrames) {
+                    entry->color = polyBlendTimedTintColor(duration - age, obj->head.endColorRampFrames, color);
+                }
+
+                if (entry->color & 0xFF000000) {
+                    polyUpdateArcRingStripPoints(obj, index);
+                    age++;
+                } else {
+                    entry->count = 0;
+                    age++;
+                }
+            }
+
+            if (age >= duration) {
+                if (loop != 0) {
+                    age = POLY_INACTIVE_ENTRY_AGE;
+                } else {
+                    completed++;
+                    if (completed >= (u32)count) {
+                        obj->head.active = 0;
+                    }
+                }
+                entry->count = 0;
+            }
+
+            record->age = age;
+            index++;
+            entry++;
+            record++;
+        } while (index < count);
+    }
+    parPrependCellNode(obj->strip);
+}
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015ED90);
 
