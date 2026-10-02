@@ -98,19 +98,19 @@ typedef struct ItfMesBlk14 {
     u16 padE;
 } ItfMesBlk14;
 
-/* Block at ItfMesState +0x24. */
-typedef struct ItfMesBlk24 {
-    u32 x;              /* +0x0: block horizontal position */
-    u32 y;              /* +0x4: block vertical position */
-    ItfMesTable *unk8;   /* +0x8 */
-    FrFontGlyph *glyphChain; /* +0xC: current entry's glyphs */
-    u32 unk10;           /* +0x10 */
-    u8 unk14;
-    u8 unk15;
-    u8 unk16[2];
-    s16 unk18;
-    s16 unk1A;
-} ItfMesBlk24;
+/* Selected entry's text position, cached glyphs and four color channels. */
+typedef struct ItfMesEntryBlock {
+    u32 x;
+    u32 y;
+    ItfMesTable *table;
+    FrFontGlyph *glyphChain;
+    u8 unk10;
+    u8 unk11; /* Written with the text-interface mask after glyph construction. */
+    u8 color[4]; /* Passed in order to itfDrawCustomColorText. */
+    s16 unk16; /* Written with the glyph span-step count. */
+    s16 itemIndex;
+    s16 tableCount;
+} ItfMesEntryBlock;
 
 /* Block at ItfMesState +0x40. */
 typedef struct ItfMesBlk40 {
@@ -142,7 +142,7 @@ typedef struct ItfMesState {
     s16 unk10;          /* 0x10 */
     s16 unk12;          /* 0x12 */
     ItfMesBlk14 blk14;    /* 0x14: passed to func_0019DDA8 */
-    ItfMesBlk24 blk24;    /* 0x24: passed to func_0019DDD0 */
+    ItfMesEntryBlock entryBlock; /* 0x24: selected entry and cached glyph chain */
     ItfMesBlk40 blk40;  /* 0x40 */
     u8 unk58[0x4C];     /* 0x58 */
     ItfMesBlkA4 blkA4;  /* 0xA4 */
@@ -197,13 +197,6 @@ typedef struct ItfMesColorSrc {
     ItfMesShade *shade;
 } ItfMesColorSrc;
 
-typedef struct ItfMesColorDst {
-    u8 pad00[0x12];
-    u8 shade12;
-    u8 shade13;
-    u8 shade14;
-    u8 shade15;
-} ItfMesColorDst;
 
 /* Operands of itfMesCountSpanSteps: word at +0x8, divisor at +0x12. */
 typedef struct ItfMesSpan {
@@ -533,7 +526,7 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     mes->unk12 = 0;
     mes->callbackAddress = 0;
     itfResetCursorPositionAndState(&mes->blk14, 1);
-    itfMesResetCursorState(&mes->blk24, 1);
+    itfMesResetCursorState(&mes->entryBlock, 1);
     itfInitializeCursorResetState(&mes->blk40);
     itfResetWindowResourceBlock(&mes->blkA4);
     itfClearDrawStateWords(mes->tableD0);
@@ -552,14 +545,15 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesStartEntry);
 
 extern s32 itfInitTextDrawArgs(s32 encodedText, s32 sub);
 
+/* Select a window's entry-table item; return text initialization's result, or zero for an empty table. */
 s32 itfMesSelectTableItemText(s32 window, s32 entryIndex, s32 item) {
     ItfMesState *mes = itfWindowSlots[window].mes;
     ItfMesTable *table = itfMesGetEntry(mes, entryIndex)->table;
-    ItfMesBlk24 *blk = &mes->blk24;
+    ItfMesEntryBlock *blk = &mes->entryBlock;
 
-    blk->unk18 = item;
-    blk->unk8 = table;
-    blk->unk1A = table->count;
+    blk->itemIndex = item;
+    blk->table = table;
+    blk->tableCount = table->count;
     if (table->count != 0) {
         return itfInitTextDrawArgs(itfMesGetTableItem(table, (s16)item), 0);
     }
@@ -568,20 +562,20 @@ s32 itfMesSelectTableItemText(s32 window, s32 entryIndex, s32 item) {
 
 void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock) {
     ItfMesState *mes;
-    ItfMesBlk24 *blk24;
+    ItfMesEntryBlock *entryBlock;
     ItfMesBlk14 *blk14;
 
     if (window < 0) {
         return;
     }
     mes = itfWindowSlots[window].mes;
-    blk24 = &mes->blk24;
+    entryBlock = &mes->entryBlock;
     blk14 = &mes->blk14;
-    if (blk24->glyphChain != NULL) {
-        frFontQueueGlyphInSelectedSlot(blk24->glyphChain);
-        blk24->glyphChain = NULL;
+    if (entryBlock->glyphChain != NULL) {
+        frFontQueueGlyphInSelectedSlot(entryBlock->glyphChain);
+        entryBlock->glyphChain = NULL;
     }
-    itfMesResetCursorState(blk24, 0);
+    itfMesResetCursorState(entryBlock, 0);
     mes->flags &= ~7;
     mes->flags &= 0xFFFDFFFF;
     if (releasePrimaryBlock == 0) {
@@ -713,7 +707,7 @@ void itfMesBlk14MoveBy(s32 window, s32 dx, s32 dy) {
 }
 
 void itfMesBlk24MoveTo(s32 window, s32 x, s32 y) {
-    ItfMesBlk24 *blk = &itfWindowSlots[window].mes->blk24;
+    ItfMesEntryBlock *blk = &itfWindowSlots[window].mes->entryBlock;
     s32 delta[2];
     delta[0] = x - blk->x;
     delta[1] = y - blk->y;
@@ -725,7 +719,7 @@ void itfMesBlk24MoveTo(s32 window, s32 x, s32 y) {
 }
 
 void itfMesBlk24MoveBy(s32 window, s32 dx, s32 dy) {
-    ItfMesBlk24 *blk = &itfWindowSlots[window].mes->blk24;
+    ItfMesEntryBlock *blk = &itfWindowSlots[window].mes->entryBlock;
     itfMesOffsetNodeChain((ItfMesNode *)blk->glyphChain, dx, dy);
     blk->x += dx;
     blk->y += dy;
@@ -754,7 +748,7 @@ void itfUpdateMessageWindowRenderValue(s32 window, s32 value) {
     ItfMesState *mes = itfWindowSlots[window].mes;
     if (mes->renderValue != value) {
         itfMesSetNodeChainRenderValue((ItfMesNode *)mes->blk14.glyphChain, value);
-        itfMesSetNodeChainRenderValue((ItfMesNode *)mes->blk24.glyphChain, value);
+        itfMesSetNodeChainRenderValue((ItfMesNode *)mes->entryBlock.glyphChain, value);
         itfMesSetNodeChainRenderValue((ItfMesNode *)mes->blk40.glyphChain, value);
         mes->renderValue = value;
     }
@@ -789,12 +783,14 @@ s16 itfMesGetWindowClearBitCount(s32 window) {
     return itfWindowSlots[window].mes->blk40.clearBitCount;
 }
 
+/* Return the selected table's cached item count for this window. */
 s16 func_001A4558(s32 window) {
-    return itfWindowSlots[window].mes->blk24.unk1A;
+    return itfWindowSlots[window].mes->entryBlock.tableCount;
 }
 
+/* Return the selected item index for this window. */
 s16 func_001A4578(s32 window) {
-    return itfWindowSlots[window].mes->blk24.unk18;
+    return itfWindowSlots[window].mes->entryBlock.itemIndex;
 }
 
 u32 itfMesGetWindowTableValue(s32 window, s32 index) {
@@ -877,8 +873,9 @@ s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
     return extent;
 }
 
+/* Set the fourth color channel used when this window's entry glyphs are built. */
 void func_001A4B98(s32 window, u8 value) {
-    itfWindowSlots[window].mes->blk24.unk15 = value;
+    itfWindowSlots[window].mes->entryBlock.color[3] = value;
 }
 
 void itfMesSetWindowCallbackAddress(s32 window, u32 value) {
@@ -1021,24 +1018,22 @@ extern void evtLipsExecFunction();
 extern void itfMesCopyGlyphShade();
 extern void itfMesEnableUnflaggedNodeContexts();
 
-/* Rebuild the selected entry's glyph chain and cache it on the window block.
- * Keep the block's byte view for the glyph builder: struct accesses change register allocation here. */
+/* Rebuild the selected entry's colored glyph chain and cache its span count. */
 void itfMesBuildEntryGlyph(ItfMesState *mes) {
-    u8 *m = (u8 *)mes;
-    u8 *blk = m + 0x24;
+    ItfMesEntryBlock *block = &mes->entryBlock;
     s32 glyph;
     s32 handle;
     s32 helper;
     s8 flags;
     void (*hook)();
 
-    handle = *(s32 *)(blk + 0xC);
+    handle = (s32)block->glyphChain;
     if (handle != 0) {
         frFontQueueGlyphInSelectedSlot((FrFontGlyph *)handle);
-        *(s32 *)(blk + 0xC) = 0;
+        block->glyphChain = NULL;
     }
-    glyph = itfDrawCustomColorText(*(s32 *)(m + 0x24), *(s32 *)(blk + 4), blk[0x12], blk[0x13], blk[0x14], blk[0x15],
-                          itfMesGetTableItem(*(ItfMesTable **)(blk + 8), *(s16 *)(blk + 0x18)), 0);
+    glyph = itfDrawCustomColorText((s32)mes->entryBlock.x, (s32)block->y, block->color[0], block->color[1], block->color[2], block->color[3],
+                          itfMesGetTableItem(block->table, block->itemIndex), 0);
     if (mes->unk12 == 3) {
         if (func_0019DB30(glyph) == 1) {
             func_0019DD48(0x1000, 0xC60, glyph);
@@ -1047,11 +1042,11 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
         }
     }
     if (!(mes->flags & 0x400000) && (itfMesWork.flags & 1)) {
-        itfMesEnableUnflaggedNodeContexts(glyph);
+        itfMesEnableUnflaggedNodeContexts((ItfMesNode *)glyph);
     }
-    itfMesCopyGlyphShade(glyph, blk);
+    itfMesCopyGlyphShade(glyph, block);
     flags = itfTestTextInterfaceMask(3);
-    blk[0x11] = flags;
+    block->unk11 = flags;
     if (flags & 2) {
         mes->flags |= 0x10000;
     } else {
@@ -1068,8 +1063,8 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
         evtLipsExecFunction(helper, func_0019E910());
     }
     itfMesSetNodeChainRenderValue((ItfMesNode *)glyph, mes->renderValue);
-    *(s16 *)(blk + 0x16) = itfMesCountSpanSteps(itfMesGetLastNode(glyph), glyph);
-    *(s32 *)(blk + 0xC) = glyph;
+    block->unk16 = itfMesCountSpanSteps(itfMesGetLastNode(glyph), glyph);
+    block->glyphChain = (FrFontGlyph *)glyph;
 }
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A5480);
@@ -1137,13 +1132,13 @@ ItfMesNode *itfMesGetLastNode(ItfMesNode *node) {
 }
 
 /* Copy glyph shade components into the current message block's color bytes. */
-void itfMesCopyGlyphShade(ItfMesColorSrc *glyph, ItfMesColorDst *block) {
+void itfMesCopyGlyphShade(ItfMesColorSrc *glyph, ItfMesEntryBlock *block) {
     ItfMesShade *shade = glyph->shade;
 
-    block->shade15 = glyph->firstByte >> 1;
-    block->shade12 = shade->shade15;
-    block->shade13 = shade->shade14;
-    block->shade14 = shade->shade16;
+    block->color[3] = glyph->firstByte >> 1;
+    block->color[0] = shade->shade15;
+    block->color[1] = shade->shade14;
+    block->color[2] = shade->shade16;
 }
 
 s32 itfMesCountSpanSteps(ItfMesSpan *last, ItfMesSpan *first) {
