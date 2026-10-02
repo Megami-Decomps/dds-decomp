@@ -135,9 +135,19 @@ typedef struct EventViewerState {
 } EventViewerState;
 
 /* Handles retained by the viewer and by its owning task context. */
+typedef struct EvtViewerAssetSlot {
+    void *request;
+    s32 resource;
+    u32 *address;
+} EvtViewerAssetSlot;
+
 typedef struct EvtWindowContext {
     s32 flags; /* 0x00 */
-    u8 pad04[0x100];
+    EvtViewerAssetSlot first;
+    u8 pad10[0x4C];
+    EvtViewerAssetSlot second;
+    EvtViewerAssetSlot third;
+    u8 pad74[0x90];
     s32 windowHandle;
 } EvtWindowContext;
 
@@ -1170,7 +1180,59 @@ void evtEventViewerDestroyTask(void) {
     kwlnTaskDestroyWithHierarchyByName(evtViewerTaskName, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024DBB8);
+struct PolyMovieWork;
+extern s32 fileIsRequestReadyInCurrentMode(void *file);
+extern s32 fileGetResourceHandle(void *file);
+extern s32 filePollEntryCleanup(void *file);
+extern struct PolyMovieWork *evtPolygonMovieInitWork();
+
+void func_0024DBB8(s32 assetsAddress) {
+    EvtWindowContext *assets = (EvtWindowContext *)assetsAddress;
+
+    if (assets->flags & 8) {
+        return;
+    }
+    if (assets->flags & 2) {
+        if (assets->first.request == 0) {
+            return;
+        }
+        if (fileIsRequestReadyInCurrentMode(assets->first.request) == 0) {
+            return;
+        }
+        assets->first.resource = fileGetResourceHandle(assets->first.request);
+        assets->first.address = sdfResourceRetainAddress(assets->first.resource);
+        filePollEntryCleanup(assets->first.request);
+        assets->first.request = 0;
+        assets->flags &= ~2;
+    } else if (assets->flags & 4) {
+        if (assets->second.request == 0) {
+            return;
+        }
+        if (fileIsRequestReadyInCurrentMode(assets->second.request) == 0) {
+            return;
+        }
+        assets->second.resource = fileGetResourceHandle(assets->second.request);
+        assets->second.address = sdfResourceRetainAddress(assets->second.resource);
+        filePollEntryCleanup(assets->second.request);
+        assets->second.request = 0;
+        assets->flags &= ~4;
+    } else if (assets->flags & 0x10) {
+        if (assets->third.request == 0) {
+            return;
+        }
+        if (fileIsRequestReadyInCurrentMode(assets->third.request) == 0) {
+            return;
+        }
+        assets->third.resource = fileGetResourceHandle(assets->third.request);
+        assets->third.address = sdfResourceRetainAddress(assets->third.resource);
+        filePollEntryCleanup(assets->third.request);
+        assets->third.request = 0;
+        assets->flags &= ~0x10;
+    } else if (assets->first.address != NULL && assets->second.address != NULL) {
+        evtPolygonMovieInitWork(assets, assets->first.address, assets->second.address, assets->third.address);
+        assets->flags |= 8;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00247518", evtViewerTaskName);
 

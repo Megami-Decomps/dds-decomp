@@ -30,9 +30,19 @@ void mnuStopMovieDrawTask(void);
 void mnuCheckMovieDecoderStatus(void);
 
 /* Handles retained by the viewer and by its owning task context. */
+typedef struct EvtViewerAssetSlot {
+    void *request;
+    s32 resource;
+    u32 *address;
+} EvtViewerAssetSlot;
+
 typedef struct EvtWindowContext {
     s32 flags; /* 0x00 */
-    u8 pad04[0x100];
+    EvtViewerAssetSlot first;
+    u8 pad10[0x4C];
+    EvtViewerAssetSlot second;
+    EvtViewerAssetSlot third;
+    u8 pad74[0x90];
     s32 windowHandle; /* 0x104 */
 } EvtWindowContext;
 
@@ -58,7 +68,13 @@ typedef struct EventViewerState {
     } history[8];
     s32 historyCount;
     u32 currentId;
-    u8 pad2284[0x24];
+    u8 pad2284[0xC];
+    s32 blurRectangleEnabled;
+    s32 texturedBlurEnabled;
+    s32 filterBlurEnabled;
+    s32 colorRectangleEnabled;
+    s32 texturedSquareEnabled;
+    s32 staggeredBlurEnabled;
     s32 selectionMode; /* 0x22A8: command mode zero, one or two */
     s32 unk22AC;
     u8 pad22B0[4];
@@ -83,7 +99,9 @@ typedef struct EventViewerState {
     s16 unk23C6;
     u8 pad23C8[0x28];
     s32 glyphTickCount; /* 0x23F0 */
-    u8 pad23F4[0x1C];
+    u8 pad23F4[4];
+    s32 framebufferQuadEnabled;
+    u8 pad23FC[0x14];
     u32 glyph; /* 0x2410: FrFontGlyph passed to frFontDrawGlyphInDefaultMode */
     s32 timedActive; /* 0x2414: gated time interval */
     s32 timedStart;  /* 0x2418 */
@@ -206,7 +224,60 @@ void func_0022CC40(EventViewerState *viewer) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022CD30);
+typedef struct EffScreenDrawParams EffScreenDrawParams;
+extern EffScreenDrawParams *effGetLoadDescA(void);
+extern void effDrawBlurRectangle(EffScreenDrawParams *);
+extern void effEnableTexturedBlur(void);
+extern void effDisableTexturedBlur(void);
+extern void effEnableTexturedSquare(void);
+extern void effDisableTexturedSquare(void);
+extern void effEnableFilterBlur(void);
+extern void effDisableFilterBlur(void);
+extern void effEnableStaggeredBlur(void);
+extern void effDisableStaggeredBlur(void);
+extern void effEnableFramebufferQuad(void);
+extern void effDisableFramebufferQuad(void);
+extern void effEnableColorRectangle(void);
+extern void effDisableColorRectangle(void);
+extern void func_00243A18();
+
+void func_0022CD30(EventViewerState *viewer) {
+    if (viewer->blurRectangleEnabled != 0) {
+        effDrawBlurRectangle(effGetLoadDescA());
+    }
+    if (viewer->texturedBlurEnabled != 0) {
+        effEnableTexturedBlur();
+    } else {
+        effDisableTexturedBlur();
+    }
+    if (viewer->texturedSquareEnabled != 0) {
+        effEnableTexturedSquare();
+    } else {
+        effDisableTexturedSquare();
+    }
+    if (viewer->filterBlurEnabled != 0) {
+        effEnableFilterBlur();
+    } else {
+        effDisableFilterBlur();
+    }
+    if (viewer->staggeredBlurEnabled != 0) {
+        effEnableStaggeredBlur();
+    } else {
+        effDisableStaggeredBlur();
+    }
+    if (viewer->framebufferQuadEnabled != 0) {
+        effEnableFramebufferQuad();
+    } else {
+        effDisableFramebufferQuad();
+    }
+    if (viewer->colorRectangleEnabled != 0) {
+        effEnableColorRectangle();
+    } else {
+        effDisableColorRectangle();
+    }
+    func_00243A18(viewer);
+    func_0022CC40(viewer);
+}
 
 void evtViewerApplySelectedEntry(EventViewerState *viewer) {
     s32 entry;
@@ -1037,7 +1108,59 @@ void evtEventViewerDestroyTask(void) {
     kwlnTaskDestroyWithHierarchyByName(evtViewerTaskName, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232E20);
+struct PolyMovieWork;
+extern s32 fileIsRequestReadyInCurrentMode(void *file);
+extern s32 fileGetResourceHandle(void *file);
+extern s32 filePollEntryCleanup(void *file);
+extern struct PolyMovieWork *evtPolygonMovieInitWork();
+
+void func_00232E20(s32 assetsAddress) {
+    EvtWindowContext *assets = (EvtWindowContext *)assetsAddress;
+
+    if (assets->flags & 8) {
+        return;
+    }
+    if (assets->flags & 2) {
+        if (assets->first.request == 0) {
+            return;
+        }
+        if (fileIsRequestReadyInCurrentMode(assets->first.request) == 0) {
+            return;
+        }
+        assets->first.resource = fileGetResourceHandle(assets->first.request);
+        assets->first.address = sdfResourceRetainAddress(assets->first.resource);
+        filePollEntryCleanup(assets->first.request);
+        assets->first.request = 0;
+        assets->flags &= ~2;
+    } else if (assets->flags & 4) {
+        if (assets->second.request == 0) {
+            return;
+        }
+        if (fileIsRequestReadyInCurrentMode(assets->second.request) == 0) {
+            return;
+        }
+        assets->second.resource = fileGetResourceHandle(assets->second.request);
+        assets->second.address = sdfResourceRetainAddress(assets->second.resource);
+        filePollEntryCleanup(assets->second.request);
+        assets->second.request = 0;
+        assets->flags &= ~4;
+    } else if (assets->flags & 0x10) {
+        if (assets->third.request == 0) {
+            return;
+        }
+        if (fileIsRequestReadyInCurrentMode(assets->third.request) == 0) {
+            return;
+        }
+        assets->third.resource = fileGetResourceHandle(assets->third.request);
+        assets->third.address = sdfResourceRetainAddress(assets->third.resource);
+        filePollEntryCleanup(assets->third.request);
+        assets->third.request = 0;
+        assets->flags &= ~0x10;
+    } else if (assets->first.address != NULL && assets->second.address != NULL) {
+        evtPolygonMovieInitWork(assets, assets->first.address, assets->second.address, assets->third.address);
+        assets->flags |= 8;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_0022CBA0", evtViewerTaskName);
 
