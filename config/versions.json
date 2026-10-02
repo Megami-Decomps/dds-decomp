@@ -8,6 +8,9 @@
     "elf_size": 2895680,
     "entry": "0x00100008",
     "gp": "0x003c0cf0",
+    "field_fld2_links": [
+      "f011_001"
+    ],
     "archive_files": [
       {
         "path": "/fld/f/f011/f011_001.LB",
@@ -26,6 +29,9 @@
     "elf_size": 3401312,
     "entry": "0x00100008",
     "gp": "0x0043ae70",
+    "field_fld2_links": [
+      "f011_001"
+    ],
     "archive_files": [
       {
         "path": "/fld/f/f011/f011_001.LB",
