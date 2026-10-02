@@ -1,100 +1,100 @@
 wap 1 profile=dds1
 
-entry 0 kind=9
-  scene args=1,0,0
-  warp args=2,1,0
+entry 0 kind=special_warp
+  scene id=1
+  warp field=2 area=1
   camera mode=1 table=10
 end
 
-entry 1 kind=9
-  scene args=2,0,0
-  warp args=11,1,0
+entry 1 kind=special_warp
+  scene id=2
+  warp field=11 area=1
   camera mode=1 table=55
 end
 
-entry 2 kind=9
-  scene args=3,0,0
-  warp args=8,1,0
+entry 2 kind=special_warp
+  scene id=3
+  warp field=8 area=1
   camera mode=1 table=40
 end
 
-entry 3 kind=9 flag=2
-  scene args=4,0,0
-  warp args=3,1,0
+entry 3 kind=special_warp flag=2
+  scene id=4
+  warp field=3 area=1
   camera mode=1 table=15
 end
 
-entry 4 kind=9
-  scene args=4,0,0
-  warp type=event args=606,0,3
+entry 4 kind=special_warp
+  scene id=4
+  warp type=event event=606 alternate_field=3
 end
 
-entry 5 kind=9
-  scene args=5,0,0
-  warp args=6,1,0
+entry 5 kind=special_warp
+  scene id=5
+  warp field=6 area=1
   camera mode=1 table=30
 end
 
-entry 6 kind=9 flag=31
-  scene args=6,0,0
-  warp args=5,1,0
+entry 6 kind=special_warp flag=31
+  scene id=6
+  warp field=5 area=1
   camera mode=1 table=25
 end
 
-entry 7 kind=9
-  scene args=6,0,0
-  warp args=5,2,0
+entry 7 kind=special_warp
+  scene id=6
+  warp field=5 area=2
   camera mode=1 table=26
   after flag=2 script="002_frombigmap"
 end
 
-entry 8 kind=9
-  scene args=7,0,0
-  warp args=12,1,0 position="01pos_02"
+entry 8 kind=special_warp
+  scene id=7
+  warp field=12 area=1 position="01pos_02"
   camera mode=1 table=60
 end
 
-entry 9 kind=9 flag=1061
-  scene args=8,0,0
-  warp args=10,1,0
+entry 9 kind=special_warp flag=1061
+  scene id=8
+  warp field=10 area=1
   camera mode=1 table=50
 end
 
-entry 10 kind=9
-  scene args=8,0,0
-  warp args=10,2,0
+entry 10 kind=special_warp
+  scene id=8
+  warp field=10 area=2
 end
 
-entry 11 kind=9 flag=23
-  scene args=9,0,0
-  warp args=4,3,0
+entry 11 kind=special_warp flag=23
+  scene id=9
+  warp field=4 area=3
   camera mode=1 table=20
 end
 
-entry 12 kind=9 flag=22
-  scene args=9,0,0
-  warp type=event args=627,0,4
+entry 12 kind=special_warp flag=22
+  scene id=9
+  warp type=event event=627 alternate_field=4
 end
 
-entry 13 kind=9 flag=13
-  scene args=9,0,0
-  warp args=4,1,0
+entry 13 kind=special_warp flag=13
+  scene id=9
+  warp field=4 area=1
   camera mode=1 table=20
 end
 
-entry 14 kind=9 flag=12
-  scene args=9,0,0
-  warp type=event args=617,0,4
+entry 14 kind=special_warp flag=12
+  scene id=9
+  warp type=event event=617 alternate_field=4
 end
 
-entry 15 kind=9
-  scene args=9,0,0
-  warp args=4,1,0
+entry 15 kind=special_warp
+  scene id=9
+  warp field=4 area=1
   camera mode=1 table=20
 end
 
-entry 16 kind=9
-  scene args=10,0,0
-  warp args=7,1,0 position="01pos_03"
+entry 16 kind=special_warp
+  scene id=10
+  warp field=7 area=1 position="01pos_03"
   camera mode=1 table=35
 end

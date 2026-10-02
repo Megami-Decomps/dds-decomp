@@ -9,1206 +9,1206 @@ elevator 5 area=56 sound=66 floor_count=2 floors=11,20,0,0,0,0
 elevator 6 area=59 sound=66 floor_count=2 floors=45,55,0,0,0,0
 elevator 7 sound=66
 
-entry 0 kind=8
-  scene args=504,0,0
-  warp args=0,18,0 position="01pos_03"
+entry 0 kind=battle_exit
+  scene event=504
+  warp area=18 position="01pos_03"
   after flag=2 script=@019_BATTLE_AFT
 end
 
-entry 1 kind=8
-  scene args=503,0,0
-  warp args=0,10,0 position="01pos_15"
+entry 1 kind=battle_exit
+  scene event=503
+  warp area=10 position="01pos_15"
 end
 
-entry 2 kind=8
-  scene args=502,0,0
-  warp args=0,10,0 position="01pos_12"
+entry 2 kind=battle_exit
+  scene event=502
+  warp area=10 position="01pos_12"
   after flag=2 script=@005_battle_fin
 end
 
-entry 3 kind=8
-  scene args=500,0,0
-  warp args=0,7,0 position="01pos_11"
+entry 3 kind=battle_exit
+  scene event=500
+  warp area=7 position="01pos_11"
   after flag=2 script=@007_battle_fin
 end
 
-entry 4 kind=8
-  scene args=501,0,0
-  warp args=0,54,0
+entry 4 kind=battle_exit
+  scene event=501
+  warp area=54
 end
 
-entry 5 kind=1 flag=27 area=1 name=@01d_01
-  scene args=1,2,64 primary="md_hoji_07" secondary="md_hoji_08"
-  warp args=10,3,0 position="01pos_02"
+entry 5 kind=door flag=27 area=1 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_hoji_07" secondary="md_hoji_08"
+  warp field=10 area=3 position="01pos_02"
   camera mode=1 table=50
 end
 
-entry 6 kind=1 flag=19 area=1 name=@01d_01
-  scene args=1,2,64 primary="md_hoji_07" secondary="md_hoji_08"
-  warp args=10,2,0 position="01pos_02"
+entry 6 kind=door flag=19 area=1 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_hoji_07" secondary="md_hoji_08"
+  warp field=10 area=2 position="01pos_02"
   camera mode=1 table=50
 end
 
-entry 7 kind=1 area=1 name=@01d_01
-  scene args=1,2,64 primary="md_hoji_05" secondary="md_hoji_06"
-  warp args=10,1,0 position="01pos_02"
+entry 7 kind=door area=1 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_hoji_05" secondary="md_hoji_06"
+  warp field=10 area=1 position="01pos_02"
   camera mode=1 table=50
   after flag=8
 end
 
-entry 8 kind=1 area=1 name=@01d_02
-  scene args=1,2,48 primary="md_01d_02" secondary="md_01d_02b"
-  warp type=elevator args=1,0,0 position="01pos_04"
+entry 8 kind=door area=1 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=48 primary="md_01d_02" secondary="md_01d_02b"
+  warp type=elevator table=1 position="01pos_04"
   camera mode=1 table=27 name="01cam_03"
   tail control=2 args=24,1,0,7,0,2,2
 end
 
-entry 9 kind=6
-  scene args=1,0,0
-  warp args=0,1,0 position="01pos_02"
+entry 9 kind=elevator_exit
+  scene elevator=1
+  warp area=1 position="01pos_02"
 end
 
-entry 10 kind=1 area=2 name=@01d_01
-  scene args=1,2,48 primary="md_01d_01" secondary="md_01d_01b"
-  warp type=elevator args=1,1,0 position="01pos_02"
+entry 10 kind=door area=2 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=48 primary="md_01d_01" secondary="md_01d_01b"
+  warp type=elevator table=1 floor=1 position="01pos_02"
   camera table=88
 end
 
-entry 11 kind=6
-  scene args=1,1,0
-  warp args=0,2,0
+entry 11 kind=elevator_exit
+  scene elevator=1 floor=1
+  warp area=2
   tail control=2 args=24,2,0,0,0,3,2
 end
 
-entry 12 kind=1 area=2 name=@01d_02
-  scene args=1,2,67 primary="md_01d_00" secondary="md_01d_00b"
-  warp type=facility args=3,6,2
+entry 12 kind=door area=2 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=67 primary="md_01d_00" secondary="md_01d_00b"
+  warp type=facility action=terminal slot=6 floor_flag=2
   after script="md_01d_00c"
   tail control=2 args=24,2,0,10,7,2,2
 end
 
-entry 13 kind=7 area=2
-  scene args=3,6,0
-  warp args=24,2,0 position="01pos_02"
+entry 13 kind=side_exit area=2
+  scene exit_mode=3 selector=6
+  warp field=24 area=2 position="01pos_02"
 end
 
-entry 14 kind=1 area=2 name=@01d_03
-  scene args=1,2,48 primary="md_01d_04" secondary="md_01d_04b"
-  warp type=elevator args=2,0,0
+entry 14 kind=door area=2 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=48 primary="md_01d_04" secondary="md_01d_04b"
+  warp type=elevator table=2
   camera table=77
 end
 
-entry 15 kind=6
-  scene args=2,0,0
-  warp args=0,2,0 position="01pos_03"
+entry 15 kind=elevator_exit
+  scene elevator=2
+  warp area=2 position="01pos_03"
 end
 
-entry 16 kind=9
-  scene args=1,0,0
-  warp args=27,5,0
+entry 16 kind=special_warp
+  scene id=1
+  warp field=27 area=5
 end
 
-entry 17 kind=6
-  scene args=2,1,0
-  warp args=0,3,0
+entry 17 kind=elevator_exit
+  scene elevator=2 floor=1
+  warp area=3
 end
 
-entry 18 kind=1 area=3 name=@01d_01
-  scene args=1,2,48 primary="md_01d_01" secondary="md_01d_01b"
-  warp type=elevator args=2,1,0
+entry 18 kind=door area=3 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=48 primary="md_01d_01" secondary="md_01d_01b"
+  warp type=elevator table=2 floor=1
 end
 
-entry 19 kind=9
-  scene args=401,0,0
-  warp args=0,5,0
+entry 19 kind=special_warp
+  scene id=401
+  warp area=5
 end
 
-entry 20 kind=1 flag=1285 area=3 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,5,0
+entry 20 kind=door flag=1285 area=3 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=5
 end
 
-entry 21 kind=1 area=3 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,4,0
+entry 21 kind=door area=3 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=4
 end
 
-entry 22 kind=9
-  scene args=15,0,0
-  warp type=facility args=0,3,3
+entry 22 kind=special_warp
+  scene id=15
+  warp type=facility action=shop selection=3 floor_flag=3
 end
 
-entry 23 kind=7 area=15
-  scene args=0,3,0
-  warp args=0,15,0 position="01pos_03"
+entry 23 kind=side_exit area=15
+  scene selector=3
+  warp area=15 position="01pos_03"
 end
 
-entry 24 kind=1 area=4 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,3,0 position="01pos_03"
+entry 24 kind=door area=4 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=3 position="01pos_03"
 end
 
-entry 25 kind=1 area=4 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,12,0 position="01pos_03"
+entry 25 kind=door area=4 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=12 position="01pos_03"
 end
 
-entry 26 kind=1 area=5 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,3,0 position="01pos_02"
+entry 26 kind=door area=5 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=3 position="01pos_02"
 end
 
-entry 27 kind=1 area=5 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,6,0 position="01pos_02"
+entry 27 kind=door area=5 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=6 position="01pos_02"
 end
 
-entry 28 kind=1 area=6 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,11,0
+entry 28 kind=door area=6 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=11
 end
 
-entry 29 kind=1 area=6 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,5,0 position="01pos_02"
+entry 29 kind=door area=6 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=5 position="01pos_02"
 end
 
-entry 30 kind=1 area=6 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,7,0
+entry 30 kind=door area=6 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=7
 end
 
-entry 31 kind=1 area=6 name="01d_04"
-  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,7,0 position="01pos_02"
+entry 31 kind=door area=6 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=7 position="01pos_02"
 end
 
-entry 32 kind=1 area=6 name="01d_05"
-  scene args=1,2,64 primary="md_01d_05" secondary="md_01d_05b"
-  warp args=0,9,0 position="01pos_03"
+entry 32 kind=door area=6 name="01d_05"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_05" secondary="md_01d_05b"
+  warp area=9 position="01pos_03"
   camera mode=1
 end
 
-entry 33 kind=1 area=6 name=@01d_06
-  scene args=1,2,64 primary="md_01d_06" secondary="md_01d_06b"
-  warp args=0,9,0 position="01pos_02"
+entry 33 kind=door area=6 name=@01d_06
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_06" secondary="md_01d_06b"
+  warp area=9 position="01pos_02"
   camera mode=1
 end
 
-entry 34 kind=1 area=6 name="01d_07"
-  scene args=1,2,64 primary="md_01d_07" secondary="md_01d_07b"
-  warp args=0,10,0 position="01pos_02"
+entry 34 kind=door area=6 name="01d_07"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_07" secondary="md_01d_07b"
+  warp area=10 position="01pos_02"
   camera name="01cam_02"
 end
 
-entry 35 kind=1 area=6 name="01d_08"
-  scene args=1,2,64 primary="md_01d_08" secondary="md_01d_08b"
-  warp args=0,10,0
+entry 35 kind=door area=6 name="01d_08"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_08" secondary="md_01d_08b"
+  warp area=10
 end
 
-entry 36 kind=1 area=7 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,6,0 position="01pos_03"
+entry 36 kind=door area=7 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=6 position="01pos_03"
 end
 
-entry 37 kind=1 area=7 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,6,0 position="01pos_04"
+entry 37 kind=door area=7 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=6 position="01pos_04"
   camera mode=1
 end
 
-entry 38 kind=1 area=7 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,9,0 position="01pos_04"
+entry 38 kind=door area=7 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=9 position="01pos_04"
   camera mode=1
   after flag=2 script="007_02_warpscr"
 end
 
-entry 39 kind=1 area=7 name="01d_04"
-  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,9,0 position="01pos_05"
+entry 39 kind=door area=7 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=9 position="01pos_05"
   camera mode=1
 end
 
-entry 40 kind=1 area=7 name="01d_05"
-  scene args=1,2,64 primary="md_01d_05" secondary="md_01d_05b"
-  warp args=0,8,0
+entry 40 kind=door area=7 name="01d_05"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_05" secondary="md_01d_05b"
+  warp area=8
 end
 
-entry 41 kind=1 area=8 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,7,0 position="01pos_05"
+entry 41 kind=door area=8 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=7 position="01pos_05"
 end
 
-entry 42 kind=1 area=8 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,10,0 position="01pos_04"
+entry 42 kind=door area=8 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=10 position="01pos_04"
 end
 
-entry 43 kind=7 area=8
-  scene args=4,30,0
-  warp args=24,8,0 position="01pos_03"
+entry 43 kind=side_exit area=8
+  scene exit_mode=4 selector=30
+  warp field=24 area=8 position="01pos_03"
 end
 
-entry 44 kind=1 area=9 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,10,0 position="01pos_03"
+entry 44 kind=door area=9 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=10 position="01pos_03"
 end
 
-entry 45 kind=1 area=9 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,6,0 position="01pos_06"
+entry 45 kind=door area=9 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=6 position="01pos_06"
 end
 
-entry 46 kind=1 area=9 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,6,0 position="01pos_05"
+entry 46 kind=door area=9 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=6 position="01pos_05"
 end
 
-entry 47 kind=1 area=9 name="01d_04"
-  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,7,0 position="01pos_03"
+entry 47 kind=door area=9 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=7 position="01pos_03"
 end
 
-entry 48 kind=1 area=9 name="01d_05"
-  scene args=1,2,64 primary="md_01d_05" secondary="md_01d_05b"
-  warp args=0,7,0 position="01pos_04"
+entry 48 kind=door area=9 name="01d_05"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_05" secondary="md_01d_05b"
+  warp area=7 position="01pos_04"
 end
 
-entry 49 kind=1 area=9 name=@01d_06
-  scene args=1,2,64 primary="md_01d_06" secondary="md_01d_06b"
-  warp args=0,18,0 position="01pos_02"
+entry 49 kind=door area=9 name=@01d_06
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_06" secondary="md_01d_06b"
+  warp area=18 position="01pos_02"
 end
 
-entry 50 kind=1 area=9 name="01d_07"
-  scene args=1,2,64 primary="md_01d_07" secondary="md_01d_07b"
-  warp args=0,14,0 position="01pos_02"
+entry 50 kind=door area=9 name="01d_07"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_07" secondary="md_01d_07b"
+  warp area=14 position="01pos_02"
 end
 
-entry 51 kind=1 area=9 name="01d_08"
-  scene args=1,2,64 primary="md_01d_08" secondary="md_01d_08b"
-  warp args=0,19,0 position="01pos_02"
+entry 51 kind=door area=9 name="01d_08"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_08" secondary="md_01d_08b"
+  warp area=19 position="01pos_02"
 end
 
-entry 52 kind=1 area=9 name="01d_09"
-  scene args=1,2,64 primary="md_01d_09" secondary="md_01d_09b"
-  warp args=0,23,0 position="01pos_03"
+entry 52 kind=door area=9 name="01d_09"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_09" secondary="md_01d_09b"
+  warp area=23 position="01pos_03"
 end
 
-entry 53 kind=1 area=9 name="01d_10"
-  scene args=1,2,64 primary="md_01d_10" secondary="md_01d_10b"
-  warp args=0,23,0 position="01pos_02"
+entry 53 kind=door area=9 name="01d_10"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_10" secondary="md_01d_10b"
+  warp area=23 position="01pos_02"
 end
 
-entry 54 kind=1 area=9 name="01d_11"
-  scene args=1,2,64 primary="md_01d_11" secondary="md_01d_11b"
-  warp args=0,19,0 position="01pos_03"
+entry 54 kind=door area=9 name="01d_11"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_11" secondary="md_01d_11b"
+  warp area=19 position="01pos_03"
 end
 
-entry 55 kind=1 area=10 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,6,0 position="01pos_08"
+entry 55 kind=door area=10 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=6 position="01pos_08"
 end
 
-entry 56 kind=1 area=10 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,6,0 position="01pos_07"
+entry 56 kind=door area=10 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=6 position="01pos_07"
 end
 
-entry 57 kind=1 area=10 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,9,0
+entry 57 kind=door area=10 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=9
   camera mode=1
 end
 
-entry 58 kind=1 area=10 name="01d_04"
-  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,8,0 position="01pos_02"
+entry 58 kind=door area=10 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=8 position="01pos_02"
 end
 
-entry 59 kind=7 area=10
-  scene args=5,2,0
-  warp args=24,10,0 position="01pos_05"
+entry 59 kind=side_exit area=10
+  scene exit_mode=5 selector=2
+  warp field=24 area=10 position="01pos_05"
 end
 
-entry 60 kind=1 area=11 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,6,0
+entry 60 kind=door area=11 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=6
 end
 
-entry 61 kind=1 area=11 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,12,0
+entry 61 kind=door area=11 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=12
 end
 
-entry 62 kind=1 area=12 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,11,0 position="01pos_02"
+entry 62 kind=door area=12 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=11 position="01pos_02"
 end
 
-entry 63 kind=1 area=12 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,13,0 position="01pos_04"
+entry 63 kind=door area=12 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=13 position="01pos_04"
 end
 
-entry 64 kind=1 area=12 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,4,0 position="01pos_02"
+entry 64 kind=door area=12 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=4 position="01pos_02"
 end
 
-entry 65 kind=1 area=13 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,23,0 position="01pos_05"
+entry 65 kind=door area=13 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=23 position="01pos_05"
 end
 
-entry 66 kind=1 area=13 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,14,0
+entry 66 kind=door area=13 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=14
 end
 
-entry 67 kind=1 area=13 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp attributes=2 args=0,16,0
+entry 67 kind=door area=13 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp attributes=2 area=16
   camera table=77
 end
 
-entry 68 kind=1 area=13 name="01d_04"
-  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,12,0 position="01pos_02"
+entry 68 kind=door area=13 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=12 position="01pos_02"
 end
 
-entry 69 kind=1 area=14 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,13,0 position="01pos_02"
+entry 69 kind=door area=14 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=13 position="01pos_02"
 end
 
-entry 70 kind=1 area=14 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,9,0 position="01pos_07"
+entry 70 kind=door area=14 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=9 position="01pos_07"
   camera mode=1 name="01cam_02"
 end
 
-entry 71 kind=7 area=14
-  scene args=4,31,0
-  warp args=24,14,0 position="01pos_03"
+entry 71 kind=side_exit area=14
+  scene exit_mode=4 selector=31
+  warp field=24 area=14 position="01pos_03"
 end
 
-entry 73 kind=1 area=15 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,17,0 position="01pos_02"
+entry 73 kind=door area=15 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=17 position="01pos_02"
 end
 
-entry 74 kind=1 area=15 name=@01d_02
-  scene args=1,2,48 primary="md_01d_02" secondary="md_01d_02b"
-  warp type=elevator args=6,0,0 position="01pos_02"
+entry 74 kind=door area=15 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=48 primary="md_01d_02" secondary="md_01d_02b"
+  warp type=elevator table=6 position="01pos_02"
 end
 
-entry 75 kind=6
-  scene args=6,0,0
-  warp args=0,15,0 position="01pos_02"
+entry 75 kind=elevator_exit
+  scene elevator=6
+  warp area=15 position="01pos_02"
 end
 
-entry 77 kind=1 area=16 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp attributes=4 args=0,13,0 position="01pos_03"
+entry 77 kind=door area=16 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp attributes=4 area=13 position="01pos_03"
 end
 
-entry 78 kind=1 area=16 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,25,0 position="01pos_02"
+entry 78 kind=door area=16 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=25 position="01pos_02"
   camera table=77
 end
 
-entry 79 kind=1 area=17 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp attributes=4 args=0,18,0 position="01pos_04"
+entry 79 kind=door area=17 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp attributes=4 area=18 position="01pos_04"
 end
 
-entry 80 kind=1 area=17 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,15,0
+entry 80 kind=door area=17 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=15
 end
 
-entry 81 kind=1 area=18 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,23,0 position="01pos_04"
+entry 81 kind=door area=18 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=23 position="01pos_04"
 end
 
-entry 82 kind=1 area=18 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,9,0 position="01pos_06"
+entry 82 kind=door area=18 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=9 position="01pos_06"
   camera mode=1 name="01cam_02"
 end
 
-entry 83 kind=1 area=18 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,19,0 position="01pos_04"
+entry 83 kind=door area=18 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=19 position="01pos_04"
 end
 
-entry 84 kind=1 area=18 name="01d_04"
-  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,17,0
+entry 84 kind=door area=18 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=17
 end
 
-entry 85 kind=1 area=19 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,22,0
+entry 85 kind=door area=19 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=22
 end
 
-entry 86 kind=1 area=19 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,9,0 position="01pos_08"
+entry 86 kind=door area=19 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=9 position="01pos_08"
   camera mode=1 name="01cam_02"
 end
 
-entry 87 kind=1 area=19 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,9,0 position="01pos_11"
+entry 87 kind=door area=19 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=9 position="01pos_11"
   camera mode=1 name="01cam_02"
 end
 
-entry 88 kind=1 flag=1288 area=19 name="01d_04"
-  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,18,0 position="01pos_03"
+entry 88 kind=door flag=1288 area=19 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=18 position="01pos_03"
 end
 
-entry 89 kind=1 area=19 name="01d_04"
-  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,18,0 position="01pos_11"
+entry 89 kind=door area=19 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=18 position="01pos_11"
   camera name="01cam_02"
   after flag=2 script=@019_01eve_01
 end
 
-entry 90 kind=7 area=19
-  scene args=5,1,0
-  warp args=24,19,0 position="01pos_05"
+entry 90 kind=side_exit area=19
+  scene exit_mode=5 selector=1
+  warp field=24 area=19 position="01pos_05"
 end
 
-entry 92 kind=1 flag=27 area=20 name=@01d_01
-  scene args=3,0,67 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,58,0
+entry 92 kind=door flag=27 area=20 name=@01d_01
+  scene motion=3 sound=67 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=58
   camera mode=1
 end
 
-entry 93 kind=1 flag=19 area=20 name=@01d_01
-  scene args=3,0,67 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,57,0
+entry 93 kind=door flag=19 area=20 name=@01d_01
+  scene motion=3 sound=67 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=57
   camera mode=1
 end
 
-entry 94 kind=1 flag=10 area=20 name=@01d_01
-  scene args=3,2,67 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,26,0
+entry 94 kind=door flag=10 area=20 name=@01d_01
+  scene motion=3 secondary_motion=2 sound=67 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=26
   camera mode=1
   after flag=8
 end
 
-entry 95 kind=1 area=20 name=@01d_01
-  scene args=3,2,67 primary="md_01d_01" secondary="md_01d_01b"
-  warp type=event args=612,0,24
+entry 95 kind=door area=20 name=@01d_01
+  scene motion=3 secondary_motion=2 sound=67 primary="md_01d_01" secondary="md_01d_01b"
+  warp type=event event=612 alternate_field=24
 end
 
-entry 96 kind=1 area=20 name=@01d_02
-  scene args=1,2,48 primary="md_01d_02" secondary="md_01d_02b"
-  warp type=elevator args=6,1,0 position="01pos_02"
+entry 96 kind=door area=20 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=48 primary="md_01d_02" secondary="md_01d_02b"
+  warp type=elevator table=6 floor=1 position="01pos_02"
 end
 
-entry 97 kind=6
-  scene args=6,1,0
-  warp args=0,20,0 position="01pos_02"
+entry 97 kind=elevator_exit
+  scene elevator=6 floor=1
+  warp area=20 position="01pos_02"
 end
 
-entry 98 kind=7 area=20
-  scene args=4,32,0
-  warp args=24,20,0 position="01pos_03"
+entry 98 kind=side_exit area=20
+  scene exit_mode=4 selector=32
+  warp field=24 area=20 position="01pos_03"
 end
 
-entry 100 kind=1 area=21 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,25,0
+entry 100 kind=door area=21 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=25
   camera table=77
 end
 
-entry 101 kind=1 area=22 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,19,0
+entry 101 kind=door area=22 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=19
 end
 
-entry 102 kind=1 area=22 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,24,0
+entry 102 kind=door area=22 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=24
 end
 
-entry 103 kind=1 area=22 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,24,0 position="01pos_02"
+entry 103 kind=door area=22 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=24 position="01pos_02"
 end
 
-entry 104 kind=1 area=22 name="01d_04"
-  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,23,0
+entry 104 kind=door area=22 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=23
 end
 
-entry 106 kind=1 area=23 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,22,0 position="01pos_04"
+entry 106 kind=door area=23 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=22 position="01pos_04"
 end
 
-entry 107 kind=1 area=23 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,9,0 position="01pos_10"
+entry 107 kind=door area=23 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=9 position="01pos_10"
   camera mode=1 name="01cam_02"
 end
 
-entry 108 kind=1 area=23 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,9,0 position="01pos_09"
+entry 108 kind=door area=23 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=9 position="01pos_09"
   camera mode=1 name="01cam_02"
 end
 
-entry 109 kind=1 area=23 name="01d_04"
-  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,18,0
+entry 109 kind=door area=23 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=18
 end
 
-entry 110 kind=1 area=23 name="01d_05"
-  scene args=1,2,64 primary="md_01d_05" secondary="md_01d_05b"
-  warp args=0,13,0
+entry 110 kind=door area=23 name="01d_05"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_05" secondary="md_01d_05b"
+  warp area=13
 end
 
-entry 112 kind=1 area=24 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,22,0 position="01pos_02"
+entry 112 kind=door area=24 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=22 position="01pos_02"
 end
 
-entry 113 kind=1 area=24 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,22,0 position="01pos_03"
+entry 113 kind=door area=24 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=22 position="01pos_03"
 end
 
-entry 114 kind=7 area=24
-  scene args=4,35,0
-  warp args=24,24,0 position="01pos_03"
+entry 114 kind=side_exit area=24
+  scene exit_mode=4 selector=35
+  warp field=24 area=24 position="01pos_03"
 end
 
-entry 115 kind=1 area=25 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,21,0
+entry 115 kind=door area=25 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=21
   camera table=77
 end
 
-entry 116 kind=1 area=25 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,16,0 position="01pos_02"
+entry 116 kind=door area=25 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=16 position="01pos_02"
   camera table=77
 end
 
-entry 118 kind=1 area=26 name=@01d_01
-  scene args=3,0,67 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,20,0
+entry 118 kind=door area=26 name=@01d_01
+  scene motion=3 sound=67 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=20
 end
 
-entry 119 kind=1 area=26 name=@01d_02
-  scene args=3,0,67 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,27,0 position="01pos_04"
+entry 119 kind=door area=26 name=@01d_02
+  scene motion=3 sound=67 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=27 position="01pos_04"
 end
 
-entry 120 kind=1 area=26 name=@01d_03
-  scene args=3,0,67 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,27,0
+entry 120 kind=door area=26 name=@01d_03
+  scene motion=3 sound=67 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=27
 end
 
-entry 121 kind=8
-  scene args=612,0,0
-  warp args=0,26,0 position="01pos_04"
+entry 121 kind=battle_exit
+  scene event=612
+  warp area=26 position="01pos_04"
   camera mode=1
   tail control=104 args=27,5,1,12,8,5,5
 end
 
-entry 122 kind=1 flag=27 area=27 name=@01d_01
-  scene args=3,0,67 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,58,0 position="01pos_03"
+entry 122 kind=door flag=27 area=27 name=@01d_01
+  scene motion=3 sound=67 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=58 position="01pos_03"
   camera mode=1
   tail control=221 args=0,0,1,0,0,0,0
 end
 
-entry 123 kind=1 flag=19 area=27 name=@01d_01
-  scene args=3,0,67 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,57,0 position="01pos_03"
+entry 123 kind=door flag=19 area=27 name=@01d_01
+  scene motion=3 sound=67 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=57 position="01pos_03"
   camera mode=1
   tail control=228 args=0,0,1,0,0,0,0
 end
 
-entry 124 kind=1 area=27 name=@01d_01
-  scene args=3,0,67 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,26,0 position="01pos_03"
+entry 124 kind=door area=27 name=@01d_01
+  scene motion=3 sound=67 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=26 position="01pos_03"
   camera mode=1
   after flag=8
 end
 
-entry 125 kind=1 area=27 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,28,0
+entry 125 kind=door area=27 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=28
 end
 
-entry 126 kind=1 area=27 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,28,0 position="01pos_02"
+entry 126 kind=door area=27 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=28 position="01pos_02"
 end
 
-entry 127 kind=1 flag=27 area=27 name="01d_04"
-  scene args=3,0,67 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,58,0 position="01pos_02"
+entry 127 kind=door flag=27 area=27 name="01d_04"
+  scene motion=3 sound=67 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=58 position="01pos_02"
   camera mode=1
   tail control=233 args=0,0,1,0,0,0,0
 end
 
-entry 128 kind=1 flag=19 area=27 name="01d_04"
-  scene args=3,0,67 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,57,0 position="01pos_02"
+entry 128 kind=door flag=19 area=27 name="01d_04"
+  scene motion=3 sound=67 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=57 position="01pos_02"
   camera mode=1
   tail control=229 args=0,0,1,0,0,0,0
 end
 
-entry 129 kind=1 area=27 name="01d_04"
-  scene args=3,0,67 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,26,0 position="01pos_02"
+entry 129 kind=door area=27 name="01d_04"
+  scene motion=3 sound=67 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=26 position="01pos_02"
   camera mode=1
   after flag=8
 end
 
-entry 130 kind=1 area=28 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,27,0 position="01pos_02"
+entry 130 kind=door area=28 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=27 position="01pos_02"
 end
 
-entry 131 kind=1 area=28 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,27,0 position="01pos_03"
+entry 131 kind=door area=28 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=27 position="01pos_03"
   tail control=117 args=24,0,3,0,0,0,0
 end
 
-entry 132 kind=1 area=28 name=@01d_03
-  scene args=1,2,48 primary="md_01d_03" secondary="md_01d_03b"
-  warp type=elevator args=3,0,0
+entry 132 kind=door area=28 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=48 primary="md_01d_03" secondary="md_01d_03b"
+  warp type=elevator table=3
   camera mode=1 name="01cam_02"
 end
 
-entry 133 kind=6
-  scene args=3,0,0
-  warp args=0,28,0 position="01pos_03"
+entry 133 kind=elevator_exit
+  scene elevator=3
+  warp area=28 position="01pos_03"
 end
 
-entry 135 kind=6
-  scene args=3,1,0
-  warp args=0,29,0 position="01pos_02"
+entry 135 kind=elevator_exit
+  scene elevator=3 floor=1
+  warp area=29 position="01pos_02"
 end
 
-entry 136 kind=1 area=29 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,32,0
+entry 136 kind=door area=29 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=32
 end
 
-entry 137 kind=1 area=29 name=@01d_02
-  scene args=1,2,48 primary="md_01d_02" secondary="md_01d_02b"
-  warp type=elevator args=3,1,0
+entry 137 kind=door area=29 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=48 primary="md_01d_02" secondary="md_01d_02b"
+  warp type=elevator table=3 floor=1
 end
 
-entry 138 kind=1 area=29 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,30,0
+entry 138 kind=door area=29 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=30
 end
 
-entry 140 kind=1 area=30 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,29,0 position="01pos_03"
+entry 140 kind=door area=30 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=29 position="01pos_03"
 end
 
-entry 142 kind=1 area=31 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,35,0
+entry 142 kind=door area=31 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=35
 end
 
-entry 144 kind=1 area=32 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,29,0
+entry 144 kind=door area=32 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=29
 end
 
-entry 145 kind=1 area=32 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,35,0 position="01pos_03"
+entry 145 kind=door area=32 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=35 position="01pos_03"
 end
 
-entry 147 kind=1 area=33 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,34,0
+entry 147 kind=door area=33 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=34
 end
 
-entry 148 kind=1 area=33 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,35,0 position="01pos_04"
+entry 148 kind=door area=33 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=35 position="01pos_04"
 end
 
-entry 149 kind=1 area=33 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,36,0
+entry 149 kind=door area=33 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=36
 end
 
-entry 151 kind=1 area=34 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,33,0
+entry 151 kind=door area=34 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=33
 end
 
-entry 153 kind=1 area=35 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,31,0
+entry 153 kind=door area=35 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=31
 end
 
-entry 154 kind=1 area=35 name=@01d_02
-  scene args=1,2,68 primary="md_01d_00" secondary="md_01d_00b"
-  warp type=facility args=3,7,2 position="01pos_02"
+entry 154 kind=door area=35 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=68 primary="md_01d_00" secondary="md_01d_00b"
+  warp type=facility action=terminal slot=7 floor_flag=2 position="01pos_02"
   after script="md_01d_00c"
   tail control=2 args=24,6,0,15,4,2,2
 end
 
-entry 155 kind=7 area=35
-  scene args=3,7,0
-  warp args=24,35,0 position="01pos_02"
+entry 155 kind=side_exit area=35
+  scene exit_mode=3 selector=7
+  warp field=24 area=35 position="01pos_02"
 end
 
-entry 156 kind=1 area=35 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,32,0 position="01pos_02"
+entry 156 kind=door area=35 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=32 position="01pos_02"
 end
 
-entry 157 kind=1 area=35 name="01d_04"
-  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,33,0 position="01pos_02"
+entry 157 kind=door area=35 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=33 position="01pos_02"
 end
 
-entry 159 kind=1 area=36 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,33,0 position="01pos_03"
+entry 159 kind=door area=36 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=33 position="01pos_03"
 end
 
-entry 160 kind=1 area=36 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,37,0
+entry 160 kind=door area=36 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=37
 end
 
-entry 162 kind=1 area=37 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,36,0 position="01pos_02"
+entry 162 kind=door area=37 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=36 position="01pos_02"
 end
 
-entry 163 kind=1 area=37 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,39,0
+entry 163 kind=door area=37 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=39
 end
 
-entry 164 kind=1 area=37 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,42,0 position="01pos_02"
+entry 164 kind=door area=37 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=42 position="01pos_02"
 end
 
-entry 165 kind=1 area=37 name="01d_04"
-  scene args=1,2,48 primary="md_01d_04" secondary="md_01d_04b"
-  warp type=elevator args=4,0,0
+entry 165 kind=door area=37 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=48 primary="md_01d_04" secondary="md_01d_04b"
+  warp type=elevator table=4
 end
 
-entry 166 kind=6
-  scene args=4,0,0
-  warp args=0,37,0 position="01pos_04"
+entry 166 kind=elevator_exit
+  scene elevator=4
+  warp area=37 position="01pos_04"
 end
 
-entry 168 kind=1 area=38 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,42,0
+entry 168 kind=door area=38 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=42
 end
 
-entry 169 kind=1 area=38 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,44,0 position="01pos_02"
+entry 169 kind=door area=38 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=44 position="01pos_02"
 end
 
-entry 170 kind=1 area=38 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,40,0
+entry 170 kind=door area=38 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=40
 end
 
-entry 172 kind=1 area=39 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,37,0 position="01pos_02"
+entry 172 kind=door area=39 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=37 position="01pos_02"
 end
 
-entry 173 kind=1 area=39 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,41,0
+entry 173 kind=door area=39 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=41
 end
 
-entry 175 kind=1 area=40 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,43,0
+entry 175 kind=door area=40 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=43
 end
 
-entry 176 kind=1 area=40 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,38,0 position="01pos_03"
+entry 176 kind=door area=40 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=38 position="01pos_03"
 end
 
-entry 177 kind=7 area=40
-  scene args=5,3,0
-  warp args=0,40,0 position="01pos_03"
+entry 177 kind=side_exit area=40
+  scene exit_mode=5 selector=3
+  warp area=40 position="01pos_03"
 end
 
-entry 178 kind=1 area=41 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,39,0 position="01pos_02"
+entry 178 kind=door area=41 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=39 position="01pos_02"
 end
 
-entry 179 kind=1 area=41 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,43,0 position="01pos_04"
+entry 179 kind=door area=41 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=43 position="01pos_04"
 end
 
-entry 181 kind=1 area=42 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,38,0
+entry 181 kind=door area=42 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=38
 end
 
-entry 182 kind=1 flag=12 area=42 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,37,0 position="01pos_03"
+entry 182 kind=door flag=12 area=42 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=37 position="01pos_03"
 end
 
-entry 183 kind=1 area=42 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp type=event args=614,0,24
+entry 183 kind=door area=42 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp type=event event=614 alternate_field=24
 end
 
-entry 184 kind=7 area=42
-  scene args=4,33,0
-  warp args=24,42,0 position="01pos_03"
+entry 184 kind=side_exit area=42
+  scene exit_mode=4 selector=33
+  warp field=24 area=42 position="01pos_03"
 end
 
-entry 185 kind=8
-  scene args=614,0,0
-  warp args=0,37,0 position="01pos_03"
+entry 185 kind=battle_exit
+  scene event=614
+  warp area=37 position="01pos_03"
 end
 
-entry 187 kind=1 area=43 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,40,0 position="01pos_02"
+entry 187 kind=door area=43 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=40 position="01pos_02"
 end
 
-entry 188 kind=1 area=43 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,44,0
+entry 188 kind=door area=43 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=44
 end
 
-entry 189 kind=1 area=43 name=@01d_03
-  scene args=1,2,48 primary="md_01d_03" secondary="md_01d_03b"
-  warp type=elevator args=5,0,0
+entry 189 kind=door area=43 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=48 primary="md_01d_03" secondary="md_01d_03b"
+  warp type=elevator table=5
 end
 
-entry 190 kind=6
-  scene args=5,0,0
-  warp args=0,43,0 position="01pos_03"
+entry 190 kind=elevator_exit
+  scene elevator=5
+  warp area=43 position="01pos_03"
 end
 
-entry 191 kind=1 area=43 name="01d_04"
-  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,41,0 position="01pos_02"
+entry 191 kind=door area=43 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=41 position="01pos_02"
 end
 
-entry 193 kind=1 area=44 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,43,0 position="01pos_02"
+entry 193 kind=door area=44 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=43 position="01pos_02"
 end
 
-entry 194 kind=1 area=44 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,38,0 position="01pos_02"
+entry 194 kind=door area=44 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=38 position="01pos_02"
 end
 
-entry 196 kind=1 area=45 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,47,0 position="01pos_03"
+entry 196 kind=door area=45 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=47 position="01pos_03"
 end
 
-entry 197 kind=1 area=45 name=@01d_02
-  scene args=1,2,48 primary="md_01d_02" secondary="md_01d_02b"
-  warp type=elevator args=5,1,0
+entry 197 kind=door area=45 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=48 primary="md_01d_02" secondary="md_01d_02b"
+  warp type=elevator table=5 floor=1
 end
 
-entry 198 kind=6
-  scene args=5,1,0
-  warp args=0,45,0 position="01pos_02"
+entry 198 kind=elevator_exit
+  scene elevator=5 floor=1
+  warp area=45 position="01pos_02"
 end
 
-entry 199 kind=1 area=45 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,46,0
+entry 199 kind=door area=45 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=46
 end
 
-entry 200 kind=1 area=45 name="01d_04"
-  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,46,0 position="01pos_02"
+entry 200 kind=door area=45 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=46 position="01pos_02"
 end
 
-entry 202 kind=1 area=46 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,45,0 position="01pos_03"
+entry 202 kind=door area=46 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=45 position="01pos_03"
 end
 
-entry 203 kind=1 area=46 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,45,0 position="01pos_04"
+entry 203 kind=door area=46 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=45 position="01pos_04"
 end
 
-entry 204 kind=1 area=47 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,48,0
+entry 204 kind=door area=47 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=48
 end
 
-entry 205 kind=1 area=47 name=@01d_02
-  scene args=1,2,48 primary="md_01d_02" secondary="md_01d_02b"
-  warp type=elevator args=4,1,0
+entry 205 kind=door area=47 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=48 primary="md_01d_02" secondary="md_01d_02b"
+  warp type=elevator table=4 floor=1
 end
 
-entry 206 kind=6
-  scene args=4,1,0
-  warp args=0,47,0 position="01pos_02"
+entry 206 kind=elevator_exit
+  scene elevator=4 floor=1
+  warp area=47 position="01pos_02"
 end
 
-entry 207 kind=1 area=47 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,45,0
+entry 207 kind=door area=47 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=45
 end
 
-entry 208 kind=1 area=48 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,47,0
+entry 208 kind=door area=48 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=47
 end
 
-entry 209 kind=1 area=48 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,50,0 position="01pos_02"
+entry 209 kind=door area=48 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=50 position="01pos_02"
 end
 
-entry 210 kind=7 area=48
-  scene args=4,34,0
-  warp args=24,48,0 position="01pos_03"
+entry 210 kind=side_exit area=48
+  scene exit_mode=4 selector=34
+  warp field=24 area=48 position="01pos_03"
 end
 
-entry 211 kind=1 area=49 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,51,0 position="01pos_02"
+entry 211 kind=door area=49 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=51 position="01pos_02"
 end
 
-entry 212 kind=1 flag=13 area=49 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
+entry 212 kind=door flag=13 area=49 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
   warp position="01pos_04"
   camera mode=1
 end
 
-entry 213 kind=1 area=49 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp type=event args=615,0,24
+entry 213 kind=door area=49 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp type=event event=615 alternate_field=24
 end
 
-entry 214 kind=1 area=49 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,51,0
+entry 214 kind=door area=49 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=51
 end
 
-entry 215 kind=1 area=49 name="01d_04"
-  scene args=2,1,64 primary="md_01d_02" secondary="md_01d_02b"
+entry 215 kind=door area=49 name="01d_04"
+  scene motion=2 secondary_motion=1 sound=64 primary="md_01d_02" secondary="md_01d_02b"
   warp position="01pos_02"
 end
 
-entry 217 kind=1 area=50 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,51,0 position="01pos_04"
+entry 217 kind=door area=50 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=51 position="01pos_04"
 end
 
-entry 218 kind=1 area=50 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,48,0 position="01pos_02"
+entry 218 kind=door area=50 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=48 position="01pos_02"
 end
 
-entry 219 kind=8
-  scene args=615,0,0
-  warp args=0,49,0 position="01pos_05"
+entry 219 kind=battle_exit
+  scene event=615
+  warp area=49 position="01pos_05"
   camera mode=1
 end
 
-entry 220 kind=1 area=51 name=@01d_01
-  scene args=2,0,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,49,0 position="01pos_03"
+entry 220 kind=door area=51 name=@01d_01
+  scene motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=49 position="01pos_03"
 end
 
-entry 221 kind=1 area=51 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,49,0
+entry 221 kind=door area=51 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=49
   camera mode=1
 end
 
-entry 222 kind=1 area=51 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,55,0
+entry 222 kind=door area=51 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=55
 end
 
-entry 223 kind=1 area=51 name="01d_04"
-  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,50,0
+entry 223 kind=door area=51 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=50
 end
 
-entry 224 kind=7 area=51
-  scene args=5,4,0
-  warp args=24,51,0 position="01pos_05"
+entry 224 kind=side_exit area=51
+  scene exit_mode=5 selector=4
+  warp field=24 area=51 position="01pos_05"
 end
 
-entry 226 kind=1 area=52 name=@01d_01
-  scene args=1,2,48 primary="md_01d_01" secondary="md_01d_01b"
-  warp type=elevator args=7,1,0 position="01pos_02"
+entry 226 kind=door area=52 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=48 primary="md_01d_01" secondary="md_01d_01b"
+  warp type=elevator table=7 floor=1 position="01pos_02"
 end
 
-entry 227 kind=1 flag=1283 area=52 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,54,0
+entry 227 kind=door flag=1283 area=52 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=54
 end
 
-entry 228 kind=1 area=52 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,54,0 position="01pos_07"
+entry 228 kind=door area=52 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=54 position="01pos_07"
   after flag=2 script=@054_01eve_01
 end
 
-entry 229 kind=1 area=52 name=@01d_03
-  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,54,0 position="01pos_02"
+entry 229 kind=door area=52 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=54 position="01pos_02"
 end
 
-entry 230 kind=1 area=52 name="01d_04"
-  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
-  warp args=0,53,0
+entry 230 kind=door area=52 name="01d_04"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
+  warp area=53
 end
 
-entry 231 kind=1 area=52 name="01d_05"
-  scene args=1,2,64 primary="md_01d_05" secondary="md_01d_05b"
-  warp args=0,53,0 position="01pos_02"
+entry 231 kind=door area=52 name="01d_05"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_05" secondary="md_01d_05b"
+  warp area=53 position="01pos_02"
 end
 
-entry 232 kind=1 area=52 name=@01d_06
-  scene args=2,1,65 primary="md_01d_06" secondary="md_01d_06b"
-  warp type=event args=616,0,11
+entry 232 kind=door area=52 name=@01d_06
+  scene motion=2 secondary_motion=1 sound=65 primary="md_01d_06" secondary="md_01d_06b"
+  warp type=event event=616 alternate_field=11
 end
 
-entry 233 kind=6
-  scene args=7,1,0
-  warp args=0,52,0
+entry 233 kind=elevator_exit
+  scene elevator=7 floor=1
+  warp area=52
 end
 
-entry 234 kind=1 area=53 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,52,0 position="01pos_04"
+entry 234 kind=door area=53 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=52 position="01pos_04"
 end
 
-entry 235 kind=1 area=53 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,52,0 position="01pos_05"
+entry 235 kind=door area=53 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=52 position="01pos_05"
 end
 
-entry 236 kind=1 area=54 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,52,0 position="01pos_02"
+entry 236 kind=door area=54 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=52 position="01pos_02"
 end
 
-entry 237 kind=1 area=54 name=@01d_02
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,52,0 position="01pos_03"
+entry 237 kind=door area=54 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=52 position="01pos_03"
 end
 
-entry 238 kind=1 area=55 name=@01d_01
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,51,0 position="01pos_03"
+entry 238 kind=door area=55 name=@01d_01
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=51 position="01pos_03"
 end
 
-entry 239 kind=1 area=55 name=@01d_02
-  scene args=1,2,48 primary="md_01d_02" secondary="md_01d_02b"
-  warp type=elevator args=7,0,0
+entry 239 kind=door area=55 name=@01d_02
+  scene motion=1 secondary_motion=2 sound=48 primary="md_01d_02" secondary="md_01d_02b"
+  warp type=elevator table=7
 end
 
-entry 240 kind=6
-  scene args=7,0,0
-  warp args=0,55,0 position="01pos_02"
+entry 240 kind=elevator_exit
+  scene elevator=7
+  warp area=55 position="01pos_02"
 end
 
-entry 241 kind=8
-  scene args=521,0,0
-  warp args=0,57,0 position="01pos_03"
+entry 241 kind=battle_exit
+  scene event=521
+  warp area=57 position="01pos_03"
   camera mode=1
   after flag=2 script=@battle_g_fin
 end
 
-entry 242 kind=8
-  scene args=510,0,0
-  warp args=0,57,0 position="01pos_07"
+entry 242 kind=battle_exit
+  scene event=510
+  warp area=57 position="01pos_07"
   camera mode=1
   after flag=2 script=@battle_g_fin
 end
 
-entry 243 kind=1 area=57 name=@01d_01
-  scene args=3,2,67 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,20,0
+entry 243 kind=door area=57 name=@01d_01
+  scene motion=3 secondary_motion=2 sound=67 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=20
 end
 
-entry 244 kind=1 area=57 name=@01d_02
-  scene args=3,2,67 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,27,0 position="01pos_04"
+entry 244 kind=door area=57 name=@01d_02
+  scene motion=3 secondary_motion=2 sound=67 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=27 position="01pos_04"
 end
 
-entry 245 kind=1 area=57 name=@01d_03
-  scene args=3,2,67 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,27,0
+entry 245 kind=door area=57 name=@01d_03
+  scene motion=3 secondary_motion=2 sound=67 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=27
 end
 
-entry 246 kind=8
-  scene args=522,0,0
-  warp args=0,58,0 position="01pos_03"
+entry 246 kind=battle_exit
+  scene event=522
+  warp area=58 position="01pos_03"
   camera mode=1
   after flag=2 script=@battle_g_fin
 end
 
-entry 247 kind=8
-  scene args=520,0,0
-  warp args=0,58,0 position="01pos_07"
+entry 247 kind=battle_exit
+  scene event=520
+  warp area=58 position="01pos_07"
   camera mode=1
   after flag=2 script=@battle_g_fin
 end
 
-entry 248 kind=1 area=58 name=@01d_01
-  scene args=3,2,67 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,20,0
+entry 248 kind=door area=58 name=@01d_01
+  scene motion=3 secondary_motion=2 sound=67 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=20
 end
 
-entry 249 kind=1 area=58 name=@01d_02
-  scene args=3,2,67 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=0,27,0 position="01pos_04"
+entry 249 kind=door area=58 name=@01d_02
+  scene motion=3 secondary_motion=2 sound=67 primary="md_01d_02" secondary="md_01d_02b"
+  warp area=27 position="01pos_04"
 end
 
-entry 250 kind=1 area=58 name=@01d_03
-  scene args=3,2,67 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=0,27,0
+entry 250 kind=door area=58 name=@01d_03
+  scene motion=3 secondary_motion=2 sound=67 primary="md_01d_03" secondary="md_01d_03b"
+  warp area=27
 end
 
-entry 252 kind=8
-  scene args=515,0,0
-  warp args=0,52,0 position="01pos_07"
+entry 252 kind=battle_exit
+  scene event=515
+  warp area=52 position="01pos_07"
 end
 
-entry 253 kind=8
-  scene args=516,0,0
-  warp args=0,53,0 position="01pos_03"
+entry 253 kind=battle_exit
+  scene event=516
+  warp area=53 position="01pos_03"
 end
