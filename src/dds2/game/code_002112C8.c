@@ -2,6 +2,60 @@
 #include "btl_command.h"
 #include "pcp_vu0.h"
 
+typedef struct ActionUnit {
+    u8 pad0[8];
+    u32 sequenceFlags; /* 0x08 */
+    u32 actorFlags;    /* 0x0C */
+    u8 pad10[8];
+    s32 parentUnit;    /* 0x18: owner of this action */
+    u8 pad1C[4];
+    f32 verticalOffset; /* 0x20: lifted for special action visual */
+    s32 parentAction;  /* 0x24 */
+    u8 pad28[0x28];
+    f32 cameraPointAHeight; /* 0x50 */
+    u8 pad54[0x8C];
+    f32 cameraPointBHeight; /* 0xE0 */
+    u8 padE4[8];
+    s32 actionStatus; /* 0xEC: checked before action 0x10 */
+    u8 padF0[8];
+    s16 motionStateA; /* 0xF8: cleared before restoring the unit's motion */
+    s16 motionStateB; /* 0xFA: exact meaning not established */
+    s32 savedMotionIndex; /* 0xFC: passed as the motion table index */
+    s32 savedMotionB; /* 0x100: passed to the motion setter */
+    f32 savedMotionScale; /* 0x104 */
+    u64 ownerId;        /* 0x108: parent battle unit owner */
+    u32 flags;
+    u32 stateFlags;
+    u8 pad118[8];
+    u16 statusFlags;
+    u8 pad122[2];
+    u16 mode;
+    u8 pad126[6];
+    u16 motionRequest; /* 0x12C */
+    u8 pad12E[2];
+    u32 pendingAction;
+    u32 action;
+    u8 pad138[4];
+    s32 actionTimer;
+    u8 pad140[0x14];
+    f32 cameraOffset; /* 0x154 */
+    u8 pad158[0x1E8];
+    u32 rendererHandle;
+    u8 pad344[0x20];
+    struct ActionUnit *next;
+} ActionUnit;
+
+/* The state at unit +0x114 links its owner to a selected target handle. */
+typedef struct BattleActionScene {
+    u8 pad00[0x208];
+    s32 soundSequence; /* 0x208: base ID for stationed sound */
+    u8 pad20C[0x40];
+    ActionUnit *units;
+    u8 pad250[0x50];
+    u32 mode;
+    u8 pad2A4[0x474];
+    u8 *state;
+} BattleActionScene;
 
 extern u64 func_00219318(void);
 
@@ -2166,7 +2220,23 @@ void func_00218250(void) {
     *(u32 *)((BattleWork *)battle)->sub = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", btlClaimCommandSlot);
+void btlClaimCommandSlot(ActionUnit *unit, u32 *entry) {
+    ActionUnit **state;
+
+    if (unit->flags & 0x400) {
+        state = (ActionUnit **)((BattleActionScene *)btlGetRuntime())->state;
+        entry[0x28 / 4] &= ~1;
+        entry[0x28 / 4] &= ~2;
+        if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0)) {
+            if (*state != 0 && *state != unit) {
+                btlRestoreUnitMinimumValueAndClearStatus(unit, entry);
+            } else {
+                *state = unit;
+                return;
+            }
+        }
+    }
+}
 
 void btlStartReadyUnitAction(void) {
     BattleWork *work = (BattleWork *)btlGetRuntime();
@@ -2591,7 +2661,24 @@ void btlClearSubtaskHandle(void) {
     work->sub->task = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", btlClaimCommandSlotAndTarget);
+void btlClaimCommandSlotAndTarget(ActionUnit *unit, u32 *entry) {
+    ActionUnit **state;
+
+    if (unit->flags & 0x400) {
+        state = (ActionUnit **)((BattleActionScene *)btlGetRuntime())->state;
+        entry[0x28 / 4] &= ~1;
+        entry[0x28 / 4] &= ~2;
+        if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0)) {
+            if (*state != 0 && *state != unit) {
+                btlRestoreUnitMinimumValueAndClearStatus(unit, entry);
+            } else {
+                *state = unit;
+                state[2] = unit;
+                return;
+            }
+        }
+    }
+}
 
 s32 btlSetSubtaskControlEnabled(s32 unused, s32 ignored, s32 action) {
     BattleSub *sub = ((BattleWork *)btlGetRuntime())->sub;
@@ -3571,60 +3658,6 @@ extern s32 func_00222450();
 
 extern s32 func_00224598();
 
-typedef struct ActionUnit {
-    u8 pad0[8];
-    u32 sequenceFlags; /* 0x08 */
-    u32 actorFlags;    /* 0x0C */
-    u8 pad10[8];
-    s32 parentUnit;    /* 0x18: owner of this action */
-    u8 pad1C[4];
-    f32 verticalOffset; /* 0x20: lifted for special action visual */
-    s32 parentAction;  /* 0x24 */
-    u8 pad28[0x28];
-    f32 cameraPointAHeight; /* 0x50 */
-    u8 pad54[0x8C];
-    f32 cameraPointBHeight; /* 0xE0 */
-    u8 padE4[8];
-    s32 actionStatus; /* 0xEC: checked before action 0x10 */
-    u8 padF0[8];
-    s16 motionStateA; /* 0xF8: cleared before restoring the unit's motion */
-    s16 motionStateB; /* 0xFA: exact meaning not established */
-    s32 savedMotionIndex; /* 0xFC: passed as the motion table index */
-    s32 savedMotionB; /* 0x100: passed to the motion setter */
-    f32 savedMotionScale; /* 0x104 */
-    u64 ownerId;        /* 0x108: parent battle unit owner */
-    u32 flags;
-    u32 stateFlags;
-    u8 pad118[8];
-    u16 statusFlags;
-    u8 pad122[2];
-    u16 mode;
-    u8 pad126[6];
-    u16 motionRequest; /* 0x12C */
-    u8 pad12E[2];
-    u32 pendingAction;
-    u32 action;
-    u8 pad138[4];
-    s32 actionTimer;
-    u8 pad140[0x14];
-    f32 cameraOffset; /* 0x154 */
-    u8 pad158[0x1E8];
-    u32 rendererHandle;
-    u8 pad344[0x20];
-    struct ActionUnit *next;
-} ActionUnit;
-
-/* The state at unit +0x114 links its owner to a selected target handle. */
-typedef struct BattleActionScene {
-    u8 pad00[0x208];
-    s32 soundSequence; /* 0x208: base ID for stationed sound */
-    u8 pad20C[0x40];
-    ActionUnit *units;
-    u8 pad250[0x50];
-    u32 mode;
-    u8 pad2A4[0x474];
-    u8 *state;
-} BattleActionScene;
 
 /* Battle mode controls whether word zero is an actor handle or action flags. */
 typedef struct BattleActionState {
