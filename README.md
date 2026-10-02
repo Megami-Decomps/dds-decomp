@@ -57,6 +57,7 @@ python tools/download_tools.py   # ee-gcc 2.96 + ee-as, decompals binutils, objd
 python tools/extract.py          # -> orig/dds1/SLUS_209.74, orig/dds2/SLUS_211.52 (SHA-1 checked)
 python configure.py              # split with splat, write build.ninja and objdiff.json
 ninja                            # build and verify every extracted version (or: ninja dds1)
+ninja dds1-dev                   # build the relocatable DDS1 development ELF
 ninja dds1-scripts dds2-scripts  # assemble and verify the tracked script corpora
 ninja dds1-field-data dds2-field-data  # assemble and verify INF/WAP/FLD2 field data
 ninja dds1-battle-data dds2-battle-data  # assemble and verify battle tables
@@ -68,7 +69,8 @@ See [`docs/flw0.md`](docs/flw0.md) for script source,
 [`docs/wap.md`](docs/wap.md) for actor, elevator, door, and transition tables.
 See [`docs/fld.md`](docs/fld.md) for relocatable FLD2 field resources and
 [`docs/battle-tables.md`](docs/battle-tables.md) for encounter and battle
-content tables.
+content tables. See [`docs/development-build.md`](docs/development-build.md)
+for the experimental relocatable DDS1 development ELF.
 
 `ninja`'s last step runs `sha1sum --quiet -c` on each built ELF
 (`build/<v>/SLUS_*`). It is silent when the ELF matches. A mismatch prints
@@ -150,8 +152,10 @@ once relocations are masked. Each one decompiled in either game is ported to
 the other automatically (`tools/shared_funcs.py`).
 
 **Can I mod the game with this?**
-Not comfortably yet. Much of the code is still assembly at fixed addresses,
-and data isn't shiftable.
+Not comfortably yet. The experimental `dds1-dev` target can relocate one
+complete code unit's `.text` into an appended loadable segment without
+changing the exact retail targets, but convenient added code, broader data
+relocation, and DDS2 support are still future work.
 
 ## Names
 
