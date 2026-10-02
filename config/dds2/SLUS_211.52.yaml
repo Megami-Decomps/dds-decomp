@@ -636,7 +636,9 @@ segments:
       - { start: 0x339D2C, type: sbss, vram: 0x439100, name: sbss_after_sdfThread }
       - { start: 0x339D2C, type: bss, vram: 0x439280, name: bss_before_fileManager }
       - { start: 0x339D2C, type: .bss, vram: 0x457F28, name: file/fileManager }
-      - { start: 0x339D2C, type: bss, vram: 0x457F68, name: bss_after_fileManager }
+      - { start: 0x339D2C, type: bss, vram: 0x457F68, name: bss_before_sdfMemory }
+      - { start: 0x339D2C, type: .bss, vram: 0x45F0F8, name: sdf/sdfMemory }
+      - { start: 0x339D2C, type: bss, vram: 0x45F120, name: bss_after_sdfMemory }
 
   # Padding, .DVP overlay tables/microcode copies, .shstrtab and section headers; not loaded.
   - [0x339D2C, bin, elf_trailer]
