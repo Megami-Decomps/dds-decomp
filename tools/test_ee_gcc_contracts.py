@@ -443,6 +443,25 @@ void other(void) { release(); }
             [("other", 6)],
         )
 
+    def test_unbraced_else_and_do_calls_are_not_prototypes(self):
+        source = """extern s32 release(void);
+void caller(s32 condition) {
+    if (condition) { } else release();
+    do release(); while (condition);
+    release();
+}
+"""
+        ignored = scan_ignored_result_calls(source, "src/dds1/a.c")
+        other = scan_non_discard_calls(source, "src/dds1/a.c")
+        self.assertEqual(
+            [(call.name, call.line) for call in ignored],
+            [("release", 5)],
+        )
+        self.assertEqual(
+            [(call.name, call.line) for call in other],
+            [("release", 3), ("release", 4)],
+        )
+
     def test_any_same_named_local_makes_function_fail_closed(self):
         source = """extern s32 release(void *);
 void caller(void *item) {
