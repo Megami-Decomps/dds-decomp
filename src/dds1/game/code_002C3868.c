@@ -88,6 +88,9 @@ extern SdfCameraVector D_003900C0;
 extern SdfCameraVector D_003900D0;
 extern f32 D_00390010[][4];
 extern f32 D_00390050[][4];
+extern SdfCameraVector D_003900E0[];
+extern SdfCameraVector D_00390180[];
+extern u32 fldGetLmapStage(void);
 extern s8 D_003BD271;
 extern void sdfQuatSlerp(f32 *, f32 *, f32 *, f32);
 extern void sdfQuaternionNormalize(f32 *);
@@ -137,7 +140,26 @@ void sdfInitInnerVectors(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C38B0);
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C3AC8);
+void func_002C3AC8(s32 index, s32 count) {
+    fldLocalMapFirstCameraVector = D_003900E0[index];
+    fldLocalMapSecondCameraVector = D_00390180[index];
+    D_003900C0 = fldLocalMapFirstCameraVector;
+    D_003900D0 = fldLocalMapSecondCameraVector;
+    sdfCounterSelectionCount = count;
+    sdfSelectedCounterIndex = index;
+    D_003BD270 = 0;
+    D_003BD271 = fldGetLmapStage();
+
+    /* DDS1 refreshes the live pose components after the stage query. */
+    fldLocalMapFirstCameraVector.v[0] = D_003900E0[index].v[0];
+    fldLocalMapFirstCameraVector.v[1] = D_003900E0[index].v[1];
+    fldLocalMapFirstCameraVector.v[2] = D_003900E0[index].v[2];
+    fldLocalMapFirstCameraVector.v[3] = D_003900E0[index].v[3];
+    fldLocalMapSecondCameraVector.v[0] = D_00390180[index].v[0];
+    fldLocalMapSecondCameraVector.v[1] = D_00390180[index].v[1];
+    fldLocalMapSecondCameraVector.v[2] = D_00390180[index].v[2];
+    fldLocalMapSecondCameraVector.v[3] = D_00390180[index].v[3];
+}
 
 extern void sdfCommitPendingVectorAndMarkChanged();
 
@@ -275,7 +297,44 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C44D0);
+extern u8 D_00390310[][52];
+extern s32 mdlFlagTest(s32);
+
+u8 *func_002C44D0(s32 scene) {
+    switch (scene) {
+    case 3:
+        if (mdlFlagTest(7)) {
+            scene = 15;
+        }
+        break;
+    case 4:
+        if (mdlFlagTest(6)) {
+            scene = 11;
+        }
+        break;
+    case 5:
+        if (mdlFlagTest(0x31)) {
+            scene = 12;
+        }
+        break;
+    case 6:
+        if (mdlFlagTest(0x1F)) {
+            scene = 13;
+        }
+        break;
+    case 7:
+        if (mdlFlagTest(0x1E)) {
+            scene = 16;
+        }
+        break;
+    case 9:
+        if (mdlFlagTest(0x16)) {
+            scene = 14;
+        }
+        break;
+    }
+    return D_00390310[scene - 1];
+}
 
 void sdfCounterDestroyRuntime(SdfCounterRuntime *rt) {
     SdfCounterChannel *channel;

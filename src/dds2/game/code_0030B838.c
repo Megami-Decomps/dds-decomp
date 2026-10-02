@@ -147,6 +147,9 @@ typedef struct SdfSlotSet {
 } SdfSlotSet;
 extern SdfCameraVector D_00400990;
 extern SdfCameraVector D_004009A0;
+extern SdfCameraVector D_004009B0[];
+extern SdfCameraVector D_00400A50[];
+extern u32 func_0030B678(void);
 
 extern s32 mnuCreateListState(s32, s32, s32);
 extern void *sdfAllocSizeClassBlock(s32);
@@ -234,7 +237,16 @@ void sdfInitInnerVectors(void) {
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030B880);
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BA98);
+void func_0030BA98(s32 index, s32 count) {
+    fldLocalMapFirstCameraVector = D_004009B0[index];
+    fldLocalMapSecondCameraVector = D_00400A50[index];
+    D_00400990 = fldLocalMapFirstCameraVector;
+    D_004009A0 = fldLocalMapSecondCameraVector;
+    sdfCounterSelectionCount = count;
+    sdfSelectedCounterIndex = index;
+    D_004388C0 = 0;
+    D_004388C1 = func_0030B678();
+}
 
 extern void sdfCommitPendingVectorAndMarkChanged();
 
