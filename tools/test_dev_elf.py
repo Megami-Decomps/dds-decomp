@@ -61,8 +61,21 @@ def _elf(payload_size: int = 0x100) -> bytes:
     return bytes(image)
 
 
-def _relocation_elf(reloc_vaddr: int, symbol_vaddr: int, kind: int) -> bytes:
-    image = bytearray(0x278)
+def _relocation_elf(
+    entries: list[tuple[int, int, int, str]],
+) -> bytes:
+    symbol_offset = 0x100
+    symbol_size = (len(entries) + 1) * dev_elf.SYMBOL_ENTRY.size
+    relocation_offset = (symbol_offset + symbol_size + 0xF) & ~0xF
+    relocation_size = len(entries) * dev_elf.REL_ENTRY.size
+    string_offset = (relocation_offset + relocation_size + 0xF) & ~0xF
+    strings = bytearray(b"\0")
+    name_offsets = []
+    for _, _, _, name in entries:
+        name_offsets.append(len(strings))
+        strings.extend(name.encode("ascii") + b"\0")
+    section_offset = (string_offset + len(strings) + 0xF) & ~0xF
+    image = bytearray(section_offset + 4 * dev_elf.SECTION_HEADER.size)
     ident = b"\x7fELF" + bytes((1, 1, 1)) + bytes(9)
     dev_elf.ELF_HEADER.pack_into(
         image,
@@ -73,22 +86,76 @@ def _relocation_elf(reloc_vaddr: int, symbol_vaddr: int, kind: int) -> bytes:
         1,
         0,
         dev_elf.ELF_HEADER.size,
-        0x200,
+        section_offset,
         0,
         dev_elf.ELF_HEADER.size,
         dev_elf.PROGRAM_HEADER.size,
         0,
         dev_elf.SECTION_HEADER.size,
-        3,
+        4,
         0,
     )
-    dev_elf.SYMBOL_ENTRY.pack_into(image, 0x110, 0, symbol_vaddr, 0, 0, 0, 0)
-    dev_elf.REL_ENTRY.pack_into(image, 0x120, reloc_vaddr, (1 << 8) | kind)
+    for index, ((reloc_vaddr, symbol_vaddr, kind, _), name_offset) in enumerate(
+        zip(entries, name_offsets), start=1
+    ):
+        dev_elf.SYMBOL_ENTRY.pack_into(
+            image,
+            symbol_offset + index * dev_elf.SYMBOL_ENTRY.size,
+            name_offset,
+            symbol_vaddr,
+            0,
+            0,
+            0,
+            0,
+        )
+        dev_elf.REL_ENTRY.pack_into(
+            image,
+            relocation_offset + (index - 1) * dev_elf.REL_ENTRY.size,
+            reloc_vaddr,
+            (index << 8) | kind,
+        )
+    image[string_offset : string_offset + len(strings)] = strings
     dev_elf.SECTION_HEADER.pack_into(
-        image, 0x228, 0, dev_elf.SHT_SYMTAB, 0, 0, 0x100, 0x20, 0, 0, 4, 0x10
+        image,
+        section_offset + dev_elf.SECTION_HEADER.size,
+        0,
+        dev_elf.SHT_SYMTAB,
+        0,
+        0,
+        symbol_offset,
+        symbol_size,
+        3,
+        0,
+        4,
+        dev_elf.SYMBOL_ENTRY.size,
     )
     dev_elf.SECTION_HEADER.pack_into(
-        image, 0x250, 0, dev_elf.SHT_REL, 0, 0, 0x120, 8, 1, 0, 4, 8
+        image,
+        section_offset + 2 * dev_elf.SECTION_HEADER.size,
+        0,
+        dev_elf.SHT_REL,
+        0,
+        0,
+        relocation_offset,
+        relocation_size,
+        1,
+        0,
+        4,
+        dev_elf.REL_ENTRY.size,
+    )
+    dev_elf.SECTION_HEADER.pack_into(
+        image,
+        section_offset + 3 * dev_elf.SECTION_HEADER.size,
+        0,
+        dev_elf.SHT_STRTAB,
+        0,
+        0,
+        string_offset,
+        len(strings),
+        0,
+        0,
+        1,
+        0,
     )
     return bytes(image)
 
@@ -98,20 +165,24 @@ class DevElfTests(unittest.TestCase):
         old_vaddr = 0x00100020
         new_vaddr = 0x00412000
         call_vaddr = 0x00100010
+        original_entry = 0x00100080
+        wrapper_vaddr = 0x00412004
         base = bytearray(_elf())
         struct.pack_into("<I", base, 0x1010, (3 << 26) | (old_vaddr >> 2))
+        struct.pack_into("<I", base, 0x1014, (3 << 26) | (original_entry >> 2))
         struct.pack_into("<I", base, 0x1020, 0x03E00008)
 
         linked = bytearray(base)
         struct.pack_into("<I", linked, 0x1010, (3 << 26) | (new_vaddr >> 2))
+        struct.pack_into("<I", linked, 0x1014, (3 << 26) | (wrapper_vaddr >> 2))
         struct.pack_into("<I", linked, 0x1020, 0)
         linked.extend(bytes((-len(linked)) & 0xFFF))
-        linked.extend(struct.pack("<I", 0x03E00008))
+        linked.extend(struct.pack("<II", 0x03E00008, 0x03E00008))
         spec = {
             "format": 1,
             "base_sha1": hashlib.sha1(base).hexdigest(),
             "extension_vaddr": new_vaddr,
-            "extension_size": 4,
+            "extension_size": 8,
             "retail_static_end": 0x0040C5F0,
             "moves": [
                 {
@@ -121,20 +192,64 @@ class DevElfTests(unittest.TestCase):
                     "expected_relocations": 0,
                 }
             ],
+            "additions": [
+                {
+                    "new_vaddr": wrapper_vaddr,
+                    "size": 4,
+                    "expected_relocations": 0,
+                }
+            ],
+            "redirects": [
+                {
+                    "symbol": "entry",
+                    "wrapper": "__wrap_entry",
+                    "old_vaddr": original_entry,
+                    "expected_relocations": 1,
+                }
+            ],
         }
         output, _ = dev_elf.finalize_image(bytes(base), bytes(linked), spec)
-        relocation_elf = _relocation_elf(call_vaddr, new_vaddr, 4)
+        relocation_elf = _relocation_elf(
+            [
+                (call_vaddr, new_vaddr, 4, "moved"),
+                (call_vaddr + 4, wrapper_vaddr, 4, "__wrap_entry"),
+            ]
+        )
 
-        with self.assertRaisesRegex(dev_elf.DevElfError, "expected 0x8"):
+        with self.assertRaisesRegex(dev_elf.DevElfError, "expected 0x10"):
             dev_elf.finalize_image(
-                bytes(base), bytes(linked), {**spec, "extension_size": 8}
+                bytes(base), bytes(linked), {**spec, "extension_size": 0x10}
             )
 
         summary = dev_elf.audit_relocation_closure(
             bytes(base), output, relocation_elf, spec
         )
-        self.assertEqual(summary["changed_relocation_words"], 1)
+        self.assertEqual(summary["changed_relocation_words"], 2)
         self.assertEqual(summary["moved_relocations"], 1)
+        self.assertEqual(summary["redirect_relocations"], 1)
+        self.assertEqual(summary["addition_relocations"], 0)
+
+        wrong_redirect = {
+            **spec,
+            "redirects": [
+                {**spec["redirects"][0], "old_vaddr": original_entry + 4}
+            ],
+        }
+        with self.assertRaisesRegex(dev_elf.DevElfError, "declared move or redirect"):
+            dev_elf.audit_relocation_closure(
+                bytes(base), output, relocation_elf, wrong_redirect
+            )
+
+        wrong_addition = {
+            **spec,
+            "additions": [
+                {**spec["additions"][0], "expected_relocations": 1}
+            ],
+        }
+        with self.assertRaisesRegex(dev_elf.DevElfError, "retained 0 relocation"):
+            dev_elf.audit_relocation_closure(
+                bytes(base), output, relocation_elf, wrong_addition
+            )
 
         corrupted = bytearray(output)
         corrupted[0x1030] = 1
@@ -145,11 +260,15 @@ class DevElfTests(unittest.TestCase):
 
     def test_linked_relocation_parser_resolves_symbol_values(self) -> None:
         relocations = dev_elf.parse_linked_relocations(
-            _relocation_elf(0x00100010, 0x00412000, 4)
+            _relocation_elf([(0x00100010, 0x00412000, 4, "target")])
         )
         self.assertEqual(
             relocations,
-            [dev_elf.LinkedRelocation(0x00100010, 4, 1, 1, 0x00412000)],
+            [
+                dev_elf.LinkedRelocation(
+                    0x00100010, 4, 1, 1, 0x00412000, "target"
+                )
+            ],
         )
 
     def test_stale_reference_scan_rejects_words_and_jumps(self) -> None:
@@ -255,12 +374,21 @@ SECTIONS
             "moves": [
                 {"object": "build/dds1/a.o", "section": ".text", "size": "0x38"}
             ],
+            "additions": [
+                {
+                    "object": "build/dds1/dev.o",
+                    "sections": [".text", ".data"],
+                    "alignment": 8,
+                }
+            ],
             "extension_vaddr": "0x412000",
             "alignment": "0x1000",
         }
         result = dev_elf.render_linker_script(source, spec)
         self.assertIn(". += 0x38; /* development slot", result)
         self.assertEqual(result.count("build/dds1/a.o(.text);"), 1)
+        self.assertIn("build/dds1/dev.o(.text);", result)
+        self.assertIn("build/dds1/dev.o(.data);", result)
         self.assertIn(".dev_extension 0x412000", result)
         self.assertLess(result.index(".dev_extension"), result.index("/DISCARD/"))
 
