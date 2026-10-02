@@ -410,13 +410,6 @@ typedef struct BillKindOneView {
     u32 flags; /* 0x54 */
 } BillKindOneView;
 
-typedef struct BillChildPayload {
-    s32 value;
-    u8 pad04[0x20];
-    f32 halfWidth;  /* 0x24 */
-    f32 halfHeight; /* 0x28 */
-} BillChildPayload;
-
 s32 billGetKindOneFlags(s32 billboard) {
     if (((BillKindOneView *)billboard)->kind == 1) {
         return ((BillKindOneView *)billboard)->flags;
