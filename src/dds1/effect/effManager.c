@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ee_mmi.h"
 
 void effManagerInitializeSubsystems(void) {
     func_001536A0();
@@ -49,7 +50,7 @@ typedef struct EffTypeOps {
 } EffTypeOps;
 
 typedef struct EffNode {
-    s32 type;
+    u32 type;
     s32 arg;
     s32 instance;
     f32 unkC;
@@ -115,11 +116,54 @@ s32 effInvokeOptionalNodeInstanceCallback(EffNode *node) {
     }
     return effNodeTypeOperations[node->type].fn24(node->instance);
 }
-extern void func_003003F0(const char *, void *);
+extern void func_003003F0(const char *fmt, ...);
 extern void *sdfReadNamedResource(void *, u32 *, s32);
 extern void *func_002D0918(void *);
-extern void *func_0014FD20(u32);
-INCLUDE_ASM(const s32, "effect/effManager", func_0014FD20);
+
+typedef struct EffNodeDescriptor {
+    u16 type;      /* 0x00 */
+    u8 pad02[2];
+    u16 arg;       /* 0x04 */
+    u8 pad06[6];
+    f32 version;   /* 0x0C */
+    u8 payload[1]; /* 0x10 */
+} EffNodeDescriptor;
+
+typedef struct EffNodeInstance {
+    u8 pad00[0x20];
+    u8 matrix20[0x40]; /* 0x20 */
+    u8 pad60[0x50];
+    u8 matrixB0[0x40]; /* 0xB0 */
+} EffNodeInstance;
+
+extern void func_0014FF28(EffNodeDescriptor *descriptor);
+
+/* Build the effect node for a resource descriptor; descriptors older than 1.03 are converted first, and ones up to 1.02 get an identity matrix. */
+EffNode *func_0014FD20(EffNodeDescriptor *descriptor) {
+    EffNode *node;
+    EffNodeInstance *instance;
+
+    if (descriptor->version < 1.03f) {
+        func_003003F0("old version!![%f]\n", descriptor->version);
+        func_0014FF28(descriptor);
+    }
+    node = effCreateNode(descriptor->type, descriptor->arg, (s32)descriptor->payload);
+    if (descriptor->version <= 1.02f) {
+        switch (node->type) {
+        case 0:
+        case 1:
+            instance = (EffNodeInstance *)node->instance;
+            EE_MMI_UNIT_MATRIX(instance->matrixB0);
+            break;
+        case 2:
+            instance = (EffNodeInstance *)node->instance;
+            EE_MMI_UNIT_MATRIX(instance->matrix20);
+            break;
+        }
+        func_003003F0("effManager:set Identity matrix\n");
+    }
+    return node;
+}
 
 void func_0014FE28(u32 parameter) {
     effCreateNode(5, 0, parameter);
