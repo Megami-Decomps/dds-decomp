@@ -23,12 +23,14 @@ typedef struct GridWidget {
     s32 height;
 } GridWidget;
 
+typedef struct GridTextListItem GridTextListItem;
+
 typedef struct GridTextWidget {
     char *text;          /* 0x00 */
     u16 textLength;      /* 0x04 */
     s16 rows;            /* 0x06 */
     u16 unk08;
-    u16 unk0A;
+    s16 unk0A;
     u32 flags;           /* 0x0C */
     void *unk10;
     void *unk14;
@@ -977,6 +979,19 @@ void itfExpandWidgetColumnWidth(s32 columns, GridTextWidget *work) {
     }
 }
 
+struct GridTextListItem {
+    char *text;
+    u16 textLength;
+    u16 index;
+    u32 unk08;
+    u32 unk0C;
+    u32 unk10;
+    u32 value;
+    struct GridTextListItem *previous;
+    struct GridTextListItem *next;
+    u8 pad20[0xC];
+};
+
 typedef struct GridListNode {
     u8 pad0[0x18];
     void *head;                 /* 0x18 */
@@ -1011,7 +1026,42 @@ u32 itfGetGridListLinkFlags(GridListOwner *owner) {
     return flags;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1A30);
+GridTextListItem *func_002C1A30(GridTextWidget *owner, const char *text, u32 value) {
+    GridTextListItem *item = (GridTextListItem *)sdfAllocSizeClassBlock(0x2C);
+    GridTextListItem *tail;
+    s32 length;
+    s32 allocation;
+    char *copy;
+
+    memset(item, 0, 0x2C);
+    if (owner->unk0A == 0) {
+        *(GridTextListItem **)((u8 *)owner + 0x10) = item;
+        *(GridTextListItem **)((u8 *)owner + 0x18) = item;
+        *(GridTextListItem **)((u8 *)owner + 0x14) = item;
+    }
+    length = strlen(text);
+    allocation = length + 1;
+    copy = (char *)sdfAllocSizeClassBlock(allocation);
+    item->textLength = allocation;
+    item->text = copy;
+    memcpy(copy, text, allocation);
+    itfExpandWidgetColumnWidth(length, owner);
+
+    /* Initialize the node links, then append it after the current tail. */
+    item->previous = *(GridTextListItem **)((u8 *)owner + 0x1C);
+    item->next = 0;
+    item->value = value;
+    tail = *(GridTextListItem **)((u8 *)owner + 0x1C);
+    item->unk08 = 0;
+    item->previous = tail;
+    if (tail != 0) {
+        tail->next = item;
+    }
+    *(GridTextListItem **)((u8 *)owner + 0x1C) = item;
+    item->index = owner->unk0A;
+    owner->unk0A++;
+    return item;
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1B30);
 
