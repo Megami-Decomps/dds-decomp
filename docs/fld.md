@@ -67,7 +67,7 @@ objects without freezing their offsets.
 | `3` | `collision`, `vertex`, `face` | Collision, automap, and placement meshes |
 | `4` | `camera` | Named camera field of view |
 | `6` | `event` | Event flags and field-script procedure name |
-| `9` | raw data plus labeled pointers | Camera motion/path object graph; layout still unresolved |
+| `9` | `motion`, `motion_curve`, typed values, `keys` | Keyed vector, quaternion, scalar, and light motion curves |
 | `10` | `placement` | Named positions, doors, and event placements |
 
 Each transform is `0x30` bytes: four position floats, four rotation floats,
@@ -86,6 +86,33 @@ face attributes=0x00000800 move_floor=0 sound=0 stop=0 place=0 \
 The assembler rejects an out-of-range vertex index, except for the retail
 `0xffffffff` triangle sentinel. Event placements likewise must refer to an
 event resource present in the same file.
+
+## Motion and path curves
+
+Type-9 resources contain one or more independently keyed curves. The track
+table names each value kind and points to its curve:
+
+```text
+motion tracks=vector3:@camera_position_curve,quaternion:@camera_rotation_curve
+
+label camera_position_curve
+motion_curve count=2 values=@camera_position_values \
+  keys=@camera_position_keys word_0c=1
+
+label camera_position_values
+vector3 9794.154296875 -756.4210205078125 -4633.36083984375
+vector3 9794.154296875 -756.4210205078125 -4633.36083984375
+
+label camera_position_keys
+keys 0 270
+```
+
+The PS2 runtime linearly interpolates `vector3` tracks and normalized-linearly
+interpolates `quaternion` tracks. `scalar` values are single-float curves.
+`light` values contain ten floats per key and feed the runtime's light-path
+sampler. A curve's values and keys have matching indices; keys must increase
+strictly. The final serialized curve word is always one in the tracked data,
+but its purpose is not established, so source retains it as `word_0c`.
 
 ## Links to scripts and warp data
 
