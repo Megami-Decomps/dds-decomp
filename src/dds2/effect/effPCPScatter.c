@@ -35,20 +35,10 @@ extern u32 func_0032C138(u32 resId);
 
 extern PcpScatterRes *effPcpScatterResCreate(u32 resId);
 
-typedef struct PcpScatterWork4 PcpScatterWork4;
+typedef struct PcpScatterInstance PcpScatterInstance;
 
-/* func_001730D0 */
-struct PcpScatterWork4 {
-    u8 pad00[0x40];
-    s128 particleParams;
-    u8 pad50[0x12C];
-    f32 scale;
-    u32 color;
-    u32 scatterObject;
-    u32 ownedBuffer;
-};
 
-extern PcpScatterWork4 *effPcpScatterCreateParticleInstance();
+extern PcpScatterInstance *effPcpScatterCreateParticleInstance();
 
 extern void effShareScatterResource(u32 param0, u32 param1);
 
@@ -56,6 +46,25 @@ typedef struct PcpScatterInstanceB PcpScatterInstanceB;
 
 typedef struct PcpScatterParticle PcpScatterParticle;
 typedef struct PcpScatterDraw PcpScatterDraw;
+
+/* The allocator creates one 0x80-byte drawable plus separate vector, UV and
+ * color arrays. Geometry and the per-particle fade pass share this owner. */
+struct PcpScatterDraw {
+    f32 origin[4];
+    f32 matrix[16];
+    u32 unk50;
+    u32 color;
+    u32 particleCount;
+    s32 stride; /* Coordinate vectors per particle; two vectors form a pair. */
+    f32 scale;
+    f32 *points;
+    f32 *uv;
+    u32 *vertexColors;
+    u32 *colors;
+    u32 asset;
+    u32 allocation;
+    PcpScatterRes *sharedResource;
+}; /* 0x80 */
 
 /* The B constructor copies this 0x13C-byte block to instance +0x40;
    ring setup and the fading update read fields from that same copy. */
@@ -164,34 +173,8 @@ extern void *effScatterInstanceCreateC();
 
 extern void *func_0017CE88();
 
-typedef struct PcpScatterWork7 PcpScatterWork7;
+typedef struct PcpScatterPlainInstance PcpScatterPlainInstance;
 
-/* func_00175230 */
-struct PcpScatterWork7 {
-    u8 pad00[0x40];
-    s128 particleParams;
-    u8 pad50[0xE4];
-    u32 scatterObject;
-    u32 ownedBuffer;
-};
-
-typedef struct PcpScatterWork8 {
-    u8 pad00[0x3C];
-    f32 unk3C;
-    u8 pad40[0x0C];
-    f32 unk4C;
-    f32 unk50;
-    u8 pad54[0x28];
-    u32 *duplicatedHandles; /* 0x7C: also used by the linked-work copy constructor */
-} PcpScatterWork8;
-
-typedef struct PcpScatterWork2 {
-    u8 pad00[0x40];
-    f32 unk40;
-    f32 unk44;
-    u8 pad48[0x24];
-    u32 unk6C;
-} PcpScatterWork2;
 
 /* Allocated after the two record arrays; resource helpers receive this same
    0x34-byte control block, not a separate effect work area. */
@@ -207,6 +190,38 @@ typedef struct PcpScatterPool {
     u32 buffer;
     PcpScatterRes *sharedResource;
 } PcpScatterPool;
+
+/* The linked variant has a 0x84-byte header before its particle array;
+ * scaling, duplication and teardown all operate on this owner. */
+typedef struct PcpScatterWork8 {
+    u8 pad00[0x20];
+    u32 particleCount;
+    u8 pad24[0x18];
+    f32 unk3C;
+    u32 unk40;
+    u32 unk44;
+    u32 unk48;
+    f32 unk4C;
+    f32 unk50;
+    u8 pad54[4];
+    u8 duplicateParticles;
+    u8 pad59[7];
+    u32 particlesPerGroup;
+    u8 pad64[0xC];
+    PcpScatterPool *childWork;
+    u32 ownedResource;
+    u32 duplicatedCount;
+    u32 *duplicatedHandles;
+    u32 duplicateAllocation;
+} PcpScatterWork8;
+
+typedef struct PcpScatterWork2 {
+    u8 pad00[0x40];
+    f32 unk40;
+    f32 unk44;
+    u8 pad48[0x24];
+    u32 unk6C;
+} PcpScatterWork2;
 
 extern u32 effParamWorkDuplicate(u32 param);
 
@@ -267,8 +282,8 @@ typedef struct PcpScatterPoolParams {
 
 extern void *func_00179DB0();
 
-/* Work2 as seen by the copy constructor: byte 0x40 is a flag here (func_00172138 scales
-   the same word as a float). */
+/* The table variant's copied header has a byte flag at 0x40. Whether it
+ * shares an argument layout with the scaler's float input is unresolved. */
 typedef struct {
     u8 pad00[0x20];
     u32 particleCount;
@@ -323,33 +338,22 @@ PcpScatterWork1 *effPcpScatterSharedDuplicate(src)
     return work;
 }
 
-typedef struct PcpScatterParticles {
-    PcpScatterPool *pool;
-    u32 buffer;
-    u32 count;
-    u32 *items;
-    u32 itemBuffer;
-} PcpScatterParticles;
 
 extern void effDispatchParameterDataAndFreeWork(u32 particle);
 
-typedef struct PcpScatterGroupWork {
-    u8 pad00[0x80];
-    PcpScatterParticles particles;
-} PcpScatterGroupWork;
 
-void effPcpScatterReleaseParticleGroup(PcpScatterGroupWork *work) {
-    if (work->particles.itemBuffer != 0) {
-        u32 count = work->particles.count;
+void effPcpScatterReleaseParticleGroup(PcpScatterWork1 *work) {
+    if (work->duplicateAllocation != 0) {
+        u32 count = work->duplicatedCount;
         u32 i;
 
         for (i = 0; i < count; i++) {
-            effDispatchParameterDataAndFreeWork(work->particles.items[i]);
+            effDispatchParameterDataAndFreeWork(work->duplicatedHandles[i]);
         }
-        func_003297C8(work->particles.itemBuffer);
+        func_003297C8(work->duplicateAllocation);
     }
-    effPcpScatterReleasePoolResources(work->particles.pool);
-    func_003297C8(work->particles.buffer);
+    effPcpScatterReleasePoolResources(work->childWork);
+    func_003297C8(work->ownedResource);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001789C0);
@@ -384,35 +388,11 @@ void func_00179438(u64 table) {
     func_001791A8(params, resource, options);
 }
 
-/* Work8 as seen by its copy constructor. The float parameters also occur
-   in PcpScatterWork8 and are scaled by effScatterScaleParticleValues. */
-typedef struct {
-    u8 pad00[0x20];
-    u32 particleCount;
-    u8 pad24[0x18];
-    /* These floats are scaled together; their individual roles are not yet known. */
-    f32 unk3C;
-    u32 unk40;
-    u32 unk44;
-    u32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    u8 pad54[4];
-    u8 duplicateParticles;
-    u8 pad59[7];
-    u32 particlesPerGroup;
-    u8 pad64[0xC];
-    PcpScatterPool *childWork;
-    u32 ownedResource;
-    u32 duplicatedCount;
-    u32 *duplicatedHandles;
-    u32 duplicateAllocation;
-} PcpScatterWork8Copy;
 
-PcpScatterWork8Copy *effPcpScatterLinkedDuplicate(src)
-    PcpScatterWork8Copy *src;
+PcpScatterWork8 *effPcpScatterLinkedDuplicate(src)
+    PcpScatterWork8 *src;
 {
-    PcpScatterWork8Copy *work;
+    PcpScatterWork8 *work;
     u32 count;
     u32 handle;
     u32 *buf;
@@ -437,23 +417,19 @@ PcpScatterWork8Copy *effPcpScatterLinkedDuplicate(src)
     return work;
 }
 
-typedef struct PcpScatterSharedWork {
-    u8 pad00[0x70];
-    PcpScatterParticles particles;
-} PcpScatterSharedWork;
 
-void effPcpScatterReleaseSharedParticles(PcpScatterSharedWork *work) {
-    if (work->particles.itemBuffer != 0) {
-        u32 count = work->particles.count;
+void effPcpScatterReleaseSharedParticles(PcpScatterWork8 *work) {
+    if (work->duplicateAllocation != 0) {
+        u32 count = work->duplicatedCount;
         u32 i;
 
         for (i = 0; i < count; i++) {
-            effDispatchParameterDataAndFreeWork(work->particles.items[i]);
+            effDispatchParameterDataAndFreeWork(work->duplicatedHandles[i]);
         }
-        func_003297C8(work->particles.itemBuffer);
+        func_003297C8(work->duplicateAllocation);
     }
-    effPcpScatterReleasePoolResources(work->particles.pool);
-    func_003297C8(work->particles.buffer);
+    effPcpScatterReleasePoolResources(work->childWork);
+    func_003297C8(work->ownedResource);
 }
 
 typedef struct PcpScatterSprite {
@@ -567,23 +543,19 @@ PcpScatterWork2Copy *effPcpScatterTableDuplicate(src)
     return work;
 }
 
-typedef struct PcpScatterLinkedWork {
-    u8 pad00[0x58];
-    PcpScatterParticles particles;
-} PcpScatterLinkedWork;
 
-void effPcpScatterReleaseLinkedParticles(PcpScatterLinkedWork *work) {
-    if (work->particles.itemBuffer != 0) {
-        u32 count = work->particles.count;
+void effPcpScatterReleaseLinkedParticles(PcpScatterWork2Copy *work) {
+    if (work->duplicateAllocation != 0) {
+        u32 count = work->duplicatedCount;
         u32 i;
 
         for (i = 0; i < count; i++) {
-            effDispatchParameterDataAndFreeWork(work->particles.items[i]);
+            effDispatchParameterDataAndFreeWork(work->duplicatedHandles[i]);
         }
-        func_003297C8(work->particles.itemBuffer);
+        func_003297C8(work->duplicateAllocation);
     }
-    effPcpScatterReleasePoolResources(work->particles.pool);
-    func_003297C8(work->particles.buffer);
+    effPcpScatterReleasePoolResources(work->childWork);
+    func_003297C8(work->ownedResource);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A248);
@@ -693,33 +665,38 @@ u32 effPcpScatterResAddRef(u32 handle) {
     return handle;
 }
 
+/* The first ring variant copies this complete 0x138-byte parameter block.
+ * Geometry and lifetime control read the copy embedded at instance +0x40. */
 typedef struct PcpScatterParams {
-    u8 pad00[0x10];
+    f32 vec[4];
     f32 matrix[16];
     u32 unk50;
-    u8 pad54[0x04];
-    s32 unk58;
+    u8 loop;
+    u8 pad55[3];
+    s32 duration;
     u32 particleCount;
     u32 unk60;
     u32 randomDelayRange;
-    u8 pad68[0x08];
-    f32 unk70;
-    f32 unk74;
-    f32 unk78;
-    f32 unk7C;
-    f32 unk80;
-    f32 unk84;
-    f32 unk88;
-    u8 pad8C[0x08];
-    f32 unk94;
-    u8 pad98[0x04];
-    f32 unk9C;
-    f32 unkA0;
-    f32 unkA4;
-    f32 unkA8;
-    u8 padAC[0x04];
-    u32 unkB0;
-    u32 unkB4;
+    s32 fadeIn;
+    s32 fadeRange;
+    f32 angleStepBase;
+    f32 angleStepJitter;
+    f32 riseStep;
+    f32 tiltScale;
+    f32 heightOffsetBase;
+    f32 heightOffsetJitter;
+    f32 initialRise;
+    f32 riseDecay;
+    u8 pad90[4];
+    f32 initialTiltSpeed;
+    f32 tiltDamping;
+    f32 radiusBase;
+    f32 radiusJitter;
+    f32 targetRadius;
+    f32 targetRadiusJitter;
+    u8 padAC[4];
+    u32 vCount;
+    u32 vTail;
     u8 padB8[0x80];
 } PcpScatterParams;
 
@@ -738,7 +715,8 @@ struct PcpScatterParticle {
     f32 heightOffset;
 };
 
-typedef struct PcpScatterInstance {
+/* One 0x18C-byte owner shared by creation, geometry, setters and teardown. */
+struct PcpScatterInstance {
     f32 matrix[16];
     PcpScatterParams params;
     PcpScatterParticle *particles;
@@ -746,7 +724,7 @@ typedef struct PcpScatterInstance {
     u32 color;
     u32 scatterObject;
     u32 ownedBuffer;
-} PcpScatterInstance;
+};
 
 extern void *func_0017D7A8();
 
@@ -755,7 +733,7 @@ extern void effCreateScatterResource(void *object, u32 resource);
 extern u32 effMiscRand(void *state);
 
 /* Allocate particles after the scatter work, then assign randomized offsets. */
-PcpScatterWork4 *effPcpScatterCreateParticleInstance(src, resource)
+PcpScatterInstance *effPcpScatterCreateParticleInstance(src, resource)
     PcpScatterParams *src;
 
     u32 resource;
@@ -767,7 +745,7 @@ PcpScatterWork4 *effPcpScatterCreateParticleInstance(src, resource)
     u32 mod;
     u32 count;
     u32 i;
-    void *object;
+    PcpScatterDraw *object;
     u32 unk50;
 
     particle = (PcpScatterParticle *)((u8 *)inst + 0x18C);
@@ -780,7 +758,7 @@ PcpScatterWork4 *effPcpScatterCreateParticleInstance(src, resource)
     object = func_0017D7A8(src->particleCount, src->unk60);
     unk50 = src->unk50;
     inst->scatterObject = (u32)object;
-    *(u32 *)((u8 *)object + 0x50) = unk50;
+    object->unk50 = unk50;
     if (resource != 0) {
         effCreateScatterResource(object, resource);
     }
@@ -793,65 +771,34 @@ PcpScatterWork4 *effPcpScatterCreateParticleInstance(src, resource)
         particle->age = -(effMiscRand(D_003AA868) % mod);
         particle++;
     }
-    return (PcpScatterWork4 *)inst;
+    return inst;
 }
 
-PcpScatterWork4 *effScatterBlockDuplicate(u64 table) {
+PcpScatterInstance *effScatterBlockDuplicate(u64 table) {
     u64 particleParams = effParamTableGetBlock(table, 0);
     u64 resource = effParamTableGetBlock(table, 1);
 
     return effPcpScatterCreateParticleInstance(particleParams, resource);
 }
 
-PcpScatterWork4 *effScatterCloneWithSharedObject(PcpScatterWork4 *work) {
-    PcpScatterWork4 *child;
+PcpScatterInstance *effScatterCloneWithSharedObject(PcpScatterInstance *work) {
+    PcpScatterInstance *child;
 
-    child = effPcpScatterCreateParticleInstance(&work->particleParams, NULL);
+    child = effPcpScatterCreateParticleInstance(&work->params, NULL);
     effShareScatterResource(child->scatterObject, work->scatterObject);
     return child;
 }
 
-void effScatterReleaseObjectAndBuffer(PcpScatterWork4 *work) {
+void effScatterReleaseObjectAndBuffer(PcpScatterInstance *work) {
     effReleaseScatterObject(work->scatterObject);
     func_003297C8(work->ownedBuffer);
 }
 
 
-typedef struct PcpScatterBlockObject {
-    u8 pad00[0x5C];
-    s32 stride;
-} PcpScatterBlockObject;
 
-typedef struct PcpScatterWork11 {
-    u8 pad00[0x98];
-    s32 lifetime;           /* 0x98 */
-    u8 pad9C[0x14];
-    f32 angleStepBase;      /* 0xB0 */
-    f32 angleStepJitter;    /* 0xB4 */
-    f32 riseStep;           /* 0xB8 */
-    f32 tiltScale;          /* 0xBC */
-    f32 heightOffsetBase;   /* 0xC0 */
-    f32 heightOffsetJitter; /* 0xC4 */
-    f32 initialRise;        /* 0xC8 */
-    f32 riseDecay;          /* 0xCC */
-    u8 padD0[4];
-    f32 initialTiltSpeed;   /* 0xD4 */
-    f32 tiltDamping;        /* 0xD8 */
-    f32 radiusBase;         /* 0xDC */
-    f32 radiusJitter;       /* 0xE0 */
-    f32 radiusEndBase;      /* 0xE4 */
-    f32 radiusEndJitter;    /* 0xE8 */
-    u8 padEC[4];
-    u32 vCount;             /* 0xF0 */
-    u32 vTail;              /* 0xF4 */
-    u8 padF8[0x80];
-    PcpScatterParticle *rings;  /* 0x178 */
-    u8 pad17C[8];
-    u32 scatterObject;      /* 0x184 */
-} PcpScatterWork11;
 
 /* Initialise ring `index`: randomised radius/angle/rise parameters, then the first set of vertex pairs. */
-void effScatterRingInit(PcpScatterWork11 *work, s32 index)
+void effScatterRingInit(PcpScatterInstance *work, s32 index)
 {
     f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
     f32 *uv = (f32 *)effGetScatterNarrowBlock(work->scatterObject, index);
@@ -870,33 +817,33 @@ void effScatterRingInit(PcpScatterWork11 *work, s32 index)
     u32 count;
     u32 i;
 
-    ring = &work->rings[index];
-    count = ((PcpScatterBlockObject *)work->scatterObject)->stride >> 1;
+    ring = &work->particles[index];
+    count = ((PcpScatterDraw *)work->scatterObject)->stride >> 1;
     angle = effMiscRandUnitFloat(D_003AA868) * (3.14159265f * 2.0f);
-    jitter = work->angleStepJitter;
-    angleStep = work->angleStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) / (f32)count;
-    riseStep = work->riseStep;
-    jitter = work->radiusJitter;
-    radius = work->radiusBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
-    jitter = work->heightOffsetJitter;
-    height = work->heightOffsetBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
-    jitter = work->radiusEndJitter;
+    jitter = work->params.angleStepJitter;
+    angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) / (f32)count;
+    riseStep = work->params.riseStep;
+    jitter = work->params.radiusJitter;
+    radius = work->params.radiusBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    jitter = work->params.heightOffsetJitter;
+    height = work->params.heightOffsetBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    jitter = work->params.targetRadiusJitter;
     rise = 0.0f;
-    ring->radiusStep = (work->radiusEndBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) - radius) / (f32)work->lifetime;
-    ring->unk00 = work->tiltScale * effMiscRandUnitFloat(D_003AA868);
+    ring->radiusStep = (work->params.targetRadius * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) - radius) / (f32)work->params.duration;
+    ring->unk00 = work->params.tiltScale * effMiscRandUnitFloat(D_003AA868);
     ring->tiltAngle = rise;
     ring->angle = angle;
     ring->radius = radius;
     ring->heightOffset = height;
     ring->angleStep = angleStep;
-    ring->tiltSpeed = work->initialTiltSpeed;
-    ring->rise = work->initialRise;
+    ring->tiltSpeed = work->params.initialTiltSpeed;
+    ring->rise = work->params.initialRise;
     func_003364B8(ring->unk00);
     func_00336818(ring->tiltAngle);
     sdfMultiplyVuMatrixInPlace();
-    v = (f32)work->vTail;
+    v = (f32)work->params.vTail;
     u = 0.0f;
-    du = (f32)work->vCount / (f32)count;
+    du = (f32)work->params.vCount / (f32)count;
     for (i = 0; i < count; i++) {
         vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
         vertex[1] = rise;
@@ -923,7 +870,7 @@ void effScatterRingInit(PcpScatterWork11 *work, s32 index)
 }
 
 /* Advance ring `index`: rebuild the rotation matrix, then lay the ring's vertex pairs around it. */
-void effScatterRingUpdate(PcpScatterWork11 *work, s32 index)
+void effScatterRingUpdate(PcpScatterInstance *work, s32 index)
 {
     f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
     PcpScatterParticle *ring;
@@ -935,9 +882,9 @@ void effScatterRingUpdate(PcpScatterWork11 *work, s32 index)
     u32 i;
 
     effGetScatterNarrowBlock(work->scatterObject, index);
-    ring = &work->rings[index];
+    ring = &work->particles[index];
     radius = ring->radius + ring->radiusStep;
-    count = ((PcpScatterBlockObject *)work->scatterObject)->stride >> 1;
+    count = ((PcpScatterDraw *)work->scatterObject)->stride >> 1;
     rise = ring->rise;
     angle = ring->angle;
     step = ring->angleStep;
@@ -945,9 +892,9 @@ void effScatterRingUpdate(PcpScatterWork11 *work, s32 index)
     func_00336818(ring->tiltAngle);
     sdfMultiplyVuMatrixInPlace();
     ring->tiltAngle += ring->tiltSpeed;
-    ring->tiltSpeed *= work->tiltDamping;
+    ring->tiltSpeed *= work->params.tiltDamping;
     ring->radius = radius;
-    ring->rise = rise * work->riseDecay;
+    ring->rise = rise * work->params.riseDecay;
     for (i = 0; i < count; i++) {
         f32 s;
 
@@ -970,25 +917,25 @@ void effScatterRingUpdate(PcpScatterWork11 *work, s32 index)
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B520);
 
-void effScatterCopyParticleParameterVector(PcpScatterWork4 *work, void *src) {
-    PCP_COPY_VECTOR(&work->particleParams, src);
+void effScatterCopyParticleParameterVector(PcpScatterInstance *work, void *src) {
+    PCP_COPY_VECTOR(&work->params, src);
 }
 
-void effScatterSetParticleScale(PcpScatterWork4 *work, f32 value)
+void effScatterSetParticleScale(PcpScatterInstance *work, f32 value)
 {
     work->scale = value;
 }
 
-void effScatterSetParticleColor(PcpScatterWork4 *work, u32 value) {
+void effScatterSetParticleColor(PcpScatterInstance *work, u32 value) {
     work->color = value;
 }
 
 /* vu0 routine: matrix = (matrix + 0x50) * src, via the vf28-vf31 by vf24-vf27 product routine */
-void effPcpScatterTransformMatrix(u8 *matrix, void *src) {
-    VU0_LOAD_MATRIX(src);
-    VU0_LOAD_MATRIX_B(matrix + 0x50);
+void effPcpScatterTransformMatrix(PcpScatterInstance *work, void *source) {
+    VU0_LOAD_MATRIX(source);
+    VU0_LOAD_MATRIX_B(work->params.matrix);
     sdfComposeVuMatrixFromRegisters();
-    VU0_STORE_MATRIX(matrix);
+    VU0_STORE_MATRIX(work);
 }
 
 
@@ -1005,7 +952,7 @@ void *effScatterInstanceCreateB(src, resource)
     u32 mod;
     u32 count;
     u32 i;
-    void *object;
+    PcpScatterDraw *object;
     u32 unk50;
     s32 limit;
 
@@ -1020,7 +967,7 @@ void *effScatterInstanceCreateB(src, resource)
     object = func_0017D7A8(src->particleCount, src->unk60);
     unk50 = src->unk50;
     inst->scatterObject = (u32)object;
-    *(u32 *)((u8 *)object + 0x50) = unk50;
+    object->unk50 = unk50;
     if (resource != 0) {
         effCreateScatterResource(object, resource);
     }
@@ -1083,7 +1030,7 @@ void effScatterRingInitScaled(PcpScatterInstanceB *work, s32 index)
     u32 i;
 
     ring = &work->particles[index];
-    count = ((PcpScatterBlockObject *)work->scatterObject)->stride >> 1;
+    count = ((PcpScatterDraw *)work->scatterObject)->stride >> 1;
     angle = effMiscRandUnitFloat(D_003AA868) * (3.14159265f * 2.0f);
     jitter = work->params.angleStepJitter;
     angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) / (f32)count;
@@ -1149,7 +1096,7 @@ void effScatterRingUpdateScaled(PcpScatterInstanceB *work, s32 index)
     effGetScatterNarrowBlock(work->scatterObject, index);
     ring = &work->particles[index];
     radius = ring->radius + ring->radiusStep;
-    count = ((PcpScatterBlockObject *)work->scatterObject)->stride >> 1;
+    count = ((PcpScatterDraw *)work->scatterObject)->stride >> 1;
     rise = ring->rise;
     angle = ring->angle;
     step = ring->angleStep;
@@ -1181,13 +1128,6 @@ void effScatterRingUpdateScaled(PcpScatterInstanceB *work, s32 index)
     }
 }
 
-/* Draw record behind the instance's scatterObject: colour per particle at +0x70, scale at +0x60. */
-struct PcpScatterDraw {
-    u8 pad00[0x60];
-    f32 scale;           /* 0x60 */
-    u8 pad64[0xC];
-    u32 *colors;         /* 0x70 */
-};
 
 
 extern s32 effMultiplyPackedColors(s32 color, s32 param);
@@ -1258,7 +1198,7 @@ void effScatterUpdateLoopedScaledRing(PcpScatterInstanceB *work) {
         work->age++;
     }
     draw->scale = work->scale;
-    PCP_COPY_VECTOR(draw, work->params.vec);
+    PCP_COPY_VECTOR(draw->origin, work->params.vec);
     effScatterStoreSourceTransformMatrix(draw, work);
     func_0017DA28(draw);
 }
@@ -1298,7 +1238,7 @@ void *effScatterInstanceCreateC(src, resource)
     u32 mod;
     u32 count;
     u32 i;
-    void *object;
+    PcpScatterDraw *object;
     u32 unk50;
     s32 limit;
 
@@ -1313,7 +1253,7 @@ void *effScatterInstanceCreateC(src, resource)
     object = func_0017D7A8(src->particleCount, src->unk60);
     unk50 = src->unk50;
     inst->scatterObject = (u32)object;
-    *(u32 *)((u8 *)object + 0x50) = unk50;
+    object->unk50 = unk50;
     if (resource != 0) {
         effCreateScatterResource(object, resource);
     }
@@ -1375,7 +1315,7 @@ void effScatterInitStaggeredRing(PcpScatterInstanceC *work, s32 index)
     u32 i;
 
     ring = &work->particles[index];
-    count = ((PcpScatterBlockObject *)work->scatterObject)->stride >> 1;
+    count = ((PcpScatterDraw *)work->scatterObject)->stride >> 1;
     angle = effMiscRandUnitFloat(D_003AA868) * (3.14159265f * 2.0f);
     jitter = work->params.angleStepJitter;
     angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) / (f32)count;
@@ -1441,7 +1381,7 @@ void effScatterRingUpdateScaledLong(PcpScatterInstanceC *work, s32 index)
     effGetScatterNarrowBlock(work->scatterObject, index);
     ring = &work->particles[index];
     radius = ring->radius + ring->radiusStep;
-    count = ((PcpScatterBlockObject *)work->scatterObject)->stride >> 1;
+    count = ((PcpScatterDraw *)work->scatterObject)->stride >> 1;
     rise = ring->rise;
     angle = ring->angle;
     step = ring->angleStep;
@@ -1546,7 +1486,7 @@ void effScatterUpdateDualColor(PcpScatterInstanceC *work) {
         work->age++;
     }
     draw->scale = work->scale;
-    PCP_COPY_VECTOR(draw, work->params.vec);
+    PCP_COPY_VECTOR(draw->origin, work->params.vec);
     effScatterStoreSourceTransformMatrix(draw, work);
     func_0017DA28(draw);
 }
@@ -1572,23 +1512,51 @@ void func_0017CE28(PcpScatterInstanceC *work, void *source) {
     VU0_STORE_MATRIX(work);
 }
 
+/* The flat-ring variant copies 0xE8 bytes; its motion fields and lifetime
+ * controls remain in the same parameter block used by the initializer. */
 typedef struct PcpScatterPlainParams {
-    f32 unk00[4];
+    f32 vec[4];
     u32 unk10;
-    f32 unk14[2];
+    u8 loop;
+    u8 pad15[3];
+    s32 duration;
     u32 particleCount;
     u32 unk20;
     u32 randomDelayRange;
-    f32 unk28[0x30];
+    s32 fadeIn;
+    s32 fadeRange;
+    f32 angleStepBase;
+    f32 angleStepJitter;
+    f32 heightBase;
+    f32 heightJitter;
+    f32 angularSpeed;
+    f32 angularDamping;
+    f32 radiusBase;
+    f32 radiusJitter;
+    f32 radialSpeed;
+    f32 radialDamping;
+    s32 radialDecayStart;
+    s32 colorParam;
+    u32 vCount;
+    u32 vTail;
+    u8 pad68[0x80];
 } PcpScatterPlainParams;
 
+/* The flat particle has three rotation angles before its signed age;
+ * it is not interchangeable with the other variants' 0x28-byte particle. */
 typedef struct PcpScatterPlainParticle {
-    u8 pad00[0x0C];
+    f32 rot[3];
     s32 age;
-    u8 pad10[0x18];
+    f32 angle;
+    f32 angularSpeed;
+    f32 angleStep;
+    f32 radius;
+    f32 radialSpeed;
+    f32 height;
 } PcpScatterPlainParticle;
 
-typedef struct PcpScatterPlainInstance {
+/* One 0x13C-byte owner shared by creation, flat-ring update and teardown. */
+struct PcpScatterPlainInstance {
     f32 matrix[16];
     PcpScatterPlainParams params;
     PcpScatterPlainParticle *particles;
@@ -1596,7 +1564,7 @@ typedef struct PcpScatterPlainInstance {
     u32 color;
     u32 scatterObject;
     u32 ownedBuffer;
-} PcpScatterPlainInstance;
+};
 
 /* Allocate particles after the scatter work (identity matrix), then assign randomized start delays. */
 void *func_0017CE88(src, resource)
@@ -1609,7 +1577,7 @@ void *func_0017CE88(src, resource)
     u32 mod;
     u32 count;
     u32 i;
-    void *object;
+    PcpScatterDraw *object;
     u32 unk50;
 
     particle = (PcpScatterPlainParticle *)((u8 *)inst + 0x13C);
@@ -1622,7 +1590,7 @@ void *func_0017CE88(src, resource)
     object = func_0017D7A8(src->particleCount, src->unk20);
     unk50 = src->unk10;
     inst->scatterObject = (u32)object;
-    *(u32 *)((u8 *)object + 0x50) = unk50;
+    object->unk50 = unk50;
     if (resource != 0) {
         effCreateScatterResource(object, resource);
     }
@@ -1647,50 +1615,28 @@ void func_0017D078(u64 table) {
     func_0017CE88(shared, local);
 }
 
-PcpScatterWork7 *effCloneScatterWithSharedResource(PcpScatterWork7 *work)
+PcpScatterPlainInstance *effCloneScatterWithSharedResource(PcpScatterPlainInstance *work)
 {
-    PcpScatterWork7 *child;
+    PcpScatterPlainInstance *child;
 
-    child = func_0017CE88(&work->particleParams, NULL);
+    child = func_0017CE88(&work->params, NULL);
     effShareScatterResource(child->scatterObject, work->scatterObject);
     return child;
 }
 
-void effReleaseScatterWorkResources(PcpScatterWork7 *work) {
+void effReleaseScatterWorkResources(PcpScatterPlainInstance *work) {
     effReleaseScatterObject(work->scatterObject);
     func_003297C8(work->ownedBuffer);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017D138);
 
-typedef struct PcpScatterRingB {
-    f32 rot[3];
-    s32 age;
-    f32 angle;
-    f32 angularSpeed;
-    f32 angleStep;
-    f32 radius;
-    f32 radialSpeed;
-    f32 height;
-} PcpScatterRingB;
-
-typedef struct PcpScatterWork14 {
-    u8 pad00[0x84];
-    f32 angularDamping;
-    u8 pad88[0xC];
-    f32 radialDamping;
-    s32 radialDecayStart;
-    u8 pad9C[0x8C];
-    PcpScatterRingB *rings;
-    u8 pad12C[8];
-    u32 scatterObject;
-} PcpScatterWork14;
 
 /* Advance ring `index` and lay its vertex pairs around a flat circle rotated by the ring's own angles. */
-void effScatterFlatRingUpdate(PcpScatterWork14 *work, s32 index)
+void effScatterFlatRingUpdate(PcpScatterPlainInstance *work, s32 index)
 {
     f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
-    PcpScatterRingB *ring;
+    PcpScatterPlainParticle *ring;
     f32 angle;
     f32 radius;
     f32 step;
@@ -1700,19 +1646,19 @@ void effScatterFlatRingUpdate(PcpScatterWork14 *work, s32 index)
     u32 i;
 
     effGetScatterNarrowBlock(work->scatterObject, index);
-    ring = &work->rings[index];
-    count = ((PcpScatterBlockObject *)work->scatterObject)->stride >> 1;
+    ring = &work->particles[index];
+    count = ((PcpScatterDraw *)work->scatterObject)->stride >> 1;
     angle = ring->angle + ring->angularSpeed;
     radius = ring->radius;
     step = ring->angleStep;
     radius += ring->radialSpeed;
-    if (ring->age >= work->radialDecayStart) {
-        ring->radialSpeed *= work->radialDamping;
+    if (ring->age >= work->params.radialDecayStart) {
+        ring->radialSpeed *= work->params.radialDamping;
     }
-    vu0RotMatrixXYZFromVec3(ring);
+    vu0RotMatrixXYZFromVec3(ring->rot);
     ring->radius = radius;
     ring->angle = angle;
-    ring->angularSpeed *= work->angularDamping;
+    ring->angularSpeed *= work->params.angularDamping;
     height = ring->height;
     for (i = 0; i < count; i++) {
         vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
