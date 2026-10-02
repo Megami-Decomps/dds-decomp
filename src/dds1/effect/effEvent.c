@@ -911,7 +911,6 @@ u32 func_00190100() {
 void func_00190118() {
     sndReleaseAllVoices();
 }
-INCLUDE_ASM(const s32, "effect/effEvent", func_00190130);
 
 
 extern u8 D_003563F0[];
@@ -942,6 +941,33 @@ typedef struct {
     u8 bytes[0x30];
 } __attribute__((packed)) FileRecordHeader;
 
+/* Init block of the event holder (0x30 bytes, copied to the event's owner record). */
+typedef struct {
+    f32 pos[3];           /* 0x00 */
+    f32 unk0C;            /* 0x0C */
+    u32 unk10;            /* 0x10 */
+    u32 unk14;            /* 0x14 */
+    u32 unk18;            /* 0x18 */
+    f32 scale;            /* 0x1C */
+    f32 rangeNear;        /* 0x20 */
+    f32 rangeFar;         /* 0x24 */
+    f32 param;            /* 0x28 */
+    u32 color;            /* 0x2C */
+} EffEventInit; /* 0x30 */
+
+extern void *func_00160958(u32, u16, s32, s32);
+extern void func_00161588(void *, f32);
+
+EffEventWork *func_00190130(u32 owner, u16 kind, const EffEventInit *params) {
+    EffEventWork *work = sdfAllocSizeClassBlock(0x38);
+
+    memcpy(work, params, sizeof(*params));
+    work->state = 0;
+    work->effect = func_00160958(owner, kind, 0, 0);
+    func_00161588(work->effect, params->param);
+    return work;
+}
+
 /* Release the attached effect before freeing the event work. */
 void effEventReleaseNode(EffEventWork *work) {
     effReleaseBattleVoiceOwner(work->effect);
@@ -956,8 +982,8 @@ void effEventCopyBillParticle(const FileRecordHeader *source, FileRecordHeader *
     *destination = *source;
 }
 
-void func_00190308(EffEventWork *work) {
-    func_00161588(work->effect);
+void func_00190308(EffEventWork *work, f32 scale) {
+    func_00161588(work->effect, scale);
 }
 
 void effEventSetState(EffEventWork *work, u32 value) {
@@ -967,21 +993,6 @@ void effEventSetState(EffEventWork *work, u32 value) {
 INCLUDE_ASM(const s32, "effect/effEvent", func_00190328);
 
 struct EffEventWork;
-/* Init block of the event holder (0x30 bytes, copied to the event's owner record). */
-typedef struct {
-    f32 pos[3];           /* 0x00 */
-    f32 unk0C;            /* 0x0C */
-    u32 unk10;            /* 0x10 */
-    u32 unk14;            /* 0x14 */
-    u32 unk18;            /* 0x18 */
-    f32 scale;            /* 0x1C */
-    f32 rangeNear;        /* 0x20 */
-    f32 rangeFar;         /* 0x24 */
-    f32 param;            /* 0x28 */
-    u32 color;            /* 0x2C */
-} __attribute__((packed)) EffEventInit; /* 0x30 */
-
-
 /* 0x3C-byte event holder: a handle, the event it owns, an init block copied to the event. */
 typedef struct EffEventLight {
     u32 handle;           /* 0x00 */
@@ -989,7 +1000,6 @@ typedef struct EffEventLight {
     EffEventInit init;    /* 0x08 */
     u8 active;            /* 0x38 */
 } EffEventLight; /* 0x3C */
-extern struct EffEventWork *func_00190130();
 
 
 
