@@ -6,9 +6,11 @@ from pathlib import Path
 from ee_gcc_contracts import (
     _definition_index,
     annotate_ignored_result_calls,
+    build_old_style_report,
     compare,
     scan_ignored_result_calls,
     scan_non_discard_calls,
+    scan_old_style_source,
     scan_source,
 )
 
@@ -156,6 +158,116 @@ int ordinary(void) { return 0; }
         skipped_text = "\n".join(str(item["reason"]) for item in report["skipped"])
         self.assertIn("K&R", skipped_text)
         self.assertTrue(any(item["line"] == 2 for item in report["skipped"]))
+
+    def test_old_style_inventory_reports_arity_and_conservative_classes(self):
+        source = """extern void transfer();
+void one(u32 value) { transfer(value); }
+void two(void *dst) { transfer(dst, (u32)0x20, 0x5100dL); }
+void transfer(dst, size)
+void *dst;
+u32 size;
+{
+    consume(dst, size);
+}
+"""
+        signatures, _skipped = scan_source(source, "src/dds1/a.c")
+        definitions, calls = scan_old_style_source(source, "src/dds1/a.c")
+        report = build_old_style_report(definitions, signatures, calls)
+        self.assertEqual([row["name"] for row in report], ["transfer"])
+        boundary = report[0]
+        self.assertEqual(
+            boundary["definitions"][0]["parameters"],
+            [{"name": "dst", "type": "void *"},
+             {"name": "size", "type": "unsigned int"}],
+        )
+        self.assertEqual(
+            [(call["caller"], call["argument_count"])
+             for call in boundary["calls"]],
+            [("one", 1), ("two", 3)],
+        )
+        self.assertEqual(
+            boundary["calls"][1]["argument_classes"],
+            ["expression (type unresolved)", "explicit cast to unsigned int",
+             "64-bit integer literal on EE"],
+        )
+
+    def test_fixed_void_prototype_is_not_old_style_boundary(self):
+        source = """extern void fixed(void);
+void caller(void) { fixed(); }
+void fixed(void) { }
+"""
+        signatures, _skipped = scan_source(source, "src/dds1/a.c")
+        definitions, calls = scan_old_style_source(source, "src/dds1/a.c")
+        self.assertEqual(definitions, [])
+        self.assertEqual(build_old_style_report(definitions, signatures, calls), [])
+
+    def test_old_style_calls_fail_closed_under_conditional_compilation(self):
+        source = """extern void transfer();
+#if VERSION_DDS1
+void caller(u32 value) { transfer(value); }
+#endif
+void transfer(value)
+u32 value;
+{
+}
+"""
+        signatures, _skipped = scan_source(source, "src/dds1/a.c")
+        definitions, calls = scan_old_style_source(source, "src/dds1/a.c")
+        report = build_old_style_report(definitions, signatures, calls)
+        self.assertEqual(len(report), 1)
+        self.assertEqual(report[0]["calls"], [])
+
+    def test_old_style_compound_literal_is_one_unresolved_argument(self):
+        source = """typedef struct Pair { u32 a; u32 b; } Pair;
+extern void transfer();
+void caller(void) { transfer((Pair){1, 2}); }
+"""
+        signatures, _skipped = scan_source(source, "src/dds1/a.c")
+        definitions, calls = scan_old_style_source(source, "src/dds1/a.c")
+        report = build_old_style_report(definitions, signatures, calls)
+        call = report[0]["calls"][0]
+        self.assertEqual(call["argument_count"], 1)
+        self.assertEqual(
+            call["argument_classes"],
+            ["compound literal expression (type unresolved)"],
+        )
+
+    def test_fixed_declaration_after_knr_definition_suppresses_call(self):
+        source = """void transfer(dst)
+u32 dst;
+{
+}
+extern void transfer(u32);
+void caller(u32 value) { transfer(value); }
+"""
+        signatures, _skipped = scan_source(source, "src/dds1/a.c")
+        definitions, calls = scan_old_style_source(source, "src/dds1/a.c")
+        report = build_old_style_report(definitions, signatures, calls)
+        self.assertEqual(len(report), 1)
+        self.assertEqual(report[0]["calls"], [])
+
+    def test_static_and_external_old_style_entities_do_not_cross_tus(self):
+        static_source = """static void transfer(value)
+u32 value;
+{
+}
+"""
+        external_source = """extern void transfer();
+void caller(u32 value) { transfer(value); }
+"""
+        static_signatures, _ = scan_source(static_source, "src/dds1/a.c")
+        external_signatures, _ = scan_source(external_source, "src/dds1/b.c")
+        definitions, static_calls = scan_old_style_source(
+            static_source, "src/dds1/a.c")
+        _external_definitions, external_calls = scan_old_style_source(
+            external_source, "src/dds1/b.c")
+        report = build_old_style_report(
+            definitions, static_signatures + external_signatures,
+            static_calls + external_calls)
+        self.assertEqual(
+            [(row["scope"], len(row["calls"])) for row in report],
+            [("external", 1), ("src/dds1/a.c", 0)],
+        )
 
     def test_array_parameter_is_explicitly_skipped(self):
         signatures, skipped = scan_source("extern int copyValues(int values[4]);\n", "src/dds1/a.c")
