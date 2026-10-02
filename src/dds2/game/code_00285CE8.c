@@ -27,6 +27,13 @@ typedef struct {
     u8 pad6[0x1BE]; /* 0x6 */
 } MtrRecord;
 
+typedef struct MtrGameState {
+    u8 pad00[0xA60];
+    MtrRecord records[32];
+} MtrGameState;
+
+extern MtrGameState *datGameState;
+
 /* Sprite grid geometry: cell counts at +0x1C/+0x1E. */
 typedef struct {
     u8 pad0[0x1C]; /* 0x0 */
@@ -40,7 +47,67 @@ INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285D78);
 
 INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285E98);
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", func_002860D8);
+typedef struct MtrCell {
+    s16 x;
+    s16 y;
+    s16 unk04;
+    s16 unk06;
+    s8 direction;
+    u8 state;
+    s8 remainingDepth;
+    u8 unk0B;
+} MtrCell;
+
+extern MtrCell *func_00285E98(MtrGrid *, MtrCell *, s8);
+extern f32 effMiscRandUnitFloat(void *);
+
+void func_002860D8(MtrGrid *grid, MtrCell *source, s8 mode) {
+    MtrCell *cell;
+    f32 random;
+    s32 i;
+
+    switch (mode) {
+    case 1:
+        cell = func_00285E98(grid, NULL, 0);
+        if (cell != NULL) {
+            cell->state = 4;
+        }
+        break;
+    case 2:
+        random = effMiscRandUnitFloat(0);
+        if (random < 0.8f) {
+            cell = func_00285E98(grid, source, 0);
+            if (cell == NULL) {
+                return;
+            }
+            cell->state = mode;
+        }
+        if (random < 0.9f) {
+            cell = func_00285E98(grid, source, 1);
+            if (cell != NULL) {
+                cell->state = 3;
+            }
+        }
+        break;
+    case 3:
+        if (effMiscRandUnitFloat(0) < 0.8f) {
+            cell = func_00285E98(grid, source, 0);
+            if (cell != NULL) {
+                cell->state = mode;
+            }
+        }
+        break;
+    case 4:
+        for (i = 0; i < 6; i++) {
+            cell = func_00285E98(grid, source, i);
+            if (cell == NULL) {
+                break;
+            }
+            cell->state = 2;
+        }
+        break;
+    }
+}
 
 void mnuDrawCellScaledGrid(s32 arg0, s32 arg1, s32 arg2, s32 arg3, MtrGrid *arg4, s32 arg5, s32 arg6) {
     uiDrawUniformColorRect(arg0 << 4, arg1 << 3, arg2, arg4->unk1C << 4, arg4->unk1E << 3, arg3 | 0x80808000, arg6);
@@ -112,7 +179,16 @@ void mtrMantraBitResetUnit(MtrRecord *record) {
         "*****************[mtrMantraBitReset_Unit():[0x%x]]*****************\n", record->unk4);
 }
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", mtrMantraBitReset);
+void mtrMantraBitReset(void) {
+    s32 i;
+
+    for (i = 0; i < 32; i++) {
+        if (datGameState->records[i].flags & 1) {
+            mtrMantraBitResetUnit(&datGameState->records[i]);
+        }
+    }
+    evtPrintDeveloperConsoleMessage("*****************[mtrMantraBitReset()]*****************\n");
+}
 
 void mtrMantraEventBitReset(void) {
     s32 i;

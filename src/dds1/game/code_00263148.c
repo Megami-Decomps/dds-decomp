@@ -550,3 +550,4 @@ void mnuRefreshPartyUnitVitalsPanels(u32 unit, u32 menu) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00263148", D_003BC550);
+

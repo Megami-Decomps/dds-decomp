@@ -748,6 +748,11 @@ single padding NOP, with no artificial statement or flag change. The compact
 builders (`002E27D8`/`0033B688`) and wide builders (`002E3390`/`0033C240`)
 match with this form. The original SDK macro name has not been recovered.
 
+The fixed-record builders (`002E2BB8`/`0033BA68`) also match this form.
+Their first additional stream uses `2 * count` VIF elements and eight bytes
+per vertex. The later streams use `4 * count` elements and 32 bytes per
+vertex: keep the element count distinct from the copied byte stride.
+
 ## Float constants and strings
 
 - Float constants are literals. ee-as puts each `li.s` constant into the
@@ -866,6 +871,12 @@ retail assembler: building everything with it changes both ELFs in thousands
 of places. Don't switch assemblers or flags per file.
 
 ## Loops, tail calls and register priority (gcc 2.95 internals)
+
+Before reload, sched1's `rank_for_schedule` compares priority, then register weight,
+before region/dependence, fanout and source order. Weight is register outputs minus
+`REG_DEAD`/`REG_UNUSED` notes (`find_insn_reg_weight`): a copy whose source dies has
+weight 0 rather than 1 and schedules **earlier**, not later, than equal-priority
+independent constants (DDS1 `func_002AA748` loop preheader; still non-matching).
 
 ### Non-rotated loops: `b` to the top-of-body test (stmt.c `expand_end_loop`)
 

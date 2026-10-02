@@ -1,4 +1,24 @@
 #include "common.h"
+#include "pcp_vu0.h"
+
+#define SCR_FLAG_ID_MASK 0xFFFF
+#define SCR_FLAG_SLOT_INDEX_MASK 7
+#define SCR_FLAG_WORD_INDEX_SHIFT 3
+#define SCR_FLAG_SLOT_BIT_SHIFT 2
+#define SCR_FLAG_PRIMARY_BIT 1U
+#define SCR_SKILL_STATE_TWO_BIT 2U
+#define SCR_FLAG_SECONDARY_BIT 4U
+#define SCR_SECONDARY_FLAG_COUNT 0x260
+#define SCR_GLOBAL_FLAG_FIRST_ID 0x1AB
+#define SCR_GLOBAL_FLAG_END_ID 0x200
+/* Adding this bias in a u16 subtracts the first ID by wrapping. */
+#define SCR_GLOBAL_FLAG_WRAP_BIAS 0xFE55
+#define SCR_GLOBAL_FLAG_WORD_SHIFT 5
+#define SCR_GLOBAL_FLAG_BIT_MASK 31
+#define PTY_SKILL_SLOT_COUNT 24
+#define PRF_SKILL_LIST_ENTRY_COUNT 8
+#define PRF_SKILL_LIST_FLAGGED 4
+
 extern void memset();
 extern u16 ptyPresetSkillSlots[][96];
 extern u16 ptyPresetPoolSkills[][96];
@@ -374,142 +394,158 @@ u32 func_002CD800(void) {
     return 1;
 }
 
-void scrDecodePackedFlagIndex(s32 unused, u32 v, u32 *a, u32 *b) {
-    u32 lo;
+/* Decode the low 16 bits: eight four-bit flag slots per word.
+ * The unused first argument remains part of the existing calling convention. */
+void scrDecodePackedFlagIndex(s32 unused, u32 value, u32 *wordIndex, u32 *bitShift) {
+    u32 slotIndex;
 
-    v &= 0xFFFF;
-    lo = v & 7;
-    v >>= 3;
-    *a = v;
-    *b = lo << 2;
+    value &= SCR_FLAG_ID_MASK;
+    slotIndex = value & SCR_FLAG_SLOT_INDEX_MASK;
+    value >>= SCR_FLAG_WORD_INDEX_SHIFT;
+    *wordIndex = value;
+    *bitShift = slotIndex << SCR_FLAG_SLOT_BIT_SHIFT;
 }
 
-s32 scrSetFlag(ScrVmOperand *work, u16 index) {
-    u32 word, shift;
-    scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
-    work->flags[word] |= 1U << shift;
+/* Set bit 0 of the selected nibble; the return value is always 1. */
+s32 scrSetFlag(ScrVmOperand *work, u16 flagId) {
+    u32 wordIndex, bitShift;
+    scrDecodePackedFlagIndex((s32)work, flagId, &wordIndex, &bitShift);
+    work->flags[wordIndex] |= SCR_FLAG_PRIMARY_BIT << bitShift;
     return 1;
 }
 
-void scrSetGlobalSeenBit(u32 id) {
-    u16 bit;
-    u32 *word;
-    s32 offset;
-    id &= 0xffff;
-    if (id < 0x1ab) return;
-    if (id >= 0x200) return;
-    bit = id + 0xfe55;
-    offset = 0x2e9d0 + (bit >> 5) * 4;
-    word = (u32 *)(datGameState + offset);
-    *word |= 1U << (bit & 31);
+/* Set the global bit for an ID in the supported half-open range. */
+void scrSetGlobalSeenBit(u32 flagId) {
+    u16 bitIndex;
+    u32 *flagWord;
+    s32 byteOffset;
+    flagId &= SCR_FLAG_ID_MASK;
+    if (flagId < SCR_GLOBAL_FLAG_FIRST_ID) return;
+    if (flagId >= SCR_GLOBAL_FLAG_END_ID) return;
+    bitIndex = flagId + SCR_GLOBAL_FLAG_WRAP_BIAS;
+    byteOffset = 0x2e9d0 + (bitIndex >> SCR_GLOBAL_FLAG_WORD_SHIFT) * 4;
+    flagWord = (u32 *)(datGameState + byteOffset);
+    *flagWord |= SCR_FLAG_PRIMARY_BIT << (bitIndex & SCR_GLOBAL_FLAG_BIT_MASK);
 }
 
-u32 scrTestGlobalSeenBit(u32 arg) {
-    u16 id = arg;
-    u32 *word;
-    s32 offset;
-    if (id < 0x1ab) return 0;
-    if (id >= 0x200) return 0;
-    id = id + 0xfe55;
-    offset = 0x2e9d0 + (id >> 5) * 4;
-    word = (u32 *)(datGameState + offset);
-    return *word & (1U << (id & 31));
+/* Return the global bit's raw word mask, not a normalized boolean. */
+u32 scrTestGlobalSeenBit(u32 flagId) {
+    u16 bitIndex = flagId;
+    u32 *flagWord;
+    s32 byteOffset;
+    if (bitIndex < SCR_GLOBAL_FLAG_FIRST_ID) return 0;
+    if (bitIndex >= SCR_GLOBAL_FLAG_END_ID) return 0;
+    bitIndex = bitIndex + SCR_GLOBAL_FLAG_WRAP_BIAS;
+    byteOffset = 0x2e9d0 + (bitIndex >> SCR_GLOBAL_FLAG_WORD_SHIFT) * 4;
+    flagWord = (u32 *)(datGameState + byteOffset);
+    return *flagWord & (SCR_FLAG_PRIMARY_BIT << (bitIndex & SCR_GLOBAL_FLAG_BIT_MASK));
 }
 
-void scrSetSecondaryScriptFlag(ScrVmOperand *work, u16 index) {
-    u32 word, shift;
-    scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
-    work->flags[word] |= 4U << shift;
+/* Set only bit 2 of the selected flag nibble. */
+void scrSetSecondaryScriptFlag(ScrVmOperand *work, u16 flagId) {
+    u32 wordIndex, bitShift;
+    scrDecodePackedFlagIndex((s32)work, flagId, &wordIndex, &bitShift);
+    work->flags[wordIndex] |= SCR_FLAG_SECONDARY_BIT << bitShift;
 }
 
-void scrClearSecondaryScriptFlag(ScrVmOperand *work, u16 index) {
-    u32 word, shift;
-    scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
-    work->flags[word] &= ~(4U << shift);
+/* Clear only bit 2 of the selected flag nibble. */
+void scrClearSecondaryScriptFlag(ScrVmOperand *work, u16 flagId) {
+    u32 wordIndex, bitShift;
+    scrDecodePackedFlagIndex((s32)work, flagId, &wordIndex, &bitShift);
+    work->flags[wordIndex] &= ~(SCR_FLAG_SECONDARY_BIT << bitShift);
 }
 
+/* Clear secondary bits over the fixed ID range, preserving other nibble bits. */
 void scrClearFlags(ScrVmOperand *work) {
-    s32 index;
-    for (index = 0; index < 0x260; index++) {
-        scrClearSecondaryScriptFlag(work, index);
+    s32 flagId;
+    for (flagId = 0; flagId < SCR_SECONDARY_FLAG_COUNT; flagId++) {
+        scrClearSecondaryScriptFlag(work, flagId);
     }
 }
 
-u32 scrGetSecondaryScriptFlag(ScrVmOperand *work, u16 index) {
-    u32 word, shift;
-    scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
-    return work->flags[word] & (4U << shift);
+/* Return bit 2's raw word mask, not a normalized boolean. */
+u32 scrGetSecondaryScriptFlag(ScrVmOperand *work, u16 flagId) {
+    u32 wordIndex, bitShift;
+    scrDecodePackedFlagIndex((s32)work, flagId, &wordIndex, &bitShift);
+    return work->flags[wordIndex] & (SCR_FLAG_SECONDARY_BIT << bitShift);
 }
 
-u32 ptyGetSkillNibbleState(ScrVmOperand *work, u16 index) {
-    u32 word, shift;
-    u32 mask;
-    scrDecodePackedFlagIndex((s32)work, index, &word, &shift);
-    mask = work->flags[word];
-    if (mask & (2U << shift)) {
+/* Bit 1 takes precedence and returns state 2; otherwise return boolean bit 0.
+ * The secondary bit does not affect this state. */
+u32 ptyGetSkillNibbleState(ScrVmOperand *work, u16 flagId) {
+    u32 wordIndex, bitShift;
+    u32 flagWord;
+    scrDecodePackedFlagIndex((s32)work, flagId, &wordIndex, &bitShift);
+    flagWord = work->flags[wordIndex];
+    if (flagWord & (SCR_SKILL_STATE_TWO_BIT << bitShift)) {
         return 2;
     }
-    return (mask & (1U << shift)) != 0;
+    return (flagWord & (SCR_FLAG_PRIMARY_BIT << bitShift)) != 0;
 }
 
+/* Search all slots for the low 16-bit ID; zero can match an empty slot. */
 s32 ptyHasSkill(s32 unit, s32 skillId) {
-    u32 key = skillId & 0xFFFF;
-    u16 *skills = ((PtyProfileUnit *)unit)->skills;
-    u32 i = 0;
+    u32 maskedSkillId = skillId & SCR_FLAG_ID_MASK;
+    u16 *skillSlot = ((PtyProfileUnit *)unit)->skills;
+    u32 slotIndex = 0;
 
     do {
-        if (*skills++ == key) {
+        if (*skillSlot++ == maskedSkillId) {
             return 1;
         }
-        i++;
-    } while (i < 0x18);
+        slotIndex++;
+    } while (slotIndex < PTY_SKILL_SLOT_COUNT);
     return 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyRemoveProfileSkills);
 
-s32 scrFindSlot(u8 *work, u16 key) {
-    u32 index;
-    u16 *entries = ((PtyProfileUnit *)work)->skills;
-    for (index = 0; index < 24; index++) {
-        if (entries[index] == key) {
-            return index;
+/* Return the first exact-ID slot, including zero IDs, or -1 when absent. */
+s32 scrFindSlot(u8 *unit, u16 skillId) {
+    u32 slotIndex;
+    u16 *skillSlots = ((PtyProfileUnit *)unit)->skills;
+    for (slotIndex = 0; slotIndex < PTY_SKILL_SLOT_COUNT; slotIndex++) {
+        if (skillSlots[slotIndex] == skillId) {
+            return slotIndex;
         }
     }
     return -1;
 }
 
-u16 scrGetSlot(PtyProfileUnit *unit, u32 index) {
-    if (index >= 24) {
+/* Read a slot's ID, returning zero for an out-of-range unsigned index. */
+u16 scrGetSlot(PtyProfileUnit *unit, u32 slotIndex) {
+    if (slotIndex >= PTY_SKILL_SLOT_COUNT) {
         return 0;
     }
-    return unit->skills[index];
+    return unit->skills[slotIndex];
 }
 
+/* Count nonzero skill IDs across every slot. */
 u32 scrCountSlots(PtyProfileUnit *unit) {
-    u32 count = 0;
-    u32 index;
+    u32 occupiedCount = 0;
+    u32 slotIndex;
 
-    for (index = 0; index < 24; index++) {
-        if (unit->skills[index] != 0) {
-            count++;
+    for (slotIndex = 0; slotIndex < PTY_SKILL_SLOT_COUNT; slotIndex++) {
+        if (unit->skills[slotIndex] != 0) {
+            occupiedCount++;
         }
     }
-    return count;
+    return occupiedCount;
 }
 
-/* Replace a skill slot and return its previous identifier. */
-u16 scrSetSlot(PtyProfileUnit *unit, s32 index, u16 skill) {
-    u16 previous = unit->skills[index];
+/* Replace an unchecked skill-slot index and return its previous identifier. */
+u16 scrSetSlot(PtyProfileUnit *unit, s32 slotIndex, u16 skillId) {
+    u16 previousSkillId = unit->skills[slotIndex];
 
-    unit->skills[index] = skill;
-    return previous;
+    unit->skills[slotIndex] = skillId;
+    return previousSkillId;
 }
 
-s32 scrRemoveSlot(u8 *work, u16 key) {
-    s32 index = scrFindSlot(work, key);
-    if (index >= 0) {
-        ((PtyProfileUnit *)work)->skills[index] = 0;
+/* Clear the first exact-ID match and report whether a slot was found. */
+s32 scrRemoveSlot(u8 *unit, u16 skillId) {
+    s32 slotIndex = scrFindSlot(unit, skillId);
+    if (slotIndex >= 0) {
+        ((PtyProfileUnit *)unit)->skills[slotIndex] = 0;
         return 1;
     }
     return 0;
@@ -595,31 +631,34 @@ s32 prfBuildRawSkillList(u16 profile, PrfSkillList *output) {
     return list.count;
 }
 
+/* Compact the selected profile's nonzero skills, optionally including nonzero
+ * nibble states and marking them in the output. The profile argument is unused;
+ * output may be NULL when only the resulting count is needed. */
 s32 prfBuildSkillList(ScrVmOperand *unit, u32 profile, PrfSkillList *output, s32 includeFlagged) {
     PrfSkillList list;
-    u32 i;
-    u16 *skills;
-    u16 skill;
-    u32 state;
-    s32 selected;
+    u32 entryIndex;
+    u16 *profileSkills;
+    u16 skillId;
+    u32 skillState;
+    s32 selectedProfile;
 
     memset(&list, 0, sizeof(PrfSkillList));
-    selected = unit->selectedIndex;
+    selectedProfile = unit->selectedIndex;
     list.count = 0;
-    if (selected != 0) {
-        skills = &D_003907BC[selected * 14];
-        for (i = 0; i < 8; i++) {
-            skill = *skills++;
-            if (skill != 0) {
-                state = ptyGetSkillNibbleState(unit, skill);
-                if (state != 0 && includeFlagged == 0) {
+    if (selectedProfile != 0) {
+        profileSkills = &D_003907BC[selectedProfile * 14];
+        for (entryIndex = 0; entryIndex < PRF_SKILL_LIST_ENTRY_COUNT; entryIndex++) {
+            skillId = *profileSkills++;
+            if (skillId != 0) {
+                skillState = ptyGetSkillNibbleState(unit, skillId);
+                if (skillState != 0 && includeFlagged == 0) {
                     continue;
                 }
                 list.flags[list.count] = 0;
-                if (state != 0) {
-                    list.flags[list.count] |= 4;
+                if (skillState != 0) {
+                    list.flags[list.count] |= PRF_SKILL_LIST_FLAGGED;
                 }
-                list.skills[list.count] = skill;
+                list.skills[list.count] = skillId;
                 list.count++;
             }
         }
@@ -834,11 +873,15 @@ u8 *frFontGetColoredGlyphResource(void) {
 
 /* Interleaved mark words and an eight-byte-per-entry value block. */
 typedef struct SdfFlagListWork {
-    u8 pad00[8];
+    s32 frame;
+    u8 pad04[4];
     u32 *marks;               /* 0x08: first word of each pair */
-    u8 pad0C[4];
-    u32 *values;              /* 0x10 */
-    u8 pad14[0x38];
+    f32 (*vertices)[4];
+    u32 *colors;
+    u8 pad14[0x28];
+    s32 surfaceIndex;
+    u8 pad40[8];
+    s32 maxFrames;
     u32 count;                /* 0x4C */
     u8 pad50[4];
     u32 resource;             /* 0x54 */
@@ -859,7 +902,7 @@ void sdfResetFlagListEntries(s32 context) {
             mark = mark + 2;
         } while (index < count);
     }
-    memset(((SdfFlagListWork *)context)->values, 0, count << 3);
+    memset(((SdfFlagListWork *)context)->colors, 0, count << 3);
 }
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CEAE8);
@@ -874,7 +917,53 @@ void sdfReleaseFlagListResource(s32 context) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CEC40);
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CF248);
+typedef struct GsSurface {
+    u8 pad00[0x10];
+    void (*submit)(struct GsSurface *, void *);
+} GsSurface;
+
+extern GsSurface *D_00398098[];
+extern f32 sdfViewTargetVector[4];
+extern u32 D_003BD2C8;
+extern s32 sdfAllocGeneralBlock(s32);
+extern void *sdfMemoryGetBlockAddress(s32);
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(void *);
+extern void sdfAppendPacket(void *, void *);
+extern void *func_002EF2B0(f32 (*)[4], u32 *, u32, s32);
+
+void func_002CF248(SdfFlagListWork *work) {
+    f32 (*source)[4];
+    f32 (*vertices)[4];
+    u32 count;
+    u32 i;
+    s32 allocation;
+    void *packet;
+    GsSurface *surface;
+
+    if (work->maxFrames != 0 && work->frame >= work->maxFrames) {
+        return;
+    }
+    count = work->count;
+    source = work->vertices;
+    allocation = sdfAllocGeneralBlock(count * 32);
+    count *= 2;
+    vertices = sdfMemoryGetBlockAddress(allocation);
+    for (i = 0; i < count; i++) {
+        VU0_LOAD_VF(vf10, &source[i]);
+        if (D_003BD2C8 != 0) {
+            VU0_LOAD_VF(vf11, sdfViewTargetVector);
+            VU0_ADD(vf10, vf10, vf11);
+        }
+        VU0_STORE_VF_UNCLOBBERED(vf10, &vertices[i]);
+    }
+    packet = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packet);
+    sdfAppendPacket(packet, func_002EF2B0(vertices, work->colors, work->count * 2, 0x40));
+    surface = D_00398098[work->surfaceIndex];
+    surface->submit(surface, packet);
+    sdfReleaseResourceAllocation(allocation);
+}
 
 float scrGetOperandFloatValue(ScrVmOperand *op) {
     return op->f50;

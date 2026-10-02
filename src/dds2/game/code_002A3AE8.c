@@ -386,7 +386,33 @@ void mnuSlidePathPoint(s32 position, s32 *outX, s32 *outY) {
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A49C0);
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4A68);
+extern s16 D_003E38E0[][2];
+
+void func_002A4A68(u8 *menu, s32 drawContext) {
+    s32 i;
+    s32 off = 0x70;
+    u8 *flags = menu + 4;
+    u8 *positions = menu + 8;
+
+    for (i = 0; i < 4; i++, off += 8) {
+        if (*(s32 *)(flags + off) != 0) {
+            s32 pos = *(s32 *)(positions + off);
+
+            if (pos > 0x100) {
+                pos = 0x200 - pos;
+            }
+            mnuDrawSprite(D_003E38E0[i][0], D_003E38E0[i][1], 0, pos / 2, 0, 0x1E, drawContext);
+            if (*(s32 *)(positions + off) == 0x200) {
+                *(s32 *)(flags + off) = 0;
+            } else {
+                *(s32 *)(positions + off) += 4;
+                if (*(s32 *)(positions + off) > 0x200) {
+                    *(s32 *)(positions + off) = 0x200;
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4B70);
 

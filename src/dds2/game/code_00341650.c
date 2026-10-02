@@ -59,7 +59,39 @@ u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size) {
 
 INCLUDE_ASM(const s32, "game/code_00341650", func_003417E0);
 
-INCLUDE_ASM(const s32, "game/code_00341650", func_00341878);
+typedef struct SceIoStat {
+    u32 mode;
+    u32 attributes;
+    u32 size;
+    u8 creationTime[8];
+    u8 accessTime[8];
+    u8 modificationTime[8];
+    u32 highSize;
+    u32 privateData[6];
+} SceIoStat;
+
+extern u8 sdfPfsDebugMode;
+extern s32 sceSifLoadModule(const char *, s32, const char *);
+extern s32 func_0036B6E0(const char *, SceIoStat *);
+extern s32 sdfSendNamedResourceRequest(char *, s32, void *, s32 *);
+
+void func_00341878(void) {
+    SceIoStat info;
+    char *module;
+
+    sceSifLoadModule("cdrom0:\\SOUNDIRX\\LIBSD.IRX;1", 0, NULL);
+    sceSifLoadModule("cdrom0:\\SOUNDIRX\\SDRDRV.IRX;1", 0, NULL);
+    sceSifLoadModule("cdrom0:\\SOUNDIRX\\MODHSYN.IRX;1", 0, NULL);
+    sceSifLoadModule("cdrom0:\\SOUNDIRX\\MODMIDI.IRX;1", 0, NULL);
+    sceSifLoadModule("cdrom0:\\SOUNDIRX\\MODMSIN.IRX;1", 0, NULL);
+    module = "cdrom0:\\USERIRX\\SDFSDMAN.IRX;1";
+    if (sdfPfsDebugMode != 0 &&
+        func_0036B6E0("pfs:/userirx/SDFSDMAN.IRX", &info) == 0 &&
+        (info.mode & 0xF000) == 0x2000) {
+        module = "pfs:/userirx/SDFSDMAN.IRX";
+    }
+    sdfSendNamedResourceRequest(module, 0, NULL, NULL);
+}
 
 void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
     SndChannel *channel;

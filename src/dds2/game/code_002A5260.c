@@ -18,6 +18,14 @@ typedef struct MenuTitleState {
     u32 movieFrame;      /* 0x114 */
 } MenuTitleState;
 
+/* Selection-list record shared with the sprite-menu routines. */
+typedef struct SpriteMenuList {
+    u8 pad00[0x1C];
+    u32 *selected;
+    u8 pad20[0xC];
+    void (*callback)(void);
+} SpriteMenuList;
+
 extern s32 mnuMovieMenuState;
 
 extern u16 mnuMovieTaskState;
@@ -59,10 +67,68 @@ extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 extern void *memset(void *, s32, u32);
 extern s32 mnuIsAnyMenuInputPressed(void);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
+extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5260);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A55B8);
+void func_002A55B8(s32 mode, s32 frame) {
+    s32 i;
+    s32 elapsed;
+    s32 alpha;
+    f32 factor;
+
+    switch (mode) {
+    case 0:
+        for (i = 0; i < 3; i++, frame -= 5) {
+            elapsed = frame - 13;
+            if (elapsed < 0) {
+                elapsed = 0;
+            }
+            if (elapsed < 10) {
+                factor = elapsed / 10.0f;
+            } else {
+                factor = 1.0f;
+            }
+            alpha = (s32)(factor * 128.0f);
+            mnuDrawSprite(0, 0, 0, alpha, 0, i + 12, 0x53);
+            if (i == *((SpriteMenuList *)((MenuTitleState *)mnuMovieMenuState)->overlayHandle)->selected) {
+                mnuDrawSprite(0, 0, 0, alpha, 0, i + 6, 0x53);
+            }
+        }
+        break;
+    case 1:
+        for (i = 0; i < 3; i++) {
+            elapsed = frame - i * 2;
+            if (elapsed < 0) {
+                elapsed = 0;
+            }
+            if (elapsed < 10) {
+                factor = elapsed / 10.0f;
+            } else {
+                factor = 1.0f;
+            }
+            alpha = (s32)(factor * 128.0f);
+            mnuDrawSprite(0, 0, 0, alpha, 0, i + 12, 0x53);
+            if (i == *((SpriteMenuList *)((MenuTitleState *)mnuMovieMenuState)->overlayHandle)->selected) {
+                mnuDrawSprite(0, 0, 0, alpha, 0, i + 6, 0x53);
+            }
+        }
+        break;
+    case 2:
+        factor = (10 - frame) / 10.0f;
+        if (factor < 0.0f) {
+            factor = 0.0f;
+        }
+        alpha = (s32)(factor * 128.0f);
+        for (i = 0; i < 3; i++) {
+            mnuDrawSprite(0, 0, 0, alpha, 0, i + 12, 0x53);
+            if (i == *((SpriteMenuList *)((MenuTitleState *)mnuMovieMenuState)->overlayHandle)->selected) {
+                mnuDrawSprite(0, 0, 0, alpha, 0, i + 6, 0x53);
+            }
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5890);
 

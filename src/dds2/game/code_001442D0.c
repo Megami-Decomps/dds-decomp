@@ -3138,7 +3138,41 @@ s32 fldIsTargetWithinInteractionRange(void) {
     return inRange;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00153560);
+s32 func_00153560(void) {
+    if (fldAreaState[4] == 23) {
+        if (fldAreaState[5] == 10 && mdlFlagTest(1254)) {
+            return 0;
+        }
+        if (fldAreaState[5] == 13 && mdlFlagTest(1255)) {
+            return 0;
+        }
+        if (fldAreaState[5] == 15 && mdlFlagTest(9)) {
+            return 0;
+        }
+        if (fldAreaState[5] == 17 && !mdlFlagTest(1232)) {
+            return 0;
+        }
+        if (fldAreaState[5] == 17 && mdlFlagTest(9)) {
+            return 0;
+        }
+    }
+    if (mdlFlagTest(1222) && fldAreaState[4] == 23 &&
+        fldAreaState[5] == 10) {
+        return 1;
+    }
+    if (fldAreaState[4] == 23) {
+        if (fldAreaState[5] == 13) {
+            return 1;
+        }
+        if (fldAreaState[5] == 15) {
+            return 1;
+        }
+        if (fldAreaState[5] == 17) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F68);
 

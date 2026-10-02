@@ -170,6 +170,24 @@ s32 mnuCountAdvancingTitleAnimations(void) {
 
 INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildLevelUpList);
 
+typedef struct BrsProfileCapUnit {
+    u16 flags;
+    u8 pad02[0x53];
+    s8 profile;
+} BrsProfileCapUnit;
+
+typedef struct BrsProfileCapState {
+    u8 pad00[0x78];
+    s32 count;
+    u32 units[32];
+    u32 skills[32];
+} BrsProfileCapState;
+
+extern u32 ptyGetCurrentProfileRecord(u8 *);
+extern void prfBuildSkillListState0(u8 *, u32, void *);
+extern u32 ptyTestProfileFlag0(u8 *, u32);
+extern u32 prfGetCapValue(u16);
+
 INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildProfileCapList);
 
 s32 mnuAdvanceTitleEntryAnimation(TitleEntry *entry) {

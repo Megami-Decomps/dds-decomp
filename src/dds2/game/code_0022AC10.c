@@ -334,12 +334,6 @@ void btlReleaseEventData(void) {
     btlBossDebugPrintf(D_0041B768);
 }
 
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B768);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B780);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B7A8);
-
 extern void btlCreateIndexedSoundResourceNode(s32 slotIndex, u32 handle);
 
 void func_0022B288(void) {
@@ -748,6 +742,12 @@ typedef struct BtlCommandRecord {
     s32 requirementBits; /* +0x28: selects the action-entry condition */
     u8 unk_2C[0xC];
 } BtlCommandRecord;
+
+INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B768);
+
+INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B780);
+
+INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B7A8);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B7D0);
 
@@ -3736,3 +3736,4 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_00420FA8);
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_00420FC0);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_00420FD8);
+

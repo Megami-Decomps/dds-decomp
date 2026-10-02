@@ -64,27 +64,33 @@ typedef struct MenuPage {
     u8 pad11C[0x18];
 } MenuPage;
 
-typedef struct MenuGauge {
+typedef struct MenuPageGauge {
     s32 id;
     u8 pad4[4];
     s32 hp;
     s32 mp;
     s32 maxHp;
     s32 maxMp;
-    u8 pad18[0xC];
-} MenuGauge;
+    u8 pad18[0x18];
+} MenuPageGauge;
 
-typedef struct MenuRecord {
-    s32 visibleCount; /* 0x00: threshold for highlighted slots */
-    u8 pad4[8];
+typedef struct MenuPageEntry {
     s32 partyIndex;
-    MenuGauge gauge;
-} MenuRecord;
+    MenuPageGauge gauge;
+} MenuPageEntry; /* 0x34-byte party row */
+
+/* Counts belong to the table header, not to every party row. */
+typedef struct MenuPageRecord {
+    s32 visibleCount;
+    s32 additionalCount;
+    u32 unk8;
+    MenuPageEntry entries[5];
+} MenuPageRecord;
 
 typedef struct MenuWindow {
     u32 flags;
     u8 pad4[4];
-    MenuRecord *records;
+    MenuPageRecord *records;
     s32 source;
     s32 slot;
     s32 field14;
@@ -1093,7 +1099,7 @@ void mnuCreatePartyPageResources(MenuWindow *menu, s32 x, s32 y, s32 style, s32 
     u32 i = 0;
     s32 offset = 0;
     for (; i < 5; i++) {
-        s32 entry = ((MenuRecord *)((u8 *)menu->records + offset))->gauge.id;
+        s32 entry = ((MenuPageEntry *)((u8 *)menu->records->entries + offset))->gauge.id;
         offset += 0x34;
         if (entry >= 0) {
             *output = mnuCreatePartyPageSpriteBundle(x, y, style, 0, color, entry);
@@ -1107,7 +1113,7 @@ void mnuReleaseSlotResources(MenuWindow *context) {
     u32 i = 0;
     s32 offset = 0;
     for (; i < 5; i++) {
-        s32 node = ((MenuRecord *)((u8 *)context->records + offset))->gauge.id;
+        s32 node = ((MenuPageEntry *)((u8 *)context->records->entries + offset))->gauge.id;
         offset += 0x34;
         if (node >= 0 && *slot != 0) {
             mnuDestroyResources((s32 *)*slot);
@@ -1447,7 +1453,7 @@ void mnuUpdateHandleStates(MenuWindow *obj) {
         }
     }
     for (i = 0, offset = 0; i < 5U; i++) {
-        MenuRecord *entry = (MenuRecord *)((u8 *)obj->records + offset);
+        MenuPageEntry *entry = (MenuPageEntry *)((u8 *)obj->records->entries + offset);
 
         offset += 0x34;
         if (entry->gauge.id >= 0) {
@@ -1555,9 +1561,9 @@ void mnuResolveUnselectedPageHandles(MenuWindow *window) {
     s32 offset = 0;
     u32 i;
 
-    for (i = 0; i < 5; i++, offset += sizeof(MenuRecord)) {
+    for (i = 0; i < 5; i++, offset += sizeof(MenuPageEntry)) {
         if (i != selected) {
-            s32 id = ((MenuRecord *)((u8 *)window->records + offset))->gauge.id;
+            s32 id = ((MenuPageEntry *)((u8 *)window->records->entries + offset))->gauge.id;
 
             if (id >= 0) {
                 if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
@@ -1573,10 +1579,10 @@ void mnuReleasePageTexturesAndSelectedResources(MenuWindow *window) {
     s32 selected = window->selected;
     u32 i;
     s32 id;
-    MenuRecord *record;
+    MenuPageEntry *record;
 
     for (i = 0; i < 5; i++) {
-        record = &window->records[i];
+        record = &window->records->entries[i];
         id = record->gauge.id;
         if (id >= 0) {
             if (effHasFirstTextureHandle(window->handlesA[id]) != 0) {
@@ -1585,7 +1591,7 @@ void mnuReleasePageTexturesAndSelectedResources(MenuWindow *window) {
             }
         }
     }
-    record = &window->records[selected];
+    record = &window->records->entries[selected];
     id = record->gauge.id;
     if (id >= 0) {
         if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
@@ -1600,13 +1606,13 @@ void mnuSelectPage(MenuWindow *window, s32 selected) {
     u32 i;
     /* Required to match: retain the header-relative handle walk below. */
     u8 *handles = window->pad4;
-    MenuRecord *record;
+    MenuPageEntry *record;
     s32 active;
 
     for (i = 0; i < 5; i++) {
         effReleaseTextureHandlesAndResetSlots(*resource++);
     }
-    record = &window->records[selected];
+    record = &window->records->entries[selected];
     active = mnuGetSelectionFromFlags(datGameState + record->partyIndex * 0x1A4 + 0xA60);
     for (i = 0; i < 5; i++) {
         if (i == active) {

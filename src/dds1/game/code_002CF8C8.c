@@ -155,3 +155,4 @@ void func_002CFB18(SdfThreadNode *node) {
 INCLUDE_SDATA(const s32, "game/code_002CF8C8", D_003BD2D0);
 
 INCLUDE_SDATA(const s32, "game/code_002CF8C8", sdfTickCallback);
+

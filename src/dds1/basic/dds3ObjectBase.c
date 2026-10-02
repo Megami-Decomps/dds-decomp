@@ -335,3 +335,4 @@ void dds3GetSlot1Data(void *obj) {
 }
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_003BA9C8);
+

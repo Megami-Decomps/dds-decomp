@@ -348,6 +348,9 @@
     ".set noreorder\n\tvadd.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
 #define VU0_MUL(dst, a, b) __asm__ volatile ( \
     ".set noreorder\n\tvmul.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
+/* Convert xyzw floats to signed 28.4 fixed-point integers (vftoi4.xyzw). */
+#define VU0_FTOI4(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvftoi4.xyzw " #dst ", " #src "\n\t.set reorder")
 /* vf.xyz = -vf.xyz, w kept (vsub.xyz vf,vf0,vf; vf0.xyz is 0): the reversed
  * direction after a matrix apply (95 retail sites, battle and effects). */
 #define VU0_NEGATE_XYZ(vf) __asm__ volatile ( \

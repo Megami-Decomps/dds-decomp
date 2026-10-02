@@ -605,13 +605,86 @@ s32 (*kwlnTextureFindIncompleteResource(void))(void) {
     return kwlnLoadDefaultResource;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104D40);
+typedef struct SdfTexHead {
+    struct SdfTexHead *next;
+    struct SdfTexHead *prev;
+    s32 allocationMode;
+    u32 address;
+    s32 size;
+    s16 width;
+    s16 height;
+    s32 format;
+} SdfTexHead;
 
-extern SdfTex *sdfGetTextureListHead(void);
-extern void func_00104D40(void *, s32, s32, SdfTex *, s32);
+extern void sdfAppendFillRectanglePacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
+
+void func_00104D40(void *list, s32 x, s32 y, SdfTexHead *block, u8 mode) {
+    s32 color;
+    u32 wordsLeft;
+    s32 column;
+    s32 rowWords;
+    s32 left;
+    s32 top;
+    s32 width;
+
+    if (mode == 0) {
+        switch (block->allocationMode) {
+        case 1:
+            color = 0x80008000;
+            break;
+        case 2:
+            color = 0x80008080;
+            break;
+        case 3:
+            color = 0x80000080;
+            break;
+        default:
+            color = 0;
+            break;
+        }
+    } else {
+        color = mode == 1 ? 0x80800000 : 0x80808000;
+    }
+    wordsLeft = block->size;
+    top = y + (block->address >> 12) * 8;
+    column = (block->address & 0xFFF) >> 6;
+    left = x + column * 16;
+    if (column > 0) {
+        rowWords = (64 - column) * 64;
+        if (wordsLeft >= rowWords) {
+            sdfAppendFillRectanglePacket(list, color, 0, left, top,
+                                         left + (64 - column) * 16, top + 8,
+                                         0x0FFFFF80, NULL);
+            wordsLeft -= rowWords;
+        } else {
+            width = wordsLeft >> 6;
+            if (width == 0) {
+                width = wordsLeft != 0;
+            }
+            sdfAppendFillRectanglePacket(list, color, 0, left, top,
+                                         left + width * 16, top + 8,
+                                         0x0FFFFF80, NULL);
+            wordsLeft = 0;
+        }
+        top += 8;
+    }
+    while (wordsLeft >= 0x1000) {
+        sdfAppendFillRectanglePacket(list, color, 0, x, top, x + 0x400, top + 8,
+                                     0x0FFFFF80, NULL);
+        wordsLeft -= 0x1000;
+        top += 8;
+    }
+    if (wordsLeft != 0) {
+        sdfAppendFillRectanglePacket(list, color, 0, x, top,
+                                     x + ((wordsLeft >> 6) << 4), top + 8,
+                                     0x0FFFFF80, NULL);
+    }
+}
+
+extern SdfTexHead *sdfGetTextureListHead(void);
 
 void kwlnDrawTextureListDiagnostic(void *list, s32 x, s32 y) {
-    SdfTex *texture = sdfGetTextureListHead();
+    SdfTexHead *texture = sdfGetTextureListHead();
 
     if (texture != NULL) {
         sdfAppendPacket(list, func_0011F250(x - 0x20, y - 0x10,

@@ -57,7 +57,8 @@ extern s32 mnuTitleSoundTask;
 
 extern char D_003771D8[];
 
-extern void func_003014F0(char *dst, char *fmt, char *name, char *arg);
+/* libc sprintf returns the signed vfprintf character count. */
+extern s32 func_003014F0(char *dst, const char *fmt, ...);
 
 extern s32 func_003003F0(const char *fmt, ...);
 
@@ -677,7 +678,57 @@ void mnuInitializeTitleSoundBuffer(void) {
     SignalSema(mnuTitleStreamSemaphore);
 }
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026AA28);
+typedef struct MnuTitleStreamEntry {
+    u8 format;
+    u8 pad;
+    s16 parameter;
+    char filename[12];
+} MnuTitleStreamEntry;
+
+extern MnuTitleStreamEntry D_00377650[];
+extern char D_003AFCF0[];
+
+/* Each format reserves 600 compressed frames before loading its named stream. */
+void func_0026AA28(s32 index) {
+    MemBlock *allocation = NULL;
+    s32 buffer;
+    char path[32];
+
+    WaitSema(mnuTitleStreamSemaphore);
+    mnuTitleSoundBufferState[6] = (u32)D_003DA1C0;
+    mnuTitleSoundBufferState[3] = D_00377650[index].parameter;
+    mnuTitleSoundBufferState[7] = (u32)D_003DA1A8;
+    mnuTitleSoundBufferState[4] = 2;
+    switch (D_00377650[index].format) {
+    case 1:
+        D_003DA1A8[2] = 1;
+        mnuTitleSoundBufferState[2] = 0x180;
+        allocation = sdfAllocGeneralBlock(0x38400);
+        break;
+    case 2:
+        D_003DA1A8[2] = 2;
+        mnuTitleSoundBufferState[2] = 0xC0;
+        allocation = sdfAllocGeneralBlock(0x1C200);
+        break;
+    case 3:
+        D_003DA1A8[2] = 3;
+        mnuTitleSoundBufferState[2] = 0xC0;
+        allocation = sdfAllocGeneralBlock(0x1C200);
+        break;
+    case 4:
+        D_003DA1A8[2] = 4;
+        mnuTitleSoundBufferState[2] = 0x60;
+        allocation = sdfAllocGeneralBlock(0xE100);
+        break;
+    }
+    buffer = sdfMemoryGetBlockAddress(allocation);
+    mnuTitleSoundBufferState[8] = (u32)allocation;
+    mnuTitleSoundBufferState[5] = buffer;
+    func_003014F0(path, D_003AFCF0, D_00377650[index].filename);
+    mnuLoadTitleStreamFrameData(path, mnuTitleSoundBufferState);
+    func_002F7628(D_003DA1A8);
+    SignalSema(mnuTitleStreamSemaphore);
+}
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026ABA8);
 

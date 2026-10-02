@@ -1,7 +1,9 @@
 #include "common.h"
 #include "btl.h"
+#include "dds3obj.h"
 
 #include "pcp_vu0.h"
+#include "fpu.h"
 
 extern s64 mnuGetSoundBufferStateLocked(void);
 extern void func_00336538(f32);
@@ -13,12 +15,12 @@ extern void mdlAddEntryFlagged(void *, s32, s32);
 extern u8 effSharedRandomState[];
 extern void func_001EC5F0(u32);
 extern void func_001EF030(void *, void *);
-extern s32 func_001E88A8(u8 *);
 extern void mdlProcessContextNodesAndTransforms(void *, void *);
 extern void func_001E38F0(void *, void *, s32, u8 *, u32);
 extern void dds3ClearObjectFlags(s32, s32);
 extern u8 D_00380788[];
 extern u8 D_003B6BD0[];
+
 
 extern void func_001EC868(void *, f32 *, f32);
 
@@ -342,8 +344,14 @@ extern u8 D_003BD7D0[];
 extern void evtSetUnitNormalizedDirection(BtlUnitExt *, s32);
 
 typedef struct XformData {
-    s128 vec0;
-    s128 vec1;
+    union {
+        s128 vec0;
+        f32 position[4];
+    };
+    union {
+        s128 vec1;
+        f32 direction[4];
+    };
     f32 f20;
     f32 f24;
 } XformData;
@@ -4119,9 +4127,85 @@ s32 btlStepPoseBlendRatio(u8 *fx) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E88A8);
+/* VU0 math: constrain the pose direction at the fixed -20 height plane. */
+s32 func_001E88A8(XformData *state) {
+    f32 vector[4];
+    f32 direction[4];
+    f32 length = state->f20;
+    f32 y;
+    f32 scale;
+    f32 delta;
+    s32 changed = 0;
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E89E0);
+    if (!(length <= 1.0f)) {
+        scale = -length;
+        vector[0] = state->direction[0] * scale + state->position[0];
+        y = state->position[1];
+        vector[1] = state->direction[1] * scale + y;
+        vector[2] = state->direction[2] * scale + state->position[2];
+        vector[3] = 0.0f;
+        if (-20.0f < vector[1]) {
+            VU0_LOAD_VF(vf10, &state->vec0);
+            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_LOAD_VF(vf10, vector);
+            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, direction);
+            delta = y - (-20.0f);
+            scale = fsqrtf(delta * delta + length * length);
+            vector[0] = -direction[0] * scale;
+            vector[1] = delta;
+            vector[2] = -direction[2] * scale;
+            VU0_LOAD_VF(vf10, vector);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, &state->vec1);
+            changed = 1;
+        }
+    }
+    return changed;
+}
+
+/* VU0 math: constrain the pose direction using a horizontal height plane. */
+s32 func_001E89E0(XformData *state, f32 height) {
+    f32 vector[4];
+    f32 direction[4];
+    f32 length = state->f20;
+    f32 y;
+    f32 scale;
+    f32 delta;
+    s32 changed = 0;
+
+    if (!(length <= 1.0f)) {
+        scale = -length;
+        vector[0] = state->direction[0] * scale + state->position[0];
+        y = state->position[1];
+        vector[1] = state->direction[1] * scale + y;
+        vector[2] = state->direction[2] * scale + state->position[2];
+        vector[3] = 0.0f;
+        if (height < vector[1]) {
+            VU0_LOAD_VF(vf10, &state->vec0);
+            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_LOAD_VF(vf10, vector);
+            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, direction);
+            delta = y - height;
+            scale = fsqrtf(delta * delta + length * length);
+            vector[0] = -direction[0] * scale;
+            vector[1] = delta;
+            vector[2] = -direction[2] * scale;
+            VU0_LOAD_VF(vf10, vector);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, &state->vec1);
+            changed = 1;
+        }
+    }
+    return changed;
+}
 
 u32 btlExecuteCommandSoundTask(u32 *taskArgs) {
     func_001E8258(taskArgs[3], *taskArgs, taskArgs[1], taskArgs[2], taskArgs[4]);
@@ -5093,7 +5177,7 @@ void btlAdvanceActorStageAndPose(ActionUnit *action) {
             ((BattlePoseBlendState *)action)->blendMode = 0;
             ((BattlePoseBlendState *)action)->duration = 30.0f;
         }
-        func_001E88A8(out);
+        func_001E88A8((XformData *)out);
         return;
     }
     if (action->stepKind == 0xD) {
@@ -5372,8 +5456,8 @@ void btlPrepareRandomizedActionCameraPose(ActionUnit *action, XformData *from, X
         VU0_LOAD_VF(vf10, D_003E9130);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, &to->vec1);
-        func_001E88A8((u8 *)from);
-        func_001E88A8((u8 *)to);
+        func_001E88A8(from);
+        func_001E88A8(to);
         action->unk154 = poses[pose][9];
         action->flags |= 0x41;
     }
@@ -5386,7 +5470,7 @@ void btlAimEffectPoseAtUnit(u8 *fx) {
             btlUnitGetMuzzlePosVU(unit);
         }
         VU0_STORE_VF_UNCLOBBERED(vf10, fx + 0xC0);
-        func_001E88A8(fx + 0xC0);
+        func_001E88A8((XformData *)(fx + 0xC0));
     }
 }
 
@@ -5404,7 +5488,7 @@ void btlRefreshActionPoseBlendSnapshot(ActionUnit *action) {
         pose->blendMode = 0;
         pose->state13C = 1;
         pose->duration = 40.0f;
-        func_001E88A8((u8 *)saved);
+        func_001E88A8(saved);
     }
 }
 
@@ -5436,8 +5520,8 @@ void btlSetupCameraPoseAimUnit(ActionUnit *action, XformData *from, XformData *t
     to->f20 += 550.0f;
     action->flags = (action->flags & ~0x14) | 0x41;
     action->unk154 = 25.0f;
-    func_001E88A8((u8 *)from);
-    func_001E88A8((u8 *)to);
+    func_001E88A8(from);
+    func_001E88A8(to);
 }
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001EDC38);
@@ -6194,7 +6278,32 @@ void btlTickFieldSwayAndTint(void) {
     btlDrawTintIfVisible();
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_00200930);
+struct WorldTransformOwner;
+struct WorldUnitOwner;
+extern WorldTransformSetup D_00452F50;
+extern void dds3LoadWorldTransformSetup(struct WorldTransformOwner *, WorldTransformSetup *);
+extern void evtBeginUnitValueColorTransition(struct WorldUnitOwner *, s32);
+
+void func_00200930(f32 *position, f32 *scale, s32 value) {
+    BtlWork *work = (BtlWork *)btlGetRuntime();
+    s32 listener = work->unk228;
+
+    D_00452F50.transform.position[0] = position[0];
+    D_00452F50.transform.position[1] = position[1];
+    D_00452F50.transform.position[2] = position[2];
+    D_00452F50.transform.scale[0] = scale[0];
+    D_00452F50.transform.scale[1] = scale[1];
+    D_00452F50.transform.scale[2] = scale[2];
+    D_00452F50.unk00 = 0;
+    D_00452F50.flags = 0;
+    D_00452F50.mode = 0;
+    D_00452F50.transform.rotation[0] = 0.0f;
+    D_00452F50.transform.rotation[1] = 0.0f;
+    D_00452F50.transform.rotation[2] = 0.0f;
+    D_00452F50.transform.rotation[3] = 0.0f;
+    dds3LoadWorldTransformSetup((struct WorldTransformOwner *)listener, &D_00452F50);
+    evtBeginUnitValueColorTransition((struct WorldUnitOwner *)work->unk228, value);
+}
 
 void btlCreateRainEffect(u32 kind, u32 arg) {
     BtlWork *work = (BtlWork *)btlGetRuntime();

@@ -513,3 +513,4 @@ INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389BC);
 INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389C0);
 
 INCLUDE_SDATA(const s32, "game/code_00324DF8", sdfTickCallback);
+

@@ -14,13 +14,13 @@ extern const char D_00438980[];
 extern const char D_00438988[];
 extern const char D_00438990[];
 
-extern u64 func_00325BB0(u64, u32);
+extern u32 *func_00325BB0(const void *, u32);
 
-extern u64 func_00325AB8(u64, u32);
+extern u32 *func_00325AB8(const void *, u32);
 
-extern u64 func_00320AE8(u64, u64, u32 *);
+extern void *func_00320AE8(const char *, const char *, u32 *);
 
-extern u64 func_00325790(u64, u32);
+extern u32 *func_00325790(const void *, s32);
 
 extern void (*sdfTickCallback)(void);
 
@@ -343,9 +343,9 @@ s32 func_00320388(const char *directory, const char *name, u32 **source) {
     return 1;
 }
 
-u64 func_00320510(u64 source, u64 request) {
-    u64 buffer;
-    u64 result;
+u32 *func_00320510(const char *source, const char *request) {
+    void *buffer;
+    u32 *result;
     u32 metadata[4];
 
     buffer = func_00320AE8(source, request, metadata);
@@ -388,9 +388,9 @@ s32 func_00320560(const char *directory, const char *name, u32 **source) {
     return 1;
 }
 
-u64 func_003206E8(u64 source, u64 request) {
-    u64 buffer;
-    u64 result;
+u32 *func_003206E8(const char *source, const char *request) {
+    void *buffer;
+    u32 *result;
     u32 metadata[4];
 
     buffer = func_00320AE8(source, request, metadata);
@@ -433,9 +433,9 @@ s32 func_00320738(const char *directory, const char *name, u32 **source) {
     return 1;
 }
 
-u64 func_003208C0(u64 source, u64 request) {
-    u64 buffer;
-    u64 result;
+u32 *func_003208C0(const char *source, const char *request) {
+    void *buffer;
+    u32 *result;
     u32 metadata[4];
 
     buffer = func_00320AE8(source, request, metadata);
@@ -478,9 +478,9 @@ s32 func_00320910(const char *directory, const char *name, u32 **source) {
     return 1;
 }
 
-u64 func_00320A98(u64 source, u64 request) {
-    u64 buffer;
-    u64 result;
+u32 *func_00320A98(const char *source, const char *request) {
+    void *buffer;
+    u32 *result;
     u32 metadata[4];
 
     buffer = func_00320AE8(source, request, metadata);

@@ -111,7 +111,75 @@ INCLUDE_ASM(const s32, "effect/billManager", func_00158430);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00158AA0);
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00158C00);
+typedef struct BillDrawNode {
+    BillManagerNode *first;
+    BillManagerNode *second;
+    u8 pad08[0xC];
+    SdfListHead *packetList;
+    struct BillDrawNode *next;
+} BillDrawNode;
+
+typedef struct BillDrawSurface {
+    u8 pad00[0x10];
+    void (*submit)(struct BillDrawSurface *, SdfListHead *);
+} BillDrawSurface;
+
+typedef struct BillStatePacket {
+    u64 dmaTag;
+    u64 vifCommands;
+    u64 gifTag;
+    u64 gifRegisters;
+    u64 test;
+    u64 testRegister;
+    u64 alpha;
+    u64 alphaRegister;
+} BillStatePacket;
+
+extern BillDrawNode *D_00438F00;
+extern BillDrawSurface D_00380228;
+extern u8 kwlnFrameDrawPacketRecords[];
+extern s32 kwlnGetDrawBufferIndex(void);
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfAppendDmaTagToList(SdfListHead *, u32);
+extern void func_0032DB78(const void *, void *, s32);
+extern void func_00158AA0(BillDrawNode *);
+
+void func_00158C00(void) {
+    BillDrawNode *node = D_00438F00;
+    SdfListHead *list;
+    void *texture;
+    BillStatePacket *packet;
+
+    if (node != NULL) {
+        do {
+            BillPacketWork *work = node->second->work;
+            if (work->count != 0) {
+                func_00158AA0(node);
+            }
+            D_00380228.submit(&D_00380228, node->packetList);
+            node->packetList = NULL;
+            node = node->next;
+        } while (node != NULL);
+    }
+    list = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    texture = sdfAllocPacketAligned(0x40);
+    func_0032DB78(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
+    sdfAppendDmaTagToList(list, (u32)texture);
+    packet = sdfAllocPacketAligned(0x40);
+    packet->dmaTag = 3;
+    packet->vifCommands = 0x5000000310000000ULL;
+    packet->gifTag = 0x1000000000008002ULL;
+    packet->gifRegisters = 0xE;
+    packet->test = 0x71801;
+    packet->testRegister = 0x47;
+    packet->alpha = 0x48;
+    packet->alphaRegister = 0x42;
+    sdfAppendPacket(list, (u32)packet);
+    D_00380228.submit(&D_00380228, list);
+    D_00438F00 = NULL;
+}
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00158D68);
 

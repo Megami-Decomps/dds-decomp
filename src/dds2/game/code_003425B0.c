@@ -69,20 +69,25 @@ typedef struct SdfStreamTextureHead {
 typedef struct SdfStreamFrameNode {
     u8 pad00[8];
     struct SdfStreamFrameNode *next; /* 0x08: sound list link */
-    u8 pad0C[8];
+    u8 active;
+    u8 pad0D[2];
+    u8 drained;
+    u8 pad10[4];
     u8 audioMode;     /* 0x14: 0=none, 1=mono, 2=stereo */
     u8 loopMode;      /* 0x15 */
     u8 playbackMode;  /* 0x16 */
     u8 pad17[5];
     s32 bufferSize;   /* 0x1C */
-    s32 buffers[2];   /* 0x20 */
-    u8 pad28[0xC];
+    u32 buffers[2];   /* 0x20 */
+    s32 textureResources[2];
+    u8 pad30[4];
     s32 resourceWord; /* 0x34: retained resource handle */
     SdfStreamTextureHead *textureHead; /* 0x38 */
     u16 width;        /* 0x3C */
     u16 height;       /* 0x3E */
     s32 sourceBytes;  /* 0x40: from stream header */
-    u8 pad44[0xC];
+    u8 pad44[8];
+    u32 unk4C;
     u8 headerReady;   /* 0x50 */
     u8 done;          /* 0x51 */
     u8 count;         /* 0x52 */
@@ -91,6 +96,7 @@ typedef struct SdfStreamFrameNode {
     u8 pad58[4];
     s32 (*read)(struct SdfStreamFrameNode *, u32, s32, void *, s32); /* 0x5C */
     u32 source;       /* 0x60 */
+    u8 pad64[0x28];
 } SdfStreamFrameNode;
 typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, u32, s32, void *, s32);
 extern SdfStreamFrameNode *sdfSoundNodeHead;
@@ -880,7 +886,7 @@ void sdfSoundInitFormattedNode(u8 *state, s32 format, SdfStreamRead read, u32 so
     sdfSoundInitNodeFromFormat(state, format);
     ((SdfStreamFrameNode *)state)->read = read;
     ((SdfStreamFrameNode *)state)->source = source;
-    state[0xC] = 1;
+    ((SdfStreamFrameNode *)state)->active = 1;
     ((SdfStreamFrameNode *)state)->scratchBuffer = sdfAllocateBlockBySizeThreshold(0x10100) + 0x100;
 }
 
@@ -934,7 +940,49 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00344A08);
+extern void sdfFreeMemoryFromEitherHeap(void *);
+extern void sdfTexQueueResourceRelease(s32);
+extern void sdfTexQueuePendingWork(s32);
+
+void func_00344A08(SdfStreamFrameNode *node) {
+    s32 interruptsEnabled;
+    s32 wasActive;
+    u32 dmaEnable;
+
+    interruptsEnabled = func_0036DE70();
+    wasActive = 0;
+    node->drained = 1;
+    sdfSoundRemoveNode(node);
+    sdfStreamNodeUnlink((SdfStreamNode *)node, 1);
+    if (D_00439204 == (u32)node) {
+        *(volatile u32 *)0x10002010 = 0x40000000;
+        sceIpuSync(0, 0);
+        dmaEnable = *(volatile u32 *)0x1000F520;
+        *(volatile u32 *)0x1000F520 = 0x10000;
+        *(volatile u32 *)0x1000B400 = 1;
+        *(volatile u32 *)0x1000B000 = 0;
+        *(volatile u32 *)0x1000F520 = dmaEnable;
+        D_00439204 = 0;
+        wasActive = 1;
+    }
+    if (interruptsEnabled != 0) {
+        EIntr();
+    }
+    sdfFreeMemoryFromEitherHeap((void *)node->unk4C);
+    sdfFreeMemoryFromEitherHeap((void *)node->buffers[0]);
+    sdfFreeMemoryFromEitherHeap((void *)node->buffers[1]);
+    sdfTexQueueResourceRelease(node->textureResources[0]);
+    sdfTexQueueResourceRelease(node->textureResources[1]);
+    if (node->scratchBuffer != 0) {
+        sdfFreeMemoryFromEitherHeap((void *)(node->scratchBuffer - 0x100));
+    }
+    if (node->textureHead != 0) {
+        sdfTexQueuePendingWork((s32)node->textureHead);
+    }
+    if (wasActive != 0) {
+        func_003450D8(0);
+    }
+}
 
 extern void *memcpy(void *dst, const void *src, u32 n);
 
@@ -1366,3 +1414,4 @@ INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438D1C);
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438D20);
 
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438D23);
+

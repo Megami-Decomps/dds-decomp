@@ -1,5 +1,6 @@
 #include "common.h"
 #include "mnu.h"
+#include "kwln.h"
 
 
 extern s32 func_0027B888(u32);
@@ -32,6 +33,8 @@ typedef struct {
     u8 pad14[8];
     MenuProgressNode *selectedNode;      /* 0x1C */
     s32 selectionState;                   /* 0x20 */
+    u8 pad24[0x18];
+    s32 scale; /* 0x3C */
 } MenuProgressOwner;
 
 typedef struct MenuVisualWork {
@@ -67,15 +70,17 @@ extern u32 *mnuCreateProfilePanel(s32);
 extern void mnuCacheProfilePanelGridPositions(s32, u32, u32, u32, u32);
 extern void func_00276720(s32, s32, s32, s32);
 
+typedef struct SceneFrameTable SceneFrameTable;
+
 typedef struct MenuTerminalWork {
     s32 allocation;          /* 0x00 */
     s32 groupResource;       /* 0x04 */
     u8 pad08[0x54];
     s32 messageResources[2]; /* 0x5C: second handle opens the message window */
-    s32 batch;               /* 0x64 */
+    SceneFrameTable *batch;  /* 0x64 */
     u32 secondResource;     /* 0x68 */
     u8 pad6C[4];
-    s32 listResource;        /* 0x70 */
+    MenuProgressOwner *listResource; /* 0x70 */
     MenuProgressOwner *list; /* 0x74 */
     MenuProgressOwner *owner;/* 0x78 */
     s32 mode;                /* 0x7C */
@@ -414,7 +419,7 @@ void mnuHighlightProgressNodeFromOwnerSelection(s32 object) {
         }
         if (((MenuTerminalWork *)object)->owner->selectionState == 0) {
             s32 selected = mnuWalkNodeList(2 - func_00249198(),
-                                              ((MenuTerminalWork *)object)->listResource);
+                                              (s32)((MenuTerminalWork *)object)->listResource);
             ((MenuProgressNode *)selected)->flags |= 1;
         }
     }
@@ -433,7 +438,7 @@ void mnuHighlightProgressNodeByMode(s32 object) {
         selectedIndex = 3 - func_00249198();
     }
     if (((MenuTerminalWork *)object)->list->selectionState == 0) {
-        s32 node = mnuWalkNodeList(selectedIndex, ((MenuTerminalWork *)object)->listResource);
+        s32 node = mnuWalkNodeList(selectedIndex, (s32)((MenuTerminalWork *)object)->listResource);
         ((MenuProgressNode *)node)->flags |= 1;
     }
 }
@@ -471,7 +476,7 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
         count = 2;
         break;
     }
-    host->listResource = mnuBuildThresholdNodeList(table + row * 5, count, excluded, (s32)host);
+    host->listResource = (MenuProgressOwner *)mnuBuildThresholdNodeList(table + row * 5, count, excluded, (s32)host);
     mnuBuildTerminalNodeList(host);
     mnuResolveStaffImageHandles((u8 *)host + 0xE0);
     mnuUpdateGroupResources((u8 *)host);
@@ -945,15 +950,15 @@ void mnuTerminalConfigureEffects(u32 mode, MenuTerminalWork *state) {
     }
     switch (mode) {
     case 1:
-        effConfigureWithDefaultSetting(state->batch, *slot, state->effect[4], 0, 5, 2);
+        effConfigureWithDefaultSetting((s32)state->batch, *slot, state->effect[4], 0, 5, 2);
         break;
     case 2:
-        effConfigureWithDefaultSetting(state->batch, *slot, state->effect[5], 0, 0, 2);
+        effConfigureWithDefaultSetting((s32)state->batch, *slot, state->effect[5], 0, 0, 2);
         break;
     case 3:
-        effConfigureWithDefaultSetting(state->batch, *slot, state->effect[4], 0, 0, 2);
+        effConfigureWithDefaultSetting((s32)state->batch, *slot, state->effect[4], 0, 0, 2);
         if (slot[1] >= 0) {
-            effConfigureWithDefaultSetting(state->batch, slot[1], state->effect[5], 0, 0, 2);
+            effConfigureWithDefaultSetting((s32)state->batch, slot[1], state->effect[5], 0, 0, 2);
         }
         break;
     }
@@ -993,7 +998,7 @@ void mnuDrawTerminalSelectedSlots(s32 context) {
     for (i = 0, slot = state->cursor; i < 2; i++, slot++) {
         if (*slot >= 0) {
             itfDrawGridWithResolvedSlot(position.a, position.b, 0, 0x81,
-                                        state->batch, *slot, 0x53);
+                                        (s32)state->batch, *slot, 0x53);
         }
     }
     if (state->mode == 2) {
@@ -1004,13 +1009,15 @@ void mnuDrawTerminalSelectedSlots(s32 context) {
 typedef struct {
     u8 pad00[0x14];
     u8 unk14;
-    u8 pad15[0x8B];
+    u8 pad15[0x6F];
+    u8 unk84;
+    u8 pad85[0x1B];
 } SceneFrameRecord;
 
-typedef struct {
+struct SceneFrameTable {
     u8 pad00[0x18];
     SceneFrameRecord *records;
-} SceneFrameTable;
+};
 
 typedef struct {
     u8 pad00[0x64];
@@ -1094,7 +1101,39 @@ s32 func_0024AB28(MenuSelectorContext *context) {
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024AB70);
 
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024ACD8);
+extern s32 D_003AF6E0[2][2];
+extern void mnuCallInitWide(s32, s32, s32, s32, s32);
+
+void func_0024ACD8(s32 close, s32 context) {
+    MenuTerminalWork *work = (MenuTerminalWork *)context;
+    s32 positions[2][2];
+    u32 progress;
+    SceneFrameTable *frames;
+
+    memcpy(positions, D_003AF6E0, sizeof(positions));
+    itfDrawGridWithResolvedSlot(positions[1][0], positions[1][1], 0, 0x80,
+        (s32)work->batch, func_0024AB28((MenuSelectorContext *)work), 0x53);
+    mnuCallInitWide(0x330, 0x340, 0, (s32)work->listResource, 0x53);
+    itfDrawGridWithResolvedSlot(positions[0][0], positions[0][1], 0, 0x80,
+        (s32)work->batch, 8, 0x53);
+    frames = work->batch;
+    progress = ((u32)frames->records[8].unk14 << 8) / frames->records[8].unk84;
+    if (close != 0) {
+        if (work->listResource->scale > 0) {
+            work->listResource->scale -= 0x40;
+        }
+        if (work->listResource->scale < 0) {
+            work->listResource->scale = 0;
+        }
+    } else if (progress == 0x100) {
+        if (work->listResource->scale < 0x100) {
+            work->listResource->scale += 0x40;
+        }
+        if (work->listResource->scale > 0x100) {
+            work->listResource->scale = 0x100;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024AE18);
 
@@ -1242,7 +1281,7 @@ u32 func_0024B470(void) {
     return 1;
 }
 
-extern u32 mnuMapPadMaskToFlags(s32 mask);
+extern s32 mnuMapPadMaskToFlags(s32 mask);
 extern s32 func_0024A1D8(s32 action, s32 context);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void mnuSetPopupEntryFlagged(s32 *state, void *entry);
@@ -1353,7 +1392,6 @@ s32 evtBClearAndReset(void) {
 }
 
 extern void func_0024AB70(s32, s32);
-extern void func_0024ACD8(void);
 
 u32 evtBeginSelectionExitFade(void) {
     s32 context = kwlnTaskGetUserValue();
@@ -1421,7 +1459,40 @@ u32 evtFinishPendingSelectionTransition(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024BB00);
+s64 func_0024BB00(u64 input) {
+    EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
+    s32 *state = &context->dispatchState;
+    u32 buttons = mnuMapPadMaskToFlags(0x33);
+    s64 result;
+
+    result = func_00285670((s32)context + 8, state, 0, input);
+    if (result != 0) {
+        return result;
+    }
+    if (((EvtBSelectionList *)context->selectionList)->scale < 0x100) {
+        return 0;
+    }
+    if (*state == 0) {
+        if (buttons & 1) {
+            mnuSetPopupEntryFlagged(state, D_0036ADA0);
+        }
+        if (buttons & 2) {
+            context->transitionPending = 1;
+            mnuSetPopupEntryFlagged(state, D_0036ACF8);
+        }
+        if (!(buttons & 0x300000)) {
+            mnuClearListFlagsOneAndTwo(context->selectionList);
+        }
+        if (buttons & 0x10) {
+            mnuRetreatListCursorDefault(context->selectionList);
+        }
+        if (buttons & 0x20) {
+            mnuAdvanceListCursorDefault(context->selectionList);
+        }
+        mnuPlayInputSound(0, buttons, context->selectionList);
+    }
+    return 0;
+}
 
 s64 func_0024BC18(s32 item) {
     s32 state = kwlnTaskGetUserValue();
@@ -1768,7 +1839,49 @@ u32 evtBRebuildTerminalMenuAndResetDispatch(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024CB80);
+extern void mnuReleaseEffectResource();
+
+s64 func_0024CB80(u64 input) {
+    EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
+    s32 *state = &context->dispatchState;
+    s64 result;
+
+    result = func_00285670((s32)context + 8, state, 0, input);
+    if (result != 0) {
+        return result;
+    }
+    if (*state == 0) {
+        if (fldClassifyRemainingFrames((MenuTerminalWork *)context) == 0) {
+            if (context->selectionStep == 0) {
+                evtSetBoundedDisplayValue(0, 4);
+            } else {
+                switch (context->dispatchMode) {
+                case 1:
+                    kwlnFadeInStart(0, 0, 0, 15);
+                    context->dispatchMode = 2;
+                    break;
+                case 2:
+                    if (kwlnFadeIsActive() == 0) {
+                        if (context->effectHandle != 0) {
+                            mnuReleaseEffectResource((void *)context->effectHandle);
+                            context->effectHandle = 0;
+                        }
+                        mnuFadeOrPlayCloseSfx(0, (u8 *)context);
+                        mnuSelectTerminalResourceBank((MenuTerminalWork *)context);
+                        context->dispatchMode = 3;
+                    }
+                    break;
+                }
+            }
+        }
+        if (evtIsActiveFlagSet(0) != 0) {
+            evtClearActiveFlag(0);
+            evtSetBoundedDisplayValue(0, 2);
+            mnuSetPopupEntryFlagged(state, D_0036ACF8);
+        }
+    }
+    return 0;
+}
 
 
 s64 evtBDispatchSyncD2(s32 item) {
@@ -1814,7 +1927,49 @@ u32 func_0024CE20(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024CE28);
+typedef struct {
+    u8 pad00[0x6C];
+    u32 resourceHandle;
+} MenuResourceWork;
+
+extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
+extern s32 evtIsActiveFlagSet(s32 flagIndex);
+extern u8 mnuHasEffectResourceHandle(MenuResourceWork *work);
+extern const char D_003AF710[];
+extern u8 D_0036AE10[];
+
+s64 func_0024CE28(u64 input) {
+    EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
+    s32 *state = &context->dispatchState;
+    s32 canOpen = 0;
+    s64 result = func_00285670((s32)context + 8, state, 0, input);
+
+    if (result == 0) {
+        if (*state == 0) {
+            if (context->state7C == 0) {
+                canOpen = kwlnTaskGetTaskByName(D_003AF710) == NULL;
+                if (evtIsActiveFlagSet(0) != 0) {
+                    canOpen = 1;
+                }
+            } else {
+                if (mnuHasEffectResourceHandle((MenuResourceWork *)context->effectHandle) != 0) {
+                    if (context->dispatchMode == 0) {
+                        kwlnFadeOutStart(0, 0, 0, 15);
+                        context->dispatchMode = 1;
+                    }
+                }
+                if (context->dispatchMode != 0) {
+                    canOpen = kwlnFadeIsActive() == 0;
+                }
+            }
+            if (canOpen != 0) {
+                mnuSetPopupEntryFlagged(state, D_0036AE10);
+            }
+        }
+        return 0;
+    }
+    return result;
+}
 
 s64 evtBLateDispatchStart(s32 request) {
     s32 context = kwlnTaskGetUserValue();

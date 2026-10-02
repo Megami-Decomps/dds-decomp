@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "pcp_vu0.h"
 
 extern s32 scrGetCommandTimer(void);
@@ -14,7 +15,8 @@ void scrSetIntegerReturnValue(s32 value);
 
 void dds3AdminSubmitModeRequest(s32 command, s32 payload, s32 payloadSize, s32 mode);
 
-void func_0035B6E0(const char *fmt, ...);
+/* libc printf returns the signed vfprintf character count. */
+s32 func_0035B6E0(const char *fmt, ...);
 
 void scrDestroyAllNamedProcesses(void);
 
@@ -665,7 +667,81 @@ s32 evtCommandSetEffectUnitSecondVector(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00241F10);
+/* Slot 1 owns a path node with the same resource record as the slot provider. */
+typedef struct ObjectResource {
+    u32 owner;
+    u32 handle;
+    u32 value;
+    u32 resourceId;
+} ObjectResource;
+
+typedef struct ObjectWithResource {
+    u8 pad0[0x18];
+    ObjectResource *resource;
+} ObjectWithResource;
+
+extern void *effObjGetDataHandle(void *);
+extern void dds3EnsureSlotData(void *);
+extern void dds3SetSlotKey(ObjectWithResource *, u32);
+extern void dds3ReplaceObjectResource(ObjectWithResource *);
+extern u32 dds3GetObjectResourceHandle(ObjectWithResource *);
+extern void func_001177D0(u32, s32);
+extern char D_00421E58[], D_00421E68[], D_00421E78[];
+
+s32 func_00241F10(void) {
+    void *unit;
+    EvtWorldUnit *target;
+    ObjBase *data;
+    ObjectWithResource *slot;
+    u32 path;
+    s32 room;
+
+    unit = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
+    if (unit == NULL) {
+        unit = (void *)func_001287B8(scrReadIntParameter(0));
+        if (unit == NULL) {
+            func_0035B6E0(D_00421E58, scrReadIntParameter(0));
+            func_0035B6E0(D_00421E68, scrReadIntParameter(1));
+            func_0035B6E0(D_00421E78);
+            return 1;
+        }
+    }
+    target = evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1));
+    if (target == NULL)
+        return 1;
+    data = effObjGetDataHandle(unit);
+    slot = data->slots[1];
+    if (slot == NULL) {
+        dds3EnsureSlotData(unit);
+        slot = data->slots[1];
+    }
+    if (slot->resource->resourceId == 0) {
+        dds3SetSlotKey(slot, (u32)target);
+        dds3ReplaceObjectResource(slot);
+    }
+    path = dds3GetObjectResourceHandle(slot);
+    if (path == 0)
+        return 1;
+    switch (scrReadIntParameter(2)) {
+    case 0:
+        func_001177D0(path, 0);
+        if (target->roomName != NULL) {
+            room = fldParseRoomNumberFromName(target->roomName);
+            if (room > 0)
+                fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, room, 1);
+        }
+        break;
+    case 1:
+        func_001177D0(path, 1);
+        if (target->roomName != NULL) {
+            room = fldParseRoomNumberFromName(target->roomName);
+            if (room > 0)
+                fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, room, 0);
+        }
+        break;
+    }
+    return 1;
+}
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421E58);
 

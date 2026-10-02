@@ -1,5 +1,20 @@
 #include "common.h"
 
+typedef struct {
+    u16 flags;
+    u16 pad2;
+    u16 unk4;
+    u8 pad6[0x1BE];
+} MtrRecord;
+
+typedef struct MtrGameState {
+    u8 pad00[0xA60];
+    MtrRecord records[32];
+} MtrGameState;
+
+extern MtrGameState *datGameState;
+extern void func_00286A58(MtrRecord *);
+
 typedef struct MenuListNode MenuListNode;
 typedef struct MenuContainer MenuContainer;
 typedef struct MenuProgressHost MenuProgressHost;
@@ -29,6 +44,12 @@ typedef struct MtrSelectionState {
     s32 timer;
 } MtrSelectionState;
 
+typedef struct MtrSelectionFlags {
+    u32 unk00 : 1;
+    u32 visible : 1;
+    u32 unk02 : 30;
+} MtrSelectionFlags;
+
 typedef struct MtrPlayerFlags {
     u32 unk00 : 16;
     u32 hasMarkedUnit : 1;
@@ -46,6 +67,7 @@ extern MenuList *func_002884C0(void);
 extern s32 mdlFlagTest(s32);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void func_00289BA0(struct MnuStatusResource *);
+extern s32 func_00288920(struct MnuStatusResource *);
 extern s32 mnuMoveNodeCursorToTargetIndex(MenuContainer *, s8);
 
 extern s32 func_00312810(u32, s32);
@@ -82,7 +104,16 @@ extern void sdfReleaseResourceAllocation(u32);
 extern void mnuReleasePanelEntryPool(void);
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286BA8);
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286E20);
+void func_00286E20(void) {
+    s32 i;
+
+    for (i = 0; i < 32; i++) {
+        if (datGameState->records[i].flags & 1) {
+            func_00286A58(&datGameState->records[i]);
+        }
+    }
+    evtPrintDeveloperConsoleMessage("*****************[mtrMantraSetBitAll()]*****************\n");
+}
 
 extern u32 sdfAllocGeneralBlock(s32 size);
 extern u32 sdfMemoryGetBlockAddress(void *block);
@@ -102,7 +133,7 @@ typedef struct MnuStatusResource {
     u8 pad40[8];
     MenuProgressHost *progressHost; /* 0x48 */
     u8 pad4C[0x1CC];
-    u32 flags218;
+    MtrSelectionFlags flags;
     u8 pad21C[0x10];
     MtrSelectionState selection; /* 0x22C */
     u8 pad234[0x560];
@@ -202,9 +233,9 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287670);
 /* Both handlers consume the current resource-task selection, but report
  * completion independently of the selected value. */
 u64 func_00287768(void) {
-    u64 selected;
+    MnuStatusResource *selected;
 
-    selected = func_00312810(mnuMantraSelectionResource, -1);
+    selected = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
     func_00288920(selected);
     return 0;
 }
@@ -224,7 +255,7 @@ void mtrMantraSelectRelease(void) {
 
     mnuReleaseMantraPanelPositionTable();
     mnuCleanupMantraVisualsAndResetTitleStream(selected);
-    selected->flags218 &= ~2;
+    selected->flags.visible = 0;
     mnuEnableTerminalTrackMode(1);
     evtPrintDeveloperConsoleMessage("mtrMantraSelectRelease\n");
 }
@@ -281,7 +312,7 @@ void func_002885E8(MnuStatusResource *work) {
     list = func_002884C0();
     list->userData = (u32)selection;
     work->list = list;
-    work->flags218 &= ~2;
+    work->flags.visible = 0;
 
     if (mdlFlagTest(0x1B1) != 0) {
         if (mdlFlagTest(0x995) == 0) {
@@ -314,7 +345,43 @@ INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426280);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00288748);
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00288920);
+extern void func_0026C900(void);
+extern s32 func_00288BD8(s32, s32, s32, s32, MnuStatusResource *, s32, f32);
+extern s32 func_00288DD0(s32, s32, s32, s32, MnuStatusResource *, s32);
+
+s32 func_00288920(MnuStatusResource *work) {
+    f32 phase = 1.0f;
+    s32 alpha;
+    MtrSelectionState *selection;
+
+    if (!work->flags.visible) {
+        return 0;
+    }
+    func_0026C900();
+    selection = &work->selection;
+    switch (selection->state) {
+        case 1:
+            phase = selection->timer * 0.125f;
+            break;
+        case 2:
+            phase = selection->timer * 0.125f;
+            break;
+        case 3:
+        case 4:
+            phase = 0.0f;
+            break;
+    }
+    if (phase > 1.0f) {
+        alpha = (2.0f - phase) * 128.0f;
+    } else {
+        alpha = phase * 128.0f;
+    }
+    func_00288BD8(0, 0, 0, alpha, work, 0x53, phase);
+    if (work->flags.visible) {
+        func_00288DD0(0, 0, 1, alpha, work, 0x53);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00288A70);
 

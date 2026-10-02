@@ -2,11 +2,6 @@
 #include "pcp_vu0.h"
 
 extern u64 effParamTableGetBlock(u64, u64);
-typedef struct EffectResourceWork {
-    u8 pad00[0x20];
-    u32 resourceHandle;
-    u32 allocation;
-} EffectResourceWork;
 
 typedef struct EffectColorState {
     u32 color;
@@ -130,7 +125,132 @@ void effThunderUpdateChainSegments(EffThunderGroup *group) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0016EDD0", func_0016F850);
+/* Point history and its resource/allocation ownership share one header. */
+typedef struct EffFragmentResources {
+    u8 pad00[8];
+    s32 count;
+    s32 activePointCount;
+    s32 position;
+    u8 pad14[4];
+    u128 *points;
+    u32 *colors;
+    u32 resourceHandle;
+    u32 allocation;
+} EffFragmentResources;
+
+/* The native Bezier update advances the two floating states at +0x74/+0x78. */
+typedef struct EffGroupSlot {
+    u8 pad00[0x10];
+    s32 age;
+    f32 scale;
+    EffFragmentResources *resources;
+    u8 pad1C[0x54];
+    u32 unk70;
+    f32 unk74;
+    f32 unk78;
+    void *node;
+} EffGroupSlot;
+
+typedef struct EffGroupParams {
+    u8 pad00[0x20];
+    u32 count;
+    u8 pad24[4];
+    s32 unk28;
+    u8 pad2C[0xC];
+    s32 unk38;
+    s32 unk3C;
+    u32 palette[4];
+} EffGroupParams;
+
+/* Kind-two placement is 0x30 bytes; its four palette colors are separate. */
+typedef struct EffPCPEventPlace {
+    f32 unk00[7];
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    u32 color;
+} EffPCPEventPlace;
+
+typedef struct EffPCPEventOwner EffPCPEventOwner;
+
+typedef struct EffGroup {
+    EffGroupParams params;
+    EffGroupSlot *slots;
+    u32 color;
+    EffPCPEventOwner *owner;
+    u8 hasHandle58;
+    u8 pad5D[3];
+    u32 allocation;
+} EffGroup;
+
+extern u32 sdfAllocGeneralBlock(s32 size);
+extern u8 *sdfResourceRetainAddress(u32 handle);
+extern u32 func_00197D38();
+extern EffFragmentResources *func_00171598(s32, s32);
+extern void func_001717E8(EffFragmentResources *, u32 *);
+extern void *func_00197D68(u32, u16, EffPCPEventPlace *);
+
+EffGroup *func_0016F850(src, eventParams)
+EffGroup *src;
+void *eventParams;
+{
+    u32 count = src->params.count;
+    u32 allocation = sdfAllocGeneralBlock(count * sizeof(EffGroupSlot) + sizeof(EffGroup));
+    EffGroup *work = (EffGroup *)sdfResourceRetainAddress(allocation);
+    EffGroupSlot *slot = (EffGroupSlot *)(work + 1);
+    EffPCPEventPlace place;
+    u32 palette[4];
+    s32 a, b;
+    u32 i;
+
+    work->params = src->params;
+    work->allocation = allocation;
+    work->hasHandle58 = 1;
+    work->slots = slot;
+    work->color = 0x80808080;
+    work->owner = (EffPCPEventOwner *)func_00197D38(eventParams);
+    a = work->params.unk38;
+    if (a == 0) {
+        work->params.unk38 = 1;
+        a = 1;
+    }
+    b = work->params.unk3C;
+    if (b <= 0) {
+        work->params.unk3C = 1;
+        b = 1;
+    }
+    if (work->params.unk28 <= 0) {
+        work->params.unk28 = 1;
+    }
+    palette[0] = work->params.palette[0];
+    palette[1] = work->params.palette[1];
+    palette[2] = work->params.palette[2];
+    palette[3] = work->params.palette[3];
+    place.unk00[0] = 0;
+    place.unk00[1] = 0;
+    place.unk00[2] = 0;
+    place.unk00[3] = 0;
+    place.unk00[4] = 0;
+    place.unk00[5] = 0;
+    place.unk00[6] = 0;
+    place.unk1C = 1.0f;
+    place.unk20 = 100.0f;
+    place.unk24 = 100.0f;
+    place.unk28 = 1.0f;
+    place.color = 0x80808080;
+    for (i = 0; i < count; i++, slot++) {
+        slot->resources = func_00171598(a, b);
+        func_001717E8(slot->resources, palette);
+        slot->age = 0;
+        slot->scale = 1.0f;
+        slot->unk70 = 0;
+        slot->unk74 = 0;
+        slot->unk78 = 0;
+        slot->node = func_00197D68((u32)work->owner, 2, &place);
+    }
+    return work;
+}
 
 /* Forward the first two parameter-table blocks as one effect-handler pair. */
 void effApplyParamBlockPair(u64 table) {
@@ -142,28 +262,66 @@ void effApplyParamBlockPair(u64 table) {
     func_0016F850(firstBlock, secondBlock);
 }
 
-INCLUDE_ASM(const s32, "game/code_0016EDD0", func_0016FB18);
+EffGroup *func_0016FB18(EffGroup *src) {
+    u32 count = src->params.count;
+    u32 allocation = sdfAllocGeneralBlock(count * sizeof(EffGroupSlot) + sizeof(EffGroup));
+    EffGroup *work = (EffGroup *)sdfResourceRetainAddress(allocation);
+    EffGroupSlot *slot = (EffGroupSlot *)(work + 1);
+    EffPCPEventPlace place;
+    u32 palette[4];
+    s32 a, b;
+    u32 i;
 
-typedef struct EffGroupSlot {
-    u8 pad00[0x18];
-    EffectResourceWork *resources; /* 0x18 */
-    u8 pad1C[0x60];
-    void *node;      /* 0x7C: passed to effEventReleaseNode */
-} EffGroupSlot; /* 0x80 */
+    work->params = src->params;
+    work->hasHandle58 = 0;
+    work->allocation = allocation;
+    work->owner = src->owner;
+    work->slots = slot;
+    work->color = 0x80808080;
+    a = work->params.unk38;
+    if (a == 0) {
+        work->params.unk38 = 1;
+        a = 1;
+    }
+    b = work->params.unk3C;
+    if (b <= 0) {
+        work->params.unk3C = 1;
+        b = 1;
+    }
+    if (work->params.unk28 <= 0) {
+        work->params.unk28 = 1;
+    }
+    palette[0] = work->params.palette[0];
+    palette[1] = work->params.palette[1];
+    palette[2] = work->params.palette[2];
+    palette[3] = work->params.palette[3];
+    place.unk00[0] = 0;
+    place.unk00[1] = 0;
+    place.unk00[2] = 0;
+    place.unk00[3] = 0;
+    place.unk00[4] = 0;
+    place.unk00[5] = 0;
+    place.unk00[6] = 0;
+    place.unk1C = 1.0f;
+    place.unk20 = 100.0f;
+    place.unk24 = 100.0f;
+    place.unk28 = 1.0f;
+    place.color = 0x80808080;
+    for (i = 0; i < count; i++, slot++) {
+        slot->resources = func_00171598(a, b);
+        func_001717E8(slot->resources, palette);
+        slot->age = 0;
+        slot->scale = 1.0f;
+        slot->unk70 = 0;
+        slot->unk74 = 0;
+        slot->unk78 = 0;
+        slot->node = func_00197D68((u32)work->owner, 2, &place);
+    }
+    return work;
+}
 
-typedef struct EffGroup {
-    u8 pad00[0x20];
-    u32 count;          /* 0x20 */
-    u8 pad24[0x2C];
-    EffGroupSlot *slots; /* 0x50 */
-    u8 pad54[4];
-    u32 handle58;       /* 0x58 */
-    u8 hasHandle58;     /* 0x5C */
-    u8 pad5D[3];
-    u32 allocation;     /* 0x60 */
-} EffGroup;
 
-extern void effReleaseEffectResources(EffectResourceWork *work);
+extern void effReleaseEffectResources(EffFragmentResources *work);
 extern void effEventReleaseNode(void *node);
 extern void func_00197D50(u32 handle);
 extern void sdfReleaseResourceAllocation(u32 allocation);
@@ -171,7 +329,7 @@ extern void sdfReleaseResourceAllocation(u32 allocation);
 /* Release every slot's effect resources and event node, then the optional handle and the group allocation. */
 void effReleaseGroupSlotsAndResources(EffGroup *group) {
     u32 i = 0;
-    u32 count = group->count;
+    u32 count = group->params.count;
     EffGroupSlot *slot = group->slots;
 
     if (count != 0) {
@@ -183,7 +341,7 @@ void effReleaseGroupSlotsAndResources(EffGroup *group) {
         } while (i < count);
     }
     if (group->hasHandle58 != 0) {
-        func_00197D50(group->handle58);
+        func_00197D50((u32)group->owner);
     }
     sdfReleaseResourceAllocation(group->allocation);
 }
@@ -200,7 +358,7 @@ void func_00171590(s32 work, u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_00171598);
 
-void effReleaseEffectResources(EffectResourceWork *work) {
+void effReleaseEffectResources(EffFragmentResources *work) {
     sdfQueueAssetRelease(work->resourceHandle);
     sdfReleaseResourceAllocation(work->allocation);
 }
@@ -212,19 +370,10 @@ void effInitializeColorState(EffectColorState *state) {
     state->valueC = 0;
 }
 
-typedef struct EffThunderPointHistory {
-    u8 pad00[8];
-    s32 count; /* 0x08: history slots */
-    s32 activePointCount; /* 0x0C: populated point slots */
-    s32 position; /* 0x10: next point index */
-    u8 pad14[4];
-    u128 *points; /* 0x18 */
-    u32 *colors; /* 0x1C */
-} EffThunderPointHistory;
 
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
-void func_001717E8(EffThunderPointHistory *history, u32 *gradientColors) {
+void func_001717E8(EffFragmentResources *history, u32 *gradientColors) {
     f32 t = 0.0f;
     u32 count = history->count / 3;
     u32 alphaCount = count >> 1;
@@ -255,7 +404,7 @@ void func_001717E8(EffThunderPointHistory *history, u32 *gradientColors) {
     }
 }
 
-void func_001719D0(EffThunderPointHistory *history, u128 *source) {
+void func_001719D0(EffFragmentResources *history, u128 *source) {
     s32 position = history->position;
     u128 *points = history->points;
     s32 count;
@@ -303,8 +452,6 @@ typedef struct EffFlashRecordWork {
     u32 resourceHandle;   /* 0x44 */
 } EffFlashRecordWork; /* 0x48 */
 
-extern u32 sdfAllocGeneralBlock(s32 size);
-extern u8 *sdfResourceRetainAddress(u32 handle);
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern s32 effRecordPoolCreateTriad();
 
