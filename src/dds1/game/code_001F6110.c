@@ -720,7 +720,26 @@ void btlScalarRangeSetStartClearEnd(s32 range, f32 start) {
     ((BtlScalarRange *)range)->end = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7CD8);
+f32 func_001F7CD8(s32 range) {
+    BtlScalarRange *state = (BtlScalarRange *)range;
+    f32 result = 0.0f;
+    f32 start = state->start;
+    f32 end = state->end;
+    f32 one;
+
+    if (start <= result) {
+        result = 1.0f;
+    } else {
+        one = 1.0f;
+        end = (end * (start - one) + one) / start;
+        state->end = end;
+        result = end;
+        if (!(result < one)) {
+            result = one;
+        }
+    }
+    return result;
+}
 
 void btlScalarRangeInitQuadratic(s32 range, f32 start) {
     f32 zero;

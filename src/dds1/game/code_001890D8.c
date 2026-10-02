@@ -16,6 +16,14 @@ typedef struct MagatuhiEffectData {
     s32 field1C;
 } MagatuhiEffectData;
 
+typedef struct {
+    u8 pad00[0x20];
+    u32 *values;
+    u16 *writeIndices;
+    u16 *validCounts;
+    f32 *angleValues; /* Four floats per indexed row. */
+} MagatuhiValueWork;
+
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 func_00189220(s32, s32, s32, f32, f32);
 extern void effMagatuhiFillColorTable(s32, s32, s32);
@@ -39,6 +47,18 @@ void func_001891A8(SceneResource *resource) {
     func_001893D8(resource->handle);
 }
 
-INCLUDE_ASM(const s32, "game/code_001890D8", func_001891C0);
+void func_001891C0(MagatuhiValueWork *work, s32 index) {
+    f32 *angles;
+
+    work->writeIndices[index] = 0;
+    work->validCounts[index] = 0;
+    work->values[index] = 0x80808080;
+    angles = work->angleValues;
+    angles += index * 4;
+    angles[0] = 6.2831853f;
+    angles[1] = 0.0f;
+    angles[2] = 3.1415926f;
+    angles[3] = 0.0f;
+}
 
 INCLUDE_ASM(const s32, "game/code_001890D8", func_00189220);

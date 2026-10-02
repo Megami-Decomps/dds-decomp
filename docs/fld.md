@@ -253,6 +253,35 @@ bindings and tracks with 165,446 keys. Every playbook has one clip, every clip
 reserved word is zero, and all nine observed binding/stride profiles agree with
 the retail dispatch handlers.
 
+### Model export
+
+The recovered hierarchy, draw graph, mesh packets, and node motion can be
+exported directly from source to one self-contained glTF 2.0 binary:
+
+```sh
+python3 tools/fld_model.py src/dds2/data/field/f011_001.f1asm model.glb \
+  --resource md_01all_01 --meters-per-unit 0.01 --frames-per-second 30
+```
+
+`--resource` is repeatable and keeps large field files manageable. Without it,
+the exporter writes every type-2 model in the FLD1. The GLB retains the model
+and node hierarchy, resource and item transforms, indexed triangles, positions,
+normals, texture coordinates, vertex colors, the unclassified four-float vertex
+attribute, and the neutral mesh control values as glTF extras. Translation,
+scale, Euler-rotation, and packed-quaternion node tracks become glTF animation
+channels. Every motion binding and clip remains summarized on the resource
+node; asset-property tracks are not converted to animation channels because
+their material meanings are not yet established.
+
+The two conversion options are explicit rather than assumed. Their defaults of
+one preserve the numeric DDS units and frame values; choose the scale and
+playback rate appropriate for the intended viewer. DDS axes are preserved. A
+track whose u16 frame values are not increasing is recorded as skipped animation
+metadata because glTF requires increasing input times. glTF also forbids
+non-finite JSON transforms. The one observed retail model with a NaN static
+translation omits that glTF component and records all three original IEEE-754
+words in the node extras instead of silently inventing coordinates.
+
 Each transform is `0x30` bytes: four position floats, four rotation floats,
 and four scale floats. Each collision object also starts with a `0x30`-byte
 header. Its header owns vertex and face counts and pointers; it is followed by
