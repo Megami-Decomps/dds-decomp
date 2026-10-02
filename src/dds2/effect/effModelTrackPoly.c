@@ -11,14 +11,33 @@ typedef struct EffTrackPolyData {
     s32 step;
     u128 *points;      /* 0x18 */
     u32 *colors;      /* 0x1C: per-vertex gradient table after the points */
-    u32 nodeHandle;
+    void *nodeHandle;
     u32 resourceHandle;
 } EffTrackPolyData;
+/* Draw-state record read by func_00167A10 (same layout as ParDrawState in code_0015A758). */
+typedef struct EffTrackPolyDraw {
+    u16 width;      /* 0x00 */
+    u16 height;     /* 0x02 */
+    u16 flags;
+    u8 pad06[2];
+    u32 color;      /* 0x08 */
+    void *unk0C;
+    u128 *points;   /* 0x10: the same vertex records owned by track data */
+    u8 pad14[0xC];
+    u32 *colors;   /* 0x20: gradient color for each input vertex */
+    u8 pad24[8];
+} EffTrackPolyDraw; /* 0x2C */
 
 /* Model handle the track's point queries resolve against. */
 typedef struct {
+    u8 pad00[0x1C];
+    f32 value; /* 0x1C */
+} EffTrackPolyModelState;
+
+typedef struct {
     u8 pad00[0x18]; /* 0x00 */
     void *param;       /* 0x18: map-record position-query source */
+    EffTrackPolyModelState *state; /* 0x1C */
 } EffTrackPolyModel;
 
 /* The constructor copies these 13 words before creating owned track data.
@@ -30,7 +49,7 @@ typedef struct {
     s32 idB;
     f32 unk0C;
     f32 unk10;
-    s32 sampleInterval; /* 0x14: updateCount modulus for endpoint sampling */
+    u32 sampleInterval; /* 0x14: updateCount modulus for endpoint sampling */
     s32 historyLength;  /* 0x18: multiplied by the constructor's step count */
     u32 unk1C;          /* 0x1C: constructor writes its fixed step count here */
     u32 kind;
@@ -80,7 +99,30 @@ void func_0018FF38(EffTrackPolyWork *work) {
     effTrackPolyDrawStrips(work->data);
 }
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_0018FF50);
+/* Per-frame update: while the model's value lies inside [unk0C, unk10] the endpoints are resampled every sampleInterval updates and the strips drawn; above the range the strips fade out, below it the track restarts. */
+void func_0018FF50(EffTrackPolyWork *work) {
+    EffTrackPolyModel *model = work->params.model;
+    f32 value = model->state->value;
+
+    if (work->params.unk0C <= value) {
+        if (value <= work->params.unk10) {
+            if (work->updateCount % work->params.sampleInterval == 0) {
+                effSampleTrackPolyEndpoints(work);
+            }
+            effTrackPolyDrawStrips(work->data);
+        } else {
+            EffTrackPolyData *data = work->data;
+
+            if (data->color & 0xFF000000) {
+                data->color += 0xE0000000;
+            }
+            effTrackPolyDrawStrips(data);
+        }
+        work->updateCount++;
+    } else {
+        effTrackPolyReset(work);
+    }
+}
 
 typedef struct EffTrackPolyList {
     EffTrackPolyWork **items; /* 0x00 */
@@ -193,7 +235,35 @@ void effTrackPolyInterpolateCatmullRomPoint(f32 (*p)[4], f32 t)
     VU0_MUL(vf10, vf10, vf11);
     VU0_ADD(vf10, vf10, vf12);
 }
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00190370);
+extern EffTrackPolyDraw D_004520E0;
+extern u8 D_003B2000[];
+extern void *sdfCreateAssetWithDrawEntries(void);
+extern void func_003332D0(void *asset, f32 scale);
+
+EffTrackPolyData *func_00190370(s32 historyLength, s32 steps) {
+    s32 count = historyLength * steps * 2 + 4;
+    s32 bytes = count * (sizeof(u128) + sizeof(u32));
+    u32 handle = func_003292A8(bytes + sizeof(EffTrackPolyData));
+    u8 *cursor = sdfResourceRetainAddress(handle);
+    EffTrackPolyData *data = (EffTrackPolyData *)(cursor + bytes);
+
+    data->points = (u128 *)cursor;
+    cursor += count * sizeof(u128);
+    data->kind = 2;
+    data->color = 0x80808080;
+    data->count = count;
+    data->activePointCount = 0;
+    data->position = 2;
+    data->step = steps;
+    data->resourceHandle = handle;
+    data->colors = (u32 *)cursor;
+    data->nodeHandle = sdfCreateAssetWithDrawEntries();
+    func_003332D0(data->nodeHandle, 1.0f);
+    memset(&D_004520E0, 0, sizeof(D_004520E0));
+    D_004520E0.flags = 0x4000;
+    D_004520E0.unk0C = D_003B2000;
+    return data;
+}
 
 void effTrackPolyFreeData(EffTrackPolyData *data) {
     sdfQueueAssetRelease(data->nodeHandle);
@@ -211,7 +281,25 @@ void func_001904A8(EffTrackPolyData *data, u32 kind) {
     data->kind = kind;
 }
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_001904B0);
+extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
+
+void func_001904B0(EffTrackPolyData *data, u32 *gradientColors) {
+    f32 t = 0.0f;
+    u32 count = data->count >> 1;
+    f32 step = 1.0f / count;
+    u32 i = 0;
+    u32 *colors = data->colors;
+
+    if (count != 0) {
+        do {
+            colors[0] = effBlendColor(gradientColors[2], gradientColors[0], t);
+            colors[1] = effBlendColor(gradientColors[3], gradientColors[1], t);
+            t += step;
+            colors += 2;
+            i++;
+        } while (i < count);
+    }
+}
 
 /* Copy the pair of track points at the wrapped position into the two outputs. */
 void func_00190590(EffTrackPolyData *data, u128 *dst0, u128 *dst1, s32 amount) {
@@ -262,25 +350,12 @@ void func_00190638(EffTrackPolyData *data, u128 *src) {
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_001906B0);
 
-/* Draw-state record read by func_00167A10 (same layout as ParDrawState in code_0015A758). */
-typedef struct EffTrackPolyDraw {
-    u16 width;      /* 0x00 */
-    u16 height;     /* 0x02 */
-    u8 pad04[4];
-    u32 color;      /* 0x08 */
-    u8 pad0C[4];
-    u128 *points;   /* 0x10: the same vertex records owned by track data */
-    u8 pad14[0xC];
-    u32 *colors;   /* 0x20: gradient color for each input vertex */
-    u8 pad24[8];
-} EffTrackPolyDraw; /* 0x2C */
 
 typedef struct EffTrackPolyFinish {
     u8 pad00[0x10];
     void (*finish)(void *, s32); /* 0x10 */
 } EffTrackPolyFinish;
 
-extern EffTrackPolyDraw D_004520E0;
 extern EffTrackPolyFinish *D_003B2040[];
 extern EffTrackPolyFinish D_00380248;
 extern s32 sdfAllocPacketAligned(s32);

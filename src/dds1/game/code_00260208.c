@@ -140,7 +140,32 @@ s32 mnuTickExtendedCommandPhase(MenuCommandWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00260AB0);
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00261688);
+/* Phase machine for phases 9-12: 9 waits for the frame counter to pass 10.0f, 10 and 12 for it to reach 10.0f, 11 reports at once. */
+s32 func_00261688(MenuCommandWork *work) {
+    switch (work->mode) {
+    case 9:
+        work->frames = work->frames + 1;
+        if ((f32)work->frames > 10.0f) {
+            return 9;
+        }
+        break;
+    case 11:
+        return 11;
+    case 10:
+        work->frames = work->frames + 1;
+        if ((f32)work->frames >= 10.0f) {
+            return 10;
+        }
+        break;
+    case 12:
+        work->frames = work->frames + 1;
+        if ((f32)work->frames >= 10.0f) {
+            return 12;
+        }
+        break;
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00261760);
 
