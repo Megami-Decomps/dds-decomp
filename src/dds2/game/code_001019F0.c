@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dds3Admin.h"
+#include "kwln.h"
 
 extern u32 dds3ActiveWorld;
 
@@ -8,31 +9,27 @@ extern char dds3AdminTaskName[];
 extern void *func_00101740(char *);
 extern u32 kwlnTaskGetUserValue(void *);
 
-typedef struct KwlnLinkNode {
-    u8 unk00[0x44];              /* 0x0 */
-    struct KwlnLinkNode *next;   /* 0x44: chain head */
-    struct KwlnLinkNode *first;  /* 0x48 */
-    struct KwlnLinkNode *link;   /* 0x4C: intrusive link */
-} KwlnLinkNode;
+/* Detach a task from its parent's child list. Detached tasks are left untouched;
+ * an attached task must already occur in that parent's sibling chain.
+ * The hierarchy link is next, separate from scheduler listNext/listPrev. */
+void kwlnUnlinkListNode(KwlnTask *task) {
+    KwlnTask *parent = task->parent;
 
-void kwlnUnlinkListNode(KwlnLinkNode *node) {
-    KwlnLinkNode *head = node->next;
-
-    if (head == 0) {
+    if (parent == 0) {
         return;
     }
-    if (head->first == node) {
-        head->first = node->link;
+    if (parent->childList == task) {
+        parent->childList = task->next;
     } else {
-        KwlnLinkNode *prev = head->first;
+        KwlnTask *previousSibling = parent->childList;
 
-        while (prev->link != node) {
-            prev = prev->link;
+        while (previousSibling->next != task) {
+            previousSibling = previousSibling->next;
         }
-        prev->link = node->link;
+        previousSibling->next = task->next;
     }
-    node->next = 0;
-    node->link = 0;
+    task->parent = 0;
+    task->next = 0;
 }
 
 void dds3SetScopedObjectFlags(u32 object, u32 mask, u32 scope) {
