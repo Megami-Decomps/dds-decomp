@@ -3,7 +3,8 @@
 #include "ee_mmi.h"
 
 typedef struct {
-    u8 pad00[0x10];
+    f32 position[3];
+    u8 pad0C[4];
     u32 value;
 } EffResourceEntry;
 
@@ -14,9 +15,10 @@ typedef struct {
     u32 entryCount;
     u32 mode;
     f32 scale[3];
-    u8 pad58[8];
-    u32 value60;
-    u8 pad64[4];
+    u32 vertexCount;
+    f32 (*positions)[4];
+    f32 (*normals)[4];
+    u32 *colors;
     u32 resource68;
     u32 resource6C;
     u32 resource70;
@@ -42,9 +44,17 @@ extern void billSetBillboardMode(u32 handle, s32 mode);
 extern void effReleaseOptionalResource(s32 work);
 
 typedef struct {
-    u32 unk00;
+    u16 parameterCount;
+    u16 vertexCount;
     u16 flags;
-    u8 pad06[0x26];
+    u8 pad06[2];
+    u32 color;
+    void *parameters;
+    f32 (*positions)[4];
+    f32 (*normals)[4];
+    u8 pad18[8];
+    u32 *colors;
+    u8 pad24[8];
 } EffResourceRenderState;
 
 extern EffResourceRenderState D_003D65E0;
@@ -53,9 +63,24 @@ extern void *sdfResourceRetainAddress(u32 handle);
 extern u32 sdfCreateAssetWithDrawEntries(void);
 extern void func_002DA420(u32 resource, f32 scale);
 extern void *memset(void *, s32, u32);
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(void *);
+extern void sdfConsAppendAssetPacket(void *, u32, s32);
+extern void sdfConsAppendVuPacket(void *, s32);
+extern void sdfComposeVuMatrixFromRegisters(void);
+extern void sdfAppendPacket(void *, void *);
+extern void *func_0015FE20(EffResourceRenderState *);
+extern f32 D_00354C10[][4];
+extern u32 D_00354CD0[];
 
-void func_00176A28(s32 work, u32 value) {
-    ((EffResourceWork *)work)->value60 = value;
+typedef struct EffResourceDrawSurface {
+    u8 pad00[0x10];
+    void (*submit)(struct EffResourceDrawSurface *, void *);
+} EffResourceDrawSurface;
+extern EffResourceDrawSurface *D_00354D00[];
+
+void func_00176A28(EffResourceWork *work, f32 (*normals)[4]) {
+    work->normals = normals;
 }
 
 /* Allocate the resource group and initialize its matrix, scale and entry colors. */
@@ -92,7 +117,69 @@ void effReleaseAttachedResources(u32 work) {
     func_002D0918(((EffResourceWork *)work)->resource70);
 }
 
-INCLUDE_ASM(const s32, "game/code_00176A28", func_00176B88);
+/* Emit scaled, translated triangle batches with separate vector and packed-color streams. */
+void func_00176B88(EffResourceWork *work) {
+    f32 matrix[16] __attribute__((aligned(16)));
+    void *packet;
+    EffResourceEntry *entry;
+    u32 i;
+    u32 remaining;
+    u32 triangleSize;
+
+    packet = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packet);
+    sdfConsAppendAssetPacket(packet, work->resource6C, 0);
+    EE_MMI_UNIT_MATRIX(matrix);
+    matrix[0] = work->scale[0];
+    matrix[5] = work->scale[1];
+    matrix[10] = work->scale[2];
+    VU0_LOAD_MATRIX(matrix);
+    VU0_LOAD_MATRIX_B(work->matrix);
+    sdfComposeVuMatrixFromRegisters();
+    VU0_STORE_MATRIX(matrix);
+    D_003D65E0.parameters = NULL;
+    entry = work->entries;
+    for (i = 0; i < work->entryCount; i++, entry++) {
+        triangleSize = 3;
+        matrix[12] = entry->position[0];
+        matrix[13] = entry->position[1];
+        matrix[14] = entry->position[2];
+        VU0_LOAD_MATRIX(matrix);
+        sdfConsAppendVuPacket(packet, 0);
+        if (work->resource68 == 0) {
+            remaining = 12;
+            D_003D65E0.colors = D_00354CD0;
+            D_003D65E0.positions = D_00354C10;
+            D_003D65E0.normals = NULL;
+        } else {
+            D_003D65E0.positions = work->positions;
+            D_003D65E0.colors = work->colors;
+            D_003D65E0.normals = work->normals;
+            remaining = work->vertexCount;
+        }
+        D_003D65E0.color = entry->value;
+        D_003D65E0.parameterCount = 16;
+        D_003D65E0.vertexCount = 48;
+        while (remaining >= 48) {
+            sdfAppendPacket(packet, func_0015FE20(&D_003D65E0));
+            if (work->resource68 == 0) {
+                D_003D65E0.colors += 48;
+                D_003D65E0.positions += 48;
+            } else {
+                D_003D65E0.colors += 48;
+                D_003D65E0.positions += 48;
+                D_003D65E0.normals += 48;
+            }
+            remaining -= 48;
+        }
+        if (remaining >= 3) {
+            D_003D65E0.parameterCount = remaining / triangleSize;
+            D_003D65E0.vertexCount = remaining;
+            sdfAppendPacket(packet, func_0015FE20(&D_003D65E0));
+        }
+    }
+    D_00354D00[work->mode]->submit(D_00354D00[work->mode], packet);
+}
 
 INCLUDE_ASM(const s32, "game/code_00176A28", func_00176E20);
 
