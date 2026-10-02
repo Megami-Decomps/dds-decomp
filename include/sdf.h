@@ -188,6 +188,9 @@ typedef struct SdfThreadNode {
     s32 threadId;               /* 0x04 */
 } SdfThreadNode;
 
+extern s32 sdfTrackedThreadSemaphore;
+extern SdfThreadNode *sdfTrackedThreadHead;
+
 /* Draw-node vector slots (SdfDrawNode vectors array indices). */
 #define SDF_DRAW_TRANSLATION_VECTOR 0
 #define SDF_DRAW_SCALE_VECTOR 1

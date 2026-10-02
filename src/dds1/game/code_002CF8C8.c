@@ -44,10 +44,6 @@ extern s32 SignalSema(s32 sema);
 
 extern void _StartThread(s32 threadId, s32 arg);
 
-extern u32 sdfTrackedThreadSemaphore;
-
-extern SdfThreadNode *sdfTrackedThreadHead;
-
 void sdfWakeAlarmThread(s32 unused0, u16 unused1, void *threadId) {
     iWakeupThread((s32)threadId);
 }
