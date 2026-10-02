@@ -258,6 +258,34 @@ def source_for(obj: Path, version: str) -> tuple[str, Path]:
     raise SystemExit(f"{obj}: no source found (expected {stem}.c or {stem}.s); re-run splat")
 
 
+def objdiff_progress_category(version: str, name: str) -> str:
+    # splat exposes the binary VU1 program as a text unit, not EE code.
+    if name == f"asm/{version}/data/vutext":
+        return "vu1"
+    return "sdk" if "/sdk/" in name else "game"
+
+
+def write_objdiff_reports(n, units: dict[str, list[dict]]) -> None:
+    objdiff_objects = sorted({p for rows in units.values() for row in rows
+                              for p in (row["target"], row["base"]) if p})
+    n.rule("report", f"{OBJDIFF} report generate -p $project -o $out", description="objdiff report $out")
+    n.build("objdiff", "phony", objdiff_objects)
+    n.build("report.json", "report", implicit=objdiff_objects + ["objdiff.json"], variables={"project": "."})
+    reports = []
+    for version, rows in units.items():
+        game_rows = [row for row in rows if objdiff_progress_category(version, row["name"]) == "game"]
+        # Keep the full-binary audit separate from the primary game-code report.
+        # objdiff computes every measure from each project's actual unit list.
+        for selected, project, out in (
+            (rows, f"build/{version}", f"build/{version}/report.all.json"),
+            (game_rows, f"build/{version}/progress", f"build/{version}/report.json"),
+        ):
+            objs = sorted({p for row in selected for p in (row["target"], row["base"]) if p})
+            n.build(out, "report", implicit=objs + [f"{project}/objdiff.json"], variables={"project": project})
+            reports.append(out)
+    n.build("report", "phony", ["report.json"] + reports)
+
+
 def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list[dict]]:
     prefix = i386_prefix()
     n = ninja_syntax.Writer(open(ROOT / "build.ninja", "w"), width=120)
@@ -850,21 +878,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         (ROOT / "config" / version / "checksum.sha1").write_text(f"{VERSIONS[version]['elf_sha1']}  {image}\n")
         n.newline()
 
-    objdiff_objects = sorted({p for rows in units.values() for row in rows
-                              for p in (row["target"], row["base"]) if p})
-    n.rule("report", f"{OBJDIFF} report generate -p $project -o $out", description="objdiff report $out")
-    n.build("objdiff", "phony", objdiff_objects)
-    n.build("report.json", "report", implicit=objdiff_objects + ["objdiff.json"], variables={"project": "."})
-    # One report per game for decomp.dev, which tracks each version separately
-    # (CI uploads build/<v>/report.json as the artifact <v>_report).
-    reports = []
-    for version, rows in units.items():
-        objs = sorted({p for row in rows for p in (row["target"], row["base"]) if p})
-        out = f"build/{version}/report.json"
-        n.build(out, "report", implicit=objs + [f"build/{version}/objdiff.json"],
-                variables={"project": f"build/{version}"})
-        reports.append(out)
-    n.build("report", "phony", ["report.json"] + reports)
+    write_objdiff_reports(n, units)
 
     configure_inputs = ["configure.py", "config/versions.json"] + [
         f"config/{v}/{VERSIONS[v]['serial']}.yaml" for v in versions
@@ -914,10 +928,7 @@ def write_objdiff(units: dict[str, list[dict]]) -> None:
     }
     for version, rows in units.items():
         for row in rows:
-            category = "sdk" if "/sdk/" in row["name"] else "game"
-            # splat exposes the binary VU1 program as a text unit, not EE code.
-            if row["name"] == f"asm/{version}/data/vutext":
-                category = "vu1"
+            category = objdiff_progress_category(version, row["name"])
             unit = {
                 "name": "/".join(Path(row["name"]).parts[1:]),  # drop asm/ or src/: "<version>/<unit>"
                 "target_path": row["target"],
@@ -945,6 +956,21 @@ def write_objdiff(units: dict[str, list[dict]]) -> None:
         path = ROOT / "build" / version / "objdiff.json"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(sub, indent=2) + "\n")
+        # decomp.dev's headline uses the report's overall matching-code measure.
+        # Give it a coherent game-only project, while keeping the full config
+        # above available for SDK/VU diagnostics and report.all.json.
+        primary = dict(sub, units=[], progress_categories=[c for c in categories if c["id"] == "game"])
+        for unit in sub["units"]:
+            if "game" not in unit["metadata"]["progress_categories"]:
+                continue
+            unit = dict(unit)
+            for key in ("target_path", "base_path"):
+                if key in unit:
+                    unit[key] = str(Path("..", unit[key]))
+            primary["units"].append(unit)
+        path = ROOT / "build" / version / "progress" / "objdiff.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(primary, indent=2) + "\n")
 
 
 def main() -> None:

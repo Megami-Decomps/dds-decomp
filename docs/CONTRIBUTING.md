@@ -114,6 +114,9 @@ ninja            # both games; fails unless every ELF is byte-identical
 Other diff tools:
 
 - objdiff (`objdiff.json` is generated; bases are built with `-DSKIP_ASM`).
+  The root and per-version configs retain all game, SDK/runtime, and VU1 units.
+  `ninja report` also generates game-only primary reports for decomp.dev;
+  `build/<v>/report.all.json` retains the full-binary audit view.
   That separate compile can differ from the production build's C because of
   ee-gcc's context sensitivity. `check_unit` recognizes a function that matches
   as built even if this comparison differs; the report does not yet account
