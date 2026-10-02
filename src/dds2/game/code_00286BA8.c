@@ -20,6 +20,10 @@ extern void mnuReleaseMantraMenuDrawResources(void *);
 
 extern void dspCloseChannel(void);
 extern void sdfQueueNonzeroResourceId(u32);
+struct TaskWork;
+struct SdfTaskItemDesc;
+extern struct SdfTaskItemDesc D_003CFCD4;
+extern void sdfAttachTaskItem(struct TaskWork *, struct SdfTaskItemDesc *);
 extern void mnuReleaseFirstMantraSpriteSlots(void);
 extern void mnuReleaseStaffAndTitleVisualResources(u32 *);
 extern void evtPrintDeveloperConsoleMessage(const char *);
@@ -99,7 +103,16 @@ void mnuStopResourceTask(void) {
     mnuMantraSelectionResource = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287030);
+s32 func_00287030(void) {
+    u32 selected = func_00312810(mnuMantraSelectionResource, -1);
+    s32 result = func_00287078((u8 *)selected + 0x21C, 0);
+
+    if (result != 0) {
+        sdfAttachTaskItem((struct TaskWork *)mnuMantraSelectionResource, &D_003CFCD4);
+        return -1;
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", mnuResourceTaskName);
 
@@ -143,12 +156,9 @@ s32 mtrMantraSelectInit(void) {
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", mtrMantraSelectRelease);
 
-struct TaskWork;
-struct SdfTaskItemDesc;
 extern struct SdfTaskItemDesc D_003CFCFC;
 extern void mnuTickPanelSoundEntries(void);
 extern s32 func_0028A1D0(MnuStatusResource *);
-extern void sdfAttachTaskItem(struct TaskWork *, struct SdfTaskItemDesc *);
 extern void sdfSetTaskItemMode(void *, s32, u32);
 
 s32 func_00287848(s32 key) {
