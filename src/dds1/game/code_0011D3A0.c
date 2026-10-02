@@ -1581,7 +1581,32 @@ u32 fldGetPlayerSceneState(void) {
     return *fldGetPlayerSceneStateAddress();
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00123E00);
+u32 func_001243C0(void);
+extern void func_001372D0(f32 *position);
+void fldSetSceneControlFlags(u32 mask);
+
+void func_00123E00(void) {
+    f32 position[4];
+
+    if (fldPlayerObject != 0) {
+        fldSetSceneControlFlags(0x40);
+        dds3InvokeSlot1Handler(fldPlayerObject, func_001243C0);
+    }
+    fldAreaState[0x3A] = 4;
+    if (fldAreaState[0x1C] < 4) {
+        fldAreaState[0x1C] = 4;
+    }
+    if (fldAreaState[0x1D] < 5) {
+        fldAreaState[0x1D] = 5;
+    }
+    fldAreaState[0x24] = -1;
+    fldAreaState[0x25] = -1;
+    fldUpdateCameraTarget();
+    effObjFetchInnerFirstVec(fldPlayerObject);
+    VU0_STORE_VF(vf10, position);
+    position[1] += 10.0f;
+    func_001372D0(position);
+}
 
 void fldResetPlayerSceneObjectState(void) {
     if (fldPlayerObject != 0) {
@@ -2290,4 +2315,3 @@ INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BABFC);
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", fldSceneControlFlags);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAC08);
-
