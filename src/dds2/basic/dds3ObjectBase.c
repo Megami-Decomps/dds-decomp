@@ -2,6 +2,7 @@
 
 #include "dds3obj.h"
 #include "dds3Admin.h"
+#include "pcp_vu0.h"
 
 extern void *dds3GetSlot(void *arg0, s32 index);
 
@@ -168,7 +169,32 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111E00);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112058);
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112168);
+extern u32 evtCreateModelFromObject(void *object);
+extern s32 evtAttachScriptToObject(void *object, void *model);
+extern void dds3LoadOrBuildObjectMatrix(u8 *object);
+extern void sdfModelUpdateRootTransforms(void *model, s32 frame);
+
+void func_00112168(void *object) {
+    ObjBaseFull *base;
+    void *slot;
+    void *motion;
+    void *model;
+
+    base = (ObjBaseFull *)dds3GetObjectOwnedHandle(object);
+    slot = dds3GetSlot(object, 3);
+    model = (void *)evtCreateModelFromObject(slot);
+    motion = (void *)evtAttachScriptToObject(slot, model);
+    dds3LoadOrBuildObjectMatrix((u8 *)object);
+    VU0_STORE_MATRIX((u8 *)model + 0x20);
+    sdfModelUpdateRootTransforms(model, 0);
+    sdfModelUpdateRootTransforms(model, 1);
+    base->resourceState = 1;
+    base->resourceHandle = (u32)model;
+    base->motion = motion;
+    base->weight = 1.0f;
+    base->mode = 0;
+    base->unk44 = 0;
+}
 
 /* Mode word and blend weight at the end of ObjBase (0x3C / 0x40). */
 typedef struct ObjMode {
@@ -224,7 +250,58 @@ s32 dds3InvokeSlot5Handler(void *object) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112328);
+extern void evtSetDrawSurfaceIndex(u32 surfaceIndex);
+extern void evtSubmitGsRegister47(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_00108BD8(s32 arg);
+extern void func_00108D80(void);
+extern void func_00108E20(void);
+extern void func_00109248();
+extern void mdlProcessContextNodesAndTransforms(void *context, const void *state);
+extern s32 D_00380818[4];
+
+typedef struct ObjRenderContextInner {
+    u8 pad00[0x19];
+    u8 flags19;
+} ObjRenderContextInner;
+
+typedef struct ObjRenderContext {
+    u8 pad00[0x18];
+    ObjRenderContextInner *inner;
+} ObjRenderContext;
+
+void func_00112328(void *object) {
+    ObjBase *base;
+    ObjRenderContext *context;
+    ObjRenderContextInner *inner;
+
+    base = (ObjBase *)dds3GetObjectOwnedHandle(object);
+    evtSetDrawSurfaceIndex(0x4A);
+    func_00108BD8(0);
+    func_00108D80();
+    evtSubmitGsRegister47(1, 1, 0x80, 2, 0, 0, 1, 1);
+    func_00109248(0, 0, 0x200, 0x1C0, 0x0FFFFFFF, 0x80000000, 0x80000000, 0x80000000, 0x80000000);
+    evtSubmitGsRegister47(1, 1, 0x80, 2, 0, 0, 1, 1);
+    evtSetDrawSurfaceIndex(0x4B);
+    evtSubmitGsRegister47(1, 1, 0x80, 2, 0, 0, 1, 1);
+    func_00108D80();
+    evtSetDrawSurfaceIndex(0x4C);
+    evtSubmitGsRegister47(1, 1, 0x80, 2, 0, 0, 1, 1);
+    func_00108D80();
+
+    context = (ObjRenderContext *)base->unkC;
+    inner = context->inner;
+    inner->flags19 |= 0x20;
+    mdlProcessContextNodesAndTransforms(context, D_00380818);
+    inner->flags19 &= ~0x20;
+    dds3SetObjectFlags(object, 0x10000);
+
+    evtSetDrawSurfaceIndex(0x4E);
+    func_00108E20();
+    func_00108BD8(0);
+    evtSubmitGsRegister47(1, 0, 0x80, 1, 0, 0, 1, 2);
+    func_00109248(0, 0, 0x200, 0x1C0, 0x0EFFFFFF, 0x30586670, 0x30586670, 0x30586670, 0x30586670);
+    evtSubmitGsRegister47(1, 5, 0x80, 1, 0, 0, 1, 2);
+}
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112518);
 
@@ -270,4 +347,3 @@ void dds3GetSlot1Data(void *obj) {
 }
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_00435D98);
-

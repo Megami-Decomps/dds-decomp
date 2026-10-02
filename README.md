@@ -116,6 +116,7 @@ See [`docs/flw0.md`](docs/flw0.md) for script source,
 [`docs/wap.md`](docs/wap.md) for actor, elevator, door, and transition tables.
 See [`docs/fld.md`](docs/fld.md) for relocatable FLD1/FLD2 field resources,
 [`docs/lb.md`](docs/lb.md) for their compressed field archives, and
+[`docs/tmx.md`](docs/tmx.md) for field texture bundles and PNG decoding. See
 [`docs/battle-tables.md`](docs/battle-tables.md) for encounter and battle
 content tables. See [`docs/development-build.md`](docs/development-build.md)
 for the experimental relocatable development ELFs.

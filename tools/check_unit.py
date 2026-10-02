@@ -71,8 +71,8 @@ DATA_SECTIONS = (".rodata", ".data", ".sdata", ".sbss", ".bss", ".lit4", ".lit8"
 
 
 def relocations(obj):
-    """{section: {offset: (type, symbol)}} for .text and .rodata relocations."""
-    out, section = {".text": {}, ".rodata": {}}, None
+    """{section: {offset: (type, symbol)}} for verified content sections."""
+    out, section = {name: {} for name in (".text", ".rodata", ".sdata")}, None
     for line in run(str(BIN / "mips-ps2-decompals-objdump"), "-r", str(obj)).splitlines():
         if line.startswith("RELOCATION RECORDS FOR"):
             section = line.split("[", 1)[1].rstrip("]:")
@@ -81,6 +81,54 @@ def relocations(obj):
         if section in out and len(parts) >= 3 and re.fullmatch(r"[0-9a-f]{8}", parts[0]):
             out[section][int(parts[0], 16)] = (parts[1], parts[2])
     return out
+
+
+def relocate_sdata_item(item, item_offset, relocs, funcs, syms):
+    """Apply resolvable R_MIPS_32 relocations to one emitted .sdata item.
+
+    Object files store section-relative addends for pointers into their own
+    text. Resolve those through the owning function's retail address so the
+    source-owned pointer value can be compared with the linked executable.
+    """
+    linked = bytearray(item)
+    problems = []
+    item_end = item_offset + len(item)
+    for off, (rtype, sym) in sorted(relocs.items()):
+        if off < item_offset or off + 4 > item_end:
+            continue
+        at = off - item_offset
+        addend = struct.unpack_from("<I", linked, at)[0]
+        base = sym.split("+", 1)[0]
+        target = None
+        if rtype != "R_MIPS_32":
+            problems.append(f"unsupported {rtype} at +0x{at:X}")
+            continue
+        if base == ".text":
+            owner = next(((obj_off, size, name) for obj_off, size, name in funcs
+                          if obj_off <= addend < obj_off + size), None)
+            owner_addr = address(owner[2], syms) if owner else None
+            if owner_addr is not None:
+                target = owner_addr + addend - owner[0]
+        else:
+            base_addr = address(base, syms)
+            if base_addr is not None:
+                target = base_addr + addend
+        if target is None:
+            problems.append(f"unresolved {rtype} {sym} at +0x{at:X}")
+            continue
+        struct.pack_into("<I", linked, at, target & 0xFFFFFFFF)
+    return bytes(linked), problems
+
+
+def trim_sdata_item(item, item_offset, relocs):
+    """Drop alignment padding without truncating relocation-backed words."""
+    reloc_words = {off - item_offset for off in relocs
+                   if item_offset <= off < item_offset + len(item)}
+    if reloc_words:
+        return item[:max(max(reloc_words) + 4, len(item.rstrip(b"\0")))]
+    nul = item.find(b"\0")
+    return item[:nul + 1] if nul >= 0 and not any(item[nul:]) \
+        else item.rstrip(b"\0") or item[:4]
 
 
 def inline_asm_share(text):
@@ -156,6 +204,7 @@ def main():
         rodata = data[ro_off:ro_off + ro_size]
         all_relocs = relocations(obj)
         relocs, rodata_relocs = all_relocs[".text"], all_relocs[".rodata"]
+        sdata_relocs = all_relocs[".sdata"]
         funcs = []
         for line in run(str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only", str(obj)).splitlines():
             parts = line.split()
@@ -541,12 +590,18 @@ def main():
             continue
         end = next(s for s in sd_starts if s > off)
         item = sdata[off:end]
-        nul = item.find(b"\0")
-        item = item[:nul + 1] if nul >= 0 and not any(item[nul:]) else item.rstrip(b"\0") or item[:4]
+        item = trim_sdata_item(item, off, sdata_relocs)
         theirs = retail[va_to_off(segs, retail_addr):][:len(item)]
-        if item != theirs:
+        linked_item, relocation_problems = relocate_sdata_item(
+            item, off, sdata_relocs, funcs, syms)
+        if relocation_problems:
             bad += 1
-            print(f"DIFF sdata of {name} (retail 0x{retail_addr:08X}): {item[:24]!r} vs {theirs[:24]!r}")
+            print(f"RELOC sdata of {name} (retail 0x{retail_addr:08X}): "
+                  f"{'; '.join(relocation_problems)}")
+        elif linked_item != theirs:
+            bad += 1
+            print(f"DIFF sdata of {name} (retail 0x{retail_addr:08X}): "
+                  f"{linked_item[:24]!r} vs {theirs[:24]!r}")
         elif users := asm_users(retail_addr):
             bad += 1
             print(f"SHARED sdata of {name} (retail 0x{retail_addr:08X}) is also used by asm {', '.join(users)}: "

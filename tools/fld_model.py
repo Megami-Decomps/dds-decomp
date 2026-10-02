@@ -11,6 +11,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import fld
+import lb
+import tmx
 
 
 GLB_JSON_CHUNK = 0x4E4F534A
@@ -89,6 +91,35 @@ class GltfBuilder:
         index = len(self.document["accessors"])
         self.document["accessors"].append(accessor)
         return index
+
+    def texture(self, texture: tmx.Texture) -> int:
+        self.binary.extend(bytes((-len(self.binary)) & 3))
+        offset = len(self.binary)
+        png = tmx.encode_png(texture)
+        self.binary.extend(png)
+        view_index = len(self.document["bufferViews"])
+        self.document["bufferViews"].append(
+            {"buffer": 0, "byteOffset": offset, "byteLength": len(png)}
+        )
+        image_index = len(self.document.setdefault("images", []))
+        self.document["images"].append(
+            {
+                "name": f"texture_{texture.index:03d}",
+                "bufferView": view_index,
+                "mimeType": "image/png",
+                "extras": {
+                    "ddsPixelStorageMode": tmx.PSM_NAMES[texture.psm],
+                    "ddsMipmapCount": texture.mipmap_count,
+                    "ddsClutStorageMode": texture.clut_psm,
+                    "ddsTextureFlags": texture.texture_flags,
+                },
+            }
+        )
+        texture_index = len(self.document.setdefault("textures", []))
+        self.document["textures"].append(
+            {"name": f"texture_{texture.index:03d}", "source": image_index}
+        )
+        return texture_index
 
 
 def _pack_floats(records: tuple[tuple[float, ...], ...]) -> bytes:
@@ -198,7 +229,7 @@ def _mesh_geometry(
         )
     if mesh.colors is not None:
         attributes["COLOR_0"] = builder.accessor(
-            bytes(value for color in mesh.colors for value in color),
+            bytes(min(value * 2, 0xFF) for color in mesh.colors for value in color),
             UNSIGNED_BYTE,
             "VEC4",
             len(mesh.colors),
@@ -363,6 +394,7 @@ def _add_animations(
 def build_gltf(
     data: bytes,
     *,
+    textures: tuple[tmx.Texture, ...] | None = None,
     resources: set[str] | None = None,
     meters_per_unit: float = 1.0,
     frames_per_second: float = 1.0,
@@ -382,6 +414,27 @@ def build_gltf(
     builder = GltfBuilder.create()
     found: set[str] = set()
     exported = 0
+    texture_cache: dict[int, int] = {}
+
+    def gltf_texture(index: int, context: str) -> tuple[int, bool]:
+        if textures is None:
+            raise AssertionError("texture lookup without a bundle")
+        if index < 0 or index >= len(textures):
+            raise fld.FldError(
+                f"{context} references texture {index}, but the bundle has "
+                f"{len(textures)} textures"
+            )
+        texture = textures[index]
+        if texture.index != index:
+            raise fld.FldError(
+                f"texture bundle entry {index} has unexpected index {texture.index}"
+            )
+        gltf_index = texture_cache.get(index)
+        if gltf_index is None:
+            gltf_index = builder.texture(texture)
+            texture_cache[index] = gltf_index
+        translucent = any(alpha < 0xFF for alpha in texture.rgba[3::4])
+        return gltf_index, translucent
 
     for resource in field_resources:
         if resource.type_id != 2 or not resource.data:
@@ -420,6 +473,63 @@ def build_gltf(
         packet_cache: dict[tuple[int, int], tuple[fld.ModelMesh, ...]] = {}
         geometry_cache: dict[tuple[int, int, int], tuple[dict[str, int], int, int]] = {}
         mesh_cache: dict[int, int] = {}
+        material_cache: dict[tuple[int, bool], int] = {}
+
+        def material_for(
+            asset_index: int, translucent_vertices: bool, has_texcoords: bool
+        ) -> int:
+            if textures is None:
+                return 0
+            key = asset_index, has_texcoords
+            old = material_cache.get(key)
+            if old is not None:
+                if translucent_vertices:
+                    builder.document["materials"][old]["alphaMode"] = "BLEND"
+                return old
+
+            asset = assets[asset_index]
+            fields = dict(asset.fields)
+            material = {
+                "name": f"{name}/asset_{asset_index}",
+                "doubleSided": True,
+                "pbrMetallicRoughness": {
+                    "metallicFactor": 0.0,
+                    "roughnessFactor": 1.0,
+                },
+                "extras": {"ddsAssetFlags": asset.flags},
+            }
+            translucent = translucent_vertices
+            if "resource_04" in fields:
+                source_index = int(fields["resource_04"][0])
+                material["extras"]["ddsPrimaryTexture"] = source_index
+                if source_index < 0 or source_index >= len(textures):
+                    raise fld.FldError(
+                        f"model {name} asset {asset_index} references texture "
+                        f"{source_index}, but the bundle has {len(textures)} textures"
+                    )
+                if has_texcoords:
+                    texture_index, texture_translucent = gltf_texture(
+                        source_index, f"model {name} asset {asset_index}"
+                    )
+                    material["pbrMetallicRoughness"]["baseColorTexture"] = {
+                        "index": texture_index
+                    }
+                    translucent |= texture_translucent
+            if "resource_20" in fields:
+                secondary, mode = fields["resource_20"]
+                if secondary < 0 or secondary >= len(textures):
+                    raise fld.FldError(
+                        f"model {name} asset {asset_index} references secondary "
+                        f"texture {secondary}, but the bundle has {len(textures)} textures"
+                    )
+                material["extras"]["ddsSecondaryTexture"] = int(secondary)
+                material["extras"]["ddsSecondaryTextureMode"] = int(mode)
+            if translucent:
+                material["alphaMode"] = "BLEND"
+            material_index = len(builder.document["materials"])
+            builder.document["materials"].append(material)
+            material_cache[key] = material_index
+            return material_index
 
         def item_mesh(item: fld.ModelItem) -> int | None:
             if not item.commands:
@@ -454,11 +564,19 @@ def build_gltf(
                             )
                             geometry_cache[geometry_key] = geometry
                         attributes, indices, controls = geometry
+                        translucent_vertices = bool(
+                            mesh.colors
+                            and any(color[3] < 0x80 for color in mesh.colors)
+                        )
                         primitives.append(
                             {
                                 "attributes": attributes,
                                 "indices": indices,
-                                "material": 0,
+                                "material": material_for(
+                                    draw.asset,
+                                    translucent_vertices,
+                                    mesh.texcoords is not None,
+                                ),
                                 "mode": 4,
                                 "extras": {
                                     "ddsAsset": draw.asset,
@@ -628,21 +746,42 @@ def main() -> None:
     )
     parser.add_argument("--meters-per-unit", type=float, default=1.0)
     parser.add_argument("--frames-per-second", type=float, default=1.0)
+    parser.add_argument(
+        "--texture-bundle",
+        type=Path,
+        help="TBN/TXP0 bundle used by an FLD1 or FLD1 source",
+    )
     args = parser.parse_args()
     try:
-        if args.input.suffix.lower() == ".f1asm":
+        textures = None
+        if args.input.suffix.lower() == ".lb":
+            if args.texture_bundle is not None:
+                raise fld.FldError("an LB input already supplies its texture bundle")
+            archive = lb.parse_archive(args.input.read_bytes())
+            models = [entry for entry in archive.entries if entry.extension.upper() == "F1"]
+            bundles = [entry for entry in archive.entries if entry.extension.upper() == "TBN"]
+            if len(models) != 1 or len(bundles) != 1:
+                raise fld.FldError(
+                    "LB model export requires exactly one F1 and one TBN entry"
+                )
+            data = lb.entry_data(models[0])
+            textures = tmx.parse_bundle(lb.entry_data(bundles[0]))
+        elif args.input.suffix.lower() == ".f1asm":
             data = fld.encode(fld.parse_source(args.input.read_text(encoding="utf-8")))
         else:
             data = args.input.read_bytes()
+        if args.texture_bundle is not None:
+            textures = tmx.parse_bundle(args.texture_bundle.read_bytes())
         document, binary = build_gltf(
             data,
+            textures=textures,
             resources=set(args.resources) if args.resources else None,
             meters_per_unit=args.meters_per_unit,
             frames_per_second=args.frames_per_second,
         )
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_bytes(encode_glb(document, binary))
-    except (OSError, fld.FldError, ValueError) as exc:
+    except (OSError, fld.FldError, lb.LbError, tmx.TmxError, ValueError) as exc:
         parser.error(str(exc))
 
 
