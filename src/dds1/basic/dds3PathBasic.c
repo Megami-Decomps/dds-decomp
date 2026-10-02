@@ -13,8 +13,8 @@ typedef struct {
 
 typedef struct {
     s32 unk0;
-    PathEntry12 *unk4;
-} PathData14;
+    PathEntry12 *entries;
+} PathPositionData;
 
 typedef struct {
     s32 unk0;
@@ -36,7 +36,7 @@ typedef struct {
     s32 unk8;
     f32 time;
     s32 bufferHandle;
-    PathData14 *unk14;
+    PathPositionData *positionData;
     PathData18 *vectorData;
     s32 unk1C;
     PathData20 *sampleData;
@@ -67,7 +67,32 @@ void dds3FreePathObject(PathObj *path) {
     sdfReleaseChipBlock(path);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3PathBasic", func_00116F38);
+/* Interpolate the sampled path position into VU vf10, or clear it. */
+void dds3PreparePathPositionVector(PathObj *path) {
+    s32 index;
+    f32 fraction;
+    PathPositionData *data;
+    f32 *entries;
+
+    if (path->flags & 1) {
+        data = path->positionData;
+        func_00116B80(&index, &fraction, path->time, data);
+        entries = (f32 *)data->entries;
+        VU0_SET_VF10_COMPONENT(x, entries[index * 3 + 3]);
+        VU0_SET_VF10_COMPONENT(y, entries[index * 3 + 4]);
+        VU0_SET_VF10_COMPONENT(z, entries[index * 3 + 5]);
+        VU0_SCALAR_OP(fraction, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_SET_VF10_COMPONENT(x, entries[index * 3]);
+        VU0_SET_VF10_COMPONENT(y, entries[index * 3 + 1]);
+        VU0_SET_VF10_COMPONENT(z, entries[index * 3 + 2]);
+        VU0_SCALAR_OP(1.0f - fraction, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_ADD(vf10, vf10, vf11);
+        __asm__ volatile (".set noreorder\n\tvmulx.w vf10, vf10, vf0x\n\t.set reorder");
+    } else {
+        VU0_MOVE_VF(vf10, vf0);
+    }
+}
 
 void dds3PreparePathVectorPair(PathObj *path) {
     s32 index;
