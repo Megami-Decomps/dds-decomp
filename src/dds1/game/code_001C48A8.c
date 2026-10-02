@@ -207,7 +207,52 @@ extern void fldSetEncounterPendingValue(s32);
 
 extern void evtSetSolarOverlayFullyVisible(void);
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", fldSceneStateRestoreDisplay);
+extern s64 func_001F53F0(void);
+
+extern void fldCreateSceneCleanupTask(void);
+
+s32 fldSceneStateRestoreDisplay(u8 *scene) {
+    if (btlCountTasksForOwner(0x8000000000000002ULL) == 0) {
+        func_001F53F0();
+        if (!(*(u32 *)(scene + 0x1F4) & 0x4000)) {
+            btlRepositionPartyAroundBattleCenter();
+        }
+        func_001A3638();
+        if (*(u32 *)(scene + 0x1F8) & 0x80) {
+            func_001A57A0();
+            *(u32 *)(scene + 0x1F8) &= ~0x80;
+        }
+        if (!(*(u32 *)(scene + 0x1F4) & 0x4000)) {
+            kwlnFadeBackgroundStartOut(0);
+            kwlnDrawSetOffsetTransition(0, 0, 1);
+            kwlnDrawEnableD88(0);
+            kwlnDrawEnableDc8(0);
+            kwlnDrawEnableE08(0);
+            kwlnDrawSetupC70B(0);
+            kwlnDrawEnableCd0(0);
+            kwlnDrawEnableD30(0);
+            btlMarkRuntimeUpdatePending();
+            if (!(*(u32 *)(scene + 0x1F8) & 8)) {
+                kwlnFadeStartIn(0);
+            }
+            if (fldGetEncounterRuntimeResult() != 0) {
+                fldSetEncounterPendingValue(1);
+            }
+            evtSetSolarOverlayFullyVisible();
+        }
+        if (*(s32 *)(scene + 0x2B0) == 0) {
+            fldCreateSceneCleanupTask();
+            if (!(*(u32 *)(scene + 0x1F8) & 0x2000)) {
+                *(u32 *)(scene + 0x1F4) |= 0x100000;
+            } else {
+                *(u32 *)(scene + 0x1F8) &= ~0x2000;
+                *(u32 *)(scene + 0x1F4) &= ~0x100000;
+            }
+        }
+        return 5;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C50C0);
 
