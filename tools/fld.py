@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Disassemble and assemble relocatable DDS ``FLD2`` field resources.
+"""Disassemble and assemble relocatable DDS ``FLD1``/``FLD2`` resources.
 
 The format is a compact object file.  Its data region contains file-relative
 pointers and its tail encodes the locations of those pointer words.  The source
@@ -33,6 +33,8 @@ VERTEX_SIZE = 0x10
 FACE_SIZE = 0x24
 ENCOUNTER_ZONE_ATTRIBUTE = 0x2000
 STRING_SIZE = 0x10
+EFFECT_SIZE = 0x30
+LIGHT_SIZE = 0x34
 MOTION_CURVE_SIZE = 0x10
 MOTION_KINDS = {
     0: ("vector3", 3),
@@ -46,7 +48,7 @@ SPECIAL_POINT_KIND_IDS = {name: kind for kind, name in SPECIAL_POINT_KINDS.items
 
 
 class FldError(ValueError):
-    """Raised when FLD2 data or source is invalid."""
+    """Raised when FLD data or source is invalid."""
 
 
 @dataclass(frozen=True)
@@ -139,7 +141,7 @@ def encounter_zone_overrides(data: bytes) -> tuple[int, ...]:
 
 def _range(data: bytes, offset: int, size: int, context: str) -> None:
     if offset < 0 or size < 0 or offset + size > len(data):
-        raise FldError(f"{context} lies outside the FLD2 file")
+        raise FldError(f"{context} lies outside the FLD file")
 
 
 def _u32(data: bytes, offset: int, context: str) -> int:
@@ -245,16 +247,17 @@ def _encode_relocations(locations: list[int]) -> bytes:
 def _read_header(data: bytes) -> tuple[list[int], int, tuple[int, ...]]:
     _range(data, 0, HEADER_SIZE, "header")
     words = list(struct.unpack_from("<16I", data))
-    if words[0] != 23 or data[4:8] != b"FLD2":
-        raise FldError("expected version-23 FLD2 data")
+    magic = data[4:8]
+    if words[0] != 23 or magic not in (b"FLD1", b"FLD2"):
+        raise FldError("expected version-23 FLD1 or FLD2 data")
     data_end = words[2]
     if words[3] != data_end:
-        raise FldError("FLD2 data-size fields disagree")
+        raise FldError("FLD data-size fields disagree")
     if data_end < HEADER_SIZE or data_end + words[4] != len(data):
-        raise FldError("FLD2 data and relocation sizes do not match the file")
+        raise FldError("FLD data and relocation sizes do not match the file")
     relocations = _decode_relocations(data[data_end:])
     if _encode_relocations(list(relocations)) != data[data_end:]:
-        raise FldError("FLD2 uses a noncanonical relocation stream")
+        raise FldError("FLD uses a noncanonical relocation stream")
     for location in relocations:
         if location + 4 > data_end:
             raise FldError(f"relocation word at 0x{location:x} lies outside the data region")
@@ -348,7 +351,7 @@ def _read_special_point(data: bytes, offset: int, context: str) -> tuple[int, in
 
 
 def validate(data: bytes) -> None:
-    """Validate the known FLD2 object graph and semantic index domains."""
+    """Validate the known FLD object graph and semantic index domains."""
 
     words, data_end, _ = _read_header(data)
     rows = _read_types(data, words, data_end)
@@ -384,6 +387,12 @@ def validate(data: bytes) -> None:
             label = _u32(data, resource.data + 4, "event label")
             if label:
                 _cstring(data, label, data_end, "event label")
+        elif resource.type_id == 5 and resource.data and data[4:8] == b"FLD1":
+            _fixed_string(data, resource.data, "texture-list filename")
+        elif resource.type_id == 11 and resource.data and data[4:8] == b"FLD1":
+            _range(data, resource.data, EFFECT_SIZE, "effect resource")
+        elif resource.type_id == 12 and resource.data and data[4:8] == b"FLD1":
+            _range(data, resource.data, LIGHT_SIZE, "light resource")
         elif resource.type_id == 9 and resource.data:
             _read_motion_tracks(data, resource.data, data_end, "motion resource")
         elif resource.type_id == 10 and resource.data:
@@ -765,6 +774,41 @@ def render_source(data: bytes) -> str:
             if label:
                 label_text, label_size = _cstring(data, label, data_end, stem + " event label")
                 add_span(label, label_size, [f"cstring {json.dumps(label_text)}"], stem + " event label")
+        elif resource.type_id == 5 and resource.data and data[4:8] == b"FLD1":
+            add_span(
+                resource.data,
+                STRING_SIZE,
+                [f"texture_list {json.dumps(_fixed_string(data, resource.data, stem + ' texture list'))}"],
+                stem + " texture list",
+            )
+        elif resource.type_id == 11 and resource.data and data[4:8] == b"FLD1":
+            values = struct.unpack_from("<III3f6I", data, resource.data)
+            add_span(
+                resource.data,
+                EFFECT_SIZE,
+                [
+                    "effect "
+                    f"flags={values[0]} type={values[1]} selector={values[2]} "
+                    f"size={','.join(_float_text(value) for value in values[3:6])} "
+                    f"parameters={','.join(str(value) for value in values[6:12])}"
+                ],
+                stem + " effect",
+            )
+        elif resource.type_id == 12 and resource.data and data[4:8] == b"FLD1":
+            values = struct.unpack_from("<III10f", data, resource.data)
+            add_span(
+                resource.data,
+                LIGHT_SIZE,
+                [
+                    "light "
+                    f"reserved={values[0]} flags={values[1]} animation={values[2]} "
+                    f"inner_radius={_float_text(values[3])} outer_radius={_float_text(values[4])} "
+                    f"softness={_float_text(values[5])} bias={_float_text(values[6])} "
+                    f"diffuse={','.join(_float_text(value) for value in values[7:10])} "
+                    f"ambient={','.join(_float_text(value) for value in values[10:13])}"
+                ],
+                stem + " light",
+            )
         elif resource.type_id == 9 and resource.data:
             tracks = _read_motion_tracks(data, resource.data, data_end, stem + " motion")
             root_size = (4 + len(tracks) * 8 + 0xF) & ~0xF
@@ -858,15 +902,16 @@ def render_source(data: bytes) -> str:
             return f"@{_label_for(labels, value)}"
         return str(value)
 
+    magic = data[4:8].decode("ascii")
     header = (
         "header "
-        f"version={words[0]} magic=FLD2 type_count={words[5]} type_table={header_value(6)} "
+        f"version={words[0]} magic={magic} type_count={words[5]} type_table={header_value(6)} "
         f"word_1c={header_value(7)} word_20={header_value(8)} word_24={header_value(9)} "
         f"word_28={header_value(10)} word_2c={header_value(11)} word_30={header_value(12)} "
         f"word_34={header_value(13)} word_38={header_value(14)} word_3c={header_value(15)}"
     )
 
-    lines = ["fld2 1", header, ""]
+    lines = [f"{magic.lower()} 1", header, ""]
     position = HEADER_SIZE
     relocation_set = set(relocations)
 
@@ -922,6 +967,7 @@ def render_source(data: bytes) -> str:
 def parse_source(source: str) -> tuple[Operation, ...]:
     operations: list[Operation] = []
     saw_preamble = False
+    source_magic = ""
     for line_number, raw_line in enumerate(source.splitlines(), 1):
         try:
             tokens = shlex.split(raw_line, comments=True, posix=True)
@@ -930,13 +976,22 @@ def parse_source(source: str) -> tuple[Operation, ...]:
         if not tokens:
             continue
         if not saw_preamble:
-            if tokens != ["fld2", "1"]:
-                raise FldError(f"line {line_number}: expected 'fld2 1'")
+            if tokens not in (["fld1", "1"], ["fld2", "1"]):
+                raise FldError(f"line {line_number}: expected 'fld1 1' or 'fld2 1'")
             saw_preamble = True
+            source_magic = tokens[0].upper()
             continue
         operations.append(Operation(line_number, tokens[0], tuple(tokens[1:])))
     if not saw_preamble:
-        raise FldError("missing 'fld2 1' preamble")
+        raise FldError("missing 'fld1 1' or 'fld2 1' preamble")
+    headers = [operation for operation in operations if operation.name == "header"]
+    if headers:
+        magic = _fields(headers[0].args).get("magic")
+        if magic is not None and magic != source_magic:
+            raise FldError(
+                f"line {headers[0].line}: {magic} header does not match "
+                f"{source_magic.lower()} preamble"
+            )
     return tuple(operations)
 
 
@@ -957,6 +1012,9 @@ def _operation_size(operation: Operation, offset: int) -> int:
         "special_point": 8,
         "motion_curve": MOTION_CURVE_SIZE,
         "string16": STRING_SIZE,
+        "texture_list": STRING_SIZE,
+        "effect": EFFECT_SIZE,
+        "light": LIGHT_SIZE,
         "pointer": 4,
         "u32": 4 * len(args),
         "s32": 4 * len(args),
@@ -1084,10 +1142,10 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
                 operation,
                 ("version", "magic", "type_count", "type_table", "word_1c", "word_20", "word_24", "word_28", "word_2c", "word_30", "word_34", "word_38", "word_3c"),
             )
-            if f["magic"] != "FLD2":
+            if f["magic"] not in ("FLD1", "FLD2"):
                 raise FldError(f"line {operation.line}: unsupported magic")
             header_offset = len(output)
-            output.extend(struct.pack("<I4s", _int(f["version"]), b"FLD2"))
+            output.extend(struct.pack("<I4s", _int(f["version"]), f["magic"].encode("ascii")))
             output.extend(pointer("@data_end"))
             output.extend(struct.pack("<II", data_end, 0))
             output.extend(struct.pack("<I", _int(f["type_count"])))
@@ -1175,6 +1233,50 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
         elif name == "camera":
             f = checked_fields(operation, ("fovy",))
             output.extend(struct.pack("<f", _parse_float(f["fovy"])))
+        elif name == "texture_list":
+            if len(args) != 1:
+                raise FldError(f"line {operation.line}: texture_list expects one filename")
+            try:
+                raw = args[0].encode("ascii")
+            except UnicodeEncodeError as exc:
+                raise FldError(f"line {operation.line}: texture-list filename is not ASCII") from exc
+            if len(raw) >= STRING_SIZE:
+                raise FldError(f"line {operation.line}: texture-list filename is too long")
+            output.extend(raw + bytes(STRING_SIZE - len(raw)))
+        elif name == "effect":
+            f = checked_fields(operation, ("flags", "type", "selector", "size", "parameters"))
+            output.extend(
+                struct.pack(
+                    "<III3f6I",
+                    _int(f["flags"]),
+                    _int(f["type"]),
+                    _int(f["selector"]),
+                    *_csv(f["size"], 3, _parse_float),
+                    *_csv(f["parameters"], 6),
+                )
+            )
+        elif name == "light":
+            f = checked_fields(
+                operation,
+                (
+                    "reserved", "flags", "animation", "inner_radius", "outer_radius",
+                    "softness", "bias", "diffuse", "ambient",
+                ),
+            )
+            output.extend(
+                struct.pack(
+                    "<III10f",
+                    _int(f["reserved"]),
+                    _int(f["flags"]),
+                    _int(f["animation"]),
+                    _parse_float(f["inner_radius"]),
+                    _parse_float(f["outer_radius"]),
+                    _parse_float(f["softness"]),
+                    _parse_float(f["bias"]),
+                    *_csv(f["diffuse"], 3, _parse_float),
+                    *_csv(f["ambient"], 3, _parse_float),
+                )
+            )
         elif name == "event":
             f = checked_fields(operation, ("flags", "label", "reserved"))
             output.extend(struct.pack("<I", _int(f["flags"])))
@@ -1321,17 +1423,17 @@ def _command_verify(args: argparse.Namespace) -> None:
     data = args.input.read_bytes()
     rebuilt = encode(decode(data))
     if rebuilt != data:
-        raise FldError("FLD2 did not round-trip")
+        raise FldError("FLD did not round-trip")
     print(f"{args.input}: exact ({len(data)} bytes, sha1 {hashlib.sha1(data).hexdigest()})")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    disassemble = commands.add_parser("disassemble", help="write readable FLD2 source")
+    disassemble = commands.add_parser("disassemble", help="write readable FLD1/FLD2 source")
     disassemble.add_argument("input", type=Path)
     disassemble.add_argument("output", nargs="?", type=Path)
-    assemble = commands.add_parser("assemble", help="assemble FLD2 source")
+    assemble = commands.add_parser("assemble", help="assemble FLD1/FLD2 source")
     assemble.add_argument("input", type=Path)
     assemble.add_argument("output", type=Path)
     assemble.add_argument("--scripts", type=Path, help="paired field BF source")
