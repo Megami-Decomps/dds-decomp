@@ -618,9 +618,9 @@ def add_model_graph(
         if old is not None:
             return old
         primitives = []
-        for list_offset in draw_roots[item.commands]:
+        for list_index, list_offset in enumerate(draw_roots[item.commands]):
             draw_list = draw_lists[list_offset]
-            for draw_offset in draw_list.draws:
+            for draw_index, draw_offset in enumerate(draw_list.draws):
                 draw = draws[draw_offset]
                 packet_key = draw.packet, draw.quadwords * 0x10
                 packet_meshes = packet_cache.get(packet_key)
@@ -661,6 +661,9 @@ def add_model_graph(
                             "extras": {
                                 "ddsAsset": draw.asset,
                                 "ddsDrawSelector": draw_list.selector,
+                                "ddsDrawListIndex": list_index,
+                                "ddsDrawIndex": draw_index,
+                                "ddsPacketMeshIndex": mesh_index,
                                 "ddsMeshControls": list(mesh.controls),
                                 "ddsProgramAddress": mesh.program,
                                 "ddsTriangleControlAccessor": controls,
