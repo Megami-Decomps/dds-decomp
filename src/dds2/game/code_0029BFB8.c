@@ -36,7 +36,7 @@ typedef struct {
 
 INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029BFB8);
 
-s64 itfRunPanelMode1(s32 request) {
+s32 itfRunPanelMode1(s32 request) {
     s32 context = kwlnTaskGetUserValue();
     PanelDispatchContext *panel = (PanelDispatchContext *)context;
 
@@ -45,7 +45,7 @@ s64 itfRunPanelMode1(s32 request) {
     return func_002C4038(panel->dispatchWork, &panel->dispatchStatus, 1, request);
 }
 
-s64 itfRunPanelMode2(s32 request) {
+s32 itfRunPanelMode2(s32 request) {
     s32 context = kwlnTaskGetUserValue();
     PanelDispatchContext *panel = (PanelDispatchContext *)context;
 

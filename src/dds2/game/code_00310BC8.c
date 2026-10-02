@@ -439,12 +439,12 @@ void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
     memcpy(out, forward, 16);
 }
 
-s64 sdfFontRegisterShort(s32 x, s32 y, u64 first, u64 second) {
+void sdfFontRegisterShort(s32 x, s32 y, u64 first, u64 second) {
     u64 handle;
 
     handle = func_0019F460(x << 4, y << 3, 0, first, second, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    return frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphInSelectedSlot(handle);
 }
 
 s32 frFontMeasureAndQueueGlyph(s32 x, s32 y, u64 first, u64 second, u64 third, s32 option) {
