@@ -341,8 +341,6 @@ void func_002C2EF8(const char *fmt, ...) {
 
 /* Field-map mode index -> track slot. Indices 7 and 12 are the only values in
  * range with no arm of their own, so they fall through to the default of 1. */
-INCLUDE_RODATA(const s32, "game/code_002C2620", fldLocalMapTaskName);
-
 s32 fldLocalMapTrackSlotFromMode(s32 index) {
     s32 slot = 1;
 
