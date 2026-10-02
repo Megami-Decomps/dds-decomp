@@ -147,7 +147,6 @@ void func_00245F80(void) {
     D_0043722C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00244F00", func_00245F88);
 
 typedef struct EventListNode {
     u16 orderKey;
@@ -162,6 +161,7 @@ typedef struct {
     EventListNode *first; /* 0x54 */
     EventListNode *last;  /* 0x58 */
 } EventList;
+INCLUDE_ASM(const s32, "game/code_00244F00", func_00245F88);
 
 void evtUnlinkListNode(EventList *owner, EventListNode *node) {
     EventListNode *next = node->next;

@@ -2961,11 +2961,11 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
 
 extern u32 D_00437E54;
 
-u32 effCreateTrackSetWithSharedReferences(u32 arg0, u16 kind, u32 arg2) {
-    EffTrackSet *effect = effCreateTrackSet(arg0, kind);
+u32 effCreateTrackSetWithSharedReferences(u32 count, u16 kind, u32 sharedRef) {
+    EffTrackSet *effect = effCreateTrackSet(count, kind);
 
     if (effect->columns != 0) {
-        if (arg2 == 0) {
+        if (sharedRef == 0) {
             switch (effect->kind) {
             case 3:
                 if (D_00437E58[0] == 0) {
@@ -2981,7 +2981,7 @@ u32 effCreateTrackSetWithSharedReferences(u32 arg0, u16 kind, u32 arg2) {
                 break;
             }
         } else {
-            effect->shared = func_002DDAA8((void *)arg2);
+            effect->shared = func_002DDAA8((void *)sharedRef);
         }
     }
     return (u32)effect;
@@ -4068,7 +4068,89 @@ void effRandomizeParticleFields(s32 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002EAC38);
+typedef struct EffPointSetTableSource {
+    u8 pad00[0x38];
+    u32 count;     /* 0x38: rows, one point set each */
+    s32 layers;    /* 0x3C: at least 3 */
+    u8 pad40[0x28];
+    f32 unk68;     /* 0x68: fade-in share of a set */
+    f32 unk6C;     /* 0x6C: end of the full-alpha span */
+    u32 colorA;    /* 0x70: low 24 bits kept, top byte ramped */
+    u32 colorB;    /* 0x74 */
+    u32 colorC;    /* 0x78 */
+} EffPointSetTableSource;
+
+typedef struct EffPointSetRow {
+    EffPointSet *set; /* 0x00 */
+    s32 key;          /* 0x04 */
+    u32 pad08;
+    u32 zero;         /* 0x0C */
+} EffPointSetRow;
+
+typedef struct EffPointSetTable {
+    EffPointSetRow *rows;
+} EffPointSetTable;
+
+EffPointSetTable *func_002EAC38(EffPointSetTableSource *src) {
+    u32 count = src->count;
+    EffPointSetTable *table;
+    EffPointSetRow *row;
+    u32 i;
+    u32 alphaA;
+    u32 alphaB;
+    u32 alphaC;
+    u32 lowA;
+    u32 lowB;
+    u32 lowC;
+    s32 rampIn;
+    s32 rampOut;
+
+    table = (EffPointSetTable *)func_00328D68(count * sizeof(EffPointSetRow) + 4);
+    table->rows = (EffPointSetRow *)(table + 1);
+    if ((u32)src->layers < 3) {
+        src->layers = 3;
+    }
+    lowA = src->colorA & 0xFFFFFF;
+    lowB = src->colorB & 0xFFFFFF;
+    lowC = src->colorC & 0xFFFFFF;
+    alphaA = src->colorA >> 24;
+    alphaB = src->colorB >> 24;
+    alphaC = src->colorC >> 24;
+    rampIn = (s32)(src->unk68 * (f32)(src->layers + 1));
+    rampOut = (s32)(src->unk6C * (f32)(src->layers + 1));
+    row = table->rows;
+    for (i = 0; i < count; i++) {
+        EffPointSet *set = effCreatePointSet5(src->layers);
+        u32 n;
+        u32 *rec;
+        u32 j;
+
+        row->set = set;
+        n = set->rows / 5;
+        rec = (u32 *)set->tail;
+        for (j = 0; j < n; j++) {
+            f32 ratio;
+
+            if (j < rampIn) {
+                ratio = (f32)j / (f32)rampIn;
+            } else if (j <= rampOut) {
+                ratio = 1.0f;
+            } else {
+                ratio = (f32)(n - j) / (f32)(n - rampOut);
+            }
+            rec[0] = lowC | ((u32)((f32)alphaC * ratio) << 24);
+            rec[1] = lowB | ((u32)((f32)alphaB * ratio) << 24);
+            rec[2] = lowA | ((u32)((f32)alphaA * ratio) << 24);
+            rec[3] = rec[1];
+            rec[4] = rec[0];
+            rec += 5;
+        }
+        row->key = ~(i * 4);
+        row->zero = 0;
+        row++;
+    }
+    return table;
+}
 
 extern void effReleasePointSetAsset(s32);
 
@@ -7489,7 +7571,50 @@ void effSetActiveSlotOpacity(s32 *work, f32 opacity) {
     dds3DispatchIndexedCallback(work[0x70 / 4], opacity);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002FB480);
+typedef struct MdlCtx MdlCtx;
+typedef struct MdlResourceItem MdlResourceItem;
+typedef struct SdfTextParam SdfTextParam;
+
+extern void *sdfChunkFindRecordById(SdfTextParam *, s32);
+extern void mdlSetResourceAmount(s32, MdlResourceItem *, f32);
+extern void mdlSetAllResourceFrames(MdlCtx *, u32);
+
+void func_002FB480(s32 *work) {
+    f32 *amount;
+    f32 scale;
+    u32 i;
+    void *record;
+    u8 *item;
+
+    work[0x28 / 4] = 0;
+    if (*(u32 *)work[0x478 / 4] == 0) {
+        return;
+    }
+    if (*(u32 *)(*(u32 *)work[0x478 / 4] + 0x1C) != 0) {
+        if (*(u8 *)((u8 *)work + 0x36) != 0) {
+            mdlAddEntryFlagged(*(s32 *)work[0x478 / 4], 0, *(u16 *)((u8 *)work + 0x34));
+        } else {
+            mdlAddEntryPlain(*(s32 *)work[0x478 / 4], 0, *(u16 *)((u8 *)work + 0x34));
+        }
+        *(f32 *)(*(u32 *)(*(u32 *)work[0x478 / 4] + 0x1C) + 0x20) = 1.0f;
+    }
+
+    scale = *(f32 *)((u8 *)work + 0x30);
+    i = 0;
+    amount = (f32 *)((u8 *)work + 0x4C);
+    for (; i < 0xFF; i++, amount++) {
+        record = sdfChunkFindRecordById(
+            (SdfTextParam *)*(u32 *)(*(u32 *)work[0x478 / 4] + 0x18), i);
+        for (item = (u8 *)*(u32 *)(*(u32 *)work[0x478 / 4] + 0x14); item != NULL;
+             item = *(u8 **)item) {
+            if (*(u32 *)(item + 0x10) == (u32)record) {
+                mdlSetResourceAmount(*(s32 *)work[0x478 / 4], (MdlResourceItem *)item, *amount * scale);
+                break;
+            }
+        }
+    }
+    mdlSetAllResourceFrames((MdlCtx *)*(u32 *)work[0x478 / 4], work[0x38 / 4]);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002FB5C0);
 
@@ -9789,7 +9914,7 @@ extern s32 fileRequestIsReady(void *);
 
 extern void func_002C7CE8(void *);
 
-extern EffRequest *func_002C7FF0(u32);
+extern void *func_002C7FF0(const char *path);
 
 extern void func_002C81D0(void *);
 

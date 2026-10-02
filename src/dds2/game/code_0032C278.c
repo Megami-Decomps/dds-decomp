@@ -578,6 +578,8 @@ s32 sdfLinkReferenceDmaNode(s32 previous, u32 source) {
     return node + 0x10;
 }
 
+extern s32 sdfLinkReferenceDmaNode(s32 previous, u32 source);
+
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D218);
 
 typedef struct SdfRefNode {

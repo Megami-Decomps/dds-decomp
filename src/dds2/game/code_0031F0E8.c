@@ -17,7 +17,7 @@ extern void func_003211F0(void);
 #define DDS_NAMED_RECORD_NAME_BYTES 0x40
 
 typedef struct DdsNamedRecord {
-    const char *name; /* 0x00: up to 0x40 bytes */
+    char *name;       /* 0x00: writable 0x40-byte name buffer */
     u32 value;        /* 0x04: packed offset or resolved address */
 } DdsNamedRecord;
 
@@ -146,7 +146,26 @@ void dds3WritePackedValue(destination, datum, size)
     func_0031F340((DdsPackedObject *)destination, value, size);
 }
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F430);
+extern u32 func_0031F168(void);
+extern char D_00438960[];
+extern void func_0035C860(char *dst, const char *format, ...);
+
+void func_0031F430(DdsPackedObject *object, const char *name) {
+    DdsNamedNode *node = ((DdsNamedList *)object->namedReferences)->first;
+    DdsNamedRecord *record;
+
+    while (node != NULL) {
+        record = node->record;
+        if (strncmp(record->name, name, DDS_NAMED_RECORD_NAME_BYTES) == 0) {
+            return;
+        }
+        node = node->next;
+    }
+    record = (DdsNamedRecord *)func_0031F168();
+    func_0035C860(record->name, D_00438960, name);
+    func_00320CE0(object->namedReferences, 0, record);
+    record->value = object->maxPackedOffset;
+}
 
 void dds3RecordNamedReference(u32 context, const char *name) {
     u32 record = func_0031F168();
@@ -227,7 +246,6 @@ u32 dds3RegisterPendingNamedReferences(u32 *object, u32 extra) {
     return object[0];
 }
 
-extern void func_0035C860(char *dst, const char *format, ...);
 extern s32 func_00359A98(const char *name, const char *path);
 extern void func_0035A648(u32 *data, s32 size, s32 flag, s32 handle);
 extern void func_003594A8(s32 handle);

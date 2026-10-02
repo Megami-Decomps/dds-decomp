@@ -146,7 +146,31 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291118);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_002911D0);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291288);
+extern s32 scrGetSelectedScriptEntryId(s32 arg0);
+extern u32 scrGetEntryLowFlags(s32 arg0, u16 index);
+extern u32 ptyGetProfileRecordCap(u16 scriptId);
+extern u32 ptyGetProfileRecordValue(u32 work, u16 scriptId);
+
+s32 func_00291288(MenuPanelSlot *slot, s32 arg1) {
+    u16 target = scrGetSelectedScriptEntryId(arg1) & 0xFFFF;
+    u16 *dst = slot->values;
+    s32 i;
+
+    for (i = 0; i < 0xB0; i++) {
+        u32 flags = scrGetEntryLowFlags(arg1, i);
+
+        *dst++ = flags;
+        if (i == target) {
+            if (((flags >> 8) & 1) != 0) {
+                target = 0;
+            }
+        }
+    }
+    if (target != 0 && ptyGetProfileRecordCap(target) == ptyGetProfileRecordValue(arg1, target)) {
+        return target;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291338);
 

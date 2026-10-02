@@ -98,7 +98,7 @@ typedef struct EventScriptEntry {
 } EventScriptEntry;
 
 typedef struct EventModeSlot {
-    u8 pad0;
+    s8 stat;
     s8 kind;             /* 0x01 */
 } EventModeSlot;
 
@@ -649,13 +649,95 @@ s32 func_0011D680(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D6A8);
+extern s32 btlResolveUnitValueWithOverride(s32, s32);
+extern u32 datReadLowHalfOfCalculatedValue(s32, s32);
+s32 func_0011D6A8(void) {
+    s8 stat = ((EventModeSlot *)datCommandSelectors)[D_0043E5C0[1]].stat;
+    s32 value;
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D758);
+    switch (stat) {
+    case -1:
+    case 16:
+    case 17:
+        value = 100;
+        break;
+    default:
+        if (btlIsRuntimeAllocated()) {
+            value = (u16)btlResolveUnitValueWithOverride(D_0043E5C0[2], stat);
+        } else {
+            value = datReadLowHalfOfCalculatedValue(D_0043E5C0[2], stat);
+        }
+        break;
+    }
+    scrSetIntegerReturnValue(value);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D808);
+s32 func_0011D758(void) {
+    s8 stat = ((EventModeSlot *)datCommandSelectors)[D_0043E5C0[1]].stat;
+    s32 value;
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D8B0);
+    switch (stat) {
+    case -1:
+    case 16:
+    case 17:
+        value = 100;
+        break;
+    default:
+        if (btlIsRuntimeAllocated()) {
+            value = (u16)btlResolveUnitValueWithOverride(D_0043E5C0[3], stat);
+        } else {
+            value = datReadLowHalfOfCalculatedValue(D_0043E5C0[3], stat);
+        }
+        break;
+    }
+    scrSetIntegerReturnValue(value);
+    return 1;
+}
+
+extern s32 func_00119F68(s32);
+
+s32 func_0011D808(void) {
+    s8 stat = func_00119F68(((EventScriptEntry *)D_0043E5C0)->index14);
+    s32 value = 100;
+
+    switch (stat) {
+    case -1:
+    case 16:
+    case 17:
+        break;
+    default:
+        if (btlIsRuntimeAllocated()) {
+            value = (u16)btlResolveUnitValueWithOverride(D_0043E5C0[2], stat);
+        } else {
+            value = datReadLowHalfOfCalculatedValue(D_0043E5C0[2], stat);
+        }
+        break;
+    }
+    scrSetIntegerReturnValue(value);
+    return 1;
+}
+
+s32 func_0011D8B0(void) {
+    s8 stat = func_00119F68(((EventScriptEntry *)D_0043E5C0)->index14);
+    s32 value = 100;
+
+    switch (stat) {
+    case -1:
+    case 16:
+    case 17:
+        break;
+    default:
+        if (btlIsRuntimeAllocated()) {
+            value = (u16)btlResolveUnitValueWithOverride(D_0043E5C0[3], stat);
+        } else {
+            value = datReadLowHalfOfCalculatedValue(D_0043E5C0[3], stat);
+        }
+        break;
+    }
+    scrSetIntegerReturnValue(value);
+    return 1;
+}
 
 s32 func_0011D958(void) {
     s32 val = scrReadIntParameter(0);

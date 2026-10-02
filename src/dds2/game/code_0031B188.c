@@ -55,7 +55,27 @@ extern void mdlAddEntryFlaggedEx(u8 *model, s32 entry, s32 flags, f32 x, f32 y);
 extern u32 func_003292A8(s32 bytes);
 extern u32 *sdfMemoryGetBlockAddress(u32 handle);
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B188);
+extern u8 D_0040ABD0[];
+extern u8 D_0040ABC0[];
+extern u8 D_0040ABB0[];
+extern s32 D_00438944;
+extern void dds3SetCameraVector(s32 object, void *vector);
+extern void effObjSetInnerFirstVec(void *node, u128 *vector);
+
+void func_0031B188(void) {
+    u8 *object;
+    void (*update)(void *);
+    u8 *data;
+
+    dds3SetCameraVector(D_00438944, D_0040ABD0);
+    effObjSetInnerFirstVec((void *)D_00438944, (u128 *)D_0040ABC0);
+    object = (u8 *)D_00438944;
+    update = *(void (**)(void *))(*(u8 **)(object + 0x10) + 8);
+    update(object);
+    data = *(u8 **)((u8 *)D_00438944 + 0x18);
+    PCP_COPY_VECTOR(data + 0x50, D_0040ABB0);
+    PCP_COPY_VECTOR(data + 0x70, D_0040ABB0);
+}
 
 void dds3InitSoundSlotPool(void) {
     u32 handle;

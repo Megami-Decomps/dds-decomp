@@ -29,6 +29,7 @@ typedef struct CompactSlotPool {
 extern u32 func_003292A8(s32 size);
 extern void *sdfMemoryGetBlockAddress(u32 handle);
 extern void evtPrintDeveloperConsoleMessage(char *text, s32 value);
+extern char D_0042DBA0[];
 
 typedef struct SpriteWorkPool {
     u32 handle;
@@ -94,7 +95,19 @@ void itfReleaseWideSlot(u32 *flags) {
 
 INCLUDE_ASM(const s32, "game/code_0031D890", func_0031DA38);
 
-INCLUDE_ASM(const s32, "game/code_0031D890", func_0031DEB8);
+/* Sprite-hit-effect work pool: count 0x10-byte items plus a 0xC-byte header. */
+u32 func_0031DEB8(u32 count) {
+    u32 size = count * 0x10 + 0xC;
+    u32 handle = func_003292A8(size);
+    SpriteWorkPool *pool = (SpriteWorkPool *)sdfMemoryGetBlockAddress(handle);
+
+    memset(pool, 0, size);
+    pool->handle = handle;
+    pool->count = count;
+    pool->items = (u8 *)pool + 0xC;
+    evtPrintDeveloperConsoleMessage(D_0042DBA0, size);
+    return (u32)pool;
+}
 
 void func_0031DF48(u32 *sprite) {
     func_003297C8(*sprite);

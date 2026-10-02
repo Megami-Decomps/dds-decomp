@@ -17,8 +17,7 @@ typedef struct MenuSlotState {
     s32 slot;       /* 0x88 */
     u8 pad8C[0x1C];
     s32 effect[7]; /* 0xA8 */
-    s32 cur;       /* 0xC4 */
-    s32 prev;      /* 0xC8 */
+    s32 selectedSlots[2]; /* 0xC4: current slot, then previous slot */
     u8 padCC[0x14];
     s32 slotCopy;   /* 0xE0 */
     s32 mode;       /* 0xE4 */
@@ -42,6 +41,9 @@ typedef struct EffectPair {
     s32 a;
     s32 b;
 } EffectPair;
+
+extern EffectPair D_00437878[];
+extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 
 typedef struct EffectInner {
     u8 pad00[0x20];
@@ -800,7 +802,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     evtLoadResourcePair("/facility/msg/terminal/mes_data.bmd", obj + 0x5C);
     evtCreateMessageWindowIfMissing(*(s32 *)(obj + 0x60));
     for (i = 0; i < 2; i++) {
-        (&((MenuSlotState *)obj)->cur)[i] = -1;
+        ((MenuSlotState *)obj)->selectedSlots[i] = -1;
     }
     *(s32 *)(obj + 0x150) = 0xF;
     mnuSelectTerminalResourceBank((MenuSlotState *)obj);
@@ -946,7 +948,7 @@ s32 fldClassifyRemainingFrames(SceneTimerView *timer) {
 }
 
 void mnuTerminalConfigureEffects(u32 mode, MenuSlotState *state) {
-    s32 *slot = &state->cur;
+    s32 *slot = state->selectedSlots;
 
     if (*slot < 0) {
         return;
@@ -974,15 +976,29 @@ void mnuTerminalSelectSlot(s32 ctx, s32 index, MenuSlotState *state) {
         index = 3;
     }
     if (index >= 0) {
-        state->prev = state->cur;
-        state->cur = table[index];
+        state->selectedSlots[1] = state->selectedSlots[0];
+        state->selectedSlots[0] = table[index];
     } else if (index == -2) {
-        state->prev = -1;
+        state->selectedSlots[1] = -1;
     }
     mnuTerminalConfigureEffects(ctx, state);
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00268B48);
+void func_00268B48(s32 context) {
+    MenuSlotState *state = (MenuSlotState *)context;
+    EffectPair position = D_00437878[0];
+    s32 *slot;
+    u32 i;
+
+    if (D_00437859 != 0) {
+        for (i = 0, slot = state->selectedSlots; i < 2; i++, slot++) {
+            if (*slot >= 0) {
+                itfDrawGridWithResolvedSlot(position.a, position.b, 0, 0x81,
+                                            state->batch, *slot, 0x52);
+            }
+        }
+    }
+}
 
 typedef struct {
     u8 pad00[0x14];

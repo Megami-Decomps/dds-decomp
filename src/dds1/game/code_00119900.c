@@ -64,7 +64,7 @@ typedef struct EventStatRow {
 } EventStatRow; /* 0x38 */
 
 typedef struct EventSelector {
-    u8 pad0;
+    s8 stat;
     s8 kind;           /* 0x01: kind five uses roster details instead */
 } EventSelector; /* 0x02 */
 
@@ -521,13 +521,105 @@ s32 func_0011BA30(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011BA58);
+extern s32 btlResolveUnitValueWithOverride(s32, s32);
+extern u32 datReadLowHalfOfCalculatedValue(s32, s32);
+s32 func_0011BA58(void) {
+    s8 stat = ((EventSelector *)datCommandSelectors)[
+        ((EvtScriptContext *)D_003C2E70)->third].stat;
+    s32 value;
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011BB08);
+    switch (stat) {
+    case -1:
+    case 16:
+    case 17:
+        value = 100;
+        break;
+    default:
+        if (btlIsRuntimeAllocated()) {
+            value = (u16)btlResolveUnitValueWithOverride(
+                ((EvtScriptContext *)D_003C2E70)->first, stat);
+        } else {
+            value = datReadLowHalfOfCalculatedValue(
+                ((EvtScriptContext *)D_003C2E70)->first, stat);
+        }
+        break;
+    }
+    scrSetIntegerReturnValue(value);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011BBB8);
+s32 func_0011BB08(void) {
+    s8 stat = ((EventSelector *)datCommandSelectors)[
+        ((EvtScriptContext *)D_003C2E70)->third].stat;
+    s32 value;
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011BC60);
+    switch (stat) {
+    case -1:
+    case 16:
+    case 17:
+        value = 100;
+        break;
+    default:
+        if (btlIsRuntimeAllocated()) {
+            value = (u16)btlResolveUnitValueWithOverride(
+                ((EvtScriptContext *)D_003C2E70)->second, stat);
+        } else {
+            value = datReadLowHalfOfCalculatedValue(
+                ((EvtScriptContext *)D_003C2E70)->second, stat);
+        }
+        break;
+    }
+    scrSetIntegerReturnValue(value);
+    return 1;
+}
+
+extern s32 func_00119750(s32);
+
+s32 func_0011BBB8(void) {
+    s8 stat = func_00119750(((EvtScriptContext *)D_003C2E70)->options);
+    s32 value = 100;
+
+    switch (stat) {
+    case -1:
+    case 16:
+    case 17:
+        break;
+    default:
+        if (btlIsRuntimeAllocated()) {
+            value = (u16)btlResolveUnitValueWithOverride(
+                ((EvtScriptContext *)D_003C2E70)->first, stat);
+        } else {
+            value = datReadLowHalfOfCalculatedValue(
+                ((EvtScriptContext *)D_003C2E70)->first, stat);
+        }
+        break;
+    }
+    scrSetIntegerReturnValue(value);
+    return 1;
+}
+
+s32 func_0011BC60(void) {
+    s8 stat = func_00119750(((EvtScriptContext *)D_003C2E70)->options);
+    s32 value = 100;
+
+    switch (stat) {
+    case -1:
+    case 16:
+    case 17:
+        break;
+    default:
+        if (btlIsRuntimeAllocated()) {
+            value = (u16)btlResolveUnitValueWithOverride(
+                ((EvtScriptContext *)D_003C2E70)->second, stat);
+        } else {
+            value = datReadLowHalfOfCalculatedValue(
+                ((EvtScriptContext *)D_003C2E70)->second, stat);
+        }
+        break;
+    }
+    scrSetIntegerReturnValue(value);
+    return 1;
+}
 
 s32 func_0011BD08(void) {
     s32 val = scrReadIntParameter(0);

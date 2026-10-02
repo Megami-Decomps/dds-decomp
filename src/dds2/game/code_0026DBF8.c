@@ -42,7 +42,7 @@ extern u32 mnuCreateMantraIconListC();
 extern void mnuReleaseMantraFadeData(s32);
 s32 func_00271368();
 void func_00271510();
-u32 func_002712E0();
+u32 func_002712E0(u32 list);
 void mnuMantraSetupSlot(u32);
 void mnuReleaseMantraFadeDrawData();
 typedef struct MantraIconEntry {
@@ -271,7 +271,7 @@ extern s32 fileRequestIsReady(void *);
 extern void func_002C7CE8(void *);
 extern u32 func_00305148(void *, u32);
 extern u32 kwlnTaskGetUserValue(void);
-extern u32 func_002C7FF0(const char *);
+extern void *func_002C7FF0(const char *path);
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(void),
                             void (*)(), void *);
 s32 mnuLoadMantraSpriteTask(void);

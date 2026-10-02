@@ -817,7 +817,24 @@ u32 itfMesGetEntryTableItem(s32 window, s32 entryIndex, s32 itemIndex) {
     return itfMesGetTableItem(itfMesGetEntry(itfWindowSlots[window].mes, entryIndex)->table, itemIndex);
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4988);
+extern void func_001A6078(ItfMesBlkA4 *blk, s32 arg1, s32 arg2);
+extern void itfPanelReleasePrimitiveResources(void *primitive);
+
+void func_001A4988(s32 window, s32 first, s32 second) {
+    ItfMesState *mes = itfWindowSlots[window].mes;
+    ItfMesBlkA4 *blk = &mes->blkA4;
+
+    if ((mes->flags & 0x3300) == 0) {
+        if (mes->unk12 != first || blk->unk28 != second) {
+            mes->unk12 = first;
+            func_001A6078(blk, first, second);
+            if (blk->unk4 != NULL) {
+                itfPanelReleasePrimitiveResources(blk->unk4);
+                blk->unk4 = NULL;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4A10);
 
