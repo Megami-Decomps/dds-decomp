@@ -105,7 +105,7 @@ typedef struct EffBezierPoint {
 /* Each slot has a 0x60-byte stride: seven control points, the current segment, the curve parameter t and its step. */
 typedef struct EffBezierSlot {
     EffBezierPoint point[7];
-    s32 segment; /* 0x54 */
+    u32 segment; /* 0x54 */
     f32 t;       /* 0x58 */
     f32 step;    /* 0x5C */
 } EffBezierSlot;
@@ -196,9 +196,69 @@ void effReleaseSlotArrayAllocation(EffArrHdr *header) {
     func_002D0918((u32)header->allocation);
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_0018E2C0);
+/* Evaluate the active slot's Bezier into out and advance it; a slot whose segment has reached 7 is finished and returns 0. A t that passes 1 clamps to 1 and moves on to the next curve segment. */
+s32 func_0018E2C0(EffArrHdr *table, s32 index, f32 *out) {
+    EffBezierSlot *slot = &((EffBezierSlot *)table->slots)[index];
+    u32 segment = slot->segment;
+    f32 w[4];
+    f32 t;
+    f32 u;
+    EffBezierPoint *p;
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_0018E408);
+    if (segment == 7) {
+        return 0;
+    }
+    t = slot->t;
+    u = 1.0f - t;
+    p = &slot->point[segment];
+    w[0] = u * u * u;
+    w[1] = t * (u * u) * 3.0f;
+    w[2] = t * t * u * 3.0f;
+    w[3] = t * t * t;
+    out[0] = p[0].x * w[0] + p[1].x * w[1] + p[2].x * w[2] + p[3].x * w[3];
+    out[1] = p[0].y * w[0] + p[1].y * w[1] + p[2].y * w[2] + p[3].y * w[3];
+    out[2] = p[0].z * w[0] + p[1].z * w[1] + p[2].z * w[2] + p[3].z * w[3];
+    out[3] = 1.0f;
+    t += slot->step;
+    if (t > 1.0f) {
+        t = 1.0f;
+        segment += 3;
+    }
+    slot->t = t;
+    slot->segment = segment;
+    return 1;
+}
+
+/* Evaluate the cubic Bezier at t into out (xyz, w = 1), advance t, and step to the next curve segment when t passes 1; returns 0 once the last segment is finished. */
+s32 func_0018E408(EffBezierSlot *slot, f32 *out) {
+    f32 w[4];
+    u32 segment = slot->segment;
+    f32 t = slot->t;
+    EffBezierPoint *p = &slot->point[segment];
+    f32 u = 1.0f - t;
+
+    w[0] = u * u * u;
+    w[1] = t * (u * u) * 3.0f;
+    w[2] = t * t * u * 3.0f;
+    w[3] = t * t * t;
+    out[0] = p[0].x * w[0] + p[1].x * w[1] + p[2].x * w[2] + p[3].x * w[3];
+    out[1] = p[0].y * w[0] + p[1].y * w[1] + p[2].y * w[2] + p[3].y * w[3];
+    out[2] = p[0].z * w[0] + p[1].z * w[1] + p[2].z * w[2] + p[3].z * w[3];
+    out[3] = 1.0f;
+    t += slot->step;
+    if (t > 1.0f) {
+        if (segment < 3) {
+            t -= 1.0f;
+            segment += 3;
+        } else {
+            slot->t = 1.0f;
+            return 0;
+        }
+    }
+    slot->segment = segment;
+    slot->t = t;
+    return 1;
+}
 
 /* Evaluate the cubic Bezier made of control points segment..segment+3 at t into out (xyz, w = 1). */
 void effEvaluateSlotBezierPosition(EffBezierSlot *slot, f32 *out) {
@@ -228,13 +288,118 @@ s32 effGetSlotAt(EffArrHdr *table, s32 index) {
     return (s32)&((EffBezierSlot *)table->slots)[index];
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_0018E678);
+extern void *func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
+extern void sdfProjectVuVectorToScreen();
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_0018E740);
+/* Draw a 32x16 box with the fixed marker colour at the screen position of `position`. */
+void func_0018E678(f32 *position) {
+    void *list = sdfAllocPacketAligned(0x20);
+    f32 screen[4];
+    s32 pixel[2]; /* written, never read; retail keeps the frame slot */
+    s32 x;
+    s32 y;
+    u8 *scene;
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_0018E810);
+    sdfInitPacketList(list);
+    VU0_LOAD_VF(vf10, position);
+    sdfProjectVuVectorToScreen();
+    VU0_STORE_VF(vf10, screen);
+    x = (s32)screen[0] - 0x700;
+    y = (s32)screen[1] * 2 - 0xF20;
+    pixel[0] = x;
+    pixel[1] = y;
+    sdfAppendPacket(list, func_0011D3E8((x << 4) + 0x7000, (y << 3) + 0x7900, 0xFF0000, 0x20, 0x10, 0x60008080, 0x60008080));
+    scene = kwlnPositionedTextSurface;
+    (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
+}
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_0018E938);
+/* Draw a 32x16 box with the given colour at the screen position of `position`. */
+void func_0018E740(f32 *position, s32 color) {
+    void *list = sdfAllocPacketAligned(0x20);
+    f32 screen[4];
+    s32 pixel[2]; /* written, never read; retail keeps the frame slot */
+    s32 x;
+    s32 y;
+    u8 *scene;
+
+    sdfInitPacketList(list);
+    VU0_LOAD_VF(vf10, position);
+    sdfProjectVuVectorToScreen();
+    VU0_STORE_VF(vf10, screen);
+    x = (s32)screen[0] - 0x700;
+    y = (s32)screen[1] * 2 - 0xF20;
+    pixel[0] = x;
+    pixel[1] = y;
+    sdfAppendPacket(list, func_0011D3E8((x << 4) + 0x7000, (y << 3) + 0x7900, 0xFF0000, 0x20, 0x10, color, color));
+    scene = kwlnPositionedTextSurface;
+    (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
+}
+
+extern void *func_0011D570(s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+/* Draw a box between the screen positions of two points in the fixed marker colour. */
+void func_0018E810(f32 *from, f32 *to) {
+    void *list = sdfAllocPacketAligned(0x20);
+    f32 start[4];
+    f32 end[4];
+    s32 pixel[4]; /* written, never read; retail keeps the frame slot */
+    s32 x0;
+    s32 y0;
+    s32 x1;
+    s32 y1;
+    u8 *scene;
+
+    sdfInitPacketList(list);
+    VU0_LOAD_VF(vf10, from);
+    sdfProjectVuVectorToScreen();
+    VU0_STORE_VF(vf10, start);
+    VU0_LOAD_VF(vf10, to);
+    sdfProjectVuVectorToScreen();
+    VU0_STORE_VF(vf10, end);
+    x0 = (s32)start[0] - 0x700;
+    y0 = (s32)start[1] * 2 - 0xF20;
+    x1 = (s32)end[0] - 0x700;
+    y1 = (s32)end[1] * 2 - 0xF20;
+    pixel[0] = x0;
+    pixel[1] = y0;
+    pixel[2] = x1;
+    pixel[3] = y1;
+    sdfAppendPacket(list, func_0011D570((x0 << 4) + 0x7000, (y0 << 3) + 0x7900, 0xFF0000, 0x60008080, (x1 << 4) + 0x7000, (y1 << 3) + 0x7900, 0xFF0000, 0x60008080, 0));
+    scene = kwlnPositionedTextSurface;
+    (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
+}
+
+/* Draw a box between the screen positions of two points in the given colour. */
+void func_0018E938(f32 *from, f32 *to, s32 color) {
+    void *list = sdfAllocPacketAligned(0x20);
+    f32 start[4];
+    f32 end[4];
+    s32 pixel[4]; /* written, never read; retail keeps the frame slot */
+    s32 x0;
+    s32 y0;
+    s32 x1;
+    s32 y1;
+    u8 *scene;
+
+    sdfInitPacketList(list);
+    VU0_LOAD_VF(vf10, from);
+    sdfProjectVuVectorToScreen();
+    VU0_STORE_VF(vf10, start);
+    VU0_LOAD_VF(vf10, to);
+    sdfProjectVuVectorToScreen();
+    VU0_STORE_VF(vf10, end);
+    x0 = (s32)start[0] - 0x700;
+    y0 = (s32)start[1] * 2 - 0xF20;
+    x1 = (s32)end[0] - 0x700;
+    y1 = (s32)end[1] * 2 - 0xF20;
+    pixel[0] = x0;
+    pixel[1] = y0;
+    pixel[2] = x1;
+    pixel[3] = y1;
+    sdfAppendPacket(list, func_0011D570((x0 << 4) + 0x7000, (y0 << 3) + 0x7900, 0xFF0000, color, (x1 << 4) + 0x7000, (y1 << 3) + 0x7900, 0xFF0000, color, 0));
+    scene = kwlnPositionedTextSurface;
+    (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
+}
 
 void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     void *task = sdfAllocPacketAligned(0x20);
@@ -252,7 +417,6 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_0018ED80);
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_0018EED0);
 
-extern void *func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 
 void effSubmitSizedDrawPacket(s32 x, s32 y, s32 w, s32 h, s32 arg4, s32 arg5) {
     void *list = sdfAllocPacketAligned(0x20);
