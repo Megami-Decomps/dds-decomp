@@ -2,24 +2,37 @@
 
 INCLUDE_ASM(const s32, "game/code_0018F9E8", func_0018F9E8);
 
-typedef struct EffTemplateBody {
-    u32 words[9];
-} EffTemplateBody;
+typedef struct {
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+} EffResourceRectBounds;
 
-typedef struct EffTemplate {
-    EffTemplateBody body;  /* 0x00: copied from the source template */
-    u32 resourceWord;      /* 0x24 */
-} EffTemplate;
+/* Nine copied words; the selected source handle belongs to the owner. */
+typedef struct {
+    s32 extent;
+    s32 centerX;
+    s32 centerY;
+    u8 color[4];
+    s32 blendControl;
+    EffResourceRectBounds bounds;
+} EffResourceRectParams; /* 0x24 */
+
+typedef struct {
+    EffResourceRectParams params;
+    u32 sourceHandle;
+} EffResourceRectWork; /* 0x28 */
 
 extern void *func_00328D68(s32 size);
 extern u32 effGetResourceFirstWord(s32 index);
 
-/* Clone an effect template into a fresh allocation. */
-EffTemplate *effCloneResourceTemplate(EffTemplate *src) {
-    EffTemplate *dst = func_00328D68(sizeof(EffTemplate));
+/* Clone rectangle parameters and select a fresh source handle. */
+EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *src) {
+    EffResourceRectWork *dst = func_00328D68(sizeof(EffResourceRectWork));
 
-    dst->resourceWord = effGetResourceFirstWord(0);
-    dst->body = src->body;
+    dst->sourceHandle = effGetResourceFirstWord(0);
+    dst->params = *src;
     return dst;
 }
 
@@ -29,44 +42,57 @@ void func_0018FC88(void) {
 
 extern s32 func_0018F9E8(void *data, s32 resource, s32 flags);
 
-s32 func_0018FCA0(u8 *object) {
-    s32 *values = (s32 *)object;
-    s32 offset = (s32)((f32)values[0] * 1.4f);
-    s32 x = values[1] + 0x100;
-    s32 y = values[2] + 0xE0;
+/* Generate pixel-coordinate bounds; the renderer applies GS coordinate scale. */
+s32 func_0018FCA0(EffResourceRectWork *work) {
+    s32 extent = (s32)((f32)work->params.extent * 1.4f);
+    s32 x = work->params.centerX + 0x100;
+    s32 y = work->params.centerY + 0xE0;
 
-    values[5] = x - offset;
-    values[6] = y - offset;
-    values[7] = x + offset;
-    values[8] = y + offset;
-    return func_0018F9E8(object + 0xC, *(s32 *)(object + 0x24), 0);
+    work->params.bounds.left = x - extent;
+    work->params.bounds.top = y - extent;
+    work->params.bounds.right = x + extent;
+    work->params.bounds.bottom = y + extent;
+    return func_0018F9E8(work->params.color, work->sourceHandle, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0018F9E8", func_0018FD10);
 
-typedef struct EffClonedBody {
-    u32 w[13];
-} EffClonedBody;
+typedef struct EffTrackPolyModel EffTrackPolyModel;
+typedef struct EffTrackPolyData EffTrackPolyData;
 
-typedef struct EffCloned {
-    EffClonedBody body; /* 0x00: copied from the source */
-    u32 f34;            /* 0x34 */
-    u32 f38;            /* 0x38 */
-} EffCloned;
+/* Same parameter/owner layout as effect/effModelTrackPoly. */
+typedef struct {
+    EffTrackPolyModel *model;
+    s32 idA;
+    s32 idB;
+    f32 unk0C;
+    f32 unk10;
+    s32 sampleInterval;
+    s32 historyLength;
+    u32 unk1C;
+    u32 kind;
+    u32 gradientColors[4];
+} EffTrackPolyParams; /* 0x34 */
 
-extern u32 func_00190370();
-extern void func_001904B0();
-extern void func_001904A8();
+typedef struct {
+    EffTrackPolyParams params;
+    u32 updateCount;
+    EffTrackPolyData *data;
+} EffTrackPolyWork; /* 0x3C */
 
-/* Clone an effect with its own sub-resource attached. */
-EffCloned *effTrackPolyCreateWork(EffCloned *src) {
-    EffCloned *dst = func_00328D68(sizeof(EffCloned));
+extern EffTrackPolyData *func_00190370(s32 historyLength, s32 step);
+extern void func_001904B0(EffTrackPolyData *data, u32 *colors);
+extern void func_001904A8(EffTrackPolyData *data, u32 kind);
 
-    dst->body = src->body;
-    dst->body.w[7] = 0xC;
-    dst->f34 = 0;
-    dst->f38 = func_00190370(dst->body.w[6], 0xC);
-    func_001904B0(dst->f38, &src->body.w[9]);
-    func_001904A8(dst->f38, src->body.w[8]);
+/* Clone a model track with independent history and gradient storage. */
+EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *src) {
+    EffTrackPolyWork *dst = func_00328D68(sizeof(EffTrackPolyWork));
+
+    dst->params = *src;
+    dst->params.unk1C = 0xC;
+    dst->updateCount = 0;
+    dst->data = func_00190370(dst->params.historyLength, 0xC);
+    func_001904B0(dst->data, src->gradientColors);
+    func_001904A8(dst->data, src->kind);
     return dst;
 }
