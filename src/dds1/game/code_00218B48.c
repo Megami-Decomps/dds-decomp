@@ -310,20 +310,23 @@ void mdlInitializeViewerResourceTable(void) {
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_00218E20);
 
-typedef struct {
+/* Relative-linked record prefix; payload fields depend on the record kind. */
+typedef struct MdlRecord {
     s32 kind;        /* 0x00: 0xFFFF terminates record traversal */
     s32 nextOffset;  /* 0x04: relative byte offset to next record */
-    u32 value08;     /* 0x08 */
-    u16 value0C;     /* 0x0C */
-    u16 field0E;     /* 0x0E */
-    u16 field10;     /* 0x10 */
+    u32 payloadWord; /* 0x08: first payload word */
+    u16 listCount;   /* 0x0C: record count for list headers */
+    u16 unk0E;       /* 0x0E */
+    u16 unk10;       /* 0x10 */
 } MdlRecord;
+
+typedef struct MdlViewerSlots MdlViewerSlots;
 
 /* The viewer resource holds a pointer to the table container at +0x0C. */
 typedef struct MdlViewerData {
     u8 pad00[0xA4];
-    s32 *records;  /* 0xA4: relative-linked model records */
-    s32 slotTable; /* 0xA8: indexable object slots */
+    MdlRecord *records;         /* 0xA4: relative-linked model records */
+    MdlViewerSlots *slotTable; /* 0xA8: indexable object slots */
 } MdlViewerData;
 
 typedef struct MdlViewerResource {
@@ -331,56 +334,58 @@ typedef struct MdlViewerResource {
     MdlViewerData *data;
 } MdlViewerResource;
 
-typedef struct MdlViewerSlots {
+struct MdlViewerSlots {
     u8 pad00[4];
     s16 count; /* 0x04 */
     u8 pad06[6];
-    s32 first; /* 0x0C: base of 0x10-byte slot entries */
-} MdlViewerSlots;
+    s32 entryBase; /* 0x0C: base of 0x10-byte slot entries */
+};
 
 /* Read the model record's payload word without advancing its relative link. */
 u32 mdlGetViewerRecordPayloadWord(MdlRecord *record) {
-    return record->value08;
+    return record->payloadWord;
 }
 
 u16 mdlGetViewerRecordListCount(MdlRecord *record) {
-    return record->value0C;
+    return record->listCount;
 }
 
 /* Follow the relative links in a resource's record table to find an ID. */
-s32 *mdlFindViewerRecord(MdlViewerResource *resource, s32 id) {
-    s32 *table = resource->data->records;
-    s32 *record;
+MdlRecord *mdlFindViewerRecord(MdlViewerResource *resource, s32 id) {
+    MdlRecord *table = resource->data->records;
+    MdlRecord *record;
     s32 remaining;
 
     if (table == NULL) {
         return NULL;
     }
     record = table;
-    remaining = mdlGetViewerRecordListCount((MdlRecord *)record);
+    remaining = mdlGetViewerRecordListCount(record);
     do {
         remaining--;
-        record = (s32 *)((s32)record + ((MdlRecord *)record)->nextOffset);
+        record = (MdlRecord *)((s32)record + record->nextOffset);
         if (remaining == -1) {
             return NULL;
         }
-    } while (*record != id);
+    } while (record->kind != id);
     return record;
 }
 
-s32 * mdlGetFirstRecord(s32 address) {
-    s32 *record = (s32 *)(address + 8);
+/* The first eight bytes belong to the enclosing list, not its first record. */
+MdlRecord *mdlGetFirstRecord(s32 address) {
+    MdlRecord *record = (MdlRecord *)(address + 8);
 
-    if (((MdlRecord *)record)->kind == 0xffff) {
+    if (record->kind == 0xffff) {
         record = NULL;
     }
     return record;
 }
 
-s32 * mdlGetNextRecord(MdlRecord *current) {
-    s32 *record = (s32 *)((s32)current + current->nextOffset);
+/* A terminal kind returns NULL; the link is a byte offset, not a pointer. */
+MdlRecord *mdlGetNextRecord(MdlRecord *current) {
+    MdlRecord *record = (MdlRecord *)((s32)current + current->nextOffset);
 
-    if (((MdlRecord *)record)->kind == 0xffff) {
+    if (record->kind == 0xffff) {
         record = NULL;
     }
     return record;
@@ -389,7 +394,7 @@ s32 * mdlGetNextRecord(MdlRecord *current) {
 /* Count relative-offset records until the 0xffff sentinel. */
 s32 mdlCountRecords(s32 address) {
     s32 count;
-    s32 *node;
+    MdlRecord *node;
 
     if (address == 0) {
         return 0;
@@ -398,21 +403,21 @@ s32 mdlCountRecords(s32 address) {
     count = 0;
     while (node != NULL) {
         count++;
-        node = mdlGetNextRecord((s32)node);
+        node = mdlGetNextRecord(node);
     }
     return count;
 }
 
-u8 mdlRecordMatchesId(s32 *recordId, s32 wantedId) {
-    return *recordId == wantedId;
+u8 mdlRecordMatchesId(MdlRecord *record, s32 wantedId) {
+    return record->kind == wantedId;
 }
 
 u16 func_002193E8(MdlRecord *record) {
-    return record->field0E;
+    return record->unk0E;
 }
 
 u16 func_002193F0(MdlRecord *record) {
-    return record->field10;
+    return record->unk10;
 }
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_002193F8);
@@ -683,16 +688,16 @@ void mdlAdvanceEffectPart(MdlPartEntry *entry) {
 
 /* Resolve a fixed-size viewer slot after checking the slot table's bounds. */
 s32 mdlFindViewerPartSlot(MdlViewerResource *resource, s32 index) {
-    s32 slotsAddress;
+    MdlViewerSlots *slots;
 
-    slotsAddress = resource->data->slotTable;
-    if (slotsAddress == 0) {
+    slots = resource->data->slotTable;
+    if (slots == NULL) {
         return 0;
     }
-    if (index >= ((MdlViewerSlots *)slotsAddress)->count) {
+    if (index >= slots->count) {
         return 0;
     }
-    return ((MdlViewerSlots *)slotsAddress)->first + index * 0x10;
+    return slots->entryBase + index * 0x10;
 }
 
 typedef struct MdlPartRec {
@@ -875,11 +880,7 @@ void mdlCondInitEntry(s32 entry) {
     }
 }
 
-typedef struct MdlRecordHeader {
-    s32 kind; /* 0x00 */
-} MdlRecordHeader;
-
-void mdlDispatchResourceEntry(MdlResourceOwner *owner, MdlRecordHeader *record, s32 option) {
+void mdlDispatchResourceEntry(MdlResourceOwner *owner, MdlRecord *record, s32 option) {
     switch (record->kind) {
     case 1:
         mdlBindViewerPartRecords(owner, (MdlPartRec *)record, option, 0, mdlAdvanceBillboardPart);
@@ -900,12 +901,12 @@ void mdlDispatchResourceEntry(MdlResourceOwner *owner, MdlRecordHeader *record, 
 }
 
 void mdlApplyResourceEntries(s32 object, s32 id, s32 option) {
-    s32 *block = mdlFindViewerRecord((MdlViewerResource *)object, id);
+    MdlRecord *block = mdlFindViewerRecord((MdlViewerResource *)object, id);
     if (block != NULL) {
-        s32 *entry = mdlGetFirstRecord((s32)block);
+        MdlRecord *entry = mdlGetFirstRecord((s32)block);
         while (entry != NULL) {
             mdlDispatchResourceEntry(object, entry, option);
-            entry = mdlGetNextRecord((s32)entry);
+            entry = mdlGetNextRecord(entry);
         }
     }
 }
