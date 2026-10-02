@@ -832,7 +832,27 @@ void btlScalarRangeInitQuadratic(s32 range, f32 start) {
     ((BtlScalarRange *)range)->inverseSpan = 1.0f / (start * start * 0.25f);
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00209770);
+f32 func_00209770(BtlScalarRange *state, f32 step) {
+    f32 target = state->target;
+    f32 rate = state->zero;
+    f32 remaining = state->end;
+
+    remaining -= step;
+
+    if (remaining <= 0.0f) {
+        return 1.0f;
+    }
+    if (remaining < state->start * 0.5f) {
+        rate -= state->inverseSpan * step;
+    } else {
+        rate += state->inverseSpan * step;
+    }
+    state->end = remaining;
+    state->zero = rate;
+    target += rate * step;
+    state->target = target;
+    return target;
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", btlDrawIconAtSize);
 
