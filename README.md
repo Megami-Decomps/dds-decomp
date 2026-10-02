@@ -155,8 +155,8 @@ the other automatically (`tools/shared_funcs.py`).
 
 **Can I mod the game with this?**
 Not comfortably yet. The experimental `dds1-dev` and `dds2-dev` targets can
-each relocate one complete code unit's `.text` into an appended loadable
-segment without changing the exact retail targets. They also link a
+each relocate one complete code unit's `.text` and `.rodata` into an appended
+loadable segment without changing the exact retail targets. They also link a
 development-only C entry hook and state block. Changed-size replacement units
 and broader data relocation are still future work.
 
