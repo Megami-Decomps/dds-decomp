@@ -46,7 +46,7 @@ end
 
 entry 11 kind=door area=3 name="01d_04"
   scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
-  warp type=facility args=3,2,3
+  warp type=facility action=terminal slot=2 floor_flag=3
 end
 
 entry 12 kind=side_exit area=3
@@ -113,7 +113,7 @@ end
 
 entry 29 kind=door area=8 name=@01d_05
   scene motion=1 secondary_motion=2 sound=64 primary="md_01d_05" secondary="md_01d_05b"
-  warp type=facility args=3,3,2
+  warp type=facility action=terminal slot=3 floor_flag=2
 end
 
 entry 30 kind=side_exit area=8

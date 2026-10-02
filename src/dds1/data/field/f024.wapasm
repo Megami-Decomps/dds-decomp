@@ -382,7 +382,7 @@ end
 
 entry 72 kind=door area=12 name="01d_08"
   scene motion=1 secondary_motion=2 sound=66 primary="md_01d_08" secondary="md_01d_08b"
-  warp type=facility args=3,4,3
+  warp type=facility action=terminal slot=4 floor_flag=3
   after script="md_01d_08c"
 end
 
@@ -844,7 +844,7 @@ end
 
 entry 157 kind=door area=28 name=@01d_05
   scene motion=1 secondary_motion=2 sound=66 primary="md_01d_05" secondary="md_01d_05b"
-  warp type=facility args=3,5,2
+  warp type=facility action=terminal slot=5 floor_flag=2
   after script="md_01d_05c"
 end
 
@@ -947,7 +947,7 @@ end
 
 entry 177 kind=door area=34 name=@01d_03
   scene motion=1 secondary_motion=2 sound=66 primary="md_01d_03" secondary="md_01d_03b"
-  warp type=facility args=3,6,2
+  warp type=facility action=terminal slot=6 floor_flag=2
   after script="md_01d_03c"
 end
 
@@ -958,7 +958,7 @@ end
 
 entry 179 kind=door area=34 name=@01d_04
   scene motion=1 secondary_motion=2 sound=66 primary="md_01d_04" secondary="md_01d_04b"
-  warp type=facility args=0,4,3
+  warp type=facility action=shop selection=4 floor_flag=3
   after script="md_01d_04c"
 end
 

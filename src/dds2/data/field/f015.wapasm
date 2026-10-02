@@ -31,7 +31,7 @@ end
 
 entry 7 kind=special_warp
   scene id=104
-  warp type=facility args=3,11,0
+  warp type=facility action=terminal slot=11
 end
 
 entry 8 kind=side_exit area=2
@@ -43,7 +43,7 @@ end
 
 entry 10 kind=special_warp
   scene id=103
-  warp type=facility args=0,8,0
+  warp type=facility action=shop selection=8
 end
 
 entry 11 kind=side_exit area=2

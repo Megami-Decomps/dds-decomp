@@ -135,7 +135,7 @@ end
 
 entry 24 kind=door area=1 name=@01d_02
   scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
-  warp type=facility args=3,2,2
+  warp type=facility action=terminal slot=2 floor_flag=2
   after script="md_01d_02c"
 end
 
@@ -621,7 +621,7 @@ end
 
 entry 143 kind=door area=30 name=@01d_01
   scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
-  warp type=facility args=3,18,5
+  warp type=facility action=terminal slot=18 floor_flag=5
   after script="md_01d_01c"
   tail control=7 args=22,3,2,4,5,2,2
 end

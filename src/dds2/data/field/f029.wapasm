@@ -54,7 +54,7 @@ end
 
 entry 9 kind=special_warp
   scene id=801
-  warp type=facility args=3,13,2
+  warp type=facility action=terminal slot=13 floor_flag=2
 end
 
 entry 12 kind=door area=1 name="01d_01"
@@ -322,7 +322,7 @@ end
 
 entry 79 kind=special_warp
   scene id=802
-  warp type=facility args=3,12,0
+  warp type=facility action=terminal slot=12
 end
 
 entry 80 kind=side_exit area=18
@@ -543,7 +543,7 @@ end
 
 entry 135 kind=ladder area=32 name="01d_03"
   scene selector=1
-  warp type=facility args=3,13,0
+  warp type=facility action=terminal slot=13
   tail control=129 args=29,0,2,0,0,0,0
 end
 

@@ -103,7 +103,7 @@ end
 
 entry 21 kind=special_warp
   scene id=802
-  warp type=facility args=3,15,0
+  warp type=facility action=terminal slot=15
 end
 
 entry 22 kind=side_exit area=2
@@ -707,7 +707,7 @@ end
 
 entry 179 kind=special_warp
   scene id=801
-  warp type=facility args=3,16,0
+  warp type=facility action=terminal slot=16
 end
 
 entry 181 kind=door area=46 name=@01d_01

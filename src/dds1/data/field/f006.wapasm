@@ -32,14 +32,14 @@ end
 
 entry 6 kind=door area=1 name="01d_04"
   scene motion=1 secondary_motion=2 sound=64 primary="md_01d_04" secondary="md_01d_04b"
-  warp type=facility args=3,20,0
+  warp type=facility action=terminal slot=20
   camera mode=1
   after script="md_01d_04c"
 end
 
 entry 7 kind=door area=1 name="01d_05"
   scene motion=1 secondary_motion=2 sound=64 primary="md_01d_05" secondary="md_01d_05b"
-  warp type=facility args=0,5,0
+  warp type=facility action=shop selection=5
   camera mode=1
   after script="md_01d_05c"
 end

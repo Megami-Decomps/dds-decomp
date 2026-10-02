@@ -121,7 +121,7 @@ end
 
 entry 19 kind=door area=1 name="01d_06"
   scene motion=1 secondary_motion=2 sound=66 primary="md_01d_06" secondary="md_01d_06b"
-  warp type=facility args=0,3,3
+  warp type=facility action=shop selection=3 floor_flag=3
   after script="md_01d_06c"
 end
 
@@ -546,7 +546,7 @@ end
 
 entry 95 kind=door area=11 name="01d_11"
   scene motion=1 secondary_motion=2 sound=66 primary="md_01d_11" secondary="md_01d_11b"
-  warp type=facility args=3,3,3
+  warp type=facility action=terminal slot=3 floor_flag=3
   after script="md_01d_11c"
 end
 

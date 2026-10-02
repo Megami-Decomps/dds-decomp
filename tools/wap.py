@@ -443,8 +443,23 @@ _WARP_ARG_NAMES: dict[int, tuple[str | None, str | None, str | None]] = {
     1: ("table", "floor", None),
     3: ("event", None, "alternate_field"),
 }
+_FACILITY_ACTIONS = {
+    "shop": 0,
+    "terminal": 3,
+    "save": 4,
+    "heal": 5,
+}
+_FACILITY_ARG_NAMES: dict[int, tuple[str, str]] = {
+    0: ("selection", "floor_flag"),
+    3: ("slot", "floor_flag"),
+    4: ("slot", "floor_flag"),
+    5: ("slot", "floor_flag"),
+}
 _WARP_NAMED_FIELDS = frozenset(
     name for names in _WARP_ARG_NAMES.values() for name in names if name is not None
+) | frozenset(
+    {"action"}
+    | {name for names in _FACILITY_ARG_NAMES.values() for name in names}
 )
 
 
@@ -458,6 +473,54 @@ def _warp_type(text: str, line_number: int) -> int:
     if text in _WARP_TYPES:
         return _WARP_TYPES[text]
     return _integer(text, line_number, "warp type")
+
+
+def _facility_action(text: str, line_number: int) -> int:
+    if text in _FACILITY_ACTIONS:
+        return _FACILITY_ACTIONS[text]
+    return _integer(text, line_number, "facility action")
+
+
+def _facility_args(
+    fields: dict[str, str],
+    base: tuple[int, int, int],
+    line_number: int,
+) -> tuple[int, int, int]:
+    """Read a facility action, its action-specific value, and its floor flag."""
+
+    named_fields = _WARP_NAMED_FIELDS.intersection(fields)
+    if "args" in fields and named_fields:
+        raise WapError(
+            f"line {line_number}: warp args cannot be combined with named arguments"
+        )
+    if "args" in fields:
+        values = _int_list(fields["args"], line_number, 3, "warp args")
+        return values[0], values[1], values[2]
+
+    action = (
+        _facility_action(fields["action"], line_number)
+        if "action" in fields
+        else base[0]
+    )
+    names = _FACILITY_ARG_NAMES.get(action)
+    valid_fields = {"action", *(names or ())}
+    invalid_fields = named_fields - valid_fields
+    if invalid_fields:
+        rendered = ", ".join(sorted(invalid_fields))
+        verb = "does" if len(invalid_fields) == 1 else "do"
+        raise WapError(
+            f"line {line_number}: {rendered} {verb} not apply to facility action "
+            f"{_format_facility_action(action)}"
+        )
+
+    values = [action, base[1], base[2]]
+    if names is not None:
+        for index, name in enumerate(names, 1):
+            if name in fields:
+                values[index] = _integer(
+                    fields[name], line_number, f"facility {name}"
+                )
+    return values[0], values[1], values[2]
 
 
 def _named_args(
@@ -669,29 +732,34 @@ def parse_source(text: str, references: References | None = None) -> WapFile:
                     )
                     warp_names = _WARP_ARG_NAMES.get(warp_type)
                     present_warp_fields = _WARP_NAMED_FIELDS.intersection(child_fields)
-                    valid_warp_fields = {
-                        name for name in warp_names or () if name is not None
-                    }
-                    invalid_warp_fields = present_warp_fields - valid_warp_fields
-                    if invalid_warp_fields:
-                        names = ", ".join(sorted(invalid_warp_fields))
-                        verb = "does" if len(invalid_warp_fields) == 1 else "do"
-                        raise WapError(
-                            f"line {child_number}: {names} {verb} not apply to warp type "
-                            f"{_format_warp_type(warp_type)}"
-                        )
+                    if warp_type != 2:
+                        valid_warp_fields = {
+                            name for name in warp_names or () if name is not None
+                        }
+                        invalid_warp_fields = present_warp_fields - valid_warp_fields
+                        if invalid_warp_fields:
+                            names = ", ".join(sorted(invalid_warp_fields))
+                            verb = "does" if len(invalid_warp_fields) == 1 else "do"
+                            raise WapError(
+                                f"line {child_number}: {names} {verb} not apply to warp type "
+                                f"{_format_warp_type(warp_type)}"
+                            )
                     entry = replace(
                         entry,
                         warp_type=warp_type,
                         attributes=_integer(child_fields["attributes"], child_number, "attributes")
                         if "attributes" in child_fields
                         else entry.attributes,
-                        warp_args=_named_args(
-                            child_fields,
-                            warp_names,
-                            entry.warp_args,
-                            child_number,
-                            "warp",
+                        warp_args=(
+                            _facility_args(child_fields, entry.warp_args, child_number)
+                            if warp_type == 2
+                            else _named_args(
+                                child_fields,
+                                warp_names,
+                                entry.warp_args,
+                                child_number,
+                                "warp",
+                            )
                         ),
                         position=_fixed_from_fields(
                             child_fields,
@@ -816,6 +884,12 @@ def _format_warp_type(value: int) -> str:
     return {number: name for name, number in _WARP_TYPES.items()}.get(value, str(value))
 
 
+def _format_facility_action(value: int) -> str:
+    return {number: name for name, number in _FACILITY_ACTIONS.items()}.get(
+        value, str(value)
+    )
+
+
 def _format_named_args(
     fields: list[str],
     values: tuple[int, ...],
@@ -831,6 +905,24 @@ def _format_named_args(
                 fields.append(f"{name}={value}")
     elif any(values):
         fields.append(f"args={_format_list(values)}")
+
+
+def _format_warp_args(
+    fields: list[str], warp_type: int, values: tuple[int, int, int]
+) -> None:
+    if warp_type != 2:
+        _format_named_args(fields, values, _WARP_ARG_NAMES.get(warp_type))
+        return
+
+    names = _FACILITY_ARG_NAMES.get(values[0])
+    if names is None:
+        if any(values):
+            fields.append(f"args={_format_list(values)}")
+        return
+    fields.append(f"action={_format_facility_action(values[0])}")
+    for name, value in zip(names, values[1:]):
+        if value != 0:
+            fields.append(f"{name}={value}")
 
 
 def render_source(wap: WapFile, references: References | None = None) -> str:
@@ -881,7 +973,7 @@ def render_source(wap: WapFile, references: References | None = None) -> str:
         if entry.warp_type != base.warp_type:
             child.append(f"type={_format_warp_type(entry.warp_type)}")
         _append_scalar(child, "attributes", entry.attributes, base.attributes)
-        _format_named_args(child, entry.warp_args, _WARP_ARG_NAMES.get(entry.warp_type))
+        _format_warp_args(child, entry.warp_type, entry.warp_args)
         _format_fixed(child, "position", entry.position, base.position)
         if child:
             lines.append(f"  warp {' '.join(child)}")

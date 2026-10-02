@@ -82,7 +82,7 @@ end
 
 entry 12 kind=door area=2 name=@01d_02
   scene motion=1 secondary_motion=2 sound=67 primary="md_01d_00" secondary="md_01d_00b"
-  warp type=facility args=3,6,2
+  warp type=facility action=terminal slot=6 floor_flag=2
   after script="md_01d_00c"
   tail control=2 args=24,2,0,10,7,2,2
 end
@@ -135,7 +135,7 @@ end
 
 entry 22 kind=special_warp
   scene id=15
-  warp type=facility args=0,3,3
+  warp type=facility action=shop selection=3 floor_flag=3
 end
 
 entry 23 kind=side_exit area=15
@@ -766,7 +766,7 @@ end
 
 entry 154 kind=door area=35 name=@01d_02
   scene motion=1 secondary_motion=2 sound=68 primary="md_01d_00" secondary="md_01d_00b"
-  warp type=facility args=3,7,2 position="01pos_02"
+  warp type=facility action=terminal slot=7 floor_flag=2 position="01pos_02"
   after script="md_01d_00c"
   tail control=2 args=24,6,0,15,4,2,2
 end

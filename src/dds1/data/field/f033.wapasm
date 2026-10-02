@@ -26,7 +26,7 @@ end
 
 entry 5 kind=door area=1 name="01d_06"
   scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
-  warp type=facility args=3,17,2
+  warp type=facility action=terminal slot=17 floor_flag=2
   tail control=5 args=0,0,2,0,0,0,0
 end
 
@@ -706,7 +706,7 @@ end
 
 entry 147 kind=door area=15 name="01d_03"
   scene motion=1 secondary_motion=2 sound=64 primary="md_01d_03" secondary="md_01d_03b"
-  warp type=facility args=3,21,2 position="01pos_03"
+  warp type=facility action=terminal slot=21 floor_flag=2 position="01pos_03"
 end
 
 entry 148 kind=side_exit area=15

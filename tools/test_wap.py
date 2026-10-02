@@ -129,6 +129,15 @@ end
         with self.assertRaisesRegex(wap.WapError, "motion does not apply"):
             wap.parse_source(wrong_scene_payload)
 
+        wrong_facility_payload = """\
+wap 1 profile=dds1
+entry 0
+  warp type=facility action=shop slot=1
+end
+"""
+        with self.assertRaisesRegex(wap.WapError, "slot does not apply"):
+            wap.parse_source(wrong_facility_payload)
+
     def test_dispatch_specific_source(self) -> None:
         source = """\
 wap 1 profile=dds2
@@ -158,6 +167,26 @@ end
 entry 5 kind=ladder
   scene selector=1 floor_flag=88
 end
+
+entry 6
+  warp type=facility action=shop selection=4 floor_flag=12
+end
+
+entry 7
+  warp type=facility action=terminal slot=9 floor_flag=2
+end
+
+entry 8
+  warp type=facility action=save slot=-1
+end
+
+entry 9
+  warp type=facility action=heal slot=1
+end
+
+entry 10
+  warp type=facility args=2,7,8
+end
 """
         model = wap.parse_source(source)
         self.assertEqual(model.entries[0].scene_args, (1, 2, 64))
@@ -168,7 +197,15 @@ end
         self.assertEqual(model.entries[3].scene_args, (606, 0, 0))
         self.assertEqual(model.entries[4].warp_args, (607, 0, 12))
         self.assertEqual(model.entries[5].scene_args, (1, 88, 0))
-        self.assertEqual(wap.parse_source(wap.render_source(model)), model)
+        self.assertEqual(model.entries[6].warp_args, (0, 4, 12))
+        self.assertEqual(model.entries[7].warp_args, (3, 9, 2))
+        self.assertEqual(model.entries[8].warp_args, (4, -1, 0))
+        self.assertEqual(model.entries[9].warp_args, (5, 1, 0))
+        self.assertEqual(model.entries[10].warp_args, (2, 7, 8))
+        rendered = wap.render_source(model)
+        self.assertIn("action=terminal slot=9 floor_flag=2", rendered)
+        self.assertIn("type=facility args=2,7,8", rendered)
+        self.assertEqual(wap.parse_source(rendered), model)
 
     def test_paired_references(self) -> None:
         references = wap.load_references(

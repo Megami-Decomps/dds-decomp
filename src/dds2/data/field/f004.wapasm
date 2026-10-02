@@ -40,7 +40,7 @@ end
 
 entry 8 kind=special_warp
   scene id=104
-  warp type=facility args=4,90,0
+  warp type=facility action=save slot=90
 end
 
 entry 9 kind=side_exit area=1
@@ -51,7 +51,7 @@ end
 
 entry 11 kind=special_warp
   scene id=107
-  warp type=facility args=5,1,0
+  warp type=facility action=heal slot=1
 end
 
 entry 12 kind=side_exit area=1
@@ -78,7 +78,7 @@ end
 
 entry 17 kind=door area=1 name=@01d_04
   scene motion=1 secondary_motion=2 primary="md_01d_04" secondary="md_01d_04b"
-  warp type=facility args=0,1,0
+  warp type=facility action=shop selection=1
 end
 
 entry 18 kind=side_exit area=1

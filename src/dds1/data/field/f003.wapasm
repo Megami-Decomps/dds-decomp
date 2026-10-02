@@ -20,7 +20,7 @@ end
 
 entry 4 kind=door area=1 name="01d_02"
   scene motion=2 secondary_motion=1 sound=64 primary="md_01d_03" secondary="md_01d_03b"
-  warp type=facility args=0,2,0
+  warp type=facility action=shop selection=2
   camera mode=1
   after script="md_01d_03c"
 end

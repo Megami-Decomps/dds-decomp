@@ -30,7 +30,7 @@ end
 
 entry 6 kind=door area=1 name=@01d_02
   scene motion=1 secondary_motion=2 sound=65 primary="md_01d_02" secondary="md_01d_02b"
-  warp type=facility args=3,7,2
+  warp type=facility action=terminal slot=7 floor_flag=2
   after script="md_01d_02c"
 end
 
