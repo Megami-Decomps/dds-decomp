@@ -70,6 +70,14 @@ class IgnoredResultCall:
     explicit_void_cast: bool
 
 
+@dataclass(frozen=True)
+class NonDiscardCall:
+    name: str
+    caller: str
+    line: int
+    path: str
+
+
 def _mask_source(source: str) -> str:
     """Blank comments, strings, chars, and preprocessing lines, preserving lines."""
     out = list(source)
@@ -418,6 +426,7 @@ def scan_source(
     path: str,
     ignored_result_calls: Optional[list[IgnoredResultCall]] = None,
     known_function_macros: AbstractSet[str] = frozenset(),
+    non_discard_calls: Optional[list[NonDiscardCall]] = None,
 ) -> tuple[list[Signature], list[dict[str, object]]]:
     masked = _mask_source(source)
     tokens = [(m.group(), m.start()) for m in TOKEN_RE.finditer(masked)]
@@ -456,12 +465,17 @@ def scan_source(
                         elif tokens[i][0] == "}":
                             depth -= 1
                         i += 1
-                    if (ignored_result_calls is not None and depth == 0
+                    if ((ignored_result_calls is not None
+                         or non_discard_calls is not None) and depth == 0
                             and not CONDITIONAL_DIRECTIVE_RE.search(source)):
-                        ignored_result_calls.extend(_body_ignored_result_calls(
+                        ignored, non_discard = _body_call_sites(
                             tokens[body_start:i - 1], source, path, parsed.name,
                             _definition_parameter_names(segment),
-                            known_function_macros | _function_macro_names(source)))
+                            known_function_macros | _function_macro_names(source))
+                        if ignored_result_calls is not None:
+                            ignored_result_calls.extend(ignored)
+                        if non_discard_calls is not None:
+                            non_discard_calls.extend(non_discard)
                     segment = []
                     continue
                 if reason:
@@ -656,6 +670,11 @@ def _function_local_names(body: list[tuple[str, int]]) -> set[str]:
         elif token == "]":
             bracket -= 1
         if token == ";" and paren == bracket == 0:
+            local_prototype = None
+            if segment and segment[0] not in {"return", "goto", "break", "continue"}:
+                local_prototype, _ = _candidate(segment, ";", "", 0)
+            if local_prototype is not None:
+                names.add(local_prototype.name)
             names.update(_declared_names(segment))
             segment = []
         elif token in {"{", "}"} and paren == bracket == 0:
@@ -666,12 +685,30 @@ def _function_local_names(body: list[tuple[str, int]]) -> set[str]:
     return names
 
 
-def _body_ignored_result_calls(
+def _call_like_sites(
+    segment: list[tuple[str, int]], excluded_names: AbstractSet[str],
+) -> list[tuple[str, int]]:
+    """Find syntactically direct calls without claiming how their result is used."""
+    calls: list[tuple[str, int]] = []
+    excluded = ({"if", "while", "switch", "for", "sizeof", "return"}
+                | TYPE_WORDS | QUALIFIERS | STORAGE_WORDS)
+    for index, (token, position) in enumerate(segment[:-1]):
+        previous = segment[index - 1][0] if index else None
+        if (re.fullmatch(r"[A-Za-z_$][\w$]*", token)
+                and token not in excluded_names | excluded
+                and segment[index + 1][0] == "("
+                and previous not in {".", ">"}):
+            calls.append((token, position))
+    return calls
+
+
+def _body_call_sites(
     body: list[tuple[str, int]], source: str, path: str, caller: str,
     parameter_names: set[str], excluded_names: AbstractSet[str],
-) -> list[IgnoredResultCall]:
+) -> tuple[list[IgnoredResultCall], list[NonDiscardCall]]:
     newlines = [index for index, char in enumerate(source) if char == "\n"]
-    calls: list[IgnoredResultCall] = []
+    ignored_calls: list[IgnoredResultCall] = []
+    non_discard_calls: list[NonDiscardCall] = []
     segment: list[tuple[str, int]] = []
     shadowed_names = set(parameter_names) | _function_local_names(body) | excluded_names
     paren = bracket = 0
@@ -686,23 +723,42 @@ def _body_ignored_result_calls(
             bracket -= 1
         if token == ";" and paren == bracket == 0:
             found = _direct_call_statement(segment)
+            ignored_position = None
             if found is not None and found[0] not in shadowed_names:
                 name, call_position, explicit_void_cast = found
-                calls.append(IgnoredResultCall(
+                ignored_position = call_position
+                ignored_calls.append(IgnoredResultCall(
                     name=name,
                     caller=caller,
                     line=bisect.bisect_right(newlines, call_position) + 1,
                     path=path,
                     explicit_void_cast=explicit_void_cast,
                 ))
+            for name, call_position in _call_like_sites(segment, shadowed_names):
+                if call_position == ignored_position:
+                    continue
+                non_discard_calls.append(NonDiscardCall(
+                    name=name,
+                    caller=caller,
+                    line=bisect.bisect_right(newlines, call_position) + 1,
+                    path=path,
+                ))
             segment = []
         elif token in {"{", "}"} and paren == bracket == 0:
             # A block boundary cannot be part of a direct expression
-            # statement. Clearing also rejects initializer/compound forms.
+            # statement. Calls in a condition before the boundary are still
+            # retained as non-discard or ambiguous forms.
+            for name, call_position in _call_like_sites(segment, shadowed_names):
+                non_discard_calls.append(NonDiscardCall(
+                    name=name,
+                    caller=caller,
+                    line=bisect.bisect_right(newlines, call_position) + 1,
+                    path=path,
+                ))
             segment = []
         else:
             segment.append((token, position))
-    return calls
+    return ignored_calls, non_discard_calls
 
 
 def scan_ignored_result_calls(
@@ -712,6 +768,18 @@ def scan_ignored_result_calls(
     """Find conservative direct call expression statements in C functions."""
     calls: list[IgnoredResultCall] = []
     scan_source(source, path, calls, known_function_macros)
+    return calls
+
+
+def scan_non_discard_calls(
+    source: str, path: str,
+    known_function_macros: AbstractSet[str] = frozenset(),
+) -> list[NonDiscardCall]:
+    """Find direct call-like forms whose result is used or syntactically ambiguous."""
+    calls: list[NonDiscardCall] = []
+    scan_source(
+        source, path, known_function_macros=known_function_macros,
+        non_discard_calls=calls)
     return calls
 
 
@@ -785,6 +853,7 @@ def annotate_ignored_result_calls(
     report: dict[str, object],
     signatures: Iterable[Signature],
     calls: Iterable[IgnoredResultCall],
+    non_discard_calls: Iterable[NonDiscardCall] = (),
 ) -> None:
     """Attach direct ignored-result evidence to return-contract conflicts.
 
@@ -794,11 +863,14 @@ def annotate_ignored_result_calls(
     """
     signature_rows = list(signatures)
     calls_by_symbol: dict[tuple[str, str], list[IgnoredResultCall]] = {}
+    non_discard_by_symbol: dict[tuple[str, str], list[NonDiscardCall]] = {}
     signatures_by_symbol: dict[tuple[str, str], list[Signature]] = {}
     external_definitions: dict[tuple[str, str], list[Signature]] = {}
     static_definitions: dict[tuple[str, str], list[Signature]] = {}
     for call in calls:
         calls_by_symbol.setdefault((call.name, call.path), []).append(call)
+    for call in non_discard_calls:
+        non_discard_by_symbol.setdefault((call.name, call.path), []).append(call)
     for sig in signature_rows:
         signatures_by_symbol.setdefault((sig.name, sig.path), []).append(sig)
         if sig.kind != "definition":
@@ -810,6 +882,7 @@ def annotate_ignored_result_calls(
                          if part in {"dds1", "dds2"}), "")
             external_definitions.setdefault((game, sig.name), []).append(sig)
     attached = 0
+    other_attached = 0
     for conflict in report["conflicts"]:
         return_mismatch = next(
             (item for item in conflict["mismatches"] if item["field"] == "return"),
@@ -819,35 +892,39 @@ def annotate_ignored_result_calls(
             continue
         declaration = conflict["declaration"]
         definition = conflict["definition"]
-        evidence: list[dict[str, object]] = []
-        for call in calls_by_symbol.get(
-                (conflict["name"], declaration["path"]), []):
+
+        def matches_conflict(call: IgnoredResultCall | NonDiscardCall) -> bool:
+            """Require the same visible declaration and unique definition."""
             visible = [
                 sig for sig in signatures_by_symbol.get((call.name, call.path), [])
                 if sig.line < call.line
             ]
             if not visible:
-                continue
+                return False
             latest_line = max(sig.line for sig in visible)
             latest = [sig for sig in visible if sig.line == latest_line]
-            # Fail closed when the most recent visible source contract is not
-            # uniquely the declaration represented by this conflict row.
             if (len(latest) != 1
                     or latest[0].path != declaration["path"]
                     or latest[0].line != declaration["line"]):
-                continue
+                return False
             visible_contract = latest[0]
             call_game = next(
-                (part for part in Path(call.path).parts if part in {"dds1", "dds2"}), "")
+                (part for part in Path(call.path).parts
+                 if part in {"dds1", "dds2"}), "")
             if visible_contract.is_static:
                 eligible_definitions = static_definitions.get(
                     (call.name, call.path), [])
             else:
                 eligible_definitions = external_definitions.get(
                     (call_game, call.name), [])
-            if (len(eligible_definitions) != 1
-                    or eligible_definitions[0].path != definition["path"]
-                    or eligible_definitions[0].line != definition["line"]):
+            return (len(eligible_definitions) == 1
+                    and eligible_definitions[0].path == definition["path"]
+                    and eligible_definitions[0].line == definition["line"])
+
+        evidence: list[dict[str, object]] = []
+        for call in calls_by_symbol.get(
+                (conflict["name"], declaration["path"]), []):
+            if not matches_conflict(call):
                 continue
             declared = return_mismatch["declaration"]
             defined = return_mismatch["definition"]
@@ -871,7 +948,26 @@ def annotate_ignored_result_calls(
             conflict["ignored_result_calls"] = sorted(
                 evidence, key=lambda row: (row["path"], row["line"], row["caller"]))
             attached += len(evidence)
+            other_forms = [
+                {
+                    "path": call.path,
+                    "line": call.line,
+                    "caller": call.caller,
+                    "callee": call.name,
+                    "source_form": "non-discard or ambiguous call form",
+                    "disposition": "review all uses before changing the declaration",
+                }
+                for call in non_discard_by_symbol.get(
+                    (conflict["name"], declaration["path"]), [])
+                if matches_conflict(call)
+            ]
+            if other_forms:
+                conflict["other_call_forms"] = sorted(
+                    other_forms,
+                    key=lambda row: (row["path"], row["line"], row["caller"]))
+                other_attached += len(other_forms)
     report["summary"]["ignored_result_call_sites"] = attached
+    report["summary"]["other_call_form_sites"] = other_attached
 
 
 def _source_paths(args: argparse.Namespace) -> list[Path]:
@@ -935,12 +1031,14 @@ def main(argv: Optional[list[str]] = None) -> int:
         parser.error("no C source files found in the requested scope")
     signatures: list[Signature] = []
     ignored_result_calls: list[IgnoredResultCall] = []
+    non_discard_calls: list[NonDiscardCall] = []
     known_function_macros = _project_function_macro_names()
     skipped: list[dict[str, object]] = []
     for path in focus:
         source = path.read_text(errors="replace")
         found, unsupported = scan_source(
-            source, str(path), ignored_result_calls, known_function_macros)
+            source, str(path), ignored_result_calls, known_function_macros,
+            non_discard_calls)
         signatures.extend(found)
         skipped.extend(unsupported)
     focus_signatures = list(signatures)
@@ -959,7 +1057,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         selected_focus = focus_signatures
     focus_declaration_count = sum(sig.kind == "declaration" for sig in selected_focus)
     report = compare(signatures, skipped)
-    annotate_ignored_result_calls(report, signatures, ignored_result_calls)
+    annotate_ignored_result_calls(
+        report, signatures, ignored_result_calls, non_discard_calls)
     report["summary"].update({
         "focus_files": len(focus),
         "focus_signatures": focus_signature_count,
@@ -985,6 +1084,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             for call in row.get("ignored_result_calls", []):
                 print(f"  ignored result: {call['path']}:{call['line']} in {call['caller']} "
                       f"({call['mechanism']}; review emitted data flow)")
+            for call in row.get("other_call_forms", []):
+                print(f"  other call form: {call['path']}:{call['line']} in "
+                      f"{call['caller']} (review all uses before changing the declaration)")
     else:
         print("No fixed declaration/definition contract mismatches found.")
     print(f"Audited {focus_declaration_count} focused declarations against "
