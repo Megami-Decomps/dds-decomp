@@ -53,10 +53,38 @@ typedef struct {
     struct SdfDrawNode **entries;
 } SdfList;
 
+typedef struct SdfSlotPair {
+    s32 first;
+    s32 second;
+} SdfSlotPair;
+
+typedef struct {
+    s32 firstWord;
+    s32 secondWord;
+    s32 thirdWord;
+    u32 **wordsByIndex;
+} SdfIndexedSlotEntry;
+
+typedef struct SdfSlotEntry {
+    union {
+        SdfSlotPair pair[2];
+        SdfIndexedSlotEntry indexed;
+    } view;
+} SdfSlotEntry;
+
+typedef struct SdfSlotBuf {
+    u8 pad00[4];
+    s16 count;             /* 0x04 */
+    u8 pad06[6];
+    SdfSlotEntry *entries; /* 0x0C */
+} SdfSlotBuf;
+
 typedef struct {
     SdfList *list;     /* 0x00 */
-    u8 pad_0x04[0x0C]; /* 0x04 */
-    void *slotPairs;   /* 0x10: buffer allocated by sdfModelAllocateSlotPairs */
+    u8 pad_0x04[0x04]; /* 0x04 */
+    void *assetData;   /* 0x08: retained creation data */
+    void *resources;   /* 0x0C: parsed resource list */
+    SdfSlotBuf *slotPairs; /* 0x10: buffer allocated by sdfModelAllocateSlotPairs */
     u8 pad_0x14[0x05]; /* 0x14 */
     u8 flags;          /* 0x19: bit 0 looks up node IDs; bit 2 selects alternate item setup */
     u8 pad_0x1A[0x06]; /* 0x1A */
@@ -88,17 +116,6 @@ typedef struct SdfDrawNode {
     u8 localTranslationRow[0x10]; /* 0xB0: fourth row written by sdfDrawNodeBuildMatrix */
     u8 worldMatrix[0x40];         /* 0xC0: local transform composed with its parent */
 } SdfDrawNode;
-
-/* The indexed resource words are stored at offset 0x0C of the asset table. */
-typedef struct SdfAssetTable {
-    u8 pad00[0x0C];
-    s32 *entries;
-} SdfAssetTable;
-
-typedef struct SdfChunk {
-    u8 pad_0x00[0x0C];
-    SdfAssetTable *assets;
-} SdfChunk;
 
 typedef struct {
     u8 pad_0x00[0x04];
@@ -197,14 +214,43 @@ SdfPacket *sdfModelWriteFixedPacket(SdfPacket *packet) {
     return packet + 1;
 }
 
-/* Find a resource word by index in the chunk's asset table. */
-void *sdfModelWriteIndexedAssetPacket(SdfChunk *chunk, s32 index, s32 packet, s32 frame) {
-    return sdfInitNodeHeaderFromWords(chunk->assets->entries[index], packet, frame);
+/* Use the indexed view of the first slot entry to initialize a packet header. */
+void *sdfModelWriteIndexedAssetPacket(SdfSlotBuf *slots, s32 index, void *packet, s32 frame) {
+    return sdfInitNodeHeaderFromWords(slots->entries->view.indexed.wordsByIndex[index], packet, frame);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfCommandListMeasure);
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D7F40);
+typedef struct {
+    u8 kind;
+    u8 pad01[3];
+    u32 assetIndexAndCount;
+    u32 address;
+} SdfIndexedCommand;
+
+typedef struct {
+    u16 quadwordCount;
+    u8 reservedByte;
+    u8 control;
+    u32 address;
+    u32 firstVifCode;
+    u32 secondVifCode;
+} SdfIndexedPayload;
+
+SdfIndexedPayload *func_002D7F40(SdfModel *model, SdfIndexedCommand *command, void *packet, s32 frame) {
+    u32 packed = command->assetIndexAndCount;
+    u16 assetIndex = packed >> 16;
+    u16 quadwordCount = packed;
+    SdfIndexedPayload *payload;
+
+    payload = sdfModelWriteIndexedAssetPacket(model->slotPairs, assetIndex, packet, frame);
+    payload->control = 0x30;
+    payload->quadwordCount = quadwordCount;
+    payload->address = command->address & 0x0FFFFFFF;
+    payload->firstVifCode = 0;
+    payload->secondVifCode = 0;
+    return payload + 1;
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D7FB0);
 
@@ -256,22 +302,6 @@ void sdfModelResetAndInitNodes(SdfModel *model, s32 commandList, s32 packetSelec
     } while (i != 2);
 }
 
-typedef struct SdfSlotPair {
-    s32 first;
-    s32 second;
-} SdfSlotPair;
-
-typedef struct SdfSlotEntry {
-    SdfSlotPair pair[2];
-} SdfSlotEntry;
-
-typedef struct SdfSlotBuf {
-    u8 pad00[4];
-    s16 count;             /* 0x04 */
-    u8 pad06[6];
-    SdfSlotEntry *entries; /* 0x0C */
-} SdfSlotBuf;
-
 /* Allocate `count` zeroed two-pair slot entries and attach them to the model. */
 void sdfModelAllocateSlotPairs(SdfModel *model, s32 count) {
     SdfSlotBuf *buf;
@@ -285,8 +315,8 @@ void sdfModelAllocateSlotPairs(SdfModel *model, s32 count) {
         entries = buf->entries;
         for (i = 0; i != count; i++) {
             for (j = 0; j != 2; j++) {
-                entries[i].pair[j].first = 0;
-                entries[i].pair[j].second = 0;
+                entries[i].view.pair[j].first = 0;
+                entries[i].view.pair[j].second = 0;
             }
         }
         buf->count = count;
