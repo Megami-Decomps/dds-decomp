@@ -30,6 +30,7 @@ ELFDATA2LSB = 1
 EM_MIPS = 8
 PT_LOAD = 1
 SHT_SYMTAB = 2
+SHT_STRTAB = 3
 SHT_REL = 9
 PF_X = 1
 PF_W = 2
@@ -77,6 +78,7 @@ class LinkedRelocation:
     symbol_table_index: int
     symbol_index: int
     symbol_value: int
+    symbol_name: str
 
 
 def _number(value: Any, context: str) -> int:
@@ -184,6 +186,13 @@ def parse_linked_relocations(image: bytes | bytearray) -> list[LinkedRelocation]
             raise DevElfError("linked symbol table has an invalid entry size")
         if sym_offset + sym_size > len(image):
             raise DevElfError("linked symbol table is outside the file")
+        string_index = symbols[6]
+        if string_index >= len(sections) or sections[string_index][1] != SHT_STRTAB:
+            raise DevElfError("linked symbol table has no string table")
+        strings = sections[string_index]
+        string_offset, string_size = strings[4], strings[5]
+        if string_offset + string_size > len(image):
+            raise DevElfError("linked string table is outside the file")
         symbol_count = sym_size // sym_entry_size
         for entry_offset in range(offset, offset + size, entry_size):
             reloc_offset, info = REL_ENTRY.unpack_from(image, entry_offset)
@@ -193,6 +202,13 @@ def parse_linked_relocations(image: bytes | bytearray) -> list[LinkedRelocation]
             symbol = SYMBOL_ENTRY.unpack_from(
                 image, sym_offset + symbol_index * sym_entry_size
             )
+            name_offset = symbol[0]
+            if name_offset >= string_size:
+                raise DevElfError("relocation symbol name is outside its string table")
+            name_start = string_offset + name_offset
+            name_end = image.find(b"\0", name_start, string_offset + string_size)
+            if name_end < 0:
+                raise DevElfError("relocation symbol name is not terminated")
             relocations.append(
                 LinkedRelocation(
                     reloc_offset,
@@ -200,6 +216,7 @@ def parse_linked_relocations(image: bytes | bytearray) -> list[LinkedRelocation]
                     link,
                     symbol_index,
                     symbol[1],
+                    bytes(image[name_start:name_end]).decode("ascii", errors="replace"),
                 )
             )
     if not relocations:
@@ -227,6 +244,25 @@ def _decode_mips_address(image: bytes | bytearray, hi_offset: int, lo_offset: in
     high = (hi_word & 0xFFFF) << 16
     low = lo_word & 0xFFFF
     if opcode == 0x09 and low & 0x8000:
+        low -= 0x10000
+    return (high + low) & 0xFFFFFFFF
+
+
+def _decode_mips_relocation_address(
+    image: bytes | bytearray, hi_offset: int, lo_offset: int
+) -> int:
+    """Decode a linked HI16/LO16 pair, including load/store LO16 sites."""
+
+    hi_word = _unpack_word(image, hi_offset, "HI16 relocation")
+    lo_word = _unpack_word(image, lo_offset, "LO16 relocation")
+    if hi_word >> 26 != 0x0F:
+        raise DevElfError(f"word at 0x{hi_offset:X} is not LUI")
+    register = (hi_word >> 16) & 0x1F
+    if (lo_word >> 21) & 0x1F != register:
+        raise DevElfError("LO16 relocation does not read the LUI destination register")
+    high = (hi_word & 0xFFFF) << 16
+    low = lo_word & 0xFFFF
+    if lo_word >> 26 != 0x0D and low & 0x8000:
         low -= 0x10000
     return (high + low) & 0xFFFFFFFF
 
@@ -356,6 +392,49 @@ def _vaddr_for_file_offset(programs: list[ProgramHeader], offset: int) -> int | 
     return None
 
 
+def _relocation_effective_targets(
+    image: bytes,
+    programs: list[ProgramHeader],
+    relocations: list[LinkedRelocation],
+) -> dict[LinkedRelocation, set[int]]:
+    """Resolve addends encoded at REL sites into their final linked targets."""
+
+    targets: dict[LinkedRelocation, set[int]] = {}
+    pending_hi: dict[tuple[int, int], list[LinkedRelocation]] = {}
+    for relocation in relocations:
+        file_offset = _file_offset_for_vaddr(programs, relocation.offset)
+        if relocation.kind == 5:
+            pending_hi.setdefault(
+                (relocation.symbol_table_index, relocation.symbol_index), []
+            ).append(relocation)
+            continue
+        if relocation.kind == 6:
+            symbol_key = (relocation.symbol_table_index, relocation.symbol_index)
+            for hi in pending_hi.pop(symbol_key, []):
+                hi_file = _file_offset_for_vaddr(programs, hi.offset)
+                if hi_file is None or file_offset is None:
+                    continue
+                try:
+                    target = _decode_mips_relocation_address(
+                        image, hi_file, file_offset
+                    )
+                except DevElfError:
+                    continue
+                targets.setdefault(hi, set()).add(target)
+                targets.setdefault(relocation, set()).add(target)
+            continue
+        if file_offset is None:
+            continue
+        word = _unpack_word(image, file_offset, "relocation target")
+        if relocation.kind == 4 and word >> 26 in (2, 3):
+            targets.setdefault(relocation, set()).add(
+                _jump_target(word, relocation.offset)
+            )
+        elif relocation.kind == 2:
+            targets.setdefault(relocation, set()).add(word)
+    return targets
+
+
 def _move_ranges(spec: dict[str, Any]) -> list[tuple[int, int, int, int]]:
     ranges: list[tuple[int, int, int, int]] = []
     for index, move in enumerate(spec.get("moves", [])):
@@ -483,12 +562,46 @@ def audit_relocation_closure(
         for offset, (old, new) in enumerate(zip(base, output))
         if old != new and offset not in allowed_bytes
     }
+    redirects: dict[str, tuple[int, int]] = {}
+    for index, redirect in enumerate(spec.get("redirects", [])):
+        symbol = redirect.get("symbol")
+        wrapper = redirect.get("wrapper")
+        if not isinstance(symbol, str) or not symbol:
+            raise DevElfError(f"redirects[{index}].symbol is not a symbol name")
+        if not isinstance(wrapper, str) or not wrapper:
+            raise DevElfError(f"redirects[{index}].wrapper is not a symbol name")
+        if wrapper != f"__wrap_{symbol}":
+            raise DevElfError(
+                f"redirects[{index}].wrapper must be __wrap_{symbol}"
+            )
+        if wrapper in redirects:
+            raise DevElfError(f"redirect wrapper {wrapper} is declared more than once")
+        redirects[wrapper] = (
+            _number(redirect.get("old_vaddr"), f"redirects[{index}].old_vaddr"),
+            _number(
+                redirect.get("expected_relocations"),
+                f"redirects[{index}].expected_relocations",
+            ),
+        )
+
     relocations_by_offset: dict[int, list[LinkedRelocation]] = {}
-    moved_relocations = []
+    redirect_relocations: list[LinkedRelocation] = []
     for relocation in relocations:
         relocations_by_offset.setdefault(relocation.offset, []).append(relocation)
-        if _mapped_move_address(relocation.symbol_value, ranges, reverse=True) is not None:
-            moved_relocations.append(relocation)
+        if relocation.symbol_name in redirects:
+            redirect_relocations.append(relocation)
+    effective_targets = _relocation_effective_targets(
+        output, output_programs, relocations
+    )
+    moved_relocations = [
+        relocation
+        for relocation in relocations
+        if any(
+            _mapped_move_address(target, ranges, reverse=True) is not None
+            for target in effective_targets.get(relocation, ())
+        )
+    ]
+    moved_relocation_set = set(moved_relocations)
 
     explained_words: set[int] = set()
     hi_lo_words: set[int] = set()
@@ -499,17 +612,18 @@ def audit_relocation_closure(
         candidates = [
             relocation
             for relocation in relocations_by_offset.get(vaddr, [])
-            if _mapped_move_address(relocation.symbol_value, ranges, reverse=True) is not None
+            if relocation in moved_relocation_set or relocation.symbol_name in redirects
         ]
         if not candidates:
             raise DevElfError(
                 f"change at file offset 0x{word_offset:X} / vaddr 0x{vaddr:X} "
-                "has no relocation to a moved symbol"
+                "has no relocation for a declared move or redirect"
             )
         old_word = _unpack_word(base, word_offset, "closure old word")
         new_word = _unpack_word(output, word_offset, "closure new word")
         matched: LinkedRelocation | None = None
         for relocation in candidates:
+            redirect = redirects.get(relocation.symbol_name)
             if (
                 relocation.kind == 4
                 and old_word >> 26 in (2, 3)
@@ -517,7 +631,13 @@ def audit_relocation_closure(
             ):
                 old_target = _jump_target(old_word, vaddr)
                 new_target = _jump_target(new_word, vaddr)
-                valid = _mapped_move_address(old_target, ranges) == new_target
+                if redirect is not None:
+                    valid = (
+                        old_target == redirect[0]
+                        and new_target == relocation.symbol_value
+                    )
+                else:
+                    valid = _mapped_move_address(old_target, ranges) == new_target
             elif relocation.kind == 2:
                 valid = _mapped_move_address(old_word, ranges) == new_word
             elif relocation.kind in (5, 6):
@@ -530,8 +650,8 @@ def audit_relocation_closure(
                 break
         if matched is None:
             raise DevElfError(
-                f"relocated word at file offset 0x{word_offset:X} does not map "
-                "the declared old interval to the new interval"
+                f"relocated word at file offset 0x{word_offset:X} does not match "
+                "its declared move or redirect"
             )
         explained_words.add(word_offset)
         if matched.kind in (5, 6):
@@ -586,6 +706,20 @@ def audit_relocation_closure(
             f"relocation to moved code at 0x{first:X} did not change the linked image"
         )
 
+    for wrapper, (_, expected) in redirects.items():
+        matching = [
+            relocation
+            for relocation in redirect_relocations
+            if relocation.symbol_name == wrapper
+        ]
+        if len(matching) != expected:
+            raise DevElfError(
+                f"redirect wrapper {wrapper} has {len(matching)} relocations, "
+                f"expected {expected}"
+            )
+        if any(relocation.kind != 4 for relocation in matching):
+            raise DevElfError(f"redirect wrapper {wrapper} has a non-R_MIPS_26 relocation")
+
     extension_relocations = 0
     for index, move in enumerate(spec.get("moves", [])):
         start = _number(move.get("new_vaddr"), f"moves[{index}].new_vaddr")
@@ -600,6 +734,34 @@ def audit_relocation_closure(
             )
         extension_relocations += actual
 
+    addition_relocations = 0
+    addition_ranges: list[tuple[int, int]] = []
+    for index, addition in enumerate(spec.get("additions", [])):
+        start = _number(addition.get("new_vaddr"), f"additions[{index}].new_vaddr")
+        size = _number(addition.get("size"), f"additions[{index}].size")
+        if size == 0:
+            raise DevElfError(f"additions[{index}].size is zero")
+        end = _range_end(start, size, f"additions[{index}] range")
+        if any(
+            start < other_end and other_start < end
+            for other_start, other_end in addition_ranges
+        ):
+            raise DevElfError(f"additions[{index}] overlaps another addition")
+        if any(start < new_end and new_start < end for _, _, new_start, new_end in ranges):
+            raise DevElfError(f"additions[{index}] overlaps a moved range")
+        addition_ranges.append((start, end))
+        actual = sum(start <= relocation.offset < end for relocation in relocations)
+        expected = _number(
+            addition.get("expected_relocations"),
+            f"additions[{index}].expected_relocations",
+        )
+        if actual != expected:
+            raise DevElfError(
+                f"additions[{index}] retained {actual} relocation entries, "
+                f"expected {expected}"
+            )
+        addition_relocations += actual
+
     extension = output_programs[-1]
     if extension.kind != PT_LOAD or extension.vaddr != _number(
         spec.get("extension_vaddr"), "extension_vaddr"
@@ -613,11 +775,24 @@ def audit_relocation_closure(
             raise DevElfError(
                 f"moves[{index}] new range is outside the development payload"
             )
+    for index, (start, end) in enumerate(addition_ranges):
+        if start < extension.vaddr or end > extension_end:
+            raise DevElfError(
+                f"additions[{index}] is outside the development payload"
+            )
+    for relocation in redirect_relocations:
+        if not extension.vaddr <= relocation.symbol_value < extension_end:
+            raise DevElfError(
+                f"redirect wrapper {relocation.symbol_name} is outside "
+                "the development payload"
+            )
     scanned_words = scan_stale_move_references(output, ranges)
     return {
         "changed_relocation_words": len(explained_words),
         "moved_relocations": len(moved_relocations),
+        "redirect_relocations": len(redirect_relocations),
         "extension_relocations": extension_relocations,
+        "addition_relocations": addition_relocations,
         "checked_hi_lo_pairs": checked_pairs,
         "stale_reference_words_scanned": scanned_words,
     }
@@ -649,6 +824,27 @@ def render_linker_script(base: str, spec: dict[str, Any]) -> str:
         replacement = f"{indent}. += 0x{size:X}; /* development slot for {obj}({section}) */"
         text = text.replace(original, replacement, 1)
         extension_lines.append(f"        {obj}({section});")
+
+    for index, addition in enumerate(spec.get("additions", [])):
+        if not isinstance(addition, dict):
+            raise DevElfError(f"additions[{index}] is not an object")
+        obj = addition.get("object")
+        sections = addition.get("sections")
+        if not isinstance(obj, str) or not isinstance(sections, list) or not sections:
+            raise DevElfError(
+                f"additions[{index}] needs an object and a nonempty sections list"
+            )
+        alignment = _number(
+            addition.get("alignment", 8), f"additions[{index}].alignment"
+        )
+        _align_up(0, alignment)
+        extension_lines.append(f"        . = ALIGN(0x{alignment:X});")
+        for section_index, section in enumerate(sections):
+            if not isinstance(section, str) or not section.startswith("."):
+                raise DevElfError(
+                    f"additions[{index}].sections[{section_index}] is invalid"
+                )
+            extension_lines.append(f"        {obj}({section});")
 
     marker = "    /DISCARD/ :"
     if text.count(marker) != 1:

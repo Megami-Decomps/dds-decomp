@@ -205,6 +205,16 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         deps="gcc",
     )
     n.rule(
+        "dev_cc",
+        f"cpp -MM -MG -MF $out.d -MT $out -nostdinc {INCLUDES} $cdefs $in && "
+        f"{prefix}{CC1} {CC1_DEFINES} {INCLUDES} $cdefs {CC1_FLAGS} -G0 $in -o $out.s && "
+        f"{sys.executable} tools/as_coproc_delay.py $out.s $out.s && "
+        f"{prefix}{EE_AS} {EE_AS_FLAGS} -G0 -o $out $out.s",
+        description="dev cc $in",
+        depfile="$out.d",
+        deps="gcc",
+    )
+    n.rule(
         "ld",
         f"{LD} -EL -T $ldscript -T $undef_syms -T $undef_funcs -Map $map --no-check-sections -o $out",
         description="ld $out",
@@ -219,7 +229,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     n.rule(
         "dev_ld",
         f"{LD} -EL --emit-relocs -T $ldscript -T $undef_syms -T $undef_funcs "
-        "-Map $map --no-check-sections -o $out",
+        "$wraps -Map $map --no-check-sections -o $out",
         description="dev link $out",
     )
     n.rule(
@@ -324,6 +334,36 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
 
         dev_descriptor = Path("config") / version / "devbuild.json"
         if (ROOT / dev_descriptor).exists():
+            dev_spec = json.loads((ROOT / dev_descriptor).read_text())
+            dev_objects = []
+            for index, addition in enumerate(dev_spec.get("additions", [])):
+                source = addition.get("source")
+                obj = addition.get("object")
+                if not isinstance(source, str) or not isinstance(obj, str):
+                    raise SystemExit(
+                        f"{dev_descriptor}: additions[{index}] needs source and object"
+                    )
+                dev_objects.append(obj)
+                n.build(
+                    obj,
+                    "dev_cc",
+                    source,
+                    implicit=["include/macro.inc", "tools/as_coproc_delay.py"],
+                    variables={
+                        "cdefs": (
+                            f"'-DASM_ROOT=\"build/eeasm/asm/{version}/nonmatchings/\"' "
+                            f"-DVERSION_{version.upper()} -DDDS_DEV_BUILD"
+                        ),
+                    },
+                )
+            wrap_symbols = []
+            for index, redirect in enumerate(dev_spec.get("redirects", [])):
+                symbol = redirect.get("symbol")
+                if not isinstance(symbol, str) or not symbol:
+                    raise SystemExit(
+                        f"{dev_descriptor}: redirects[{index}] needs a symbol"
+                    )
+                wrap_symbols.append(f"--wrap={symbol}")
             dev_script = Path("build") / version / f"{serial}.dev.ld"
             dev_wrapper = Path("build") / version / f"{serial}.dev-link.elf"
             dev_raw = Path("build") / version / f"{serial}.dev.raw"
@@ -338,7 +378,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             n.build(
                 str(dev_wrapper),
                 "dev_ld",
-                [str(obj) for obj in objects],
+                [str(obj) for obj in objects] + dev_objects,
                 implicit=[
                     str(dev_script),
                     f"config/{version}/undefined_syms_auto.txt",
@@ -349,6 +389,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     "undef_syms": f"config/{version}/undefined_syms_auto.txt",
                     "undef_funcs": f"config/{version}/undefined_funcs_auto.txt",
                     "map": str(dev_wrapper.with_suffix(".map")),
+                    "wraps": " ".join(wrap_symbols),
                 },
             )
             n.build(str(dev_raw), "objcopy", str(dev_wrapper))
