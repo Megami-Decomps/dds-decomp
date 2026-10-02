@@ -22,6 +22,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+import fld
 import reloc
 
 
@@ -32,6 +33,7 @@ ICON_SIZE = 0x08
 MODEL_SIZE = 0x08
 VEC3_SIZE = 0x0C
 STRING_SIZE = 0x10
+MODEL_DIRECTIVES = fld.STATIC_MODEL_DIRECTIVES
 
 
 class AmbError(ValueError):
@@ -68,6 +70,18 @@ class Icon:
 
 
 @dataclass(frozen=True)
+class ModelGraph:
+    items_offset: int
+    assets_offset: int
+    items: tuple[fld.ModelItem, ...]
+    assets: tuple[fld.ModelAsset, ...]
+    draw_roots: dict[int, tuple[int, ...]]
+    draw_lists: dict[int, fld.ModelDrawList]
+    draws: dict[int, fld.ModelDraw]
+    packets: dict[int, tuple[int, tuple[fld.ModelMesh, ...], int]]
+
+
+@dataclass(frozen=True)
 class AmbFile:
     data_end: int
     relocations: tuple[int, ...]
@@ -75,6 +89,7 @@ class AmbFile:
     areas: tuple[Area, ...]
     sblocks: tuple[tuple[Sblock, ...], ...]
     icons: tuple[tuple[tuple[Icon, ...], ...], ...]
+    models: tuple[ModelGraph, ...]
 
 
 @dataclass(frozen=True)
@@ -163,6 +178,7 @@ def decode(data: bytes) -> AmbFile:
     areas: list[Area] = []
     all_sblocks: list[tuple[Sblock, ...]] = []
     all_icons: list[tuple[tuple[Icon, ...], ...]] = []
+    models: list[ModelGraph] = []
     for area_index in range(area_count):
         offset = areas_at + area_index * AREA_SIZE
         name, sblocks_at, sblock_count, model, position = struct.unpack_from(
@@ -193,7 +209,7 @@ def decode(data: bytes) -> AmbFile:
                 relocations,
                 model + field_offset,
                 f"area {area_index} model {context}",
-                required=False,
+                required=True,
             )
 
         area = Area(offset, name, sblocks_at, sblock_count, model, position)
@@ -282,6 +298,68 @@ def decode(data: bytes) -> AmbFile:
         all_sblocks.append(tuple(sblock_rows))
         all_icons.append(tuple(icon_groups))
 
+        geometry, material = struct.unpack_from("<2I", data, model)
+        try:
+            items = fld._read_model_items(
+                data, geometry, data_end, f"area {area_index} model hierarchy"
+            )
+            assets = fld._read_model_assets(
+                data, material, data_end, f"area {area_index} model assets"
+            )
+            for item_index, item in enumerate(items):
+                item_offset = geometry + fld.MODEL_ITEM_LIST_SIZE + item_index * fld.MODEL_ITEM_SIZE
+                for field_offset, value, context in (
+                    (0x40, item.bounds, "bounds"),
+                    (0x44, item.commands, "draw set"),
+                ):
+                    _pointer(
+                        data,
+                        relocations,
+                        item_offset + field_offset,
+                        f"area {area_index} model node {item_index} {context}",
+                        required=False,
+                    )
+                if item_offset + 0x48 in relocations or item_offset + 0x4C in relocations:
+                    raise AmbError(
+                        f"area {area_index} model node {item_index} has a relocated reserved word"
+                    )
+            draw_roots, draw_lists, draws = fld._read_model_draw_graph(
+                data,
+                items,
+                len(assets),
+                data_end,
+                relocations,
+                f"area {area_index} model",
+            )
+            packets: dict[int, tuple[int, tuple[fld.ModelMesh, ...], int]] = {}
+            for draw in draws.values():
+                size = draw.quadwords * 0x10
+                old = packets.get(draw.packet)
+                if old is not None:
+                    if old[0] != size:
+                        raise AmbError(
+                            f"area {area_index} model packet at 0x{draw.packet:x} has conflicting sizes"
+                        )
+                    continue
+                meshes, nop_count = fld._read_model_mesh_packet(
+                    data, draw.packet, size, f"area {area_index} model packet"
+                )
+                packets[draw.packet] = (size, meshes, nop_count)
+        except fld.FldError as exc:
+            raise AmbError(str(exc)) from exc
+        models.append(
+            ModelGraph(
+                geometry,
+                material,
+                items,
+                assets,
+                draw_roots,
+                draw_lists,
+                draws,
+                packets,
+            )
+        )
+
     return AmbFile(
         data_end,
         relocation_tuple,
@@ -289,6 +367,7 @@ def decode(data: bytes) -> AmbFile:
         tuple(areas),
         tuple(all_sblocks),
         tuple(all_icons),
+        tuple(models),
     )
 
 
@@ -365,6 +444,20 @@ def render_source(data: bytes) -> str:
         geometry, material = struct.unpack_from("<2I", data, area.model)
         assign(geometry, f"{stem}_geometry")
         assign(material, f"{stem}_material")
+        graph = model.models[area_index]
+        for node_index, node in enumerate(graph.items):
+            assign(node.bounds, f"{stem}_node_{node_index}_bounds")
+            if not node.commands:
+                continue
+            root_name = f"{stem}_node_{node_index}_draws"
+            assign(node.commands, root_name)
+            for list_index, list_offset in enumerate(graph.draw_roots[node.commands]):
+                list_name = f"{root_name}_list_{list_index}"
+                assign(list_offset, list_name)
+                for draw_index, draw_offset in enumerate(graph.draw_lists[list_offset].draws):
+                    draw_name = f"{list_name}_draw_{draw_index}"
+                    assign(draw_offset, draw_name)
+                    assign(graph.draws[draw_offset].packet, f"{draw_name}_packet")
         for sblock_index, sblock in enumerate(model.sblocks[area_index]):
             sblock_name = _fixed_string(data, model.data_end, sblock.name, "sub-block name")
             part = _name_part(sblock_name, f"sblock_{sblock_index + 1:02d}")
@@ -436,6 +529,102 @@ def render_source(data: bytes) -> str:
             [f"model geometry={reference(geometry)} material={reference(material)}"],
             f"{stem} model root",
         )
+        graph = model.models[area_index]
+        node_lines = [f"model_items count={len(graph.items)}"]
+        for node in graph.items:
+            node_lines.append(
+                "model_item "
+                f"node_id={node.node_id} parent={node.parent} "
+                f"rotation={','.join(fld._float_text(value) for value in node.rotation)} "
+                f"position={','.join(fld._float_text(value) for value in node.position)} "
+                f"scale={','.join(fld._float_text(value) for value in node.scale)} "
+                f"bounds={reference(node.bounds)} commands={reference(node.commands)}"
+            )
+        add_span(
+            graph.items_offset,
+            fld.MODEL_ITEM_LIST_SIZE + len(graph.items) * fld.MODEL_ITEM_SIZE,
+            node_lines,
+            f"{stem} model hierarchy",
+        )
+        for node_index, node in enumerate(graph.items):
+            if not node.bounds:
+                continue
+            bounds = struct.unpack_from("<6f", data, node.bounds)
+            add_span(
+                node.bounds,
+                fld.MODEL_BOUNDS_SIZE,
+                [
+                    "model_bounds "
+                    f"minimum={','.join(fld._float_text(value) for value in bounds[:3])} "
+                    f"maximum={','.join(fld._float_text(value) for value in bounds[3:])}"
+                ],
+                f"{stem} model node {node_index} bounds",
+            )
+
+        asset_lines = [f"model_assets count={len(graph.assets)}"]
+        for asset in graph.assets:
+            fields = [f"index={asset.index}"]
+            for field_name, values in asset.fields:
+                if field_name in {
+                    "values_08",
+                    "values_40",
+                    "scalar_100",
+                    "scalar_200",
+                    "pair_400",
+                }:
+                    text = ",".join(fld._float_text(value) for value in values)
+                elif field_name in {"word_01", "word_02", "word_10", "word_80"}:
+                    text = ",".join(f"0x{value:08x}" for value in values)
+                else:
+                    text = ",".join(str(value) for value in values)
+                fields.append(f"{field_name}={text}")
+            asset_lines.append("model_asset " + " ".join(fields))
+        add_span(
+            graph.assets_offset,
+            4 + sum(asset.size for asset in graph.assets),
+            asset_lines,
+            f"{stem} model assets",
+        )
+
+        for root_offset, list_offsets in graph.draw_roots.items():
+            add_span(
+                root_offset,
+                (len(list_offsets) + 1) * 4,
+                [
+                    "model_draw_set lists="
+                    + ",".join(f"@{labels[value]}" for value in list_offsets)
+                ],
+                f"{stem} model draw set",
+            )
+        for list_offset, draw_list in graph.draw_lists.items():
+            add_span(
+                list_offset,
+                4 + len(draw_list.draws) * 4,
+                [
+                    "model_draw_list "
+                    f"selector={draw_list.selector} draws="
+                    + ",".join(f"@{labels[value]}" for value in draw_list.draws)
+                ],
+                f"{stem} model draw list",
+            )
+        for draw_offset, draw in graph.draws.items():
+            add_span(
+                draw_offset,
+                fld.MODEL_DRAW_SIZE,
+                [
+                    "model_draw "
+                    f"asset={draw.asset} qwords={draw.quadwords} "
+                    f"packet=@{labels[draw.packet]}"
+                ],
+                f"{stem} model draw",
+            )
+        for packet_offset, (packet_size, meshes, nop_count) in graph.packets.items():
+            add_span(
+                packet_offset,
+                packet_size,
+                fld._model_mesh_source(meshes, nop_count),
+                f"{stem} model draw packet",
+            )
         add_span(
             area.position,
             VEC3_SIZE,
@@ -587,6 +776,11 @@ def parse_source(source: str) -> tuple[Operation, ...]:
 
 
 def _operation_size(operation: Operation, offset: int) -> int:
+    if operation.name in MODEL_DIRECTIVES:
+        try:
+            return fld._operation_size(operation, offset)
+        except fld.FldError as exc:
+            raise AmbError(str(exc)) from exc
     fixed = {
         "header": HEADER_SIZE,
         "area": AREA_SIZE,
@@ -619,11 +813,16 @@ def _operation_size(operation: Operation, offset: int) -> int:
 
 
 def encode(operations: tuple[Operation, ...]) -> bytes:
+    try:
+        fld._validate_model_source_blocks(operations)
+        mesh_codes = fld._model_mesh_source_codes(operations)
+    except fld.FldError as exc:
+        raise AmbError(str(exc)) from exc
     labels: dict[str, int] = {}
     offset = 0
     header_count = 0
     end_count = 0
-    for operation in operations:
+    for operation_index, operation in enumerate(operations):
         if operation.name == "label":
             if len(operation.args) != 1 or not re.fullmatch(
                 r"[A-Za-z_][A-Za-z0-9_]*", operation.args[0]
@@ -655,7 +854,10 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
             relocations.append(len(output) if location is None else location)
         return value
 
-    for operation in operations:
+    def write_pointer(text: str) -> None:
+        output.extend(struct.pack("<I", pointer(text)))
+
+    for operation_index, operation in enumerate(operations):
         try:
             if operation.name in {"label", "end_data"}:
                 continue
@@ -736,6 +938,10 @@ def encode(operations: tuple[Operation, ...]) -> bytes:
                         pointer(fields["material"], base + 4),
                     )
                 )
+            elif fld._encode_static_model_operation(
+                operation, operation_index, output, write_pointer, mesh_codes
+            ):
+                pass
             elif operation.name == "vec3":
                 if len(operation.args) != 3:
                     raise AmbError("vec3 expects three values")
