@@ -24,6 +24,17 @@ extern u8 D_0036C648[];
 
 typedef s16 MnuSpritePlacement[4];
 
+typedef struct MnuSpriteWork {
+    u8 pad00[0x24];
+    f32 rotation;
+    u8 pad28[0x78];
+} MnuSpriteWork;
+
+typedef struct MnuSpriteResource {
+    u8 pad00[0x18];
+    MnuSpriteWork *sprites;
+} MnuSpriteResource;
+
 enum {
     MNU_SPRITE_RESOURCE_INDEX,
     MNU_SPRITE_INDEX,
@@ -81,7 +92,23 @@ s32 func_0024E3C0(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex,
                          context);
 }
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024E470);
+void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex,
+                   s32 context, f32 rotation) {
+    ((MnuSpriteResource *)D_0036C698[
+        D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]])
+        ->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].rotation = rotation;
+    func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+                  (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  flags,
+                  D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                  D_0036B510[placementIndex][MNU_SPRITE_INDEX],
+                  context);
+    ((MnuSpriteResource *)D_0036C698[
+        D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]])
+        ->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].rotation = 0.0f;
+}
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024E5A0);
 
