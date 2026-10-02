@@ -32,6 +32,10 @@ extern f32 sdfVec3DotNormalized(void *, void *);
 
 extern f32 func_003532B8(f32);
 
+extern f64 cos(f64);
+
+extern f64 sin(f64);
+
 typedef struct ResourceNode {
     u32 id;
     u32 value;
@@ -148,11 +152,32 @@ INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325BB0);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325CC8);
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325EC8);
+void func_00325EC8(f32 *vector, f32 angle) {
+    f32 rotated[4];
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00326018);
+    rotated[1] = vector[1] * cos(angle) + vector[2] * sin(angle);
+    rotated[2] = vector[1] * -sin(angle) + vector[2] * cos(angle);
+    vector[1] = rotated[1];
+    vector[2] = rotated[2];
+}
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00326158);
+void func_00326018(f32 *vector, f32 angle) {
+    f32 rotated[4];
+
+    rotated[0] = vector[0] * cos(angle) - vector[2] * sin(angle);
+    rotated[2] = vector[0] * sin(angle) + vector[2] * cos(angle);
+    vector[0] = rotated[0];
+    vector[2] = rotated[2];
+}
+
+void func_00326158(f32 *vector, f32 angle) {
+    f32 rotated[4];
+
+    rotated[0] = vector[0] * cos(angle) + vector[1] * sin(angle);
+    rotated[1] = vector[0] * -sin(angle) + vector[1] * cos(angle);
+    vector[0] = rotated[0];
+    vector[1] = rotated[1];
+}
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_003262A8);
 
