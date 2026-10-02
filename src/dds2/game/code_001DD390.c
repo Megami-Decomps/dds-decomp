@@ -2555,7 +2555,22 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001E3E20);
 
-INCLUDE_ASM(const s32, "game/code_001DD390", btlFormatUnitBedName);
+extern char D_00436A28[];
+
+s32 btlFormatUnitBedName(BtlUnit *unit, char *name) {
+    btlGetRuntime();
+    if (unit->flags & 0x200) {
+        if (unit->statBits & 0x10) {
+            func_0035C860(name, "%s%03X_%02X.BED", D_00436A28, 0, unit->mode + 0x20);
+        } else if (unit->flags & 0x1000) {
+            func_0035C860(name, "%s%03X_%02X.BED", D_00436A28, 0, unit->mode);
+        } else {
+            func_0035C860(name, "%s%03X_%02X.BED", D_00436A28, btlGetActorBedAssetIdFromIndex(unit->unk172), unit->mode);
+        }
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001E40F0);
 

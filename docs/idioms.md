@@ -1017,6 +1017,28 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     address pseudo loses the allocation and is rematerialised; that is a
     liveness question, not an address-form one. Volatile `asm` between the uses
     does not break the sharing (tested).
+    **Switch with the symbol used in every arm** (4 arms, field accesses and a
+    call each): `W *w = &G;` initialised before the switch and used in every arm
+    gives ONE `lui`/`addiu` in the prologue held in a saved register for the
+    whole function (retail DDS1 `func_002890B8`: `lui/addiu &fileManagerWork` in
+    $19 before the switch). Writing `G.a`, `G.b` (direct field accesses) or
+    assigning `w = &G` inside each arm rematerialises per arm (4 pairs). A
+    self-assigned `FileManWork *work = work;` placeholder, as in the old
+    `func_002890B8` park, gives neither: it never reads the symbol.
+15. **`j callee` (tail call) needs a function with no `return;` statement; and a
+    "both or neither" test is spelled out.** A void function whose last
+    statement is a call is compiled to `ld regs; j callee` (sibling call) only if
+    it has no `return;` (an early `return;` creates a return label and every call
+    stays `jal`, tested with a one-call body plus one `return;`). Retail's
+    `j btlAppendIndexListEntry` in DDS2 `func_00220B20` therefore means the whole
+    body is nested in `if`s, never `if (...) return;`. Same function: "exactly one
+    of two flags is clear" matched only as
+    `if (!((a == 0 && b == 0) || (a != 0 && b != 0))) { x = (a == 0 ? first : second); ... }`
+    (the select is emitted once after the join, as `movz`); `(a == 0) != (b == 0)`,
+    `a ? b == 0 : b != 0` and the positive `(a == 0 && b != 0) || (a != 0 && b == 0)`
+    each differ by 3-40 words. Also: a local that is initialised only inside the
+    guarding `if` (not at its declaration) lets gcc fill the `beqz` delay slot with
+    the first initialisation, as retail does.
 
 Unresolved: a saved register initialised as a copy of another holding the same
 constant (`move $16,$19` for `i` from `bestIndex = 0`, DDS1 `func_00202F90`,
