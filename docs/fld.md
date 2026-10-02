@@ -348,6 +348,12 @@ rows resolve to placement nodes: 1,552 of 1,582 in DDS1 and 1,179 of 1,198 in
 DDS2. Sixty DDS1 and 43 DDS2 placement identities own more than one row; the
 exporter preserves every alternative and its gate.
 
+For a whole-game view of those proven field-to-field edges, including absent
+resource areas and conditional alternatives, use `tools/field_graph.py` as
+described in [`wap.md`](wap.md). It emits deterministic JSON or Graphviz DOT;
+non-field transition types remain in the per-scene metadata until their target
+identity is independently established.
+
 The scene layer validates all 1,232 supported FLD2 payload occurrences across
 both games: 5,533 collision resources and 167,623 output triangles, 1,551
 cameras, and 10,222 placements. The paired DDS1 and DDS2 composed fields pass

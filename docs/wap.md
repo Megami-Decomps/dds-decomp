@@ -183,6 +183,32 @@ transition and its typed destination. The field wrapper reports unlinked named
 rows explicitly, which makes incomplete or exceptional resource relationships
 inspectable without weakening the exact WAP or FLD2 codecs.
 
+## Field-world graph
+
+`tools/field_graph.py` builds a deterministic whole-game navigation graph from
+the tracked WAP and FLD2 identities. JSON keeps the complete transition
+metadata for other tools; Graphviz DOT gives a direct visual representation:
+
+```sh
+python3 tools/field_graph.py src/dds1/data/field dds1-field-world.json
+python3 tools/field_graph.py src/dds1/data/field dds1-field-world.dot \
+  --format dot
+```
+
+An area node records whether its FLD2 source is present. A field-transition
+edge records its source and target areas, actor, WAP entry, actor kind, raw and
+typed destination, flag gate, post-transition state, and DDS tail. Missing
+source or target areas remain explicit and render as dashed nodes/edges in
+DOT. The graph includes only WAP type `field` rows with concrete source and
+target areas. Elevator, facility, event, and unresolved transition types stay
+in WAP and composed-scene metadata because they do not prove an area-to-area
+edge by themselves.
+
+The tracked DDS1 graph contains 579 area nodes and 1,477 field transitions;
+1,437 edges have a present source and 1,450 have a present target. DDS2 has
+580 nodes and 1,252 transitions, with 1,226 present sources and 1,233 present
+targets. Conditional alternatives are separate edges rather than collapsed.
+
 Run the codec and complete-corpus regression tests with:
 
 ```sh
