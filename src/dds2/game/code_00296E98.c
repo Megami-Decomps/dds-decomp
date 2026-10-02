@@ -115,7 +115,35 @@ extern u32 *ptyGetCurrentProfileRecord(s32 unit);
 extern u32 ptyAddProfileRecordValueClamped(u8 *unit, u32 amount);
 extern void func_00299988(u32, s32, u16, u32, s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00296E98);
+typedef s16 BrsIconRecord[4];
+
+enum {
+    BRS_ICON_ID = 1,
+    BRS_ICON_X = 2,
+    BRS_ICON_Y = 3,
+};
+
+extern BrsIconRecord D_003D03F0[];
+extern u8 *D_00438FC8;
+extern s32 func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
+
+/* Draw the selected result icon, then the fixed companion at the same alpha. */
+s32 func_00296E98(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
+    f32 strength;
+    s32 layer;
+
+    layer = *(s32 *)(D_00438FC8 + 0x68);
+    strength = (f32)alpha * 0.00390625f;
+    iconIndex += 3;
+    func_00306CD0(D_003D03F0[iconIndex][BRS_ICON_X] << 4,
+                  D_003D03F0[iconIndex][BRS_ICON_Y] << 3, 0,
+                  (u32)(strength * 256.0f), 0, layer,
+                  D_003D03F0[iconIndex][BRS_ICON_ID], option);
+    return func_00306CD0(D_003D03F0[8][BRS_ICON_X] << 4,
+                         D_003D03F0[8][BRS_ICON_Y] << 3, 0,
+                         (u32)(strength * 256.0f), 0, layer,
+                         D_003D03F0[8][BRS_ICON_ID], option);
+}
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00297000);
 
