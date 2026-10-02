@@ -253,6 +253,43 @@ end_data
         with self.assertRaisesRegex(fld.FldError, "does not match fld1 preamble"):
             fld.parse_source(source.replace("magic=FLD1", "magic=FLD2", 1))
 
+    def test_fld1_model_graph_round_trip(self) -> None:
+        source = """\
+fld1 1
+header version=23 magic=FLD1 type_count=1 type_table=@resource_types word_1c=0 word_20=0 word_24=0 word_28=0 word_2c=0 word_30=0 word_34=0 word_38=0 word_3c=0
+label resource_types
+type id=2 count=1 resources=@resources
+label resources
+resource serial=0 flags=0 type=2 name=null reserved=0 transform=null area=null link=null sblock=null data=@model_resource
+label model_resource
+model_resource items=@items assets=@assets motion=@motion
+label items
+model_items count=2
+model_item node_id=0 parent=-1 rotation=0,0,0 position=0,0,0,1 scale=1,1,1,0 bounds=null commands=null
+model_item node_id=1 parent=0 rotation=0,1.5,0 position=10,20,30,1 scale=1,2,1,0 bounds=@bounds commands=@commands
+label bounds
+model_bounds minimum=-1,-2,-3 maximum=1,2,3
+label commands
+u32 0
+label assets
+u32 0
+label motion
+u32 0
+label data_end
+end_data
+"""
+        data = fld.encode(fld.parse_source(source))
+        rendered = fld.render_source(data)
+        self.assertIn("model_items count=2", rendered)
+        self.assertIn("node_id=1 parent=0", rendered)
+        self.assertIn("model_bounds minimum=-1.0,-2.0,-3.0", rendered)
+        self.assertEqual(fld.encode(fld.parse_source(rendered)), data)
+
+        with self.assertRaisesRegex(fld.FldError, "has parent 2"):
+            fld.encode(fld.parse_source(source.replace("node_id=1 parent=0", "node_id=1 parent=2")))
+        with self.assertRaisesRegex(fld.FldError, "followed by 2 model_item"):
+            fld.encode(fld.parse_source(source.replace("model_items count=2", "model_items count=1")))
+
     def test_tracked_sources_are_canonical_and_exact(self) -> None:
         expected_links = {
             ("dds1", "f011_001"): fld.LinkSummary(2, 3, 1),

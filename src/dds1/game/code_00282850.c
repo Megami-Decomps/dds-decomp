@@ -212,6 +212,13 @@ typedef struct MenuStagePanelHeader {
 extern void func_00281D40(s32, s32, s32, MenuStageTestState *, s32, s32);
 extern void func_00282360(s32, s32, s32, MenuStageTestState *, s32, s32);
 
+typedef struct MenuStageLayoutCounts {
+    s32 first;
+    s32 second;
+} MenuStageLayoutCounts;
+
+extern s32 D_0037CD80[];
+
 void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuStageTestState *menu, s32 panelIndex, s32 param) {
     MenuStagePanelHeader *panel = (MenuStagePanelHeader *)((u8 *)menu + 0x78) + panelIndex;
     s32 mode = panel->mode;
@@ -234,7 +241,47 @@ void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuStageTestState *menu, s32 pan
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002828D0);
+void func_002828D0(s32 *position, MenuStageTestState *menu, s32 panelIndex) {
+    MenuStagePanelHeader *panel =
+        (MenuStagePanelHeader *)((u8 *)menu + 0x78) + panelIndex;
+    MenuStageLayoutCounts *layout = (MenuStageLayoutCounts *)menu->layout;
+    u32 panelFlags = panel->flags;
+    s32 secondCount = layout->second;
+    s32 totalCount;
+    s32 firstCount = layout->first;
+    s32 group;
+
+    totalCount = firstCount + secondCount;
+
+    if (!(panelFlags & 0x80)) {
+        group = panelIndex < firstCount ? 1 : 2;
+    } else {
+        group = 1;
+    }
+
+    switch (group) {
+    case 1:
+        position[1] = panelIndex * 0x320 + 0xA8;
+        position[0] = 0xEF0;
+        if (panelIndex == 1) {
+            position[0] = 0xE50;
+        }
+        break;
+    case 2: {
+        s32 entryIndex = ((firstCount * 5 + totalCount) << 1) - 12;
+        position[1] =
+            (D_0037CD80[entryIndex] +
+             (panelIndex - firstCount) * *(entryIndex + D_0037CD80 + 1))
+            << 3;
+        position[0] = 0x1060;
+        goto done;
+    }
+    default:
+        goto done;
+    }
+done:
+    return;
+}
 
 /* Advance the panel's current transition value toward its 0x100 limit. */
 void mnuAdvancePanelTransition(s32 panel) {
@@ -2268,4 +2315,3 @@ INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7C8);
 INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7D0);
 
 INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7D4);
-
