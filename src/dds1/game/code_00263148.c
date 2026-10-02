@@ -63,7 +63,7 @@ typedef struct MenuItemScene {
     u8 pad250[0x78];
     s32 selectionTargetCount;
     u8 pad2CC[0x78];
-    s32 nextPanelMode;
+    s32 partyUnitCount;
     u8 pad348[0x7C];
     u32 resetStateB;
     s32 selectedExtent;
@@ -212,7 +212,7 @@ s64 prfCapTaskStep(u64 request) {
             if (kwlnItemDismissOverlay(scene) != 0) {
                 return 0;
             }
-            if (scene->nextPanelMode == 0) {
+            if (scene->partyUnitCount == 0) {
                 kwlnFadeInStart(0, 0, 0, 0xF);
                 mnuSetPopupEntryFlagged(dispatchStatus, D_0036D494);
                 return 0;
@@ -321,7 +321,69 @@ void func_00263728(MenuItemScene *scene) {
     func_00263640(scene);
 }
 
-INCLUDE_ASM(const s32, "game/code_00263148", func_00263838);
+extern void evtStageTestUpdateCamera(void);
+extern s32 brsAdvanceSkillPackagePanel(s32);
+extern void ptyAccumulateStatGains(s32 *, s32, MenuItem *);
+extern s32 mnuAdvanceTitleEntryAnimation(MenuItem *);
+extern void mnuStaffCopyPanelBlock(MenuItem *, MenuItemScene *);
+extern void mnuRefreshSelectedUnitPanels(MenuItem *, MenuItemScene *);
+extern u32 mnuInitializeItemSelectionExtent(u64);
+extern void mnuSetPopupEntry(s32 *, void *);
+extern s32 btlAddBaseStats(s32 *, MenuItem *);
+extern void func_002E96D8(u32);
+extern char D_0036D424[];
+extern char D_0036D45C[];
+
+s64 func_00263838(u64 request) {
+    s64 result;
+    MenuItemScene *scene = (MenuItemScene *)kwlnTaskGetUserValue();
+    s32 *dispatchStatus;
+    s32 *slots;
+
+    evtStageTestUpdateCamera();
+    if (evtGetMessageWindowControlState() != 0) {
+        return 0;
+    }
+    dispatchStatus = &scene->dispatchStatus;
+    result = func_00285670((s32)scene->dispatchWork, dispatchStatus, 0,
+                          request);
+    if (result != 0) {
+        return result;
+    }
+    if (brsAdvanceSkillPackagePanel((s32)scene) != 0) {
+        return 0;
+    }
+    if (*dispatchStatus == 0) {
+        if (scene->resetStateA < scene->partyUnitCount) {
+            brsSelectNextUnit(scene, 1);
+            slots = scene->slots;
+            ptyAccumulateStatGains(slots, scene->selectionData->extentFactor,
+                                   scene->selectionData->item);
+            func_00263728(scene);
+            mnuAdvanceTitleEntryAnimation(scene->selectionData->item);
+            mnuStaffCopyPanelBlock(scene->selectionData->item, scene);
+            mnuRefreshSelectedUnitPanels(scene->selectionData->item, scene);
+
+            if (scene->selectionData->item->kind == 1) {
+                mnuInitializeItemSelectionExtent(request);
+                if (scene->extentExhausted == 0) {
+                    mnuSetPopupEntry(dispatchStatus, D_0036D424);
+                    return 0;
+                }
+            } else {
+                btlAddBaseStats(slots, scene->selectionData->item);
+                mnuRefreshSelectedUnitPanels(scene->selectionData->item,
+                                             scene);
+            }
+            mnuSetPopupEntry(dispatchStatus, D_0036D45C);
+        } else {
+            func_002E96D8(0x50001);
+            kwlnFadeInStart(0, 0, 0, 0xF);
+            mnuSetPopupEntryFlagged(dispatchStatus, D_0036D494);
+        }
+    }
+    return 0;
+}
 
 void mnuDrawItemPanelBackdrop(s32 scene) {
     mnuDrawBackdrop(scene + 0xd1c, 0x20);
@@ -426,7 +488,7 @@ s64 mnuAdvanceSkillPanelToNextMenu(s32 request) {
 }
 
 /* Bound the selection extent by the remaining capacity after five components. */
-u32 mnuInitializeItemSelectionExtent(void) {
+u32 mnuInitializeItemSelectionExtent(u64 unused) {
     s8 component;
     MenuItemScene *scene;
     u32 *slot;
