@@ -17,21 +17,6 @@
 
 extern s32 frFontDefaultGlyphCellSize;
 
-/* Value with u16 pair read by effDisableStaggeredBlur/func_00197200. */
-typedef struct Unk6C84Val {
-    u8 unk0[0x10]; /* 0x0 */
-    u16 unk10;     /* 0x10 */
-    u16 unk12;     /* 0x12 */
-} Unk6C84Val;
-
-/* 0x24-byte record pointing at the value. */
-typedef struct Unk6C84Rec {
-    Unk6C84Val *unk0; /* 0x0 */
-    u8 unk4[0x20];    /* 0x4 */
-} Unk6C84Rec;
-
-extern Unk6C84Rec frFontResourceRecords[];
-
 /* Circular doubly-linked list node; prev/next at +0x18/+0x1C. */
 typedef struct FntNode {
     u8 unk0[0x18];          /* 0x0 */
@@ -48,10 +33,26 @@ typedef struct FntList {
 
 extern FntList frFontResourceList;
 
-/* 0x24-byte table entry in the D_003D6C80 font system (one per index & 0xFF). */
+/* Retained font resource header, including the dimensions used by the cell-size getters. */
+typedef struct FrFontHeader {
+    u32 tableOffset;
+    u8 pad04[6];
+    u8 tableCount;
+    u8 pad0B[3];
+    u16 widthCount;
+    u16 cellWidth;  /* 0x10: returned by frFontGetSlotCellWidth */
+    u16 cellHeight; /* 0x12: returned by frFontGetSlotCellHeight */
+    u8 pad14[2];
+    u8 hasExtra;
+    u8 pad17;
+    u8 pad18[8];
+    u32 lookupOffset; /* 0x20; DDS1 stores this at 0x18 */
+} FrFontHeader;
+
+/* 0x24-byte table entry in the frFontWork font system (one per index & 0xFF). */
 typedef struct FrFontEntry {
     void *buffer; /* 0x0: released by frFontFreeEntry */
-    void *resourceHeader; /* 0x4: retained resource bytes, read as FrFontHeader */
+    FrFontHeader *resourceHeader; /* 0x4: retained resource header */
     u32 unk8;    /* 0x8 */
     u32 unkC;    /* 0xC */
     u8 *flagBytes; /* 0x10: first byte enables entry, second stores value + 1 */
@@ -79,8 +80,8 @@ typedef struct FrFontDrawGlyph {
     struct FrFontDrawGlyph *firstChild;
 } FrFontDrawGlyph;
 
-/* Font system at D_003D6C80: 9 entries followed by shared control words. */
-typedef struct FrFontSysLocal {
+/* Font system at frFontWork: 9 entries followed by shared control words. */
+typedef struct FrFontSystem {
     FrFontEntry entries[9]; /* 0x0 */
     s32 unk144;             /* 0x144 */
     s32 unk148;             /* 0x148 */
@@ -97,9 +98,9 @@ typedef struct FrFontSysLocal {
     s32 gsFormat;           /* 0x174 */
     u8 unk178[0x1C];        /* 0x178 */
     void *glyphSlots[2]; /* 0x194: glyph chain slots */
-} FrFontSysLocal;
+} FrFontSystem;
 
-extern FrFontSysLocal frFontWork;
+extern FrFontSystem frFontWork;
 
 extern void frFontFreeAllEntries(void);
 
@@ -127,12 +128,14 @@ void frFontListInsert(FntNode *node) {
     nextNode->prev = node;
 }
 
+/* Return the selected resource header's cell width; index is unchecked. */
 u16 frFontGetSlotCellWidth(s32 index) {
-    return frFontResourceRecords[index].unk0->unk10;
+    return frFontWork.entries[index].resourceHeader->cellWidth;
 }
 
+/* Return the selected resource header's cell height; index is unchecked. */
 u16 frFontGetSlotCellHeight(s32 index) {
-    return frFontResourceRecords[index].unk0->unk12;
+    return frFontWork.entries[index].resourceHeader->cellHeight;
 }
 
 void itfSetTextDrawLimit(s32 value) {
@@ -282,7 +285,7 @@ extern void frFontBindResourceSections(u8, u8 *, void *);
 /* Load only when the slot word is not exactly one; slot one borrows entry zero's allocation. */
 void frFontEnsureSlotLoaded(s32 slotId, s32 path) {
     s32 slotIndex = slotId & FR_FONT_BYTE_MASK;
-    FrFontSysLocal *fontSystem = &frFontWork;
+    FrFontSystem *fontSystem = &frFontWork;
 
     if (frFontSlotLoadedFlags[slotIndex] != FR_FONT_LOADED_STATE) {
         if (slotIndex == FR_FONT_SYSTEM_SLOT) {
@@ -308,19 +311,6 @@ void frFontReleaseAll(void) {
     sdfUpdateTextureHeadsWithInterruptsMasked(frFontWork.unk15C);
 }
 
-typedef struct FrFontHeader {
-    u32 tableOffset;
-    u8 pad04[6];
-    u8 tableCount;
-    u8 pad0B[3];
-    u16 widthCount;
-    u8 pad10[6];
-    u8 hasExtra;
-    u8 pad17;
-    u8 pad18[8];
-    u32 lookupOffset;
-} FrFontHeader;
-
 /* Bind sections from resource bytes or a retained allocation.
  * Optional flag/value sections each start with a byte-length word; their data
  * precedes the word table and remaining resource data. Offsets are unchecked.
@@ -337,9 +327,9 @@ void frFontBindResourceSections(u8 slotIndex, u8 *resourceBytes, void *allocatio
     }
     entry = &frFontWork.entries[slotIndex];
     entry->buffer = allocation;
-    entry->resourceHeader = resourceBytes;
-    sectionOffset = ((FrFontHeader *)resourceBytes)->tableOffset + (((FrFontHeader *)resourceBytes)->tableCount << FR_FONT_TABLE_ENTRY_SHIFT);
-    if (((FrFontHeader *)resourceBytes)->hasExtra != 0) {
+    entry->resourceHeader = (FrFontHeader *)resourceBytes;
+    sectionOffset = entry->resourceHeader->tableOffset + (entry->resourceHeader->tableCount << FR_FONT_TABLE_ENTRY_SHIFT);
+    if (entry->resourceHeader->hasExtra != 0) {
         s32 *flagSection = (s32 *)(resourceBytes + sectionOffset);
         s32 flagDataBytes = *flagSection;
         s32 *valueSection;
@@ -364,9 +354,9 @@ void frFontBindResourceSections(u8 slotIndex, u8 *resourceBytes, void *allocatio
         entry->unkC = 0;
     }
     entry->unk18 = resourceBytes + sectionOffset;
-    sectionOffset += ((FrFontHeader *)entry->resourceHeader)->widthCount * FR_FONT_WORD_BYTES;
+    sectionOffset += entry->resourceHeader->widthCount * FR_FONT_WORD_BYTES;
     entry->unk1C = resourceBytes + sectionOffset;
-    lookupOffset = ((FrFontHeader *)entry->resourceHeader)->lookupOffset;
+    lookupOffset = entry->resourceHeader->lookupOffset;
     if (lookupOffset != 0) {
         entry->unk20 = (u32)(resourceBytes + lookupOffset);
     } else {
