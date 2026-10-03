@@ -1259,7 +1259,10 @@ end
             "SCREEN_FADE_A": (0x00F, 2, False),
             "SCREEN_FADE_B": (0x010, 2, False),
             "ADD_EFFECT_UNIT_TO_WORLD": (0x012, 1, False),
+            "START_CAMERA_PATH_MOVE": (0x013, 2, False),
             "CREATE_LINKED_CAMERA_VIEWER": (0x015, 2, True),
+            "DESTROY_WORLD_UNIT": (0x016, 1, False),
+            "START_UNIT_MOVE_TO_POSITION_OBJECT": (0x017, 5, False),
             "ADD_FLAGGED_EFFECT_UNIT_TO_WORLD": (0x019, 1, False),
             "SET_CONTROLLER_VIBRATION": (0x01A, 3, False),
             "FADE_BACKGROUND_IN": (0x01F, 1, False),
@@ -1282,10 +1285,12 @@ end
             "CHANGE_ITEM_COUNT": (0x070, 2, False),
             "SET_MESSAGE_WINDOW_GEOMETRY": (0x071, 3, False),
             "PREPARE_UNIT_MOTION_STATE": (0x073, 5, False),
+            "START_UNIT_PATH_FOLLOW": (0x08B, 7, False),
             "READ_SECONDARY_WORLD_ID_VALUE": (0x094, 1, True),
             "RESET_FIELD_EFFECTS": (0x099, 0, False),
             "DESTROY_WORLD_EFFECT_OBJECT": (0x09B, 1, False),
             "COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE": (0x09D, 2, False),
+            "FOCUS_CAMERA_ON_OBJECT": (0x0A3, 1, False),
             "UPDATE_FIELD_LOOK_AT_SEGMENT": (0x0A4, 0, False),
             "CREATE_SCRIPT_TASK": (0x0A5, 2, True),
             "DESTROY_REGISTERED_TASK": (0x0A6, 1, False),
@@ -1956,7 +1961,7 @@ end
                         )
         self.assertEqual(type5_uses, 7863)
         self.assertEqual(command_uses, 53389)
-        self.assertEqual(profiled_command_uses, 50826)
+        self.assertEqual(profiled_command_uses, 51285)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -2010,8 +2015,8 @@ end
     def test_semantic_view_handles_both_tracked_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (143, 79078, 5619),
-            "dds2": (140, 60537, 2794),
+            "dds1": (143, 77857, 4398),
+            "dds2": (140, 59960, 2217),
         }
         for game, expected_counts in expected.items():
             files = 0
@@ -2062,6 +2067,23 @@ end
             (8 << 16) | flw0.OPCODE_IDS["PUSHIS"],
             (9 << 16) | flw0.OPCODE_IDS["PUSHIS"],
             (0x04A << 16) | flw0.OPCODE_IDS["COMM"],
+            (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (2 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x013 << 16) | flw0.OPCODE_IDS["COMM"],
+            (3 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x016 << 16) | flw0.OPCODE_IDS["COMM"],
+            *(
+                (value << 16) | flw0.OPCODE_IDS["PUSHIS"]
+                for value in range(1, 6)
+            ),
+            (0x017 << 16) | flw0.OPCODE_IDS["COMM"],
+            *(
+                (value << 16) | flw0.OPCODE_IDS["PUSHIS"]
+                for value in range(1, 8)
+            ),
+            (0x08B << 16) | flw0.OPCODE_IDS["COMM"],
+            (6 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x0A3 << 16) | flw0.OPCODE_IDS["COMM"],
             (0x068 << 16) | flw0.OPCODE_IDS["COMM"],
             flw0.OPCODE_IDS["PUSHREG"],
             (10 << 16) | flw0.OPCODE_IDS["PUSHIS"],
@@ -2073,6 +2095,11 @@ end
         self.assertIn("ADD_EFFECT_UNIT_TO_WORLD(4)", view)
         self.assertIn("WAIT_FOR_UNIT_MOTION(4)", view)
         self.assertIn("ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(9, 8)", view)
+        self.assertIn("START_CAMERA_PATH_MOVE(2, 1)", view)
+        self.assertIn("DESTROY_WORLD_UNIT(3)", view)
+        self.assertIn("START_UNIT_MOVE_TO_POSITION_OBJECT(5, 4, 3, 2, 1)", view)
+        self.assertIn("START_UNIT_PATH_FOLLOW(7, 6, 5, 4, 3, 2, 1)", view)
+        self.assertIn("FOCUS_CAMERA_ON_OBJECT(6)", view)
         self.assertIn("result = READ_CURRENT_WORLD_OBJECT_ID()", view)
         self.assertIn("push result", view)
         self.assertIn("QUEUE_WORLD_OBJECT_PENDING_VALUE(20, 10)", view)
@@ -2192,7 +2219,7 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53389, 50826)
+            (code_words, commands, profiled_commands), (168829, 53389, 51285)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
@@ -2321,7 +2348,7 @@ end
                 totals["message_references"],
                 totals["selection_references"],
             ),
-            (37298, 1910, 287),
+            (37586, 1910, 287),
         )
         self.assertEqual(totals["event_references"], 43)
         self.assertEqual(totals["procedure_references"], 463)

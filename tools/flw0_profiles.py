@@ -72,7 +72,12 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(0x00F, "SCREEN_FADE_A", 2, writes_result=False),
     NativeCommand(0x010, "SCREEN_FADE_B", 2, writes_result=False),
     NativeCommand(0x012, "ADD_EFFECT_UNIT_TO_WORLD", 1, writes_result=False),
+    NativeCommand(0x013, "START_CAMERA_PATH_MOVE", 2, writes_result=False),
     NativeCommand(0x015, "CREATE_LINKED_CAMERA_VIEWER", 2, writes_result=True),
+    NativeCommand(0x016, "DESTROY_WORLD_UNIT", 1, writes_result=False),
+    NativeCommand(
+        0x017, "START_UNIT_MOVE_TO_POSITION_OBJECT", 5, writes_result=False
+    ),
     NativeCommand(
         0x019, "ADD_FLAGGED_EFFECT_UNIT_TO_WORLD", 1, writes_result=False
     ),
@@ -111,6 +116,7 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(0x070, "CHANGE_ITEM_COUNT", 2, writes_result=False),
     NativeCommand(0x071, "SET_MESSAGE_WINDOW_GEOMETRY", 3, writes_result=False),
     NativeCommand(0x073, "PREPARE_UNIT_MOTION_STATE", 5, writes_result=False),
+    NativeCommand(0x08B, "START_UNIT_PATH_FOLLOW", 7, writes_result=False),
     NativeCommand(0x094, "READ_SECONDARY_WORLD_ID_VALUE", 1, writes_result=True),
     NativeCommand(0x099, "RESET_FIELD_EFFECTS", 0, writes_result=False),
     NativeCommand(0x09B, "DESTROY_WORLD_EFFECT_OBJECT", 1, writes_result=False),
@@ -120,6 +126,7 @@ SHARED_DDS_COMMANDS = (
         2,
         writes_result=False,
     ),
+    NativeCommand(0x0A3, "FOCUS_CAMERA_ON_OBJECT", 1, writes_result=False),
     NativeCommand(0x0A4, "UPDATE_FIELD_LOOK_AT_SEGMENT", 0, writes_result=False),
     NativeCommand(0x0A5, "CREATE_SCRIPT_TASK", 2, writes_result=True),
     NativeCommand(0x0A6, "DESTROY_REGISTERED_TASK", 1, writes_result=False),
