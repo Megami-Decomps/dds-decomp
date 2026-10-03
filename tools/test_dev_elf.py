@@ -672,10 +672,12 @@ class DevElfTests(unittest.TestCase):
             ("dev_move_0_END", 0x00412004, 0, 0, 1),
             ("dev_addition_0_START", 0x00412004, 0, 0, 1),
             ("dev_addition_0_END", 0x0041200C, 0, 0, 1),
+            ("dev_addition_0_section_0_START", 0x00412004, 0, 0, 1),
+            ("dev_addition_0_section_0_END", 0x0041200C, 0, 0, 1),
         ]
         spec = {
             "moves": [{"old_vaddr": 0x00100020, "old_size": 4}],
-            "additions": [{}],
+            "additions": [{"sections": [".text"]}],
         }
         resolved, _ = dev_elf._resolve_linked_layout(
             spec, _metadata_elf(symbols, [])
@@ -684,6 +686,10 @@ class DevElfTests(unittest.TestCase):
         self.assertEqual(resolved["moves"][0]["new_size"], 4)
         self.assertEqual(resolved["additions"][0]["new_vaddr"], 0x00412004)
         self.assertEqual(resolved["additions"][0]["size"], 8)
+        self.assertEqual(
+            resolved["additions"][0]["_linked_sections"],
+            [{"section": ".text", "start": 0x00412004, "end": 0x0041200C}],
+        )
 
     def test_nonempty_retained_section_resolves_at_old_vaddr(self) -> None:
         old_vaddr = 0x00100080
@@ -1754,6 +1760,166 @@ class DevElfTests(unittest.TestCase):
                 retail_elf,
                 spec,
                 development_gp,
+            )
+
+    def test_moved_state_verifies_complete_gp_reference_contract(self) -> None:
+        gp = 0x108000
+        old_vaddr = gp - 0x10
+        new_vaddr = gp + 0x10
+
+        def raw_lw(target: int) -> int:
+            displacement = (target - gp) & 0xFFFF
+            return (0x23 << 26) | (28 << 21) | (2 << 16) | displacement
+
+        base = bytearray(_elf())
+        output = bytearray(base)
+        struct.pack_into("<I", base, 0x1010, raw_lw(old_vaddr))
+        struct.pack_into("<I", base, 0x1014, raw_lw(old_vaddr + 4))
+        struct.pack_into("<I", output, 0x1010, raw_lw(new_vaddr))
+        struct.pack_into("<I", output, 0x1014, 0)
+        _, base_programs = dev_elf.parse_elf(base)
+        _, output_programs = dev_elf.parse_elf(output)
+        global_func = (dev_elf.STB_GLOBAL << 4) | dev_elf.STT_FUNC
+        global_notype = dev_elf.STB_GLOBAL << 4
+        symbols = [
+            ("_gp", gp, 0, global_notype, 1),
+            ("main_TEXT_START", 0x100000, 0, global_notype, 1),
+            ("main_TEXT_END", 0x100020, 0, global_notype, 1),
+            ("worker", 0x100000, 0x20, global_func, 1),
+        ]
+        development_elf = _metadata_elf(symbols, [])
+        retail_elf = _metadata_elf(symbols, [])
+        development_symbols = dev_elf.parse_linked_symbols(development_elf)
+        spec = {
+            "moves": [
+                {
+                    "object": "state.o",
+                    "section": ".sbss",
+                    "storage": "nobits",
+                    "old_vaddr": old_vaddr,
+                    "new_vaddr": new_vaddr,
+                    "old_size": 8,
+                    "new_size": 8,
+                    "expected_retail_gp_references": 2,
+                    "expected_gp_references": 1,
+                }
+            ]
+        }
+        self.assertEqual(
+            dev_elf._audit_moved_gp_references(
+                bytes(base),
+                bytes(output),
+                base_programs,
+                output_programs,
+                development_symbols,
+                retail_elf,
+                spec,
+                gp,
+            ),
+            {"moved_gp_contracts": 1, "moved_gp_references": 1},
+        )
+
+        wrong_count = {
+            "moves": [{**spec["moves"][0], "expected_gp_references": 0}]
+        }
+        with self.assertRaisesRegex(dev_elf.DevElfError, "1 development GP references"):
+            dev_elf._audit_moved_gp_references(
+                bytes(base),
+                bytes(output),
+                base_programs,
+                output_programs,
+                development_symbols,
+                retail_elf,
+                wrong_count,
+                gp,
+            )
+
+        stale_output = bytearray(output)
+        struct.pack_into("<I", stale_output, 0x1010, raw_lw(old_vaddr))
+        with self.assertRaisesRegex(dev_elf.DevElfError, "abandoned retail range"):
+            dev_elf._audit_moved_gp_references(
+                bytes(base),
+                bytes(stale_output),
+                base_programs,
+                output_programs,
+                development_symbols,
+                retail_elf,
+                spec,
+                gp,
+            )
+
+        addition_output = bytearray(output)
+        struct.pack_into("<I", addition_output, 0x1040, raw_lw(old_vaddr))
+        addition_symbols = dev_elf.parse_linked_symbols(
+            _metadata_elf(
+                [
+                    *symbols,
+                    ("addition_worker", 0x100040, 0x20, global_func, 1),
+                ],
+                [],
+            )
+        )
+        addition_spec = {
+            "moves": spec["moves"],
+            "additions": [
+                {
+                    "sections": [".text"],
+                    "_linked_sections": [
+                        {
+                            "section": ".text",
+                            "start": 0x100040,
+                            "end": 0x100060,
+                        }
+                    ],
+                }
+            ],
+        }
+        with self.assertRaisesRegex(dev_elf.DevElfError, "abandoned retail range"):
+            dev_elf._audit_moved_gp_references(
+                bytes(base),
+                bytes(addition_output),
+                base_programs,
+                output_programs,
+                addition_symbols,
+                retail_elf,
+                addition_spec,
+                gp,
+            )
+
+        moved_site_output = bytearray(output)
+        struct.pack_into("<I", moved_site_output, 0x1010, 0)
+        struct.pack_into("<I", moved_site_output, 0x1018, raw_lw(new_vaddr))
+        with self.assertRaisesRegex(dev_elf.DevElfError, "changed its GP-reference sites"):
+            dev_elf._audit_moved_gp_references(
+                bytes(base),
+                bytes(moved_site_output),
+                base_programs,
+                output_programs,
+                development_symbols,
+                retail_elf,
+                spec,
+                gp,
+            )
+
+        missing_contract = {
+            "moves": [
+                {
+                    key: value
+                    for key, value in spec["moves"][0].items()
+                    if not key.startswith("expected_")
+                }
+            ]
+        }
+        with self.assertRaisesRegex(dev_elf.DevElfError, "overlaps the retail GP window"):
+            dev_elf._audit_moved_gp_references(
+                bytes(base),
+                bytes(output),
+                base_programs,
+                output_programs,
+                development_symbols,
+                retail_elf,
+                missing_contract,
+                gp,
             )
 
     def test_replacement_fallback_preserves_bytes_and_relocations(self) -> None:

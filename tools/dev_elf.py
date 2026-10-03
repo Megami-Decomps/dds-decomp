@@ -1400,6 +1400,30 @@ def _resolve_linked_layout(
             raise DevElfError(f"additions[{index}] linked size does not match descriptor")
         addition["new_vaddr"] = start
         addition["size"] = end - start
+        linked_sections = []
+        sections = addition.get("sections")
+        if isinstance(sections, list):
+            for section_index, section in enumerate(sections):
+                marker = f"dev_addition_{index}_section_{section_index}"
+                section_start = _unique_defined_symbol(
+                    symbols, f"{marker}_START", f"{marker} start"
+                ).value
+                section_end = _unique_defined_symbol(
+                    symbols, f"{marker}_END", f"{marker} end"
+                ).value
+                if not start <= section_start <= section_end <= end:
+                    raise DevElfError(
+                        f"additions[{index}].sections[{section_index}] linked "
+                        "range is outside its addition"
+                    )
+                linked_sections.append(
+                    {
+                        "section": section,
+                        "start": section_start,
+                        "end": section_end,
+                    }
+                )
+        addition["_linked_sections"] = linked_sections
     for replacement_index, replacement in enumerate(
         resolved.get("replacements", [])
     ):
@@ -2281,17 +2305,17 @@ def _raw_gp_reference_sites(
         ]
         if len(matching) != 1:
             raise DevElfError(
-                f"retained GP-reference code range 0x{code_start:X}.."
+                f"GP-reference code range 0x{code_start:X}.."
                 f"0x{code_end:X} is not wholly executable and file-backed"
             )
         program = matching[0]
         file_start = program.offset + code_start - program.vaddr
         file_end = program.offset + code_end - program.vaddr
         if file_start % 4 or file_end % 4:
-            raise DevElfError("retained GP-reference code range is not word-aligned")
+            raise DevElfError("GP-reference code range is not word-aligned")
         for file_offset in range(file_start, file_end - 3, 4):
             vaddr = program.vaddr + file_offset - program.offset
-            word = _unpack_word(image, file_offset, "retained GP-reference scan")
+            word = _unpack_word(image, file_offset, "GP-reference scan")
             opcode = word >> 26
             if opcode not in GP_ADDRESS_OPCODES or (word >> 21) & 0x1F != 28:
                 continue
@@ -2328,6 +2352,178 @@ def _gp_reference_identities(
             )
         result.append(next(iter(identities)))
     return sorted(result)
+
+
+def _main_text_range(
+    symbols: list[LinkedSymbol], context: str
+) -> tuple[int, int]:
+    start = _unique_defined_symbol(symbols, "main_TEXT_START", context).value
+    end = _unique_defined_symbol(symbols, "main_TEXT_END", context).value
+    if end <= start or start % 4 or end % 4:
+        raise DevElfError(
+            f"{context} main text range 0x{start:X}..0x{end:X} is invalid"
+        )
+    return start, end
+
+
+def _range_intersects_gp_window(start: int, end: int, gp: int) -> bool:
+    raw_start = gp - 0x8000
+    raw_end = gp + 0x8000
+    if raw_start < 0:
+        windows = ((0, raw_end), (raw_start + 0x100000000, 0x100000000))
+    elif raw_end > 0x100000000:
+        windows = ((raw_start, 0x100000000), (0, raw_end - 0x100000000))
+    else:
+        windows = ((raw_start, raw_end),)
+    return any(
+        start < window_end and window_start < end
+        for window_start, window_end in windows
+    )
+
+
+def _audit_moved_gp_references(
+    base: bytes,
+    output: bytes,
+    base_programs: list[ProgramHeader],
+    output_programs: list[ProgramHeader],
+    development_symbols: list[LinkedSymbol],
+    retail_symbol_elf: bytes | None,
+    spec: dict[str, Any],
+    gp: int | None,
+) -> dict[str, int]:
+    """Verify raw GP-addressing closure for state moved out of its retail slot."""
+
+    state_sections = {".sdata", ".sbss", ".data", ".bss"}
+    state_moves = [
+        (index, move)
+        for index, move in enumerate(spec.get("moves", []))
+        if move.get("section") in state_sections
+    ]
+    if not state_moves:
+        return {"moved_gp_contracts": 0, "moved_gp_references": 0}
+    if gp is None or retail_symbol_elf is None:
+        raise DevElfError(
+            "moved-state GP audit requires the retail symbol ELF and _gp"
+        )
+
+    ranges = _move_ranges(spec)
+    contracts: list[tuple[int, int, int]] = []
+    for index, move in state_moves:
+        old_start, old_end, _, _ = ranges[index]
+        intersects_gp_window = _range_intersects_gp_window(old_start, old_end, gp)
+        has_retail = "expected_retail_gp_references" in move
+        has_development = "expected_gp_references" in move
+        if intersects_gp_window and not (has_retail and has_development):
+            raise DevElfError(
+                f"moves[{index}] overlaps the retail GP window and requires "
+                "expected_retail_gp_references and expected_gp_references"
+            )
+        if has_retail != has_development:
+            raise DevElfError(
+                f"moves[{index}] GP contract requires both "
+                "expected_retail_gp_references and expected_gp_references"
+            )
+        if has_retail:
+            contracts.append(
+                (
+                    index,
+                    _number(
+                        move["expected_retail_gp_references"],
+                        f"moves[{index}].expected_retail_gp_references",
+                    ),
+                    _number(
+                        move["expected_gp_references"],
+                        f"moves[{index}].expected_gp_references",
+                    ),
+                )
+            )
+    if not contracts:
+        return {"moved_gp_contracts": 0, "moved_gp_references": 0}
+
+    retail_symbols = parse_linked_symbols(retail_symbol_elf)
+    retail_code_ranges = [_main_text_range(retail_symbols, "retail ELF")]
+    development_code_ranges = [
+        _main_text_range(development_symbols, "development ELF")
+    ]
+    development_code_ranges.extend(
+        (new_start, new_end)
+        for index, (_, _, new_start, new_end) in enumerate(ranges)
+        if spec["moves"][index].get("section") == ".text"
+        and _move_storage(spec["moves"][index], index) == "file"
+    )
+    for addition_index, addition in enumerate(spec.get("additions", [])):
+        sections = addition.get("sections", [])
+        linked_sections = addition.get("_linked_sections")
+        if ".text" not in sections:
+            continue
+        if not isinstance(linked_sections, list):
+            raise DevElfError(
+                f"additions[{addition_index}] GP audit requires linked section ranges"
+            )
+        development_code_ranges.extend(
+            (entry["start"], entry["end"])
+            for entry in linked_sections
+            if entry.get("section") == ".text" and entry["end"] > entry["start"]
+        )
+
+    development_reference_count = 0
+    for index, expected_retail, expected_development in contracts:
+        old_start, old_end, new_start, new_end = ranges[index]
+        context = f"moves[{index}]"
+        retail_sites = _raw_gp_reference_sites(
+            base,
+            base_programs,
+            gp,
+            old_start,
+            old_end,
+            retail_code_ranges,
+        )
+        development_sites = _raw_gp_reference_sites(
+            output,
+            output_programs,
+            gp,
+            new_start,
+            new_end,
+            development_code_ranges,
+        )
+        stale_sites = []
+        if (old_start, old_end) != (new_start, new_end):
+            stale_sites = _raw_gp_reference_sites(
+                output,
+                output_programs,
+                gp,
+                old_start,
+                old_end,
+                development_code_ranges,
+            )
+        if stale_sites:
+            raise DevElfError(
+                f"{context} has {len(stale_sites)} development GP references "
+                "to its abandoned retail range"
+            )
+        for label, sites, expected in (
+            ("retail", retail_sites, expected_retail),
+            ("development", development_sites, expected_development),
+        ):
+            if len(sites) != expected:
+                raise DevElfError(
+                    f"{context} has {len(sites)} {label} GP references, "
+                    f"expected {expected}"
+                )
+        retail_identities = _gp_reference_identities(
+            retail_sites, retail_symbols, f"{context} retail"
+        )
+        development_identities = _gp_reference_identities(
+            development_sites, development_symbols, f"{context} development"
+        )
+        if not set(development_identities).issubset(retail_identities):
+            raise DevElfError(f"{context} changed its GP-reference sites")
+        development_reference_count += len(development_sites)
+
+    return {
+        "moved_gp_contracts": len(contracts),
+        "moved_gp_references": development_reference_count,
+    }
 
 
 def _linked_symbols_in_range(
@@ -2649,11 +2845,15 @@ def audit_relocation_closure(
         for replacement in spec.get("replacements", [])
         for entry in replacement.get("retained_sections", [])
     )
+    requires_moved_gp = any(
+        move.get("section") in {".sdata", ".sbss", ".data", ".bss"}
+        for move in spec.get("moves", [])
+    )
     development_gp, retail_gp = _matched_gp_values(
         relocations,
         development_symbols,
         retail_symbol_elf,
-        required=requires_retained_gp,
+        required=requires_retained_gp or requires_moved_gp,
     )
     effective_targets = _relocation_effective_targets(
         output, output_programs, relocations, development_gp
@@ -2670,6 +2870,16 @@ def audit_relocation_closure(
         retail_symbol_elf,
         spec,
         development_gp,
+    )
+    moved_gp_summary = _audit_moved_gp_references(
+        base,
+        output,
+        base_programs,
+        output_programs,
+        development_symbols,
+        retail_symbol_elf,
+        spec,
+        retail_gp,
     )
     changed_payload_words = _audit_moved_payloads(
         base,
@@ -3013,6 +3223,7 @@ def audit_relocation_closure(
         "cross_replacement_relocations": cross_replacement_relocations,
         "stale_reference_words_scanned": scanned_words,
         **retained_summary,
+        **moved_gp_summary,
     }
 
 
@@ -3185,7 +3396,10 @@ def render_linker_script(base: str, spec: dict[str, Any]) -> str:
                 raise DevElfError(
                     f"additions[{index}].sections[{section_index}] is invalid"
                 )
+            marker = f"dev_addition_{index}_section_{section_index}"
+            file_extension_lines.append(f"        {marker}_START = .;")
             file_extension_lines.append(f"        {obj}({section});")
+            file_extension_lines.append(f"        {marker}_END = .;")
         file_extension_lines.append(f"        dev_addition_{index}_END = .;")
 
     marker = "    /DISCARD/ :"
