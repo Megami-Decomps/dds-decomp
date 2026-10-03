@@ -5,8 +5,6 @@ extern s32 sdfCreateThread(s32 entry, s32 stack, s32 stackSize, s32 priority);
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 extern void _StartThread(s32, s32);
-extern s32 sdfTrackedThreadSemaphore;
-extern SdfThreadNode *sdfTrackedThreadHead;
 
 extern s32 CancelWakeupThread(s32 threadId);
 
