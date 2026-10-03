@@ -350,6 +350,32 @@ FLD2 remain visible in `ddsUnlinkedTransitionActors` on the field wrapper
 instead of being dropped. Tracked `.wapasm` inputs automatically use their
 paired INF and field-script sources to resolve exact symbols.
 
+For an ordinary `fNNN_AAA` source, a tracked `.wapasm` also adds the paired INF
+interaction state machines. They can be supplied without WAP metadata as well:
+
+```sh
+python3 tools/fld_scene.py src/dds1/data/field/f004_001.f1asm field.glb \
+  --field src/dds1/data/field/f004_001.fldasm \
+  --interactions src/dds1/data/field/f004.infasm
+```
+
+Every nondefault INF start row's action byte equals `AAA` for an existing
+ordinary field source, and its event string names the type-10 placement. A
+resolved placement receives every matching set, including its kind, event-hit
+selector, flag branches, message/selection rows, four
+choice targets, flag mutations, view action, extra action, and a unique BF
+message name when available. Control values retain their encoded number;
+proven row, warp, and completion targets also receive a typed form. Referenced
+canonical rows are included even when their stored row is otherwise the INF
+default.
+
+This exact area-and-name join resolves 141 of 143 nondefault DDS1 sets and 117
+of 141 DDS2 sets. The 26 remaining sets stay in
+`ddsUnlinkedInteractionActors`; they are not attached by a field-wide name
+guess. Together the tables expose 333 nondefault flag selectors and 453
+message/action rows. Alternate `kNNN_AAA` sources do not acquire an inferred
+INF table, though callers may supply one explicitly for inspection.
+
 Across field areas present in the tracked FLD2 corpus, 2,731 of 2,780 named WAP
 rows resolve to placement nodes: 1,552 of 1,582 in DDS1 and 1,179 of 1,198 in
 DDS2. Sixty DDS1 and 43 DDS2 placement identities own more than one row; the
