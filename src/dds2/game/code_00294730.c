@@ -195,7 +195,33 @@ void func_002968B8(s32 x, s32 y, s32 z, MenuDrawValuePanel *panel, s32 scale, s3
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_002969D8);
+extern s32 func_0035C860(char *, const char *, ...);
+extern s32 func_0019F798(s32, s32, s32, s32, char *, s32);
+extern void frFontSetChainFlag(s32, u8);
+extern void func_0019D550(s32, s32, s32);
+extern void frFontQueueGlyphInSelectedSlot(s32);
+extern char D_00437980[];
+
+void func_002969D8(s32 x, s32 y, s32 depth, MenuDrawValuePanel *panel, s32 option) {
+    char text[16];
+    s32 texture = D_00438FC8->textures[0];
+    MenuDrawObject *object = panel->object;
+    MenuDrawInner *inner;
+    s32 glyph;
+
+    func_00306CD0(D_003D03F0[25][MENU_ICON_X] * 16, D_003D03F0[25][MENU_ICON_Y] * 8,
+                  0, 0x100, 0, texture, D_003D03F0[25][MENU_ICON_FRAME], option);
+    func_00306CD0(D_003D03F0[26][MENU_ICON_X] * 16, D_003D03F0[26][MENU_ICON_Y] * 8,
+                  0, 0x100, 0, texture, D_003D03F0[26][MENU_ICON_FRAME], option);
+    inner = object->inner;
+    if (inner->active != 0) {
+        func_0035C860(text, D_00437980, 0);
+        glyph = func_0019F798(0x1910, 0x290, depth, 0xA09DC380, text, 0);
+        frFontSetChainFlag(glyph, 4);
+        func_0019D550(glyph, 1, option);
+        frFontQueueGlyphInSelectedSlot(glyph);
+    }
+}
 
 void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     func_00306CD0(
@@ -206,12 +232,6 @@ void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 optio
     );
 }
 
-extern s32 func_0035C860(char *, const char *, ...);
-extern s32 func_0019F798(s32, s32, s32, s32, char *, s32);
-extern void frFontSetChainFlag(s32, u8);
-extern void func_0019D550(s32, s32, s32);
-extern void frFontQueueGlyphInSelectedSlot(s32);
-extern char D_00437980[];
 extern s32 datGameState;
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 
