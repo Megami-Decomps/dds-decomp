@@ -12,6 +12,7 @@ from pathlib import Path
 import fld
 import fld_model
 import field_world
+import flw0
 import inf
 import lb
 import tmx
@@ -172,6 +173,7 @@ def append_field_scene(
     placement_marker_size: float = 50.0,
     transitions: dict[str, tuple[dict, ...]] | None = None,
     interactions: dict[str, tuple[dict, ...]] | None = None,
+    event_procedures: dict[str, int] | None = None,
 ) -> tuple[dict, bytes]:
     """Append FLD2 collision, cameras, events, and placements to a glTF document."""
 
@@ -207,6 +209,8 @@ def append_field_scene(
     marker_mesh = None
     counts = {"collision": 0, "camera": 0, "event": 0, "placement": 0}
     linked_event_placements = 0
+    script_linked_event_resources = 0
+    script_linked_event_placements = 0
     transition_actors: set[str] = set()
     interaction_actors: set[str] = set()
     event_ordinal = 0
@@ -260,6 +264,12 @@ def append_field_scene(
                 label = event_labels[event_ordinal]
                 if label is not None:
                     node["extras"]["ddsEventLabel"] = label
+                    if event_procedures is not None and label in event_procedures:
+                        node["extras"]["ddsEventProcedure"] = {
+                            "name": label,
+                            "index": event_procedures[label],
+                        }
+                        script_linked_event_resources += 1
                 counts["event"] += 1
             event_ordinal += 1
         elif resource.type_id == 10 and resource.data:
@@ -277,6 +287,12 @@ def append_field_scene(
                 label = event_labels[event_index]
                 if label is not None:
                     node["extras"]["ddsEventLabel"] = label
+                    if event_procedures is not None and label in event_procedures:
+                        node["extras"]["ddsEventProcedure"] = {
+                            "name": label,
+                            "index": event_procedures[label],
+                        }
+                        script_linked_event_placements += 1
                 node["extras"]["ddsEventResourceSerial"] = events[event_index].serial
                 linked_event_placements += 1
             if kind == 8 and payload:
@@ -341,6 +357,14 @@ def append_field_scene(
         ]
         if unlinked:
             wrapper["extras"]["ddsUnlinkedTransitionActors"] = unlinked
+    if event_procedures is not None:
+        wrapper["extras"].update(
+            {
+                "ddsFieldScriptProcedures": len(event_procedures),
+                "ddsScriptLinkedEventResources": script_linked_event_resources,
+                "ddsScriptLinkedEventPlacements": script_linked_event_placements,
+            }
+        )
     if interactions is not None:
         interaction_sets = sum(len(rows) for rows in interactions.values())
         linked_sets = sum(
@@ -380,6 +404,7 @@ def build_scene(
     warp_data: bytes | None = None,
     interaction_data: bytes | None = None,
     message_symbols: tuple[str | None, ...] = (),
+    event_procedures: dict[str, int] | None = None,
     field_number: int | None = None,
     area_number: int | None = None,
 ) -> tuple[dict, bytes]:
@@ -412,8 +437,13 @@ def build_scene(
         placement_marker_size=placement_marker_size,
         transitions=transitions,
         interactions=interactions,
+        event_procedures=event_procedures,
     )
-    if warp_data is not None or interaction_data is not None:
+    if (
+        warp_data is not None
+        or interaction_data is not None
+        or event_procedures is not None
+    ):
         document["asset"]["generator"] = "dds-decomp field-world exporter"
         document["asset"]["extras"].update(
             {"ddsFieldNumber": field_number, "ddsAreaNumber": area_number}
@@ -457,6 +487,44 @@ def _interaction_source_or_binary(
     return inf.encode(table), by_index
 
 
+def _script_procedures(path: Path) -> dict[str, int]:
+    """Load the runtime procedure-name lookup table from one BF/FLW0 script."""
+
+    if path.suffix.lower() == ".bfasm":
+        script = flw0.parse_source(path.read_text(encoding="utf-8"))
+    else:
+        script = flw0.parse(path.read_bytes())
+    procedures: dict[str, int] = {}
+    for row in script.named_rows(0):
+        if row.name in procedures:
+            raise flw0.Flw0Error(f"duplicate procedure name {row.name!r} in {path}")
+        procedures[row.name] = row.row_index
+    return procedures
+
+
+def _paired_script_path(field_number: int, *paths: Path | None) -> Path | None:
+    """Find the tracked field script paired with a tracked field-data source."""
+
+    for path in paths:
+        if path is None:
+            continue
+        resolved = path.resolve()
+        if (
+            resolved.parent.name.lower() != "field"
+            or resolved.parent.parent.name.lower() != "data"
+        ):
+            continue
+        candidate = (
+            resolved.parent.parent.parent
+            / "scripts"
+            / "field"
+            / f"f{field_number:03}.bfasm"
+        )
+        if candidate.is_file():
+            return candidate
+    return None
+
+
 def _field_identity(*paths: Path | None) -> tuple[int, int] | None:
     for path in paths:
         if path is None:
@@ -497,6 +565,11 @@ def main() -> None:
         type=Path,
         help="INF binary or tracked source whose state machines annotate placements",
     )
+    parser.add_argument(
+        "--scripts",
+        type=Path,
+        help="paired BF/FLW0 binary or source whose procedures annotate events",
+    )
     args = parser.parse_args()
     try:
         textures = None
@@ -531,7 +604,11 @@ def main() -> None:
                 and inferred.is_file()
             ):
                 interaction_path = inferred
-        if (args.warps is not None or interaction_path is not None) and identity is None:
+        if (
+            args.warps is not None
+            or interaction_path is not None
+            or args.scripts is not None
+        ) and identity is None:
             raise fld.FldError(
                 "field metadata requires an fNNN_AAA input or --field filename"
             )
@@ -550,6 +627,20 @@ def main() -> None:
             )
         else:
             interaction_data, message_symbols = None, ()
+        script_path = args.scripts
+        if (
+            script_path is None
+            and identity is not None
+            and _field_prefix(args.input, args.field) == "f"
+        ):
+            script_path = _paired_script_path(identity[0], args.input, args.field)
+        if script_path is not None:
+            script_match = re.fullmatch(r"f(\d{3})", script_path.stem, re.IGNORECASE)
+            if script_match and int(script_match.group(1)) != identity[0]:
+                raise fld.FldError("BF filename does not match the field scene")
+            event_procedures = _script_procedures(script_path)
+        else:
+            event_procedures = None
         document, binary = build_scene(
             model_data,
             field_data,
@@ -565,6 +656,7 @@ def main() -> None:
             ),
             interaction_data=interaction_data,
             message_symbols=message_symbols,
+            event_procedures=event_procedures,
             field_number=identity[0] if identity is not None else None,
             area_number=identity[1] if identity is not None else None,
         )
