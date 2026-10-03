@@ -2824,10 +2824,7 @@ _264:
         RELEASE_CURRENT_BGM()
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
-        push 671
-        push 25
-        push 1
-        COMM 0x0097
+        DEFER_BATTLE_EXIT(1, 25, 671)
         CALL_EVENT(event(e671))
         return
       }
@@ -2841,10 +2838,7 @@ _264:
     RELEASE_CURRENT_BGM()
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    push 671
-    push 25
-    push 1
-    COMM 0x0097
+    DEFER_BATTLE_EXIT(1, 25, 671)
     CALL_EVENT(event(e671))
     return
     goto _269
@@ -3052,12 +3046,8 @@ warpscr_002_01:
   WAIT_FOR_TIMER_LIMIT(20)
   RESET_STREAM_PLAYBACK()
   WAIT_FOR_STREAM_IDLE()
-  push 500
-  push 25
-  push 1
-  COMM 0x0097
-  push 823
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 25, 500)
+  SUBMIT_EVENT(823)
   return
   return
 after_002btl:
@@ -3137,12 +3127,8 @@ warpscr_005_04:
   WAIT_FOR_TIMER_LIMIT(20)
   RESET_STREAM_PLAYBACK()
   WAIT_FOR_STREAM_IDLE()
-  push 501
-  push 25
-  push 1
-  COMM 0x0097
-  push 845
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 25, 501)
+  SUBMIT_EVENT(845)
   return
   return
 after_007btl:
@@ -3819,12 +3805,8 @@ warpscr_031_03:
   WAIT_FOR_TIMER_LIMIT(20)
   RESET_STREAM_PLAYBACK()
   WAIT_FOR_STREAM_IDLE()
-  push 502
-  push 25
-  push 1
-  COMM 0x0097
-  push 825
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 25, 502)
+  SUBMIT_EVENT(825)
   return
   return
 after_030btl:
@@ -4024,12 +4006,8 @@ warpscr_044_02:
   WAIT_FOR_TIMER_LIMIT(20)
   RESET_STREAM_PLAYBACK()
   WAIT_FOR_STREAM_IDLE()
-  push 503
-  push 25
-  push 1
-  COMM 0x0097
-  push 826
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 25, 503)
+  SUBMIT_EVENT(826)
   return
   return
 after_046btl:

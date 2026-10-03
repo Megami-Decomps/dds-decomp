@@ -2974,12 +2974,8 @@ proc_0022:
       PREPARE_UNIT_MOTION_STATE(global_int[2], 15, 0, 0, 1)
       WAIT_FOR_TIMER_LIMIT(40)
       STOP_ARCHIVE_SOUND(27, 0)
-      push 500
-      push 7
-      push 1
-      COMM 0x0097
-      push 268
-      COMM 0x0067
+      DEFER_BATTLE_EXIT(1, 7, 500)
+      SUBMIT_EVENT(268)
       return
     }
   _357:

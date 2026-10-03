@@ -1936,10 +1936,7 @@ proc_0014:
     RELEASE_CURRENT_BGM()
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    push 674
-    push 23
-    push 1
-    COMM 0x0097
+    DEFER_BATTLE_EXIT(1, 23, 674)
     CALL_EVENT(event(e674))
     return
   }
@@ -2123,12 +2120,8 @@ proc_001a:
     START_ARCHIVE_SOUND(38, 0)
     WAIT_FOR_TIMER_LIMIT(15)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 502
-    push 23
-    push 1
-    COMM 0x0097
-    push 790
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 23, 502)
+    SUBMIT_EVENT(790)
     return
   } else {
   _234:
@@ -2834,12 +2827,8 @@ _325:
     WAIT_FOR_TIMER_LIMIT(30)
     STOP_ARCHIVE_SOUND(9, 0)
     SET_MODEL_FLAG(1222)
-    push 200
-    push 23
-    push 1
-    COMM 0x0097
-    push 770
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 23, 200)
+    SUBMIT_EVENT(770)
     return
   }
 _327:
@@ -2957,9 +2946,7 @@ _337:
       SET_SOLAR_OVERLAY_MODE(0)
       SCREEN_FADE_B(0, 5)
       WAIT_FOR_TIMER_LIMIT(5)
-      push string(str_01pos_01_2)
-      push 12
-      COMM 0x0098
+      REQUEST_CURRENT_GROUP_SEQUENCE(12, string(str_01pos_01_2))
       return
     }
   _339:
@@ -2991,9 +2978,7 @@ _341:
           COMM 0x01f8
           SCREEN_FADE_B(0, 5)
           WAIT_FOR_TIMER_LIMIT(5)
-          push string(str_01pos_01_3)
-          push 13
-          COMM 0x0098
+          REQUEST_CURRENT_GROUP_SEQUENCE(13, string(str_01pos_01_3))
           return
         } else {
         _345:
@@ -4061,9 +4046,7 @@ _491:
           COMM 0x01f8
           SCREEN_FADE_B(0, 5)
           WAIT_FOR_TIMER_LIMIT(5)
-          push string(str_01pos_01_6)
-          push 15
-          COMM 0x0098
+          REQUEST_CURRENT_GROUP_SEQUENCE(15, string(str_01pos_01_6))
           return
         } else {
         _495:
@@ -5025,9 +5008,7 @@ _641:
       SET_SOLAR_OVERLAY_MODE(0)
       SCREEN_FADE_B(0, 5)
       WAIT_FOR_TIMER_LIMIT(5)
-      push string(str_01pos_01_7)
-      push 17
-      COMM 0x0098
+      REQUEST_CURRENT_GROUP_SEQUENCE(17, string(str_01pos_01_7))
       return
     }
   _643:
@@ -5858,12 +5839,8 @@ proc_0079:
     RELEASE_CURRENT_BGM()
     RESET_STREAM_PLAYBACK()
     WAIT_FOR_STREAM_IDLE()
-    push 501
-    push 23
-    push 1
-    COMM 0x0097
-    push 834
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 23, 501)
+    SUBMIT_EVENT(834)
     return
   }
 _761:
@@ -6010,12 +5987,8 @@ proc_007a:
     PREPARE_UNIT_MOTION_STATE(local_int[79], 1, 3, 15, 0)
     MESSAGE_REQUEST_AND_POLL(message(EAT_EVE_07))
     FINISH_SCRIPT_MESSAGE_WINDOW()
-    push 503
-    push 23
-    push 18
-    COMM 0x0097
-    push 798
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(18, 23, 503)
+    SUBMIT_EVENT(798)
     return
   }
 _763:
@@ -6024,10 +5997,7 @@ _765:
   return
 proc_007b:
   PROC proc_007b
-  push 611
-  push 7
-  push 1
-  COMM 0x0097
+  DEFER_BATTLE_EXIT(1, 7, 611)
   CALL_EVENT(event(e611))
   return
   return
@@ -6203,10 +6173,7 @@ _787:
     if (MESSAGE_SELECTION_REQUEST_AND_POLL(selection(YES_NO)) == 0) {
       FINISH_SCRIPT_MESSAGE_WINDOW()
       RELEASE_CURRENT_BGM()
-      push 611
-      push 7
-      push 1
-      COMM 0x0097
+      DEFER_BATTLE_EXIT(1, 7, 611)
       CALL_EVENT(event(e611))
       return
     } else {

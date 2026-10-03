@@ -2131,10 +2131,7 @@ proc_002a:
     SCREEN_FADE_B(0, 10)
     WAIT_FOR_TIMER_LIMIT(10)
     CALL_EVENT(event(e672))
-    push 672
-    push 21
-    push 1
-    COMM 0x0097
+    DEFER_BATTLE_EXIT(1, 21, 672)
     return
   }
 _306:
@@ -2231,12 +2228,8 @@ proc_002c:
     SET_EFFECT_MODEL_CUT(local_int[71], 0)
     WAIT_FOR_TIMER_LIMIT(25)
     RESET_STREAM_PLAYBACK()
-    push 507
-    push 21
-    push 1
-    COMM 0x0097
-    push 814
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 21, 507)
+    SUBMIT_EVENT(814)
     return
   }
 _310:
@@ -2332,12 +2325,8 @@ _314:
       SET_EFFECT_MODEL_CUT(local_int[76], 0)
       WAIT_FOR_TIMER_LIMIT(25)
       RESET_STREAM_PLAYBACK()
-      push 510
-      push 21
-      push 1
-      COMM 0x0097
-      push 803
-      COMM 0x0067
+      DEFER_BATTLE_EXIT(1, 21, 510)
+      SUBMIT_EVENT(event(e803))
       return
     } else {
     _319:
@@ -2438,12 +2427,8 @@ proc_0030:
     SET_EFFECT_MODEL_CUT(local_int[81], 0)
     WAIT_FOR_TIMER_LIMIT(25)
     RESET_STREAM_PLAYBACK()
-    push 510
-    push 21
-    push 1
-    COMM 0x0097
-    push 803
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 21, 510)
+    SUBMIT_EVENT(event(e803))
     return
   }
 _324:
@@ -2489,12 +2474,8 @@ proc_0031:
     SET_EFFECT_MODEL_CUT(local_int[87], 0)
     WAIT_FOR_TIMER_LIMIT(25)
     RESET_STREAM_PLAYBACK()
-    push 502
-    push 21
-    push 1
-    COMM 0x0097
-    push 804
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 21, 502)
+    SUBMIT_EVENT(804)
     return
   }
 _326:
@@ -2539,12 +2520,8 @@ proc_0032:
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_07_2)))
     MESSAGE_REQUEST_AND_POLL(46)
     FINISH_SCRIPT_MESSAGE_WINDOW()
-    push 509
-    push 21
-    push 1
-    COMM 0x0097
-    push 805
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 21, 509)
+    SUBMIT_EVENT(805)
     return
   }
 _330:
@@ -2642,12 +2619,8 @@ proc_0034:
     SET_EFFECT_MODEL_CUT(local_int[95], 0)
     WAIT_FOR_TIMER_LIMIT(25)
     RESET_STREAM_PLAYBACK()
-    push 500
-    push 21
-    push 1
-    COMM 0x0097
-    push 802
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 21, 500)
+    SUBMIT_EVENT(event(e802))
     return
   }
 _332:
@@ -3205,12 +3178,8 @@ proc_0046:
     MESSAGE_REQUEST_AND_POLL(62)
     FINISH_SCRIPT_MESSAGE_WINDOW()
     FINISH_SCRIPT_MESSAGE_WINDOW()
-    push 503
-    push 21
-    push 1
-    COMM 0x0097
-    push 809
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 21, 503)
+    SUBMIT_EVENT(809)
     return
   }
 _402:
@@ -3271,12 +3240,8 @@ proc_0047:
     MESSAGE_REQUEST_AND_POLL(62)
     FINISH_SCRIPT_MESSAGE_WINDOW()
     FINISH_SCRIPT_MESSAGE_WINDOW()
-    push 503
-    push 21
-    push 1
-    COMM 0x0097
-    push 809
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 21, 503)
+    SUBMIT_EVENT(809)
     return
   }
 _404:
@@ -3394,12 +3359,8 @@ t_battle_03:
     SET_EFFECT_MODEL_CUT(local_int[106], 0)
     WAIT_FOR_TIMER_LIMIT(25)
     RESET_STREAM_PLAYBACK()
-    push 511
-    push 21
-    push 1
-    COMM 0x0097
-    push 815
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 21, 511)
+    SUBMIT_EVENT(815)
     return
   }
 _420:
@@ -3432,9 +3393,7 @@ _422:
       SCREEN_FADE_B(0, 15)
       WAIT_FOR_TIMER_LIMIT(15)
       LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(8)
-      push string(str_01pos_01_2)
-      push 30
-      COMM 0x0098
+      REQUEST_CURRENT_GROUP_SEQUENCE(30, string(str_01pos_01_2))
       return
     }
   _424:
@@ -3497,9 +3456,7 @@ _428:
       SCREEN_FADE_B(0, 15)
       WAIT_FOR_TIMER_LIMIT(15)
       STOP_ARCHIVE_SOUND(8, 0)
-      push string(str_01pos_02)
-      push 28
-      COMM 0x0098
+      REQUEST_CURRENT_GROUP_SEQUENCE(28, string(str_01pos_02))
       return
     }
   _430:
@@ -3623,12 +3580,8 @@ battle_angel:
     WAIT_FOR_TIMER_LIMIT(13)
     START_ARCHIVE_SOUND(40, 0)
     WAIT_FOR_TIMER_LIMIT(25)
-    push 512
-    push 21
-    push 31
-    COMM 0x0097
-    push 806
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(31, 21, 512)
+    SUBMIT_EVENT(806)
     return
   }
 _444:

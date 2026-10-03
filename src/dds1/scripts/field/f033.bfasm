@@ -1730,12 +1730,8 @@ proc_0028:
     START_ARCHIVE_SOUND(18, 0)
     WAIT_FOR_TIMER_LIMIT(20)
     DISABLE_FIELD_MODELS(0, 0, string(md_hoji_01), 0)
-    push 500
-    push 33
-    push 1
-    COMM 0x0097
-    push 331
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 33, 500)
+    SUBMIT_EVENT(331)
     return
   }
 _210:

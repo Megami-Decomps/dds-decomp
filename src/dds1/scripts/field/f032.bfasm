@@ -4053,12 +4053,8 @@ proc_006c:
     LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(17)
     START_ARCHIVE_SOUND(17, 0)
     WAIT_FOR_TIMER_LIMIT(40)
-    push 500
-    push 32
-    push 1
-    COMM 0x0097
-    push 329
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 32, 500)
+    SUBMIT_EVENT(329)
     return
   }
 _230:

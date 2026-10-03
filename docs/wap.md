@@ -243,7 +243,7 @@ destinations. Unlinked placements, unknown controls, and missing target areas
 are dashed. This option enables interaction loading automatically; the default
 command remains the fast version-1 world graph.
 
-`--include-events` upgrades the JSON schema to `dds-field-world-3` and adds
+`--include-events` upgrades the JSON schema to `dds-field-world-4` and adds
 the executable field-script layer. Each nonnegative kind-1 placement keeps its
 exact FLD2 event resource and becomes an entry edge only when the label exists
 in the `fNNN.bf` owned by that field's shared archive. The graph does not use a
@@ -251,21 +251,35 @@ global label or numeric-prefix fallback.
 
 Procedure nodes expose their runtime index, source name, code-word extent, and
 aggregated native-command vocabulary. Exact `CALL`, `JUMP`, and
-`CREATE_SCRIPT_TASK` targets form local execution edges; literal `CALL_EVENT`
-targets point to maintained event scripts. Reachability begins at concrete
-placement entries and follows those local edges. Dynamic or invalid targets
-remain explicit unresolved records. `--event-field fNNN` renders the reachable
-slice for one field, including placement roots, local procedure edges, the
-most frequent semantic commands on each node, and external event targets.
+`CREATE_SCRIPT_TASK` targets form local execution edges. Literal `CALL_EVENT`
+and `SUBMIT_EVENT` targets become event-resource edges, with the command,
+dispatch kind, and whether the target source is present retained on each edge.
+Reachability begins at concrete placement entries and follows those local edges.
+Dynamic or invalid targets remain explicit unresolved records with their
+dispatch command.
+`--event-field fNNN` renders the reachable slice for one field, including
+placement roots, local procedure edges, the most frequent semantic commands on
+each node, and external event targets.
+
+Literal `DEFER_BATTLE_EXIT` calls join the requested field and event to the
+exact `battle_exit` row in that field's WAP table. The resulting edge keeps all
+matching WAP entries and points to their concrete destination area when they
+agree. This resolves 63 of 64 DDS1 sites and all 88 DDS2 sites; all 151 resolved
+destinations have maintained field source. The remaining DDS1 request from
+`f002` asks the `f031` table for battle-exit event 657, which is absent, so it
+remains an explicit unresolved edge.
 
 Across DDS1, 526 placement links seed 510 entry procedures and reach 595 of
 1,528 field procedures through 567 distinct task edges (767 call sites). DDS2
 has 675 placement links, 669 entry procedures, and 712 of 1,711 procedures
 reachable through 460 task edges (462 sites). The field scripts also contain
-6 DDS1 and 19 DDS2 distinct event-script edges. All 1,229 task sites and 26
-event-call sites have direct in-range literal targets; none require inference.
-The complete graphs expose 48,700 DDS1 and 36,331 DDS2 native calls, of which
-46,905 and 34,772 respectively use verified command names.
+59 DDS1 and 83 DDS2 distinct event-script edges; 27 and 33 respectively leave
+reachable procedures. DDS1 has 6 `CALL_EVENT` and 58 `SUBMIT_EVENT` sites;
+DDS2 has 20 and 64. All 1,229 task sites and 148 event-dispatch sites have
+direct literal targets; none require inference. Of the deferred battle exits,
+29 DDS1 and 34 DDS2 sites leave placement-reachable procedures. The complete
+graphs expose 48,700 DDS1 and 36,331 DDS2 native calls, of which 47,908 and
+35,742 respectively use verified command names.
 
 Run the codec and complete-corpus regression tests with:
 

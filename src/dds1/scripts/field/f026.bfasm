@@ -1914,12 +1914,8 @@ proc_001a:
     SET_EFFECT_MODEL_CUT(local_int[61], 0)
     WAIT_FOR_TIMER_LIMIT(20)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 500
-    push 26
-    push 1
-    COMM 0x0097
-    push 307
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 26, 500)
+    SUBMIT_EVENT(307)
     return
   }
 _247:
@@ -2002,12 +1998,8 @@ proc_001d:
     SET_EFFECT_MODEL_CUT(local_int[65], 0)
     WAIT_FOR_TIMER_LIMIT(20)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 501
-    push 26
-    push 1
-    COMM 0x0097
-    push 307
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 26, 501)
+    SUBMIT_EVENT(307)
     return
   }
 _255:
@@ -2063,12 +2055,8 @@ proc_001e:
     SET_EFFECT_MODEL_CUT(local_int[69], 0)
     WAIT_FOR_TIMER_LIMIT(20)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 502
-    push 26
-    push 1
-    COMM 0x0097
-    push 307
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 26, 502)
+    SUBMIT_EVENT(307)
     return
   }
 _259:
@@ -2673,12 +2661,8 @@ set_bomb_5f:
     SET_EFFECT_MODEL_CUT(local_int[90], 0)
     WAIT_FOR_TIMER_LIMIT(20)
     STOP_ARCHIVE_SOUND(35, 0)
-    push 505
-    push 26
-    push 1
-    COMM 0x0097
-    push 309
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 26, 505)
+    SUBMIT_EVENT(309)
     return
   }
 _365:
@@ -2902,12 +2886,8 @@ set_bomb_7f:
     SET_EFFECT_MODEL_CUT(local_int[101], 0)
     WAIT_FOR_TIMER_LIMIT(20)
     STOP_ARCHIVE_SOUND(35, 0)
-    push 503
-    push 26
-    push 1
-    COMM 0x0097
-    push 310
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 26, 503)
+    SUBMIT_EVENT(310)
     return
   }
 _401:
@@ -3463,12 +3443,8 @@ proc_0033:
     STOP_ARCHIVE_SOUND(25, 0)
     STOP_ARCHIVE_SOUND(26, 0)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 504
-    push 26
-    push 1
-    COMM 0x0097
-    push 308
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 26, 504)
+    SUBMIT_EVENT(308)
     return
   }
 _561:
@@ -3621,12 +3597,8 @@ proc_0037:
     SET_EFFECT_MODEL_CUT(local_int[132], 0)
     WAIT_FOR_TIMER_LIMIT(20)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 506
-    push 26
-    push 1
-    COMM 0x0097
-    push 303
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 26, 506)
+    SUBMIT_EVENT(303)
     return
   }
 _573:
