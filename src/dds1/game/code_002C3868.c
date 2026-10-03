@@ -8,7 +8,7 @@ extern void mnuTickMapTimers(void);
 
 extern void sdfCounterTickPositionTransition(void);
 
-extern void func_002C3DB0(void);
+extern s32 func_002C3DB0(void);
 
 extern s32 sdfCounterGetDisplayValue(void);
 
@@ -206,7 +206,52 @@ void func_002C3D90(void) {
     func_002C3DB0();
 }
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C3DB0);
+s32 func_002C3DB0(void) {
+    f32 t;
+
+    if (D_003BD271 == 0) {
+        return 1;
+    }
+    if (D_003BD270 != 0) {
+        t = (45 - D_003BD270) / 45.0f;
+        t = 1.0f - t * t;
+        if (t > 1.0f) {
+            t = 1.0f;
+        }
+        fldLocalMapFirstCameraVector.v[0] = D_003900C0.v[0] * (1.0f - t) +
+            D_003900E0[sdfSelectedCounterIndex].v[0] * t;
+        fldLocalMapFirstCameraVector.v[1] = D_003900C0.v[1] * (1.0f - t) +
+            D_003900E0[sdfSelectedCounterIndex].v[1] * t;
+        fldLocalMapFirstCameraVector.v[2] = D_003900C0.v[2] * (1.0f - t) +
+            D_003900E0[sdfSelectedCounterIndex].v[2] * t;
+        fldLocalMapFirstCameraVector.v[3] = 1.0f;
+        sdfQuatSlerp(fldLocalMapSecondCameraVector.v, D_003900D0.v,
+            D_00390180[sdfSelectedCounterIndex].v, t);
+        if ((s8)(D_003BD270 + 1) >= 45) {
+            D_003BD270 = 0;
+        } else {
+            D_003BD270++;
+        }
+    } else {
+        fldLocalMapFirstCameraVector.v[0] =
+            D_003900E0[sdfSelectedCounterIndex].v[0];
+        fldLocalMapFirstCameraVector.v[1] =
+            D_003900E0[sdfSelectedCounterIndex].v[1];
+        fldLocalMapFirstCameraVector.v[2] =
+            D_003900E0[sdfSelectedCounterIndex].v[2];
+        fldLocalMapFirstCameraVector.v[3] =
+            D_003900E0[sdfSelectedCounterIndex].v[3];
+        fldLocalMapSecondCameraVector.v[0] =
+            D_00390180[sdfSelectedCounterIndex].v[0];
+        fldLocalMapSecondCameraVector.v[1] =
+            D_00390180[sdfSelectedCounterIndex].v[1];
+        fldLocalMapSecondCameraVector.v[2] =
+            D_00390180[sdfSelectedCounterIndex].v[2];
+        fldLocalMapSecondCameraVector.v[3] =
+            D_00390180[sdfSelectedCounterIndex].v[3];
+    }
+    return 1;
+}
 
 s32 sdfStepSelectedMapCameraTransition(void) {
     f32 t;

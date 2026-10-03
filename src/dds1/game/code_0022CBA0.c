@@ -1,5 +1,7 @@
 #include "common.h"
 #include "evt_world.h"
+#include "pcp_vu0.h"
+#include "evt_unit.h"
 
 extern void *kwlnTaskGetUserValue(void);
 
@@ -22,7 +24,7 @@ extern u32 kwlnDrawControlFlags;
 s32 evtEventViewerGetPendingNode(s32 arg0);
 void func_0022E5A0(s32 arg0, void *arg1);
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32 dds3GetWorldObject(void);
+void *dds3GetWorldObject(void);
 void dds3SetWorldCameraObject(s32 arg0, u32 arg1);
 f32 dds3GetCameraFieldOfView(s32 arg0);
 s32 func_00106488(f32 arg0);
@@ -54,7 +56,8 @@ typedef struct EventViewerState {
     s32 glyphAdvanceStart;    /* 0x10 */
     s32 glyphAdvanceLimit;    /* 0x14 */
     s32 glyphAdvancePosition; /* 0x18 */
-    u8 pad1C[0x2008];
+    u8 pad1C[8];
+    u8 unitNames[256][32];
     s32 selectedEntry;
     u8 pad2028[4];
     s32 fallbackEntry;
@@ -146,9 +149,13 @@ u16 evtViewerPopHistory(EventViewerState *viewer);
 
 typedef struct EvtViewGlyph {
     u16 id;       /* 0x00 */
-    u8 pad02[6];
-    s8 kind;      /* 0x08 */
-    u8 pad09[3];
+    u16 duration;
+    u8 pad04[4];
+    union {
+        s8 kind;
+        s16 unitIndex;
+    } selector; /* Interpretation depends on the enclosing track kind. */
+    s16 enabled;
     s8 channel;   /* 0x0C */
     u8 pad0D[3];
     s16 condition; /* 0x10 */
@@ -293,7 +300,7 @@ void evtViewerApplySelectedEntry(EventViewerState *viewer) {
     if (entry == 0) {
         return;
     }
-    dds3SetWorldCameraObject(dds3GetWorldObject(), entry);
+    dds3SetWorldCameraObject((s32)dds3GetWorldObject(), entry);
     func_00106488(dds3GetCameraFieldOfView(entry));
 }
 
@@ -303,7 +310,78 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022D420);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022D528);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022E098);
+typedef struct EvtWorldLink {
+    u8 pad00[8];
+    u8 *name;
+    u8 pad0C[0xC];
+    void *data;
+    u8 pad1C[4];
+    struct EvtWorldLink *next;
+} EvtWorldLink;
+
+extern EvtWorldLink *dds3FindIndexedObjectChainNodeByName(EvtWorldObject *, s32, const u8 *);
+extern s32 evtUnitGetNestedValue(u8 *);
+extern void evtSetUnitValueTransition(EvtUnit *, s32, s32);
+extern void evtEndUnitValueTransition(EvtUnit *, s32);
+
+void func_0022E098(s32 time, EventViewerState *viewer) {
+    EvtWorldLink *object;
+    EvtViewNode *node;
+    EvtViewGlyph *key;
+    EvtViewGlyph *selected;
+    EvtUnit *unit;
+    s32 selectedValue;
+    s32 selectedTime;
+
+    if (dds3GetWorldObject() != NULL) {
+        object = ((EvtWorldObject *)dds3GetWorldObject())->table->slots[EVT_WORLD_SLOT_UNIT].head;
+        while (object != NULL) {
+            if (object->name != NULL) {
+                selected = NULL;
+                selectedValue = 0;
+                selectedTime = -1;
+                node = viewer->nodes;
+                while (node != NULL) {
+                    if (node->kind == 9) {
+                        key = node->glyphs;
+                        while (key != NULL) {
+                            if (time >= key->id + node->time && key->selector.unitIndex >= 0 &&
+                                object == dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(),
+                                    EVT_WORLD_SLOT_UNIT, viewer->unitNames[key->selector.unitIndex])) {
+                                if (selectedTime < key->id + node->time) {
+                                    selectedValue = node->owner;
+                                    selectedTime = key->id + node->time;
+                                    selected = key;
+                                }
+                            }
+                            key = key->next;
+                        }
+                    }
+                    node = node->next;
+                }
+                unit = (EvtUnit *)evtUnitGetNestedValue((u8 *)object);
+                if (selected != NULL) {
+                    if (selected->enabled != 0) {
+                        if (unit->currentTransitionValue != selectedValue || !(unit->flags & 0x40000)) {
+                            evtSetUnitValueTransition(unit, selectedValue, selected->duration);
+                        }
+                    } else {
+                        if (unit->flags & 0x40000) {
+                            if (!(unit->flags & 0x100000)) {
+                                evtEndUnitValueTransition(unit, selected->duration);
+                            }
+                        }
+                    }
+                } else {
+                    if (unit->currentTransitionValue != 0) {
+                        evtEndUnitValueTransition(unit, 0);
+                    }
+                }
+            }
+            object = object->next;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022E288);
 
@@ -311,12 +389,6 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022E5A0);
 
 extern s32 dds3GetSlot(s32 owner, s32 kind);
 extern void evtPolygonMovieClampTime(s32 object, s32 arg1, s32 start, s32 end);
-
-
-typedef struct EvtWorldLink {
-    u8 pad0[0x20];
-    s32 next; /* 0x20 */
-} EvtWorldLink;
 
 void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
     s32 table;
@@ -349,7 +421,7 @@ void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
                             }
                             node = node->next;
                         }
-                        object = ((EvtWorldLink *)object)->next;
+                        object = (s32)((EvtWorldLink *)object)->next;
                     } while (object != 0);
                 }
             }
@@ -382,7 +454,7 @@ void evtViewerSyncWorldGroups(s32 position, EventViewerState *viewer) {
                 if (found != NULL) {
                     func_0022EB10(position, object, node, viewer, 0);
                 }
-                object = ((EvtWorldLink *)object)->next;
+                object = (s32)((EvtWorldLink *)object)->next;
             } while (object != 0);
         }
     }
@@ -405,7 +477,7 @@ void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
             best = NULL;
             if (glyph != NULL) {
                 do {
-                    if (position >= glyph->id && bestId < glyph->id && glyph->kind == 6) {
+                    if (position >= glyph->id && bestId < glyph->id && glyph->selector.kind == 6) {
                         bestId = glyph->id;
                         best = glyph;
                     }
@@ -426,7 +498,71 @@ void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F038);
+typedef struct EffTransformNode EffTransformNode;
+struct WorldObjectPointer;
+extern void effObjSetInnerFirstVec(EffTransformNode *, u128 *);
+extern void effObjSetInnerSecondVec(EffTransformNode *, u128 *);
+extern void effObjFetchInnerFirstVec(EffTransformNode *);
+extern u32 *dds3FindObjectChainNodeByName(struct WorldObjectPointer *, const u8 *);
+extern void mdlAttachWorldObjectToSourceVector(s32, s32);
+
+void func_0022F038(s32 position, EventViewerState *viewer) {
+    EvtViewNode *node = viewer->nodes;
+    EvtViewGlyph *glyph;
+    EvtViewGlyph *best;
+    s32 bestId;
+
+    while (node != NULL) {
+        if (node->kind == 1) {
+            glyph = node->glyphs;
+            bestId = -1;
+            best = NULL;
+            if (glyph != NULL) {
+                do {
+                    if (glyph->selector.kind == 7 && position >= glyph->id &&
+                        bestId < glyph->id) {
+                        bestId = glyph->id;
+                        best = glyph;
+                    }
+                    glyph = glyph->next;
+                } while (glyph != NULL);
+            }
+            if (best == NULL) {
+                if (*(s32 *)((u8 *)node + 0x4C) == 1) {
+                    effObjSetInnerFirstVec((EffTransformNode *)node->owner,
+                        (u128 *)((u8 *)node + 0x2C));
+                    effObjSetInnerSecondVec((EffTransformNode *)node->owner,
+                        (u128 *)((u8 *)node + 0x3C));
+                    effObjFetchInnerFirstVec((EffTransformNode *)node->owner);
+                    VU0_STORE_VF(vf10,
+                        (u8 *)*(void **)((u8 *)node->owner + 0x1C) + 0x70);
+                    *(s32 *)((u8 *)node + 0x4C) = 0;
+                }
+            } else if (best->id == position) {
+                s16 channel = *(s16 *)((u8 *)best + 0xC);
+
+                if (channel == -1) {
+                    effObjSetInnerFirstVec((EffTransformNode *)node->owner,
+                        (u128 *)((u8 *)node + 0x2C));
+                    effObjSetInnerSecondVec((EffTransformNode *)node->owner,
+                        (u128 *)((u8 *)node + 0x3C));
+                    effObjFetchInnerFirstVec((EffTransformNode *)node->owner);
+                    VU0_STORE_VF(vf10,
+                        (u8 *)*(void **)((u8 *)node->owner + 0x1C) + 0x70);
+                    *(s32 *)((u8 *)node + 0x4C) = 0;
+                } else {
+                    u32 *object = dds3FindObjectChainNodeByName(
+                        dds3GetWorldObject(), viewer->unitNames[channel]);
+
+                    mdlAttachWorldObjectToSourceVector(
+                        *(s32 *)((u8 *)node->owner + 4), object[1]);
+                    *(s32 *)((u8 *)node + 0x4C) = 1;
+                }
+            }
+        }
+        node = node->next;
+    }
+}
 
 struct CampPacked;
 extern void mnuUnpackNibbleFields(struct CampPacked *, s32 *, s32 *);
@@ -576,7 +712,7 @@ EvtViewGlyph *evtViewerFindLatestMatchingGlyph(EvtViewNode *group, s32 position,
 
     if (glyph != NULL) {
         do {
-            if (position >= glyph->id && bestId < glyph->id && glyph->kind == 5 &&
+            if (position >= glyph->id && bestId < glyph->id && glyph->selector.kind == 5 &&
                 glyph->channel == channel && evtViewerTestIndexedCondition(glyph->condition) == 1) {
                 bestId = glyph->id;
                 best = glyph;

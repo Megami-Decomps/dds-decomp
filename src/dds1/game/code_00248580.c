@@ -1101,6 +1101,7 @@ s32 func_0024AB28(MenuSelectorContext *context) {
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024AB70);
 
 
+extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
 extern s32 D_003AF6E0[2][2];
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
@@ -1147,7 +1148,6 @@ typedef struct GridPanelHost {
 } GridPanelHost;
 
 
-extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
 
 /* Reset grid entry 0x1A, then configure it from the panel's setting slot chosen by `kind`. */
 void mnuApplyGridPanelHostSetting(u32 kind, GridPanelHost *host) {
@@ -1245,7 +1245,7 @@ typedef struct EvtBContext {
     s32 thresholdList; /* 0x74 */
     s32 selectionList; /* 0x78 */
     s32 state7C;       /* 0x7C: nonzero also re-requests the effect resource */
-    u8  pad80[0x8];
+    u8 pad80[0x8];
     s32 panelMode; /* 0x88 */
     u8 pad8C[0x40]; /* 0x98: reset flag meaning still unclear */
     s32 exitPending; /* 0xCC */
@@ -1405,7 +1405,37 @@ u32 evtBeginSelectionExitFade(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024B868);
+extern s32 sdfCheckPendingWorkWithInterrupts(void);
+extern s32 fileMenuTaskExists(void);
+extern void fileSetPreviewLocation();
+extern void fileEnterMcPackScene(s32);
+
+s64 func_0024B868(s32 request) {
+    s32 context = kwlnTaskGetUserValue();
+    s32 *dispatch = (s32 *)(context + 0x54);
+    s64 result = func_00285670(context + 8, dispatch, 0, request);
+
+    if (result != 0) {
+        return result;
+    }
+    if (kwlnFadeIsActive() != 0) {
+        return 0;
+    }
+    if (*(s32 *)(context + 0x94) == 0 &&
+        sdfCheckPendingWorkWithInterrupts() == 0) {
+        mnuReleaseBothVisualResourceTextures((MenuVisualWork *)context);
+        fileSetPreviewLocation(*(s32 *)(context + 0x7C),
+            *(s32 *)(context + 0x80));
+        fileEnterMcPackScene(0);
+        *(s32 *)(context + 0x94) = 1;
+    }
+    if (*(s32 *)(context + 0x54) == 0 && fileMenuTaskExists() == 0 &&
+        sdfCheckPendingWorkWithInterrupts() == 0) {
+        *(s32 *)(context + 0x94) = 0;
+        mnuSetPopupEntryFlagged(dispatch, D_0036ACF8);
+    }
+    return 0;
+}
 
 s64 evtBDispatchStart(s32 request) {
     s32 context = kwlnTaskGetUserValue();

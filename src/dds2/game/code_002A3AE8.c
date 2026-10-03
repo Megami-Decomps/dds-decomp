@@ -119,7 +119,24 @@ extern u32 effLoadIndexedResource(const char *path, const char *name, u32 mode);
 extern void effRequestResourceByMode(const char *path, const char *name, u32 mode, u32 *handle);
 
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3D70);
+void func_002A3D70(void) {
+    u32 *state = (u32 *)mnuMovieMenuState;
+    u32 resource;
+
+    if (state[1] == 0) {
+        resource = effLoadIndexedResource((const char *)D_00437A48,
+            (const char *)D_003E3760, 0);
+        state = (u32 *)mnuMovieMenuState;
+        state[1] = resource;
+    }
+    if (state[3] == 0) {
+        const char *name = (const char *)D_003E3760;
+        name += 0x20;
+        resource = effLoadIndexedResource((const char *)D_00437A48, name, 0);
+        state = (u32 *)mnuMovieMenuState;
+        state[3] = resource;
+    }
+}
 
 void mnuReleaseMenuResourceSlots(void) {
     u32 *state = (u32 *)mnuMovieMenuState;
