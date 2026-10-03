@@ -770,7 +770,15 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
 
 extern void func_00340DC8(f32, f32, f32);
 extern f32 func_003532E8(f32, f32);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+extern f32 sdfSinPoly(f32);
 extern u128 D_003BE0D0;
+
+static inline f32 btlAbsF32(f32 value) {
+    f32 result;
+    __asm__("abs.s %0, %1" : "=f"(result) : "f"(value));
+    return result;
+}
 
 s32 btlAimHorizontalDirectionVU(f32 *from, f32 *to) {
     f32 delta[4];
@@ -784,7 +792,39 @@ s32 btlAimHorizontalDirectionVU(f32 *from, f32 *to) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00209258);
+s32 func_00209258(f32 *from, f32 *to, f32 angle) {
+    f32 delta[4];
+    f32 absX;
+    f32 limit;
+    f32 slope;
+    f32 clamped;
+    f32 zero;
+    f32 radians;
+
+    radians = angle;
+    zero = 0.0f;
+    delta[0] = to[0];
+    delta[0] -= from[0];
+    delta[2] = to[2] - from[2];
+    if (delta[0] == zero && delta[2] == zero) {
+        return 0;
+    }
+
+    slope = sdfSinPoly(radians);
+    slope /= sdfEvaluateCosineViaSinePhaseShift(radians);
+    absX = btlAbsF32(delta[0]);
+    clamped = slope * delta[2];
+    limit = __builtin_fabsf(clamped);
+    if (absX < limit) {
+        clamped = delta[0];
+    } else if (delta[0] >= zero) {
+        clamped = limit;
+    } else {
+        clamped = -limit;
+    }
+    func_00340DC8(zero, func_003532E8(clamped, delta[2]), zero);
+    return 1;
+}
 
 /* vu0 routine: unit normal of the triangle (a, b, c); result in vf10 (VU register convention) */
 void btlTriangleNormalVU(f32 *a, f32 *b, f32 *c) {

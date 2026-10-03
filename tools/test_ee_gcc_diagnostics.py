@@ -47,6 +47,19 @@ class ProbeTests(unittest.TestCase):
             self.assertTrue(probe.inside(root / "child", root))
             self.assertFalse(probe.inside(root, root / "child"))
 
+    def test_snapshot_source_preserves_exact_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "candidate.c"
+            out_dir = root / "probe"
+            out_dir.mkdir()
+            contents = b"int candidate(void) { return 1; }\n\xff"
+            source.write_bytes(contents)
+            snapshot = probe.snapshot_source(source, out_dir)
+            self.assertEqual(out_dir / "input.c", snapshot)
+            self.assertEqual(contents, snapshot.read_bytes())
+            self.assertEqual(hashlib.sha256(contents).hexdigest(), probe.sha256(snapshot))
+
     def test_object_record_hashes_present_output(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
