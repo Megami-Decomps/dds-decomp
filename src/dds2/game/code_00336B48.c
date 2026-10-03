@@ -1120,7 +1120,44 @@ void sdfVuBeginPacketFromWork(VuWork *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_003394C8);
+u64 *func_003394C8(VuWork *work) {
+    u32 cursor;
+    u32 start;
+    s32 quadwords;
+    u32 descriptor;
+    u64 gifTag;
+    u64 *header;
+
+    if (work->state == 0) {
+        return NULL;
+    }
+
+    cursor = (u32)work->cursor;
+    start = (u32)work->dataStart;
+    if (cursor == start) {
+        sdfSetPacketCursorAligned(work->state);
+        return NULL;
+    }
+
+    while (((u32)cursor & 0xC) != 0) {
+        *(u32 *)cursor = 0;
+        cursor += 4;
+    }
+    quadwords = (s32)(cursor - start) >> 4;
+
+    while (((u32)cursor & 0x30) != 0) {
+        *(u128 *)cursor = 0;
+        cursor += 0x10;
+    }
+
+    sdfSetPacketCursorAligned(cursor & 0x0FFFFFFF);
+    header = (u64 *)work->header;
+    descriptor = 0x20000000 | (quadwords & 0xFFFF);
+    gifTag = 0x1100000000000000ULL;
+    header[0] = descriptor;
+    header[1] = gifTag;
+    return header;
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_003395A0);
 
