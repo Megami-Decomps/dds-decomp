@@ -259,6 +259,47 @@ def include_directives(
     return [match.groups() for match in matches]
 
 
+def validate_replacement_includes(
+    includes: list[tuple[str, str, str]],
+    fallback_symbols: list[str],
+    retained_sections: object,
+    *,
+    context: str,
+) -> None:
+    """Require executable fallbacks and included small data to be explicit."""
+
+    def positive_size(section: dict[str, object]) -> bool:
+        value = section.get("size")
+        try:
+            return int(value, 0) > 0 if isinstance(value, str) else value > 0
+        except (TypeError, ValueError):
+            return False
+
+    unsupported = [
+        f"INCLUDE_{kind}({name})"
+        for kind, _, name in includes
+        if kind not in {"ASM", "SDATA"}
+    ]
+    if unsupported:
+        raise SystemExit(f"{context} has unsupported fallback {unsupported[0]}")
+
+    included_symbols = [name for kind, _, name in includes if kind == "ASM"]
+    if included_symbols != fallback_symbols:
+        raise SystemExit(
+            f"{context} fallback_symbols must exactly match {included_symbols!r}"
+        )
+
+    includes_sdata = any(kind == "SDATA" for kind, _, _ in includes)
+    retains_sdata = isinstance(retained_sections, list) and any(
+        isinstance(section, dict)
+        and section.get("section") == ".sdata"
+        and positive_size(section)
+        for section in retained_sections
+    )
+    if includes_sdata and not retains_sdata:
+        raise SystemExit(f"{context} uses INCLUDE_SDATA without retaining .sdata")
+
+
 def source_for(obj: Path, version: str) -> tuple[str, Path]:
     """Map a linker-script object back to the input splat or the tree provides."""
     rel = obj.relative_to(Path("build") / version)
@@ -520,22 +561,12 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                         f"{dev_descriptor}: replacements[{index}].fallback_symbols "
                         "must be a list of symbol names"
                     )
-                included_symbols = [name for kind, _, name in includes if kind == "ASM"]
-                unsupported = [
-                    f"INCLUDE_{kind}({name})"
-                    for kind, _, name in includes
-                    if kind != "ASM"
-                ]
-                if unsupported:
-                    raise SystemExit(
-                        f"{dev_descriptor}: replacement source {source} has unsupported "
-                        f"fallback {unsupported[0]}"
-                    )
-                if included_symbols != fallback_symbols:
-                    raise SystemExit(
-                        f"{dev_descriptor}: replacements[{index}].fallback_symbols "
-                        f"must exactly match {included_symbols!r} from {source}"
-                    )
+                validate_replacement_includes(
+                    includes,
+                    fallback_symbols,
+                    replacement.get("retained_sections"),
+                    context=f"{dev_descriptor}: replacements[{index}] ({source})",
+                )
                 eeasm = [
                     str(
                         Path("build")
