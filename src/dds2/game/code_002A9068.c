@@ -155,10 +155,29 @@ extern char D_0042A950[];
 
 extern u32 effLoadIndexedResource(char *, u32, u32);
 
+#define MNU_STAFF_BASE_RESOURCE_COUNT 2
+#define MNU_STAFF_MAIN_RESOURCE_COUNT 16
+#define MNU_STAFF_EXTRA_RESOURCE_COUNT 5
+#define MNU_STAFF_PAIR_RESOURCE_COUNT 2
+#define MNU_STAFF_STATUS_BATCH_COUNT 2
+#define MNU_STAFF_PANEL_COUNT 3
+#define MNU_STAFF_PARTY_COUNT 5
+#define MNU_STAFF_PARTY_RECORD_BYTES 0x1C4
+#define MNU_STAFF_PARTY_RECORD_BASE 0xA60
+#define MNU_STAFF_PARTY_PRESENT_BIT 1
+#define MNU_STAFF_PARTY_CATEGORY 4
+#define MNU_STAFF_RETAIN_RESOURCE 1
+#define MNU_CAMP_STATE_IDLE 0
+#define MNU_CAMP_STATE_ACTIVE 1
+#define MNU_CAMP_STATE_CLEANED_UP 2
+#define MNU_CAMP_CANCEL_MASK 8
+#define MNU_CAMP_OPEN_FADE_FRAMES 0xF
+
+/* Load the base image handles into the global table, retaining each resource. */
 void mnuLoadCampResources(void) {
-    s32 i;
-    for (i = 0; i < 2; i++) {
-        mnuCampResourceHandles[i] = effLoadIndexedResource(D_0042A950, D_003E6848[i * 2], 1);
+    s32 resourceIndex;
+    for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
+        mnuCampResourceHandles[resourceIndex] = effLoadIndexedResource(D_0042A950, D_003E6848[resourceIndex * 2], MNU_STAFF_RETAIN_RESOURCE);
     }
 }
 
@@ -166,22 +185,24 @@ extern void effReleaseTextureHandlesAndResetSlots(u32);
 
 extern void effResolveAndReleaseResource(u32);
 
+/* Resolve each global handle, then copy its post-call value into destination. */
 void mnuSnapshotCampTextureHandles(u32 *destination) {
-    s32 i;
-    for (i = 0; i < 2; i++) {
-        effResolveAndReleaseResource(mnuCampResourceHandles[i]);
-        destination[i] = mnuCampResourceHandles[i];
+    s32 resourceIndex;
+    for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
+        effResolveAndReleaseResource(mnuCampResourceHandles[resourceIndex]);
+        destination[resourceIndex] = mnuCampResourceHandles[resourceIndex];
     }
 }
 
+/* Release textures through the global handles and clear the caller's slots. */
 void mnuReleaseCampTextureHandlesAndClearOutput(u32 *destination) {
-    s32 remaining = 1;
-    u32 offset = 0;
+    s32 resourceCountdown = MNU_STAFF_BASE_RESOURCE_COUNT - 1;
+    u32 byteOffset = 0;
     do {
-        effReleaseTextureHandlesAndResetSlots(*(u32 *)((u8 *)mnuCampResourceHandles + offset));
-        *(u32 *)((u8 *)destination + offset) = 0;
-        offset += 4;
-    } while (--remaining >= 0);
+        effReleaseTextureHandlesAndResetSlots(*(u32 *)((u8 *)mnuCampResourceHandles + byteOffset));
+        *(u32 *)((u8 *)destination + byteOffset) = 0;
+        byteOffset += 4;
+    } while (--resourceCountdown >= 0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A440);
@@ -322,69 +343,72 @@ INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A940);
 
 INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A950);
 
-u8 *mnuGetStaffCategoryEntries(s32 kind, s32 *count, u8 *work) {
-    switch (kind) {
+/* Return this category's handle array and count; unknown categories have none. */
+u8 *mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount, u8 *menuBytes) {
+    switch (category) {
     case 1:
-        *count = 1;
-        return work + 0xC8;
+        *outEntryCount = 1;
+        return menuBytes + 0xC8;
     case 2:
-        *count = 1;
-        return work + 0xC4;
+        *outEntryCount = 1;
+        return menuBytes + 0xC4;
     case 3:
-        *count = 2;
-        return work + 0x68;
-    case 4:
-        *count = 9;
-        return work + 0xCC;
+        *outEntryCount = 2;
+        return menuBytes + 0x68;
+    case MNU_STAFF_PARTY_CATEGORY:
+        *outEntryCount = 9;
+        return menuBytes + 0xCC;
     case 5:
-        *count = 1;
-        return work + 0xF0;
+        *outEntryCount = 1;
+        return menuBytes + 0xF0;
     default:
-        *count = 0;
+        *outEntryCount = 0;
         return 0;
     }
 }
 
-/* Release the first category model plus one model per occupied party slot;
- * slotIndex is offset by the active party selection before indexing list. */
-void movReleaseActivePartyCategoryModels(s32 list, s32 count, u8 *work) {
-    s32 i;
+/* Resolve entry zero and the active party's adjusted one-based model indices.
+ * The supplied count and work are unused; model indices are not range-clamped. */
+void movReleaseActivePartyCategoryModels(s32 modelListAddress, s32 unusedCount, u8 *unusedWork) {
+    s32 partyIndex;
 
-    effResolveAndReleaseResource(*(u32 *)list);
-    for (i = 0; i < 5; i++) {
-        PartyRecord *slot = (PartyRecord *)(datGameState + 0xA60 + i * 0x1C4);
+    effResolveAndReleaseResource(*(u32 *)modelListAddress);
+    for (partyIndex = 0; partyIndex < MNU_STAFF_PARTY_COUNT; partyIndex++) {
+        PartyRecord *partyRecord = (PartyRecord *)(datGameState + MNU_STAFF_PARTY_RECORD_BASE + partyIndex * MNU_STAFF_PARTY_RECORD_BYTES);
 
-        if ((slot->flags & 1) != 0) {
-            s32 index = slot->slotIndex + D_00437B73;
+        if ((partyRecord->flags & MNU_STAFF_PARTY_PRESENT_BIT) != 0) {
+            s32 modelIndex = partyRecord->slotIndex + D_00437B73;
 
-            effResolveAndReleaseResource(*(u32 *)(list + index * 4 - 4));
+            effResolveAndReleaseResource(*(u32 *)(modelListAddress + modelIndex * 4 - 4));
         }
     }
 }
 
-void movReleaseCategoryModels(s32 kind, u8 *work) {
-    s32 count;
-    s32 *entries = (s32 *)mnuGetStaffCategoryEntries(kind, &count, work);
-    if (kind != 4) {
-        s32 i;
-        for (i = 0; i < count; i++) {
-            effResolveAndReleaseResource(entries[i]);
+/* Resolve all category entries, except party models selected by active records. */
+void movReleaseCategoryModels(s32 category, u8 *menuBytes) {
+    s32 entryCount;
+    s32 *modelHandles = (s32 *)mnuGetStaffCategoryEntries(category, &entryCount, menuBytes);
+    if (category != MNU_STAFF_PARTY_CATEGORY) {
+        s32 resourceIndex;
+        for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++) {
+            effResolveAndReleaseResource(modelHandles[resourceIndex]);
         }
     } else {
-        movReleaseActivePartyCategoryModels(entries, count, work);
+        movReleaseActivePartyCategoryModels(modelHandles, entryCount, menuBytes);
     }
 }
 
-void mnuReleaseStaffCategoryTextureHandles(s32 kind, u8 *work) {
-    s32 count;
-    s32 i = 0;
-    u8 *buffer = mnuGetStaffCategoryEntries(kind, &count, work);
+/* Release each category entry's textures without overwriting the handle array. */
+void mnuReleaseStaffCategoryTextureHandles(s32 category, u8 *menuBytes) {
+    s32 entryCount;
+    s32 resourceIndex = 0;
+    u8 *entryBytes = mnuGetStaffCategoryEntries(category, &entryCount, menuBytes);
 
-    if (count > 0) {
-        u32 *handles = (u32 *)buffer;
+    if (entryCount > 0) {
+        u32 *handleCursor = (u32 *)entryBytes;
         do {
-            effReleaseTextureHandlesAndResetSlots(*handles++);
-        } while (++i < count);
+            effReleaseTextureHandlesAndResetSlots(*handleCursor++);
+        } while (++resourceIndex < entryCount);
     }
 }
 
@@ -416,47 +440,49 @@ typedef struct CampVisualWork {
     s32 highlightOpacity;   /* 0xB1DC, range 0..0x100 */
 } CampVisualWork;
 
-/* Switch the active category, releasing its old handles and resolving the
- * next category's models; a repeated category needs no work. */
-void mnuSwitchCampVisualCategory(s32 kind, u8 *work) {
-    s32 old = ((CampVisualWork *)work)->categoryKind;
-    if (kind == old) {
+/* On a category change, release old textures and resolve the new model entries. */
+void mnuSwitchCampVisualCategory(s32 nextCategory, u8 *menuBytes) {
+    s32 previousCategory = ((CampVisualWork *)menuBytes)->categoryKind;
+    if (nextCategory == previousCategory) {
         return;
     }
-    if (old != 0) {
-        mnuReleaseStaffCategoryTextureHandles(old, work);
+    if (previousCategory != 0) {
+        mnuReleaseStaffCategoryTextureHandles(previousCategory, menuBytes);
     }
-    if (kind != 0) {
-        movReleaseCategoryModels(kind, work);
+    if (nextCategory != 0) {
+        movReleaseCategoryModels(nextCategory, menuBytes);
     }
-    ((CampVisualWork *)work)->categoryKind = kind;
+    ((CampVisualWork *)menuBytes)->categoryKind = nextCategory;
 }
 
 extern u32 D_003E6970[];
 
-void movLoadTitleEffects(u8 *work) {
-    s32 *data;
+/* Load the mapped motion resource and initialize both status batches' words.
+ * Batch categories and the initial 0xF word remain opaque. */
+void movLoadTitleEffects(u8 *menuBytes) {
+    s32 *statusWords;
 
-    ((CampVisualWork *)work)->motionResource = effLoadMappedResource("/camp/mot/", D_003E6970[0]);
-    ((CampVisualWork *)work)->motion[0] = effCreateStatusBatch(6);
-    data = ((CampVisualWork *)work)->motion[0]->sub->data;
-    data[0] = 0xF;
-    data[1] = 0;
-    data[2] = 0;
-    data[3] = 0;
-    data[4] = 0;
-    ((CampVisualWork *)work)->motion[1] = effCreateStatusBatch(1);
-    data = ((CampVisualWork *)work)->motion[1]->sub->data;
-    data[0] = 0xF;
-    data[1] = 0;
+    ((CampVisualWork *)menuBytes)->motionResource = effLoadMappedResource("/camp/mot/", D_003E6970[0]);
+    ((CampVisualWork *)menuBytes)->motion[0] = effCreateStatusBatch(6);
+    statusWords = ((CampVisualWork *)menuBytes)->motion[0]->sub->data;
+    statusWords[0] = 0xF;
+    statusWords[1] = 0;
+    statusWords[2] = 0;
+    statusWords[3] = 0;
+    statusWords[4] = 0;
+    ((CampVisualWork *)menuBytes)->motion[1] = effCreateStatusBatch(1);
+    statusWords = ((CampVisualWork *)menuBytes)->motion[1]->sub->data;
+    statusWords[0] = 0xF;
+    statusWords[1] = 0;
 }
 
-void movReleaseTitleEffects(u32 *state) {
-    u32 *handles = state + 0x110 / 4;
-    u32 i;
-    effDestroyPackedBatch(state[0x100 / 4]);
-    for (i = 0; i < 2; i++) {
-        effDestroyPackedBatch(*handles++);
+/* Destroy the mapped motion resource followed by both status batches. */
+void movReleaseTitleEffects(u32 *resourceSlots) {
+    u32 *batchCursor = resourceSlots + 0x110 / 4;
+    u32 batchIndex;
+    effDestroyPackedBatch(resourceSlots[0x100 / 4]);
+    for (batchIndex = 0; batchIndex < MNU_STAFF_STATUS_BATCH_COUNT; batchIndex++) {
+        effDestroyPackedBatch(*batchCursor++);
     }
 }
 
@@ -470,75 +496,79 @@ void mnuInitializeCampPanelResources(u32 container, u32 *resources, u32 unused, 
     mnuSetPanelSlotValues(container, resources[1]);
 }
 
-void mnuAppendCampSpriteRequests(u32 *list, u32 *state) {
-    s32 i;
-    s32 flag;
+/* Snapshot base handles, then queue the main, extra and paired sprite groups.
+ * Only owner word 1 selects the second column of each image table. */
+void mnuAppendCampSpriteRequests(u32 *resourceList, u32 *resourceSlots) {
+    s32 resourceIndex;
+    s32 tableColumn;
 
-    mnuSnapshotCampTextureHandles(state);
-    flag = mnuGetValueRecordOwner(list) == 1;
-    for (i = 0; i < 16; i++) {
-        effAppendListEntry(list, D_0042A950, D_003E6858[i][flag], 1, state + 0x10 / 4 + i);
+    mnuSnapshotCampTextureHandles(resourceSlots);
+    tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
+    for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
+        effAppendListEntry(resourceList, D_0042A950, D_003E6858[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, resourceSlots + 0x10 / 4 + resourceIndex);
     }
-    for (i = 0; i < 5; i++) {
-        effAppendListEntry(list, D_0042A950, D_003E68D8[i][flag], 1, state + 0x50 / 4 + i);
+    for (resourceIndex = 0; resourceIndex < MNU_STAFF_EXTRA_RESOURCE_COUNT; resourceIndex++) {
+        effAppendListEntry(resourceList, D_0042A950, D_003E68D8[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, resourceSlots + 0x50 / 4 + resourceIndex);
     }
-    for (i = 0; i < 2; i++) {
-        effAppendListEntry(list, "/camp/spr/n_sta/", D_003E6900[i][flag], 1, state + 0x8 / 4 + i);
+    for (resourceIndex = 0; resourceIndex < MNU_STAFF_PAIR_RESOURCE_COUNT; resourceIndex++) {
+        effAppendListEntry(resourceList, "/camp/spr/n_sta/", D_003E6900[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, resourceSlots + 0x8 / 4 + resourceIndex);
     }
 }
 
-/* Releases the sprite handle groups held by the movie/title effect work. */
-void mnuReleaseTitleEffectSprites(u32 *work) {
-    s32 i;
-    u32 *group0;
-    u32 *group1;
-    u32 *group2;
+/* Clear base output slots, then destroy the main, extra and paired slot sets.
+ * Each countdown decreases while its handle cursor advances forward. */
+void mnuReleaseTitleEffectSprites(u32 *resourceSlots) {
+    s32 resourceCountdown;
+    u32 *mainCursor;
+    u32 *extraCursor;
+    u32 *pairCursor;
 
-    mnuReleaseCampTextureHandlesAndClearOutput(work);
-    group0 = work + 0x10 / 4;
-    for (i = 0xF; i >= 0; i--) {
-        effDestroyResourceSlotSet(*group0++);
+    mnuReleaseCampTextureHandlesAndClearOutput(resourceSlots);
+    mainCursor = resourceSlots + 0x10 / 4;
+    for (resourceCountdown = MNU_STAFF_MAIN_RESOURCE_COUNT - 1; resourceCountdown >= 0; resourceCountdown--) {
+        effDestroyResourceSlotSet(*mainCursor++);
     }
-    group1 = work + 0x50 / 4;
-    for (i = 4; i >= 0; i--) {
-        effDestroyResourceSlotSet(*group1++);
+    extraCursor = resourceSlots + 0x50 / 4;
+    for (resourceCountdown = MNU_STAFF_EXTRA_RESOURCE_COUNT - 1; resourceCountdown >= 0; resourceCountdown--) {
+        effDestroyResourceSlotSet(*extraCursor++);
     }
-    group2 = work + 0x8 / 4;
-    for (i = 1; i >= 0; i--) {
-        effDestroyResourceSlotSet(*group2++);
+    pairCursor = resourceSlots + 0x8 / 4;
+    for (resourceCountdown = MNU_STAFF_PAIR_RESOURCE_COUNT - 1; resourceCountdown >= 0; resourceCountdown--) {
+        effDestroyResourceSlotSet(*pairCursor++);
     }
 }
 
-s32 movAreTitleEffectsReady(s32 mode, u32 *state) {
-    u32 *entry;
-    u32 *tail;
-    s32 i;
-    effPollResourceList(mode);
-    i = 0;
-    entry = state;
-    for (; i < 2; i++) {
-        if (*entry++ == 0) {
+/* Poll the supplied resource list, then require nonzero handles in every group. */
+s32 movAreTitleEffectsReady(s32 resourceListAddress, u32 *resourceSlots) {
+    u32 *resourceSlot;
+    u32 *pairSlot;
+    s32 resourceIndex;
+    effPollResourceList(resourceListAddress);
+    resourceIndex = 0;
+    resourceSlot = resourceSlots;
+    for (; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
+        if (*resourceSlot++ == 0) {
             return 0;
         }
     }
-    i = 0;
-    entry = state + 4;
-    for (; i < 16; i++) {
-        if (*entry++ == 0) {
+    resourceIndex = 0;
+    resourceSlot = resourceSlots + 4;
+    for (; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
+        if (*resourceSlot++ == 0) {
             return 0;
         }
     }
-    i = 0;
-    entry = state + 0x50 / 4;
-    for (; i < 5; i++) {
-        if (*entry++ == 0) {
+    resourceIndex = 0;
+    resourceSlot = resourceSlots + 0x50 / 4;
+    for (; resourceIndex < MNU_STAFF_EXTRA_RESOURCE_COUNT; resourceIndex++) {
+        if (*resourceSlot++ == 0) {
             return 0;
         }
     }
-    tail = state + 2;
-    i = 0;
-    for (; i < 2; i++) {
-        if (*tail++ == 0) {
+    pairSlot = resourceSlots + 2;
+    resourceIndex = 0;
+    for (; resourceIndex < MNU_STAFF_PAIR_RESOURCE_COUNT; resourceIndex++) {
+        if (*pairSlot++ == 0) {
             return 0;
         }
     }
@@ -612,16 +642,17 @@ extern void mnuDestroyWindowContainer(u32);
 
 extern void mnuReleaseResourceList(u32);
 
-void mnuReleaseStaffSpriteAndResourceHandles(u8 *work) {
-    u32 *handles = ((StaffResourceHeader *)work)->resourceLists;
-    u32 i;
+/* Destroy the menu windows, then release their associated resource lists. */
+void mnuReleaseStaffSpriteAndResourceHandles(u8 *menuBytes) {
+    u32 *windowCursor = ((StaffResourceHeader *)menuBytes)->resourceLists;
+    u32 windowIndex;
 
-    for (i = 0; i < 3; i++) {
-        mnuDestroyWindowContainer(*handles++);
+    for (windowIndex = 0; windowIndex < MNU_STAFF_PANEL_COUNT; windowIndex++) {
+        mnuDestroyWindowContainer(*windowCursor++);
     }
-    mnuReleaseResourceList(((StaffResourceHeader *)work)->baseHandles[0]);
-    mnuReleaseResourceList(((StaffResourceHeader *)work)->baseHandles[1]);
-    mnuReleaseResourceList(((StaffResourceHeader *)work)->baseHandles[2]);
+    mnuReleaseResourceList(((StaffResourceHeader *)menuBytes)->baseHandles[0]);
+    mnuReleaseResourceList(((StaffResourceHeader *)menuBytes)->baseHandles[1]);
+    mnuReleaseResourceList(((StaffResourceHeader *)menuBytes)->baseHandles[2]);
 }
 
 extern u16 D_003E6500[];
@@ -680,52 +711,58 @@ void mnuBuildSkillSlotTable(ListSlotWork *work) {
     }
 }
 
-u8 *mnuCreateStaffMenuWork(void) {
-    s32 handle;
-    u8 *work;
-    u8 *effects;
+#define MNU_STAFF_WORK_BYTES 0xB1E0
 
-    handle = sdfAllocGeneralBlock(0xB1E0);
-    work = (u8 *)sdfResourceRetainAddress(handle);
-    memset(work, 0, 0xB1E0);
-    ((CampVisualWork *)work)->allocationHandle = handle;
-    effects = work + 0x11C;
-    mnuClearPanelTransitionState(work + 8);
+/* Allocate and clear menu work, select its image-table owner word from the
+ * previous sample, then initialize the owned UI and resource state. */
+u8 *mnuCreateStaffMenuWork(void) {
+    s32 allocation;
+    u8 *menuBytes;
+    u8 *effectBytes;
+
+    allocation = sdfAllocGeneralBlock(MNU_STAFF_WORK_BYTES);
+    menuBytes = (u8 *)sdfResourceRetainAddress(allocation);
+    memset(menuBytes, 0, MNU_STAFF_WORK_BYTES);
+    ((CampVisualWork *)menuBytes)->allocationHandle = allocation;
+    effectBytes = menuBytes + 0x11C;
+    mnuClearPanelTransitionState(menuBytes + 8);
     if (dds3AdminReadPreviousSignedSample() != 0) {
-        ((CampVisualWork *)work)->menuResource = mnuAllocateValueRecord(1);
+        ((CampVisualWork *)menuBytes)->menuResource = mnuAllocateValueRecord(1);
     } else {
-        ((CampVisualWork *)work)->menuResource = mnuAllocateValueRecord(0);
+        ((CampVisualWork *)menuBytes)->menuResource = mnuAllocateValueRecord(0);
     }
-    mnuInitPartyPanelSlots((s32)work + 0xA928);
-    mnuLoadEffectResources(effects);
-    mnuEnableCampBadgeFade(effects);
+    mnuInitPartyPanelSlots((s32)menuBytes + 0xA928);
+    mnuLoadEffectResources(effectBytes);
+    mnuEnableCampBadgeFade(effectBytes);
     evtCreateMessageWindowIfMissing((s32)D_003E5778);
-    movLoadTitleEffects(work);
-    func_002A9908(work);
-    mnuResetGradientFadeColor(work + 0xAA50, 0x60);
-    mnuBuildListSlotTableA((ListSlotWork *)work);
-    mnuBuildListSlotTableB((ListSlotWork *)work);
-    mnuBuildSkillSlotTable((ListSlotWork *)work);
+    movLoadTitleEffects(menuBytes);
+    func_002A9908(menuBytes);
+    mnuResetGradientFadeColor(menuBytes + 0xAA50, 0x60);
+    mnuBuildListSlotTableA((ListSlotWork *)menuBytes);
+    mnuBuildListSlotTableB((ListSlotWork *)menuBytes);
+    mnuBuildSkillSlotTable((ListSlotWork *)menuBytes);
     func_003425B0();
-    return work;
+    return menuBytes;
 }
 
+/* Ignore null task userdata; otherwise drain transitions and release owned
+ * resources in shutdown order before marking camp cleanup complete. */
 void mnuDestroyStaffMenuTask(u32 task) {
-    u8 *work = (u8 *)kwlnTaskGetUserValue(task);
-    if (work == NULL) {
+    u8 *menuBytes = (u8 *)kwlnTaskGetUserValue(task);
+    if (menuBytes == NULL) {
         return;
     }
-    mnuDrainPanelTransitions(work + 8, task);
-    mnuReleaseStaffSpriteAndResourceHandles(work);
-    mnuDestroyScrollPanel(((CampVisualWork *)work)->modelHandle);
-    mnuShutdownContext(work + 0x284);
+    mnuDrainPanelTransitions(menuBytes + 8, task);
+    mnuReleaseStaffSpriteAndResourceHandles(menuBytes);
+    mnuDestroyScrollPanel(((CampVisualWork *)menuBytes)->modelHandle);
+    mnuShutdownContext(menuBytes + 0x284);
     dspCloseChannel();
-    mnuDestroyEffectResources(work + 0x11c);
-    mnuReleaseTitleEffectResourceGroups(work);
-    movReleaseTitleEffects(work);
-    func_00303D58(((CampVisualWork *)work)->menuResource);
-    sdfReleaseResourceAllocation(((CampVisualWork *)work)->allocationHandle);
-    mnuCampTaskState = 2;
+    mnuDestroyEffectResources(menuBytes + 0x11c);
+    mnuReleaseTitleEffectResourceGroups(menuBytes);
+    movReleaseTitleEffects(menuBytes);
+    func_00303D58(((CampVisualWork *)menuBytes)->menuResource);
+    sdfReleaseResourceAllocation(((CampVisualWork *)menuBytes)->allocationHandle);
+    mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
     func_003425D8();
 }
 
@@ -751,10 +788,10 @@ extern void mnuDestroyCampTasks(void);
 
 extern void mnuPlayInputSound();
 
-/* On button 8, exit the camp only when both nested guards permit it;
- * otherwise play the alternate sound without destroying its tasks. */
+/* Mapped cancel input closes camp only through the full guard chain.
+ * Return -1 on closure, otherwise 0; blocked nested guards use the alternate sound. */
 s32 mnuStaffCampCancelCheck(s32 menu) {
-    u32 buttons = mnuMapPadMaskToFlags(8);
+    u32 mappedButtons = mnuMapPadMaskToFlags(MNU_CAMP_CANCEL_MASK);
     s32 result;
 
     if (func_002A9AB8(menu) == 0) {
@@ -762,7 +799,7 @@ s32 mnuStaffCampCancelCheck(s32 menu) {
     }
     result = 0;
     if (evtGetMessageWindowControlState() == 0) {
-        if (buttons & 8) {
+        if (mappedButtons & MNU_CAMP_CANCEL_MASK) {
             if (func_002C6CE8() != 1) {
                 if (fileConsumeConfigTaskReady() == 0) {
                     mnuDestroyCampTasks();
@@ -780,40 +817,46 @@ INCLUDE_RODATA(const s32, "game/code_002A9068", mnuCampDrawTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_002A9068", mnuCampOwnerTaskName);
 
+/* Share menu userdata across the input/draw/owner tasks, attach fade and cancel
+ * tasks to drawing, then start the opening fade and mark camp active. */
 void mnuCreateCampTasks(void) {
-    s32 work;
-    s32 draw;
+    s32 menuAddress;
+    s32 drawTask;
 
-    work = (s32)mnuCreateStaffMenuWork();
-    kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, func_002AAF70, 0, work);
-    draw = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, func_002AB0E0, 0, work);
-    kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, work);
-    func_00101968(draw, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, func_002AA278, 0, work));
-    func_00101968(draw, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, work));
-    kwlnFadeOutStart(0, 0, 0, 0xF);
-    mnuCampTaskState = 1;
+    menuAddress = (s32)mnuCreateStaffMenuWork();
+    kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, func_002AAF70, 0, menuAddress);
+    drawTask = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, func_002AB0E0, 0, menuAddress);
+    kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, menuAddress);
+    func_00101968(drawTask, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, func_002AA278, 0, menuAddress));
+    func_00101968(drawTask, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, menuAddress));
+    kwlnFadeOutStart(0, 0, 0, MNU_CAMP_OPEN_FADE_FRAMES);
+    mnuCampTaskState = MNU_CAMP_STATE_ACTIVE;
 }
 
+/* Destroy the three named camp task hierarchies; owner teardown frees userdata. */
 void mnuDestroyCampTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(mnuCampInputTaskName, 0);
     kwlnTaskDestroyWithHierarchyByName(mnuCampDrawTaskName, 0);
     kwlnTaskDestroyWithHierarchyByName(mnuCampOwnerTaskName, 0);
 }
 
+/* Report active camp; acknowledge cleanup only for the exact cleaned-up state.
+ * Other non-active states return 0 without being rewritten. */
 s32 mnuAcknowledgeCampState(void) {
-    s8 state = mnuCampTaskState;
-    if (state == 1) {
+    s8 campState = mnuCampTaskState;
+    if (campState == MNU_CAMP_STATE_ACTIVE) {
         return 1;
     }
-    if (state < 2) {
+    if (campState < MNU_CAMP_STATE_CLEANED_UP) {
         return 0;
     }
-    if (state == 2) {
-        mnuCampTaskState = 0;
+    if (campState == MNU_CAMP_STATE_CLEANED_UP) {
+        mnuCampTaskState = MNU_CAMP_STATE_IDLE;
     }
     return 0;
 }
 
+/* Return 1 exactly when the kernel reports no active fade. */
 u8 mnuIsFadeIdle(void) {
     s64 fadeActive;
 
@@ -870,11 +913,12 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, s3
 
 extern u32 D_003E5710[];
 
-void mnuCreateStaffImageSprite(s32 index) {
-    u32 *object = (u32 *)func_0019F460(0x340, 0x148, 0, 0xa09dc35a,
-                                      D_003E5710[index], 0);
-    func_0019D550(object, 1, 0x54);
-    frFontQueueGlyphInSelectedSlot(object);
+/* Create and queue the table-selected image sprite; imageIndex is unchecked. */
+void mnuCreateStaffImageSprite(s32 imageIndex) {
+    u32 *sprite = (u32 *)func_0019F460(0x340, 0x148, 0, 0xa09dc35a,
+                                      D_003E5710[imageIndex], 0);
+    func_0019D550(sprite, 1, 0x54);
+    frFontQueueGlyphInSelectedSlot(sprite);
 }
 
 INCLUDE_ASM(const s32, "game/code_002A9068", func_002AA7A0);
