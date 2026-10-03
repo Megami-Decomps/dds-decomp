@@ -548,7 +548,38 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_003375B0);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00337688);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00337718);
+/* vu0 routine: transform packed XY pairs through a 2D affine basis into row +0x30 */
+void func_00337718(void *rows, s32 count, void *points, void *basis) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "ld $2, 0x00(%3)\n"
+        "qmtc2 $2, vf16\n"
+        "ld $3, 0x08(%3)\n"
+        "qmtc2 $3, vf17\n"
+        "ld $2, 0x10(%3)\n"
+        "qmtc2 $2, vf18\n"
+        "ld $2, 0x00(%2)\n"
+        "qmtc2 $2, vf2\n"
+        "vmulaw.xy ACC, vf18, vf0w\n"
+        "vmaddax.xy ACC, vf16, vf2x\n"
+        "vmaddy.xy vf3, vf17, vf2y\n"
+        "1:\n"
+        "addi %2, %2, 8\n"
+        "ld $2, 0x00(%2)\n"
+        "qmtc2 $2, vf2\n"
+        "qmfc2 $2, vf3\n"
+        "vmulaw.xy ACC, vf18, vf0w\n"
+        "vmaddax.xy ACC, vf16, vf2x\n"
+        "vmaddy.xy vf3, vf17, vf2y\n"
+        "addi %1, %1, -1\n"
+        "addi %0, %0, 0x60\n"
+        "bne $0, %1, 1b\n"
+        "sd $2, -0x30(%0)\n"
+        ".set reorder"
+        : "+r"(rows), "+r"(count), "+r"(points)
+        : "r"(basis)
+        : "$2", "$3", "memory");
+}
 
 void sdfVuBlendNodeXY(VuBlendNode *node) {
     while (node != NULL) {
