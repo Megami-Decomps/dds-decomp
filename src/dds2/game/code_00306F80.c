@@ -89,7 +89,7 @@ struct GridTextListItem {
     struct GridTextListItem *previous;
     struct GridTextListItem *next;
     GridTextWidget *child; /* 0x20 */
-    u8 pad24[4];
+    void (*select)(GridTextWidget *); /* 0x24 */
     void (*format)(void *, void *, char *, s32); /* 0x28 */
 };
 
@@ -1362,7 +1362,87 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00309DF8);
+extern void fldLmapSubmitPositionedCommandPacket(s32, s32, s32, s32, s32, s32);
+
+/* Draw visible local-map rows and invoke the selected row callback once. */
+void func_00309DF8(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget,
+                   s32 surfaceIndex) {
+    char text[0x100];
+    GridTextListItem *item;
+    s32 rowEnd;
+    u32 column;
+    s32 itemIndex = 0;
+    s32 invokeSelected = 1;
+
+    offsetY = widget->y + offsetY + 0x10;
+    rowEnd = offsetY + ((widget->height << 3) + widget->y) - 0x6C;
+    offsetX = widget->x + offsetX + 0x20;
+    item = widget->firstVisible;
+    if (item != NULL) {
+        if (offsetY < rowEnd) {
+            if ((u16)widget->rows != 0) {
+                do {
+                    s32 layout = itfGetGridChildLayoutMode((u8 *)widget, (u32)item);
+                    s32 drawMode = 0;
+
+                    if (invokeSelected != 0) {
+                        drawMode = layout;
+                    }
+                    if (!(widget->flags & 0x40)) {
+                        if (item == widget->selected && (widget->flags & 4)) {
+                            column = (s32)item->number;
+
+                            if (widget->flags & 0x100) {
+                                column += 4;
+                                if (widget->flags & 0x200) {
+                                    column += 2;
+                                }
+                            }
+                            column = (column * 3) << 6;
+                            uiDrawUniformColorRect(offsetX + column, offsetY, z,
+                                                   0xD0, 0x78, 0x40408080,
+                                                   surfaceIndex);
+                        }
+                        if ((widget->flags & 8) && item->value != 0) {
+                            s32 width = strlen(item->text) * 0xC0 + 0x10;
+                            s32 indent;
+
+                            if (widget->flags & 0x100) {
+                                indent = 0x300;
+                                if (widget->flags & 0x200) {
+                                    indent = 0x480;
+                                }
+                            } else {
+                                indent = 0;
+                            }
+                            uiDrawUniformColorRect(offsetX + indent, offsetY, z,
+                                                   width, 0x78,
+                                                   0x40408080, surfaceIndex);
+                        }
+                        itfFormatGridValueEntryText(widget, item, text);
+                        fldLmapSubmitPositionedCommandPacket(offsetX, offsetY, z,
+                                                             drawMode, (s32)text,
+                                                             surfaceIndex);
+                    }
+                    if (item->select != NULL && item == widget->selected &&
+                        invokeSelected != 0) {
+                        invokeSelected = 0;
+                        item->select(widget);
+                    }
+                    offsetY += 0x70;
+                    item = item->next;
+                    itemIndex++;
+                    if (item == NULL) {
+                        break;
+                    }
+                    if (offsetY >= rowEnd) {
+                        break;
+                    }
+                } while (itemIndex < (u16)widget->rows);
+            }
+        }
+    }
+}
 
 s32 itfFindGridNodeByKey(u32 key, u32 head) {
     u32 n;
