@@ -949,6 +949,9 @@ typedef struct ShopWindowSettings {
     s16 value;
 } ShopWindowSettings;
 
+struct MenuWindowContainer;
+struct MenuListNode;
+extern struct MenuListNode *mnuAppendWindowListNode(struct MenuWindowContainer *window, s32 value);
 extern s32 func_0025E820();
 
 s32 func_002443F8(s32 unused, s32 count, ShopWindowSettings *settings) {
@@ -962,7 +965,7 @@ s32 func_002443F8(s32 unused, s32 count, ShopWindowSettings *settings) {
     window = (ShopWindowContainer *)mnuCreateWindowContainer(0, 0x260, 0x10, count, 0x15);
     mnuInitializeWindowEntryPlacement(0, window, 0, 8, 0xA);
     for (i = 0; i < count; i++) {
-        mnuAppendWindowListNode(window, 0);
+        mnuAppendWindowListNode((struct MenuWindowContainer *)window, 0);
     }
     window->list->callback = func_0025E820;
     buffer = sdfAllocSizeClassBlock(0x10);

@@ -1193,6 +1193,9 @@ struct CampWindowContainer {
     CampWindowListData *list;
 };
 
+struct MenuWindowContainer;
+struct MenuListNode;
+extern struct MenuListNode *mnuAppendWindowListNode(struct MenuWindowContainer *window, s32 value);
 extern void func_00295400(void);
 
 s32 mnuCreateEnabledCampEntryWindow(s32 count, s32 *enabled, u8 *settings) {
@@ -1204,7 +1207,8 @@ s32 mnuCreateEnabledCampEntryWindow(s32 count, s32 *enabled, u8 *settings) {
     mnuSetWindowEntryParameters(0, window, 0, 8, 0xA);
     for (i = 0; i < count; i++) {
         if (enabled[i] != 0) {
-            ((CampWindowNode *)mnuAppendWindowListNode(window, 0))->params.value = i;
+            ((CampWindowNode *)mnuAppendWindowListNode((struct MenuWindowContainer *)window, 0))
+                ->params.value = i;
         }
     }
     window->list->callback = func_00295400;
