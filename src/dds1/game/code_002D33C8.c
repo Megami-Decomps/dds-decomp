@@ -159,7 +159,56 @@ void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfListHead *linkedList
     sdfAppendPacketRange(list, packet + 0x10, packet + 0xD0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D39B0);
+typedef struct SdfDescriptorSource {
+    u8 pad00[0xC];
+    u32 baseAddress;
+    u8 pad10[4];
+    s16 bufferWidth;
+    u8 pad16[2];
+    s32 pixelFormat;
+} SdfDescriptorSource;
+
+typedef struct SdfDescriptorPacket {
+    u64 header[4];
+    u64 transfer[8];
+    u64 imageReferenceTag;
+    u64 imageReferencePad;
+    u64 imageGifTag0;
+    u64 imageGifTag1;
+    u64 flushTag0;
+    u64 flushTag1;
+    u64 flushGifTag;
+    u64 flushRegister;
+    u64 zero;
+    u64 finishRegister;
+} SdfDescriptorPacket;
+
+void func_002D39B0(SdfDescriptorPacket *packet, SdfDescriptorSource *source,
+                   s64 destinationX, s64 destinationY, s32 transferWidth,
+                   s32 transferHeight, u32 sourceAddress) {
+    s32 qwc;
+
+    packet->header[0] = 0x10000006;
+    packet->header[1] = 0x5000000611000000;
+    packet->header[2] = 0x1000000000000004;
+    packet->header[3] = 0xE;
+    func_002D5A68((SdfPacket *)packet->transfer, source->baseAddress, source->bufferWidth,
+                  source->pixelFormat, destinationX, destinationY, 0, 0, 0, 0, 0,
+                  transferWidth, transferHeight, 0);
+
+    qwc = (sdfFormatBitsPerPixelB(source->pixelFormat) * transferWidth * transferHeight) >> 7;
+    packet->imageReferenceTag = 0x0800000000000000 | qwc;
+    packet->imageReferencePad = 0;
+    packet->imageGifTag0 = (u32)((qwc & SDF_DMA_QWC_MASK) | 0x30000000) |
+                           ((u64)(sourceAddress & SDF_DMA_ADDRESS_MASK) << 32);
+    packet->imageGifTag1 = (u64)(0x51000000 | qwc) << 32;
+    packet->flushTag0 = 0x20000002;
+    packet->flushTag1 = 0x5000000200000000;
+    packet->flushGifTag = 0x1000000000008001;
+    packet->flushRegister = 0xE;
+    packet->zero = 0;
+    packet->finishRegister = 0x3F;
+}
 
 void sdfCreateDescriptorPacket(SdfListHead *list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
                    s32 (*alloc)(s32)) {
@@ -168,7 +217,8 @@ void sdfCreateDescriptorPacket(SdfListHead *list, s32 source, s32 a, s32 b, s32 
         alloc = sdfAllocPacketAligned;
     }
     block = alloc(0xB0);
-    func_002D39B0(block, source, a, b, c, d, e);
+    func_002D39B0((SdfDescriptorPacket *)block, (SdfDescriptorSource *)source,
+                  a, b, c, d, e);
     sdfAppendPacketRange(list, block, block + 0x80);
 }
 
@@ -1918,4 +1968,3 @@ INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD33C);
 INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD340);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD344);
-
