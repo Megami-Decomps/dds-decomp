@@ -832,7 +832,69 @@ s32 fldFindRecordItem(s32 scene, u32 index) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00142C78);
+typedef struct FldModelNodeView {
+    u8 pad0[4];
+    struct FldModelNodeView *next;
+    struct FldModelNodeView *owner;
+    struct FldModelNodeView *children;
+    u8 pad10[4];
+    u16 flags;
+} FldModelNodeView;
+
+typedef struct {
+    u8 pad0[0xC];
+    FldModelNodeView **entries;
+} FldModelNodeListView;
+
+typedef struct {
+    FldModelNodeListView *list;
+} FldModelView;
+
+void func_00142C78(FldModelView *model, s32 index, s32 clearFlag) {
+    FldModelNodeView *parent = model->list->entries[index + 1];
+    FldModelNodeView *first;
+    FldModelNodeView *node;
+    FldModelNodeView *next;
+    FldModelNodeView *headNext;
+    u16 flags;
+
+    if (parent->children == NULL) {
+        return;
+    }
+    parent->children->flags &= ~1;
+    if (clearFlag == 0) {
+        parent->children->flags |= 1;
+    }
+
+    first = parent->children;
+    headNext = first->next;
+    if (headNext == NULL) {
+        return;
+    }
+    node = headNext;
+    if (parent != node->owner || first == node) {
+        return;
+    }
+    for (;;) {
+        flags = node->flags & ~1;
+        node->flags = flags;
+        if (clearFlag == 0) {
+            node->flags = flags | 1;
+        }
+        next = node->next;
+        if (next == NULL) {
+            return;
+        }
+        node = next;
+        if (parent != node->owner) {
+            return;
+        }
+        if (first != node) {
+            continue;
+        }
+        return;
+    }
+}
 
 s32 fldGetMaxItemValue(void) {
     s32 max = 0;
@@ -2716,4 +2778,3 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAFEC);
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAFF0);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldWeatherLimitTexture);
-
