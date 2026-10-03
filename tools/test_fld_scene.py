@@ -10,12 +10,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
+import amb  # noqa: E402
 import fld  # noqa: E402
 import fld_model  # noqa: E402
 import fld_scene  # noqa: E402
 import field_world  # noqa: E402
 import inf  # noqa: E402
 import wap  # noqa: E402
+from test_amb_scene import SOURCE as AUTOMAP_SOURCE  # noqa: E402
+from test_fld_model import SOURCE as MODEL_SOURCE  # noqa: E402
 
 
 SOURCE = """\
@@ -134,6 +137,79 @@ class FldSceneTests(unittest.TestCase):
         self.assertEqual(collision["extras"]["ddsTriangleCount"], 2)
         self.assertIn("KHR_materials_unlit", document["extensionsUsed"])
         fld_model.encode_glb(document, binary)
+
+    def test_composes_the_runtime_automap_row_and_discovery_metadata(self) -> None:
+        field_data = fld.encode(
+            fld.parse_source(
+                SOURCE.replace("attributes=0x00002000", "attributes=0x00002800")
+            )
+        )
+        document, binary = fld_scene.build_scene(
+            fld.encode(fld.parse_source(MODEL_SOURCE)),
+            field_data,
+            field_number=11,
+            area_number=1,
+            automap_data=amb.encode(amb.parse_source(AUTOMAP_SOURCE)),
+            meters_per_unit=0.01,
+        )
+
+        wrapper = next(
+            node for node in document["nodes"] if node["name"] == "FLD2 field data"
+        )
+        self.assertEqual(
+            wrapper["extras"]["ddsAutomapSelection"],
+            {
+                "source": "f011_001",
+                "areaIndex": 0,
+                "status": "linked",
+                "target": "automap:f011:area:0",
+                "name": "001",
+            },
+        )
+        self.assertEqual(wrapper["extras"]["ddsAutomapDiscoveryFaces"], 1)
+        collision = next(
+            document["nodes"][index]
+            for index in wrapper["children"]
+            if document["nodes"][index]["name"] == "01all"
+        )
+        self.assertEqual(
+            collision["extras"]["ddsAutomapDiscoveryFaces"],
+            [
+                {
+                    "collisionSerial": 2,
+                    "collisionIndex": 0,
+                    "face": 0,
+                    "selector": 1,
+                    "upperName": 1,
+                    "resolution": "subblock",
+                    "areaStatus": "linked",
+                    "subblockIndex": 0,
+                    "subblockName": "s01",
+                    "floor": -2,
+                    "runtimeFloor": -1,
+                }
+            ],
+        )
+        automap_node = next(
+            node for node in document["nodes"] if node["name"] == "area_001"
+        )
+        self.assertEqual(automap_node["extras"]["ddsAreaIndex"], 0)
+        self.assertEqual(document["asset"]["extras"]["ddsAutomapAreaCount"], 1)
+        self.assertEqual(
+            document["asset"]["extras"]["ddsAutomapSelectionMode"],
+            "runtime-index",
+        )
+        fld_model.encode_glb(document, binary)
+
+    def test_automatic_automap_selection_rejects_an_unmapped_room_index(self) -> None:
+        with self.assertRaisesRegex(fld.FldError, "out-of-range"):
+            fld_scene.build_scene(
+                fld.encode(fld.parse_source(MODEL_SOURCE)),
+                fld.encode(fld.parse_source(SOURCE)),
+                field_number=11,
+                area_number=2,
+                automap_data=amb.encode(amb.parse_source(AUTOMAP_SOURCE)),
+            )
 
     def test_links_event_placement_to_exact_event_resource(self) -> None:
         builder = fld_model.GltfBuilder.create()

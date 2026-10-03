@@ -9,6 +9,9 @@ import re
 import struct
 from pathlib import Path
 
+import amb
+import amb_scene
+import automap_flow
 import fld
 import fld_model
 import field_world
@@ -174,6 +177,7 @@ def append_field_scene(
     transitions: dict[str, tuple[dict, ...]] | None = None,
     interactions: dict[str, tuple[dict, ...]] | None = None,
     event_procedures: dict[str, int] | None = None,
+    automap_runtime: dict | None = None,
 ) -> tuple[dict, bytes]:
     """Append FLD2 collision, cameras, events, and placements to a glTF document."""
 
@@ -214,6 +218,11 @@ def append_field_scene(
     transition_actors: set[str] = set()
     interaction_actors: set[str] = set()
     event_ordinal = 0
+    automap_by_collision: dict[int, list[dict]] = {}
+    if automap_runtime is not None:
+        for row in automap_runtime["discoveryFaces"]:
+            automap_by_collision.setdefault(row["collisionIndex"], []).append(row)
+    collision_ordinal = 0
 
     for resource in resources:
         if resource.type_id not in {3, 4, 6, 10}:
@@ -243,7 +252,11 @@ def append_field_scene(
             )
             if mesh is not None:
                 node["mesh"] = mesh
+            discovery_faces = automap_by_collision.get(collision_ordinal, ())
+            if discovery_faces:
+                node["extras"]["ddsAutomapDiscoveryFaces"] = list(discovery_faces)
             counts["collision"] += 1
+            collision_ordinal += 1
         elif resource.type_id == 4 and resource.data:
             node["extras"]["ddsCameraYFov"] = struct.unpack_from(
                 "<f", field_data, resource.data
@@ -383,6 +396,20 @@ def append_field_scene(
         ]
         if unlinked:
             wrapper["extras"]["ddsUnlinkedInteractionActors"] = unlinked
+    if automap_runtime is not None:
+        discovery = automap_runtime["discoveryFaces"]
+        wrapper["extras"].update(
+            {
+                "ddsAutomapSelection": automap_runtime["selection"],
+                "ddsAutomapDiscoveryFaces": len(discovery),
+                "ddsResolvedAutomapDiscoveryFaces": sum(
+                    row["resolution"] == "subblock" for row in discovery
+                ),
+                "ddsDefaultFloorAutomapDiscoveryFaces": sum(
+                    row["resolution"] == "default-floor" for row in discovery
+                ),
+            }
+        )
     if scene_children:
         wrapper["children"] = scene_children
     document["nodes"].append(wrapper)
@@ -407,6 +434,9 @@ def build_scene(
     event_procedures: dict[str, int] | None = None,
     field_number: int | None = None,
     area_number: int | None = None,
+    automap_data: bytes | None = None,
+    automap_areas: set[str] | None = None,
+    icon_marker_size: float = 50.0,
 ) -> tuple[dict, bytes]:
     transitions = None
     if warp_data is not None:
@@ -421,6 +451,69 @@ def build_scene(
             raise fld.FldError("INF scene metadata requires an area number")
         interactions = field_world.area_interactions(
             inf.decode(interaction_data), area_number, message_symbols
+        )
+    automap_runtime = None
+    automap_area_indices = None
+    if (
+        automap_data is not None
+        and field_number is not None
+        and area_number is not None
+    ):
+        field_id = f"f{field_number:03}_{area_number:03}"
+        try:
+            sections = automap_flow.build_sections(
+                ((field_id, field_data),),
+                {field_number: (f"f{field_number:03}", automap_data)},
+            )
+        except automap_flow.AutomapFlowError as exc:
+            raise fld.FldError(str(exc)) from exc
+        selection = sections["automapAreaEdges"][0]
+        active_area = next(
+            (
+                row
+                for row in sections["automapAreas"]
+                if row["id"] == selection["target"]
+            ),
+            None,
+        )
+        subblocks = {row["id"]: row for row in sections["automapSubblocks"]}
+        discovery_faces = []
+        for edge in sections["automapDiscoveryEdges"]:
+            target = subblocks.get(edge["target"])
+            discovery_faces.append(
+                {
+                    "collisionSerial": edge["collisionSerial"],
+                    "collisionIndex": edge["collisionIndex"],
+                    "face": edge["face"],
+                    "selector": edge["selector"],
+                    "upperName": edge["upperName"],
+                    "resolution": edge["resolution"],
+                    "areaStatus": edge["areaStatus"],
+                    "subblockIndex": edge["subblockIndex"],
+                    "subblockName": target["name"] if target is not None else None,
+                    "floor": target["floor"] if target is not None else None,
+                    "runtimeFloor": edge["runtimeFloor"],
+                }
+            )
+        automap_runtime = {
+            "selection": {
+                "source": selection["source"],
+                "areaIndex": selection["areaIndex"],
+                "status": selection["status"],
+                "target": selection["target"],
+                "name": active_area["name"] if active_area is not None else None,
+            },
+            "discoveryFaces": discovery_faces,
+        }
+        if automap_areas is None:
+            if selection["status"] != "linked":
+                raise fld.FldError(
+                    f"{field_id} has no runtime automap area: {selection['status']}"
+                )
+            automap_area_indices = {selection["areaIndex"]}
+    elif automap_data is not None and automap_areas is None:
+        raise fld.FldError(
+            "automatic automap selection requires an fNNN_AAA field identity"
         )
     document, binary = fld_model.build_gltf(
         model_data,
@@ -438,11 +531,26 @@ def build_scene(
         transitions=transitions,
         interactions=interactions,
         event_procedures=event_procedures,
+        automap_runtime=automap_runtime,
     )
+    if automap_data is not None:
+        document, binary = amb_scene.append_automap_scene(
+            document,
+            binary,
+            automap_data,
+            areas=automap_areas,
+            area_indices=automap_area_indices,
+            meters_per_unit=meters_per_unit,
+            icon_marker_size=icon_marker_size,
+        )
+        document["asset"]["extras"]["ddsAutomapSelectionMode"] = (
+            "runtime-index" if automap_areas is None else "explicit-name"
+        )
     if (
         warp_data is not None
         or interaction_data is not None
         or event_procedures is not None
+        or automap_data is not None
     ):
         document["asset"]["generator"] = "dds-decomp field-world exporter"
         document["asset"]["extras"].update(
@@ -454,6 +562,12 @@ def build_scene(
 def _source_or_binary(path: Path, source_suffix: str) -> bytes:
     if path.suffix.lower() == source_suffix:
         return fld.encode(fld.parse_source(path.read_text(encoding="utf-8")))
+    return path.read_bytes()
+
+
+def _automap_source_or_binary(path: Path) -> bytes:
+    if path.suffix.lower() == ".ambasm":
+        return amb.encode(amb.parse_source(path.read_text(encoding="utf-8")))
     return path.read_bytes()
 
 
@@ -556,6 +670,18 @@ def main() -> None:
     parser.add_argument("--frames-per-second", type=float, default=1.0)
     parser.add_argument("--placement-marker-size", type=float, default=50.0)
     parser.add_argument(
+        "--automap",
+        type=Path,
+        help="base fNNN AMB binary or tracked source to compose with the field",
+    )
+    parser.add_argument(
+        "--automap-area",
+        action="append",
+        dest="automap_areas",
+        help="override runtime selection with this AMB area name (repeatable)",
+    )
+    parser.add_argument("--icon-marker-size", type=float, default=50.0)
+    parser.add_argument(
         "--warps",
         type=Path,
         help="WAP binary or tracked source whose transitions annotate placements",
@@ -595,6 +721,22 @@ def main() -> None:
             if args.texture_bundle is not None:
                 textures = tmx.parse_bundle(args.texture_bundle.read_bytes())
         identity = _field_identity(args.input, args.field)
+        if args.automap_areas and args.automap is None:
+            raise fld.FldError("--automap-area requires --automap")
+        if (
+            args.automap is not None
+            and not args.automap_areas
+            and (identity is None or _field_prefix(args.input, args.field) != "f")
+        ):
+            raise fld.FldError(
+                "automatic automap selection requires an fNNN_AAA field input"
+            )
+        if args.automap is not None and identity is not None:
+            automap_match = re.fullmatch(
+                r"f(\d{3})", args.automap.stem, re.IGNORECASE
+            )
+            if automap_match and int(automap_match.group(1)) != identity[0]:
+                raise fld.FldError("AMB filename does not match the field scene")
         interaction_path = args.interactions
         if interaction_path is None and args.warps is not None:
             inferred = args.warps.with_suffix(".infasm")
@@ -659,6 +801,15 @@ def main() -> None:
             event_procedures=event_procedures,
             field_number=identity[0] if identity is not None else None,
             area_number=identity[1] if identity is not None else None,
+            automap_data=(
+                _automap_source_or_binary(args.automap)
+                if args.automap is not None
+                else None
+            ),
+            automap_areas=(
+                set(args.automap_areas) if args.automap_areas else None
+            ),
+            icon_marker_size=args.icon_marker_size,
         )
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_bytes(fld_model.encode_glb(document, binary))
