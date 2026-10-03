@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 #define SDF_HEAP_BLOCK_FREE 0
 #define SDF_HEAP_BLOCK_USED 1
@@ -16,15 +17,7 @@
 #define SDF_NAMED_RESOURCE_RPC_ID 0x6F496453
 #define SDF_RPC_BIND_RETRY_TICKS 0x1ED2
 
-typedef struct SdfAllocation {
-    struct SdfAllocation *previous;
-    struct SdfAllocation *next;
-    s32 address;
-    u16 state;
-    s16 referenceCount;
-} SdfAllocation;
-
-extern SdfAllocation *sdfFindGeneralBlockByAddress(void *address);
+extern SdfMemBlock *sdfFindGeneralBlockByAddress(void *address);
 extern void sdfReleaseChipBlock(void *block);
 extern s32 func_00312C08(void);
 extern void EIntr(void);
@@ -43,8 +36,8 @@ void sdfSkipNextListNode(u8 *node) {
 }
 
 /* Coalesce adjacent free records, then recycle this record or mark it free. */
-void sdfReleaseResourceAllocation(SdfAllocation *allocation) {
-    SdfAllocation *nextBlock;
+void sdfReleaseResourceAllocation(SdfMemBlock *allocation) {
+    SdfMemBlock *nextBlock;
     s32 interruptsDisabled;
 
     if (allocation == NULL) {
@@ -56,8 +49,8 @@ void sdfReleaseResourceAllocation(SdfAllocation *allocation) {
         sdfSkipNextListNode((u8 *)allocation);
         sdfReleaseChipBlock(nextBlock);
     }
-    if (allocation->previous->state == SDF_HEAP_BLOCK_FREE) {
-        sdfSkipNextListNode((u8 *)allocation->previous);
+    if (allocation->prev->state == SDF_HEAP_BLOCK_FREE) {
+        sdfSkipNextListNode((u8 *)allocation->prev);
         sdfReleaseChipBlock(allocation);
     } else {
         allocation->state = SDF_HEAP_BLOCK_FREE;
@@ -70,7 +63,7 @@ void sdfReleaseResourceAllocation(SdfAllocation *allocation) {
 
 /* Resolve a data address to its allocation record before releasing it. */
 void sdfReleaseCurrentResourceHandle(void *address) {
-    SdfAllocation *allocation;
+    SdfMemBlock *allocation;
 
     allocation = sdfFindGeneralBlockByAddress(address);
     sdfReleaseResourceAllocation(allocation);
@@ -83,7 +76,7 @@ void sdfReleaseMemorySlot(s32 *handleSlot) {
     allocationHandle = *handleSlot;
     if (allocationHandle != 0) {
         *handleSlot = 0;
-        sdfReleaseResourceAllocation((SdfAllocation *)allocationHandle);
+        sdfReleaseResourceAllocation((SdfMemBlock *)allocationHandle);
         return;
     }
 }
@@ -98,7 +91,7 @@ void sdfQueueNonzeroResourceId(s32 arg0) {
 
 
 /* Increment the signed reference count and return the stored data address. */
-u32 sdfResourceRetainAddress(SdfAllocation *allocation) {
+u32 sdfResourceRetainAddress(SdfMemBlock *allocation) {
     allocation->referenceCount = allocation->referenceCount + 1;
     return allocation->address;
 }
@@ -111,24 +104,14 @@ void sdfDecrementAllocationReferenceCount(u8 *allocation) {
     }
 }
 
-typedef struct SdfHeapRoot {
-    s32 unk0; /* 0x0 */
-    SdfAllocation *first; /* 0x4: first block record */
-    s32 unk8; /* 0x8 */
-    s32 unkC; /* 0xC */
-    SdfAllocation *last; /* 0x10: end marker */
-} SdfHeapRoot;
-
-extern SdfHeapRoot D_003E2748;
-
 /* The address must belong to an existing used block: the end-marker path does not end this scan. */
-SdfAllocation *sdfFindGeneralBlockByAddress(void *address) {
-    SdfHeapRoot *heap = &D_003E2748;
-    SdfAllocation *block;
+SdfMemBlock *sdfFindGeneralBlockByAddress(void *address) {
+    SdfMemHeap *heap = &sdfGeneralHeap;
+    SdfMemBlock *block;
     s32 interruptsDisabled;
 
     interruptsDisabled = func_00312C08();
-    for (block = heap->first;; block = block->next) {
+    for (block = heap->head.next;; block = block->next) {
         if (block->state != SDF_HEAP_BLOCK_USED) {
             if (block->state == SDF_HEAP_BLOCK_END) {
                 if (interruptsDisabled != 0) {
@@ -144,11 +127,9 @@ SdfAllocation *sdfFindGeneralBlockByAddress(void *address) {
     }
 }
 
-extern SdfAllocation *D_003E274C[];
-
 /* Walk the general heap's block list and write its statistics: total bytes, free bytes, largest and smallest free block, block count and free block count. */
 void sdfGetGeneralHeapStats(s32 *stats) {
-    SdfAllocation *block = D_003E274C[0];
+    SdfMemBlock *block = sdfGeneralHeap.head.next;
     s32 totalBytes = 0;
     s32 freeBytes = 0;
     s32 largestFreeBytes = 0;
@@ -183,9 +164,9 @@ void sdfGetGeneralHeapStats(s32 *stats) {
 }
 
 /* Find the used heap block that contains `address`; NULL when the end marker is reached. */
-SdfAllocation *sdfFindGeneralBlockContaining(s32 address) {
-    SdfAllocation *block = D_003E274C[0];
-    SdfAllocation *nextBlock;
+SdfMemBlock *sdfFindGeneralBlockContaining(s32 address) {
+    SdfMemBlock *block = sdfGeneralHeap.head.next;
+    SdfMemBlock *nextBlock;
 
     for (;; block = nextBlock) {
         nextBlock = block->next;
@@ -213,7 +194,7 @@ s32 sdfSendNamedResourceRequest(char *name, s32 dataSize, void *data, s32 *outSi
     u8 replyScratch[0x50];
     s32 nameLength = strlen(name);
     s32 requestBytes = nameLength + dataSize + SDF_NAMED_REQUEST_OVERHEAD_BYTES;
-    u32 *requestWords = (u32 *)sdfResourceRetainAddress((SdfAllocation *)sdfAllocGeneralBlock(requestBytes));
+    u32 *requestWords = (u32 *)sdfResourceRetainAddress((SdfMemBlock *)sdfAllocGeneralBlock(requestBytes));
     u32 *replyWords;
     s32 result;
 

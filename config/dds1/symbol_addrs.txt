@@ -6780,6 +6780,7 @@ evtStageTestState = 0x003DC5E8;
 fileManagerWork = 0x003DC658;
 fileRequestEntries = 0x003DC698;
 fileRequestSlotFlags = 0x003DC6AC;
+sdfGeneralHeap = 0x003E2748;
 sdfTextureQueueWork = 0x003EB848;
 sdfPadPortBuffers = 0x003F9900;
 sdfPadPorts = 0x003F9B00;

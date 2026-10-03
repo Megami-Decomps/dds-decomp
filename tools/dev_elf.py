@@ -2392,8 +2392,14 @@ def _jump_target(word: int, pc: int) -> int:
 def scan_stale_move_references(
     image: bytes,
     ranges: list[tuple[int, int, int, int]],
+    literal_target_alignments: list[int] | None = None,
 ) -> int:
     """Find ordinary address encodings that still target an abandoned slot."""
+
+    if literal_target_alignments is None:
+        literal_target_alignments = [1] * len(ranges)
+    if len(literal_target_alignments) != len(ranges):
+        raise DevElfError("literal-target alignment count does not match move count")
 
     _, programs = parse_elf(image)
     scanned_words = 0
@@ -2406,7 +2412,14 @@ def scan_stale_move_references(
             vaddr = program.vaddr + file_offset - program.offset
             word = _unpack_word(image, file_offset, "stale-reference scan")
             scanned_words += 1
-            if _address_in_move(word, ranges):
+            # Raw address literals in an ELF image are indistinguishable from
+            # ordinary integer payloads.  Text targets are word-aligned on the
+            # EE, while data moves can still have byte-granular field targets.
+            stale_literal = any(
+                old_start <= word < old_end and word % literal_target_alignments[index] == 0
+                for index, (old_start, old_end, _, _) in enumerate(ranges)
+            )
+            if stale_literal:
                 raise DevElfError(
                     f"stale absolute word at 0x{vaddr:X} points into an abandoned move slot"
                 )
@@ -3464,7 +3477,13 @@ def audit_relocation_closure(
                 f"redirect wrapper {relocation.symbol_name} is outside "
                 "the development payload"
             )
-    scanned_words = scan_stale_move_references(output, ranges)
+    literal_target_alignments = [
+        4 if str(move.get("section", "")).startswith(".text") else 1
+        for move in moves
+    ]
+    scanned_words = scan_stale_move_references(
+        output, ranges, literal_target_alignments
+    )
     return {
         "changed_relocation_words": len(explained_words),
         "changed_payload_words": changed_payload_words,

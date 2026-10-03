@@ -897,6 +897,11 @@ class DevElfTests(unittest.TestCase):
     def test_stale_reference_scan_rejects_words_and_jumps(self) -> None:
         ranges = [(0x00100020, 0x00100040, 0x00412000, 0x00412024)]
         image = bytearray(_elf())
+        struct.pack_into("<I", image, 0x1000, 0x00100025)
+        dev_elf.scan_stale_move_references(bytes(image), ranges, [4])
+        with self.assertRaisesRegex(dev_elf.DevElfError, "stale absolute word"):
+            dev_elf.scan_stale_move_references(bytes(image), ranges, [1])
+
         struct.pack_into("<I", image, 0x1000, 0x00100024)
         with self.assertRaisesRegex(dev_elf.DevElfError, "stale absolute word"):
             dev_elf.scan_stale_move_references(bytes(image), ranges)
