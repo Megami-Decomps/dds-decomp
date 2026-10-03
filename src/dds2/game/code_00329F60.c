@@ -722,6 +722,9 @@ void sdfTexListInsert(SdfTex *texture) {
 }
 
 extern void *sdfAllocAndClearQuadwords(s32 size);
+extern void func_0032B908(SdfTex *texture);
+extern void sdfTexCopyImageData(SdfTex *texture, void *source);
+extern void sdfTexCreateFirstPacket(SdfTex *texture);
 
 SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, s32 primary, s32 paletteFormat, s32 arg6, s32 secondary) {
     SdfTex *tex = sdfAllocAndClearQuadwords(0x40);
@@ -742,10 +745,40 @@ SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 max
     return tex;
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B6B0);
+SdfTex *func_0032B6B0(SdfTex *source) {
+    SdfTex *texture;
+    SdfTexRef *reference;
+    SdfTex *original;
+
+    texture = sdfAllocSizeClassBlock(sizeof(*texture));
+    *texture = *source;
+    reference = sdfAllocAndClearQuadwords(sizeof(*reference));
+    original = reference->unk0;
+    reference->refCount = 1;
+    texture->reference = reference;
+    if (original == NULL) {
+        original = source;
+        reference->unk0 = original;
+    }
+    texture->primaryBuffer = NULL;
+    texture->secondaryBuffer = NULL;
+    texture->data = NULL;
+    texture->auxiliaryAllocation = NULL;
+    sdfTexListInsert(texture);
+    if (texture->secondaryResource != NULL) {
+        texture->secondaryResource = (SdfTexResource *)func_0032B800(
+            texture->pixelFormat, texture->clutFormat, texture->unk18);
+        func_0032B908(texture);
+        sdfTexCopyImageData(texture, original->data);
+        texture->unk38 = 0x80808080;
+    }
+    sdfTexCreateFirstPacket(texture);
+    sdfTexUploadSecondaryResource(texture);
+    return texture;
+}
 
 /* Allocate a texture head for a 0x20-byte (kind 0) or 0x10-byte (kind 2/10) unit; types 19/27 use unit*8 bytes and 0x20 rows, 20/36/44 use 0x40 bytes and 8 rows. */
-SdfTexHead *func_0032B800(s32 type, s32 kind) {
+SdfTexHead *func_0032B800(s32 type, s32 kind, s32 unused) {
     SdfTexHead *head = NULL;
     s32 unit;
     s32 size;
