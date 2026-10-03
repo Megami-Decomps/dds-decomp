@@ -1,9 +1,10 @@
 #include "common.h"
 #include "dds3Admin.h"
+#include "kwln.h"
 
 extern AdminWork* dds3GetAdminTaskWork(void);
 extern void dds3AdminSubmitModeRequest(s32 a0, s32 a1, s32 a2, s32 a3);
-extern void* kwlnTaskGetUserValue(void* task);
+extern u32 kwlnTaskGetUserValue(KwlnTask *task);
 extern void kwlnTaskSetUserValue(void* task, u32 value);
 extern void* sdfAllocSizeClassBlock(s32 a0);
 extern void sdfReleaseChipBlock(void* ptr);
@@ -69,7 +70,7 @@ u8 dds3AdminReadPreviousUnsignedSample(void)
 
 /* Activate a pending mode request and continue through the mode dispatcher. */
 void *dds3AdminActivateRequestedMode(void *task) {
-    AdminWork *work = kwlnTaskGetUserValue(task);
+    AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
     u32 flags = work->flags;
     s32 restoring;
     void (*entry)(s32, void *);
@@ -113,7 +114,7 @@ void *dds3AdminActivateRequestedMode(void *task) {
 /* Run the mode's destroy callback; a non-negative result is stored (+1) in unk21 and the mode
    cleared. Returns the next step function, or NULL if the callback failed. */
 void *dds3AdminPollModeDestruction(void *task) {
-    AdminWork *work = kwlnTaskGetUserValue(task);
+    AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
     s32 mode = work->unk08;
     s32 (*destroy)(void);
     s32 result;
@@ -137,7 +138,7 @@ INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102CD8);
 /* Run the mode's destroy callback (the row's second pointer), then free the
  * attached data block and the task itself. */
 void dds3AdminReleaseTaskWork(void* task) {
-    AdminWork* work = kwlnTaskGetUserValue(task);
+    AdminWork* work = (AdminWork*)kwlnTaskGetUserValue(task);
     s32 mode = work->unk08;
 
     if (mode >= 0) {
@@ -150,5 +151,5 @@ void dds3AdminReleaseTaskWork(void* task) {
     if (work->unk1C != NULL) {
         sdfReleaseChipBlock(work->unk1C);
     }
-    sdfReleaseChipBlock(kwlnTaskGetUserValue(task));
+    sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(task));
 }
