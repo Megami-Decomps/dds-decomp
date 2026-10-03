@@ -4,6 +4,11 @@
 #include "pcp_vu0.h"
 #include "kwln.h"
 
+enum {
+    BTL_RESOURCE_DESCRIPTOR_BYTES = 0x48,
+    BTL_RESOURCE_NAME_RECORD_BYTES = 0x38
+};
+
 extern void btlClearUnitDefeatCandidate(s32 actor);
 
 extern u32 btlGetIndexListCount(s32 actor);
@@ -313,6 +318,7 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
 }
 
 
+/* Return the larger unscaled extent multiplied by the unit scale. */
 f32 btlUnitGetLargestScaledExtent(BtlUnit *unit) {
     f32 reach;
     f32 height;
@@ -325,19 +331,21 @@ f32 btlUnitGetLargestScaledExtent(BtlUnit *unit) {
     return height * unit->scale;
 }
 
+/* Upper Y bound: scaled half-height minus the sampled position's Y. */
 f32 btlUnitGetTopY(BtlUnit *unit) {
-    f32 pos[4];
+    f32 position[4];
     btlUnitGetMuzzlePosVU(unit);
-    VU0_STORE_VF(vf10, pos);
-    return unit->height * unit->scale * 0.5f - pos[1];
+    VU0_STORE_VF(vf10, position);
+    return unit->height * unit->scale * 0.5f - position[1];
 }
 
 
+/* Lower Y bound uses the same negated position Y and scaled half-height. */
 f32 btlUnitGetBottomY(BtlUnit *unit) {
-    f32 pos[4];
+    f32 position[4];
     btlUnitGetMuzzlePosVU(unit);
-    VU0_STORE_VF(vf10, pos);
-    return -pos[1] - unit->height * unit->scale * 0.5f;
+    VU0_STORE_VF(vf10, position);
+    return -position[1] - unit->height * unit->scale * 0.5f;
 }
 
 
@@ -345,77 +353,82 @@ INCLUDE_ASM(const s32, "game/code_001F6110", func_001F66D8);
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6970);
 
+/* Maximum top bound among active units matching any mask bit; zero if none. */
 f32 btlGetMaxUnitTop(u32 mask) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    f32 best = 0.0f;
-    s32 first = 1;
+    f32 maxTopY = 0.0f;
+    s32 needsFirstSample = 1;
     while (unit != NULL) {
         if ((unit->flags & 1) && (unit->flags & mask)) {
-            f32 value = btlUnitGetTopY(unit);
-            if (first) {
-                best = value;
-                first = 0;
-            } else if (best < value) {
-                best = value;
+            f32 topY = btlUnitGetTopY(unit);
+            if (needsFirstSample) {
+                maxTopY = topY;
+                needsFirstSample = 0;
+            } else if (maxTopY < topY) {
+                maxTopY = topY;
             }
         }
         unit = unit->next;
     }
-    return best;
+    return maxTopY;
 }
 
 
 
+/* Maximum scaled reach among active units matching any mask bit; zero if none. */
 f32 btlGetMaxUnitReach(u32 mask) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    f32 best = 0.0f;
-    s32 first = 1;
+    f32 maxReach = 0.0f;
+    s32 needsFirstSample = 1;
     while (unit != NULL) {
         if ((unit->flags & 1) && (unit->flags & mask)) {
-            f32 value = unit->reach * unit->scale;
-            if (first) {
-                best = value;
-                first = 0;
-            } else if (best < value) {
-                best = value;
+            f32 scaledReach = unit->reach * unit->scale;
+            if (needsFirstSample) {
+                maxReach = scaledReach;
+                needsFirstSample = 0;
+            } else if (maxReach < scaledReach) {
+                maxReach = scaledReach;
             }
         }
         unit = unit->next;
     }
-    return best;
+    return maxReach;
 }
 
+/* Despite the legacy Y name, this selects a Z edge from position[2].
+ * Mask bit 0x200 selects the maximum plus reach; otherwise use the minimum
+ * minus reach. No matching active unit leaves the zero result. */
 f32 btlGetExtremeUnitY(u32 mask) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    f32 best = 0.0f;
-    s32 first = 1;
-    f32 pos[4];
-    f32 value;
+    f32 extremeZ = 0.0f;
+    s32 needsFirstSample = 1;
+    f32 position[4];
+    f32 edgeZ;
     while (unit != NULL) {
         if ((unit->flags & 1) && (unit->flags & mask)) {
             btlUnitGetMuzzlePosVU(unit);
-            VU0_STORE_VF(vf10, pos);
+            VU0_STORE_VF(vf10, position);
             if (mask & 0x200) {
-                value = pos[2] + unit->reach * unit->scale;
-                if (first) {
-                    best = value;
-                    first = 0;
-                } else if (best < value) {
-                    best = value;
+                edgeZ = position[2] + unit->reach * unit->scale;
+                if (needsFirstSample) {
+                    extremeZ = edgeZ;
+                    needsFirstSample = 0;
+                } else if (extremeZ < edgeZ) {
+                    extremeZ = edgeZ;
                 }
             } else {
-                value = pos[2] - unit->reach * unit->scale;
-                if (first) {
-                    best = value;
-                    first = 0;
-                } else if (value < best) {
-                    best = value;
+                edgeZ = position[2] - unit->reach * unit->scale;
+                if (needsFirstSample) {
+                    extremeZ = edgeZ;
+                    needsFirstSample = 0;
+                } else if (edgeZ < extremeZ) {
+                    extremeZ = edgeZ;
                 }
             }
         }
         unit = unit->next;
     }
-    return best;
+    return extremeZ;
 }
 
 
@@ -426,7 +439,7 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     BtlUnit *nearest;
-    s32 first;
+    s32 needsFirstSample;
     f32 nearestDistance;
     f32 distance;
     BtlVec4 targetPos;
@@ -434,7 +447,7 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
     VU0_STORE_VF(vf10, &targetPos);
     unit = state->units;
     nearest = NULL;
-    first = 1;
+    needsFirstSample = 1;
     nearestDistance = 0.0f;
     while (unit != NULL) {
         if (unit->flags & 1) {
@@ -446,10 +459,10 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
                         VU0_LOAD_VF($vf11, &targetPos);
                         VU0_SUB(vf10, vf10, vf11);
                         VU0_LENGTH_VF10(distance);
-                        if (first) {
+                        if (needsFirstSample) {
                             nearestDistance = distance;
                             nearest = unit;
-                            first = 0;
+                            needsFirstSample = 0;
                         } else if (distance < nearestDistance) {
                             nearestDistance = distance;
                             nearest = unit;
@@ -463,7 +476,8 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
     return nearest;
 }
 
-/* Return the eligible unit farthest from point, using the VU distance. */
+/* Return the eligible unit farthest from point, using the VU distance.
+ * The zero baseline leaves NULL when no candidate has a positive distance. */
 BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     BtlUnit *farthest = NULL;
@@ -491,16 +505,18 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
 }
 
 
+/* Select the smallest X for reference flag 0x200, otherwise the largest.
+ * An empty indexed list returns NULL but still loads the native scratch vector. */
 /* vu0 routine: returns the selected muzzle position in vf10. */
 BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *reference, s32 actor) {
     BtlVec4 position, selectedPosition;
     BtlUnit *selected = NULL;
     BtlUnit *unit;
-    u32 i = 0;
-    u32 count = btlGetIndexListCount(actor);
+    u32 entryIndex = 0;
+    u32 entryCount = btlGetIndexListCount(actor);
 
-    for (; i < count; i++) {
-        unit = (BtlUnit *)btlGetIndexListEntry(actor, i);
+    for (; entryIndex < entryCount; entryIndex++) {
+        unit = (BtlUnit *)btlGetIndexListEntry(actor, entryIndex);
         btlUnitGetMuzzlePosVU(unit);
         if (selected == NULL) {
             selected = unit;
@@ -568,26 +584,28 @@ void btlClearMatchingUnitDefeatCandidates(s32 mask) {
     }
 }
 
+/* Mark every unit in the actor's indexed list as a defeat candidate. */
 void btlFlagActorUnitsDefeatCandidate(s32 actor) {
-    u32 i = 0;
-    u32 count = btlGetIndexListCount(actor);
-    if (count != 0) {
+    u32 entryIndex = 0;
+    u32 entryCount = btlGetIndexListCount(actor);
+    if (entryCount != 0) {
         do {
-            btlFlagUnitDefeatCandidate(btlGetIndexListEntry(actor, i));
-            i++;
-        } while (i < count);
+            btlFlagUnitDefeatCandidate(btlGetIndexListEntry(actor, entryIndex));
+            entryIndex++;
+        } while (entryIndex < entryCount);
     }
 }
 
 
+/* Clear the defeat-candidate state of every unit in the actor's indexed list. */
 void btlClearActorUnitDefeatCandidates(s32 actor) {
-    u32 i = 0;
-    u32 count = btlGetIndexListCount(actor);
-    if (count != 0) {
+    u32 entryIndex = 0;
+    u32 entryCount = btlGetIndexListCount(actor);
+    if (entryCount != 0) {
         do {
-            btlClearUnitDefeatCandidate(btlGetIndexListEntry(actor, i));
-            i++;
-        } while (i < count);
+            btlClearUnitDefeatCandidate(btlGetIndexListEntry(actor, entryIndex));
+            entryIndex++;
+        } while (entryIndex < entryCount);
     }
 }
 
@@ -598,23 +616,24 @@ extern void btlSetUnitRotation(s32, s32);
 extern void func_001D5990(s32);
 extern void func_001D5578(s32, s32, s32, f32);
 
+/* Refresh each unit's transform/effect state, then invoke the runtime callback. */
 void btlUpdateUnitActors(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
-    BtlUnit *actor = state->units;
-    while (actor != NULL) {
-        btlFlagUnitDefeatCandidate((s32)actor);
-        btlSetUnitPosition((s32)actor, (s32)((u8 *)actor + 0x30));
-        btlSetUnitRotation((s32)actor, (s32)((u8 *)actor + 0x40));
-        if ((btlIsActorModeAcceptedByBattleHook((s32)actor) == 0 && actor->effectState != 0) ||
-            (actor->updateFlags & 2) != 0) {
-            func_001D5990((s32)actor);
-            actor->effectTimerA = 0;
-            actor->effectTimerB = 0;
-            func_001D5578((s32)actor, actor->effectArgA, actor->effectArgB,
-                          actor->effectValue);
+    BtlUnit *unit = state->units;
+    while (unit != NULL) {
+        btlFlagUnitDefeatCandidate((s32)unit);
+        btlSetUnitPosition((s32)unit, (s32)((u8 *)unit + 0x30));
+        btlSetUnitRotation((s32)unit, (s32)((u8 *)unit + 0x40));
+        if ((btlIsActorModeAcceptedByBattleHook((s32)unit) == 0 && unit->effectState != 0) ||
+            (unit->updateFlags & 2) != 0) {
+            func_001D5990((s32)unit);
+            unit->effectTimerA = 0;
+            unit->effectTimerB = 0;
+            func_001D5578((s32)unit, unit->effectArgA, unit->effectArgB,
+                          unit->effectValue);
         }
-        actor->stateFlags &= ~0x8000;
-        actor = actor->next;
+        unit->stateFlags &= ~0x8000;
+        unit = unit->next;
     }
     {
         void (*callback)(void) = state->updateCallback;
@@ -644,22 +663,23 @@ void btlRefreshUnitEffects(void) {
 }
 
 
+/* Count matching units with bit 0 set, excluding every unit with bit 0x20. */
 s32 btlCountActiveUnitsWithFlags(s32 mask) {
     BtlUnit *unit;
-    s32 count = 0;
-    s32 flags;
+    s32 activeCount = 0;
+    s32 unitFlags;
 
     unit = ((BtlState *)btlGetRuntime())->units;
     if (unit != NULL) {
         do {
-            flags = unit->flags;
-            if (((flags & mask) != 0) && ((flags & 0x20) == 0)) {
-                count += flags & 1;
+            unitFlags = unit->flags;
+            if (((unitFlags & mask) != 0) && ((unitFlags & 0x20) == 0)) {
+                activeCount += unitFlags & 1;
             }
             unit = unit->next;
         } while (unit != NULL);
     }
-    return count;
+    return activeCount;
 }
 
 extern void func_002E7F20(f32, f32, f32);
@@ -721,15 +741,16 @@ s32 func_001F7868(f32 *from, f32 *to, f32 angle) {
     return 1;
 }
 
-/* Unit normal of the triangle (a, b, c); result in vf10 (VU register convention). */
-/* vu0 routine: unit normal of triangle (a, b, c) into vf10 */
-void btlTriangleNormalVU(f32 *a, f32 *b, f32 *c) {
-    VU0_LOAD_VF(vf10, b);
-    VU0_LOAD_VF(vf11, a);
+/* vu0 routine: vf10.xyz = normalize(e x (e x f)),
+ * e = vertexB - vertexA, f = vertexC - vertexA.
+ * The double cross lies in the triangle plane, despite the legacy normal name. */
+void btlTriangleNormalVU(f32 *vertexA, f32 *vertexB, f32 *vertexC) {
+    VU0_LOAD_VF(vf10, vertexB);
+    VU0_LOAD_VF(vf11, vertexA);
     VU0_SUB(vf10, vf10, vf11);
     VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf11, c);
-    VU0_LOAD_VF_MEMORY(vf10, a);
+    VU0_LOAD_VF(vf11, vertexC);
+    VU0_LOAD_VF_MEMORY(vf10, vertexA);
     VU0_SUB(vf11, vf11, vf10);
     VU0_MOVE_VF(vf10, vf12);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
@@ -740,101 +761,107 @@ void btlTriangleNormalVU(f32 *a, f32 *b, f32 *c) {
 }
 
 
-f32 btlTriangleNormalDotEdge(f32 *a, f32 *b, f32 *c) {
-    f32 normal[4];
-    f32 dot;
-    btlTriangleNormalVU(a, b, c);
-    VU0_STORE_VF($vf10, normal);
-    VU0_LOAD_VF($vf10, a);
-    VU0_LOAD_VF($vf11, c);
+/* Dot the normalized double-cross direction with vertexA - vertexC. */
+f32 btlTriangleNormalDotEdge(f32 *vertexA, f32 *vertexB, f32 *vertexC) {
+    f32 direction[4];
+    f32 projection;
+    btlTriangleNormalVU(vertexA, vertexB, vertexC);
+    VU0_STORE_VF($vf10, direction);
+    VU0_LOAD_VF($vf10, vertexA);
+    VU0_LOAD_VF($vf11, vertexC);
     VU0_SUB(vf10, vf10, vf11);
     VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF($vf10, normal);
-        VU0_DOT_XYZ(dot, vf10, vf11);
-    return dot;
+    VU0_LOAD_VF($vf10, direction);
+        VU0_DOT_XYZ(projection, vf10, vf11);
+    return projection;
 }
 
-/* vu0 routine: vf10 = c + normalize(d - c) * dist */
-void btlPointOffPlaneVU(f32 *a, f32 *b, f32 *c, f32 *d) {
-    f32 dist = btlTriangleNormalDotEdge(a, b, c);
-    VU0_LOAD_VF(vf10, d);
-    VU0_LOAD_VF(vf11, c);
+/* vu0 routine: vf10 = vertexC + normalize(point - vertexC) * projection,
+ * where projection is the double-cross direction dotted with vertexA - vertexC. */
+void btlPointOffPlaneVU(f32 *vertexA, f32 *vertexB, f32 *vertexC, f32 *point) {
+    f32 projection = btlTriangleNormalDotEdge(vertexA, vertexB, vertexC);
+    VU0_LOAD_VF(vf10, point);
+    VU0_LOAD_VF(vf11, vertexC);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
-    VU0_SCALAR_OP(dist, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_LOAD_VF(vf11, c);
+    VU0_SCALAR_OP(projection, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_LOAD_VF(vf11, vertexC);
     VU0_ADD(vf10, vf10, vf11);
 }
 
 
-/* vu0 routine: vf10 = c + n * dot(n, a - c), n = unit normal of triangle (a, b, c) */
-void btlProjectOnPlaneVU(f32 *a, f32 *b, f32 *c) {
-    f32 normal[4];
-    f32 dot;
-    btlTriangleNormalVU(a, b, c);
-    VU0_STORE_VF(vf10, normal);
-    VU0_LOAD_VF(vf10, a);
-    VU0_LOAD_VF(vf11, c);
+/* vu0 routine: vf10 = vertexC + direction * dot(direction, vertexA - vertexC).
+ * Direction is the normalized in-plane double cross, not a triangle normal. */
+void btlProjectOnPlaneVU(f32 *vertexA, f32 *vertexB, f32 *vertexC) {
+    f32 direction[4];
+    f32 projection;
+    btlTriangleNormalVU(vertexA, vertexB, vertexC);
+    VU0_STORE_VF(vf10, direction);
+    VU0_LOAD_VF(vf10, vertexA);
+    VU0_LOAD_VF(vf11, vertexC);
     VU0_SUB(vf10, vf10, vf11);
     VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, normal);
-    VU0_DOT_XYZ(dot, vf10, vf11);
-    VU0_SCALAR_OP(dot, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_LOAD_VF(vf11, c);
+    VU0_LOAD_VF(vf10, direction);
+    VU0_DOT_XYZ(projection, vf10, vf11);
+    VU0_SCALAR_OP(projection, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_LOAD_VF(vf11, vertexC);
     VU0_ADD(vf10, vf10, vf11);
 }
 
 
 
-s32 btlPointInBox(BtlVec3 *a, BtlVec3 *b, BtlVec3 *p) {
-    if (((a->x >= p->x && p->x >= b->x) || (a->x <= p->x && p->x <= b->x))
-        && ((a->y >= p->y && p->y >= b->y) || (a->y <= p->y && p->y <= b->y))
-        && ((a->z >= p->z && p->z >= b->z) || (a->z <= p->z && p->z <= b->z))) {
+/* Inclusive box test; either corner order is accepted independently per axis. */
+s32 btlPointInBox(BtlVec3 *cornerA, BtlVec3 *cornerB, BtlVec3 *point) {
+    if (((cornerA->x >= point->x && point->x >= cornerB->x) || (cornerA->x <= point->x && point->x <= cornerB->x))
+        && ((cornerA->y >= point->y && point->y >= cornerB->y) || (cornerA->y <= point->y && point->y <= cornerB->y))
+        && ((cornerA->z >= point->z && point->z >= cornerB->z) || (cornerA->z <= point->z && point->z <= cornerB->z))) {
         return 1;
     }
     return 0;
 }
 
 
-/* vu0 routine: blend two RGBA8888 colours by t (lerp in float, packed back to RGBA8888) */
-u32 btlBlendColor(u32 colorA, u32 colorB, f32 t) {
-    s32 color1[4];
-    s32 color2[4];
-    s32 blended[4];
+/* vu0 routine: interpolate packed RGBA bytes using a 1/128 channel scale.
+ * Factors at or above one return colorB directly; negative factors are not clamped. */
+u32 btlBlendColor(u32 colorA, u32 colorB, f32 blendFactor) {
+    s32 colorBStorage[4];
+    s32 colorAStorage[4];
+    s32 packedStorage[4];
     u32 packed;
-    u32 unit;
-    if (t >= 1.0f) {
+    u32 channelScaleBits;
+    if (blendFactor >= 1.0f) {
         return colorB;
     }
-    unit = 0x3C000000;
-    color1[0] = colorB;
-    EE_MMI_RGBA_UNPACK(color1, unit);
+    channelScaleBits = 0x3C000000;
+    colorBStorage[0] = colorB;
+    EE_MMI_RGBA_UNPACK(colorBStorage, channelScaleBits);
     VU0_MOVE_VF(vf11, vf10);
-    color2[0] = colorA;
-    EE_MMI_RGBA_UNPACK(color2, unit);
-    VU0_SCALAR_OP_CLOBBER(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_SCALAR_OP_R3_CLOBBER(t, "vmulx.xyzw vf11, vf11, vf2x");
+    colorAStorage[0] = colorA;
+    EE_MMI_RGBA_UNPACK(colorAStorage, channelScaleBits);
+    VU0_SCALAR_OP_CLOBBER(1.0f - blendFactor, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALAR_OP_R3_CLOBBER(blendFactor, "vmulx.xyzw vf11, vf11, vf2x");
     VU0_ADD(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK(packed);
-    blended[0] = packed;
+    packedStorage[0] = packed;
     
     return packed;
 }
 
 
-/* Blend two RGBA float vectors (0..1 scale) by t and pack to 8-bit channels. */
-/* vu0 routine: blend two RGBA float vectors by t, packed to RGBA8888 */
-u32 btlBlendColorVec(f32 *a, f32 *b, f32 t) {
+/* vu0 routine: interpolate RGBA float vectors, multiply channels by 128,
+ * then truncate and pack. Unlike the packed-color routine, neither endpoint
+ * is returned early and the blend factor is not clamped. */
+u32 btlBlendColorVec(f32 *colorA, f32 *colorB, f32 blendFactor) {
     u32 packed;
-    s32 blended[4];
-    VU0_LOAD_VF(vf10, a);
-    VU0_LOAD_VF(vf11, b);
-    VU0_SCALAR_OP(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_SCALAR_OP_R3(t, "vmulx.xyzw vf11, vf11, vf2x");
+    s32 packedStorage[4];
+    VU0_LOAD_VF(vf10, colorA);
+    VU0_LOAD_VF(vf11, colorB);
+    VU0_SCALAR_OP(1.0f - blendFactor, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALAR_OP_R3(blendFactor, "vmulx.xyzw vf11, vf11, vf2x");
     VU0_ADD(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK(packed);
-    blended[0] = packed;
-    return blended[0];
+    packedStorage[0] = packed;
+    return packedStorage[0];
 }
 
 
@@ -847,9 +874,10 @@ typedef struct BtlScalarRange {
     f32 target;      /* 0x10 */
 } BtlScalarRange;
 
-void btlScalarRangeSetStartClearEnd(s32 range, f32 start) {
-    ((BtlScalarRange *)range)->start = start;
-    ((BtlScalarRange *)range)->end = 0;
+/* Store the starting span and clear end; the other state fields are untouched. */
+void btlScalarRangeSetStartClearEnd(s32 rangeAddress, f32 start) {
+    ((BtlScalarRange *)rangeAddress)->start = start;
+    ((BtlScalarRange *)rangeAddress)->end = 0;
 }
 
 f32 func_001F7CD8(s32 range) {
@@ -873,18 +901,19 @@ f32 func_001F7CD8(s32 range) {
     return result;
 }
 
-void btlScalarRangeInitQuadratic(s32 range, f32 start) {
-    f32 zero;
+/* Initialize the quadratic accumulator; a zero span leaves inverseSpan unchanged. */
+void btlScalarRangeInitQuadratic(s32 rangeAddress, f32 start) {
+    f32 initialValue;
 
-    ((BtlScalarRange *)range)->zero = 0.0f;
-    ((BtlScalarRange *)range)->start = start;
-    zero = ((BtlScalarRange *)range)->zero;
-    ((BtlScalarRange *)range)->end = start;
-    ((BtlScalarRange *)range)->target = zero;
-    if (start == zero) {
+    ((BtlScalarRange *)rangeAddress)->zero = 0.0f;
+    ((BtlScalarRange *)rangeAddress)->start = start;
+    initialValue = ((BtlScalarRange *)rangeAddress)->zero;
+    ((BtlScalarRange *)rangeAddress)->end = start;
+    ((BtlScalarRange *)rangeAddress)->target = initialValue;
+    if (start == initialValue) {
         return;
     }
-    ((BtlScalarRange *)range)->inverseSpan = 1.0f / (start * start * 0.25f);
+    ((BtlScalarRange *)rangeAddress)->inverseSpan = 1.0f / (start * start * 0.25f);
 }
 
 f32 func_001F7D80(BtlScalarRange *state, f32 step) {
@@ -2589,39 +2618,40 @@ typedef struct BtlResourceDescriptor {
     BtlResourceEntryList *entryList; /* 0x44 */
 } BtlResourceDescriptor;
 
-/* Initialize a browser descriptor at the first entry of the borrowed list. */
+/* Initialize a browser descriptor at the first entry of the borrowed list.
+ * The native constructor leaves ownsHandle untouched. */
 BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
-    BtlResourceDescriptor *resource = sdfAllocSizeClassBlock(0x48);
+    BtlResourceDescriptor *descriptor = sdfAllocSizeClassBlock(BTL_RESOURCE_DESCRIPTOR_BYTES);
 
-    resource->word00 = 8;
-    resource->word04 = 8;
-    resource->word08 = 0;
-    resource->entryCount = list->count;
-    resource->word10[0] = 0;
-    resource->word10[1] = 0;
-    resource->word10[2] = 0;
-    resource->word10[3] = 0;
-    resource->word10[4] = 0;
-    resource->word24 = 0x60;
-    resource->word28 = 0x80806020;
-    resource->word2C = 0x60000000;
-    resource->firstVisibleEntry = list->head;
-    resource->selectedEntry = list->head;
-    resource->word38 = 0;
-    resource->handle = 0;
-    resource->entryList = list;
-    return resource;
+    descriptor->word00 = 8;
+    descriptor->word04 = 8;
+    descriptor->word08 = 0;
+    descriptor->entryCount = list->count;
+    descriptor->word10[0] = 0;
+    descriptor->word10[1] = 0;
+    descriptor->word10[2] = 0;
+    descriptor->word10[3] = 0;
+    descriptor->word10[4] = 0;
+    descriptor->word24 = 0x60;
+    descriptor->word28 = 0x80806020;
+    descriptor->word2C = 0x60000000;
+    descriptor->firstVisibleEntry = list->head;
+    descriptor->selectedEntry = list->head;
+    descriptor->word38 = 0;
+    descriptor->handle = 0;
+    descriptor->entryList = list;
+    return descriptor;
 }
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FBA38);
 
 /* Release an owned texture handle and the descriptor, but not its entry list. */
-void btlDestroyResourceDescriptor(BtlResourceDescriptor *resource) {
-    s32 handle = resource->handle;
-    if (handle != 0 && resource->ownsHandle == 1) {
-        sdfTexReleaseReferenceViaHandler(handle);
+void btlDestroyResourceDescriptor(BtlResourceDescriptor *descriptor) {
+    s32 textureHandle = descriptor->handle;
+    if (textureHandle != 0 && descriptor->ownsHandle == 1) {
+        sdfTexReleaseReferenceViaHandler(textureHandle);
     }
-    sdfReleaseChipBlock(resource);
+    sdfReleaseChipBlock(descriptor);
 }
 
 /* Header of the 0x38-byte resource-name record; trailing bytes hold the name. */
@@ -2650,28 +2680,28 @@ u32 func_001FBF48(s32 recordAddress) {
 }
 
 /* Format prefix + selected name; return its resource category, not its id. */
-s32 btlFormatSelectedResourceName(BtlResourceDescriptor *resource, char *output) {
-    char *prefix = resource->entryList->pathPrefix;
-    if (prefix != NULL) {
-        func_003014F0(output, D_003BB818, prefix, resource->selectedEntry->name);
+s32 btlFormatSelectedResourceName(BtlResourceDescriptor *descriptor, char *output) {
+    char *pathPrefix = descriptor->entryList->pathPrefix;
+    if (pathPrefix != NULL) {
+        func_003014F0(output, D_003BB818, pathPrefix, descriptor->selectedEntry->name);
     } else {
-        func_003014F0(output, D_003BB820, resource->selectedEntry->name);
+        func_003014F0(output, D_003BB820, descriptor->selectedEntry->name);
     }
-    return resource->selectedEntry->category;
+    return descriptor->selectedEntry->category;
 }
 
 /* Strip from the first '.' onward; return the selected entry's category. */
-s32 btlTrimResourceName(BtlResourceDescriptor *resource, char *output) {
-    u32 length;
-    u32 i;
-    func_003014F0(output, D_003BB820, resource->selectedEntry->name);
-    length = strlen(output);
-    for (i = 0; i < length && output[i] != '.'; i++) {
+s32 btlTrimResourceName(BtlResourceDescriptor *descriptor, char *output) {
+    u32 nameLength;
+    u32 characterIndex;
+    func_003014F0(output, D_003BB820, descriptor->selectedEntry->name);
+    nameLength = strlen(output);
+    for (characterIndex = 0; characterIndex < nameLength && output[characterIndex] != '.'; characterIndex++) {
     }
-    if (length != i) {
-        output[i] = 0;
+    if (nameLength != characterIndex) {
+        output[characterIndex] = 0;
     }
-    return resource->selectedEntry->category;
+    return descriptor->selectedEntry->category;
 }
 
 
@@ -2684,36 +2714,41 @@ extern void sdfTexReleaseReferenceViaHandler(s32);
 extern void sdfReleaseResourceAllocation(s32);
 void btlReplaceResourceHandle(BtlResourceDescriptor *, s32);
 
-void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) {
-    u32 loaded;
-    s32 handle = resource->handle;
-    s32 buffer;
-    if (handle != 0 && resource->ownsHandle == 1) {
-        sdfTexReleaseReferenceViaHandler(handle);
-        resource->handle = 0;
+/* Replace an owned old texture, acquire the named resource's texture,
+ * then release the temporary allocation returned by the resource reader. */
+void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, s32 nameAddress) {
+    u32 loadedResource;
+    s32 textureHandle = descriptor->handle;
+    s32 allocationHandle;
+    if (textureHandle != 0 && descriptor->ownsHandle == 1) {
+        sdfTexReleaseReferenceViaHandler(textureHandle);
+        descriptor->handle = 0;
     }
-    buffer = sdfReadNamedResource(name, &loaded, 0);
-    btlReplaceResourceHandle(resource, loaded);
-    sdfReleaseResourceAllocation(buffer);
+    allocationHandle = sdfReadNamedResource(nameAddress, &loadedResource, 0);
+    btlReplaceResourceHandle(descriptor, loadedResource);
+    sdfReleaseResourceAllocation(allocationHandle);
 }
 
 extern s32 sdfTexAcquireResourceTexture(s32);
 
-void btlReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) {
-    s32 handle = resource->handle;
-    if (handle != 0 && resource->ownsHandle == 1) {
-        sdfTexReleaseReferenceViaHandler(handle);
-        resource->handle = 0;
+/* Acquire a texture from the supplied resource, releasing an owned old handle. */
+void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, s32 textureResource) {
+    s32 textureHandle = descriptor->handle;
+    if (textureHandle != 0 && descriptor->ownsHandle == 1) {
+        sdfTexReleaseReferenceViaHandler(textureHandle);
+        descriptor->handle = 0;
     }
-    resource->handle = sdfTexAcquireResourceTexture(name);
+    descriptor->handle = sdfTexAcquireResourceTexture(textureResource);
 }
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FC160);
 
-s32 btlCreateResourceNameRecord(s32 name) {
+/* Allocate the native name record and copy the initial text at byte 0x1C.
+ * Preserve the raw address ABI and the constructor's individual field writes. */
+s32 btlCreateResourceNameRecord(s32 nameAddress) {
     s32 recordAddress;
 
-    recordAddress = (s32)sdfAllocSizeClassBlock(0x38);
+    recordAddress = (s32)sdfAllocSizeClassBlock(BTL_RESOURCE_NAME_RECORD_BYTES);
     ((BtlResourceNameRecord *)recordAddress)->word14 = 9;
     ((BtlResourceNameRecord *)recordAddress)->word00 = 8;
     ((BtlResourceNameRecord *)recordAddress)->word04 = 8;
@@ -2721,7 +2756,7 @@ s32 btlCreateResourceNameRecord(s32 name) {
     ((BtlResourceNameRecord *)recordAddress)->nameLength = 0;
     ((BtlResourceNameRecord *)recordAddress)->word0C = 0;
     ((BtlResourceNameRecord *)recordAddress)->word18 = 0;
-    strcpy(recordAddress + 0x1c, name);
+    strcpy(recordAddress + 0x1c, nameAddress);
     return recordAddress;
 }
 
@@ -2740,9 +2775,10 @@ u32 func_001FC730(s32 recordAddress) {
     return ((BtlResourceNameRecord *)recordAddress)->word08;
 }
 
-void btlResourceRecordSetName(char *record, char *name) {
-    strcpy(record + 0x21, name);
-    ((BtlResourceNameRecord *)record)->nameLength = strlen(name);
+/* Copy text at native byte 0x21 and record its length, unlike the constructor's 0x1C copy. */
+void btlResourceRecordSetName(char *recordBytes, char *text) {
+    strcpy(recordBytes + 0x21, text);
+    ((BtlResourceNameRecord *)recordBytes)->nameLength = strlen(text);
 }
 
 void btlFormatResourceNameWithPrefix(s32 recordAddress, void *output) {
