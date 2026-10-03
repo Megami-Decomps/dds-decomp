@@ -46,7 +46,7 @@ extern s32 effMiscRandMod(s32, s32);
 
 extern void kwlnPadStartMotor(u32, u8, s32);
 
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfInitPacketList(void *);
 

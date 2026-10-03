@@ -182,7 +182,7 @@ typedef struct ParBlock {
     s32 handle;      /* 0x14 */
 } ParBlock;
 
-extern s32 sdfCreateAssetWithDrawEntries();
+extern void *sdfCreateAssetWithDrawEntries(void);
 
 extern void func_003332D0(s32, f32);
 

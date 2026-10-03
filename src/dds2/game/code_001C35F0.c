@@ -21,9 +21,9 @@ typedef struct UiInputState {
 
 extern u32 D_004367CC;
 
-extern u32 kwlnTaskGetUserValue(s64);
+extern u32 kwlnTaskGetUserValue(void *);
 
-extern s64 func_00101740(u32);
+extern void *func_00101740(const char *name);
 
 extern s32 btlGetRuntime(void);
 
@@ -46,7 +46,7 @@ void btlUpdateActorSlotPresentationState(UiSceneNode *object, s8 mode, s8 value)
     UiSceneNode *node = *(UiSceneNode **)(btlGetRuntime() + 0x24C);
     u8 *entry;
     UiSlotRow *slotEntry;
-    s64 task;
+    void *task;
     s32 offset;
 
     for (; node != 0; node = node->next) {
@@ -187,7 +187,6 @@ typedef struct BtlTrackedState {
         s8 status;
     } word; /* 0x3C */
 } BtlTrackedState;
-
 extern BtlTrackedState *btlTrackedTaskHandles;
 extern u32 btlCommandPanelTaskNameRef;
 
