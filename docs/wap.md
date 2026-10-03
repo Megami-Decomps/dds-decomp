@@ -194,9 +194,11 @@ python3 tools/field_graph.py src/dds1/data/field dds1-field-world.json
 python3 tools/field_graph.py src/dds1/data/field dds1-field-world.dot \
   --format dot
 python3 tools/field_graph.py src/dds1/data/field dds1-field-world-full.json \
-  --include-interactions
+  --include-interactions --include-events
 python3 tools/field_graph.py src/dds1/data/field f004_001-interactions.dot \
   --format dot --interaction-area f004_001
+python3 tools/field_graph.py src/dds1/data/field f011-events.dot \
+  --format dot --event-field f011
 ```
 
 An area node records whether its FLD2 source is present. A field-transition
@@ -240,6 +242,30 @@ shows flag and choice edges, and connects warp nodes to their exact WAP
 destinations. Unlinked placements, unknown controls, and missing target areas
 are dashed. This option enables interaction loading automatically; the default
 command remains the fast version-1 world graph.
+
+`--include-events` upgrades the JSON schema to `dds-field-world-3` and adds
+the executable field-script layer. Each nonnegative kind-1 placement keeps its
+exact FLD2 event resource and becomes an entry edge only when the label exists
+in the `fNNN.bf` owned by that field's shared archive. The graph does not use a
+global label or numeric-prefix fallback.
+
+Procedure nodes expose their runtime index, source name, code-word extent, and
+aggregated native-command vocabulary. Exact `CALL`, `JUMP`, and
+`CREATE_SCRIPT_TASK` targets form local execution edges; literal `CALL_EVENT`
+targets point to maintained event scripts. Reachability begins at concrete
+placement entries and follows those local edges. Dynamic or invalid targets
+remain explicit unresolved records. `--event-field fNNN` renders the reachable
+slice for one field, including placement roots, local procedure edges, the
+most frequent semantic commands on each node, and external event targets.
+
+Across DDS1, 526 placement links seed 510 entry procedures and reach 595 of
+1,528 field procedures through 567 distinct task edges (767 call sites). DDS2
+has 675 placement links, 669 entry procedures, and 712 of 1,711 procedures
+reachable through 460 task edges (462 sites). The field scripts also contain
+6 DDS1 and 19 DDS2 distinct event-script edges. All 1,229 task sites and 26
+event-call sites have direct in-range literal targets; none require inference.
+The complete graphs expose 48,700 DDS1 and 36,331 DDS2 native calls, of which
+46,905 and 34,772 respectively use verified command names.
 
 Run the codec and complete-corpus regression tests with:
 
