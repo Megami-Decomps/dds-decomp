@@ -194,13 +194,16 @@ python3 tools/field_graph.py src/dds1/data/field dds1-field-world.json
 python3 tools/field_graph.py src/dds1/data/field dds1-field-world.dot \
   --format dot
 python3 tools/field_graph.py src/dds1/data/field dds1-field-world-full.json \
-  --include-interactions --include-events --include-random-encounters
+  --include-interactions --include-events --include-random-encounters \
+  --include-automap
 python3 tools/field_graph.py src/dds1/data/field f004_001-interactions.dot \
   --format dot --interaction-area f004_001
 python3 tools/field_graph.py src/dds1/data/field f011-events.dot \
   --format dot --event-field f011
 python3 tools/field_graph.py src/dds1/data/field f022_001-encounters.dot \
   --format dot --encounter-area f022_001
+python3 tools/field_graph.py src/dds1/data/field f011_001-automap.dot \
+  --format dot --automap-area f011_001
 ```
 
 An area node records whether its FLD2 source is present. A field-transition
@@ -351,9 +354,25 @@ pool thresholds and total weights, and each weighted formation choice. It does
 not choose a current flag state, collision face, condition result, or random
 roll.
 
+`--include-automap` upgrades the graph to schema 9 and adds the exact runtime
+join from each `fNNN_AAA` source to base AMB area index `AAA - 1`. AMB areas
+and sub-blocks are stable nodes with their source names, positions, floors,
+model-node links, icon counts, and bounds. Every collision face tagged with
+attribute `0x800` becomes a discovery edge carrying its physical collision and
+face identity, one-based selector, separate `upperName` byte, and runtime floor
+result. Missing base maps, out-of-range room indices, selectors that take the
+native default, and tagged `k*` resources without a proven active map remain
+explicit.
+
+`--automap-area fNNN_AAA` enables the layer and renders one focused room. It
+shows the runtime-selected AMB row and groups its discovery faces by selector,
+upper-name channel, target sub-block, and floor result. It does not infer an
+area from its display name or coordinates.
+
 Run the codec and complete-corpus regression tests with:
 
 ```sh
 python3 -m unittest tools.test_wap tools.test_field_graph \
-  tools.test_encounter_flow tools.test_random_encounter_flow
+  tools.test_encounter_flow tools.test_random_encounter_flow \
+  tools.test_automap_flow
 ```
