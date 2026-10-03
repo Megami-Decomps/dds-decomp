@@ -175,8 +175,8 @@ extern void effMiscNormalizeVU(void);
 #define KWLN_DRAW_SQUARE_FADE_BIT 0x200000
 #define KWLN_DRAW_SQUARE_TRANSITION_BIT 0x400000
 #define KWLN_DRAW_CLEAR_SQUARE_TRANSITION 0xFFBFFFFF
-#define KWLN_DRAW_OFFSET_TRANSITION_BIT 0x800
-#define KWLN_DRAW_CLEAR_OFFSET_TRANSITION 0xfffff7ff
+#define KWLN_DRAW_OVERLAY_TRANSITION_BIT 0x800
+#define KWLN_DRAW_CLEAR_OVERLAY_TRANSITION 0xfffff7ff
 
 /* Copy one complete vector into the default draw color state. */
 void kwlnDrawCopyRow128(void *source) {
@@ -340,27 +340,27 @@ void kwlnDrawEnableE08(s32 duration) {
     }
 }
 
-/* Apply offsets now or interpolate from the current offsets over duration updates.
- * Existing alpha/scale global names hold the two signed offset components. */
-void kwlnDrawSetOffsetTransition(s32 duration, s32 x, s32 y) {
+/* Apply vignette alpha and Q12 scale now, or interpolate them over duration updates.
+ * Despite the legacy function name, these values do not specify position offsets. */
+void kwlnDrawSetOffsetTransition(s32 duration, s32 alpha, s32 scale) {
     if (duration == 0) {
-        kwlnDrawOverlayAlpha = (s16)x;
-        kwlnDrawOverlayScale = (s16)y;
-        if ((x == 0) && (y == 0)) {
+        kwlnDrawOverlayAlpha = (s16)alpha;
+        kwlnDrawOverlayScale = (s16)scale;
+        if ((alpha == 0) && (scale == 0)) {
             kwlnDrawOverlayEnabled = 0;
         }
         else {
             kwlnDrawOverlayEnabled = 1;
         }
-        kwlnDrawControlFlags = kwlnDrawControlFlags & KWLN_DRAW_CLEAR_OFFSET_TRANSITION;
+        kwlnDrawControlFlags = kwlnDrawControlFlags & KWLN_DRAW_CLEAR_OVERLAY_TRANSITION;
         return;
     }
     D_003BD6B8 = kwlnDrawOverlayAlpha;
     D_003BD6BA = kwlnDrawOverlayScale;
-    D_003BD6BC = (s16)x;
-    D_003BD6BE = (s16)y;
+    D_003BD6BC = (s16)alpha;
+    D_003BD6BE = (s16)scale;
     D_003BD6B6 = (s16)duration;
-    kwlnDrawControlFlags = kwlnDrawControlFlags | KWLN_DRAW_OFFSET_TRANSITION_BIT;
+    kwlnDrawControlFlags = kwlnDrawControlFlags | KWLN_DRAW_OVERLAY_TRANSITION_BIT;
     D_003BD6B4 = 0;
 }
 
