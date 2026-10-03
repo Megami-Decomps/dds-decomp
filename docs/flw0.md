@@ -319,18 +319,26 @@ event script's resource name:
 
   PUSHEVENT e633
   COMM SUBMIT_EVENT
+
+  PUSHEVENT e610
+  PUSHIS 258
+  COMM SUBMIT_EVENT_WITH_SELECTION
 ```
 
 `PUSHEVENT` also assembles to `PUSHIS`. The selected game profile binds names
 to the event IDs present in its maintained corpus. This mirrors the runtime,
 which formats event ID 602 as
-`/event/e600/e602/scr/e602.bf`. The disassembler emits the name only for an
-adjacent literal `PUSHIS` followed by `CALL_EVENT` or `SUBMIT_EVENT`, and only
-when that event target is maintained for the selected game. Dynamic values and
-references to absent targets stay numeric.
+`/event/e600/e602/scr/e602.bf`. The command profile records which handler
+argument carries the event resource. The disassembler emits the name only when
+that argument is a direct literal and the target is maintained for the selected
+game. This covers `CALL_EVENT`, `SUBMIT_EVENT`, and the second argument of
+`SUBMIT_EVENT_WITH_SELECTION`; dynamic values and references to absent targets
+stay numeric.
 
-The reading view carries the same evidence as `CALL_EVENT(event(e602))` or
-`SUBMIT_EVENT(event(e633))`, while leaving an unresolved literal numeric.
+The reading view carries the same evidence as `CALL_EVENT(event(e602))`,
+`SUBMIT_EVENT(event(e633))`, or
+`SUBMIT_EVENT_WITH_SELECTION(258, event(e610))`, while leaving an unresolved
+target numeric.
 
 A literal procedure-table index passed to the script-task command uses a local
 procedure symbol:
@@ -460,7 +468,7 @@ table and native implementation; shared commands were checked in both games:
 | `SET_CONTROLLER_VIBRATION` | `0x01A` | 3 | Sets the `SMALL_MOTOR` or `LARGE_MOTOR` vibration strength and duration |
 | `FADE_BACKGROUND_IN` | `0x01F` | 1 | Starts the background fade-in with the supplied duration |
 | `READ_SOLAR_PHASE` | `0x027` | 0 | Returns the current solar phase |
-| `SUBMIT_EVENT_WITH_MODE` | `0x028` | 2 | Submits an event request with its execution mode |
+| `SUBMIT_EVENT_WITH_SELECTION` | `0x028` | 2 | Submits a request ID and uses the positive second argument as the selected event resource |
 | `RESET_DRAW_EFFECTS` | `0x043` | 0 | Clears draw transitions and effect enables |
 | `RETURN_TO_TITLE` | `0x046` | 0 | Requests the title scene |
 | `WAIT_FOR_UNIT_MOTION` | `0x049` | 1 | Waits until the selected unit's motion is idle or in its timed mode |

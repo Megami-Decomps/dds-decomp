@@ -136,6 +136,7 @@ class Flw0FlowTests(unittest.TestCase):
                     "kind": "event",
                     "value": None,
                     "command": "CALL_EVENT",
+                    "dispatch": "call",
                 },
                 {
                     "source": 0,
@@ -143,8 +144,56 @@ class Flw0FlowTests(unittest.TestCase):
                     "kind": "event",
                     "value": None,
                     "command": "SUBMIT_EVENT",
+                    "dispatch": "submit",
                 },
             ],
+        )
+
+    def test_recovers_selected_event_and_request_id(self) -> None:
+        source = SOURCE.replace(
+            "  return\nworker:",
+            "  SUBMIT_EVENT_WITH_SELECTION(258, event(e634))\n"
+            "  PUSHIX 0\n"
+            "  COMM SUBMIT_EVENT_IMMEDIATE\n"
+            "  return\nworker:",
+        )
+        flow = flw0_flow.analyze(
+            flw0.parse_source(source), flw0_profiles.get("dds1")
+        )
+        selected = next(
+            edge
+            for edge in flow["eventEdges"]
+            if edge["command"] == "SUBMIT_EVENT_WITH_SELECTION"
+        )
+        self.assertEqual(
+            {
+                key: selected[key]
+                for key in (
+                    "eventId",
+                    "event",
+                    "requestId",
+                    "kind",
+                    "command",
+                )
+            },
+            {
+                "eventId": 634,
+                "event": "e634",
+                "requestId": 258,
+                "kind": "submit-selection",
+                "command": "SUBMIT_EVENT_WITH_SELECTION",
+            },
+        )
+        self.assertIn(
+            {
+                "source": 0,
+                "pc": 17,
+                "kind": "event",
+                "value": None,
+                "command": "SUBMIT_EVENT_IMMEDIATE",
+                "dispatch": "submit-immediate",
+            },
+            flow["unresolvedTargets"],
         )
 
     def test_keeps_dynamic_battle_exit_unresolved(self) -> None:

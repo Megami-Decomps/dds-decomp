@@ -260,7 +260,7 @@ def _render_instruction(
         return f"  PUSHSELECT {selection_symbol}", pc + 1
     event_symbol = flw0._event_push_symbol(
         raw,
-        words[pc + 1].raw if pc + 1 < len(words) else None,
+        tuple(word.raw for word in words[pc + 1 : pc + 3]),
         command_profile,
     )
     if event_symbol is not None:
