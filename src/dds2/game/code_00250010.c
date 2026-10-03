@@ -162,6 +162,18 @@ typedef struct EvtRuntime {
     s32 pendingWork; /* 0x2428 */
     s32 pendingResource; /* 0x242C */
 } EvtRuntime;
+extern s32 effUpdateCh72Params(void);
+extern s32 effEventAdvanceBlurTemplateSetup(void);
+extern s32 effEventAdvanceScatterBlurSetup(void);
+extern s32 effEventAdvanceScaleBlurSetup(void);
+extern s32 func_001978B8(void);
+extern s32 func_002570F8(EvtRuntime *runtime);
+extern s32 func_00257910(EvtRuntime *runtime);
+extern s32 func_002582D0(EvtRuntime *runtime);
+extern void *D_004364B0;
+extern void *D_0043653C;
+extern void *D_00436520;
+
 
 typedef struct GsSurface {
     u8 pad00[0x10];
@@ -1577,7 +1589,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00256CF0);
 
 extern s32 effEventAdvanceResourceTemplateSetup();
 
-extern s32 kwlnTaskGetTimer(s32 task);
+extern u32 kwlnTaskGetTimer(s32 task);
 
 typedef struct EvtSelectionCache {
     u8 pad00[0x24];
@@ -1636,7 +1648,71 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00257910);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_002582D0);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00258700);
+s32 func_00258700(s32 arg0, s32 arg1, EvtRuntime *runtime) {
+    s32 status = 1;
+
+    switch (runtime->frameGroup->type) {
+    case 0xD:
+        status = effUpdateCh72Params();
+        break;
+    case 0xE:
+        status = effEventAdvanceBlurTemplateSetup();
+        if (runtime->selected != 0) {
+            *(s32 *)((u8 *)D_004364B0 + 0x2C) = runtime->selected;
+        }
+        break;
+    case 0xF:
+        status = effEventAdvanceScatterBlurSetup();
+        if (runtime->selected != 0) {
+            *(s32 *)((u8 *)D_0043653C + 0x2C) = runtime->selected;
+        }
+        break;
+    case 0x17:
+        status = effEventAdvanceScaleBlurSetup();
+        if (runtime->selected != 0) {
+            *(s32 *)((u8 *)D_00436520 + 0x2C) = runtime->selected;
+        }
+        break;
+    case 0x1B:
+        status = func_001978B8();
+        break;
+    case 0x10:
+    case 0x11:
+        if (runtime->busy == 0) {
+            return 1;
+        }
+        break;
+    case 0x18:
+        status = func_002570F8(runtime);
+        break;
+    case 0x19:
+        status = func_00257910(runtime);
+        break;
+    case 0x6:
+        status = func_002582D0(runtime);
+        break;
+    case 0x7:
+    case 0x8:
+    case 0x9:
+    case 0xA:
+    case 0xB:
+    case 0xC:
+    default:
+        if (D_0037F510.apply < 0) {
+            status = 0;
+        }
+        break;
+    }
+
+    if (status != 0) {
+        return 0;
+    }
+    if (runtime->busy != 0) {
+        kwlnTaskDestroyWithHierarchy(runtime->busy, 1);
+        runtime->busy = 0;
+    }
+    return 1;
+}
 
 s32 evtDispatchActionByIndex(s32 index, s32 x, s32 y, void *runtime) {
     s32 mode = ((EvtRuntime *)runtime)->mode;
@@ -2706,3 +2782,4 @@ INCLUDE_SDATA(const s32, "game/code_00250010", D_004377C0);
 INCLUDE_SDATA(const s32, "game/code_00250010", D_004377C8);
 
 INCLUDE_SDATA(const s32, "game/code_00250010", D_004377D0);
+
