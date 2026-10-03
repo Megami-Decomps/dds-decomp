@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 import unittest
 from collections import Counter
 from dataclasses import replace
@@ -11,11 +12,57 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 import field_graph  # noqa: E402
+import flw0_profiles  # noqa: E402
 import inf  # noqa: E402
 import wap  # noqa: E402
 
 
 class FieldGraphTests(unittest.TestCase):
+    def test_links_event_placements_to_reachable_script_procedures(self) -> None:
+        source_script = ROOT / "src/dds1/scripts/field/f011.bfasm"
+        field_source = ROOT / "src/dds1/data/field/f011_001.fldasm"
+        with tempfile.TemporaryDirectory() as temporary:
+            script_dir = Path(temporary) / "scripts/field"
+            script_dir.mkdir(parents=True)
+            (script_dir / "f011.bfasm").write_text(
+                source_script.read_text(encoding="utf-8"), encoding="utf-8"
+            )
+            sections = field_graph._event_sections(
+                [field_source], script_dir, flw0_profiles.get("dds1")
+            )
+
+        self.assertEqual(
+            {
+                key: sections["eventSummary"][key]
+                for key in (
+                    "fieldScripts",
+                    "eventPlacements",
+                    "linkedEventPlacements",
+                    "entryProcedures",
+                    "procedureNodes",
+                    "reachableProcedures",
+                    "unresolvedScriptTargets",
+                )
+            },
+            {
+                "fieldScripts": 1,
+                "eventPlacements": 2,
+                "linkedEventPlacements": 2,
+                "entryProcedures": 2,
+                "procedureNodes": 43,
+                "reachableProcedures": 2,
+                "unresolvedScriptTargets": 0,
+            },
+        )
+        self.assertEqual(
+            [row["label"] for row in sections["eventEntries"]],
+            ["001_01eve_01", "001_01eve_02"],
+        )
+        graph = {key: value for key, value in sections.items() if key != "eventSummary"}
+        dot = field_graph._render_event_dot(graph, "f011")
+        self.assertIn('"f011_001:event-placement:4" -> "f011:procedure:38"', dot)
+        self.assertIn("001_01eve_02 [39]", dot)
+
     def test_builds_present_missing_and_conditional_edges(self) -> None:
         table = wap.default_file(wap.PROFILES["dds1"])
         entries = list(table.entries)
