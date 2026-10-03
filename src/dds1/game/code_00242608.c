@@ -15,6 +15,7 @@ extern void mnuUnpackNibbleFields();
 extern u8 D_00368C40[];
 
 extern s32 datGameState;
+extern s32 ptyCountBulletItem(s32);
 
 extern s8 D_003BC39C;
 
@@ -1152,7 +1153,39 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00244D10);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244E08);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244FA0);
+s32 func_00244FA0(s32 context) {
+    s32 globalState = datGameState;
+    s32 itemObject = *(s32 *)((u8 *)context + 0x70);
+    s32 record = *(s32 *)((u8 *)itemObject + 0x14);
+    s32 parameters = *(s32 *)((u8 *)record + 0x1C) + 0x60;
+    s32 itemId = *(s32 *)((u8 *)parameters + 4);
+    s32 divisor = *(s32 *)((u8 *)parameters + 8);
+    s32 kind = *(s32 *)((u8 *)parameters + 0x0C);
+    s32 limit = *(s32 *)((u8 *)globalState + 0x3C) / divisor;
+    s32 quantity = *(s32 *)((u8 *)context + 0x8C);
+    s32 available;
+
+    if (kind == 2) {
+        available = quantity - ptyCountBulletItem(itemId);
+    } else if (kind == 3) {
+        available = 1 - *((u8 *)(itemId + globalState) + 0x12A0);
+    } else {
+        available = 0x63 - *((u8 *)(itemId + globalState) + 0x12A0);
+    }
+    if (available < 0) {
+        available = 0;
+    }
+    if (limit == 0) {
+        return -1;
+    }
+    if (available == 0) {
+        return -2;
+    }
+    if (available < limit) {
+        return available;
+    }
+    return limit;
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00245068);
 
