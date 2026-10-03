@@ -276,4 +276,51 @@ s32 func_003460D8(DevState *deviceState, s32 operation, void *data, s32 bytesRea
     return 0;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMovie", func_00346468);
+s32 func_00346468(void *unused, MovObj *movie, s32 operation, u8 *data, s32 size) {
+    MovSub *stream = movie->stream;
+
+    switch (operation) {
+    case 0:
+        if (movie->stopRequested != 0) {
+            *data = 1;
+            return 0;
+        }
+        if (movie->remainingBytes == 0) {
+            *data = 1;
+        }
+        return stream->bufferedBytes;
+    case 1:
+        if (movie->stopRequested != 0) {
+            return 0;
+        }
+        {
+            u8 *readCursor = stream->readCursor;
+            u8 *bufferStart = stream->bufferStart;
+            s32 wrappedBytes = (readCursor - bufferStart) + size - 0x20000;
+
+            if (wrappedBytes >= 0) {
+                s32 firstSpan = size - wrappedBytes;
+                memcpy(data, readCursor, firstSpan);
+                if (wrappedBytes > 0) {
+                    memcpy(data + firstSpan, bufferStart, wrappedBytes);
+                }
+                stream->readCursor = bufferStart + wrappedBytes;
+            } else {
+                memcpy(data, readCursor, size);
+                stream->readCursor = readCursor + size;
+            }
+            stream->bufferedBytes -= size;
+            return movie->remainingBytes;
+        }
+    case 2:
+        if (movie->stopRequested != 0) {
+            return 0;
+        }
+        if (movie->state == 5) {
+            func_00345E18(movie);
+        }
+        break;
+    }
+
+    return 0;
+}
