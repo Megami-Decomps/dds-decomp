@@ -2,6 +2,42 @@
 #include "eff.h"
 #include "pcp_vu0.h"
 
+#define EFF_EVENT_VECTOR_COMPONENTS 4
+#define EFF_EVENT_BEZIER_POINT_COUNT 7
+#define EFF_EVENT_BEZIER_WEIGHT_COUNT 4
+#define EFF_EVENT_BEZIER_SLOT_BYTES 0x60
+#define EFF_EVENT_SLOT_HEADER_BYTES 0xC
+#define EFF_EVENT_CURVE_POINT_STRIDE 3
+#define EFF_EVENT_CURVE_FINISHED_INDEX 7
+#define EFF_EVENT_CURVE_DEFAULT_STEP 0.05f
+#define EFF_EVENT_CURVE_MIDDLE_FACTOR 3.0f
+#define EFF_EVENT_DRAW_LIST_BYTES 0x20
+#define EFF_EVENT_PROJECTED_X_BIAS 0x700
+#define EFF_EVENT_PROJECTED_Y_BIAS 0xF20
+#define EFF_EVENT_PROJECTED_Y_SCALE 2
+#define EFF_EVENT_GS_X_BIAS 0x7000
+#define EFF_EVENT_GS_Y_BIAS 0x7900
+#define EFF_EVENT_GS_X_SHIFT 4
+#define EFF_EVENT_GS_Y_SHIFT 3
+#define EFF_EVENT_GS_X_SCALE 0x10
+#define EFF_EVENT_GS_Y_SCALE 8
+#define EFF_EVENT_OVERLAY_DEPTH 0xFF0000
+#define EFF_EVENT_MARKER_WIDTH 0x20 /* GS coordinate units, not pixels. */
+#define EFF_EVENT_MARKER_HEIGHT 0x10 /* GS coordinate units, not pixels. */
+#define EFF_EVENT_MARKER_COLOR 0x60008080
+#define EFF_EVENT_BLUR_SOURCE_BYTES 0x28
+#define EFF_EVENT_BLUR_RESOURCE_INDEX 2
+#define EFF_EVENT_STAGGERED_RESOURCE_INDEX 3
+#define EFF_EVENT_SQUARE_RESOURCE_INDEX 0
+#define EFF_EVENT_STAGGERED_SLOT_COUNT 4
+#define EFF_EVENT_NEUTRAL_COLOR 0x80808080
+#define EFF_EVENT_EVENT_RECORD_BYTES 0x30
+#define EFF_EVENT_COMPACT_WORK_BYTES 0x38
+#define EFF_EVENT_HALF_TURN 3.14159265f
+#define EFF_EVENT_RANDOM_MIDPOINT 0.5f
+#define EFF_EVENT_JITTER_RANGE 0.3f
+#define EFF_EVENT_JITTER_BASE 0.7f
+
 
 
 /* Packet-source layouts and concrete blur owners mirror their constructors.
@@ -102,12 +138,12 @@ typedef struct EffBezierPoint {
     f32 z;
 } EffBezierPoint;
 
-/* Each slot has a 0x60-byte stride: seven control points, the current segment, the curve parameter t and its step. */
+/* A 0x60-byte slot: seven control points, the first point's index, t and its step. */
 typedef struct EffBezierSlot {
-    EffBezierPoint point[7];
-    u32 segment; /* 0x54 */
+    EffBezierPoint controlPoints[EFF_EVENT_BEZIER_POINT_COUNT];
+    u32 pointIndex; /* 0x54: first control point, not a segment ordinal */
     f32 t;       /* 0x58 */
-    f32 step;    /* 0x5C */
+    f32 parameterStep; /* 0x5C */
 } EffBezierSlot;
 
 
@@ -172,8 +208,8 @@ extern u8 *sdfResourceRetainAddress(s32);
 
 /* Allocate contiguous slots followed by their count and allocation handle. */
 EffArrHdr *effCreateSlotArray(u32 count) {
-    s32 slotBytes = count * 0x60;
-    s32 handle = sdfAllocGeneralBlock(slotBytes + 0xC);
+    s32 slotBytes = count * EFF_EVENT_BEZIER_SLOT_BYTES;
+    s32 handle = sdfAllocGeneralBlock(slotBytes + EFF_EVENT_SLOT_HEADER_BYTES);
     EffBezierSlot *slot = (EffBezierSlot *)sdfResourceRetainAddress(handle);
     EffArrHdr *table = (EffArrHdr *)((u8 *)slot + slotBytes);
     u32 index = 0;
@@ -183,107 +219,113 @@ EffArrHdr *effCreateSlotArray(u32 count) {
     if (count != 0) {
         do {
             index++;
-            slot->segment = 0;
+            slot->pointIndex = 0;
             slot->t = 0;
-            slot->step = 0.05f;
+            slot->parameterStep = EFF_EVENT_CURVE_DEFAULT_STEP;
             slot++;
         } while (index < count);
     }
     return table;
 }
 
+/* Release the allocation handle stored after the contiguous slot array. */
 void effReleaseSlotArrayAllocation(EffArrHdr *header) {
     sdfReleaseResourceAllocation((u32)header->allocation);
 }
 
-/* Evaluate the active slot's Bezier into out and advance it; a slot whose segment has reached 7 is finished and returns 0. A t that passes 1 clamps to 1 and moves on to the next curve segment. */
+/* Return 0 before evaluation only for the point-index sentinel 7. Overflow t
+ * clamps to 1 and advances the index by three; there is no general bounds check. */
 s32 effStepActiveBezierSlot(EffArrHdr *table, s32 index, f32 *out) {
     EffBezierSlot *slot = &((EffBezierSlot *)table->slots)[index];
-    u32 segment = slot->segment;
-    f32 w[4];
+    u32 pointIndex = slot->pointIndex;
+    f32 weights[EFF_EVENT_BEZIER_WEIGHT_COUNT];
     f32 t;
     f32 u;
-    EffBezierPoint *p;
+    EffBezierPoint *controlPoints;
 
-    if (segment == 7) {
+    if (pointIndex == EFF_EVENT_CURVE_FINISHED_INDEX) {
         return 0;
     }
     t = slot->t;
     u = 1.0f - t;
-    p = &slot->point[segment];
-    w[0] = u * u * u;
-    w[1] = t * (u * u) * 3.0f;
-    w[2] = t * t * u * 3.0f;
-    w[3] = t * t * t;
-    out[0] = p[0].x * w[0] + p[1].x * w[1] + p[2].x * w[2] + p[3].x * w[3];
-    out[1] = p[0].y * w[0] + p[1].y * w[1] + p[2].y * w[2] + p[3].y * w[3];
-    out[2] = p[0].z * w[0] + p[1].z * w[1] + p[2].z * w[2] + p[3].z * w[3];
+    controlPoints = &slot->controlPoints[pointIndex];
+    weights[0] = u * u * u;
+    weights[1] = t * (u * u) * EFF_EVENT_CURVE_MIDDLE_FACTOR;
+    weights[2] = t * t * u * EFF_EVENT_CURVE_MIDDLE_FACTOR;
+    weights[3] = t * t * t;
+    out[0] = controlPoints[0].x * weights[0] + controlPoints[1].x * weights[1] + controlPoints[2].x * weights[2] + controlPoints[3].x * weights[3];
+    out[1] = controlPoints[0].y * weights[0] + controlPoints[1].y * weights[1] + controlPoints[2].y * weights[2] + controlPoints[3].y * weights[3];
+    out[2] = controlPoints[0].z * weights[0] + controlPoints[1].z * weights[1] + controlPoints[2].z * weights[2] + controlPoints[3].z * weights[3];
     out[3] = 1.0f;
-    t += slot->step;
+    t += slot->parameterStep;
     if (t > 1.0f) {
         t = 1.0f;
-        segment += 3;
+        pointIndex += EFF_EVENT_CURVE_POINT_STRIDE;
     }
     slot->t = t;
-    slot->segment = segment;
+    slot->pointIndex = pointIndex;
     return 1;
 }
 
-/* Evaluate the cubic Bezier at t into out (xyz, w = 1), advance t, and step to the next curve segment when t passes 1; returns 0 once the last segment is finished. */
+/* Evaluate at the entry t before advancing. The first segment carries excess t;
+ * the second stores t = 1 and returns 0 after producing output at the entry t. */
 s32 effStepBezierSlotSegment(EffBezierSlot *slot, f32 *out) {
-    f32 w[4];
-    u32 segment = slot->segment;
+    f32 weights[EFF_EVENT_BEZIER_WEIGHT_COUNT];
+    u32 pointIndex = slot->pointIndex;
     f32 t = slot->t;
-    EffBezierPoint *p = &slot->point[segment];
+    EffBezierPoint *controlPoints = &slot->controlPoints[pointIndex];
     f32 u = 1.0f - t;
 
-    w[0] = u * u * u;
-    w[1] = t * (u * u) * 3.0f;
-    w[2] = t * t * u * 3.0f;
-    w[3] = t * t * t;
-    out[0] = p[0].x * w[0] + p[1].x * w[1] + p[2].x * w[2] + p[3].x * w[3];
-    out[1] = p[0].y * w[0] + p[1].y * w[1] + p[2].y * w[2] + p[3].y * w[3];
-    out[2] = p[0].z * w[0] + p[1].z * w[1] + p[2].z * w[2] + p[3].z * w[3];
+    weights[0] = u * u * u;
+    weights[1] = t * (u * u) * EFF_EVENT_CURVE_MIDDLE_FACTOR;
+    weights[2] = t * t * u * EFF_EVENT_CURVE_MIDDLE_FACTOR;
+    weights[3] = t * t * t;
+    out[0] = controlPoints[0].x * weights[0] + controlPoints[1].x * weights[1] + controlPoints[2].x * weights[2] + controlPoints[3].x * weights[3];
+    out[1] = controlPoints[0].y * weights[0] + controlPoints[1].y * weights[1] + controlPoints[2].y * weights[2] + controlPoints[3].y * weights[3];
+    out[2] = controlPoints[0].z * weights[0] + controlPoints[1].z * weights[1] + controlPoints[2].z * weights[2] + controlPoints[3].z * weights[3];
     out[3] = 1.0f;
-    t += slot->step;
+    t += slot->parameterStep;
     if (t > 1.0f) {
-        if (segment < 3) {
+        if (pointIndex < EFF_EVENT_CURVE_POINT_STRIDE) {
             t -= 1.0f;
-            segment += 3;
+            pointIndex += EFF_EVENT_CURVE_POINT_STRIDE;
         } else {
             slot->t = 1.0f;
             return 0;
         }
     }
-    slot->segment = segment;
+    slot->pointIndex = pointIndex;
     slot->t = t;
     return 1;
 }
 
-/* Evaluate the cubic Bezier made of control points segment..segment+3 at t into out (xyz, w = 1). */
+/* Evaluate four control points starting at pointIndex into xyz with w = 1;
+ * unlike the stepping paths, this does not update t or the point index. */
 void effEvaluateSlotBezierPosition(EffBezierSlot *slot, f32 *out) {
-    EffBezierPoint *p = &slot->point[slot->segment];
+    EffBezierPoint *controlPoints = &slot->controlPoints[slot->pointIndex];
     f32 t = slot->t;
     f32 u = 1.0f - t;
-    f32 w[4]; /* never read; gcc drops the stores but keeps the frame slot */
+    f32 w[EFF_EVENT_BEZIER_WEIGHT_COUNT]; /* never read; gcc drops the stores but keeps the frame slot */
     f32 w0 = u * u * u;
-    f32 w1 = t * (u * u) * 3.0f;
-    f32 w2 = t * t * u * 3.0f;
+    f32 w1 = t * (u * u) * EFF_EVENT_CURVE_MIDDLE_FACTOR;
+    f32 w2 = t * t * u * EFF_EVENT_CURVE_MIDDLE_FACTOR;
     f32 w3 = t * t * t;
 
-    out[0] = p[0].x * w0 + p[1].x * w1 + p[2].x * w2 + p[3].x * w3;
-    out[1] = p[0].y * w0 + p[1].y * w1 + p[2].y * w2 + p[3].y * w3;
-    out[2] = p[0].z * w0 + p[1].z * w1 + p[2].z * w2 + p[3].z * w3;
+    out[0] = controlPoints[0].x * w0 + controlPoints[1].x * w1 + controlPoints[2].x * w2 + controlPoints[3].x * w3;
+    out[1] = controlPoints[0].y * w0 + controlPoints[1].y * w1 + controlPoints[2].y * w2 + controlPoints[3].y * w3;
+    out[2] = controlPoints[0].z * w0 + controlPoints[1].z * w1 + controlPoints[2].z * w2 + controlPoints[3].z * w3;
     out[3] = 1.0f;
 }
 
+/* Reset only curve progress and its default step; retain all control points. */
 void effInitSlotTail(EffArrHdr *table, s32 index) {
     EffBezierSlot *slot = &((EffBezierSlot *)table->slots)[index];
 
-    slot->step = 0.05f;
-    slot->segment = slot->t = 0;
+    slot->parameterStep = EFF_EVENT_CURVE_DEFAULT_STEP;
+    slot->pointIndex = slot->t = 0;
 }
 
+/* Return the selected slot address through the native signed-word interface. */
 s32 effGetSlotAt(EffArrHdr *table, s32 index) {
     return (s32)&((EffBezierSlot *)table->slots)[index];
 }
@@ -291,10 +333,10 @@ s32 effGetSlotAt(EffArrHdr *table, s32 index) {
 extern void *func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 extern void sdfProjectVuVectorToScreen();
 
-/* Draw a 32x16 box with the fixed marker colour at the screen position of `position`. */
+/* Project a point and draw a filled/bordered marker with 0x20/0x10 GS-unit extents. */
 void effDrawMarkerBoxAtPoint(f32 *position) {
-    void *list = sdfAllocPacketAligned(0x20);
-    f32 screen[4];
+    void *list = sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
+    f32 screen[EFF_EVENT_VECTOR_COMPONENTS];
     s32 pixel[2]; /* written, never read; retail keeps the frame slot */
     s32 x;
     s32 y;
@@ -304,19 +346,19 @@ void effDrawMarkerBoxAtPoint(f32 *position) {
     VU0_LOAD_VF(vf10, position);
     sdfProjectVuVectorToScreen();
     VU0_STORE_VF(vf10, screen);
-    x = (s32)screen[0] - 0x700;
-    y = (s32)screen[1] * 2 - 0xF20;
+    x = (s32)screen[0] - EFF_EVENT_PROJECTED_X_BIAS;
+    y = (s32)screen[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
     pixel[0] = x;
     pixel[1] = y;
-    sdfAppendPacket(list, func_0011D3E8((x << 4) + 0x7000, (y << 3) + 0x7900, 0xFF0000, 0x20, 0x10, 0x60008080, 0x60008080));
+    sdfAppendPacket(list, func_0011D3E8((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, EFF_EVENT_MARKER_COLOR, EFF_EVENT_MARKER_COLOR));
     scene = kwlnPositionedTextSurface;
     (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
 }
 
-/* Draw a 32x16 box with the given colour at the screen position of `position`. */
+/* Project a point and use color for both the marker's fill and border. */
 void effDrawColoredBoxAtPoint(f32 *position, s32 color) {
-    void *list = sdfAllocPacketAligned(0x20);
-    f32 screen[4];
+    void *list = sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
+    f32 screen[EFF_EVENT_VECTOR_COMPONENTS];
     s32 pixel[2]; /* written, never read; retail keeps the frame slot */
     s32 x;
     s32 y;
@@ -326,22 +368,22 @@ void effDrawColoredBoxAtPoint(f32 *position, s32 color) {
     VU0_LOAD_VF(vf10, position);
     sdfProjectVuVectorToScreen();
     VU0_STORE_VF(vf10, screen);
-    x = (s32)screen[0] - 0x700;
-    y = (s32)screen[1] * 2 - 0xF20;
+    x = (s32)screen[0] - EFF_EVENT_PROJECTED_X_BIAS;
+    y = (s32)screen[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
     pixel[0] = x;
     pixel[1] = y;
-    sdfAppendPacket(list, func_0011D3E8((x << 4) + 0x7000, (y << 3) + 0x7900, 0xFF0000, 0x20, 0x10, color, color));
+    sdfAppendPacket(list, func_0011D3E8((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, color, color));
     scene = kwlnPositionedTextSurface;
     (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
 }
 
 extern void *func_0011D570(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-/* Draw a box between the screen positions of two points in the fixed marker colour. */
+/* Draw a GS line between two projected points, using the fixed marker color. */
 void effDrawMarkerLineBetweenPoints(f32 *from, f32 *to) {
-    void *list = sdfAllocPacketAligned(0x20);
-    f32 start[4];
-    f32 end[4];
+    void *list = sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
+    f32 start[EFF_EVENT_VECTOR_COMPONENTS];
+    f32 end[EFF_EVENT_VECTOR_COMPONENTS];
     s32 pixel[4]; /* written, never read; retail keeps the frame slot */
     s32 x0;
     s32 y0;
@@ -356,24 +398,24 @@ void effDrawMarkerLineBetweenPoints(f32 *from, f32 *to) {
     VU0_LOAD_VF(vf10, to);
     sdfProjectVuVectorToScreen();
     VU0_STORE_VF(vf10, end);
-    x0 = (s32)start[0] - 0x700;
-    y0 = (s32)start[1] * 2 - 0xF20;
-    x1 = (s32)end[0] - 0x700;
-    y1 = (s32)end[1] * 2 - 0xF20;
+    x0 = (s32)start[0] - EFF_EVENT_PROJECTED_X_BIAS;
+    y0 = (s32)start[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
+    x1 = (s32)end[0] - EFF_EVENT_PROJECTED_X_BIAS;
+    y1 = (s32)end[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
     pixel[0] = x0;
     pixel[1] = y0;
     pixel[2] = x1;
     pixel[3] = y1;
-    sdfAppendPacket(list, func_0011D570((x0 << 4) + 0x7000, (y0 << 3) + 0x7900, 0xFF0000, 0x60008080, (x1 << 4) + 0x7000, (y1 << 3) + 0x7900, 0xFF0000, 0x60008080, 0));
+    sdfAppendPacket(list, func_0011D570((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, 0));
     scene = kwlnPositionedTextSurface;
     (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
 }
 
-/* Draw a box between the screen positions of two points in the given colour. */
+/* Draw a GS line between two projected points, using color at both vertices. */
 void effDrawColoredLineBetweenPoints(f32 *from, f32 *to, s32 color) {
-    void *list = sdfAllocPacketAligned(0x20);
-    f32 start[4];
-    f32 end[4];
+    void *list = sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
+    f32 start[EFF_EVENT_VECTOR_COMPONENTS];
+    f32 end[EFF_EVENT_VECTOR_COMPONENTS];
     s32 pixel[4]; /* written, never read; retail keeps the frame slot */
     s32 x0;
     s32 y0;
@@ -388,25 +430,26 @@ void effDrawColoredLineBetweenPoints(f32 *from, f32 *to, s32 color) {
     VU0_LOAD_VF(vf10, to);
     sdfProjectVuVectorToScreen();
     VU0_STORE_VF(vf10, end);
-    x0 = (s32)start[0] - 0x700;
-    y0 = (s32)start[1] * 2 - 0xF20;
-    x1 = (s32)end[0] - 0x700;
-    y1 = (s32)end[1] * 2 - 0xF20;
+    x0 = (s32)start[0] - EFF_EVENT_PROJECTED_X_BIAS;
+    y0 = (s32)start[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
+    x1 = (s32)end[0] - EFF_EVENT_PROJECTED_X_BIAS;
+    y1 = (s32)end[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
     pixel[0] = x0;
     pixel[1] = y0;
     pixel[2] = x1;
     pixel[3] = y1;
-    sdfAppendPacket(list, func_0011D570((x0 << 4) + 0x7000, (y0 << 3) + 0x7900, 0xFF0000, color, (x1 << 4) + 0x7000, (y1 << 3) + 0x7900, 0xFF0000, color, 0));
+    sdfAppendPacket(list, func_0011D570((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, 0));
     scene = kwlnPositionedTextSurface;
     (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
 }
 
+/* Submit the native command at biased screen coordinates; payload args stay opaque. */
 void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
-    void *task = sdfAllocPacketAligned(0x20);
+    void *task = sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
     u8 *scene;
 
     sdfInitPacketList(task);
-    sdfAppendPacket(task, sdfCreateFormattedSifCommand((x << 4) + 0x7000, (y << 3) + 0x7900, 0xFF0000, arg2, arg3));
+    sdfAppendPacket(task, sdfCreateFormattedSifCommand((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, arg2, arg3));
     scene = kwlnPositionedTextSurface;
     (*(void (**)(void *, void *))(scene + 0x10))(scene, task);
 }
@@ -418,12 +461,14 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_0018ED80);
 INCLUDE_ASM(const s32, "effect/effEvent", func_0018EED0);
 
 
-void effSubmitSizedDrawPacket(s32 x, s32 y, s32 w, s32 h, s32 arg4, s32 arg5) {
-    void *list = sdfAllocPacketAligned(0x20);
+/* Submit a filled rectangle and its line-strip border. Keep native width/height
+ * scaling and the distinct shift/multiply forms used by the other draw paths. */
+void effSubmitSizedDrawPacket(s32 x, s32 y, s32 width, s32 height, s32 fillColor, s32 borderColor) {
+    void *list = sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
     u8 *scene;
 
     sdfInitPacketList(list);
-    sdfAppendPacket(list, func_0011D3E8(x * 0x10 + 0x7000, y * 8 + 0x7900, 0xFF0000, w * 0x10, h * 8, arg4, arg5));
+    sdfAppendPacket(list, func_0011D3E8(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, width * EFF_EVENT_GS_X_SCALE, height * EFF_EVENT_GS_Y_SCALE, fillColor, borderColor));
     scene = kwlnPositionedTextSurface;
     (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
 }
@@ -436,10 +481,12 @@ void effDisableRectangleBlur(void) {
     effRectangleBlurEnabled = 0;
 }
 
-void effCopyRectangleBlurParameters(void *src) {
-    memcpy(&effBlurRectangleParameters, src, 0x28);
+/* Copy only the 0x28-byte source prefix; retain the screen record's trailing bytes. */
+void effCopyRectangleBlurParameters(void *parameters) {
+    memcpy(&effBlurRectangleParameters, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
+/* Expose the rectangle-blur parameter block by address. */
 EffScreenDrawParams *effGetCh70Params(void) {
     return &effBlurRectangleParameters;
 }
@@ -453,20 +500,22 @@ void effDisableTexturedBlur(void) {
 }
 
 /* Copy the pixel rectangle only; retain its selected source resource. */
-void effCopyCh71Common(EffBlurTemplateBody *src) {
-    effBlurPixelWork->body = *src;
+void effCopyCh71Common(EffBlurTemplateBody *parameters) {
+    effBlurPixelWork->body = *parameters;
 }
 
+/* Return the current textured-blur work without retaining it. */
 EffBlurTemplate *effGetCh71Work(void) {
     return effBlurPixelWork;
 }
 
-void effSetCh71Id(u32 id) {
-    effBlurPixelWork->resourceWord = id;
+void effSetCh71Id(u32 resourceWord) {
+    effBlurPixelWork->resourceWord = resourceWord;
 }
 
+/* Select the same resource-table entry used by the filter-blur initializer. */
 void effInitCh71Id(void) {
-    effBlurPixelWork->resourceWord = effGetResourceFirstWord(2);
+    effBlurPixelWork->resourceWord = effGetResourceFirstWord(EFF_EVENT_BLUR_RESOURCE_INDEX);
 }
 
 void effEnableFilterBlur(void) {
@@ -478,20 +527,22 @@ void effDisableFilterBlur(void) {
 }
 
 /* Update scatter parameters without replacing the owned allocation or slots. */
-void effCopyCh72Common(EffBlurScatterParams *src) {
-    effFilterBlurWork->params = *src;
+void effCopyCh72Common(EffBlurScatterParams *parameters) {
+    effFilterBlurWork->params = *parameters;
 }
 
+/* Return the current filter-blur work without retaining it. */
 EffBlurScatterWork *effGetCh72Work(void) {
     return effFilterBlurWork;
 }
 
-void effSetCh72Id(u32 id) {
-    effFilterBlurWork->sourceHandle = id;
+void effSetCh72Id(u32 sourceHandle) {
+    effFilterBlurWork->sourceHandle = sourceHandle;
 }
 
+/* Install the filter-blur resource-table word without changing its slots. */
 void effInitCh72Id(void) {
-    effFilterBlurWork->sourceHandle = effGetResourceFirstWord(2);
+    effFilterBlurWork->sourceHandle = effGetResourceFirstWord(EFF_EVENT_BLUR_RESOURCE_INDEX);
 }
 
 void effEnableStaggeredBlur(void) {
@@ -503,20 +554,22 @@ void effDisableStaggeredBlur(void) {
 }
 
 /* Update scale parameters without replacing the owned allocation or slots. */
-void effCopyCh76Common(EffBlurScaleParams *src) {
-    effStaggeredBlurWork->params = *src;
+void effCopyCh76Common(EffBlurScaleParams *parameters) {
+    effStaggeredBlurWork->params = *parameters;
 }
 
+/* Return the current staggered-blur work without retaining it. */
 EffBlurScaleWork *effGetCh76Work(void) {
     return effStaggeredBlurWork;
 }
 
-void effSetCh76Id(u32 id) {
-    effStaggeredBlurWork->sourceHandle = id;
+void effSetCh76Id(u32 sourceHandle) {
+    effStaggeredBlurWork->sourceHandle = sourceHandle;
 }
 
+/* Install the staggered-blur resource-table word without changing its slots. */
 void effInitCh76Id(void) {
-    effStaggeredBlurWork->sourceHandle = effGetResourceFirstWord(3);
+    effStaggeredBlurWork->sourceHandle = effGetResourceFirstWord(EFF_EVENT_STAGGERED_RESOURCE_INDEX);
 }
 
 void effEnableFramebufferQuad(void) {
@@ -527,10 +580,12 @@ void effDisableFramebufferQuad(void) {
     D_003BB073 = 0;
 }
 
-void effCopyFramebufferQuadParameters(void *src) {
-    memcpy(&D_00355908, src, 0x28);
+/* Copy only the framebuffer source prefix, not the trailing screen-record bytes. */
+void effCopyFramebufferQuadParameters(void *parameters) {
+    memcpy(&D_00355908, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
+/* Expose the framebuffer-quad parameter block by address. */
 EffScreenDrawParams *effGetCh73Params(void) {
     return &D_00355908;
 }
@@ -543,10 +598,12 @@ void effDisableColorRectangle(void) {
     effColorRectangleEnabled = 0;
 }
 
-void effCopyColorRectangleParameters(EffSolidRectParams *src) {
-    effColorRectangleParameters = *src;
+/* Replace the complete solid-rectangle parameter block. */
+void effCopyColorRectangleParameters(EffSolidRectParams *parameters) {
+    effColorRectangleParameters = *parameters;
 }
 
+/* Expose the solid-rectangle parameter block by address. */
 EffSolidRectParams *effGetCh74Params(void) {
     return &effColorRectangleParameters;
 }
@@ -560,30 +617,34 @@ void effDisableTexturedSquare(void) {
 }
 
 /* Copy the resource template body while preserving its selected resource. */
-void effCopyCh75Common(EffTemplateBody *src) {
-    effTexturedSquareWork->body = *src;
+void effCopyCh75Common(EffTemplateBody *parameters) {
+    effTexturedSquareWork->body = *parameters;
 }
 
+/* Return the current textured-square work without retaining it. */
 EffTemplate *effGetCh75Work(void) {
     return effTexturedSquareWork;
 }
 
-void effSetCh75Id(u32 id) {
-    effTexturedSquareWork->resourceWord = id;
+void effSetCh75Id(u32 resourceWord) {
+    effTexturedSquareWork->resourceWord = resourceWord;
 }
 
+/* Install the textured-square resource-table word while retaining its body. */
 void effInitCh75Id(void) {
-    effTexturedSquareWork->resourceWord = effGetResourceFirstWord(0);
+    effTexturedSquareWork->resourceWord = effGetResourceFirstWord(EFF_EVENT_SQUARE_RESOURCE_INDEX);
 }
 
+/* Clone the four default work templates; only the staggered slot count is overridden. */
 void effInitWorks(void) {
     effBlurPixelWork = effCloneBlurTemplate(D_003558D8);
     effFilterBlurWork = func_00186F90(D_003558A8);
     effTexturedSquareWork = effCloneResourceTemplate(D_00355948);
     effStaggeredBlurWork = effCloneBlurWorkWithSlots(D_00355970);
-    effGetCh76Work()->params.count = 4;
+    effGetCh76Work()->params.count = EFF_EVENT_STAGGERED_SLOT_COUNT;
 }
 
+/* Dispatch enabled draw families independently, in their native order. */
 void effDispatchActive(void) {
     if (effRectangleBlurEnabled) {
         effDrawBlurRectangle(&effBlurRectangleParameters);
@@ -608,15 +669,17 @@ void effDispatchActive(void) {
     }
 }
 
+/* Optional callback/copy preparation shared by the seven setup paths below.
+ * callbackResult must be valid whenever callback is present. */
 typedef struct ChState {
     u8 pad00[0x1C];
-    void *src;
-    void *dst;
-    u32 size;
+    void *source;
+    void *destination;
+    u32 copyBytes;
     u8 pad28[4];
-    s32 (*getter)(void *);
+    s32 (*callback)(void *);
     u8 pad30[8];
-    s32 *result;
+    s32 *callbackResult;
 } ChState;
 
 extern ChState D_00355AB8;
@@ -627,18 +690,20 @@ extern void func_0018CDF8(void);
 extern void func_0018CDF0(void *);
 extern void func_0018CE00(void);
 
+/* Prepare once per flag cycle, then run the registered operations while ready.
+ * A negative control byte clears readiness only after those operations. */
 s32 effUpdateCh72Params(void) {
     u8 ready = D_003BB0BD;
 
     if (D_003BB0BD == 0) {
         ChState *state = &D_00355AB8;
 
-        if (state->getter != NULL) {
-            *state->result = state->getter(state->src);
+        if (state->callback != NULL) {
+            *state->callbackResult = state->callback(state->source);
         }
-        if (state->dst != NULL) {
-            if (state->src != NULL) {
-                memcpy(state->dst, state->src, state->size);
+        if (state->destination != NULL) {
+            if (state->source != NULL) {
+                memcpy(state->destination, state->source, state->copyBytes);
             }
         }
         ready = 1;
@@ -656,29 +721,33 @@ s32 effUpdateCh72Params(void) {
     return D_003BB0BD;
 }
 
+/* Expose this screen-draw setup block; no parameter copy is made. */
 EffScreenDrawParams *effGetLoadDescA(void) {
     return &D_003559A0;
 }
 
-void func_0018F9C0(void *src) {
-    memcpy(&D_003559A0, src, 0x28);
+/* Replace the screen-draw source prefix while preserving the trailing bytes. */
+void func_0018F9C0(void *parameters) {
+    memcpy(&D_003559A0, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
 extern ChState D_00355C30;
 extern s8 D_003BB0CD;
 
+/* Prepare the blur-template callback from its explicit parameter block,
+ * then process the channel; its optional copy still uses source/destination. */
 s32 effEventAdvanceBlurTemplateSetup(void) {
     u8 ready = D_003BB0CD;
 
     if (D_003BB0CD == 0) {
         ChState *state = &D_00355C30;
 
-        if (state->getter != NULL) {
-            *state->result = state->getter(&D_00355AF8);
+        if (state->callback != NULL) {
+            *state->callbackResult = state->callback(&D_00355AF8);
         }
-        if (state->dst != NULL) {
-            if (state->src != NULL) {
-                memcpy(state->dst, state->src, state->size);
+        if (state->destination != NULL) {
+            if (state->source != NULL) {
+                memcpy(state->destination, state->source, state->copyBytes);
             }
         }
         ready = 1;
@@ -696,29 +765,32 @@ s32 effEventAdvanceBlurTemplateSetup(void) {
     return D_003BB0CD;
 }
 
+/* Expose the blur-template setup parameters by address. */
 EffBlurTemplateBody *effGetLoadDescB(void) {
     return &D_00355AF8;
 }
 
-void effEventSetBlurTemplateParameters(EffBlurTemplateBody *src) {
-    D_00355AF8 = *src;
+/* Replace the setup template; this does not modify the active blur work. */
+void effEventSetBlurTemplateParameters(EffBlurTemplateBody *parameters) {
+    D_00355AF8 = *parameters;
 }
 
 extern ChState D_00355E08;
 extern s8 D_003BB0FF;
 
+/* Prepare scatter setup from its explicit parameters, then process the channel. */
 s32 effEventAdvanceScatterBlurSetup(void) {
     u8 ready = D_003BB0FF;
 
     if (D_003BB0FF == 0) {
         ChState *state = &D_00355E08;
 
-        if (state->getter != NULL) {
-            *state->result = state->getter(&D_00355C70);
+        if (state->callback != NULL) {
+            *state->callbackResult = state->callback(&D_00355C70);
         }
-        if (state->dst != NULL) {
-            if (state->src != NULL) {
-                memcpy(state->dst, state->src, state->size);
+        if (state->destination != NULL) {
+            if (state->source != NULL) {
+                memcpy(state->destination, state->source, state->copyBytes);
             }
         }
         ready = 1;
@@ -736,29 +808,32 @@ s32 effEventAdvanceScatterBlurSetup(void) {
     return D_003BB0FF;
 }
 
+/* Expose the scatter-blur setup parameters by address. */
 EffBlurScatterParams *effGetLoadDescC(void) {
     return &D_00355C70;
 }
 
-void effEventSetScatterBlurParameters(EffBlurScatterParams *src) {
-    D_00355C70 = *src;
+/* Replace setup parameters without replacing the active filter-blur work. */
+void effEventSetScatterBlurParameters(EffBlurScatterParams *parameters) {
+    D_00355C70 = *parameters;
 }
 
 extern ChState D_00355F48;
 extern s8 D_003BB114;
 
+/* Prepare from the channel's source, process it, then honor the control-byte reset. */
 s32 func_0018FC80(void) {
     u8 ready = D_003BB114;
 
     if (D_003BB114 == 0) {
         ChState *state = &D_00355F48;
 
-        if (state->getter != NULL) {
-            *state->result = state->getter(state->src);
+        if (state->callback != NULL) {
+            *state->callbackResult = state->callback(state->source);
         }
-        if (state->dst != NULL) {
-            if (state->src != NULL) {
-                memcpy(state->dst, state->src, state->size);
+        if (state->destination != NULL) {
+            if (state->source != NULL) {
+                memcpy(state->destination, state->source, state->copyBytes);
             }
         }
         ready = 1;
@@ -776,29 +851,32 @@ s32 func_0018FC80(void) {
     return D_003BB114;
 }
 
+/* Expose the other screen-draw setup block by address. */
 EffScreenDrawParams *effGetLoadDescD(void) {
     return &D_00355E48;
 }
 
-void func_0018FD48(void *src) {
-    memcpy(&D_00355E48, src, 0x28);
+/* Replace this screen-draw source prefix without changing trailing bytes. */
+void func_0018FD48(void *parameters) {
+    memcpy(&D_00355E48, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
 extern ChState D_00356048;
 extern s8 D_003BB127;
 
+/* Prepare solid-rectangle setup from the channel source, then process it. */
 s32 effEventAdvanceSolidRectangleSetup(void) {
     u8 ready = D_003BB127;
 
     if (D_003BB127 == 0) {
         ChState *state = &D_00356048;
 
-        if (state->getter != NULL) {
-            *state->result = state->getter(state->src);
+        if (state->callback != NULL) {
+            *state->callbackResult = state->callback(state->source);
         }
-        if (state->dst != NULL) {
-            if (state->src != NULL) {
-                memcpy(state->dst, state->src, state->size);
+        if (state->destination != NULL) {
+            if (state->source != NULL) {
+                memcpy(state->destination, state->source, state->copyBytes);
             }
         }
         ready = 1;
@@ -816,29 +894,32 @@ s32 effEventAdvanceSolidRectangleSetup(void) {
     return D_003BB127;
 }
 
+/* Expose the solid-rectangle setup parameters by address. */
 EffSolidRectParams *effGetLoadDescE(void) {
     return &D_00355F88;
 }
 
-void effEventSetSolidRectangleParameters(EffSolidRectParams *src) {
-    D_00355F88 = *src;
+/* Replace the setup block rather than the active solid-rectangle parameters. */
+void effEventSetSolidRectangleParameters(EffSolidRectParams *parameters) {
+    D_00355F88 = *parameters;
 }
 
 extern ChState D_00356188;
 extern s8 D_003BB12C;
 
+/* Prepare resource-template setup from its explicit body, then process the channel. */
 s32 func_0018FEB0(void) {
     u8 ready = D_003BB12C;
 
     if (D_003BB12C == 0) {
         ChState *state = &D_00356188;
 
-        if (state->getter != NULL) {
-            *state->result = state->getter(&D_00356088);
+        if (state->callback != NULL) {
+            *state->callbackResult = state->callback(&D_00356088);
         }
-        if (state->dst != NULL) {
-            if (state->src != NULL) {
-                memcpy(state->dst, state->src, state->size);
+        if (state->destination != NULL) {
+            if (state->source != NULL) {
+                memcpy(state->destination, state->source, state->copyBytes);
             }
         }
         ready = 1;
@@ -856,29 +937,32 @@ s32 func_0018FEB0(void) {
     return D_003BB12C;
 }
 
+/* Expose the resource-template setup body by address. */
 EffTemplateBody *effGetLoadDescF(void) {
     return &D_00356088;
 }
 
-void effEventSetResourceTemplateParameters(EffTemplateBody *src) {
-    D_00356088 = *src;
+/* Replace the setup body without replacing the active textured-square work. */
+void effEventSetResourceTemplateParameters(EffTemplateBody *parameters) {
+    D_00356088 = *parameters;
 }
 
 extern ChState D_00356360;
 extern s8 D_003BB13F;
 
+/* Prepare scale-blur setup from its explicit parameters, then process the channel. */
 s32 effAdvancePendingChannelState(void) {
     u8 ready = D_003BB13F;
 
     if (D_003BB13F == 0) {
         ChState *state = &D_00356360;
 
-        if (state->getter != NULL) {
-            *state->result = state->getter(&D_003561C8);
+        if (state->callback != NULL) {
+            *state->callbackResult = state->callback(&D_003561C8);
         }
-        if (state->dst != NULL) {
-            if (state->src != NULL) {
-                memcpy(state->dst, state->src, state->size);
+        if (state->destination != NULL) {
+            if (state->source != NULL) {
+                memcpy(state->destination, state->source, state->copyBytes);
             }
         }
         ready = 1;
@@ -896,12 +980,14 @@ s32 effAdvancePendingChannelState(void) {
     return D_003BB13F;
 }
 
+/* Expose the scale-blur setup parameters by address. */
 EffBlurScaleParams *effGetLoadDescG(void) {
     return &D_003561C8;
 }
 
-void effEventSetScaleBlurParameters(EffBlurScaleParams *src) {
-    D_003561C8 = *src;
+/* Replace setup parameters without replacing the active staggered-blur work. */
+void effEventSetScaleBlurParameters(EffBlurScaleParams *parameters) {
+    D_003561C8 = *parameters;
 }
 
 u32 func_00190100() {
@@ -926,19 +1012,19 @@ extern u32 D_003BB148;
 
 /* Event work shared by resource setup, teardown and state updates. */
 typedef struct {
-    u8   pad_0x00[0x04]; /* 0x00 */
+    u8   pad00[0x04];     /* 0x00 */
     void *owner;         /* 0x04: file-record header destination */
     u8   initBlock[0x28];/* 0x08: file-record header source */
     u32  state;          /* 0x30 */
     void *effect;        /* 0x34 */
-    u8   pad_0x38[0x48]; /* 0x38 */
+    u8   pad38[0x48];     /* 0x38 */
     u8   flag;           /* 0x80 */
-    u8   pad_0x81[0x03]; /* 0x81 */
+    u8   pad81[0x03];     /* 0x81 */
     void *resource;      /* 0x84: released on teardown */
 } EffEventWork; /* 0x88 */
 
 typedef struct {
-    u8 bytes[0x30];
+    u8 bytes[EFF_EVENT_EVENT_RECORD_BYTES];
 } __attribute__((packed)) FileRecordHeader;
 
 /* Init block of the event holder (0x30 bytes, copied to the event's owner record). */
@@ -958,8 +1044,9 @@ typedef struct {
 extern void *func_00160958(u32, u16, s32, s32);
 extern void func_00161588(void *, f32);
 
+/* Allocate the compact record, copy its init prefix, then attach the new effect. */
 EffEventWork *func_00190130(u32 owner, u16 kind, const EffEventInit *params) {
-    EffEventWork *work = sdfAllocSizeClassBlock(0x38);
+    EffEventWork *work = sdfAllocSizeClassBlock(EFF_EVENT_COMPACT_WORK_BYTES);
 
     memcpy(work, params, sizeof(*params));
     work->state = 0;
@@ -974,20 +1061,23 @@ void effEventReleaseNode(EffEventWork *work) {
     sdfReleaseChipBlock(work);
 }
 
+/* Copy the packed 0x30-byte record while retaining its native packed layout. */
 void effEventCopyFileRecordHeader(FileRecordHeader *destination, const FileRecordHeader *source) {
     *destination = *source;
 }
 
+/* This copies a packed 0x30-byte record, not a complete 0x60-byte billboard state. */
 void effEventCopyBillParticle(const FileRecordHeader *source, FileRecordHeader *destination) {
     *destination = *source;
 }
 
+/* Forward the effect's scale value without modifying the record's init prefix. */
 void func_00190308(EffEventWork *work, f32 scale) {
     func_00161588(work->effect, scale);
 }
 
-void effEventSetState(EffEventWork *work, u32 value) {
-    work->state = value;
+void effEventSetState(EffEventWork *work, u32 state) {
+    work->state = state;
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00190328);
@@ -1003,6 +1093,7 @@ typedef struct EffEventLight {
 
 
 
+/* Initialize a holder and its effect record; the teardown flag starts set. */
 EffEventLight *effEventLightCreate(u32 arg, f32 param) {
     EffEventLight *work = sdfAllocSizeClassBlock(sizeof(EffEventLight));
 
@@ -1011,7 +1102,7 @@ EffEventLight *effEventLightCreate(u32 arg, f32 param) {
     work->init.rangeFar = 180.0f;
     work->init.pos[1] = -90.0f;
     work->init.param = param;
-    work->init.color = 0x80808080;
+    work->init.color = EFF_EVENT_NEUTRAL_COLOR;
     work->init.unk10 = 0;
     work->init.unk14 = 0;
     work->init.unk18 = 0;
@@ -1024,6 +1115,7 @@ EffEventLight *effEventLightCreate(u32 arg, f32 param) {
     return work;
 }
 
+/* Release the effect, invoke shared teardown only when flagged, then free the holder. */
 void effEventLightDestroy(EffEventLight *work) {
     effEventReleaseNode(work->owner);
     if (work->active != 0) {
@@ -1032,6 +1124,7 @@ void effEventLightDestroy(EffEventLight *work) {
     sdfReleaseChipBlock(work);
 }
 
+/* Clone the init block/effect using the same handle; clear the shared-teardown flag. */
 EffEventLight *effEventLightClone(EffEventLight *src) {
     EffEventInit *block = &src->init;
     EffEventLight *work = sdfAllocSizeClassBlock(sizeof(EffEventLight));
@@ -1043,37 +1136,39 @@ EffEventLight *effEventLightClone(EffEventLight *src) {
     return work;
 }
 
+/* Apply the native owner operation to the pointer stored in the record prefix. */
 void func_00190810(EffEventWork *work) {
     func_00190328(work->owner);
 }
 
-void effEventLightSetPosition(EffEventLight *work, f32 *vec) {
-    work->init.pos[0] = vec[0];
-    work->init.pos[1] = vec[1] - work->init.rangeFar * 0.5f;
-    work->init.pos[2] = vec[2];
+/* Copy xyz with y lowered by half rangeFar; clear the next scalar and publish the record. */
+void effEventLightSetPosition(EffEventLight *work, f32 *position) {
+    work->init.pos[0] = position[0];
+    work->init.pos[1] = position[1] - work->init.rangeFar * 0.5f;
+    work->init.pos[2] = position[2];
     work->init.unk0C = 0;
     effEventCopyFileRecordHeader((FileRecordHeader *)work->owner, (FileRecordHeader *)&work->init);
 }
 
 /* Attach the effect and copy the initial file-record header to its owner. */
-void effEventBindEffect(EffEventWork *work, void *value) {
-    work->effect = value;
+void effEventBindEffect(EffEventWork *work, void *effect) {
+    work->effect = effect;
     effEventCopyFileRecordHeader(work->owner, work->initBlock);
 }
 
 typedef struct EffAimSource {
-    f32 pos[4];           /* 0x00 */
-    f32 rot[4];           /* 0x10 */
+    f32 position[EFF_EVENT_VECTOR_COMPONENTS];    /* 0x00 */
+    f32 orientation[EFF_EVENT_VECTOR_COMPONENTS]; /* 0x10: quaternion input */
     f32 range;            /* 0x20 */
     f32 height;           /* 0x24 */
 } EffAimSource;
 
 typedef struct EffAimParams {
     u8 pad0;
-    u8 mode;              /* 0x01 */
-    u8 sub;               /* 0x02 */
+    u8 aimMode;           /* 0x01 */
+    u8 directionMode;     /* 0x02 */
     u8 pad3;
-    s32 range;            /* 0x04 */
+    s32 rangeOverride;    /* 0x04: zero uses the source range */
 } EffAimParams;
 
 extern f32 D_003563A0[];
@@ -1086,43 +1181,44 @@ extern void effMiscQuaternionToMatrixVU(void);
 extern void func_002DD968(f32 angle);
 extern void sdfComposeVuMatrixFromRegisters(void);
 
-/* vu0 routine: vf10 = the aimed offset point computed from the source and parameters */
+/* vu0 routine: leave the selected aim point in vf10, not a C return value.
+ * Preserve the non-camera output scratch w, which is not initialized here. */
 void effEventLoadSelectedAimPositionVu(EffAimSource *src, EffAimParams *param) {
-    f32 out[4];
-    f32 dir[4];
-    f32 pos[4];
+    f32 out[EFF_EVENT_VECTOR_COMPONENTS];
+    f32 dir[EFF_EVENT_VECTOR_COMPONENTS];
+    f32 pos[EFF_EVENT_VECTOR_COMPONENTS];
     f32 radius;
     f32 half;
     f32 y;
-    s32 range = param->range;
-    u8 sub = param->sub;
-    u8 mode = param->mode;
+    s32 rangeOverride = param->rangeOverride;
+    u8 directionMode = param->directionMode;
+    u8 aimMode = param->aimMode;
 
-    if (range == 0) {
+    if (rangeOverride == 0) {
         radius = src->range;
     } else {
-        radius = (f32)range;
+        radius = (f32)rangeOverride;
     }
     half = src->height * 0.5f;
-    PCP_COPY_VECTOR(pos, src->pos);
-    if (mode == 5) {
-        if (sub == 8 || sub == 10) {
+    PCP_COPY_VECTOR(pos, src->position);
+    if (aimMode == 5) {
+        if (directionMode == 8 || directionMode == 10) {
             y = -1.0f;
-            if (range != 0) {
+            if (rangeOverride != 0) {
                 y = -radius;
             }
         } else {
             y = -1.0f;
         }
     } else {
-        y = pos[1] - D_003563A0[mode] * half;
-        if (sub == 8 || sub == 10) {
-            if (range != 0) {
+        y = pos[1] - D_003563A0[aimMode] * half;
+        if (directionMode == 8 || directionMode == 10) {
+            if (rangeOverride != 0) {
                 y -= radius;
             }
         }
     }
-    if (sub == 9 || mode == 4) {
+    if (directionMode == 9 || aimMode == 4) {
         dir[2] = half < radius ? -radius : -half;
         dir[0] = dir[1] = 0.0f;
         pos[1] = y;
@@ -1135,7 +1231,7 @@ void effEventLoadSelectedAimPositionVu(EffAimSource *src, EffAimParams *param) {
         VU0_ADD(vf10, vf10, vf11);
         return;
     }
-    if (sub == 8 || sub == 10) {
+    if (directionMode == 8 || directionMode == 10) {
         out[0] = pos[0];
         out[1] = y;
         out[2] = pos[2];
@@ -1143,9 +1239,9 @@ void effEventLoadSelectedAimPositionVu(EffAimSource *src, EffAimParams *param) {
         dir[0] = 0.0f;
         dir[2] = 1.0f;
         dir[1] = 0.0f;
-        VU0_LOAD_VF(vf10, src->rot);
+        VU0_LOAD_VF(vf10, src->orientation);
         effMiscQuaternionToMatrixVU();
-        func_002DD968(D_003563B8[sub]);
+        func_002DD968(D_003563B8[directionMode]);
         sdfComposeVuMatrixFromRegisters();
         VU0_LOAD_VF(vf10, dir);
         VU0_CLEAR_W(vf10);
@@ -1161,8 +1257,8 @@ void effEventLoadSelectedAimPositionVu(EffAimSource *src, EffAimParams *param) {
 /* Billboard emitter parameters (0x7C). Creation/copy clamps startDelaySpread,
    fadeIn and fadeOut to at least one; motionDelaySpread is left unchanged. */
 typedef struct {
-    f32 position[4];
-    u32 count;
+    f32 position[EFF_EVENT_VECTOR_COMPONENTS];
+    u32 particleCount;
     s32 duration;
     s32 startDelaySpread;
     s32 motionDelaySpread;
@@ -1230,15 +1326,15 @@ extern void *billCreateFromResource(s32 kind, const char *path);
 INCLUDE_RODATA(const s32, "effect/effEvent", D_003A12E0);
 
 EffEventBillSet *effEventBillSetCreate(EffEventBillParams *src) {
-    u32 count = src->count;
-    u32 size = count * sizeof(EffEventBillParticle);
-    u32 handle = sdfAllocGeneralBlock(size + sizeof(EffEventBillSet));
-    EffEventBillParticle *particle = (EffEventBillParticle *)sdfResourceRetainAddress(handle);
-    EffEventBillSet *work = (EffEventBillSet *)((u8 *)particle + size);
+    u32 particleCount = src->particleCount;
+    u32 particleBytes = particleCount * sizeof(EffEventBillParticle);
+    u32 allocationHandle = sdfAllocGeneralBlock(particleBytes + sizeof(EffEventBillSet));
+    EffEventBillParticle *particle = (EffEventBillParticle *)sdfResourceRetainAddress(allocationHandle);
+    EffEventBillSet *work = (EffEventBillSet *)((u8 *)particle + particleBytes);
     u32 i;
 
     work->head = *src;
-    work->allocationHandle = handle;
+    work->allocationHandle = allocationHandle;
     work->particles = particle;
     work->flag = 0;
     if (work->head.fadeIn <= 0) {
@@ -1255,14 +1351,16 @@ EffEventBillSet *effEventBillSetCreate(EffEventBillParams *src) {
         D_003BB144 = (u32)billCreateFromResource(0, "/efftool/bill/dbball01.tmx");
         D_003BB148 = (u32)billCreateFromResource(0, "/efftool/bill/dbball02.tmx");
     }
-    count = work->head.count;
-    for (i = 0; i < count; i++) {
+    particleCount = work->head.particleCount;
+    for (i = 0; i < particleCount; i++) {
         particle->age = 0;
         particle++;
     }
     return work;
 }
 
+/* Drop the shared texture reference count; zero dispatches both resource handles.
+ * The retained allocation is released afterwards, regardless of that count. */
 void effEventReleaseSharedResources(EffEventWork *work) {
     D_003BB140 = D_003BB140 - 1;
     if (D_003BB140 == 0) {
@@ -1279,61 +1377,64 @@ extern u8 D_0034DF38[];
 /* Randomize delays, scale oscillations, spin and motion. Scale amplitudes share
    the base-scale random factor; motion's Y component begins as zero height. */
 void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
-    EffEventBillParticle *p = &work->particles[index];
-    f32 dir[4];
-    f32 scale;
-    f32 range;
+    EffEventBillParticle *particle = &work->particles[index];
+    f32 direction[EFF_EVENT_VECTOR_COMPONENTS];
+    f32 scaleFactor;
+    f32 spawnRadius;
     s32 startDelaySpread = work->head.startDelaySpread;
     s32 motionDelaySpread = work->head.motionDelaySpread;
 
-    p->age = -(effMiscRand(D_0034DF38) % startDelaySpread);
-    p->motionDelay = -(effMiscRand(D_0034DF38) % motionDelaySpread);
-    scale = effMiscRandUnitFloat(D_0034DF38) * work->head.scaleRandomness + (1.0f - work->head.scaleRandomness);
-    p->baseScale = work->head.baseScale * scale;
-    p->scalePhaseX = effMiscRandUnitFloat(D_0034DF38) * (3.14159265f * 2.0f);
-    p->scalePhaseY = effMiscRandUnitFloat(D_0034DF38) * (3.14159265f * 2.0f);
-    p->scalePhaseStepX = work->head.scalePhaseStep * (effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f);
-    p->scalePhaseStepY = work->head.scalePhaseStep * (effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f);
-    p->scaleAmplitudeX = work->head.scaleAmplitudeX * (effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f) * scale;
-    p->scaleAmplitudeY = work->head.scaleAmplitudeY * (effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f) * scale;
-    p->rotation = effMiscRandUnitFloat(D_0034DF38) * (3.14159265f * 2.0f);
+    particle->age = -(effMiscRand(D_0034DF38) % startDelaySpread);
+    particle->motionDelay = -(effMiscRand(D_0034DF38) % motionDelaySpread);
+    scaleFactor = effMiscRandUnitFloat(D_0034DF38) * work->head.scaleRandomness + (1.0f - work->head.scaleRandomness);
+    particle->baseScale = work->head.baseScale * scaleFactor;
+    particle->scalePhaseX = effMiscRandUnitFloat(D_0034DF38) * (EFF_EVENT_HALF_TURN * 2.0f);
+    particle->scalePhaseY = effMiscRandUnitFloat(D_0034DF38) * (EFF_EVENT_HALF_TURN * 2.0f);
+    particle->scalePhaseStepX = work->head.scalePhaseStep * (effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f);
+    particle->scalePhaseStepY = work->head.scalePhaseStep * (effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f);
+    particle->scaleAmplitudeX = work->head.scaleAmplitudeX * (effMiscRandUnitFloat(D_0034DF38) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
+    particle->scaleAmplitudeY = work->head.scaleAmplitudeY * (effMiscRandUnitFloat(D_0034DF38) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
+    particle->rotation = effMiscRandUnitFloat(D_0034DF38) * (EFF_EVENT_HALF_TURN * 2.0f);
     if (effMiscRand(D_0034DF38) & 1) {
-        p->angularSpeed = work->head.angularSpeed * (effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f);
+        particle->angularSpeed = work->head.angularSpeed * (effMiscRandUnitFloat(D_0034DF38) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE);
     } else {
-        p->angularSpeed = -(work->head.angularSpeed * (effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f));
+        particle->angularSpeed = -(work->head.angularSpeed * (effMiscRandUnitFloat(D_0034DF38) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE));
     }
-    range = work->head.spawnRadius;
-    dir[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    dir[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    dir[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    VU0_LOAD_VF(vf10, dir);
+    spawnRadius = work->head.spawnRadius;
+    direction[0] = (effMiscRandUnitFloat(D_0034DF38) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    direction[1] = (effMiscRandUnitFloat(D_0034DF38) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    direction[2] = (effMiscRandUnitFloat(D_0034DF38) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    VU0_LOAD_VF(vf10, direction);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, dir);
-    p->position[0] = range * effMiscRandUnitFloat(D_0034DF38) * dir[0];
-    p->position[1] = range * effMiscRandUnitFloat(D_0034DF38) * dir[1];
-    p->position[2] = range * effMiscRandUnitFloat(D_0034DF38) * dir[2];
-    p->motion[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    p->motion[1] = 0;
-    p->motion[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    VU0_LOAD_VF(vf10, p->motion);
+    VU0_STORE_VF(vf10, direction);
+    /* Each coordinate consumes its own radial random factor, not one shared radius. */
+    particle->position[0] = spawnRadius * effMiscRandUnitFloat(D_0034DF38) * direction[0];
+    particle->position[1] = spawnRadius * effMiscRandUnitFloat(D_0034DF38) * direction[1];
+    particle->position[2] = spawnRadius * effMiscRandUnitFloat(D_0034DF38) * direction[2];
+    particle->motion[0] = (effMiscRandUnitFloat(D_0034DF38) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    particle->motion[1] = 0;
+    particle->motion[2] = (effMiscRandUnitFloat(D_0034DF38) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    VU0_LOAD_VF(vf10, particle->motion);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, p->motion);
-    p->swayAmplitude = work->head.swayAmplitude * (effMiscRandUnitFloat(D_0034DF38) * work->head.swayRandomness + (1.0f - work->head.swayRandomness));
-    p->swayPhase = 0;
-    p->verticalSpeed = work->head.verticalSpeed * (effMiscRandUnitFloat(D_0034DF38) * work->head.verticalSpeedRandomness + (1.0f - work->head.verticalSpeedRandomness));
-    p->lateralSpeed = work->head.lateralSpeed * (effMiscRandUnitFloat(D_0034DF38) * work->head.lateralSpeedRandomness + (1.0f - work->head.lateralSpeedRandomness));
+    VU0_STORE_VF(vf10, particle->motion);
+    particle->swayAmplitude = work->head.swayAmplitude * (effMiscRandUnitFloat(D_0034DF38) * work->head.swayRandomness + (1.0f - work->head.swayRandomness));
+    particle->swayPhase = 0;
+    particle->verticalSpeed = work->head.verticalSpeed * (effMiscRandUnitFloat(D_0034DF38) * work->head.verticalSpeedRandomness + (1.0f - work->head.verticalSpeedRandomness));
+    particle->lateralSpeed = work->head.lateralSpeed * (effMiscRandUnitFloat(D_0034DF38) * work->head.lateralSpeedRandomness + (1.0f - work->head.lateralSpeedRandomness));
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_001910C8);
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_001914E0);
 
+/* Copy one full vector quadword through vf10, including its fourth component. */
 void effEventCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void effEventSetWorkFlag(EffEventWork *work, u8 value) {
-    work->flag = value;
+/* Set the native byte flag without normalizing it to a boolean. */
+void effEventSetWorkFlag(EffEventWork *work, u8 flag) {
+    work->flag = flag;
 }
 
 /* Copy the serialized emitter parameters without changing their values. */
@@ -1341,7 +1442,8 @@ void effEventCopyParameterBlock(const EffEventBillParams *source, EffEventBillPa
     *destination = *source;
 }
 
-/* Copy parameters and normalize only start-delay spread and the two fade divisors. */
+/* Copy parameters and clamp only start-delay spread and fade divisors;
+ * motionDelaySpread remains unvalidated on this native path. */
 void effCopyEventBlockAndClampPositiveParameters(EffEventBillParams *destination, const EffEventBillParams *source) {
     *destination = *source;
     if (destination->fadeIn <= 0) {
@@ -1355,6 +1457,7 @@ void effCopyEventBlockAndClampPositiveParameters(EffEventBillParams *destination
     }
 }
 
+/* Create from the installed default emitter block; the returned pointer is unused. */
 void effEventInstallBillParticleSet(void) {
     effEventBillSetCreate(D_003563F0);
 }
@@ -1365,6 +1468,7 @@ extern void *effParamTableGetBlock(void *data, s32 index);
 extern u32 effParamTableGetWord2(void *data, s32 index);
 extern void func_00192250(void *src, u16 kind, void *params);
 
+/* Forward block 0, block 1's word-2 kind (narrowed to u16), and block 1 unchanged. */
 void effEventParticleSetCreateFromTable(void *data) {
     void *block0 = effParamTableGetBlock(data, 0);
     void *block1 = effParamTableGetBlock(data, 1);
