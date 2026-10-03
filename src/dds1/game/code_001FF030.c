@@ -3,6 +3,17 @@
 #include "btl_command.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+
+/* Native 0x20-byte action-animation descriptor, shared by motion and camera selection. */
+typedef struct BtlActionAnimationRecord {
+    u8 pad00[3];
+    u8 kind;
+    u16 displayCode;
+    u8 pad06[0x16];
+    u16 flags;
+    u8 pad1E[2];
+} BtlActionAnimationRecord;
+
 extern u32 btlGetEffectActor(void);
 
 extern u32 func_001A3360(s32, s32, s32);
@@ -31,7 +42,7 @@ extern char D_003BB8A0[];
 
 extern char D_003BB898[];
 
-extern s32 datActionAnimationRecords;
+extern BtlActionAnimationRecord *datActionAnimationRecords;
 
 extern s8 D_003A5A80[];
 
@@ -2763,7 +2774,6 @@ extern s8 D_003BD86C;
 extern s32 sdfNamedChunkFindId(void *, void *);
 
 extern void func_00207CA0(s32, s32);
-
 /* Named chunk indirection follows the same +0x18/+0x0C layout as DDS2. */
 typedef struct BtlNamedChunkData {
     u8 pad00[0xC];
@@ -3829,11 +3839,12 @@ s32 btlMapSkillRange(u32 skill) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020ADA8);
 
+/* Map populated boss-action descriptors to species-specific variants; -1 rejects. */
 s32 btlMapSpeciesToActionVariant(u8 *unit, s32 action) {
     if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
         return -1;
     }
-    if (*((u8 *)datActionAnimationRecords + action * 32 + 3) == 0) {
+    if (datActionAnimationRecords[action].kind == 0) {
         return -1;
     }
     switch (((BtlUnit *)unit)->mode) {
@@ -4015,17 +4026,11 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_0020BE30);
 
 extern void func_0020B190(u8 *, void *);
 
-/* 0x20-byte action metadata entries referenced by a unit's action index. */
-typedef struct BtlActionTableRow {
-    u8 pad00[3];
-    u8 enabled; /* 0x03: zero rejects the action */
-    u8 pad04[0x18];
-    u16 flags;  /* 0x1C: special animation selection bits */
-    u8 pad1E[2];
-} BtlActionTableRow;
+/* Descriptor flag 0x1000 takes precedence over 0x2000's single-target camera.
+ * Return 1 after selecting keys, or 0 when neither camera policy is requested. */
 
 s32 btlChooseDefeatCameraByActionAndTargets(u8 *unit) {
-    u16 flags = ((BtlActionTableRow *)datActionAnimationRecords)[((BtlLinkedCommand *)unit)->actionCode].flags;
+    u16 flags = datActionAnimationRecords[((BtlLinkedCommand *)unit)->actionCode].flags;
     if (flags & 0x1000) {
         btlFlagAllUnitDefeatCandidatesTask();
         if (!(flags & 0x10)) {

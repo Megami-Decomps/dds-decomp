@@ -2,6 +2,16 @@
 #include "btl_command.h"
 #include "pcp_vu0.h"
 
+/* Native 0x20-byte action-animation descriptor, shared by motion and camera selection. */
+typedef struct BtlActionAnimationRecord {
+    u8 pad00[3];
+    u8 kind;
+    u16 displayCode;
+    u8 pad06[0x16];
+    u16 flags;
+    u8 pad1E[2];
+} BtlActionAnimationRecord;
+
 typedef struct ActionUnit {
     u8 pad0[8];
     u32 sequenceFlags; /* 0x08 */
@@ -159,7 +169,7 @@ typedef struct BattleWork {
     u8 pad21C[0x10];
     s32 state22C; /* A value of 5 blocks the world-effect helpers. */
     u8 pad230[0x18];
-    struct BattleActorHandle *actionActors; /* 0x248: linked action handles */
+    struct ActionStateLink *actionActors; /* 0x248: linked action handles */
     BtlUnit *actorList;
     u8 pad250[0x18];
     u16 unk268;
@@ -178,18 +188,41 @@ typedef struct BattleWork {
 } BattleWork;
 
 typedef struct BattleNamedResource BattleNamedResource;
+/* Queued action slot: some queries inspect the full word, others its ID. */
+typedef union BattleActionSlot {
+    s32 word;
+    s16 actionId;
+} BattleActionSlot;
 
 
-/* Action-state link shared by the camera, motion and AI command paths in this unit. */
+/* Native 0x180-byte command-actor allocation; its two list links are at
+ * 0x174/0x178. The public index-list APIs use both signed and unsigned words. */
 typedef struct ActionStateLink {
-    u8 pad00[0x18];
+    u8 pad00[8];
+    u32 pendingFlags; /* 0x08 */
+    u32 flags; /* 0x0C */
+    u8 pad10[8];
     BtlUnit *unit; /* 0x18 */
-    u8 pad1C[0x28];
-    s32 slot; /* 0x44: action-kind table index, also reached through command->link */
-    u8 pad48[0x18];
-    u32 targetHandle; /* 0x60 */
-    u8 pad64[0x10C];
-    s32 lastMode; /* 0x170: mode of the unit picked last time */
+    u8 pad1C[4];
+    s32 phase; /* 0x20 */
+    s32 skillId; /* 0x24 */
+    u8 pad28[0x1C];
+    s32 slot; /* 0x44: action-kind table/resource-node index */
+    s32 adjustedValue; /* 0x48 */
+    s8 resultKind; /* 0x4C */
+    u8 pad4D[0x13];
+    union {
+        u32 targetHandle;
+        s32 actorIndices;
+    }; /* 0x60: the same index-list address */
+    u8 pad64[0x24];
+    u8 *entries; /* 0x88: retained index-work buffer */
+    u8 pad8C[0xC4];
+    BattleActionSlot actions[8]; /* 0x150 */
+    s32 lastMode; /* 0x170 */
+    struct ActionStateLink *prev;
+    struct ActionStateLink *next;
+    u8 pad17C[4];
 } ActionStateLink;
 
 /* Battle-select controller at work+0x718: the unit being selected and the previous one. */
@@ -200,28 +233,7 @@ typedef struct BtlSelectCtrl {
 } BtlSelectCtrl;
 
 
-/* Queued action slot: some queries inspect the full word, others its ID. */
-typedef union BattleActionSlot {
-    s32 word;
-    s16 actionId;
-} BattleActionSlot;
 
-/* Handle returned by btlFindUnitByActor; these fields drive its action task. */
-typedef struct BattleActorHandle {
-    u8 pad00[8];
-    u32 pendingFlags; /* 0x08 */
-    u32 flags; /* 0x0C */
-    u8 pad10[8];
-    BtlUnit *unit; /* 0x18 */
-    u8 pad1C[4];
-    s32 phase; /* 0x20 */
-    u8 pad24[0x3C];
-    s32 actorIndices; /* 0x60 */
-    u8 pad64[0xEC];
-    BattleActionSlot actions[8]; /* 0x150: 0x20 bytes */
-    u8 pad170[8];
-    struct BattleActorHandle *next; /* 0x178 */
-} BattleActorHandle;
 
 /* Action and sound tasks both carry their mutable control word at +0x28. */
 typedef struct BattleTaskControl {
@@ -1224,16 +1236,17 @@ s32 func_00213F58(s32 mask, s16 actionId, s8 force) {
     return 0;
 }
 
+/* Return whether an eligible unit has a queued action in the requested category. */
 s32 btlAnyUnitHasActionInSlots(mask, action)
     s32 mask;
     s32 action;
 {
-    u8 *actor;
+    ActionStateLink *actor;
     BtlUnit *unit;
     u32 flags;
     s32 i;
-    for (actor = (u8 *)((BattleWork *)btlGetRuntime())->actionActors; actor != 0; actor = (u8 *)((BattleActorHandle *)actor)->next) {
-        unit = ((BattleActorHandle *)actor)->unit;
+    for (actor = ((BattleWork *)btlGetRuntime())->actionActors; actor != 0; actor = actor->next) {
+        unit = actor->unit;
         if (unit == 0) {
             continue;
         }
@@ -1248,7 +1261,7 @@ s32 btlAnyUnitHasActionInSlots(mask, action)
             continue;
         }
         for (i = 0; i < 8; i++) {
-            if (func_00213F58(action, ((BattleActorHandle *)actor)->actions[i].actionId, 1) != 0) {
+            if (func_00213F58(action, actor->actions[i].actionId, 1) != 0) {
                 return 1;
             }
         }
@@ -1274,11 +1287,11 @@ s32 func_002141A8(s32 unused, s32 action) {
 
 s32 func_00214230(s32 unused, s32 battler) {
     s32 node = (s32)((BattleWork *)btlGetRuntime())->actionActors;
-    for (; node != 0; node = (s32)((BattleActorHandle *)node)->next) {
-        BtlUnit *target = ((BattleActorHandle *)node)->unit;
+    for (; node != 0; node = (s32)((ActionStateLink *)node)->next) {
+        BtlUnit *target = ((ActionStateLink *)node)->unit;
         if (target != 0 &&
             (target->flags64 & 0x221) == 0x201 &&
-            func_00213F58(battler, ((BattleActorHandle *)node)->actions[0].actionId, 0)) {
+            func_00213F58(battler, ((ActionStateLink *)node)->actions[0].actionId, 0)) {
             return 1;
         }
     }
@@ -1316,8 +1329,8 @@ s32 btlHasEligibleQueuedSpecialAction(void) {
     u8 *actionEntry;
     s16 actionId;
     s32 i;
-    for (actor = (u8 *)((BattleWork *)btlGetRuntime())->actionActors; actor != 0; actor = (u8 *)((BattleActorHandle *)actor)->next) {
-        unit = ((BattleActorHandle *)actor)->unit;
+    for (actor = (u8 *)((BattleWork *)btlGetRuntime())->actionActors; actor != 0; actor = (u8 *)((ActionStateLink *)actor)->next) {
+        unit = ((ActionStateLink *)actor)->unit;
         if (unit == 0) {
             continue;
         }
@@ -1325,7 +1338,7 @@ s32 btlHasEligibleQueuedSpecialAction(void) {
             continue;
         }
         for (i = 0; i < 8; i++) {
-            actionId = ((BattleActorHandle *)actor)->actions[i].actionId;
+            actionId = ((ActionStateLink *)actor)->actions[i].actionId;
             if (actionId == 0) {
                 continue;
             }
@@ -1421,13 +1434,14 @@ INCLUDE_ASM(const s32, "game/code_002112C8", btlAnyGroup400HasQuery);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", btlAnyGroup200HasQuery);
 
+/* Test the full queued words, rather than the halfword IDs used by category queries. */
 s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 id, s32 mask) {
-    u8 *actor;
+    ActionStateLink *actor;
     BtlUnit *unit;
     u32 flags;
     s32 i;
-    for (actor = (u8 *)((BattleWork *)btlGetRuntime())->actionActors; actor != 0; actor = (u8 *)((BattleActorHandle *)actor)->next) {
-        unit = ((BattleActorHandle *)actor)->unit;
+    for (actor = ((BattleWork *)btlGetRuntime())->actionActors; actor != 0; actor = actor->next) {
+        unit = actor->unit;
         if (unit == 0) {
             continue;
         }
@@ -1442,7 +1456,7 @@ s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 id, s32 mask) {
             continue;
         }
         for (i = 0; i < 8; i++) {
-            if (((BattleActorHandle *)actor)->actions[i].word == id) {
+            if (actor->actions[i].word == id) {
                 return 1;
             }
         }
@@ -2263,16 +2277,16 @@ void btlStartUnitActionIfPairedSelected(void) {
                 if (other->flags & 0xE0) {
                     handle = btlFindUnitByActor(found);
                     fldAppendSceneGroupHandle(handle);
-                    ((BattleActorHandle *)handle)->phase = 0x11;
-                    ((BattleActorHandle *)handle)->flags |= 8;
-                    btlAppendIndexListEntry(((BattleActorHandle *)handle)->actorIndices, (u32)((BattleActorHandle *)handle)->unit);
+                    ((ActionStateLink *)handle)->phase = 0x11;
+                    ((ActionStateLink *)handle)->flags |= 8;
+                    btlAppendIndexListEntry(((ActionStateLink *)handle)->actorIndices, (u32)((ActionStateLink *)handle)->unit);
                 }
             }
         }
     }
 }
 
-void func_00217EB8(BattleActorHandle *action) {
+void func_00217EB8(ActionStateLink *action) {
     BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
     s8 *state = (s8 *)scene->state;
     ActionUnit *unit;
@@ -2446,16 +2460,16 @@ void btlStartReadyUnitAction(void) {
         if (unit != 0) {
             handle = btlFindUnitByActor(unit);
             fldAppendSceneGroupHandle(handle);
-            ((BattleActorHandle *)handle)->phase = 0x11;
-            ((BattleActorHandle *)handle)->flags |= 8;
-            btlAppendIndexListEntry(((BattleActorHandle *)handle)->actorIndices, (u32)((BattleActorHandle *)handle)->unit);
+            ((ActionStateLink *)handle)->phase = 0x11;
+            ((ActionStateLink *)handle)->flags |= 8;
+            btlAppendIndexListEntry(((ActionStateLink *)handle)->actorIndices, (u32)((ActionStateLink *)handle)->unit);
             ctrl->prevUnit = ctrl->unit;
             ctrl->unit = 0;
         }
     }
 }
 
-void btlStartPrevUnitScriptAction(BattleActorHandle *handle) {
+void btlStartPrevUnitScriptAction(ActionStateLink *handle) {
     BtlSelectCtrl *ctrl = (BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub;
     s32 script;
     BattleTaskControl *task;
@@ -2661,15 +2675,10 @@ s32 btlFlagAbadonHpMpTrigger(s32 unit, s32 unused, s32 action) {
     return 0;
 }
 
-typedef struct BattleActionRecord {
-    u8 pad0[8];
-    u32 flags;
-    u8 padC[0xC];
-    BtlUnit *unit;
-} BattleActionRecord;
 
-s32 btlCheckActionRecordUnit(BattleActionRecord *record) {
-    if ((record->flags & 8) == 0) {
+/* Pending command records return 12 only when their owner is the selected unit. */
+s32 btlCheckActionRecordUnit(ActionStateLink *record) {
+    if ((record->pendingFlags & 8) == 0) {
         return -1;
     }
     return ((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit == record->unit ? 12 : -1;
@@ -2685,9 +2694,9 @@ extern u8 *btlCreateEffObjB(s32, s32);
 
 extern u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 
-s32 btlStartActionRecordTasks(BattleActionRecord *record) {
+s32 btlStartActionRecordTasks(ActionStateLink *record) {
     u8 *task;
-    if (!(record->flags & 8)) {
+    if (!(record->pendingFlags & 8)) {
         return -1;
     }
     if (((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit != record->unit) {
@@ -2782,34 +2791,26 @@ s32 btlRaiseUnitForCommandSlot(u8 *command) {
     return 0;
 }
 
-/* One-shot linked effect: its parent action, elapsed counter and spawn latch. */
-typedef struct BtlLinkedEffectTask {
-    u8 pad00[0x114];
-    BattleActionRecord *record; /* 0x114 */
-    u8 pad118[0x18];
-    s32 elapsed; /* 0x130 */
-    u8 pad134[8];
-    s32 spawned; /* 0x13C */
-} BtlLinkedEffectTask;
 
+/* Install these camera keys once, after motion 0x10's duration plus 15 task ticks. */
 s32 btlSpawnLinkedActionEffect(u8 *task) {
-    if (((BtlLinkedEffectTask *)task)->spawned == 0) {
-        if (func_001E2E58((u8 *)((BtlLinkedEffectTask *)task)->record->unit, 0x10) + 0xF <=
-            ((BtlLinkedEffectTask *)task)->elapsed) {
+    if (((BtlLinkedCommand *)task)->motionProgress == 0) {
+        if (func_001E2E58((u8 *)((BtlLinkedCommand *)task)->link->unit, 0x10) + 0xF <=
+            ((BtlLinkedCommand *)task)->state) {
             btlSetEffectCameraKeys((s32)task, -6.8f, -476.8f, -525.0f, 0.184f, 0.008f, -0.011f, 0.974f, 0.3f,
                           -214.2f, -1419.8f, -0.101f, 0.012f, -0.013f, 0.986f, 40.0f, 12.0f);
-            ((BtlLinkedEffectTask *)task)->elapsed = 0;
-            ((BtlLinkedEffectTask *)task)->spawned = 1;
+            ((BtlLinkedCommand *)task)->state = 0;
+            ((BtlLinkedCommand *)task)->motionProgress = 1;
         }
     }
     return 1;
 }
 
 
-void btlStartActionRecordSoundTask(BattleActionRecord *record, u64 owner, s32 controlBase) {
+void btlStartActionRecordSoundTask(ActionStateLink *record, u64 owner, s32 controlBase) {
     BtlUnit *unit;
     u8 *task;
-    if (record->flags & 8) {
+    if (record->pendingFlags & 8) {
         unit = record->unit;
         if (unit->flags & 0x400) {
             if (unit->mode == 0x108) {
@@ -2949,9 +2950,9 @@ void btlStartReadyUnitActionCopy(void) {
         if (unit != 0) {
             handle = btlFindUnitByActor(unit);
             fldAppendSceneGroupHandle(handle);
-            ((BattleActorHandle *)handle)->phase = 0x11;
-            ((BattleActorHandle *)handle)->flags |= 8;
-            btlAppendIndexListEntry(((BattleActorHandle *)handle)->actorIndices, (u32)((BattleActorHandle *)handle)->unit);
+            ((ActionStateLink *)handle)->phase = 0x11;
+            ((ActionStateLink *)handle)->flags |= 8;
+            btlAppendIndexListEntry(((ActionStateLink *)handle)->actorIndices, (u32)((ActionStateLink *)handle)->unit);
             ctrl->prevUnit = ctrl->unit;
             ctrl->unit = 0;
         }
@@ -3487,19 +3488,6 @@ typedef struct BtlSubtask {
     u64 flags;
 } BtlSubtask;
 
-typedef struct BtlSkillTask {
-    u8 pad0[8];
-    u32 flags;
-    u8 pad0C[0xC];
-    struct BtlUnitNode *unit;
-    u8 pad1C[8];
-    s32 kind;
-    u8 pad28[0x20];
-    s32 adjustedValue;
-    s8 resultKind;
-    u8 pad4D[0x13];
-    s32 list60;
-} BtlSkillTask;
 
 typedef struct BtlEffect {
     u8 pad0[0x10];
@@ -3514,7 +3502,7 @@ typedef struct BtlEffect {
     f32 fE0;
     u8 padE4[0x2C];
     u32 flags;
-    BtlSkillTask *task;
+    ActionStateLink *task;
     u8 pad118[0x18];
     s32 unk130;
     s32 index134;
@@ -3522,46 +3510,25 @@ typedef struct BtlEffect {
     f32 unk154;
 } BtlEffect;
 
-typedef struct BtlEntry {
-    u8 pad0[3];
-    u8 kind;
-    u8 pad4[0x18];
-    u16 flags1C;
-    u8 pad1E[2];
-} BtlEntry;
 
+/* Observed parameter-blob prefix; Hekato and Brahma use distinct neighboring ratios. */
 typedef struct BtlParams {
     u8 pad0[0xBF4];
-    f32 ratioScale;
-    f32 ratioMax;
+    f32 hekatoRatioScale; /* 0xBF4 */
+    f32 hekatoRatioMax; /* 0xBF8 */
+    u8 padBFC[4];
+    f32 actionScale; /* 0xC00 */
+    f32 brahmaRatioMultiplier; /* 0xC04 */
+    f32 brahmaRatioMaximum; /* 0xC08 */
 } BtlParams;
 
-/* Sparse view of the battle unit: this unit only walks the actor list and
- * reads three fields, so it names only those. The layout is the canonical
- * BtlUnit's; see code_001DD390 for the full one. Renamed from BtlUnit because
- * a partial view under the full type's name hides which fields are really
- * known here. */
-struct BtlUnitNode {
-    u8 pad0[0x110];
-    u32 flags;               /* 0x110 */
-    u32 stateFlags;          /* 0x114 */
-    u8 pad118[4];
-    u8 state;                /* 0x11C */
-    u8 pad11D[7];
-    u16 mode;                /* 0x124 */
-    u8 pad126[0x21A];
-    BtlUnitExt *ext;         /* 0x340 */
-    u8 pad344[0x20];
-    struct BtlUnitNode *next; /* 0x364: actor-list link */
-};
-typedef struct BtlUnitNode BtlUnitNode;
 
 extern BtlParams *datBattleParameters;
-extern BtlEntry *datActionAnimationRecords;
-extern s32 btlBossDebugPrintf(const char *, ...);
+extern BtlActionAnimationRecord *datActionAnimationRecords;
+extern void btlBossDebugPrintf(const char *, ...);
 extern BtlSubtask *func_001E5FF8(s32, s32);
-extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnitNode *, s32);
-extern s32 btlAdjustPointsForCombatFlags(BtlUnitNode *, s32, s32, s32, s32);
+extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
+extern s32 btlAdjustPointsForCombatFlags(BtlUnit *, s32, s32, s32, s32);
 extern s8 btlGetCommandResultKindFromFlags(s32, s32, s32);
 extern void btlCopyMotionTransform(void *, f32 *);
 extern void btlFlagAllUnitDefeatCandidatesTask();
@@ -3595,7 +3562,7 @@ u64 btlStartSubtaskWithInput(u64 input) {
     return task->result;
 }
 
-void btlMarkActiveBossUnitExtensionFlags(BtlUnitNode *unit) {
+void btlMarkActiveBossUnitExtensionFlags(BtlUnit *unit) {
     if (unit->flags & BTL_UNIT_BOSS_FLAG) {
         if (unit->flags & 2) {
             unit->ext->flagsA8 |= 0x1000000;
@@ -3605,12 +3572,12 @@ void btlMarkActiveBossUnitExtensionFlags(BtlUnitNode *unit) {
     }
 }
 
-f32 btlGetBossPresenceActionScale(BtlUnitNode *unit, BtlUnitNode *target) {
-    struct BtlUnitNode *other;
+f32 btlGetBossPresenceActionScale(BtlUnit *unit, BtlUnit *target) {
+    BtlUnit *other;
     f32 scale = 1.0f;
     if (unit->flags & 0x200) {
         if (target->mode == 0x110) {
-            for (other = ((BattleWork *)btlGetRuntime())->actorList; other != 0; other = other->next) {
+            for (other = ((BattleWork *)btlGetRuntime())->actorList; other != 0; other = other->nextActor) {
                 if (other->flags & 1) {
                     if (other->flags & BTL_UNIT_BOSS_FLAG) {
                         if (!(other->flags & 0xE0)) {
@@ -3627,7 +3594,8 @@ f32 btlGetBossPresenceActionScale(BtlUnitNode *unit, BtlUnitNode *target) {
     return scale;
 }
 
-void btlSetSkillTaskResults(BtlSkillTask *task, s32 flags, s32 otherFlags, s32 skillId) {
+/* Store the flag-adjusted value and signed result kind in the owning command actor. */
+void btlSetSkillTaskResults(ActionStateLink *task, s32 flags, s32 otherFlags, s32 skillId) {
     s32 percent = 100;
     if (skillId >= 0x1AB && skillId < 0x220) {
         percent *= btlGetSlotValueAdjustedForSpecialAbility(task->unit, skillId);
@@ -3752,7 +3720,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_0021E778);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021E8C0);
 
-s32 btlMapBossEntryKindToIndex(BtlUnitNode *unit, s32 index) {
+s32 btlMapBossEntryKindToIndex(BtlUnit *unit, s32 index) {
     if (!(unit->flags & BTL_UNIT_BOSS_FLAG)) {
         return -1;
     }
@@ -3777,7 +3745,7 @@ s32 btlMapBossEntryKindToIndex(BtlUnitNode *unit, s32 index) {
     }
 }
 
-s32 btlGetBossEntryKind(BtlUnitNode *unit, s32 index) {
+s32 btlGetBossEntryKind(BtlUnit *unit, s32 index) {
     if (!(unit->flags & BTL_UNIT_BOSS_FLAG)) {
         return -1;
     }
@@ -3787,7 +3755,7 @@ s32 btlGetBossEntryKind(BtlUnitNode *unit, s32 index) {
     return datActionAnimationRecords[index].kind;
 }
 
-s32 btlRemapBossResponseForActionPhase(BtlUnitNode *unit, s32 value) {
+s32 btlRemapBossResponseForActionPhase(BtlUnit *unit, s32 value) {
     s32 mode;
     if (!(unit->flags & BTL_UNIT_BOSS_FLAG)) {
         return value;
@@ -3806,7 +3774,7 @@ s32 btlRemapBossResponseForActionPhase(BtlUnitNode *unit, s32 value) {
     return value;
 }
 
-s32 btlPlayStationedSoundForActiveBossAction(BtlUnitNode *unit) {
+s32 btlPlayStationedSoundForActiveBossAction(BtlUnit *unit) {
     s32 mode;
     if (unit->flags & BTL_UNIT_BOSS_FLAG) {
         if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0)) {
@@ -3835,17 +3803,18 @@ void btlResetBossRatioScale(void) {
     ((BattleWork *)btlGetRuntime())->sub->scale = 1.0f;
 }
 
-s32 btlAccumulateBossRatioScale(BtlSkillTask *task) {
+/* Hekato multiplies the active ratio and clamps it to its own parameter maximum. */
+s32 btlAccumulateBossRatioScale(ActionStateLink *task) {
     f32 *ratio;
     BtlParams *params;
-    if (task->flags & 8) {
+    if (task->pendingFlags & 8) {
         if (task->unit->flags & BTL_UNIT_BOSS_FLAG) {
             ratio = &((BattleWork *)btlGetRuntime())->sub->scale;
-            if (task->kind == BTL_SKILL_HEKATO) {
+            if (task->skillId == BTL_SKILL_HEKATO) {
                 params = datBattleParameters;
-                *ratio *= params->ratioScale;
-                if (*ratio > params->ratioMax) {
-                    *ratio = params->ratioMax;
+                *ratio *= params->hekatoRatioScale;
+                if (*ratio > params->hekatoRatioMax) {
+                    *ratio = params->hekatoRatioMax;
                 }
                 btlBossDebugPrintf("btl:boss HEKATO ratio = %f\n", *ratio);
             }
@@ -3853,7 +3822,7 @@ s32 btlAccumulateBossRatioScale(BtlSkillTask *task) {
     }
 }
 
-f32 btlGetBossRatioScale(BtlUnitNode *unit, s32 unused, s32 kind, s32 flag) {
+f32 btlGetBossRatioScale(BtlUnit *unit, s32 unused, s32 kind, s32 flag) {
     f32 scale = 1.0f;
     if (kind == BTL_SKILL_HEKATO && flag == 1) {
         if (unit->flags & BTL_UNIT_BOSS_FLAG) {
@@ -3863,14 +3832,14 @@ f32 btlGetBossRatioScale(BtlUnitNode *unit, s32 unused, s32 kind, s32 flag) {
     return scale;
 }
 
-BtlUnitNode *btlFindUnitByMode(void) {
+BtlUnit *btlFindUnitByMode(void) {
     BattleWork *work = (BattleWork *)btlGetRuntime();
     BattleSub *sub = work->sub;
-    struct BtlUnitNode *unit;
+    BtlUnit *unit;
     if (sub->b.active == 0) {
         return 0;
     }
-    for (unit = work->actorList; unit != 0; unit = unit->next) {
+    for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
         if (unit->flags & 1) {
             if (unit->flags & 0x200) {
                 if (sub->targetMode == unit->mode) {
@@ -3972,28 +3941,8 @@ typedef struct BattleActionByteState {
     s8 markedActive;  /* 0x08 */
 } BattleActionByteState;
 
-/* Each action-table entry is 0x20 bytes; only the observed words are exposed. */
-typedef struct BattleActionTableEntry {
-    u8 pad00[3];
-    u8 resourceType; /* 0x03: selects the resource class for the action */
-    u16 displayCode; /* 0x04: label formatting parameter */
-    u8 pad06[0x16];
-    u16 flags;       /* 0x1C: special action handling */
-    u8 pad1E[2];
-} BattleActionTableEntry;
 
-typedef struct BattleActorResource {
-    u8 pad00[0xC4];
-    u32 kind;  /* 0xC4: model/resource kind */
-    u32 index; /* 0xC8: model/resource index */
-} BattleActorResource;
 
-typedef struct BattleActionScaleTable {
-    u8 pad00[0xC00];
-    f32 actionScale;
-    f32 ratioMultiplier;
-    f32 ratioMaximum;
-} BattleActionScaleTable;
 
 typedef struct BattleActionTask {
     u8 pad00[0x28];
@@ -4091,7 +4040,7 @@ void btlFormatSpecialMotionDisplayCode(s32 unit, u32 action, char *buffer) {
         default:
             return;
         }
-        func_0035C860(buffer, D_0041AAC8, D_00436CF0, ((BattleActionTableEntry *)datActionAnimationRecords)[action].displayCode, value);
+        func_0035C860(buffer, D_0041AAC8, D_00436CF0, datActionAnimationRecords[action].displayCode, value);
     }
 }
 
@@ -4486,9 +4435,9 @@ void btlQueueLoneFreeTeamHandle(void) {
         if (!((firstReady == 0 && secondReady == 0) || (firstReady != 0 && secondReady != 0))) {
             handle = btlFindUnitByActor((BtlUnit *)(firstReady == 0 ? first : second));
             fldAppendSceneGroupHandle(handle);
-            ((BattleActorHandle *)handle)->phase = 0x11;
-            ((BattleActorHandle *)handle)->flags |= 8;
-            btlAppendIndexListEntry(((BattleActorHandle *)handle)->actorIndices, (u32)((BattleActorHandle *)handle)->unit);
+            ((ActionStateLink *)handle)->phase = 0x11;
+            ((ActionStateLink *)handle)->flags |= 8;
+            btlAppendIndexListEntry(((ActionStateLink *)handle)->actorIndices, (u32)((ActionStateLink *)handle)->unit);
         }
     }
 }
@@ -4557,7 +4506,7 @@ f32 btlGetActionScaleFactor(ActionUnit *unit, ActionUnit *other) {
     }
     state = (BattleActionFlagState *)((BattleActionScene *)btlGetRuntime())->state;
     if (state->active != 0 && state->phase < 4) {
-        return ((BattleActionScaleTable *)datBattleParameters)->actionScale;
+        return datBattleParameters->actionScale;
     }
     return 1.0f;
 }
@@ -4715,14 +4664,14 @@ void btlDestroyActionActor(void) {
 }
 
 u32 func_00221828(u32 unit) {
-    if (((BattleActorResource *)unit)->kind == 1 && ((BattleActorResource *)unit)->index == 0x10b) {
+    if (((BtlUnit *)unit)->resourceKind == 1 && ((BtlUnit *)unit)->resourceIndex == 0x10b) {
         return 0;
     }
     return 1;
 }
 
 u32 func_00221858(u32 unit) {
-    if (((BattleActorResource *)unit)->kind == 1 && ((BattleActorResource *)unit)->index == 0x10b) {
+    if (((BtlUnit *)unit)->resourceKind == 1 && ((BtlUnit *)unit)->resourceIndex == 0x10b) {
         return 0;
     }
     return 1;
@@ -4745,18 +4694,19 @@ void btlMarkSpecialActionUnit(ActionUnit *actor) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002218C8);
 
+/* Brahma's action 0x19F updates the second state word, independently of Hekato. */
 s32 btlAdvanceBrahmaRatioOnAction(ActionUnit *unit) {
     f32 *state;
-    u8 *table;
+    BtlParams *table;
 
     if (unit->sequenceFlags & 8) {
         if (((ActionUnit *)unit->parentUnit)->flags & 0x400) {
             state = (f32 *)((BattleActionScene *)btlGetRuntime())->state;
             if (unit->parentAction == 0x19F) {
                 table = datBattleParameters;
-                state[1] = state[1] * ((BattleActionScaleTable *)table)->ratioMultiplier;
-                if (((BattleActionScaleTable *)table)->ratioMaximum < state[1]) {
-                    state[1] = ((BattleActionScaleTable *)table)->ratioMaximum;
+                state[1] = state[1] * table->brahmaRatioMultiplier;
+                if (table->brahmaRatioMaximum < state[1]) {
+                    state[1] = table->brahmaRatioMaximum;
                 }
                 btlBossDebugPrintf("btl:boss BRAHMA ratio = %f\n", state[1]);
             }
@@ -4906,9 +4856,9 @@ s32 btlQueueMarkedSpecialActorSceneGroup(void) {
     }
     handle = btlFindUnitByActor(found);
     fldAppendSceneGroupHandle(handle);
-    ((BattleActorHandle *)handle)->phase = 0x11;
-    ((BattleActorHandle *)handle)->flags |= 8;
-    btlAppendIndexListEntry(((BattleActorHandle *)handle)->actorIndices, (u32)((BattleActorHandle *)handle)->unit);
+    ((ActionStateLink *)handle)->phase = 0x11;
+    ((ActionStateLink *)handle)->flags |= 8;
+    btlAppendIndexListEntry(((ActionStateLink *)handle)->actorIndices, (u32)((ActionStateLink *)handle)->unit);
     return -1;
 }
 
@@ -4918,14 +4868,14 @@ s32 btlActionResourceTypeToMotionId(ActionUnit *unit, s32 action) {
     if ((unit->flags & 0x400) == 0) {
         return -1;
     }
-    if (((BattleActionTableEntry *)datActionAnimationRecords)[action].resourceType == 0) {
+    if (datActionAnimationRecords[action].kind == 0) {
         return -1;
     }
-    if (((BattleActionTableEntry *)datActionAnimationRecords)[action].resourceType >= 0xB &&
-        ((BattleActionTableEntry *)datActionAnimationRecords)[action].resourceType <= 0x19) {
+    if (datActionAnimationRecords[action].kind >= 0xB &&
+        datActionAnimationRecords[action].kind <= 0x19) {
         return -1;
     }
-    switch (((BattleActionTableEntry *)datActionAnimationRecords)[action].resourceType) {
+    switch (datActionAnimationRecords[action].kind) {
     case 3: return 0xF;
     case 4: return 0x13;
     case 5: return 0x12;
@@ -4986,7 +4936,7 @@ void btlUnitSetCameraOffset(u32 unit) {
     ((ActionUnit *)unit)->flags |= 0x41;
 }
 
-extern s32 effMiscRandMod(s32, s32);
+extern u32 effMiscRandMod(void *stream, u32 modulus);
 extern char D_0041ACA8[]; /* "BRAHMA:I-0 ++++\n" */
 extern char D_0041ACC0[];
 void btlChooseBrahmaIndividualCamera(u32 unit) {
@@ -5198,7 +5148,7 @@ s32 func_00223BD8(ActionUnit *unit) {
 }
 
 s32 btlSelectActionCameraByTableFlags(ActionUnit *unit) {
-    u32 flags = ((BattleActionTableEntry *)datActionAnimationRecords)[unit->action].flags;
+    u32 flags = datActionAnimationRecords[unit->action].flags;
 
     if (flags & 0x1000) {
         btlFlagAllUnitDefeatCandidatesTask();
@@ -5224,7 +5174,7 @@ s32 btlSelectActionCameraByTableFlags(ActionUnit *unit) {
 }
 
 s32 func_00223DD8(ActionUnit *unit) {
-    u32 flags = ((BattleActionTableEntry *)datActionAnimationRecords)[unit->action].flags;
+    u32 flags = datActionAnimationRecords[unit->action].flags;
 
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
@@ -5479,7 +5429,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", btlUnitWrapB);
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002247D0);
 
 s32 btlSelectRaisedCameraFromActionFlags(ActionUnit *unit) {
-    u32 flags = ((BattleActionTableEntry *)datActionAnimationRecords)[unit->action].flags;
+    u32 flags = datActionAnimationRecords[unit->action].flags;
 
     if (flags & 0x1000) {
         btlFlagAllUnitDefeatCandidatesTask();
@@ -5505,7 +5455,7 @@ s32 btlSelectRaisedCameraFromActionFlags(ActionUnit *unit) {
 }
 
 s32 func_00224DF0(ActionUnit *unit) {
-    u32 flags = ((BattleActionTableEntry *)datActionAnimationRecords)[unit->action].flags;
+    u32 flags = datActionAnimationRecords[unit->action].flags;
 
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
