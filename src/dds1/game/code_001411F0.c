@@ -789,7 +789,35 @@ void fldSetEmitterPosition(FldEmitter *emitter, f32 x, f32 y, f32 z) {
     func_002D9238(D_00325838, emitter);
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00142800);
+typedef struct {
+    s16 u;
+    s16 v;
+    s16 width;
+    s16 height;
+    s16 anchorX;
+    s16 anchorY;
+    s32 textureSlot;
+} FldProjectedSprite;
+
+extern FldProjectedSprite D_0033EBA0[];
+extern u32 D_003D40A0[];
+
+void func_00142800(s32 index, u32 color, f32 x, f32 y) {
+    FldProjectedSprite *sprite = &D_0033EBA0[index];
+    s32 anchorY = sprite->anchorY;
+    s16 u = sprite->u;
+    s16 v = sprite->v;
+
+    y -= 2048.0f;
+    x -= 2048.0f;
+    y += y;
+    y += 224.0f;
+    x += 256.0f;
+    fldSubmitSpriteRect((s32)(x - sprite->anchorX), (s32)(y - anchorY),
+                        sprite->width, sprite->height, u, v,
+                        sprite->width, sprite->height, color,
+                        D_003D40A0[D_0033EBA0[index].textureSlot]);
+}
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_001428C0);
 
@@ -955,8 +983,6 @@ extern s32 D_003BAECC;
 extern s32 D_003BAED4;
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00145B18);
-
-extern u32 D_003D40A0[];
 
 extern void sdfTexReleaseReferenceViaHandler();
 
