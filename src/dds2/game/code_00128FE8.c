@@ -219,7 +219,7 @@ extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 
-extern s32 kwlnGetDrawBufferIndex(void);
+extern u32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 
@@ -2212,6 +2212,8 @@ extern void fldClearSceneModelColors(void);
 extern void fldMarkPrimaryObjectByPeerPresence(void);
 extern void fldClearCameraObjectTransitionFlags(void);
 
+extern u8 fldTestSceneControlFlags(u32 mask);
+
 void fldUpdateCameraProximity(void) {
     f32 vec[4];
     f32 range = 45.0f;
@@ -2383,8 +2385,7 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00132408);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00132540);
 
-extern s32 fldGetSceneReadyFlag(void);
-extern s32 fldTestSceneControlFlags(s32);
+extern u32 fldGetSceneReadyFlag(void);
 extern void fldClearCameraObjectHighlightFlag(void);
 extern void func_001321F8(void);
 extern void func_00131B50(void);

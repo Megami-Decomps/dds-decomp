@@ -140,7 +140,7 @@ extern void sdfAppendPacket(void *, void *);
 
 extern u8 *sdfConsFinalizePacketHeader(void *, s32);
 
-extern s32 kwlnGetDrawBufferIndex(void);
+extern u32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 

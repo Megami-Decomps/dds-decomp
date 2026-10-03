@@ -2220,7 +2220,7 @@ void func_002C6758(s32 index, f32 *out) {
     out[2] = evtStageTestState.entries[index & 0xFFFF].rotation[2];
 }
 
-extern s32 kwlnGetDrawBufferIndex(void);
+extern u32 kwlnGetDrawBufferIndex(void);
 extern void sdfCameraBuildProjection(void *);
 extern void sdfConsBuildMatrixPacket(void *packet, void *node, void *matrix);
 extern void sdfConsCacheTransformedNode(void *node, void *matrix);
