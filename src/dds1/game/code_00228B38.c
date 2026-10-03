@@ -8,9 +8,19 @@ typedef struct SolarNoiseLayer {
 } SolarNoiseLayer;
 
 typedef struct SolarNoiseState {
-    u8 pad00[0x10];
+    u8 pad00[8];
+    u16 spawnAge;
+    s16 spawnInterval;
+    u16 activeCount;
+    u16 pad0E;
     SolarNoiseLayer layers[10];
 } SolarNoiseState;
+
+typedef struct SolarNoiseDebugData {
+    const char *label;
+    u32 unused;
+    char format[4];
+} SolarNoiseDebugData;
 
 typedef struct SolarSpriteLayer {
     u8 pad00[0xC];
@@ -70,6 +80,7 @@ void sdfSubmitGsTestOneRegisterPacket();
 void uiDrawUniformColorRect(s32 x, s32 y, s32 z, s32 width, s32 height, s32 angle, s32 object);
 void uiDrawActiveSurfaceRegion(s32 object);
 f32 effMiscRandUnitFloat(s32 seed);
+u32 effMiscRand(s32 seed);
 
 extern u32 D_003BBDD0[];
 
@@ -282,7 +293,61 @@ s32 evtAdvanceSolarLongLayerTimer(SolarLayerTimer *timer) {
 
 INCLUDE_ASM(const s32, "game/code_00228B38", func_00229540);
 
-INCLUDE_ASM(const s32, "game/code_00228B38", func_00229750);
+INCLUDE_SDATA(const s32, "game/code_00228B38", D_003BBDD0);
+
+/* Spawn phase-dependent long-lived noise layers and expire active slots. */
+void func_00229750(SolarNoiseState *state) {
+    u8 phase = evtGetMirroredSolarPhase();
+    u16 spawns[15][3] = {
+        {57, 62, 50}, {50, 66, 20}, {52, 62, 50}, {52, 60, 100},
+        {45, 58, 50}, {41, 50, 50}, {41, 50, 100}, {42, 42, 50},
+        {46, 39, 50}, {50, 32, 50}, {50, 32, 100}, {60, 32, 50},
+        {67, 38, 50}, {65, 40, 100}, {71, 45, 50},
+    };
+
+    {
+        u8 spawnCounts[8] = {3, 5, 6, 8, 10, 12, 13, 15};
+        SolarNoiseLayer *layer;
+        s8 *active;
+        s32 i;
+
+        if (phase >= 2) {
+            s32 spawnLimit = (s32)((f32)phase * 3.0f * 0.125f + 1.0f);
+            state->spawnAge++;
+            if ((s16)state->spawnAge > state->spawnInterval) {
+                state->spawnAge = 0;
+                if (state->activeCount < 10 && state->activeCount < spawnLimit) {
+                    state->activeCount++;
+                    for (i = 0; i < 10; i++) {
+                        if (state->layers[i].active == 0) {
+                            s32 spawnIndex =
+                                effMiscRand(0) % spawnCounts[phase - 2];
+                            state->layers[i].x = spawns[spawnIndex][0];
+                            state->layers[i].y = spawns[spawnIndex][1];
+                            state->layers[i].age = 0;
+                            state->layers[i].active = 1;
+                            state->layers[i].scale = spawns[spawnIndex][2];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        layer = state->layers;
+        active = &layer->active;
+        for (i = 9; i >= 0; i--, layer++, active += sizeof(*layer)) {
+            if (*active != 0 &&
+                evtAdvanceSolarLongLayerTimer((SolarLayerTimer *)layer) == 0) {
+                state->activeCount--;
+            }
+        }
+    }
+}
+
+const char D_003ACC58[16] = "FREE CAMERA";
+static SolarNoiseDebugData evtSolarNoiseDebugData
+    __attribute__((section(".sdata"))) = {(const char *)0x003ACC58, 0, "%s"};
 
 void evtDrawShortSolarNoiseLayers(s32 x, s32 y, s32 z, s32 width, SolarNoiseState *state, s32 context, s32 color) {
     SolarNoiseLayer *layer = state->layers;
@@ -406,15 +471,8 @@ void evtUpdateSolarPointTimers(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_00228B38", func_00229ED8);
 
-INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACBF8);
-
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC68);
 
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC78);
 
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC88);
-
-INCLUDE_SDATA(const s32, "game/code_00228B38", D_003BBDD0);
-
-INCLUDE_SDATA(const s32, "game/code_00228B38", D_003BBDD8);
-
