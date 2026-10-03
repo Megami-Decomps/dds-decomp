@@ -648,18 +648,20 @@ def add_model_graph(
                         mesh.colors
                         and any(color[3] < 0x80 for color in mesh.colors)
                     )
+                    material_index = material_for(
+                        draw.asset,
+                        translucent_vertices,
+                        mesh.texcoords is not None,
+                    )
                     primitives.append(
                         {
                             "attributes": attributes,
                             "indices": indices,
-                            "material": material_for(
-                                draw.asset,
-                                translucent_vertices,
-                                mesh.texcoords is not None,
-                            ),
+                            "material": material_index,
                             "mode": 4,
                             "extras": {
                                 "ddsAsset": draw.asset,
+                                "ddsMaterialIndex": material_index,
                                 "ddsDrawSelector": draw_list.selector,
                                 "ddsDrawListIndex": list_index,
                                 "ddsDrawIndex": draw_index,

@@ -4,15 +4,20 @@
 from __future__ import annotations
 
 import argparse
+import math
+import struct
 from pathlib import Path
 
 import fld
+import fld_model
 from sdf_model_import import (
     ImportSummary,
     ModelGraph,
     ModelImportError,
+    _asset_metadata,
     decode_glb,
     import_model_graphs,
+    validate_wrapper_node,
 )
 
 
@@ -30,8 +35,8 @@ def import_geometry(
     if not isinstance(nodes, list):
         raise ModelImportError("GLB has no node array")
 
-    selected: dict[int, str] = {}
-    for node in nodes:
+    selected: dict[int, tuple[str, int]] = {}
+    for node_index, node in enumerate(nodes):
         if not isinstance(node, dict):
             continue
         extras = node.get("extras")
@@ -43,9 +48,10 @@ def import_geometry(
             raise ModelImportError("model wrapper has an invalid identity")
         if serial in selected:
             raise ModelImportError(f"GLB repeats model resource serial {serial}")
-        selected[serial] = name
+        selected[serial] = name, node_index
     if not selected:
         raise ModelImportError("GLB has no DDS model-resource wrappers")
+    meters_per_unit = _asset_metadata(document)
 
     words, data_end, relocation_tuple = fld._read_header(field_data)
     relocations = set(relocation_tuple)
@@ -63,7 +69,7 @@ def import_geometry(
         raise ModelImportError("FLD1 repeats a model resource serial")
 
     graphs = []
-    for serial, gltf_name in selected.items():
+    for serial, (gltf_name, wrapper_index) in selected.items():
         try:
             resource = source_by_serial[serial]
         except KeyError as exc:
@@ -94,9 +100,42 @@ def import_geometry(
             relocations,
             f"model {source_name}",
         )
-        graphs.append(
-            ModelGraph(source_name, items, draw_roots, draw_lists, draws)
+        graph = ModelGraph(source_name, items, draw_roots, draw_lists, draws)
+        expected_transform = {"extras": {}}
+        if resource.transform:
+            values = struct.unpack_from("<12f", field_data, resource.transform)
+            translation = values[0:3]
+            fld_model._set_transform_component(
+                expected_transform,
+                "translation",
+                translation,
+                [value * meters_per_unit for value in translation],
+            )
+            rotation = values[4:8]
+            fld_model._set_transform_component(
+                expected_transform,
+                "rotation",
+                rotation,
+                fld_model._normalized_quaternion(rotation)
+                if all(math.isfinite(value) for value in rotation)
+                else [],
+            )
+            scale = values[8:11]
+            fld_model._set_transform_component(
+                expected_transform, "scale", scale, list(scale)
+            )
+        validate_wrapper_node(
+            document,
+            wrapper_index,
+            {
+                f"{source_name}/node_{item.node_id}"
+                for item in items
+                if item.parent < 0
+            },
+            expected_transform,
+            f"model {source_name!r}",
         )
+        graphs.append(graph)
 
     rebuilt, summary = import_model_graphs(
         field_data, document, binary, tuple(graphs)
