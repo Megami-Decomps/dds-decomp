@@ -3,7 +3,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
-extern s32 sdfCreateFormattedSifCommand();
+extern s32 sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *format, ...);
 
 extern void sdfReleaseChipBlock();
 extern void *sdfAllocAndClearQuadwords(s32 size);
@@ -638,7 +638,60 @@ u16 func_00233F60(MdlRecord *record) {
     return record->unk10;
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00233F68);
+extern char D_00420FF0[], D_00421000[], D_00421010[], D_00421020[], D_00421030[], D_00421040[];
+extern char D_00436FC0[], D_00436FC8[];
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00420FF0);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421000);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421010);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421020);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421030);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421040);
+
+void func_00233F68(s32 list, s32 source, s32 end, s32 argument, s32 index, MdlRecord *record) {
+    if (record->kind >= 1 && record->kind <= 5) {
+        switch (record->kind) {
+        case 1:
+        case 2: {
+            char *label = record->kind == 1 ? D_00436FC0 : D_00436FC8;
+
+            if (record->parameter.part.count == 1) {
+                sdfAppendPacket(list, sdfCreateFormattedSifCommand(source, end, argument, index,
+                                                                    D_00420FF0, label, record->payload.word,
+                                                                    record->parameter.part.partIndex));
+                return;
+            }
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(source, end, argument, index,
+                                                                D_00421000, label, record->payload.word,
+                                                                record->payload.word + record->parameter.part.count - 1,
+                                                                record->parameter.part.partIndex));
+            return;
+        }
+        case 3:
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(source, end, argument, index,
+                                                                D_00421010, record->payload.word,
+                                                                record->parameter.word));
+            return;
+        case 4:
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(source, end, argument, index,
+                                                                D_00421020, record->payload.stream.selectorA,
+                                                                record->payload.stream.selectorB));
+            return;
+        case 5:
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(source, end, argument, index,
+                                                                D_00421030, record->payload.word));
+            return;
+        }
+    } else {
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(source, end, argument, index,
+                                                            D_00421040, record->kind));
+    }
+}
 
 /* Draw labeled marker fields and each of four packed color channels. */
 void mdlDrawMarkParamsPanel(s32 list, s32 x, s32 y, s32 z, EffMarkParams *params, s32 selected) {
