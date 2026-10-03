@@ -1,5 +1,6 @@
 #include "common.h"
 #include "ee_mmi.h"
+#include "eff.h"
 #include "pcp_vu0.h"
 
 enum {
@@ -42,7 +43,7 @@ typedef struct {
     u16 slotCount;
     u16 pointCapacity;
     ParSlot *slots;
-    void *billboardRef;
+    BillObj **billboardRef;
     u32 resource;
 } ParTable; /* 0x10 */
 
@@ -290,6 +291,9 @@ void effParReleaseNodeResource(ParTable *table) {
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00159CF0);
 
+extern void billSetChildScaleComponents(BillObj *billboard, f32 scaleX, f32 scaleY);
+extern void billInvokeCallback(BillObj *billboard);
+
 void func_00159D68(ParTable *table, s32 slotIndex, const f32 *origin, u32 color,
                    ParHistoryTable *source, f32 scale) {
     f32 localOrigin[4];
@@ -326,7 +330,48 @@ void func_00159D68(ParTable *table, s32 slotIndex, const f32 *origin, u32 color,
     slot->billboardScale = scale;
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", func_00159E20);
+void func_00159E20(ParTable *table) {
+    BillObj *billboard;
+    ParSlot *slot;
+    s32 remainingSlots;
+    s32 pointCount;
+    s32 remainingPoints;
+    u32 color;
+    u32 alpha;
+    u32 alphaStep;
+    u128 *point;
+
+    billboard = *table->billboardRef;
+    slot = table->slots;
+
+    if (table->slotCount != 0) {
+        remainingSlots = table->slotCount;
+
+        do {
+            pointCount = slot->pointCount;
+            color = slot->color;
+            point = slot->points;
+            alpha = color & 0xFF000000;
+            alphaStep = alpha / (pointCount + 1);
+
+            billSetChildScaleComponents(billboard, slot->billboardScale, slot->billboardScale);
+            color &= 0xFFFFFF;
+            if (pointCount != 0) {
+                remainingPoints = pointCount;
+                do {
+                    PCP_COPY_VECTOR(billboard, point);
+                    alpha -= alphaStep;
+                    --remainingPoints;
+                    billboard->childParam = color | (alpha & 0xFF000000);
+                    ++point;
+                    billInvokeCallback(billboard);
+                } while (remainingPoints != 0);
+            }
+            --remainingSlots;
+            ++slot;
+        } while (remainingSlots != 0);
+    }
+}
 
 /* Disable this slot's billboard points by clearing its count, not a bit flag. */
 void parClearSlotFlag(ParTable *table, s32 slotIndex) {

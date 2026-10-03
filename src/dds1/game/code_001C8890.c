@@ -1,6 +1,7 @@
 #include "common.h"
 #include "btl_task.h"
 #include "pcp_vu0.h"
+#include "fpu.h"
 
 #define VU_LOAD10(p) __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(p))
 
@@ -4920,7 +4921,51 @@ s32 btlStepPoseBlendRatio(u8 *actor) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001DB698);
+typedef struct CameraPoseTransform {
+    f32 vec0[4];
+    f32 vec1[4];
+    f32 distance;
+    f32 fov;
+} CameraPoseTransform;
+
+s32 func_001DB698(CameraPoseTransform *state) {
+    f32 vector[4];
+    f32 direction[4];
+    f32 length = state->distance;
+    f32 y;
+    f32 scale;
+    f32 delta;
+    s32 changed = 0;
+
+    if (!(length <= 1.0f)) {
+        scale = -length;
+        vector[0] = state->vec1[0] * scale + state->vec0[0];
+        y = state->vec0[1];
+        vector[1] = state->vec1[1] * scale + y;
+        vector[2] = state->vec1[2] * scale + state->vec0[2];
+        vector[3] = 0.0f;
+        if (-20.0f < vector[1]) {
+            VU0_LOAD_VF(vf10, state->vec0);
+            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_LOAD_VF(vf10, vector);
+            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, direction);
+            delta = y - (-20.0f);
+            scale = fsqrtf(delta * delta + length * length);
+            vector[0] = -direction[0] * scale;
+            vector[1] = delta;
+            vector[2] = -direction[2] * scale;
+            VU0_LOAD_VF(vf10, vector);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, state->vec1);
+            changed = 1;
+        }
+    }
+    return changed;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DB7D0);
 
@@ -5979,13 +6024,6 @@ u8 *out;
 }
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DF410);
 
-typedef struct CameraPoseTransform {
-    f32 vec0[4];
-    f32 vec1[4];
-    f32 distance;
-    f32 fov;
-} CameraPoseTransform;
-
 typedef struct CameraPoseLink {
     u8 pad_00[0x18];
     BtlUnit *unit;
@@ -6000,7 +6038,6 @@ typedef struct CameraPoseAction {
     f32 cameraPreset;
 } CameraPoseAction;
 
-extern s32 func_001DB698(u8 *);
 extern s32 func_001D6428(u8 *, s32);
 extern f32 func_002FA148(f32);
 
@@ -6060,8 +6097,8 @@ void btlPrepareRandomizedActionCameraPose(CameraPoseAction *action, CameraPoseTr
         VU0_LOAD_VF(vf10, D_0037E110);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, to->vec1);
-        func_001DB698((u8 *)from);
-        func_001DB698((u8 *)to);
+        func_001DB698(from);
+        func_001DB698(to);
         action->cameraPreset = poses[pose][9];
         action->flags |= 0x41;
     }
@@ -6074,7 +6111,7 @@ void btlAimEffectPoseAtUnit(u8 *actor) {
             btlUnitGetMuzzlePosVU(object);
         }
         __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(actor + 0xC0));
-        func_001DB698(actor + 0xC0);
+        func_001DB698((CameraPoseTransform *)(actor + 0xC0));
     }
 }
 
@@ -6091,7 +6128,7 @@ void btlRefreshActionPoseBlendSnapshot(u8 *action) {
         *(s32 *)(action + 0x110) = 0;
         *(s32 *)(action + 0x11C) = 1;
         *(f32 *)(action + 0x130) = 40.0f;
-        func_001DB698(saved);
+        func_001DB698((CameraPoseTransform *)saved);
     }
 }
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DFE28);
@@ -6125,8 +6162,8 @@ void btlSetupCameraPoseAimUnit(ActionUnit *action, BtlCameraPose *from, BtlCamer
     to->distance += 550.0f;
     action->flags = (action->flags & ~0x14) | 0x41;
     action->unk130 = 25.0f;
-    func_001DB698((u8 *)from);
-    func_001DB698((u8 *)to);
+    func_001DB698(from);
+    func_001DB698(to);
 }
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E0398);
 
@@ -8392,7 +8429,38 @@ void sndClearList(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001F3C38);
+typedef struct SoundSlotTableEntry {
+    s16 resourceOffset;
+    u16 fileId;
+} SoundSlotTableEntry;
+
+extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
+
+u32 func_001F3C38(u32 *sound, u32 slot) {
+    u32 id = sound[2];
+    u32 category = sound[1];
+    SoundSlotTableEntry *table = btlSelectSideIndexedActorParameterTable(category, id);
+    s32 specialCategory = 1;
+    s32 scaledId = id * 0x20;
+    s32 offset;
+    u32 resource = 0;
+
+    table += slot;
+    offset = table->resourceOffset;
+
+    if (offset < 0) {
+        return resource;
+    }
+    resource = (scaledId + offset + 0x500) << 16;
+    if (category != specialCategory) {
+        return resource;
+    }
+    resource = 0;
+    if (slot >= 23) {
+        return resource;
+    }
+    return (id * 0x10 + offset + 0x1000) << 16;
+}
 
 extern char D_003A5178[];
 
@@ -8401,8 +8469,6 @@ extern char D_003A5188[];
 extern char D_003A5198[];
 
 extern char D_003A51A8[];
-
-extern u32 func_001F3C38(u32 *, u32);
 
 void sndLoadMotSeFiles(u32 *sound) {
     char filename[0x70];

@@ -39,6 +39,36 @@ typedef struct {
     DspUnit *unit; /* 0xC */
 } DspWindowContext;
 
+typedef struct {
+    u8 pad00[0x1C];
+    void *selectedNode; /* 0x1C */
+    u8 pad20[0xC];
+    void (*drawCallback)();
+    s32 *drawValues; /* 0x30 */
+} DspMenuList;
+
+typedef struct {
+    DspEntry *entry;
+    s32 profileId;
+    s32 value;
+    s32 cap;
+} DspProfileProgress;
+
+typedef struct {
+    u8 pad00[0x70];
+    DspProfileProgress *progress; /* 0x70 */
+} DspMenuListNode;
+
+typedef struct {
+    s8 spriteIndices[7];
+} DspEntrySpriteLookup;
+
+extern DspEntrySpriteLookup D_003BC448[];
+extern char D_003BC450[];
+extern s32 func_0024E310(s32, s32, s32, s32, s32, s32, s32);
+extern void func_003014F0(char *, const char *, ...);
+extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, u32, s32, u32);
+
 /* Store the selected value in the display unit and open its scaled window. */
 void itfDspInitSelectedWindow(s32 x, s32 y, s32 z, s32 value, DspWindowContext *context, s32 parameter) {
     DspUnit *unit = context->unit;
@@ -47,7 +77,37 @@ void itfDspInitSelectedWindow(s32 x, s32 y, s32 z, s32 value, DspWindowContext *
     mnuCallInitWide(x << 4, y << 3, z, (s32)unit, parameter);
 }
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00254C68);
+/* Draw one party entry, highlighting the currently selected list node. */
+void func_00254C68(s32 x, s32 y, s32 layer, DspMenuList *list, DspMenuListNode *node,
+                   s32 context) {
+    char text[0x20];
+    DspEntrySpriteLookup lookup = D_003BC448[0];
+    DspProfileProgress *progress = node->progress;
+    s32 alpha = list->drawValues[0];
+    u32 textColor;
+
+    if (list->selectedNode == node) {
+        func_0024E310(x >> 4, y >> 3, layer, alpha, 0x58,
+                      lookup.spriteIndices[progress->entry->unitId] + 1, context);
+        func_0024E310(x >> 4, y >> 3, layer, alpha, 0x59, 0xB, context);
+        func_003014F0(text, D_003BC450, progress->entry->level);
+        textColor = alpha & 0xFF;
+        textColor |= 0xA09DC300;
+        itfDrawGlyphChainWithWidthQuery((x >> 4) + 0xD5, (y >> 3) + 0x7D, layer,
+                                       textColor,
+                                       4, (u32)text, 0, context);
+    } else {
+        func_0024E310(x >> 4, y >> 3, layer, alpha, 0x58,
+                      lookup.spriteIndices[progress->entry->unitId], context);
+        func_0024E310(x >> 4, y >> 3, layer, alpha, 0x59, 0xA, context);
+        func_003014F0(text, D_003BC450, progress->entry->level);
+        textColor = alpha & 0xFF;
+        textColor |= 0xA09DC300;
+        itfDrawGlyphChainWithWidthQuery((x >> 4) + 0xD5, (y >> 3) + 0x7D, layer,
+                                       textColor,
+                                       0, (u32)text, 0, context);
+    }
+}
 
 extern void *memset(void *, s32, u32);
 extern void func_002CD0D8(u32, s32, void *);
@@ -67,8 +127,6 @@ void itfDspDrawIndexedRecord(s32 x, s32 y, s32 layer, u32 attributes, u32 entry,
 extern char D_003BC458[];
 extern char D_003BC460[];
 extern char D_003BC468[];
-extern void func_003014F0(char *buffer, const char *format, ...);
-
 void func_00254EF0(s32 x, s32 y, s32 layer, s32 alpha, s32 context) {
     u32 textColor = (u32)((f32)alpha * 0.6f) | 0xA09D7D00;
     char text[0x20];
@@ -80,8 +138,6 @@ void func_00254EF0(s32 x, s32 y, s32 layer, s32 alpha, s32 context) {
     frFontDrawStyledGlyphChainAndMeasure(x + 0xB3, y + 0x171, layer, textColor,
                                       0, text, 0x80000000, context);
 }
-
-extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, u32, s32, u32);
 
 void func_00255010(s32 x, s32 y, s32 layer, s32 alpha, s32 value, s32 context) {
     u32 textColor = (u32)((f32)alpha * 0.6f) | 0xA09D7D00;
@@ -532,4 +588,3 @@ INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC470);
 INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC478);
 
 INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC480);
-
