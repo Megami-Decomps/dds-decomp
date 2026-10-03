@@ -137,8 +137,8 @@ typedef struct BillStatePacket {
 extern BillDrawNode *D_003BD7F8;
 extern BillDrawSurface D_00325228;
 extern u8 kwlnFrameDrawPacketRecords[];
-extern s32 kwlnGetDrawBufferIndex(void);
-extern void *sdfAllocPacketAligned(s32);
+extern u32 kwlnGetDrawBufferIndex(void);
+extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendDmaTagToList(SdfListHead *, u32);
 extern void func_002D4CC8(const void *, void *, s32);
