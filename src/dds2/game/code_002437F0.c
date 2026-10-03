@@ -133,7 +133,35 @@ void func_00243958(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002437F0", func_00243AD8);
+/* Draw a scaled sprite around its center, then restore its native dimensions. */
+void func_00243AD8(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
+    s32 contextHandle, s32 color, f32 scale) {
+    {
+        SolarSpriteContext *context = *(SolarSpriteContext **)contextHandle;
+        s32 spriteOffset = layer * sizeof(SolarSpriteLayer);
+        s32 scalePercent = D_003C8C90[layer][2];
+        SolarSpriteLayer *sprite =
+            (SolarSpriteLayer *)(spriteOffset + (s32)context->layers);
+
+        sprite->drawWidth =
+            (s32)((scale * (f32)sprite->width * (f32)scalePercent) / 100.0f) << 4;
+        sprite->drawHeight =
+            (s32)((scale * (f32)sprite->height * (f32)D_003C8C90[layer][2]) / 100.0f) << 3;
+        func_00306CD0(((x + D_003C8C90[layer][0]) << 4) - (sprite->drawWidth / 2),
+                      ((y + D_003C8C90[layer][1]) << 3) - (sprite->drawHeight / 2), z,
+                      (u32)((f32)(alpha << 8) * 0.0078125f), mode, (s32)context, layer, color);
+    }
+
+    {
+        SolarSpriteContext *restoredContext = *(SolarSpriteContext **)contextHandle;
+        s32 restoredOffset = layer * sizeof(SolarSpriteLayer);
+        SolarSpriteLayer *restoredSprite =
+            (SolarSpriteLayer *)(restoredOffset + (s32)restoredContext->layers);
+
+        restoredSprite->drawWidth = restoredSprite->width << 4;
+        restoredSprite->drawHeight = restoredSprite->height << 3;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_00243C68);
 
