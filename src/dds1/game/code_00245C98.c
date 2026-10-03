@@ -529,7 +529,7 @@ extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 extern void mnuDrawIconFixedEntryWithBadge(s32, s32, s32, s32, s32, s32);
 extern void mnuClearWindowPanelTransitionFlag(void *);
 extern void func_00260100(void *, s32);
-extern s32 func_00260208(s32, u32, s32, s32);
+extern void func_00260208(s32, u32, s32, s32);
 
 void func_00247A78(s32 callback) {
     EvtDispatchState *state = (EvtDispatchState *)kwlnTaskGetUserValue();

@@ -25,10 +25,10 @@ enum {
 
 extern BrsIconRecord D_0036C728[];
 extern s32 D_003BC520;
-extern s32 func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 
 /* Draw a selected result icon and its fixed companion at the same opacity. */
-s32 func_00260208(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
+void func_00260208(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
     f32 strength;
     s32 layer;
 
@@ -39,13 +39,13 @@ s32 func_00260208(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
                   D_0036C728[iconIndex][BRS_ICON_Y] << 3, 0,
                   (u32)(strength * 256.0f), 0, layer,
                   D_0036C728[iconIndex][BRS_ICON_ID], option);
-    return func_002BF4E0(D_0036C728[8][BRS_ICON_X] << 4,
+    func_002BF4E0(D_0036C728[8][BRS_ICON_X] << 4,
                          D_0036C728[8][BRS_ICON_Y] << 3, 0,
                          (u32)(strength * 256.0f), 0, layer,
                          D_0036C728[8][BRS_ICON_ID], option);
 }
 
-s32 func_00260370(s32 unused, u32 value, s32 iconIndex, s32 option) {
+void func_00260370(s32 unused, u32 value, s32 iconIndex, s32 option) {
     f32 normalized;
     f32 companionPosition;
     s32 layer;
@@ -69,7 +69,7 @@ s32 func_00260370(s32 unused, u32 value, s32 iconIndex, s32 option) {
     companionX = (s32)((f32)D_0036C728[8][BRS_ICON_X] -
                        (1.0f - companionPosition) * 128.0f);
 
-    return func_002BF4E0(companionX << 4,
+    func_002BF4E0(companionX << 4,
                          D_0036C728[8][BRS_ICON_Y] << 3, 0,
                          (u32)(normalized * 256.0f), 0, layer,
                          D_0036C728[8][BRS_ICON_ID], option);
