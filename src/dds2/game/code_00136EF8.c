@@ -3,6 +3,16 @@
 #include "pcp_vu0.h"
 #include "dds3obj.h"
 
+/* Fixed allocation sizes and native room/actor table dimensions. */
+enum {
+    FIELD_VALUE_RECORD_STORAGE_SIZE = 0x72000,
+    FIELD_AUX_RECORD_STORAGE_SIZE = 0x4A00,
+    FIELD_ROOM_RECORD_COUNT = 64,
+    FIELD_ROOM_CORNER_COUNT = 8,
+    FIELD_ROOM_PLANE_COUNT = 6,
+    FIELD_ACTOR_SLOT_COUNT = 256
+};
+
 /* vu0 routine: normalize vf10 and return its original XYZ length. */
 static inline f32 fldNormalizeProbeVector(void) {
     f32 length;
@@ -444,19 +454,20 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
 /* Keep both the resource handles and retained addresses: callers use the
  * retained storage, whereas the handles are needed at release time. */
 void fldAllocateRecordStorage(void) {
-    u8 *storage = sdfAllocGeneralBlock(0x72000);
+    u8 *storage = sdfAllocGeneralBlock(FIELD_VALUE_RECORD_STORAGE_SIZE);
 
     fldValueRecordResource = (u32)storage;
     storage = sdfResourceRetainAddress(storage);
     fldValueRecords = (u32)storage;
-    memset(storage, 0, 0x72000);
-    storage = sdfAllocGeneralBlock(0x4A00);
+    memset(storage, 0, FIELD_VALUE_RECORD_STORAGE_SIZE);
+    storage = sdfAllocGeneralBlock(FIELD_AUX_RECORD_STORAGE_SIZE);
     fldAuxRecordResource = (u32)storage;
     storage = sdfResourceRetainAddress(storage);
     fldAuxRecordBuffer = (u32)storage;
-    memset(storage, 0, 0x4A00);
+    memset(storage, 0, FIELD_AUX_RECORD_STORAGE_SIZE);
 }
 
+/* Release both retained resources and clear the usable buffer addresses. */
 void fldReleaseRecordStorage(void) {
     sdfDecrementAllocationReferenceCount(fldValueRecordResource);
     sdfQueueNonzeroResourceId(fldValueRecordResource);
@@ -466,84 +477,92 @@ void fldReleaseRecordStorage(void) {
     fldAuxRecordBuffer = 0;
 }
 
+/* Dot product of XYZ only; any fourth vector component is ignored. */
 float fldDotVector(float *left, float *right) {
     return *left * *right + left[1] * right[1] + left[2] * right[2];
 }
 
+/* Return the Euclidean XYZ length without normalizing the input vector. */
 f32 fldCalculateVectorLength(const f32 *vector) {
     return fsqrtf(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
 }
 
-void fldCalcTrianglePlane(f32 *points, f32 *nx, f32 *ny, f32 *nz, f32 *planeD) {
-    f32 p0[4];
-    f32 p1[4];
-    f32 p2[4];
-    f32 inv;
+/* Build a normalized plane from three vertices spaced four floats apart.
+ * Snap near-zero normal components before deriving D from the third vertex.
+ * Degenerate triangles retain the native divide-by-zero behavior. */
+void fldCalcTrianglePlane(f32 *vertices, f32 *normalX, f32 *normalY, f32 *normalZ, f32 *planeConstant) {
+    f32 firstPoint[4];
+    f32 secondPoint[4];
+    f32 thirdPoint[4];
+    f32 inverseLength;
 
-    p0[0] = points[0];
-    p0[1] = points[1];
-    p0[2] = points[2];
-    p1[0] = points[4];
-    p1[1] = points[5];
-    p1[2] = points[6];
-    p2[0] = points[8];
-    p2[1] = points[9];
-    p2[2] = points[10];
-    *nx = (p1[1] - p0[1]) * (p2[2] - p1[2]) - (p1[2] - p0[2]) * (p2[1] - p1[1]);
-    *ny = (p1[2] - p0[2]) * (p2[0] - p1[0]) - (p1[0] - p0[0]) * (p2[2] - p1[2]);
-    *nz = (p1[0] - p0[0]) * (p2[1] - p1[1]) - (p1[1] - p0[1]) * (p2[0] - p1[0]);
-    inv = 1.0f / fsqrtf(*nx * *nx + *ny * *ny + *nz * *nz);
-    *nx = *nx * inv;
-    *ny = *ny * inv;
-    *nz = *nz * inv;
-    if (*nx > -0.0001f && *nx < 0.0001f) {
-        *nx = 0.0f;
+    firstPoint[0] = vertices[0];
+    firstPoint[1] = vertices[1];
+    firstPoint[2] = vertices[2];
+    secondPoint[0] = vertices[4];
+    secondPoint[1] = vertices[5];
+    secondPoint[2] = vertices[6];
+    thirdPoint[0] = vertices[8];
+    thirdPoint[1] = vertices[9];
+    thirdPoint[2] = vertices[10];
+    *normalX = (secondPoint[1] - firstPoint[1]) * (thirdPoint[2] - secondPoint[2]) - (secondPoint[2] - firstPoint[2]) * (thirdPoint[1] - secondPoint[1]);
+    *normalY = (secondPoint[2] - firstPoint[2]) * (thirdPoint[0] - secondPoint[0]) - (secondPoint[0] - firstPoint[0]) * (thirdPoint[2] - secondPoint[2]);
+    *normalZ = (secondPoint[0] - firstPoint[0]) * (thirdPoint[1] - secondPoint[1]) - (secondPoint[1] - firstPoint[1]) * (thirdPoint[0] - secondPoint[0]);
+    inverseLength = 1.0f / fsqrtf(*normalX * *normalX + *normalY * *normalY + *normalZ * *normalZ);
+    *normalX = *normalX * inverseLength;
+    *normalY = *normalY * inverseLength;
+    *normalZ = *normalZ * inverseLength;
+    if (*normalX > -0.0001f && *normalX < 0.0001f) {
+        *normalX = 0.0f;
     }
-    if (*ny > -0.0001f && *ny < 0.0001f) {
-        *ny = 0.0f;
+    if (*normalY > -0.0001f && *normalY < 0.0001f) {
+        *normalY = 0.0f;
     }
-    if (*nz > -0.0001f && *nz < 0.0001f) {
-        *nz = 0.0f;
+    if (*normalZ > -0.0001f && *normalZ < 0.0001f) {
+        *normalZ = 0.0f;
     }
-    *planeD = -(*nx * p2[0] + *ny * p2[1] + *nz * p2[2]);
+    *planeConstant = -(*normalX * thirdPoint[0] + *normalY * thirdPoint[1] + *normalZ * thirdPoint[2]);
 }
 
-s32 fldGetRecordValueById(s32 key) {
-    s32 i = 0;
+/* Return the first matching record's value; zero also denotes a missing ID. */
+s32 fldGetRecordValueById(s32 id) {
+    s32 index = 0;
 
     if (fldValueRecordCount > 0) {
         FldRecE4 *record = (FldRecE4 *)fldValueRecords;
         do {
-            if (record->id == key) {
+            if (record->id == id) {
                 return record->value;
             }
-            i++;
+            index++;
             record++;
-        } while (i < fldValueRecordCount);
+        } while (index < fldValueRecordCount);
     }
     return 0;
 }
 
+/* Update every matching ID, including duplicates; leave other records intact. */
 void fldSetRecordValueById(s32 id, s32 value) {
-    s32 i;
+    s32 index;
 
-    for (i = 0; i < fldValueRecordCount; i++) {
-        if (((FldRecE4 *)fldValueRecords)[i].id == id) {
-            ((FldRecE4 *)fldValueRecords)[i].value = value;
+    for (index = 0; index < fldValueRecordCount; index++) {
+        if (((FldRecE4 *)fldValueRecords)[index].id == id) {
+            ((FldRecE4 *)fldValueRecords)[index].value = value;
         }
     }
 }
 
+/* Clear populated values before discarding the count and releasing storage. */
 void fldResetRecordState(void) {
-    s32 count = fldValueRecordCount;
-    if (count > 0) {
+    s32 remaining = fldValueRecordCount;
+    if (remaining > 0) {
         /* Required to match: advance a pointer to the value field, not the record base. */
-        u8 *record = (u8 *)fldValueRecords + 0xd0;
+        u8 *valueCursor = (u8 *)fldValueRecords + 0xd0;
         do {
-            count--;
-            *(s32 *)record = 0;
-            record += 0xe4;
-        } while (count != 0);
+            remaining--;
+            *(s32 *)valueCursor = 0;
+            valueCursor += 0xe4;
+        } while (remaining != 0);
     }
     fldValueRecordCount = 0;
     fldAreaState[0x28] = -1;
@@ -633,48 +652,51 @@ void func_0013AA80(void) {
 void func_0013AA88(void) {
 }
 
-f32 fldGetPositionZoneClearance(f32 margin, s32 mode, s32 count, f32 *pos, FldZone *zone) {
-    f32 probe[3];
-    f32 planar[2];
-    f32 best = margin;
-    f32 dist;
-    f32 slack;
-    s32 i;
+/* Project away the selected axis and reject points outside expanded bounds.
+ * Return the last negative plane's margin-adjusted distance, not a minimum;
+ * no negative plane leaves margin unchanged. Reject results below 0.001. */
+f32 fldGetPositionZoneClearance(f32 margin, s32 axisMode, s32 planeCount, f32 *position, FldZone *zone) {
+    f32 projectedPosition[3];
+    f32 planarPosition[2];
+    f32 clearance = margin;
+    f32 planeDistance;
+    f32 marginDistance;
+    s32 planeIndex;
 
-    if (mode == 0) {
-        probe[0] = 0.0f;
-        probe[1] = pos[1];
-        probe[2] = pos[2];
-        planar[0] = pos[1];
-        planar[1] = pos[2];
-    } else if (mode == 1) {
-        probe[0] = pos[0];
-        probe[1] = 0.0f;
-        probe[2] = pos[2];
-        planar[0] = pos[0];
-        planar[1] = pos[2];
+    if (axisMode == 0) {
+        projectedPosition[0] = 0.0f;
+        projectedPosition[1] = position[1];
+        projectedPosition[2] = position[2];
+        planarPosition[0] = position[1];
+        planarPosition[1] = position[2];
+    } else if (axisMode == 1) {
+        projectedPosition[0] = position[0];
+        projectedPosition[1] = 0.0f;
+        projectedPosition[2] = position[2];
+        planarPosition[0] = position[0];
+        planarPosition[1] = position[2];
     } else {
-        probe[0] = pos[0];
-        probe[1] = pos[1];
-        probe[2] = 0.0f;
-        planar[0] = pos[0];
-        planar[1] = pos[1];
+        projectedPosition[0] = position[0];
+        projectedPosition[1] = position[1];
+        projectedPosition[2] = 0.0f;
+        planarPosition[0] = position[0];
+        planarPosition[1] = position[1];
     }
-    for (i = 0; i < count; i++) {
-        dist = fldDotVector(probe, zone->plane[i]) - zone->limit[i];
-        slack = dist + margin;
-        if (slack < 0.0f || planar[0] < zone->bound[0] - margin || planar[1] < zone->bound[1] - margin ||
-            zone->bound[2] + margin < planar[0] || zone->bound[3] + margin < planar[1]) {
+    for (planeIndex = 0; planeIndex < planeCount; planeIndex++) {
+        planeDistance = fldDotVector(projectedPosition, zone->plane[planeIndex]) - zone->limit[planeIndex];
+        marginDistance = planeDistance + margin;
+        if (marginDistance < 0.0f || planarPosition[0] < zone->bound[0] - margin || planarPosition[1] < zone->bound[1] - margin ||
+            zone->bound[2] + margin < planarPosition[0] || zone->bound[3] + margin < planarPosition[1]) {
             return -1.0f;
         }
-        if (dist < 0.0f) {
-            best = slack;
+        if (planeDistance < 0.0f) {
+            clearance = marginDistance;
         }
     }
-    if (best < 0.001f) {
-        best = -1.0f;
+    if (clearance < 0.001f) {
+        clearance = -1.0f;
     }
-    return best;
+    return clearance;
 }
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013AC40);
@@ -686,46 +708,47 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013B4F8);
 void func_0013B810(void) {
 }
 
+/* Reset room records and selection sentinels, then apply actor-slot defaults. */
 void fldResetZoneRecordsAndActorSlots(void) {
-    s32 i;
-    s32 j;
+    s32 roomIndex;
+    s32 vectorIndex;
 
     fldTaskSlotCount = 0;
     D_004361B8 = 0;
     D_004361BC = 0;
-    for (i = 0; i < 0x40; i++) {
-        for (j = 0; j < 8; j++) {
-            fldRoomRecords[i].corner[j][0] = 0.0f;
-            fldRoomRecords[i].corner[j][1] = 0.0f;
-            fldRoomRecords[i].corner[j][2] = 0.0f;
-            fldRoomRecords[i].corner[j][3] = 1.0f;
+    for (roomIndex = 0; roomIndex < FIELD_ROOM_RECORD_COUNT; roomIndex++) {
+        for (vectorIndex = 0; vectorIndex < FIELD_ROOM_CORNER_COUNT; vectorIndex++) {
+            fldRoomRecords[roomIndex].corner[vectorIndex][0] = 0.0f;
+            fldRoomRecords[roomIndex].corner[vectorIndex][1] = 0.0f;
+            fldRoomRecords[roomIndex].corner[vectorIndex][2] = 0.0f;
+            fldRoomRecords[roomIndex].corner[vectorIndex][3] = 1.0f;
         }
-        fldRoomRecords[i].center[0] = 0.0f;
-        fldRoomRecords[i].center[1] = 0.0f;
-        fldRoomRecords[i].center[2] = 0.0f;
-        fldRoomRecords[i].center[3] = 1.0f;
-        for (j = 0; j < 6; j++) {
-            fldRoomRecords[i].plane[j][0] = 0.0f;
-            fldRoomRecords[i].plane[j][1] = 0.0f;
-            fldRoomRecords[i].plane[j][2] = 0.0f;
-            fldRoomRecords[i].plane[j][3] = 1.0f;
-            fldRoomRecords[i].limit[j] = 0.0f;
+        fldRoomRecords[roomIndex].center[0] = 0.0f;
+        fldRoomRecords[roomIndex].center[1] = 0.0f;
+        fldRoomRecords[roomIndex].center[2] = 0.0f;
+        fldRoomRecords[roomIndex].center[3] = 1.0f;
+        for (vectorIndex = 0; vectorIndex < FIELD_ROOM_PLANE_COUNT; vectorIndex++) {
+            fldRoomRecords[roomIndex].plane[vectorIndex][0] = 0.0f;
+            fldRoomRecords[roomIndex].plane[vectorIndex][1] = 0.0f;
+            fldRoomRecords[roomIndex].plane[vectorIndex][2] = 0.0f;
+            fldRoomRecords[roomIndex].plane[vectorIndex][3] = 1.0f;
+            fldRoomRecords[roomIndex].limit[vectorIndex] = 0.0f;
         }
-        D_0038BD50[i] = 0;
-        fldRoomRecords[i].unk108 = 0;
-        fldRoomRecords[i].unk10C = 0.0f;
-        fldRoomRecords[i].unk110 = 0.0f;
-        fldRoomRecords[i].unk114 = 0.0f;
-        fldRoomRecords[i].unk118 = 0.0f;
-        fldRoomRecords[i].unk11C = 0.0f;
-        fldRoomRecords[i].unk130 = 0;
-        fldRoomRecords[i].roomId = -1;
-        fldRoomRecords[i].unk134 = -1;
-        fldRoomRecords[i].mode = 0;
-        fldRoomRecords[i].unk138 = -1;
-        fldRoomRecords[i].unk120 = -1;
-        fldRoomRecords[i].axisMode = 0;
-        fldRoomRecords[i].unk13C = 0;
+        D_0038BD50[roomIndex] = 0;
+        fldRoomRecords[roomIndex].unk108 = 0;
+        fldRoomRecords[roomIndex].unk10C = 0.0f;
+        fldRoomRecords[roomIndex].unk110 = 0.0f;
+        fldRoomRecords[roomIndex].unk114 = 0.0f;
+        fldRoomRecords[roomIndex].unk118 = 0.0f;
+        fldRoomRecords[roomIndex].unk11C = 0.0f;
+        fldRoomRecords[roomIndex].unk130 = 0;
+        fldRoomRecords[roomIndex].roomId = -1;
+        fldRoomRecords[roomIndex].unk134 = -1;
+        fldRoomRecords[roomIndex].mode = 0;
+        fldRoomRecords[roomIndex].unk138 = -1;
+        fldRoomRecords[roomIndex].unk120 = -1;
+        fldRoomRecords[roomIndex].axisMode = 0;
+        fldRoomRecords[roomIndex].unk13C = 0;
     }
     D_00436194 = -1;
     D_00436198 = -1;
@@ -738,33 +761,35 @@ void fldResetZoneRecordsAndActorSlots(void) {
     fldResetActorSlots();
 }
 
+/* Clear slot handles and destroy named tasks reached through linked display values. */
 void fldResetTaskSlots(void) {
-    s32 i;
+    s32 slotIndex;
     u64 world;
-    u32 id;
-    FldTaskInfo *info;
+    u32 task;
+    FldTaskInfo *taskInfo;
 
     D_004361BC = 1;
-    for (i = 0; i < fldTaskSlotCount; i++) {
-        D_0038BD50[i] = 0;
+    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+        D_0038BD50[slotIndex] = 0;
     }
     D_004361A8 = -1;
     D_004361AC = -1;
     D_004361B0 = -1;
     world = dds3GetWorldSecondaryObject();
     if (world != 0) {
-        for (i = 0; i < fldTaskSlotCount; i++) {
-            info = *(FldTaskInfo **)(D_0038BC50[i] + 8);
-            if (info->slot >= 0) {
-                id = dds3GetPathState(dds3FindWorldObjectNodeByKey(world, *(u32 *)D_00444A30[info->slot], 0xD));
-                if (scrFindNamedProcessNode(id) != 0) {
-                    evtDestroyNamedTask(dds3GetWorldObject(), id);
+        for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+            taskInfo = *(FldTaskInfo **)(D_0038BC50[slotIndex] + 8);
+            if (taskInfo->slot >= 0) {
+                task = dds3GetPathState(dds3FindWorldObjectNodeByKey(world, *(u32 *)D_00444A30[taskInfo->slot], 0xD));
+                if (scrFindNamedProcessNode(task) != 0) {
+                    evtDestroyNamedTask(dds3GetWorldObject(), task);
                 }
             }
         }
     }
 }
 
+/* Append a display value and return its index; no capacity check is performed. */
 s32 fldPushDisplayValue(u32 value) {
     s32 index = D_004361B8;
     D_00444A30[index] = value;
@@ -1069,47 +1094,51 @@ void fldDrawTaskMarkers(void) {
     }
 }
 
+/* Clear unregistered task handles; retain the native global-count loop bound. */
 void fldClearInactiveTaskSlots(void) {
     s32 count = fldTaskSlotCount;
-    s32 i = 0;
+    s32 slotIndex = 0;
     if (count > 0) {
-        u32 *entry = D_0038BD50;
+        u32 *taskSlot = D_0038BD50;
         do {
-            if (kwlnTaskIsRegistered(*entry) == 0) {
-                *entry = 0;
+            if (kwlnTaskIsRegistered(*taskSlot) == 0) {
+                *taskSlot = 0;
             }
-            i++;
-            entry++;
-        } while (i < fldTaskSlotCount);
+            slotIndex++;
+            taskSlot++;
+        } while (slotIndex < fldTaskSlotCount);
     }
 }
 
+/* Return the first matching task slot's record ID; -1 denotes a miss. */
 s32 fldFindTaskRecordId(u32 task) {
-    s32 i;
-    for (i = 0; i < fldTaskSlotCount; i++) {
-        if (D_0038BD50[i] == task) {
-            return D_0038BC50[i][0];
+    s32 slotIndex;
+    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+        if (D_0038BD50[slotIndex] == task) {
+            return D_0038BC50[slotIndex][0];
         }
     }
     return -1;
 }
 
+/* Return the first matching task slot's room ID; -1 denotes a miss. */
 s32 fldFindRoomByTask(u32 task) {
-    s32 i;
+    s32 slotIndex;
 
-    for (i = 0; i < fldTaskSlotCount; i++) {
-        if (D_0038BD50[i] == task) {
-            return fldRoomRecords[i].roomId;
+    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+        if (D_0038BD50[slotIndex] == task) {
+            return fldRoomRecords[slotIndex].roomId;
         }
     }
     return -1;
 }
 
+/* Return the first matching task slot's third record word; zero on miss. */
 s32 fldGetTaskRecordValue(u32 task) {
-    s32 i;
-    for (i = 0; i < fldTaskSlotCount; i++) {
-        if (D_0038BD50[i] == task) {
-            return D_0038BC50[i][2];
+    s32 slotIndex;
+    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+        if (D_0038BD50[slotIndex] == task) {
+            return D_0038BC50[slotIndex][2];
         }
     }
     return 0;
@@ -1139,10 +1168,11 @@ s32 fldCheckEntryActive(s32 value) {
     return 0;
 }
 
+/* Test for any nonzero slot handle, without consulting task registration. */
 s32 fldHasActiveTasks(void) {
-    s32 i;
-    for (i = 0; i < fldTaskSlotCount; i++) {
-        if (D_0038BD50[i] != 0) {
+    s32 slotIndex;
+    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+        if (D_0038BD50[slotIndex] != 0) {
             return 1;
         }
     }
@@ -1498,27 +1528,27 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141F58);
 
 /* Read a selected actor state or a named world-object value; cases 1 and 2
  * deliberately fall through when no named object is found. */
-s32 fldGetActorStat0(s32 mode) {
+s32 fldGetActorStat0(s32 attribute) {
     FldActorEntry *actor = (FldActorEntry *)(D_003932A0 + fldSelectedActorEntryIndex * 108);
-    s32 *entry;
-    s32 flags;
+    s32 *objectNode;
+    s32 secondaryMotion;
 
-    switch (mode) {
+    switch (attribute) {
     case 0:
         return actor->motion;
     case 1:
-        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->motionName);
-        if (entry != NULL) {
-            return entry[1];
+        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->motionName);
+        if (objectNode != NULL) {
+            return objectNode[1];
         }
     case 2:
-        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->otherName);
-        if (entry != NULL) {
-            return entry[1];
+        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->otherName);
+        if (objectNode != NULL) {
+            return objectNode[1];
         }
     case 3:
-        flags = (u16)actor->secondaryMotion;
-        if (flags & 1) {
+        secondaryMotion = (u16)actor->secondaryMotion;
+        if (secondaryMotion & 1) {
             return 1;
         }
         return 0;
@@ -1532,11 +1562,13 @@ INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004134C0);
 
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004134D0);
 
-s32 fldGetMappedActorStateAttribute(u32 mode) {
+/* Read a selected actor attribute; selector zero maps its motion code.
+ * Missing named objects fall through to subsequent attribute cases. */
+s32 fldGetMappedActorStateAttribute(u32 attribute) {
     FldActorEntry *actor = (FldActorEntry *)D_003932A0 + fldSelectedActorEntryIndex;
-    s32 *entry;
+    s32 *objectNode;
 
-    switch (mode) {
+    switch (attribute) {
     case 0:
         switch (actor->motion) {
         case 0:
@@ -1552,14 +1584,14 @@ s32 fldGetMappedActorStateAttribute(u32 mode) {
         }
         return 0;
     case 1:
-        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->motionName);
-        if (entry != NULL) {
-            return entry[1];
+        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->motionName);
+        if (objectNode != NULL) {
+            return objectNode[1];
         }
     case 2:
-        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->otherName);
-        if (entry != NULL) {
-            return entry[1];
+        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->otherName);
+        if (objectNode != NULL) {
+            return objectNode[1];
         }
         return actor->secondaryMotion;
     case 3:
@@ -1574,37 +1606,37 @@ s32 fldGetMappedActorStateAttribute(u32 mode) {
 
 /* Look up a motion-table attribute indexed by this actor's state; named
  * object lookups fall through to the next attribute if absent. */
-s32 fldGetActorMotionEntry(u32 kind) {
-    FldActorEntry *entry = (FldActorEntry *)(D_003932A0 + fldSelectedActorEntryIndex * 108);
-    s16 index = entry->motion;
-    s32 *found;
+s32 fldGetActorMotionEntry(u32 attribute) {
+    FldActorEntry *actor = (FldActorEntry *)(D_003932A0 + fldSelectedActorEntryIndex * 108);
+    s16 motionIndex = actor->motion;
+    s32 *objectNode;
     s32 flags;
 
-    switch (kind) {
+    switch (attribute) {
     case 0:
-        return D_00391FA0[index].defaultMotionId;
+        return D_00391FA0[motionIndex].defaultMotionId;
     case 1:
-        found = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00391FA0[index].primaryName);
-        if (found != NULL) {
-            return found[1];
+        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00391FA0[motionIndex].primaryName);
+        if (objectNode != NULL) {
+            return objectNode[1];
         }
     case 2:
-        found = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00391FA0[index].secondaryName);
-        if (found != NULL) {
-            return found[1];
+        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00391FA0[motionIndex].secondaryName);
+        if (objectNode != NULL) {
+            return objectNode[1];
         }
     case 3:
-        D_004361D4 = D_00391FA0[index].unk24;
+        D_004361D4 = D_00391FA0[motionIndex].unk24;
         return 0;
     case 4:
-        D_004361D8 = D_00391FA0[index].unk34;
+        D_004361D8 = D_00391FA0[motionIndex].unk34;
         return 0;
     case 5:
-        return D_00391FA0[index].unk44;
+        return D_00391FA0[motionIndex].unk44;
     case 6:
-        flags = entry->flags64;
+        flags = actor->flags64;
         if (flags & 1) {
-            return entry->value67;
+            return actor->value67;
         }
         return -1;
     }
@@ -1662,32 +1694,33 @@ s32 fldFindTableEntry(s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142670);
 
+/* Apply native actor-slot defaults; fields not written here remain untouched. */
 void fldResetActorSlots(void) {
-    s32 i;
+    s32 actorIndex;
 
-    for (i = 0; i < 256; i++) {
-        fldActorSlots[i].unk00[0] = 0;
-        fldActorSlots[i].unk00[1] = 0;
-        fldActorSlots[i].unk00[2] = 0;
-        fldActorSlots[i].unk00[3] = -1;
-        fldActorSlots[i].unk00[4] = 0;
-        fldActorSlots[i].unk00[5] = -1;
-        fldActorSlots[i].unk00[6] = -1;
-        fldActorSlots[i].unk00[7] = 0;
-        fldActorSlots[i].unk00[8] = 0;
-        fldActorSlots[i].unk00[9] = 0;
-        fldActorSlots[i].unk2C = 0.0f;
-        fldActorSlots[i].unk30[0] = 0;
-        fldActorSlots[i].unk30[1] = 0;
-        fldActorSlots[i].unk30[2] = 0;
-        fldActorSlots[i].unk30[3] = 0;
-        fldActorSlots[i].unk30[4] = 0;
-        fldActorSlots[i].unk30[5] = 0;
-        fldActorSlots[i].unk30[6] = 0;
-        fldActorSlots[i].unk30[7] = 0;
-        fldActorSlots[i].unk50[0] = 0;
-        fldActorSlots[i].unk50[1] = 0;
-        fldActorSlots[i].unk50[2] = 0;
+    for (actorIndex = 0; actorIndex < FIELD_ACTOR_SLOT_COUNT; actorIndex++) {
+        fldActorSlots[actorIndex].unk00[0] = 0;
+        fldActorSlots[actorIndex].unk00[1] = 0;
+        fldActorSlots[actorIndex].unk00[2] = 0;
+        fldActorSlots[actorIndex].unk00[3] = -1;
+        fldActorSlots[actorIndex].unk00[4] = 0;
+        fldActorSlots[actorIndex].unk00[5] = -1;
+        fldActorSlots[actorIndex].unk00[6] = -1;
+        fldActorSlots[actorIndex].unk00[7] = 0;
+        fldActorSlots[actorIndex].unk00[8] = 0;
+        fldActorSlots[actorIndex].unk00[9] = 0;
+        fldActorSlots[actorIndex].unk2C = 0.0f;
+        fldActorSlots[actorIndex].unk30[0] = 0;
+        fldActorSlots[actorIndex].unk30[1] = 0;
+        fldActorSlots[actorIndex].unk30[2] = 0;
+        fldActorSlots[actorIndex].unk30[3] = 0;
+        fldActorSlots[actorIndex].unk30[4] = 0;
+        fldActorSlots[actorIndex].unk30[5] = 0;
+        fldActorSlots[actorIndex].unk30[6] = 0;
+        fldActorSlots[actorIndex].unk30[7] = 0;
+        fldActorSlots[actorIndex].unk50[0] = 0;
+        fldActorSlots[actorIndex].unk50[1] = 0;
+        fldActorSlots[actorIndex].unk50[2] = 0;
     }
     fldSelectedActorEntryIndex = -1;
 }
