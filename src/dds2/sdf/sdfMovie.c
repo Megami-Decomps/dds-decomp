@@ -18,9 +18,9 @@ typedef struct MovSub {
     s32 blockIndex;
     u8 pad4C[0x4];
     void *pendingCursor;
-    u8 *linearBuffer;
-    s32 linearBaseOffset;
-    s32 linearWriteOffset;
+    u8 *pacBuffer;
+    s32 pacReadOffset;
+    s32 pacBufferedBytes;
     u8 *ringBuffer;
     s32 ringOffset;
     s32 ringLength;
@@ -152,7 +152,7 @@ void sdfMovieProcessPendingData(MovObj *movie) {
     if (remaining == 0) {
         return;
     }
-    if ((0x10000 - stream->linearWriteOffset) < 0x4000 || ((stream->unk6C - stream->ringLength) + 0x10000) < 0x4000) {
+    if ((0x10000 - stream->pacBufferedBytes) < 0x4000 || ((stream->unk6C - stream->ringLength) + 0x10000) < 0x4000) {
         movie->state = 5;
         return;
     }
@@ -242,10 +242,10 @@ s32 func_003460D8(DevState *deviceState, s32 operation, void *data, s32 bytesRea
                 } else {
                     s32 restoreInterrupts = func_0036DE70();
 
-                    writeOffset = stream->linearBaseOffset + stream->linearWriteOffset;
+                    writeOffset = stream->pacReadOffset + stream->pacBufferedBytes;
                     writeOffset += (writeOffset > 0xFFFF) * -0x10000;
-                    memcpy(stream->linearBuffer + writeOffset, source, blockBytes);
-                    stream->linearWriteOffset += blockBytes;
+                    memcpy(stream->pacBuffer + writeOffset, source, blockBytes);
+                    stream->pacBufferedBytes += blockBytes;
                     if (restoreInterrupts != 0) {
                         EIntr();
                     }
@@ -325,6 +325,54 @@ s32 func_00346468(void *unused, MovObj *movie, s32 operation, u8 *data, s32 size
     return 0;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMovie", func_003465E8);
+s32 func_00346608(void *unused, MovObj *movie, s32 operation, u8 *data, s32 size) {
+    void func_003465E8(void *destination, const void *source, u32 byteCount) {
+        memcpy(destination, source, byteCount);
+    }
+    MovSub *stream = movie->stream;
 
-INCLUDE_ASM(const s32, "sdf/sdfMovie", func_00346608);
+    switch (operation) {
+    case 0:
+        if (movie->stopRequested != 0) {
+            *data = 1;
+            return 0;
+        }
+        if (movie->remainingBytes == 0) {
+            *data = 1;
+        }
+        return stream->pacBufferedBytes;
+    case 1:
+        if (movie->stopRequested != 0) {
+            return 0;
+        }
+        {
+            u8 *bufferStart = stream->pacBuffer;
+            s32 readOffset = stream->pacReadOffset;
+            s32 wrappedBytes = readOffset + size - 0x10000;
+
+            if (wrappedBytes >= 0) {
+                s32 firstSpan = size - wrappedBytes;
+                func_003465E8(data, bufferStart + readOffset, firstSpan);
+                if (wrappedBytes > 0) {
+                    func_003465E8(data + firstSpan, bufferStart, wrappedBytes);
+                }
+                stream->pacReadOffset = wrappedBytes;
+            } else {
+                func_003465E8(data, bufferStart + readOffset, size);
+                stream->pacReadOffset = readOffset + size;
+            }
+            stream->pacBufferedBytes -= size;
+            return movie->remainingBytes;
+        }
+    case 2:
+        if (movie->stopRequested != 0) {
+            return 0;
+        }
+        if (movie->state == 5) {
+            sdfMovieProcessPendingData(movie);
+        }
+        break;
+    }
+
+    return 0;
+}
