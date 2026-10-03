@@ -16,7 +16,9 @@ typedef struct FileReqEntry {
 
 extern FileReqEntry fileRequestEntries[];
 
-extern s32 D_00437CC0;
+extern FileManGuardState D_00437CC0;
+/* Scalar view keeps the original direct GP-relative access. */
+extern s32 fileManGuardActive __asm__("D_00437CC0");
 extern s32 D_00439000;
 
 void fileReqInit(s32 request);
@@ -124,10 +126,10 @@ s32 func_002C83F0(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
         } else {
             SignalSema(work->sema);
         }
-        saved = D_00437CC0;
-        D_00437CC0 = 1;
+        saved = fileManGuardActive;
+        fileManGuardActive = 1;
         func_002C8AC0();
-        D_00437CC0 = saved;
+        fileManGuardActive = saved;
         break;
     case 7:
         WaitSema(work->sema);
@@ -258,6 +260,6 @@ void func_002C92D0(u32 arg0) {
     func_0034FCE0(arg0, 0);
 }
 
-INCLUDE_SDATA(const s32, "game/code_002C83F0", D_00437CC0);
+FileManGuardState D_00437CC0 __attribute__((section(".sdata"))) = { 0 };
 
-INCLUDE_SDATA(const s32, "game/code_002C83F0", D_00437CC8);
+char D_00437CC8[8] __attribute__((section(".sdata"))) = "fileMan";
