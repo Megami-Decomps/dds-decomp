@@ -743,13 +743,71 @@ s32 func_00241F10(void) {
     return 1;
 }
 
+extern char D_00421E98[]; /* "re attach...!\n" */
+
+s32 func_00242100(void) {
+    extern void dds3RefreshStoredVec3(void *);
+    void *unit;
+    void *target;
+    ObjBase *data;
+    ObjectWithResource *slot;
+    u32 path;
+    s32 targetId;
+    s32 mode;
+
+    unit = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
+    if (unit == NULL) {
+        unit = (void *)func_001287B8(scrReadIntParameter(0));
+        if (unit == NULL) {
+            func_0035B6E0(D_00421E58, scrReadIntParameter(0));
+            targetId = scrReadIntParameter(1);
+            func_0035B6E0(D_00421E68, targetId);
+            func_0035B6E0(D_00421E78);
+            return 1;
+        }
+    }
+    target = evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1));
+    if (target == NULL) {
+        return 1;
+    }
+    data = effObjGetDataHandle(unit);
+    slot = data->slots[1];
+    if (slot == NULL) {
+        dds3EnsureSlotData(unit);
+        slot = data->slots[1];
+    }
+    if (slot->resource->resourceId == 0) {
+        dds3SetSlotKey(slot, (u32)target);
+        dds3ReplaceObjectResource(slot);
+    } else {
+        dds3RefreshStoredVec3(unit);
+        dds3SetSlotKey(slot, (u32)target);
+        dds3ReplaceObjectResource(slot);
+        func_0035B6E0(D_00421E98);
+    }
+    path = dds3GetObjectResourceHandle(slot);
+    if (path == 0) {
+        return 1;
+    }
+    mode = scrReadIntParameter(2);
+    switch (mode) {
+    case 0:
+        func_001177D0(path, 0);
+        break;
+    case 1:
+        func_001177D0(path, 1);
+        break;
+    }
+    return 1;
+}
+
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421E58);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421E68);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421E78);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00242100);
+INCLUDE_RODATA(const s32, "event/evtCommand", D_00421E98);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_002422A8);
 

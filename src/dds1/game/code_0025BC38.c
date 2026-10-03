@@ -15,9 +15,26 @@ typedef struct {
 } DspListHead;
 
 typedef struct {
+    u32 allocation;
+    u8 pad04[0xC];
+    u32 userData;
+    u32 callback14;
+    void (*onDestroy)(s32, u32);
+} SdfTaskHeader;
+
+typedef struct {
     s32 allocation;
-    s32 tasks[10];
+    SdfTaskHeader *tasks[10];
+    s32 activeCount;
+    s32 spawnCountdown;
 } MovieResourceGroup;
+
+extern void *sdfCreateTaskHeader(u32);
+extern f32 effMiscRandUnitFloat(s32);
+extern void mnuReleaseOptionalDrawAllocation(void *, void *);
+
+
+
 
 void mnuDestroyMantraDrawPool(MovieResourceGroup *resources) {
     s32 i;
@@ -45,7 +62,7 @@ typedef struct MovieCueNode {
     u8 enabled;           /* 0x12 */
 } MovieCueNode;
 
-extern void func_0025BA20(s32, s32, u8 *, s32);
+extern void func_0025BA20(s32, s32, u8 *, s8);
 extern u8 *sdfListRemoveNode(s32, u8 *);
 
 s32 mnuTickResourceGroup(s32 owner, s32 group) {
@@ -71,8 +88,40 @@ s32 mnuTickResourceGroup(s32 owner, s32 group) {
     } while (list != NULL);
     return group;
 }
+void func_0025BDD0(MovieResourceGroup *resources) {
+    SdfTaskHeader **slot;
+    s32 i;
+    SdfTaskHeader *group;
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025BDD0);
+    if (resources->spawnCountdown == 0) {
+        if (resources->activeCount < 10) {
+            group = sdfCreateTaskHeader(0);
+            group->callback14 = (u32)mnuReleaseOptionalDrawAllocation;
+            func_0025BA20((s32)resources, (s32)group, NULL, 0);
+            for (i = 0; i < 10; i++) {
+                if (resources->tasks[i] == 0) {
+                    resources->tasks[i] = group;
+                    resources->activeCount++;
+                    break;
+                }
+            }
+        }
+        resources->spawnCountdown = (s32)(effMiscRandUnitFloat(0) * 20.0f + 1.0f);
+    } else {
+        resources->spawnCountdown--;
+    }
+    slot = (SdfTaskHeader **)resources->tasks;
+    for (i = 0; i < 10; i++, slot++) {
+        group = *slot;
+        if (group != NULL) {
+            *slot = (SdfTaskHeader *)mnuTickResourceGroup((s32)resources, (s32)group);
+            if (*slot == NULL) {
+                resources->activeCount--;
+            }
+        }
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025BF18);
 
@@ -106,10 +155,24 @@ void mnuReleaseEffectResource(MenuResourceWork *work) {
     effDestroyResourceSlotSet(work->resourceHandle);
     sdfReleaseChipBlock(work);
 }
-
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C0D8);
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C1C8);
+
+typedef s16 MnuSpritePlacement[4];
+
+extern MnuSpritePlacement D_0036C268[];
+
+void func_0025C1C8(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                  s32 flags, s32 context) {
+    func_002BF4E0((x + D_0036C268[placementIndex][2]) << 4,
+                  (y + D_0036C268[placementIndex][3]) << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  flags,
+                  D_0036C698[D_0036C268[placementIndex][0]],
+                  D_0036C268[placementIndex][1],
+                  context);
+}
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C278);
 
@@ -131,7 +194,7 @@ void mnuAdvanceLoopingFrame(s32 *frame) {
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C588);
 
-extern void mnuGetMantraDisplayFlags(s32 *, s32);
+extern u32 mnuGetMantraDisplayFlags(void *, s32);
 
 void mnuAdvanceGridSlotAnimation(s32 animationContext, s32 unusedGrid, u8 *slot) {
     s32 *counter = *(s32 **)(slot + 4);
@@ -164,7 +227,26 @@ void mnuAdvanceActiveGridSlotAnimations(s32 animationContext, s32 owner) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C8D0);
+extern void func_0025C278(s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_0025C8D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *entry, s32 arg6) {
+    u32 flags = mnuGetMantraDisplayFlags(entry, arg4);
+
+    if (flags & 1) {
+        func_0025C278(arg0, arg1, arg2, arg3, *(u16 *)(entry + 0xC), 0x34, 0, arg6);
+    } else if (flags & 2) {
+        func_0025C278(arg0, arg1, arg2, arg3, *(u16 *)(entry + 0xC), 0x32, 0, arg6);
+    } else if (flags & 0xC) {
+        func_0025C278(arg0, arg1, arg2, arg3, *(u16 *)(entry + 0xC), 0x33, 0, arg6);
+    }
+    if (flags & 2) {
+        func_0025C278(arg0, arg1, arg2, (s32)((f32)arg3 * 0.5f),
+                      *(u16 *)(entry + 0xC), 0x2F, 0, arg6);
+    }
+    if (flags & 1) {
+        func_0025C278(arg0, arg1, arg2, arg3, *(u16 *)(entry + 0xC), 0x30, 0, arg6);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025CA50);
 

@@ -94,16 +94,72 @@ typedef struct BattleActionContext {
     BattleEffectState *effect;
 } BattleActionContext;
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_00224FC0);
-
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_002251A0);
-
-extern BattleActionUnit *btlGetTargetUnitForLink(BattleActionUnit *);
-extern void btlClearAllUnitDefeatCandidatesTask(void);
-extern void btlFlagUnitDefeatCandidate(BattleActionUnit *);
-extern void btlApplyCombinedActorFlags(u8 *);
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32,
     f32, f32, f32, f32, f32, f32, f32, f32);
+extern void btlClearAllUnitDefeatCandidatesTask(void);
+extern u32 effMiscRandMod(void *, u32);
+extern s32 btlBossDebugPrintf(const char *, ...);
+extern void btlFlagLinkedGroupDefeatCandidatesTask(s32);
+extern char D_0041B3B8[];
+
+void func_00224FC0(s32 actor) {
+    btlFlagAllUnitDefeatCandidatesTask();
+    switch (effMiscRandMod(NULL, 3)) {
+    case 0:
+        btlBossDebugPrintf(D_0041B3B8);
+        btlSetEffectCameraKeys(actor,
+            -779.2f, -58.1f, -1169.4f, -0.128f, -0.276f, 0.029f, 0.943f, 648.2f,
+            -57.0f, -1638.5f, -0.089f, 0.189f, -0.026f, 0.968f, 40.0f, 20.0f);
+        break;
+    case 1:
+        btlBossDebugPrintf("SATAN:ATTACK-1 ++++\n");
+        btlSetEffectCameraKeys(actor,
+            -1151.0f, 14.1f, -635.3f, -0.172f, -0.484f, 0.087f, 0.843f, -566.4f,
+            -16.9f, -1472.1f, -0.114f, -0.182f, 0.012f, 0.967f, 40.0f, 25.0f);
+        break;
+    case 2:
+        btlBossDebugPrintf("SATAN:ATTACK-2 ++++\n");
+        btlSetEffectCameraKeys(actor,
+            789.1f, -88.3f, -251.3f, -0.305f, 0.444f, -0.171f, 0.814f, 727.7f,
+            -9.4f, -1334.9f, -0.137f, 0.222f, -0.039f, 0.954f, 40.0f, 10.0f);
+        break;
+    }
+}
+extern s32 btlHasLinkedEffectNodeTrigger(void *);
+extern void func_001E3108(BattleActionUnit *, f32 *);
+
+
+void func_002251A0(s32 actor) {
+    switch (effMiscRandMod(NULL, 3)) {
+    case 0:
+        btlBossDebugPrintf("SATAN:I-0 ++++\n");
+        btlFlagAllUnitDefeatCandidatesTask();
+        btlSetEffectCameraKeys(actor,
+            -211.2f, -446.8f, -639.3f, -0.266f, -0.088f, 0.016f, 0.95f, 621.5f,
+            -764.2f, -563.1f, -0.086f, 0.279f, -0.035f, 0.945f, 40.0f, 20.0f);
+        break;
+    case 1:
+        btlBossDebugPrintf("SATAN:I-0 ++++\n");
+        btlFlagAllUnitDefeatCandidatesTask();
+        btlSetEffectCameraKeys(actor,
+            -583.4f, -1381.4f, -1169.0f, 0.118f, -0.198f, -0.034f, 0.962f, -632.8f,
+            -425.2f, -989.0f, -0.167f, -0.226f, 0.028f, 0.949f, 40.0f, 20.0f);
+        break;
+    case 2:
+        btlBossDebugPrintf("SATAN:I-0 ++++\n");
+        /* This preset marks only the actor's linked group. */
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask(actor);
+        btlSetEffectCameraKeys(actor,
+            706.9f, 48.6f, -363.8f, -0.333f, 0.341f, -0.146f, 0.855f, -674.4f,
+            -115.1f, -856.2f, -0.23f, -0.259f, 0.053f, 0.926f, 40.0f, 25.0f);
+        break;
+    }
+}
+
+extern BattleActionUnit *btlGetTargetUnitForLink(BattleActionUnit *);
+extern void btlFlagUnitDefeatCandidate(BattleActionUnit *);
+extern void btlApplyCombinedActorFlags(u8 *);
 
 void func_00225368(BattleActionUnit *command) {
     BattleActionUnit *target = btlGetTargetUnitForLink(command);
@@ -515,7 +571,32 @@ void btlSetSpecialBattleEffectActorByte(u8 value) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226598);
+extern u8 *btlGetSideIndexedActorStatusTable(s32, s32);
+
+s32 func_00226598(BattleActionUnit *command) {
+    BattleActionUnit *unit = btlGetTargetUnitForLink(command);
+    u8 *table;
+    s32 kind;
+    f32 pos[4];
+
+    if ((unit->flags & 0x400) == 0) {
+        return 0;
+    }
+    if (unit->kind == 0x113) {
+        table = btlGetSideIndexedActorStatusTable(
+            *(s32 *)((u8 *)unit + 0xC4), *(s32 *)((u8 *)unit + 0xC8));
+        if (btlHasLinkedEffectNodeTrigger(command) == 0) {
+            s32 slot = *(s32 *)((u8 *)command->actor + 0x44);
+            kind = *(s16 *)(table + slot * 0x14 + 0x2C);
+            if (kind == 2 || kind == 7) {
+                func_001E3108(unit, pos);
+                pos[2] += 400.0f;
+                btlSetUnitPosition(unit, pos);
+            }
+        }
+    }
+    return 0;
+}
 
 u32 func_00226670(void) {
     return 0xffffffff;
