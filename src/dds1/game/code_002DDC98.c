@@ -1709,7 +1709,67 @@ u32 func_002E2F40(s32 count) {
     return (count * 0x4c + 0x4bU) & 0xfffffff0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2F68);
+/* vu0 routine: pack an indexed-attribute stream into a VIF packet. */
+u32 func_002E2F68(const u128 *positions, const void *attributes,
+                  const void *halfAttributes, const void *wordAttributes,
+                  s32 count, void *(*alloc)(s32)) {
+    s32 bytes;
+    u32 *packet;
+    u32 *cursor;
+    u32 index;
+    u32 code;
+    s32 n;
+    s32 i;
+
+    bytes = sdfMeasureVertexAttributePacketBytes(count);
+    if (alloc == NULL) {
+        cursor = sdfAllocPacketAligned(bytes);
+    } else {
+        cursor = alloc(bytes);
+    }
+    packet = cursor;
+    packet[0] = (bytes >> 4) - 1;
+    packet[1] = 0;
+    packet[2] = 0x6C01C000;
+    packet[3] = count;
+    packet[4] = 0xD0000000;
+    packet[5] = 0x34134130;
+    packet[6] = 0x41341;
+    packet[7] = 0x6001C001;
+    packet[8] = 0x155;
+    packet[9] = (count << 16) | 0x6800C002;
+
+    cursor = packet + 10;
+    i = 0;
+    do {
+        EE_MMI_STORE_VEC3_VALUE(cursor, positions[i]);
+        cursor += 3;
+        i++;
+    } while (i != count);
+
+    code = count << 18;
+    index = count + 2;
+    n = count * 4;
+    *cursor++ = code | index | 0x6E00C000;
+    memcpy(cursor, attributes, n * 4);
+    cursor += n;
+    index += n;
+    *cursor++ = code | index | 0x6500C000;
+    memcpy(cursor, halfAttributes, n * 4);
+    cursor += n;
+    index += n;
+    n = count * 8;
+    *cursor++ = code | index | 0x6400C000;
+    memcpy(cursor, wordAttributes, n * 4);
+    cursor += n;
+    cursor[0] = 0x04000006;
+    cursor[1] = 0x14000008;
+    cursor += 2;
+    while (((u32)cursor & 0xF) != 0) {
+        *cursor++ = 0;
+    }
+    return (u32)packet;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E31A0);
 
@@ -2187,3 +2247,4 @@ INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD3A9);
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD3C0);
 
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD3C4);
+
