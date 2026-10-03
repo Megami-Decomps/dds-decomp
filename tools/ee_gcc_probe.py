@@ -74,6 +74,13 @@ def artifact_record(path: Path) -> dict[str, object]:
     return {"name": path.name, "size": path.stat().st_size, "sha256": sha256(path)}
 
 
+def snapshot_source(source: Path, out_dir: Path) -> Path:
+    """Preserve the candidate bytes without changing the path compiled by default."""
+    snapshot = out_dir / "input.c"
+    snapshot.write_bytes(source.read_bytes())
+    return snapshot
+
+
 def object_record(path: Path, root: Path) -> dict[str, object] | None:
     """Describe an object output without implying that assembly succeeded."""
     if not path.is_file():
@@ -129,11 +136,13 @@ def main() -> int:
     if inside(out_dir, repo) and not args.allow_inside_repo:
         parser.error("refusing to put compiler dumps inside the checkout; use /tmp or --allow-inside-repo")
 
+    source_snapshot = snapshot_source(source, out_dir)
+    original_source_sha256 = sha256(source_snapshot)
     replacements: list[tuple[str, str, int]] = []
     compiled_source = source
     as_unit = args.as_unit
     if args.replace:
-        text = source.read_text()
+        text = source_snapshot.read_text()
         for item in args.replace:
             if "=" not in item:
                 parser.error(f"replacement must be OLD=NEW: {item}")
@@ -145,8 +154,8 @@ def main() -> int:
             if not count:
                 parser.error(f"replacement token not found: {old}")
             replacements.append((old, new, count))
-        compiled_source = out_dir / "input.c"
-        compiled_source.write_text(text)
+        source_snapshot.write_text(text)
+        compiled_source = source_snapshot
         if not as_unit:
             try:
                 as_unit = source.relative_to(repo).as_posix()
@@ -192,7 +201,9 @@ def main() -> int:
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "repo": str(repo),
         "source": str(source),
-        "source_sha256": sha256(source),
+        "source_sha256": original_source_sha256,
+        "source_snapshot": artifact_record(source_snapshot),
+        "compiled_source_sha256": sha256(source_snapshot),
         "version": args.version,
         "as_unit": as_unit,
         "compiled_source": str(compiled_source),
