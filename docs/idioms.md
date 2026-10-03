@@ -100,6 +100,23 @@ This shape preserves the retail code with the true `s32`
 check clean. Their former comma-assignment guards changed code when the
 incorrect wide getter declaration was corrected.
 
+The shared fade query `kwlnFadeIsActive` likewise has an `s32` logical-status
+contract, not a byte return inferred merely from its boolean range. Both
+providers return the integer comparison of the direction bits with zero;
+all twelve consumer declarations now agree. The two provider units each
+check at 56 match, 0 differ, and narrowing the sole wide consumer declaration
+in DDS2 `code_00265AD8` leaves that unit at 21 match, 0 differ.
+
+## Promoted channel arguments and byte storage
+
+Byte members do not establish a byte-parameter API. `kwlnFadeSetColor` takes
+four `s32` channels while the live RGBA record still contains four `s8`
+members. The event-viewer caller passes RGB from `lbu` and computes the full
+`128 - fade` alpha; narrowing at the caller would change that observed ABI.
+The assignments perform the byte-storage conversion instead. Both 40-byte
+setter bodies and their complete 56-function provider units remain exact
+with the promoted formals.
+
 ## `jal` tails through a shared inline helper
 
 A call returned through a `static inline` helper is not turned into a
@@ -171,9 +188,6 @@ functions use trampolines and are a different case.
   a function *defined in C earlier in the same unit*. While that callee is
   still INCLUDE_ASM, gcc can't see it and never fills the slots. Match the
   callee first (`sndClearList`, `func_00204CC8`).
-- Declaring an INCLUDE_ASM callee `s32` instead of `void` moves values loaded
-  after the call from `$2` to `$3`. Try this on near-misses that only differ
-  in `v0`/`v1`.
 - Callers that pass fewer arguments than the callee reads want the callee
   unprototyped (K&R). A missing unused parameter is real too: m2c drops
   parameters nothing reads, so check the callers.
@@ -529,6 +543,13 @@ functions use trampolines and are a different case.
   the payload's handle type distinct preserves the resource-slot load before
   the row store. This recovered representation checks at 649 match, 0 differ
   for the complete `code_002DE248` unit.
+- `mnuCreateListState` returns an opaque `struct MenuList *`. Keep that
+  allocation contract in consumer declarations, and convert explicitly only
+  where an existing API stores an encoded integer handle. Five consumer units
+  in both games check clean after this correction. The terminal units retain
+  unprototyped declarations because their matched callers pass both three and
+  four arguments; a callee using only three parameters is not evidence for
+  deleting the fourth argument or inventing a variadic interface.
 
 ## Rodata order
 
