@@ -164,6 +164,7 @@ void mdlDrawViewerSelectionLabel(void);
 
 void sdfAppendPacket(s32, s32);
 
+
 void sdfStreamCreateWithParams(s32, s32, s32, s32, s32);
 
 extern s32 kwlnTaskGetTaskByName(void *name);
@@ -342,13 +343,26 @@ void mdlInitializeViewerResourceTable(void) {
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_00218E20);
 
-/* Relative-linked record prefix; payload fields depend on the record kind. */
+/* Relative-linked record prefix with kind-dependent packed payload words.
+ * Kinds 1/2 use the count/part-index halfwords at 0x0C/0x0E; kind 3 reads
+ * the whole parameter word. Kind 4 reads both selector halfwords at 0x08/0x0A. */
 typedef struct MdlRecord {
     s32 kind;        /* 0x00: 0xFFFF terminates record traversal */
     s32 nextOffset;  /* 0x04: relative byte offset to next record */
-    u32 payloadWord; /* 0x08: first payload word */
-    u16 listCount;   /* 0x0C: record count for list headers */
-    u16 unk0E;       /* 0x0E */
+    union {
+        u32 word;               /* 0x08 */
+        struct {
+            u16 selectorA;
+            u16 selectorB;
+        } stream;
+    } payload;
+    union {
+        u32 word;               /* 0x0C */
+        struct {
+            u16 count;
+            u16 partIndex;
+        } part;
+    } parameter;
     u16 unk10;       /* 0x10 */
 } MdlRecord;
 
@@ -390,11 +404,12 @@ struct MdlViewerSlots {
 
 /* Read the model record's payload word without advancing its relative link. */
 u32 mdlGetViewerRecordPayloadWord(MdlRecord *record) {
-    return record->payloadWord;
+    return record->payload.word;
 }
 
+/* The part-list count is the low half of the packed parameter word. */
 u16 mdlGetViewerRecordListCount(MdlRecord *record) {
-    return record->listCount;
+    return record->parameter.part.count;
 }
 
 /* Follow the relative links in a resource's record table to find an ID. */
@@ -460,7 +475,7 @@ u8 mdlRecordMatchesId(MdlRecord *record, s32 wantedId) {
 }
 
 u16 func_002193E8(MdlRecord *record) {
-    return record->unk0E;
+    return record->parameter.part.partIndex;
 }
 
 u16 func_002193F0(MdlRecord *record) {
