@@ -18,7 +18,7 @@ extern s32 btlHasRegisteredGuidePanelTask(void);
 extern s32 btlHasRegisteredSkillNamePanelTask(void);
 extern s32 btlHasRegisteredAphNamePanelTask(void);
 extern s32 btlCreateAiWork(s32);
-extern s32 btlBossDebugPrintf(const char *, ...);
+extern void btlBossDebugPrintf(const char *, ...);
 extern u32 fldGetSceneScriptTaskUserData(void);
 extern char *D_004367B8;
 typedef struct SceneWorkBuffers {
@@ -1697,7 +1697,7 @@ void func_001D5BD8(void) {
 
 extern u32 btlGetIndexListCount(s32);
 extern u32 btlGetIndexListEntry(s32, s32);
-extern s32 func_001DD390();
+extern void func_001DD390(u8 *command, u8 *argument);
 extern s32 btlIsActiveActor();
 
 s32 btlCommandStateSelectC(u8 *task) {
