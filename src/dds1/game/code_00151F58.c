@@ -259,27 +259,28 @@ typedef struct BillValueLink {
     BillLinkedValue *target;
 } BillValueLink;
 
-void billSetAllChildVariants(BillObj *effect, s32 value) {
-    s32 count;
-    s32 *entries;
-    s32 *entry;
+/* Store the signed variant in one child payload or every child of a list. */
+void billSetAllChildVariants(BillObj *effect, s32 variant) {
+    s32 remainingChildren;
+    s32 *childEntries;
+    s32 *childCursor;
 
-    value = (s16)value;
+    variant = (s16)variant;
     switch (effect->kind) {
     case 0:
-        ((BillChildPayload *)effect->entryList)->signedVariant = value;
+        ((BillChildPayload *)effect->entryList)->signedVariant = variant;
         break;
     case 1:
-        count = ((BillEntryList *)effect->entryList)->count;
-        entries = ((BillEntryList *)effect->entryList)->entries;
+        remainingChildren = ((BillEntryList *)effect->entryList)->count;
+        childEntries = ((BillEntryList *)effect->entryList)->entries;
 
-        if (count > 0) {
-            entry = entries;
+        if (remainingChildren > 0) {
+            childCursor = childEntries;
             do {
-                ((BillChildPayload *)*entry)->signedVariant = value;
-                entry++;
-                count--;
-            } while (count != 0);
+                ((BillChildPayload *)*childCursor)->signedVariant = variant;
+                childCursor++;
+                remainingChildren--;
+            } while (remainingChildren != 0);
         }
         break;
     }
@@ -725,19 +726,20 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 void parDispatchKindInit(void *work, s32 index);
 
-void effEmitterRingSpawn(EffRingEmitter *effect, u32 index) {
+/* Seed one ring packet's phase, radius and vertical motion, then its subeffect. */
+void effEmitterRingSpawn(EffRingEmitter *effect, u32 packetIndex) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    u32 rem;
+    u32 phaseIndex;
     f32 phase;
     f32 jitter;
 
-    packet += index;
+    packet += packetIndex;
     packet->color = 0;
     packet->age = 0;
     phase = 0.0f;
-    rem = index % effect->period;
-    if (rem != 0) {
-        phase = (3.14159265f * 2.0f) / effect->period * rem;
+    phaseIndex = packetIndex % effect->period;
+    if (phaseIndex != 0) {
+        phase = (3.14159265f * 2.0f) / effect->period * phaseIndex;
     }
     packet->f30 = phase;
     jitter = effect->radiusRange;
@@ -764,7 +766,7 @@ void effEmitterRingSpawn(EffRingEmitter *effect, u32 index) {
     } else {
         packet->spin = 0;
     }
-    parDispatchKindInit(&effect->head.sub, index);
+    parDispatchKindInit(&effect->head.sub, packetIndex);
 }
 
 extern void parUpdateSharedScaleAndDelta(void *sub);
@@ -772,35 +774,37 @@ extern u32 func_00159AB8(void *fade, u32 color, s32 age);
 extern u32 effParModulateColors(u32 color, u32 mask);
 void parDispatchKindUpdate(void *work, s32 index, u32 color, f32 speed);
 
+/* Advance ring motion and ages; repeat by tagging packets for the next update.
+ * completedCount counts expired nonrepeating packets in this update only. */
 /* vf12 keeps the packet's previous position and vf10 the new one for
  * parDispatchKindUpdate, which reads them as implicit arguments. */
 void effEmitterRingUpdate(EffRingEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    u32 kind = effect->head.sub.kind;
+    u32 subeffectKind = effect->head.sub.kind;
     f32 origin[4];
     f32 offset[4];
-    f32 decay;
-    f32 spin;
-    s32 cycles;
-    s32 loop;
-    s32 count;
-    s32 frames;
-    s32 i;
+    f32 verticalScale;
+    f32 phaseStep;
+    s32 completedCount;
+    s32 repeatEnabled;
+    s32 packetCount;
+    s32 lifetimeFrames;
+    s32 packetIndex;
 
     parUpdateSharedScaleAndDelta(&effect->head.sub);
     VU0_LOAD_MATRIX(effect->head.matrix);
-    spin = effect->f164 * (3.14159265f / 180.0f);
-    decay = effect->f16C / 100.0f + 1.0f;
-    cycles = 0;
-    count = effect->head.packetCount;
-    frames = effect->head.frameCount;
-    loop = effect->flag151;
+    phaseStep = effect->f164 * (3.14159265f / 180.0f);
+    verticalScale = effect->f16C / 100.0f + 1.0f;
+    completedCount = 0;
+    packetCount = effect->head.packetCount;
+    lifetimeFrames = effect->head.frameCount;
+    repeatEnabled = effect->flag151;
     PCP_COPY_VECTOR(origin, effect->head.origin);
-    for (i = 0; i < count; i++, packet++) {
+    for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
-        if (age == 0xF0000001) {
-            effEmitterRingSpawn(effect, i);
+        if (age == EFF_PACKET_INITIAL_TAG) {
+            effEmitterRingSpawn(effect, packetIndex);
             age = packet->age;
         }
         if (age >= 0) {
@@ -809,11 +813,11 @@ void effEmitterRingUpdate(EffRingEmitter *effect) {
 
             packet->color = func_00159AB8(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
-            if (kind != 0) {
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
-            packet->f34 += (packet->vel[0] - effect->radius) / frames;
-            packet->f30 += spin;
+            packet->f34 += (packet->vel[0] - effect->radius) / lifetimeFrames;
+            packet->f30 += phaseStep;
             if (packet->f34 < 0) {
                 packet->f34 = 0;
             }
@@ -829,20 +833,20 @@ void effEmitterRingUpdate(EffRingEmitter *effect) {
             packet->pos[0] = origin[0] + offset[0];
             packet->pos[1] = origin[1] + offset[1];
             packet->pos[2] = origin[2] + offset[2];
-            packet->f38 *= decay;
-            if (kind != 0) {
+            packet->f38 *= verticalScale;
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf10, packet);
-                parDispatchKindUpdate(&effect->head.sub, i, packet->color, packet->speed);
+                parDispatchKindUpdate(&effect->head.sub, packetIndex, packet->color, packet->speed);
             }
         }
         age++;
-        if (age >= frames) {
-            if (loop) {
-                age = 0xF0000001;
+        if (age >= lifetimeFrames) {
+            if (repeatEnabled) {
+                age = EFF_PACKET_INITIAL_TAG;
             } else {
-                cycles++;
-                parDispatchKindInit(&effect->head.sub, i);
-                if (cycles >= count) {
+                completedCount++;
+                parDispatchKindInit(&effect->head.sub, packetIndex);
+                if (completedCount >= packetCount) {
                     effect->head.active = 0;
                 }
             }
@@ -912,23 +916,24 @@ typedef struct EffDiscEmitter {
 
 extern u32 effMiscRand(void *state);
 
-void effEmitterDiscSpawn(EffDiscEmitter *effect, u32 index) {
+/* Seed a random planar position and direction; radialDistance may be negative. */
+void effEmitterDiscSpawn(EffDiscEmitter *effect, u32 packetIndex) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    f32 tmp[4];
-    f32 scale;
+    f32 directionVector[4];
+    f32 radialDistance;
     f32 jitter;
 
-    packet += index;
-    scale = effect->radius * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
-    tmp[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    tmp[1] = 0;
-    tmp[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    VU0_LOAD_VF(vf10, tmp);
+    packet += packetIndex;
+    radialDistance = effect->radius * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
+    directionVector[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[1] = 0;
+    directionVector[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, tmp);
-    packet->pos[0] = tmp[0] * scale;
+    VU0_STORE_VF(vf10, directionVector);
+    packet->pos[0] = directionVector[0] * radialDistance;
     packet->pos[1] = 0;
-    packet->pos[2] = tmp[2] * scale;
+    packet->pos[2] = directionVector[2] * radialDistance;
     VU0_LOAD_MATRIX(effect->head.matrix);
     VU0_LOAD_VF(vf10, packet->pos);
     VU0_APPLY_MATRIX(vf10, vf10);
@@ -936,10 +941,10 @@ void effEmitterDiscSpawn(EffDiscEmitter *effect, u32 index) {
     packet->pos[0] += effect->head.origin[0];
     packet->pos[1] += effect->head.origin[1];
     packet->pos[2] += effect->head.origin[2];
-    tmp[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    tmp[1] = 0;
-    tmp[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    VU0_LOAD_VF(vf10, tmp);
+    directionVector[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[1] = 0;
+    directionVector[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, packet->vel);
     packet->f30 = effect->f164 * (effMiscRandUnitFloat(D_0034DF38) * effect->jitterB + (1.0f - effect->jitterB));
@@ -956,78 +961,79 @@ void effEmitterDiscSpawn(EffDiscEmitter *effect, u32 index) {
     } else {
         packet->spin = 0;
     }
-    parDispatchKindInit(&effect->head.sub, index);
+    parDispatchKindInit(&effect->head.sub, packetIndex);
 }
 
+/* Advance sinusoidal planar displacement and scaled vertical steps, then ages. */
 void effEmitterDiscUpdate(EffDiscEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    u32 kind = effect->head.sub.kind;
-    f32 tmp[4];
-    f32 decay;
-    f32 spin;
+    u32 subeffectKind = effect->head.sub.kind;
+    f32 positionDelta[4];
+    f32 verticalScale;
+    f32 phaseStep;
     f32 waveRate;
-    s32 cycles;
-    s32 frames;
-    s32 count;
-    s32 i;
-    u32 loop;
+    s32 completedCount;
+    s32 lifetimeFrames;
+    s32 packetCount;
+    s32 packetIndex;
+    u32 repeatEnabled;
 
     parUpdateSharedScaleAndDelta(&effect->head.sub);
     VU0_LOAD_MATRIX(effect->head.matrix);
-    spin = effect->f160 * (3.14159265f / 180.0f);
-    decay = effect->f16C / 100.0f + 1.0f;
-    frames = effect->head.frameCount;
-    count = effect->head.packetCount;
-    loop = effect->flag150;
+    phaseStep = effect->f160 * (3.14159265f / 180.0f);
+    verticalScale = effect->f16C / 100.0f + 1.0f;
+    lifetimeFrames = effect->head.frameCount;
+    packetCount = effect->head.packetCount;
+    repeatEnabled = effect->flag150;
     waveRate = effect->f168;
-    cycles = 0;
-    for (i = 0; i < count; i++, packet++) {
+    completedCount = 0;
+    for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
-        if (age == 0xF0000001) {
-            effEmitterDiscSpawn(effect, i);
+        if (age == EFF_PACKET_INITIAL_TAG) {
+            effEmitterDiscSpawn(effect, packetIndex);
             age = packet->age;
         }
         if (age >= 0) {
-            f32 lift;
-            f32 old;
-            f32 k;
+            f32 verticalStep;
+            f32 previousWaveValue;
+            f32 factor;
 
             packet->color = func_00159AB8(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
-            if (kind != 0) {
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
             packet->f30 += waveRate;
-            lift = packet->f3C;
-            packet->f34 += spin;
-            k = sdfSinPoly(packet->f34);
-            old = packet->f38;
-            packet->f38 = k;
-            k = (k - old) * packet->f30;
-            tmp[0] = packet->vel[0] * k;
-            tmp[1] = lift;
-            tmp[2] = packet->vel[2] * k;
-            VU0_LOAD_VF(vf10, tmp);
+            verticalStep = packet->f3C;
+            packet->f34 += phaseStep;
+            factor = sdfSinPoly(packet->f34);
+            previousWaveValue = packet->f38;
+            packet->f38 = factor;
+            factor = (factor - previousWaveValue) * packet->f30;
+            positionDelta[0] = packet->vel[0] * factor;
+            positionDelta[1] = verticalStep;
+            positionDelta[2] = packet->vel[2] * factor;
+            VU0_LOAD_VF(vf10, positionDelta);
             VU0_APPLY_MATRIX(vf10, vf10);
-            VU0_STORE_VF(vf10, tmp);
-            packet->pos[0] += tmp[0];
-            packet->pos[1] += tmp[1];
-            packet->pos[2] += tmp[2];
-            packet->f3C = lift * decay;
-            if (kind != 0) {
+            VU0_STORE_VF(vf10, positionDelta);
+            packet->pos[0] += positionDelta[0];
+            packet->pos[1] += positionDelta[1];
+            packet->pos[2] += positionDelta[2];
+            packet->f3C = verticalStep * verticalScale;
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf10, packet);
-                parDispatchKindUpdate(&effect->head.sub, i, packet->color, packet->speed);
+                parDispatchKindUpdate(&effect->head.sub, packetIndex, packet->color, packet->speed);
             }
         }
         age++;
-        if (age >= frames) {
-            if (loop) {
-                age = 0xF0000001;
+        if (age >= lifetimeFrames) {
+            if (repeatEnabled) {
+                age = EFF_PACKET_INITIAL_TAG;
             } else {
-                parDispatchKindInit(&effect->head.sub, i);
-                cycles++;
-                if (cycles >= count) {
+                parDispatchKindInit(&effect->head.sub, packetIndex);
+                completedCount++;
+                if (completedCount >= packetCount) {
                     effect->head.active = 0;
                 }
             }
@@ -1099,65 +1105,67 @@ typedef struct EffBallisticEmitter {
 void func_001547D8(EffBallisticEmitter *effect, s32 index);
 INCLUDE_ASM(const s32, "game/code_00151F58", func_001547D8);
 
+/* Scale velocity, add its stored vertical acceleration, and advance position.
+ * Only mode zero transforms the displacement through the emitter matrix. */
 void effEmitterBallisticUpdate(EffBallisticEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    u32 kind = effect->head.sub.kind;
+    u32 subeffectKind = effect->head.sub.kind;
     u32 mode;
-    f32 tmp[4];
-    f32 decay;
-    s32 cycles;
-    s32 frames;
-    s32 count;
-    s32 loop;
-    s32 i;
+    f32 positionDelta[4];
+    f32 velocityScale;
+    s32 completedCount;
+    s32 lifetimeFrames;
+    s32 packetCount;
+    s32 repeatEnabled;
+    s32 packetIndex;
 
     parUpdateSharedScaleAndDelta(&effect->head.sub);
     mode = effect->mode;
     if (mode == 0) {
         VU0_LOAD_MATRIX(effect->head.matrix);
     }
-    decay = effect->decayPct / 100.0f + 1.0f;
-    cycles = 0;
-    frames = effect->head.frameCount;
-    count = effect->head.packetCount;
-    loop = effect->loop;
-    for (i = 0; i < count; i++, packet++) {
+    velocityScale = effect->decayPct / 100.0f + 1.0f;
+    completedCount = 0;
+    lifetimeFrames = effect->head.frameCount;
+    packetCount = effect->head.packetCount;
+    repeatEnabled = effect->loop;
+    for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
-        if (age == 0xF0000001) {
-            func_001547D8(effect, i);
+        if (age == EFF_PACKET_INITIAL_TAG) {
+            func_001547D8(effect, packetIndex);
             age = packet->age;
         }
         if (age >= 0) {
             packet->color = func_00159AB8(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
-            if (kind != 0) {
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
-            packet->vel[1] = packet->vel[1] * decay + packet->f38;
-            packet->vel[0] *= decay;
-            packet->vel[2] *= decay;
+            packet->vel[1] = packet->vel[1] * velocityScale + packet->f38;
+            packet->vel[0] *= velocityScale;
+            packet->vel[2] *= velocityScale;
             VU0_LOAD_VF(vf10, packet->vel);
             if (mode == 0) {
                 VU0_APPLY_MATRIX(vf10, vf10);
             }
-            VU0_STORE_VF(vf10, tmp);
-            packet->pos[0] += tmp[0];
-            packet->pos[1] += tmp[1];
-            packet->pos[2] += tmp[2];
-            if (kind != 0) {
+            VU0_STORE_VF(vf10, positionDelta);
+            packet->pos[0] += positionDelta[0];
+            packet->pos[1] += positionDelta[1];
+            packet->pos[2] += positionDelta[2];
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf10, packet);
-                parDispatchKindUpdate(&effect->head.sub, i, packet->color, packet->speed);
+                parDispatchKindUpdate(&effect->head.sub, packetIndex, packet->color, packet->speed);
             }
         }
         age++;
-        if (age >= frames) {
-            if (loop) {
-                age = 0xF0000001;
+        if (age >= lifetimeFrames) {
+            if (repeatEnabled) {
+                age = EFF_PACKET_INITIAL_TAG;
             } else {
-                parDispatchKindInit(&effect->head.sub, i);
-                cycles++;
-                if (cycles >= count) {
+                parDispatchKindInit(&effect->head.sub, packetIndex);
+                completedCount++;
+                if (completedCount >= packetCount) {
                     effect->head.active = 0;
                 }
             }
@@ -1232,20 +1240,21 @@ extern u8 sdfViewUpVector[];
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfInvertRigidVuTransform(void);
 
-void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 index) {
+/* Seed a view-oriented ring packet and initialize its subeffect. */
+void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 packetIndex) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 period = 0;
     f32 angle;
     f32 scale;
     f32 jitter;
 
-    packet += index;
+    packet += packetIndex;
     sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
     sdfInvertRigidVuTransform();
     if (effect->mode == 0) {
         PCP_COPY_VECTOR(packet, effect->head.origin);
         period = effect->period;
-        angle = (3.14159265f * 2.0f) / period * (index % period);
+        angle = (3.14159265f * 2.0f) / period * (packetIndex % period);
         packet->vel[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
         packet->vel[1] = sdfSinPoly(angle);
         packet->vel[2] = 0;
@@ -1256,12 +1265,13 @@ void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 index) {
         packet->age = 0;
         packet->color = 0;
     } else {
-        f32 frames = effect->head.frameCount;
+        f32 lifetimeFrames = effect->head.frameCount;
 
         scale = effect->f164;
-        angle = (3.14159265f * 2.0f) / period * (index % period);
-        scale *= frames;
-        angle += effect->f160 * (3.14159265f / 180.0f) * frames;
+        /* Native quirk: period was assigned only in mode zero and is still zero here. */
+        angle = (3.14159265f * 2.0f) / period * (packetIndex % period);
+        scale *= lifetimeFrames;
+        angle += effect->f160 * (3.14159265f / 180.0f) * lifetimeFrames;
         packet->vel[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
         packet->vel[1] = 0;
         packet->vel[2] = sdfSinPoly(angle);
@@ -1280,41 +1290,42 @@ void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 index) {
     } else {
         packet->spin = 0;
     }
-    parDispatchKindInit(&effect->head.sub, index);
+    parDispatchKindInit(&effect->head.sub, packetIndex);
 }
 
+/* Advance view-oriented motion and ages; repeated packets respawn immediately. */
 void effEmitterLookAtRingUpdate(EffLookAtRingEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    u32 kind = effect->head.sub.kind;
-    f32 spin;
-    f32 scale;
-    s32 cycles = 0;
-    s32 loop;
-    s32 count;
-    s32 frames;
-    s32 i;
+    u32 subeffectKind = effect->head.sub.kind;
+    f32 phaseStep;
+    f32 stepScale;
+    s32 completedCount = 0;
+    s32 repeatEnabled;
+    s32 packetCount;
+    s32 lifetimeFrames;
+    s32 packetIndex;
 
     parUpdateSharedScaleAndDelta(&effect->head.sub);
     sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
     sdfInvertRigidVuTransform();
-    frames = effect->head.frameCount;
-    spin = effect->f160 * (3.14159265f / 180.0f);
-    count = effect->head.packetCount;
-    loop = effect->loop;
-    scale = effect->f164;
-    for (i = 0; i < count; i++, packet++) {
+    lifetimeFrames = effect->head.frameCount;
+    phaseStep = effect->f160 * (3.14159265f / 180.0f);
+    packetCount = effect->head.packetCount;
+    repeatEnabled = effect->loop;
+    stepScale = effect->f164;
+    for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
         f32 angle;
 
         if (age >= 0) {
             packet->color = func_00159AB8(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
-            if (kind != 0) {
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
-            packet->pos[0] += packet->vel[0] * scale;
-            packet->pos[1] += packet->vel[1] * scale;
-            packet->pos[2] += packet->vel[2] * scale;
+            packet->pos[0] += packet->vel[0] * stepScale;
+            packet->pos[1] += packet->vel[1] * stepScale;
+            packet->pos[2] += packet->vel[2] * stepScale;
             angle = packet->f34;
             packet->vel[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
             packet->vel[1] = sdfSinPoly(angle);
@@ -1322,21 +1333,21 @@ void effEmitterLookAtRingUpdate(EffLookAtRingEmitter *effect) {
             VU0_LOAD_VF(vf10, packet->vel);
             VU0_ROTATE_VEC(vf10, vf10);
             VU0_STORE_VF(vf10, packet->vel);
-            packet->f34 += spin;
-            if (kind != 0) {
+            packet->f34 += phaseStep;
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf10, packet);
-                parDispatchKindUpdate(&effect->head.sub, i, packet->color, packet->speed);
+                parDispatchKindUpdate(&effect->head.sub, packetIndex, packet->color, packet->speed);
             }
         }
         age++;
-        if (age >= frames) {
-            if (loop) {
-                effEmitterLookAtRingSpawn((EffLookAtRingEmitter *)effect, i);
+        if (age >= lifetimeFrames) {
+            if (repeatEnabled) {
+                effEmitterLookAtRingSpawn((EffLookAtRingEmitter *)effect, packetIndex);
                 age = packet->age;
             } else {
-                parDispatchKindInit(&effect->head.sub, i);
-                cycles++;
-                if (cycles >= count) {
+                parDispatchKindInit(&effect->head.sub, packetIndex);
+                completedCount++;
+                if (completedCount >= packetCount) {
                     effect->head.active = 0;
                 }
             }
@@ -1401,29 +1412,30 @@ typedef struct EffBurstEmitter {
     f32 jitterB;     /* 0x168 */
 } EffBurstEmitter;
 
-void effEmitterBurstSpawn(EffBurstEmitter *effect, u32 index) {
+/* Seed burst velocity and an optional random axis; retain the native spawn delay. */
+void effEmitterBurstSpawn(EffBurstEmitter *effect, u32 packetIndex) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    f32 tmp[4];
+    f32 directionVector[4];
     f32 speed;
     f32 jitter;
-    f32 length;
+    f32 velocityLength;
 
-    packet += index;
+    packet += packetIndex;
     packet->color = 0;
     packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     speed = effect->speed;
     jitter = effect->jitterA;
-    tmp[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    tmp[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    tmp[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    VU0_LOAD_VF(vf10, tmp);
+    directionVector[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, tmp);
-    packet->vel[0] = speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * tmp[0];
-    packet->vel[1] = speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * tmp[1];
-    packet->vel[2] = speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * tmp[2];
+    VU0_STORE_VF(vf10, directionVector);
+    packet->vel[0] = speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * directionVector[0];
+    packet->vel[1] = speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * directionVector[1];
+    packet->vel[2] = speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * directionVector[2];
     VU0_LOAD_VF(vf10, packet->vel);
-    VU0_LENGTH_VF10(length);
+    VU0_LENGTH_VF10(velocityLength);
     VU0_LOAD_MATRIX(effect->head.matrix);
     VU0_LOAD_VF(vf10, packet->vel);
     VU0_ROTATE_VEC(vf10, vf10);
@@ -1432,22 +1444,22 @@ void effEmitterBurstSpawn(EffBurstEmitter *effect, u32 index) {
     packet->pos[1] = packet->vel[1] + effect->head.origin[1];
     packet->pos[2] = packet->vel[2] + effect->head.origin[2];
     if (effect->mode == 1) {
-        tmp[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-        tmp[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-        tmp[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-        VU0_LOAD_VF(vf10, tmp);
+        directionVector[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+        directionVector[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+        directionVector[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+        VU0_LOAD_VF(vf10, directionVector);
         VU0_NORMALIZE_VF10();
-        VU0_STORE_VF(vf10, tmp);
-        packet->f30 = tmp[0];
-        packet->f34 = tmp[1];
-        packet->f38 = tmp[2];
+        VU0_STORE_VF(vf10, directionVector);
+        packet->f30 = directionVector[0];
+        packet->f34 = directionVector[1];
+        packet->f38 = directionVector[2];
     } else {
         packet->f30 = 0;
         packet->f34 = -1.0f;
         packet->f38 = 0;
     }
     jitter = effect->jitterB;
-    packet->f3C = (effect->f160 * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) - length) / effect->head.frameCount;
+    packet->f3C = (effect->f160 * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) - velocityLength) / effect->head.frameCount;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
@@ -1456,87 +1468,88 @@ void effEmitterBurstSpawn(EffBurstEmitter *effect, u32 index) {
     } else {
         packet->spin = 0;
     }
-    parDispatchKindInit(&effect->head.sub, index);
+    parDispatchKindInit(&effect->head.sub, packetIndex);
 }
 
 extern void sdfBuildVuRotationFromAxisAngle(f32 angle, f32 *axis);
 
+/* Adjust velocity length, rotate around the packet axis, and rebuild position. */
 void effEmitterBurstUpdate(EffBurstEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    u32 kind = effect->head.sub.kind;
+    u32 subeffectKind = effect->head.sub.kind;
     f32 origin[4];
-    f32 axis[4];
-    f32 growth[4];
-    f32 length;
-    f32 spin;
-    s32 cycles;
-    s32 frames;
-    s32 loop;
-    s32 count;
-    s32 i;
+    f32 rotationAxis[4];
+    f32 scaleVector[4];
+    f32 velocityLength;
+    f32 rotationStep;
+    s32 completedCount;
+    s32 lifetimeFrames;
+    s32 repeatEnabled;
+    s32 packetCount;
+    s32 packetIndex;
 
     parUpdateSharedScaleAndDelta(&effect->head.sub);
     VU0_LOAD_MATRIX_B(effect->head.matrix);
-    count = effect->head.packetCount;
-    frames = effect->head.frameCount;
-    cycles = 0;
-    spin = effect->spinRate * (3.14159265f / 180.0f);
-    loop = effect->loop;
+    packetCount = effect->head.packetCount;
+    lifetimeFrames = effect->head.frameCount;
+    completedCount = 0;
+    rotationStep = effect->spinRate * (3.14159265f / 180.0f);
+    repeatEnabled = effect->loop;
     PCP_COPY_VECTOR(origin, effect->head.origin);
-    for (i = 0; i < count; i++, packet++) {
+    for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
-        if (age == 0xF0000001) {
-            effEmitterBurstSpawn(effect, i);
+        if (age == EFF_PACKET_INITIAL_TAG) {
+            effEmitterBurstSpawn(effect, packetIndex);
             age = packet->age;
         }
         if (age >= 0) {
             packet->color = func_00159AB8(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
-            if (kind != 0) {
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
             VU0_LOAD_VF(vf10, packet->vel);
-            VU0_LENGTH_VF10(length);
-            length += packet->f3C;
-            growth[0] = length;
-            growth[1] = length;
-            growth[2] = length;
+            VU0_LENGTH_VF10(velocityLength);
+            velocityLength += packet->f3C;
+            scaleVector[0] = velocityLength;
+            scaleVector[1] = velocityLength;
+            scaleVector[2] = velocityLength;
             VU0_NORMALIZE_VF10();
-            VU0_LOAD_VF(vf11, growth);
+            VU0_LOAD_VF(vf11, scaleVector);
             VU0_MUL(vf10, vf10, vf11);
             VU0_STORE_VF(vf10, packet->vel);
             VU0_MOVE_VF(vf28, vf24);
             VU0_MOVE_VF(vf29, vf25);
             VU0_MOVE_VF(vf30, vf26);
             VU0_MOVE_VF(vf31, vf27);
-            axis[0] = packet->f30;
-            axis[1] = packet->f34;
-            axis[2] = packet->f38;
-            axis[3] = 0;
-            VU0_LOAD_VF(vf10, axis);
+            rotationAxis[0] = packet->f30;
+            rotationAxis[1] = packet->f34;
+            rotationAxis[2] = packet->f38;
+            rotationAxis[3] = 0;
+            VU0_LOAD_VF(vf10, rotationAxis);
             VU0_ROTATE_VEC(vf10, vf10);
-            VU0_STORE_VF_UNCLOBBERED(vf10, axis);
-            sdfBuildVuRotationFromAxisAngle(spin, axis);
+            VU0_STORE_VF_UNCLOBBERED(vf10, rotationAxis);
+            sdfBuildVuRotationFromAxisAngle(rotationStep, rotationAxis);
             VU0_LOAD_VF(vf10, packet->vel);
             VU0_ROTATE_VEC(vf10, vf10);
             VU0_LOAD_VF(vf11, origin);
             VU0_STORE_VF(vf10, packet->vel);
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF(vf10, packet);
-            if (kind != 0) {
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf10, packet);
-                parDispatchKindUpdate(&effect->head.sub, i, packet->color, packet->speed);
+                parDispatchKindUpdate(&effect->head.sub, packetIndex, packet->color, packet->speed);
             }
         }
         age++;
-        if (age >= frames) {
-            if (loop) {
-                age = 0xF0000001;
+        if (age >= lifetimeFrames) {
+            if (repeatEnabled) {
+                age = EFF_PACKET_INITIAL_TAG;
             } else {
-                parDispatchKindInit(&effect->head.sub, i);
-                cycles++;
-                if (cycles >= count) {
+                parDispatchKindInit(&effect->head.sub, packetIndex);
+                completedCount++;
+                if (completedCount >= packetCount) {
                     effect->head.active = 0;
                 }
             }
@@ -1605,24 +1618,26 @@ typedef struct EffSphereEmitter {
     f32 f178;
 } EffSphereEmitter;
 
-void effEmitterSphereSpawn(EffSphereEmitter *effect, u32 index) {
+/* Seed a jittered spherical position and planar direction.
+ * Native delay uses bitwise complement, not unary negation. */
+void effEmitterSphereSpawn(EffSphereEmitter *effect, u32 packetIndex) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    f32 tmp[4];
+    f32 directionVector[4];
     f32 radius;
     f32 jitter;
 
-    packet += index;
+    packet += packetIndex;
     radius = effect->radius;
     jitter = effect->f178;
-    tmp[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    tmp[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    tmp[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    VU0_LOAD_VF(vf10, tmp);
+    directionVector[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, tmp);
-    packet->pos[0] = radius * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * tmp[0];
-    packet->pos[1] = radius * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * tmp[1];
-    packet->pos[2] = radius * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * tmp[2];
+    VU0_STORE_VF(vf10, directionVector);
+    packet->pos[0] = radius * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * directionVector[0];
+    packet->pos[1] = radius * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * directionVector[1];
+    packet->pos[2] = radius * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * directionVector[2];
     VU0_LOAD_MATRIX(effect->head.matrix);
     VU0_LOAD_VF(vf10, packet->pos);
     VU0_APPLY_MATRIX(vf10, vf10);
@@ -1650,78 +1665,79 @@ void effEmitterSphereSpawn(EffSphereEmitter *effect, u32 index) {
     } else {
         packet->spin = 0;
     }
-    parDispatchKindInit(&effect->head.sub, index);
+    parDispatchKindInit(&effect->head.sub, packetIndex);
 }
 
+/* Advance sinusoidal planar displacement and scaled vertical steps, then ages. */
 void effEmitterSphereUpdate(EffSphereEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    u32 kind = effect->head.sub.kind;
-    f32 tmp[4];
-    f32 decay;
-    f32 spin;
+    u32 subeffectKind = effect->head.sub.kind;
+    f32 positionDelta[4];
+    f32 verticalScale;
+    f32 phaseStep;
     f32 waveRate;
-    s32 cycles;
-    s32 frames;
-    s32 count;
-    s32 i;
-    u32 loop;
+    s32 completedCount;
+    s32 lifetimeFrames;
+    s32 packetCount;
+    s32 packetIndex;
+    u32 repeatEnabled;
 
     parUpdateSharedScaleAndDelta(&effect->head.sub);
     VU0_LOAD_MATRIX(effect->head.matrix);
-    spin = effect->f160 * (3.14159265f / 180.0f);
-    decay = effect->f16C / 100.0f + 1.0f;
-    frames = effect->head.frameCount;
-    count = effect->head.packetCount;
-    loop = effect->flag150;
+    phaseStep = effect->f160 * (3.14159265f / 180.0f);
+    verticalScale = effect->f16C / 100.0f + 1.0f;
+    lifetimeFrames = effect->head.frameCount;
+    packetCount = effect->head.packetCount;
+    repeatEnabled = effect->flag150;
     waveRate = effect->f168;
-    cycles = 0;
-    for (i = 0; i < count; i++, packet++) {
+    completedCount = 0;
+    for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
-        if (age == 0xF0000001) {
-            effEmitterSphereSpawn(effect, i);
+        if (age == EFF_PACKET_INITIAL_TAG) {
+            effEmitterSphereSpawn(effect, packetIndex);
             age = packet->age;
         }
         if (age >= 0) {
-            f32 lift;
-            f32 old;
-            f32 k;
+            f32 verticalStep;
+            f32 previousWaveValue;
+            f32 factor;
 
             packet->color = func_00159AB8(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
-            if (kind != 0) {
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
             packet->f30 += waveRate;
-            lift = packet->f3C;
-            packet->f34 += spin;
-            k = sdfSinPoly(packet->f34);
-            old = packet->f38;
-            packet->f38 = k;
-            k = (k - old) * packet->f30;
-            tmp[0] = packet->vel[0] * k;
-            tmp[1] = lift;
-            tmp[2] = packet->vel[2] * k;
-            VU0_LOAD_VF(vf10, tmp);
+            verticalStep = packet->f3C;
+            packet->f34 += phaseStep;
+            factor = sdfSinPoly(packet->f34);
+            previousWaveValue = packet->f38;
+            packet->f38 = factor;
+            factor = (factor - previousWaveValue) * packet->f30;
+            positionDelta[0] = packet->vel[0] * factor;
+            positionDelta[1] = verticalStep;
+            positionDelta[2] = packet->vel[2] * factor;
+            VU0_LOAD_VF(vf10, positionDelta);
             VU0_APPLY_MATRIX(vf10, vf10);
-            VU0_STORE_VF(vf10, tmp);
-            packet->pos[0] += tmp[0];
-            packet->pos[1] += tmp[1];
-            packet->pos[2] += tmp[2];
-            packet->f3C = lift * decay;
-            if (kind != 0) {
+            VU0_STORE_VF(vf10, positionDelta);
+            packet->pos[0] += positionDelta[0];
+            packet->pos[1] += positionDelta[1];
+            packet->pos[2] += positionDelta[2];
+            packet->f3C = verticalStep * verticalScale;
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf10, packet);
-                parDispatchKindUpdate(&effect->head.sub, i, packet->color, packet->speed);
+                parDispatchKindUpdate(&effect->head.sub, packetIndex, packet->color, packet->speed);
             }
         }
         age++;
-        if (age >= frames) {
-            if (loop) {
-                age = 0xF0000001;
+        if (age >= lifetimeFrames) {
+            if (repeatEnabled) {
+                age = EFF_PACKET_INITIAL_TAG;
             } else {
-                parDispatchKindInit(&effect->head.sub, i);
-                cycles++;
-                if (cycles >= count) {
+                parDispatchKindInit(&effect->head.sub, packetIndex);
+                completedCount++;
+                if (completedCount >= packetCount) {
                     effect->head.active = 0;
                 }
             }
@@ -1790,28 +1806,29 @@ typedef struct EffExpandingRingEmitter {
     f32 spinRate;    /* 0x164 */
 } EffExpandingRingEmitter;
 
-void effEmitterExpandRingSpawn(EffExpandingRingEmitter *effect, u32 index) {
+/* Seed radius and ring direction, placing the packet at its rotated vertical offset. */
+void effEmitterExpandRingSpawn(EffExpandingRingEmitter *effect, u32 packetIndex) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    f32 tmp[4];
+    f32 offsetVector[4];
     f32 jitter;
     f32 radius;
     f32 angle;
 
-    packet += index;
+    packet += packetIndex;
     packet->age = -1;
     packet->color = 0;
     jitter = effect->jitter;
     radius = effect->radius * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
     packet->f30 = radius;
-    angle = (3.14159265f * 2.0f) / effect->period * (index % effect->period);
+    angle = (3.14159265f * 2.0f) / effect->period * (packetIndex % effect->period);
     packet->vel[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
     packet->vel[1] = 0;
     packet->vel[2] = sdfSinPoly(angle);
     VU0_LOAD_MATRIX(effect->head.matrix);
-    tmp[1] = radius;
-    tmp[0] = 0;
-    tmp[2] = 0;
-    VU0_LOAD_VF(vf10, tmp);
+    offsetVector[1] = radius;
+    offsetVector[0] = 0;
+    offsetVector[2] = 0;
+    VU0_LOAD_VF(vf10, offsetVector);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_LOAD_VF(vf11, effect->head.origin);
     VU0_ADD(vf10, vf10, vf11);
@@ -1824,80 +1841,82 @@ void effEmitterExpandRingSpawn(EffExpandingRingEmitter *effect, u32 index) {
     } else {
         packet->spin = 0;
     }
-    parDispatchKindInit(&effect->head.sub, index);
+    parDispatchKindInit(&effect->head.sub, packetIndex);
 }
 
+/* Build age-phase ring positions and rotate the stored X/Z directions.
+ * vector is reused for the position offset and old direction components. */
 void effEmitterExpandRingUpdate(EffExpandingRingEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    u32 kind = effect->head.sub.kind;
+    u32 subeffectKind = effect->head.sub.kind;
     f32 origin[4];
-    f32 tmp[4];
-    f32 spin;
-    f32 cosv;
-    f32 sinv;
-    s32 cycles;
-    s32 loop;
-    s32 count;
-    s32 frames;
-    s32 i;
+    f32 vector[4];
+    f32 rotationStep;
+    f32 rotationCos;
+    f32 rotationSin;
+    s32 completedCount;
+    s32 repeatEnabled;
+    s32 packetCount;
+    s32 lifetimeFrames;
+    s32 packetIndex;
 
     parUpdateSharedScaleAndDelta(&effect->head.sub);
     VU0_LOAD_MATRIX(effect->head.matrix);
-    spin = effect->spinRate * (3.14159265f / 180.0f);
-    cycles = 0;
-    count = effect->head.packetCount;
-    frames = effect->head.frameCount;
-    loop = effect->loop;
-    cosv = sdfEvaluateCosineViaSinePhaseShift(spin);
-    sinv = sdfSinPoly(spin);
+    rotationStep = effect->spinRate * (3.14159265f / 180.0f);
+    completedCount = 0;
+    packetCount = effect->head.packetCount;
+    lifetimeFrames = effect->head.frameCount;
+    repeatEnabled = effect->loop;
+    rotationCos = sdfEvaluateCosineViaSinePhaseShift(rotationStep);
+    rotationSin = sdfSinPoly(rotationStep);
     PCP_COPY_VECTOR(origin, effect->head.origin);
-    for (i = 0; i < count; i++, packet++) {
+    for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
-        if (age == 0xF0000001) {
-            effEmitterExpandRingSpawn(effect, i);
+        if (age == EFF_PACKET_INITIAL_TAG) {
+            effEmitterExpandRingSpawn(effect, packetIndex);
             age = packet->age;
         }
         if (age >= 0) {
             f32 angle;
             f32 radius;
-            f32 c;
-            f32 s;
+            f32 phaseCos;
+            f32 phaseSin;
 
             packet->color = func_00159AB8(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
-            if (kind != 0) {
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
-            angle = (f32)age / (f32)frames * 3.14159265f;
+            angle = (f32)age / (f32)lifetimeFrames * 3.14159265f;
             radius = packet->f30;
-            c = sdfEvaluateCosineViaSinePhaseShift(angle);
-            s = sdfSinPoly(angle);
-            tmp[0] = packet->vel[0] * (radius * s);
-            tmp[1] = radius * c;
-            tmp[2] = packet->vel[2] * (radius * s);
-            VU0_LOAD_VF(vf10, tmp);
+            phaseCos = sdfEvaluateCosineViaSinePhaseShift(angle);
+            phaseSin = sdfSinPoly(angle);
+            vector[0] = packet->vel[0] * (radius * phaseSin);
+            vector[1] = radius * phaseCos;
+            vector[2] = packet->vel[2] * (radius * phaseSin);
+            VU0_LOAD_VF(vf10, vector);
             VU0_APPLY_MATRIX(vf10, vf10);
             VU0_LOAD_VF(vf11, origin);
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF(vf10, packet);
-            tmp[0] = packet->vel[0];
-            tmp[2] = packet->vel[2];
-            packet->vel[0] = cosv * tmp[0] + sinv * tmp[2];
-            packet->vel[2] = cosv * tmp[2] - sinv * tmp[0];
-            if (kind != 0) {
+            vector[0] = packet->vel[0];
+            vector[2] = packet->vel[2];
+            packet->vel[0] = rotationCos * vector[0] + rotationSin * vector[2];
+            packet->vel[2] = rotationCos * vector[2] - rotationSin * vector[0];
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf10, packet);
-                parDispatchKindUpdate(&effect->head.sub, i, packet->color, packet->speed);
+                parDispatchKindUpdate(&effect->head.sub, packetIndex, packet->color, packet->speed);
             }
         }
         age++;
-        if (age >= frames) {
-            if (loop) {
-                age = 0xF0000001;
+        if (age >= lifetimeFrames) {
+            if (repeatEnabled) {
+                age = EFF_PACKET_INITIAL_TAG;
             } else {
-                parDispatchKindInit(&effect->head.sub, i);
-                cycles++;
-                if (cycles >= count) {
+                parDispatchKindInit(&effect->head.sub, packetIndex);
+                completedCount++;
+                if (completedCount >= packetCount) {
                     effect->head.active = 0;
                 }
             }
@@ -1966,31 +1985,32 @@ typedef struct EffConeEmitter {
     f32 degrees;     /* 0x174 */
 } EffConeEmitter;
 
-void effEmitterConeSpawn(EffConeEmitter *effect, s32 index) {
+/* Seed mode-zero cone position/velocity; every mode initializes age and subeffect. */
+void effEmitterConeSpawn(EffConeEmitter *effect, s32 packetIndex) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     f32 gravity;
-    f32 sweep;
+    f32 sweepRadians;
     f32 angle;
     f32 radius;
     f32 cone;
     f32 speed;
-    f32 cosv;
-    f32 sinv;
+    f32 angleCos;
+    f32 angleSin;
     f32 jitter;
 
-    packet += index;
+    packet += packetIndex;
     gravity = effect->gravity / 100.0f;
-    sweep = effect->degrees * (3.14159265f / 180.0f);
+    sweepRadians = effect->degrees * (3.14159265f / 180.0f);
     radius = effect->radius;
     cone = effect->cone;
     speed = effect->speed;
     if (effect->mode == 0) {
-        angle = sweep / (u32)effect->head.packetCount * index;
-        cosv = sdfEvaluateCosineViaSinePhaseShift(angle);
-        sinv = sdfSinPoly(angle);
-        packet->pos[0] = cosv * radius;
+        angle = sweepRadians / (u32)effect->head.packetCount * packetIndex;
+        angleCos = sdfEvaluateCosineViaSinePhaseShift(angle);
+        angleSin = sdfSinPoly(angle);
+        packet->pos[0] = angleCos * radius;
         packet->pos[1] = 0;
-        packet->pos[2] = sinv * radius;
+        packet->pos[2] = angleSin * radius;
         VU0_LOAD_MATRIX(effect->head.matrix);
         VU0_LOAD_VF(vf10, packet->pos);
         VU0_APPLY_MATRIX(vf10, vf10);
@@ -1998,9 +2018,9 @@ void effEmitterConeSpawn(EffConeEmitter *effect, s32 index) {
         packet->pos[0] += effect->head.origin[0];
         packet->pos[1] += effect->head.origin[1];
         packet->pos[2] += effect->head.origin[2];
-        packet->vel[0] = cosv * cone * speed;
+        packet->vel[0] = angleCos * cone * speed;
         packet->vel[1] = -speed * (1.0f - cone);
-        packet->vel[2] = sinv * cone * speed;
+        packet->vel[2] = angleSin * cone * speed;
         packet->f38 = gravity;
     }
     packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
@@ -2013,62 +2033,63 @@ void effEmitterConeSpawn(EffConeEmitter *effect, s32 index) {
     } else {
         packet->spin = 0;
     }
-    parDispatchKindInit(&effect->head.sub, index);
+    parDispatchKindInit(&effect->head.sub, packetIndex);
 }
 
+/* Scale velocity, apply stored gravity, and transform each motion step before aging. */
 void effEmitterConeUpdate(EffConeEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    u32 kind = effect->head.sub.kind;
-    f32 tmp[4];
-    f32 decay;
-    s32 cycles;
-    s32 frames;
-    s32 count;
-    s32 loop;
-    s32 i;
+    u32 subeffectKind = effect->head.sub.kind;
+    f32 positionDelta[4];
+    f32 velocityScale;
+    s32 completedCount;
+    s32 lifetimeFrames;
+    s32 packetCount;
+    s32 repeatEnabled;
+    s32 packetIndex;
 
     parUpdateSharedScaleAndDelta(&effect->head.sub);
     VU0_LOAD_MATRIX(effect->head.matrix);
-    decay = effect->decayPct / 100.0f + 1.0f;
-    cycles = 0;
-    frames = effect->head.frameCount;
-    count = effect->head.packetCount;
-    loop = effect->loop;
-    for (i = 0; i < count; i++, packet++) {
+    velocityScale = effect->decayPct / 100.0f + 1.0f;
+    completedCount = 0;
+    lifetimeFrames = effect->head.frameCount;
+    packetCount = effect->head.packetCount;
+    repeatEnabled = effect->loop;
+    for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
-        if (age == 0xF0000001) {
-            effEmitterConeSpawn(effect, i);
+        if (age == EFF_PACKET_INITIAL_TAG) {
+            effEmitterConeSpawn(effect, packetIndex);
             age = packet->age;
         }
         if (age >= 0) {
             packet->color = func_00159AB8(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
-            if (kind != 0) {
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
-            packet->vel[0] *= decay;
-            packet->vel[1] = packet->vel[1] * decay + packet->f38;
-            packet->vel[2] *= decay;
+            packet->vel[0] *= velocityScale;
+            packet->vel[1] = packet->vel[1] * velocityScale + packet->f38;
+            packet->vel[2] *= velocityScale;
             VU0_LOAD_VF(vf10, packet->vel);
             VU0_APPLY_MATRIX(vf10, vf10);
-            VU0_STORE_VF(vf10, tmp);
-            packet->pos[0] += tmp[0];
-            packet->pos[1] += tmp[1];
-            packet->pos[2] += tmp[2];
-            if (kind != 0) {
+            VU0_STORE_VF(vf10, positionDelta);
+            packet->pos[0] += positionDelta[0];
+            packet->pos[1] += positionDelta[1];
+            packet->pos[2] += positionDelta[2];
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf10, packet);
-                parDispatchKindUpdate(&effect->head.sub, i, packet->color, packet->speed);
+                parDispatchKindUpdate(&effect->head.sub, packetIndex, packet->color, packet->speed);
             }
         }
         age++;
-        if (age >= frames) {
-            if (loop) {
-                age = 0xF0000001;
+        if (age >= lifetimeFrames) {
+            if (repeatEnabled) {
+                age = EFF_PACKET_INITIAL_TAG;
             } else {
-                parDispatchKindInit(&effect->head.sub, i);
-                cycles++;
-                if (cycles >= count) {
+                parDispatchKindInit(&effect->head.sub, packetIndex);
+                completedCount++;
+                if (completedCount >= packetCount) {
                     effect->head.active = 0;
                 }
             }
@@ -2291,71 +2312,73 @@ typedef struct EffOffsetGravityEmitter {
 void func_00157D28(EffOffsetGravityEmitter *effect, s32 index);
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00157D28);
 
+/* Accumulate motion in the stored offset, then add the emitter origin.
+ * Only mode zero transforms the per-frame displacement through the matrix. */
 void effEmitterOffsetGravityUpdate(EffOffsetGravityEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    u32 kind = effect->head.sub.kind;
+    u32 subeffectKind = effect->head.sub.kind;
     u32 mode;
-    f32 tmp[4];
+    f32 positionDelta[4];
     f32 origin[4];
-    f32 decay;
-    s32 cycles;
-    s32 frames;
-    s32 count;
-    s32 loop;
-    s32 i;
+    f32 velocityScale;
+    s32 completedCount;
+    s32 lifetimeFrames;
+    s32 packetCount;
+    s32 repeatEnabled;
+    s32 packetIndex;
 
     parUpdateSharedScaleAndDelta(&effect->head.sub);
     mode = effect->mode;
     if (mode == 0) {
         VU0_LOAD_MATRIX(effect->head.matrix);
     }
-    decay = effect->decayPct / 100.0f + 1.0f;
-    cycles = 0;
-    count = effect->head.packetCount;
-    frames = effect->head.frameCount;
-    loop = effect->loop;
+    velocityScale = effect->decayPct / 100.0f + 1.0f;
+    completedCount = 0;
+    packetCount = effect->head.packetCount;
+    lifetimeFrames = effect->head.frameCount;
+    repeatEnabled = effect->loop;
     PCP_COPY_VECTOR(origin, effect->head.origin);
-    for (i = 0; i < count; i++, packet++) {
+    for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
-        if (age == 0xF0000001) {
-            func_00157D28(effect, i);
+        if (age == EFF_PACKET_INITIAL_TAG) {
+            func_00157D28(effect, packetIndex);
             age = packet->age;
         }
         if (age >= 0) {
             packet->color = func_00159AB8(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
-            if (kind != 0) {
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
-            packet->vel[1] = packet->vel[1] * decay + packet->f3C;
-            packet->vel[0] *= decay;
-            packet->vel[2] *= decay;
+            packet->vel[1] = packet->vel[1] * velocityScale + packet->f3C;
+            packet->vel[0] *= velocityScale;
+            packet->vel[2] *= velocityScale;
             VU0_LOAD_VF(vf10, packet->vel);
             if (mode == 0) {
                 VU0_APPLY_MATRIX(vf10, vf10);
             }
-            VU0_STORE_VF(vf10, tmp);
-            packet->f30 += tmp[0];
-            packet->f34 += tmp[1];
-            packet->f38 += tmp[2];
+            VU0_STORE_VF(vf10, positionDelta);
+            packet->f30 += positionDelta[0];
+            packet->f34 += positionDelta[1];
+            packet->f38 += positionDelta[2];
             VU0_LOAD_VF(vf10, &packet->f30);
             VU0_LOAD_VF(vf11, origin);
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF(vf10, packet);
-            if (kind != 0) {
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf10, packet);
-                parDispatchKindUpdate(&effect->head.sub, i, packet->color, packet->speed);
+                parDispatchKindUpdate(&effect->head.sub, packetIndex, packet->color, packet->speed);
             }
         }
         age++;
-        if (age >= frames) {
-            if (loop) {
-                age = 0xF0000001;
+        if (age >= lifetimeFrames) {
+            if (repeatEnabled) {
+                age = EFF_PACKET_INITIAL_TAG;
             } else {
-                parDispatchKindInit(&effect->head.sub, i);
-                cycles++;
-                if (cycles >= count) {
+                parDispatchKindInit(&effect->head.sub, packetIndex);
+                completedCount++;
+                if (completedCount >= packetCount) {
                     effect->head.active = 0;
                 }
             }
@@ -2430,33 +2453,34 @@ typedef struct EffDiscAuxEmitter {
     f32 (*aux)[4];   /* 0x178: 16 bytes per packet */
 } EffDiscAuxEmitter;
 
-void effEmitterDiscAuxSpawn(EffDiscAuxEmitter *effect, u32 index) {
+/* Seed the auxiliary position and packet direction separately, then the subeffect. */
+void effEmitterDiscAuxSpawn(EffDiscAuxEmitter *effect, u32 packetIndex) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    f32 (*aux)[4] = effect->aux;
-    f32 tmp[4];
-    f32 radius;
+    f32 (*auxiliaryCursor)[4] = effect->aux;
+    f32 directionVector[4];
+    f32 radialDistance;
     f32 jitter;
 
-    packet += index;
-    aux += index;
-    radius = effect->radius * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
-    tmp[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    tmp[1] = 0;
-    tmp[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    VU0_LOAD_VF(vf10, tmp);
+    packet += packetIndex;
+    auxiliaryCursor += packetIndex;
+    radialDistance = effect->radius * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
+    directionVector[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[1] = 0;
+    directionVector[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, tmp);
-    (*aux)[0] = tmp[0] * radius;
-    (*aux)[1] = 0;
-    (*aux)[2] = tmp[2] * radius;
+    VU0_STORE_VF(vf10, directionVector);
+    (*auxiliaryCursor)[0] = directionVector[0] * radialDistance;
+    (*auxiliaryCursor)[1] = 0;
+    (*auxiliaryCursor)[2] = directionVector[2] * radialDistance;
     VU0_LOAD_MATRIX(effect->head.matrix);
-    VU0_LOAD_VF(vf10, *aux);
+    VU0_LOAD_VF(vf10, *auxiliaryCursor);
     VU0_APPLY_MATRIX(vf10, vf10);
-    VU0_STORE_VF(vf10, *aux);
-    tmp[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    tmp[1] = 0;
-    tmp[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    VU0_LOAD_VF(vf10, tmp);
+    VU0_STORE_VF(vf10, *auxiliaryCursor);
+    directionVector[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[1] = 0;
+    directionVector[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, packet->vel);
     packet->f30 = effect->f164 * (effMiscRandUnitFloat(D_0034DF38) * effect->f174 + (1.0f - effect->f174));
@@ -2474,81 +2498,83 @@ void effEmitterDiscAuxSpawn(EffDiscAuxEmitter *effect, u32 index) {
     } else {
         packet->spin = 0;
     }
-    parDispatchKindInit(&effect->head.sub, index);
+    parDispatchKindInit(&effect->head.sub, packetIndex);
 }
 
+/* Advance auxiliary positions, then transform/store packet positions with origin.
+ * Auxiliary accumulation remains separate from the transformed packet position. */
 void effEmitterDiscAuxUpdate(EffDiscAuxEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
-    u32 kind = effect->head.sub.kind;
-    f32 (*aux)[4] = effect->aux;
-    f32 tmp[4];
+    u32 subeffectKind = effect->head.sub.kind;
+    f32 (*auxiliaryCursor)[4] = effect->aux;
+    f32 positionVector[4];
     f32 origin[4];
-    f32 decay;
-    f32 spin;
+    f32 verticalScale;
+    f32 phaseStep;
     f32 waveRate;
-    s32 cycles;
-    s32 frames;
-    s32 count;
-    s32 i;
-    u32 loop;
+    s32 completedCount;
+    s32 lifetimeFrames;
+    s32 packetCount;
+    s32 packetIndex;
+    u32 repeatEnabled;
 
     parUpdateSharedScaleAndDelta(&effect->head.sub);
     VU0_LOAD_MATRIX(effect->head.matrix);
-    spin = effect->f160 * (3.14159265f / 180.0f);
-    decay = effect->f16C / 100.0f + 1.0f;
-    cycles = 0;
-    count = effect->head.packetCount;
-    frames = effect->head.frameCount;
-    loop = effect->flag150;
+    phaseStep = effect->f160 * (3.14159265f / 180.0f);
+    verticalScale = effect->f16C / 100.0f + 1.0f;
+    completedCount = 0;
+    packetCount = effect->head.packetCount;
+    lifetimeFrames = effect->head.frameCount;
+    repeatEnabled = effect->flag150;
     waveRate = effect->f168;
     PCP_COPY_VECTOR(origin, effect->head.origin);
-    for (i = 0; i < count; i++, packet++, aux++) {
+    for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++, auxiliaryCursor++) {
         s32 age = packet->age;
 
-        if (age == 0xF0000001) {
-            effEmitterDiscAuxSpawn(effect, i);
+        if (age == EFF_PACKET_INITIAL_TAG) {
+            effEmitterDiscAuxSpawn(effect, packetIndex);
             age = packet->age;
         }
         if (age >= 0) {
-            f32 lift;
-            f32 old;
-            f32 k;
+            f32 verticalStep;
+            f32 previousWaveValue;
+            f32 factor;
 
             packet->color = func_00159AB8(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
-            if (kind != 0) {
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
             packet->f30 += waveRate;
-            lift = packet->f3C;
-            packet->f34 += spin;
-            k = sdfSinPoly(packet->f34);
-            old = packet->f38;
-            packet->f38 = k;
-            k = (k - old) * packet->f30;
-            tmp[0] = (*aux)[0] + packet->vel[0] * k;
-            tmp[1] = (*aux)[1] + lift;
-            tmp[2] = (*aux)[2] + packet->vel[2] * k;
-            VU0_LOAD_VF(vf10, tmp);
-            VU0_STORE_VF(vf10, *aux);
+            verticalStep = packet->f3C;
+            packet->f34 += phaseStep;
+            factor = sdfSinPoly(packet->f34);
+            previousWaveValue = packet->f38;
+            packet->f38 = factor;
+            factor = (factor - previousWaveValue) * packet->f30;
+            positionVector[0] = (*auxiliaryCursor)[0] + packet->vel[0] * factor;
+            positionVector[1] = (*auxiliaryCursor)[1] + verticalStep;
+            positionVector[2] = (*auxiliaryCursor)[2] + packet->vel[2] * factor;
+            VU0_LOAD_VF(vf10, positionVector);
+            VU0_STORE_VF(vf10, *auxiliaryCursor);
             VU0_APPLY_MATRIX(vf10, vf10);
             VU0_LOAD_VF(vf11, origin);
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF(vf10, packet);
-            packet->f3C = lift * decay;
-            if (kind != 0) {
+            packet->f3C = verticalStep * verticalScale;
+            if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf10, packet);
-                parDispatchKindUpdate(&effect->head.sub, i, packet->color, packet->speed);
+                parDispatchKindUpdate(&effect->head.sub, packetIndex, packet->color, packet->speed);
             }
         }
         age++;
-        if (age >= frames) {
-            if (loop) {
-                age = 0xF0000001;
+        if (age >= lifetimeFrames) {
+            if (repeatEnabled) {
+                age = EFF_PACKET_INITIAL_TAG;
             } else {
-                parDispatchKindInit(&effect->head.sub, i);
-                cycles++;
-                if (cycles >= count) {
+                parDispatchKindInit(&effect->head.sub, packetIndex);
+                completedCount++;
+                if (completedCount >= packetCount) {
                     effect->head.active = 0;
                 }
             }
