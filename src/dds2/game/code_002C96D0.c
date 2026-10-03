@@ -47,9 +47,13 @@ extern s32 sdfAllocGeneralBlock();
 
 extern s32 sdfResourceRetainAddress();
 
-extern s64 sdfDevCreateCommandState(u64);
+typedef struct DevState DevState;
+extern DevState *sdfDevCreateCommandState(s32);
 
-extern u64 sdfDevQueueControlAndWait(s64);
+extern u32 sdfDevQueueControlAndWait(DevState *);
+extern void sdfDevQueueReadAndWait(DevState *, void *, s32);
+extern void sdfDevWaitThenReleaseCommandState(DevState *);
+
 
 extern s32 fileLoadSelectionWork;
 
@@ -1257,7 +1261,6 @@ void *fileUpdateWait(void) {
     }
     return NULL;
 }
-
 void *fileSetMenuCallbackAndClearResult(u32 menuCallback) {
     D_00439020 = menuCallback;
     D_00437D40 = 0;
@@ -2649,6 +2652,8 @@ typedef struct FileConfigTask {
     u32 pending;    /* 0x38: zero when no load can start */
 } FileConfigTask;
 
+
+
 void fileConfigTaskDestroy(void) {
     s32 request = 1;
     FileConfigListNode *node;
@@ -3116,20 +3121,20 @@ void fileJobSetPrimaryData(job, src, size, option)
     }
 }
 
-void fileJobCopyCommandIntoPrimaryData(u64 job, u64 commandId, u16 option) {
-    s64 command;
-    u64 size;
-    u64 handle;
-    u64 address;
+void fileJobCopyCommandIntoPrimaryData(FileJob *job, s32 commandId, u16 option) {
+    DevState *command;
+    s32 size;
+    s32 handle;
+    s32 address;
 
     command = sdfDevCreateCommandState(commandId);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
         handle = sdfAllocGeneralBlock(size);
         address = sdfResourceRetainAddress(handle);
-        sdfDevQueueReadAndWait(command, address, size);
+        sdfDevQueueReadAndWait(command, (void *)address, size);
         sdfDevWaitThenReleaseCommandState(command);
-        fileJobSetPrimaryData(job, address, size, option);
+        fileJobSetPrimaryData(job, (void *)address, size, option);
         sdfReleaseResourceAllocation(handle);
         return;
     }
@@ -3151,20 +3156,20 @@ void fileJobSetSecondaryData(job, src, size, selector)
     }
 }
 
-void fileJobCopyCommandIntoSecondaryData(u64 job, u64 commandId, u16 selector) {
-    s64 command;
-    u64 size;
-    u64 handle;
-    u64 address;
+void fileJobCopyCommandIntoSecondaryData(FileJob *job, s32 commandId, u16 selector) {
+    DevState *command;
+    s32 size;
+    s32 handle;
+    s32 address;
 
     command = sdfDevCreateCommandState(commandId);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
         handle = sdfAllocGeneralBlock(size);
         address = sdfResourceRetainAddress(handle);
-        sdfDevQueueReadAndWait(command, address, size);
+        sdfDevQueueReadAndWait(command, (void *)address, size);
         sdfDevWaitThenReleaseCommandState(command);
-        fileJobSetSecondaryData(job, address, size, selector);
+        fileJobSetSecondaryData(job, (void *)address, size, selector);
         sdfReleaseResourceAllocation(handle);
         return;
     }
@@ -3204,10 +3209,10 @@ void *fileDuplicateJob(void *source) {
 /* No return on the path where no command state exists: retail hands back
  * whatever v0 held. */
 void *fileJobCreateFromCommandState(entry)
-    u64 entry;
+    s32 entry;
 {
-    s64 command;
-    u64 size;
+    DevState *command;
+    s32 size;
     s32 handle;
     s32 address;
     void *job;
@@ -3217,7 +3222,7 @@ void *fileJobCreateFromCommandState(entry)
         size = sdfDevQueueControlAndWait(command);
         handle = sdfAllocGeneralBlock(size);
         address = sdfResourceRetainAddress(handle);
-        sdfDevQueueReadAndWait(command, address, size);
+        sdfDevQueueReadAndWait(command, (void *)address, size);
         sdfDevWaitThenReleaseCommandState(command);
         job = fileDuplicateJob((void *)address);
         sdfReleaseResourceAllocation(handle);

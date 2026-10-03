@@ -21,7 +21,9 @@ extern u64 func_001579C8(void);
 
 extern u64 effLoadResourceNode(void);
 
-extern u64 effCreateNodeFromDescriptor(void);
+struct EffNode;
+struct EffNodeDescriptor;
+extern struct EffNode *effCreateNodeFromDescriptor(struct EffNodeDescriptor *descriptor);
 
 extern u64 billCreateFromResource(u64, u64);
 
@@ -72,7 +74,7 @@ typedef struct {
     f32 parameter;
 } EffectParameters;
 
-typedef struct {
+typedef struct EffectObj {
     u8 pad0[4];       /* 0x0 */
     u32 worldCounter; /* 0x4 copied from the constructor's worldCounter */
     u8 pad8[7];       /* 0x8 */
@@ -341,12 +343,12 @@ EffectObj *effObjCreateWithBoundBill(bill, firstVector, secondVectorAddress)
     return obj;
 }
 
-/* Create the descriptor-sourced node, then bind it; retain unused and the wide ABI. */
-void effObjSpawnDescriptorBoundEffect(u64 unused, u64 firstVectorAddress, u64 secondVectorAddress) {
-    u64 bill;
+/* Create the descriptor-sourced node and return its bound world object. */
+EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, s32 secondVectorAddress) {
+    struct EffNode *bill;
 
-    bill = effCreateNodeFromDescriptor();
-    effObjCreateWithBoundBill(bill, firstVectorAddress, secondVectorAddress);
+    bill = effCreateNodeFromDescriptor(descriptor);
+    return effObjCreateWithBoundBill(bill, firstVector, secondVectorAddress);
 }
 
 /* Create the loaded-resource node, then bind it; constructor failure is not returned. */

@@ -196,6 +196,7 @@ extern char *strcat(char *, char *);
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D5D0);
 
 extern void *func_0033D5D0(void *packet, const char *fmt, void *args);
+
 void sdfPktInit(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index);
 
 void *sdfFormatSifPacket(void *packet, const char *fmt, ...) {
@@ -648,13 +649,14 @@ void sdfDevWaitThenReleaseCommandState(DevState *state) {
     sdfDevQueueReleaseState(state);
 }
 
-void sdfDevQueueReadAndWait(void) {
-    sdfDevQueueRead();
+/* Forward the queued request's arguments, then wait for its reply callback. */
+void sdfDevQueueReadAndWait(DevState *state, void *data, s32 extra) {
+    sdfDevQueueRead(state, data, extra);
     WaitSema(sdfDevReplySemaphore);
 }
 
-u32 sdfDevQueueControlAndWait(void) {
-    sdfDevQueueControlRequest();
+u32 sdfDevQueueControlAndWait(DevState *state) {
+    sdfDevQueueControlRequest(state);
     WaitSema(sdfDevReplySemaphore);
     return sdfDevControlReplyValue;
 }

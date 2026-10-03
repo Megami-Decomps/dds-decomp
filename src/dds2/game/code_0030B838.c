@@ -151,7 +151,7 @@ extern SdfCameraVector D_004009B0[];
 extern SdfCameraVector D_00400A50[];
 extern u32 func_0030B678(void);
 
-extern s32 mnuCreateListState(s32, s32, s32);
+extern struct MenuList *mnuCreateListState(u32, u32, s32);
 extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 extern s32 mdlCollectFlagBitsIntoMask(void);
@@ -393,7 +393,7 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
     s32 i;
 
     count = 0;
-    sdfActiveCounterRuntime = mnuCreateListState(0, 8, 0x16);
+    sdfActiveCounterRuntime = (s32)mnuCreateListState(0, 8, 0x16);
     ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer = sdfAllocSizeClassBlock(0x24);
     memset(((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer, 0, 0x24);
     ((SdfCounterRuntime *)sdfActiveCounterRuntime)->draw = (SdfCounterDrawFn)func_0030CC68;

@@ -59,7 +59,7 @@ void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode,
                   drawContext);
 }
 
-extern s32 mnuCreateListState(s32, s32, s32);
+extern struct MenuList *mnuCreateListState(u32, u32, s32);
 
 extern void mnuDestroyListState(s32);
 
@@ -73,7 +73,7 @@ void mnuRecreateMenuSelectionList(void) {
     if (((SpriteMenuState *)mnuMovieMenuState)->list != 0) {
         mnuDestroyListState(((SpriteMenuState *)mnuMovieMenuState)->list);
     }
-    node = mnuCreateListState(0, 3, 0);
+    node = (s32)mnuCreateListState(0, 3, 0);
     ((SpriteMenuState *)mnuMovieMenuState)->list = node;
     ((SpriteMenuList *)node)->callback = func_002A5A78;
     for (i = 0; i < 3; i++) {

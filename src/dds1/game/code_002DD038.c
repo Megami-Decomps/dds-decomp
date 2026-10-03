@@ -48,7 +48,7 @@ typedef struct MotionKeySample {
     f32 weight;
 } MotionKeySample;
 
-extern void sdfFindMotionKeyInterval(void *, void *);
+extern void sdfFindMotionKeyInterval(void *, void *, f32);
 
 s32 sdfAllocateBoundMotionPointerEntry(s32 source, s32 unused, s32 entryIndex) {
     s32 entry = sdfAllocSizeClassBlock(0x20);
@@ -57,8 +57,8 @@ s32 sdfAllocateBoundMotionPointerEntry(s32 source, s32 unused, s32 entryIndex) {
     return entry;
 }
 
-/* Interpolate the sampled values, retaining separate keys when their IDs differ. */
-void sdfBlendMotionKeys(MotionKeyWork *motion) {
+/* Sample the supplied frame and interpolate, retaining separate keys when IDs differ. */
+void sdfBlendMotionKeys(MotionKeyWork *motion, f32 frame) {
     MotionKeySample sample;
     MotionKey *out;
     s32 firstId;
@@ -68,7 +68,7 @@ void sdfBlendMotionKeys(MotionKeyWork *motion) {
     f32 weight;
     f32 inverse;
 
-    sdfFindMotionKeyInterval(motion, &sample);
+    sdfFindMotionKeyInterval(motion, &sample, frame);
     firstId = sample.first->id;
     secondId = sample.second->id;
     firstValue = sample.first->value;

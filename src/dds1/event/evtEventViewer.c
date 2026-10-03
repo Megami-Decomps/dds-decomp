@@ -495,7 +495,9 @@ typedef struct EvtViewParams {
 extern void effObjSetFlags(s32 obj, s32 flags);
 extern void *func_00115298(void *resource, void *position, void *scale);
 extern void effObjReplaceActiveEventNode(void *obj, u32 entryId);
-extern s32 effObjSpawnDescriptorBoundEffect(s32 arg, f32 *vec0, f32 *vec1);
+struct EffectObj;
+struct EffNodeDescriptor;
+extern struct EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, s32 secondVectorAddress);
 extern s32 func_001150B0(s32 arg, f32 *vec0, f32 *vec1);
 extern s32 func_00115840(s32 mode, s32 arg);
 extern void effObjDispatchReadyState(s32 obj);
@@ -527,7 +529,7 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *
     case 3:
     case 0x1A:
         if (cmd->kind == 3) {
-            handle = effObjSpawnDescriptorBoundEffect(cmd->arg, vec0, vec1);
+            handle = (s32)effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)cmd->arg, vec0, (s32)vec1);
         } else {
             handle = func_001150B0(cmd->arg, vec0, vec1);
         }

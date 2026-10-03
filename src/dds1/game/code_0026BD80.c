@@ -36,7 +36,7 @@ extern s8 D_00324510[];
 
 extern void mnuReleaseMenuResourceSlots(void);
 
-extern s32 mnuCreateListState(s32, s32, s32);
+extern struct MenuList *mnuCreateListState(s32, s32, s32);
 
 extern s32 mnuListAppendNode(s32, s32);
 
@@ -84,7 +84,7 @@ void mnuRecreateMenuSelectionList(void) {
     if (((MenuState *)mnuMovieMenuState)->linkedState != 0) {
         mnuDestroyListState(((MenuState *)mnuMovieMenuState)->linkedState);
     }
-    node = mnuCreateListState(0, 3, 0);
+    node = (s32)mnuCreateListState(0, 3, 0);
     ((MenuState *)mnuMovieMenuState)->linkedState = node;
     ((MenuState *)node)->linkedState = (s32)func_0026D480;
     for (i = 0; i < 3; i++) {
