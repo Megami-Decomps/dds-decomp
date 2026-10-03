@@ -4,9 +4,9 @@
 #include "kwln.h"
 
 extern void func_00101968(KwlnTask *, KwlnTask *);
-extern s64 mnuPreparePopupAndDispatchSelection(s32);
-extern s64 mnuAdvanceCampPopup(s32);
-extern s64 mnuFinishCampPopup(s32);
+extern s32 mnuPreparePopupAndDispatchSelection(s32);
+extern s32 mnuAdvanceCampPopup(s32);
+extern s32 mnuFinishCampPopup(s32);
 
 extern s32 sdfAllocGeneralBlock(s32);
 extern u8 *sdfResourceRetainAddress(s32);
@@ -87,9 +87,9 @@ extern char D_00424BD0[]; /* "camp_update" */
 
 extern s8 mnuPanelTaskCompletionState;
 
-extern s64 func_002C4038(s32, s32 *, u64, u64);
+extern s32 func_002C4038(s32, s32 *, u64, u64);
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
 
 extern void mnuShopReleaseWindowSprites();
 
@@ -107,7 +107,7 @@ extern s32 mnuShopReleaseSceneObjects(u8 *);
 
 extern void mnuDrainPanelTransitions(s32, s32);
 
-extern void dspCloseChannel(void);
+extern s32 dspCloseChannel(void);
 
 extern void evtReleaseResourcePairHandle();
 
@@ -436,7 +436,7 @@ void mnuInitializeCampPanelVisualDefaults(f32 *firstVector, f32 *secondVector, f
     *scalarB = 0.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E048);
+INCLUDE_ASM(s32, "game/code_0025DA20", func_0025E048);
 
 typedef struct CampDisplayDefaults {
     s32 width;
@@ -1440,21 +1440,21 @@ s32 mnuCampConsumePanelTaskCompletion(void) {
     return 0;
 }
 
-static inline s64 campSetHandler(s32 context, u64 mode, s32 callback) {
+static inline s32 campSetHandler(s32 context, u64 mode, s32 callback) {
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), mode, callback);
 }
 
-s64 mnuPreparePopupAndDispatchSelection(s32 callback) {
+s32 mnuPreparePopupAndDispatchSelection(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     mnuSetPopupEntry((s32 *)(context + 0x58), D_003CE658);
     return campSetHandler(context, 0, callback);
 }
 
-s64 mnuAdvanceCampPopup(s32 callback) {
+s32 mnuAdvanceCampPopup(s32 callback) {
     return campSetHandler(kwlnTaskGetUserValue(), 1, callback);
 }
 
-s64 mnuFinishCampPopup(s32 callback) {
+s32 mnuFinishCampPopup(s32 callback) {
     return campSetHandler(kwlnTaskGetUserValue(), 2, callback);
 }
 

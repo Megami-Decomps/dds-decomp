@@ -3,9 +3,9 @@ extern void frFontSetChainFlag();
 extern s32 frFontQueueGlyphInSelectedSlot();
 extern s32 func_0019D550();
 
-extern s32 func_002C4038();
+extern s32 func_002C4038(s32, s32 *, u64, u64);
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
 
 typedef struct {
     u8 pad0[6];

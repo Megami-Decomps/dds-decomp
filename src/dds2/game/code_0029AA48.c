@@ -1,7 +1,7 @@
 #include "common.h"
 #include "mnu.h"
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
 
 typedef struct MenuLayoutContext {
     u8 pad00[0x94];
@@ -83,7 +83,7 @@ void mnuDrawRemainingSelectionExtent(MenuLayoutContext *context) {
 
 INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AC20);
 
-s64 mnuAdvanceSkillPackageToItemPanel(s32 request) {
+s32 mnuAdvanceSkillPackageToItemPanel(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
@@ -94,7 +94,7 @@ s64 mnuAdvanceSkillPackageToItemPanel(s32 request) {
     return menuSetHandler(context, 1, request);
 }
 
-s64 mnuAdvanceSkillPanelToNextMenu(s32 request) {
+s32 mnuAdvanceSkillPanelToNextMenu(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {

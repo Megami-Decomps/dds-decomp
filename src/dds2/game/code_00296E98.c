@@ -125,10 +125,10 @@ enum {
 
 extern BrsIconRecord D_003D03F0[];
 extern u8 *D_00438FC8;
-extern s32 func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
 
 /* Draw the selected result icon, then the fixed companion at the same alpha. */
-s32 func_00296E98(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
+void func_00296E98(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
     f32 strength;
     s32 layer;
 
@@ -139,13 +139,13 @@ s32 func_00296E98(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
                   D_003D03F0[iconIndex][BRS_ICON_Y] << 3, 0,
                   (u32)(strength * 256.0f), 0, layer,
                   D_003D03F0[iconIndex][BRS_ICON_ID], option);
-    return func_00306CD0(D_003D03F0[8][BRS_ICON_X] << 4,
+    func_00306CD0(D_003D03F0[8][BRS_ICON_X] << 4,
                          D_003D03F0[8][BRS_ICON_Y] << 3, 0,
                          (u32)(strength * 256.0f), 0, layer,
                          D_003D03F0[8][BRS_ICON_ID], option);
 }
 
-s32 func_00297000(s32 unused, u32 value, s32 entryIndex, s32 drawArg) {
+void func_00297000(s32 unused, u32 value, s32 entryIndex, s32 drawArg) {
     f32 normalized;
     f32 companionPosition;
     s32 layer;
@@ -169,7 +169,7 @@ s32 func_00297000(s32 unused, u32 value, s32 entryIndex, s32 drawArg) {
     companionX = (s32)((f32)D_003D03F0[8][BRS_ICON_X] -
                        (1.0f - companionPosition) * 128.0f);
 
-    return func_00306CD0(companionX << 4,
+    func_00306CD0(companionX << 4,
                          D_003D03F0[8][BRS_ICON_Y] << 3, 0,
                          (u32)(normalized * 256.0f), 0, layer,
                          D_003D03F0[8][BRS_ICON_ID], drawArg);
@@ -680,13 +680,13 @@ void *brsCreateRewardTaskWork(void) {
     return work;
 }
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
 extern void effDestroyResourceSlotSet(s32);
 extern void mnuDrainPanelTransitions(s32, s32);
 extern s32 brsAdvanceSkillPackagePanel(s32);
 extern void brsCloseSkillPackagePanel(s32);
 extern void func_00303D58(s32);
-extern void dspCloseChannel(void);
+extern s32 dspCloseChannel(void);
 extern void sdfReleaseResourceAllocation(s32);
 
 /* Release the panel and task resources, then mark the result task finished. */
@@ -709,8 +709,8 @@ void brsStaffTaskDestroy(s32 taskArg) {
 extern s32 kwlnTaskCreate(void *name, s32 flags, s32 prio, s32 stacked, void *update, void *destroy, void *data);
 extern void *brsCreateRewardTaskWork(void);
 extern void brsMessageInputStep(void);
-extern void mnuStaffRunPanel1(void);
-extern void mnuStaffRunPanel2(void);
+extern s32 mnuStaffRunPanel1(s32);
+extern s32 mnuStaffRunPanel2(s32);
 extern void brsStaffTaskDestroy(s32);
 
 s32 mnuStaffCreateTasks(void) {

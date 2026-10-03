@@ -13,16 +13,29 @@ extern u8 D_003E7200[];
 extern u8 D_003E73F8[];
 
 extern s32 mnuUseFieldSkillOnParty(s32, s32, s32);
+extern u32 mnuMapPadMaskToFlags(s32);
+extern s32 func_002A9AB8(s32);
+extern void mnuSetPopupEntry(s32, s32);
+extern void func_002B9808(s32);
+extern void mnuRetreatWindowListSelection(s32);
+extern void mnuAdvanceWindowListSelection(s32);
+extern void mnuClearWindowPanelTransitionFlag(s32);
+extern void mnuPlayInputSound(s32, u32, s32);
+extern u8 D_003E6F38[];
 
 /* Sub-object reached through the context's +0x104 chain. */
 typedef struct {
     u8 pad0[0x48]; /* 0x0 */
     u32 flags;     /* 0x48 */
+    u8 pad4C[0x14];
+    u32 commandIndex;
 } MtrSub;
 
 typedef struct {
     u8 pad0[0x14]; /* 0x0 */
     MtrSub *sub;   /* 0x14 */
+    u8 pad18[4];
+    MtrSub *entry;
 } MtrMid;
 
 typedef struct {
@@ -32,7 +45,10 @@ typedef struct {
 
 /* A focused view of the staff menu's CampVisualWork (code_002A9068). */
 typedef struct CampVisualWork {
-    u8 pad00[0x60];
+    u8 pad00[8];
+    u8 dispatchState[0x4C];
+    s32 popup;
+    u8 pad58[8];
     u32 drawContext;        /* 0x60 */
     u8 pad64[0x8C];
     u32 panelResource;      /* 0xF0 */
@@ -69,11 +85,58 @@ u32 mnuStartCampTitleFadeOut(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AAF70);
+/* Handle the selected field skill after both dispatch and resource readiness. */
+s32 func_002AAF70(s32 callback) {
+    CampVisualWork *context;
+    s32 *popup;
+    u32 input;
+    s32 state;
+
+    context = (CampVisualWork *)kwlnTaskGetUserValue();
+    input = mnuMapPadMaskToFlags(0x33);
+    popup = &context->popup;
+    state = func_002C4038((s32)context->dispatchState, popup, 0, callback);
+    if (state != 0) {
+        return state;
+    }
+    state = func_002A9AB8(callback);
+    if (state == 0) {
+        return state;
+    }
+    if (*popup == 0) {
+        if (input & 1) {
+            MtrSub *entry = context->skillFlagRoot->mid->entry;
+
+            if ((entry->flags & 1) == 0) {
+                u32 index = entry->commandIndex + 1;
+
+                mnuSetPopupEntry((s32)popup, (s32)(D_003E6F38 + index * 0x1C));
+                context->titleFadingOut = 1;
+            } else {
+                input = 0x8000;
+            }
+        }
+        if (input & 2) {
+            mnuSetPopupEntry((s32)popup, (s32)D_003E6F38);
+        }
+    }
+    if ((input & 0x300000) == 0) {
+        func_002B9808((s32)context->skillFlagRoot);
+    }
+    if (input & 0x10) {
+        mnuRetreatWindowListSelection((s32)context->skillFlagRoot);
+    }
+    if (input & 0x20) {
+        mnuAdvanceWindowListSelection((s32)context->skillFlagRoot);
+    }
+    mnuClearWindowPanelTransitionFlag((s32)context->skillFlagRoot);
+    mnuPlayInputSound(0, input, (s32)context->skillFlagRoot->mid);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB0E0);
 
-s64 mnuFinishStaffConfigPopup(s32 callback) {
+s32 mnuFinishStaffConfigPopup(s32 callback) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
@@ -100,10 +163,10 @@ u32 mnuConfigureCampDrawContextPanel(void) {
 }
 
 /* Dispatch a callback; on idle, install the default entry unless busy. */
-s64 mnuDispatchStaffMenuWithIdlePopup(s32 callback) {
+s32 mnuDispatchStaffMenuWithIdlePopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *dispatchEntry = (s32 *)(context + 0x54);
-    s64 state = func_002C4038(context + 8, dispatchEntry, 0, callback);
+    s32 state = func_002C4038(context + 8, dispatchEntry, 0, callback);
     if (state == 0) {
         if (fileConsumeConfigTaskReady() == 0) {
             mnuSetPopupEntryFlagged(dispatchEntry, D_003E7034);
@@ -113,7 +176,7 @@ s64 mnuDispatchStaffMenuWithIdlePopup(s32 callback) {
     return state;
 }
 
-s64 mnuDrawStaffImageScreen(s32 callback) {
+s32 mnuDrawStaffImageScreen(s32 callback) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
@@ -124,7 +187,7 @@ s64 mnuDrawStaffImageScreen(s32 callback) {
     return menuSetHandler(context, 1, callback);
 }
 
-s64 mnuFinishStaffImagePopup(s32 callback) {
+s32 mnuFinishStaffImagePopup(s32 callback) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
@@ -140,9 +203,9 @@ u32 func_002AB3A8(void) {
     return 1;
 }
 
-s64 mnuPollCampFieldSkillAndPopup(s32 callback) {
+s32 mnuPollCampFieldSkillAndPopup(s32 callback) {
     s32 context;
-    s64 state;
+    s32 state;
 
     context = kwlnTaskGetUserValue();
     state = menuSetHandler(context, 0, callback);
@@ -156,7 +219,7 @@ s64 mnuPollCampFieldSkillAndPopup(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB448);
 
-s64 mnuFinishFieldSkillPopup(s32 callback) {
+s32 mnuFinishFieldSkillPopup(s32 callback) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
