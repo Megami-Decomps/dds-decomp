@@ -2099,10 +2099,7 @@ proc_0022:
     SCREEN_FADE_B(0, 30)
     WAIT_FOR_TIMER_LIMIT(30)
     SET_MODEL_FLAG(1600)
-    push 703
-    push 29
-    push 1
-    COMM 0x0097
+    DEFER_BATTLE_EXIT(1, 29, 703)
     CALL_EVENT(event(e675))
     return
   }
@@ -2420,12 +2417,8 @@ proc_0031:
     STOP_ARCHIVE_SOUND(28, 0)
     RESET_STREAM_PLAYBACK()
     WAIT_FOR_STREAM_IDLE()
-    push 700
-    push 29
-    push 1
-    COMM 0x0097
-    push 784
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 29, 700)
+    SUBMIT_EVENT(784)
     return
   }
 _302:
@@ -2671,12 +2664,8 @@ proc_003a:
   WAIT_FOR_TIMER_LIMIT(5)
   WAIT_FOR_TIMER_LIMIT(5)
   STOP_ARCHIVE_SOUND(32, 0)
-  push 707
-  push 29
-  push 1
-  COMM 0x0097
-  push 799
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 29, 707)
+  SUBMIT_EVENT(799)
   return
   return
 proc_003b:
@@ -2858,12 +2847,8 @@ proc_0040:
     STOP_ARCHIVE_SOUND(29, 0)
     RESET_STREAM_PLAYBACK()
     WAIT_FOR_STREAM_IDLE()
-    push 701
-    push 29
-    push 1
-    COMM 0x0097
-    push 785
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 29, 701)
+    SUBMIT_EVENT(785)
     return
   }
 _358:
@@ -3202,12 +3187,8 @@ proc_004f:
     COMM 0x0041
     WAIT_FOR_TIMER_LIMIT(5)
     STOP_ARCHIVE_SOUND(33, 0)
-    push 704
-    push 29
-    push 1
-    COMM 0x0097
-    push 838
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 29, 704)
+    SUBMIT_EVENT(838)
     return
   }
 _416:
@@ -3692,12 +3673,8 @@ proc_0066:
     COMM 0x0041
     WAIT_FOR_TIMER_LIMIT(5)
     STOP_ARCHIVE_SOUND(34, 0)
-    push 705
-    push 29
-    push 1
-    COMM 0x0097
-    push 839
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 29, 705)
+    SUBMIT_EVENT(839)
     return
   }
 _506:
@@ -3755,12 +3732,8 @@ proc_0067:
     COMM 0x0041
     WAIT_FOR_TIMER_LIMIT(5)
     STOP_ARCHIVE_SOUND(35, 0)
-    push 706
-    push 29
-    push 1
-    COMM 0x0097
-    push 840
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 29, 706)
+    SUBMIT_EVENT(840)
     return
   }
 _508:
@@ -4181,12 +4154,8 @@ proc_007a:
     STOP_ARCHIVE_SOUND(30, 0)
     RESET_STREAM_PLAYBACK()
     WAIT_FOR_STREAM_IDLE()
-    push 702
-    push 29
-    push 1
-    COMM 0x0097
-    push 786
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 29, 702)
+    SUBMIT_EVENT(786)
     return
   }
 _582:

@@ -1676,12 +1676,8 @@ sub_btl:
     SET_EFFECT_MODEL_CUT(local_int[52], 0)
     WAIT_FOR_TIMER_LIMIT(20)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 507
-    push 23
-    push 1
-    COMM 0x0097
-    push 321
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 23, 507)
+    SUBMIT_EVENT(321)
     return
   }
 _249:
@@ -1785,12 +1781,8 @@ btl_1_1:
     PREPARE_UNIT_MOTION_STATE(local_int[59], 3, 10, 10, 1)
     WAIT_FOR_TIMER_LIMIT(20)
     STOP_ARCHIVE_SOUND(7, 0)
-    push 500
-    push 23
-    push 1
-    COMM 0x0097
-    push 275
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 23, 500)
+    SUBMIT_EVENT(275)
     return
   }
 _251:
@@ -1824,12 +1816,8 @@ btl_1_2:
     START_ARCHIVE_SOUND(8, 0)
     WAIT_FOR_TIMER_LIMIT(33)
     STOP_ARCHIVE_SOUND(8, 0)
-    push 501
-    push 23
-    push 1
-    COMM 0x0097
-    push 274
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 23, 501)
+    SUBMIT_EVENT(274)
     SET_SOLAR_OVERLAY_MODE(3)
     RELEASE_CURRENT_OBJECT()
     return
@@ -1896,12 +1884,8 @@ btl_1_3:
     PREPARE_UNIT_MOTION_STATE(global_int[0], 11, 3, 15, 1)
     WAIT_FOR_TIMER_LIMIT(20)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 502
-    push 23
-    push 1
-    COMM 0x0097
-    push 276
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 23, 502)
+    SUBMIT_EVENT(276)
     return
   }
 _255:
@@ -1983,12 +1967,8 @@ btl_2_1:
   SET_EFFECT_MODEL_CUT(local_int[76], 0)
   WAIT_FOR_TIMER_LIMIT(20)
   STOP_ARCHIVE_SOUND(38, 0)
-  push 503
-  push 23
-  push 1
-  COMM 0x0097
-  push 289
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 23, 503)
+  SUBMIT_EVENT(289)
   return
   return
 proc_0020:
@@ -2137,12 +2117,8 @@ proc_0025:
     SET_EFFECT_MODEL_CUT(local_int[83], 0)
     WAIT_FOR_TIMER_LIMIT(20)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 504
-    push 23
-    push 1
-    COMM 0x0097
-    push 293
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 23, 504)
+    SUBMIT_EVENT(293)
     return
   }
 _269:
@@ -2227,12 +2203,8 @@ proc_0027:
     SET_EFFECT_MODEL_CUT(local_int[87], 0)
     WAIT_FOR_TIMER_LIMIT(20)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 505
-    push 23
-    push 1
-    COMM 0x0097
-    push 298
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 23, 505)
+    SUBMIT_EVENT(298)
     return
   }
 _277:
@@ -2276,12 +2248,8 @@ proc_0028:
     SET_EFFECT_MODEL_CUT(local_int[88], 0)
     WAIT_FOR_TIMER_LIMIT(30)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 506
-    push 23
-    push 1
-    COMM 0x0097
-    push 302
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 23, 506)
+    SUBMIT_EVENT(302)
     return
   }
 _281:
@@ -2468,12 +2436,8 @@ proc_002a:
     SET_MODEL_FLAG(1204)
     SET_MODEL_FLAG(2078)
     CLEAR_MODEL_FLAG(2060)
-    push 509
-    push 23
-    push 1
-    COMM 0x0097
-    push 339
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 23, 509)
+    SUBMIT_EVENT(339)
     return
   }
 _301:
@@ -2870,12 +2834,8 @@ _337:
   PREPARE_UNIT_MOTION_STATE(global_int[0], 11, 3, 15, 1)
   WAIT_FOR_TIMER_LIMIT(30)
   STOP_ARCHIVE_SOUND(38, 0)
-  push 508
-  push 23
-  push 1
-  COMM 0x0097
-  push 323
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 23, 508)
+  SUBMIT_EVENT(323)
   return
   return
 win_byakko:

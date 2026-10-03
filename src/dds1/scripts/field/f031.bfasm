@@ -2222,12 +2222,8 @@ proc_002c:
     START_ARCHIVE_SOUND(16, 0)
     WAIT_FOR_TIMER_LIMIT(12)
     STOP_ARCHIVE_SOUND(16, 0)
-    push 330
-    push 31
-    push 14
-    COMM 0x0097
-    push 314
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(14, 31, 330)
+    SUBMIT_EVENT(314)
     return
   }
 _305:
@@ -2368,12 +2364,8 @@ proc_0035:
     START_ARCHIVE_SOUND(28, 0)
     WAIT_FOR_TIMER_LIMIT(30)
     STOP_ARCHIVE_SOUND(28, 0)
-    push 332
-    push 31
-    push 40
-    COMM 0x0097
-    push 332
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(40, 31, 332)
+    SUBMIT_EVENT(332)
     return
   }
 _315:
@@ -2411,12 +2403,8 @@ proc_0037:
     START_ARCHIVE_SOUND(27, 0)
     WAIT_FOR_TIMER_LIMIT(38)
     STOP_ARCHIVE_SOUND(27, 0)
-    push 551
-    push 31
-    push 38
-    COMM 0x0097
-    push 317
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(38, 31, 551)
+    SUBMIT_EVENT(317)
     return
   } else {
   _318:
@@ -2473,10 +2461,7 @@ proc_0039:
   PROC proc_0039
   if (TEST_MODEL_FLAG(51) == 0) {
     RELEASE_CURRENT_BGM()
-    push 655
-    push 31
-    push 39
-    COMM 0x0097
+    DEFER_BATTLE_EXIT(39, 31, 655)
     CALL_EVENT(event(e655))
   }
 _327:

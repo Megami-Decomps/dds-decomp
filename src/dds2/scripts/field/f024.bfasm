@@ -1912,21 +1912,13 @@ proc_0023:
       PREPARE_UNIT_MOTION_STATE(global_int[5], 2, 0, 0, 1)
       WAIT_FOR_TIMER_LIMIT(6)
       FINISH_SCRIPT_MESSAGE_WINDOW()
-      push 500
-      push 24
-      push 7
-      COMM 0x0097
-      push 851
-      COMM 0x0067
+      DEFER_BATTLE_EXIT(7, 24, 500)
+      SUBMIT_EVENT(851)
     } else {
     _278:
       FINISH_SCRIPT_MESSAGE_WINDOW()
-      push 500
-      push 24
-      push 7
-      COMM 0x0097
-      push 848
-      COMM 0x0067
+      DEFER_BATTLE_EXIT(7, 24, 500)
+      SUBMIT_EVENT(848)
       goto _277
     }
   _277:
@@ -2109,12 +2101,8 @@ proc_0028:
     SET_EFFECT_MODEL_CUT(local_int[68], 0)
     WAIT_FOR_TIMER_LIMIT(23)
     RESET_STREAM_PLAYBACK()
-    push 502
-    push 24
-    push 10
-    COMM 0x0097
-    push 817
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(10, 24, 502)
+    SUBMIT_EVENT(817)
     return
   }
 _298:
@@ -2191,12 +2179,8 @@ proc_0029:
     WAIT_FOR_TIMER_LIMIT(23)
     RESET_STREAM_PLAYBACK()
     SET_MODEL_FLAG(1287)
-    push 503
-    push 24
-    push 10
-    COMM 0x0097
-    push 849
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(10, 24, 503)
+    SUBMIT_EVENT(849)
     return
   }
 _304:
@@ -2271,12 +2255,8 @@ proc_002b:
     SET_EFFECT_MODEL_CUT(local_int[78], 0)
     WAIT_FOR_TIMER_LIMIT(30)
     RESET_STREAM_PLAYBACK()
-    push 504
-    push 24
-    push 18
-    COMM 0x0097
-    push 850
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(18, 24, 504)
+    SUBMIT_EVENT(850)
     return
   }
 _312:
@@ -2401,21 +2381,14 @@ battle_micael:
     WAIT_FOR_TIMER_LIMIT(15)
     STOP_ARCHIVE_SOUND(39, 0)
     if (TEST_MODEL_FLAG(1294) == 0) {
-      push 510
-      push 24
-      push 57
-      COMM 0x0097
+      DEFER_BATTLE_EXIT(57, 24, 510)
     } else {
     _329:
-      push 521
-      push 24
-      push 58
-      COMM 0x0097
+      DEFER_BATTLE_EXIT(58, 24, 521)
       goto _328
     }
   _328:
-    push 792
-    COMM 0x0067
+    SUBMIT_EVENT(792)
     return
   }
 _330:
@@ -2464,21 +2437,14 @@ battle_micael_02:
     WAIT_FOR_TIMER_LIMIT(15)
     STOP_ARCHIVE_SOUND(39, 0)
     if (TEST_MODEL_FLAG(1294) == 0) {
-      push 520
-      push 24
-      push 58
-      COMM 0x0097
+      DEFER_BATTLE_EXIT(58, 24, 520)
     } else {
     _337:
-      push 522
-      push 24
-      push 58
-      COMM 0x0097
+      DEFER_BATTLE_EXIT(58, 24, 522)
       goto _336
     }
   _336:
-    push 792
-    COMM 0x0067
+    SUBMIT_EVENT(792)
     return
   }
 _338:
@@ -2581,12 +2547,8 @@ proc_0037:
     SET_EFFECT_MODEL_CUT(local_int[83], 0)
     WAIT_FOR_TIMER_LIMIT(25)
     RESET_STREAM_PLAYBACK()
-    push 501
-    push 24
-    push 1
-    COMM 0x0097
-    push 818
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 24, 501)
+    SUBMIT_EVENT(818)
     return
   }
 _348:
@@ -2647,12 +2609,8 @@ proc_003b:
   if (TEST_MODEL_FLAG(1291) == 0) {
     RESTORE_CAMERA_NODE_MODE()
     SET_MODEL_FLAG(1291)
-    push 515
-    push 24
-    push 52
-    COMM 0x0097
-    push 843
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(52, 24, 515)
+    SUBMIT_EVENT(843)
     return
   }
 _360:
@@ -2662,12 +2620,8 @@ proc_003c:
   if (TEST_MODEL_FLAG(1292) == 0) {
     RESTORE_CAMERA_NODE_MODE()
     SET_MODEL_FLAG(1292)
-    push 516
-    push 24
-    push 52
-    COMM 0x0097
-    push 844
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(52, 24, 516)
+    SUBMIT_EVENT(844)
     return
   }
 _362:

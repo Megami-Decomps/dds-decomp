@@ -2696,12 +2696,8 @@ proc_0018:
       START_ARCHIVE_SOUND(14, 0)
       WAIT_FOR_TIMER_LIMIT(30)
       STOP_ARCHIVE_SOUND(14, 0)
-      push 500
-      push 26
-      push 1
-      COMM 0x0097
-      push 827
-      COMM 0x0067
+      DEFER_BATTLE_EXIT(1, 26, 500)
+      SUBMIT_EVENT(827)
       return
     } else {
     _316:
@@ -2732,12 +2728,8 @@ warpscr_024_01:
   MESSAGE_REQUEST_AND_POLL(message(BATTLE_023))
   FINISH_SCRIPT_MESSAGE_WINDOW()
   SET_MODEL_FLAG(1414)
-  push 504
-  push 26
-  push 1
-  COMM 0x0097
-  push 846
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 26, 504)
+  SUBMIT_EVENT(846)
   return
   return
 after_024btl:
@@ -2780,12 +2772,8 @@ warpscr_027_02:
   MESSAGE_REQUEST_AND_POLL(message(BATTLE_028_02))
   FINISH_SCRIPT_MESSAGE_WINDOW()
   STOP_ARCHIVE_SOUND(15, 0)
-  push 501
-  push 26
-  push 1
-  COMM 0x0097
-  push 828
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 26, 501)
+  SUBMIT_EVENT(828)
   return
   return
 warpscr_045_02:
@@ -2813,12 +2801,8 @@ warpscr_045_02:
   MESSAGE_REQUEST_AND_POLL(message(BATTLE_048_02))
   FINISH_SCRIPT_MESSAGE_WINDOW()
   STOP_ARCHIVE_SOUND(16, 0)
-  push 502
-  push 26
-  push 1
-  COMM 0x0097
-  push 829
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 26, 502)
+  SUBMIT_EVENT(829)
   return
   return
 warp_eff_false:
@@ -4559,12 +4543,8 @@ warpscr_050_03:
   COMM 0x00ed
   WAIT_FOR_TIMER_LIMIT(10)
   STOP_ARCHIVE_SOUND(37, 0)
-  push 503
-  push 26
-  push 1
-  COMM 0x0097
-  push 791
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 26, 503)
+  SUBMIT_EVENT(791)
   return
   return
 after_btl_054:

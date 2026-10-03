@@ -2934,12 +2934,8 @@ proc_0024:
     START_ARCHIVE_SOUND(15, 0)
     WAIT_FOR_TIMER_LIMIT(15)
     STOP_ARCHIVE_SOUND(15, 0)
-    push 550
-    push 30
-    push 2
-    COMM 0x0097
-    push 319
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(2, 30, 550)
+    SUBMIT_EVENT(319)
   }
 _337:
   return
@@ -3001,12 +2997,8 @@ proc_0025:
     START_ARCHIVE_SOUND(15, 0)
     WAIT_FOR_TIMER_LIMIT(15)
     STOP_ARCHIVE_SOUND(15, 0)
-    push 550
-    push 30
-    push 2
-    COMM 0x0097
-    push 319
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(2, 30, 550)
+    SUBMIT_EVENT(319)
   }
 _339:
   return
@@ -3330,12 +3322,8 @@ proc_002c:
       PREPARE_UNIT_MOTION_STATE(global_int[2], 1, 0, 0, 2)
       WAIT_FOR_TIMER_LIMIT(40)
       STOP_ARCHIVE_SOUND(29, 0)
-      push 501
-      push 30
-      push 1
-      COMM 0x0097
-      push 340
-      COMM 0x0067
+      DEFER_BATTLE_EXIT(1, 30, 501)
+      SUBMIT_EVENT(340)
     } else {
     _380:
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -3438,17 +3426,13 @@ _395:
         RUN_FIELD_TRANSITION_SELECTOR(97)
       } else {
       _398:
-        push string(str_01pos_02_2)
-        push 12
-        COMM 0x0098
+        REQUEST_CURRENT_GROUP_SEQUENCE(12, string(str_01pos_02_2))
         goto _397
       }
     _397:
       goto _399
     _400:
-      push string(str_01pos_02_3)
-      push 12
-      COMM 0x0098
+      REQUEST_CURRENT_GROUP_SEQUENCE(12, string(str_01pos_02_3))
       goto _399
     _399:
       return
@@ -3478,9 +3462,7 @@ _403:
       SCREEN_FADE_B(0, 30)
       WAIT_FOR_TIMER_LIMIT(30)
       PLAY_FIELD_SE(96)
-      push string(str_01pos_03_6)
-      push 11
-      COMM 0x0098
+      REQUEST_CURRENT_GROUP_SEQUENCE(11, string(str_01pos_03_6))
       return
     }
   _405:

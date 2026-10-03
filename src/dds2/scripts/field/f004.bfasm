@@ -2215,10 +2215,7 @@ _263:
         RELEASE_CURRENT_BGM()
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
-        push 668
-        push 4
-        push 1
-        COMM 0x0097
+        DEFER_BATTLE_EXIT(1, 4, 668)
         COMM 0x01df
         return
       } else {
@@ -2287,10 +2284,7 @@ _263:
         RELEASE_CURRENT_BGM()
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
-        push 668
-        push 4
-        push 1
-        COMM 0x0097
+        DEFER_BATTLE_EXIT(1, 4, 668)
         COMM 0x01df
         return
       } else {
@@ -2360,10 +2354,7 @@ _263:
         RELEASE_CURRENT_BGM()
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
-        push 668
-        push 4
-        push 1
-        COMM 0x0097
+        DEFER_BATTLE_EXIT(1, 4, 668)
         COMM 0x01df
         return
       } else {
@@ -3440,10 +3431,7 @@ _423:
         RELEASE_CURRENT_BGM()
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
-        push 562
-        push 4
-        push 1
-        COMM 0x0097
+        DEFER_BATTLE_EXIT(1, 4, 562)
         CALL_EVENT(event(e562))
         return
       } else {
@@ -3453,10 +3441,7 @@ _423:
           RELEASE_CURRENT_BGM()
           SCREEN_FADE_B(0, 15)
           WAIT_FOR_TIMER_LIMIT(15)
-          push 670
-          push 4
-          push 1
-          COMM 0x0097
+          DEFER_BATTLE_EXIT(1, 4, 670)
           CALL_EVENT(event(e670))
           return
         }
@@ -3816,10 +3801,7 @@ _467:
             RELEASE_CURRENT_BGM()
             SCREEN_FADE_B(0, 15)
             WAIT_FOR_TIMER_LIMIT(15)
-            push 562
-            push 4
-            push 1
-            COMM 0x0097
+            DEFER_BATTLE_EXIT(1, 4, 562)
             CALL_EVENT(event(e562))
             return
           } else {
@@ -3829,10 +3811,7 @@ _467:
               RELEASE_CURRENT_BGM()
               SCREEN_FADE_B(0, 15)
               WAIT_FOR_TIMER_LIMIT(15)
-              push 670
-              push 4
-              push 1
-              COMM 0x0097
+              DEFER_BATTLE_EXIT(1, 4, 670)
               CALL_EVENT(event(e670))
               return
             }
@@ -3921,10 +3900,7 @@ _483:
         RELEASE_CURRENT_BGM()
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
-        push 606
-        push 4
-        push 1
-        COMM 0x0097
+        DEFER_BATTLE_EXIT(1, 4, 606)
         CALL_EVENT(event(e606))
         return
       }

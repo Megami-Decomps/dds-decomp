@@ -32,6 +32,12 @@ main:
   COMM CREATE_SCRIPT_TASK
   PUSHEVENT e632
   COMM CALL_EVENT
+  PUSHEVENT e633
+  COMM SUBMIT_EVENT
+  PUSHIS 501
+  PUSHIS 22
+  PUSHIS 1
+  COMM DEFER_BATTLE_EXIT
   return
 worker:
   PROC worker
@@ -66,23 +72,96 @@ class Flw0FlowTests(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {
-                key: flow["eventEdges"][0][key]
-                for key in ("source", "eventId", "event", "count")
-            },
-            {"source": 0, "eventId": 632, "event": "e632", "count": 1},
+            [
+                {
+                    key: edge[key]
+                    for key in (
+                        "source",
+                        "eventId",
+                        "event",
+                        "kind",
+                        "command",
+                        "count",
+                    )
+                }
+                for edge in flow["eventEdges"]
+            ],
+            [
+                {
+                    "source": 0,
+                    "eventId": 632,
+                    "event": "e632",
+                    "kind": "call",
+                    "command": "CALL_EVENT",
+                    "count": 1,
+                },
+                {
+                    "source": 0,
+                    "eventId": 633,
+                    "event": "e633",
+                    "kind": "submit",
+                    "command": "SUBMIT_EVENT",
+                    "count": 1,
+                },
+            ],
+        )
+        self.assertEqual(
+            flow["deferredBattleExits"],
+            [
+                {
+                    "source": 0,
+                    "pc": 12,
+                    "diagnostic": 1,
+                    "field": 22,
+                    "event": 501,
+                }
+            ],
         )
         self.assertEqual(flow["unresolvedTargets"], [])
 
     def test_keeps_dynamic_event_target_unresolved(self) -> None:
-        source = SOURCE.replace("  PUSHEVENT e632\n", "  PUSHIX 0\n")
+        source = SOURCE.replace("  PUSHEVENT e632\n", "  PUSHIX 0\n").replace(
+            "  PUSHEVENT e633\n", "  PUSHIX 0\n"
+        )
         flow = flw0_flow.analyze(
             flw0.parse_source(source), flw0_profiles.get("dds1")
         )
         self.assertEqual(flow["eventEdges"], [])
         self.assertEqual(
             flow["unresolvedTargets"],
-            [{"source": 0, "pc": 6, "kind": "event", "value": None}],
+            [
+                {
+                    "source": 0,
+                    "pc": 6,
+                    "kind": "event",
+                    "value": None,
+                    "command": "CALL_EVENT",
+                },
+                {
+                    "source": 0,
+                    "pc": 8,
+                    "kind": "event",
+                    "value": None,
+                    "command": "SUBMIT_EVENT",
+                },
+            ],
+        )
+
+    def test_keeps_dynamic_battle_exit_unresolved(self) -> None:
+        source = SOURCE.replace("  PUSHIS 501\n", "  PUSHIX 0\n")
+        flow = flw0_flow.analyze(
+            flw0.parse_source(source), flw0_profiles.get("dds1")
+        )
+        self.assertEqual(flow["deferredBattleExits"], [])
+        self.assertIn(
+            {
+                "source": 0,
+                "pc": 12,
+                "kind": "battleExit",
+                "value": None,
+                "command": "DEFER_BATTLE_EXIT",
+            },
+            flow["unresolvedTargets"],
         )
 
 

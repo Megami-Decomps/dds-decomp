@@ -2012,12 +2012,8 @@ proc_0021:
     SET_EFFECT_MODEL_CUT(local_int[55], 0)
     WAIT_FOR_TIMER_LIMIT(30)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 504
-    push 28
-    push 9
-    COMM 0x0097
-    push 318
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(9, 28, 504)
+    SUBMIT_EVENT(318)
     return
   } else {
   _281:
@@ -2031,12 +2027,8 @@ proc_0021:
     SET_EFFECT_MODEL_CUT(local_int[55], 0)
     WAIT_FOR_TIMER_LIMIT(30)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 504
-    push 28
-    push 9
-    COMM 0x0097
-    push 318
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(9, 28, 504)
+    SUBMIT_EVENT(318)
     return
     goto _280
   }
@@ -2080,12 +2072,8 @@ _285:
     SET_EFFECT_MODEL_CUT(local_int[55], 0)
     WAIT_FOR_TIMER_LIMIT(30)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 504
-    push 28
-    push 9
-    COMM 0x0097
-    push 318
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(9, 28, 504)
+    SUBMIT_EVENT(318)
     return
   } else {
   _283:
@@ -2099,12 +2087,8 @@ _285:
     SET_EFFECT_MODEL_CUT(local_int[55], 0)
     WAIT_FOR_TIMER_LIMIT(30)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 504
-    push 28
-    push 9
-    COMM 0x0097
-    push 318
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(9, 28, 504)
+    SUBMIT_EVENT(318)
     return
     goto _282
   }
@@ -2329,12 +2313,8 @@ proc_0025:
     SET_EFFECT_MODEL_CUT(local_int[66], 0)
     WAIT_FOR_TIMER_LIMIT(30)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 503
-    push 28
-    push 1
-    COMM 0x0097
-    push 278
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 28, 503)
+    SUBMIT_EVENT(278)
     return
   }
 _306:
@@ -2434,12 +2414,8 @@ proc_0027:
     SET_EFFECT_MODEL_CUT(local_int[68], 0)
     WAIT_FOR_TIMER_LIMIT(30)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 501
-    push 28
-    push 1
-    COMM 0x0097
-    push 315
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 28, 501)
+    SUBMIT_EVENT(315)
     return
   }
 _316:
@@ -2539,12 +2515,8 @@ proc_0029:
     SET_EFFECT_MODEL_CUT(local_int[70], 0)
     WAIT_FOR_TIMER_LIMIT(30)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 502
-    push 28
-    push 1
-    COMM 0x0097
-    push 316
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 28, 502)
+    SUBMIT_EVENT(316)
     return
   }
 _326:
@@ -2645,12 +2617,8 @@ proc_002b:
     SET_EFFECT_MODEL_CUT(local_int[72], 0)
     WAIT_FOR_TIMER_LIMIT(30)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 505
-    push 28
-    push 45
-    COMM 0x0097
-    push 324
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(45, 28, 505)
+    SUBMIT_EVENT(324)
     return
   }
 _338:

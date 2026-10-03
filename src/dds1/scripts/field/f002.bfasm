@@ -3013,20 +3013,14 @@ _367:
       FINISH_SCRIPT_MESSAGE_WINDOW()
       if (local_int[70] == 0) {
         RELEASE_CURRENT_BGM()
-        push 652
-        push 28
-        push 1
-        COMM 0x0097
+        DEFER_BATTLE_EXIT(1, 28, 652)
         CALL_EVENT(event(e652))
         return
       } else {
       _370:
         if (local_int[70] == 1) {
           RELEASE_CURRENT_BGM()
-          push 657
-          push 31
-          push 1
-          COMM 0x0097
+          DEFER_BATTLE_EXIT(1, 31, 657)
           CALL_EVENT(event(e657))
           return
         }

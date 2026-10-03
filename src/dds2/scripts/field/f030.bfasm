@@ -2364,12 +2364,8 @@ proc_0038:
     STOP_ARCHIVE_SOUND(31, 0)
     RESET_STREAM_PLAYBACK()
     WAIT_FOR_STREAM_IDLE()
-    push 700
-    push 30
-    push 1
-    COMM 0x0097
-    push 787
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 30, 700)
+    SUBMIT_EVENT(787)
     return
   }
 _298:
@@ -2563,12 +2559,8 @@ proc_0040:
     COMM 0x0041
     WAIT_FOR_TIMER_LIMIT(10)
     STOP_ARCHIVE_SOUND(24, 0)
-    push 705
-    push 30
-    push 1
-    COMM 0x0097
-    push 794
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 30, 705)
+    SUBMIT_EVENT(794)
     return
   }
 _318:
@@ -2760,12 +2752,8 @@ proc_0048:
     COMM 0x0041
     WAIT_FOR_TIMER_LIMIT(10)
     STOP_ARCHIVE_SOUND(25, 0)
-    push 704
-    push 30
-    push 1
-    COMM 0x0097
-    push 795
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 30, 704)
+    SUBMIT_EVENT(795)
     return
   }
 _344:
@@ -3127,12 +3115,8 @@ proc_005e:
     COMM 0x0041
     WAIT_FOR_TIMER_LIMIT(5)
     STOP_ARCHIVE_SOUND(36, 0)
-    push 706
-    push 30
-    push 1
-    COMM 0x0097
-    push 841
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 30, 706)
+    SUBMIT_EVENT(841)
     return
   }
 _410:
@@ -3309,12 +3293,8 @@ proc_0066:
       COMM 0x0041
       WAIT_FOR_TIMER_LIMIT(10)
       STOP_ARCHIVE_SOUND(26, 0)
-      push 702
-      push 30
-      push 1
-      COMM 0x0097
-      push 796
-      COMM 0x0067
+      DEFER_BATTLE_EXIT(1, 30, 702)
+      SUBMIT_EVENT(796)
       return
     }
   _440:
@@ -3406,12 +3386,8 @@ proc_0068:
       COMM 0x0041
       WAIT_FOR_TIMER_LIMIT(10)
       STOP_ARCHIVE_SOUND(27, 0)
-      push 703
-      push 30
-      push 1
-      COMM 0x0097
-      push 797
-      COMM 0x0067
+      DEFER_BATTLE_EXIT(1, 30, 703)
+      SUBMIT_EVENT(797)
       return
     }
   _444:
@@ -3477,12 +3453,8 @@ proc_006a:
     WAIT_FOR_TIMER_LIMIT(10)
     STOP_ARCHIVE_SOUND(21, 0)
     ENABLE_FIELD_MODEL_GROUP(0, 0, 1)
-    push 701
-    push 30
-    push 1
-    COMM 0x0097
-    push 788
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 30, 701)
+    SUBMIT_EVENT(788)
     return
   }
 _448:

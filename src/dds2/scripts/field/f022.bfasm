@@ -2293,10 +2293,7 @@ _325:
       SCREEN_FADE_B(0, 15)
       WAIT_FOR_TIMER_LIMIT(15)
       RELEASE_CURRENT_BGM()
-      push 607
-      push 22
-      push 1
-      COMM 0x0097
+      DEFER_BATTLE_EXIT(1, 22, 607)
       CALL_EVENT(event(e607))
       return
     }
@@ -2572,10 +2569,7 @@ proc_0032:
     SCREEN_FADE_B(0, 60)
     WAIT_FOR_TIMER_LIMIT(60)
     RELEASE_CURRENT_BGM()
-    push 607
-    push 22
-    push 1
-    COMM 0x0097
+    DEFER_BATTLE_EXIT(1, 22, 607)
     CALL_EVENT(event(e607))
     return
   }
@@ -2697,12 +2691,8 @@ proc_0035:
     WAIT_FOR_STREAM_IDLE()
     SET_MODEL_FLAG(1168)
     SET_MODEL_FLAG(168)
-    push 503
-    push 22
-    push 1
-    COMM 0x0097
-    push 812
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 22, 503)
+    SUBMIT_EVENT(812)
     return
   }
 _373:
@@ -2845,12 +2835,8 @@ proc_0038:
     WAIT_FOR_TIMER_LIMIT(25)
     RESET_STREAM_PLAYBACK()
     WAIT_FOR_STREAM_IDLE()
-    push 131
-    push 22
-    push 1
-    COMM 0x0097
-    push 821
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 22, 131)
+    SUBMIT_EVENT(821)
     return
   }
 _391:
@@ -3283,12 +3269,8 @@ proc_0043:
     WAIT_FOR_TIMER_LIMIT(25)
     RESET_STREAM_PLAYBACK()
     WAIT_FOR_STREAM_IDLE()
-    push 504
-    push 22
-    push 1
-    COMM 0x0097
-    push 819
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 22, 504)
+    SUBMIT_EVENT(819)
     return
   }
 _469:
@@ -4007,12 +3989,8 @@ boss_battle:
     WAIT_FOR_TIMER_LIMIT(25)
     RESET_STREAM_PLAYBACK()
     WAIT_FOR_STREAM_IDLE()
-    push 502
-    push 22
-    push 1
-    COMM 0x0097
-    push 769
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 22, 502)
+    SUBMIT_EVENT(769)
     return
   }
 _593:

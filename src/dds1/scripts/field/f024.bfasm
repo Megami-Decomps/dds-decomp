@@ -1604,12 +1604,8 @@ proc_0016:
     SET_EFFECT_MODEL_CUT(local_int[61], 0)
     WAIT_FOR_TIMER_LIMIT(20)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 500
-    push 24
-    push 1
-    COMM 0x0097
-    push 280
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 24, 500)
+    SUBMIT_EVENT(280)
     return
   }
 _204:
@@ -2470,12 +2466,8 @@ proc_0033:
     SET_EFFECT_MODEL_CUT(local_int[74], 0)
     WAIT_FOR_TIMER_LIMIT(25)
     STOP_ARCHIVE_SOUND(38, 0)
-    push 501
-    push 24
-    push 1
-    COMM 0x0097
-    push 281
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 24, 501)
+    SUBMIT_EVENT(281)
     return
   }
 _260:
@@ -2579,12 +2571,8 @@ proc_0036:
     WAIT_FOR_UNIT_MOTION(local_int[78])
     WAIT_FOR_TIMER_LIMIT(8)
     STOP_ARCHIVE_SOUND(12, 0)
-    push 502
-    push 24
-    push 1
-    COMM 0x0097
-    push 273
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 24, 502)
+    SUBMIT_EVENT(273)
     return
   }
 _272:
@@ -2683,12 +2671,8 @@ proc_0039:
     START_ARCHIVE_SOUND(11, 0)
     WAIT_FOR_TIMER_LIMIT(28)
     STOP_ARCHIVE_SOUND(11, 0)
-    push 503
-    push 24
-    push 1
-    COMM 0x0097
-    push 338
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 24, 503)
+    SUBMIT_EVENT(338)
     return
   }
 _284:
@@ -2755,12 +2739,8 @@ proc_003b:
     START_ARCHIVE_SOUND(11, 0)
     WAIT_FOR_TIMER_LIMIT(28)
     STOP_ARCHIVE_SOUND(11, 0)
-    push 504
-    push 24
-    push 1
-    COMM 0x0097
-    push 338
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 24, 504)
+    SUBMIT_EVENT(338)
     return
   }
 _294:
@@ -2827,12 +2807,8 @@ proc_003d:
     START_ARCHIVE_SOUND(11, 0)
     WAIT_FOR_TIMER_LIMIT(28)
     STOP_ARCHIVE_SOUND(11, 0)
-    push 505
-    push 24
-    push 1
-    COMM 0x0097
-    push 338
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 24, 505)
+    SUBMIT_EVENT(338)
     return
   }
 _304:
@@ -2899,12 +2875,8 @@ proc_003f:
     START_ARCHIVE_SOUND(11, 0)
     WAIT_FOR_TIMER_LIMIT(28)
     STOP_ARCHIVE_SOUND(11, 0)
-    push 506
-    push 24
-    push 1
-    COMM 0x0097
-    push 338
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 24, 506)
+    SUBMIT_EVENT(338)
     return
   }
 _314:
@@ -3492,12 +3464,8 @@ _407:
   PREPARE_UNIT_MOTION_STATE(global_int[0], 11, 3, 15, 1)
   WAIT_FOR_TIMER_LIMIT(30)
   STOP_ARCHIVE_SOUND(38, 0)
-  push 507
-  push 24
-  push 1
-  COMM 0x0097
-  push 325
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 24, 507)
+  SUBMIT_EVENT(325)
   return
   return
 win_genbu:
@@ -3547,12 +3515,8 @@ btl_hitosyura:
     WAIT_FOR_TIMER_LIMIT(60)
     push 0
     COMM 0x00f3
-    push 508
-    push 24
-    push 1
-    COMM 0x0097
-    push 312
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 24, 508)
+    SUBMIT_EVENT(312)
     return
   }
 _409:
