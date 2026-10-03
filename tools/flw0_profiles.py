@@ -26,6 +26,9 @@ class NativeCommand:
     stack_pop: int
     writes_result: bool | None = None
     argument_symbols: tuple[IntegerSymbols | None, ...] = ()
+    event_argument: int | None = None
+    event_dispatch: str | None = None
+    event_request_argument: int | None = None
 
     def symbols_for_argument(self, index: int) -> IntegerSymbols | None:
         if not self.argument_symbols:
@@ -94,7 +97,15 @@ SHARED_DDS_COMMANDS = (
     ),
     NativeCommand(0x01F, "FADE_BACKGROUND_IN", 1, writes_result=False),
     NativeCommand(0x027, "READ_SOLAR_PHASE", 0, writes_result=True),
-    NativeCommand(0x028, "SUBMIT_EVENT_WITH_MODE", 2, writes_result=False),
+    NativeCommand(
+        0x028,
+        "SUBMIT_EVENT_WITH_SELECTION",
+        2,
+        writes_result=False,
+        event_argument=1,
+        event_dispatch="submit-selection",
+        event_request_argument=0,
+    ),
     NativeCommand(0x043, "RESET_DRAW_EFFECTS", 0, writes_result=False),
     NativeCommand(0x046, "RETURN_TO_TITLE", 0, writes_result=False),
     NativeCommand(0x049, "WAIT_FOR_UNIT_MOTION", 1, writes_result=False),
@@ -107,8 +118,22 @@ SHARED_DDS_COMMANDS = (
     ),
     NativeCommand(0x060, "RESTORE_CAMERA_NODE_MODE", 0, writes_result=False),
     NativeCommand(0x061, "RELEASE_CURRENT_OBJECT", 0, writes_result=False),
-    NativeCommand(0x066, "CALL_EVENT", 1, writes_result=False),
-    NativeCommand(0x067, "SUBMIT_EVENT", 1, writes_result=False),
+    NativeCommand(
+        0x066,
+        "CALL_EVENT",
+        1,
+        writes_result=False,
+        event_argument=0,
+        event_dispatch="call",
+    ),
+    NativeCommand(
+        0x067,
+        "SUBMIT_EVENT",
+        1,
+        writes_result=False,
+        event_argument=0,
+        event_dispatch="submit",
+    ),
     NativeCommand(0x068, "READ_CURRENT_WORLD_OBJECT_ID", 0, writes_result=True),
     NativeCommand(0x069, "CLEAR_UNIT_LOW_FLAG", 1, writes_result=False),
     NativeCommand(0x06A, "SET_UNIT_LOW_FLAG", 1, writes_result=False),
@@ -234,7 +259,14 @@ SHARED_DDS_COMMANDS = (
         ),
     ),
     NativeCommand(0x13C, "SET_MESSAGE_RANGE", 2, writes_result=False),
-    NativeCommand(0x166, "SUBMIT_EVENT_IMMEDIATE", 1, writes_result=False),
+    NativeCommand(
+        0x166,
+        "SUBMIT_EVENT_IMMEDIATE",
+        1,
+        writes_result=False,
+        event_argument=0,
+        event_dispatch="submit-immediate",
+    ),
     NativeCommand(
         0x1E0, "QUEUE_WORLD_OBJECT_PENDING_VALUE", 2, writes_result=False
     ),
@@ -733,3 +765,10 @@ for _profile in PROFILES.values():
                 assert -0x8000 <= _value <= 0x7FFF
                 assert _name.isidentifier() and _name.upper() == _name
                 assert _name not in {"NAN", "INF", "RESULT"}
+        if _command.event_argument is None:
+            assert _command.event_dispatch is None
+        else:
+            assert 0 <= _command.event_argument < _command.stack_pop
+            assert _command.event_dispatch is not None
+        if _command.event_request_argument is not None:
+            assert 0 <= _command.event_request_argument < _command.stack_pop

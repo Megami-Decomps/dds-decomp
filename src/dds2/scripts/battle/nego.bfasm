@@ -475,7 +475,7 @@ _37:
 DealMoney:
   PROC DealMoney
   push local_int[4]
-  COMM SUBMIT_EVENT_WITH_MODE
+  COMM SUBMIT_EVENT_WITH_SELECTION
   PUSHREG
   POPLIX 0x000b
   local_int[11] = local_int[11] * 1000
@@ -595,7 +595,7 @@ DealMag:
   push local_int[2]
   COMM CREATE_FLAGGED_EFFECT_OBJECT
   push local_int[4]
-  COMM SUBMIT_EVENT_WITH_MODE
+  COMM SUBMIT_EVENT_WITH_SELECTION
   PUSHREG
   POPLIX 0x000b
   SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[11], 0)
@@ -724,7 +724,7 @@ _64:
 RemunareMoney:
   PROC RemunareMoney
   push local_int[4]
-  COMM SUBMIT_EVENT_WITH_MODE
+  COMM SUBMIT_EVENT_WITH_SELECTION
   PUSHREG
   POPLIX 0x0025
   SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[37], 0)
@@ -737,7 +737,7 @@ RemunareMoney:
 RemunareMag:
   PROC RemunareMag
   push local_int[4]
-  COMM SUBMIT_EVENT_WITH_MODE
+  COMM SUBMIT_EVENT_WITH_SELECTION
   PUSHREG
   POPLIX 0x0026
   SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[38], 0)

@@ -1175,7 +1175,11 @@ def render_code(
             selection = flw0._selection_push_symbol(
                 word.raw, next_raw, profile, selection_symbols
             )
-            event = flw0._event_push_symbol(word.raw, next_raw, profile)
+            event = flw0._event_push_symbol(
+                word.raw,
+                tuple(item.raw for item in words[pc + 1 : pc + 3]),
+                profile,
+            )
             procedure = flw0._procedure_push_symbol(
                 word.raw, next_raw, profile, tuple(procedure_symbols)
             )
