@@ -56,7 +56,7 @@ typedef struct EffThunderGroup {
     u32 color;
 } EffThunderGroup;
 
-extern s32 effMultiplyPackedColors(s32, s32);
+extern u32 effMultiplyPackedColors(u32, u32);
 extern void func_00165758(void *work, s32 index);
 extern void func_001673D0(void *work, s32 index, void *seed);
 extern void parPrependCellNode(void *system);

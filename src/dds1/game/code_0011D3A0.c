@@ -1951,7 +1951,7 @@ extern void kwlnFadeStartIn(s32);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void func_00145B18(void);
 extern void func_00131688(void);
-extern s32 fldHasPendingSceneFlags(void);
+extern u8 fldHasPendingSceneFlags(void);
 extern void fldSetCameraNodeModeWithTen(void);
 extern void func_00121B88(s32, s32, f32, f32, f32);
 extern void evtStartSceneResourceTask(u64, void *);
