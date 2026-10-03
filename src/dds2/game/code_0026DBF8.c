@@ -18,7 +18,7 @@ extern u32 mnuAllocateMantraSparkleEmitter(s16);
 
 extern s32 mnuFindMantraDrawItemByKind(u32, u32);
 
-extern s32 sdfAllocSizeClassBlock(u32);
+extern void *sdfAllocSizeClassBlock(s32);
 
 void sdfReleaseResourceAllocation(u32 sprite);
 
@@ -1290,7 +1290,16 @@ void mnuQueueMantraLimitLineFlags(s32 pool, u32 flags) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002712E0);
+u32 func_002712E0(u32 pool) {
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 1);
+    u8 *work = sdfAllocSizeClassBlock(0x24);
+
+    memset(work, 0, 0x24);
+    *(u16 *)(work + 2) = 0;
+    *(u16 *)work = (item->flags >> 12) & 0xFF;
+    *(u32 *)(work + 0x18) = 0;
+    return (u32)work;
+}
 
 void mnuReleaseMantraFadeDrawData(u32 obj) {
     sdfReleaseChipBlock(((MantraDrawItem *)obj)->data);

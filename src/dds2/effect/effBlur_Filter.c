@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u32 effGetResourceFirstWord(u32);
+extern s32 effGetResourceFirstWord(s32 index);
 extern u32 effMiscRand(void *);
 extern f32 effMiscRandUnitFloat(void *);
 extern u8 D_003AA868[];

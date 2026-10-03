@@ -253,7 +253,7 @@ extern void fldResetPlayerSceneObjectState(void);
 
 extern s32 D_003897C0[];
 
-extern u64 dds3GetWorldSecondaryObject(void);
+extern void *dds3GetWorldSecondaryObject(void);
 
 extern u32 *dds3FindObjectChainNodeByName(u64 world, const char *name);
 
@@ -832,22 +832,18 @@ s32 fldCmdSetFadeAndSway(void) {
 
 extern void fldSetRoomModeFlag(s32, s32, s32, s32);
 
-extern s64 dds3GetWorldValueCount(u64);
-
-extern s64 dds3AdvanceObjectValueCursor(u64);
-
-extern u64 dds3CopyWorldListToValueChain(u64, u64);
-
-extern void dds3DestroyWorldIndexNode(u64);
-
-extern s32 dds3ResetObjectValueCursor(u64);
+extern u16 dds3GetWorldValueCount(s32 object);
+extern u32 dds3AdvanceObjectValueCursor(void *object);
+extern void *dds3CopyWorldListToValueChain(void *object, s32 kind);
+extern void dds3DestroyWorldIndexNode(void *node);
+extern u32 dds3ResetObjectValueCursor(void *object);
 
 typedef struct FldWorldItem {
     u8 pad0[0x18];
     s32 *data;
 } FldWorldItem;
 
-extern FldWorldItem *dds3ReadIndexedWorldObjectWord(u64);
+extern u32 dds3ReadIndexedWorldObjectWord(void *object);
 
 extern void evtSetObjectTransitionWork(FldWorldItem *, s32);
 
@@ -857,7 +853,7 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
     s32 mode;
     char *name;
     s32 room;
-    u64 list;
+    void *list;
     FldWorldItem *item;
 
     world = scrReadIntParameter(0);
@@ -880,10 +876,10 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
     }
     if (world == fldAreaState[4] && stage == fldAreaState[5] + 1) {
         list = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 6);
-        if (dds3GetWorldValueCount(list) != 0) {
+        if (dds3GetWorldValueCount((s32)list) != 0) {
             dds3ResetObjectValueCursor(list);
             do {
-                item = dds3ReadIndexedWorldObjectWord(list);
+                item = (FldWorldItem *)dds3ReadIndexedWorldObjectWord(list);
                 if (item->data[1] == room) {
                     switch (mode) {
                     case 0:
@@ -914,7 +910,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     s32 mode;
     char *name;
     s32 room;
-    u64 list;
+    void *list;
     FldWorldItem *item;
 
     world = scrReadIntParameter(0);
@@ -940,10 +936,10 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     }
     if (world == fldAreaState[4] && stage == fldAreaState[5] + 1) {
         list = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 6);
-        if (dds3GetWorldValueCount(list) != 0) {
+        if (dds3GetWorldValueCount((s32)list) != 0) {
             dds3ResetObjectValueCursor(list);
             do {
-                item = dds3ReadIndexedWorldObjectWord(list);
+                item = (FldWorldItem *)dds3ReadIndexedWorldObjectWord(list);
                 if (item->data[1] == room) {
                     switch (mode) {
                     case 0:
