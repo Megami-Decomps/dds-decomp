@@ -179,15 +179,49 @@ def bss_symbols(objdump_text):
     return nobits_symbols(objdump_text, ".bss")
 
 
+def _retail_nobits_inventory(start, size, syms):
+    """Derive canonical ``(offset, size, name)`` rows from symbol_addrs.
+
+    Every named address inside the exact owned span is authoritative.  Aliases
+    at one address are separate required names for the same object extent;
+    their spelling order is canonicalized because ELF symbol-table order is
+    not a source-layout fact.
+    """
+    end = start + size
+    addressed = sorted(
+        (retail, name)
+        for name, retail in syms.items()
+        if start <= retail < end
+    )
+    if not addressed:
+        return [], ["retail span has no symbol_addrs inventory"]
+
+    addresses = sorted({retail for retail, _ in addressed})
+    problems = []
+    if addresses[0] != start:
+        problems.append(
+            f"retail inventory begins at +0x{addresses[0] - start:X}, expected +0x0"
+        )
+    next_address = {
+        retail: addresses[index + 1] if index + 1 < len(addresses) else end
+        for index, retail in enumerate(addresses)
+    }
+    inventory = [
+        (retail - start, next_address[retail] - retail, name)
+        for retail, name in addressed
+    ]
+    return inventory, problems
+
+
 def nobits_ownership_problems(
         yaml_text, unit, section_name, section_size, emitted, syms):
     """Explain why emitted NOBITS does not exactly implement its retail span.
 
-    The YAML owns the bounded address range and ``symbol_addrs`` owns each
-    canonical retail address.  The object must then prove the remaining
-    facts: every definition is STT_OBJECT, every name maps to its emitted
-    section offset, and the individually sized objects cover the range once,
-    in address order, without anonymous padding or overlap.
+    The YAML owns the bounded address range.  Every ``symbol_addrs`` fact in
+    that range forms the canonical retail inventory, including same-address
+    aliases.  The object must emit that inventory one-for-one with each name
+    at the derived address and size as STT_OBJECT.  This deliberately fails
+    closed when the retail inventory is absent or does not begin at the span.
     """
     owned = owned_nobits_range(yaml_text, unit, section_name)
     if owned is None:
@@ -198,41 +232,48 @@ def nobits_ownership_problems(
         problems.append(
             f"section size 0x{section_size:X}, retail span 0x{expected_size:X}"
         )
-    if not emitted:
-        problems.append("section has no explicit symbols")
-        return problems
+    inventory, inventory_problems = _retail_nobits_inventory(
+        start, expected_size, syms
+    )
+    problems.extend(inventory_problems)
+    canonical = {
+        name: (offset, size)
+        for offset, size, name in inventory
+    }
 
     seen_names = set()
-    seen_offsets = set()
-    cursor = 0
-    for offset, size, name, is_object in sorted(emitted):
+    for offset, size, name, is_object in sorted(
+        emitted, key=lambda row: (row[0], row[2], row[1], row[3])
+    ):
         if name in seen_names:
             problems.append(f"duplicate symbol {name}")
-        if offset in seen_offsets:
-            problems.append(f"multiple symbols at +0x{offset:X}")
         seen_names.add(name)
-        seen_offsets.add(offset)
         if not is_object:
             problems.append(f"{name} is not STT_OBJECT")
-        retail = syms.get(name)
-        if retail is None:
-            problems.append(f"{name} has no retail address")
-        elif retail != start + offset:
+        expected = canonical.get(name)
+        if expected is None:
+            problems.append(f"extra emitted symbol {name}")
+            continue
+        expected_offset, expected_object_size = expected
+        if offset != expected_offset:
             problems.append(
-                f"{name} maps to 0x{retail:08X}, expected 0x{start + offset:08X}"
+                f"{name} is at +0x{offset:X}, retail inventory requires "
+                f"+0x{expected_offset:X}"
             )
-        if size <= 0:
-            problems.append(f"{name} has nonpositive size 0x{size:X}")
-        if offset != cursor:
-            relation = "overlaps" if offset < cursor else "leaves a gap before"
+        if size != expected_object_size:
             problems.append(
-                f"{name} at +0x{offset:X} {relation} expected +0x{cursor:X}"
+                f"{name} has size 0x{size:X}, retail inventory requires "
+                f"0x{expected_object_size:X}"
             )
-        cursor = max(cursor, offset + size)
 
-    if cursor != expected_size:
+    for offset, size, name in inventory:
+        if name not in seen_names:
+            problems.append(
+                f"missing retail symbol {name} at +0x{offset:X} size 0x{size:X}"
+            )
+    if not emitted:
         problems.append(
-            f"explicit symbols end at +0x{cursor:X}, retail span ends at +0x{expected_size:X}"
+            "section has no explicit symbols"
         )
     return problems
 
