@@ -126,6 +126,13 @@ def unit_cflags(version: str) -> dict[str, str]:
     return out
 
 
+def missing_field_archive_bases(version: str, sources: list[Path]) -> list[Path]:
+    """Return the retail LB bases unavailable for the discovered sources."""
+
+    bases = [Path("orig") / version / "field" / f"{source.stem}.LB" for source in sources]
+    return [base for base in bases if not (ROOT / base).is_file()]
+
+
 def run_splat(version: str, yaml: Path, force: bool) -> None:
     """Split when the config inputs changed since the last successful split."""
     inputs = [yaml, ROOT / "config" / version / "symbol_addrs.txt", ROOT / "config" / version / "reloc_addrs.txt"]
@@ -910,6 +917,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             lb_source_dir = Path("src") / version / "data" / "field"
             lb_output_dir = Path("build") / version / "data" / "field"
             lb_sources = sorted((ROOT / lb_source_dir).glob("*.lbasm"))
+            missing_lb_bases = missing_field_archive_bases(version, lb_sources)
             lb_outputs = []
             for source in lb_sources:
                 source = source.relative_to(ROOT)
@@ -937,8 +945,14 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             lb_stamp = lb_output_dir / "field_lb.ok"
             n.build(str(lb_stamp), "check", str(lb_manifest), implicit=lb_outputs)
             n.build(f"{version}-field-archives", "phony", str(lb_stamp))
-            version_outputs.append(str(lb_stamp))
-            field_data_stamps.append(str(lb_stamp))
+            if missing_lb_bases:
+                print(
+                    f"{version}: field archives excluded from default targets; "
+                    f"{len(missing_lb_bases)} retail base archive(s) unavailable"
+                )
+            else:
+                version_outputs.append(str(lb_stamp))
+                field_data_stamps.append(str(lb_stamp))
 
         if field_data_stamps:
             n.build(f"{version}-field-data", "phony", field_data_stamps)
