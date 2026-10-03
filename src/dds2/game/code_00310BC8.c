@@ -22,12 +22,6 @@ extern u64 func_0019F460(s32, s32, u64, u64, u64, u64);
 
 extern s32 func_00101740(u32);
 
-/* Grid prefix through the two margins used by the viewport-follow routine. */
-typedef struct SdfGridMarginPrefix {
-    u8 pad00[0x2C];    // 0x00
-    s16 columnMargin;  // 0x2C
-    s16 rowMargin;     // 0x2E
-} SdfGridMarginPrefix; // 0x30
 
 /* Task item descriptor (0x14): key plus optional handlers, defaults filled in by func_00312A48. */
 typedef struct SdfTaskItemDesc {
@@ -58,43 +52,30 @@ extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
 extern void func_00313A58(u8 *);
 
-typedef struct SdfLink {
-    u8 pad00[8];
-    struct SdfLink *prev;
-    struct SdfLink *next;
-} SdfLink;
+typedef struct SdfListNode {
+    u32 index;                 /* 0x00 */
+    s32 key;                   /* 0x04 */
+    struct SdfListNode *next;  /* 0x08 */
+    struct SdfListNode *prev;  /* 0x0C */
+    void *value;               /* 0x10 */
+} SdfListNode;
 
-typedef struct SdfTaskOwner {
-    u32 handle;        /* 0x00 */
-    u8 pad04[0xC];
-    u32 removeArg;     /* 0x10 */
-    u8 pad14[4];
-    void (*onRemove)(s32, u32); /* 0x18 */
-} SdfTaskOwner;
-
-typedef struct TaskListNode {
-    u32 handle; /* 0x00 */
-    s32 key;    /* 0x04 */
-    struct TaskListNode *next; /* 0x08 */
-    u8 pad0C[4];
-    u32 value;  /* 0x10 */
-} TaskListNode;
-
-typedef struct {
-    u32 pad00;
-    u32 tail;  /* 0x04 */
-    TaskListNode *head; /* 0x08 */
-    u32 count; /* 0x0C */
-    u32 current; /* 0x10 */
-    void (*onRemove)(u32, u32); /* 0x14 */
-} TaskList;
+typedef struct SdfList {
+    u32 allocation;            /* 0x00 */
+    u32 count;                 /* 0x04 */
+    SdfListNode *head;         /* 0x08 */
+    SdfListNode *tail;         /* 0x0C */
+    u32 userData;              /* 0x10 */
+    void (*onRemove)();        /* 0x14: ordinal/payload hook, installed through the word-address API */
+    void (*onDestroy)(s32, s32); /* 0x18 */
+} SdfList;                     /* 0x1C, allocated by sdfCreateTaskHeader */
 
 typedef struct TaskWork {
-    u32 handle;
+    u32 allocation;
     char *primaryTaskName;
     char *secondaryTaskName;
-    TaskList *list;
-    u32 firstItemHandle; /* Address of the next list node to visit, not an allocation handle. */
+    SdfList *list;
+    SdfListNode *currentNode; /* Next node to visit; reset to the list head at pass end. */
 } TaskWork;
 
 /* Low flag bits: 0 update, 1 callback, 2 initialize once, 15 pending removal.
@@ -109,13 +90,6 @@ typedef struct SdfTaskEntry {
     s32 initResult;              /* 0x18 */
 } SdfTaskEntry;
 
-typedef struct SdfGridOwner {
-    u32 handle;        /* 0x00 */
-    u8 pad04[0x1C];
-    void (*onDestroy)(s32, u32); /* 0x20 */
-    u8 pad24[0xC];
-    u32 destroyArg;    /* 0x30 */
-} SdfGridOwner;
 
 extern f32 sdfQuatDot(f32 *, f32 *);
 
@@ -135,7 +109,7 @@ typedef struct SdfGrid {
     u32 width;             /* 0x14 */
     void (*drawCell)(s32, s32, s32, struct SdfGrid *, SdfGridCell *, s32); /* 0x18 */
     void (*releaseCell)(u32, u32); /* 0x1C */
-    void (*onSelect)();    /* 0x20 */
+    void (*onDestroy)(s32, u32); /* 0x20 */
     u16 cellWidth;         /* 0x24 */
     u16 cellHeight;        /* 0x26 */
     u16 visibleColumns;    /* 0x28 */
@@ -163,22 +137,6 @@ extern u64 func_0019F798(s32, s32, u64, u64, u64, u64);
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
 extern u64 itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
 
-typedef struct SdfListNode {
-    u32 index;                  /* 0x00 */
-    s32 key;                    /* 0x04 */
-    struct SdfListNode *next;   /* 0x08 */
-    struct SdfListNode *prev;   /* 0x0C */
-    void *value;                /* 0x10 */
-} SdfListNode;
-
-typedef struct SdfList {
-    u32 pad00;
-    u32 count;                  /* 0x04 */
-    SdfListNode *head;          /* 0x08 */
-    SdfListNode *tail;          /* 0x0C */
-    u32 pad10;
-    void (*onRemove)(u32, void *); /* 0x14 */
-} SdfList;
 extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 
@@ -554,29 +512,30 @@ s32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, u64 first, u64 second, u
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00311F20);
 
+/* Return a callback-list header address, retaining its allocation handle and teardown userData. */
 void *sdfCreateTaskHeader(u32 userData) {
     s32 allocation = sdfAllocGeneralBlock(0x1C);
-    u32 *obj = sdfMemoryGetBlockAddress(allocation);
+    SdfList *obj = sdfMemoryGetBlockAddress(allocation);
 
     memset(obj, 0, 0x1C);
-    obj[0] = allocation;
-    obj[4] = userData;
-    obj[5] = (u32)func_00313BA8;
-    obj[6] = (u32)func_00313BA8;
+    obj->allocation = allocation;
+    obj->userData = userData;
+    obj->onRemove = func_00313BA8;
+    obj->onDestroy = func_00313BA8;
     return obj;
 }
 
-s64 sdfDestroyTaskWork(SdfTaskOwner *owner) {
+s64 sdfDestroyTaskWork(SdfList *owner) {
     if (owner != NULL) {
         sdfClearTaskList(owner);
-        owner->onRemove(-1, owner->removeArg);
-        return sdfReleaseResourceAllocation(owner->handle);
+        owner->onDestroy(-1, owner->userData);
+        return sdfReleaseResourceAllocation(owner->allocation);
     }
 }
 
 void sdfSetTaskDestroyCallback(s32 work, s32 callback) {
     if (callback != 0) {
-        *(s32 *)(work + 0x18) = (s32)callback;
+        ((SdfList *)work)->onDestroy = (void (*)(s32, s32))callback;
     }
 }
 
@@ -626,7 +585,7 @@ SdfListNode *sdfListInsertAfter(SdfList *list, SdfListNode *after, s32 key, void
 
 void sdfSetTaskSecondaryCallback(s32 work, s32 callback) {
     if (callback != 0) {
-        *(s32 *)(work + 0x14) = (s32)callback;
+        ((SdfList *)work)->onRemove = (void (*)())callback;
     }
 }
 
@@ -673,64 +632,67 @@ SdfListNode *sdfListRemoveNode(SdfList *list, SdfListNode *node) {
     return neighbour;
 }
 
-void sdfClearTaskList(TaskList *list) {
-    TaskListNode *node;
+/* Release each row through its ordinal/payload hook, then clear tail, head and count in that order. */
+void sdfClearTaskList(SdfList *list) {
+    SdfListNode *node;
     if (list != NULL) {
         node = list->head;
         if (node != NULL) {
             do {
-                TaskListNode *current = node;
+                SdfListNode *current = node;
                 node = node->next;
-                list->onRemove(current->handle, current->value);
+                list->onRemove(current->index, current->value);
                 sdfReleaseChipBlock(current);
             } while (node != NULL);
         }
-        list->count = 0;
-        list->head = 0;
         list->tail = 0;
+        list->head = 0;
+        list->count = 0;
     }
 }
 
-void sdfSwapLinkedListNodes(SdfLink *list, SdfLink *a, SdfLink *b) {
-    SdfLink *tmpNext;
-    SdfLink *tmpPrev;
+/* Exchange native next/prev links and list endpoints without changing row ordinals. */
+void sdfSwapLinkedListNodes(SdfList *list, SdfListNode *a, SdfListNode *b) {
+    SdfListNode *previous;
+    SdfListNode *next;
 
     if (a != NULL && b != NULL) {
-        if (a->prev != NULL) {
-            a->prev->next = b;
-        }
         if (a->next != NULL) {
             a->next->prev = b;
         }
-        if (b->prev != NULL) {
-            b->prev->next = a;
+        if (a->prev != NULL) {
+            a->prev->next = b;
         }
         if (b->next != NULL) {
             b->next->prev = a;
         }
-        tmpNext = a->next;
-        a->next = b->next;
-        tmpPrev = a->prev;
+        if (b->prev != NULL) {
+            b->prev->next = a;
+        }
+        previous = a->prev;
         a->prev = b->prev;
-        b->next = tmpNext;
-        b->prev = tmpPrev;
-        if (a->next == NULL) {
-            list->prev = a;
-        }
+        next = a->next;
+        a->next = b->next;
+        b->prev = previous;
+        b->next = next;
         if (a->prev == NULL) {
-            list->next = a;
+            list->head = a;
         }
-        if (b->next == NULL) {
-            list->prev = b;
+        if (a->next == NULL) {
+            list->tail = a;
         }
         if (b->prev == NULL) {
-            list->next = b;
+            list->head = b;
+        }
+        if (b->next == NULL) {
+            list->tail = b;
         }
     }
 }
 
-void *sdfFindTaskListNodeByKey(TaskList *list, s32 key) {
-    TaskListNode *node;
+/* Find a key in a nonempty list; the first node is read before traversal exhaustion is checked. */
+void *sdfFindTaskListNodeByKey(SdfList *list, s32 key) {
+    SdfListNode *node;
 
     node = list->head;
     while (node->key != key) {
@@ -818,9 +780,9 @@ s32 kwlnTaskExists(u32 name) {
 }
 
 void sdfAttachTaskItem(TaskWork *work, SdfTaskItemDesc *item) {
-    u32 result = (u32)sdfListAppend((SdfList *)work->list, item->key, func_00312A48(item));
-    if (work->firstItemHandle == 0) {
-        work->firstItemHandle = result;
+    SdfListNode *node = sdfListAppend(work->list, item->key, func_00312A48(item));
+    if (work->currentNode == NULL) {
+        work->currentNode = node;
     }
 }
 
@@ -832,11 +794,11 @@ s64 sdfRemoveTaskItem(TaskWork *work, s32 key) {
 }
 
 s32 sdfFindTaskItemValueByKey(TaskWork *work, s32 key) {
-    TaskListNode *item;
+    SdfListNode *item;
 
     item = sdfFindTaskListNodeByKey(work->list, key);
     if (item != NULL) {
-        return item->value;
+        return (s32)item->value;
     }
     return 0;
 }
