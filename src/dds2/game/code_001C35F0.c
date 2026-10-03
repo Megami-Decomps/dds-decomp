@@ -186,6 +186,8 @@ typedef struct BtlTrackedState {
         u32 flags;
         s8 status;
     } word; /* 0x3C */
+    s32 counter;
+    s32 threshold;
 } BtlTrackedState;
 extern BtlTrackedState *btlTrackedTaskHandles;
 extern u32 btlCommandPanelTaskNameRef;
@@ -210,7 +212,44 @@ s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7DB8);
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7F10);
+extern s32 btlAreLinkedSceneCountersAtThreshold(void);
+extern void func_001C35F0(s32, s32, s32);
+
+s32 func_001C7F10(void) {
+    BtlTrackedState *flow;
+    void *task;
+    s32 counter;
+
+    if (btlTrackedTaskHandles != NULL) {
+        task = func_00101740(btlCommandPanelTaskNameRef);
+        flow = btlTrackedTaskHandles;
+        switch (flow->word.status) {
+        case 1:
+            flow->counter++;
+            if (flow->counter >= flow->threshold) {
+                flow->word.status = 2;
+            }
+            break;
+        case 3:
+            counter = flow->counter + 1;
+            flow->counter = counter;
+            if (counter < flow->threshold) {
+                break;
+            }
+            counter = counter <= 0 ? 0 :
+                (counter < flow->threshold ? counter : flow->threshold);
+            flow->counter = counter;
+            if (btlAreLinkedSceneCountersAtThreshold() != 0) {
+                if (task != NULL) {
+                    func_001C35F0(*(s32 *)(kwlnTaskGetUserValue(task) + 0x2C), 2, 0);
+                }
+                btlTrackedTaskHandles->word.status = 0;
+            }
+            break;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_001C35F0", D_00416920);
 
