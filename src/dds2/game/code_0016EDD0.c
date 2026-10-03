@@ -64,7 +64,7 @@ typedef struct EffThunderGroup {
     u32 color;
 } EffThunderGroup;
 
-extern s32 effMultiplyPackedColors(s32, s32);
+extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 extern void func_0016D3B0(void *work, s32 index);
 extern void func_0016F028(void *work, s32 index, void *seed);
 extern void parPrependCellNode(void *system);
@@ -453,7 +453,7 @@ typedef struct EffFlashRecordWork {
 } EffFlashRecordWork; /* 0x48 */
 
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern s32 effRecordPoolCreateTriple();
+extern struct EffRecordPool *effRecordPoolCreateTriple(s32 count);
 
 /* Clone the 0x30-byte parameter block, create the record pool and clear every particle's age. */
 EffFlashRecordWork *effFlashRecordCreate(src)
