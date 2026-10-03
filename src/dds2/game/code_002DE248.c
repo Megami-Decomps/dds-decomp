@@ -3261,7 +3261,82 @@ void effReleaseClassDrawResources(s32 work) {
     sdfReleaseResourceAllocation(((EffClassDrawState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E6B68);
+typedef struct EffClassFrameResource {
+    u8 pad_00[8];
+    u32 frameCount;
+    u8 pad_0C[4];
+    u8 *rows;
+} EffClassFrameResource;
+
+typedef struct EffClassRowOutput {
+    u8 pad_00[0x1C];
+    u8 *rows;
+} EffClassRowOutput;
+
+extern void effAdvanceClassFrame();
+
+void func_002E6B68(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    s32 limit = work->frameLimit;
+    s32 progress = ((EffBillConfig *)config)->progress;
+    u32 *list = work->instances;
+    EffClassWork *classWork;
+    f32 *scales;
+    EffClassFrameResource **resource;
+    EffClassRowOutput *output;
+    EffClassFrameResource *frames;
+    u8 *src;
+    u8 *dst;
+    u8 *wrap;
+    u32 count;
+    u32 lastFrame;
+    u32 i;
+
+    classWork = (EffClassWork *)list[1];
+    resource = (EffClassFrameResource **)classWork->resource;
+    output = (EffClassRowOutput *)list[2];
+    scales = (f32 *)list[0];
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    effAdvanceClassFrame(classWork);
+    count = ((EffBillConfig *)config)->frames.count;
+    frames = *resource;
+    lastFrame = frames->frameCount - 1;
+    dst = output->rows;
+    src = frames->rows;
+    if (config[0xC4] != 0) {
+        return;
+    }
+    i = 0;
+    if (count == 0) {
+        return;
+    }
+    wrap = src + lastFrame * 0x10 - 0x60;
+    do {
+        VU0_LOAD_VF(vf10, src + 0x10);
+        VU0_MOVE_VF(vf12, vf10);
+        VU0_LOAD_VF(vf11, src + 0x30);
+        VU0_STORE_VF(vf10, dst + 0x20);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_NORMALIZE_VF10();
+        VU0_SCALAR_OP(*scales, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_ADD(vf10, vf10, vf12);
+        VU0_STORE_VF(vf10, dst);
+        PCP_COPY_VECTOR(dst + 0x10, src + 0x50);
+        if (i == 0) {
+            PCP_COPY_VECTOR(dst + 0x30, wrap);
+        } else {
+            PCP_COPY_VECTOR(dst + 0x30, src - 0x30);
+        }
+        i++;
+        dst += 0x40;
+        wrap += 0x40;
+        src += 0x40;
+        scales++;
+    } while (i < count);
+}
 
 extern void effRunClassPostFrame(s32);
 

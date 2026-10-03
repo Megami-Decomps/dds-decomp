@@ -3957,7 +3957,9 @@ s32 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *came
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020B560);
+s64 func_0020B560(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+    return btlSetLinkedDefeatCameraPresetA(command, camera, rotate);
+}
 
 s32 btlTryStartTargetFacingActionEffect(u8 *unit) {
     u8 *entry = (u8 *)((BtlEventEntry *)unit)->task;
