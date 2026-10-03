@@ -326,19 +326,20 @@ event script's resource name:
 ```
 
 `PUSHEVENT` also assembles to `PUSHIS`. The selected game profile binds names
-to the event IDs present in its maintained corpus. This mirrors the runtime,
+to the event-resource IDs present in its maintained corpus. This mirrors the runtime,
 which formats event ID 602 as
 `/event/e600/e602/scr/e602.bf`. The command profile records which handler
 argument carries the event resource. The disassembler emits the name only when
 that argument is a direct literal and the target is maintained for the selected
-game. This covers `CALL_EVENT`, `SUBMIT_EVENT`, and the second argument of
-`SUBMIT_EVENT_WITH_SELECTION`; dynamic values and references to absent targets
-stay numeric.
+game. This covers `CALL_EVENT` and the selected-event argument of
+`SUBMIT_EVENT_WITH_SELECTION`. The first argument of that command,
+`SUBMIT_EVENT`, and `SUBMIT_EVENT_IMMEDIATE` are event-request IDs; they remain
+numeric and are represented separately from event-resource links. Dynamic
+values and references to absent event resources stay numeric.
 
-The reading view carries the same evidence as `CALL_EVENT(event(e602))`,
-`SUBMIT_EVENT(event(e633))`, or
-`SUBMIT_EVENT_WITH_SELECTION(258, event(e610))`, while leaving an unresolved
-target numeric.
+The reading view carries the same evidence as `CALL_EVENT(event(e602))` or
+`SUBMIT_EVENT_WITH_SELECTION(258, event(e610))`. Request IDs stay ordinary
+integers, as in `SUBMIT_EVENT(633)` and the first selection argument.
 
 A literal procedure-table index passed to the script-task command uses a local
 procedure symbol:
@@ -468,7 +469,7 @@ table and native implementation; shared commands were checked in both games:
 | `SET_CONTROLLER_VIBRATION` | `0x01A` | 3 | Sets the `SMALL_MOTOR` or `LARGE_MOTOR` vibration strength and duration |
 | `FADE_BACKGROUND_IN` | `0x01F` | 1 | Starts the background fade-in with the supplied duration |
 | `READ_SOLAR_PHASE` | `0x027` | 0 | Returns the current solar phase |
-| `SUBMIT_EVENT_WITH_SELECTION` | `0x028` | 2 | Submits a request ID and uses the positive second argument as the selected event resource |
+| `SUBMIT_EVENT_WITH_SELECTION` | `0x028` | 2 | Uses arg0 as an event-request ID and arg1 as the selected event resource |
 | `RESET_DRAW_EFFECTS` | `0x043` | 0 | Clears draw transitions and effect enables |
 | `RETURN_TO_TITLE` | `0x046` | 0 | Requests the title scene |
 | `WAIT_FOR_UNIT_MOTION` | `0x049` | 1 | Waits until the selected unit's motion is idle or in its timed mode |
@@ -477,8 +478,8 @@ table and native implementation; shared commands were checked in both games:
 | `ACTION_WINDOW_REQUEST_AND_POLL` | `0x05E` | 1 | Requests or polls the current action-window message and returns `-1`, `0`, or `1` |
 | `RESTORE_CAMERA_NODE_MODE` | `0x060` | 0 | Resets the player scene-object state and restores camera node mode |
 | `RELEASE_CURRENT_OBJECT` | `0x061` | 0 | Releases the current field object and refreshes field state |
-| `CALL_EVENT` | `0x066` | 1 | Submits an event request and clears named processes |
-| `SUBMIT_EVENT` | `0x067` | 1 | Submits an event request with mode zero |
+| `CALL_EVENT` | `0x066` | 1 | Calls the event resource in arg0 and clears named processes |
+| `SUBMIT_EVENT` | `0x067` | 1 | Submits the event-request ID in arg0 with mode zero |
 | `READ_CURRENT_WORLD_OBJECT_ID` | `0x068` | 0 | Returns the current world object's ID, or `-1` when absent |
 | `CLEAR_UNIT_LOW_FLAG` | `0x069` | 1 | Clears the selected unit's low flag bit |
 | `SET_UNIT_LOW_FLAG` | `0x06A` | 1 | Sets the selected unit's low flag bit |
@@ -549,7 +550,7 @@ table and native implementation; shared commands were checked in both games:
 | `ADD_PARTY_CURRENCY` | `0x139` | 1 | Adds a clamped amount to party currency |
 | `APPLY_PARTY_TRAP_EFFECT` | `0x13A` | 1 | Applies a named HP-loss or status effect to the party |
 | `SET_MESSAGE_RANGE` | `0x13C` | 2 | Sets the active message range for the current window |
-| `SUBMIT_EVENT_IMMEDIATE` | `0x166` | 1 | Submits the selected event immediately |
+| `SUBMIT_EVENT_IMMEDIATE` | `0x166` | 1 | Submits the event-request ID in arg0 immediately |
 | `QUEUE_WORLD_OBJECT_PENDING_VALUE` | `0x1E0` | 2 | Arms a selected world object with a pending value |
 | `CLEAR_WORLD_OBJECT_PENDING_VALUE` | `0x1E1` | 1 | Clears a selected world object's pending value and starts its reset timer |
 | `CLEAR_PROCESS_CONTROL_FLAG` | `0x1E7` | 0 | Clears the script-process control flag |

@@ -424,6 +424,7 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
     }
     all_procedure_edges = graph.get("scriptProcedureEdges", ())
     all_event_edges = graph.get("eventScriptEdges", ())
+    all_event_requests = graph.get("eventRequestEdges", ())
     adjacency: dict[str, set[str]] = defaultdict(set)
     for edge in all_procedure_edges:
         adjacency[edge["source"]].add(edge["target"])
@@ -452,6 +453,9 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
     ]
     event_edges = [
         row for row in all_event_edges if row["source"] in reachable
+    ]
+    event_requests = [
+        row for row in all_event_requests if row["source"] in reachable
     ]
     battle_exit_edges = [
         row
@@ -536,6 +540,27 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
         lines.append(
             f"  {json.dumps(edge['source'])} -> {json.dumps(edge['target'])} "
             f"[label={json.dumps(label)}];"
+        )
+    request_targets = {
+        f"request:{edge['requestId']}": edge for edge in event_requests
+    }
+    for target, edge in sorted(request_targets.items()):
+        label = f"event request {edge['requestId']}"
+        attributes = [f"label={json.dumps(label)}", 'shape="ellipse"']
+        attributes.extend(('style="dashed"', 'color="gray"'))
+        lines.append(f"  {json.dumps(target)} [{', '.join(attributes)}];")
+    for edge in event_requests:
+        label = edge["command"]
+        if "selection" in edge:
+            label += f" selection {edge['selection']}"
+        elif "selectionId" in edge:
+            label += f" selection {edge['selectionId']}"
+        if edge["count"] > 1:
+            label += f" x{edge['count']}"
+        lines.append(
+            f"  {json.dumps(edge['source'])} -> "
+            f"{json.dumps('request:' + str(edge['requestId']))} "
+            f"[label={json.dumps(label)}, style=dashed, color=gray];"
         )
     battle_exit_routes = Counter(
         (
@@ -799,6 +824,7 @@ def _event_sections(
     procedures = []
     procedure_edges = []
     event_edges = []
+    event_requests = []
     battle_exit_edges = []
     unresolved = []
     for script_id, script_record in sorted(scripts.items()):
@@ -855,6 +881,14 @@ def _event_sections(
                     "targetPresent": target_present,
                 }
             )
+        event_requests.extend(
+            {
+                **edge,
+                **script_metadata,
+                "source": f"{prefix}{edge['source']}",
+            }
+            for edge in flow["eventRequests"]
+        )
         for site in flow["deferredBattleExits"]:
             candidates = _battle_exit_candidates(
                 tables.get(site["field"]), site["field"], site["event"]
@@ -909,6 +943,8 @@ def _event_sections(
         edge["sourceReachable"] = edge["source"] in reachable
     for edge in event_edges:
         edge["sourceReachable"] = edge["source"] in reachable
+    for edge in event_requests:
+        edge["sourceReachable"] = edge["source"] in reachable
     for edge in battle_exit_edges:
         edge["sourceReachable"] = edge["source"] in reachable
 
@@ -938,6 +974,7 @@ def _event_sections(
         "scriptProcedures": procedures,
         "scriptProcedureEdges": procedure_edges,
         "eventScriptEdges": event_edges,
+        "eventRequestEdges": event_requests,
         "deferredBattleExitEdges": battle_exit_edges,
         "scriptUnresolvedTargets": unresolved,
         "eventSummary": {
@@ -986,8 +1023,18 @@ def _event_sections(
             "eventEventScriptEdges": sum(
                 edge["scriptType"] == "event" for edge in event_edges
             ),
+            "eventRequestEdges": len(event_requests),
+            "fieldEventRequestEdges": sum(
+                edge["scriptType"] == "field" for edge in event_requests
+            ),
+            "eventEventRequestEdges": sum(
+                edge["scriptType"] == "event" for edge in event_requests
+            ),
             "reachableEventScriptEdges": sum(
                 edge["sourceReachable"] for edge in event_edges
+            ),
+            "reachableEventRequestEdges": sum(
+                edge["sourceReachable"] for edge in event_requests
             ),
             "deferredBattleExitSites": len(battle_exit_edges),
             "resolvedDeferredBattleExitSites": sum(
@@ -1077,7 +1124,7 @@ def _load_graph(
         except KeyError as exc:
             raise FieldGraphError(f"unknown command profile {profile_name!r}") from exc
         sections = _event_sections(field_paths, script_dir, profile, tables)
-        graph["schema"] = "dds-field-world-5"
+        graph["schema"] = "dds-field-world-6"
         graph["summary"].update(sections.pop("eventSummary"))
         graph.update(sections)
     return graph
