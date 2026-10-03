@@ -42,6 +42,7 @@ extern u32 effRetainResource(s32 kind);
 extern void billSetBillboardMode(u32 handle, s32 mode);
 extern s32 sdfAllocGeneralBlock(s32 size);
 extern s32 sdfResourceRetainAddress(s32 handle);
+extern void effReleaseOptionalResource(s32 work);
 extern void *sdfCreateAssetWithDrawEntries(void);
 extern void func_003332D0(u32 asset, f32 value);
 typedef struct {
@@ -185,7 +186,81 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
     D_003B1630[work->mode]->submit(D_003B1630[work->mode], packet);
 }
 
-INCLUDE_ASM(const s32, "game/code_0017E680", func_0017EA78);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+extern f32 sdfSinPoly(f32 angle);
+
+void func_0017EA78(EffResourceWork *work, u32 count, u32 centerColor, u32 outerColor,
+                   f32 radiusScale, f32 height) {
+    s32 oldResource = work->resource68;
+    u32 recordCount;
+    s32 allocation;
+    f32 (*positions)[4];
+    f32 (*unitVectors)[4];
+    u32 *colors;
+    u32 i;
+    f32 angle;
+    f32 step;
+    f32 halfStep;
+    f32 middleAngle;
+    f32 negativeHeight;
+
+    if (count < 3) {
+        count = 3;
+    }
+    if (oldResource != 0) {
+        effReleaseOptionalResource((s32)work);
+    }
+    angle = 0.0f;
+    recordCount = count * 3;
+    allocation = sdfAllocGeneralBlock(recordCount * 0x24);
+    work->resource68 = allocation;
+    positions = (f32 (*)[4])sdfResourceRetainAddress(allocation);
+    unitVectors = positions + recordCount;
+    colors = (u32 *)(unitVectors + recordCount);
+    work->vertexCount = recordCount;
+    work->positions = positions;
+    work->normals = unitVectors;
+    work->colors = colors;
+    step = 6.2831852f / (f32)count;
+    for (i = 0; i < count; i++) {
+        f32 sine;
+
+        negativeHeight = -height;
+        unitVectors[0][0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        unitVectors[0][1] = sdfSinPoly(angle);
+        unitVectors[0][2] = 0.0f;
+        halfStep = step * 0.5f;
+        middleAngle = angle + halfStep;
+        angle += step;
+        positions[0][0] = unitVectors[0][0] * radiusScale;
+        sine = unitVectors[0][1];
+        unitVectors++;
+        positions[0][2] = negativeHeight;
+        positions[0][1] = sine * radiusScale;
+        positions++;
+        unitVectors[0][0] =
+            sdfEvaluateCosineViaSinePhaseShift(middleAngle);
+        unitVectors[0][1] = sdfSinPoly(middleAngle);
+        unitVectors[0][2] = 0.0f;
+        positions[0][0] = 0.0f;
+        positions[0][1] = 0.0f;
+        positions[0][2] = 0.0f;
+        unitVectors++;
+        positions++;
+        unitVectors[0][0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        unitVectors[0][1] = sdfSinPoly(angle);
+        unitVectors[0][2] = 0.0f;
+        positions[0][0] = unitVectors[0][0] * radiusScale;
+        positions[0][1] = unitVectors[0][1] * radiusScale;
+        positions[0][2] = negativeHeight;
+        colors[0] = outerColor;
+        colors[1] = centerColor;
+        colors[2] = outerColor;
+        colors += 3;
+        positions++;
+        unitVectors++;
+    }
+}
 
 void effReleaseOptionalResource(s32 address) {
     EffResourceWork *effect = (EffResourceWork *)address;
