@@ -2049,10 +2049,6 @@ u32 func_0026B4A0(void) {
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424FC8);
-
-INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424FF8);
-
 extern KwlnTask *func_00101740(const char *);
 extern s32 mnuHasMantraSpriteTaskFinished(void);
 extern void func_002665E8(EventDispatchState *);
@@ -2119,6 +2115,12 @@ s32 evtBDispatchSyncC(s32 request) {
 
     return menuSetHandler((s32)state, 2, request);
 }
+INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424FC8);
+
+INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424FF8);
+
+INCLUDE_RODATA(const s32, "game/code_002665B0", D_00425008);
+
 INCLUDE_SDATA(const s32, "game/code_002665B0", mnuTerminalTaskState);
 
 INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437859);
