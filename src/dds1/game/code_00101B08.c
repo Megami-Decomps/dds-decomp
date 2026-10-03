@@ -39,7 +39,84 @@ void dds3ClearScopedObjectFlags(u32 object, u32 mask, u32 scope) {
     func_00101060(0, object, mask, scope);
 }
 
-INCLUDE_ASM(const s32, "game/code_00101B08", func_00101BD8);
+typedef struct SdfThreadNode SdfThreadNode;
+
+extern void func_002FC0A8(void);
+extern void sceSifInitRpc(s32);
+extern s32 sceSifInitIopHeap(void);
+extern void sdfInitDeviceSemaphores(void);
+extern s32 sceSifRebootIop(const char *);
+extern s32 func_00312AC0(void);
+extern void sceSifLoadFileReset(void);
+extern void sceFsReset(void);
+extern void func_002F3CB8(s32);
+extern void func_002F4190(u32);
+extern s32 sceSifLoadModule(const char *, s32, const char *);
+extern void sdfDevStartLoad(s32, s32);
+extern void sdfLoadIopModulePair(const char *, s32);
+extern void func_002CF9A8(u32, u32, u32);
+extern void sdfPadRequestMode(s32, u8);
+extern void func_002E5CD8(const char *);
+extern void func_002E5D80(s32);
+extern void sdfEnsureDeviceWorkerThreadStarted(s32);
+extern void func_002D0D70(const char *, const char *);
+extern void sdfStartAndSuspendWorkerThread(void);
+extern void sdfStartTrackedThread(SdfThreadNode *, s32, s32, s64, s32, s32);
+extern s32 sdfThreadSleepSelf(void);
+extern void func_001005C8(void);
+
+const char D_0039DF28[] __attribute__((aligned(8))) = "cdrom0:\\IRX\\IOPRP255.IMG;1";
+const char D_0039DF48[] __attribute__((aligned(8))) = "cdrom0:\\IRX\\SIO2MAN.IRX;1";
+const char D_0039DF68[] __attribute__((aligned(8))) = "cdrom0:\\IRX\\PADMAN.IRX;1";
+const char D_0039DF88[] __attribute__((aligned(8))) = "\\DDS3.IMG;1";
+const char D_0039DF98[] __attribute__((aligned(8))) = "cdrom0:\\DDS3.DDT;1";
+const char D_0039DFB0[] __attribute__((aligned(8))) = "cdrom0:\\IRX";
+const char D_0039DFC0[] __attribute__((aligned(8))) = "../../../dds3data";
+const char D_0039DFD8[] __attribute__((aligned(8))) = "cdrom0:\\USERIRX\\SDFIOP.IRX;1";
+const char D_0039DFF8[] __attribute__((aligned(8))) = "cdrom0:\\IRX\\MSIFRPC.IRX;1";
+extern const s32 D_003BA83C;
+extern u32 sdfDiscType;
+extern u8 D_003BD39C;
+extern u32 D_003BD680;
+extern u8 D_003BDC90[];
+
+s32 func_00101BD8(void) {
+    func_002FC0A8();
+    sceSifInitRpc(0);
+    sceSifInitIopHeap();
+    sdfDiscType = D_003BA83C;
+    sdfInitDeviceSemaphores();
+    while (sceSifRebootIop(D_0039DF28) == 0) {
+    }
+    while (func_00312AC0() == 0) {
+    }
+    sceSifInitRpc(0);
+    sceSifInitIopHeap();
+    sceSifLoadFileReset();
+    sceFsReset();
+    func_002F3CB8(0);
+    func_002F4190(D_003BA83C);
+    while (sceSifLoadModule(D_0039DF48, 0, 0) < 0) {
+    }
+    while (sceSifLoadModule(D_0039DF68, 0, 0) < 0) {
+    }
+    sdfDevStartLoad((s32)D_0039DF88, (s32)D_0039DF98);
+    sdfLoadIopModulePair(D_0039DFB0, 1);
+    func_002CF9A8(0x17C0000, 0x200000, 0x380000);
+    D_003BD39C = 1;
+    sdfPadRequestMode(0, 3);
+    sdfPadRequestMode(1, 3);
+    func_002E5CD8(D_0039DFC0);
+    func_002E5D80(3);
+    sdfEnsureDeviceWorkerThreadStarted(3);
+    sdfEnsureDeviceWorkerThreadStarted(0);
+    func_002D0D70(D_0039DFD8, D_0039DFF8);
+    sdfStartAndSuspendWorkerThread();
+    sdfStartTrackedThread((SdfThreadNode *)((u8 *)&D_003BD680 + 8),
+                          (s32)func_001005C8, (s32)D_003BDC90, 0x4000, 0x60, 0);
+    sdfThreadSleepSelf();
+    return 0;
+}
 
 typedef struct KwlnDrawSink {
     u8 pad00[0x10];
