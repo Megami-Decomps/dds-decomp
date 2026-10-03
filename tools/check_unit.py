@@ -762,6 +762,16 @@ def main():
         pat = re.compile(rf"^\.align 4\n(?:.*\n){{0,3}}dlabel (?:D|jtbl)_{addr:08X}\b", re.M)
         return any(pat.search(p.read_text()) for p in (eeasm_dir / f"{n}.s" for n in included) if p.exists())
 
+    def object_supplies_gap(table_off, retail_addr, size):
+        """The object's next item after the table sits at the same distance as
+        retail's next item, with only zero padding between: the compiled
+        section reproduces the gap itself."""
+        nxt = next((a for a, _ in retail_labels if a > retail_addr), None)
+        obj_next = next((s for s in starts if s > table_off), None)
+        if nxt is None or obj_next is None or obj_next >= len(rodata):
+            return False
+        return obj_next - table_off == nxt - retail_addr and not any(rodata[table_off + size:obj_next])
+
 
     # Rodata the C emits: jump tables (every entry must land on the retail case
     # label) and data items such as string literals (bytes must equal retail's).
@@ -840,11 +850,14 @@ def main():
         elif (pad := retail_padding(retail_addr, 4 * k)) and not next(
                 (k2 == "end" and a == (retail_addr + 4 * k + 15) & ~15
                  or a == (retail_addr + 4 * k + 15) & ~15 and realigned(a)
-                 for a, k2 in retail_labels if a > retail_addr), False):
+                 for a, k2 in retail_labels if a > retail_addr), False) \
+                and not object_supplies_gap(table_off, retail_addr, 4 * k):
             # Retail has bytes after the table before the next item of this
             # unit that nothing supplies once the table is C. Padding up to the
-            # unit's own end comes from the linker's section alignment, and
-            # padding before a 16-aligned asm blob from its `.align 4`.
+            # unit's own end comes from the linker's section alignment, padding
+            # before a 16-aligned asm blob from its `.align 4`, and padding
+            # before a 16-aligned C item (ee-gcc aligns objects of 16+ bytes to
+            # 16) from the object itself.
             bad += 1
             print(f"PAD jump table of {name} (retail 0x{retail_addr:08X}): retail has {pad} more bytes "
                   "after it that no C or asm supplies; keep the function as asm")
