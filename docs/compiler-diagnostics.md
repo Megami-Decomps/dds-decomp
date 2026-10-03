@@ -287,6 +287,36 @@ the previous instruction's dependency class and, before reload, register
 pressure. The report flags choices that the printed-field heuristic does not
 explain, without asserting which unprinted input caused the selection.
 
+For instructions in the same basic block, the pinned compiler's
+`rank_for_schedule` compares these facts in order:
+
+1. higher priority;
+2. smaller register-pressure weight in sched1 only;
+3. the relationship to the most recently scheduled instruction;
+4. more forward dependents;
+5. original RTL LUID, with the earlier instruction winning the final tie.
+
+Sched2 omits the register-pressure comparison. Interblock scheduling adds
+speculation and probability tests between the first two groups and the
+dependency tests, so do not extend the same-block rule across basic blocks.
+Printed cost, incoming dependency count, functional-unit name, and GPR versus
+FPR register class are not independent rank keys. They can still matter
+indirectly by changing priority, readiness, dependencies, or whether an
+instruction can issue in that clock. The MIPS reorder hook is not a generic
+GPR/FPR tie-break either: before reload, and only with more than two ready
+instructions, it groups operations around the R5900 multiply/divide unit.
+
+This gives a cheap stop rule for a local order mismatch. Find the clock before
+the first wrong instruction and verify that both candidate UIDs are in the
+ready list. Compare priority first, then inspect real dependencies and forward
+dependents. For sched1, remember that register weight is not printed in the
+table. If two independent same-block instructions tie through dependent count,
+their original RTL order decides; a candidate that leaves those inputs
+unchanged cannot reverse them. The remaining credible source levers are a
+truthful dependency or critical-path change, or an earlier expansion change
+that changes their LUIDs. Adding an artificial dependency or merely renaming
+locals does not explain retail code.
+
 This is enough to distinguish two useful outcomes. If the desired order has a
 truthful dependency, lifetime, or register-use fact that changes the ready set
 or a leading metric, test that one fact. If independent instructions remain
