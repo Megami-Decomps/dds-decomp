@@ -45,6 +45,7 @@ def analyze(
             "procedures": [],
             "procedureEdges": [],
             "eventEdges": [],
+            "eventRequests": [],
             "deferredBattleExits": [],
             "unresolvedTargets": [],
         }
@@ -65,6 +66,7 @@ def analyze(
     command_counts: dict[int, Counter[int]] = defaultdict(Counter)
     local_sites: dict[tuple[int, int, str], list[int]] = defaultdict(list)
     event_sites: dict[tuple[int, int, str, str, int], list[int]] = defaultdict(list)
+    request_sites: dict[tuple[int, int, str, str, int], list[int]] = defaultdict(list)
     deferred_battle_exits = []
     unresolved = []
     previous_pc: int | None = None
@@ -81,7 +83,10 @@ def analyze(
     event_commands = {
         command.command_id: command
         for command in commands.values()
-        if command.event_argument is not None
+        if (
+            command.event_argument is not None
+            or command.event_request_argument is not None
+        )
     }
 
     for instruction_index, pc in enumerate(instruction_pcs):
@@ -160,43 +165,59 @@ def analyze(
                     max(0, instruction_index - command.stack_pop) : instruction_index
                 ]
                 argument_words = [words[argument_pc] for argument_pc in argument_pcs]
-                arguments_are_local_literals = (
-                    len(argument_words) == command.stack_pop
-                    and all(
-                        argument.opcode == flw0.OPCODE_IDS["PUSHIS"]
-                        and bisect_right(starts, argument_pc) - 1 == source
-                        for argument_pc, argument in zip(argument_pcs, argument_words)
-                    )
+                arguments = tuple(reversed(argument_words))
+
+                def literal_argument(index: int | None) -> int | None:
+                    if index is None or index >= len(arguments):
+                        return None
+                    argument_pc, argument = argument_pcs[-1 - index], arguments[index]
+                    if (
+                        argument.opcode != flw0.OPCODE_IDS["PUSHIS"]
+                        or bisect_right(starts, argument_pc) - 1 != source
+                    ):
+                        return None
+                    return argument.operand_u16
+
+                event_id = literal_argument(command.event_argument)
+                request_id = literal_argument(command.event_request_argument)
+                event_is_dynamic = (
+                    command.event_argument is not None and event_id is None
                 )
-                if not arguments_are_local_literals:
-                    unresolved.append(
-                        {
-                            "source": source,
-                            "pc": pc,
-                            "kind": "event",
-                            "value": None,
-                            "command": command.name,
-                            "dispatch": command.event_dispatch,
-                        }
-                    )
-                else:
-                    arguments = tuple(
-                        argument.operand_u16 for argument in reversed(argument_words)
-                    )
-                    assert command.event_argument is not None
-                    event_id = arguments[command.event_argument]
-                    request_id = (
-                        arguments[command.event_request_argument]
-                        if command.event_request_argument is not None
-                        else -1
-                    )
+                request_is_dynamic = (
+                    command.event_request_argument is not None
+                    and request_id is None
+                )
+                if event_id is not None:
                     event_sites[
                         source,
                         event_id,
                         command.event_dispatch or "event",
                         command.name,
-                        request_id,
+                        request_id if request_id is not None else -1,
                     ].append(pc)
+                if request_id is not None:
+                    request_sites[
+                        source,
+                        request_id,
+                        command.event_dispatch or "request",
+                        command.name,
+                        event_id if event_id is not None else -1,
+                    ].append(pc)
+                for is_dynamic, kind in (
+                    (event_is_dynamic, "event"),
+                    (request_is_dynamic, "eventRequest"),
+                ):
+                    if is_dynamic:
+                        unresolved.append(
+                            {
+                                "source": source,
+                                "pc": pc,
+                                "kind": kind,
+                                "value": None,
+                                "command": command.name,
+                                "dispatch": command.event_dispatch,
+                            }
+                        )
         elif opcode in (flw0.OPCODE_IDS["CALL"], flw0.OPCODE_IDS["JUMP"]):
             kind = "call" if opcode == flw0.OPCODE_IDS["CALL"] else "jump"
             if operand >= len(rows):
@@ -258,10 +279,32 @@ def analyze(
         if request_id >= 0:
             edge["requestId"] = request_id
         event_edges.append(edge)
+    event_requests = []
+    for (
+        source,
+        request_id,
+        kind,
+        command,
+        selection_id,
+    ), sites in sorted(request_sites.items()):
+        request = {
+            "source": source,
+            "requestId": request_id,
+            "kind": kind,
+            "command": command,
+            "count": len(sites),
+            "sites": sites,
+        }
+        if selection_id >= 0:
+            request["selectionId"] = selection_id
+            if selection_id in events:
+                request["selection"] = events[selection_id]
+        event_requests.append(request)
     return {
         "procedures": procedures,
         "procedureEdges": procedure_edges,
         "eventEdges": event_edges,
+        "eventRequests": event_requests,
         "deferredBattleExits": deferred_battle_exits,
         "unresolvedTargets": unresolved,
     }

@@ -429,6 +429,15 @@ functions use trampolines and are a different case.
   0x110, 0, 0, 0); }` matches (DDS1 `func_002E9810`/`func_002E9918`/
   `func_002E94E0`/`func_002E9510`, DDS2 `func_003426B8`/`func_00342388`/
   `func_003423B8`).
+- Preserve a 32-bit packet field's unsigned width when storing it through a
+  wider lvalue. `u32 descriptor = 0x20000000 | (quadwords & 0xFFFF);` followed
+  by `header[0] = descriptor;` and the equivalent direct store
+  `header[0] = (u32)(0x20000000 | (quadwords & 0xFFFF));` give the same code.
+  Omitting the `u32` boundary makes the expression signed, so its conversion to
+  the `u64` element uses sign-extension. Even when the value is always positive,
+  that changes local-allocator quantity grouping and can rotate otherwise
+  unrelated registers. Use the typed local or cast only when the field really
+  is unsigned 32-bit (DDS1 `func_002E0618`, DDS2 `func_003394C8`).
 - Mixed `j` and `jal` tails inside one function (one arm `ld...; j f`, the last
   arm `jal f` + shared `jr`) come from an explicit `return;` in an earlier arm:
   the `return;` makes the epilogue label a jump target, so the call that jumps
