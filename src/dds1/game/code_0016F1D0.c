@@ -3,12 +3,37 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
+#define EFF_RING_PARAM_BYTES 0x58
+#define EFF_RING_HEADER_BYTES 0x80
+#define EFF_RING_VERTEX_BYTES 16
+#define EFF_POOL_HEADER_BYTES 0x70
+#define EFF_PACKET_PARAMS_BYTES 0x2C
+#define EFF_PACKET_LIST_BYTES 0x20
+#define EFF_STATE_PACKET_BYTES 0x30
+#define EFF_MATRIX_WORD_COUNT 16
+#define EFF_FAN_VERTEX_COUNT 5
+#define EFF_FAN_BATCH_VERTICES 0x19
+#define EFF_FAN_BATCH_PARAMS 0xF
+#define EFF_TRIANGLE_VERTEX_COUNT 3
+#define EFF_TRIANGLE_BATCH_VERTICES 0x30
+#define EFF_QUAD_VERTEX_COUNT 4
+#define EFF_QUAD_BATCH_VERTICES 0x20
+#define EFF_TRIANGLE_POSITION_BYTES 0x30
+#define EFF_TRIANGLE_COLOR_BYTES 0xc
+#define EFF_QUAD_POSITION_BYTES 0x40
+#define EFF_QUAD_COLOR_BYTES 0x10
+#define EFF_FAN_POSITION_BYTES 0x50
+#define EFF_FAN_COLOR_BYTES 0x14
+#define EFF_NEUTRAL_COLOR 0x80808080
+#define EFF_RGB_MASK 0xFFFFFF
+#define EFF_DIRECT_SURFACE_COUNT 4
+
 typedef struct SdfMemoryBlock SdfMemoryBlock;
 
 
 typedef struct {
     u8 pad0[8];
-    f32 value;
+    f32 accumulated;
     u8 padC[4];
 } EffectVectorRecord;
 
@@ -20,8 +45,8 @@ typedef struct {
     u8 pad5C[4];
     u8 *records;
     u8 *indices;
-    u32 handle68;
-    u32 handle6C;
+    u32 resource;
+    u32 buffer;
     u8 pad70[8];
     u32 handle78;
     u32 handle7C;
@@ -37,15 +62,15 @@ extern f32 D_00354980[];
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
-/* Record pool header: the allocation holds the 0x10-byte and 0x4-byte record
- * arrays first, then this 0x70-byte header whose first 0x50 bytes are cleared. */
+/* Position and color arrays precede this 0x70-byte pool header. Constructors
+ * below clear their entire allocation, including both arrays and the header. */
 typedef struct EffRecordPool {
-    f32 matrix[16];
+    f32 matrix[EFF_MATRIX_WORD_COUNT];
     f32 origin[3];
     u8 pad4C[4];
     u32 drawMode;      /* 0x50: selects the packet submission surface */
     u32 color;         /* 0x54: 0x80808080 on creation */
-    s32 count;         /* 0x58 */
+    s32 vertexCount;   /* 0x58: positions and color words, not group count */
     f32 scale;         /* 0x5C: 1.0f on creation */
     s32 recordBase;    /* 0x60 */
     s32 auxRecordBase; /* 0x64 */
@@ -90,9 +115,9 @@ extern void sdfConsAppendAssetPacket(void *, u32, s32);
 extern void *func_0015FE20(EffPacketParams *);
 
 /* Ring (fan) effect: a copy of the 0x58-byte parameter block followed by
- * `count` vertices spread evenly around the circle from -pi/2. */
+ * `count` evenly spaced angular records; each expands to a five-vertex fan. */
 typedef struct EffectRingHeader {
-    u8 head[0x58];
+    u8 head[EFF_RING_PARAM_BYTES];
 } EffectRingHeader;
 
 typedef struct EffectRingVertex {
@@ -128,7 +153,7 @@ typedef struct EffectRing {
     u8 *matrix;
 } EffectRing;
 
-/* The vertex array lives inside the same block, 0x28 past the header. */
+/* The vertex array starts immediately after the 0x80-byte header in this block. */
 typedef struct EffectRingBlock {
     EffectRing header;              /* 0x00, 0x80 bytes */
     EffectRingVertex vertices[1];   /* 0x80 */
@@ -140,7 +165,7 @@ extern u8 *effAllocateIdentityMatrixWork(u32);
 extern u32 effMiscRand(void *state);
 extern u8 D_0034DF38[];
 
-/* Allocate and initialize a circular fan, with randomized per-vertex offsets. */
+/* Allocate a circular fan group. Zero spread becomes one; count is not guarded. */
 /* K&R: effCreateRingFanFromParams passes the table block as the raw 64-bit value. */
 EffectRing *effCreateRingFan(source)
 EffectRing *source;
@@ -153,13 +178,13 @@ EffectRing *source;
     u32 spread;
     u32 i;
 
-    handle = (u32)sdfAllocGeneralBlock(source->count * 16 + 0x80);
+    handle = (u32)sdfAllocGeneralBlock(source->count * EFF_RING_VERTEX_BYTES + EFF_RING_HEADER_BYTES);
     block = (EffectRingBlock *)sdfResourceRetainAddress((SdfMemoryBlock *)handle);
     ring = &block->header;
-    memcpy(ring, source, 0x58);
+    memcpy(ring, source, EFF_RING_PARAM_BYTES);
     ring->vertices = &block->vertices[0];
     ring->handle = handle;
-    ring->color = 0x80808080;
+    ring->color = EFF_NEUTRAL_COLOR;
     ring->unk68 = ring->param38;
     ring->unk70 = ring->param30;
     ring->unk74 = ring->param34;
@@ -184,69 +209,73 @@ EffectRing *source;
 
 /* Create a ring from the first parameter-table block. */
 void effCreateRingFanFromParams(u64 table) {
-    u64 block;
+    u64 parameterBlock;
 
-    block = effParamTableGetBlock(table, 0);
-    effCreateRingFan(block);
+    parameterBlock = effParamTableGetBlock(table, 0);
+    effCreateRingFan(parameterBlock);
 }
 
 void func_0016F440(EffectRing *ring) {
     effCreateRingFan(ring);
 }
 
+/* Release the matrix pool's resources before the ring's backing allocation. */
 void effReleaseRingResources(EffectRing *ring) {
     func_001705A0((u32)ring->matrix);
     sdfReleaseResourceAllocation(ring->handle);
 }
 
-void effCopyRingVector(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+/* Copy one quadword; the fourth component is copied along with XYZ. */
+void effCopyRingVector(void *destination, void *source) {
+    PCP_COPY_VECTOR(destination, source);
 }
 
+/* Replace the ring's packed modulation color without touching vertex colors. */
 void effSetRingColor(EffectRing *ring, u32 color) {
     ring->color = color;
 }
 
-void effSetRingScale(u8 *work, f32 value) {
-    ((EffectRing *)work)->scale = value;
+/* Set the ring's scalar, preserving the byte-pointer calling interface. */
+void effSetRingScale(u8 *work, f32 scale) {
+    ((EffectRing *)work)->scale = scale;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effCopyRingTransformMatrix(void *work, void *src) {
-    VU0_LOAD_MATRIX(src);
+void effCopyRingTransformMatrix(void *work, void *matrixSource) {
+    VU0_LOAD_MATRIX(matrixSource);
     VU0_STORE_MATRIX(((EffectRing *)work)->matrix);
 }
 
 /* Each five-vertex fan group has one packed color word per vertex. */
 typedef struct EffRingColorSlot {
-    s32 colors[5];
+    s32 colors[EFF_FAN_VERTEX_COUNT];
 } EffRingColorSlot;
 
 /* Fill five fan-vertex colors; odd and even groups use different alpha values. */
-void effFlashWriteRingColorSlots(u8 *work, s32 index, s32 param) {
+void effFlashWriteRingColorSlots(u8 *work, s32 index, s32 modulationColor) {
     EffRingColorSlot *slot;
-    s32 rgb1;
-    s32 rgb2;
+    s32 firstRgb;
+    s32 secondRgb;
 
     slot = (EffRingColorSlot *)effGetExtendedGroupAuxEntry(((EffectRing *)work)->matrix, index);
-    rgb1 = ((EffectRing *)work)->firstColor & 0xFFFFFF;
-    rgb2 = ((EffectRing *)work)->secondColor & 0xFFFFFF;
-    slot->colors[0] = effMultiplyPackedColors(rgb2, param);
-    slot->colors[1] = effMultiplyPackedColors(rgb2, param);
+    firstRgb = ((EffectRing *)work)->firstColor & EFF_RGB_MASK;
+    secondRgb = ((EffectRing *)work)->secondColor & EFF_RGB_MASK;
+    slot->colors[0] = effMultiplyPackedColors(secondRgb, modulationColor);
+    slot->colors[1] = effMultiplyPackedColors(secondRgb, modulationColor);
     if (index & 1) {
-        slot->colors[2] = effMultiplyPackedColors(0x80000000, param);
-        slot->colors[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
-        slot->colors[4] = effMultiplyPackedColors(0x80000000, param);
+        slot->colors[2] = effMultiplyPackedColors(0x80000000, modulationColor);
+        slot->colors[3] = effMultiplyPackedColors(firstRgb | 0xFF000000, modulationColor);
+        slot->colors[4] = effMultiplyPackedColors(0x80000000, modulationColor);
     } else {
-        slot->colors[2] = effMultiplyPackedColors(0xFF000000, param);
-        slot->colors[3] = effMultiplyPackedColors(rgb1 | 0x40000000, param);
-        slot->colors[4] = effMultiplyPackedColors(0xFF000000, param);
+        slot->colors[2] = effMultiplyPackedColors(0xFF000000, modulationColor);
+        slot->colors[3] = effMultiplyPackedColors(firstRgb | 0x40000000, modulationColor);
+        slot->colors[4] = effMultiplyPackedColors(0xFF000000, modulationColor);
     }
 }
 
 typedef struct {
     u8 pad00[8];
-    f32 accumulator;
+    f32 phase;
     f32 unk0C;
 } EffectArcQuadPart;
 
@@ -259,97 +288,102 @@ typedef struct {
     f32 unk70;
     f32 unk74;
     u8 pad78[4];
-    EffectRecordGroup *resourceHandle;
+    EffectRecordGroup *recordPool;
 } EffectArcQuadWork;
 
-/* vu0 routine: billboard corner offsets for an arc particle */
+/* vu0 routine: build five orbiting fan positions from a phase-derived basis.
+ * No camera matrix is read. Quadword loads retain the native scratch W values. */
 void effBuildOrbitingArcQuadPoints(EffectArcQuadWork *work, s32 index) {
     EffectArcQuadPart *part = &work->parts[index];
-    f32 *quad = (f32 *)effGetExtendedGroupElement(work->resourceHandle, index);
-    f32 offset[4];
-    f32 unit[4];
-    f32 scaleA[4];
-    f32 scaleB[4];
-    f32 scaleC[4];
-    f32 sinv;
-    f32 height;
+    f32 *positions = (f32 *)effGetExtendedGroupElement(work->recordPool, index);
+    f32 orbitOffset[4];
+    f32 radialDirection[4];
+    f32 axisOffset[4];
+    f32 sideOffsetA[4];
+    f32 sideOffsetB[4];
+    f32 sine;
+    f32 basisFactor;
 
-    VEC3_SPLAT(scaleA, work->unk6C);
-    VEC3_SPLAT(scaleB, work->unk74);
-    VEC3_SPLAT(scaleC, work->unk70);
-    unit[0] = sdfEvaluateCosineViaSinePhaseShift(part->accumulator);
-    unit[1] = 0;
-    sinv = sdfSinPoly(part->accumulator);
-    unit[2] = sinv;
-    offset[0] = unit[0] * work->orbitRadius;
-    offset[1] = 0;
-    offset[2] = sinv * work->orbitRadius;
-    height = part->unk0C;
-    D_00354980[0] = unit[0] * height;
-    D_00354980[1] = height + -1.0f;
-    D_00354980[2] = sinv * height;
+    VEC3_SPLAT(axisOffset, work->unk6C);
+    VEC3_SPLAT(sideOffsetA, work->unk74);
+    VEC3_SPLAT(sideOffsetB, work->unk70);
+    radialDirection[0] = sdfEvaluateCosineViaSinePhaseShift(part->phase);
+    radialDirection[1] = 0;
+    sine = sdfSinPoly(part->phase);
+    radialDirection[2] = sine;
+    orbitOffset[0] = radialDirection[0] * work->orbitRadius;
+    orbitOffset[1] = 0;
+    orbitOffset[2] = sine * work->orbitRadius;
+    basisFactor = part->unk0C;
+    D_00354980[0] = radialDirection[0] * basisFactor;
+    D_00354980[1] = basisFactor + -1.0f;
+    D_00354980[2] = sine * basisFactor;
     VU0_LOAD_VF(vf10, D_00354980);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf11, vf10);
     VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf10, unit);
+    VU0_LOAD_VF(vf10, radialDirection);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, scaleB);
+    VU0_LOAD_VF(vf10, sideOffsetA);
     VU0_MUL(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, scaleB);
-    VU0_LOAD_VF(vf10, scaleC);
+    VU0_STORE_VF(vf10, sideOffsetA);
+    VU0_LOAD_VF(vf10, sideOffsetB);
     VU0_MUL(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, scaleC);
+    VU0_STORE_VF(vf10, sideOffsetB);
     VU0_MOVE_VF(vf10, vf12);
-    VU0_LOAD_VF(vf11, scaleA);
+    VU0_LOAD_VF(vf11, axisOffset);
     VU0_MUL(vf10, vf10, vf11);
     VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf10, offset);
-    VU0_LOAD_VF(vf11, scaleC);
-    VU0_STORE_VF(vf10, quad + 12);
+    VU0_LOAD_VF(vf10, orbitOffset);
+    VU0_LOAD_VF(vf11, sideOffsetB);
+    VU0_STORE_VF(vf10, positions + 12);
     VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, quad + 8);
+    VU0_STORE_VF(vf10, positions + 8);
     VU0_SUB(vf10, vf10, vf11);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, quad + 16);
-    VU0_LOAD_VF(vf10, offset);
-    VU0_LOAD_VF(vf11, scaleB);
+    VU0_STORE_VF(vf10, positions + 16);
+    VU0_LOAD_VF(vf10, orbitOffset);
+    VU0_LOAD_VF(vf11, sideOffsetA);
     VU0_ADD(vf10, vf10, vf12);
     VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, quad);
+    VU0_STORE_VF(vf10, positions);
     VU0_SUB(vf10, vf10, vf11);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, quad + 4);
+    VU0_STORE_VF(vf10, positions + 4);
 }
 
+/* Add the group's increment to one accumulated scalar; index is unchecked. */
 void effAdvanceVectorRecord(EffectRecordGroup *group, s32 index) {
     EffectVectorRecord *record;
 
     record = &group->vectors[index];
-    record->value = record->value + group->increment;
+    record->accumulated = record->accumulated + group->increment;
 }
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F7B0);
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016FB08);
 
+/* Queue asset release, then free the pool allocation; neither handle is cleared. */
 void effReleaseRecordGroupAssetAndHandle(EffectRecordGroup *group) {
-    sdfQueueAssetRelease(group->handle68);
-    sdfReleaseResourceAllocation(group->handle6C);
+    sdfQueueAssetRelease(group->resource);
+    sdfReleaseResourceAllocation(group->buffer);
 }
 
+/* Build scale/origin transform and submit five-vertex groups in batches of 25.
+ * The remainder path retains its native vertex count, even for a partial group. */
 void effDrawScaledRecordPool(EffRecordPool *work)
 {
-    f32 matrix[16] __attribute__((aligned(16)));
+    f32 matrix[EFF_MATRIX_WORD_COUNT] __attribute__((aligned(16)));
     void *list;
     s32 remaining;
-    s32 chunk;
+    s32 fanCount;
     u64 *packet;
-    void *clearList;
+    void *stateList;
 
-    list = sdfAllocPacketAligned(0x20);
+    list = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
     sdfInitPacketList(list);
     EE_MMI_UNIT_MATRIX(matrix);
     matrix[0] = work->scale;
@@ -361,40 +395,40 @@ void effDrawScaledRecordPool(EffRecordPool *work)
     VU0_LOAD_MATRIX(matrix);
     sdfConsAppendVuPacket(list, 0);
     sdfConsAppendAssetPacket(list, work->resource, 0);
-    remaining = work->count;
+    remaining = work->vertexCount;
     D_003D6550->colors = (u32 *)work->auxRecordBase;
     D_003D6550->positions = (u128 *)work->recordBase;
     D_003D6550->unk08 = work->color;
-    D_003D6550->parameterCount = 0xF;
-    D_003D6550->vertexCount = 0x19;
+    D_003D6550->parameterCount = EFF_FAN_BATCH_PARAMS;
+    D_003D6550->vertexCount = EFF_FAN_BATCH_VERTICES;
     D_003D6550->parameters = D_00354990;
-    while (remaining >= 0x19) {
-        remaining -= 0x19;
+    while (remaining >= EFF_FAN_BATCH_VERTICES) {
+        remaining -= EFF_FAN_BATCH_VERTICES;
         sdfAppendPacket(list, func_0015FE20(D_003D6550));
-        D_003D6550->positions += 0x19;
-        D_003D6550->colors += 0x19;
+        D_003D6550->positions += EFF_FAN_BATCH_VERTICES;
+        D_003D6550->colors += EFF_FAN_BATCH_VERTICES;
     }
-    if (remaining >= 5) {
-        chunk = remaining / 5;
+    if (remaining >= EFF_FAN_VERTEX_COUNT) {
+        fanCount = remaining / EFF_FAN_VERTEX_COUNT;
         D_003D6550->vertexCount = remaining;
-        D_003D6550->parameterCount = chunk * 3;
+        D_003D6550->parameterCount = fanCount * 3;
         sdfAppendPacket(list, func_0015FE20(D_003D6550));
     }
-    if (work->drawMode < 4) {
+    if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {
         D_003549D8[work->drawMode]->submit(D_003549D8[work->drawMode], list);
     } else {
-        clearList = sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(clearList);
-        packet = sdfAllocPacketAligned(0x30);
+        stateList = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
+        sdfInitPacketList(stateList);
+        packet = sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
         packet[4] = 6;
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
         packet[3] = 0xE;
         packet[5] = 0x42;
-        sdfAppendPacket(clearList, packet);
-        D_00325248.submit(&D_00325248, clearList);
-        packet = sdfAllocPacketAligned(0x30);
+        sdfAppendPacket(stateList, packet);
+        D_00325248.submit(&D_00325248, stateList);
+        packet = sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
@@ -406,24 +440,29 @@ void effDrawScaledRecordPool(EffRecordPool *work)
     }
 }
 
-s32 effGetIndexedEffectGroupRecord(EffectRecordGroup *group, s32 index) {
-    return (s32)group->records + index * 0x50;
+/* Address the five-position record for a group; no index bounds check. */
+s32 effGetIndexedEffectGroupRecord(EffectRecordGroup *group, s32 groupIndex) {
+    return (s32)group->records + groupIndex * EFF_FAN_POSITION_BYTES;
 }
 
-s32 effGetIndexedEffectGroupIndexEntry(EffectRecordGroup *group, s32 index) {
-    return (s32)group->indices + index * 0x14;
+/* Address the group's five packed color words. */
+s32 effGetIndexedEffectGroupIndexEntry(EffectRecordGroup *group, s32 groupIndex) {
+    return (s32)group->indices + groupIndex * EFF_FAN_COLOR_BYTES;
 }
 
+/* Store raw control bits: this view interprets them as a floating increment. */
 void effSetVectorIncrementBits(EffectRecordGroup *group, u32 incrementBits) {
     *(u32 *)&group->increment = incrementBits;
 }
 
+/* Opaque control word: only the store is understood here. */
 void func_0016FF40(EffectRecordGroup *group, u32 value) {
     group->value54 = value;
 }
 
-void func_0016FF48(u8 *work, f32 value) {
-    ((EffRecordPool *)work)->scale = value;
+/* Set the pool scale without changing the native byte-pointer interface. */
+void func_0016FF48(u8 *work, f32 scale) {
+    ((EffRecordPool *)work)->scale = scale;
 }
 
 
@@ -431,48 +470,51 @@ extern void *memset(void *dst, s32 value, u32 size);
 extern u32 sdfCreateAssetWithDrawEntries(void);
 extern void func_002DA420(u32 asset, f32 value);
 
-EffRecordPool *effRecordPoolCreateTriad(s32 groups) {
+/* Allocate three positions and three colors per triangle, then the header.
+ * The complete block and shared packet-parameter record are cleared. */
+EffRecordPool *effRecordPoolCreateTriad(s32 triangleCount) {
     EffRecordPool *pool;
     u32 handle;
     u32 *block;
-    s32 slots;
-    s32 first;
-    s32 second;
+    s32 vertexCount;
+    s32 positionWordCount;
+    s32 colorWordCount;
     u32 size;
 
-    slots = groups * 3;
-    first = slots * 4;
-    second = slots;
-    size = (first + second) * 4 + 0x70;
+    vertexCount = triangleCount * EFF_TRIANGLE_VERTEX_COUNT;
+    positionWordCount = vertexCount * 4;
+    colorWordCount = vertexCount;
+    size = (positionWordCount + colorWordCount) * 4 + EFF_POOL_HEADER_BYTES;
     handle = (u32)sdfAllocGeneralBlock(size);
     block = (u32 *)sdfResourceRetainAddress((SdfMemoryBlock *)handle);
     memset(block, 0, size);
-    pool = (EffRecordPool *)(block + (first + second));
+    pool = (EffRecordPool *)(block + (positionWordCount + colorWordCount));
     pool->recordBase = (s32)block;
-    pool->auxRecordBase = (s32)(block + first);
-    pool->color = 0x80808080;
+    pool->auxRecordBase = (s32)(block + positionWordCount);
+    pool->color = EFF_NEUTRAL_COLOR;
     pool->drawMode = 2;
-    pool->count = second;
+    pool->vertexCount = colorWordCount;
     pool->buffer = handle;
     pool->scale = 1.0f;
     pool->resource = sdfCreateAssetWithDrawEntries();
     func_002DA420(pool->resource, 1.0f);
-    memset(D_003D6550, 0, 0x2C);
+    memset(D_003D6550, 0, EFF_PACKET_PARAMS_BYTES);
     D_003D6550->primitive = 0x4000;
     return pool;
 }
 
+/* Release the asset and backing allocation; the header points into that block. */
 void effReleaseRecordPoolResourceAndBuffer(EffectRecordGroup *group) {
-    sdfQueueAssetRelease(group->handle68);
-    sdfReleaseResourceAllocation(group->handle6C);
+    sdfQueueAssetRelease(group->resource);
+    sdfReleaseResourceAllocation(group->buffer);
 }
 
 /* Submit the position/color pool in triangle batches of at most 48 vertices. */
 void effDrawTriangleRecordPool(EffRecordPool *pool)
 {
-    f32 matrix[16];
-    void *packet = sdfAllocPacketAligned(0x20);
-    s32 count;
+    f32 matrix[EFF_MATRIX_WORD_COUNT];
+    void *packet = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
+    s32 remainingVertices;
     EffDrawSurface *surface;
 
     sdfInitPacketList(packet);
@@ -486,76 +528,81 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
     VU0_LOAD_MATRIX(matrix);
     sdfConsAppendVuPacket(packet, 0);
     sdfConsAppendAssetPacket(packet, pool->resource, 0);
-    count = pool->count;
+    remainingVertices = pool->vertexCount;
     D_003D6550->colors = (u32 *)pool->auxRecordBase;
     D_003D6550->positions = (u128 *)pool->recordBase;
     D_003D6550->unk08 = pool->color;
     D_003D6550->parameterCount = 0x10;
-    D_003D6550->vertexCount = 0x30;
+    D_003D6550->vertexCount = EFF_TRIANGLE_BATCH_VERTICES;
     D_003D6550->parameters = NULL;
-    while (count >= 0x30) {
-        count -= 0x30;
+    while (remainingVertices >= EFF_TRIANGLE_BATCH_VERTICES) {
+        remainingVertices -= EFF_TRIANGLE_BATCH_VERTICES;
         sdfAppendPacket(packet, func_0015FE20(D_003D6550));
-        D_003D6550->positions += 0x30;
-        D_003D6550->colors += 0x30;
+        D_003D6550->positions += EFF_TRIANGLE_BATCH_VERTICES;
+        D_003D6550->colors += EFF_TRIANGLE_BATCH_VERTICES;
     }
-    if (count >= 3) {
-        D_003D6550->parameterCount = count / 3;
-        D_003D6550->vertexCount = count;
+    if (remainingVertices >= EFF_TRIANGLE_VERTEX_COUNT) {
+        D_003D6550->parameterCount = remainingVertices / EFF_TRIANGLE_VERTEX_COUNT;
+        D_003D6550->vertexCount = remainingVertices;
         sdfAppendPacket(packet, func_0015FE20(D_003D6550));
     }
     surface = D_003549E8[pool->drawMode];
     surface->submit(surface, packet);
 }
 
-s32 effGetGroupRecordByIndex(EffectRecordGroup *group, s32 index) {
-    return (s32)group->records + index * 0x30;
+/* Address three quadword positions for one triangle. */
+s32 effGetGroupRecordByIndex(EffectRecordGroup *group, s32 groupIndex) {
+    return (s32)group->records + groupIndex * EFF_TRIANGLE_POSITION_BYTES;
 }
 
-s32 effGetGroupIndexRecord(EffectRecordGroup *group, s32 index) {
-    return (s32)group->indices + index * 0xc;
+/* Address three packed color words for one triangle. */
+s32 effGetGroupIndexRecord(EffectRecordGroup *group, s32 groupIndex) {
+    return (s32)group->indices + groupIndex * EFF_TRIANGLE_COLOR_BYTES;
 }
 
-EffRecordPool *effRecordPoolCreate(s32 groups) {
+/* Allocate four positions and four colors per quad, followed by the header.
+ * Both allocation and shared packet parameters are cleared before defaults. */
+EffRecordPool *effRecordPoolCreate(s32 quadCount) {
     EffRecordPool *pool;
     u32 handle;
     u32 *block;
-    s32 first;
-    s32 second;
+    s32 positionWordCount;
+    s32 colorWordCount;
     u32 size;
 
-    first = groups * 16;
-    second = groups * 4;
-    size = (first + second) * 4 + 0x70;
+    positionWordCount = quadCount * 16;
+    colorWordCount = quadCount * EFF_QUAD_VERTEX_COUNT;
+    size = (positionWordCount + colorWordCount) * 4 + EFF_POOL_HEADER_BYTES;
     handle = (u32)sdfAllocGeneralBlock(size);
     block = (u32 *)sdfResourceRetainAddress((SdfMemoryBlock *)handle);
     memset(block, 0, size);
-    pool = (EffRecordPool *)(block + (first + second));
+    pool = (EffRecordPool *)(block + (positionWordCount + colorWordCount));
     pool->recordBase = (s32)block;
     pool->drawMode = 2;
-    pool->auxRecordBase = (s32)(block + first);
-    pool->count = second;
+    pool->auxRecordBase = (s32)(block + positionWordCount);
+    pool->vertexCount = colorWordCount;
     pool->buffer = handle;
     pool->scale = 1.0f;
-    pool->color = 0x80808080;
+    pool->color = EFF_NEUTRAL_COLOR;
     pool->resource = sdfCreateAssetWithDrawEntries();
     func_002DA420(pool->resource, 1.0f);
-    memset(D_003D6550, 0, 0x2C);
+    memset(D_003D6550, 0, EFF_PACKET_PARAMS_BYTES);
     D_003D6550->primitive = 0x4000;
     return pool;
 }
 
+/* Queue the asset before releasing the allocation containing this header. */
 void effReleaseRecordGroupResources(EffectRecordGroup *group) {
-    sdfQueueAssetRelease(group->handle68);
-    sdfReleaseResourceAllocation(group->handle6C);
+    sdfQueueAssetRelease(group->resource);
+    sdfReleaseResourceAllocation(group->buffer);
 }
 
 /* Submit the position/color pool in quad batches of at most 32 vertices. */
 void effDrawQuadRecordPool(EffRecordPool *pool)
 {
-    f32 matrix[16];
-    void *packet = sdfAllocPacketAligned(0x20);
-    s32 count;
+    f32 matrix[EFF_MATRIX_WORD_COUNT];
+    void *packet = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
+    s32 remainingVertices;
     EffDrawSurface *surface;
 
     sdfInitPacketList(packet);
@@ -569,38 +616,41 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
     VU0_LOAD_MATRIX(matrix);
     sdfConsAppendVuPacket(packet, 0);
     sdfConsAppendAssetPacket(packet, pool->resource, 0);
-    count = pool->count;
+    remainingVertices = pool->vertexCount;
     D_003D6550->colors = (u32 *)pool->auxRecordBase;
     D_003D6550->positions = (u128 *)pool->recordBase;
     D_003D6550->unk08 = pool->color;
     D_003D6550->parameterCount = 0x10;
-    D_003D6550->vertexCount = 0x20;
+    D_003D6550->vertexCount = EFF_QUAD_BATCH_VERTICES;
     D_003D6550->parameters = D_00354A00;
-    while (count >= 0x20) {
-        count -= 0x20;
+    while (remainingVertices >= EFF_QUAD_BATCH_VERTICES) {
+        remainingVertices -= EFF_QUAD_BATCH_VERTICES;
         sdfAppendPacket(packet, func_0015FE20(D_003D6550));
-        D_003D6550->positions += 0x20;
-        D_003D6550->colors += 0x20;
+        D_003D6550->positions += EFF_QUAD_BATCH_VERTICES;
+        D_003D6550->colors += EFF_QUAD_BATCH_VERTICES;
     }
-    if (count >= 4) {
-        D_003D6550->parameterCount = count / 4 * 2;
-        D_003D6550->vertexCount = count;
+    if (remainingVertices >= EFF_QUAD_VERTEX_COUNT) {
+        D_003D6550->parameterCount = remainingVertices / EFF_QUAD_VERTEX_COUNT * 2;
+        D_003D6550->vertexCount = remainingVertices;
         sdfAppendPacket(packet, func_0015FE20(D_003D6550));
     }
     surface = D_00354A48[pool->drawMode];
     surface->submit(surface, packet);
 }
 
-s32 effGetRecordGroupElement(EffectRecordGroup *group, s32 index) {
-    return (s32)group->records + index * 0x40;
+/* Address four quadword positions for one quad. */
+s32 effGetRecordGroupElement(EffectRecordGroup *group, s32 groupIndex) {
+    return (s32)group->records + groupIndex * EFF_QUAD_POSITION_BYTES;
 }
 
-s32 effGetRecordGroupAuxEntry(EffectRecordGroup *group, s32 index) {
-    return (s32)group->indices + index * 0x10;
+/* Address four packed color words for one quad. */
+s32 effGetRecordGroupAuxEntry(EffectRecordGroup *group, s32 groupIndex) {
+    return (s32)group->indices + groupIndex * EFF_QUAD_COLOR_BYTES;
 }
 
-u8 *effAllocateIdentityMatrixWork(u32 count) {
-    u8 *matrix = func_0016FB08(count);
+/* Allocate five-vertex fan groups, then set the returned header's matrix. */
+u8 *effAllocateIdentityMatrixWork(u32 fanCount) {
+    u8 *matrix = func_0016FB08(fanCount);
 
     EE_MMI_UNIT_MATRIX(matrix);
     return matrix;
@@ -610,16 +660,18 @@ void func_001705A0(u32 id) {
     effReleaseRecordGroupAssetAndHandle(id);
 }
 
+/* Apply the stored matrix/origin, then submit batches of five-vertex groups.
+ * Native state-only and drawing lists remain separate for non-direct modes. */
 void effDrawTransformedRecordPool(EffRecordPool *work)
 {
-    f32 matrix[16] __attribute__((aligned(16)));
+    f32 matrix[EFF_MATRIX_WORD_COUNT] __attribute__((aligned(16)));
     void *list;
     s32 remaining;
-    s32 chunk;
+    s32 fanCount;
     u64 *packet;
-    void *clearList;
+    void *stateList;
 
-    list = sdfAllocPacketAligned(0x20);
+    list = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
     sdfInitPacketList(list);
     VU0_COPY_MATRIX(matrix, work->matrix);
     matrix[12] = work->origin[0];
@@ -628,40 +680,40 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
     VU0_LOAD_MATRIX(matrix);
     sdfConsAppendVuPacket(list, 0);
     sdfConsAppendAssetPacket(list, work->resource, 0);
-    remaining = work->count;
+    remaining = work->vertexCount;
     D_003D6550->colors = (u32 *)work->auxRecordBase;
     D_003D6550->positions = (u128 *)work->recordBase;
     D_003D6550->unk08 = work->color;
-    D_003D6550->parameterCount = 0xF;
-    D_003D6550->vertexCount = 0x19;
+    D_003D6550->parameterCount = EFF_FAN_BATCH_PARAMS;
+    D_003D6550->vertexCount = EFF_FAN_BATCH_VERTICES;
     D_003D6550->parameters = D_00354990;
-    while (remaining >= 0x19) {
-        remaining -= 0x19;
+    while (remaining >= EFF_FAN_BATCH_VERTICES) {
+        remaining -= EFF_FAN_BATCH_VERTICES;
         sdfAppendPacket(list, func_0015FE20(D_003D6550));
-        D_003D6550->positions += 0x19;
-        D_003D6550->colors += 0x19;
+        D_003D6550->positions += EFF_FAN_BATCH_VERTICES;
+        D_003D6550->colors += EFF_FAN_BATCH_VERTICES;
     }
-    if (remaining >= 5) {
-        chunk = remaining / 5;
+    if (remaining >= EFF_FAN_VERTEX_COUNT) {
+        fanCount = remaining / EFF_FAN_VERTEX_COUNT;
         D_003D6550->vertexCount = remaining;
-        D_003D6550->parameterCount = chunk * 3;
+        D_003D6550->parameterCount = fanCount * 3;
         sdfAppendPacket(list, func_0015FE20(D_003D6550));
     }
-    if (work->drawMode < 4) {
+    if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {
         D_00354A58[work->drawMode]->submit(D_00354A58[work->drawMode], list);
     } else {
-        clearList = sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(clearList);
-        packet = sdfAllocPacketAligned(0x30);
+        stateList = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
+        sdfInitPacketList(stateList);
+        packet = sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
         packet[4] = 6;
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
         packet[3] = 0xE;
         packet[5] = 0x42;
-        sdfAppendPacket(clearList, packet);
-        D_00325248.submit(&D_00325248, clearList);
-        packet = sdfAllocPacketAligned(0x30);
+        sdfAppendPacket(stateList, packet);
+        D_00325248.submit(&D_00325248, stateList);
+        packet = sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
@@ -673,26 +725,29 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
     }
 }
 
-s32 effGetExtendedGroupElement(EffectRecordGroup *group, s32 index) {
-    return (s32)group->records + index * 0x50;
+/* Address the five-position record for one fan group. */
+s32 effGetExtendedGroupElement(EffectRecordGroup *group, s32 groupIndex) {
+    return (s32)group->records + groupIndex * EFF_FAN_POSITION_BYTES;
 }
 
-s32 effGetExtendedGroupAuxEntry(EffectRecordGroup *group, s32 index) {
-    return (s32)group->indices + index * 0x14;
+/* Address the five color words for one fan group. */
+s32 effGetExtendedGroupAuxEntry(EffectRecordGroup *group, s32 groupIndex) {
+    return (s32)group->indices + groupIndex * EFF_FAN_COLOR_BYTES;
 }
 
 /* Select the record pool's packet submission mode. */
-void effSetRecordPoolDrawMode(s32 slot, u32 mode) {
-    ((EffRecordPool *)slot)->drawMode = mode;
+void effSetRecordPoolDrawMode(s32 poolAddress, u32 mode) {
+    ((EffRecordPool *)poolAddress)->drawMode = mode;
 }
 
 /* Set the packed color word passed to the pool's packet builder. */
-void effSetRecordPoolColor(s32 slot, u32 color) {
-    ((EffRecordPool *)slot)->color = color;
+void effSetRecordPoolColor(s32 poolAddress, u32 color) {
+    ((EffRecordPool *)poolAddress)->color = color;
 }
 
-void effSetRecordPoolScale(u8 *work, f32 value) {
-    ((EffRecordPool *)work)->scale = value;
+/* Set the scalar used by the scale/origin rendering path. */
+void effSetRecordPoolScale(u8 *work, f32 scale) {
+    ((EffRecordPool *)work)->scale = scale;
 }
 
 typedef struct PcpScatterRes PcpScatterRes;
