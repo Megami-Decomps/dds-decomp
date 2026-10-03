@@ -560,9 +560,112 @@ void sdfVuBlendNodeVectors(VuBlendNode *node) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE980);
+/* vu0 routine: apply a clamped weight to the row color vector and linked copies */
+void func_002DE980(void *work, void *parameters) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        ".set noat\n"
+        "lui $1, 0x3F00\n"
+        "mtc1 $1, $f0\n"
+        "mfc1 $2, $f0\n"
+        "vsub.xyzw vf12, vf0, vf0\n"
+        "lqc2 vf10, 0x10(%1)\n"
+        "lqc2 vf11, 0x20(%1)\n"
+        "qmtc2 $2, vf2\n"
+        "vaddx.xyzw vf12, vf12, vf2x\n"
+        "lw %1, 0x64(%0)\n"
+        "lh $2, 0x42(%0)\n"
+        "lqc2 vf2, 0x10(%1)\n"
+        "vmulaw.w ACC, vf12, vf0w\n"
+        "vmaddw.w vf3, vf2, vf12w\n"
+        "1:\n"
+        "vmaxx.w vf4, vf3, vf0x\n"
+        "addi %1, %1, 0x60\n"
+        "lqc2 vf2, 0x10(%1)\n"
+        "vminiw.w vf5, vf4, vf0w\n"
+        "vmulaw.w ACC, vf12, vf0w\n"
+        "vmaddw.w vf3, vf2, vf12w\n"
+        "vmulaw.xyzw ACC, vf10, vf0w\n"
+        "vmaddw.xyzw vf6, vf11, vf5w\n"
+        "addi $2, $2, -1\n"
+        "bne $0, $2, 1b\n"
+        "sqc2 vf6, -0x40(%1)\n"
+        "lw %1, 0x78(%0)\n"
+        "beqz %1, 3f\n"
+        "nop\n"
+        "lw $3, 0x44(%1)\n"
+        "2:\n"
+        "addiu %0, %1, 0x20\n"
+        "addiu $3, $3, 0x20\n"
+        "lq $2, 0x00($3)\n"
+        "sq $2, 0x00(%0)\n"
+        "lw %1, 0x40(%1)\n"
+        "nop\n"
+        "bnel %1, $0, 2b\n"
+        "lw $3, 0x44(%1)\n"
+        "3:\n"
+        ".set at\n"
+        ".set reorder"
+        : "+r"(work), "+r"(parameters)
+        :
+        : "$2", "$3", "memory");
+}
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DEA18);
+/* ee/vu0 routine: multiply packed colors and publish the expanded row color */
+void func_002DEA18(void *work, u32 packedColor) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        ".set noat\n"
+        "lui $1, 0x3C00\n"
+        "mtc1 $1, $f0\n"
+        "daddu $6, %0, $0\n"
+        "lw %0, 0x58($6)\n"
+        "mfc1 $7, $f0\n"
+        "pextlb $2, $0, %0\n"
+        "pextlb $3, $0, %1\n"
+        "pextlh $2, $0, $2\n"
+        "pextlh $3, $0, $3\n"
+        "qmtc2 $2, vf2\n"
+        "qmtc2 $3, vf3\n"
+        "qmtc2 $7, vf4\n"
+        "vitof0.xyzw vf2, vf2\n"
+        "vitof0.xyzw vf3, vf3\n"
+        "vmul.xyzw vf2, vf2, vf3\n"
+        "vmulx.xyzw vf2, vf2, vf4x\n"
+        "qmfc2 %0, vf2\n"
+        "lh $2, 0x42($6)\n"
+        "beqz $2, 2f\n"
+        "lw %1, 0x64($6)\n"
+        "1:\n"
+        "addiu $2, $2, -1\n"
+        "sq %0, 0x20(%1)\n"
+        "nop\n"
+        "nop\n"
+        "nop\n"
+        "bnez $2, 1b\n"
+        "addiu %1, %1, 0x60\n"
+        "2:\n"
+        "lw %1, 0x78($6)\n"
+        "beqz %1, 4f\n"
+        "nop\n"
+        "lw $3, 0x44(%1)\n"
+        "nop\n"
+        "3:\n"
+        "addiu %0, %1, 0x20\n"
+        "addiu $3, $3, 0x20\n"
+        "lq $2, 0x00($3)\n"
+        "sq $2, 0x00(%0)\n"
+        "lw %1, 0x40(%1)\n"
+        "nop\n"
+        "bnel %1, $0, 3b\n"
+        "lw $3, 0x44(%1)\n"
+        "4:\n"
+        ".set at\n"
+        ".set reorder"
+        : "+r"(work), "+r"(packedColor)
+        :
+        : "$2", "$3", "$6", "$7", "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DEAC0);
 
