@@ -63,7 +63,13 @@ extern u32 D_00438B84;
 
 extern void sdfGetGeneralHeapStats(void *out);
 
-extern void sdfPrintFormattedDevMessage(char *fmt, ...);
+extern s32 sdfPrintFormattedDevMessage(const char *fmt, ...);
+extern char D_0042E590[];
+extern char D_0042E5B0[];
+extern char D_0042E5C8[];
+extern char D_0042E5F0[];
+extern char D_0042E610[];
+extern char *D_0040BB18[];
 
 typedef struct MidiChannel {
     u8 pad00[0x19];
@@ -536,7 +542,7 @@ void func_00342E58(u32 kind, u8 *dst) {
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00343188);
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_003432F0);
+INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E590);
 
 INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E5B0);
 
@@ -546,7 +552,71 @@ INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E5F0);
 
 INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E610);
 
-INCLUDE_RODATA(const s32, "game/code_003425B0", jtbl_0042E630);
+void func_003432F0(u32 *dmaTag) {
+    u32 *returnStack[2];
+    u32 *cursor;
+    u32 tag;
+    u32 tagAddress;
+    u32 tagDataCount;
+    s32 tagType;
+    s32 depth = 0;
+    s32 done = 0;
+
+    sdfPrintFormattedDevMessage(D_0042E590, dmaTag);
+    cursor = dmaTag;
+    for (;;) {
+        if (((u32)cursor & 0xF) != 0) {
+            sdfPrintFormattedDevMessage(D_0042E5B0, cursor);
+            return;
+        }
+
+        tag = cursor[0];
+        tagAddress = cursor[1];
+        tagType = (tag >> 28) & 7;
+        tagDataCount = tag & 0xFFFF;
+        sdfPrintFormattedDevMessage(D_0042E5C8, cursor, D_0040BB18[tagType], tag, tagAddress, cursor[2], cursor[3]);
+        cursor += 4;
+
+        switch (tagType) {
+        case 0:
+            done = 1;
+            break;
+        case 1:
+            cursor += tagDataCount * 4;
+            break;
+        case 2:
+            cursor = (u32 *)tagAddress;
+            break;
+        case 3:
+        case 4:
+            break;
+        case 5:
+            if (depth == 2) {
+                sdfPrintFormattedDevMessage(D_0042E5F0);
+                return;
+            }
+            returnStack[depth++] = cursor;
+            cursor = (u32 *)tagAddress;
+            break;
+        case 6:
+            if (depth == 0) {
+                done = 1;
+            } else {
+                cursor = returnStack[--depth];
+            }
+            break;
+        case 7:
+            cursor += tagDataCount * 4;
+            done = 1;
+            break;
+        }
+
+        if (done != 0) {
+            sdfPrintFormattedDevMessage(D_0042E610, cursor);
+            return;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00343468);
 
