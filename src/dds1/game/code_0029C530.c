@@ -2647,12 +2647,18 @@ typedef struct EffRingSource {
     u32 lastColor;      // 0x4C
 } EffRingSource;
 
-typedef struct EffRingBuffer {
-    u8 pad_00[8];
-    s32 wordCount;      // 0x08, four words per segment
-    u8 pad_0C[8];
-    u32 *entries;       // 0x14
-} EffRingBuffer;
+/* Point-set node: `rows` 16-byte entries in `buffer`, then `tail`. */
+typedef struct EffPointSet {
+    u32 type;       // 0x00
+    u32 color;      // 0x04
+    s32 rows;       // 0x08
+    u8 flag;        // 0x0C
+    u8 pad_0D[3];
+    u8 *buffer;     // 0x10
+    u8 *tail;       // 0x14
+    s32 *handle;    // 0x18
+    u8 *allocation; // 0x1C
+} EffPointSet;
 
 u8 *effCreateResourceInstanceA(u16 kind, void *source, u32 option) {
     u8 *effect = effAllocateActiveInstanceWork(kind, source);
@@ -2737,7 +2743,7 @@ typedef struct EffTrackSet {
     s32 count;     // 0x10
     u8 flag;       // 0x14
     u8 pad_15[3];
-    void *shared;    // 0x18: released via EffResourceRefs.shared
+    void *shared;    // 0x18: optional retained reference
     u8 *buffer;    // 0x1C
     u8 *columns;   // 0x20
     u8 *tail;      // 0x24
@@ -2848,22 +2854,10 @@ u32 effCreateTrackSetWithSharedReferences(u32 count, u32 kind, u32 sharedRef) {
 
 
 
-/* Same resource-reference header as the DDS2 effect unit. */
-typedef struct EffResourceRefs {
-    u8 pad_00[0xC];
-    u16 kind;           /* 0x0C */
-    u8 pad_0E[0xA];
-    RefObj *shared;     /* 0x18 */
-    u8 pad_1C[4];
-    s32 owned;          /* 0x20 */
-    u8 pad_24[4];
-    u32 asset;          /* 0x28 */
-    u32 buffer;         /* 0x2C */
-} EffResourceRefs;
-
+/* Release the track set's retained reference, draw asset, and allocation. */
 void effReleaseResourceRefs(u8 *work) {
-    EffResourceRefs *refs = (EffResourceRefs *)work;
-    if (refs->owned != 0) {
+    EffTrackSet *refs = (EffTrackSet *)work;
+    if (refs->columns != 0) {
         RefObj *ref = refs->shared;
         if (ref == NULL) {
             switch (refs->kind) {
@@ -2884,8 +2878,8 @@ void effReleaseResourceRefs(u8 *work) {
             effReleaseSharedReference(ref);
         }
     }
-    sdfQueueAssetRelease(refs->asset);
-    sdfReleaseResourceAllocation(refs->buffer);
+    sdfQueueAssetRelease((u32)refs->handle);
+    sdfReleaseResourceAllocation((u32)refs->allocation);
 }
 
 /* Copy a track set: same size and kind, retaining the source's shared reference (or counting one more user of the built-in one). */
@@ -2939,10 +2933,11 @@ void effResetRingResourceFrame(s32 work) {
     ((EffClassDrawState *)((EffBillFrameWork *)work)->frameState)->ring->frame = 0;
 }
 
+/* Create a point-set reference and initialize four colors per segment. */
 u32 *effSegmentPointerSet(u8 *work) {
-    u32 *handle = sdfAllocSizeClassBlock(4);
-    u32 kind = ((EffRingSource *)work)->segments;
-    u8 *ring;
+    u32 *pointSetRef = sdfAllocSizeClassBlock(4);
+    u32 segments = ((EffRingSource *)work)->segments;
+    EffPointSet *pointSet;
     u32 *entry;
     u32 groups;
     u32 i;
@@ -2950,15 +2945,15 @@ u32 *effSegmentPointerSet(u8 *work) {
     u32 second;
     u32 third;
 
-    if (kind < 3) {
+    if (segments < 3) {
         ((EffRingSource *)work)->segments = 3;
-        kind = 3;
+        segments = 3;
     }
-    ring = effCreatePointSet4(kind);
+    pointSet = (EffPointSet *)effCreatePointSet4(segments);
     first = ((EffRingSource *)work)->firstColor;
-    groups = ((EffRingBuffer *)ring)->wordCount / 4;
-    *handle = (u32)ring;
-    entry = ((EffRingBuffer *)ring)->entries;
+    groups = pointSet->rows / 4;
+    *pointSetRef = (u32)pointSet;
+    entry = (u32 *)pointSet->tail;
     second = ((EffRingSource *)work)->middleColor;
     third = ((EffRingSource *)work)->lastColor;
     for (i = 0; i < groups; i++) {
@@ -2968,7 +2963,7 @@ u32 *effSegmentPointerSet(u8 *work) {
         entry[3] = third;
         entry += 4;
     }
-    return handle;
+    return pointSetRef;
 }
 
 void effReleaseRingResourceHandle(u32 handle) {
@@ -3101,10 +3096,11 @@ void effResetClassRingFrame(s32 work) {
 
 extern u8 *effCreatePointSet4(u32);
 
+/* Create a point-set reference and initialize four colors per segment. */
 u32 *effCreateRingHandle(u8 *work) {
-    u32 *handle = sdfAllocSizeClassBlock(4);
-    u32 kind = ((EffRingSource *)work)->segments;
-    u8 *ring;
+    u32 *pointSetRef = sdfAllocSizeClassBlock(4);
+    u32 segments = ((EffRingSource *)work)->segments;
+    EffPointSet *pointSet;
     u32 *entry;
     u32 groups;
     u32 i;
@@ -3112,15 +3108,15 @@ u32 *effCreateRingHandle(u8 *work) {
     u32 second;
     u32 third;
 
-    if (kind < 3) {
+    if (segments < 3) {
         ((EffRingSource *)work)->segments = 3;
-        kind = 3;
+        segments = 3;
     }
-    ring = effCreatePointSet4(kind);
+    pointSet = (EffPointSet *)effCreatePointSet4(segments);
     first = ((EffRingSource *)work)->firstColor;
-    groups = ((EffRingBuffer *)ring)->wordCount / 4;
-    *handle = (u32)ring;
-    entry = ((EffRingBuffer *)ring)->entries;
+    groups = pointSet->rows / 4;
+    *pointSetRef = (u32)pointSet;
+    entry = (u32 *)pointSet->tail;
     second = ((EffRingSource *)work)->middleColor;
     third = ((EffRingSource *)work)->lastColor;
     for (i = 0; i < groups; i++) {
@@ -3130,7 +3126,7 @@ u32 *effCreateRingHandle(u8 *work) {
         entry[3] = third;
         entry += 4;
     }
-    return handle;
+    return pointSetRef;
 }
 
 void effReleaseRingHandle(u32 handle) {
@@ -3252,18 +3248,6 @@ void effSetClassWorkScale(EffClassWork *work, float value) {
     work->scale = value;
 }
 
-/* Point-set node: `rows` 16-byte entries in `buffer`, then `tail`. */
-typedef struct EffPointSet {
-    u32 type;       // 0x00
-    u32 color;      // 0x04
-    s32 rows;       // 0x08
-    u8 flag;        // 0x0C
-    u8 pad_0D[3];
-    u8 *buffer;     // 0x10
-    u8 *tail;       // 0x14
-    s32 *handle;    // 0x18
-    u8 *allocation; // 0x1C
-} EffPointSet;
 
 extern u16 D_003DCA10[];
 
@@ -3293,16 +3277,10 @@ u8 *effCreatePointSet4(u32 count) {
     return (u8 *)set;
 }
 
-/* Common asset-and-allocation handles in the class cleanup callbacks. */
-typedef struct EffAssetOwner {
-    u8 pad_00[0x18];
-    u32 asset;      /* 0x18 */
-    u32 allocation; /* 0x1C */
-} EffAssetOwner;
-
+/* Queue the draw asset for release and return the backing allocation. */
 void effAssetQueueRelease(s32 work) {
-    sdfQueueAssetRelease(((EffAssetOwner *)work)->asset);
-    sdfReleaseResourceAllocation(((EffAssetOwner *)work)->allocation);
+    sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
+    sdfReleaseResourceAllocation((u32)((EffPointSet *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A5640);
@@ -4274,9 +4252,10 @@ EffPointSet *effCreatePointSet5(s32 count) {
     return set;
 }
 
+/* Queue the draw asset for release and return the backing allocation. */
 void effReleasePointSetAsset(s32 work) {
-    sdfQueueAssetRelease(((EffAssetOwner *)work)->asset);
-    sdfReleaseResourceAllocation(((EffAssetOwner *)work)->allocation);
+    sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
+    sdfReleaseResourceAllocation((u32)((EffPointSet *)work)->allocation);
 }
 
 void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
@@ -5983,9 +5962,10 @@ EffPointSet *effCreatePointSet3(s32 count) {
     return set;
 }
 
+/* Queue the draw asset for release and return the backing allocation. */
 void effReleaseModelPointSetAsset(s32 work) {
-    sdfQueueAssetRelease(((EffAssetOwner *)work)->asset);
-    sdfReleaseResourceAllocation(((EffAssetOwner *)work)->allocation);
+    sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
+    sdfReleaseResourceAllocation((u32)((EffPointSet *)work)->allocation);
 }
 
 void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
@@ -6307,6 +6287,7 @@ u32 effAllocateCopiedEffectPayload(u32 owner, u32 source, s32 size) {
     memcpy(body, (void *)source, size);
     return (u32)node;
 }
+
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B3420);
 

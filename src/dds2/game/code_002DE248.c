@@ -2921,7 +2921,7 @@ typedef struct EffTrackSet {
     s32 count;     // 0x10
     u8 flag;       // 0x14
     u8 pad_15[3];
-    void *shared;    // 0x18: released via EffResourceRefs.shared
+    void *shared;    // 0x18: optional retained reference
     u8 *buffer;    // 0x1C
     u8 *columns;   // 0x20
     u8 *tail;      // 0x24
@@ -3063,30 +3063,25 @@ typedef struct EffRingSource {
     u32 lastColor;      // 0x4C
 } EffRingSource;
 
-typedef struct EffRingBuffer {
-    u8 pad_00[8];
-    s32 wordCount;      // 0x08, four words per segment
-    u8 pad_0C[8];
-    u32 *entries;       // 0x14
-} EffRingBuffer;
+/* Point-set node: `rows` 16-byte entries in `buffer`, then `tail`. */
+typedef struct EffPointSet {
+    u32 type;       // 0x00
+    u32 color;      // 0x04
+    s32 rows;       // 0x08
+    u8 flag;        // 0x0C
+    u8 pad_0D[3];
+    u8 *buffer;     // 0x10
+    u8 *tail;       // 0x14
+    s32 *handle;    // 0x18
+    u8 *allocation; // 0x1C
+} EffPointSet;
 
-typedef struct EffResourceRefs {
-    u8 pad_00[0xC];
-    u16 kind;
-    u8 pad_0E[0xA];
-    void *shared;
-    u8 pad_1C[4];
-    s32 owned;
-    u8 pad_24[4];
-    u32 asset;
-    u32 buffer;
-} EffResourceRefs;
-
-void effReleaseResourceRefs(EffResourceRefs *work) {
+/* Release the track set's retained reference, draw asset, and allocation. */
+void effReleaseResourceRefs(EffTrackSet *work) {
     s32 *count;
     void **slot;
 
-    if (work->owned != 0) {
+    if (work->columns != 0) {
         if (work->shared == 0) {
             switch (work->kind) {
             case 3:
@@ -3110,8 +3105,8 @@ void effReleaseResourceRefs(EffResourceRefs *work) {
             effReleaseSharedReference(work->shared);
         }
     }
-    sdfQueueAssetRelease(work->asset);
-    sdfReleaseResourceAllocation(work->buffer);
+    sdfQueueAssetRelease((u32)work->handle);
+    sdfReleaseResourceAllocation((u32)work->allocation);
 }
 
 /* Copy a track set: same size and kind, retaining the source's shared reference (or counting one more user of the built-in one). */
@@ -3165,10 +3160,11 @@ void effResetRingResourceFrame(s32 work) {
     ((EffClassDrawState *)((EffBillFrameWork *)work)->frameState)->ring->frame = 0;
 }
 
+/* Create a point-set reference and initialize four colors per segment. */
 u32 *effSegmentPointerSet(u8 *work) {
-    u32 *handle = sdfAllocSizeClassBlock(4);
-    u32 kind = ((EffRingSource *)work)->segments;
-    u8 *ring;
+    u32 *pointSetRef = sdfAllocSizeClassBlock(4);
+    u32 segments = ((EffRingSource *)work)->segments;
+    EffPointSet *pointSet;
     u32 *entry;
     u32 groups;
     u32 i;
@@ -3176,15 +3172,15 @@ u32 *effSegmentPointerSet(u8 *work) {
     u32 second;
     u32 third;
 
-    if (kind < 3) {
+    if (segments < 3) {
         ((EffRingSource *)work)->segments = 3;
-        kind = 3;
+        segments = 3;
     }
-    ring = effCreatePointSet4(kind);
+    pointSet = (EffPointSet *)effCreatePointSet4(segments);
     first = ((EffRingSource *)work)->firstColor;
-    groups = ((EffRingBuffer *)ring)->wordCount / 4;
-    *handle = (u32)ring;
-    entry = ((EffRingBuffer *)ring)->entries;
+    groups = pointSet->rows / 4;
+    *pointSetRef = (u32)pointSet;
+    entry = (u32 *)pointSet->tail;
     second = ((EffRingSource *)work)->middleColor;
     third = ((EffRingSource *)work)->lastColor;
     for (i = 0; i < groups; i++) {
@@ -3194,7 +3190,7 @@ u32 *effSegmentPointerSet(u8 *work) {
         entry[3] = third;
         entry += 4;
     }
-    return handle;
+    return pointSetRef;
 }
 
 void effReleaseRingResourceHandle(u32 handle) {
@@ -3323,10 +3319,11 @@ void effResetClassRingFrame(s32 work) {
     ((EffClassDrawState *)((EffBillFrameWork *)work)->frameState)->ring->frame = 0;
 }
 
+/* Create a point-set reference and initialize four colors per segment. */
 u32 *effCreateRingHandle(u8 *work) {
-    u32 *handle = sdfAllocSizeClassBlock(4);
-    u32 kind = ((EffRingSource *)work)->segments;
-    u8 *ring;
+    u32 *pointSetRef = sdfAllocSizeClassBlock(4);
+    u32 segments = ((EffRingSource *)work)->segments;
+    EffPointSet *pointSet;
     u32 *entry;
     u32 groups;
     u32 i;
@@ -3334,15 +3331,15 @@ u32 *effCreateRingHandle(u8 *work) {
     u32 second;
     u32 third;
 
-    if (kind < 3) {
+    if (segments < 3) {
         ((EffRingSource *)work)->segments = 3;
-        kind = 3;
+        segments = 3;
     }
-    ring = effCreatePointSet4(kind);
+    pointSet = (EffPointSet *)effCreatePointSet4(segments);
     first = ((EffRingSource *)work)->firstColor;
-    groups = ((EffRingBuffer *)ring)->wordCount / 4;
-    *handle = (u32)ring;
-    entry = ((EffRingBuffer *)ring)->entries;
+    groups = pointSet->rows / 4;
+    *pointSetRef = (u32)pointSet;
+    entry = (u32 *)pointSet->tail;
     second = ((EffRingSource *)work)->middleColor;
     third = ((EffRingSource *)work)->lastColor;
     for (i = 0; i < groups; i++) {
@@ -3352,7 +3349,7 @@ u32 *effCreateRingHandle(u8 *work) {
         entry[3] = third;
         entry += 4;
     }
-    return handle;
+    return pointSetRef;
 }
 
 void effReleaseRingHandle(u32 handle) {
@@ -3478,18 +3475,6 @@ void effSetClassWorkScale(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-/* Point-set node: `rows` 16-byte entries in `buffer`, then `tail`. */
-typedef struct EffPointSet {
-    u32 type;       // 0x00
-    u32 color;      // 0x04
-    s32 rows;       // 0x08
-    u8 flag;        // 0x0C
-    u8 pad_0D[3];
-    u8 *buffer;     // 0x10
-    u8 *tail;       // 0x14
-    s32 *handle;    // 0x18
-    u8 *allocation; // 0x1C
-} EffPointSet;
 
 extern u16 D_004582E0[];
 
@@ -3519,16 +3504,10 @@ u8 *effCreatePointSet4(u32 count) {
     return (u8 *)set;
 }
 
-/* Shared asset and allocation handles released by the effect cleanup callbacks. */
-typedef struct EffAssetOwner {
-    u8 pad_00[0x18];
-    u32 asset;      /* 0x18 */
-    u32 allocation; /* 0x1C */
-} EffAssetOwner;
-
+/* Queue the draw asset for release and return the backing allocation. */
 void effAssetQueueRelease(s32 work) {
-    sdfQueueAssetRelease(((EffAssetOwner *)work)->asset);
-    sdfReleaseResourceAllocation(((EffAssetOwner *)work)->allocation);
+    sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
+    sdfReleaseResourceAllocation((u32)((EffPointSet *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E76C8);
@@ -3689,6 +3668,7 @@ s32 effRecreateSurfaceNodeFromWork(u8 *work) {
     effReplaceResourceRef(object, ((EffGridRecord *)((EffectSlotNode54 *)work)->record)->kind, arg);
     return object;
 }
+
 
 u32 effCreateSurfaceGridWithConfiguration(u8 *work) {
     EffGridRecord *config = (EffGridRecord *)((EffectSlotNode54 *)work)->record;
@@ -4555,9 +4535,10 @@ EffPointSet *effCreatePointSet5(s32 count) {
     return set;
 }
 
+/* Queue the draw asset for release and return the backing allocation. */
 void effReleasePointSetAsset(s32 work) {
-    sdfQueueAssetRelease(((EffAssetOwner *)work)->asset);
-    sdfReleaseResourceAllocation(((EffAssetOwner *)work)->allocation);
+    sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
+    sdfReleaseResourceAllocation((u32)((EffPointSet *)work)->allocation);
 }
 
 void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
@@ -6196,9 +6177,10 @@ EffPointSet *effCreatePointSet3(s32 count) {
     return set;
 }
 
+/* Queue the draw asset for release and return the backing allocation. */
 void effReleaseModelPointSetAsset(s32 work) {
-    sdfQueueAssetRelease(((EffAssetOwner *)work)->asset);
-    sdfReleaseResourceAllocation(((EffAssetOwner *)work)->allocation);
+    sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
+    sdfReleaseResourceAllocation((u32)((EffPointSet *)work)->allocation);
 }
 
 void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
@@ -6919,7 +6901,51 @@ void effReleaseOwnedClassResourceWork(u32 handle) {
     sdfReleaseChipBlock(handle);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F7AC8);
+/* vu0 routine: orient along the vector between two requested positions and advance the resource. */
+void func_002F7AC8(u8 *work) {
+    u8 *object = ((EffActiveResource *)work)->payload;
+    s32 *handle = (s32 *)((EffActiveResource *)work)->resource;
+    u128 mtx[4];
+    f32 first[4];
+    f32 second[4];
+    f32 look[4];
+    f32 length;
+    u8 *state;
+
+    if (effResolveRequestPositionIntoVu((EffectVectorRequest *)(object + 0x88), *(s16 *)(object + 0x98)) == 0) {
+        VU0_LOAD_VF(vf10, work);
+    }
+    VU0_STORE_VF_UNCLOBBERED(vf10, first);
+    if (effResolveRequestPositionIntoVu((EffectVectorRequest *)(object + 0x90), *(s16 *)(object + 0x9A)) == 0) {
+        VU0_LOAD_VF(vf10, work);
+    }
+    VU0_STORE_VF_UNCLOBBERED(vf10, second);
+    effCopyClassResourcePosition((s128 *)handle[0], (s128 *)first);
+    state = ((EffClassWork *)handle[0])->payload;
+    VU0_LOAD_VF(vf10, first);
+    VU0_LOAD_VF(vf11, second);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    ((EffAimState *)state)->length = length;
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf11, D_003E9140);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf30, vf10);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_MOVE_VF(vf29, vf10);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf28, vf10);
+    VU0_LOAD_VF(vf31, D_003E9110);
+    VU0_SET_W_ONE(vf31);
+    VU0_STORE_MATRIX_UNCLOBBERED(mtx);
+    func_002D31C0(mtx);
+    VU0_STORE_VF_UNCLOBBERED(vf10, look);
+    effCopyClassResourceOrientation((s128 *)handle[0], (s128 *)look);
+    effAdvanceClassResourceFrame(handle[0]);
+}
 
 void effDrawActiveClassResource(s32 owner) {
     effDrawClassResourceWork(*(u32 *)((EffActiveResource *)owner)->resource);
