@@ -4,7 +4,9 @@
 extern s32 kwlnTaskGetUserValue();
 
 typedef struct MenuLayoutContext {
-    u8 pad00[0x9C];
+    u8 pad00[0x94];
+    s32 backdropContext;
+    u8 pad98[4];
     s32 *config;
     u8 padA0[0x34C];
     s32 selectionWidth;
@@ -15,6 +17,8 @@ typedef struct MenuLayoutContext {
     u8 padAD38[8];
     u8 menuList[0x9A4];
     s32 visible;
+    s32 iconFade;
+    u32 suppressDelta;
 } MenuLayoutContext;
 
 extern s32 brsAdvanceSkillPackagePanel(s32);
@@ -27,7 +31,55 @@ void func_0029AA48(MenuLayoutContext *context) {
     mnuDrawCampIconBackdrop((s32)context->menuList, 0x20);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AA68);
+struct FrFontGlyph;
+
+extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern u32 uiBlendColors(u32, u32, s32);
+extern s32 func_0035C860(char *, const char *, ...);
+extern u32 func_0019F6C8(s32, s32, s32, u32, char *, s32);
+extern void frFontSetChainFlag(struct FrFontGlyph *, u8);
+extern s32 func_0019D550(struct FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
+extern u32 mnuKindIsSelectable(u32);
+extern char D_004379B0[];
+
+void func_0029AA68(MenuLayoutContext *context) {
+    char text[16];
+    s32 iconFade = context->iconFade;
+    u8 *item = (u8 *)context->config[0];
+    s32 delta;
+    s32 x;
+    struct FrFontGlyph *glyph;
+    u32 color;
+
+    func_00306CD0(0x1710, 0x8C0, 0, iconFade, 1,
+                  context->backdropContext, 8, 0x53);
+    delta = context->suppressDelta != 0 ? 0 : context->selectionWidth - context->margin;
+    x = 0x19C0;
+    if (delta / 100 <= 0) {
+        if (delta / 10 > 0) {
+            x = 0x1A50;
+        } else {
+            x = 0x1AA0;
+        }
+    }
+    color = uiBlendColors(0xA09DC380, 0xA09DC300, iconFade);
+    func_0035C860(text, D_004379B0, delta);
+    glyph = (struct FrFontGlyph *)func_0019F6C8(x, 0x8E8, 0, color, text, 0);
+    frFontSetChainFlag(glyph, 3);
+    func_0019D550(glyph, 1, 0x53);
+    frFontQueueGlyphInSelectedSlot(glyph);
+    if (mnuKindIsSelectable(*(u16 *)(item + 4)) != 0) {
+        if (context->iconFade < 0x100) {
+            context->iconFade += 0x20;
+        }
+        if (context->iconFade > 0x100) {
+            context->iconFade = 0x100;
+        }
+    } else {
+        context->iconFade = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AC20);
 
