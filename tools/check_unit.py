@@ -26,7 +26,7 @@ from pairing import RETAIL, ROOT, load_segments, va_to_off  # noqa: E402
 BIN = ROOT / "tools/bin"
 VERSIONS = __import__("json").loads((ROOT / "config/versions.json").read_text())
 ROW = re.compile(r"^\s*(\S+)\s*=\s*0x([0-9A-Fa-f]+)\s*;")
-AUTO = re.compile(r"^(?:func|D|jtbl)_([0-9A-F]{8})$")
+AUTO = re.compile(r"^(?:func|D|jtbl)_([0-9A-F]{8})(?:\.\d+)?$")
 
 
 def symbols(version):
@@ -642,7 +642,9 @@ def main():
             continue
         print(f"ASMBODY {name}: {asm} of {total} instructions are inline asm; mark it as an SDK copy "
               "or VU0 routine, or keep it as INCLUDE_ASM (docs/idioms.md, Inline asm)")
-    # C functions must keep retail order (the object's text is laid out in source order).
+    # Top-level C functions must keep retail order (the object's text is laid out in
+    # source order). Nested functions are indented and GCC emits them before their
+    # owner, so their actual object offsets provide the ordering check instead.
     # (an implicit-int K&R definition starts with the function name itself)
     order = re.findall(r'^INCLUDE_ASM\([^\n]*\b(\w+)\);|^(?:[A-Za-z_][^;\n=]*?\b)?([A-Za-z_]\w*)\s*\([^;\n]*\)\s*\{?\s*$',
                        unit.read_text(), re.M)
@@ -662,7 +664,7 @@ def main():
     if full.exists() and not args.func:
         source = unit.read_text()
         for name in re.findall(r"^glabel (\w+)", full.read_text(), re.M):
-            if not re.search(rf"^INCLUDE_ASM\([^\n]*\b{name}\);|^(?:[A-Za-z_][^;\n]*\b)?{name}\s*\([^;]*$", source, re.M):
+            if not re.search(rf"^INCLUDE_ASM\([^\n]*\b{name}\);|^[ \t]*(?:[A-Za-z_][^;\n]*\b)?{name}\s*\([^;]*$", source, re.M):
                 bad += 1
                 print(f"MISSING {name}: neither C nor INCLUDE_ASM in the unit")
     # A func_XXXXXXXX whose address symbol_addrs now names differently fails a fresh link
