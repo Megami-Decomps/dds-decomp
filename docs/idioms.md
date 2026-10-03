@@ -968,6 +968,23 @@ before region/dependence, fanout and source order. Weight is register outputs mi
 weight 0 rather than 1 and schedules **earlier**, not later, than equal-priority
 independent constants (DDS1 `func_002AA748` loop preheader; still non-matching).
 
+### Saved-register homes: what global allocation actually sorts by
+
+Mirrored `$s0`/`$s1` homes are not a declaration-order effect. In this cc1,
+`allocno_compare` sorts first on `REG_N_RANGE_COPY_P` (a Cygnus live-range
+splitting copy, not a pointer or user-variable flag), then by descending
+`floor_log2(refs) * refs / live_length * 10000 * width`, and only then by
+ascending pseudo number. Pseudos local to one basic block with a single death
+are allocated earlier by local-alloc, with copy suggestions tried first.
+Controls on DDS1 `func_00104168`, `func_002E69F0` and others: plain versus
+`register` storage class, prototyped versus unprototyped integer calls, and
+visible/static/opaque out-of-line callees all left the priorities and homes
+unchanged. The ordering follows from what is referenced and for how long:
+for example, testing the other operand of a predicate swaps the homes. So look
+for the real data flow (which value is reloaded, cached or recomputed) and not
+for a declaration or prototype switch. Some "mirrored" parks are caller-saved
+`$v0`/`$v1` problems instead (`func_00244658`, `btlSelectLowestRankTarget`).
+
 ### Non-rotated loops: `b` to the top-of-body test (stmt.c `expand_end_loop`)
 
 `expand_end_loop` "rolls" the loop-top test to the bottom. It scans from the top
