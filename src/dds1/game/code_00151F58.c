@@ -9,6 +9,39 @@ extern void func_002DA3C0(void *, u32);
 extern void func_002DA3F0(void *, u32);
 #include "eff.h"
 
+typedef struct EffEmitterSub {
+    u16 kind;
+    u8 pad02[6];
+    s32 nodeResource;       /* Kind 1: particle-node resource. */
+    u32 unk0C;
+    s32 primaryCellSystem;  /* Kind 2: cell system. */
+    s32 secondaryResource;  /* Kind 3: cell system; kind 4: tracked model work. */
+} EffEmitterSub;
+
+/* Header shared by the effect emitters that spawn a ring or spray of packets:
+ * an origin, a sub-effect, a fade descriptor, jitter ranges and the packet
+ * buffer. The kind-specific parameters follow at +0x150. */
+typedef struct EffEmitterHead {
+    f32 origin[4];         /* 0x00 */
+    f32 speed;             /* 0x10: base packet speed */
+    u8 pad14[0xC];
+    s32 packetCount;       /* 0x20 */
+    s32 frameCount;        /* 0x24 */
+    u8 pad28[8];
+    EffEmitterSub sub;     /* 0x30 */
+    u8 fade[0x4C];         /* 0x48 */
+    f32 speedJitter;       /* 0x94 */
+    f32 spinJitter;        /* 0x98 */
+    u8 pad9C[0x14];
+    f32 matrix[16];        /* 0xB0 */
+    u32 colorMask;         /* 0xF0 */
+    s32 billboard;
+    EffectBufferTail *buffer; /* 0xF8 */
+    u8 padFC[0x46];
+    u16 active;            /* 0x142 */
+    u8 pad144[0xC];
+} EffEmitterHead;
+
 typedef struct EffTemplatePacketList {
     u8 pad00[0x10];
     f32 x; /* 0x10 */
@@ -89,36 +122,19 @@ EffectBufferRecord *sdfResourceRetainAddress(s32 allocation);
 
 void effInitExpandRingPacketSchedule(EffTemplatePacketList *effect);
 
-typedef struct EffEmitterD EffEmitterD;
+typedef struct EffLookAtRingEmitter EffLookAtRingEmitter;
 
-void effEmitterLookAtRingSpawn(EffEmitterD *effect, u32 index);
+void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 index);
 
-typedef struct EffResourceOwner {
-    u8 pad00[0x30];
-    s32 *resource; /* 0x30: reference-counted effect resource */
-} EffResourceOwner;
 
-/* Resource cleanup view; unlike the retain view above, +0x30 is a kind. */
-typedef struct EffResourceSet {
-    u8 pad00[0x30];
-    u16 kind;
-    u8 pad32[6];
-    s32 unk38;
-    u8 pad3C[4];
-    s32 unk40;
-    s32 unk44;
-    u8 pad48[0xAC];
-    s32 billboard;
-    s32 buffer;
-} EffResourceSet;
-
-/* Attach the indexed effect resource to a new billboard and increment its reference count. */
+/* Create a billboard sharing the indexed entry's resource. Word two of the
+ * resource stores the reference count; the BillObj entryList is not an emitter. */
 void effRetainResource(s32 index) {
-    s32 *effect = (s32 *)billCreateIndexed(D_0034DF54[index].billboardKind, 0);
-    s32 *resource = ((EffResourceOwner *)effBillResourceOwners[index])->resource;
+    BillObj *effect = (BillObj *)billCreateIndexed(D_0034DF54[index].billboardKind, 0);
+    s32 *resource = ((BillObj *)effBillResourceOwners[index])->entryList;
     s32 references = resource[2];
 
-    effect[12] = (s32)resource;
+    effect->entryList = resource;
     resource[2] = references + 1;
 }
 
@@ -127,7 +143,7 @@ u32 func_00151FC0(void) {
 }
 
 s32 effGetResourceFirstWord(s32 index) {
-    return *(s32 *)((EffResourceOwner *)effBillResourceOwners[index])->resource;
+    return *(s32 *)((BillObj *)effBillResourceOwners[index])->entryList;
 }
 
 void effCopyVector(void *dst, void *src) {
@@ -581,23 +597,25 @@ void effReleaseBufferAllocation(u32 *allocationSlot) {
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00153740);
 
+/* Release the selected sub-effect resource, billboard and packet-buffer
+ * allocation described by the common emitter prefix. */
 void effDestroyResources(effect)
     s32 effect;
 
 {
-    EffResourceSet *owner = (EffResourceSet *)effect;
-    switch (owner->kind) {
+    EffEmitterHead *owner = (EffEmitterHead *)effect;
+    switch (owner->sub.kind) {
     case 1:
-        effParReleaseNodeResource(owner->unk38);
+        effParReleaseNodeResource(owner->sub.nodeResource);
         break;
     case 2:
-        parReleaseCellSystem(owner->unk40);
+        parReleaseCellSystem(owner->sub.primaryCellSystem);
         break;
     case 3:
-        parReleaseCellSystem(owner->unk44);
+        parReleaseCellSystem(owner->sub.secondaryResource);
         break;
     case 4:
-        effTrackPolyDestroyModelWorkList(owner->unk44);
+        effTrackPolyDestroyModelWorkList(owner->sub.secondaryResource);
         break;
     }
     billDispatchByKind(owner->billboard);
@@ -654,34 +672,6 @@ void effFreeRingTemplate(u32 effect) {
     sdfReleaseChipBlock(effect);
 }
 
-/* Header shared by the effect emitters that spawn a ring or spray of packets:
- * an origin, a sub-effect, a fade descriptor, jitter ranges and the packet
- * buffer. The kind-specific parameters follow at +0x150. */
-typedef struct EffEmitterSub {
-    u16 kind;
-    u8 pad02[0x16];
-} EffEmitterSub;
-
-typedef struct EffEmitterHead {
-    f32 origin[4];         /* 0x00 */
-    f32 speed;             /* 0x10: base packet speed */
-    u8 pad14[0xC];
-    s32 packetCount;       /* 0x20 */
-    s32 frameCount;        /* 0x24 */
-    u8 pad28[8];
-    EffEmitterSub sub;     /* 0x30 */
-    u8 fade[0x4C];         /* 0x48 */
-    f32 speedJitter;       /* 0x94 */
-    f32 spinJitter;        /* 0x98 */
-    u8 pad9C[0x14];
-    f32 matrix[16];        /* 0xB0 */
-    u32 colorMask;         /* 0xF0 */
-    u8 padF4[4];
-    EffectBufferTail *buffer; /* 0xF8 */
-    u8 padFC[0x46];
-    u16 active;            /* 0x142 */
-    u8 pad144[0xC];
-} EffEmitterHead;
 
 typedef struct EffPacket {
     f32 pos[4];   /* 0x00 */
@@ -696,7 +686,7 @@ typedef struct EffPacket {
     f32 f3C;
 } EffPacket;
 
-typedef struct EffEmitterA {
+typedef struct EffRingEmitter {
     EffEmitterHead head;
     u8 flag150;
     u8 flag151;
@@ -709,14 +699,14 @@ typedef struct EffEmitterA {
     f32 f16C;
     f32 radiusRange; /* 0x170 */
     f32 speedRange;  /* 0x174 */
-} EffEmitterA;
+} EffRingEmitter;
 
 extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 void parDispatchKindInit(void *work, s32 index);
 
-void effEmitterRingSpawn(EffEmitterA *effect, u32 index) {
+void effEmitterRingSpawn(EffRingEmitter *effect, u32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 rem;
     f32 phase;
@@ -765,7 +755,7 @@ void parDispatchKindUpdate(void *work, s32 index, u32 color, f32 speed);
 
 /* vf12 keeps the packet's previous position and vf10 the new one for
  * parDispatchKindUpdate, which reads them as implicit arguments. */
-void effEmitterRingUpdate(EffEmitterA *effect) {
+void effEmitterRingUpdate(EffRingEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 origin[4];
@@ -884,7 +874,7 @@ void effFreeDiscTemplate(u32 effect) {
     sdfReleaseChipBlock(effect);
 }
 
-typedef struct EffEmitterB {
+typedef struct EffDiscEmitter {
     EffEmitterHead head;
     u8 flag150;
     u8 pad151[3];
@@ -897,11 +887,11 @@ typedef struct EffEmitterB {
     f32 f16C;
     f32 jitterA;     /* 0x170 */
     f32 jitterB;     /* 0x174 */
-} EffEmitterB;
+} EffDiscEmitter;
 
 extern u32 effMiscRand(void *state);
 
-void effEmitterDiscSpawn(EffEmitterB *effect, u32 index) {
+void effEmitterDiscSpawn(EffDiscEmitter *effect, u32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     f32 tmp[4];
     f32 scale;
@@ -948,7 +938,7 @@ void effEmitterDiscSpawn(EffEmitterB *effect, u32 index) {
     parDispatchKindInit(&effect->head.sub, index);
 }
 
-void effEmitterDiscUpdate(EffEmitterB *effect) {
+void effEmitterDiscUpdate(EffDiscEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 tmp[4];
@@ -1067,7 +1057,7 @@ void effFreeBallisticTemplate(u32 effect) {
     sdfReleaseChipBlock(effect);
 }
 
-typedef struct EffEmitterC {
+typedef struct EffBallisticEmitter {
     EffEmitterHead head;
     u8 mode;         /* 0x150 */
     u8 loop;         /* 0x151 */
@@ -1081,12 +1071,12 @@ typedef struct EffEmitterC {
     f32 speed;       /* 0x168 */
     f32 decayPct;    /* 0x16C */
     f32 jitter;      /* 0x170 */
-} EffEmitterC;
+} EffBallisticEmitter;
 
-void func_001547D8(EffEmitterC *effect, s32 index);
+void func_001547D8(EffBallisticEmitter *effect, s32 index);
 INCLUDE_ASM(const s32, "game/code_00151F58", func_001547D8);
 
-void effEmitterBallisticUpdate(EffEmitterC *effect) {
+void effEmitterBallisticUpdate(EffBallisticEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     u32 mode;
@@ -1164,7 +1154,7 @@ void effInitLookAtRingPacketSchedule(EffTemplatePacketList *effect) {
     record = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            effEmitterLookAtRingSpawn((EffEmitterD *)effect, i);
+            effEmitterLookAtRingSpawn((EffLookAtRingEmitter *)effect, i);
             record->unk20 = tag;
             next = i + 1;
             record = record + 1;
@@ -1201,7 +1191,7 @@ void effFreeLookAtRingTemplate(u32 effect) {
     sdfReleaseChipBlock(effect);
 }
 
-struct EffEmitterD {
+struct EffLookAtRingEmitter {
     EffEmitterHead head;
     u8 mode;         /* 0x150 */
     u8 loop;         /* 0x151 */
@@ -1217,7 +1207,7 @@ extern u8 sdfViewUpVector[];
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfInvertRigidVuTransform(void);
 
-void effEmitterLookAtRingSpawn(EffEmitterD *effect, u32 index) {
+void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 period = 0;
     f32 angle;
@@ -1268,7 +1258,7 @@ void effEmitterLookAtRingSpawn(EffEmitterD *effect, u32 index) {
     parDispatchKindInit(&effect->head.sub, index);
 }
 
-void effEmitterLookAtRingUpdate(EffEmitterD *effect) {
+void effEmitterLookAtRingUpdate(EffLookAtRingEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 spin;
@@ -1316,7 +1306,7 @@ void effEmitterLookAtRingUpdate(EffEmitterD *effect) {
         age++;
         if (age >= frames) {
             if (loop) {
-                effEmitterLookAtRingSpawn((EffEmitterD *)effect, i);
+                effEmitterLookAtRingSpawn((EffLookAtRingEmitter *)effect, i);
                 age = packet->age;
             } else {
                 parDispatchKindInit(&effect->head.sub, i);
@@ -1371,7 +1361,7 @@ void effFreeBurstTemplate(u32 effect) {
     sdfReleaseChipBlock(effect);
 }
 
-typedef struct EffEmitterE {
+typedef struct EffBurstEmitter {
     EffEmitterHead head;
     u8 mode;         /* 0x150 */
     u8 loop;         /* 0x151 */
@@ -1382,9 +1372,9 @@ typedef struct EffEmitterE {
     f32 f160;
     f32 jitterA;     /* 0x164 */
     f32 jitterB;     /* 0x168 */
-} EffEmitterE;
+} EffBurstEmitter;
 
-void effEmitterBurstSpawn(EffEmitterE *effect, u32 index) {
+void effEmitterBurstSpawn(EffBurstEmitter *effect, u32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     f32 tmp[4];
     f32 speed;
@@ -1444,7 +1434,7 @@ void effEmitterBurstSpawn(EffEmitterE *effect, u32 index) {
 
 extern void sdfBuildVuRotationFromAxisAngle(f32 angle, f32 *axis);
 
-void effEmitterBurstUpdate(EffEmitterE *effect) {
+void effEmitterBurstUpdate(EffBurstEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 origin[4];
@@ -1570,7 +1560,7 @@ void effFreeSphereTemplate(u32 effect) {
     sdfReleaseChipBlock(effect);
 }
 
-typedef struct EffEmitterF {
+typedef struct EffSphereEmitter {
     EffEmitterHead head;
     u8 flag150;
     u8 pad151[3];
@@ -1584,9 +1574,9 @@ typedef struct EffEmitterF {
     f32 f170;
     f32 f174;
     f32 f178;
-} EffEmitterF;
+} EffSphereEmitter;
 
-void effEmitterSphereSpawn(EffEmitterF *effect, u32 index) {
+void effEmitterSphereSpawn(EffSphereEmitter *effect, u32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     f32 tmp[4];
     f32 radius;
@@ -1634,7 +1624,7 @@ void effEmitterSphereSpawn(EffEmitterF *effect, u32 index) {
     parDispatchKindInit(&effect->head.sub, index);
 }
 
-void effEmitterSphereUpdate(EffEmitterF *effect) {
+void effEmitterSphereUpdate(EffSphereEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 tmp[4];
@@ -1758,7 +1748,7 @@ void effFreeExpandRingTemplate(u32 effect) {
     sdfReleaseChipBlock(effect);
 }
 
-typedef struct EffEmitterG {
+typedef struct EffExpandingRingEmitter {
     EffEmitterHead head;
     u8 pad150;
     u8 loop;         /* 0x151 */
@@ -1767,9 +1757,9 @@ typedef struct EffEmitterG {
     f32 jitter;      /* 0x15C */
     u32 period;      /* 0x160 */
     f32 spinRate;    /* 0x164 */
-} EffEmitterG;
+} EffExpandingRingEmitter;
 
-void effEmitterExpandRingSpawn(EffEmitterG *effect, u32 index) {
+void effEmitterExpandRingSpawn(EffExpandingRingEmitter *effect, u32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     f32 tmp[4];
     f32 jitter;
@@ -1806,7 +1796,7 @@ void effEmitterExpandRingSpawn(EffEmitterG *effect, u32 index) {
     parDispatchKindInit(&effect->head.sub, index);
 }
 
-void effEmitterExpandRingUpdate(EffEmitterG *effect) {
+void effEmitterExpandRingUpdate(EffExpandingRingEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 origin[4];
@@ -1927,7 +1917,7 @@ void effFreeConeTemplate(u32 effect) {
     sdfReleaseChipBlock(effect);
 }
 
-typedef struct EffEmitterH {
+typedef struct EffConeEmitter {
     EffEmitterHead head;
     u8 mode;         /* 0x150 */
     u8 loop;         /* 0x151 */
@@ -1941,9 +1931,9 @@ typedef struct EffEmitterH {
     f32 decayPct;    /* 0x16C */
     u8 pad170[4];
     f32 degrees;     /* 0x174 */
-} EffEmitterH;
+} EffConeEmitter;
 
-void effEmitterConeSpawn(EffEmitterH *effect, s32 index) {
+void effEmitterConeSpawn(EffConeEmitter *effect, s32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     f32 gravity;
     f32 sweep;
@@ -1993,7 +1983,7 @@ void effEmitterConeSpawn(EffEmitterH *effect, s32 index) {
     parDispatchKindInit(&effect->head.sub, index);
 }
 
-void effEmitterConeUpdate(EffEmitterH *effect) {
+void effEmitterConeUpdate(EffConeEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 tmp[4];
@@ -2252,18 +2242,18 @@ void effFreeOffsetGravityTemplate(u32 effect) {
     sdfReleaseChipBlock(effect);
 }
 
-typedef struct EffEmitterJ {
+typedef struct EffOffsetGravityEmitter {
     EffEmitterHead head;
     u8 mode;         /* 0x150 */
     u8 loop;         /* 0x151 */
     u8 pad152[0x1A];
     f32 decayPct;    /* 0x16C */
-} EffEmitterJ;
+} EffOffsetGravityEmitter;
 
-void func_00157D28(EffEmitterJ *effect, s32 index);
+void func_00157D28(EffOffsetGravityEmitter *effect, s32 index);
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00157D28);
 
-void effEmitterOffsetGravityUpdate(EffEmitterJ *effect) {
+void effEmitterOffsetGravityUpdate(EffOffsetGravityEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     u32 mode;
@@ -2383,7 +2373,7 @@ void effFreeDiscAuxTemplate(u32 effect) {
     sdfReleaseChipBlock(effect);
 }
 
-typedef struct EffEmitterK {
+typedef struct EffDiscAuxEmitter {
     EffEmitterHead head;
     u8 flag150;
     u8 flag151;
@@ -2398,9 +2388,9 @@ typedef struct EffEmitterK {
     f32 f170;
     f32 f174;
     f32 (*aux)[4];   /* 0x178: 16 bytes per packet */
-} EffEmitterK;
+} EffDiscAuxEmitter;
 
-void effEmitterDiscAuxSpawn(EffEmitterK *effect, u32 index) {
+void effEmitterDiscAuxSpawn(EffDiscAuxEmitter *effect, u32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     f32 (*aux)[4] = effect->aux;
     f32 tmp[4];
@@ -2447,7 +2437,7 @@ void effEmitterDiscAuxSpawn(EffEmitterK *effect, u32 index) {
     parDispatchKindInit(&effect->head.sub, index);
 }
 
-void effEmitterDiscAuxUpdate(EffEmitterK *effect) {
+void effEmitterDiscAuxUpdate(EffDiscAuxEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 (*aux)[4] = effect->aux;
