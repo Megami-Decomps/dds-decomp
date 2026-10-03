@@ -90,86 +90,115 @@ void mnuCampDestroyAllTasks(void) {
     }
 }
 
-typedef struct ScrollNode {
-    u16 pos;                  /* 0x0 */
-    u8 pad02[0x2E];           /* 0x2 */
-    struct ScrollNode *next;  /* 0x30 */
-} ScrollNode;
+/* Timeline keys carry type-dependent payloads as well as their common links. */
+typedef struct CampKeyNode {
+    u16 frame;                 /* 0x00 */
+    u8 pad02[6];
+    union {
+        s16 offset;
+        u16 packed;
+    } firstValue;              /* 0x08 */
+    s16 offsetB;               /* 0x0A */
+    s16 condition;             /* 0x0C */
+    u8 pad0E[2];
+    s16 entryCode;             /* 0x10: 0 follows alt, 1 clears, >=2 names an entry */
+    u8 pad12[0x1E];
+    struct CampKeyNode *next;  /* 0x30 */
+    struct CampKeyNode *alt;   /* 0x34 */
+} CampKeyNode;
 
-typedef struct ScrollList {
-    u8 pad00[0x1C];
+/* The same track owns its key list, name/value state and next-track link. */
+typedef struct CampKeyTrack {
+    s32 type;                 /* 0x00 */
+    u8 pad04[4];
+    s32 nameIndex;             /* 0x08: 32-byte name in the owning scene */
+    u8 pad0C[0x10];
     s16 base;                 /* 0x1C */
-    u8 pad1E[0x36];
-    ScrollNode *nodes;        /* 0x54 */
-} ScrollList;
+    u8 pad1E[6];
+    s32 value;                /* 0x24 */
+    u32 unk28;                /* Reset by fldResetCampSceneEntries; no reader here. */
+    u8 pad2C[0x28];
+    CampKeyNode *first;       /* 0x54 */
+    CampKeyNode *fallback;    /* 0x58 */
+    u8 pad5C[0x20];
+    struct CampKeyTrack *next; /* 0x7C */
+} CampKeyTrack;
 
-typedef struct ScrollOwner {
-    u8 pad00[0xC];
-    s32 limit;                /* 0xC */
-    u8 pad10[0x22F8];
-    ScrollList *list;         /* 0x2308 */
-} ScrollOwner;
+typedef struct CampOwner {
+    u8 pad00[0x104];
+    s32 handle; /* 0x104 */
+    u8 pad108[4];
+    s32 bgmId; /* 0x10C: validated event BGM ID used with registered variations */
+} CampOwner;
 
-void mnuShopScrollList(ScrollOwner *owner, s32 delta) {
-    ScrollList *list = owner->list;
-    ScrollNode *node;
+/* Event-viewer timeline data and the camp/shop state that owns those tracks. */
+typedef struct {
+    u8 pad00[8];
+    CampOwner *owner; /* 0x08 */
+    union {
+        s32 whole;
+        u16 low;
+    } limitv; /* 0x0C */
+    u8 pad10[4];
+    s32 scrollOffset; /* 0x14: shifted by delta, wraps to 10 below zero */
+    s32 clampedOffset; /* 0x18: cannot exceed the current limit */
+    s32 unk1C;
+    u8 pad20[4];
+    char names[256][32]; /* 0x24: fixed-width names addressed by each track */
+    u8 pad2024[0xC];
+    s32 entryCount; /* 0x2030 */
+    CampKeyTrack *entries; /* 0x2034 */
+    u8 pad2038[0x2D0];
+    CampKeyTrack *scrollTrack; /* 0x2308 */
+    u8 pad230C[0x24];
+    f32 transform[12]; /* 0x2330: three four-component vectors saved by shop */
+    u8 pad2360[0x6C];
+    s32 sceneMode; /* 0x23CC: checked after func_00243818 */
+    u8 pad23D0[0x10];
+    s32 pendingValue; /* 0x23E0 */
+    u8 pad23E4[0x28];
+    u32 state; /* 0x240C */
+    u32 fontResource; /* 0x2410: returned by func_001951C8 */
+    u8 pad2414[0x14];
+    s32 descriptorResource; /* 0x2428 */
+    s32 descriptorBackingHandle; /* 0x242C */
+    s32 menuState; /* 0x2430 */
+    s32 shopFlag;  /* 0x2434: 1 once the shop descriptor was submitted */
+    u32 auxResource; /* 0x2438 */
+    u32 options; /* 0x243C: two two-bit fields */
+    u8 pad2440[4];
+    s32 registeredCount; /* 0x2444 */
+    s32 registeredIds[10]; /* 0x2448 */
+} CampScene;
+
+/* Shift the selected track's frames; values exactly at the upper limit are kept. */
+void mnuShopScrollList(CampScene *owner, s32 delta) {
+    CampKeyTrack *list = owner->scrollTrack;
+    CampKeyNode *node;
     s32 next;
 
     if (list == NULL) {
         return;
     }
-    for (node = list->nodes; node != NULL; node = node->next) {
-        next = node->pos + list->base + delta;
+    for (node = list->first; node != NULL; node = node->next) {
+        next = node->frame + list->base + delta;
         if (next < list->base) {
-            node->pos = 0;
-        } else if (owner->limit < next) {
-            node->pos = (u16)owner->limit - (u16)list->base - 1;
+            node->frame = 0;
+        } else if (owner->limitv.whole < next) {
+            node->frame = (u16)owner->limitv.whole - (u16)list->base - 1;
         } else {
-            node->pos = node->pos + delta;
+            node->frame = node->frame + delta;
         }
     }
 }
 
-typedef struct FxChild {
-    u16 offset;           /* 0x00 */
-    u8 pad02[6];
-    s16 fadeA;            /* 0x08 */
-    s16 fadeB;            /* 0x0A */
-    u8 pad0C[0x24];
-    struct FxChild *next; /* 0x30 */
-} FxChild;
-
-typedef struct FxNode {
-    s32 kind;             /* 0x00 */
-    u8 pad04[0x18];
-    s16 base;             /* 0x1C */
-    u8 pad1E[0x36];
-    FxChild *children;    /* 0x54 */
-    u8 pad58[0x24];
-    struct FxNode *next;  /* 0x7C */
-} FxNode;
-
-typedef struct FxWorld {
-    u8 pad00[0xC];
-    union {
-        s32 whole;
-        u16 low;
-    } limitv;             /* 0x0C */
-    u8 pad10[4];
-    s32 scrollOffset;     /* 0x14: shifted by delta, wraps to 10 below zero */
-    s32 clampedOffset;    /* 0x18: cannot exceed the current limit */
-    s32 unk1C;            /* 0x1C: decremented on each scroll; other uses unknown */
-    u8 pad20[0x2010];
-    s32 count;            /* 0x2030 */
-    FxNode *nodes;        /* 0x2034 */
-} FxWorld;
-
-void mnuFxWorldScrollDelta(FxWorld *world, s32 delta, s32 threshold, s32 base, s32 offset, s32 ubase) {
-    FxNode *node;
-    FxChild *child;
+/* Shift keys at or after threshold in a nonempty scene and update its scroll limits. */
+void mnuFxWorldScrollDelta(CampScene *world, s32 delta, s32 threshold, s32 base, s32 offset, s32 ubase) {
+    CampKeyTrack *node;
+    CampKeyNode *child;
     s32 total;
 
-    if (world->count <= 0) {
+    if (world->entryCount <= 0) {
         return;
     }
     if (world->scrollOffset + delta < 0) {
@@ -185,10 +214,10 @@ void mnuFxWorldScrollDelta(FxWorld *world, s32 delta, s32 threshold, s32 base, s
     if (world->clampedOffset > world->limitv.whole) {
         world->clampedOffset = world->limitv.whole;
     }
-    node = world->nodes;
+    node = world->entries;
     while (node != NULL) {
-        for (child = node->children; child != NULL; child = child->next) {
-            offset = child->offset;
+        for (child = node->first; child != NULL; child = child->next) {
+            offset = child->frame;
             base = node->base;
             ubase = (u16)node->base;
             total = offset + base;
@@ -197,21 +226,22 @@ void mnuFxWorldScrollDelta(FxWorld *world, s32 delta, s32 threshold, s32 base, s
             }
             total += delta;
             if (total < base) {
-                child->offset = 0;
+                child->frame = 0;
             } else if (world->limitv.whole < total) {
-                child->offset = world->limitv.low - ubase - 1;
+                child->frame = world->limitv.low - ubase - 1;
             } else {
-                child->offset = offset + delta;
+                child->frame = offset + delta;
             }
-            switch (node->kind) {
+            /* Payload bounds test the updated offset plus delta a second time. */
+            switch (node->type) {
             case 0x12:
-                if (child->fadeA != 0) {
-                    child->fadeA += delta;
-                    if (child->fadeA < 0) {
-                        child->fadeA = 0;
+                if (child->firstValue.offset != 0) {
+                    child->firstValue.offset += delta;
+                    if (child->firstValue.offset < 0) {
+                        child->firstValue.offset = 0;
                     }
-                    if (world->limitv.whole < child->fadeA + delta) {
-                        child->fadeA = world->limitv.whole - 1;
+                    if (world->limitv.whole < child->firstValue.offset + delta) {
+                        child->firstValue.offset = world->limitv.whole - 1;
                     }
                 }
                 break;
@@ -219,13 +249,13 @@ void mnuFxWorldScrollDelta(FxWorld *world, s32 delta, s32 threshold, s32 base, s
             case 0x14:
             case 0x15:
             case 0x1A:
-                if (child->fadeB != 0) {
-                    child->fadeB += delta;
-                    if (child->fadeB < 0) {
-                        child->fadeB = 0;
+                if (child->offsetB != 0) {
+                    child->offsetB += delta;
+                    if (child->offsetB < 0) {
+                        child->offsetB = 0;
                     }
-                    if (world->limitv.whole < child->fadeB + delta) {
-                        child->fadeB = world->limitv.whole - 1;
+                    if (world->limitv.whole < child->offsetB + delta) {
+                        child->offsetB = world->limitv.whole - 1;
                     }
                 }
                 break;
@@ -240,21 +270,22 @@ void mnuFxWorldScrollDelta(FxWorld *world, s32 delta, s32 threshold, s32 base, s
 
 extern void func_0022BFD8();
 
-void mnuFxWorldDropOutOfRange(FxWorld *world, s32 threshold) {
-    FxNode *node;
-    FxChild *child;
+/* Process keys at or beyond threshold, restarting at the head after each call. */
+void mnuFxWorldDropOutOfRange(CampScene *world, s32 threshold) {
+    CampKeyTrack *node;
+    CampKeyNode *child;
 
-    if (world->count <= 0) {
+    if (world->entryCount <= 0) {
         return;
     }
-    for (node = world->nodes; node != NULL; node = node->next) {
-        child = node->children;
+    for (node = world->entries; node != NULL; node = node->next) {
+        child = node->first;
         while (child != NULL) {
-            if (child->offset + node->base < threshold) {
+            if (child->frame + node->base < threshold) {
                 child = child->next;
             } else {
                 func_0022BFD8(world, node, child);
-                child = node->children;
+                child = node->first;
             }
         }
     }
@@ -305,24 +336,6 @@ void mnuCampInitDisplayDefaults(CampDisplayDefaults *display) {
     display->enabled = 1;
     display->variant = 0;
 }
-
-typedef struct CampKeyNode {
-    u16 frame;
-    u8 pad02[0xA];
-    s16 condition;             /* 0xC */
-    u8 pad0E[0x22];
-    struct CampKeyNode *next;  /* 0x30 */
-    struct CampKeyNode *alt;   /* 0x34 */
-} CampKeyNode;
-
-typedef struct CampKeyTrack {
-    s32 type;
-    u8 pad04[0x18];
-    s16 base;                  /* 0x1C */
-    u8 pad1E[0x36];
-    CampKeyNode *first;        /* 0x54 */
-    CampKeyNode *fallback;     /* 0x58 */
-} CampKeyTrack;
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242E70);
 
@@ -391,29 +404,16 @@ void mnuFindCampKeyTrackNeighbors(CampKeyTrack *track, s32 value, CampKeyNode **
     }
 }
 
-typedef struct CampOwner {
-    u8 pad00[0x104];
-    s32 handle; /* 0x104 */
-    u8 pad108[4];
-    s32 bgmId; /* 0x10C: validated event BGM ID used with registered variations */
-} CampOwner;
-
-typedef struct CampWorld {
-    u8 pad00[8];
-    CampOwner *owner; /* 0x08 */
-    u8 pad0C[0x2028];
-    FxNode *entries;  /* 0x2034 */
-} CampWorld;
-
-s32 campAnyPackedFlagSet(CampWorld *scene) {
-    FxNode *node;
-    FxChild *child;
+/* Return 1 if a type-4 key's low 12-bit index yields 1 from the owner's item query. */
+s32 campAnyPackedFlagSet(CampScene *scene) {
+    CampKeyTrack *node;
+    CampKeyNode *child;
     s32 low;
     s32 high;
 
     for (node = scene->entries; node != NULL; node = node->next) {
-        if (node->kind == 4) {
-            for (child = node->children; child != NULL; child = child->next) {
+        if (node->type == 4) {
+            for (child = node->first; child != NULL; child = child->next) {
                 mnuUnpackNibbleFields(child, &low, &high);
                 if (itfMesGetWindowEntryItems(scene->owner->handle, low) == 1) {
                     return 1;
@@ -424,65 +424,23 @@ s32 campAnyPackedFlagSet(CampWorld *scene) {
     return 0;
 }
 
-typedef struct CampPacked {
-    u8 pad00[8];
-    union {
-        u32 whole;
-        u16 packed;
-    } value;
-} CampPacked;
-
-void mnuUnpackNibbleFields(CampPacked *src, s32 *low, s32 *high) {
-    *low = src->value.packed & 0xFFF;
-    *high = src->value.packed >> 12;
+/* Split the key's packed halfword into its low 12 bits and upper four bits. */
+void mnuUnpackNibbleFields(CampKeyNode *src, s32 *low, s32 *high) {
+    *low = src->firstValue.packed & 0xFFF;
+    *high = src->firstValue.packed >> 12;
 }
-
-typedef struct CampEntryNode {
-    u8 pad00[8];
-    s32 nameIndex; /* 0x08: 32-byte name in the owning scene */
-    u8 pad0C[0x18];
-    s32 value; /* 0x24 */
-    u32 status; /* 0x28 */
-    u8 pad2C[0x50];
-    struct CampEntryNode *next; /* 0x7C */
-} CampEntryNode;
-
-typedef struct {
-    u8 pad00[8];
-    CampOwner *owner; /* 0x08 */
-    u8 pad0C[0x2028];
-    CampEntryNode *entries; /* 0x2034 */
-    u8 pad2038[0x2F8];
-    f32 transform[12]; /* 0x2330: three four-component vectors saved by shop */
-    u8 pad2360[0x6C];
-    s32 sceneMode; /* 0x23CC: checked after func_00243818 */
-    u8 pad23D0[0x10];
-    s32 pendingValue; /* 0x23E0 */
-    u8 pad23E4[0x28];
-    u32 state; /* 0x240C */
-    u32 fontResource; /* 0x2410: returned by func_001951C8 */
-    u8 pad2414[0x14];
-    s32 descriptorResource; /* 0x2428 */
-    s32 descriptorBackingHandle; /* 0x242C */
-    s32 menuState; /* 0x2430 */
-    s32 shopFlag;  /* 0x2434: 1 once the shop descriptor was submitted */
-    u32 auxResource; /* 0x2438 */
-    u32 options; /* 0x243C: two two-bit fields */
-    u8 pad2440[4];
-    s32 registeredCount; /* 0x2444 */
-    s32 registeredIds[10]; /* 0x2448 */
-} CampScene;
 
 typedef struct CampNameLookup {
     u8 pad00[0x7C];
-    u8 *nameTable; /* 0x7C: 32-byte names indexed by nameIndex */
+    char (*nameTable)[32]; /* 0x7C: fixed-width names indexed by nameIndex */
 } CampNameLookup;
 
+/* Return the scene's matching name index, or -1 when the track list has no match. */
 s32 mnuCampFindMatchingEntryIndex(CampNameLookup *entry, CampScene *scene, s32 nameIndex) {
-    CampEntryNode *node = scene->entries;
+    CampKeyTrack *node = scene->entries;
     while (node != NULL) {
-        if (strcmp((char *)scene + (node->nameIndex << 5) + 0x24,
-                   (char *)entry->nameTable + (nameIndex << 5)) == 0) {
+        if (strcmp(scene->names[node->nameIndex],
+                   entry->nameTable[nameIndex]) == 0) {
             return node->nameIndex;
         }
         node = node->next;
@@ -490,10 +448,11 @@ s32 mnuCampFindMatchingEntryIndex(CampNameLookup *entry, CampScene *scene, s32 n
     return -1;
 }
 
+/* Return the first track with this fixed-width name, or NULL when absent. */
 void *mnuCampFindEntryByName(CampScene *scene, const char *name) {
-    CampEntryNode *node = scene->entries;
+    CampKeyTrack *node = scene->entries;
     while (node != NULL) {
-        if (strcmp((char *)scene + (node->nameIndex << 5) + 0x24, name) == 0) {
+        if (strcmp(scene->names[node->nameIndex], name) == 0) {
             return node;
         }
         node = node->next;
@@ -501,61 +460,56 @@ void *mnuCampFindEntryByName(CampScene *scene, const char *name) {
     return NULL;
 }
 
-typedef struct CampCue {
-    u8 pad00[0x10];
-    s16 kind;             /* 0x10 */
-    u8 pad12[0x22];
-    struct CampCue *link; /* 0x34 */
-} CampCue;
-
-void campResolvePendingValue(CampScene *scene, CampCue *cue) {
-    CampCue *next;
+/* Code 0 follows alternatives, 1 clears the value, and other codes index names from 2. */
+void campResolvePendingValue(CampScene *scene, CampKeyNode *cue) {
+    CampKeyNode *next;
     s32 kind;
     u16 id;
 
     if (cue == NULL) {
         return;
     }
-    kind = cue->kind;
-    id = cue->kind;
+    kind = cue->entryCode;
+    id = cue->entryCode;
     if (kind == 1) {
         scene->pendingValue = 0;
         return;
     }
     if (kind == 0) {
-        next = cue->link;
+        next = cue->alt;
         scene->pendingValue = 0;
-        for (; ; next = next->link) {
+        for (; ; next = next->alt) {
             s32 nextKind;
 
             if (next == NULL) {
                 return;
             }
-            nextKind = next->kind;
+            nextKind = next->entryCode;
             if (nextKind != 0) {
                 if (nextKind == 1) {
                     scene->pendingValue = 0;
                     return;
                 }
-                scene->pendingValue = ((CampEntryNode *)mnuCampFindEntryByName(scene, (char *)scene + (nextKind << 5) - 0x1C))->value;
+                scene->pendingValue = ((CampKeyTrack *)mnuCampFindEntryByName(scene, scene->names[nextKind - 2]))->value;
                 return;
             }
         }
     } else {
-        scene->pendingValue = ((CampEntryNode *)mnuCampFindEntryByName(scene, (char *)scene + ((s16)id << 5) - 0x1C))->value;
+        scene->pendingValue = ((CampKeyTrack *)mnuCampFindEntryByName(scene, scene->names[(s16)id - 2]))->value;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243608);
 
+/* Clear each track's unknown word and the scene state; do not alter links or values. */
 void fldResetCampSceneEntries(CampScene *scene) {
-    CampEntryNode *node;
+    CampKeyTrack *node;
 
     node = scene->entries;
     if (node != 0) {
-        node->status = 0;
+        node->unk28 = 0;
         while (node = node->next, node != 0) {
-            node->status = 0;
+            node->unk28 = 0;
         }
     }
     scene->state = 0;
