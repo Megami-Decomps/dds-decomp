@@ -690,7 +690,50 @@ void func_002A2628(s32 index) {
     SignalSema(mnuTitleStreamSemaphore);
 }
 
-INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A27A8);
+/* Install an in-memory ATRAC stream and configure the decoder for its frame
+ * format while holding the shared sound-buffer semaphore. */
+void func_002A27A8(void *data, s32 size, s32 format) {
+    MemBlock *allocation = NULL;
+    s32 buffer;
+    s32 frames;
+
+    WaitSema(mnuTitleStreamSemaphore);
+    mnuTitleSoundBufferState[6] = (u32)D_00455DB0;
+    mnuTitleSoundBufferState[7] = (u32)D_00455D98;
+    mnuTitleSoundBufferState[4] = 2;
+    mnuTitleSoundBufferState[3] = -1;
+    switch (format) {
+    case 1:
+        D_00455D98[2] = format;
+        mnuTitleSoundBufferState[2] = 0x180;
+        allocation = sdfAllocGeneralBlock(0x38400);
+        break;
+    case 2:
+        D_00455D98[2] = format;
+        mnuTitleSoundBufferState[2] = 0xC0;
+        allocation = sdfAllocGeneralBlock(0x1C200);
+        break;
+    case 3:
+        D_00455D98[2] = format;
+        mnuTitleSoundBufferState[2] = 0xC0;
+        allocation = sdfAllocGeneralBlock(0x1C200);
+        break;
+    case 4:
+        D_00455D98[2] = format;
+        mnuTitleSoundBufferState[2] = 0x60;
+        allocation = sdfAllocGeneralBlock(0xE100);
+        break;
+    }
+    buffer = sdfMemoryGetBlockAddress(allocation);
+    mnuTitleSoundBufferState[8] = (u32)allocation;
+    mnuTitleSoundBufferState[5] = buffer;
+    memcpy((void *)buffer, data, size);
+    frames = size / (s32)mnuTitleSoundBufferState[2];
+    mnuTitleSoundBufferState[1] = 0;
+    mnuTitleSoundBufferState[0] = frames;
+    func_003504A8(D_00455D98);
+    SignalSema(mnuTitleStreamSemaphore);
+}
 
 s32 mnuGetSoundBufferStateLocked(void) {
     WaitSema(mnuTitleStreamSemaphore);

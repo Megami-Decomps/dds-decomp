@@ -27,6 +27,17 @@ typedef struct SolarSpriteContext {
     SolarSpriteLayer *layers;
 } SolarSpriteContext;
 
+typedef struct SolarOverlayShape {
+    s32 *primaryPositions;
+    u32 *primaryColors;
+    s32 primaryCount;
+    s32 *positions;
+    u32 *colors;
+    s32 count;
+    s32 *tailPositions;
+    s32 tailCount;
+} SolarOverlayShape;
+
 extern f32 sdfSinPoly(f32 angle);
 extern void func_00228E20(s32, s32, s32, s32, s32, s32, s32, s32, f32);
 
@@ -48,6 +59,7 @@ extern void func_002CAAC8(s32, s32, s32 *, s32, s32, s32);
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern s32 D_0036832C[];
 extern s32 D_00367EE0[][3];
+extern SolarOverlayShape D_00368310[];
 
 u32 effLoadIndexedResource(void *arg0, const char *arg1, s32 arg2);
 void effDestroyResourceSlotSet(u32 sprite);
@@ -163,7 +175,29 @@ void func_00228FB0(s32 unused0, s32 unused1, s32 alpha, s32 intensity, s32 objec
     func_002CAAC8((s32)positions, alpha, colors, 14, 0, object);
 }
 
-INCLUDE_ASM(const s32, "game/code_00228B38", func_00229100);
+/* Scale a selected overlay shape's alpha values and submit it between GS states. */
+void func_00229100(s32 unused0, s32 unused1, s32 alpha, s32 alphaScale,
+    s32 entryIndex, s32 object) {
+    s32 colors[4];
+    s32 i;
+    s32 tableIndex;
+    u32 color;
+
+    if (entryIndex == 0) {
+        return;
+    }
+
+    sdfSubmitGsAlphaOneRegisterPacket(0x48, object);
+    tableIndex = entryIndex - 1;
+    for (i = 0; i < D_00368310[tableIndex].count; i++) {
+        color = D_00368310[tableIndex].colors[i];
+        colors[i] = (color & 0xFFFFFF) |
+            ((s32)((f32)((s32)((color & 0xFF000000) >> 24) * alphaScale) * 0.0078125f) << 24);
+    }
+    func_002CAAC8((s32)D_00368310[tableIndex].positions, alpha, colors,
+                  D_00368310[tableIndex].count, 0, object);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, object);
+}
 
 /* Indexed solar-table pass, then the shared layer setup with the 0xA rate. */
 void evtDrawIndexedSolarOverlayLayers(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t3) {
