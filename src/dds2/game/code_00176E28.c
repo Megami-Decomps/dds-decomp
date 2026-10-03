@@ -156,7 +156,7 @@ extern f32 sdfSinPoly(f32 angle);
 
 /* Allocate a circular fan group. Zero spread becomes one; count is not guarded. */
 /* K&R: effCreateRingFanFromParams passes the table block as the raw 64-bit value. */
-extern s32 effMultiplyPackedColors(s32 color, s32 param);
+extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 
 EffectRing *effCreateRingFan(source)
 EffectRing *source;
