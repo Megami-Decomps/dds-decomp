@@ -482,7 +482,61 @@ u16 func_002193F0(MdlRecord *record) {
     return record->unk10;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_002193F8);
+extern s32 sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *format, ...);
+extern char D_003ABA80[], D_003ABA90[], D_003ABAA0[], D_003ABAB0[], D_003ABAC0[], D_003ABAD0[];
+extern char D_003BBB80[], D_003BBB88[];
+
+INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABA80);
+
+INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABA90);
+
+INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABAA0);
+
+INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABAB0);
+
+INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABAC0);
+
+INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABAD0);
+
+void func_002193F8(s32 list, s32 source, s32 end, s32 argument, s32 index, MdlRecord *record) {
+    if (record->kind >= 1 && record->kind <= 5) {
+        switch (record->kind) {
+        case 1:
+        case 2: {
+            char *label = record->kind == 1 ? D_003BBB80 : D_003BBB88;
+
+            if (record->parameter.part.count == 1) {
+                sdfAppendPacket(list, sdfCreateFormattedSifCommand(source, end, argument, index,
+                                                                    D_003ABA80, label, record->payload.word,
+                                                                    record->parameter.part.partIndex));
+                return;
+            }
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(source, end, argument, index,
+                                                                D_003ABA90, label, record->payload.word,
+                                                                record->payload.word + record->parameter.part.count - 1,
+                                                                record->parameter.part.partIndex));
+            return;
+        }
+        case 3:
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(source, end, argument, index,
+                                                                D_003ABAA0, record->payload.word,
+                                                                record->parameter.word));
+            return;
+        case 4:
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(source, end, argument, index,
+                                                                D_003ABAB0, record->payload.stream.selectorA,
+                                                                record->payload.stream.selectorB));
+            return;
+        case 5:
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(source, end, argument, index,
+                                                                D_003ABAC0, record->payload.word));
+            return;
+        }
+    } else {
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(source, end, argument, index,
+                                                            D_003ABAD0, record->kind));
+    }
+}
 
 typedef struct EffMarkParams {
     u8 unk0[8];

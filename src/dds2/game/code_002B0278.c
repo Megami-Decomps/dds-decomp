@@ -984,7 +984,54 @@ s64 mnuStepStaffCampPageControl(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2C88);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", mnuCreatePanels);
+extern void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
+extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
+extern s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode);
+extern s32 mnuCreateSpriteState(s32, s32, s32);
+extern s32 mnuAllocateSimpleSprite(s32, s32, s32);
+extern s32 mnuCreateProfilePanel(s32 source);
+extern void mnuSetGroupProperties(s32, s32, s32, s32, s32);
+extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
+extern void evtStageTestSelectEntry(s32, s32, s32);
+extern void func_002B2C88(s32, s32, s32, s32);
+
+s32 mnuCreatePanels(s32 callback) {
+    s32 context = kwlnTaskGetUserValue();
+    MenuContext *menuContext = (MenuContext *)context;
+    MenuList *list = *(MenuList **)(context + 0xA914);
+    s32 index = list->cursor->index;
+    s32 data = datGameState + index * 0x1C4 + 0xA60;
+    s32 window = context + 0x284;
+    s32 *party = (s32 *)menuContext->party;
+    s32 profile;
+
+    mnuSetWindowResource(index, (u32 *)window, menuContext->displayHandle,
+                         (s32)menuContext->displayResource,
+                         menuContext->alternateResource, 0, 0);
+    mnuAttachPartyIconBundle(index, window, (u32)menuContext->displayResource);
+    menuContext->panelGroup = mnuCreatePanelGroup(menuContext->resourceHandle,
+                                                   (s32)menuContext->displayResource, 0);
+    menuContext->panelRequest = mnuCreateSpriteState(menuContext->resourceHandle,
+                                                       (s32)menuContext->displayResource,
+                                                       menuContext->displayHandle);
+    menuContext->panelEffects = mnuAllocateSimpleSprite(menuContext->resourceHandle,
+                                                         menuContext->alternateResource,
+                                                         menuContext->displayHandle);
+    profile = mnuCreateProfilePanel(data);
+    menuContext->resourceList = profile;
+    mnuSetGroupProperties(profile, menuContext->displayHandle,
+                          menuContext->alternateResource, 1, 2);
+    party[8] = func_002B9FF8(4, menuContext->displayHandle, *(s32 *)(context + 0x100));
+    if (mnuClassifyQuarterHalfPercent(*(u16 *)(data + 6), *(u16 *)(data + 8)) < 2) {
+        party[11] = -1;
+    } else {
+        party[11] = 0xA;
+    }
+    evtStageTestSelectEntry(*(u16 *)(data + 4), party[11], 0);
+    func_002B2C88(window, 1, party[5], party[4]);
+    func_002BAF50(0, context + 0xB10C);
+    return 1;
+}
 
 s32 mnuDestroyPanels(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
