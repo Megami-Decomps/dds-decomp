@@ -18,7 +18,23 @@ INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E108);
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E308);
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E420);
+extern f32 sdfSinPoly(f32);
+
+void func_0025E420(u8 *object, s32 scale, s32 mode) {
+    u32 texture = D_003BC520;
+    s8 phase = (s8)object[0xB2];
+    f32 angle = (f32)phase / 120.0f * 6.2831852f;
+    s32 offset = (s32)((f32)scale * sdfSinPoly(angle));
+
+    func_002BF4E0(D_0036C728[1][BRS_ICON_X] << 4,
+                  D_0036C728[1][BRS_ICON_Y] << 3,
+                  0, offset, 0, texture, D_0036C728[1][BRS_ICON_ID], mode);
+
+    object[0xB2]++;
+    if ((f32)(s8)object[0xB2] >= 120.0f) {
+        object[0xB2] = 0;
+    }
+}
 
 void mnuDrawStatusIconAndCompanion(s32 x, s32 y, s32 z, void *context, s32 width, s32 mode) {
     s32 iconIndex;
