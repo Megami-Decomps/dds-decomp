@@ -412,7 +412,63 @@ void func_002DE118(void *rows, s32 count, void *matrix, void *records, void *vec
         : "$2", "$3", "$4", "$9", "memory");
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE1A0);
+/* vu0 routine: transform packed records and row vectors through microprogram 0x48 */
+void func_002DE1A0(void *rows, s32 count, void *matrix, void *records, void *vectors) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "daddu $10, $4, $0\n"
+        "daddu $9, $5, $0\n"
+        "lqc2 vf28, 0x00($6)\n"
+        "lqc2 vf29, 0x10($6)\n"
+        "lqc2 vf30, 0x20($6)\n"
+        "lqc2 vf31, 0x30($6)\n"
+        "lqc2 vf24, 0x40($6)\n"
+        "lqc2 vf25, 0x50($6)\n"
+        "lqc2 vf26, 0x60($6)\n"
+        "ldr $2, 0x00($8)\n"
+        "ldl $2, 0x07($8)\n"
+        "lw $3, 0x08($8)\n"
+        "pcpyld $3, $3, $2\n"
+        "addi $8, $8, 0x0C\n"
+        "lq $2, 0x00($7)\n"
+        "addi $7, $7, 0x10\n"
+        "lq $4, 0x00($10)\n"
+        "lq $5, 0x10($10)\n"
+        "addi $9, $9, -1\n"
+        "1:\n"
+        "qmtc2 $2, vf2\n"
+        "qmtc2 $3, vf3\n"
+        "qmtc2 $4, vf5\n"
+        "qmtc2 $5, vf6\n"
+        "vcallms 0x48\n"
+        "addi $9, $9, -1\n"
+        "addi $10, $10, 0x60\n"
+        "ldr $2, 0x00($8)\n"
+        "ldl $2, 0x07($8)\n"
+        "lw $3, 0x08($8)\n"
+        "pcpyld $3, $3, $2\n"
+        "addi $8, $8, 0x0C\n"
+        "lq $2, 0x00($7)\n"
+        "addi $7, $7, 0x10\n"
+        "lq $4, 0x00($10)\n"
+        "lq $5, 0x10($10)\n"
+        "qmfc2.i $6, vf4\n"
+        "sqc2 vf3, -0x50($10)\n"
+        "bne $0, $9, 1b\n"
+        "sq $6, -0x60($10)\n"
+        "qmtc2 $2, vf2\n"
+        "qmtc2 $3, vf3\n"
+        "qmtc2 $4, vf5\n"
+        "qmtc2 $5, vf6\n"
+        "vcallms 0x48\n"
+        "qmfc2.i $6, vf4\n"
+        "sqc2 vf3, 0x10($10)\n"
+        "sq $6, 0x00($10)\n"
+        ".set reorder"
+        :
+        :
+        : "$2", "$3", "$4", "$5", "$6", "$9", "$10", "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE268);
 
