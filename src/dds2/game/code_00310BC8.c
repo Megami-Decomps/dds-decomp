@@ -510,7 +510,60 @@ s32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, u64 first, u64 second, u
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00311F20);
+typedef struct SdfOverlaySurface {
+    u8 pad00[0x10];
+    void (*submit)(struct SdfOverlaySurface *, s32);
+    u8 pad14[0xC];
+} SdfOverlaySurface;
+
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(s32);
+extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
+extern s32 sdfConsInitPacketHeader(s32, s32, s32, s64, s32);
+extern s32 sdfConsMeasurePacketWithHeader(s32);
+extern void sdfAppendPacket(s32, s32);
+extern SdfOverlaySurface kwlnDrawSurfaces[];
+
+/* Build an indexed RGBA/XYZ2 packet and submit it through the selected surface. */
+void func_00311F20(s32 *points, u32 tail, u32 *colors, s32 count,
+                   s32 useFirstColor, s32 surfaceIndex) {
+    s32 list = sdfAllocPacketAligned(0x20);
+    s32 packet;
+    u64 *vertex;
+    SdfOverlaySurface *surface;
+    u32 *selectedColors;
+    s32 i;
+    s32 x;
+    s32 y;
+    u32 color;
+
+    sdfInitPacketList(list);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
+    sdfConsInitPacketHeader(packet, 0x14D, 2, 0x41, count);
+    vertex = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    for (i = 0; i < count; i++) {
+        if (useFirstColor & 1) {
+            selectedColors = colors;
+        } else {
+            selectedColors = &colors[i];
+        }
+        color = *selectedColors;
+        x = points[i * 2];
+        y = points[i * 2 + 1];
+
+        vertex[0] = (color & 0xFF) | ((u64)((color & 0xFF00) >> 8) << 32);
+        vertex[1] = ((color & 0xFF0000) >> 16) |
+                    ((u64)((color & 0xFF000000) >> 24) << 32);
+        vertex += 2;
+        vertex[0] = (u32)((x << 4) + 0x7000) |
+                    ((u64)((y << 3) + 0x7900) << 32);
+        vertex[1] = tail;
+        vertex += 2;
+    }
+    sdfAppendPacket(list, packet);
+    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface->submit(surface, list);
+}
 
 /* Return a callback-list header address, retaining its allocation handle and teardown userData. */
 void *sdfCreateTaskHeader(u32 userData) {
