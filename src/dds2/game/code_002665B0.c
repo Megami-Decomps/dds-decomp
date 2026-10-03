@@ -93,7 +93,7 @@ extern void func_002686F0(s32);
 
 extern s8 mnuTerminalTaskState;
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
 
 extern s32 mnuDrawAndAdvanceProfilePanel(s32, s32, s32, s32);
 
@@ -139,7 +139,7 @@ extern const char D_00424F20[];
 
 extern KwlnTask *D_0043785C;
 
-extern s32 mnuCreateListState();
+extern struct MenuList *mnuCreateListState();
 
 extern s32 mnuListAppendNode(s32, s32);
 
@@ -890,7 +890,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
 
 extern void func_00266808(u32 *work);
 extern void mnuDrainPanelTransitions(u8 *state, s32 arg);
-extern void dspCloseChannel(void);
+extern s32 dspCloseChannel(void);
 extern void evtReleaseResourcePairHandle(u32 *record);
 extern void sdfReleaseResourceAllocation(s32 handle);
 extern s32 mnuCheckResourceTask(void);
@@ -1159,7 +1159,7 @@ typedef struct MenuEffHost {
     s32 effectB;      /* 0xB4 */
 } MenuEffHost;
 
-extern void effConfigureWithDefaultSetting(s32, s32, s32, s32, s32, s32);
+extern u32 effConfigureWithDefaultSetting(u32, u32, u32, u32, u32, u32);
 
 void mnuConfigureSelectedSceneModeEffect(s32 mode, MenuEffHost *host) {
     switch (mode) {
@@ -1314,7 +1314,7 @@ extern void evtCopyEntryStringToActiveWindow(s32, void *);
 
 extern void dspSetActive(s32);
 
-extern void dspStartEntry(s32);
+extern s32 dspStartEntry(s32);
 
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 
