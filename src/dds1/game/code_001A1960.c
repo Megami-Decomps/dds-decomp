@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "pcp_vu0.h"
 
 typedef struct ActorEntrySlot {
@@ -228,6 +229,10 @@ extern u32 kwlnTaskGetUserValue(s64);
 extern u32 btlMahenPanelTaskNameRef;
 
 extern s64 kwlnTaskGetTaskByName(u32);
+
+extern KwlnTask *kwlnTaskGetTaskByNamePointer(const char *) __asm__("kwlnTaskGetTaskByName");
+
+extern u32 kwlnTaskGetUserValuePointer(KwlnTask *) __asm__("kwlnTaskGetUserValue");
 
 extern s64 kwlnTaskIsRegistered(s64);
 
@@ -3614,7 +3619,13 @@ void fldInitializeSceneObject(s32 object, s32 owner) {
     *(s32 *)(object + 0x2C) = owner;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", fldGetSceneObjectTaskUserData);
+u32 fldGetSceneObjectTaskUserData(void) {
+    KwlnTask *task = kwlnTaskGetTaskByNamePointer((const char *)btlCommandPanelTaskNameRef);
+    if (task == 0) {
+        return 0;
+    }
+    return kwlnTaskGetUserValuePointer(task);
+}
 
 s64 fldGetSceneObjectState(void) {
     s64 temp_v0;
@@ -3768,7 +3779,13 @@ void fldReleaseSceneSprite(s64 arg0) {
     *(u32 *)(temp_v1 + 0x2ac) = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", fldGetSceneScriptTaskUserData);
+u32 fldGetSceneScriptTaskUserData(void) {
+    KwlnTask *task = kwlnTaskGetTaskByNamePointer((const char *)D_003BB3A0);
+    if (task == 0) {
+        return 0;
+    }
+    return kwlnTaskGetUserValuePointer(task);
+}
 
 u32 fldGetSceneScriptState(void) {
     u32 *puVar1;
