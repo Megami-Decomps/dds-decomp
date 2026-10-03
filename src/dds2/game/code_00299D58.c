@@ -47,7 +47,7 @@ typedef struct ProfileCapSkillList {
 typedef struct MenuItemScene {
     u8 pad00[4];
     u32 overlayFlags;
-    u8 pad08[0x4C];
+    u8 dispatchWork[0x4C];
     s32 dispatchState;
     u8 pad58[0x30];
     u16 unk88;
@@ -61,10 +61,12 @@ typedef struct MenuItemScene {
     u8 pad274[0x78];
     s32 extentLimit;
     u8 pad2F0[0x78];
-    u32 unk368;
+    s32 partyUnitCount; /* 0x368 */
     u8 pad36C[0x7C];
     u32 resetStateB; /* 0x3E8 */
-    u8 pad3EC[0xFC];
+    u8 pad3EC[8];
+    s32 slots[5];
+    u8 pad408[0xE0];
     ProfileCapSkillList skillList;
     u8 pad51C[0xA820];
     s32 extentExhausted; /* 0xAD3C: selects the exhausted-extent message. */
@@ -327,7 +329,7 @@ s32 func_0029A400(void *task) {
             if (func_0029A2F8(scene) != 0) {
                 return 0;
             }
-            if (scene->unk368 == 0) {
+            if (scene->partyUnitCount == 0) {
                 kwlnFadeInStart(0, 0, 0, 0xF);
                 mnuSetPopupEntryFlagged((s32)dispatchStatus, (s32)D_003D64E4);
                 return 0;
@@ -445,7 +447,70 @@ void func_0029A768(MenuItemScene *scene) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A898);
+extern void evtStageTestUpdateCamera(void);
+extern s32 brsAdvanceSkillPackagePanel(s32);
+extern void ptyAccumulateStatGains(s32 *, s32, u8 *);
+extern s32 mnuAdvanceTitleEntryAnimation(u8 *);
+extern void mnuStaffCopyPanelBlock(MenuItem *, MenuItemScene *);
+extern void mnuRefreshSelectedUnitPanels(u32, s32);
+/* The legacy call forwards its request; this initializer reads current task data. */
+extern u32 mnuResetSelectionWidthsFromConfig();
+extern void mnuSetPopupEntry(s32 *, void *);
+extern s32 btlAddBaseStats(s32 *, MenuItem *);
+extern void func_00342580(u32);
+extern char D_003D6474[];
+extern char D_003D64AC[];
+
+/* Advance the selected party member, apply its gains, and choose the next popup. */
+s32 func_0029A898(u64 request) {
+    s32 result;
+    MenuItemScene *scene = (MenuItemScene *)kwlnTaskGetUserValue();
+    s32 *dispatchStatus;
+    s32 *slots;
+    MenuItem *item;
+
+    evtStageTestUpdateCamera();
+    if (evtGetMessageWindowControlState() != 0) {
+        return 0;
+    }
+    dispatchStatus = &scene->dispatchState;
+    result = func_002C4038((s32)scene->dispatchWork, dispatchStatus, 0, request);
+    if (result != 0) {
+        return result;
+    }
+    if (brsAdvanceSkillPackagePanel((s32)scene) != 0) {
+        return 0;
+    }
+    if (*dispatchStatus == 0) {
+        if (scene->resetStateA < scene->partyUnitCount) {
+            func_00299B98(scene, 1);
+            slots = scene->slots;
+            ptyAccumulateStatGains(slots, scene->selectionData->extentFactor,
+                                   (u8 *)scene->selectionData->item);
+            func_0029A768(scene);
+            mnuAdvanceTitleEntryAnimation((u8 *)scene->selectionData->item);
+            mnuStaffCopyPanelBlock(scene->selectionData->item, scene);
+            mnuRefreshSelectedUnitPanels((u32)scene->selectionData->item, (s32)scene);
+            item = scene->selectionData->item;
+            if (mnuKindIsSelectable(item->kind) != 0) {
+                mnuResetSelectionWidthsFromConfig(request);
+                if (scene->extentExhausted == 0) {
+                    mnuSetPopupEntry(dispatchStatus, D_003D6474);
+                    return 0;
+                }
+            } else {
+                btlAddBaseStats(slots, item);
+                mnuRefreshSelectedUnitPanels((u32)scene->selectionData->item, (s32)scene);
+            }
+            mnuSetPopupEntry(dispatchStatus, D_003D64AC);
+        } else {
+            func_00342580(0x50001);
+            kwlnFadeInStart(0, 0, 0, 0xF);
+            mnuSetPopupEntryFlagged((s32)dispatchStatus, (s32)D_003D64E4);
+        }
+    }
+    return 0;
+}
 
 INCLUDE_SDATA(const s32, "game/code_00299D58", D_004379B0);
 
