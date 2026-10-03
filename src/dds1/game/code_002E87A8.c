@@ -14,7 +14,7 @@ u32 func_002E87A8(u32 command, u32 channel, void *packet, u32 size);
 
 void sndEnsureMidiBankResident(s32 trackId);
 
-/* Sound command work block: header, 16 channel records, 13 track slots (see code_002E9140). */
+/* Sound command work block: header, 16 channels/buffers, 13 track slots (see code_002E9140). */
 typedef struct SndChannel {
     u8 index;     /* 0x0 */
     u8 unk1;      /* 0x1 */
@@ -31,11 +31,17 @@ typedef struct SndTrackSlot {
     u8 pad6[2];
 } SndTrackSlot;
 
+typedef struct SndIopBuffer {
+    s32 size;
+    u32 address;
+} SndIopBuffer;
+
 typedef struct SndWork {
     s32 header;                /* 0x000 */
-    u8 pad004[0xC];
+    s32 bufferCount;           /* 0x004 */
+    u8 pad008[8];
     SndChannel channels[16];   /* 0x010 */
-    u8 pad110[0x80];
+    SndIopBuffer buffers[16];  /* 0x110 */
     SndTrackSlot slots[13];    /* 0x190 */
     u8 pad1F8[8];
     u32 unk200;                /* 0x200 */
@@ -118,7 +124,35 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E8B58);
+/* Allocate one aligned IOP block and distribute its address among active buffers. */
+void func_002E8B58(s32 *sizes, s32 count) {
+    SndIopBuffer *buffer;
+    s32 total, size, i;
+    u32 address;
+
+    sndMidiTrackState.bufferCount = count;
+    buffer = sndMidiTrackState.buffers;
+    total = 0;
+    i = 0;
+    do {
+        size = (*sizes++ + 15) & ~15;
+        buffer->size = size;
+        buffer++;
+        total += size;
+        i++;
+    } while (i != count);
+    for (; i < 16; i++) {
+        sndMidiTrackState.buffers[i].size = 0;
+        sndMidiTrackState.buffers[i].address = 0;
+    }
+    address = sndReserveIopWorkMemory(total);
+    i = 0;
+    do {
+        sndMidiTrackState.buffers[i].address = address;
+        address += sndMidiTrackState.buffers[i].size;
+        i++;
+    } while (i != count);
+}
 
 INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E8C30);
 
