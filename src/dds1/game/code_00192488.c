@@ -2,6 +2,20 @@
 #include "eff.h"
 #include "pcp_vu0.h"
 
+#define EFF_CURVE_COMPONENT_COUNT 3
+#define EFF_CURVE_POINT_BYTES 12
+#define EFF_CURVE_ROW_FLOATS 4
+#define EFF_CURVE_SCALAR_SOURCE_OFFSET 16
+#define EFF_CURVE_SOURCE_ROW_COUNT 4
+#define EFF_BEZIER_MIN_RECORD_COUNT 4
+#define EFF_BEZIER_RECORD_ADVANCE 3
+#define EFF_CHANNEL_BYTES 0x18
+#define EFF_CHANNEL_DEFAULT_STEP 0.05f
+#define EFF_CHANNEL_ALPHA_SCALE 127.0f
+#define EFF_CHANNEL_ALPHA_SHIFT 24
+#define EFF_CHANNEL_RGB_COLOR 0x00808080
+#define EFF_PRIMITIVE_CUBIC_MODE 0
+
 /* The channel copies three coordinates from each four-float source row,
  * then copies the four trailing values to a second block. */
 typedef struct EffFloatRows {
@@ -21,14 +35,14 @@ typedef struct EffChan {
     f32 cursorStep; /* 0x14: channel-A position increment */
 } EffChan;
 
-/* 0x38-byte keyframe record addressed by effMathGetSlotAt. */
+/* Four XYZ Bezier controls, cursor position and step: the effMath EffBezierSlot layout. */
 typedef struct EffRec38 {
     f32 controlPoints[4][3];
     f32 scaledRandomValue; /* 0x30 */
     f32 randomScale;       /* 0x34 */
 } EffRec38;
 
-/* Interpolated vertex (x, y, z, w) written by func_00192ED0. */
+/* Interpolation output vector; the cubic path writes W while the linear path writes only XYZ. */
 typedef struct EffVert {
     f32 unk0; /* 0x0 */
     f32 unk4; /* 0x4 */
@@ -105,49 +119,51 @@ extern s32 effMathStepBezierSlot(void *slots, s32 index, f32 *out);
 extern void effParamWorkCallback0(void *param, void *value);
 extern void effParamWorkInvokeCallback(void *param);
 
-/* Create a channel work: clone the header, allocate the slot array, then give every record a duplicated parameter and a random negative start delay. */
-EffChanWork *effChanWorkCreate(EffChanSource *src) {
-    u32 count = src->head.count;
-    void *handle = sdfAllocGeneralBlock(count * sizeof(EffChanRecord) + sizeof(EffChanWork));
-    EffChanWork *work = sdfResourceRetainAddress(handle);
-    EffChanRecord *record = (EffChanRecord *)(work + 1);
-    void *param;
-    s32 spread;
-    u32 i;
+/* Clone channel work, allocate slots and duplicate a parameter template per record.
+ * The record count is captured before allocation; a nonpositive delay modulus becomes one. */
+EffChanWork *effChanWorkCreate(EffChanSource *source) {
+    u32 recordCount = source->head.count;
+    void *allocationHandle = sdfAllocGeneralBlock(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
+    EffChanWork *work = sdfResourceRetainAddress(allocationHandle);
+    EffChanRecord *recordCursor = (EffChanRecord *)(work + 1);
+    void *parameterTemplate;
+    s32 delayModulus;
+    u32 recordIndex;
 
-    work->head = src->head;
-    work->buffer = handle;
-    work->records = record;
+    work->head = source->head;
+    work->buffer = allocationHandle;
+    work->records = recordCursor;
     if (work->head.spread <= 0) {
         work->head.spread = 1;
     }
-    work->slots = effAllocSlotArray(count);
-    if (count != 0) {
-        param = src->owner->param;
-        spread = work->head.spread;
-        for (i = 0; i < count; i++) {
-            record->param = effParamWorkDuplicate(param);
-            record->delay = -(effMiscRand(D_0034DF38) % spread);
-            record++;
+    work->slots = effAllocSlotArray(recordCount);
+    if (recordCount != 0) {
+        parameterTemplate = source->owner->param;
+        delayModulus = work->head.spread;
+        for (recordIndex = 0; recordIndex < recordCount; recordIndex++) {
+            recordCursor->param = effParamWorkDuplicate(parameterTemplate);
+            recordCursor->delay = -(effMiscRand(D_0034DF38) % delayModulus);
+            recordCursor++;
         }
     }
     return work;
 }
 
+/* Release slot storage, every duplicated parameter and the backing allocation in native order. */
 void effDestroyChannelWork(EffChanWork *work) {
-    EffChanRecord *record;
-    u32 i = 0;
-    u32 count;
+    EffChanRecord *recordCursor;
+    u32 recordIndex = 0;
+    u32 recordCount;
 
     effMathReleaseWorkResource(work->slots);
-    count = work->head.count;
-    record = work->records;
-    if (count != 0) {
+    recordCount = work->head.count;
+    recordCursor = work->records;
+    if (recordCount != 0) {
         do {
-            effDispatchParameterDataAndFreeWork(record->param);
-            record++;
-            i++;
-        } while (i < count);
+            effDispatchParameterDataAndFreeWork(recordCursor->param);
+            recordCursor++;
+            recordIndex++;
+        } while (recordIndex < recordCount);
     }
     sdfReleaseResourceAllocation(work->buffer);
 }
@@ -157,30 +173,31 @@ extern f32 sdfViewEyeVector[4];
 extern f32 effMiscRandUnitFloat(void *);
 extern void effParamWorkCallback3(void *param, u32 value);
 
-/* Jitter control points perpendicular to the path and camera viewing direction. */
-void effJitterChannelControlPoints(EffChanWork *work, u32 index) {
-    f32 scale[4];
+/* vu0 routine: Jitter four control points normal to the path and viewing direction.
+ * Reuse the final edge normal for the endpoint; retain XYZ-only scale initialization. */
+void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
+    f32 jitterScale[4];
     f32 lastNormal[4];
     f32 viewDirection[4];
-    f32 point[4];
-    EffChanRecord *record = work->records + index;
-    EffRec38 *slot;
-    f32 step;
-    f32 random;
+    f32 jitteredPoint[4];
+    EffChanRecord *record = work->records + recordIndex;
+    EffRec38 *bezierSlot;
+    f32 cursorStep;
+    f32 centeredRandom;
 
     VU0_LOAD_VF(vf10, sdfViewTargetVector);
     VU0_LOAD_VF(vf11, sdfViewEyeVector);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, viewDirection);
-    step = 1.0f / (f32)work->head.steps;
-    slot = (EffRec38 *)effMathGetSlotAt(work->slots, index);
-    slot->scaledRandomValue = 0;
-    slot->randomScale = step;
+    cursorStep = 1.0f / (f32)work->head.steps;
+    bezierSlot = (EffRec38 *)effMathGetSlotAt(work->slots, recordIndex);
+    bezierSlot->scaledRandomValue = 0;
+    bezierSlot->randomScale = cursorStep;
 
-    random = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
-    scale[0] = work->head.jitter[0] * (random + random);
-    scale[1] = scale[0];
-    scale[2] = scale[0];
+    centeredRandom = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
+    jitterScale[0] = work->head.jitter[0] * (centeredRandom + centeredRandom);
+    jitterScale[1] = jitterScale[0];
+    jitterScale[2] = jitterScale[0];
     VU0_LOAD_VF(vf10, work->head.controlPoints[0]);
     VU0_LOAD_VF(vf11, work->head.controlPoints[1]);
     VU0_MOVE_VF(vf12, vf10);
@@ -188,18 +205,18 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 index) {
     VU0_LOAD_VF(vf11, viewDirection);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
-    VU0_LOAD_VF(vf11, scale);
+    VU0_LOAD_VF(vf11, jitterScale);
     VU0_MUL(vf10, vf10, vf11);
     VU0_ADD(vf10, vf10, vf12);
-    VU0_STORE_VF(vf10, point);
-    slot->controlPoints[0][0] = point[0];
-    slot->controlPoints[0][1] = point[1];
-    slot->controlPoints[0][2] = point[2];
+    VU0_STORE_VF(vf10, jitteredPoint);
+    bezierSlot->controlPoints[0][0] = jitteredPoint[0];
+    bezierSlot->controlPoints[0][1] = jitteredPoint[1];
+    bezierSlot->controlPoints[0][2] = jitteredPoint[2];
 
-    random = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
-    scale[0] = work->head.jitter[1] * (random + random);
-    scale[1] = scale[0];
-    scale[2] = scale[0];
+    centeredRandom = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
+    jitterScale[0] = work->head.jitter[1] * (centeredRandom + centeredRandom);
+    jitterScale[1] = jitterScale[0];
+    jitterScale[2] = jitterScale[0];
     VU0_LOAD_VF(vf10, work->head.controlPoints[1]);
     VU0_LOAD_VF(vf11, work->head.controlPoints[2]);
     VU0_MOVE_VF(vf12, vf10);
@@ -207,18 +224,18 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 index) {
     VU0_LOAD_VF(vf11, viewDirection);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
-    VU0_LOAD_VF(vf11, scale);
+    VU0_LOAD_VF(vf11, jitterScale);
     VU0_MUL(vf10, vf10, vf11);
     VU0_ADD(vf10, vf10, vf12);
-    VU0_STORE_VF(vf10, point);
-    slot->controlPoints[1][0] = point[0];
-    slot->controlPoints[1][1] = point[1];
-    slot->controlPoints[1][2] = point[2];
+    VU0_STORE_VF(vf10, jitteredPoint);
+    bezierSlot->controlPoints[1][0] = jitteredPoint[0];
+    bezierSlot->controlPoints[1][1] = jitteredPoint[1];
+    bezierSlot->controlPoints[1][2] = jitteredPoint[2];
 
-    random = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
-    scale[0] = work->head.jitter[2] * (random + random);
-    scale[1] = scale[0];
-    scale[2] = scale[0];
+    centeredRandom = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
+    jitterScale[0] = work->head.jitter[2] * (centeredRandom + centeredRandom);
+    jitterScale[1] = jitterScale[0];
+    jitterScale[2] = jitterScale[0];
     VU0_LOAD_VF(vf10, work->head.controlPoints[2]);
     VU0_LOAD_VF(vf11, work->head.controlPoints[3]);
     VU0_MOVE_VF(vf12, vf10);
@@ -227,140 +244,145 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 index) {
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, lastNormal);
-    VU0_LOAD_VF(vf11, scale);
+    VU0_LOAD_VF(vf11, jitterScale);
     VU0_MUL(vf10, vf10, vf11);
     VU0_ADD(vf10, vf10, vf12);
-    VU0_STORE_VF(vf10, point);
-    slot->controlPoints[2][0] = point[0];
-    slot->controlPoints[2][1] = point[1];
-    slot->controlPoints[2][2] = point[2];
+    VU0_STORE_VF(vf10, jitteredPoint);
+    bezierSlot->controlPoints[2][0] = jitteredPoint[0];
+    bezierSlot->controlPoints[2][1] = jitteredPoint[1];
+    bezierSlot->controlPoints[2][2] = jitteredPoint[2];
 
-    random = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
-    scale[0] = work->head.jitter[3] * (random + random);
-    scale[1] = scale[0];
-    scale[2] = scale[0];
+    centeredRandom = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
+    jitterScale[0] = work->head.jitter[3] * (centeredRandom + centeredRandom);
+    jitterScale[1] = jitterScale[0];
+    jitterScale[2] = jitterScale[0];
     VU0_LOAD_VF(vf10, lastNormal);
-    VU0_LOAD_VF(vf11, scale);
+    VU0_LOAD_VF(vf11, jitterScale);
     VU0_MUL(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, work->head.controlPoints[3]);
     VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, point);
-    slot->controlPoints[3][0] = point[0];
-    slot->controlPoints[3][1] = point[1];
-    slot->controlPoints[3][2] = point[2];
+    VU0_STORE_VF(vf10, jitteredPoint);
+    bezierSlot->controlPoints[3][0] = jitteredPoint[0];
+    bezierSlot->controlPoints[3][1] = jitteredPoint[1];
+    bezierSlot->controlPoints[3][2] = jitteredPoint[2];
     effParamWorkCallback3(record->param, 0);
 }
 
+/* Step active records, update their packed color/position callbacks, and optionally recycle.
+ * The slot-zero lookup precedes the empty-count check; retain the time snapshot and later stored increments. */
 void func_001929A0(EffChanWork *work) {
-    EffChanRecord *record = work->records;
-    void *slots = work->slots;
-    u32 count = work->head.count;
-    u32 index = 0;
-    u8 enabled = work->head.enabled;
-    s32 steps = work->head.steps;
-    s32 modulus = work->head.spread;
-    s32 fadeIn = work->head.fadeIn;
-    s32 fadeOut = work->head.fadeOut;
-    f32 xyz[3];
+    EffChanRecord *recordCursor = work->records;
+    void *bezierSlots = work->slots;
+    u32 recordCount = work->head.count;
+    u32 recordIndex = 0;
+    u8 cycleEnabled = work->head.enabled;
+    s32 activeSteps = work->head.steps;
+    s32 delayModulus = work->head.spread;
+    s32 fadeInSteps = work->head.fadeIn;
+    s32 fadeOutSteps = work->head.fadeOut;
+    f32 position[3];
 
-    (void)effMathGetSlotAt(slots, 0);
-    if (count == 0) {
+    (void)effMathGetSlotAt(bezierSlots, 0);
+    if (recordCount == 0) {
         return;
     }
     do {
-        s32 delay = record->delay;
+        s32 recordTime = recordCursor->delay;
 
-        if (delay == 0) {
-            effJitterChannelControlPoints(work, index);
+        if (recordTime == 0) {
+            effJitterChannelControlPoints(work, recordIndex);
         }
-        if (delay > 0 && delay <= steps) {
+        if (recordTime > 0 && recordTime <= activeSteps) {
             f32 opacity;
             s32 fadePhase;
             u32 alpha;
             u32 color;
 
-            effMathStepBezierSlot(slots, index, xyz);
-            fadePhase = fadeIn > delay;
+            effMathStepBezierSlot(bezierSlots, recordIndex, position);
+            fadePhase = fadeInSteps > recordTime;
             if (fadePhase) {
-                opacity = (f32)delay / (f32)fadeIn;
+                opacity = (f32)recordTime / (f32)fadeInSteps;
             } else {
-                fadePhase = steps - delay;
-                if (fadePhase <= fadeOut) {
-                    opacity = (f32)fadePhase / (f32)fadeOut;
+                fadePhase = activeSteps - recordTime;
+                if (fadePhase <= fadeOutSteps) {
+                    opacity = (f32)fadePhase / (f32)fadeOutSteps;
                 } else {
                     opacity = 1.0f;
                 }
             }
-            alpha = (u32)(opacity * 127.0f);
-            color = (alpha << 24) | 0x00808080;
-            effParamWorkCallback3(record->param, color);
-            effParamWorkCallback0(record->param, xyz);
-            effParamWorkInvokeCallback(record->param);
+            alpha = (u32)(opacity * EFF_CHANNEL_ALPHA_SCALE);
+            color = (alpha << EFF_CHANNEL_ALPHA_SHIFT) | EFF_CHANNEL_RGB_COLOR;
+            effParamWorkCallback3(recordCursor->param, color);
+            effParamWorkCallback0(recordCursor->param, position);
+            effParamWorkInvokeCallback(recordCursor->param);
         }
-        if (delay < steps) {
-            record->delay++;
-        } else if (enabled != 0) {
-            record->delay = -(effMiscRand(D_0034DF38) % modulus);
+        if (recordTime < activeSteps) {
+            recordCursor->delay++;
+        } else if (cycleEnabled != 0) {
+            recordCursor->delay = -(effMiscRand(D_0034DF38) % delayModulus);
         } else {
-            record->delay++;
+            recordCursor->delay++;
         }
-        record++;
-        index++;
-    } while (index < count);
+        recordCursor++;
+        recordIndex++;
+    } while (recordIndex < recordCount);
 }
 
-/* Copy four rows of three coordinates and their separate scalar values. */
+/* Copy XYZ from four float4 rows without touching destination W, then copy four trailing scalars. */
 void effCopyVertRows(EffChan *channel, f32 *source) {
-    f32 *row;
-    u32 index;
-    f32 *secondary;
-    f32 *primary;
+    f32 *sourceRow;
+    u32 rowIndex;
+    f32 *scalarCursor;
+    f32 *destinationRow;
 
-    row = source;
-    index = 0;
-    source += 16;
-    secondary = channel->rows->secondary;
-    primary = channel->rows->primary;
+    sourceRow = source;
+    rowIndex = 0;
+    source += EFF_CURVE_SCALAR_SOURCE_OFFSET;
+    scalarCursor = channel->rows->secondary;
+    destinationRow = channel->rows->primary;
     do {
-        index++;
-        primary[0] = row[0];
-        primary[1] = row[1];
-        primary[2] = row[2];
-        row += 4;
-        primary += 4;
-        *secondary = *source++;
-        secondary++;
-    } while (index < 4);
+        rowIndex++;
+        destinationRow[0] = sourceRow[0];
+        destinationRow[1] = sourceRow[1];
+        destinationRow[2] = sourceRow[2];
+        sourceRow += EFF_CURVE_ROW_FLOATS;
+        destinationRow += EFF_CURVE_ROW_FLOATS;
+        *scalarCursor = *source++;
+        scalarCursor++;
+    } while (rowIndex < EFF_CURVE_SOURCE_ROW_COUNT);
 }
 
+/* Jitter each slot and choose its initial unsigned-modulo step.
+ * Stored record time is one ahead of the Bezier cursor parameter's sampled step. */
 void effFillRandRecords(EffEmit *emitter) {
-    EffChanWork *primitive = emitter->primitive;
-    u32 modulus = primitive->head.steps;
-    u32 count = primitive->head.count;
-    EffChanRecord *record = primitive->records;
-    u32 index = 0;
-    EffRec38 *keyframe;
-    s32 randomIndex;
-    f32 scale;
+    EffChanWork *channelWork = emitter->primitive;
+    u32 stepModulus = channelWork->head.steps;
+    u32 recordCount = channelWork->head.count;
+    EffChanRecord *recordCursor = channelWork->records;
+    u32 recordIndex = 0;
+    EffRec38 *bezierSlot;
+    s32 randomStep;
+    f32 cursorStep;
 
-    if (count == 0) {
+    if (recordCount == 0) {
         return;
     }
     do {
-        effJitterChannelControlPoints(primitive, index);
-        record->delay = effMiscRand(&D_0034DF38) % modulus;
-        keyframe = (EffRec38 *)effMathGetSlotAt(primitive->slots, index);
-        index++;
-        randomIndex = record->delay;
-        scale = keyframe->randomScale;
-        record->delay = randomIndex + 1;
-        record++;
-        keyframe->scaledRandomValue = scale * (f32)randomIndex;
-    } while (index < count);
+        effJitterChannelControlPoints(channelWork, recordIndex);
+        recordCursor->delay = effMiscRand(&D_0034DF38) % stepModulus;
+        bezierSlot = (EffRec38 *)effMathGetSlotAt(channelWork->slots, recordIndex);
+        recordIndex++;
+        randomStep = recordCursor->delay;
+        cursorStep = bezierSlot->randomScale;
+        recordCursor->delay = randomStep + 1;
+        recordCursor++;
+        bezierSlot->scaledRandomValue = cursorStep * (f32)randomStep;
+    } while (recordIndex < recordCount);
 }
 
 INCLUDE_ASM(const s32, "game/code_00192488", func_00192CC8);
 
+/* Release the optional coefficient allocation, then the primary buffer; do not free or clear the object. */
 void effFreeBuffers(EffPrim *primitive) {
     if (primitive != NULL) {
         if (primitive->unk14 != NULL) {
@@ -370,99 +392,104 @@ void effFreeBuffers(EffPrim *primitive) {
     }
 }
 
-/* Interpolate the current primitive record, then advance its wrapping cursor. */
+/* Sample before stepping. Wrap at >1 only, subtract once, and return zero when the record cursor resets. */
 s32 effAdvancePrimCursor(void *vertex, EffPrim *primitive) {
     s32 continuing = 1;
     f32 position = primitive->cursorPosition;
-    u32 index = primitive->cursorIndex;
+    u32 recordIndex = primitive->cursorIndex;
 
-    func_00192ED0(vertex, primitive, index, position);
+    func_00192ED0(vertex, primitive, recordIndex, position);
     position += primitive->cursorStep;
     if (position > 1.0f) {
         position -= 1.0f;
-        index += 1;
+        recordIndex += 1;
     }
-    if (index >= primitive->recordCount - 1) {
+    if (recordIndex >= primitive->recordCount - 1) {
         position = 0.0f;
-        index = 0;
+        recordIndex = 0;
         continuing = 0;
     }
-    primitive->cursorIndex = index;
+    primitive->cursorIndex = recordIndex;
     primitive->cursorPosition = position;
     return continuing;
 }
 
-void func_00192ED0(EffVert *out, EffPrim *primitive, s32 index, f32 t) {
+/* Evaluate packed XYZ cubic coefficients or adjacent linear keys at t.
+ * a/b serve as coefficients or endpoints; only the cubic path writes output W. */
+void func_00192ED0(EffVert *vertex, EffPrim *primitive, s32 recordIndex, f32 t) {
     f32 *a;
     f32 *b;
     f32 *c;
     f32 *d;
 
-    if (primitive->unkC == 0) {
-        a = (f32 *)primitive->unk14 + index * 3;
-        b = (f32 *)primitive->unk18 + index * 3;
-        c = (f32 *)primitive->unk1C + index * 3;
-        d = (f32 *)primitive->unk10 + index * 3;
-        out->unk0 = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
-        out->unk4 = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
-        out->unk8 = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
-        out->unkC = 1.0f;
+    if (primitive->unkC == EFF_PRIMITIVE_CUBIC_MODE) {
+        a = (f32 *)primitive->unk14 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        b = (f32 *)primitive->unk18 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        c = (f32 *)primitive->unk1C + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        d = (f32 *)primitive->unk10 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        vertex->unk0 = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
+        vertex->unk4 = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
+        vertex->unk8 = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
+        vertex->unkC = 1.0f;
     } else {
-        a = (f32 *)primitive->unk10 + index * 3;
-        b = a + 3;
-        out->unk0 = a[0] + (b[0] - a[0]) * t;
-        out->unk4 = a[1] + (b[1] - a[1]) * t;
-        out->unk8 = a[2] + (b[2] - a[2]) * t;
+        a = (f32 *)primitive->unk10 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        b = a + EFF_CURVE_COMPONENT_COUNT;
+        vertex->unk0 = a[0] + (b[0] - a[0]) * t;
+        vertex->unk4 = a[1] + (b[1] - a[1]) * t;
+        vertex->unk8 = a[2] + (b[2] - a[2]) * t;
     }
 }
 
-/* Evaluate cubic coefficients or adjacent linear keys into the VU input vector. */
-void effSamplePrimitiveCurve(EffPrim *primitive, s32 index, f32 t)
+/* Evaluate packed XYZ cubic coefficients or adjacent linear keys into vf10.
+ * The linear path leaves local W untouched before the native full-vector load. */
+void effSamplePrimitiveCurve(EffPrim *primitive, s32 recordIndex, f32 t)
 {
-    f32 result[4];
+    f32 vertex[4];
     f32 *a;
     f32 *b;
     f32 *c;
     f32 *d;
 
-    if (primitive->unkC == 0) {
-        a = (f32 *)primitive->unk14 + index * 3;
-        b = (f32 *)primitive->unk18 + index * 3;
-        c = (f32 *)primitive->unk1C + index * 3;
-        d = (f32 *)primitive->unk10 + index * 3;
-        result[0] = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
-        result[1] = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
-        result[2] = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
-        result[3] = 1.0f;
+    if (primitive->unkC == EFF_PRIMITIVE_CUBIC_MODE) {
+        a = (f32 *)primitive->unk14 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        b = (f32 *)primitive->unk18 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        c = (f32 *)primitive->unk1C + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        d = (f32 *)primitive->unk10 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        vertex[0] = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
+        vertex[1] = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
+        vertex[2] = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
+        vertex[3] = 1.0f;
     } else {
-        a = (f32 *)primitive->unk10 + index * 3;
-        b = a + 3;
-        result[0] = a[0] + (b[0] - a[0]) * t;
-        result[1] = a[1] + (b[1] - a[1]) * t;
-        result[2] = a[2] + (b[2] - a[2]) * t;
+        a = (f32 *)primitive->unk10 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        b = a + EFF_CURVE_COMPONENT_COUNT;
+        vertex[0] = a[0] + (b[0] - a[0]) * t;
+        vertex[1] = a[1] + (b[1] - a[1]) * t;
+        vertex[2] = a[2] + (b[2] - a[2]) * t;
     }
-    VU0_LOAD_VF_FROM(vf10, *(u128 *)result);
+    VU0_LOAD_VF_FROM(vf10, *(u128 *)vertex);
 }
 
+/* Reset the primitive's record index and within-record position without changing its step. */
 void effResetPrimitiveRecordCursor(EffPrim *primitive) {
     primitive->cursorIndex = 0;
     primitive->cursorPosition = 0;
 }
 
+/* Set the per-call cursor increment; sampling and wrapping are performed by the advance routine. */
 void effSetPrimitiveRecordCursorStep(EffPrim *primitive, f32 step) {
     primitive->cursorStep = step;
 }
 
-/* Build a temporary record array and dispatch it through the selected path. */
-void effBuildAndDispatch(EffPrim *primitive, s32 variant) {
-    void *allocation = sdfAllocGeneralBlock(primitive->recordCount * 12);
-    void *records = sdfResourceRetainAddress(allocation);
+/* Build temporary coordinate-major tangents, select a coefficient policy, then release the temporary buffer. */
+void effBuildAndDispatch(EffPrim *primitive, s32 flattenEqualComponents) {
+    void *allocation = sdfAllocGeneralBlock(primitive->recordCount * EFF_CURVE_POINT_BYTES);
+    void *tangentData = sdfResourceRetainAddress(allocation);
 
-    func_001931E0(records, primitive->unk10, primitive->recordCount);
-    if (variant == 0) {
-        func_001934E8(primitive, records);
+    func_001931E0(tangentData, primitive->unk10, primitive->recordCount);
+    if (flattenEqualComponents == 0) {
+        func_001934E8(primitive, tangentData);
     } else {
-        func_001935B8(primitive, records);
+        func_001935B8(primitive, tangentData);
     }
     sdfReleaseResourceAllocation(allocation);
 }
@@ -472,134 +499,143 @@ INCLUDE_ASM(const s32, "game/code_00192488", func_001931E0);
 
 INCLUDE_ASM(const s32, "game/code_00192488", func_00193368);
 
+/* Build Hermite power-basis XYZ coefficients from interleaved points and coordinate-major tangents. */
 void func_001934E8(EffPrim *primitive, f32 *tangents) {
     f32 *cubic = primitive->unk14;
     f32 *quadratic = primitive->unk18;
     f32 *linear = primitive->unk1C;
     f32 *points = (f32 *)primitive->unk10;
-    s32 count = primitive->recordCount;
+    s32 recordCount = primitive->recordCount;
     s32 segment;
-    for (segment = 0; segment < count - 1; segment++) {
+    for (segment = 0; segment < recordCount - 1; segment++) {
         s32 component;
-        for (component = 0; component < 3; component++) {
-            f32 next = points[segment * 3 + component + 3];
-            f32 current = points[segment * 3 + component];
-            f32 startTangent = tangents[component * count + segment];
-            f32 endTangent = tangents[component * count + segment + 1];
-            cubic[segment * 3 + component] = 2.0f * (current - next) +
+        for (component = 0; component < EFF_CURVE_COMPONENT_COUNT; component++) {
+            f32 endValue = points[segment * EFF_CURVE_COMPONENT_COUNT + component + EFF_CURVE_COMPONENT_COUNT];
+            f32 startValue = points[segment * EFF_CURVE_COMPONENT_COUNT + component];
+            f32 startTangent = tangents[component * recordCount + segment];
+            f32 endTangent = tangents[component * recordCount + segment + 1];
+            cubic[segment * EFF_CURVE_COMPONENT_COUNT + component] = 2.0f * (startValue - endValue) +
                 (startTangent + endTangent);
-            quadratic[segment * 3 + component] = (next - current) * 3.0f -
+            quadratic[segment * EFF_CURVE_COMPONENT_COUNT + component] = (endValue - startValue) * 3.0f -
                 (2.0f * startTangent + endTangent);
-            linear[segment * 3 + component] = startTangent;
+            linear[segment * EFF_CURVE_COMPONENT_COUNT + component] = startTangent;
         }
     }
 }
 
-void func_001935B8(EffPrim *prim, void *tangentData) {
+/* Build Hermite coefficients, but flatten exactly equal endpoint components even when tangents are nonzero. */
+void func_001935B8(EffPrim *primitive, void *tangentData) {
     f32 *tangents = tangentData;
-    f32 *a = prim->unk14;
-    f32 *b = prim->unk18;
-    f32 *c = prim->unk1C;
-    f32 *points = (f32 *)prim->unk10;
-    s32 count = prim->recordCount;
-    s32 i;
-    s32 j;
+    f32 *cubic = primitive->unk14;
+    f32 *quadratic = primitive->unk18;
+    f32 *linear = primitive->unk1C;
+    f32 *points = (f32 *)primitive->unk10;
+    s32 recordCount = primitive->recordCount;
+    s32 segment;
+    s32 component;
 
-    for (i = 0; i < count - 1; i++) {
-        for (j = 0; j < 3; j++) {
-            f32 p0 = points[i * 3 + j];
-            f32 p1 = points[i * 3 + j + 3];
+    for (segment = 0; segment < recordCount - 1; segment++) {
+        for (component = 0; component < EFF_CURVE_COMPONENT_COUNT; component++) {
+            f32 startValue = points[segment * EFF_CURVE_COMPONENT_COUNT + component];
+            f32 endValue = points[segment * EFF_CURVE_COMPONENT_COUNT + component + EFF_CURVE_COMPONENT_COUNT];
 
-            if (p0 == p1) {
-                a[i * 3 + j] = 0.0f;
-                b[i * 3 + j] = 0.0f;
-                c[i * 3 + j] = 0.0f;
+            if (startValue == endValue) {
+                cubic[segment * EFF_CURVE_COMPONENT_COUNT + component] = 0.0f;
+                quadratic[segment * EFF_CURVE_COMPONENT_COUNT + component] = 0.0f;
+                linear[segment * EFF_CURVE_COMPONENT_COUNT + component] = 0.0f;
             } else {
-                f32 t0 = tangents[j * count + i];
-                f32 t1 = tangents[j * count + i + 1];
+                f32 startTangent = tangents[component * recordCount + segment];
+                f32 endTangent = tangents[component * recordCount + segment + 1];
 
-                a[i * 3 + j] = 2.0f * (p0 - p1) + (t0 + t1);
-                b[i * 3 + j] = (p1 - p0) * 3.0f - (2.0f * t0 + t1);
-                c[i * 3 + j] = t0;
+                cubic[segment * EFF_CURVE_COMPONENT_COUNT + component] = 2.0f * (startValue - endValue) + (startTangent + endTangent);
+                quadratic[segment * EFF_CURVE_COMPONENT_COUNT + component] = (endValue - startValue) * 3.0f - (2.0f * startTangent + endTangent);
+                linear[segment * EFF_CURVE_COMPONENT_COUNT + component] = startTangent;
             }
         }
     }
 }
 
-/* Create a channel only when there are enough records for interpolation. */
-void *effCreateChannel(void *rows, u32 count) {
+/* Allocate the small channel when at least four records exist; borrow the supplied rows and set its default step. */
+void *effCreateChannel(void *rows, u32 recordCount) {
     void *channel = NULL;
     void *allocation;
-    EffChan *cursor;
+    EffChan *channelObject;
 
-    if (count < 4) {
+    if (recordCount < EFF_BEZIER_MIN_RECORD_COUNT) {
         return channel;
     }
-    allocation = sdfAllocGeneralBlock(0x18);
+    allocation = sdfAllocGeneralBlock(EFF_CHANNEL_BYTES);
     channel = sdfResourceRetainAddress(allocation);
-    cursor = channel;
-    cursor->unk0 = allocation;
-    cursor->cursorStep = 0.05f;
-    cursor->recordCount = count;
-    cursor->rows = rows;
-    cursor->cursorPosition = 0;
-    cursor->cursorIndex = 0;
+    channelObject = channel;
+    channelObject->unk0 = allocation;
+    channelObject->cursorStep = EFF_CHANNEL_DEFAULT_STEP;
+    channelObject->recordCount = recordCount;
+    channelObject->rows = rows;
+    channelObject->cursorPosition = 0;
+    channelObject->cursorIndex = 0;
     return channel;
 }
 
-s32 effReleaseInterpolationChannel(void **channel) {
-    if (channel != NULL) {
-        sdfReleaseResourceAllocation(*channel);
+/* Release the handle at a nonnull address without clearing it.
+ * The native s32 signature has no explicit return; retain that contract. */
+s32 effReleaseInterpolationChannel(void **handleAddress) {
+    if (handleAddress != NULL) {
+        sdfReleaseResourceAllocation(*handleAddress);
     }
 }
 
-/* Interpolate the channel; advance three records when its position wraps. */
+/* Sample before stepping, then advance three records only when position exceeds one.
+ * Subtract once; return zero when the record cursor resets at the unsigned count-minus-one boundary. */
 s32 effAdvanceChanCursor(void *vertex, EffChan *channel) {
     s32 continuing = 1;
     f32 position = channel->cursorPosition;
-    u32 index = channel->cursorIndex;
+    u32 recordIndex = channel->cursorIndex;
 
-    effSampleChannelBezier(vertex, channel, index, position);
+    effSampleChannelBezier(vertex, channel, recordIndex, position);
     position += channel->cursorStep;
     if (position > 1.0f) {
         position -= 1.0f;
-        index += 3;
+        recordIndex += EFF_BEZIER_RECORD_ADVANCE;
     }
-    if (index >= channel->recordCount - 1) {
+    if (recordIndex >= channel->recordCount - 1) {
         position = 0.0f;
-        index = 0;
+        recordIndex = 0;
         continuing = 0;
     }
-    channel->cursorIndex = index;
+    channel->cursorIndex = recordIndex;
     channel->cursorPosition = position;
     return continuing;
 }
 
-void effSampleChannelBezier(EffVert *out, EffChan *channel, s32 index, f32 t) {
+/* Evaluate four packed XYZ Bezier controls at t and write homogeneous W=1.
+ * Preserve the native weight multiplication and sum association. */
+void effSampleChannelBezier(EffVert *vertex, EffChan *channel, s32 recordIndex, f32 t) {
     f32 weights[4];
-    f32 inverse = 1.0f - t;
-    f32 *p0 = channel->rows->primary + index * 3;
-    f32 *p1 = p0 + 3;
+    f32 oneMinusT = 1.0f - t;
+    f32 *p0 = channel->rows->primary + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+    f32 *p1 = p0 + EFF_CURVE_COMPONENT_COUNT;
     f32 *p2 = p0 + 6;
     f32 *p3 = p0 + 9;
 
-    weights[0] = inverse * inverse * inverse;
-    weights[1] = t * (inverse * inverse) * 3.0f;
-    weights[2] = t * t * inverse * 3.0f;
+    weights[0] = oneMinusT * oneMinusT * oneMinusT;
+    weights[1] = t * (oneMinusT * oneMinusT) * 3.0f;
+    weights[2] = t * t * oneMinusT * 3.0f;
     weights[3] = t * t * t;
-    out->unk0 = p0[0] * weights[0] + p1[0] * weights[1] + p2[0] * weights[2] + p3[0] * weights[3];
-    out->unk4 = p0[1] * weights[0] + p1[1] * weights[1] + p2[1] * weights[2] + p3[1] * weights[3];
-    out->unk8 = p0[2] * weights[0] + p1[2] * weights[1] + p2[2] * weights[2] + p3[2] * weights[3];
-    out->unkC = 1.0f;
+    vertex->unk0 = p0[0] * weights[0] + p1[0] * weights[1] + p2[0] * weights[2] + p3[0] * weights[3];
+    vertex->unk4 = p0[1] * weights[0] + p1[1] * weights[1] + p2[1] * weights[2] + p3[1] * weights[3];
+    vertex->unk8 = p0[2] * weights[0] + p1[2] * weights[1] + p2[2] * weights[2] + p3[2] * weights[3];
+    vertex->unkC = 1.0f;
 }
 
-void effClearChanCursor(EffChan *chan) {
-    chan->cursorIndex = 0;
-    chan->cursorPosition = 0;
+/* Reset the channel's record index and within-record position without changing its step. */
+void effClearChanCursor(EffChan *channel) {
+    channel->cursorIndex = 0;
+    channel->cursorPosition = 0;
 }
 
-void effSetChanStep(EffChan *chan, f32 step) {
-    chan->cursorStep = step;
+/* Set the per-call channel cursor increment without advancing it. */
+void effSetChanStep(EffChan *channel, f32 step) {
+    channel->cursorStep = step;
 }
 
 void *effGetFontListHead(void) {
