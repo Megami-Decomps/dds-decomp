@@ -11,7 +11,7 @@ extern u32 D_0045C7A0[];
 
 extern u32 D_0045C7B0[];
 
-s32 sdfQueueNonzeroResourceId(u32 sprite);
+void sdfQueueNonzeroResourceId(s32 sprite);
 
 typedef struct MapResource {
     u32 image;
@@ -194,7 +194,11 @@ SdfRing *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     return ring;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030EF18);
+s32 func_0030EF18(u32 *resource) {
+    if (resource != NULL) {
+        sdfQueueNonzeroResourceId(*resource);
+    }
+}
 
 void fldAdvanceMapRequest(s32 queue, u32 first, u32 second, u32 third) {
     u32 *entry;
