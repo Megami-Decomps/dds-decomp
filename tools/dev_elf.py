@@ -44,6 +44,11 @@ STB_WEAK = 2
 STT_OBJECT = 1
 STT_FUNC = 2
 STT_SECTION = 3
+R_MIPS_32 = 2
+R_MIPS_26 = 4
+R_MIPS_HI16 = 5
+R_MIPS_LO16 = 6
+R_MIPS_GPREL16 = 7
 PF_X = 1
 PF_W = 2
 PF_R = 4
@@ -718,13 +723,21 @@ def audit_replacement_objects(
                 f"replacements[{index}] has unaccounted allocated section "
                 f"{section} of size 0x{actual[section]:X}"
             )
-        missing = sorted(set(expected) - set(actual))
+        missing = sorted(
+            section
+            for section, expected_size in expected.items()
+            if section not in actual and expected_size != 0
+        )
         if missing:
             raise DevElfError(
                 f"replacements[{index}] object is missing section {missing[0]}"
             )
         for section, expected_size in expected.items():
-            if expected_size is not None and actual[section] != expected_size:
+            if (
+                section in actual
+                and expected_size is not None
+                and actual[section] != expected_size
+            ):
                 raise DevElfError(
                     f"replacements[{index}] section {section} has size "
                     f"0x{actual[section]:X}, expected 0x{expected_size:X}"
@@ -767,6 +780,33 @@ def _unique_defined_symbol(
             f"{context} symbol {name} has {len(matching)} definitions, expected one"
         )
     return matching[0]
+
+
+def _matched_gp_values(
+    relocations: list[LinkedRelocation],
+    development_symbols: list[LinkedSymbol],
+    retail_symbol_elf: bytes | None,
+) -> tuple[int | None, int | None]:
+    """Resolve the fixed retail/development GP pair when GPREL16 is present."""
+
+    if not any(relocation.kind == R_MIPS_GPREL16 for relocation in relocations):
+        return None, None
+    development_gp = _unique_defined_symbol(
+        development_symbols, "_gp", "development ELF"
+    ).value
+    if retail_symbol_elf is None:
+        raise DevElfError(
+            "R_MIPS_GPREL16 relocation audit requires the retail symbol ELF"
+        )
+    retail_gp = _unique_defined_symbol(
+        parse_linked_symbols(retail_symbol_elf), "_gp", "retail ELF"
+    ).value
+    if development_gp != retail_gp:
+        raise DevElfError(
+            f"development _gp 0x{development_gp:X} differs from retail "
+            f"0x{retail_gp:X}"
+        )
+    return development_gp, retail_gp
 
 
 def _resolve_linked_layout(
@@ -1025,9 +1065,12 @@ def repair_stale_replacement_relocations(
     )
     _, programs = parse_elf(output)
     relocations = parse_linked_relocations(relocation_elf)
+    development_gp, _ = _matched_gp_values(
+        relocations, development_symbols, retail_symbol_elf
+    )
     original = bytes(output)
     effective_targets = _relocation_effective_targets(
-        original, programs, relocations
+        original, programs, relocations, development_gp
     )
     patches: dict[int, int] = {}
 
@@ -1129,7 +1172,7 @@ def repair_stale_replacement_relocations(
     for file_offset, word in patches.items():
         struct.pack_into("<I", repaired, file_offset, word)
     repaired_targets = _relocation_effective_targets(
-        bytes(repaired), programs, relocations
+        bytes(repaired), programs, relocations, development_gp
     )
     stale = [
         (relocation.offset, target)
@@ -1369,6 +1412,7 @@ def _relocation_effective_targets(
     image: bytes,
     programs: list[ProgramHeader],
     relocations: list[LinkedRelocation],
+    gp: int | None = None,
 ) -> dict[LinkedRelocation, set[int]]:
     """Resolve addends encoded at REL sites into their final linked targets."""
 
@@ -1378,17 +1422,24 @@ def _relocation_effective_targets(
         targets.setdefault(lo, set()).add(target)
     for relocation in relocations:
         file_offset = _file_offset_for_vaddr(programs, relocation.offset)
-        if relocation.kind in (5, 6):
+        if relocation.kind in (R_MIPS_HI16, R_MIPS_LO16):
             continue
         if file_offset is None:
             continue
         word = _unpack_word(image, file_offset, "relocation target")
-        if relocation.kind == 4 and word >> 26 in (2, 3):
+        if relocation.kind == R_MIPS_26 and word >> 26 in (2, 3):
             targets.setdefault(relocation, set()).add(
                 _jump_target(word, relocation.offset)
             )
-        elif relocation.kind == 2:
+        elif relocation.kind == R_MIPS_32:
             targets.setdefault(relocation, set()).add(word)
+        elif relocation.kind == R_MIPS_GPREL16:
+            if gp is None:
+                raise DevElfError("R_MIPS_GPREL16 relocation requires a defined _gp")
+            addend = word & 0xFFFF
+            if addend & 0x8000:
+                addend -= 0x10000
+            targets.setdefault(relocation, set()).add((gp + addend) & 0xFFFFFFFF)
     return targets
 
 
@@ -1471,6 +1522,7 @@ def _audit_moved_payloads(
     effective_targets: dict[LinkedRelocation, set[int]],
     ranges: list[tuple[int, int, int, int]],
     replacement_moves: set[int],
+    retail_gp: int | None,
 ) -> int:
     """Require each moved byte to equal retail, except validated relocations."""
 
@@ -1503,7 +1555,7 @@ def _audit_moved_payloads(
         old_relocations.append(old_relocation)
         old_for_new[relocation] = old_relocation
     old_targets = _relocation_effective_targets(
-        base, base_programs, old_relocations
+        base, base_programs, old_relocations, retail_gp
     )
 
     changed_words = 0
@@ -1766,11 +1818,14 @@ def audit_relocation_closure(
         relocations_by_offset.setdefault(relocation.offset, []).append(relocation)
         if relocation.symbol_name in redirects:
             redirect_relocations.append(relocation)
+    development_gp, retail_gp = _matched_gp_values(
+        relocations, development_symbols, retail_symbol_elf
+    )
     effective_targets = _relocation_effective_targets(
-        output, output_programs, relocations
+        output, output_programs, relocations, development_gp
     )
     retail_effective_targets = _relocation_effective_targets(
-        base, base_programs, relocations
+        base, base_programs, relocations, retail_gp
     )
     changed_payload_words = _audit_moved_payloads(
         base,
@@ -1781,6 +1836,7 @@ def audit_relocation_closure(
         effective_targets,
         ranges,
         replacement_moves,
+        retail_gp,
     )
     stale_relocations = [
         (relocation, target)
