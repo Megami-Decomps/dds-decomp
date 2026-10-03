@@ -242,6 +242,9 @@ extern u8 *datEnemyAiRecords;
 extern s32 func_001B32F8(s32, s32 *);
 
 extern char D_00415840[]; /* "btl:endure=%d%%[ratio=%.2f]\n" */
+extern s32 fldAreaState[];
+extern u8 D_003B4EC8[];
+extern char D_004159A0[];
 
 extern u32 btlLinkedSelectionTaskBuffer;
 
@@ -3388,7 +3391,26 @@ u32 btlPickWeightedEntry(u16 index) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5600);
+u32 func_001B5600(void) {
+    u32 i;
+
+    if (mdlFlagTest(0x818) != 0) {
+        return 0;
+    }
+    for (i = 0; i < 0x12; i++) {
+        u8 area = D_003B4EC8[i * 2];
+        if (area == fldAreaState[4]) {
+            u8 zone = D_003B4EC8[i * 2 + 1];
+            if (zone == fldAreaState[5] + 1) {
+                btlBossDebugPrintf(D_004159A0, area, zone);
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004159A0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5688);
 
