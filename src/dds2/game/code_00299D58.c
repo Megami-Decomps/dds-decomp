@@ -235,6 +235,7 @@ s32 mnuRequestContextClearSceneDsp(MenuDspState *state)
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A2F8);
 
+
 INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A400);
 
 s64 func_0029A588(s32 request) {
@@ -263,7 +264,31 @@ u32 func_0029A650(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A658);
+void func_0029A658(MenuItemScene *scene) {
+    struct ActiveItemSlots {
+        s32 indices[5];
+        s32 values[5];
+        s32 count;
+    } active;
+    MenuItem *item = scene->selectionData->item;
+    s32 i;
+
+    memset(&active, 0, sizeof(active));
+    for (i = 0; i < 5; i++) {
+        if (((s32 *)((u8 *)scene + 0x3F4))[i] > 0) {
+            active.indices[active.count] = i;
+            active.values[active.count] = ((s32 *)((u8 *)scene + 0x3F4))[i];
+            active.count++;
+        }
+    }
+    evtCopyEntryStringToActiveWindow(0, (s32)D_00435E48[item->kind].encodedText);
+    dspSetActive(1);
+    if (scene->extentExhausted == 0) {
+        dspStartEntry(0x15);
+    } else {
+        dspStartEntry(0x16);
+    }
+}
 
 u32 mnuKindIsSelectable(u32 kind) {
     if (kind == 1) {

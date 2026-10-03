@@ -1029,7 +1029,42 @@ void parFillCellVertexQuads(ParSystem *system, s32 middleWord, s32 edgeWord) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015CAA0);
+void func_0015CAA0(ParSystem *system, u32 middleWord, u32 edgeWord) {
+    s32 perCell = system->vertexWordCount >> 2;
+    s32 count = system->cellCount;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    u32 middleStep = middleAlpha / perCell;
+    u32 edgeStep = edgeAlpha / perCell;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParQuadVertexColors *vertex;
+
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParQuadVertexColors **)cell;
+            middle = middleAlpha;
+            edge = edgeAlpha;
+            for (j = 0; j < perCell; j++, vertex++) {
+                middle -= middleStep;
+                edge -= edgeStep;
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015CB58);
 

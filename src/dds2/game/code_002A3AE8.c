@@ -115,6 +115,9 @@ s32 mnuIsAnyMenuInputPressed(void) {
 extern u8 D_00437A48[];
 
 extern u8 D_003E3760[];
+extern u32 effLoadIndexedResource(const char *path, const char *name, u32 mode);
+extern void effRequestResourceByMode(const char *path, const char *name, u32 mode, u32 *handle);
+
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3D70);
 
@@ -132,7 +135,23 @@ void mnuReleaseMenuResourceSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3E38);
+void func_002A3E38(s32 mode) {
+    u32 *handle = (u32 *)&((SpriteMenuState *)mnuMovieMenuState)->spriteHandle;
+
+    if (*handle == 0) {
+        if (mode != 0) {
+            const char *name = (const char *)D_003E3760;
+            name += 0x10;
+            ((SpriteMenuState *)mnuMovieMenuState)->spriteHandle =
+                effLoadIndexedResource((const char *)D_00437A48, name, 0);
+        } else {
+            const char *name = (const char *)D_003E3760;
+            name += 0x10;
+            effRequestResourceByMode((const char *)D_00437A48, name, 0,
+                                     handle);
+        }
+    }
+}
 
 u8 mnuHasSpriteHandle(void) {
     return ((SpriteMenuState *)mnuMovieMenuState)->spriteHandle != 0;
