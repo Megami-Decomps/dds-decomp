@@ -43,7 +43,6 @@ s32 effCreateNodeFromDescriptor(s32);
 #define MDL_MARK_COLOR_FIRST_FIELD 7
 #define MDL_PAD_REPEAT_FLAG 2
 #define MDL_PART_SLOT_BYTES 0x10
-#define MDL_RESOURCE_ITEM_BYTES 0x20
 #define MDL_PART_VALUE_SIZE_THRESHOLD 0x11
 #define MDL_RESOURCE_BILLBOARD 0
 #define MDL_RESOURCE_EFFECT 1
@@ -546,7 +545,7 @@ typedef struct MdlObj {
 } MdlObj;
 
 typedef struct MdlPartEntry {
-    u32 kind;     /* 0x00: billboard or effect */
+    u32 kind;     /* 0x00: billboard, effect, or object */
     s32 state;    /* 0x04 */
     s32 object;   /* 0x08 */
     u8 pad0C[4];
@@ -570,12 +569,31 @@ typedef struct MdlItemCfg {
     u8 unk3;
 } MdlItemCfg;
 
+/* Object attachment payload, embedded at resource item +8. */
+typedef struct MdlObjectAttachment {
+    MdlResource *owner;
+    s32 objectAddress; /* Retain the native address-word type. */
+    s32 data;
+    s32 minimumTime; /* Owner's motion must reach this threshold. */
+    u8 attributes[8]; /* Passed to stream initialization. */
+} MdlObjectAttachment;
+
+/* Native 0x20-byte list item. type selects a part handle or a deferred object
+ * attachment; these are alternative payloads, not separate allocations. */
 typedef struct MdlResourceItem {
     struct MdlResourceItem *next; /* 0x00 */
-    u16 type;                     /* 0x04: billboard / effect kind */
-    s16 subtype;                  /* 0x06 */
-    s32 resource;                 /* 0x08 */
-    u8 pad0C[0x14];
+    u16 type; /* 0x04: MDL_RESOURCE_* */
+    s16 subtype; /* 0x06 */
+    union {
+        struct {
+            s32 handle; /* 0x08: billboard, effect, or tracked-poly handle */
+            MdlPartEntry *unk0C; /* Retained slot; only written here. */
+            void *unk10; /* Retained chunk record; only written here. */
+            f32 unk14; /* Optional record value; only written here. */
+            u8 pad18[8];
+        } part;
+        MdlObjectAttachment object;
+    } payload;
 } MdlResourceItem;
 
 
@@ -884,7 +902,7 @@ void mdlDestroyPartList(MdlPartList *partList) {
 
 /* Prepend a cleared, typed resource item to the owner's list. */
 MdlResourceItem *mdlInsertResourceItem(MdlResource *owner, s32 type, s32 subtype) {
-    MdlResourceItem *item = sdfAllocAndClearQuadwords(MDL_RESOURCE_ITEM_BYTES);
+    MdlResourceItem *item = sdfAllocAndClearQuadwords(sizeof(MdlResourceItem));
     MdlResourceItem *previousHead = owner->first;
     item->type = type;
     item->next = previousHead;
@@ -926,13 +944,6 @@ typedef struct MdlPartRec {
     f32 value;     /* 0x10 */
 } MdlPartRec;
 
-typedef struct MdlPartItem {
-    u8 pad00[8];
-    s32 handle;         /* 0x08 */
-    MdlPartEntry *part; /* 0x0C */
-    void *record;       /* 0x10 */
-    f32 value;          /* 0x14 */
-} MdlPartItem;
 
 extern void *sdfChunkFindRecordById(void *chunk, s32 id);
 
@@ -954,12 +965,12 @@ s32 mdlBindViewerPartRecords(MdlResource *owner, MdlPartRec *partRecord, s32 sub
             void *chunkRecord = sdfChunkFindRecordById(chunk, recordId++);
 
             if (chunkRecord != NULL) {
-                MdlPartItem *resourceItem = (MdlPartItem *)mdlInsertResourceItem(owner, type, subtype);
+                MdlResourceItem *resourceItem = mdlInsertResourceItem(owner, type, subtype);
 
-                resourceItem->handle = createPart(partSlot);
-                resourceItem->part = partSlot;
-                resourceItem->record = chunkRecord;
-                resourceItem->value = optionalValue;
+                resourceItem->payload.part.handle = createPart(partSlot);
+                resourceItem->payload.part.unk0C = partSlot;
+                resourceItem->payload.part.unk10 = chunkRecord;
+                resourceItem->payload.part.unk14 = optionalValue;
             }
         } while (--remainingRecords != 0);
     }
@@ -1017,7 +1028,7 @@ s32 mdlCreateViewerEffectPart(MdlResource *owner, MdlEffectRec *effectRecord, s3
     effectParams.value20 = effectRecord->value20;
     effectParams.value24 = effectRecord->value24;
     resourceItem = mdlInsertResourceItem(owner, MDL_RESOURCE_TRACK_POLY, subtype);
-    return resourceItem->resource = effTrackPolyCreateWork(&effectParams);
+    return resourceItem->payload.part.handle = effTrackPolyCreateWork(&effectParams);
 }
 
 /* Kind-four model record: two selectors and two 32-bit stream parameters. */
@@ -1037,20 +1048,11 @@ s32 mdlLoadViewerStreamRecord(u32 owner, s32 record) {
                   ((MdlStreamRecord *)record)->value10);
 }
 
-/* Same conditional object-entry offsets as the DDS1 model viewer. */
-typedef struct MdlObjItem {
-    u8 pad00[8];
-    MdlResource *owner; /* 0x08 */
-    s32 obj;                 /* 0x0C */
-    s32 data;                /* 0x10 */
-    s32 param;               /* 0x14 */
-    u8 attr[8];              /* 0x18 */
-} MdlObjItem;
 
 typedef struct MdlEntryRec {
     u8 pad00[8];
     s32 dataId; /* 0x08 */
-    s32 param;  /* 0x0C */
+    s32 minimumTime; /* 0x0C: deferred initialization threshold */
     u8 flagB;   /* 0x10 */
     u8 flagA;   /* 0x11 */
     u16 index;  /* 0x12 */
@@ -1072,15 +1074,16 @@ s32 mdlClaimViewerObjectPart(MdlResource *owner, MdlEntryRec *entryRecord, s32 s
         if (object->inUse == 0) {
             s32 resourceData = (s32)sdfFindResourceById(entryRecord->dataId);
             if (resourceData != 0) {
-                MdlObjItem *resourceItem;
+                MdlResourceItem *resourceItem;
                 u8 *attributes;
                 object->inUse = 1;
-                resourceItem = (MdlObjItem *)mdlInsertResourceItem(owner, MDL_RESOURCE_OBJECT, subtype);
-                resourceItem->owner = owner;
-                resourceItem->obj = (s32)object;
-                attributes = resourceItem->attr;
-                resourceItem->data = resourceData;
-                resourceItem->param = entryRecord->param;
+                resourceItem = mdlInsertResourceItem(owner, MDL_RESOURCE_OBJECT, subtype);
+                /* Required to match: store object/data before binding the owner. */
+                resourceItem->payload.object.objectAddress = (s32)object;
+                attributes = resourceItem->payload.object.attributes;
+                resourceItem->payload.object.data = resourceData;
+                resourceItem->payload.object.owner = owner;
+                resourceItem->payload.object.minimumTime = entryRecord->minimumTime;
                 attributes[1] = 1;
                 attributes[2] = entryRecord->flagA;
                 attributes[3] = entryRecord->flagB;
@@ -1091,14 +1094,14 @@ s32 mdlClaimViewerObjectPart(MdlResource *owner, MdlEntryRec *entryRecord, s32 s
 
 /* Initialize once the owner's motion reaches the stored threshold; retain native float-to-signed-to-unsigned conversion. */
 void mdlCondInitEntry(s32 itemAddress) {
-    s32 objectAddress = ((MdlObjItem *)itemAddress)->obj;
+    s32 objectAddress = ((MdlResourceItem *)itemAddress)->payload.object.objectAddress;
     if (((MdlObj *)objectAddress)->initialized == 0) {
-        s32 minimumTime = ((MdlObjItem *)itemAddress)->param;
-        f32 motionTime = ((MdlObjItem *)itemAddress)->owner->motion->time;
+        s32 minimumTime = ((MdlResourceItem *)itemAddress)->payload.object.minimumTime;
+        f32 motionTime = ((MdlResourceItem *)itemAddress)->payload.object.owner->motion->time;
         if ((u32)(s32)motionTime < (u32)minimumTime) {
             return;
         }
-        mdlObjInit((MdlObj *)objectAddress, ((MdlObjItem *)itemAddress)->data, itemAddress + 0x18);
+        mdlObjInit((MdlObj *)objectAddress, ((MdlResourceItem *)itemAddress)->payload.object.data, (s32)((MdlResourceItem *)itemAddress)->payload.object.attributes);
     }
 }
 
@@ -1139,13 +1142,13 @@ void mdlApplyResourceEntries(s32 resourceAddress, s32 recordId, s32 subtype) {
 void mdlDestroyResourceItem(MdlResourceItem *item) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        billDispatchByKind(item->resource);
+        billDispatchByKind(item->payload.part.handle);
         break;
     case MDL_RESOURCE_EFFECT:
-        effDestroyNode(item->resource);
+        effDestroyNode(item->payload.part.handle);
         break;
     case MDL_RESOURCE_TRACK_POLY:
-        effTrackPolyRelease(item->resource);
+        effTrackPolyRelease(item->payload.part.handle);
         break;
     }
     sdfReleaseChipBlock((void *)item);
@@ -1215,24 +1218,26 @@ void mdlDispatchViewerAnchorRecord(MdlResource *owner, MdlAnchorRec *anchorRecor
     }
 }
 
+/* Set a billboard/effect frame; other resource-item kinds have no frame dispatch. */
 void mdlSetResourceFrame(s32 unused, MdlResourceItem *item, s32 frame) {
     switch (item->type) {
-    case 0:
-        billSetChildParameter(item->resource, frame);
+    case MDL_RESOURCE_BILLBOARD:
+        billSetChildParameter(item->payload.part.handle, frame);
         return;
-    case 1:
-        effSetNodeParameterValue(item->resource, frame);
+    case MDL_RESOURCE_EFFECT:
+        effSetNodeParameterValue(item->payload.part.handle, frame);
         break;
     }
 }
 
+/* Apply amount to billboard/effect scale; other resource-item kinds are ignored. */
 void mdlSetResourceAmount(s32 unused, MdlResourceItem *item, float amount) {
     switch (item->type) {
-    case 0:
-        billSetChildScaleComponents(item->resource, amount, amount);
+    case MDL_RESOURCE_BILLBOARD:
+        billSetChildScaleComponents(item->payload.part.handle, amount, amount);
         return;
-    case 1:
-        effApplyNodeScale(item->resource, amount);
+    case MDL_RESOURCE_EFFECT:
+        effApplyNodeScale(item->payload.part.handle, amount);
         break;
     }
 }
