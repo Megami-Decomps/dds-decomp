@@ -283,7 +283,12 @@ functions use trampolines and are a different case.
   affected unit and both complete builds. The paired `fldFileResolver` objects
   are the reference case: the real creator and its callback string immediately
   precede the resolver in both games, and restoring that ownership changes the
-  sole `bnezl` residual to retail `bnez` without changing either creator.
+  sole `bnezl` residual to retail `bnez` without changing either creator. The
+  second case is `kernel/dds3AdminiProcess` in both games. The process
+  dispatcher `func_00102CD8` / `func_00102BC8` needs the mode-request provider
+  visible. The provider immediately precedes the first Nocturne-mapped process
+  function (which calls it), and the `"Admini"` task-name sdata goes with it.
+  So the unit now starts at `dds3GetAdminTaskWork`.
 
   Stop if pass 28 already differs, the donor or opposite-path liveness differs,
   the controlled visibility test does not change the predicted annul bit, or
