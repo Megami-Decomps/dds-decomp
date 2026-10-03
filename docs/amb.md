@@ -155,3 +155,26 @@ All 54 retail AMBs export without an alternate parser: the scene exporter
 consumes the same decoded model graph used by disassembly and reuses the FLD1
 SDF-to-glTF consumer. The complete pass emits 1,446 areas, 13,810 glTF nodes,
 3,938 meshes, and 1,625 icon markers.
+
+## Geometry import
+
+`tools/amb_scene_import.py` applies edited model vertex streams from an
+exported AMB GLB back to exact automap source:
+
+```sh
+python3 tools/amb_scene_import.py edited-f024.glb \
+  src/dds1/data/field/f024.ambasm edited-f024.ambasm
+```
+
+The importer shares its SDF packet engine with the FLD1 model importer. It
+accepts position, normal, texture-coordinate, four-float attribute, and vertex-
+color changes while preserving triangle topology and controls, material and
+draw identities, stream layout, VIF commands, VU program addresses, packet
+sizes, and padding. Shared packet streams must carry one consistent edit.
+
+Area and node transforms, sub-block metadata, icons, bounds, and material
+parameters remain authoritative in AMB source. The importer uses exact area,
+node, draw, and packet identities from the GLB and rejects structural changes
+rather than guessing how to rebuild them. All 54 tracked AMBs round-trip
+byte-for-byte through export and import, covering 1,446 areas and 6,143 native
+meshes.
