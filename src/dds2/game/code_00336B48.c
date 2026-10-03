@@ -764,7 +764,48 @@ void func_003378C8(void *work, u32 packedColor) {
         : "$2", "$3", "$6", "$7", "memory");
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00337970);
+/* vu0 routine: interpolate two keyframe rows and publish the VU status */
+void func_00337970(void *work, void *sourceA, void *sourceB) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        ".set noat\n"
+        "sw %1, 0x44(%0)\n"
+        "sw %2, 0x48(%0)\n"
+        "vaddx.w vf2, vf0, vf0x\n"
+        "lbu $2, 0x50(%1)\n"
+        "lqc2 vf4, 0x10(%1)\n"
+        "lqc2 vf5, 0x10(%2)\n"
+        "andi $2, $2, 1\n"
+        "bne $0, $2, 1f\n"
+        "lqc2 vf6, 0x00(%1)\n"
+        "vsubw.w vf2, vf1, vf0w\n"
+        "1:\n"
+        "lqc2 vf7, 0x00(%2)\n"
+        "lqc2 vf8, 0x30(%1)\n"
+        "lqc2 vf9, 0x30(%2)\n"
+        "vsubw.w vf12, vf2, vf4w\n"
+        "vsubw.w vf13, vf5, vf4w\n"
+        "vsub.xyzw vf14, vf7, vf6\n"
+        "vdiv Q, vf12w, vf13w\n"
+        "lqc2 vf10, 0x20(%1)\n"
+        "vsub.xyzw vf15, vf9, vf8\n"
+        "vmulaw.xyzw ACC, vf6, vf0w\n"
+        "sqc2 vf10, 0x20(%0)\n"
+        "vwaitq\n"
+        "cfc2.ni $2, $vi22\n"
+        "vmaddq.xyzw vf14, vf14, Q\n"
+        "vmulaw.xyzw ACC, vf8, vf0w\n"
+        "vmaddq.xy vf15, vf15, Q\n"
+        "sqc2 vf14, 0x00(%0)\n"
+        "sw $2, 0x4C(%0)\n"
+        "sqc2 vf15, 0x30(%0)\n"
+        "sqc2 vf2, 0x10(%0)\n"
+        ".set at\n"
+        ".set reorder"
+        : "+r"(work), "+r"(sourceA), "+r"(sourceB)
+        :
+        : "$2", "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_003379F0);
 
