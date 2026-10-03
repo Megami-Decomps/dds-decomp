@@ -137,7 +137,7 @@ extern u8 D_003D64B0[];
 
 extern u8 parDrawControl[];
 
-extern s32 parGetRestartFlag();
+extern u16 parGetRestartFlag(ParObj *obj);
 
 extern void parCellInit();
 
@@ -291,7 +291,9 @@ void effParScaleComponent(float scale, ParObj *work) {
     work->scale8C *= scale;
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015AD48);
+u16 func_0015AD48(ParObj *obj) {
+    return parGetRestartFlag(obj);
+}
 
 void parCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
