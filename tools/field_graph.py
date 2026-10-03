@@ -10,6 +10,8 @@ import struct
 from collections import Counter, defaultdict, deque
 from pathlib import Path
 
+import battle_tbl
+import encounter_flow
 import fld
 import field_world
 import flw0
@@ -425,10 +427,23 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
     all_procedure_edges = graph.get("scriptProcedureEdges", ())
     all_event_edges = graph.get("eventScriptEdges", ())
     all_event_requests = graph.get("eventRequestEdges", ())
+    all_encounters = {
+        row["id"]: row for row in graph.get("encounterNodes", ())
+    }
+    all_encounter_requests = graph.get("encounterRequestEdges", ())
+    all_encounter_chains = graph.get("encounterChainEdges", ())
+    all_encounter_events = graph.get("encounterEventEdges", ())
     adjacency: dict[str, set[str]] = defaultdict(set)
     for edge in all_procedure_edges:
         adjacency[edge["source"]].add(edge["target"])
     for edge in all_event_edges:
+        if edge["targetPresent"]:
+            adjacency[edge["source"]].add(edge["target"])
+    for edge in all_encounter_requests:
+        adjacency[edge["source"]].add(edge["target"])
+    for edge in all_encounter_chains:
+        adjacency[edge["source"]].add(edge["target"])
+    for edge in all_encounter_events:
         if edge["targetPresent"]:
             adjacency[edge["source"]].add(edge["target"])
     reachable = {
@@ -446,6 +461,11 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
         for node_id in sorted(reachable)
         if node_id in all_procedures
     }
+    encounters = {
+        node_id: all_encounters[node_id]
+        for node_id in sorted(reachable)
+        if node_id in all_encounters
+    }
     procedure_edges = [
         row
         for row in all_procedure_edges
@@ -456,6 +476,15 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
     ]
     event_requests = [
         row for row in all_event_requests if row["source"] in reachable
+    ]
+    encounter_requests = [
+        row for row in all_encounter_requests if row["source"] in reachable
+    ]
+    encounter_chains = [
+        row for row in all_encounter_chains if row["source"] in reachable
+    ]
+    encounter_events = [
+        row for row in all_encounter_events if row["source"] in reachable
     ]
     battle_exit_edges = [
         row
@@ -494,11 +523,35 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
             f"  {json.dumps(procedure['id'])} "
             f"[label={json.dumps(label)}, shape=box];"
         )
+    for encounter in encounters.values():
+        enemies = [
+            slot["name"] or str(slot["id"])
+            for slot in encounter["enemySlots"]
+            if slot is not None
+        ]
+        label = f"encounter {encounter['index']}"
+        if enemies:
+            label += " | " + ", ".join(enemies)
+        label += (
+            f" | bg {encounter['backgrounds'][0]}/{encounter['backgrounds'][1]}"
+            f" | bgm {encounter['bgm']}"
+        )
+        lines.append(
+            f"  {json.dumps(encounter['id'])} "
+            f"[label={json.dumps(label)}, shape=ellipse];"
+        )
     event_targets = {
         edge["target"]: edge for edge in event_edges if not edge["targetPresent"]
     }
+    event_targets.update(
+        (edge["target"], edge)
+        for edge in encounter_events
+        if not edge["targetPresent"]
+    )
     for target, edge in sorted(event_targets.items()):
-        label = edge.get("event", f"event {edge['eventId']}")
+        label = edge.get(
+            "event", edge.get("targetScript", f"event {edge['eventId']}")
+        )
         attributes = [f"label={json.dumps(label)}", 'shape="ellipse"']
         attributes.extend(('style="dashed"', 'color="gray"'))
         lines.append(f"  {json.dumps(target)} [{', '.join(attributes)}];")
@@ -541,15 +594,19 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
             f"  {json.dumps(edge['source'])} -> {json.dumps(edge['target'])} "
             f"[label={json.dumps(label)}];"
         )
-    request_targets = {
-        f"request:{edge['requestId']}": edge for edge in event_requests
-    }
+    request_targets = (
+        {}
+        if all_encounter_requests
+        else {f"request:{edge['requestId']}": edge for edge in event_requests}
+    )
     for target, edge in sorted(request_targets.items()):
         label = f"event request {edge['requestId']}"
         attributes = [f"label={json.dumps(label)}", 'shape="ellipse"']
         attributes.extend(('style="dashed"', 'color="gray"'))
         lines.append(f"  {json.dumps(target)} [{', '.join(attributes)}];")
     for edge in event_requests:
+        if all_encounter_requests:
+            continue
         label = edge["command"]
         if "selection" in edge:
             label += f" selection {edge['selection']}"
@@ -561,6 +618,25 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
             f"  {json.dumps(edge['source'])} -> "
             f"{json.dumps('request:' + str(edge['requestId']))} "
             f"[label={json.dumps(label)}, style=dashed, color=gray];"
+        )
+    for edge in encounter_requests:
+        label = edge["command"]
+        if edge["count"] > 1:
+            label += f" x{edge['count']}"
+        lines.append(
+            f"  {json.dumps(edge['source'])} -> {json.dumps(edge['target'])} "
+            f"[label={json.dumps(label)}];"
+        )
+    for edge in encounter_chains:
+        lines.append(
+            f"  {json.dumps(edge['source'])} -> {json.dumps(edge['target'])} "
+            f"[label={json.dumps('next encounter')}];"
+        )
+    for edge in encounter_events:
+        label = f"battle event e{edge['eventId']:03}"
+        lines.append(
+            f"  {json.dumps(edge['source'])} -> {json.dumps(edge['target'])} "
+            f"[label={json.dumps(label)}];"
         )
     battle_exit_routes = Counter(
         (
@@ -753,6 +829,8 @@ def _event_sections(
     script_dir: Path,
     profile: flw0_profiles.CommandProfile,
     tables: dict[int, wap.WapFile] | None = None,
+    encounter_table: battle_tbl.EncountTable | None = None,
+    battle_symbols: battle_tbl.BattleSymbols | None = None,
 ) -> dict:
     """Build exact placement roots and linked field/event procedure flow."""
 
@@ -923,12 +1001,31 @@ def _event_sections(
             for row in flow["unresolvedTargets"]
         )
 
+    encounter_sections = None
+    if encounter_table is not None:
+        event_scripts = {
+            script_id
+            for script_id, record in scripts.items()
+            if record["type"] == "event" and record["flow"]["procedures"]
+        }
+        encounter_sections = encounter_flow.build_sections(
+            event_requests, encounter_table, event_scripts, battle_symbols
+        )
+
     adjacency: dict[str, set[str]] = defaultdict(set)
     for edge in procedure_edges:
         adjacency[edge["source"]].add(edge["target"])
     for edge in event_edges:
         if edge["targetPresent"]:
             adjacency[edge["source"]].add(edge["target"])
+    if encounter_sections is not None:
+        for edge in encounter_sections["encounterRequestEdges"]:
+            adjacency[edge["source"]].add(edge["target"])
+        for edge in encounter_sections["encounterChainEdges"]:
+            adjacency[edge["source"]].add(edge["target"])
+        for edge in encounter_sections["encounterEventEdges"]:
+            if edge["targetPresent"]:
+                adjacency[edge["source"]].add(edge["target"])
     reachable = set(entry_counts)
     pending = deque(sorted(reachable))
     while pending:
@@ -947,6 +1044,8 @@ def _event_sections(
         edge["sourceReachable"] = edge["source"] in reachable
     for edge in battle_exit_edges:
         edge["sourceReachable"] = edge["source"] in reachable
+    if encounter_sections is not None:
+        encounter_flow.mark_reachable(encounter_sections, reachable)
 
     field_procedures = [
         row for row in procedures if row["scriptType"] == "field"
@@ -969,7 +1068,7 @@ def _event_sections(
         if procedure["reachableFromPlacement"]
         for call in procedure["nativeCalls"]
     )
-    return {
+    result = {
         "eventEntries": entries,
         "scriptProcedures": procedures,
         "scriptProcedureEdges": procedure_edges,
@@ -992,7 +1091,9 @@ def _event_sections(
             "procedureNodes": len(procedures),
             "fieldProcedureNodes": len(field_procedures),
             "eventProcedureNodes": len(event_procedures),
-            "reachableProcedures": len(reachable),
+            "reachableProcedures": sum(
+                row["id"] in reachable for row in procedures
+            ),
             "reachableFieldProcedures": sum(
                 row["id"] in reachable for row in field_procedures
             ),
@@ -1049,6 +1150,12 @@ def _event_sections(
             "unresolvedScriptTargets": len(unresolved),
         },
     }
+    if encounter_sections is not None:
+        result["eventSummary"].update(
+            encounter_sections.pop("encounterSummary")
+        )
+        result.update(encounter_sections)
+    return result
 
 
 def _load_graph(
@@ -1123,8 +1230,23 @@ def _load_graph(
             profile = flw0_profiles.get(profile_name)
         except KeyError as exc:
             raise FieldGraphError(f"unknown command profile {profile_name!r}") from exc
-        sections = _event_sections(field_paths, script_dir, profile, tables)
-        graph["schema"] = "dds-field-world-6"
+        encounter_table, battle_symbols = encounter_flow.load_sources(
+            field_dir.parent / "battle"
+        )
+        if encounter_table.profile.name != profile_name:
+            raise FieldGraphError(
+                f"{encounter_table.profile.name} encounter source does not match "
+                f"the {profile_name} command profile"
+            )
+        sections = _event_sections(
+            field_paths,
+            script_dir,
+            profile,
+            tables,
+            encounter_table,
+            battle_symbols,
+        )
+        graph["schema"] = "dds-field-world-7"
         graph["summary"].update(sections.pop("eventSummary"))
         graph.update(sections)
     return graph
@@ -1148,7 +1270,7 @@ def main() -> None:
     parser.add_argument(
         "--include-events",
         action="store_true",
-        help="include placement-rooted field-script procedure flow",
+        help="include placement-rooted script and encounter execution flow",
     )
     parser.add_argument(
         "--profile",
@@ -1217,9 +1339,11 @@ def main() -> None:
         )
     if "eventPlacements" in summary:
         description += (
-            f", {summary['linkedEventPlacements']} linked event placements, and "
+            f", {summary['linkedEventPlacements']} linked event placements, "
             f"{summary['reachableProcedures']} reachable procedures"
         )
+    if "encounterNodes" in summary:
+        description += f", and {summary['encounterNodes']} linked encounters"
     print(f"wrote {description} to {args.output}")
 
 
