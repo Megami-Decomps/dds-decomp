@@ -230,7 +230,7 @@ u32 mnuDestroyListState(MenuList *list);
 
 MenuListNode *mnuListAdvanceCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
-MenuListNode *mnuListAppendNode();
+MenuListNode *mnuListAppendNode(MenuList *list, s32 value);
 
 MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
@@ -461,8 +461,8 @@ void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *window) {
     window->flags = window->flags & MNU_WINDOW_TRANSITION_CLEAR_MASK;
 }
 
-void mnuAppendWindowListNode(MenuWindowContainer *window) {
-    mnuListAppendNode(window->list);
+MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *window, s32 value) {
+    return mnuListAppendNode(window->list, value);
 }
 
 void func_0027C688(MenuWindowContainer *window) {
@@ -593,7 +593,9 @@ void func_0027CEE8(MenuWindowContainer *window) {
     }
 }
 
+
 INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027CF28);
+
 
 extern s32 sdfAllocGeneralBlock(s32);
 
