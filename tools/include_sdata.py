@@ -27,7 +27,8 @@ LINE = re.compile(r'^INCLUDE_SDATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?', re.M)
 DEF = re.compile(r"^[A-Za-z_][\w \t\*]*?\b(\w+)\s*\([^;{]*\)\s*\{?[ \t]*$", re.M)
 DATA_DEF = re.compile(
     r"^(?!extern\b|typedef\b)(?:static\s+)?(?:const\s+)?"
-    r"[A-Za-z_][\w \t\*]*?\b(\w+)\s*(?:\[[^\]]*\])*\s*"
+    r"[A-Za-z_][\w \t\*]*?(?:\(\s*\*\s*)?\b(\w+)\s*"
+    r"(?:\)\s*\([^;{}\n]*\))?\s*(?:\[[^\]]*\])*\s*"
     r'(?:__attribute__\s*\(\([^;\n]*\)\)\s*)*(?:=|;)',
     re.M,
 )
