@@ -23,6 +23,8 @@ extern u32 D_0043658C;
 extern u32 itfBackgroundSpriteTexture;
 
 extern u8 D_00436580[];
+extern u8 D_003B4378[];
+extern u8 D_003B4380[];
 extern u64 func_0019CE78(u64, u64, u64, u64, u64);
 
 extern u64 frFontAppendGlyphFromData(u64, u64, u64, u64, u64);
@@ -936,7 +938,42 @@ void itfDrawQuadFlat4(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
     sdfAppendPacket(command, packet);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A09C0);
+void func_001A09C0(DrawVertex *bounds, DrawColorRec *color, u32 tail, s32 borderWidth, void *command) {
+    DrawVertex vertices[4];
+    DrawColorRec colors[2];
+    s32 middleWidth;
+
+    colors[0].word[0] = color->word[0];
+    colors[0].word[1] = color->word[1];
+    colors[0].word[2] = color->word[2];
+    colors[0].word[3] = 0;
+    colors[1].word[0] = color->word[0];
+    colors[1].word[1] = color->word[1];
+    colors[1].word[2] = color->word[2];
+    colors[1].word[3] = color->word[3];
+
+    middleWidth = bounds[1].x - bounds[0].x - borderWidth * 2;
+    vertices[0].x = bounds[0].x;
+    vertices[0].y = bounds[0].y;
+    vertices[1].x = bounds[0].x + borderWidth;
+    vertices[1].y = bounds[0].y;
+    vertices[2].x = bounds[0].x + borderWidth;
+    vertices[2].y = bounds[1].y;
+    vertices[3].x = bounds[0].x;
+    vertices[3].y = bounds[1].y;
+
+    itfDrawQuadFlat4(vertices, colors, D_003B4378, D_003B4380, tail, command);
+    vertices[0].x += borderWidth;
+    vertices[1].x += middleWidth;
+    vertices[2].x += middleWidth;
+    vertices[3].x += borderWidth;
+    itfDrawQuadFlat4(vertices, colors, D_003B4378, D_003B4380 + 4, tail, command);
+    vertices[0].x += middleWidth;
+    vertices[1].x += borderWidth;
+    vertices[2].x += borderWidth;
+    vertices[3].x += middleWidth;
+    itfDrawQuadFlat4(vertices, colors, D_003B4378, D_003B4380 + 8, tail, command);
+}
 
 void itfDrawQuadTextured4(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, u32 tail, s32 flag, void *command) {
     void *packet;
