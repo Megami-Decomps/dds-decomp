@@ -392,7 +392,29 @@ s32 effAdvancePrimCursor(void *vertex, EffPrim *primitive) {
     return continuing;
 }
 
-INCLUDE_ASM(const s32, "game/code_00192488", func_00192ED0);
+void func_00192ED0(EffVert *out, EffPrim *primitive, s32 index, f32 t) {
+    f32 *a;
+    f32 *b;
+    f32 *c;
+    f32 *d;
+
+    if (primitive->unkC == 0) {
+        a = (f32 *)primitive->unk14 + index * 3;
+        b = (f32 *)primitive->unk18 + index * 3;
+        c = (f32 *)primitive->unk1C + index * 3;
+        d = (f32 *)primitive->unk10 + index * 3;
+        out->unk0 = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
+        out->unk4 = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
+        out->unk8 = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
+        out->unkC = 1.0f;
+    } else {
+        a = (f32 *)primitive->unk10 + index * 3;
+        b = a + 3;
+        out->unk0 = a[0] + (b[0] - a[0]) * t;
+        out->unk4 = a[1] + (b[1] - a[1]) * t;
+        out->unk8 = a[2] + (b[2] - a[2]) * t;
+    }
+}
 
 /* Evaluate cubic coefficients or adjacent linear keys into the VU input vector. */
 void effSamplePrimitiveCurve(EffPrim *primitive, s32 index, f32 t)
