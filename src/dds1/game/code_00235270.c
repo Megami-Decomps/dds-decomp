@@ -1549,7 +1549,73 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023C248);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023CA60);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023D420);
+extern s32 effUpdateCh72Params(void);
+extern s32 effEventAdvanceBlurTemplateSetup(void);
+extern s32 effEventAdvanceScatterBlurSetup(void);
+extern s32 effAdvancePendingChannelState(void);
+extern s32 func_0018FC80(void);
+extern s32 func_0023C248(EvtRuntime *runtime);
+extern s32 func_0023CA60(EvtRuntime *runtime);
+extern void *D_003BB0C0;
+extern void *D_003BB14C;
+extern void *D_003BB130;
+
+s32 func_0023D420(s32 arg0, s32 arg1, EvtRuntime *runtime) {
+    s32 status = 1;
+
+    switch (runtime->frameGroup->type) {
+    case 0xD:
+        status = effUpdateCh72Params();
+        break;
+    case 0xE:
+        status = effEventAdvanceBlurTemplateSetup();
+        if (runtime->selectedEntry != 0) {
+            *(s32 *)((u8 *)D_003BB0C0 + 0x2C) = runtime->selectedEntry;
+        }
+        break;
+    case 0xF:
+        status = effEventAdvanceScatterBlurSetup();
+        if (runtime->selectedEntry != 0) {
+            *(s32 *)((u8 *)D_003BB14C + 0x2C) = runtime->selectedEntry;
+        }
+        break;
+    case 0x17:
+        status = effAdvancePendingChannelState();
+        if (runtime->selectedEntry != 0) {
+            *(s32 *)((u8 *)D_003BB130 + 0x2C) = runtime->selectedEntry;
+        }
+        break;
+    case 0x1B:
+        status = func_0018FC80();
+        break;
+    case 0x10:
+    case 0x11:
+        if (runtime->controlState == 0) {
+            return 1;
+        }
+        break;
+    case 0x18:
+        status = func_0023C248(runtime);
+        break;
+    case 0x19:
+        status = func_0023CA60(runtime);
+        break;
+    default:
+        if (D_00324510[0x2C] < 0) {
+            status = 0;
+        }
+        break;
+    }
+
+    if (status != 0) {
+        return 0;
+    }
+    if (runtime->controlState != 0) {
+        kwlnTaskDestroyWithHierarchy(runtime->controlState, 1);
+        runtime->controlState = 0;
+    }
+    return 1;
+}
 
 extern s32 (*D_00368B48[])(s32, s32, void *);
 
