@@ -927,7 +927,50 @@ s32 mnuShopHasPendingFlag(void) {
     return found;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_002443F8);
+typedef struct ShopWindowListData {
+    u8 pad00[0x2C];
+    s32 (*callback)();
+    void *buffer;
+} ShopWindowListData;
+
+typedef struct ShopWindowContainer {
+    u8 pad00[0x14];
+    ShopWindowListData *list;
+} ShopWindowContainer;
+
+typedef struct ShopWindowBuffer {
+    u8 pad00[0xC];
+    u16 value;
+    u8 pad0E[2];
+} ShopWindowBuffer;
+
+typedef struct ShopWindowSettings {
+    u8 pad00[0x90];
+    s16 value;
+} ShopWindowSettings;
+
+extern s32 func_0025E820();
+
+s32 func_002443F8(s32 unused, s32 count, ShopWindowSettings *settings) {
+    ShopWindowContainer *window;
+    ShopWindowBuffer *buffer;
+    s32 i;
+
+    if (settings->value != 0) {
+        count++;
+    }
+    window = (ShopWindowContainer *)mnuCreateWindowContainer(0, 0x260, 0x10, count, 0x15);
+    mnuInitializeWindowEntryPlacement(0, window, 0, 8, 0xA);
+    for (i = 0; i < count; i++) {
+        mnuAppendWindowListNode(window, 0);
+    }
+    window->list->callback = func_0025E820;
+    buffer = sdfAllocSizeClassBlock(0x10);
+    memset(buffer, 0, 0x10);
+    window->list->buffer = buffer;
+    buffer->value = settings->value;
+    return (s32)window;
+}
 
 
 void func_002444D0(s32 *record) {
