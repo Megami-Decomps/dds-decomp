@@ -204,6 +204,15 @@ void mnuCampDestroyAllTasks(void) {
     }
 }
 
+typedef struct EvtBlendH {
+    s32 w[4];
+    s32 x;
+    u32 flagWord;
+    u8 pad[8];
+    s32 y[3];
+    s32 z[3];
+} EvtBlendH;
+
 /* Timeline keys carry type-dependent payloads as well as their common links. */
 typedef struct CampKeyNode {
     u16 frame;                 /* 0x00 */
@@ -216,7 +225,8 @@ typedef struct CampKeyNode {
     s16 condition;             /* 0x0C */
     u8 pad0E[2];
     s16 entryCode;             /* 0x10: 0 follows alt, 1 clears, >=2 names an entry */
-    u8 pad12[0x1E];
+    u8 pad12[0x1A];
+    EvtBlendH *blendData;      /* 0x2C */
     struct CampKeyNode *next;  /* 0x30 */
     struct CampKeyNode *alt;   /* 0x34 */
 } CampKeyNode;
@@ -284,6 +294,9 @@ typedef struct {
     s32 idCount; /* 0x2444 */
     s32 registeredIds[20]; /* 0x2448 */
 } CampScene;
+
+extern void evtBlendParamsH(s32 enable, f32 t, EvtBlendH *a, EvtBlendH *b, EvtBlendH *out);
+extern void fldApplyCameraColorKeyWords(CampScene *scene, const s32 *colorSettings);
 
 /* Shift the selected track's frames; values exactly at the upper limit are kept. */
 void mnuShopScrollList(CampScene *owner, s32 delta) {
@@ -610,7 +623,53 @@ void fldResetCampSceneEntries(CampScene *scene) {
     scene->state = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EC00);
+void func_0025EC00(CampScene *scene) {
+    CampKeyTrack *track;
+    CampKeyNode *before;
+    CampKeyNode *after;
+    EvtBlendH fallbackBlend;
+    EvtBlendH result;
+    EvtBlendH *afterBlend;
+    s32 time;
+    u16 beforeFrame;
+    u16 afterFrame;
+    f32 blend;
+
+    before = NULL;
+    after = NULL;
+    time = scene->clampedOffset;
+    if (scene->state == 1) {
+        return;
+    }
+    track = scene->entries;
+    while (track != NULL) {
+        if (track->type == 0x19) {
+            mnuFindCampKeyTrackNeighbors(track, time, &before, &after);
+            break;
+        }
+        track = track->next;
+    }
+    if (before == NULL) {
+        scene->sceneMode = 0;
+        return;
+    }
+
+    if (after == NULL) {
+        blend = 0.0f;
+        afterBlend = &fallbackBlend;
+    } else {
+        beforeFrame = before->frame;
+        afterFrame = after->frame;
+        if (afterFrame != beforeFrame) {
+            blend = (f32)(time - beforeFrame) / (f32)(afterFrame - beforeFrame);
+        } else {
+            blend = 0.0f;
+        }
+        afterBlend = after->blendData;
+    }
+    evtBlendParamsH(before->condition, blend, before->blendData, afterBlend, &result);
+    fldApplyCameraColorKeyWords(scene, (const s32 *)&result);
+}
 
 extern void fldCopyCameraSetting(void *setting);
 extern void fldUpdateCameraColorEffect(void *setting);
@@ -657,7 +716,7 @@ void fldApplyCameraColorKeyWords(CampScene *scene, const s32 *colorSettings) {
 }
 
 void func_0025EE00(CampScene *scene) {
-    func_0025EC00();
+    func_0025EC00(scene);
     if (scene->sceneMode == 1) {
         func_00137888();
         return;

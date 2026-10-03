@@ -1380,10 +1380,7 @@ _211:
           RELEASE_CURRENT_BGM()
           SCREEN_FADE_B(0, 15)
           WAIT_FOR_TIMER_LIMIT(15)
-          push 645
-          push 28
-          push 1
-          COMM 0x0097
+          DEFER_BATTLE_EXIT(1, 28, 645)
           CALL_EVENT(event(e645))
           PREPARE_UNIT_MOTION_STATE(local_int[53], 0, 10, 20, 0)
           SET_SOLAR_OVERLAY_MODE(3)
@@ -1712,12 +1709,8 @@ proc_001e:
     WAIT_FOR_TIMER_LIMIT(20)
     RESET_STREAM_PLAYBACK()
     WAIT_FOR_STREAM_IDLE()
-    push 505
-    push 28
-    push 1
-    COMM 0x0097
-    push 830
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 28, 505)
+    SUBMIT_EVENT(830)
     return
   }
 _251:
@@ -1771,12 +1764,8 @@ proc_001f:
   WAIT_FOR_TIMER_LIMIT(20)
   RESET_STREAM_PLAYBACK()
   WAIT_FOR_STREAM_IDLE()
-  push 504
-  push 28
-  push 1
-  COMM 0x0097
-  push 781
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 28, 504)
+  SUBMIT_EVENT(781)
   return
   return
 proc_0020:
@@ -1831,12 +1820,8 @@ proc_0021:
     WAIT_FOR_TIMER_LIMIT(20)
     RESET_STREAM_PLAYBACK()
     WAIT_FOR_STREAM_IDLE()
-    push 507
-    push 28
-    push 1
-    COMM 0x0097
-    push 847
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 28, 507)
+    SUBMIT_EVENT(847)
     return
   }
 _257:
@@ -1902,12 +1887,8 @@ proc_0023:
   WAIT_FOR_TIMER_LIMIT(20)
   RESET_STREAM_PLAYBACK()
   WAIT_FOR_STREAM_IDLE()
-  push 501
-  push 28
-  push 1
-  COMM 0x0097
-  push 831
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 28, 501)
+  SUBMIT_EVENT(831)
   return
   return
 proc_0024:
@@ -2018,12 +1999,8 @@ warpscr_100:
   WAIT_FOR_TIMER_LIMIT(20)
   RESET_STREAM_PLAYBACK()
   WAIT_FOR_STREAM_IDLE()
-  push 502
-  push 28
-  push 1
-  COMM 0x0097
-  push 782
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 28, 502)
+  SUBMIT_EVENT(782)
   return
   return
 proc_0026:
@@ -2079,12 +2056,8 @@ proc_0027:
     WAIT_FOR_TIMER_LIMIT(20)
     RESET_STREAM_PLAYBACK()
     WAIT_FOR_STREAM_IDLE()
-    push 506
-    push 28
-    push 1
-    COMM 0x0097
-    push 832
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 28, 506)
+    SUBMIT_EVENT(832)
     return
   }
 _271:
@@ -2129,12 +2102,8 @@ proc_0028:
     WAIT_FOR_TIMER_LIMIT(20)
     RESET_STREAM_PLAYBACK()
     WAIT_FOR_STREAM_IDLE()
-    push 506
-    push 28
-    push 1
-    COMM 0x0097
-    push 832
-    COMM 0x0067
+    DEFER_BATTLE_EXIT(1, 28, 506)
+    SUBMIT_EVENT(832)
     return
   }
 _275:
@@ -2173,12 +2142,8 @@ proc_0029:
   WAIT_FOR_TIMER_LIMIT(20)
   RESET_STREAM_PLAYBACK()
   WAIT_FOR_STREAM_IDLE()
-  push 503
-  push 28
-  push 1
-  COMM 0x0097
-  push 783
-  COMM 0x0067
+  DEFER_BATTLE_EXIT(1, 28, 503)
+  SUBMIT_EVENT(783)
   return
   return
 proc_002a:
@@ -2259,10 +2224,7 @@ _283:
       SCREEN_FADE_B(0, 60)
       WAIT_FOR_TIMER_LIMIT(60)
       WAIT_FOR_TIMER_LIMIT(30)
-      push 648
-      push 14
-      push 1
-      COMM 0x0097
+      DEFER_BATTLE_EXIT(1, 14, 648)
       CALL_EVENT(event(e648))
       return
     }

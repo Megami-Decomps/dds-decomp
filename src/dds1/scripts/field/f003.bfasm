@@ -3098,10 +3098,7 @@ _395:
       RELEASE_CURRENT_BGM()
       SCREEN_FADE_B(0, 15)
       WAIT_FOR_TIMER_LIMIT(15)
-      push 646
-      push 27
-      push 1
-      COMM 0x0097
+      DEFER_BATTLE_EXIT(1, 27, 646)
       CALL_EVENT(event(e646))
       return
     }

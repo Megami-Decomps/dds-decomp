@@ -1,4 +1,4 @@
-#include "common.h"
+#include "file.h"
 
 /* Intrusive list node threaded through +0x4. */
 typedef struct FileNode {
@@ -42,26 +42,7 @@ typedef struct FileRequest {
     u16 slot; /* 0x6A */
 } FileRequest;
 
-/* Work area behind the fileMan task (see game/code_00288E70). */
-typedef struct FileManSlot {
-    FileRequest *request; /* 0x24 + 8 * slot */
-    u32 unk4;
-} FileManSlot;
-
-typedef struct FileManWork {
-    s32 sema;    /* 0x00 */
-    u8 pad04;
-    u8 nextSlot; /* 0x05 */
-    u8 pad06;
-    u8 freeSlots; /* 0x07 */
-    FileNode *head; /* 0x08: queued requests, linked through +0x4 */
-    FileNode *tail; /* 0x0C */
-    u8 pad10[8];
-    u32 unk18;   /* 0x18 */
-    u32 buffer;  /* 0x1C */
-    u8 pad20[4];
-    FileManSlot slots[4]; /* 0x24 */
-} FileManWork;
+FileManWork fileManagerWork __attribute__((section(".bss")));
 
 typedef struct FileCleanup {
     u8 kind;
@@ -74,8 +55,6 @@ typedef struct FileCleanup {
 extern s32 btlDestroyStageTask(void *);
 extern void sdfDevQueueReleaseState(u32);
 extern void sdfReleaseChipBlock(void *);
-
-extern FileManWork fileManagerWork;
 
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
