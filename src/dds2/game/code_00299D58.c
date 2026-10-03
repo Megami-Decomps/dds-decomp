@@ -7,18 +7,13 @@ extern void dspSetActive(s32 index);
 
 extern s32 dspStartEntry(s32 index);
 
-/* DSP request bookkeeping lives in the menu scene's own state word. */
-typedef struct MenuDspState {
-    u8 pad00[4];
-    u32 flags; /* 0x04 */
-} MenuDspState;
 
 
 extern u32 func_0029D790(u32, s32);
 
 extern void func_0026C900(void);
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
 
 extern void mnuMapPadMaskToFlags(s32);
 
@@ -52,20 +47,58 @@ typedef struct ProfileCapSkillList {
 typedef struct MenuItemScene {
     u8 pad00[4];
     u32 overlayFlags;
-    u8 pad08[0x94];
+    u8 pad08[0x4C];
+    s32 dispatchState;
+    u8 pad58[0x30];
+    u16 unk88;
+    u8 pad8A[0x12];
     MenuItemSelectionData *selectionData; /* 0x9C */
     u8 padA0[0x1C4];
-    u32 resetStateA; /* 0x264 */
+    s32 resetStateA; /* 0x264 */
     s32 pendingSkillCount; /* 0x268: consumed by capped-skill message processing */
     s32 pendingSkillIndex;
     u32 selectionApplied; /* 0x270 */
-    u8 pad274[0x174];
+    u8 pad274[0x78];
+    s32 extentLimit;
+    u8 pad2F0[0x78];
+    u32 unk368;
+    u8 pad36C[0x7C];
     u32 resetStateB; /* 0x3E8 */
     u8 pad3EC[0xFC];
     ProfileCapSkillList skillList;
     u8 pad51C[0xA820];
     s32 extentExhausted; /* 0xAD3C: selects the exhausted-extent message. */
+    u8 padAD40[0x9BC];
+    u32 thresholdMessageShown;
 } MenuItemScene;
+
+/* Reward/AP coefficients and scene-message thresholds share this 0xE0 record. */
+typedef struct FieldResourceRecord {
+    s16 category;
+    s16 id;
+    s16 unk04;
+    u8 unk06[2];
+    s16 unk08;
+    s16 apMultiplier;
+    s16 unk0C;
+    s16 unk0E;
+    u32 thresholds[4];
+    u8 pad20[0xC0];
+} FieldResourceRecord;
+
+extern FieldResourceRecord *D_00435E18;
+extern s32 func_001514A8(void);
+extern s16 func_001514B8(void);
+extern s64 func_002C4038(s32, s32 *, u64, u64);
+extern s32 evtGetMessageWindowControlState(void);
+extern void func_00299B98(MenuItemScene *, s32);
+extern void kwlnFadeInStart(s8, s8, s8, s32);
+extern void mnuSetPopupEntryFlagged(s32, s32);
+extern s32 brsStartPartyPanelResourcesOnce(s32);
+extern void func_00341CF8(void);
+extern s32 btlHasPendingRuntimeActivity(void);
+extern char D_003D64E4[];
+extern char D_003D6458[];
 
 INCLUDE_ASM(const s32, "game/code_00299D58", brsMessageInputStep);
 
@@ -192,32 +225,32 @@ void prfCapPresentMessages(MenuItemScene *scene) {
     }
 }
 
-u32 func_0029A1E0(void) {
+u32 func_0029A1E0(MenuItemScene *scene) {
     return 0;
 }
 
-s32 mnuRequestContextLatchedSceneDsp(MenuDspState *state)
+s32 mnuRequestContextLatchedSceneDsp(MenuItemScene *state)
 {
     if (mdlFlagTest(0xB8F) == 0) {
-        if (state->flags & 1) {
+        if (state->overlayFlags & 1) {
             if (mdlFlagTest(0x915) != 0) {
                 return 0;
             }
             dspSetActive(1);
             dspStartEntry(1);
             mdlFlagSet(0x915);
-            state->flags |= 2;
+            state->overlayFlags |= 2;
             return 1;
         }
     }
     return 0;
 }
 
-s32 mnuRequestContextClearSceneDsp(MenuDspState *state)
+s32 mnuRequestContextClearSceneDsp(MenuItemScene *state)
 {
     if (mdlFlagTest(0xB8F) == 0) {
         if (mdlFlagTest(0x290) != 0) {
-            if (state->flags & 2) {
+            if (state->overlayFlags & 2) {
                 return 0;
             }
             if (mdlFlagTest(0x817) != 0) {
@@ -233,10 +266,83 @@ s32 mnuRequestContextClearSceneDsp(MenuDspState *state)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A2F8);
+/* Request the weighted-profile message bucket only once. */
+s32 func_0029A2F8(MenuItemScene *scene) {
+    s32 profileIndex;
+    u32 value;
+    s32 rank;
+    FieldResourceRecord *record;
+
+    if (scene->thresholdMessageShown == 0) {
+        profileIndex = func_001514A8();
+        if (profileIndex == -1) {
+            return 0;
+        }
+        value = scene->unk88 * D_00435E18[profileIndex].unk0E;
+        value += func_001514B8() * D_00435E18[profileIndex].unk0C;
+        record = &D_00435E18[profileIndex];
+        rank = 0;
+        while (rank < 4 && value < record->thresholds[rank]) {
+            rank++;
+        }
+        dspSetActive(1);
+        dspStartEntry(rank + 0x9E);
+        scene->thresholdMessageShown = 1;
+        return 1;
+    }
+    return 0;
+}
 
 
-INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A400);
+s64 func_0029A400(void *task) {
+    s64 result;
+    MenuItemScene *scene = (MenuItemScene *)kwlnTaskGetUserValue(task);
+    s32 *dispatchStatus = &scene->dispatchState;
+
+    result = func_002C4038((s32)scene + 8, dispatchStatus, 0, (s32)task);
+    if (result == 0) {
+        if (*dispatchStatus == 0 &&
+            (result = evtGetMessageWindowControlState(), result == 0)) {
+            if (scene->resetStateA < scene->extentLimit ||
+                scene->pendingSkillCount > 0 ||
+                scene->selectionApplied != 0) {
+                if ((scene->pendingSkillCount == 0 ||
+                     scene->resetStateA == 0) &&
+                    scene->selectionApplied == 0) {
+                    func_00299B98(scene, 0);
+                    mnuProcessItemSelection((u32)scene);
+                }
+                prfCapPresentMessages(scene);
+                return 0;
+            }
+            if (func_0029A1E0(scene) != 0) {
+                return 0;
+            }
+            if (mnuRequestContextLatchedSceneDsp(scene) != 0) {
+                return 0;
+            }
+            if (mnuRequestContextClearSceneDsp(scene) != 0) {
+                return 0;
+            }
+            if (func_0029A2F8(scene) != 0) {
+                return 0;
+            }
+            if (scene->unk368 == 0) {
+                kwlnFadeInStart(0, 0, 0, 0xF);
+                mnuSetPopupEntryFlagged((s32)dispatchStatus, (s32)D_003D64E4);
+                return 0;
+            }
+            if (btlHasPendingRuntimeActivity() != 0) {
+                return 0;
+            }
+            brsStartPartyPanelResourcesOnce((s32)scene);
+            mnuSetPopupEntryFlagged((s32)dispatchStatus, (s32)D_003D6458);
+            func_00341CF8();
+        }
+        result = 0;
+    }
+    return result;
+}
 
 
 s64 func_0029A588(s32 request) {
