@@ -104,6 +104,29 @@ s64 f(s32 cb) { return mnuRequest(func_00101958(), 2, cb); }
 that genuinely recurs. Wrapping a one-off call in an inline just to get
 `jal` is a codegen lever, not source.
 
+## Lexical nested helpers and the static chain
+
+GNU C nested functions use `$v0` as a hidden static-chain register on EE. A
+retail helper is strong evidence for lexical nesting only when both sides of
+that interface are present:
+
+- immediately before the direct call, the owner copies its frame address into
+  `$v0`; and
+- the helper saves incoming `$v0` to its own frame independently of its normal
+  `$a0`--`$a3` arguments.
+
+Write that helper inside its sole owner. Even when the helper does not read a
+captured variable, gcc gives the incoming static chain a stack home. That
+prevents the helper's final call from becoming a sibling `j` and naturally
+produces its framed `jal` form. It also proves that the helper and owner belong
+to the same source unit. The paired `sdfMovie` copy helpers and owners have this
+shape; keeping each pair together reproduces both the seven-instruction helper
+and the owner's late ordinary branch.
+
+Do not make a helper nested merely to suppress a tail call. Require the
+two-sided `$v0` evidence and a single lexical owner. Address-taken nested
+functions use trampolines and are a different case.
+
 ## Small shape rules (confirmed while matching)
 
 - `a && b && c` bit tests fold into one masked compare. Nested `if`s keep
