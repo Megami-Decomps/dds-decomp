@@ -204,9 +204,7 @@
       "object": "build/dds2/dev/code_00328FA8.o",
       "expected_symbols": 5,
       "expected_shifted_symbols": 3,
-      "fallback_symbols": [
-        "func_00328FA8"
-      ],
+      "fallback_symbols": [],
       "retained_sections": [
         {
           "section": ".rodata",
