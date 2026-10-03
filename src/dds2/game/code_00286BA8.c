@@ -296,7 +296,44 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287AF8);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287C20);
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00288158);
+extern void func_0026C900(void);
+extern void mnuUpdateMantraDrawPool(u32 pool);
+extern void func_0026E788(s32, s32, s32, s32, s32, s32, s32);
+extern s32 mnuDrawLoadedProgressPanels(s32, MenuProgressHost *, s32);
+extern void evtStageTestSelectEntryWithoutInitialValue(u16, u32);
+extern void mnuDrawCurrentProfilePanel(s32, s32, s32, MenuProgressHost *, s32);
+extern s8 evtStageTestUpdate(s32);
+extern u8 D_00380818[];
+
+s32 func_00288158(void) {
+    MnuStatusResource *work = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
+    f32 ratio;
+    s32 value;
+
+    func_0026C900();
+    mnuUpdateMantraDrawPool(*(u32 *)((u8 *)work + 0xC00));
+    ratio = 0.0f;
+    if (((*(u32 *)((u8 *)work + 0x218) >> 2) & 1) != 0) {
+        if (*(s32 *)((u8 *)work + 0xBFC) < 30) {
+            (*(s32 *)((u8 *)work + 0xBFC))++;
+        }
+        ratio = (f32)*(s32 *)((u8 *)work + 0xBFC) / 30.0f;
+    }
+    value = (s32)(ratio * 128.0f);
+    func_0026E788(0, 0, 0, value, 0x68, 0, 0x4A);
+    func_0026E788(0, 0, 0, value, 0x69, 0, 0x4A);
+    if (mnuDrawLoadedProgressPanels((s32)((u8 *)work + 0x54), work->progressHost, 0x53) != 0) {
+        if (((*(u32 *)((u8 *)work + 0x218) >> 3) & 1) == 0) {
+            evtStageTestSelectEntryWithoutInitialValue(*(u16 *)((u8 *)work + 0x58), 0);
+        }
+        *(u32 *)((u8 *)work + 0x218) |= 8;
+    }
+    mnuDrawCurrentProfilePanel(0xE80, 0x5B8, 1, work->progressHost, 0x53);
+    if (evtStageTestUpdate((s32)D_00380818) >= 2) {
+        *(u32 *)((u8 *)work + 0x218) |= 4;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_002882B8);
 

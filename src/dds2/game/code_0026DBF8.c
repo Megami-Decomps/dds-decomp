@@ -613,6 +613,7 @@ void mnuDrawMantraCostIconOffset(u32 unused1, u32 unused2, u32 third, u32 record
     func_0026E788(0, 0, third, position, markers[index] + 8, 0, packet);
 }
 
+extern s32 func_0026F1F0(s32 x, s32 y, s32 depth, MantraDisplayNode *node, s32 index, s32 drawArg);
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026F1F0);
 
 MantraDisplayNode *mnuAllocateDisplayListNode(void) {
@@ -738,7 +739,46 @@ void mnuReleaseDisplayListNodes(u32 state) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026F8A0);
+s32 func_0026F8A0(s32 x, s32 y, s32 depth, MantraListState *state, s32 amount, s32 drawArg) {
+    s32 index = 0;
+    u32 record;
+    s32 offset;
+    f32 fadeWeight = 0.0f;
+    MantraDisplayNode *node;
+
+    node = state->head;
+    if (mnuDrawMantraSineFade(x, y, depth, state->unk0, amount, drawArg) != 0) {
+        state->unk0 = 0;
+    } else {
+        state->unk0++;
+    }
+
+    if (node == NULL) {
+        if (state->unk2C != 0) {
+            state->unk2C--;
+            fadeWeight = (f32)state->unk2C / 30.0f;
+            fadeWeight = sdfSinPoly(fadeWeight * 6.2831852f + (-1.5707963f));
+            fadeWeight = (fadeWeight + 1.0f) * 0.5f;
+        }
+        mnuDrawMantraCostIcon(x, y, depth, state->entries[state->index], amount, drawArg);
+        record = state->entries[state->index];
+        offset = (s32)((f32)amount * fadeWeight);
+        mnuDrawMantraCostIconOffset(x, y, depth, record, offset, drawArg);
+        record = state->entries[state->index];
+        mnuDrawMantraCostBadge(x, y, depth, (u8 *)record, amount, drawArg);
+        return 1;
+    }
+    do {
+        if (func_0026F1F0(x, y, depth, node, index, drawArg) != 0) {
+            node = (MantraDisplayNode *)mnuReleaseDisplayListNodeAndGetNext(node);
+            state->head = node;
+        } else {
+            node = node->next;
+        }
+        index++;
+    } while (node != NULL);
+    return 0;
+}
 
 void func_0026FAA8(s32 state) {
     ((MantraListState *)state)->unk2C = 0x1e;

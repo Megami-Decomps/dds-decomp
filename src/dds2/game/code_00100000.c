@@ -29,6 +29,18 @@ extern KwlnTask *kwlnActiveTaskHead;
 extern KwlnTask *D_00435BEC;
 extern s32 kwlnActiveTaskCount;
 
+extern u8 D_00435BB8[];
+extern u8 D_00435BC0[];
+extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
+extern s32 func_00101C50(void);
+extern s32 func_00101D30(void);
+extern s32 kwlnRenderFrame(void);
+extern u32 func_00102740(void);
+extern u32 func_00102768(void);
+extern s32 frFontAdvanceSelectedGlyphSlot(void);
+extern void frFontReleaseAll(void);
+extern s32 func_001A1810(void);
+
 INCLUDE_ASM(const s32, "game/code_00100000", func_00100000);
 
 INCLUDE_ASM(const s32, "game/code_00100000", _start);
@@ -37,7 +49,41 @@ INCLUDE_ASM(const s32, "game/code_00100000", func_001001C8);
 
 INCLUDE_ASM(const s32, "game/code_00100000", func_001001D0);
 
-INCLUDE_ASM(const s32, "game/code_00100000", func_001001D8);
+s32 func_001001D8(void) {
+    evtResetDisplayProjectionAndVectorState();
+    func_001038D0();
+    kwlnTaskCreate(D_00435BB8, 0, 0, 0, func_00101C50, 0, 0);
+    kwlnTaskCreate(D_00435BC0, 0x2710, 0, 0, func_00101D30, 0, 0);
+    kwlnTaskCreate("RequestDraw", 0x4E20, 0, 0, kwlnRenderFrame, 0, 0);
+    kwlnTaskCreate("basic_main", 0x3FC, 1, 1, func_00102740, 0, 0);
+    kwlnTaskCreate("basic_draw", 0x2B09, 1, 1, func_00102768, 0, 0);
+    func_0019BEB8(0x100, 0x200);
+    kwlnTaskCreate("font_sys", 0x4E1F, 0, 0, frFontAdvanceSelectedGlyphSlot, frFontReleaseAll, 0);
+    fileManInit();
+    itfMesInit();
+    mnuInitializeTitleAudioAndEffects();
+    sdfDevConsInit();
+    btlInitializeCommandSemaphoreSlots();
+    fldCreateFieldEffectTask();
+    fldInitializeDisplayAndSceneSound();
+    sdfResetChannels();
+    btlLoadInputIconsAndSystemSounds();
+    mnuLoadCampResources();
+    mnuCreateMovieManagerTask();
+    sdfCreateRuntimeTask();
+    D_00435B88 = 0;
+    D_00435B80 = 0;
+    func_0010FE50(0x2710);
+    kwlnInitMagicState();
+    kwlnDebugTaskCreate();
+    dds3AdminSubmitModeRequest(0, 0, 0, 0);
+    func_001034E0();
+    kwlnTaskCreate("DbgDevDump", 0x5215, 0, 0, func_001A1810, 0, 0);
+    kwlnFadeClear();
+    evtEnsureSolarOverlayTaskAndResetPhase();
+    fldCreateEncounterTask();
+    return dds3AdminSubmitModeRequest(1, 0, 0, 0);
+}
 
 void func_001003E8(void) {
     D_00435B88 = 1;
