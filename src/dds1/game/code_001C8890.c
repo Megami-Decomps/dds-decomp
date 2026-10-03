@@ -427,6 +427,8 @@ typedef struct BattleActionLinkState {
     BtlUnit *unit;
     u8 pad1C[0x44];
     s32 actorIndices;
+    u8 pad64[0x1C];
+    struct BtlOperandGroup *groups; /* 0x80 */
 } BattleActionLinkState;
 
 typedef struct ActionUnit {
@@ -465,7 +467,9 @@ typedef struct BtlCategoryTableEntry {
     u8 flags00;
     u8 pad01[2];
     u8 kind03;
-    u8 pad04[0x34];
+    u8 pad04[0x2C];
+    s32 categoryType;
+    u8 pad34[4];
 } BtlCategoryTableEntry;
 
 typedef struct BtlStatArgs {
@@ -1898,11 +1902,45 @@ s32 btlClassifyActionResult(u8 *arg0, u32 arg1, s32 arg2, u32 arg3, s32 arg4, u8
     return code;
 }
 
-s32 btlActionEntryIsEmpty(s32 index, u8 *slot, u8 *entry) {
+typedef struct BtlOperandSlot {
+    u8 pad00[8];
+    s32 kind;
+} BtlOperandSlot;
+
+/* Operand payload words remain unknown; only the flag bits are identified. */
+typedef struct BtlOperandEntry {
+    s32 unk00;
+    s32 unk04;
+    s32 unk08;
+    s32 unk0C;
+    s32 unk10;
+    u8 pad14[4];
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    u8 pad24[2];
+    u16 flags;
+} BtlOperandEntry;
+
+/* Retained group: a header followed by 64 operands. Reset leaves the payload intact. */
+typedef struct BtlOperandGroup {
+    u8 count;
+    u8 pad01[7];
+    s32 unk08;
+    s32 unk0C;
+    u8 unk10;
+    u8 pad11[3];
+    u8 unk14;
+    u8 pad15[7];
+    BtlOperandEntry entries[64];
+} BtlOperandGroup;
+
+/* Test whether the operand is empty, subject to command-category and slot-kind exclusions. */
+s32 btlActionEntryIsEmpty(s32 index, BtlOperandSlot *slot, BtlOperandEntry *entry) {
     s32 kind;
 
     if (index >= 0) {
-        switch (*(s32 *)(datCommandRecords + index * 56 + 0x30)) {
+        switch (((BtlCategoryTableEntry *)datCommandRecords)[index].categoryType) {
         case 1:
         case 2:
         case 9:
@@ -1915,25 +1953,25 @@ s32 btlActionEntryIsEmpty(s32 index, u8 *slot, u8 *entry) {
         }
     }
     if (slot != 0) {
-        kind = *(s32 *)(slot + 8);
+        kind = slot->kind;
         if (kind == 2 || kind == 0x10000) {
             return 0;
         }
     }
-    if ((*(u16 *)(entry + 0x26) & 1) != 0) {
+    if ((entry->flags & 1) != 0) {
         return 0;
     }
-    if ((*(u16 *)(entry + 0x26) & 2) != 0) {
+    if ((entry->flags & 2) != 0) {
         return 0;
     }
-    if (*(s32 *)(entry + 0x00) == 0) {
-        if (*(s32 *)(entry + 0x04) == 0) {
-            if (*(s32 *)(entry + 0x08) == 0) {
-                if (*(s32 *)(entry + 0x0C) == 0) {
-                    if (*(s32 *)(entry + 0x1C) == 0) {
-                        if (*(s32 *)(entry + 0x20) == 0) {
-                            if (*(s32 *)(entry + 0x10) == 0) {
-                                if (*(s32 *)(entry + 0x18) == 0) {
+    if (entry->unk00 == 0) {
+        if (entry->unk04 == 0) {
+            if (entry->unk08 == 0) {
+                if (entry->unk0C == 0) {
+                    if (entry->unk1C == 0) {
+                        if (entry->unk20 == 0) {
+                            if (entry->unk10 == 0) {
+                                if (entry->unk18 == 0) {
                                     return 1;
                                 }
                             }
@@ -1950,16 +1988,14 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001D1218);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001D12A0);
 
-typedef struct BattleIndexEntry {
-    u8 unk0;
-    u8 pad1[7];
-    s32 unk8;
-    u8 padC[4];
-    u8 unk10;
-    u8 pad11[3];
-    u8 unk14;
-} BattleIndexEntry;
+typedef struct BtlIndexList {
+    s32 capacity;       /* 0x00: allocated entry count */
+    s32 count;          /* 0x04: live entry count */
+    u32 *entries;       /* 0x08: points just past this header */
+} BtlIndexList;
 
+
+/* Owns an index list and an SDK allocation containing thirteen operand groups. */
 typedef struct BattleIndexWork {
     s32 unk00;
     s32 unk04;
@@ -1979,22 +2015,25 @@ typedef struct BattleIndexWork {
     s32 unk34;
     s32 unk38;
     s32 unk3C;
-    s32 indices;
-    u8 pad44[0xC];
+    BtlIndexList *indices;
+    u8 pad44[4];
+    u64 unk48;
     s32 unk50;
     s32 unk54;
     s32 unk58;
     u16 unk5C;
     u8 unk5E;
     u8 pad5F;
-    u32 device;
+    BtlOperandGroup *groups;
+    u32 allocationHandle;
 } BattleIndexWork;
 
+/* Reset work status and group headers, preserving the retained payload and allocation. */
 void btlResetIndexWork(BattleIndexWork *work) {
     u32 i;
     s32 offset;
-    BattleIndexEntry *entry;
-    BattleIndexEntry *next;
+    BtlOperandGroup *entry;
+    BtlOperandGroup *group;
     work->unk00 = -1;
     work->unk04 = -1;
     work->unk08 = -1;
@@ -2015,41 +2054,44 @@ void btlResetIndexWork(BattleIndexWork *work) {
     work->unk58 = 0;
     work->unk5C = 0;
     work->unk5E = 0;
+    /* SDK addresses are words; offset-first arithmetic is required for matching. */
     for (i = 0, offset = 0; i < 13; i++) {
-        *(u8 *)(offset + work->device) = 0;
-        entry = (BattleIndexEntry *)(offset + work->device);
-        entry->unk8 = 0;
+        ((BtlOperandGroup *)(offset + (u32)work->groups))->count = 0;
+        entry = (BtlOperandGroup *)(offset + (u32)work->groups);
+        entry->unk08 = 0;
         entry->unk14 = 0;
-        next = (BattleIndexEntry *)(offset + work->device);
-        offset += 0xA1C;
-        next->unk10 = 0;
+        group = (BtlOperandGroup *)(offset + (u32)work->groups);
+        offset += sizeof(BtlOperandGroup);
+        group->unk10 = 0;
     }
     btlClearIndexList(work->indices);
 }
 
-void btlInitBattleIndexWork(u8 *object) {
+/* Allocate the index list and retained groups, then initialize their headers. */
+void btlInitBattleIndexWork(BattleIndexWork *object) {
     u32 handle;
     u32 value;
-    *(u32 *)(object + 0x40) = (u32)btlAllocateIndexList(13);
+    object->indices = btlAllocateIndexList(13);
     handle = sdfAllocGeneralBlock(0x836C);
     value = sdfResourceRetainAddress(handle);
-    *(u32 *)(object + 0x64) = handle;
-    *(u32 *)(object + 0x60) = value;
-    *(u64 *)(object + 0x48) = 0;
+    object->allocationHandle = handle;
+    object->groups = (BtlOperandGroup *)value;
+    object->unk48 = 0;
     btlResetIndexWork(object);
 }
 
 extern void btlFreeIndexList();
 
-void btlReleaseObjectBuffers(u8 *object) {
-    u32 handle = *(u32 *)(object + 0x64);
+/* Release each owned buffer once. The cached group address is deliberately not cleared. */
+void btlReleaseObjectBuffers(BattleIndexWork *object) {
+    u32 handle = object->allocationHandle;
     if (handle != 0) {
         sdfReleaseResourceAllocation(handle);
-        *(u32 *)(object + 0x64) = 0;
+        object->allocationHandle = 0;
     }
-    if (*(u32 *)(object + 0x40) != 0) {
-        btlFreeIndexList(*(u32 *)(object + 0x40));
-        *(u32 *)(object + 0x40) = 0;
+    if (object->indices != 0) {
+        btlFreeIndexList(object->indices);
+        object->indices = 0;
     }
 }
 
@@ -4704,11 +4746,12 @@ s32 btlFindUnitByModeFlagged(s32 arg0) {
     return 0;
 }
 
+/* Allocate a 12-byte native header followed by capacity words. */
 void *btlAllocateIndexList(s32 capacity) {
     u8 *list = sdfAllocAndClearQuadwords(capacity * 4 + 12);
-    *(s32 *)list = capacity;
-    *(u32 **)(list + 8) = (u32 *)(list + 12);
-    *(s32 *)(list + 4) = 0;
+    ((BtlIndexList *)list)->capacity = capacity;
+    ((BtlIndexList *)list)->entries = (u32 *)(list + 12);
+    ((BtlIndexList *)list)->count = 0;
     return list;
 }
 
@@ -4716,24 +4759,28 @@ void btlFreeIndexList(u32 ptr) {
     sdfReleaseChipBlock(ptr);
 }
 
-void btlAppendIndexListEntry(s32 arg0, u32 arg1) {
-    s32 temp_v0;
+/* Append one word; the caller must keep the live count within the allocated capacity. */
+void btlAppendIndexListEntry(s32 list, u32 entry) {
+    s32 index;
 
-    temp_v0 = *(s32 *)(arg0 + 4);
-    *(s32 *)(arg0 + 4) = temp_v0 + 1;
-    *(u32 *)(temp_v0 * 4 + *(s32 *)(arg0 + 8)) = arg1;
+    index = ((BtlIndexList *)list)->count;
+    ((BtlIndexList *)list)->count = index + 1;
+    ((BtlIndexList *)list)->entries[index] = entry;
 }
 
-void btlClearIndexList(s32 arg0) {
-    *(u32 *)(arg0 + 4) = 0;
+/* Clear the live count without changing storage or its existing entries. */
+void btlClearIndexList(s32 list) {
+    ((BtlIndexList *)list)->count = 0;
 }
 
-u32 btlGetIndexListCount(s32 arg0) {
-    return *(u32 *)(arg0 + 4);
+/* Return the number of live entries, not the allocated capacity. */
+u32 btlGetIndexListCount(s32 list) {
+    return ((BtlIndexList *)list)->count;
 }
 
-u32 btlGetIndexListEntry(s32 arg0, s32 arg1) {
-    return *(u32 *)(arg1 * 4 + *(s32 *)(arg0 + 8));
+/* Return one stored word; the caller supplies an in-range index. */
+u32 btlGetIndexListEntry(s32 list, s32 index) {
+    return ((BtlIndexList *)list)->entries[index];
 }
 
 void btlCopyIndexList(s32 destination, s32 source) {
@@ -4747,19 +4794,20 @@ void btlCopyIndexList(s32 destination, s32 source) {
     }
 }
 
-void btlSwapIndexListEntries(s32 arg0, s32 arg1, s32 arg2) {
-    s32 *temp_v0;
-    s32 temp_v1;
-    s32 temp_v2;
+/* Swap two stored words without changing the live count. */
+void btlSwapIndexListEntries(s32 list, s32 firstIndex, s32 secondIndex) {
+    s32 *entries;
+    s32 first;
+    s32 second;
 
-    if (arg1 == arg2) {
+    if (firstIndex == secondIndex) {
         return;
     }
-    temp_v0 = *(s32 **)(arg0 + 8);
-    temp_v1 = temp_v0[arg1];
-    temp_v2 = temp_v0[arg2];
-    temp_v0[arg1] = temp_v2;
-    temp_v0[arg2] = temp_v1;
+    entries = (s32 *)((BtlIndexList *)list)->entries;
+    first = entries[firstIndex];
+    second = entries[secondIndex];
+    entries[firstIndex] = second;
+    entries[secondIndex] = first;
 }
 
 u32 btlFindListIndex(s32 arg0, s32 arg1) {
@@ -5250,6 +5298,7 @@ u32 btlIsRuntimeFlag2000Clear(void) {
     return ((*(s32 *)(temp_v0 + 0x160) >> 0xd) ^ 1U) & 1;
 }
 
+
 typedef struct WorldMotionData {
     u8 pad0[0x20];
     s32 unk20;
@@ -5279,7 +5328,6 @@ extern void dds3SetWorldCameraObject(void *, s32);
 extern f32 dds3GetCameraFieldOfView(s32);
 
 extern void func_00106488(f32);
-
 void btlRefreshWorldCameraHandle(void) {
     WorldObj *object;
     s32 handle;
@@ -5514,12 +5562,13 @@ void btlAimLinkedUnitAtMuzzle(u8 *action) {
 }
 INCLUDE_ASM(const s32, "game/code_001C8890", btlMatchFirstLinkedActorFlags);
 
+/* Check actor status, linked-group marks, and owner restrictions before use. */
 s32 btlCanUseLinkedActor(s32 actor) {
     u32 status = *(u32 *)(actor + 0x104);
-    s32 linked;
+    BattleActionLinkState *linked;
     s32 category;
     u32 count;
-    u8 *entry;
+    BtlOperandGroup *entry;
     u32 i;
 
     switch (status) {
@@ -5531,18 +5580,18 @@ s32 btlCanUseLinkedActor(s32 actor) {
     default:
         return 1;
     }
-    linked = *(s32 *)(actor + 0xF4);
+    linked = ((ActionUnit *)actor)->link;
     if (linked == 0) {
         return 1;
     }
-    count = btlGetIndexListCount(*(s32 *)(linked + 0x60));
-    entry = *(u8 **)(linked + 0x80);
-    for (i = 0; i < count; i++, entry += 0xA1C) {
-        if (entry[0x14] != 0) {
+    count = btlGetIndexListCount(linked->actorIndices);
+    entry = linked->groups;
+    for (i = 0; i < count; i++, entry++) {
+        if (entry->unk14 != 0) {
             return 0;
         }
     }
-    if (*(u16 *)(*(s32 *)(linked + 0x18) + 0x12E) & 0x480) {
+    if (*(u16 *)((u8 *)linked->unit + 0x12E) & 0x480) {
         return 0;
     }
     category = *(s32 *)(actor + 0x114);
@@ -5552,18 +5601,19 @@ s32 btlCanUseLinkedActor(s32 actor) {
     return 1;
 }
 
+/* Return whether a live linked group has its byte at 0x10 marked. */
 u32 btlHasMarkedEntry10(u8 *object) {
-    u8 *resource = *(u8 **)(object + 0xF4);
+    BattleActionLinkState *resource = ((ActionUnit *)object)->link;
     u32 count;
     u32 index;
-    u8 *entry;
+    BtlOperandGroup *entry;
     if (resource == 0) {
         return 0;
     }
-    count = btlGetIndexListCount(*(s32 *)(resource + 0x60));
-    entry = *(u8 **)(resource + 0x80);
-    for (index = 0; index < count; index++, entry += 0xA1C) {
-        if (entry[0x10] != 0) {
+    count = btlGetIndexListCount(resource->actorIndices);
+    entry = resource->groups;
+    for (index = 0; index < count; index++, entry++) {
+        if (entry->unk10 != 0) {
             return 1;
         }
     }
@@ -5600,40 +5650,42 @@ s32 btlIsEntryHeightWithinLimit(void) {
     return 1;
 }
 
+/* Find an unmarked linked kind-two slot whose unit is not disabled. */
 s32 btlHasIdleLinkedSlotKindTwo(u8 *actor) {
-    u8 *linked = *(u8 **)(actor + 0xF4);
+    BattleActionLinkState *linked = ((ActionUnit *)actor)->link;
     u32 count;
     u32 i;
-    u8 *entry;
+    BtlOperandGroup *entry;
     if (linked == NULL) {
         return 0;
     }
     i = 0;
-    count = btlGetIndexListCount(*(s32 *)(linked + 0x60));
-    entry = *(u8 **)(linked + 0x80);
-    for (; i < count; i++, entry += 0xA1C) {
-        if (entry[0x10] == 0 && *(s32 *)(entry + 8) == 1 && *(s32 *)(entry + 0xC) == 2 &&
-            !(*(u32 *)(btlGetIndexListEntry(*(s32 *)(linked + 0x60), i) + 0x110) & 0x80002000)) {
+    count = btlGetIndexListCount(linked->actorIndices);
+    entry = linked->groups;
+    for (; i < count; i++, entry++) {
+        if (entry->unk10 == 0 && entry->unk08 == 1 && entry->unk0C == 2 &&
+            !(((BtlUnit *)btlGetIndexListEntry(linked->actorIndices, i))->flags & 0x80002000)) {
             return 1;
         }
     }
     return 0;
 }
 
+/* Find a type-two linked group whose associated unit is not disabled. */
 s32 btlHasEligibleLinkedEntryTypeTwo(u8 *actor) {
-    u8 *linked = *(u8 **)(actor + 0xF4);
+    BattleActionLinkState *linked = ((ActionUnit *)actor)->link;
     u32 count;
     u32 i;
-    u8 *entry;
+    BtlOperandGroup *entry;
     if (linked == NULL) {
         return 0;
     }
     i = 0;
-    count = btlGetIndexListCount(*(s32 *)(linked + 0x60));
-    entry = *(u8 **)(linked + 0x80);
-    for (; i < count; i++, entry += 0xA1C) {
-        if (*(s32 *)(entry + 8) == 2 &&
-            !(*(u32 *)(btlGetIndexListEntry(*(s32 *)(linked + 0x60), i) + 0x110) & 0x80002000)) {
+    count = btlGetIndexListCount(linked->actorIndices);
+    entry = linked->groups;
+    for (; i < count; i++, entry++) {
+        if (entry->unk08 == 2 &&
+            !(((BtlUnit *)btlGetIndexListEntry(linked->actorIndices, i))->flags & 0x80002000)) {
             return 1;
         }
     }
