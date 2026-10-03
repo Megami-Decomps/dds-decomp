@@ -6,11 +6,15 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from collections import Counter
+import struct
+from collections import Counter, defaultdict, deque
 from pathlib import Path
 
 import fld
 import field_world
+import flw0
+import flw0_flow
+import flw0_profiles
 import inf
 import wap
 
@@ -404,11 +408,107 @@ def _render_interaction_dot(graph: dict, area_id: str) -> str:
     return "\n".join(lines) + "\n"
 
 
-def render_dot(graph: dict, interaction_area: str | None = None) -> str:
+def _render_event_dot(graph: dict, field_id: str) -> str:
+    """Render placement-rooted procedure flow for one ordinary field script."""
+
+    field_number = int(field_id[1:])
+    entries = [
+        row
+        for row in graph.get("eventEntries", ())
+        if row["field"] == field_number
+    ]
+    procedures = {
+        row["id"]: row
+        for row in graph.get("scriptProcedures", ())
+        if row["field"] == field_number and row["reachableFromPlacement"]
+    }
+    if not entries:
+        raise FieldGraphError(f"no event placements found for {field_id}")
+    procedure_edges = [
+        row
+        for row in graph["scriptProcedureEdges"]
+        if row["field"] == field_number and row["source"] in procedures
+    ]
+    event_edges = [
+        row
+        for row in graph["eventScriptEdges"]
+        if row["field"] == field_number and row["source"] in procedures
+    ]
+
+    lines = [
+        "digraph dds_field_event_flow {",
+        "  graph [rankdir=LR];",
+        '  node [fontname="sans-serif"];',
+        '  edge [fontname="sans-serif" fontsize=9];',
+    ]
+    for entry in entries:
+        label = f"{entry['area']} | {entry['actor'] or 'unnamed'} | {entry['label']}"
+        attributes = [f"label={json.dumps(label)}", 'shape="diamond"']
+        if entry["procedure"] is None:
+            attributes.extend(('style="dashed"', 'color="gray"'))
+        lines.append(f"  {json.dumps(entry['id'])} [{', '.join(attributes)}];")
+    for procedure in procedures.values():
+        calls = sorted(
+            procedure["nativeCalls"], key=lambda row: (-row["count"], row["id"])
+        )
+        command_names = [
+            row.get("name", f"COMM_{row['id']:03X}") for row in calls[:3]
+        ]
+        call_count = sum(row["count"] for row in calls)
+        label = (
+            f"{procedure['name']} [{procedure['index']}] | "
+            f"{call_count} native calls"
+        )
+        if command_names:
+            label += " | " + ", ".join(command_names)
+        lines.append(
+            f"  {json.dumps(procedure['id'])} "
+            f"[label={json.dumps(label)}, shape=box];"
+        )
+    event_targets = {edge["target"]: edge for edge in event_edges}
+    for target, edge in sorted(event_targets.items()):
+        label = edge.get("event", f"event {edge['eventId']}")
+        attributes = [f"label={json.dumps(label)}", 'shape="ellipse"']
+        if not edge["targetPresent"]:
+            attributes.extend(('style="dashed"', 'color="gray"'))
+        lines.append(f"  {json.dumps(target)} [{', '.join(attributes)}];")
+    for entry in entries:
+        if entry["procedure"] is not None:
+            lines.append(
+                f"  {json.dumps(entry['id'])} -> {json.dumps(entry['procedure'])} "
+                f"[label={json.dumps('event ' + str(entry['eventIndex']))}];"
+            )
+    for edge in procedure_edges:
+        label = edge["kind"]
+        if edge["count"] > 1:
+            label += f" x{edge['count']}"
+        lines.append(
+            f"  {json.dumps(edge['source'])} -> {json.dumps(edge['target'])} "
+            f"[label={json.dumps(label)}];"
+        )
+    for edge in event_edges:
+        label = "CALL_EVENT"
+        if edge["count"] > 1:
+            label += f" x{edge['count']}"
+        lines.append(
+            f"  {json.dumps(edge['source'])} -> {json.dumps(edge['target'])} "
+            f"[label={json.dumps(label)}];"
+        )
+    lines.append("}")
+    return "\n".join(lines) + "\n"
+
+
+def render_dot(
+    graph: dict,
+    interaction_area: str | None = None,
+    event_field: str | None = None,
+) -> str:
     """Render the world graph or one area's INF interaction state machines."""
 
     if interaction_area is not None:
         return _render_interaction_dot(graph, interaction_area)
+    if event_field is not None:
+        return _render_event_dot(graph, event_field)
 
     lines = [
         "digraph dds_field_world {",
@@ -471,10 +571,243 @@ def _placement_names(source: Path) -> Counter[str]:
     return result
 
 
+def _event_entries(
+    source: Path,
+    field_number: int,
+    area_number: int,
+    procedures: dict[str, int],
+) -> list[dict]:
+    """Read exact kind-1 placement-to-event links from canonical FLD2 source."""
+
+    data = fld.encode(fld.parse_source(source.read_text(encoding="utf-8")))
+    words, data_end, _ = fld._read_header(data)
+    resources = fld._read_resources(
+        data, fld._read_types(data, words, data_end)
+    )
+    events = [resource for resource in resources if resource.type_id == 6]
+    event_labels: list[str | None] = []
+    for event_index, resource in enumerate(events):
+        label = None
+        if resource.data:
+            label_pointer = struct.unpack_from("<I", data, resource.data + 4)[0]
+            if label_pointer:
+                label, _ = fld._cstring(
+                    data,
+                    label_pointer,
+                    data_end,
+                    f"event resource {event_index} label",
+                )
+        event_labels.append(label)
+
+    area = _area_id(field_number, area_number)
+    rows = []
+    placement_index = 0
+    for resource in resources:
+        if resource.type_id != 10:
+            continue
+        current_index = placement_index
+        placement_index += 1
+        if not resource.data:
+            continue
+        kind, event_index = struct.unpack_from("<Ii", data, resource.data)
+        if kind != 1 or event_index < 0:
+            continue
+        label = event_labels[event_index]
+        name = (
+            fld._fixed_string(data, resource.name, "field placement name")
+            if resource.name
+            else None
+        )
+        procedure_index = procedures.get(label) if label is not None else None
+        rows.append(
+            {
+                "id": f"{area}:event-placement:{current_index}",
+                "field": field_number,
+                "area": area,
+                "placement": current_index,
+                "placementSerial": resource.serial,
+                "actor": name,
+                "eventIndex": event_index,
+                "eventResourceSerial": events[event_index].serial,
+                "label": label,
+                "procedure": (
+                    f"f{field_number:03}:procedure:{procedure_index}"
+                    if procedure_index is not None
+                    else None
+                ),
+            }
+        )
+    return rows
+
+
+def _event_sections(
+    field_paths: list[Path],
+    script_dir: Path,
+    profile: flw0_profiles.CommandProfile,
+) -> dict:
+    """Build exact placement roots and procedure-level field-script flow."""
+
+    scripts: dict[int, dict] = {}
+    procedure_names: dict[int, dict[str, int]] = {}
+    for source in sorted(script_dir.glob("f???.bfasm")):
+        match = re.fullmatch(r"f(\d{3})", source.stem, re.IGNORECASE)
+        if match is None:
+            continue
+        field_number = int(match.group(1))
+        if field_number in scripts:
+            raise FieldGraphError(f"duplicate field script for f{field_number:03}")
+        script = flw0.parse_source(source.read_text(encoding="utf-8"))
+        flow = flw0_flow.analyze(script, profile)
+        scripts[field_number] = flow
+        procedure_names[field_number] = {
+            row["name"]: row["index"] for row in flow["procedures"]
+        }
+    if not scripts:
+        raise FieldGraphError(f"no field BF sources found in {script_dir}")
+
+    entries = []
+    for source in field_paths:
+        match = FIELD_AREA_PATTERN.fullmatch(source.stem)
+        if match is None:
+            continue
+        field_number = int(match.group(1))
+        if field_number not in scripts:
+            continue
+        entries.extend(
+            _event_entries(
+                source,
+                field_number,
+                int(match.group(2)),
+                procedure_names[field_number],
+            )
+        )
+
+    entry_counts = Counter(
+        row["procedure"] for row in entries if row["procedure"] is not None
+    )
+    procedures = []
+    procedure_edges = []
+    event_edges = []
+    unresolved = []
+    for field_number, flow in sorted(scripts.items()):
+        prefix = f"f{field_number:03}:procedure:"
+        for row in flow["procedures"]:
+            node_id = f"{prefix}{row['index']}"
+            procedures.append(
+                {
+                    "id": node_id,
+                    "field": field_number,
+                    **row,
+                    "entryPlacements": entry_counts[node_id],
+                }
+            )
+        for edge in flow["procedureEdges"]:
+            procedure_edges.append(
+                {
+                    **edge,
+                    "field": field_number,
+                    "source": f"{prefix}{edge['source']}",
+                    "target": f"{prefix}{edge['target']}",
+                }
+            )
+        for edge in flow["eventEdges"]:
+            event_name = edge.get("event")
+            event_edges.append(
+                {
+                    **edge,
+                    "field": field_number,
+                    "source": f"{prefix}{edge['source']}",
+                    "target": f"event:{event_name or edge['eventId']}",
+                    "targetPresent": (
+                        event_name is not None
+                        and (
+                            script_dir.parent / "event" / f"{event_name}.bfasm"
+                        ).is_file()
+                    ),
+                }
+            )
+        unresolved.extend(
+            {
+                **row,
+                "field": field_number,
+                "source": f"{prefix}{row['source']}",
+            }
+            for row in flow["unresolvedTargets"]
+        )
+
+    adjacency: dict[str, set[str]] = defaultdict(set)
+    for edge in procedure_edges:
+        adjacency[edge["source"]].add(edge["target"])
+    reachable = set(entry_counts)
+    pending = deque(sorted(reachable))
+    while pending:
+        source = pending.popleft()
+        for target in sorted(adjacency[source]):
+            if target not in reachable:
+                reachable.add(target)
+                pending.append(target)
+    for procedure in procedures:
+        procedure["reachableFromPlacement"] = procedure["id"] in reachable
+    for edge in procedure_edges:
+        edge["sourceReachable"] = edge["source"] in reachable
+    for edge in event_edges:
+        edge["sourceReachable"] = edge["source"] in reachable
+
+    native_calls = sum(
+        call["count"] for procedure in procedures for call in procedure["nativeCalls"]
+    )
+    named_native_calls = sum(
+        call["count"]
+        for procedure in procedures
+        for call in procedure["nativeCalls"]
+        if "name" in call
+    )
+    reachable_native_calls = sum(
+        call["count"]
+        for procedure in procedures
+        if procedure["reachableFromPlacement"]
+        for call in procedure["nativeCalls"]
+    )
+    return {
+        "eventEntries": entries,
+        "scriptProcedures": procedures,
+        "scriptProcedureEdges": procedure_edges,
+        "eventScriptEdges": event_edges,
+        "scriptUnresolvedTargets": unresolved,
+        "eventSummary": {
+            "fieldScripts": len(scripts),
+            "eventPlacements": len(entries),
+            "linkedEventPlacements": sum(
+                row["procedure"] is not None for row in entries
+            ),
+            "entryProcedures": len(entry_counts),
+            "procedureNodes": len(procedures),
+            "reachableProcedures": len(reachable),
+            "procedureEdges": len(procedure_edges),
+            "taskEdges": sum(edge["kind"] == "task" for edge in procedure_edges),
+            "taskCalls": sum(
+                edge["count"]
+                for edge in procedure_edges
+                if edge["kind"] == "task"
+            ),
+            "eventScriptEdges": len(event_edges),
+            "reachableEventScriptEdges": sum(
+                edge["sourceReachable"] for edge in event_edges
+            ),
+            "nativeCalls": native_calls,
+            "namedNativeCalls": named_native_calls,
+            "reachableNativeCalls": reachable_native_calls,
+            "unresolvedScriptTargets": len(unresolved),
+        },
+    }
+
+
 def _load_graph(
     field_dir: Path,
     script_dir: Path,
     include_interactions: bool = False,
+    include_events: bool = False,
+    profile_name: str | None = None,
 ) -> dict:
     if not field_dir.is_dir():
         raise FieldGraphError(f"field source directory does not exist: {field_dir}")
@@ -502,37 +835,50 @@ def _load_graph(
         raise FieldGraphError(f"no .wapasm sources found in {field_dir}")
 
     if not include_interactions:
-        return build_graph(field_sources, tables)
-
-    placements = {
-        source.stem.lower(): _placement_names(source)
-        for source in field_paths
-        if FIELD_AREA_PATTERN.fullmatch(source.stem)
-    }
-    interaction_tables: dict[int, inf.InfFile] = {}
-    message_symbols: dict[int, tuple[str | None, ...]] = {}
-    for source in sorted(field_dir.glob("*.infasm")):
-        match = WAP_PATTERN.fullmatch(source.stem)
-        if match is None:
-            raise FieldGraphError(f"INF source name is not fNNN: {source.name}")
-        field_number = int(match.group(1))
-        if field_number in interaction_tables:
-            raise FieldGraphError(f"duplicate INF table for field {field_number}")
-        script = script_dir / f"f{field_number:03}.bfasm"
-        by_index, by_name = inf.load_message_symbols(script)
-        interaction_tables[field_number] = inf.parse_source(
-            source.read_text(encoding="utf-8"), by_name
+        graph = build_graph(field_sources, tables)
+    else:
+        placements = {
+            source.stem.lower(): _placement_names(source)
+            for source in field_paths
+            if FIELD_AREA_PATTERN.fullmatch(source.stem)
+        }
+        interaction_tables: dict[int, inf.InfFile] = {}
+        message_symbols: dict[int, tuple[str | None, ...]] = {}
+        for source in sorted(field_dir.glob("*.infasm")):
+            match = WAP_PATTERN.fullmatch(source.stem)
+            if match is None:
+                raise FieldGraphError(f"INF source name is not fNNN: {source.name}")
+            field_number = int(match.group(1))
+            if field_number in interaction_tables:
+                raise FieldGraphError(f"duplicate INF table for field {field_number}")
+            script = script_dir / f"f{field_number:03}.bfasm"
+            by_index, by_name = inf.load_message_symbols(script)
+            interaction_tables[field_number] = inf.parse_source(
+                source.read_text(encoding="utf-8"), by_name
+            )
+            message_symbols[field_number] = by_index
+        if not interaction_tables:
+            raise FieldGraphError(f"no .infasm sources found in {field_dir}")
+        graph = build_graph(
+            field_sources,
+            tables,
+            placements,
+            interaction_tables,
+            message_symbols,
         )
-        message_symbols[field_number] = by_index
-    if not interaction_tables:
-        raise FieldGraphError(f"no .infasm sources found in {field_dir}")
-    return build_graph(
-        field_sources,
-        tables,
-        placements,
-        interaction_tables,
-        message_symbols,
-    )
+
+    if include_events:
+        if profile_name is None:
+            raise FieldGraphError("event flow requires a DDS command profile")
+        try:
+            profile = flw0_profiles.get(profile_name)
+        except KeyError as exc:
+            raise FieldGraphError(f"unknown command profile {profile_name!r}") from exc
+        sections = _event_sections(field_paths, script_dir, profile)
+        graph["schema"] = "dds-field-world-3"
+        graph["summary"].update(sections.pop("eventSummary"))
+        graph.update(sections)
+    return graph
 
 
 def main() -> None:
@@ -551,8 +897,22 @@ def main() -> None:
         help="include exact INF state flow and same-actor WAP handoffs",
     )
     parser.add_argument(
+        "--include-events",
+        action="store_true",
+        help="include placement-rooted field-script procedure flow",
+    )
+    parser.add_argument(
+        "--profile",
+        choices=("dds1", "dds2"),
+        help="command profile for event flow (inferred from the repository layout)",
+    )
+    parser.add_argument(
         "--interaction-area",
         help="render one fNNN_AAA interaction graph (DOT output only)",
+    )
+    parser.add_argument(
+        "--event-field",
+        help="render one fNNN placement and procedure graph (DOT output only)",
     )
     args = parser.parse_args()
     try:
@@ -564,15 +924,33 @@ def main() -> None:
             if FIELD_AREA_PATTERN.fullmatch(interaction_area) is None:
                 raise FieldGraphError("interaction area must have the form fNNN_AAA")
         script_dir = args.scripts_dir or args.field_dir.parent.parent / "scripts/field"
+        event_field = None
+        if args.event_field is not None:
+            event_field = args.event_field.lower()
+            if args.format != "dot":
+                raise FieldGraphError("--event-field requires --format dot")
+            if WAP_PATTERN.fullmatch(event_field) is None:
+                raise FieldGraphError("event field must have the form fNNN")
+            if interaction_area is not None:
+                raise FieldGraphError(
+                    "--event-field and --interaction-area are mutually exclusive"
+                )
+        profile_name = args.profile
+        if profile_name is None:
+            inferred_profile = script_dir.parent.parent.name.lower()
+            if inferred_profile in ("dds1", "dds2"):
+                profile_name = inferred_profile
         graph = _load_graph(
             args.field_dir,
             script_dir,
             args.include_interactions or interaction_area is not None,
+            args.include_events or event_field is not None,
+            profile_name,
         )
         text = (
             json.dumps(graph, indent=2, ensure_ascii=True) + "\n"
             if args.format == "json"
-            else render_dot(graph, interaction_area)
+            else render_dot(graph, interaction_area, event_field)
         )
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(text, encoding="utf-8")
@@ -587,6 +965,11 @@ def main() -> None:
         description += (
             f", {summary['interactionSets']} interaction sets, and "
             f"{summary['warpHandoffs']} warp handoffs"
+        )
+    if "eventPlacements" in summary:
+        description += (
+            f", {summary['linkedEventPlacements']} linked event placements, and "
+            f"{summary['reachableProcedures']} reachable procedures"
         )
     print(f"wrote {description} to {args.output}")
 
