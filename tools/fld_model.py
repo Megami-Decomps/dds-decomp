@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import struct
@@ -23,6 +24,13 @@ FLOAT = 5126
 UNSIGNED_BYTE = 5121
 UNSIGNED_SHORT = 5123
 UNSIGNED_INT = 5125
+
+
+def _material_fingerprint(material: object) -> str:
+    payload = json.dumps(
+        material, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    ).encode("ascii")
+    return hashlib.sha256(payload).hexdigest()
 
 
 @dataclass
@@ -619,9 +627,9 @@ def add_model_graph(
         if old is not None:
             return old
         primitives = []
-        for list_offset in draw_roots[item.commands]:
+        for list_index, list_offset in enumerate(draw_roots[item.commands]):
             draw_list = draw_lists[list_offset]
-            for draw_offset in draw_list.draws:
+            for draw_index, draw_offset in enumerate(draw_list.draws):
                 draw = draws[draw_offset]
                 packet_key = draw.packet, draw.quadwords * 0x10
                 packet_meshes = packet_cache.get(packet_key)
@@ -649,19 +657,24 @@ def add_model_graph(
                         mesh.colors
                         and any(color[3] < 0x80 for color in mesh.colors)
                     )
+                    material_index = material_for(
+                        draw.asset,
+                        translucent_vertices,
+                        mesh.texcoords is not None,
+                    )
                     primitives.append(
                         {
                             "attributes": attributes,
                             "indices": indices,
-                            "material": material_for(
-                                draw.asset,
-                                translucent_vertices,
-                                mesh.texcoords is not None,
-                            ),
+                            "material": material_index,
                             "mode": 4,
                             "extras": {
                                 "ddsAsset": draw.asset,
+                                "ddsMaterialIndex": material_index,
                                 "ddsDrawSelector": draw_list.selector,
+                                "ddsDrawListIndex": list_index,
+                                "ddsDrawIndex": draw_index,
+                                "ddsPacketMeshIndex": mesh_index,
                                 "ddsMeshControls": list(mesh.controls),
                                 "ddsProgramAddress": mesh.program,
                                 "ddsTriangleControlAccessor": controls,
@@ -722,6 +735,12 @@ def add_model_graph(
         else:
             parent = builder.document["nodes"][node_indices[item.parent]]
             parent.setdefault("children", []).append(node_indices[item_index])
+    for mesh_index in mesh_cache.values():
+        for primitive in builder.document["meshes"][mesh_index]["primitives"]:
+            material = builder.document["materials"][primitive["material"]]
+            primitive["extras"]["ddsMaterialFingerprint"] = (
+                _material_fingerprint(material)
+            )
     return tuple(node_indices), tuple(roots)
 
 

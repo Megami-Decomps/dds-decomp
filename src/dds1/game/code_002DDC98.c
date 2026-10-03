@@ -370,7 +370,47 @@ void sdfVuTransformWorkAtOffset(void *out, VuTransformWork *work, void *referenc
                   work->y + deltaY);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE118);
+/* vu0 routine: transform aligned records and packed vectors into 0x60-byte rows */
+void func_002DE118(void *rows, s32 count, void *matrix, void *records, void *vectors) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "daddu $9, $4, $0\n"
+        "lqc2 vf28, 0x00($6)\n"
+        "lqc2 vf29, 0x10($6)\n"
+        "lqc2 vf30, 0x20($6)\n"
+        "lqc2 vf31, 0x30($6)\n"
+        "lqc2 vf24, 0x40($6)\n"
+        "lqc2 vf25, 0x50($6)\n"
+        "lqc2 vf26, 0x60($6)\n"
+        "ldr $2, 0x00($8)\n"
+        "ldl $2, 0x07($8)\n"
+        "lw $3, 0x08($8)\n"
+        "addi $8, $8, 0x0C\n"
+        "pcpyld $3, $3, $2\n"
+        "lq $2, 0x00($7)\n"
+        "addi $7, $7, 0x10\n"
+        "1:\n"
+        "qmtc2 $2, vf2\n"
+        "qmtc2 $3, vf3\n"
+        "vcallms 0x0\n"
+        "ldr $2, 0x00($8)\n"
+        "ldl $2, 0x07($8)\n"
+        "lw $3, 0x08($8)\n"
+        "addi $8, $8, 0x0C\n"
+        "pcpyld $3, $3, $2\n"
+        "lq $2, 0x00($7)\n"
+        "addi $7, $7, 0x10\n"
+        "addi $5, $5, -1\n"
+        "addi $9, $9, 0x60\n"
+        "qmfc2.i $4, vf7\n"
+        "sqc2 vf4, -0x60($9)\n"
+        "bne $0, $5, 1b\n"
+        "sq $4, -0x50($9)\n"
+        ".set reorder"
+        :
+        :
+        : "$2", "$3", "$4", "$9", "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE1A0);
 
