@@ -58,15 +58,15 @@ typedef struct {
 
 extern void *D_004360F0;
 
-extern s32 kwlnSetDrawColorTarget(s32, void *);
+extern void kwlnSetDrawColorTarget(s32, f32 *);
 
 extern s32 func_00107EF8(s32, s32, void *);
 
-extern s32 kwlnSetBackgroundColorTarget(s32, void *);
+extern void kwlnSetBackgroundColorTarget(s32, f32 *);
 
 extern s32 func_00107FF8(s32, s32, void *);
 
-extern s32 evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
 
 extern void fldSetSwayMode(u32);
 

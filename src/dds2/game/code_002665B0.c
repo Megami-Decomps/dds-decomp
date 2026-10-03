@@ -81,7 +81,7 @@ extern EffectObject *effCreateStatusBatch(s32);
 
 extern s32 mdlFlagTest(u32);
 
-extern s64 evtGetMessageWindowControlState(void);
+extern s32 evtGetMessageWindowControlState(void);
 
 extern s32 fldGetModeFrameRecordIndex(s32);
 
@@ -1912,13 +1912,13 @@ s64 evtBContinueDispatchOrRestoreTable(u64 request) {
     state = (EventDispatchState *)kwlnTaskGetUserValue();
     dispatch = &state->dispatchStatus;
     result = func_002C4038((s32)state->dispatchWork, dispatch, 0, request);
-    if (result == 0) {
-        if ((*dispatch == 0) && (result = evtGetMessageWindowControlState(), result == 0)) {
-            mnuSetPopupEntry(dispatch, state->dispatchValue);
-        }
-        result = 0;
+    if (result != 0) {
+        return result;
     }
-    return result;
+    if (*dispatch == 0 && evtGetMessageWindowControlState() == 0) {
+        mnuSetPopupEntry(dispatch, state->dispatchValue);
+    }
+    return 0;
 }
 
 s64 mnuPrepareDispatchStateAndBindHandler(s32 request) {

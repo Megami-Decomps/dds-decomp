@@ -88,7 +88,7 @@ extern EffectObjectNode *effFloorModelListHead;
 
 extern s64 btlIsRuntimeAllocated(void);
 
-extern s64 btlIsCurrentActorFullyMarked(void);
+extern s32 btlIsCurrentActorFullyMarked(void);
 
 extern EffModelOwner *effCreateModelOwner();
 
