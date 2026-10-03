@@ -170,25 +170,55 @@ s32 mnuCountAdvancingTitleAnimations(void) {
 
 INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildLevelUpList);
 
-typedef struct BrsProfileCapUnit {
-    u16 flags;
-    u8 pad02[0x53];
-    s8 profile;
-} BrsProfileCapUnit;
+typedef struct BrsProfileCapRow {
+    u32 unit;
+    u32 skillState;
+    u8 pad08[0x10];
+} BrsProfileCapRow;
 
-typedef struct BrsProfileCapState {
-    u8 pad00[0x78];
+typedef struct BrsProfileCapList {
+    BrsProfileCapRow rows[5];
     s32 count;
-    u32 units[32];
-    u32 skills[32];
-} BrsProfileCapState;
+} BrsProfileCapList;
 
-extern u32 ptyGetCurrentProfileRecord(u8 *);
-extern void prfBuildSkillListState0(u8 *, u32, void *);
-extern u32 ptyTestProfileFlag0(u8 *, u32);
+typedef struct ScrVmOperand ScrVmOperand;
+
+extern u32 ptyGetCurrentProfileRecord(ScrVmOperand *);
+extern s32 ptyTestProfileFlag0(s32, u16);
+extern u32 prfBuildSkillListState0(u32, u32, u32);
 extern u32 prfGetCapValue(u16);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildProfileCapList);
+s32 brsBuildProfileCapList(BrsProfileCapList *list) {
+    u8 skillState[0x34];
+    u32 *states = (u32 *)((u8 *)list + 4);
+    u32 *units = (u32 *)list;
+    s32 offset = 0;
+    s32 remaining = 4;
+
+    memset(list, 0, 0x7C);
+    list->count = 0;
+    do {
+        u8 *unit = (u8 *)(datGameState + 0xA60 + offset);
+        offset += 0x1A4;
+        if ((*(u16 *)unit & 1) != 0) {
+            s32 *profile = (s32 *)ptyGetCurrentProfileRecord((ScrVmOperand *)unit);
+
+            prfBuildSkillListState0((u32)unit, (u32)profile, (u32)skillState);
+            if (*(s8 *)(unit + 0x55) != 0 &&
+                prfGetCapValue((u16)*(s8 *)(unit + 0x55)) == *profile) {
+                if (ptyTestProfileFlag0((s32)unit, (u16)*(s8 *)(unit + 0x55)) == 0) {
+                    s32 rowIndex = list->count * 6;
+                    u32 *unitRow = &units[rowIndex];
+                    u32 *stateRow = &states[rowIndex];
+                    *stateRow = *(u32 *)(skillState + 0x20);
+                    *unitRow = (u32)unit;
+                    list->count++;
+                }
+            }
+        }
+    } while (--remaining >= 0);
+    return list->count;
+}
 
 s32 mnuAdvanceTitleEntryAnimation(TitleEntry *entry) {
     s32 step = ptyCalcLevelUps(entry);
@@ -277,7 +307,24 @@ u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
     return uiBlendColors(0x80808080, 0x80808000, blend);
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildActiveUnitProgressRows);
+typedef struct BrsActiveProgressList {
+    BrsProgressRow rows[5];
+    u32 count;
+} BrsActiveProgressList;
+
+void brsBuildActiveUnitProgressRows(BrsActiveProgressList *output) {
+    s32 offset = 0;
+    s32 remaining = 4;
+
+    memset(output, 0, sizeof(*output));
+    do {
+        u8 *unit = (u8 *)(datGameState + 0xA60 + offset);
+        offset += 0x1A4;
+        if ((*(u16 *)unit & 1) != 0) {
+            brsBuildUnitProgressRow((u8 *)&output->rows[output->count++], unit);
+        }
+    } while (--remaining >= 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00266250);
 
