@@ -18,12 +18,14 @@ typedef struct {
     void *unk1C;
 } SceneObjectRes;
 
+/* Release field resources before clearing the scene object's state word.
+ * The scene resource handle/address are released separately. */
 void dds3ClearSceneObjectState(Scene *scene) {
-    SceneObject *object;
+    SceneObject *sceneObject;
 
-    object = scene->object;
+    sceneObject = scene->object;
     fldReleaseFieldResources();
-    object->state = 0;
+    sceneObject->state = 0;
 }
 
 /* Load another scene's named resource and give the scene object ownership. */
@@ -50,49 +52,54 @@ s32 evtLoadSceneResourceFrom(Scene *scene, const char *resourceName) {
     return 1;
 }
 
-/* Retain `name` and hand its address to the scene object. */
-s32 evtRetainSceneResource(Scene *scene, void *name) {
+/* Retain an allocation handle and attach its resolved address; return 1 on
+ * attachment, 0 otherwise. NULL preserves the current resource. A non-NULL
+ * handle releases the old resource first, so failure does not restore it;
+ * a NULL resolved address fails attachment without undoing the retain. */
+s32 evtRetainSceneResource(Scene *scene, void *resourceHandle) {
     s32 result = 0;
-    void *address;
-    SceneObjectRes *object = (SceneObjectRes *)scene->object;
+    void *resourceAddress;
+    SceneObjectRes *sceneObject = (SceneObjectRes *)scene->object;
 
-    if (name == NULL) {
+    if (resourceHandle == NULL) {
         return result;
     }
-    if (object->unk18 != NULL) {
+    if (sceneObject->unk18 != NULL) {
         evtReleaseSceneResource(scene);
     }
-    address = sdfResourceRetainAddress(name);
-    if (address != NULL) {
-        object->unk18 = name;
-        object->unk1C = address;
+    resourceAddress = sdfResourceRetainAddress(resourceHandle);
+    if (resourceAddress != NULL) {
+        sceneObject->unk18 = resourceHandle;
+        sceneObject->unk1C = resourceAddress;
         return 1;
     }
     return result;
 }
 
-/* Release the resource this scene object currently owns. */
+/* Release a stored allocation handle when present, then always clear both
+ * handle and resolved address. Safe for an already-cleared resource state. */
 void evtReleaseSceneResource(Scene *scene) {
-    SceneObjectRes *object = (SceneObjectRes *)scene->object;
+    SceneObjectRes *sceneObject = (SceneObjectRes *)scene->object;
 
-    if (object->unk18 != NULL) {
-        sdfReleaseResourceAllocation(object->unk18);
+    if (sceneObject->unk18 != NULL) {
+        sdfReleaseResourceAllocation(sceneObject->unk18);
     }
-    object->unk18 = NULL;
-    object->unk1C = NULL;
+    sceneObject->unk18 = NULL;
+    sceneObject->unk1C = NULL;
 }
 
 /* Starts the named script task on the scene object's resource; stays asm:
    retail's beqz/b merge of the two exit paths has no plain-C shape. */
 INCLUDE_ASM(const s32, "basic/dds3SceneBasic", evtStartSceneResourceTask);
 
-/* Destroys the task named by `name`, if there is one. The `return` inside the
-   nested block is what keeps retail's jal+epilogue instead of a sibling call. */
-void evtDestroyNamedTask(void *ctx, const char *name) {
+/* Destroy the task selected by taskName; NULL or an absent task is a no-op.
+ * unusedContext is not read. The nested early return retains the matched
+ * jal/epilogue rather than turning the destruction into a sibling call. */
+void evtDestroyNamedTask(void *unusedContext, const char *taskName) {
     KwlnTask *task;
 
-    if (name != NULL) {
-        task = func_00101740(name);
+    if (taskName != NULL) {
+        task = func_00101740(taskName);
         if (task == NULL) {
             return;
         }
