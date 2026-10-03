@@ -164,7 +164,7 @@ extern s32 func_001958A0(FrFontGlyph *glyph, s8 mode, u32 flags);
 
 extern FrFontCtx *frFontAppendGlyphFromData(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, s32 previousGlyphAddress);
 
-extern FrFontGlyph *func_001951C8(void *text, s32 fontIndex, s32 firstOption, s32 secondOption, s32 existingGlyph);
+extern FrFontGlyph *func_001951C8(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
 
 void frFontDrawGlyphWithSharedFlags(FrFontGlyph *glyph, s8 mode);
 

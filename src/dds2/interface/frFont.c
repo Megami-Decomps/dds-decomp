@@ -170,7 +170,7 @@ extern FrFontRec frFontResourceRecords[];
 
 extern s32 frFontDefaultGlyphCellSize;
 
-extern FrFontGlyph *func_0019CE78(void *text, s32 fontIndex, s32 firstOption, s32 secondOption, s32 existingGlyph);
+extern FrFontGlyph *func_0019CE78(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
