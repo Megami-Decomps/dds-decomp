@@ -412,6 +412,9 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     return 1;
 }
 
+extern void evtEndUnitValueTransitionForObject(void *, s32);
+extern void evtSetUnitValueTransitionForObject(void *, void *, s32);
+
 void evtEndObjectValueTransition(EffectObject *object) {
     EffectObjectData *data;
 
@@ -442,9 +445,6 @@ extern u32 dds3ReadIndexedWorldObjectWord(void *);
 extern s32 dds3AdvanceObjectValueCursor(void *);
 extern void dds3DestroyWorldIndexNode(void *);
 extern s32 func_0010FBD0(f32 *, f32 *);
-extern void evtEndUnitValueTransitionForObject(EffectObject *, s32);
-extern void evtSetUnitValueTransitionForObject(EffectValueObject *, EffectObject *, s32);
-
 void func_00113D18(EffectObject *object) {
     EffectObjectData *data = object->data;
     u64 world = dds3GetWorldSecondaryObject();
