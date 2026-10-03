@@ -606,8 +606,9 @@ s32 evtPollStageSelectionAndAdvance(void) {
     }
 }
 
-void evtMarkSceneFollowupReadyAndQueueAction(void) {
-    s32 context = kwlnTaskGetUserValue();
+/* The stage-selection caller forwards its task to the user-value lookup. */
+void evtMarkSceneFollowupReadyAndQueueAction(s32 callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     mnuSetCommandPhase(context, 8);
     func_00297220(((EvtStateTableContext *)context)->secondaryObject->node, 10);
     ((EvtStateTableContext *)context)->sceneReady = 1;
