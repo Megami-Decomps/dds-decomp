@@ -94,10 +94,10 @@ extern char D_003A66F0[];
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_0020FC48);
 
 extern u8 *datBattleSceneRecords;
-const char D_003A6738[0x20] = "/event/e%03d/e%03d/scr/e%03d.bf";
-const char D_003A6758[0x10] = "btl:event[%s]\n";
-const char D_003A6768[0x20] = "btl:event BE load[e%03d]\n";
-const char D_003A6788[0x18] = "btl:event SMG load[%X]\n";
+extern char D_003A6738[]; /* "/event/e%03d/e%03d/scr/e%03d.bf" */
+extern char D_003A6758[]; /* "btl:event[%s]\n" */
+extern char D_003A6768[]; /* "btl:event BE load[e%03d]\n" */
+extern char D_003A6788[]; /* "btl:event SMG load[%X]\n" */
 extern void *sdfReadNamedResource(const char *, void *, s32);
 extern s32 mnuCampCreateTask(s32);
 extern void func_00101A80(s32, s32);
