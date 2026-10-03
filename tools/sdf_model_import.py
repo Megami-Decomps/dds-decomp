@@ -25,6 +25,10 @@ COMPONENT_FORMATS = {
     fld_model.FLOAT: "f",
 }
 TYPE_WIDTHS = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4}
+TRANSFORM_KEYS = ("translation", "rotation", "scale")
+OMITTED_TRANSFORM_KEYS = tuple(
+    f"ddsOmitted{key.title()}Bits" for key in TRANSFORM_KEYS
+)
 
 
 @dataclass(frozen=True)
@@ -189,6 +193,165 @@ def _asset_metadata(document: dict) -> float:
     return float(scale)
 
 
+def _model_item_transform(item: fld.ModelItem, meters_per_unit: float) -> dict:
+    expected = {"extras": {}}
+    translation = item.position[:3]
+    fld_model._set_transform_component(
+        expected,
+        "translation",
+        translation,
+        [value * meters_per_unit for value in translation],
+    )
+    fld_model._set_transform_component(
+        expected,
+        "rotation",
+        item.rotation,
+        fld_model._euler_quaternion(*item.rotation)
+        if all(math.isfinite(value) for value in item.rotation)
+        else [],
+    )
+    scale = item.scale[:3]
+    fld_model._set_transform_component(expected, "scale", scale, list(scale))
+    return expected
+
+
+def _validate_transform(node: dict, expected: dict, context: str) -> None:
+    for key in TRANSFORM_KEYS:
+        if (key in node) != (key in expected) or node.get(key) != expected.get(key):
+            raise ModelImportError(f"{context} changes an unsupported node transform")
+    if "matrix" in node:
+        raise ModelImportError(f"{context} adds an unsupported node matrix")
+    if "weights" in node:
+        raise ModelImportError(f"{context} adds unsupported morph weights")
+    extras = node.get("extras")
+    expected_extras = expected.get("extras", {})
+    if not isinstance(extras, dict):
+        extras = {}
+    for key in OMITTED_TRANSFORM_KEYS:
+        if (key in extras) != (key in expected_extras) or extras.get(
+            key
+        ) != expected_extras.get(key):
+            raise ModelImportError(f"{context} changes an unsupported node transform")
+
+
+def _child_names(
+    nodes: list,
+    node: dict,
+    expected: set[str],
+    context: str,
+) -> None:
+    if not expected:
+        if "children" in node:
+            raise ModelImportError(f"{context} changes the model hierarchy")
+        return
+    children = node.get("children")
+    if not isinstance(children, (list, tuple)) or any(
+        not isinstance(index, int)
+        or isinstance(index, bool)
+        or not 0 <= index < len(nodes)
+        for index in children
+    ):
+        raise ModelImportError(f"{context} has invalid children")
+    names = []
+    for index in children:
+        child = nodes[index]
+        name = child.get("name") if isinstance(child, dict) else None
+        if not isinstance(name, str):
+            raise ModelImportError(f"{context} has an unnamed child")
+        names.append(name)
+    if len(names) != len(set(names)) or set(names) != expected:
+        raise ModelImportError(f"{context} changes the model hierarchy")
+
+
+def validate_wrapper_node(
+    document: dict,
+    wrapper_index: int,
+    expected_children: set[str],
+    expected_transform: dict,
+    context: str,
+) -> None:
+    """Reject unsupported edits to one selected model wrapper."""
+
+    nodes = document.get("nodes")
+    if (
+        not isinstance(nodes, list)
+        or not 0 <= wrapper_index < len(nodes)
+        or not isinstance(nodes[wrapper_index], dict)
+    ):
+        raise ModelImportError(f"{context} wrapper is invalid")
+    wrapper = nodes[wrapper_index]
+    _validate_transform(wrapper, expected_transform, context + " wrapper")
+    _child_names(nodes, wrapper, expected_children, context + " wrapper")
+    if "mesh" in wrapper:
+        raise ModelImportError(f"{context} wrapper changes its mesh attachment")
+
+
+def _validate_model_graph_nodes(
+    document: dict,
+    graph: ModelGraph,
+    meshes_by_name: dict[str, tuple[int, dict]],
+    meters_per_unit: float,
+) -> None:
+    nodes = document.get("nodes")
+    if not isinstance(nodes, list):
+        raise ModelImportError("GLB has no node array")
+    expected_names = {
+        f"{graph.name}/node_{item.node_id}" for item in graph.items
+    }
+    node_indices: dict[str, int] = {}
+    for index, node in enumerate(nodes):
+        name = node.get("name") if isinstance(node, dict) else None
+        if name not in expected_names:
+            continue
+        if name in node_indices:
+            raise ModelImportError(f"GLB repeats model node {name!r}")
+        node_indices[name] = index
+    missing = expected_names - set(node_indices)
+    if missing:
+        raise ModelImportError(f"GLB is missing model node {min(missing)!r}")
+
+    command_meshes: dict[int, str] = {}
+    expected_children = {name: set() for name in expected_names}
+    for item in graph.items:
+        name = f"{graph.name}/node_{item.node_id}"
+        if item.commands and item.commands not in command_meshes:
+            command_meshes[item.commands] = name
+        if item.parent >= 0:
+            if item.parent >= len(graph.items):
+                raise ModelImportError(f"model {graph.name!r} has an invalid parent")
+            parent = graph.items[item.parent]
+            expected_children[f"{graph.name}/node_{parent.node_id}"].add(name)
+
+    for item in graph.items:
+        name = f"{graph.name}/node_{item.node_id}"
+        node = nodes[node_indices[name]]
+        extras = node.get("extras")
+        if not isinstance(extras, dict) or extras.get("ddsNodeId") != item.node_id:
+            raise ModelImportError(f"model node {name!r} changes its identity")
+        _validate_transform(
+            node,
+            _model_item_transform(item, meters_per_unit),
+            f"model node {name!r}",
+        )
+        _child_names(
+            nodes,
+            node,
+            expected_children[name],
+            f"model node {name!r}",
+        )
+        expected_mesh = None
+        if item.commands:
+            mesh_name = command_meshes[item.commands]
+            try:
+                expected_mesh = meshes_by_name[mesh_name][0]
+            except KeyError as exc:
+                raise ModelImportError(f"GLB is missing mesh {mesh_name!r}") from exc
+        if ("mesh" in node) != (expected_mesh is not None) or node.get(
+            "mesh"
+        ) != expected_mesh:
+            raise ModelImportError(f"model node {name!r} changes its mesh attachment")
+
+
 def import_model_graphs(
     source_data: bytes,
     document: dict,
@@ -208,13 +371,18 @@ def import_model_graphs(
         raise ModelImportError("selected SDF model graphs repeat a name")
     selected_prefixes = tuple(f"{name}/node_" for name in graph_names)
 
-    meshes_by_name: dict[str, dict] = {}
-    for mesh in meshes:
+    meshes_by_name: dict[str, tuple[int, dict]] = {}
+    for mesh_index, mesh in enumerate(meshes):
         name = mesh.get("name") if isinstance(mesh, dict) else None
         if isinstance(name, str) and name.startswith(selected_prefixes):
             if name in meshes_by_name:
                 raise ModelImportError(f"GLB repeats mesh name {name!r}")
-            meshes_by_name[name] = mesh
+            meshes_by_name[name] = (mesh_index, mesh)
+
+    for graph in graphs:
+        _validate_model_graph_nodes(
+            document, graph, meshes_by_name, meters_per_unit
+        )
 
     output = bytearray(source_data)
     stream_values: dict[tuple[int, str], tuple[tuple[int | float, ...], ...]] = {}
@@ -311,10 +479,14 @@ def import_model_graphs(
             mesh_name = f"{source_name}/node_{item.node_id}"
             command_meshes[item.commands] = mesh_name
             try:
-                gltf_mesh = meshes_by_name[mesh_name]
+                _, gltf_mesh = meshes_by_name[mesh_name]
             except KeyError as exc:
                 raise ModelImportError(f"GLB is missing mesh {mesh_name!r}") from exc
             consumed_mesh_names.add(mesh_name)
+            if "weights" in gltf_mesh:
+                raise ModelImportError(
+                    f"mesh {mesh_name!r} adds unsupported morph weights"
+                )
             primitives = gltf_mesh.get("primitives")
             if not isinstance(primitives, list):
                 raise ModelImportError(f"mesh {mesh_name!r} has no primitives")
@@ -356,6 +528,10 @@ def import_model_graphs(
                     raise ModelImportError(
                         f"mesh {mesh_name!r} has a non-triangle primitive"
                     )
+                if "targets" in primitive:
+                    raise ModelImportError(
+                        f"mesh {mesh_name!r} adds unsupported morph targets"
+                    )
                 (
                     list_index,
                     draw_index,
@@ -380,6 +556,16 @@ def import_model_graphs(
                     extras.get(name) != value for name, value in metadata.items()
                 ):
                     raise ModelImportError(f"{context} DDS identity metadata differs")
+                material_index = primitive.get("material")
+                materials = document.get("materials")
+                if (
+                    not isinstance(material_index, int)
+                    or isinstance(material_index, bool)
+                    or not isinstance(materials, list)
+                    or not 0 <= material_index < len(materials)
+                    or extras.get("ddsMaterialIndex") != material_index
+                ):
+                    raise ModelImportError(f"{context} changes material assignment")
                 indices = _records(
                     document,
                     binary,

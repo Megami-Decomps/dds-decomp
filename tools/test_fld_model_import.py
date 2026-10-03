@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import struct
 import sys
 import unittest
@@ -180,6 +181,93 @@ class FldModelImportTests(unittest.TestCase):
             fld_model_import.import_geometry(
                 self.data, self.document, bytes(self.binary)
             )
+
+    def test_rejects_unsupported_scene_edits(self) -> None:
+        def alternate_material(document: dict) -> None:
+            document["materials"].append({"name": "unsupported replacement"})
+            document["meshes"][0]["primitives"][0]["material"] = (
+                len(document["materials"]) - 1
+            )
+
+        def morph_target(document: dict) -> None:
+            primitive = document["meshes"][0]["primitives"][0]
+            primitive["targets"] = [
+                {"POSITION": primitive["attributes"]["POSITION"]}
+            ]
+
+        def mesh_morph_weights(document: dict) -> None:
+            document["meshes"][0]["weights"] = [0.5]
+
+        def node_morph_weights(document: dict) -> None:
+            node = next(
+                item
+                for item in document["nodes"]
+                if "ddsNodeId" in item.get("extras", {})
+            )
+            node["weights"] = [0.5]
+
+        def model_transform(document: dict) -> None:
+            node = next(
+                item
+                for item in document["nodes"]
+                if "ddsNodeId" in item.get("extras", {})
+            )
+            node["translation"] = [123.0, 0.0, 0.0]
+
+        def wrapper_transform(document: dict) -> None:
+            node = next(
+                item
+                for item in document["nodes"]
+                if "ddsResourceSerial" in item.get("extras", {})
+            )
+            node["matrix"] = [1.0, 0.0, 0.0, 0.0] * 4
+
+        def detach_mesh(document: dict) -> None:
+            node = next(item for item in document["nodes"] if "mesh" in item)
+            del node["mesh"]
+
+        def change_model_hierarchy(document: dict) -> None:
+            wrapper_index = next(
+                index
+                for index, item in enumerate(document["nodes"])
+                if "ddsResourceSerial" in item.get("extras", {})
+            )
+            node = next(
+                item
+                for item in document["nodes"]
+                if "ddsNodeId" in item.get("extras", {})
+            )
+            node["children"] = [wrapper_index]
+
+        def change_wrapper_hierarchy(document: dict) -> None:
+            wrapper = next(
+                item
+                for item in document["nodes"]
+                if "ddsResourceSerial" in item.get("extras", {})
+            )
+            wrapper["children"] = []
+
+        cases = (
+            ("material", alternate_material, "material assignment"),
+            ("morph target", morph_target, "morph targets"),
+            ("mesh morph weights", mesh_morph_weights, "morph weights"),
+            ("node morph weights", node_morph_weights, "morph weights"),
+            ("model transform", model_transform, "node transform"),
+            ("wrapper transform", wrapper_transform, "node matrix"),
+            ("mesh attachment", detach_mesh, "mesh attachment"),
+            ("model hierarchy", change_model_hierarchy, "model hierarchy"),
+            ("wrapper hierarchy", change_wrapper_hierarchy, "model hierarchy"),
+        )
+        for label, mutate, message in cases:
+            with self.subTest(label=label):
+                document = copy.deepcopy(self.document)
+                mutate(document)
+                with self.assertRaisesRegex(
+                    fld_model_import.ModelImportError, message
+                ):
+                    fld_model_import.import_geometry(
+                        self.data, document, bytes(self.binary)
+                    )
 
     def test_tracked_fld1_sources_round_trip_unchanged(self) -> None:
         for version in ("dds1", "dds2"):

@@ -13,6 +13,7 @@ from sdf_model_import import (
     ModelImportError,
     decode_glb,
     import_model_graphs,
+    validate_wrapper_node,
 )
 
 
@@ -28,8 +29,8 @@ def import_geometry(
     if not isinstance(nodes, list):
         raise ModelImportError("GLB has no node array")
 
-    selected: dict[int, str] = {}
-    for node in nodes:
+    selected: dict[int, tuple[str, int]] = {}
+    for node_index, node in enumerate(nodes):
         if not isinstance(node, dict):
             continue
         extras = node.get("extras")
@@ -41,12 +42,12 @@ def import_geometry(
             raise ModelImportError("automap area wrapper has an invalid identity")
         if area_index in selected:
             raise ModelImportError(f"GLB repeats automap area index {area_index}")
-        selected[area_index] = name
+        selected[area_index] = name, node_index
     if not selected:
         raise ModelImportError("GLB has no DDS automap-area wrappers")
 
     graphs = []
-    for area_index, gltf_name in selected.items():
+    for area_index, (gltf_name, wrapper_index) in selected.items():
         if not 0 <= area_index < len(model.areas):
             raise ModelImportError(
                 f"GLB automap area index {area_index} is absent from the AMB"
@@ -65,6 +66,29 @@ def import_geometry(
                 f"expected {source_name!r}"
             )
         graph = model.models[area_index]
+        expected_children = {
+            f"{source_name}/node_{item.node_id}"
+            for item in graph.items
+            if item.parent < 0
+        }
+        for sblock_index, sblock in enumerate(model.sblocks[area_index]):
+            sblock_name = amb._fixed_string(
+                automap_data,
+                model.data_end,
+                sblock.name,
+                f"area {area_name} sub-block {sblock_index} name",
+            )
+            expected_children.update(
+                f"{source_name}/{sblock_name}/icon_{icon_index}"
+                for icon_index in range(len(model.icons[area_index][sblock_index]))
+            )
+        validate_wrapper_node(
+            document,
+            wrapper_index,
+            expected_children,
+            {"extras": {}},
+            f"automap area {area_index}",
+        )
         graphs.append(
             ModelGraph(
                 source_name,
