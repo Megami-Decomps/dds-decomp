@@ -191,6 +191,28 @@ typedef struct SdfThreadNode {
 extern s32 sdfTrackedThreadSemaphore;
 extern SdfThreadNode *sdfTrackedThreadHead;
 
+/* General-heap allocation descriptor (0x10); links bound the represented span. */
+typedef struct SdfMemBlock {
+    struct SdfMemBlock *prev; /* 0x00 */
+    struct SdfMemBlock *next; /* 0x04 */
+    s32 address;              /* 0x08: start of represented span */
+    u16 state;                /* 0x0C: free, used, or end sentinel */
+    s16 referenceCount;       /* 0x0E: -1 for sentinels */
+} SdfMemBlock;
+
+/* Embedded end sentinels and backing-span metadata for the general heap (0x28). */
+typedef struct SdfMemHeap {
+    SdfMemBlock head; /* 0x00: low-address sentinel */
+    SdfMemBlock tail; /* 0x10: high-address sentinel */
+    u32 base;         /* 0x20: unaligned backing allocation */
+    u32 size;         /* 0x24 */
+} SdfMemHeap;
+
+typedef char SdfMemBlock_size_must_be_0x10[(sizeof(SdfMemBlock) == 0x10) ? 1 : -1];
+typedef char SdfMemHeap_size_must_be_0x28[(sizeof(SdfMemHeap) == 0x28) ? 1 : -1];
+
+extern SdfMemHeap sdfGeneralHeap;
+
 /* Draw-node vector slots (SdfDrawNode vectors array indices). */
 #define SDF_DRAW_TRANSLATION_VECTOR 0
 #define SDF_DRAW_SCALE_VECTOR 1

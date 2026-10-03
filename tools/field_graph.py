@@ -409,7 +409,7 @@ def _render_interaction_dot(graph: dict, area_id: str) -> str:
 
 
 def _render_event_dot(graph: dict, field_id: str) -> str:
-    """Render placement-rooted procedure flow for one ordinary field script."""
+    """Render one field's placement-rooted field and event procedure closure."""
 
     field_number = int(field_id[1:])
     entries = [
@@ -417,27 +417,46 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
         for row in graph.get("eventEntries", ())
         if row["field"] == field_number
     ]
-    procedures = {
-        row["id"]: row
-        for row in graph.get("scriptProcedures", ())
-        if row["field"] == field_number and row["reachableFromPlacement"]
-    }
     if not entries:
         raise FieldGraphError(f"no event placements found for {field_id}")
+    all_procedures = {
+        row["id"]: row for row in graph.get("scriptProcedures", ())
+    }
+    all_procedure_edges = graph.get("scriptProcedureEdges", ())
+    all_event_edges = graph.get("eventScriptEdges", ())
+    adjacency: dict[str, set[str]] = defaultdict(set)
+    for edge in all_procedure_edges:
+        adjacency[edge["source"]].add(edge["target"])
+    for edge in all_event_edges:
+        if edge["targetPresent"]:
+            adjacency[edge["source"]].add(edge["target"])
+    reachable = {
+        row["procedure"] for row in entries if row["procedure"] is not None
+    }
+    pending = deque(sorted(reachable))
+    while pending:
+        source = pending.popleft()
+        for target in sorted(adjacency[source]):
+            if target not in reachable:
+                reachable.add(target)
+                pending.append(target)
+    procedures = {
+        node_id: all_procedures[node_id]
+        for node_id in sorted(reachable)
+        if node_id in all_procedures
+    }
     procedure_edges = [
         row
-        for row in graph["scriptProcedureEdges"]
-        if row["field"] == field_number and row["source"] in procedures
+        for row in all_procedure_edges
+        if row["source"] in reachable and row["target"] in reachable
     ]
     event_edges = [
-        row
-        for row in graph["eventScriptEdges"]
-        if row["field"] == field_number and row["source"] in procedures
+        row for row in all_event_edges if row["source"] in reachable
     ]
     battle_exit_edges = [
         row
         for row in graph.get("deferredBattleExitEdges", ())
-        if row["field"] == field_number and row["source"] in procedures
+        if row["source"] in reachable
     ]
 
     lines = [
@@ -461,7 +480,8 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
         ]
         call_count = sum(row["count"] for row in calls)
         label = (
-            f"{procedure['name']} [{procedure['index']}] | "
+            f"{procedure['script']}:{procedure['name']} "
+            f"[{procedure['index']}] | "
             f"{call_count} native calls"
         )
         if command_names:
@@ -470,12 +490,13 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
             f"  {json.dumps(procedure['id'])} "
             f"[label={json.dumps(label)}, shape=box];"
         )
-    event_targets = {edge["target"]: edge for edge in event_edges}
+    event_targets = {
+        edge["target"]: edge for edge in event_edges if not edge["targetPresent"]
+    }
     for target, edge in sorted(event_targets.items()):
         label = edge.get("event", f"event {edge['eventId']}")
         attributes = [f"label={json.dumps(label)}", 'shape="ellipse"']
-        if not edge["targetPresent"]:
-            attributes.extend(('style="dashed"', 'color="gray"'))
+        attributes.extend(('style="dashed"', 'color="gray"'))
         lines.append(f"  {json.dumps(target)} [{', '.join(attributes)}];")
     battle_exit_targets = {}
     for edge in battle_exit_edges:
@@ -508,6 +529,8 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
         )
     for edge in event_edges:
         label = edge["command"]
+        if "requestId" in edge:
+            label += f" request {edge['requestId']}"
         if edge["count"] > 1:
             label += f" x{edge['count']}"
         lines.append(
@@ -706,27 +729,52 @@ def _event_sections(
     profile: flw0_profiles.CommandProfile,
     tables: dict[int, wap.WapFile] | None = None,
 ) -> dict:
-    """Build exact placement roots and procedure-level field-script flow."""
+    """Build exact placement roots and linked field/event procedure flow."""
 
     tables = tables or {}
     known_areas = {path.stem.lower() for path in field_paths}
-    scripts: dict[int, dict] = {}
+    scripts: dict[str, dict] = {}
     procedure_names: dict[int, dict[str, int]] = {}
     for source in sorted(script_dir.glob("f???.bfasm")):
         match = re.fullmatch(r"f(\d{3})", source.stem, re.IGNORECASE)
         if match is None:
             continue
         field_number = int(match.group(1))
-        if field_number in scripts:
+        script_id = f"f{field_number:03}"
+        if script_id in scripts:
             raise FieldGraphError(f"duplicate field script for f{field_number:03}")
         script = flw0.parse_source(source.read_text(encoding="utf-8"))
         flow = flw0_flow.analyze(script, profile)
-        scripts[field_number] = flow
+        scripts[script_id] = {
+            "id": script_id,
+            "type": "field",
+            "field": field_number,
+            "flow": flow,
+        }
         procedure_names[field_number] = {
             row["name"]: row["index"] for row in flow["procedures"]
         }
     if not scripts:
         raise FieldGraphError(f"no field BF sources found in {script_dir}")
+
+    event_dir = script_dir.parent / "event"
+    if not event_dir.is_dir():
+        raise FieldGraphError(f"event script directory does not exist: {event_dir}")
+    for source in sorted(event_dir.glob("e???.bfasm")):
+        match = re.fullmatch(r"e(\d{3})", source.stem, re.IGNORECASE)
+        if match is None:
+            continue
+        event_number = int(match.group(1))
+        script_id = f"e{event_number:03}"
+        if script_id in scripts:
+            raise FieldGraphError(f"duplicate event script for {script_id}")
+        script = flw0.parse_source(source.read_text(encoding="utf-8"))
+        scripts[script_id] = {
+            "id": script_id,
+            "type": "event",
+            "event": event_number,
+            "flow": flw0_flow.analyze(script, profile),
+        }
 
     entries = []
     for source in field_paths:
@@ -734,7 +782,7 @@ def _event_sections(
         if match is None:
             continue
         field_number = int(match.group(1))
-        if field_number not in scripts:
+        if f"f{field_number:03}" not in scripts:
             continue
         entries.extend(
             _event_entries(
@@ -753,14 +801,23 @@ def _event_sections(
     event_edges = []
     battle_exit_edges = []
     unresolved = []
-    for field_number, flow in sorted(scripts.items()):
-        prefix = f"f{field_number:03}:procedure:"
+    for script_id, script_record in sorted(scripts.items()):
+        flow = script_record["flow"]
+        prefix = f"{script_id}:procedure:"
+        script_metadata = {
+            "script": script_id,
+            "scriptType": script_record["type"],
+        }
+        if script_record["type"] == "field":
+            script_metadata["field"] = script_record["field"]
+        else:
+            script_metadata["event"] = script_record["event"]
         for row in flow["procedures"]:
             node_id = f"{prefix}{row['index']}"
             procedures.append(
                 {
                     "id": node_id,
-                    "field": field_number,
+                    **script_metadata,
                     **row,
                     "entryPlacements": entry_counts[node_id],
                 }
@@ -769,25 +826,33 @@ def _event_sections(
             procedure_edges.append(
                 {
                     **edge,
-                    "field": field_number,
+                    **script_metadata,
                     "source": f"{prefix}{edge['source']}",
                     "target": f"{prefix}{edge['target']}",
                 }
             )
         for edge in flow["eventEdges"]:
             event_name = edge.get("event")
+            target_script = event_name or f"e{edge['eventId']:03}"
+            target_record = scripts.get(target_script)
+            target_present = (
+                target_record is not None
+                and target_record["type"] == "event"
+                and bool(target_record["flow"]["procedures"])
+            )
             event_edges.append(
                 {
                     **edge,
-                    "field": field_number,
+                    **script_metadata,
                     "source": f"{prefix}{edge['source']}",
-                    "target": f"event:{event_name or edge['eventId']}",
-                    "targetPresent": (
-                        event_name is not None
-                        and (
-                            script_dir.parent / "event" / f"{event_name}.bfasm"
-                        ).is_file()
+                    "target": (
+                        f"{target_script}:procedure:0"
+                        if target_present
+                        else f"event:{target_script}"
                     ),
+                    "targetScript": target_script,
+                    "targetProcedure": 0 if target_present else None,
+                    "targetPresent": target_present,
                 }
             )
         for site in flow["deferredBattleExits"]:
@@ -803,7 +868,7 @@ def _event_sections(
             battle_exit_edges.append(
                 {
                     "source": f"{prefix}{site['source']}",
-                    "field": field_number,
+                    **script_metadata,
                     "pc": site["pc"],
                     "diagnostic": site["diagnostic"],
                     "lookupField": site["field"],
@@ -818,7 +883,7 @@ def _event_sections(
         unresolved.extend(
             {
                 **row,
-                "field": field_number,
+                **script_metadata,
                 "source": f"{prefix}{row['source']}",
             }
             for row in flow["unresolvedTargets"]
@@ -827,6 +892,9 @@ def _event_sections(
     adjacency: dict[str, set[str]] = defaultdict(set)
     for edge in procedure_edges:
         adjacency[edge["source"]].add(edge["target"])
+    for edge in event_edges:
+        if edge["targetPresent"]:
+            adjacency[edge["source"]].add(edge["target"])
     reachable = set(entry_counts)
     pending = deque(sorted(reachable))
     while pending:
@@ -844,6 +912,12 @@ def _event_sections(
     for edge in battle_exit_edges:
         edge["sourceReachable"] = edge["source"] in reachable
 
+    field_procedures = [
+        row for row in procedures if row["scriptType"] == "field"
+    ]
+    event_procedures = [
+        row for row in procedures if row["scriptType"] == "event"
+    ]
     native_calls = sum(
         call["count"] for procedure in procedures for call in procedure["nativeCalls"]
     )
@@ -867,15 +941,38 @@ def _event_sections(
         "deferredBattleExitEdges": battle_exit_edges,
         "scriptUnresolvedTargets": unresolved,
         "eventSummary": {
-            "fieldScripts": len(scripts),
+            "fieldScripts": sum(
+                row["type"] == "field" for row in scripts.values()
+            ),
+            "eventScripts": sum(
+                row["type"] == "event" for row in scripts.values()
+            ),
             "eventPlacements": len(entries),
             "linkedEventPlacements": sum(
                 row["procedure"] is not None for row in entries
             ),
             "entryProcedures": len(entry_counts),
             "procedureNodes": len(procedures),
+            "fieldProcedureNodes": len(field_procedures),
+            "eventProcedureNodes": len(event_procedures),
             "reachableProcedures": len(reachable),
+            "reachableFieldProcedures": sum(
+                row["id"] in reachable for row in field_procedures
+            ),
+            "reachableEventProcedures": sum(
+                row["id"] in reachable for row in event_procedures
+            ),
+            "reachableEventScripts": len(
+                {
+                    row["script"]
+                    for row in event_procedures
+                    if row["id"] in reachable
+                }
+            ),
             "procedureEdges": len(procedure_edges),
+            "eventProcedureEdges": sum(
+                edge["scriptType"] == "event" for edge in procedure_edges
+            ),
             "taskEdges": sum(edge["kind"] == "task" for edge in procedure_edges),
             "taskCalls": sum(
                 edge["count"]
@@ -883,6 +980,12 @@ def _event_sections(
                 if edge["kind"] == "task"
             ),
             "eventScriptEdges": len(event_edges),
+            "fieldEventScriptEdges": sum(
+                edge["scriptType"] == "field" for edge in event_edges
+            ),
+            "eventEventScriptEdges": sum(
+                edge["scriptType"] == "event" for edge in event_edges
+            ),
             "reachableEventScriptEdges": sum(
                 edge["sourceReachable"] for edge in event_edges
             ),
@@ -974,7 +1077,7 @@ def _load_graph(
         except KeyError as exc:
             raise FieldGraphError(f"unknown command profile {profile_name!r}") from exc
         sections = _event_sections(field_paths, script_dir, profile, tables)
-        graph["schema"] = "dds-field-world-4"
+        graph["schema"] = "dds-field-world-5"
         graph["summary"].update(sections.pop("eventSummary"))
         graph.update(sections)
     return graph

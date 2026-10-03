@@ -293,6 +293,9 @@ class Flw0Tests(unittest.TestCase):
                 (0x066 << 16) | flw0.OPCODE_IDS["COMM"],
                 (10 << 16) | flw0.OPCODE_IDS["PUSHIS"],
                 (0x066 << 16) | flw0.OPCODE_IDS["COMM"],
+                (610 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                (258 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                (0x028 << 16) | flw0.OPCODE_IDS["COMM"],
                 flw0.OPCODE_IDS["END"],
             ]
         )
@@ -304,12 +307,17 @@ class Flw0Tests(unittest.TestCase):
         self.assertIn("  PUSHEVENT e602", symbolic)
         self.assertIn("0003: PUSHIS 0x000a", physical)
         self.assertIn("  PUSHIS 10", symbolic)
+        self.assertIn("0005: PUSHEVENT e610", physical)
+        self.assertIn("  PUSHEVENT e610", symbolic)
         self.assertEqual(flw0.parse_source(physical).to_bytes(), original)
         self.assertEqual(flw0.parse_source(symbolic).to_bytes(), original)
 
         view = flw0_view.render(script, "dds1")
         self.assertIn("CALL_EVENT(event(e602))", view)
         self.assertIn("CALL_EVENT(10)", view)
+        self.assertIn(
+            "SUBMIT_EVENT_WITH_SELECTION(258, event(e610))", view
+        )
 
         with self.assertRaisesRegex(flw0.Flw0Error, "unknown dds1 event target"):
             flw0.parse_source(symbolic.replace("PUSHEVENT e602", "PUSHEVENT e010"))
@@ -1267,7 +1275,7 @@ end
             "SET_CONTROLLER_VIBRATION": (0x01A, 3, False),
             "FADE_BACKGROUND_IN": (0x01F, 1, False),
             "READ_SOLAR_PHASE": (0x027, 0, True),
-            "SUBMIT_EVENT_WITH_MODE": (0x028, 2, False),
+            "SUBMIT_EVENT_WITH_SELECTION": (0x028, 2, False),
             "RESET_DRAW_EFFECTS": (0x043, 0, False),
             "RETURN_TO_TITLE": (0x046, 0, False),
             "WAIT_FOR_UNIT_MOTION": (0x049, 1, False),
@@ -1572,6 +1580,35 @@ end
                 if profile.name == "dds2":
                     profile_expected.update(dds2_field_only)
                 self.assertEqual(commands, profile_expected)
+                self.assertEqual(
+                    {
+                        name: (
+                            profile.by_name[name].event_argument,
+                            profile.by_name[name].event_dispatch,
+                            profile.by_name[name].event_request_argument,
+                        )
+                        for name in (
+                            "CALL_EVENT",
+                            "SUBMIT_EVENT",
+                            "SUBMIT_EVENT_WITH_SELECTION",
+                            "SUBMIT_EVENT_IMMEDIATE",
+                        )
+                    },
+                    {
+                        "CALL_EVENT": (0, "call", None),
+                        "SUBMIT_EVENT": (0, "submit", None),
+                        "SUBMIT_EVENT_WITH_SELECTION": (
+                            1,
+                            "submit-selection",
+                            0,
+                        ),
+                        "SUBMIT_EVENT_IMMEDIATE": (
+                            0,
+                            "submit-immediate",
+                            None,
+                        ),
+                    },
+                )
                 treasure_fields = profile.by_name[
                     "READ_TREASURE_TABLE_VALUE"
                 ].symbols_for_argument(0)
@@ -2227,7 +2264,7 @@ end
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
         self.assertEqual(selection_references, 329)
-        self.assertEqual(event_references, 31)
+        self.assertEqual(event_references, 50)
         self.assertEqual(procedure_references, 807)
         self.assertEqual(short_string_counts, 30)
 
@@ -2353,7 +2390,7 @@ end
             ),
             (37752, 1910, 287),
         )
-        self.assertEqual(totals["event_references"], 46)
+        self.assertEqual(totals["event_references"], 56)
         self.assertEqual(totals["procedure_references"], 463)
         self.assertEqual((totals["font"], totals["glyphs"]), (433, 159))
         self.assertEqual(totals["short_string_counts"], 22)

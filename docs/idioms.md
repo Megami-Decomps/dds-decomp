@@ -1130,6 +1130,14 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     in source order (tag header store first, then the buffer fields):
     putting the buffer stores first makes sched1 issue them between `div` and
     its check (14/28 words), the tag-first order gets to 5/28.
+    Independent work is different. In the paired title-stream setup helpers
+    `func_0026ABA8` / `func_002A27A8`, the shapes `q = n / d; zero = 0;
+    result = q;` and `result = n / d; zero = 0;` differ at pass 00, but sched1
+    converges both forms: the zero store fills divider latency and the quotient
+    store waits for the result.
+    Both forms produce the same exact assembly. If a controlled source-order
+    or temporary-local test converges by pass 17, stop permuting those forms;
+    only a real dependency can constrain the schedule.
 12. **`bne` with a filled slot vs annulled `bnel`: the callee must be C-defined
     earlier in the same unit.** `if (a >= 200) return; if (b == 1) f();` (jal
     tail, `ld $31` slot) compiles to `bnel`/`ld ra` when `f` is only declared

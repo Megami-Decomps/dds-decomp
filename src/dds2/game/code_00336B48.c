@@ -397,7 +397,67 @@ void sdfVuRotateObjectBasis(void *vectors) {
         : : "r"(vectors), "r"(m), "r"(D_00476250) : "memory");
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00336EC0);
+/* vu0 routine: expand packed colors and build the scaled transform vectors */
+void func_00336EC0(void *out, u32 transform, void *reference, u32 packedA,
+                   u32 packedB, f32 scale, f32 x, f32 y) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        ".set noat\n"
+        "lui $1, 0x3F80\n"
+        "mtc1 $1, $f0\n"
+        "daddu $9, $4, $0\n"
+        "c.lt.s $f13, $f0\n"
+        "bc1f 1f\n"
+        "daddu $10, $5, $0\n"
+        "mov.s $f13, $f0\n"
+        "1:\n"
+        "mul.s $f1, $f14, $f13\n"
+        "lui $1, 0x3C00\n"
+        "mtc1 $1, $f0\n"
+        "swc1 $f13, 0x0C($9)\n"
+        "lui $5, 0x437F\n"
+        "mfc1 $11, $f12\n"
+        "mfc1 $12, $f0\n"
+        "swc1 $f1, 0x04($9)\n"
+        "pextlb $2, $0, $7\n"
+        "pextlb $3, $0, $8\n"
+        "pextlb $4, $0, $6\n"
+        "pextlh $2, $0, $2\n"
+        "pextlh $3, $0, $3\n"
+        "pextlh $4, $0, $4\n"
+        "qmtc2.ni $2, vf2\n"
+        "qmtc2.ni $3, vf3\n"
+        "qmtc2.ni $4, vf4\n"
+        "qmtc2.ni $11, vf5\n"
+        "qmtc2.ni $12, vf6\n"
+        "qmtc2.ni $5, vf7\n"
+        "vitof0.xyzw vf2, vf2\n"
+        "vitof0.xyzw vf3, vf3\n"
+        "vitof0.xyzw vf4, vf4\n"
+        "lqc2 vf8, 0x40($10)\n"
+        "lqc2 vf9, 0x80($10)\n"
+        "vmulx.xyzw vf2, vf2, vf6x\n"
+        "vmulx.xyzw vf3, vf3, vf6x\n"
+        "vmove.w vf9, vf0\n"
+        "vmulx.w vf8, vf8, vf0x\n"
+        "vmulw.w vf4, vf4, vf2w\n"
+        "vmul.xyz vf9, vf3, vf9\n"
+        "vmul.xyz vf8, vf2, vf8\n"
+        "vmulaw.xyz ACC, vf9, vf0w\n"
+        "vmaddax.xyz ACC, vf8, vf5x\n"
+        "vmsubx.xyz vf9, vf9, vf5x\n"
+        "vmul.xyzw vf8, vf8, vf4\n"
+        "vmul.xyzw vf9, vf9, vf4\n"
+        "vminix.xyzw vf8, vf8, vf7x\n"
+        "vsub.xyz vf8, vf8, vf9\n"
+        "sqc2 vf9, 0x10($9)\n"
+        "sqc2 vf8, 0x20($9)\n"
+        ".set at\n"
+        ".set reorder"
+        :
+        :
+        : "$2", "$3", "$4", "$5", "$9", "$10", "$11", "$12", "memory");
+}
 
 void sdfVuTransformWorkAtOffset(void *out, VuAsset *work, void *reference, f32 deltaX, f32 deltaY) {
     func_00336EC0(out, D_00439188, reference,
@@ -1060,7 +1120,44 @@ void sdfVuBeginPacketFromWork(VuWork *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_003394C8);
+u64 *func_003394C8(VuWork *work) {
+    u32 cursor;
+    u32 start;
+    s32 quadwords;
+    u32 descriptor;
+    u64 gifTag;
+    u64 *header;
+
+    if (work->state == 0) {
+        return NULL;
+    }
+
+    cursor = (u32)work->cursor;
+    start = (u32)work->dataStart;
+    if (cursor == start) {
+        sdfSetPacketCursorAligned(work->state);
+        return NULL;
+    }
+
+    while (((u32)cursor & 0xC) != 0) {
+        *(u32 *)cursor = 0;
+        cursor += 4;
+    }
+    quadwords = (s32)(cursor - start) >> 4;
+
+    while (((u32)cursor & 0x30) != 0) {
+        *(u128 *)cursor = 0;
+        cursor += 0x10;
+    }
+
+    sdfSetPacketCursorAligned(cursor & 0x0FFFFFFF);
+    header = (u64 *)work->header;
+    descriptor = 0x20000000 | (quadwords & 0xFFFF);
+    gifTag = 0x1100000000000000ULL;
+    header[0] = descriptor;
+    header[1] = gifTag;
+    return header;
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_003395A0);
 

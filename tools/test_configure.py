@@ -110,6 +110,42 @@ const char *text = "INCLUDE_SDATA(hidden)";
                 context="test",
             )
 
+    def test_replacement_includes_allow_explicitly_retained_small_data(self) -> None:
+        includes = [
+            ("ASM", "game/example", "fallback"),
+            ("SDATA", "game/example", "small_data"),
+        ]
+        configure.validate_replacement_includes(
+            includes,
+            ["fallback"],
+            [{"section": ".sdata", "size": 4}],
+            context="test replacement",
+        )
+
+    def test_replacement_includes_reject_unretained_small_data(self) -> None:
+        includes = [("SDATA", "game/example", "small_data")]
+        with self.assertRaisesRegex(SystemExit, "without retaining .sdata"):
+            configure.validate_replacement_includes(
+                includes, [], [], context="test replacement"
+            )
+
+    def test_replacement_includes_reject_empty_retained_small_data(self) -> None:
+        includes = [("SDATA", "game/example", "small_data")]
+        with self.assertRaisesRegex(SystemExit, "without retaining .sdata"):
+            configure.validate_replacement_includes(
+                includes,
+                [],
+                [{"section": ".sdata", "size": 0}],
+                context="test replacement",
+            )
+
+    def test_replacement_includes_still_reject_rodata_fallbacks(self) -> None:
+        includes = [("RODATA", "game/example", "table")]
+        with self.assertRaisesRegex(SystemExit, "unsupported fallback"):
+            configure.validate_replacement_includes(
+                includes, [], [], context="test replacement"
+            )
+
 
 class ObjdiffProgressTests(unittest.TestCase):
     def setUp(self) -> None:
