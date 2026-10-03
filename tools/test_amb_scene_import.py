@@ -108,6 +108,22 @@ class AmbSceneImportTests(unittest.TestCase):
         self.assertEqual(rebuilt, self.data)
         self.assertEqual(summary.models, 1)
 
+    def test_rejects_referenced_material_edits(self) -> None:
+        primitive = self.document["meshes"][0]["primitives"][0]
+        material = self.document["materials"][primitive["material"]]
+        material["pbrMetallicRoughness"]["baseColorFactor"] = [
+            0.5,
+            1.0,
+            1.0,
+            1.0,
+        ]
+        with self.assertRaisesRegex(
+            sdf_model_import.ModelImportError, "referenced material"
+        ):
+            amb_scene_import.import_geometry(
+                self.data, self.document, bytes(self.binary)
+            )
+
     def test_rejects_unsupported_scene_edits(self) -> None:
         def alternate_material(document: dict) -> None:
             document["materials"].append({"name": "unsupported replacement"})

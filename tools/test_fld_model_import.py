@@ -182,6 +182,21 @@ class FldModelImportTests(unittest.TestCase):
                 self.data, self.document, bytes(self.binary)
             )
 
+    def test_rejects_referenced_material_edits(self) -> None:
+        material = self.document["materials"][self.primitive["material"]]
+        material["pbrMetallicRoughness"]["baseColorFactor"] = [
+            0.5,
+            1.0,
+            1.0,
+            1.0,
+        ]
+        with self.assertRaisesRegex(
+            fld_model_import.ModelImportError, "referenced material"
+        ):
+            fld_model_import.import_geometry(
+                self.data, self.document, bytes(self.binary)
+            )
+
     def test_rejects_unsupported_scene_edits(self) -> None:
         def alternate_material(document: dict) -> None:
             document["materials"].append({"name": "unsupported replacement"})
