@@ -330,9 +330,19 @@ hides the geometry while retaining the nodes and metadata.
 Type-6 event resources are separate nodes with their index, flags, label, and
 retained words. A kind-1 placement with a nonnegative event index carries the
 label and serial of that exact resource, exposing the native relationship
-without guessing which globally named BF procedure owns it. Across the tracked
-corpus, all 1,273 such references resolve to labeled resources: 557 in DDS1
-and 716 in DDS2. The other kind-1 placements retain their native `-1` index.
+without guessing which globally named BF procedure owns it. Runtime resolves
+that label in the BF/FLW0 script attached to the active world object. The
+tracked `fNNN_000` archive pairs this script with the field data, so source
+exports automatically add the exact procedure name and index as
+`ddsEventProcedure`. Loose binaries can provide the same identity with
+`--scripts fNNN.bf`. No field script contains a duplicate procedure name.
+
+Across the tracked corpus, all 1,273 such placement references resolve to
+labeled resources: 557 in DDS1 and 716 in DDS2. Of these, 526 and 675
+respectively resolve in the paired field script. The remaining 72 retain their
+resource label without a procedure link; the exporter does not use a global
+name or numeric-prefix fallback. Kind-1 placements with the native `-1` event
+index remain unlinked.
 
 Collision quads are triangulated as `(0,1,2)` and `(0,2,3)`; the retail
 `0xffffffff` fourth-index sentinel selects a single triangle. Source face
