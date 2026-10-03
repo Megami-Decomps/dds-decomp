@@ -1,6 +1,10 @@
 #include "common.h"
 
 #define MNU_SCENE_WORK_SIZE 0x5B0
+#define MNU_SCENE_SHADE_FRAME_LIMIT 10
+#define MNU_SCENE_SHADE_FRAME_SCALE 10.0f
+#define MNU_SCENE_SHADE_ALPHA_SCALE 112.0f
+#define MNU_SCENE_DRAW_CONTEXT 0x53
 
 extern void func_002512F0(s32, s32);
 
@@ -111,15 +115,17 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00251260);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_002512F0);
 
-void mnuFreeTaskData(s32 unused, void *data) {
-    if (data != NULL) {
-        sdfReleaseChipBlock(data);
+/* Release nonnull chip-allocated task data; the scheduler argument is unused. */
+void mnuFreeTaskData(s32 unused, void *taskData) {
+    if (taskData != NULL) {
+        sdfReleaseChipBlock(taskData);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_002515F0);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_002517C0);
+
 
 extern s32 sdfAllocGeneralBlock(s32);
 extern s32 sdfMemoryGetBlockAddress(s32);
@@ -128,24 +134,25 @@ extern u8 *datGameState;
 
 /* Allocate and clear scene work before registering its grid and coordinates. */
 s32 mnuCreateSceneWork(void) {
-    s32 handle = sdfAllocGeneralBlock(MNU_SCENE_WORK_SIZE);
-    u8 *work = (u8 *)sdfMemoryGetBlockAddress(handle);
+    s32 allocationHandle = sdfAllocGeneralBlock(MNU_SCENE_WORK_SIZE);
+    u8 *sceneWork = (u8 *)sdfMemoryGetBlockAddress(allocationHandle);
 
-    memset(work, 0, MNU_SCENE_WORK_SIZE);
-    ((MenuSceneWork *)work)->allocationHandle = handle;
-    mnuInitializeMantraSelectionGrid((s32)work);
-    ((MenuSceneWork *)work)->coordinateA = 0;
-    ((MenuSceneWork *)work)->coordinateB = 0;
+    memset(sceneWork, 0, MNU_SCENE_WORK_SIZE);
+    ((MenuSceneWork *)sceneWork)->allocationHandle = allocationHandle;
+    mnuInitializeMantraSelectionGrid((s32)sceneWork);
+    ((MenuSceneWork *)sceneWork)->coordinateA = 0;
+    ((MenuSceneWork *)sceneWork)->coordinateB = 0;
     ((MenuSceneMetadata *)func_002CB3B8(mnuSceneResourceContext, -1))->displayedCurrency = ((DatGameCounters *)datGameState)->currency;
-    mnuCopySceneCoordinates((s32)work);
-    return (s32)work;
+    mnuCopySceneCoordinates((s32)sceneWork);
+    return (s32)sceneWork;
 }
 
-void mnuReleaseSceneContext(s32 unused, s32 context) {
+/* Retain the native metadata lookup, then release grid/list/allocation resources and reset projection state. */
+void mnuReleaseSceneContext(s32 unused, s32 sceneAddress) {
     func_002CB3B8(mnuSceneResourceContext, -1);
-    sdfDestroyGridWork(((MenuSceneWork *)context)->gridHandle);
-    mnuReleaseDisplayListNodes(context + 0x584);
-    sdfReleaseResourceAllocation(((MenuSceneWork *)context)->allocationHandle);
+    sdfDestroyGridWork(((MenuSceneWork *)sceneAddress)->gridHandle);
+    mnuReleaseDisplayListNodes(sceneAddress + 0x584);
+    sdfReleaseResourceAllocation(((MenuSceneWork *)sceneAddress)->allocationHandle);
     mnuResetWorkFloats();
 }
 
@@ -173,10 +180,11 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_002530D8);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00253208);
 
-void mnuReinitializeSceneGrid(s32 context) {
-    sdfDestroyGridWork(((MenuSceneWork *)context)->gridHandle);
-    mnuInitializeMantraSelectionGrid(context);
-    mnuCopySceneCoordinates(context);
+/* Recreate the scene's selection grid and copy its resulting coordinates. */
+void mnuReinitializeSceneGrid(s32 sceneAddress) {
+    sdfDestroyGridWork(((MenuSceneWork *)sceneAddress)->gridHandle);
+    mnuInitializeMantraSelectionGrid(sceneAddress);
+    mnuCopySceneCoordinates(sceneAddress);
 }
 
 extern void func_002CBB48(MenuGrid *grid);
@@ -206,19 +214,20 @@ void func_00253558(s32 context) {
     }
 }
 
+/* Return the selected entry address through the scene-work/grid/slot chain, or zero when scene work is absent. */
 s32 fldGetSceneMetadataNode(void) {
-    s32 context = func_002CB3B8(mnuSceneResourceContext, 1);
+    s32 sceneAddress = func_002CB3B8(mnuSceneResourceContext, 1);
 
-    if (context == 0) {
+    if (sceneAddress == 0) {
         return 0;
     }
-    return *(s32 *)(*(s32 *)(*(s32 *)(context + 0x484) + 8) + 4);
+    return *(s32 *)(*(s32 *)(*(s32 *)(sceneAddress + 0x484) + 8) + 4);
 }
 
 extern s32 dspCloseChannel(void);
 extern s32 evtCreateMessageWindowIfMissing(s32);
-extern u32 mnuGetSelectedNodeValue(void);
 extern void mnuSetupStaffMenuProfilePage(s32, void *);
+extern u32 mnuGetSelectedNodeValue(void);
 extern void *memcpy(void *, const void *, u32);
 
 typedef struct SceneEntryNode {
@@ -395,36 +404,38 @@ extern s64 evtGetMessageWindowControlState(void);
 extern u8 D_00325818[];
 extern void uiDrawGradientColorRect(s32, s32, s32, s32, s32, u32 *, s32);
 
+/* Update attached visuals and stage completion, then ramp the message-window shade over ten frames.
+ * Only the final two rectangle colors receive alpha; preserve both native selection lookups and the zero return. */
 s32 mnuUpdateMantraSceneDisplay(void) {
-    MenuSceneMetadata *scene = (MenuSceneMetadata *)func_002CB3B8(mnuSceneResourceContext, -1);
-    u32 colors[4];
+    MenuSceneMetadata *sceneMetadata = (MenuSceneMetadata *)func_002CB3B8(mnuSceneResourceContext, -1);
+    u32 shadeColors[4];
 
     mnuGetSelectedNodeValue();
     fldGetSceneMetadataNode();
     func_0024DD78();
-    func_00255E08(scene, 0x80, 0x4A);
-    func_0025B0F0(0, -27, 0, 0x80, scene, 0x53);
-    if (func_00249998(&scene->attachedEffectControl, scene->attachedEffect, 0x53) != 0) {
-        if (scene->stageStarted == 0) {
-            evtStageTestSelectEntryWithoutInitialValue(scene->entryId, 0);
+    func_00255E08(sceneMetadata, 0x80, 0x4A);
+    func_0025B0F0(0, -27, 0, 0x80, sceneMetadata, MNU_SCENE_DRAW_CONTEXT);
+    if (func_00249998(&sceneMetadata->attachedEffectControl, sceneMetadata->attachedEffect, MNU_SCENE_DRAW_CONTEXT) != 0) {
+        if (sceneMetadata->stageStarted == 0) {
+            evtStageTestSelectEntryWithoutInitialValue(sceneMetadata->entryId, 0);
         }
-        scene->stageStarted = 1;
+        sceneMetadata->stageStarted = 1;
     }
-    effUpdateAttached(0x1200, 0x730, 1, scene->attachedEffect, 0x53);
+    effUpdateAttached(0x1200, 0x730, 1, sceneMetadata->attachedEffect, MNU_SCENE_DRAW_CONTEXT);
     if (evtStageTestUpdate(D_00325818) >= 2) {
-        scene->stageFinished = 1;
+        sceneMetadata->stageFinished = 1;
     }
     if (evtGetMessageWindowControlState() != 0) {
-        if (scene->messageShadeFrames < 10) {
-            scene->messageShadeFrames++;
+        if (sceneMetadata->messageShadeFrames < MNU_SCENE_SHADE_FRAME_LIMIT) {
+            sceneMetadata->messageShadeFrames++;
         }
-    } else if (scene->messageShadeFrames > 0) {
-        scene->messageShadeFrames--;
+    } else if (sceneMetadata->messageShadeFrames > 0) {
+        sceneMetadata->messageShadeFrames--;
     }
-    if (scene->messageShadeFrames != 0) {
-        memset(colors, 0, sizeof(colors));
-        colors[3] = colors[2] = (u32)((f32)scene->messageShadeFrames / 10.0f * 112.0f);
-        uiDrawGradientColorRect(0, 0x700, 2, 0x2000, 0x700, colors, 0x53);
+    if (sceneMetadata->messageShadeFrames != 0) {
+        memset(shadeColors, 0, sizeof(shadeColors));
+        shadeColors[3] = shadeColors[2] = (u32)((f32)sceneMetadata->messageShadeFrames / MNU_SCENE_SHADE_FRAME_SCALE * MNU_SCENE_SHADE_ALPHA_SCALE);
+        uiDrawGradientColorRect(0, 0x700, 2, 0x2000, 0x700, shadeColors, MNU_SCENE_DRAW_CONTEXT);
     }
     return 0;
 }
@@ -453,24 +464,26 @@ typedef struct {
 } SceneMetadataContext;
 
 /* Copy the active scene entry coordinates selected by the grid metadata. */
-void fldUpdateSceneEntryMetadata(s32 context) {
-    SceneMetadataNode *node = ((SceneMetadataContext *)context)->grid->slot->node;
-    u16 index = node->entryIndex;
-    ((SceneMetadataContext *)context)->entryX = D_0036BE38[index].entryX;
-    index = node->entryIndex;
-    ((SceneMetadataContext *)context)->entryY = D_0036BE38[index].entryY;
+void fldUpdateSceneEntryMetadata(s32 sceneAddress) {
+    SceneMetadataNode *selectedNode = ((SceneMetadataContext *)sceneAddress)->grid->slot->node;
+    u16 entryIndex = selectedNode->entryIndex;
+    ((SceneMetadataContext *)sceneAddress)->entryX = D_0036BE38[entryIndex].entryX;
+    entryIndex = selectedNode->entryIndex;
+    ((SceneMetadataContext *)sceneAddress)->entryY = D_0036BE38[entryIndex].entryY;
 }
 
+/* Refresh the active scene-work entry coordinates and return zero. */
 s32 fldResetSceneState(void) {
     fldUpdateSceneEntryMetadata(func_002CB3B8(mnuSceneResourceContext, 1));
     return 0;
 }
 
+/* Update and copy scene coordinates before releasing its node list; retain the native call order. */
 void mnuCopySceneCoordinatesAndReleaseNodeList(void) {
-    s32 context = func_002CB3B8(mnuSceneResourceContext, 1);
-    func_002512F0(context, 1);
-    mnuCopySceneCoordinates(context);
-    mnuReleaseListNodes(context + 0x590);
+    s32 sceneAddress = func_002CB3B8(mnuSceneResourceContext, 1);
+    func_002512F0(sceneAddress, 1);
+    mnuCopySceneCoordinates(sceneAddress);
+    mnuReleaseListNodes(sceneAddress + 0x590);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC420);

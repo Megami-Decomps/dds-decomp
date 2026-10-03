@@ -1,5 +1,18 @@
 #include "common.h"
 
+#define MNU_DISPLAY_TEXT_RGB 0xA09DC300
+#define MNU_DISPLAY_DIM_TEXT_RGB 0xA09D7D00
+#define MNU_DISPLAY_ALPHA_MASK 0xFF
+#define MNU_DISPLAY_DIM_ALPHA_SCALE 0.6f
+#define MNU_DISPLAY_TEXT_BUFFER_BYTES 0x20
+#define MNU_SELECTION_ROW_HEIGHT 26
+#define MNU_DISPLAY_FIXED_X_SHIFT 4
+#define MNU_DISPLAY_FIXED_Y_SHIFT 3
+#define MNU_DISPLAY_RECORD_ID_MASK 0xFFFF
+#define MNU_DISPLAY_TEXT_FLAGS 0x80000000
+#define MNU_SELECTED_ROW_SPRITE 12
+#define MNU_UNSELECTED_ROW_SPRITE 14
+
 extern void dspStartEntry(s32 signal);
 
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
@@ -73,62 +86,62 @@ extern void func_003014F0(char *, const char *, ...);
 extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, u32, s32, u32);
 
 /* Draw the selection strip from the last row back to the first. */
-void func_00254B30(s32 x, s32 y, s32 z, s32 alpha, DspWindowContext *context, s32 drawContext) {
-    DspUnit *unit = context->unit;
-    s32 selected = *unit->selectedIndex;
-    s32 i;
+void func_00254B30(s32 x, s32 y, s32 z, s32 alpha, DspWindowContext *windowContext, s32 drawContext) {
+    DspUnit *displayUnit = windowContext->unit;
+    s32 selectedIndex = *displayUnit->selectedIndex;
+    s32 rowIndex;
 
     func_0024E260(x, y, z, alpha, 0x56, drawContext);
-    i = unit->entryCount - 1;
-    if (i >= 0) {
+    rowIndex = displayUnit->entryCount - 1;
+    if (rowIndex >= 0) {
         do {
-            if (i == selected) {
-                func_0024E310(x, y + i * 26, z, alpha, 0x57, 12, drawContext);
+            if (rowIndex == selectedIndex) {
+                func_0024E310(x, y + rowIndex * MNU_SELECTION_ROW_HEIGHT, z, alpha, 0x57, MNU_SELECTED_ROW_SPRITE, drawContext);
             } else {
-                func_0024E310(x, y + i * 26, z, alpha, 0x57, 14, drawContext);
+                func_0024E310(x, y + rowIndex * MNU_SELECTION_ROW_HEIGHT, z, alpha, 0x57, MNU_UNSELECTED_ROW_SPRITE, drawContext);
             }
-            i--;
-        } while (i >= 0);
+            rowIndex--;
+        } while (rowIndex >= 0);
     }
 }
 
 /* Store the selected value in the display unit and open its scaled window. */
-void itfDspInitSelectedWindow(s32 x, s32 y, s32 z, s32 value, DspWindowContext *context, s32 parameter) {
-    DspUnit *unit = context->unit;
+void itfDspInitSelectedWindow(s32 x, s32 y, s32 z, s32 drawValue, DspWindowContext *windowContext, s32 drawContext) {
+    DspUnit *displayUnit = windowContext->unit;
 
-    *unit->selectedValue = value;
-    mnuCallInitWide(x << 4, y << 3, z, (s32)unit, parameter);
+    *displayUnit->selectedValue = drawValue;
+    mnuCallInitWide(x << MNU_DISPLAY_FIXED_X_SHIFT, y << MNU_DISPLAY_FIXED_Y_SHIFT, z, (s32)displayUnit, drawContext);
 }
 
 /* Draw one party entry, highlighting the currently selected list node. */
 void func_00254C68(s32 x, s32 y, s32 layer, DspMenuList *list, DspMenuListNode *node,
-                   s32 context) {
-    char text[0x20];
-    DspEntrySpriteLookup lookup = D_003BC448[0];
-    DspProfileProgress *progress = node->progress;
+                   s32 drawContext) {
+    char levelText[MNU_DISPLAY_TEXT_BUFFER_BYTES];
+    DspEntrySpriteLookup spriteLookup = D_003BC448[0];
+    DspProfileProgress *profileProgress = node->progress;
     s32 alpha = list->drawValues[0];
     u32 textColor;
 
     if (list->selectedNode == node) {
-        func_0024E310(x >> 4, y >> 3, layer, alpha, 0x58,
-                      lookup.spriteIndices[progress->entry->unitId] + 1, context);
-        func_0024E310(x >> 4, y >> 3, layer, alpha, 0x59, 0xB, context);
-        func_003014F0(text, D_003BC450, progress->entry->level);
-        textColor = alpha & 0xFF;
-        textColor |= 0xA09DC300;
-        itfDrawGlyphChainWithWidthQuery((x >> 4) + 0xD5, (y >> 3) + 0x7D, layer,
+        func_0024E310(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x58,
+                      spriteLookup.spriteIndices[profileProgress->entry->unitId] + 1, drawContext);
+        func_0024E310(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x59, 0xB, drawContext);
+        func_003014F0(levelText, D_003BC450, profileProgress->entry->level);
+        textColor = alpha & MNU_DISPLAY_ALPHA_MASK;
+        textColor |= MNU_DISPLAY_TEXT_RGB;
+        itfDrawGlyphChainWithWidthQuery((x >> MNU_DISPLAY_FIXED_X_SHIFT) + 0xD5, (y >> MNU_DISPLAY_FIXED_Y_SHIFT) + 0x7D, layer,
                                        textColor,
-                                       4, (u32)text, 0, context);
+                                       4, (u32)levelText, 0, drawContext);
     } else {
-        func_0024E310(x >> 4, y >> 3, layer, alpha, 0x58,
-                      lookup.spriteIndices[progress->entry->unitId], context);
-        func_0024E310(x >> 4, y >> 3, layer, alpha, 0x59, 0xA, context);
-        func_003014F0(text, D_003BC450, progress->entry->level);
-        textColor = alpha & 0xFF;
-        textColor |= 0xA09DC300;
-        itfDrawGlyphChainWithWidthQuery((x >> 4) + 0xD5, (y >> 3) + 0x7D, layer,
+        func_0024E310(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x58,
+                      spriteLookup.spriteIndices[profileProgress->entry->unitId], drawContext);
+        func_0024E310(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x59, 0xA, drawContext);
+        func_003014F0(levelText, D_003BC450, profileProgress->entry->level);
+        textColor = alpha & MNU_DISPLAY_ALPHA_MASK;
+        textColor |= MNU_DISPLAY_TEXT_RGB;
+        itfDrawGlyphChainWithWidthQuery((x >> MNU_DISPLAY_FIXED_X_SHIFT) + 0xD5, (y >> MNU_DISPLAY_FIXED_Y_SHIFT) + 0x7D, layer,
                                        textColor,
-                                       0, (u32)text, 0, context);
+                                       0, (u32)levelText, 0, drawContext);
     }
 }
 
@@ -136,41 +149,44 @@ extern void *memset(void *, s32, u32);
 extern void func_002CD0D8(u32, s32, void *);
 extern void frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, s32, void *, u32, s32);
 
-/* Fetch an indexed display record and draw it with the requested tag bits. */
-void itfDspDrawIndexedRecord(s32 x, s32 y, s32 layer, u32 attributes, u32 entry, s32 context) {
-    u32 tag = attributes | 0xA09DC300;
-    u32 id = entry & 0xFFFF;
-    u8 buffer[0x20];
+/* Fetch the low-16-bit display record ID and draw its text with the supplied attributes and fixed RGB. */
+void itfDspDrawIndexedRecord(s32 x, s32 y, s32 layer, u32 textAttributes, u32 packedEntryId, s32 drawContext) {
+    u32 textColor = textAttributes | MNU_DISPLAY_TEXT_RGB;
+    u32 recordId = packedEntryId & MNU_DISPLAY_RECORD_ID_MASK;
+    u8 recordText[MNU_DISPLAY_TEXT_BUFFER_BYTES];
 
-    memset(buffer, 0, 0x20);
-    func_002CD0D8(id, 1, buffer);
-    frFontDrawStyledGlyphChainAndMeasure(x + 0x35, y + 0x136, layer, tag, 4, buffer, 0x80000000, context);
+    memset(recordText, 0, MNU_DISPLAY_TEXT_BUFFER_BYTES);
+    func_002CD0D8(recordId, 1, recordText);
+    frFontDrawStyledGlyphChainAndMeasure(x + 0x35, y + 0x136, layer, textColor, 4, recordText, MNU_DISPLAY_TEXT_FLAGS, drawContext);
 }
 
 extern char D_003BC458[];
 extern char D_003BC460[];
 extern char D_003BC468[];
-void mnuDrawDisplayPlaceholder(s32 x, s32 y, s32 layer, s32 alpha, s32 context) {
-    u32 textColor = (u32)((f32)alpha * 0.6f) | 0xA09D7D00;
-    char text[0x20];
+/* Draw the placeholder sprites and dim text. Keep both native formatting calls:
+ * the second replaces the first call's buffer contents before drawing. */
+void mnuDrawDisplayPlaceholder(s32 x, s32 y, s32 layer, s32 alpha, s32 drawContext) {
+    u32 textColor = (u32)((f32)alpha * MNU_DISPLAY_DIM_ALPHA_SCALE) | MNU_DISPLAY_DIM_TEXT_RGB;
+    char placeholderText[MNU_DISPLAY_TEXT_BUFFER_BYTES];
 
-    func_0024E260(x, y, layer, alpha, 0x21, context);
-    func_0024E260(x, y, layer, alpha, 0x11, context);
-    func_003014F0(text, "%s %s %s", D_003BC458, D_003BC458, D_003BC458);
-    func_003014F0(text, D_003BC460);
+    func_0024E260(x, y, layer, alpha, 0x21, drawContext);
+    func_0024E260(x, y, layer, alpha, 0x11, drawContext);
+    func_003014F0(placeholderText, "%s %s %s", D_003BC458, D_003BC458, D_003BC458);
+    func_003014F0(placeholderText, D_003BC460);
     frFontDrawStyledGlyphChainAndMeasure(x + 0xB3, y + 0x171, layer, textColor,
-                                      0, text, 0x80000000, context);
+                                      0, placeholderText, MNU_DISPLAY_TEXT_FLAGS, drawContext);
 }
 
-void func_00255010(s32 x, s32 y, s32 layer, s32 alpha, s32 value, s32 context) {
-    u32 textColor = (u32)((f32)alpha * 0.6f) | 0xA09D7D00;
-    char text[0x20];
+/* Draw a formatted integer value with the same dim sprite/text treatment as the placeholder. */
+void func_00255010(s32 x, s32 y, s32 layer, s32 alpha, s32 displayValue, s32 drawContext) {
+    u32 textColor = (u32)((f32)alpha * MNU_DISPLAY_DIM_ALPHA_SCALE) | MNU_DISPLAY_DIM_TEXT_RGB;
+    char valueText[MNU_DISPLAY_TEXT_BUFFER_BYTES];
 
-    func_0024E260(x, y, layer, alpha, 0x21, context);
-    func_0024E260(x, y, layer, alpha, 0x11, context);
-    func_003014F0(text, D_003BC468, value);
+    func_0024E260(x, y, layer, alpha, 0x21, drawContext);
+    func_0024E260(x, y, layer, alpha, 0x11, drawContext);
+    func_003014F0(valueText, D_003BC468, displayValue);
     itfDrawGlyphChainWithWidthQuery(x + 0xB3, y + 0x173, layer, textColor,
-                                  0, (u32)text, 0x80000000, context);
+                                  0, (u32)valueText, MNU_DISPLAY_TEXT_FLAGS, drawContext);
 }
 
 typedef struct MnuSpritePlacement {
