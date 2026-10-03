@@ -2899,8 +2899,8 @@ void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *window) {
     window->flags = window->flags & MNU_WINDOW_TRANSITION_CLEAR_MASK;
 }
 
-void mnuAppendWindowListNode(MenuWindowContainer *menu) {
-    mnuListAppendNode((u32)menu->list);
+MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *menu, s32 value) {
+    return mnuListAppendNode((u32)menu->list, value);
 }
 
 void func_002B9708(MenuWindowContainer *menu) {
