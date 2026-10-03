@@ -327,6 +327,13 @@ terminals, and other script-facing positions are visible in ordinary glTF
 viewers; `--placement-marker-size` sets its radius in native DDS units, or zero
 hides the geometry while retaining the nodes and metadata.
 
+Type-6 event resources are separate nodes with their index, flags, label, and
+retained words. A kind-1 placement with a nonnegative event index carries the
+label and serial of that exact resource, exposing the native relationship
+without guessing which globally named BF procedure owns it. Across the tracked
+corpus, all 1,273 such references resolve to labeled resources: 557 in DDS1
+and 716 in DDS2. The other kind-1 placements retain their native `-1` index.
+
 Collision quads are triangulated as `(0,1,2)` and `(0,2,3)`; the retail
 `0xffffffff` fourth-index sentinel selects a single triangle. Source face
 controls remain authoritative in the FLD2 source, while mesh extras record
@@ -348,10 +355,17 @@ rows resolve to placement nodes: 1,552 of 1,582 in DDS1 and 1,179 of 1,198 in
 DDS2. Sixty DDS1 and 43 DDS2 placement identities own more than one row; the
 exporter preserves every alternative and its gate.
 
+For a whole-game view of those proven field-to-field edges, including absent
+resource areas and conditional alternatives, use `tools/field_graph.py` as
+described in [`wap.md`](wap.md). It emits deterministic JSON or Graphviz DOT;
+non-field transition types remain in the per-scene metadata until their target
+identity is independently established.
+
 The scene layer validates all 1,232 supported FLD2 payload occurrences across
 both games: 5,533 collision resources and 167,623 output triangles, 1,551
-cameras, and 10,222 placements. The paired DDS1 and DDS2 composed fields pass
-the Khronos glTF validator without errors or warnings.
+cameras, 2,954 event resources, and 10,222 placements. The paired DDS1 and
+DDS2 composed fields pass the Khronos glTF validator without errors or
+warnings.
 
 ### Collision geometry and transform import
 

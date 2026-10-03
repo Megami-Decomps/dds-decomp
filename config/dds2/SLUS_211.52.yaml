@@ -243,6 +243,7 @@ segments:
       - [0x20C838, c, game/code_0030B838]
       - [0x20F1A0, c, game/code_0030E1A0]
       - [0x211BC8, c, game/code_00310BC8]
+      - [0x213850, c, game/code_00312850]
       - [0x214BB8, c, game/code_00313BB8]
       - [0x217E08, c, game/code_00316E08]
       - [0x21B288, c, game/code_0031A288]
@@ -283,7 +284,7 @@ segments:
       - [0x242FE8, c, game/code_00341FE8]
       - [0x2435B0, c, game/code_003425B0]
       - [0x246E18, c, sdf/sdfMovie]  # Nocturne __FILE__
-      - [0x247608, c, game/code_00346608]
+      - [0x2475E8, c, game/code_003465E8]
       - [0x247CF0, c, sdf/sdfPacDecode]  # Nocturne __FILE__
       - [0x2488C0, c, game/code_003478C0]
       # Sony SDK / C runtime, one file per library (boundaries = first romwright signature hit)
@@ -409,7 +410,8 @@ segments:
       - [0x32E240, .rodata, game/code_0030A128]
       - [0x32E348, .rodata, game/code_0030B7D0]
       - [0x32E358, .rodata, game/code_0030B838]
-      - [0x32E420, .rodata, game/code_00310BC8]
+      - [0x32E418, .rodata, game/code_00310BC8]
+      - [0x32E420, .rodata, game/code_00312850]
       - [0x32E440, .rodata, game/code_00313BB8]
       - [0x32E4D0, .rodata, game/code_00316E08]
       - [0x32E928, .rodata, game/code_0031A288]
@@ -628,7 +630,7 @@ segments:
       - [0x339B78, .sdata, game/code_00341240]
       - [0x339B80, .sdata, game/code_00341FE8]
       - [0x339B84, .sdata, game/code_003425B0]
-      - [0x339D28, .sdata, game/code_00346608]
+      - [0x339D28, .sdata, game/code_003465E8]
       - { start: 0x339D2C, type: sbss, vram: 0x438D80, name: sbss }
       - { start: 0x339D2C, type: bss, vram: 0x439280, name: bss }
 
