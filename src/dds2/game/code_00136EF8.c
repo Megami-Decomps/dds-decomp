@@ -242,9 +242,13 @@ typedef struct FldTaskInfo {
     s32 slot;
 } FldTaskInfo;
 
-extern s32 dds3FindWorldObjectNodeByKey(u64, u32, s32);
+typedef struct WorldObject WorldObject;
 
-extern u32 dds3GetPathState(s32);
+typedef struct WorldListNode WorldListNode;
+
+extern WorldListNode *dds3FindWorldObjectNodeByKey(WorldObject *object, u32 key, s32 kind);
+
+extern u32 dds3GetPathState(s32 path);
 
 typedef struct FldRoomPlanes {
     f32 plane[6][4];
@@ -764,7 +768,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
 /* Clear slot handles and destroy named tasks reached through linked display values. */
 void fldResetTaskSlots(void) {
     s32 slotIndex;
-    u64 world;
+    WorldObject *world;
     u32 task;
     FldTaskInfo *taskInfo;
 
@@ -780,7 +784,7 @@ void fldResetTaskSlots(void) {
         for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
             taskInfo = *(FldTaskInfo **)(D_0038BC50[slotIndex] + 8);
             if (taskInfo->slot >= 0) {
-                task = dds3GetPathState(dds3FindWorldObjectNodeByKey(world, *(u32 *)D_00444A30[taskInfo->slot], 0xD));
+                task = dds3GetPathState((s32)dds3FindWorldObjectNodeByKey(world, *(u32 *)D_00444A30[taskInfo->slot], 0xD));
                 if (scrFindNamedProcessNode(task) != 0) {
                     evtDestroyNamedTask(dds3GetWorldObject(), task);
                 }
@@ -1558,12 +1562,12 @@ s32 fldGetActorStat0(s32 attribute) {
 
 extern s32 D_003897C0[];
 
+/* Read a selected actor attribute; selector zero maps its motion code.
+ * Missing named objects fall through to subsequent attribute cases. */
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004134C0);
 
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004134D0);
 
-/* Read a selected actor attribute; selector zero maps its motion code.
- * Missing named objects fall through to subsequent attribute cases. */
 s32 fldGetMappedActorStateAttribute(u32 attribute) {
     FldActorEntry *actor = (FldActorEntry *)D_003932A0 + fldSelectedActorEntryIndex;
     s32 *objectNode;
