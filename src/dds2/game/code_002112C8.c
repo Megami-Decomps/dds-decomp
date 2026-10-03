@@ -19,6 +19,8 @@
 #define BTL_LOW_HP_PERCENT_LIMIT 0x1E
 #define BTL_LOW_HP_BUCKET_LIMIT 0x1E
 #define BTL_LOW_HP_ENEMY_COUNT_LIMIT 2
+#define BTL_TASK_CONDITION_HANDLE_GONE 4
+#define BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE 5
 
 /* Native 0x20-byte action-animation descriptor, shared by motion and camera selection. */
 typedef struct BtlActionAnimationRecord {
@@ -247,17 +249,22 @@ typedef struct BtlSelectCtrl {
 
 
 
-/* Action and sound tasks both carry their mutable control word at +0x28. */
-typedef struct BattleTaskControl {
-    u8 enabled;
+/* Native 0x70-byte scheduler-task header, distinct from a queued command actor.
+ * The condition evaluator reads the first byte and +8 query key; task startup
+ * assigns handle, while owner lookup uses ownerId. The remaining SDK fields
+ * beyond ownerId stay opaque here.
+ */
+typedef struct BtlRuntimeTask {
+    u8 conditionKind;
     u8 pad01[7];
-    u64 owner;
+    u64 conditionHandle;
     u8 pad10[0x18];
-    u32 control;
+    s32 startDelay; /* Signed countdown before the task's running phase. */
     u8 pad2C[0xC];
-    u64 result; /* 0x38: returned by the model-load task starter */
-    u64 targetId; /* 0x40 */
-} BattleTaskControl;
+    u64 handle;
+    u64 ownerId;
+    u8 pad48[0x28];
+} BtlRuntimeTask;
 
 typedef struct SoundTask SoundTask;
 extern SoundTask *sndCreateStationedSeTask(u32);
@@ -2341,12 +2348,15 @@ void btlStartUnitActionIfPairedSelected(void) {
     }
 }
 
+/* Queue the matching boss's resource/sound pair once its status mask passes.
+ * Condition 5 lets the sound start when that task runs or is already gone.
+ */
 void func_00217EB8(ActionStateLink *action) {
     BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
     s8 *state = (s8 *)scene->state;
     ActionUnit *unit;
-    BattleTaskControl *task;
-    BattleTaskControl *sound;
+    BtlRuntimeTask *task;
+    BtlRuntimeTask *sound;
 
     if (*state == 0) {
         unit = scene->units;
@@ -2363,13 +2373,13 @@ void func_00217EB8(ActionStateLink *action) {
             }
             if (unit != 0) {
                 if (unit->flags & 0xE0) {
-                    task = (BattleTaskControl *)btlCreateScriptResourceTask((u32)unit, 0x64);
-                    task->targetId = action->unit->owner;
-                    task->control = 0xE;
+                    task = (BtlRuntimeTask *)btlCreateScriptResourceTask((u32)unit, 0x64);
+                    task->ownerId = action->unit->owner;
+                    task->startDelay = 0xE;
                     btlStartTask(task);
-                    sound = (BattleTaskControl *)sndCreateStationedSeTask(scene->soundSequence);
-                    sound->enabled = 5;
-                    sound->owner = task->result;
+                    sound = (BtlRuntimeTask *)sndCreateStationedSeTask(scene->soundSequence);
+                    sound->conditionKind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE;
+                    sound->conditionHandle = task->handle;
                     btlStartTask(sound);
                     action->flags &= ~8;
                     *state = 1;
@@ -2524,10 +2534,13 @@ void btlStartReadyUnitAction(void) {
     }
 }
 
+/* Start the previous selection's script when eligible, then consume the selection
+ * even if no script was found. The script task's start delay is 20 ticks.
+ */
 void btlStartPrevUnitScriptAction(ActionStateLink *handle) {
     BtlSelectCtrl *ctrl = (BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub;
     s32 script;
-    BattleTaskControl *task;
+    BtlRuntimeTask *task;
 
     if (ctrl->prevUnit == 0) {
         return;
@@ -2555,8 +2568,8 @@ void btlStartPrevUnitScriptAction(ActionStateLink *handle) {
     }
     if (script != -1) {
         task = btlCreateActionTask(handle, script);
-        task->targetId = handle->unit->owner;
-        task->control = 0x14;
+        task->ownerId = handle->unit->owner;
+        task->startDelay = 0x14;
         btlStartTask(task);
     }
     ctrl->prevUnit = 0;
@@ -2749,6 +2762,7 @@ extern u8 *btlCreateEffObjB(s32, s32);
 
 extern u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 
+/* Start the selected action's task group; its scene action carries a 22-tick start delay. */
 s32 btlStartActionRecordTasks(ActionStateLink *record) {
     u8 *task;
     if (!(record->pendingFlags & 8)) {
@@ -2762,7 +2776,7 @@ s32 btlStartActionRecordTasks(ActionStateLink *record) {
     btlStartTask(btlCreateCommandSoundTask((u8 *)record, 9));
     btlStartTask(btlCreateEffObjB((s32)record->unit, 0xD8));
     task = fldCreateSceneGroupAction((u8 *)record, 0x64, 1);
-    ((BattleTaskControl *)task)->control = 0x16;
+    ((BtlRuntimeTask *)task)->startDelay = 0x16;
     btlStartTask(task);
     return 0x1B;
 }
@@ -2862,7 +2876,10 @@ s32 btlSpawnLinkedActionEffect(u8 *task) {
 }
 
 
-void btlStartActionRecordSoundTask(ActionStateLink *record, u64 owner, s32 controlBase) {
+/* For the eligible action/unit pair, gate sound on a disappearing prerequisite
+ * task and use delayBase + 40 as the signed start-delay countdown.
+ */
+void btlStartActionRecordSoundTask(ActionStateLink *record, u64 prerequisiteHandle, s32 delayBase) {
     BtlUnit *unit;
     u8 *task;
     if (record->pendingFlags & 8) {
@@ -2870,9 +2887,9 @@ void btlStartActionRecordSoundTask(ActionStateLink *record, u64 owner, s32 contr
         if (unit->flags & 0x400) {
             if (unit->mode == 0x108) {
                 task = (u8 *)sndCreateStationedSeTask(((BattleWork *)btlGetRuntime())->soundTaskBase + 6);
-                ((BattleTaskControl *)task)->owner = owner;
-                task[0] = 4;
-                ((BattleTaskControl *)task)->control = controlBase + 0x28;
+                ((BtlRuntimeTask *)task)->conditionHandle = prerequisiteHandle;
+                ((BtlRuntimeTask *)task)->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
+                ((BtlRuntimeTask *)task)->startDelay = delayBase + 0x28;
                 btlStartTask(task);
             }
         }
@@ -3509,7 +3526,11 @@ extern void func_001AA898(s32, s32);
 
 extern u8 *btlCreateModelLoadPollTask(s32, s32, s32, s32);
 
-s64 btlEnsureHeroUnitTask(u64 owner) {
+/* Create/load the unit only for an empty slot. A populated slot returns a fresh
+ * sequence ID without launching a task; a nonzero prerequisite waits until
+ * that task handle is gone.
+ */
+s64 btlEnsureHeroUnitTask(u64 prerequisiteHandle) {
     s32 *slot = (s32 *)((BattleWork *)btlGetRuntime())->sub;
     u8 *task;
     if (*slot != 0) {
@@ -3518,12 +3539,12 @@ s64 btlEnsureHeroUnitTask(u64 owner) {
     *slot = btlCreateUnit();
     func_001AA898(*slot + 0x120, 0x110);
     task = btlCreateModelLoadPollTask(*slot, 1, 0x110, 0);
-    if (owner != 0) {
-        ((BattleTaskControl *)task)->owner = owner;
-        task[0] = 4;
+    if (prerequisiteHandle != 0) {
+        ((BtlRuntimeTask *)task)->conditionHandle = prerequisiteHandle;
+        ((BtlRuntimeTask *)task)->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
     }
     btlStartTask(task);
-    return ((BattleTaskControl *)task)->result;
+    return ((BtlRuntimeTask *)task)->handle;
 }
 
 
@@ -3534,14 +3555,6 @@ s64 btlEnsureHeroUnitTask(u64 owner) {
 
 typedef struct BtlUnit BtlUnit;
 
-typedef struct BtlSubtask {
-    u8 kind;
-    u8 pad1[7];
-    u64 arg;
-    u8 pad10[0x28];
-    u64 result;
-    u64 flags;
-} BtlSubtask;
 
 
 typedef struct BtlEffect {
@@ -3581,7 +3594,7 @@ typedef struct BtlParams {
 extern BtlParams *datBattleParameters;
 extern BtlActionAnimationRecord *datActionAnimationRecords;
 extern void btlBossDebugPrintf(const char *, ...);
-extern BtlSubtask *func_001E5FF8(s32, s32);
+extern BtlRuntimeTask *func_001E5FF8(s32, s32);
 extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
 extern s32 btlAdjustPointsForCombatFlags(BtlUnit *, s32, s32, s32, s32);
 extern s8 btlGetCommandResultKindFromFlags(s32, s32, s32);
@@ -3605,16 +3618,19 @@ void btlCancelCurrentSubtask(void) {
     }
 }
 
-/* Allocate and launch a subtask from the active battle task slot. */
-u64 btlStartSubtaskWithInput(u64 input) {
-    BtlSubtask *task = func_001E5FF8(((BattleWork *)btlGetRuntime())->sub->task, 0xC);
-    if (input != 0) {
-        task->arg = input;
-        task->kind = 4;
+/* Launch a subtask from the active slot and return its new scheduler handle.
+ * Zero leaves the constructor's condition intact; otherwise wait for the
+ * prerequisite task to disappear. The fixed high-bit owner value is preserved.
+ */
+u64 btlStartSubtaskWithInput(u64 prerequisiteHandle) {
+    BtlRuntimeTask *task = func_001E5FF8(((BattleWork *)btlGetRuntime())->sub->task, 0xC);
+    if (prerequisiteHandle != 0) {
+        task->conditionHandle = prerequisiteHandle;
+        task->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
     }
-    task->flags = 0x8000000000000003;
+    task->ownerId = 0x8000000000000003;
     btlStartTask(task);
-    return task->result;
+    return task->handle;
 }
 
 void btlMarkActiveBossUnitExtensionFlags(BtlUnit *unit) {
@@ -3999,12 +4015,6 @@ typedef struct BattleActionByteState {
 
 
 
-typedef struct BattleActionTask {
-    u8 pad00[0x28];
-    s32 delay;         /* 0x28 */
-    u8 pad2C[0x14];
-    u64 resourceOwner; /* 0x40 */
-} BattleActionTask;
 
 /* Handle returned by btlFindUnitByActor; these fields drive its action task. */
 extern void func_001E22D8(ActionUnit *, s32, s32, f32);
@@ -4497,6 +4507,9 @@ void btlQueueLoneFreeTeamHandle(void) {
     }
 }
 
+/* Consume the selected actor after starting resource and sound tasks. Sound's
+ * condition observes the resource task's running phase, not its completion.
+ */
 void btlQueueSelectedActorResourceAndSound(ActionUnit *unit) {
     BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
     ActionUnit **slot = (ActionUnit **)scene->state;
@@ -4505,12 +4518,12 @@ void btlQueueSelectedActorResourceAndSound(ActionUnit *unit) {
 
     if (*slot != 0) {
         task = (u8 *)btlCreateScriptResourceTask((u32)*slot, (*slot)->mode == 0x10E ? 0x61 : 0x62);
-        ((BattleActionTask *)task)->resourceOwner = ((ActionUnit *)unit->parentUnit)->ownerId;
-        ((BattleActionTask *)task)->delay = 0xE;
+        ((BtlRuntimeTask *)task)->ownerId = ((ActionUnit *)unit->parentUnit)->ownerId;
+        ((BtlRuntimeTask *)task)->startDelay = 0xE;
         btlStartTask(task);
         sound = (u8 *)sndCreateStationedSeTask(scene->soundSequence + ((*slot)->mode == 0x10E ? 3 : 2));
-        sound[0] = 5;
-        *(u64 *)(sound + 8) = *(u64 *)(task + 0x38);
+        ((BtlRuntimeTask *)sound)->conditionKind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE;
+        ((BtlRuntimeTask *)sound)->conditionHandle = ((BtlRuntimeTask *)task)->handle;
         btlStartTask(sound);
         *slot = 0;
         unit->actorFlags &= ~8;
@@ -5260,7 +5273,10 @@ s32 func_00223DD8(ActionUnit *unit) {
 }
 
 extern u8 *btlCreateEffObjD(s32, s32);
-void btlSpawnBrahmaActionEffectTasks(ActionUnit *unit, u32 action, u32 unused, u64 owner) {
+/* For this action, issue two differently-owned effect tasks with the same
+ * prerequisite; only the second receives an explicit 38-tick start delay.
+ */
+void btlSpawnBrahmaActionEffectTasks(ActionUnit *unit, u32 action, u32 unused, u64 prerequisiteHandle) {
     s32 *state;
     u8 *task;
     s32 kind;
@@ -5280,16 +5296,16 @@ void btlSpawnBrahmaActionEffectTasks(ActionUnit *unit, u32 action, u32 unused, u
             break;
         }
         task = btlCreateEffObjB(unit->parentUnit, kind);
-        task[0] = 4;
-        *(u64 *)(task + 8) = owner;
-        ((BattleActionTask *)task)->resourceOwner = btlAdvanceRuntimeSequenceCounter();
+        ((BtlRuntimeTask *)task)->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
+        ((BtlRuntimeTask *)task)->conditionHandle = prerequisiteHandle;
+        ((BtlRuntimeTask *)task)->ownerId = btlAdvanceRuntimeSequenceCounter();
         btlStartTask(task);
         task = btlCreateEffObjD(unit->parentUnit, 0x19F);
-        task[0] = 4;
-        *(u64 *)(task + 8) = owner;
+        ((BtlRuntimeTask *)task)->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
+        ((BtlRuntimeTask *)task)->conditionHandle = prerequisiteHandle;
         value = btlAdvanceRuntimeSequenceCounter();
-        ((BattleActionTask *)task)->delay = 0x26;
-        ((BattleActionTask *)task)->resourceOwner = value;
+        ((BtlRuntimeTask *)task)->startDelay = 0x26;
+        ((BtlRuntimeTask *)task)->ownerId = value;
         btlStartTask(task);
         state[3] += 1;
     }
