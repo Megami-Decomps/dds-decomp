@@ -127,7 +127,9 @@
       "old_size": "0x8",
       "alignment": 8,
       "old_vaddr": "0x00435EA8",
-      "expected_relocations": 2
+      "expected_relocations": 2,
+      "expected_retail_gp_references": 1,
+      "expected_gp_references": 0
     }
   ],
   "additions": [
