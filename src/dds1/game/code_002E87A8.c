@@ -39,17 +39,24 @@ typedef struct SndIopBuffer {
 typedef struct SndWork {
     s32 header;                /* 0x000 */
     s32 bufferCount;           /* 0x004 */
-    u8 pad008[8];
+    u32 unk008;              /* 0x008 */
+    u32 unk00C;              /* 0x00C */
     SndChannel channels[16];   /* 0x010 */
     SndIopBuffer buffers[16];  /* 0x110 */
     SndTrackSlot slots[13];    /* 0x190 */
-    u8 pad1F8[8];
+    u32 unk1F8;              /* 0x1F8 */
+    u32 unk1FC;              /* 0x1FC */
     u32 unk200;                /* 0x200 */
     u32 unk204;                /* 0x204 */
 } SndWork;
 
 extern SndWork sndMidiTrackState;
 extern u32 sndReserveIopWorkMemory(s32 size);
+extern s8 D_003BDA80;
+extern s32 D_003BDA8C;
+extern s32 sceSifInitIopHeap(void);
+extern s32 func_002E8700(void);
+extern void func_002E8938(s32, void *, s32);
 
 INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E87A8);
 
@@ -154,7 +161,22 @@ void func_002E8B58(s32 *sizes, s32 count) {
     } while (i != count);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E8C30);
+void func_002E8C30(s32 arg0, s32 arg1, s32 *sizes, s32 count) {
+    D_003BDA80 = 1;
+    func_002E89D0();
+    sceSifInitIopHeap();
+    func_002E8700();
+    sndMidiTrackState.unk008 = sndReserveIopWorkMemory(0x4000);
+    sndMidiTrackState.unk00C = 0x4000;
+    sndInitializeChannelAndTrackState(arg0, arg1);
+    func_002E8B58(sizes, count);
+    D_003BDA8C = sndReserveIopWorkMemory(0x8D0);
+    sndMidiTrackState.unk1F8 = (u32)&sndMidiTrackState;
+    sndMidiTrackState.unk1FC = 0x8D0;
+    func_002E8938(D_003BDA8C, &sndMidiTrackState, 0x8D0);
+    sndSendCommandPacket(0, 0, &D_003BDA8C, 4);
+    D_003BDA80 = 0;
+}
 
 /* Starts a track with the default 0x7f setting after preparing its identifier. */
 void sndStartTrackDefault(s32 trackId) {
