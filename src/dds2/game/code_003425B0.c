@@ -867,7 +867,8 @@ void sdfSoundRemoveNode(SdfStreamFrameNode *node) {
 }
 
 
-extern s32 sdfAllocateBlockBySizeThreshold(s32);
+extern void *sdfAllocateBlockBySizeThreshold(s32);
+extern void FlushCache(s32);
 
 /* Allocate two width-by-height frames, using four bytes per pixel for mode zero, two otherwise. */
 void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
@@ -914,7 +915,8 @@ void sdfSoundInitNodeFromFormat(u8 *nodeBytes, u8 *formatBytes) {
     ((SdfStreamFrameNode *)nodeBytes)->playbackMode = ((SoundFormat *)formatBytes)->playbackMode;
 }
 
-extern void func_00344420();
+
+extern void func_00344420(SdfStreamFrameNode *node, u8 *data, s32 size);
 
 /* Decode the frame header, allocate its buffers, then queue the bytes after that header. */
 void sdfStreamOpen(u8 *nodeBytes, s32 format, u8 *frameBytes, s32 sourceSize) {
@@ -924,7 +926,7 @@ void sdfStreamOpen(u8 *nodeBytes, s32 format, u8 *frameBytes, s32 sourceSize) {
     ((SdfStreamFrameNode *)nodeBytes)->sourceBytes = ((SdfStreamHeader *)frameBytes)->sourceBytes;
     ((SdfStreamFrameNode *)nodeBytes)->height = ((SdfStreamHeader *)frameBytes)->height;
     sdfAllocateStreamFrameBuffers(nodeBytes);
-    func_00344420(nodeBytes, frameBytes + SDF_STREAM_FRAME_HEADER_BYTES, sourceSize - SDF_STREAM_FRAME_HEADER_BYTES);
+    func_00344420((SdfStreamFrameNode *)nodeBytes, frameBytes + SDF_STREAM_FRAME_HEADER_BYTES, sourceSize - SDF_STREAM_FRAME_HEADER_BYTES);
     interruptsEnabled = func_0036DE70();
     sdfStreamNodeAppend((SdfStreamNode *)nodeBytes, 0);
     if (interruptsEnabled != 0) {
@@ -933,7 +935,7 @@ void sdfStreamOpen(u8 *nodeBytes, s32 format, u8 *frameBytes, s32 sourceSize) {
     func_003450D8(0);
 }
 
-extern s32 sdfAllocateBlockBySizeThreshold(s32);
+extern void *sdfAllocateBlockBySizeThreshold(s32);
 extern void sdfSoundInitNodeFromFormat();
 
 /* Store the callback/source token and allocate an eight-slot feed ring plus its leading mirror bytes. */
