@@ -11,6 +11,7 @@ from pathlib import Path
 
 import battle_tbl
 import fld
+import inf
 import wap
 
 
@@ -118,6 +119,124 @@ def area_transitions(
             continue
         transition = transition_metadata(entry, entry_index, current_field, default)
         result.setdefault(entry.name.value, []).append(transition)
+    return {name: tuple(rows) for name, rows in result.items()}
+
+
+def _interaction_target(value: int) -> dict:
+    """Describe one INF control value without hiding its encoded value."""
+
+    target = {"value": value}
+    if value == 0:
+        target["type"] = "complete"
+    elif 10 <= value < 10 + inf.MESSAGE_COUNT:
+        target.update({"type": "row", "row": value - 10})
+    elif value == 100:
+        target["type"] = "warp"
+    else:
+        target["type"] = "control"
+    return target
+
+
+def interaction_metadata(
+    table: inf.InfFile,
+    interaction: inf.InteractionSet,
+    set_index: int,
+    message_symbols: tuple[str | None, ...] = (),
+) -> dict:
+    """Return one complete nondefault INF interaction state machine."""
+
+    start = interaction.start
+    result = {
+        "set": set_index,
+        "kindId": start.type_id,
+        "kind": {0: "npc", 1: "event"}.get(start.type_id, "unknown"),
+        "area": start.area,
+        "action": start.action,
+        "eventHit": start.event_hit,
+        "event": start.event,
+        "flagSelectors": [],
+        "rows": [],
+    }
+    for row_index, selector in enumerate(interaction.flags):
+        if selector == inf.DEFAULT_FLAG:
+            continue
+        result["flagSelectors"].append(
+            {
+                "row": row_index,
+                "flag": selector.flag_id,
+                "off": _interaction_target(selector.go_off),
+                "on": _interaction_target(selector.go_on),
+            }
+        )
+    referenced_rows = {
+        value - 10
+        for selector in interaction.flags
+        for value in (selector.go_off, selector.go_on)
+        if 10 <= value < 10 + inf.MESSAGE_COUNT
+    }
+    referenced_rows.update(
+        value - 10
+        for row in interaction.messages
+        if row != inf.DEFAULT_MESSAGE
+        for value in row.go
+        if 10 <= value < 10 + inf.MESSAGE_COUNT
+    )
+    for row_index, row in enumerate(interaction.messages):
+        if row == inf.DEFAULT_MESSAGE and row_index not in referenced_rows:
+            continue
+        message = {
+            "row": row_index,
+            "kindId": row.type_id,
+            "kind": {-1: "action", 0: "message", 1: "selection"}.get(
+                row.type_id, "unknown"
+            ),
+            "messageId": row.message_id,
+            "choices": [_interaction_target(value) for value in row.go],
+            "flags": {"off": row.flag_off, "on": row.flag_on},
+        }
+        if 0 <= row.message_id < len(message_symbols):
+            symbol = message_symbols[row.message_id]
+            if symbol is not None:
+                message["messageName"] = symbol
+        if row.view_id:
+            view_metadata = {"index": row.view_id}
+            if row.view_id < len(table.views):
+                view = table.views[row.view_id]
+                view_metadata.update(
+                    {
+                        "player": view.player_on,
+                        "motion": view.player_motion,
+                        "position": view.player_position,
+                        "camera": view.camera,
+                    }
+                )
+            message["view"] = view_metadata
+        if row.ex_id:
+            action_metadata = {"index": row.ex_id}
+            if row.ex_id < len(table.extra_actions):
+                action = table.extra_actions[row.ex_id]
+                action_metadata.update(
+                    {"id": action.action_id, "parameters": list(action.parameters)}
+                )
+            message["extraAction"] = action_metadata
+        result["rows"].append(message)
+    return result
+
+
+def area_interactions(
+    table: inf.InfFile,
+    area_number: int,
+    message_symbols: tuple[str | None, ...] = (),
+) -> dict[str, tuple[dict, ...]]:
+    """Group nondefault INF sets by their exact actor in one field area."""
+
+    result: dict[str, list[dict]] = {}
+    for set_index, interaction in enumerate(table.sets):
+        if interaction == inf.DEFAULT_SET or interaction.start.action != area_number:
+            continue
+        result.setdefault(interaction.start.event, []).append(
+            interaction_metadata(table, interaction, set_index, message_symbols)
+        )
     return {name: tuple(rows) for name, rows in result.items()}
 
 

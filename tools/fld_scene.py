@@ -12,6 +12,7 @@ from pathlib import Path
 import fld
 import fld_model
 import field_world
+import inf
 import lb
 import tmx
 import wap
@@ -170,6 +171,7 @@ def append_field_scene(
     meters_per_unit: float,
     placement_marker_size: float = 50.0,
     transitions: dict[str, tuple[dict, ...]] | None = None,
+    interactions: dict[str, tuple[dict, ...]] | None = None,
 ) -> tuple[dict, bytes]:
     """Append FLD2 collision, cameras, events, and placements to a glTF document."""
 
@@ -206,6 +208,7 @@ def append_field_scene(
     counts = {"collision": 0, "camera": 0, "event": 0, "placement": 0}
     linked_event_placements = 0
     transition_actors: set[str] = set()
+    interaction_actors: set[str] = set()
     event_ordinal = 0
 
     for resource in resources:
@@ -288,6 +291,10 @@ def append_field_scene(
             if actor_transitions:
                 node["extras"]["ddsTransitions"] = list(actor_transitions)
                 transition_actors.add(name)
+            actor_interactions = (interactions or {}).get(name)
+            if actor_interactions:
+                node["extras"]["ddsInteractions"] = list(actor_interactions)
+                interaction_actors.add(name)
             if placement_marker_size > 0.0:
                 if marker_material is None:
                     marker_material = _unlit_material(
@@ -334,6 +341,24 @@ def append_field_scene(
         ]
         if unlinked:
             wrapper["extras"]["ddsUnlinkedTransitionActors"] = unlinked
+    if interactions is not None:
+        interaction_sets = sum(len(rows) for rows in interactions.values())
+        linked_sets = sum(
+            len(rows) for name, rows in interactions.items() if name in interaction_actors
+        )
+        wrapper["extras"].update(
+            {
+                "ddsInteractionSets": interaction_sets,
+                "ddsLinkedInteractionSets": linked_sets,
+            }
+        )
+        unlinked = [
+            {"actor": name, "sets": [row["set"] for row in rows]}
+            for name, rows in sorted(interactions.items())
+            if name not in interaction_actors
+        ]
+        if unlinked:
+            wrapper["extras"]["ddsUnlinkedInteractionActors"] = unlinked
     if scene_children:
         wrapper["children"] = scene_children
     document["nodes"].append(wrapper)
@@ -353,6 +378,8 @@ def build_scene(
     frames_per_second: float = 1.0,
     placement_marker_size: float = 50.0,
     warp_data: bytes | None = None,
+    interaction_data: bytes | None = None,
+    message_symbols: tuple[str | None, ...] = (),
     field_number: int | None = None,
     area_number: int | None = None,
 ) -> tuple[dict, bytes]:
@@ -362,6 +389,13 @@ def build_scene(
             raise fld.FldError("WAP scene metadata requires a field and area number")
         transitions = field_world.area_transitions(
             wap.decode(warp_data), field_number, area_number
+        )
+    interactions = None
+    if interaction_data is not None:
+        if area_number is None:
+            raise fld.FldError("INF scene metadata requires an area number")
+        interactions = field_world.area_interactions(
+            inf.decode(interaction_data), area_number, message_symbols
         )
     document, binary = fld_model.build_gltf(
         model_data,
@@ -377,8 +411,9 @@ def build_scene(
         meters_per_unit=meters_per_unit,
         placement_marker_size=placement_marker_size,
         transitions=transitions,
+        interactions=interactions,
     )
-    if warp_data is not None:
+    if warp_data is not None or interaction_data is not None:
         document["asset"]["generator"] = "dds-decomp field-world exporter"
         document["asset"]["extras"].update(
             {"ddsFieldNumber": field_number, "ddsAreaNumber": area_number}
@@ -407,6 +442,21 @@ def _warp_source_or_binary(path: Path) -> bytes:
     return wap.encode(wap.parse_source(resolved.read_text(encoding="utf-8"), references))
 
 
+def _interaction_source_or_binary(
+    path: Path,
+) -> tuple[bytes, tuple[str | None, ...]]:
+    if path.suffix.lower() != ".infasm":
+        return path.read_bytes(), ()
+    resolved = path.resolve()
+    game_root = resolved.parent.parent.parent
+    script_path = game_root / "scripts" / "field" / f"{resolved.stem}.bfasm"
+    if not script_path.is_file():
+        raise inf.InfError("INF source export requires its paired field script source")
+    by_index, by_name = inf.load_message_symbols(script_path)
+    table = inf.parse_source(resolved.read_text(encoding="utf-8"), by_name)
+    return inf.encode(table), by_index
+
+
 def _field_identity(*paths: Path | None) -> tuple[int, int] | None:
     for path in paths:
         if path is None:
@@ -414,6 +464,16 @@ def _field_identity(*paths: Path | None) -> tuple[int, int] | None:
         match = re.fullmatch(r"[fk](\d{3})_(\d{3})", path.stem, re.IGNORECASE)
         if match:
             return int(match.group(1)), int(match.group(2))
+    return None
+
+
+def _field_prefix(*paths: Path | None) -> str | None:
+    for path in paths:
+        if path is None:
+            continue
+        match = re.fullmatch(r"([fk])\d{3}_\d{3}", path.stem, re.IGNORECASE)
+        if match:
+            return match.group(1).lower()
     return None
 
 
@@ -431,6 +491,11 @@ def main() -> None:
         "--warps",
         type=Path,
         help="WAP binary or tracked source whose transitions annotate placements",
+    )
+    parser.add_argument(
+        "--interactions",
+        type=Path,
+        help="INF binary or tracked source whose state machines annotate placements",
     )
     args = parser.parse_args()
     try:
@@ -457,14 +522,34 @@ def main() -> None:
             if args.texture_bundle is not None:
                 textures = tmx.parse_bundle(args.texture_bundle.read_bytes())
         identity = _field_identity(args.input, args.field)
-        if args.warps is not None and identity is None:
+        interaction_path = args.interactions
+        if interaction_path is None and args.warps is not None:
+            inferred = args.warps.with_suffix(".infasm")
+            if (
+                _field_prefix(args.input, args.field) == "f"
+                and args.warps.suffix.lower() == ".wapasm"
+                and inferred.is_file()
+            ):
+                interaction_path = inferred
+        if (args.warps is not None or interaction_path is not None) and identity is None:
             raise fld.FldError(
-                "WAP scene metadata requires an fNNN_AAA input or --field filename"
+                "field metadata requires an fNNN_AAA input or --field filename"
             )
         if args.warps is not None:
             warp_match = re.fullmatch(r"f(\d{3})", args.warps.stem, re.IGNORECASE)
             if warp_match and int(warp_match.group(1)) != identity[0]:
                 raise fld.FldError("WAP filename does not match the field scene")
+        if interaction_path is not None:
+            interaction_match = re.fullmatch(
+                r"f(\d{3})", interaction_path.stem, re.IGNORECASE
+            )
+            if interaction_match and int(interaction_match.group(1)) != identity[0]:
+                raise fld.FldError("INF filename does not match the field scene")
+            interaction_data, message_symbols = _interaction_source_or_binary(
+                interaction_path
+            )
+        else:
+            interaction_data, message_symbols = None, ()
         document, binary = build_scene(
             model_data,
             field_data,
@@ -478,6 +563,8 @@ def main() -> None:
                 if args.warps is not None
                 else None
             ),
+            interaction_data=interaction_data,
+            message_symbols=message_symbols,
             field_number=identity[0] if identity is not None else None,
             area_number=identity[1] if identity is not None else None,
         )
