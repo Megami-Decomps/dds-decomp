@@ -46,7 +46,9 @@ typedef struct FileCbNode {
 } FileCbNode;
 
 extern char D_003BC7E0[];
-extern s32 D_003BC7D8;
+extern FileManGuardState D_003BC7D8;
+/* Scalar view keeps the original direct GP-relative access. */
+extern s32 fileManGuardActive __asm__("D_003BC7D8");
 extern s32 (*fileIdleUpdateCallback)(void);
 
 s32 WaitSema(s32 sema);
@@ -113,10 +115,10 @@ s32 func_00288E70(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
         } else {
             SignalSema(work->sema);
         }
-        saved = D_003BC7D8;
-        D_003BC7D8 = 1;
+        saved = fileManGuardActive;
+        fileManGuardActive = 1;
         func_00289540();
-        D_003BC7D8 = saved;
+        fileManGuardActive = saved;
         break;
     case 7:
         WaitSema(work->sema);
@@ -247,6 +249,6 @@ void func_00289D50(u32 arg0) {
     func_002F6E90(arg0, 0);
 }
 
-INCLUDE_SDATA(const s32, "game/code_00288E70", D_003BC7D8);
+FileManGuardState D_003BC7D8 __attribute__((section(".sdata"))) = { 0 };
 
-INCLUDE_SDATA(const s32, "game/code_00288E70", D_003BC7E0);
+char D_003BC7E0[8] __attribute__((section(".sdata"))) = "fileMan";
