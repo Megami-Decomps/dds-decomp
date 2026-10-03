@@ -111,7 +111,7 @@ extern void dspCloseChannel(void);
 
 extern void evtReleaseResourcePairHandle();
 
-extern void sdfReleaseResourceAllocation(s32);
+extern void sdfReleaseResourceAllocation();
 
 extern void mnuDrawAndStepGradientFade(s32, s32);
 
@@ -993,6 +993,44 @@ s32 mnuShopReleaseSceneObjects(u8 *scene) {
     return result;
 }
 
+typedef struct MapPacket MapPacket;
+
+extern const CampMapArguments D_00424A90;
+extern const CampEffectRows D_00424AC0;
+extern const char D_00424AE0[];
+extern u64 sdfReadNamedResource();
+extern u32 effCreateMappedResource(u32);
+extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
+extern void mnuSetCampEffectResourceHandles(u32, u32, u32 *);
+extern void mnuCopyCampEffectRowData(s32, s32);
+extern void mnuOrEntryFlags(u32, u32 *);
+
+void func_0025F8B8(u32 object, MapPacket *packet) {
+    CampMapArguments mapArguments = D_00424A90;
+    CampEffectRows rows = D_00424AC0;
+    u32 dataAddress;
+    u64 allocation;
+    u32 mappedResource;
+
+    allocation = sdfReadNamedResource(D_00424AE0, &dataAddress, 0);
+    mappedResource = effCreateMappedResource(dataAddress);
+    sdfReleaseResourceAllocation(allocation);
+    mnuInitializeMapPacket(2, mapArguments.values, 11, packet);
+    mnuSetCampEffectResourceHandles(object, mappedResource, (u32 *)packet);
+    mnuCopyCampEffectRowData((s32)&rows, (s32)packet);
+    mnuOrEntryFlags(7, (u32 *)packet);
+}
+
+/* The background-effect packet owns the packed animation created for it. */
+typedef struct MenuEffectResources {
+    u8 pad00[0x3C];
+    u32 animationHandle;
+} MenuEffectResources;
+
+void mnuShopDestroyNestedEffectBatch(s32 object) {
+    effDestroyPackedBatch(((MenuEffectResources *)object)->animationHandle);
+}
+
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424A00);
 
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424A10);
@@ -1015,17 +1053,7 @@ INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424A90);
 
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424AC0);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F8B8);
-
-/* The background-effect packet owns the packed animation created for it. */
-typedef struct MenuEffectResources {
-    u8 pad00[0x3C];
-    u32 animationHandle;
-} MenuEffectResources;
-
-void mnuShopDestroyNestedEffectBatch(s32 object) {
-    effDestroyPackedBatch(((MenuEffectResources *)object)->animationHandle);
-}
+INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424AE0);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FA28);
 
