@@ -392,7 +392,11 @@ def render(
             selection_symbol = flw0._selection_push_symbol(
                 raw, next_raw, profile, selection_symbols
             )
-            event_symbol = flw0._event_push_symbol(raw, next_raw, profile)
+            event_symbol = flw0._event_push_symbol(
+                raw,
+                tuple(item.raw for item in words[pc + 1 : pc + 3]),
+                profile,
+            )
             procedure_symbol = flw0._procedure_push_symbol(
                 raw, next_raw, profile, procedure_symbols
             )

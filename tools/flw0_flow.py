@@ -64,7 +64,7 @@ def analyze(
     events = profile.events_by_id if profile is not None else {}
     command_counts: dict[int, Counter[int]] = defaultdict(Counter)
     local_sites: dict[tuple[int, int, str], list[int]] = defaultdict(list)
-    event_sites: dict[tuple[int, int, str, str], list[int]] = defaultdict(list)
+    event_sites: dict[tuple[int, int, str, str, int], list[int]] = defaultdict(list)
     deferred_battle_exits = []
     unresolved = []
     previous_pc: int | None = None
@@ -79,14 +79,10 @@ def analyze(
         battle_exit_command.command_id if battle_exit_command is not None else 0x097
     )
     event_commands = {
-        0x066: ("call", "CALL_EVENT"),
-        0x067: ("submit", "SUBMIT_EVENT"),
+        command.command_id: command
+        for command in commands.values()
+        if command.event_argument is not None
     }
-    if profile is not None:
-        for name, kind in (("CALL_EVENT", "call"), ("SUBMIT_EVENT", "submit")):
-            command = profile.by_name.get(name)
-            if command is not None:
-                event_commands[command.command_id] = (kind, name)
 
     for instruction_index, pc in enumerate(instruction_pcs):
         source = bisect_right(starts, pc) - 1
@@ -132,38 +128,74 @@ def analyze(
                             "event": event,
                         }
                     )
-            elif operand == task_command_id or operand in event_commands:
+            elif operand == task_command_id:
                 previous = words[previous_pc] if previous_pc is not None else None
-                kind = "task" if operand == task_command_id else "event"
                 if (
                     previous is None
                     or previous.opcode != flw0.OPCODE_IDS["PUSHIS"]
                     or bisect_right(starts, previous_pc) - 1 != source
                 ):
-                    unresolved_target = {
-                        "source": source,
-                        "pc": pc,
-                        "kind": kind,
-                        "value": None,
-                    }
-                    if kind == "event":
-                        unresolved_target["command"] = event_commands[operand][1]
-                    unresolved.append(unresolved_target)
-                elif kind == "task" and previous.operand_u16 >= len(rows):
                     unresolved.append(
                         {
                             "source": source,
                             "pc": pc,
-                            "kind": kind,
+                            "kind": "task",
+                            "value": None,
+                        }
+                    )
+                elif previous.operand_u16 >= len(rows):
+                    unresolved.append(
+                        {
+                            "source": source,
+                            "pc": pc,
+                            "kind": "task",
                             "value": previous.operand_u16,
                         }
                     )
-                elif kind == "task":
-                    local_sites[source, previous.operand_u16, kind].append(pc)
                 else:
-                    edge_kind, command_name = event_commands[operand]
+                    local_sites[source, previous.operand_u16, "task"].append(pc)
+            elif operand in event_commands:
+                command = event_commands[operand]
+                argument_pcs = instruction_pcs[
+                    max(0, instruction_index - command.stack_pop) : instruction_index
+                ]
+                argument_words = [words[argument_pc] for argument_pc in argument_pcs]
+                arguments_are_local_literals = (
+                    len(argument_words) == command.stack_pop
+                    and all(
+                        argument.opcode == flw0.OPCODE_IDS["PUSHIS"]
+                        and bisect_right(starts, argument_pc) - 1 == source
+                        for argument_pc, argument in zip(argument_pcs, argument_words)
+                    )
+                )
+                if not arguments_are_local_literals:
+                    unresolved.append(
+                        {
+                            "source": source,
+                            "pc": pc,
+                            "kind": "event",
+                            "value": None,
+                            "command": command.name,
+                            "dispatch": command.event_dispatch,
+                        }
+                    )
+                else:
+                    arguments = tuple(
+                        argument.operand_u16 for argument in reversed(argument_words)
+                    )
+                    assert command.event_argument is not None
+                    event_id = arguments[command.event_argument]
+                    request_id = (
+                        arguments[command.event_request_argument]
+                        if command.event_request_argument is not None
+                        else -1
+                    )
                     event_sites[
-                        source, previous.operand_u16, edge_kind, command_name
+                        source,
+                        event_id,
+                        command.event_dispatch or "event",
+                        command.name,
+                        request_id,
                     ].append(pc)
         elif opcode in (flw0.OPCODE_IDS["CALL"], flw0.OPCODE_IDS["JUMP"]):
             kind = "call" if opcode == flw0.OPCODE_IDS["CALL"] else "jump"
@@ -206,7 +238,13 @@ def analyze(
         for (source, target, kind), sites in sorted(local_sites.items())
     ]
     event_edges = []
-    for (source, event_id, kind, command), sites in sorted(event_sites.items()):
+    for (
+        source,
+        event_id,
+        kind,
+        command,
+        request_id,
+    ), sites in sorted(event_sites.items()):
         edge = {
             "source": source,
             "eventId": event_id,
@@ -217,6 +255,8 @@ def analyze(
         }
         if event_id in events:
             edge["event"] = events[event_id]
+        if request_id >= 0:
+            edge["requestId"] = request_id
         event_edges.append(edge)
     return {
         "procedures": procedures,

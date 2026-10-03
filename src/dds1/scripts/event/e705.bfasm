@@ -297,7 +297,7 @@ _3:
     RESET_DRAW_EFFECTS()
     COMM 0x0023
     SET_MODEL_FLAG(151)
-    SUBMIT_EVENT_WITH_MODE(473, 705)
+    SUBMIT_EVENT_WITH_SELECTION(473, event(e705))
     return
   }
 _5:
@@ -527,7 +527,7 @@ _7:
     RESET_DRAW_EFFECTS()
     COMM 0x0023
     SET_MODEL_FLAG(151)
-    SUBMIT_EVENT_WITH_MODE(473, 705)
+    SUBMIT_EVENT_WITH_SELECTION(473, event(e705))
     return
   } else {
   _10:
@@ -622,7 +622,7 @@ _7:
       RESET_DRAW_EFFECTS()
       COMM 0x0023
       SET_MODEL_FLAG(151)
-      SUBMIT_EVENT_WITH_MODE(473, 705)
+      SUBMIT_EVENT_WITH_SELECTION(473, event(e705))
       return
     } else {
     _11:
@@ -717,7 +717,7 @@ _7:
         RESET_DRAW_EFFECTS()
         COMM 0x0023
         SET_MODEL_FLAG(151)
-        SUBMIT_EVENT_WITH_MODE(473, 705)
+        SUBMIT_EVENT_WITH_SELECTION(473, event(e705))
         return
       }
     }
