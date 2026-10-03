@@ -165,6 +165,8 @@ extern void frFontSetChainFlag(s32, u8);
 extern void func_001958A0(s32, s32, s32);
 extern void frFontQueueGlyphInSelectedSlot(s32);
 extern char D_003BC508[];
+extern s32 datGameState;
+extern void sndSetSequenceVolumePan(s32, s32, s32);
 
 void mnuDrawIconFixedEntryWithBadge(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     char text[16];
@@ -201,7 +203,40 @@ void func_0025FFC8(s32 x, s32 y, s32 depth, MenuDrawValuePanel *panel, s32 optio
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", func_00260100);
+typedef struct MenuValueTransitionState {
+    u8 pad00[0x9C];
+    s32 previousValue;
+    s32 elapsedFrames;
+} MenuValueTransitionState;
+
+void func_00260100(MenuValueTransitionState *state, s32 style) {
+    char text[16];
+
+    if (*(s32 *)(datGameState + 0x3C) != state->previousValue) {
+        s32 transitionFrames = 20;
+        s32 displayedValue;
+
+        sndSetSequenceVolumePan(19, 127, 63);
+        state->elapsedFrames++;
+        displayedValue = state->previousValue +
+                         ((*(s32 *)(datGameState + 0x3C) - state->previousValue) * state->elapsedFrames) /
+                             transitionFrames;
+        func_003014F0(text, D_003BC508, displayedValue);
+        if (state->elapsedFrames == transitionFrames) {
+            state->previousValue = *(s32 *)(datGameState + 0x3C);
+            state->elapsedFrames = 0;
+        }
+    } else {
+        func_003014F0(text, D_003BC508, *(s32 *)(datGameState + 0x3C));
+    }
+
+    {
+        s32 glyph = func_00197A98(0x17C0, 0x2B8, 0, style, text, 0);
+
+        func_001958A0(glyph, 1, 0x53);
+        frFontQueueGlyphInSelectedSlot(glyph);
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_0025DF68", D_003BC4F0);
 
@@ -210,4 +245,3 @@ INCLUDE_SDATA(const s32, "game/code_0025DF68", D_003BC4F8);
 INCLUDE_SDATA(const s32, "game/code_0025DF68", D_003BC500);
 
 INCLUDE_SDATA(const s32, "game/code_0025DF68", D_003BC508);
-

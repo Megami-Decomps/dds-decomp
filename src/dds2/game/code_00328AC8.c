@@ -1,11 +1,14 @@
 #include "common.h"
 #include "ee_mmi.h"
+#include "sdf.h"
 
 #define SDF_CURRENT_THREAD_SELECTOR 0xffffffffffffffff
 #define SDF_THREAD_COMPLETION_EVENT 2
 #define SDF_WAKE_WORKER_STACK_BYTES 0x800
 #define SDF_WAKE_WORKER_PRIORITY 0x3E
 #define SDF_SLEEP_THREAD_PRIORITY 0x7C
+
+s32 sdfThreadWakeTick __attribute__((section(".sdata"), aligned(8))) = 0;
 
 extern u64 sdfFindThreadNode(u64);
 
@@ -35,14 +38,6 @@ s32 sdfWakeThreadOnCompletionEvent(s32 eventId) {
     return 0;
 }
 
-typedef struct SdfTrackedThreadEntry {
-    struct SdfTrackedThreadEntry *next; /* 0x0 */
-    s32 threadId;                       /* 0x4 */
-} SdfTrackedThreadEntry;
-
-extern s32 sdfThreadWakeTick;
-extern s32 sdfTrackedThreadSemaphore;
-extern SdfTrackedThreadEntry *sdfTrackedThreadHead;
 extern void sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
 extern void func_003667E8(s32);
 extern s32 WaitSema(s32);
@@ -51,7 +46,7 @@ extern s32 WakeupThread(s32);
 
 /* Each wake-up broadcasts to every tracked thread under the list semaphore. */
 void sdfWakeQueuedThreadWaiters(void) {
-    SdfTrackedThreadEntry *threadEntry;
+    SdfThreadNode *threadEntry;
 
     sdfAddHandler(0, SDF_THREAD_COMPLETION_EVENT, sdfWakeThreadOnCompletionEvent, -1, 0);
     func_003667E8(SDF_THREAD_COMPLETION_EVENT);
@@ -96,21 +91,21 @@ s32 sdfThreadSleepSelf(void) {
     return SleepThread();
 }
 
-typedef struct SdfNode {
-    struct SdfNode *next;
-} SdfNode;
+typedef struct SdfCursorLink {
+    struct SdfCursorLink *next;
+} SdfCursorLink;
 
 typedef struct {
-    SdfNode *current;
-    SdfNode *next;
+    SdfCursorLink *current;
+    SdfCursorLink *next;
 } SdfNodeCursor;
 
 /* Promote the next list node to current; an empty list clears current. */
 void sdfAdvanceNodeCursor(SdfNodeCursor *cursor) {
-    SdfNode *nextNode;
+    SdfCursorLink *nextNode;
 
     nextNode = cursor->next;
-    if (nextNode != (SdfNode *)0x0) {
+    if (nextNode != (SdfCursorLink *)0x0) {
         cursor->next = nextNode->next;
     }
     cursor->current = nextNode;
@@ -220,6 +215,3 @@ SdfCursorNode *sdfAllocSizeClassBlock(s32 size) {
     }
     return result;
 }
-
-INCLUDE_SDATA(const s32, "game/code_00328AC8", sdfThreadWakeTick);
-
