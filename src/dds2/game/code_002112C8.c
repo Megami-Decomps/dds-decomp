@@ -3719,9 +3719,7 @@ s32 rotate;
     return 1;
 }
 
-s64 func_0021C7F8(void) {
-    return btlSetLinkedDefeatCameraPresetA();
-}
+INCLUDE_ASM(const s32, "game/code_002112C8", func_0021C7F8);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021C818);
 
