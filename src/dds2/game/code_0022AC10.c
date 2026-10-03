@@ -3,6 +3,36 @@
 #include "btl_command.h"
 #include "pcp_vu0.h"
 
+typedef struct BattleGroupIdEntry {
+    struct BattleGroupIdEntry *next;
+    s32 id;
+} BattleGroupIdEntry;
+
+typedef struct BattleGroupSlot {
+    s32 unk_0;
+    s32 unk_4;
+    s32 unk_8;
+    s32 resourceHandle;
+} BattleGroupSlot;
+
+typedef struct BattleGroupNode {
+    struct BattleGroupNode *next;
+    struct BattleGroupNode *prev;
+    u16 group;
+    u16 type;
+    u8 ownsResources;
+    u8 pad0D[3];
+    s32 modelContext;
+    s32 resourceList;
+    s32 unk_18;
+    s32 requestHandle;
+    BattleGroupSlot slots[8];
+    s32 resourceHandle;
+    s32 unk_A4;
+    s32 partList;
+    f32 unk_AC;
+    f32 unk_B0;
+} BattleGroupNode;
 extern s32 *btlFindGroupedEntity();
 
 extern u8 D_00436F5D;
@@ -133,9 +163,9 @@ extern s32 sdfCreateSemaphore(s32, s32, s32);
 
 extern u32 mdlGroupJobSemaphore;
 
-extern s32 btlGroupNodeHeads[];
+extern BattleGroupNode *btlGroupNodeHeads[];
 
-extern s32 btlGroupIdHeads[];
+extern BattleGroupIdEntry *btlGroupIdHeads[];
 
 extern void scrSetIntegerReturnValue();
 
@@ -157,15 +187,37 @@ extern s32 btlReleaseScriptResource(void);
 
 extern s32 btlFindModelEntry();
 
-typedef struct BattleScriptTask {
-    u8 active;
+struct BattleScriptTaskData;
+
+typedef struct BattleTask {
+    u8 enabled;
     u8 pad01[0xF];
-    u8 startFlag;
+    u8 status;
     u8 pad11[0xF];
-    u16 kind;
-    u8 pad22[0x2A];
-    void (*callback)(void);
-} BattleScriptTask;
+    u16 taskId;
+    u16 state;
+    u16 flags;
+    u8 pad26[2];
+    s32 startDelay;
+    s32 endDelay;
+    u32 unk30;
+    u32 unk34;
+    u64 sequence;
+    u64 owner;
+    void (*onStart)(u32);
+    union {
+        void (*update)(void);
+        s32 (*run)(void *);
+        u32 (*processScript)(struct BattleScriptTaskData *);
+    } callback;
+    void (*onFinish)(u32 *);
+    void *args;
+    struct BattleTask *next;
+    struct BattleTask *nextActive;
+    struct BattleTask *deferNext;
+    struct BattleTask *deferPrev;
+    u8 pad68[8];
+} BattleTask;
 
 typedef struct BattleScriptTaskData {
     u32 object;
@@ -200,7 +252,8 @@ extern s32 fileRequestIsReady(void *);
 
 extern void sdfBuildPacketE(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern s64 btlStartTask(void *);
+struct SoundTask;
+extern u64 btlStartTask(struct SoundTask *task);
 
 extern s32 scrReadIntParameter(s32);
 
@@ -218,36 +271,6 @@ extern void *btlCreateModelChangeTask(void *, s32, s32, s32, s32, s32);
 
 extern void *sdfAllocSizeClassBlock(s32);
 
-typedef struct BattleGroupIdEntry {
-    struct BattleGroupIdEntry *next;
-    s32 id;
-} BattleGroupIdEntry;
-
-typedef struct BattleGroupSlot {
-    s32 unk_0;
-    s32 unk_4;
-    s32 unk_8;
-    s32 resourceHandle;
-} BattleGroupSlot;
-
-typedef struct BattleGroupNode {
-    struct BattleGroupNode *next;
-    struct BattleGroupNode *prev;
-    u16 group;
-    u16 type;
-    u8 flag;
-    u8 pad0D[3];
-    s32 modelContext;
-    s32 resourceList;
-    s32 unk_18;
-    s32 requestHandle;
-    BattleGroupSlot slots[8];
-    s32 unk_A0;
-    s32 unk_A4;
-    s32 partList;
-    f32 unk_AC;
-    f32 unk_B0;
-} BattleGroupNode;
 
 extern char D_00436CF8[];
 
@@ -550,7 +573,7 @@ typedef struct BtlFlagSlot {
 
 extern BtlFlagSlot D_003BF960[];
 
-extern s32 effMiscRandMod();
+extern u32 effMiscRandMod(void *state, u32 modulus);
 
 /* Script command: picks a random slot of the argument's group whose flag 0x8FF - slot is clear; passes its index (or -1 / 0) to scrSetIntegerReturnValue. */
 s32 func_0022B7A0(void) {
@@ -643,12 +666,12 @@ u32 func_0022B9D0(void) {
 INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022BA08);
 
 u32 btlCreateScriptResourceTask(u32 object, u32 group) {
-    BattleScriptTask *task = (BattleScriptTask *)btlAllocTask(12);
+    BattleTask *task = (BattleTask *)btlAllocTask(12);
     BattleScriptTaskData *data;
-    task->active = 1;
-    task->kind = 0x68;
-    task->callback = func_0022BA08;
-    task->startFlag = 0;
+    task->enabled = 1;
+    task->taskId = 0x68;
+    task->callback.update = func_0022BA08;
+    task->status = 0;
     data = (BattleScriptTaskData *)btlGetTaskArguments((u32)task);
     data->object = object;
     data->group = group;
@@ -673,34 +696,20 @@ u32 btlUpdateScriptResourceTask(BattleScriptTaskData *record) {
     return 0;
 }
 
-typedef struct BattleActionTask {
-    u8 active;
-    u8 unk_01[0xf];
-    u8 phase;
-    u8 unk_11[0xf];
-    s16 kind;
-    u8 unk_22[0x2a];
-    s32 (*update)(void *);
-} BattleActionTask;
 
-typedef struct BattleActionTaskData {
-    void *battler;
-    s32 action;
-    s32 finished;
-} BattleActionTaskData;
 
-void *btlCreateActionTask(void *battler, s32 action) {
-    BattleActionTask *task = (BattleActionTask *)btlAllocTask(12);
-    BattleActionTaskData *data;
+void *btlCreateActionTask(void *object, s32 group) {
+    BattleTask *task = (BattleTask *)btlAllocTask(12);
+    BattleScriptTaskData *data;
 
-    task->active = 1;
-    task->kind = 0x69;
-    task->update = (s32 (*)(void *))btlUpdateScriptResourceTask;
-    task->phase = 0;
-    data = (BattleActionTaskData *)btlGetTaskArguments((u32)task);
-    data->battler = battler;
-    data->action = action;
-    data->finished = 0;
+    task->enabled = 1;
+    task->taskId = 0x69;
+    task->callback.processScript = btlUpdateScriptResourceTask;
+    task->status = 0;
+    data = (BattleScriptTaskData *)btlGetTaskArguments((u32)task);
+    data->object = (u32)object;
+    data->group = group;
+    data->frames = 0;
     return task;
 }
 
@@ -964,14 +973,71 @@ s32 btlCheckCommandRequiredEntryMatches(void *list, s32 row) {
 
 INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022C600);
 
+typedef struct SoundSlotOwner {
+    u32 flags;
+    s32 category;
+    s32 id;
+    s32 refCount;
+    s32 load[2];
+    s32 slot[0x1D];
+    s32 handle[0x1D];
+    struct SoundSlotOwner *prev;
+    struct SoundSlotOwner *next;
+} SoundSlotOwner;
+
+typedef struct PacWork {
+    struct PacWork *next;
+    struct PacState *owner;
+    s32 resourceHandle;
+    u8 *dataCursor;
+    u8 packet[1];
+} PacWork;
+
+typedef struct PacState {
+    u8 phase;
+    u8 flags;
+    u16 packetCounter;
+    s32 (*packetCallback)();
+    void (*onInput)(struct PacState *);
+    void (*onComplete)(struct PacState *);
+    u8 *inputCursor;
+    s32 inputAvailable;
+    s32 consumedBytes;
+    u8 *outputCursor;
+    s32 pendingBytes;
+    struct PacBuf *decoder;
+    struct PacBuf *resourceBuffer;
+    struct PacAlloc *allocation;
+    PacWork *queueHead;
+    PacWork *queueTail;
+} PacState;
+
+typedef struct FilePacRequest {
+    u8 kind;
+    u8 state;
+    u8 pad02[2];
+    struct FileNode *next;
+    char *name;
+    u32 handle;
+    s32 size;
+    u8 pad14[4];
+    void *callback;
+    void *userData;
+    u8 pad20[0x10];
+    PacState packet;
+    u16 readinessEnabled;
+    u16 slot;
+    u8 pad6C[4];
+} FilePacRequest;
+
 typedef struct BattleModelEntry {
     s32 kind;
     s32 id;
-    s32 refs;
+    s32 refCount;
     s8 state;
     u8 unk_0d[3];
-    void *resource;
-    void *actor;
+    FilePacRequest *packRequest;
+    SoundSlotOwner *soundOwner;
     struct BattleModelEntry *prev;
     struct BattleModelEntry *next;
 } BattleModelEntry;
@@ -980,7 +1046,7 @@ BattleModelEntry *btlCreateModelEntry(void) {
     BattleModelEntry *entry = sdfAllocAndClearQuadwords(sizeof(BattleModelEntry));
     u8 *battle;
     BattleModelEntry *head;
-    entry->refs = 1;
+    entry->refCount = 1;
     entry->state = 0;
     battle = (u8 *)btlGetRuntime();
     entry->prev = 0;
@@ -996,14 +1062,14 @@ BattleModelEntry *btlCreateModelEntry(void) {
 }
 
 void btlReleaseModelEntry(BattleModelEntry *entry) {
-    if (--entry->refs != 0) {
+    if (--entry->refCount != 0) {
         return;
     }
-    if (entry->resource != 0) {
-        func_002C7CE8(entry->resource);
+    if (entry->packRequest != 0) {
+        func_002C7CE8(entry->packRequest);
     }
-    if (entry->actor != 0) {
-        sndReleaseSlotOwner(entry->actor);
+    if (entry->soundOwner != 0) {
+        sndReleaseSlotOwner(entry->soundOwner);
     }
     if (entry->next != 0) {
         entry->next->prev = entry->prev;
@@ -1035,19 +1101,19 @@ void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *filename) {
     }
 }
 
-s8 btlIsModelPackEntryReady(u8 *task) {
+s8 btlIsModelPackEntryReady(BattleModelEntry *entry) {
     s32 result;
-    if (((BattleModelEntry *)task)->state != 0) {
+    if (entry->state != 0) {
         return 1;
     }
-    if (mdlRequestAsset(((BattleModelEntry *)task)->kind, ((BattleModelEntry *)task)->id, 0) == 0 ||
-        mdlRequestAsset(((BattleModelEntry *)task)->kind, ((BattleModelEntry *)task)->id, 0) == -1) {
+    if (mdlRequestAsset(entry->kind, entry->id, 0) == 0 ||
+        mdlRequestAsset(entry->kind, entry->id, 0) == -1) {
         return 0;
     }
-    if (((BattleModelEntry *)task)->resource == 0) {
+    if (entry->packRequest == 0) {
         return 1;
     }
-    result = fileRequestIsReady(((BattleModelEntry *)task)->resource);
+    result = fileRequestIsReady(entry->packRequest);
     return result;
 }
 
@@ -1083,16 +1149,16 @@ void btlLoadModelPack(s32 kind, s32 id) {
         mdlRequestAsset(kind, id, 0);
         if (sndFindListNodeForChannel(kind, id) == 0) {
             btlFormatModelResourcePath(kind, id, path);
-            entry->resource = (void *)fileQueuePlainDispatchRequest(path);
+            entry->packRequest = (FilePacRequest *)fileQueuePlainDispatchRequest(path);
             btlBossDebugPrintf("btl:pack load start[%s][%X,%X]\n", path, kind, id);
         } else {
-            entry->resource = 0;
-            entry->actor = 0;
+            entry->packRequest = 0;
+            entry->soundOwner = 0;
             btlBossDebugPrintf("btl:pack load start[same motSE find][%X,%X]\n", kind, id);
         }
     } else {
         btlBossDebugPrintf("btl:same pack find[%X,%X]\n", kind, id);
-        entry->refs++;
+        entry->refCount++;
     }
 }
 
@@ -1108,10 +1174,10 @@ void btlReleaseFoundModelEntry(void) {
 
 INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022CBA0);
 
-s32 btlGetEntryState(s32 kind, s32 value) {
-    u8 *entry = (u8 *)btlFindModelEntry(kind, value);
+s32 btlGetEntryState(s32 kind, s32 id) {
+    BattleModelEntry *entry = (BattleModelEntry *)btlFindModelEntry(kind, id);
     if (entry != 0) {
-        return ((BattleModelEntry *)entry)->state;
+        return entry->state;
     }
     return 0;
 }
@@ -1119,7 +1185,7 @@ s32 btlGetEntryState(s32 kind, s32 value) {
 s32 btlReleaseEntryIfReady(s32 kind, s32 id) {
     s32 entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
-        return btlIsModelPackEntryReady((u8 *)entry);
+        return btlIsModelPackEntryReady((BattleModelEntry *)entry);
     }
     return entry;
 }
@@ -1685,67 +1751,67 @@ s32 *btlFindGroupedEntity(group, type)
     s32 type;
 
 {
-    s32 *entry = (s32 *)btlGroupNodeHeads[group];
+    BattleGroupNode *entry = btlGroupNodeHeads[group];
     while (entry != 0) {
-        if (((BattleGroupNode *)entry)->type == type) {
+        if (entry->type == type) {
             break;
         }
-        entry = (s32 *)*entry;
+        entry = entry->next;
     }
-    return entry;
+    return (s32 *)entry;
 }
 
 s32 btlGroupContainsId(s32 group, s32 id) {
-    s32 *entry = (s32 *)btlGroupIdHeads[group];
+    BattleGroupIdEntry *entry = btlGroupIdHeads[group];
     while (entry != 0) {
-        if (entry[1] == id) {
+        if (entry->id == id) {
             return 1;
         }
-        entry = (s32 *)*entry;
+        entry = entry->next;
     }
     return 0;
 }
 
 void btlAddGroupId(s32 group, s32 id) {
     BattleGroupIdEntry *node = sdfAllocSizeClassBlock(sizeof(BattleGroupIdEntry));
-    BattleGroupIdEntry **head = (BattleGroupIdEntry **)&btlGroupIdHeads[group];
+    BattleGroupIdEntry **head = &btlGroupIdHeads[group];
     node->id = id;
     node->next = *head;
     *head = node;
 }
 
 void btlRemoveGroupId(s32 group, s32 id) {
-    s32 *link;
-    s32 *node;
+    BattleGroupIdEntry **link;
+    BattleGroupIdEntry *node;
 
     link = &btlGroupIdHeads[group];
-    node = (s32 *)*link;
+    node = *link;
     if (node == 0) {
         return;
     }
     do {
-        if (*(node + 1) == id) {
-            *link = *node;
+        if (node->id == id) {
+            *link = node->next;
             sdfReleaseChipBlock(node);
             break;
         } else {
-            link = node;
-            node = (s32 *)*node;
+            link = &node->next;
+            node = node->next;
         }
     } while (node != 0);
 }
 
-void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 arg4, s32 requestHandle) {
+void btlCreateGroupNode(s32 group, s32 type, s32 flags, s32 resourceList, s32 arg4, s32 requestHandle) {
     BattleGroupNode *node;
     BattleGroupNode *head;
     s32 i;
     btlRemoveCurrentGroupedEntity(group, type);
     node = sdfAllocSizeClassBlock(sizeof(BattleGroupNode));
-    head = (BattleGroupNode *)btlGroupNodeHeads[group];
+    head = btlGroupNodeHeads[group];
     if (head != NULL) {
         head->prev = node;
     }
-    btlGroupNodeHeads[group] = (s32)node;
+    btlGroupNodeHeads[group] = node;
     node->next = head;
     node->group = group;
     node->type = type;
@@ -1759,8 +1825,8 @@ void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 arg
         node->slots[i].unk_8 = 0;
         node->slots[i].resourceHandle = 0;
     }
-    node->flag = flag & 1;
-    node->unk_A0 = 0;
+    node->ownsResources = flags & 1;
+    node->resourceHandle = 0;
     node->unk_A4 = 0;
     node->partList = 0;
     node->unk_AC = 1.0f;
@@ -1770,7 +1836,7 @@ void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 arg
 void btlDestroyGroupNode(BattleGroupNode *node) {
     BattleGroupNode *prev;
     BattleGroupNode *next;
-    u8 flag;
+    u8 ownsResources;
     s32 i;
     if (node == NULL) {
         return;
@@ -1778,21 +1844,21 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
     prev = node->prev;
     next = node->next;
     if (prev == NULL) {
-        btlGroupNodeHeads[node->group] = (s32)next;
+        btlGroupNodeHeads[node->group] = next;
     } else {
         prev->next = next;
     }
     if (next != NULL) {
         next->prev = prev;
     }
-    flag = node->flag;
-    node->flag = 0;
+    ownsResources = node->ownsResources;
+    node->ownsResources = 0;
     if (node->modelContext != 0) {
         do {
             mdlDestroyContext(node->modelContext);
         } while (node->modelContext != 0);
     }
-    if (flag != 0) {
+    if (ownsResources != 0) {
         sdfResourceListRelease((void *)node->resourceList, 1);
         sdfQueueNonzeroResourceId((void *)node->requestHandle);
         for (i = 0; i != 8; i++) {
@@ -1802,24 +1868,24 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
         }
     }
     mdlDestroyPartList(node->partList);
-    sdfReleaseResourceAllocation(node->unk_A0);
+    sdfReleaseResourceAllocation(node->resourceHandle);
     sdfReleaseChipBlock(node);
 }
 
 void btlRemoveCurrentGroupedEntity(void) {
-    s32 *node;
+    BattleGroupNode *node;
 
-    node = btlFindGroupedEntity();
-    btlDestroyGroupNode((BattleGroupNode *)node);
+    node = (BattleGroupNode *)btlFindGroupedEntity();
+    btlDestroyGroupNode(node);
 }
 
 void btlReleaseAllEntities(void) {
     u32 i = 0;
-    s32 *head = btlGroupNodeHeads;
+    BattleGroupNode **head = btlGroupNodeHeads;
     do {
-        s32 *node = (s32 *)*head;
+        BattleGroupNode *node = *head;
         while (node != 0) {
-            s32 *next = (s32 *)*node;
+            BattleGroupNode *next = node->next;
             btlDestroyGroupNode(node);
             node = next;
         }
