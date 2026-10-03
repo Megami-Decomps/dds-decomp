@@ -218,14 +218,10 @@ extern void *btlCreateModelChangeTask(void *, s32, s32, s32, s32, s32);
 
 extern void *sdfAllocSizeClassBlock(s32);
 
-extern void *sdfAllocSizeClassBlock(s32);
-
 typedef struct BattleGroupIdEntry {
     struct BattleGroupIdEntry *next;
     s32 id;
 } BattleGroupIdEntry;
-
-    s32 type;
 
 typedef struct BattleGroupSlot {
     s32 unk_0;
