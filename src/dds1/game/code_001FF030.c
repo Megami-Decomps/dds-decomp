@@ -5,7 +5,6 @@
 #include "pcp_vu0.h"
 
 #define BTL_AI_SLOT_COUNT 5
-#define BTL_AI_SCRATCH_BYTES 0x10
 #define BTL_AI_WEIGHT_MASK 0xFFFF
 #define BTL_HEALTH_RATE_SCALE 100
 #define BTL_PARTY_QUERY_MASK 0x221
@@ -54,7 +53,37 @@ extern s32 btlIsSelectedActorStatusAndRecordClear();
 
 extern s8 btlHistoryCounter;
 
-extern s32 *btlActionScratchWork;
+/* Command-actor state retained by AI queries; this is not a battle unit.
+ * The first queued action is also the word tested by btlActionMatchesUnit. */
+typedef union BtlActionSlot {
+    s32 word;
+    s16 actionId;
+} BtlActionSlot;
+
+typedef struct BtlActionTask {
+    u8 pad00[0xC];
+    s32 flags; /* 0x0C: AI context flags */
+    u8 pad10[0x78];
+    u16 aiCounter; /* 0x88: wraps as a halfword, then clamps to 0xFF */
+    u8 pad8A[0xBC];
+    s8 lowHpActionHold; /* 0x146: positive suppresses the low-HP action */
+    u8 pad147;
+    BtlActionSlot actions[8]; /* 0x148 */
+    u8 pad168[4];
+    struct BtlActionTask *next; /* 0x16C, same link as BtlTask */
+} BtlActionTask;
+
+/* Native 0x10-byte AI selection scratch. Its producer retains the command
+ * actor and species/mode; the conditional-action dispatcher uses +8 as a
+ * table row and +0xC as its query selector. This is not the singleton battle work. */
+typedef struct BtlAiScratchWork {
+    BtlActionTask *actor;
+    s32 speciesId;
+    s32 rowIndex;
+    s32 conditionKind;
+} BtlAiScratchWork;
+
+extern BtlAiScratchWork *btlActionScratchWork;
 
 extern char D_003BB8A0[];
 
@@ -160,7 +189,7 @@ void btlRunWeightedAiAction(BtlTask *task, s32 rowIndex) {
     u16 speciesId;
     s32 slotIndex;
 
-    btlActionScratchWork = sdfAllocAndClearQuadwords(BTL_AI_SCRATCH_BYTES);
+    btlActionScratchWork = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
     speciesId = task->unit->mode;
     slotIndex = btlPickWeightedAiSlot(task->unit, speciesId, rowIndex);
     btlRunAiAction(task, datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].actionId, datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].actionArg);
@@ -282,7 +311,7 @@ u32 btlResetAiCounterAtLimit(void) {
     if (limitReached == 0) {
         return limitReached;
     }
-    *(u16 *)(*(s32 *)btlActionScratchWork + 0x88) = 0;
+    btlActionScratchWork->actor->aiCounter = 0;
     return 1;
 }
 
@@ -647,7 +676,7 @@ s32 func_00200F20(BtlUnit *unit) {
 
 /* Test scratch-context bit 1; no gameplay meaning for this flag is established here. */
 s32 btlHasContextFlagTwo(void) {
-    return ((*(s32 *)(*(s32 *)btlActionScratchWork + 0xc) & 2) > 0);
+    return ((btlActionScratchWork->actor->flags & 2) > 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", btlCheckCounterLimit);
@@ -660,17 +689,12 @@ s32 btlCounterReachedLimit(s32 unused, u32 minimumCount) {
     return 1;
 }
 
-typedef struct BtlCounterState {
-    u8 unk_00[0x88];
-    u16 count; /* 0x88: saturates at 0xFF */
-} BtlCounterState;
-
 /* Increment the stored counter, retain native wrap/clamp behavior, then reread it for the limit test. */
 s32 btlAiCounterReachedLimit(s32 unused, u32 minimumCount) {
-    BtlCounterState *counterState = *(BtlCounterState **)btlActionScratchWork;
-    counterState->count++;
-    counterState->count = counterState->count <= 0 ? 0 : counterState->count >= BTL_AI_COUNTER_SATURATION ? BTL_AI_COUNTER_MAX : counterState->count;
-    if ((*(BtlCounterState **)btlActionScratchWork)->count < minimumCount) {
+    BtlActionTask *counterState = btlActionScratchWork->actor;
+    counterState->aiCounter++;
+    counterState->aiCounter = counterState->aiCounter <= 0 ? 0 : counterState->aiCounter >= BTL_AI_COUNTER_SATURATION ? BTL_AI_COUNTER_MAX : counterState->aiCounter;
+    if (btlActionScratchWork->actor->aiCounter < minimumCount) {
         return 0;
     }
     return 1;
@@ -734,7 +758,7 @@ s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
     if (unit->flags & 0x400) {
         return 0;
     }
-    contextAddress = *(s32 *)btlActionScratchWork;
+    contextAddress = (s32)btlActionScratchWork->actor;
     indexList = btlAllocateIndexList(13);
     func_001A30F8(contextAddress, indexList, 2, 0, 0);
     entryCount = btlGetIndexListCount(indexList);
@@ -751,13 +775,13 @@ s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
 /* Gate the low-HP action on hold, delay, HP ratio, enemy count, bucket roll, and selected-actor status.
  * Preserve native unsigned timing and division behavior, including the absence of a max-HP guard. */
 s32 btlIsLowHpActionReady(BtlUnit *unit) {
-    s32 contextAddress = *btlActionScratchWork;
+    BtlActionTask *context = btlActionScratchWork->actor;
     s32 conditionMet = 0;
     u32 actionTime = unit->actionTime;
     u32 currentTime = func_001A9488(4);
     s16 bucketRoll;
 
-    if (*(s8 *)(contextAddress + 0x146) <= 0) {
+    if (context->lowHpActionHold <= 0) {
         if (currentTime >= actionTime + BTL_LOW_HP_ACTION_DELAY) {
             if (unit->hp * BTL_HEALTH_RATE_SCALE / unit->maxHp < BTL_LOW_HP_PERCENT_LIMIT) {
                 if (btlIsGroup400CountAtMost((s32)unit, BTL_LOW_HP_ENEMY_COUNT_LIMIT) != 0) {
@@ -987,19 +1011,6 @@ s32 func_00201900(s32 mask, s16 actionId, s8 force) {
     }
     return 0;
 }
-
-/* Action IDs occupy the low halfword of each 0x4-byte queued action slot. */
-typedef union BtlActionSlot {
-    s32 word;
-    s16 actionId;
-} BtlActionSlot;
-
-typedef struct BtlActionTask {
-    u8 pad00[0x148];
-    BtlActionSlot actions[8]; /* 0x148 */
-    u8 pad168[4];
-    struct BtlActionTask *next; /* 0x16C, same link as BtlTask */
-} BtlActionTask;
 
 s32 btlAnyUnitHasActionInSlots(mask, action)
 u32 mask;
@@ -1276,9 +1287,11 @@ s32 btlUnitHasEitherSpecialAction(void *unit) {
     return btlGroup400UnitHasAction(unit, 0x1c2) != 0;
 }
 
+/* Require the complete first queued-action word and unit status bit 0x1000.
+ * Comparing only actions[0].actionId would discard the upper halfword. */
 s32 btlActionMatchesUnit(u8 *unit, s32 action) {
-    s32 *battle = (s32 *)*btlActionScratchWork;
-    if (battle[0x148 / 4] == action) {
+    BtlActionTask *context = btlActionScratchWork->actor;
+    if (context->actions[0].word == action) {
         if (((BtlUnit *)unit)->stateFlags & 0x1000) {
             return 1;
         }

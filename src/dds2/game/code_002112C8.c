@@ -3,7 +3,6 @@
 #include "pcp_vu0.h"
 
 #define BTL_AI_SLOT_COUNT 5
-#define BTL_AI_SCRATCH_BYTES 0x10
 #define BTL_AI_WEIGHT_MASK 0xFFFF
 #define BTL_HEALTH_RATE_SCALE 100
 #define BTL_PARTY_QUERY_MASK 0x221
@@ -150,16 +149,6 @@ extern s32 btlIsActorCategoryMarked(s32);
 
 extern void btlPrepareRandomizedActionCameraPose(s32, s32, s32);
 
-typedef struct BattleCtx {
-    u8 pad0[0xC];
-    s32 flags;
-    u8 pad10[0x80];
-    u16 turns;
-    u8 pad92[0xBC];
-    s8 lowHpActionHold; /* 0x14E: positive suppresses btlIsLowHpActionReady */
-    u8 pad14F;
-    s32 action;
-} BattleCtx;
 
 typedef struct BattleSub {
     union {
@@ -236,7 +225,11 @@ typedef struct ActionStateLink {
     }; /* 0x60: the same index-list address */
     u8 pad64[0x24];
     u8 *entries; /* 0x88: retained index-work buffer */
-    u8 pad8C[0xC4];
+    u8 pad8C[4];
+    u16 aiCounter; /* 0x90: wraps as a halfword, then clamps to 0xFF */
+    u8 pad92[0xBC];
+    s8 lowHpActionHold; /* 0x14E: positive suppresses the low-HP action */
+    u8 pad14F;
     BattleActionSlot actions[8]; /* 0x150 */
     s32 lastMode; /* 0x170 */
     struct ActionStateLink *prev;
@@ -276,7 +269,17 @@ extern void fldAppendSceneGroupHandle(s32);
 
 extern void btlAppendIndexListEntry();
 
-extern BattleCtx **btlActionScratchWork;
+/* Native 0x10-byte AI selection scratch. Its producer retains the command
+ * actor and species/mode; the conditional-action dispatcher uses +8 as a
+ * table row and +0xC as its query selector. This is not the singleton battle work. */
+typedef struct BtlAiScratchWork {
+    ActionStateLink *actor;
+    s32 speciesId;
+    s32 rowIndex;
+    s32 conditionKind;
+} BtlAiScratchWork;
+
+extern BtlAiScratchWork *btlActionScratchWork;
 
 /* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
 typedef struct AiSlot {
@@ -439,7 +442,7 @@ void btlRunWeightedAiAction(ActionStateLink *task, s32 rowIndex) {
     u16 speciesId;
     s32 slotIndex;
 
-    btlActionScratchWork = sdfAllocAndClearQuadwords(BTL_AI_SCRATCH_BYTES);
+    btlActionScratchWork = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
     speciesId = task->unit->mode;
     slotIndex = btlPickWeightedAiSlot((s32)task->unit, speciesId, rowIndex);
     func_00211EA8(task, datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].actionId, datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].actionArg);
@@ -558,7 +561,7 @@ s32 btlHasUnitAtOrAboveHealthRate(s32 unused, s32 multiplier) {
 /* Reset the scratch-context counter only when its query succeeds; retain the native no-argument query. */
 s32 btlResetAiCounterAtLimit() {
     if (btlAiCounterReachedLimit()) {
-        (*btlActionScratchWork)->turns = 0;
+        btlActionScratchWork->actor->aiCounter = 0;
         return 1;
     }
     return 0;
@@ -943,7 +946,8 @@ s32 func_00213438(BtlUnit *unit) {
 
 /* Test scratch-context bit 1; no gameplay meaning for this flag is established here. */
 s32 btlHasContextFlagTwo(void) {
-    return (((*btlActionScratchWork)->flags & 2) > 0);
+    /* Preserve the AI query's signed-word interpretation of this unsigned mask. */
+    return (((s32)btlActionScratchWork->actor->flags & 2) > 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_002112C8", btlCheckCounterLimit);
@@ -958,11 +962,11 @@ s32 btlCounterReachedLimit(s32 unused, u32 minimumCount) {
 
 /* Increment the stored counter, retain native wrap/clamp behavior, then reread it for the limit test. */
 s32 btlAiCounterReachedLimit(s32 unused, u32 minimumCount) {
-    BattleCtx *counterState = *btlActionScratchWork;
+    ActionStateLink *counterState = btlActionScratchWork->actor;
 
-    counterState->turns = counterState->turns + 1;
-    counterState->turns = counterState->turns == 0 ? 0 : counterState->turns >= BTL_AI_COUNTER_SATURATION ? BTL_AI_COUNTER_MAX : counterState->turns;
-    if ((*btlActionScratchWork)->turns < minimumCount) {
+    counterState->aiCounter = counterState->aiCounter + 1;
+    counterState->aiCounter = counterState->aiCounter == 0 ? 0 : counterState->aiCounter >= BTL_AI_COUNTER_SATURATION ? BTL_AI_COUNTER_MAX : counterState->aiCounter;
+    if (btlActionScratchWork->actor->aiCounter < minimumCount) {
         return 0;
     }
     return 1;
@@ -1052,7 +1056,7 @@ s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
     if (unit->flags & 0x400) {
         return 0;
     }
-    contextAddress = (s32)*btlActionScratchWork;
+    contextAddress = (s32)btlActionScratchWork->actor;
     indexList = btlAllocateIndexList(13);
     func_001AC0F8(contextAddress, indexList, 2, 0, 0);
     entryCount = btlGetIndexListCount(indexList);
@@ -1071,7 +1075,7 @@ s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
 s32 btlIsLowHpActionReady(BtlUnit *unit) {
     s32 conditionMet = 0;
     s16 bucketRoll;
-    BattleCtx *context = *btlActionScratchWork;
+    ActionStateLink *context = btlActionScratchWork->actor;
     u16 actionTime = unit->actionTime;
     s32 delayPending = func_001B39E8(4) < (u32)(actionTime + BTL_LOW_HP_ACTION_DELAY);
 
@@ -1612,8 +1616,10 @@ s32 btlUnitHasEitherSpecialAction(void *unit) {
     return btlGroup400UnitHasAction(unit, 0x1c2) != 0;
 }
 
+/* Require the complete first queued-action word and unit status bit 0x1000.
+ * Comparing only actions[0].actionId would discard the upper halfword. */
 s32 btlActionMatchesUnit(s32 unit, s32 action) {
-    if ((*btlActionScratchWork)->action == action) {
+    if (btlActionScratchWork->actor->actions[0].word == action) {
         if (((BtlUnit *)unit)->stateFlags & 0x1000) {
             return 1;
         }
