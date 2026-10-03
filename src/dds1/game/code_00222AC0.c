@@ -42,7 +42,7 @@ extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
 extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);
 extern void func_00221D00(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
 extern void evtSetUnitRgbTransition(EvtUnit *unit, s32 arg, u32 color);
-extern void func_00221EF0(EvtUnit *unit, s32 arg, u32 color);
+extern void evtSetUnitAlphaTransition(EvtUnit *unit, s32 arg, u32 color);
 
 extern u32 evtWindowMotionUnit;
 extern s32 D_003BBDB0;
@@ -82,12 +82,12 @@ extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 arg0, s32 arg1);
 extern void *dds3FindWorldObjectNodeByKey(void *world, s32 objectId, s32 kind);
 extern void *dds3GetWorldPlayerObject(void *world);
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
-extern void effObjDispatchMagatuhiState(void *arg0);
+extern void effObjDispatchReadyState(void *arg0);
 extern void dds3RemoveWorldObjectNode(void *arg0);
 extern void *dds3GetWorldSecondaryObject(void);
 extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast);
 extern void dds3FreePathObject(s32);
-extern s32 func_00116D38(void *);
+extern s32 dds3CreatePathCurveWork(void *);
 extern void func_00116F38(s32);
 extern f32 evtMeasurePathTrajectoryLength(s32);
 extern void evtScaleValueByMultiplier(s32, f32);
@@ -271,7 +271,7 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
     if (work->pathHandle != 0) {
         dds3FreePathObject(work->pathHandle);
     }
-    path = func_00116D38(pathSource);
+    path = dds3CreatePathCurveWork(pathSource);
     work->pathHandle = path;
     work->pathSpeed = 40.0f / evtMeasurePathTrajectoryLength(path);
     if (dirFlag == 0) {
@@ -1191,7 +1191,7 @@ u32 evtOpSetUnitPackedAlpha(void) {
     VU0_SCALAR_OP(bfWaitReadArgFloat(2), "vmulx.w vf10, vf0, vf2x");
     EE_MMI_RGBA_PACK_F128(packed);
     color[0] = packed;
-    func_00221EF0(unit, scrReadIntParameter(1), packed);
+    evtSetUnitAlphaTransition(unit, scrReadIntParameter(1), packed);
     return 1;
 }
 
@@ -1310,7 +1310,7 @@ f32 evtComputeClampedModelScale(s32 index) {
 }
 
 extern f32 evtComputeClampedModelScale(s32);
-extern void func_00190308(void *, f32);
+extern void effEventSetScale(void *, f32);
 
 u32 evtOpSetModelCutAndScale(void) {
     void *unit;
@@ -1329,7 +1329,7 @@ u32 evtOpSetModelCutAndScale(void) {
             f32 value = evtComputeClampedModelScale(index);
             void *target = *(void **)(*(u8 **)((u8 *)unit + 0x18) + 0x2C);
             if (target != NULL) {
-                func_00190308(target, value);
+                effEventSetScale(target, value);
             }
         }
     }
@@ -1387,7 +1387,7 @@ u32 func_00225D80(void) {
     id = scrReadIntParameter(0);
     obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
-        effObjDispatchMagatuhiState(obj);
+        effObjDispatchReadyState(obj);
     }
     return 1;
 }
@@ -1399,7 +1399,7 @@ u32 func_00225DC0(void) {
     id = scrReadIntParameter(0);
     obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
-        effObjDispatchMagatuhiState(obj);
+        effObjDispatchReadyState(obj);
     }
     return 1;
 }

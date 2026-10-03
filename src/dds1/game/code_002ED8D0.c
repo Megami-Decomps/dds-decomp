@@ -207,7 +207,7 @@ extern void func_002EBB60(void *);
 extern void func_002E98F0(void);
 
 /* Wait for active work's release phase, free its owned buffers, then deactivate it. */
-void func_002EDAE0(SdfPacWork *job) {
+void sdfCancelAndReleasePacWork(SdfPacWork *job) {
     PacOwnedBuffers *ownedBuffers;
 
     if (job->active != 0) {
@@ -402,3 +402,4 @@ void sdfDecodePacNodeAndAdvanceTail(PacCompletionState *state) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_002ED8D0", D_003BD638);
+

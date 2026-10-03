@@ -7439,7 +7439,7 @@ extern s32 effCurrentFileQueueEntry;
 extern u32 D_003BD064;
 extern u32 D_0038F2F0[];
 
-u32 func_002B65C0(EffCameraCreateRequest *request) {
+u32 effAppendPositionedCameraFileJob(EffCameraCreateRequest *request) {
     EffFileJobEntry *entry;
     u32 count;
 

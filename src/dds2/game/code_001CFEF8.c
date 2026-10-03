@@ -231,7 +231,7 @@ extern void func_001AEEA8();
 
 extern void kwlnFadeBackgroundStartOut();
 
-extern void kwlnDrawSetOffsetTransition();
+extern void kwlnDrawSetOverlayTransition();
 
 extern void kwlnDrawEnableD88();
 
@@ -380,7 +380,7 @@ s32 fldSceneStateRestoreDisplay(BattleSceneWork *scene) {
         }
         if (!(scene->flags & 0x4000)) {
             kwlnFadeBackgroundStartOut(0);
-            kwlnDrawSetOffsetTransition(0, 0, 1);
+            kwlnDrawSetOverlayTransition(0, 0, 1);
             kwlnDrawEnableD88(0);
             kwlnDrawEnableDc8(0);
             kwlnDrawEnableE08(0);
@@ -523,7 +523,7 @@ extern void func_001AA868();
 
 extern s32 func_0029D000();
 
-extern void datMoveCursorX();
+extern void datAdjustCurrentHp();
 
 /* Nudge every active party entry's cursor by weight * 0.05 once scene flag
  * 0x40 is clear. */
@@ -543,7 +543,7 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
                     if (datGameState->entry[i].link != 0 || scene->unk2F8 != 0) {
                         if (!(datGameState->entry[i].mask & 0x40)) {
                             if (func_0029D000(&datGameState->entry[i]) == 0) {
-                                datMoveCursorX(&datGameState->entry[i], (s32)((f32)datGameState->entry[i].weight * scale));
+                                datAdjustCurrentHp(&datGameState->entry[i], (s32)((f32)datGameState->entry[i].weight * scale));
                             }
                         }
                     }

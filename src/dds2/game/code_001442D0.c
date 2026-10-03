@@ -322,7 +322,7 @@ extern void *D_00451B94[];
 
 extern void func_0035B6E0(const char *fmt, ...);
 
-extern void func_00125F58(void);
+extern void fldPreparePlayerSceneCameraTarget(void);
 
 extern s32 mnuPositionedResourceNodes[];
 
@@ -474,7 +474,7 @@ typedef struct FldVec4 {
 
 extern void effObjSetInnerFirstVec();
 
-extern s32 *dds3GetUnk0C();
+extern s32 *dds3GetObjectBaseResourceHandle();
 
 extern void dds3ClearObjectFlags();
 
@@ -1356,7 +1356,7 @@ void fldEnterSceneCamera(void) {
     fldReleaseResourceSlots();
     fldSceneReady = 0;
     fldClearSceneLifecycleFlags(1);
-    func_00125F58();
+    fldPreparePlayerSceneCameraTarget();
     evtSetSolarOverlayFullyVisible();
     fldApplySkyLightSetToPlayerVU();
     cam->unk70 = 4;
@@ -2724,7 +2724,7 @@ void fldFreeSparkSlot(s32 index) {
         vec.v[2] = fldSparkSlots[index].pos[2];
         effObjSetInnerFirstVec(fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle, &vec);
         obj = fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle;
-        flags = dds3GetUnk0C(obj);
+        flags = dds3GetObjectBaseResourceHandle(obj);
         *flags |= 1;
         dds3ClearObjectFlags(obj, 0x400);
         slot = fldSparkSlots[index].objectSlot;
@@ -2780,7 +2780,7 @@ void fldFinishEventFieldState(void) {
         fldClearObjectEntryHandles();
         fldReleaseWeatherEffects();
         fldStartSceneBgmAlternate();
-        func_00125F58();
+        fldPreparePlayerSceneCameraTarget();
         work->eventActive = 0;
         fldSparkControlState[3] = 0;
         fldSparkControlState[4] = 0;
@@ -2822,7 +2822,7 @@ void fldResetEventSceneState(void) {
     fldAreaState[0x118 / 4] = 0;
     fldClearObjectEntryHandles();
     fldReleaseWeatherEffects();
-    func_00125F58();
+    fldPreparePlayerSceneCameraTarget();
     fldAreaState[0x114 / 4] = 1;
     ((FldWorkView *)fldAreaState)->eventActive = 0;
     D_00451B9C[0] = 0;
@@ -2857,7 +2857,7 @@ void fldFinishDeferredExit(void) {
         if (!evtGetMessageWindowControlState()) {
             evtFinishMessageWindowAndNotify();
             dspCloseChannel();
-            func_00125F58();
+            fldPreparePlayerSceneCameraTarget();
             fldAreaState[0x45] = 0;
         }
     }
@@ -3067,7 +3067,7 @@ void fldTickTargetGuideAndNotify(void) {
 extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-void func_00152230(void) {
+void fldUpdateTargetGuideCycleMotion(void) {
     f32 distance, angle;
     FieldTargetGuideState *state = &fldTargetGuideState;
 

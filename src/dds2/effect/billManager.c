@@ -69,7 +69,7 @@ typedef struct BillPacketWork {
 extern BillManagerNode *D_00438EFC;
 extern BillDeferredDescriptor *D_003AA960[5];
 extern void sdfAppendPacket(SdfListHead *list, u32 packet);
-extern u32 func_0033B688(void *work, void *arg1, void *arg2, void *arg3, s32 count, s32 callback);
+extern u32 sdfBuildCompactVertexVifPacket(void *work, void *arg1, void *arg2, void *arg3, s32 count, s32 callback);
 
 void func_00158340(void) {
     BillManagerNode *node;
@@ -82,7 +82,7 @@ void func_00158340(void) {
             s32 i;
 
             if (count > 0) {
-                u32 packet = func_0033B688(work, (u8 *)work + 0xF0, (u8 *)work + 0x12C,
+                u32 packet = sdfBuildCompactVertexVifPacket(work, (u8 *)work + 0xF0, (u8 *)work + 0x12C,
                                            (u8 *)work + 0x21C, count, 0);
                 sdfAppendPacket(node->pendingLists[node->packetListIndex], packet);
                 work->count = 0;
@@ -336,6 +336,7 @@ typedef struct BillSourceRecord {
     f32 z;              /* 0x24 */
     f32 w;              /* 0x28 */
 } BillSourceRecord;
+extern BillSourceRecord *func_00158F88(BillObj *obj, void *entries);
 
 typedef struct BillSnapshot {
     f32 x;              /* 0x00 */
@@ -346,7 +347,6 @@ typedef struct BillSnapshot {
     BillVec4 vector;    /* 0x14 */
 } BillSnapshot;
 
-extern BillSourceRecord *func_00158F88(BillObj *obj, void *entries);
 
 /* Copy the billboard's current source record (by kind) into a snapshot. */
 void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {

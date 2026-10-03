@@ -28,8 +28,8 @@ typedef struct StaffScreenContext {
     u32 display;        /* 0x138 */
 } StaffScreenContext;
 
-INCLUDE_ASM(const s32, "game/code_00272798", func_00272798);
 
+INCLUDE_ASM(const s32, "game/code_00272798", func_00272798);
 INCLUDE_ASM(const s32, "game/code_00272798", func_002728F8);
 
 /* Submit a request to the active menu dispatcher in mode 2. */

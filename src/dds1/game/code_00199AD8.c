@@ -572,7 +572,7 @@ extern s32 D_003BD820;
 
 /* Configure the fade on timer zero, wait thirty ticks, then consume a negative option status.
    Keep both timer reads: setup tests a second read, while later comparisons use the cached one. */
-s32 func_0019B1B0(void) {
+s32 itfCommandSelectOptionWithFade(void) {
     s32 window;
     s32 elapsedTicks;
     s32 entryIndex;

@@ -176,7 +176,7 @@ extern void sdfInvertRigidVuTransform(void);
 extern void sdfPostmultiplyVuMatrixFromMemory(f32 *);
 
 /* vu0 routine: forward-cone projection from vf10 to integer screen XY */
-s32 func_001F6158(s32 *out) {
+s32 btlProjectForwardPositionToScreen(s32 *out) {
     f32 distance;
     f32 facing;
     f32 *projection;

@@ -186,10 +186,10 @@ extern SdfTex *func_0032B968(s32, s32, u32, u32, u32, u32);
 extern u8 func_0032B240(SdfTex *);
 extern void func_0032B908(SdfTex *);
 extern u8 *sdfTexSubmitPixelsForFormat(SdfTex *, s32, u8 *, s32);
-extern s32 sdfTexGetStorageBitsPerPixel(s32);
+extern s32 sdfTexFormatSizeHint(s32);
 extern u8 *sdfTexSubmitImageCopy(u32, s32, s32, u32, u8 *, s32);
 
-SdfTex *func_0032BF78(SdfTextureFileHeader *header, s32 mode) {
+SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
     SdfTex *texture;
     u8 *pixels;
     s32 format;
@@ -227,7 +227,7 @@ SdfTex *func_0032BF78(SdfTextureFileHeader *header, s32 mode) {
     height = texture->height;
     levels = texture->maxMipLevel;
     destination = sdfTexGetPrimaryResourceWord(texture);
-    bits = sdfTexGetStorageBitsPerPixel(format);
+    bits = sdfTexFormatSizeHint(format);
     do {
         pixels = sdfTexSubmitImageCopy(destination, width, height, format, pixels, mode);
         levels--;
@@ -241,12 +241,12 @@ SdfTex *func_0032BF78(SdfTextureFileHeader *header, s32 mode) {
 
 /* Process a resource address with packet variant zero. */
 void sdfTexAcquireResourceTexture(u32 resourceAddress) {
-    func_0032BF78((SdfTextureFileHeader *)resourceAddress, 0);
+    sdfTexCreateFromFileHeader((SdfTextureFileHeader *)resourceAddress, 0);
 }
 
 /* Process a resource address with packet variant one. */
 void sdfTexAcquireAlternateResourceTexture(u32 resourceAddress) {
-    func_0032BF78((SdfTextureFileHeader *)resourceAddress, 1);
+    sdfTexCreateFromFileHeader((SdfTextureFileHeader *)resourceAddress, 1);
 }
 
 /* Build one intensity byte for every source pixel. */

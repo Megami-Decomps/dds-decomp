@@ -498,7 +498,7 @@ extern void effObjReplaceActiveEventNode(void *obj, u32 entryId);
 extern s32 effObjSpawnDescriptorBoundEffect(s32 arg, f32 *vec0, f32 *vec1);
 extern s32 func_001150B0(s32 arg, f32 *vec0, f32 *vec1);
 extern s32 func_00115840(s32 mode, s32 arg);
-extern void effObjDispatchMagatuhiState(s32 obj);
+extern void effObjDispatchReadyState(s32 obj);
 extern s32 effObjCopyMagatuhiSourceParameters(s32 obj, s32 a, s32 b, s32 c, s32 d);
 extern void func_0022C6B0(s32 obj, s32 value, s32 type, u32 word, EvtViewer *viewer);
 
@@ -532,7 +532,7 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *
             handle = func_001150B0(cmd->arg, vec0, vec1);
         }
         if (params->u.a.flag != 0) {
-            effObjDispatchMagatuhiState(handle);
+            effObjDispatchReadyState(handle);
         }
         if (cmd->plain == 0) {
             func_0022C6B0(handle, params->u.a.value, params->u.a.type, params->word, viewer);
@@ -555,7 +555,7 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *
         n2 = evtEventViewerGetNameObject(params->u.names[2], viewer);
         effObjCopyMagatuhiSourceParameters(handle, n0, n1, n2, evtEventViewerGetNameObject(params->u.names[3], viewer));
         if (params->unk9 != 0) {
-            effObjDispatchMagatuhiState(handle);
+            effObjDispatchReadyState(handle);
         }
         break;
     }

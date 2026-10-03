@@ -197,8 +197,10 @@ void func_0020E850(BtlLinkedEffectArgs *args, u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020E858);
 
+
 void func_0020EA10(void) {
 }
+
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020EA18);
 

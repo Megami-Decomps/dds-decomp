@@ -56,7 +56,7 @@ s32 effResourceRectDrawPixels(EffResourceRectWork *work) {
 }
 
 /* Generate already-scaled GS coordinates; the renderer must not scale again. */
-void effResourceRectDrawGsCoords(EffResourceRectWork *work) {
+void effComputeBlurRectBounds(EffResourceRectWork *work) {
     f32 scaledExtent = (f32)work->params.extent * 1.4f;
     s32 x = work->params.centerX + 0x1000;
     s32 y = (work->params.centerY + 0xE00) >> 1;

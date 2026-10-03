@@ -3,7 +3,7 @@
 extern s32 effGetSlotWorkOrOverride(s32, s32);
 
 /* 0x80 leaves the copied corner words unchanged. */
-void func_002BEDC8(u32 *source, u32 *destination, u8 *edgeValues, u32 edge) {
+void sdfCopyCornerWordsWithEdgeByte(u32 *source, u32 *destination, u8 *edgeValues, u32 edge) {
     u8 value = edgeValues[edge];
 
     destination[0] = source[0];

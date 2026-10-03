@@ -21,6 +21,7 @@
 0x001019F0	kwlnUnlinkListNode	inferred	L69; sources=names_pending_main.tsv; twin=0x00101B08, input-family pairing. [names_qp10.tsv]
 0x00101A60	dds3SetScopedObjectFlags	inferred	Calls the kernel dispatcher with set mode, object, mask and scope; its MIPS code ORs the masked bits into object flags at offset 0x1C.
 0x00101A90	dds3ClearScopedObjectFlags	inferred	Calls the same kernel dispatcher with clear mode, which ANDs the complement of the supplied flag mask into the selected object or scope.
+0x00101C50	kwlnPrepareFrameDrawPackets	inferred	readability/matching review (QP16)
 0x001023C8	kwlnRenderFrame	inferred	Runs frame-level draw/update dispatch and rendering; DDS1 twin. [names_qp9.tsv]
 0x00102790	dds3GetAdminTaskWork	inferred	Finds the named admin task and returns its attached AdminWork. [names_reviewed12.tsv]
 0x001027B8	dds3GetAdminTaskValue	inferred	Reads the value field from the named admin task work. [names_reviewed12.tsv]
@@ -61,10 +62,10 @@
 0x00106160	kwlnFadeSetMode	inferred	stores D_00435CFC mode; mode 0 clears the two counters, otherwise sets alpha byte 0x80 [names_reviewed2.tsv]
 0x00106188	kwlnStepBackgroundFade	inferred	M141; sources=names_pending_main.tsv; twin=0x00106268, input-family pairing. [names_qp10.tsv]
 0x00106460	kwlnDrawSnapshotSolidRect	inferred	confidence=high; func_00106460 saves the current solid rectangle parameters and stages or immediately applies pending parameters.; sources=names_R_Structs54.tsv; twin=0x00106540, input-family pairing. [names_qp10.tsv]
-0x00106658	kwlnDrawApplyEffectWord	inferred	Corrected: replaces E08/Ch75 IDs; source copies a DrawWord36 channel word and applies common effect settings; DDS1 twin. [names_qp9.tsv]
-0x00106810	kwlnDrawSetOffsetTransition	inferred	Sets two drawing offsets immediately or queues an interpolation from their previous values.
+0x00106658	kwlnDrawSetupE08FromCh75	inferred	readability/matching review (QP16)
+0x00106810	kwlnDrawSetOverlayTransition	inferred	readability/matching review (QP16)
 0x001068C8	kwlnSetRectangleBlurParameterTransition	inferred	confidence=high; matched-C; src/dds2/kernel/dds3KernelDraw.c:400:func_001068C8; Snapshots rectangle-blur parameters and chooses immediate copy of desired parameters or staged transition; twin=0x001069A8, relocation-masked retail twin report.; sources=names_R_Structs54.tsv,names_reviewed36.tsv [names_qp10.tsv]
-0x00106AE8	kwlnDrawApplyEffectBlock	inferred	Corrected: replaces C70/Ch71 IDs; source copies a DrawBlkD30 channel block and applies common effect settings; DDS1 twin. [names_qp9.tsv]
+0x00106AE8	kwlnDrawSetupC70FromCh71	inferred	readability/matching review (QP16)
 0x00106D10	kwlnSetFilterBlurParameterTransition	inferred	confidence=high; matched-C; src/dds2/kernel/dds3KernelDraw.c:547:func_00106D10; Snapshots filter-blur work and either copies desired parameters immediately or sets interpolation control bit; twin=0x00106DF0, relocation-masked retail twin report.; sources=names_R_Structs54.tsv,names_reviewed36.tsv [names_qp10.tsv]
 0x00106F38	kwlnSetStaggeredBlurParameterTransition	inferred	confidence=high; matched-C; src/dds2/kernel/dds3KernelDraw.c:624:func_00106F38; Snapshots staggered blur work and either copies desired parameters immediately or sets interpolation control bit; twin=0x00107018, relocation-masked retail twin report.; sources=names_R_Structs54.tsv,names_reviewed36.tsv [names_qp10.tsv]
 0x00108138	kwlnSetBackgroundColorTarget	inferred	confidence=high; matched-C; src/dds2/game/code_00107EF8.c:224:func_00108138; M141; source=names_pending_main.tsv:106; review=Either installs the background color vector immediately or starts a timed interpolation from its previous color. [names_qp11.tsv]
@@ -73,6 +74,7 @@
 0x001089A0	evtSetDrawSurfaceIndex	inferred	stores draw surface slot used by GS packet submitters [names_R_FuncNames2.tsv]
 0x001089A8	evtSubmitGsRegister47	inferred	packs GS register 0x47 and submits packet to chosen surface [names_R_FuncNames2.tsv]
 0x00108AC0	evtSubmitGsRegister48	inferred	packs GS register 0x48 and submits packet to chosen surface [names_R_FuncNames2.tsv]
+0x00109780	evtSubmitQuadFromVertices	inferred	readability/matching review (QP16)
 0x00109C30	evtDrawPositionedSurfacePacket	inferred	Allocates packet list, builds XY-offset draw packet and submits to event surface. [names_reviewed7.tsv]
 0x00109D00	evtPrepareSizedDrawResource	inferred	Creates graphics resource from shifted dimensions and passes it to two preparation routines. [names_reviewed7.tsv]
 0x0010A298	evtDestroySelectionState	inferred	calls evtSelStateDestroy [names_R_FuncNames2.tsv]
@@ -298,15 +300,18 @@
 0x001118E0	dds3ReplaceObjectResource	inferred	Releases any existing object resource and acquires a replacement by the stored resource ID.
 0x00111920	dds3ReleaseObjectResource	inferred	Releases the nested resource handle and clears its slot.
 0x00111958	dds3GetObjectResourceHandle	inferred	Returns the resource handle from nested object data.
-0x00111980	dds3GetObjectSlotRingOccupancy	inferred	Maps object kind to the number of slots it occupies in the slot ring. [names_reviewed10.tsv]
+0x00111980	dds3SelectSlotForObjectKind	inferred	readability/matching review (QP16)
 0x001119D0	dds3CreateSlotResourceState	inferred	confidence=high; Paired slot-state constructor; allocates/clears state, attaches world index node and initializes empty slot indices.; sources=names_M143.tsv; twin=0x001117A8, input-family pairing. [names_qp10.tsv]
 0x00111A68	dds3DestroyObjectBase	inferred	confidence=high; src/dds2/basic/dds3ObjectBase.c:func_00111A68; Removes owned world nodes, releases development and world-index resources, then frees the object-base block. [names_qp9.tsv]
 0x00111B30	dds3SetObjectFlags	inferred	ORs selected flag bits into object-base flags; mirrors DDS1 dds3SetObjectFlags.
 0x00111B60	dds3ClearObjectFlags	inferred	Clears selected flag bits from object-base flags; mirrors DDS1 dds3ClearObjectFlags.
 0x00111B98	dds3TestObjectFlags	inferred	Tests selected object-base flag bits; mirrors DDS1 dds3TestObjectFlags.
 0x00111BC8	dds3SetExtData	inferred	confidence=high; src/dds2/basic/dds3ObjectBase.c:func_00111BC8; Stores the extension pointer on the object base after resolving the owned handle and touching the ext-data accessor. [names_qp9.tsv]
+0x00111D28	dds3GetObjectIndexNode	inferred	readability/matching review (QP16)
+0x00111D48	dds3GetObjectBaseResourceHandle	inferred	readability/matching review (QP16)
 0x00111D68	dds3ReleaseObjectBaseResources	inferred	confidence=high; src/dds2/basic/dds3ObjectBase.c:func_00111D68; Releases model/transition or development/motion resources according to the base resource kind, then clears ownership. [names_qp9.tsv]
 0x00112230	dds3SetObjectModeAndDefaultWeight	inferred	src/dds2/basic/dds3ObjectBase.c func_00112230: Sets supported mode and its default weight: modes zero, four and five use one, others zero. Twin of DDS1 func_00112008. [names_reviewed24.tsv]
+0x001122E8	dds3RegisterObjectInHandlerIndex	inferred	readability/matching review (QP16)
 0x00112978	dds3EnsureSlotData	inferred	Creates and attaches slot-one data only when the object has no existing slot-one entry.
 0x00112AB0	dds3GetObjectOwnedHandle	inferred	DDS2 twin of DDS1 0x00112888 (same subtype byte, same six getters) [names_L13_FinishUnits.tsv]
 0x00112B58	dds3SetOwnedWorldInnerValue	inferred	Stores a value in the owned inner world-object state. [names_reviewed10.tsv]
@@ -346,7 +351,7 @@
 0x001147D8	effObjReleaseObjectData	inferred	Frees dependent resources and clears the object's data pointer after releasing its inner object.
 0x00114CD0	effObjGetObjectHandle	inferred	Returns the handle at offset zero of the nested effect data.
 0x00114CE0	effObjCreateWithVectors	inferred	allocates effect object kind seven and initializes its vectors and data [names_reviewed5.tsv]
-0x00114D80	effObjCreateWithBill	inferred	Corrected: stores the supplied bill on the created effect object; kind-two overstates implementation detail; DDS1 twin. [names_qp9.tsv]
+0x00114D80	effObjCreateKindTwo	inferred	readability/matching review (QP16)
 0x00114E58	effObjSpawnSharedBillClone	inferred	confidence=high; matched-C; src/dds2/basic/dds3EffectObjectBasic.c:158:func_00114E58; Clones the object-owned billboard retaining its shared data, then creates a new effect object using the supplied vector and extra argument.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00114EA0	effObjCreateIndexedKindOne	inferred	Creates a billboard via billCreateIndexed with kind one and dispatches its draw arguments.
 0x00114EE8	effObjCreateResourceKindOne	inferred	Creates a billboard via billCreateFromResource with kind one and dispatches its draw arguments.
@@ -360,7 +365,7 @@
 0x00115AC0	effObjCreateKindFromResource	inferred	resolves resource and creates effect of requested kind [names_reviewed5.tsv]
 0x00115B20	effObjGetReadyData	inferred	returns effect data only for kind seven in state six [names_reviewed5.tsv]
 0x00115B58	effObjLoadReadyParameterVector	inferred	loads parameter vector into VU register only when effect is ready [names_reviewed5.tsv]
-0x00115BD8	effObjDispatchMagatuhiState	inferred	confidence=high; matched-C; src/dds2/basic/dds3EffectObjectBasic.c:442:func_00115BD8; M141; source=names_pending_main.tsv:101; review=Checks object kind 7 and dispatches Magatuhi operations for data states 1/8; there is no generic ready-data test in the body. [names_qp11.tsv]
+0x00115BD8	effObjDispatchReadyState	inferred	readability/matching review (QP16)
 0x00115C50	effObjCopyMagatuhiSourceParameters	inferred	confidence=high; matched-C; src/dds2/basic/dds3EffectObjectBasic.c:460:func_00115C50; For kind-7 effect objects in states 7/8, copies ready source-object vectors and integer scalar parameters into two/four rows and commits those rows to the Magatuhi work; returns 0 for unsupported states.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00115DF0	effObjSetFlags	inferred	Sets bits in nested effect data flags at offset four.
 0x00115E08	effObjClearFlags	inferred	Clears bits in nested effect data flags at offset four.
@@ -392,6 +397,7 @@
 0x00116D40	dds3SetPathStateValue	inferred	Writes the value in the object state's +0x10 word.
 0x00116D50	dds3GetPathStateValueById	inferred	Resolves the secondary-world path by ID and reads its state word.
 0x00116DE0	dds3GetPathState	inferred	Returns the path object's state pointer at +0x18.
+0x00116FA0	dds3CreatePathCurveWork	inferred	readability/matching review (QP16)
 0x00117340	dds3InterpolatePathOutput	inferred	confidence=high; src/dds2/basic/dds3PathBasic.c:func_00117340; Locates the path segment/fraction for the current time and linearly interpolates three vector groups; clears the output when the path flag is disabled. [names_qp9.tsv]
 0x001176A0	sdfSampleActiveLinearCurve	inferred	src/dds2/game/code_001176A0.c func_001176A0: Samples adjacent curve values using located time fraction; returns zero when inactive. Twin of DDS1 func_00117438. [names_reviewed24.tsv]
 0x00117728	sdfStepWrappingFloatCounter	inferred	src/dds2/game/code_001176A0.c func_00117728: Steps up or down by one, supports freeze and wrapping flags and reports nonwrapping exhaustion. Twin of DDS1 func_001174C0. [names_reviewed24.tsv]
@@ -409,20 +415,21 @@
 0x00118CC0	sdfGetHpBracketScale	inferred	confidence=high; src/dds2/game/code_001176A0.c:369:func_00118CC0; Computes clamped HP fraction band and returns party/enemy HP scale-table entry.; sources=names_M143.tsv [names_qp10.tsv]
 0x001190B0	sdfRollActionHit	inferred	Resolves a randomized roll/action result against packed value state; DDS1 twin. [names_qp9.tsv]
 0x00119480	sdfQueryChannelValue	inferred	channel mode 1/3 counterpart of sdfQueryChannelBits (mode 2) [names_M34_SmallSweep3.tsv]
+0x00119548	sdfApplyCommandResults	inferred	readability/matching review (QP16)
 0x00119710	sdfSetPackedValuePreservingFlag	inferred	Replaces the low fifteen bits of a packed halfword while preserving its high bit, matching DDS1.
 0x00119728	sdfRaisePackedChannelValue	inferred	src/dds2/game/code_001176A0.c func_00119728: Raises packed low-fifteen-bit value preserving status; selected thresholds rerandomize entry. Twin of DDS1 func_00119018. [names_reviewed24.tsv]
 0x001197A8	datClearUnitStatusBits	inferred	Clears mask bits in a unit's halfword status field. [names_reviewed6.tsv]
 0x001197C0	datComputeSkillBoostedMaxHp	inferred	confidence=high; matched-C; src/dds2/newdata/datCalc.c:46:func_001197C0; F2; source=names_pending_main.tsv:93; review=Adds skill-dependent 10/20/30 percent HP bonuses and caps normal units at 999. [names_qp11.tsv]
 0x001198C0	datComputeSkillBoostedMaxMp	inferred	confidence=high; matched-C; src/dds2/newdata/datCalc.c:66:func_001198C0; F2; source=names_pending_main.tsv:94; review=Adds skill-dependent 10/20/30 percent MP bonuses and caps normal units at 999. [names_qp11.tsv]
-0x001199C0	datMoveCursorX	inferred	Adds a signed delta to cursor X and clamps to zero and xMax; mirrors DDS1.
-0x001199E8	datMoveCursorY	inferred	Adds a signed delta to cursor Y and clamps to zero and yMax; mirrors DDS1.
+0x001199C0	datAdjustCurrentHp	inferred	readability/matching review (QP16)
+0x001199E8	datAdjustCurrentMp	inferred	readability/matching review (QP16)
 0x00119A10	datGetClampedProfileAdjustedStat	inferred	confidence=high; matched-C; src/dds2/newdata/datCalc.c:122:func_00119A10; Adds the current-profile contribution to the selected unit stat and clamps it to the game-specific supported stat range (DDS1 maximum 99; DDS2 maximum 127).; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00119A78	datGetStatWithStatusOverride	inferred	confidence=high; matched-C; src/dds2/newdata/datCalc.c:134:func_00119A78; Returns one for the exact masked status 0x1000; otherwise adds the profile-adjusted stat and linked record/slot contribution, then clamps the final value to zero through ninety-nine. Uses the DDS1 status-wrapper twin name staged in QP12.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00119AF8	datUnitHasSkill	inferred	src/dds2/newdata/datCalc.c func_00119AF8: Searches local twenty-four-slot skill array or flag-selected party eight-slot skill array. Twin of DDS1 func_001193A0. [names_reviewed24.tsv]
-0x00119BA0	datAdjustCalculatedValueForStatus	inferred	confidence=high; matched-C; src/dds2/newdata/datCalc.c:168:func_00119BA0; M141; source=names_pending_main.tsv:92; review=Status 4 forces low-half value 1 and can lower it; other statuses impose floors, with high-half exemption flags. A raise/floor-only name is not correct for every branch. [names_qp11.tsv]
+0x00119BA0	datRaiseCalculatedValueFloor	inferred	readability/matching review (QP16)
 0x00119F20	datReadLowHalfOfCalculatedValue	inferred	Extracts lower unsigned halfword from calculation result. [names_reviewed6.tsv]
 0x00119F40	datReadHighHalfOfCalculatedValue	inferred	Masks lower halfword from calculation result to return upper bits. [names_reviewed6.tsv]
-0x00119F68	datMapFlagToStatIndex	inferred	confidence=high; matched-C; src/dds2/newdata/datCalc.c:205:func_00119F68; M141; source=names_pending_main.tsv:100; review=Consumers sdfRollActionHit and evtPushRosterOptionStat use the mapping as a calculated stat/channel index. Retains verified flag-to-index role without claiming all returned categories are elements. [names_qp11.tsv]
+0x00119F68	datFlagToElementIndex	inferred	readability/matching review (QP16)
 0x0011A098	datIsValueBelowQuarterMax	inferred	Compares first unsigned value against one quarter of following unsigned maximum. [names_reviewed6.tsv]
 0x0011A0D0	datAddCurrencyClamped	inferred	Adds signed delta to currency counter, clamps to zero and maximum currency. [names_reviewed6.tsv]
 0x0011A100	datHasEnoughCurrency	inferred	Compares current currency counter against the requested amount. [names_reviewed6.tsv]
@@ -497,6 +504,7 @@
 0x00120820	fldResetCameraMoveTracking	inferred	Clears camera tracking sentinel values and calls fldClearCameraMoveMode. [names_reviewed5.tsv]
 0x00120858	fldEvaluateCameraMoveTracking	inferred	Compares tracked camera values and sets signed camera movement mode on a match. [names_reviewed5.tsv]
 0x00120A88	fldSubmitVisibleWorldBackground	inferred	Searches active secondary-world objects for visibility flags before submitting background resource and descriptor packets. [names_reviewed5.tsv]
+0x00122828	fldLoadFieldTablesAndIndexStages	inferred	readability/matching review (QP16)
 0x00122F38	fldSetRoomModeFlag	inferred	confidence=medium; matched-C; src/dds2/game/code_0011F208.c:717:func_00122F38; Sets or clears a room bit in the world/stage flag bank used by room-mode field commands.; source=revalidated-unapplied-names_R_Names19.tsv:5 [names_qp12_apply.tsv]
 0x00122FE0	fldTestRoomModeFlag	inferred	confidence=medium; matched-C; src/dds2/game/code_0011F208.c:732:func_00122FE0; Returns the selected bit from the same world/stage room-mode flag bank.; source=revalidated-unapplied-names_R_Names19.tsv:6 [names_qp12_apply.tsv]
 0x00123038	fldSetRoomObjectModeFlag	inferred	confidence=medium; matched-C; src/dds2/game/code_0011F208.c:747:func_00123038; Sets or clears a room bit in the bank written by room-object mode script commands.; source=revalidated-unapplied-names_R_Names19.tsv:7 [names_qp12_apply.tsv]
@@ -537,6 +545,7 @@
 0x00125EE8	fldShutdownSceneTasksAndWorld	inferred	Resets field task and draw work, releases player and secondary-world objects and tears down camp tasks. [names_reviewed15.tsv]
 0x00125F28	fldGetPlayerSceneStateAddress	inferred	Returns the address of the player-scene state word reset during resource release. [names_reviewed5.tsv]
 0x00125F38	fldGetPlayerSceneState	inferred	Returns the value stored at the player-scene state address. [names_reviewed5.tsv]
+0x00125F58	fldPreparePlayerSceneCameraTarget	inferred	readability/matching review (QP16)
 0x00126000	fldResetPlayerSceneObjectState	inferred	Notifies the active player object with zero, clears a scene control flag and sets the scene state to four. [names_reviewed5.tsv]
 0x001265D0	fldCreateSecondaryWorldCamera	inferred	confidence=high; matched-C; src/dds2/game/code_0011F208.c:1739:func_001265D0; Creates secondary-world camera and initializes vectors, transform and callback before activating it.; twin=0x001242B8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001266E8	fldConsumeSceneCommandFlag	inferred	If scene command flag is set, clears it and records the consumed event bit. [names_reviewed5.tsv]
@@ -559,6 +568,7 @@
 0x00127370	fldHasBadkaifukuLabelProcess	inferred	confidence=high; src/dds2/game/code_0011F208.c:func_00127370; Returns whether the named script process badkaifuku_label exists; the process label is literal retail evidence, not the function name. [names_qp9.tsv]
 0x00127398	fldGetCampSceneControlMode	inferred	Chooses a control mode from pending requests, camp acknowledgement and scene flags. [names_reviewed9.tsv]
 0x001275D0	fldGetSceneReadyOrPendingState	inferred	Returns pending state when outstanding work exists or the scene-ready flag otherwise. [names_reviewed10.tsv]
+0x00127600	fldUpdateNextFloorTransition	inferred	readability/matching review (QP16)
 0x001277D8	fldDispatchPendingSceneResource	inferred	Selects override, scene-work or fallback script resource and starts a secondary-world event task. [names_reviewed5.tsv]
 0x00128340	fldSetSceneLifecycleFlags	inferred	ORs the supplied mask into the lifecycle flag word used when advancing scenes. [names_reviewed5.tsv]
 0x00128358	fldClearSceneLifecycleFlags	inferred	Clears the supplied mask from the scene lifecycle flag word. [names_reviewed5.tsv]
@@ -746,6 +756,7 @@
 0x00151918	fldApproachTargetAngleWithMinimumStep	inferred	Approaches the target angle by divided angular distance with a minimum step. [names_reviewed13.tsv]
 0x00151DE0	fldTickTargetGuideCounter	inferred	decrements target-guide frame counter if positive [names_R_FuncNames2.tsv]
 0x001521F0	fldTickTargetGuideAndNotify	inferred	decrements counter and calls pending handler when zero [names_R_FuncNames2.tsv]
+0x00152230	fldUpdateTargetGuideCycleMotion	inferred	readability/matching review (QP16)
 0x00152C18	fldResetTargetViewAndSound	inferred	releases target guide resource, resets view work and sends sound command [names_R_FuncNames2.tsv]
 0x00152C48	fldUpdateViewAngle	inferred	Calls func_00151868 for distance and angle, stores angle and 180.0f minus angle to view state
 0x00152FB8	fldCalcDistanceVolume	inferred	sqrt distance minus 600, clamped to 0..4800, scaled to 0..127
@@ -763,6 +774,7 @@
 0x001548A0	fldCmdClearSceneControlFlag	inferred	Field-script command disables the same scene-control flag and acknowledges completion. [names_reviewed13.tsv]
 0x001548C0	fldCmdFocusCameraOnObject	inferred	Copies script-selected object's position into camera focusPos and enables focus; twin 0x0014D498. [names_R_FuncNames6.tsv]
 0x00154AE8	fldCmdSetScenePhaseThree	inferred	Script handler writes scene phase 3; twin 0x0014D6C0. [names_R_FuncNames6.tsv]
+0x00154B00	fldCmdSetLookAtHeading	inferred	readability/matching review (QP16)
 0x00154CE0	fldCmdCaptureObjectPose	inferred	Copies current object's position and rotation into scene pose arrays before phase 4; twin 0x0014D8B8. [names_R_FuncNames6.tsv]
 0x00154E08	fldCmdSetRequestedSceneName	inferred	DDS1 0014D9E0 twin; copies first script string to field scene-name buffer and sets phase 5 [names_R_FuncNames2.tsv]
 0x00154E48	fldCmdSetSolarOverlayMode	inferred	script mode selects solar overlay alpha and visibility [names_R_FuncNames2.tsv]
@@ -1033,6 +1045,7 @@
 0x001695E0	effBTLFieldColorClearFlags	inferred	Clears selected bits in the field-color state word.
 0x001695F8	effBTLFieldColorTestFlags	inferred	Tests whether any supplied field-color state bits are set.
 0x00169608	effBTLFieldColorResetFlags	inferred	Clears all field-color state bits.
+0x00169610	effBTLFieldColorGetActorScale	inferred	readability/matching review (QP16)
 0x001696D0	effBattleMiscQueryPosition	inferred	dispatch table D_003528D8 by param type, stores vf10 to out [names_M61_EffVu.tsv]
 0x00169770	effBattleMiscQueryOverrideAttachment	inferred	medium confidence; src/dds2/effect/effBattleMisc.c func_00169770: Uses the override-aware actor selector and parameter byte to load its effect attachment vector, falling back to the muzzle vector. [names_reviewed25.tsv]
 0x001697A0	effBattleMiscQueryFinalAttachment	inferred	medium confidence; src/dds2/effect/effBattleMisc.c func_001697A0: Uses the final actor selector and parameter byte to load its effect attachment vector, falling back to the muzzle vector. [names_reviewed25.tsv]
@@ -1045,6 +1058,7 @@
 0x0016A5A0	effParamWorkGetData	inferred	Returns the parameter-work data pointer from offset four.
 0x0016A5A8	effParamWorkGetId	inferred	Returns the parameter-work kind ID at offset zero.
 0x0016A668	effParamWorkInvokeCallback	inferred	Invokes the per-kind callback on the 8-byte parameter work item's data pointer.
+0x0016A990	effParamCreateViewerWork	inferred	readability/matching review (QP16)
 0x0016AB48	effCreateDispatchedParameterWork	inferred	src/dds2/game/code_0016A100.c func_0016AB48: Reads dispatch ID and parameter index, allocates work and creates payload from table or source. Twin of DDS1 func_00162EF0. [names_reviewed24.tsv]
 0x0016ABF8	effReleaseDispatchedParameterWork	inferred	Dispatches effect parameter cleanup and releases its work. [names_reviewed9.tsv]
 0x0016AC40	effInvokeParameterWorkDispatch	inferred	Calls a work-selected effect dispatch routine. [names_reviewed9.tsv]
@@ -1076,7 +1090,7 @@
 0x00171580	effCopyResourceGroupVector	inferred	high confidence; src/dds2/game/code_0016EDD0.c func_00171580: Copies one 16-byte vector in the effect resource-group unit. [names_reviewed25.tsv]
 0x00171798	effReleaseEffectResources	inferred	Releases the work's resource handle and frees its separately owned allocation.
 0x001717C8	effInitializeColorState	inferred	Sets the effect state to mode three, initializes its packed color to 0x80808080, and clears the additional word at offset 0xC.
-0x00171CE0	effFlashTrianglePulseCreate	inferred	confidence=high; matched-C; src/dds2/game/code_0016EDD0.c:169:effFlashRecordCreate; High: effFlashRecordCreate allocates the 0x48-byte triangle-pulse owner plus 0x10-byte particles and initializes its triad draw pool.; source=names_R_Structs54c.tsv:1 [names_qp11.tsv]
+0x00171CE0	effFlashRecordCreate	inferred	readability/matching review (QP16)
 0x00171E00	effFlashTrianglePulseSpawnFromTable	inferred	Takes parameter block zero from the supplied table for the triangular flash initializer. [names_reviewed5.tsv]
 0x00171E38	effFlashTrianglePulseDestroy	inferred	Releases the triangular flash resource handle and its owned backing buffer. [names_reviewed5.tsv]
 0x00171E68	effFlashTrianglePulseCopyVector	inferred	Copies the vector supplied by src into dst using PCP_COPY_VECTOR. [names_reviewed5.tsv]
@@ -1184,7 +1198,7 @@
 0x00177B60	effGetIndexedEffectGroupRecord	inferred	Computes the indexed resource record within an effect record group. [names_reviewed16.tsv]
 0x00177B78	effGetIndexedEffectGroupIndexEntry	inferred	Computes the indexed index-entry pointer within the same effect record group. [names_reviewed16.tsv]
 0x00177B90	effSetVectorIncrementBits	inferred	Byte-identical DDS1 counterpart: Stores raw float bit representation to the record group's increment field at offset 0x50.
-0x00177BA8	effRecordPoolCreateTriad	inferred	Corrected: pool allocation reserves three slots per group; avoids numeric-kind suffix; DDS1 twin. [names_qp9.tsv]
+0x00177BA8	effRecordPoolCreateTriple	inferred	readability/matching review (QP16)
 0x00177CA0	effReleaseRecordPoolResourceAndBuffer	inferred	Queues release of the record pool asset and frees its owned buffer. [names_reviewed17.tsv]
 0x00177CD0	effDrawTriangleRecordPool	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:450:func_00177CD0; Builds origin/scale transform and asset packets, submits paired position/color records in triangle batches of at most 48 vertices, then dispatches through the pool kind draw surface.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00177E78	effGetGroupRecordByIndex	inferred	Returns the indexed record in a typed effect record group. [names_reviewed9.tsv]
@@ -1202,6 +1216,7 @@
 0x001784E8	effSetRecordPoolColor	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:678:func_001784E8; Sets the packed color supplied to the record-pool packet builder.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001784F0	effSetRecordPoolScale	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:682:func_001784F0; Sets the uniform scale used by the scaled record-pool transform.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001787E0	effScatterCreateFromParameterTriplet	inferred	Extracts three packed parameter blocks and creates scatter work from them. [names_reviewed6.tsv]
+0x001789C0	effPcpScatterInitRadialParticle	inferred	readability/matching review (QP16)
 0x00179180	effScatterScaleParticleValues	inferred	Multiplies three work float values by the supplied scale. [names_reviewed6.tsv]
 0x00179618	effScatterSpriteSpawn	inferred	DDS1 twin 0x001719C0 [names_M58_VuSweep.tsv]
 0x00179D90	effScatterScalePair	inferred	Multiplies both particle work float values by the scale. [names_reviewed6.tsv]
@@ -1238,7 +1253,7 @@
 0x0017C568	effReleaseScatterObjectAndOwnedBuffer	inferred	Releases both the scatter object and its separately allocated backing buffer. [names_reviewed17.tsv]
 0x0017C598	effScatterInitStaggeredRing	inferred	Initializes scatter-ring particles with staggered starts; DDS1 twin. [names_qp9.tsv]
 0x0017C988	effScatterRingUpdateScaledLong	inferred	DDS1 twin 0x00174D30 [names_M58_VuSweep.tsv]
-0x0017CB28	effScatterUpdateDualColor	inferred	Corrected: two-color is a natural description but violates the no-numeric-name bar; dual-color describes the scatter update; DDS1 twin. [names_qp9.tsv]
+0x0017CB28	effScatterUpdateTwoColor	inferred	readability/matching review (QP16)
 0x0017CE00	effScatterSetDualColorOrigin	inferred	confidence=high; matched-C; src/dds2/effect/effPCPScatter.c:1541:func_0017CE00; Copies the dual-color instance parameter origin subsequently forwarded to the scatter draw object.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x0017CE28	effScatterComposeParticleMatrix	inferred	confidence=high; matched-C; src/dds2/effect/effPCPScatter.c:1555:func_0017CE28; Multiplies the supplied matrix by work matrix and stores the resulting matrix.; source=revalidated-unapplied-names_R_Names21.tsv:9 [names_qp13.tsv]
 0x0017CE88	effPcpScatterCreatePlainInstance	inferred	M141; sources=names_pending_main.tsv; twin=0x00175230, input-family pairing. [names_qp10.tsv]
@@ -1256,6 +1271,7 @@
 0x0017E688	effCreateResourceEntryWork	inferred	confidence=high; matched-C; src/dds2/game/code_0017E680.c:82:func_0017E688; Allocates resource work plus its entry array, initializes the matrix and scale, creates a draw-entry asset, initializes entry values and clears shared render-state work.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x0017E7A8	effReleaseAttachedResources	inferred	Releases the object's graphics handle and two attached resource handles without freeing the outer object.
 0x0017E7E0	effDrawInstancedResourceTrianglesVU	inferred	confidence=high; matched-C; src/dds2/game/code_0017E680.c:125:func_0017E7E0; Composes resource scale and basis, translates each indexed entry, and submits triangle batches from separate position/color/normal streams with per-entry color.; source=names_P6.tsv:4 [names_qp12_apply.tsv]
+0x0017EA78	effBuildRadialFanStreams	inferred	readability/matching review (QP16)
 0x0017ECA0	effReleaseOptionalResource	inferred	Releases the nested effect resource at +0x68 only if present.
 0x0017ECD0	effSetResourceEntryPosition	inferred	Copies the first three floats into the selected 0x14-byte effect resource entry.
 0x0017ED00	effGetResourceEntryPosition	inferred	Copies the first three floats out of the selected 0x14-byte effect resource entry.
@@ -1368,9 +1384,11 @@
 0x001829D8	effPcpThunderUniformGrowFadeUpdate	inferred	grows both dimensions equally then fades out late and stops at frame 65 [names_R_FuncNames8.tsv]
 0x00182B28	effPcpCopyGrowingThunderFadeVector	inferred	Copies vector for growing thunder fade work after its frame updater. [names_reviewed8.tsv]
 0x00182B40	effPcpSetGrowingThunderFadeColor	inferred	Growing thunder fade updater reads offset 0x14 as packed color. [names_reviewed21.tsv]
+0x00182B48	effPcpCreateSharedTrailRef	inferred	readability/matching review (QP16)
 0x00182C60	effPcpUpdateSharedTrail	inferred	advances the shared trail only for its matching reference frame and alternates colors [names_reviewed5.tsv]
 0x00182DA0	effPcpSharedTrailSetPosition	inferred	copies a vector into the singleton trail position used by the update [names_reviewed5.tsv]
 0x00182DB8	effPcpSharedTrailSetFlags	inferred	confidence=high; matched-C; src/dds2/effect/effPCPMisc.c:2356:func_00182DB8; sets singleton trail flags applied to the object color during update; source=revalidated-unapplied-names_R_Names11.tsv:6 [names_qp12_apply.tsv]
+0x00182DD8	effPcpTrailCreate	inferred	readability/matching review (QP16)
 0x00182E70	effPcpTrailRelease	inferred	DDS1 func_0017B218 twin; releases trail resource and work [names_R_FuncNames.tsv]
 0x00182EA0	effPcpTrailUpdate	inferred	DDS1 func_0017B248 twin; updates trail position size and color [names_R_FuncNames.tsv]
 0x00182F80	effPcpCopySharedTrailVector	inferred	Copies vector for the shared trail work immediately after its updater. [names_reviewed8.tsv]
@@ -1379,13 +1397,13 @@
 0x00182FA0	effPcpCompactEffectCreate	inferred	allocates compact work with copied flags and parameters plus a resource handle [names_reviewed5.tsv]
 0x00183030	effPcpCompactEffectCreateFromTable	inferred	extracts a parameter block from the effect table and creates compact work [names_reviewed5.tsv]
 0x001830F0	effPcpCompactEffectRelease	inferred	releases the compact work resource handle and then frees its allocation [names_reviewed5.tsv]
-0x00183120	effPcpUpdateCompactBlurRect	inferred	confidence=high; matched-C; src/dds2/effect/effPCPMisc.c:2456:func_00183120; Projects the compact effect origin, interpolates rectangle extent and opacity, draws its resource rectangle, then advances the frame.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
+0x00183120	effPcpCompactEffectUpdate	inferred	readability/matching review (QP16)
 0x001832C8	effPcpCopyCompactResourceRectVector	inferred	confidence=high; matched-C; src/dds2/effect/effPCPMisc.c:2472:func_001832C8; Copies the leading vector of the compact resource-backed rectangle work.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001832D8	effPcpSetCompactColor	inferred	Compact work initialized offset 0x14 packed gray as color14. [names_reviewed21.tsv]
 0x001832E8	effPcpCompactLongCreate	inferred	confidence=high; matched-C; src/dds2/effect/effPCPMisc.c:2464:func_001832E8; allocates the longer-parameter compact variant and builds its resource handle; source=revalidated-unapplied-names_R_Names11.tsv:10 [names_qp12_apply.tsv]
 0x00183378	effPcpCompactLongCreateFromTable	inferred	confidence=high; matched-C; src/dds2/effect/effPCPMisc.c:2481:func_00183378; retrieves the long compact parameter block and creates its work; source=revalidated-unapplied-names_R_Names11.tsv:11 [names_qp12_apply.tsv]
 0x00183448	effPcpCompactLongRelease	inferred	confidence=high; matched-C; src/dds2/effect/effPCPMisc.c:2501:func_00183448; releases the long compact variant resource and then frees its work; source=revalidated-unapplied-names_R_Names11.tsv:12 [names_qp12_apply.tsv]
-0x00183478	effPcpUpdateCompactTexturedBlurRect	inferred	confidence=high; matched-C; src/dds2/effect/effPCPMisc.c:2551:func_00183478; Projects and fades the textured compact rectangle, interpolates its extent and draws the resource-backed blur rectangle.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
+0x00183478	effPcpCompactLongUpdate	inferred	readability/matching review (QP16)
 0x00183620	effPcpCopyCompactTexturedBlurVector	inferred	confidence=high; matched-C; src/dds2/effect/effPCPMisc.c:2567:func_00183620; Copies the leading vector of the compact textured-blur rectangle work; distinct from the already-named compact blur-vector callback.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00183630	effPcpSetLongCompactColor	inferred	Long compact work uses packed colorFrom at offset 0x14. [names_reviewed21.tsv]
 0x001836D0	effPcpCreateFadeTimerFromTable	inferred	Obtains parameter block zero and constructs the shorter fade-timer work. [names_reviewed8.tsv]
@@ -1491,15 +1509,18 @@
 0x001878F0	effPcpCreateOrangeVioletFragmentSingle	inferred	src/dds2/effect/effPCPMisc.c:func_001878F0; Allocates work and creates 1 fragment(s) from fixed template D_003B1F10; particle color words 0xFF2E56C3,0xFFFF023A,0x00030812. Palette label describes the first two RGB controls, not a game skill. Registration: asm/dds2/data/data.data.s:63922: table record 0x003B0B38, create slot. [names_qp9.tsv]
 0x00187940	effPcpRecreateOrangeVioletFragmentSingle	inferred	src/dds2/effect/effPCPMisc.c:func_00187940; Clone/recreation slot rebuilds the same 1-fragment fixed color preset rather than copying caller state. Registration: asm/dds2/data/data.data.s:63925: table record 0x003B0B38, recreate slot. [names_qp9.tsv]
 0x00187958	effPcpThunderBurstRelease	inferred	releases the work thunder fragment then frees the burst allocation [names_reviewed5.tsv]
+0x00187988	effPcpUpdateMuzzleThunderRay	inferred	readability/matching review (QP16)
 0x00187A90	effPcpCopyThunderBurstVector	inferred	Copies the thunder-burst effect work vector. [names_reviewed21.tsv]
 0x00187AA0	effPcpSetThunderBurstColor	inferred	src/dds2/effect/effPCPMisc.c:func_00187AA0; Writes the shared thunder-fragment burst work color parameter; registered in the same color callback slot as named effect color setters. Registration: asm/dds2/data/data.data.s:63779: table record 0x003B08E0, color slot. [names_qp9.tsv]
+0x00187AA8	effPcpCreateScaledThunder	inferred	readability/matching review (QP16)
 0x00187B68	effPcpScaledEffectCreateFromTable	inferred	extracts the scaled effect parameter block before creating its work [names_reviewed5.tsv]
 0x00187B88	effPcpCreateScaledEffectFromResource	inferred	high confidence; src/dds2/effect/effPCPMisc.c func_00187B88: Combines five work words with the resolved 76-byte resource and starts the scaled effect. [names_reviewed25.tsv]
 0x00187CA8	effPcpScaledEffectRelease	inferred	releases the scaled work thunder resource before freeing the work [names_reviewed5.tsv]
 0x00187E30	effPcpCopyScaledThunderVector	inferred	Copies the scaled thunder effect vector. [names_reviewed21.tsv]
 0x00187E40	effPcpSetScaledThunderColor	inferred	src/dds2/effect/effPCPMisc.c:func_00187E40; Writes the scaled thunder work color parameter; registered in the same color callback slot as named effect color setters. Registration: asm/dds2/data/data.data.s:63889: table record 0x003B0A98, color slot. [names_qp9.tsv]
 0x00187E48	effPcpSetScaledThunderScale	inferred	src/dds2/effect/effPCPMisc.c:func_00187E48; Writes the scaled thunder float scale parameter through its registered scale callback. Registration: asm/dds2/data/data.data.s:63887: table record 0x003B0A98, scale slot. [names_qp9.tsv]
-0x00187E50	effPcpCreateBeamGeometryNode	inferred	confidence=high; matched-C; src/dds2/effect/effPCPMisc.c:4103:func_00187E50; Allocates segment-based point/color storage, creates the geometry asset, and initializes both beam transforms to identity.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
+0x00187E50	effPcpBeamNodeCreate	inferred	readability/matching review (QP16)
+0x00187FC8	effPcpDrawBeamGeometryNode	inferred	readability/matching review (QP16)
 0x00188198	effPcpBuildConcentricBeamVertices	inferred	confidence=high; matched-C; src/dds2/effect/effPCPMisc.c:4134:func_00188198; Builds four concentric XZ-plane vertex rings from a base radius and three successive widths.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x001884E8	effPcpBeamCreateFromTable	inferred	reads a beam parameter block and creates the nested colorized beam work [names_reviewed5.tsv]
 0x00188508	effPcpRecreateBeam	inferred	src/dds2/effect/effPCPMisc.c:func_00188508; Invokes beam construction in the beam effect alternate-create slot. Registration: asm/dds2/data/data.data.s:63895: table record 0x003B0AC0, recreate slot. [names_qp9.tsv]
@@ -1524,13 +1545,17 @@
 0x00189DD8	effPcpSetSprayColor	inferred	src/dds2/effect/effPCPMisc.c:func_00189DD8; Writes the spray work color parameter; registered in the same color callback slot as named effect color setters. Registration: asm/dds2/data/data.data.s:64009: table record 0x003B0C78, color slot. [names_qp9.tsv]
 0x00189DE0	effPcpSetSprayScale	inferred	src/dds2/effect/effPCPMisc.c:func_00189DE0; Writes the spray float scale parameter through its registered scale callback. Registration: asm/dds2/data/data.data.s:64007: table record 0x003B0C78, scale slot. [names_qp9.tsv]
 0x00189DE8	effPcpEntryWorkBCreate	inferred	Allocates entry work, initializes metadata, and creates its entries; DDS1 twin. [names_qp9.tsv]
+0x0018A038	effPcpCloneDriftEventWork	inferred	readability/matching review (QP16)
 0x0018A2B8	effPcpDriftRandomizeSlot	inferred	DDS1 twin 0x00182660 [names_M48_PcpMisc.tsv]
+0x0018A428	effPcpUpdateDriftEventRing	inferred	readability/matching review (QP16)
 0x0018A678	effPcpCopyDriftVector	inferred	Copies the drift effect work vector. [names_reviewed21.tsv]
 0x0018A688	effPcpDriftSetScale	inferred	Stores drift scale used by slot position and step calculations. [names_reviewed6.tsv]
 0x0018A8E8	effPcpDriftCreateFromTable	inferred	fetches three effect parameter blocks to construct the drift work [names_reviewed5.tsv]
+0x0018A950	effPcpClonePairedDriftEvents	inferred	readability/matching review (QP16)
 0x0018AC20	effPcpRandomizeSlot	inferred	Computes evenly spaced phase and randomized speed and signed spin for one particle slot.
 0x0018B118	effPcpCopyRandomizedVector	inferred	Copies the particle effect vector in the randomized-slot group. [names_reviewed21.tsv]
 0x0018B350	effPcpSlotEffectCreateFromTable	inferred	extracts two parameter blocks before creating randomized-slot effect work [names_reviewed5.tsv]
+0x0018B398	effPcpCloneSpawnRangeEvents	inferred	readability/matching review (QP16)
 0x0018B628	effPcpRandomizeSpawnSlot	inferred	dds1 func_001839D0 twin [names_reviewed2.tsv]
 0x0018B9F8	effPcpCopySpawnRangeVector	inferred	Copies a vector of the randomized spawn-range effect group. [names_reviewed21.tsv]
 0x0018BA08	effPcpSpawnRangeSetScale	inferred	Stores scale on randomized spawning range work. [names_reviewed6.tsv]
@@ -1539,6 +1564,7 @@
 0x0018BB38	effPcpEventWorkCreate	inferred	M141; sources=names_pending_main.tsv; twin=0x00183EE0, input-family pairing. [names_qp10.tsv]
 0x0018BC28	effPcpEventWorkCreateFromTable	inferred	reads three event parameter blocks and constructs event work [names_reviewed5.tsv]
 0x0018BC90	effEventWorkClone	inferred	dds1 func_00184038 twin [names_reviewed2.tsv]
+0x0018BD88	effPcpUpdateMapMotionEvents	inferred	readability/matching review (QP16)
 0x0018C190	effBossCellRandomize	inferred	Randomizes one 0x14-byte cell (x/y/z blend, flip, delay); called per cell by func_00184630 [names_M61_EffVu.tsv]
 0x0018C4E8	effBossCreate	inferred	copies the 0x8C param head, creates param work (kind 3), runs func_00184630 [names_M61_EffVu.tsv]
 0x0018C618	effPCPBossApplyTwoBlocks	inferred	Fetches effect parameter blocks 0 and 1 and passes both to the boss effect worker; DDS1 twin 001849C0.
@@ -1613,26 +1639,30 @@
 0x001917E0	effMagatuhiFillColorTable	inferred	count04 effBlendColor samples from colorA to colorB [names_M61_EffVu.tsv]
 0x001918D0	effMagatuhiCreateFirst	inferred	first-family create: 0x30 particles before work [names_M61_EffVu.tsv]
 0x00191A98	effMagatuhiReleaseMathOwnerAndBuffer	inferred	Releases math resource, owner and allocated buffer held in wide work. [names_reviewed6.tsv]
-0x001922B0	effMagatuhiCreateSecond	inferred	second-family create: delays after work [names_M61_EffVu.tsv]
+0x001922B0	effMagatuhiCreateBezierHistoryWork	inferred	readability/matching review (QP16)
 0x00192438	effMagatuhiReleaseWideWorkResources	inferred	Releases math and owner resources plus retained allocation from wide work. [names_reviewed6.tsv]
 0x00192470	effMagatuhiBuildBezierControlPointsVU	inferred	confidence=high; matched-C; src/dds2/effect/effMagatuhi.c:269:func_00192470; Builds all four cubic control points with independently configured camera/path-perpendicular jitter, resets the per-slot parameter and life-derived step, and initializes the associated value work.; source=names_P6.tsv:3 [names_qp12_apply.tsv]
-0x00192990	effMagatuhiCopyHandlerRows	inferred	Copies four triples and their extra words into the effect handler's argument. [names_reviewed6.tsv]
-0x00192C20	effMagatuhiCreateFourth	inferred	0x18-byte particles after work, identity matrix [names_M61_EffVu.tsv]
+0x00192990	effMagatuhiSetControlPointParams	inferred	readability/matching review (QP16)
+0x00192C20	effMagatuhiCreateRingWork	inferred	readability/matching review (QP16)
 0x00192E08	effMagatuhiReleaseOwnerAndBuffer	inferred	Releases the first managed resource and its owned buffer. [names_reviewed6.tsv]
 0x00192E38	effMagatuhiInitParticleA	inferred	randomizes a 0x18 particle then func_00189C80/effMagatuhiSetValue [names_M61_EffVu.tsv]
-0x00193238	effMagatuhiCopyWorkVector	inferred	Copies supplied VU vector into Magatuhi work vector. [names_reviewed6.tsv]
-0x00193250	effMagatuhiSetSecondResource	inferred	Writes the resource handle used by the second-resource cleanup path.
-0x00193280	effMagatuhiInitRingParticles	inferred	Corrected: initializes ring particles; family was vague and body is particle setup; DDS1 twin. [names_qp9.tsv]
-0x00193488	effMagatuhiCreateFifth	inferred	0x1C-byte particles after work, identity matrix [names_M61_EffVu.tsv]
+0x00193238	effMagatuhiSetRingOrigin	inferred	readability/matching review (QP16)
+0x00193250	effMagatuhiSetRingColor	inferred	readability/matching review (QP16)
+0x00193258	effMagatuhiCopyRingMatrix	inferred	readability/matching review (QP16)
+0x00193280	effMagatuhiUpdateRingFamily	inferred	readability/matching review (QP16)
+0x00193488	effMagatuhiCreateOrbitWork	inferred	readability/matching review (QP16)
 0x00193638	effMagatuhiReleaseOwnerAndExtraBuffer	inferred	Releases the second managed resource and its extra buffer. [names_reviewed6.tsv]
+0x00193668	effMagatuhiInitOrbitParticle	inferred	readability/matching review (QP16)
 0x00193A88	effMagatuhiSetOrbitOrigin	inferred	confidence=high; matched-C; src/dds2/effect/effMagatuhi.c:687:func_00193A88; Copies the orbit effect origin vector used by the particle update.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
-0x00193AA0	effMagatuhiSetWorkBuffer	inferred	Stores supplied buffer pointer on Magatuhi work structure. [names_reviewed6.tsv]
-0x00193CF8	effMagatuhiCreateThird	inferred	0x30-byte particles before work, identity matrix [names_M61_EffVu.tsv]
+0x00193AA0	effMagatuhiSetOrbitColor	inferred	readability/matching review (QP16)
+0x00193AA8	effMagatuhiCopyOrbitMatrix	inferred	readability/matching review (QP16)
+0x00193CF8	effMagatuhiCreateDriftWork	inferred	readability/matching review (QP16)
 0x00193EE0	effMagatuhiReleaseSecondaryOwnerAndBuffer	inferred	Releases the work's second managed resource and regular owned buffer. [names_reviewed6.tsv]
 0x00193F10	effMagatuhiInitializeDriftParticle	inferred	confidence=high; matched-C; src/dds2/effect/effMagatuhi.c:823:func_00193F10; Randomizes normalized planar position/drift, scale, angle and lift, then resets the particle value slot.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x001943E0	effMagatuhiSetDriftOrigin	inferred	confidence=high; matched-C; src/dds2/effect/effMagatuhi.c:863:func_001943E0; Copies the drift effect origin vector.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
-0x001943F8	effMagatuhiSetFirstResource	inferred	Writes the resource handle used by the first-resource cleanup path.
-0x00194428	effMagatuhiInitDriftParticles	inferred	Corrected: initializes drift particles; family was vague and body is particle setup; DDS1 twin. [names_qp9.tsv]
+0x001943F8	effMagatuhiSetDriftColor	inferred	readability/matching review (QP16)
+0x00194400	effMagatuhiCopyDriftMatrix	inferred	readability/matching review (QP16)
+0x00194428	effMagatuhiUpdateDriftFamily	inferred	readability/matching review (QP16)
 0x00194668	effMagatuhiDispatchByKind	inferred	switch on func_0018CBC0 result (5-entry jump table) [names_M61_EffVu.tsv]
 0x00194A68	effReturnCallbackValue	inferred	medium confidence; src/dds2/game/code_00194700.c func_00194A68: Returns the signed callback argument unchanged. [names_reviewed25.tsv]
 0x00195060	effCreateResourceListDescriptor	inferred	confidence=high; src/dds2/game/code_00194700.c:func_00195060; Allocates a descriptor, initializes its fixed state words and retains the input list head, count and owner reference. [names_qp9.tsv]
@@ -1660,10 +1690,13 @@
 0x00196FF0	effCopyRectangleBlurParameters	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:231:func_00196FF0; Copies the 0x28-byte direct rectangle renderer parameter block; twin=0x0018F3B8, relocation-masked retail twin report.; sources=names_reviewed36.tsv [names_qp10.tsv]
 0x00197060	effEnableTexturedBlur	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:239:func_00197060; Sets resource-backed pixel rectangle blur enable byte; twin=0x0018F428, relocation-masked retail twin report.; sources=names_reviewed36.tsv [names_qp10.tsv]
 0x00197070	effDisableTexturedBlur	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:243:func_00197070; Clears resource-backed pixel rectangle blur enable byte; twin=0x0018F438, relocation-masked retail twin report.; sources=names_reviewed36.tsv [names_qp10.tsv]
+0x00197078	effCopyTexturedBlurParameters	inferred	readability/matching review (QP16)
 0x00197118	effEnableFilterBlur	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:263:func_00197118; Sets the enable byte for effBlur_Filter renderer, linked through kwlnDrawSetupCd0; twin=0x0018F4E0, relocation-masked retail twin report.; sources=names_reviewed36.tsv [names_qp10.tsv]
 0x00197128	effDisableFilterBlur	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:267:func_00197128; Clears the filter blur renderer enable byte; twin=0x0018F4F0, relocation-masked retail twin report.; sources=names_reviewed36.tsv [names_qp10.tsv]
+0x00197130	effCopyFilterBlurParameters	inferred	readability/matching review (QP16)
 0x001971D0	effEnableStaggeredBlur	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:287:func_001971D0; Sets enable byte for four-slot staggered blur work, linked through kwlnDrawSetupD30; twin=0x0018F598, relocation-masked retail twin report.; sources=names_reviewed36.tsv [names_qp10.tsv]
 0x001971E0	effDisableStaggeredBlur	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:291:func_001971E0; Clears staggered blur renderer enable byte; twin=0x0018F5A8, relocation-masked retail twin report.; sources=names_reviewed36.tsv [names_qp10.tsv]
+0x001971E8	effCopyStaggeredBlurParameters	inferred	readability/matching review (QP16)
 0x00197288	effEnableFramebufferQuad	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:543:func_00197288; Enables the flag tested by effDispatchActive before drawing the framebuffer quad.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00197298	effDisableFramebufferQuad	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:547:func_00197298; Clears that framebuffer-quad dispatch enable flag.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x001972A0	effCopyFramebufferQuadParameters	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:551:func_001972A0; Copies the 0x28-byte framebuffer-quad draw parameter prefix without touching the trailing padding.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
@@ -1672,16 +1705,26 @@
 0x00197328	effCopyColorRectangleParameters	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:335:func_00197328; Copies the 0x18-byte untextured rectangle parameter block; twin=0x0018F6F0, relocation-masked retail twin report.; sources=names_reviewed36.tsv [names_qp10.tsv]
 0x00197378	effEnableTexturedSquare	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:343:func_00197378; Sets enable byte for effSquare_Draw resource-backed square renderer; twin=0x0018F740, relocation-masked retail twin report.; sources=names_reviewed36.tsv [names_qp10.tsv]
 0x00197388	effDisableTexturedSquare	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:347:func_00197388; Clears resource-backed square renderer enable byte; twin=0x0018F750, relocation-masked retail twin report.; sources=names_reviewed36.tsv [names_qp10.tsv]
+0x00197390	effCopyTexturedSquareParameters	inferred	readability/matching review (QP16)
 0x00197658	effEventAdvanceBlurTemplateSetup	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:684:func_00197658; Initializes the blur-template channel using its template-body getter and optional copy, runs both callback stages, and resets readiness for a negative shared marker.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
+0x00197710	effEventGetBlurTemplateSetupParams	inferred	readability/matching review (QP16)
 0x00197720	effEventSetBlurTemplateParameters	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:554:func_00197720; Copies the complete EffBlurTemplateBody into the event blur-template parameter block used by its channel initializer; no allocation or active-owner replacement.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00197788	effEventAdvanceScatterBlurSetup	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:717:func_00197788; Initializes the scatter-blur channel using its getter and optional source-to-destination copy, invokes both callback stages, and resets readiness for a negative shared marker.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
+0x00197840	effEventGetScatterBlurSetupParams	inferred	readability/matching review (QP16)
 0x00197850	effEventSetScatterBlurParameters	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:587:func_00197850; Copies the complete EffBlurScatterParams into the event scatter-blur parameter block supplied to its channel initializer.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x001979E0	effEventAdvanceSolidRectangleSetup	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:783:func_001979E0; Advances the setup state paired with the solid-rectangle descriptor, running getter/copy once, callback stages while ready, and marker-driven readiness reset.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
+0x00197A98	effEventGetSolidRectangleSetupParams	inferred	readability/matching review (QP16)
 0x00197AA8	effEventSetSolidRectangleParameters	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:809:func_00197AA8; Copies the event-channel solid-rectangle parameter record: color, blend control, and four bounds.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
+0x00197AE8	effEventAdvanceResourceTemplateSetup	inferred	readability/matching review (QP16)
+0x00197BA0	effEventGetResourceTemplateSetupParams	inferred	readability/matching review (QP16)
 0x00197BB0	effEventSetResourceTemplateParameters	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:842:func_00197BB0; Copies the nine-word event resource-template body; does not replace a selected resource handle.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
+0x00197C08	effEventAdvanceScaleBlurSetup	inferred	readability/matching review (QP16)
+0x00197CC0	effEventGetScaleBlurSetupParams	inferred	readability/matching review (QP16)
 0x00197CD0	effEventSetScaleBlurParameters	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:719:func_00197CD0; Copies the complete EffBlurScaleParams into the event scale-blur parameter block supplied to its channel initializer.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x00197D68	effEventCreate	inferred	readability/matching review (QP16)
 0x00197E40	effEventReleaseNode	inferred	Releases the event node's resource and frees the node.
-0x00197ED8	effEventCopyBillParticle	inferred	copies billboard particle record from source to destination [names_reviewed5.tsv]
+0x00197ED8	effEventCopySerializedRecord	inferred	readability/matching review (QP16)
+0x00197F40	effEventSetScale	inferred	readability/matching review (QP16)
 0x00197F58	effEventSetState	inferred	Writes the supplied value to the event node's state word.
 0x00198278	effEventLightCreate	inferred	0x3C holder: handle, owner event, 0x30 init block, active flag [names_M61_EffVu.tsv]
 0x00198340	effEventLightDestroy	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:829:func_00198340; Releases light owner, conditionally releases cloned handle and frees light work.; twin=0x00190708, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
@@ -1721,7 +1764,9 @@
 0x0019C490	frFontAdvanceOrRetainFadingGlyph	inferred	retains glyph while fade advances otherwise advances chain [names_reviewed5.tsv]
 0x0019C4D0	frFontReleaseGlyphChain	inferred	confidence=high; matched-C; src/dds2/interface/frFont.c:232:func_0019C4D0; Peer-matched C proposal; M141; source=names_pending_main.tsv:144 [names_qp12_apply.tsv]
 0x0019C5B0	frFontQueueGlyphInSelectedSlot	inferred	links glyph into slot selected by current font index [names_reviewed5.tsv]
+0x0019C850	frFontAppendGlyphReference	inferred	readability/matching review (QP16)
 0x0019C980	frFontAppendClonedGlyph	inferred	Clones a glyph; if cloning succeeds, links it after the destination. [names_reviewed6.tsv]
+0x0019C9D0	frFontCreateAtlasItem	inferred	readability/matching review (QP16)
 0x0019CB30	frFontRetainOrCreateCachedItem	inferred	src/dds2/interface/frFont.c func_0019CB30: Retains cached item or clones font resource, creates item and caches it by slot and ID. Twin of DDS1 func_00194E80. [names_reviewed24.tsv]
 0x0019CE10	frFontAppendGlyphFromData	inferred	Builds a glyph from data and three byte attributes, then links it after previous glyph. [names_reviewed6.tsv]
 0x0019D010	frFontSetContextEncodedByte	inferred	doubles low byte and clamps to sentinel in context [names_reviewed5.tsv]
@@ -1760,6 +1805,7 @@
 0x0019F878	itfAttachGlyph12x16	inferred	Builds a glyph with 0x0C by 0x10 cell, applies child colors and links it to its parent; first-game twin 00197B78.
 0x0019F940	itfCountTextSeparators	inferred	Counts two-byte text codes whose high nibble is 0xF and second byte is 0x0F.
 0x0019F990	itfCopyTextSegment	inferred	Copies plain characters from the chosen separator-delimited segment while passing other control codes through.
+0x0019FC38	itfDrawBankTextWithLayoutFlags	inferred	readability/matching review (QP16)
 0x0019FE00	itfDrawTextWithSelectedFontMode	inferred	Draws a text ID with the resource chosen by font mode. [names_reviewed8.tsv]
 0x0019FEF8	itfDrawUnderscoreTextSegment	inferred	confidence=high; matched-C; src/dds2/game/code_0019E138.c:433:func_0019FEF8; Extracts the requested underscore-delimited segment into a 0x200-byte local buffer and passes it to the text renderer; returns zero for overlong input or no selected segment.; source=names_pending_main.tsv:140 [names_qp12_apply.tsv]
 0x001A0050	itfReturnThirdCallbackValue	inferred	high confidence; src/dds2/game/code_0019E138.c func_001A0050: Ignores the first two callback arguments and returns the third unchanged. [names_reviewed25.tsv]
@@ -1805,6 +1851,7 @@
 0x001A2EA8	itfPanelAcquireHold	inferred	DDS1 twin 0019AE78 [names_M33_SmallSweep2.tsv]
 0x001A2F08	itfPanelReleaseHold	inferred	DDS1 twin 0019AED8 [names_M33_SmallSweep2.tsv]
 0x001A2F60	itfCommandQueueHeldPanelEntry	inferred	src/dds2/game/code_001A1B08.c func_001A2F60: Reads three script integers into held panel queue, ignoring absent hold or full queue. Twin of DDS1 func_0019AF30. [names_reviewed24.tsv]
+0x001A31E0	itfCommandSelectOptionWithFade	inferred	readability/matching review (QP16)
 0x001A3458	itfMesFinishScriptWindowIfActive	inferred	For the current script window, finishes active message flags and returns whether status is zero. [names_reviewed6.tsv]
 0x001A34D0	itfMesFinishWindowAndClearStatus	inferred	Marks active status flags then cleans, resets, and clears window status. [names_reviewed6.tsv]
 0x001A38A0	itfMesGetGlobalWindowValue	inferred	Returns the stored word at offset 4 of the message manager's global window state.
@@ -1842,6 +1889,7 @@
 0x001A55B0	itfMesInitCharTable	inferred	calls func_0019E8F0 for each of 32 table words
 0x001A5600	itfMesGetNextEntrySelectedItem	inferred	Gets the message subrecord's next entry and reads the item at the window block's selected index.
 0x001A5670	itfMesBuildNodeRows	inferred	twin [names_M67_Named.tsv]
+0x001A5760	itfMesTrimGlyphChainToRow	inferred	readability/matching review (QP16)
 0x001A58B8	itfMesCopyGlyphShade	inferred	Copies three shade bytes plus an upper byte from a source color into destination color; DDS1 twin 0019D888.
 0x001A58E8	itfMesCountSpanSteps	inferred	Returns one plus the byte-span delta divided by eight and by the second span's step.
 0x001A5918	itfMesOffsetNodeChain	inferred	Byte-identical DDS1 counterpart: Adds two offsets to the horizontal and row positions of every linked message node.
@@ -1870,6 +1918,7 @@
 0x001A6DA8	itfMesRenderActivePanelSprites	inferred	Queues active panel sprite layers and refreshes the selected panel. [names_reviewed11.tsv]
 0x001A7878	itfAdjustPanelBoundsWithPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:783:func_001A7878; Peer-matched C proposal: P5; source=names_P5.tsv:16 [names_qp13.tsv]
 0x001A7A08	sndStepIndexByPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:799:func_001A7A08; Peer-matched C proposal; M141; source=names_pending_main.tsv:132 [names_qp12_apply.tsv]
+0x001A7B00	itfQueueOffsetTexturedRect	inferred	readability/matching review (QP16)
 0x001A87E8	sndCycleTestMessageResource	inferred	Releases the previous TestMsgMng resource and cycles the four sound-test message choices, loading the next resource when present.
 0x001A8848	itfUpdateTestMessageResourceInput	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:915:func_001A8848; The TestMsgMngC task cycles its test message texture/resource when the corresponding pad state is negative, then returns zero.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001A8918	itfPrintTestMessageCallback	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:943:func_001A8918; The registered test-message window callback prints the fixed diagnostic marker.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
@@ -1938,6 +1987,7 @@
 0x001AF060	btlSyncModelFlagFromEventThresholds	inferred	Sets or clears a model flag based on two event value thresholds. [names_reviewed14.tsv]
 0x001B08A8	btlTestActorStatusPredicate	inferred	Checks an optional battle predicate, then tests actor status bits. [names_reviewed8.tsv]
 0x001B08F8	btlComputeStatusPenaltyFifth	inferred	Returns a negative fifth of the actor metric for specified status categories. [names_reviewed10.tsv]
+0x001B09F0	btlRollAllFearChance	inferred	readability/matching review (QP16)
 0x001B0C18	btlGetActorDisplayByteWithDefault	inferred	Reads the indexed record display byte for a flagged actor or returns the default value. [names_reviewed16.tsv]
 0x001B0D28	btlMapActionCode	inferred	Maps action codes 0x31-0x33 and 0x185 to 0x35, 0x186 to 0x1E, 0x193 to 0x25, otherwise consults category table
 0x001B1640	btlQueryUnitChannelFlags	inferred	Returns channel flags for two units, adding a status-dependent bit. [names_reviewed8.tsv]
@@ -2496,6 +2546,7 @@
 0x00207728	btlCreateMoveOtherUnitsTask	inferred	Allocates task 0x64 whose callback moves other units for selected category. [names_R_FuncNames3.tsv]
 0x00207958	btlCreateSoundPlaybackTask	inferred	Allocates a battle task and records sound identifier, channel and flags. [names_reviewed10.tsv]
 0x00207A10	btlCommandRecenterParty	inferred	confidence=high; src/dds2/game/code_00207A10.c:func_00207A10; Runs the party-recentering operation and the subsequent battle callback, returning script-command completion. [names_qp9.tsv]
+0x00207A80	btlProjectForwardPositionToScreen	inferred	readability/matching review (QP16)
 0x00207F40	btlUnitGetLargestScaledExtent	inferred	Returns the greater of the unit height and reach, multiplied by its size scale.
 0x002089F0	btlFindNearestUnit	inferred	Byte-identical dds1 twin 0x001F70C8; Scans live units matching the mask, excludes the target and inactive units, then returns the closest unit to the target's muzzle position. [names_conflicts.tsv]
 0x00208BF0	btlSelectUnitAtExtremeX	inferred	confidence=high; matched-C; src/dds2/game/code_00207A38.c:520:func_00208BF0; Indexed-list X-extreme selection counterpart: DDS2 constructs its point with the indexed 0x40 rotation/0x50 scale and body offset, rather than the ordinary muzzle accessor. Flag 0x200 selects minimum X, otherwise maximum; pointer and point are returned.; source=fresh-R_Names31-today [names_qp11.tsv]
@@ -2798,6 +2849,7 @@
 0x0021C390	btlPrepareDefeatEffectCamera	inferred	high confidence; src/dds2/game/code_0021B5C0.c func_0021C390: Flags all defeat candidates, then applies one fixed camera-key preset to the effect. [names_reviewed25.tsv]
 0x0021C428	btlSetCameraPresetForBossUnitMode	inferred	Selects fixed effect camera keys according to the owner boss unit mode. [names_reviewed16.tsv]
 0x0021C548	btlInitializeEffectVectors	inferred	Initializes effect vectors, transform and activation flags.
+0x0021C5E0	btlSetLinkedDefeatCameraPresetA	inferred	readability/matching review (QP16)
 0x0021EA38	btlMapBossEntryKindToIndex	inferred	Maps kinds one through ten to indices twelve through twenty-one; rejects zero and eleven through twenty-five, otherwise defaults to thirteen.
 0x0021EAF8	btlGetBossEntryKind	inferred	Returns the indexed entry kind only for units marked with flag 0x400.
 0x0021EB28	btlRemapBossResponseForActionPhase	inferred	Remaps two response values for eligible boss unit modes. [names_reviewed16.tsv]
@@ -2822,10 +2874,12 @@
 0x00220568	btlSetBattleActionFlag	inferred	Writes byte 2 of the battle+0x718 state: 0 for actions 0x103-0x104, 1 for action 0x19C
 0x002205C0	btlRemapMarkedUnitCommand	inferred	Remaps selected commands when a flagged unit is in the marked action scene. [names_reviewed13.tsv]
 0x002206A0	btlIsSupportedActorAction	inferred	Reports whether flagged actor supports one of four specified action values.
+0x00220700	btlGetHealthyAllyActionStatus	inferred	readability/matching review (QP16)
 0x002209B0	btlMarkUnitActionAndStatusForMode	inferred	Sets action and status bits on flagged units in the designated mode. [names_reviewed13.tsv]
 0x002209F0	btlStartAction19A	inferred	Sets unit flag 0x800 and calls func_001E9F30 when unit action is 0x19A-0x19B; family with func_00221390 (action 0x6b start)
 0x00220A38	btlTickAction19A	inferred	Calls func_001E98C0 and returns 1 when unit action is 0x19A-0x19B; family with func_002213E0 (action 0x6b tick)
 0x00220A78	btlSelectMarkedActorAndClearEntryFlags	inferred	Clears two entry bits and selects or dispatches the flagged battle actor. [names_reviewed13.tsv]
+0x00220B20	btlQueueLoneFreeTeamHandle	inferred	readability/matching review (QP16)
 0x00220C38	btlQueueSelectedActorResourceAndSound	inferred	Creates owner-linked resource and stationed sound tasks for the selected actor. [names_reviewed13.tsv]
 0x00220D18	btlGetSelectedActorAction	inferred	Reads the current action from the battle state-selected actor, or returns default action 0x10E if no actor is selected.
 0x00220D48	btlClearActionPhaseOnNegativeState	inferred	Clears the action phase when a matching unit receives a negative state. [names_reviewed13.tsv]
@@ -2859,23 +2913,29 @@
 0x002226F0	btlUnitSetCameraOffset	inferred	calls func_00217898 then offsets +0x50/+0xE0 by 650.0 and sets flag 0x41
 0x00222768	btlChooseBrahmaIndividualCamera	inferred	Randomly chooses an individual BRAHMA camera key set and flags defeat candidates. [names_reviewed13.tsv]
 0x002228C0	btlChooseBrahmaGroupCamera	inferred	Randomly chooses one of the BRAHMA group camera key sets. [names_reviewed13.tsv]
+0x00222A08	btlChooseBrahmaMoveCamera	inferred	readability/matching review (QP16)
 0x00222D18	btlApplySingleTargetCameraOffset	inferred	Applies the unit camera offset when a marked owner has one eligible target. [names_reviewed13.tsv]
 0x00222DA8	btlAimAtLinkedTargetOrGroupCamera	inferred	Faces a single eligible target or chooses group camera when no marked owner exists. [names_reviewed13.tsv]
 0x00222E58	btlLiftTowardLinkedTarget	inferred	Adds vertical offset after approaching one eligible linked target. [names_reviewed13.tsv]
+0x00223280	btlSetSpecialLinkedActionCamera	inferred	readability/matching review (QP16)
 0x00223D10	btlSelectActionCameraByTableFlags	inferred	Chooses linked-target or group camera behavior from action table flag bits. [names_reviewed13.tsv]
 0x00223ED0	btlSpawnBrahmaActionEffectTasks	inferred	Creates two owner-linked effect tasks and increments the BRAHMA scene stage. [names_reviewed13.tsv]
 0x00224020	btlRaiseActionCameraPoints	inferred	Raises two camera points and updates the unit motion for a linked action. [names_reviewed13.tsv]
 0x002240F8	btlRaiseSingleTargetCameraPoints	inferred	Raises unit camera points when the marked owner has one eligible target. [names_reviewed13.tsv]
 0x00224188	btlAimLinkedTargetOrSetCameraTransform	inferred	Faces an eligible linked target or installs a fixed camera transform. [names_reviewed13.tsv]
 0x00224238	btlLiftLinkedTargetAndUpdateMotion	inferred	Moves vertically toward the eligible target and refreshes its motion. [names_reviewed13.tsv]
+0x00224598	btlSetLinkedDefeatCameraPresetB	inferred	readability/matching review (QP16)
 0x002247B0	btlUnitWrapB	inferred	wrapper around func_00224598
 0x00224D28	btlSelectRaisedCameraFromActionFlags	inferred	Chooses raised linked-target or fixed camera framing by action flags. [names_reviewed13.tsv]
+0x00225368	btlSelectTargetCameraPose	inferred	readability/matching review (QP16)
+0x002254C8	btlSetSpecialDefeatCameraPreset	inferred	readability/matching review (QP16)
 0x00225798	btlTryTransitionSingleTargetAction	inferred	Requires owner flag and exactly one eligible target before marking defeat and resetting transition state. [names_reviewed21.tsv]
 0x00225828	btlHandleTargetDirectionOrAction	inferred	For flagged single target, faces unit; otherwise flags candidates and invokes opaque action function, not proven release. [names_reviewed21.tsv]
 0x002258D8	btlLiftUnitForLinkedTarget	inferred	confidence=high; src/dds2/game/code_00224FC0.c:139:func_002258D8; Under linked-owner and single-target flags, configures the passed unit, raises its vertical offset and updates motion; unlike the already-named linked-target lifting routine, this modifies the input unit itself. [names_pending_main.tsv, collision repaired]; sources=names_pending_main.tsv [names_qp10.tsv]
 0x002260E0	btlDispatchActionByResourceFlags	inferred	Checks action table flags, marks defeat candidates and selects action task path. [names_reviewed21.tsv]
 0x002262A0	btlFilterActionByUnitFlags	inferred	For units bearing both flag 0x400 and flag 2, substitutes action result for actions 2, 9 and 13.
 0x00226398	btlFlagBattleForSpecialAction	inferred	For the specific action code, sets a battle context state flag. [names_reviewed21.tsv]
+0x002263D8	btlSelectLowestStatTarget	inferred	readability/matching review (QP16)
 0x002264E8	btlCheckActionUnitResourceEligibility	inferred	Rejects inactive units or unsupported resource types; accepts only a designated unit kind. [names_reviewed21.tsv]
 0x00226558	btlSetSpecialBattleEffectActorByte	inferred	For the selected battle ID, writes low byte of the effect actor field. [names_reviewed21.tsv]
 0x002266A8	btlIsCommandCodeF	inferred	Twin of dds1 0x00204B78; Returns whether second argument is command code 0xF. [names_R_FuncNames3.tsv]
@@ -2975,6 +3035,7 @@
 0x00232EE8	mdlGetContextResourceGroup	inferred	confidence=high; matched-C; src/dds2/game/code_00231A80.c:646:func_00232EE8; Returns the linked grouped asset key group; the group-node constructor stores this halfword and model cloning passes it back to the asset request path.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00232EF8	mdlGetContextResourceId	inferred	confidence=high; matched-C; src/dds2/game/code_00231A80.c:650:func_00232EF8; Returns the linked grouped asset key ID, compared by btlFindGroupedEntity and passed back to the asset request path by model cloning.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00232F58	mdlReleaseInnerResourceHandle	inferred	Byte-identical DDS1 counterpart: Releases the inner model context's resource handle.
+0x002330C8	mdlApplyQueuedGroupPackets	inferred	readability/matching review (QP16)
 0x002334F0	mdlDestroyLoadRequestOwner	inferred	src/dds2/game/code_00231A80.c func_002334F0: Invokes task-request destruction on attached pointer, then releases model load owner block. Twin of DDS1 func_002189D8. [names_reviewed24.tsv]
 0x00233520	mdlCompleteGroupedJobAndNotify	inferred	Removes job group under a semaphore then invokes completion callback if present. [names_reviewed21.tsv]
 0x00233718	mdlReleaseViewerSlotResources	inferred	Walks viewer slot five, releasing its entry resources. [names_reviewed7.tsv]
@@ -3059,6 +3120,7 @@
 0x0023C828	evtUnitSetValueAndFlag	inferred	Writes a unit value at offset 0x6c and sets the 0x20000 flag.
 0x0023C908	evtSetUnitNormalizedDirection	inferred	Normalizes VU direction into unit vector, copies another vector, and adjusts unit flags. [names_reviewed6.tsv]
 0x0023C978	evtSetUnitRgbTransition	inferred	Byte-identical DDS1 twin; updates the evt-unit RGB transition counters and applies or queues the low 24-bit model color
+0x0023CA60	evtSetUnitAlphaTransition	inferred	readability/matching review (QP16)
 0x0023CB48	evtTestUnitStatusFlags	inferred	Byte-identical dds1 twin 0x00221FD8; Tests whether any of the unit's 0x7800 flag bits are set. [names_conflicts.tsv]
 0x0023CB58	evtSetUnitStatusFlags	inferred	Byte-identical dds1 twin 0x00221FE8; Sets unit flag bits 0x300. [names_conflicts.tsv]
 0x0023CB68	evtConfigureUnitTransition	inferred	Clears transition flags for zero or initializes direction and transition flags otherwise. [names_reviewed6.tsv]
@@ -3153,6 +3215,7 @@
 0x00241C20	evtCommandCreateWorldEffectObject	inferred	Creates a world object at origin with identity rotation and returns its world ID. [names_reviewed6.tsv]
 0x00241CB0	evtCommandDestroyEffectUnitById	inferred	src/dds2/event/evtCommand.c func_00241CB0: Reads script ID and destroys world kind 4 list node if found. Twin of DDS1 func_00227050. [names_reviewed24.tsv]
 0x00241CF0	evtCommandSetEffectUnitFirstVector	inferred	Resolves unit by ID or implicit current unit; writes three float components to first vector. [names_reviewed6.tsv]
+0x00241D98	evtCommandSetEffectUnitEulerRotation	inferred	readability/matching review (QP16)
 0x00241E70	evtCommandSetEffectUnitSecondVector	inferred	Resolves unit by ID or implicit current unit; writes four floats to second vector. [names_reviewed6.tsv]
 0x00242368	evtCommandEnableSolarAdvance	inferred	confidence=high; matched-C; src/dds2/event/evtCommand.c:680:func_00242368; Enables automatic solar-phase progression and reports script command completion.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00242388	evtCommandDisableSolarAdvance	inferred	confidence=high; matched-C; src/dds2/event/evtCommand.c:685:func_00242388; Disables automatic solar-phase progression and reports script command completion.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
@@ -3296,6 +3359,10 @@
 0x00251DE8	evtDrawSelectedEntryLabel	inferred	Draws selection indicator and optional entry label; viewer identity is not established. [names_reviewed12.tsv]
 0x002520E8	evtUpdateEntrySelectionDialog	inferred	Draws scrollable entries and handles cursor input in selection mode. [names_reviewed7.tsv]
 0x002534B0	evtDrawFrameListRow	inferred	DDS1 twin 0x00238600 [names_M95_Event.tsv]
+0x00253D80	evtDrawMessageDataRow	inferred	readability/matching review (QP16)
+0x00253FF8	evtUpdateMessageValueDialog	inferred	readability/matching review (QP16)
+0x00254250	evtDrawComparisonValueRow	inferred	readability/matching review (QP16)
+0x00254458	evtUpdateComparisonValueDialog	inferred	readability/matching review (QP16)
 0x00254620	evtIsMenuTableEntryEnabled	inferred	Tests the selected entry enabled flag in the event viewer table. [names_reviewed8.tsv]
 0x00254F80	evtUpdateMotionChangeRow	inferred	Updates the motion-change row state; DDS1 twin. [names_qp9.tsv]
 0x00255360	evtDrawGroupListRow	inferred	DDS1 twin 0x0023A4B0 [names_M95_Event.tsv]
@@ -3337,6 +3404,7 @@
 0x0025D140	evtSpawnResourceObject	inferred	DDS1 twin 0x00241D28 [names_M95_Event.tsv]
 0x0025D6B0	evtCreateMotionSeTask	inferred	twin of DDS1 evtCreateMotionSeTask
 0x0025D758	evtBeginEventPackScriptLoad	inferred	confidence=high; matched-C; src/dds2/event/evtEventPack.c:52:func_0025D758; Formats grouped event .be script path, requests resource, saves handle and sets loading state.; twin=0x00242340, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x0025D7E0	evtCompleteEventPackScriptLoad	inferred	readability/matching review (QP16)
 0x0025D8C8	evtTickPackLoad	inferred	confidence=high; matched-C; src/dds2/event/evtEventPack.c:70:func_0025D8C8; L69; source=names_pending_main.tsv:102; review=Starts event-pack script loading at state zero and dispatches the load poll at state one. [names_qp11.tsv]
 0x0025D928	evtReleaseEventPackResources	inferred	twin of DDS1 evtReleaseEventPackResources
 0x0025DAB0	mnuCampDestroyTaskById	inferred	DDS1 has the same unprefixed symbol; game/code_0025DA20 uses mnu for the already-described campDestroyTaskById behavior.
@@ -3360,6 +3428,7 @@
 0x0025F5D0	mnuReleaseCampSceneRegisteredIds	inferred	Releases registered scene identifiers and clears their count. [names_reviewed8.tsv]
 0x0025F7F0	mnuInitializeShopStatusBatches	inferred	Allocates and initializes the shop scene status graphics batches. [names_reviewed10.tsv]
 0x0025FA10	mnuShopDestroyNestedEffectBatch	inferred	Destroys the effect batch referenced by the nested shop scene object. [names_reviewed15.tsv]
+0x0025FC08	mnuShopLoadMessageResource	inferred	readability/matching review (QP16)
 0x0025FCD8	mnuShopReleaseWindowAndEffectResources	inferred	Releases window textures and effect slot sets, including the mode-dependent nested batch. [names_reviewed15.tsv]
 0x0025FE70	mnuCampHasEligibleOwnedItems	inferred	Scans owned non-bullet items and reports whether any pass the menu eligibility flags. [names_reviewed15.tsv]
 0x0025FF18	mnuCreateEnabledCampEntryWindow	inferred	confidence=high; src/dds2/game/code_0025DA20.c:func_0025FF18; Creates a camp list containing enabled source indices and copies selected settings into retained list work. [names_qp9.tsv]
@@ -3384,6 +3453,7 @@
 0x00261040	mnuCampResolveOwnedItemVariant	inferred	Replaces a row item ID with its variant when the original qualifies and is owned. [names_reviewed15.tsv]
 0x002610C0	mnuCampGetCompactEntryId	inferred	Returns the ID at the requested column of a compact camp entry row. [names_reviewed15.tsv]
 0x002610E8	mnuCampCountRemainingUses	inferred	Per-mode remaining count (99 or 1 minus the flag byte) clamped at zero. [names_M44_Mid3.tsv]
+0x00261310	mnuCampDisableUnavailableItemEntries	inferred	readability/matching review (QP16)
 0x00261480	mnuCampAdvanceCounter	inferred	Adds a delta to the scene counter, clamps to [1, max] and flags saturation; mode 3 also rescales the record value. [names_M44_Mid3.tsv]
 0x00261D78	mnuQueueCampTextGlyphWithChildColor	inferred	Creates a tinted camp glyph and queues it only for nonzero display input. [names_reviewed11.tsv]
 0x00261E10	evtIsFadeDispatchIdle	inferred	Returns true only when no fade is active and the associated dispatch-status function returns zero.
@@ -3414,6 +3484,7 @@
 0x00264F00	evtTriggerProgressGateThenOpenPopup	inferred	Triggers the progress flag gate and opens the next popup only if no gate fires. [names_reviewed15.tsv]
 0x00265130	evtIsLastSlot	inferred	compares argument+1 against the number of active EvtSlot entries
 0x00265178	mnuSetFlagForMenuEntry	inferred	Uses explicit index parameter, no selected-menu cursor is read. [names_reviewed21.tsv]
+0x002651C0	evtMenuPopulateSelectedSlotLabels	inferred	readability/matching review (QP16)
 0x002652E0	evtMenuPollWindow	inferred	Polls an event window, opening the default window when the previous one closes and no window remains.
 0x002653B8	evtFinishPopupAfterMenuConfiguration	inferred	medium confidence; src/dds2/game/code_002651C0.c func_002653B8: Runs menu configuration with arguments (1,0), then invokes completion mode on the active event-menu popup. [names_reviewed25.tsv]
 0x00265500	evtMenuPersistSelectedSlot	inferred	Scans for the selected node id, obtains a slot and stores it in both a record and the context.
@@ -3442,7 +3513,7 @@
 0x00267110	mnuBuildTerminalNodeList	inferred	Builds the five-record progress list and refreshes threshold flags. [names_M44_Mid3.tsv]
 0x002671E8	mnuReleaseProgressWorkList	inferred	Destroys the list state owned by a menu progress work object. [names_reviewed17.tsv]
 0x00267200	mnuReleaseSelectedProgressPanel	inferred	Releases the selected panel and passes its owner list to cleanup. [names_reviewed10.tsv]
-0x00267358	mnuSlotKindMatchesGroupOrSpecial	inferred	confidence=high; src/dds2/game/code_002665B0.c:func_00267358; True when the entry's kind equals the queried kind, or when both are one of the special kinds 15/29/30. [names_qp9.tsv]
+0x00267358	mnuSlotKindsInSameGroup	inferred	readability/matching review (QP16)
 0x00267500	mnuThresholdNodeDrawCallback	inferred	Installed as list->updateCallback in mnuBuildThresholdNodeList; draws two sprites per node. [names_M44_Mid3.tsv]
 0x002675C8	mnuBuildThresholdNodeList	inferred	Builds a menu node list from supplied item IDs while excluding the supplied array index.
 0x00267680	mnuHighlightProgressNodeFromOwnerSelection	inferred	Highlights a progress node only when owner selection is idle. [names_reviewed10.tsv]
@@ -3461,7 +3532,7 @@
 0x00267F68	mnuEnableTerminalTrackMode	inferred	confidence=medium; matched-C; src/dds2/game/code_002665B0.c:710:func_00267F68; Enables terminal track display mode.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00267F88	mnuTerminalCreateEffects	inferred	Creates seven effect objects and seeds their two-word parameter pairs. [names_M44_Mid3.tsv]
 0x00268090	mnuDestroyAllMenuSlotEffectBatches	inferred	Destroys every effect batch owned by a menu slot. [names_reviewed10.tsv]
-0x002680E0	mnuSelectTerminalResourceBank	inferred	confidence=high; src/dds2/game/code_002665B0.c:func_002680E0; Chooses the fixed 0x20000 bank or the current BGM handle for the terminal mode and ensures the MIDI bank stays resident. [names_qp9.tsv]
+0x002680E0	mnuTerminalSelectResourceBank	inferred	readability/matching review (QP16)
 0x00268128	mnuApplyFadeTrackMode	inferred	Selects audio track start or stop based on fade mode and reduced setting. [names_reviewed8.tsv]
 0x00268178	mnuTerminalCreateScene	inferred	Loads /facility/msg/terminal/mes_data.bmd into the new 0x3F8-byte scene. [names_M44_Mid3.tsv]
 0x00268278	mnuReleaseTerminalWorkAndResumeField	inferred	src/dds2/game/code_002665B0.c func_00268278: Releases terminal menu resources and effect batches, stops resource task and processes deferred field command. Twin of DDS1 func_00249F08. [names_reviewed24.tsv]
@@ -3484,6 +3555,7 @@
 0x0026A1B8	evtInitializeSelectionListWhenReady	inferred	Selects the first list node and initializes display when no transition is pending. [names_reviewed10.tsv]
 0x0026A258	evtFinishPendingSelectionTransition	inferred	Clears pending state and cleans up the message window when a transition was pending. [names_reviewed10.tsv]
 0x0026A4B0	evtEnterThresholdSelectionList	inferred	Refreshes threshold-list flags, selects its first node and installs a callback. [names_reviewed10.tsv]
+0x0026A728	mnuQueueTerminalCurrencyLabel	inferred	readability/matching review (QP16)
 0x0026A808	mnuInitializeSelectionDispatchWhenModeUnset	inferred	Initializes selection dispatch and starts the optional menu mode before handling input. [names_reviewed11.tsv]
 0x0026A8D8	evtSelectFinalVisualNode	inferred	Passes the visual list to func_002B8988, which selects the list's final entry through func_002B88F0(count-1).
 0x0026A900	evtOpenTerminalFollowupPopupWhenIdle	inferred	confidence=high; matched-C; src/dds2/game/code_002665B0.c:1513:func_0026A900; Opens terminal followup popup only when active event task is idle.; twin=0x0024C120, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
@@ -3491,6 +3563,7 @@
 0x0026AB38	mnuOpenTerminalSelectionMessageWindow	inferred	Opens terminal selection UI and records its event dispatch callback. [names_reviewed12.tsv]
 0x0026ABB0	evtPollDispatchAfterFade	inferred	Polls the mode-zero dispatch request and only advances its result when the global fade and subsequent visual effect finish.
 0x0026AD38	evtPrepareSelectedMenuEntry	inferred	Reads the menu owner's selected entry index to select the corresponding D_003A41A8 entry and configures its presentation.
+0x0026ADC8	evtOpenTerminalOwnerStatePopup	inferred	readability/matching review (QP16)
 0x0026AF68	evtBCheckPanelMode	inferred	Byte-identical dds1 twin 0x0024C8A0; evt B handler switching on panel mode [names_conflicts.tsv]
 0x0026AFE0	evtBContinueDispatchOrRestoreTable	inferred	Byte-identical dds1 twin 0x0024C918; Polls event dispatch and reinstalls the context state table when dispatch and stage are idle. [names_conflicts.tsv]
 0x0026B068	mnuPrepareDispatchStateAndBindHandler	inferred	confidence=high; src/dds2/game/code_00269978.c:func_0026B068; Runs dispatch-state preparation and transition callbacks, then binds the requested handler to task state. [names_qp9.tsv]
@@ -3508,6 +3581,7 @@
 0x0026BC00	mnuClearTerminalPanelSelection	inferred	Clears current terminal menu state selection field. [names_reviewed7.tsv]
 0x0026BC28	mnuRebuildTerminalMenuResources	inferred	Releases existing menu work resources and rebuilds terminal menus. [names_reviewed7.tsv]
 0x0026BC80	mnuFirstPresentMainCharacterIndex	inferred	confidence=high; matched-C; src/dds2/game/code_0026B6A8.c:226:func_0026BC80; Peer-matched C proposal; M141; source=names_pending_main.tsv:133 [names_qp12_apply.tsv]
+0x0026BD50	mnuInitScrollingStripState	inferred	readability/matching review (QP16)
 0x0026C170	evtCopyWorldObjectEntryValue	inferred	Finds secondary world object entry and copies source nested value into destination. [names_reviewed7.tsv]
 0x0026C1D0	evtSwitchWorldValueIfChanged	inferred	Compares packed world value with two supplied halves and switches only if different. [names_reviewed7.tsv]
 0x0026C240	evtResetDrawTransitions	inferred	Resets draw offset, display state and several event transition resources. [names_reviewed7.tsv]
@@ -3521,14 +3595,16 @@
 0x0026C4F0	evtLoadResourcePair	inferred	Passes the resource and a record-side output pointer to the loader, then saves the returned handle.
 0x0026C520	evtReleaseResourcePairHandle	inferred	Releases the handle stored in the first word of the two-word event resource record.
 0x0026C538	evtCreateMessageWindowIfMissing	inferred	Creates message window and initializes display state only if handle is negative. [names_reviewed7.tsv]
-0x0026C580	evtRefreshActiveMessageWindow	inferred	confidence=high; matched-C; src/dds2/game/code_0026C1D0.c:185:func_0026C580; Refreshes page zero of the active dspWindowHandle with the supplied mode; returns zero if no window exists.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
-0x0026C618	evtCaptureMessageWindowSoundMode	inferred	Stores supplied window value and current sound mode if window exists. [names_reviewed7.tsv]
+0x0026C580	evtSetMessageWindowPageValue	inferred	readability/matching review (QP16)
+0x0026C618	evtStoreValueAndCaptureWindowPanelValue	inferred	readability/matching review (QP16)
 0x0026C648	evtSetMessageWindowOptionWhenOpen	inferred	Stores a message-window option only while a message window exists. [names_reviewed11.tsv]
 0x0026C660	evtGetMessageWindowOption	inferred	confidence=high; src/dds2/game/code_0026C1D0.c:func_0026C660; Returns the option byte written by the open-message-window setter. [names_qp9.tsv]
-0x0026C6A0	evtGetCapturedMessageWindowSoundMode	inferred	Reads the sound mode captured when opening the message window. [names_reviewed11.tsv]
+0x0026C668	dspReadWindowSecondPanelValue	inferred	readability/matching review (QP16)
+0x0026C6A0	evtGetCapturedWindowPanelValue	inferred	readability/matching review (QP16)
 0x0026C6A8	evtCleanupMessageWindow	inferred	Clears panel status, optionally notifies, cleans window and restores active display. [names_reviewed7.tsv]
 0x0026C710	evtFinishMessageWindowAndNotify	inferred	Closes the message window with the notification flag set. [names_reviewed11.tsv]
 0x0026C768	evtGetMessageWindowControlState	inferred	Returns active message control state unless no window or gated state is blocked. [names_reviewed7.tsv]
+0x0026C7B0	dspCaptureWindowSecondPanelValue	inferred	readability/matching review (QP16)
 0x0026C918	evtCopyEntryStringToActiveWindow	inferred	confidence=high; matched-C; src/dds2/game/code_0026C1D0.c:301:func_0026C918; Copies an indexed entry/item string into the active message window table slot.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x0026C940	dspGetWindowStateGate	inferred	confidence=high; src/dds2/game/code_0026C1D0.c:func_0026C940; Returns the named message-window state gate. [names_qp9.tsv]
 0x0026C9B8	evtMoveMessageWindowWithPanelOffset	inferred	Moves window to scaled coordinates and emits panel offset derived from y. [names_reviewed7.tsv]
@@ -3536,13 +3612,17 @@
 0x0026CA70	evtIsActiveFlagSet	inferred	Byte-identical DDS1 counterpart: Reports whether the requested byte of the event active-flag table is nonzero.
 0x0026CA80	evtSetBoundedDisplayValue	inferred	Stores indexed display value only when index is inside table bounds. [names_reviewed7.tsv]
 0x0026CAA8	evtGetBoundedDisplayValue	inferred	Reads the display table using its final entry for indices above the limit. [names_reviewed11.tsv]
-0x0026CAD0	evtSetCurrentActiveFlag	inferred	Byte-identical DDS1 counterpart: Reads the current script operand as an index and sets its event active-flag byte.
+0x0026CAD0	evtOpSetActiveEntryFlag	inferred	readability/matching review (QP16)
+0x0026CB00	evtOpReadDisplayValue	inferred	readability/matching review (QP16)
 0x0026CB48	evtLoadTextureFromResourcePath	inferred	Loads named file, creates texture from data and releases temporary file allocation. [names_reviewed7.tsv]
+0x0026CB98	evtDrawListViewportIndicators	inferred	readability/matching review (QP16)
 0x0026CC88	evtDrawListViewportPanel	inferred	Computes panel height from list viewport and draws panel with edge detail. [names_reviewed7.tsv]
 0x0026CD20	evtDrawPlainPanel	inferred	Draws solid panel rectangle with fixed fill color and depth mode. [names_reviewed7.tsv]
 0x0026CF08	mnuLoadMantraNodePositionTable	inferred	Replaces active loaded record whose indexed positions drive mantra icon transitions in Mantra menu. [names_reviewed18.tsv]
 0x0026CF48	mnuReleaseMantraNodePositionTable	inferred	Releases loaded Mantra node position table allocation and clears shared pointer. [names_reviewed18.tsv]
 0x0026CF70	mnuGetMantraNodePositionRecord	inferred	Returns the indexed 32-byte node-position record, including x and y coordinates. [names_reviewed18.tsv]
+0x0026CF88	mnuFindMantraNodePositionRecord	inferred	readability/matching review (QP16)
+0x0026D020	mnuGetMantraNodePositionRecordCount	inferred	readability/matching review (QP16)
 0x0026D030	mnuLoadMantraPanelPositionTable	inferred	Replaces the loaded panel position table referenced by Mantra selector and icon setup. [names_reviewed18.tsv]
 0x0026D070	mnuReleaseMantraPanelPositionTable	inferred	Releases loaded Mantra panel position table allocation and clears pointer. [names_reviewed18.tsv]
 0x0026D098	mnuGetMantraPanelPositionRecord	inferred	Returns the indexed 32-byte panel-position record, including screen-position coordinates. [names_reviewed18.tsv]
@@ -3572,7 +3652,7 @@
 0x0026F5D8	mnuInitMantraListEntries	inferred	zeros list, copies at most eight entries and index [names_R_FuncNames.tsv]
 0x0026F680	mnuQueueMantraSelectionTransition	inferred	Appends a display transition node from the previous entry to the newly selected entry unless unchanged.
 0x0026F700	mnuQueueNextMantraSelection	inferred	Appends a transition to the next entry, wrapping to zero when already at the final index.
-0x0026F778	mnuQueueMantraSelectionStep	inferred	confidence=high; src/dds2/game/code_0026DBF8.c:func_0026F778; Appends a display node stepping the mantra index to the previous entry (wrapping at 0), recording the from/to values and transition kind 1. [names_qp9.tsv]
+0x0026F778	mnuQueuePreviousMantraSelection	inferred	readability/matching review (QP16)
 0x0026F7E8	mnuAppendDisplayListNode	inferred	Allocates the first display-list node or follows the next links to append and return a new node.
 0x0026FAD0	mnuCreateMantraDrawPool	inferred	Allocates and clears a pool of 0x24-byte draw items; diagnostic string identifies the mantra draw process.
 0x0026FB68	mnuDestroyMantraDrawPool	inferred	Visits active mantra draw items for cleanup and frees the pool's allocation handle.
@@ -3742,6 +3822,7 @@
 0x00287638	mtrUnitSelectRelease	evidence	Prints its own debug string "mtrUnitSelectRelease\n" via func_0010AE38; selects the current resource task and calls func_00288710 [names_L2_LiteSweep.tsv]
 0x00287798	mtrMantraSelectInit	evidence	Prints its own debug string "mtrMantraSelectInit\n" via func_0010AE38; calls func_00267F68(0) then func_00289DC8 [names_L2_LiteSweep.tsv]
 0x002877E8	mtrMantraSelectRelease	evidence	Prints its own debug string "mtrMantraSelectRelease\n" via func_0010AE38; clears bit 1 of the selected record's +0x218 word and calls func_00267F68(1) [names_L2_LiteSweep.tsv]
+0x002885E8	mtrInitUnitSelectionWork	inferred	readability/matching review (QP16)
 0x00288710	mnuReleaseSelectionWorkResources	inferred	high confidence; src/dds2/game/code_00286BA8.c func_00288710: Destroys the selection list, releases the auxiliary object and invokes the work cleanup path. [names_reviewed25.tsv]
 0x00288F60	mnuRebuildProfilePanelFromRenderSnapshot	inferred	Releases the old effect, snapshots the selected list items and constructs its new panel effect. [names_reviewed17.tsv]
 0x00289058	mnuGetSelectedNodeValue	inferred	Returns the value at offset 0x70 of the selected menu node.
@@ -3761,6 +3842,7 @@
 0x0028CCB8	mnuStartMantraPanelExitTransition	inferred	Resets menu transition timer and selects state two, which returns to idle after six frames. [names_reviewed18.tsv]
 0x0028CCC8	mnuAdvanceMantraPanelTransitionTimer	inferred	Ticks entry or exit panel transition for six frames and changes menu transition state. [names_reviewed18.tsv]
 0x0028F770	mnuSelectMatchingNode	inferred	Traverses menu nodes and records the index whose payload ID equals the requested ID.
+0x0028F7B8	mnuSelectMantraLimitLine	inferred	readability/matching review (QP16)
 0x00290A70	mnuGetDefaultPanelSelector	inferred	Returns the panel object's selector at offset 0x7A0, used when its alternate selector is absent.
 0x00290B28	mnuUpdateSelectedPanelSlot	inferred	Reuses or allocates the slot indexed by the current menu choice and binds the selected node's value.
 0x00290B98	mnuGetSelectedPanelValue	inferred	Returns the selected slot's halfword indexed by alternate or default selector.
@@ -3810,6 +3892,7 @@
 0x0029A1E8	mnuRequestContextLatchedSceneDsp	inferred	medium confidence; src/dds2/game/code_00299D58.c func_0029A1E8: Under the event-flag gates, starts DSP entry 1 and records both an event flag and context flags bit 1. [names_reviewed25.tsv]
 0x0029A270	mnuRequestContextClearSceneDsp	inferred	medium confidence; src/dds2/game/code_00299D58.c func_0029A270: Starts DSP entry 2 only while context flags bit 1 is clear and the event-flag gates permit it; records its event flag. [names_reviewed25.tsv]
 0x0029A748	mnuKindIsSelectable	inferred	game/code_00299D58: returns 1 for kind 1 and otherwise tests (kind ^ 8) < 1 unsigned [names_L14_MidUnits.tsv]
+0x0029AA68	mnuDrawRemainingSelectionExtent	inferred	readability/matching review (QP16)
 0x0029AD98	mnuAdvanceSkillPackageToItemPanel	inferred	Advances skill package work before drawing the item panel and running it. [names_reviewed10.tsv]
 0x0029AE10	mnuAdvanceSkillPanelToNextMenu	inferred	Advances the skill package panel and runs the next menu once it finishes. [names_reviewed10.tsv]
 0x0029AE70	mnuResetSelectionWidthsFromConfig	inferred	Computes clamped selection width from configuration and five signed bytes, clears layout widths and refreshes an active resource.
@@ -3817,6 +3900,7 @@
 0x0029AF80	mnuRefreshPartyUnitVitalsPanels	inferred	Recomputes maximum unit vitals before refreshing selected party panels. [names_reviewed10.tsv]
 0x0029B320	mnuDrawItemPanelDuringRequest	inferred	Draws the item panel backdrop and forwards the active request. [names_reviewed10.tsv]
 0x0029B3C0	mnuResetGroupSelectionAndStartMessage	inferred	confidence=high; src/dds2/game/code_0029AFC0.c:func_0029B3C0; Clears the current panel-group selection, starts its message entry and configures message-window sound/options. [names_qp9.tsv]
+0x0029B6A0	mnuShowProgressLevelChangePopup	inferred	readability/matching review (QP16)
 0x0029B780	mnuRunPanelWithIdleFallback	inferred	Runs the panel in mode 0 and installs a fallback state only when both the panel and state are idle.
 0x0029B810	mnuRunItemPanelWithInactiveBackdrop	inferred	src/dds2/game/code_0029AFC0.c func_0029B810: Draws backdrop with zero mode, then runs item-panel request mode one. Twin of DDS1 func_002646A0. [names_reviewed24.tsv]
 0x0029B8B0	mnuChooseWeightedItem	inferred	confidence=high; matched-C; src/dds2/game/code_0029AFC0.c:143:func_0029B8B0; Uses one random byte against eight cumulative item thresholds, returns the chosen item or zero, and substitutes item nine for gated IDs 109 through 127 while flag 0x990 is unset.; source=fresh-R_Names31-today [names_qp11.tsv]
@@ -3830,6 +3914,7 @@
 0x0029CDF0	brsGetLevelStepForValue	inferred	byte-identical twin of DDS1 brsGetLevelStepForValue @ 0x265500: maps a value to the battle-result LevelStep whose threshold it reaches
 0x0029CE30	brsGetLevelStepCrossedBy	inferred	byte-identical twin of DDS1 brsGetLevelStepCrossedBy @ 0x265540: returns the LevelStep value whose threshold lies within (position, position+increment]
 0x0029D900	mnuTitleInitFourParameters	inferred	DDS1 has the same unprefixed symbol; game/code_0029BC58 uses mnu for the already-described titleInitFourParameters behavior.
+0x002A0EE8	brsPollResultCounterCompletion	inferred	readability/matching review (QP16)
 0x002A1040	mnuBuildSoundResourcePath	inferred	src/dds2/game/code_002A05C0.c func_002A1040: Copies eight-byte /sound/ prefix from retail global and appends caller filename with strcat. Twin of DDS1 func_00269420. [names_reviewed24.tsv]
 0x002A1070	mnuBuildVoiceResourcePath	inferred	src/dds2/game/code_002A05C0.c func_002A1070: Copies eight-byte /voice/ prefix from retail global and appends caller filename with strcat. Twin of DDS1 func_00269450. [names_reviewed24.tsv]
 0x002A10A0	mnuInitializeTitleAudioAndEffects	inferred	Initializes title sound resources and title-effect task once. [names_reviewed8.tsv]
@@ -3879,8 +3964,9 @@
 0x002A3F28	mnuStartMovieMenuSfx17	inferred	same shape as mnuStartMovieMenuSfx16 with item 0x20, context 0x53
 0x002A3F60	mnuStartMovieMenuSfx18	inferred	same shape with item 0x21, context 0x53
 0x002A3F98	mnuSlideBarSetState	inferred	mode 2 = reset to closed (pos 0), 3 = open (pos 0x200), else store mode
+0x002A3FE0	mnuDrawAndAdvanceMovieMenuBar	inferred	readability/matching review (QP16)
 0x002A40C8	mnuSlideBarSetStateB	inferred	identical to func_002A3F98 (separate copy in retail)
-0x002A4110	mnuDrawSlideBarAtOffset	inferred	confidence=high; src/dds2/game/code_002A3AE8.c:func_002A4110; Draws the slide bar sprite at pos/4 and steps pos by 0x20 toward or away from the active end, clamped to 0..0x200. [names_qp9.tsv]
+0x002A4110	mnuAdvanceSlideBarValue	inferred	readability/matching review (QP16)
 0x002A41C0	mnuSlideBarSetStateSmall	inferred	like SetState but the position field is state[2], open value 0x80
 0x002A4388	mnuTitlePickRandomSlot	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002A4670	mnuPairedSlideBarSetState	inferred	sets pos/state[0x1b]/state[0x1c] for the paired bars (open value 0x80)
@@ -4148,6 +4234,7 @@
 0x002BAE08	mnuDrawFadingWindows	inferred	Iterates active fade entries and draws each stored window at stored coordinates. [names_reviewed5.tsv]
 0x002BAF10	mnuInitializeWindowFadeState	inferred	Clears a window fade block and initializes its opacity and transition fields. [names_reviewed15.tsv]
 0x002BB0D0	mnuResetWindowFadeParameters	inferred	Resets fade offset, opacity and step fields of a window. [names_reviewed5.tsv]
+0x002BB0E8	mnuUpdateAndDrawWindowTransition	inferred	readability/matching review (QP16)
 0x002BB290	mnuInitScrollHandles	inferred	creates three scroll handles and sets their speed params
 0x002BB320	mnuReleaseScrollPanelAnimations	inferred	Destroys three packed effect handles owned by scroll panel. [names_reviewed5.tsv]
 0x002BB370	mnuCreateScrollPanel	inferred	Allocates scroll panel, initializes anchor positions and three animation handles. [names_reviewed5.tsv]
@@ -4346,11 +4433,11 @@
 0x002C9500	mcOpenFilePath	inferred	confidence=high; matched-C; src/dds2/mc/mcManager.c:100:func_002C9500; Submits memory-card open RPC command 2 with port, slot zero, path and open flags.; twin=0x00289F80, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x002C9528	mcPollCommandStatusWithResult	inferred	Reads card command completion and writes a successful status value. [names_reviewed9.tsv]
 0x002C9588	mcCloseOpenFile	inferred	confidence=high; matched-C; src/dds2/mc/mcManager.c:122:func_002C9588; Calls SDK close RPC command 3; existing short-arity forwarding left unchanged.; twin=0x0028A008, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
-0x002C95A0	fileWaitCommandDone	inferred	polls command 1 and returns 1 only when it completed with result 0 (-4 -> -2, other errors -1); byte-identical twin of DDS1 0x0028A020. fileWriteWait was misplaced here; it is 0x002C9678
+0x002C95A0	mcPollZeroCommandResult	inferred	readability/matching review (QP16)
 0x002C95F0	mcReadOpenFile	inferred	confidence=high; matched-C; src/dds2/mc/mcManager.c:139:func_002C95F0; Calls SDK read RPC command 5; SDK marshals descriptor, destination and byte count.; twin=0x0028A070, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x002C9608	mcPollCompletionStatus	inferred	Polls SDK completion and classifies negative errors without exposing nonnegative status. [names_reviewed6.tsv]
-0x002C9660	fileWriteBegin	inferred	DDS2 twin of DDS1 fileWriteBegin @ 0x28A0E0 (unit base; forwards to the file-write start helper), legacy Save_FileWrite_Begin
-0x002C9678	fileWriteWait	inferred	twin of DDS1 fileWriteWait 0x0028A0F8 (shared map): polls the file-write command, maps -4 to -2 and other errors to -1
+0x002C9660	mcBeginWrite	inferred	readability/matching review (QP16)
+0x002C9678	mcPollWriteCompletion	inferred	readability/matching review (QP16)
 0x002C96D0	fileDestroyMenuTask	inferred	DDS2 twin of DDS1 fileDestroyMenuTask @ 0x28A150: destroys the file-menu task at D_00437CD8 and clears the alive flag D_00437CD4
 0x002C9700	fileMenuTaskIsAlive	inferred	DDS2 twin of DDS1 fileMenuTaskIsAlive @ 0x28A180 (returns D_00437CD4)
 0x002C9708	mnuFormatSaveSlotHeaderName	inferred	Selects save title ID based on global flag and formats BASLUS name with slot. [names_reviewed22.tsv]
@@ -4901,6 +4988,7 @@
 0x002FC808	effQueueAttachedResourceRequest	inferred	Resets the queue and requests the resource consumed by attached-file polling. [names_reviewed8.tsv]
 0x002FC8F8	effFindAssetData	inferred	near twin of dds1 effFindAssetData @ 2B5878 (same scan, returns asset instead of object; adds the type-6/id<2 wildcard) [names_reviewed2.tsv]
 0x002FC9B8	effFindAssetObject	inferred	byte-identical twin of dds1 effFindAssetObject @ 2B5908 (linear scan of the asset link tables) [names_reviewed2.tsv]
+0x002FD748	effAppendPositionedCameraFileJob	inferred	readability/matching review (QP16)
 0x002FDD70	effFinalizeQueuedFile	inferred	Fetches the current file-queue entry, commits its queued data, clears the 44-byte effect file status record and selects the default resource.
 0x002FE208	effFlagFileQueueActive	inferred	confidence=high; matched-C; src/dds2/game/code_002DE248.c:8681:func_002FE208; Sets file queue active flag, updates linked file state and returns zero.; source=revalidated-unapplied-names_R_Names16.tsv:38 [names_qp12_apply.tsv]
 0x002FE230	effSelectLinkedFileState	inferred	High: selects the queued file object's linked state when non-null and returns zero whether or not it switches. [names_qp9.tsv]
@@ -4984,7 +5072,9 @@
 0x003059E0	effConfigureIndexedSlotResource	inferred	Attaches indexed 0x24-byte resource record to slot and refreshes state. [names_R_FuncNames4.tsv]
 0x00305A60	effConfigureIndexedSlotMaterial	inferred	Attaches indexed record, refreshes slot then sets material flags and color. [names_R_FuncNames4.tsv]
 0x00305BD0	effSelectPresetByKind	inferred	switch 0/1/2 -> func_00308478(0x44/0x48/0x42, arg)
+0x003064C0	itfDrawRotatedTexturedRect	inferred	readability/matching review (QP16)
 0x00306500	effSelectPresetAndDispatch	inferred	Selects preset by supplied kind then invokes effect dispatch and restores preset 0x44. [names_R_FuncNames4.tsv]
+0x003065A0	sdfCopyCornerWordsWithEdgeByte	inferred	readability/matching review (QP16)
 0x00306F80	itfDrawGridWithResolvedSlot	inferred	Resolves a slot before submitting a grid drawing request. [names_reviewed8.tsv]
 0x003071D0	itfSetGridEntryQuantizedAndRefresh	inferred	Quantizes grid bounds then refreshes the corresponding entry. [names_reviewed8.tsv]
 0x00307270	itfGridSetQuantizedBounds	inferred	Stores x and width shifted by four and y and height shifted by three, then copies all four quantized coordinates into its draw entry.
@@ -5040,6 +5130,7 @@
 0x0030A300	fldLmapAdvanceThroughWindow	inferred	Advances the local-map cursor through its remaining capacity. [names_reviewed8.tsv]
 0x0030A378	fldLmapRewindThroughWindow	inferred	Rewinds the local-map cursor through its current window. [names_reviewed8.tsv]
 0x0030A3E8	fldLocalMapDrawScrollIndicators	inferred	confidence=high; matched-C; src/dds2/game/code_0030A128.c:232:func_0030A3E8; Uses the list link flags to draw upper/lower triangular scroll indicators centered on the local-map list width, accounting for its screen offset and height.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x0030A528	fldLmapDrawListTree	inferred	readability/matching review (QP16)
 0x0030A700	fldLmapSubmitPositionedCommandPacket	inferred	src/dds2/game/code_0030A128.c func_0030A700: Builds rectangle header with GS coordinate biases, formats command packet and submits to selected surface. Twin of DDS1 func_002C2BF8. [names_reviewed24.tsv]
 0x0030A7C8	fldLmapSubmitScaledSpritePacket	inferred	src/dds2/game/code_0030A128.c func_0030A7C8: Builds sprite packet with GS coordinate biases and scaled dimensions, then submits to selected surface. Twin of DDS1 func_002C2CC0. [names_reviewed24.tsv]
 0x0030A970	fldStartLmapTask	inferred	DDS1 twin 002C2E38 (DDS2 additionally allocates and clears the 0x88 task state) [names_M33_SmallSweep2.tsv]
@@ -5052,6 +5143,7 @@
 0x0030B6D8	fldLmapToggleOverlay	inferred	DDS1 twin 002C36E8 [names_M33_SmallSweep2.tsv]
 0x0030B7D0	fldCreateLocalMapCamera	inferred	Creates a world object tagged Lmap_Cam and attaches it to local-map world. [names_reviewed8.tsv]
 0x0030B838	sdfInitInnerVectors	inferred	sets inner first/second vec on D_004388B4 then vtbl refresh
+0x0030BA98	sdfInitializeMapCounterSelection	inferred	readability/matching review (QP16)
 0x0030BBA8	sdfLatchBaseVectorsForSelection	inferred	src/dds2/game/code_0030B838.c func_0030BBA8: Copies both base vectors into pending pair, sets selection-change flag and commits pending vector. Twin of DDS1 func_002C3C48. [names_reviewed24.tsv]
 0x0030BC30	sdfSetSelectedIndex	inferred	Resets selection state then stores the requested index
 0x0030BC58	sdfCycleForward	inferred	advances D_004388B8 with wrap to 0, mirror of func_0030BCA8
@@ -5196,16 +5288,19 @@
 0x00317958	mdlLoadViewerPackageFromWork	inferred	medium confidence; src/dds2/game/code_00316E08.c func_00317958: Reads the work package ID and two resource values, then loads viewer kind 5 with fixed options 0x101. [names_reviewed25.tsv]
 0x0031A690	mnuInitializeHighScoreState	inferred	confidence=high; src/dds2/game/code_0031A638.c:22:func_0031A690; Ensures flag-selected high-score minimum and initializes work score fields.; sources=names_M143.tsv [names_qp10.tsv]
 0x0031A770	mnuUpdateHighScoreFlag	inferred	confidence=high; src/dds2/game/code_0031A638.c:47:func_0031A770; Commits improved work score to global high score and sets/clears new-high-score flag.; sources=names_M143.tsv [names_qp10.tsv]
+0x0031A920	mnuTickScoreProgressState	inferred	readability/matching review (QP16)
 0x0031AD00	itfDispatchObjectFadeSequenceMode	inferred	confidence=high; src/dds2/game/code_0031AD00.c:func_0031AD00; Chooses initial fade setup, sequence-offset drawing, glyph-triplet drawing or a paired sequence from object mode. [names_qp9.tsv]
 0x0031B1F8	dds3InitSoundSlotPool	inferred	Releases an existing pool, allocates and zeros 100 timed sound-sequence slots.
 0x0031B268	dds3ReleaseSoundSlotPool	inferred	Releases the global sound slot pool handle and clears its pointer.
-0x0031B290	sndFindFreeSoundSlot	inferred	confidence=high; src/dds2/game/code_0031B188.c:func_0031B290; Returns the first sound slot whose sequence is 0, or NULL when the pool is full. [names_qp9.tsv]
-0x0031B2E0	sndClaimFreeSoundSlot	inferred	confidence=high; src/dds2/game/code_0031B188.c:func_0031B2E0; Takes a free sound slot and stamps it with the sequence and frame count, returning NULL when none is free. [names_qp9.tsv]
+0x0031B290	dds3FindFreeSoundSlot	inferred	readability/matching review (QP16)
+0x0031B2E0	dds3ClaimSoundSlot	inferred	readability/matching review (QP16)
 0x0031B328	dds3UpdateSoundSlots	inferred	Decrements remaining frames of active sequence slots and restores sequence volume/pan when a slot expires.
+0x0031B3D0	mnuApplyFrameKeyedModelMotion	inferred	readability/matching review (QP16)
 0x0031B4F0	mnuCreateEffectWork	inferred	confidence=high; matched-C; src/dds2/game/code_0031B188.c:173:func_0031B4F0; Retail diagnostic says EffectWork Object Size; allocates and clears the work header, one counted list per group, and each group's contiguous thirty-two-byte effect records.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x0031B5F8	mnuClearNodeRecords	inferred	Zeroes each 0x20-byte node record in the supplied list.
 0x0031B668	mnuClearAllNodeBroadcastFlags	inferred	Walks every model node, clears its broadcast flag and notifies associated queue jobs. [names_reviewed15.tsv]
 0x0031B6D0	mnuDestroyNodeJobQueues	inferred	Destroys the non-null job queue referenced by each menu node. [names_reviewed15.tsv]
+0x0031B838	mnuClaimPositionedEffectRecord	inferred	readability/matching review (QP16)
 0x0031BB80	mnuClearNodeBroadcastFlag	inferred	Clears node flag bit zero then broadcasts the node's model handle.
 0x0031BBB0	mnuLoadNodeModelFromResource	inferred	Resolves a model from a resource, stores it on the owner and frees temporary resource data. [names_reviewed15.tsv]
 0x0031BFA0	mnuPauseEffectQueueFrameAdvance	inferred	Sets the render flag that suppresses effect queue frame counter advancement. [names_reviewed15.tsv]
@@ -5229,6 +5324,7 @@
 0x0031C8A8	mnuSetModelNodeBroadcastAlpha	inferred	Keeps model RGB broadcast value and replaces high alpha byte. [names_reviewed22.tsv]
 0x0031C8B0	mnuSetNodeModelBroadcastByte	inferred	Replaces the upper broadcast byte while preserving the remaining model broadcast bits. [names_reviewed15.tsv]
 0x0031C900	mnuSetModelNodeVisibility	inferred	Sets or clears the model inactive bit according to the node visibility selector. [names_reviewed15.tsv]
+0x0031CA10	itfProjectScreenPointToViewPlane	inferred	readability/matching review (QP16)
 0x0031CF68	itfDrawUniformlyScaledIndexedImage	inferred	medium confidence; src/dds2/game/code_0031C940.c func_0031CF68: Supplies equal horizontal and vertical scales to the table-indexed image renderer, which temporarily changes quad dimensions and restores them after submission. [names_reviewed25.tsv]
 0x0031D260	itfCreateModelInstanceWork	inferred	confidence=high; matched-C; src/dds2/game/code_0031C940.c:63:func_0031D260; Retail diagnostic says SpriteWork Object Size; allocates and clears the ModelInstanceWork header, group list headers, and contiguous ModelInstance records with counts and retained allocation handle.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x0031D380	itfClearModelInstances	inferred	Clears each 0x34-byte model-instance record in the supplied list.
@@ -5248,6 +5344,7 @@
 0x0031E008	itfReleaseCompactSlot	inferred	Clears the in-use bit for a compact pool slot.
 0x0031E198	itfApplyWorkTintAndClearBuffers	inferred	confidence=high; src/dds2/game/code_0031D890.c:func_0031E198; Applies the tint stored in the work record and clears its eight embedded buffers. [names_qp9.tsv]
 0x0031E240	itfClearTintAndWorkBuffers	inferred	confidence=high; src/dds2/game/code_0031D890.c:func_0031E240; Clears the interface fade tint and the same eight embedded work buffers. [names_qp9.tsv]
+0x0031E2E8	itfDrawFullExtentWorkPanels	inferred	readability/matching review (QP16)
 0x0031E410	mnuGetIndexedFadeTexture	inferred	returns the texture byte of the 12-byte D_0040B088 glyph entry [names_L5_LiteSweep.tsv]
 0x0031E430	mnuDrawIndexedFadeGlyph	inferred	Draws an indexed glyph at coordinates adjusted by the 12-byte D_0040B088 offset table.
 0x0031E4D0	itfFadeSetTint	inferred	Writes the global tint used by the fade drawing routine.
@@ -5258,6 +5355,7 @@
 0x0031E550	itfIsFadeActive	inferred	Returns false only if fade extent and mode are both zero.
 0x0031E578	itfUpdateFade	inferred	Activates the queued mode after its delay and advances/clamps fade extent in 0..128.
 0x0031E640	itfDrawFadeGlyphStrip	inferred	Draws the four indexed glyphs for an active fade, then advances its state.
+0x0031E6E0	itfDrawEightDigitFadeValue	inferred	readability/matching review (QP16)
 0x0031E7D0	itfDrawLowerFadeGlyphPair	inferred	While fading, draws indexed glyphs 3 and 2 and their supplementary image at y=0x2A8, then updates the fade.
 0x0031E858	itfDrawUpperFadeGlyphPair	inferred	While fading, draws indexed glyphs 1 and 0 and their supplementary image at y=0x118, then updates the fade.
 0x0031E8D8	itfSetFadeParameter	inferred	Stores the supplied value in FadeEntry.parameter at offset 0x1C.
@@ -5324,6 +5422,7 @@
 0x00322D98	mnuGetWorkEntryPool	inferred	Returns the currently registered menu work-entry pool pointer. [names_reviewed15.tsv]
 0x00322DA0	mnuEvaluateTimedValue	inferred	Returns a record's base float plus elapsed clock ticks when its registry flag is active.
 0x00322F00	mnuDeactivateWorkEntry	inferred	Clears active bit and releases its callback handle.
+0x00322F48	mnuAdvanceRegistryWorkEntry	inferred	readability/matching review (QP16)
 0x003236B0	mnuVisitActiveWorkAndEffectEntry	inferred	confidence=high; matched-C; src/dds2/game/code_00321500.c:425:func_003236B0; Visits active menu work pool and separate active effect entry with callback.; sources=names_M143.tsv,names_R_Names35.tsv [names_qp10.tsv]
 0x003238A0	mnuVisitActiveRecords	inferred	Invokes func_00323748 on each flagged 0x48-byte record in the global record array.
 0x00323928	mnuSetActiveWorkVisitor	inferred	confidence=high; matched-C; src/dds2/game/code_00321500.c:464:func_00323928; Stores active menu-work visitor callback.; sources=names_R_Names35.tsv [names_qp10.tsv]
@@ -5338,6 +5437,7 @@
 0x00324E80	mnuRemoveMatchedNodesFromLinkedResourceLists	inferred	Looks up a resource by key and removes its matching node from both linked lists. [names_reviewed17.tsv]
 0x00324EF0	mnuClearOwnedResourceListPair	inferred	high confidence; src/dds2/game/code_00324DF8.c func_00324EF0: Clears both owned linked resource lists in order; the retail callee invokes each list callback, frees every node and zeroes count and endpoints. [names_reviewed25.tsv]
 0x00324F98	mnuRemoveLinkedResourceByHandle	inferred	high confidence; src/dds2/game/code_00324DF8.c func_00324F98: Looks up the implicit handle in the second owned resource list and removes the found node with notification. [names_reviewed25.tsv]
+0x00325688	sdfCloneOwnedResourceRecords	inferred	readability/matching review (QP16)
 0x003268A8	sdfVectorAdd	inferred	Adds the three delta components in place to a vector.
 0x003268E0	sdfVectorSubtract	inferred	Subtracts three delta components in place from a vector.
 0x00326918	sdfVectorAddComponents	inferred	confidence=high; matched-C; src/dds2/game/code_00324DF8.c:139:func_00326918; Adds the supplied x, y and z scalars to the corresponding three vector components in place; no normalization or fourth-component write.; source=fresh-R_Names31-today [names_qp11.tsv]
@@ -5393,6 +5493,8 @@
 0x00329DB8	sdfGraphRecreateBuffers	inferred	Byte-identical dds1 twin 0x002D0F08; Releases existing graph buffers and allocates three using dimensions and modes from the graph. [names_conflicts.tsv]
 0x00329E40	sdfGraphSelectDisplayBuffer	inferred	M143; sources=names_M143.tsv; twin=0x002D0F90, input-family pairing. [names_qp10.tsv]
 0x00329F60	sdfRequestDeferredGsImageCapture	inferred	Stores capture parameters and marks a GS image capture request pending. [names_reviewed19.tsv]
+0x0032A688	sdfTexAllocHeadLow	inferred	readability/matching review (QP16)
+0x0032A7A8	sdfTexAllocHeadHigh	inferred	readability/matching review (QP16)
 0x0032A8C8	sdfTexAllocateHeadForDimensions	inferred	Computes texture size from dimensions and pixel format, then allocates its header. [names_reviewed8.tsv]
 0x0032A968	sdfCoalesceUnusedTextureBlocks	inferred	Merges adjacent unused texture blocks and repairs their linked-list pointers. [names_reviewed12.tsv]
 0x0032AA40	sdfUpdateTextureHeadsWithInterruptsMasked	inferred	Clears current texture head and updates a linked neighbor while masking interrupts; shortened to naming limit. [names_reviewed11.tsv]
@@ -5404,7 +5506,7 @@
 0x0032B1B0	sdfTexGetPrimaryBuffer	inferred	Byte-identical DDS1 counterpart: Returns the texture's primary buffer address.
 0x0032B1B8	sdfTexGetPrimaryBufferSize	inferred	Packed primary buffer count (+1), masked by 0x7FFF and converted to 16-byte units.
 0x0032B218	sdfTexGetSecondaryBufferSize	inferred	Same packed size calculation for the secondary texture buffer.
-0x0032B2C0	sdfTexGetStorageBitsPerPixel	inferred	confidence=high; matched-C; src/dds2/game/code_00329F60.c:491:func_0032B2C0; M141; source=names_pending_main.tsv:99; review=Returns 8 for PSMT8, 4 for PSMT4, 16 for PSMCT16/16S, and 32 otherwise. This is storage bit width, including 32-bit storage for the default formats, not a byte size. [names_qp11.tsv]
+0x0032B2C0	sdfTexFormatSizeHint	inferred	readability/matching review (QP16)
 0x0032B318	sdfTexGetPrimaryTextureState	inferred	confidence=high; matched-C; src/dds2/game/code_00329F60.c:512:func_0032B318; Returns the primary texture buffer textureState packed u64 without modification.; source=fresh-R_Names31 [names_qp11.tsv]
 0x0032B328	sdfTexGetPrimarySamplingState	inferred	confidence=high; matched-C; src/dds2/game/code_00329F60.c:516:func_0032B328; Returns primary-buffer samplingState; neighboring mode setter updates this word with GS mag/min filtering bits.; source=fresh-R_Names31 [names_qp11.tsv]
 0x0032B338	sdfTexGetPrimaryClampState	inferred	confidence=high; matched-C; src/dds2/game/code_00329F60.c:520:func_0032B338; Returns the primary texture buffer clampState packed u64 without modification.; source=fresh-R_Names31 [names_qp11.tsv]
@@ -5415,6 +5517,7 @@
 0x0032B500	sdfTexSubmitPixelsForFormat	inferred	Selects dimensions from texture format before submitting pixel data. [names_reviewed9.tsv]
 0x0032B558	sdfTexUploadSecondaryResource	inferred	Uploads secondary texture data when a secondary resource exists. [names_reviewed8.tsv]
 0x0032B5D8	sdfTexCreateResourceWithReference	inferred	Allocates a texture and reference, attaches resource pointers and links it. [names_reviewed8.tsv]
+0x0032B800	sdfTexAllocHead	inferred	readability/matching review (QP16)
 0x0032B8D8	sdfTexGetPaletteByteSize	inferred	Returns colors-per-palette times bytes-per-color times palette count.
 0x0032B948	sdfTexCopyImageData	inferred	Copies source bytes into texture->data using texture->dataSize.
 0x0032BBB0	sdfTexReleaseReferenceViaHandler	inferred	Decrements the texture refcount and passes the final reference to func_0032CAE0.
@@ -5422,6 +5525,7 @@
 0x0032BE00	sdfTexCreateFirstPacket	inferred	Stores the first generated resource packet on the texture.
 0x0032BE30	sdfTexCreateSecondPacket	inferred	Stores the second generated resource packet on the texture.
 0x0032BE60	sdfTexRefreshResourcePackets	inferred	confidence=high; matched-C; src/dds2/sdf/sdfTex.c:137:func_0032BE60; Rebuilds existing primary/secondary texture packets while preserving each TEX0 TCC bit.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
+0x0032BF78	sdfTexCreateFromFileHeader	inferred	readability/matching review (QP16)
 0x0032C138	sdfTexAcquireResourceTexture	inferred	confidence=high; matched-C; src/dds2/sdf/sdfTex.c:141:func_0032C138; Finds cached resource texture and increments reference or builds texture/upload state; default upload-mode flag.; twin=0x002D3288, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x0032C150	sdfTexAcquireAlternateResourceTexture	inferred	confidence=high; matched-C; src/dds2/sdf/sdfTex.c:169:func_0032C150; Processes the resource texture using packet variant one, complementary to sdfTexAcquireResourceTexture.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x0032C448	sdfRegisterTextureReleaseRequestHandler	inferred	Binds texture release callback to the synchronized request slot rather than merely echoing initialization. [names_reviewed12.tsv]
@@ -5454,6 +5558,7 @@
 0x0032D6B0	sdfBuildSceneDrawHeader	inferred	Initializes packet header before writing scene draw fields. [names_reviewed8.tsv]
 0x0032D758	sdfBuildTextureScenePacket	inferred	confidence=high; src/dds2/game/code_0032C278.c:func_0032D758; Builds texture setup for both rendering contexts, centered bounds, test/blend registers, and the draw packet. [names_qp9.tsv]
 0x0032DAF0	sdfAppendLinkedPacketPayload	inferred	Appends a node to its pointer list and its payload at offset sixteen to the packet list.
+0x0032DD98	sdfQueueFramePackets	inferred	readability/matching review (QP16)
 0x0032DE98	sdfSetNonnegativePacketIndex	inferred	Clamps negative index values to zero before storing current packet index. [names_reviewed8.tsv]
 0x0032DEB0	sdfResetPacketSlotState	inferred	Zeroes current packet index and two related slot-state words. [names_reviewed8.tsv]
 0x0032E468	sdfInitPrimaryAlphaBlendRegisters	inferred	src/dds2/game/code_0032C278.c func_0032E468: Writes primary GS TEST=0x717FB and ALPHA=0x44; ALPHA selects blend equation. Twin of DDS1 func_002D55B8. [names_reviewed24.tsv]
@@ -5660,10 +5765,12 @@
 0x0033AAA0	sdfConsBuildFrustumPacket	inferred	Encodes frustum scale and midpoint into DMA and GIF fields. [names_reviewed8.tsv]
 0x0033ABB8	sdfConsAppendProgramReferencePacket	inferred	Appends a reference to the resident VU program buffer. [names_reviewed8.tsv]
 0x0033AD68	sdfInitializeResourceQueuesAndTextureWords	inferred	Caches texture resource words and registers the resource queue callbacks. [names_reviewed9.tsv]
-0x0033AEA8	sdfWriteVuMatrixAndScaledRows	inferred	confidence=high; matched-C; src/dds2/game/code_00336B48.c:1095:func_0033AEA8; Main; source=names_pending_main.tsv:109; review=Stores the current VU matrix, three rows scaled by inverse column lengths, and four packet tag words. Body contains no explicit light or color input; the name describes the verified packet contents without claiming a lighting-only use. [names_qp11.tsv]
+0x0033AEA8	sdfWriteVuLightingPacket	inferred	readability/matching review (QP16)
 0x0033B678	sdfMeasureVertexAttributePacketBytes	inferred	confidence=high; matched-C; src/dds2/game/code_00336B48.c:1145:func_0033B678; Measures the allocation for the native VIF vertex-attribute packet builder: a fixed header plus packed per-vertex attribute payloads.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x0033B688	sdfBuildCompactVertexVifPacket	inferred	readability/matching review (QP16)
 0x0033BA40	sdfMeasureAlignedRecordBufferBytes	inferred	Calculates the 16-byte-aligned allocation length from a record count. [names_reviewed17.tsv]
 0x0033BDF0	sdfMeasureAlignedRecordStorage	inferred	medium confidence; src/dds2/game/code_00336B48.c func_0033BDF0: Computes (count * 0x4C + 0x4B) rounded down to a 16-byte boundary for this record-buffer size query. [names_reviewed25.tsv]
+0x0033C240	sdfBuildWideVertexVifPacket	inferred	readability/matching review (QP16)
 0x0033C478	sdfPadUpdatePort	inferred	DDS2 twin of DDS1 port polling routine; invoked once per each of two pad entries.
 0x0033C820	sdfPadUpdatePorts	inferred	Calls the port update on both D_00476480 pad entries.
 0x0033C878	sdfPadBuildButtonStates	inferred	Exactly matches first-game sdfPadBuildButtonStates: tracks two controller ports, 15-tick first repeat, four-tick repeats, new-press flag.
@@ -5723,6 +5830,7 @@
 0x00341240	effMiscRandUnitFloat	inferred	Effect-misc random helper converts the low 24 random bits to a unit-interval float. [names_reviewed8.tsv]
 0x003412D8	effMiscSeedRandom	inferred	M141; sources=names_pending_main.tsv; twin=0x002E8430, input-family pairing. [names_qp10.tsv]
 0x00341348	effMiscSeedRandomFromClock	inferred	confidence=high; matched-C; src/dds2/game/code_00341240.c:57:func_00341348; Combines clock year/month/day/hour/minute/second and seeds specified random state.; twin=0x002E84A0, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x003414D0	sndReserveIopWorkMemory	inferred	readability/matching review (QP16)
 0x00341570	sdfServiceUnblockedWorkerThread	inferred	Sleeps until signaled, then services worker requests while the gate is clear. [names_reviewed10.tsv]
 0x00341958	sndInitializeChannelAndTrackState	inferred	confidence=high; src/dds2/game/code_00341650.c:func_00341958; Initializes sixteen sound channels, allocates channel-zero storage, and resets thirteen track slots to unused ids. [names_qp9.tsv]
 0x00341BB8	sndStartTrackDefault	inferred	Prepares a track ID and sends command 0x20 with setting 0x7f.
@@ -5768,6 +5876,7 @@
 0x003456C0	sdfSoundInitFormattedAndAppendNode	inferred	Byte-identical DDS1 counterpart: Initializes a formatted sound node, stores the caller value, and appends it to the active-node list.
 0x003456F8	sdfSoundInitIpuStream	inferred	sceIpuInit, IPU_CMD write, registers DMA handlers 3/4 and starts thread
 0x003458F0	sdfSetGridScaledDrawBounds	inferred	Stores grid-scaled draw bounds and the supplied mode. [names_reviewed10.tsv]
+0x00346988	sdfCancelAndReleasePacWork	inferred	readability/matching review (QP16)
 0x00346A60	sdfPacCheckDecoderStatus	inferred	confidence=medium; matched-C; src/dds2/game/code_00346778.c:111:func_00346A60; Checks the decoder status pair: the first byte must be nonzero and the second zero; called by movie playback status polling without claiming exact flag meanings.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00346A80	sdfPacInitializeDispatchPacket	inferred	confidence=high; src/dds2/game/code_00346778.c:func_00346A80; Clears the PAC dispatch packet, sets status to minus one, and chooses a supplied dispatch callback or the default. [names_qp9.tsv]
 0x00346B68	sdfPacAdvanceCallbackBoundary	inferred	confidence=high; src/dds2/game/code_00346778.c:func_00346B68; Handles 64-byte consumption boundaries, advances input, invokes the callback, and updates activity/remainder according to callback results. [names_qp9.tsv]
@@ -5798,6 +5907,7 @@
 0x00348670	sdfLoadIopModulePair	inferred	src/dds2/game/code_003478C0.c func_00348670: Builds paths for two group-selected names and calls sceSifLoadModule on each. Twin of DDS1 func_002EF7C8. [names_reviewed24.tsv]
 0x00348700	sdfRotateBalancedTreeSecondLink	inferred	confidence=high; src/dds2/game/code_003478C0.c:func_00348700; Performs the single right or double left-right link rotation and restores AVL balance values for the affected branch. CORRECTED: same; sdfRotateBalancedTreeFirstLink = 0x00348780 is the sibling in this unit. [names_qp9.tsv]
 0x00348780	sdfRotateBalancedTreeFirstLink	inferred	src/dds2/game/code_003478C0.c func_00348780: Rotates first-link subtree, rewires pivot and updates balance flags; returns subtree root. Twin of DDS1 func_002EF8D8. [names_reviewed24.tsv]
+0x00348800	sdfRebalanceFloatKeyTreeAfterInsert	inferred	readability/matching review (QP16)
 0x00348900	sdfInsertFloatKeyTreeItem	inferred	src/dds2/game/code_003478C0.c func_00348900: Replaces equal float-key item or allocates new leaf and invokes tree balancing. Twin of DDS1 func_002EFA58. [names_reviewed24.tsv]
 0x00348A30	sdfAppendPoolNodeChain	inferred	confidence=high; matched-C; src/dds2/game/code_003478C0.c:399:func_00348A30; Peer-matched C proposal: M141; source=names_pending_main.tsv:147 [names_qp13.tsv]
 0x00348AA0	sdfKeyTreeApply	inferred	Applies key-tree updates; DDS1 twin. [names_qp9.tsv]

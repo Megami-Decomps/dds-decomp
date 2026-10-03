@@ -204,7 +204,7 @@ void evtViewerApplyInterpolatedNodeKey(EventViewerState *viewer, EvtViewNode *no
     }
 }
 
-void func_0022CC40(EventViewerState *viewer) {
+void evtViewerApplyParameterKeyTracks(EventViewerState *viewer) {
     EvtViewNode *node = viewer->nodes;
     s32 position = viewer->glyphAdvancePosition;
 
@@ -284,7 +284,7 @@ void func_0022CD30(EventViewerState *viewer) {
         effDisableColorRectangle();
     }
     func_00243A18(viewer);
-    func_0022CC40(viewer);
+    evtViewerApplyParameterKeyTracks(viewer);
 }
 
 void evtViewerApplySelectedEntry(EventViewerState *viewer) {
@@ -569,7 +569,7 @@ extern void mnuUnpackNibbleFields(struct CampPacked *, s32 *, s32 *);
 extern u32 itfMesGetWindowEntryItems(s32, s32);
 void evtViewerMarkWindowActive(EventViewerState *viewer);
 
-void func_0022F1C0(s32 id, EventViewerState *viewer) {
+void evtViewerActivateWindowForGlyphEntry(s32 id, EventViewerState *viewer) {
     s32 low;
     s32 high;
     EvtViewNode *node;
@@ -1412,3 +1412,4 @@ INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF60);
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF68);
 
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF70);
+

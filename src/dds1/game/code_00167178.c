@@ -183,7 +183,7 @@ extern u8 *sdfResourceRetainAddress(u32 handle);
 extern u32 func_00190100();
 extern EffFragmentResources *func_00169940(s32, s32);
 extern void func_00169B90(EffFragmentResources *, u32 *);
-extern void *func_00190130(u32, u16, EffPCPEventPlace *);
+extern void *effEventCreate(u32, u16, EffPCPEventPlace *);
 
 EffGroup *func_00167BF8(src, eventParams)
 EffGroup *src;
@@ -241,7 +241,7 @@ void *eventParams;
         slot->unk70 = 0;
         slot->unk74 = 0;
         slot->unk78 = 0;
-        slot->node = func_00190130((u32)work->owner, 2, &place);
+        slot->node = effEventCreate((u32)work->owner, 2, &place);
     }
     return work;
 }
@@ -309,7 +309,7 @@ EffGroup *func_00167EC0(EffGroup *src) {
         slot->unk70 = 0;
         slot->unk74 = 0;
         slot->unk78 = 0;
-        slot->node = func_00190130((u32)work->owner, 2, &place);
+        slot->node = effEventCreate((u32)work->owner, 2, &place);
     }
     return work;
 }
@@ -455,10 +455,10 @@ typedef struct EffFlashRecordWork {
 } EffFlashRecordWork; /* 0x48 */
 
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern s32 effRecordPoolCreateTriad();
+extern s32 effRecordPoolCreateTriple();
 
 /* Clone the 0x30-byte parameter block, create the record pool and clear every particle's age. */
-EffFlashRecordWork *effFlashTrianglePulseCreate(src)
+EffFlashRecordWork *effFlashRecordCreate(src)
     EffFlashRecordWork *src;
 {
     u32 handle = sdfAllocGeneralBlock(src->particleCount * sizeof(EffFlashRecordPart) + sizeof(EffFlashRecordWork));
@@ -472,7 +472,7 @@ EffFlashRecordWork *effFlashTrianglePulseCreate(src)
     work->ownedBuffer = handle;
     work->renderScale = 1.0f;
     work->updateCount = 0;
-    record = (EffFlashRecordHandle *)effRecordPoolCreateTriad(work->particleCount);
+    record = (EffFlashRecordHandle *)effRecordPoolCreateTriple(work->particleCount);
     work->resourceHandle = (u32)record;
     record->unk50 = work->unk2C;
     for (i = 0; i < work->particleCount; i++) {

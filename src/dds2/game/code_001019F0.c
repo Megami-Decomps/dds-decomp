@@ -166,7 +166,7 @@ extern void sdfInitializeDrawPacketGroups(u8 *);
 
 /* Prepare the selected buffer's thirteen packet groups and link its draw sink.
  * The buffer index is sampled before waiting/selecting; keep that ordering. */
-s32 func_00101C50(void) {
+s32 kwlnPrepareFrameDrawPackets(void) {
     s32 bufferIndex = kwlnGetDrawBufferIndex();
     s32 groupIndex;
     u8 *packetGroups;
@@ -219,7 +219,7 @@ extern void func_00105CF8(void);
 extern void func_00107108(void);
 extern s32 func_001200E0(void);
 extern void func_00343468(s32);
-extern void func_0032DD98(s32 *, void *);
+extern void sdfQueueFramePackets(s32 *, void *);
 extern u8 D_00380788[];
 extern u8 kwlnFrameDrawPacketRecords[];
 extern u8 D_00380708[];
@@ -322,7 +322,7 @@ s32 kwlnRenderFrame(void) {
         D_00435BC8 = 0;
     }
     if (!(kwlnDrawControlFlags & KWLN_FRAME_SKIP_POOL_QUEUE_BIT)) {
-        func_0032DD98(poolHead, D_00380860);
+        sdfQueueFramePackets(poolHead, D_00380860);
     } else {
         kwlnDrawControlFlags &= KWLN_FRAME_CLEAR_SKIP_POOL_QUEUE;
     }
@@ -406,6 +406,22 @@ void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBy
 }
 
 INCLUDE_RODATA(const s32, "game/code_001019F0", D_004110A8);
+
+INCLUDE_RODATA(const s32, "game/code_001019F0", D_004110C8);
+
+INCLUDE_RODATA(const s32, "game/code_001019F0", D_004110E8);
+
+INCLUDE_RODATA(const s32, "game/code_001019F0", D_00411108);
+
+INCLUDE_RODATA(const s32, "game/code_001019F0", D_00411118);
+
+INCLUDE_RODATA(const s32, "game/code_001019F0", D_00411130);
+
+INCLUDE_RODATA(const s32, "game/code_001019F0", D_00411140);
+
+INCLUDE_RODATA(const s32, "game/code_001019F0", D_00411158);
+
+INCLUDE_RODATA(const s32, "game/code_001019F0", D_00411178);
 
 INCLUDE_RODATA(const s32, "game/code_001019F0", D_00411198);
 

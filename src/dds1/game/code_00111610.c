@@ -24,7 +24,7 @@ typedef struct ObjectWithResource {
 #define DDS3_SLOT_RING_ENTRY_COUNT 10
 #define DDS3_SLOT_STATE_CAPACITY 24
 
-extern u32 func_00116D38(u32);
+extern u32 dds3CreatePathCurveWork(u32);
 
 extern ObjectWithResource *dds3AppendWorldObjectNode();
 extern u32 dds3AdvanceWorldCounter();
@@ -83,7 +83,7 @@ void dds3ReplaceObjectResource(ObjectWithResource *object) {
     if (resource->pathHandle != 0) {
         dds3FreePathObject(resource->pathHandle);
     }
-    pathHandle = func_00116D38(resource->sourceObjectAddress);
+    pathHandle = dds3CreatePathCurveWork(resource->sourceObjectAddress);
     resource->pathHandle = pathHandle;
 }
 
@@ -110,7 +110,7 @@ void func_00111740(void) {
 }
 
 /* Number of slots a given object kind occupies in the slot ring. */
-s32 dds3GetObjectSlotRingOccupancy(u32 kind)
+s32 dds3SelectSlotForObjectKind(u32 kind)
 {
     s32 slots = 0;
 

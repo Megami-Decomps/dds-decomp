@@ -183,7 +183,7 @@ extern void func_001A57A0(void);
 
 extern void kwlnFadeBackgroundStartOut(s32);
 
-extern void kwlnDrawSetOffsetTransition(s32, s32, s32);
+extern void kwlnDrawSetOverlayTransition(s32, s32, s32);
 
 extern void kwlnDrawEnableD88(s32);
 
@@ -224,7 +224,7 @@ s32 fldSceneStateRestoreDisplay(u8 *scene) {
         }
         if (!(*(u32 *)(scene + 0x1F4) & 0x4000)) {
             kwlnFadeBackgroundStartOut(0);
-            kwlnDrawSetOffsetTransition(0, 0, 1);
+            kwlnDrawSetOverlayTransition(0, 0, 1);
             kwlnDrawEnableD88(0);
             kwlnDrawEnableDc8(0);
             kwlnDrawEnableE08(0);
@@ -426,7 +426,7 @@ extern void func_001A1960();
 
 extern s32 mnuIsTitleEntryAvailable();
 
-extern void datMoveCursorX();
+extern void datAdjustCurrentHp();
 
 void btlApplyPartyEntryWeightedDelta(BattleSceneDeltaState *scene) {
     u32 i;
@@ -445,7 +445,7 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneDeltaState *scene) {
                     if (datGameState->entry[i].link != 0 || scene->alternateLink != 0) {
                         if (!(datGameState->entry[i].mask & 0x40)) {
                             if (mnuIsTitleEntryAvailable(&datGameState->entry[i]) == 0) {
-                                datMoveCursorX(&datGameState->entry[i],
+                                datAdjustCurrentHp(&datGameState->entry[i],
                                                (s32)((f32)datGameState->entry[i].weight * scale));
                             }
                         }
@@ -1217,3 +1217,4 @@ store:
 INCLUDE_RODATA(const s32, "game/code_001C48A8", D_003A35A8);
 
 INCLUDE_RODATA(const s32, "game/code_001C48A8", D_003A35B8);
+

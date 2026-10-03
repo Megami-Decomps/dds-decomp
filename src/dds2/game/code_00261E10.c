@@ -152,6 +152,7 @@ extern void mnuStorePendingMenuCommandValue(s32, u32);
 
 extern void func_002958B0();
 
+
 s32 evtIsFadeDispatchIdle(void) {
     s32 fadeActive = kwlnFadeIsActive();
 

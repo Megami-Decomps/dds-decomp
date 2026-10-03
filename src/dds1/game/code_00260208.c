@@ -626,7 +626,7 @@ extern void *sdfResourceRetainAddress(s32);
 extern void mnuClearPanelTransitionState(void *);
 extern s32 mnuAllocateValueRecord(s32);
 extern void evtCreateMessageWindowIfMissing(void *);
-extern void evtRefreshActiveMessageWindow(s32);
+extern void evtSetMessageWindowPageValue(s32);
 extern void func_001A1530(MenuIconBatch *);
 extern void brsBuildRewardRows(void *, MenuIconBatch *);
 extern void brsBuildLevelUpList(BrsRewardBatch *);
@@ -651,7 +651,7 @@ void *brsCreateTaskContext(void) {
     mnuClearPanelTransitionState(work->transition);
     work->fadeTarget = mnuAllocateValueRecord(1);
     evtCreateMessageWindowIfMissing(D_0036C858);
-    evtRefreshActiveMessageWindow(200);
+    evtSetMessageWindowPageValue(200);
     rewards = &work->rewards;
     func_001A1530(rewards);
     party = work->partyRows;

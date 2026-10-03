@@ -13,7 +13,6 @@ extern void *memset(void *s, s32 c, u32 n);
 extern s32 D_00436170;
 
 extern u32 D_00436128;
-
 extern u32 D_00389988[];
 
 typedef struct {

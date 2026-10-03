@@ -802,11 +802,11 @@ void *fileReadSlotPreviewWait(void) {
     return fileBeginSlotMetadataRefresh();
 }
 
-extern s32 fileWaitCommandDone(void);
+extern s32 mcPollZeroCommandResult(void);
 extern u8 D_004580C0[];
 
 void *fileStoreSlotHeader(void) {
-    s32 status = fileWaitCommandDone();
+    s32 status = mcPollZeroCommandResult();
 
     if (status == 0) {
         return NULL;
@@ -1652,7 +1652,7 @@ s32 fileBeginRequest(char *name, void *a1, void *a2, void *a3, void *a4) {
     return (s32)fileWriteWaitOpen;
 }
 
-extern void fileWriteBegin(s32 request, u32 first, u32 second);
+extern void mcBeginWrite(s32 request, u32 first, u32 second);
 extern void *mcHandleLoadResult(void);
 extern void *fileFinishRequest(void);
 
@@ -1666,7 +1666,7 @@ s32 fileWriteWaitOpen(void) {
         if (D_00439054 != 0 && *(u32 *)D_00439054 != 0) {
             return (s32)fileFinishRequest;
         }
-        fileWriteBegin(fileSaveFileDescriptor, *D_00439048, *D_0043904C);
+        mcBeginWrite(fileSaveFileDescriptor, *D_00439048, *D_0043904C);
         return (s32)mcHandleLoadResult;
     }
     if (status == -1) {
@@ -1678,11 +1678,11 @@ s32 fileWriteWaitOpen(void) {
 }
 
 
-extern s32 fileWriteWait(void);
+extern s32 mcPollWriteCompletion(void);
 extern void *mcDispatchReadCallback(void);
 
 void *mcHandleLoadResult(void) {
-    s32 status = fileWriteWait();
+    s32 status = mcPollWriteCompletion();
 
     if (status == 0) {
         return 0;
@@ -1701,7 +1701,7 @@ void *mcHandleLoadResult(void) {
 
 extern u32 D_00439050;
 void *mcDispatchReadCallback(void) {
-    s32 status = fileWaitCommandDone();
+    s32 status = mcPollZeroCommandResult();
 
     if (status == 0) {
         return 0;
@@ -1721,7 +1721,7 @@ void *fileFinishRequest(void) {
     if (fileSaveIconRequest != 0) {
         return NULL;
     }
-    fileWriteBegin(fileSaveFileDescriptor, *D_00439048, *D_0043904C);
+    mcBeginWrite(fileSaveFileDescriptor, *D_00439048, *D_0043904C);
     return mcHandleLoadResult;
 }
 
@@ -1818,7 +1818,7 @@ void *mcHandleSetupResult(void) {
 extern s8 D_00437CD5;
 
 void *mcdHandleSaveSetupDone(void) {
-    s32 status = fileWaitCommandDone();
+    s32 status = mcPollZeroCommandResult();
 
     if (status == 0) {
         return NULL;
@@ -2679,7 +2679,8 @@ void fileConfigTaskDestroy(void) {
     }
 }
 
-extern s32 func_002D1058(void);
+extern s32 func_002D1058(s32 mode);
+
 extern s32 fileStartQueuedLoad(void);
 extern void fileConfigTaskDestroy(void);
 extern void func_002D1450(void);
@@ -2687,9 +2688,9 @@ extern u32 fileGetConfigTaskFailure(void);
 
 extern s8 fileConfigTaskState;
 
-void mnuCreateConfigTasks(void) {
+void mnuCreateConfigTasks(s32 mode) {
     if (fileConfigTaskWork == 0) {
-        fileConfigTaskWork = func_002D1058();
+        fileConfigTaskWork = func_002D1058(mode);
         kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, func_002D1450, NULL, (void *)fileConfigTaskWork);
         kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (void *)fileConfigTaskWork);
         kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileGetConfigTaskFailure, fileConfigTaskDestroy, (void *)fileConfigTaskWork);

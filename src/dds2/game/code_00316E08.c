@@ -174,11 +174,11 @@ extern void mnuDestroyAllModelNodeContexts(s32 *);
 extern u8 *mnuGetResourceProgressParameters(void);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern void func_0031CAE8(f32 *, s32, s32);
-extern s32 func_0031B838(void *, void *, s32, f32, f32, f32, f32);
+extern s32 mnuClaimPositionedEffectRecord(void *, void *, s32, f32, f32, f32, f32);
 extern void func_00319FF0(void);
 
 typedef struct SoundSlot SoundSlot;
-extern SoundSlot *sndClaimFreeSoundSlot(u32, u32);
+extern SoundSlot *dds3ClaimSoundSlot(u32, u32);
 extern void mdlAddEntryFlaggedEx(MdlCtx *, s32, s32, f32, f32);
 extern void sdfMotionSampleAtFrame(Motion *, f32);
 extern s32 D_00438934;
@@ -446,10 +446,10 @@ void func_00319E48(MenuWorkEntry *record) {
 
     if ((record->state.bytes[1] & 0xF0) == 0x40) {
         if (record->state.bytes[1] == 0x44) {
-            sndClaimFreeSoundSlot(0x1E00001, 0);
+            dds3ClaimSoundSlot(0x1E00001, 0);
         } else if ((record->state.word & 0x1E) == 4 ||
                    (record->state.word & 0x1E) == 6) {
-            sndClaimFreeSoundSlot(0x1E00000, 0);
+            dds3ClaimSoundSlot(0x1E00000, 0);
         }
     }
     node = D_0040ABF8.modelNode;
@@ -478,7 +478,7 @@ void func_00319F48(void) {
     value = mnuEvaluateTimedValue(&D_0040ABF8);
     func_0031CAE8(position, (s32)D_0040ABF8.x0 + x, (s32)value + y - 32);
     lists = D_0043891C->effectWork->lists;
-    D_00438930 = (MnuEffectRecord *)func_0031B838(lists + 2, NULL, 0,
+    D_00438930 = (MnuEffectRecord *)mnuClaimPositionedEffectRecord(lists + 2, NULL, 0,
                                                position[0], position[1], position[2], 0.5f);
     func_00319FF0();
 }

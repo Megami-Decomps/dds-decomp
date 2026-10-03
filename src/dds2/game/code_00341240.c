@@ -68,7 +68,7 @@ void effMiscSeedRandomFromClock(void *state) {
 
 INCLUDE_ASM(const s32, "game/code_00341240", func_003413F0);
 
-u32 func_003414D0(s32 size) {
+u32 sndReserveIopWorkMemory(s32 size) {
     return (u32)sceSifAllocIopHeap(size);
 }
 

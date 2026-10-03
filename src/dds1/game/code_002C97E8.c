@@ -24,7 +24,7 @@ extern void frFontStoreShiftedContextValue(u32, u32);
 
 extern void frFontSetChainFlag(u32, u8);
 
-extern u32 func_00197C40(s32, s32, u32, u16, u32, u32);
+extern u32 itfDrawBankTextWithLayoutFlags(s32, s32, u32, u16, u32, u32);
 
 extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
@@ -438,7 +438,7 @@ s32 frFontQueueFlaggedGlyphAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, u32 
 }
 
 s32 frFontDrawColoredGlyphChainAndMeasure(s32 x, s32 y, u32 first, u32 second, u8 opacity, u16 width, u32 name, u32 extra, s32 flag, s32 option) {
-    u32 handle = func_00197C40(x << 4, y << 3, first, width, name, extra);
+    u32 handle = itfDrawBankTextWithLayoutFlags(x << 4, y << 3, first, width, name, extra);
     s32 result = 0;
     frFontSetChainFlag(handle, opacity);
     frFontSetChildColors(handle, second);

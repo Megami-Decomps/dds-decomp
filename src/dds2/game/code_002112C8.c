@@ -3550,7 +3550,7 @@ extern void btlInitMotionTransformFromComponents(BtlEffect *, f32, f32, f32, f32
 extern void func_003364B8(f32);
 extern void func_00336818(f32);
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern s32 func_0021C5E0();
+extern s32 btlSetLinkedDefeatCameraPresetA();
 
 void btlCancelCurrentSubtask(void) {
     BattleSub *sub;
@@ -3654,7 +3654,7 @@ s32 btlInitializeEffectVectors(BtlEffect *fx) {
     return 1;
 }
 
-s32 func_0021C5E0(command, camera, rotate)
+s32 btlSetLinkedDefeatCameraPresetA(command, camera, rotate)
 BtlLinkedCommand *command;
 BtlEffect *camera;
 s32 rotate;
@@ -3720,7 +3720,7 @@ s32 rotate;
 }
 
 s64 func_0021C7F8(void) {
-    return func_0021C5E0();
+    return btlSetLinkedDefeatCameraPresetA();
 }
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021C818);
@@ -3932,7 +3932,7 @@ extern void func_002218C8(void);
 
 extern s32 func_00222450();
 
-extern s32 func_00224598();
+extern s32 btlSetLinkedDefeatCameraPresetB();
 
 
 /* Battle mode controls whether word zero is an actor handle or action flags. */
@@ -4314,7 +4314,7 @@ s32 btlIsSupportedActorAction(ActionUnit *actor, s32 action) {
     }
 }
 
-s32 func_00220700(ActionUnit *unit) {
+s32 btlGetHealthyAllyActionStatus(ActionUnit *unit) {
     BattleActionScene *battle = (BattleActionScene *)btlGetRuntime();
     ActionUnit *actor;
 
@@ -4432,7 +4432,7 @@ s32 btlSelectMarkedActorAndClearEntryFlags(ActionUnit *unit, u32 *entry) {
     }
 }
 
-void func_00220B20(void) {
+void btlQueueLoneFreeTeamHandle(void) {
     BattleActionScene *battle = (BattleActionScene *)btlGetRuntime();
     ActionUnit *actor;
     ActionUnit *first;
@@ -5011,7 +5011,7 @@ void btlChooseBrahmaGroupCamera(u32 unit) {
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 extern void btlApplyCombinedActorFlags(u8 *);
 
-void func_00222A08(BtlLinkedCommand *command) {
+void btlChooseBrahmaMoveCamera(BtlLinkedCommand *command) {
     BtlUnit *target = btlGetTargetUnitForLink(command);
     if (target == 0) {
         return;
@@ -5120,7 +5120,7 @@ s32 btlLiftTowardLinkedTarget(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00222F18);
 
-s32 func_00223280(BtlLinkedCommand *command) {
+s32 btlSetSpecialLinkedActionCamera(BtlLinkedCommand *command) {
     if (btlIsActorCategoryMarked((s32)command) == 0) {
         if (command->link->unit->flags & 0x200) {
             if (command->unk12C == 14) {
@@ -5396,7 +5396,7 @@ s32 func_00224500(s32 object) {
     return 0;
 }
 
-s32 func_00224598(BtlLinkedCommand *command, BtlEffect *camera, s32 rotate) {
+s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlEffect *camera, s32 rotate) {
     u16 *runtime = (u16 *)btlGetRuntime();
     BtlUnit *unit;
     u32 kind;
@@ -5501,7 +5501,7 @@ s32 func_00224DF0(ActionUnit *unit) {
         unit->pendingAction = 0;
     } else if (flags & 0x8000) {
         btlFlagAllUnitDefeatCandidatesTask();
-        func_00224598(unit, unit, 0);
+        btlSetLinkedDefeatCameraPresetB(unit, unit, 0);
     } else if (flags & 0x8) {
         if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();

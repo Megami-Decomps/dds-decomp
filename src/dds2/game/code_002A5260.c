@@ -839,7 +839,6 @@ void mnuReleaseMovieResourceAfterPendingWork(void) {
 }
 
 extern u32 D_00437AB4;
-
 extern u32 D_00437AB8;
 
 void mnuInitializeMovieRollViewport(void) {
@@ -1112,7 +1111,7 @@ void mnuStopMovieDrawTask(void) {
     if (mnuMovieDrawTask == 0) {
         return;
     }
-    func_00346988(mnuMovieDrawContext);
+    sdfCancelAndReleasePacWork(mnuMovieDrawContext);
     kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }

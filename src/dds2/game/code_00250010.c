@@ -1041,7 +1041,7 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423F60);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423F70);
 
-void func_00253D80(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *ctx) {
+void evtDrawMessageDataRow(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *ctx) {
     char *names[11] = {D_004376B8, D_00423EE0, D_00423EF0, D_00423F00,
         D_00423F10, D_00423F20, D_00423F30, D_00423F40, D_00423F50, D_00423F60, D_00423F70};
 
@@ -1084,7 +1084,7 @@ void func_00253D80(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *ctx) {
     }
 }
 
-s32 func_00253FF8(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     s32 packed;
     s32 number;
@@ -1094,7 +1094,7 @@ s32 func_00253FF8(s32 x, s32 y, EvtRuntime *ctx) {
     s32 handle;
 
     list = sdfCreateResetPacketList();
-    func_00250338(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawMessageMenuLabel, func_00253D80);
+    func_00250338(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawMessageMenuLabel, evtDrawMessageDataRow);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
     if (ctx->mode != 0xD) {
         return 0;
@@ -1155,7 +1155,7 @@ s32 mnuDrawCutFlagLabel(s32 target, s32 x, s32 y) {
 }
 
 
-void func_00254250(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtDrawComparisonValueRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     char *labels[11] = {D_004376C8, D_00423EE0, D_00423EF0, D_00423F00,
         D_00423F10, D_00423F20, D_00423F30, D_00423F40, D_00423F50, D_00423F60, D_00423F70};
     s32 flag;
@@ -1185,7 +1185,7 @@ void func_00254250(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     }
 }
 
-s32 func_00254458(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     s32 packed;
     s32 number;
@@ -1194,7 +1194,7 @@ s32 func_00254458(s32 x, s32 y, EvtRuntime *ctx) {
     s32 delta;
 
     list = sdfCreateResetPacketList();
-    func_00250338(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawCutFlagLabel, func_00254250);
+    func_00250338(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawCutFlagLabel, evtDrawComparisonValueRow);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
     if (ctx->mode != 0xE) {
         return 0;
@@ -1573,7 +1573,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00256AE0);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00256CF0);
 
-extern s32 func_00197AE8();
+extern s32 effEventAdvanceResourceTemplateSetup();
 
 extern s32 kwlnTaskGetTimer(s32 task);
 
@@ -1589,7 +1589,7 @@ extern s32 evtActiveEntryFlags;
 s32 evtSynchronizeSelectedEntry(s32 task) {
     EvtRuntime *runtime = (EvtRuntime *)kwlnTaskGetUserValue(task);
 
-    if (func_00197AE8() == 0) {
+    if (effEventAdvanceResourceTemplateSetup() == 0) {
         runtime->busy = 0;
         return -1;
     }
@@ -2366,7 +2366,7 @@ extern Entry270 *D_00435DF0;
 extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
 extern void *func_00115500(void *obj, void *vecA, void *vecB);
-extern void func_00197F40(void *target, f32 scale);
+extern void effEventSetScale(void *target, f32 scale);
 
 void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
     u8 vecA[16];
@@ -2384,7 +2384,7 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
             effObjSetFlags(obj, 1);
             if (index >= 0) {
                 inner = ((EvtEffectObject *)obj)->inner;
-                func_00197F40(inner->scaledObject, D_00435DF0[index].modelScale / D_00435DE0->modelScale);
+                effEventSetScale(inner->scaledObject, D_00435DF0[index].modelScale / D_00435DE0->modelScale);
             }
             return obj;
         }

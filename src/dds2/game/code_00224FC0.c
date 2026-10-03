@@ -161,7 +161,7 @@ extern BattleActionUnit *btlGetTargetUnitForLink(BattleActionUnit *);
 extern void btlFlagUnitDefeatCandidate(BattleActionUnit *);
 extern void btlApplyCombinedActorFlags(u8 *);
 
-void func_00225368(BattleActionUnit *command) {
+void btlSelectTargetCameraPose(BattleActionUnit *command) {
     BattleActionUnit *target = btlGetTargetUnitForLink(command);
 
     if (target == NULL) {
@@ -190,7 +190,7 @@ extern void func_003364B8(f32);
 extern void func_00336818(f32);
 extern void sdfComposeVuMatrixFromRegisters(void);
 
-s32 func_002254C8(BattleActionUnit *command, BtlCamState *camera, s32 rotate) {
+s32 btlSetSpecialDefeatCameraPreset(BattleActionUnit *command, BtlCamState *camera, s32 rotate) {
     BattleActionContext *runtime = (BattleActionContext *)btlGetRuntime();
     BattleActionUnit *unit;
     u32 kind;
@@ -395,7 +395,7 @@ s32 btlDispatchActionByResourceFlags(BattleActionUnit *unit) {
     return 0;
 }
 
-extern s32 func_002254C8(BattleActionUnit *, BtlCamState *, s32);
+extern s32 btlSetSpecialDefeatCameraPreset(BattleActionUnit *, BtlCamState *, s32);
 
 s32 func_002261A8(BattleActionUnit *unit) {
     u16 flags = ((BattleActionTableEntry *)datActionAnimationRecords)[unit->type].flags;
@@ -411,7 +411,7 @@ s32 func_002261A8(BattleActionUnit *unit) {
         unit->transitionState = 0;
     } else if (flags & 0x8000) {
         btlFlagAllUnitDefeatCandidatesTask();
-        func_002254C8(unit, (BtlCamState *)unit, 0);
+        btlSetSpecialDefeatCameraPreset(unit, (BtlCamState *)unit, 0);
     } else if (flags & 0x8) {
         if (btlGetIndexListCount(unit->actor->targetIndexList) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
@@ -484,7 +484,7 @@ struct DatUnitStatus;
 extern s32 datGetStatWithStatusOverride(struct DatUnitStatus *, s32);
 extern void btlAppendIndexListEntry(s32, u32);
 
-s32 func_002263D8(BattleActor *actor) {
+s32 btlSelectLowestStatTarget(BattleActor *actor) {
     BattleActionContext *battle;
     u8 *statIndex;
     BattleActionUnit *unit;

@@ -132,7 +132,7 @@ void itfDrawFadeGlyphStrip(FadeEntry *entry) {
 }
 
 /* Keep all decimal places visible, dimming zeros before the first nonzero digit. */
-void func_0031E6E0(s32 x, s32 y, s32 extent, u32 value) {
+void itfDrawEightDigitFadeValue(s32 x, s32 y, s32 extent, u32 value) {
     s32 placeValue = 10000000;
     s32 leadingZero = 1;
     s32 i;
@@ -161,7 +161,7 @@ void itfDrawLowerFadeGlyphPair(FadeEntry *entry) {
     if (active != 0) {
         mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 3, 0x54);
         mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 2, 0x54);
-        func_0031E6E0(0xe0, 0x2a8, entry->extent, entry->displayValue);
+        itfDrawEightDigitFadeValue(0xe0, 0x2a8, entry->extent, entry->displayValue);
         itfUpdateFade(entry);
         return;
     }
@@ -178,7 +178,7 @@ void itfDrawUpperFadeGlyphPair(FadeEntry *entry) {
     if (active != 0) {
         mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 1, 0x54);
         mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0, 0x54);
-        func_0031E6E0(0xe0, 0x118, entry->extent, entry->displayValue);
+        itfDrawEightDigitFadeValue(0xe0, 0x118, entry->extent, entry->displayValue);
         itfUpdateFade(entry);
         return;
     }

@@ -184,6 +184,7 @@ extern void func_00253208(s32 context, s32 sceneId, s32 *x, s32 *y);
 extern void *sdfGridSelectFilledCell(MenuGrid *grid, s32 x, s32 y);
 extern void func_002CC0D0(MenuGrid *grid);
 
+
 void func_00253558(s32 context) {
     s32 grid = ((MenuSceneWork *)context)->gridHandle;
     MenuGridCell *cursor = ((MenuGrid *)grid)->cursor;
@@ -217,7 +218,7 @@ s32 fldGetSceneMetadataNode(void) {
 extern s32 dspCloseChannel(void);
 extern s32 evtCreateMessageWindowIfMissing(s32);
 extern u32 mnuGetSelectedNodeValue(void);
-extern void func_00249850(s32, void *);
+extern void mnuSetupStaffMenuProfilePage(s32, void *);
 extern void *memcpy(void *, const void *, u32);
 
 typedef struct SceneEntryNode {
@@ -235,7 +236,7 @@ s32 func_00253640(void) {
     evtCreateMessageWindowIfMissing(scene->messageWindowResource);
     memcpy((u32 *)((u8 *)scene + 0x28), (u32 *)*(u32 *)mnuGetSelectedNodeValue(), 0x1A4);
     ((u8 *)scene)[0x7D] = (u8)scene->pendingProfileId;
-    func_00249850((s32)((u8 *)scene + 0x28), (void *)scene->attachedEffect);
+    mnuSetupStaffMenuProfilePage((s32)((u8 *)scene + 0x28), (void *)scene->attachedEffect);
     scene->stageFinished = 0;
     scene->stageStarted = 0;
     return 0;
@@ -283,7 +284,7 @@ extern void itfDspSignalC(void);
 extern void itfDspSignalD(void);
 extern void itfDspSignalE(void);
 extern s64 evtGetMessageWindowControlState(void);
-extern s8 evtGetCapturedMessageWindowSoundMode(void);
+extern s8 evtGetCapturedWindowPanelValue(void);
 extern void sdfSetTaskItemMode(void *, s32, u32);
 
 s32 func_00253830(void) {
@@ -333,7 +334,7 @@ s32 func_00253830(void) {
         break;
     case 9:
         if (evtGetMessageWindowControlState() == 0) {
-            if (evtGetCapturedMessageWindowSoundMode() != 0) {
+            if (evtGetCapturedWindowPanelValue() != 0) {
                 scene->state = 10;
                 scene->pendingProfileId = 0;
             } else {
@@ -394,7 +395,7 @@ extern s64 evtGetMessageWindowControlState(void);
 extern u8 D_00325818[];
 extern void uiDrawGradientColorRect(s32, s32, s32, s32, s32, u32 *, s32);
 
-s32 func_00253AD0(void) {
+s32 mnuUpdateMantraSceneDisplay(void) {
     MenuSceneMetadata *scene = (MenuSceneMetadata *)func_002CB3B8(mnuSceneResourceContext, -1);
     u32 colors[4];
 
@@ -481,3 +482,4 @@ INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC428);
 INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC430);
 
 INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC438);
+

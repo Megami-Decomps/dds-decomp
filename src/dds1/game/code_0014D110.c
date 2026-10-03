@@ -127,7 +127,7 @@ extern void fldSetCameraNodeModeWithTen(void);
 
 extern void dds3InvokeSlot1Handler(s32 arg0, s32 arg1);
 
-extern void func_00123E00(void);
+extern void fldPreparePlayerSceneCameraTarget(void);
 
 extern void evtSetSolarOverlayFullyVisible(void);
 
@@ -225,7 +225,7 @@ extern u32 D_003BAFAC;
 
 extern u32 D_003BAF9C;
 
-extern void func_00123E00(void);
+extern void fldPreparePlayerSceneCameraTarget(void);
 
 extern void evtSetSolarOverlayFullyVisible(void);
 
@@ -366,7 +366,7 @@ s32 fldCmdReleaseCurrentObject(void) {
     }
     dds3InvokeSlot1Handler(object, 0);
     fldSetCameraNodeModeWithTen();
-    func_00123E00();
+    fldPreparePlayerSceneCameraTarget();
     return 1;
 }
 
@@ -454,7 +454,7 @@ s32 fldCmdSetScenePhaseThree(void) {
     return 1;
 }
 
-s32 func_0014D6D8(void) {
+s32 fldCmdSetLookAtHeading(void) {
     FldCamPose *cam;
     FldVec3 near;
     FldVec3 far;

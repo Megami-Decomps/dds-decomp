@@ -28,7 +28,7 @@ void mnuReleaseMantraPanelBurstPool(u32 *obj);
 u32 mnuAllocateMantraBackgroundBurstPool(void);
 extern void mnuDrawCellScaledGrid();
 u32 mnuQueueNextMantraSelection(u32);
-u32 mnuQueueMantraSelectionStep(u32);
+u32 mnuQueuePreviousMantraSelection(u32);
 extern u32 mnuRegisterMantraDrawItem(u32, u32, s32 (*)(), void (*)(), u32 (*)(), void (*)(), s16, s16, u32);
 extern s32 mnuUpdateMantraFadeA();
 extern u32 mnuDrawMantraIconList(u32, u32);
@@ -695,7 +695,7 @@ u32 mnuQueueNextMantraSelection(u32 state) {
 }
 
 /* Queue the previous selection, wrapping to the last list entry at the start. */
-u32 mnuQueueMantraSelectionStep(u32 state) {
+u32 mnuQueuePreviousMantraSelection(u32 state) {
     u32 item = mnuAppendDisplayListNode(state);
     u32 *entries = ((MantraListState *)state)->entries;
     if (item != 0) {
@@ -1864,7 +1864,7 @@ void mnuShowMantraUnitPanel(u32 ctx) {
 
 void mnuAdvanceMantraUnitPanelListState(u32 pool) {
     s32 obj = mnuFindMantraDrawItemByKind(pool, 9);
-    mnuQueueMantraSelectionStep((u32)&((MantraLampState *)((MantraDrawItem *)obj)->data)->list);
+    mnuQueuePreviousMantraSelection((u32)&((MantraLampState *)((MantraDrawItem *)obj)->data)->list);
 }
 
 void mnuQueueNextUnitPanelSelection(u32 pool) {

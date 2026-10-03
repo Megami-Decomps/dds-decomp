@@ -651,7 +651,7 @@ s32 evtCommandSetEffectUnitFirstVector(void) {
     return 1;
 }
 
-s32 func_00227138(void) {
+s32 evtCommandSetEffectUnitEulerRotation(void) {
     void *unit;
     f32 quaternion[4];
     f32 radians;

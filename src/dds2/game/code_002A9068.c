@@ -205,6 +205,7 @@ void mnuReleaseCampTextureHandlesAndClearOutput(u32 *destination) {
     } while (--resourceCountdown >= 0);
 }
 
+/* Return this category's handle array and count; unknown categories have none. */
 INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A440);
 
 INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A450);
@@ -343,7 +344,6 @@ INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A940);
 
 INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A950);
 
-/* Return this category's handle array and count; unknown categories have none. */
 u8 *mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount, u8 *menuBytes) {
     switch (category) {
     case 1:
@@ -813,12 +813,12 @@ s32 mnuStaffCampCancelCheck(s32 menu) {
     return result;
 }
 
+/* Share menu userdata across the input/draw/owner tasks, attach fade and cancel
+ * tasks to drawing, then start the opening fade and mark camp active. */
 INCLUDE_RODATA(const s32, "game/code_002A9068", mnuCampDrawTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_002A9068", mnuCampOwnerTaskName);
 
-/* Share menu userdata across the input/draw/owner tasks, attach fade and cancel
- * tasks to drawing, then start the opening fade and mark camp active. */
 void mnuCreateCampTasks(void) {
     s32 menuAddress;
     s32 drawTask;

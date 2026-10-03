@@ -237,7 +237,7 @@ void sdfInitInnerVectors(void) {
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030B880);
 
-void func_0030BA98(s32 index, s32 count) {
+void sdfInitializeMapCounterSelection(s32 index, s32 count) {
     fldLocalMapFirstCameraVector = D_004009B0[index];
     fldLocalMapSecondCameraVector = D_00400A50[index];
     D_00400990 = fldLocalMapFirstCameraVector;

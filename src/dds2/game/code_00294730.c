@@ -48,6 +48,9 @@ struct BlendDispatchWork;
 extern void func_00294680(struct BlendDispatchWork *, s32, s32);
 
 
+
+
+
 void func_00294B40(s32 x, s32 y, s32 depth, EventSpriteObject *object,
                    s32 scale, s32 option) {
     u32 index;
@@ -85,10 +88,14 @@ typedef struct MenuDrawValueItem {
 } MenuDrawValueItem;
 
 typedef struct MenuDrawInner {
-    u8 pad00[0x18];
+    u8 pad00[4];
+    s32 flags;
+    u8 pad08[0x10];
     MenuDrawValueItem *first;
     MenuDrawValueItem *item;
     s32 active;
+    u8 pad24[0xC];
+    s32 *delay;
 } MenuDrawInner;
 
 typedef struct MenuDrawObject {
@@ -155,7 +162,36 @@ void mnuDrawListChildrenWithCountdown(s32 x, s32 y, s32 z, u8 *object, s32 drawA
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_002960F0);
+void func_002960F0(s32 x, s32 y, s32 z, s32 unused, u8 *objectData, s32 option) {
+    MenuDrawObject *object = (MenuDrawObject *)objectData;
+    MenuDrawInner *inner = object->inner;
+    s32 texture = D_00438FC8->textures[0];
+    s32 mode = inner->delay[1];
+    s32 flags = inner->flags;
+    f32 alpha = 0.0f;
+
+    switch (mode) {
+    case 1:
+        alpha = (f32)inner->delay[0] / 15.0f;
+        alpha = 1.0f - alpha;
+        break;
+    case 2:
+        alpha = (f32)inner->delay[0] / 15.0f;
+        break;
+    }
+    if (flags & 1) {
+        func_00306CD0(D_003D03F0[20][MENU_ICON_X] << 4,
+                      D_003D03F0[20][MENU_ICON_Y] << 3,
+                      0, (u32)(alpha * 256.0f), 0,
+                      texture, D_003D03F0[20][MENU_ICON_FRAME], option);
+    }
+    if (flags & 2) {
+        func_00306CD0(D_003D03F0[21][MENU_ICON_X] << 4,
+                      D_003D03F0[21][MENU_ICON_Y] << 3,
+                      0, (u32)(alpha * 256.0f), 0,
+                      texture, D_003D03F0[21][MENU_ICON_FRAME], option);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00296298);
 
@@ -234,6 +270,7 @@ void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 optio
 
 extern s32 datGameState;
 extern void sndSetSequenceVolumePan(s32, s32, s32);
+
 
 void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     char text[16];
@@ -317,3 +354,4 @@ INCLUDE_SDATA(const s32, "game/code_00294730", D_00437970);
 INCLUDE_SDATA(const s32, "game/code_00294730", D_00437978);
 
 INCLUDE_SDATA(const s32, "game/code_00294730", D_00437980);
+

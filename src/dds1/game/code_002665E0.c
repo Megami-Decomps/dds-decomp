@@ -1,7 +1,7 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "game/code_002665E0", func_002665E0);
 
+INCLUDE_ASM(const s32, "game/code_002665E0", func_002665E0);
 INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFBB0);
 
 INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFBC0);
@@ -11,8 +11,8 @@ INCLUDE_ASM(const s32, "game/code_002665E0", func_00266668);
 INCLUDE_ASM(const s32, "game/code_002665E0", func_00266908);
 
 INCLUDE_ASM(const s32, "game/code_002665E0", func_00266B10);
-
 INCLUDE_ASM(const s32, "game/code_002665E0", func_00266BC0);
+
 
 INCLUDE_ASM(const s32, "game/code_002665E0", func_00266E28);
 

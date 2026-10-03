@@ -2118,7 +2118,7 @@ void fldSetCameraMoveMode(u32 value) {
     D_003BAD20 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012E510);
+INCLUDE_ASM(void, "game/code_00126A30", func_0012E510);
 
 void fldClearCameraMoveMode(void) {
     D_003BAD1C = 0;

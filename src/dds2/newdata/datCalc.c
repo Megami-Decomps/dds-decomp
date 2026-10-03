@@ -116,7 +116,7 @@ u32 datComputeSkillBoostedMaxMp(DatSkillOwner *unit) {
 
 /* Add delta to current HP, then clamp to 0..maxHp. Preserve unsigned
  * addition, signed comparisons and the final s16 cast. */
-void datMoveCursorX(DatCalcCursor *unit, s32 delta) {
+void datAdjustCurrentHp(DatCalcCursor *unit, s32 delta) {
     u32 currentHp;
 
     currentHp = (u32)unit->hp + delta;
@@ -130,7 +130,7 @@ void datMoveCursorX(DatCalcCursor *unit, s32 delta) {
 }
 
 /* Add delta to current MP and clamp with the same integer/cast rules as HP. */
-void datMoveCursorY(DatCalcCursor *unit, s32 delta) {
+void datAdjustCurrentMp(DatCalcCursor *unit, s32 delta) {
     u32 currentMp;
 
     currentMp = (u32)unit->mp + delta;
@@ -220,7 +220,7 @@ s32 datUnitHasSkill(DatSkillOwner *unit, s32 skillId) {
 /* Unless a skip-status bit is set, adjust only the low 16 bits by exact masked
  * status: 8/0x100 floor at 200, 2 at 150, 1 at 300, and 4 forces one.
  * High bits are retained; combined or unlisted statuses leave the value alone. */
-s32 datAdjustCalculatedValueForStatus(DatUnitStatus *unit, s32 packedValue) {
+s32 datRaiseCalculatedValueFloor(DatUnitStatus *unit, s32 packedValue) {
     if ((packedValue & DAT_CALC_SKIP_STATUS_MASK) == 0) {
         switch (unit->status & DAT_STATUS_VALUE_MASK) {
         case 8:
@@ -261,7 +261,7 @@ u32 datReadHighHalfOfCalculatedValue(void) {
 
 /* Map one exact flag to a stat index. Flag one and unknown/combined flags
  * return -1; shared destination indices are intentional. */
-s32 datMapFlagToStatIndex(s32 flag) {
+s32 datFlagToElementIndex(s32 flag) {
     s32 statIndex = -1;
 
     switch (flag) {

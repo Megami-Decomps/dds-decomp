@@ -92,7 +92,7 @@ extern u8 kwlnPositionedTextSurface[];
 
 extern s8 D_0037F53B[];
 
-extern void func_0010B650(void *arg0);
+extern void evtDrawHeapUsageOverlay(void *arg0);
 
 typedef struct {
     f32 x;
@@ -490,7 +490,7 @@ extern void *func_0033B050(EvtQuadDesc *);
 extern void func_003332E8(void *, u32);
 extern void sdfQueueAssetRelease(void *);
 
-void func_00109780(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, f32 x3, f32 y3, f32 z3, u32 i0, u32 i1, u32 i2, u32 i3) {
+void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, f32 x3, f32 y3, f32 z3, u32 i0, u32 i1, u32 i2, u32 i3) {
     EvtQuadDesc desc;
     DrawVec4 verts[4];
     s32 indices[4];
@@ -1307,7 +1307,7 @@ extern void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32
                                            const char *text, ...);
 extern void func_0010B3D8(void *list, s32 source, s32 end);
 
-void func_0010B650(void *owner) {
+void evtDrawHeapUsageOverlay(void *owner) {
     s32 general[6];
     SdfChipStats chip;
     char text[100];
@@ -1333,7 +1333,7 @@ s32 func_0010B780(void) {
     if (D_0037F53B[0] != 0) {
         return 0;
     }
-    func_0010B650(kwlnPositionedTextSurface);
+    evtDrawHeapUsageOverlay(kwlnPositionedTextSurface);
     return 0;
 }
 

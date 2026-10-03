@@ -275,7 +275,7 @@ extern s32 fldGetRowValue(s32);
 
 extern u32 fldGetSelectedActorMotionId(void);
 
-extern void func_00125F58(void);
+extern void fldPreparePlayerSceneCameraTarget(void);
 
 extern s32 D_0043633C;
 
@@ -557,7 +557,7 @@ s32 fldCmdReleaseCurrentObject(void) {
     }
     dds3InvokeSlot1Handler(fldPlayerObject, 0);
     fldSetCameraNodeModeWithTen();
-    func_00125F58();
+    fldPreparePlayerSceneCameraTarget();
     D_003898B0[0] = 0;
     return 1;
 }
@@ -655,7 +655,7 @@ s32 fldCmdSetScenePhaseThree(void) {
     return 1;
 }
 
-s32 func_00154B00(void) {
+s32 fldCmdSetLookAtHeading(void) {
     FldWorkView *cam;
     FldVec3 near;
     FldVec3 far;

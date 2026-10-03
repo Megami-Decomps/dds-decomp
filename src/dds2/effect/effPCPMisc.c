@@ -9,7 +9,7 @@ extern u32 func_0016D290(u32 handle);
 extern void effPCPThunderSetParam58(void *work, u32 value);
 extern void func_0016D9D8(u32 handle);
 extern u32 sdfCountMapPositionRecords(void *model);
-extern u32 func_00197D68(void *owner, s32 kind, void *place);
+extern u32 effEventCreate(void *owner, s32 kind, void *place);
 
 
 
@@ -2246,7 +2246,7 @@ typedef struct {
     u32 frame;
 } EffPCPSharedTrailRef;
 
-EffPCPSharedTrailRef *func_00182B48(EffPCPTrailParams *params) {
+EffPCPSharedTrailRef *effPcpCreateSharedTrailRef(EffPCPTrailParams *params) {
     EffPCPSharedTrailRef *ref = sdfAllocSizeClassBlock(sizeof(*ref));
 
     ref->frame = 0;
@@ -2361,7 +2361,7 @@ void effSetSharedScale(u32 unused, f32 value) {
 }
 
 
-EffPCPTrailWork *func_00182DD8(EffPCPTrailParams *params) {
+EffPCPTrailWork *effPcpTrailCreate(EffPCPTrailParams *params) {
     EffPCPTrailWork *work = sdfAllocSizeClassBlock(sizeof(EffPCPTrailWork));
 
     work->obj = (EffPCPTrailObj *)effCloneBlurTemplate(&params->res);
@@ -2483,7 +2483,7 @@ static inline s32 effPcpInterpolateCompactExtent(s32 from, s32 to,
 }
 
 /* vu0 routine: project the compact rectangle's world-space center to screen. */
-void effPcpUpdateCompactBlurRect(EffPCPCompactFadeWork *work) {
+void effPcpCompactEffectUpdate(EffPCPCompactFadeWork *work) {
     f32 projected[4];
     s32 frame = work->frame;
     s32 duration = work->duration;
@@ -2578,7 +2578,7 @@ void effPcpCompactLongRelease(EffPCPCompactFadeWork *work) {
 }
 
 /* vu0 routine: project the compact textured rectangle's world-space center. */
-void effPcpUpdateCompactTexturedBlurRect(EffPCPCompactFadeWork *work) {
+void effPcpCompactLongUpdate(EffPCPCompactFadeWork *work) {
     f32 projected[4];
     s32 frame = work->frame;
     s32 duration = work->duration;
@@ -4006,7 +4006,7 @@ void effPcpThunderBurstRelease(EffPCPBurstWork *work) {
 }
 
 /* vu0 routine: normalize the muzzle direction for the thunder ray. */
-void func_00187988(EffPCPBurstWork *work) {
+void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
     f32 point[4] __attribute__((aligned(16)));
     f32 direction[4] __attribute__((aligned(16)));
     f32 dirX;
@@ -4094,7 +4094,7 @@ typedef struct EffPCPGrowWork {
     void *handle;
 } EffPCPGrowWork;
 
-EffPCPGrowWork *func_00187AA8(EffPCPScaledThunderParams *params) {
+EffPCPGrowWork *effPcpCreateScaledThunder(EffPCPScaledThunderParams *params) {
     EffPCPGrowWork *work = sdfAllocSizeClassBlock(sizeof(EffPCPGrowWork));
     void *handle;
 
@@ -4120,7 +4120,7 @@ void effPcpScaledEffectCreateFromTable(void *data) {
     void *work;
 
     work = effParamTableGetBlock(data, 0);
-    func_00187AA8(work);
+    effPcpCreateScaledThunder(work);
 }
 
 
@@ -4135,7 +4135,7 @@ void effPcpCreateScaledEffectFromResource(EffPCPGrowWork *work) {
     params.base = work->base;
     params.target = work->target;
     params.res = *res;
-    func_00187AA8(&params);
+    effPcpCreateScaledThunder(&params);
 }
 
 void effPcpScaledEffectRelease(EffPCPGrowWork *work) {
@@ -4176,7 +4176,7 @@ extern void *sdfCreateAssetWithDrawEntries(void);
 extern void func_003332D0(void *asset, f32 scale);
 
 /* vu0 routine: initialize both transforms with the libvu0 identity primitive. */
-EffPCPBeamNode *effPcpCreateBeamGeometryNode(u32 segments) {
+EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
     u32 count = segments * 4 + 4;
     EffPCPBeamNode *node = sdfAllocSizeClassBlock(sizeof(EffPCPBeamNode));
     void *allocation = sdfAllocGeneralBlock(count * 20);
@@ -4221,7 +4221,7 @@ extern s32 func_00167A10(EffPCPBeamDrawParams *params);
 extern void sdfAppendPacket(s32 list, s32 packet);
 
 /* vu0 routine: compose the beam transform and submit batches of its vertices. */
-void func_00187FC8(EffPCPBeamNode *node) {
+void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {
     f32 scaleMatrix[4][4];
     s32 list;
     s32 count;
@@ -4327,7 +4327,7 @@ u8 *effBeamEffectClone(src)
         src->segments = 3;
         segments = 3;
     }
-    node = effPcpCreateBeamGeometryNode(segments);
+    node = effPcpBeamNodeCreate(segments);
     i = 0;
     work->node = node;
     work->vertexCount = node->vertexCount;
@@ -4491,7 +4491,7 @@ u8 *effBeamEffectCloneLarge(src)
         src->segments = 3;
         segments = 3;
     }
-    node = effPcpCreateBeamGeometryNode(segments);
+    node = effPcpBeamNodeCreate(segments);
     i = 0;
     work->node = node;
     groups = (s32)node->vertexCount >> 2;
@@ -4555,7 +4555,7 @@ void effPcpUpdateBeamTimeline(EffPCPBeamLargeWork *work) {
     beam = work->node;
     beam->color = color;
     PCP_COPY_VECTOR(&beam->position, work);
-    func_00187FC8(beam);
+    effPcpDrawBeamGeometryNode(beam);
     work->frame++;
 }
 
@@ -5049,7 +5049,7 @@ EffPCPDriftEventWork *effPcpEntryWorkBCreate(EffPCPDriftEventParams *src, void *
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
-        entry->event = (void *)func_00197D68(work->owner, 2, &place);
+        entry->event = (void *)effEventCreate(work->owner, 2, &place);
         if (life > 0) {
             entry->frame = -(effMiscRand(D_003AA868) % life);
         } else {
@@ -5069,7 +5069,7 @@ void func_00189FF0(void *data) {
     effPcpEntryWorkBCreate(work0, work1);
 }
 
-EffPCPDriftEventWork *func_0018A038(EffPCPDriftEventWork *src) {
+EffPCPDriftEventWork *effPcpCloneDriftEventWork(EffPCPDriftEventWork *src) {
     u32 count = src->params.count;
     void *handle = sdfAllocGeneralBlock(count * 24 + 0x11C);
     EffPCPDriftEventWork *work = sdfResourceRetainAddress(handle);
@@ -5100,7 +5100,7 @@ EffPCPDriftEventWork *func_0018A038(EffPCPDriftEventWork *src) {
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
-        entry->event = (void *)func_00197D68(src->owner, 2, &place);
+        entry->event = (void *)effEventCreate(src->owner, 2, &place);
         if (life > 0) {
             entry->frame = -(effMiscRand(D_003AA868) % life);
         } else {
@@ -5146,8 +5146,9 @@ void effPcpDriftRandomizeSlot(EffPCPDriftEventWork *work, s32 index) {
     slot->angleStep = work->params.angleStep * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
 }
 
+
 /* vu0 routine: place delayed drift events along expanding rotating rings. */
-void func_0018A428(EffPCPDriftEventWork *work) {
+void effPcpUpdateDriftEventRing(EffPCPDriftEventWork *work) {
     EffPCPEventPlace place;
     f32 base[4] __attribute__((aligned(16)));
     u32 count = work->params.count;
@@ -5287,8 +5288,8 @@ EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
         entry->fragment = (u32)effThunderFragCreate(src->fragmentParams);
-        entry->eventA = (void *)func_00197D68(work->ownerA, 2, &place);
-        entry->eventB = (void *)func_00197D68(work->ownerB, 2, &place);
+        entry->eventA = (void *)effEventCreate(work->ownerA, 2, &place);
+        entry->eventB = (void *)effEventCreate(work->ownerB, 2, &place);
         entry->delay = -(effMiscRand(D_003AA868) % life);
         entry++;
     }
@@ -5306,7 +5307,7 @@ void effPcpDriftCreateFromTable(void *data) {
     effPcpCreateDelayedDriftEntries(work0, work1, work2);
 }
 
-EffPCPPairedEventWork *func_0018A950(EffPCPPairedEventWork *src) {
+EffPCPPairedEventWork *effPcpClonePairedDriftEvents(EffPCPPairedEventWork *src) {
     u32 count = src->params.count;
     void *handle = sdfAllocGeneralBlock(count * 32 + 0xA4);
     EffPCPPairedEventWork *work = sdfResourceRetainAddress(handle);
@@ -5338,8 +5339,8 @@ EffPCPPairedEventWork *func_0018A950(EffPCPPairedEventWork *src) {
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
         entry->fragment = (u32)effThunderFragCreate(src->params.fragmentParams);
-        entry->eventA = (void *)func_00197D68(src->ownerA, 2, &place);
-        entry->eventB = (void *)func_00197D68(src->ownerB, 2, &place);
+        entry->eventA = (void *)effEventCreate(src->ownerA, 2, &place);
+        entry->eventB = (void *)effEventCreate(src->ownerB, 2, &place);
         entry->delay = -(effMiscRand(D_003AA868) % life);
         entry++;
     }
@@ -5462,7 +5463,7 @@ void *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *src, void *params)
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
-        entry->event = (void *)func_00197D68(work->owner, 2, &place);
+        entry->event = (void *)effEventCreate(work->owner, 2, &place);
         if (life > 0) {
             entry->delay = -(effMiscRand(D_003AA868) % life);
         } else {
@@ -5482,7 +5483,7 @@ void effPcpSlotEffectCreateFromTable(void *data) {
     effPcpCreateDelayedEventEntries(work0, work1);
 }
 
-EffPCPSpawnRangeWork *func_0018B398(EffPCPSpawnRangeWork *src) {
+EffPCPSpawnRangeWork *effPcpCloneSpawnRangeEvents(EffPCPSpawnRangeWork *src) {
     u32 count = src->params.count;
     void *handle = sdfAllocGeneralBlock(count * 32 + 0xAC);
     EffPCPSpawnRangeWork *work = sdfResourceRetainAddress(handle);
@@ -5513,7 +5514,7 @@ EffPCPSpawnRangeWork *func_0018B398(EffPCPSpawnRangeWork *src) {
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
-        entry->event = (void *)func_00197D68(work->owner, 2, &place);
+        entry->event = (void *)effEventCreate(work->owner, 2, &place);
         if (life > 0) {
             entry->delay = -(effMiscRand(D_003AA868) % life);
         } else {
@@ -5564,6 +5565,7 @@ void effPcpRandomizeSpawnSlot(EffPCPSpawnRangeWork *work, s32 index) {
     spread = work->params.endJitter;
     slot->positionStep = (work->params.endPosition * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->params.duration;
 }
+
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018B778);
 
@@ -5656,7 +5658,7 @@ void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
         entry->hasMoved = 0;
         entry->age = 0;
         entry->frameLimit = 0;
-        entry->event = (void *)func_00197D68(work->owner, 2, &place);
+        entry->event = (void *)effEventCreate(work->owner, 2, &place);
         entry++;
     }
 }
@@ -5735,12 +5737,12 @@ void effDestroyParticleEvents(EffPCPMapEventWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-extern void func_00197F40(void *event, f32 scale);
+extern void effEventSetScale(void *event, f32 scale);
 extern void effEventCopyFileRecordHeader(void *dst, const void *src);
 extern void func_00197F60(void *event);
 
 /* vu0 routine: latch map-node motion, then place and fade each event. */
-void func_0018BD88(EffPCPMapEventWork *work) {
+void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {
     EffPCPEventPlace place;
     f32 position[4] __attribute__((aligned(16)));
     f32 initialPosition[4] __attribute__((aligned(16)));
@@ -5783,7 +5785,7 @@ void func_0018BD88(EffPCPMapEventWork *work) {
         entry = work->entries;
         for (i = 0; i < count; i++, entry++) {
             if (frame == 0) {
-                func_00197F40(entry->event, work->scale);
+                effEventSetScale(entry->event, work->scale);
             }
             if (frame >= 0) {
                 sdfLoadMapRecordPositionVector(mapHandle, i);

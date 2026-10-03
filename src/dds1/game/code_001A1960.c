@@ -632,7 +632,7 @@ u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
 }
 
 void func_001A4060(void) {
-    datMapFlagToStatIndex();
+    datFlagToElementIndex();
 }
 
 s32 btlCheckSpecialAbility(s32 object, s32 flag) {
@@ -770,7 +770,7 @@ s32 btlCountAvailableParticipants(void) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A47F0);
+INCLUDE_ASM(const f32, "game/code_001A1960", func_001A47F0);
 
 void btlClearAllActorEntrySlots(u32 arg0) {
     u32 temp_v0;
@@ -1112,7 +1112,7 @@ s32 btlRollFearChance(s32 unused, u8 *actor, u32 flags, u32 options) {
     return btlRollAiBucket() < ratio;
 }
 
-s32 func_001A6828(s32 unused, UiObject *unit, u32 flags, s32 unusedFlags,
+s32 btlRollAllFearChance(s32 unused, UiObject *unit, u32 flags, s32 unusedFlags,
                   u8 useSelectedAction) {
     s32 actionThreshold;
     s32 statusThreshold;
@@ -4029,3 +4029,4 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3268);
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3278);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A32F0);
+

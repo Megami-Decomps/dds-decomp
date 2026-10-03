@@ -628,3 +628,4 @@ s32 evtInitializeEffectObjectData(EffectObject *obj) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_001130E0", D_003BA9D0);
+

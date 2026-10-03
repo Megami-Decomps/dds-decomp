@@ -36,7 +36,7 @@ void sdfReleaseChipBlock(void *arg0);
 void sdfFreeMemoryFromEitherHeap(void *arg0);
 void sdfPendingQueuePush(void *arg0, void *arg1);
 void *sdfTexCreateResourcePacket(SdfTex *arg0, s32 arg1);
-SdfTex *func_002D30C8(SdfTextureFileHeader *header, s32 mode);
+SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode);
 void *sdfAllocSizeClassBlock(s32 arg0);
 u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
@@ -176,10 +176,10 @@ extern SdfTex *func_002D2AB8(s32, s32, u32, u32, u32, u32);
 extern u8 func_002D2390(SdfTex *);
 extern void func_002D2A58(SdfTex *);
 extern u8 *sdfTexSubmitPixelsForFormat(SdfTex *, s32, u8 *, s32);
-extern s32 sdfTexGetStorageBitsPerPixel(s32);
+extern s32 sdfTexFormatSizeHint(s32);
 extern u8 *sdfTexSubmitImageCopy(u32, s32, s32, u32, u8 *, s32);
 
-SdfTex *func_002D30C8(SdfTextureFileHeader *header, s32 mode) {
+SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
     SdfTex *texture;
     u8 *pixels;
     s32 format;
@@ -217,7 +217,7 @@ SdfTex *func_002D30C8(SdfTextureFileHeader *header, s32 mode) {
     height = texture->height;
     levels = texture->maxMipLevel;
     destination = sdfTexGetPrimaryResourceWord(texture);
-    bits = sdfTexGetStorageBitsPerPixel(format);
+    bits = sdfTexFormatSizeHint(format);
     do {
         pixels = sdfTexSubmitImageCopy(destination, width, height, format, pixels, mode);
         levels--;
@@ -231,12 +231,12 @@ SdfTex *func_002D30C8(SdfTextureFileHeader *header, s32 mode) {
 
 /* Process a resource address with packet variant zero. */
 void sdfTexAcquireResourceTexture(void *resourceAddress) {
-    func_002D30C8(resourceAddress, 0);
+    sdfTexCreateFromFileHeader(resourceAddress, 0);
 }
 
 /* Process a resource address with packet variant one. */
 void sdfTexAcquireAlternateResourceTexture(void *resourceAddress) {
-    func_002D30C8(resourceAddress, 1);
+    sdfTexCreateFromFileHeader(resourceAddress, 1);
 }
 
 /* Build one intensity byte for every source pixel. */

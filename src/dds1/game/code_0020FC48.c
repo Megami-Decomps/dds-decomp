@@ -61,7 +61,7 @@ extern s32 btlGroupNodeHeads[];
 
 extern s32 btlGroupIdHeads[];
 
-extern void func_003014F0(char *, const char *, const char *, s32);
+extern s32 func_003014F0(char *, const char *, ...);
 
 extern s32 btlGetRuntime(void);
 
@@ -93,7 +93,55 @@ extern char D_003A66F0[];
 
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_0020FC48);
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_0020FF50);
+extern u8 *datBattleSceneRecords;
+const char D_003A6738[0x20] = "/event/e%03d/e%03d/scr/e%03d.bf";
+const char D_003A6758[0x10] = "btl:event[%s]\n";
+const char D_003A6768[0x20] = "btl:event BE load[e%03d]\n";
+const char D_003A6788[0x18] = "btl:event SMG load[%X]\n";
+extern void *sdfReadNamedResource(const char *, void *, s32);
+extern s32 mnuCampCreateTask(s32);
+extern void func_00101A80(s32, s32);
+
+void func_0020FF50(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    u32 battleMode = battle->battleMode;
+    u16 sceneEvent;
+    s16 eventId;
+    char path[0x80];
+    s32 task;
+
+    battle->eventTaskId = -1;
+    battle->eventAction = -1;
+    battle->eventActive = 0;
+    battle->scriptFlags = 0;
+    battle->eventFlags = 0;
+    battle->scriptHandle = 0;
+    battle->eventAssets = 0;
+    battle->eventRequest = 0;
+    battle->eventData = 0;
+    if (battleMode >= 0x400) {
+        return;
+    }
+    sceneEvent = *(u16 *)(datBattleSceneRecords + battleMode * 0x28 + 0x26);
+    if (sceneEvent == 0) {
+        return;
+    }
+    eventId = (s16)sceneEvent;
+    battle->eventTaskId = eventId;
+    func_003014F0(path, D_003A6738, eventId - eventId % 10, eventId, eventId);
+    battle->eventAssets = sdfReadNamedResource(path, &battle->scriptHandle, 0);
+    btlBossDebugPrintf(D_003A6758, path);
+    task = mnuCampCreateTask(battle->eventTaskId);
+    btlBossDebugPrintf(D_003A6768, battle->eventTaskId);
+    func_00101A80((s32)battle->scriptOwner, task);
+    battle->sequenceHandle =
+        ((battle->eventTaskId - 0x384) << 16) + 0x1E60000;
+    if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == 0) {
+        sndEnsureMidiBankResident(battle->sequenceHandle);
+        btlBossDebugPrintf(D_003A6788, battle->sequenceHandle);
+    }
+    battle->eventFlags |= 2;
+}
 
 extern char D_003A67A0[], D_003A67B8[];
 
@@ -414,6 +462,14 @@ s32 btlIndexListMatchesEntryCodes(void *list, s32 code, u32 mask) {
     }
     return matched == count;
 }
+
+INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6738);
+
+INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6758);
+
+INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6768);
+
+INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6788);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A67A0);
 

@@ -214,7 +214,7 @@ void evtSetUnitRgbTransition(EvtUnit *unit, s32 duration, u32 color) {
     }
 }
 
-void func_00221EF0(EvtUnit *unit, s32 duration, u32 color) {
+void evtSetUnitAlphaTransition(EvtUnit *unit, s32 duration, u32 color) {
     u8 *work = (u8 *)unit;
 
     *(s16 *)(work + 0x15A) = duration;

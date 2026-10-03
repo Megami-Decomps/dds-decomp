@@ -123,7 +123,7 @@ extern void *sdfAllocSizeClassBlock(s32 bytes);
 extern void *memset(void *destination, s32 value, u32 bytes);
 extern EffPrim *func_0019A900(f32 *data, u32 count, s32 mode);
 
-Dds3PathCurveWork *func_00116FA0(ActionObj *object) {
+Dds3PathCurveWork *dds3CreatePathCurveWork(ActionObj *object) {
     Dds3PathCurveTable *table = object->unk18;
     Dds3PathCurveEntry *entry;
     Dds3PathKeyframes *keys;

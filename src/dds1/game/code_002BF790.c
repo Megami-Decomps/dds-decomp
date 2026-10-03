@@ -217,7 +217,7 @@ typedef struct GridAngleOwner {
 } GridAngleOwner;
 
 /* Apply the MOVE_01 easing to the bounds and packed colors, then return its cycle step. */
-s32 func_002BFBA8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
+s32 itfGridApplySqrtBoundsAndColorScale(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
     GridAngleTable *table = owner->slot->table;
     s32 deltas[2];
     s32 *dimensionOut = (s32 *)((u8 *)out + 4);

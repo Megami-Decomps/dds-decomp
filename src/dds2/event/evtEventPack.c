@@ -30,6 +30,7 @@ typedef struct EvtFieldBeTaskData {
     EvtFieldBeEntry *entries;
 } EvtFieldBeTaskData;
 
+
 /* Start a field BE from the task's resource table when all four payloads exist. */
 s32 func_0025D390(s32 eventId, s32 resourceId) {
     EvtFieldBeTaskData *data;
@@ -175,7 +176,7 @@ extern s32 filePollEntryCleanup(struct FileCleanup *);
 extern u32 sdfResourceRetainAddress(struct SdfAllocation *);
 extern char D_004377E8[];
 
-void func_0025D7E0(EvtPackLoadState *state) {
+void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
     EvtPackScriptHeader *header;
     s32 i;
 
@@ -214,7 +215,7 @@ s32 evtTickPackLoad(void) {
         }
         break;
     case 1:
-        func_0025D7E0(state);
+        evtCompleteEventPackScriptLoad(state);
         break;
     }
     return 0;

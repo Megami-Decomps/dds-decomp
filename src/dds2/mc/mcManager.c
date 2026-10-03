@@ -152,7 +152,7 @@ void mcCloseOpenFile(void) {
 
 /* Despite its name, poll once rather than waiting; success requires status
  * zero, -4 maps to -2 and other completed statuses to -1. */
-s32 fileWaitCommandDone(void) {
+s32 mcPollZeroCommandResult(void) {
     s32 commandId;
     s32 commandResult;
 
@@ -191,13 +191,13 @@ s32 mcPollCompletionStatus(void) {
 
 /* Begin the SDK write through the existing unprototyped call. Keep its
  * argument form unchanged; this entry does not report completion. */
-void fileWriteBegin(s32 request, u32 first, u32 second) {
+void mcBeginWrite(s32 request, u32 first, u32 second) {
     func_0034F490();
 }
 
 /* Poll once: any completed nonnegative write status returns 1; -4 becomes
  * -2 and other negatives become -1. Non-complete SDK polls map to 0. */
-s32 fileWriteWait(void) {
+s32 mcPollWriteCompletion(void) {
     u32 commandId;
     s32 commandResult;
     s32 pollResult = func_0034F680(MC_SYNC_POLL_MODE, &commandId, &commandResult);

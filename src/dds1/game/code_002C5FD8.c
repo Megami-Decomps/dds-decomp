@@ -137,7 +137,7 @@ typedef struct SdfCounterRuntime {
     SdfCounterTimer *timer;         /* 0x30 */
 } SdfCounterRuntime;
 
-s32 func_002C5FB8(u32 arg0);
+s32 sdfCounterMeasureLabelWidth(u32 arg0);
 
 s32 fldCountMaskBitsBeforeOrdinal(s32 mask, s32 ordinal) {
     s32 bitIndex = 0;
@@ -245,7 +245,7 @@ extern SdfCounterRuntime *sdfActiveCounterRuntime;
 extern void func_001093B8(s32, s32, s32, s32, u32, u32, u32, u32);
 extern void sdfCounterDrawGlyphAtGridCell(s32, s32, u32, const u8 *);
 
-void func_002C6130(s32 x, s32 y) {
+void sdfCounterDrawFadingLabelPanel(s32 x, s32 y) {
     SdfCounterDisplay *display = sdfActiveCounterRuntime->channel->display;
     f32 fade = 1.0f;
     s32 color;
@@ -259,7 +259,7 @@ void func_002C6130(s32 x, s32 y) {
     color = ((s32)(fade * 0.3f) << 24) | 0x5A3335;
     func_001093B8(0, 0x17E, 0x100, 0x1A, 0x5A3335, color, color, 0x5A3335);
     func_001093B8(0x100, 0x17E, 0x100, 0x1A, color, 0x5A3335, 0x5A3335, color);
-    width = func_002C5FB8((u32)display->info);
+    width = sdfCounterMeasureLabelWidth((u32)display->info);
     x = (s32)((f32)x - (f32)width * 0.5f);
     style = ((u32)fade & 0xFF) | 0x80808000;
     sdfCounterDrawGlyphAtGridCell(x, y, style, display->info);
@@ -325,19 +325,19 @@ INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C6EC8);
 
 extern MapRequestState *sdfCreateLinkedRequestRing(s16, s16);
 
-extern void func_002C7180(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
+extern void fldDrawMapRequestHalo(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
 
-extern void func_002C7430(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
+extern void fldDrawMapRequestPulse(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
 
 void fldSetMapRequestInterval(MapRequestState *state, u16 interval);
 
 /* Allocate the two map request queues and install their dispatch callbacks. */
 void fldCreateMapRequestQueues(void) {
     D_003BD988 = sdfCreateLinkedRequestRing(0x14, 0xC);
-    D_003BD988->callback = func_002C7180;
+    D_003BD988->callback = fldDrawMapRequestHalo;
     fldSetMapRequestInterval(D_003BD988, 0);
     D_003BD98C = sdfCreateLinkedRequestRing(0x14, 0x18);
-    D_003BD98C->callback = func_002C7430;
+    D_003BD98C->callback = fldDrawMapRequestPulse;
 }
 
 /* Release both map request queues. */
@@ -347,7 +347,7 @@ void fldReleaseMapRequestQueues(void) {
 }
 
 /* Draw the auxiliary map texture centred on the requested position. */
-void func_002C7080(s32 x, s32 y, u32 colour, f32 scale) {
+void fldDrawScaledAuxMapTexture(s32 x, s32 y, u32 colour, f32 scale) {
     evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
     func_00108FA0((s32)(x - scale * 16.0f), (s32)(y - scale * 12.0f),
                   (s32)(scale * 32.0f), (s32)(scale * 24.0f),
@@ -358,7 +358,7 @@ void func_002C7080(s32 x, s32 y, u32 colour, f32 scale) {
 /* Four corners use the same grey pulse colour. */
 #define MAP_GREY_COLOR(alpha) (((u32)(alpha) << 24) | 0x808080)
 
-void func_002C7180(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *node, f32 progress) {
+void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *node, f32 progress) {
     s32 gridX;
     s32 gridY;
     f32 scale = (1.0f - progress) * 2.0f + progress;
@@ -384,7 +384,7 @@ void func_002C7180(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *
 }
 
 
-void func_002C7430(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *node, f32 progress) {
+void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *node, f32 progress) {
     s32 gridX;
     s32 gridY;
     f32 scale = (1.0f - progress) * 3.0f + progress;
@@ -420,7 +420,7 @@ void sdfCommitPendingVectorAndMarkChanged(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C7738);
 
-void func_002C7950(void) {
+void fldDrawCounterMapMarker(void) {
     s32 x;
     s32 y;
     s8 index = sdfCounterGetDisplayValue() - 1;
@@ -435,7 +435,7 @@ void func_002C7950(void) {
     }
     func_002C7C58(D_003BD98C);
     fldProjectPointToGridCell(&x, &y, D_0038FE30[index][0], D_0038FE30[index][1], D_0038FE30[index][2]);
-    func_002C7080(x, y, MAP_GREY_COLOR(opacity * 32.0f), 5.0f);
+    fldDrawScaledAuxMapTexture(x, y, MAP_GREY_COLOR(opacity * 32.0f), 5.0f);
 }
 
 extern u32 sdfAllocGeneralBlock(s32 size);

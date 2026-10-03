@@ -1282,7 +1282,7 @@ ItfMesNode *itfMesBuildNodeRows(u32 *items, s32 itemCount, u32 mask, s32 x, s32 
 /* Discard (to - from - 1) preceding rows when positive, retain the next
  * complete y-group and queue everything after it. Requires non-NULL input;
  * return NULL if discarding preceding rows exhausts the chain. */
-ItfMesNode *func_001A5760(ItfMesNode *node, s32 from, s32 to) {
+ItfMesNode *itfMesTrimGlyphChainToRow(ItfMesNode *node, s32 from, s32 to) {
     s32 rowsToDiscard = to - from - 1;
     s32 rowY = node->y;
     ItfMesNode *nextNode;

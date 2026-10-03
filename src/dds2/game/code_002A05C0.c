@@ -84,7 +84,7 @@ INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A05C0);
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A08D8);
 
 /* Complete the result screen after five counter pairs have settled. */
-s32 func_002A0EE8(void) {
+s32 brsPollResultCounterCompletion(void) {
     KwlnTask *task = func_00101740(D_00428550);
     BrsResultWork *work;
     s32 i;
@@ -794,10 +794,10 @@ void func_002A2AA0(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2AC0);
-
 extern void mnuStopTitleMovieDraw(void);
 
 extern void func_003458E8(u32);
+
 
 extern void mnuReleaseMenuResourceSlots(void);
 

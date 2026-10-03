@@ -902,7 +902,7 @@ SndMessageNode *func_001A7A98(SndMessageNode *node) {
     return node;
 }
 
-void func_001A7B00(s32 *bounds, s32 *region, s32 x, s32 y,
+void itfQueueOffsetTexturedRect(s32 *bounds, s32 *region, s32 x, s32 y,
                    s32 alpha, s32 texture, s32 command) {
     s32 positions[4];
     s32 uv[4];
@@ -1466,11 +1466,11 @@ s32 btlComputeSkillAdjustedMaxMp() {
 }
 
 void btlAdjustUnitHp(void) {
-    datMoveCursorX();
+    datAdjustCurrentHp();
 }
 
 void btlAdjustUnitMp(void) {
-    datMoveCursorY();
+    datAdjustCurrentMp();
 }
 
 /* Cache the skill-adjusted maximum and return current HP clamped to it.
@@ -1848,7 +1848,7 @@ u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
 }
 
 void func_001AD090(void) {
-    datMapFlagToStatIndex();
+    datFlagToElementIndex();
 }
 
 extern s32 datUnitHasSkill();
@@ -2476,7 +2476,7 @@ extern s32 fldCountSceneSlots(void);
 /* Combine both contributions; groups of three or more suppress the 30% case. */
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415440);
 
-s32 func_001B09F0(s32 unused, UiObject *unit, u32 flags,
+s32 btlRollAllFearChance(s32 unused, UiObject *unit, u32 flags,
                   s32 unusedFlags, u8 useSelectedAction) {
     s32 actionThreshold;
     s32 statusThreshold;

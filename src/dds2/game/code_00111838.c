@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u32 func_00116FA0(u32);
+extern u32 dds3CreatePathCurveWork(u32);
 
 typedef struct ObjectResource {
     u32 owner;      /* 0x00: object passed to the slot constructor */
@@ -86,7 +86,7 @@ void dds3ReplaceObjectResource(ObjectWithResource *object) {
     if (resource->pathHandle != 0) {
         dds3FreePathObject(resource->pathHandle);
     }
-    pathHandle = func_00116FA0(resource->sourceObjectAddress);
+    pathHandle = dds3CreatePathCurveWork(resource->sourceObjectAddress);
     resource->pathHandle = pathHandle;
 }
 
@@ -113,7 +113,7 @@ void func_00111968(void) {
 }
 
 /* Number of slots a given object kind occupies in the slot ring. */
-s32 dds3GetObjectSlotRingOccupancy(u32 kind)
+s32 dds3SelectSlotForObjectKind(u32 kind)
 {
     s32 slots = 0;
 

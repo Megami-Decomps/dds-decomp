@@ -211,7 +211,7 @@ void mnuSlideBarSetState(u32 *work, s32 state) {
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
-void func_002A3FE0(SlideBar *bar, s32 value) {
+void mnuDrawAndAdvanceMovieMenuBar(SlideBar *bar, s32 value) {
     s32 offset;
 
     if (bar->active != 0 || bar->pos != 0) {
@@ -241,7 +241,7 @@ void mnuSlideBarSetStateB(u32 *state, u32 mode) {
 }
 
 
-void mnuDrawSlideBarAtOffset(SlideBar *bar, s32 value) {
+void mnuAdvanceSlideBarValue(SlideBar *bar, s32 value) {
     if (bar->active == 0 && bar->pos == 0) {
         return;
     }

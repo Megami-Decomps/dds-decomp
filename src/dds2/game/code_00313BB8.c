@@ -193,7 +193,7 @@ typedef struct PtyProfileUnit {
 
 void func_003140C8(s32 useCurrentProfile, u8 *unit);
 
-extern u32 func_0019FC38(s32, s32, u32, u16, u32, u32);
+extern u32 itfDrawBankTextWithLayoutFlags(s32, s32, u32, u16, u32, u32);
 
 extern void frFontSetChildColors(u32, u32);
 
@@ -1037,7 +1037,7 @@ u16 scrGetEntryLowFlags(u32 context, u16 entryId) {
 }
 
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
-    u32 handle = func_0019FC38(x, y, first, width, (u32)frFontColoredGlyphResource, 0);
+    u32 handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, (u32)frFontColoredGlyphResource, 0);
     frFontSetChildColors(handle, second);
     func_0019D550(handle, 1, option);
     frFontQueueGlyphInSelectedSlot(handle);

@@ -85,7 +85,7 @@ extern s32 func_00312C08(void);
 extern void EIntr(void);
 extern void (*D_003BD304)(s32 size, s32 allocationMode);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
-struct SdfTexHead *func_002D17D8(s32 size, s32 arg1);
+struct SdfTexHead *sdfTexAllocHeadLow(s32 size, s32 arg1);
 void sdfUpdateTextureHeadsWithInterruptsMasked(void *block);
 void sdfTexCreateSecondPacket(void);
 void sdfTexRefreshResourcePackets(void);
@@ -162,7 +162,7 @@ void func_002D14C8(void) {
             sdfGraphSelectDisplayBuffer(bufferIndex);
         }
         if (sdfPacketSlotIndex != 0) {
-            sdfPacketSlotIndex += 0xFF;
+            sdfPacketSlotIndex--;
         }
     }
 }
@@ -250,7 +250,7 @@ s32 sdfTexListContains(SdfTex *target) {
     return 0;
 }
 
-SdfTexHead *func_002D17D8(s32 size, s32 allocationMode) {
+SdfTexHead *sdfTexAllocHeadLow(s32 size, s32 allocationMode) {
     SdfTexHead *block;
     SdfTexHead *allocated;
     s32 interruptsEnabled;
@@ -296,7 +296,7 @@ SdfTexHead *func_002D17D8(s32 size, s32 allocationMode) {
     }
 }
 
-SdfTexHead *func_002D18F8(s32 size, s32 allocationMode) {
+SdfTexHead *sdfTexAllocHeadHigh(s32 size, s32 allocationMode) {
     SdfTexHead *block;
     SdfTexHead *allocated;
     s32 interruptsEnabled;
@@ -349,9 +349,9 @@ SdfTexHead *sdfTexAllocateHeadForDimensions(s32 width, s32 height, s32 format, s
     SdfTexHead *textureBlock;
 
     if (useFirstAllocator != 0) {
-        textureBlock = func_002D17D8(sizeWords, allocationMode);
+        textureBlock = sdfTexAllocHeadLow(sizeWords, allocationMode);
     } else {
-        textureBlock = func_002D18F8(sizeWords, allocationMode);
+        textureBlock = sdfTexAllocHeadHigh(sizeWords, allocationMode);
     }
     textureBlock->width = width;
     textureBlock->height = height;
@@ -436,7 +436,7 @@ SdfTexHead *sdfAllocImageBuffer(s32 width, s32 height, s32 format) {
     case SDF_PSMZ24:
         break;
     }
-    textureBlock = func_002D17D8((rowWidth * rowCount + 0x7FF) & -0x800, 1);
+    textureBlock = sdfTexAllocHeadLow((rowWidth * rowCount + 0x7FF) & -0x800, 1);
     textureBlock->width = width;
     textureBlock->height = height;
     textureBlock->format = format;
@@ -669,7 +669,7 @@ s32 sdfFormatBitsPerPixelC(u32 format) {
 }
 
 /* Storage-depth subset for indexed and 16-bit color formats; all other values return 32. */
-s32 sdfTexGetStorageBitsPerPixel(s32 format) {
+s32 sdfTexFormatSizeHint(s32 format) {
     s32 storageBitsPerPixel;
 
     switch (format) {
@@ -809,7 +809,7 @@ SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 max
     return tex;
 }
 
-extern SdfTexHead *func_002D2950(s32, s32, s32);
+extern SdfTexHead *sdfTexAllocHead(s32, s32, s32);
 extern void func_002D2A58(SdfTex *);
 extern void sdfTexCopyImageData(SdfTex *, void *);
 extern void sdfTexCreateFirstPacket(SdfTex *);
@@ -835,7 +835,7 @@ SdfTex *func_002D2800(SdfTex *source) {
     texture->auxiliaryAllocation = NULL;
     sdfTexListInsert(texture);
     if (texture->secondaryResource != NULL) {
-        texture->secondaryResource = (SdfTexResource *)func_002D2950(
+        texture->secondaryResource = (SdfTexResource *)sdfTexAllocHead(
             texture->pixelFormat, texture->clutFormat, texture->unk18);
         func_002D2A58(texture);
         sdfTexCopyImageData(texture, original->data);
@@ -847,7 +847,7 @@ SdfTex *func_002D2800(SdfTex *source) {
 }
 
 /* Allocate a texture head for a 0x20-byte (kind 0) or 0x10-byte (kind 2/10) unit; types 19/27 use unit*8 bytes and 0x20 rows, 20/36/44 use 0x40 bytes and 8 rows. */
-SdfTexHead *func_002D2950(s32 type, s32 kind, s32 unused) {
+SdfTexHead *sdfTexAllocHead(s32 type, s32 kind, s32 unused) {
     SdfTexHead *head = NULL;
     s32 unit;
     s32 size;
@@ -879,7 +879,7 @@ SdfTexHead *func_002D2950(s32 type, s32 kind, s32 unused) {
     default:
         return head;
     }
-    head = func_002D18F8(size, 3);
+    head = sdfTexAllocHeadHigh(size, 3);
     head->width = 8;
     head->height = height;
     head->format = kind;

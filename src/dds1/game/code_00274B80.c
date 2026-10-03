@@ -189,7 +189,7 @@ extern u8 D_0037CC74[];
 extern u8 D_0037CC3C[];
 extern u8 D_0037CAB0[];
 extern u8 D_0037CA78[];
-extern void mnuUpdateWindowListFromInput();
+extern void mnuStepPartyPanelListFromInput();
 extern void mnuClearListFlags();
 extern s32 sdfAllocGeneralBlock(s32);
 extern s32 *sdfResourceRetainAddress(s32);
@@ -346,7 +346,6 @@ void mnuPreparePartyPanelTransition(s32 menu) {
     mnuSetPopupEntryFlagged(menu + 0x54, (s32)D_0037CA58);
     mnuActivatePanelAndConfigureGridResources(((CampMenuContext *)menu)->display, ((CampMenuContext *)menu)->displayVariant, 0, 1);
 }
-
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00275920);
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00275B40);
@@ -473,7 +472,7 @@ s64 mnuStaffPopupUpdate(s32 callback) {
     }
     if (*popup == 0) {
         window = context + 0x15C;
-        mnuUpdateWindowListFromInput(4, window);
+        mnuStepPartyPanelListFromInput(4, window);
         if (buttons & 1) {
             *(s32 *)(menu + 0x18) = *((MenuSelectionList *)((CampMenuContext *)context)->selectionList)->selectedSlot;
             mnuSetPopupEntry(popup, D_0037CAB0);
@@ -612,7 +611,7 @@ s32 mnuStaffSwitchPartyPage(s32 contextArg) {
 extern s32 func_00286F48();
 extern u8 D_0037CA94[];
 
-s64 mnuPollStaffPartyBrowseInput(s32 callback) {
+s64 mnuStaffBrowsePartyUpdate(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     s32 *popup;

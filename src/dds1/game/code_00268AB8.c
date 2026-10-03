@@ -116,7 +116,7 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_00268AB8);
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00268D40);
 
 /* Complete the result screen after five counter pairs have settled. */
-s32 func_002692E0(void) {
+s32 brsPollResultCounterCompletion(void) {
     KwlnTask *task = kwlnTaskGetTaskByName(D_003AFBA0);
     BrsResultWork *work;
     s32 i;
@@ -348,7 +348,7 @@ s32 movCheckStartupSoundState(void) {
 }
 
 u32 func_002698C0(void) {
-    mnuRunTitleStreamTransitionAndLogBgm();
+    mnuTitleStreamUpdateAndLogBgm();
     return 1;
 }
 
@@ -594,7 +594,7 @@ extern void fileWaitIdle(void);
 
 INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFCF0);
 
-void mnuRunTitleStreamTransitionAndLogBgm(void) {
+void mnuTitleStreamUpdateAndLogBgm(void) {
     WaitSema(mnuTitleStreamSemaphore);
     if (mnuUpdateTitleTransition() == 1) {
         fileWaitIdle();

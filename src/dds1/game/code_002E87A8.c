@@ -43,7 +43,7 @@ typedef struct SndWork {
 } SndWork;
 
 extern SndWork sndMidiTrackState;
-extern u32 func_002E8628(s32 size);
+extern u32 sndReserveIopWorkMemory(s32 size);
 
 INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E87A8);
 
@@ -108,7 +108,7 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
         channel->unkC = 0;
         channel++;
     }
-    sndMidiTrackState.channels[0].unk8 = func_002E8628(0x21600);
+    sndMidiTrackState.channels[0].unk8 = sndReserveIopWorkMemory(0x21600);
     sndMidiTrackState.unk200 = 0;
     sndMidiTrackState.unk204 = 0;
     for (i = 0; i < 13; i++) {

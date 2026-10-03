@@ -32,7 +32,7 @@ extern s32 kwlnActiveTaskCount;
 extern u8 D_00435BB8[];
 extern u8 D_00435BC0[];
 extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
-extern s32 func_00101C50(void);
+extern s32 kwlnPrepareFrameDrawPackets(void);
 extern s32 func_00101D30(void);
 extern s32 kwlnRenderFrame(void);
 extern u32 func_00102740(void);
@@ -52,7 +52,7 @@ INCLUDE_ASM(const s32, "game/code_00100000", func_001001D0);
 s32 func_001001D8(void) {
     evtResetDisplayProjectionAndVectorState();
     func_001038D0();
-    kwlnTaskCreate(D_00435BB8, 0, 0, 0, func_00101C50, 0, 0);
+    kwlnTaskCreate(D_00435BB8, 0, 0, 0, kwlnPrepareFrameDrawPackets, 0, 0);
     kwlnTaskCreate(D_00435BC0, 0x2710, 0, 0, func_00101D30, 0, 0);
     kwlnTaskCreate("RequestDraw", 0x4E20, 0, 0, kwlnRenderFrame, 0, 0);
     kwlnTaskCreate("basic_main", 0x3FC, 1, 1, func_00102740, 0, 0);

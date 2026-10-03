@@ -264,7 +264,7 @@ extern u32 ptyGetProfileRecordValue(u32, u16);
 extern void func_0025C1C8(s32, s32, s32, s32, s32, s32, s32);
 
 /* Draw cap markers, with a second marker for the first four profiles. */
-void func_0025CFA0(s32 x, s32 y, s32 depth, s32 alpha,
+void mnuDrawCappedProfileMarkers(s32 x, s32 y, s32 depth, s32 alpha,
                    MnuProfileOwner *owner, s32 context) {
     MnuProfileIdList profiles = D_003AFA00;
     s32 i;

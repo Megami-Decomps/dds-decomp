@@ -122,9 +122,9 @@ void mnuReleaseStaffImageHandles(u32 *resources) {
     }
 }
 
+/* Return this category's handle array and count; unknown categories have none. */
 INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2020);
 
-/* Return this category's handle array and count; unknown categories have none. */
 void *mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount, u8 *menuBytes) {
     switch (category) {
     case 1:
@@ -300,10 +300,10 @@ void mnuInitializeStaffPageWindows(u32 container, u32 *resources, u32 unused, u3
     mnuUpdateHandleStates(container);
 }
 
-INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2058);
-
 /* Snapshot base handles, then queue the main, extra and paired sprite groups.
  * Only owner word 1 selects the second column of each image table. */
+INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2058);
+
 void mnuAppendCampSpriteRequests(u32 *resourceList, u32 *resourceSlots) {
     s32 resourceIndex;
     s32 tableColumn;
@@ -373,8 +373,8 @@ s32 mnuStaffSlotsAllFilled(s32 unused, StaffSlots *slots) {
     }
     return 1;
 }
-
 INCLUDE_ASM(const s32, "game/code_00270FB0", func_002717D8);
+
 
 s64 mnuReleaseStaffResourceSlotGroups(u32 *resources) {
     s32 i;
@@ -528,12 +528,12 @@ extern void func_002729C8();
 extern void func_00101A80(s32, s32);
 extern void kwlnFadeOutStart(s8, s8, s8, s32);
 
+/* Share menu userdata across the input/draw/owner tasks, attach fade and cancel
+ * tasks to drawing, then start the opening fade and mark camp active. */
 INCLUDE_RODATA(const s32, "game/code_00270FB0", mnuCampDrawTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_00270FB0", mnuCampOwnerTaskName);
 
-/* Share menu userdata across the input/draw/owner tasks, attach fade and cancel
- * tasks to drawing, then start the opening fade and mark camp active. */
 void mnuCreateCampTasks(void) {
     s32 menuAddress;
     s32 drawTask;
@@ -610,7 +610,6 @@ void mnuCreateStaffImageSprite(s32 imageIndex) {
     func_001958A0(sprite, 1, 0x54);
     frFontQueueGlyphInSelectedSlot(sprite);
 }
-
 INCLUDE_ASM(const s32, "game/code_00270FB0", func_002723B0);
 
 INCLUDE_ASM(const s32, "game/code_00270FB0", func_00272518);

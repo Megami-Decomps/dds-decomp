@@ -379,7 +379,7 @@ s32 scrCommandSetDrawOffsetTransition(void)
     s32 p1;
     p0 = scrReadIntParameter(0);
     p1 = scrReadIntParameter(1);
-    kwlnDrawSetOffsetTransition(p0, p1, scrReadIntParameter(2));
+    kwlnDrawSetOverlayTransition(p0, p1, scrReadIntParameter(2));
     return 1;
 }
 
@@ -437,7 +437,7 @@ s32 scrCmdSetTexturedBlurIntegerParameters(void)
 
 s32 scrCmdSetTexturedBlurTransitionMode(void)
 {
-    kwlnDrawApplyEffectBlock(scrReadIntParameter(0));
+    kwlnDrawSetupC70FromCh71(scrReadIntParameter(0));
     return 1;
 }
 
@@ -796,7 +796,7 @@ s32 scrCmdSetTexturedSquareIntegerParameters(void)
 
 s32 scrCmdSetTexturedSquareTransitionMode(void)
 {
-    kwlnDrawApplyEffectWord(scrReadIntParameter(0));
+    kwlnDrawSetupE08FromCh75(scrReadIntParameter(0));
     return 1;
 }
 
@@ -814,7 +814,7 @@ s32 scrCmdBeginTexturedSquareDeactivation(void)
 
 s32 scrCommandResetDrawEffects(void)
 {
-    kwlnDrawSetOffsetTransition(0, 0, 0);
+    kwlnDrawSetOverlayTransition(0, 0, 0);
     kwlnDrawEnableD88(0);
     kwlnDrawSetupC70B(0);
     kwlnDrawEnableCd0(0);

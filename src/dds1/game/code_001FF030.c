@@ -90,7 +90,7 @@ extern void btlDebugPrintf(const char *, ...);
 
 
 
-extern s32 func_0020B348();
+extern s32 btlSetLinkedDefeatCameraPresetA();
 
 extern s32 btlAnyUnitHasActionInSlots();
 
@@ -3190,7 +3190,7 @@ void btlDestroyActiveMemberSlot(void) {
 
 extern s32 mdlGetNodeField2C(s32, s32);
 
-extern void func_00221EF0(void *, s32, s32);
+extern void evtSetUnitAlphaTransition(void *, s32, s32);
 
 void btlStepFocusAngle(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -3230,7 +3230,7 @@ void btlStepFocusAngle(void) {
             slot[1] += 0xF0000000;
         }
     }
-    func_00221EF0(((BtlUnit *)*(u32 **)slot)->ext, 0, slot[1]);
+    evtSetUnitAlphaTransition(((BtlUnit *)*(u32 **)slot)->ext, 0, slot[1]);
 }
 
 typedef struct BtlEffectTarget {
@@ -3281,7 +3281,7 @@ u32 btlSelectResponseCodeForEnemyFlag(u32 unused, s32 unit) {
 
 extern char D_003A5DB8[];
 
-s32 func_00209238(void) {
+s32 btlSwapRandomBossSelection(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlBossEffectPayload *effect = (BtlBossEffectPayload *)battle->effect;
     s32 options;
@@ -3896,7 +3896,7 @@ extern void func_002DD608(f32);
 extern void func_002DD968(f32);
 extern void sdfComposeVuMatrixFromRegisters(void);
 
-s32 func_0020B348(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+s32 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     u16 *runtime = (u16 *)btlGetRuntime();
     BtlUnit *unit;
     u32 kind;
@@ -3975,7 +3975,7 @@ s32 btlTryStartTargetFacingActionEffect(u8 *unit) {
             btlFaceLinkedTargetAndFlagDirection(unit, unit);
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020B348(unit, unit, 0);
+            btlSetLinkedDefeatCameraPresetA(unit, unit, 0);
         }
     } else {
         btlChooseRandomPresetCameraKeys();
@@ -3997,7 +3997,7 @@ s32 btlHandleTargetedDefeatAction(u8 *unit) {
             func_0020B190(unit, other);
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020B348(unit, unit, 0);
+            btlSetLinkedDefeatCameraPresetA(unit, unit, 0);
         }
         ((BtlUnit *)unit)->flags = 0;
         return 1;

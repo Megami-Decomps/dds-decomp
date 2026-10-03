@@ -47,12 +47,14 @@ void mnuAdvanceMantraPulseGridEntries(s32 argument, MantraPulseGrid *grid) {
     }
 }
 
+
 INCLUDE_ASM(const s32, "game/code_00257200", func_00257718);
 
 typedef struct MantraPulseDisplayWork {
     u8 pad00[0x5AC];
     u8 flags;
 } MantraPulseDisplayWork;
+
 
 extern void *func_002CB3B8(s32, s32);
 extern void func_0024EDC0(s32, s32, s32, s32, s32, s32, f32, f32, s32);

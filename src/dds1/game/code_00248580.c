@@ -150,7 +150,7 @@ typedef struct EffectPair {
 
 extern EffectPair D_003BC400[];
 extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
-extern void func_0024BF48(s32, s32);
+extern void mnuDrawTerminalAmountText(s32, s32);
 extern char D_003BC3F0[];
 extern u32 func_001979C8(s32, s32, s32, s32, char *, s32);
 
@@ -390,7 +390,7 @@ typedef struct MenuSlotKind {
 extern MenuSlotKind D_0032EF18[];
 
 /* Same slot kind, or both kinds in the 30/31 pair. */
-s32 mnuSlotKindMatchesGroupOrSpecial(s32 index, s32 requestedKind) {
+s32 mnuSlotKindsInSameGroup(s32 index, s32 requestedKind) {
     s16 current = D_0032EF18[index].kind;
 
     if (requestedKind == current) {
@@ -638,7 +638,7 @@ s32 mnuTickInitState(u8 *work) {
 }
 
 /* Bind the party selection's textures/grid, then create its panel and profile visuals. */
-void func_00249850(s32 source, MenuVisualWork *work) {
+void mnuSetupStaffMenuProfilePage(s32 source, MenuVisualWork *work) {
     s32 window = (s32)work->window;
     s32 index;
 
@@ -741,7 +741,7 @@ extern void sndEnsureMidiBankResident(u32);
 
 /* Select the native default/current BGM handle and make only its bank bits resident.
  * DDS1's default includes track one; DDS2's default has a zero low halfword. */
-void mnuSelectTerminalResourceBank(MenuTerminalWork *work) {
+void mnuTerminalSelectResourceBank(MenuTerminalWork *work) {
     if (work->mode == 0) {
         work->bgmHandle = MNU_TERMINAL_DEFAULT_BGM;
     } else {
@@ -791,7 +791,7 @@ u8 *mnuTerminalCreateScene(reduced, slot)
     for (i = 0; i < MNU_SELECTED_SLOT_COUNT; i++) {
         ((MenuTerminalWork *)obj)->cursor[i] = -1;
     }
-    mnuSelectTerminalResourceBank((MenuTerminalWork *)obj);
+    mnuTerminalSelectResourceBank((MenuTerminalWork *)obj);
     return obj;
 }
 
@@ -1046,7 +1046,7 @@ INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF678);
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF688);
 
-void mnuSelectTerminalCursorSlot(u32 mode, s32 index, MenuTerminalWork *state) {
+void mnuTerminalSelectSlot(u32 mode, s32 index, MenuTerminalWork *state) {
     s32 table[4] = {3, 1, 2, 0x2D};
 
     if (state->reduced == 1) {
@@ -1077,7 +1077,7 @@ void mnuDrawTerminalSelectedSlots(s32 context) {
         }
     }
     if (state->mode == 2) {
-        func_0024BF48(0, context);
+        mnuDrawTerminalAmountText(0, context);
     }
 }
 
@@ -1217,7 +1217,7 @@ void func_0024ACD8(s32 close, s32 context) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024AE18);
 
-void func_0024AF58(s32 close, s32 context) {
+void mnuDrawOwnerProgressAndFade(s32 close, s32 context) {
     MenuTerminalWork *work = (MenuTerminalWork *)context;
     MenuGridPositions positions = D_003AF6F0;
     u32 progress;
@@ -1509,7 +1509,7 @@ u32 evtBeginSelectionExitFade(void) {
 
     func_0024AB70(1, context);
     evtRememberDispatchCallback((s32)func_0024ACD8, context);
-    mnuSelectTerminalCursorSlot(0, -2, context);
+    mnuTerminalSelectSlot(0, -2, context);
     mnuSetWorldObjectAndMenuEnabled(1);
     mnuReleaseVisualResources(context);
     kwlnFadeOutStart(0, 0, 0, 15);
@@ -1572,10 +1572,10 @@ u32 evtInitializeSelectionListWhenReady(void) {
     if (((EvtBContext *)context)->transitionPending == 0) {
         mnuSelectFirstListNode(((EvtBContext *)context)->selectionList);
         func_0024A728(3, context);
-        evtRememberDispatchCallback((s32)func_0024AF58, context);
+        evtRememberDispatchCallback((s32)mnuDrawOwnerProgressAndFade, context);
         func_0024AE18(3, context);
         func_0024AB70(4, context);
-        mnuSelectTerminalCursorSlot(3, 1, context);
+        mnuTerminalSelectSlot(3, 1, context);
     }
     ((EvtBContext *)context)->transitionPending = 0;
     evtClearActiveFlag(0);
@@ -1592,7 +1592,7 @@ u32 evtFinishPendingSelectionTransition(void) {
         evtRememberDispatchCallback((s32)func_0024ACD8, context);
         func_0024AE18(4, context);
         func_0024AB70(3, context);
-        mnuSelectTerminalCursorSlot(3, 0, context);
+        mnuTerminalSelectSlot(3, 0, context);
         evtFinishMessageWindowAndNotify();
     }
     ((EvtBContext *)context)->transitionPending = 0;
@@ -1658,7 +1658,7 @@ u32 evtEnterThresholdSelectionList(void) {
 
     mnuRefreshThresholdNodeFlags(((EvtBContext *)context)->thresholdList);
     mnuSelectFirstListNode(((EvtBContext *)context)->thresholdList);
-    mnuSelectTerminalCursorSlot(3, 2, context);
+    mnuTerminalSelectSlot(3, 2, context);
     mnuApplyGridPanelHostSetting(3, context);
     func_0024AB70(4, context);
     evtRememberDispatchCallback((s32)func_0024B168, context);
@@ -1670,7 +1670,7 @@ extern void mnuHighlightProgressNodeByMode(s32);
 u32 evtBEnterStateA(void) {
     s32 context = kwlnTaskGetUserValue();
 
-    mnuSelectTerminalCursorSlot(3, 0, context);
+    mnuTerminalSelectSlot(3, 0, context);
     mnuApplyGridPanelHostSetting(4, context);
     func_0024AB70(3, context);
     evtRememberDispatchCallback((s32)func_0024ACD8, context);
@@ -1680,7 +1680,7 @@ u32 evtBEnterStateA(void) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024BDB8);
 
-void func_0024BF48(s32 fading, s32 context) {
+void mnuDrawTerminalAmountText(s32 fading, s32 context) {
     SceneFrameOwner *scene = (SceneFrameOwner *)context;
     char text[16];
     s32 index;
@@ -1699,7 +1699,7 @@ void func_0024BF48(s32 fading, s32 context) {
     frFontQueueGlyphInSelectedSlot(sprite);
 }
 
-extern void func_0024BF48(s32, s32);
+extern void mnuDrawTerminalAmountText(s32, s32);
 
 s64 mnuInitializeSelectionDispatchWhenModeUnset(s32 item) {
     s32 state = kwlnTaskGetUserValue();
@@ -1709,7 +1709,7 @@ s64 mnuInitializeSelectionDispatchWhenModeUnset(s32 item) {
     func_0024A930(state);
     mnuDrawTerminalSelectedSlots(state);
     if (*(s32 *)(state + 0x7C) == 0) {
-        func_0024BF48(1, state);
+        mnuDrawTerminalAmountText(1, state);
     }
     return menuRunPanel(state, 1, item);
 }
@@ -1765,7 +1765,7 @@ u32 evtBReleaseImagesAndQueueMenuTransition(void) {
 
     mnuReleaseStaffImageHandles(context + 0xE0);
     func_0024A728(2, context);
-    mnuSelectTerminalCursorSlot(2, -1, context);
+    mnuTerminalSelectSlot(2, -1, context);
     func_0024AB70(2, context);
     evtRememberDispatchCallback(0, context);
     ((EvtBContext *)context)->exitPending = 1;
@@ -1781,7 +1781,7 @@ s32 mnuOpenTerminalSelectionMessageWindow(void) {
 
     mnuResolveStaffImageHandles((u8 *)context + 0xE0);
     func_0024A728(1, context);
-    mnuSelectTerminalCursorSlot(1, 0, (MenuTerminalWork *)context);
+    mnuTerminalSelectSlot(1, 0, (MenuTerminalWork *)context);
     func_0024AB70(1, context);
     evtRememberDispatchCallback((s32)func_0024ACD8, context);
     ((EvtBContext *)context)->exitPending = 0;
@@ -1824,7 +1824,7 @@ extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern void dspSetActive(s32);
 extern void dspStartEntry(s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
-extern void evtCaptureMessageWindowSoundMode(s32);
+extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 /* Bind the selected text row to message slot zero, then start the entry prompt. */
 u32 evtPrepareSelectedMenuEntry(void) {
@@ -1839,7 +1839,7 @@ u32 evtPrepareSelectedMenuEntry(void) {
     dspSetActive(1);
     dspStartEntry(0);
     evtSetMessageWindowOptionWhenOpen(1);
-    evtCaptureMessageWindowSoundMode(6);
+    evtStoreValueAndCaptureWindowPanelValue(6);
     return 1;
 }
 
@@ -1847,10 +1847,10 @@ u32 func_0024C6F8(void) {
     return 1;
 }
 
-extern s32 evtGetCapturedMessageWindowSoundMode(void);
+extern s32 evtGetCapturedWindowPanelValue(void);
 extern u8 D_0036ADD8[];
 
-s64 func_0024C700(u64 input) {
+s64 evtBChooseSelectionCompletionPopup(u64 input) {
     EvtBContext *context;
     s32 *state;
     s64 result;
@@ -1862,7 +1862,7 @@ s64 func_0024C700(u64 input) {
         if (*state == 0) {
             result = evtGetMessageWindowControlState();
             if (result == 0) {
-                if (evtGetCapturedMessageWindowSoundMode() == 0) {
+                if (evtGetCapturedWindowPanelValue() == 0) {
                     mnuResetProgressModeFromOwner((u8 *)context);
                     mnuSetPopupEntryFlagged(state, D_0036ADD8);
                 } else if (((EvtBSelectionList *)context->selectionList)->mode >= 2) {
@@ -1951,10 +1951,10 @@ u32 evtExitSelectionMenuAndSendSoundCommand(void) {
 
     func_0024A728(2, context);
     if (((EvtBContext *)context)->transitionStage >= 2) {
-        mnuSelectTerminalCursorSlot(2, -1, context);
+        mnuTerminalSelectSlot(2, -1, context);
         func_0024AE18(2, context);
     } else {
-        mnuSelectTerminalCursorSlot(2, -1, context);
+        mnuTerminalSelectSlot(2, -1, context);
         func_0024AB70(2, context);
     }
     evtRememberDispatchCallback(0, context);
@@ -1971,7 +1971,7 @@ u32 evtBRebuildTerminalMenuAndResetDispatch(void) {
     mnuReleaseWorkResources(context);
     mnuTerminalBuildMenus(context);
     func_0024A728(1, context);
-    mnuSelectTerminalCursorSlot(1, 0, context);
+    mnuTerminalSelectSlot(1, 0, context);
     func_0024AB70(1, context);
     evtRememberDispatchCallback((s32)func_0024ACD8, context);
     ((EvtBContext *)context)->dispatchMode = 0;
@@ -2007,7 +2007,7 @@ s64 func_0024CB80(u64 input) {
                             context->effectHandle = 0;
                         }
                         mnuFadeOrPlayCloseSfx(0, (u8 *)context);
-                        mnuSelectTerminalResourceBank((MenuTerminalWork *)context);
+                        mnuTerminalSelectResourceBank((MenuTerminalWork *)context);
                         context->dispatchMode = 3;
                     }
                     break;
@@ -2072,9 +2072,8 @@ typedef struct {
     u32 resourceHandle;
 } MenuResourceWork;
 
-extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
-extern s32 evtIsActiveFlagSet(s32 flagIndex);
 extern u8 mnuHasEffectResourceHandle(MenuResourceWork *work);
+
 extern const char D_003AF710[];
 extern u8 D_0036AE10[];
 

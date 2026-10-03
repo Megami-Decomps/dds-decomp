@@ -43,7 +43,7 @@ extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 extern u32 mnuKindIsSelectable(u32);
 extern char D_004379B0[];
 
-void func_0029AA68(MenuLayoutContext *context) {
+void mnuDrawRemainingSelectionExtent(MenuLayoutContext *context) {
     char text[16];
     s32 iconFade = context->iconFade;
     u8 *item = (u8 *)context->config[0];

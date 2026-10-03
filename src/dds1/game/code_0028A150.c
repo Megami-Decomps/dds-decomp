@@ -510,7 +510,7 @@ typedef struct LoadObj {
 
 extern void *mcdHandleSaveSetupDone(void);
 
-extern s32 fileWaitCommandDone(void);
+extern s32 mcPollZeroCommandResult(void);
 
 extern void func_00292720(void *);
 
@@ -709,7 +709,7 @@ s32 fileIsLoadStepComplete(void) {
     return 1;
 }
 
-s32 func_0028A5E8(void) {
+s32 fileDrawStatusDialogFrame(void) {
     s32 frame;
     s32 y;
     s32 height;
@@ -799,7 +799,7 @@ void fileShowStatusDialog(void) {
             D_003BC844 = 0;
             D_003BC840 = 0;
             fileResetLoadContextSlide();
-            if (func_0028A5E8() != 0) {
+            if (fileDrawStatusDialogFrame() != 0) {
                 fileDrawDialogLine(0, (u32)D_0037D520);
                 fileDrawDialogLine(1, (u32)D_0037D550);
                 fileDrawDialogLine(2, (u32)D_0037D570);
@@ -810,7 +810,7 @@ void fileShowStatusDialog(void) {
             }
         }
         if (D_003BC854 == 2) {
-            if (func_0028A5E8() != 0) {
+            if (fileDrawStatusDialogFrame() != 0) {
                 fileDrawDialogLine(0, (u32)D_0037D620);
                 fileDrawDialogLine(1, (u32)D_0037D650);
                 fileDrawDialogLine(2, (u32)D_0037D668);
@@ -821,21 +821,21 @@ void fileShowStatusDialog(void) {
             }
         }
         if (D_003BC854 == 3) {
-            if (func_0028A5E8() != 0) {
+            if (fileDrawStatusDialogFrame() != 0) {
                 fileDrawDialogLine(0, (u32)D_0037D788);
                 fileDrawPulsingSaveHighlight();
                 D_003BC810 = 0;
             }
         }
         if (D_003BC854 == 4) {
-            if (func_0028A5E8() != 0) {
+            if (fileDrawStatusDialogFrame() != 0) {
                 fileDrawDialogLine(0, (u32)D_0037D798);
                 fileDrawPulsingSaveHighlight();
                 D_003BC810 = 0;
             }
         }
         if (D_003BC854 == 5) {
-            if (func_0028A5E8() != 0) {
+            if (fileDrawStatusDialogFrame() != 0) {
                 fileDrawDialogLine(0, (u32)D_0037D820);
                 fileDrawDialogLine(1, (u32)D_0037D848);
                 fileDrawDialogLine(2, (u32)D_0037D868);
@@ -846,14 +846,14 @@ void fileShowStatusDialog(void) {
             }
         }
         if (D_003BC854 == 6) {
-            if (func_0028A5E8() != 0) {
+            if (fileDrawStatusDialogFrame() != 0) {
                 fileDrawDialogLine(0, (u32)D_0037D7A8);
                 fileDrawPulsingSaveHighlight();
                 D_003BC810 = 0;
             }
         }
         if (D_003BC854 == 7) {
-            if (func_0028A5E8() != 0) {
+            if (fileDrawStatusDialogFrame() != 0) {
                 fileDrawDialogLine(0, (u32)D_0037DB30);
                 fileDrawDialogLine(1, (u32)D_0037DB58);
                 fileDrawDialogLine(2, (u32)D_0037DB88);
@@ -874,10 +874,10 @@ void fileSetMenuFlowState(u32 state) {
     }
 }
 
-void func_0028AB48(void) {
+void fileShowFlowDialog(void) {
     if (D_003BC850 != 0) {
         if (D_003BC850 == 1) {
-            if (func_0028A5E8() != 0) {
+            if (fileDrawStatusDialogFrame() != 0) {
                 fileDrawDialogLine(0, (u32)D_0037D6C8);
                 fileDrawDialogLine(1, (u32)D_0037D6E8);
                 fileDrawDialogLine(2, (u32)D_0037D700);
@@ -885,7 +885,7 @@ void func_0028AB48(void) {
             }
         }
         if (D_003BC850 == 2) {
-            if (func_0028A5E8() != 0) {
+            if (fileDrawStatusDialogFrame() != 0) {
                 fileDrawDialogLine(0, (u32)D_0037D768);
                 fileDrawDialogLine(1, (u32)D_0037D7B8);
                 fileDrawDialogLine(2, (u32)D_0037D7D8);
@@ -894,7 +894,7 @@ void func_0028AB48(void) {
             }
         }
         if (D_003BC850 == 3) {
-            if (func_0028A5E8() != 0) {
+            if (fileDrawStatusDialogFrame() != 0) {
                 fileDrawDialogLine(0, (u32)D_0037D758);
                 fileDrawDialogLine(1, (u32)D_0037D7B8);
                 fileDrawDialogLine(2, (u32)D_0037D7D8);
@@ -903,14 +903,14 @@ void func_0028AB48(void) {
             }
         }
         if (D_003BC850 == 4) {
-            if (func_0028A5E8() != 0) {
+            if (fileDrawStatusDialogFrame() != 0) {
                 fileDrawDialogLine(0, (u32)D_0037D948);
                 fileDrawPulsingSaveHighlight();
             }
             D_003BC81C = 1;
         }
         if (D_003BC850 == 5) {
-            if (func_0028A5E8() != 0) {
+            if (fileDrawStatusDialogFrame() != 0) {
                 fileDrawDialogLine(0, (u32)D_0037D778);
                 fileDrawDialogLine(1, (u32)D_0037D7B8);
                 fileDrawDialogLine(2, (u32)D_0037D7D8);
@@ -919,13 +919,13 @@ void func_0028AB48(void) {
             }
         }
         if (D_003BC850 == 6) {
-            if (func_0028A5E8() != 0) {
+            if (fileDrawStatusDialogFrame() != 0) {
                 fileDrawDialogLine(0, (u32)D_0037D960);
                 fileDrawPulsingSaveHighlight();
             }
         }
         if (D_003BC850 == 13) {
-            if (func_0028A5E8() != 0) {
+            if (fileDrawStatusDialogFrame() != 0) {
                 fileDrawDialogLine(0, (u32)D_0037D930);
                 fileDrawPulsingSaveHighlight();
             }
@@ -1002,7 +1002,7 @@ void *fileReadSlotPreviewWait(void) {
 }
 
 void *fileStoreSlotHeader(void) {
-    s32 status = fileWaitCommandDone();
+    s32 status = mcPollZeroCommandResult();
 
     if (status == 0) {
         return NULL;
@@ -1840,7 +1840,7 @@ void *fileBeginRequest(const char *name, u32 *first, u32 *second, void *callback
     return fileWriteWaitOpen;
 }
 
-extern void fileWriteBegin(s32 request, u32 first, u32 second);
+extern void mcBeginWrite(s32 request, u32 first, u32 second);
 extern void *fileFinishRequest(void);
 
 void *fileWriteWaitOpen(void) {
@@ -1853,7 +1853,7 @@ void *fileWriteWaitOpen(void) {
         if (D_003BD934 != NULL && *D_003BD934 != 0) {
             return fileFinishRequest;
         }
-        fileWriteBegin(fileSaveFileDescriptor, *D_003BD928, *D_003BD92C);
+        mcBeginWrite(fileSaveFileDescriptor, *D_003BD928, *D_003BD92C);
         return mcHandleLoadResult;
     }
     if (status == -1) {
@@ -1866,7 +1866,7 @@ void *fileWriteWaitOpen(void) {
 
 
 void *mcHandleLoadResult(void) {
-    s32 status = fileWriteWait();
+    s32 status = mcPollWriteCompletion();
     if (status == 0) {
         return NULL;
     }
@@ -1883,7 +1883,7 @@ void *mcHandleLoadResult(void) {
 }
 
 void *mcDispatchReadCallback(void) {
-    s32 status = fileWaitCommandDone();
+    s32 status = mcPollZeroCommandResult();
     if (status == 0) {
         return NULL;
     }
@@ -1902,7 +1902,7 @@ void *fileFinishRequest(void) {
     if (fileSaveIconRequest != 0) {
         return NULL;
     }
-    fileWriteBegin(fileSaveFileDescriptor, *D_003BD928, *D_003BD92C);
+    mcBeginWrite(fileSaveFileDescriptor, *D_003BD928, *D_003BD92C);
     return mcHandleLoadResult;
 }
 
@@ -1999,7 +1999,7 @@ extern void fileCacheSlotFlagsFromState(void);
 extern void fileRestoreSlotFlagsToState(void);
 
 void *mcdHandleSaveSetupDone(void) {
-    s32 status = fileWaitCommandDone();
+    s32 status = mcPollZeroCommandResult();
     if (status == 0) {
         return NULL;
     }
@@ -2073,7 +2073,7 @@ s32 fileDrawMenuFrame(s32 work) {
     if (D_003BC810 != 0) {
         fileDrawSlotListAndPreview(work);
     }
-    func_0028AB48();
+    fileShowFlowDialog();
     fileShowPromptDialog();
     fileShowStatusDialog();
     func_00108CB8(0);
