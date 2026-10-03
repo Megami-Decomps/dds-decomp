@@ -354,14 +354,6 @@ void effRequestMappedResource(const char *base, const char *name, u32 *outMapped
     fileCreateCallbackRequest(path, 0, effCompleteMappedResourceJob, outMappedResource);
 }
 
-/* Create an owner word followed by sixteen initially empty bucket heads. */
-void *effCreateOwnerRecordList(void *owner) {
-    u32 *listWords = sdfAllocSizeClassBlock(EFF_OWNER_LIST_BYTES);
-    memset(listWords, 0, EFF_OWNER_LIST_BYTES);
-    listWords[0] = (u32)owner;
-    return listWords;
-}
-
 typedef struct EffectRecord {
     void *owner;
     s32 slot;
@@ -373,6 +365,14 @@ typedef struct EffectOwnerRecord {
     void *owner;
     EffectRecord *entries[16];
 } EffectOwnerRecord;
+
+/* Create an owner list with sixteen initially empty record buckets. */
+void *effCreateOwnerRecordList(void *owner) {
+    EffectOwnerRecord *list = sdfAllocSizeClassBlock(EFF_OWNER_LIST_BYTES);
+    memset(list, 0, EFF_OWNER_LIST_BYTES);
+    list->owner = owner;
+    return list;
+}
 
 /* Per-slot effect data (0x80 bytes each); only the bucket index is known. */
 typedef struct EffectSlot {
@@ -500,6 +500,7 @@ u32 effSumRecordStatuses(u32 *recordWords) {
     return statusBytes;
 }
 
+/* Serialized file header; this is distinct from the live batch header below. */
 typedef struct EffMappedHeader {
     u8 pad_00[0x14];
     u32 count;        // 0x14
@@ -507,16 +508,18 @@ typedef struct EffMappedHeader {
 } EffMappedHeader;    // 0x20
 
 typedef struct EffMappedRecord {
-    u8 pad_00[0x18];
-    u32 size;         // 0x18
-    u8 pad_1C[4];
+    u8 pad00[0x14];
+    u32 category;     // 0x14, dispatches the status-size calculation
+    u32 statusBytes;  // 0x18, expanded to the required capacity when loaded
+    u8 pad1C[4];
     u8 *status;       // 0x20
 } EffMappedRecord;    // 0x24
 
 /* Copy packed headers and status data into live records, zero-filling extra status capacity.
  * The required-size calculation uses the first record, not the current row.
+ * Returns the record-allocation handle, not its retained address.
  */
-void *effLoadMappedStatusRecords(u8 *source, EffMappedHeader *headerOut) {
+u32 effLoadMappedStatusRecords(u8 *source, EffMappedHeader *headerOut) {
     EffMappedHeader header;
     u32 allocation;
     EffMappedRecord *records;
@@ -533,84 +536,74 @@ void *effLoadMappedStatusRecords(u8 *source, EffMappedHeader *headerOut) {
         memcpy(record, source, EFF_PACKED_STATUS_HEADER_BYTES);
         source += EFF_PACKED_STATUS_HEADER_BYTES;
         statusBytes = effSumRecordStatuses((u32 *)records);
-        if (statusBytes < record->size) {
-            statusBytes = record->size;
+        if (statusBytes < record->statusBytes) {
+            statusBytes = record->statusBytes;
         }
         record->status = sdfAllocSizeClassBlock(statusBytes);
         memset(record->status, 0, statusBytes);
-        memcpy(record->status, source, record->size);
-        source += record->size;
-        if (record->size < statusBytes) {
-            record->size = statusBytes;
+        memcpy(record->status, source, record->statusBytes);
+        source += record->statusBytes;
+        if (record->statusBytes < statusBytes) {
+            record->statusBytes = statusBytes;
         }
     }
     if (headerOut != 0) {
         memcpy(headerOut, &header, sizeof(header));
     }
-    return (void *)allocation;
+    return allocation;
 }
 
-typedef struct {
-    s32 count;
-    void *records;
-    void *allocation;
-} EffMappedResource;
+typedef struct EffMappedResource {
+    s32 count;                // 0x00
+    u32 allocation;           // 0x04, owns the record array
+    EffMappedRecord *records; // 0x08, retained address of that allocation
+} EffMappedResource;          // 0x0C
 
-/* Keep the count, record-allocation handle and retained record address in the existing header members. */
+/* Build the live batch header from the serialized count and owned record array. */
 u32 effCreateMappedResource(u32 sourceAddress) {
     EffMappedResource *mappedResource = (EffMappedResource *)sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
     EffMappedHeader header;
 
-    mappedResource->records = effLoadMappedStatusRecords((u8 *)sourceAddress, &header);
-    mappedResource->allocation = (void *)sdfResourceRetainAddress((u32)mappedResource->records);
+    mappedResource->allocation = effLoadMappedStatusRecords((u8 *)sourceAddress, &header);
+    mappedResource->records = (EffMappedRecord *)sdfResourceRetainAddress(mappedResource->allocation);
     mappedResource->count = header.count;
     return (u32)mappedResource;
 }
 
 /* Build one zeroed status record and allocate the category's required status storage. */
 u32 *effCreateStatusBatch(u32 category) {
-    u32 *batch = sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
+    EffMappedResource *batch = sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
     u32 allocation;
     u32 recordAddress;
     u32 statusBytes;
     void *statuses;
 
-    batch[0] = 1;
+    batch->count = 1;
     allocation = (u32)sdfAllocGeneralBlock(EFF_STATUS_RECORD_BYTES);
-    batch[1] = allocation;
+    batch->allocation = allocation;
     recordAddress = sdfResourceRetainAddress(allocation);
-    batch[2] = recordAddress;
+    batch->records = (EffMappedRecord *)recordAddress;
     memset((void *)recordAddress, 0, EFF_STATUS_RECORD_BYTES);
     {
-        u32 *recordWords = (u32 *)batch[2];
-        recordWords[5] = category;
-        statusBytes = effSumRecordStatuses(recordWords);
+        EffMappedRecord *record = batch->records;
+        record->category = category;
+        statusBytes = effSumRecordStatuses((u32 *)record);
     }
     statuses = sdfAllocSizeClassBlock(statusBytes);
-    ((u32 *)batch[2])[8] = (u32)statuses;
+    batch->records->status = statuses;
     memset(statuses, 0, statusBytes);
-    ((u32 *)batch[2])[6] = statusBytes;
-    return batch;
+    batch->records->statusBytes = statusBytes;
+    return (u32 *)batch;
 }
 
-typedef struct PackedEffectRecord {
-    u8 unk_00[0x20];
-    void *storage;
-} PackedEffectRecord;
-
-typedef struct PackedEffectBatch {
-    s32 count;
-    u32 job;
-    PackedEffectRecord *records;
-} PackedEffectBatch;
 
 /* Release each record's status storage, then the record allocation and batch header. */
-u32 effDestroyPackedBatch(PackedEffectBatch *batch) {
+u32 effDestroyPackedBatch(EffMappedResource *batch) {
     s32 recordIndex;
     for (recordIndex = 0; recordIndex < batch->count; recordIndex++) {
-        sdfReleaseChipBlock(batch->records[recordIndex].storage);
+        sdfReleaseChipBlock(batch->records[recordIndex].status);
     }
-    sdfReleaseResourceAllocation(batch->job);
+    sdfReleaseResourceAllocation(batch->allocation);
     sdfReleaseChipBlock(batch);
     return 1;
 }
@@ -760,7 +753,44 @@ u32 effDestroyPayload(u32 payload) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BD9C0);
+u32 func_002BD9C0(u32 allocationHandle, u32 keepAllocation) {
+    EffectSlotSet *set;
+    u8 *resource;
+    u32 *entries;
+    u32 index;
+    u32 sourceOffset;
+
+    set = sdfAllocSizeClassBlock(0x30);
+    memset(set, 0, 0x30);
+    *(u32 *)((u8 *)set + 4) = 0;
+    *(u32 *)set = keepAllocation != 0 ? allocationHandle : 0;
+    resource = (u8 *)sdfResourceRetainAddress(allocationHandle);
+    ((TexHandleSet *)set)->count = *(u16 *)(resource + 0x14);
+    *(u32 *)((u8 *)set + 0x20) =
+        (u32)sdfAllocGeneralBlock(((TexHandleSet *)set)->count * 4);
+    ((TexHandleSet *)set)->handles = (void **)sdfResourceRetainAddress(
+        *(u32 *)((u8 *)set + 0x20));
+    memset(((TexHandleSet *)set)->handles, 0,
+        ((TexHandleSet *)set)->count * 4);
+    entries = (u32 *)effResolveResourceSlots((TexHandleSet *)set, resource,
+        keepAllocation, -1);
+
+    set->count = *(u16 *)(resource + 0x16);
+    *(u32 *)((u8 *)set + 0xC) =
+        (u32)sdfAllocGeneralBlock(set->count * 0x80);
+    set->descriptions = sdfResourceRetainAddress(
+        *(u32 *)((u8 *)set + 0xC));
+    set->workAllocation = (u32)sdfAllocGeneralBlock(set->count * 0xA0);
+    set->workEntries = sdfResourceRetainAddress(set->workAllocation);
+    for (index = 0; index < set->count; index++) {
+        sourceOffset = entries[1];
+        memcpy((void *)(set->descriptions + index * 0x80),
+            resource + sourceOffset, 0x80);
+        effResetSlotWork((u32)set, index);
+        entries += 2;
+    }
+    return (u32)set;
+}
 
 extern void effResetSlotWork(u32, u32);
 
@@ -809,11 +839,6 @@ u32 effDestroyResourceSlotSet(u32 work) {
     return 1;
 }
 
-/* Resource table holding 0x24-byte effect records at its +8 pointer. */
-typedef struct EffectRecordSource {
-    u8 pad00[8];
-    s32 records;
-} EffectRecordSource;
 
 typedef struct EffectRecordState {
     u32 flags;
@@ -834,7 +859,7 @@ u32 effSetSlotResourceAndFlags(u32 *record, u32 entry, u32 flags) {
 }
 
 u32 effSetSlotIndexedResource(u32 record, s32 data, s32 item, u32 flags) {
-    effSetSlotResourceAndFlags(record, ((EffectRecordSource *)data)->records + item * 0x24, flags);
+    effSetSlotResourceAndFlags(record, (u32)&((EffMappedResource *)data)->records[item], flags);
     return 1;
 }
 
@@ -964,7 +989,7 @@ u32 effConfigureSlotResource(s32 work, s32 index, u32 value, u32 flags) {
 
 u32 effConfigureIndexedSlotResource(s32 work, s32 index, s32 data, s32 item, u32 flags) {
     s32 effect = ((EffectSlotSet *)work)->workEntries + index * 0xA0;
-    effSetSlotResourceAndFlags((u32 *)(effect + 0x28), ((EffectRecordSource *)data)->records + item * 0x24, flags);
+    effSetSlotResourceAndFlags((u32 *)(effect + 0x28), (u32)&((EffMappedResource *)data)->records[item], flags);
     effUpdateTimedStates(work, index, (BdWork *)effect);
     return 1;
 }
@@ -972,7 +997,7 @@ u32 effConfigureIndexedSlotResource(s32 work, s32 index, s32 data, s32 item, u32
 u32 effConfigureIndexedSlotMaterial(s32 work, s32 index, s32 data, s32 item,
                   u32 flags, u32 color, u32 option) {
     s32 effect = ((EffectSlotSet *)work)->workEntries + index * 0xA0;
-    effSetSlotResourceAndFlags((u32 *)(effect + 0x28), ((EffectRecordSource *)data)->records + item * 0x24, option);
+    effSetSlotResourceAndFlags((u32 *)(effect + 0x28), (u32)&((EffMappedResource *)data)->records[item], option);
     effUpdateTimedStates(work, index, (BdWork *)effect);
     ((BdWork *)effect)->materialFlags = flags;
     ((BdWork *)effect)->materialColor = color;
