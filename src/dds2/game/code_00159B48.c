@@ -12,6 +12,15 @@ extern s32 effEmitterDelayRandomState[];
 extern void effMiscSeedRandomFromClock();
 #include "eff.h"
 
+#define BILL_ENTRY_BYTES 0x14
+#define BILL_FRAME_MODE_BITS 6
+#define BILL_VARIANT_MASK 0xFFFF
+#define EFF_INSTANCE_BYTES 0x88
+#define EFF_MATRIX_BYTES 0x40
+#define EFF_PACKET_LIST_BYTES 0x20
+#define EFF_TEMPLATE_TAIL_OFFSET 0x150
+#define EFF_PACKET_INITIAL_TAG 0xF0000001
+
 typedef struct EffEmitterSub {
     u16 kind;
     u8 pad02[6];
@@ -81,7 +90,7 @@ typedef struct EffParticleRecord {
     f32 y;              /* 0x04 */
     f32 z;              /* 0x08 */
     u8 pad0C[0x14];
-    s32 frame;   /* 0x20: starts at -1; read as a countdown and incremented */
+    s32 frame;   /* 0x20: starts at -1; zero requests reinitialization before increment */
     u32 color;   /* 0x24: packed RGBA built from the effect's colour and alpha */
     f32 speed;
     f32 angle;
@@ -224,10 +233,11 @@ void effCopyPosition(BillObj *effect, const void *position) {
     }
 }
 
+/* Narrow mode to s16; kinds 0/3 store it, while kind 1 replaces only frame bits 1..2. */
 void billSetBillboardMode(BillObj *effect, s32 mode) {
-    s32 count;
+    s32 entryCount;
     s32 remaining;
-    s32 entry;
+    s32 frameSlotAddress;
     mode = (s16)mode;
     switch (effect->kind) {
     case 0:
@@ -235,21 +245,21 @@ void billSetBillboardMode(BillObj *effect, s32 mode) {
         effect->unk2E = mode;
         break;
     case 1:
-        count = effect->entryCount;
-        if (count > 0) {
-            remaining = count;
+        entryCount = effect->entryCount;
+        if (entryCount > 0) {
+            remaining = entryCount;
             /* Required to match: induction points to each entry's frame slot at +0x0C. */
-            entry = (s32)effect->unk60 + 0xc;
+            frameSlotAddress = (s32)effect->unk60 + 0xc;
             do {
-                EffBillFrame *node = (EffBillFrame *)*(s32 *)entry;
-                u32 flags = node->flags & ~6;
-                node->flags = flags;
+                EffBillFrame *frameData = (EffBillFrame *)*(s32 *)frameSlotAddress;
+                u32 frameFlags = frameData->flags & ~BILL_FRAME_MODE_BITS;
+                frameData->flags = frameFlags;
                 if (mode == 2) {
-                    node->flags = flags | 2;
+                    frameData->flags = frameFlags | 2;
                 } else if (mode == 3) {
-                    node->flags = flags | 4;
+                    frameData->flags = frameFlags | 4;
                 }
-                entry += 0x14;
+                frameSlotAddress += BILL_ENTRY_BYTES;
             } while (--remaining != 0);
         }
         break;
@@ -305,15 +315,16 @@ u16 billGetKind(BillObj *effect) {
     return effect->kind;
 }
 
+/* Store the low halfword through the kind-specific variant field. */
 void billSetVariantValue(BillObj *effect, s32 value) {
-    s32 v = value & 0xffff;
+    s32 variantValue = value & BILL_VARIANT_MASK;
 
     switch (effect->kind) {
     case 0:
-        ((EffSlot *)effect->entryList)->value = v;
+        ((EffSlot *)effect->entryList)->value = variantValue;
         break;
     case 1:
-        effect->unk3C = v;
+        effect->unk3C = variantValue;
         break;
     }
 }
@@ -330,9 +341,9 @@ u16 billGetVariantValue(BillObj *effect) {
 }
 
 /* Replace the selected list entry only when its index changes. */
-void billSetKind1Entry(BillObj *effect, u32 value) {
-    if (effect->kind == 1 && effect->unk58 != value) {
-        func_001594C8(effect, value);
+void billSetKind1Entry(BillObj *effect, u32 entryIndex) {
+    if (effect->kind == 1 && effect->unk58 != entryIndex) {
+        func_001594C8(effect, entryIndex);
     }
 }
 
@@ -363,20 +374,20 @@ s32 billGetLinkedChildValue(s32 billboard) {
 }
 
 /* Start every entry's animation at the requested frame, with mode zero. */
-void billSetEntryFrameMode0(BillObj *effect, u32 time) {
+void billSetEntryFrameMode0(BillObj *effect, u32 startFrame) {
     if (effect->kind == 1) {
-        s32 count = effect->entryCount;
+        s32 entryCount = effect->entryCount;
 
-        if (count > 0) {
+        if (entryCount > 0) {
             EffBillEntry *entry = (EffBillEntry *)effect->unk60;
-            s32 remaining = count;
+            s32 remaining = entryCount;
 
             do {
                 EffBillFrame *frameData = entry->data;
-                u32 frame = time % frameData->period;
+                u32 wrappedFrame = startFrame % frameData->period;
                 remaining -= 1;
                 entry->mode = 0;
-                entry->frame = frame;
+                entry->frame = wrappedFrame;
                 entry++;
             } while (remaining != 0);
         }
@@ -384,20 +395,20 @@ void billSetEntryFrameMode0(BillObj *effect, u32 time) {
 }
 
 /* Start every entry's animation at the requested frame, with mode one. */
-void billSetEntryFrameMode1(BillObj *effect, u32 time) {
+void billSetEntryFrameMode1(BillObj *effect, u32 startFrame) {
     if (effect->kind == 1) {
-        s32 count = effect->entryCount;
+        s32 entryCount = effect->entryCount;
 
-        if (count > 0) {
+        if (entryCount > 0) {
             EffBillEntry *entry = (EffBillEntry *)effect->unk60;
-            s32 remaining = count;
+            s32 remaining = entryCount;
 
             do {
                 EffBillFrame *frameData = entry->data;
-                u32 frame = time % frameData->period;
+                u32 wrappedFrame = startFrame % frameData->period;
                 remaining -= 1;
                 entry->mode = 1;
-                entry->frame = frame;
+                entry->frame = wrappedFrame;
                 entry++;
             } while (remaining != 0);
         }
@@ -440,11 +451,12 @@ void billMarkKindOneFlag(s32 billboard) {
     }
 }
 
+/* Kind 0 stores half the supplied width/height; other kinds remain unchanged. */
 void billSetChildHalfExtents(s32 billboard, float width, float height) {
     if (((BillKindOneView *)billboard)->kind == 0) {
-        s32 tmp = (s32)((BillObj *)billboard)->entryList;
-        ((BillChildPayload *)tmp)->halfWidth = width * 0.5f;
-        ((BillChildPayload *)tmp)->halfHeight = height * 0.5f;
+        s32 payloadAddress = (s32)((BillObj *)billboard)->entryList;
+        ((BillChildPayload *)payloadAddress)->halfWidth = width * 0.5f;
+        ((BillChildPayload *)payloadAddress)->halfHeight = height * 0.5f;
     }
 }
 
@@ -456,11 +468,11 @@ extern u8 D_003AA9B0[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 extern f32 sdfAtan2(f32, f32);
 
-/* vu0 routine: computes the projected angle between two vectors */
+/* vu0 routine: project position and position + scaled offset; return the reverse XY heading. */
 f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
-    f32 delta[4];
+    f32 projectedDelta[4];
     f32 projectedPosition[4];
-    f32 projectedOffset[4];
+    f32 projectedEndpoint[4];
 
     VU0_LOAD_MATRIX(sdfViewMatrix);
     sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
@@ -485,31 +497,33 @@ f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     VU0_MUL(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, D_0037F660);
     VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, projectedOffset);
+    VU0_STORE_VF(vf10, projectedEndpoint);
 
-    delta[0] = projectedPosition[0] - projectedOffset[0];
-    delta[1] = projectedPosition[1] - projectedOffset[1];
-    delta[2] = 0.0f;
-    VU0_LOAD_VF(vf10, delta);
+    projectedDelta[0] = projectedPosition[0] - projectedEndpoint[0];
+    projectedDelta[1] = projectedPosition[1] - projectedEndpoint[1];
+    projectedDelta[2] = 0.0f;
+    VU0_LOAD_VF(vf10, projectedDelta);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, delta);
-    return sdfAtan2(delta[1], delta[0]);
+    VU0_STORE_VF(vf10, projectedDelta);
+    return sdfAtan2(projectedDelta[1], projectedDelta[0]);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A150);
 
-u8 *billCreateUnitObject(s32 index) {
-    EffInstance *instance = sdfAllocSizeClassBlock(0x88);
+/* Create the indexed billboard and render asset; only the second matrix is initialized. */
+u8 *billCreateUnitObject(s32 entryIndex) {
+    EffInstance *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
 
-    instance->billboard = (BillObj *)billCreateIndexed(1, index);
+    instance->billboard = (BillObj *)billCreateIndexed(1, entryIndex);
     instance->renderState = sdfCreateAssetWithDrawEntries();
     func_003332D0(instance->renderState, 1.0f);
     EE_MMI_UNIT_MATRIX(instance->transform);
     return (u8 *)instance;
 }
 
+/* Retain a cloned billboard's shared data, create a fresh render asset, and reset both matrices. */
 u8 *billCloneUnitObject(EffInstance *source) {
-    EffInstance *instance = sdfAllocSizeClassBlock(0x88);
+    EffInstance *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
 
     instance->billboard = (BillObj *)billCloneObjectRetainingSharedData((s32)source->billboard);
     instance->renderState = sdfCreateAssetWithDrawEntries();
@@ -536,13 +550,13 @@ void billSetChildScale2(EffInstance *instance, f32 scale) {
     billSetChildScaleComponents(instance->billboard, scale, scale);
 }
 
-/* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effCopyMatrixToNext(EffInstance *instance, void *src) {
-    u8 *dst;
+/* vu0 routine: copy the supplied 4x4 matrix to the instance's second matrix. */
+void effCopyMatrixToNext(EffInstance *instance, void *matrix) {
+    u8 *transformBytes;
 
-    VU0_LOAD_MATRIX(src);
-    dst = instance->transform;
-    VU0_STORE_MATRIX(dst);
+    VU0_LOAD_MATRIX(matrix);
+    transformBytes = instance->transform;
+    VU0_STORE_MATRIX(transformBytes);
 }
 
 void billSetChildValue(EffInstance *instance, u32 value) {
@@ -554,23 +568,24 @@ void effVuCopyMatrix(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
-void effReadBillboardModeValues(EffInstance *instance, s32 *values) {
+/* Kind 1 writes mode plus one/two entry values; untouched output words retain their contents. */
+void effReadBillboardModeValues(EffInstance *instance, s32 *modeValues) {
     BillObj *billboard = instance->billboard;
 
     if (billboard->kind == 1) {
         u32 modeFlags = *(u32 *)((u8 *)billboard + 0x54);
 
         if (modeFlags & 0x40) {
-            values[0] = 2;
-            values[2] = func_00158F88((s32)billboard, (s32)billboard->unk60);
-            values[1] = func_00158F88((s32)billboard, (s32)billboard->unk60 + 0x14);
+            modeValues[0] = 2;
+            modeValues[2] = func_00158F88((s32)billboard, (s32)billboard->unk60);
+            modeValues[1] = func_00158F88((s32)billboard, (s32)billboard->unk60 + BILL_ENTRY_BYTES);
         } else if (modeFlags & 0x80) {
-            values[0] = 3;
-            values[2] = func_00158F88((s32)billboard, (s32)billboard->unk60);
-            values[1] = func_00158F88((s32)billboard, (s32)billboard->unk60 + 0x14);
+            modeValues[0] = 3;
+            modeValues[2] = func_00158F88((s32)billboard, (s32)billboard->unk60);
+            modeValues[1] = func_00158F88((s32)billboard, (s32)billboard->unk60 + BILL_ENTRY_BYTES);
         } else {
-            values[0] = 0;
-            values[1] = func_00158F88((s32)billboard, (s32)billboard->unk60);
+            modeValues[0] = 0;
+            modeValues[1] = func_00158F88((s32)billboard, (s32)billboard->unk60);
         }
     }
 }
@@ -585,22 +600,24 @@ typedef struct EffPacketSink {
     void (*submit)(s32 owner, s32 packet);
 } EffPacketSink;
 
+/* Allocate/init a packet list, generate its texture payload, then submit it to the sink. */
 void effSubmitGeneratedTexturePacket(s32 sink, s32 source) {
-    s32 tmp = sdfAllocPacketAligned(0x20);
+    s32 packetAddress = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
 
-    sdfInitPacketList(tmp);
-    func_0015AA30(tmp, source);
-    ((EffPacketSink *)sink)->submit(sink, tmp);
+    sdfInitPacketList(packetAddress);
+    func_0015AA30(packetAddress, source);
+    ((EffPacketSink *)sink)->submit(sink, packetAddress);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015AD18);
 
+/* Allocate/init a packet list, generate its composite GS payload, then submit it to the sink. */
 void effSubmitCompositeGsPacket(s32 sink, s32 source) {
-    s32 tmp = sdfAllocPacketAligned(0x20);
+    s32 packetAddress = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
 
-    sdfInitPacketList(tmp);
-    func_0015AD18(tmp, source);
-    ((EffPacketSink *)sink)->submit(sink, tmp);
+    sdfInitPacketList(packetAddress);
+    func_0015AD18(packetAddress, source);
+    ((EffPacketSink *)sink)->submit(sink, packetAddress);
 }
 
 void func_0015B270(void) {
@@ -610,24 +627,25 @@ void func_0015B270(void) {
 void func_0015B290(void) {
 }
 
-EffectBufferTail *effAllocateBuffer(s32 count) {
-    s32 bytes = count * sizeof(EffectBufferRecord);
-    s32 allocation = sdfAllocGeneralBlock(bytes + sizeof(EffectBufferTail));
-    EffectBufferRecord *record = sdfResourceRetainAddress(allocation);
-    EffectBufferTail *tail = (EffectBufferTail *)((u8 *)record + bytes);
+/* Allocate records followed by their owner tail; clear only two native state words per record. */
+EffectBufferTail *effAllocateBuffer(s32 recordCount) {
+    s32 recordBytes = recordCount * sizeof(EffectBufferRecord);
+    s32 allocationHandle = sdfAllocGeneralBlock(recordBytes + sizeof(EffectBufferTail));
+    EffectBufferRecord *recordCursor = sdfResourceRetainAddress(allocationHandle);
+    EffectBufferTail *bufferTail = (EffectBufferTail *)((u8 *)recordCursor + recordBytes);
 
-    tail->allocation = allocation;
-    tail->records = record;
-    if (count > 0) {
-        s32 remaining = count;
+    bufferTail->allocation = allocationHandle;
+    bufferTail->records = recordCursor;
+    if (recordCount > 0) {
+        s32 remaining = recordCount;
         do {
             remaining--;
-            record->unk20 = 0;
-            record->unk24 = 0;
-            record++;
+            recordCursor->unk20 = 0;
+            recordCursor->unk24 = 0;
+            recordCursor++;
         } while (remaining != 0);
     }
-    return tail;
+    return bufferTail;
 }
 
 void effReleaseBufferAllocation(u32 *allocationSlot) {
@@ -657,25 +675,26 @@ void effDestroyResources(EffEmitterHead *owner) {
     effReleaseBufferAllocation(owner->buffer);
 }
 
+/* Stagger native tags in period-sized groups; a nonempty buffer requires a nonzero period. */
 void effSetTemplateTagPeriod(EffTemplatePacketList *effect) {
-    EffectBufferRecord *record;
-    u32 i;
-    u32 next;
-    s32 tag;
+    EffectBufferRecord *packetCursor;
+    u32 packetIndex;
+    u32 nextPacketIndex;
+    s32 packetTag;
 
-    tag = 0xf0000001;
-    i = 0;
-    record = effect->buffer->records;
+    packetTag = EFF_PACKET_INITIAL_TAG;
+    packetIndex = 0;
+    packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            record->unk20 = tag;
-            next = i + 1;
-            record = record + 1;
-            if (next % effect->tailWords[0] == 0) {
-                tag = tag - effect->decayStep;
+            packetCursor->unk20 = packetTag;
+            nextPacketIndex = packetIndex + 1;
+            packetCursor = packetCursor + 1;
+            if (nextPacketIndex % effect->tailWords[0] == 0) {
+                packetTag = packetTag - effect->decayStep;
             }
-            i = next;
-        } while (i < effect->packetCount);
+            packetIndex = nextPacketIndex;
+        } while (packetIndex < effect->packetCount);
     }
 }
 
@@ -688,16 +707,17 @@ void effScaleTemplateTail13(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
+/* Clone the template prefix and appended tail, then allocate its packet records. */
 s32 effCloneRingTemplate(EffTemplatePacketList *source) {
-    s32 obj = (s32)sdfAllocSizeClassBlock(0x180);
-    s32 tailLen = 0x30;
+    s32 clone = (s32)sdfAllocSizeClassBlock(0x180);
+    s32 tailBytes = 0x30;
 
-    memset((void *)obj, 0, 0x180);
-    memcpy((void *)obj, source, source->templateSize);
-    memcpy((void *)(obj + 0x150), (u8 *)source + source->templateSize, tailLen);
-    func_0015B330(obj);
-    effSetTemplateTagPeriod(obj);
-    return obj;
+    memset((void *)clone, 0, 0x180);
+    memcpy((void *)clone, source, source->templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
+    func_0015B330(clone);
+    effSetTemplateTagPeriod(clone);
+    return clone;
 }
 
 void effFreeRingTemplate(u32 effect) {
@@ -865,18 +885,19 @@ void effEmitterRingUpdate(EffRingEmitter *effect) {
     }
 }
 
+/* Initialize only the native age/tag word of each packet record. */
 void effResetDiscPacketAges(EffTemplatePacketList *effect) {
-    EffectBufferRecord *record;
-    u32 index;
+    EffectBufferRecord *packetCursor;
+    u32 packetIndex;
 
-    index = 0;
-    record = effect->buffer->records;
+    packetIndex = 0;
+    packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            record->unk20 = 0xf0000001;
-            index = index + 1;
-            record = record + 1;
-        } while (index < effect->packetCount);
+            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetIndex = packetIndex + 1;
+            packetCursor = packetCursor + 1;
+        } while (packetIndex < effect->packetCount);
     }
 }
 
@@ -889,16 +910,17 @@ void effScaleDiscTemplate(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
+/* Clone the disc prefix/tail, allocate packet records, and initialize their native age tags. */
 s32 effCloneTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)sdfAllocSizeClassBlock(0x180);
-    s32 tailLen = 0x30;
+    s32 clone = (s32)sdfAllocSizeClassBlock(0x180);
+    s32 tailBytes = 0x30;
 
-    memset((void *)copy, 0, 0x180);
-    memcpy((void *)copy, source, source->templateSize);
-    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
-    func_0015B330(copy);
-    effResetDiscPacketAges(copy);
-    return copy;
+    memset((void *)clone, 0, 0x180);
+    memcpy((void *)clone, source, source->templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
+    func_0015B330(clone);
+    effResetDiscPacketAges(clone);
+    return clone;
 }
 
 void effFreeDiscTemplate(u32 effect) {
@@ -1045,18 +1067,19 @@ void effEmitterDiscUpdate(EffDiscEmitter *effect) {
     }
 }
 
+/* Initialize only the native age/tag word of each packet record. */
 void effResetBallisticPacketAges(EffTemplatePacketList *effect) {
-    EffectBufferRecord *record;
-    u32 index;
+    EffectBufferRecord *packetCursor;
+    u32 packetIndex;
 
-    index = 0;
-    record = effect->buffer->records;
+    packetIndex = 0;
+    packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            record->unk20 = 0xf0000001;
-            index = index + 1;
-            record = record + 1;
-        } while (index < effect->packetCount);
+            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetIndex = packetIndex + 1;
+            packetCursor = packetCursor + 1;
+        } while (packetIndex < effect->packetCount);
     }
 }
 
@@ -1069,16 +1092,17 @@ void effScaleBallisticTemplate(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
+/* Clone the ballistic prefix/tail, allocate packet records, and initialize their native age tags. */
 s32 effCloneBallisticTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)sdfAllocSizeClassBlock(0x180);
-    s32 tailLen = 0x30;
+    s32 clone = (s32)sdfAllocSizeClassBlock(0x180);
+    s32 tailBytes = 0x30;
 
-    memset((void *)copy, 0, 0x180);
-    memcpy((void *)copy, source, source->templateSize);
-    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
-    func_0015B330(copy);
-    effResetBallisticPacketAges(copy);
-    return copy;
+    memset((void *)clone, 0, 0x180);
+    memcpy((void *)clone, source, source->templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
+    func_0015B330(clone);
+    effResetBallisticPacketAges(clone);
+    return clone;
 }
 
 void effFreeBallisticTemplate(u32 effect) {
@@ -1176,26 +1200,27 @@ typedef struct EffLookAtRingEmitter EffLookAtRingEmitter;
 
 extern void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 index);
 
+/* Spawn each packet, then overwrite its tag with a zero-based, period-grouped schedule. */
 void effInitLookAtRingPacketSchedule(EffTemplatePacketList *effect) {
-    EffectBufferRecord *record;
-    u32 i;
-    u32 next;
-    s32 tag;
+    EffectBufferRecord *packetCursor;
+    u32 packetIndex;
+    u32 nextPacketIndex;
+    s32 packetTag;
 
-    tag = 0;
-    i = 0;
-    record = effect->buffer->records;
+    packetTag = 0;
+    packetIndex = 0;
+    packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            effEmitterLookAtRingSpawn((EffLookAtRingEmitter *)effect, i);
-            record->unk20 = tag;
-            next = i + 1;
-            record = record + 1;
-            if (next % effect->tailWords[0] == 0) {
-                tag = tag - effect->decayStep;
+            effEmitterLookAtRingSpawn((EffLookAtRingEmitter *)effect, packetIndex);
+            packetCursor->unk20 = packetTag;
+            nextPacketIndex = packetIndex + 1;
+            packetCursor = packetCursor + 1;
+            if (nextPacketIndex % effect->tailWords[0] == 0) {
+                packetTag = packetTag - effect->decayStep;
             }
-            i = next;
-        } while (i < effect->packetCount);
+            packetIndex = nextPacketIndex;
+        } while (packetIndex < effect->packetCount);
     }
 }
 
@@ -1206,16 +1231,17 @@ void effScaleLookAtRingTemplate(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
+/* Clone the look-at ring prefix/tail and spawn its staggered packet schedule. */
 s32 effCloneLookAtRingTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)sdfAllocSizeClassBlock(0x170);
-    s32 tailLen = 0x20;
+    s32 clone = (s32)sdfAllocSizeClassBlock(0x170);
+    s32 tailBytes = 0x20;
 
-    memset((void *)copy, 0, 0x170);
-    memcpy((void *)copy, source, source->templateSize);
-    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
-    func_0015B330(copy);
-    effInitLookAtRingPacketSchedule(copy);
-    return copy;
+    memset((void *)clone, 0, 0x170);
+    memcpy((void *)clone, source, source->templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
+    func_0015B330(clone);
+    effInitLookAtRingPacketSchedule(clone);
+    return clone;
 }
 
 void effFreeLookAtRingTemplate(u32 effect) {
@@ -1352,18 +1378,19 @@ void effEmitterLookAtRingUpdate(EffLookAtRingEmitter *effect) {
     }
 }
 
+/* Initialize only the native age/tag word of each packet record. */
 void effResetBurstPacketAges(EffTemplatePacketList *effect) {
-    EffectBufferRecord *record;
-    u32 index;
+    EffectBufferRecord *packetCursor;
+    u32 packetIndex;
 
-    index = 0;
-    record = effect->buffer->records;
+    packetIndex = 0;
+    packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            record->unk20 = 0xf0000001;
-            index = index + 1;
-            record = record + 1;
-        } while (index < effect->packetCount);
+            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetIndex = packetIndex + 1;
+            packetCursor = packetCursor + 1;
+        } while (packetIndex < effect->packetCount);
     }
 }
 
@@ -1375,16 +1402,17 @@ void effScaleBurstTemplate(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[1] = effect->tailValues[1] * scale;
 }
 
+/* Clone the burst prefix/tail, allocate packet records, and initialize their native age tags. */
 s32 effCloneBurstTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)sdfAllocSizeClassBlock(0x170);
-    s32 tailLen = 0x20;
+    s32 clone = (s32)sdfAllocSizeClassBlock(0x170);
+    s32 tailBytes = 0x20;
 
-    memset((void *)copy, 0, 0x170);
-    memcpy((void *)copy, source, source->templateSize);
-    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
-    func_0015B330(copy);
-    effResetBurstPacketAges(copy);
-    return copy;
+    memset((void *)clone, 0, 0x170);
+    memcpy((void *)clone, source, source->templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
+    func_0015B330(clone);
+    effResetBurstPacketAges(clone);
+    return clone;
 }
 
 void effFreeBurstTemplate(u32 effect) {
@@ -1549,18 +1577,19 @@ void effEmitterBurstUpdate(EffBurstEmitter *effect) {
     }
 }
 
+/* Initialize only the native age/tag word of each packet record. */
 void effResetSpherePacketAges(EffTemplatePacketList *effect) {
-    EffectBufferRecord *record;
-    u32 index;
+    EffectBufferRecord *packetCursor;
+    u32 packetIndex;
 
-    index = 0;
-    record = effect->buffer->records;
+    packetIndex = 0;
+    packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            record->unk20 = 0xf0000001;
-            index = index + 1;
-            record = record + 1;
-        } while (index < effect->packetCount);
+            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetIndex = packetIndex + 1;
+            packetCursor = packetCursor + 1;
+        } while (packetIndex < effect->packetCount);
     }
 }
 
@@ -1573,16 +1602,17 @@ void effScaleSphereTemplate(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
+/* Clone the sphere prefix/tail, allocate packet records, and initialize their native age tags. */
 s32 effCloneSphereTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)sdfAllocSizeClassBlock(0x180);
-    s32 tailLen = 0x30;
+    s32 clone = (s32)sdfAllocSizeClassBlock(0x180);
+    s32 tailBytes = 0x30;
 
-    memset((void *)copy, 0, 0x180);
-    memcpy((void *)copy, source, source->templateSize);
-    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
-    func_0015B330(copy);
-    effResetSpherePacketAges(copy);
-    return copy;
+    memset((void *)clone, 0, 0x180);
+    memcpy((void *)clone, source, source->templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
+    func_0015B330(clone);
+    effResetSpherePacketAges(clone);
+    return clone;
 }
 
 void effFreeSphereTemplate(u32 effect) {
@@ -1731,25 +1761,26 @@ void effEmitterSphereUpdate(EffSphereEmitter *effect) {
     }
 }
 
+/* Stagger native tags using this variant's second tail word as the group period. */
 void effInitExpandRingPacketSchedule(EffTemplatePacketList *effect) {
-    EffectBufferRecord *record;
-    u32 i;
-    u32 next;
-    s32 tag;
+    EffectBufferRecord *packetCursor;
+    u32 packetIndex;
+    u32 nextPacketIndex;
+    s32 packetTag;
 
-    tag = 0xf0000001;
-    i = 0;
-    record = effect->buffer->records;
+    packetTag = EFF_PACKET_INITIAL_TAG;
+    packetIndex = 0;
+    packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            record->unk20 = tag;
-            next = i + 1;
-            record = record + 1;
-            if (next % effect->tailWords[1] == 0) {
-                tag = tag - effect->decayStep;
+            packetCursor->unk20 = packetTag;
+            nextPacketIndex = packetIndex + 1;
+            packetCursor = packetCursor + 1;
+            if (nextPacketIndex % effect->tailWords[1] == 0) {
+                packetTag = packetTag - effect->decayStep;
             }
-            i = next;
-        } while (i < effect->packetCount);
+            packetIndex = nextPacketIndex;
+        } while (packetIndex < effect->packetCount);
     }
 }
 
@@ -1760,16 +1791,17 @@ void effScaleExpandRingTemplate(float scale, EffTemplatePacketList *effect) {
     effect->recordScale = effect->recordScale * scale;
 }
 
+/* Clone the expanding-ring prefix/tail and initialize its period-grouped packet tags. */
 s32 billCloneTemplateSmall(EffTemplatePacketList *source) {
-    s32 obj = (s32)sdfAllocSizeClassBlock(0x170);
-    s32 tailLen = 0x20;
+    s32 clone = (s32)sdfAllocSizeClassBlock(0x170);
+    s32 tailBytes = 0x20;
 
-    memset((void *)obj, 0, 0x170);
-    memcpy((void *)obj, source, source->templateSize);
-    memcpy((void *)(obj + 0x150), (u8 *)source + source->templateSize, tailLen);
-    func_0015B330(obj);
-    effInitExpandRingPacketSchedule(obj);
-    return obj;
+    memset((void *)clone, 0, 0x170);
+    memcpy((void *)clone, source, source->templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
+    func_0015B330(clone);
+    effInitExpandRingPacketSchedule(clone);
+    return clone;
 }
 
 void effFreeExpandRingTemplate(u32 effect) {
@@ -1904,18 +1936,19 @@ void effEmitterExpandRingUpdate(EffExpandingRingEmitter *effect) {
     }
 }
 
+/* Initialize only the native age/tag word of each packet record. */
 void effResetConePacketAges(EffTemplatePacketList *effect) {
-    EffectBufferRecord *record;
-    u32 index;
+    EffectBufferRecord *packetCursor;
+    u32 packetIndex;
 
-    index = 0;
-    record = effect->buffer->records;
+    packetIndex = 0;
+    packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            record->unk20 = 0xf0000001;
-            index = index + 1;
-            record = record + 1;
-        } while (index < effect->packetCount);
+            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetIndex = packetIndex + 1;
+            packetCursor = packetCursor + 1;
+        } while (packetIndex < effect->packetCount);
     }
 }
 
@@ -1928,16 +1961,17 @@ void effScaleConeTemplate(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
+/* Clone the cone prefix/tail, allocate packet records, and initialize their native age tags. */
 s32 effCloneConeTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)sdfAllocSizeClassBlock(0x180);
-    s32 tailLen = 0x30;
+    s32 clone = (s32)sdfAllocSizeClassBlock(0x180);
+    s32 tailBytes = 0x30;
 
-    memset((void *)copy, 0, 0x180);
-    memcpy((void *)copy, source, source->templateSize);
-    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
-    func_0015B330(copy);
-    effResetConePacketAges(copy);
-    return copy;
+    memset((void *)clone, 0, 0x180);
+    memcpy((void *)clone, source, source->templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
+    func_0015B330(clone);
+    effResetConePacketAges(clone);
+    return clone;
 }
 
 void effFreeConeTemplate(u32 effect) {
@@ -2072,16 +2106,17 @@ void effEmitterConeUpdate(EffConeEmitter *effect) {
     }
 }
 
+/* Initialize each packet's native tag and its template-selected uniform scale. */
 void effApplyTemplateScaleToRecords(EffTemplatePacketList *effect) {
-    s32 i = 0;
-    EffScaledRecord *record = (EffScaledRecord *)effect->buffer->records;
+    s32 packetIndex = 0;
+    EffScaledRecord *packetCursor = (EffScaledRecord *)effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            record->flags = 0xf0000001;
-            record->scale = effect->recordScale;
-            i++;
-            record++;
-        } while ((u32)i < effect->packetCount);
+            packetCursor->flags = EFF_PACKET_INITIAL_TAG;
+            packetCursor->scale = effect->recordScale;
+            packetIndex++;
+            packetCursor++;
+        } while ((u32)packetIndex < effect->packetCount);
     }
 }
 
@@ -2094,16 +2129,17 @@ void effScalePacketRecordTemplate(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[1] = effect->tailValues[1] * scale;
 }
 
+/* Clone the prefix/tail and initialize each packet record with the template's uniform scale. */
 s32 effClonePacketRecordScaleTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)sdfAllocSizeClassBlock(0x170);
-    s32 tailLen = 0x20;
+    s32 clone = (s32)sdfAllocSizeClassBlock(0x170);
+    s32 tailBytes = 0x20;
 
-    memset((void *)copy, 0, 0x170);
-    memcpy((void *)copy, source, source->templateSize);
-    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
-    func_0015B330(copy);
-    effApplyTemplateScaleToRecords(copy);
-    return copy;
+    memset((void *)clone, 0, 0x170);
+    memcpy((void *)clone, source, source->templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
+    func_0015B330(clone);
+    effApplyTemplateScaleToRecords(clone);
+    return clone;
 }
 
 void effFreePacketRecordScaleTemplate(u32 effect) {
@@ -2125,17 +2161,18 @@ void effScaleSingleParticleTemplate(float scale, EffTemplatePacketList *effect) 
     effect->z = effect->z * scale;
 }
 
+/* Clone the prefix without tail bytes; the zero-length copy is retained for matching. */
 void *effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
-    EffTemplatePacketList *copy = sdfAllocSizeClassBlock(0x150);
-    s32 tailLen = 0;
+    EffTemplatePacketList *clone = sdfAllocSizeClassBlock(0x150);
+    s32 tailBytes = 0;
 
-    memset(copy, 0, 0x150);
-    memcpy(copy, source, source->templateSize);
-    memcpy((u8 *)copy + 0x150, (u8 *)source + source->templateSize, tailLen);
-    copy->packetCount = 1;
-    copy->packetTag = 0;
-    func_0015B330((s32)copy);
-    return copy;
+    memset(clone, 0, 0x150);
+    memcpy(clone, source, source->templateSize);
+    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->templateSize, tailBytes);
+    clone->packetCount = 1;
+    clone->packetTag = 0;
+    func_0015B330((s32)clone);
+    return clone;
 }
 
 void effFreeSingleParticleTemplate(u32 effect) {
@@ -2146,36 +2183,37 @@ void effFreeSingleParticleTemplate(u32 effect) {
 extern u8 D_003AA868[];
 extern f32 effMiscRandUnitFloat(void *);
 
-/* Initialize a particle record, applying random speed and angle jitter. */
+/* Initialize the first record at frame -1; speed draws RNG, angle draws it only for nonzero jitter. */
 void effInitParticleRecord(effect)
     EffParticle *effect;
 {
-    EffParticleRecord *particle = (EffParticleRecord *)effect->buffer->records;
+    EffParticleRecord *record = (EffParticleRecord *)effect->buffer->records;
     f32 jitter;
-    u32 color;
+    u32 baseColor;
 
-    color = effect->color | (effect->alpha << 24);
-    particle->x = effect->x;
-    particle->frame = -1;
-    particle->y = effect->y;
-    particle->color = color;
-    particle->z = effect->z;
-    particle->speed = 1.0f;
-    particle->angle = 0;
+    baseColor = effect->color | (effect->alpha << 24);
+    record->x = effect->x;
+    record->frame = -1;
+    record->y = effect->y;
+    record->color = baseColor;
+    record->z = effect->z;
+    record->speed = 1.0f;
+    record->angle = 0;
     effect->lastSpeed = effect->speed;
     jitter = effect->speedJitter;
-    particle->speed = effect->speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    record->speed = effect->speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
     jitter = effect->angleJitter;
     if (jitter != 0) {
-        particle->angle = (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        record->angle = (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
-        particle->angle = 0;
+        record->angle = 0;
     }
 }
 
+/* Frame zero reinitializes to -1 before incrementing; refresh position and modulated packed color. */
 void effUpdateParticleRecord(EffParticle *effect) {
     EffParticleRecord *record = (EffParticleRecord *)effect->buffer->records;
-    u32 color;
+    u32 baseColor;
 
     if (record->frame == 0) {
         effInitParticleRecord(effect);
@@ -2183,25 +2221,26 @@ void effUpdateParticleRecord(EffParticle *effect) {
     record->frame = record->frame + 1;
     record->x = effect->x;
     record->y = effect->y;
-    color = effect->color | (effect->alpha << 24);
+    baseColor = effect->color | (effect->alpha << 24);
     effect->unk24 = record->frame + 1;
-    record->color = color;
+    record->color = baseColor;
     record->z = effect->z;
-    record->color = effParModulateColors(color, effect->unkF0);
+    record->color = effParModulateColors(baseColor, effect->unkF0);
 }
 
+/* Initialize only the native age/tag word of each packet record. */
 void effResetOffsetGravityPacketAges(EffTemplatePacketList *effect) {
-    EffectBufferRecord *record;
-    u32 index;
+    EffectBufferRecord *packetCursor;
+    u32 packetIndex;
 
-    index = 0;
-    record = effect->buffer->records;
+    packetIndex = 0;
+    packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            record->unk20 = 0xf0000001;
-            index = index + 1;
-            record = record + 1;
-        } while (index < effect->packetCount);
+            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetIndex = packetIndex + 1;
+            packetCursor = packetCursor + 1;
+        } while (packetIndex < effect->packetCount);
     }
 }
 
@@ -2214,16 +2253,17 @@ void effScaleOffsetGravityTemplate(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
+/* Clone the offset-gravity prefix/tail, allocate records, and initialize their native age tags. */
 s32 effCloneOffsetGravityTemplate(EffTemplatePacketList *source) {
-    s32 copy = (s32)sdfAllocSizeClassBlock(0x190);
-    s32 tailLen = 0x40;
+    s32 clone = (s32)sdfAllocSizeClassBlock(0x190);
+    s32 tailBytes = 0x40;
 
-    memset((void *)copy, 0, 0x190);
-    memcpy((void *)copy, source, source->templateSize);
-    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
-    func_0015B330(copy);
-    effResetOffsetGravityPacketAges(copy);
-    return copy;
+    memset((void *)clone, 0, 0x190);
+    memcpy((void *)clone, source, source->templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
+    func_0015B330(clone);
+    effResetOffsetGravityPacketAges(clone);
+    return clone;
 }
 
 void effFreeOffsetGravityTemplate(u32 effect) {
@@ -2315,18 +2355,19 @@ void effEmitterOffsetGravityUpdate(EffOffsetGravityEmitter *effect) {
     }
 }
 
+/* Initialize only the native age/tag word of each packet record. */
 void effResetDiscAuxPacketAges(EffTemplatePacketList *effect) {
-    EffectBufferRecord *record;
-    u32 index;
+    EffectBufferRecord *packetCursor;
+    u32 packetIndex;
 
-    index = 0;
-    record = effect->buffer->records;
+    packetIndex = 0;
+    packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            record->unk20 = 0xf0000001;
-            index = index + 1;
-            record = record + 1;
-        } while (index < effect->packetCount);
+            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetIndex = packetIndex + 1;
+            packetCursor = packetCursor + 1;
+        } while (packetIndex < effect->packetCount);
     }
 }
 
@@ -2339,20 +2380,21 @@ void effScaleDiscAuxTemplate(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
+/* Clone the disc prefix/tail plus a separate 16-byte-per-packet auxiliary allocation. */
 void *effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
-    EffTemplatePacketList *copy = sdfAllocSizeClassBlock(0x200);
-    s32 allocation;
-    s32 tailLen = 0xB0;
+    EffTemplatePacketList *clone = sdfAllocSizeClassBlock(0x200);
+    s32 auxAllocationHandle;
+    s32 tailBytes = 0xB0;
 
-    memset(copy, 0, 0x200);
-    memcpy(copy, source, source->templateSize);
-    memcpy((u8 *)copy + 0x150, (u8 *)source + source->templateSize, tailLen);
-    allocation = sdfAllocGeneralBlock(copy->packetCount * 0x10);
-    copy->auxiliaryAllocation = allocation;
-    copy->auxiliaryData = sdfResourceRetainAddress(allocation);
-    func_0015B330((s32)copy);
-    effResetDiscAuxPacketAges(copy);
-    return copy;
+    memset(clone, 0, 0x200);
+    memcpy(clone, source, source->templateSize);
+    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->templateSize, tailBytes);
+    auxAllocationHandle = sdfAllocGeneralBlock(clone->packetCount * 0x10);
+    clone->auxiliaryAllocation = auxAllocationHandle;
+    clone->auxiliaryData = sdfResourceRetainAddress(auxAllocationHandle);
+    func_0015B330((s32)clone);
+    effResetDiscAuxPacketAges(clone);
+    return clone;
 }
 
 void effFreeDiscAuxTemplate(u32 effect) {
@@ -2505,18 +2547,19 @@ void effEmitterDiscAuxUpdate(EffDiscAuxEmitter *effect) {
     }
 }
 
+/* Initialize only the native age/tag word of each packet record. */
 void effMarkAllTemplateBufferRecords(EffTemplatePacketList *effect) {
-    EffectBufferRecord *record;
-    u32 index;
+    EffectBufferRecord *packetCursor;
+    u32 packetIndex;
 
-    index = 0;
-    record = effect->buffer->records;
+    packetIndex = 0;
+    packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            record->unk20 = 0xf0000001;
-            index = index + 1;
-            record = record + 1;
-        } while (index < effect->packetCount);
+            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetIndex = packetIndex + 1;
+            packetCursor = packetCursor + 1;
+        } while (packetIndex < effect->packetCount);
     }
 }
 
