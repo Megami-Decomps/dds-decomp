@@ -35,12 +35,12 @@ typedef struct {
     f32 (*positions)[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     u32 *colorTable;
     f32 *unk1C;
-    u32 *values;
+    u32 *slotColors;
     u16 *writeIndices;
     u16 *validCounts;
     f32 (*unk2C)[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     u32 texture;
-    void *resource;
+    void *allocationHandle;
 } EffMagatuhiValueWork;
 
 /* Callback input prefix; type 3 contains an effect-dispatch object at +8. */
@@ -80,13 +80,13 @@ typedef struct {
     u8 pad64[0x118];
 } EffMagatuhiHeadFirst; /* 0x17C */
 
-/* A 0x30-byte position/direction state, shared by the first and drift families. */
+/* Shared 0x30-byte state: base position, planar drift, and accumulated lift. */
 typedef struct {
-    f32 pos[EFF_MAGATUHI_XYZ_COMPONENT_COUNT];
+    f32 position[EFF_MAGATUHI_XYZ_COMPONENT_COUNT];
     u8 pad0C[4];
-    f32 dir[EFF_MAGATUHI_XYZ_COMPONENT_COUNT];
+    f32 driftState[EFF_MAGATUHI_XYZ_COMPONENT_COUNT]; /* XZ direction, Y accumulated lift */
     u8 pad1C[4];
-    s32 delay;
+    s32 age; /* negative: waiting to start; nonnegative: elapsed frames */
     f32 scale;
     f32 angle;
     f32 liftStep;
@@ -98,7 +98,7 @@ typedef struct {
     void *mathResource;    /* 0x180 */
     u8 pad184[8];
     EffMagatuhiOwner *managedResource; /* 0x18C */
-    void *buffer;          /* 0x190 */
+    void *allocationHandle; /* 0x190 opaque handle, not the particle address */
 } EffMagatuhiWideFirst;
 
 /* Bezier parameter head: particle count and delay spread at their native offsets. */
@@ -121,7 +121,7 @@ typedef struct {
     s32 *delays;           /* 0x180 */
     void *mathResource;    /* 0x184 */
     EffMagatuhiOwner *managedResource; /* 0x188 */
-    void *buffer;          /* 0x18C */
+    void *allocationHandle; /* 0x18C opaque handle, not the work address */
 } EffMagatuhiWideSecond;
 
 /* Float source block read by effMagatuhiCopyFloatBlock. */
@@ -136,16 +136,16 @@ typedef struct {
 
 /* Release the allocation retained by the render/history owner. */
 void effMagatuhiReleaseResource(EffMagatuhiValueWork *work) {
-    sdfReleaseResourceAllocation(work->resource);
+    sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001893D8);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00189818);
 
-/* Store one per-slot word; the native path does not validate the index. */
-void effMagatuhiSetValue(EffMagatuhiValueWork *work, s32 index, u32 value) {
-    work->values[index] = value;
+/* Store a per-slot packed color; the native path does not validate the index. */
+void effMagatuhiSetValue(EffMagatuhiValueWork *work, s32 index, u32 color) {
+    work->slotColors[index] = color;
 }
 
 /* Accumulate 1/historyCount per entry; the nominal last fraction is below 1. */
@@ -178,7 +178,7 @@ void func_00189C80(void *valueWork, s32 index) {
 
 /* Ring state is one 0x18-byte slot; replay visits every third slot. */
 typedef struct {
-    s32 delay;
+    s32 age; /* negative: waiting to start; nonnegative: elapsed frames */
     f32 height;
     f32 angle;
     f32 angleStep;
@@ -206,7 +206,7 @@ EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
     u32 i;
 
     work->head = *src;
-    work->buffer = (void *)handle;
+    work->allocationHandle = (void *)handle;
     work->particles = particle;
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
@@ -215,7 +215,7 @@ EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
     work->mathResource = effAllocSlotArray(count);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
-        particle->delay = -(effMiscRand(D_0034DF38) % spread);
+        particle->age = -(effMiscRand(D_0034DF38) % spread);
         particle++;
     }
     return work;
@@ -225,7 +225,7 @@ EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
 void effMagatuhiReleaseMathOwnerAndBuffer(EffMagatuhiWideFirst *work) {
     effMathReleaseWorkResource(work->mathResource);
     effReleaseMagatuhiOwner(work->managedResource);
-    sdfReleaseResourceAllocation(work->buffer);
+    sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
 /* Seed independent normalized XZ position/drift vectors and clear slot history.
@@ -247,17 +247,17 @@ void func_00189E98(EffMagatuhiWideFirst *work, s32 index) {
     VU0_LOAD_VF_FROM(vf10, *(u128 *)direction);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF_TO_MEMORY(vf10, *(u128 *)direction);
-    particle->pos[0] = radius * direction[0];
-    particle->pos[1] = 0.0f;
-    particle->pos[2] = radius * direction[2];
+    particle->position[0] = radius * direction[0];
+    particle->position[1] = 0.0f;
+    particle->position[2] = radius * direction[2];
     random = effMiscRandUnitFloat(D_0034DF38) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    particle->dir[0] = random + random;
-    particle->dir[1] = 0.0f;
+    particle->driftState[0] = random + random;
+    particle->driftState[1] = 0.0f;
     random = effMiscRandUnitFloat(D_0034DF38) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    particle->dir[2] = random + random;
-    VU0_LOAD_VF(vf10, particle->dir);
+    particle->driftState[2] = random + random;
+    VU0_LOAD_VF(vf10, particle->driftState);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, particle->dir);
+    VU0_STORE_VF(vf10, particle->driftState);
     particle->scale = *(f32 *)((u8 *)work + 0x44) *
         (effMiscRandUnitFloat(D_0034DF38) * *(f32 *)((u8 *)work + 0x4C) +
          (1.0f - *(f32 *)((u8 *)work + 0x4C)));
@@ -298,7 +298,7 @@ EffMagatuhiWideSecond *effMagatuhiCreateBezierHistoryWork(EffMagatuhiHeadSecond 
     u32 i;
 
     work->head = *src;
-    work->buffer = (void *)handle;
+    work->allocationHandle = (void *)handle;
     work->delays = delays;
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
@@ -316,7 +316,7 @@ EffMagatuhiWideSecond *effMagatuhiCreateBezierHistoryWork(EffMagatuhiHeadSecond 
 void effMagatuhiReleaseWideWorkResources(EffMagatuhiWideSecond *work) {
     effMathReleaseWorkResource(work->mathResource);
     effReleaseMagatuhiOwner(work->managedResource);
-    sdfReleaseResourceAllocation(work->buffer);
+    sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
 extern s32 effMathStepBezierSlot(void *slots, s32 index, void *out);
@@ -325,8 +325,8 @@ extern void func_00189818(void *valueWork, s32 index, void *out);
 
 typedef struct {
     f32 controlPoints[EFF_MAGATUHI_CONTROL_POINT_COUNT][EFF_MAGATUHI_XYZ_COMPONENT_COUNT];
-    f32 scale; /* 0x30 */
-    f32 base;  /* 0x34 */
+    f32 t;    /* 0x30 Bezier evaluation parameter, as in effMath's slot */
+    f32 step; /* 0x34 per-frame increment of t */
 } EffMagatuhiSlot;
 
 extern f32 sdfViewTargetVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
@@ -348,8 +348,8 @@ void effMagatuhiBuildBezierControlPointsVU(EffMagatuhiWideSecond *work, s32 inde
     VU0_STORE_VF(vf10, viewDirection);
     step = 1.0f / (f32)work->head.lifetimeFrames;
     slot = effMathGetSlotAt(work->mathResource, index);
-    slot->scale = 0;
-    slot->base = step;
+    slot->t = 0;
+    slot->step = step;
 
     random = effMiscRandUnitFloat(D_0034DF38) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     scale[0] = work->head.jitterScales[0] * (random + random);
@@ -491,46 +491,46 @@ void effMagatuhiSetControlPointParams(EffMagatuhiCallback *work, EffMagatuhiRows
 void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiCallback *arg) {
     EffMagatuhiWideSecond *work = effGetHandlerArg(arg->effect);
     EffMagatuhiValueWork *valueWork = work->managedResource->valueWork;
-    u32 duration = work->head.duration;
-    s32 life = work->head.lifetimeFrames;
+    u32 historyFrames = work->head.duration;
+    s32 lifetimeFrames = work->head.lifetimeFrames;
     u32 count = work->head.particleCount;
-    s32 *delays = work->delays;
-    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    f32 from[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    f32 to[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    f32 t;
-    f32 step;
+    s32 *ages = work->delays;
+    f32 samplePosition[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 startPosition[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 endPosition[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 blendFraction;
+    f32 blendStep;
     u32 i;
     u32 j;
-    s32 span;
+    s32 sampleSpan;
     EffMagatuhiSlot *slot;
 
     for (i = 0; i < count; i += EFF_MAGATUHI_BEZIER_GROUP_STRIDE) {
         effMagatuhiBuildBezierControlPointsVU(work, i);
-        *delays = effMiscRand(D_0034DF38) % life;
+        *ages = effMiscRand(D_0034DF38) % lifetimeFrames;
         slot = effMathGetSlotAt(work->mathResource, i);
-        if (duration < *delays) {
-            slot->scale = slot->base * (f32)(*delays - duration);
-            span = duration;
+        if (historyFrames < *ages) {
+            slot->t = slot->step * (f32)(*ages - historyFrames);
+            sampleSpan = historyFrames;
         } else {
-            slot->scale = 0.0f;
-            span = duration - *delays;
+            slot->t = 0.0f;
+            sampleSpan = historyFrames - *ages;
         }
-        t = 0.0f;
-        effMathStepBezierSlot(work->mathResource, i, from);
-        slot->scale = slot->base * (f32)*delays;
-        effMathStepBezierSlot(work->mathResource, i, to);
-        step = 1.0f / (f32)span;
-        for (j = 0; j < span; j++) {
-            VU0_LOAD_VF(vf10, from);
-            VU0_LOAD_VF(vf11, to);
-            VU0_LERP_VF10(t);
-            VU0_STORE_VF(vf10, out);
-            func_00189818(valueWork, i, out);
-            t += step;
+        blendFraction = 0.0f;
+        effMathStepBezierSlot(work->mathResource, i, startPosition);
+        slot->t = slot->step * (f32)*ages;
+        effMathStepBezierSlot(work->mathResource, i, endPosition);
+        blendStep = 1.0f / (f32)sampleSpan;
+        for (j = 0; j < sampleSpan; j++) {
+            VU0_LOAD_VF(vf10, startPosition);
+            VU0_LOAD_VF(vf11, endPosition);
+            VU0_LERP_VF10(blendFraction);
+            VU0_STORE_VF(vf10, samplePosition);
+            func_00189818(valueWork, i, samplePosition);
+            blendFraction += blendStep;
         }
-        (*delays)++;
-        delays += EFF_MAGATUHI_BEZIER_GROUP_STRIDE;
+        (*ages)++;
+        ages += EFF_MAGATUHI_BEZIER_GROUP_STRIDE;
     }
 }
 
@@ -578,8 +578,8 @@ typedef struct {
     EffMagatuhiRingParams head;
     EffMagatuhiRingParticle *particles;
     EffMagatuhiOwner *managedResource;
-    u32 color;
-    void *buffer;
+    u32 tintColor;
+    void *allocationHandle;
 } EffMagatuhiRingWork;
 
 /* Clone ring parameters; the returned work precedes its individual slots. */
@@ -593,8 +593,8 @@ EffMagatuhiRingWork *effMagatuhiCreateRingWork(EffMagatuhiRingParams *src) {
 
     work->head = *src;
     work->particles = particle;
-    work->color = EFF_MAGATUHI_NEUTRAL_COLOR;
-    work->buffer = (void *)handle;
+    work->tintColor = EFF_MAGATUHI_NEUTRAL_COLOR;
+    work->allocationHandle = (void *)handle;
     EE_MMI_UNIT_MATRIX(work->matrix);
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
@@ -602,7 +602,7 @@ EffMagatuhiRingWork *effMagatuhiCreateRingWork(EffMagatuhiRingParams *src) {
     work->managedResource = effCloneMagatuhiWithColorResource(&work->head.particleCount);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
-        particle->delay = -(effMiscRand(D_0034DF38) % spread);
+        particle->age = -(effMiscRand(D_0034DF38) % spread);
         particle++;
     }
     return work;
@@ -611,7 +611,7 @@ EffMagatuhiRingWork *effMagatuhiCreateRingWork(EffMagatuhiRingParams *src) {
 /* Release the ring history owner before the work/state allocation. */
 void effMagatuhiReleaseOwnerAndBuffer(EffMagatuhiRingWork *work) {
     effReleaseMagatuhiOwner(work->managedResource);
-    sdfReleaseResourceAllocation(work->buffer);
+    sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
 /* Initialize a ring slot and reset the history/value owned by that slot. */
@@ -620,7 +620,7 @@ void effMagatuhiInitParticleA(EffMagatuhiRingWork *work, s32 index) {
     f32 blend;
     f32 t;
 
-    elem->delay = 0;
+    elem->age = 0;
     elem->height = -work->head.heightSpread * effMiscRandUnitFloat(D_0034DF38);
     elem->angle = effMiscRandUnitFloat(D_0034DF38) * (EFF_MAGATUHI_HALF_TURN * 2.0f);
     blend = work->head.angleJitter;
@@ -643,7 +643,7 @@ void effMagatuhiSetRingOrigin(EffMagatuhiRingWork *work, void *origin) {
 
 /* The historical symbol names a resource, but this slot is packed color. */
 void effMagatuhiSetRingColor(EffMagatuhiRingWork *work, u32 color) {
-    work->color = color;
+    work->tintColor = color;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -689,7 +689,7 @@ void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *arg) {
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagatuhiInitParticleA(work, i);
                 frameOffset = effMiscRand(D_0034DF38) % frames;
-                particle->delay = frameOffset;
+                particle->age = frameOffset;
                 /* Keep at most maxSteps samples: skip older state only when
                  * the random age exceeds that window; otherwise start at zero. */
                 if (maxSteps < frameOffset) {
@@ -747,7 +747,7 @@ typedef struct {
 
 /* One 0x1C-byte orbit slot; replay visits the first slot in each triplet. */
 typedef struct {
-    s32 delay;
+    s32 age; /* negative: waiting to start; nonnegative: elapsed frames */
     f32 height;
     f32 heightStep;
     f32 angle;
@@ -762,8 +762,8 @@ typedef struct {
     EffMagatuhiOrbitParams head;
     EffMagatuhiOrbitParticle *particles;
     EffMagatuhiOwner *managedResource;
-    u32 color;
-    void *buffer;
+    u32 tintColor;
+    void *allocationHandle;
 } EffMagatuhiOrbitWork;
 
 /* Clone orbit parameters; the returned work precedes its individual slots. */
@@ -777,8 +777,8 @@ EffMagatuhiOrbitWork *effMagatuhiCreateOrbitWork(EffMagatuhiOrbitParams *src) {
 
     work->head = *src;
     work->particles = particle;
-    work->color = EFF_MAGATUHI_NEUTRAL_COLOR;
-    work->buffer = (void *)handle;
+    work->tintColor = EFF_MAGATUHI_NEUTRAL_COLOR;
+    work->allocationHandle = (void *)handle;
     EE_MMI_UNIT_MATRIX(work->matrix);
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
@@ -786,7 +786,7 @@ EffMagatuhiOrbitWork *effMagatuhiCreateOrbitWork(EffMagatuhiOrbitParams *src) {
     work->managedResource = effCloneMagatuhiWithColorResource(&work->head.particleCount);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
-        particle->delay = -(effMiscRand(D_0034DF38) % spread);
+        particle->age = -(effMiscRand(D_0034DF38) % spread);
         particle++;
     }
     return work;
@@ -795,7 +795,7 @@ EffMagatuhiOrbitWork *effMagatuhiCreateOrbitWork(EffMagatuhiOrbitParams *src) {
 /* Release the orbit history owner before the work/state allocation. */
 void effMagatuhiReleaseOwnerAndExtraBuffer(EffMagatuhiOrbitWork *work) {
     effReleaseMagatuhiOwner(work->managedResource);
-    sdfReleaseResourceAllocation(work->buffer);
+    sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
 /* Seed randomized height/angular/radial increments and clear the slot history. */
@@ -804,7 +804,7 @@ void effMagatuhiInitOrbitParticle(EffMagatuhiOrbitWork *work, s32 index) {
     f32 blend;
     f32 t;
 
-    elem->delay = 0;
+    elem->age = 0;
     elem->height = 0;
     blend = work->head.heightJitter;
     elem->heightStep = work->head.heightStep * (effMiscRandUnitFloat(D_0034DF38) * blend + (1.0f - blend));
@@ -829,7 +829,7 @@ void effMagatuhiSetOrbitOrigin(EffMagatuhiOrbitWork *work, void *origin) {
 
 /* This callback sets the packed orbit color, not an allocation handle. */
 void effMagatuhiSetOrbitColor(EffMagatuhiOrbitWork *work, u32 color) {
-    work->color = color;
+    work->tintColor = color;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -876,7 +876,7 @@ void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *arg) {
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagatuhiInitOrbitParticle(work, i);
                 frameOffset = effMiscRand(D_0034DF38) % frames;
-                particle->delay = frameOffset;
+                particle->age = frameOffset;
                 /* Keep at most maxSteps samples: skip older state only when
                  * the random age exceeds that window; otherwise start at zero. */
                 if (maxSteps < frameOffset) {
@@ -920,9 +920,9 @@ typedef struct {
     f32 matrix[EFF_MAGATUHI_MATRIX_WORD_COUNT];
     EffMagatuhiDriftParams head;
     EffMagatuhiDriftParticle *particles;
-    u32 color;
+    u32 tintColor;
     EffMagatuhiOwner *managedResource;
-    void *buffer;
+    void *allocationHandle;
 } EffMagatuhiDriftWork;
 
 /* Clone drift parameters; return the work after its 0x30-byte state array. */
@@ -937,8 +937,8 @@ EffMagatuhiDriftWork *effMagatuhiCreateDriftWork(EffMagatuhiDriftParams *src) {
 
     work->head = *src;
     work->particles = particle;
-    work->color = EFF_MAGATUHI_NEUTRAL_COLOR;
-    work->buffer = (void *)handle;
+    work->tintColor = EFF_MAGATUHI_NEUTRAL_COLOR;
+    work->allocationHandle = (void *)handle;
     EE_MMI_UNIT_MATRIX(work->matrix);
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
@@ -946,7 +946,7 @@ EffMagatuhiDriftWork *effMagatuhiCreateDriftWork(EffMagatuhiDriftParams *src) {
     work->managedResource = effCloneMagatuhiWithColorResource(&work->head.particleCount);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
-        particle->delay = -(effMiscRand(D_0034DF38) % spread);
+        particle->age = -(effMiscRand(D_0034DF38) % spread);
         particle++;
     }
     return work;
@@ -955,7 +955,7 @@ EffMagatuhiDriftWork *effMagatuhiCreateDriftWork(EffMagatuhiDriftParams *src) {
 /* Release the drift history owner before its states-plus-work allocation. */
 void effMagatuhiReleaseSecondaryOwnerAndBuffer(EffMagatuhiDriftWork *work) {
     effReleaseMagatuhiOwner(work->managedResource);
-    sdfReleaseResourceAllocation(work->buffer);
+    sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
 /* vu0 routine: initialize a planar particle with normalized position/drift. */
@@ -975,17 +975,17 @@ void effMagatuhiInitializeDriftParticle(EffMagatuhiDriftWork *work, s32 index) {
     VU0_LOAD_VF_FROM(vf10, *(u128 *)direction);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF_TO_MEMORY(vf10, *(u128 *)direction);
-    particle->pos[0] = radius * direction[0];
-    particle->pos[1] = 0.0f;
-    particle->pos[2] = radius * direction[2];
+    particle->position[0] = radius * direction[0];
+    particle->position[1] = 0.0f;
+    particle->position[2] = radius * direction[2];
     random = effMiscRandUnitFloat(D_0034DF38) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    particle->dir[0] = random + random;
-    particle->dir[1] = 0.0f;
+    particle->driftState[0] = random + random;
+    particle->driftState[1] = 0.0f;
     random = effMiscRandUnitFloat(D_0034DF38) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    particle->dir[2] = random + random;
-    VU0_LOAD_VF(vf10, particle->dir);
+    particle->driftState[2] = random + random;
+    VU0_LOAD_VF(vf10, particle->driftState);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, particle->dir);
+    VU0_STORE_VF(vf10, particle->driftState);
     particle->scale = work->head.initialScale *
         (effMiscRandUnitFloat(D_0034DF38) * work->head.initialScaleRandomness +
          (1.0f - work->head.initialScaleRandomness));
@@ -1006,7 +1006,7 @@ void effMagatuhiSetDriftOrigin(EffMagatuhiDriftWork *work, void *origin) {
 
 /* This callback sets packed drift color; +0x120 is not an owner pointer. */
 void effMagatuhiSetDriftColor(EffMagatuhiDriftWork *work, u32 color) {
-    work->color = color;
+    work->tintColor = color;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -1049,7 +1049,7 @@ void effMagatuhiUpdateDriftFamily(EffMagatuhiCallback *arg) {
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagatuhiInitializeDriftParticle(work, i);
                 frameOffset = effMiscRand(D_0034DF38) % frames;
-                particle->delay = frameOffset;
+                particle->age = frameOffset;
                 /* Keep at most maxSteps samples: skip older state only when
                  * the random age exceeds that window; otherwise start at zero. */
                 if (maxSteps < frameOffset) {
@@ -1064,16 +1064,16 @@ void effMagatuhiUpdateDriftFamily(EffMagatuhiCallback *arg) {
                 liftStep = particle->liftStep;
                 angle = particle->angle + angleStep * (f32)frameOffset;
                 scale = particle->scale + scaleStep * (f32)frameOffset;
-                lift = particle->dir[1] + liftStep * (f32)frameOffset;
+                lift = particle->driftState[1] + liftStep * (f32)frameOffset;
                 out[3] = 0;
                 for (k = 0; k < steps; k++) {
                     /* Native ordering: lift advances before sampling, scale/angle after. */
                     lift += liftStep;
                     /* Keep the sine evaluation even though its result is unused here. */
                     sdfSinPoly(angle);
-                    out[0] = particle->pos[0] + particle->dir[0] * scale;
-                    out[1] = particle->pos[1] + lift;
-                    out[2] = particle->pos[2] + particle->dir[2] * scale;
+                    out[0] = particle->position[0] + particle->driftState[0] * scale;
+                    out[1] = particle->position[1] + lift;
+                    out[2] = particle->position[2] + particle->driftState[2] * scale;
                     VU0_LOAD_VF(vf11, origin);
                     VU0_LOAD_VF(vf10, out);
                     VU0_APPLY_MATRIX(vf10, vf10);
@@ -1085,7 +1085,7 @@ void effMagatuhiUpdateDriftFamily(EffMagatuhiCallback *arg) {
                 }
                 particle->scale = scale;
                 particle->angle = angle;
-                particle->dir[1] = lift;
+                particle->driftState[1] = lift;
             }
         }
     }
