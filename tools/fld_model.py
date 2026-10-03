@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import struct
@@ -23,6 +24,13 @@ FLOAT = 5126
 UNSIGNED_BYTE = 5121
 UNSIGNED_SHORT = 5123
 UNSIGNED_INT = 5125
+
+
+def _material_fingerprint(material: object) -> str:
+    payload = json.dumps(
+        material, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    ).encode("ascii")
+    return hashlib.sha256(payload).hexdigest()
 
 
 @dataclass
@@ -726,6 +734,12 @@ def add_model_graph(
         else:
             parent = builder.document["nodes"][node_indices[item.parent]]
             parent.setdefault("children", []).append(node_indices[item_index])
+    for mesh_index in mesh_cache.values():
+        for primitive in builder.document["meshes"][mesh_index]["primitives"]:
+            material = builder.document["materials"][primitive["material"]]
+            primitive["extras"]["ddsMaterialFingerprint"] = (
+                _material_fingerprint(material)
+            )
     return tuple(node_indices), tuple(roots)
 
 

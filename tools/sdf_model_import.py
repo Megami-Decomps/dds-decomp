@@ -566,6 +566,13 @@ def import_model_graphs(
                     or extras.get("ddsMaterialIndex") != material_index
                 ):
                     raise ModelImportError(f"{context} changes material assignment")
+                material = materials[material_index]
+                if (
+                    not isinstance(material, dict)
+                    or extras.get("ddsMaterialFingerprint")
+                    != fld_model._material_fingerprint(material)
+                ):
+                    raise ModelImportError(f"{context} changes referenced material")
                 indices = _records(
                     document,
                     binary,
