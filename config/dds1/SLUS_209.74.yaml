@@ -623,10 +623,13 @@ segments:
       - [0x2BE638, .sdata, game/code_002ED8D0]
       - { start: 0x2BE63C, type: sbss, vram: 0x3BD680, name: sbss_before_sdfThread }
       - { start: 0x2BE63C, type: .sbss, vram: 0x3BD998, name: sdf/sdfThread }
-      - { start: 0x2BE63C, type: sbss, vram: 0x3BD9A0, name: sbss_after_sdfThread }
+      - { start: 0x2BE63C, type: sbss, vram: 0x3BD9A0, name: sbss_before_sdfChip }
+      - { start: 0x2BE63C, type: .sbss, vram: 0x3BD9A8, name: sdf/sdfChip }
+      - { start: 0x2BE63C, type: sbss, vram: 0x3BD9C8, name: sbss_after_sdfChip }
       - { start: 0x2BE63C, type: bss, vram: 0x3BDB00, name: bss_before_fileManager }
       - { start: 0x2BE63C, type: .bss, vram: 0x3DC658, name: file/fileManager }
       - { start: 0x2BE63C, type: bss, vram: 0x3DC698, name: bss_before_sdfMemory }
+      - { start: 0x2BE63C, type: .bss, vram: 0x3E26F0, name: sdf/sdfChip }
       - { start: 0x2BE63C, type: .bss, vram: 0x3E2748, name: sdf/sdfMemory }
       - { start: 0x2BE63C, type: bss, vram: 0x3E2770, name: bss_after_sdfMemory }
 

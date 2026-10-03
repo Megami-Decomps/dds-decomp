@@ -18,6 +18,26 @@ import ee_gcc_schedules as schedules
 
 
 DIAGNOSTIC_CFLAG = re.compile(r"^-fsched-verbose(?:=.*)?$")
+RTL_UID = re.compile(
+    r"^\((?:insn|jump_insn|call_insn)[^ \t\r\n()]*\s+(\d+)"
+)
+RTL_PRIMARY_SET = re.compile(
+    r"^\((?:insn|jump_insn|call_insn)[^ \t\r\n()]*"
+    r"\s+\d+\s+\d+\s+\d+\s+(\(set\b)"
+)
+DI_REGISTER_DESTINATION = re.compile(
+    r"^\(set\s+\(reg(?:/[A-Za-z]+)*:DI\s+(\d+)\b"
+)
+DI_REGISTER_SOURCE = re.compile(
+    r"\(reg(?:/[A-Za-z]+)*:DI\s+(\d+)(?:\s+[^()]*)?\)\s*\)$"
+)
+SI_TO_DI_EXTENSION = re.compile(
+    r"\((zero_extend|sign_extend):DI\s+"
+    r"\(reg(?:/[A-Za-z]+)*:SI\s+\d+\b"
+)
+DI_MEMORY_DESTINATION = re.compile(
+    r"^\(set\s+\(mem(?:/[A-Za-z]+)*:DI\b"
+)
 
 
 def read_manifest(directory: Path) -> tuple[dict[str, Any], str | None]:
@@ -187,8 +207,83 @@ def parse_side(directory: Path, function: str | None, artifact: str,
     return parser(path.read_text(errors="replace"))
 
 
+def primary_set(form: str) -> str | None:
+    """Return an instruction's outer SET, excluding SETs in notes."""
+    match = RTL_PRIMARY_SET.match(form)
+    if match is None:
+        return None
+    try:
+        result, _ = delay_slots.balanced_form(form, match.start(1))
+    except ValueError:
+        return None
+    return result
+
+
+def integer_widening_stores(text: str, lookahead: int = 8) -> list[dict[str, Any]]:
+    """Find unambiguous SI-to-DI results which feed a nearby DI store."""
+    forms = delay_slots.top_level_forms(text)
+    observations: list[dict[str, Any]] = []
+    for index, form in enumerate(forms):
+        set_form = primary_set(form)
+        if set_form is None:
+            continue
+        destination = DI_REGISTER_DESTINATION.match(set_form)
+        kinds = set(SI_TO_DI_EXTENSION.findall(form))
+        if destination is None or len(kinds) != 1:
+            continue
+        pseudo = int(destination.group(1))
+        extension_uid = RTL_UID.match(form)
+        for later in forms[index + 1:index + 1 + lookahead]:
+            later_set = primary_set(later)
+            if later_set is None:
+                continue
+            source = DI_REGISTER_SOURCE.search(later_set)
+            if (
+                DI_MEMORY_DESTINATION.match(later_set)
+                and source is not None
+                and int(source.group(1)) == pseudo
+            ):
+                store_uid = RTL_UID.match(later)
+                observations.append({
+                    "kind": next(iter(kinds)),
+                    "from_mode": "SI",
+                    "to_mode": "DI",
+                    "destination_pseudo": pseudo,
+                    "extension_uid": (
+                        int(extension_uid.group(1)) if extension_uid else None
+                    ),
+                    "store_uid": int(store_uid.group(1)) if store_uid else None,
+                })
+                break
+            redefinition = DI_REGISTER_DESTINATION.match(later_set)
+            if redefinition is not None and int(redefinition.group(1)) == pseudo:
+                break
+    return observations
+
+
+def integer_widening_comparison(left: Path, right: Path,
+                                function: str | None) -> dict[str, Any] | None:
+    """Compare pass-00 widening-to-store observations without pairing pseudos."""
+    paired: dict[str, Any] = {}
+    for label, directory in (("left", left), ("right", right)):
+        path = artifact_path(directory, function, "rtl.00.rtl")
+        if path is None or not path.is_file():
+            return None
+        paired[label] = integer_widening_stores(path.read_text(errors="replace"))
+    left_rows = paired["left"]
+    right_rows = paired["right"]
+    paired["opposite_signedness"] = (
+        len(left_rows) == 1
+        and len(right_rows) == 1
+        and {left_rows[0]["kind"], right_rows[0]["kind"]}
+        == {"zero_extend", "sign_extend"}
+    )
+    return paired
+
+
 def diagnosis_for(comparison: dict[str, Any], object_report: dict[str, Any],
-                  function: str | None, compiler_evidence: bool = True) -> dict[str, Any]:
+                  function: str | None, compiler_evidence: bool = True,
+                  widening: dict[str, Any] | None = None) -> dict[str, Any]:
     first = comparison["first_semantic_divergence"]
     if not compiler_evidence:
         return {
@@ -230,6 +325,35 @@ def diagnosis_for(comparison: dict[str, Any], object_report: dict[str, Any],
             "class": "insufficient-evidence",
             "basis": [f"the first unmatched artifact is missing on one side: {first}"],
             "next_step": "recapture both probes with the same function and compiler options",
+        }
+    if comparison["assembly"]["status"] == "same":
+        return {
+            "class": "final-code-convergence",
+            "basis": [
+                f"the first normalized difference is {first}, but extracted final assembly agrees"
+            ],
+            "next_step": (
+                "stop changing source for the match; inspect intermediate passes "
+                "only for mechanism research"
+            ),
+        }
+    if (
+        number == 0
+        and widening is not None
+        and widening.get("opposite_signedness") is True
+    ):
+        left_kind = widening["left"][0]["kind"]
+        right_kind = widening["right"][0]["kind"]
+        return {
+            "class": "integer-widening",
+            "basis": [
+                "pass 00 changes an SI-to-DI wide-store input from "
+                f"{left_kind} to {right_kind}"
+            ],
+            "next_step": (
+                "verify the authentic source width and signedness, then test one "
+                "truthful type or cast boundary"
+            ),
         }
     if number in (19, 20):
         return {
@@ -295,7 +419,14 @@ def analyze(left: Path, right: Path, function: str | None = None) -> dict[str, A
         manifest.get("cc1_succeeded") is False
         for manifest in (left_manifest, right_manifest)
     )
-    diagnosis = diagnosis_for(comparison, objects, function, compiler_evidence)
+    first = comparison["first_semantic_divergence"]
+    widening = (
+        integer_widening_comparison(left, right, function)
+        if first == "rtl.00.rtl" else None
+    )
+    diagnosis = diagnosis_for(
+        comparison, objects, function, compiler_evidence, widening
+    )
     incompatible: list[str] = []
     left_flags = semantic_cflags(left_provenance["extra_cflags"])
     right_flags = semantic_cflags(right_provenance["extra_cflags"])
@@ -311,7 +442,6 @@ def analyze(left: Path, right: Path, function: str | None = None) -> dict[str, A
             "basis": incompatible,
             "next_step": "recapture both probes with the same compiler and code-affecting options",
         }
-    first = comparison["first_semantic_divergence"]
     report: dict[str, Any] = {
         "schema": 1,
         "comparison": comparison,
@@ -321,6 +451,8 @@ def analyze(left: Path, right: Path, function: str | None = None) -> dict[str, A
         "diagnosis": diagnosis,
         "first_diff": normalized_diff(left, right, function, first) if first else [],
     }
+    if widening is not None:
+        report["integer_widening"] = widening
 
     evidence_gaps: list[str] = []
     number = (comparison.get("classification") or {}).get("pass_number")
@@ -374,6 +506,13 @@ def render(report: dict[str, Any]) -> str:
         lines.append(f"warning     {warning}")
     for gap in report.get("evidence_gaps", []):
         lines.append(f"gap         {gap}")
+    if "integer_widening" in report:
+        for side in ("left", "right"):
+            for row in report["integer_widening"][side]:
+                lines.append(
+                    f"{side} widen uid {row['extension_uid']} -> store "
+                    f"{row['store_uid']}: {row['kind']}:{row['to_mode']}"
+                )
     if "allocation" in report:
         for side in ("left", "right"):
             functions = report["allocation"].get(side, [])
