@@ -66,26 +66,22 @@ typedef struct DevState {
     s32 callbackContext; /* 0x3C */
 } DevState;
 
-typedef struct SemaEntry {
-    s32 sema; /* 0x0 */
-    u8 pad4[20]; /* 0x4 */
-} SemaEntry;
-
-typedef struct ThreadEntry {
-    s32 threadId;
-    s32 sema;               /* 0x4 */
-    DevState *first;        /* 0x8 */
-    DevState *last;         /* 0xC */
+/* Native 0x18 worker record; semaphore-only addresses point inside this array,
+ * not at a separately allocated table. */
+typedef struct DevWorkerEntry {
+    s32 threadId; /* 0x00 */
+    s32 semaphore; /* 0x04 */
+    struct DevState *first; /* 0x08 */
+    struct DevState *last; /* 0x0C */
     u8 pad10[8];
-} ThreadEntry;
+} DevWorkerEntry;
 
-extern SemaEntry D_0040BA14[];
 
 extern s32 SignalSema(s32 sema);
 
 extern s32 sdfDeviceWorkerPriority;
 
-extern ThreadEntry sdfDeviceWorkerEntries[];
+extern DevWorkerEntry sdfDeviceWorkerEntries[];
 
 extern s32 ChangeThreadPriority(s32 tid, s32 prio);
 
@@ -696,7 +692,7 @@ extern s16 D_00438B1C;
 
 /* Queue a request on the global list and on its worker's list; wake the worker when its list was empty. */
 void sdfDevEnqueueStateAndWakeWorker(DevState *state) {
-    ThreadEntry *worker;
+    DevWorkerEntry *worker;
     s64 interrupts;
     s32 wake = 0;
     DevState *last;
@@ -727,7 +723,7 @@ void sdfDevEnqueueStateAndWakeWorker(DevState *state) {
         EIntr();
     }
     if (wake != 0) {
-        SignalSema(worker->sema);
+        SignalSema(worker->semaphore);
     }
 }
 extern void EIntr(void);
@@ -762,8 +758,10 @@ void sdfDevUnlinkAndFreeState(DevState *state) {
     sdfReleaseChipBlock(state);
 }
 
+/* Move state from both active lists to the completed cache, evict the oldest
+ * entry at nine cached states, and wake any remaining request on this worker. */
 void sdfDevRecycleCompletedState(DevState *state) {
-    ThreadEntry *worker;
+    DevWorkerEntry *worker;
     DevState *prev;
     DevState *next;
     s64 interrupts;
@@ -811,7 +809,7 @@ void sdfDevRecycleCompletedState(DevState *state) {
         sdfDevUnlinkAndFreeState(D_00438B14);
     }
     if (worker->first != NULL) {
-        SignalSema(worker->sema);
+        SignalSema(worker->semaphore);
     }
 }
 
@@ -885,6 +883,7 @@ DevState *sdfDevCreateModeState(s32 path, void (*callback)(DevState *, s32, s32,
     return state;
 }
 
+/* Store operation arguments and wake the owning worker; return 0 if active, otherwise -1. */
 s32 sdfDevQueueOperation(DevState *state, s32 operationArg, s32 options) {
     if (state->state != 7) {
         return -1;
@@ -892,19 +891,21 @@ s32 sdfDevQueueOperation(DevState *state, s32 operationArg, s32 options) {
     state->operationArg = operationArg;
     state->options = options;
     state->operation = 3;
-    SignalSema(D_0040BA14[state->workerIndex].sema);
+    SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
     return 0;
 }
 
+/* Queue the control request; return 0 if active, otherwise -1 without changing the state. */
 s32 sdfDevQueueControlRequest(DevState *state) {
     if (state->state != 7) {
         return -1;
     }
     state->operation = 4;
-    SignalSema(D_0040BA14[state->workerIndex].sema);
+    SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
     return 0;
 }
 
+/* Queue a read using the supplied data pointer and extra word; reject inactive states with -1. */
 s32 sdfDevQueueRead(DevState *state, void *data, s32 extra) {
     if (state->state != 7) {
         return -1;
@@ -912,10 +913,11 @@ s32 sdfDevQueueRead(DevState *state, void *data, s32 extra) {
     state->requestExtra = extra;
     state->operation = 5;
     state->requestData = data;
-    SignalSema(D_0040BA14[state->workerIndex].sema);
+    SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
     return 0;
 }
 
+/* Queue a write using the supplied data pointer and extra word; reject inactive states with -1. */
 s32 sdfDevQueueWrite(DevState *state, void *data, s32 extra) {
     if (state->state != 7) {
         return -1;
@@ -923,7 +925,7 @@ s32 sdfDevQueueWrite(DevState *state, void *data, s32 extra) {
     state->requestExtra = extra;
     state->operation = 6;
     state->requestData = data;
-    SignalSema(D_0040BA14[state->workerIndex].sema);
+    SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
     return 0;
 }
 
@@ -936,6 +938,7 @@ s32 sdfDevReactivate(DevState *state) {
     return 0;
 }
 
+/* Use the active-state value as the operation and wake its worker; return -1 unless active. */
 s32 sdfDevQueueActiveOperation(DevState *request) {
     s8 state = request->state;
 
@@ -943,7 +946,7 @@ s32 sdfDevQueueActiveOperation(DevState *request) {
         return -1;
     }
     request->operation = state;
-    SignalSema(D_0040BA14[request->workerIndex].sema);
+    SignalSema(sdfDeviceWorkerEntries[request->workerIndex].semaphore);
     return 0;
 }
 
@@ -995,7 +998,7 @@ DevState *sdfDevOpenRequest(s32 path, void *data, s32 extra,
 
 /* Update non-negative worker IDs only; skip an unchanged numeric priority. */
 void sdfSetThreadPriorities(s32 priority) {
-    ThreadEntry *worker;
+    DevWorkerEntry *worker;
     u32 index;
 
     if (sdfDeviceWorkerPriority == priority) {
@@ -1047,13 +1050,13 @@ extern void sdfDevWorkerThread();
 
 /* Start worker thread `index` if it isn't running; slot 3 runs the alternate entry point. */
 void sdfEnsureDeviceWorkerThreadStarted(s32 index) {
-    ThreadEntry *worker = &sdfDeviceWorkerEntries[index];
+    DevWorkerEntry *worker = &sdfDeviceWorkerEntries[index];
     void (*entry)();
     s32 thread;
 
     thread = worker->threadId;
     if (thread < 0) {
-        worker->sema = sdfCreateSemaphore(0, 0xFF, 0);
+        worker->semaphore = sdfCreateSemaphore(0, 0xFF, 0);
         entry = D_0033F3E0;
         if (index != 3) {
             entry = sdfDevWorkerThread;
