@@ -70,7 +70,25 @@ void func_0026F518(void) {
     mnuUnloadStaffFonts();
 }
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F530);
+extern u64 frFontBuildColoredGlyphWithSharedFlags();
+extern u32 frFontMeasureLines(u64);
+extern void frFontDrawGlyphWithSharedFlags(u64, s8);
+extern s32 frFontQueueGlyphInSelectedSlot(u64);
+
+s32 func_0026F530(s64 alternate, s32 color, u64 source, f32 x, f32 y) {
+    u64 glyph;
+
+    if (alternate == 0) {
+        glyph = frFontBuildColoredGlyphWithSharedFlags(
+            (s32)(x * 16.0f), (s32)(y * 8.0f), 0, 1, 1, 10, color, source, 0);
+    } else {
+        glyph = frFontBuildColoredGlyphWithSharedFlags(
+            (s32)(x * 16.0f), (s32)(y * 8.0f), 0, 0, 1, 8, color, source, 0);
+    }
+    frFontMeasureLines(glyph);
+    frFontDrawGlyphWithSharedFlags(glyph, 1);
+    return frFontQueueGlyphInSelectedSlot(glyph);
+}
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F5E8);
 
