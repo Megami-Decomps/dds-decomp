@@ -117,6 +117,7 @@ extern void sdfVuClearTransformCache(void);
 
 extern u8 *sdfTexSubmitImageCopy();
 
+
 void sdfRequestDeferredGsImageCapture(u32 destination, u32 onComplete) {
     D_004389E4 = destination;
     D_004389E8 = onComplete;
@@ -150,7 +151,42 @@ void sdfSetBufferSlot(s32 updateSingleSlot, s32 bufferIndex, s32 slotIndex) {
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A230);
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A378);
+extern u8 D_004389D1;
+extern volatile u8 D_004389E1;
+extern s32 D_00439138;
+extern s32 D_004389EC;
+extern volatile u8 sdfPacketSlotIndex;
+extern void sdfSleepThreadCount(s32);
+extern void sdfDevSignalPendingSemaphore(void);
+extern s32 WakeupThread(s32);
+extern s32 WaitSema(s32);
+extern void sdfGraphSelectDisplayBuffer(s32);
+
+void func_0032A378(void) {
+    s8 bufferIndex;
+    s32 idleFlag;
+
+    for (;;) {
+        sdfSleepThreadCount(0);
+        if ((D_004389D1 & 1) == 0) {
+            sdfDevSignalPendingSemaphore();
+        }
+        idleFlag = (~*(volatile u64 *)0x12001000 >> 13) & 1;
+        D_004389D1 = idleFlag ^ 1;
+        if (D_004389E1 == 1) {
+            D_004389E1 = 2;
+            WakeupThread(D_00439138);
+            WaitSema(D_004389EC);
+        }
+        bufferIndex = sdfBufferSlotIndices[D_004389D1];
+        if (bufferIndex >= 0) {
+            sdfGraphSelectDisplayBuffer(bufferIndex);
+        }
+        if (sdfPacketSlotIndex != 0) {
+            sdfPacketSlotIndex += 0xFF;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A440);
 
@@ -516,7 +552,6 @@ void sdfResetSemaphoreState(SdfSemaObj *semaphore) {
     semaphore->unkC = NULL;
     semaphore->packetTail = 0;
 }
-
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AFF0);
 
 extern s32 GetThreadId(void);
@@ -798,6 +833,10 @@ SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 max
     return tex;
 }
 
+extern SdfTexHead *func_0032B800(s32, s32, s32);
+extern void func_0032B908(SdfTex *);
+extern void sdfTexCopyImageData(SdfTex *, void *);
+extern void sdfTexCreateFirstPacket(SdfTex *);
 SdfTex *func_0032B6B0(SdfTex *source) {
     SdfTex *texture;
     SdfTexRef *reference;
@@ -887,3 +926,4 @@ INCLUDE_SDATA(const s32, "game/code_00329F60", sdfBusyBufferIndex);
 INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389F4);
 
 INCLUDE_SDATA(const s32, "game/code_00329F60", sdfResourceListHead);
+
