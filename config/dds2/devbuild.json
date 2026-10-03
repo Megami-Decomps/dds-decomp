@@ -4,10 +4,10 @@
   "extension_vaddr": "0x0048E000",
   "alignment": "0x1000",
   "heap_alignment": "0x80",
-  "expected_replacement_symbols": 72,
-  "expected_shifted_replacement_symbols": 50,
-  "expected_shifted_symbol_relocations": 1025,
-  "expected_cross_replacement_relocations": 47,
+  "expected_replacement_symbols": 121,
+  "expected_shifted_replacement_symbols": 73,
+  "expected_shifted_symbol_relocations": 1113,
+  "expected_cross_replacement_relocations": 77,
   "expected_repaired_relocation_words": 0,
   "retail_static_end": "0x00488B30",
   "bss_end_assertions": [
@@ -78,6 +78,52 @@
           "size": 0
         }
       ]
+    },
+    {
+      "retail_object": "build/dds2/src/dds2/file/fileManager.o",
+      "object": "build/dds2/dev/fileManager.o",
+      "expected_symbols": 24,
+      "expected_shifted_symbols": 0,
+      "retained_sections": [
+        {
+          "section": ".data",
+          "size": 0
+        }
+      ]
+    },
+    {
+      "retail_object": "build/dds2/src/dds2/game/code_002C83F0.o",
+      "object": "build/dds2/dev/code_002C83F0.o",
+      "expected_symbols": 25,
+      "expected_shifted_symbols": 23,
+      "fallback_symbols": [
+        "func_002C8638",
+        "func_002C8900",
+        "func_002C8AC0",
+        "fileManUpdate",
+        "fileReqInit",
+        "fileReqPoll"
+      ],
+      "retained_sections": [
+        {
+          "section": ".data",
+          "size": 0
+        },
+        {
+          "section": ".sdata",
+          "size": "0x10",
+          "old_vaddr": "0x00437CC0",
+          "alignment": 8,
+          "storage": "file",
+          "expected_symbols": 2,
+          "expected_retail_gp_references": 10,
+          "expected_gp_references": 6
+        },
+        {
+          "section": ".bss",
+          "size": 0
+        }
+      ]
     }
   ],
   "moves": [
@@ -130,6 +176,57 @@
       "expected_relocations": 2,
       "expected_retail_gp_references": 1,
       "expected_gp_references": 0
+    },
+    {
+      "object": "build/dds2/src/dds2/file/fileManager.o",
+      "section": ".text",
+      "old_size": "0x6F0",
+      "new_size": "0x6F0",
+      "alignment": 8,
+      "old_vaddr": "0x002C7D00",
+      "expected_relocations": 47,
+      "expected_target_relocations": 185
+    },
+    {
+      "object": "build/dds2/src/dds2/file/fileManager.o",
+      "section": ".rodata",
+      "old_size": "0x1E",
+      "new_size": "0x1E",
+      "alignment": 8,
+      "old_vaddr": "0x0042B628",
+      "expected_relocations": 0,
+      "expected_target_relocations": 4
+    },
+    {
+      "object": "build/dds2/src/dds2/game/code_002C83F0.o",
+      "section": ".text",
+      "old_size": "0xEF8",
+      "new_size": "0xF10",
+      "alignment": 8,
+      "old_vaddr": "0x002C83F0",
+      "expected_relocations": 148,
+      "expected_target_relocations": 114
+    },
+    {
+      "object": "build/dds2/src/dds2/game/code_002C83F0.o",
+      "section": ".rodata",
+      "old_size": "0x18",
+      "new_size": "0x18",
+      "alignment": 8,
+      "old_vaddr": "0x0042B648",
+      "expected_relocations": 0,
+      "expected_target_relocations": 2
+    },
+    {
+      "object": "build/dds2/src/dds2/file/fileManager.o",
+      "section": ".bss",
+      "storage": "nobits",
+      "old_size": "0x40",
+      "new_size": "0x40",
+      "alignment": 8,
+      "old_vaddr": "0x00457F28",
+      "expected_relocations": 0,
+      "expected_target_relocations": 26
     }
   ],
   "additions": [
