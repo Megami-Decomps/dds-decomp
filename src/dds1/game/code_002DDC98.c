@@ -596,7 +596,67 @@ void func_002DE558(u32 rows, s32 count) {
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE600);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE700);
+/* vu0 routine: transform rows with packed XY weights and store clip data */
+void func_002DE700(void *rows, s32 count, void *weights, void *basis) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lui $8, %%hi(D_003F9860)\n"
+        "addiu $8, $8, %%lo(D_003F9860)\n"
+        "lqc2 vf19, 0x00($8)\n"
+        "lqc2 vf20, 0x10($8)\n"
+        "lqc2 vf21, 0x20($8)\n"
+        "vmulx.w vf24, vf19, vf24x\n"
+        "vmulx.w vf25, vf19, vf25x\n"
+        "vmulx.w vf26, vf19, vf26x\n"
+        "ld $2, 0x00(%3)\n"
+        "qmtc2 $2, vf16\n"
+        "ld $3, 0x08(%3)\n"
+        "qmtc2 $3, vf17\n"
+        "ld $2, 0x10(%3)\n"
+        "qmtc2 $2, vf18\n"
+        "1:\n"
+        "lqc2 vf6, 0x10(%0)\n"
+        "lqc2 vf2, 0x00(%0)\n"
+        "ld $2, 0x00(%2)\n"
+        "qmtc2 $2, vf4\n"
+        "addi %2, %2, 0x08\n"
+        "vmulay.w ACC, vf0, vf19y\n"
+        "vmaddax.w ACC, vf24, vf6x\n"
+        "vmadday.w ACC, vf25, vf6y\n"
+        "vmaddz.w vf7, vf26, vf6z\n"
+        "vmulax.xyzw ACC, vf28, vf2x\n"
+        "vmadday.xyzw ACC, vf29, vf2y\n"
+        "vmaddaz.xyzw ACC, vf30, vf2z\n"
+        "vmaddw.xyzw vf3, vf31, vf0w\n"
+        "vaddaw.w ACC, vf7, vf7w\n"
+        "vmsubw.w vf6, vf0, vf0w\n"
+        "vmaxx.w vf8, vf7, vf0x\n"
+        "vclipw.xyzw vf3, vf3w\n"
+        "vmulax.xy ACC, vf16, vf4x\n"
+        "vaddw.x vf9, vf0, vf6w\n"
+        "vmadday.xy ACC, vf17, vf4y\n"
+        "vminiw.w vf8, vf8, vf0w\n"
+        "vmaddw.xy vf5, vf18, vf0w\n"
+        "cfc2.ni $2, $vi18\n"
+        "vclipw.xyzw vf9, vf0w\n"
+        "vmulaw.xyzw ACC, vf20, vf0w\n"
+        "vmaddw.xyzw vf8, vf21, vf8w\n"
+        "sqc2 vf3, 0x00(%0)\n"
+        "sqc2 vf6, 0x10(%0)\n"
+        "sqc2 vf5, 0x30(%0)\n"
+        "sqc2 vf8, 0x20(%0)\n"
+        "sb $2, 0x51(%0)\n"
+        "cfc2.ni $2, $vi18\n"
+        "addi %0, %0, 0x60\n"
+        "addi %1, %1, -1\n"
+        "andi $2, $2, 3\n"
+        "bne $0, %1, 1b\n"
+        "sb $2, -0x10(%0)\n"
+        ".set reorder"
+        : "+r"(rows), "+r"(count), "+r"(weights)
+        : "r"(basis)
+        : "$2", "$3", "$8", "memory");
+}
 
 /* vu0 routine: derive clamped clip weights and low clip flags for 0x60-byte rows */
 void func_002DE7D8(u32 rows, s32 count) {
