@@ -9,9 +9,10 @@ extern s32 func_002C4038(s32, s32 *, u64, u64);
 static inline s32 menuSetHandler(s32 context, u64 mode, s32 callback) {
     return func_002C4038(context + 8, (s32 *)(context + 0x54), mode, callback);
 }
-extern s64 func_00285670(s32, s32 *, u64, u64);
+/* DDS1 uses the same scheduler-word contract as the DDS2 dispatcher. */
+extern s32 func_00285670(s32, s32 *, u64, u64);
 
-static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
+static inline s32 menuRunPanel(s32 context, u64 mode, u64 arg) {
     return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
 }
 

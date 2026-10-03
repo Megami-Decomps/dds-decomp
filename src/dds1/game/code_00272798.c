@@ -33,7 +33,7 @@ INCLUDE_ASM(const s32, "game/code_00272798", func_00272798);
 INCLUDE_ASM(const s32, "game/code_00272798", func_002728F8);
 
 /* Submit a request to the active menu dispatcher in mode 2. */
-s64 func_002729C8(s32 request) {
+s32 func_002729C8(s32 request) {
     s32 context = kwlnTaskGetUserValue();
     return menuRunPanel(context, 2, request);
 }
@@ -56,10 +56,10 @@ u32 mnuConfigureCampDrawContextPanel(void) {
 }
 
 /* Dispatch a callback; on idle, install the default entry unless busy. */
-s64 mnuDispatchStaffMenuWithIdlePopup(s32 callback) {
+s32 mnuDispatchStaffMenuWithIdlePopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *dispatchEntry = (s32 *)(context + 0x54);
-    s64 state = func_00285670(context + 8, dispatchEntry, 0, callback);
+    s32 state = func_00285670(context + 8, dispatchEntry, 0, callback);
     if (state == 0) {
         if (fileConsumeConfigTaskReady() == 0) {
             mnuSetPopupEntryFlagged(dispatchEntry, D_0037C844);
@@ -69,7 +69,7 @@ s64 mnuDispatchStaffMenuWithIdlePopup(s32 callback) {
     return state;
 }
 
-s64 mnuDrawStaffImageScreen(s32 callback) {
+s32 mnuDrawStaffImageScreen(s32 callback) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
@@ -80,7 +80,7 @@ s64 mnuDrawStaffImageScreen(s32 callback) {
     return menuRunPanel(context, 1, callback);
 }
 
-s64 func_00272B80(s32 request) {
+s32 func_00272B80(s32 request) {
     s32 context = kwlnTaskGetUserValue();
     return menuRunPanel(context, 2, request);
 }

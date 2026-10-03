@@ -524,7 +524,7 @@ s32 mnuStaffCampCancelCheck(s32 menu) {
 
 extern void func_00272798();
 extern void func_002728F8();
-extern void func_002729C8();
+extern s32 func_002729C8(s32);
 extern void func_00101A80(s32, s32);
 extern void kwlnFadeOutStart(s8, s8, s8, s32);
 

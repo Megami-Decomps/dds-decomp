@@ -22,7 +22,7 @@ extern void mdlFlagSet(s32);
 
 extern void mnuRefreshPanelLayer(s32 arg0);
 
-extern s64 func_00285670(s32, s32 *, u64, u64);
+extern s32 func_00285670(s32, s32 *, u64, u64);
 
 extern void func_0024DD78(void);
 typedef struct MenuItem {
@@ -173,7 +173,7 @@ u32 mnuMarkItemSelectionSceneVisited(MenuItemScene *scene) {
     return 0;
 }
 
-extern s64 evtGetMessageWindowControlState(void);
+extern s32 evtGetMessageWindowControlState(void);
 extern void brsSelectNextUnit(MenuItemScene *, s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void mnuSetPopupEntryFlagged(s32 *, void *);
@@ -183,8 +183,8 @@ extern void func_002E8E50(void);
 extern char D_0036D494[];
 extern char D_0036D408[];
 
-s64 prfCapTaskStep(u64 request) {
-    s64 result;
+s32 prfCapTaskStep(u64 request) {
+    s32 result;
     MenuItemScene *scene = (MenuItemScene *)kwlnTaskGetUserValue();
     s32 *dispatchStatus = &scene->dispatchStatus;
 
@@ -229,13 +229,13 @@ s64 prfCapTaskStep(u64 request) {
     return result;
 }
 
-s64 func_00263570(s32 request) {
+s32 func_00263570(s32 request) {
     s32 context = kwlnTaskGetUserValue();
     mnuRefreshPanelLayer(context);
     return menuRunPanel(context, 1, request);
 }
 
-s64 func_002635C0(s32 request) {
+s32 func_002635C0(s32 request) {
     s32 context = kwlnTaskGetUserValue();
     func_0024DD78();
     return menuRunPanel(context, 2, request);
@@ -334,8 +334,8 @@ extern void func_002E96D8(u32);
 extern char D_0036D424[];
 extern char D_0036D45C[];
 
-s64 func_00263838(u64 request) {
-    s64 result;
+s32 func_00263838(u64 request) {
+    s32 result;
     MenuItemScene *scene = (MenuItemScene *)kwlnTaskGetUserValue();
     s32 *dispatchStatus;
     s32 *slots;
@@ -466,7 +466,7 @@ void func_00263B78(s32 context, s32 copyOptions) {
 
 extern s32 brsAdvanceSkillPackagePanel(s32);
 
-s64 mnuAdvanceSkillPackageToItemPanel(s32 request) {
+s32 mnuAdvanceSkillPackageToItemPanel(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
@@ -477,7 +477,7 @@ s64 mnuAdvanceSkillPackageToItemPanel(s32 request) {
     return menuRunPanel(context, 1, request);
 }
 
-s64 mnuAdvanceSkillPanelToNextMenu(s32 request) {
+s32 mnuAdvanceSkillPanelToNextMenu(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {

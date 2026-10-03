@@ -60,7 +60,7 @@ INCLUDE_ASM(const s32, "game/code_00263EB0", func_00263EF8);
 extern void mnuDrawItemPanelBackdrop(s32);
 extern void func_00263B78(s32, s32);
 
-s64 mnuDrawItemPanelDuringRequest(s32 request) {
+s32 mnuDrawItemPanelDuringRequest(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     mnuDrawItemPanelBackdrop(context);
@@ -68,7 +68,7 @@ s64 mnuDrawItemPanelDuringRequest(s32 request) {
     return menuRunPanel(context, 1, request);
 }
 
-s64 func_00264238(s32 input) {
+s32 func_00264238(s32 input) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
@@ -92,7 +92,7 @@ u32 func_002642C8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00263EB0", func_002642D0);
 
-s64 func_00264498(s32 request) {
+s32 func_00264498(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     mnuDrawItemPanelBackdrop(context);
@@ -100,7 +100,7 @@ s64 func_00264498(s32 request) {
     return menuRunPanel(context, 1, request);
 }
 
-s64 func_002644F0(s32 input) {
+s32 func_002644F0(s32 input) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
@@ -137,10 +137,10 @@ extern void mnuSetPopupEntryFlagged(s32 *, char *);
 extern char D_0036D478[];
 
 /* On an idle panel, apply the extra fallback only when the auxiliary check also fails. */
-s64 mnuRunPanelWithIdleFallback(u64 request) {
+s32 mnuRunPanelWithIdleFallback(u64 request) {
     s32 context = kwlnTaskGetUserValue();
     s32 *panelState = (s32 *)(context + 0x54);
-    s64 result;
+    s32 result;
 
     evtStageTestUpdateCamera();
     result = func_00285670(context + 8, panelState, 0, request);
@@ -153,7 +153,7 @@ s64 mnuRunPanelWithIdleFallback(u64 request) {
     return 0;
 }
 
-s64 mnuRunItemPanelWithInactiveBackdrop(s32 request) {
+s32 mnuRunItemPanelWithInactiveBackdrop(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     mnuDrawItemPanelBackdrop(context);
@@ -161,7 +161,7 @@ s64 mnuRunItemPanelWithInactiveBackdrop(s32 request) {
     return menuRunPanel(context, 1, request);
 }
 
-s64 func_002646F8(s32 input) {
+s32 func_002646F8(s32 input) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
