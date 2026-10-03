@@ -18,6 +18,7 @@ from check_unit import (
     relocate_sdata_item,
     section_symbols,
     source_owned_item_size,
+    symbols,
     trim_sdata_item,
 )
 
@@ -127,7 +128,10 @@ segments:
         problems = self.ownership_problems(
             emitted, {"fileManagerWork": 0x003DC658}
         )
-        self.assertIn("wrongManagerWork has no retail address", problems)
+        self.assertIn("extra emitted symbol wrongManagerWork", problems)
+        self.assertIn(
+            "missing retail symbol fileManagerWork at +0x0 size 0x40", problems
+        )
 
     def test_rejects_wrong_symbol_order(self):
         emitted = [
@@ -136,11 +140,11 @@ segments:
         ]
         problems = self.ownership_problems(emitted)
         self.assertIn(
-            "fileManagerSlots maps to 0x003DC668, expected 0x003DC658",
+            "fileManagerSlots is at +0x0, retail inventory requires +0x10",
             problems,
         )
         self.assertIn(
-            "fileManagerHead maps to 0x003DC658, expected 0x003DC688",
+            "fileManagerHead is at +0x30, retail inventory requires +0x0",
             problems,
         )
 
@@ -151,7 +155,11 @@ segments:
         ]
         problems = self.ownership_problems(wrong_offset)
         self.assertIn(
-            "fileManagerSlots maps to 0x003DC668, expected 0x003DC66C",
+            "fileManagerHead has size 0x14, retail inventory requires 0x10",
+            problems,
+        )
+        self.assertIn(
+            "fileManagerSlots is at +0x14, retail inventory requires +0x10",
             problems,
         )
 
@@ -161,7 +169,7 @@ segments:
         ]
         problems = self.ownership_problems(wrong_size)
         self.assertIn(
-            "fileManagerSlots at +0x10 leaves a gap before expected +0xC",
+            "fileManagerHead has size 0xC, retail inventory requires 0x10",
             problems,
         )
 
@@ -172,7 +180,11 @@ segments:
         )
         self.assertIn("fileManagerWork is not STT_OBJECT", problems)
         self.assertIn(
-            "fileManagerWork maps to 0x003DC65C, expected 0x003DC658",
+            "retail inventory begins at +0x4, expected +0x0",
+            problems,
+        )
+        self.assertIn(
+            "fileManagerWork is at +0x0, retail inventory requires +0x4",
             problems,
         )
 
@@ -182,7 +194,7 @@ segments:
             gap, {"fileManagerWork": 0x003DC65C}
         )
         self.assertIn(
-            "fileManagerWork at +0x4 leaves a gap before expected +0x0",
+            "retail inventory begins at +0x4, expected +0x0",
             problems,
         )
 
@@ -192,7 +204,8 @@ segments:
         ]
         problems = self.ownership_problems(overlap)
         self.assertIn(
-            "fileManagerSlots at +0x10 overlaps expected +0x20", problems
+            "fileManagerHead has size 0x20, retail inventory requires 0x10",
+            problems,
         )
         self.assertIn(
             "section size 0x44, retail span 0x40",
@@ -202,6 +215,114 @@ segments:
                 section_size=0x44,
             ),
         )
+
+    def test_rejects_omitted_interior_retail_symbol(self):
+        syms = {
+            "fileManagerHead": 0x003DC658,
+            "fileManagerInterior": 0x003DC668,
+            "fileManagerTail": 0x003DC678,
+        }
+        emitted = [
+            (0x00, 0x20, "fileManagerHead", True),
+            (0x20, 0x20, "fileManagerTail", True),
+        ]
+
+        problems = self.ownership_problems(emitted, syms)
+
+        self.assertIn(
+            "fileManagerHead has size 0x20, retail inventory requires 0x10",
+            problems,
+        )
+        self.assertIn(
+            "missing retail symbol fileManagerInterior at +0x10 size 0x10",
+            problems,
+        )
+
+    def test_requires_aliases_one_for_one(self):
+        syms = {
+            "fileManagerHead": 0x003DC658,
+            "fileManagerHeadAlias": 0x003DC658,
+            "fileManagerSlots": 0x003DC668,
+        }
+        exact = [
+            (0x00, 0x10, "fileManagerHeadAlias", True),
+            (0x10, 0x30, "fileManagerSlots", True),
+            (0x00, 0x10, "fileManagerHead", True),
+        ]
+        self.assertEqual(self.ownership_problems(exact, syms), [])
+
+        missing_alias = exact[1:]
+        self.assertIn(
+            "missing retail symbol fileManagerHeadAlias at +0x0 size 0x10",
+            self.ownership_problems(missing_alias, syms),
+        )
+
+        extra_alias = [*exact, (0x00, 0x10, "inventedAlias", True)]
+        self.assertIn(
+            "extra emitted symbol inventedAlias",
+            self.ownership_problems(extra_alias, syms),
+        )
+
+    def test_rejects_duplicate_emitted_name_and_empty_inventory(self):
+        duplicate = [
+            (0x00, 0x10, "fileManagerHead", True),
+            (0x00, 0x10, "fileManagerHead", True),
+            (0x10, 0x30, "fileManagerSlots", True),
+        ]
+        self.assertIn(
+            "duplicate symbol fileManagerHead",
+            self.ownership_problems(duplicate),
+        )
+        self.assertIn(
+            "retail span has no symbol_addrs inventory",
+            self.ownership_problems([], {}),
+        )
+
+    def test_real_paired_nobits_inventories_remain_accepted(self):
+        for version in ("dds1", "dds2"):
+            with self.subTest(version=version, section=".bss"):
+                syms = symbols(version)
+                start = syms["fileManagerWork"]
+                end = syms["fileRequestEntries"]
+                yaml_text = self.YAML.replace("0x003DC658", hex(start)).replace(
+                    "0x003DC698", hex(end)
+                )
+                self.assertEqual(end - start, 0x40)
+                self.assertEqual(
+                    bss_ownership_problems(
+                        yaml_text,
+                        "file/fileManager",
+                        0x40,
+                        [(0, 0x40, "fileManagerWork", True)],
+                        syms,
+                    ),
+                    [],
+                )
+
+            with self.subTest(version=version, section=".sbss"):
+                syms = symbols(version)
+                start = syms["sdfTrackedThreadSemaphore"]
+                end = syms["sdfThreadWakeWorkerId"]
+                yaml_text = self.YAML.replace(".bss", ".sbss", 1).replace(
+                    "file/fileManager", "sdf/sdfThread"
+                ).replace("0x003DC658", hex(start)).replace(
+                    "0x003DC698", hex(end)
+                )
+                self.assertEqual(end - start, 8)
+                self.assertEqual(
+                    nobits_ownership_problems(
+                        yaml_text,
+                        "sdf/sdfThread",
+                        ".sbss",
+                        8,
+                        [
+                            (0, 4, "sdfTrackedThreadSemaphore", True),
+                            (4, 4, "sdfTrackedThreadHead", True),
+                        ],
+                        syms,
+                    ),
+                    [],
+                )
 
     def test_parses_bss_object_type_from_objdump(self):
         table = """\
