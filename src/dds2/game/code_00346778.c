@@ -66,7 +66,149 @@ typedef struct SdfPacDispatchPacket {
 /* The built-in packet callback is referenced as an address in this unit. */
 extern u8 sdfPacDispatchPacket[];
 
-INCLUDE_ASM(const s32, "game/code_00346778", func_00346778);
+typedef struct SdfMovieDescriptor {
+    u16 unk00;
+    u16 unk02;
+    u32 unk04;
+    u16 unk08;
+    u16 unk0A;
+    s32 source;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 pad13;
+} SdfMovieDescriptor;
+
+typedef struct SdfMovieStream {
+    void *allocation;
+    u8 *bufferStart;
+    u8 *readCursor;
+    u8 *writeCursor;
+    u8 pad10[4];
+} SdfMovieStream;
+
+typedef struct SdfMoviePacWork {
+    u8 pad00[0x4C];
+    void *allocation;
+    u8 *resource;
+    u8 *ringStart;
+    u8 pad58[8];
+    u8 *blockStart;
+    u8 pad64[0xC];
+    s32 scratchSize;
+    u8 *scratch;
+} SdfMoviePacWork;
+
+typedef struct SdfMovieOwner {
+    u8 active;
+    u8 state;
+    u8 stopRequested;
+    u8 isPac;
+    u16 unk04;
+    u16 unk06;
+    u32 unk08;
+    u16 unk0C;
+    u16 unk0E;
+    void *deviceState;
+    u8 pad14[4];
+    s32 remainingBytes;
+    void *stream;
+    u8 pacEnabled;
+    u8 pad21;
+    u8 packetLimit;
+    u8 pad23;
+    u8 soundNode[0x8C];
+} SdfMovieOwner;
+
+extern void *sdfAllocAndClearQuadwords(s32 size);
+extern void *sdfAllocGeneralBlock(s32 size);
+extern s32 sdfResourceRetainAddress(void *block);
+extern void *sdfDevCreateCallbackState(s32 path, void *callback, s32 context);
+extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
+extern s32 func_0035D5B0(const char *text, s32 delimiter);
+extern s32 func_0035CB10(const char *text, const char *suffix);
+extern void sdfSoundInitFormattedAndAppendNode(void *node, u8 *format,
+                                                void *callback, void *owner, s32 source);
+extern s32 func_00345EB0(void *, s32, s32, s32, s32);
+extern s32 func_003460D8(void *, s32, s32, s32, s32);
+extern s32 func_00346468(void *, void *, s32, u8 *, s32);
+extern s32 func_00346608(void *, void *, s32, u8 *, s32);
+extern s32 D_00438D08;
+extern s32 D_0043921C;
+extern u8 D_00438D28[];
+
+void func_00346778(SdfMovieOwner *owner, SdfMovieDescriptor *descriptor, const char *name) {
+    u8 soundFormat[4];
+    void *work;
+    void *allocation;
+    u8 *resource;
+    SdfMovieStream *stream;
+    SdfMoviePacWork *pacWork;
+    char *extension;
+    s32 isPac;
+
+    memset(owner, 0, 0xB0);
+    owner->active = 1;
+    extension = (char *)func_0035D5B0(name, '.');
+    isPac = 0;
+    if (extension != NULL) {
+        isPac = func_0035CB10(extension, (const char *)&D_00438D28) == 0;
+    }
+    owner->isPac = isPac;
+    owner->remainingBytes = 0x7FFFFFFF;
+    owner->unk04 = descriptor->unk00;
+    owner->unk08 = descriptor->unk04;
+    owner->unk06 = descriptor->unk02;
+    owner->unk0C = descriptor->unk08;
+    owner->unk0E = descriptor->unk0A;
+    soundFormat[0] = descriptor->unk10;
+    soundFormat[1] = descriptor->unk11;
+    soundFormat[2] = 0;
+    soundFormat[3] = descriptor->unk12;
+
+    if (!isPac) {
+        work = sdfAllocAndClearQuadwords(0x14);
+        owner->stream = work;
+        stream = work;
+        allocation = sdfAllocGeneralBlock(0x20000);
+        stream->allocation = allocation;
+        {
+            u8 *buffer = (u8 *)sdfResourceRetainAddress(allocation);
+            stream->bufferStart = buffer;
+            stream->readCursor = buffer;
+            stream->writeCursor = buffer;
+        }
+        owner->state = 0;
+        owner->deviceState = sdfDevCreateCallbackState((s32)name,
+                                                        (void *)func_00345EB0, (s32)owner);
+        sdfSoundInitFormattedAndAppendNode(owner->soundNode, soundFormat,
+                                            (void *)func_00346468, owner, descriptor->source);
+        return;
+    }
+
+    if (D_00438D08 < 0) {
+        D_00438D08 = sdfCreateSemaphore(1, 1, 0);
+    }
+    D_0043921C = -1;
+    work = sdfAllocAndClearQuadwords(0x78);
+    owner->stream = work;
+    pacWork = work;
+    allocation = sdfAllocGeneralBlock(0x24000);
+    pacWork->allocation = allocation;
+    resource = (u8 *)sdfResourceRetainAddress(allocation);
+    pacWork->resource = resource;
+    pacWork->ringStart = resource + 0x4000;
+    pacWork->blockStart = (u8 *)((u32)resource + 0x14000);
+    pacWork->scratchSize = 0x20;
+    pacWork->scratch = (u8 *)work + 0x20;
+    owner->state = 0;
+    owner->deviceState = sdfDevCreateCallbackState((s32)name,
+                                                    (void *)func_003460D8, (s32)owner);
+    owner->pacEnabled = 1;
+    owner->packetLimit = 0x7F;
+    sdfSoundInitFormattedAndAppendNode(owner->soundNode, soundFormat,
+                                        (void *)func_00346608, owner, descriptor->source);
+}
 
 extern s32 sdfDevQueueActiveOperation(void *);
 extern void sdfCreateSemaphoreFromOptions(void);

@@ -218,46 +218,50 @@ functions use trampolines and are a different case.
   leaves earlier calls implicitly `int` and moves values between `$2`/`$3`.
   Keep new externs in the declaration block at the top of the unit; externs
   added mid-file can flip other functions to CONTEXT.
-- A call to a function already compiled earlier in the same file differs from
-  a call to an extern. Without `-fexceptions`, `rest_of_compilation` marks
-  every compiled function `TREE_NOTHROW`, and later calls to it get a
-  `REG_EH_REGION 0` note. In reorg (`find_dead_or_set_registers`), the scan of
-  a branch target's live registers stops at a call that can throw (an extern)
-  but runs past a nothrow call. That changes which delay slots get filled:
-  `bne` against `bnel`, or a lone `nop`. So when a caller matches only with its
-  callee opaque, retail compiled the callee in a *different* file: a
-  translation-unit boundary lies between the callee and the caller. When a
-  caller matches only with the callee visible, both were in one file. Record
-  such cases as boundary evidence and split the unit; a block-scope `extern`
-  in the caller reproduces the bytes, but it is a codegen lever, not the
-  source. The definition form of the callee (`static`, return type,
-  prototype) makes no difference.
-  Mechanism (gdb on cc1, `fill_slots_from_thread`): when the delay slot comes
-  from the branch target, the insn stays unannulled only if it sets nothing
-  in `opposite_needed`, the registers `mark_target_live_regs` reports live at
-  the fall-through. That set is a forward simulation from the start of the
-  extended block (REG_DEAD regs only die at the next label) and
-  `find_dead_or_set_registers` then stops at the first throwing call. So a
-  fall-through that starts with an extern call keeps the slot register
-  "live" and the branch becomes `beqzl`/`bnel`; with the callee compiled
-  earlier in the unit the scan runs on, sees the call clobber the register and
-  the branch stays plain. Toy-verified on `func_00190708` (callee
-  `func_00190118`, defined in the unit before `effEvent`), DDS2
-  `func_00224500` (callee `func_00217470`) and `func_00183EE0` (callee
-  `effPcpEventWorkInitEntries`, same unit: the branch matches once the C
-  function is visible, no unit change needed). For `func_00190708` and
-  `func_00224500` the callee sits in another unit, i.e. those units are one
-  translation unit in retail.
-  Quick test without touching the repo: copy the unit to a scratch file, put
-  a K&R stub (`void callee() { }`, or `s32 callee() { return 0; }` when the
-  result is used) before the caller, and run
-  `check_unit.py <unit> --source <copy>`. If the caller then reports OK the
-  callee must be compiled earlier in the same TU (merge the units or match
-  the callee first); the reverse test (replace an earlier C callee by an
-  `extern` prototype) finds the opposite evidence, a unit that has to be
-  split (`func_00280978`: `mnuClearListFlagsOneAndTwo`/`mnuTestListFlagTwo`
-  must be opaque). A ternary `t = c ? a : b;` also adds a jump to the join
-  label, which stops cse's skip-block path (see "Float constants").
+- **Same-TU callee visibility can change branch annulment.** Test this only
+  when a natural near-match has an ordinary-versus-likely branch residual,
+  the fall-through starts with a call, and controlled visible/opaque probes
+  keep the same pass-28 branch topology and branch-target donor. Without
+  `-fexceptions`,
+  `rest_of_compilation` marks a function already compiled in the same file
+  `TREE_NOTHROW`, and later calls to it get a `REG_EH_REGION 0` note. An opaque
+  external call may throw.
+
+  In reorg (`fill_slots_from_thread`), a branch-target donor stays unannulled
+  only if it sets nothing in `opposite_needed`, the registers
+  `mark_target_live_regs` reports live on the fall-through. That scan runs
+  through a known nothrow call but stops at a possibly throwing external call.
+  A later call clobber can therefore make the visible-callee form use plain
+  `bne`/`beq`, while the opaque form needs `bnel`/`beql` so the target donor
+  executes only on the taken path. This mechanism does not explain an
+  arbitrary branch difference; use `ee_gcc_why.py` and
+  `ee_gcc_delay_slots.py` to confirm the earliest pass and donor.
+
+  The cheapest falsifier does not touch the real source. Copy the unit to a
+  scratch file, put a behavior-neutral stub with the observed call contract
+  before the caller, then run:
+
+  ```sh
+  python3 tools/check_unit.py <unit> --source <copy> --func <caller>
+  ```
+
+  Replacing an existing earlier definition with an external declaration tests
+  the reverse direction. A predicted branch flip is a controlled compiler
+  result, **not proof of historical file ownership**. Before moving a real
+  boundary, also require independent provenance such as paired text/rodata
+  adjacency, a debug-source identity, or comparably strong source-lineage
+  evidence. Then move the authentic definition, not a stub, and validate every
+  affected unit and both complete builds. The paired `fldFileResolver` objects
+  are the reference case: the real creator and its callback string immediately
+  precede the resolver in both games, and restoring that ownership changes the
+  sole `bnezl` residual to retail `bnez` without changing either creator.
+
+  Stop if pass 28 already differs, the donor or opposite-path liveness differs,
+  the controlled visibility test does not change the predicted annul bit, or
+  independent ownership evidence is absent. Never ship a stub, block-scope
+  declaration, attribute, dummy use, or fake dependency as the fix. A ternary
+  `t = c ? a : b;` can separately add a jump to a join label and stop CSE's
+  skip-block path (see "Float constants").
 - A `"memory"` clobber on a COP2 save/restore asm stops gcc reusing `$4`
   across it; retail's code has none.
 - `(n * 6 + 1) << 16` gives retail's `lui $1; addu` large-immediate add.

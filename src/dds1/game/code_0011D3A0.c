@@ -100,9 +100,7 @@ extern void *dds3AdvanceWorldCounter(void);
 extern void *kwlnTaskGetTaskByName(const char *);
 extern void dds3WorkClear(void);
 extern char D_0039FBC0[]; /* "fldProcSequence" */
-extern void *dds3SpawnInnerVecObj6(void *, u32 *, u32 *);
 extern void dds3SetWorldEntryCallbackTarget(void *, const char *);
-extern char D_0039FD50[]; /* "FLD_DMY_MATTER" */
 extern u8 D_003BAB3C;
 extern u8 D_0032C9A0[];
 extern s16 D_0032C9B0[];
@@ -2192,27 +2190,9 @@ s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter) {
     return 1;
 }
 
-void *fldCreateDummyMatter(void) {
-    u32 args[8];
-    void *matter;
-    args[0] = 0;
-    args[1] = 0;
-    args[2] = 0;
-    args[3] = 0;
-    args[4] = 0;
-    args[5] = 0;
-    args[6] = 0;
-    args[7] = 0;
-    matter = dds3SpawnInnerVecObj6(dds3AdvanceWorldCounter(), args, args + 4);
-    dds3SetWorldEntryCallbackTarget(matter, D_0039FD50);
-    return matter;
-}
-
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FD30);
 
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FD40);
-
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FD50);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAAE0);
 
@@ -2315,4 +2295,3 @@ INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BABFC);
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", fldSceneControlFlags);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAC08);
-

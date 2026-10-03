@@ -1523,9 +1523,7 @@ proc_001b:
     global_int[3] = CREATE_LINKED_CAMERA_VIEWER(2, 24)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[3], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04)))
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02)))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_MOTION))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_2))
-    COMM 0x0013
+    START_CAMERA_PATH_MOVE(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_2)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_MOTION)))
     PREPARE_UNIT_MOTION_STATE(global_int[3], 0, 0, 0, 2)
     SCREEN_FADE_A(1, 20)
     WAIT_FOR_TIMER_LIMIT(20)
@@ -1533,8 +1531,7 @@ proc_001b:
     WAIT_FOR_TIMER_LIMIT(23)
     SCREEN_FADE_B(1, 1)
     WAIT_FOR_TIMER_LIMIT(1)
-    push global_int[3]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(global_int[3])
     UPDATE_FIELD_LOOK_AT_SEGMENT()
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(-(1))
     SCREEN_FADE_A(1, 20)
@@ -1571,7 +1568,7 @@ _223:
       WAIT_FOR_TIMER_LIMIT(45)
       MOVE_OBJECT_ALONG_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_02)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01path_01_3)), 0)
       WAIT_FOR_TIMER_LIMIT(60)
-      COMM 0x0216
+      RELEASE_CURRENT_BGM()
       WAIT_FOR_TIMER_LIMIT(50)
       PLAY_FIELD_SE(98)
       SCREEN_FADE_B(0, 15)
@@ -1607,7 +1604,7 @@ _227:
       WAIT_FOR_TIMER_LIMIT(45)
       MOVE_OBJECT_ALONG_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_02_2)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01path_01_4)), 0)
       WAIT_FOR_TIMER_LIMIT(60)
-      COMM 0x0216
+      RELEASE_CURRENT_BGM()
       WAIT_FOR_TIMER_LIMIT(50)
       PLAY_FIELD_SE(98)
       SCREEN_FADE_B(0, 15)
@@ -1676,17 +1673,14 @@ proc_0022:
     global_int[3] = CREATE_LINKED_CAMERA_VIEWER(2, 24)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[3], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_10)))
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05)))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_MOTION))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_2))
-    COMM 0x0013
+    START_CAMERA_PATH_MOVE(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_2)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_MOTION)))
     SCREEN_FADE_A(1, 20)
     WAIT_FOR_TIMER_LIMIT(20)
     WAIT_FOR_TIMER_LIMIT(340)
     WAIT_FOR_TIMER_LIMIT(23)
     SCREEN_FADE_B(1, 1)
     WAIT_FOR_TIMER_LIMIT(1)
-    push global_int[3]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(global_int[3])
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_12_2)))
     UPDATE_FIELD_LOOK_AT_SEGMENT()
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(-(1))
@@ -1770,8 +1764,7 @@ _251:
   if (TEST_MODEL_FLAG(1569) == 0) {
     global_int[2] = CREATE_LINKED_CAMERA_VIEWER(6, 278)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03)))
-    push global_int[2]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[2])
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
@@ -1780,8 +1773,7 @@ _251:
     PREPARE_UNIT_MOTION_STATE(global_int[2], 16, 0, 0, 1)
     global_int[1] = CREATE_LINKED_CAMERA_VIEWER(6, 279)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04_2)))
-    push global_int[1]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[1])
     PREPARE_UNIT_MOTION_STATE(global_int[1], 16, 0, 0, 1)
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[2])
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[1])
@@ -1791,8 +1783,7 @@ _253:
   if (TEST_MODEL_FLAG(1570) == 0) {
     global_int[2] = CREATE_LINKED_CAMERA_VIEWER(6, 278)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_2)))
-    push global_int[2]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[2])
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
@@ -1801,8 +1792,7 @@ _253:
     PREPARE_UNIT_MOTION_STATE(global_int[2], 16, 0, 0, 1)
     global_int[1] = CREATE_LINKED_CAMERA_VIEWER(6, 279)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_06)))
-    push global_int[1]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[1])
     PREPARE_UNIT_MOTION_STATE(global_int[1], 16, 0, 0, 1)
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[2])
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[1])
@@ -1814,8 +1804,7 @@ _257:
   if (TEST_MODEL_FLAG(1571) == 0) {
     global_int[2] = CREATE_LINKED_CAMERA_VIEWER(6, 278)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07)))
-    push global_int[2]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[2])
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
@@ -1824,8 +1813,7 @@ _257:
     PREPARE_UNIT_MOTION_STATE(global_int[2], 16, 0, 0, 1)
     global_int[1] = CREATE_LINKED_CAMERA_VIEWER(6, 279)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08)))
-    push global_int[1]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[1])
     PREPARE_UNIT_MOTION_STATE(global_int[1], 16, 0, 0, 1)
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[2])
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[1])
@@ -1837,8 +1825,7 @@ _261:
   if (TEST_MODEL_FLAG(1576) == 0) {
     global_int[2] = CREATE_LINKED_CAMERA_VIEWER(6, 278)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_09)))
-    push global_int[2]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[2])
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
@@ -1847,8 +1834,7 @@ _261:
     PREPARE_UNIT_MOTION_STATE(global_int[2], 16, 0, 0, 1)
     global_int[1] = CREATE_LINKED_CAMERA_VIEWER(6, 279)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_10_2)))
-    push global_int[1]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[1])
     PREPARE_UNIT_MOTION_STATE(global_int[1], 16, 0, 0, 1)
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[2])
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[1])
@@ -1857,10 +1843,8 @@ _263:
   goto _265
 _265:
   if (TEST_MODEL_FLAG(1576) == 1) {
-    push global_int[2]
-    COMM 0x0016
-    push global_int[1]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(global_int[2])
+    DESTROY_WORLD_UNIT(global_int[1])
   }
 _267:
   return
@@ -1890,14 +1874,11 @@ proc_0026:
     PLAY_FIELD_SE(57)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    push global_int[2]
-    COMM 0x0016
-    push global_int[1]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(global_int[2])
+    DESTROY_WORLD_UNIT(global_int[1])
     global_int[2] = CREATE_LINKED_CAMERA_VIEWER(6, 278)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_3)))
-    push global_int[2]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[2])
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
@@ -1906,8 +1887,7 @@ proc_0026:
     PREPARE_UNIT_MOTION_STATE(global_int[2], 16, 0, 0, 1)
     global_int[1] = CREATE_LINKED_CAMERA_VIEWER(6, 279)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_06_2)))
-    push global_int[1]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[1])
     PREPARE_UNIT_MOTION_STATE(global_int[1], 16, 0, 0, 1)
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[2])
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[1])
@@ -2006,14 +1986,11 @@ proc_0028:
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(-(1))
     ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_05_2))
     ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_08_2))
-    push global_int[2]
-    COMM 0x0016
-    push global_int[1]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(global_int[2])
+    DESTROY_WORLD_UNIT(global_int[1])
     global_int[2] = CREATE_LINKED_CAMERA_VIEWER(6, 278)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_2)))
-    push global_int[2]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[2])
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
@@ -2022,8 +1999,7 @@ proc_0028:
     PREPARE_UNIT_MOTION_STATE(global_int[2], 16, 0, 0, 1)
     global_int[1] = CREATE_LINKED_CAMERA_VIEWER(6, 279)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08_2)))
-    push global_int[1]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[1])
     PREPARE_UNIT_MOTION_STATE(global_int[1], 16, 0, 0, 1)
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[2])
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[1])
@@ -2118,14 +2094,11 @@ proc_002a:
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(-(1))
     ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_06_2))
     ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_09_2))
-    push global_int[2]
-    COMM 0x0016
-    push global_int[1]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(global_int[2])
+    DESTROY_WORLD_UNIT(global_int[1])
     global_int[2] = CREATE_LINKED_CAMERA_VIEWER(6, 278)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_09_2)))
-    push global_int[2]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[2])
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
@@ -2134,8 +2107,7 @@ proc_002a:
     PREPARE_UNIT_MOTION_STATE(global_int[2], 16, 0, 0, 1)
     global_int[1] = CREATE_LINKED_CAMERA_VIEWER(6, 279)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_10_3)))
-    push global_int[1]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[1])
     PREPARE_UNIT_MOTION_STATE(global_int[1], 16, 0, 0, 1)
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[2])
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[1])
@@ -2208,20 +2180,16 @@ proc_002c:
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     SET_SOLAR_OVERLAY_MODE(2)
-    COMM 0x0216
-    push 128
-    COMM 0x0210
+    RELEASE_CURRENT_BGM()
+    START_SCENE_BGM(128)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_15)))
     PREPARE_UNIT_MOTION_STATE(global_int[0], 11, 0, 0, 1)
-    push global_int[2]
-    COMM 0x0016
-    push global_int[1]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(global_int[2])
+    DESTROY_WORLD_UNIT(global_int[1])
     global_int[2] = CREATE_LINKED_CAMERA_VIEWER(6, 278)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_11)))
-    push global_int[2]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[2])
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
@@ -2230,15 +2198,12 @@ proc_002c:
     PREPARE_UNIT_MOTION_STATE(global_int[2], 16, 0, 0, 1)
     global_int[1] = CREATE_LINKED_CAMERA_VIEWER(6, 279)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_13)))
-    push global_int[1]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[1])
     PREPARE_UNIT_MOTION_STATE(global_int[1], 17, 0, 0, 0)
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[2])
     CLEAR_WORLD_OBJECT_STATE_FLAGS(global_int[1])
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_07)))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_07_MOTION))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_07_2))
-    COMM 0x0013
+    START_CAMERA_PATH_MOVE(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_07_2)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_07_MOTION)))
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     WAIT_FOR_TIMER_LIMIT(90)
@@ -2250,20 +2215,13 @@ proc_002c:
     ACTIVATE_MESSAGE_PANEL()
     MESSAGE_REQUEST_AND_POLL(message(JTY_01))
     FINISH_SCRIPT_MESSAGE_WINDOW()
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_08_MOTION))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_08_2))
-    COMM 0x0013
+    START_CAMERA_PATH_MOVE(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_08_2)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_08_MOTION)))
     PREPARE_UNIT_MOTION_STATE(global_int[1], 5, 5, 50, 0)
     WAIT_FOR_TIMER_LIMIT(38)
-    push 16
-    COMM 0x0217
-    push 0
-    push 16
-    COMM 0x01f3
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(16)
+    START_ARCHIVE_SOUND(16, 0)
     WAIT_FOR_TIMER_LIMIT(12)
-    push 0
-    push 16
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(16, 0)
     push 330
     push 31
     push 14
@@ -2351,8 +2309,7 @@ proc_0033:
     ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_02_3))
     local_int[60] = CREATE_LINKED_CAMERA_VIEWER(3, 109)
     PREPARE_UNIT_MOTION_STATE(local_int[60], 7, 0, 0, 1)
-    push local_int[60]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(local_int[60])
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[60], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_28)))
   }
 _307:
@@ -2386,42 +2343,31 @@ proc_0035:
     SET_SOLAR_OVERLAY_MODE(2)
     SET_MODEL_FLAG(1732)
     local_int[61] = CREATE_LINKED_CAMERA_VIEWER(6, 275)
-    push local_int[61]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(local_int[61])
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[61], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03_2)))
     push float32(3.0, bits=0x40400000)
     push float32(3.0, bits=0x40400000)
     push float32(3.0, bits=0x40400000)
     push local_int[61]
     COMM 0x001b
-    COMM 0x0216
-    push 128
-    COMM 0x0210
+    RELEASE_CURRENT_BGM()
+    START_SCENE_BGM(128)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04_2)))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04_MOTION))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04_3))
-    COMM 0x0013
+    START_CAMERA_PATH_MOVE(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04_3)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04_MOTION)))
     ACTIVATE_MESSAGE_PANEL()
     MESSAGE_REQUEST_AND_POLL(message(KOURYU_01))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_4)))
-    push 28
-    COMM 0x0217
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(28)
     ACTIVATE_MESSAGE_PANEL()
     MESSAGE_REQUEST_AND_POLL(message(KOURYU_02))
     FINISH_SCRIPT_MESSAGE_WINDOW()
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_MOTION_2))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_5))
-    COMM 0x0013
+    START_CAMERA_PATH_MOVE(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_5)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_MOTION_2)))
     PREPARE_UNIT_MOTION_STATE(local_int[61], 14, 15, 30, 0)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 0
-    push 28
-    COMM 0x01f3
+    START_ARCHIVE_SOUND(28, 0)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 0
-    push 28
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(28, 0)
     push 332
     push 31
     push 40
@@ -2444,14 +2390,12 @@ proc_0037:
   SET_SOLAR_OVERLAY_MODE(2)
   WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(proc_0036), 0))
   local_int[62] = CREATE_LINKED_CAMERA_VIEWER(6, 280)
-  push local_int[62]
-  COMM 0x021e
+  APPLY_FIELD_MODEL_LIGHTING(local_int[62])
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[62], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_4)))
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   PREPARE_UNIT_MOTION_STATE(global_int[0], 11, 0, 0, 1)
-  COMM 0x0216
-  push 128
-  COMM 0x0210
+  RELEASE_CURRENT_BGM()
+  START_SCENE_BGM(128)
   ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04_4)))
   ACTIVATE_MESSAGE_PANEL()
   MESSAGE_REQUEST_AND_POLL(message(ANANTA))
@@ -2460,20 +2404,13 @@ proc_0037:
     CLEAR_MODEL_FLAG(556)
     MESSAGE_REQUEST_AND_POLL(message(ANANTA_BT))
     FINISH_SCRIPT_MESSAGE_WINDOW()
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04_MOTION_2))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04_5))
-    COMM 0x0013
+    START_CAMERA_PATH_MOVE(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04_5)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04_MOTION_2)))
     PREPARE_UNIT_MOTION_STATE(local_int[62], 4, 15, 30, 0)
     WAIT_FOR_TIMER_LIMIT(45)
-    push 27
-    COMM 0x0217
-    push 0
-    push 27
-    COMM 0x01f3
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(27)
+    START_ARCHIVE_SOUND(27, 0)
     WAIT_FOR_TIMER_LIMIT(38)
-    push 0
-    push 27
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(27, 0)
     push 551
     push 31
     push 38
@@ -2486,9 +2423,8 @@ proc_0037:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    COMM 0x0216
-    push 2
-    COMM 0x0210
+    RELEASE_CURRENT_BGM()
+    START_SCENE_BGM(2)
     RUN_FIELD_TRANSITION_SELECTOR(575)
     return
     goto _317
@@ -2515,7 +2451,7 @@ _321:
       _324:
         MESSAGE_REQUEST_AND_POLL(message(gale_040_01_ans0))
         FINISH_SCRIPT_MESSAGE_WINDOW()
-        COMM 0x0216
+        RELEASE_CURRENT_BGM()
         PLAY_FIELD_SE_VOLUME_PAN(66)
         MOVE_OBJECT_ALONG_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_02)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01path_03)), 0)
         MOVE_OBJECT_ALONG_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_02b)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01path_02_2)), 0)
@@ -2536,7 +2472,7 @@ _322:
 proc_0039:
   PROC proc_0039
   if (TEST_MODEL_FLAG(51) == 0) {
-    COMM 0x0216
+    RELEASE_CURRENT_BGM()
     push 655
     push 31
     push 39

@@ -109,7 +109,7 @@ segments:
       - [0x1FC90, c, game/code_0011EC90]
       - [0x200F8, c, misc/l2d]  # Nocturne __FILE__
       - [0x20208, c, game/code_0011F208]
-      - [0x297B8, c, field/fldFileResolver]  # Nocturne __FILE__
+      - [0x29750, c, field/fldFileResolver]  # Nocturne __FILE__
       - [0x29FE8, c, game/code_00128FE8]
       - [0x370B8, c, game/code_001360B8]
       - [0x37EF8, c, game/code_00136EF8]
@@ -324,7 +324,7 @@ segments:
       - [0x313910, .rodata, basic/dds3EffectObjectBasic]
       - [0x313AB0, .rodata, game/code_001176A0]
       - [0x313B30, .rodata, game/code_0011F208]
-      - [0x314000, .rodata, field/fldFileResolver]
+      - [0x313FF0, .rodata, field/fldFileResolver]
       - [0x314050, .rodata, game/code_00128FE8]
       - [0x3143A0, .rodata, game/code_00136EF8]
       - [0x3146B0, .rodata, field/fldPanel]

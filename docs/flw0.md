@@ -449,7 +449,10 @@ table and native implementation; shared commands were checked in both games:
 | `SCREEN_FADE_A` | `0x00F` | 2 | Starts the selected screen fade when its timer reaches zero |
 | `SCREEN_FADE_B` | `0x010` | 2 | Starts the selected screen fade-in when its timer reaches zero |
 | `ADD_EFFECT_UNIT_TO_WORLD` | `0x012` | 1 | Adds the selected player object or effect-unit ID to the active world |
+| `START_CAMERA_PATH_MOVE` | `0x013` | 2 | Starts a camera path move by binding a motion resource to a selected camera object |
 | `CREATE_LINKED_CAMERA_VIEWER` | `0x015` | 2 | Creates the linked-camera viewer object and returns its fixed object ID |
+| `DESTROY_WORLD_UNIT` | `0x016` | 1 | Removes a selected staged unit from the world |
+| `START_UNIT_MOVE_TO_POSITION_OBJECT` | `0x017` | 5 | Starts a staged unit move toward a selected position object |
 | `ADD_FLAGGED_EFFECT_UNIT_TO_WORLD` | `0x019` | 1 | Adds the selected player object, or marks and adds an effect-unit ID |
 | `SET_CONTROLLER_VIBRATION` | `0x01A` | 3 | Sets the `SMALL_MOTOR` or `LARGE_MOTOR` vibration strength and duration |
 | `FADE_BACKGROUND_IN` | `0x01F` | 1 | Starts the background fade-in with the supplied duration |
@@ -472,10 +475,12 @@ table and native implementation; shared commands were checked in both games:
 | `CHANGE_ITEM_COUNT` | `0x070` | 2 | Adjusts the selected item or flag count and applies its range limit |
 | `SET_MESSAGE_WINDOW_GEOMETRY` | `0x071` | 3 | Applies three geometry values to the current message window |
 | `PREPARE_UNIT_MOTION_STATE` | `0x073` | 5 | Looks up an event unit and applies four motion-state values |
+| `START_UNIT_PATH_FOLLOW` | `0x08B` | 7 | Starts a staged unit following a selected path resource |
 | `READ_SECONDARY_WORLD_ID_VALUE` | `0x094` | 1 | Looks up a named secondary-world ID and returns its value or zero |
 | `RESET_FIELD_EFFECTS` | `0x099` | 0 | Resets field draw, sway, sky, and fade state |
 | `DESTROY_WORLD_EFFECT_OBJECT` | `0x09B` | 1 | Removes the selected world effect object |
 | `COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE` | `0x09D` | 2 | Copies a source vector's position and rotation to an effect object |
+| `FOCUS_CAMERA_ON_OBJECT` | `0x0A3` | 1 | Focuses the field camera on the selected object's current position |
 | `UPDATE_FIELD_LOOK_AT_SEGMENT` | `0x0A4` | 0 | Rebuilds the field camera's look-at segment and clears its highlight state |
 | `CREATE_SCRIPT_TASK` | `0x0A5` | 2 | Creates a task at a local procedure with a relative priority and returns its handle |
 | `DESTROY_REGISTERED_TASK` | `0x0A6` | 1 | Destroys a registered task and its hierarchy; an absent handle is ignored |
@@ -535,6 +540,9 @@ table and native implementation; shared commands were checked in both games:
 | `CLEAR_WORLD_OBJECT_PENDING_VALUE` | `0x1E1` | 1 | Clears a selected world object's pending value and starts its reset timer |
 | `CLEAR_PROCESS_CONTROL_FLAG` | `0x1E7` | 0 | Clears the script-process control flag |
 | `CONSUME_FIELD_SKILL_END_NOTICE` | `0x1F1` | 1 | Clears and reports a pending Lightoma, Liftoma, Riberama, or Estoma expiration notice |
+| `START_ARCHIVE_SOUND` | `0x1F3` | 2 | Starts an archive sound with the default volume and pan |
+| `STOP_ARCHIVE_SOUND` | `0x1F4` | 2 | Stops an archive sound selected by bank and sound ID |
+| `REVEAL_AUTOMAP_RECTANGLE` | `0x1F6` | 5 | Marks a rectangular range of cells in the current field's automap bitmap |
 | `READ_SUCTION_WARP_VALUE` | `0x1FA` | 1 | Returns a state, object, map-entry, or motion value for the selected suction warp |
 | `READ_BARRIER_VALUE` | `0x1FB` | 1 | Returns a model flag, object, completion flag, or map entry for the selected barrier |
 | `APPLY_ROOM_MODE_GROUP_ZERO` | `0x1FC` | 4 | Applies DDS2 room-object transition modes from group zero |
@@ -557,11 +565,32 @@ table and native implementation; shared commands were checked in both games:
 | `APPLY_CURRENT_TASK_RECORD_ENTRY` | `0x20D` | 0 | Applies the record entry attached to the current field task |
 | `START_CURRENT_FIELD_INTERACTION_EVENT` | `0x20E` | 0 | Starts the script event selected by the current field interaction |
 | `RUN_FIELD_TRANSITION_SELECTOR` | `0x20F` | 1 | Runs the field transition selected by its script ID; the shared `HEAL_FACILITY` and `SAVE_POINT` IDs are named |
+| `START_SCENE_BGM` | `0x210` | 1 | Stores the scene BGM selector and starts the resolved scene track |
 | `PLAY_FIELD_SE_VOLUME_PAN` | `0x214` | 1 | Plays a field sound effect through its volume-and-pan path |
 | `PLAY_FIELD_SE` | `0x215` | 1 | Plays a field sound effect |
+| `RELEASE_CURRENT_BGM` | `0x216` | 0 | Releases the current field BGM handle |
+| `LOAD_ARCHIVE_SOUND_BANK_AND_WAIT` | `0x217` | 1 | Requests an archive sound bank and waits until it is resident |
 | `READ_WARP_EFFECT_MODE` | `0x219` | 0 | Returns the warp-effect selector; both DDS implementations return zero |
 | `RESET_FIELD_AFTER_EVENT` | `0x21A` | 0 | Resets DDS2 field state after an event |
 | `ACTION_WINDOW_REQUEST_AND_POLL_DIRECT` | `0x21D` | 1 | Requests or polls an action-window message without the actor-entry precheck and returns `-1`, `0`, or `1` |
+| `APPLY_FIELD_MODEL_LIGHTING` | `0x21E` | 1 | Applies the active field-lighting state to the selected world unit |
+
+The archive-sound commands build the same `0x30000000 | bank << 16 | sound`
+identity in both games. Start sends the volume/pan command with the retail
+defaults, stop sends the single-track stop command, and the bank command waits
+until the requested archive is resident. The automap command forwards a map
+row, origin, width, and height to the bitmap marker, which only sets discovery
+bits. The model-lighting command resolves the selected world unit and applies
+the active field-light state. Together these seven contracts replace 509 DDS1
+and 569 DDS2 numeric calls.
+
+The field-staging commands cover the common camera and unit choreography path.
+The camera command binds a type-`0x10` motion resource to a selected type-`4`
+camera object, while the focus command copies a selected object's position into
+the active field-camera focus. The unit commands remove a selected type-`5`
+unit or start motion toward a type-`0x11` position object or along a type-`0x10`
+path. Together these five contracts replace 459 DDS1 and 288 DDS2 numeric
+calls across the complete tracked corpora.
 
 The standard profiles also contain the paired battle-runtime commands used by
 the negotiation script and AICALC programs:
@@ -607,8 +636,8 @@ row flag, but its full role is not yet established, so it remains numeric.
 `READ_WARP_EFFECT_MODE` is retained by the shared warp procedure even though
 both DDS handlers are stubs that return zero.
 
-The reviewed set names 50,317 of 53,389 native calls in the complete DDS1
-corpus and 36,729 of 38,839 calls in the complete DDS2 corpus. It also makes
+The reviewed set names 51,285 of 53,389 native calls in the complete DDS1
+corpus and 37,586 of 38,839 calls in the complete DDS2 corpus. It also makes
 the adjacent message-command pattern safe to recognize, producing 188 symbolic
 DDS1 message references in the original event slice, 2,368 across complete
 DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic
