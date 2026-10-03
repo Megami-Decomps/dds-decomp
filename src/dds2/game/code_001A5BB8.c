@@ -1517,6 +1517,7 @@ void btlClearActorSelectedEntryIndex(UiObject *actor) {
     actor->selectedEntryIndex = -1;
 }
 
+
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AA898);
 
 s32 btlGetActorEntryData(UiObject *actor) {
@@ -1752,6 +1753,7 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415158);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC0F8);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC360);
+
 
 extern u32 btlGetIndexListCount(s32);
 extern u32 btlGetIndexListEntry(s32, s32);
@@ -2252,7 +2254,57 @@ void btlTickActorEntryCountdowns(UiObject *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AE3A8);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AE678);
+s32 func_001AE678(u8 *actor, s32 attr) {
+    u32 value = 100;
+
+    if (((BattleController *)btlGetRuntime())->flags21C & 0x20000) {
+        return value;
+    }
+    switch (attr) {
+    case 0:
+    case 1:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x25C)) {
+            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x1E0) * (f32)value);
+        }
+        break;
+    case 2:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x25D)) {
+            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x1E8) * (f32)value);
+        }
+        break;
+    case 3:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x25E)) {
+            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x1F0) * (f32)value);
+        }
+        break;
+    case 4:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x25F)) {
+            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x1F8) * (f32)value);
+        }
+        break;
+    case 5:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x260)) {
+            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x200) * (f32)value);
+        }
+        break;
+    case 6:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x261)) {
+            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x208) * (f32)value);
+        }
+        break;
+    case 8:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x262)) {
+            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x210) * (f32)value);
+        }
+        break;
+    case 9:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x263)) {
+            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x218) * (f32)value);
+        }
+        break;
+    }
+    return value;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AE8C0);
 
@@ -2502,6 +2554,7 @@ typedef struct EventStatRecord {
     s16 stat34;
     s16 stat36;
 } EventStatRecord;
+
 
 extern s32 datRosterDetails;
 
@@ -3913,8 +3966,8 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B88F8);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8A80);
 
-extern void itfMesCleanupWindow(s32, s32);
 
+extern void itfMesCleanupWindow(s32, s32);
 extern s32 itfMesDestroyWindowIfPresent();
 
 typedef struct MesWindowSet {
