@@ -89,6 +89,13 @@ end_data
 
 
 class FldSceneTests(unittest.TestCase):
+    def test_loads_paired_field_script_procedure_indices(self) -> None:
+        field_path = ROOT / "src/dds1/data/field/f001_000.fldasm"
+        script_path = ROOT / "src/dds1/scripts/field/f001.bfasm"
+        self.assertEqual(fld_scene._paired_script_path(1, field_path), script_path)
+        procedures = fld_scene._script_procedures(script_path)
+        self.assertEqual(procedures["warp_label"], 4)
+
     def test_appends_collision_camera_and_placement(self) -> None:
         builder = fld_model.GltfBuilder.create()
         document, binary = fld_scene.append_field_scene(
@@ -135,6 +142,7 @@ class FldSceneTests(unittest.TestCase):
             bytes(builder.binary),
             fld.encode(fld.parse_source(EVENT_SOURCE)),
             meters_per_unit=0.01,
+            event_procedures={"001_01eve_01": 7, "unused_procedure": 8},
         )
         wrapper = document["nodes"][-1]
         children = [document["nodes"][index] for index in wrapper["children"]]
@@ -151,13 +159,21 @@ class FldSceneTests(unittest.TestCase):
                 "ddsEventFlags": 5,
                 "ddsEventReserved": [7, 9],
                 "ddsEventLabel": "001_01eve_01",
+                "ddsEventProcedure": {"name": "001_01eve_01", "index": 7},
             },
         )
         self.assertEqual(placement["extras"]["ddsEventIndex"], 0)
         self.assertEqual(placement["extras"]["ddsEventLabel"], "001_01eve_01")
+        self.assertEqual(
+            placement["extras"]["ddsEventProcedure"],
+            {"name": "001_01eve_01", "index": 7},
+        )
         self.assertEqual(placement["extras"]["ddsEventResourceSerial"], 3)
         self.assertEqual(wrapper["extras"]["ddsEventResources"], 1)
         self.assertEqual(wrapper["extras"]["ddsLinkedEventPlacements"], 1)
+        self.assertEqual(wrapper["extras"]["ddsFieldScriptProcedures"], 2)
+        self.assertEqual(wrapper["extras"]["ddsScriptLinkedEventResources"], 1)
+        self.assertEqual(wrapper["extras"]["ddsScriptLinkedEventPlacements"], 1)
         fld_model.encode_glb(document, binary)
 
     def test_rejects_negative_marker_size(self) -> None:

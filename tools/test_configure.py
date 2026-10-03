@@ -27,6 +27,41 @@ from tools import progress  # noqa: E402
 
 
 class ConfigureTests(unittest.TestCase):
+    def test_field_archive_bases_are_available_when_all_expected_files_exist(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp, patch.object(configure, "ROOT", Path(tmp)):
+            sources = [Path("f001_000.lbasm"), Path("f002_000.lbasm")]
+            base_dir = Path(tmp) / "orig" / "dds1" / "field"
+            base_dir.mkdir(parents=True)
+            for source in sources:
+                (base_dir / f"{source.stem}.LB").touch()
+
+            self.assertEqual(configure.missing_field_archive_bases("dds1", sources), [])
+
+    def test_field_archive_bases_report_a_partial_input_set(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp, patch.object(configure, "ROOT", Path(tmp)):
+            sources = [Path("f001_000.lbasm"), Path("f002_000.lbasm")]
+            base_dir = Path(tmp) / "orig" / "dds1" / "field"
+            base_dir.mkdir(parents=True)
+            (base_dir / "f001_000.LB").touch()
+
+            self.assertEqual(
+                configure.missing_field_archive_bases("dds1", sources),
+                [Path("orig/dds1/field/f002_000.LB")],
+            )
+
+    def test_unrelated_field_archive_does_not_satisfy_expected_base(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp, patch.object(configure, "ROOT", Path(tmp)):
+            base_dir = Path(tmp) / "orig" / "dds2" / "field"
+            base_dir.mkdir(parents=True)
+            (base_dir / "unrelated.LB").touch()
+
+            self.assertEqual(
+                configure.missing_field_archive_bases(
+                    "dds2", [Path("f001_000.lbasm")]
+                ),
+                [Path("orig/dds2/field/f001_000.LB")],
+            )
+
     def test_include_directive_accepts_leading_and_internal_comments(self) -> None:
         source = """\
 /* retained table */ INCLUDE_RODATA /* generated */ (
