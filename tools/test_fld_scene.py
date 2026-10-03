@@ -14,6 +14,7 @@ import fld  # noqa: E402
 import fld_model  # noqa: E402
 import fld_scene  # noqa: E402
 import field_world  # noqa: E402
+import inf  # noqa: E402
 import wap  # noqa: E402
 
 
@@ -268,6 +269,98 @@ end_data
         self.assertEqual(
             wrapper["extras"]["ddsUnlinkedTransitionActors"],
             [{"actor": "missing_actor", "entries": [5]}],
+        )
+        fld_model.encode_glb(document, binary)
+
+    def test_placement_retains_complete_inf_interaction(self) -> None:
+        flags = list(inf.DEFAULT_SET.flags)
+        flags[0] = inf.FlagSelector(23, 12, 100)
+        messages = list(inf.DEFAULT_SET.messages)
+        messages[2] = inf.MessageRow(
+            1,
+            7,
+            (13, 100, 0, 207),
+            4,
+            5,
+            2,
+            3,
+        )
+        views = list(inf.DEFAULT_FILE.views)
+        views[2] = inf.View(0, 6, "01pos_04", "01cam_02")
+        actions = list(inf.DEFAULT_FILE.extra_actions)
+        actions[3] = inf.ExtraAction(9, (10, 20, 30, 40))
+        sets = list(inf.DEFAULT_FILE.sets)
+        sets[1] = inf.InteractionSet(
+            inf.Start(1, 0, 1, 2, "01heal_01"), tuple(flags), tuple(messages)
+        )
+        sets[2] = replace(
+            sets[1], start=inf.Start(0, 0, 1, 3, "missing_actor")
+        )
+        table = replace(
+            inf.DEFAULT_FILE,
+            views=tuple(views),
+            extra_actions=tuple(actions),
+            sets=tuple(sets),
+        )
+        symbols = (None,) * 7 + ("HEAL_PROMPT",)
+        interactions = field_world.area_interactions(table, 1, symbols)
+
+        builder = fld_model.GltfBuilder.create()
+        document, binary = fld_scene.append_field_scene(
+            builder.document,
+            bytes(builder.binary),
+            fld.encode(fld.parse_source(SOURCE)),
+            meters_per_unit=0.01,
+            interactions=interactions,
+        )
+
+        wrapper = document["nodes"][-1]
+        children = [document["nodes"][index] for index in wrapper["children"]]
+        placement = next(node for node in children if node["name"] == "01heal_01")
+        interaction = placement["extras"]["ddsInteractions"][0]
+        self.assertEqual(
+            {key: interaction[key] for key in ("set", "kind", "action", "event")},
+            {"set": 1, "kind": "event", "action": 1, "event": "01heal_01"},
+        )
+        self.assertEqual(
+            interaction["flagSelectors"][0],
+            {
+                "row": 0,
+                "flag": 23,
+                "off": {"value": 12, "type": "row", "row": 2},
+                "on": {"value": 100, "type": "warp"},
+            },
+        )
+        row = interaction["rows"][0]
+        self.assertEqual(row["messageName"], "HEAL_PROMPT")
+        self.assertEqual(
+            row["choices"],
+            [
+                {"value": 13, "type": "row", "row": 3},
+                {"value": 100, "type": "warp"},
+                {"value": 0, "type": "complete"},
+                {"value": 207, "type": "control"},
+            ],
+        )
+        self.assertEqual(
+            row["view"],
+            {
+                "index": 2,
+                "player": 0,
+                "motion": 6,
+                "position": "01pos_04",
+                "camera": "01cam_02",
+            },
+        )
+        self.assertEqual(
+            row["extraAction"],
+            {"index": 3, "id": 9, "parameters": [10, 20, 30, 40]},
+        )
+        self.assertEqual(wrapper["extras"]["ddsInteractionSets"], 2)
+        self.assertEqual(wrapper["extras"]["ddsLinkedInteractionSets"], 1)
+        self.assertEqual(
+            wrapper["extras"]["ddsUnlinkedInteractionActors"],
+            [{"actor": "missing_actor", "sets": [2]}],
         )
         fld_model.encode_glb(document, binary)
 

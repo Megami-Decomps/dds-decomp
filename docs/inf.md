@@ -108,3 +108,20 @@ Run the codec and complete-corpus regression tests with:
 ```sh
 python3 tools/test_inf.py
 ```
+
+## Placement and scene linkage
+
+For every nondefault set, the start row's `action` byte equals the `AAA` part
+of an existing ordinary `fNNN_AAA` field area, while its event string names a
+type-10 FLD2 placement. This gives a strict cross-resource identity for 258 of
+the 284 nondefault sets:
+141 of 143 in DDS1 and 117 of 141 in DDS2. There are no duplicate placement
+matches within an area. The other 26 sets remain explicit unlinked identities;
+the linker does not fall back to matching the same name elsewhere in a field.
+
+`tools/fld_scene.py` exposes the relationship in composed GLB scenes. A linked
+placement carries `ddsInteractions`, with the complete nondefault flag and
+message graph plus any default row reached by an explicit branch. BF message
+names are included only when the paired source gives a unique symbol for that
+numeric message ID. Raw control values remain alongside typed row, warp, and
+completion targets.
