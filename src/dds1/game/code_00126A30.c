@@ -1837,9 +1837,6 @@ void fldStartQuadPacketList(s32 quadState) {
     sdfAppendPacket((SdfListHead *)((FldQuadState *)quadState)->packetList, packet);
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B940);
-
-
 typedef struct {
     u8 pad0[0x10];
     void (*invoke)(void *, s32);
@@ -1848,6 +1845,39 @@ extern FldGfxCallback D_00325708;
 extern FldGfxCallback kwlnPositionedTextSurface;
 extern void sdfPktInit(void *, s32, s32, s32, s32);
 extern s32 sdfFormatSifPacket();
+extern void sdfInvertScaledVuTransform(void);
+
+void func_0012B940(f32 x, f32 y, f32 z, s32 drawValue) {
+    FldQuadState quad;
+    u8 packet[16];
+    f32 screenX;
+    f32 screenY;
+
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    sdfInvertScaledVuTransform();
+    fldProjectPointSetup(&screenX, &screenY, x, y, z);
+    if (screenX < -4000.0f || screenX > 4000.0f ||
+        screenY < -4000.0f || screenY > 4000.0f) {
+        return;
+    }
+
+    quad.rowX = 0x73C0;
+    quad.rowY = 0x8440;
+    quad.drawDepth = 0x0FFFFF80;
+    quad.unkC = 0;
+    quad.unk14 = 0x10000000;
+    quad.rgba = 0x80806020;
+    quad.baseX = 0x73C0;
+    quad.baseY = 0x8440;
+    quad.unk8 = 0x1A40;
+    quad.unk10 = 0x0FFFFF7F;
+    fldStartQuadPacketList((s32)&quad);
+    sdfPktInit(packet, (s32)screenX * 16, (s32)screenY * 16, quad.drawDepth, 1);
+    sdfAppendPacket((SdfListHead *)quad.packetList,
+                    sdfFormatSifPacket(packet, D_003BACE0, drawValue));
+    fldAdvanceQuadRow((s32)&quad);
+    D_00325708.invoke(&D_00325708, quad.packetList);
+}
 
 void fldDrawFloorQuad(s32 x, s32 y, s32 drawValue) {
     FldQuadState quad;
@@ -4914,4 +4944,3 @@ INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE68);
 INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE6C);
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", fldFieldTaskHandle);
-
