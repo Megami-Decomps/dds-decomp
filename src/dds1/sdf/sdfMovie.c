@@ -19,17 +19,22 @@ typedef struct MovSub {
 
 typedef struct MovObj {
     u8 unk0;
-    u8 unk1;
-    u8 unk2;
+    u8 state;
+    u8 stopRequested;
     u8 pad3;
     u8 pad4[0xC];
     DevState *deviceState;
-    u8 pad14[0x4];
+    s32 totalBytes;
     s32 remainingBytes;
     MovSub *stream;
 } MovObj;
 
 s32 sdfDevQueueRead(DevState *state, void *data, s32 size);
+s32 sdfDevQueueControlRequest(DevState *state);
+s32 sdfDevQueueActiveOperation(DevState *state);
+s32 sdfDevQueueReleaseState(DevState *state);
+s32 func_00312C08(void);
+s32 EIntr(void);
 
 void func_002ECF70(MovObj *movie) {
     MovSub *stream = movie->stream;
@@ -45,11 +50,11 @@ void func_002ECF70(MovObj *movie) {
         return;
     }
     if (0x20000 - stream->bufferedBytes < 0x4000) {
-        movie->unk1 = 5;
+        movie->state = 5;
         return;
     }
 
-    movie->unk1 = 4;
+    movie->state = 4;
     readSize = 0x4000;
     if (remaining <= 0x4000) {
         readSize = remaining;
@@ -67,7 +72,60 @@ void func_002ECF70(MovObj *movie) {
     sdfDevQueueRead(deviceState, bufferPosition, readSize);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMovie", func_002ED008);
+s32 func_002ED008(DevState *deviceState, s32 operation, void *data, s32 bytesRead, MovObj *movie) {
+    MovSub *stream;
+    s32 restoreInterrupts;
+
+    movie->deviceState = deviceState;
+    stream = movie->stream;
+
+    if (movie->stopRequested != 0 && (movie->state < 6 || movie->state > 7)) {
+        movie->state = 7;
+        sdfDevQueueActiveOperation(deviceState);
+        return 0;
+    }
+
+    switch (movie->state) {
+    case 0:
+        if (operation == 2) {
+            movie->state = 1;
+            sdfDevQueueControlRequest(deviceState);
+        }
+        break;
+    case 1:
+        if (operation == 4) {
+            movie->totalBytes = bytesRead;
+            movie->remainingBytes = bytesRead;
+            func_002ECF70(movie);
+        }
+        break;
+    case 4:
+        if (operation == 5) {
+            restoreInterrupts = func_00312C08();
+            stream->bufferedBytes += bytesRead;
+            movie->remainingBytes -= bytesRead;
+            if (restoreInterrupts != 0) {
+                EIntr();
+            }
+            if (movie->remainingBytes == 0) {
+                movie->state = 7;
+                sdfDevQueueActiveOperation(deviceState);
+            } else {
+                func_002ECF70(movie);
+            }
+        }
+        break;
+    case 7:
+        if (operation == 7) {
+            movie->deviceState = NULL;
+            movie->state = 6;
+            sdfDevQueueReleaseState(deviceState);
+        }
+        break;
+    }
+
+    return 0;
+}
 
 void sdfMovieProcessPendingData(MovObj *movie) {
     MovSub *stream;
@@ -79,10 +137,10 @@ void sdfMovieProcessPendingData(MovObj *movie) {
         return;
     }
     if ((0x10000 - stream->unk5C) < 0x4000 || ((stream->unk6C - stream->unk68) + 0x10000) < 0x4000) {
-        movie->unk1 = 5;
+        movie->state = 5;
         return;
     }
-    movie->unk1 = 4;
+    movie->state = 4;
     sdfDevQueueRead(movie->deviceState, stream->pendingCursor, remaining <= 0x4000 ? remaining : 0x4000);
 }
 
