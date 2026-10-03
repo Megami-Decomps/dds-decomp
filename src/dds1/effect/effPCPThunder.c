@@ -55,7 +55,7 @@ typedef struct {
 typedef struct {
     u32 delayFrames;
     u32 activeFrames;
-    f32 dirA[3];        /* 0x08 unit X/Z direction, with a separate Y height */
+    f32 placementVector[3]; /* 0x08 unit X/Z direction, with a separate Y height */
     f32 rotationAxis[3]; /* 0x14 normalized axis */
     f32 rotationScale;  /* 0x20 scales the per-update random rotation angle */
     f32 radius;         /* 0x24 scales the X/Z direction during placement */
@@ -63,14 +63,14 @@ typedef struct {
 } EffThunderVectorCell; /* 0x2C */
 
 /* Both vector-based variants allocate this 0x64-byte work followed by cells.
-   Their scale, color and teardown callbacks use the same constructor layout. */
+   Their scale, tint and teardown callbacks use the same constructor layout. */
 typedef struct {
     EffThunderVectorParams head;
     EffThunderVectorCell *cells; /* 0x4C */
-    u32 color;          /* 0x50 */
+    u32 tintColor;      /* 0x50 multiplies each cell's sampled/faded color */
     f32 baseRadiusScale; /* 0x54 retained for absolute scale callbacks */
     f32 baseHeightScale; /* 0x58 retained for absolute scale callbacks */
-    void *system;       /* 0x5C */
+    void *cellSystem;   /* 0x5C */
     u32 allocationHandle; /* 0x60 */
 } EffThunderVectorWork; /* 0x64 */
 
@@ -119,7 +119,7 @@ void func_001634C0(void *parameters) {
 
 /* Release the cell system before releasing the containing work allocation. */
 void effPCPThunderFree(EffThunderVectorWork *work) {
-    parReleaseCellSystem((u32)work->system);
+    parReleaseCellSystem((u32)work->cellSystem);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
@@ -129,8 +129,8 @@ void func_00163508(void *destination, void *source) {
 }
 
 /* Set the packed modulation color applied to every vector cell. */
-void effPCPThunderSetParam50(EffThunderVectorWork *work, u32 color) {
-    work->color = color;
+void effPCPThunderSetParam50(EffThunderVectorWork *work, u32 tintColor) {
+    work->tintColor = tintColor;
 }
 
 /* Absolute radius/height scaling from the retained constructor values. */
@@ -183,9 +183,9 @@ void effThunderCellRestart(EffThunderVectorWork *work, s32 index) {
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, scratchVector);
     scratchVector[1] = work->head.heightScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN);
-    cell->dirA[0] = scratchVector[0];
-    cell->dirA[1] = scratchVector[1];
-    cell->dirA[2] = scratchVector[2];
+    cell->placementVector[0] = scratchVector[0];
+    cell->placementVector[1] = scratchVector[1];
+    cell->placementVector[2] = scratchVector[2];
     scratchVector[0] = (effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
     scratchVector[1] = 1.0f;
     scratchVector[2] = (effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
@@ -211,9 +211,9 @@ extern void func_00163AF8(EffThunderVectorWork *, s32);
    The unsigned wrap-add is not a saturating fade. Submit even for signed count <= 0. */
 void effThunderUpdateVectorCells(EffThunderVectorWork *work) {
     s32 i = 0;
-    EffThunderParSystem *renderSystem = work->system;
+    EffThunderParSystem *renderSystem = work->cellSystem;
     s32 cellCount = work->head.cellCount;
-    u32 tintColor = work->color;
+    u32 tintColor = work->tintColor;
     EffThunderVectorCell *cell = work->cells;
     EffThunderParCell *renderCells = renderSystem->cells;
     u32 *renderColor;
@@ -231,7 +231,7 @@ void effThunderUpdateVectorCells(EffThunderVectorWork *work) {
                     func_00163AF8(work, i);
                 } else {
                     effThunderCellRestart(work, i);
-                    parCellInit(work->system, i);
+                    parCellInit(work->cellSystem, i);
                 }
             } else {
                 cell->delayFrames--;
@@ -242,7 +242,7 @@ void effThunderUpdateVectorCells(EffThunderVectorWork *work) {
             renderColor = (u32 *)((u8 *)renderColor + sizeof(EffThunderParCell));
         } while (i < cellCount);
     }
-    parPrependCellNode(work->system);
+    parPrependCellNode(work->cellSystem);
 }
 
 /* Allocate one work followed by its vector cells and retain unscaled dimensions.
@@ -257,21 +257,21 @@ EffThunderVectorWork *effThunderWorkCreate(EffThunderVectorParams *parameters) {
     work->baseRadiusScale = parameters->radiusScale;
     work->baseHeightScale = parameters->heightScale;
     work->allocationHandle = allocationHandle;
-    work->system = parAllocateCellSystem(work->head.cellCount, work->head.perCell, 0, 0);
-    parDispatchSub(work->system, 2, work->head.dispatchArg, work->head.dispatchArg);
-    func_0015D078(work->system, work->head.systemParam);
+    work->cellSystem = parAllocateCellSystem(work->head.cellCount, work->head.perCell, 0, 0);
+    parDispatchSub(work->cellSystem, 2, work->head.dispatchArg, work->head.dispatchArg);
+    func_0015D078(work->cellSystem, work->head.systemParam);
     for (i = 0; i < work->head.cellCount; i++) {
         work->cells[i].delayFrames = 0;
         work->cells[i].activeFrames = 0;
         work->cells[i].color = 0;
     }
-    work->color = EFF_THUNDER_NEUTRAL_COLOR;
+    work->tintColor = EFF_THUNDER_NEUTRAL_COLOR;
     return work;
 }
 
 /* Tear down the indexed vector variant: system first, containing allocation last. */
 void effPCPThunderFree2(EffThunderVectorWork *work) {
-    parReleaseCellSystem((u32)work->system);
+    parReleaseCellSystem((u32)work->cellSystem);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
@@ -294,8 +294,8 @@ void func_00164038(void *destination, void *source) {
 }
 
 /* Set the shared packed modulation color, not an individual cell's sampled color. */
-void effThunderSetVectorCellColor(EffThunderVectorWork *work, u32 color) {
-    work->color = color;
+void effThunderSetVectorCellColor(EffThunderVectorWork *work, u32 tintColor) {
+    work->tintColor = tintColor;
 }
 
 /* Absolute radius/height scaling for the indexed variant; repeated calls do not compound. */
@@ -324,9 +324,9 @@ void effThunderRestartIndexedCell(EffThunderVectorWork *work, s32 index) {
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, scratchVector);
     scratchVector[1] = work->head.heightScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN);
-    cell->dirA[0] = scratchVector[0];
-    cell->dirA[1] = scratchVector[1];
-    cell->dirA[2] = scratchVector[2];
+    cell->placementVector[0] = scratchVector[0];
+    cell->placementVector[1] = scratchVector[1];
+    cell->placementVector[2] = scratchVector[2];
     scratchVector[0] = (effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
     scratchVector[1] = 1.0f;
     scratchVector[2] = (effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
@@ -352,9 +352,9 @@ extern void func_001645A0(EffThunderVectorWork *, s32);
    Fade is unsigned wrap-add; submission is unconditional after the signed-count loop. */
 void effThunderUpdateIndexedVectorCells(EffThunderVectorWork *work) {
     s32 i = 0;
-    EffThunderParSystem *renderSystem = work->system;
+    EffThunderParSystem *renderSystem = work->cellSystem;
     s32 cellCount = work->head.cellCount;
-    u32 tintColor = work->color;
+    u32 tintColor = work->tintColor;
     EffThunderVectorCell *cell = work->cells;
     EffThunderParCell *renderCells = renderSystem->cells;
     u32 *renderColor;
@@ -372,7 +372,7 @@ void effThunderUpdateIndexedVectorCells(EffThunderVectorWork *work) {
                     func_001645A0(work, i);
                 } else {
                     effThunderRestartIndexedCell(work, i);
-                    parCellInit(work->system, i);
+                    parCellInit(work->cellSystem, i);
                 }
             } else {
                 cell->delayFrames--;
@@ -383,15 +383,15 @@ void effThunderUpdateIndexedVectorCells(EffThunderVectorWork *work) {
             renderColor = (u32 *)((u8 *)renderColor + sizeof(EffThunderParCell));
         } while (i < cellCount);
     }
-    parPrependCellNode(work->system);
+    parPrependCellNode(work->cellSystem);
 }
 
-/* Parameter head (0xA4 bytes) of the spark effect, copied verbatim into the work. */
+/* Spark parameter prefix (0xA4 bytes); updates also rewrite its position vectors. */
 typedef struct {
     u8 pad00[0x10];
-    f32 lowPos[3];      /* 0x10 spark position with the height offset removed */
+    f32 loweredPosition[3]; /* 0x10 spark position with the height offset removed */
     u8 pad1C[4];
-    f32 pos[3];         /* 0x20 spark position */
+    f32 position[3];    /* 0x20 spark position */
     u8 pad2C[4];
     u16 systemParam;    /* 0x30 */
     u8 pad32[0x16];
@@ -405,8 +405,8 @@ typedef struct {
     u8 pad6D[3];
     s32 duration;       /* 0x70 */
     s32 startDelaySpread; /* 0x74 modulus of the initial negative age */
-    s32 fadeIn;         /* 0x78 */
-    s32 fadeRange;      /* 0x7C */
+    s32 fadeInTime;     /* 0x78 initial-age blend duration */
+    s32 fadeOutTime;    /* 0x7C remaining-lifetime blend duration */
     f32 orbitRadius;            /* 0x80 */
     f32 radiusRandomness;       /* 0x84 */
     f32 heightOffsetRange;      /* 0x88 */
@@ -423,7 +423,7 @@ typedef struct {
 typedef struct {
     EffThunderSparkParams head;
     EffThunderSpark *sparks; /* 0xA4 */
-    u32 color;          /* 0xA8 */
+    u32 tintColor;      /* 0xA8 multiplies the faded spark color */
     u32 allocationHandle; /* 0xAC */
 } EffThunderSparkWork; /* 0xB0 */
 
@@ -439,7 +439,7 @@ EffThunderSparkWork *effThunderSparkCreate(EffThunderSparkParams *parameters) {
 
     work->head = *parameters;
     work->sparks = (EffThunderSpark *)(work + 1);
-    work->color = EFF_THUNDER_NEUTRAL_COLOR;
+    work->tintColor = EFF_THUNDER_NEUTRAL_COLOR;
     work->allocationHandle = allocationHandle;
     if (work->head.startDelaySpread <= 0) {
         work->head.startDelaySpread = EFF_THUNDER_MIN_DELAY_SPREAD;
@@ -474,9 +474,9 @@ void effThunderCopySparkVector(void *destination, void *source) {
     PCP_COPY_VECTOR(destination, source);
 }
 
-/* Set the spark work's packed color word. */
-void effPCPThunderSetParamA8(EffThunderSparkWork *work, u32 color) {
-    work->color = color;
+/* Set the spark work's packed modulation color, separate from the age fade. */
+void effPCPThunderSetParamA8(EffThunderSparkWork *work, u32 tintColor) {
+    work->tintColor = tintColor;
 }
 
 /* Sample orbit radius, angular/vertical speeds and initial height offset.
