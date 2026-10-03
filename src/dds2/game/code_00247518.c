@@ -31,7 +31,8 @@ void func_00249088(s32 arg0, void *arg1);
 
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
-extern void *kwlnTaskGetUserValue(void);
+/* Task user values are words; viewer callbacks decode the stored address. */
+extern u32 kwlnTaskGetUserValue();
 
 void func_0024D430(void);
 
@@ -51,7 +52,8 @@ extern void mnuMarkTitleStreamResetPending(void);
 extern void func_0025A280(s32 arg0, void *arg1);
 extern s32 func_0024D760(u8 *ctx);
 
-void evtEventViewerReset(u64 arg0);
+struct EvtViewer;
+void evtEventViewerReset(struct EvtViewer *viewer);
 
 typedef struct EvtViewerGlyph {
     u16 x;
@@ -1225,7 +1227,7 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_0024D430);
 void *evtViewerScheduleFrameVariableTask(s32 task) {
     void *viewer;
 
-    viewer = kwlnTaskGetUserValue();
+    viewer = (void *)kwlnTaskGetUserValue();
     func_00249088(((EventViewerState *)viewer)->glyphAdvancePosition, viewer);
     func_00101968(task, evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
@@ -1234,9 +1236,9 @@ void *evtViewerScheduleFrameVariableTask(s32 task) {
 
 /* Initialize the active viewer and schedule its next update callback. */
 void *evtViewerInitializeUpdateSequence(void) {
-    u64 viewer;
+    struct EvtViewer *viewer;
 
-    viewer = kwlnTaskGetUserValue();
+    viewer = (struct EvtViewer *)kwlnTaskGetUserValue();
     fldInitializeCameraColorResource();
     evtEventViewerReset(viewer);
     kwlnDrawControlFlags |= 0x2000000;
@@ -1373,16 +1375,16 @@ void evtViewerRelease(viewer)
 }
 
 void func_0024DAA0(void) {
-    u64 viewer;
+    EventViewerState *viewer;
 
-    viewer = kwlnTaskGetUserValue();
+    viewer = (EventViewerState *)kwlnTaskGetUserValue();
     evtViewerRelease(viewer);
 }
 
 void func_0024DAC0(void) {
-    u64 viewer;
+    EventViewerState *viewer;
 
-    viewer = kwlnTaskGetUserValue();
+    viewer = (EventViewerState *)kwlnTaskGetUserValue();
     evtViewerRelease(viewer);
 }
 

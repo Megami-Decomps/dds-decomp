@@ -42,7 +42,7 @@ extern u16 D_00435CEE;
 
 extern u32 kwlnTaskGetTimer(void);
 
-extern s32 effMiscRandMod(s32, s32);
+extern u32 effMiscRandMod(void *stream, u32 modulus);
 
 extern void kwlnPadStartMotor(u32, u8, s32);
 
@@ -942,7 +942,7 @@ void kwlnFadeClear(void) {
 }
 
 /* Store RGBA and cancel foreground direction flags without changing timing. */
-void kwlnFadeSetColor(s8 red, s8 green, s8 blue, s8 alpha) {
+void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha) {
     kwlnDrawControlFlags &= ~KWLN_FADE_DIRECTION_BITS;
     kwlnFadeColor.r = red;
     kwlnFadeColor.g = green;
@@ -1030,7 +1030,7 @@ void kwlnFadeStartOut(s32 duration) {
 }
 
 /* Return whether either foreground counter direction is enabled. */
-u8 kwlnFadeIsActive(void) {
+s32 kwlnFadeIsActive(void) {
     return (kwlnDrawControlFlags & KWLN_FADE_DIRECTION_BITS) != 0;
 }
 

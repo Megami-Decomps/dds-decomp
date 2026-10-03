@@ -610,13 +610,14 @@ void sdfDevWaitThenReleaseCommandState(DevState *state) {
     sdfDevQueueReleaseState(state);
 }
 
-void sdfDevQueueReadAndWait(void) {
-    sdfDevQueueRead();
+/* Forward the queued request's arguments, then wait for its reply callback. */
+void sdfDevQueueReadAndWait(DevState *state, void *data, s32 extra) {
+    sdfDevQueueRead(state, data, extra);
     WaitSema(sdfDevReplySemaphore);
 }
 
-u32 sdfDevQueueControlAndWait(void) {
-    sdfDevQueueControlRequest();
+u32 sdfDevQueueControlAndWait(DevState *state) {
+    sdfDevQueueControlRequest(state);
     WaitSema(sdfDevReplySemaphore);
     return sdfDevControlReplyValue;
 }
