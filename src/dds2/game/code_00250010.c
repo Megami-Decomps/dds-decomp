@@ -43,6 +43,7 @@ extern void *kwlnTaskGetUserValue();
 
 extern s32 effEventAdvanceSolidRectangleSetup(void);
 
+/* Native viewer child node; frame rows traverse this same linked record. */
 typedef struct EvtRuntimeChild {
     u16 unk00;
     u16 groupTypeBIndex; /* Consecutive index among children of type 0xB groups. */
@@ -60,43 +61,41 @@ typedef struct EvtRuntimeChild {
     u8 pad28[4];
     void *payload; /* 0x2C: serialized child data */
     struct EvtRuntimeChild *next; /* 0x30 */
+    struct EvtRuntimeChild *prev; /* 0x34 */
 } EvtRuntimeChild;
 
-typedef struct EvtGroupInfo {
+/* World-slot node borrowed by a viewer group. Its data is slot-specific;
+ * model groups use EvtModelSlot, while all named nodes share the list links. */
+typedef struct EvtWorldNode {
     u8 pad00[8];
     char *name; /* 0x08 */
-} EvtGroupInfo;
+    u8 pad0C[0xC];
+    void *data; /* 0x18 */
+    u8 pad1C[4];
+    struct EvtWorldNode *next; /* 0x20 */
+} EvtWorldNode;
 
+/* The native 0x84-byte viewer entry owns its child list and borrows info.
+ * EvtRuntime.frameGroup selects one of these entries, not a separate list. */
 typedef struct EvtRuntimeGroup {
     s32 type;
     u8 value04;
     u8 pad05[3];
     s32 value08;
     u8 pad0C[4];
-    struct EvtGroupInfo *info; /* 0x10 */
+    EvtWorldNode *info; /* 0x10 */
     u8 pad14[8];
     u16 value1C;
     u8 value1E;
     u8 value1F;
-    u8 pad20[0x34];
-    EvtRuntimeChild *children;
-    u8 pad58[0x24];
-    struct EvtRuntimeGroup *next;
+    u8 pad20[0x30];
+    s32 childCount; /* 0x50 */
+    EvtRuntimeChild *children; /* 0x54 */
+    EvtRuntimeChild *lastChild; /* 0x58 */
+    u8 pad5C[0x20];
+    struct EvtRuntimeGroup *next; /* 0x7C */
+    struct EvtRuntimeGroup *prev; /* 0x80 */
 } EvtRuntimeGroup;
-
-typedef struct EvtFrameNode {
-    u8 pad00[0x30];
-    struct EvtFrameNode *next; /* 0x30 */
-} EvtFrameNode;
-
-typedef struct EvtFrameList {
-    s32 kind;           /* 0x00 */
-    u8 pad04[0xC];
-    struct EvtModelOwner *owner; /* 0x10 */
-    u8 pad14[0x3C];
-    s32 count;          /* 0x50 */
-    EvtFrameNode *head; /* 0x54 */
-} EvtFrameList;
 
 typedef struct EvtRuntime {
     u8 pad0000[4];
@@ -132,7 +131,7 @@ typedef struct EvtRuntime {
     u8 pad22FC[0x4];
     s32 frameFirst; /* 0x2300 */
     s32 frameCursor; /* 0x2304 */
-    EvtFrameList *frameList; /* 0x2308 */
+    EvtRuntimeGroup *frameGroup; /* 0x2308: selected entry from groups */
     u8 pad230C[0x4];
     s32 value; /* 0x2310: modes D/E pack a 12-bit number and 4-bit option */
     s32 valueMin; /* 0x2314 */
@@ -857,17 +856,18 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B70);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00252378);
 
-extern void func_00252378(s32 list, s32 x, s32 y, s32 color, EvtFrameNode *node, EvtRuntime *ctx);
+extern void func_00252378(s32 list, s32 x, s32 y, s32 color, EvtRuntimeChild *node, EvtRuntime *ctx);
 
+/* Draw an indexed child of the selected group, or its trailing new-frame row. */
 s32 evtDrawFrameListRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
-    EvtFrameNode *node;
+    EvtRuntimeChild *node;
     s32 color;
     s32 i;
 
-    if (index < ctx->frameList->count + 1) {
+    if (index < ctx->frameGroup->childCount + 1) {
         node = NULL;
-        if (index != ctx->frameList->count) {
-            node = ctx->frameList->head;
+        if (index != ctx->frameGroup->childCount) {
+            node = ctx->frameGroup->children;
             for (i = 0; i < index; i++) {
                 node = node->next;
             }
@@ -890,13 +890,6 @@ s32 evtDrawFrameListRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00253590);
-
-typedef struct EvtWorldNode {
-    u8 pad00[8];
-    char *name; /* 0x08 */
-    u8 pad0C[0x14];
-    struct EvtWorldNode *next; /* 0x20 */
-} EvtWorldNode;
 
 
 extern EvtWorldObject *dds3GetWorldObject();
@@ -964,12 +957,13 @@ void evtViewerDrawPendingNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *
 
 extern void evtViewerDrawPendingNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
 
+/* Draw the pending-node selector for group types 20/21; other types return -1. */
 s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     s32 rows;
 
     list = sdfCreateResetPacketList();
-    switch (ctx->frameList->kind) {
+    switch (ctx->frameGroup->type) {
     case 0x14:
         rows = 2;
         break;
@@ -1249,8 +1243,9 @@ s32 evtIsMenuTableEntryEnabled(s32 *index) {
     return D_003C9730[*index].enabled != 0;
 }
 
+/* Return the table value selected by this group's type and editor column. */
 s32 mnuGetSelectedTableValue(EvtRuntime *runtime) {
-    return D_003C9732[runtime->tableColumn + runtime->frameList->kind * 10];
+    return D_003C9732[runtime->tableColumn + runtime->frameGroup->type * 10];
 }
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00254678);
@@ -1288,11 +1283,6 @@ typedef struct EvtModelSlot {
     EvtModelRef *ref; /* 0xC */
 } EvtModelSlot;
 
-struct EvtModelOwner {
-    u8 pad00[0x18];
-    EvtModelSlot *slot; /* 0x18 */
-};
-
 typedef struct EvtMotionData {
     u8 pad00[4];
     s32 **frames; /* 0x4 */
@@ -1318,7 +1308,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
     EvtMotionValue packed;
 
     list = sdfCreateResetPacketList();
-    model = ctx->frameList->owner->slot->ref->handle;
+    model = ((EvtModelSlot *)ctx->frameGroup->info->data)->ref->handle;
     func_00250338(list, x, y, 0x14, 0xA, 0, 1, ctx, mnuDrawMotionChangeLabel, func_00254CE0);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
     if (ctx->mode != 0x10) {
