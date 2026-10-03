@@ -54,12 +54,6 @@ extern f32 func_002FA060(f32);
 
 extern s32 kwlnTaskGetTaskByName(u32);
 
-/* Grid prefix through the two margins used by the viewport-follow routine. */
-typedef struct SdfGridMarginPrefix {
-    u8 pad00[0x2C];    // 0x00
-    s16 columnMargin;  // 0x2C
-    s16 rowMargin;     // 0x2E
-} SdfGridMarginPrefix; // 0x30
 
 typedef struct SdfTaskItemDesc {
     s32 key;                         /* 0x00 */
@@ -69,15 +63,17 @@ typedef struct SdfTaskItemDesc {
     void (*callback)(s32, s32);      /* 0x10 */
 } SdfTaskItemDesc;
 
-typedef struct SdfTaskItemWork {
-    u32 type;                        /* 0x00 */
+/* Low flag bits: 0 update, 1 callback, 2 initialize once, 15 pending removal.
+ * The high word selects active, suspended, or pending-activation dispatch modes. */
+typedef struct SdfTaskEntry {
+    u32 flags;                       /* 0x00 */
     s32 key;                         /* 0x04 */
     s32 (*init)(void);               /* 0x08 */
     void (*destroy)(s32, s32);       /* 0x0C */
     s32 (*update)(s32, s32);         /* 0x10 */
     void (*callback)(s32, s32);      /* 0x14 */
-    u32 pad18;
-} SdfTaskItemWork;
+    s32 initResult;                  /* 0x18 */
+} SdfTaskEntry;                       /* 0x1C */
 
 extern void *func_002CB5F0(SdfTaskItemDesc *);
 
@@ -100,13 +96,14 @@ typedef struct SdfListNode {
 } SdfListNode;
 
 typedef struct SdfList {
-    u32 pad00;
+    u32 allocation;             /* 0x00 */
     u32 count;                  /* 0x04 */
     SdfListNode *head;          /* 0x08 */
     SdfListNode *tail;          /* 0x0C */
-    u32 pad10;
-    void (*onRemove)(u32, void *); /* 0x14 */
-} SdfList;
+    u32 userData;               /* 0x10 */
+    void (*onRemove)();         /* 0x14: ordinal/payload hook, installed through the word-address API */
+    void (*onDestroy)(s32, s32); /* 0x18: two-word callback ABI */
+} SdfList;                      /* 0x1C, allocated by sdfCreateTaskHeader */
 
 extern void *sdfAllocSizeClassBlock(s32);
 
@@ -452,27 +449,21 @@ s32 frFontDrawColoredGlyphChainAndMeasure(s32 x, s32 y, u32 first, u32 second, u
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAAC8);
 
-typedef struct SdfTaskHeader {
-    u32 allocation;                     /* 0x00 */
-    u8 pad04[0x0C];
-    u32 userData;                       /* 0x10 */
-    u32 callback14;                     /* 0x14: installed separately */
-    void (*onDestroy)(s32, u32);       /* 0x18 */
-} SdfTaskHeader;
 
+/* Return a callback-list header address, retaining its allocation handle and teardown userData. */
 void *sdfCreateTaskHeader(u32 userData) {
     s32 allocation = sdfAllocGeneralBlock(0x1C);
-    SdfTaskHeader *obj = sdfMemoryGetBlockAddress(allocation);
+    SdfList *obj = sdfMemoryGetBlockAddress(allocation);
 
     memset(obj, 0, 0x1C);
     obj->allocation = allocation;
     obj->userData = userData;
-    obj->callback14 = (u32)func_002CC740;
-    obj->onDestroy = (void (*)(s32, u32))func_002CC740;
+    obj->onRemove = func_002CC740;
+    obj->onDestroy = func_002CC740;
     return obj;
 }
 
-void sdfDestroyTaskWork(SdfTaskHeader *work) {
+void sdfDestroyTaskWork(SdfList *work) {
     if (work != NULL) {
         sdfClearTaskList();
         work->onDestroy(-1, work->userData);
@@ -480,9 +471,9 @@ void sdfDestroyTaskWork(SdfTaskHeader *work) {
     }
 }
 
-void sdfSetTaskDestroyCallback(SdfTaskHeader *work, s32 callback) {
+void sdfSetTaskDestroyCallback(SdfList *work, s32 callback) {
     if (callback != 0) {
-        work->onDestroy = (void (*)(s32, u32))callback;
+        work->onDestroy = (void (*)(s32, s32))callback;
     }
 }
 
@@ -530,9 +521,9 @@ SdfListNode *sdfListInsertAfter(SdfList *list, SdfListNode *after, s32 key, void
     return node;
 }
 
-void sdfSetTaskSecondaryCallback(SdfTaskHeader *work, s32 callback) {
+void sdfSetTaskSecondaryCallback(SdfList *work, s32 callback) {
     if (callback != 0) {
-        work->callback14 = callback;
+        work->onRemove = (void (*)())callback;
     }
 }
 
@@ -579,87 +570,69 @@ SdfListNode *sdfListRemoveNode(SdfList *list, SdfListNode *node) {
     return neighbour;
 }
 
-typedef struct TaskListNode {
-    u32 handle; /* 0x00 */
-    s32 key;    /* 0x04 */
-    struct TaskListNode *next; /* 0x08 */
-    u8 pad0C[4];
-    u32 value;  /* 0x10 */
-} TaskListNode;
 
-typedef struct {
-    u32 pad00;
-    u32 tail;  /* 0x04 */
-    TaskListNode *head; /* 0x08 */
-    u32 count; /* 0x0C */
-    u32 current; /* 0x10 */
-    void (*onRemove)(u32, u32); /* 0x14 */
-} TaskList;
-
-void sdfClearTaskList(TaskList *list) {
-    TaskListNode *node;
+/* Release each row through its ordinal/payload hook, then clear tail, head and count in that order. */
+void sdfClearTaskList(SdfList *list) {
+    SdfListNode *node;
     if (list != NULL) {
         node = list->head;
         if (node != NULL) {
             do {
-                TaskListNode *current = node;
+                SdfListNode *current = node;
                 node = node->next;
-                list->onRemove(current->handle, current->value);
+                list->onRemove(current->index, current->value);
                 sdfReleaseChipBlock(current);
             } while (node != NULL);
         }
-        list->count = 0;
-        list->head = 0;
         list->tail = 0;
+        list->head = 0;
+        list->count = 0;
     }
 }
 
-typedef struct SdfLink {
-    u8 pad00[8];
-    struct SdfLink *prev;
-    struct SdfLink *next;
-} SdfLink;
 
-void sdfSwapLinkedListNodes(SdfLink *list, SdfLink *a, SdfLink *b) {
-    SdfLink *tmpNext;
-    SdfLink *tmpPrev;
+/* Exchange native next/prev links and list endpoints without changing row ordinals. */
+void sdfSwapLinkedListNodes(SdfList *list, SdfListNode *a, SdfListNode *b) {
+    SdfListNode *previous;
+    SdfListNode *next;
 
     if (a != NULL && b != NULL) {
-        if (a->prev != NULL) {
-            a->prev->next = b;
-        }
         if (a->next != NULL) {
             a->next->prev = b;
         }
-        if (b->prev != NULL) {
-            b->prev->next = a;
+        if (a->prev != NULL) {
+            a->prev->next = b;
         }
         if (b->next != NULL) {
             b->next->prev = a;
         }
-        tmpNext = a->next;
-        a->next = b->next;
-        tmpPrev = a->prev;
+        if (b->prev != NULL) {
+            b->prev->next = a;
+        }
+        previous = a->prev;
         a->prev = b->prev;
-        b->next = tmpNext;
-        b->prev = tmpPrev;
-        if (a->next == NULL) {
-            list->prev = a;
-        }
+        next = a->next;
+        a->next = b->next;
+        b->prev = previous;
+        b->next = next;
         if (a->prev == NULL) {
-            list->next = a;
+            list->head = a;
         }
-        if (b->next == NULL) {
-            list->prev = b;
+        if (a->next == NULL) {
+            list->tail = a;
         }
         if (b->prev == NULL) {
-            list->next = b;
+            list->head = b;
+        }
+        if (b->next == NULL) {
+            list->tail = b;
         }
     }
 }
 
-void *sdfFindTaskListNodeByKey(TaskList *list, s32 key) {
-    TaskListNode *node;
+/* Find a key in a nonempty list; the first node is read before traversal exhaustion is checked. */
+void *sdfFindTaskListNodeByKey(SdfList *list, s32 key) {
+    SdfListNode *node;
 
     node = list->head;
     while (node->key != key) {
@@ -714,11 +687,11 @@ u32 sdfReadPadDirectionMask(void) {
 }
 
 typedef struct TaskWork {
-    u32 handle;
+    u32 allocation;
     char *primaryTaskName;
     char *secondaryTaskName;
-    TaskList *list;
-    u32 firstItemHandle; /* Address of the next list node to visit, not an allocation handle. */
+    SdfList *list;
+    SdfListNode *currentNode; /* Next node to visit; reset to the list head at pass end. */
 } TaskWork;
 
 extern s32 sdfTaskWorkRunAllEntries(void);
@@ -761,9 +734,9 @@ s32 kwlnTaskExists(u32 name) {
 }
 
 void sdfAttachTaskItem(TaskWork *work, SdfTaskItemDesc *item) {
-    u32 result = (u32)sdfListAppend((SdfList *)work->list, item->key, func_002CB5F0(item));
-    if (work->firstItemHandle == 0) {
-        work->firstItemHandle = result;
+    SdfListNode *node = sdfListAppend(work->list, item->key, func_002CB5F0(item));
+    if (work->currentNode == NULL) {
+        work->currentNode = node;
     }
 }
 
@@ -775,7 +748,7 @@ void sdfRemoveTaskItem(TaskWork *work, s32 key) {
 }
 
 u32 *sdfFindTaskItemValueByKey(TaskWork *work, s32 key) {
-    TaskListNode *item;
+    SdfListNode *item;
 
     item = sdfFindTaskListNodeByKey(work->list, key);
     if (item != NULL) {
@@ -820,7 +793,7 @@ TaskWork *sdfCreateNamedTaskWork(char *name, s32 destroyCallback, u32 userData) 
     TaskWork *work = sdfMemoryGetBlockAddress(allocation);
 
     memset(work, 0, 0x14);
-    work->handle = allocation;
+    work->allocation = allocation;
     work->list = sdfCreateTaskHeader(userData);
     sdfSetTaskDestroyCallback(work->list, destroyCallback);
     sdfSetTaskSecondaryCallback(work->list, (s32)sdfCallbackWorkOnRemove);
@@ -831,27 +804,21 @@ TaskWork *sdfCreateNamedTaskWork(char *name, s32 destroyCallback, u32 userData) 
     return work;
 }
 
-typedef struct SdfTaskResourceWork {
-    u32 allocation;            /* 0x00 */
-    void *firstBuffer;          /* 0x04 */
-    void *secondBuffer;         /* 0x08 */
-    SdfTaskHeader *taskWork;    /* 0x0C */
-} SdfTaskResourceWork;
 
-void sdfDestroyTaskResourceWork(SdfTaskResourceWork *work) {
+void sdfDestroyTaskResourceWork(TaskWork *work) {
     if (work != NULL) {
-        sdfDestroyTaskWork(work->taskWork);
-        sdfReleaseChipBlock(work->firstBuffer);
-        sdfReleaseChipBlock(work->secondBuffer);
+        sdfDestroyTaskWork(work->list);
+        sdfReleaseChipBlock(work->primaryTaskName);
+        sdfReleaseChipBlock(work->secondaryTaskName);
         sdfReleaseResourceAllocation(work->allocation);
     }
 }
 
 void *func_002CB5F0(SdfTaskItemDesc *item) {
-    SdfTaskItemWork *work = sdfAllocSizeClassBlock(0x1C);
+    SdfTaskEntry *work = sdfAllocSizeClassBlock(0x1C);
 
     memset(work, 0, 0x1C);
-    work->type = 0x10007;
+    work->flags = 0x10007;
     work->key = item->key;
     if (item->init == NULL) {
         work->init = func_002CC738;
@@ -876,56 +843,37 @@ void *func_002CB5F0(SdfTaskItemDesc *item) {
     return work;
 }
 
-typedef struct SdfCallbackWork {
-    u8 pad00[4];
-    u32 key;                      /* 0x04 */
-    u8 pad08[4];
-    void (*destroy)(u32, u32);   /* 0x0C */
-    u8 pad10[8];
-    u32 initResult;               /* 0x18 */
-} SdfCallbackWork;
 
 /* Pass the entry key and saved init result to its destructor, then release it. */
-void sdfDestroyCallbackWork(SdfCallbackWork *entry) {
+void sdfDestroyCallbackWork(SdfTaskEntry *entry) {
     if (entry != NULL) {
-        void (*destroy)(u32, u32) = entry->destroy;
+        void (*destroy)(s32, s32) = entry->destroy;
         destroy(entry->key, entry->initResult);
         sdfReleaseChipBlock(entry);
     }
 }
 
-void sdfCallbackWorkOnRemove(u32 unused, SdfCallbackWork *work) {
+void sdfCallbackWorkOnRemove(u32 unused, SdfTaskEntry *work) {
     sdfDestroyCallbackWork(work);
 }
 
-/* Low flag bits: 0 update, 1 callback, 2 initialize once, 15 pending removal.
- * The high word selects active, suspended, or pending-activation dispatch modes. */
-typedef struct SdfTaskEntry {
-    u32 flags;                   /* 0x00 */
-    s32 key;                     /* 0x04 */
-    s32 (*init)(void);           /* 0x08 */
-    u8 pad0C[4];
-    s32 (*update)(s32, s32);     /* 0x10 */
-    void (*callback)(s32, s32);  /* 0x14 */
-    s32 initResult;              /* 0x18 */
-} SdfTaskEntry;
 
 extern void *kwlnTaskGetUserValue(void);
 
 /* Visit one entry: initialize, remove if pending, otherwise update.
  * An update result of -1 queues removal for its next visit. Returns 0 at pass end. */
 s32 sdfTaskWorkStepEntry(TaskWork *work) {
-    TaskListNode *node = (TaskListNode *)work->firstItemHandle;
+    SdfListNode *node = work->currentNode;
     SdfTaskEntry *entry;
     u32 flags;
 
     if (node == NULL) {
-        work->firstItemHandle = (u32)work->list->head;
+        work->currentNode = work->list->head;
         return 0;
     }
     entry = (SdfTaskEntry *)node->value;
     flags = entry->flags;
-    work->firstItemHandle = (u32)node->next;
+    work->currentNode = node->next;
     switch (flags & 0xFFFF0000) {
     case 0x100000:
         /* DDS1 activates this pending mode in the update pass and falls through. */
@@ -953,17 +901,17 @@ s32 sdfTaskWorkStepEntry(TaskWork *work) {
 
 /* Run one entry's callback phase; return 0 after resetting the cursor at pass end. */
 s32 sdfTaskWorkStep(TaskWork *work) {
-    TaskListNode *node = (TaskListNode *)work->firstItemHandle;
+    SdfListNode *node = work->currentNode;
     SdfTaskEntry *entry;
     u32 flags;
 
     if (node == NULL) {
-        work->firstItemHandle = (u32)work->list->head;
+        work->currentNode = work->list->head;
         return 0;
     }
     entry = (SdfTaskEntry *)node->value;
     flags = entry->flags;
-    work->firstItemHandle = (u32)node->next;
+    work->currentNode = node->next;
     switch (flags & 0xFFFF0000) {
     case 0x10000:
         if (flags & 2) {
@@ -982,7 +930,7 @@ s32 sdfTaskWorkStep(TaskWork *work) {
 s32 sdfTaskWorkRunAllEntries(void) {
     TaskWork *work = kwlnTaskGetUserValue();
 
-    if (work->firstItemHandle == 0) {
+    if (work->currentNode == NULL) {
         return -1;
     }
     while (sdfTaskWorkStepEntry(work) == 1) {
@@ -993,7 +941,7 @@ s32 sdfTaskWorkRunAllEntries(void) {
 s32 sdfTaskWorkRunAll(void) {
     TaskWork *work = kwlnTaskGetUserValue();
 
-    if (work->firstItemHandle == 0) {
+    if (work->currentNode == NULL) {
         return -1;
     }
     while (sdfTaskWorkStep(work) == 1) {
@@ -1010,24 +958,6 @@ void func_002CB9B8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB9C0);
 
-/* Set horizontal/vertical cursor margins without changing the viewport itself. */
-void sdfSetShortPairValues(SdfGridMarginPrefix *grid, s32 columnMargin, s32 rowMargin) {
-    grid->columnMargin = columnMargin;
-    grid->rowMargin = rowMargin;
-}
-
-void sdfDestroyGridWork(u8 *work) {
-    if (work != NULL) {
-        sdfGridReleaseAllCells();
-        (*(void (**)(s32, u32))(work + 0x20))(0, *(u32 *)(work + 0x30));
-        sdfReleaseResourceAllocation(*(u32 *)work);
-    }
-}
-
-void func_002CBB48(void) {
-    sdfGridReleaseAllCells();
-}
-
 typedef struct SdfGridCell {
     u32 index;
     u32 value;
@@ -1042,7 +972,7 @@ typedef struct SdfGrid {
     u32 width;             /* 0x14 */
     void (*drawCell)(s32, s32, s32, struct SdfGrid *, SdfGridCell *, s32); /* 0x18 */
     void (*releaseCell)(u32, u32); /* 0x1C */
-    void (*onSelect)();    /* 0x20 */
+    void (*onDestroy)(s32, u32); /* 0x20 */
     u16 cellWidth;         /* 0x24 */
     u16 cellHeight;        /* 0x26 */
     u16 visibleColumns;    /* 0x28 */
@@ -1051,6 +981,26 @@ typedef struct SdfGrid {
     u16 rowMargin;         /* 0x2E */
     u32 userData;          /* 0x30 */
 } SdfGrid;
+
+/* Set horizontal/vertical cursor margins without changing the viewport itself. */
+void sdfSetShortPairValues(SdfGrid *grid, s32 columnMargin, s32 rowMargin) {
+    grid->columnMargin = columnMargin;
+    grid->rowMargin = rowMargin;
+}
+
+/* Release cells, invoke onDestroy(0, userData), then release the grid header allocation. */
+void sdfDestroyGridWork(SdfGrid *work) {
+    if (work != NULL) {
+        sdfGridReleaseAllCells();
+        work->onDestroy(0, work->userData);
+        sdfReleaseResourceAllocation(work->allocation);
+    }
+}
+
+void func_002CBB48(void) {
+    sdfGridReleaseAllCells();
+}
+
 
 SdfGridCell *sdfGridGetCell(SdfGrid *grid, s32 column, s32 row) {
     u32 cellIndex;
