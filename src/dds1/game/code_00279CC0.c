@@ -1,4 +1,4 @@
-#include "common.h"
+#include "mnu.h"
 
 typedef struct MenuWindowContainer MenuWindowContainer;
 
@@ -85,9 +85,6 @@ typedef struct MenuWindow {
     s32 fade;
 } MenuWindow;
 
-static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
-    return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
-}
 
 extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
 
@@ -97,7 +94,7 @@ extern s32 func_0027B888(u32);
 
 extern s32 kwlnTaskGetUserValue();
 
-extern s64 func_00285670(s32, s32 *, u64, u64);
+extern s32 func_00285670(s32, s32 *, u64, u64);
 
 struct MenuListNode {
     s32 index;
@@ -181,7 +178,7 @@ void mnuSeekSelectedWindowRow(s32 menu, s32 target) {
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", ptySkillMenuBrowseCandidatePages);
 
-s64 mnuOpenSkillDetailPanel(s32 callback) {
+s32 mnuOpenSkillDetailPanel(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *menu = *(s32 **)(context + 0x90C);
     s32 index = ((MenuList *)menu[3])->cursor->index;
@@ -202,7 +199,7 @@ s64 mnuOpenSkillDetailPanel(s32 callback) {
     return menuRunPanel(context, 1, callback);
 }
 
-s64 func_0027A0A8(s32 callback) {
+s32 func_0027A0A8(s32 callback) {
     return menuRunPanel(kwlnTaskGetUserValue(), 2, callback);
 }
 
@@ -291,12 +288,12 @@ s32 mnuCloseSkillSelection(s32 selection) {
     return 1;
 }
 
-s64 mnuUpdateSkillListInput(s32 callback) {
+s32 mnuUpdateSkillListInput(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *popup = (s32 *)(context + 0x54);
     s32 *menu = *(s32 **)(context + 0x90C);
     u32 buttons = mnuMapPadMaskToFlags(0x32);
-    s64 state;
+    s32 state;
     s32 *list;
 
     state = menuRunPanel(context, 0, callback);
@@ -360,7 +357,7 @@ void mnuDrawListFrames(s32 menu) {
     }
 }
 
-void mnuCampMenuDrawStatus(s32 param) {
+s32 mnuCampMenuDrawStatus(s32 param) {
     s32 context = kwlnTaskGetUserValue();
     s32 menu = *(s32 *)(context + 0x90C);
     s32 slots;
@@ -383,10 +380,10 @@ void mnuCampMenuDrawStatus(s32 param) {
         }
     }
     func_002723B0(2, ((MenuContextSprites *)context)->sprite78);
-    menuRunPanel(context, 1, param);
+    return menuRunPanel(context, 1, param);
 }
 
-s64 func_0027AC00(s32 callback) {
+s32 func_0027AC00(s32 callback) {
     return menuRunPanel(kwlnTaskGetUserValue(), 2, callback);
 }
 

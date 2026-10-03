@@ -113,7 +113,7 @@ extern void mnuRetreatListCursorDefault();
 extern void mnuAdvanceListCursorDefault();
 extern void mnuClearListFlagsOneAndTwo();
 
-s64 mnuStaffImageEnterA(s32 callback) {
+s32 mnuStaffImageEnterA(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
 
@@ -142,12 +142,12 @@ u32 func_00273C48(void) {
 }
 
 /* Once the popup is idle, confirmation captures the page-selection cursor index. */
-s64 mnuPollStaffValueSelectionConfirmation(s32 callback) {
+s32 mnuPollStaffValueSelectionConfirmation(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = mnuMapPadMaskToFlags(3);
-    s64 state;
+    s32 state;
     s32 window;
 
     state = func_00285670(context + 8, popup, 0, callback);
@@ -168,7 +168,7 @@ s64 mnuPollStaffValueSelectionConfirmation(s32 callback) {
     return 0;
 }
 
-s64 mnuPrepareStaffImageAndSelectionLabel(s32 callback) {
+s32 mnuPrepareStaffImageAndSelectionLabel(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_00272778(callback);
     mnuCreateStaffImageSprite(7);
@@ -178,17 +178,17 @@ s64 mnuPrepareStaffImageAndSelectionLabel(s32 callback) {
     return menuRunPanel(context, 1, callback);
 }
 
-s64 func_00273DE8(s32 callback) {
+s32 func_00273DE8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     return menuRunPanel(context, 2, callback);
 }
 
-s64 mnuHandleSecondaryStaffObjectInput(s32 callback) {
+s32 mnuHandleSecondaryStaffObjectInput(s32 callback) {
     StaffImageContext *context = (StaffImageContext *)kwlnTaskGetUserValue((KwlnTask *)callback);
     s32 *popup = (s32 *)((u8 *)context + 0x54);
     StaffImageChoices *menu = context->menu;
     s32 buttons = mnuMapPadMaskToFlags(0x33);
-    s64 state;
+    s32 state;
     StaffImageList *window;
 
     state = func_00285670((s32)context + 8, popup, 0, callback);
@@ -218,7 +218,7 @@ s64 mnuHandleSecondaryStaffObjectInput(s32 callback) {
     return 0;
 }
 
-s64 mnuStaffImageEnterD(s32 callback) {
+s32 mnuStaffImageEnterD(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
 
@@ -235,7 +235,7 @@ s64 mnuStaffImageEnterD(s32 callback) {
     return menuRunPanel(context, 1, callback);
 }
 
-s64 func_00274008(s32 callback) {
+s32 func_00274008(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     return menuRunPanel(context, 2, callback);
 }
@@ -250,7 +250,7 @@ u32 func_00274048(void) {
 
 INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274050);
 
-s64 mnuStaffImageEnterB(s32 callback) {
+s32 mnuStaffImageEnterB(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
 
@@ -267,7 +267,7 @@ s64 mnuStaffImageEnterB(s32 callback) {
     return menuRunPanel(context, 1, callback);
 }
 
-s64 func_00274310(s32 callback) {
+s32 func_00274310(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     return menuRunPanel(context, 2, callback);
 }
@@ -414,7 +414,7 @@ INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274768);
 
 INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274978);
 
-s64 func_00274B30(s32 selection) {
+s32 func_00274B30(s32 selection) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();

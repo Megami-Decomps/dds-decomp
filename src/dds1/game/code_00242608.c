@@ -1,4 +1,4 @@
-#include "common.h"
+#include "mnu.h"
 #include "sdf.h"
 
 
@@ -1082,9 +1082,9 @@ void mnuShopDestroyScene(s32 arg) {
     }
 }
 
-extern s64 mnuCampRunPanel0(u64 request);
-extern s64 mnuCampRunPanel1(u64 request);
-extern s64 mnuCampRunPanel2(u64 request);
+extern s32 mnuCampRunPanel0(u64 request);
+extern s32 mnuCampRunPanel1(u64 request);
+extern s32 mnuCampRunPanel2(u64 request);
 
 /* Create the camp context and its three scheduler tasks (main, draw, update).
  * Optionally seed the initial selection from the caller. */
@@ -1126,23 +1126,20 @@ s32 mnuPollTaskState(void) {
 extern void mnuSetPopupEntry(s32 *, void *);
 extern u8 D_0036AB48[];
 
-s64 mnuCampRunPanel0(u64 request) {
+s32 mnuCampRunPanel0(u64 request) {
     s32 state = kwlnTaskGetUserValue();
     s32 *panel = (s32 *)(state + 0x54);
     mnuSetPopupEntry(panel, D_0036AB48);
-    return func_00285670(state + 8, panel, 0, request);
+    return menuRunPanel(state, 0, request);
 }
 
-static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
-    return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
-}
 
-s64 mnuCampRunPanel1(u64 request) {
+s32 mnuCampRunPanel1(u64 request) {
     s32 state = kwlnTaskGetUserValue();
     return menuRunPanel(state, 1, request);
 }
 
-s64 mnuCampRunPanel2(u64 request) {
+s32 mnuCampRunPanel2(u64 request) {
     s32 state = kwlnTaskGetUserValue();
     return menuRunPanel(state, 2, request);
 }

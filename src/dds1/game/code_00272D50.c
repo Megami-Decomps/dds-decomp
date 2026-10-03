@@ -6,7 +6,7 @@ extern s32 kwlnTaskGetUserValue();
 
 extern s32 datGameState;
 
-extern s64 func_00285670(s32, s32 *, u64, u64);
+extern s32 func_00285670(s32, s32 *, u64, u64);
 extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfResourceRetainAddress(s32);
 extern void *memset(void *, s32, u32);
@@ -147,7 +147,7 @@ extern void mnuDrawWindowContainer(s32, s32, s32, s32, s32);
 extern void func_002723B0(s32, s32);
 extern u8 D_0037C860[];
 
-s64 mnuStaffDrawImagePanelA(s32 callback) {
+s32 mnuStaffDrawImagePanelA(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_00272778(callback);
     mnuCreateStaffImageSprite(4);
@@ -157,7 +157,7 @@ s64 mnuStaffDrawImagePanelA(s32 callback) {
     return menuRunPanel(context, 1, callback);
 }
 
-s64 mnuStaffRunPanel2b(u64 request) {
+s32 mnuStaffRunPanel2b(u64 request) {
     s32 state = kwlnTaskGetUserValue();
 
     return menuRunPanel(state, 2, request);

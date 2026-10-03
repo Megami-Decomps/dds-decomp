@@ -102,10 +102,10 @@ extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuSetPanelState(s32, s32);
 extern void func_00282DA0(s32, s32, s32, s32, s32);
 
-s64 ptySkillMenuUpdate(s32 callback) {
+s32 ptySkillMenuUpdate(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
-    s64 state = menuRunPanel(context, 0, callback);
+    s32 state = menuRunPanel(context, 0, callback);
     if (state != 0) {
         return state;
     }
@@ -158,7 +158,7 @@ void ptySkillMenuCopyPageState(s32 context) {
     }
 }
 
-s64 ptySkillMenuEnterPage(s32 callback) {
+s32 ptySkillMenuEnterPage(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     SkillMenuContext *work = (SkillMenuContext *)context;
     SkillMenuState *menu = work->menu;
@@ -193,7 +193,7 @@ s64 ptySkillMenuEnterPage(s32 callback) {
     return menuRunPanel(context, 1, callback);
 }
 
-s64 ptySkillMenuDispatchPageRequest(s32 selection) {
+s32 ptySkillMenuDispatchPageRequest(s32 selection) {
     s32 context = kwlnTaskGetUserValue();
     return menuRunPanel(context, 2, selection);
 }
@@ -241,12 +241,12 @@ void mnuFlagMatchingEntries(s32 context) {
     }
 }
 
-s64 ptySkillMenuHandleFieldUse(s32 callback) {
+s32 ptySkillMenuHandleFieldUse(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = mnuMapPadMaskToFlags(3);
-    s64 state;
+    s32 state;
     s32 label;
     u16 code;
     s32 window;
@@ -276,7 +276,7 @@ s64 ptySkillMenuHandleFieldUse(s32 callback) {
     return 0;
 }
 
-s64 ptySkillMenuEnterConfirm(s32 callback) {
+s32 ptySkillMenuEnterConfirm(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     func_00272778(callback);
@@ -288,7 +288,7 @@ s64 ptySkillMenuEnterConfirm(s32 callback) {
     return menuRunPanel(context, 1, callback);
 }
 
-s64 ptySkillMenuDispatchConfirmRequest(s32 selection) {
+s32 ptySkillMenuDispatchConfirmRequest(s32 selection) {
     s32 context = kwlnTaskGetUserValue();
     return menuRunPanel(context, 2, selection);
 }

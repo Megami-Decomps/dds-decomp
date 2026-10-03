@@ -64,7 +64,7 @@ extern u32 evtDisplayValues[];
 
 extern void func_0024A2D8(s32 arg0);
 
-extern s64 func_00285670(s32, s32 *, u64, u64);
+extern s32 func_00285670(s32, s32 *, u64, u64);
 
 extern void func_0024DD78(void);
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
@@ -175,10 +175,10 @@ u32 func_0024D260(void) {
 
 /* Propagate the panel worker's nonzero result before considering a flag-event popup.
  * When its popup slot and message control are idle, fall back if no event starts. */
-s64 dspUpdateFlagEvent(s32 request) {
+s32 dspUpdateFlagEvent(s32 request) {
     s32 workAddress = kwlnTaskGetUserValue();
     s32 *popupSlot = (s32 *)(workAddress + 0x54);
-    s64 result = func_00285670(workAddress + 8, popupSlot, 0, request);
+    s32 result = func_00285670(workAddress + 8, popupSlot, 0, request);
     if (result != 0) {
         return result;
     }
@@ -193,14 +193,14 @@ s64 dspUpdateFlagEvent(s32 request) {
 }
 
 /* Prepare the current terminal work and dispatch panel mode one. */
-s64 mnuDispatchTerminalPanel(s32 request) {
+s32 mnuDispatchTerminalPanel(s32 request) {
     s32 workAddress = kwlnTaskGetUserValue();
     func_0024A2D8(workAddress);
     return menuRunPanel(workAddress, 1, request);
 }
 
 /* Request the message-window transition before dispatching terminal panel mode two. */
-s64 mnuDispatchTerminalPanelExit(s32 request) {
+s32 mnuDispatchTerminalPanelExit(s32 request) {
     s32 workAddress = kwlnTaskGetUserValue();
     func_0024DD78();
     return menuRunPanel(workAddress, 2, request);
@@ -241,10 +241,10 @@ extern char D_0036AE48[];
 /* Propagate the panel worker result; create a ready popup only for an empty slot.
  * Kind zero waits for the named task unless active flag zero overrides the wait;
  * other kinds wait for the fade to finish. */
-s64 mnuUpdateTerminalReadyPopup(s32 request) {
+s32 mnuUpdateTerminalReadyPopup(s32 request) {
     s32 workAddress = kwlnTaskGetUserValue();
     s32 *popupSlot = (s32 *)(workAddress + 0x54);
-    s64 result = menuRunPanel(workAddress, 0, request);
+    s32 result = menuRunPanel(workAddress, 0, request);
     s32 ready;
 
     if (result != 0) {
@@ -267,14 +267,14 @@ s64 mnuUpdateTerminalReadyPopup(s32 request) {
 }
 
 /* Prepare the current work and dispatch panel mode one; distinct callback role unknown. */
-s64 func_0024D500(s32 request) {
+s32 func_0024D500(s32 request) {
     s32 workAddress = kwlnTaskGetUserValue();
     func_0024A2D8(workAddress);
     return menuRunPanel(workAddress, 1, request);
 }
 
 /* Dispatch current work in panel mode two without the message transition request. */
-s64 func_0024D550(s32 request) {
+s32 func_0024D550(s32 request) {
     s32 workAddress = kwlnTaskGetUserValue();
 
     return menuRunPanel(workAddress, 2, request);

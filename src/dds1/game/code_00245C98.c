@@ -32,9 +32,9 @@ extern u8 D_0036AABC[];
 
 extern s32 kwlnFadeIsActive(void);
 
-extern s64 evtGetMessageWindowControlState(void);
+extern s32 evtGetMessageWindowControlState(void);
 
-extern s64 func_00285670(s32, s32 *, u64, u64);
+extern s32 func_00285670(s32, s32 *, u64, u64);
 
 extern u32 kwlnTaskGetUserValue();
 
@@ -134,18 +134,18 @@ s32 evtAdvancePhaseOne(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00245DE0);
 
-void evtPrimeDispatchStart(s32 callback) {
+s32 evtPrimeDispatchStart(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_00260670(context);
-    func_00285670(context + 8, context + 0x54, 1, callback);
+    return func_00285670(context + 8, context + 0x54, 1, callback);
 }
 
-void evtSetupDispatchSync(s32 callback) {
+s32 evtSetupDispatchSync(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, callback);
+    return func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
 void evtInstallStateTableB(EvtDispatchState *state) {
@@ -185,18 +185,18 @@ s32 evtSelectStateAction(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00246220);
 
-void evtStageDispatchStart(s32 callback) {
+s32 evtStageDispatchStart(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_00260AB0(context);
-    func_00285670(context + 8, context + 0x54, 1, callback);
+    return func_00285670(context + 8, context + 0x54, 1, callback);
 }
 
-void evtSetupDispatchSyncB(s32 callback) {
+s32 evtSetupDispatchSyncB(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, callback);
+    return func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
 void evtInstallStateTableC(EvtDispatchState *state) {
@@ -235,18 +235,18 @@ s32 evtSelectStateActionB(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_002465F8);
 
-void evtStageDispatchStartB(s32 callback) {
+s32 evtStageDispatchStartB(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_00260AB0(context);
-    func_00285670(context + 8, context + 0x54, 1, callback);
+    return func_00285670(context + 8, context + 0x54, 1, callback);
 }
 
-void evtSetupDispatchSyncC(s32 callback) {
+s32 evtSetupDispatchSyncC(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, callback);
+    return func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
 void evtInstallStateTableD(EvtDispatchState *state) {
@@ -283,8 +283,8 @@ s32 evtSelectStateActionC(void) {
     return 1;
 }
 
-s64 func_002469F0(KwlnTask *task) {
-    s64 result;
+s32 func_002469F0(KwlnTask *task) {
+    s32 result;
     s32 input;
     s32 context;
     s32 *dispatch;
@@ -343,18 +343,18 @@ s64 func_002469F0(KwlnTask *task) {
     return result;
 }
 
-void evtStageDispatchStartC(s32 callback) {
+s32 evtStageDispatchStartC(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_00260AB0(context);
-    func_00285670(context + 8, context + 0x54, 1, callback);
+    return func_00285670(context + 8, context + 0x54, 1, callback);
 }
 
-void evtSetupDispatchSyncD(s32 callback) {
+s32 evtSetupDispatchSyncD(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, callback);
+    return func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
 u32 evtResetStateProgressTimer(void) {
@@ -367,9 +367,9 @@ u32 evtResetStateProgressTimer(void) {
 }
 
 /* Keep the dispatch query alive for 20 idle ticks before restarting its table. */
-s64 evtQueryStateProgress(u64 argument) {
+s32 evtQueryStateProgress(u64 argument) {
     s32 state = kwlnTaskGetUserValue();
-    s64 result = func_00285670(state + 8, state + 0x54, 0, argument);
+    s32 result = func_00285670(state + 8, state + 0x54, 0, argument);
 
     if (result == 0) {
         if ((((EvtDispatchState *)state)->dispatchState == 0) && (evtGetMessageWindowControlState() == 0)) {
@@ -386,18 +386,18 @@ s64 evtQueryStateProgress(u64 argument) {
     return result;
 }
 
-void evtFetchDispatchStart(s32 callback) {
+s32 evtFetchDispatchStart(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0025E108(context, ((EvtDispatchState *)context)->progressTicks);
-    func_00285670(context + 8, context + 0x54, 1, callback);
+    return func_00285670(context + 8, context + 0x54, 1, callback);
 }
 
-void evtSetupDispatchSyncE(s32 callback) {
+s32 evtSetupDispatchSyncE(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, callback);
+    return func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
 s32 evtApplyBaseRateProgressStep(void) {
@@ -425,18 +425,18 @@ s32 evtAdvanceStateStage(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00246EA0);
 
-void evtAlignDispatchStart(s32 callback) {
+s32 evtAlignDispatchStart(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_00261760(context);
-    func_00285670(context + 8, context + 0x54, 1, callback);
+    return func_00285670(context + 8, context + 0x54, 1, callback);
 }
 
-void evtSetupDispatchSyncF(s32 callback) {
+s32 evtSetupDispatchSyncF(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, callback);
+    return func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247190);
@@ -457,11 +457,11 @@ INCLUDE_ASM(const s32, "game/code_00245C98", func_00247588);
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247728);
 
-void evtSetupDispatchSyncG(s32 callback) {
+s32 evtSetupDispatchSyncG(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, callback);
+    return func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
 extern void dspStartEntry();
@@ -502,9 +502,9 @@ s32 evtApplyDispatchModeState(void) {
 }
 
 /* After idle dispatch, resume the state table at its saved position. */
-s64 evtSetPopupEntryWhenMessageWindowIdle(u64 argument) {
+s32 evtSetPopupEntryWhenMessageWindowIdle(u64 argument) {
     s32 state;
-    s64 result;
+    s32 result;
     s32 *dispatchState;
 
     state = kwlnTaskGetUserValue();
@@ -531,7 +531,7 @@ extern void mnuClearWindowPanelTransitionFlag(void *);
 extern void func_00260100(void *, s32);
 extern void func_00260208(s32, u32, s32, s32);
 
-void func_00247A78(s32 callback) {
+s32 func_00247A78(s32 callback) {
     EvtDispatchState *state = (EvtDispatchState *)kwlnTaskGetUserValue();
 
     switch (state->mode) {
@@ -563,14 +563,14 @@ void func_00247A78(s32 callback) {
         }
         break;
     }
-    func_00285670((s32)state + 8, &state->dispatchState, 1, callback);
+    return func_00285670((s32)state + 8, &state->dispatchState, 1, callback);
 }
 
-void evtSetupDispatchSyncH(s32 callback) {
+s32 evtSetupDispatchSyncH(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, callback);
+    return func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
 u32 evtStartScriptFadeAndResetDisplayFlags(void) {
@@ -590,21 +590,21 @@ INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF528);
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247D58);
 
-void evtRefreshDispatchStart(s32 callback) {
+s32 evtRefreshDispatchStart(s32 callback) {
     s32 state = kwlnTaskGetUserValue();
     s32 ticks = ((EvtDispatchState *)state)->progressTicks;
 
     if (ticks != 0) {
         func_0025DF68(state, ticks);
     }
-    func_00285670(state + 8, state + 0x54, 1, callback);
+    return func_00285670(state + 8, state + 0x54, 1, callback);
 }
 
-void evtSetupDispatchSyncI(s32 callback) {
+s32 evtSetupDispatchSyncI(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, callback);
+    return func_00285670(context + 8, context + 0x54, 2, callback);
 }
 
 u32 evtResetStateFlags(void) {
@@ -623,17 +623,17 @@ u32 evtStartFadeOut(void) {
 INCLUDE_ASM(const s32, "game/code_00245C98", func_002481A0);
 
 /* Register a callback for the next asynchronous dispatch. */
-void evtDispatchStart(s32 callback) {
+s32 evtDispatchStart(s32 callback) {
     s32 eventContext = kwlnTaskGetUserValue();
 
-    func_00285670(eventContext + 8, eventContext + 0x54, 1, callback);
+    return func_00285670(eventContext + 8, eventContext + 0x54, 1, callback);
 }
 
 /* Register a callback for synchronous dispatch (mode 2). */
-void evtDispatchSync(s32 callback) {
+s32 evtDispatchSync(s32 callback) {
     s32 eventContext = kwlnTaskGetUserValue();
 
-    func_00285670(eventContext + 8, eventContext + 0x54, 2, callback);
+    return func_00285670(eventContext + 8, eventContext + 0x54, 2, callback);
 }
 
 u32 func_002482B0(void) {
