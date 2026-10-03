@@ -640,7 +640,56 @@ void func_00337338(void *rows, s32 count, void *points, void *weights) {
         : "$2", "$3", "memory");
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00337408);
+/* vu0 routine: transform rows, derive clamped clip weights, and store both clip flags */
+void func_00337408(u32 rows, s32 count) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lui $6, %%hi(D_00476210)\n"
+        "addiu $6, $6, %%lo(D_00476210)\n"
+        "lqc2 vf19, 0x00($6)\n"
+        "lqc2 vf20, 0x10($6)\n"
+        "lqc2 vf21, 0x20($6)\n"
+        "vmulx.w vf24, vf19, vf24x\n"
+        "vmulx.w vf25, vf19, vf25x\n"
+        "vmulx.w vf26, vf19, vf26x\n"
+        "lqc2 vf6, 0x10(%0)\n"
+        "lqc2 vf2, 0x00(%0)\n"
+        "1:\n"
+        "vmulay.w ACC, vf0, vf19y\n"
+        "vmaddax.w ACC, vf24, vf6x\n"
+        "vmadday.w ACC, vf25, vf6y\n"
+        "vmaddz.w vf7, vf26, vf6z\n"
+        "vmulax.xyzw ACC, vf28, vf2x\n"
+        "vmadday.xyzw ACC, vf29, vf2y\n"
+        "vmaddaz.xyzw ACC, vf30, vf2z\n"
+        "vmaddw.xyzw vf3, vf31, vf0w\n"
+        "vaddaw.w ACC, vf7, vf7w\n"
+        "vmsubw.w vf6, vf0, vf0w\n"
+        "vmaxx.w vf8, vf7, vf0x\n"
+        "vclipw.xyzw vf3, vf3w\n"
+        "sqc2 vf3, 0x00(%0)\n"
+        "addi %1, %1, -1\n"
+        "vaddw.x vf9, vf0, vf6w\n"
+        "vminiw.w vf8, vf8, vf0w\n"
+        "sqc2 vf6, 0x10(%0)\n"
+        "addi %0, %0, 0x60\n"
+        "vmulaw.xyzw ACC, vf20, vf0w\n"
+        "cfc2.ni $2, $vi18\n"
+        "vmaddw.xyzw vf8, vf21, vf8w\n"
+        "vclipw.xyzw vf9, vf0w\n"
+        "lqc2 vf6, 0x10(%0)\n"
+        "lqc2 vf2, 0x00(%0)\n"
+        "sqc2 vf8, -0x40(%0)\n"
+        "sb $2, -0x0F(%0)\n"
+        "cfc2.ni $2, $vi18\n"
+        "andi $2, $2, 3\n"
+        "bne $0, %1, 1b\n"
+        "sb $2, -0x10(%0)\n"
+        ".set reorder"
+        : "+r"(rows), "+r"(count)
+        :
+        : "$2", "$6", "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_003374B0);
 
