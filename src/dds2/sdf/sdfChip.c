@@ -17,7 +17,7 @@ void sdfPendingQueuePush(void *arg0, s32 arg1);
 
 s32 func_0036DE70(void);
 s32 EIntr(void);
-void sdfAdvanceNodeCursor(SdfChipClass *sizeClass);
+void sdfSelectNextChipPage(SdfChipClass *sizeClass);
 
 void *sdfAllocAndClearQuadwords(s32 size) {
     void *allocation;
@@ -50,7 +50,7 @@ void sdfReleaseChipBlock(void *memory) {
     if (page->usedCells == 0) {
         link = &sizeClass->availablePages;
         if (sizeClass->currentPage == page) {
-            sdfAdvanceNodeCursor(sizeClass);
+            sdfSelectNextChipPage(sizeClass);
         } else {
             while (*link != page) {
                 link = &(*link)->next;
