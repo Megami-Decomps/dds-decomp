@@ -6,7 +6,6 @@ extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 
 extern s32 sdfAllocSizeClassBlock(u32);
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00254B30);
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
@@ -30,7 +29,10 @@ typedef struct {
 } DspSelection;
 
 typedef struct {
-    u8 pad0[0x30];
+    u8 pad0[0x1C];
+    s32 *selectedIndex; /* 0x1C */
+    s32 entryCount; /* 0x20 */
+    u8 pad24[0xC];
     s32 *selectedValue; /* 0x30 */
 } DspUnit;
 
@@ -66,9 +68,29 @@ typedef struct {
 extern DspEntrySpriteLookup D_003BC448[];
 extern DspEntrySpriteLookup D_003BC480[];
 extern char D_003BC450[];
-extern s32 func_0024E310(s32, s32, s32, s32, s32, s32, s32);
+extern void func_0024E310(s32, s32, s32, s32, s32, s32, s32);
 extern void func_003014F0(char *, const char *, ...);
 extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, u32, s32, u32);
+
+/* Draw the selection strip from the last row back to the first. */
+void func_00254B30(s32 x, s32 y, s32 z, s32 alpha, DspWindowContext *context, s32 drawContext) {
+    DspUnit *unit = context->unit;
+    s32 selected = *unit->selectedIndex;
+    s32 i;
+
+    func_0024E260(x, y, z, alpha, 0x56, drawContext);
+    i = unit->entryCount - 1;
+    if (i >= 0) {
+        do {
+            if (i == selected) {
+                func_0024E310(x, y + i * 26, z, alpha, 0x57, 12, drawContext);
+            } else {
+                func_0024E310(x, y + i * 26, z, alpha, 0x57, 14, drawContext);
+            }
+            i--;
+        } while (i >= 0);
+    }
+}
 
 /* Store the selected value in the display unit and open its scaled window. */
 void itfDspInitSelectedWindow(s32 x, s32 y, s32 z, s32 value, DspWindowContext *context, s32 parameter) {
@@ -322,7 +344,24 @@ void mnuTickMantraSparkParticles(DspParticleState *state) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00255A98);
+extern f32 sdfSinPoly(f32);
+extern void func_0024E1C8(s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_00255A98(const DspParticle *particle, s32 sprite, s32 surfaceIndex) {
+    f32 fraction;
+    s32 x;
+    s32 y;
+    s32 alpha;
+
+    if (particle->phase == 0) {
+        return;
+    }
+    fraction = 1.0f - (f32)particle->timer / particle->timerMax;
+    x = (s32)(particle->x + fraction * particle->z);
+    y = particle->y;
+    alpha = (s32)(sdfSinPoly(fraction * 3.14159265f) * 25.6f);
+    func_0024E1C8(x, y, 1, alpha, sprite, 0x2D, 0x20, surfaceIndex);
+}
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255B78);
 

@@ -69,7 +69,7 @@ extern MnuSpritePlacement D_0036B510[];
 extern MnuVariantSpritePlacement D_0036B7F0[];
 extern u16 D_0036BC68[][4];
 extern s32 D_0036C6AC[];
-extern s32 func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern void mnuDestroyMantraDrawPool(void *);
 extern void mnuReleaseStaffMenuContextAndResources(u32 *);
 extern s32 dspCloseChannel(void);
@@ -99,9 +99,9 @@ typedef struct MnuResourceTaskWork {
     u8 pad23C[0xC];
 } MnuResourceTaskWork;
 
-s32 func_0024E1C8(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 placementIndex,
+void func_0024E1C8(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 placementIndex,
                   s32 flags, s32 context) {
-    return func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+    func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                          (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                          z,
                          (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -111,8 +111,8 @@ s32 func_0024E1C8(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 placementIndex
                          context);
 }
 
-s32 func_0024E260(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context) {
-    return func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+void func_0024E260(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context) {
+    func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                          (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                          z,
                          (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -122,9 +122,9 @@ s32 func_0024E260(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 contex
                          context);
 }
 
-s32 func_0024E310(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 mode,
+void func_0024E310(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 mode,
                   s32 context) {
-    return func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+    func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                          (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                          z,
                          (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -134,9 +134,9 @@ s32 func_0024E310(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 mode,
                          context);
 }
 
-s32 func_0024E3C0(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex,
+void func_0024E3C0(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex,
                   s32 context) {
-    return func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+    func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                          (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                          z,
                          (u32)((f32)(alpha << 8) * 0.0078125f),
