@@ -149,8 +149,7 @@ typedef struct SoundFormat {
 
 extern SdfStreamFrameNode *sdfSoundNodeHead;
 extern s32 sceIpuSync(s32, s32);
-extern u32 sdfAllocateBlockBySizeThreshold(s32);
-extern void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *, SoundFormat *);
+extern void *sdfAllocateBlockBySizeThreshold(s32);
 extern void sdfStreamOpen(SdfStreamFrameNode *, SoundFormat *, s32, s32);
 extern void sdfSoundInitFormattedNode(SdfStreamFrameNode *, SoundFormat *, SdfStreamRead, u32);
 extern s32 D_003BDA9C;
