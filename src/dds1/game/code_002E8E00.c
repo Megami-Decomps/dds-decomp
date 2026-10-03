@@ -14,6 +14,7 @@ u32 func_002E87A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
 void sndEnsureMidiBankResident(s32 arg0);
 
+
 void func_002E8E00(void) {
     func_002E87A8(0x1a0, 0, 0, 0);
 }

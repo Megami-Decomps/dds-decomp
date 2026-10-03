@@ -554,9 +554,9 @@ void effThunderRandomizeFrag(EffThunderFragmentWork *work, s32 index) {
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016D3B0);
 
+
+
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016D9D8);
-
-
 extern void effThunderRandomizeFrag2(EffThunderFragmentWork *work, s32 index);
 
 EffThunderFragmentWork *func_0016DB28(EffThunderFragmentParams *src) {

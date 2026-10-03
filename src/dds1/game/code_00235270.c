@@ -21,7 +21,7 @@ extern void kwlnTaskCreate(void *name, s32 taskId, s32, s32, void *update, void 
 extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
 extern void *func_00115298(void *obj, void *vecA, void *vecB);
-extern void func_00190308(void *target, f32 scale);
+extern void effEventSetScale(void *target, f32 scale);
 extern s32 kwlnTaskGetTaskByName(void *name);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 extern void fldSetSwayMode(s32 mode);
@@ -967,7 +967,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE950);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE960);
 
-void func_00238ED0(s32 list, s32 x, s32 y, u32 kind, EvtRuntime *ctx) {
+void evtDrawMessageDataRow(s32 list, s32 x, s32 y, u32 kind, EvtRuntime *ctx) {
     char *names[11] = {D_003BC250, D_003AE8D0, D_003AE8E0, D_003AE8F0,
         D_003AE900, D_003AE910, D_003AE920, D_003AE930, D_003AE940, D_003AE950, D_003AE960};
 
@@ -1010,7 +1010,7 @@ void func_00238ED0(s32 list, s32 x, s32 y, u32 kind, EvtRuntime *ctx) {
     }
 }
 
-s32 func_00239148(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     s32 packed;
     s32 number;
@@ -1020,7 +1020,7 @@ s32 func_00239148(s32 x, s32 y, EvtRuntime *ctx) {
     s32 handle;
 
     list = sdfCreateResetPacketList();
-    func_00235598(list, x, y, 0x18, 0xA, 0, 1, (u8 *)ctx, mnuDrawMessageMenuLabel, func_00238ED0);
+    func_00235598(list, x, y, 0x18, 0xA, 0, 1, (u8 *)ctx, mnuDrawMessageMenuLabel, evtDrawMessageDataRow);
     kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)list);
     if (ctx->actionMode != 0xD) {
         return 0;
@@ -1081,7 +1081,7 @@ s32 mnuDrawCutFlagLabel(s32 target, s32 x, s32 y) {
 }
 
 
-void func_002393A0(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+void evtDrawComparisonValueRow(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     char *labels[11] = {D_003BC260, D_003AE8D0, D_003AE8E0, D_003AE8F0,
         D_003AE900, D_003AE910, D_003AE920, D_003AE930, D_003AE940, D_003AE950, D_003AE960};
     s32 flag;
@@ -1111,7 +1111,7 @@ void func_002393A0(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     }
 }
 
-s32 func_002395A8(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     s32 packed;
     s32 number;
@@ -1120,7 +1120,7 @@ s32 func_002395A8(s32 x, s32 y, EvtRuntime *ctx) {
     s32 delta;
 
     list = sdfCreateResetPacketList();
-    func_00235598(list, x, y, 0x18, 0xA, 0, 1, (u8 *)ctx, mnuDrawCutFlagLabel, func_002393A0);
+    func_00235598(list, x, y, 0x18, 0xA, 0, 1, (u8 *)ctx, mnuDrawCutFlagLabel, evtDrawComparisonValueRow);
     kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)list);
     if (ctx->actionMode != 0xE) {
         return 0;
@@ -1496,7 +1496,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023BC30);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023BE40);
 
-extern s32 func_0018FEB0();
+extern s32 effEventAdvanceResourceTemplateSetup();
 extern s32 kwlnTaskGetTimer(s32 task);
 typedef struct EvtSelectionCache {
     u8 pad00[0x24];
@@ -1508,7 +1508,7 @@ extern s32 evtActiveEntryFlags;
 
 s32 evtSynchronizeSelectedEntry(s32 task) {
     EvtRuntime *runtime = kwlnTaskGetUserValue();
-    if (func_0018FEB0() == 0) {
+    if (effEventAdvanceResourceTemplateSetup() == 0) {
         runtime->controlState = 0;
         return -1;
     }
@@ -1552,7 +1552,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023CA60);
 extern s32 effUpdateCh72Params(void);
 extern s32 effEventAdvanceBlurTemplateSetup(void);
 extern s32 effEventAdvanceScatterBlurSetup(void);
-extern s32 effAdvancePendingChannelState(void);
+extern s32 effEventAdvanceScaleBlurSetup(void);
 extern s32 func_0018FC80(void);
 extern s32 func_0023C248(EvtRuntime *runtime);
 extern s32 func_0023CA60(EvtRuntime *runtime);
@@ -1560,7 +1560,7 @@ extern void *D_003BB0C0;
 extern void *D_003BB14C;
 extern void *D_003BB130;
 
-s32 func_0023D420(s32 arg0, s32 arg1, EvtRuntime *runtime) {
+s32 evtPollEffectFrameControl(s32 arg0, s32 arg1, EvtRuntime *runtime) {
     s32 status = 1;
 
     switch (runtime->frameGroup->type) {
@@ -1580,7 +1580,7 @@ s32 func_0023D420(s32 arg0, s32 arg1, EvtRuntime *runtime) {
         }
         break;
     case 0x17:
-        status = effAdvancePendingChannelState();
+        status = effEventAdvanceScaleBlurSetup();
         if (runtime->selectedEntry != 0) {
             *(s32 *)((u8 *)D_003BB130 + 0x2C) = runtime->selectedEntry;
         }
@@ -2353,7 +2353,7 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
             effObjSetFlags(obj, 1);
             if (index >= 0) {
                 inner = ((EvtEffectObject *)obj)->inner;
-                func_00190308(inner->scaledObject, D_003BAA20[index].modelScale / D_003BAA10->modelScale);
+                effEventSetScale(inner->scaledObject, D_003BAA20[index].modelScale / D_003BAA10->modelScale);
             }
             return obj;
         }

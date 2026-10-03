@@ -75,6 +75,12 @@ extern char D_00436CF8[];
 extern char D_0041B628[];
 
 extern char D_0041B640[];
+extern s32 btlHasMarkedEntry14(s32 actor);
+extern void btlClearRuntimeFlag2000(void);
+extern u32 effMiscRandMod(void *state, u32 modulus);
+extern void btlSetEffectCameraKeys(s32 command, f32, f32, f32, f32, f32, f32, f32, f32,
+    f32, f32, f32, f32, f32, f32, f32, f32);
+
 
 void func_00227288(void) {
     func_00226F58();
@@ -435,7 +441,40 @@ s32 func_00228F20(BtlLinkedCommand *command) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00228F48);
+s32 func_00228F48(BtlLinkedCommand *command) {
+    u32 choice;
+
+    if (command->actionCode != 0x188) {
+        return 0;
+    }
+    if (btlHasMarkedEntry14((s32)command) != 0) {
+        if (command->motionProgress >= 0x19) {
+            btlClearRuntimeFlag2000();
+            if (command->motionProgress == 0x19) {
+                choice = effMiscRandMod(0, 2);
+                switch (choice) {
+                case 0:
+                    btlSetEffectCameraKeys((s32)command,
+                        -438.9f, -787.7f, 536.2f, 0.091f,
+                        -0.889f, -0.328f, 0.275f, -533.3f,
+                        -901.0f, 631.6f, 0.098f, -0.883f,
+                        -0.326f, 0.295f, 40.0f, 15.0f);
+                    break;
+                case 1:
+                    btlSetEffectCameraKeys((s32)command,
+                        359.4f, -728.1f, 534.7f, -0.086f,
+                        -0.911f, -0.283f, -0.254f, 399.0f,
+                        -801.4f, 632.3f, -0.084f, -0.913f,
+                        -0.284f, -0.248f, 40.0f, 15.0f);
+                    break;
+                }
+                command->state = 0;
+            }
+        }
+        command->motionProgress++;
+    }
+    return 1;
+}
 
 u32 btlGetEffectActive(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();

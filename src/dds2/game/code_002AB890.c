@@ -38,6 +38,7 @@ extern void func_002AB8F0(s32);
 extern void func_002BAF50(s32, s32);
 extern u8 func_002BDA50(s32 index);
 
+
 void func_002AB890(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     func_002AB690(arg0, arg1, arg2, 0, arg3, arg4, arg5);
 }
@@ -163,7 +164,7 @@ s32 mnuDestroyWindowOwnerResourceSet(void) {
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACC50);
 
 extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
-extern void func_002BB0E8(s32, s32, s32, s32, s32);
+extern void mnuUpdateAndDrawWindowTransition(s32, s32, s32, s32, s32);
 extern void func_002AA7A0(s32, s32);
 extern u8 D_003E7050[];
 
@@ -174,7 +175,7 @@ s64 func_002ACE58(s32 callback) {
     func_002AAC98(0,
         ((MenuStaffContext *)context)->activeWindow->window->selectedNode->label,
         (s32)D_003E7050, context, 1, 0x53);
-    func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
     return menuSetHandler(context, 1, callback);
 }

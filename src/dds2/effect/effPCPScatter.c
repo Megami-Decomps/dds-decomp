@@ -440,7 +440,7 @@ void effPcpScatterReleaseParticleGroup(PcpScatterRadialWork *work) {
     sdfReleaseResourceAllocation(work->ownedResource);
 }
 
-void func_001789C0(PcpScatterRadialWork *work, u32 index) {
+void effPcpScatterInitRadialParticle(PcpScatterRadialWork *work, u32 index) {
     u32 segments = work->params.radialSegments;
     PcpScatterRadialParticle *particle = &work->particles[index];
     f32 angleStep;
@@ -1677,7 +1677,7 @@ void effScatterRingUpdateScaledLong(PcpScatterInstanceC *work, s32 index)
 
 
 /* Per-frame update of a fading, optionally looping scatter instance whose colour blends between two keys over its lifetime. */
-void effScatterUpdateDualColor(PcpScatterInstanceC *work) {
+void effScatterUpdateTwoColor(PcpScatterInstanceC *work) {
     s32 loop;
     s32 duration = work->params.duration;
     PcpScatterDraw *draw = (PcpScatterDraw *)work->scatterObject;

@@ -1542,7 +1542,7 @@ typedef struct VuLightingPacket {
 } VuLightingPacket;
 
 /* vu0 routine: store vf28-vf31 and its rows scaled by the inverse column lengths, then the GIF tag words. */
-void sdfWriteVuMatrixAndScaledRows(VuLightingPacket *packet) {
+void sdfWriteVuLightingPacket(VuLightingPacket *packet) {
     VU0_STORE_MATRIX_AND_UNIT_ROWS(packet);
     packet->tag[0] = 0x04000010;
     packet->tag[1] = 0x14000000;
@@ -1558,7 +1558,7 @@ void sdfConsAppendVuPacket(s32 list, s32 (*alloc)(s32)) {
     packet = (u64 *)alloc(0x90);
     packet[0] = ((u64)((u32)(packet + 2) & 0x0FFFFFFF) << 32) | 0x20000008;
     packet[1] = 0x6C07C000ULL << 32;
-    sdfWriteVuMatrixAndScaledRows((VuLightingPacket *)(packet + 2));
+    sdfWriteVuLightingPacket((VuLightingPacket *)(packet + 2));
     sdfAppendPacket(list, (u32)packet);
 }
 
@@ -1597,7 +1597,7 @@ s32 sdfMeasureVertexAttributePacketBytes(s32 count) {
 }
 
 /* vu0 routine: pack aligned positions into the VIF three-word stream. */
-u32 func_0033B688(const u128 *positions, const void *attributes, const void *halfAttributes, const void *wordAttributes, s32 count, void *(*alloc)(s32)) {
+u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *attributes, const void *halfAttributes, const void *wordAttributes, s32 count, void *(*alloc)(s32)) {
     s32 bytes;
     u32 *packet;
     u32 *cursor;
@@ -1797,7 +1797,7 @@ u32 sdfMeasureAlignedDrawPacketSize(s32 count) {
 }
 
 /* vu0 routine: pack aligned positions into the VIF three-word stream. */
-u32 func_0033C240(u128 *positions, void *attributes, void *halfAttributes, void *wordAttributes, s32 count, void *(*alloc)(s32)) {
+u32 sdfBuildWideVertexVifPacket(u128 *positions, void *attributes, void *halfAttributes, void *wordAttributes, s32 count, void *(*alloc)(s32)) {
     s32 bytes;
     u32 *packet;
     u32 *cursor;

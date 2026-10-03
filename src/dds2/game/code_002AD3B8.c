@@ -6,7 +6,7 @@ extern void func_0026C900(void);
 extern void func_002AAE80(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
-extern void func_002BB0E8(s32, s32, s32, s32, s32);
+extern void mnuUpdateAndDrawWindowTransition(s32, s32, s32, s32, s32);
 extern void func_002AA7A0(s32, s32);
 extern u8 D_003E7050[];
 extern char D_003E7207[20];
@@ -131,7 +131,7 @@ s64 func_002AD3B8(s32 callback) {
 
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(5);
-    func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     object = menu->primaryObject;
     if (object->window->panelActive != 0) {
         func_002AD330(context, 0);
@@ -196,7 +196,7 @@ s64 mnuPrepareStaffImageAndSelectionLabel(s32 callback) {
     func_002AAC98(0,
         ((MenuStaffContext *)context)->activeWindow->window->selectedNode->label,
         (s32)D_003E7050, context, 1, 0x53);
-    func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
     return menuSetHandler(context, 1, callback);
 }
@@ -248,7 +248,7 @@ s64 func_002AD808(s32 callback) {
     func_002AAC98(0,
         ((MenuStaffContext *)context)->activeWindow->window->selectedNode->label,
         (s32)D_003E7050, context, 1, 0x53);
-    func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
     return menuSetHandler(context, 1, callback);
 }
@@ -299,7 +299,7 @@ s64 func_002AD9F8(s32 callback) {
     func_002AAC98(0,
         ((MenuStaffContext *)context)->activeWindow->window->selectedNode->label,
         (s32)D_003E7050, context, 1, 0x53);
-    func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
     return menuSetHandler(context, 1, callback);
 }
@@ -369,7 +369,7 @@ s64 mnuStaffImageEnterD(s32 callback) {
 
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(0xD);
-    func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     object = menu->secondaryObject;
     if (object->window->panelActive != 0) {
         func_002AD330(context, 1);
@@ -395,7 +395,7 @@ s64 func_002ADF90(s32 callback) {
 
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(6);
-    func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     object = menu->primaryObject;
     if (object->window->panelActive != 0) {
         func_002AD330(context, 0);

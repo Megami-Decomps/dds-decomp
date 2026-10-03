@@ -161,7 +161,7 @@ extern void frFontSetFlagAndMeasureGlyphs(u64, s32);
 
 extern u64 func_0019F798(s32, s32, u64, u64, u64, u64);
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
-extern u64 func_0019FC38(s32, s32, u64, u64, u64, u64);
+extern u64 itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
 
 typedef struct SdfListNode {
     u32 index;                  /* 0x00 */
@@ -537,7 +537,7 @@ s32 func_00311DB0(s32 x, s32 y, u64 z, u64 w, u8 flags, u64 style, s32 flag, s32
 }
 
 s32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, u64 first, u64 second, u8 opacity, u16 width, u64 name, u64 extra, s32 flag, s32 option) {
-    u64 handle = func_0019FC38(x << 4, y << 3, first, width, name, extra);
+    u64 handle = itfDrawBankTextWithLayoutFlags(x << 4, y << 3, first, width, name, extra);
     s32 result = 0;
     frFontSetChainFlag(handle, opacity);
     frFontSetChildColors(handle, second);

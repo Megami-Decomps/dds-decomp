@@ -508,7 +508,7 @@ extern s32 func_00195E60(s32 text);
 extern s32 func_00195ED8(s32 line, s32 text);
 extern void frFontMoveChainTo(s32 x, s32 y, s32 text);
 
-s32 func_00197C40(s32 x, s32 y, s32 depth, u16 textId, s32 bank, s32 flags) {
+s32 itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, s32 bank, s32 flags) {
     s32 text = func_001961B0(textId, bank, 0);
     u32 mode;
     s32 handle;
@@ -561,10 +561,10 @@ s32 itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 te
     itfSetTextDrawLimit(0x13);
     switch (fontMode) {
     case 0:
-        result = func_00197C40(x, y, depth, textId, D_003BAA98, flags);
+        result = itfDrawBankTextWithLayoutFlags(x, y, depth, textId, D_003BAA98, flags);
         break;
     case 1:
-        result = func_00197C40(x, y, depth, textId, D_003BAA9C, flags);
+        result = itfDrawBankTextWithLayoutFlags(x, y, depth, textId, D_003BAA9C, flags);
         break;
     }
     itfSetTextDrawLimit(-1);

@@ -413,11 +413,11 @@ void effFlashTrianglePulseSpawnFromTable(u64 table) {
     u64 effectParams;
 
     effectParams = effParamTableGetBlock(table, 0);
-    effFlashTrianglePulseCreate(effectParams);
+    effFlashRecordCreate(effectParams);
 }
 
 void func_00171E20(void) {
-    effFlashTrianglePulseCreate();
+    effFlashRecordCreate();
 }
 
 void effFlashTrianglePulseDestroy(PcpFlashTrianglePulseWork *work) {
@@ -1716,7 +1716,7 @@ void effFlashRotatingQuadUpdate(PcpFlashRotatingQuadWork *work) {
     effDrawScaledRecordPool(handle);
 }
 
-extern PcpFlashDrawPool *effRecordPoolCreateTriad(s32 count);
+extern PcpFlashDrawPool *effRecordPoolCreateTriple(s32 count);
 
 PcpFlashRadialTriangleWork *effFlashRadialTriangleCreate(src)
     PcpFlashRadialTriangleWork *src;
@@ -1732,7 +1732,7 @@ PcpFlashRadialTriangleWork *effFlashRadialTriangleCreate(src)
     work->ownedBuffer = handle;
     work->renderScale = 1.0f;
     work->updateCount = 0;
-    record = effRecordPoolCreateTriad(work->particleCount);
+    record = effRecordPoolCreateTriple(work->particleCount);
     work->resourceHandle = (u32)record;
     record->unk50 = work->unk38;
     for (i = 0; i < work->particleCount; i++) {
@@ -2428,7 +2428,7 @@ PcpFlashOffsetRadialWork *effFlashOffsetRadialTriangleCreate(src)
     work->ownedBuffer = handle;
     work->renderScale = 1.0f;
     work->updateCount = 0;
-    record = effRecordPoolCreateTriad(work->particleCount);
+    record = effRecordPoolCreateTriple(work->particleCount);
     work->resourceHandle = (u32)record;
     record->unk50 = work->unk3C;
     for (i = 0; i < work->particleCount; i++) {

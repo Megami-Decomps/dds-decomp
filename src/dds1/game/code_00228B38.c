@@ -293,9 +293,9 @@ s32 evtAdvanceSolarLongLayerTimer(SolarLayerTimer *timer) {
 
 INCLUDE_ASM(const s32, "game/code_00228B38", func_00229540);
 
+/* Spawn phase-dependent long-lived noise layers and expire active slots. */
 INCLUDE_SDATA(const s32, "game/code_00228B38", D_003BBDD0);
 
-/* Spawn phase-dependent long-lived noise layers and expire active slots. */
 void func_00229750(SolarNoiseState *state) {
     u8 phase = evtGetMirroredSolarPhase();
     u16 spawns[15][3] = {
@@ -476,3 +476,4 @@ INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC68);
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC78);
 
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC88);
+

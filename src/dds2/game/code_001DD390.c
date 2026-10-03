@@ -22,6 +22,7 @@ extern u8 D_00380788[];
 extern u8 D_003B6BD0[];
 
 
+
 extern void func_001EC868(void *, f32 *, f32);
 
 typedef struct BtlUnitData {
@@ -744,7 +745,7 @@ extern void func_001F5320(s32, s32, s32, s32);
 extern s32 effCreateSelectionFlagListFromWork(void *);
 extern char D_003BDCC8[];
 extern void mnuReleaseSoundBufferLocked(void);
-extern void func_0023CA60(u32, s32, u32);
+extern void evtSetUnitAlphaTransition(u32, s32, u32);
 extern void func_002A27A8(s32, s32, u8);
 extern void mdlBroadcastMasked(s32, s32);
 extern s32 fldReleaseIdleSceneActorResources(BtlUnit *);
@@ -2902,7 +2903,7 @@ void btlRequestModelOrReuse(u32 *arguments) {
         func_001E1BB8(object, effect, model);
         if (*(char *)(arguments + 3) == 0) {
             btlClearUnitDefeatCandidate(object);
-            func_0023CA60((u32)((BtlUnit *)object)->ext, 0, 0);
+            evtSetUnitAlphaTransition((u32)((BtlUnit *)object)->ext, 0, 0);
             ((BtlUnit *)object)->overlayColor = ((BtlUnit *)object)->baseColor & 0xFFFFFF;
         }
         btlBossDebugPrintf(D_00417AF0, effect, model);
@@ -2927,7 +2928,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
     }
     if (*(s8 *)(arguments + 3) == 0) {
         btlClearUnitDefeatCandidate(object);
-        func_0023CA60((u32)((BtlUnit *)object)->ext, 0, 0);
+        evtSetUnitAlphaTransition((u32)((BtlUnit *)object)->ext, 0, 0);
         ((BtlUnit *)object)->overlayColor = ((BtlUnit *)object)->baseColor & 0xFFFFFF;
     }
     ((BtlUnit *)object)->gunResourceFlags = (((BtlUnit *)object)->gunResourceFlags & ~1) | 2;
@@ -3097,8 +3098,8 @@ s32 btlUnitFadeInTask(BtlFadeArgs *args) {
             btlFlagUnitDefeatCandidate(unit);
             mdlBroadcastMasked((s32)unit->ext->info, 0);
             evtSetUnitRgbTransition(unit->ext, 0, 0);
-            func_0023CA60((u32)unit->ext, 0, 0);
-            func_0023CA60((u32)unit->ext, args->fadeIn, args->color);
+            evtSetUnitAlphaTransition((u32)unit->ext, 0, 0);
+            evtSetUnitAlphaTransition((u32)unit->ext, args->fadeIn, args->color);
             unit->flags |= 0x100000;
         }
         if (args->count == args->fadeIn - 1) {
@@ -3111,7 +3112,7 @@ s32 btlUnitFadeInTask(BtlFadeArgs *args) {
     if (!(unit->flags & 0x100000)) {
         if (args->count >= total) {
             evtSetUnitRgbTransition(unit->ext, 0, args->color);
-            func_0023CA60((u32)unit->ext, 0, args->color);
+            evtSetUnitAlphaTransition((u32)unit->ext, 0, args->color);
             return 1;
         }
     }
@@ -3149,7 +3150,7 @@ s32 btlUnitFadeOutTask(BtlFadeArgs *args) {
         if (args->count == args->fadeOut - 1) {
             unit->overlayColor = 0x80000000;
             evtSetUnitRgbTransition(unit->ext, 0, 0);
-            func_0023CA60((u32)unit->ext, args->fadeIn, 0);
+            evtSetUnitAlphaTransition((u32)unit->ext, args->fadeIn, 0);
         }
     } else {
         unit->overlayColor = 0x80000000;
@@ -4359,7 +4360,6 @@ SoundTask *btlScheduleContextReset(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001E9130);
-
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001E9410);
 
 void btlClearPendingSoundList(void) {
@@ -8600,7 +8600,6 @@ SoundTask *btlCreateMoveOtherUnitsTask(BtlUnit *unit, s32 option, s32 target) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_002077C0);
-
 extern u32 func_002077C0(u32 *);
 
 SoundTask *btlCreateSoundPlaybackTask(BtlUnit *unit, u32 soundId, u32 variant, u32 channel, u32 flags) {
@@ -8674,3 +8673,4 @@ INCLUDE_SDATA(const s32, "game/code_001DD390", btlTintTransitionHoldCount);
 INCLUDE_SDATA(const s32, "game/code_001DD390", D_00436AE0);
 
 INCLUDE_SDATA(const s32, "game/code_001DD390", D_00436AE8);
+

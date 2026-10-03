@@ -359,7 +359,7 @@ extern void mdlLoadViewerPackage();
 
 /* Create and initialize a viewer-package context in the fixed effect group.
  * DDS2 skips occupied halfword ids before loading; DDS1 does not scan them. */
-void *func_0016A990(s32 *package) {
+void *effParamCreateViewerWork(s32 *package) {
     void *work;
 
     while (btlFindGroupedEntity(EFF_VIEWER_RESOURCE_GROUP, D_00436434) != 0) {

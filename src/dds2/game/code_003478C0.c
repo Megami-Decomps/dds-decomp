@@ -480,7 +480,7 @@ SdfKeyTreeNode *sdfRotateBalancedTreeFirstLink(SdfKeyTreeNode *heavyChild, SdfKe
 }
 
 /* Walk the insertion path upward, updating balance flags and reconnecting a rotated subtree. */
-void func_00348800(SdfKeyTreeNode **path, s32 depth, SdfKeyTreeNode *child,
+void sdfRebalanceFloatKeyTreeAfterInsert(SdfKeyTreeNode **path, s32 depth, SdfKeyTreeNode *child,
                    SdfKeyTreeNode **root) {
     SdfKeyTreeNode *parent;
     SdfKeyTreeNode *replacement = NULL;
@@ -560,7 +560,7 @@ void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item) {
     *link = node;
     node->balance = 0;
     if (depth != 0) {
-        func_00348800(path, depth, node, tree);
+        sdfRebalanceFloatKeyTreeAfterInsert(path, depth, node, tree);
     }
 }
 

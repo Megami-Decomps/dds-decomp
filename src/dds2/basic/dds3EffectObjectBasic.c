@@ -33,7 +33,7 @@ extern s32 sdfLoadMapRecordLookAtBasis(void *param, s32 id);
 
 extern void effEventReleaseNode(void *node);
 
-extern void *func_00197D68(void *bill, u32 id, void *vec);
+extern void *effEventCreate(void *bill, u32 id, void *vec);
 
 extern void *dds3AppendWorldObjectNode(s32 kind);
 
@@ -45,7 +45,7 @@ extern void effObjSetInnerSecondVec(void *obj, void *vec);
 
 extern void effObjInnerVecBackup(void *params);
 extern void effMagatuhiCopyFloatBlock(void *, const void *);
-extern void effMagatuhiCopyHandlerRows(void *, const void *);
+extern void effMagatuhiSetControlPointParams(void *, const void *);
 
 extern void *sdfReadNamedResource(void *resource, u32 *resolvedId, s32 options);
 
@@ -63,7 +63,7 @@ typedef struct {
     void *owner; /* 0x20 owning effect object */
     u16 entryId; /* 0x24 forwarded to the bill parameter lookup */
     u16 ownerKind; /* 0x26 copied from owner's kind */
-    void *vector; /* 0x28 passed to func_00197D68 */
+    void *vector; /* 0x28 passed to effEventCreate */
     void *node; /* 0x2C released and replaced by effObjReplaceActiveEventNode */
 } EffectData; /* 0x30 bytes */
 
@@ -178,7 +178,7 @@ extern void *dds3GetFirstWorldObjectNodeOfKind2(void);
 extern void effCopyVector(void *source, void *destination);
 extern void effCopyVectorToNodeInstance(void *source, void *destination);
 
-EffectObj *effObjCreateWithBill(bill, vec, extra)
+EffectObj *effObjCreateKindTwo(bill, vec, extra)
     void *bill;
     void *vec;
     s32 extra;
@@ -219,21 +219,21 @@ void effObjSpawnSharedBillClone(EffectObj *obj, u64 firstVectorAddress, u64 seco
     u64 bill;
 
     bill = billCloneObjectRetainingSharedData((u32)obj->data->bill);
-    effObjCreateWithBill(bill, firstVectorAddress, secondVectorAddress);
+    effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
 }
 /* Create a kind-one indexed bill; the native constructor result is discarded. */
 void effObjCreateIndexedKindOne(u64 billId, u64 firstVectorAddress, u64 secondVectorAddress) {
     u64 bill;
 
     bill = billCreateIndexed(1, billId);
-    effObjCreateWithBill(bill, firstVectorAddress, secondVectorAddress);
+    effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
 }
 /* Create a kind-one resource bill; the native constructor result is discarded. */
 void effObjCreateResourceKindOne(u64 resourceId, u64 firstVectorAddress, u64 secondVectorAddress) {
     u64 bill;
 
     bill = billCreateFromResource(1, resourceId);
-    effObjCreateWithBill(bill, firstVectorAddress, secondVectorAddress);
+    effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
 }
 
 /* Select the stored bill's kind-one entry; no object/data/bill checks are made. */
@@ -441,7 +441,7 @@ void effObjReplaceActiveEventNode(EffectObj *obj, u32 entryId) {
         effEventReleaseNode(data->node);
         data->node = NULL;
     }
-    data->node = func_00197D68(data->bill, entryId & EFF_OBJ_ENTRY_ID_MASK, data->vector);
+    data->node = effEventCreate(data->bill, entryId & EFF_OBJ_ENTRY_ID_MASK, data->vector);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115600);
@@ -513,7 +513,7 @@ extern void effMagatuhiDispatchByKind(void *bill);
 
 /* Dispatch bound-bill setup or four-row history initialization; two-row state does nothing.
    Native implicit-int fall-through leaves the return value unspecified. */
-effObjDispatchMagatuhiState(EffectObj *obj) {
+effObjDispatchReadyState(EffectObj *obj) {
     if (obj->kind == EFF_OBJ_KIND) {
         EffectData *data = obj->data;
 
@@ -572,7 +572,7 @@ s32 effObjCopyMagatuhiSourceParameters(EffectObj *obj, EffectObj *first, EffectO
             VU0_STORE_VF(vf10, parameterRows + 12);
             parameterRows[19] = effObjGetIntParam(fourth);
         }
-        effMagatuhiCopyHandlerRows(data->bill, parameterRows);
+        effMagatuhiSetControlPointParams(data->bill, parameterRows);
         return 1;
     }
     return 0;

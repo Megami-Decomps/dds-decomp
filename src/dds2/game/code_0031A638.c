@@ -111,12 +111,12 @@ void func_0031A830(u8 *work) {
     } else {
         timer->step = 0x14;
         timer->completed = 0x258;
-        sndClaimFreeSoundSlot(0x1E00005, 0);
+        dds3ClaimSoundSlot(0x1E00005, 0);
     }
 }
 
 /* Decay progress at the current interval and maintain the score high-water mark. */
-void func_0031A920(TimerWork *work) {
+void mnuTickScoreProgressState(TimerWork *work) {
     u32 currentScore;
 
     func_0031A830((u8 *)work);

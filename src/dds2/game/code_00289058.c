@@ -329,6 +329,7 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_0028A1D0);
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028B1B0);
 
+
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028B318);
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028B738);
@@ -417,6 +418,14 @@ void mnuAdvanceMantraPanelTransitionTimer(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028CD50);
 
+typedef struct MantraFlagResource {
+    u8 pad00[8];
+    u16 *flags;
+} MantraFlagResource;
+
+extern s32 mnuGetActiveMantraModelFlagState(void);
+extern s32 func_00315C68(s32, s32, u32, u16, s32);
+
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028D070);
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028D2F8);
@@ -428,13 +437,6 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_0028DC08);
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028DE10);
 
 
-typedef struct MantraFlagResource {
-    u8 pad00[8];
-    u16 *flags;
-} MantraFlagResource;
-
-extern s32 mnuGetActiveMantraModelFlagState(void);
-extern s32 func_00315C68(s32, s32, u32, u16, s32);
 
 void func_0028DFA0(s32 object) {
     s32 modelFlagState = mnuGetActiveMantraModelFlagState();

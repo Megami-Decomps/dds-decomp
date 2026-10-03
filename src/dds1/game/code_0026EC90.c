@@ -189,7 +189,7 @@ void mnuStopMovieDrawTask(void) {
     if (mnuMovieDrawTask == 0) {
         return;
     }
-    func_002EDAE0(mnuMovieDrawContext);
+    sdfCancelAndReleasePacWork(mnuMovieDrawContext);
     kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }

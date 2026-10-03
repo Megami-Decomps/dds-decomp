@@ -142,7 +142,7 @@ extern void mnuFreeWindowSprites();
 
 extern void mnuHideIconGroup();
 
-extern s32 evtGetCapturedMessageWindowSoundMode();
+extern s32 evtGetCapturedWindowPanelValue();
 
 extern void mnuSetPopupEntryFlagged();
 
@@ -176,7 +176,7 @@ extern void mnuCreateStaffImageSprite();
 
 extern void func_002AA7A0();
 
-extern void func_002BB0E8(s32, s32, s32, s32, s32);
+extern void mnuUpdateAndDrawWindowTransition(s32, s32, s32, s32, s32);
 
 extern void mnuIdleVoiceTimer();
 
@@ -519,7 +519,7 @@ u32 mnuEnterSelectedResourceLabel(void) {
                                     *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(resourceOwner + 0x18) + 0x18) + 0x1c) + 100) * 0x19);
     dspStartEntry(8);
     evtSetMessageWindowOptionWhenOpen(0);
-    evtCaptureMessageWindowSoundMode(0xf);
+    evtStoreValueAndCaptureWindowPanelValue(0xf);
     return 1;
 }
 
@@ -542,7 +542,7 @@ s64 mnuUpdatePartySlotAssignmentPopup(s32 callback) {
     if (evtGetMessageWindowControlState() != 0) {
         return 0;
     }
-    if (evtGetCapturedMessageWindowSoundMode() == 0) {
+    if (evtGetCapturedWindowPanelValue() == 0) {
         label = ((MenuWindowContainer *)*(s32 *)(menu + 0x18))->list->cursor->sortKeySecondary;
         mnuPrepareStaffValueChangeDialog(context, slot, label, func_002B06A8(menu, slot, label));
         mnuInitPartyPanelSlots(context + 0xA928);
@@ -592,7 +592,7 @@ u32 mnuEnterSlotLabel(void) {
     evtCopyEntryStringToActiveWindow(0, D_00435E5C + selectedEntry * 0x19);
     dspStartEntry(0xd);
     evtSetMessageWindowOptionWhenOpen(0);
-    evtCaptureMessageWindowSoundMode(0xf);
+    evtStoreValueAndCaptureWindowPanelValue(0xf);
     return 1;
 }
 
@@ -612,7 +612,7 @@ s64 mnuPartySlotConfirmClearUpdate(s32 callback) {
     if (evtGetMessageWindowControlState() != 0) {
         return 0;
     }
-    if (evtGetCapturedMessageWindowSoundMode() == 0) {
+    if (evtGetCapturedWindowPanelValue() == 0) {
         selectedEntry = mnuGetPartyEntryCurrentId(slot);
         mnuClearPartySelectionValues(slot, selectedEntry);
         evtCopyEntryStringToActiveWindow(0, D_00435E5C + selectedEntry * 0x19);
@@ -838,7 +838,7 @@ s64 mnuOpenStaffPartySelectionPanel(s32 callback) {
     } else {
         menu->primaryWindow->list->stateFlags &= ~0x10;
     }
-    func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
     if (menu->freezePanel == 0) {
         func_002B2408(context);
     }
@@ -969,7 +969,7 @@ s64 mnuDrawStaffCampPageWithImage(s32 callback) {
     } else {
         mnuCreateStaffImageSprite(0x15);
     }
-    func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
     func_002AA7A0(0, ((MenuContext *)context)->displayHandle);
     if (menu[9] != 0) {
         func_002AAC98(0, ((MenuWindowContainer *)((MenuContext *)context)->imageHandle)->list->cursor->index, D_003E69B0, context, 1, 0x53);
@@ -1343,9 +1343,9 @@ s64 mnuCampMenuDrawSlotLabel(s32 callback) {
     func_002AAC98(0, ((MenuWindowContainer *)((MenuContext *)context)->imageHandle)->list->cursor->index, D_003E69B0, context, 1, 0x53);
     /* Both arms are identical in retail; kept as written. */
     if (((MenuWindowContainer *)((MenuContext *)context)->imageHandle)->list->cursor->index == 0) {
-        func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
+        mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
     } else {
-        func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
+        mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
     }
     func_002AA7A0(0, ((MenuContext *)context)->displayHandle);
     return menuSetHandler(context, 1, callback);
@@ -1577,9 +1577,9 @@ s64 ptySkillMenuEnterPage(s32 callback) {
     s32 *menu = (s32 *)((MenuContext *)context)->party;
     s32 label;
     if (((MenuWindowContainer *)((MenuContext *)context)->imageHandle)->list->cursor->index == 0) {
-        func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
+        mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
     } else {
-        func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
+        mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
         ptySkillMenuCopyPageState(context);
     }
     func_002AAE80(callback);
@@ -1688,7 +1688,7 @@ s64 ptySkillMenuOpenSelectedSkillPage(s32 callback) {
     mnuCreateStaffImageSprite(3);
     func_002AAC70(0, ((MenuPartyRuntime *)menu)->selectedWindow->list->cursor->sortKeyPrimary, D_00435E6C, context, 1, 1, 0x53);
     ((MenuPartyRuntime *)menu)->selectedWindow->list->stateFlags &= ~8;
-    func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
     func_002AA7A0(0, ((MenuContext *)context)->displayHandle);
     return menuSetHandler(context, 1, callback);
 }
@@ -1856,7 +1856,7 @@ s64 mnuOpenSkillDetailPanel(s32 callback) {
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
     ((MenuPartyRuntime *)menu)->selectedWindow->list->stateFlags |= 8;
-    func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
     func_002AA7A0(3, ((MenuContext *)context)->displayHandle);
     return menuSetHandler(context, 1, callback);
 }
@@ -2003,7 +2003,7 @@ s64 mnuCampMenuDrawStatus(s32 callback) {
     func_002AAE80(callback);
     func_002B7588(context);
     mnuCreateStaffImageSprite(0x14);
-    func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
     label = ((MenuWindowContainer *)*(s32 *)(menu + 0x24 + *(s32 *)(menu + 0x2c) * 4))->list->cursor->sortKeyPrimary;
     func_002B7228(context);
     if (label != 0 && label != 0xffff) {
@@ -3494,7 +3494,7 @@ void mnuResetWindowFadeParameters(MenuFadeFields *menu) {
     menu->currentProgress = 0;
 }
 
-void func_002BB0E8(s32 x, s32 y, s32 depth, s32 work, s32 option) {
+void mnuUpdateAndDrawWindowTransition(s32 x, s32 y, s32 depth, s32 work, s32 option) {
     MenuFadeFields *menu = (MenuFadeFields *)work;
     f32 t;
 

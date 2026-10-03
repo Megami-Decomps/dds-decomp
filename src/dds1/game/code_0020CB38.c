@@ -24,9 +24,9 @@ extern void btlSetUnitPosition(BtlUnit *, void *);
 
 
 
-extern s32 func_0020B348();
+extern s32 btlSetLinkedDefeatCameraPresetA();
 
-extern s32 func_0020DC38();
+extern s32 btlSetLinkedDefeatCameraPresetB();
 
 extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 
@@ -86,7 +86,7 @@ s32 btlDispatchActionAnimationB(BtlLinkedCommand *command) {
         command->state = 0;
     } else if (flags & 0x8000) {
         btlFlagAllUnitDefeatCandidatesTask();
-        func_0020B348((void *)command, (void *)command, 0);
+        btlSetLinkedDefeatCameraPresetA((void *)command, (void *)command, 0);
     } else if (flags & 8) {
         if (btlGetIndexListCount(command->task->targetList) == 1) {
             void *target = (void *)btlGetIndexListEntry((void *)command->task->targetList, 0);
@@ -373,7 +373,7 @@ extern void func_002DD968(f32);
 extern void sdfComposeVuMatrixFromRegisters(void);
 extern f32 D_003BB8B0[];
 
-s32 func_0020DC38(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     u16 *runtime = (u16 *)btlGetRuntime();
     BtlUnit *unit;
     u32 kind;
@@ -456,7 +456,7 @@ s32 btlHandleLinkedUnitDefeatAction(BtlLinkedCommand *command) {
             btlRaiseLinkedActionPose(command);
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020DC38((void *)command, (void *)command, 0);
+            btlSetLinkedDefeatCameraPresetB((void *)command, (void *)command, 0);
             command->state = 0;
         }
         return 1;

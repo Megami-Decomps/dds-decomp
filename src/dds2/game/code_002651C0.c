@@ -30,12 +30,12 @@ extern EvtSlot D_003CE1A8[];
 extern char (*D_00435E5C)[25];
 extern char D_00437850[];
 extern s32 func_00265038();
-extern s32 evtGetCapturedMessageWindowSoundMode();
+extern s32 evtGetCapturedWindowPanelValue();
 extern void mnuShopReleaseWindowSprites();
 extern void func_00260020();
 extern s32 mnuCampHasEligibleOwnedItems();
 extern void mnuAdvanceListCursorDefault();
-extern void func_0025FC08();
+extern void mnuShopLoadMessageResource();
 extern s32 mnuFirstPresentMainCharacterIndex();
 extern void evtCreateEventScriptProcess();
 extern void kwlnFadeOutStart();
@@ -56,7 +56,7 @@ extern void func_0011A118();
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 evtIsLastSlot(s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
-extern s32 evtCaptureMessageWindowSoundMode(s32);
+extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
 struct KwlnTask;
 
 /* Selection chain used by the event UI. Only accessed offsets are described. */
@@ -94,7 +94,7 @@ typedef struct EvtMenuContext {
     s8 unkCD;
 } EvtMenuContext;
 
-s32 func_002651C0(struct KwlnTask *task) {
+s32 evtMenuPopulateSelectedSlotLabels(struct KwlnTask *task) {
     EvtMenuContext *context = (EvtMenuContext *)kwlnTaskGetUserValue(task);
     s32 slotIndex = func_00265038();
     s32 i;
@@ -121,7 +121,7 @@ s32 func_002651C0(struct KwlnTask *task) {
                 dspStartEntry(0x2A);
             }
             evtSetMessageWindowOptionWhenOpen(0);
-            evtCaptureMessageWindowSoundMode(0x27);
+            evtStoreValueAndCaptureWindowPanelValue(0x27);
         }
     }
     return 1;
@@ -200,7 +200,7 @@ s64 func_00265850(s32 callback) {
 /* Fade out according to the event mode, with a separate flag-dependent case 2. */
 s32 evtStartFadeByState(void) {
     s32 context = kwlnTaskGetUserValue();
-    func_0025FC08(context);
+    mnuShopLoadMessageResource(context);
     switch (((EvtMenuContext *)context)->mode) {
     case 2:
         if (mdlFlagTest(0x42a) == 0 && mnuFirstPresentMainCharacterIndex() == 0) {

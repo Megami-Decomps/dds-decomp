@@ -145,7 +145,7 @@ extern u8 kwlnPositionedTextSurface[];
 
 extern s8 D_0032453B[];
 
-extern void func_0010B428(void *arg0);
+extern void evtDrawHeapUsageOverlay(void *arg0);
 
 extern void kwlnTaskDestroyWithHierarchy(void *, s32);
 
@@ -488,7 +488,7 @@ extern void *func_002E21A0(EvtQuadDesc *);
 extern void func_002DA438(void *, u32);
 extern void sdfQueueAssetRelease(void *);
 
-void func_00109640(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, f32 x3, f32 y3, f32 z3, u32 i0, u32 i1, u32 i2, u32 i3) {
+void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, f32 x3, f32 y3, f32 z3, u32 i0, u32 i1, u32 i2, u32 i3) {
     EvtQuadDesc desc;
     DrawVec4 verts[4];
     s32 indices[4];
@@ -1275,7 +1275,7 @@ extern u32 D_003BA97C;
 extern char D_003BA980[];
 extern char D_003BA988[];
 
-void func_0010B428(void *owner) {
+void evtDrawHeapUsageOverlay(void *owner) {
     s32 general[6];
     SdfChipStats chip;
     char text[100];
@@ -1301,7 +1301,7 @@ s32 func_0010B558(void) {
     if (D_0032453B[0] != 0) {
         return 0;
     }
-    func_0010B428(kwlnPositionedTextSurface);
+    evtDrawHeapUsageOverlay(kwlnPositionedTextSurface);
     return 0;
 }
 

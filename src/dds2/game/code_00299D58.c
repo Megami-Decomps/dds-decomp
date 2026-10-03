@@ -238,6 +238,7 @@ INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A2F8);
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A400);
 
+
 s64 func_0029A588(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 

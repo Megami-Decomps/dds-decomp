@@ -483,7 +483,7 @@ extern s32 func_003230A0(MenuWorkEntry *, MenuRegistryTable *, MenuRegistryRecor
 extern void func_00321528(u32, MenuRegistryRecord *);
 
 /* Tick the packed countdown and dispatch the row's fixed-kind record. */
-s32 func_00322F48(MenuWorkEntry *entry) {
+s32 mnuAdvanceRegistryWorkEntry(MenuWorkEntry *entry) {
     MenuRegistryTable *table;
     MenuRegistryRecord *row;
     ShortRecordList *list;
@@ -636,6 +636,7 @@ void mnuInitializeEffectContext(MenuWorkEntry *context) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324B28);
+
 
 u32 mnuCreateAnimatedEffect(u32 context, f32 x, f32 y, f32 progress) {
     u32 entry = (u32)mnuFindUnusedWorkEntry();

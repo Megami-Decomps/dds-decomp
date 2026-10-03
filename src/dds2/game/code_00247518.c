@@ -263,7 +263,7 @@ void evtViewerApplyInterpolatedNodeKey(EventViewerState *viewer, EvtViewNode *no
     }
 }
 
-void func_002475C8(EventViewerState *viewer) {
+void evtViewerApplyParameterKeyTracks(EventViewerState *viewer) {
     EvtViewNode *node = (EvtViewNode *)viewer->groups;
     s32 position = viewer->glyphAdvancePosition;
 
@@ -343,7 +343,7 @@ void func_002476B8(EventViewerState *viewer) {
         effDisableColorRectangle();
     }
     func_0025EE00(viewer);
-    func_002475C8(viewer);
+    evtViewerApplyParameterKeyTracks(viewer);
 }
 
 /* Select the active entry (or fallback) and sync world selection and camera. */
@@ -671,7 +671,7 @@ extern void mnuUnpackNibbleFields(PackedPair *, s32 *, s32 *);
 extern u32 itfMesGetWindowEntryItems(s32, s32);
 void evtViewerMarkWindowActive(EventViewerState *);
 
-void func_00249DC8(s32 position, EventViewerState *viewer) {
+void evtViewerActivateWindowForGlyphEntry(s32 position, EventViewerState *viewer) {
     EvtViewerGroup *group;
     EvtViewerGlyph *glyph;
     s32 entry;

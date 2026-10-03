@@ -148,7 +148,7 @@ extern u8 *datItemSkillRecords;
 
 extern u8 D_003CDA88[];
 
-extern s32 func_0019FC38(s32, s32, u64, u64, u64, u64);
+extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
 
 extern void frFontSetChildColors(s32, u32);
 
@@ -1071,7 +1071,7 @@ typedef struct ShopMessageScene {
 extern void evtLoadResourcePair();
 extern void evtCreateMessageWindowIfMissing();
 
-void func_0025FC08(ShopMessageScene *scene) {
+void mnuShopLoadMessageResource(ShopMessageScene *scene) {
     scene->messageSet = D_003C9A40[scene->shopRow].messageSet;
     switch (scene->messageSet) {
     case 0:
@@ -1626,7 +1626,7 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261198);
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261290);
 
 /* Mark rows unavailable when neither currency nor inventory capacity permits a use. */
-void func_00261310(u8 *scene) {
+void mnuCampDisableUnavailableItemEntries(u8 *scene) {
     CampWindowNode *node;
     CampWindowParams *item;
     s32 i;
@@ -1721,7 +1721,7 @@ void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2
     s32 handle;
 
     if (enabled != 0) {
-        handle = func_0019FC38(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);
+        handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);
         frFontSetChildColors(handle, 0x80808040);
         func_0019D550(handle, 0, flags);
         frFontQueueGlyphInSelectedSlot(handle);

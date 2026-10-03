@@ -68,7 +68,7 @@ typedef struct BillPacketWork {
 extern BillManagerNode *D_003BD7F4;
 extern BillDeferredDescriptor *D_0034E030[5];
 extern void sdfAppendPacket(SdfListHead *list, u32 packet);
-extern u32 func_002E27D8(void *work, void *arg1, void *arg2, void *arg3, s32 count, s32 callback);
+extern u32 sdfBuildCompactVertexVifPacket(void *work, void *arg1, void *arg2, void *arg3, s32 count, s32 callback);
 
 void func_00150750(void) {
     BillManagerNode *node;
@@ -81,7 +81,7 @@ void func_00150750(void) {
             s32 i;
 
             if (count > 0) {
-                u32 packet = func_002E27D8(work, (u8 *)work + 0xF0, (u8 *)work + 0x12C,
+                u32 packet = sdfBuildCompactVertexVifPacket(work, (u8 *)work + 0xF0, (u8 *)work + 0x12C,
                                            (u8 *)work + 0x21C, count, 0);
                 sdfAppendPacket(node->pendingLists[node->packetListIndex], packet);
                 work->count = 0;
@@ -108,8 +108,6 @@ void func_00150750(void) {
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00150840);
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00150EB0);
-
 typedef struct BillDrawNode {
     BillManagerNode *first;
     BillManagerNode *second;
@@ -117,6 +115,8 @@ typedef struct BillDrawNode {
     SdfListHead *packetList;
     struct BillDrawNode *next;
 } BillDrawNode;
+INCLUDE_ASM(const s32, "effect/billManager", func_00150EB0);
+
 
 typedef struct BillDrawSurface {
     u8 pad00[0x10];

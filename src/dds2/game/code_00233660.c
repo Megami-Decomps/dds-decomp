@@ -149,7 +149,7 @@ extern void effObjSetInnerFloat(s32 obj, f32 value);
 
 extern void func_00112058(s32 obj, s32 a, s32 b);
 
-extern MdlResource *dds3GetUnk0C(s32 obj);
+extern MdlResource *dds3GetObjectBaseResourceHandle(s32 obj);
 
 extern void func_001129C8(s32 obj, s32 a);
 
@@ -1310,38 +1310,6 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00235568);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235628);
 
-INCLUDE_RODATA(const s32, "game/code_00233660", D_00421120);
-
-INCLUDE_RODATA(const s32, "game/code_00233660", D_00421130);
-
-INCLUDE_RODATA(const s32, "game/code_00233660", D_00421140);
-
-INCLUDE_RODATA(const s32, "game/code_00233660", D_00421150);
-
-INCLUDE_RODATA(const s32, "game/code_00233660", D_00421160);
-
-INCLUDE_RODATA(const s32, "game/code_00233660", D_00421170);
-
-INCLUDE_RODATA(const s32, "game/code_00233660", D_00421180);
-
-INCLUDE_RODATA(const s32, "game/code_00233660", D_00421190);
-
-INCLUDE_RODATA(const s32, "game/code_00233660", D_004211A0);
-
-INCLUDE_RODATA(const s32, "game/code_00233660", D_004211B0);
-
-INCLUDE_RODATA(const s32, "game/code_00233660", D_004211C0);
-
-INCLUDE_RODATA(const s32, "game/code_00233660", D_004211D0);
-
-INCLUDE_RODATA(const s32, "game/code_00233660", D_004211E0);
-
-INCLUDE_RODATA(const s32, "game/code_00233660", D_004211F0);
-
-INCLUDE_RODATA(const s32, "game/code_00233660", D_00421208);
-
-INCLUDE_RODATA(const s32, "game/code_00233660", D_00421220);
-
 void func_00235728(void) {
     MdlSifCommand packet;
     const char *format;
@@ -1408,6 +1376,38 @@ void mdlAddPlainViewerEntryForSelectedNode(void) {
     state->activeEntryId = state->selectedEntryId;
     mdlAddEntryPlainEx(state->resources[0], state->selectedNodeId, state->selectedEntryId, width, height);
 }
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421120);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421130);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421140);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421150);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421160);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421170);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421180);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421190);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_004211A0);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_004211B0);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_004211C0);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_004211D0);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_004211E0);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_004211F0);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421208);
+
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421220);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421238);
 
@@ -2512,8 +2512,8 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     dds3SetObjectFlags(obj, 0x20);
     effObjSetInnerFloat(obj, 10.0f);
     func_00112058(obj, slotKind, resource);
-    if (dds3GetUnk0C(obj)->motion != NULL) {
-        mdlAddEntryFlagged(dds3GetUnk0C(obj), 0, 0);
+    if (dds3GetObjectBaseResourceHandle(obj)->motion != NULL) {
+        mdlAddEntryFlagged(dds3GetObjectBaseResourceHandle(obj), 0, 0);
     }
     func_001129C8(obj, 0);
     return world;
@@ -2523,7 +2523,7 @@ extern s32 dds3FindWorldObjectNodeByKey(s32 world, s32 a, s32 b);
 
 extern void dds3SetSlotByKind(s32 obj, s32 slot);
 
-extern void dds3InvokeSlot5Handler(s32 obj);
+extern void dds3RegisterObjectInHandlerIndex(s32 obj);
 
 s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     f32 pos[4];
@@ -2540,9 +2540,9 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     dds3SetObjectFlags(obj, 0x20);
     effObjSetInnerFloat(obj, 10.0f);
     func_00112058(obj, slotKind, resource);
-    mdlAddEntryFlagged(dds3GetUnk0C(obj), 0, 0);
+    mdlAddEntryFlagged(dds3GetObjectBaseResourceHandle(obj), 0, 0);
     dds3SetSlotByKind(obj, dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), 0x10000, 2));
-    dds3InvokeSlot5Handler(obj);
+    dds3RegisterObjectInHandlerIndex(obj);
     func_001129C8(obj, 0);
     dds3SetObjectFlags(obj, 0x400);
     return world;
@@ -2741,3 +2741,4 @@ INCLUDE_SDATA(const s32, "game/code_00233660", D_004371D8);
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004371E0);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", evtPendingEventSelection);
+

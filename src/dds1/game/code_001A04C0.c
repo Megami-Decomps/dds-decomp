@@ -473,11 +473,11 @@ u32 btlComputeSkillAdjustedMaxMp(s32 object) {
 }
 
 void btlAdjustUnitHp(u8 *object, s32 value) {
-    datMoveCursorX(object, value);
+    datAdjustCurrentHp(object, value);
 }
 
 void btlAdjustUnitMp(u8 *object, s32 value) {
-    datMoveCursorY(object, value);
+    datAdjustCurrentMp(object, value);
 }
 
 /* Cache the skill-adjusted maximum and return current HP clamped to it.

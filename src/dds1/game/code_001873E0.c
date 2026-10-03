@@ -183,3 +183,4 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
 
 INCLUDE_ASM(const s32, "game/code_001873E0", func_00187C08);
 
+

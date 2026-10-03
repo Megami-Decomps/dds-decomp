@@ -169,9 +169,9 @@ extern void scrSetFloatReturnValue(f32 value);
 
 extern s32 effMiscRandMod(u32 stream, u32 modulus);
 
-extern s32 datMoveCursorX(void *, s32);
+extern s32 datAdjustCurrentHp(void *, s32);
 
-extern s32 datMoveCursorY(void *, s32);
+extern s32 datAdjustCurrentMp(void *, s32);
 
 extern u8 btlIsRuntimeAllocated(void);
 
@@ -307,8 +307,8 @@ void ptyRecoverAllUnits(void) {
         Entry1A4 *entry = (Entry1A4 *)(datGameState + offset + 0xA60);
         offset += 0x1C4;
         if (entry->flags & 1) {
-            datMoveCursorX(entry, 9999);
-            datMoveCursorY(entry, 9999);
+            datAdjustCurrentHp(entry, 9999);
+            datAdjustCurrentMp(entry, 9999);
             entry->unkE &= 0x8000;
         }
         remaining--;
@@ -368,10 +368,10 @@ void func_0011A808(Entry1A4 *entry, u32 skill) {
         break;
     }
     if (dx > 0) {
-        datMoveCursorX(entry, dx);
+        datAdjustCurrentHp(entry, dx);
     }
     if (dy > 0) {
-        datMoveCursorY(entry, dy);
+        datAdjustCurrentMp(entry, dy);
     }
 }
 
@@ -902,10 +902,10 @@ s32 evtPushSecondRosterSelectedStat(void) {
     return 1;
 }
 
-extern s32 datMapFlagToStatIndex(s32);
+extern s32 datFlagToElementIndex(s32);
 
 s32 evtPushFirstRosterOptionStat(void) {
-    s8 stat = datMapFlagToStatIndex(((EventScriptEntry *)D_0043E5C0)->index14);
+    s8 stat = datFlagToElementIndex(((EventScriptEntry *)D_0043E5C0)->index14);
     s32 value = 100;
 
     switch (stat) {
@@ -926,7 +926,7 @@ s32 evtPushFirstRosterOptionStat(void) {
 }
 
 s32 evtPushSecondRosterOptionStat(void) {
-    s8 stat = datMapFlagToStatIndex(((EventScriptEntry *)D_0043E5C0)->index14);
+    s8 stat = datFlagToElementIndex(((EventScriptEntry *)D_0043E5C0)->index14);
     s32 value = 100;
 
     switch (stat) {

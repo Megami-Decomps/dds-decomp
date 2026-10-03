@@ -1,6 +1,7 @@
 #include "common.h"
 
 extern s32 func_0031CF88(f32, f32);
+
 extern f32 func_00353228(f32);
 extern f32 D_0037F5EC[];
 extern f32 sdfViewEyeVector[4];
@@ -41,7 +42,7 @@ extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031C940);
 
 /* Map a screen point onto the view plane using the eye/target Z separation. */
-void func_0031CA10(f32 *position, s32 screenX, s32 screenY) {
+void itfProjectScreenPointToViewPlane(f32 *position, s32 screenX, s32 screenY) {
     f32 halfViewAngle;
     f32 eyeTargetDepth;
 

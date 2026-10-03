@@ -518,7 +518,7 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00118D60);
 
 extern s32 datAbilityParameters;
 
-extern s32 datMapFlagToStatIndex(u32);
+extern s32 datFlagToElementIndex(u32);
 extern u32 func_00119C78(SdfPackedValue *, s32);
 extern s32 datUnitHasSkill(SdfPackedValue *, s32);
 extern s32 effMiscRandMod(s32, s32);
@@ -549,7 +549,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
         mask = 1 << list[effMiscRandMod(0, count)];
     }
     if (mask != 0 && (datCommandRecords[index].mode == 1 || datCommandRecords[index].mode == 3)) {
-        kind = datMapFlagToStatIndex(mask);
+        kind = datFlagToElementIndex(mask);
         if (!(datCommandRecords[index].mode30 == 4 && (packed->flagsAndValue & 0x7FFF) == 8)) {
             if (func_00119C78(packed, kind) & 0x170000) {
                 return 0;
@@ -632,11 +632,11 @@ u32 sdfQueryChannelBits(s32 channel, s32 queryArg, SdfPackedValue *item) {
 
 extern s32 func_00118D60(s32 channel, s32 queryArg, SdfPackedValue *item, u32 mode, u8 vital);
 extern void datClearUnitStatusBits(void *item, s32 mask);
-extern s32 datMoveCursorX(void *item, s32 delta);
-extern s32 datMoveCursorY(void *item, s32 delta);
+extern s32 datAdjustCurrentHp(void *item, s32 delta);
+extern s32 datAdjustCurrentMp(void *item, s32 delta);
 void sdfRaisePackedChannelValue(SdfPackedValue *item, u32 value);
 
-s32 func_00119548(s32 channel, s32 queryArg, SdfPackedValue *item) {
+s32 sdfApplyCommandResults(s32 channel, s32 queryArg, SdfPackedValue *item) {
     s32 hpDelta;
     s32 mpDelta;
     u32 value;
@@ -653,10 +653,10 @@ s32 func_00119548(s32 channel, s32 queryArg, SdfPackedValue *item) {
         sdfRaisePackedChannelValue(item, value);
         datClearUnitStatusBits(item, bits);
         if (mpDelta != 0) {
-            datMoveCursorY(item, mpDelta);
+            datAdjustCurrentMp(item, mpDelta);
         }
         if (hpDelta != 0) {
-            datMoveCursorX(item, hpDelta);
+            datAdjustCurrentHp(item, hpDelta);
             if (item->hp == 0) {
                 sdfRaisePackedChannelValue(item, 0x4000);
             }

@@ -88,7 +88,7 @@ extern void func_0035C860(char *, char *, ...);
 extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void dspStartEntry(s32);
-extern void evtCaptureMessageWindowSoundMode(s32);
+extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_004388A0[];
 extern s64 evtGetMessageWindowControlState(void);
 extern void func_0026C900(void);
@@ -101,7 +101,7 @@ extern s32 fldPackLocalMapFlagStates(void);
 extern s32 fldCountMaskBitsBeforeOrdinal(s32, s32);
 extern s32 sdfCreateMaskedCounterChannels(s32, s32);
 extern s32 func_0030B880(s32);
-extern void func_0030BA98(s32, s32);
+extern void sdfInitializeMapCounterSelection(s32, s32);
 extern void func_0030E880(void);
 extern u32 sdfReadNamedResource(const char *, u32 *, u32 *);
 extern void evtCreateMessageWindowIfMissing(s32);
@@ -274,7 +274,7 @@ extern LmapList *D_00439088;
 extern void fldLmapSubmitScaledSpritePacket(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_00309DF8(s32, s32, s32, LmapList *, s32);
 
-void func_0030A528(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
+void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
     u32 color;
 
     D_00438888++;
@@ -300,7 +300,7 @@ void func_0030A528(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
         D_00439088 = list;
         if (list->flags & 0x21) {
             if (list->cursor->child != 0) {
-                func_0030A528(x + ((list->width + 8) << 4), y, z, list->cursor->child, channel);
+                fldLmapDrawListTree(x + ((list->width + 8) << 4), y, z, list->cursor->child, channel);
             }
         } else if ((list->flags & 2) && list->selected != 0) {
             list->selected(list);
@@ -483,7 +483,7 @@ void fldInitializeLocalMapScene(void) {
     index = fldCountMaskBitsBeforeOrdinal(mask, D_00438890);
     D_00438894 = index;
     sdfCreateMaskedCounterChannels(mask, index);
-    func_0030BA98(D_00438894, func_0030B880(mask));
+    sdfInitializeMapCounterSelection(D_00438894, func_0030B880(mask));
     func_0030E880();
     dspCloseChannel();
     D_004388A4 = sdfReadNamedResource("/lmap/lmpmsg.bmd", &D_004388A8, NULL);
@@ -570,7 +570,7 @@ void fldDisplayLocalMapCounterMessage(void) {
     evtCopyEntryStringToActiveWindow(0, text);
     evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(0);
-    evtCaptureMessageWindowSoundMode(1);
+    evtStoreValueAndCaptureWindowPanelValue(1);
 }
 
 s32 fldLmapToggleOverlay(void) {

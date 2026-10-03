@@ -816,7 +816,7 @@ extern void *memset(void *, s32, u32);
  * and handle, but retains an existing part list when its requested count is zero.
  * Resource-list packets overwrite their handle. Part additions assume a list.
  * Unknown commands/tags are still removed. Normal completion returns NULL. */
-PacWork *func_002330C8(PacWork *packetWork, s32 group, s32 id, s32 mode) {
+PacWork *mdlApplyQueuedGroupPackets(PacWork *packetWork, s32 group, s32 id, s32 mode) {
     MdlGroupSetup groupSetup;
     MdlPartList *partList;
     s32 requestedPartCount;

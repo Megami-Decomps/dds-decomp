@@ -103,7 +103,7 @@ extern void *dds3FindWorldObjectNodeByKey(void *arg0, s32 arg1, s32 arg2);
 
 extern void *dds3GetWorldSecondaryObject(void);
 extern void dds3FreePathObject(s32);
-extern s32 func_00116FA0(void *);
+extern s32 dds3CreatePathCurveWork(void *);
 extern void func_001171A0(s32);
 extern f32 evtMeasurePathTrajectoryLength(s32);
 extern void evtScaleValueByMultiplier(s32, f32);
@@ -189,7 +189,7 @@ extern void effObjSetInnerSecondVec(void *, void *);
 extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);
 extern void func_0023C870(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
 extern void evtSetUnitRgbTransition(EvtUnit *unit, s32 arg, u32 color);
-extern void func_0023CA60(EvtUnit *unit, s32 arg, u32 color);
+extern void evtSetUnitAlphaTransition(EvtUnit *unit, s32 arg, u32 color);
 
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 
@@ -239,7 +239,7 @@ extern void effObjReplaceActiveEventNode(void *arg0, u32 arg1);
 
 extern char D_00421AF8[];
 
-extern void effObjDispatchMagatuhiState(void *arg0);
+extern void effObjDispatchReadyState(void *arg0);
 
 extern s32 scrGetCurrentContext(void);
 
@@ -267,7 +267,7 @@ extern void evtUnitPrepareVerticalMoveSteps(EvtUnit *unit);
 
 extern f32 evtComputeClampedModelScale(s32);
 
-extern void func_00197F40(void *, f32);
+extern void effEventSetScale(void *, f32);
 
 /* Start a bounded vector transition; detach any previous secondary-world source. */
 void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
@@ -333,7 +333,7 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
     if (work->pathHandle != 0) {
         dds3FreePathObject(work->pathHandle);
     }
-    path = func_00116FA0(pathSource);
+    path = dds3CreatePathCurveWork(pathSource);
     work->pathHandle = path;
     work->pathSpeed = 40.0f / evtMeasurePathTrajectoryLength(path);
     if (dirFlag == 0) {
@@ -1253,7 +1253,7 @@ u32 evtOpSetUnitPackedAlpha(void) {
     VU0_SCALAR_OP(bfWaitReadArgFloat(2), "vmulx.w vf10, vf0, vf2x");
     EE_MMI_RGBA_PACK_F128(packed);
     color[0] = packed;
-    func_0023CA60(unit, scrReadIntParameter(1), packed);
+    evtSetUnitAlphaTransition(unit, scrReadIntParameter(1), packed);
     return 1;
 }
 
@@ -1388,7 +1388,7 @@ u32 evtOpSetModelCutAndScale(void) {
             f32 value = evtComputeClampedModelScale(index);
             void *target = unit->header->target2C;
             if (target != NULL) {
-                func_00197F40(target, value);
+                effEventSetScale(target, value);
             }
         }
     }
@@ -1446,7 +1446,7 @@ u32 func_002409E0(void) {
     id = scrReadIntParameter(0);
     obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
-        effObjDispatchMagatuhiState(obj);
+        effObjDispatchReadyState(obj);
     }
     return 1;
 }
@@ -1458,7 +1458,7 @@ u32 func_00240A20(void) {
     id = scrReadIntParameter(0);
     obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
-        effObjDispatchMagatuhiState(obj);
+        effObjDispatchReadyState(obj);
     }
     return 1;
 }

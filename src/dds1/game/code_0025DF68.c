@@ -20,7 +20,7 @@ INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E308);
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E420);
 
-void func_0025E508(s32 x, s32 y, s32 z, void *context, s32 width, s32 mode) {
+void mnuDrawStatusIconAndCompanion(s32 x, s32 y, s32 z, void *context, s32 width, s32 mode) {
     s32 iconIndex;
     u32 layer = D_003BC520;
 

@@ -81,7 +81,7 @@ void evtSwitchWorldValueIfChanged(s32 high, s32 low) {
 
 /* Reset draw offsets and the five enabled screen-effect modes. */
 void evtResetDrawTransitions(void) {
-    kwlnDrawSetOffsetTransition(0, 0, 0);
+    kwlnDrawSetOverlayTransition(0, 0, 0);
     kwlnDrawSetupC70B(0);
     kwlnDrawEnableCd0(0);
     effDisableRectangleBlur();
@@ -221,7 +221,7 @@ s32 evtCreateMessageWindowIfMissing(void) {
 }
 
 /* Apply page mode zero and the caller's opaque page value to an open window. */
-s32 evtRefreshActiveMessageWindow(s32 pageValue) {
+s32 evtSetMessageWindowPageValue(s32 pageValue) {
     if (dspWindowHandle < 0) {
         return 0;
     }
@@ -246,12 +246,12 @@ s32 dspStartEntry(s32 entry) {
 
 /* Store the caller's opaque value and snapshot the panel's second halfword.
  * This routine itself performs no sound-driver operation. */
-s32 evtCaptureMessageWindowSoundMode(s32 requestedValue) {
+s32 evtStoreValueAndCaptureWindowPanelValue(s32 requestedValue) {
     if (dspWindowHandle < 0) {
         return 0;
     }
     D_00437888 = requestedValue;
-    dspCapturedSoundMode = sndGetActiveMode();
+    dspCapturedSoundMode = dspReadWindowSecondPanelValue();
     return 1;
 }
 
@@ -269,7 +269,7 @@ s8 evtGetMessageWindowOption(void) {
 
 /* Read the second panel halfword, or -1 when no message window exists.
  * Despite the inherited name, this is not a sound-driver query. */
-s32 sndGetActiveMode(void) {
+s32 dspReadWindowSecondPanelValue(void) {
     if (dspWindowHandle < 0) {
         return -1;
     }
@@ -277,7 +277,7 @@ s32 sndGetActiveMode(void) {
 }
 
 /* Return the captured signed-byte panel value without querying the live window. */
-s8 evtGetCapturedMessageWindowSoundMode(void) {
+s8 evtGetCapturedWindowPanelValue(void) {
     return dspCapturedSoundMode;
 }
 
@@ -330,14 +330,14 @@ s32 evtGetMessageWindowControlState(void) {
 }
 
 /* Snapshot the second panel halfword only after the first halfword is nonnegative. */
-s32 sndUpdateActiveMode(void) {
+s32 dspCaptureWindowSecondPanelValue(void) {
     if (dspWindowHandle < 0) {
         return 0;
     }
     if (itfPanelGetPairFirst(dspWindowHandle) < 0) {
         return 0;
     }
-    dspCapturedSoundMode = sndGetActiveMode();
+    dspCapturedSoundMode = dspReadWindowSecondPanelValue();
     return 1;
 }
 
@@ -429,7 +429,7 @@ u32 evtGetBoundedDisplayValue(s32 index) {
 }
 
 /* Script opcode: set the supplied active-entry flag without bounds checking. */
-s32 evtSetCurrentActiveFlag(void) {
+s32 evtOpSetActiveEntryFlag(void) {
     s32 flagIndex = scrReadIntParameter(0);
     evtActiveEntryFlags[8 + flagIndex] = 1;
     return 1;
@@ -437,7 +437,7 @@ s32 evtSetCurrentActiveFlag(void) {
 
 /* Script opcode: return a display-table value, clamping only its upper index.
  * It does not activate or test an active-entry flag. */
-s32 evtActivateCurrentFlag(void) {
+s32 evtOpReadDisplayValue(void) {
     s32 index = scrReadIntParameter(0);
     if (index >= EVT_DISPLAY_VALUE_COUNT) {
         index = EVT_LAST_DISPLAY_VALUE;
@@ -465,7 +465,7 @@ extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 
 /* Draw top/bottom viewport indicators; each flag selects its brighter color.
  * DDS2 copies its two colors from the data table rather than using DDS1 literals. */
-void func_0026CB98(s32 x, s32 topY, s32 bottomY, s32 size, s32 record) {
+void evtDrawListViewportIndicators(s32 x, s32 topY, s32 bottomY, s32 size, s32 record) {
     s32 coordinates[2][3];
     s32 xRadius = (size << 4) >> 1;
     s32 yOffset = size << 3;
@@ -491,7 +491,7 @@ extern s32 mnuGetListViewportHeight(s32);
 
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, u32, s32);
 
-extern void func_0026CB98(s32, s32, s32, s32, s32);
+extern void evtDrawListViewportIndicators(s32, s32, s32, s32, s32);
 
 typedef struct {
     u8 pad0[0x18];
@@ -515,7 +515,7 @@ void evtDrawListViewportPanel(s32 x, s32 y, s32 width, EvtPanelRecord *record) {
     s32 height = mnuGetListViewportHeight(record->heightSource) + 0x80;
 
     uiDrawUniformColorRect(x, y, 0, width, height, 0x30303040, 0x53);
-    func_0026CB98(x + width - 0xA0, y, y + height, 8, (s32)record);
+    evtDrawListViewportIndicators(x + width - 0xA0, y, y + height, 8, (s32)record);
 }
 
 /* Draw a plain background rectangle with the shared panel color and command. */
@@ -550,7 +550,7 @@ s32 mnuGetMantraNodePositionRecord(s32 index) {
 /* Find the first position matching two signed-halfword, staggered-grid keys.
  * The second coordinate's odd bit adds five to the first key; both scale by ten.
  * A loaded table is required; a failed search returns address zero. */
-s32 func_0026CF88(s32 firstCoordinate, s32 secondCoordinate) {
+s32 mnuFindMantraNodePositionRecord(s32 firstCoordinate, s32 secondCoordinate) {
     EvtLoadedRecord *loaded = (EvtLoadedRecord *)mnuMantraNodePositionTable;
     s16 firstKey;
     s16 secondKey;
@@ -573,7 +573,7 @@ s32 func_0026CF88(s32 firstCoordinate, s32 secondCoordinate) {
 }
 
 /* Return the loaded node-position count; the table must already exist. */
-u32 func_0026D020(void) {
+u32 mnuGetMantraNodePositionRecordCount(void) {
     return ((EvtLoadedRecord *)mnuMantraNodePositionTable)->recordCount;
 }
 
@@ -697,7 +697,6 @@ void prfSummarizeNonzeroEntryAttributes(s32 entryId, s32 *summary) {
 void func_0026DB20(void) {
 }
 
-extern s32 scrClearEntryFlag();
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DB28);
 
@@ -744,3 +743,4 @@ INCLUDE_SDATA(const s32, "game/code_0026C1D0", D_00437890);
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", mnuMantraNodePositionTable);
 
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", mnuMantraPanelPositionTable);
+

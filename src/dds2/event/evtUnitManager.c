@@ -48,7 +48,6 @@ extern void evtComputePlanarTargetDirectionVu(EvtUnit *unit);
 s32 func_0023D030(EvtUnit *unit, f32 *dir, f32 angle);
 extern f32 evtGetValueScaleFactor(s32 path);
 extern void evtScaleValueByMultiplier(s32 path, f32 multiplier);
-
 void func_0023C870(EvtUnit *unit, s32 a, s32 b, s32 c);
 
 typedef struct PcpScatterWork4 PcpScatterWork4;
@@ -238,7 +237,7 @@ void evtSetUnitRgbTransition(EvtUnit *unit, s32 duration, u32 color) {
     }
 }
 
-void func_0023CA60(EvtUnit *unit, s32 duration, u32 color) {
+void evtSetUnitAlphaTransition(EvtUnit *unit, s32 duration, u32 color) {
     u8 *work = (u8 *)unit;
 
     *(s16 *)(work + 0x1BA) = duration;

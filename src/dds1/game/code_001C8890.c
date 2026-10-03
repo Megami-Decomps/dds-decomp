@@ -3776,7 +3776,7 @@ void btlRequestModelOrReuse(u32 *arguments) {
         func_001D4E98(object, effect, model);
         if (*(char *)(arguments + 3) == 0) {
             btlClearUnitDefeatCandidate(object);
-            func_00221EF0(*(u32 *)(object + 0x320), 0, 0);
+            evtSetUnitAlphaTransition(*(u32 *)(object + 0x320), 0, 0);
             *(u32 *)(object + 0x84) = *(u32 *)(object + 0x54) & 0xFFFFFF;
         }
         btlBossDebugPrintf(D_003A3BC8, effect, model);
@@ -3805,7 +3805,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
     }
     if (*(s8 *)(arguments + 3) == 0) {
         btlClearUnitDefeatCandidate(object);
-        func_00221EF0(*(u32 *)(object + 0x320), 0, 0);
+        evtSetUnitAlphaTransition(*(u32 *)(object + 0x320), 0, 0);
         *(u32 *)(object + 0x84) = *(u32 *)(object + 0x54) & 0xFFFFFF;
     }
     *(u32 *)(object + 0x118) = (*(u32 *)(object + 0x118) & ~1) | 2;
@@ -3960,7 +3960,7 @@ u8 *btlCreateUnitTask10(u8 *unit, f32 *spawnPosition, s32 value) {
     return task;
 }
 
-extern void func_00221EF0(u32, s32, u32);
+extern void evtSetUnitAlphaTransition(u32, s32, u32);
 
 u32 btlUnitFadeInTask(BtlFadeArgs *args) {
     u32 total = args->fadeIn + args->fadeOut;
@@ -3971,8 +3971,8 @@ u32 btlUnitFadeInTask(BtlFadeArgs *args) {
             btlFlagUnitDefeatCandidate((u8 *)unit);
             mdlBroadcastMasked(*(s32 *)(unit->ext + 0x8C), 0);
             evtSetUnitRgbTransition(unit->ext, 0, 0);
-            func_00221EF0(unit->ext, 0, 0);
-            func_00221EF0(unit->ext, args->fadeIn, args->color);
+            evtSetUnitAlphaTransition(unit->ext, 0, 0);
+            evtSetUnitAlphaTransition(unit->ext, args->fadeIn, args->color);
             unit->flags |= 0x100000;
         }
         if (args->count == args->fadeIn - 1) {
@@ -3985,7 +3985,7 @@ u32 btlUnitFadeInTask(BtlFadeArgs *args) {
     if (!(unit->flags & 0x100000)) {
         if (args->count >= total) {
             evtSetUnitRgbTransition(unit->ext, 0, args->color);
-            func_00221EF0(unit->ext, 0, args->color);
+            evtSetUnitAlphaTransition(unit->ext, 0, args->color);
             return 1;
         }
     }
@@ -4025,7 +4025,7 @@ u32 btlUnitFadeOutTask(BtlFadeArgs *args) {
         if (args->count == args->fadeOut - 1) {
             unit->overlayColor = 0x80000000;
             evtSetUnitRgbTransition(unit->ext, 0, 0);
-            func_00221EF0(unit->ext, args->fadeIn, 0);
+            evtSetUnitAlphaTransition(unit->ext, args->fadeIn, 0);
         }
     } else {
         unit->overlayColor = 0x80000000;
@@ -5413,20 +5413,6 @@ void btlResetCameraMotion(s32 action) {
         }
     }
 }
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3D38);
-
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3D50);
-
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3D60);
-
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3D70);
-
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3D80);
-
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3D90);
-
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3DD0);
-
 typedef struct BtlDebugWorldTransform {
     u8 pad00[0x40];
     f32 position[3];
@@ -5820,6 +5806,20 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001DD6A0);
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DD7E8);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DD890);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3D38);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3D50);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3D60);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3D70);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3D80);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3D90);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3DD0);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3DF0);
 
@@ -8061,7 +8061,7 @@ void btlResetTitleStreamOnBattleFlag(void) {
 
     temp_v0 = btlGetRuntime();
     if ((*(u32 *)(temp_v0 + 500) & 0x10000) != 0) {
-        mnuRunTitleStreamTransitionAndLogBgm();
+        mnuTitleStreamUpdateAndLogBgm();
         return;
     }
 }
@@ -8987,3 +8987,4 @@ u8 *btlCreateSoundPlaybackTask(u8 *owner, u32 soundId, u32 variant, u32 channel,
 }
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5410);
+

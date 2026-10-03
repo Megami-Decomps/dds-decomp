@@ -101,7 +101,7 @@ u32 mnuResetGroupSelectionAndStartMessage(void) {
     mnuSetPanelGroupSelection(*(u32 *)(context + 0xad34), 0xffffffffffffffff);
     dspStartEntry(0x17);
     evtSetMessageWindowOptionWhenOpen(0);
-    evtCaptureMessageWindowSoundMode(0xa3);
+    evtStoreValueAndCaptureWindowPanelValue(0xa3);
     return 1;
 }
 
@@ -126,7 +126,7 @@ s64 func_0029B658(s32 request) {
     return menuSetHandler(context, 2, request);
 }
 
-s32 func_0029B6A0(void) {
+s32 mnuShowProgressLevelChangePopup(void) {
     char text[0x20];
     MenuProgressContext *context;
     MenuProgressItem *item;

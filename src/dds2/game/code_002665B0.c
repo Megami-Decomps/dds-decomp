@@ -481,7 +481,7 @@ typedef struct MenuSlotKind {
 extern MenuSlotKind D_0038A3B8[];
 
 /* Same slot kind, or both kinds in the 0xF/0x1D/0x1E group. */
-s32 mnuSlotKindMatchesGroupOrSpecial(s32 index, s32 kind) {
+s32 mnuSlotKindsInSameGroup(s32 index, s32 kind) {
     s16 current = D_0038A3B8[index].kind;
 
     if (kind == current) {
@@ -830,7 +830,7 @@ extern void sndEnsureMidiBankResident(u32);
 
 /* Select the native default/current BGM handle and make only its bank bits resident.
  * DDS2's default has a zero low halfword; DDS1's default includes track one. */
-void mnuSelectTerminalResourceBank(MenuSlotState *host) {
+void mnuTerminalSelectResourceBank(MenuSlotState *host) {
     if (host->reduced == 0) {
         host->bgmHandle = MNU_TERMINAL_DEFAULT_BGM;
     } else {
@@ -882,7 +882,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
         ((MenuSlotState *)obj)->selectedSlots[i] = -1;
     }
     *(s32 *)(obj + 0x150) = 0xF;
-    mnuSelectTerminalResourceBank((MenuSlotState *)obj);
+    mnuTerminalSelectResourceBank((MenuSlotState *)obj);
     mnuApplyFadeTrackMode(0, (MenuSlotState *)obj);
     mnuResetGradientFadeColor(obj + 0x3E8, 0x60);
     return obj;
@@ -932,13 +932,13 @@ s32 mnuUpdateTerminalMessageWindowIndicator(void) {
     return 0;
 }
 
+/* Create terminal update/draw/exit tasks plus DDS2's parented term_fade task. */
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F00);
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F10);
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F20);
 
-/* Create terminal update/draw/exit tasks plus DDS2's parented term_fade task. */
 void func_00268380(s32 reduced, s32 slot) {
     u8 *scene = mnuTerminalCreateScene(reduced, slot);
     KwlnTask *drawTask;
@@ -1303,7 +1303,7 @@ extern void func_00268CC0(s32, s32);
 
 
 
-extern void func_0026A728(s32, s32);
+extern void mnuQueueTerminalCurrencyLabel(s32, s32);
 
 extern void mnuSelectFirstListNode(s32);
 
@@ -1318,7 +1318,7 @@ extern void dspStartEntry(s32);
 
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 
-extern void evtCaptureMessageWindowSoundMode(s32);
+extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 
 
@@ -1660,7 +1660,7 @@ typedef struct DatGameCounters {
 extern s32 datGameState;
 extern char D_00437868[];
 
-void func_0026A728(s32 fading, s32 context) {
+void mnuQueueTerminalCurrencyLabel(s32 fading, s32 context) {
     EventDispatchState *state = (EventDispatchState *)context;
     s32 index;
     s32 font;
@@ -1689,7 +1689,7 @@ s64 mnuInitializeSelectionDispatchWhenModeUnset(s32 request) {
     func_00268EC8(state);
     mnuDrawTerminalSelectedSlots(state);
     if (dispatchState->menuMode == 0) {
-        func_0026A728(1, state);
+        mnuQueueTerminalCurrencyLabel(1, state);
     }
     return menuSetHandler((s32)dispatchState, 1, request);
 }
@@ -1789,7 +1789,7 @@ s64 evtPollDispatchAfterFade(u64 request) {
             if (*dispatch == 0 && state->fadeStarted == 1 &&
                 mnuCheckResourceTask() == 0) {
                 if (sdfCheckPendingWorkWithInterrupts() != 0) return 0;
-                mnuSelectTerminalResourceBank((MenuSlotState *)state);
+                mnuTerminalSelectResourceBank((MenuSlotState *)state);
                 state->fadeStarted = 0;
                 mnuSetPopupEntryFlagged(dispatch, D_003CE848);
             }
@@ -1837,7 +1837,7 @@ u32 evtPrepareSelectedMenuEntry(void) {
     dspSetActive(1);
     dspStartEntry(0);
     evtSetMessageWindowOptionWhenOpen(1);
-    evtCaptureMessageWindowSoundMode(6);
+    evtStoreValueAndCaptureWindowPanelValue(6);
     return 1;
 }
 
@@ -1845,10 +1845,10 @@ u32 func_0026ADC0(void) {
     return 1;
 }
 
-extern s8 evtGetCapturedMessageWindowSoundMode(void);
+extern s8 evtGetCapturedWindowPanelValue(void);
 extern char D_003CE928[];
 
-s64 func_0026ADC8(s32 request) {
+s64 evtOpenTerminalOwnerStatePopup(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
     s32 *dispatch = &state->dispatchStatus;
     s64 result = func_002C4038((s32)state->dispatchWork, dispatch, 0, request);
@@ -1856,7 +1856,7 @@ s64 func_0026ADC8(s32 request) {
     if (result == 0) {
         /* Choose the follow-up only after menu and message-window work is idle. */
         if (*dispatch == 0 && evtGetMessageWindowControlState() == 0) {
-            if (evtGetCapturedMessageWindowSoundMode() == 0) {
+            if (evtGetCapturedWindowPanelValue() == 0) {
                 mnuResetProgressModeFromOwner((u8 *)state);
                 mnuSetPopupEntryFlagged(dispatch, D_003CE928);
             } else if (state->menuOwner->state >= 2) {
@@ -1989,7 +1989,7 @@ s64 evtBStartSelectionChainAfterFade(u64 request) {
         case 1:
             kwlnFadeInStart(0, 0, 0, 15);
             if (state->savedMenuMode != 0) {
-                mnuSelectTerminalResourceBank((MenuSlotState *)state);
+                mnuTerminalSelectResourceBank((MenuSlotState *)state);
             }
             state->stage = 2;
             break;

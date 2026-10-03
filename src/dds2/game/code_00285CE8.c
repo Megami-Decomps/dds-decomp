@@ -41,10 +41,8 @@ typedef struct {
     s16 unk1E;     /* 0x1E */
 } MtrGrid;
 
-
 INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285CE8);
 INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285D78);
-
 INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285E98);
 
 typedef struct MtrCell {

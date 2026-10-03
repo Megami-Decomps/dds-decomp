@@ -88,7 +88,7 @@ void effBTLFieldColorResetFlags(void) {
     effFieldColorFlags = 0;
 }
 
-f32 func_00169610(BtlUnit *unit) {
+f32 effBTLFieldColorGetActorScale(BtlUnit *unit) {
     f32 scale = unit->scale;
     f32 maximum = 3.0f;
     f32 radius = ((unit->reach * scale) + (unit->height * scale * 0.5f)) * 0.5f * (1.0f / 87.5f);
@@ -116,7 +116,7 @@ f32 func_00169610(BtlUnit *unit) {
 }
 
 f32 func_001696B8(BtlUnit *unit) {
-    return func_00169610(unit);
+    return effBTLFieldColorGetActorScale(unit);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00169418", effFieldColorFlags);

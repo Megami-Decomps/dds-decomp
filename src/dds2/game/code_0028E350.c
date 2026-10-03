@@ -85,7 +85,7 @@ s32 mnuSelectMatchingNode(MenuSearchObject *object, MenuSearchState *state) {
     return 0;
 }
 
-void func_0028F7B8(MenuSearchObject *object, u16 id) {
+void mnuSelectMantraLimitLine(MenuSearchObject *object, u16 id) {
     u32 flags = 0;
     u16 limitIds[18] = {
         0x61, 0x3B, 0x5B, 0x23, 0x40, 0x62,

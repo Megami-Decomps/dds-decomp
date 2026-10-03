@@ -1758,7 +1758,7 @@ extern void mnuRetreatListCursorDefault(u32 list);
 extern void mnuPlayInputSound(s32, u32, s32);
 
 /* Step the selected party-panel list from the pad: left/right move its cursor, any input restarts the fade. */
-void mnuUpdateWindowListFromInput(s32 mode, MenuPageWindow *window) {
+void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
     u32 input = mnuMapPadMaskToFlags(0x30);
     u32 flags = window->flags;
     u32 state;

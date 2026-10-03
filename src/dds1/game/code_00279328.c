@@ -24,7 +24,7 @@ extern void mnuUpdateHandleStates(s32);
 extern void func_00280048(s32);
 extern u32 mnuMapPadMaskToFlags(u32);
 extern s32 mnuGetAbilityByteCategory(u16);
-extern void mnuUpdateWindowListFromInput();
+extern void mnuStepPartyPanelListFromInput();
 extern void mnuSetPopupEntry(s32 *, char *);
 extern char D_0037CC58[];
 extern void mnuClearListFlags();
@@ -263,7 +263,7 @@ s64 ptySkillMenuHandleFieldUse(s32 callback) {
         ((SkillMenuContext *)context)->actionFlags |= 0x20;
     }
     window = context + 0x15C;
-    mnuUpdateWindowListFromInput(8, window);
+    mnuStepPartyPanelListFromInput(8, window);
     if (buttons & 1) {
         buttons = ptySkillMenuUseSelectedInField(label, context) == 0 ? 0x8000 : 0;
         mnuFlagMatchingEntries(context);

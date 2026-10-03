@@ -289,7 +289,7 @@ void effMagatuhiCopyFloatBlock(EffMagatuhiCallback *work, EffMagatuhiFloatParams
 }
 
 /* Clone history parameters; signed delays follow the returned work block. */
-EffMagatuhiWideSecond *effMagatuhiCreateSecond(EffMagatuhiHeadSecond *src) {
+EffMagatuhiWideSecond *effMagatuhiCreateBezierHistoryWork(EffMagatuhiHeadSecond *src) {
     u32 count = src->particleCount;
     u32 handle = sdfAllocGeneralBlock(count * EFF_MAGATUHI_DELAY_WORD_BYTES + sizeof(EffMagatuhiWideSecond));
     EffMagatuhiWideSecond *work = (EffMagatuhiWideSecond *)sdfResourceRetainAddress(handle);
@@ -474,7 +474,7 @@ void func_0018AB40(EffMagatuhiWideSecond *work) {
 }
 
 /* Replace control-point xyz and jitter amplitudes without changing point w. */
-void effMagatuhiCopyHandlerRows(EffMagatuhiCallback *work, EffMagatuhiRowsSrc *src) {
+void effMagatuhiSetControlPointParams(EffMagatuhiCallback *work, EffMagatuhiRowsSrc *src) {
     EffMagatuhiWideSecond *dst = effGetHandlerArg(work->effect);
     u32 i;
 
@@ -583,7 +583,7 @@ typedef struct {
 } EffMagatuhiRingWork;
 
 /* Clone ring parameters; the returned work precedes its individual slots. */
-EffMagatuhiRingWork *effMagatuhiCreateFourth(EffMagatuhiRingParams *src) {
+EffMagatuhiRingWork *effMagatuhiCreateRingWork(EffMagatuhiRingParams *src) {
     u32 count = src->particleCount;
     u32 handle = sdfAllocGeneralBlock(count * sizeof(EffMagatuhiRingParticle) + sizeof(EffMagatuhiRingWork));
     EffMagatuhiRingWork *work = (EffMagatuhiRingWork *)sdfResourceRetainAddress(handle);
@@ -637,17 +637,17 @@ void effMagatuhiInitParticleA(EffMagatuhiRingWork *work, s32 index) {
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B348);
 
 /* Copy the ring origin as one quadword, including its fourth component. */
-void effMagatuhiCopyWorkVector(EffMagatuhiRingWork *work, void *origin) {
+void effMagatuhiSetRingOrigin(EffMagatuhiRingWork *work, void *origin) {
     PCP_COPY_VECTOR(work->head.origin, origin);
 }
 
 /* The historical symbol names a resource, but this slot is packed color. */
-void effMagatuhiSetSecondResource(EffMagatuhiRingWork *work, u32 color) {
+void effMagatuhiSetRingColor(EffMagatuhiRingWork *work, u32 color) {
     work->color = color;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effMagatuhiCopyVecs(EffMagatuhiRingWork *work, void *matrix) {
+void effMagatuhiCopyRingMatrix(EffMagatuhiRingWork *work, void *matrix) {
     VU0_COPY_MATRIX(work->matrix, matrix);
 }
 
@@ -657,7 +657,7 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
 /* Replay the first slot of each three-slot group from a random age. */
-void effMagatuhiInitRingParticles(EffMagatuhiCallback *arg) {
+void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *arg) {
     u32 k;
     EffMagatuhiRingWork *work;
     EffMagatuhiValueWork *valueWork;
@@ -767,7 +767,7 @@ typedef struct {
 } EffMagatuhiOrbitWork;
 
 /* Clone orbit parameters; the returned work precedes its individual slots. */
-EffMagatuhiOrbitWork *effMagatuhiCreateFifth(EffMagatuhiOrbitParams *src) {
+EffMagatuhiOrbitWork *effMagatuhiCreateOrbitWork(EffMagatuhiOrbitParams *src) {
     u32 count = src->particleCount;
     u32 handle = sdfAllocGeneralBlock(count * sizeof(EffMagatuhiOrbitParticle) + sizeof(EffMagatuhiOrbitWork));
     EffMagatuhiOrbitWork *work = (EffMagatuhiOrbitWork *)sdfResourceRetainAddress(handle);
@@ -799,7 +799,7 @@ void effMagatuhiReleaseOwnerAndExtraBuffer(EffMagatuhiOrbitWork *work) {
 }
 
 /* Seed randomized height/angular/radial increments and clear the slot history. */
-void func_0018BA30(EffMagatuhiOrbitWork *work, s32 index) {
+void effMagatuhiInitOrbitParticle(EffMagatuhiOrbitWork *work, s32 index) {
     EffMagatuhiOrbitParticle *elem = &work->particles[index];
     f32 blend;
     f32 t;
@@ -828,12 +828,12 @@ void effMagatuhiSetOrbitOrigin(EffMagatuhiOrbitWork *work, void *origin) {
 }
 
 /* This callback sets the packed orbit color, not an allocation handle. */
-void effMagatuhiSetWorkBuffer(EffMagatuhiOrbitWork *work, u32 color) {
+void effMagatuhiSetOrbitColor(EffMagatuhiOrbitWork *work, u32 color) {
     work->color = color;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effMagatuhiCopyVecs2(EffMagatuhiOrbitWork *work, void *matrix) {
+void effMagatuhiCopyOrbitMatrix(EffMagatuhiOrbitWork *work, void *matrix) {
     VU0_COPY_MATRIX(work->matrix, matrix);
 }
 
@@ -874,7 +874,7 @@ void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *arg) {
             PCP_COPY_VECTOR(origin, work->head.origin);
             VU0_LOAD_MATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
-                func_0018BA30(work, i);
+                effMagatuhiInitOrbitParticle(work, i);
                 frameOffset = effMiscRand(D_0034DF38) % frames;
                 particle->delay = frameOffset;
                 /* Keep at most maxSteps samples: skip older state only when
@@ -926,7 +926,7 @@ typedef struct {
 } EffMagatuhiDriftWork;
 
 /* Clone drift parameters; return the work after its 0x30-byte state array. */
-EffMagatuhiDriftWork *effMagatuhiCreateThird(EffMagatuhiDriftParams *src) {
+EffMagatuhiDriftWork *effMagatuhiCreateDriftWork(EffMagatuhiDriftParams *src) {
     u32 count = src->particleCount;
     u32 size = count * sizeof(EffMagatuhiDriftParticle);
     u32 handle = sdfAllocGeneralBlock(size + sizeof(EffMagatuhiDriftWork));
@@ -1005,18 +1005,18 @@ void effMagatuhiSetDriftOrigin(EffMagatuhiDriftWork *work, void *origin) {
 }
 
 /* This callback sets packed drift color; +0x120 is not an owner pointer. */
-void effMagatuhiSetFirstResource(EffMagatuhiDriftWork *work, u32 color) {
+void effMagatuhiSetDriftColor(EffMagatuhiDriftWork *work, u32 color) {
     work->color = color;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effMagatuhiCopyVecs3(EffMagatuhiDriftWork *work, void *matrix) {
+void effMagatuhiCopyDriftMatrix(EffMagatuhiDriftWork *work, void *matrix) {
     VU0_COPY_MATRIX(work->matrix, matrix);
 }
 
 
 /* Replay the first slot of each three-slot drift group from a random age. */
-void effMagatuhiInitDriftParticles(EffMagatuhiCallback *arg) {
+void effMagatuhiUpdateDriftFamily(EffMagatuhiCallback *arg) {
     u32 k;
     EffMagatuhiDriftWork *work;
     EffMagatuhiValueWork *valueWork;
@@ -1103,13 +1103,13 @@ s32 effMagatuhiDispatchByKind(EffMagatuhiCallback *work) {
             effMagatuhiInitializeInterpolatedHistory(work);
             break;
         case EFF_MAGATUHI_REPLAY_RING:
-            effMagatuhiInitRingParticles(work);
+            effMagatuhiUpdateRingFamily(work);
             break;
         case EFF_MAGATUHI_REPLAY_ORBIT:
             effMagatuhiReplayOrbitStartDelays(work);
             break;
         case EFF_MAGATUHI_REPLAY_DRIFT:
-            effMagatuhiInitDriftParticles(work);
+            effMagatuhiUpdateDriftFamily(work);
             break;
         }
     }

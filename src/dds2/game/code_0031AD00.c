@@ -113,7 +113,7 @@ void func_0031AF60(void) {
 }
 
 typedef struct SoundSlot SoundSlot;
-extern SoundSlot *sndClaimFreeSoundSlot(u32 sequence, u32 frames);
+extern SoundSlot *dds3ClaimSoundSlot(u32 sequence, u32 frames);
 extern s8 D_0037F510[];
 
 /* Clamp cursor movement before confirm/cancel override the navigation sound. */
@@ -143,13 +143,13 @@ s32 func_0031AF68(ItfChoiceState *object) {
     }
     switch (sound) {
     case 1:
-        sndClaimFreeSoundSlot(0, 0);
+        dds3ClaimSoundSlot(0, 0);
         break;
     case 2:
-        sndClaimFreeSoundSlot(8, 0);
+        dds3ClaimSoundSlot(8, 0);
         break;
     case 3:
-        sndClaimFreeSoundSlot(10, 0);
+        dds3ClaimSoundSlot(10, 0);
         break;
     }
     return result;

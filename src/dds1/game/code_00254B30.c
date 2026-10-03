@@ -128,7 +128,7 @@ void itfDspDrawIndexedRecord(s32 x, s32 y, s32 layer, u32 attributes, u32 entry,
 extern char D_003BC458[];
 extern char D_003BC460[];
 extern char D_003BC468[];
-void func_00254EF0(s32 x, s32 y, s32 layer, s32 alpha, s32 context) {
+void mnuDrawDisplayPlaceholder(s32 x, s32 y, s32 layer, s32 alpha, s32 context) {
     u32 textColor = (u32)((f32)alpha * 0.6f) | 0xA09D7D00;
     char text[0x20];
 
@@ -192,7 +192,7 @@ extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern s32 mnuGetMantraSourceValue(s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void dspStartEntry(s32);
-extern void evtCaptureMessageWindowSoundMode(s32);
+extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 /* Populate the unit and both mantra labels, plus the selected mantra's cost. */
 void itfDspPopulatePrimaryLabels(void) {
@@ -207,7 +207,7 @@ void itfDspPopulatePrimaryLabels(void) {
     evtCopyEntryStringToActiveWindow(3, text);
     evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(0);
-    evtCaptureMessageWindowSoundMode(8);
+    evtStoreValueAndCaptureWindowPanelValue(8);
 }
 
 /* Populate the same menu labels, selecting the alternate display signal. */
@@ -223,7 +223,7 @@ void itfDspPopulateAlternateLabels(void) {
     evtCopyEntryStringToActiveWindow(3, text);
     evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(1);
-    evtCaptureMessageWindowSoundMode(8);
+    evtStoreValueAndCaptureWindowPanelValue(8);
 }
 
 /* Populate menu labels for the third display signal. */

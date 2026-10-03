@@ -29,7 +29,7 @@ typedef struct {
     void *owner; /* 0x20 owning effect object */
     u16 entryId; /* 0x24 forwarded to the bill parameter lookup */
     u16 ownerKind; /* 0x26 copied from owner's kind */
-    void *vector; /* 0x28 passed to func_00190130 */
+    void *vector; /* 0x28 passed to effEventCreate */
     void *node; /* 0x2C released and replaced by effObjReplaceActiveEventNode */
 } EffectData; /* 0x30 bytes */
 
@@ -54,7 +54,7 @@ void dds3DestroyObjectBase(void *arg);
 void sdfReleaseChipBlock(void *arg);
 /* Dispatchers take (bill handle, 16-byte vector, extra); the vector is
    loaded with lqc2 and the extra is forwarded to effObjCreateWithVectors. */
-EffectObj *effObjCreateWithBill(void *bill, void *vec, s32 extra);
+EffectObj *effObjCreateKindTwo(void *bill, void *vec, s32 extra);
 void billSetKind1Entry(void *arg);
 EffectObj *effObjCreateBillNode(void *bill, void *vec, s32 extra);
 EffectObj *effObjCreateWithBoundBill(void *bill, void *vec, s32 extra);
@@ -89,7 +89,7 @@ extern s32 sdfLoadMapRecordLookAtBasis(void *param, s32 id);
 
 extern void effEventReleaseNode(void *node);
 
-extern void *func_00190130(void *bill, u32 id, void *vec);
+extern void *effEventCreate(void *bill, u32 id, void *vec);
 
 extern EffectObj *dds3AppendWorldObjectNode(s32 kind);
 
@@ -101,7 +101,7 @@ extern void effObjSetInnerSecondVec(void *obj, void *vec);
 
 extern void effObjInnerVecBackup(void *params);
 extern void effMagatuhiCopyFloatBlock(void *, const void *);
-extern void effMagatuhiCopyHandlerRows(void *, const void *);
+extern void effMagatuhiSetControlPointParams(void *, const void *);
 
 
 
@@ -192,7 +192,7 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
 }
 
 
-EffectObj *effObjCreateWithBill(void *bill, void *vec, s32 extra) {
+EffectObj *effObjCreateKindTwo(void *bill, void *vec, s32 extra) {
     u8 vector[0x10];
     EffectObj *obj;
     EffectData *data;
@@ -229,7 +229,7 @@ void effObjSpawnSharedBillClone(EffectObj *obj, void *firstVector, s32 secondVec
     void *bill;
 
     bill = billCloneObjectRetainingSharedData(obj->data->bill);
-    effObjCreateWithBill(bill, firstVector, secondVectorAddress);
+    effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
 }
 
 /* Create a kind-one indexed bill; the native constructor result is discarded. */
@@ -237,7 +237,7 @@ void effObjCreateIndexedKindOne(u32 billId, void *firstVector, s32 secondVectorA
     void *bill;
 
     bill = billCreateIndexed(1, billId);
-    effObjCreateWithBill(bill, firstVector, secondVectorAddress);
+    effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
 }
 
 /* Create a kind-one resource bill; the native constructor result is discarded. */
@@ -245,7 +245,7 @@ void effObjCreateResourceKindOne(s32 resourceId, void *firstVector, s32 secondVe
     void *bill;
 
     bill = billCreateFromResource(1, resourceId);
-    effObjCreateWithBill(bill, firstVector, secondVectorAddress);
+    effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
 }
 
 /* Select the stored bill's kind-one entry; no object/data/bill checks are made. */
@@ -441,7 +441,7 @@ void effObjReplaceActiveEventNode(EffectObj *obj, u32 entryId) {
         effEventReleaseNode(data->node);
         data->node = NULL;
     }
-    data->node = func_00190130(data->bill, entryId & EFF_OBJ_ENTRY_ID_MASK, data->vector);
+    data->node = effEventCreate(data->bill, entryId & EFF_OBJ_ENTRY_ID_MASK, data->vector);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115398);
@@ -513,7 +513,7 @@ extern void effMagatuhiDispatchByKind(void *bill);
 
 /* Dispatch bound-bill setup or four-row history initialization; two-row state does nothing.
    Native implicit-int fall-through leaves the return value unspecified. */
-effObjDispatchMagatuhiState(EffectObj *obj) {
+effObjDispatchReadyState(EffectObj *obj) {
     if (obj->kind == EFF_OBJ_KIND) {
         EffectData *data = obj->data;
 
@@ -571,7 +571,7 @@ s32 effObjCopyMagatuhiSourceParameters(EffectObj *obj, EffectObj *first, EffectO
             VU0_STORE_VF(vf10, parameterRows + 12);
             parameterRows[19] = effObjGetIntParam(fourth);
         }
-        effMagatuhiCopyHandlerRows(data->bill, parameterRows);
+        effMagatuhiSetControlPointParams(data->bill, parameterRows);
         return 1;
     }
     return 0;

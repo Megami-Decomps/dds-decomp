@@ -724,7 +724,7 @@ extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 extern void sdfDevWaitThenReleaseCommandState(u32);
 
 /* Load every field table from FLDALL.TBL, then build D_003899F0: for each stage id (1..0x1E) the running total of the coordinate rows that precede its first record. Reads the coordinate table through the array each time: a pointer local assigned from D_00389170 would share its address with the argument use in a saved register across the calls. */
-void func_00122828(void) {
+void fldLoadFieldTablesAndIndexStages(void) {
     u32 command = sdfDevCreateCommandState("/fld/f/bin/FLDALL.TBL");
     s32 sum;
     s16 previous;
@@ -1495,7 +1495,7 @@ extern void effMiscSeedRandom();
 extern void fldParseMixLb();
 extern void func_001343E8();
 extern void func_00145818();
-extern void func_00122828();
+extern void fldLoadFieldTablesAndIndexStages();
 extern u8 D_0038A6E0[];
 
 void fldInitializeDisplayAndSceneSound(void) {
@@ -1506,7 +1506,7 @@ void fldInitializeDisplayAndSceneSound(void) {
     fldParseMixLb();
     func_001343E8();
     func_00145818();
-    func_00122828();
+    fldLoadFieldTablesAndIndexStages();
 }
 
 void fldResetPlayerSceneTransformState(void) {
@@ -1744,7 +1744,7 @@ u32 fldGetPlayerSceneState(void) {
     return *fldGetPlayerSceneStateAddress();
 }
 
-void func_00125F58(void) {
+void fldPreparePlayerSceneCameraTarget(void) {
     f32 position[4];
 
     if (fldPlayerObject != 0) {
@@ -2097,7 +2097,7 @@ extern s32 fldHasPendingSceneFlags(void);
 extern void fldSetCameraNodeModeWithTen(void);
 extern void func_00123B88(s32, s32, f32, f32, f32);
 
-s32 func_00127600(void) {
+s32 fldUpdateNextFloorTransition(void) {
     s32 pressed = 0;
     FldSceneState *state;
 
@@ -2417,3 +2417,4 @@ INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F8C);
 INCLUDE_SDATA(const s32, "game/code_0011F208", fldSceneControlFlags);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F98);
+

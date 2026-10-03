@@ -153,17 +153,17 @@ extern void effEnableRectangleBlur(void);
 extern void effDisableColorRectangle(void);
 extern void effDisableTexturedSquare(void);
 extern void effDisableRectangleBlur(void);
-extern void effCopyCh71Common(void *);
+extern void effCopyTexturedBlurParameters(void *);
 extern u32 effGetCh72Work(void);
 extern void effEnableTexturedBlur(void);
-extern void effCopyCh72Common(void *);
+extern void effCopyFilterBlurParameters(void *);
 extern void effEnableFilterBlur(void);
 extern void effDisableFilterBlur(void);
 extern void effDisableStaggeredBlur(void);
-extern void effCopyCh75Common(void *);
+extern void effCopyTexturedSquareParameters(void *);
 extern void effEnableTexturedSquare(void);
 extern void effDisableTexturedBlur(void);
-extern void effCopyCh76Common(void *);
+extern void effCopyStaggeredBlurParameters(void *);
 extern u32 effGetCh76Work(void);
 extern void effEnableStaggeredBlur(void);
 extern void effMiscNormalizeVU(void);
@@ -293,13 +293,13 @@ extern u16 D_003BD75E;
 extern u32 effGetCh75Work(void);
 
 /* Save the live textured-square params; zero copies the staged body immediately. */
-void kwlnDrawApplyEffectWord(s32 duration) {
+void kwlnDrawSetupE08FromCh75(s32 duration) {
     D_003C2DE0 = *(KwlnResourceRectParams *)effGetCh75Work();
     D_003BD75C = 0;
     D_003BD75E = duration;
     if (duration == 0) {
         kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_SQUARE_TRANSITION;
-        effCopyCh75Common(&kwlnTexturedSquareParameters);
+        effCopyTexturedSquareParameters(&kwlnTexturedSquareParameters);
     } else {
         kwlnDrawControlFlags |= KWLN_DRAW_SQUARE_TRANSITION_BIT;
     }
@@ -316,7 +316,7 @@ void kwlnDrawSetupE08(s32 duration) {
     kwlnTexturedSquareFadeDuration = requestedDuration;
     if (requestedDuration == 0) {
         kwlnDrawControlFlags &= ~KWLN_DRAW_SQUARE_FADE_BIT;
-        effCopyCh75Common(params);
+        effCopyTexturedSquareParameters(params);
         effEnableTexturedSquare();
     }
     else {
@@ -342,7 +342,7 @@ void kwlnDrawEnableE08(s32 duration) {
 
 /* Apply vignette alpha and Q12 scale now, or interpolate them over duration updates.
  * Despite the legacy function name, these values do not specify position offsets. */
-void kwlnDrawSetOffsetTransition(s32 duration, s32 alpha, s32 scale) {
+void kwlnDrawSetOverlayTransition(s32 duration, s32 alpha, s32 scale) {
     if (duration == 0) {
         kwlnDrawOverlayAlpha = (s16)alpha;
         kwlnDrawOverlayScale = (s16)scale;
@@ -469,13 +469,13 @@ extern u16 D_003BD722;
 extern u32 effGetCh71Work(void);
 
 /* Save live textured-blur params; zero copies the staged body immediately. */
-void kwlnDrawApplyEffectBlock(s32 duration) {
+void kwlnDrawSetupC70FromCh71(s32 duration) {
     D_003C2C40 = *(KwlnPixelBlurParams *)effGetCh71Work();
     D_003BD720 = 0;
     D_003BD722 = duration;
     if (duration == 0) {
         kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_TEXTURE_TRANSITION;
-        effCopyCh71Common(&kwlnTexturedBlurParameters);
+        effCopyTexturedBlurParameters(&kwlnTexturedBlurParameters);
     } else {
         kwlnDrawControlFlags |= KWLN_DRAW_TEXTURE_TRANSITION_BIT;
     }
@@ -492,7 +492,7 @@ void kwlnDrawSetupC70(s32 duration) {
     kwlnTexturedBlurFadeDuration = requestedDuration;
     if (requestedDuration == 0) {
         kwlnDrawControlFlags &= ~KWLN_DRAW_TEXTURE_FADE_BIT;
-        effCopyCh71Common(params);
+        effCopyTexturedBlurParameters(params);
         effEnableTexturedBlur();
     }
     else {
@@ -512,7 +512,7 @@ void kwlnDrawSetupC70B(s32 duration) {
     if (requestedDuration == 0) {
         kwlnDrawControlFlags &= ~KWLN_DRAW_TEXTURE_FADE_BIT;
         kwlnDrawControlFlags &= ~KWLN_DRAW_TEXTURE_TRANSITION_BIT;
-        effCopyCh71Common(params);
+        effCopyTexturedBlurParameters(params);
         effDisableTexturedBlur();
     }
     else {
@@ -567,7 +567,7 @@ void kwlnSetFilterBlurParameterTransition(s32 duration) {
     D_003BD72E = duration;
     if (duration == 0) {
         kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_FILTER_TRANSITION;
-        effCopyCh72Common(&kwlnFilterBlurParameters);
+        effCopyFilterBlurParameters(&kwlnFilterBlurParameters);
     } else {
         kwlnDrawControlFlags |= KWLN_DRAW_FILTER_TRANSITION_BIT;
     }
@@ -585,12 +585,12 @@ void kwlnDrawSetupCd0(s32 duration) {
     kwlnFilterBlurFadeDuration = requestedDuration;
     if (requestedDuration == 0) {
         kwlnDrawControlFlags &= ~KWLN_DRAW_FILTER_FADE_BIT;
-        effCopyCh72Common(params);
+        effCopyFilterBlurParameters(params);
         effEnableFilterBlur();
     }
     else {
         kwlnDrawControlFlags |= KWLN_DRAW_FILTER_FADE_BIT;
-        effCopyCh72Common(params);
+        effCopyFilterBlurParameters(params);
         effDisableFilterBlur();
     }
 }
@@ -647,7 +647,7 @@ void kwlnSetStaggeredBlurParameterTransition(s32 duration) {
     D_003BD73A = duration;
     if (duration == 0) {
         kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_STAGGERED_TRANSITION;
-        effCopyCh76Common(&kwlnStaggeredBlurParameters);
+        effCopyStaggeredBlurParameters(&kwlnStaggeredBlurParameters);
     } else {
         kwlnDrawControlFlags |= KWLN_DRAW_STAGGERED_TRANSITION_BIT;
     }
@@ -665,12 +665,12 @@ void kwlnDrawSetupD30(s32 duration) {
     kwlnStaggeredBlurFadeDuration = requestedDuration;
     if (requestedDuration == 0) {
         kwlnDrawControlFlags &= ~KWLN_DRAW_STAGGERED_FADE_BIT;
-        effCopyCh76Common(params);
+        effCopyStaggeredBlurParameters(params);
         effEnableStaggeredBlur();
     }
     else {
         kwlnDrawControlFlags |= KWLN_DRAW_STAGGERED_FADE_BIT;
-        effCopyCh76Common(params);
+        effCopyStaggeredBlurParameters(params);
         effDisableStaggeredBlur();
     }
 }

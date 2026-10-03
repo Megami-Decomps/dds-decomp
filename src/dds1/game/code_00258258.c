@@ -27,9 +27,10 @@ void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
 
 
 INCLUDE_ASM(const s32, "game/code_00258258", func_00258B00);
-
-
 INCLUDE_ASM(const s32, "game/code_00258258", func_00258B90);
+
+
+
 
 INCLUDE_ASM(const s32, "game/code_00258258", func_00258EB8);
 
@@ -89,3 +90,4 @@ INCLUDE_SDATA(const s32, "game/code_00258258", D_003BC488);
 INCLUDE_SDATA(const s32, "game/code_00258258", D_003BC490);
 
 INCLUDE_SDATA(const s32, "game/code_00258258", D_003BC498);
+

@@ -81,7 +81,7 @@ extern s32 sdfReadNamedResource(const char *, u32 *, s32);
 extern void mnuMarkTitleStreamResetPending(void);
 extern void mnuResetTitleStreamLocked(void);
 extern void func_0026A5F0(s32);
-extern void mnuRunTitleStreamTransitionAndLogBgm(void);
+extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern void *mnuCreateSpriteResource(s32, u8, u8);
 extern u8 *mnuCreateWorkBlock(void);
 
@@ -446,7 +446,7 @@ MnuResourceTaskWork *func_0024F608(void) {
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
     func_0026A5F0(0x10);
-    mnuRunTitleStreamTransitionAndLogBgm();
+    mnuTitleStreamUpdateAndLogBgm();
     memset(D_0036C698, 0, sizeof(s32) * 14);
     mnuRequestMantraResources(work);
     work->drawPool = mnuCreateSpriteResource(0x3C, 8, 0);

@@ -30,7 +30,7 @@ extern void sdfBuildVuRotationFromAxisAngle(f32 angle, void *orientation);
 
 /* Effect initializers implemented in assembly below. Each is entered both with
    and without spawn arguments, so they are declared unchecked. */
-extern void effFlashTrianglePulseCreate();
+extern void effFlashRecordCreate();
 extern void *effFlashOrbitArcCreate();
 
 typedef struct PcpFlashPulseParticle {
@@ -457,12 +457,12 @@ extern void effFlashOffsetRadialWriteCorners(PcpFlashOffsetRadialWork *, s32, vo
 
 void effFlashTrianglePulseSpawnFromTable(void *data)
 {
-    effFlashTrianglePulseCreate(effParamTableGetBlock(data, 0));
+    effFlashRecordCreate(effParamTableGetBlock(data, 0));
 }
 
 void func_0016A1C8(void)
 {
-    effFlashTrianglePulseCreate();
+    effFlashRecordCreate();
 }
 
 void effFlashTrianglePulseDestroy(PcpFlashTrianglePulseWork *work)
@@ -1730,7 +1730,7 @@ void effFlashRotatingQuadUpdate(PcpFlashRotatingQuadWork *work) {
     effDrawScaledRecordPool(handle);
 }
 
-extern PcpFlashDrawPool *effRecordPoolCreateTriad(s32 count);
+extern PcpFlashDrawPool *effRecordPoolCreateTriple(s32 count);
 
 PcpFlashRadialTriangleWork *effFlashRadialTriangleCreate(src)
     PcpFlashRadialTriangleWork *src;
@@ -1746,7 +1746,7 @@ PcpFlashRadialTriangleWork *effFlashRadialTriangleCreate(src)
     work->ownedBuffer = handle;
     work->renderScale = 1.0f;
     work->updateCount = 0;
-    record = effRecordPoolCreateTriad(work->particleCount);
+    record = effRecordPoolCreateTriple(work->particleCount);
     work->resourceHandle = (u32)record;
     record->unk50 = work->unk38;
     for (i = 0; i < work->particleCount; i++) {
@@ -2448,7 +2448,7 @@ PcpFlashOffsetRadialWork *effFlashOffsetRadialTriangleCreate(src)
     work->ownedBuffer = handle;
     work->renderScale = 1.0f;
     work->updateCount = 0;
-    record = effRecordPoolCreateTriad(work->particleCount);
+    record = effRecordPoolCreateTriple(work->particleCount);
     work->resourceHandle = (u32)record;
     record->unk50 = work->unk3C;
     for (i = 0; i < work->particleCount; i++) {

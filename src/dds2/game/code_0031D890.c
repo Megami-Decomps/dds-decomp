@@ -223,7 +223,7 @@ extern void func_0031F040(FadeEntry *entry, u32 displayValue);
 extern void itfDrawFadeGlyphForFrame(FadeEntry *entry);
 
 /* Fade blocks have a common state prefix and callback-specific trailing data. */
-void func_0031E2E8(ItfFadeWork *work) {
+void itfDrawFullExtentWorkPanels(ItfFadeWork *work) {
     itfSetFadeMode((FadeEntry *)work->strip, 1, 0x80);
     itfDrawFadeGlyphStrip((FadeEntry *)work->strip);
     itfSetFadeMode((FadeEntry *)work->lowerNumber, 1, 0x80);

@@ -15,6 +15,7 @@ extern void mnuForwardDupArg(s32, s32, s32, s32, s32);
 extern void mnuActivatePanelAndConfigureGridResources(s32, s32, s32, s32);
 extern s32 mnuSeekListNode(s32, s32);
 
+
 typedef struct {
     u32 allocation; /* 0x00 */
     u32 pad04;       /* 0x04 */
@@ -146,7 +147,7 @@ extern void mnuDrawWindowContainer(s32, s32, s32, s32, s32);
 extern void func_002723B0(s32, s32);
 extern u8 D_0037C860[];
 
-s64 mnuPrepareStaffImageAndSelectionLabelB(s32 callback) {
+s64 mnuStaffDrawImagePanelA(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_00272778(callback);
     mnuCreateStaffImageSprite(4);

@@ -184,7 +184,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
-void func_00176E20(EffResourceWork *work, u32 count, u32 centerColor, u32 outerColor,
+void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor, u32 outerColor,
                    f32 radiusScale, f32 height) {
     u32 oldResource = work->resource68;
     u32 recordCount;

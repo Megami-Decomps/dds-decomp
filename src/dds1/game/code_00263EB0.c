@@ -82,7 +82,7 @@ u32 mnuBeginPanelEntryAndCaptureSoundMode(void) {
     mnuSetPanelGroupSelection(*(u32 *)(context + 0xd10), 0xffffffffffffffff);
     dspStartEntry(0x16);
     evtSetMessageWindowOptionWhenOpen(0);
-    evtCaptureMessageWindowSoundMode(0x1d);
+    evtStoreValueAndCaptureWindowPanelValue(0x1d);
     return 1;
 }
 

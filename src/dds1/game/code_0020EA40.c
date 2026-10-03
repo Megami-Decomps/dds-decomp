@@ -12,7 +12,7 @@ extern s32 datActionAnimationRecords;
 
 extern s32 btlGetRuntime(void);
 
-extern s32 func_0020DC38();
+extern s32 btlSetLinkedDefeatCameraPresetB();
 
 extern void btlFlagAllUnitDefeatCandidatesTask(void);
 
@@ -54,7 +54,7 @@ s32 btlDispatchActionAnimation(BtlLinkedCommand *command) {
         command->state = 0;
     } else if (flags & 0x8000) {
         btlFlagAllUnitDefeatCandidatesTask();
-        func_0020DC38(command, command, 0);
+        btlSetLinkedDefeatCameraPresetB(command, command, 0);
     } else if (flags & 8) {
         if (btlGetIndexListCount(command->task->targetList) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();

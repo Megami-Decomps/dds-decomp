@@ -119,7 +119,7 @@ extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32,
 
 extern void func_001093B8(s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern s32 func_002C5FB8(u32);
+extern s32 sdfCounterMeasureLabelWidth(u32);
 
 extern void evtPrepareSizedDrawResource();
 
@@ -140,7 +140,7 @@ void sdfInitInnerVectors(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C38B0);
 
-void func_002C3AC8(s32 index, s32 count) {
+void sdfInitializeMapCounterSelection(s32 index, s32 count) {
     fldLocalMapFirstCameraVector = D_003900E0[index];
     fldLocalMapSecondCameraVector = D_00390180[index];
     D_003900C0 = fldLocalMapFirstCameraVector;
@@ -289,7 +289,7 @@ extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 extern s32 mdlCollectFlagBitsIntoMask(void);
 extern SdfCounterChannel *mnuListAppendNode(s32, s32);
-extern u8 *func_002C44D0(s32);
+extern u8 *sdfResolveSceneCounterInfo(s32);
 extern void sdfCounterSelectChannelByIndex(SdfCounterRuntime *, s32);
 extern void func_002C4C88();
 extern u8 D_00390220[];
@@ -314,7 +314,7 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
             memset(display, 0, 0x10);
             display->value = i + 1;
             display->word = (u32 *)(D_00390220 + i * 0x18);
-            display->info = func_002C44D0(i + 1);
+            display->info = sdfResolveSceneCounterInfo(i + 1);
             if ((completedMask >> i) & 1) {
                 display->flag = 1;
             }
@@ -345,7 +345,7 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
 extern u8 D_00390310[][52];
 extern s32 mdlFlagTest(s32);
 
-u8 *func_002C44D0(s32 scene) {
+u8 *sdfResolveSceneCounterInfo(s32 scene) {
     switch (scene) {
     case 3:
         if (mdlFlagTest(7)) {
@@ -443,7 +443,7 @@ void sdfCounterDrawChannelPlate(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt,
                   PACK(base, base, base, (u32)((f32)(base + 0x10) * fade)),
                   PACK(base + 0x30, base + 0x30, base + 0x30, (u32)(fade * 64.0f)),
                   PACK(base + 0x60, base + 0x60, base + 0x60, (u32)((f32)(base + 0x70) * fade)));
-    width = func_002C5FB8((u32)channel->display->word);
+    width = sdfCounterMeasureLabelWidth((u32)channel->display->word);
     evtPrepareSizedDrawResource(x + (0x80 - width) / 2 + 1, y + 1,
                                 PACK((u32)(fade * 128.0f), (u32)(fade * 128.0f), (u32)((f32)(base + 0x80) * fade), (u32)(fade * 128.0f)),
                                 channel->display->word);

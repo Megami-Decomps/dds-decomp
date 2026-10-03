@@ -1583,7 +1583,7 @@ u32 func_001243C0(void);
 extern void func_001372D0(f32 *position);
 void fldSetSceneControlFlags(u32 mask);
 
-void func_00123E00(void) {
+void fldPreparePlayerSceneCameraTarget(void) {
     f32 position[4];
 
     if (fldPlayerObject != 0) {
@@ -1956,7 +1956,7 @@ extern void fldSetCameraNodeModeWithTen(void);
 extern void func_00121B88(s32, s32, f32, f32, f32);
 extern void evtStartSceneResourceTask(u64, void *);
 
-s32 func_00125170(void) {
+s32 fldUpdateNextFloorTransition(void) {
     s32 pressed = 0;
     FldSceneState *state;
 
@@ -2295,3 +2295,4 @@ INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BABFC);
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", fldSceneControlFlags);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAC08);
+

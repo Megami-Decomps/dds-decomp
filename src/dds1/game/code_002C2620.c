@@ -21,7 +21,7 @@ extern void func_003014F0(char *, char *, s32);
 extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void dspStartEntry(s32);
-extern void evtCaptureMessageWindowSoundMode(s32);
+extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_003BD250[];
 extern s32 evtGetMessageWindowControlState(void);
 extern void func_0024DD78(void);
@@ -58,7 +58,7 @@ extern s32 mdlCollectLowFlagBits(void);
 extern s32 fldCountMaskBitsBeforeOrdinal(s32, s32);
 extern s32 sdfCreateMaskedCounterChannels(s32, s32);
 extern s32 func_002C38B0(s32);
-extern void func_002C3AC8(s32, s32);
+extern void sdfInitializeMapCounterSelection(s32, s32);
 extern s32 fldLoadLocalMapResources();
 extern void fldCreateMapRequestQueues(void);
 extern u32 sdfReadNamedResource(const char *, u32 *, u32 *);
@@ -263,7 +263,7 @@ extern LmapList *D_003BD968;
 extern void fldLmapSubmitScaledSpritePacket(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_002C22F0(s32, s32, s32, LmapList *, s32);
 
-void func_002C2A20(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
+void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
     u32 color;
 
     D_003BD238++;
@@ -289,7 +289,7 @@ void func_002C2A20(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
         D_003BD968 = list;
         if (list->flags & 0x21) {
             if (list->cursor->child != 0) {
-                func_002C2A20(x + ((list->width + 8) << 4), y, z, list->cursor->child, channel);
+                fldLmapDrawListTree(x + ((list->width + 8) << 4), y, z, list->cursor->child, channel);
             }
         } else if ((list->flags & 2) && list->selected != 0) {
             list->selected(list);
@@ -493,7 +493,7 @@ void fldInitializeLocalMapScene(void) {
     index = fldCountMaskBitsBeforeOrdinal(mask, D_003BD23C);
     D_003BD240 = index;
     sdfCreateMaskedCounterChannels(mask, index);
-    func_002C3AC8(D_003BD240, func_002C38B0(mask));
+    sdfInitializeMapCounterSelection(D_003BD240, func_002C38B0(mask));
     fldLoadLocalMapResources(mask);
     fldCreateMapRequestQueues();
     dspCloseChannel();
@@ -515,7 +515,7 @@ extern void evtSetDrawSurfaceIndex(s32);
 extern void func_00108CB8(s32);
 extern void func_001093B8(s32, s32, s32, s32, u32, s32, s32, s32);
 extern void func_002C4850(s32);
-extern void func_002C7950(void);
+extern void fldDrawCounterMapMarker(void);
 extern void func_002C6448(s32);
 extern s32 func_00134CD8(void);
 
@@ -529,12 +529,12 @@ void func_002C3420(void) {
     case 1:
     case 2:
         func_002C4850(1);
-        func_002C7950();
+        fldDrawCounterMapMarker();
         func_002C6448(0);
         break;
     case 3:
         func_002C4850(0);
-        func_002C7950();
+        fldDrawCounterMapMarker();
         func_002C6448(1);
         break;
     case 4:
@@ -604,7 +604,7 @@ void fldDisplayLocalMapCounterMessage(void) {
     evtCopyEntryStringToActiveWindow(0, text);
     evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(0);
-    evtCaptureMessageWindowSoundMode(1);
+    evtStoreValueAndCaptureWindowPanelValue(1);
 }
 
 s32 fldLmapToggleOverlay(void) {

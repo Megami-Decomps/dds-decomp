@@ -472,7 +472,7 @@ extern void func_002DA420(u32 asset, f32 value);
 
 /* Allocate three positions and three colors per triangle, then the header.
  * The complete block and shared packet-parameter record are cleared. */
-EffRecordPool *effRecordPoolCreateTriad(s32 triangleCount) {
+EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount) {
     EffRecordPool *pool;
     u32 handle;
     u32 *block;

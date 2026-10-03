@@ -119,7 +119,7 @@ extern void fldRelocatePackedTransferChunk(u32 arg0, s32 arg1);
 
 extern s32 func_001277A8(s32 arg0);
 
-extern void func_00123E00(void);
+extern void fldPreparePlayerSceneCameraTarget(void);
 
 extern void fldReleaseCameraModel(s32 arg0);
 
@@ -1048,7 +1048,7 @@ void fldEnterSceneCamera(void) {
     fldReleaseTitleSlots();
     fldSceneReady = 0;
     fldClearSceneLifecycleFlags(1);
-    func_00123E00();
+    fldPreparePlayerSceneCameraTarget();
     evtSetSolarOverlayFullyVisible();
     fldApplySkyLightSetToPlayerVU();
     cam->unk70 = 4;
@@ -2409,7 +2409,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_0014BA50);
 
 extern void effObjSetInnerFirstVec();
 
-extern s32 *dds3GetUnk0C();
+extern s32 *dds3GetObjectBaseResourceHandle();
 
 extern void dds3ClearObjectFlags();
 
@@ -2427,7 +2427,7 @@ void fldFreeSparkSlot(s32 index) {
         vec.v[2] = fldSparkSlots[index].pos[2];
         effObjSetInnerFirstVec(fldSparkObjectEntries[fldSparkSlots[index].objectSlot].unk0, &vec);
         obj = fldSparkObjectEntries[fldSparkSlots[index].objectSlot].unk0;
-        flags = dds3GetUnk0C(obj);
+        flags = dds3GetObjectBaseResourceHandle(obj);
         *flags |= 1;
         dds3ClearObjectFlags(obj, 0x400);
         slot = fldSparkSlots[index].objectSlot;
@@ -2478,7 +2478,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_0014C210);
 
 extern s32 fldSparkControlState[];
 
-extern void evtCaptureMessageWindowSoundMode(s32);
+extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 
@@ -2498,7 +2498,7 @@ extern void fldReleaseWeatherEffects(void);
 
 extern void fldStartSceneBgmAlternate(void);
 
-extern void func_00123E00(void);
+extern void fldPreparePlayerSceneCameraTarget(void);
 
 extern void evtSetSolarOverlayFullyVisible(void);
 
@@ -2516,7 +2516,7 @@ void fldFinishEventFieldState(void) {
         fldClearObjectEntryHandles();
         fldReleaseWeatherEffects();
         fldStartSceneBgmAlternate();
-        func_00123E00();
+        fldPreparePlayerSceneCameraTarget();
         state->eventActive = 0;
         fldSparkControlState[2] = 0;
         fldSparkControlState[3] = 0;
@@ -2544,7 +2544,7 @@ void fldResetEventSceneState(void) {
     fldAreaState[0x46] = 0;
     fldClearObjectEntryHandles();
     fldReleaseWeatherEffects();
-    func_00123E00();
+    fldPreparePlayerSceneCameraTarget();
     fldAreaState[0x45] = 1;
     ((FldResetWork *)fldAreaState)->eventActive = 0;
     D_003D62A8[0] = 0;
@@ -2565,7 +2565,7 @@ void fldFinishDeferredExit(void) {
         if (!evtGetMessageWindowControlState()) {
             evtFinishMessageWindowAndNotify();
             dspCloseChannel();
-            func_00123E00();
+            fldPreparePlayerSceneCameraTarget();
             fldAreaState[0x45] = 0;
         }
     }
@@ -2778,3 +2778,4 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAFEC);
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAFF0);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldWeatherLimitTexture);
+

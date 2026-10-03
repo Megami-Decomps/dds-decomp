@@ -199,7 +199,7 @@ void dds3ReleaseSoundSlotPool(void) {
     }
 }
 
-SoundSlot *sndFindFreeSoundSlot(void) {
+SoundSlot *dds3FindFreeSoundSlot(void) {
     SoundSlotPool *pool = (SoundSlotPool *)dds3SoundSlotPool;
     SoundSlot *slot = pool->slots;
     s32 i;
@@ -212,8 +212,8 @@ SoundSlot *sndFindFreeSoundSlot(void) {
     return 0;
 }
 
-SoundSlot *sndClaimFreeSoundSlot(u32 sequence, u32 frames) {
-    SoundSlot *slot = sndFindFreeSoundSlot();
+SoundSlot *dds3ClaimSoundSlot(u32 sequence, u32 frames) {
+    SoundSlot *slot = dds3FindFreeSoundSlot();
 
     if (slot != NULL) {
         slot->sequence = sequence;
@@ -254,7 +254,7 @@ void func_0031B3B8(s32 objectAddress) {
 void func_0031B3C8(void) {
 }
 
-s32 func_0031B3D0(MenuWorkEntry *work) {
+s32 mnuApplyFrameKeyedModelMotion(MenuWorkEntry *work) {
     MenuRegistryRecord *registry;
     ShortRecordList *list;
     ShortRecord *record;
@@ -375,7 +375,7 @@ extern void fileQueueSetScale(FileQueue *queue, f32 scale);
 extern void func_0031BC10(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 zAngle);
 
 /* Position-step vectors are copied verbatim; a missing queue aborts the claim. */
-s32 func_0031B838(void *listAddress, void *stepAddress, s32 delay,
+s32 mnuClaimPositionedEffectRecord(void *listAddress, void *stepAddress, s32 delay,
                   f32 x, f32 y, f32 z, f32 scale) {
     MnuEffectList *list = (MnuEffectList *)listAddress;
     f32 position[4];

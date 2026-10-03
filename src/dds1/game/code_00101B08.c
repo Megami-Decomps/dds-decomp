@@ -87,7 +87,7 @@ extern void sdfInitializeDrawPacketGroups(u8 *);
 
 /* Prepare the selected buffer's thirteen packet groups and link its draw sink.
  * The buffer index is sampled before waiting/selecting; keep that ordering. */
-s32 func_00101D60(void) {
+s32 kwlnPrepareFrameDrawPackets(void) {
     s32 bufferIndex = kwlnGetDrawBufferIndex();
     s32 groupIndex;
     u8 *packetGroups;
@@ -140,7 +140,7 @@ extern void func_00105DD8(void);
 extern void func_001071E8(void);
 extern s32 func_0011E278(void);
 extern void func_002EA5C0(s32);
-extern void func_002D4EE8(s32 *, void *);
+extern void sdfQueueFramePackets(s32 *, void *);
 extern u8 D_00325788[];
 extern u8 kwlnFrameDrawPacketRecords[];
 extern u8 D_00325708[];
@@ -243,7 +243,7 @@ s32 kwlnRenderFrame(void) {
         D_003BA7FC = 0;
     }
     if (!(kwlnDrawControlFlags & KWLN_FRAME_SKIP_POOL_QUEUE_BIT)) {
-        func_002D4EE8(poolHead, D_00325860);
+        sdfQueueFramePackets(poolHead, D_00325860);
     } else {
         kwlnDrawControlFlags &= KWLN_FRAME_CLEAR_SKIP_POOL_QUEUE;
     }

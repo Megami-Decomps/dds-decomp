@@ -151,7 +151,7 @@ extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 typedef struct MemNode MemNode;
 extern void *itfDequeueMemNode(MemNode *queue);
 
-extern FrFontGlyph *func_00194BA0(FrFontGlyph *source, FrFontGlyph *destination);
+extern FrFontGlyph *frFontAppendGlyphReference(FrFontGlyph *source, FrFontGlyph *destination);
 extern void frFontSetupGlyph(FrFontGlyph *glyph, s32 glyphId, s32 fontIndex, s32 firstOption, s32 packedFlags, s32 secondOption);
 extern void frFontInitGlyph(FrFontGlyph *glyph);
 extern u32 frFontGetGlyphCellWidth(u8 fontIndex);
@@ -371,7 +371,7 @@ u32 func_001949A8() {
 INCLUDE_ASM(const s32, "interface/frFont", func_001949B0);
 
 /* Create a glyph wrapper for source and append it to an optional destination chain. */
-FrFontGlyph *func_00194BA0(FrFontGlyph *source, FrFontGlyph *destination) {
+FrFontGlyph *frFontAppendGlyphReference(FrFontGlyph *source, FrFontGlyph *destination) {
     FrFontGlyph *glyph;
     FrFontGlyph *previous;
 
@@ -405,7 +405,7 @@ FrFontGlyph *func_00194BA0(FrFontGlyph *source, FrFontGlyph *destination) {
 /* Append a source-glyph reference wrapper, not a deep copy of source storage.
  * If wrapper creation returns NULL, preserve the original destination. */
 FrFontGlyph *frFontAppendClonedGlyph(FrFontGlyph *source, FrFontGlyph *destination) {
-    FrFontGlyph *referenceChain = func_00194BA0(source, 0);
+    FrFontGlyph *referenceChain = frFontAppendGlyphReference(source, 0);
 
     if (referenceChain == NULL) {
         return destination;
@@ -431,7 +431,7 @@ extern void func_002D1D80(SdfImageUploadRequest *);
 
 /* Retain one atlas item and submit its pixel upload with the requested ownership
  * mode. Coordinates are converted from sixteenths; pool exhaustion is unchecked. */
-FrFontItem *func_00194D20(s32 width, s32 height, void *pixels, s8 ownsPixels) {
+FrFontItem *frFontCreateAtlasItem(s32 width, s32 height, void *pixels, s8 ownsPixels) {
     s32 imagePosition[2];
     SdfImageUploadRequest uploadRequest;
     FntNode *atlasNode;
@@ -498,7 +498,7 @@ FrFontItem *frFontRetainOrCreateCachedItem(FrFontGlyph *glyph, s32 itemIndex) {
         return cachedItem;
     }
     clonedResource = frFontCloneEntryResource(glyph->u14.b[1], itemIndex);
-    cachedItem = func_00194D20(frFontGetSlotCellWidth(glyph->u14.b[1]), frFontGetSlotCellHeight(glyph->u14.b[1]), clonedResource, 1);
+    cachedItem = frFontCreateAtlasItem(frFontGetSlotCellWidth(glyph->u14.b[1]), frFontGetSlotCellHeight(glyph->u14.b[1]), clonedResource, 1);
     cachedItem->index = itemIndex;
     ((FrFontItem **)entry->table)[itemIndex] = cachedItem;
     frFontWork.cachedItemCount++;

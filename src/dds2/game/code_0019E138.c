@@ -507,7 +507,7 @@ extern s32 func_0019DB30(s32 text);
 extern s32 func_0019DBA8(s32 line, s32 text);
 extern void frFontMoveChainTo(s32 x, s32 y, s32 text);
 
-s32 func_0019FC38(s32 x, s32 y, s32 depth, u16 textId, s32 bank, s32 flags) {
+s32 itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, s32 bank, s32 flags) {
     s32 text = func_0019DE70(textId, bank, 0);
     u32 mode;
     s32 handle;

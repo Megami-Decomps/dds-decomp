@@ -500,7 +500,7 @@ void effDisableTexturedBlur(void) {
 }
 
 /* Copy the pixel rectangle only; retain its selected source resource. */
-void effCopyCh71Common(EffBlurTemplateBody *parameters) {
+void effCopyTexturedBlurParameters(EffBlurTemplateBody *parameters) {
     effBlurPixelWork->body = *parameters;
 }
 
@@ -527,7 +527,7 @@ void effDisableFilterBlur(void) {
 }
 
 /* Update scatter parameters without replacing the owned allocation or slots. */
-void effCopyCh72Common(EffBlurScatterParams *parameters) {
+void effCopyFilterBlurParameters(EffBlurScatterParams *parameters) {
     effFilterBlurWork->params = *parameters;
 }
 
@@ -554,7 +554,7 @@ void effDisableStaggeredBlur(void) {
 }
 
 /* Update scale parameters without replacing the owned allocation or slots. */
-void effCopyCh76Common(EffBlurScaleParams *parameters) {
+void effCopyStaggeredBlurParameters(EffBlurScaleParams *parameters) {
     effStaggeredBlurWork->params = *parameters;
 }
 
@@ -617,7 +617,7 @@ void effDisableTexturedSquare(void) {
 }
 
 /* Copy the resource template body while preserving its selected resource. */
-void effCopyCh75Common(EffTemplateBody *parameters) {
+void effCopyTexturedSquareParameters(EffTemplateBody *parameters) {
     effTexturedSquareWork->body = *parameters;
 }
 
@@ -766,7 +766,7 @@ s32 effEventAdvanceBlurTemplateSetup(void) {
 }
 
 /* Expose the blur-template setup parameters by address. */
-EffBlurTemplateBody *effGetLoadDescB(void) {
+EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void) {
     return &D_00355AF8;
 }
 
@@ -809,7 +809,7 @@ s32 effEventAdvanceScatterBlurSetup(void) {
 }
 
 /* Expose the scatter-blur setup parameters by address. */
-EffBlurScatterParams *effGetLoadDescC(void) {
+EffBlurScatterParams *effEventGetScatterBlurSetupParams(void) {
     return &D_00355C70;
 }
 
@@ -895,7 +895,7 @@ s32 effEventAdvanceSolidRectangleSetup(void) {
 }
 
 /* Expose the solid-rectangle setup parameters by address. */
-EffSolidRectParams *effGetLoadDescE(void) {
+EffSolidRectParams *effEventGetSolidRectangleSetupParams(void) {
     return &D_00355F88;
 }
 
@@ -908,7 +908,7 @@ extern ChState D_00356188;
 extern s8 D_003BB12C;
 
 /* Prepare resource-template setup from its explicit body, then process the channel. */
-s32 func_0018FEB0(void) {
+s32 effEventAdvanceResourceTemplateSetup(void) {
     u8 ready = D_003BB12C;
 
     if (D_003BB12C == 0) {
@@ -938,7 +938,7 @@ s32 func_0018FEB0(void) {
 }
 
 /* Expose the resource-template setup body by address. */
-EffTemplateBody *effGetLoadDescF(void) {
+EffTemplateBody *effEventGetResourceTemplateSetupParams(void) {
     return &D_00356088;
 }
 
@@ -951,7 +951,7 @@ extern ChState D_00356360;
 extern s8 D_003BB13F;
 
 /* Prepare scale-blur setup from its explicit parameters, then process the channel. */
-s32 effAdvancePendingChannelState(void) {
+s32 effEventAdvanceScaleBlurSetup(void) {
     u8 ready = D_003BB13F;
 
     if (D_003BB13F == 0) {
@@ -981,7 +981,7 @@ s32 effAdvancePendingChannelState(void) {
 }
 
 /* Expose the scale-blur setup parameters by address. */
-EffBlurScaleParams *effGetLoadDescG(void) {
+EffBlurScaleParams *effEventGetScaleBlurSetupParams(void) {
     return &D_003561C8;
 }
 
@@ -1045,7 +1045,7 @@ extern void *func_00160958(u32, u16, s32, s32);
 extern void func_00161588(void *, f32);
 
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
-EffEventWork *func_00190130(u32 owner, u16 kind, const EffEventInit *params) {
+EffEventWork *effEventCreate(u32 owner, u16 kind, const EffEventInit *params) {
     EffEventWork *work = sdfAllocSizeClassBlock(EFF_EVENT_COMPACT_WORK_BYTES);
 
     memcpy(work, params, sizeof(*params));
@@ -1067,12 +1067,12 @@ void effEventCopyFileRecordHeader(FileRecordHeader *destination, const FileRecor
 }
 
 /* This copies a packed 0x30-byte record, not a complete 0x60-byte billboard state. */
-void effEventCopyBillParticle(const FileRecordHeader *source, FileRecordHeader *destination) {
+void effEventCopySerializedRecord(const FileRecordHeader *source, FileRecordHeader *destination) {
     *destination = *source;
 }
 
 /* Forward the effect's scale value without modifying the record's init prefix. */
-void func_00190308(EffEventWork *work, f32 scale) {
+void effEventSetScale(EffEventWork *work, f32 scale) {
     func_00161588(work->effect, scale);
 }
 
@@ -1110,7 +1110,7 @@ EffEventLight *effEventLightCreate(u32 arg, f32 param) {
     work->init.pos[2] = 0;
     work->init.unk0C = 0;
     work->handle = func_00190100(arg);
-    work->owner = func_00190130(work->handle, 0, &work->init);
+    work->owner = effEventCreate(work->handle, 0, &work->init);
     work->active = 1;
     return work;
 }
@@ -1129,7 +1129,7 @@ EffEventLight *effEventLightClone(EffEventLight *src) {
     EffEventInit *block = &src->init;
     EffEventLight *work = sdfAllocSizeClassBlock(sizeof(EffEventLight));
 
-    work->owner = func_00190130(src->handle, 0, block);
+    work->owner = effEventCreate(src->handle, 0, block);
     work->handle = src->handle;
     work->init = *block;
     work->active = 0;

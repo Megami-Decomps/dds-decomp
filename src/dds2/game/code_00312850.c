@@ -161,7 +161,7 @@ extern void frFontSetFlagAndMeasureGlyphs(u64, s32);
 
 extern u64 func_0019F798(s32, s32, u64, u64, u64, u64);
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
-extern u64 func_0019FC38(s32, s32, u64, u64, u64, u64);
+extern u64 itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
 
 typedef struct SdfListNode {
     u32 index;                  /* 0x00 */

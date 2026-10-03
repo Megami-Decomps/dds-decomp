@@ -145,7 +145,7 @@ typedef struct MnuStatusResource {
     u8 padBD8[0x30];
 } MnuStatusResource; /* 0xC08 */
 
-extern void func_002885E8(MnuStatusResource *);
+extern void mtrInitUnitSelectionWork(MnuStatusResource *);
 
 /* Allocate and zero the 0xC08 status resource, then wire up its host pointer,
  * console banner and panel sound entries. */
@@ -216,7 +216,7 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287078);
 s32 mtrUnitSelectInit(void) {
     MnuStatusResource *selected = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
 
-    func_002885E8(selected);
+    mtrInitUnitSelectionWork(selected);
     evtPrintDeveloperConsoleMessage("mtrUnitSelectInit\n");
     return 0;
 }
@@ -339,7 +339,7 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_002882B8);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_002884C0);
 
-void func_002885E8(MnuStatusResource *work) {
+void mtrInitUnitSelectionWork(MnuStatusResource *work) {
     MtrSelectionState *selection = &work->selection;
     MenuList *list;
     s32 i;

@@ -7,7 +7,7 @@ extern void *dds3GetSlot(void *arg0, s32 index);
 
 extern ObjBase *dds3GetObjectOwnedHandle(void *obj);
 
-s32 dds3GetObjectSlotRingOccupancy(u8 arg);
+s32 dds3SelectSlotForObjectKind(u8 arg);
 void *dds3GetExtData(void *obj);
 void *dds3SetSlotByKind(void *arg0, ObjData *arg1);
 void *dds3ExchangeSlot(void *arg0, void *arg1, s32 index);
@@ -122,7 +122,7 @@ void *dds3SetSlotByKind(void *object, ObjData *slotData) {
     if (slotData == NULL) {
         return NULL;
     }
-    return dds3ExchangeSlot(object, slotData, dds3GetObjectSlotRingOccupancy(slotData->kind));
+    return dds3ExchangeSlot(object, slotData, dds3SelectSlotForObjectKind(slotData->kind));
 }
 
 /* Replace one caller-selected slot and return its previous pointer; no release. */
@@ -140,12 +140,12 @@ void *dds3GetSlot(void *object, s32 slotIndex) {
 }
 
 /* Return the world-index node word also used when destroying the full base. */
-u32 dds3GetUnk04(void *object) {
+u32 dds3GetObjectIndexNode(void *object) {
     return dds3GetObjectOwnedHandle(object)->unk4;
 }
 
 /* Return the primary resource-handle word, whose interpretation depends on state. */
-u32 dds3GetUnk0C(void *object) {
+u32 dds3GetObjectBaseResourceHandle(void *object) {
     return dds3GetObjectOwnedHandle(object)->unkC;
 }
 
@@ -253,7 +253,7 @@ void dds3SetObjectModeAndDefaultWeight(void *object, u32 requestedMode) {
 
 /* Ensure the owner appears in its auxiliary handler's world index.
  * Return 0 for an absent handler, otherwise 1 after updating the index. */
-s32 dds3InvokeSlot5Handler(void *object) {
+s32 dds3RegisterObjectInHandlerIndex(void *object) {
     void *handler;
 
     handler = dds3GetSlot(object, DDS3_OBJECT_HANDLER_SLOT);

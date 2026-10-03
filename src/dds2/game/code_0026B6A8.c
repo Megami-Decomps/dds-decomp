@@ -101,7 +101,7 @@ s32 dspStartFlagEvent(s32 context) {
 s32 mnuPrepareTerminalPanelState(void) {
     s32 *state = (s32 *)kwlnTaskGetUserValue();
 
-    mnuSelectTerminalResourceBank(state);
+    mnuTerminalSelectResourceBank(state);
     mnuApplyFadeTrackMode(0, state);
     return 1;
 }
@@ -279,7 +279,7 @@ s32 func_0026BD38(s32 index) {
     return index == 1 ? 4 : 6;
 }
 
-void func_0026BD50(DspScrollingStripState *state, s32 layout, void *resource, s32 firstFrame, s32 layer) {
+void mnuInitScrollingStripState(DspScrollingStripState *state, s32 layout, void *resource, s32 firstFrame, s32 layer) {
     s32 count;
     s32 i;
 

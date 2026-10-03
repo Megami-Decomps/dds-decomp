@@ -2,7 +2,7 @@
 
 extern u32 D_003BAA9C;
 
-extern u64 func_00197C40(u64, u64, u64, u16, u32, u64);
+extern u64 itfDrawBankTextWithLayoutFlags(u64, u64, u64, u16, u32, u64);
 
 typedef struct ItfGlyphData {
     u8 pad00[0x64];
@@ -32,7 +32,7 @@ void itfEmitSelectedGlyph(ItfGlyphDisplayContext *context, u64 unused, u64 paren
 
     entry = context->glyphList->selected;
     if (entry->active != 0) {
-        glyph = func_00197C40(0x970, 0xb58, 1, entry->data->code, D_003BAA9C,
+        glyph = itfDrawBankTextWithLayoutFlags(0x970, 0xb58, 1, entry->data->code, D_003BAA9C,
                               parentGlyph);
         frFontSetChildColors(glyph, color);
         func_001958A0(glyph, 1, glyphAttribute);

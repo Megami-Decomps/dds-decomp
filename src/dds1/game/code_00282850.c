@@ -1431,13 +1431,13 @@ s32 mnuConsumeEntryCost(s32 id, u8 *cursor) {
         if (((BtlEntry *)cursor)->hp < amount) {
             return 0;
         }
-        datMoveCursorX(cursor, -amount);
+        datAdjustCurrentHp(cursor, -amount);
         return 1;
     case 2:
         if (((BtlEntry *)cursor)->mp < amount) {
             return 0;
         }
-        datMoveCursorY(cursor, -amount);
+        datAdjustCurrentMp(cursor, -amount);
         return 1;
     default:
         return 1;
@@ -1462,7 +1462,7 @@ s32 mnuGetAbilityByteCategory(u16 ability) {
 }
 
 void func_002866B0(u16 ability) {
-    func_00118E38(ability);
+    sdfApplyCommandResults(ability);
 }
 
 u32 func_002866C8(void) {

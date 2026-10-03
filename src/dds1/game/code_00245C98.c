@@ -520,7 +520,7 @@ s64 evtSetPopupEntryWhenMessageWindowIdle(u64 argument) {
 }
 
 extern void func_0025E308(s32, s32, s32, void *, s32, s32);
-extern void func_0025E508(s32, s32, s32, void *, s32, s32);
+extern void mnuDrawStatusIconAndCompanion(s32, s32, s32, void *, s32, s32);
 extern void func_0025E6B0(s32, s32, s32, void *, s32, s32);
 extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, void *, s32);
@@ -547,7 +547,7 @@ void func_00247A78(s32 callback) {
     case 2:
         if (state->stateTable == (s32)D_0036AA68) {
             func_0025E308(0, 0, 0, state, 0x100, 0x53);
-            func_0025E508(0, 0, 0, state, 0x100, 0x53);
+            mnuDrawStatusIconAndCompanion(0, 0, 0, state, 0x100, 0x53);
             mnuDrawListChildrenWithCountdown(
                 0, 0, 0, (u8 *)((EvtDispatchLink *)state->menuLink)->target, 0x53);
             func_00260100(state, 0xA09DC380);

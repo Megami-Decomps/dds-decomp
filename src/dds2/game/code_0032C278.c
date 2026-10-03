@@ -1037,7 +1037,7 @@ void sdfInitPacketBuilder(SdfPacketBuilder *packet, s32 source, s32 data, s32 re
     packet->prepare = func_0032DC80;
 }
 
-void func_0032DD98(SdfListHead *list, SdfPacketChain *chain) {
+void sdfQueueFramePackets(SdfListHead *list, SdfPacketChain *chain) {
     u32 start = func_003287E0();
     s32 interrupts;
     s32 index;
@@ -1980,3 +1980,4 @@ INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A2C);
 INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A30);
 
 INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A34);
+

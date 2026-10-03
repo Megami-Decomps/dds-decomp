@@ -129,7 +129,7 @@ INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325398);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_003255A0);
 
-u32 *func_00325688(const SdfResourceRecord *source, s32 count) {
+u32 *sdfCloneOwnedResourceRecords(const SdfResourceRecord *source, s32 count) {
     u32 *owner = func_00324D50();
 
     if (count != 0) {

@@ -18,7 +18,6 @@ typedef struct UiInputState {
 } UiInputState;
 
 
-extern void func_001C35F0(s32, s32, s32);
 
 extern u32 D_004367CC;
 
@@ -39,8 +38,8 @@ typedef struct UiSceneNode {
 
 extern s32 btlHasRequiredActorStatusBits(UiSceneNode *node);
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C35F0);
 
+INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C35F0);
 void btlUpdateActorSlotPresentationState(UiSceneNode *object, s8 mode, s8 value) {
     s32 count = 0;
     u8 slot = 0;

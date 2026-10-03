@@ -99,9 +99,9 @@ s32 sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexHead *block);
 
 void sdfInitializeSynchronizedRequest(void *request, void (*onComplete)(void *));
 
-extern SdfTexHead *func_0032A688(s32 size, s32 allocationMode);
+extern SdfTexHead *sdfTexAllocHeadLow(s32 size, s32 allocationMode);
 
-extern SdfTexHead *func_0032A7A8(s32 size, s32 allocationMode);
+extern SdfTexHead *sdfTexAllocHeadHigh(s32 size, s32 allocationMode);
 
 extern SdfSemaObj sdfTextureQueueWork;
 
@@ -183,7 +183,7 @@ void func_0032A378(void) {
             sdfGraphSelectDisplayBuffer(bufferIndex);
         }
         if (sdfPacketSlotIndex != 0) {
-            sdfPacketSlotIndex += 0xFF;
+            sdfPacketSlotIndex--;
         }
     }
 }
@@ -268,7 +268,7 @@ s32 sdfTexListContains(SdfTex *target) {
     return 0;
 }
 
-SdfTexHead *func_0032A688(s32 size, s32 allocationMode) {
+SdfTexHead *sdfTexAllocHeadLow(s32 size, s32 allocationMode) {
     SdfTexHead *block;
     SdfTexHead *allocated;
     s32 interruptsEnabled;
@@ -314,7 +314,7 @@ SdfTexHead *func_0032A688(s32 size, s32 allocationMode) {
     }
 }
 
-SdfTexHead *func_0032A7A8(s32 size, s32 allocationMode) {
+SdfTexHead *sdfTexAllocHeadHigh(s32 size, s32 allocationMode) {
     SdfTexHead *block;
     SdfTexHead *allocated;
     s32 interruptsEnabled;
@@ -366,9 +366,9 @@ SdfTexHead *sdfTexAllocateHeadForDimensions(s32 width, s32 height, s32 format, s
     SdfTexHead *textureBlock;
 
     if (useFirstAllocator != 0) {
-        textureBlock = func_0032A688(sizeWords, allocationMode);
+        textureBlock = sdfTexAllocHeadLow(sizeWords, allocationMode);
     } else {
-        textureBlock = func_0032A7A8(sizeWords, allocationMode);
+        textureBlock = sdfTexAllocHeadHigh(sizeWords, allocationMode);
     }
     textureBlock->width = width;
     textureBlock->height = height;
@@ -458,7 +458,7 @@ SdfTexHead *sdfAllocImageBuffer(s32 width, s32 height, s32 format) {
     case SDF_PSMZ24:
         break;
     }
-    textureBlock = func_0032A688((rowWidth * rowCount + 0x7FF) & -0x800, 1);
+    textureBlock = sdfTexAllocHeadLow((rowWidth * rowCount + 0x7FF) & -0x800, 1);
     textureBlock->width = width;
     textureBlock->height = height;
     textureBlock->format = format;
@@ -690,7 +690,7 @@ s32 sdfFormatBitsPerPixelC(u32 format) {
 }
 
 /* Storage-depth subset for indexed and 16-bit color formats; all other values return 32. */
-s32 sdfTexGetStorageBitsPerPixel(s32 format) {
+s32 sdfTexFormatSizeHint(s32 format) {
     s32 storageBitsPerPixel;
 
     switch (format) {
@@ -833,7 +833,7 @@ SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 max
     return tex;
 }
 
-extern SdfTexHead *func_0032B800(s32, s32, s32);
+extern SdfTexHead *sdfTexAllocHead(s32, s32, s32);
 extern void func_0032B908(SdfTex *);
 extern void sdfTexCopyImageData(SdfTex *, void *);
 extern void sdfTexCreateFirstPacket(SdfTex *);
@@ -858,7 +858,7 @@ SdfTex *func_0032B6B0(SdfTex *source) {
     texture->auxiliaryAllocation = NULL;
     sdfTexListInsert(texture);
     if (texture->secondaryResource != NULL) {
-        texture->secondaryResource = (SdfTexResource *)func_0032B800(
+        texture->secondaryResource = (SdfTexResource *)sdfTexAllocHead(
             texture->pixelFormat, texture->clutFormat, texture->unk18);
         func_0032B908(texture);
         sdfTexCopyImageData(texture, original->data);
@@ -870,7 +870,7 @@ SdfTex *func_0032B6B0(SdfTex *source) {
 }
 
 /* Allocate a texture head for a 0x20-byte (kind 0) or 0x10-byte (kind 2/10) unit; types 19/27 use unit*8 bytes and 0x20 rows, 20/36/44 use 0x40 bytes and 8 rows. */
-SdfTexHead *func_0032B800(s32 type, s32 kind, s32 unused) {
+SdfTexHead *sdfTexAllocHead(s32 type, s32 kind, s32 unused) {
     SdfTexHead *head = NULL;
     s32 unit;
     s32 size;
@@ -902,7 +902,7 @@ SdfTexHead *func_0032B800(s32 type, s32 kind, s32 unused) {
     default:
         return head;
     }
-    head = func_0032A7A8(size, 3);
+    head = sdfTexAllocHeadHigh(size, 3);
     head->width = 8;
     head->height = height;
     head->format = kind;

@@ -7271,7 +7271,7 @@ typedef struct EffFadeNode {
     struct EffFadeNode *next; // 0x364
 } EffFadeNode;
 
-extern void func_0023CA60(void *, u32, u32);
+extern void evtSetUnitAlphaTransition(void *, u32, u32);
 
 void effSyncFadeColorToTargets(void) {
     s32 owner = btlGetRuntime();
@@ -7286,7 +7286,7 @@ void effSyncFadeColorToTargets(void) {
                 if (target != 0) {
                     node->packedColor = (node->packedColor & 0xFFFFFF) | (node->color & 0xFF000000);
                     target->color = node->color;
-                    func_0023CA60(target, 0, node->color);
+                    evtSetUnitAlphaTransition(target, 0, node->color);
                 }
             }
             node = node->next;
@@ -8681,7 +8681,7 @@ extern FileJob *fileAppendJob(FileQueue *, u32);
 extern s32 fileQueueCountLinkedJobs(FileQueue *);
 extern u32 effCurrentFileQueueEntry;
 
-u32 func_002FD748(EffCameraCreateRequest *request) {
+u32 effAppendPositionedCameraFileJob(EffCameraCreateRequest *request) {
     EffFileJobEntry *entry;
     u32 count;
 
@@ -11163,7 +11163,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_00306030);
 extern void func_00306030(u32, u32, u32, u32, u32, u32, u32, u32,
                           f32, u32, u32, u32, u32, u32);
 
-void func_003064C0(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g, u32 h,
+void itfDrawRotatedTexturedRect(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g, u32 h,
                    f32 rotation, u32 x, u32 y, u32 width, u32 height) {
     func_00306030(a, b, c, d, e, f, g, h, rotation, x, y, 1, width, height);
 }
