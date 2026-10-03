@@ -600,18 +600,6 @@ u32 evtLoadTextureFromResourcePath(u32 path) {
     return texture;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024E010);
-
-void evtDrawListViewportPanel(s32 x, s32 y, s32 width, s32 record) {
-    s32 height = mnuGetListViewportHeight(*(s32 *)(record + 0x14)) + 0x80;
-    uiDrawUniformColorRect(x, y, 0, width, height, 0x30303040, 0x53);
-    func_0024E010(x + width - 0xA0, y, y + height, 8, record);
-}
-
-void evtDrawPlainPanel(u32 x, u32 y, u32 width, u32 height) {
-    uiDrawUniformColorRect(x, y, 0, width, height, 0x30303040, 0x53);
-}
-
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspWindowHandle);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspWindowControlState);
@@ -624,5 +612,45 @@ INCLUDE_SDATA(const s32, "game/code_0024CFB0", evtMessageWindowOption);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspCapturedSoundMode);
 
-INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC418);
+typedef struct EvtListViewportState {
+    u8 pad0[4];
+    u32 flags;
+} EvtListViewportState;
 
+typedef struct EvtListPanelRecord {
+    u8 pad0[0x14];
+    EvtListViewportState *viewport;
+} EvtListPanelRecord;
+
+extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
+
+void func_0024E010(s32 x, s32 topY, s32 bottomY, s32 size, EvtListPanelRecord *record) {
+    s32 coordinates[2][3];
+    s32 xRadius = (size << 4) >> 1;
+    s32 yOffset = size << 3;
+    u32 flags = record->viewport->flags;
+    u32 colors[2] = {0x8080C040, 0x30306040};
+
+    coordinates[0][0] = x;
+    coordinates[0][1] = x - xRadius;
+    coordinates[0][2] = x + xRadius;
+    coordinates[1][0] = topY;
+    coordinates[1][2] = coordinates[1][1] = topY + yOffset;
+    uiDrawUniformRgbRange(coordinates[0], coordinates[1], 0,
+                          (flags & 1) ? colors[0] : colors[1], 0x53);
+
+    coordinates[1][0] = bottomY;
+    coordinates[1][2] = coordinates[1][1] = bottomY - yOffset;
+    uiDrawUniformRgbRange(coordinates[0], coordinates[1], 0,
+                          (flags & 2) ? colors[0] : colors[1], 0x53);
+}
+
+void evtDrawListViewportPanel(s32 x, s32 y, s32 width, s32 record) {
+    s32 height = mnuGetListViewportHeight(*(s32 *)(record + 0x14)) + 0x80;
+    uiDrawUniformColorRect(x, y, 0, width, height, 0x30303040, 0x53);
+    func_0024E010(x + width - 0xA0, y, y + height, 8, record);
+}
+
+void evtDrawPlainPanel(u32 x, u32 y, u32 width, u32 height) {
+    uiDrawUniformColorRect(x, y, 0, width, height, 0x30303040, 0x53);
+}
