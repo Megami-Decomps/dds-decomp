@@ -10,6 +10,7 @@ start from the retail BSS-clear end.
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import hashlib
 import json
 import struct
@@ -153,6 +154,13 @@ class ObjectSection:
     info: int
     alignment: int
     entry_size: int
+
+
+@dataclass(frozen=True)
+class GpReference:
+    site: int
+    target: int
+    word: int
 
 
 def _number(value: Any, context: str) -> int:
@@ -621,6 +629,47 @@ def _named_section_symbol_contract(
     return result
 
 
+def _named_object_symbol_contract(
+    symbols: list[LinkedSymbol], section: ObjectSection
+) -> dict[str, tuple[int, int, int, int, int]]:
+    """Describe every named STT_OBJECT definition in an input section."""
+
+    result: dict[str, tuple[int, int, int, int, int]] = {}
+    for symbol in symbols:
+        if (
+            not symbol.name
+            or symbol.section_index != section.index
+            or symbol.kind != STT_OBJECT
+        ):
+            continue
+        if symbol.name in result:
+            raise DevElfError(
+                f"replacement object section {section.name} has duplicate object "
+                f"symbol {symbol.name}"
+            )
+        result[symbol.name] = (
+            symbol.value,
+            symbol.size,
+            symbol.binding,
+            symbol.kind,
+            symbol.other & 3,
+        )
+    return result
+
+
+def _move_requires_exact_object_contract(move: dict[str, Any], index: int) -> bool:
+    """Return whether a moved section must preserve its object-state layout."""
+
+    explicit = move.get("exact_object_symbols", False)
+    if not isinstance(explicit, bool):
+        raise DevElfError(f"moves[{index}].exact_object_symbols is not a boolean")
+    return (
+        explicit
+        or move.get("section") in {".sdata", ".sbss", ".data", ".bss"}
+        or _move_storage(move, index) == "nobits"
+    )
+
+
 def _section_relocation_contract(
     image: bytes | bytearray,
     sections: list[ObjectSection],
@@ -906,8 +955,20 @@ def _fallback_bytes_match(
         if relocation is None:
             return False
         if relocation[1] in (R_MIPS_HI16, R_MIPS_LO16):
+            old_word = _unpack_word(
+                retail_body, relative, "retail fallback address relocation"
+            )
+            new_word = _unpack_word(
+                development_body,
+                relative,
+                "development fallback address relocation",
+            )
             old_targets = retail_address_targets.get(relative)
-            if old_targets and old_targets == development_address_targets.get(relative):
+            if (
+                (old_word & 0xFFFF0000) == (new_word & 0xFFFF0000)
+                and old_targets
+                and old_targets == development_address_targets.get(relative)
+            ):
                 continue
             return False
         if relocation[1] != R_MIPS_26:
@@ -1089,7 +1150,19 @@ def audit_replacement_objects(
                     f"replacements[{index}] section {section} has size "
                     f"0x{actual[section].size:X}, expected 0x{expected_size:X}"
                 )
-        symbols = _object_symbols(image, _object_sections(image))
+        development_object_sections = _object_sections(image)
+        symbols = _object_symbols(image, development_object_sections)
+        retail_sections_by_name: dict[str, ObjectSection] = {}
+        retail_object_sections: list[ObjectSection] = []
+        retail_symbols: list[LinkedSymbol] = []
+        if retail_objects is not None:
+            retail_object_sections = _object_sections(retail_objects[index])
+            retail_sections_by_name = parse_allocated_sections(
+                retail_objects[index]
+            )
+            retail_symbols = _object_symbols(
+                retail_objects[index], retail_object_sections
+            )
         common = [
             symbol
             for symbol in symbols
@@ -1102,6 +1175,64 @@ def audit_replacement_objects(
                 f"replacements[{index}] symbol {common[0].name or '<anonymous>'} "
                 "uses COMMON storage"
             )
+        exact_moves = [
+            (move_index, move)
+            for move_index, move in enumerate(spec.get("moves", []))
+            if move.get("object") == retail_obj
+            and _move_requires_exact_object_contract(move, move_index)
+        ]
+        if exact_moves and retail_objects is None:
+            raise DevElfError(
+                f"replacements[{index}] moved-state audit requires the retail object"
+            )
+        if retail_objects is not None:
+            for move_index, move in exact_moves:
+                section_name = move.get("section")
+                if not isinstance(section_name, str):
+                    raise DevElfError(
+                        f"moves[{move_index}].section is not a string"
+                    )
+                retail_section = retail_sections_by_name.get(section_name)
+                development_section = actual.get(section_name)
+                if retail_section is None:
+                    raise DevElfError(
+                        f"moves[{move_index}] retail object is missing section "
+                        f"{section_name}"
+                    )
+                if development_section is None:
+                    raise DevElfError(
+                        f"moves[{move_index}] development object is missing section "
+                        f"{section_name}"
+                    )
+                retail_metadata = (
+                    retail_section.kind,
+                    retail_section.flags,
+                    retail_section.size,
+                    retail_section.alignment,
+                )
+                development_metadata = (
+                    development_section.kind,
+                    development_section.flags,
+                    development_section.size,
+                    development_section.alignment,
+                )
+                if retail_metadata != development_metadata:
+                    raise DevElfError(
+                        f"moves[{move_index}] state section {section_name} changed "
+                        "its object metadata"
+                    )
+                retail_contract = _named_object_symbol_contract(
+                    retail_symbols,
+                    retail_object_sections[retail_section.index],
+                )
+                development_contract = _named_object_symbol_contract(
+                    symbols, development_object_sections[development_section.index]
+                )
+                if retail_contract != development_contract:
+                    raise DevElfError(
+                        f"moves[{move_index}] state section {section_name} changed "
+                        "its object symbol contract"
+                    )
         for section_index, entry in enumerate(
             replacement.get("retained_sections", [])
         ):
@@ -1114,6 +1245,25 @@ def audit_replacement_objects(
                 _,
             ) = _retained_section_contract(entry, index, section_index)
             if size == 0:
+                if retail_objects is not None:
+                    section_name = entry["section"]
+                    retail_section = retail_sections_by_name.get(section_name)
+                    development_section = actual.get(section_name)
+                    if (retail_section is None) != (development_section is None):
+                        raise DevElfError(
+                            f"replacements[{index}] zero-size retained section "
+                            f"{section_name} changed presence"
+                        )
+                    for label, section_value in (
+                        ("retail", retail_section),
+                        ("development", development_section),
+                    ):
+                        if section_value is not None and section_value.size != 0:
+                            raise DevElfError(
+                                f"replacements[{index}] {label} retained section "
+                                f"{section_name} has size 0x{section_value.size:X}, "
+                                "expected zero"
+                            )
                 continue
             if retail_objects is None:
                 raise DevElfError(
@@ -1122,7 +1272,6 @@ def audit_replacement_objects(
                 )
             section_name = entry["section"]
             development_section = actual[section_name]
-            retail_sections_by_name = parse_allocated_sections(retail_objects[index])
             if section_name not in retail_sections_by_name:
                 raise DevElfError(
                     f"replacements[{index}] retail object is missing section "
@@ -1161,9 +1310,8 @@ def audit_replacement_objects(
                 raise DevElfError(
                     f"replacements[{index}] retained section {section_name} changed bytes"
                 )
-            retail_object_sections = _object_sections(retail_objects[index])
             retail_contract = _named_section_symbol_contract(
-                _object_symbols(retail_objects[index], retail_object_sections),
+                retail_symbols,
                 retail_object_sections[retail_section.index],
             )
             development_contract = _named_section_symbol_contract(
@@ -1183,15 +1331,14 @@ def audit_replacement_objects(
             retail_relocations = _section_relocation_contract(
                 retail_objects[index],
                 retail_object_sections,
-                _object_symbols(retail_objects[index], retail_object_sections),
+                retail_symbols,
                 retail_object_sections[retail_section.index],
             )
-            development_sections = _object_sections(image)
             development_relocations = _section_relocation_contract(
                 image,
-                development_sections,
+                development_object_sections,
                 symbols,
-                development_sections[development_section.index],
+                development_object_sections[development_section.index],
             )
             if retail_relocations != development_relocations:
                 raise DevElfError(
@@ -1571,8 +1718,9 @@ def _map_replacement_target(
     old_target: int,
     symbols: dict[str, tuple[LinkedSymbol, LinkedSymbol]],
     ranges: list[tuple[int, int, int, int]],
+    fail_closed_moves: set[int] | None = None,
 ) -> int | None:
-    """Map an old target by containing symbol, then by a same-size move."""
+    """Map an old target by a containing symbol or an allowed same-size move."""
 
     matching = []
     for old_symbol, new_symbol in symbols.values():
@@ -1585,6 +1733,8 @@ def _map_replacement_target(
         )
     if matching:
         return matching[0]
+    if _range_index_for_address(old_target, ranges) in (fail_closed_moves or set()):
+        return None
     return _mapped_move_address(old_target, ranges)
 
 
@@ -1595,6 +1745,7 @@ def _replacement_target_follows(
     symbols: dict[str, tuple[LinkedSymbol, LinkedSymbol]],
     ranges: list[tuple[int, int, int, int]],
     replacement_moves: set[int],
+    fail_closed_moves: set[int] | None = None,
 ) -> bool:
     if relocation.symbol_name in symbols:
         return _replacement_target_matches(
@@ -1604,7 +1755,10 @@ def _replacement_target_follows(
     if move_index in replacement_moves:
         return (
             relocation.symbol_kind == STT_SECTION
-            and _map_replacement_target(old_target, symbols, ranges) == new_target
+            and _map_replacement_target(
+                old_target, symbols, ranges, fail_closed_moves
+            )
+            == new_target
         )
     return _mapped_move_address(old_target, ranges) == new_target
 
@@ -1620,6 +1774,11 @@ def repair_stale_replacement_relocations(
     resolved, development_symbols = _resolve_linked_layout(spec, relocation_elf)
     ranges = _move_ranges(resolved)
     replacement_moves = _replacement_move_indexes(resolved)
+    fail_closed_moves = {
+        index
+        for index in replacement_moves
+        if _move_requires_exact_object_contract(resolved["moves"][index], index)
+    }
     if not replacement_moves:
         return output, 0
     symbols = _replacement_symbol_map(
@@ -1662,7 +1821,9 @@ def repair_stale_replacement_relocations(
                 f"relocation at 0x{relocation.offset:X} has ambiguous stale targets"
             )
         old_target = stale_targets[0]
-        new_target = _map_replacement_target(old_target, symbols, ranges)
+        new_target = _map_replacement_target(
+            old_target, symbols, ranges, fail_closed_moves
+        )
         if new_target is None:
             raise DevElfError(
                 f"relocation at 0x{relocation.offset:X} targets unmapped "
@@ -1706,7 +1867,9 @@ def repair_stale_replacement_relocations(
             continue
         if hi.symbol_kind != STT_SECTION or lo.symbol_kind != STT_SECTION:
             continue
-        new_target = _map_replacement_target(old_target, symbols, ranges)
+        new_target = _map_replacement_target(
+            old_target, symbols, ranges, fail_closed_moves
+        )
         if new_target is None:
             raise DevElfError(
                 f"HI16/LO16 repair at 0x{hi.offset:X}/0x{lo.offset:X} "
@@ -2290,7 +2453,7 @@ def _raw_gp_reference_sites(
     start: int,
     end: int,
     code_ranges: list[tuple[int, int]],
-) -> list[int]:
+) -> list[GpReference]:
     """Find unrelocated GP references within declared executable code ranges."""
 
     result = []
@@ -2324,34 +2487,73 @@ def _raw_gp_reference_sites(
                 displacement -= 0x10000
             target = (gp + displacement) & 0xFFFFFFFF
             if start <= target < end:
-                result.append(vaddr)
+                result.append(GpReference(vaddr, target, word))
     return result
 
 
-def _gp_reference_identities(
-    sites: list[int], symbols: list[LinkedSymbol], context: str
-) -> list[tuple[str, int]]:
-    """Name GP-reference sites by their containing function and byte offset."""
+def _gp_reference_contract(
+    references: list[GpReference],
+    code_symbols: list[LinkedSymbol],
+    target_symbols: list[LinkedSymbol],
+    context: str,
+) -> list[tuple[str, int, str, int, int]]:
+    """Name each GP-reference site, target, and non-immediate instruction bits."""
 
     result = []
-    for site in sites:
-        identities = {
-            (symbol.name, site - symbol.value)
-            for symbol in symbols
+    for reference in references:
+        site_identities = {
+            (symbol.name, reference.site - symbol.value)
+            for symbol in code_symbols
             if symbol.name
             and symbol.size
             and symbol.section_index != SHN_UNDEF
             and symbol.binding in (STB_GLOBAL, STB_WEAK)
             and symbol.kind == STT_FUNC
-            and symbol.value <= site < symbol.value + symbol.size
+            and symbol.value <= reference.site < symbol.value + symbol.size
         }
-        if len(identities) != 1:
+        if len(site_identities) != 1:
             raise DevElfError(
-                f"{context} GP reference at 0x{site:X} has "
-                f"{len(identities)} containing functions, expected one"
+                f"{context} GP reference at 0x{reference.site:X} has "
+                f"{len(site_identities)} containing functions, expected one"
             )
-        result.append(next(iter(identities)))
+        target_identities = {
+            (symbol.name, reference.target - symbol.value)
+            for symbol in target_symbols
+            if symbol.name
+            and symbol.size
+            and symbol.section_index != SHN_UNDEF
+            and symbol.kind == STT_OBJECT
+            and symbol.value <= reference.target < symbol.value + symbol.size
+        }
+        if len(target_identities) != 1:
+            raise DevElfError(
+                f"{context} GP target 0x{reference.target:X} has "
+                f"{len(target_identities)} containing objects, expected one"
+            )
+        site_name, site_offset = next(iter(site_identities))
+        target_name, target_offset = next(iter(target_identities))
+        result.append(
+            (
+                site_name,
+                site_offset,
+                target_name,
+                target_offset,
+                reference.word & 0xFFFF0000,
+            )
+        )
     return sorted(result)
+
+
+def _gp_contract_is_subset(
+    development: list[tuple[str, int, str, int, int]],
+    retail: list[tuple[str, int, str, int, int]],
+) -> bool:
+    development_counts = Counter(development)
+    retail_counts = Counter(retail)
+    return all(
+        count <= retail_counts[identity]
+        for identity, count in development_counts.items()
+    )
 
 
 def _main_text_range(
@@ -2510,14 +2712,20 @@ def _audit_moved_gp_references(
                     f"{context} has {len(sites)} {label} GP references, "
                     f"expected {expected}"
                 )
-        retail_identities = _gp_reference_identities(
-            retail_sites, retail_symbols, f"{context} retail"
+        retail_identities = _gp_reference_contract(
+            retail_sites,
+            retail_symbols,
+            retail_symbols,
+            f"{context} retail",
         )
-        development_identities = _gp_reference_identities(
-            development_sites, development_symbols, f"{context} development"
+        development_identities = _gp_reference_contract(
+            development_sites,
+            development_symbols,
+            development_symbols,
+            f"{context} development",
         )
-        if not set(development_identities).issubset(retail_identities):
-            raise DevElfError(f"{context} changed its GP-reference sites")
+        if not _gp_contract_is_subset(development_identities, retail_identities):
+            raise DevElfError(f"{context} changed its GP-reference contract")
         development_reference_count += len(development_sites)
 
     return {
@@ -2686,14 +2894,20 @@ def _audit_retained_sections(
                     f"{context} has {len(raw_sites)} {label} GP references, expected "
                     f"{expected_gp}"
                 )
-        retail_identities = _gp_reference_identities(
-            retail_sites, retail_symbols, f"{context} retail"
+        retail_identities = _gp_reference_contract(
+            retail_sites,
+            retail_symbols,
+            retail_symbols,
+            f"{context} retail",
         )
-        development_identities = _gp_reference_identities(
-            development_sites, development_symbols, f"{context} development"
+        development_identities = _gp_reference_contract(
+            development_sites,
+            development_symbols,
+            development_symbols,
+            f"{context} development",
         )
-        if not set(development_identities).issubset(retail_identities):
-            raise DevElfError(f"{context} changed its GP-reference sites")
+        if not _gp_contract_is_subset(development_identities, retail_identities):
+            raise DevElfError(f"{context} changed its GP-reference contract")
         retained_symbol_count += len(retail_contract)
         raw_gp_count += len(development_sites)
     return {
@@ -2720,6 +2934,12 @@ def audit_relocation_closure(
     if not ranges:
         raise DevElfError("relocation closure requires at least one moved range")
     replacement_moves = _replacement_move_indexes(spec)
+    moves = spec.get("moves", [])
+    fail_closed_moves = {
+        index
+        for index in replacement_moves
+        if _move_requires_exact_object_contract(moves[index], index)
+    }
     replacement_symbols: dict[str, tuple[LinkedSymbol, LinkedSymbol]] = {}
     if replacement_moves:
         if retail_symbol_elf is None:
@@ -2740,7 +2960,6 @@ def audit_relocation_closure(
             replacement_moves,
         )
     }
-    moves = spec.get("moves", [])
     for replacement_index, replacement in enumerate(
         spec.get("replacements", [])
     ):
@@ -3013,6 +3232,7 @@ def audit_relocation_closure(
                         replacement_symbols,
                         ranges,
                         replacement_moves,
+                        fail_closed_moves,
                     )
             elif relocation.kind == 2:
                 valid = _replacement_target_follows(
@@ -3022,6 +3242,7 @@ def audit_relocation_closure(
                     replacement_symbols,
                     ranges,
                     replacement_moves,
+                    fail_closed_moves,
                 )
             elif relocation.kind in (5, 6):
                 # Paired HI16/LO16 encodings are checked together below.
@@ -3056,6 +3277,7 @@ def audit_relocation_closure(
                 replacement_symbols,
                 ranges,
                 replacement_moves,
+                fail_closed_moves,
             )
             for old_target in retail_effective_targets.get(relocation, ())
             for new_target in effective_targets.get(relocation, ())
