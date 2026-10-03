@@ -53,10 +53,29 @@ extern void mnuPositionPanelItemPoints(s32, s32, s32);
 extern s8 D_003E7928[];
 extern s32 mdlRequestAsset(s32, s32, s32);
 
-typedef struct MenuSelectionEntry {
-    u8 pad00[0xE];
+/* Party/enemy entry shared by cost checks, status selection and stat items.
+ * Party-array stride is 0x1C4 in DDS2 (0x1A4 in DDS1). */
+typedef struct BtlEntry {
     u16 flags;
-} MenuSelectionEntry;
+    u8 pad02[2];
+    u16 tableIndex; /* 0x04 */
+    u16 hp;        /* 0x06 */
+    u16 maxHp;     /* 0x08 */
+    u16 mp;        /* 0x0A */
+    u16 maxMp;     /* 0x0C */
+    u16 status;    /* 0x0E */
+    u8 pad10[4];
+    u16 unk14;
+    s8 baseStats[5];
+    u8 pad1B;
+    u16 hpBonus;   /* 0x1C */
+    u16 mpBonus;   /* 0x1E */
+    u8 pad20[0x32];
+    u16 menuValue; /* 0x52 */
+    u8 pad54[0x15E];
+    u16 currentId; /* 0x1B2 */
+    u8 pad1B4[0x10];
+} BtlEntry;
 
 extern u16 D_003E7900[];
 
@@ -78,15 +97,6 @@ typedef struct RangeEntry {
     u8 pad28[0x10];
 } RangeEntry;
 
-/* Counts checked before cursor moves; the primary/denominator pair also
- * supplies the fixed-point comparison used to sort available entries. */
-typedef struct MenuItemCounts {
-    u16 flags;       /* 0x00 */
-    u8 pad02[4];
-    u16 primary;     /* 0x06 */
-    u16 denominator; /* 0x08 */
-    u16 secondary;   /* 0x0A */
-} MenuItemCounts;
 
 typedef struct AffinityRow {
     s32 affinity[4];
@@ -1410,29 +1420,13 @@ void mnuPlayDefaultInputSounds(u32 buttons) {
     mnuPlayInputSoundKind(buttons, 0);
 }
 
-typedef struct MenuPanelEntry {
-    u16 flags;
-    u8 unknown02[2];
-    u16 tableIndex; /* 0x04 */
-    u8 unknown06[4];
-    u16 weight;     /* 0x0A */
-    u8 unknown0C[2];
-    u16 state;      /* 0x0E */
-    u8 unknown10[4];
-    u16 marker;
-    u8 unknown16[0x3C];
-    u16 menuValue; /* 0x52 */
-    u8 unknown54[0x15E];
-    u16 currentId;
-    u8 unknown1B4[0x10];
-} MenuPanelEntry;
 
 s32 mnuFindMatchingPartyEntryIndex(s32 object) {
     s32 i;
     u8 *entry = datGameState + 0xA60;
     for (i = 0; i < 5; i++, entry += 0x1C4) {
-        if ((((MenuPanelEntry *)entry)->flags & 1) &&
-            ((MenuPanelEntry *)object)->tableIndex == ((MenuPanelEntry *)entry)->tableIndex) {
+        if ((((BtlEntry *)entry)->flags & 1) &&
+            ((BtlEntry *)object)->tableIndex == ((BtlEntry *)entry)->tableIndex) {
             return i;
         }
     }
@@ -1513,7 +1507,7 @@ u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
     u16 base = entry->value;
     u16 addition = entry->addition;
     if (mnuGetRangeEntryKind(id & 0xFFFF) == 1) {
-        base = addition + ((MenuItemCounts *)object)->denominator * base / 100;
+        base = addition + ((BtlEntry *)object)->maxHp * base / 100;
     }
     return base;
 }
@@ -1536,12 +1530,12 @@ s32 mnuCanAffordEntryCost(u16 id, s32 item) {
 
     switch (kind) {
     case 1:
-        if (((MenuItemCounts *)item)->primary < minimum) {
+        if (((BtlEntry *)item)->hp < minimum) {
             return 0;
         }
         break;
     case 2:
-        if (((MenuItemCounts *)item)->secondary < minimum) {
+        if (((BtlEntry *)item)->mp < minimum) {
             return 0;
         }
         break;
@@ -1564,12 +1558,12 @@ s32 mnuIsEntryCostUnaffordable(u16 id, s32 object) {
 
     switch (kind) {
     case 1:
-        if (((MenuItemCounts *)object)->primary < value) {
+        if (((BtlEntry *)object)->hp < value) {
             return 1;
         }
         break;
     case 2:
-        if (((MenuItemCounts *)object)->secondary < value) {
+        if (((BtlEntry *)object)->mp < value) {
             return 1;
         }
         break;
@@ -1583,13 +1577,13 @@ s32 mnuConsumeEntryCost(s32 id, u8 *cursor) {
 
     switch (record->kind) {
     case 1:
-        if (((MenuItemCounts *)cursor)->primary < amount) {
+        if (((BtlEntry *)cursor)->hp < amount) {
             return 0;
         }
         datMoveCursorX(cursor, -amount);
         return 1;
     case 2:
-        if (((MenuItemCounts *)cursor)->secondary < amount) {
+        if (((BtlEntry *)cursor)->mp < amount) {
             return 0;
         }
         datMoveCursorY(cursor, -amount);
@@ -1712,7 +1706,7 @@ u32 ptyCountBulletItem(s32 id) {
     if (id >= 0xBF) return 0;
     value = *(u8 *)(id + (s32)datGameState + 0x1340);
     for (index = 0; index < 5; index++) {
-        MenuPanelEntry *entry = (MenuPanelEntry *)(datGameState + 0xA60) + index;
+        BtlEntry *entry = (BtlEntry *)(datGameState + 0xA60) + index;
         if (id == mnuGetPartyEntryMenuValue((s32)entry)) {
             value++;
         }
@@ -1721,28 +1715,28 @@ u32 ptyCountBulletItem(s32 id) {
 }
 
 u32 mnuSetPartyEntryMenuValue(s32 entry, u16 value) {
-    ((MenuPanelEntry *)entry)->menuValue = value;
+    ((BtlEntry *)entry)->menuValue = value;
     return 1;
 }
 
 u16 mnuGetPartyEntryMenuValue(s32 entry) {
-    return ((MenuPanelEntry *)entry)->menuValue;
+    return ((BtlEntry *)entry)->menuValue;
 }
 
 u32 mnuSetPartyEntryCurrentId(u32 entry, u32 id) {
-    ((MenuPanelEntry *)entry)->currentId = (s16)id;
+    ((BtlEntry *)entry)->currentId = (s16)id;
     mnuMarkEntryBlocked(id);
     ptyRecomputeMaxHpMp(entry);
     return 1;
 }
 
 u16 mnuGetPartyEntryCurrentId(s32 entry) {
-    return ((MenuPanelEntry *)entry)->currentId;
+    return ((BtlEntry *)entry)->currentId;
 }
 
-MenuPanelEntry *mnuFindPartySlotByCurrentId(u32 id) {
+BtlEntry *mnuFindPartySlotByCurrentId(u32 id) {
     s32 index;
-    MenuPanelEntry *entry = (MenuPanelEntry *)(datGameState + 0xA60);
+    BtlEntry *entry = (BtlEntry *)(datGameState + 0xA60);
     for (index = 0; index < 5; index++, entry++) {
         if ((entry->flags & 1) && id == entry->currentId) {
             return entry;
@@ -1751,11 +1745,11 @@ MenuPanelEntry *mnuFindPartySlotByCurrentId(u32 id) {
     return 0;
 }
 
-MenuPanelEntry *mnuFindReserveSlotByCurrentId(u32 id) {
+BtlEntry *mnuFindReserveSlotByCurrentId(u32 id) {
     s32 index;
-    MenuPanelEntry *entry = (MenuPanelEntry *)(datGameState + 0x1CA10);
+    BtlEntry *entry = (BtlEntry *)(datGameState + 0x1CA10);
     for (index = 0; index < 16; index++, entry++) {
-        if (entry->marker != 0 && (entry->flags & 1) && id == entry->currentId) {
+        if (entry->unk14 != 0 && (entry->flags & 1) && id == entry->currentId) {
             return entry;
         }
     }
@@ -1820,23 +1814,9 @@ s32 sndPlayPartyItemSe(u32 id, s32 mode) {
     return 0;
 }
 
-/* Party-entry vitals and permanent bonuses; the unused bytes retain the retail layout. */
-typedef struct BtlPermanentBonusUnit {
-    u8 pad00[6];
-    u16 currentHp;   /* 0x06 */
-    u16 maxHp;       /* 0x08 */
-    u16 currentMp;   /* 0x0A */
-    u16 maxMp;       /* 0x0C */
-    u16 statusFlags; /* 0x0E: bit 0x4000 prevents the refill below */
-    u8 pad10[6];
-    s8 baseStats[5];
-    u8 pad1B;
-    u16 hpBonus;     /* 0x1C: added by ptyComputeMaxHp */
-    u16 mpBonus;     /* 0x1E: added by ptyComputeMaxMp */
-} BtlPermanentBonusUnit;
 
-extern s32 datComputeSkillBoostedMaxHp(BtlPermanentBonusUnit *);
-extern s32 datComputeSkillBoostedMaxMp(BtlPermanentBonusUnit *);
+extern s32 datComputeSkillBoostedMaxHp(BtlEntry *);
+extern s32 datComputeSkillBoostedMaxMp(BtlEntry *);
 
 /* Apply a permanent stat/capacity item and refill eligible vitals.
  * Returns 0 for other items, 1 when accepted, or 2 when capped and already full. */
@@ -1852,7 +1832,7 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B440);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B4C0);
 
-s32 btlItemApplyPermanentBonus(u16 item, BtlPermanentBonusUnit *unit) {
+s32 btlItemApplyPermanentBonus(u16 item, BtlEntry *unit) {
     s32 stat = -1;
     s32 valid = 0;
 
@@ -1878,8 +1858,8 @@ s32 btlItemApplyPermanentBonus(u16 item, BtlPermanentBonusUnit *unit) {
         valid = 1;
         break;
     case 5:
-        if (unit->maxHp >= 0x3E7 && unit->currentHp >= unit->maxHp &&
-            unit->currentMp >= unit->maxMp) {
+        if (unit->maxHp >= 0x3E7 && unit->hp >= unit->maxHp &&
+            unit->mp >= unit->maxMp) {
             return 2;
         }
         unit->hpBonus += 10;
@@ -1889,8 +1869,8 @@ s32 btlItemApplyPermanentBonus(u16 item, BtlPermanentBonusUnit *unit) {
         valid = 1;
         break;
     case 6:
-        if (unit->maxMp >= 0x3E7 && unit->currentHp >= unit->maxHp &&
-            unit->currentMp >= unit->maxMp) {
+        if (unit->maxMp >= 0x3E7 && unit->hp >= unit->maxHp &&
+            unit->mp >= unit->maxMp) {
             return 2;
         }
         unit->mpBonus += 10;
@@ -1908,7 +1888,7 @@ s32 btlItemApplyPermanentBonus(u16 item, BtlPermanentBonusUnit *unit) {
     }
     if (stat >= 0) {
         if (unit->baseStats[stat] >= 0x63 &&
-            unit->currentHp >= unit->maxHp && unit->currentMp >= unit->maxMp) {
+            unit->hp >= unit->maxHp && unit->mp >= unit->maxMp) {
             return 2;
         }
         unit->baseStats[stat] += 2;
@@ -1919,9 +1899,9 @@ s32 btlItemApplyPermanentBonus(u16 item, BtlPermanentBonusUnit *unit) {
 
     unit->maxHp = datComputeSkillBoostedMaxHp(unit);
     unit->maxMp = datComputeSkillBoostedMaxMp(unit);
-    if ((unit->statusFlags & 0x4000) == 0) {
-        unit->currentMp = unit->maxMp;
-        unit->currentHp = unit->maxHp;
+    if ((unit->status & 0x4000) == 0) {
+        unit->mp = unit->maxMp;
+        unit->hp = unit->maxHp;
     }
     return 1;
 }
@@ -1935,8 +1915,8 @@ s32 ptyChooseFirstAvailableRosterId(void) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5A28);
 
-s32 mnuGetSelectionFromFlags(MenuSelectionEntry *entry) {
-    u16 flags = entry->flags;
+s32 mnuGetSelectionFromFlags(BtlEntry *entry) {
+    u16 flags = entry->status;
     if (flags & 0x400) return 0;
     if (flags & 0x100) return 1;
     if (flags & 0x80) return 2;
@@ -1949,8 +1929,8 @@ s32 mnuGetMatchingPartyEntryMask(s32 object) {
     s32 i;
     u8 *entry = datGameState + 0xA60;
     for (i = 0; i < 5; i++, entry += 0x1C4) {
-        if ((((MenuPanelEntry *)entry)->flags & 1) &&
-            ((MenuPanelEntry *)entry)->tableIndex == ((MenuPanelEntry *)object)->tableIndex) {
+        if ((((BtlEntry *)entry)->flags & 1) &&
+            ((BtlEntry *)entry)->tableIndex == ((BtlEntry *)object)->tableIndex) {
             return 1 << i;
         }
     }
@@ -1972,21 +1952,21 @@ s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor) {
     return 0;
 }
 
-MenuPanelEntry *mnuPickBestPartyEntry(u32 *table) {
-    MenuPanelEntry *best = NULL;
-    MenuPanelEntry *entry;
+BtlEntry *mnuPickBestPartyEntry(u32 *table) {
+    BtlEntry *best = NULL;
+    BtlEntry *entry;
     s32 pass;
-    s32 bestWeight;
+    s32 bestMp;
     s32 i;
 
     for (pass = 0; pass < 2; pass++) {
-        bestWeight = 0;
-        entry = (MenuPanelEntry *)(datGameState + 0xA60);
+        bestMp = 0;
+        entry = (BtlEntry *)(datGameState + 0xA60);
         for (i = 0; i < 5; i++, entry++) {
             if ((entry->flags & 1) && table[entry->tableIndex] == 0) {
                 s32 usable = 0;
 
-                if (!(entry->state & 0x10)) {
+                if (!(entry->status & 0x10)) {
                     if (pass == 0) {
                         if (!(entry->flags & 2)) {
                             usable = 1;
@@ -1996,8 +1976,8 @@ MenuPanelEntry *mnuPickBestPartyEntry(u32 *table) {
                     }
                 }
 
-                if (usable && bestWeight < entry->weight) {
-                    bestWeight = entry->weight;
+                if (usable && bestMp < entry->mp) {
+                    bestMp = entry->mp;
                     best = entry;
                 }
             }
@@ -2009,16 +1989,16 @@ MenuPanelEntry *mnuPickBestPartyEntry(u32 *table) {
     return 0;
 }
 
-MenuPanelEntry *mnuFindPartyEntryBySelection(s32 *out) {
+BtlEntry *mnuFindPartyEntryBySelection(s32 *out) {
     u16 table[5][2] = {{0x400, 0xD4}, {0x100, 0xCF}, {0x80, 0xA9}, {0x40, 0xCE}, {0x10, 0xA8}};
     u32 i;
 
     for (i = 0; i < 5; i++) {
-        MenuPanelEntry *entry;
+        BtlEntry *entry;
         s32 j;
 
-        for (j = 0, entry = (MenuPanelEntry *)(datGameState + 0xA60); j < 5; j++, entry++) {
-            if ((entry->flags & 1) && entry->state == table[i][0]) {
+        for (j = 0, entry = (BtlEntry *)(datGameState + 0xA60); j < 5; j++, entry++) {
+            if ((entry->flags & 1) && entry->status == table[i][0]) {
                 *out = table[i][1];
                 return entry;
             }
@@ -2029,7 +2009,7 @@ MenuPanelEntry *mnuFindPartyEntryBySelection(s32 *out) {
 
 s32 mnuTryUseFieldSkill(s32 partyPanel, s32 skill, s32 target, s32 commit) {
     s32 id;
-    MenuPanelEntry *entry = mnuFindPartyEntryBySelection(&id);
+    BtlEntry *entry = mnuFindPartyEntryBySelection(&id);
 
     if (entry == 0) {
         return 3;
@@ -2051,12 +2031,12 @@ s32 mnuTryUseFieldSkill(s32 partyPanel, s32 skill, s32 target, s32 commit) {
 }
 
 /* Give flag-bit-1 entries precedence, then compare their 10-bit fixed-point
- * field-6/field-8 ratios without converting to floating point. */
+ * HP/max-HP ratios without converting to floating point. */
 s32 mnuComparePartyEntryCostRatio(u32 *left, u32 *right) {
-    MenuItemCounts *a = (MenuItemCounts *)*left;
-    MenuItemCounts *b = (MenuItemCounts *)*right;
-    s32 leftRatio = (a->primary << 10) / a->denominator;
-    s32 rightRatio = (b->primary << 10) / b->denominator;
+    BtlEntry *a = (BtlEntry *)*left;
+    BtlEntry *b = (BtlEntry *)*right;
+    s32 leftRatio = (a->hp << 10) / a->maxHp;
+    s32 rightRatio = (b->hp << 10) / b->maxHp;
     if (a->flags & 2) {
         if (!(b->flags & 2)) {
             return -1;
@@ -2073,7 +2053,7 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6008);
 
 s32 mnuUseFieldSkillOnParty(s32 partyPanel, s32 skill, s32 commit) {
     u32 used[32];
-    MenuPanelEntry *entry;
+    BtlEntry *entry;
     s32 pass;
     s32 more;
     s32 result;
