@@ -2,6 +2,37 @@
 #include "pcp_vu0.h"
 #include "mnu.h"
 
+#define MNU_PANEL_ITEM_COUNT 5
+#define MNU_PANEL_STATE_BYTES 0x64
+#define MNU_PANEL_GROUP_BYTES 0x28
+#define MNU_SPRITE_STATE_BYTES 0x20
+#define MNU_SIMPLE_SPRITE_BYTES 0x28
+#define MNU_PANEL_ITEM_BYTES 0x90
+#define MNU_PROFILE_PANEL_BYTES 0x3c
+#define MNU_TRANSITION_LIMIT 0x100
+#define MNU_TRANSITION_STEP 8
+#define MNU_GRADIENT_FADE_STEP 0x20
+#define MNU_PROFILE_PHASE_PERIOD 0x200
+#define MNU_PROFILE_PHASE_STEP 12
+#define MNU_NO_SELECTION 0xffffffff
+#define MNU_PANEL_TEXTURE_COUNT 9
+#define MNU_POPUP_STATE_BYTES 0x4c
+#define MNU_POPUP_INSERT_BEFORE_TOP 0x20000
+#define MNU_POPUP_ENTRY_MARK_BITS 0x60000
+#define MNU_PARTY_SLOT_COUNT 5
+#define MNU_PARTY_ENTRY_BYTES 0x1A4
+#define MNU_PARTY_ENTRY_BASE 0xA60
+#define MNU_INPUT_PRIORITY_BIT 1
+#define MNU_PAD_TRIGGER_BIT 2
+#define MNU_COMMAND_RECORD_BYTES 0x38
+#define MNU_COMMAND_ID_MASK 0xFFFF
+#define MNU_COST_KIND_HP 1
+#define MNU_COST_KIND_MP 2
+#define MNU_PERCENT_SCALE 100
+#define MNU_COMMAND_USE_STATUS_BOUNDARY 0x200
+#define MNU_RATIO_QUARTER_PERCENT 25
+#define MNU_RATIO_HALF_PERCENT 50
+
 typedef struct RangeEntry {
     u8 pad00;
     u8 flags;
@@ -331,10 +362,10 @@ done:
     return;
 }
 
-/* Advance the panel's current transition value toward its 0x100 limit. */
+/* Increment while below the transition limit; the native add is not clamped. */
 void mnuAdvancePanelTransition(MenuPageWindow *menu) {
-    if (menu->transitionValue < 0x100) {
-        menu->transitionValue = menu->transitionValue + 8;
+    if (menu->transitionValue < MNU_TRANSITION_LIMIT) {
+        menu->transitionValue = menu->transitionValue + MNU_TRANSITION_STEP;
     }
 }
 
@@ -366,20 +397,21 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     }
 }
 
+/* Draw the selected panel or all visible/additional panels, then advance the transition. */
 void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 param) {
     s32 positionOffset[2];
     MenuPageRecord *layout = menu->records;
-    s32 count;
-    s32 i;
+    s32 panelCount;
+    s32 panelIndex;
 
-    count = layout->visibleCount;
-    count += layout->additionalCount;
+    panelCount = layout->visibleCount;
+    panelCount += layout->additionalCount;
     if (menu->selected >= 0) {
         mnuDrawPanelWithTemporaryOverride(x, y, z, overrideValue, menu, param);
     } else {
-        for (i = 0; i < count; i++) {
-            func_002828D0(positionOffset, menu, i);
-            mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, i, param);
+        for (panelIndex = 0; panelIndex < panelCount; panelIndex++) {
+            func_002828D0(positionOffset, menu, panelIndex);
+            mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, panelIndex, param);
         }
     }
     mnuAdvancePanelTransition(menu);
@@ -417,9 +449,10 @@ typedef struct MenuPanelState {
     u32 resourceHandle; /* 0x60 */
 } MenuPanelState;
 
+/* Allocate a zeroed native panel state with the requested dimensions. */
 void *mnuCreatePanelState(s32 width, s32 height) {
-    MenuPanelState *panel = sdfAllocSizeClassBlock(0x64);
-    memset(panel, 0, 0x64);
+    MenuPanelState *panel = sdfAllocSizeClassBlock(MNU_PANEL_STATE_BYTES);
+    memset(panel, 0, MNU_PANEL_STATE_BYTES);
     panel->width = width;
     panel->height = height;
     return panel;
@@ -477,32 +510,35 @@ void mnuSetPanelState(MenuPanelState *panel, u32 state) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00282DA0);
 
+/* Create the five panel items owned by this group and clear its selection. */
 s32 mnuCreatePanelGroup(s32 parent) {
-    MenuPanelGroup *group = sdfAllocSizeClassBlock(0x28);
-    s32 i;
-    for (i = 0; i < 5; i++) {
-        s32 child = mnuCreatePanelItem();
-        func_002848E0(child, parent, i);
-        group->children[i] = child;
+    MenuPanelGroup *group = sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
+    s32 panelIndex;
+    for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
+        s32 panelItem = mnuCreatePanelItem();
+        func_002848E0(panelItem, parent, panelIndex);
+        group->children[panelIndex] = panelItem;
     }
     mnuClearPanelGroupSelection(group);
     group->initialValue = 0x100;
     return (s32)group;
 }
 
+/* Release every owned panel item before releasing the group allocation. */
 void mnuDestroyPanelGroup(MenuPanelGroup *group) {
-    s32 i;
-    for (i = 0; i < 5; i++) {
-        mnuFreePanelItemWork(group->children[i]);
+    s32 panelIndex;
+    for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
+        mnuFreePanelItemWork(group->children[panelIndex]);
     }
     sdfReleaseChipBlock(group);
 }
 
 extern void mnuPositionPanelItemPoints(s32, s32, s32);
-void mnuUpdateFiveListEntries(MenuPanelGroup *group, s32 data) {
-    s32 i;
-    for (i = 0; i < 5; i++) {
-        mnuPositionPanelItemPoints(group->children[i], data, i);
+/* Configure all five panel items against the same grid object. */
+void mnuUpdateFiveListEntries(MenuPanelGroup *group, s32 gridObject) {
+    s32 panelIndex;
+    for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
+        mnuPositionPanelItemPoints(group->children[panelIndex], gridObject, panelIndex);
     }
 }
 
@@ -510,8 +546,9 @@ void mnuSetPanelGroupSelection(MenuPanelGroup *group, u32 selection) {
     group->selection = selection;
 }
 
+/* Store the native unsigned no-selection sentinel. */
 void mnuClearPanelGroupSelection(MenuPanelGroup *group) {
-    group->selection = 0xffffffff;
+    group->selection = MNU_NO_SELECTION;
 }
 
 u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
@@ -520,13 +557,14 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283110);
 
-void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 value, s32 option) {
+/* Update the indexed item's selection and option without changing the group selection. */
+void mnuSetGroupSelection(MenuPanelGroup *group, s32 panelIndex, s32 selection, s32 option) {
     /* Required to match: retain byte-offset indexing for the child slot. */
-    s32 offset = index * 4;
-    s32 base = (s32)group + 0xC;
-    s32 *item = (s32 *)(base + offset);
-    mnuSetPanelItemSelection(*item, value);
-    mnuSetPanelItemOption(*item, option);
+    s32 slotOffset = panelIndex * 4;
+    s32 slotBaseAddress = (s32)group + 0xC;
+    s32 *itemSlot = (s32 *)(slotBaseAddress + slotOffset);
+    mnuSetPanelItemSelection(*itemSlot, selection);
+    mnuSetPanelItemOption(*itemSlot, option);
 }
 
 typedef struct MenuSpriteState {
@@ -537,14 +575,15 @@ typedef struct MenuSpriteState {
     s32 initialValue; /* 0x1C: initialized to 0x100 */
 } MenuSpriteState;
 
+/* Create a zeroed sprite-position state with its native initial value. */
 void *mnuCreateSpriteState(s32 x, s32 y, s32 z) {
-    MenuSpriteState *item = sdfAllocSizeClassBlock(0x20);
-    memset(item, 0, 0x20);
-    item->x = x;
-    item->y = y;
-    item->z = z;
-    item->initialValue = 0x100;
-    return item;
+    MenuSpriteState *spriteState = sdfAllocSizeClassBlock(MNU_SPRITE_STATE_BYTES);
+    memset(spriteState, 0, MNU_SPRITE_STATE_BYTES);
+    spriteState->x = x;
+    spriteState->y = y;
+    spriteState->z = z;
+    spriteState->initialValue = 0x100;
+    return spriteState;
 }
 
 void mnuFreeSpriteStateWork(void) {
@@ -567,9 +606,10 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002833B0);
 
+/* Create the DDS1 sprite record, including its color and texture words. */
 u32 *mnuAllocateSimpleSprite(u32 x, u32 y, u32 z, u32 color, u32 texture) {
-    u32 *sprite = sdfAllocSizeClassBlock(0x28);
-    memset(sprite, 0, 0x28);
+    u32 *sprite = sdfAllocSizeClassBlock(MNU_SIMPLE_SPRITE_BYTES);
+    memset(sprite, 0, MNU_SIMPLE_SPRITE_BYTES);
     sprite[4] = x;
     sprite[5] = y;
     sprite[6] = z;
@@ -604,21 +644,22 @@ void func_00283BF0(u32 *out, u32 value) {
 extern u32 uiBlendColors(u32, u32, u32);
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, u32, u32);
 
+/* Draw two clear corners and two blended corners, then step the bounded blend value. */
 void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface) {
-    s32 colors[4];
+    s32 cornerColors[4];
     s32 color = state->color;
 
     color = uiBlendColors(color, color & ~0xFF, state->blend);
-    panelSetVec4((u32 *)colors, 0, 0, color, color);
+    panelSetVec4((u32 *)cornerColors, 0, 0, color, color);
 
-    uiDrawGradientColorRect(0, 0x700, 0, 0x2000, 0x700, (u32)colors, surface);
+    uiDrawGradientColorRect(0, 0x700, 0, 0x2000, 0x700, (u32)cornerColors, surface);
     if (state->active != 0) {
-        state->blend += 0x20;
-        if (state->blend > 0x100) {
-            state->blend = 0x100;
+        state->blend += MNU_GRADIENT_FADE_STEP;
+        if (state->blend > MNU_TRANSITION_LIMIT) {
+            state->blend = MNU_TRANSITION_LIMIT;
         }
     } else {
-        state->blend -= 0x20;
+        state->blend -= MNU_GRADIENT_FADE_STEP;
         if (state->blend < 0) {
             state->blend = 0;
         }
@@ -647,21 +688,21 @@ typedef struct MenuEffectPair {
     MenuEffectNode *second; /* 0x44 */
 } MenuEffectPair;
 
-/* Feed two mirrored effect positions from the active menu entry. */
+/* Set both effect positions; only the first Y comes from the active menu entry. */
 void mnuSetPairedEffectPositions(MenuEffectPair *pair) {
     MenuEffectNode *first = pair->first;
     MenuEffectNode *second = pair->second;
-    MenuEffectPosition *firstData = first->position;
-    MenuEffectPosition *secondData = second->position;
-    s32 *pos = firstData->coordinates;
+    MenuEffectPosition *firstPosition = first->position;
+    MenuEffectPosition *secondPosition = second->position;
+    s32 *coordinates = firstPosition->coordinates;
 
-    pos[0] = 10;
-    pos[1] = pair->positionY;
-    pos[2] = 10;
-    pos = secondData->coordinates;
-    pos[1] = 5;
-    pos[0] = 10;
-    pos[2] = 10;
+    coordinates[0] = 10;
+    coordinates[1] = pair->positionY;
+    coordinates[2] = 10;
+    coordinates = secondPosition->coordinates;
+    coordinates[1] = 5;
+    coordinates[0] = 10;
+    coordinates[2] = 10;
 }
 
 s32 mnuRateByThreshold(s32 object) {
@@ -705,10 +746,11 @@ void mnuCreatePairedEffects(MenuEffectPair *pair) {
     pair->second = (MenuEffectNode *)effectHandle;
 }
 
-void mnuReleasePairedEffectBatches(s32 *list) {
-    u32 i;
-    for (i = 0; i < 2; i++) {
-        effDestroyPackedBatch(list[i + 16]);
+/* Release the two effect-batch handles in the native object-word layout. */
+void mnuReleasePairedEffectBatches(s32 *objectWords) {
+    u32 effectIndex;
+    for (effectIndex = 0; effectIndex < 2; effectIndex++) {
+        effDestroyPackedBatch(objectWords[effectIndex + 16]);
     }
 }
 
@@ -733,18 +775,20 @@ void mnuDrawPanelSequenceByRow(s32 x, s32 y, s32 depth, s32 color, s32 variant, 
     }
 }
 
-void mnuReleaseSpriteTextures(s32 *object) {
-    u32 i;
-    for (i = 0; i < 9; i++) {
-        effDestroyResourceSlotSet(object[i + 7]);
+/* Release the nine sprite texture handles, then the paired effect batches. */
+void mnuReleaseSpriteTextures(s32 *objectWords) {
+    u32 textureIndex;
+    for (textureIndex = 0; textureIndex < MNU_PANEL_TEXTURE_COUNT; textureIndex++) {
+        effDestroyResourceSlotSet(objectWords[textureIndex + 7]);
     }
-    mnuReleasePairedEffectBatches(object);
+    mnuReleasePairedEffectBatches(objectWords);
 }
 
-u32 mnuGetPanelRatioColor(s32 useDefault, s32 index, s32 option) {
+/* Select the packed ratio color; a zero divisor retains the default color. */
+u32 mnuGetPanelRatioColor(s32 useDefault, s32 amount, s32 divisor) {
     u32 color = 0xA09DC380;
     if (!useDefault) {
-        switch (mnuClassifyQuarterHalfPercent(index, option)) {
+        switch (mnuClassifyQuarterHalfPercent(amount, divisor)) {
         case 1:
             color = 0xB4A06480;
             break;
@@ -777,32 +821,35 @@ typedef struct MenuPanelItem {
     u32 selectionRamp; /* 0x8C */
 } MenuPanelItem;
 
+/* Allocate a zeroed native panel item and initialize its three default values. */
 s32 mnuCreatePanelItem(void) {
-    MenuPanelItem *item = sdfAllocSizeClassBlock(0x90);
-    memset(item, 0, 0x90);
-    item->value14 = 0x63;
-    item->value10 = 0x8c;
-    item->initialValue = 0x100;
-    return (s32)item;
+    MenuPanelItem *panelItem = sdfAllocSizeClassBlock(MNU_PANEL_ITEM_BYTES);
+    memset(panelItem, 0, MNU_PANEL_ITEM_BYTES);
+    panelItem->value14 = 0x63;
+    panelItem->value10 = 0x8c;
+    panelItem->initialValue = 0x100;
+    return (s32)panelItem;
 }
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002848E0);
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B24D0);
 
-void mnuPositionPanelItemPoints(s32 obj, s32 param, s32 index) {
-    s32 table[5] = {0, 4, 1, 2, 3};
-    MenuPanelItem *item = (MenuPanelItem *)obj;
+/* Bind five grid object/index references and initialize their quantized bounds.
+ * The x/y members in this path hold object addresses and entry indices, not coordinates. */
+void mnuPositionPanelItemPoints(s32 itemAddress, s32 gridObject, s32 panelIndex) {
+    s32 entryIndices[5] = {0, 4, 1, 2, 3};
+    MenuPanelItem *item = (MenuPanelItem *)itemAddress;
 
-    itfGridStorePosition(&item->points[0], param, 7);
+    itfGridStorePosition(&item->points[0], gridObject, 7);
     itfSetGridEntryQuantizedAndRefresh(item->points[0].x, item->points[0].y, 0, 0, 0, 0);
-    itfGridStorePosition(&item->points[1], param, 5);
+    itfGridStorePosition(&item->points[1], gridObject, 5);
     itfSetGridEntryQuantizedAndRefresh(item->points[1].x, item->points[1].y, 0x440, 0x58, 0, 0);
-    itfGridStorePosition(&item->points[2], param, 6);
+    itfGridStorePosition(&item->points[2], gridObject, 6);
     itfSetGridEntryQuantizedAndRefresh(item->points[2].x, item->points[2].y, 0x440, 0x58, 0, 0);
-    itfGridStorePosition(&item->points[3], param, 9);
+    itfGridStorePosition(&item->points[3], gridObject, 9);
     itfSetGridEntryQuantizedAndRefresh(item->points[3].x, item->points[3].y, 0x620, 0x50, 0, 0);
-    itfGridStorePosition(&item->points[4], param, table[index]);
+    itfGridStorePosition(&item->points[4], gridObject, entryIndices[panelIndex]);
     itfSetGridEntryQuantizedAndRefresh(item->points[4].x, item->points[4].y, 0x100, -0x48, 0, 0);
 }
 
@@ -848,16 +895,17 @@ void mnuSetProfilePanelValues(s32 item, s32 value, s32 option) {
     ((MenuProfilePanel *)item)->option = option;
 }
 
-u32 *mnuCreateProfilePanel(s32 source) {
-    u32 *item = (u32 *)sdfAllocSizeClassBlock(0x3c);
-    s32 first;
-    u32 second;
-    memset(item, 0, 0x3c);
-    first = scrGetSelectedOperandIndex(source);
-    second = ptyGetCurrentProfileRecord(source);
-    mnuSetProfilePanelValues(item, prfGetCapValue((u16)first), *(u32 *)second);
-    item[14] = 0x100;
-    return item;
+/* Create a profile panel from the selection state's current profile ID and record. */
+u32 *mnuCreateProfilePanel(s32 selectionState) {
+    u32 *panelWords = (u32 *)sdfAllocSizeClassBlock(MNU_PROFILE_PANEL_BYTES);
+    s32 profileId;
+    u32 profileRecordAddress;
+    memset(panelWords, 0, MNU_PROFILE_PANEL_BYTES);
+    profileId = scrGetSelectedOperandIndex(selectionState);
+    profileRecordAddress = ptyGetCurrentProfileRecord(selectionState);
+    mnuSetProfilePanelValues(panelWords, prfGetCapValue((u16)profileId), *(u32 *)profileRecordAddress);
+    panelWords[14] = 0x100;
+    return panelWords;
 }
 
 void mnuFreeProfilePanelWork(void) {
@@ -874,24 +922,26 @@ void mnuCacheProfilePanelGridPositions(s32 item, u32 grid, u32 unused, u32 first
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00285208);
 
-void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, u32 *item, s32 option) {
-    s32 previous;
-    s32 next;
-    func_00285208(x, y, z, item, option);
-    previous = item[13];
-    next = previous + 12;
-    if (previous < 0x200) {
-        item[13] = next;
-        if (next < 0x200) {
+/* Draw first, then advance the native phase by twelve with a single period subtraction. */
+void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, u32 *panelWords, s32 option) {
+    s32 phase;
+    s32 nextPhase;
+    func_00285208(x, y, z, panelWords, option);
+    phase = panelWords[13];
+    nextPhase = phase + MNU_PROFILE_PHASE_STEP;
+    if (phase < MNU_PROFILE_PHASE_PERIOD) {
+        panelWords[13] = nextPhase;
+        if (nextPhase < MNU_PROFILE_PHASE_PERIOD) {
             return;
         }
-        previous = next;
+        phase = nextPhase;
     }
-    item[13] = previous - 0x200;
+    panelWords[13] = phase - MNU_PROFILE_PHASE_PERIOD;
 }
 
-void mnuClearPanelTransitionState(u32 item) {
-    memset(item, 0, 0x4c);
+/* Clear the complete native popup-transition state, including saved entry addresses. */
+void mnuClearPanelTransitionState(u32 stateAddress) {
+    memset(stateAddress, 0, MNU_POPUP_STATE_BYTES);
 }
 
 typedef u32 (*MenuPopupCallback)();
@@ -954,13 +1004,14 @@ void func_002854B0(s32 action, MenuPopupEntry *entry, MenuPopupState *state, u32
     }
 }
 
-void mnuDrainPanelTransitions(u32 item, u32 option) {
-    s32 currentValue;
+/* Pop saved entries with their leave callbacks until the state count reaches zero. */
+void mnuDrainPanelTransitions(u32 stateAddress, u32 callbackArgument) {
+    s32 entryCount;
 
-    currentValue = *(s32 *)item;
-    while (currentValue != 0) {
-        func_002854B0(1, 0, item, option);
-        currentValue = *(s32 *)item;
+    entryCount = *(s32 *)stateAddress;
+    while (entryCount != 0) {
+        func_002854B0(1, 0, stateAddress, callbackArgument);
+        entryCount = *(s32 *)stateAddress;
     }
 }
 
@@ -970,61 +1021,66 @@ s32 mnuHasPopupSelectionFlag(s32 *flags) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00285670);
 
-/* Popup state retains the entry address at +0x44. */
+/* Compare the popup state's current entry address, not an entry payload value. */
 
-u8 mnuIsPopupEntryValue(s32 item, s32 value) {
-    return ((MenuPopupState *)item)->entryAddress == value;
+u8 mnuIsPopupEntryValue(s32 stateAddress, s32 entryAddress) {
+    return ((MenuPopupState *)stateAddress)->entryAddress == entryAddress;
 }
 
-void mnuSetPopupEntry(s32 out, s32 entry) {
-    u16 lowHalf;
+/* Bind the entry address and retain only the entry's low sixteen flag bits. */
+void mnuSetPopupEntry(s32 entrySlotAddress, s32 entryAddress) {
+    u16 retainedFlags;
 
-    lowHalf = *(u16 *)entry;
-    *(s32 *)out = entry;
-    *(s32 *)entry = lowHalf;
+    retainedFlags = *(u16 *)entryAddress;
+    *(s32 *)entrySlotAddress = entryAddress;
+    *(s32 *)entryAddress = retainedFlags;
 }
 
-void mnuSetPopupEntryFlagged(s32 out, s32 entry) {
-    u16 lowHalf;
+/* Bind the entry with the native insert-before-top bit after preserving low flags. */
+void mnuSetPopupEntryFlagged(s32 entrySlotAddress, s32 entryAddress) {
+    u16 retainedFlags;
 
-    lowHalf = *(u16 *)entry;
-    *(s32 *)out = entry;
-    *(s32 *)entry = lowHalf | 0x20000;
+    retainedFlags = *(u16 *)entryAddress;
+    *(s32 *)entrySlotAddress = entryAddress;
+    *(s32 *)entryAddress = retainedFlags | MNU_POPUP_INSERT_BEFORE_TOP;
 }
 
-void mnuAttachAndMarkMenuEntry(s32 out, s32 entry) {
-    u16 lowHalf;
+/* Bind the entry with both native marking bits after preserving low flags. */
+void mnuAttachAndMarkMenuEntry(s32 entrySlotAddress, s32 entryAddress) {
+    u16 retainedFlags;
 
-    lowHalf = *(u16 *)entry;
-    *(s32 *)out = entry;
-    *(s32 *)entry = lowHalf | 0x60000;
+    retainedFlags = *(u16 *)entryAddress;
+    *(s32 *)entrySlotAddress = entryAddress;
+    *(s32 *)entryAddress = retainedFlags | MNU_POPUP_ENTRY_MARK_BITS;
 }
 
-void mnuBindPresentMenuEntry(s32 item, u32 out) {
-    if (((MenuPopupState *)item)->entryAddress != 0) {
-        mnuSetPopupEntryFlagged(out, ((MenuPopupState *)item)->entryAddress);
+/* Bind the current popup entry only when its saved address is nonzero. */
+void mnuBindPresentMenuEntry(s32 stateAddress, u32 entrySlotAddress) {
+    if (((MenuPopupState *)stateAddress)->entryAddress != 0) {
+        mnuSetPopupEntryFlagged(entrySlotAddress, ((MenuPopupState *)stateAddress)->entryAddress);
         return;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00285960);
 
+/* Populate occupied party slots; empty slots retain the native unknown-field sentinel. */
 void mnuInitPartyPanelSlots(PartyPanel *panel) {
-    u32 i;
-    u8 *entry;
-    s32 offset = 0;
+    u32 partyIndex;
+    u8 *partyEntry;
+    s32 entryOffset = 0;
 
     memset(panel, 0, 0x10C);
     panel->unk0 = 0;
     panel->unk4 = 0;
-    for (i = 0; i < 5; i++) {
-        entry = (u8 *)(datGameState + offset + 0xA60);
-        offset += 0x1A4;
-        if (*(u16 *)entry & 1) {
-            func_00285960(entry, 0, i, panel);
-            panel->slots[i].index = i;
+    for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
+        partyEntry = (u8 *)(datGameState + entryOffset + MNU_PARTY_ENTRY_BASE);
+        entryOffset += MNU_PARTY_ENTRY_BYTES;
+        if (*(u16 *)partyEntry & 1) {
+            func_00285960(partyEntry, 0, partyIndex, panel);
+            panel->slots[partyIndex].index = partyIndex;
         } else {
-            panel->slots[i].unk8 = -1;
+            panel->slots[partyIndex].unk8 = -1;
         }
     }
 }
@@ -1032,164 +1088,165 @@ void mnuInitPartyPanelSlots(PartyPanel *panel) {
 extern s8 D_00324510[];
 extern u8 D_00324530[];
 
-/* Translate a mask of pad buttons into held/pressed flags: low bits test each digital button (sign bit or pressure bit), the high bits
- * report the same inputs as plain non-zero tests. Select (bit 0) overrides everything else. */
-s32 mnuMapPadMaskToFlags(s32 buttons) {
-    s32 out = 0;
+/* Translate requested inputs using native sign-bit/trigger-bit and nonzero tests.
+ * Input bit zero has exclusive priority over every other result bit. */
+s32 mnuMapPadMaskToFlags(s32 buttonMask) {
+    s32 inputFlags = 0;
 
-    if (buttons & 0x1) {
+    if (buttonMask & MNU_INPUT_PRIORITY_BIT) {
         if (D_00324510[0x21] < 0) {
-            out = 1;
+            inputFlags = MNU_INPUT_PRIORITY_BIT;
         }
     }
-    if (buttons & 0x2) {
+    if (buttonMask & 0x2) {
         if (D_00324510[0x23] < 0) {
-            out |= 0x2;
+            inputFlags |= 0x2;
         }
     }
-    if (buttons & 0x10) {
-        if (D_00324530[6] & 2) {
-            out |= 0x10;
+    if (buttonMask & 0x10) {
+        if (D_00324530[6] & MNU_PAD_TRIGGER_BIT) {
+            inputFlags |= 0x10;
         }
     }
-    if (buttons & 0x20) {
-        if (D_00324530[7] & 2) {
-            out |= 0x20;
+    if (buttonMask & 0x20) {
+        if (D_00324530[7] & MNU_PAD_TRIGGER_BIT) {
+            inputFlags |= 0x20;
         }
     }
-    if (buttons & 0x40) {
-        if (D_00324530[4] & 2) {
-            out |= 0x40;
+    if (buttonMask & 0x40) {
+        if (D_00324530[4] & MNU_PAD_TRIGGER_BIT) {
+            inputFlags |= 0x40;
         }
     }
-    if (buttons & 0x80) {
-        if (D_00324530[5] & 2) {
-            out |= 0x80;
+    if (buttonMask & 0x80) {
+        if (D_00324530[5] & MNU_PAD_TRIGGER_BIT) {
+            inputFlags |= 0x80;
         }
     }
-    if (buttons & 0x4) {
+    if (buttonMask & 0x4) {
         if (D_00324510[0x22] < 0) {
-            out |= 0x4;
+            inputFlags |= 0x4;
         }
     }
-    if (buttons & 0x8) {
+    if (buttonMask & 0x8) {
         if (D_00324510[0x20] < 0) {
-            out |= 0x8;
+            inputFlags |= 0x8;
         }
     }
-    if (buttons & 0x200) {
-        if (D_00324530[0xA] & 2) {
-            out |= 0x200;
+    if (buttonMask & 0x200) {
+        if (D_00324530[0xA] & MNU_PAD_TRIGGER_BIT) {
+            inputFlags |= 0x200;
         }
     }
-    if (buttons & 0x100) {
-        if (D_00324530[8] & 2) {
-            out |= 0x100;
+    if (buttonMask & 0x100) {
+        if (D_00324530[8] & MNU_PAD_TRIGGER_BIT) {
+            inputFlags |= 0x100;
         }
     }
-    if (buttons & 0x800) {
-        if (D_00324530[0xB] & 2) {
-            out |= 0x800;
+    if (buttonMask & 0x800) {
+        if (D_00324530[0xB] & MNU_PAD_TRIGGER_BIT) {
+            inputFlags |= 0x800;
         }
     }
-    if (buttons & 0x400) {
-        if (D_00324530[9] & 2) {
-            out |= 0x400;
+    if (buttonMask & 0x400) {
+        if (D_00324530[9] & MNU_PAD_TRIGGER_BIT) {
+            inputFlags |= 0x400;
         }
     }
-    if (buttons & 0x1000) {
+    if (buttonMask & 0x1000) {
         if (D_00324510[0x2C] < 0) {
-            out |= 0x1000;
+            inputFlags |= 0x1000;
         }
     }
-    if (buttons & 0x2000) {
+    if (buttonMask & 0x2000) {
         if (D_00324510[0x2D] < 0) {
-            out |= 0x2000;
+            inputFlags |= 0x2000;
         }
     }
-    if (buttons & 0x20000) {
+    if (buttonMask & 0x20000) {
         if (D_00324510[0x2A] < 0) {
-            out |= 0x20000;
+            inputFlags |= 0x20000;
         }
     }
-    if (buttons & 0x10000) {
+    if (buttonMask & 0x10000) {
         if (D_00324510[0x28] < 0) {
-            out |= 0x10000;
+            inputFlags |= 0x10000;
         }
     }
-    if (buttons & 0x80000) {
+    if (buttonMask & 0x80000) {
         if (D_00324510[0x2B] < 0) {
-            out |= 0x80000;
+            inputFlags |= 0x80000;
         }
     }
-    if (buttons & 0x40000) {
+    if (buttonMask & 0x40000) {
         if (D_00324510[0x29] < 0) {
-            out |= 0x40000;
+            inputFlags |= 0x40000;
         }
     }
-    if (buttons & 0x10) {
+    if (buttonMask & 0x10) {
         if (D_00324510[0x26] != 0) {
-            out |= 0x100000;
+            inputFlags |= 0x100000;
         }
     }
-    if (buttons & 0x20) {
+    if (buttonMask & 0x20) {
         if (D_00324510[0x27] != 0) {
-            out |= 0x200000;
+            inputFlags |= 0x200000;
         }
     }
-    if (buttons & 0x40) {
+    if (buttonMask & 0x40) {
         if (D_00324510[0x24] != 0) {
-            out |= 0x400000;
+            inputFlags |= 0x400000;
         }
     }
-    if (buttons & 0x80) {
+    if (buttonMask & 0x80) {
         if (D_00324510[0x25] != 0) {
-            out |= 0x800000;
+            inputFlags |= 0x800000;
         }
         if (D_00324510[0x2A] != 0) {
-            out |= 0x1000000;
+            inputFlags |= 0x1000000;
         }
     }
-    if (buttons & 0x40) {
+    if (buttonMask & 0x40) {
         if (D_00324510[0x28] != 0) {
-            out |= 0x2000000;
+            inputFlags |= 0x2000000;
         }
     }
-    if (buttons & 0x80) {
+    if (buttonMask & 0x80) {
         if (D_00324510[0x2B] != 0) {
-            out |= 0x4000000;
+            inputFlags |= 0x4000000;
         }
     }
-    if (buttons & 0x40) {
+    if (buttonMask & 0x40) {
         if (D_00324510[0x29] != 0) {
-            out |= 0x8000000;
+            inputFlags |= 0x8000000;
         }
     }
-    if (out & 1) {
-        out = out & 1;
+    if (inputFlags & MNU_INPUT_PRIORITY_BIT) {
+        inputFlags = inputFlags & MNU_INPUT_PRIORITY_BIT;
     }
-    return out;
+    return inputFlags;
 }
 
-void mnuPlayInputSound(s32 unused, s32 buttons, s32 *state) {
-    if (buttons & 0x8000) {
+/* Bits 0x8000 and 0x4000 return early in that order; state bits may suppress navigation SE. */
+void mnuPlayInputSound(s32 unused, s32 inputFlags, s32 *stateFlags) {
+    if (inputFlags & 0x8000) {
         sndSetSequenceVolumePan(0xD, 0x7F, 0x3F);
         return;
     }
-    if (buttons & 0x4000) {
+    if (inputFlags & 0x4000) {
         sndSetSequenceVolumePan(0xC, 0x7F, 0x3F);
         return;
     }
-    if (buttons != 0) {
-        if (buttons & 1) {
+    if (inputFlags != 0) {
+        if (inputFlags & MNU_INPUT_PRIORITY_BIT) {
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         }
-        if (buttons & 2) {
+        if (inputFlags & 2) {
             sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
         }
-        if (buttons & 0xF0) {
-            if (state != NULL) {
-                if ((*state & 3) != 2) {
+        if (inputFlags & 0xF0) {
+            if (stateFlags != NULL) {
+                if ((*stateFlags & 3) != 2) {
                     sndSetSequenceVolumePan(0, 0x7F, 0x3F);
                 }
             } else {
@@ -1199,29 +1256,30 @@ void mnuPlayInputSound(s32 unused, s32 buttons, s32 *state) {
     }
 }
 
-void mnuPlayInputSoundKind(s32 buttons, s8 kind) {
-    if (buttons & 0x8000) {
+/* Only bit 0x8000 returns early; other flags may play multiple sounds of the selected kind. */
+void mnuPlayInputSoundKind(s32 inputFlags, s8 soundKind) {
+    if (inputFlags & 0x8000) {
         sndSetSequenceVolumePan(0xD, 0x7F, 0x3F);
         return;
     }
-    if (buttons != 0) {
-        if (buttons & 0x4000) {
+    if (inputFlags != 0) {
+        if (inputFlags & 0x4000) {
             sndSetSequenceVolumePan(0xC, 0x7F, 0x3F);
         }
-        if (buttons & 1) {
+        if (inputFlags & MNU_INPUT_PRIORITY_BIT) {
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         }
-        if (buttons & 2) {
+        if (inputFlags & 2) {
             sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
         }
-        if (buttons & 0x1000) {
+        if (inputFlags & 0x1000) {
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         }
-        if (buttons & 0x2000) {
+        if (inputFlags & 0x2000) {
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         }
-        if (buttons & 0xF0FF0) {
-            switch (kind) {
+        if (inputFlags & 0xF0FF0) {
+            switch (soundKind) {
             case 1:
                 sndSetSequenceVolumePan(6, 0x7F, 0x3F);
                 break;
@@ -1239,19 +1297,21 @@ void mnuPlayInputSoundKind(s32 buttons, s8 kind) {
     }
 }
 
-void mnuPlayDefaultInputSounds(u32 buttons) {
-    mnuPlayInputSoundKind(buttons, 0);
+/* Dispatch the input flags with the native default sound kind. */
+void mnuPlayDefaultInputSounds(u32 inputFlags) {
+    mnuPlayInputSoundKind(inputFlags, 0);
 }
 
 
 extern s32 datGameState;
-s32 mnuFindMatchingPartyEntryIndex(s32 object) {
-    s32 i;
-    u8 *entry = (u8 *)(datGameState + 0xA60);
-    for (i = 0; i < 5; i++, entry += 0x1A4) {
-        if ((((BtlEntry *)entry)->flags & 1) &&
-            ((BtlEntry *)object)->tableIndex == ((BtlEntry *)entry)->tableIndex) {
-            return i;
+/* Find the first occupied slot with the same table ID; zero also serves as no-match. */
+s32 mnuFindMatchingPartyEntryIndex(s32 targetEntryAddress) {
+    s32 partyIndex;
+    u8 *partyEntry = (u8 *)(datGameState + MNU_PARTY_ENTRY_BASE);
+    for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry += MNU_PARTY_ENTRY_BYTES) {
+        if ((((BtlEntry *)partyEntry)->flags & 1) &&
+            ((BtlEntry *)targetEntryAddress)->tableIndex == ((BtlEntry *)partyEntry)->tableIndex) {
+            return partyIndex;
         }
     }
     return 0;
@@ -1261,85 +1321,91 @@ extern s8 D_0037CE40[];
 extern u16 D_0037CE18[];
 extern u16 D_0037CE1A[];
 
+/* Match a half-open range, then return its signed mapping value; unmatched IDs return zero. */
 s32 mnuLookupRangeEntry(u16 rangeId) {
-    u16 *table = D_0037CE18;
-    s8 *entries = D_0037CE40;
-    u32 key = rangeId & 0xffff;
-    u32 i;
-    for (i = 0; i < 0x14; i += 2, table += 2) {
-        if (key < table[0]) {
+    u16 *rangeBounds = D_0037CE18;
+    s8 *mappingRows = D_0037CE40;
+    u32 rangeKey = rangeId & MNU_COMMAND_ID_MASK;
+    u32 boundWordIndex;
+    for (boundWordIndex = 0; boundWordIndex < 0x14; boundWordIndex += 2, rangeBounds += 2) {
+        if (rangeKey < rangeBounds[0]) {
             continue;
         }
-        if (key >= table[1]) {
+        if (rangeKey >= rangeBounds[1]) {
             continue;
         }
         {
-            u32 j = 0;
-            s8 *entry = entries + 1;
-            for (; j < 6; j++, entry += 3) {
-                if (i != entry[1]) {
+            u32 mappingIndex = 0;
+            s8 *mappingCursor = mappingRows + 1;
+            for (; mappingIndex < 6; mappingIndex++, mappingCursor += 3) {
+                if (boundWordIndex != mappingCursor[1]) {
                     continue;
                 }
-                return entry[0];
+                return mappingCursor[0];
             }
         }
     }
     return 0;
 }
 
-u16 mnuPickPairedTableValue(s32 index, s32 alt) {
-    return (alt == 0) ? D_0037CE18[index] : D_0037CE1A[index];
+/* Read a bound word from the primary table or its one-word-shifted alternate view. */
+u16 mnuPickPairedTableValue(s32 boundWordIndex, s32 alternate) {
+    return (alternate == 0) ? D_0037CE18[boundWordIndex] : D_0037CE1A[boundWordIndex];
 }
 
-s32 mnuGetIndexedNonzeroEffect(s32 index) {
-    s32 count = 0;
-    s32 i;
-    s8 *entry = D_0037CE40;
-    for (i = 0; i < 6; i++, entry += 3) {
-        s32 value = *entry;
-        if (value != 0) count++;
-        if (index == count - 1) return value;
+/* For nonnegative indices, select among nonzero signed mapping values in row order. */
+s32 mnuGetIndexedNonzeroEffect(s32 valueIndex) {
+    s32 nonzeroCount = 0;
+    s32 mappingIndex;
+    s8 *mappingCursor = D_0037CE40;
+    for (mappingIndex = 0; mappingIndex < 6; mappingIndex++, mappingCursor += 3) {
+        s32 mappingValue = *mappingCursor;
+        if (mappingValue != 0) nonzeroCount++;
+        if (valueIndex == nonzeroCount - 1) return mappingValue;
     }
     return 0;
 }
 
 extern s8 D_0037CE42[];
 
-u16 mnuLookupPartyTableValue(u32 count, s32 base, s32 which) {
-    u32 i;
-    s32 sum = 0;
+/* Accumulate selected mapping values, then read the requested adjacent range bound. */
+u16 mnuLookupPartyTableValue(u32 valueCount, s32 baseIndex, s32 alternate) {
+    u32 valueIndex;
+    s32 mappingSum = 0;
 
-    for (i = 0; i < count; i++) {
-        sum += mnuGetIndexedNonzeroEffect(i);
+    for (valueIndex = 0; valueIndex < valueCount; valueIndex++) {
+        mappingSum += mnuGetIndexedNonzeroEffect(valueIndex);
     }
-    if (which == 0) {
-        return D_0037CE18[D_0037CE42[(base + sum) * 3]];
+    if (alternate == 0) {
+        return D_0037CE18[D_0037CE42[(baseIndex + mappingSum) * 3]];
     }
-    return D_0037CE1A[D_0037CE42[(base + sum) * 3]];
+    return D_0037CE1A[D_0037CE42[(baseIndex + mappingSum) * 3]];
 }
 
 /* Only secondary-kind-2 entries expose the paired value. */
-u16 mnuGetSecondaryValueIfKind2(s32 entryId) {
-    RangeEntry *entry = (RangeEntry *)((entryId & 0xffff) * 56 + datCommandRecords);
+u16 mnuGetSecondaryValueIfKind2(s32 commandId) {
+    RangeEntry *command = (RangeEntry *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + datCommandRecords);
 
-    if (entry->secondaryKind != 2) {
+    if (command->secondaryKind != 2) {
         return 0;
     }
-    return entry->secondaryValue;
+    return command->secondaryValue;
 }
 
-u8 mnuGetRangeEntryKind(u32 id) {
-    return ((RangeEntry *)((id & 0xffff) * 0x38 + datCommandRecords))->kind;
+/* Return the native value/cost kind from the low-sixteen-bit command ID. */
+u8 mnuGetRangeEntryKind(u32 commandId) {
+    return ((RangeEntry *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + datCommandRecords))->kind;
 }
 
-u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
-    RangeEntry *entry = (RangeEntry *)((id & 0xFFFF) * 0x38 + datCommandRecords);
-    u16 base = entry->value;
-    u16 addition = entry->addition;
-    if (mnuGetRangeEntryKind(id & 0xFFFF) == 1) {
-        base = addition + ((BtlEntry *)object)->maxHp * base / 100;
+/* HP-kind values use max HP as a percentage basis; other kinds retain the stored value. */
+u16 mnuGetAdjustedEntryValue(s32 commandId, s32 actorAddress) {
+    RangeEntry *command = (RangeEntry *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + datCommandRecords);
+    u16 entryValue = command->value;
+    u16 flatAddition = command->addition;
+    if (mnuGetRangeEntryKind(commandId & MNU_COMMAND_ID_MASK) == MNU_COST_KIND_HP) {
+        entryValue = flatAddition + ((BtlEntry *)actorAddress)->maxHp * entryValue / MNU_PERCENT_SCALE;
     }
-    return base;
+    return entryValue;
 }
 
 u16 mnuGetAdjustedPartyRangeValue(s32 id) {
@@ -1371,18 +1437,19 @@ u16 mnuGetAdjustedPartyRangeValue(s32 id) {
     return scale;
 }
 
-s32 mnuCanAffordEntryCost(u16 id, s32 item) {
-    u16 minimum = ((RangeEntry *)datCommandRecords)[id].value;
-    s32 kind = mnuGetRangeEntryKind(id);
+/* Compare the stored raw HP/MP cost; equality is affordable and other kinds pass. */
+s32 mnuCanAffordEntryCost(u16 commandId, s32 actorAddress) {
+    u16 cost = ((RangeEntry *)datCommandRecords)[commandId].value;
+    s32 costKind = mnuGetRangeEntryKind(commandId);
 
-    switch (kind) {
-    case 1:
-        if (((BtlEntry *)item)->hp < minimum) {
+    switch (costKind) {
+    case MNU_COST_KIND_HP:
+        if (((BtlEntry *)actorAddress)->hp < cost) {
             return 0;
         }
         break;
-    case 2:
-        if (((BtlEntry *)item)->mp < minimum) {
+    case MNU_COST_KIND_MP:
+        if (((BtlEntry *)actorAddress)->mp < cost) {
             return 0;
         }
         break;
@@ -1390,31 +1457,33 @@ s32 mnuCanAffordEntryCost(u16 id, s32 item) {
     return 1;
 }
 
-s32 mnuGetEntryUseStatus(s32 object, u16 id) {
-    if (mnuCanAffordEntryCost(id, object) == 0) {
+/* Return -1 for insufficient raw cost, else 0 for flagged IDs below the boundary, or 1. */
+s32 mnuGetEntryUseStatus(s32 actorAddress, u16 commandId) {
+    if (mnuCanAffordEntryCost(commandId, actorAddress) == 0) {
         return -1;
     }
-    if (!(((RangeEntry *)datCommandRecords)[id].flags & 1)) {
+    if (!(((RangeEntry *)datCommandRecords)[commandId].flags & 1)) {
         return 1;
     }
-    if (id < 0x200) {
+    if (commandId < MNU_COMMAND_USE_STATUS_BOUNDARY) {
         return 0;
     }
     return 1;
 }
 
-s32 mnuIsEntryCostUnaffordable(u16 id, s32 object) {
-    s32 kind = ((RangeEntry *)datCommandRecords)[id].kind;
-    u16 value = ((RangeEntry *)datCommandRecords)[id].value;
+/* Report insufficient raw HP/MP cost; equality and unhandled kinds return zero. */
+s32 mnuIsEntryCostUnaffordable(u16 commandId, s32 actorAddress) {
+    s32 costKind = ((RangeEntry *)datCommandRecords)[commandId].kind;
+    u16 cost = ((RangeEntry *)datCommandRecords)[commandId].value;
 
-    switch (kind) {
-    case 1:
-        if (((BtlEntry *)object)->hp < value) {
+    switch (costKind) {
+    case MNU_COST_KIND_HP:
+        if (((BtlEntry *)actorAddress)->hp < cost) {
             return 1;
         }
         break;
-    case 2:
-        if (((BtlEntry *)object)->mp < value) {
+    case MNU_COST_KIND_MP:
+        if (((BtlEntry *)actorAddress)->mp < cost) {
             return 1;
         }
         break;
@@ -1422,35 +1491,37 @@ s32 mnuIsEntryCostUnaffordable(u16 id, s32 object) {
     return 0;
 }
 
-s32 mnuConsumeEntryCost(s32 id, u8 *cursor) {
-    RangeEntry *record = (RangeEntry *)((id & 0xFFFF) * 0x38 + datCommandRecords);
-    u16 amount = record->value;
+/* Deduct an affordable stored HP/MP cost; unhandled kinds succeed without a deduction. */
+s32 mnuConsumeEntryCost(s32 commandId, u8 *actorEntry) {
+    RangeEntry *command = (RangeEntry *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + datCommandRecords);
+    u16 cost = command->value;
 
-    switch (record->kind) {
-    case 1:
-        if (((BtlEntry *)cursor)->hp < amount) {
+    switch (command->kind) {
+    case MNU_COST_KIND_HP:
+        if (((BtlEntry *)actorEntry)->hp < cost) {
             return 0;
         }
-        datAdjustCurrentHp(cursor, -amount);
+        datAdjustCurrentHp(actorEntry, -cost);
         return 1;
-    case 2:
-        if (((BtlEntry *)cursor)->mp < amount) {
+    case MNU_COST_KIND_MP:
+        if (((BtlEntry *)actorEntry)->mp < cost) {
             return 0;
         }
-        datAdjustCurrentMp(cursor, -amount);
+        datAdjustCurrentMp(actorEntry, -cost);
         return 1;
     default:
         return 1;
     }
 }
 
-s32 mnuGetAbilityByteCategory(u16 ability) {
-    u8 value;
-    if (ability == 0) {
+/* Map the native category byte 0/1/2 to 1/2/3; command zero bypasses the record read. */
+s32 mnuGetAbilityByteCategory(u16 commandId) {
+    u8 category;
+    if (commandId == 0) {
         return 1;
     }
-    value = *(u8 *)(datCommandRecords + ability * 56 + 8);
-    switch (value) {
+    category = *(u8 *)(datCommandRecords + commandId * MNU_COMMAND_RECORD_BYTES + 8);
+    switch (category) {
     case 0:
         return 1;
     case 1:
@@ -1471,8 +1542,9 @@ u32 func_002866C8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", ptySkillApplyFieldUseEffect);
 
-u8 mnuIsAbilityValueMarked(u32 id) {
-    return *(s8 *)((id & 0xffff) * 2 + datCommandSelectors) == '\x01';
+/* Test for the exact signed-byte marker one, not merely a nonzero selector byte. */
+u8 mnuIsAbilityValueMarked(u32 commandId) {
+    return *(s8 *)((commandId & MNU_COMMAND_ID_MASK) * 2 + datCommandSelectors) == '\x01';
 }
 
 extern u32 datAffinityRecords;
@@ -1542,11 +1614,11 @@ typedef struct PtyBulletInventory {
     u8 itemCount[0xBF];      /* 0x12A0: indexed by item ID */
 } PtyBulletInventory;
 
-/* Count a bullet item in the active party: inventory plus one per unit
- * that has the item equipped. Only IDs 0xA0..0xBE are bullet items. */
+/* Count inventory plus one for every matching slot value, without an occupancy test.
+ * This counter accepts only IDs 0xA0..0xBE. */
 s32 ptyCountBulletItem(s32 bulletId) {
-    s32 count;
-    s32 i;
+    s32 totalCount;
+    s32 partyIndex;
 
     if (bulletId < 0xA0) {
         return 0;
@@ -1554,13 +1626,13 @@ s32 ptyCountBulletItem(s32 bulletId) {
     if (bulletId >= 0xBF) {
         return 0;
     }
-    count = ((PtyBulletInventory *)datGameState)->itemCount[bulletId];
-    for (i = 0; i < 5; i++) {
-        if (bulletId == mnuGetPartyEntryMenuValue(datGameState + i * 0x1A4 + 0xA60)) {
-            count++;
+    totalCount = ((PtyBulletInventory *)datGameState)->itemCount[bulletId];
+    for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
+        if (bulletId == mnuGetPartyEntryMenuValue(datGameState + partyIndex * MNU_PARTY_ENTRY_BYTES + MNU_PARTY_ENTRY_BASE)) {
+            totalCount++;
         }
     }
-    return count;
+    return totalCount;
 }
 
 u32 mnuSetPartyEntryMenuValue(s32 entry, u16 value) {
@@ -1575,17 +1647,18 @@ u16 mnuGetPartyEntryMenuValue(s32 entry) {
 extern u16 D_0037CE00[];
 extern void dspStartEntry(s32);
 
-s32 sndPlayPartyItemSe(u32 id, s32 mode) {
-    u16 *entry = D_0037CE00;
-    u32 i;
+/* Match an item ID, select its mode-dependent SE ID, and start it; id changes roles. */
+s32 sndPlayPartyItemSe(u32 id, s32 soundMode) {
+    u16 *soundRow = D_0037CE00;
+    u32 rowIndex;
 
-    for (i = 0; i < 3; i++, entry += 3) {
-        if (id == entry[0]) {
-            if (mode != 0) {
-                id = entry[2];
+    for (rowIndex = 0; rowIndex < 3; rowIndex++, soundRow += 3) {
+        if (id == soundRow[0]) {
+            if (soundMode != 0) {
+                id = soundRow[2];
                 id += 0x17;
             } else {
-                id = entry[1];
+                id = soundRow[1];
                 id += 10;
             }
             dspStartEntry(id);
@@ -1601,30 +1674,30 @@ extern s32 datComputeSkillBoostedMaxMp(BtlEntry *);
 
 /* Apply a permanent stat/capacity item and refill eligible vitals.
  * Returns 0 for other items, 1 when accepted, or 2 when capped and already full. */
-s32 btlItemApplyPermanentBonus(u16 item, BtlEntry *unit) {
-    s32 stat = -1;
-    s32 valid = 0;
+s32 btlItemApplyPermanentBonus(u16 itemId, BtlEntry *unit) {
+    s32 statIndex = -1;
+    s32 accepted = 0;
 
-    switch (item - 0x50) {
+    switch (itemId - 0x50) {
     case 0:
-        stat = 0;
-        valid = 1;
+        statIndex = 0;
+        accepted = 1;
         break;
     case 1:
-        stat = 1;
-        valid = 1;
+        statIndex = 1;
+        accepted = 1;
         break;
     case 2:
-        stat = 2;
-        valid = 1;
+        statIndex = 2;
+        accepted = 1;
         break;
     case 3:
-        stat = 3;
-        valid = 1;
+        statIndex = 3;
+        accepted = 1;
         break;
     case 4:
-        stat = 4;
-        valid = 1;
+        statIndex = 4;
+        accepted = 1;
         break;
     case 5:
         if (unit->maxHp >= 0x3E7 && unit->hp >= unit->maxHp &&
@@ -1635,7 +1708,7 @@ s32 btlItemApplyPermanentBonus(u16 item, BtlEntry *unit) {
         if (unit->hpBonus >= 0x3E8) {
             unit->hpBonus = 0x3E7;
         }
-        valid = 1;
+        accepted = 1;
         break;
     case 6:
         if (unit->maxMp >= 0x3E7 && unit->hp >= unit->maxHp &&
@@ -1646,28 +1719,29 @@ s32 btlItemApplyPermanentBonus(u16 item, BtlEntry *unit) {
         if (unit->mpBonus >= 0x3E8) {
             unit->mpBonus = 0x3E7;
         }
-        valid = 1;
+        accepted = 1;
         break;
     default:
         break;
     }
 
-    if (valid == 0) {
+    if (accepted == 0) {
         return 0;
     }
-    if (stat >= 0) {
-        if (unit->baseStats[stat] >= 0x63 &&
+    if (statIndex >= 0) {
+        if (unit->baseStats[statIndex] >= 0x63 &&
             unit->hp >= unit->maxHp && unit->mp >= unit->maxMp) {
             return 2;
         }
-        unit->baseStats[stat] += 2;
-        if (unit->baseStats[stat] >= 0x64) {
-            unit->baseStats[stat] = 0x63;
+        unit->baseStats[statIndex] += 2;
+        if (unit->baseStats[statIndex] >= 0x64) {
+            unit->baseStats[statIndex] = 0x63;
         }
     }
 
     unit->maxHp = datComputeSkillBoostedMaxHp(unit);
     unit->maxMp = datComputeSkillBoostedMaxMp(unit);
+    /* This status bit suppresses both native refill stores. */
     if ((unit->status & 0x4000) == 0) {
         unit->mp = unit->maxMp;
         unit->hp = unit->maxHp;
@@ -1712,37 +1786,41 @@ s32 btlItemApplyDirectEffect(s32 context, u16 item, s32 mode,
 }
 
 
-s32 mnuGetSelectionFromFlags(s32 entry) {
-    u16 flags = ((BtlEntry *)entry)->status;
-    if (flags & 0x400) return 0;
-    if (flags & 0x100) return 1;
-    if (flags & 0x80) return 2;
-    if (flags & 0x40) return 3;
-    if (flags & 0x10) return 4;
+/* Return the first matching status index in native priority order, or -1. */
+s32 mnuGetSelectionFromFlags(s32 actorAddress) {
+    u16 statusFlags = ((BtlEntry *)actorAddress)->status;
+    if (statusFlags & 0x400) return 0;
+    if (statusFlags & 0x100) return 1;
+    if (statusFlags & 0x80) return 2;
+    if (statusFlags & 0x40) return 3;
+    if (statusFlags & 0x10) return 4;
     return -1;
 }
 
-s32 mnuGetMatchingPartyEntryMask(s32 object) {
-    s32 i;
-    u8 *entry = (u8 *)(datGameState + 0xA60);
-    for (i = 0; i < 5; i++, entry += 0x1A4) {
-        if ((((BtlEntry *)entry)->flags & 1) &&
-            ((BtlEntry *)entry)->tableIndex == ((BtlEntry *)object)->tableIndex) {
-            return 1 << i;
+/* Return one bit for the first occupied matching table ID, or zero when absent. */
+s32 mnuGetMatchingPartyEntryMask(s32 targetEntryAddress) {
+    s32 partyIndex;
+    u8 *partyEntry = (u8 *)(datGameState + MNU_PARTY_ENTRY_BASE);
+    for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry += MNU_PARTY_ENTRY_BYTES) {
+        if ((((BtlEntry *)partyEntry)->flags & 1) &&
+            ((BtlEntry *)partyEntry)->tableIndex == ((BtlEntry *)targetEntryAddress)->tableIndex) {
+            return 1 << partyIndex;
         }
     }
     return 0;
 }
 
+/* Classify the truncated signed percentage: below 25 -> 2, below 50 -> 1, else 0.
+ * A zero divisor returns zero without division. */
 s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor) {
-    s32 percent;
+    s32 ratioPercent;
 
     if (divisor != 0) {
-        percent = amount * 100 / divisor;
-        if (percent < 25) {
+        ratioPercent = amount * MNU_PERCENT_SCALE / divisor;
+        if (ratioPercent < MNU_RATIO_QUARTER_PERCENT) {
             return 2;
         }
-        if (percent < 50) {
+        if (ratioPercent < MNU_RATIO_HALF_PERCENT) {
             return 1;
         }
     }
