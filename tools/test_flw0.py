@@ -326,6 +326,26 @@ class Flw0Tests(unittest.TestCase):
         ):
             flw0.parse_source(symbolic.replace("profile dds1\n", ""))
 
+    def test_event_resource_name_survives_dynamic_selection_request(self) -> None:
+        original = _fixture(
+            [
+                flw0.OPCODE_IDS["PROC"],
+                (610 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                flw0.OPCODE_IDS["PUSHIX"],
+                (0x028 << 16) | flw0.OPCODE_IDS["COMM"],
+                flw0.OPCODE_IDS["END"],
+            ]
+        )
+        script = flw0.parse(original)
+
+        physical = flw0.render_source(script, "dds1")
+        symbolic = flw0_symbolic.render(script, "dds1")
+        self.assertIn("PUSHEVENT e610", physical)
+        self.assertIn("PUSHEVENT e610", symbolic)
+        self.assertIn("PUSHIX", physical)
+        self.assertEqual(flw0.parse_source(physical).to_bytes(), original)
+        self.assertEqual(flw0.parse_source(symbolic).to_bytes(), original)
+
     def test_script_task_targets_use_local_procedure_symbols(self) -> None:
         original = _fixture(
             [
@@ -1596,16 +1616,16 @@ end
                     },
                     {
                         "CALL_EVENT": (0, "call", None),
-                        "SUBMIT_EVENT": (0, "submit", None),
+                        "SUBMIT_EVENT": (None, "submit", 0),
                         "SUBMIT_EVENT_WITH_SELECTION": (
                             1,
                             "submit-selection",
                             0,
                         ),
                         "SUBMIT_EVENT_IMMEDIATE": (
-                            0,
-                            "submit-immediate",
                             None,
+                            "submit-immediate",
+                            0,
                         ),
                     },
                 )
@@ -2390,7 +2410,7 @@ end
             ),
             (37752, 1910, 287),
         )
-        self.assertEqual(totals["event_references"], 56)
+        self.assertEqual(totals["event_references"], 53)
         self.assertEqual(totals["procedure_references"], 463)
         self.assertEqual((totals["font"], totals["glyphs"]), (433, 159))
         self.assertEqual(totals["short_string_counts"], 22)
