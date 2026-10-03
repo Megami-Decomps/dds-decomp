@@ -519,7 +519,52 @@ s64 evtSetPopupEntryWhenMessageWindowIdle(u64 argument) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_00245C98", func_00247A78);
+extern void func_0025E308(s32, s32, s32, void *, s32, s32);
+extern void func_0025E508(s32, s32, s32, void *, s32, s32);
+extern void func_0025E6B0(s32, s32, s32, void *, s32, s32);
+extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawIfActive(s32, s32, s32, void *, s32);
+extern void func_0025FD50(s32, s32, s32, void *, s32);
+extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
+extern void mnuDrawIconFixedEntryWithBadge(s32, s32, s32, s32, s32, s32);
+extern void mnuClearWindowPanelTransitionFlag(void *);
+extern void func_00260100(void *, s32);
+extern s32 func_00260208(s32, u32, s32, s32);
+
+void func_00247A78(s32 callback) {
+    EvtDispatchState *state = (EvtDispatchState *)kwlnTaskGetUserValue();
+
+    switch (state->mode) {
+    case 1:
+        func_0025E308(0, 0, 0, state, 0x100, 0x53);
+        mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
+        func_0025E6B0(0, 0, 0, state, 0x100, 0x53);
+        mnuDrawIfActive(0, 0, 0, (void *)state->taskLink, 0x53);
+        func_0025FD50(0, 0, 0, state, 0x53);
+        func_00260100(state, 0xA09DC380);
+        func_00260208((s32)state, 0x100, 3, 0x53);
+        break;
+    case 2:
+        if (state->stateTable == (s32)D_0036AA68) {
+            func_0025E308(0, 0, 0, state, 0x100, 0x53);
+            func_0025E508(0, 0, 0, state, 0x100, 0x53);
+            mnuDrawListChildrenWithCountdown(
+                0, 0, 0, (u8 *)((EvtDispatchLink *)state->menuLink)->target, 0x53);
+            func_00260100(state, 0xA09DC380);
+            func_00260208((s32)state, 0x100, 4, 0x53);
+        } else {
+            func_0025E308(0, 0, 0, state, 0x100, 0x53);
+            mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
+            func_0025E6B0(0, 0, 0, state, 0x100, 0x53);
+            mnuClearWindowPanelTransitionFlag((void *)state->menuLink);
+            mnuDrawIconFixedEntryWithBadge(0, 0, 0, (s32)state, 0x100, 0x53);
+            func_00260100(state, 0xA09DC380);
+            func_00260208((s32)state, 0x100, 2, 0x53);
+        }
+        break;
+    }
+    func_00285670((s32)state + 8, &state->dispatchState, 1, callback);
+}
 
 void evtSetupDispatchSyncH(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
