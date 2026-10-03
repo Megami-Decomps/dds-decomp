@@ -207,6 +207,8 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101250);
 extern u8 D_004393C8[];
 extern void func_00101250(KwlnTask* task, s32 arg1);
 
+
+
 /* Blank the task-name scratch buffer, then run func_00101250 on every parentless task of the three scheduler lists. */
 void kwlnVisitTaskForestRoots(void)
 {
