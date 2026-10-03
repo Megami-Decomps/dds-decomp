@@ -127,7 +127,7 @@ extern s32 func_0035C860(char *, const char *, ...);
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
 
-extern s32 sdfReadNamedResource(char *, void *, s32);
+extern s32 sdfReadNamedResource(char *resource, void *info, s32 options);
 
 extern u32 D_0044F7F0[];
 
@@ -314,7 +314,7 @@ extern u8 D_003A9EB0[];
 
 extern void evtCreateMessageWindowIfMissing(void *arg0);
 
-extern void dspStartEntry(s32 arg0);
+extern s32 dspStartEntry(s32 arg0);
 
 extern void fldResetPlayerSceneObjectState(void);
 
@@ -1116,7 +1116,38 @@ void fldSetEmitterPosition(FldEmitter *emitter, f32 x, f32 y, f32 z) {
     func_003320E8(D_00380838, emitter);
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00145948);
+extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32,
+                                u32, u32);
+
+typedef struct {
+    s16 u;
+    s16 v;
+    s16 width;
+    s16 height;
+    s16 anchorX;
+    s16 anchorY;
+    s32 textureSlot;
+} FldProjectedSprite;
+
+extern FldProjectedSprite D_0039A0E0[];
+
+/* Convert projected GS coordinates to the field's centered sprite origin. */
+void func_00145948(s32 index, u32 color, f32 x, f32 y) {
+    FldProjectedSprite *sprite = &D_0039A0E0[index];
+    s32 anchorY = sprite->anchorY;
+    s16 u = sprite->u;
+    s16 v = sprite->v;
+
+    y -= 2048.0f;
+    x -= 2048.0f;
+    y += y;
+    y += 224.0f;
+    x += 256.0f;
+    fldSubmitSpriteRect((s32)(x - sprite->anchorX), (s32)(y - anchorY),
+                        sprite->width, sprite->height, u, v,
+                        sprite->width, sprite->height, color,
+                        D_0044F7F0[D_0039A0E0[index].textureSlot]);
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00145A08);
 
@@ -2164,8 +2195,6 @@ s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z) {
 extern void fldSelectDisplayBuffer(u32);
 extern void func_0012BE18(s32);
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32,
-                                u32, u32);
 extern s32 ptyAnyUnitFlagMatch(s32, s32);
 extern f32 sdfSinPoly(f32);
 extern void func_0012B690(s32, s32, s32, s32, s32, s32, s32, s32, u32,
