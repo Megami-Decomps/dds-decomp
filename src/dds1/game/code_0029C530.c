@@ -3863,6 +3863,8 @@ typedef struct EffPointSetTableSource {
     u32 colorA;    /* 0x70: low 24 bits kept, top byte ramped */
     u32 colorB;    /* 0x74 */
     u32 colorC;    /* 0x78 */
+    u8 pad7C[8];
+    f32 unk84;     /* 0x84: copied separately from the descriptor prefix */
 } EffPointSetTableSource;
 
 typedef struct EffPointSetRow {
@@ -3975,7 +3977,42 @@ void effResetIndexedInstanceFrames(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A93A0);
+extern u8 *effCreateClassResourceWork(u16, void *);
+extern float effMiscRandUnitFloat(void *);
+
+u8 *func_002A93A0(EffPointSetTableSource *config) {
+    u32 count = config->count;
+    u8 *allocation = sdfAllocSizeClassBlock(count * 4 + 4);
+    u32 *entries = (u32 *)(allocation + 4);
+    EffPointSetTableSource copy;
+    u32 index;
+    f32 step;
+    f32 position;
+    f32 offset;
+
+    *(u32 **)allocation = entries;
+    if ((u32)config->layers < 3) {
+        config->layers = 3;
+    }
+    if (count == 0) {
+        return allocation;
+    }
+    memcpy(&copy, config, 0x84);
+    copy.count = 1;
+    copy.unk84 = config->unk84;
+    step = 6.2831852f / (f32)count;
+    position = step * ((effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f);
+    for (index = 0; index < count; index++) {
+        u8 *resourceWork = effCreateClassResourceWork(1, &copy);
+        u8 **resourceSlot = (u8 **)((EffClassWork *)resourceWork)->resource;
+
+        *entries++ = (u32)resourceWork;
+        *(f32 *)(*resourceSlot + 0xC) = position;
+        offset = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f;
+        position += step + step * offset * 0.25f;
+    }
+    return allocation;
+}
 
 extern void effDestroyClassResourceWork(EffClassWork *);
 
