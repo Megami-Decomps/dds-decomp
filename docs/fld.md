@@ -300,6 +300,36 @@ Across the archived field corpus, every one of the 150,694 primary and 3,948
 secondary material texture references resolves inside its paired TBN bundle.
 This covers 3,656 DDS1 and 3,415 DDS2 model resources.
 
+### Model geometry import
+
+`tools/fld_model_import.py` applies edited vertex streams from an exported GLB
+back to an FLD1 binary or source file:
+
+```sh
+python3 tools/fld_model_import.py edited-model.glb \
+  src/dds1/data/field/f011_001.f1asm edited-f011_001.f1asm
+```
+
+The importer accepts changes to positions, normals, texture coordinates, the
+unclassified four-float vertex attribute, and vertex colors. Positions are
+converted back through the unit scale recorded by the exporter. Colors are
+converted from glTF's normalized 0..255 representation to the DDS 0..128
+range. Components that still equal the exported values retain their original
+float bits.
+
+The edit path deliberately preserves the FLD1 structure that glTF does not
+describe. Triangle indices and control bytes, material and draw identities,
+mesh ordering, vertex-channel layout, packet sizes, VIF commands, VU program
+addresses, and padding must still match the exported model. Shared packet
+streams must also have one consistent edit. The importer rejects a GLB that
+changes any of these properties instead of rebuilding a different packet
+program implicitly.
+
+Node transforms, motion, and model bounds remain authoritative in FLD1 source;
+use the source directives to edit them. Bounds should be updated there when a
+geometry edit extends beyond the existing local box. The same packet-preserving
+engine handles standalone automap models through `tools/amb_scene_import.py`.
+
 ### Composed field export
 
 `tools/fld_scene.py` combines the visual FLD1 layer with the matching FLD2

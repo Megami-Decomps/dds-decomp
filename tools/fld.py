@@ -255,6 +255,11 @@ class ModelMesh:
     colors: tuple[tuple[int, int, int, int], ...] | None
     controls: tuple[int, int]
     program: int
+    positions_offset: int
+    normals_offset: int | None
+    texcoords_offset: int | None
+    attributes_offset: int | None
+    colors_offset: int | None
 
 
 @dataclass(frozen=True)
@@ -882,35 +887,44 @@ def _read_model_mesh_packet(
         address += triangle_count
 
         expect_unpack(0x8, vertex_count, address, prefix + " position command")
+        positions_offset = cursor
         positions = records(vertex_count, "<3f", prefix + " positions")
         address += vertex_count
 
         normals = None
+        normals_offset = None
         if cursor + 4 <= end and struct.unpack_from("<I", data, cursor)[0] == _vif_unpack_code(
             0x8, vertex_count, address
         ):
             cursor += 4
+            normals_offset = cursor
             normals = records(vertex_count, "<3f", prefix + " normals")
             address += vertex_count
 
         texcoords = None
+        texcoords_offset = None
         attributes = None
+        attributes_offset = None
         if cursor + 4 <= end:
             next_word = struct.unpack_from("<I", data, cursor)[0]
             if next_word == _vif_unpack_code(0x4, vertex_count, address):
                 cursor += 4
+                texcoords_offset = cursor
                 texcoords = records(vertex_count, "<2f", prefix + " texture coordinates")
                 address += vertex_count
             elif next_word == _vif_unpack_code(0xC, vertex_count, address):
                 cursor += 4
+                attributes_offset = cursor
                 attributes = records(vertex_count, "<4f", prefix + " attributes")
                 address += vertex_count
 
         colors = None
+        colors_offset = None
         if cursor + 4 <= end and struct.unpack_from("<I", data, cursor)[0] == _vif_unpack_code(
             0xE, vertex_count, address
         ):
             cursor += 4
+            colors_offset = cursor
             colors = records(vertex_count, "<4B", prefix + " colors")
 
         program_word = word(prefix + " program command")
@@ -928,6 +942,11 @@ def _read_model_mesh_packet(
                 colors,
                 (control_0, control_1),
                 program_word & 0xFFFF,
+                positions_offset,
+                normals_offset,
+                texcoords_offset,
+                attributes_offset,
+                colors_offset,
             )
         )
 
