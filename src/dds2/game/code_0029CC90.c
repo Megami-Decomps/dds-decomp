@@ -204,7 +204,66 @@ s32 mnuCountAdvancingTitleAnimations(void) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029CC90", func_0029D2D8);
+typedef struct BrsLevelUpRow {
+    u32 unit;
+    s32 levelUps;
+    s32 partyIndex;
+    u8 pad0C[0xC];
+} BrsLevelUpRow;
+
+typedef struct BrsLevelUpList {
+    BrsLevelUpRow rows[5];
+    s32 count;
+} BrsLevelUpList;
+
+typedef struct BrsProfileUnit {
+    u16 flags;
+    u8 pad02[2];
+    u16 unitId;
+    u8 pad06[0x4F];
+    u8 profileId;
+} BrsProfileUnit;
+
+s32 func_0029D2D8(BrsLevelUpList *list) {
+    s32 *rowData = &list->rows[0].levelUps;
+    s32 offset = 0;
+    s32 partyIndex = 0;
+    BrsProfileUnit *unit;
+
+    memset(list, 0, 0x7C);
+    list->count = 0;
+    while (partyIndex < 5) {
+        unit = (BrsProfileUnit *)(datGameState + 0xA60 + offset);
+        offset += 0x1C4;
+        if ((unit->flags & 1) != 0) {
+            s32 levelUps;
+
+            if (unit->unitId == 9) {
+                partyIndex++;
+                continue;
+            }
+
+            levelUps = ptyCalcLevelUps((u8 *)unit);
+            if (levelUps <= 0) {
+                partyIndex++;
+                continue;
+            }
+
+            {
+                s32 rowIndex = list->count * 6;
+                u32 *unitRow = &((u32 *)list)[rowIndex];
+                s32 *levelRow = &rowData[rowIndex];
+
+                *levelRow = levelUps;
+                *unitRow = (u32)unit;
+                rowData[list->count * 6 + 1] = partyIndex;
+                list->count++;
+            }
+        }
+        partyIndex++;
+    }
+    return list->count;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029CC90", func_0029D3D8);
 
@@ -314,7 +373,28 @@ u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
     return uiBlendColors(0x80808080, 0x80808000, blend);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029CC90", func_0029DA98);
+typedef struct BrsActiveProgressList {
+    BrsProgressRow rows[5];
+    u32 count;
+} BrsActiveProgressList;
+
+void func_0029DA98(BrsActiveProgressList *output) {
+    u32 *count = &output->count;
+    s32 offset = 0;
+    s32 remaining = 4;
+
+    memset(output, 0, sizeof(*output));
+    do {
+        BrsProfileUnit *unit = (BrsProfileUnit *)(datGameState + 0xA60 + offset);
+        offset += 0x1C4;
+        if ((unit->flags & 1) != 0) {
+            if (unit->unitId == 9) {
+                continue;
+            }
+            brsBuildUnitProgressRow((u8 *)output + (*count)++ * sizeof(BrsProgressRow), (u8 *)unit);
+        }
+    } while (--remaining >= 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_0029CC90", func_0029DB58);
 
