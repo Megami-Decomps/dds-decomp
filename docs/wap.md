@@ -193,6 +193,10 @@ metadata for other tools; Graphviz DOT gives a direct visual representation:
 python3 tools/field_graph.py src/dds1/data/field dds1-field-world.json
 python3 tools/field_graph.py src/dds1/data/field dds1-field-world.dot \
   --format dot
+python3 tools/field_graph.py src/dds1/data/field dds1-field-world-full.json \
+  --include-interactions
+python3 tools/field_graph.py src/dds1/data/field f004_001-interactions.dot \
+  --format dot --interaction-area f004_001
 ```
 
 An area node records whether its FLD2 source is present. A field-transition
@@ -208,6 +212,34 @@ The tracked DDS1 graph contains 579 area nodes and 1,477 field transitions;
 1,437 edges have a present source and 1,450 have a present target. DDS2 has
 580 nodes and 1,252 transitions, with 1,226 present sources and 1,233 present
 targets. Conditional alternatives are separate edges rather than collapsed.
+
+`--include-interactions` upgrades the JSON schema to `dds-field-world-2` and
+adds the exact INF state graph. Each interaction set records its ordinary area,
+actor, kind, and whether that actor resolves to exactly one type-10 placement.
+Flag selectors, message/action rows, completion, warp, and unresolved numeric
+controls become stable nodes. Off/on branches and all four row choices become
+edges, while message symbols, flag mutations, view actions, and extra actions
+stay on their owning row nodes.
+
+A set containing a `warp` target also joins to every same-area, same-actor WAP
+row. These handoffs preserve conditional alternatives and every destination
+type. Concrete field destinations point to area nodes; elevator, facility,
+event, and zero-area destinations remain typed terminal handoffs. There is no
+field-wide actor-name fallback.
+
+Across both games the extended graph contains 284 interaction sets, 333 flag
+selectors, 453 state rows, and 2,478 encoded state edges. The exact INF-to-WAP
+join resolves 167 of 172 sets that contain a warp target, retaining 247 WAP
+alternatives. Of those alternatives, 221 reach concrete field areas. DDS1
+resolves all 95 warp-bearing sets; DDS2 resolves 72 of 77, with the five
+unresolved sets remaining explicit.
+
+`--interaction-area fNNN_AAA` renders a focused DOT graph instead of the full
+world view. It groups each actor's state machine, labels unique BF messages,
+shows flag and choice edges, and connects warp nodes to their exact WAP
+destinations. Unlinked placements, unknown controls, and missing target areas
+are dashed. This option enables interaction loading automatically; the default
+command remains the fast version-1 world graph.
 
 Run the codec and complete-corpus regression tests with:
 
