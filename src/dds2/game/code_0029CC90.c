@@ -122,9 +122,8 @@ u32 func_0029CE88(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029CC90", ptyComputeTotalExp);
 
-INCLUDE_ASM(const s32, "game/code_0029CC90", func_0029CF00);
-
 #define BRS_ACTIVE_PARTY_FLAG 2
+#define BRS_AP_BLOCKED_FLAG 0x40
 #define BRS_HALF_EXP_SKILL 0x23F
 #define BRS_FULL_EXP_SKILL 0x240
 
@@ -134,6 +133,37 @@ typedef struct BrsExpUnit {
     u8 pad02[0xC];
     u16 apStatus;       /* 0x0E */
 } BrsExpUnit;
+
+typedef struct BrsProfileApRecord {
+    u8 pad00[0xA];
+    s16 apMultiplier;
+    u8 pad0C[0xD4];
+} BrsProfileApRecord;
+
+extern BrsProfileApRecord *D_00435E18;
+extern s32 func_001514A8(void);
+extern s16 func_001514B8(void);
+
+s32 func_0029CF00(u8 *unit, s32 baseApTotal, s32 perUnitBonus) {
+    s32 gain;
+    s32 profileIndex;
+
+    if (((BrsExpUnit *)unit)->apStatus & BRS_AP_BLOCKED_FLAG) {
+        return 0;
+    }
+    gain = baseApTotal;
+    gain += perUnitBonus;
+    if ((((BrsExpUnit *)unit)->flags & BRS_ACTIVE_PARTY_FLAG) == 0) {
+        gain = perUnitBonus;
+        gain += baseApTotal;
+    }
+
+    profileIndex = func_001514A8();
+    if (profileIndex >= 0) {
+        gain += func_001514B8() * D_00435E18[profileIndex].apMultiplier;
+    }
+    return gain;
+}
 
 /* Active party members take full EXP; benched members need the half/full
  * EXP skills (0x23F/0x240 respectively). The third caller arg is unused. */
