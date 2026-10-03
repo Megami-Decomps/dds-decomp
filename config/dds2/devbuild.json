@@ -5,8 +5,8 @@
   "alignment": "0x1000",
   "heap_alignment": "0x80",
   "expected_replacement_symbols": 169,
-  "expected_shifted_replacement_symbols": 90,
-  "expected_shifted_symbol_relocations": 1453,
+  "expected_shifted_replacement_symbols": 91,
+  "expected_shifted_symbol_relocations": 1455,
   "expected_cross_replacement_relocations": 128,
   "expected_repaired_relocation_words": 0,
   "retail_static_end": "0x00488B30",
@@ -203,7 +203,7 @@
       "retail_object": "build/dds2/src/dds2/game/code_00328FA8.o",
       "object": "build/dds2/dev/code_00328FA8.o",
       "expected_symbols": 5,
-      "expected_shifted_symbols": 3,
+      "expected_shifted_symbols": 4,
       "fallback_symbols": [],
       "retained_sections": [
         {
@@ -415,10 +415,10 @@
       "object": "build/dds2/src/dds2/game/code_00328FA8.o",
       "section": ".text",
       "old_size": "0x294",
-      "new_size": "0x2AC",
+      "new_size": "0x2CC",
       "alignment": 8,
       "old_vaddr": "0x00328FA8",
-      "expected_relocations": 25,
+      "expected_relocations": 37,
       "expected_target_relocations": 6
     },
     {
