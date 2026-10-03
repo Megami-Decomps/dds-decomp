@@ -2865,7 +2865,26 @@ u32 btlGetSubtaskTargetMode(void) {
     return work->sub->targetMode;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00219318);
+u64 func_00219318(void) {
+    BattleWork *work = (BattleWork *)btlGetRuntime();
+    BtlUnit *selected = (BtlUnit *)work->sub->task;
+    BtlUnit *unit;
+
+    if (selected != 0) {
+        return (u64)selected;
+    }
+    for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+        u32 flags = unit->flags;
+        if ((flags & 1) != 0) {
+            if ((flags & 0x200) != 0) {
+                if ((flags & 0xE0) == 0) {
+                    break;
+                }
+            }
+        }
+    }
+    return (u64)unit;
+}
 
 void btlClearSubtaskHandle(void) {
     BattleWork *work;
