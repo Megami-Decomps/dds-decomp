@@ -243,35 +243,39 @@ destinations. Unlinked placements, unknown controls, and missing target areas
 are dashed. This option enables interaction loading automatically; the default
 command remains the fast version-1 world graph.
 
-`--include-events` upgrades the JSON schema to `dds-field-world-6` and adds
-the linked field/event execution layer. Each nonnegative kind-1 placement keeps
-its exact FLD2 event resource and becomes an entry edge only when the label
-exists in the `fNNN.bf` owned by that field's shared archive. The graph does not
-use a global label or numeric-prefix fallback.
+`--include-events` upgrades the JSON schema to `dds-field-world-7` and adds
+the linked field, event-script, and encounter execution layer. Each
+nonnegative kind-1 placement keeps its exact FLD2 event resource and becomes
+an entry edge only when the label exists in the `fNNN.bf` owned by that
+field's shared archive. The graph does not use a global label or numeric-prefix
+fallback.
 
 Procedure nodes expose their runtime index, source name, code-word extent, and
 aggregated native-command vocabulary. Exact `CALL`, `JUMP`, and
 `CREATE_SCRIPT_TASK` targets form local execution edges. Literal `CALL_EVENT`
 resources and the selected event resource in `SUBMIT_EVENT_WITH_SELECTION`
-form external event-script edges. `SUBMIT_EVENT`, `SUBMIT_EVENT_IMMEDIATE`,
-and arg0 of `SUBMIT_EVENT_WITH_SELECTION` carry request IDs; these are emitted
-as `eventRequestEdges`, never as execution edges or procedure-0 reachability.
-When the maintained `eNNN.bfasm` exists, the edge enters procedure 0, matching
-the native path: admin mode 6 selects either its explicit payload or the
-pending positive selection, formats the corresponding event BF resource path,
-and creates the process at procedure index 0. The graph then continues through
-that script's local and external event-script edges. Event-script edges retain
-their command and dispatch kind. Separate request edges retain the request ID
-and, for selection submissions, the known selected event when available. A
-literal operand is retained even when the other operand is dynamic; only the
-dynamic identity becomes unresolved. Event-request edges do not affect
-reachability. The event view renders them as dashed request nodes, separate
-from event-resource links.
+form external event-script edges. When the maintained `eNNN.bfasm` exists,
+the edge enters procedure 0, matching the native path that formats the event
+BF resource and creates its process there.
 
-Reachability begins at concrete field placements and crosses both local and
-maintained event-script edges recursively. `--event-field fNNN` renders that
-complete closure for one field, including event procedures and subsequent
-event chains rather than stopping at resource-name leaves.
+`SUBMIT_EVENT`, `SUBMIT_EVENT_IMMEDIATE`, and argument 0 of
+`SUBMIT_EVENT_WITH_SELECTION` take encounter indices. Their native path passes
+the value to `fldRequestEncounterWithFade`, and battle setup indexes the
+1,024-row `ENCOUNT.TBL`. `eventRequestEdges` retain the literal script calls;
+`encounterRequestEdges` resolve those same calls to typed encounter nodes.
+Each node carries the exact enemy slots, backgrounds, flags, BGM, and related
+setup values from maintained battle-table source. Nonzero `next` fields form
+`encounterChainEdges`, and nonzero battle-owned `event` fields form
+`encounterEventEdges` into maintained event-script procedure 0. The selected
+event in argument 1 remains a separate event-script edge. A literal operand is
+retained even when the other operand is dynamic; only the dynamic identity
+remains unresolved.
+
+Reachability begins at concrete field placements and crosses local procedure,
+event-script, encounter-request, chained-encounter, and battle-event edges
+recursively. `--event-field fNNN` renders that complete closure for one field,
+including readable encounter formations and every subsequent maintained event
+script rather than stopping at numeric request leaves.
 
 Literal `DEFER_BATTLE_EXIT` calls join the requested field and event to the
 exact `battle_exit` row in that field's WAP table. The resulting edge keeps all
@@ -282,10 +286,11 @@ destinations have maintained field source. The remaining DDS1 request from
 remains an explicit unresolved edge.
 
 Across DDS1, 526 placement links seed 510 field procedures and reach 595 of
-1,528 field procedures plus 12 maintained event scripts. Those event chains
-raise the reachable closure to 607 procedures. DDS2 has 675 placement links,
-669 entry procedures, 712 of 1,711 reachable field procedures, and 11
-procedures across 10 maintained event scripts, for a 723-procedure closure.
+1,528 field procedures. Direct event-script links and battle-owned events
+extend the closure to 21 maintained event scripts and 616 procedures. DDS2
+has 675 placement links, 669 entry procedures, 712 of 1,711 reachable field
+procedures, and 20 procedures across 19 maintained event scripts, for a
+732-procedure closure.
 
 The corrected graph contains 54 DDS1 and 52 DDS2 distinct external event
 edges (57 and 53 call sites). Of these, 48 and 33 edges originate in event
@@ -298,8 +303,16 @@ request IDs and remain explicit unresolved sites. Placement reachability covers
 source procedures are reachable. Of the deferred battle exits, 29 DDS1 and 34
 DDS2 sites leave placement-reachable procedures.
 
+The literal requests select 63 distinct DDS1 and 75 distinct DDS2 encounters.
+Following `next` adds 14 and 8 chain-only encounters, yielding 77 and 83 typed
+nodes with 14 and 8 chain edges. Their nonzero `event` fields add 19 DDS1 and
+35 DDS2 battle-event edges; every target has maintained `eNNN.bfasm` source.
+Placement closure reaches 36 DDS1 and 32 DDS2 encounter nodes. Nine reachable
+battle-event edges in DDS1 and 13 in DDS2 enter nine additional event scripts
+in each game.
+
 Run the codec and complete-corpus regression tests with:
 
 ```sh
-python3 tools/test_wap.py
+python3 -m unittest tools.test_wap tools.test_field_graph tools.test_encounter_flow
 ```
