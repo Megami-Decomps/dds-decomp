@@ -434,6 +434,11 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
         for row in graph["eventScriptEdges"]
         if row["field"] == field_number and row["source"] in procedures
     ]
+    battle_exit_edges = [
+        row
+        for row in graph.get("deferredBattleExitEdges", ())
+        if row["field"] == field_number and row["source"] in procedures
+    ]
 
     lines = [
         "digraph dds_field_event_flow {",
@@ -472,6 +477,21 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
         if not edge["targetPresent"]:
             attributes.extend(('style="dashed"', 'color="gray"'))
         lines.append(f"  {json.dumps(target)} [{', '.join(attributes)}];")
+    battle_exit_targets = {}
+    for edge in battle_exit_edges:
+        target = edge["target"] or (
+            f"battle-exit:{edge['lookupField']}:{edge['lookupEvent']}"
+        )
+        battle_exit_targets[target] = edge
+    for target, edge in sorted(battle_exit_targets.items()):
+        label = edge["target"] or (
+            f"unresolved f{edge['lookupField']:03} battle exit "
+            f"{edge['lookupEvent']}"
+        )
+        attributes = [f"label={json.dumps(label)}", 'shape="ellipse"']
+        if not edge["targetPresent"]:
+            attributes.extend(('style="dashed"', 'color="gray"'))
+        lines.append(f"  {json.dumps(target)} [{', '.join(attributes)}];")
     for entry in entries:
         if entry["procedure"] is not None:
             lines.append(
@@ -487,11 +507,31 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
             f"[label={json.dumps(label)}];"
         )
     for edge in event_edges:
-        label = "CALL_EVENT"
+        label = edge["command"]
         if edge["count"] > 1:
             label += f" x{edge['count']}"
         lines.append(
             f"  {json.dumps(edge['source'])} -> {json.dumps(edge['target'])} "
+            f"[label={json.dumps(label)}];"
+        )
+    battle_exit_routes = Counter(
+        (
+            edge["source"],
+            edge["target"]
+            or f"battle-exit:{edge['lookupField']}:{edge['lookupEvent']}",
+            edge["lookupField"],
+            edge["lookupEvent"],
+        )
+        for edge in battle_exit_edges
+    )
+    for (source, target, lookup_field, lookup_event), count in sorted(
+        battle_exit_routes.items()
+    ):
+        label = f"DEFER_BATTLE_EXIT f{lookup_field:03}/{lookup_event}"
+        if count > 1:
+            label += f" x{count}"
+        lines.append(
+            f"  {json.dumps(source)} -> {json.dumps(target)} "
             f"[label={json.dumps(label)}];"
         )
     lines.append("}")
@@ -640,13 +680,36 @@ def _event_entries(
     return rows
 
 
+def _battle_exit_candidates(
+    table: wap.WapFile | None, field_number: int, event_id: int
+) -> list[dict]:
+    """Resolve the WAP rows inspected by the deferred battle-exit dispatcher."""
+
+    if table is None:
+        return []
+    candidates = []
+    for entry_index, entry in enumerate(table.entries):
+        if entry.kind != 8 or entry.scene_args[0] != event_id:
+            continue
+        target = None
+        if entry.warp_type == 0 and entry.warp_args[1] > 0:
+            target = _area_id(
+                entry.warp_args[0] or field_number, entry.warp_args[1]
+            )
+        candidates.append({"entry": entry_index, "target": target})
+    return candidates
+
+
 def _event_sections(
     field_paths: list[Path],
     script_dir: Path,
     profile: flw0_profiles.CommandProfile,
+    tables: dict[int, wap.WapFile] | None = None,
 ) -> dict:
     """Build exact placement roots and procedure-level field-script flow."""
 
+    tables = tables or {}
+    known_areas = {path.stem.lower() for path in field_paths}
     scripts: dict[int, dict] = {}
     procedure_names: dict[int, dict[str, int]] = {}
     for source in sorted(script_dir.glob("f???.bfasm")):
@@ -688,6 +751,7 @@ def _event_sections(
     procedures = []
     procedure_edges = []
     event_edges = []
+    battle_exit_edges = []
     unresolved = []
     for field_number, flow in sorted(scripts.items()):
         prefix = f"f{field_number:03}:procedure:"
@@ -726,6 +790,31 @@ def _event_sections(
                     ),
                 }
             )
+        for site in flow["deferredBattleExits"]:
+            candidates = _battle_exit_candidates(
+                tables.get(site["field"]), site["field"], site["event"]
+            )
+            targets = {
+                row["target"]
+                for row in candidates
+                if row["target"] is not None
+            }
+            target = next(iter(targets)) if len(targets) == 1 else None
+            battle_exit_edges.append(
+                {
+                    "source": f"{prefix}{site['source']}",
+                    "field": field_number,
+                    "pc": site["pc"],
+                    "diagnostic": site["diagnostic"],
+                    "lookupField": site["field"],
+                    "lookupEvent": site["event"],
+                    "candidates": candidates,
+                    "target": target,
+                    "targetPresent": (
+                        target in known_areas if target is not None else False
+                    ),
+                }
+            )
         unresolved.extend(
             {
                 **row,
@@ -752,6 +841,8 @@ def _event_sections(
         edge["sourceReachable"] = edge["source"] in reachable
     for edge in event_edges:
         edge["sourceReachable"] = edge["source"] in reachable
+    for edge in battle_exit_edges:
+        edge["sourceReachable"] = edge["source"] in reachable
 
     native_calls = sum(
         call["count"] for procedure in procedures for call in procedure["nativeCalls"]
@@ -773,6 +864,7 @@ def _event_sections(
         "scriptProcedures": procedures,
         "scriptProcedureEdges": procedure_edges,
         "eventScriptEdges": event_edges,
+        "deferredBattleExitEdges": battle_exit_edges,
         "scriptUnresolvedTargets": unresolved,
         "eventSummary": {
             "fieldScripts": len(scripts),
@@ -793,6 +885,13 @@ def _event_sections(
             "eventScriptEdges": len(event_edges),
             "reachableEventScriptEdges": sum(
                 edge["sourceReachable"] for edge in event_edges
+            ),
+            "deferredBattleExitSites": len(battle_exit_edges),
+            "resolvedDeferredBattleExitSites": sum(
+                edge["target"] is not None for edge in battle_exit_edges
+            ),
+            "reachableDeferredBattleExitSites": sum(
+                edge["sourceReachable"] for edge in battle_exit_edges
             ),
             "nativeCalls": native_calls,
             "namedNativeCalls": named_native_calls,
@@ -874,8 +973,8 @@ def _load_graph(
             profile = flw0_profiles.get(profile_name)
         except KeyError as exc:
             raise FieldGraphError(f"unknown command profile {profile_name!r}") from exc
-        sections = _event_sections(field_paths, script_dir, profile)
-        graph["schema"] = "dds-field-world-3"
+        sections = _event_sections(field_paths, script_dir, profile, tables)
+        graph["schema"] = "dds-field-world-4"
         graph["summary"].update(sections.pop("eventSummary"))
         graph.update(sections)
     return graph
