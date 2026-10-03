@@ -19,6 +19,61 @@ import wap  # noqa: E402
 
 
 class FieldGraphTests(unittest.TestCase):
+    def test_renders_runtime_automap_selection_and_discovery_defaults(self) -> None:
+        graph = {
+            "automapAreaEdges": [
+                {
+                    "source": "f011_002",
+                    "target": "automap:f011:area:1",
+                    "areaIndex": 1,
+                    "status": "linked",
+                }
+            ],
+            "automapAreas": [
+                {
+                    "id": "automap:f011:area:1",
+                    "source": "f011",
+                    "index": 1,
+                    "name": "002",
+                    "subblockCount": 1,
+                }
+            ],
+            "automapSubblocks": [
+                {
+                    "id": "automap:f011:area:1:subblock:0",
+                    "index": 0,
+                    "name": "s01",
+                    "floor": 0,
+                    "runtimeFloor": 1,
+                    "iconCount": 2,
+                }
+            ],
+            "automapDiscoveryEdges": [
+                {
+                    "source": "f011_002",
+                    "target": "automap:f011:area:1:subblock:0",
+                    "resolution": "subblock",
+                    "selector": 1,
+                    "upperName": 3,
+                    "runtimeFloor": 1,
+                },
+                {
+                    "source": "f011_002",
+                    "target": None,
+                    "resolution": "default-floor",
+                    "selector": 4,
+                    "upperName": 7,
+                    "runtimeFloor": 1,
+                },
+            ],
+        }
+
+        dot = field_graph._render_automap_dot(graph, "f011_002")
+        self.assertIn("room - 1 = 1", dot)
+        self.assertIn("sub-block 0 | s01 | floor 0 (runtime 1) | 2 icons", dot)
+        self.assertIn("selector 4 | upper 7 | faces x1", dot)
+        self.assertIn("default floor | runtime floor 1", dot)
+
     def test_links_complete_maintained_event_corpora(self) -> None:
         expected = {
             "dds1": {
