@@ -1999,6 +1999,37 @@ class DevElfTests(unittest.TestCase):
                 development_gp,
             )
 
+        retained_contract["allow_shifted_gp_reference_offsets"] = True
+        self.assertEqual(
+            dev_elf._audit_retained_sections(
+                bytes(base),
+                bytes(drifted_output),
+                base_programs,
+                output_programs,
+                development_symbols,
+                retail_elf,
+                spec,
+                development_gp,
+            )["retained_gp_references"],
+            2,
+        )
+        changed_access_output = bytearray(drifted_output)
+        struct.pack_into("<I", changed_access_output, 0x1018, raw_lw)
+        with self.assertRaisesRegex(
+            dev_elf.DevElfError, "changed its GP-reference signatures"
+        ):
+            dev_elf._audit_retained_sections(
+                bytes(base),
+                bytes(changed_access_output),
+                base_programs,
+                output_programs,
+                development_symbols,
+                retail_elf,
+                spec,
+                development_gp,
+            )
+        del retained_contract["allow_shifted_gp_reference_offsets"]
+
         spec["replacements"][0]["retained_sections"][0][
             "expected_gp_references"
         ] = 0

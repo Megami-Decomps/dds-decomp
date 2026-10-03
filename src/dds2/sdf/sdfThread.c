@@ -1,9 +1,8 @@
 #include "common.h"
 #include "sdf.h"
 
-extern s32 sdfTrackedThreadSemaphore;
-
-extern SdfThreadNode *sdfTrackedThreadHead;
+s32 sdfTrackedThreadSemaphore __attribute__((section(".sbss")));
+SdfThreadNode *sdfTrackedThreadHead __attribute__((section(".sbss")));
 
 s32 GetThreadId(void);
 
