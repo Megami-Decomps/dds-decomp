@@ -55,7 +55,10 @@ typedef struct BattleController {
     u16 variant;
     u8 pad_24E[2];
     s32 step;
-    u8 pad_254[0x28];
+    u8 pad_254[0x1C];
+    s32 adjustmentRecordIndex;
+    s32 adjustmentGroupIndex;
+    s32 adjustmentEntryIndex;
     s32 mode;
     u8 pad_280[0x1C];
     s32 taskParent;
@@ -685,11 +688,40 @@ s32 btlAllActiveUnitsReady(void) {
     return 1;
 }
 
-extern s32 D_003BAA3C;
+typedef struct BattleAdjustmentEntry {
+    s8 value;
+    u8 pad_01[5];
+} BattleAdjustmentEntry;
+
+typedef struct BattleAdjustmentGroup {
+    u8 pad_00[0x24];
+    BattleAdjustmentEntry entries[14];
+    u8 pad_78[4];
+} BattleAdjustmentGroup;
+
+typedef struct BattleAdjustmentRecord {
+    BattleAdjustmentGroup groups[4];
+    u8 pad_1F0[0x1C];
+} BattleAdjustmentRecord;
+
+extern BattleAdjustmentRecord *D_003BAA3C;
 
 extern s32 datBattleParameters;
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A4598);
+f32 func_001A4598(void) {
+    BattleController *runtime = (BattleController *)btlGetRuntime();
+    s32 adjustment = D_003BAA3C[runtime->adjustmentRecordIndex]
+                         .groups[runtime->adjustmentGroupIndex]
+                         .entries[runtime->adjustmentEntryIndex]
+                         .value;
+
+    if (adjustment < -3) {
+        adjustment = -3;
+    } else if (adjustment > 3) {
+        adjustment = 3;
+    }
+    return *(f32 *)(datBattleParameters + 0x8CC + adjustment * 4);
+}
 
 u32 func_001A4630(void) {
     s32 temp_v0;
