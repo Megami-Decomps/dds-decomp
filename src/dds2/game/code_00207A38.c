@@ -188,33 +188,23 @@ extern s32 btlCreateFloatTask29(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32
 
 extern void evtConfigureUnitTransition(s32, s32);
 
-typedef struct BtlEntry {
+/* Resource-browser entries are linked in scan order and occupy 0x44 bytes. */
+typedef struct BtlResourceEntry {
     s32 category;
-    s32 flags;
+    s32 value; /* Category-specific index or metadata. */
     s32 id;
     char name[0x30];
-    struct BtlEntry *prev;
-    struct BtlEntry *next;
-} BtlEntry;
+    struct BtlResourceEntry *prev;
+    struct BtlResourceEntry *next;
+} BtlResourceEntry;
 
-typedef struct BtlEntryList {
+typedef struct BtlResourceEntryList {
     s32 count;
-    s32 unk_04;
-    BtlEntry *head;
-} BtlEntryList;
+    char *pathPrefix; /* Owned copy of the directory-scan path, or NULL. */
+    BtlResourceEntry *head;
+} BtlResourceEntryList;
 
-typedef struct BtlResourcePath {
-    s32 id;
-    u32 variant;
-    u8 pad8[4];
-    char name[1];
-} BtlResourcePath;
-
-typedef struct BtlResourceSelector {
-    s32 unk0;
-    s32 index;
-} BtlResourceSelector;
-
+/* Browser viewport/selection and texture ownership; the entry list is borrowed. */
 typedef struct BtlResourceDescriptor {
     s32 word00;             // 0x00
     s32 word04;             // 0x04
@@ -224,12 +214,12 @@ typedef struct BtlResourceDescriptor {
     u32 word24;             // 0x24
     u32 word28;             // 0x28
     u32 word2C;             // 0x2C
-    struct BtlEntry *head;  // 0x30
-    BtlResourcePath *path;  // 0x34
+    BtlResourceEntry *firstVisibleEntry; /* 0x30 */
+    BtlResourceEntry *selectedEntry; /* 0x34 */
     u32 word38;             // 0x38
     s32 handle;             // 0x3C
     s32 ownsHandle;         // 0x40
-    BtlResourceSelector *selector; // 0x44
+    BtlResourceEntryList *entryList; /* 0x44 */
 } BtlResourceDescriptor;
 
 extern u8 D_00436C50[];
@@ -2659,46 +2649,51 @@ void func_0020D268(void) {
 void func_0020D270(void) {
 }
 
-/* Script command table: 0x18-byte rows, with the command key at row +8. */
-typedef struct BtlCommandTable {
-    u8 pad00[0x14];
-    u8 *entries; /* 0x14 */
-    s32 count;   /* 0x18 */
-} BtlCommandTable;
-
-typedef struct BtlCommandEntryView {
-    u8 pad00[8];
+/* Packed command entries have a 0x18-byte stride. */
+typedef struct BtlCommandEntry {
+    u8 pad00[4];
+    u8 opcode; /* 0x04 */
+    u8 pad05[3];
     s32 command; /* 0x08 */
-} BtlCommandEntryView;
+    u8 pad0C[0xC];
+} BtlCommandEntry;
 
-u8 *btlFindEntryByCommand(u8 *list, s32 command) {
+typedef struct BtlCommandEntryList {
+    u8 pad00[0x14];
+    BtlCommandEntry *entries; /* 0x14 */
+    s32 count;   /* 0x18 */
+} BtlCommandEntryList;
+
+/* Return the matching entry, or the one-past-end address when none matches. */
+u8 *btlFindEntryByCommand(BtlCommandEntryList *list, s32 command) {
     s32 i;
-    u8 *entry = ((BtlCommandTable *)list)->entries;
-    for (i = 0; i < ((BtlCommandTable *)list)->count; i++) {
-        if (((BtlCommandEntryView *)entry)->command == command) {
-            return entry;
+    BtlCommandEntry *entry = list->entries;
+    for (i = 0; i < list->count; i++) {
+        if (entry->command == command) {
+            return (u8 *)entry;
         }
-        entry += 0x18;
+        entry++;
     }
-    return entry;
+    return (u8 *)entry;
 }
 
-s32 btlCountNonPartOpcodes(u8 *list) {
+/* Count entries other than the two part opcodes, 0x14 and 0x15. */
+s32 btlCountNonPartOpcodes(BtlCommandEntryList *list) {
     u32 count;
-    u8 *entry;
+    BtlCommandEntry *entry;
     u32 i;
     s32 found;
     if (list == NULL) {
         return 0;
     }
-    count = ((BtlCommandTable *)list)->count;
+    count = list->count;
     if (count == 0) {
         return 0;
     }
-    entry = ((BtlCommandTable *)list)->entries;
+    entry = list->entries;
     found = 0;
     for (i = 0; i < count; i++) {
-        switch (entry[4]) {
+        switch (entry->opcode) {
         case 0x14:
         case 0x15:
             break;
@@ -2706,7 +2701,7 @@ s32 btlCountNonPartOpcodes(u8 *list) {
             found++;
             break;
         }
-        entry += 0x18;
+        entry++;
     }
     return found;
 }
@@ -2824,26 +2819,28 @@ s32 btlReadBattleResourceDirectoryEntry(s32 unused, BtlReader *reader) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", btlScanDirectory);
 
-void btlDestroyEntryList(s32 list) {
-    s32 entry;
+/* Release all scanned entries, the owned path prefix, and the list header. */
+void btlDestroyEntryList(BtlResourceEntryList *list) {
+    BtlResourceEntry *entry;
 
-    if (((BtlEntryList *)list)->head != 0) {
-        entry = (s32)((BtlEntryList *)list)->head;
+    if (list->head != NULL) {
+        entry = list->head;
         do {
-            s32 nextEntry = (s32)((BtlEntry *)entry)->next;
+            BtlResourceEntry *next = entry->next;
             sdfReleaseChipBlock(entry);
-            entry = nextEntry;
-        } while (entry != 0);
+            entry = next;
+        } while (entry != NULL);
     }
-    sdfReleaseChipBlock(((BtlEntryList *)list)->unk_04);
+    sdfReleaseChipBlock(list->pathPrefix);
     sdfReleaseChipBlock(list);
 }
 
-void btlAppendEntry(BtlEntryList *list, char *name, s32 category, s32 flags, s32 id) {
-    BtlEntry *entry = sdfAllocSizeClassBlock(0x44);
-    BtlEntry *tail;
+/* Append a named browser entry without changing the current scan order. */
+void btlAppendEntry(BtlResourceEntryList *list, char *name, s32 category, s32 value, s32 id) {
+    BtlResourceEntry *entry = sdfAllocSizeClassBlock(0x44);
+    BtlResourceEntry *tail;
     entry->category = category;
-    entry->flags = flags;
+    entry->value = value;
     entry->id = id;
     strcpy(entry->name, name);
     if (list->head == NULL) {
@@ -2862,7 +2859,8 @@ void btlAppendEntry(BtlEntryList *list, char *name, s32 category, s32 flags, s32
     list->count++;
 }
 
-BtlResourceDescriptor *btlCreateResourceDescriptor(BtlEntryList *list) {
+/* Initialize a browser descriptor at the first entry of the borrowed list. */
+BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
     BtlResourceDescriptor *resource = sdfAllocSizeClassBlock(0x48);
 
     resource->word00 = 8;
@@ -2877,16 +2875,17 @@ BtlResourceDescriptor *btlCreateResourceDescriptor(BtlEntryList *list) {
     resource->word24 = 0x60;
     resource->word28 = 0x80806020;
     resource->word2C = 0x60000000;
-    resource->head = list->head;
-    resource->path = (BtlResourcePath *)list->head;
+    resource->firstVisibleEntry = list->head;
+    resource->selectedEntry = list->head;
     resource->word38 = 0;
     resource->handle = 0;
-    resource->selector = (BtlResourceSelector *)list;
+    resource->entryList = list;
     return resource;
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020DAB8);
 
+/* Release an owned texture handle and the descriptor, but not its entry list. */
 void btlDestroyResourceDescriptor(BtlResourceDescriptor *resource) {
     s32 handle = resource->handle;
     if (handle != 0 && resource->ownsHandle == 1) {
@@ -2920,31 +2919,34 @@ u32 func_0020DFC8(s32 record) {
     return ((BtlResourceNameRecord *)record)->word08;
 }
 
+/* Format prefix + selected name; return its resource category, not its id. */
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *resource, char *output) {
-    s32 index = resource->selector->index;
-    if (index != 0) {
-        func_0035C860(output, D_00436C50, index, resource->path->name);
+    char *prefix = resource->entryList->pathPrefix;
+    if (prefix != NULL) {
+        func_0035C860(output, D_00436C50, prefix, resource->selectedEntry->name);
     } else {
-        func_0035C860(output, D_00436C58, resource->path->name);
+        func_0035C860(output, D_00436C58, resource->selectedEntry->name);
     }
-    return resource->path->id;
+    return resource->selectedEntry->category;
 }
 
+/* Strip from the first '.' onward; return the selected entry's category. */
 s32 btlTrimResourceName(BtlResourceDescriptor *resource, char *output) {
     u32 length;
     u32 i;
-    func_0035C860(output, D_00436C58, resource->path->name);
+    func_0035C860(output, D_00436C58, resource->selectedEntry->name);
     length = strlen(output);
     for (i = 0; i < length && output[i] != '.'; i++) {
     }
     if (length != i) {
         output[i] = 0;
     }
-    return resource->path->id;
+    return resource->selectedEntry->category;
 }
 
+/* Return the selected entry's category-specific metadata word unchanged. */
 u32 btlGetResourcePathVariant(BtlResourceDescriptor *resource) {
-    return resource->path->variant;
+    return resource->selectedEntry->value;
 }
 
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) {
