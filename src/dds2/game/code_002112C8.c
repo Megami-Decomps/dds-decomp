@@ -114,8 +114,8 @@ extern s32 btlHasLinkedEffectNodeTrigger(void *);
 extern u32 btlAppendSelfAfterTargetScan();
 
 extern void btlSelectLinkedTargets(s32, s32, s8);
-
 extern void func_00216988();
+
 
 extern s32 btlIsActorCategoryMarked(s32);
 
@@ -2009,6 +2009,12 @@ extern f32 func_00353140(f32);
 extern f32 func_00353228(f32);
 extern void func_00336538(f32);
 
+extern void btlFlagAllUnitsDefeatCandidate(void);
+extern void btlCopyMotionTransform();
+extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
+extern void func_001E88A8();
+extern f32 btlUnitGetTopY(BtlUnit *);
+
 /* Frame one unit approaching its target: out->position sits between the muzzle positions, pulled back along the
    line by 0.6 of the gap; angle (degrees) swings the pull-back, mirrored when the command faces left (0x200). */
 void func_00217470(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f32 backLift, f32 angle) {
@@ -2054,13 +2060,61 @@ void func_00217470(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f
     VU0_STORE_VF(vf10, out->direction);
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00217650);
+void func_00217650(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back, s8 mirror, f32 sideScale, f32 backLift) {
+    BtlUnit *user;
+    BtlUnit *target;
+    f32 userPos[4];
+    f32 targetPos[4];
+    f32 userExtent;
+    f32 targetExtent;
+    f32 angle;
+    f32 length;
+    f32 minDistance;
+
+    btlFlagAllUnitsDefeatCandidate();
+    front->fov = command->camera.fov;
+    user = btlGetTargetUnitForLink(command);
+    target = (BtlUnit *)btlGetIndexListEntry(command->targetList, 0);
+    userExtent = user->reach * user->scale;
+    targetExtent = target->reach * target->scale;
+    btlUnitGetMuzzlePosVU(user);
+    VU0_STORE_VF(vf10, userPos);
+    userPos[1] = -btlUnitGetTopY(user);
+    btlUnitGetMuzzlePosVU(target);
+    VU0_STORE_VF(vf10, targetPos);
+    targetPos[1] += target->height * target->scale * backLift;
+    if (targetPos[0] <= userPos[0]) {
+        userPos[0] -= userExtent;
+        targetPos[0] += targetExtent * sideScale;
+    } else {
+        userPos[0] += userExtent;
+        targetPos[0] -= targetExtent * sideScale;
+    }
+    VU0_LOAD_VF(vf10, targetPos);
+    VU0_STORE_VF(vf10, front->position);
+    VU0_LOAD_VF(vf11, userPos);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    front->distance = length;
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, front->direction);
+    angle = front->fov * 1.3333333f * 0.5f;
+    front->distance += userExtent * 2.5f / func_00353228(angle);
+    minDistance = targetExtent / func_00353228(angle);
+    if (front->distance < minDistance) {
+        front->distance = minDistance;
+    }
+    btlCopyMotionTransform(back, front);
+    back->distance += 250.0f;
+    if (mirror != 0) {
+        func_001E88A8(front);
+        func_001E88A8(back);
+    }
+    btlUnitFaceTarget(user, target);
+    btlUnitFaceTarget(target, user);
+}
 
 
-extern void btlFlagAllUnitsDefeatCandidate(void);
-extern void btlCopyMotionTransform();
-extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
-extern void func_001E88A8();
 
 
 /* Frame a two-unit exchange: place the camera pair between the units' muzzle positions and push it out far enough to see both. */
@@ -2554,7 +2608,45 @@ void btlResetUnitSelectionStateAndSetMode(void) {
     func_0011AEE0(6);
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00218BA8);
+void func_00218BA8(BtlUnit *unit, u8 *arg1) {
+    BattleWork *work = (BattleWork *)btlGetRuntime();
+    u8 *sub = (u8 *)work->sub;
+    BtlUnit *actor;
+    u32 flags;
+    u32 actorFlags;
+
+    flags = *(u32 *)(arg1 + 0x28);
+    if (flags & 0x2000) {
+        btlAttachActionEffectToUnit(unit);
+        *(s32 *)(sub + 4) = 0;
+        sub[8] = 0;
+    } else if (flags & 0x4000) {
+        btlCommitSelectedUnit();
+        *(s32 *)(sub + 4) = 0;
+        sub[8] = 0;
+
+        actor = work->actorList;
+        while (actor != 0) {
+            actorFlags = actor->flags;
+            if (actorFlags & 1) {
+                if (actorFlags & 0x400) {
+                    if (actor->mode == 0x108) {
+                        break;
+                    }
+                }
+            }
+            actor = actor->nextActor;
+        }
+        if (actor != 0) {
+            func_001E2758(actor);
+        }
+    }
+    if ((unit->flags & 0x400) && unit->mode == 0x108) {
+        s32 damage = *(s32 *)(sub + 4) - *(s32 *)arg1;
+        *(s32 *)(sub + 4) = damage;
+        btlBossDebugPrintf("btl:ABADON damage = %d\n", damage);
+    }
+}
 
 s32 btlFlagAbadonHpMpTrigger(s32 unit, s32 unused, s32 action) {
     BtlSelectCtrl *ctrl = (BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub;
