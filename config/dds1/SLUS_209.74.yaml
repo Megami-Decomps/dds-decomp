@@ -65,7 +65,7 @@ segments:
       - [0x1000, c, game/code_00100000]
       - [0x1A98, c, kernel/dds3KernelCore]  # Nocturne __FILE__
       - [0x2B08, c, game/code_00101B08]
-      - [0x39E8, c, kernel/dds3AdminiProcess]  # Nocturne __FILE__
+      - [0x38A0, c, kernel/dds3AdminiProcess]  # Nocturne __FILE__; starts at dds3GetAdminTaskWork (same-TU provider evidence)
       - [0x3ED8, c, game/code_00102ED8]
       - [0x7498, c, kernel/dds3KernelDraw]  # Nocturne __FILE__
       - [0x8FD8, c, game/code_00107FD8]
@@ -522,6 +522,7 @@ segments:
       - [0x2BB700, .sdata, game/code_00100000]
       - [0x2BB824, .sdata, kernel/dds3KernelCore]
       - [0x2BB83C, .sdata, game/code_00101B08]
+      - [0x2BB848, .sdata, kernel/dds3AdminiProcess]
       - [0x2BB850, .sdata, game/code_00102ED8]
       - [0x2BB948, .sdata, game/code_00107FD8]
       - [0x2BB9A0, .sdata, game/code_0010EEF0]

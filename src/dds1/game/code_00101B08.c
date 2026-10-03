@@ -2,8 +2,6 @@
 #include "dds3Admin.h"
 #include "kwln.h"
 
-extern AdminWork *dds3GetAdminTaskWork(void);
-
 extern u32 dds3ActiveWorld;
 
 /* Detach a task from its parent's child list. Detached tasks are left untouched;
@@ -340,73 +338,6 @@ u32 func_00102878(void) {
     return 0;
 }
 
-extern char dds3AdminTaskName[];
-extern void *kwlnTaskGetTaskByName(char *);
-extern AdminWork *kwlnTaskGetUserValue(void *);
-
-/* Return the named administration task's user state; the task must exist. */
-AdminWork *dds3GetAdminTaskWork(void) {
-    return kwlnTaskGetUserValue(kwlnTaskGetTaskByName(dds3AdminTaskName));
-}
-
-/* Read the administration state's shared value word, without modifying it. */
-u32 dds3GetAdminTaskValue(void) {
-    AdminWork *work;
-
-    work = dds3GetAdminTaskWork();
-    return work->value;
-}
-
-extern void *sdfAllocSizeClassBlock(s32 size);
-
-#define DDS3_ADMIN_REQUEST_PENDING_BIT 1
-#define DDS3_ADMIN_KEEP_HISTORY_SLOT_BIT 8
-#define DDS3_ADMIN_RESTORE_HISTORY_BIT 0x10000
-#define DDS3_ADMIN_MARK_HISTORY_BIT 4
-#define DDS3_ADMIN_REQUEST_DATA_MAX_BYTES 0x100
-#define DDS3_ADMIN_REQUEST_DELAY 2
-
-/* Request a mode and replace its attached data. NULL data is accepted regardless
- * of dataBytes; only oversized non-NULL data rejects the entire request.
- * Mode and stored byte count retain their byte truncation (256 bytes records zero).
- * Previous data is released before copying; the history flag marks the old slot
- * when the requested mode is activated. */
-void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory) {
-    AdminWork *work;
-    void *previousData;
-    u32 flags;
-
-    if (requestData == NULL || dataBytes <= DDS3_ADMIN_REQUEST_DATA_MAX_BYTES) {
-        work = dds3GetAdminTaskWork();
-        previousData = work->unk1C;
-        work->unk09 = requestedMode;
-        flags = work->flags;
-        flags |= DDS3_ADMIN_REQUEST_PENDING_BIT;
-        flags &= ~DDS3_ADMIN_KEEP_HISTORY_SLOT_BIT;
-        flags &= ~DDS3_ADMIN_RESTORE_HISTORY_BIT;
-        work->flags = flags;
-        work->unk21 = DDS3_ADMIN_REQUEST_DELAY;
-        if (previousData != NULL) {
-            sdfReleaseChipBlock(previousData);
-            work->unk1C = NULL;
-            work->unk20 = 0;
-        }
-        if (requestData != NULL) {
-            work->unk1C = sdfAllocSizeClassBlock(dataBytes);
-            memcpy(work->unk1C, requestData, dataBytes);
-            work->unk20 = dataBytes;
-        } else {
-            work->unk1C = NULL;
-            work->unk20 = 0;
-        }
-        if (markHistory != 0) {
-            work->flags |= DDS3_ADMIN_MARK_HISTORY_BIT;
-        } else {
-            work->flags &= ~DDS3_ADMIN_MARK_HISTORY_BIT;
-        }
-    }
-}
-
 INCLUDE_RODATA(const s32, "game/code_00101B08", D_0039DF28);
 
 INCLUDE_RODATA(const s32, "game/code_00101B08", D_0039DF48);
@@ -430,6 +361,4 @@ INCLUDE_RODATA(const s32, "game/code_00101B08", D_0039E018);
 INCLUDE_SDATA(const s32, "game/code_00101B08", D_003BA83C);
 
 INCLUDE_SDATA(const s32, "game/code_00101B08", D_003BA844);
-
-INCLUDE_SDATA(const s32, "game/code_00101B08", dds3AdminTaskName);
 

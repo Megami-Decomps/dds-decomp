@@ -1,11 +1,75 @@
 #include "common.h"
 #include "dds3Admin.h"
+#include "kwln.h"
 
-extern AdminWork* dds3GetAdminTaskWork(void);
+extern char dds3AdminTaskName[];
+extern void *func_00101740(char *);
+extern u32 kwlnTaskGetUserValue(KwlnTask *);
+extern void sdfReleaseChipBlock(void *);
+extern void *sdfAllocSizeClassBlock(s32);
+extern void *memcpy(void *, void *, s32);
 
-extern void dds3AdminSubmitModeRequest(s32 a0, s32 a1, s32 a2, s32 a3);
-extern void* kwlnTaskGetUserValue(void* task);
-extern void sdfReleaseChipBlock(void* ptr);
+/* Return the named administration task's user state; the task must exist. */
+AdminWork *dds3GetAdminTaskWork(void) {
+    return (AdminWork *)kwlnTaskGetUserValue(func_00101740(dds3AdminTaskName));
+}
+
+/* Read the administration state's shared value word, without modifying it. */
+u32 dds3GetAdminTaskValue(void) {
+    AdminWork *work;
+
+    work = dds3GetAdminTaskWork();
+    return work->value;
+}
+
+#define DDS3_ADMIN_REQUEST_PENDING_BIT 1
+#define DDS3_ADMIN_KEEP_HISTORY_SLOT_BIT 8
+#define DDS3_ADMIN_RESTORE_HISTORY_BIT 0x10000
+#define DDS3_ADMIN_MARK_HISTORY_BIT 4
+#define DDS3_ADMIN_REQUEST_DATA_MAX_BYTES 0x100
+#define DDS3_ADMIN_REQUEST_DELAY 2
+
+/* Request a mode and replace its attached data. NULL data is accepted regardless
+ * of dataBytes; only oversized non-NULL data rejects the entire request.
+ * Mode and stored byte count retain their byte truncation (256 bytes records zero).
+ * Previous data is released before copying; the history flag marks the old slot
+ * when the requested mode is activated. */
+void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory) {
+    AdminWork *work;
+    void *previousData;
+    u32 flags;
+
+    if (requestData == NULL || dataBytes <= DDS3_ADMIN_REQUEST_DATA_MAX_BYTES) {
+        work = dds3GetAdminTaskWork();
+        previousData = work->unk1C;
+        work->unk09 = requestedMode;
+        flags = work->flags;
+        flags |= DDS3_ADMIN_REQUEST_PENDING_BIT;
+        flags &= ~DDS3_ADMIN_KEEP_HISTORY_SLOT_BIT;
+        flags &= ~DDS3_ADMIN_RESTORE_HISTORY_BIT;
+        work->flags = flags;
+        work->unk21 = DDS3_ADMIN_REQUEST_DELAY;
+        if (previousData != NULL) {
+            sdfReleaseChipBlock(previousData);
+            work->unk1C = NULL;
+            work->unk20 = 0;
+        }
+        if (requestData != NULL) {
+            work->unk1C = sdfAllocSizeClassBlock(dataBytes);
+            memcpy(work->unk1C, requestData, dataBytes);
+            work->unk20 = dataBytes;
+        } else {
+            work->unk1C = NULL;
+            work->unk20 = 0;
+        }
+        if (markHistory != 0) {
+            work->flags |= DDS3_ADMIN_MARK_HISTORY_BIT;
+        } else {
+            work->flags &= ~DDS3_ADMIN_MARK_HISTORY_BIT;
+        }
+    }
+}
+
 /* One dispatch row per mode: three function pointers, 12 bytes each. The three
  * columns are consecutive symbols, ddsAdminModeCallbacks / D_003847D4 / D_003847D8. */
 typedef struct AdminDispatch {
@@ -66,7 +130,7 @@ u8 dds3AdminReadPreviousUnsignedSample(void)
 
 /* Activate a pending mode request and continue through the mode dispatcher. */
 void *dds3AdminActivateRequestedMode(void *task) {
-    AdminWork *work = kwlnTaskGetUserValue(task);
+    AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
     u32 flags = work->flags;
     s32 restoring;
     void (*entry)(s32, void *);
@@ -110,7 +174,7 @@ void *dds3AdminActivateRequestedMode(void *task) {
 /* Run the mode's destroy callback; a non-negative result is stored (+1) in unk21 and the mode
    cleared. Returns the next step function, or NULL if the callback failed. */
 void *dds3AdminPollModeDestruction(void *task) {
-    AdminWork *work = kwlnTaskGetUserValue(task);
+    AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
     s32 mode = work->unk08;
     s32 (*destroy)(void);
     s32 result;
@@ -129,12 +193,52 @@ void *dds3AdminPollModeDestruction(void *task) {
     return dds3AdminActivateRequestedMode;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102BC8);
+void *func_00102BC8(void *task) {
+    AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
+    u32 flags = work->flags;
+    s32 (*cleanup)(void);
+    s32 previous;
+
+    if ((flags & 2) == 0) {
+        if (work->unk08 >= 0) {
+            cleanup = ddsAdminModeCallbacks[work->unk08].cleanup;
+            if (cleanup != NULL && cleanup() != 0) {
+                work->flags |= 2;
+            }
+            work->value++;
+        }
+        flags = work->flags;
+    }
+    if ((flags & 2) && work->unk08 >= 0) {
+        previous = (work->historyIndex + 7) & 7;
+        if (work->signedHistory[previous] >= 0 && (work->unsignedHistory[previous] & 1)) {
+            void *data = work->unk1C;
+
+            work->flags |= 0x10001;
+            work->unk09 = work->signedHistory[previous];
+            work->unk21 = 2;
+            work->flags &= ~4;
+            if (data != NULL) {
+                sdfReleaseChipBlock(data);
+                work->unk1C = NULL;
+                work->unk20 = 0;
+            }
+        }
+        if ((work->flags & 1) == 0) {
+            dds3AdminSubmitModeRequest(0, 0, 0, 0);
+        }
+        work->flags &= ~2;
+    }
+    if ((work->flags & 1) != 0 && work->unk09 >= 0) {
+        return dds3AdminPollModeDestruction;
+    }
+    return NULL;
+}
 
 /* Run the mode's destroy callback (the row's second pointer), then free the
  * attached data block and the task itself. */
 void dds3AdminReleaseTaskWork(void* task) {
-    AdminWork* work = kwlnTaskGetUserValue(task);
+    AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
     s32 mode = work->unk08;
 
     if (mode >= 0) {
@@ -147,5 +251,8 @@ void dds3AdminReleaseTaskWork(void* task) {
     if (work->unk1C != NULL) {
         sdfReleaseChipBlock(work->unk1C);
     }
-    sdfReleaseChipBlock(kwlnTaskGetUserValue(task));
+    sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(task));
 }
+
+INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", dds3AdminTaskName);
+
