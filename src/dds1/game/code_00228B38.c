@@ -116,20 +116,22 @@ void func_00228CA0(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
     }
 }
 
+/* Draw a scaled sprite around its center, then restore its native dimensions. */
 void func_00228E20(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
-                   s32 contextHandle, s32 color, f32 factor) {
+    s32 contextHandle, s32 color, f32 scale) {
     {
         SolarSpriteContext *context = *(SolarSpriteContext **)contextHandle;
         s32 spriteOffset = layer * sizeof(SolarSpriteLayer);
+        s32 scalePercent = D_00367EE0[layer][2];
         SolarSpriteLayer *sprite =
             (SolarSpriteLayer *)(spriteOffset + (s32)context->layers);
 
         sprite->drawWidth =
-            (s32)(factor * (f32)sprite->width * D_00367EE0[layer][2] / 100.0f) << 4;
+            (s32)((scale * (f32)sprite->width * (f32)scalePercent) / 100.0f) << 4;
         sprite->drawHeight =
-            (s32)(factor * (f32)sprite->height * D_00367EE0[layer][2] / 100.0f) << 3;
-        func_002BF4E0(((x + D_00367EE0[layer][0]) << 4) - (sprite->drawWidth >> 1),
-                      ((y + D_00367EE0[layer][1]) << 3) - (sprite->drawHeight >> 1), z,
+            (s32)((scale * (f32)sprite->height * (f32)D_00367EE0[layer][2]) / 100.0f) << 3;
+        func_002BF4E0(((x + D_00367EE0[layer][0]) << 4) - (sprite->drawWidth / 2),
+                      ((y + D_00367EE0[layer][1]) << 3) - (sprite->drawHeight / 2), z,
                       (u32)((f32)(alpha << 8) * 0.0078125f), mode, (s32)context, layer, color);
     }
 
@@ -144,7 +146,22 @@ void func_00228E20(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00228B38", func_00228FB0);
+/* Submit the fixed fourteen-point solar marker with a scaled leading alpha. */
+void func_00228FB0(s32 unused0, s32 unused1, s32 alpha, s32 intensity, s32 object) {
+    s32 positions[28] = {
+        47, 48, 76, 48, 72, 63, 63, 75, 51, 79, 38, 75, 29, 64,
+        27, 48, 29, 32, 38, 20, 51, 16, 63, 20, 72, 31, 76, 48,
+    };
+    s32 colors[14];
+    s32 i;
+    s32 color = 0x335072;
+
+    colors[0] = ((s32)((f32)intensity * 0.2f) << 24) | color;
+    for (i = 1; i < 14; i++) {
+        colors[i] = color;
+    }
+    func_002CAAC8((s32)positions, alpha, colors, 14, 0, object);
+}
 
 INCLUDE_ASM(const s32, "game/code_00228B38", func_00229100);
 
