@@ -24,6 +24,31 @@
 #define SDF_CONSOLE_CELL_BYTES 2
 #define SDF_CONSOLE_NODE_BYTES 0x20
 
+#define SDF_DMA_QWORD_SHIFT 4
+#define SDF_DMA_CHCR_TTE 0x40
+#define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
+#define SDF_QWORD_ALIGNMENT_MASK 0xF
+#define SDF_TEXTURE_DRAW_PACKET_BYTES 0x50
+#define SDF_GIF_REGISTER_AD 0xE
+#define SDF_GS_FOGCOL_REGISTER 0x3D
+#define SDF_GIF_NREG_SHIFT 60
+#define SDF_GIF_PRIM_SHIFT 47
+#define SDF_GIF_PRE_EOP_FLAGS 0x400000008000LL
+#define SDF_VIF_DIRECT_COMMAND 0x50000000
+#define SDF_VIF_FLUSHA_COMMAND 0x13000000
+#define SDF_VIF_ITOP_MATRIX 0x04000002
+#define SDF_VIF_ITOP_COMPACT_VERTEX 0x04000002
+#define SDF_VIF_ITOP_WIDE_VERTEX 0x04000008
+#define SDF_VIF_ITOP_LIGHTING 0x04000010
+#define SDF_VIF_MSCAL_COMMAND 0x14000000
+#define SDF_VIF_MSCAL_TRIANGLES 0x14000004
+#define SDF_VIF_MSCAL_VERTICES 0x14000008
+#define SDF_VU_TEXTURED_FLAG 0x10
+#define SDF_VU_TEXTURED_BATCH_LIMIT 0x10
+#define SDF_VU_COLORED_BATCH_LIMIT 0x18
+#define SDF_CAMERA_USE_FOV_FLAG 2
+#define SDF_CAMERA_HALF_HEIGHT_FLAG 1
+
 
 extern void *D_003BDA34;
 
@@ -176,11 +201,11 @@ void sdfPostmultiplyVuMatrixFromMemory(void *matrix) {
     sdfMultiplyVuMatrixInPlace();
 }
 
-/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void sdfVuTransformVector(void *dst, void *src) {
-    VU0_LOAD_VF(vf10, src);
+/* Transform inputVector by the matrix resident in VU0; write outputVector. */
+void sdfVuTransformVector(void *outputVector, void *inputVector) {
+    VU0_LOAD_VF(vf10, inputVector);
     VU0_APPLY_MATRIX(vf10, vf10);
-    VU0_STORE_VF(vf10, dst);
+    VU0_STORE_VF(vf10, outputVector);
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
@@ -192,12 +217,12 @@ f32 sdfVuDot3(void *left, void *right) {
     return dot;
 }
 
-/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void sdfVuCross3(void *dst, void *src1, void *src2) {
-    VU0_LOAD_VF(vf10, src1);
-    VU0_LOAD_VF(vf11, src2);
+/* Write the XYZ cross product of leftVector and rightVector via VU0. */
+void sdfVuCross3(void *outputVector, void *leftVector, void *rightVector) {
+    VU0_LOAD_VF(vf10, leftVector);
+    VU0_LOAD_VF(vf11, rightVector);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, dst);
+    VU0_STORE_VF(vf10, outputVector);
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
@@ -225,15 +250,16 @@ void sdfVuBuildLookAtBasis(void *target, void *origin, void *up) {
 void sdfConfigureScratchpadRingTransfer(void) {
 }
 
-void sdfVuConfigureWorkRingDma(VuWork *work, s32 count) {
-    void *end = (u8 *)work + 0x78;
-    if (count < 0x80) {
-        work->dmaCountA = 0x80 - count;
+/* Split ring addressing at position 128; retain the native 96-byte stride. */
+void sdfVuConfigureWorkRingDma(VuWork *work, s32 ringPosition) {
+    void *ringEnd = (u8 *)work + 0x78;
+    if (ringPosition < 0x80) {
+        work->dmaCountA = 0x80 - ringPosition;
         work->dmaAddrB = D_003BDA20;
-        work->dmaAddrA = count * 96 + 0x70001000;
+        work->dmaAddrA = ringPosition * 96 + 0x70001000;
         work->dmaCountB = 0x2000;
         work->dmaBase = 0x70001000;
-    } else if (count == 0x80) {
+    } else if (ringPosition == 0x80) {
         work->dmaBase = 0x70001000;
         work->dmaAddrA = D_003BDA20;
         work->dmaCountA = 0x2000;
@@ -243,33 +269,34 @@ void sdfVuConfigureWorkRingDma(VuWork *work, s32 count) {
         work->dmaCountA = 0x80;
         work->dmaBase = D_003BDA20;
         work->dmaAddrA = 0x70001000;
-        work->dmaAddrB = D_003BDA20 + count * 96;
-        work->dmaCountB = 0x2000 - count;
+        work->dmaAddrB = D_003BDA20 + ringPosition * 96;
+        work->dmaCountB = 0x2000 - ringPosition;
     }
-    work->dmaEnd = end;
+    work->dmaEnd = ringEnd;
 }
 
 
 
-void sdfInitializeVuWorkParameters(VuWork *work, u16 *params, u32 mask) {
-    u8 *payload = (u8 *)(params + 4);
-    u16 second;
-    u16 flags;
-    u16 next;
-    u16 selected;
-    work->param0 = params[0];
-    second = params[1];
-    work->param1 = second;
-    flags = params[2];
-    next = params[3];
-    selected = flags & mask;
-    work->flags = flags;
-    work->nextParam = next;
-    work->selectedFlags = selected;
-    D_003BDA24 = selected & 0x78;
+/* Decode four leading halfwords; selectionMask filters flags, not the payload. */
+void sdfInitializeVuWorkParameters(VuWork *work, u16 *parameterWords, u32 selectionMask) {
+    u8 *payload = (u8 *)(parameterWords + 4);
+    u16 ringPosition;
+    u16 parameterFlags;
+    u16 nextParameter;
+    u16 selectedFlags;
+    work->param0 = parameterWords[0];
+    ringPosition = parameterWords[1];
+    work->param1 = ringPosition;
+    parameterFlags = parameterWords[2];
+    nextParameter = parameterWords[3];
+    selectedFlags = parameterFlags & selectionMask;
+    work->flags = parameterFlags;
+    work->nextParam = nextParameter;
+    work->selectedFlags = selectedFlags;
+    D_003BDA24 = selectedFlags & 0x78;
     work->payload = payload;
     work->packetStart = 0;
-    sdfVuConfigureWorkRingDma(work, second);
+    sdfVuConfigureWorkRingDma(work, ringPosition);
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
@@ -1050,121 +1077,126 @@ void sdfVuEmitTexturedTriangleBatches(work)
 }
 
 
-void sdfBuildChunkedVuNodeTransfer(VuWork *work, u64 a, u64 b, u64 c, u64 d, s32 clearMask) {
-    s32 remaining = work->nodeCount;
-    if (remaining != 0) {
-        u128 *(*nodes)[3] = D_003EB860;
-        u32 *cursor = work->cursor;
-        s32 first = 1;
+/* Emit up to 16 triangles per batch; TEX1/TEX0/CLAMP/ALPHA context 2 state
+ * precedes the first batch only. clearPrimitiveFlags filters GIF PRIM bits. */
+void sdfBuildChunkedVuNodeTransfer(VuWork *work, u64 samplingState, u64 textureState, u64 clampState, u64 alphaState, s32 clearPrimitiveFlags) {
+    s32 remainingTriangles = work->nodeCount;
+    if (remainingTriangles != 0) {
+        u128 *(*triangleRefs)[3] = D_003EB860;
+        u32 *packetCursor = work->cursor;
+        s32 firstBatch = 1;
         do {
-            s32 chunk = (remaining <= 0x10) ? remaining : 0x10;
-            remaining -= chunk;
-            while (((u32)cursor & 0xC) != 4) {
-                *cursor++ = 0;
+            s32 batchTriangles = (remainingTriangles <= SDF_VU_TEXTURED_BATCH_LIMIT) ? remainingTriangles : SDF_VU_TEXTURED_BATCH_LIMIT;
+            remainingTriangles -= batchTriangles;
+            while (((u32)packetCursor & 0xC) != 4) {
+                *packetCursor++ = 0;
             }
-            if (first) {
-                *cursor++ = 0x6501C000;
-                *cursor++ = 6;
-                *cursor++ = ((chunk * 9 + 7) << 16) | 0x6C00C001;
-                first = 0;
-                *(u64 *)cursor = 0x1000000000000005ULL;
-                cursor += 2;
-                *(u64 *)cursor = 0xE;
-                cursor += 2;
-                *(u64 *)cursor = a;
-                cursor += 2;
-                *(u64 *)cursor = 0x15;
-                cursor += 2;
-                *(u64 *)cursor = b;
-                cursor += 2;
-                *(u64 *)cursor = 7;
-                cursor += 2;
-                *(u64 *)cursor = c;
-                cursor += 2;
-                *(u64 *)cursor = 9;
-                cursor += 2;
-                *(u64 *)cursor = 0x51801;
-                cursor += 2;
-                *(u64 *)cursor = 0x48;
-                cursor += 2;
-                *(u64 *)cursor = d;
-                cursor += 2;
-                *(u64 *)cursor = 0x43;
-                cursor += 2;
+            if (firstBatch) {
+                *packetCursor++ = 0x6501C000;
+                *packetCursor++ = 6;
+                *packetCursor++ = ((batchTriangles * 9 + 7) << 16) | 0x6C00C001;
+                firstBatch = 0;
+                *(u64 *)packetCursor = 0x1000000000000005ULL;
+                packetCursor += 2;
+                *(u64 *)packetCursor = SDF_GIF_REGISTER_AD;
+                packetCursor += 2;
+                *(u64 *)packetCursor = samplingState;
+                packetCursor += 2;
+                *(u64 *)packetCursor = 0x15;
+                packetCursor += 2;
+                *(u64 *)packetCursor = textureState;
+                packetCursor += 2;
+                *(u64 *)packetCursor = 7;
+                packetCursor += 2;
+                *(u64 *)packetCursor = clampState;
+                packetCursor += 2;
+                *(u64 *)packetCursor = 9;
+                packetCursor += 2;
+                *(u64 *)packetCursor = 0x51801;
+                packetCursor += 2;
+                *(u64 *)packetCursor = 0x48;
+                packetCursor += 2;
+                *(u64 *)packetCursor = alphaState;
+                packetCursor += 2;
+                *(u64 *)packetCursor = 0x43;
+                packetCursor += 2;
             } else {
-                *cursor++ = 0x6501C000;
-                *cursor++ = 0;
-                *cursor++ = ((chunk * 9 + 1) << 16) | 0x6C00C001;
+                *packetCursor++ = 0x6501C000;
+                *packetCursor++ = 0;
+                *packetCursor++ = ((batchTriangles * 9 + 1) << 16) | 0x6C00C001;
             }
-            *(u64 *)cursor = ((u64)((D_003BDA24 & ~clearMask) | 0x203) << 47) | (chunk * 3) | 0x3000400000008000ULL;
-            cursor += 2;
-            *(u64 *)cursor = 0x412;
-            cursor += 2;
+            *(u64 *)packetCursor = ((u64)((D_003BDA24 & ~clearPrimitiveFlags) | 0x203) << SDF_GIF_PRIM_SHIFT) | (batchTriangles * 3) | 0x3000400000008000ULL;
+            packetCursor += 2;
+            *(u64 *)packetCursor = 0x412;
+            packetCursor += 2;
             do {
-                u128 *a = (*nodes)[0];
-                u128 *b = (*nodes)[1];
-                u128 *c = (*nodes)[2];
-                nodes++;
-                ((u128 *)cursor)[0] = a[0];
-                ((u128 *)cursor)[1] = a[3];
-                ((u128 *)cursor)[2] = a[2];
-                ((u128 *)cursor)[3] = b[0];
-                ((u128 *)cursor)[4] = b[3];
-                ((u128 *)cursor)[5] = b[2];
-                ((u128 *)cursor)[6] = c[0];
-                ((u128 *)cursor)[7] = c[3];
-                ((u128 *)cursor)[8] = c[2];
-                cursor += 0x24;
-            } while (--chunk != 0);
-            *cursor++ = 0x14000004;
-        } while (remaining != 0);
-        work->cursor = cursor;
+                u128 *vertexA = (*triangleRefs)[0];
+                u128 *vertexB = (*triangleRefs)[1];
+                u128 *vertexC = (*triangleRefs)[2];
+                triangleRefs++;
+                ((u128 *)packetCursor)[0] = vertexA[0];
+                ((u128 *)packetCursor)[1] = vertexA[3];
+                ((u128 *)packetCursor)[2] = vertexA[2];
+                ((u128 *)packetCursor)[3] = vertexB[0];
+                ((u128 *)packetCursor)[4] = vertexB[3];
+                ((u128 *)packetCursor)[5] = vertexB[2];
+                ((u128 *)packetCursor)[6] = vertexC[0];
+                ((u128 *)packetCursor)[7] = vertexC[3];
+                ((u128 *)packetCursor)[8] = vertexC[2];
+                packetCursor += 0x24;
+            } while (--batchTriangles != 0);
+            *packetCursor++ = SDF_VIF_MSCAL_TRIANGLES;
+        } while (remainingTriangles != 0);
+        work->cursor = packetCursor;
     }
 }
 
 
+/* Emit up to 24 colored triangles per batch, copying vertex quadwords 0 and 2.
+ * Keep the native K&R declaration and caller convention. */
 void sdfVuEmitColoredTriangleBatches(work)
     VuWork *work;
 {
-    s32 remaining = work->nodeCount;
-    if (remaining != 0) {
-        u128 *(*nodes)[3] = D_003EB860;
-        u32 *cursor = work->cursor;
+    s32 remainingTriangles = work->nodeCount;
+    if (remainingTriangles != 0) {
+        u128 *(*triangleRefs)[3] = D_003EB860;
+        u32 *packetCursor = work->cursor;
         do {
-            s32 chunk = (remaining <= 0x18) ? remaining : 0x18;
-            remaining -= chunk;
-            while (((u32)cursor & 0xC) != 4) {
-                *cursor++ = 0;
+            s32 batchTriangles = (remainingTriangles <= SDF_VU_COLORED_BATCH_LIMIT) ? remainingTriangles : SDF_VU_COLORED_BATCH_LIMIT;
+            remainingTriangles -= batchTriangles;
+            while (((u32)packetCursor & 0xC) != 4) {
+                *packetCursor++ = 0;
             }
-            *cursor++ = 0x6501C000;
-            *cursor++ = 0x10000;
-            *cursor++ = ((chunk * 6 + 1) << 16) | 0x6C00C001;
-            *(u64 *)cursor = (chunk * 3) | ((u64)(D_003BDA24 | 3) << 47) | 0x2000400000008000ULL;
-            cursor += 2;
-            *(u64 *)cursor = 0x41;
-            cursor += 2;
+            *packetCursor++ = 0x6501C000;
+            *packetCursor++ = 0x10000;
+            *packetCursor++ = ((batchTriangles * 6 + 1) << 16) | 0x6C00C001;
+            *(u64 *)packetCursor = (batchTriangles * 3) | ((u64)(D_003BDA24 | 3) << SDF_GIF_PRIM_SHIFT) | 0x2000400000008000ULL;
+            packetCursor += 2;
+            *(u64 *)packetCursor = 0x41;
+            packetCursor += 2;
             do {
-                u128 *a = (*nodes)[0];
-                u128 *b = (*nodes)[1];
-                u128 *c = (*nodes)[2];
-                nodes++;
-                ((u128 *)cursor)[0] = a[0];
-                ((u128 *)cursor)[1] = a[2];
-                ((u128 *)cursor)[2] = b[0];
-                ((u128 *)cursor)[3] = b[2];
-                ((u128 *)cursor)[4] = c[0];
-                ((u128 *)cursor)[5] = c[2];
-                cursor += 0x18;
-            } while (--chunk != 0);
-            *cursor++ = 0x14000004;
-        } while (remaining != 0);
-        work->cursor = cursor;
+                u128 *vertexA = (*triangleRefs)[0];
+                u128 *vertexB = (*triangleRefs)[1];
+                u128 *vertexC = (*triangleRefs)[2];
+                triangleRefs++;
+                ((u128 *)packetCursor)[0] = vertexA[0];
+                ((u128 *)packetCursor)[1] = vertexA[2];
+                ((u128 *)packetCursor)[2] = vertexB[0];
+                ((u128 *)packetCursor)[3] = vertexB[2];
+                ((u128 *)packetCursor)[4] = vertexC[0];
+                ((u128 *)packetCursor)[5] = vertexC[2];
+                packetCursor += 0x18;
+            } while (--batchTriangles != 0);
+            *packetCursor++ = SDF_VIF_MSCAL_TRIANGLES;
+        } while (remainingTriangles != 0);
+        work->cursor = packetCursor;
     }
 }
 
 
+/* Select textured or colored emission; preserve the native no-argument calls. */
 void sdfVuEmitSelectedNodePacket(VuWork *work) {
-    if ((work->selectedFlags & 0x10) != 0) {
+    if ((work->selectedFlags & SDF_VU_TEXTURED_FLAG) != 0) {
         sdfVuEmitTexturedTriangleBatches();
         return;
     }
@@ -1175,18 +1207,19 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E02D8);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E03C0);
 
+/* Emit selected geometry, then apply flag callbacks; the first may change flags. */
 void sdfVuApplySelectedWorkFlags(u32 workAddress) {
-    u32 flags;
-    s32 address;
+    u32 selectedFlags;
+    s32 signedWorkAddress;
 
-    address = (s32)workAddress;
-    sdfVuEmitSelectedNodePacket((VuWork *)address);
-    flags = ((VuWork *)address)->selectedFlags;
-    if ((flags & 0x1000) != 0) {
+    signedWorkAddress = (s32)workAddress;
+    sdfVuEmitSelectedNodePacket((VuWork *)signedWorkAddress);
+    selectedFlags = ((VuWork *)signedWorkAddress)->selectedFlags;
+    if ((selectedFlags & 0x1000) != 0) {
         func_002E02D8(workAddress);
-        flags = ((VuWork *)address)->selectedFlags;
+        selectedFlags = ((VuWork *)signedWorkAddress)->selectedFlags;
     }
-    if ((flags & 1) != 0) {
+    if ((selectedFlags & 1) != 0) {
         func_002E03C0(workAddress);
         return;
     }
@@ -1196,25 +1229,26 @@ extern void func_002DF128(VuWork *work);
 extern void func_002DF710(VuWork *work);
 extern void func_002DE7D8(u32 base, s32 count);
 
+/* Align the packet to 64 bytes; the optional second pass preserves vf24-vf26. */
 void sdfVuBeginPacketFromWork(VuWork *work) {
-    u32 cursor = sdfGetPacketCursor();
-    u32 aligned = (cursor + 0x3F) & ~0x3F;
-    u32 ring = ((aligned + 0x40) & 0x0FFFFFFF) | 0x30000000;
-    work->packetStart = cursor;
-    work->header = aligned + 0x30;
-    work->ringStart = (u32 *)ring;
-    work->cursor = (u32 *)ring;
+    u32 packetStart = sdfGetPacketCursor();
+    u32 alignedStart = (packetStart + 0x3F) & ~0x3F;
+    u32 ringAddress = ((alignedStart + 0x40) & SDF_DMA_ADDRESS_MASK) | 0x30000000;
+    work->packetStart = packetStart;
+    work->header = alignedStart + 0x30;
+    work->ringStart = (u32 *)ringAddress;
+    work->cursor = (u32 *)ringAddress;
     if ((work->selectedFlags & 0x4000) != 0) {
-        u8 saved[0x30];
-        VU0_STORE_VF_UNCLOBBERED(vf24, saved);
-        VU0_STORE_VF_AT_UNCLOBBERED(vf25, 16, saved);
-        VU0_STORE_VF_AT_UNCLOBBERED(vf26, 32, saved);
+        u8 savedVectors[0x30];
+        VU0_STORE_VF_UNCLOBBERED(vf24, savedVectors);
+        VU0_STORE_VF_AT_UNCLOBBERED(vf25, 16, savedVectors);
+        VU0_STORE_VF_AT_UNCLOBBERED(vf26, 32, savedVectors);
         func_002DF128(work);
         sdfVuApplySelectedWorkFlags((u32)work);
         sdfVuConfigureWorkRingDma(work, work->param1);
-        VU0_LOAD_VF(vf24, saved);
-        VU0_LOAD_VF_AT(vf25, 16, saved);
-        VU0_LOAD_VF_AT(vf26, 32, saved);
+        VU0_LOAD_VF(vf24, savedVectors);
+        VU0_LOAD_VF_AT(vf25, 16, savedVectors);
+        VU0_LOAD_VF_AT(vf26, 32, savedVectors);
         func_002DE7D8(work->dmaBase, work->param1);
         func_002DF710(work);
         sdfVuApplySelectedWorkFlags((u32)work);
@@ -1298,10 +1332,11 @@ void sdfVuSelectTransformMatrix(u32 matrixAddress) {
     D_003BDA28 = matrixAddress;
 }
 
-void sdfVuCacheObjectVector(u8 *object) {
-    if (D_003BDA2C != (u32)object) {
-        D_003BDA2C = (u32)object;
-        PCP_COPY_VECTOR(&D_003F9890, object + 0x10);
+/* Cache the object's vector only when its address changes, not its contents. */
+void sdfVuCacheObjectVector(u8 *sourceObject) {
+    if (D_003BDA2C != (u32)sourceObject) {
+        D_003BDA2C = (u32)sourceObject;
+        PCP_COPY_VECTOR(&D_003F9890, sourceObject + 0x10);
     }
 }
 
@@ -1326,18 +1361,20 @@ extern void sdfReleaseMemorySlot(void *);
 extern s32 sdfAllocGeneralBlock(s32);
 extern s32 sdfResourceRetainAddress(s32);
 
-void sdfConsUploadDmaProgram(s32 size) {
-    u32 *chan = sceDmaGetChan(0);
-    *chan &= ~0x40;
-    sceDmaSendN(chan, D_003200A0, (D_00320630 - D_003200A0) >> 4);
-    sceDmaSync(chan, 0, 0);
+/* Upload the VIF0 program synchronously, then replace the ring workspace. */
+void sdfConsUploadDmaProgram(s32 workspaceBytes) {
+    u32 *dmaChannel = sceDmaGetChan(0);
+    *dmaChannel &= ~SDF_DMA_CHCR_TTE;
+    sceDmaSendN(dmaChannel, D_003200A0, (D_00320630 - D_003200A0) >> SDF_DMA_QWORD_SHIFT);
+    sceDmaSync(dmaChannel, 0, 0);
     sdfReleaseMemorySlot(&D_003BD350);
-    D_003BD350 = sdfAllocGeneralBlock(size);
+    D_003BD350 = sdfAllocGeneralBlock(workspaceBytes);
     D_003BDA20 = sdfResourceRetainAddress(D_003BD350);
 }
 
-u32 sdfConsGetTextureDrawPacketSize(s32 width) {
-    return 0x50;
+/* Fixed allocation size; the texture address is deliberately unused. */
+u32 sdfConsGetTextureDrawPacketSize(s32 unusedTextureAddress) {
+    return SDF_TEXTURE_DRAW_PACKET_BYTES;
 }
 
 /* Texture draw packet: three resource-derived values alternate with their
@@ -1361,59 +1398,66 @@ extern u64 sdfTexGetPrimaryTextureState(void *);
 extern u64 sdfTexGetPrimarySamplingState(void *);
 extern u64 sdfTexGetPrimaryClampState(void *);
 
-SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *p, void *tex, s32 data) {
-    p->quadwords = 4;
-    p->gifTag = 0x1000000000008003ULL;
-    p->command = 0x50000004;
-    p->reservedWord = 0;
-    p->payloadHeader = 0xE;
-    p->textureWordA = sdfTexGetPrimarySamplingState(tex);
-    p->registerAddressA = data + 0x14;
-    p->textureWordB = sdfTexGetPrimaryTextureState(tex);
-    p->registerAddressB = data + 6;
-    p->textureWordC = sdfTexGetPrimaryClampState(tex);
-    p->registerAddressC = data + 8;
-    return p;
+/* Fill TEX1, TEX0 and CLAMP A+D writes; contextOffset 0/1 selects GS context. */
+SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *drawPacket, void *texture, s32 contextOffset) {
+    drawPacket->quadwords = 4;
+    drawPacket->gifTag = 0x1000000000008003ULL;
+    drawPacket->command = 0x50000004;
+    drawPacket->reservedWord = 0;
+    drawPacket->payloadHeader = SDF_GIF_REGISTER_AD;
+    drawPacket->textureWordA = sdfTexGetPrimarySamplingState(texture);
+    drawPacket->registerAddressA = contextOffset + 0x14;
+    drawPacket->textureWordB = sdfTexGetPrimaryTextureState(texture);
+    drawPacket->registerAddressB = contextOffset + 6;
+    drawPacket->textureWordC = sdfTexGetPrimaryClampState(texture);
+    drawPacket->registerAddressC = contextOffset + 8;
+    return drawPacket;
 }
 
-s32 sdfConsCreateDrawPacket(s32 owner, s32 width, s32 height) {
-    s32 size = sdfConsGetTextureDrawPacketSize(width);
-    void *packet = (void *)sdfAllocPacketAligned(size);
-    s32 result = sdfConsInitTextureDrawPacket(packet, width, height);
-    sdfAppendPacket(owner, result);
-    return result;
+/* Allocate and append texture state; return its packet address. */
+s32 sdfConsCreateDrawPacket(s32 packetList, s32 textureAddress, s32 contextOffset) {
+    s32 packetBytes = sdfConsGetTextureDrawPacketSize(textureAddress);
+    void *packet = (void *)sdfAllocPacketAligned(packetBytes);
+    s32 packetAddress = sdfConsInitTextureDrawPacket(packet, textureAddress, contextOffset);
+    sdfAppendPacket(packetList, packetAddress);
+    return packetAddress;
 }
 
-u32 sdfConsFinalizePacketHeader(u32 packet, s32 size) {
-    sdfInitializeDmaReferenceTag(packet, (size >> 4) - 2);
-    return packet;
+/* Exclude the two header quadwords from the reference payload count. */
+u32 sdfConsFinalizePacketHeader(u32 packetAddress, s32 packetBytes) {
+    sdfInitializeDmaReferenceTag(packetAddress, (packetBytes >> SDF_DMA_QWORD_SHIFT) - 2);
+    return packetAddress;
 }
 
-s32 sdfConsCalculateDrawPacketSize(s32 width, s32 height) {
-    return (width * height + 2) << 4;
+/* Packed GIF loops contain registerCount values, plus two header quadwords. */
+s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount) {
+    return (registerCount * loopCount + 2) << SDF_DMA_QWORD_SHIFT;
 }
 
-s32 sdfConsMeasurePacketWithHeader(s32 size) {
-    return size + 0x20;
+/* Include the DMA/GIF header space in a measured payload byte count. */
+s32 sdfConsMeasurePacketWithHeader(s32 payloadBytes) {
+    return payloadBytes + 0x20;
 }
 
-void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 flags, s32 width, s64 command, s32 height) {
-    s32 quadwords = width * height + 1;
-    s64 header = height | ((s64)width << 60);
+/* Build packed GIF NLOOP/NREG/PRIM fields and its VIF DIRECT command. */
+void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags, s32 registerCount, s64 registerList, s32 loopCount) {
+    s32 packetQuadwords = registerCount * loopCount + 1;
+    s64 gifTag = loopCount | ((s64)registerCount << SDF_GIF_NREG_SHIFT);
 
-    header |= (s64)flags << 47;
-    header |= 0x400000008000LL;
-    packet->gifTag = header;
-    packet->command = quadwords | 0x50000000;
-    packet->payloadHeader = command;
+    gifTag |= (s64)primitiveFlags << SDF_GIF_PRIM_SHIFT;
+    gifTag |= SDF_GIF_PRE_EOP_FLAGS;
+    packet->gifTag = gifTag;
+    packet->command = packetQuadwords | SDF_VIF_DIRECT_COMMAND;
+    packet->payloadHeader = registerList;
     packet->reservedWord = 0;
-    packet->quadwords = quadwords;
+    packet->quadwords = packetQuadwords;
     return packet;
 }
 
-void *sdfConsAllocateColumnPacket(s32 height) {
-    void *packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, height));
-    sdfConsInitPacketHeader(packet, 0x156, 5, 0x53531, height);
+/* Allocate loopCount sprite loops with RGBAQ, UV, XYZ2, UV, XYZ2 registers. */
+void *sdfConsAllocateColumnPacket(s32 loopCount) {
+    void *packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, loopCount));
+    sdfConsInitPacketHeader(packet, 0x156, 5, 0x53531, loopCount);
     return packet;
 }
 
@@ -1434,25 +1478,26 @@ typedef struct ConsMatrixPacket {
 } ConsMatrixPacket;
 
 
-void sdfConsBuildMatrixPacket(ConsMatrixPacket *packet, u8 *src, void *matrix) {
+/* Emit two matrices and three vectors; also cache the inverse origin in node. */
+void sdfConsBuildMatrixPacket(ConsMatrixPacket *packet, u8 *node, void *transformMatrix) {
     packet->quadwords = 0xC;
     packet->command = 0x6C0BC000;
     packet->reservedWord = 0;
-    VU0_LOAD_MATRIX(matrix);
+    VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(packet->matrixA);
-    sdfPostmultiplyVuMatrixFromMemory(src + 0x30);
+    sdfPostmultiplyVuMatrixFromMemory(node + 0x30);
     VU0_STORE_MATRIX(packet->matrixB);
-    VU0_LOAD_VF_MEMORY(vf10, src + 0x70);
+    VU0_LOAD_VF_MEMORY(vf10, node + 0x70);
     VU0_STORE_VF(vf10, packet->vecC);
-    VU0_LOAD_VF_MEMORY(vf10, src + 0x80);
+    VU0_LOAD_VF_MEMORY(vf10, node + 0x80);
     VU0_STORE_VF(vf10, packet->vecD);
-    VU0_LOAD_MATRIX(matrix);
+    VU0_LOAD_MATRIX(transformMatrix);
     sdfInvertRigidVuTransform();
     VU0_MOVE_VF(vf10, vf31);
     VU0_STORE_VF(vf10, packet->vecE);
-    VU0_STORE_VF(vf10, src + 0x90);
-    packet->stmodCommand = 0x04000002;
-    packet->mscalCommand = 0x14000000;
+    VU0_STORE_VF(vf10, node + 0x90);
+    packet->stmodCommand = SDF_VIF_ITOP_MATRIX;
+    packet->mscalCommand = SDF_VIF_MSCAL_COMMAND;
     packet->reservedA = 0;
     packet->reservedB = 0;
 }
@@ -1463,8 +1508,9 @@ extern u8 D_00398470[];
 extern u8 D_003984B0[];
 extern u8 D_003984F0[];
 
-void sdfConsCacheTransformedNode(u8 *node, void *matrix) {
-    VU0_LOAD_MATRIX(matrix);
+/* Cache node data, its composed transform, and the transformed cached origin. */
+void sdfConsCacheTransformedNode(u8 *node, void *transformMatrix) {
+    VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(D_003984B0);
     sdfPostmultiplyVuMatrixFromMemory(node + 0x30);
     VU0_LOAD_VF_MEMORY(vf10, node + 0x90);
@@ -1515,52 +1561,53 @@ extern f32 D_003BD36C;
 extern f32 D_003BD370;
 extern f32 func_002FA148(f32);
 
-void sdfCameraBuildProjection(SdfCamera *cam) {
-    f32 m[16];
-    f32 farZ = cam->farZ;
-    f32 nearZ = cam->nearZ;
-    f32 range = farZ - nearZ;
-    f32 halfWidth = cam->width * 0.5f;
-    f32 halfHeight = cam->height * 0.5f;
-    f32 v;
+/* Compose camera projection and screen parameters without reassociating floats. */
+void sdfCameraBuildProjection(SdfCamera *camera) {
+    f32 projectionMatrix[16];
+    f32 farZ = camera->farZ;
+    f32 nearZ = camera->nearZ;
+    f32 depthRange = farZ - nearZ;
+    f32 halfWidth = camera->width * 0.5f;
+    f32 halfHeight = camera->height * 0.5f;
+    f32 projectionScale;
     f32 centerY;
 
-    EE_MMI_UNIT_MATRIX(m);
-    m[0] = 1.0f / (halfWidth * cam->aspect);
-    m[5] = 1.0f / halfHeight;
-    m[10] = farZ * nearZ * 2.0f / range;
-    m[14] = -(nearZ + farZ) / range;
-    VU0_LOAD_MATRIX(m);
-    EE_MMI_UNIT_MATRIX(m);
-    if (cam->flags & 2) {
-        v = cam->height / (func_002FA148(cam->fov * 0.5f) * 2.0f);
+    EE_MMI_UNIT_MATRIX(projectionMatrix);
+    projectionMatrix[0] = 1.0f / (halfWidth * camera->aspect);
+    projectionMatrix[5] = 1.0f / halfHeight;
+    projectionMatrix[10] = farZ * nearZ * 2.0f / depthRange;
+    projectionMatrix[14] = -(nearZ + farZ) / depthRange;
+    VU0_LOAD_MATRIX(projectionMatrix);
+    EE_MMI_UNIT_MATRIX(projectionMatrix);
+    if (camera->flags & SDF_CAMERA_USE_FOV_FLAG) {
+        projectionScale = camera->height / (func_002FA148(camera->fov * 0.5f) * 2.0f);
     } else {
-        v = cam->scale;
+        projectionScale = camera->scale;
     }
-    m[5] = m[0] = v;
-    m[10] = 0;
-    m[15] = 0;
-    m[14] = m[11] = 1.0f;
-    sdfPremultiplyVuMatrixFromMemory(m);
-    VU0_STORE_MATRIX(cam->matrix);
-    cam->halfWidth = halfWidth;
-    centerY = (cam->bottom - cam->top) * 0.5f;
-    if (cam->flags & 1) {
-        cam->halfHeight = halfHeight * 0.5f;
+    projectionMatrix[5] = projectionMatrix[0] = projectionScale;
+    projectionMatrix[10] = 0;
+    projectionMatrix[15] = 0;
+    projectionMatrix[14] = projectionMatrix[11] = 1.0f;
+    sdfPremultiplyVuMatrixFromMemory(projectionMatrix);
+    VU0_STORE_MATRIX(camera->matrix);
+    camera->halfWidth = halfWidth;
+    centerY = (camera->bottom - camera->top) * 0.5f;
+    if (camera->flags & SDF_CAMERA_HALF_HEIGHT_FLAG) {
+        camera->halfHeight = halfHeight * 0.5f;
     } else {
-        cam->halfHeight = halfHeight;
+        camera->halfHeight = halfHeight;
     }
-    cam->centerY = centerY;
-    cam->one = 1.0f;
-    cam->originX = cam->offsetX;
-    cam->originY = cam->offsetY;
-    cam->bottomY = centerY + cam->top;
-    cam->zero = 0;
+    camera->centerY = centerY;
+    camera->one = 1.0f;
+    camera->originX = camera->offsetX;
+    camera->originY = camera->offsetY;
+    camera->bottomY = centerY + camera->top;
+    camera->zero = 0;
     if (D_003BD360 != 0) {
-        cam->halfWidth *= D_003BD364;
-        cam->halfHeight *= D_003BD368;
-        cam->originX += D_003BD36C;
-        cam->originY += D_003BD370;
+        camera->halfWidth *= D_003BD364;
+        camera->halfHeight *= D_003BD368;
+        camera->originX += D_003BD36C;
+        camera->originY += D_003BD370;
     }
 }
 
@@ -1593,27 +1640,28 @@ typedef struct ConsFrustumPacket {
     u32 reservedC;
 } ConsFrustumPacket;
 
-void sdfConsBuildFrustumPacket(ConsFrustumPacket *packet, ConsFrustumParams *params) {
-    f32 right = params->right;
-    f32 left = params->left;
-    f32 nearZ = params->nearZ;
-    f32 farZ = params->farZ;
-    f32 range = farZ - nearZ;
-    s32 mask = params->mask;
+/* Emit projection depth coefficients and a GS FOGCOL A+D write. */
+void sdfConsBuildFrustumPacket(ConsFrustumPacket *packet, ConsFrustumParams *projectionParams) {
+    f32 rangeMax = projectionParams->right;
+    f32 rangeMin = projectionParams->left;
+    f32 nearZ = projectionParams->nearZ;
+    f32 farZ = projectionParams->farZ;
+    f32 depthRange = farZ - nearZ;
+    s32 fogColor = projectionParams->mask;
     packet->dmaTag = 0x20000004;
     packet->vifUnpackCode = 0x6C03C00013000000ULL;
     packet->gifTag = 0x1000000000008001ULL;
-    packet->gifRegister = 0xE;
-    packet->registerValue = (u32)mask;
-    packet->fogColorRegister = 0x3D;
+    packet->gifRegister = SDF_GIF_REGISTER_AD;
+    packet->registerValue = (u32)fogColor;
+    packet->fogColorRegister = SDF_GS_FOGCOL_REGISTER;
     packet->mscalCommand = 0x14000014;
     packet->reservedC = 0;
-    packet->right = right;
-    packet->left = left;
+    packet->right = rangeMax;
+    packet->left = rangeMin;
     packet->reservedA = 0;
     packet->reservedB = 0;
-    packet->mid = (((right - left) * (farZ + nearZ)) / range + (right + left)) * 0.5f;
-    packet->scale = ((farZ * nearZ) * (left - right)) / range;
+    packet->mid = (((rangeMax - rangeMin) * (farZ + nearZ)) / depthRange + (rangeMax + rangeMin)) * 0.5f;
+    packet->scale = ((farZ * nearZ) * (rangeMin - rangeMax)) / depthRange;
 }
 
 
@@ -1629,12 +1677,13 @@ typedef struct DmaPacketHeader {
     u32 unused1C;
 } DmaPacketHeader;
 
-void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 address, s32 size) {
-    s32 qwc = (size + 15) >> 4;
-    packet->quadwords = qwc;
-    packet->address = address & 0x0FFFFFFF;
-    packet->tag = 0x13000000;
-    packet->command = qwc | 0x50000000;
+/* Round payloadBytes up to quadwords and pair FLUSHA with VIF DIRECT. */
+void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes) {
+    s32 quadwordCount = (payloadBytes + 15) >> SDF_DMA_QWORD_SHIFT;
+    packet->quadwords = quadwordCount;
+    packet->address = sourceAddress & SDF_DMA_ADDRESS_MASK;
+    packet->tag = SDF_VIF_FLUSHA_COMMAND;
+    packet->command = quadwordCount | SDF_VIF_DIRECT_COMMAND;
     packet->unused10 = 0;
     packet->unused18 = 0;
     packet->unused1C = 0;
@@ -1643,15 +1692,16 @@ void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 address, s32 size) 
 extern u8 D_00324350[];
 extern void sdfAppendReferencePacket(s32, void *);
 
-void sdfConsAppendProgramReferencePacket(s32 list, DmaPacketHeader *packet) {
-    packet->address = (u32)D_00320630 & 0x0FFFFFFF;
-    packet->quadwords = (D_00324350 - D_00320630) >> 4;
+/* Append the second fixed program block as a DMA reference packet. */
+void sdfConsAppendProgramReferencePacket(s32 packetList, DmaPacketHeader *packet) {
+    packet->address = (u32)D_00320630 & SDF_DMA_ADDRESS_MASK;
+    packet->quadwords = (D_00324350 - D_00320630) >> SDF_DMA_QWORD_SHIFT;
     packet->tag = 0;
     packet->command = 0;
     packet->unused10 = 0;
     packet->unused18 = 0;
     packet->unused1C = 0;
-    sdfAppendReferencePacket(list, packet);
+    sdfAppendReferencePacket(packetList, packet);
 }
 
 
@@ -1680,21 +1730,22 @@ extern void *sdfTexAcquireAlternateResourceTexture(void *);
 extern void sdfInitializeObjectListRequest(void);
 extern void sdfRegisterResourceQueueCallbacks(void);
 
+/* Acquire texture resources, split their TEX0 words, and initialize queues. */
 void sdfInitializeResourceQueuesAndTextureWords(void) {
-    s64 value;
+    s64 textureWord;
     func_002E1D60();
-    value = sdfTexGetPrimaryTextureState(D_003BD380);
-    D_003BD388 = value;
-    D_003241D8[0] = value;
-    D_003241D8[1] = value >> 32;
+    textureWord = sdfTexGetPrimaryTextureState(D_003BD380);
+    D_003BD388 = textureWord;
+    D_003241D8[0] = textureWord;
+    D_003241D8[1] = textureWord >> 32;
     D_003BD37C = sdfTexAcquireAlternateResourceTexture(D_00317C20);
-    value = sdfTexGetPrimaryTextureState(D_003BD37C);
-    D_00324290[0] = value;
-    D_00324290[1] = value >> 32;
+    textureWord = sdfTexGetPrimaryTextureState(D_003BD37C);
+    D_00324290[0] = textureWord;
+    D_00324290[1] = textureWord >> 32;
     D_003BD390 = sdfTexAcquireAlternateResourceTexture(D_0031BC60);
-    value = sdfTexGetPrimaryTextureState(D_003BD390);
-    D_00324214[0] = value;
-    D_00324214[1] = value >> 32;
+    textureWord = sdfTexGetPrimaryTextureState(D_003BD390);
+    D_00324214[0] = textureWord;
+    D_00324214[1] = textureWord >> 32;
     sdfInitializeObjectListRequest();
     sdfRegisterResourceQueueCallbacks();
 }
@@ -1703,16 +1754,17 @@ void sdfInitializeResourceQueuesAndTextureWords(void) {
 extern u8 D_00398580[];
 extern void sdfAppendReferencePacket(s32, void *);
 
-void sdfConsAppendClearPacket(s32 list, s32 (*alloc)(s32)) {
-    u64 *packet;
-    if (alloc == NULL) {
-        alloc = sdfAllocPacketAligned;
+/* Append the fixed clear block; NULL allocatePacket selects the packet allocator. */
+void sdfConsAppendClearPacket(s32 packetList, s32 (*allocatePacket)(s32)) {
+    u64 *referencePacket;
+    if (allocatePacket == NULL) {
+        allocatePacket = sdfAllocPacketAligned;
     }
-    packet = (u64 *)alloc(0x20);
-    packet[0] = ((u64)((u32)D_00398580 & 0x0FFFFFFF) << 32) | 0x30000008;
-    packet[1] = 0x6C07C000ULL << 32;
-    *(u128 *)&packet[2] = 0;
-    sdfAppendReferencePacket(list, packet);
+    referencePacket = (u64 *)allocatePacket(0x20);
+    referencePacket[0] = ((u64)((u32)D_00398580 & SDF_DMA_ADDRESS_MASK) << 32) | 0x30000008;
+    referencePacket[1] = 0x6C07C000ULL << 32;
+    *(u128 *)&referencePacket[2] = 0;
+    sdfAppendReferencePacket(packetList, referencePacket);
 }
 
 typedef struct VuLightingPacket {
@@ -1721,25 +1773,26 @@ typedef struct VuLightingPacket {
     u32 tag[4];
 } VuLightingPacket;
 
-/* vu0 routine: store vf28-vf31 and its rows scaled by the inverse column lengths, then the GIF tag words. */
-void sdfWriteVuLightingPacket(VuLightingPacket *packet) {
-    VU0_STORE_MATRIX_AND_UNIT_ROWS(packet);
-    packet->tag[0] = 0x04000010;
-    packet->tag[1] = 0x14000000;
-    packet->tag[2] = 0;
-    packet->tag[3] = 0;
+/* vu0 routine: store the resident matrix and inverse-column-length scaled rows, then VIF ITOP/MSCAL. */
+void sdfWriteVuLightingPacket(VuLightingPacket *lightingPacket) {
+    VU0_STORE_MATRIX_AND_UNIT_ROWS(lightingPacket);
+    lightingPacket->tag[0] = SDF_VIF_ITOP_LIGHTING;
+    lightingPacket->tag[1] = SDF_VIF_MSCAL_COMMAND;
+    lightingPacket->tag[2] = 0;
+    lightingPacket->tag[3] = 0;
 }
 
-void sdfConsAppendVuPacket(s32 list, s32 (*alloc)(s32)) {
-    u64 *packet;
-    if (alloc == NULL) {
-        alloc = sdfAllocPacketAligned;
+/* Append inline matrix/lighting data using allocatePacket or the default allocator. */
+void sdfConsAppendVuPacket(s32 packetList, s32 (*allocatePacket)(s32)) {
+    u64 *dmaPacket;
+    if (allocatePacket == NULL) {
+        allocatePacket = sdfAllocPacketAligned;
     }
-    packet = (u64 *)alloc(0x90);
-    packet[0] = ((u64)((u32)(packet + 2) & 0x0FFFFFFF) << 32) | 0x20000008;
-    packet[1] = 0x6C07C000ULL << 32;
-    sdfWriteVuLightingPacket((VuLightingPacket *)(packet + 2));
-    sdfAppendPacket(list, (u32)packet);
+    dmaPacket = (u64 *)allocatePacket(0x90);
+    dmaPacket[0] = ((u64)((u32)(dmaPacket + 2) & SDF_DMA_ADDRESS_MASK) << 32) | 0x20000008;
+    dmaPacket[1] = 0x6C07C000ULL << 32;
+    sdfWriteVuLightingPacket((VuLightingPacket *)(dmaPacket + 2));
+    sdfAppendPacket(packetList, (u32)dmaPacket);
 }
 
 extern vu8 sdfCurrentBufferIndex;
@@ -1747,16 +1800,17 @@ extern void sdfAssetApplyEntryChanges(void *, s32);
 extern void sdfInitNodeHeaderFromWords(void *, void *, s32);
 extern void sdfAppendReferencePacket(s32, void *);
 
-void sdfConsAppendAssetPacket(s32 list, void *asset, s32 (*alloc)(s32)) {
-    u64 *packet;
-    if (alloc == NULL) {
-        alloc = sdfAllocPacketAligned;
+/* Apply current-buffer changes and append the asset reference; keep both index reads. */
+void sdfConsAppendAssetPacket(s32 packetList, void *asset, s32 (*allocatePacket)(s32)) {
+    u64 *referencePacket;
+    if (allocatePacket == NULL) {
+        allocatePacket = sdfAllocPacketAligned;
     }
     sdfAssetApplyEntryChanges(asset, (s8)sdfCurrentBufferIndex);
-    packet = (u64 *)alloc(0x20);
-    sdfInitNodeHeaderFromWords(asset, packet, (s8)sdfCurrentBufferIndex);
-    *(u128 *)&packet[2] = 0;
-    sdfAppendReferencePacket(list, packet);
+    referencePacket = (u64 *)allocatePacket(0x20);
+    sdfInitNodeHeaderFromWords(asset, referencePacket, (s8)sdfCurrentBufferIndex);
+    *(u128 *)&referencePacket[2] = 0;
+    sdfAppendReferencePacket(packetList, referencePacket);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E21A0);
@@ -1781,63 +1835,65 @@ s32 sdfMeasureVertexAttributePacketBytes(s32 count) {
     return count * 0x40 + 0x40;
 }
 
+/* Build XYZ and attribute VIF streams; return the packet address.
+ * vertexCount must be positive; n retains its native count/byte-size reuse. */
 /* vu0 routine: pack aligned positions into the VIF three-word stream. */
-u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *attributes, const void *halfAttributes, const void *wordAttributes, s32 count, void *(*alloc)(s32)) {
-    s32 bytes;
+u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttributes, const void *halfAttributes, const void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32)) {
+    s32 packetBytes;
     u32 *packet;
     u32 *cursor;
-    u32 index;
-    u32 code;
+    u32 vuAddress;
+    u32 unpackCode;
     s32 n;
-    s32 i;
+    s32 vertexIndex;
 
-    bytes = sdfMeasureVertexAttributePacketBytes(count);
-    if (alloc == NULL) {
-        cursor = sdfAllocPacketAligned(bytes);
+    packetBytes = sdfMeasureVertexAttributePacketBytes(vertexCount);
+    if (allocatePacket == NULL) {
+        cursor = sdfAllocPacketAligned(packetBytes);
     } else {
-        cursor = alloc(bytes);
+        cursor = allocatePacket(packetBytes);
     }
     packet = cursor;
-    packet[0] = (bytes >> 4) - 1;
+    packet[0] = (packetBytes >> SDF_DMA_QWORD_SHIFT) - 1;
     packet[1] = 0;
     packet[2] = 0x6C01C000;
-    packet[3] = count;
+    packet[3] = vertexCount;
     packet[4] = 0xA0000000;
     packet[5] = 0x43434310;
     packet[6] = 0x43;
     packet[7] = 0x6001C001;
     packet[8] = 0x155;
-    packet[9] = (count << 16) | 0x6800C002;
+    packet[9] = (vertexCount << 16) | 0x6800C002;
     cursor = packet + 10;
-    i = 0;
+    vertexIndex = 0;
     do {
-        EE_MMI_STORE_VEC3_VALUE(cursor, positions[i]);
+        EE_MMI_STORE_VEC3_VALUE(cursor, positions[vertexIndex]);
         cursor += 3;
-        i++;
-    } while (i != count);
-    n = count;
-    code = n << 16;
-    index = count + 2;
-    *cursor++ = code | index | 0x6E00C000;
-    memcpy(cursor, attributes, n * 4);
+        vertexIndex++;
+    } while (vertexIndex != vertexCount);
+    n = vertexCount;
+    unpackCode = n << 16;
+    vuAddress = vertexCount + 2;
+    *cursor++ = unpackCode | vuAddress | 0x6E00C000;
+    memcpy(cursor, byteAttributes, n * 4);
     cursor += n;
-    index += n;
-    n = count * 4;
-    code = n << 16;
-    *cursor++ = code | index | 0x6500C000;
-    index += n;
-    code |= index;
+    vuAddress += n;
+    n = vertexCount * 4;
+    unpackCode = n << 16;
+    *cursor++ = unpackCode | vuAddress | 0x6500C000;
+    vuAddress += n;
+    unpackCode |= vuAddress;
     memcpy(cursor, halfAttributes, n * 4);
     cursor += n;
     n *= 8;
-    code |= 0x6400C000;
-    *cursor++ = code;
+    unpackCode |= 0x6400C000;
+    *cursor++ = unpackCode;
     memcpy(cursor, wordAttributes, n);
     cursor = (u32 *)((u8 *)cursor + n);
-    cursor[0] = 0x04000002;
-    cursor[1] = 0x14000008;
+    cursor[0] = SDF_VIF_ITOP_COMPACT_VERTEX;
+    cursor[1] = SDF_VIF_MSCAL_VERTICES;
     cursor += 2;
-    while (((u32)cursor & 0xF) != 0) {
+    while (((u32)cursor & SDF_QWORD_ALIGNMENT_MASK) != 0) {
         *cursor++ = 0;
     }
     return (u32)packet;
@@ -1982,60 +2038,62 @@ u32 sdfMeasureAlignedDrawPacketSize(s32 count) {
     return (count * 0x6c + 0x4bU) & 0xfffffff0;
 }
 
+/* Build the wider attribute VIF stream; return the packet address.
+ * vertexCount must be positive; preserve the native copy lengths and n reuse. */
 /* vu0 routine: pack aligned positions into the VIF three-word stream. */
-u32 sdfBuildWideVertexVifPacket(u128 *positions, void *attributes, void *halfAttributes, void *wordAttributes, s32 count, void *(*alloc)(s32)) {
-    s32 bytes;
+u32 sdfBuildWideVertexVifPacket(u128 *positions, void *byteAttributes, void *halfAttributes, void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32)) {
+    s32 packetBytes;
     u32 *packet;
     u32 *cursor;
-    u32 index;
-    u32 code;
+    u32 vuAddress;
+    u32 unpackCode;
     s32 n;
-    s32 i;
+    s32 vertexIndex;
 
-    bytes = sdfMeasureAlignedDrawPacketSize(count);
-    if (alloc == NULL) {
-        cursor = sdfAllocPacketAligned(bytes);
+    packetBytes = sdfMeasureAlignedDrawPacketSize(vertexCount);
+    if (allocatePacket == NULL) {
+        cursor = sdfAllocPacketAligned(packetBytes);
     } else {
-        cursor = alloc(bytes);
+        cursor = allocatePacket(packetBytes);
     }
     packet = cursor;
-    packet[0] = (bytes >> 4) - 1;
+    packet[0] = (packetBytes >> SDF_DMA_QWORD_SHIFT) - 1;
     packet[1] = 0;
     packet[2] = 0x6C01C000;
-    packet[3] = count;
+    packet[3] = vertexCount;
     packet[4] = 0xD0000000;
     packet[5] = 0x34134130;
     packet[6] = 0x41341;
     packet[7] = 0x6001C001;
     packet[8] = 0x15D;
-    packet[9] = (count << 16) | 0x6800C002;
+    packet[9] = (vertexCount << 16) | 0x6800C002;
     cursor = packet + 10;
-    i = 0;
+    vertexIndex = 0;
     do {
-        EE_MMI_STORE_VEC3_VALUE(cursor, positions[i]);
+        EE_MMI_STORE_VEC3_VALUE(cursor, positions[vertexIndex]);
         cursor += 3;
-        i++;
-    } while (i != count);
-    n = count * 8;
-    index = count + 2;
-    *cursor++ = (n << 16) | index | 0x6E00C000;
-    memcpy(cursor, attributes, n * 4);
+        vertexIndex++;
+    } while (vertexIndex != vertexCount);
+    n = vertexCount * 8;
+    vuAddress = vertexCount + 2;
+    *cursor++ = (n << 16) | vuAddress | 0x6E00C000;
+    memcpy(cursor, byteAttributes, n * 4);
     cursor += n;
-    index += n;
-    n = count * 4;
-    code = n << 16;
-    *cursor++ = code | index | 0x6D00C000;
+    vuAddress += n;
+    n = vertexCount * 4;
+    unpackCode = n << 16;
+    *cursor++ = unpackCode | vuAddress | 0x6D00C000;
     memcpy(cursor, halfAttributes, n * 8);
     cursor += n * 2;
-    index += n;
-    code |= index;
-    *cursor++ = code | 0x6400C000;
+    vuAddress += n;
+    unpackCode |= vuAddress;
+    *cursor++ = unpackCode | 0x6400C000;
     memcpy(cursor, wordAttributes, n * 8);
     cursor += n * 2;
-    cursor[0] = 0x04000008;
-    cursor[1] = 0x14000008;
+    cursor[0] = SDF_VIF_ITOP_WIDE_VERTEX;
+    cursor[1] = SDF_VIF_MSCAL_VERTICES;
     cursor += 2;
-    while (((u32)cursor & 0xF) != 0) {
+    while (((u32)cursor & SDF_QWORD_ALIGNMENT_MASK) != 0) {
         *cursor++ = 0;
     }
     return (u32)packet;
