@@ -4,11 +4,25 @@
 
 extern f32 fldAngleDifference(f32, f32);
 
-/* Field work area (fldAreaState) fields reached through a pointer. */
-typedef struct FldWorkView {
-    u8 unk00[0x14];
-    s32 stage;            /* 0x14 */
-    u8 unk18[0x18];
+/* Retained field-area work, including camera/event state and named resources.
+ * DDS2 loads automap TMX files separately rather than taking them from fldmix.LB. */
+typedef struct FldResourceBlock {
+    s32 unk0;  /* Retained named-resource result; only written here. */
+    s32 block;
+} FldResourceBlock;
+
+typedef struct FldTextureResource {
+    s32 unk0; /* Retained named-resource result; only written here. */
+    s32 block;
+    s32 texture;
+} FldTextureResource;
+
+typedef struct FldAreaWork {
+    u8 pad00[0x10];
+    s32 area; /* 0x10 */
+    s32 room; /* 0x14: the room argument of fldSetSceneLocation. */
+    s32 unk18;
+    u8 pad1C[0x14];
     f32 focusPos[3];      /* 0x30 */
     u8 unk3C[0x14];
     s32 focusActive;      /* 0x50 */
@@ -20,20 +34,25 @@ typedef struct FldWorkView {
     s32 unkC0;            /* 0xC0 */
     u8 unkC4[0x40];
     s16 eventActive;      /* 0x104 */
-    u8 unk106[0x24];
-    s16 unk12A;           /* 0x12A */
-    u8 unk12C[0x20];
+    u8 pad106[0xE];
+    s32 unk114;
+    s32 unk118;
+    u8 pad11C[0xE];
+    s16 unk12A; /* 0x12A */
+    u8 pad12C[0xC];
+    s32 unk138;
+    u8 pad13C[0x10];
     f32 x;                /* 0x14C */
     f32 y;
     f32 z;
     u8 unk158[0x18];
     f32 angle;            /* 0x170 */
-    u8 unk174[0x4C];
-    struct {
-        s32 value;
-        s32 block;
-    } fldmix[5];          /* 0x1C0 */
-} FldWorkView;
+    u8 pad174[0x34];
+    FldResourceBlock mapResources[8]; /* 0x1A8: autmap_1,2,3,5,6,7,8,9. */
+    FldTextureResource fieldTextures[4]; /* 0x1E8: d2_fild1..4.tmx. */
+} FldAreaWork;
+
+#define FLD_WORK ((FldAreaWork *)fldAreaState)
 
 typedef struct FldSlot0C {
     s32 unk0;
@@ -1374,7 +1393,7 @@ extern s32 D_00436268;
 /* Enters the field camera state for a fresh scene: releases the resource slots and
  * centers the camera on the scene's entry point. */
 void fldEnterSceneCamera(void) {
-    FldWorkView *cam = (FldWorkView *)fldAreaState;
+    FldAreaWork *cam = (FldAreaWork *)fldAreaState;
     f32 focus[4];
     f32 eye[4];
     FldVec4 up;
@@ -1394,10 +1413,10 @@ void fldEnterSceneCamera(void) {
     frFontSetSharedRenderFlags(0x54);
     dds3SetWorldObjectDataValue(dds3GetWorldObject(), 1);
     D_00436268 = 0;
-    D_00436248 = cam->stage;
+    D_00436248 = cam->room;
     D_0043624C = cam->unkC0;
     D_00436264 = cam->unkC0;
-    fldGetSceneEntryPosition(cam->stage, &entry[0], &entry[1]);
+    fldGetSceneEntryPosition(cam->room, &entry[0], &entry[1]);
     ix = (f32)(s32)cam->x + entry[0];
     iz = (f32)(s32)cam->z + entry[1];
     memcpy(&up, &D_00413788[1], sizeof(up));
@@ -1431,7 +1450,7 @@ extern s32 sdfTexAcquireResourceTexture();
 /* Loads the scene's models into the resource slots, then centers the camera on the
  * scene's entry point. */
 void fldLoadSceneModelsAndCamera(void) {
-    FldWorkView *cam;
+    FldAreaWork *cam;
     FldSceneRecord *rec;
     f32 focus[4];
     f32 eye[4];
@@ -1448,16 +1467,16 @@ void fldLoadSceneModelsAndCamera(void) {
         ((FldPoint *)D_0044F818)[i].y = rec->pos->y;
         ((FldPoint *)D_0044F818)[i].z = rec->pos->z;
     }
-    cam = (FldWorkView *)fldAreaState;
-    D_0044F7F0[5] = sdfTexAcquireResourceTexture(cam->fldmix[0].block);
-    D_0044F7F0[7] = sdfTexAcquireResourceTexture(cam->fldmix[2].block);
-    D_0044F7F0[8] = sdfTexAcquireResourceTexture(cam->fldmix[3].block);
-    D_0044F7F0[9] = sdfTexAcquireResourceTexture(cam->fldmix[4].block);
+    cam = (FldAreaWork *)fldAreaState;
+    D_0044F7F0[5] = sdfTexAcquireResourceTexture(cam->mapResources[3].block);
+    D_0044F7F0[7] = sdfTexAcquireResourceTexture(cam->mapResources[5].block);
+    D_0044F7F0[8] = sdfTexAcquireResourceTexture(cam->mapResources[6].block);
+    D_0044F7F0[9] = sdfTexAcquireResourceTexture(cam->mapResources[7].block);
     D_00436268 = 0;
-    D_00436248 = cam->stage;
+    D_00436248 = cam->room;
     D_0043624C = cam->unkC0;
     D_00436264 = cam->unkC0;
-    fldGetSceneEntryPosition(cam->stage, &entry[0], &entry[1]);
+    fldGetSceneEntryPosition(cam->room, &entry[0], &entry[1]);
     ix = (f32)(s32)cam->x + entry[0];
     iz = (f32)(s32)cam->z + entry[1];
     memcpy(&up, &D_00413788[2], sizeof(up));
@@ -1502,7 +1521,7 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413788);
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_004137B8);
 
 void fldCenterCameraOnEntry(void) {
-    FldWorkView *cam = (FldWorkView *)fldAreaState;
+    FldAreaWork *cam = (FldAreaWork *)fldAreaState;
     f32 focus[4];
     f32 eye[4];
     f32 up[4] = {0.0f, 0.0f, -1.0f, 1.0f};
@@ -1510,10 +1529,10 @@ void fldCenterCameraOnEntry(void) {
     s32 ix;
     s32 iz;
 
-    D_00436248 = cam->stage;
+    D_00436248 = cam->room;
     D_0043624C = cam->unkC0;
     D_00436264 = cam->unkC0;
-    fldGetSceneEntryPosition(cam->stage, &entry[0], &entry[1]);
+    fldGetSceneEntryPosition(cam->room, &entry[0], &entry[1]);
     ix = (f32)(s32)cam->x + entry[0];
     iz = (f32)(s32)cam->z + entry[1];
     D_0043625C = iz;
@@ -1536,10 +1555,12 @@ void fldCenterCameraOnEntry(void) {
     D_0037FB30.unk10 = 0x808080;
 }
 
+/* Stores the area, room and third location selection, and selects the area's
+ * flag table. The third selection's interpretation is left unknown. */
 void fldSetSceneLocation(s32 stage, s32 room, s32 entrance) {
-    fldAreaState[4] = stage;
-    fldAreaState[6] = entrance;
-    D_00436248 = fldAreaState[5] = room;
+    FLD_WORK->area = stage;
+    FLD_WORK->unk18 = entrance;
+    D_00436248 = FLD_WORK->room = room;
     fldAreaFlagIndex = stage % 100;
 }
 
@@ -1953,23 +1974,25 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413848);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413860);
 
+/* Retains field/automap TMX blocks and field-model resources. Unlike DDS1,
+ * these map blocks come from separate files; fldmix.LB supplies other nodes. */
 void fldParseMixLb(void) {
     FldLbFile *lb;
     FldLbNode *node;
     u32 index;
 
-    fldAreaState[0x1E8 / 4] = sdfReadNamedResource("/fld/f/bin/d2_fild1.tmx", &fldAreaState[0x1EC / 4], 0);
-    fldAreaState[0x1F4 / 4] = sdfReadNamedResource("/fld/f/bin/d2_fild2.tmx", &fldAreaState[0x1F8 / 4], 0);
-    fldAreaState[0x200 / 4] = sdfReadNamedResource("/fld/f/bin/d2_fild3.tmx", &fldAreaState[0x204 / 4], 0);
-    fldAreaState[0x20C / 4] = sdfReadNamedResource("/fld/f/bin/d2_fild4.tmx", &fldAreaState[0x210 / 4], 0);
-    fldAreaState[0x1A8 / 4] = sdfReadNamedResource("/fld/f/bin/autmap_1.tmx", &fldAreaState[0x1AC / 4], 0);
-    fldAreaState[0x1B0 / 4] = sdfReadNamedResource("/fld/f/bin/autmap_2.tmx", &fldAreaState[0x1B4 / 4], 0);
-    fldAreaState[0x1B8 / 4] = sdfReadNamedResource("/fld/f/bin/autmap_3.tmx", &fldAreaState[0x1BC / 4], 0);
-    fldAreaState[0x1C0 / 4] = sdfReadNamedResource("/fld/f/bin/autmap_5.tmx", &fldAreaState[0x1C4 / 4], 0);
-    fldAreaState[0x1C8 / 4] = sdfReadNamedResource("/fld/f/bin/autmap_6.tmx", &fldAreaState[0x1CC / 4], 0);
-    fldAreaState[0x1D0 / 4] = sdfReadNamedResource("/fld/f/bin/autmap_7.tmx", &fldAreaState[0x1D4 / 4], 0);
-    fldAreaState[0x1D8 / 4] = sdfReadNamedResource("/fld/f/bin/autmap_8.tmx", &fldAreaState[0x1DC / 4], 0);
-    fldAreaState[0x1E0 / 4] = sdfReadNamedResource("/fld/f/bin/autmap_9.tmx", &fldAreaState[0x1E4 / 4], 0);
+    FLD_WORK->fieldTextures[0].unk0 = sdfReadNamedResource("/fld/f/bin/d2_fild1.tmx", &FLD_WORK->fieldTextures[0].block, 0);
+    FLD_WORK->fieldTextures[1].unk0 = sdfReadNamedResource("/fld/f/bin/d2_fild2.tmx", &FLD_WORK->fieldTextures[1].block, 0);
+    FLD_WORK->fieldTextures[2].unk0 = sdfReadNamedResource("/fld/f/bin/d2_fild3.tmx", &FLD_WORK->fieldTextures[2].block, 0);
+    FLD_WORK->fieldTextures[3].unk0 = sdfReadNamedResource("/fld/f/bin/d2_fild4.tmx", &FLD_WORK->fieldTextures[3].block, 0);
+    FLD_WORK->mapResources[0].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_1.tmx", &FLD_WORK->mapResources[0].block, 0);
+    FLD_WORK->mapResources[1].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_2.tmx", &FLD_WORK->mapResources[1].block, 0);
+    FLD_WORK->mapResources[2].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_3.tmx", &FLD_WORK->mapResources[2].block, 0);
+    FLD_WORK->mapResources[3].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_5.tmx", &FLD_WORK->mapResources[3].block, 0);
+    FLD_WORK->mapResources[4].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_6.tmx", &FLD_WORK->mapResources[4].block, 0);
+    FLD_WORK->mapResources[5].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_7.tmx", &FLD_WORK->mapResources[5].block, 0);
+    FLD_WORK->mapResources[6].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_8.tmx", &FLD_WORK->mapResources[6].block, 0);
+    FLD_WORK->mapResources[7].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_9.tmx", &FLD_WORK->mapResources[7].block, 0);
     index = 0;
     D_004362E0 = sdfReadNamedResource("/fld/f/bin/TOPEN.D3P", &D_004362E4, 0);
     D_00436304 = sdfReadNamedResource("/fld/f/bin/TAKARA2.D3P", &D_00436308, 0);
@@ -2024,6 +2047,8 @@ extern u32 fldAreaDamageEffect;
 
 extern s32 fldAreaDamageEffectPlaced;
 
+/* For regular field areas, creates menu effects and acquires texture references
+ * from the four retained d2_fild TMX blocks. */
 void fldInitializeMenuResources(void) {
     if (fldAreaState[4] < 200) {
         D_004362DC = effCreateNodeFromDescriptor(D_004362D8);
@@ -2037,10 +2062,10 @@ void fldInitializeMenuResources(void) {
             fldAreaDamageEffect = 0;
         }
         fldAreaDamageEffectPlaced = 0;
-        fldAreaState[0x1F0 / 4] = sdfTexAcquireResourceTexture(fldAreaState[0x1EC / 4]);
-        fldAreaState[0x1FC / 4] = sdfTexAcquireResourceTexture(fldAreaState[0x1F8 / 4]);
-        fldAreaState[0x208 / 4] = sdfTexAcquireResourceTexture(fldAreaState[0x204 / 4]);
-        fldAreaState[0x214 / 4] = sdfTexAcquireResourceTexture(fldAreaState[0x210 / 4]);
+        FLD_WORK->fieldTextures[0].texture = sdfTexAcquireResourceTexture(FLD_WORK->fieldTextures[0].block);
+        FLD_WORK->fieldTextures[1].texture = sdfTexAcquireResourceTexture(FLD_WORK->fieldTextures[1].block);
+        FLD_WORK->fieldTextures[2].texture = sdfTexAcquireResourceTexture(FLD_WORK->fieldTextures[2].block);
+        FLD_WORK->fieldTextures[3].texture = sdfTexAcquireResourceTexture(FLD_WORK->fieldTextures[3].block);
     }
 }
 
@@ -2052,22 +2077,24 @@ extern u32 D_004362F4;
 
 extern u32 fldAreaDamageEffect;
 
+/* Releases retained field texture references and menu effects. Each reference
+ * is cleared immediately so repeated cleanup does not release it twice. */
 void fldFreeSceneResources(void) {
-    if (fldAreaState[0x1F0 / 4] != 0) {
-        sdfTexReleaseReferenceViaHandler(fldAreaState[0x1F0 / 4]);
-        fldAreaState[0x1F0 / 4] = 0;
+    if (FLD_WORK->fieldTextures[0].texture != 0) {
+        sdfTexReleaseReferenceViaHandler(FLD_WORK->fieldTextures[0].texture);
+        FLD_WORK->fieldTextures[0].texture = 0;
     }
-    if (fldAreaState[0x1FC / 4] != 0) {
-        sdfTexReleaseReferenceViaHandler(fldAreaState[0x1FC / 4]);
-        fldAreaState[0x1FC / 4] = 0;
+    if (FLD_WORK->fieldTextures[1].texture != 0) {
+        sdfTexReleaseReferenceViaHandler(FLD_WORK->fieldTextures[1].texture);
+        FLD_WORK->fieldTextures[1].texture = 0;
     }
-    if (fldAreaState[0x208 / 4] != 0) {
-        sdfTexReleaseReferenceViaHandler(fldAreaState[0x208 / 4]);
-        fldAreaState[0x208 / 4] = 0;
+    if (FLD_WORK->fieldTextures[2].texture != 0) {
+        sdfTexReleaseReferenceViaHandler(FLD_WORK->fieldTextures[2].texture);
+        FLD_WORK->fieldTextures[2].texture = 0;
     }
-    if (fldAreaState[0x214 / 4] != 0) {
-        sdfTexReleaseReferenceViaHandler(fldAreaState[0x214 / 4]);
-        fldAreaState[0x214 / 4] = 0;
+    if (FLD_WORK->fieldTextures[3].texture != 0) {
+        sdfTexReleaseReferenceViaHandler(FLD_WORK->fieldTextures[3].texture);
+        FLD_WORK->fieldTextures[3].texture = 0;
     }
     if (D_004362DC != 0) {
         effDestroyNode(D_004362DC);
@@ -2201,29 +2228,31 @@ extern void func_0012B690(s32, s32, s32, s32, s32, s32, s32, s32, u32,
                           u32, u32, u32, u32);
 extern f32 D_0043634C;
 
+/* Draws the field banner at (x, y), using field textures 0 and 2, unless either
+ * field-state gate is 1. alpha is unused; the optional party mark animates. */
 void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
     u32 color;
 
-    if (fldAreaState[0x118 / 4] != 1 && fldAreaState[0x114 / 4] != 1) {
+    if (FLD_WORK->unk118 != 1 && FLD_WORK->unk114 != 1) {
         fldSelectDisplayBuffer(0x53);
         func_0012BE18(0);
         fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
         fldSubmitSpriteRect(x + 0x140, y + 0x10, 0x12, 0x19,
                             0x26, 3, 0x12, 0x19, 0x80808080,
-                            fldAreaState[0x1F0 / 4]);
+                            FLD_WORK->fieldTextures[0].texture);
         fldSubmitSpriteRect(x + 0x152, y + 0x10, 0x90, 0x19,
                             0x36, 3, 1, 0x19, 0x80808080,
-                            fldAreaState[0x1F0 / 4]);
+                            FLD_WORK->fieldTextures[0].texture);
         fldSubmitSpriteRect(x + 0x1E2, y - 1, 0x20, 0x39,
                             1, 2, 0x20, 0x39, 0x80808080,
-                            fldAreaState[0x1F0 / 4]);
+                            FLD_WORK->fieldTextures[0].texture);
         if (ptyAnyUnitFlagMatch(0x5D0, 0) != 0) {
             fldSubmitSpriteRect(x + 0x1B6, y + 0x2E, 0x23, 0xB,
                                 0x3B, 0x25, 0x23, 0xB, 0x80808080,
-                                fldAreaState[0x208 / 4]);
+                                FLD_WORK->fieldTextures[2].texture);
             fldSubmitSpriteRect(x + 0x1D8, y + 0x26, 0x1B, 0x21,
                                 0x64, 2, 0x1B, 0x21, 0x80808080,
-                                fldAreaState[0x208 / 4]);
+                                FLD_WORK->fieldTextures[2].texture);
             color = 0x808080;
             if (D_0043634C < 45.0f) {
                 color = (s32)(sdfSinPoly(D_0043634C * 4.0f * 3.14f / 180.0f) *
@@ -2235,12 +2264,12 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
                           0x3B, 0x25, 0x23, 0xB,
                           color | 0x30000000, color | 0x30000000,
                           color | 0x30000000, color | 0x30000000,
-                          fldAreaState[0x208 / 4]);
+                          FLD_WORK->fieldTextures[2].texture);
             func_0012B690(x + 0x1D8, y + 0x26, 0x1B, 0x21,
                           0x64, 2, 0x1B, 0x21,
                           color | 0x5A000000, color | 0x5A000000,
                           color | 0x5A000000, color | 0x5A000000,
-                          fldAreaState[0x208 / 4]);
+                          FLD_WORK->fieldTextures[2].texture);
             D_0043634C += 1.0f;
             if (D_0043634C > 90.0f) {
                 D_0043634C = 0.0f;
@@ -2266,13 +2295,13 @@ void fldFlushQueuedEffectPositions(void) {
             return;
         }
         if (fldSecondaryEffectPositionPending != 0) {
-            if (((FldWorkView *)fldAreaState)->unk12A == 0) {
+            if (FLD_WORK->unk12A == 0) {
                 mnuSpawnResourceAtPosition(fldSecondaryQueuedEffectPosition[0], fldSecondaryQueuedEffectPosition[1], fldSecondaryQueuedEffectPosition[2]);
             }
             fldSecondaryEffectPositionPending = 0;
         }
         if (fldPrimaryEffectPositionPending != 0) {
-            if (((FldWorkView *)fldAreaState)->unk12A == 0) {
+            if (FLD_WORK->unk12A == 0) {
                 mnuSpawnResourceAtPosition(fldPrimaryQueuedEffectPosition[0], fldPrimaryQueuedEffectPosition[1], fldPrimaryQueuedEffectPosition[2]);
             }
             fldPrimaryEffectPositionPending = 0;
@@ -2800,8 +2829,10 @@ extern s32 D_003899E0[];
 
 extern void func_00125B10(void);
 
+/* Restores field presentation once an active event finishes, then clears the
+ * event latch. An already-cleared latch leaves field resources untouched. */
 void fldFinishEventFieldState(void) {
-    FldWorkView *work = (FldWorkView *)fldAreaState;
+    FldAreaWork *work = (FldAreaWork *)fldAreaState;
 
     if (work->eventActive != 0) {
         D_003899E0[0] = 0;
@@ -2845,31 +2876,35 @@ extern s32 D_003899E0[];
 
 extern void fldReleaseCameraModel(s32);
 
+/* Releases scene presentation and camera resources before clearing the event
+ * latch and installing the existing field-state values. */
 void fldResetEventSceneState(void) {
     fldReleaseCameraModel(0);
     D_003899E0[0] = 0;
-    fldAreaState[0x118 / 4] = 0;
+    FLD_WORK->unk118 = 0;
     fldClearObjectEntryHandles();
     fldReleaseWeatherEffects();
     fldPreparePlayerSceneCameraTarget();
-    fldAreaState[0x114 / 4] = 1;
-    ((FldWorkView *)fldAreaState)->eventActive = 0;
+    FLD_WORK->unk114 = 1;
+    FLD_WORK->eventActive = 0;
     D_00451B9C[0] = 0;
-    fldAreaState[0x138 / 4] = 1;
+    FLD_WORK->unk138 = 1;
 }
 
+/* Restores title/menu and field presentation after an event, then clears the
+ * event latch and field gates while retaining the existing reset values. */
 void fldResetAfterEvent(void) {
     func_00341C78(0x680017);
     mnuAdvanceTitleStateUnderSemaphore();
     D_003899E0[0] = 0;
-    fldAreaState[0x118 / 4] = 0;
+    FLD_WORK->unk118 = 0;
     fldClearObjectEntryHandles();
     fldReleaseWeatherEffects();
     fldStartSceneBgmAlternate();
-    fldAreaState[0x114 / 4] = 0;
-    ((FldWorkView *)fldAreaState)->eventActive = 0;
+    FLD_WORK->unk114 = 0;
+    FLD_WORK->eventActive = 0;
     D_00451B9C[0] = 0;
-    fldAreaState[0x138 / 4] = 1;
+    FLD_WORK->unk138 = 1;
     evtSetSolarOverlayFullyVisible();
 }
 
@@ -2880,14 +2915,16 @@ void fldStartDeferredFieldExit(void) {
     D_00389884[0] = 2;
 }
 
+/* Completes deferred exit state 2 only after the message window stops being
+ * controlled, then closes its display channel and restores the camera target. */
 void fldFinishDeferredExit(void) {
-    if (fldAreaState[0x45] == 2) {
+    if (FLD_WORK->unk114 == 2) {
         func_0026C900();
         if (!evtGetMessageWindowControlState()) {
             evtFinishMessageWindowAndNotify();
             dspCloseChannel();
             fldPreparePlayerSceneCameraTarget();
-            fldAreaState[0x45] = 0;
+            FLD_WORK->unk114 = 0;
         }
     }
 }
@@ -2974,6 +3011,7 @@ void fldResetViewState(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001514F8);
+
 
 void fldReleaseTargetGuideResource(void) {
     if (D_004363C4 != 0) {

@@ -2,11 +2,19 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 
-typedef struct FldCamPose {
-    u8 pad0[0x10];
-    s32 world; /* 0x10 */
-    s32 stage;
-    u8 pad18[0x18];
+/* Retained field-area work, not a camera-only object. Unknown regions remain
+ * opaque; this prefix covers the camera, event state and fldmix map resources. */
+typedef struct FldResourceBlock {
+    s32 unk0;  /* Retained fldmix.LB node value; only written here. */
+    s32 block; /* sdfMemoryGetBlockAddress(unk0). */
+} FldResourceBlock;
+
+typedef struct FldAreaWork {
+    u8 pad00[0x10];
+    s32 area; /* 0x10 */
+    s32 room; /* 0x14: the floor/room argument of fldSetSceneLocation. */
+    s32 unk18;
+    u8 pad1C[0x14];
     f32 focusPos[3]; /* 0x30 */
     u8 pad3C[0x14];
     s32 unk50;
@@ -16,20 +24,26 @@ typedef struct FldCamPose {
     s32 unk70;
     u8 pad74[0x4C];
     s32 unkC0;
-    u8 padC4[0x66];
+    u8 padC4[0x40];
+    s16 eventActive; /* 0x104 */
+    u8 pad106[0xE];
+    s32 unk114;
+    s32 unk118;
+    u8 pad11C[0xE];
     s16 unk12A;
-    u8 pad12C[0x14];
+    u8 pad12C[0xC];
+    s32 unk138;
+    u8 pad13C[4];
     f32 x;
     f32 y;
     f32 z;
     u8 pad14C[0x18];
     f32 angle;
     u8 pad168[0x34];
-    struct {
-        s32 value; /* fldmix.LB node value */
-        s32 block; /* sdfMemoryGetBlockAddress(value) */
-    } fldmix[4]; /* 0x19C */
-} FldCamPose;
+    FldResourceBlock mapResources[4]; /* 0x19C: fldmix.LB nodes 10..13. */
+} FldAreaWork;
+
+#define FLD_WORK ((FldAreaWork *)fldAreaState)
 
 typedef struct FldVec4 {
     f32 v[4];
@@ -1059,7 +1073,7 @@ extern void dds3SetWorldObjectDataValue(s32, s32);
 /* Enters the field camera state for a fresh scene: releases the title slots and
  * centers the camera on the scene's entry point. */
 void fldEnterSceneCamera(void) {
-    FldCamPose *cam = (FldCamPose *)fldAreaState;
+    FldAreaWork *cam = (FldAreaWork *)fldAreaState;
     f32 focus[4];
     f32 eye[4];
     FldVec4 up;
@@ -1081,10 +1095,10 @@ void fldEnterSceneCamera(void) {
     frFontSetSharedRenderFlags(0x54);
     dds3SetWorldObjectDataValue(dds3GetWorldObject(), 1);
     D_003BAED4 = 0;
-    D_003BAEB4 = cam->stage;
+    D_003BAEB4 = cam->room;
     D_003BAEB8 = cam->unkC0;
     D_003BAED0 = cam->unkC0;
-    fldGetSceneEntryPosition(cam->stage, &entry[0], &entry[1]);
+    fldGetSceneEntryPosition(cam->room, &entry[0], &entry[1]);
     cx = cam->x;
     cz = cam->z;
     iz = cz + entry[1];
@@ -1120,7 +1134,7 @@ extern s32 sdfTexAcquireResourceTexture();
 /* Loads the scene's models into the menu slots, then centers the camera on the
  * scene's entry point. */
 void fldLoadSceneModelsAndCamera(void) {
-    FldCamPose *cam;
+    FldAreaWork *cam;
     FldSceneRecord *rec;
     f32 focus[4];
     f32 eye[4];
@@ -1139,14 +1153,14 @@ void fldLoadSceneModelsAndCamera(void) {
         ((FldPoint *)D_003D40B0)[i].y = rec->pos->y;
         ((FldPoint *)D_003D40B0)[i].z = rec->pos->z;
     }
-    cam = (FldCamPose *)fldAreaState;
-    D_003D40A0[0] = sdfTexAcquireResourceTexture(cam->fldmix[0].block);
-    D_003D40A0[1] = sdfTexAcquireResourceTexture(cam->fldmix[1].block);
+    cam = (FldAreaWork *)fldAreaState;
+    D_003D40A0[0] = sdfTexAcquireResourceTexture(cam->mapResources[0].block);
+    D_003D40A0[1] = sdfTexAcquireResourceTexture(cam->mapResources[1].block);
     D_003BAED4 = 0;
-    D_003BAEB4 = cam->stage;
+    D_003BAEB4 = cam->room;
     D_003BAEB8 = cam->unkC0;
     D_003BAED0 = cam->unkC0;
-    fldGetSceneEntryPosition(cam->stage, &entry[0], &entry[1]);
+    fldGetSceneEntryPosition(cam->room, &entry[0], &entry[1]);
     cx = cam->x;
     cz = cam->z;
     iz = cz + entry[1];
@@ -1193,7 +1207,7 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A05D8);
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0608);
 
 void fldCenterCameraOnEntry(void) {
-    FldCamPose *cam = (FldCamPose *)fldAreaState;
+    FldAreaWork *cam = (FldAreaWork *)fldAreaState;
     f32 focus[4];
     f32 eye[4];
     f32 up[4] = {0.0f, 0.0f, -1.0f, 1.0f};
@@ -1201,10 +1215,10 @@ void fldCenterCameraOnEntry(void) {
     s32 ix;
     s32 iz;
 
-    D_003BAEB4 = cam->stage;
+    D_003BAEB4 = cam->room;
     D_003BAEB8 = cam->unkC0;
     D_003BAED0 = cam->unkC0;
-    fldGetSceneEntryPosition(cam->stage, &entry[0], &entry[1]);
+    fldGetSceneEntryPosition(cam->room, &entry[0], &entry[1]);
     ix = (f32)(s32)cam->x + entry[0];
     iz = (f32)(s32)cam->z + entry[1];
     D_003BAEC8 = iz;
@@ -1227,10 +1241,12 @@ void fldCenterCameraOnEntry(void) {
     D_00324B30.unk10 = 0x808080;
 }
 
+/* Stores the area, floor/room and third location selection, and selects the
+ * area's flag table. The third selection's interpretation is left unknown. */
 void fldSetSceneLocation(s32 area, s32 floor, s32 stage) {
-    fldAreaState[4] = area;
-    fldAreaState[6] = stage;
-    D_003BAEB4 = fldAreaState[5] = floor;
+    FLD_WORK->area = area;
+    FLD_WORK->unk18 = stage;
+    D_003BAEB4 = FLD_WORK->room = floor;
     fldAreaFlagIndex = area % 100;
 }
 
@@ -1618,7 +1634,6 @@ typedef struct FldLbFile {
     FldLbNode *nodes; /* 0x60 */
 } FldLbFile;
 
-#define FLD_WORK ((FldCamPose *)fldAreaState)
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0650);
 
@@ -1630,6 +1645,8 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0698);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A06B0);
 
+/* Retains fldmix.LB node values and their memory blocks in field work.
+ * Nodes 10..13 supply the map resources later acquired by the scene camera. */
 void fldParseMixLb(void) {
     FldLbFile *lb;
     FldLbNode *node;
@@ -1693,23 +1710,23 @@ void fldParseMixLb(void) {
             break;
         case 10:
             value = node->value;
-            FLD_WORK->fldmix[0].value = value;
-            FLD_WORK->fldmix[0].block = sdfMemoryGetBlockAddress(value);
+            FLD_WORK->mapResources[0].unk0 = value;
+            FLD_WORK->mapResources[0].block = sdfMemoryGetBlockAddress(value);
             break;
         case 11:
             value = node->value;
-            FLD_WORK->fldmix[1].value = value;
-            FLD_WORK->fldmix[1].block = sdfMemoryGetBlockAddress(value);
+            FLD_WORK->mapResources[1].unk0 = value;
+            FLD_WORK->mapResources[1].block = sdfMemoryGetBlockAddress(value);
             break;
         case 12:
             value = node->value;
-            FLD_WORK->fldmix[2].value = value;
-            FLD_WORK->fldmix[2].block = sdfMemoryGetBlockAddress(value);
+            FLD_WORK->mapResources[2].unk0 = value;
+            FLD_WORK->mapResources[2].block = sdfMemoryGetBlockAddress(value);
             break;
         case 13:
             value = node->value;
-            FLD_WORK->fldmix[3].value = value;
-            FLD_WORK->fldmix[3].block = sdfMemoryGetBlockAddress(value);
+            FLD_WORK->mapResources[3].unk0 = value;
+            FLD_WORK->mapResources[3].block = sdfMemoryGetBlockAddress(value);
             break;
         }
     }
@@ -2528,13 +2545,10 @@ extern void fldPreparePlayerSceneCameraTarget(void);
 
 extern void evtSetSolarOverlayFullyVisible(void);
 
-typedef struct FldResetWork {
-    u8 pad00[0x104];
-    s16 eventActive; /* 0x104 */
-} FldResetWork;
-
+/* Restores field presentation once an active event finishes, then clears the
+ * event latch. An already-cleared latch leaves field resources untouched. */
 void fldFinishEventFieldState(void) {
-    FldResetWork *state = (FldResetWork *)fldAreaState;
+    FldAreaWork *state = (FldAreaWork *)fldAreaState;
 
     if (state->eventActive != 0) {
         D_0032E5C4[0] = 0;
@@ -2564,17 +2578,19 @@ s32 func_0014CAF8(void) {
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014CB08);
 
+/* Releases scene presentation and camera resources before clearing the event
+ * latch and installing the existing field-state values. */
 void fldResetEventSceneState(void) {
     fldReleaseCameraModel(0);
     D_0032E5C4[0] = 0;
-    fldAreaState[0x46] = 0;
+    FLD_WORK->unk118 = 0;
     fldClearObjectEntryHandles();
     fldReleaseWeatherEffects();
     fldPreparePlayerSceneCameraTarget();
-    fldAreaState[0x45] = 1;
-    ((FldResetWork *)fldAreaState)->eventActive = 0;
+    FLD_WORK->unk114 = 1;
+    FLD_WORK->eventActive = 0;
     D_003D62A8[0] = 0;
-    fldAreaState[0x4E] = 1;
+    FLD_WORK->unk138 = 1;
     evtSetSolarOverlayFullyVisible();
 }
 
@@ -2585,14 +2601,16 @@ void fldStartDeferredFieldExit(void) {
     D_0032E4C4[0] = 2;
 }
 
+/* Completes deferred exit state 2 only after the message window stops being
+ * controlled, then closes its display channel and restores the camera target. */
 void fldFinishDeferredExit(void) {
-    if (fldAreaState[0x45] == 2) {
+    if (FLD_WORK->unk114 == 2) {
         func_0024DD78();
         if (!evtGetMessageWindowControlState()) {
             evtFinishMessageWindowAndNotify();
             dspCloseChannel();
             fldPreparePlayerSceneCameraTarget();
-            fldAreaState[0x45] = 0;
+            FLD_WORK->unk114 = 0;
         }
     }
 }
