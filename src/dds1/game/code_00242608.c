@@ -1144,7 +1144,59 @@ s32 mnuCampRunPanel2(u64 request) {
     return menuRunPanel(state, 2, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244C00);
+typedef struct ShopSourcePriceEntry {
+    u16 itemId;
+    u8 type;
+    u8 flags;
+    u16 pricePercent;
+} ShopSourcePriceEntry;
+
+typedef struct ShopSourcePriceRow {
+    u16 pricePercent;
+    ShopSourcePriceEntry entries[0x40];
+} ShopSourcePriceRow;
+
+typedef struct ShopProgressPriceScale {
+    f32 percent;
+    u8 pad04[4];
+} ShopProgressPriceScale;
+
+typedef struct ShopItemPriceRecord {
+    u8 pad00[4];
+    s32 price;
+} ShopItemPriceRecord;
+
+extern ShopSourcePriceRow D_00368CF0[];
+extern ShopProgressPriceScale D_0036A234[];
+
+s32 func_00244C00(s32 index, s32 source, s32 halfPrice) {
+    u32 rowIndex;
+    u32 itemId;
+    u32 rowPercent;
+    u32 pricePercent;
+    s32 itemPrice;
+    s32 price;
+    s32 progressStage;
+
+    rowIndex = (u8)campFlagRowValue(source);
+    itemId = D_00368CF0[rowIndex].entries[index].itemId;
+    if (halfPrice == 0) {
+        itemPrice = ((ShopItemPriceRecord *)datItemSkillRecords)[itemId].price;
+        rowPercent = D_00368CF0[rowIndex].pricePercent;
+        pricePercent = D_00368CF0[rowIndex].entries[index].pricePercent;
+        if (pricePercent == 0) {
+            pricePercent = rowPercent;
+        }
+        price = itemPrice * pricePercent / 100;
+        progressStage = mnuCampGetProgressStage();
+        if (progressStage != 0) {
+            price = price * (s32)D_0036A234[progressStage].percent / 100;
+        }
+    } else {
+        price = (u32)((ShopItemPriceRecord *)datItemSkillRecords)[itemId].price >> 1;
+    }
+    return price;
+}
 
 typedef struct ShopRankPriceEntry {
     u16 itemId;
@@ -1158,18 +1210,6 @@ typedef struct ShopRankPriceRow {
     u16 pricePercent;
     ShopRankPriceEntry entries[0x20];
 } ShopRankPriceRow;
-
-typedef struct ShopProgressPriceScale {
-    f32 percent;
-    u8 pad04[4];
-} ShopProgressPriceScale;
-
-typedef struct ShopItemPriceRecord {
-    u8 pad00[4];
-    s32 price;
-} ShopItemPriceRecord;
-
-extern ShopProgressPriceScale D_0036A234[];
 
 s32 func_00244D10(s32 index, s32 halfPrice) {
     u32 rowOffset;
