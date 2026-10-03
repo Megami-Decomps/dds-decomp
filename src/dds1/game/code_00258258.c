@@ -36,12 +36,51 @@ INCLUDE_ASM(const s32, "game/code_00258258", func_00258EB8);
 INCLUDE_ASM(const s32, "game/code_00258258", func_00258FD0);
 
 extern s32 mnuSceneResourceContext;
-void func_002CB3B8(s32 arg0, s32 arg1);
-void mnuGetMantraDisplayFlags(s32 arg0, s32 arg1);
-void func_00258B00(s32 arg0);
-void func_00258EB8(void *arg0);
+typedef struct MantraPulseGrid MantraPulseGrid;
 
-INCLUDE_ASM(const s32, "game/code_00258258", func_002593E0);
+typedef struct MantraPulseEntry {
+    s32 unk_0;
+    struct DspScene *scene;
+} MantraPulseEntry;
+
+typedef struct DspScene {
+    s32 frame;
+    u8 pad04[8];
+    u16 sceneId;
+    u8 pad0E[6];
+    s32 state;
+} DspScene;
+
+typedef struct DspProfileSelection {
+    u32 unit;
+    s32 profileId;
+} DspProfileSelection;
+
+extern void *func_002CB3B8(s32 arg0, s32 arg1);
+extern u32 mnuGetMantraDisplayFlags(DspScene *scene, DspProfileSelection *target);
+extern void func_00258B00(void *sceneState);
+extern void func_00258EB8(DspScene *entry);
+
+void func_002593E0(DspProfileSelection *target, MantraPulseGrid *grid, MantraPulseEntry *entry) {
+    void *scene;
+    DspScene *displayEntry;
+    u32 flags;
+
+    scene = func_002CB3B8(mnuSceneResourceContext, 1);
+    displayEntry = entry->scene;
+    displayEntry->frame += 1;
+    if ((f32)displayEntry->frame > 60.0f) {
+        displayEntry->frame = 0;
+    }
+    flags = mnuGetMantraDisplayFlags(displayEntry, target);
+    if ((flags & 1) != 0) {
+        func_00258B00((u8 *)scene + 0x488);
+        return;
+    }
+    if ((flags & 2) != 0) {
+        func_00258EB8(displayEntry);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00258258", D_003AF9B8);
 
@@ -50,4 +89,3 @@ INCLUDE_SDATA(const s32, "game/code_00258258", D_003BC488);
 INCLUDE_SDATA(const s32, "game/code_00258258", D_003BC490);
 
 INCLUDE_SDATA(const s32, "game/code_00258258", D_003BC498);
-
