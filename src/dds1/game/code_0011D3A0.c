@@ -4,6 +4,28 @@
 #include "fpu.h"
 #include "fld.h"
 
+/* Signed selectors read signed storage; all writes retain the selected width. */
+enum {
+    FIELD_EDIT_UNSIGNED_BYTE = 1,
+    FIELD_EDIT_UNSIGNED_HALFWORD = 2,
+    FIELD_EDIT_UNSIGNED_WORD = 4,
+    FIELD_EDIT_SIGNED_BYTE = -1,
+    FIELD_EDIT_SIGNED_HALFWORD = -2,
+    FIELD_EDIT_SIGNED_WORD = -4,
+    FIELD_EDIT_WRAP_INPUT = 0x80,
+    FIELD_EDIT_CLAMP_INPUT = 2,
+    FIELD_EDIT_COLOR_COARSE_STEP = 10
+};
+
+/* Native lookup bounds differ even when two searches share the same table. */
+enum {
+    FIELD_COORDINATE_SCAN_LIMIT = 512,
+    FIELD_MAP_COORDINATE_SCAN_LIMIT = 256,
+    FIELD_LOCATION_COORDINATE_SCAN_LIMIT = 640,
+    FIELD_STAGE_INDEX_SCAN_LIMIT = 0x280,
+    FIELD_STAGE_RECORD_SCAN_LIMIT = 0x60
+};
+
 extern u32 D_003BABE0;
 
 extern s32 fldDeferredCommand;
@@ -42,7 +64,7 @@ extern char D_0039FA00[];
 extern char D_0039FCA0[];
 extern char D_0039FCB0[];
 extern char D_0039FCC8[];
-extern void fldStepValueByPad(f32 *value, u8 *pad, f32 min, f32 max, f32 step, f32 bigStep);
+extern void fldStepValueByPad(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
 extern s32 fldTestDrawUpdate(void);
 extern void fldClearCameraMoveMode(void);
 extern void fldSetCameraMoveMode(s32);
@@ -148,215 +170,223 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011D570);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011D6B0);
 
-void fldStepValueByPad(f32 *value, u8 *pad, f32 min, f32 max, f32 step, f32 bigStep) {
-    f32 v = *value;
+/* Wrap input cycles past the bounds; clamp input saturates there.
+ * Coarse controls take priority over fine controls. */
+void fldStepValueByPad(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep) {
+    f32 adjustedValue = *value;
 
-    if ((s8)pad[5] & 0x80) {
-        v += bigStep;
-        if (max < v) {
-            v = min;
+    if ((s8)padState[5] & FIELD_EDIT_WRAP_INPUT) {
+        adjustedValue += bigStep;
+        if (max < adjustedValue) {
+            adjustedValue = min;
         }
-    } else if (pad[5] & 2) {
-        v += bigStep;
-        if (max < v) {
-            v = max;
+    } else if (padState[5] & FIELD_EDIT_CLAMP_INPUT) {
+        adjustedValue += bigStep;
+        if (max < adjustedValue) {
+            adjustedValue = max;
         }
-    } else if ((s8)pad[4] & 0x80) {
-        v -= bigStep;
-        if (v < min) {
-            v = max;
+    } else if ((s8)padState[4] & FIELD_EDIT_WRAP_INPUT) {
+        adjustedValue -= bigStep;
+        if (adjustedValue < min) {
+            adjustedValue = max;
         }
-    } else if (pad[4] & 2) {
-        v -= bigStep;
-        if (v < min) {
-            v = min;
+    } else if (padState[4] & FIELD_EDIT_CLAMP_INPUT) {
+        adjustedValue -= bigStep;
+        if (adjustedValue < min) {
+            adjustedValue = min;
         }
-    } else if ((s8)pad[7] & 0x80) {
-        v += step;
-        if (max < v) {
-            v = min;
+    } else if ((s8)padState[7] & FIELD_EDIT_WRAP_INPUT) {
+        adjustedValue += step;
+        if (max < adjustedValue) {
+            adjustedValue = min;
         }
-    } else if (pad[7] & 2) {
-        v += step;
-        if (max < v) {
-            v = max;
+    } else if (padState[7] & FIELD_EDIT_CLAMP_INPUT) {
+        adjustedValue += step;
+        if (max < adjustedValue) {
+            adjustedValue = max;
         }
-    } else if ((s8)pad[6] & 0x80) {
-        v -= step;
-        if (v < min) {
-            v = max;
+    } else if ((s8)padState[6] & FIELD_EDIT_WRAP_INPUT) {
+        adjustedValue -= step;
+        if (adjustedValue < min) {
+            adjustedValue = max;
         }
-    } else if (pad[6] & 2) {
-        v -= step;
-        if (v < min) {
-            v = min;
+    } else if (padState[6] & FIELD_EDIT_CLAMP_INPUT) {
+        adjustedValue -= step;
+        if (adjustedValue < min) {
+            adjustedValue = min;
         }
     } else {
         return;
     }
-    *value = v;
+    *value = adjustedValue;
 }
 
 void fldStepValueByCurrentPad(f32 *value, f32 min, f32 max, f32 step, f32 bigStep) {
     fldStepValueByPad(value, D_00324530, min, max, step, bigStep);
 }
 
-void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8 *pad) {
-    s64 value;
-    switch (type) {
-    case 1:
-        value = *(u8 *)ptr;
+/* Read the selected signed/unsigned integer, apply pad stepping, then truncate
+ * back to its original width. Unsupported storage selectors leave it untouched. */
+void fldStepIntByPad(void *valueAddress, s32 storageType, s64 min, s64 max, s64 step, s64 bigStep, s8 *padState) {
+    s64 adjustedValue;
+    switch (storageType) {
+    case FIELD_EDIT_UNSIGNED_BYTE:
+        adjustedValue = *(u8 *)valueAddress;
         break;
-    case 2:
-        value = *(u16 *)ptr;
+    case FIELD_EDIT_UNSIGNED_HALFWORD:
+        adjustedValue = *(u16 *)valueAddress;
         break;
-    case 4:
-        value = *(u32 *)ptr;
+    case FIELD_EDIT_UNSIGNED_WORD:
+        adjustedValue = *(u32 *)valueAddress;
         break;
-    case -1:
-        value = *(s8 *)ptr;
+    case FIELD_EDIT_SIGNED_BYTE:
+        adjustedValue = *(s8 *)valueAddress;
         break;
-    case -2:
-        value = *(s16 *)ptr;
+    case FIELD_EDIT_SIGNED_HALFWORD:
+        adjustedValue = *(s16 *)valueAddress;
         break;
-    case -4:
-        value = *(s32 *)ptr;
+    case FIELD_EDIT_SIGNED_WORD:
+        adjustedValue = *(s32 *)valueAddress;
         break;
     default:
         return;
     }
-    if (pad[5] & 0x80) {
-        value += big;
-        if (max < value) {
-            value = min;
+    if (padState[5] & FIELD_EDIT_WRAP_INPUT) {
+        adjustedValue += bigStep;
+        if (max < adjustedValue) {
+            adjustedValue = min;
         }
-    } else if (pad[5] & 2) {
-        value += big;
-        if (max < value) {
-            value = max;
+    } else if (padState[5] & FIELD_EDIT_CLAMP_INPUT) {
+        adjustedValue += bigStep;
+        if (max < adjustedValue) {
+            adjustedValue = max;
         }
-    } else if (pad[4] & 0x80) {
-        value -= big;
-        if (value < min) {
-            value = max;
+    } else if (padState[4] & FIELD_EDIT_WRAP_INPUT) {
+        adjustedValue -= bigStep;
+        if (adjustedValue < min) {
+            adjustedValue = max;
         }
-    } else if (pad[4] & 2) {
-        value -= big;
-        if (value < min) {
-            value = min;
+    } else if (padState[4] & FIELD_EDIT_CLAMP_INPUT) {
+        adjustedValue -= bigStep;
+        if (adjustedValue < min) {
+            adjustedValue = min;
         }
-    } else if (pad[7] & 0x80) {
-        value += small;
-        if (max < value) {
-            value = min;
+    } else if (padState[7] & FIELD_EDIT_WRAP_INPUT) {
+        adjustedValue += step;
+        if (max < adjustedValue) {
+            adjustedValue = min;
         }
-    } else if (pad[7] & 2) {
-        value += small;
-        if (max < value) {
-            value = max;
+    } else if (padState[7] & FIELD_EDIT_CLAMP_INPUT) {
+        adjustedValue += step;
+        if (max < adjustedValue) {
+            adjustedValue = max;
         }
-    } else if (pad[6] & 0x80) {
-        value -= small;
-        if (value < min) {
-            value = max;
+    } else if (padState[6] & FIELD_EDIT_WRAP_INPUT) {
+        adjustedValue -= step;
+        if (adjustedValue < min) {
+            adjustedValue = max;
         }
-    } else if (pad[6] & 2) {
-        value -= small;
-        if (value < min) {
-            value = min;
+    } else if (padState[6] & FIELD_EDIT_CLAMP_INPUT) {
+        adjustedValue -= step;
+        if (adjustedValue < min) {
+            adjustedValue = min;
         }
     } else {
         return;
     }
-    switch (type) {
-    case -1:
-    case 1:
-        *(u8 *)ptr = value;
+    switch (storageType) {
+    case FIELD_EDIT_SIGNED_BYTE:
+    case FIELD_EDIT_UNSIGNED_BYTE:
+        *(u8 *)valueAddress = adjustedValue;
         break;
-    case -2:
-    case 2:
-        *(u16 *)ptr = value;
+    case FIELD_EDIT_SIGNED_HALFWORD:
+    case FIELD_EDIT_UNSIGNED_HALFWORD:
+        *(u16 *)valueAddress = adjustedValue;
         break;
-    case -4:
-    case 4:
-        *(u32 *)ptr = value;
+    case FIELD_EDIT_SIGNED_WORD:
+    case FIELD_EDIT_UNSIGNED_WORD:
+        *(u32 *)valueAddress = adjustedValue;
         break;
     }
 }
 
-void fldAdjustIntegerUsingMainPad(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep) {
-    fldStepIntByPad(ptr, type, min, max, step, bigStep, (s8 *)D_00324530);
+void fldAdjustIntegerUsingMainPad(void *valueAddress, s32 storageType, s64 min, s64 max, s64 step, s64 bigStep) {
+    fldStepIntByPad(valueAddress, storageType, min, max, step, bigStep, (s8 *)D_00324530);
 }
 
-s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *pad) {
-    s32 old = *color;
-    s32 byte = old;
-    s32 value;
+/* Step a packed color byte by 10 or 1; return whether the word changed.
+ * Wrap input only wraps at endpoints. An invalid channel reads the low byte
+ * but replaces the high byte, preserving the native selector fallback. */
+s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *padState) {
+    s32 originalColor = *color;
+    s32 channelValue = originalColor;
+    s32 updatedColor;
     switch (channel) {
     case 0:
         break;
     case 1:
-        byte = old >> 8;
+        channelValue = originalColor >> 8;
         break;
     case 2:
-        byte = old >> 16;
+        channelValue = originalColor >> 16;
         break;
     case 3:
-        byte = old >> 24;
+        channelValue = originalColor >> 24;
         break;
     }
-    byte &= 0xFF;
-    if (((pad[5] & 0x80) || (pad[7] & 0x80)) && byte == 0xFF) {
-        byte = 0;
-    } else if (pad[5] & 2) {
-        byte += 10;
-        if (byte >= 0x100) {
-            byte = 0xFF;
+    channelValue &= 0xFF;
+    if (((padState[5] & FIELD_EDIT_WRAP_INPUT) || (padState[7] & FIELD_EDIT_WRAP_INPUT)) && channelValue == 0xFF) {
+        channelValue = 0;
+    } else if (padState[5] & FIELD_EDIT_CLAMP_INPUT) {
+        channelValue += FIELD_EDIT_COLOR_COARSE_STEP;
+        if (channelValue >= 0x100) {
+            channelValue = 0xFF;
         }
-    } else if (((pad[4] & 0x80) || (pad[6] & 0x80)) && byte == 0) {
-        byte = 0xFF;
-    } else if (pad[4] & 2) {
-        byte -= 10;
-        if (byte < 0) {
-            byte = 0;
+    } else if (((padState[4] & FIELD_EDIT_WRAP_INPUT) || (padState[6] & FIELD_EDIT_WRAP_INPUT)) && channelValue == 0) {
+        channelValue = 0xFF;
+    } else if (padState[4] & FIELD_EDIT_CLAMP_INPUT) {
+        channelValue -= FIELD_EDIT_COLOR_COARSE_STEP;
+        if (channelValue < 0) {
+            channelValue = 0;
         }
-    } else if (pad[7] & 2) {
-        byte += 1;
-        if (byte >= 0x100) {
-            byte = 0xFF;
+    } else if (padState[7] & FIELD_EDIT_CLAMP_INPUT) {
+        channelValue += 1;
+        if (channelValue >= 0x100) {
+            channelValue = 0xFF;
         }
-    } else if (pad[6] & 2) {
-        byte -= 1;
-        if (byte < 0) {
-            byte = 0;
+    } else if (padState[6] & FIELD_EDIT_CLAMP_INPUT) {
+        channelValue -= 1;
+        if (channelValue < 0) {
+            channelValue = 0;
         }
     } else {
         return 0;
     }
     switch (channel) {
     case 0:
-        value = (old & 0xFFFFFF00) | byte;
+        updatedColor = (originalColor & 0xFFFFFF00) | channelValue;
         break;
     case 1:
-        value = (old & 0xFFFF00FF) | (byte << 8);
+        updatedColor = (originalColor & 0xFFFF00FF) | (channelValue << 8);
         break;
     case 2:
-        value = (old & 0xFF00FFFF) | (byte << 16);
+        updatedColor = (originalColor & 0xFF00FFFF) | (channelValue << 16);
         break;
     default:
-        value = (old & 0x00FFFFFF) | (byte << 24);
+        updatedColor = (originalColor & 0x00FFFFFF) | (channelValue << 24);
         break;
     }
-    *color = value;
-    return value != old;
+    *color = updatedColor;
+    return updatedColor != originalColor;
 }
 
 void fldStepColorChannelByCurrentPad(u32 *color, s32 channel) {
     fldStepColorChannelByPad(color, channel, D_00324530);
 }
 
-/* Formats a time in seconds as "d.dd" (digits saturate at 9.99). */
-void fldFormatSecondsText(char *digits, f32 value) {
+/* Emit one whole-value character and two fractional digits after rounding.
+ * At whole >= 10 only the fractional digits become 9; whole is not clamped. */
+void fldFormatSecondsText(char *text, f32 value) {
     s32 whole;
     s32 tenths;
     s32 hundredths;
@@ -373,11 +403,11 @@ void fldFormatSecondsText(char *digits, f32 value) {
         value -= (f32)tenths;
         hundredths = (s32)(value * 10.0f);
     }
-    digits[0] = whole + '0';
-    digits[1] = '.';
-    digits[2] = tenths + '0';
-    digits[3] = hundredths + '0';
-    digits[4] = 0;
+    text[0] = whole + '0';
+    text[1] = '.';
+    text[2] = tenths + '0';
+    text[3] = hundredths + '0';
+    text[4] = 0;
 }
 
 
@@ -809,7 +839,7 @@ u8 fldTestObjectActivationFlag(u32 flagIndex) {
     return (*(u8 *)(((s32)flagIndex >> 3) + datGameState + FIELD_ACTIVATION_FLAGS_OFFSET) >> (flagIndex & 7)) & 1;
 }
 
-/* Coordinate tables have 28-byte records; the first record is reserved. */
+/* Search records 1..511 of the 28-byte coordinate table; return zero on miss. */
 s32 func_00121818(s32 x, s32 y) {
     u8 *records = D_0033F068;
     u8 *yColumn = records + 2;
@@ -821,10 +851,11 @@ s32 func_00121818(s32 x, s32 y) {
         }
         index++;
         offset += 28;
-    } while (index < 512);
+    } while (index < FIELD_COORDINATE_SCAN_LIMIT);
     return 0;
 }
 
+/* Search the second 28-byte coordinate table, also reserving index zero. */
 s32 func_00121870(s32 x, s32 y) {
     u8 *records = D_00342868;
     u8 *yColumn = records + 2;
@@ -836,10 +867,11 @@ s32 func_00121870(s32 x, s32 y) {
         }
         index++;
         offset += 28;
-    } while (index < 512);
+    } while (index < FIELD_COORDINATE_SCAN_LIMIT);
     return 0;
 }
 
+/* Search the 28-byte map records, skipping row zero; zero denotes a miss. */
 s32 fldFindMapCoordinateIndex(s32 x, s32 y) {
     u8 *records = D_00346068;
     u8 *yColumn = records + 2;
@@ -851,10 +883,12 @@ s32 fldFindMapCoordinateIndex(s32 x, s32 y) {
         }
         index++;
         offset += 28;
-    } while (index < 256);
+    } while (index < FIELD_MAP_COORDINATE_SCAN_LIMIT);
     return 0;
 }
 
+/* Search location records 1..639; a miss returns the reserved first record,
+ * not NULL, so callers can read the fallback record's fields. */
 s16 *fldFindLocationCoordinateRecord(s32 x, s32 y) {
     u8 *records = (u8 *)D_0032C9B0;
     u8 *yColumn = records + 2;
@@ -865,10 +899,11 @@ s16 *fldFindLocationCoordinateRecord(s32 x, s32 y) {
         if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)yColumn)) {
             return (s16 *)(offset + (s32)records);
         }
-    } while (index < 640);
+    } while (index < FIELD_LOCATION_COORDINATE_SCAN_LIMIT);
     return D_0032C9B0;
 }
 
+/* Read the matching location record's fourth signed halfword; zero on miss. */
 s32 fldGetLocationCoordinateValue(s32 x, s32 y) {
     u8 *records = (u8 *)D_0032C9B0;
     u8 *yColumn = records + 2;
@@ -880,10 +915,11 @@ s32 fldGetLocationCoordinateValue(s32 x, s32 y) {
         if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)yColumn)) {
             return *(s16 *)(offset + (s32)valueColumn);
         }
-    } while (index < 640);
+    } while (index < FIELD_LOCATION_COORDINATE_SCAN_LIMIT);
     return 0;
 }
 
+/* Search all 640 stage entries; the miss result is 640 rather than zero. */
 u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
     s16 *record = D_0032DDB0;
     s32 index = 0;
@@ -896,10 +932,11 @@ u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
         index++;
         visited++;
         record += 8;
-    } while (visited < 0x280);
+    } while (visited < FIELD_STAGE_INDEX_SCAN_LIMIT);
     return index;
 }
 
+/* This pointer lookup searches only the first 96 stage entries; NULL on miss. */
 s16 * fldFindStageCoordinateRecord(s32 x, s32 y) {
     s16 *record = D_0032DDB0;
     s32 index = 0;
@@ -910,7 +947,7 @@ s16 * fldFindStageCoordinateRecord(s32 x, s32 y) {
         }
         index++;
         record += 8;
-    } while (index < 0x60);
+    } while (index < FIELD_STAGE_RECORD_SCAN_LIMIT);
     return NULL;
 }
 
@@ -922,24 +959,25 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00121DE0);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00121ED8);
 
-f32 fldAngleDifference(f32 a, f32 b) {
-    f32 diff;
+/* Return to-minus-from after integer-degree reduction and one wrap adjustment. */
+f32 fldAngleDifference(f32 fromAngle, f32 toAngle) {
+    f32 difference;
 
-    if (a < 0.0f || b < 0.0f) {
-        a += 360.0f;
-        b += 360.0f;
+    if (fromAngle < 0.0f || toAngle < 0.0f) {
+        fromAngle += 360.0f;
+        toAngle += 360.0f;
     }
-    a = (s32)a % 360;
-    b = (s32)b % 360;
-    diff = a - b;
-    if (diff > 180.0f || diff < -180.0f) {
-        if (a < b) {
-            a += 360.0f;
+    fromAngle = (s32)fromAngle % 360;
+    toAngle = (s32)toAngle % 360;
+    difference = fromAngle - toAngle;
+    if (difference > 180.0f || difference < -180.0f) {
+        if (fromAngle < toAngle) {
+            fromAngle += 360.0f;
         } else {
-            b += 360.0f;
+            toAngle += 360.0f;
         }
     }
-    return b - a;
+    return toAngle - fromAngle;
 }
 
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FB18);
@@ -1187,20 +1225,22 @@ f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz) {
     return fsqrtf(dx * dx + dy * dy + dz * dz);
 }
 
+/* For objects in transition state 4, set state 3 or clear it to 0.
+ * status honestly covers the count, transition state and cursor result. */
 void fldToggleWorldNodeState(s64 clearMode) {
-    u64 list;
+    u64 valueChain;
     s64 status;
     u64 object;
 
-    list = dds3GetWorldSecondaryObject();
-    list = dds3CopyWorldListToValueChain(list, 6);
-    status = dds3GetWorldValueCount(list);
+    valueChain = dds3GetWorldSecondaryObject();
+    valueChain = dds3CopyWorldListToValueChain(valueChain, 6);
+    status = dds3GetWorldValueCount(valueChain);
     if (status == 0) {
         return;
     }
-    dds3ResetObjectValueCursor(list);
+    dds3ResetObjectValueCursor(valueChain);
     do {
-        object = dds3ReadIndexedWorldObjectWord(list);
+        object = dds3ReadIndexedWorldObjectWord(valueChain);
         status = evtGetObjectTransitionWork(object);
         if (status == 4) {
             if (clearMode == 0) {
@@ -1210,9 +1250,9 @@ void fldToggleWorldNodeState(s64 clearMode) {
                 evtSetObjectTransitionWork(object, 0);
             }
         }
-        status = dds3AdvanceObjectValueCursor(list);
+        status = dds3AdvanceObjectValueCursor(valueChain);
     } while (status != 0);
-    dds3DestroyWorldIndexNode(list);
+    dds3DestroyWorldIndexNode(valueChain);
 }
 
 extern u32 D_0032E570[];
@@ -1956,26 +1996,28 @@ extern void fldSetCameraNodeModeWithTen(void);
 extern void func_00121B88(s32, s32, f32, f32, f32);
 extern void evtStartSceneResourceTask(u64, void *);
 
+/* Gate next-floor input on camp/readiness flags, then start the native scene
+ * transition or its delayed fade path. All return paths retain zero. */
 s32 fldUpdateNextFloorTransition(void) {
-    s32 pressed = 0;
-    FldSceneState *state;
+    s32 transitionInput = 0;
+    FldSceneState *scene;
 
     if (fldGetCampSceneControlMode() != 0) {
         return 0;
     }
     if (D_0032E570[0x54 / 4] & fldTestSceneControlFlags(0x40)) {
         if ((s8)D_00324530[2] != 0) {
-            pressed = 1;
+            transitionInput = 1;
         }
     } else if ((s8)D_00324530[2] < 0) {
-        pressed = 1;
+        transitionInput = 1;
     }
-    state = (FldSceneState *)fldAreaState;
-    if (fldFindLocationCoordinateRecord(state->area, state->floor + 1)[2] <= 0) {
-        if (state->sceneMode == 0) {
-            if (fldTestSceneControlFlags(0x40) != 0 && pressed != 0) {
-                state->sceneMode = 4;
-                state->sceneState = 5;
+    scene = (FldSceneState *)fldAreaState;
+    if (fldFindLocationCoordinateRecord(scene->area, scene->floor + 1)[2] <= 0) {
+        if (scene->sceneMode == 0) {
+            if (fldTestSceneControlFlags(0x40) != 0 && transitionInput != 0) {
+                scene->sceneMode = 4;
+                scene->sceneState = 5;
                 fldResetPlayerSceneObjectState();
                 evtStartSceneResourceTask((u64)dds3GetWorldObject(), D_0039FCC8);
             }
@@ -1993,14 +2035,14 @@ s32 fldUpdateNextFloorTransition(void) {
         if (fldGetSceneReadyOrPendingState() != 0) {
             return 0;
         }
-        func_00121B88(state->floor, state->unkC0, state->position.x, state->position.z, 50.0f);
-        if (state->sceneMode == 0) {
+        func_00121B88(scene->floor, scene->unkC0, scene->position.x, scene->position.z, 50.0f);
+        if (scene->sceneMode == 0) {
             if (fldHasPendingSceneFlags() != 0) {
                 return 0;
             }
-            if (fldTestSceneControlFlags(0x40) != 0 && pressed != 0 && D_0032E570[0x48 / 4] == 0) {
-                state->sceneMode = 4;
-                state->sceneState = 5;
+            if (fldTestSceneControlFlags(0x40) != 0 && transitionInput != 0 && D_0032E570[0x48 / 4] == 0) {
+                scene->sceneMode = 4;
+                scene->sceneState = 5;
                 fldResetPlayerSceneObjectState();
                 func_00131688();
                 kwlnFadeInStart(0, 0, 0, 4);
@@ -2017,7 +2059,7 @@ extern void func_0014C468(void);
  * over the scene-work buffer and its saved fallback. */
 s32 fldDispatchPendingSceneResource(void) {
     FieldPlayerSceneWork *sceneWork = &D_0032F1A0;
-    u32 flags;
+    u32 overrideFlags;
 
     if (fldAreaState[64] == 1) {
         func_0014C468();
@@ -2025,10 +2067,10 @@ s32 fldDispatchPendingSceneResource(void) {
     fldAreaState[64] = 0;
     if ((D_003BAB3C & 2) && *(s8 *)D_0032C9A0 != 0) {
         evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), D_0032C9A0);
-        flags = D_003BAB3C;
-        if (!(flags & 1)) {
+        overrideFlags = D_003BAB3C;
+        if (!(overrideFlags & 1)) {
             D_0032C9A0[0] = 0;
-            D_003BAB3C = flags & 0xFB;
+            D_003BAB3C = overrideFlags & 0xFB;
         }
         return 1;
     }
