@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
+import encounter_flow  # noqa: E402
 import field_graph  # noqa: E402
 import flw0_profiles  # noqa: E402
 import inf  # noqa: E402
@@ -20,20 +21,71 @@ import wap  # noqa: E402
 class FieldGraphTests(unittest.TestCase):
     def test_links_complete_maintained_event_corpora(self) -> None:
         expected = {
-            "dds1": (
-                24, 104, 1528, 165, 607, 12, 54, 6, 48, 69, 53, 16, 24, 19
-            ),
-            "dds2": (
-                22, 103, 1711, 135, 723, 10, 52, 19, 33, 79, 64, 15, 22, 10
-            ),
+            "dds1": {
+                "fieldScripts": 24,
+                "eventScripts": 104,
+                "fieldProcedureNodes": 1528,
+                "eventProcedureNodes": 165,
+                "reachableProcedures": 616,
+                "reachableEventScripts": 21,
+                "eventScriptEdges": 54,
+                "fieldEventScriptEdges": 6,
+                "eventEventScriptEdges": 48,
+                "eventRequestEdges": 69,
+                "fieldEventRequestEdges": 53,
+                "eventEventRequestEdges": 16,
+                "unresolvedScriptTargets": 24,
+                "selectedEventSites": 19,
+                "encounterRequestEdges": 69,
+                "encounterRequestSites": 77,
+                "requestedEncounters": 63,
+                "encounterNodes": 77,
+                "chainOnlyEncounters": 14,
+                "reachableEncounters": 36,
+                "encounterChainEdges": 14,
+                "encounterEventEdges": 19,
+                "resolvedEncounterEventEdges": 19,
+                "reachableEncounterEventEdges": 9,
+            },
+            "dds2": {
+                "fieldScripts": 22,
+                "eventScripts": 103,
+                "fieldProcedureNodes": 1711,
+                "eventProcedureNodes": 135,
+                "reachableProcedures": 732,
+                "reachableEventScripts": 19,
+                "eventScriptEdges": 52,
+                "fieldEventScriptEdges": 19,
+                "eventEventScriptEdges": 33,
+                "eventRequestEdges": 79,
+                "fieldEventRequestEdges": 64,
+                "eventEventRequestEdges": 15,
+                "unresolvedScriptTargets": 22,
+                "selectedEventSites": 10,
+                "encounterRequestEdges": 79,
+                "encounterRequestSites": 79,
+                "requestedEncounters": 75,
+                "encounterNodes": 83,
+                "chainOnlyEncounters": 8,
+                "reachableEncounters": 32,
+                "encounterChainEdges": 8,
+                "encounterEventEdges": 35,
+                "resolvedEncounterEventEdges": 35,
+                "reachableEncounterEventEdges": 13,
+            },
         }
-        for game, counts in expected.items():
+        for game, expected_counts in expected.items():
             with self.subTest(game=game):
                 root = ROOT / f"src/{game}"
+                encounter_table, battle_symbols = encounter_flow.load_sources(
+                    root / "data/battle"
+                )
                 sections = field_graph._event_sections(
                     sorted((root / "data/field").glob("*.fldasm")),
                     root / "scripts/field",
                     flw0_profiles.get(game),
+                    encounter_table=encounter_table,
+                    battle_symbols=battle_symbols,
                 )
                 summary = sections["eventSummary"]
                 selected_sites = sum(
@@ -41,25 +93,15 @@ class FieldGraphTests(unittest.TestCase):
                     for edge in sections["eventScriptEdges"]
                     if edge["command"] == "SUBMIT_EVENT_WITH_SELECTION"
                 )
-                self.assertEqual(
-                    (
-                        summary["fieldScripts"],
-                        summary["eventScripts"],
-                        summary["fieldProcedureNodes"],
-                        summary["eventProcedureNodes"],
-                        summary["reachableProcedures"],
-                        summary["reachableEventScripts"],
-                        summary["eventScriptEdges"],
-                        summary["fieldEventScriptEdges"],
-                        summary["eventEventScriptEdges"],
-                        summary["eventRequestEdges"],
-                        summary["fieldEventRequestEdges"],
-                        summary["eventEventRequestEdges"],
-                        summary["unresolvedScriptTargets"],
-                        selected_sites,
-                    ),
-                    counts,
-                )
+                actual_counts = {
+                    key: (
+                        selected_sites
+                        if key == "selectedEventSites"
+                        else summary[key]
+                    )
+                    for key in expected_counts
+                }
+                self.assertEqual(actual_counts, expected_counts)
                 self.assertTrue(
                     all(
                         edge["targetPresent"]
@@ -86,6 +128,22 @@ class FieldGraphTests(unittest.TestCase):
                     },
                     {"SUBMIT_EVENT_IMMEDIATE"},
                 )
+                self.assertTrue(
+                    all(
+                        edge["targetPresent"]
+                        for edge in sections["encounterEventEdges"]
+                    )
+                )
+
+                graph = {
+                    key: value
+                    for key, value in sections.items()
+                    if key != "eventSummary"
+                }
+                field = "f007" if game == "dds1" else "f024"
+                dot = field_graph._render_event_dot(graph, field)
+                self.assertIn("encounter ", dot)
+                self.assertIn("battle event e", dot)
 
     def test_resolves_deferred_battle_exits_through_wap_rows(self) -> None:
         field_dir = ROOT / "src/dds1/data/field"
