@@ -96,7 +96,6 @@ extern s32 sdfDevQueueActiveOperation();
 extern s32 WaitSema(s32);
 extern s32 func_003482B0(DevState *, s32, s32, s32, s32);
 
-extern void func_00348540();
 
 extern s32 sdfCreateThreadWithAllocatedWorkspace();
 
@@ -341,7 +340,47 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
     return D_0047BE00;
 }
 
-INCLUDE_ASM(const s32, "game/code_003478C0", func_00348540);
+typedef struct SceIoStat {
+    u32 mode;
+    u32 attributes;
+    u32 size;
+    u8 creationTime[8];
+    u8 accessTime[8];
+    u8 modificationTime[8];
+    u32 highSize;
+    u32 privateData[6];
+} SceIoStat;
+
+extern s32 sdfCreateSemaphore(s32, s32, s32);
+extern void sceSifSetRpcQueue(void *, s32);
+extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
+extern void sceSifRpcLoop(void *);
+extern s32 func_0036B6E0(const char *, SceIoStat *);
+extern s32 sdfSendNamedResourceRequest(char *, s32, void *, s32 *);
+extern s32 WakeupThread(s32);
+extern u8 sdfPfsDebugMode;
+extern u8 D_0047BD00[];
+void func_00348540(void) {
+    SdfStreamCfg *state = &D_0047BCC0;
+    SceIoStat info;
+    u8 queue[0x20];
+    u8 server[0x50];
+    char *module;
+
+    state->semaphore = sdfCreateSemaphore(0, 1, 0);
+    sceSifSetRpcQueue(queue, GetThreadId());
+    sceSifRegisterRpc(server, 0x66504F49, sdfStreamDispatchSynchronousCommand,
+                      D_0047BD00, 0, 0, queue);
+    module = "cdrom0:\\USERIRX\\SDFIOPFL.IRX;1";
+    if (sdfPfsDebugMode != 0 &&
+        func_0036B6E0("pfs0:/userirx/sdfiopfl.irx", &info) == 0 &&
+        (info.mode & 0xF000) == 0x2000) {
+        module = "pfs0:/userirx/sdfiopfl.irx";
+    }
+    sdfSendNamedResourceRequest(module, 0, NULL, NULL);
+    WakeupThread(D_00439224);
+    sceSifRpcLoop(queue);
+}
 
 /* Start the newly created worker, then record and suspend the calling thread. */
 void sdfStartAndSuspendWorkerThread(void) {

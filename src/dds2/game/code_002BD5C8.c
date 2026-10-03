@@ -40,9 +40,26 @@ s8 func_002BDA78(s32 value) {
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDAA8);
 
+
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDC38);
 
-INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE080);
+extern void func_00314500(u32, s32, char *);
+extern s32 func_0019CE78(s32 *, s32, s32, s32, s32);
+extern void frFontSetChildColors(s32, u32);
+extern void frFontSetContextPair(s32, s32, s32);
+
+void func_002BE080(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
+    char text[0x40];
+    s32 item;
+
+    color = (color & 0xFF) | 0xD7ABFA00;
+    func_00314500(textId & 0xFFFF, 1, text);
+    item = func_0019CE78((s32 *)text, 0, 0, 0, 0);
+    frFontSetChildColors(item, color);
+    frFontSetContextPair(item, x, y);
+    func_0019D550(item, 1, param);
+    frFontQueueGlyphInSelectedSlot(item);
+}
 
 extern s32 func_00314C10(s32);
 extern s32 uiBlendColors();

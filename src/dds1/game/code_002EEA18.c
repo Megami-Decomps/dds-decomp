@@ -299,14 +299,53 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
     return D_003FF480;
 }
 
-INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EF698);
+typedef struct SceIoStat {
+    u32 mode;
+    u32 attributes;
+    u32 size;
+    u8 creationTime[8];
+    u8 accessTime[8];
+    u8 modificationTime[8];
+    u32 highSize;
+    u32 privateData[6];
+} SceIoStat;
 
-extern void func_002EF698();
+extern s32 sdfCreateSemaphore(s32, s32, s32);
+extern s32 GetThreadId(void);
+extern void sceSifSetRpcQueue(void *, s32);
+extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
+extern void sceSifRpcLoop(void *);
+extern s32 func_00310478(const char *, SceIoStat *);
+extern s32 sdfSendNamedResourceRequest(char *, s32, void *, s32 *);
+extern s32 WakeupThread(s32);
+extern s32 D_003BDAC4;
+extern u8 D_003FF380[];
+extern u8 sdfPfsDebugMode;
+void func_002EF698(void) {
+    SdfStreamCfg *stream = &D_003FF340;
+    SceIoStat info;
+    u8 queue[0x20];
+    u8 server[0x50];
+    char *module;
+
+    stream->semaphore = sdfCreateSemaphore(0, 1, 0);
+    sceSifSetRpcQueue(queue, GetThreadId());
+    sceSifRegisterRpc(server, 0x66504F49, sdfStreamDispatchSynchronousCommand,
+                      D_003FF380, 0, 0, queue);
+    module = "cdrom0:\\USERIRX\\SDFIOPFL.IRX;1";
+    if (sdfPfsDebugMode != 0 &&
+        func_00310478("pfs0:/userirx/sdfiopfl.irx", &info) == 0 &&
+        (info.mode & 0xF000) == 0x2000) {
+        module = "pfs0:/userirx/sdfiopfl.irx";
+    }
+    sdfSendNamedResourceRequest(module, 0, NULL, NULL);
+    WakeupThread(D_003BDAC4);
+    sceSifRpcLoop(queue);
+}
+
 extern s32 sdfCreateThreadWithAllocatedWorkspace();
 extern void _StartThread();
-extern s32 GetThreadId(void);
 extern void SleepThread(void);
-extern s32 D_003BDAC4;
 
 /* Start the newly created worker, then record and suspend the calling thread. */
 void sdfStartAndSuspendWorkerThread(void) {
@@ -597,3 +636,4 @@ INCLUDE_RODATA(const s32, "game/code_002EEA18", D_003B50D0);
 INCLUDE_RODATA(const s32, "game/code_002EEA18", D_003B50E0);
 
 INCLUDE_RODATA(const s32, "game/code_002EEA18", D_003B50F0);
+
