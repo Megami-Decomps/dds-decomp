@@ -48,13 +48,26 @@ typedef struct SdfTextParam {
 typedef struct SdfChunk {
     u32 id;   /* 0x0: entry id, 0 terminates the list */
     u32 size; /* 0x4: byte offset to the next entry */
+    u32 firstValue; /* 0x8: payload of single-value UNIQ/LODC chunks */
 } SdfChunk;
 
+/* A map record has separate draw-node and lookup IDs, followed by three
+ * vectors consumed by the VU basis/position routines. */
 typedef struct SdfMapPositionRecord {
-    u32 unk00;
-    s32 id;
-    u8 pad08[0x38];
+    u32 nodeId;        /* 0x00: passed to the draw-node lookup */
+    s32 id;            /* 0x04: used to find this map record */
+    u8 pad08[8];
+    u128 position;     /* 0x10 */
+    u128 up;           /* 0x20 */
+    u128 direction;    /* 0x30: negated when building the basis */
 } SdfMapPositionRecord;
+
+/* Map-position chunk: 0x10 header, then the records back to back. */
+typedef struct SdfMapPositionChunk {
+    SdfChunk header;
+    u8 pad0C[4];
+    SdfMapPositionRecord records[1]; /* 0x10 */
+} SdfMapPositionChunk;
 
 typedef struct SdfResourceList {
     u32 unk0;
@@ -98,8 +111,8 @@ void *sdfChunkFindById(SdfChunk *chunk, s32 chunkId);
 void *sdfAllocSizeClassBlock(s32 size);
 void *sdfAllocAndClearQuadwords(s32 size);
 void *sdfChunkFindRecordById(SdfTextParam *, s32);
-void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource);
-void sdfVuTransformMapRecordPosition(SdfTextParam *param, void *resource);
+void sdfSetLookAtBasisFromRecord(SdfTextParam *param, SdfMapPositionRecord *record);
+void sdfVuTransformMapRecordPosition(SdfTextParam *param, SdfMapPositionRecord *record);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 void sdfPendingQueuePush(void *arg0, s32 arg1);
 void sdfResourceListReleaseAssets(SdfResourceList *list);
@@ -120,15 +133,21 @@ extern u16 D_00398198[];
 extern SdfTex *func_002D2800(SdfTex *);
 extern void func_002D33C8(u32, s32, f32);
 
-typedef struct SdfPacketCommand {
-    u8 pad00[0x28];
-    u32 opcode; /* 0x28: packet header command */
-} SdfPacketCommand;
+/* Four 0x60 draw groups and a final sync list/tag occupy one 0x1B0 record.
+ * Each blend builder fills the 0x40-byte packet area after the list head. */
+typedef struct SdfDrawPacketGroup {
+    SdfListHead list;
+    SdfNode header;
+    u8 pad30[0x30];
+} SdfDrawPacketGroup;
 
-typedef struct SdfPacketFooter {
-    u64 data;
-    u64 opcode;
-} SdfPacketFooter;
+typedef struct SdfDrawPacketGroups {
+    SdfDrawPacketGroup groups[4];
+    SdfListHead syncList;
+    u64 unk1A0;
+    u64 unk1A8;
+} SdfDrawPacketGroups;
+
 
 typedef struct SdfPacketOwner {
     u8 pad00[0x10];
@@ -137,33 +156,38 @@ typedef struct SdfPacketOwner {
 } SdfPacketOwner;
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002D9748);
 
-void sdfInitializeDrawPacketGroups(u8 *ctx) {
-    u8 *packet = ctx;
+/* Initialize one draw-group record in the kernel's byte-buffer storage. */
+void sdfInitializeDrawPacketGroups(u8 *memory) {
+    SdfDrawPacketGroups *ctx = (SdfDrawPacketGroups *)memory;
+    SdfDrawPacketGroup *packet = ctx->groups;
     s32 i;
 
-    sdfBuildPrimaryAlphaBlendDmaPacket(ctx + 0x20);
-    sdfBuildPrimaryTestBlendPacket(ctx + 0x80);
-    sdfBuildPrimaryAlphaAdditiveDmaPacket(ctx + 0xE0);
-    sdfBuildPrimaryAlphaSubtractiveDmaPacket(ctx + 0x140);
+    sdfBuildPrimaryAlphaBlendDmaPacket(&ctx->groups[0].header);
+    sdfBuildPrimaryTestBlendPacket(&ctx->groups[1].header);
+    sdfBuildPrimaryAlphaAdditiveDmaPacket(&ctx->groups[2].header);
+    sdfBuildPrimaryAlphaSubtractiveDmaPacket(&ctx->groups[3].header);
     for (i = 0; i != 4; i++) {
-        ((SdfPacketCommand *)packet)->opcode = 0x11000000;
-        sdfInitPacketList(packet);
-        sdfAppendPacket(packet, packet + 0x20);
-        packet += 0x60;
+        /* Replace only the first VIF word; preserve the builder's DIRECT word. */
+        packet->header.unk8 = 0x11000000;
+        sdfInitPacketList(&packet->list);
+        sdfAppendPacket(&packet->list, &packet->header);
+        packet++;
     }
-    sdfInitPacketList(ctx + 0x180);
-    ((SdfPacketFooter *)(ctx + 0x1A0))->data = 0;
-    ((SdfPacketFooter *)(ctx + 0x1A0))->opcode = 0x13000000;
-    sdfAppendPacket(ctx + 0x180, ctx + 0x1A0);
+    sdfInitPacketList(&ctx->syncList);
+    ctx->unk1A0 = 0;
+    ctx->unk1A8 = 0x13000000;
+    sdfAppendPacket(&ctx->syncList, &ctx->unk1A0);
 }
 
-void sdfSubmitDrawPacketGroups(SdfPacketOwner **owners, u8 *packets) {
+/* Submit the four draw lists, then the trailing list to the fourth owner. */
+void sdfSubmitDrawPacketGroups(SdfPacketOwner **owners, u8 *memory) {
+    SdfDrawPacketGroups *packets = (SdfDrawPacketGroups *)memory;
     s32 i;
 
     for (i = 0; i != 4; i++) {
-        owners[i]->draw(owners[i], 1, packets + i * 0x60);
+        owners[i]->draw(owners[i], 1, &packets->groups[i]);
     }
-    owners[3]->sync(owners[3], packets + 0x180);
+    owners[3]->sync(owners[3], &packets->syncList);
 }
 
 /* Follow chunk byte extents until the requested ID or the zero-ID terminator is reached. */
@@ -221,48 +245,49 @@ u32 sdfCountMapPositionRecords(SdfTextParam *param) {
     return 0;
 }
 
-/* vu0 routine: build the basis in vf28-vf31 from the vectors at record+0x10/+0x20/+0x30, then load the chunk matrix */
-void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource) {
-    u8 *base = sdfModelFindDrawNode(param, *(s32 *)resource);
-    u8 *record = resource;
-    u8 *vec = record + 0x20;
+/* vu0 routine: build basis rows in vf28-vf31 from the map record, then
+ * postmultiply using its draw-node matrix. */
+void sdfSetLookAtBasisFromRecord(SdfTextParam *param, SdfMapPositionRecord *record) {
+    u8 *matrix = sdfModelFindDrawNode(param, record->nodeId);
+    u8 *vector;
 
-    VU0_LOAD_VF(vf10, vec);
+    vector = (u8 *)&record->up;
+    VU0_LOAD_VF(vf10, vector);
     VU0_MOVE_VF(vf30, vf10);
     VU0_MOVE_VF(vf11, vf10);
-    vec = record + 0x30;
-    VU0_LOAD_VF(vf10, vec);
+    vector = (u8 *)&record->direction;
+    VU0_LOAD_VF(vf10, vector);
     VU0_NEGATE_XYZ(vf10);
     VU0_MOVE_VF(vf29, vf10);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf28, vf10);
-    record += 0x10;
-    VU0_LOAD_VF(vf31, record);
+    VU0_LOAD_VF(vf31, &record->position);
     VU0_SET_W_ONE(vf31);
-    sdfPostmultiplyVuMatrixFromMemory(base + 0xC0);
+    sdfPostmultiplyVuMatrixFromMemory(matrix + 0xC0);
 }
 
-/* vu0 routine: transform the vector at resource+0x10 by the chunk matrix at +0xC0 (result in vf10) */
-void sdfVuTransformMapRecordPosition(SdfTextParam *param, void *resource) {
-    u8 *matrix = sdfModelFindDrawNode(param, *(s32 *)resource) + 0xC0;
-    u8 *vector;
+/* vu0 routine: transform the map-record position by its draw-node matrix;
+ * the transformed position is left in vf10. */
+void sdfVuTransformMapRecordPosition(SdfTextParam *param, SdfMapPositionRecord *record) {
+    u8 *matrix = sdfModelFindDrawNode(param, record->nodeId) + 0xC0;
 
     VU0_LOAD_MATRIX(matrix);
-    vector = (u8 *)resource + 0x10;
-    VU0_LOAD_VF(vf10, vector);
+    VU0_LOAD_VF(vf10, &record->position);
     VU0_TRANSFORM_POINT(vf10, vf10);
 }
 
 /* Search the fixed-size map-position records within the chunk's declared byte extent. */
 void *sdfChunkFindRecordById(SdfTextParam *param, s32 recordId) {
     SdfChunk *positionsChunk = sdfChunkFindByTag(param, SDF_CHUNK_MAP_POSITIONS);
+    SdfMapPositionChunk *positions;
     SdfMapPositionRecord *record;
     u8 *chunkEnd;
     if (positionsChunk == NULL) {
         return NULL;
     }
-    record = (SdfMapPositionRecord *)((u8 *)positionsChunk + 0x10);
+    positions = (SdfMapPositionChunk *)positionsChunk;
+    record = positions->records;
     chunkEnd = (u8 *)positionsChunk + positionsChunk->size;
     while ((u8 *)record < chunkEnd) {
         if (record->id == recordId) {
@@ -294,7 +319,7 @@ s32 sdfLoadMapRecordPositionVector(SdfTextParam *param, s32 id) {
 u32 sdfGetUniqueChunkValue(SdfTextParam *param) {
     SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_UNIQUE_VALUE);
     if (chunk != NULL) {
-        return *(u32 *)((u8 *)chunk + 8);
+        return chunk->firstValue;
     }
     return 0;
 }
@@ -302,7 +327,7 @@ u32 sdfGetUniqueChunkValue(SdfTextParam *param) {
 u32 sdfGetLodChunkValue(SdfTextParam *param) {
     SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_LOD_VALUE);
     if (chunk != NULL) {
-        return *(u32 *)((u8 *)chunk + 8);
+        return chunk->firstValue;
     }
     return 0;
 }
@@ -823,13 +848,11 @@ void sdfApplyResourceListEntriesWithForcedTexture(SdfResourceList *list, s32 ent
     }
 }
 
-typedef struct SdfSubParamWords {
-    u32 word[6];
-} SdfSubParamWords;
 
-/* Copy base state; only present source subparameters overwrite destination subparameter blocks. */
+/* Copy base state; only present source subparameters overwrite destination
+ * blocks. Each whole scalar aggregate includes its final opaque word. */
 void sdfCopyAssetParameterState(SdfAsset *destination, SdfAsset *source) {
-    SdfSubParamWords *subParameters;
+    SdfSubParam *subParameters;
 
     destination->pad00[6] = 0xFF;
     destination->unk10 = source->unk10;
@@ -842,11 +865,11 @@ void sdfCopyAssetParameterState(SdfAsset *destination, SdfAsset *source) {
     destination->unk28 = source->unk28;
     subParameters = source->third;
     if (subParameters != NULL) {
-        *(SdfSubParamWords *)sdfEnsurePrimaryTextSubParam((SdfTextParam *)destination) = *subParameters;
+        sdfEnsurePrimaryTextSubParam((SdfTextParam *)destination)->scalar = subParameters->scalar;
     }
     subParameters = source->fourth;
     if (subParameters != NULL) {
-        *(SdfSubParamWords *)sdfEnsureSecondaryTextSubParam((SdfTextParam *)destination) = *subParameters;
+        sdfEnsureSecondaryTextSubParam((SdfTextParam *)destination)->scalar = subParameters->scalar;
     }
     destination->unk40 = source->unk40;
     destination->unk44 = source->unk44;
