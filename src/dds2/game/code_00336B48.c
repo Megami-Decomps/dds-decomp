@@ -412,7 +412,38 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_00337050);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00337118);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00337170);
+/* vu0 routine: transform one vector per 0x60-byte row, then accumulate it by the record W */
+void func_00337170(void *rows, s32 count, void *matrix, void *records) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf28, 0x00(%2)\n"
+        "lqc2 vf29, 0x10(%2)\n"
+        "lqc2 vf30, 0x20(%2)\n"
+        "lqc2 vf31, 0x30(%2)\n"
+        "1:\n"
+        "ldr $2, 0x00(%3)\n"
+        "ldl $2, 0x07(%3)\n"
+        "ldr $3, 0x08(%3)\n"
+        "ldl $3, 0x0F(%3)\n"
+        "pcpyld $2, $3, $2\n"
+        "qmtc2 $2, vf2\n"
+        "lqc2 vf5, 0x00(%0)\n"
+        "vmulax.xyzw ACC, vf28, vf2x\n"
+        "vmadday.xyzw ACC, vf29, vf2y\n"
+        "vmaddaz.xyzw ACC, vf30, vf2z\n"
+        "vmaddw.xyzw vf4, vf31, vf0w\n"
+        "addi %3, %3, 0x10\n"
+        "addi %1, %1, -1\n"
+        "vmulaw.xyzw ACC, vf5, vf0w\n"
+        "vmaddw.xyzw vf4, vf4, vf2w\n"
+        "addi %0, %0, 0x60\n"
+        "bne $0, %1, 1b\n"
+        "sqc2 vf4, -0x60(%0)\n"
+        ".set reorder"
+        : "+r"(rows), "+r"(count), "+r"(matrix), "+r"(records)
+        :
+        : "$2", "$3", "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_003371D0);
 
