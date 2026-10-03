@@ -210,8 +210,51 @@ extern s32 func_001B3A00(u32 arg0);
 extern s32 scrCreateTaskWithDefaultOption(void);
 
 extern void *memset(void *dst, s32 c, u32 n);
+extern void mdlFlagSet(s32 flagIndex);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A118);
+void func_0011A118(s32 index, s32 delta) {
+    s32 value;
+
+    if ((u32)(index - 0x80) < 0x20) {
+        mdlFlagSet(index + 0x980);
+        return;
+    }
+    value = ((SaveItemCounts *)datGameState)->counts[index];
+    value += delta;
+    if (value < 0) {
+        value = 0;
+    }
+    if (index >= 0xC0) {
+        if (value >= 2) {
+            value = 1;
+        }
+        goto store_value;
+    }
+    if (index >= 0xA0) {
+        goto clamp_99;
+    }
+    if (index < 0x80) {
+        goto below_80;
+    }
+    if (value >= 2) {
+        value = 1;
+    }
+    goto store_value;
+
+below_80:
+    if (index < 0x60) {
+        goto select_99;
+    }
+clamp_99:
+    if (value >= 100) {
+        value = 99;
+    }
+    goto store_value;
+select_99:
+    value = value < 100 ? value : 99;
+store_value:
+    ((SaveItemCounts *)datGameState)->counts[index] = value;
+}
 
 s32 evtCheckValueThreshold(s32 index, s32 limit) {
     if ((u32)(index - 0x80) < 0x20) {
