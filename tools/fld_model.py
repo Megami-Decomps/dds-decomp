@@ -541,6 +541,7 @@ def add_model_graph(
     meters_per_unit: float,
     textures: tuple[tmx.Texture, ...] | None = None,
     texture_cache: dict[int, int] | None = None,
+    default_material: int = 0,
 ) -> tuple[tuple[int, ...], tuple[int, ...]]:
     """Append one decoded SDF model graph and return its nodes and roots."""
 
@@ -555,7 +556,7 @@ def add_model_graph(
         asset_index: int, translucent_vertices: bool, has_texcoords: bool
     ) -> int:
         if textures is None:
-            return 0
+            return default_material
         key = asset_index, has_texcoords
         old = material_cache.get(key)
         if old is not None:
