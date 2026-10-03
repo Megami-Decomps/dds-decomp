@@ -2282,7 +2282,39 @@ void btlClearTaskActorSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC9E8);
+typedef struct ActorSlotOrder {
+    u8 pad00[0xC];
+    s32 entries[12];
+} ActorSlotOrder;
+
+typedef struct ActorOrder12 {
+    s32 entries[12];
+} ActorOrder12;
+
+typedef struct ActorOrder6 {
+    s32 entries[6];
+} ActorOrder6;
+
+extern ActorSlotOrder *D_003BD840[2];
+extern const ActorOrder12 D_003A2228;
+extern const ActorOrder6 D_003A2258;
+
+void func_001AC9E8(s32 selector, s32 count) {
+    ActorOrder12 primaryOrder = D_003A2228;
+    ActorOrder6 secondaryOrder = D_003A2258;
+    s32 *order = selector != 0 ? primaryOrder.entries : secondaryOrder.entries;
+    ActorSlotOrder *destination;
+    s32 i;
+
+    i = 0;
+    if (count > 0) {
+        destination = D_003BD840[selector];
+        do {
+            destination->entries[i] = order[i];
+            i++;
+        } while (i < count);
+    }
+}
 
 void func_001ACAE0(void) {
     s32 temp_v0;
