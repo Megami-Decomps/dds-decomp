@@ -65,7 +65,7 @@ extern s32 func_002E99A0();
 
 extern void sdfGetGeneralHeapStats(void *out);
 
-extern void sdfPrintFormattedDevMessage(const char *fmt, ...);
+extern s32 sdfPrintFormattedDevMessage(const char *fmt, ...);
 
 typedef struct MidiChannel {
     u8 pad00[0x19];
