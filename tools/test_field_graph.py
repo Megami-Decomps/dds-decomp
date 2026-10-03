@@ -18,6 +18,56 @@ import wap  # noqa: E402
 
 
 class FieldGraphTests(unittest.TestCase):
+    def test_links_complete_maintained_event_corpora(self) -> None:
+        expected = {
+            "dds1": (24, 104, 1528, 165, 607, 12, 107, 59, 48, 24, 19),
+            "dds2": (22, 103, 1711, 135, 724, 11, 121, 83, 38, 22, 10),
+        }
+        for game, counts in expected.items():
+            with self.subTest(game=game):
+                root = ROOT / f"src/{game}"
+                sections = field_graph._event_sections(
+                    sorted((root / "data/field").glob("*.fldasm")),
+                    root / "scripts/field",
+                    flw0_profiles.get(game),
+                )
+                summary = sections["eventSummary"]
+                selected_sites = sum(
+                    edge["count"]
+                    for edge in sections["eventScriptEdges"]
+                    if edge["command"] == "SUBMIT_EVENT_WITH_SELECTION"
+                )
+                self.assertEqual(
+                    (
+                        summary["fieldScripts"],
+                        summary["eventScripts"],
+                        summary["fieldProcedureNodes"],
+                        summary["eventProcedureNodes"],
+                        summary["reachableProcedures"],
+                        summary["reachableEventScripts"],
+                        summary["eventScriptEdges"],
+                        summary["fieldEventScriptEdges"],
+                        summary["eventEventScriptEdges"],
+                        summary["unresolvedScriptTargets"],
+                        selected_sites,
+                    ),
+                    counts,
+                )
+                self.assertTrue(
+                    all(
+                        edge["targetPresent"]
+                        for edge in sections["eventScriptEdges"]
+                        if edge["command"] == "SUBMIT_EVENT_WITH_SELECTION"
+                    )
+                )
+                self.assertEqual(
+                    {
+                        row.get("command")
+                        for row in sections["scriptUnresolvedTargets"]
+                    },
+                    {"SUBMIT_EVENT_IMMEDIATE"},
+                )
+
     def test_resolves_deferred_battle_exits_through_wap_rows(self) -> None:
         field_dir = ROOT / "src/dds1/data/field"
         script_source = ROOT / "src/dds1/scripts/field/f022.bfasm"
@@ -31,6 +81,7 @@ class FieldGraphTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             script_dir = Path(temporary) / "scripts/field"
             script_dir.mkdir(parents=True)
+            (script_dir.parent / "event").mkdir()
             (script_dir / script_source.name).write_text(
                 script_source.read_text(encoding="utf-8"), encoding="utf-8"
             )
@@ -62,6 +113,7 @@ class FieldGraphTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             script_dir = Path(temporary) / "scripts/field"
             script_dir.mkdir(parents=True)
+            (script_dir.parent / "event").mkdir()
             (script_dir / "f011.bfasm").write_text(
                 source_script.read_text(encoding="utf-8"), encoding="utf-8"
             )
@@ -89,7 +141,7 @@ class FieldGraphTests(unittest.TestCase):
                 "entryProcedures": 2,
                 "procedureNodes": 43,
                 "reachableProcedures": 2,
-                "unresolvedScriptTargets": 0,
+                "unresolvedScriptTargets": 1,
             },
         )
         self.assertEqual(
@@ -100,6 +152,63 @@ class FieldGraphTests(unittest.TestCase):
         dot = field_graph._render_event_dot(graph, "f011")
         self.assertIn('"f011_001:event-placement:4" -> "f011:procedure:38"', dot)
         self.assertIn("001_01eve_02 [39]", dot)
+
+    def test_follows_event_scripts_from_field_placements(self) -> None:
+        field_dir = ROOT / "src/dds1/data/field"
+        source_script = ROOT / "src/dds1/scripts/field/f025.bfasm"
+        event_source_dir = ROOT / "src/dds1/scripts/event"
+        with tempfile.TemporaryDirectory() as temporary:
+            script_dir = Path(temporary) / "scripts/field"
+            event_dir = script_dir.parent / "event"
+            script_dir.mkdir(parents=True)
+            event_dir.mkdir()
+            (script_dir / source_script.name).write_text(
+                source_script.read_text(encoding="utf-8"), encoding="utf-8"
+            )
+            for event_name in ("e632", "e633", "e634", "e635"):
+                source = event_source_dir / f"{event_name}.bfasm"
+                (event_dir / source.name).write_text(
+                    source.read_text(encoding="utf-8"), encoding="utf-8"
+                )
+            sections = field_graph._event_sections(
+                sorted(field_dir.glob("f025_*.fldasm")),
+                script_dir,
+                flw0_profiles.get("dds1"),
+            )
+
+        reachable_events = {
+            row["script"]
+            for row in sections["scriptProcedures"]
+            if row["scriptType"] == "event" and row["reachableFromPlacement"]
+        }
+        self.assertEqual(reachable_events, {"e632", "e633", "e634", "e635"})
+        routes = {
+            (edge["source"], edge["target"], edge["command"])
+            for edge in sections["eventScriptEdges"]
+            if edge["sourceReachable"] and edge["targetPresent"]
+        }
+        self.assertIn(
+            ("f025:procedure:246", "e632:procedure:0", "CALL_EVENT"), routes
+        )
+        self.assertIn(
+            (
+                "e632:procedure:0",
+                "e633:procedure:0",
+                "SUBMIT_EVENT_WITH_SELECTION",
+            ),
+            routes,
+        )
+        self.assertIn(
+            ("e633:procedure:0", "e634:procedure:0", "CALL_EVENT"), routes
+        )
+        self.assertIn(
+            (
+                "e634:procedure:0",
+                "e635:procedure:0",
+                "SUBMIT_EVENT_WITH_SELECTION",
+            ),
+            routes,
+        )
 
     def test_builds_present_missing_and_conditional_edges(self) -> None:
         table = wap.default_file(wap.PROFILES["dds1"])
