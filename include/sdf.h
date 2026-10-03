@@ -213,6 +213,66 @@ typedef char SdfMemHeap_size_must_be_0x28[(sizeof(SdfMemHeap) == 0x28) ? 1 : -1]
 
 extern SdfMemHeap sdfGeneralHeap;
 
+#define SDF_CHIP_CLASS_COUNT 7
+
+typedef struct SdfChipCell SdfChipCell;
+typedef struct SdfChipPage SdfChipPage;
+typedef struct SdfChipClass SdfChipClass;
+typedef struct SdfPendingNode SdfPendingNode;
+
+/* A free chip cell carries its next-list link at byte 8. */
+struct SdfChipCell {
+    u8 pad00[8];
+    SdfChipCell *nextFree;
+};
+
+/* One power-of-two allocation class in the chip heap (0x0C). */
+struct SdfChipClass {
+    SdfChipPage *currentPage;
+    SdfChipPage *availablePages;
+    s16 cellSize;
+    s16 cellCount;
+};
+
+typedef SdfChipCell *(*SdfChipAllocateFn)(SdfChipClass *, SdfChipPage *);
+
+/* Per-page allocation metadata for one 4 KiB chip-heap page (0x18). */
+struct SdfChipPage {
+    SdfChipPage *next;
+    u8 *base;
+    SdfChipAllocateFn allocate;
+    SdfChipClass *sizeClass;
+    SdfChipCell *freeCells;
+    s16 usedCells;
+    s16 bumpCellsRemaining;
+};
+
+/* Interrupt-synchronized deferred callback owner (0x08). */
+typedef struct SdfPendingRequest {
+    void (*handler)(u32);
+    SdfPendingNode *pending;
+} SdfPendingRequest;
+
+typedef char SdfChipClass_size_must_be_0x0C[(sizeof(SdfChipClass) == 0x0C) ? 1 : -1];
+typedef char SdfChipPage_size_must_be_0x18[(sizeof(SdfChipPage) == 0x18) ? 1 : -1];
+typedef char SdfPendingRequest_size_must_be_0x08[(sizeof(SdfPendingRequest) == 0x08) ? 1 : -1];
+
+/* Seven size classes followed by the retail range's four-byte alignment tail. */
+typedef struct SdfChipClassTable {
+    SdfChipClass classes[SDF_CHIP_CLASS_COUNT];
+    u8 pad54[4];
+} SdfChipClassTable;
+
+typedef char SdfChipClassTable_size_must_be_0x58[(sizeof(SdfChipClassTable) == 0x58) ? 1 : -1];
+
+extern SdfChipPage *sdfChipPages;
+extern SdfChipPage *sdfFreeChipPages;
+extern u8 *sdfChipHeapStart;
+extern u8 *sdfChipHeapEnd;
+extern s32 sdfChipPageCount[2];
+extern SdfPendingRequest sdfChipReleaseRequest;
+extern SdfChipClassTable sdfChipClassTable;
+
 /* Draw-node vector slots (SdfDrawNode vectors array indices). */
 #define SDF_DRAW_TRANSLATION_VECTOR 0
 #define SDF_DRAW_SCALE_VECTOR 1
