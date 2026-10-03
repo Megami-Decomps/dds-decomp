@@ -34,6 +34,28 @@ mismatch.
 A correct park is useful output. It prevents repeated searches for a source
 lever when the visible compiler inputs do not support one.
 
+## Treat call contracts as allocation inputs
+
+An incorrect call argument is not only a call-site mismatch. Its value and
+hard-register copy are created before local and global allocation, so they can
+extend other lifetimes, add conflicts and change several later homes. A result
+that looks like a scheduler or register-choice problem may therefore begin at
+the call contract.
+
+When a residual is organized around call argument registers, establish the
+callee's real arity from its definition, callers and any independent
+cross-title evidence before changing local lifetimes. Compare the call uses in
+pass 00, then the affected pass-19/20 conflicts and homes. The paired SDF movie
+read schedulers provide an exact example: removing an unsupported fourth
+argument eliminated its early `$a3` copy, let the live ring base take `$a3`,
+and let the stream take the retail first-fit `$t0`.
+
+Do not remove an argument merely to obtain those registers. Old-style
+boundaries can have legitimate arity variation, and a desired final home does
+not prove a prototype. If caller/callee evidence does not support the contract
+change, or the predicted early copy and allocation inputs remain unchanged,
+park the hypothesis.
+
 ## Allocation decisions in this compiler
 
 Passes 19 and 20 together report the inputs that explain the global allocator's
