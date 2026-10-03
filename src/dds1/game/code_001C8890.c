@@ -5016,7 +5016,45 @@ s32 func_001DB698(CameraPoseTransform *state) {
     return changed;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001DB7D0);
+/* VU0 math: constrain the pose direction using a horizontal height plane. */
+s32 func_001DB7D0(CameraPoseTransform *state, f32 height) {
+    f32 vector[4];
+    f32 direction[4];
+    f32 length = state->distance;
+    f32 y;
+    f32 scale;
+    f32 delta;
+    s32 changed = 0;
+
+    if (!(length <= 1.0f)) {
+        scale = -length;
+        vector[0] = state->vec1[0] * scale + state->vec0[0];
+        y = state->vec0[1];
+        vector[1] = state->vec1[1] * scale + y;
+        vector[2] = state->vec1[2] * scale + state->vec0[2];
+        vector[3] = 0.0f;
+        if (height < vector[1]) {
+            VU0_LOAD_VF(vf10, state->vec0);
+            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_LOAD_VF(vf10, vector);
+            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, direction);
+            delta = y - height;
+            scale = fsqrtf(delta * delta + length * length);
+            vector[0] = -direction[0] * scale;
+            vector[1] = delta;
+            vector[2] = -direction[2] * scale;
+            VU0_LOAD_VF(vf10, vector);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, state->vec1);
+            changed = 1;
+        }
+    }
+    return changed;
+}
 
 u32 btlExecuteCommandSoundTask(u32 *arg0) {
     func_001DB048(arg0[3], *arg0, arg0[1], arg0[2], arg0[4]);
