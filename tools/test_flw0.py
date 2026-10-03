@@ -1345,6 +1345,9 @@ end
             "CLEAR_WORLD_OBJECT_PENDING_VALUE": (0x1E1, 1, False),
             "CLEAR_PROCESS_CONTROL_FLAG": (0x1E7, 0, False),
             "CONSUME_FIELD_SKILL_END_NOTICE": (0x1F1, 1, True),
+            "START_ARCHIVE_SOUND": (0x1F3, 2, False),
+            "STOP_ARCHIVE_SOUND": (0x1F4, 2, False),
+            "REVEAL_AUTOMAP_RECTANGLE": (0x1F6, 5, False),
             "READ_SUCTION_WARP_VALUE": (0x1FA, 1, True),
             "READ_BARRIER_VALUE": (0x1FB, 1, True),
             "READ_CURRENT_SCENE_SELECTION_RESOURCE": (0x1FE, 0, True),
@@ -1365,10 +1368,14 @@ end
             "APPLY_CURRENT_TASK_RECORD_ENTRY": (0x20D, 0, False),
             "START_CURRENT_FIELD_INTERACTION_EVENT": (0x20E, 0, False),
             "RUN_FIELD_TRANSITION_SELECTOR": (0x20F, 1, False),
+            "START_SCENE_BGM": (0x210, 1, False),
             "PLAY_FIELD_SE_VOLUME_PAN": (0x214, 1, False),
             "PLAY_FIELD_SE": (0x215, 1, False),
+            "RELEASE_CURRENT_BGM": (0x216, 0, False),
+            "LOAD_ARCHIVE_SOUND_BANK_AND_WAIT": (0x217, 1, False),
             "READ_WARP_EFFECT_MODE": (0x219, 0, True),
             "ACTION_WINDOW_REQUEST_AND_POLL_DIRECT": (0x21D, 1, True),
+            "APPLY_FIELD_MODEL_LIGHTING": (0x21E, 1, False),
             "AI_COUNTER_REACHED_LIMIT": (0x0DF, 1, True),
             "AI_SELECT_ACTION_BY_KIND": (0x0E2, 2, False),
             "TRACE_BATTLE_RETREAT": (0x0E4, 0, False),
@@ -1949,7 +1956,7 @@ end
                         )
         self.assertEqual(type5_uses, 7863)
         self.assertEqual(command_uses, 53389)
-        self.assertEqual(profiled_command_uses, 50317)
+        self.assertEqual(profiled_command_uses, 50826)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -2003,8 +2010,8 @@ end
     def test_semantic_view_handles_both_tracked_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (143, 79894, 6435),
-            "dds2": (140, 61315, 3572),
+            "dds1": (143, 79078, 5619),
+            "dds2": (140, 60537, 2794),
         }
         for game, expected_counts in expected.items():
             files = 0
@@ -2185,7 +2192,7 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53389, 50317)
+            (code_words, commands, profiled_commands), (168829, 53389, 50826)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
@@ -2314,7 +2321,7 @@ end
                 totals["message_references"],
                 totals["selection_references"],
             ),
-            (36729, 1910, 287),
+            (37298, 1910, 287),
         )
         self.assertEqual(totals["event_references"], 43)
         self.assertEqual(totals["procedure_references"], 463)

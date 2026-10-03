@@ -1392,12 +1392,7 @@ proc_0016:
     DISABLE_FIELD_MODELS(0, 0, string(md_hoji_04_2), 0)
     SET_MODEL_FLAG(1440)
     FADE_BACKGROUND_IN(0)
-    push 4
-    push 4
-    push 10
-    push 2
-    push 7
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(7, 2, 10, 4, 4)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08)))
     PREPARE_UNIT_MOTION_STATE(global_int[0], 23, 3, 15, 1)
@@ -1480,12 +1475,7 @@ _210:
       WAIT_FOR_TIMER_LIMIT(15)
       WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(proc_001b), 0))
       SET_MODEL_FLAG(1505)
-      push 4
-      push 4
-      push 2
-      push 18
-      push 10
-      COMM 0x01f6
+      REVEAL_AUTOMAP_RECTANGLE(10, 18, 2, 4, 4)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_09)))
       ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_2)))
@@ -1574,12 +1564,7 @@ _222:
       WAIT_FOR_TIMER_LIMIT(15)
       WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(proc_001b), 0))
       SET_MODEL_FLAG(1506)
-      push 4
-      push 4
-      push 1
-      push 2
-      push 12
-      COMM 0x01f6
+      REVEAL_AUTOMAP_RECTANGLE(12, 2, 1, 4, 4)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_10)))
       ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02)))
@@ -1668,12 +1653,7 @@ _234:
       WAIT_FOR_TIMER_LIMIT(15)
       WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(proc_001b), 0))
       SET_MODEL_FLAG(1507)
-      push 4
-      push 4
-      push 29
-      push 18
-      push 14
-      COMM 0x01f6
+      REVEAL_AUTOMAP_RECTANGLE(14, 18, 29, 4, 4)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_11)))
       ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03)))
@@ -1763,12 +1743,7 @@ _246:
         WAIT_FOR_TIMER_LIMIT(15)
         WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(proc_001b), 0))
         SET_MODEL_FLAG(1508)
-        push 4
-        push 4
-        push 19
-        push 2
-        push 17
-        COMM 0x01f6
+        REVEAL_AUTOMAP_RECTANGLE(17, 2, 19, 4, 4)
         global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
         ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_12)))
         ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_06)))
@@ -2004,9 +1979,8 @@ proc_0021:
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(0)
   local_int[55] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE_BED))
-  COMM 0x0216
-  push 128
-  COMM 0x0210
+  RELEASE_CURRENT_BGM()
+  START_SCENE_BGM(128)
   SET_MODEL_FLAG(1734)
   SET_MODEL_FLAG(2307)
   CHANGE_ITEM_COUNT(138, 1)
@@ -2045,17 +2019,12 @@ proc_0021:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_MOTION))
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_4))
     COMM 0x0013
-    push 38
-    COMM 0x0217
-    push 0
-    push 38
-    COMM 0x01f3
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(38)
+    START_ARCHIVE_SOUND(38, 0)
     COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[55], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_2)))
     SET_EFFECT_MODEL_CUT(local_int[55], 0)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 0
-    push 38
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(38, 0)
     push 504
     push 28
     push 9
@@ -2071,17 +2040,12 @@ proc_0021:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_MOTION_2))
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_6))
     COMM 0x0013
-    push 38
-    COMM 0x0217
-    push 0
-    push 38
-    COMM 0x01f3
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(38)
+    START_ARCHIVE_SOUND(38, 0)
     COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[55], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_3)))
     SET_EFFECT_MODEL_CUT(local_int[55], 0)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 0
-    push 38
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(38, 0)
     push 504
     push 28
     push 9
@@ -2127,17 +2091,12 @@ _285:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04_MOTION_2))
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04_4))
     COMM 0x0013
-    push 38
-    COMM 0x0217
-    push 0
-    push 38
-    COMM 0x01f3
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(38)
+    START_ARCHIVE_SOUND(38, 0)
     COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[55], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_09_2)))
     SET_EFFECT_MODEL_CUT(local_int[55], 0)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 0
-    push 38
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(38, 0)
     push 504
     push 28
     push 9
@@ -2153,17 +2112,12 @@ _285:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04_MOTION_3))
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04_6))
     COMM 0x0013
-    push 38
-    COMM 0x0217
-    push 0
-    push 38
-    COMM 0x01f3
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(38)
+    START_ARCHIVE_SOUND(38, 0)
     COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[55], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_09_3)))
     SET_EFFECT_MODEL_CUT(local_int[55], 0)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 0
-    push 38
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(38, 0)
     push 504
     push 28
     push 9
@@ -2258,9 +2212,8 @@ proc_0025:
   if (TEST_MODEL_FLAG(1443) == 0) {
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(0)
-    COMM 0x0216
-    push 128
-    COMM 0x0210
+    RELEASE_CURRENT_BGM()
+    START_SCENE_BGM(128)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_5)))
     local_int[61] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE1_BED))
     local_int[62] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE1_BED_2))
@@ -2379,11 +2332,8 @@ proc_0025:
     PREPARE_UNIT_MOTION_STATE(local_int[58], 16, 0, 0, 1)
     PREPARE_UNIT_MOTION_STATE(local_int[59], 16, 0, 0, 1)
     PREPARE_UNIT_MOTION_STATE(local_int[60], 16, 0, 0, 1)
-    push 38
-    COMM 0x0217
-    push 0
-    push 38
-    COMM 0x01f3
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(38)
+    START_ARCHIVE_SOUND(38, 0)
     COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[61], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03_2)))
     COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[62], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_4)))
     COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[63], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_3)))
@@ -2397,9 +2347,7 @@ proc_0025:
     SET_EFFECT_MODEL_CUT(local_int[65], 0)
     SET_EFFECT_MODEL_CUT(local_int[66], 0)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 0
-    push 38
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(38, 0)
     push 503
     push 28
     push 1
@@ -2469,9 +2417,8 @@ proc_0027:
   if (TEST_MODEL_FLAG(1441) == 0) {
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(0)
-    COMM 0x0216
-    push 128
-    COMM 0x0210
+    RELEASE_CURRENT_BGM()
+    START_SCENE_BGM(128)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_9)))
     local_int[68] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE_BED_2))
     local_int[67] = CREATE_LINKED_CAMERA_VIEWER(3, 18)
@@ -2501,17 +2448,12 @@ proc_0027:
     MESSAGE_REQUEST_AND_POLL(message(BOSS_01))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     PREPARE_UNIT_MOTION_STATE(local_int[67], 15, 0, 0, 0)
-    push 38
-    COMM 0x0217
-    push 0
-    push 38
-    COMM 0x01f3
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(38)
+    START_ARCHIVE_SOUND(38, 0)
     COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[68], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03_3)))
     SET_EFFECT_MODEL_CUT(local_int[68], 0)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 0
-    push 38
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(38, 0)
     push 501
     push 28
     push 1
@@ -2581,9 +2523,8 @@ proc_0029:
   if (TEST_MODEL_FLAG(1442) == 0) {
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(0)
-    COMM 0x0216
-    push 128
-    COMM 0x0210
+    RELEASE_CURRENT_BGM()
+    START_SCENE_BGM(128)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_13)))
     local_int[70] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE_BED_3))
     local_int[69] = CREATE_LINKED_CAMERA_VIEWER(3, 104)
@@ -2613,17 +2554,12 @@ proc_0029:
     MESSAGE_REQUEST_AND_POLL(message(BOSS_02))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     PREPARE_UNIT_MOTION_STATE(local_int[69], 15, 0, 0, 1)
-    push 38
-    COMM 0x0217
-    push 0
-    push 38
-    COMM 0x01f3
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(38)
+    START_ARCHIVE_SOUND(38, 0)
     COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[70], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03_4)))
     SET_EFFECT_MODEL_CUT(local_int[70], 0)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 0
-    push 38
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(38, 0)
     push 502
     push 28
     push 1
@@ -2725,17 +2661,12 @@ proc_002b:
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02_5)))
     WAIT_FOR_TIMER_LIMIT(30)
-    push 38
-    COMM 0x0217
-    push 0
-    push 38
-    COMM 0x01f3
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(38)
+    START_ARCHIVE_SOUND(38, 0)
     COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[72], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03_5)))
     SET_EFFECT_MODEL_CUT(local_int[72], 0)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 0
-    push 38
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(38, 0)
     push 505
     push 28
     push 45

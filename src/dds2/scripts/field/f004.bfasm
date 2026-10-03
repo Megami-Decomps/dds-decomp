@@ -2212,7 +2212,7 @@ _263:
         CLEAR_MODEL_FLAG(442)
         CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[60])
         FINISH_SCRIPT_MESSAGE_WINDOW()
-        COMM 0x0216
+        RELEASE_CURRENT_BGM()
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
         push 668
@@ -2284,7 +2284,7 @@ _263:
         CLEAR_MODEL_FLAG(441)
         CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[60])
         FINISH_SCRIPT_MESSAGE_WINDOW()
-        COMM 0x0216
+        RELEASE_CURRENT_BGM()
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
         push 668
@@ -2357,7 +2357,7 @@ _263:
         CLEAR_MODEL_FLAG(440)
         CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[60])
         FINISH_SCRIPT_MESSAGE_WINDOW()
-        COMM 0x0216
+        RELEASE_CURRENT_BGM()
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
         push 668
@@ -3437,7 +3437,7 @@ _423:
     _426:
       if (local_int[85] == 1) {
         FINISH_SCRIPT_MESSAGE_WINDOW()
-        COMM 0x0216
+        RELEASE_CURRENT_BGM()
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
         push 562
@@ -3450,7 +3450,7 @@ _423:
       _427:
         if (local_int[85] == 2) {
           FINISH_SCRIPT_MESSAGE_WINDOW()
-          COMM 0x0216
+          RELEASE_CURRENT_BGM()
           SCREEN_FADE_B(0, 15)
           WAIT_FOR_TIMER_LIMIT(15)
           push 670
@@ -3813,7 +3813,7 @@ _467:
         _470:
           if (local_int[94] == 1) {
             FINISH_SCRIPT_MESSAGE_WINDOW()
-            COMM 0x0216
+            RELEASE_CURRENT_BGM()
             SCREEN_FADE_B(0, 15)
             WAIT_FOR_TIMER_LIMIT(15)
             push 562
@@ -3826,7 +3826,7 @@ _467:
           _471:
             if (local_int[94] == 2) {
               FINISH_SCRIPT_MESSAGE_WINDOW()
-              COMM 0x0216
+              RELEASE_CURRENT_BGM()
               SCREEN_FADE_B(0, 15)
               WAIT_FOR_TIMER_LIMIT(15)
               push 670
@@ -3918,7 +3918,7 @@ _483:
     _486:
       if (local_int[97] == 1) {
         FINISH_SCRIPT_MESSAGE_WINDOW()
-        COMM 0x0216
+        RELEASE_CURRENT_BGM()
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
         push 606
@@ -5068,7 +5068,7 @@ _626:
   while (1) {
     if (ACTION_WINDOW_REQUEST_AND_POLL(2) == 1) {
       RESTORE_CAMERA_NODE_MODE()
-      COMM 0x0216
+      RELEASE_CURRENT_BGM()
       PLAY_FIELD_SE_VOLUME_PAN(96)
       ENABLE_FIELD_ANIMATION(4, 5, string(md_hoji_01_6), 0)
       WAIT_FOR_TIMER_LIMIT(30)

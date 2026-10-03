@@ -535,6 +535,9 @@ table and native implementation; shared commands were checked in both games:
 | `CLEAR_WORLD_OBJECT_PENDING_VALUE` | `0x1E1` | 1 | Clears a selected world object's pending value and starts its reset timer |
 | `CLEAR_PROCESS_CONTROL_FLAG` | `0x1E7` | 0 | Clears the script-process control flag |
 | `CONSUME_FIELD_SKILL_END_NOTICE` | `0x1F1` | 1 | Clears and reports a pending Lightoma, Liftoma, Riberama, or Estoma expiration notice |
+| `START_ARCHIVE_SOUND` | `0x1F3` | 2 | Starts an archive sound with the default volume and pan |
+| `STOP_ARCHIVE_SOUND` | `0x1F4` | 2 | Stops an archive sound selected by bank and sound ID |
+| `REVEAL_AUTOMAP_RECTANGLE` | `0x1F6` | 5 | Marks a rectangular range of cells in the current field's automap bitmap |
 | `READ_SUCTION_WARP_VALUE` | `0x1FA` | 1 | Returns a state, object, map-entry, or motion value for the selected suction warp |
 | `READ_BARRIER_VALUE` | `0x1FB` | 1 | Returns a model flag, object, completion flag, or map entry for the selected barrier |
 | `APPLY_ROOM_MODE_GROUP_ZERO` | `0x1FC` | 4 | Applies DDS2 room-object transition modes from group zero |
@@ -557,11 +560,24 @@ table and native implementation; shared commands were checked in both games:
 | `APPLY_CURRENT_TASK_RECORD_ENTRY` | `0x20D` | 0 | Applies the record entry attached to the current field task |
 | `START_CURRENT_FIELD_INTERACTION_EVENT` | `0x20E` | 0 | Starts the script event selected by the current field interaction |
 | `RUN_FIELD_TRANSITION_SELECTOR` | `0x20F` | 1 | Runs the field transition selected by its script ID; the shared `HEAL_FACILITY` and `SAVE_POINT` IDs are named |
+| `START_SCENE_BGM` | `0x210` | 1 | Stores the scene BGM selector and starts the resolved scene track |
 | `PLAY_FIELD_SE_VOLUME_PAN` | `0x214` | 1 | Plays a field sound effect through its volume-and-pan path |
 | `PLAY_FIELD_SE` | `0x215` | 1 | Plays a field sound effect |
+| `RELEASE_CURRENT_BGM` | `0x216` | 0 | Releases the current field BGM handle |
+| `LOAD_ARCHIVE_SOUND_BANK_AND_WAIT` | `0x217` | 1 | Requests an archive sound bank and waits until it is resident |
 | `READ_WARP_EFFECT_MODE` | `0x219` | 0 | Returns the warp-effect selector; both DDS implementations return zero |
 | `RESET_FIELD_AFTER_EVENT` | `0x21A` | 0 | Resets DDS2 field state after an event |
 | `ACTION_WINDOW_REQUEST_AND_POLL_DIRECT` | `0x21D` | 1 | Requests or polls an action-window message without the actor-entry precheck and returns `-1`, `0`, or `1` |
+| `APPLY_FIELD_MODEL_LIGHTING` | `0x21E` | 1 | Applies the active field-lighting state to the selected world unit |
+
+The archive-sound commands build the same `0x30000000 | bank << 16 | sound`
+identity in both games. Start sends the volume/pan command with the retail
+defaults, stop sends the single-track stop command, and the bank command waits
+until the requested archive is resident. The automap command forwards a map
+row, origin, width, and height to the bitmap marker, which only sets discovery
+bits. The model-lighting command resolves the selected world unit and applies
+the active field-light state. Together these seven contracts replace 509 DDS1
+and 569 DDS2 numeric calls.
 
 The standard profiles also contain the paired battle-runtime commands used by
 the negotiation script and AICALC programs:
@@ -607,8 +623,8 @@ row flag, but its full role is not yet established, so it remains numeric.
 `READ_WARP_EFFECT_MODE` is retained by the shared warp procedure even though
 both DDS handlers are stubs that return zero.
 
-The reviewed set names 50,317 of 53,389 native calls in the complete DDS1
-corpus and 36,729 of 38,839 calls in the complete DDS2 corpus. It also makes
+The reviewed set names 50,826 of 53,389 native calls in the complete DDS1
+corpus and 37,298 of 38,839 calls in the complete DDS2 corpus. It also makes
 the adjacent message-command pattern safe to recognize, producing 188 symbolic
 DDS1 message references in the original event slice, 2,368 across complete
 DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic

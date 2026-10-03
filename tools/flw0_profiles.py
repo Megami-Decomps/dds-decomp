@@ -246,6 +246,11 @@ SHARED_DDS_COMMANDS = (
             ),
         ),
     ),
+    NativeCommand(0x1F3, "START_ARCHIVE_SOUND", 2, writes_result=False),
+    NativeCommand(0x1F4, "STOP_ARCHIVE_SOUND", 2, writes_result=False),
+    NativeCommand(
+        0x1F6, "REVEAL_AUTOMAP_RECTANGLE", 5, writes_result=False
+    ),
     NativeCommand(
         0x1FA,
         "READ_SUCTION_WARP_VALUE",
@@ -371,8 +376,13 @@ SHARED_DDS_COMMANDS = (
             IntegerSymbols(((900, "HEAL_FACILITY"), (901, "SAVE_POINT"))),
         ),
     ),
+    NativeCommand(0x210, "START_SCENE_BGM", 1, writes_result=False),
     NativeCommand(0x214, "PLAY_FIELD_SE_VOLUME_PAN", 1, writes_result=False),
     NativeCommand(0x215, "PLAY_FIELD_SE", 1, writes_result=False),
+    NativeCommand(0x216, "RELEASE_CURRENT_BGM", 0, writes_result=False),
+    NativeCommand(
+        0x217, "LOAD_ARCHIVE_SOUND_BANK_AND_WAIT", 1, writes_result=False
+    ),
     NativeCommand(0x219, "READ_WARP_EFFECT_MODE", 0, writes_result=True),
     NativeCommand(
         0x21D,
@@ -380,6 +390,7 @@ SHARED_DDS_COMMANDS = (
         1,
         writes_result=True,
     ),
+    NativeCommand(0x21E, "APPLY_FIELD_MODEL_LIGHTING", 1, writes_result=False),
 )
 
 

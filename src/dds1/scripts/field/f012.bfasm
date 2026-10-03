@@ -1771,12 +1771,9 @@ _254:
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04)))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05)))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[3], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07)))
-    push global_int[1]
-    COMM 0x021e
-    push global_int[2]
-    COMM 0x021e
-    push global_int[3]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[1])
+    APPLY_FIELD_MODEL_LIGHTING(global_int[2])
+    APPLY_FIELD_MODEL_LIGHTING(global_int[3])
   }
 _256:
   if (TEST_MODEL_FLAG(1043)) {
@@ -1812,12 +1809,9 @@ proc_001c:
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04_2)))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_2)))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[3], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_2)))
-    push global_int[1]
-    COMM 0x021e
-    push global_int[2]
-    COMM 0x021e
-    push global_int[3]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[1])
+    APPLY_FIELD_MODEL_LIGHTING(global_int[2])
+    APPLY_FIELD_MODEL_LIGHTING(global_int[3])
   }
 _262:
   ACTIVATE_MESSAGE_PANEL()
@@ -1933,12 +1927,9 @@ _284:
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04_3)))
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_3)))
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[3], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_3)))
-      push global_int[1]
-      COMM 0x021e
-      push global_int[2]
-      COMM 0x021e
-      push global_int[3]
-      COMM 0x021e
+      APPLY_FIELD_MODEL_LIGHTING(global_int[1])
+      APPLY_FIELD_MODEL_LIGHTING(global_int[2])
+      APPLY_FIELD_MODEL_LIGHTING(global_int[3])
       SET_MODEL_FLAG(31)
       CLEAR_MODEL_FLAG(1067)
       SET_MODEL_FLAG(253)

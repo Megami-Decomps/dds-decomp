@@ -2400,8 +2400,7 @@ _213:
     local_int[53] = CREATE_LINKED_CAMERA_VIEWER(3, 4)
     CLEAR_UNIT_LOW_FLAG(local_int[53])
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[53], READ_SECONDARY_WORLD_ID_VALUE(string(k_01pos_02_20)))
-    push local_int[53]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(local_int[53])
     SCREEN_FADE_A(0, 10)
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
@@ -2652,8 +2651,7 @@ proc_0018:
     SET_SOLAR_OVERLAY_MODE(6)
     SCREEN_FADE_B(0, 10)
     WAIT_FOR_TIMER_LIMIT(10)
-    push 14
-    COMM 0x0217
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(14)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07)))
     local_int[60] = CREATE_LINKED_CAMERA_VIEWER(6, 104)
@@ -2661,10 +2659,8 @@ proc_0018:
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[60], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_09)))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[61], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_11)))
     PREPARE_UNIT_MOTION_STATE(local_int[60], 0, 15, 15, 0)
-    push local_int[60]
-    COMM 0x021e
-    push local_int[61]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(local_int[60])
+    APPLY_FIELD_MODEL_LIGHTING(local_int[61])
     UPDATE_FIELD_LOOK_AT_SEGMENT()
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
     SCREEN_FADE_A(0, 5)
@@ -2718,19 +2714,13 @@ proc_0018:
       FINISH_SCRIPT_MESSAGE_WINDOW()
       PREPARE_UNIT_MOTION_STATE(local_int[61], 3, 3, 15, 0)
       WAIT_FOR_TIMER_LIMIT(5)
-      push 0
-      push 14
-      COMM 0x01f3
+      START_ARCHIVE_SOUND(14, 0)
       WAIT_FOR_TIMER_LIMIT(3)
       PREPARE_UNIT_MOTION_STATE(local_int[60], 7, 3, 15, 0)
       WAIT_FOR_TIMER_LIMIT(5)
-      push 0
-      push 14
-      COMM 0x01f3
+      START_ARCHIVE_SOUND(14, 0)
       WAIT_FOR_TIMER_LIMIT(30)
-      push 0
-      push 14
-      COMM 0x01f4
+      STOP_ARCHIVE_SOUND(14, 0)
       push 500
       push 26
       push 1
@@ -2796,8 +2786,7 @@ warpscr_027_02:
   PROC warpscr_027_02
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(0)
-  push 15
-  COMM 0x0217
+  LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(15)
   SET_MODEL_FLAG(1412)
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05)))
@@ -2806,26 +2795,18 @@ warpscr_027_02:
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[62], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_06_2)))
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[63], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_2)))
   PREPARE_UNIT_MOTION_STATE(local_int[62], 5, 0, 0, 0)
-  push local_int[62]
-  COMM 0x021e
-  push local_int[63]
-  COMM 0x021e
+  APPLY_FIELD_MODEL_LIGHTING(local_int[62])
+  APPLY_FIELD_MODEL_LIGHTING(local_int[63])
   ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_7)))
   PREPARE_UNIT_MOTION_STATE(global_int[0], 11, 3, 15, 1)
-  push 0
-  push 15
-  COMM 0x01f3
+  START_ARCHIVE_SOUND(15, 0)
   ACTIVATE_MESSAGE_PANEL()
   MESSAGE_REQUEST_AND_POLL(message(BATTLE_028_01))
   PREPARE_UNIT_MOTION_STATE(local_int[63], 5, 3, 15, 0)
-  push 0
-  push 15
-  COMM 0x01f3
+  START_ARCHIVE_SOUND(15, 0)
   MESSAGE_REQUEST_AND_POLL(message(BATTLE_028_02))
   FINISH_SCRIPT_MESSAGE_WINDOW()
-  push 0
-  push 15
-  COMM 0x01f4
+  STOP_ARCHIVE_SOUND(15, 0)
   push 501
   push 26
   push 1
@@ -2838,8 +2819,7 @@ warpscr_045_02:
   PROC warpscr_045_02
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(0)
-  push 16
-  COMM 0x0217
+  LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(16)
   SET_MODEL_FLAG(1413)
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04)))
@@ -2848,26 +2828,18 @@ warpscr_045_02:
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[64], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03_2)))
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[65], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_2)))
   PREPARE_UNIT_MOTION_STATE(local_int[65], 5, 0, 0, 0)
-  push local_int[64]
-  COMM 0x021e
-  push local_int[65]
-  COMM 0x021e
+  APPLY_FIELD_MODEL_LIGHTING(local_int[64])
+  APPLY_FIELD_MODEL_LIGHTING(local_int[65])
   ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_8)))
   PREPARE_UNIT_MOTION_STATE(global_int[0], 11, 3, 15, 1)
-  push 0
-  push 16
-  COMM 0x01f3
+  START_ARCHIVE_SOUND(16, 0)
   ACTIVATE_MESSAGE_PANEL()
   MESSAGE_REQUEST_AND_POLL(message(BATTLE_048_01))
   PREPARE_UNIT_MOTION_STATE(local_int[64], 5, 3, 15, 0)
-  push 0
-  push 16
-  COMM 0x01f3
+  START_ARCHIVE_SOUND(16, 0)
   MESSAGE_REQUEST_AND_POLL(message(BATTLE_048_02))
   FINISH_SCRIPT_MESSAGE_WINDOW()
-  push 0
-  push 16
-  COMM 0x01f4
+  STOP_ARCHIVE_SOUND(16, 0)
   push 502
   push 26
   push 1
@@ -3007,12 +2979,7 @@ proc_0022:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 13, 3)
-    push 4
-    push 1
-    push 22
-    push 1
-    push 6
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(6, 1, 22, 1, 4)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(11, string(str_01pos_06_4))
     return
   }
@@ -3025,12 +2992,7 @@ proc_0023:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 13, 4)
-    push 1
-    push 4
-    push 19
-    push 4
-    push 6
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(6, 4, 19, 4, 1)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(11, string(str_01pos_07_3))
     return
   }
@@ -3067,12 +3029,7 @@ proc_0026:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 16, 2)
-    push 1
-    push 4
-    push 14
-    push 22
-    push 6
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(6, 22, 14, 4, 1)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(14, string(str_01pos_03_4))
     return
   }
@@ -3085,12 +3042,7 @@ proc_0027:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 19, 3)
-    push 1
-    push 4
-    push 1
-    push 44
-    push 5
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(5, 44, 1, 4, 1)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(21, string(str_01pos_07_4))
     return
   }
@@ -3148,12 +3100,7 @@ proc_002c:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 24, 3)
-    push 4
-    push 1
-    push 35
-    push 31
-    push 5
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(5, 31, 35, 1, 4)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(23, string(str_01pos_07_5))
     return
   }
@@ -3166,12 +3113,7 @@ proc_002d:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 25, 2)
-    push 4
-    push 1
-    push 32
-    push 18
-    push 5
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(5, 18, 32, 1, 4)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(26, string(str_01pos_03_6))
     return
   }
@@ -3208,12 +3150,7 @@ proc_0030:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 29, 3)
-    push 4
-    push 1
-    push 22
-    push 13
-    push 5
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(5, 13, 22, 1, 4)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(27, string(str_01pos_06_8))
     return
   }
@@ -3226,12 +3163,7 @@ proc_0031:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 30, 2)
-    push 1
-    push 4
-    push 29
-    push 4
-    push 5
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(5, 4, 29, 4, 1)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(32, string(str_01pos_03_8))
     return
   }
@@ -3244,12 +3176,7 @@ proc_0032:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 32, 3)
-    push 4
-    push 1
-    push 10
-    push 13
-    push 5
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(5, 13, 10, 1, 4)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(27, string(str_01pos_06_9))
     return
   }
@@ -3262,12 +3189,7 @@ proc_0033:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 33, 3)
-    push 1
-    push 4
-    push 6
-    push 7
-    push 5
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(5, 7, 6, 4, 1)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(32, string(str_01pos_03_9))
     return
   }
@@ -3280,12 +3202,7 @@ proc_0034:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 33, 4)
-    push 4
-    push 1
-    push 10
-    push 3
-    push 5
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(5, 3, 10, 1, 4)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(27, string(str_01pos_07_6))
     return
   }
@@ -3310,12 +3227,7 @@ proc_0036:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 36, 3)
-    push 1
-    push 4
-    push 29
-    push 2
-    push 4
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(4, 2, 29, 4, 1)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(37, string(str_01pos_03_10))
     return
   }
@@ -3352,12 +3264,7 @@ proc_0039:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 39, 2)
-    push 4
-    push 1
-    push 5
-    push 16
-    push 4
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(4, 16, 5, 1, 4)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(38, string(str_01pos_07_7))
     return
   }
@@ -3436,12 +3343,7 @@ proc_0040:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 46, 2)
-    push 1
-    push 4
-    push 16
-    push 13
-    push 3
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(3, 13, 16, 4, 1)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(43, string(str_01pos_04_4))
     return
   }
@@ -3454,12 +3356,7 @@ proc_0041:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 47, 3)
-    push 1
-    push 4
-    push 16
-    push 19
-    push 3
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(3, 19, 16, 4, 1)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(45, string(str_01pos_01_3))
     return
   }
@@ -3472,12 +3369,7 @@ proc_0042:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 47, 4)
-    push 1
-    push 4
-    push 19
-    push 19
-    push 3
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(3, 19, 19, 4, 1)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(44, string(str_01pos_01_4))
     return
   }
@@ -3490,12 +3382,7 @@ proc_0043:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 48, 3)
-    push 1
-    push 4
-    push 19
-    push 13
-    push 3
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(3, 13, 19, 4, 1)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(42, string(str_01pos_06_11))
     return
   }
@@ -3508,12 +3395,7 @@ proc_0044:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 49, 3)
-    push 1
-    push 4
-    push 19
-    push 6
-    push 3
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(3, 6, 19, 4, 1)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(48, string(str_01pos_01_5))
     return
   }
@@ -3526,12 +3408,7 @@ proc_0045:
     RESTORE_CAMERA_NODE_MODE()
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0))
     ENABLE_FIELD_MAP_ENTRY(26, 49, 4)
-    push 1
-    push 4
-    push 19
-    push 2
-    push 3
-    COMM 0x01f6
+    REVEAL_AUTOMAP_RECTANGLE(3, 2, 19, 4, 1)
     REQUEST_ALTERNATE_FIELD_SEQUENCE(56, string(str_01pos_04_5))
     return
   }
@@ -3668,12 +3545,7 @@ warpscr_ev633:
   DISABLE_FIELD_COLLISION(26, 49, string(atari_hoji_01_26))
   DISABLE_FIELD_COLLISION(26, 56, string(atari_hoji_01_27))
   ENABLE_FIELD_MAP_ENTRY(26, 56, 7)
-  push 18
-  push 9
-  push 18
-  push 1
-  push 1
-  COMM 0x01f6
+  REVEAL_AUTOMAP_RECTANGLE(1, 1, 18, 9, 18)
   DISABLE_FIELD_MAP_ENTRY(26, 1, 3)
   ENABLE_FIELD_COLLISION(26, 20, string(atari_hoji_01_28))
   SET_SOLAR_OVERLAY_MODE(3)
@@ -4670,11 +4542,9 @@ warpscr_050_03:
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(0)
   COMM 0x021f
-  COMM 0x0216
-  push 37
-  COMM 0x0217
-  push 128
-  COMM 0x0210
+  RELEASE_CURRENT_BGM()
+  LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(37)
+  START_SCENE_BGM(128)
   ENABLE_FIELD_MODELS(26, 54, string(md_hoji_02_28), 0)
   DISABLE_FIELD_MODELS(26, 54, string(md_hoji_01_28), 0)
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
@@ -4686,8 +4556,7 @@ warpscr_050_03:
   push local_int[67]
   COMM 0x001b
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[67], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03_13)))
-  push local_int[67]
-  COMM 0x021e
+  APPLY_FIELD_MODEL_LIGHTING(local_int[67])
   ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_3)))
   push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_MOTION_2))
   push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_4))
@@ -4700,9 +4569,7 @@ warpscr_050_03:
   FINISH_SCRIPT_MESSAGE_WINDOW()
   PREPARE_UNIT_MOTION_STATE(local_int[67], 4, 3, 15, 2)
   WAIT_FOR_TIMER_LIMIT(30)
-  push 0
-  push 37
-  COMM 0x01f3
+  START_ARCHIVE_SOUND(37, 0)
   WAIT_FOR_TIMER_LIMIT(5)
   push 0
   push float32(0.9259999990463257, bits=0x3f6d0e56)
@@ -4720,9 +4587,7 @@ warpscr_050_03:
   push 0
   COMM 0x00ed
   WAIT_FOR_TIMER_LIMIT(10)
-  push 0
-  push 37
-  COMM 0x01f4
+  STOP_ARCHIVE_SOUND(37, 0)
   push 503
   push 26
   push 1

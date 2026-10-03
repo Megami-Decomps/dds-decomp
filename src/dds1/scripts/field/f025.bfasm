@@ -2470,13 +2470,11 @@ proc_0012:
       DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_01_3), 0)
       DISABLE_FIELD_MODELS(0, 0, string(md_hoji_02_2), 0)
       global_int[4] = CREATE_LINKED_CAMERA_VIEWER(6, 50)
-      push global_int[4]
-      COMM 0x021e
+      APPLY_FIELD_MODEL_LIGHTING(global_int[4])
       SET_UNIT_VALUE(global_int[4], 1)
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[4], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_12)))
       global_int[5] = CREATE_LINKED_CAMERA_VIEWER(6, 50)
-      push global_int[5]
-      COMM 0x021e
+      APPLY_FIELD_MODEL_LIGHTING(global_int[5])
       SET_UNIT_VALUE(global_int[5], 1)
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[5], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_16)))
       ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_02_2))
@@ -3998,8 +3996,7 @@ _351:
     ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_17))
     global_int[10] = CREATE_LINKED_CAMERA_VIEWER(6, 54)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[10], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_16_2)))
-    push global_int[10]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[10])
   }
 _353:
   goto _355
@@ -4045,15 +4042,10 @@ _359:
       FINISH_SCRIPT_MESSAGE_WINDOW()
       PREPARE_UNIT_MOTION_STATE(global_int[10], 3, 20, 60, 0)
       WAIT_FOR_TIMER_LIMIT(25)
-      push 32
-      COMM 0x0217
-      push 0
-      push 32
-      COMM 0x01f3
+      LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(32)
+      START_ARCHIVE_SOUND(32, 0)
       WAIT_FOR_TIMER_LIMIT(20)
-      push 0
-      push 32
-      COMM 0x01f4
+      STOP_ARCHIVE_SOUND(32, 0)
       push 333
       push 25
       push 38
@@ -4186,8 +4178,7 @@ _377:
     ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_20))
     global_int[6] = CREATE_LINKED_CAMERA_VIEWER(6, 48)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[6], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_24_2)))
-    push global_int[6]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[6])
   }
 _379:
   goto _381
@@ -4233,15 +4224,10 @@ _385:
       FINISH_SCRIPT_MESSAGE_WINDOW()
       PREPARE_UNIT_MOTION_STATE(global_int[6], 3, 20, 60, 0)
       WAIT_FOR_TIMER_LIMIT(30)
-      push 33
-      COMM 0x0217
-      push 0
-      push 33
-      COMM 0x01f3
+      LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(33)
+      START_ARCHIVE_SOUND(33, 0)
       WAIT_FOR_TIMER_LIMIT(29)
-      push 0
-      push 33
-      COMM 0x01f4
+      STOP_ARCHIVE_SOUND(33, 0)
       push 334
       push 25
       push 40
@@ -4611,12 +4597,7 @@ _432:
   return
 proc_004e:
   PROC proc_004e
-  push 4
-  push 3
-  push 7
-  push 14
-  push 2
-  COMM 0x01f6
+  REVEAL_AUTOMAP_RECTANGLE(2, 14, 7, 3, 4)
   if_not (TEST_MODEL_FLAG(1317) == 1) goto _437
   if (TEST_MODEL_FLAG(1362) == 0) {
     RESTORE_CAMERA_NODE_MODE()
@@ -4691,9 +4672,8 @@ proc_004f:
   SET_MODEL_FLAG(1317)
   SCREEN_FADE_B(0, 20)
   WAIT_FOR_TIMER_LIMIT(20)
-  COMM 0x0216
-  push 128
-  COMM 0x0210
+  RELEASE_CURRENT_BGM()
+  START_SCENE_BGM(128)
   local_int[55] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE1_BED))
   local_int[56] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE1_BED_2))
   local_int[57] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE1_B_BED))
@@ -4706,10 +4686,8 @@ proc_004f:
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[54], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_54)))
   PREPARE_UNIT_MOTION_STATE(local_int[53], 0, 0, 0, 1)
   PREPARE_UNIT_MOTION_STATE(local_int[54], 0, 0, 0, 1)
-  push local_int[53]
-  COMM 0x021e
-  push local_int[54]
-  COMM 0x021e
+  APPLY_FIELD_MODEL_LIGHTING(local_int[53])
+  APPLY_FIELD_MODEL_LIGHTING(local_int[54])
   PREPARE_UNIT_MOTION_STATE(global_int[0], 23, 3, 15, 1)
   push 0
   push 35
@@ -4764,8 +4742,7 @@ _439:
   _444:
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_10_2)))
     MESSAGE_REQUEST_AND_POLL(94)
-    push 38
-    COMM 0x0217
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(38)
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
     MESSAGE_REQUEST_AND_POLL(95)
@@ -4782,13 +4759,9 @@ _439:
     SET_EFFECT_MODEL_CUT(local_int[56], 0)
     COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE(local_int[57], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_66_2)))
     SET_EFFECT_MODEL_CUT(local_int[57], 0)
-    push 0
-    push 38
-    COMM 0x01f3
+    START_ARCHIVE_SOUND(38, 0)
     WAIT_FOR_TIMER_LIMIT(65)
-    push 0
-    push 38
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(38, 0)
     push 132
     push 25
     push 1
@@ -4805,12 +4778,7 @@ _445:
   return
 proc_0050:
   PROC proc_0050
-  push 3
-  push 4
-  push 16
-  push 11
-  push 3
-  COMM 0x01f6
+  REVEAL_AUTOMAP_RECTANGLE(3, 11, 16, 4, 3)
   if_not (TEST_MODEL_FLAG(1340) == 1) goto _449
   if (TEST_MODEL_FLAG(1336) == 0) {
     RESTORE_CAMERA_NODE_MODE()
@@ -11351,8 +11319,7 @@ _1510:
       SCREEN_FADE_B(0, 30)
       WAIT_FOR_TIMER_LIMIT(30)
       global_int[1] = CREATE_LINKED_CAMERA_VIEWER(2, 29)
-      push global_int[1]
-      COMM 0x021e
+      APPLY_FIELD_MODEL_LIGHTING(global_int[1])
       PREPARE_UNIT_MOTION_STATE(global_int[1], 1, 0, 0, 1)
       SET_UNIT_VALUE(local_int[78], 1)
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_21_2)))
@@ -11392,8 +11359,7 @@ _1510:
       COMM 0x0016
       global_int[2] = CREATE_LINKED_CAMERA_VIEWER(3, 4)
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_41)))
-      push global_int[2]
-      COMM 0x021e
+      APPLY_FIELD_MODEL_LIGHTING(global_int[2])
       ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_06_3)))
       SCREEN_FADE_A(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)
@@ -11683,8 +11649,7 @@ proc_00f1:
   DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_27))
   if (TEST_MODEL_FLAG(1375) == 1) {
     global_int[4] = CREATE_LINKED_CAMERA_VIEWER(6, 50)
-    push global_int[4]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[4])
     SET_UNIT_VALUE(global_int[4], 1)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[4], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03_5)))
     ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_28))
@@ -11777,15 +11742,13 @@ proc_00f5:
     PREPARE_UNIT_MOTION_STATE(global_int[0], 11, 0, 0, 1)
     local_int[80] = CREATE_LINKED_CAMERA_VIEWER(6, 311)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[80], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04_3)))
-    push local_int[80]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(local_int[80])
     SET_SOLAR_OVERLAY_MODE(2)
     SET_MODEL_FLAG(1737)
     CHANGE_ITEM_COUNT(147, 1)
     SET_MODEL_FLAG(2310)
-    COMM 0x0216
-    push 128
-    COMM 0x0210
+    RELEASE_CURRENT_BGM()
+    START_SCENE_BGM(128)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_34)))
     WAIT_FOR_TIMER_LIMIT(45)
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_MOTION_2))
@@ -11805,15 +11768,10 @@ proc_00f5:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_18))
     COMM 0x0013
     PREPARE_UNIT_MOTION_STATE(local_int[80], 14, 20, 50, 0)
-    push 19
-    COMM 0x0217
-    push 0
-    push 19
-    COMM 0x01f3
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(19)
+    START_ARCHIVE_SOUND(19, 0)
     WAIT_FOR_TIMER_LIMIT(80)
-    push 0
-    push 19
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(19, 0)
     push 140
     push 25
     push 31
@@ -11839,7 +11797,7 @@ _1592:
       if (MESSAGE_SELECTION_REQUEST_AND_POLL(194) == 0) {
         SCREEN_FADE_B(1, 25)
         WAIT_FOR_TIMER_LIMIT(25)
-        COMM 0x0216
+        RELEASE_CURRENT_BGM()
         push 632
         push 12
         push 1
@@ -11970,8 +11928,7 @@ proc_00f9:
     push global_int[8]
     COMM 0x001b
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[8], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02_14)))
-    push global_int[8]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[8])
   }
 _1606:
   goto _1608
@@ -12021,15 +11978,10 @@ _1614:
       FINISH_SCRIPT_MESSAGE_WINDOW()
       PREPARE_UNIT_MOTION_STATE(global_int[8], 3, 20, 50, 0)
       WAIT_FOR_TIMER_LIMIT(30)
-      push 30
-      COMM 0x0217
-      push 0
-      push 30
-      COMM 0x01f3
+      LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(30)
+      START_ARCHIVE_SOUND(30, 0)
       WAIT_FOR_TIMER_LIMIT(15)
-      push 0
-      push 30
-      COMM 0x01f4
+      STOP_ARCHIVE_SOUND(30, 0)
       push 336
       push 25
       push 24
@@ -12044,15 +11996,10 @@ _1614:
         FINISH_SCRIPT_MESSAGE_WINDOW()
         PREPARE_UNIT_MOTION_STATE(global_int[8], 3, 20, 50, 0)
         WAIT_FOR_TIMER_LIMIT(30)
-        push 30
-        COMM 0x0217
-        push 0
-        push 30
-        COMM 0x01f3
+        LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(30)
+        START_ARCHIVE_SOUND(30, 0)
         WAIT_FOR_TIMER_LIMIT(15)
-        push 0
-        push 30
-        COMM 0x01f4
+        STOP_ARCHIVE_SOUND(30, 0)
         push 336
         push 25
         push 24
@@ -12081,15 +12028,10 @@ _1614:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     PREPARE_UNIT_MOTION_STATE(global_int[8], 3, 20, 50, 0)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 30
-    COMM 0x0217
-    push 0
-    push 30
-    COMM 0x01f3
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(30)
+    START_ARCHIVE_SOUND(30, 0)
     WAIT_FOR_TIMER_LIMIT(15)
-    push 0
-    push 30
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(30, 0)
     push 336
     push 25
     push 24
@@ -12117,8 +12059,7 @@ proc_00fb:
     ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_32))
     global_int[9] = CREATE_LINKED_CAMERA_VIEWER(6, 84)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[9], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02_15)))
-    push global_int[9]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[9])
   }
 _1628:
   goto _1630
@@ -12164,15 +12105,10 @@ _1636:
       FINISH_SCRIPT_MESSAGE_WINDOW()
       PREPARE_UNIT_MOTION_STATE(global_int[9], 3, 20, 50, 0)
       WAIT_FOR_TIMER_LIMIT(20)
-      push 31
-      COMM 0x0217
-      push 0
-      push 31
-      COMM 0x01f3
+      LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(31)
+      START_ARCHIVE_SOUND(31, 0)
       WAIT_FOR_TIMER_LIMIT(21)
-      push 0
-      push 31
-      COMM 0x01f4
+      STOP_ARCHIVE_SOUND(31, 0)
       push 335
       push 25
       push 25
@@ -12198,8 +12134,7 @@ proc_00fd:
     ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_34))
     global_int[7] = CREATE_LINKED_CAMERA_VIEWER(6, 43)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[7], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02_16)))
-    push global_int[7]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(global_int[7])
   }
 _1644:
   goto _1646
@@ -12245,15 +12180,10 @@ _1652:
       FINISH_SCRIPT_MESSAGE_WINDOW()
       PREPARE_UNIT_MOTION_STATE(global_int[7], 3, 20, 45, 0)
       WAIT_FOR_TIMER_LIMIT(18)
-      push 34
-      COMM 0x0217
-      push 0
-      push 34
-      COMM 0x01f3
+      LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(34)
+      START_ARCHIVE_SOUND(34, 0)
       WAIT_FOR_TIMER_LIMIT(22)
-      push 0
-      push 34
-      COMM 0x01f4
+      STOP_ARCHIVE_SOUND(34, 0)
       push 337
       push 25
       push 50
@@ -12273,30 +12203,15 @@ _1658:
   return
 proc_00ff:
   PROC proc_00ff
-  push 3
-  push 4
-  push 2
-  push 17
-  push 4
-  COMM 0x01f6
+  REVEAL_AUTOMAP_RECTANGLE(4, 17, 2, 4, 3)
   return
 proc_0100:
   PROC proc_0100
-  push 3
-  push 3
-  push 23
-  push 6
-  push 2
-  COMM 0x01f6
+  REVEAL_AUTOMAP_RECTANGLE(2, 6, 23, 3, 3)
   return
 proc_0101:
   PROC proc_0101
-  push 2
-  push 2
-  push 23
-  push 25
-  push 2
-  COMM 0x01f6
+  REVEAL_AUTOMAP_RECTANGLE(2, 25, 23, 2, 2)
   return
 end
 
