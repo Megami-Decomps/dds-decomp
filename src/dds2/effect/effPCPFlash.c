@@ -501,7 +501,7 @@ void effFlashTrianglePulseWriteCorners(PcpFlashTrianglePulseWork *work, s32 inde
 extern void effFlashTrianglePulseWriteCorners();
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
-extern s32 effBlendColor(s32, s32, f32);
+extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 extern void effFlashBillboardQuad(PcpFlashStreakWork *, s32, void *);
 extern void effDrawTriangleRecordPool(void *);
 
@@ -799,7 +799,7 @@ void effRotateFlashParticlePosition(PcpFlashStreakWork *work, s32 index, void *o
     part->position[2] = position[2];
 }
 
-extern s32 effBlendColor(s32, s32, f32);
+extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 extern void effDrawScaledRecordPool(void *);
 extern u8 D_003AA868[];
 extern u8 sdfViewEyeVector[];
@@ -1124,7 +1124,8 @@ void effFlashOrbitScalingUpdate(PcpFlashScalingOrbitWork *work) {
     effDrawScaledRecordPool(handle);
 }
 
-extern s32 effRecordPoolCreate();
+typedef struct EffRecordPool EffRecordPool;
+extern EffRecordPool *effRecordPoolCreate(s32 quadCount);
 
 /* Clone the 0x50-byte parameter block, then spread the particles evenly around the orbit from -pi/2 with random negative start ages (two handle slots per particle). */
 PcpFlashAccumulatingWork *effFlashAccumulatingCreate(src)
@@ -1191,7 +1192,6 @@ void effFlashAccumulatingParticleSetRenderScale(PcpFlashAccumulatingWork *work, 
     work->renderScale = value;
 }
 
-typedef struct EffRecordPool EffRecordPool;
 extern s32 effGetRecordGroupAuxEntry(EffRecordPool *, s32);
 
 void func_00173718(PcpFlashAccumulatingWork *work, s32 index, u32 param) {
@@ -1720,7 +1720,7 @@ void effFlashRotatingQuadUpdate(PcpFlashRotatingQuadWork *work) {
     effDrawScaledRecordPool(handle);
 }
 
-extern PcpFlashDrawPool *effRecordPoolCreateTriple(s32 count);
+extern EffRecordPool *effRecordPoolCreateTriple(s32 count);
 
 PcpFlashRadialTriangleWork *effFlashRadialTriangleCreate(src)
     PcpFlashRadialTriangleWork *src;

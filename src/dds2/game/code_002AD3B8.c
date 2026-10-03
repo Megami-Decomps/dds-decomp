@@ -1,6 +1,6 @@
 #include "mnu.h"
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
 
 extern void func_0026C900(void);
 extern void func_002AAE80(s32);
@@ -41,7 +41,7 @@ extern s32 D_00435E48;
 extern s32 mnuGetPartyEntryMenuValue();
 extern s32 mnuGetPartyEntryCurrentId();
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
-extern void dspStartEntry(s32);
+extern s32 dspStartEntry(s32);
 extern void func_0011A118();
 extern void func_002AD330();
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
