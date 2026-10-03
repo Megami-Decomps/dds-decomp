@@ -4,6 +4,45 @@
 #include "btl_command.h"
 #include "ee_mmi.h"
 
+#define BTL_COMMAND_RECORD_BYTES 0x38
+#define BTL_LIST_FLAG_MASK 0x7FFF
+#define BTL_LIST_MARKED_FLAG 0x4000
+#define BTL_ENTRY_CODE_COUNT 5
+#define BTL_EXPIRED_POSITIVE_ENTRY_RULE 0x800
+#define BTL_EXPIRED_NEGATIVE_ENTRY_RULE 0x1000
+#define BTL_COUNTER_ELIGIBILITY_UNSET (-1)
+#define BTL_COUNTER_ELIGIBILITY_MET 3
+#define BTL_COUNTER_ELIGIBILITY_NOT_MET 0
+#define BTL_BLOCK_EMPTY_OR_ALL_FLAGGED 9
+
+#define MNU_LIST_INPUT_FLAG 2
+#define MNU_LIST_ROW_HEIGHT 0x18
+#define MNU_LIST_FRAME_INSET 4
+#define MNU_LIST_FIXED_ROW_HEIGHT 0xC0
+#define MNU_LIST_LABEL_OFFSET 0x2C
+#define MNU_LIST_SELECTED_COLOR 0x89FEFF80
+#define MNU_LIST_NORMAL_COLOR 0xA09DC380
+#define MNU_LIST_TEXT_DEPTH 0xFF0000
+#define MNU_LIST_SELECTED_TEXT_FLAG 4
+
+#define BTL_GROUP_COUNT 8
+#define BTL_GROUP_RESOURCE_SLOT_COUNT 8
+#define BTL_GROUP_OWNS_RESOURCES_FLAG 1
+
+#define BTL_EVENT_TASK_NONE (-1)
+#define BTL_EVENT_ACTION_NONE (-1)
+#define BTL_SCENE_RECORD_BYTES 0x28
+#define BTL_SCENE_EVENT_ID_OFFSET 0x26
+#define BTL_EVENT_SCENE_MODE_LIMIT 0x400
+#define BTL_EVENT_SOUND_RESOURCE_COUNT 15
+#define BTL_EVENT_SOUND_KEY_FIRST 0x32
+#define BTL_EVENT_SOUND_SLOT_FIRST 0xB
+#define BTL_EVENT_DATA_LIFETIME_FLAG 2
+#define BTL_EVENT_SEQUENCE_BASE 0x1E60000
+#define BTL_EVENT_SEQUENCE_ID_BIAS 0x384
+#define BTL_EVENT_SEQUENCE_VOLUME 0x7F
+#define BTL_EVENT_SEQUENCE_PAN 0x3F
+
 /* Each group also has an independent, singly-linked list of IDs. */
 typedef struct BattleGroupIdEntry {
     struct BattleGroupIdEntry *next;
@@ -136,45 +175,48 @@ extern void *sdfReadNamedResource(const char *, void *, s32);
 extern s32 mnuCampCreateTask(s32);
 extern void func_00101A80(s32, s32);
 
+/* Reset event state and request the scene's script/task resources.
+ * The raw unsigned event word is deliberately converted to signed 16-bit.
+ * DDS1 ensures the derived sequence is resident, unlike DDS2's release path. */
 void func_0020FF50(void) {
-    BtlState *battle = (BtlState *)btlGetRuntime();
-    u32 battleMode = battle->battleMode;
-    u16 sceneEvent;
+    BtlState *battleState = (BtlState *)btlGetRuntime();
+    u32 battleMode = battleState->battleMode;
+    u16 rawEventId;
     s16 eventId;
-    char path[0x80];
-    s32 task;
+    char scriptPath[0x80];
+    s32 eventTask;
 
-    battle->eventTaskId = -1;
-    battle->eventAction = -1;
-    battle->eventActive = 0;
-    battle->scriptFlags = 0;
-    battle->eventFlags = 0;
-    battle->scriptHandle = 0;
-    battle->eventAssets = 0;
-    battle->eventRequest = 0;
-    battle->eventData = 0;
-    if (battleMode >= 0x400) {
+    battleState->eventTaskId = BTL_EVENT_TASK_NONE;
+    battleState->eventAction = BTL_EVENT_ACTION_NONE;
+    battleState->eventActive = 0;
+    battleState->scriptFlags = 0;
+    battleState->eventFlags = 0;
+    battleState->scriptHandle = 0;
+    battleState->eventAssets = 0;
+    battleState->eventRequest = 0;
+    battleState->eventData = 0;
+    if (battleMode >= BTL_EVENT_SCENE_MODE_LIMIT) {
         return;
     }
-    sceneEvent = *(u16 *)(datBattleSceneRecords + battleMode * 0x28 + 0x26);
-    if (sceneEvent == 0) {
+    rawEventId = *(u16 *)(datBattleSceneRecords + battleMode * BTL_SCENE_RECORD_BYTES + BTL_SCENE_EVENT_ID_OFFSET);
+    if (rawEventId == 0) {
         return;
     }
-    eventId = (s16)sceneEvent;
-    battle->eventTaskId = eventId;
-    func_003014F0(path, D_003A6738, eventId - eventId % 10, eventId, eventId);
-    battle->eventAssets = sdfReadNamedResource(path, &battle->scriptHandle, 0);
-    btlBossDebugPrintf(D_003A6758, path);
-    task = mnuCampCreateTask(battle->eventTaskId);
-    btlBossDebugPrintf(D_003A6768, battle->eventTaskId);
-    func_00101A80((s32)battle->scriptOwner, task);
-    battle->sequenceHandle =
-        ((battle->eventTaskId - 0x384) << 16) + 0x1E60000;
-    if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == 0) {
-        sndEnsureMidiBankResident(battle->sequenceHandle);
-        btlBossDebugPrintf(D_003A6788, battle->sequenceHandle);
+    eventId = (s16)rawEventId;
+    battleState->eventTaskId = eventId;
+    func_003014F0(scriptPath, D_003A6738, eventId - eventId % 10, eventId, eventId);
+    battleState->eventAssets = sdfReadNamedResource(scriptPath, &battleState->scriptHandle, 0);
+    btlBossDebugPrintf(D_003A6758, scriptPath);
+    eventTask = mnuCampCreateTask(battleState->eventTaskId);
+    btlBossDebugPrintf(D_003A6768, battleState->eventTaskId);
+    func_00101A80((s32)battleState->scriptOwner, eventTask);
+    battleState->sequenceHandle =
+        ((battleState->eventTaskId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16) + BTL_EVENT_SEQUENCE_BASE;
+    if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) == 0) {
+        sndEnsureMidiBankResident(battleState->sequenceHandle);
+        btlBossDebugPrintf(D_003A6788, battleState->sequenceHandle);
     }
-    battle->eventFlags |= 2;
+    battleState->eventFlags |= BTL_EVENT_DATA_LIFETIME_FLAG;
 }
 
 extern char D_003A67A0[], D_003A67B8[];
@@ -197,25 +239,27 @@ s32 btlIsEventSequenceTaskReady(void) {
 
 extern char D_003A67D0[];
 
+/* Release both optional voice resources once and reset the action state.
+ * The shared temporary holds either resource; other event flag bits survive. */
 void btlReleaseEventData(void) {
-    BtlState *battle = (BtlState *)btlGetRuntime();
-    void *data;
-    if ((battle->eventFlags & 2) == 0) {
+    BtlState *battleState = (BtlState *)btlGetRuntime();
+    void *resource;
+    if ((battleState->eventFlags & BTL_EVENT_DATA_LIFETIME_FLAG) == 0) {
         return;
     }
-    data = battle->eventData;
-    if (data != 0) {
-        effReleaseBattleVoiceOwner(data);
-        battle->eventData = 0;
+    resource = battleState->eventData;
+    if (resource != 0) {
+        effReleaseBattleVoiceOwner(resource);
+        battleState->eventData = 0;
     }
-    data = battle->eventRequest;
-    if (data != 0) {
-        sndReleaseAllVoices(data);
-        battle->eventRequest = 0;
+    resource = battleState->eventRequest;
+    if (resource != 0) {
+        sndReleaseAllVoices(resource);
+        battleState->eventRequest = 0;
     }
-    battle->eventActive = 0;
-    battle->eventAction = -1;
-    battle->eventFlags &= ~2;
+    battleState->eventActive = 0;
+    battleState->eventAction = BTL_EVENT_ACTION_NONE;
+    battleState->eventFlags &= ~BTL_EVENT_DATA_LIFETIME_FLAG;
     btlBossDebugPrintf(D_003A67D0);
 }
 
@@ -226,25 +270,26 @@ extern void btlCreateIndexedSoundResourceNode(s32, u32);
 extern char D_003A67E8[];
 extern char D_003A6810[];
 
+/* Populate sound slots 11..25 from event keys 50..64; skip missing bindings. */
 void func_002101C8(void) {
-    BtlState *battle = (BtlState *)btlGetRuntime();
-    s32 i;
+    BtlState *battleState = (BtlState *)btlGetRuntime();
+    s32 resourceIndex;
 
-    if (battle->eventTaskId == -1) {
+    if (battleState->eventTaskId == BTL_EVENT_TASK_NONE) {
         return;
     }
 
-    for (i = 0; i < 15; i++) {
-        s32 resourceKey = i + 0x32;
+    for (resourceIndex = 0; resourceIndex < BTL_EVENT_SOUND_RESOURCE_COUNT; resourceIndex++) {
+        s32 resourceKey = resourceIndex + BTL_EVENT_SOUND_KEY_FIRST;
         s32 slotIndex;
-        s32 handle;
+        s32 resourceValue;
 
-        handle = evtFindTaskResourceEntryByKey(battle->eventTaskId, resourceKey);
-        slotIndex = i + 0xB;
-        if (handle == 0) {
+        resourceValue = evtFindTaskResourceEntryByKey(battleState->eventTaskId, resourceKey);
+        slotIndex = resourceIndex + BTL_EVENT_SOUND_SLOT_FIRST;
+        if (resourceValue == 0) {
             btlBossDebugPrintf(D_003A67E8, slotIndex, resourceKey);
         } else {
-            btlCreateIndexedSoundResourceNode(slotIndex, handle);
+            btlCreateIndexedSoundResourceNode(slotIndex, resourceValue);
             btlBossDebugPrintf(D_003A6810, slotIndex, resourceKey);
         }
     }
@@ -252,45 +297,49 @@ void func_002101C8(void) {
 
 extern char D_003A6838[];
 
+/* Release the voice resources before the optional event asset allocation. */
 void btlReleaseEventAssets(void) {
-    BtlState *battle = (BtlState *)btlGetRuntime();
-    void *data;
+    BtlState *battleState = (BtlState *)btlGetRuntime();
+    void *eventAssets;
     btlReleaseEventData();
-    data = battle->eventAssets;
-    if (data != 0) {
-        sdfReleaseResourceAllocation(data);
-        battle->eventAssets = 0;
+    eventAssets = battleState->eventAssets;
+    if (eventAssets != 0) {
+        sdfReleaseResourceAllocation(eventAssets);
+        battleState->eventAssets = 0;
     }
     btlBossDebugPrintf(D_003A6838);
 }
 
+/* Select a unit and event-resource key from script parameters.
+ * Missing/inactive units or missing resources leave state untouched;
+ * the command still returns 1 on every path. */
 s32 btlCommandSelectEventAction(void) {
-    s32 first = scrReadIntParameter(0);
-    s32 second = scrReadIntParameter(1);
-    s32 action = scrReadIntParameter(2);
-    u8 *unit;
-    BtlState *battle;
-    s32 result;
-    if (first == 0) {
-        unit = (u8 *)btlFindUnitByModeClear(second);
+    s32 modeSelector = scrReadIntParameter(0);
+    s32 unitId = scrReadIntParameter(1);
+    s32 actionKey = scrReadIntParameter(2);
+    u8 *selectedUnit;
+    BtlState *battleState;
+    s32 actionResource;
+    if (modeSelector == 0) {
+        selectedUnit = (u8 *)btlFindUnitByModeClear(unitId);
     } else {
-        unit = (u8 *)btlFindUnitByModeFlagged(second);
+        selectedUnit = (u8 *)btlFindUnitByModeFlagged(unitId);
     }
-    if (unit == 0) {
+    if (selectedUnit == 0) {
         return 1;
     }
-    if ((((BtlUnit *)unit)->flags & 2) == 0) {
+    if ((((BtlUnit *)selectedUnit)->flags & 2) == 0) {
         return 1;
     }
-    battle = (BtlState *)btlGetRuntime();
-    result = evtFindTaskResourceEntryByKey(battle->eventTaskId, action);
-    if (result == 0) {
+    battleState = (BtlState *)btlGetRuntime();
+    actionResource = evtFindTaskResourceEntryByKey(battleState->eventTaskId, actionKey);
+    if (actionResource == 0) {
         return 1;
     }
-    battle->eventResult = result;
-    battle->eventUnit = (BtlUnit *)unit;
-    battle->eventAction = action;
-    battle->eventActive = 1;
+    battleState->eventResult = actionResource;
+    battleState->eventUnit = (BtlUnit *)selectedUnit;
+    battleState->eventAction = actionKey;
+    battleState->eventActive = 1;
     return 1;
 }
 
@@ -360,12 +409,14 @@ s32 btlCommandStartSlotMotion(void) {
 
 extern char D_003A6848[];
 
+/* Apply the fixed volume/pan to a loaded sequence plus the script's offset.
+ * Returns 1 even when the sequence is not loaded. */
 s32 btlCommandSetSequenceVolumePan(void) {
-    BtlState *battle = (BtlState *)btlGetRuntime();
-    s32 index = scrReadIntParameter(0);
-    if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) != 0) {
-        sndSetSequenceVolumePan(battle->sequenceHandle + index, 0x7f, 0x3f);
-        btlBossDebugPrintf(D_003A6848, battle->sequenceHandle + index);
+    BtlState *battleState = (BtlState *)btlGetRuntime();
+    s32 sequenceOffset = scrReadIntParameter(0);
+    if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) != 0) {
+        sndSetSequenceVolumePan(battleState->sequenceHandle + sequenceOffset, BTL_EVENT_SEQUENCE_VOLUME, BTL_EVENT_SEQUENCE_PAN);
+        btlBossDebugPrintf(D_003A6848, battleState->sequenceHandle + sequenceOffset);
     }
     return 1;
 }
@@ -434,19 +485,20 @@ void *btlCreateActionTask(void *battler, s32 action) {
     return task;
 }
 
+/* Report whether a bit-0x200 unit meets either native restriction test. */
 s32 btlHasRestrictedUnit(void) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        u32 status = unit->flags;
-        if (status & 0x200) {
-            if (status & 0xe0) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        u32 unitFlags = unitCursor->flags;
+        if (unitFlags & 0x200) {
+            if (unitFlags & 0xe0) {
                 return 1;
             }
-            if (unit->conditionFlags & 0x4000) {
+            if (unitCursor->conditionFlags & 0x4000) {
                 return 1;
             }
         }
-        unit = unit->next;
+        unitCursor = unitCursor->next;
     }
     return 0;
 }
@@ -460,66 +512,72 @@ typedef struct BtlListStatus {
     u16 flags;            /* 0x0E */
 } BtlListStatus;
 
-s32 btlListHasMarkedFlag(u8 **entries, s32 count) {
-    s32 i;
-    for (i = 0; i < count; i++) {
-        if ((((BtlListStatus *)entries[i])->flags & 0x7fff) == 0x4000) {
+/* Match exactly the marked flag after discarding bit 0x8000. */
+s32 btlListHasMarkedFlag(u8 **entryList, s32 entryCount) {
+    s32 entryIndex;
+    for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+        if ((((BtlListStatus *)entryList[entryIndex])->flags & BTL_LIST_FLAG_MASK) == BTL_LIST_MARKED_FLAG) {
             return 1;
         }
     }
     return 0;
 }
 
-s32 btlListCountersWithinLimits(u8 **entries, s32 count) {
-    s32 i;
-    for (i = 0; i < count; i++) {
-        if (((BtlListStatus *)entries[i])->primaryCurrent < ((BtlListStatus *)entries[i])->primaryLimit) {
+/* True only when every primary counter is >= its limit; an empty list passes. */
+s32 btlListCountersWithinLimits(u8 **entryList, s32 entryCount) {
+    s32 entryIndex;
+    for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+        if (((BtlListStatus *)entryList[entryIndex])->primaryCurrent < ((BtlListStatus *)entryList[entryIndex])->primaryLimit) {
             return 0;
         }
     }
     return 1;
 }
 
-s32 btlListSecondaryCountersWithinLimits(u8 **entries, s32 count) {
-    s32 i;
-    for (i = 0; i < count; i++) {
-        if (((BtlListStatus *)entries[i])->secondaryCurrent < ((BtlListStatus *)entries[i])->secondaryLimit) {
+/* The secondary-counter counterpart also accepts equality and empty lists. */
+s32 btlListSecondaryCountersWithinLimits(u8 **entryList, s32 entryCount) {
+    s32 entryIndex;
+    for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+        if (((BtlListStatus *)entryList[entryIndex])->secondaryCurrent < ((BtlListStatus *)entryList[entryIndex])->secondaryLimit) {
             return 0;
         }
     }
     return 1;
 }
 
-s32 btlListHasMatchingFlag(u8 **entries, s32 count, u32 flags) {
-    s32 i;
-    for (i = 0; i < count; i++) {
-        if ((((BtlListStatus *)entries[i])->flags & 0x7fff) & flags) {
+/* Test any requested low-15-bit flag, rather than the exact marked pattern. */
+s32 btlListHasMatchingFlag(u8 **entryList, s32 entryCount, u32 requestedFlags) {
+    s32 entryIndex;
+    for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+        if ((((BtlListStatus *)entryList[entryIndex])->flags & BTL_LIST_FLAG_MASK) & requestedFlags) {
             return 1;
         }
     }
     return 0;
 }
 
-s32 btlIndexListMatchesEntryCodes(void *list, s32 code, u32 mask) {
-    u32 matched = 0;
-    u32 i;
-    u32 count = btlGetIndexListCount(list);
+/* Every entry must classify as 1 or 2 with a corresponding allowed mask bit.
+ * Other classifications fail the all-entry check; an empty list passes. */
+s32 btlIndexListMatchesEntryCodes(void *indexList, s32 entryCode, u32 allowedCodeBits) {
+    u32 matchedCount = 0;
+    u32 entryIndex;
+    u32 entryCount = btlGetIndexListCount(indexList);
 
-    for (i = 0; i < count; i++) {
-        switch (btlMatchActorEntryCode(btlGetIndexListEntry(list, i), code)) {
+    for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+        switch (btlMatchActorEntryCode(btlGetIndexListEntry(indexList, entryIndex), entryCode)) {
         case 1:
-            if (mask & 0x2555) {
-                matched++;
+            if (allowedCodeBits & 0x2555) {
+                matchedCount++;
             }
             break;
         case 2:
-            if (mask & 0x2AA) {
-                matched++;
+            if (allowedCodeBits & 0x2AA) {
+                matchedCount++;
             }
             break;
         }
     }
-    return matched == count;
+    return matchedCount == entryCount;
 }
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6738);
@@ -544,33 +602,35 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6838);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6848);
 
-s32 btlIndexListNoExpiredEntryCodes(void *list, s32 command) {
-    s32 codes[5] = {0, 1, 2, 3, 4};
-    s32 count = btlGetIndexListCount(list);
-    s32 i;
-    u32 j;
-    void *entry;
-    s32 flags;
+/* Reject expired positive or negative codes according to the command's rule.
+ * A returned code value of zero is not rejected; other expiry rules pass. */
+s32 btlIndexListNoExpiredEntryCodes(void *indexList, s32 commandId) {
+    s32 entryCodes[BTL_ENTRY_CODE_COUNT] = {0, 1, 2, 3, 4};
+    s32 entryCount = btlGetIndexListCount(indexList);
+    s32 entryIndex;
+    u32 codeIndex;
+    void *actorEntry;
+    s32 requirementBits;
 
-    for (i = 0; i < count; i++) {
-        entry = btlGetIndexListEntry(list, i);
+    for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+        actorEntry = btlGetIndexListEntry(indexList, entryIndex);
         /* The row's +0x28 word is BtlCommandRecord.requiredEntryFlags.
            Keep this loop-invariant load per entry to match the original. */
-        flags = *(s32 *)(datCommandRecords + command * 0x38 + 0x28);
-        switch (flags) {
-        case 0x800:
-            for (j = 0; j < 5; j++) {
-                if (btlActorEntryIsExpired(entry, codes[j]) != 0) {
-                    if (btlGetActorEntryCode(entry, codes[j]) > 0) {
+        requirementBits = *(s32 *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES + 0x28);
+        switch (requirementBits) {
+        case BTL_EXPIRED_POSITIVE_ENTRY_RULE:
+            for (codeIndex = 0; codeIndex < BTL_ENTRY_CODE_COUNT; codeIndex++) {
+                if (btlActorEntryIsExpired(actorEntry, entryCodes[codeIndex]) != 0) {
+                    if (btlGetActorEntryCode(actorEntry, entryCodes[codeIndex]) > 0) {
                         return 0;
                     }
                 }
             }
             break;
-        case 0x1000:
-            for (j = 0; j < 5; j++) {
-                if (btlActorEntryIsExpired(entry, codes[j]) != 0) {
-                    if (btlGetActorEntryCode(entry, codes[j]) < 0) {
+        case BTL_EXPIRED_NEGATIVE_ENTRY_RULE:
+            for (codeIndex = 0; codeIndex < BTL_ENTRY_CODE_COUNT; codeIndex++) {
+                if (btlActorEntryIsExpired(actorEntry, entryCodes[codeIndex]) != 0) {
+                    if (btlGetActorEntryCode(actorEntry, entryCodes[codeIndex]) < 0) {
                         return 0;
                     }
                 }
@@ -581,38 +641,41 @@ s32 btlIndexListNoExpiredEntryCodes(void *list, s32 command) {
     return 1;
 }
 
-u16 btlDetermineCommandCounterEligibility(u8 **entries, s32 count, s32 unused, s32 command) {
-    s32 result = -1;
-    if (datCommandRecords[command * 0x38 + 9] & 1) {
-        switch (*(u16 *)(datCommandRecords + command * 0x38 + 0x16)) {
+/* Return 3 for met requirements, or 0 for failed/inapplicable requirements.
+ * A failed primary check suppresses later checks. DDS1 has no requirementBits
+ * guard here; do not import DDS2's additional guards or cache table reads. */
+u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, s32 unused, s32 commandId) {
+    s32 eligibility = BTL_COUNTER_ELIGIBILITY_UNSET;
+    if (datCommandRecords[commandId * BTL_COMMAND_RECORD_BYTES + 9] & 1) {
+        switch (*(u16 *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES + 0x16)) {
         case 2:
         case 5:
         case 7:
         case 9:
         case 11:
         case 15:
-            result = btlListCountersWithinLimits(entries, count) ? 3 : 0;
+            eligibility = btlListCountersWithinLimits(entryList, entryCount) ? BTL_COUNTER_ELIGIBILITY_MET : BTL_COUNTER_ELIGIBILITY_NOT_MET;
             break;
         }
-        if (result != 0) {
-            switch (*(u16 *)(datCommandRecords + command * 0x38 + 0x1A)) {
+        if (eligibility != BTL_COUNTER_ELIGIBILITY_NOT_MET) {
+            switch (*(u16 *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES + 0x1A)) {
             case 2:
             case 5:
             case 7:
             case 9:
             case 11:
             case 15:
-                result = btlListSecondaryCountersWithinLimits(entries, count) ? 3 : 0;
+                eligibility = btlListSecondaryCountersWithinLimits(entryList, entryCount) ? BTL_COUNTER_ELIGIBILITY_MET : BTL_COUNTER_ELIGIBILITY_NOT_MET;
                 break;
             }
-            if (result != 0) {
-                if (datCommandRecords[command * 0x38 + 0x24] == 2) {
-                    result = btlListHasMatchingFlag(entries, count, *(u16 *)(datCommandRecords + command * 0x38 + 0x26)) == 0 ? 3 : 0;
+            if (eligibility != BTL_COUNTER_ELIGIBILITY_NOT_MET) {
+                if (datCommandRecords[commandId * BTL_COMMAND_RECORD_BYTES + 0x24] == 2) {
+                    eligibility = btlListHasMatchingFlag(entryList, entryCount, *(u16 *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES + 0x26)) == 0 ? BTL_COUNTER_ELIGIBILITY_MET : BTL_COUNTER_ELIGIBILITY_NOT_MET;
                 }
             }
         }
     }
-    return (result < 0) ? 0 : result;
+    return (eligibility < 0) ? BTL_COUNTER_ELIGIBILITY_NOT_MET : eligibility;
 }
 
 typedef struct BtlCommandRecord {
@@ -632,56 +695,59 @@ extern s8 *datCommandSelectors;
 
 extern u8 *datCommandRecords;
 
-s32 btlGetCommandBlockReason(BtlTask *task, s32 command) {
-    BtlUnit *owner;
-    BtlCommandRecord *record;
-    void *list;
-    s32 count;
-    s32 flaggedCount;
-    s32 i;
+/* Query the command's block reason, freeing the temporary target list.
+ * DDS1 additionally has the mode/flag gate returning 6. The final empty/all-
+ * flagged-target reason is 9 here, versus 10 in DDS2. Zero means no block. */
+s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
+    BtlUnit *ownerUnit;
+    BtlCommandRecord *commandRecord;
+    void *targetList;
+    s32 targetCount;
+    s32 flaggedTargetCount;
+    s32 targetIndex;
     if (((BtlState *)btlGetRuntime())->unk_1FC & 0x800) {
         return 0;
     }
-    if (command <= 0) {
+    if (commandId <= 0) {
         return 0;
     }
-    if (datCommandSelectors[command * 2 + 1] == 2) {
-        owner = task->unit;
-        if (owner->flags & 0x200) {
-            if (owner->mode == 4) {
+    if (datCommandSelectors[commandId * 2 + 1] == 2) {
+        ownerUnit = actionTask->unit;
+        if (ownerUnit->flags & 0x200) {
+            if (ownerUnit->mode == 4) {
                 if (mdlFlagTest(0x61) == 0) {
                     return 6;
                 }
             }
         }
     }
-    record = (BtlCommandRecord *)(command * 0x38 + (s32)datCommandRecords);
-    if ((record->attributeBits & 0x400000FF) == 0x40000002) {
-        if ((~record->restriction & 0x7FFF) == 0x4000) {
+    commandRecord = (BtlCommandRecord *)(commandId * BTL_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
+    if ((commandRecord->attributeBits & 0x400000FF) == 0x40000002) {
+        if ((~commandRecord->restriction & 0x7FFF) == 0x4000) {
             if (btlHasRestrictedUnit() == 0) {
                 return 2;
             }
         }
     }
-    flaggedCount = 0;
-    list = btlAllocateIndexList(0xD);
-    func_001A3360((s32)task, (s32)list, 0);
-    count = btlGetIndexListCount(list);
-    /* Keep this byte-table load separate from record for the matching address calculation. */
-    if (datCommandRecords[command * 0x38] & 8) {
-        for (i = 0; i < count; i++) {
-            if (((BtlUnit *)btlGetIndexListEntry(list, i))->conditionFlags & 0x800) {
-                flaggedCount++;
+    flaggedTargetCount = 0;
+    targetList = btlAllocateIndexList(0xD);
+    func_001A3360((s32)actionTask, (s32)targetList, 0);
+    targetCount = btlGetIndexListCount(targetList);
+    /* Keep this byte-table load separate from commandRecord for the matching address calculation. */
+    if (datCommandRecords[commandId * BTL_COMMAND_RECORD_BYTES] & 8) {
+        for (targetIndex = 0; targetIndex < targetCount; targetIndex++) {
+            if (((BtlUnit *)btlGetIndexListEntry(targetList, targetIndex))->conditionFlags & 0x800) {
+                flaggedTargetCount++;
             }
         }
     }
-    btlFreeIndexList(list);
-    if (count != 0) {
-        if (count != flaggedCount) {
+    btlFreeIndexList(targetList);
+    if (targetCount != 0) {
+        if (targetCount != flaggedTargetCount) {
             return 0;
         }
     }
-    return 9;
+    return BTL_BLOCK_EMPTY_OR_ALL_FLAGGED;
 }
 
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_00210EB0);
@@ -798,22 +864,22 @@ extern void *sdfAllocAndClearQuadwords(s32);
 
 /* Allocate a cache entry with one reference and insert it at the list head. */
 BattleModelEntry *btlCreateModelEntry(void) {
-    BattleModelEntry *entry = sdfAllocAndClearQuadwords(sizeof(BattleModelEntry));
-    BtlState *battle;
-    BattleModelEntry *head;
-    entry->refCount = 1;
-    entry->state = 0;
-    battle = (BtlState *)btlGetRuntime();
-    entry->prev = 0;
-    head = battle->modelEntries;
-    if (head != 0) {
-        head->prev = entry;
-        entry->next = battle->modelEntries;
+    BattleModelEntry *cacheEntry = sdfAllocAndClearQuadwords(sizeof(BattleModelEntry));
+    BtlState *battleState;
+    BattleModelEntry *previousHead;
+    cacheEntry->refCount = 1;
+    cacheEntry->state = 0;
+    battleState = (BtlState *)btlGetRuntime();
+    cacheEntry->prev = 0;
+    previousHead = battleState->modelEntries;
+    if (previousHead != 0) {
+        previousHead->prev = cacheEntry;
+        cacheEntry->next = battleState->modelEntries;
     } else {
-        entry->next = 0;
+        cacheEntry->next = 0;
     }
-    battle->modelEntries = entry;
-    return entry;
+    battleState->modelEntries = cacheEntry;
+    return cacheEntry;
 }
 
 extern char D_003A68F8[];
@@ -825,46 +891,47 @@ extern void sndReleaseSlotOwner(void *);
 extern void sdfReleaseChipBlock(void *);
 
 /* Only the final reference releases resources and unlinks the cache entry. */
-void btlReleaseModelEntry(BattleModelEntry *entry) {
-    if (--entry->refCount != 0) {
+void btlReleaseModelEntry(BattleModelEntry *cacheEntry) {
+    if (--cacheEntry->refCount != 0) {
         return;
     }
-    if (entry->packRequest != 0) {
-        func_00288788(entry->packRequest);
+    if (cacheEntry->packRequest != 0) {
+        func_00288788(cacheEntry->packRequest);
     }
-    if (entry->soundOwner != 0) {
-        sndReleaseSlotOwner(entry->soundOwner);
+    if (cacheEntry->soundOwner != 0) {
+        sndReleaseSlotOwner(cacheEntry->soundOwner);
     }
-    if (entry->next != 0) {
-        entry->next->prev = entry->prev;
+    if (cacheEntry->next != 0) {
+        cacheEntry->next->prev = cacheEntry->prev;
     }
-    if (entry->prev != 0) {
-        entry->prev->next = entry->next;
+    if (cacheEntry->prev != 0) {
+        cacheEntry->prev->next = cacheEntry->next;
     } else {
-        ((BtlState *)btlGetRuntime())->modelEntries = entry->next;
+        ((BtlState *)btlGetRuntime())->modelEntries = cacheEntry->next;
     }
-    sdfReleaseChipBlock(entry);
-    btlBossDebugPrintf(D_003A68F8, entry->kind, entry->id);
+    sdfReleaseChipBlock(cacheEntry);
+    btlBossDebugPrintf(D_003A68F8, cacheEntry->kind, cacheEntry->id);
 }
 
 /* Release one reference from each entry, preserving any retained entries. */
 void btlReleaseAllModelEntries(void) {
-    BattleModelEntry *entry = ((BtlState *)btlGetRuntime())->modelEntries;
-    BattleModelEntry *next;
-    while (entry != 0) {
-        next = entry->next;
-        btlReleaseModelEntry(entry);
-        entry = next;
+    BattleModelEntry *cacheCursor = ((BtlState *)btlGetRuntime())->modelEntries;
+    BattleModelEntry *nextEntry;
+    while (cacheCursor != 0) {
+        nextEntry = cacheCursor->next;
+        btlReleaseModelEntry(cacheCursor);
+        cacheCursor = nextEntry;
     }
 }
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A68F8);
 
-void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *filename) {
+/* Format the model path into the caller's buffer; nonzero selects devil data. */
+void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *pathOut) {
     if (isDevil == 0) {
-        func_003014F0(filename, "%spc%03X_ms.LB", "/model/human/", modelId);
+        func_003014F0(pathOut, "%spc%03X_ms.LB", "/model/human/", modelId);
     } else {
-        func_003014F0(filename, "%s%03X_ms.LB", "/model/devil/", modelId);
+        func_003014F0(pathOut, "%s%03X_ms.LB", "/model/devil/", modelId);
     }
 }
 
@@ -872,34 +939,35 @@ extern s32 mdlRequestAsset(s32, s32, s32);
 
 extern s32 fileRequestIsReady(void *);
 
-/* Query model/PAC readiness. The repeated model query on -1 is intentional. */
-s8 btlIsModelPackEntryReady(BattleModelEntry *entry) {
-    s32 result;
-    if (entry->state != 0) {
+/* Nonzero cache state bypasses requests. Otherwise retain both native model
+ * queries and the signed-byte readiness result. */
+s8 btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
+    s32 requestReady;
+    if (cacheEntry->state != 0) {
         return 1;
     }
-    if (mdlRequestAsset(entry->kind, entry->id, 0) == 0 ||
-        mdlRequestAsset(entry->kind, entry->id, 0) == -1) {
+    if (mdlRequestAsset(cacheEntry->kind, cacheEntry->id, 0) == 0 ||
+        mdlRequestAsset(cacheEntry->kind, cacheEntry->id, 0) == -1) {
         return 0;
     }
-    if (entry->packRequest == 0) {
+    if (cacheEntry->packRequest == 0) {
         return 1;
     }
-    result = fileRequestIsReady(entry->packRequest);
-    return result;
+    requestReady = fileRequestIsReady(cacheEntry->packRequest);
+    return requestReady;
 }
 
 /* Return the matching cache entry's legacy 32-bit address, or zero. */
-s32 btlFindModelEntry(kind, id)
-s32 kind;
-s32 id;
+s32 btlFindModelEntry(modelKind, modelId)
+s32 modelKind;
+s32 modelId;
 {
-    BattleModelEntry *entry = ((BtlState *)btlGetRuntime())->modelEntries;
-    while (entry != 0) {
-        if (entry->kind == kind && entry->id == id) {
-            return (s32)entry;
+    BattleModelEntry *cacheCursor = ((BtlState *)btlGetRuntime())->modelEntries;
+    while (cacheCursor != 0) {
+        if (cacheCursor->kind == modelKind && cacheCursor->id == modelId) {
+            return (s32)cacheCursor;
         }
-        entry = entry->next;
+        cacheCursor = cacheCursor->next;
     }
     return 0;
 }
@@ -912,37 +980,37 @@ void func_002115E8(void) {
 }
 
 /* Reuse a cached kind/id pair or request its model pack and first reference. */
-void btlLoadModelPack(s32 kind, s32 id) {
-    char path[128];
-    BattleModelEntry *entry = (BattleModelEntry *)btlFindModelEntry(kind, id);
+void btlLoadModelPack(s32 modelKind, s32 modelId) {
+    char resourcePath[128];
+    BattleModelEntry *cacheEntry = (BattleModelEntry *)btlFindModelEntry(modelKind, modelId);
 
-    if (entry == 0) {
-        entry = btlCreateModelEntry();
-        entry->kind = kind;
-        entry->id = id;
-        mdlRequestAsset(kind, id, 0);
-        if (sndFindListNodeForChannel(kind, id) == 0) {
-            btlFormatModelResourcePath(kind, id, path);
-            entry->packRequest = (FilePacRequest *)fileQueuePlainDispatchRequest(path);
-            btlBossDebugPrintf("btl:pack load start[%s][%X,%X]\n", path, kind, id);
+    if (cacheEntry == 0) {
+        cacheEntry = btlCreateModelEntry();
+        cacheEntry->kind = modelKind;
+        cacheEntry->id = modelId;
+        mdlRequestAsset(modelKind, modelId, 0);
+        if (sndFindListNodeForChannel(modelKind, modelId) == 0) {
+            btlFormatModelResourcePath(modelKind, modelId, resourcePath);
+            cacheEntry->packRequest = (FilePacRequest *)fileQueuePlainDispatchRequest(resourcePath);
+            btlBossDebugPrintf("btl:pack load start[%s][%X,%X]\n", resourcePath, modelKind, modelId);
         } else {
-            entry->packRequest = 0;
-            entry->soundOwner = 0;
-            btlBossDebugPrintf("btl:pack load start[same motSE find][%X,%X]\n", kind, id);
+            cacheEntry->packRequest = 0;
+            cacheEntry->soundOwner = 0;
+            btlBossDebugPrintf("btl:pack load start[same motSE find][%X,%X]\n", modelKind, modelId);
         }
     } else {
-        btlBossDebugPrintf("btl:same pack find[%X,%X]\n", kind, id);
-        entry->refCount++;
+        btlBossDebugPrintf("btl:same pack find[%X,%X]\n", modelKind, modelId);
+        cacheEntry->refCount++;
     }
 }
 
 /* Drop one reference from the matching kind/id cache entry, if it exists. */
-void btlReleaseFoundModelEntry(s32 kind, s32 id) {
-    s32 entry;
+void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId) {
+    s32 entryAddress;
 
-    entry = btlFindModelEntry(kind, id);
-    if (entry != 0) {
-        btlReleaseModelEntry((BattleModelEntry *)entry);
+    entryAddress = btlFindModelEntry(modelKind, modelId);
+    if (entryAddress != 0) {
+        btlReleaseModelEntry((BattleModelEntry *)entryAddress);
         return;
     }
 }
@@ -950,10 +1018,10 @@ void btlReleaseFoundModelEntry(s32 kind, s32 id) {
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_00211740);
 
 /* Return the sign-extended cache state, or zero when no entry exists. */
-s32 btlGetEntryState(s32 kind, s32 id) {
-    BattleModelEntry *entry = (BattleModelEntry *)btlFindModelEntry(kind, id);
-    if (entry != 0) {
-        return entry->state;
+s32 btlGetEntryState(s32 modelKind, s32 modelId) {
+    BattleModelEntry *cacheEntry = (BattleModelEntry *)btlFindModelEntry(modelKind, modelId);
+    if (cacheEntry != 0) {
+        return cacheEntry->state;
     }
     return 0;
 }
@@ -1453,42 +1521,44 @@ typedef struct MenuList {
     u32 rows;
 } MenuList;
 
-s32 mnuListMoveCursor(MenuList *list) {
-    if (sdfPadButtonStates->b6 & 2) {
-        if (list->cursor != 0) {
-            list->cursor--;
-            if (list->cursor == list->top && list->cursor != 0) {
-                list->top = list->cursor - 1;
+/* Apply up/down/page-down/page-up precedence, including endpoint wrapping.
+ * Returns 1 only for a negative stick byte when no direction branch ran. */
+s32 mnuListMoveCursor(MenuList *menuList) {
+    if (sdfPadButtonStates->b6 & MNU_LIST_INPUT_FLAG) {
+        if (menuList->cursor != 0) {
+            menuList->cursor--;
+            if (menuList->cursor == menuList->top && menuList->cursor != 0) {
+                menuList->top = menuList->cursor - 1;
             }
         } else {
-            list->cursor = list->count - 1;
-            list->top = list->count - list->rows;
+            menuList->cursor = menuList->count - 1;
+            menuList->top = menuList->count - menuList->rows;
         }
-    } else if (sdfPadButtonStates->b7 & 2) {
-        if (list->cursor >= list->count - 1) {
-            list->cursor = 0;
-            list->top = 0;
+    } else if (sdfPadButtonStates->b7 & MNU_LIST_INPUT_FLAG) {
+        if (menuList->cursor >= menuList->count - 1) {
+            menuList->cursor = 0;
+            menuList->top = 0;
         } else {
-            list->cursor++;
-            if (list->cursor == list->top + list->rows - 1 && list->top < list->count - list->rows) {
-                list->top++;
+            menuList->cursor++;
+            if (menuList->cursor == menuList->top + menuList->rows - 1 && menuList->top < menuList->count - menuList->rows) {
+                menuList->top++;
             }
         }
-    } else if (sdfPadButtonStates->b5 & 2) {
-        if (list->top + list->rows * 2 < list->count) {
-            list->top += list->rows;
-            list->cursor += list->rows;
+    } else if (sdfPadButtonStates->b5 & MNU_LIST_INPUT_FLAG) {
+        if (menuList->top + menuList->rows * 2 < menuList->count) {
+            menuList->top += menuList->rows;
+            menuList->cursor += menuList->rows;
         } else {
-            list->cursor = list->count - 1;
-            list->top = list->count - list->rows;
+            menuList->cursor = menuList->count - 1;
+            menuList->top = menuList->count - menuList->rows;
         }
-    } else if (sdfPadButtonStates->b4 & 2) {
-        if (list->top >= list->rows) {
-            list->top -= list->rows;
-            list->cursor -= list->rows;
+    } else if (sdfPadButtonStates->b4 & MNU_LIST_INPUT_FLAG) {
+        if (menuList->top >= menuList->rows) {
+            menuList->top -= menuList->rows;
+            menuList->cursor -= menuList->rows;
         } else {
-            list->cursor = 0;
-            list->top = 0;
+            menuList->cursor = 0;
+            menuList->top = 0;
         }
     } else if (sdfPadButtonStates->stick < 0) {
         return 1;
@@ -1502,10 +1572,11 @@ extern void func_001958A0(void *, s32, s32);
 
 extern s32 frFontQueueGlyphInSelectedSlot(void *);
 
-s32 mnuQueueColoredGlyphAtPosition(s32 width, s32 height, s32 mode) {
-    void *packet = func_00197748(width << 4, height << 3, 0xff0000, 0xa09dc380, mode, 0);
-    func_001958A0(packet, 0, 0x60);
-    return frFontQueueGlyphInSelectedSlot(packet);
+/* Queue text at pixel coordinates, using the font's native X/Y scaling. */
+s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
+    void *textGlyph = func_00197748(x << 4, y << 3, MNU_LIST_TEXT_DEPTH, MNU_LIST_NORMAL_COLOR, text, 0);
+    func_001958A0(textGlyph, 0, 0x60);
+    return frFontQueueGlyphInSelectedSlot(textGlyph);
 }
 
 typedef struct BtlMenuSelection {
@@ -1515,33 +1586,36 @@ typedef struct BtlMenuSelection {
     s32 count;    /* 0x0C */
 } BtlMenuSelection;
 
-s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 mode, u8 *menu, s32 *items) {
-    u32 first;
-    u32 count;
-    u32 index;
-    u32 end;
-    u32 selected;
+/* Draw the visible text interval, highlighting the selected absolute index.
+ * Keep pointer-typed coordinates and the legacy s32 fallthrough unchanged. */
+s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, u8 *selectionState, s32 *rowTexts) {
+    u32 firstIndex;
+    u32 visibleRowCount;
+    u32 itemIndex;
+    u32 endIndex;
+    u32 selectedIndex;
     s32 rowY;
-    first = ((BtlMenuSelection *)menu)->first;
-    count = ((BtlMenuSelection *)menu)->count;
-    end = first + count;
-    index = first;
-    selected = ((BtlMenuSelection *)menu)->selected;
+    firstIndex = ((BtlMenuSelection *)selectionState)->first;
+    visibleRowCount = ((BtlMenuSelection *)selectionState)->count;
+    endIndex = firstIndex + visibleRowCount;
+    itemIndex = firstIndex;
+    selectedIndex = ((BtlMenuSelection *)selectionState)->selected;
     rowY = (s32)y;
-    for (; index < end; index++) {
-        void *packet = func_00197748((s32)x << 4, rowY << 3, 0xFF0000, index == selected ? 0x89FEFF80 : 0xA09DC380, items[index], 0);
-        func_001958A0(packet, 0, 0x60);
-        frFontQueueGlyphInSelectedSlot(packet);
-        rowY += 0x18;
+    for (; itemIndex < endIndex; itemIndex++) {
+        void *textGlyph = func_00197748((s32)x << 4, rowY << 3, MNU_LIST_TEXT_DEPTH, itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR, rowTexts[itemIndex], 0);
+        func_001958A0(textGlyph, 0, 0x60);
+        frFontQueueGlyphInSelectedSlot(textGlyph);
+        rowY += MNU_LIST_ROW_HEIGHT;
     }
 }
 
 extern void func_001FB140(u8 *, u8 *, s32, s32, u32, u32);
 
-s32 mnuDrawMenuFrameSizedToRows(u8 *first, u8 *second, s32 mode, u8 *settings, s32 *items) {
-    s32 offset = ((BtlMenuSelection *)settings)->count * 24 + 4;
-    func_001FB140(first - 4, second - 4, mode, offset, 0x80806020, 0x30000000);
-    return btlDrawSelectableListRows(first, second, mode, settings, items);
+/* Size the frame from the visible rows, then forward the row-draw result. */
+s32 mnuDrawMenuFrameSizedToRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *rowTexts) {
+    s32 frameHeight = ((BtlMenuSelection *)selectionState)->count * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET;
+    func_001FB140(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, mode, frameHeight, 0x80806020, 0x30000000);
+    return btlDrawSelectableListRows(x, y, mode, selectionState, rowTexts);
 }
 
 extern void sdfInitPacketList(void *);
@@ -1559,35 +1633,37 @@ typedef struct BtlMenuDrawer {
 
 extern BtlMenuDrawer kwlnPositionedTextSurface;
 
-s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *menu, s32 *items) {
-    void *handle;
-    u32 first;
-    u32 count;
-    u32 index;
-    u32 end;
-    u32 selected;
+/* Submit formatted indices in one packet list, then draw the text column.
+ * Preserve the separate fixed-point and pixel-coordinate arithmetic. */
+s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *rowTexts) {
+    void *indexPackets;
+    u32 firstIndex;
+    u32 visibleRowCount;
+    u32 itemIndex;
+    u32 endIndex;
+    u32 selectedIndex;
     s32 rowY;
-    func_001FB140(x - 4, y - 4, mode, ((BtlMenuSelection *)menu)->count * 24 + 4, 0x80806020, 0x30000000);
-    handle = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(handle);
-    first = ((BtlMenuSelection *)menu)->first;
-    count = ((BtlMenuSelection *)menu)->count;
-    end = first + count;
-    index = first;
-    selected = ((BtlMenuSelection *)menu)->selected;
-    if (index < end) {
+    func_001FB140(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, mode, ((BtlMenuSelection *)selectionState)->count * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET, 0x80806020, 0x30000000);
+    indexPackets = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(indexPackets);
+    firstIndex = ((BtlMenuSelection *)selectionState)->first;
+    visibleRowCount = ((BtlMenuSelection *)selectionState)->count;
+    endIndex = firstIndex + visibleRowCount;
+    itemIndex = firstIndex;
+    selectedIndex = ((BtlMenuSelection *)selectionState)->selected;
+    if (itemIndex < endIndex) {
         rowY = (s32)y * 8 + 0x7900;
-        for (; index < end; index++) {
-            s32 flag = 4;
-            if (index != selected) {
-                flag = 0;
+        for (; itemIndex < endIndex; itemIndex++) {
+            s32 selectionFlags = MNU_LIST_SELECTED_TEXT_FLAG;
+            if (itemIndex != selectedIndex) {
+                selectionFlags = 0;
             }
-            sdfAppendPacket(handle, sdfCreateFormattedSifCommand((s32)x * 16 + 0x7000, rowY, 0xFF0000, flag, D_003BBAA8, index));
-            rowY += 0xC0;
+            sdfAppendPacket(indexPackets, sdfCreateFormattedSifCommand((s32)x * 16 + 0x7000, rowY, MNU_LIST_TEXT_DEPTH, selectionFlags, D_003BBAA8, itemIndex));
+            rowY += MNU_LIST_FIXED_ROW_HEIGHT;
         }
     }
-    kwlnPositionedTextSurface.draw(&kwlnPositionedTextSurface, (s32)handle);
-    return btlDrawSelectableListRows(x + 0x2C, y, mode, menu, items);
+    kwlnPositionedTextSurface.draw(&kwlnPositionedTextSurface, (s32)indexPackets);
+    return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, mode, selectionState, rowTexts);
 }
 
 extern s32 D_003BAA70;
@@ -1721,13 +1797,13 @@ s32 *btlFindGroupedEntity(group, type)
 }
 
 /* Return whether this group's separate ID list contains id. */
-s32 btlGroupContainsId(s32 group, s32 id) {
-    BattleGroupIdEntry *entry = btlGroupIdHeads[group];
-    while (entry != 0) {
-        if (entry->id == id) {
+s32 btlGroupContainsId(s32 groupIndex, s32 wantedId) {
+    BattleGroupIdEntry *idCursor = btlGroupIdHeads[groupIndex];
+    while (idCursor != 0) {
+        if (idCursor->id == wantedId) {
             return 1;
         }
-        entry = entry->next;
+        idCursor = idCursor->next;
     }
     return 0;
 }
@@ -1736,68 +1812,68 @@ extern void *sdfAllocSizeClassBlock(s32);
 
 
 /* Prepend id to this group's ID list; duplicate IDs are allowed. */
-void btlAddGroupId(s32 group, s32 id) {
-    BattleGroupIdEntry *node = sdfAllocSizeClassBlock(sizeof(BattleGroupIdEntry));
-    BattleGroupIdEntry **head = &btlGroupIdHeads[group];
-    node->id = id;
-    node->next = *head;
-    *head = node;
+void btlAddGroupId(s32 groupIndex, s32 newId) {
+    BattleGroupIdEntry *idEntry = sdfAllocSizeClassBlock(sizeof(BattleGroupIdEntry));
+    BattleGroupIdEntry **groupHead = &btlGroupIdHeads[groupIndex];
+    idEntry->id = newId;
+    idEntry->next = *groupHead;
+    *groupHead = idEntry;
 }
 
 /* Remove the first matching ID using its incoming link, including the head. */
-void btlRemoveGroupId(s32 group, s32 id) {
-    BattleGroupIdEntry **link;
-    BattleGroupIdEntry *entry;
+void btlRemoveGroupId(s32 groupIndex, s32 wantedId) {
+    BattleGroupIdEntry **idLink;
+    BattleGroupIdEntry *idCursor;
 
-    link = &btlGroupIdHeads[group];
-    entry = *link;
-    if (entry == 0) {
+    idLink = &btlGroupIdHeads[groupIndex];
+    idCursor = *idLink;
+    if (idCursor == 0) {
         return;
     }
     do {
-        if (entry->id == id) {
-            *link = entry->next;
-            sdfReleaseChipBlock(entry);
+        if (idCursor->id == wantedId) {
+            *idLink = idCursor->next;
+            sdfReleaseChipBlock(idCursor);
             break;
         } else {
-            link = &entry->next;
-            entry = entry->next;
+            idLink = &idCursor->next;
+            idCursor = idCursor->next;
         }
-    } while (entry != 0);
+    } while (idCursor != 0);
 }
 
 
 /* Replace the group/type node; only flags bit 0 selects resource ownership. */
-void btlCreateGroupNode(s32 group, s32 type, s32 flags, s32 resourceList, s32 arg4, s32 requestHandle) {
-    BattleGroupNode *node;
-    BattleGroupNode *head;
-    s32 i;
-    btlRemoveCurrentGroupedEntity(group, type);
-    node = sdfAllocSizeClassBlock(sizeof(BattleGroupNode));
-    head = btlGroupNodeHeads[group];
-    if (head != NULL) {
-        head->prev = node;
+void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, s32 resourceList, s32 unknownValue, s32 requestHandle) {
+    BattleGroupNode *groupNode;
+    BattleGroupNode *previousHead;
+    s32 slotIndex;
+    btlRemoveCurrentGroupedEntity(groupIndex, entityType);
+    groupNode = sdfAllocSizeClassBlock(sizeof(BattleGroupNode));
+    previousHead = btlGroupNodeHeads[groupIndex];
+    if (previousHead != NULL) {
+        previousHead->prev = groupNode;
     }
-    btlGroupNodeHeads[group] = node;
-    node->next = head;
-    node->group = group;
-    node->type = type;
-    node->resourceList = resourceList;
-    node->unk_18 = arg4;
-    node->requestHandle = requestHandle;
-    node->prev = NULL;
-    node->modelContext = 0;
-    for (i = 0; i != 8; i++) {
-        node->slots[i].unk_0 = 0;
-        node->slots[i].unk_8 = 0;
-        node->slots[i].resourceHandle = 0;
+    btlGroupNodeHeads[groupIndex] = groupNode;
+    groupNode->next = previousHead;
+    groupNode->group = groupIndex;
+    groupNode->type = entityType;
+    groupNode->resourceList = resourceList;
+    groupNode->unk_18 = unknownValue;
+    groupNode->requestHandle = requestHandle;
+    groupNode->prev = NULL;
+    groupNode->modelContext = 0;
+    for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
+        groupNode->slots[slotIndex].unk_0 = 0;
+        groupNode->slots[slotIndex].unk_8 = 0;
+        groupNode->slots[slotIndex].resourceHandle = 0;
     }
-    node->ownsResources = flags & 1;
-    node->resourceHandle = 0;
-    node->unk_A4 = 0;
-    node->partList = 0;
-    node->unk_AC = 1.0f;
-    node->unk_B0 = 100.0f;
+    groupNode->ownsResources = ownershipFlags & BTL_GROUP_OWNS_RESOURCES_FLAG;
+    groupNode->resourceHandle = 0;
+    groupNode->unk_A4 = 0;
+    groupNode->partList = 0;
+    groupNode->unk_AC = 1.0f;
+    groupNode->unk_B0 = 100.0f;
 }
 
 extern void mdlDestroyContext(s32);
@@ -1810,67 +1886,67 @@ extern void sdfResourceListRelease(void *, s32);
 
 /* Capture ownership before clearing it for callbacks; keep the context-release
  * loop and resource-release order intact. NULL is allowed. */
-void btlDestroyGroupNode(BattleGroupNode *node) {
-    BattleGroupNode *prev;
-    BattleGroupNode *next;
+void btlDestroyGroupNode(BattleGroupNode *groupNode) {
+    BattleGroupNode *previousNode;
+    BattleGroupNode *nextNode;
     u8 ownsResources;
-    s32 i;
-    if (node == NULL) {
+    s32 slotIndex;
+    if (groupNode == NULL) {
         return;
     }
-    prev = node->prev;
-    next = node->next;
-    if (prev == NULL) {
-        btlGroupNodeHeads[node->group] = next;
+    previousNode = groupNode->prev;
+    nextNode = groupNode->next;
+    if (previousNode == NULL) {
+        btlGroupNodeHeads[groupNode->group] = nextNode;
     } else {
-        prev->next = next;
+        previousNode->next = nextNode;
     }
-    if (next != NULL) {
-        next->prev = prev;
+    if (nextNode != NULL) {
+        nextNode->prev = previousNode;
     }
-    ownsResources = node->ownsResources;
-    node->ownsResources = 0;
-    if (node->modelContext != 0) {
+    ownsResources = groupNode->ownsResources;
+    groupNode->ownsResources = 0;
+    if (groupNode->modelContext != 0) {
         do {
-            mdlDestroyContext(node->modelContext);
-        } while (node->modelContext != 0);
+            mdlDestroyContext(groupNode->modelContext);
+        } while (groupNode->modelContext != 0);
     }
     if (ownsResources != 0) {
-        sdfResourceListRelease((void *)node->resourceList, 1);
-        sdfQueueNonzeroResourceId((void *)node->requestHandle);
-        for (i = 0; i != 8; i++) {
-            if (node->slots[i].resourceHandle != 0) {
-                sdfReleaseResourceAllocation(node->slots[i].resourceHandle);
+        sdfResourceListRelease((void *)groupNode->resourceList, 1);
+        sdfQueueNonzeroResourceId((void *)groupNode->requestHandle);
+        for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
+            if (groupNode->slots[slotIndex].resourceHandle != 0) {
+                sdfReleaseResourceAllocation(groupNode->slots[slotIndex].resourceHandle);
             }
         }
     }
-    mdlDestroyPartList(node->partList);
-    sdfReleaseResourceAllocation(node->resourceHandle);
-    sdfReleaseChipBlock(node);
+    mdlDestroyPartList(groupNode->partList);
+    sdfReleaseResourceAllocation(groupNode->resourceHandle);
+    sdfReleaseChipBlock(groupNode);
 }
 
 /* Forward the group/type pair explicitly, then destroy its node if present. */
-void btlRemoveCurrentGroupedEntity(s32 group, s32 type) {
-    BattleGroupNode *node;
+void btlRemoveCurrentGroupedEntity(s32 groupIndex, s32 entityType) {
+    BattleGroupNode *groupNode;
 
-    node = (BattleGroupNode *)btlFindGroupedEntity(group, type);
-    btlDestroyGroupNode(node);
+    groupNode = (BattleGroupNode *)btlFindGroupedEntity(groupIndex, entityType);
+    btlDestroyGroupNode(groupNode);
 }
 
 /* Destroy every group node, saving the next link before each unlink/free. */
 void btlReleaseAllEntities(void) {
-    u32 i = 0;
-    BattleGroupNode **head = btlGroupNodeHeads;
+    u32 groupIndex = 0;
+    BattleGroupNode **groupHead = btlGroupNodeHeads;
     do {
-        BattleGroupNode *node = *head;
-        while (node != 0) {
-            BattleGroupNode *next = node->next;
-            btlDestroyGroupNode(node);
-            node = next;
+        BattleGroupNode *groupNode = *groupHead;
+        while (groupNode != 0) {
+            BattleGroupNode *nextNode = groupNode->next;
+            btlDestroyGroupNode(groupNode);
+            groupNode = nextNode;
         }
-        i++;
-        head++;
-    } while (i < 8);
+        groupIndex++;
+        groupHead++;
+    } while (groupIndex < BTL_GROUP_COUNT);
 }
 
 /* Record table owned by a motion container: 0x20-byte header, then 0x10-byte records. */
