@@ -138,7 +138,77 @@ s32 mnuStaffFreeDisplayResources(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00272D50", func_002734C0);
+extern s32 mnuMapPadMaskToFlags(s32);
+extern void mnuSetPopupEntry(s32, s32);
+extern void mnuSetPopupEntryFlagged(s32, s32);
+extern void func_0027C788(s32);
+extern void mnuRetreatWindowListSelection(s32);
+extern void mnuAdvanceWindowListSelection(s32);
+extern void mnuClearWindowPanelTransitionFlag(s32);
+extern void mnuPlayInputSound(s32, s32, s32);
+extern char D_0037C9C8[];
+extern char D_0037C9E4[];
+extern char D_0037CA00[];
+extern char D_0037C990[];
+
+/* Handle staff-item selection and window navigation while the popup is idle. */
+s32 func_002734C0(s32 callback) {
+    StaffDisplayContext *context;
+    StaffWindowResources *resources;
+    StaffWindowHeader *window;
+    s32 *popup;
+    s32 itemKind;
+    u32 input;
+    s32 result;
+
+    context = (StaffDisplayContext *)kwlnTaskGetUserValue();
+    popup = (s32 *)((u8 *)context + 0x54);
+    resources = context->resources;
+    input = mnuMapPadMaskToFlags(0x33);
+    result = menuRunPanel((s32)context, 0, callback);
+    if (result != 0) {
+        return result;
+    }
+    if (*popup == 0) {
+        if (input & 1) {
+            itemKind = context->activeWindow->data->selectedNode->label;
+            switch (itemKind) {
+            case 0:
+                resources->selection = 0;
+                mnuSetPopupEntry((s32)popup, (s32)D_0037C9C8);
+                break;
+            case 1:
+                mnuSetPopupEntry((s32)popup, (s32)D_0037C9E4);
+                break;
+            default:
+                mnuSetPopupEntry((s32)popup, (s32)D_0037CA00);
+                break;
+            }
+            mnuSeekListNode(0, (s32)((StaffWindowHeader *)resources->firstWindow)->data);
+            mnuSeekListNode(0, (s32)((StaffWindowHeader *)resources->secondWindow)->data);
+        }
+        if (input & 2) {
+            mnuSetPopupEntryFlagged((s32)popup, (s32)D_0037C990);
+            mnuActivatePanelAndConfigureGridResources((s32)context->unk138,
+                                                      *(s32 *)((u8 *)context + 0x6C), 0, 1);
+        }
+        window = context->activeWindow;
+        if (window != NULL) {
+            if ((input & 0x300000) == 0) {
+                func_0027C788((s32)window);
+            }
+            if (input & 0x10) {
+                mnuRetreatWindowListSelection((s32)window);
+            }
+            if (input & 0x20) {
+                mnuAdvanceWindowListSelection((s32)window);
+            }
+            mnuClearWindowPanelTransitionFlag((s32)window);
+            mnuPlayInputSound(0, input, (s32)window->data);
+        }
+    }
+    return 0;
+}
 
 extern void func_00272778(s32);
 extern void mnuCreateStaffImageSprite(s32);
