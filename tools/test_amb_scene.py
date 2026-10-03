@@ -109,12 +109,68 @@ class AmbSceneTests(unittest.TestCase):
     def test_area_selection_and_option_validation(self) -> None:
         document, _ = amb_scene.build_gltf(self.data, areas={"001"})
         self.assertEqual(document["asset"]["extras"]["ddsAreaCount"], 1)
+        indexed, _ = amb_scene.build_gltf(self.data, area_indices={0})
+        self.assertEqual(indexed["asset"]["extras"]["ddsAreaCount"], 1)
         with self.assertRaisesRegex(amb.AmbError, "not found"):
             amb_scene.build_gltf(self.data, areas={"missing"})
+        with self.assertRaisesRegex(amb.AmbError, "name or index"):
+            amb_scene.build_gltf(self.data, areas={"001"}, area_indices={0})
+        with self.assertRaisesRegex(amb.AmbError, "out of range"):
+            amb_scene.build_gltf(self.data, area_indices={1})
         with self.assertRaisesRegex(amb.AmbError, "positive finite"):
             amb_scene.build_gltf(self.data, meters_per_unit=0.0)
         with self.assertRaisesRegex(amb.AmbError, "finite and nonnegative"):
             amb_scene.build_gltf(self.data, icon_marker_size=-1.0)
+
+    def test_appends_to_an_existing_scene_without_reusing_its_material(self) -> None:
+        builder = fld_model.GltfBuilder.create()
+        existing_mesh = fld_model.add_marker_mesh(builder, "existing", 0, 1.0)
+        builder.document["nodes"].append({"name": "existing", "mesh": existing_mesh})
+        builder.document["scenes"][0]["nodes"].append(0)
+        builder.document["asset"]["extras"] = {
+            "ddsMetersPerUnit": 0.01,
+            "ddsNativeAxesPreserved": True,
+        }
+        original_material = dict(builder.document["materials"][0])
+
+        document, binary = amb_scene.append_automap_scene(
+            builder.document,
+            bytes(builder.binary),
+            self.data,
+            area_indices={0},
+            meters_per_unit=0.01,
+            icon_marker_size=0.0,
+        )
+
+        self.assertEqual(document["nodes"][0]["name"], "existing")
+        self.assertEqual(document["materials"][0], original_material)
+        self.assertEqual(document["materials"][1]["name"], "AMB geometry")
+        self.assertEqual(document["materials"][2]["name"], "AMB icon")
+        automap_primitive = document["meshes"][1]["primitives"][0]
+        self.assertEqual(automap_primitive["material"], 1)
+        self.assertEqual(document["asset"]["extras"]["ddsAutomapAreaCount"], 1)
+        self.assertEqual(document["scenes"][0]["nodes"], [0, 3])
+        fld_model.encode_glb(document, binary)
+
+    def test_rejects_invalid_selection_before_mutating_the_scene(self) -> None:
+        builder = fld_model.GltfBuilder.create()
+        builder.document["asset"]["extras"] = {"ddsMetersPerUnit": 0.01}
+        before = json.dumps(builder.document, sort_keys=True)
+
+        for arguments, message in (
+            ({"meters_per_unit": 1.0}, "different unit scales"),
+            ({"area_indices": {1}, "meters_per_unit": 0.01}, "out of range"),
+        ):
+            with self.subTest(message=message), self.assertRaisesRegex(
+                amb.AmbError, message
+            ):
+                amb_scene.append_automap_scene(
+                    builder.document,
+                    bytes(builder.binary),
+                    self.data,
+                    **arguments,
+                )
+            self.assertEqual(json.dumps(builder.document, sort_keys=True), before)
 
 
 if __name__ == "__main__":
