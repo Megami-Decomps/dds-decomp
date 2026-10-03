@@ -29,7 +29,7 @@ enum {
 
 extern s32 fldDeferredCommand;
 
-extern u64 dds3GetWorldSecondaryObject(void);
+extern void *dds3GetWorldSecondaryObject(void);
 
 extern s64 dds3GetWorldValueCount(u64);
 
@@ -41,7 +41,7 @@ extern u64 dds3CopyWorldListToValueChain(u64, u64);
 
 extern s64 evtGetObjectTransitionWork(u64);
 
-extern u64 sdfAllocPacketAligned(u64);
+extern s32 sdfAllocPacketAligned(s32 size);
 
 extern s32 datGameState;
 
@@ -184,9 +184,9 @@ extern u32 D_00389790[];
 
 extern s32 fldIsAreaResourceReady(void);
 
-extern void fldPollAreaResourceLoad(void);
+extern u32 fldPollAreaResourceLoad(void);
 
-extern s32 fldGetResourceReadyFlag(void);
+extern u32 fldGetResourceReadyFlag(void);
 
 extern void fldFreeDisplayObjects(void);
 
@@ -206,7 +206,7 @@ extern void fldStepIntByPad(void *, s32, s64, s64, s64, s64, s8 *);
 
 extern s32 fldStepColorChannelByPad(u32 *, s32, s8 *);
 
-extern s32 fldTestDrawUpdate(void);
+extern s32 fldTestDrawUpdate(KwlnTask *task);
 
 extern s32 fldGetEncounterRuntimeResult(void);
 
@@ -295,7 +295,7 @@ void fldUnloadPlayerModel(void);
 
 extern void dds3ClearObjectFlags(u32, s32);
 
-extern void dds3SetWorldPlayerObject(u64, u32);
+extern void dds3SetWorldPlayerObject(void *object, u32 value);
 
 extern void func_00112058(u32, s32, s32);
 
@@ -633,7 +633,7 @@ u32 func_001200E0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_001200E8);
 
-s32 fldTestDrawUpdate(void) {
+s32 fldTestDrawUpdate(KwlnTask *task) {
     if (fldGetEncounterRuntimeResult() != 0) {
         return 0;
     }
@@ -663,7 +663,7 @@ s32 fldTestDrawUpdate(void) {
 }
 
 void fldTestDrawCreate(void) {
-    kwlnTaskCreate(D_00412B90, 0x2AF8, 0, 0, (TaskUpdate)fldTestDrawUpdate, NULL, 0);
+    kwlnTaskCreate(D_00412B90, 0x2AF8, 0, 0, fldTestDrawUpdate, NULL, 0);
 }
 
 void fldTestDrawDestroy(void) {
@@ -2137,7 +2137,7 @@ extern void kwlnFadeStartIn(s32);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void func_00149A00(void);
 extern void func_00133F08(void);
-extern s32 fldHasPendingSceneFlags(void);
+extern u8 fldHasPendingSceneFlags(void);
 extern void fldSetCameraNodeModeWithTen(void);
 extern void func_00123B88(s32, s32, f32, f32, f32);
 
@@ -2326,7 +2326,7 @@ void fldSetDeferredFieldCommand(u32 command, u32 parameter) {
     fldDeferredCommandParameter = parameter;
 }
 
-extern s32 dds3AdminGetRequestedMode(void);
+extern s8 dds3AdminGetRequestedMode(void);
 extern s32 dds3AdminReadPreviousUnsignedSample(void);
 extern s32 func_00141CF0(s32, u32);
 

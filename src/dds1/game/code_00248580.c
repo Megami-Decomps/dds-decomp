@@ -121,7 +121,7 @@ extern s32 mnuPercentOrHundred(u16, u16);
 
 extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
 
-extern s32 mnuCreateListState();
+extern struct MenuList *mnuCreateListState();
 
 extern s32 mnuListAppendNode(s32, s32);
 
@@ -426,7 +426,7 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_002491B8);
 
 /* Omit the input-array position `excluded`, not all entries with that same value. */
 s32 mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback) {
-    s32 list = mnuCreateListState(0, count, 0x15, callback);
+    s32 list = (s32)mnuCreateListState(0, count, 0x15, callback);
     s32 entryIndex;
     *(s32 *)(list + 0x30) = callback;
     *(s32 *)(list + 0x2c) = (s32)func_002491B8;
@@ -2047,7 +2047,7 @@ s64 evtBDispatchSyncB(s32 request) {
     return menuRunPanel(context, 2, request);
 }
 
-extern s32 mnuRequestEffectResource(char *, char *);
+extern u32 mnuRequestEffectResource(u32, u32);
 extern char D_003AF590[];
 extern char D_003AF620[];
 
