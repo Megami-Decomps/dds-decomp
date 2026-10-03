@@ -1,15 +1,16 @@
 #include "common.h"
 
-typedef struct IconEntry {
-    s16 pad0;
-    s16 id;
-    s16 x;
-    s16 y;
-} IconEntry;
+typedef s16 BrsIconRecord[4];
 
-extern IconEntry D_0036C728[];
+enum {
+    BRS_ICON_ID = 1,
+    BRS_ICON_X = 2,
+    BRS_ICON_Y = 3,
+};
+
+extern BrsIconRecord D_0036C728[];
 extern u32 D_003BC520;
-extern s32 func_002BF4E0(s32, s32, s32, s32, s32, u32, s32, s32);
+extern void func_002BF4E0(s32, s32, s32, s32, s32, u32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025DF68);
 
@@ -19,14 +20,24 @@ INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E308);
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E420);
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E508);
+void func_0025E508(s32 x, s32 y, s32 z, void *context, s32 width, s32 mode) {
+    s32 iconIndex;
+    u32 layer = D_003BC520;
+
+    iconIndex = 0x25;
+    if (*(s16 *)((u8 *)context + 0x90) == 0) {
+        iconIndex = 9;
+    }
+    func_002BF4E0(x + (D_0036C728[iconIndex][BRS_ICON_X] << 4), y + (D_0036C728[iconIndex][BRS_ICON_Y] << 3), z, width, 0, layer, D_0036C728[iconIndex][BRS_ICON_ID], mode);
+    func_002BF4E0(D_0036C728[2][BRS_ICON_X] << 4, D_0036C728[2][BRS_ICON_Y] << 3, z, width, 0, layer, D_0036C728[2][BRS_ICON_ID], mode);
+}
 
 void mnuDrawIconTriple(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
     u32 layer = D_003BC520;
 
-    func_002BF4E0(x + (D_0036C728[18].x << 4), y + (D_0036C728[18].y << 3), 0, b, 0, layer, D_0036C728[18].id, c);
-    func_002BF4E0(D_0036C728[17].x << 4, D_0036C728[17].y << 3, 0, b, 0, layer, D_0036C728[17].id, c);
-    func_002BF4E0(D_0036C728[22].x << 4, D_0036C728[22].y << 3, 0, b, 0, layer, D_0036C728[22].id, c);
+    func_002BF4E0(x + (D_0036C728[18][BRS_ICON_X] << 4), y + (D_0036C728[18][BRS_ICON_Y] << 3), 0, b, 0, layer, D_0036C728[18][BRS_ICON_ID], c);
+    func_002BF4E0(D_0036C728[17][BRS_ICON_X] << 4, D_0036C728[17][BRS_ICON_Y] << 3, 0, b, 0, layer, D_0036C728[17][BRS_ICON_ID], c);
+    func_002BF4E0(D_0036C728[22][BRS_ICON_X] << 4, D_0036C728[22][BRS_ICON_Y] << 3, 0, b, 0, layer, D_0036C728[22][BRS_ICON_ID], c);
 }
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E6B0);
@@ -47,10 +58,14 @@ typedef struct MenuDrawValueItem {
 } MenuDrawValueItem;
 
 typedef struct MenuDrawInner {
-    u8 pad00[0x18];
+    u8 pad00[4];
+    s32 flags;
+    u8 pad08[0x10];
     MenuDrawValueItem *first;
     MenuDrawValueItem *item;
     s32 active;
+    u8 pad24[0xC];
+    s32 *delay;
 } MenuDrawInner;
 
 typedef struct MenuDrawObject {
@@ -117,7 +132,34 @@ void mnuDrawListChildrenWithCountdown(s32 x, s32 y, s32 z, u8 *object, s32 drawA
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025F4E0);
+void func_0025F4E0(s32 x, s32 y, s32 z, s32 unused, u8 *objectData, s32 option) {
+    MenuDrawObject *object = (MenuDrawObject *)objectData;
+    MenuDrawInner *inner = object->inner;
+    u32 texture = D_003BC520;
+    s32 mode = inner->delay[1];
+    s32 flags = inner->flags;
+    f32 alpha = 0.0f;
+
+    switch (mode) {
+    case 1:
+        alpha = (f32)inner->delay[0] / 15.0f;
+        alpha = 1.0f - alpha;
+        break;
+    case 2:
+        alpha = (f32)inner->delay[0] / 15.0f;
+        break;
+    }
+    if (flags & 1) {
+        func_002BF4E0(D_0036C728[20][BRS_ICON_X] << 4, D_0036C728[20][BRS_ICON_Y] << 3,
+                      0, (u32)(alpha * 256.0f), 0,
+                      texture, D_0036C728[20][BRS_ICON_ID], option);
+    }
+    if (flags & 2) {
+        func_002BF4E0(D_0036C728[21][BRS_ICON_X] << 4, D_0036C728[21][BRS_ICON_Y] << 3,
+                      0, (u32)(alpha * 256.0f), 0,
+                      texture, D_0036C728[21][BRS_ICON_ID], option);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025F680);
 
@@ -129,12 +171,12 @@ void func_0025FB30(s32 x, s32 y, s32 z, MenuDrawValuePanel *panel, s32 option) {
     s32 row = panel->object->inner->item->index - firstIndex;
 
     if (panel->unkB3 != 1) {
-        func_002BF4E0(D_0036C728[30].x << 4, (D_0036C728[30].y + row * 21) << 3,
-            0, 0x100, 0, texture, D_0036C728[30].id, option);
+        func_002BF4E0(D_0036C728[30][BRS_ICON_X] << 4, (D_0036C728[30][BRS_ICON_Y] + row * 21) << 3,
+            0, 0x100, 0, texture, D_0036C728[30][BRS_ICON_ID], option);
     }
     if (panel->multiplier != 1) {
-        func_002BF4E0(D_0036C728[31].x << 4, (D_0036C728[31].y + row * 21) << 3,
-            0, 0x100, 0, texture, D_0036C728[31].id, option);
+        func_002BF4E0(D_0036C728[31][BRS_ICON_X] << 4, (D_0036C728[31][BRS_ICON_Y] + row * 21) << 3,
+            0, 0x100, 0, texture, D_0036C728[31][BRS_ICON_ID], option);
     }
 }
 
@@ -144,12 +186,12 @@ void func_0025FC38(s32 x, s32 y, s32 z, MenuDrawValuePanel *panel, s32 scale, s3
     s32 row = panel->object->inner->item->index - firstIndex;
 
     if (panel->unkB3 != 1) {
-        func_002BF4E0(D_0036C728[30].x << 4, (D_0036C728[30].y + row * 21) << 3,
-            0, scale, 0, texture, D_0036C728[30].id, option);
+        func_002BF4E0(D_0036C728[30][BRS_ICON_X] << 4, (D_0036C728[30][BRS_ICON_Y] + row * 21) << 3,
+            0, scale, 0, texture, D_0036C728[30][BRS_ICON_ID], option);
     }
     if (panel->multiplier != 1) {
-        func_002BF4E0(D_0036C728[31].x << 4, (D_0036C728[31].y + row * 21) << 3,
-            0, scale, 0, texture, D_0036C728[31].id, option);
+        func_002BF4E0(D_0036C728[31][BRS_ICON_X] << 4, (D_0036C728[31][BRS_ICON_Y] + row * 21) << 3,
+            0, scale, 0, texture, D_0036C728[31][BRS_ICON_ID], option);
     }
 }
 
@@ -167,10 +209,10 @@ void func_0025FD50(s32 x, s32 y, s32 depth, MenuDrawValuePanel *panel, s32 optio
     MenuDrawInner *inner;
     s32 glyph;
 
-    func_002BF4E0(D_0036C728[25].x << 4, D_0036C728[25].y << 3,
-                  0, 0x100, 0, texture, D_0036C728[25].id, option);
-    func_002BF4E0(D_0036C728[26].x << 4, D_0036C728[26].y << 3,
-                  0, 0x100, 0, texture, D_0036C728[26].id, option);
+    func_002BF4E0(D_0036C728[25][BRS_ICON_X] << 4, D_0036C728[25][BRS_ICON_Y] << 3,
+                  0, 0x100, 0, texture, D_0036C728[25][BRS_ICON_ID], option);
+    func_002BF4E0(D_0036C728[26][BRS_ICON_X] << 4, D_0036C728[26][BRS_ICON_Y] << 3,
+                  0, 0x100, 0, texture, D_0036C728[26][BRS_ICON_ID], option);
     inner = object->inner;
     if (inner->active != 0) {
         func_003014F0(text, D_003BC508, 0);
@@ -182,7 +224,7 @@ void func_0025FD50(s32 x, s32 y, s32 depth, MenuDrawValuePanel *panel, s32 optio
 }
 
 void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
-    func_002BF4E0(x + (D_0036C728[26].x << 4), y + (D_0036C728[26].y << 3), z, b, 0, D_003BC520, D_0036C728[26].id, c);
+    func_002BF4E0(x + (D_0036C728[26][BRS_ICON_X] << 4), y + (D_0036C728[26][BRS_ICON_Y] << 3), z, b, 0, D_003BC520, D_0036C728[26][BRS_ICON_ID], c);
 }
 
 extern s32 datGameState;
@@ -193,7 +235,7 @@ void mnuDrawIconFixedEntryWithBadge(s32 x, s32 y, s32 z, s32 unused, s32 scale, 
     s32 value;
     s32 glyph;
 
-    func_002BF4E0(x + (D_0036C728[25].x << 4), y + (D_0036C728[25].y << 3), z, scale, 0, D_003BC520, D_0036C728[25].id, option);
+    func_002BF4E0(x + (D_0036C728[25][BRS_ICON_X] << 4), y + (D_0036C728[25][BRS_ICON_Y] << 3), z, scale, 0, D_003BC520, D_0036C728[25][BRS_ICON_ID], option);
     value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
     func_003014F0(text, D_003BC508, 0);
     glyph = func_00197A98(x + 0x17C0, y + 0x380, z, value, text, 0);
@@ -209,10 +251,10 @@ void func_0025FFC8(s32 x, s32 y, s32 depth, MenuDrawValuePanel *panel, s32 optio
     MenuDrawInner *inner;
     s32 glyph;
 
-    func_002BF4E0(D_0036C728[25].x << 4, D_0036C728[25].y << 3,
-                  0, 0x100, 0, texture, D_0036C728[25].id, option);
-    func_002BF4E0(D_0036C728[26].x << 4, D_0036C728[26].y << 3,
-                  0, 0x100, 0, texture, D_0036C728[26].id, option);
+    func_002BF4E0(D_0036C728[25][BRS_ICON_X] << 4, D_0036C728[25][BRS_ICON_Y] << 3,
+                  0, 0x100, 0, texture, D_0036C728[25][BRS_ICON_ID], option);
+    func_002BF4E0(D_0036C728[26][BRS_ICON_X] << 4, D_0036C728[26][BRS_ICON_Y] << 3,
+                  0, 0x100, 0, texture, D_0036C728[26][BRS_ICON_ID], option);
     inner = object->inner;
     if (inner->active != 0) {
         func_003014F0(text, D_003BC508, inner->item->value * panel->multiplier);
@@ -265,3 +307,4 @@ INCLUDE_SDATA(const s32, "game/code_0025DF68", D_003BC4F8);
 INCLUDE_SDATA(const s32, "game/code_0025DF68", D_003BC500);
 
 INCLUDE_SDATA(const s32, "game/code_0025DF68", D_003BC508);
+
