@@ -74,18 +74,55 @@ typedef struct MemOut {
     void *third; /* 0x8 */
 } MemOut;
 
-/* Value with u16 pair read by frFontGetSlotCellWidth/frFontGetSlotCellHeight. */
-typedef struct Unk6C84Val {
-    u8 unk0[0x10]; /* 0x0 */
-    u16 unk10;     /* 0x10 */
-    u16 unk12;     /* 0x12 */
-} Unk6C84Val;
+/* Native font resource header layout used by the binder. */
+typedef struct FrFontHeader {
+    u32 tableOffset;
+    u8 pad04[6];
+    u8 tableCount;
+    u8 pad0B[3];
+    u16 widthCount;
+    u16 cellWidth;  /* 0x10: returned by frFontGetSlotCellWidth */
+    u16 cellHeight; /* 0x12: returned by frFontGetSlotCellHeight */
+    u8 pad14[2];
+    u8 hasExtra;
+    u8 pad17;
+    u32 lookupOffset; /* 0x18; DDS2 stores this at 0x20 */
+} FrFontHeader;
 
-/* 0x24-byte record pointing at the value. */
-typedef struct Unk6C84Rec {
-    Unk6C84Val *unk0; /* 0x0 */
-    u8 unk4[0x20];    /* 0x4 */
-} Unk6C84Rec;
+/* 0x24-byte table entry in the frFontWork font system. */
+typedef struct FrFontEntry {
+    void *buffer; /* 0x0: released by frFontFreeEntry */
+    FrFontHeader *resourceHeader; /* 0x4: retained resource header */
+    u32 unk8;    /* 0x8 */
+    u32 unkC;    /* 0xC */
+    u8 *flagBytes; /* 0x10: first byte enables entry, second stores value + 1 */
+    void *unk14; /* 0x14 */
+    void *unk18; /* 0x18 */
+    void *unk1C; /* 0x1C */
+    u32 unk20;   /* 0x20 */
+} FrFontEntry;
+
+/* Font system at frFontWork: 9 entries followed by shared control words.
+ * The former resource-record view starts four bytes into each entry, at resourceHeader.
+ */
+typedef struct FrFontSystem {
+    FrFontEntry entries[9]; /* 0x0 */
+    s32 unk144;             /* 0x144 */
+    s32 unk148;             /* 0x148 */
+    s32 unk14C;             /* 0x14C */
+    void *unk150;           /* 0x150: passed to itfReleaseMemNodeBuffer by frFontReleaseAll */
+    void *unk154;           /* 0x154: passed to itfReleaseMemNodeBuffer by frFontReleaseAll */
+    void *unk158;           /* 0x158: passed to sdfUpdateTextureHeadsWithInterruptsMasked by frFontReleaseAll */
+    void *unk15C;           /* 0x15C: passed to sdfUpdateTextureHeadsWithInterruptsMasked by frFontReleaseAll */
+    s32 width;              /* 0x160 */
+    s32 unk164;             /* 0x164 */
+    s32 height;             /* 0x168 */
+    s32 unk16C;             /* 0x16C */
+    s32 gsBuffer;           /* 0x170 */
+    s32 gsFormat;           /* 0x174 */
+    u8 unk178[0x1C];        /* 0x178 */
+    void *glyphSlots[2];    /* 0x194: glyph chain slots */
+} FrFontSystem;
 
 typedef struct TextPoolNode {
     struct TextPoolNode *previous;
@@ -135,7 +172,7 @@ extern s32 func_00197068(TextDrawArgs *args);
 
 extern u32 D_003BB15C;
 extern u32 D_003D6E20[];
-extern Unk6C84Rec frFontResourceRecords[];
+extern FrFontSystem frFontWork;
 extern s32 D_003BAA98;
 extern s32 D_003BAA9C;
 s32 itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub);
@@ -241,12 +278,14 @@ s32 itfInitTextDrawArgs(s32 encodedText, s32 sub) {
     return func_00197068(&args);
 }
 
+/* Return the selected resource header's cell width; index is unchecked. */
 u16 frFontGetSlotCellWidth(s32 index) {
-    return frFontResourceRecords[index].unk0->unk10;
+    return frFontWork.entries[index].resourceHeader->cellWidth;
 }
 
+/* Return the selected resource header's cell height; index is unchecked. */
 u16 frFontGetSlotCellHeight(s32 index) {
-    return frFontResourceRecords[index].unk0->unk12;
+    return frFontWork.entries[index].resourceHeader->cellHeight;
 }
 
 void itfSetTextDrawLimit(s32 limit) {
