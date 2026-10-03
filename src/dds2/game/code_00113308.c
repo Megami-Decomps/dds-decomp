@@ -412,6 +412,9 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     return 1;
 }
 
+extern void evtEndUnitValueTransitionForObject(void *, s32);
+extern void evtSetUnitValueTransitionForObject(void *, void *, s32);
+
 void evtEndObjectValueTransition(EffectObject *object) {
     EffectObjectData *data;
 
@@ -422,7 +425,82 @@ void evtEndObjectValueTransition(EffectObject *object) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00113308", func_00113D18);
+typedef struct EffectValueData {
+    u8 pad00[0x64];
+    u32 flags;
+} EffectValueData;
+
+typedef struct EffectValueObject {
+    u8 pad00[4];
+    s32 valueId;
+    u8 pad08[0x10];
+    EffectValueData *data;
+    f32 *source;
+} EffectValueObject;
+
+extern void *dds3CopyWorldListToValueChain();
+extern s32 dds3GetWorldValueCount(void *);
+extern s32 dds3ResetObjectValueCursor(void *);
+extern u32 dds3ReadIndexedWorldObjectWord(void *);
+extern s32 dds3AdvanceObjectValueCursor(void *);
+extern void dds3DestroyWorldIndexNode(void *);
+extern s32 func_0010FBD0(f32 *, f32 *);
+void func_00113D18(EffectObject *object) {
+    EffectObjectData *data = object->data;
+    u64 world = dds3GetWorldSecondaryObject();
+    void *list;
+    EffectValueObject *other;
+    EffectValueData *otherData;
+
+    if (world == 0) {
+        return;
+    }
+    list = dds3CopyWorldListToValueChain(world, 9);
+    if (list == NULL) {
+        return;
+    }
+    if (dds3GetWorldValueCount(list) == 0) {
+        dds3DestroyWorldIndexNode(list);
+        return;
+    }
+    if (dds3ResetObjectValueCursor(list) != 0) {
+        do {
+            other = (EffectValueObject *)dds3ReadIndexedWorldObjectWord(list);
+            otherData = other->data;
+            if (!(otherData->flags & 4) &&
+                func_0010FBD0(object->source, other->source) == 0 &&
+                data->activeId == other->valueId) {
+                evtEndUnitValueTransitionForObject(object, 10);
+                data->activeId = -1;
+            }
+        } while (dds3AdvanceObjectValueCursor(list) != 0);
+    }
+    dds3DestroyWorldIndexNode(list);
+
+    if (data->activeId == -1) {
+        list = dds3CopyWorldListToValueChain(world, 9);
+        if (dds3ResetObjectValueCursor(list) == 0) {
+            goto destroy_list;
+        }
+        do {
+            other = (EffectValueObject *)dds3ReadIndexedWorldObjectWord(list);
+            otherData = other->data;
+            if (!(otherData->flags & 4) &&
+                func_0010FBD0(object->source, other->source) != 0) {
+                goto attach_transition;
+            }
+        } while (dds3AdvanceObjectValueCursor(list) != 0);
+
+destroy_list:
+        dds3DestroyWorldIndexNode(list);
+        return;
+
+attach_transition:
+        evtSetUnitValueTransitionForObject(other, object, 10);
+        data->activeId = other->valueId;
+        dds3DestroyWorldIndexNode(list);
+    }
+}
 
 u32 effObjGetDataHandle(EffectObject *object) {
     return object->data->handle;
@@ -557,4 +635,3 @@ s32 evtInitializeEffectObjectData(EffectObject *obj) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00113308", D_00435DA0);
-
