@@ -168,7 +168,51 @@ s32 mnuCountAdvancingTitleAnimations(void) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildLevelUpList);
+typedef struct BrsLevelUpRow {
+    u32 unit;
+    s32 levelUps;
+    s32 partyIndex;
+    u8 pad0C[0xC];
+} BrsLevelUpRow;
+
+typedef struct BrsLevelUpList {
+    BrsLevelUpRow rows[5];
+    s32 count;
+} BrsLevelUpList;
+
+s32 brsBuildLevelUpList(BrsLevelUpList *list) {
+    s32 *rowData = &list->rows[0].levelUps;
+    s32 offset = 0;
+    s32 partyIndex = 0;
+    u8 *unit;
+
+    memset(list, 0, 0x7C);
+    list->count = 0;
+    while (partyIndex < 5) {
+        unit = (u8 *)(datGameState + 0xA60 + offset);
+        offset += 0x1A4;
+        if ((*(u16 *)unit & 1) != 0) {
+            s32 levelUps = ptyCalcLevelUps(unit);
+            if (levelUps <= 0) {
+                partyIndex++;
+                continue;
+            }
+
+            {
+                s32 rowIndex = list->count * 6;
+                u32 *unitRow = &((u32 *)list)[rowIndex];
+                s32 *levelRow = &rowData[rowIndex];
+
+                *levelRow = levelUps;
+                *unitRow = (u32)unit;
+                rowData[list->count * 6 + 1] = partyIndex;
+                list->count++;
+            }
+        }
+        partyIndex++;
+    }
+    return list->count;
+}
 
 typedef struct BrsProfileCapRow {
     u32 unit;
