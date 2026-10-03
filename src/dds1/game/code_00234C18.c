@@ -73,7 +73,7 @@ extern u32 D_003BA8EC;
 extern s32 sdfAllocGeneralBlock(s32 size);
 extern u32 *sdfResourceRetainAddress(s32 handle);
 extern void *memset(void *dst, s32 value, u32 size);
-extern EvtViewerWork *evtPolygonMovieAllocWork(void);
+extern void *evtPolygonMovieAllocWork(void);
 extern s32 fileQueueDefaultCallbackRequest(char *path);
 extern s32 sdfPathExists(char *path);
 extern s32 kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
