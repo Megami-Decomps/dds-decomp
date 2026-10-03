@@ -125,3 +125,9 @@ message graph plus any default row reached by an explicit branch. BF message
 names are included only when the paired source gives a unique symbol for that
 numeric message ID. Raw control values remain alongside typed row, warp, and
 completion targets.
+
+`tools/field_graph.py --include-interactions` turns the same exact data into a
+whole-game state graph and joins each warp terminal to same-area, same-actor
+WAP alternatives. Use `--format dot --interaction-area fNNN_AAA` for a focused
+actor-by-actor view with dialogue names, flag branches, choices, and concrete
+field destinations.
