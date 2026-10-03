@@ -135,8 +135,15 @@ extern SdfStreamFrameNode *sdfSoundNodeHead;
 typedef struct SdfStreamNode {
     struct SdfStreamNode *prev;
     struct SdfStreamNode *next;
-    u8 pad8[5];
+    u8 pad08[4];
+    u8 field_0C;
     u8 queued;
+    u8 pad0E[5];
+    u8 field_13;
+    u8 pad14[6];
+    u8 field_1A;
+    u8 pad1B[0x37];
+    u8 field_52;
 } SdfStreamNode;
 
 extern SdfStreamNode *sdfStreamNodeListHead;
@@ -194,6 +201,7 @@ typedef struct MidiPlaybackState {
 extern s32 func_0036DE70(void);
 
 extern void func_003450D8(s32);
+extern s32 func_00344F08(void *);
 
 typedef struct GsMemBlock {
     struct GsMemBlock *link0; /* 0x00 */
@@ -1118,7 +1126,33 @@ s32 sdfSoundSyncIpu(void) {
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00344F08);
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_003450D8);
+/* Remove and advance the first list item matching the IPU cleanup test. */
+void func_003450D8(s32 skipInterruptGuard) {
+    SdfStreamNode *node;
+    s32 interruptsEnabled = 0;
+
+    if (D_00439204 != 0) {
+        return;
+    }
+    if (skipInterruptGuard == 0) {
+        interruptsEnabled = func_0036DE70();
+    }
+
+    node = sdfStreamNodeListHead;
+    while (node != 0) {
+        if (node->field_1A + node->field_13 < 2 &&
+            (node->field_0C != 1 || node->field_52 != 0)) {
+            sdfStreamNodeUnlink(node, 1);
+            func_00344F08(node);
+            break;
+        }
+        node = node->next;
+    }
+
+    if (skipInterruptGuard == 0 && interruptsEnabled != 0) {
+        EIntr();
+    }
+}
 
 extern void sceIpuStopDMA(void *);
 
