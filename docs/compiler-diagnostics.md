@@ -110,6 +110,7 @@ python3 tools/ee_gcc_probe.py \
 The probe calls `tools/cc.sh` with `-da`, preserves the generated assembly,
 and writes:
 
+- `input.c`: an exact local snapshot of the candidate source bytes;
 - `rtl.NN.pass`: every dump emitted by the compiler;
 - `candidate.s`: final assembly for the translation unit;
 - `functions/NAME/`: the named function extracted from every available pass;
@@ -119,6 +120,12 @@ and writes:
   path-normalized hash masks only the wrapper's random same-length scratch path,
   which old MIPS objects retain in metadata. A failed assembler can leave a
   partial object, so the wrapper return code remains authoritative.
+
+The manifest records both the original source hash and the compiled-input
+snapshot hash. They differ when `--replace` applies a controlled rename. Keep
+`input.c` with the manifest and dumps so a released or restored source edit can
+still be reproduced; the normal no-replacement probe continues compiling the
+canonical source path, so retaining the snapshot does not change codegen.
 
 The compiler stage can succeed even when the final assembler cannot resolve
 the unit's `INCLUDE_ASM` paths in an isolated setup. In that case the RTL and
