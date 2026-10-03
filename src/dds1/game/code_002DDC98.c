@@ -354,7 +354,31 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE350);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE398);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE408);
+/* vu0 routine: add each scaled packed vector to the XYZ components of a 0x60-byte row */
+void func_002DE408(void *rows, s32 count, void *vectors, f32 scale) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $7, $f12\n"
+        "qmtc2 $7, vf6\n"
+        "1:\n"
+        "lqc2 vf4, 0x00(%0)\n"
+        "ldr $2, 0x00(%2)\n"
+        "ldl $2, 0x07(%2)\n"
+        "lw $3, 0x08(%2)\n"
+        "pcpyld $2, $3, $2\n"
+        "qmtc2 $2, vf2\n"
+        "addi %2, %2, 0x0C\n"
+        "vmulaw.xyz ACC, vf4, vf0w\n"
+        "vmaddx.xyz vf2, vf2, vf6x\n"
+        "addi %0, %0, 0x60\n"
+        "addi %1, %1, -1\n"
+        "bne $0, %1, 1b\n"
+        "sqc2 vf2, -0x60(%0)\n"
+        ".set reorder"
+        : "+r"(rows), "+r"(count), "+r"(vectors)
+        :
+        : "$2", "$3", "$7", "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE450);
 
