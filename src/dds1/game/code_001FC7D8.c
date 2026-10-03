@@ -34,10 +34,28 @@ extern void btlSelectTargetsExcludingActorUnit();
 extern void btlAppendEffectActorToCommandIndices(s32, s32);
 extern void btlSelectTargetsBlockingElement();
 
-typedef struct EffCounterOwner {
-    u8 pad00[0x20];
-    BtlUnit *unit; /* 0x20: battle unit retained by the effect argument block */
-} EffCounterOwner;
+/* Linked-effect arguments share an owner and carry task-specific timing data.
+ * The linked-number task allocates 0x34 bytes; the counter task uses 0x2C. */
+typedef struct BtlLinkedEffectArgs {
+    u8 pad00[0x14];
+    u32 unk14;
+    u8 pad18[8];
+    BtlUnit *unit; /* 0x20: also used by both destruction callbacks */
+    union {
+        struct {
+            s32 value; /* 0x24: signed number rendered by the update callback */
+            s32 elapsedTicks; /* 0x28 */
+            u32 color; /* 0x2C */
+            u8 kind; /* 0x30 */
+            u8 offsetIndex; /* 0x31: indexes the twelve display offsets */
+        } linked;
+        struct {
+            s32 elapsedTicks; /* 0x24 */
+            u8 kind; /* 0x28 */
+            u8 offsetIndex; /* 0x29 */
+        } counter;
+    } payload;
+} BtlLinkedEffectArgs;
 
 
 extern s32 (*btlPackedEffectHandlers[])(s32, u32);
@@ -200,11 +218,12 @@ s32 effOffsetIfOwnerFlagClear(BtlUnit *owner, s32 base) {
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FD5C8);
 
-void effDecrementFirstCountdown(EffCounterOwner *owner) {
+/* Decrement the linked-number task's unit counter without underflowing zero. */
+void effDecrementFirstCountdown(BtlLinkedEffectArgs *args) {
     u8 remaining;
     BtlUnit *unit;
 
-    unit = owner->unit;
+    unit = args->unit;
     remaining = unit->firstCountdown;
     if (remaining != 0) {
         unit->firstCountdown = remaining + 0xff;
@@ -236,19 +255,10 @@ extern BtlEffObj *btlAllocTask(s32);
 extern BtlObjLink *btlGetTaskArguments(BtlEffObj *);
 extern void func_001FD5C8();
 
-/* Link block hung off a freshly created effect object. */
-typedef struct BtlEffLinkEx {
-    u8 pad00[0x20];
-    BtlUnit *owner; /* 0x20 */
-    s32 arg;            /* 0x24 */
-    s32 unk28;          /* 0x28 */
-    u8 pad2C[4];
-    u8 kind;            /* 0x30 */
-} BtlEffLinkEx;
-
-BtlEffObj *btlCreateLinkedEffectTask(BtlUnit *owner, s32 arg, u8 kind) {
+/* Create the selected numbered-display task with its frame count starting at zero. */
+BtlEffObj *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind) {
     BtlEffObj *obj = btlAllocTask(0x34);
-    BtlEffLinkEx *link;
+    BtlLinkedEffectArgs *args;
 
     obj->kind = 1;
     obj->unk10 = 0;
@@ -264,38 +274,32 @@ BtlEffObj *btlCreateLinkedEffectTask(BtlUnit *owner, s32 arg, u8 kind) {
     obj->ownerData = owner->identity;
     obj->update = func_001FD5C8;
     obj->destroy = effDecrementFirstCountdown;
-    link = (BtlEffLinkEx *)btlGetTaskArguments(obj);
-    link->kind = kind;
-    link->owner = owner;
-    link->arg = arg;
-    link->unk28 = 0;
+    args = (BtlLinkedEffectArgs *)btlGetTaskArguments(obj);
+    args->payload.linked.kind = kind;
+    args->unit = owner;
+    args->payload.linked.value = value;
+    args->payload.linked.elapsedTicks = 0;
     return obj;
 }
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FDA78);
 
-void effDecrementSecondCountdown(EffCounterOwner *owner) {
+/* Decrement the counter-display task's unit counter without underflowing zero. */
+void effDecrementSecondCountdown(BtlLinkedEffectArgs *args) {
     u8 remaining;
     BtlUnit *unit;
 
-    unit = owner->unit;
+    unit = args->unit;
     remaining = unit->secondCountdown;
     if (remaining != 0) {
         unit->secondCountdown = remaining + 0xff;
     }
 }
 
-
-typedef struct BtlExtendedLink {
-    u8 pad00[0x20];
-    BtlUnit *owner; /* 0x20 */
-    s32 state;          /* 0x24 */
-    u8 parameter;       /* 0x28 */
-} BtlExtendedLink;
-
-BtlEffObj *btlCreateEffectCounterTask(BtlUnit *owner, s32 arg) {
+/* Create the counter-display task; its kind is stored as a byte. */
+BtlEffObj *btlCreateEffectCounterTask(BtlUnit *owner, s32 kind) {
     BtlEffObj *obj = btlAllocTask(0x2C);
-    BtlExtendedLink *link;
+    BtlLinkedEffectArgs *args;
 
     obj->kind = 1;
     obj->unk10 = 0;
@@ -304,10 +308,10 @@ BtlEffObj *btlCreateEffectCounterTask(BtlUnit *owner, s32 arg) {
     obj->ownerData = owner->identity;
     obj->update = func_001FDA78;
     obj->destroy = effDecrementSecondCountdown;
-    link = (BtlExtendedLink *)btlGetTaskArguments(obj);
-    link->parameter = arg;
-    link->owner = owner;
-    link->state = 0;
+    args = (BtlLinkedEffectArgs *)btlGetTaskArguments(obj);
+    args->payload.counter.kind = kind;
+    args->unit = owner;
+    args->payload.counter.elapsedTicks = 0;
     return obj;
 }
 
