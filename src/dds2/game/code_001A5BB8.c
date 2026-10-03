@@ -194,7 +194,7 @@ extern s32 datCommandSelectors;
 
 extern char D_00415158[];
 
-extern s32 btlBossDebugPrintf(const char *, ...);
+extern void btlBossDebugPrintf(const char *, ...);
 
 extern s8 effSharedRandomState[];
 
@@ -3297,7 +3297,58 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415840);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B4828);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B4918);
+typedef struct BtlAiActionEntry {
+    s32 abilityId;
+    s32 actionCode;
+    u8 unk_08;
+    u8 pad_09[3];
+} BtlAiActionEntry;
+
+extern BtlAiActionEntry D_003B5100[];
+
+s32 func_001B4918(UiObject *unit, UiObject *target) {
+    s32 result;
+    s32 threshold;
+    u32 i;
+
+    if (btlIsUnitDefeatTriggeredByValueDelta((u8 *)unit, 0) != 0) {
+        return -1;
+    }
+
+    result = 0;
+    for (i = 0; i < 5; i++) {
+        if (btlCheckSpecialAbility((s32)unit + 0x120, D_003B5100[i].abilityId) == 0) {
+            continue;
+        }
+        if (D_003B5100[i].unk_08 != 0) {
+            if ((unit->flags & 0x200) == 0) {
+                continue;
+            }
+            if ((target->flags & 0x400) == 0) {
+                continue;
+            }
+            if ((unit->flags & 0x1000) == 0) {
+                if ((unit->entryMask & 0x10) == 0) {
+                    continue;
+                }
+            }
+            if ((unit->statusFlags & 0x40) != 0) {
+                continue;
+            }
+            if ((btlGetEntryFlagsUnlessDisabled((s32)target + 0x120) & 0x40) != 0) {
+                continue;
+            }
+        }
+        threshold = (s32)(*(f32 *)((u8 *)datAbilityParameters +
+                                   D_003B5100[i].abilityId * 8 - 0x1100) *
+                          100.0f);
+        if (btlRollAiBucket() < threshold) {
+            result = D_003B5100[i].actionCode;
+            break;
+        }
+    }
+    return result != 0 ? result : -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B4AA0);
 
@@ -3990,7 +4041,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8A80);
 
 
 extern void itfMesCleanupWindow(s32, s32);
-extern s32 itfMesDestroyWindowIfPresent();
+extern void itfMesDestroyWindowIfPresent(s32);
 
 typedef struct MesWindowSet {
     u32 unk0;
