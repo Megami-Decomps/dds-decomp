@@ -317,7 +317,7 @@ event script's resource name:
   PUSHEVENT e602
   COMM CALL_EVENT
 
-  PUSHEVENT e633
+  PUSHIS 633
   COMM SUBMIT_EVENT
 
   PUSHEVENT e610
@@ -333,9 +333,11 @@ argument carries the event resource. The disassembler emits the name only when
 that argument is a direct literal and the target is maintained for the selected
 game. This covers `CALL_EVENT` and the selected-event argument of
 `SUBMIT_EVENT_WITH_SELECTION`. The first argument of that command,
-`SUBMIT_EVENT`, and `SUBMIT_EVENT_IMMEDIATE` are event-request IDs; they remain
-numeric and are represented separately from event-resource links. Dynamic
-values and references to absent event resources stay numeric.
+`SUBMIT_EVENT`, and `SUBMIT_EVENT_IMMEDIATE` are encounter request IDs: their
+native path uses the value as an index into the 1,024-row `ENCOUNT.TBL`. They
+remain numeric in BF source because they belong to the encounter domain, not
+the event-resource domain. Dynamic values and references to absent event
+resources stay numeric.
 
 The reading view carries the same evidence as `CALL_EVENT(event(e602))` or
 `SUBMIT_EVENT_WITH_SELECTION(258, event(e610))`. Request IDs stay ordinary
@@ -469,7 +471,7 @@ table and native implementation; shared commands were checked in both games:
 | `SET_CONTROLLER_VIBRATION` | `0x01A` | 3 | Sets the `SMALL_MOTOR` or `LARGE_MOTOR` vibration strength and duration |
 | `FADE_BACKGROUND_IN` | `0x01F` | 1 | Starts the background fade-in with the supplied duration |
 | `READ_SOLAR_PHASE` | `0x027` | 0 | Returns the current solar phase |
-| `SUBMIT_EVENT_WITH_SELECTION` | `0x028` | 2 | Uses arg0 as an event-request ID and arg1 as the selected event resource |
+| `SUBMIT_EVENT_WITH_SELECTION` | `0x028` | 2 | Starts ENCOUNT.TBL encounter arg0 and selects event resource arg1 after it |
 | `RESET_DRAW_EFFECTS` | `0x043` | 0 | Clears draw transitions and effect enables |
 | `RETURN_TO_TITLE` | `0x046` | 0 | Requests the title scene |
 | `WAIT_FOR_UNIT_MOTION` | `0x049` | 1 | Waits until the selected unit's motion is idle or in its timed mode |
@@ -479,7 +481,7 @@ table and native implementation; shared commands were checked in both games:
 | `RESTORE_CAMERA_NODE_MODE` | `0x060` | 0 | Resets the player scene-object state and restores camera node mode |
 | `RELEASE_CURRENT_OBJECT` | `0x061` | 0 | Releases the current field object and refreshes field state |
 | `CALL_EVENT` | `0x066` | 1 | Calls the event resource in arg0 and clears named processes |
-| `SUBMIT_EVENT` | `0x067` | 1 | Submits the event-request ID in arg0 with mode zero |
+| `SUBMIT_EVENT` | `0x067` | 1 | Starts the ENCOUNT.TBL encounter indexed by arg0 with no selected event |
 | `READ_CURRENT_WORLD_OBJECT_ID` | `0x068` | 0 | Returns the current world object's ID, or `-1` when absent |
 | `CLEAR_UNIT_LOW_FLAG` | `0x069` | 1 | Clears the selected unit's low flag bit |
 | `SET_UNIT_LOW_FLAG` | `0x06A` | 1 | Sets the selected unit's low flag bit |
@@ -550,7 +552,7 @@ table and native implementation; shared commands were checked in both games:
 | `ADD_PARTY_CURRENCY` | `0x139` | 1 | Adds a clamped amount to party currency |
 | `APPLY_PARTY_TRAP_EFFECT` | `0x13A` | 1 | Applies a named HP-loss or status effect to the party |
 | `SET_MESSAGE_RANGE` | `0x13C` | 2 | Sets the active message range for the current window |
-| `SUBMIT_EVENT_IMMEDIATE` | `0x166` | 1 | Submits the event-request ID in arg0 immediately |
+| `SUBMIT_EVENT_IMMEDIATE` | `0x166` | 1 | Starts the ENCOUNT.TBL encounter indexed by arg0 immediately |
 | `QUEUE_WORLD_OBJECT_PENDING_VALUE` | `0x1E0` | 2 | Arms a selected world object with a pending value |
 | `CLEAR_WORLD_OBJECT_PENDING_VALUE` | `0x1E1` | 1 | Clears a selected world object's pending value and starts its reset timer |
 | `CLEAR_PROCESS_CONTROL_FLAG` | `0x1E7` | 0 | Clears the script-process control flag |
