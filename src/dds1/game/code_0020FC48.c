@@ -4,7 +4,41 @@
 #include "btl_command.h"
 #include "ee_mmi.h"
 
+/* Each group also has an independent, singly-linked list of IDs. */
+typedef struct BattleGroupIdEntry {
+    struct BattleGroupIdEntry *next;
+    s32 id;
+} BattleGroupIdEntry;
+
+typedef struct BattleGroupSlot {
+    s32 unk_0;
+    s32 unk_4;
+    s32 unk_8;
+    s32 resourceHandle; /* released when the owning group is destroyed */
+} BattleGroupSlot;
+
+/* 0xB4-byte group owner, with eight 0x10-byte resource slots. */
+typedef struct BattleGroupNode {
+    struct BattleGroupNode *next;
+    struct BattleGroupNode *prev;
+    u16 group;
+    u16 type;
+    u8 ownsResources;
+    u8 pad0D[3];
+    s32 modelContext;
+    s32 resourceList;
+    s32 unk_18;
+    s32 requestHandle;
+    BattleGroupSlot slots[8];
+    s32 resourceHandle;
+    s32 unk_A4;
+    s32 partList;
+    f32 unk_AC;
+    f32 unk_B0;
+} BattleGroupNode;
+
 extern s32 *btlFindGroupedEntity();
+void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
 
 extern u8 D_003BBB0D;
 
@@ -57,9 +91,9 @@ extern s32 sdfCreateSemaphore(s32, s32, s32);
 
 extern u32 mdlGroupJobSemaphore;
 
-extern s32 btlGroupNodeHeads[];
+extern BattleGroupNode *btlGroupNodeHeads[];
 
-extern s32 btlGroupIdHeads[];
+extern BattleGroupIdEntry *btlGroupIdHeads[];
 
 extern s32 func_003014F0(char *, const char *, ...);
 
@@ -336,20 +370,44 @@ s32 btlCommandSetSequenceVolumePan(void) {
     return 1;
 }
 
+struct BattleScriptTaskData;
+
+/* 0x70-byte queued-task header, distinct from the unit's 0x170-byte BtlTask.
+ * The callback union preserves each consumer's actual function prototype. */
 typedef struct BattleTask {
-    u8 active;
-    u8 unk_01[0xf];
-    u8 phase;
-    u8 unk_11[0xf];
-    s16 kind;
-    u8 unk_22[0x2a];
-    s32 (*update)(void *);
+    u8 enabled;
+    u8 pad01[0xF];
+    u8 status;
+    u8 pad11[0xF];
+    u16 taskId;
+    u16 state;
+    u16 flags;
+    u8 pad26[2];
+    s32 startDelay;
+    s32 endDelay;
+    u32 unk30;
+    u32 unk34;
+    u64 sequence;
+    u64 owner;
+    void (*onStart)(u32);
+    union {
+        void (*update)(void);
+        s32 (*run)(void *);
+        u32 (*processScript)(struct BattleScriptTaskData *);
+    } callback;
+    void (*onFinish)(u32 *);
+    void *args;
+    struct BattleTask *next;
+    struct BattleTask *nextActive;
+    struct BattleTask *deferNext;
+    struct BattleTask *deferPrev;
+    u8 pad68[8];
 } BattleTask;
 
 typedef struct BattleTaskData {
     void *battler;
     s32 action;
-    s32 finished;
+    s32 frames;
 } BattleTaskData;
 
 extern BattleTask *btlAllocTask(s32);
@@ -360,18 +418,19 @@ extern s32 func_00210670(void *);
 
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_00210670);
 
+/* Queue a battler/action task with zero elapsed frames; return the task. */
 void *btlCreateActionTask(void *battler, s32 action) {
     BattleTask *task = btlAllocTask(12);
     BattleTaskData *data;
 
-    task->active = 1;
-    task->kind = 0x62;
-    task->update = func_00210670;
-    task->phase = 0;
+    task->enabled = 1;
+    task->taskId = 0x62;
+    task->callback.run = func_00210670;
+    task->status = 0;
     data = btlGetTaskArguments(task);
     data->battler = battler;
     data->action = action;
-    data->finished = 0;
+    data->frames = 0;
     return task;
 }
 
@@ -661,25 +720,88 @@ s32 btlCheckCommandRequiredEntryMatches(void *list, s32 row) {
 
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_002111A0);
 
+/* 0x108-byte sound cache owner, with 29 file/handle slots; not a battler. */
+typedef struct SoundSlotOwner {
+    u32 flags;
+    s32 category;
+    s32 id;
+    s32 refCount;
+    s32 load[2];
+    s32 slot[0x1D];
+    s32 handle[0x1D];
+    struct SoundSlotOwner *prev;
+    struct SoundSlotOwner *next;
+} SoundSlotOwner;
+
+/* PAC queue item: allocation handle and decoder cursor precede packet data. */
+typedef struct PacWork {
+    struct PacWork *next;
+    struct PacState *owner;
+    s32 resourceHandle;
+    u8 *dataCursor;
+    u8 packet[1];
+} PacWork;
+
+/* 0x38-byte PAC decoder state; resource packets are linked through queueHead. */
+typedef struct PacState {
+    u8 phase;
+    u8 flags;
+    u16 packetCounter;
+    s32 (*packetCallback)();
+    void (*onInput)(struct PacState *);
+    void (*onComplete)(struct PacState *);
+    u8 *inputCursor;
+    s32 inputAvailable;
+    s32 consumedBytes;
+    u8 *outputCursor;
+    s32 pendingBytes;
+    struct PacBuf *decoder;
+    struct PacBuf *resourceBuffer;
+    struct PacAlloc *allocation;
+    PacWork *queueHead;
+    PacWork *queueTail;
+} PacState;
+
+/* 0x70-byte file request: PAC state at 0x30, readiness gate at 0x68. */
+typedef struct FilePacRequest {
+    u8 kind;
+    u8 state;
+    u8 pad02[2];
+    struct FileNode *next;
+    char *name;
+    u32 handle;
+    s32 size;
+    u8 pad14[4];
+    void *callback;
+    void *userData;
+    u8 pad20[0x10];
+    PacState packet;
+    u16 readinessEnabled;
+    u16 slot;
+    u8 pad6C[4];
+} FilePacRequest;
+
+/* 0x20-byte model cache entry owns a file/PAC request and a sound-cache reference. */
 typedef struct BattleModelEntry {
     s32 kind;
     s32 id;
-    s32 refs;
+    s32 refCount;
     s8 state;
     u8 unk_0d[3];
-    void *resource;
-    void *actor;
+    FilePacRequest *packRequest;
+    SoundSlotOwner *soundOwner;
     struct BattleModelEntry *prev;
     struct BattleModelEntry *next;
 } BattleModelEntry;
 
 extern void *sdfAllocAndClearQuadwords(s32);
 
+/* Allocate a cache entry with one reference and insert it at the list head. */
 BattleModelEntry *btlCreateModelEntry(void) {
     BattleModelEntry *entry = sdfAllocAndClearQuadwords(sizeof(BattleModelEntry));
     BtlState *battle;
     BattleModelEntry *head;
-    entry->refs = 1;
+    entry->refCount = 1;
     entry->state = 0;
     battle = (BtlState *)btlGetRuntime();
     entry->prev = 0;
@@ -702,15 +824,16 @@ extern void sndReleaseSlotOwner(void *);
 
 extern void sdfReleaseChipBlock(void *);
 
+/* Only the final reference releases resources and unlinks the cache entry. */
 void btlReleaseModelEntry(BattleModelEntry *entry) {
-    if (--entry->refs != 0) {
+    if (--entry->refCount != 0) {
         return;
     }
-    if (entry->resource != 0) {
-        func_00288788(entry->resource);
+    if (entry->packRequest != 0) {
+        func_00288788(entry->packRequest);
     }
-    if (entry->actor != 0) {
-        sndReleaseSlotOwner(entry->actor);
+    if (entry->soundOwner != 0) {
+        sndReleaseSlotOwner(entry->soundOwner);
     }
     if (entry->next != 0) {
         entry->next->prev = entry->prev;
@@ -724,6 +847,7 @@ void btlReleaseModelEntry(BattleModelEntry *entry) {
     btlBossDebugPrintf(D_003A68F8, entry->kind, entry->id);
 }
 
+/* Release one reference from each entry, preserving any retained entries. */
 void btlReleaseAllModelEntries(void) {
     BattleModelEntry *entry = ((BtlState *)btlGetRuntime())->modelEntries;
     BattleModelEntry *next;
@@ -748,6 +872,7 @@ extern s32 mdlRequestAsset(s32, s32, s32);
 
 extern s32 fileRequestIsReady(void *);
 
+/* Query model/PAC readiness. The repeated model query on -1 is intentional. */
 s8 btlIsModelPackEntryReady(BattleModelEntry *entry) {
     s32 result;
     if (entry->state != 0) {
@@ -757,13 +882,14 @@ s8 btlIsModelPackEntryReady(BattleModelEntry *entry) {
         mdlRequestAsset(entry->kind, entry->id, 0) == -1) {
         return 0;
     }
-    if (entry->resource == 0) {
+    if (entry->packRequest == 0) {
         return 1;
     }
-    result = fileRequestIsReady(entry->resource);
+    result = fileRequestIsReady(entry->packRequest);
     return result;
 }
 
+/* Return the matching cache entry's legacy 32-bit address, or zero. */
 s32 btlFindModelEntry(kind, id)
 s32 kind;
 s32 id;
@@ -785,6 +911,7 @@ void func_002115E8(void) {
     btlReleaseAllModelEntries();
 }
 
+/* Reuse a cached kind/id pair or request its model pack and first reference. */
 void btlLoadModelPack(s32 kind, s32 id) {
     char path[128];
     BattleModelEntry *entry = (BattleModelEntry *)btlFindModelEntry(kind, id);
@@ -796,23 +923,24 @@ void btlLoadModelPack(s32 kind, s32 id) {
         mdlRequestAsset(kind, id, 0);
         if (sndFindListNodeForChannel(kind, id) == 0) {
             btlFormatModelResourcePath(kind, id, path);
-            entry->resource = (void *)fileQueuePlainDispatchRequest(path);
+            entry->packRequest = (FilePacRequest *)fileQueuePlainDispatchRequest(path);
             btlBossDebugPrintf("btl:pack load start[%s][%X,%X]\n", path, kind, id);
         } else {
-            entry->resource = 0;
-            entry->actor = 0;
+            entry->packRequest = 0;
+            entry->soundOwner = 0;
             btlBossDebugPrintf("btl:pack load start[same motSE find][%X,%X]\n", kind, id);
         }
     } else {
         btlBossDebugPrintf("btl:same pack find[%X,%X]\n", kind, id);
-        entry->refs++;
+        entry->refCount++;
     }
 }
 
-void btlReleaseFoundModelEntry(void) {
+/* Drop one reference from the matching kind/id cache entry, if it exists. */
+void btlReleaseFoundModelEntry(s32 kind, s32 id) {
     s32 entry;
 
-    entry = btlFindModelEntry();
+    entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
         btlReleaseModelEntry((BattleModelEntry *)entry);
         return;
@@ -821,14 +949,16 @@ void btlReleaseFoundModelEntry(void) {
 
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_00211740);
 
-s32 btlGetEntryState(s32 kind, s32 value) {
-    u8 *entry = (u8 *)btlFindModelEntry(kind, value);
+/* Return the sign-extended cache state, or zero when no entry exists. */
+s32 btlGetEntryState(s32 kind, s32 id) {
+    BattleModelEntry *entry = (BattleModelEntry *)btlFindModelEntry(kind, id);
     if (entry != 0) {
-        return ((BattleModelEntry *)entry)->state;
+        return entry->state;
     }
     return 0;
 }
 
+/* Despite its public name, this only queries readiness; it releases nothing. */
 s32 btlReleaseEntryIfReady(s32 kind, s32 id) {
     s32 entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
@@ -1562,6 +1692,7 @@ INCLUDE_ASM(const s32, "game/code_0020FC48", func_00215FF8);
 
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_002162E0);
 
+/* Create the model-job semaphore and clear both lists for all eight groups. */
 void btlInitializeCommandSemaphoreSlots(void) {
     s32 i;
 
@@ -1572,106 +1703,82 @@ void btlInitializeCommandSemaphoreSlots(void) {
     }
 }
 
+/* Return the first node of this type in group, or NULL (legacy word-pointer API). */
 s32 *btlFindGroupedEntity(group, type)
     s32 group;
 
     s32 type;
 
 {
-    s32 *entry = (s32 *)btlGroupNodeHeads[group];
+    BattleGroupNode *entry = btlGroupNodeHeads[group];
     while (entry != 0) {
-        if (*(u16 *)((u8 *)entry + 0xa) == type) {
+        if (entry->type == type) {
             break;
         }
-        entry = (s32 *)*entry;
+        entry = entry->next;
     }
-    return entry;
+    return (s32 *)entry;
 }
 
+/* Return whether this group's separate ID list contains id. */
 s32 btlGroupContainsId(s32 group, s32 id) {
-    s32 *entry = (s32 *)btlGroupIdHeads[group];
+    BattleGroupIdEntry *entry = btlGroupIdHeads[group];
     while (entry != 0) {
-        if (entry[1] == id) {
+        if (entry->id == id) {
             return 1;
         }
-        entry = (s32 *)*entry;
+        entry = entry->next;
     }
     return 0;
 }
 
 extern void *sdfAllocSizeClassBlock(s32);
 
-typedef struct BattleGroupIdEntry {
-    struct BattleGroupIdEntry *next;
-    s32 id;
-} BattleGroupIdEntry;
 
+/* Prepend id to this group's ID list; duplicate IDs are allowed. */
 void btlAddGroupId(s32 group, s32 id) {
     BattleGroupIdEntry *node = sdfAllocSizeClassBlock(sizeof(BattleGroupIdEntry));
-    BattleGroupIdEntry **head = (BattleGroupIdEntry **)&btlGroupIdHeads[group];
+    BattleGroupIdEntry **head = &btlGroupIdHeads[group];
     node->id = id;
     node->next = *head;
     *head = node;
 }
 
+/* Remove the first matching ID using its incoming link, including the head. */
 void btlRemoveGroupId(s32 group, s32 id) {
-    s32 *link;
-    s32 *entry;
+    BattleGroupIdEntry **link;
+    BattleGroupIdEntry *entry;
 
     link = &btlGroupIdHeads[group];
-    entry = (s32 *)*link;
+    entry = *link;
     if (entry == 0) {
         return;
     }
     do {
-        if (*(entry + 1) == id) {
-            *link = *entry;
+        if (entry->id == id) {
+            *link = entry->next;
             sdfReleaseChipBlock(entry);
             break;
         } else {
-            link = entry;
-            entry = (s32 *)*entry;
+            link = &entry->next;
+            entry = entry->next;
         }
     } while (entry != 0);
 }
 
-typedef struct BattleGroupSlot {
-    s32 unk_0;
-    s32 unk_4;
-    s32 unk_8;
-    s32 resourceHandle; /* released when the owning group is destroyed */
-} BattleGroupSlot;
 
-typedef struct BattleGroupNode {
-    struct BattleGroupNode *next;
-    struct BattleGroupNode *prev;
-    u16 group;
-    u16 type;
-    u8 flag;
-    u8 pad0D[3];
-    s32 modelContext;
-    s32 resourceList;
-    s32 unk_18;
-    s32 requestHandle;
-    BattleGroupSlot slots[8];
-    s32 unk_A0;
-    s32 unk_A4;
-    s32 partList;
-    f32 unk_AC;
-    f32 unk_B0;
-} BattleGroupNode;
-
-void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 arg4, s32 requestHandle) {
+/* Replace the group/type node; only flags bit 0 selects resource ownership. */
+void btlCreateGroupNode(s32 group, s32 type, s32 flags, s32 resourceList, s32 arg4, s32 requestHandle) {
     BattleGroupNode *node;
     BattleGroupNode *head;
     s32 i;
     btlRemoveCurrentGroupedEntity(group, type);
     node = sdfAllocSizeClassBlock(sizeof(BattleGroupNode));
-    head = (BattleGroupNode *)btlGroupNodeHeads[group];
+    head = btlGroupNodeHeads[group];
     if (head != NULL) {
         head->prev = node;
     }
-    btlGroupNodeHeads[group] = (s32)node;
+    btlGroupNodeHeads[group] = node;
     node->next = head;
     node->group = group;
     node->type = type;
@@ -1685,8 +1792,8 @@ void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 arg
         node->slots[i].unk_8 = 0;
         node->slots[i].resourceHandle = 0;
     }
-    node->flag = flag & 1;
-    node->unk_A0 = 0;
+    node->ownsResources = flags & 1;
+    node->resourceHandle = 0;
     node->unk_A4 = 0;
     node->partList = 0;
     node->unk_AC = 1.0f;
@@ -1701,10 +1808,12 @@ extern void sdfReleaseResourceAllocation(s32);
 
 extern void sdfResourceListRelease(void *, s32);
 
+/* Capture ownership before clearing it for callbacks; keep the context-release
+ * loop and resource-release order intact. NULL is allowed. */
 void btlDestroyGroupNode(BattleGroupNode *node) {
     BattleGroupNode *prev;
     BattleGroupNode *next;
-    u8 flag;
+    u8 ownsResources;
     s32 i;
     if (node == NULL) {
         return;
@@ -1712,21 +1821,21 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
     prev = node->prev;
     next = node->next;
     if (prev == NULL) {
-        btlGroupNodeHeads[node->group] = (s32)next;
+        btlGroupNodeHeads[node->group] = next;
     } else {
         prev->next = next;
     }
     if (next != NULL) {
         next->prev = prev;
     }
-    flag = node->flag;
-    node->flag = 0;
+    ownsResources = node->ownsResources;
+    node->ownsResources = 0;
     if (node->modelContext != 0) {
         do {
             mdlDestroyContext(node->modelContext);
         } while (node->modelContext != 0);
     }
-    if (flag != 0) {
+    if (ownsResources != 0) {
         sdfResourceListRelease((void *)node->resourceList, 1);
         sdfQueueNonzeroResourceId((void *)node->requestHandle);
         for (i = 0; i != 8; i++) {
@@ -1736,24 +1845,26 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
         }
     }
     mdlDestroyPartList(node->partList);
-    sdfReleaseResourceAllocation(node->unk_A0);
+    sdfReleaseResourceAllocation(node->resourceHandle);
     sdfReleaseChipBlock(node);
 }
 
-void btlRemoveCurrentGroupedEntity(void) {
-    s32 *node;
+/* Forward the group/type pair explicitly, then destroy its node if present. */
+void btlRemoveCurrentGroupedEntity(s32 group, s32 type) {
+    BattleGroupNode *node;
 
-    node = btlFindGroupedEntity();
+    node = (BattleGroupNode *)btlFindGroupedEntity(group, type);
     btlDestroyGroupNode(node);
 }
 
+/* Destroy every group node, saving the next link before each unlink/free. */
 void btlReleaseAllEntities(void) {
     u32 i = 0;
-    s32 *head = btlGroupNodeHeads;
+    BattleGroupNode **head = btlGroupNodeHeads;
     do {
-        s32 *node = (s32 *)*head;
+        BattleGroupNode *node = *head;
         while (node != 0) {
-            s32 *next = (s32 *)*node;
+            BattleGroupNode *next = node->next;
             btlDestroyGroupNode(node);
             node = next;
         }
