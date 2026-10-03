@@ -4,10 +4,10 @@
   "extension_vaddr": "0x00412000",
   "alignment": "0x1000",
   "heap_alignment": "0x80",
-  "expected_replacement_symbols": 120,
-  "expected_shifted_replacement_symbols": 73,
-  "expected_shifted_symbol_relocations": 1089,
-  "expected_cross_replacement_relocations": 75,
+  "expected_replacement_symbols": 142,
+  "expected_shifted_replacement_symbols": 85,
+  "expected_shifted_symbol_relocations": 1411,
+  "expected_cross_replacement_relocations": 96,
   "expected_repaired_relocation_words": 0,
   "retail_static_end": "0x0040C5F0",
   "bss_end_assertions": [
@@ -128,6 +128,93 @@
           "size": 0
         }
       ]
+    },
+    {
+      "retail_object": "build/dds1/src/dds1/game/code_002CF8C8.o",
+      "object": "build/dds1/dev/code_002CF8C8.o",
+      "expected_symbols": 9,
+      "expected_shifted_symbols": 4,
+      "fallback_symbols": [
+        "func_002CF930"
+      ],
+      "retained_sections": [
+        {
+          "section": ".rodata",
+          "size": 0
+        },
+        {
+          "section": ".data",
+          "size": 0
+        },
+        {
+          "section": ".sdata",
+          "size": "0x8",
+          "old_vaddr": "0x003BD2D0",
+          "alignment": 8,
+          "storage": "file",
+          "expected_symbols": 2,
+          "expected_retail_gp_references": 2,
+          "expected_gp_references": 2,
+          "allow_shifted_gp_reference_offsets": true
+        },
+        {
+          "section": ".bss",
+          "size": 0
+        }
+      ]
+    },
+    {
+      "retail_object": "build/dds1/src/dds1/sdf/sdfThread.o",
+      "object": "build/dds1/dev/sdfThread.o",
+      "expected_symbols": 3,
+      "expected_shifted_symbols": 0,
+      "fallback_symbols": [],
+      "retained_sections": [
+        {
+          "section": ".rodata",
+          "size": 0
+        },
+        {
+          "section": ".data",
+          "size": 0
+        },
+        {
+          "section": ".bss",
+          "size": 0
+        }
+      ]
+    },
+    {
+      "retail_object": "build/dds1/src/dds1/game/code_002CFC18.o",
+      "object": "build/dds1/dev/code_002CFC18.o",
+      "expected_symbols": 10,
+      "expected_shifted_symbols": 8,
+      "fallback_symbols": [],
+      "retained_sections": [
+        {
+          "section": ".rodata",
+          "size": 0
+        },
+        {
+          "section": ".data",
+          "size": 0
+        },
+        {
+          "section": ".sdata",
+          "size": "0x4",
+          "old_vaddr": "0x003BD2D8",
+          "alignment": 8,
+          "storage": "file",
+          "expected_symbols": 1,
+          "expected_retail_gp_references": 3,
+          "expected_gp_references": 3,
+          "allow_shifted_gp_reference_offsets": true
+        },
+        {
+          "section": ".bss",
+          "size": 0
+        }
+      ]
     }
   ],
   "moves": [
@@ -221,6 +308,43 @@
       "old_vaddr": "0x003DC658",
       "expected_relocations": 0,
       "expected_target_relocations": 26
+    },
+    {
+      "object": "build/dds1/src/dds1/game/code_002CF8C8.o",
+      "section": ".text",
+      "old_size": "0x2E4",
+      "alignment": 8,
+      "old_vaddr": "0x002CF8C8",
+      "expected_relocations": 55
+    },
+    {
+      "object": "build/dds1/src/dds1/sdf/sdfThread.o",
+      "section": ".text",
+      "old_size": "0x64",
+      "alignment": 8,
+      "old_vaddr": "0x002CFBB0",
+      "expected_relocations": 8
+    },
+    {
+      "object": "build/dds1/src/dds1/sdf/sdfThread.o",
+      "section": ".sbss",
+      "storage": "nobits",
+      "old_size": "0x8",
+      "new_size": "0x8",
+      "alignment": 4,
+      "old_vaddr": "0x003BD998",
+      "expected_relocations": 0,
+      "expected_target_relocations": 23,
+      "expected_retail_gp_references": 15,
+      "expected_gp_references": 0
+    },
+    {
+      "object": "build/dds1/src/dds1/game/code_002CFC18.o",
+      "section": ".text",
+      "old_size": "0x350",
+      "alignment": 8,
+      "old_vaddr": "0x002CFC18",
+      "expected_relocations": 56
     }
   ],
   "additions": [
