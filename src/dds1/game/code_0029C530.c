@@ -3860,11 +3860,11 @@ typedef struct EffPointSetTableSource {
     u8 pad40[0x28];
     f32 unk68;     /* 0x68: fade-in share of a set */
     f32 unk6C;     /* 0x6C: end of the full-alpha span */
-    u32 colorA;    /* 0x70 */
+    u32 colorA;    /* 0x70: low 24 bits kept, top byte ramped */
     u32 colorB;    /* 0x74 */
     u32 colorC;    /* 0x78 */
     u8 pad7C[8];
-    f32 unk84;     /* 0x84 */
+    f32 unk84;     /* 0x84: copied separately from the descriptor prefix */
 } EffPointSetTableSource;
 
 typedef struct EffPointSetRow {
@@ -3977,9 +3977,8 @@ void effResetIndexedInstanceFrames(u8 *work) {
     }
 }
 
-
-extern float effMiscRandUnitFloat(void *);
 extern u8 *effCreateClassResourceWork(u16, void *);
+extern float effMiscRandUnitFloat(void *);
 
 u8 *func_002A93A0(EffPointSetTableSource *config) {
     u32 count = config->count;
@@ -4082,6 +4081,8 @@ typedef struct EffScaleRangeWork {
     EffScaleRange *range;
     EffScaleRangeConfig *config;
 } EffScaleRangeWork;
+
+extern float effMiscRandUnitFloat(void *);
 
 void effSeedBillScaleRange(u8 *work) {
     EffScaleRangeConfig *config = ((EffScaleRangeWork *)work)->config;
