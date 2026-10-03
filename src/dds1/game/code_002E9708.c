@@ -106,17 +106,33 @@ typedef struct SdfStreamTextureHead {
     s32 resourceWord;
 } SdfStreamTextureHead;
 
+/* Opaque IPU DMA environment saved at the end of the native stream node. */
+typedef struct IpuDmaState {
+    u8 pad0[8];
+} IpuDmaState;
+
+/* One 0x8C allocation owns the independent stream/sound links, feed ring
+ * and IPU completion state; these are not separate prefix-only objects. */
 typedef struct SdfStreamFrameNode {
-    u8 pad00[8];
-    struct SdfStreamFrameNode *next;
+    struct SdfStreamFrameNode *streamPrev;
+    struct SdfStreamFrameNode *streamNext;
+    struct SdfStreamFrameNode *next; /* Independent singly-linked sound list. */
     u8 active;
-    u8 pad0D[2];
+    u8 queued;
+    u8 unk0E;
     u8 drained;
-    u8 pad10[4];
+    u8 firstStop;
+    u8 unk11;
+    u8 pad12;
+    u8 unk13;
     u8 audioMode; /* 0=no audio, 1=mono, 2=stereo */
     u8 loopMode;
     u8 playbackMode;
-    u8 pad17[5];
+    u8 pad17;
+    u8 bufferIndex; /* IPU output buffer selector, toggled after each submission. */
+    u8 pad19;
+    u8 unk1A;
+    u8 pad1B;
     s32 bufferSize;
     u32 buffers[2];
     s32 textureResources[2];
@@ -125,8 +141,9 @@ typedef struct SdfStreamFrameNode {
     SdfStreamTextureHead *textureHead;
     u16 width;
     u16 height;
-    s32 sourceBytes;
-    u8 pad44[8];
+    u32 cycleLength; /* Header word counted against completed IPU transfers. */
+    u32 tickCount;
+    u8 pad48[4];
     u32 unk4C;
     u8 headerReady;
     u8 done;
@@ -136,7 +153,12 @@ typedef struct SdfStreamFrameNode {
     u8 pad58[4];
     s32 (*read)(struct SdfStreamFrameNode *, u32, s32, void *, s32);
     u32 source;
-    u8 pad64[0x28];
+    u8 pad64;
+    u8 unk65;
+    u8 pad66[2];
+    IpuDmaState dma;
+    u32 unk70;
+    u8 pad74[0x18];
 } SdfStreamFrameNode;
 typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, u32, s32, void *, s32);
 
@@ -164,23 +186,9 @@ extern s32 sdfCreateConfiguredBufferedResourceList(s32);
 
 extern void sdfAppendResourceListItem(s32, u64);
 
-typedef struct SdfStreamNode {
-    struct SdfStreamNode *prev;
-    struct SdfStreamNode *next;
-    u8 pad08[4];
-    u8 field_0C;
-    u8 queued;
-    u8 pad0E[5];
-    u8 field_13;
-    u8 pad14[6];
-    u8 field_1A;
-    u8 pad1B[0x37];
-    u8 field_52;
-} SdfStreamNode;
+extern SdfStreamFrameNode *sdfStreamNodeListHead;
 
-extern SdfStreamNode *sdfStreamNodeListHead;
-
-extern SdfStreamNode *sdfStreamNodeListTail;
+extern SdfStreamFrameNode *sdfStreamNodeListTail;
 
 extern void sdfTexEnqueuePacketWithSemaphore(s32, s32);
 
@@ -784,25 +792,25 @@ void sdfRelocatePackedResourceWords(s32 *words, s32 relocationBase, u8 *table, s
 }
 
 /* Remove a queued node without clearing its old links; the caller may own the interrupt guard. */
-void sdfStreamNodeUnlink(SdfStreamNode *node, s32 skipInterruptGuard) {
+void sdfStreamNodeUnlink(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
     s32 interruptsEnabled = 0;
-    SdfStreamNode *previousNode;
-    SdfStreamNode *nextNode;
+    SdfStreamFrameNode *previousNode;
+    SdfStreamFrameNode *nextNode;
     if (skipInterruptGuard == 0) {
         interruptsEnabled = func_00312C08();
     }
     if (node->queued != 0) {
-        previousNode = node->prev;
-        nextNode = node->next;
+        previousNode = node->streamPrev;
+        nextNode = node->streamNext;
         if (previousNode == 0) {
             sdfStreamNodeListHead = nextNode;
         } else {
-            previousNode->next = nextNode;
+            previousNode->streamNext = nextNode;
         }
         if (nextNode == 0) {
             sdfStreamNodeListTail = previousNode;
         } else {
-            nextNode->prev = previousNode;
+            nextNode->streamPrev = previousNode;
         }
         node->queued = 0;
     }
@@ -812,7 +820,7 @@ void sdfStreamNodeUnlink(SdfStreamNode *node, s32 skipInterruptGuard) {
 }
 
 /* Move a node to the queue tail, using one interrupt guard for unlink plus append. */
-void sdfStreamNodeAppend(SdfStreamNode *node, s32 skipInterruptGuard) {
+void sdfStreamNodeAppend(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
     s32 interruptsEnabled = 0;
     if (skipInterruptGuard == 0) {
         interruptsEnabled = func_00312C08();
@@ -824,10 +832,10 @@ void sdfStreamNodeAppend(SdfStreamNode *node, s32 skipInterruptGuard) {
     if (sdfStreamNodeListTail == 0) {
         sdfStreamNodeListHead = node;
     } else {
-        sdfStreamNodeListTail->next = node;
+        sdfStreamNodeListTail->streamNext = node;
     }
-    node->prev = sdfStreamNodeListTail;
-    node->next = 0;
+    node->streamPrev = sdfStreamNodeListTail;
+    node->streamNext = 0;
     sdfStreamNodeListTail = node;
     if (skipInterruptGuard == 0 && interruptsEnabled != 0) {
         EIntr();
@@ -892,13 +900,13 @@ void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *node, SoundFormat *format) {
     node->loopMode = format->loopMode;
     node->playbackMode = format->playbackMode;
 }
-/* Stream frame header precedes the bytes passed to the frame decoder. */
-typedef struct SoundFrameHeader {
+/* Native 0x10 serialized header: dimensions and the DMA-cycle limit. */
+typedef struct SdfStreamHeader {
     u8 pad00[8];
     u16 width;
     u16 height;
-    s32 sourceBytes;
-} SoundFrameHeader;
+    u32 cycleLength;
+} SdfStreamHeader;
 
 /* Decode the frame header, allocate its buffers, then queue the bytes after that header. */
 void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddress, s32 sourceSize) {
@@ -906,13 +914,13 @@ void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddr
     u8 *frameBytes = (u8 *)sourceAddress;
 
     sdfSoundInitNodeFromFormat(node, format);
-    node->width = ((SoundFrameHeader *)frameBytes)->width;
-    node->sourceBytes = ((SoundFrameHeader *)frameBytes)->sourceBytes;
-    node->height = ((SoundFrameHeader *)frameBytes)->height;
+    node->width = ((SdfStreamHeader *)frameBytes)->width;
+    node->cycleLength = ((SdfStreamHeader *)frameBytes)->cycleLength;
+    node->height = ((SdfStreamHeader *)frameBytes)->height;
     sdfAllocateStreamFrameBuffers(node);
     func_002EB578(node, frameBytes + SDF_STREAM_FRAME_HEADER_BYTES, sourceSize - SDF_STREAM_FRAME_HEADER_BYTES);
     interruptsEnabled = func_00312C08();
-    sdfStreamNodeAppend((SdfStreamNode *)node, 0);
+    sdfStreamNodeAppend(node, 0);
     if (interruptsEnabled != 0) {
         EIntr();
     }
@@ -934,7 +942,7 @@ extern SdfStreamTextureHead *sdfTexAllocateHeadForDimensions(s32, s32, s32, s32,
  * only when larger than one GS page; smaller dimensions remain unchanged.
  */
 void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
-    SoundFrameHeader header;
+    SdfStreamHeader header;
     s32 readStatus;
     s32 interruptsEnabled;
 
@@ -948,7 +956,7 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
     node->read(node, node->source, 1, &header, sizeof(header));
     node->width = header.width;
     node->height = header.height;
-    node->sourceBytes = header.sourceBytes;
+    node->cycleLength = header.cycleLength;
     if (node->resourceWord == 0) {
         s32 textureWidth = node->width;
         s32 textureHeight = node->height;
@@ -975,7 +983,7 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
     }
     sdfAllocateStreamFrameBuffers(node);
     interruptsEnabled = func_00312C08();
-    sdfStreamNodeAppend((SdfStreamNode *)node, 0);
+    sdfStreamNodeAppend(node, 0);
     if (interruptsEnabled != 0) {
         EIntr();
     }
@@ -995,7 +1003,7 @@ void func_002EBB60(SdfStreamFrameNode *node) {
     wasActive = 0;
     node->drained = 1;
     sdfSoundRemoveNode(node);
-    sdfStreamNodeUnlink((SdfStreamNode *)node, 1);
+    sdfStreamNodeUnlink(node, 1);
     if (D_003BDAA4 == (u32)node) {
         *(volatile u32 *)0x10002010 = 0x40000000;
         sceIpuSync(0, 0);
@@ -1083,24 +1091,16 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EBEB8);
 
-typedef struct SoundIpuBuffer {
-    u8 pad00[0x18];
-    u8 active;
-    u8 pad19[3];
-    s32 size;
-    u32 buffers[2];
-} SoundIpuBuffer;
-
 /* Start DMA from the IPU into the selected buffer, then toggle the byte index. */
-void sdfSoundQueueIpuBuffer(SoundIpuBuffer *stream) {
+void sdfSoundQueueIpuBuffer(SdfStreamFrameNode *stream) {
     vu32 *dmaAddress = (vu32 *)SDF_IPU_OUTPUT_DMA_ADDRESS;
     vu32 *dmaQwords = (vu32 *)SDF_IPU_OUTPUT_DMA_QWC;
     vu32 *dmaControl = (vu32 *)SDF_IPU_OUTPUT_DMA_CTRL;
-    u8 bufferIndex = stream->active;
+    u8 bufferIndex = stream->bufferIndex;
     *dmaAddress = stream->buffers[bufferIndex] & SDF_EE_PHYSICAL_MASK;
-    *dmaQwords = stream->size / SDF_STREAM_QWORD_BYTES;
+    *dmaQwords = stream->bufferSize / SDF_STREAM_QWORD_BYTES;
     *dmaControl = SDF_IPU_DMA_START;
-    stream->active = bufferIndex ^ 1;
+    stream->bufferIndex = bufferIndex ^ 1;
 }
 
 /* Read the FDEC result, then issue FDEC with an eight-bit advance; return the earlier result. */
@@ -1120,7 +1120,7 @@ INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC060);
 
 /* Remove and advance the first list item matching the IPU cleanup test. */
 void func_002EC230(s32 skipInterruptGuard) {
-    SdfStreamNode *node;
+    SdfStreamFrameNode *node;
     s32 interruptsEnabled = 0;
 
     if (D_003BDAA4 != 0) {
@@ -1132,13 +1132,13 @@ void func_002EC230(s32 skipInterruptGuard) {
 
     node = sdfStreamNodeListHead;
     while (node != 0) {
-        if (node->field_1A + node->field_13 < 2 &&
-            (node->field_0C != 1 || node->field_52 != 0)) {
+        if (node->unk1A + node->unk13 < 2 &&
+            (node->active != 1 || node->filledSlots != 0)) {
             sdfStreamNodeUnlink(node, 1);
             func_002EC060(node);
             break;
         }
-        node = node->next;
+        node = node->streamNext;
     }
 
     if (skipInterruptGuard == 0 && interruptsEnabled != 0) {
@@ -1148,42 +1148,16 @@ void func_002EC230(s32 skipInterruptGuard) {
 
 extern void sceIpuStopDMA(void *);
 
-/* IPU stream worker: queued stream node plus the DMA progress counters polled by this thread. */
-/* DMA control block embedded in the worker at 0x68. */
-typedef struct IpuDmaState {
-    u8 pad0[8];
-} IpuDmaState;
 
-typedef struct IpuWorker {
-    SdfStreamNode *prev;
-    SdfStreamNode *next;
-    u8 pad08[5];
-    u8 queued;
-    u8 unk0E;
-    u8 drained;      /* 0x0F: set when the cycle wraps without the drain flag */
-    u8 firstStop;    /* 0x10: set on the first DMA stop, cleared by the worker */
-    u8 unk11;
-    u8 pad12[3];
-    u8 unk15;
-    u8 pad16[4];
-    u8 unk1A;
-    u8 pad1B[0x25];
-    u32 cycleLength; /* 0x40: cycle the tick counter counts up to */
-    u32 tickCount;   /* 0x44: incremented per completed DMA, reset at cycleLength */
-    u8 pad48[0x1D];
-    u8 unk65;
-    u8 pad66[2];
-    IpuDmaState dma; /* 0x68: embedded block, address handed to sceIpuStopDMA */
-    u32 unk70;
-} IpuWorker;
-
+/* Sleep for IPU completion, advance cycle state and requeue non-drained nodes;
+ * the DMA worker runs indefinitely and retains the native completion-byte gates. */
 void sdfIpuDmaCompletionWorker(void) {
-    IpuWorker *work;
+    SdfStreamFrameNode *work;
     s32 interruptsEnabled;
 
     for (;;) {
         SleepThread();
-        work = (IpuWorker *)D_003BDAA4;
+        work = (SdfStreamFrameNode *)D_003BDAA4;
         if (work == NULL) {
             continue;
         }
@@ -1198,7 +1172,7 @@ void sdfIpuDmaCompletionWorker(void) {
         D_003BDAA4 = 0;
         work->tickCount++;
         if (work->tickCount == work->cycleLength) {
-            if (work->unk15 != 0) {
+            if (work->loopMode != 0) {
                 work->unk0E = 0;
                 work->tickCount = 0;
                 work->unk65 = 0;
@@ -1208,7 +1182,7 @@ void sdfIpuDmaCompletionWorker(void) {
         }
         if (work->drained == 0) {
             interruptsEnabled = func_00312C08();
-            sdfStreamNodeAppend((SdfStreamNode *)work, 0);
+            sdfStreamNodeAppend(work, 0);
             if (interruptsEnabled != 0) {
                 EIntr();
             }
