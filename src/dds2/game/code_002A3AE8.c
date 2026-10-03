@@ -420,7 +420,33 @@ void mnuSlidePathPoint(s32 position, s32 *outX, s32 *outY) {
     *outY = y0 + dy * offset / span;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A49C0);
+typedef struct MovieMenuEffectSlot {
+    s32 active;
+    s32 counter;
+} MovieMenuEffectSlot;
+
+typedef struct MovieMenuEffectState {
+    u8 pad00[0x74];
+    MovieMenuEffectSlot slots[4];
+} MovieMenuEffectState;
+
+void func_002A49C0(MovieMenuEffectState *work) {
+    s32 selected = -1;
+    s32 i;
+
+    if (effMiscRand(0) % 60u == 0) {
+        for (i = 0; i < 4; i++) {
+            if (work->slots[i].active == 0) {
+                selected = i;
+                break;
+            }
+        }
+        if (selected >= 0) {
+            work->slots[selected].active = 1;
+            work->slots[selected].counter = 0;
+        }
+    }
+}
 
 extern s16 D_003E38E0[][2];
 
@@ -545,7 +571,32 @@ void mnuAdvanceMultiSpriteSlideBar(SlideBar *bar, s32 drawContext) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A5040);
+typedef struct MovieMenuFadeState {
+    u8 pad00[0x10C];
+    s32 active;
+    s32 amount;
+} MovieMenuFadeState;
+
+void func_002A5040(SlideBarTimed *primary, SlideBar *secondary, s32 drawContext) {
+    MovieMenuFadeState *fade;
+    s32 primaryPos = primary->pos;
+    s32 x;
+
+    if (primaryPos == 0 && secondary->pos == 0) {
+        return;
+    }
+    if (primaryPos != 0) {
+        mnuDrawSprite(0, 0, 0, primaryPos / 4, 0, 0x1D, drawContext);
+        return;
+    }
+    fade = (MovieMenuFadeState *)mnuMovieMenuState;
+    if (fade->active == 0) {
+        x = 0x80;
+    } else {
+        x = 0x80 - fade->amount;
+    }
+    mnuDrawSprite(0, 0, 0, x, 0, 0x1D, drawContext);
+}
 
 void func_002A50E8(s32 buffer, s32 index, u8 value) {
     *(u8 *)(buffer + index) = value;
