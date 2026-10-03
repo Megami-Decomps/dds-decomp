@@ -17,23 +17,37 @@ typedef struct MagatuhiEffectData {
 } MagatuhiEffectData;
 
 typedef struct {
-    u8 pad00[0x20];
+    s32 count;
+    u16 historyCount;
+    u8 pad06[2];
+    f32 unk08;
+    f32 unk0C;
+    u32 unk10;
+    f32 (*positions)[4];
+    u32 *colorTable;
+    f32 *unk1C;
     u32 *values;
     u16 *writeIndices;
     u16 *validCounts;
     f32 *angleValues; /* Four floats per indexed row. */
-} MagatuhiValueWork;
+    u32 texture;
+    void *resource;
+} EffMagatuhiValueWork;
 
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern s32 func_00190E58(s32, s32, s32, f32, f32);
+extern void *sdfAllocGeneralBlock(s32 size);
+extern s32 sdfResourceRetainAddress(void *resource);
+extern u32 effGetResourceFirstWord(s32 index);
+extern s32 func_00190E58(s32, s32, f32, s32, f32);
 extern void effMagatuhiFillColorTable(s32, s32, s32);
+extern s16 D_00452110[];
 
 void *effCloneMagatuhiWithColorResource(MagatuhiEffectData *source) {
     MagatuhiEffectData *effect;
 
     effect = (MagatuhiEffectData *)sdfAllocSizeClassBlock(0x20);
     memcpy(effect, source, 0x1C);
-    effect->field1C = func_00190E58(effect->field00, effect->field04, effect->field14, effect->field08, effect->field18);
+    effect->field1C = func_00190E58(effect->field00, effect->field04, effect->field08, effect->field14, effect->field18);
     effMagatuhiFillColorTable(effect->field1C, effect->field0C, effect->field10);
     return effect;
 }
@@ -47,7 +61,7 @@ void func_00190DE0(MagatuhiEffectOwner *effect) {
     func_00191010(effect->resource);
 }
 
-void func_00190DF8(MagatuhiValueWork *work, s32 index) {
+void func_00190DF8(EffMagatuhiValueWork *work, s32 index) {
     f32 *angles;
 
     work->writeIndices[index] = 0;
@@ -61,4 +75,73 @@ void func_00190DF8(MagatuhiValueWork *work, s32 index) {
     angles[3] = 0.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_00190D10", func_00190E58);
+s32 func_00190E58(s32 count, s32 frames, f32 param08, s32 param, f32 param0C) {
+    s32 countFrames;
+    s32 frameTerm;
+    s32 countTerm;
+    s32 allocationSize;
+    void *allocation;
+    s32 positions;
+    s32 colorTable;
+    s32 unknownValues;
+    s32 values;
+    s32 writeIndices;
+    s32 validCounts;
+    s32 angleValues;
+    EffMagatuhiValueWork *resource;
+    s16 *defaults;
+    u32 i;
+
+    countFrames = count * frames;
+    frameTerm = countFrames + frames;
+    countTerm = (countFrames << 2) + count;
+    allocationSize = (((count << 3) + ((countTerm + frameTerm) << 1) + (count << 1)) << 1) + 0x38;
+    allocation = sdfAllocGeneralBlock(allocationSize);
+    positions = sdfResourceRetainAddress(allocation);
+    colorTable = positions + (countFrames << 4);
+    unknownValues = colorTable + (frames << 2);
+    values = unknownValues + (countFrames << 2);
+    writeIndices = values + (count << 2);
+    validCounts = writeIndices + (count << 1);
+    angleValues = validCounts + (count << 1);
+    resource = (EffMagatuhiValueWork *)(angleValues + (count << 4));
+
+    resource->count = count;
+    resource->historyCount = frames;
+    resource->unk0C = param0C;
+    resource->unk08 = param08;
+    resource->unk10 = param;
+    resource->positions = (f32 (*)[4])positions;
+    resource->colorTable = (u32 *)colorTable;
+    resource->unk1C = (f32 *)unknownValues;
+    resource->values = (u32 *)values;
+    resource->writeIndices = (u16 *)writeIndices;
+    resource->validCounts = (u16 *)validCounts;
+    resource->angleValues = (f32 *)angleValues;
+    resource->resource = allocation;
+    resource->texture = effGetResourceFirstWord(0);
+
+    defaults = D_00452110;
+    i = 0;
+    do {
+        i++;
+        defaults[0] = 0;
+        defaults[1] = 0;
+        defaults[2] = 0x400;
+        defaults[3] = 0;
+        defaults[4] = 0x400;
+        defaults[5] = 0x400;
+        defaults[6] = 0;
+        defaults[7] = 0x400;
+        defaults += 8;
+    } while (i < 0xF);
+
+    if (count != 0) {
+        i = 0;
+        do {
+            func_00190DF8(resource, i);
+            i++;
+        } while (i < count);
+    }
+    return (s32)resource;
+}
