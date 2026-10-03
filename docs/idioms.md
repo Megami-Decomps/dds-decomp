@@ -431,6 +431,16 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
 - Repeated `unit->entrySlots[index].f` accesses retain separate address
   pseudos and `daddu` copies; caching a slot pointer merges them
   (`func_001ADDD0`).
+- When retail computes one scaled row base and then copies it for several
+  component loads, preserve a genuinely homogeneous row as a multidimensional
+  scalar array. Paired `mnuDrawSprite` is exact with its signed-halfword table
+  declared `s16 rows[][4]` and direct `rows[index][component]` reads: pass 00
+  creates one eight-byte row address and the later pointer-copy topology.
+  Repeated fields of an array-of-struct view create multiple row additions;
+  caching one row pointer instead collapses all of the copies. Require the
+  element type, row stride and component offsets to agree with the data, then
+  compare `.00.rtl`; if the address topology is unchanged, stop rather than
+  adding aliases or redundant pointer locals.
 - A countdown pointer loop in retail (`addiu v1,-1; sb ..,0(v0); bgez v1;
   addiu v0,-1`, pointer starting at `base + N-1`) is an ascending index
   loop in the source: `for (i = 0; i < N; i++) buf[i] = c;`. When the
