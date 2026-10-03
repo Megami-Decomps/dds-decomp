@@ -207,36 +207,72 @@ extern void btlStopStage(void);
 
 extern void *evtBattleStageTestScreen(void);
 
-typedef struct MenuStageTestState {
+/* Native page-table shape, shared with the party-window resource handlers. */
+typedef struct MenuPageGauge {
+    s32 resourceIndex;
+    u8 pad4[4];
+    s32 hp;
+    s32 mp;
+    s32 maxHp;
+    s32 maxMp;
+    u8 pad18[0x18];
+} MenuPageGauge;
+
+typedef struct MenuPageEntry {
+    s32 partyIndex;
+    MenuPageGauge gauge;
+} MenuPageEntry;
+
+typedef struct MenuPageRecord {
+    s32 visibleCount;
+    s32 additionalCount;
+    u32 unk8;
+    MenuPageEntry entries[5];
+} MenuPageRecord;
+
+/* Only this sprite object's prefix is accessed here. */
+typedef struct MenuSprites {
+    u8 pad00[0xC];
+    s32 unkC;
+} MenuSprites;
+
+typedef struct MenuPageSlot {
+    s32 kind;
     u32 flags;
-    u8 pad04[4];
-    s32 *layout;       /* 0x08: two counts, summed for the list length */
-    u8 pad0C[0x678];
-    s32 selectedPanel; /* 0x684 */
+    u8 pad08[0xD8];
+    MenuSprites *windowSprites; /* 0xE0 */
+    u8 padE4[0x50];
+} MenuPageSlot; /* 0x134 */
+
+typedef struct MenuList MenuList;
+
+/* Five page slots begin at +0x78, followed by the two owned list pointers. */
+typedef struct MenuPageWindow {
+    u32 flags;
+    s32 transitionValue;
+    MenuPageRecord *records;
+    u8 pad0C[0x18];
+    s32 handlesA[8];
+    s32 handlesB[8];
+    s32 handlesC[5];
+    MenuPageSlot slots[5];
+    MenuList *lists[2]; /* 0x67C */
+    s32 selected;      /* 0x684 */
     s32 scrollOffset;  /* 0x688 */
-} MenuStageTestState;
+    s32 fade;          /* 0x68C */
+} MenuPageWindow;
 
-typedef struct MenuStagePanelHeader {
-    s32 mode;  /* 0x00 */
-    u32 flags; /* 0x04 */
-    u8 pad08[0x12C];
-} MenuStagePanelHeader; /* 0x134 */
+extern void func_00281D40(s32, s32, s32, MenuPageWindow *, s32, s32);
+extern void func_00282360(s32, s32, s32, MenuPageWindow *, s32, s32);
 
-extern void func_00281D40(s32, s32, s32, MenuStageTestState *, s32, s32);
-extern void func_00282360(s32, s32, s32, MenuStageTestState *, s32, s32);
-
-typedef struct MenuStageLayoutCounts {
-    s32 first;
-    s32 second;
-} MenuStageLayoutCounts;
 
 extern s32 D_0037CD80[];
 
-void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuStageTestState *menu, s32 panelIndex, s32 param) {
-    MenuStagePanelHeader *panel = (MenuStagePanelHeader *)((u8 *)menu + 0x78) + panelIndex;
-    s32 mode = panel->mode;
+void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIndex, s32 param) {
+    MenuPageSlot *panel = &menu->slots[panelIndex];
+    s32 mode = panel->kind;
 
-    if (menu->selectedPanel >= 0) {
+    if (menu->selected >= 0) {
         x -= 0x270;
         y += 0x20;
         mode = 1;
@@ -254,14 +290,13 @@ void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuStageTestState *menu, s32 pan
     }
 }
 
-void func_002828D0(s32 *position, MenuStageTestState *menu, s32 panelIndex) {
-    MenuStagePanelHeader *panel =
-        (MenuStagePanelHeader *)((u8 *)menu + 0x78) + panelIndex;
-    MenuStageLayoutCounts *layout = (MenuStageLayoutCounts *)menu->layout;
+void func_002828D0(s32 *position, MenuPageWindow *menu, s32 panelIndex) {
+    MenuPageSlot *panel = &menu->slots[panelIndex];
+    MenuPageRecord *layout = menu->records;
     u32 panelFlags = panel->flags;
-    s32 secondCount = layout->second;
+    s32 secondCount = layout->additionalCount;
     s32 totalCount;
-    s32 firstCount = layout->first;
+    s32 firstCount = layout->visibleCount;
     s32 group;
 
     totalCount = firstCount + secondCount;
@@ -297,58 +332,49 @@ done:
 }
 
 /* Advance the panel's current transition value toward its 0x100 limit. */
-void mnuAdvancePanelTransition(s32 panel) {
-    if (*(s32 *)(panel + 4) < 0x100) {
-        *(s32 *)(panel + 4) = *(s32 *)(panel + 4) + 8;
+void mnuAdvancePanelTransition(MenuPageWindow *menu) {
+    if (menu->transitionValue < 0x100) {
+        menu->transitionValue = menu->transitionValue + 8;
     }
 }
 
 
 
-typedef struct MenuStageNode {
-    u8 pad00[0xC];
-    s32 overrideValue;
-} MenuStageNode;
-
-typedef struct MenuStagePanel {
-    u8 pad00[0xE0];
-    MenuStageNode *node;
-} MenuStagePanel;
 
 /* Apply a temporary override to the selected node while drawing its panel. */
-void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, MenuStageTestState *menu, s32 param) {
+void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 param) {
     s32 positionOffset[2];
-    MenuStagePanel *panel = (MenuStagePanel *)((s32)menu + menu->selectedPanel * 0x134 + 0x78);
-    MenuStageNode *node;
+    MenuPageSlot *panel = &menu->slots[menu->selected];
+    MenuSprites *node;
 
     func_002828D0(positionOffset, menu, 0);
-    node = panel->node;
+    node = panel->windowSprites;
     if (node != NULL) {
-        node->overrideValue = overrideValue;
+        node->unkC = overrideValue;
     }
     x += menu->scrollOffset * 0x10;
     menu->scrollOffset = (s32)((f32)menu->scrollOffset / 1.19999993f);
     /* Both arms are identical in retail; kept as written. */
     if (menu->flags & 0x100) {
-        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selectedPanel, param);
+        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
     } else {
-        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selectedPanel, param);
+        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
     }
-    node = panel->node;
+    node = panel->windowSprites;
     if (node != NULL) {
-        node->overrideValue = 0;
+        node->unkC = 0;
     }
 }
 
-void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, MenuStageTestState *menu, s32 param) {
+void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 param) {
     s32 positionOffset[2];
-    s32 *layout = menu->layout;
+    MenuPageRecord *layout = menu->records;
     s32 count;
     s32 i;
 
-    count = layout[0];
-    count += layout[1];
-    if (menu->selectedPanel >= 0) {
+    count = layout->visibleCount;
+    count += layout->additionalCount;
+    if (menu->selected >= 0) {
         mnuDrawPanelWithTemporaryOverride(x, y, z, overrideValue, menu, param);
     } else {
         for (i = 0; i < count; i++) {
@@ -356,11 +382,11 @@ void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, MenuStageTestS
             mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, i, param);
         }
     }
-    mnuAdvancePanelTransition((s32)menu);
+    mnuAdvancePanelTransition(menu);
 }
 
 /* Same as mnuDrawStageTestList with no override value; arg5 is unused. */
-void mnuDrawPanelListDefault(s32 x, s32 y, s32 z, MenuStageTestState *menu, s32 param, s32 unused) {
+void mnuDrawPanelListDefault(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 param, s32 unused) {
     mnuDrawStageTestList(x, y, z, 0, menu, param);
 }
 

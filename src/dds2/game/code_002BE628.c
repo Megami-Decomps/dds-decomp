@@ -202,31 +202,98 @@ extern s8 D_0037F510[];
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE628);
 
-typedef struct MenuSubBlock {
-    u8 pad00[0x100];
-    s32 value; /* 0x100 */
+/* Native page-table shape, shared with the party-window resource handlers. */
+typedef struct MenuPageGauge {
+    s32 resourceIndex;
+    u8 pad4[4];
+    s32 hp;
+    s32 mp;
+    s32 maxHp;
+    s32 maxMp;
+    u8 pad18[0x18];
+} MenuPageGauge;
+
+typedef struct MenuPageEntry {
+    s32 partyIndex;
+    MenuPageGauge gauge;
+} MenuPageEntry;
+
+typedef struct MenuPageRecord {
+    s32 visibleCount;
+    s32 additionalCount;
+    u32 unk8;
+    MenuPageEntry entries[5];
+} MenuPageRecord;
+
+typedef struct MenuSprites {
+    u8 pad00[0xC];
+    s32 unkC;
+    void *icon[5];
+    void *item[11];
+    void *cursor[4];
+    s32 fade;
+    u8 pad64[0x10];
+    u8 unk74;
+    u8 unk75;
+} MenuSprites;
+
+typedef struct MenuQueuedCommand {
+    u32 unk0;
+    s32 kind;
+    s32 option;
+    s32 unkC;
+    s32 unk10;
+    s32 initialValue;
+    s32 argument;
+} MenuQueuedCommand; /* 0x1C */
+
+/* Each page owns two 0x1024-byte banks. The command's +0x14 word is
+ * the value compared when choosing a bank; +0x100 is a separate word. */
+typedef struct MenuPageSlotContent {
+    u8 pad00[0xD0];
+    MenuSprites *windowSprites;
+    u8 padD4[0x10];
+    MenuQueuedCommand command; /* 0xE4 */
+    s32 unk100;
     u8 pad104[0xF20];
-} MenuSubBlock;
+} MenuPageSlotContent;
 
-typedef struct MenuPanelSlots {
-    MenuSubBlock sub[2];
-    u8 pad2048[0xF0];
-} MenuPanelSlots;
+typedef struct MenuPageSlot {
+    s32 kind;
+    u32 flags;
+    u8 pad08[4];
+    MenuPageSlotContent contents[2]; /* 0x0C */
+    u8 pad2054[0xE4];
+} MenuPageSlot; /* 0x2138 */
 
-typedef struct MenuPanelSet {
-    u8 pad00[0x84];
-    MenuPanelSlots panel[5]; /* 0x84, stride 0x2138 */
-} MenuPanelSet;
+typedef struct MenuList MenuList;
 
-/* Sets the value word of both sub-blocks of every panel. */
-void mnuSetPanelSlotValues(MenuPanelSet *menu, s32 value) {
-    MenuPanelSlots *panel = menu->panel;
+/* Five page slots start at +0x78; the first content bank is twelve bytes
+ * into its page, at +0x84. These are not independent panel arrays. */
+typedef struct MenuPageWindow {
+    u32 flags;
+    s32 transitionValue;
+    MenuPageRecord *records;
+    u8 pad0C[0x18];
+    s32 handlesA[8];
+    s32 handlesB[8];
+    s32 handlesC[5];
+    MenuPageSlot slots[5];
+    MenuList *lists[2]; /* 0xA690 */
+    s32 selected;      /* 0xA698 */
+    s32 scrollOffset;  /* 0xA69C */
+    s32 fade;          /* 0xA6A0 */
+} MenuPageWindow;
+
+/* Set the separate +0x100 word in both content banks of every page. */
+void mnuSetPanelSlotValues(MenuPageWindow *menu, s32 value) {
+    MenuPageSlot *panel = menu->slots;
     s32 i;
     s32 j;
 
     for (i = 0; i < 5; i++, panel++) {
         for (j = 0; j < 2; j++) {
-            panel->sub[j].value = value;
+            panel->contents[j].unk100 = value;
         }
     }
 }
@@ -235,56 +302,49 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE730);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BED10);
 
-void func_002BEE38(u32 *entry) {
-    entry[3] = 0x18;
-    entry[4] = 5;
-    *entry = 0;
+void func_002BEE38(MenuQueuedCommand *entry) {
+    entry->unkC = 0x18;
+    entry->unk10 = 5;
+    entry->unk0 = 0;
 }
 
-typedef struct MenuQueuedCommand {
-    u32 word00;
-    s32 kind;         /* 0x04 */
-    s32 option;       /* 0x08: chosen from the roster flag */
-    u8 pad0C[8];
-    s32 initialValue; /* 0x14 */
-    s32 argument;     /* 0x18 */
-} MenuQueuedCommand;
 
-/* Retail returns int here without a return statement: the last call is a plain jal, not a sibcall. */
-s32 mnuQueueListEntry(u8 *menu, s32 window, u32 kind, s32 argument) {
-    u8 *base = menu + window * 0x2138;
-    u8 *block = base + 0x78;
-    s32 *count = (s32 *)(base + 0x17C);
+/* Queue in the least-valued command bank; use bank zero if neither value
+ * is below 0x200. Retail has no explicit return: its last call is a plain jal. */
+s32 mnuQueueListEntry(MenuPageWindow *menu, s32 window, u32 kind, s32 argument) {
+    MenuPageSlot *panel = &menu->slots[window];
+    s32 *count = &panel->contents[0].command.initialValue;
     s32 best = 0x200;
     s32 bestIndex = 0;
     s32 i;
-    u8 *entry;
+    MenuQueuedCommand *entry;
     u32 flags;
 
-    for (i = 0; i < 2; i++, count += 0x409) {
+    /* Selection words are one content-bank stride apart. */
+    for (i = 0; i < 2; i++, count += sizeof(MenuPageSlotContent) / sizeof(*count)) {
         if (*count < best) {
             best = *count;
             bestIndex = i;
         }
     }
-    flags = *(u16 *)(datGameState + window * 0x1C4 + 0xA60);
-    entry = block + bestIndex * 0x1024 + 0xF0;
-    ((MenuQueuedCommand *)entry)->initialValue = 0x200;
-    ((MenuQueuedCommand *)entry)->argument = argument;
-    ((MenuQueuedCommand *)entry)->kind = kind;
+    flags = ((BtlEntry *)(datGameState + window * 0x1C4 + 0xA60))->flags;
+    entry = &panel->contents[bestIndex].command;
+    entry->initialValue = 0x200;
+    entry->argument = argument;
+    entry->kind = kind;
     if ((flags & 2) != 0) {
-        ((MenuQueuedCommand *)entry)->option = 0;
+        entry->option = 0;
     } else {
-        ((MenuQueuedCommand *)entry)->option = 1;
+        entry->option = 1;
     }
     switch (kind) {
     case 0:
         func_002BE730(entry);
-        *(s32 *)(menu + 0xA6A0) = 0;
+        menu->fade = 0;
         break;
     case 1:
         func_002BED10(entry);
-        *(s32 *)(menu + 0xA6A0) = 0;
+        menu->fade = 0;
         break;
     case 2:
         func_002BEE38(entry);
@@ -292,26 +352,27 @@ s32 mnuQueueListEntry(u8 *menu, s32 window, u32 kind, s32 argument) {
     }
 }
 
-void mnuClearSpriteRecord(u32 *entry) {
-    entry[0] = 0;
-    entry[1] = 0;
-    entry[2] = 0;
-    entry[3] = 0;
-    entry[4] = 0;
-    entry[5] = 0;
-    entry[6] = 0;
+void mnuClearSpriteRecord(MenuQueuedCommand *entry) {
+    entry->unk0 = 0;
+    entry->kind = 0;
+    entry->option = 0;
+    entry->unkC = 0;
+    entry->unk10 = 0;
+    entry->initialValue = 0;
+    entry->argument = 0;
 }
 
-void mnuClearPairedSpriteRecords(s32 menu, s32 index) {
-    s32 record;
+/* Clear both command headers; they are embedded in separate content banks. */
+void mnuClearPairedSpriteRecords(MenuPageWindow *menu, s32 index) {
+    MenuQueuedCommand *entry;
     s32 remaining;
 
     remaining = 1;
-    record = index * 0x2138 + menu + 0x168;
+    entry = &menu->slots[index].contents[0].command;
     do {
         remaining = remaining - 1;
-        mnuClearSpriteRecord(record);
-        record = record + 0x1024;
+        mnuClearSpriteRecord(entry);
+        entry = (MenuQueuedCommand *)((u8 *)entry + sizeof(MenuPageSlotContent));
     } while (-1 < remaining);
 }
 
@@ -329,39 +390,18 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF830);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BFEA0);
 
-typedef struct MenuListNode {
-    u8 pad00[0xC];
-    s32 overrideValue;
-} MenuListNode;
 
-typedef struct MenuListPanel {
-    s32 mode;        /* 0x00 */
-    u32 layoutFlags; /* 0x04: bit 0x40 forces the regular list spacing */
-    u8 pad08[0xD4];
-    MenuListNode *node;
-    u8 padE0[0x2058];
-} MenuListPanel;
+extern void func_002BF830(s32, s32, s32, MenuPageWindow *, s32, s32);
+extern void func_002BFEA0(s32, s32, s32, MenuPageWindow *, s32, s32);
 
-typedef struct MenuListState {
-    u32 flags;
-    s32 transitionValue; /* 0x04: advances toward 0x100 */
-    s32 *entryCount; /* 0x08 */
-    u8 pad0C[0xA68C];
-    s32 selectedPanel; /* 0xA698 */
-    s32 scrollOffset; /* 0xA69C */
-} MenuListState;
+void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIndex, s32 param) {
+    MenuPageSlot *panel = &menu->slots[panelIndex];
+    s32 mode = panel->kind;
 
-extern void func_002BF830(s32, s32, s32, MenuListState *, s32, s32);
-extern void func_002BFEA0(s32, s32, s32, MenuListState *, s32, s32);
-
-void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuListState *menu, s32 panelIndex, s32 param) {
-    MenuListPanel *panel = (MenuListPanel *)((u8 *)menu + 0x78) + panelIndex;
-    s32 mode = panel->mode;
-
-    if (menu->selectedPanel >= 0) {
+    if (menu->selected >= 0) {
         mode = 1;
     }
-    if (panel->layoutFlags & 0x40) {
+    if (panel->flags & 0x40) {
         mode = 1;
     }
     switch (mode) {
@@ -386,17 +426,17 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B130);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B140);
 
-void mnuCalcListEntryOffset(s32 *out, MenuListState *menu, s32 index) {
+void mnuCalcListEntryOffset(s32 *out, MenuPageWindow *menu, s32 index) {
     MenuSpacing spacing = {0x310, 0x370, 0x190};
-    s32 count = *menu->entryCount;
+    s32 count = menu->records->visibleCount;
     s32 mode;
 
-    if (!(((MenuListPanel *)((s32)menu + index * 0x2138 + 0x78))->layoutFlags & 0x40)) {
+    if (!(menu->slots[index].flags & 0x40)) {
         mode = index < count ? 1 : 2;
     } else {
         mode = 1;
     }
-    if (menu->selectedPanel >= 0) {
+    if (menu->selected >= 0) {
         out[0] = 0xC80;
         out[1] = 0x20;
     } else {
@@ -418,46 +458,46 @@ void mnuCalcListEntryOffset(s32 *out, MenuListState *menu, s32 index) {
 }
 
 /* Advance the panel's current transition value toward its 0x100 limit. */
-void mnuAdvancePanelTransition(MenuListState *menu) {
+void mnuAdvancePanelTransition(MenuPageWindow *menu) {
     if (menu->transitionValue < 0x100) {
         menu->transitionValue = menu->transitionValue + 8;
     }
 }
 
 /* Apply a temporary override to the selected node while drawing its panel. */
-void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, MenuListState *menu, s32 param) {
+void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 param) {
     s32 positionOffset[2];
-    MenuListPanel *panel = (MenuListPanel *)((s32)menu + menu->selectedPanel * 0x2138 + 0x78);
-    MenuListNode *node;
+    MenuPageSlot *panel = &menu->slots[menu->selected];
+    MenuSprites *node;
 
     mnuCalcListEntryOffset(positionOffset, menu, 0);
-    node = panel->node;
+    node = panel->contents[0].windowSprites;
     if (node != NULL) {
-        node->overrideValue = overrideValue;
+        node->unkC = overrideValue;
     }
     x += menu->scrollOffset * 0x10;
     menu->scrollOffset = (s32)((f32)menu->scrollOffset / 1.19999993f);
     /* Both arms are identical in retail; kept as written. */
     if (menu->flags & 0x80) {
-        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selectedPanel, param);
+        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
     } else {
-        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selectedPanel, param);
+        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
     }
-    node = panel->node;
+    node = panel->contents[0].windowSprites;
     if (node != NULL) {
-        node->overrideValue = 0;
+        node->unkC = 0;
     }
 }
 
-void mnuDrawListPanels(s32 x, s32 y, s32 z, s32 overrideValue, MenuListState *menu, s32 param) {
+void mnuDrawListPanels(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 param) {
     s32 positionOffset[2];
-    s32 *layout = menu->entryCount;
+    MenuPageRecord *layout = menu->records;
     s32 count;
     s32 i;
 
-    count = layout[0];
-    count += layout[1];
-    if (menu->selectedPanel >= 0) {
+    count = layout->visibleCount;
+    count += layout->additionalCount;
+    if (menu->selected >= 0) {
         mnuDrawPanelWithTemporaryOverride(x, y, z, overrideValue, menu, param);
     } else {
         for (i = 0; i < count; i++) {
@@ -465,11 +505,11 @@ void mnuDrawListPanels(s32 x, s32 y, s32 z, s32 overrideValue, MenuListState *me
             mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, i, param);
         }
     }
-    mnuAdvancePanelTransition((s32)menu);
+    mnuAdvancePanelTransition(menu);
 }
 
 void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, s32 source, s32 mode, s32 option) {
-    mnuDrawListPanels(x, y, depth, 0, (MenuListState *)source, mode);
+    mnuDrawListPanels(x, y, depth, 0, (MenuPageWindow *)source, mode);
 }
 
 typedef struct MenuPoint {
