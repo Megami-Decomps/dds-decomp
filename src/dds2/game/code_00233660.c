@@ -3,7 +3,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
-extern s32 sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *format, ...);
+extern void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *format, ...);
 
 extern void sdfReleaseChipBlock();
 extern void *sdfAllocAndClearQuadwords(s32 size);
