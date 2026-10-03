@@ -66,8 +66,265 @@ def text_section(obj):
 
 # Only units with their own .rodata subsegment (tools/split_rodata.py) may emit
 # rodata, and only jump tables, which are verified entry by entry. Strings and
-# constants still come from INCLUDE_RODATA; other data is not split per unit.
+# constants still come from INCLUDE_RODATA. A unit may emit zero-initialized
+# data only when the YAML gives the matching section an exact, bounded
+# dict-form subsegment; other data remains fail-closed.
 DATA_SECTIONS = (".rodata", ".data", ".sdata", ".sbss", ".bss", ".lit4", ".lit8")
+YAML_ITEM = re.compile(
+    r"^(?P<indent>[ \t]*)-\s*(?P<body>[^\n#]*?)(?:\s+#.*)?$", re.M
+)
+
+
+def _inline_yaml_fields(body):
+    """Parse the scalar fields from one simple inline YAML mapping."""
+    body = body.strip()
+    if not body.startswith("{") or not body.endswith("}"):
+        return None
+    fields = {}
+    for field in body[1:-1].split(","):
+        if ":" not in field:
+            return None
+        key, value = field.split(":", 1)
+        fields[key.strip()] = value.strip().strip("'\"")
+    return fields
+
+
+def owned_nobits_range(yaml_text, unit, section):
+    """Return an exact per-unit NOBITS ``(vram, size)``, or None.
+
+    NOBITS subsegments share a file offset, so their retail size comes from
+    consecutive VRAM boundaries.  Accept only an unambiguous inline mapping
+    whose immediate sibling is another inline mapping with a greater VRAM.
+    """
+    if section not in (".sbss", ".bss"):
+        raise ValueError(f"unsupported NOBITS section {section!r}")
+    items = list(YAML_ITEM.finditer(yaml_text))
+    matches = []
+    for index, item in enumerate(items):
+        fields = _inline_yaml_fields(item.group("body"))
+        if fields is None or fields.get("type") != section \
+                or fields.get("name") != unit:
+            continue
+        try:
+            start = int(fields["vram"], 0)
+        except (KeyError, ValueError):
+            continue
+        sibling = None
+        indent = len(item.group("indent"))
+        for later in items[index + 1:]:
+            later_indent = len(later.group("indent"))
+            if later_indent < indent:
+                break
+            if later_indent == indent:
+                sibling = later
+                break
+        if sibling is None:
+            continue
+        next_fields = _inline_yaml_fields(sibling.group("body"))
+        try:
+            end = int(next_fields["vram"], 0) if next_fields is not None else 0
+        except (KeyError, ValueError):
+            continue
+        if end > start:
+            matches.append((start, end - start))
+    return matches[0] if len(matches) == 1 else None
+
+
+def owned_bss_range(yaml_text, unit):
+    """Compatibility wrapper for an exact source-owned .bss span."""
+    return owned_nobits_range(yaml_text, unit, ".bss")
+
+
+def owned_nobits_size(yaml_text, unit, section):
+    owned = owned_nobits_range(yaml_text, unit, section)
+    return owned[1] if owned is not None else None
+
+
+def owned_bss_size(yaml_text, unit):
+    """Compatibility wrapper for an exact source-owned .bss size."""
+    return owned_nobits_size(yaml_text, unit, ".bss")
+
+
+def nobits_symbols(objdump_text, section_name):
+    """Return explicit NOBITS ``(offset, size, name, is_object)`` rows.
+
+    The B/b letter printed by nm establishes storage, but not the ELF symbol
+    type.  Objdump's ``O`` marker is the STT_OBJECT fact needed before local
+    NOBITS relocations may be treated as belonging to a recovered object.
+    """
+    if section_name not in (".sbss", ".bss"):
+        raise ValueError(f"unsupported NOBITS section {section_name!r}")
+    result = []
+    for line in objdump_text.splitlines():
+        parts = line.split()
+        if section_name not in parts:
+            continue
+        section = parts.index(section_name)
+        if section == 0 or section + 2 >= len(parts):
+            continue
+        try:
+            offset = int(parts[0], 16)
+            size = int(parts[section + 1], 16)
+        except ValueError:
+            continue
+        name = parts[section + 2]
+        if name == section_name:
+            continue
+        result.append((offset, size, name, "O" in parts[1:section]))
+    return result
+
+
+def bss_symbols(objdump_text):
+    """Compatibility wrapper for explicit .bss symbols."""
+    return nobits_symbols(objdump_text, ".bss")
+
+
+def _retail_nobits_inventory(start, size, syms):
+    """Derive canonical ``(offset, size, name)`` rows from symbol_addrs.
+
+    Every named address inside the exact owned span is authoritative.  Aliases
+    at one address are separate required names for the same object extent;
+    their spelling order is canonicalized because ELF symbol-table order is
+    not a source-layout fact.
+    """
+    end = start + size
+    addressed = sorted(
+        (retail, name)
+        for name, retail in syms.items()
+        if start <= retail < end
+    )
+    if not addressed:
+        return [], ["retail span has no symbol_addrs inventory"]
+
+    addresses = sorted({retail for retail, _ in addressed})
+    problems = []
+    if addresses[0] != start:
+        problems.append(
+            f"retail inventory begins at +0x{addresses[0] - start:X}, expected +0x0"
+        )
+    next_address = {
+        retail: addresses[index + 1] if index + 1 < len(addresses) else end
+        for index, retail in enumerate(addresses)
+    }
+    inventory = [
+        (retail - start, next_address[retail] - retail, name)
+        for retail, name in addressed
+    ]
+    return inventory, problems
+
+
+def nobits_ownership_problems(
+        yaml_text, unit, section_name, section_size, emitted, syms):
+    """Explain why emitted NOBITS does not exactly implement its retail span.
+
+    The YAML owns the bounded address range.  Every ``symbol_addrs`` fact in
+    that range forms the canonical retail inventory, including same-address
+    aliases.  The object must emit that inventory one-for-one with each name
+    at the derived address and size as STT_OBJECT.  This deliberately fails
+    closed when the retail inventory is absent or does not begin at the span.
+    """
+    owned = owned_nobits_range(yaml_text, unit, section_name)
+    if owned is None:
+        return [f"no unambiguous dict-form retail {section_name} span"]
+    start, expected_size = owned
+    problems = []
+    if section_size != expected_size:
+        problems.append(
+            f"section size 0x{section_size:X}, retail span 0x{expected_size:X}"
+        )
+    inventory, inventory_problems = _retail_nobits_inventory(
+        start, expected_size, syms
+    )
+    problems.extend(inventory_problems)
+    canonical = {
+        name: (offset, size)
+        for offset, size, name in inventory
+    }
+
+    seen_names = set()
+    for offset, size, name, is_object in sorted(
+        emitted, key=lambda row: (row[0], row[2], row[1], row[3])
+    ):
+        if name in seen_names:
+            problems.append(f"duplicate symbol {name}")
+        seen_names.add(name)
+        if not is_object:
+            problems.append(f"{name} is not STT_OBJECT")
+        expected = canonical.get(name)
+        if expected is None:
+            problems.append(f"extra emitted symbol {name}")
+            continue
+        expected_offset, expected_object_size = expected
+        if offset != expected_offset:
+            problems.append(
+                f"{name} is at +0x{offset:X}, retail inventory requires "
+                f"+0x{expected_offset:X}"
+            )
+        if size != expected_object_size:
+            problems.append(
+                f"{name} has size 0x{size:X}, retail inventory requires "
+                f"0x{expected_object_size:X}"
+            )
+
+    for offset, size, name in inventory:
+        if name not in seen_names:
+            problems.append(
+                f"missing retail symbol {name} at +0x{offset:X} size 0x{size:X}"
+            )
+    if not emitted:
+        problems.append(
+            "section has no explicit symbols"
+        )
+    return problems
+
+
+def bss_ownership_problems(yaml_text, unit, section_size, emitted, syms):
+    """Compatibility wrapper for exact .bss ownership diagnostics."""
+    return nobits_ownership_problems(
+        yaml_text, unit, ".bss", section_size, emitted, syms
+    )
+
+
+def common_symbols(nm_text):
+    """Return sized COMMON/SCOMMON definitions from `nm -S` output."""
+    result = []
+    for line in nm_text.splitlines():
+        parts = line.split()
+        if len(parts) == 4 and parts[2] in "Cc":
+            result.append((parts[3], int(parts[1], 16)))
+    return result
+
+
+def section_symbols(objdump_text, section):
+    """Return (offset, size, name) definitions in one object section.
+
+    `nm` deliberately collapses `.data` and `.sdata` to the same symbol type,
+    while the ownership check needs to distinguish them.  The objdump symbol
+    table retains the defining section name.
+    """
+    result = []
+    for line in objdump_text.splitlines():
+        parts = line.split()
+        if len(parts) >= 6 and parts[-3] == section:
+            try:
+                result.append((int(parts[0], 16), int(parts[-2], 16), parts[-1]))
+            except ValueError:
+                pass
+    return result
+
+
+def owns_exact_section_item(definitions, syms, offset, size, retail_addr):
+    """Whether one exact object symbol maps this item to its retail address."""
+    return any(obj_off == offset and obj_size == size
+               and address(name, syms) == retail_addr
+               for obj_off, obj_size, name in definitions)
+
+
+def source_owned_item_size(definitions, syms, offset, retail_addr):
+    """Return an unambiguous source-owned item's declared size, if any."""
+    sizes = {obj_size for obj_off, obj_size, name in definitions
+             if obj_off == offset and address(name, syms) == retail_addr}
+    return sizes.pop() if len(sizes) == 1 else None
 
 
 def relocations(obj):
@@ -205,11 +462,25 @@ def main():
         all_relocs = relocations(obj)
         relocs, rodata_relocs = all_relocs[".text"], all_relocs[".rodata"]
         sdata_relocs = all_relocs[".sdata"]
+        defined_symbols = run(
+            str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only", str(obj)
+        )
+        has_nobits = any(emitted.get(section) for section in (".sbss", ".bss"))
+        needs_object_symbols = has_nobits or bool(emitted.get(".sdata"))
+        object_symbols = run(
+            str(BIN / "mips-ps2-decompals-objdump"), "-t", str(obj)
+        ) if needs_object_symbols else ""
+        explicit_nobits = {
+            section: nobits_symbols(object_symbols, section)
+            for section in (".sbss", ".bss")
+        }
+        sdata_symbols = section_symbols(object_symbols, ".sdata")
         funcs = []
-        for line in run(str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only", str(obj)).splitlines():
+        for line in defined_symbols.splitlines():
             parts = line.split()
             if len(parts) == 4 and parts[2] in "Tt":
                 funcs.append((int(parts[0], 16), int(parts[1], 16), parts[3]))
+        common = common_symbols(defined_symbols)
         undefined = {l.split()[-1] for l in run(str(BIN / "mips-ps2-decompals-nm"), "-u", str(obj)).splitlines() if l.strip()}
         # The build compiles the unit with its asm included, not with SKIP_ASM.
         # ee-gcc 2.96's CSE hashes symbol-name addresses, so the preprocessed
@@ -590,7 +861,9 @@ def main():
             continue
         end = next(s for s in sd_starts if s > off)
         item = sdata[off:end]
-        item = trim_sdata_item(item, off, sdata_relocs)
+        owned_size = source_owned_item_size(sdata_symbols, syms, off, retail_addr)
+        item = item[:owned_size] if owned_size is not None and owned_size <= len(item) \
+            else trim_sdata_item(item, off, sdata_relocs)
         theirs = retail[va_to_off(segs, retail_addr):][:len(item)]
         linked_item, relocation_problems = relocate_sdata_item(
             item, off, sdata_relocs, funcs, syms)
@@ -602,7 +875,8 @@ def main():
             bad += 1
             print(f"DIFF sdata of {name} (retail 0x{retail_addr:08X}): "
                   f"{linked_item[:24]!r} vs {theirs[:24]!r}")
-        elif users := asm_users(retail_addr):
+        elif (users := asm_users(retail_addr)) and not owns_exact_section_item(
+                sdata_symbols, syms, off, len(item), retail_addr):
             bad += 1
             print(f"SHARED sdata of {name} (retail 0x{retail_addr:08X}) is also used by asm {', '.join(users)}: "
                   "keep the extern D_ symbol until they are C")
@@ -612,13 +886,39 @@ def main():
         del emitted[".sdata"]
     if emitted.get(".lit4") and owns_rodata(version, unit_name, "lit4"):
         del emitted[".lit4"]  # every constant was compared with retail above
+    owned_nobits = {
+        section: owned_nobits_size(yaml_text, unit_name, section)
+        for section in (".sbss", ".bss")
+    }
+    for section, expected in owned_nobits.items():
+        if not emitted.get(section) or expected is None:
+            continue
+        problems = nobits_ownership_problems(
+            yaml_text, unit_name, section, emitted[section],
+            explicit_nobits[section], syms
+        )
+        if problems and not args.func:
+            for problem in problems:
+                bad += 1
+                print(f"DATA NOBITS {section} {problem}")
+            del emitted[section]  # every failure was reported specifically
+        elif not problems:
+            del emitted[section]
     # --func compares one function: the rest of the unit's data is not its business.
+    if not args.func:
+        for name, size in common:
+            bad += 1
+            print(f"DATA COMMON {name}: 0x{size:X} bytes emitted by the unit; "
+                  "use an explicit, owned .bss definition")
     for name, size in ({} if args.func else emitted).items():
         bad += 1
-        why = ("rodata no instruction refers to (unused static data?)"
-               if name == ".rodata" and owns_rodata(version, unit_name)
-               else "reference the existing D_ symbol instead or keep the function as INCLUDE_ASM "
-               "(this data is not split per unit yet)")
+        if name == ".rodata" and owns_rodata(version, unit_name):
+            why = "rodata no instruction refers to (unused static data?)"
+        elif name in owned_nobits and owned_nobits[name] is not None:
+            why = f"the unit's retail {name} span is 0x{owned_nobits[name]:X} bytes"
+        else:
+            why = ("reference the existing D_ symbol instead or keep the function as INCLUDE_ASM "
+                   "(this data is not split per unit yet)")
         print(f"DATA {name}: 0x{size:X} bytes emitted by the unit; {why}")
     # Constructs that force codegen rather than express the original source.
     source_text = re.sub(r"/\*.*?\*/|//[^\n]*", "", unit.read_text(), flags=re.S)

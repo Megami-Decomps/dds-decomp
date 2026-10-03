@@ -45,6 +45,7 @@ def analyze(
             "procedures": [],
             "procedureEdges": [],
             "eventEdges": [],
+            "deferredBattleExits": [],
             "unresolvedTargets": [],
         }
     starts = [row.start_pc for row in rows]
@@ -63,11 +64,31 @@ def analyze(
     events = profile.events_by_id if profile is not None else {}
     command_counts: dict[int, Counter[int]] = defaultdict(Counter)
     local_sites: dict[tuple[int, int, str], list[int]] = defaultdict(list)
-    event_sites: dict[tuple[int, int], list[int]] = defaultdict(list)
+    event_sites: dict[tuple[int, int, str, str], list[int]] = defaultdict(list)
+    deferred_battle_exits = []
     unresolved = []
     previous_pc: int | None = None
+    task_command = (
+        profile.by_name.get("CREATE_SCRIPT_TASK") if profile is not None else None
+    )
+    task_command_id = task_command.command_id if task_command is not None else 0x0A5
+    battle_exit_command = (
+        profile.by_name.get("DEFER_BATTLE_EXIT") if profile is not None else None
+    )
+    battle_exit_command_id = (
+        battle_exit_command.command_id if battle_exit_command is not None else 0x097
+    )
+    event_commands = {
+        0x066: ("call", "CALL_EVENT"),
+        0x067: ("submit", "SUBMIT_EVENT"),
+    }
+    if profile is not None:
+        for name, kind in (("CALL_EVENT", "call"), ("SUBMIT_EVENT", "submit")):
+            command = profile.by_name.get(name)
+            if command is not None:
+                event_commands[command.command_id] = (kind, name)
 
-    for pc in instruction_pcs:
+    for instruction_index, pc in enumerate(instruction_pcs):
         source = bisect_right(starts, pc) - 1
         if source < 0:
             previous_pc = pc
@@ -78,13 +99,56 @@ def analyze(
 
         if opcode == flw0.OPCODE_IDS["COMM"]:
             command_counts[source][operand] += 1
-            if operand in (0x0A5, 0x066):
-                previous = words[previous_pc] if previous_pc is not None else None
-                kind = "task" if operand == 0x0A5 else "event"
-                if previous is None or previous.opcode != flw0.OPCODE_IDS["PUSHIS"]:
+            if operand == battle_exit_command_id:
+                argument_pcs = instruction_pcs[
+                    max(0, instruction_index - 3) : instruction_index
+                ]
+                argument_words = [words[argument_pc] for argument_pc in argument_pcs]
+                arguments_are_local_literals = len(argument_words) == 3 and all(
+                    argument.opcode == flw0.OPCODE_IDS["PUSHIS"]
+                    and bisect_right(starts, argument_pc) - 1 == source
+                    for argument_pc, argument in zip(argument_pcs, argument_words)
+                )
+                if not arguments_are_local_literals:
                     unresolved.append(
-                        {"source": source, "pc": pc, "kind": kind, "value": None}
+                        {
+                            "source": source,
+                            "pc": pc,
+                            "kind": "battleExit",
+                            "value": None,
+                            "command": "DEFER_BATTLE_EXIT",
+                        }
                     )
+                else:
+                    event, field, diagnostic = (
+                        argument.operand_u16 for argument in argument_words
+                    )
+                    deferred_battle_exits.append(
+                        {
+                            "source": source,
+                            "pc": pc,
+                            "diagnostic": diagnostic,
+                            "field": field,
+                            "event": event,
+                        }
+                    )
+            elif operand == task_command_id or operand in event_commands:
+                previous = words[previous_pc] if previous_pc is not None else None
+                kind = "task" if operand == task_command_id else "event"
+                if (
+                    previous is None
+                    or previous.opcode != flw0.OPCODE_IDS["PUSHIS"]
+                    or bisect_right(starts, previous_pc) - 1 != source
+                ):
+                    unresolved_target = {
+                        "source": source,
+                        "pc": pc,
+                        "kind": kind,
+                        "value": None,
+                    }
+                    if kind == "event":
+                        unresolved_target["command"] = event_commands[operand][1]
+                    unresolved.append(unresolved_target)
                 elif kind == "task" and previous.operand_u16 >= len(rows):
                     unresolved.append(
                         {
@@ -97,7 +161,10 @@ def analyze(
                 elif kind == "task":
                     local_sites[source, previous.operand_u16, kind].append(pc)
                 else:
-                    event_sites[source, previous.operand_u16].append(pc)
+                    edge_kind, command_name = event_commands[operand]
+                    event_sites[
+                        source, previous.operand_u16, edge_kind, command_name
+                    ].append(pc)
         elif opcode in (flw0.OPCODE_IDS["CALL"], flw0.OPCODE_IDS["JUMP"]):
             kind = "call" if opcode == flw0.OPCODE_IDS["CALL"] else "jump"
             if operand >= len(rows):
@@ -139,10 +206,12 @@ def analyze(
         for (source, target, kind), sites in sorted(local_sites.items())
     ]
     event_edges = []
-    for (source, event_id), sites in sorted(event_sites.items()):
+    for (source, event_id, kind, command), sites in sorted(event_sites.items()):
         edge = {
             "source": source,
             "eventId": event_id,
+            "kind": kind,
+            "command": command,
             "count": len(sites),
             "sites": sites,
         }
@@ -153,5 +222,6 @@ def analyze(
         "procedures": procedures,
         "procedureEdges": procedure_edges,
         "eventEdges": event_edges,
+        "deferredBattleExits": deferred_battle_exits,
         "unresolvedTargets": unresolved,
     }

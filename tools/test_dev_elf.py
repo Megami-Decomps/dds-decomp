@@ -547,6 +547,138 @@ def _retained_object(payload: bytes) -> bytes:
     return bytes(image)
 
 
+def _state_object(
+    section_size: int,
+    symbols: list[tuple[str, int, int, int, int]],
+    *,
+    section_name: str = ".bss",
+    section_type: int = dev_elf.SHT_NOBITS,
+) -> bytes:
+    """Create a state section with explicit local/global object symbols."""
+
+    section_names = (
+        b"\0.shstrtab\0"
+        + section_name.encode("ascii")
+        + b"\0.symtab\0.strtab\0"
+    )
+    name_offsets = {
+        name: section_names.index(name.encode("ascii"))
+        for name in (".shstrtab", section_name, ".symtab", ".strtab")
+    }
+    strings = bytearray(b"\0")
+    symbol_name_offsets = []
+    for name, _, _, _, _ in symbols:
+        symbol_name_offsets.append(len(strings))
+        strings.extend(name.encode("ascii") + b"\0")
+
+    data_offset = 0x100
+    string_offset = data_offset
+    if section_type != dev_elf.SHT_NOBITS:
+        string_offset += section_size
+    symbol_offset = (string_offset + len(strings) + 3) & ~3
+    symbol_size = (len(symbols) + 1) * dev_elf.SYMBOL_ENTRY.size
+    shstr_offset = symbol_offset + symbol_size
+    section_offset = (shstr_offset + len(section_names) + 0xF) & ~0xF
+    image = bytearray(section_offset + 5 * dev_elf.SECTION_HEADER.size)
+    ident = b"\x7fELF" + bytes((1, 1, 1)) + bytes(9)
+    dev_elf.ELF_HEADER.pack_into(
+        image,
+        0,
+        ident,
+        1,
+        dev_elf.EM_MIPS,
+        1,
+        0,
+        0,
+        section_offset,
+        0,
+        dev_elf.ELF_HEADER.size,
+        0,
+        0,
+        dev_elf.SECTION_HEADER.size,
+        5,
+        1,
+    )
+    image[string_offset : string_offset + len(strings)] = strings
+    for index, ((_, value, size, binding, visibility), name_offset) in enumerate(
+        zip(symbols, symbol_name_offsets), start=1
+    ):
+        dev_elf.SYMBOL_ENTRY.pack_into(
+            image,
+            symbol_offset + index * dev_elf.SYMBOL_ENTRY.size,
+            name_offset,
+            value,
+            size,
+            (binding << 4) | dev_elf.STT_OBJECT,
+            visibility,
+            2,
+        )
+    image[shstr_offset : shstr_offset + len(section_names)] = section_names
+    headers = [
+        (
+            name_offsets[".shstrtab"],
+            dev_elf.SHT_STRTAB,
+            0,
+            shstr_offset,
+            len(section_names),
+            0,
+            0,
+            1,
+            0,
+        ),
+        (
+            name_offsets[section_name],
+            section_type,
+            dev_elf.SHF_ALLOC,
+            data_offset,
+            section_size,
+            0,
+            0,
+            4,
+            0,
+        ),
+        (
+            name_offsets[".symtab"],
+            dev_elf.SHT_SYMTAB,
+            0,
+            symbol_offset,
+            symbol_size,
+            4,
+            1,
+            4,
+            dev_elf.SYMBOL_ENTRY.size,
+        ),
+        (
+            name_offsets[".strtab"],
+            dev_elf.SHT_STRTAB,
+            0,
+            string_offset,
+            len(strings),
+            0,
+            0,
+            1,
+            0,
+        ),
+    ]
+    for index, fields in enumerate(headers, start=1):
+        name, kind, flags, offset, size, link, info, align, entry_size = fields
+        dev_elf.SECTION_HEADER.pack_into(
+            image,
+            section_offset + index * dev_elf.SECTION_HEADER.size,
+            name,
+            kind,
+            flags,
+            0,
+            offset,
+            size,
+            link,
+            info,
+            align,
+            entry_size,
+        )
+    return bytes(image)
+
+
 class DevElfTests(unittest.TestCase):
     def test_relocation_closure_accepts_only_explained_prefix_changes(self) -> None:
         old_vaddr = 0x00100020
@@ -1614,6 +1746,126 @@ class DevElfTests(unittest.TestCase):
                 "retained_symbols": 0,
             },
         )
+        self.assertEqual(
+            dev_elf.audit_replacement_objects(
+                empty_spec,
+                [replacement_without_data],
+                [replacement_without_data],
+            )["retained_sections"],
+            0,
+        )
+        with self.assertRaisesRegex(dev_elf.DevElfError, "zero-size retained section"):
+            dev_elf.audit_replacement_objects(
+                empty_spec, [replacement_without_data], [retained]
+            )
+
+    def test_moved_state_requires_exact_object_symbol_contract(self) -> None:
+        spec = {
+            "replacements": [
+                {
+                    "retail_object": "old.o",
+                    "object": "new.o",
+                    "retained_sections": [],
+                }
+            ],
+            "moves": [
+                {
+                    "object": "old.o",
+                    "section": ".bss",
+                    "storage": "nobits",
+                }
+            ],
+        }
+        local = 0
+        retail_symbols = [
+            ("first", 0, 4, local, 0),
+            ("second", 4, 4, local, 0),
+        ]
+        retail = _state_object(8, retail_symbols)
+        with self.assertRaisesRegex(dev_elf.DevElfError, "requires the retail object"):
+            dev_elf.audit_replacement_objects(spec, [retail])
+        self.assertEqual(
+            dev_elf.audit_replacement_objects(spec, [retail], [retail]),
+            {
+                "fallback_symbols": 0,
+                "retained_sections": 0,
+                "retained_symbols": 0,
+            },
+        )
+
+        mutations = {
+            "local rename": [
+                ("renamed", 0, 4, local, 0),
+                ("second", 4, 4, local, 0),
+            ],
+            "object order": [
+                ("first", 4, 4, local, 0),
+                ("second", 0, 4, local, 0),
+            ],
+            "object size redistribution": [
+                ("first", 0, 1, local, 0),
+                ("second", 1, 7, local, 0),
+            ],
+            "object binding": [
+                ("first", 0, 4, dev_elf.STB_GLOBAL, 0),
+                ("second", 4, 4, local, 0),
+            ],
+            "object visibility": [
+                ("first", 0, 4, local, 2),
+                ("second", 4, 4, local, 0),
+            ],
+            "extra export": [
+                *retail_symbols,
+                ("extra", 0, 4, dev_elf.STB_GLOBAL, 0),
+            ],
+        }
+        for label, changed_symbols in mutations.items():
+            with self.subTest(label=label), self.assertRaisesRegex(
+                dev_elf.DevElfError, "object symbol contract"
+            ):
+                dev_elf.audit_replacement_objects(
+                    spec,
+                    [_state_object(8, changed_symbols)],
+                    [retail],
+                )
+
+        wrong_type = bytearray(retail)
+        state_sections = dev_elf._object_sections(wrong_type)
+        symbol_table = next(
+            section
+            for section in state_sections
+            if section.kind == dev_elf.SHT_SYMTAB
+        )
+        first_symbol = symbol_table.offset + dev_elf.SYMBOL_ENTRY.size
+        info_offset = first_symbol + 12
+        wrong_type[info_offset] = (
+            wrong_type[info_offset] & 0xF0
+        ) | dev_elf.STT_FUNC
+        with self.assertRaisesRegex(dev_elf.DevElfError, "object symbol contract"):
+            dev_elf.audit_replacement_objects(spec, [bytes(wrong_type)], [retail])
+
+        padded_retail = _state_object(
+            12,
+            [
+                ("first", 0, 4, local, 0),
+                ("second", 4, 4, local, 0),
+            ],
+        )
+        shifted = _state_object(
+            12,
+            [
+                ("first", 0, 4, local, 0),
+                ("second", 8, 4, local, 0),
+            ],
+        )
+        with self.assertRaisesRegex(dev_elf.DevElfError, "object symbol contract"):
+            dev_elf.audit_replacement_objects(spec, [shifted], [padded_retail])
+
+        ranges = [(0x1000, 0x1008, 0x2000, 0x2008)]
+        self.assertEqual(dev_elf._map_replacement_target(0x1004, {}, ranges), 0x2004)
+        self.assertIsNone(
+            dev_elf._map_replacement_target(0x1004, {}, ranges, {0})
+        )
 
     def test_nonempty_retained_section_verifies_linked_gp_contract(self) -> None:
         retained_vaddr = 0x100080
@@ -1734,7 +1986,7 @@ class DevElfTests(unittest.TestCase):
         struct.pack_into("<I", drifted_output, 0x1014, 0)
         struct.pack_into("<I", drifted_output, 0x1018, raw_sw)
         with self.assertRaisesRegex(
-            dev_elf.DevElfError, "changed its GP-reference sites"
+            dev_elf.DevElfError, "changed its GP-reference contract"
         ):
             dev_elf._audit_retained_sections(
                 bytes(base),
@@ -1780,15 +2032,20 @@ class DevElfTests(unittest.TestCase):
         _, base_programs = dev_elf.parse_elf(base)
         _, output_programs = dev_elf.parse_elf(output)
         global_func = (dev_elf.STB_GLOBAL << 4) | dev_elf.STT_FUNC
+        global_object = (dev_elf.STB_GLOBAL << 4) | dev_elf.STT_OBJECT
         global_notype = dev_elf.STB_GLOBAL << 4
-        symbols = [
+        common_symbols = [
             ("_gp", gp, 0, global_notype, 1),
             ("main_TEXT_START", 0x100000, 0, global_notype, 1),
             ("main_TEXT_END", 0x100020, 0, global_notype, 1),
             ("worker", 0x100000, 0x20, global_func, 1),
         ]
-        development_elf = _metadata_elf(symbols, [])
-        retail_elf = _metadata_elf(symbols, [])
+        development_elf = _metadata_elf(
+            [*common_symbols, ("state", new_vaddr, 8, global_object, 1)], []
+        )
+        retail_elf = _metadata_elf(
+            [*common_symbols, ("state", old_vaddr, 8, global_object, 1)], []
+        )
         development_symbols = dev_elf.parse_linked_symbols(development_elf)
         spec = {
             "moves": [
@@ -1853,7 +2110,8 @@ class DevElfTests(unittest.TestCase):
         addition_symbols = dev_elf.parse_linked_symbols(
             _metadata_elf(
                 [
-                    *symbols,
+                    *common_symbols,
+                    ("state", new_vaddr, 8, global_object, 1),
                     ("addition_worker", 0x100040, 0x20, global_func, 1),
                 ],
                 [],
@@ -1889,10 +2147,46 @@ class DevElfTests(unittest.TestCase):
         moved_site_output = bytearray(output)
         struct.pack_into("<I", moved_site_output, 0x1010, 0)
         struct.pack_into("<I", moved_site_output, 0x1018, raw_lw(new_vaddr))
-        with self.assertRaisesRegex(dev_elf.DevElfError, "changed its GP-reference sites"):
+        with self.assertRaisesRegex(
+            dev_elf.DevElfError, "changed its GP-reference contract"
+        ):
             dev_elf._audit_moved_gp_references(
                 bytes(base),
                 bytes(moved_site_output),
+                base_programs,
+                output_programs,
+                development_symbols,
+                retail_elf,
+                spec,
+                gp,
+            )
+
+        retargeted_output = bytearray(output)
+        struct.pack_into("<I", retargeted_output, 0x1010, raw_lw(new_vaddr + 4))
+        with self.assertRaisesRegex(
+            dev_elf.DevElfError, "changed its GP-reference contract"
+        ):
+            dev_elf._audit_moved_gp_references(
+                bytes(base),
+                bytes(retargeted_output),
+                base_programs,
+                output_programs,
+                development_symbols,
+                retail_elf,
+                spec,
+                gp,
+            )
+
+        changed_opcode_output = bytearray(output)
+        displacement = (new_vaddr - gp) & 0xFFFF
+        raw_sw = (0x2B << 26) | (28 << 21) | (2 << 16) | displacement
+        struct.pack_into("<I", changed_opcode_output, 0x1010, raw_sw)
+        with self.assertRaisesRegex(
+            dev_elf.DevElfError, "changed its GP-reference contract"
+        ):
+            dev_elf._audit_moved_gp_references(
+                bytes(base),
+                bytes(changed_opcode_output),
                 base_programs,
                 output_programs,
                 development_symbols,
@@ -2063,6 +2357,27 @@ class DevElfTests(unittest.TestCase):
                 [new_address_target, new_fallback],
             )
         )
+        for label, changed_low in (
+            ("opcode", 0x34A50028),
+            ("destination register", 0x24A60028),
+        ):
+            with self.subTest(label=label):
+                changed_body = struct.pack("<II", 0x3C050000, changed_low)
+                self.assertFalse(
+                    dev_elf._fallback_bytes_match(
+                        old_address_body,
+                        changed_body,
+                        text_section,
+                        text_section,
+                        old_fallback,
+                        new_fallback,
+                        address_relocations,
+                        [text_section],
+                        [text_section],
+                        [old_address_target, old_fallback],
+                        [new_address_target, new_fallback],
+                    )
+                )
 
         changed_opcode = bytearray(relocated)
         word = struct.unpack_from("<I", changed_opcode, relocation_word)[0]

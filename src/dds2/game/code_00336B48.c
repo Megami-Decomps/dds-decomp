@@ -546,9 +546,81 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_003374B0);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_003375B0);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00337688);
+/* vu0 routine: derive clamped clip weights and low clip flags for 0x60-byte rows */
+void func_00337688(u32 rows, s32 count) {
+    void *clipParameters = D_00476210;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf19, 0x00(%2)\n"
+        "lqc2 vf20, 0x10(%2)\n"
+        "lqc2 vf21, 0x20(%2)\n"
+        "vmulx.w vf24, vf19, vf24x\n"
+        "vmulx.w vf25, vf19, vf25x\n"
+        "vmulx.w vf26, vf19, vf26x\n"
+        "1:\n"
+        "lqc2 vf6, 0x10(%0)\n"
+        "vsub.xyz vf6, vf0, vf6\n"
+        "vmulay.w ACC, vf0, vf19y\n"
+        "vmaddax.w ACC, vf24, vf6x\n"
+        "vmadday.w ACC, vf25, vf6y\n"
+        "vmaddz.w vf7, vf26, vf6z\n"
+        "vaddaw.w ACC, vf7, vf7w\n"
+        "vmsubw.w vf6, vf0, vf0w\n"
+        "vmaxx.w vf8, vf7, vf0x\n"
+        "vaddw.x vf9, vf0, vf6w\n"
+        "vminiw.w vf8, vf8, vf0w\n"
+        "vclipw.xyzw vf9, vf0w\n"
+        "sqc2 vf6, 0x10(%0)\n"
+        "vmulaw.xyzw ACC, vf20, vf0w\n"
+        "vmaddw.xyzw vf8, vf21, vf8w\n"
+        "vnop\n"
+        "vnop\n"
+        "vnop\n"
+        "cfc2 $2, $vi18\n"
+        "sqc2 vf8, 0x20(%0)\n"
+        "addi %0, %0, 0x60\n"
+        "addi %1, %1, -1\n"
+        "andi $2, $2, 3\n"
+        "bne $0, %1, 1b\n"
+        "sb $2, -0x10(%0)\n"
+        ".set reorder"
+        : "+r"(rows), "+r"(count)
+        : "r"(clipParameters)
+        : "$2", "memory");
+}
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_00337718);
+/* vu0 routine: transform packed XY pairs through a 2D affine basis into row +0x30 */
+void func_00337718(void *rows, s32 count, void *points, void *basis) {
+    __asm__ volatile (
+        ".set noreorder\n"
+        "ld $2, 0x00(%3)\n"
+        "qmtc2 $2, vf16\n"
+        "ld $3, 0x08(%3)\n"
+        "qmtc2 $3, vf17\n"
+        "ld $2, 0x10(%3)\n"
+        "qmtc2 $2, vf18\n"
+        "ld $2, 0x00(%2)\n"
+        "qmtc2 $2, vf2\n"
+        "vmulaw.xy ACC, vf18, vf0w\n"
+        "vmaddax.xy ACC, vf16, vf2x\n"
+        "vmaddy.xy vf3, vf17, vf2y\n"
+        "1:\n"
+        "addi %2, %2, 8\n"
+        "ld $2, 0x00(%2)\n"
+        "qmtc2 $2, vf2\n"
+        "qmfc2 $2, vf3\n"
+        "vmulaw.xy ACC, vf18, vf0w\n"
+        "vmaddax.xy ACC, vf16, vf2x\n"
+        "vmaddy.xy vf3, vf17, vf2y\n"
+        "addi %1, %1, -1\n"
+        "addi %0, %0, 0x60\n"
+        "bne $0, %1, 1b\n"
+        "sd $2, -0x30(%0)\n"
+        ".set reorder"
+        : "+r"(rows), "+r"(count), "+r"(points)
+        : "r"(basis)
+        : "$2", "$3", "memory");
+}
 
 void sdfVuBlendNodeXY(VuBlendNode *node) {
     while (node != NULL) {

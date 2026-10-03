@@ -15,16 +15,20 @@ CallbackTable callbackTable __attribute__((section(".sdata"))) = {
     callbackA,
     callbackB,
 };
+void (*tickCallback)(void) __attribute__((section(".sdata"))) = NULL;
 """
         self.assertEqual(
             include_sdata.DATA_DEF.findall(text),
-            ["plainValue", "arrayValue", "callbackTable"],
+            ["plainValue", "arrayValue", "callbackTable", "tickCallback"],
         )
 
     def test_ignores_declarations_and_type_definitions(self) -> None:
         text = """\
 extern s32 externalValue;
 typedef struct CallbackTable CallbackTable;
+extern void (*externalCallback)(void);
+typedef void (*Callback)(void);
+void callback(void);
 """
         self.assertEqual(include_sdata.DATA_DEF.findall(text), [])
 

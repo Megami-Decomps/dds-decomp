@@ -1277,6 +1277,7 @@ end
             "RESTORE_CAMERA_NODE_MODE": (0x060, 0, False),
             "RELEASE_CURRENT_OBJECT": (0x061, 0, False),
             "CALL_EVENT": (0x066, 1, False),
+            "SUBMIT_EVENT": (0x067, 1, False),
             "READ_CURRENT_WORLD_OBJECT_ID": (0x068, 0, True),
             "CLEAR_UNIT_LOW_FLAG": (0x069, 1, False),
             "SET_UNIT_LOW_FLAG": (0x06A, 1, False),
@@ -1287,6 +1288,8 @@ end
             "PREPARE_UNIT_MOTION_STATE": (0x073, 5, False),
             "START_UNIT_PATH_FOLLOW": (0x08B, 7, False),
             "READ_SECONDARY_WORLD_ID_VALUE": (0x094, 1, True),
+            "DEFER_BATTLE_EXIT": (0x097, 3, False),
+            "REQUEST_CURRENT_GROUP_SEQUENCE": (0x098, 2, False),
             "RESET_FIELD_EFFECTS": (0x099, 0, False),
             "DESTROY_WORLD_EFFECT_OBJECT": (0x09B, 1, False),
             "COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE": (0x09D, 2, False),
@@ -1961,7 +1964,7 @@ end
                         )
         self.assertEqual(type5_uses, 7863)
         self.assertEqual(command_uses, 53389)
-        self.assertEqual(profiled_command_uses, 51285)
+        self.assertEqual(profiled_command_uses, 51421)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -2015,8 +2018,8 @@ end
     def test_semantic_view_handles_both_tracked_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (143, 77857, 4398),
-            "dds2": (140, 59960, 2217),
+            "dds1": (143, 77582, 4123),
+            "dds2": (140, 59612, 1869),
         }
         for game, expected_counts in expected.items():
             files = 0
@@ -2219,7 +2222,7 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53389, 51285)
+            (code_words, commands, profiled_commands), (168829, 53389, 51421)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
@@ -2348,9 +2351,9 @@ end
                 totals["message_references"],
                 totals["selection_references"],
             ),
-            (37586, 1910, 287),
+            (37752, 1910, 287),
         )
-        self.assertEqual(totals["event_references"], 43)
+        self.assertEqual(totals["event_references"], 46)
         self.assertEqual(totals["procedure_references"], 463)
         self.assertEqual((totals["font"], totals["glyphs"]), (433, 159))
         self.assertEqual(totals["short_string_counts"], 22)

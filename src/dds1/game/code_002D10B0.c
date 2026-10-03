@@ -498,7 +498,60 @@ void sdfResetSemaphoreState(SdfSemaObj *semaphore) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2140);
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2168);
+extern s32 GetThreadId(void);
+extern s32 func_002D2140(s32 threadId);
+extern s32 func_0030A740(s32 channel, s32 (*handler)(s32), s32 arg, s32 threadId);
+extern void *sceDmaGetChan(s32 channel);
+extern void FlushCache(s32 mode);
+extern void sceDmaSend(void *channel, void *packet);
+extern void SleepThread(void);
+extern s32 RemoveDmacHandler(s32 channel, s32 handlerId);
+extern u8 D_00398100[];
+
+void func_002D2168(void) {
+    SdfSemaObj *work = &sdfTextureQueueWork;
+    SdfTexReleaseEntry *entry;
+    SdfTexPacketTail *packet;
+    void *dmaPacket;
+
+    WaitSema(work->semaphoreId);
+    entry = (SdfTexReleaseEntry *)work->unk4;
+    dmaPacket = work->unkC;
+    packet = (SdfTexPacketTail *)work->packetTail;
+    sdfResetSemaphoreState(work);
+    SignalSema(work->semaphoreId);
+
+    if (dmaPacket != NULL) {
+        s32 threadId = GetThreadId();
+        s32 handlerId = func_0030A740(1, func_002D2140, 0, threadId);
+        u64 tag = ((u64)((u32)D_00398100 & 0x0FFFFFFF) << 32) | 0x20000000;
+        u32 *channel;
+
+        packet->next = 0;
+        packet->tag = tag;
+        channel = (u32 *)sceDmaGetChan(1);
+        channel[0] |= 0x40;
+        FlushCache(0);
+        sceDmaSend((void *)channel, dmaPacket);
+        SleepThread();
+        RemoveDmacHandler(1, handlerId);
+    }
+
+    while (entry != NULL) {
+        SdfTexReleaseEntry *next = entry->next;
+
+        switch (entry->mode) {
+        case 1:
+            sdfReleaseResourceAllocation(entry->handle);
+            break;
+        case 2:
+            sdfReleaseChipBlock((void *)entry->address);
+            break;
+        }
+        sdfReleaseChipBlock(entry);
+        entry = next;
+    }
+}
 
 void sdfTexInitializeSemaphore(void) {
     SdfSemaObj *obj;
@@ -815,4 +868,3 @@ INCLUDE_SDATA(const s32, "game/code_002D10B0", sdfBusyBufferIndex);
 INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD304);
 
 INCLUDE_SDATA(const s32, "game/code_002D10B0", sdfResourceListHead);
-

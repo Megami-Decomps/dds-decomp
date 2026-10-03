@@ -19,27 +19,6 @@ extern FileReqEntry fileRequestEntries[];
 extern u32 fileRequestSlotFlags[];
 extern s32 D_003BD8E8;
 
-typedef struct FileManSlot {
-    s32 completedBytes;
-    void *request;
-} FileManSlot;
-
-/* Work area behind the fileMan task (fileManagerWork, 0x40 bytes). */
-typedef struct FileManWork {
-    s32 sema;   /* 0x00 */
-    u8 unk4;    /* 0x04 */
-    u8 unk5;    /* 0x05 */
-    u8 unk6;    /* 0x06 */
-    u8 unk7;    /* 0x07 */
-    void *unk8; /* 0x08 */
-    u32 unkC;   /* 0x0C */
-    void *unk10; /* 0x10 */
-    void *unk14; /* 0x14 */
-    u32 unk18;  /* 0x18 */
-    s32 unk1C;  /* 0x1C */
-    FileManSlot slots[4]; /* 0x20 */
-} FileManWork;
-
 /* Async job handled by func_00288E70 and friends. */
 typedef struct FileJob {
     u8 unk0;      /* 0x00 */
@@ -66,9 +45,10 @@ typedef struct FileCbNode {
     struct FileCbNode *next;         /* 0x2C */
 } FileCbNode;
 
-extern FileManWork fileManagerWork;
 extern char D_003BC7E0[];
-extern s32 D_003BC7D8;
+extern FileManGuardState D_003BC7D8;
+/* Scalar view keeps the original direct GP-relative access. */
+extern s32 fileManGuardActive __asm__("D_003BC7D8");
 extern s32 (*fileIdleUpdateCallback)(void);
 
 s32 WaitSema(s32 sema);
@@ -115,19 +95,19 @@ s32 func_00288E70(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
         if (job->stateRequired != 0) {
             job->state = 5;
         } else {
-            work->slots[job->slot].completedBytes = byteCount;
+            work->slots[job->slot].value = byteCount;
             job->transferBytes -= byteCount;
             if (job->transferBytes == 0) {
                 job->state = 5;
-                work->unk8 = job->unk4;
+                work->head = (struct FileNode *)job->unk4;
                 if (job->unk4 == NULL) {
-                    work->unkC = 0;
+                    work->tail = NULL;
                 }
             } else {
                 job->state = FILE_JOB_READY;
             }
         }
-        work->unk6++;
+        work->activeSlots++;
         if (job->state == 5) {
             filePrependNode(work, job);
             SignalSema(work->sema);
@@ -135,10 +115,10 @@ s32 func_00288E70(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
         } else {
             SignalSema(work->sema);
         }
-        saved = D_003BC7D8;
-        D_003BC7D8 = 1;
+        saved = fileManGuardActive;
+        fileManGuardActive = 1;
         func_00289540();
-        D_003BC7D8 = saved;
+        fileManGuardActive = saved;
         break;
     case 7:
         WaitSema(work->sema);
@@ -185,8 +165,8 @@ void fileManDispatchDone(void) {
     FileCbNode *node;
 
     WaitSema(work->sema);
-    while ((node = work->unk10) != NULL) {
-        work->unk10 = node->next;
+    while ((node = work->done) != NULL) {
+        work->done = node->next;
         SignalSema(work->sema);
         node->cb(node, node->arg);
         WaitSema(work->sema);
@@ -204,9 +184,9 @@ s32 fileMan(void) {
 
 void fileManInit(void) {
     memset(&fileManagerWork, 0, 0x40);
-    fileManagerWork.unk7 = 4;
+    fileManagerWork.freeSlots = 4;
     fileManagerWork.sema = sdfCreateSemaphore(1, 0x7F, 0);
-    fileManagerWork.unk1C = sdfResourceRetainAddress(sdfAllocGeneralBlock(0x40000));
+    fileManagerWork.buffer = sdfResourceRetainAddress(sdfAllocGeneralBlock(0x40000));
     kwlnTaskCreate((s32)&D_003BC7E0, 0x384, 1, 0, (s32)&fileMan, 0, 0);
     fileIdleUpdateCallback = fileManUpdate;
 }
@@ -269,7 +249,6 @@ void func_00289D50(u32 arg0) {
     func_002F6E90(arg0, 0);
 }
 
-INCLUDE_SDATA(const s32, "game/code_00288E70", D_003BC7D8);
+FileManGuardState D_003BC7D8 __attribute__((section(".sdata"))) = { 0 };
 
-INCLUDE_SDATA(const s32, "game/code_00288E70", D_003BC7E0);
-
+char D_003BC7E0[8] __attribute__((section(".sdata"))) = "fileMan";

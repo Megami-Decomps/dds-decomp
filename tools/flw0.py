@@ -603,14 +603,18 @@ def _event_push_symbol(
 ) -> str | None:
     if command_profile is None or next_raw is None:
         return None
-    command = command_profile.by_name.get("CALL_EVENT")
-    if command is None:
+    event_commands = {
+        command.command_id
+        for name in ("CALL_EVENT", "SUBMIT_EVENT")
+        if (command := command_profile.by_name.get(name)) is not None
+    }
+    if not event_commands:
         return None
     event_id = raw >> 16
     if (
         raw & 0xFFFF != OPCODE_IDS["PUSHIS"]
         or next_raw & 0xFFFF != OPCODE_IDS["COMM"]
-        or next_raw >> 16 != command.command_id
+        or next_raw >> 16 not in event_commands
     ):
         return None
     return command_profile.events_by_id.get(event_id)
