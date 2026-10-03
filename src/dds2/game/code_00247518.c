@@ -75,7 +75,8 @@ typedef struct EventViewerState {
     u32 resourceHandle; /* 0x00 */
     u32 flags;          /* 0x04 */
     s32 windowContext; /* 0x08: owns the message-window handle at +0x104 */
-    u8 padC[8];
+    u8 padC[4];
+    s32 glyphAdvanceStart; /* 0x10 */
     s32 glyphAdvanceLimit;
     s32 glyphAdvancePosition;
     u8 pad1C[0x2008];
@@ -578,7 +579,49 @@ void evtViewerCountFlaggedUpdates(EventViewerState *viewer) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_00249EE8);
+extern s32 func_0025E7B0(void *scene);
+extern s32 scrCommandIsProcessControlFlagClear(void);
+extern u32 mnuCampGetSecondaryOption(void *scene);
+extern void mnuReleaseCampSceneRegisteredIds();
+extern s32 mnuQueryTitleSoundBusy(void);
+extern void mnuStopTitleVoicePlayback(void);
+extern void sdfSoundSetChannelCount(u32 channels);
+extern s32 fldTitleIsActive(void);
+extern void func_0014E668(s32 active);
+void evtViewerCleanupMessageWindow(s32 viewerAddr);
+
+void func_00249EE8(EventViewerState *viewer) {
+    if (func_0025E7B0(viewer) == 1 || scrCommandIsProcessControlFlagClear() == 0) {
+        if (viewer->glyphTickCount == 0) {
+            viewer->glyphTickCount = 1;
+        }
+        return;
+    }
+    if (viewer->glyphAdvancePosition < viewer->glyphAdvanceLimit - 30) {
+        if (viewer->glyphAdvanceStart + 20 >= viewer->glyphAdvancePosition) {
+            return;
+        }
+    } else {
+        return;
+    }
+
+    viewer->flags |= 0x10;
+    if (mnuCampGetSecondaryOption(viewer) == 2) {
+        viewer->updateCount = 0x17;
+    } else {
+        viewer->updateCount = 0;
+    }
+    mnuReleaseCampSceneRegisteredIds(viewer);
+    if (mnuQueryTitleSoundBusy() == 1) {
+        mnuStopTitleVoicePlayback();
+    } else if (viewer->timedActive == 1) {
+        sdfSoundSetChannelCount(10);
+    }
+    if (fldTitleIsActive() == 1) {
+        func_0014E668(0);
+    }
+    evtViewerCleanupMessageWindow((s32)viewer);
+}
 
 s32 evtViewerHasUpdateFlag(s32 viewer) {
     return (*(s32 *)(viewer + 4) & 0x10) > 0;
