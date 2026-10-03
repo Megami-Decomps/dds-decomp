@@ -7,7 +7,7 @@ extern void btlDispatchStateHandler();
 
 extern s32 btlHasRegisteredGuidePanelTask(void);
 
-extern s32 btlBossDebugPrintf(const char *, ...);
+extern void btlBossDebugPrintf(const char *, ...);
 
 extern s32 datEnemyRecords;
 
@@ -15,7 +15,6 @@ extern void func_001C7DB8(s32, s32);
 
 extern void func_00230960(s32);
 
-extern s32 D_003B6940[];
 
 extern s32 func_00230978(void);
 
@@ -110,12 +109,14 @@ typedef struct SceneTask {
     s64 ownerId;
 } SceneTask;
 
+/* Three-byte scheduling slot. IDs move with slots; insertion renumbers them. */
 typedef struct SceneSlot {
-    u8 a;
-    u8 b;
+    u8 group;
+    u8 remaining;
     u8 id;
 } SceneSlot;
 
+/* Native fade snapshot: slot bytes, alpha byte, then signed target word. */
 typedef struct SceneFadingRecord {
     SceneSlot slot;
     u8 alpha;
@@ -128,6 +129,7 @@ typedef struct SceneLinkedNode {
     struct SceneLinkedNode *next; /* 0x178: scene-linked chain */
 } SceneLinkedNode;
 
+/* Primary scene controller; loading and group scheduling share this record. */
 typedef struct BattleSceneWork {
     u8 pad00[0x218];
     u32 flags;
@@ -691,7 +693,7 @@ void btlGetCurrentSceneRecordValue(void) {
 s32 fldGetSceneDescriptorProperty(void) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
     s32 index = scene->currentScene;
-    return D_003B6940[index * 3];
+    return D_003B6938[index].flags;
 }
 
 SceneTask **fldGetActorSceneGroupResource(SceneTask *task) {
@@ -815,49 +817,49 @@ s32 fldGetSceneGroupIndexByActorFlags(u8 *object) {
 
 INCLUDE_ASM(const s32, "game/code_001CFEF8", func_001D30E0);
 
+/* Pop the front slot only when its remaining counter is zero. */
 void fldCompactSceneSlots(void) {
     SceneSlot *slot = ((BattleSceneWork *)btlGetRuntime())->slots;
     u32 i;
-    if (slot->b == 0) {
+    if (slot->remaining == 0) {
         for (i = 0; i < 7; i++) {
-            slot[0].a = slot[1].a;
-            slot[0].b = slot[1].b;
+            slot[0].group = slot[1].group;
+            slot[0].remaining = slot[1].remaining;
             slot[0].id = slot[1].id;
             slot++;
         }
-        slot->a = 0;
-        slot->b = 0;
+        slot->group = 0;
+        slot->remaining = 0;
         slot->id = 0;
     }
 }
 
-/* Consume `amount` scene-slot time: mode 1 drains the front slot's counter
- * (popping it when empty), modes 2 and 3 drain full slots of 100 in steps of 50. */
+/* Mode 1 drains front counters; modes 2/3 spend full counters in steps of 50. */
 void fldConsumeSceneSlotCounters(s32 amount, u8 mode) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
-    u8 head;
+    u8 headGroup;
     u32 i;
     if (scene->flags & 0x100) {
-        head = scene->slots[0].a;
+        headGroup = scene->slots[0].group;
         switch (mode) {
         case 0:
             break;
         case 1:
             if (amount < 100) {
-                if (amount < scene->slots[0].b) {
-                    scene->slots[0].b -= amount;
+                if (amount < scene->slots[0].remaining) {
+                    scene->slots[0].remaining -= amount;
                 } else {
-                    scene->slots[0].b = 0;
+                    scene->slots[0].remaining = 0;
                     fldCompactSceneSlots();
                 }
             } else {
                 while (amount > 0) {
-                    scene->slots[0].b = 0;
+                    scene->slots[0].remaining = 0;
                     fldCompactSceneSlots();
-                    if (scene->slots[0].a != head) {
+                    if (scene->slots[0].group != headGroup) {
                         return;
                     }
-                    if (scene->slots[0].b == 0) {
+                    if (scene->slots[0].remaining == 0) {
                         break;
                     }
                     amount -= 100;
@@ -868,14 +870,14 @@ void fldConsumeSceneSlotCounters(s32 amount, u8 mode) {
         case 3:
             while (amount > 0) {
                 for (i = 0; i < 8; i++) {
-                    if (scene->slots[i].a == head && scene->slots[i].b == 100) {
+                    if (scene->slots[i].group == headGroup && scene->slots[i].remaining == 100) {
                         break;
                     }
                 }
                 if (i < 8) {
-                    scene->slots[i].b -= 50;
+                    scene->slots[i].remaining -= 50;
                 } else {
-                    scene->slots[0].b = 0;
+                    scene->slots[0].remaining = 0;
                     fldCompactSceneSlots();
                 }
                 amount -= 50;
@@ -885,13 +887,14 @@ void fldConsumeSceneSlotCounters(s32 amount, u8 mode) {
     }
 }
 
+/* Insert half-counter slots for the current variant, clamped to eight entries. */
 void fldInsertSceneSlots(s32 count) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
-    s32 kind;
+    s32 group;
     s32 used;
     s32 i;
 
-    kind = scene->variant == 1 ? 1 : 2;
+    group = scene->variant == 1 ? 1 : 2;
     used = fldCountSceneSlots();
     if (used + count >= 8) {
         count = 8 - used;
@@ -900,52 +903,55 @@ void fldInsertSceneSlots(s32 count) {
         return;
     }
     for (i = used + count - 1; i != count - 1; i--) {
-        scene->slots[i].a = scene->slots[i - count].a;
-        scene->slots[i].b = scene->slots[i - count].b;
+        scene->slots[i].group = scene->slots[i - count].group;
+        scene->slots[i].remaining = scene->slots[i - count].remaining;
         scene->slots[i].id = i + 1;
     }
     for (; i != -1; i--) {
-        scene->slots[i].a = kind;
-        scene->slots[i].b = 0x32;
+        scene->slots[i].group = group;
+        scene->slots[i].remaining = 0x32;
         scene->slots[i].id = i + 1;
     }
     fldInitSceneFadeRecords();
 }
 
-void fldSwapSceneSlots(s32 index) {
+/* Spend amount first; swap front groups only if the original counter survives. */
+void fldSwapSceneSlots(s32 amount) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
     if (scene->flags & 0x100) {
-        u8 firstId = scene->slots[0].a;
-        u8 count = scene->slots[0].b;
-        fldConsumeSceneSlotCounters(index, 1);
-        if (index < count) {
-            if (scene->slots[1].a != 0 && scene->slots[1].a != firstId) {
-                u8 a = scene->slots[0].a;
-                u8 b = scene->slots[0].b;
+        u8 firstGroup = scene->slots[0].group;
+        u8 remainingBefore = scene->slots[0].remaining;
+        fldConsumeSceneSlotCounters(amount, 1);
+        if (amount < remainingBefore) {
+            if (scene->slots[1].group != 0 && scene->slots[1].group != firstGroup) {
+                u8 group = scene->slots[0].group;
+                u8 remaining = scene->slots[0].remaining;
                 u8 id = scene->slots[0].id;
-                scene->slots[0].a = scene->slots[1].a;
-                scene->slots[0].b = scene->slots[1].b;
+                scene->slots[0].group = scene->slots[1].group;
+                scene->slots[0].remaining = scene->slots[1].remaining;
                 scene->slots[0].id = scene->slots[1].id;
-                scene->slots[1].a = a;
-                scene->slots[1].b = b;
+                scene->slots[1].group = group;
+                scene->slots[1].remaining = remaining;
                 scene->slots[1].id = id;
             }
         }
     }
 }
 
+/* Count slots with both group and counter; zero-counter groups can still block finish. */
 s32 fldCountSceneSlots(void) {
     SceneSlot *slot = ((BattleSceneWork *)btlGetRuntime())->slots;
     s32 count = 0;
     u32 i;
     for (i = 0; i < 8; i++, slot++) {
-        if (slot->a != 0 && slot->b != 0) {
+        if (slot->group != 0 && slot->remaining != 0) {
             count++;
         }
     }
     return count;
 }
 
+/* Finished when no group remains, or the explicit finish flag is set. */
 s32 fldAreSceneSlotsFinished(void) {
     BattleSceneWork *work = (BattleSceneWork *)btlGetRuntime();
     SceneSlot *slot;
@@ -955,7 +961,7 @@ s32 fldAreSceneSlotsFinished(void) {
     }
     slot = work->slots;
     for (i = 0; i < 8; i++) {
-        if (slot->a != 0) {
+        if (slot->group != 0) {
             return 0;
         }
         slot++;
@@ -1091,21 +1097,23 @@ void fldClearSceneAdvanceFlag(void) {
     scene->flags = scene->flags & 0xfffffffb;
 }
 
+/* Prefer the special handle queue; otherwise return the front group's first task. */
 s32 fldGetActiveSceneGroupValue(void) {
     u8 *scene = (u8 *)btlGetRuntime();
     s32 value = (s32)((BattleSceneWork *)scene)->groupHandles[0];
     if (value != 0) {
         return value;
     }
-    return *(s32 *)fldGetSceneGroupResource(scene[0x2FE]);
+    return *(s32 *)fldGetSceneGroupResource(((BattleSceneWork *)scene)->slots[0].group);
 }
 
+/* Read one task word from the front group; an empty front slot returns zero. */
 s32 fldGetSceneGroupEntry(s32 index) {
     u8 *scene = (u8 *)btlGetRuntime();
-    if (scene[0x2FE] == 0) {
+    if (((BattleSceneWork *)scene)->slots[0].group == 0) {
         return 0;
     }
-    return ((s32 *)fldGetSceneGroupResource(scene[0x2FE]))[index];
+    return ((s32 *)fldGetSceneGroupResource(((BattleSceneWork *)scene)->slots[0].group))[index];
 }
 
 extern s32 func_001B2630();
@@ -1146,7 +1154,7 @@ void func_001D3ED8(void) {
                     scene->flags |= 0x400;
                     return;
                 }
-                task = *fldGetSceneGroupResource(((u8 *)scene)[0x2FE]);
+                task = *fldGetSceneGroupResource(scene->slots[0].group);
                 if (task == 0) {
                     return;
                 }
@@ -1167,13 +1175,14 @@ void func_001D3ED8(void) {
     }
 }
 
+/* Clear scheduling slots and group queues, preserving their fade snapshots. */
 void fldClearSceneSlotsAndGroups(void) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
     u32 i;
 
     for (i = 0; i < 8; i++) {
-        scene->slots[i].a = 0;
-        scene->slots[i].b = 0;
+        scene->slots[i].group = 0;
+        scene->slots[i].remaining = 0;
         scene->slots[i].id = 0;
     }
     for (i = 0; i < 20; i++) {
