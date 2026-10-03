@@ -2798,10 +2798,49 @@ void mnuProjectViewPoint(void) {
     VU0_ADD(vf10, vf10, vf11);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D2D48);
-
-extern s32 func_002D2D48();
 extern u8 sdfViewTargetVector[];
+extern void sdfInvertRigidVuTransform(void);
+
+/* vu0 routine: tests whether vf10 projects within the camera's forward cone. */
+s32 func_002D2D48(void) {
+    f32 distance, facing;
+    f32 *projection;
+
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(distance);
+    if (!(distance > 16.0))
+        return 0;
+
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    VU0_MOVE_MATRIX_TO_B();
+    sdfInvertRigidVuTransform();
+    VU0_MOVE_VF(vf10, vf30);
+    VU0_NORMALIZE_VF10();
+    VU0_DOT_XYZ(facing, vf10, vf11);
+    if (facing <= 0.25f)
+        return 0;
+
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_MOVE_VF(vf28, vf24);
+    VU0_MOVE_VF(vf29, vf25);
+    VU0_MOVE_VF(vf30, vf26);
+    VU0_MOVE_VF(vf31, vf27);
+    projection = (f32 *)sdfProjectionMatrix;
+    sdfPostmultiplyVuMatrixFromMemory(projection);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    projection += 16;
+    VU0_LOAD_VF(vf11, projection);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_0037F660);
+    VU0_ADD(vf10, vf10, vf11);
+    return 1;
+}
+
 extern u8 sdfViewUpVector[];
 
 /* vu0 routine: distance between the projected view point and a second point offset perpendicular to
