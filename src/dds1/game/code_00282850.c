@@ -855,7 +855,65 @@ void mnuClearPanelTransitionState(u32 item) {
     memset(item, 0, 0x4c);
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002854B0);
+typedef u32 (*MenuPopupCallback)();
+
+typedef struct MenuPopupEntry {
+    u32 flags;
+    MenuPopupCallback enter;
+    MenuPopupCallback leave;
+    MenuPopupCallback start;
+    MenuPopupCallback update;
+    MenuPopupCallback finish;
+    MenuPopupCallback canEnter;
+} MenuPopupEntry;
+
+typedef struct MenuPopupState {
+    s32 count;
+    MenuPopupEntry *entries[16];
+    s32 entryAddress;
+    s32 lastEntryAddress;
+} MenuPopupState;
+
+void func_002854B0(s32 action, MenuPopupEntry *entry, MenuPopupState *state, u32 argument) {
+    MenuPopupCallback callback;
+    MenuPopupEntry *saved;
+    s32 i;
+
+    if (state == NULL) {
+        return;
+    }
+    switch (action) {
+        case 0:
+            callback = entry->enter;
+            if (callback != NULL) {
+                if (entry->leave != NULL) {
+                    for (i = 0; i < state->count; i++) {
+                        if (entry->enter == state->entries[i]->enter) {
+                            return;
+                        }
+                    }
+                    state->entries[state->count++] = entry;
+                    if ((entry->flags & 0x20000) && state->count >= 2) {
+                        saved = state->entries[state->count - 1];
+                        state->entries[state->count - 1] = state->entries[state->count - 2];
+                        state->entries[state->count - 2] = saved;
+                    }
+                }
+                callback(argument);
+            }
+            break;
+        case 1:
+        case 2:
+            if (state->count != 0) {
+                saved = state->entries[state->count - 1];
+                if (saved->leave != NULL && action == 1) {
+                    saved->leave(argument);
+                }
+                state->count--;
+            }
+            break;
+    }
+}
 
 void mnuDrainPanelTransitions(u32 item, u32 option) {
     s32 currentValue;
@@ -874,10 +932,6 @@ s32 mnuHasPopupSelectionFlag(s32 *flags) {
 INCLUDE_ASM(const s32, "game/code_00282850", func_00285670);
 
 /* Popup state retains the entry address at +0x44. */
-typedef struct MenuPopupState {
-    u8 pad00[0x44];
-    s32 entryAddress;
-} MenuPopupState;
 
 u8 mnuIsPopupEntryValue(s32 item, s32 value) {
     return ((MenuPopupState *)item)->entryAddress == value;
