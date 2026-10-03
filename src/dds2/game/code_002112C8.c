@@ -401,7 +401,7 @@ extern void func_001E2758(void *);
 
 extern void fldAppendTaskToGroup(void *);
 
-extern s32 btlDispatchStateHandler(void *, s32);
+extern void btlDispatchStateHandler(s32 *, s32);
 
 void btlRunWeightedAiAction(ActionStateLink *task, s32 row) {
     u16 species;

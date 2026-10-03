@@ -85,6 +85,21 @@ build. Treat it like `DIFF`: try another natural formulation or park it.
 Editing a unit can make an existing function CONTEXT, so always check the
 whole unit.
 
+## Narrow status queries after dispatch
+
+Use a status getter's recovered return type even when the surrounding
+dispatcher has a wider result. A getter used only as a guard need not be
+assigned to the dispatcher's result and immediately cleared again.
+Return a nonzero dispatch result early, test the getter directly in the
+fallback condition, and return zero after the fallback.
+
+This shape preserves the retail code with the true `s32`
+`evtGetMessageWindowControlState` declaration in DDS1
+`mnuRunPanelWithIdleFallback` (0x00264610) and DDS2
+`evtBContinueDispatchOrRestoreTable` (0x0026AFE0). Both complete units
+check clean. Their former comma-assignment guards changed code when the
+incorrect wide getter declaration was corrected.
+
 ## `jal` tails through a shared inline helper
 
 A call returned through a `static inline` helper is not turned into a
@@ -506,6 +521,14 @@ functions use trampolines and are a different case.
   DDS2 `func_001B32F8` (input and output indexed), `func_0029D790`,
   `func_002294D0`. Don't apply blindly: indexed motor, particle-replay and
   memory-map loops did not match.
+- A packed table can have a pointer-typed header but numeric `u32` work handles
+  in its payload. Check the consumer before choosing an array-of-pointers
+  representation. DDS2 `func_002EB968` returns such a table:
+  `effReleaseBillFrameEntries` reads its rows as `u32` and passes each handle
+  to `effDestroyClassResourceWork(s32)`. Keeping the header's entry pointer and
+  the payload's handle type distinct preserves the resource-slot load before
+  the row store. This recovered representation checks at 649 match, 0 differ
+  for the complete `code_002DE248` unit.
 
 ## Rodata order
 

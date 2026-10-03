@@ -132,7 +132,7 @@ u32 func_00264608(void) {
 }
 
 extern s32 evtStageTestUpdateCamera(void);
-extern s64 evtGetMessageWindowControlState(void);
+extern s32 evtGetMessageWindowControlState(void);
 extern void mnuSetPopupEntryFlagged(s32 *, char *);
 extern char D_0036D478[];
 
@@ -144,13 +144,13 @@ s64 mnuRunPanelWithIdleFallback(u64 request) {
 
     evtStageTestUpdateCamera();
     result = func_00285670(context + 8, panelState, 0, request);
-    if (result == 0) {
-        if ((*panelState == 0) && (result = evtGetMessageWindowControlState(), result == 0)) {
-            mnuSetPopupEntryFlagged(panelState, D_0036D478);
-        }
-        result = 0;
+    if (result != 0) {
+        return result;
     }
-    return result;
+    if (*panelState == 0 && evtGetMessageWindowControlState() == 0) {
+        mnuSetPopupEntryFlagged(panelState, D_0036D478);
+    }
+    return 0;
 }
 
 s64 mnuRunItemPanelWithInactiveBackdrop(s32 request) {

@@ -41,7 +41,7 @@ typedef struct FldFadeColor {
 
 extern void itfCopyColorFields(s32, void *);
 
-extern u64 dds3GetWorldObject(void);
+extern void *dds3GetWorldObject(void);
 extern u32 *dds3FindIndexedObjectChainNodeByName();
 extern void dds3SetWorldCameraObject();
 
@@ -215,7 +215,7 @@ extern u32 D_00444A30[];
 
 extern s32 D_004361AC;
 
-extern u64 dds3GetWorldSecondaryObject(void);
+extern void *dds3GetWorldSecondaryObject(void);
 
 extern s32 D_004361A8;
 
