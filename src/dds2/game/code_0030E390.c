@@ -108,7 +108,12 @@ extern s32 sdfDrawUniformlyScaledSlotImage(s32, s32, s32, s32, s32, s32, s32, f3
 
 extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
 
-INCLUDE_ASM(const s32, "game/code_0030E390", fldReleaseMapRequestQueues);
+void func_0030EF18(u32 *resource);
+
+void fldReleaseMapRequestQueues(void) {
+    func_0030EF18((u32 *)D_004390AC);
+    func_0030EF18((u32 *)D_004390B0);
+}
 
 INCLUDE_ASM(const s32, "game/code_0030E390", func_0030E910);
 
@@ -178,7 +183,7 @@ SdfRing *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     return ring;
 }
 
-s32 func_0030EF18(u32 *resource) {
+void func_0030EF18(u32 *resource) {
     if (resource != NULL) {
         sdfQueueNonzeroResourceId(*resource);
     }
