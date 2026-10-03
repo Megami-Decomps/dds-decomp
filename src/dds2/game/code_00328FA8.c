@@ -154,7 +154,7 @@ void sdfInitGeneralHeap(u32 heapSize) {
     freeBlock->address = alignedStart;
     freeBlock->referenceCount = 0;
     D_004389CC = 0;
-    sdfInitializeSynchronizedRequest(D_00439128, sdfReleaseResourceAllocation);
+    sdfInitializeSynchronizedRequest(D_00439128, (u32)sdfReleaseResourceAllocation);
 }
 
 u16 sdfGetMemoryBlockState(SdfMemBlock *block) {
