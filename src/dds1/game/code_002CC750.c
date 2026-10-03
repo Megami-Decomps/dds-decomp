@@ -19,6 +19,34 @@
 #define PRF_SKILL_LIST_ENTRY_COUNT 8
 #define PRF_SKILL_LIST_FLAGGED 4
 
+#define PTY_PRESET_SKILL_SLOT_COUNT 8
+#define PTY_PRESET_POOL_SKILL_COUNT 40
+#define PTY_PROFILE_UNIT_LAST_INDEX 4
+#define PTY_PROFILE_UNIT_TABLE_OFFSET 0xA60
+#define PTY_PROFILE_UNIT_STRIDE 0x1A4
+#define PTY_PROFILE_UNIT_ID_COUNT 0x10
+#define PTY_PROFILE_UNIT_OCCUPIED_BIT 1
+#define PTY_PROFILE_RECORD_TABLE_OFFSET 0x2EBB0
+#define PTY_PROFILE_RECORD_TABLE_BYTES 0x3000
+#define PTY_PROFILE_RECORD_BANK_BYTES 0x300
+#define PRF_PROFILE_RECORD_BYTES 8
+/* Stride in u16 entries, not bytes; only the first eight are skill IDs. */
+#define PRF_SKILL_TABLE_STRIDE 14
+#define PRF_PROFILE_COUNT 0x60
+#define PRF_REQUIRED_PROFILE_COUNT 8
+#define PRF_REQUIRED_PROFILE_IDS_OFFSET 0xC
+#define PRF_FALLBACK_GROUP_COUNT 4
+#define PRF_FALLBACK_FLAG_COUNT 2
+#define PRF_REQUIREMENT_RULES_BIT 4
+#define PRF_REQUIREMENT_EXCLUSION_BIT 1
+#define SCR_PAIRED_OUTPUT_BYTES 8
+#define SDF_FLAG_LIST_VALUE_SHIFT 3
+#define SDF_FLAG_LIST_MARK_WORDS 2
+#define SDF_FLAG_LIST_RESET_MARK 0xFFFFFFFF
+#define SDF_FLAG_LIST_ENTRY_VERTEX_BYTES 32
+#define SDF_FLAG_LIST_VERTICES_PER_ENTRY 2
+#define SDF_FLAG_LIST_PACKET_BYTES 0x20
+
 extern void memset();
 extern u16 ptyPresetSkillSlots[][96];
 extern u16 ptyPresetPoolSkills[][96];
@@ -173,42 +201,45 @@ void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
     }
 }
 
+/* Clear the complete per-unit profile-record table in game state. */
 void ptyClearProfileRecords(void) {
-    memset(datGameState + 0x2ebb0, 0, 0x3000);
+    memset(datGameState + PTY_PROFILE_RECORD_TABLE_OFFSET, 0, PTY_PROFILE_RECORD_TABLE_BYTES);
 }
 
 INCLUDE_ASM(const s32, "game/code_002CC750", ptySelectProfileStage);
 
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyApplyProfilePreset);
 
-void ptyLoadPresetSkillSlots(u8 *work) {
-    u16 *source = ptyPresetSkillSlots[((PtyProfileUnit *)work)->unitId];
-    u16 *slots = ((PtyProfileUnit *)work)->skills;
-    u32 index;
-    index = 0;
+/* Load nonzero preset IDs into their original slots; zero IDs leave slots unchanged. */
+void ptyLoadPresetSkillSlots(u8 *unit) {
+    u16 *presetSkills = ptyPresetSkillSlots[((PtyProfileUnit *)unit)->unitId];
+    u16 *skillCursor = ((PtyProfileUnit *)unit)->skills;
+    u32 presetIndex;
+    presetIndex = 0;
     do {
-        u16 id = *source++;
-        if (id != 0) {
-            scrSetFlag(work, id);
-            *slots = id;
+        u16 skillId = *presetSkills++;
+        if (skillId != 0) {
+            scrSetFlag(unit, skillId);
+            *skillCursor = skillId;
         }
-        slots++;
-        index++;
-    } while (index < 8);
+        skillCursor++;
+        presetIndex++;
+    } while (presetIndex < PTY_PRESET_SKILL_SLOT_COUNT);
 }
 
-void ptyMarkPresetSkillPool(u8 *work) {
-    u16 *source = ptyPresetPoolSkills[((PtyProfileUnit *)work)->unitId];
-    u32 index = 0;
+/* Mark nonzero IDs in the preset pool, then perform the native flag-gated extra call. */
+void ptyMarkPresetSkillPool(u8 *unit) {
+    u16 *presetSkills = ptyPresetPoolSkills[((PtyProfileUnit *)unit)->unitId];
+    u32 presetIndex = 0;
     do {
-        u16 id = *source++;
-        if (id != 0) {
-            scrSetFlag(work, id);
+        u16 skillId = *presetSkills++;
+        if (skillId != 0) {
+            scrSetFlag(unit, skillId);
         }
-        index++;
-    } while (index < 40);
+        presetIndex++;
+    } while (presetIndex < PTY_PRESET_POOL_SKILL_COUNT);
     if (mdlFlagTest(0xB90)) {
-        ptyMergeStockSkills(work);
+        ptyMergeStockSkills(unit);
     }
 }
 
@@ -218,22 +249,22 @@ void ptyRebuildProfileSkills(s32 useCurrentProfile, u8 *unit);
 
 /* Rebuild skill lists for the five occupied party slots. */
 void ptyRebuildAllProfiles(void) {
-    s32 i;
-    s32 offset;
+    s32 unitCountdown;
+    s32 unitOffset;
 
-    for (offset = 0, i = 4; i >= 0; i--) {
-        u8 *unit = (u8 *)datGameState + 0xA60 + offset;
+    for (unitOffset = 0, unitCountdown = PTY_PROFILE_UNIT_LAST_INDEX; unitCountdown >= 0; unitCountdown--) {
+        u8 *unit = (u8 *)datGameState + PTY_PROFILE_UNIT_TABLE_OFFSET + unitOffset;
 
-        if ((((PtyProfileUnit *)unit)->flags & 1) != 0) {
-            s32 j;
+        if ((((PtyProfileUnit *)unit)->flags & PTY_PROFILE_UNIT_OCCUPIED_BIT) != 0) {
+            s32 candidateUnitId;
 
-            for (j = 0; j < 0x10; j++) {
-                if (((PtyProfileUnit *)unit)->unitId == j) {
+            for (candidateUnitId = 0; candidateUnitId < PTY_PROFILE_UNIT_ID_COUNT; candidateUnitId++) {
+                if (((PtyProfileUnit *)unit)->unitId == candidateUnitId) {
                     ptyRebuildProfileSkills(0, unit);
                 }
             }
         }
-        offset += 0x1A4;
+        unitOffset += PTY_PROFILE_UNIT_STRIDE;
     }
 }
 
@@ -247,8 +278,9 @@ INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD0D8);
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD240);
 
-u32 prfGetCapValue(u16 i) {
-    return D_003907B8[i].v0;
+/* Read the configured capacity for an unchecked profile ID. */
+u32 prfGetCapValue(u16 profileId) {
+    return D_003907B8[profileId].v0;
 }
 
 /* Clamp one profile record to its configured capacity. */
@@ -261,24 +293,25 @@ void ptySetProfileRecordToCap(u32 unit, u16 profileId) {
     *record = cap;
 }
 
-u32 ptyAddProfilePoints(ScrVmOperand *work, s32 increment) {
-    u32 *position;
-    u32 limit;
-    u32 result;
-    s32 selectedIndex;
-    if (ptyGetCurrentProfileId(work) == 0) {
+/* Add to the selected record and cap the unsigned result; no selection returns zero. */
+u32 ptyAddProfilePoints(ScrVmOperand *unit, s32 increment) {
+    u32 *record;
+    u32 recordCap;
+    u32 recordValue;
+    s32 selectedProfile;
+    if (ptyGetCurrentProfileId(unit) == 0) {
         return 0;
     }
-    position = (u32 *)ptyGetCurrentProfileRecord(work);
-    selectedIndex = work->selectedIndex;
-    *position += increment;
-    limit = prfGetCapValue(selectedIndex & 0xffff);
-    result = *position;
-    if (limit < result) {
-        *position = limit;
-        result = limit;
+    record = (u32 *)ptyGetCurrentProfileRecord(unit);
+    selectedProfile = unit->selectedIndex;
+    *record += increment;
+    recordCap = prfGetCapValue(selectedProfile & SCR_FLAG_ID_MASK);
+    recordValue = *record;
+    if (recordCap < recordValue) {
+        *record = recordCap;
+        recordValue = recordCap;
     }
-    return result;
+    return recordValue;
 }
 
 void prfDecodeFlagPair(u32 v, u32 *a, u32 *b) {
@@ -325,16 +358,17 @@ s32 ptyTestProfileFlag0(s32 work, u16 id) {
     return (flags[0x2e9f0 / 4 + word + ((ScrVmOperand *)work)->h04 * 7] & (1 << shift)) != 0;
 }
 
-s32 scrCheckStateBits(ScrVmOperand *work) {
-    u32 index = 0;
+/* Require the primary profile flag for every row not marked as excluded. */
+s32 scrCheckStateBits(ScrVmOperand *unit) {
+    u32 profileIndex = 0;
     do {
-        u16 id = index;
-        index++;
-        if ((prfIsRequirementExcluded(id) & 1) == 0 &&
-            !ptyTestProfileFlag0(work, id)) {
+        u16 profileId = profileIndex;
+        profileIndex++;
+        if ((prfIsRequirementExcluded(profileId) & PRF_REQUIREMENT_EXCLUSION_BIT) == 0 &&
+            !ptyTestProfileFlag0(unit, profileId)) {
             return 0;
         }
-    } while (index < 0x60);
+    } while (profileIndex < PRF_PROFILE_COUNT);
     return 1;
 }
 
@@ -355,10 +389,11 @@ s8 scrGetSelectedOperandIndex(ScrVmOperand *op) {
     return op->selectedIndex;
 }
 
-u32 ptyGetProfileRecord(u32 work, u16 index) {
-    u32 record = datGameState + *(u16 *)(work + 4) * 0x300;
+/* Address an unchecked profile record within the unit's record bank. */
+u32 ptyGetProfileRecord(u32 unit, u16 profileId) {
+    u32 unitRecordsBase = datGameState + *(u16 *)(unit + 4) * PTY_PROFILE_RECORD_BANK_BYTES;
 
-    return record + index * 8 + 0x2EBB0;
+    return unitRecordsBase + profileId * PRF_PROFILE_RECORD_BYTES + PTY_PROFILE_RECORD_TABLE_OFFSET;
 }
 
 u32 ptyGetProfileRecordValue(u32 unit, u16 profileId) {
@@ -368,18 +403,20 @@ u32 ptyGetProfileRecordValue(u32 unit, u16 profileId) {
     return *record;
 }
 
-u32 ptyGetCurrentProfileRecord(ScrVmOperand *p) {
-    return ptyGetProfileRecord((u32)p, scrGetSelectedOperandIndex(p) & 0xFFFF);
+/* Resolve the selected ID using the native low-16-bit conversion. */
+u32 ptyGetCurrentProfileRecord(ScrVmOperand *unit) {
+    return ptyGetProfileRecord((u32)unit, scrGetSelectedOperandIndex(unit) & SCR_FLAG_ID_MASK);
 }
 
 s8 ptyGetCurrentProfileId(ScrVmOperand *op) {
     return op->selectedIndex;
 }
 
-s8 scrSelectOperandIndex(ScrVmOperand *p, s32 v) {
-    p->selectedIndex = v;
-    ptySetProfileFlag1(p, v & 0xFFFF);
-    return p->selectedIndex;
+/* Store the narrowed selection, mark its paired profile flag, and return the stored ID. */
+s8 scrSelectOperandIndex(ScrVmOperand *unit, s32 profileId) {
+    unit->selectedIndex = profileId;
+    ptySetProfileFlag1(unit, profileId & SCR_FLAG_ID_MASK);
+    return unit->selectedIndex;
 }
 
 u32 func_002CD7F0(u32 arg0, u32 arg1) {
@@ -551,16 +588,19 @@ s32 scrRemoveSlot(u8 *unit, u16 skillId) {
     return 0;
 }
 
-u8 prfGetParamWord7b4(u16 i) {
-    return D_003907B4[i].v0;
+/* Read a byte parameter from the unchecked profile row. */
+u8 prfGetParamWord7b4(u16 profileId) {
+    return D_003907B4[profileId].v0;
 }
 
-s32 prfGetParamWord7b6(u16 i) {
-    return D_003907B6[i].v0;
+/* Read the threshold used by the profile-level check. */
+s32 prfGetParamWord7b6(u16 profileId) {
+    return D_003907B6[profileId].v0;
 }
 
-u8 prfGetParamWord7b5(u16 i) {
-    return D_003907B5[i].v0;
+/* Read a byte parameter from the unchecked profile row. */
+u8 prfGetParamWord7b5(u16 profileId) {
+    return D_003907B5[profileId].v0;
 }
 
 u32 func_002CDDB0() {
@@ -575,11 +615,12 @@ u32 scrCallIfOperandReady(ScrVmOperand *operand, u32 value) {
     }
 }
 
-u16 prfGetSkillAtIndex(u16 scriptId, u32 entry) {
-    if (entry >= 8) {
+/* Read one of the profile row's eight skills; an unsigned out-of-range slot returns zero. */
+u16 prfGetSkillAtIndex(u16 profileId, u32 skillIndex) {
+    if (skillIndex >= PRF_SKILL_LIST_ENTRY_COUNT) {
         return 0;
     }
-    return D_003907BC[scriptId * 14 + entry];
+    return D_003907BC[profileId * PRF_SKILL_TABLE_STRIDE + skillIndex];
 }
 
 u32 func_002CDE60(void) {
@@ -594,8 +635,9 @@ u32 ptyCheckLevelAtLeastProfileParam7b6(ScrVmOperand *operand, u16 index) {
     return 1;
 }
 
-void scrClearPairedEntryOutput(u32 arg0, u32 arg1, u32 arg2) {
-    memset(arg2, 0, 8);
+/* Clear the paired output words; the first two arguments are unused. */
+void scrClearPairedEntryOutput(u32 unused0, u32 unused1, u32 output) {
+    memset(output, 0, SCR_PAIRED_OUTPUT_BYTES);
 }
 
 u8 ptyIsCurrentProfileId(s32 operand, u32 profileId) {
@@ -634,7 +676,7 @@ s32 prfBuildRawSkillList(u16 profile, PrfSkillList *output) {
 /* Compact the selected profile's nonzero skills, optionally including nonzero
  * nibble states and marking them in the output. The profile argument is unused;
  * output may be NULL when only the resulting count is needed. */
-s32 prfBuildSkillList(ScrVmOperand *unit, u32 profile, PrfSkillList *output, s32 includeFlagged) {
+s32 prfBuildSkillList(ScrVmOperand *unit, u32 unusedProfile, PrfSkillList *output, s32 includeFlagged) {
     PrfSkillList list;
     u32 entryIndex;
     u16 *profileSkills;
@@ -646,7 +688,7 @@ s32 prfBuildSkillList(ScrVmOperand *unit, u32 profile, PrfSkillList *output, s32
     selectedProfile = unit->selectedIndex;
     list.count = 0;
     if (selectedProfile != 0) {
-        profileSkills = &D_003907BC[selectedProfile * 14];
+        profileSkills = &D_003907BC[selectedProfile * PRF_SKILL_TABLE_STRIDE];
         for (entryIndex = 0; entryIndex < PRF_SKILL_LIST_ENTRY_COUNT; entryIndex++) {
             skillId = *profileSkills++;
             if (skillId != 0) {
@@ -669,48 +711,52 @@ s32 prfBuildSkillList(ScrVmOperand *unit, u32 profile, PrfSkillList *output, s32
     return list.count;
 }
 
-u32 prfBuildSkillListState0(u32 unit, u32 profile, u32 output) {
-    return prfBuildSkillList((ScrVmOperand *)unit, profile, (PrfSkillList *)output, 0);
+/* Build the stored selection's list without flagged skills; the explicit ID is ignored. */
+u32 prfBuildSkillListState0(u32 unit, u32 unusedProfile, u32 output) {
+    return prfBuildSkillList((ScrVmOperand *)unit, unusedProfile, (PrfSkillList *)output, 0);
 }
 
-u32 prfCountProfileList(u8 *work) {
-    u8 *slots = work + 0xc;
-    u32 index;
-    for (index = 0; index < 8; index++) {
-        if (slots[index] == 0) {
-            return index;
+/* Count leading profile IDs up to the first zero or the eight-entry bound. */
+u32 prfCountProfileList(u8 *operand) {
+    u8 *profileIds = operand + PRF_REQUIRED_PROFILE_IDS_OFFSET;
+    u32 profileIndex;
+    for (profileIndex = 0; profileIndex < PRF_REQUIRED_PROFILE_COUNT; profileIndex++) {
+        if (profileIds[profileIndex] == 0) {
+            return profileIndex;
         }
     }
-    return 8;
+    return PRF_REQUIRED_PROFILE_COUNT;
 }
 
-s32 ptyHasAllReqProfiles(s32 state, u8 *operand) {
-    s32 index = 0;
-    s32 count = prfCountProfileList(operand);
-    if (count > 0) {
-        u8 *slots = operand + 0xc;
+/* Require each listed profile's primary flag; an empty list succeeds. */
+s32 ptyHasAllReqProfiles(s32 unit, u8 *operand) {
+    s32 profileIndex = 0;
+    s32 profileCount = prfCountProfileList(operand);
+    if (profileCount > 0) {
+        u8 *profileIds = operand + PRF_REQUIRED_PROFILE_IDS_OFFSET;
         do {
-            if (ptyTestProfileFlag0(state, slots[index++]) == 0) {
+            if (ptyTestProfileFlag0(unit, profileIds[profileIndex++]) == 0) {
                 return 0;
             }
-        } while (index < count);
+        } while (profileIndex < profileCount);
     }
     return 1;
 }
 
-s32 ptyReqProfileCountAtLeast(s32 state, u8 *operand) {
-    u32 matched = 0;
-    s32 index = 0;
-    s32 count = prfCountProfileList(operand);
-    if (count > 0) {
-        u8 *slots = operand + 0xc;
+/* Compare the number of flagged IDs in the list with its minimum count. */
+s32 ptyReqProfileCountAtLeast(s32 unit, u8 *operand) {
+    u32 matchedCount = 0;
+    s32 profileIndex = 0;
+    s32 profileCount = prfCountProfileList(operand);
+    if (profileCount > 0) {
+        u8 *profileIds = operand + PRF_REQUIRED_PROFILE_IDS_OFFSET;
         do {
-            if (ptyTestProfileFlag0(state, slots[index++]) != 0) {
-                matched++;
+            if (ptyTestProfileFlag0(unit, profileIds[profileIndex++]) != 0) {
+                matchedCount++;
             }
-        } while (index < count);
+        } while (profileIndex < profileCount);
     }
-    if (matched < ((PrfRequirementOperand *)operand)->requiredValue) {
+    if (matchedCount < ((PrfRequirementOperand *)operand)->requiredValue) {
         return 0;
     }
     return 1;
@@ -722,55 +768,58 @@ typedef struct PtyReqEntry {
     u8 pad6[0x16];
 } PtyReqEntry;
 
-s32 ptyProfileCountAtLeast(u8 *work, u8 *req) {
-    PtyReqEntry *entry = (PtyReqEntry *)D_003907B0;
-    u32 index;
-    u32 count = 0;
+/* Count flagged profile rows whose byte-five value reaches the operand's threshold. */
+s32 ptyProfileCountAtLeast(u8 *unit, u8 *operand) {
+    PtyReqEntry *profileTable = (PtyReqEntry *)D_003907B0;
+    u32 profileIndex;
+    u32 matchedCount = 0;
 
-    for (index = 0; index < 0x60; index++) {
-        if (ptyTestProfileFlag0((s32)work, (u16)index)) {
-            if (entry[index].value5 >= req[5]) {
-                count++;
+    for (profileIndex = 0; profileIndex < PRF_PROFILE_COUNT; profileIndex++) {
+        if (ptyTestProfileFlag0((s32)unit, (u16)profileIndex)) {
+            if (profileTable[profileIndex].value5 >= operand[5]) {
+                matchedCount++;
             }
         }
     }
-    if (count < ((PrfRequirementOperand *)req)->requiredValue) {
+    if (matchedCount < ((PrfRequirementOperand *)operand)->requiredValue) {
         return 0;
     }
     return 1;
 }
 
+/* Each listed profile must be flagged in at least one occupied party slot. */
 s32 ptyAreReqProfilesInParty(u8 *operand) {
-    s32 index = 0;
-    s32 count = prfCountProfileList(operand);
-    if (count > 0) {
-        u8 *slots = operand + 0xc;
+    s32 profileIndex = 0;
+    s32 profileCount = prfCountProfileList(operand);
+    if (profileCount > 0) {
+        u8 *profileIds = operand + PRF_REQUIRED_PROFILE_IDS_OFFSET;
         do {
-            s32 present = 0;
-            s32 selected = slots[index];
-            s32 offset = 0;
-            s32 remaining = 4;
+            s32 profilePresent = 0;
+            s32 profileId = profileIds[profileIndex];
+            s32 unitOffset = 0;
+            s32 unitCountdown = PTY_PROFILE_UNIT_LAST_INDEX;
             do {
-                u8 *entry = (u8 *)datGameState + 0xa60 + offset;
-                offset += 0x1a4;
-                if ((((PtyProfileUnit *)entry)->flags & 1) != 0) {
-                    if (ptyTestProfileFlag0((s32)entry, (u16)selected) != 0) {
-                        present = 1;
+                u8 *partyUnit = (u8 *)datGameState + PTY_PROFILE_UNIT_TABLE_OFFSET + unitOffset;
+                unitOffset += PTY_PROFILE_UNIT_STRIDE;
+                if ((((PtyProfileUnit *)partyUnit)->flags & PTY_PROFILE_UNIT_OCCUPIED_BIT) != 0) {
+                    if (ptyTestProfileFlag0((s32)partyUnit, (u16)profileId) != 0) {
+                        profilePresent = 1;
                     }
                 }
-                remaining--;
-            } while (remaining >= 0);
-            if (present == 0) {
+                unitCountdown--;
+            } while (unitCountdown >= 0);
+            if (profilePresent == 0) {
                 return 0;
             }
-            index++;
-        } while (index < count);
+            profileIndex++;
+        } while (profileIndex < profileCount);
     }
     return 1;
 }
 
-u32 prfReqCheckUnitLevel(ScrVmOperand *operand, u8 *value) {
-    if (operand->h14 < value[4]) {
+/* Compare the unit's level word with the prerequisite's byte threshold. */
+u32 prfReqCheckUnitLevel(ScrVmOperand *unit, u8 *operand) {
+    if (unit->h14 < operand[4]) {
         return 0;
     }
     return 1;
@@ -791,12 +840,14 @@ void prfReq54Evaluate(u32 state, u32 operand, u16 requirementId) {
     prfReqEvaluateRules(state, operand, requirementId, 0);
 }
 
-u32 prfIsRequirementExcluded(u16 i) {
-    return D_003907B0[i].v0;
+/* Read requirement flags for an unchecked profile ID. */
+u32 prfIsRequirementExcluded(u16 requirementId) {
+    return D_003907B0[requirementId].v0;
 }
 
-u32 prfReq54GetWord1230(u16 i) {
-    return D_00391230[i].v0;
+/* Read the rule-state word for an unchecked requirement ID. */
+u32 prfReq54GetWord1230(u16 requirementId) {
+    return D_00391230[requirementId].v0;
 }
 
 typedef struct PrfFallbackGroup {
@@ -806,24 +857,26 @@ typedef struct PrfFallbackGroup {
 } PrfFallbackGroup;
 
 extern PrfFallbackGroup D_003931B0[];
-s32 prfReqCheckWithFallback(void *operand, u16 id) {
+/* A zero evaluator return selects its result; otherwise test the fallback flags.
+ * Missing fallback IDs succeed, as do entries with no nonzero flag requirements. */
+s32 prfReqCheckWithFallback(void *operand, u16 requirementId) {
 
-    u32 result;
-    u32 group;
-    u32 i;
+    u32 ruleResult;
+    u32 groupIndex;
+    u32 flagIndex;
 
-    id &= 0xFFFF;
-    if ((prfReq54GetWord1230(id) & 4) != 0) {
-        if (prfReqEvaluateRules(0, (u32)operand, id, &result) == 0) {
-            return result != 0;
+    requirementId &= SCR_FLAG_ID_MASK;
+    if ((prfReq54GetWord1230(requirementId) & PRF_REQUIREMENT_RULES_BIT) != 0) {
+        if (prfReqEvaluateRules(0, (u32)operand, requirementId, &ruleResult) == 0) {
+            return ruleResult != 0;
         }
     }
-    for (group = 0; group < 4; group++) {
-        if (D_003931B0[group].id == id) {
-            for (i = 0; i < 2; i++) {
-                u32 flag = D_003931B0[group].flags[i];
+    for (groupIndex = 0; groupIndex < PRF_FALLBACK_GROUP_COUNT; groupIndex++) {
+        if (D_003931B0[groupIndex].id == requirementId) {
+            for (flagIndex = 0; flagIndex < PRF_FALLBACK_FLAG_COUNT; flagIndex++) {
+                u32 flagId = D_003931B0[groupIndex].flags[flagIndex];
 
-                if (flag != 0 && mdlFlagTest(flag) == 0) {
+                if (flagId != 0 && mdlFlagTest(flagId) == 0) {
                     return 0;
                 }
             }
@@ -835,26 +888,29 @@ s32 prfReqCheckWithFallback(void *operand, u16 id) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", prfReqSelectGroup);
 
-u8 prfReq18GetWord3220(s32 i) {
-    return D_00393220[i].v0;
+/* Read the byte in an unchecked prerequisite-table entry. */
+u8 prfReq18GetWord3220(s32 entryIndex) {
+    return D_00393220[entryIndex].v0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002CC750", prfReqGetPair);
-u32 prfReq18GetWord3234(s32 i) {
-    return D_00393234[i].v0;
+/* Read the flag ID in an unchecked prerequisite-table entry. */
+u32 prfReq18GetWord3234(s32 entryIndex) {
+    return D_00393234[entryIndex].v0;
 }
 
+/* Set flags returned by the native selector until it yields a negative index. */
 void sdfSetAllFlagsFromTable(void) {
-    s32 index = 0;
+    s32 entryIndex = 0;
     do {
-        index = prfReqSelectGroup(index);
-        if (index >= 0) {
-            u32 name = prfReq18GetWord3234(index);
-            if (name != 0) {
-                mdlFlagSet(name);
+        entryIndex = prfReqSelectGroup(entryIndex);
+        if (entryIndex >= 0) {
+            u32 flagId = prfReq18GetWord3234(entryIndex);
+            if (flagId != 0) {
+                mdlFlagSet(flagId);
             }
         }
-    } while (index++ >= 0);
+    } while (entryIndex++ >= 0);
 }
 
 Entry84W *prfReqGetEntryRecord(u16 index) {
@@ -888,22 +944,23 @@ typedef struct SdfFlagListWork {
     u32 resource;             /* 0x54 */
 } SdfFlagListWork;
 
-void sdfResetFlagListEntries(s32 context) {
-    u32 count;
-    u32 *mark;
-    u32 index;
+/* Reset only the first mark word of each pair, then clear both value words per entry. */
+void sdfResetFlagListEntries(s32 workAddress) {
+    u32 entryCount;
+    u32 *markCursor;
+    u32 entryIndex;
 
-    index = 0;
-    count = ((SdfFlagListWork *)context)->count;
-    mark = ((SdfFlagListWork *)context)->marks;
-    if (count != 0) {
+    entryIndex = 0;
+    entryCount = ((SdfFlagListWork *)workAddress)->count;
+    markCursor = ((SdfFlagListWork *)workAddress)->marks;
+    if (entryCount != 0) {
         do {
-            index = index + 1;
-            *mark = 0xffffffff;
-            mark = mark + 2;
-        } while (index < count);
+            entryIndex = entryIndex + 1;
+            *markCursor = SDF_FLAG_LIST_RESET_MARK;
+            markCursor = markCursor + SDF_FLAG_LIST_MARK_WORDS;
+        } while (entryIndex < entryCount);
     }
-    memset(((SdfFlagListWork *)context)->colors, 0, count << 3);
+    memset(((SdfFlagListWork *)workAddress)->colors, 0, entryCount << SDF_FLAG_LIST_VALUE_SHIFT);
 }
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CEAE8);
@@ -933,37 +990,39 @@ extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, void *);
 extern void *func_002EF2B0(f32 (*)[4], u32 *, u32, s32);
 
+/* Copy vertex pairs, optionally add the view target, and submit the packet list.
+ * count is reused first as an entry count and then as a vertex count. */
 void func_002CF248(SdfFlagListWork *work) {
-    f32 (*source)[4];
-    f32 (*vertices)[4];
+    f32 (*sourceVertices)[4];
+    f32 (*copiedVertices)[4];
     u32 count;
-    u32 i;
-    s32 allocation;
-    void *packet;
+    u32 vertexIndex;
+    s32 vertexAllocation;
+    void *packetList;
     GsSurface *surface;
 
     if (work->maxFrames != 0 && work->frame >= work->maxFrames) {
         return;
     }
     count = work->count;
-    source = work->vertices;
-    allocation = sdfAllocGeneralBlock(count * 32);
-    count *= 2;
-    vertices = sdfMemoryGetBlockAddress(allocation);
-    for (i = 0; i < count; i++) {
-        VU0_LOAD_VF(vf10, &source[i]);
+    sourceVertices = work->vertices;
+    vertexAllocation = sdfAllocGeneralBlock(count * SDF_FLAG_LIST_ENTRY_VERTEX_BYTES);
+    count *= SDF_FLAG_LIST_VERTICES_PER_ENTRY;
+    copiedVertices = sdfMemoryGetBlockAddress(vertexAllocation);
+    for (vertexIndex = 0; vertexIndex < count; vertexIndex++) {
+        VU0_LOAD_VF(vf10, &sourceVertices[vertexIndex]);
         if (D_003BD2C8 != 0) {
             VU0_LOAD_VF(vf11, sdfViewTargetVector);
             VU0_ADD(vf10, vf10, vf11);
         }
-        VU0_STORE_VF_UNCLOBBERED(vf10, &vertices[i]);
+        VU0_STORE_VF_UNCLOBBERED(vf10, &copiedVertices[vertexIndex]);
     }
-    packet = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(packet);
-    sdfAppendPacket(packet, func_002EF2B0(vertices, work->colors, work->count * 2, 0x40));
+    packetList = sdfAllocPacketAligned(SDF_FLAG_LIST_PACKET_BYTES);
+    sdfInitPacketList(packetList);
+    sdfAppendPacket(packetList, func_002EF2B0(copiedVertices, work->colors, work->count * SDF_FLAG_LIST_VERTICES_PER_ENTRY, 0x40));
     surface = D_00398098[work->surfaceIndex];
-    surface->submit(surface, packet);
-    sdfReleaseResourceAllocation(allocation);
+    surface->submit(surface, packetList);
+    sdfReleaseResourceAllocation(vertexAllocation);
 }
 
 float scrGetOperandFloatValue(ScrVmOperand *op) {
