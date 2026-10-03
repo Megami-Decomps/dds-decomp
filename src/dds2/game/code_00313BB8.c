@@ -914,7 +914,39 @@ u32 scrGetEntryState(u16 index) {
     return D_00402BE0[index].state;
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00316020);
+typedef struct RequirementFallbackEntry {
+    u8 id;
+    u8 pad01[3];
+    u32 flags[2];
+} RequirementFallbackEntry;
+
+extern RequirementFallbackEntry D_00404A20[];
+
+s32 func_00316020(void *operand, u16 id) {
+    u32 result;
+    u32 group;
+    u32 i;
+
+    id &= 0xFFFF;
+    if ((scrGetEntryState(id) & 4) != 0) {
+        if (func_00315C68(0, 0, (u32)operand, id, &result) == 0) {
+            return result != 0;
+        }
+    }
+    for (group = 0; group < 4; group++) {
+        if (D_00404A20[group].id == id) {
+            for (i = 0; i < 2; i++) {
+                u32 flag = D_00404A20[group].flags[i];
+
+                if (flag != 0 && mdlFlagTest(flag) == 0) {
+                    return 0;
+                }
+            }
+            return 1;
+        }
+    }
+    return 1;
+}
 
 /* Index of the first active table entry whose requirements are met and whose flag is not yet set; -1 when there is none. Only entry 0 is ever visited: the loop bound is one. */
 s32 sdfFindUnmetRequirementIndex(u32 start) {

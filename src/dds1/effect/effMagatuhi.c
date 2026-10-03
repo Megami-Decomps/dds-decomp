@@ -141,6 +141,7 @@ void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 color
 
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_0034DF38[];
+extern void *effMathGetSlotAt(void *slots, s32 index);
 
 /* Owner of the value table an effect variant's particles write through. */
 struct EffMagatuhiOwner {
@@ -203,7 +204,47 @@ void effMagatuhiReleaseMathOwnerAndBuffer(EffMagatuhiWideFirst *work) {
     sdfReleaseResourceAllocation(work->buffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00189E98);
+void func_00189E98(EffMagatuhiWideFirst *work, s32 index) {
+    EffMagatuhiDriftParticle *particle = &work->particles[index];
+    f32 direction[4];
+    f32 radius;
+    f32 random;
+    void *slot;
+
+    random = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
+    radius = work->head.unk34 * (random + random);
+    random = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
+    direction[0] = random + random;
+    direction[1] = 0.0f;
+    random = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
+    direction[2] = random + random;
+    VU0_LOAD_VF_FROM(vf10, *(u128 *)direction);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF_TO_MEMORY(vf10, *(u128 *)direction);
+    particle->pos[0] = radius * direction[0];
+    particle->pos[1] = 0.0f;
+    particle->pos[2] = radius * direction[2];
+    random = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
+    particle->dir[0] = random + random;
+    particle->dir[1] = 0.0f;
+    random = effMiscRandUnitFloat(D_0034DF38) - 0.5f;
+    particle->dir[2] = random + random;
+    VU0_LOAD_VF(vf10, particle->dir);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, particle->dir);
+    particle->scale = *(f32 *)((u8 *)work + 0x44) *
+        (effMiscRandUnitFloat(D_0034DF38) * *(f32 *)((u8 *)work + 0x4C) +
+         (1.0f - *(f32 *)((u8 *)work + 0x4C)));
+    particle->angle = effMiscRandUnitFloat(D_0034DF38) * 6.2831853f;
+    particle->liftStep = *(f32 *)((u8 *)work + 0x38) *
+        (effMiscRandUnitFloat(D_0034DF38) * *(f32 *)((u8 *)work + 0x3C) +
+         (1.0f - *(f32 *)((u8 *)work + 0x3C)));
+    slot = effMathGetSlotAt(work->mathResource, index);
+    *(s32 *)((u8 *)slot + 0x30) = 0;
+    *(s32 *)((u8 *)slot + 0x34) = 0;
+    func_00189C80(work->managedResource->valueWork, index);
+    effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018A098);
 
@@ -251,7 +292,6 @@ void effMagatuhiReleaseWideWorkResources(EffMagatuhiWideSecond *work) {
     sdfReleaseResourceAllocation(work->buffer);
 }
 
-extern void *effMathGetSlotAt(void *slots, s32 index);
 extern s32 effMathStepBezierSlot(void *slots, s32 index, void *out);
 extern void func_001891A8(void *owner);
 extern void func_00189818(void *valueWork, s32 index, void *out);

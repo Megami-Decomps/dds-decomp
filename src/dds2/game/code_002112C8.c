@@ -2121,7 +2121,64 @@ void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     btlUnitFaceTarget(target, user);
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00217B20);
+void func_00217B20(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back, s8 mirror, s8 swapRoles, f32 targetSideScale, f32 userSideScale, f32 backLift, f32 frontLift) {
+    BtlUnit *user;
+    BtlUnit *target;
+    f32 userPos[4];
+    f32 targetPos[4];
+    f32 userExtent;
+    f32 targetExtent;
+    f32 minDistance;
+    f32 angle;
+    f32 length;
+
+    btlFlagAllUnitsDefeatCandidate();
+    front->fov = command->camera.fov;
+    if (swapRoles == 0) {
+        user = btlGetTargetUnitForLink(command);
+        target = (BtlUnit *)btlGetIndexListEntry(command->targetList, 0);
+    } else {
+        target = btlGetTargetUnitForLink(command);
+        user = (BtlUnit *)btlGetIndexListEntry(command->targetList, 0);
+    }
+    userExtent = user->reach * user->scale;
+    targetExtent = target->reach * target->scale;
+    btlUnitGetMuzzlePosVU(user);
+    VU0_STORE_VF(vf10, userPos);
+    userPos[1] += user->height * user->scale * frontLift;
+    btlUnitGetMuzzlePosVU(target);
+    VU0_STORE_VF(vf10, targetPos);
+    targetPos[1] += target->height * target->scale * backLift;
+    if (targetPos[0] <= userPos[0]) {
+        targetPos[0] = targetPos[0] + targetExtent * targetSideScale;
+        userPos[0] = userPos[0] - userExtent * userSideScale;
+    } else {
+        targetPos[0] = targetPos[0] - targetExtent * targetSideScale;
+        userPos[0] = userPos[0] + userExtent * userSideScale;
+    }
+    VU0_LOAD_VF(vf10, userPos);
+    VU0_STORE_VF(vf10, front->position);
+    VU0_LOAD_VF(vf11, targetPos);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    front->distance = length;
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, front->direction);
+    angle = front->fov * 1.3333333f * 0.5f;
+    front->distance = front->distance + targetExtent * 1.5f / func_00353228(angle);
+    minDistance = userExtent / func_00353228(angle);
+    if (front->distance < minDistance) {
+        front->distance = minDistance;
+    }
+    btlCopyMotionTransform(back, front);
+    back->distance += 250.0f;
+    if (mirror != 0) {
+        func_001E88A8(front);
+        func_001E88A8(back);
+    }
+    btlUnitFaceTarget(user, target);
+    btlUnitFaceTarget(target, user);
+}
 
 void btlStartUnitActionIfPairedSelected(void) {
     BattleWork *work = (BattleWork *)btlGetRuntime();

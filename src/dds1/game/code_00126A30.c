@@ -3,6 +3,11 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
+#include "sdf.h"
+
+typedef struct SdfDrawPacket SdfDrawPacket;
+typedef struct DmaPacketHeader DmaPacketHeader;
+/* Packet addresses are 32-bit handles; GS and GIF payload words remain 64-bit. */
 
 extern s32 scrGetCurrentContext(void);
 extern void fldPlayFieldSeVolumePan(s32);
@@ -118,12 +123,14 @@ extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern void btlActivateRuntime(s32 mode);
 extern void dds3SetWorldObjectDataValue(u64, s8);
-extern void sdfInitPacketList(u64);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfAppendPacket(SdfListHead *, u32);
+extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern void sdfConsInitPacketHeader(u64, s32, s32, s32, s32);
-extern u64 *sdfConsMeasurePacketWithHeader(u64);
-extern s32 sdfConsAllocateColumnPacket(s32);
-extern void sdfConsCreateDrawPacket(u64, s32, s32);
+extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
+extern s32 sdfConsMeasurePacketWithHeader(s32);
+extern void *sdfConsAllocateColumnPacket(s32);
+extern s32 sdfConsCreateDrawPacket(s32, s32, s32);
 
 extern s32 D_0032E3C0[];
 extern s8 D_0032C9A0[];
@@ -174,7 +181,7 @@ extern s32 datBattleSceneRecords;
 extern u32 D_003BACF8;
 
 extern u32 sdfCreateResetPacketList(void);
-extern u64 sdfAllocPacketAligned(u64);
+extern s32 sdfAllocPacketAligned(s32);
 
 extern u64 func_00197760(s32, s32, u64, u64, u64, u64);
 
@@ -961,13 +968,13 @@ typedef struct FldSpriteVertex {
 } FldSpriteVertex;
 
 void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, u32 packetFlags) {
-    s32 handle = sdfConsAllocateColumnPacket(1);
+    s32 handle = (s32)sdfConsAllocateColumnPacket(1);
     FldSpriteVertex *vtx = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(handle);
     s32 ubase = u * 16;
     s32 xl = x * 16 + 0x7000;
     s32 vbase = v * 16;
     s32 yt = y * 8 + 0x7900;
-    u64 command;
+    s32 command;
     FieldBufferDescriptor *descriptor;
 
     vtx->r = color & 0xFF;
@@ -987,9 +994,9 @@ void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 v
     vtx->corner[1].mask = -1;
     vtx->corner[1].flag = 0;
     command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(command);
+    sdfInitPacketList((SdfListHead *)command);
     sdfConsCreateDrawPacket(command, packetFlags, 0);
-    sdfAppendPacket(command, handle);
+    sdfAppendPacket((SdfListHead *)command, handle);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
@@ -1095,46 +1102,87 @@ void fldSelectDisplayBuffer(u32 displayRow) {
 }
 
 
-extern void sdfInitPacketList(u64);
 void fldSubmitGsCommandWord(s32 lower, s32 bits, u64 upper) {
-    u64 command = sdfAllocPacketAligned(0x20);
-    u64 packet;
+    s32 command = sdfAllocPacketAligned(0x20);
+    s32 packet;
     u64 *entry;
     FieldBufferDescriptor *descriptor;
 
-    sdfInitPacketList(command);
+    sdfInitPacketList((SdfListHead *)command);
     packet = sdfAllocPacketAligned(0x30);
-    entry = sdfConsFinalizePacketHeader(packet, 0x30);
+    entry = (u64 *)sdfConsFinalizePacketHeader(packet, 0x30);
     entry[5] = 0x3B;
     entry[4] = (u64)(bits << 15) | (upper << 32) | lower;
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket((SdfListHead *)command, packet);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
-extern void sdfAppendPacket(u64, u64);
 void fldSubmitFrameQuad(s32 bit0, s32 bit1, s32 bit4, s32 bit12, s32 bit14, s32 bit15, s32 unused, s32 bit17) {
-    u64 command = sdfAllocPacketAligned(0x20);
-    u64 packet;
+    s32 command = sdfAllocPacketAligned(0x20);
+    s32 packet;
     u64 *data;
     FieldBufferDescriptor *descriptor;
 
-    sdfInitPacketList(command);
+    sdfInitPacketList((SdfListHead *)command);
     packet = sdfAllocPacketAligned(0x30);
-    data = sdfConsFinalizePacketHeader(packet, 0x30);
+    data = (u64 *)sdfConsFinalizePacketHeader(packet, 0x30);
     data[4] = (bit17 << 17) | 0x10000 | (bit15 << 15) | (bit14 << 14) | (bit12 << 12) | (bit4 << 4) | (bit1 << 1) | bit0;
     data[5] = 0x47;
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket((SdfListHead *)command, packet);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00129900);
+/* Write the selected blend equation to GS ALPHA_1. */
+void func_00129900(s32 mode) {
+    s32 command = sdfAllocPacketAligned(0x20);
+    s32 packet;
+    u64 *data;
+    FieldBufferDescriptor *descriptor;
+
+    sdfInitPacketList((SdfListHead *)command);
+    packet = sdfAllocPacketAligned(0x30);
+    data = (u64 *)sdfConsFinalizePacketHeader(packet, 0x30);
+    switch (mode) {
+    case 1:
+        data[4] = 0x48;
+        break;
+    case 2:
+        data[4] = 0x42;
+        break;
+    case 3:
+        data[4] = 0x84;
+        break;
+    case 4:
+        data[4] = 0x06;
+        break;
+    case 5:
+        data[4] = 0x89;
+        break;
+    case 6:
+        data[4] = 0x42;
+        break;
+    case 10:
+        data[4] = 0x2A;
+        break;
+    case 20:
+        data[4] = 0x4A;
+        break;
+    default:
+        data[4] = 0x44;
+        break;
+    }
+    data[5] = 0x42;
+    sdfAppendPacket((SdfListHead *)command, packet);
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
+    descriptor->open(descriptor, command);
+}
 
 void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2) {
     s32 coords[4];
-    u64 command;
-    u64 packet;
+    s32 command;
+    s32 packet;
     u64 *dst;
     u64 lo;
     u64 hi;
@@ -1147,10 +1195,10 @@ void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsW
     coords[2] = x1 * 16;
     coords[3] = y1 * 16;
     command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(command);
+    sdfInitPacketList((SdfListHead *)command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
-    sdfConsInitPacketHeader(packet, 0x49, 2, 0x41, 2);
-    dst = sdfConsMeasurePacketWithHeader(packet);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x49, 2, 0x41, 2);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | (0x8000LL << 24);
     pos = coords;
@@ -1163,15 +1211,15 @@ void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsW
         pos += 2;
         dst += 2;
     }
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket((SdfListHead *)command, packet);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
 void fldSubmitGsLines(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2) {
     u32 coords[4];
-    u64 command;
-    u64 packet;
+    s32 command;
+    s32 packet;
     u64 *dst;
     FieldBufferDescriptor *descriptor;
     u32 *pos;
@@ -1184,10 +1232,10 @@ void fldSubmitGsLines(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, 
     coords[2] = x1;
     coords[3] = y1;
     command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(command);
+    sdfInitPacketList((SdfListHead *)command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
-    sdfConsInitPacketHeader(packet, 0x49, 2, 0x41, 2);
-    dst = sdfConsMeasurePacketWithHeader(packet);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x49, 2, 0x41, 2);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | (0x8000LL << 24);
     pos = coords;
@@ -1200,15 +1248,15 @@ void fldSubmitGsLines(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, 
         pos += 2;
         dst += 2;
     }
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket((SdfListHead *)command, packet);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
 void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
     s32 coords[8];
-    u64 command;
-    u64 packet;
+    s32 command;
+    s32 packet;
     u64 *dst;
     u64 lo;
     u64 hi;
@@ -1225,10 +1273,10 @@ void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1,
     coords[6] = x * 16;
     coords[7] = (y + h) * 16;
     command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(command);
+    sdfInitPacketList((SdfListHead *)command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
-    dst = sdfConsMeasurePacketWithHeader(packet);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 4);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
     pos = coords;
@@ -1241,15 +1289,15 @@ void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1,
         pos += 2;
         dst += 2;
     }
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket((SdfListHead *)command, packet);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
 void fldSubmitPackedRectangleGsPacket(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
     s32 coords[8];
-    u64 command;
-    u64 packet;
+    s32 command;
+    s32 packet;
     u64 *dst;
     u64 lo;
     u64 hi;
@@ -1267,10 +1315,10 @@ void fldSubmitPackedRectangleGsPacket(s32 x, s32 y, s32 w, s32 h, u32 vertexTag,
     coords[6] = x * 16;
     coords[7] = (y + h) * 16;
     command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(command);
+    sdfInitPacketList((SdfListHead *)command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
-    dst = sdfConsMeasurePacketWithHeader(packet);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 4);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     tag = vertexTag;
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
@@ -1284,15 +1332,15 @@ void fldSubmitPackedRectangleGsPacket(s32 x, s32 y, s32 w, s32 h, u32 vertexTag,
         pos += 2;
         dst += 2;
     }
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket((SdfListHead *)command, packet);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
 void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
     u32 coords[8];
-    u64 command;
-    u64 packet;
+    s32 command;
+    s32 packet;
     u64 *dst;
     u64 lo;
     u64 hi;
@@ -1309,10 +1357,10 @@ void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u
     coords[6] = x0;
     coords[7] = y1;
     command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(command);
+    sdfInitPacketList((SdfListHead *)command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
-    dst = sdfConsMeasurePacketWithHeader(packet);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 4);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
     pos = coords;
@@ -1325,21 +1373,113 @@ void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u
         pos += 2;
         dst += 2;
     }
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket((SdfListHead *)command, packet);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", fldSubmitGsGradientTriangle);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldSubmitGsGradientQuad);
+void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3) {
+    s32 coords[8];
+    s32 command;
+    s32 packet;
+    u64 *dst;
+    s32 i;
+    s32 *pos;
+    FieldBufferDescriptor *descriptor;
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012A5D8);
+    coords[0] = x * 16;
+    coords[1] = y * 16;
+    coords[2] = (x + w) * 16;
+    coords[3] = y * 16;
+    coords[4] = x * 16;
+    coords[5] = (y + h) * 16;
+    coords[6] = (x + w) * 16;
+    coords[7] = (y + h) * 16;
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList((SdfListHead *)command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4C, 2, 0x41, 4);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    for (i = 0, pos = coords; i < 4; i++) {
+        if (i == 0) {
+            dst[0] = (u64)r0 | ((u64)g0 << 32);
+            dst[1] = (u64)b0 | ((u64)a0 << 32);
+        } else if (i == 1) {
+            dst[0] = (u64)r1 | ((u64)g1 << 32);
+            dst[1] = (u64)b1 | ((u64)a1 << 32);
+        } else if (i == 2) {
+            dst[0] = (u64)r2 | ((u64)g2 << 32);
+            dst[1] = (u64)b2 | ((u64)a2 << 32);
+        } else {
+            dst[0] = (u64)r3 | ((u64)g3 << 32);
+            dst[1] = (u64)b3 | ((u64)a3 << 32);
+        }
+        dst += 2;
+        dst[1] = 0xFFFFFF;
+        dst[0] = (u64)(u32)(pos[0] + 0x7000) |
+            ((u64)(pos[1] + 0x7900) << 32);
+        dst += 2;
+        pos += 2;
+    }
+    sdfAppendPacket((SdfListHead *)command, packet);
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
+    descriptor->open(descriptor, command);
+}
+
+void func_0012A5D8(u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3, f32 x, f32 y, f32 w, f32 h) {
+    s32 coords[8];
+    s32 command;
+    s32 packet;
+    u64 *dst;
+    s32 i;
+    s32 *pos;
+    FieldBufferDescriptor *descriptor;
+
+    coords[0] = (s32)(x * 16.0f);
+    coords[1] = (s32)(y * 8.0f);
+    coords[2] = (s32)((x + w) * 16.0f);
+    coords[3] = (s32)(y * 8.0f);
+    coords[4] = (s32)((x + w) * 16.0f);
+    coords[5] = (s32)((y + h) * 8.0f);
+    coords[6] = (s32)(x * 16.0f);
+    coords[7] = (s32)((y + h) * 8.0f);
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList((SdfListHead *)command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 4);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    for (i = 0, pos = coords; i < 4; i++) {
+        if (i == 0) {
+            dst[0] = (u64)r0 | ((u64)g0 << 32);
+            dst[1] = (u64)b0 | ((u64)a0 << 32);
+        } else if (i == 1) {
+            dst[0] = (u64)r1 | ((u64)g1 << 32);
+            dst[1] = (u64)b1 | ((u64)a1 << 32);
+        } else if (i == 2) {
+            dst[0] = (u64)r2 | ((u64)g2 << 32);
+            dst[1] = (u64)b2 | ((u64)a2 << 32);
+        } else {
+            dst[0] = (u64)r3 | ((u64)g3 << 32);
+            dst[1] = (u64)b3 | ((u64)a3 << 32);
+        }
+        dst += 2;
+        dst[1] = 0xFFFFFF;
+        dst[0] = (u64)(u32)(pos[0] + 0x7000) |
+            ((u64)(pos[1] + 0x7900) << 32);
+        dst += 2;
+        pos += 2;
+    }
+    sdfAppendPacket((SdfListHead *)command, packet);
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
+    descriptor->open(descriptor, command);
+}
 
 void func_0012A890(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3, u32 vertexTag) {
     s32 coords[8];
-    u64 command;
-    u64 packet;
+    s32 command;
+    s32 packet;
     u64 *dst;
     u64 lo;
     u64 hi;
@@ -1357,10 +1497,10 @@ void func_0012A890(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsW
     coords[6] = x * 16;
     coords[7] = (y + h) * 16;
     command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(command);
+    sdfInitPacketList((SdfListHead *)command);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
-    dst = sdfConsMeasurePacketWithHeader(packet);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 4);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
     tag = vertexTag;
@@ -1374,19 +1514,18 @@ void func_0012A890(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsW
         pos += 2;
         dst += 2;
     }
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket((SdfListHead *)command, packet);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
 extern s32 sdfTexGetPrimaryBuffer(s32);
 extern s32 sdfTexGetPrimaryBufferSize(s32);
-extern void sdfConsInitDmaPacketHeader(u64, s32, s32);
-extern void sdfAppendReferencePacket(u64, u64);
+extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *, u32, s32);
+extern void sdfAppendReferencePacket(SdfListHead *, u32);
 extern void func_002DD708(f32);
-extern void sdfInitGeometryDmaPacket(u64, f32 *);
+extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
 extern void func_002E2680(u64, u8 *, s32, u8 *, u8 *);
-extern void sdfAppendPacket(u64, u64);
 
 /* The model draw input supplies a rotation and a second packet parameter. */
 typedef struct FldModelPacketInput {
@@ -1395,67 +1534,66 @@ typedef struct FldModelPacketInput {
     f32 angle;         /* 0x44: applied to the VU0 matrix */
 } FldModelPacketInput;
 void fldSubmitModelPacket(s32 textureId, u8 *modelData) {
-    u64 command = sdfAllocPacketAligned(0x20);
-    u64 header;
-    u64 packet;
+    s32 command = sdfAllocPacketAligned(0x20);
+    s32 header;
+    s32 packet;
     f32 mat[16];
     FieldBufferDescriptor *descriptor;
 
-    sdfInitPacketList(command);
+    sdfInitPacketList((SdfListHead *)command);
     header = sdfAllocPacketAligned(0x20);
-    sdfConsInitDmaPacketHeader(header, sdfTexGetPrimaryBuffer(textureId), sdfTexGetPrimaryBufferSize(textureId));
-    sdfAppendReferencePacket(command, header);
+    sdfConsInitDmaPacketHeader((DmaPacketHeader *)header, sdfTexGetPrimaryBuffer(textureId), sdfTexGetPrimaryBufferSize(textureId));
+    sdfAppendReferencePacket((SdfListHead *)command, header);
     func_002DD708(((FldModelPacketInput *)modelData)->angle);
         VU0_STORE_MATRIX(mat);
 ;
     packet = sdfAllocPacketAligned(0x38);
-    sdfInitGeometryDmaPacket(packet, mat);
-    sdfAppendPacket(command, packet);
+    sdfInitGeometryDmaPacket((u8 *)packet, mat);
+    sdfAppendPacket((SdfListHead *)command, packet);
     packet = sdfAllocPacketAligned(0x80);
     func_002E2680(packet, modelData, ((FldModelPacketInput *)modelData)->geometryValue, modelData + 0x10, modelData + 0x20);
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket((SdfListHead *)command, packet);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
 extern s32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];
-extern void func_002D4C80(const void *, u64, s32);
-extern void func_002D4CC8(const void *, u64, s32);
-extern void sdfAppendDmaTagToList(u64, u64);
+extern void func_002D4C80(s32, u32, s32);
+extern void func_002D4CC8(s32, u32, s32);
+extern void sdfAppendDmaTagToList(SdfListHead *, u32);
 
 void fldSubmitPrimaryFramePacket(void) {
-    u64 command = sdfAllocPacketAligned(0x20);
-    u64 texture;
+    s32 command = sdfAllocPacketAligned(0x20);
+    s32 texture;
     FieldBufferDescriptor *descriptor;
-    sdfInitPacketList(command);
+    sdfInitPacketList((SdfListHead *)command);
     texture = sdfAllocPacketAligned(0x40);
-    func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
-    sdfAppendDmaTagToList(command, texture);
+    func_002D4C80((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
+    sdfAppendDmaTagToList((SdfListHead *)command, texture);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
 void fldSubmitAlternateFramePacket(void) {
-    u64 command = sdfAllocPacketAligned(0x20);
-    u64 texture;
+    s32 command = sdfAllocPacketAligned(0x20);
+    s32 texture;
     FieldBufferDescriptor *descriptor;
-    sdfInitPacketList(command);
+    sdfInitPacketList((SdfListHead *)command);
     texture = sdfAllocPacketAligned(0x40);
-    func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
-    sdfAppendDmaTagToList(command, texture);
+    func_002D4CC8((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
+    sdfAppendDmaTagToList((SdfListHead *)command, texture);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
 
 extern f32 D_0032F4E0[];
 extern u32 D_0032F500[];
-extern u64 func_002EF2B0(const void *, const void *, s32, s32);
-extern void sdfAppendPacket(u64, u64);
+extern void *func_002EF2B0(const void *, const void *, s32, s32);
 
 void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
-    u64 resource;
-    u64 record;
+    s32 resource;
+    s32 record;
     FieldBufferDescriptor *descriptor;
     D_0032F4E0[0] = x;
     D_0032F4E0[1] = y;
@@ -1466,9 +1604,9 @@ void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 
     D_0032F500[1] = second;
     D_0032F500[0] = first;
     resource = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(resource);
-    record = func_002EF2B0(D_0032F4E0, D_0032F500, 2, 0x80);
-    sdfAppendPacket(resource, record);
+    sdfInitPacketList((SdfListHead *)resource);
+    record = (s32)func_002EF2B0(D_0032F4E0, D_0032F500, 2, 0x80);
+    sdfAppendPacket((SdfListHead *)resource, record);
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, resource);
 }
@@ -1484,20 +1622,20 @@ typedef struct FldPrimDesc {
     s32 *indices;
     u8 pad24[8];
 } FldPrimDesc; /* 0x2C bytes */
-extern void sdfConsAppendClearPacket(u64, s32);
-extern void sdfConsAppendAssetPacket(u64, u32, s32);
-extern u64 func_002E21A0(FldPrimDesc *);
+extern void sdfConsAppendClearPacket(s32, s32 (*)(s32));
+extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
+extern void *func_002E21A0(FldPrimDesc *);
 void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5, f32 f6, f32 f7, f32 f8) {
     FldPrimDesc desc;
     f32 verts[12];
     s32 indices[3];
-    u64 command;
+    s32 command;
     FieldBufferDescriptor *descriptor;
 
     command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(command);
+    sdfInitPacketList((SdfListHead *)command);
     sdfConsAppendClearPacket(command, 0);
-    sdfConsAppendAssetPacket(command, D_003BACEC, 0);
+    sdfConsAppendAssetPacket(command, (void *)D_003BACEC, 0);
     memset(&desc, 0, 0x2C);
     desc.color = 0x80808080;
     desc.kind = 1;
@@ -1516,7 +1654,7 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     indices[0] = a0;
     indices[1] = a1;
     indices[2] = a2;
-    sdfAppendPacket(command, func_002E21A0(&desc));
+    sdfAppendPacket((SdfListHead *)command, (u32)func_002E21A0(&desc));
     descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
     descriptor->open(descriptor, command);
 }
@@ -1679,14 +1817,14 @@ void fldAdvanceQuadRow(s32 quadState) {
 }
 
 void fldStartQuadPacketList(s32 quadState) {
-    u64 packet;
+    s32 packet;
     u32 packetList;
 
     packetList = sdfCreateResetPacketList();
     ((FldQuadState *)quadState)->packetList = packetList;
     packet = sdfAllocPacketAligned(0x40);
     sdfBuildPrimaryAlphaBlendDmaPacket(packet);
-    sdfAppendPacket(((FldQuadState *)quadState)->packetList, packet);
+    sdfAppendPacket((SdfListHead *)((FldQuadState *)quadState)->packetList, packet);
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B940);
@@ -1717,7 +1855,7 @@ void fldDrawFloorQuad(s32 x, s32 y, s32 drawValue) {
     quad.unk10 = 0x0FFFFF7D;
     fldStartQuadPacketList((s32)&quad);
     sdfPktInit(packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, 0);
-    sdfAppendPacket(quad.packetList, sdfFormatSifPacket(packet, drawValue));
+    sdfAppendPacket((SdfListHead *)quad.packetList, sdfFormatSifPacket(packet, drawValue));
     fldAdvanceQuadRow((s32)&quad);
     kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, quad.packetList);
 }
@@ -1738,7 +1876,7 @@ void fldDrawFloorQuadA(s32 x, s32 y, s32 packetField, s32 drawValue) {
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList((s32)&quad);
     sdfPktInit(packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, packetField);
-    sdfAppendPacket(quad.packetList, sdfFormatSifPacket(packet, drawValue));
+    sdfAppendPacket((SdfListHead *)quad.packetList, sdfFormatSifPacket(packet, drawValue));
     fldAdvanceQuadRow((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.packetList);
 }
@@ -1759,7 +1897,7 @@ void fldDrawMapQuadTiled(s32 x, s32 y, s32 drawValue) {
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList((s32)&quad);
     sdfPktInit(packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
-    sdfAppendPacket(quad.packetList, sdfFormatSifPacket(packet, D_003BACE0, drawValue));
+    sdfAppendPacket((SdfListHead *)quad.packetList, sdfFormatSifPacket(packet, D_003BACE0, drawValue));
     fldAdvanceQuadRow((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.packetList);
 }
@@ -1780,7 +1918,7 @@ void fldDrawMapQuadTiledAlt(s32 x, s32 y, s32 drawValue) {
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList((s32)&quad);
     sdfPktInit(packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
-    sdfAppendPacket(quad.packetList, sdfFormatSifPacket(packet, D_003BACE8, drawValue));
+    sdfAppendPacket((SdfListHead *)quad.packetList, sdfFormatSifPacket(packet, D_003BACE8, drawValue));
     fldAdvanceQuadRow((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.packetList);
 }
@@ -1801,7 +1939,7 @@ void fldDrawMapQuad(s32 x, s32 y, s32 drawValue) {
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList((s32)&quad);
     sdfPktInit(packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
-    sdfAppendPacket(quad.packetList, sdfFormatSifPacket(packet, drawValue));
+    sdfAppendPacket((SdfListHead *)quad.packetList, sdfFormatSifPacket(packet, drawValue));
     fldAdvanceQuadRow((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.packetList);
 }
@@ -1822,7 +1960,7 @@ void fldDrawMapQuadPacket(s32 x, s32 y, s32 packetField, s32 drawValue) {
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList((s32)&quad);
     sdfPktInit(packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, packetField);
-    sdfAppendPacket(quad.packetList, sdfFormatSifPacket(packet, drawValue));
+    sdfAppendPacket((SdfListHead *)quad.packetList, sdfFormatSifPacket(packet, drawValue));
     fldAdvanceQuadRow((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.packetList);
 }
@@ -1843,7 +1981,7 @@ void fldDrawMapQuadScaled(s32 packetField, s32 drawValue, f32 x, f32 y) {
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList((s32)&quad);
     sdfPktInit(packet, quad.rowX + (s32)(x * 16.0f), quad.rowY + (s32)(y * 8.0f), quad.drawDepth, packetField);
-    sdfAppendPacket(quad.packetList, sdfFormatSifPacket(packet, drawValue));
+    sdfAppendPacket((SdfListHead *)quad.packetList, sdfFormatSifPacket(packet, drawValue));
     fldAdvanceQuadRow((s32)&quad);
     D_00325708.invoke(&D_00325708, quad.packetList);
 }
@@ -3846,7 +3984,10 @@ typedef struct FldActorEntry {
     s8 variantMode;        /* 0x30 */
     u8 flags31;            /* 0x31 */
     s16 variant;           /* 0x32 */
-    u8 pad34[0x20];
+    u8 pad34[0x10];
+    s8 linkKind;           /* 0x44 */
+    u8 pad45;
+    char linkName[0x0E];    /* 0x46 */
     u8 flags54;            /* 0x54 */
     u8 pad55[0x0F];
     u8 flags64;            /* 0x64 */
@@ -4079,7 +4220,40 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
 
 extern s32 dds3FindIndexedObjectChainNodeByName(u64, s32, void *);
 extern void dds3SetWorldCameraObject(u64, s32);
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013DDF0);
+void func_0013DDF0(const char *name) {
+    FldActorEntry *entry;
+    char *entryName;
+    u32 *camera;
+    s32 i;
+
+    if (name == NULL) {
+        return;
+    }
+    for (i = 0; i < 0x100; i++) {
+        entry = (FldActorEntry *)D_00337D00 + i;
+        if (entry->requiredFlag != 0 && mdlFlagTest(entry->requiredFlag) == 0) {
+            continue;
+        }
+        if (entry->kind == 0) {
+            continue;
+        }
+        entryName = entry->name;
+        if (entry->floor == ((FldAreaState *)fldAreaState)->floor + 1) {
+            if (strcmp(name, entryName) == 0) {
+                if (entry->variantMode == 2) {
+                    return;
+                }
+                if (entry->variantMode == 0 && entry->linkKind == 3) {
+                    camera = dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(), 4,
+                                                                 entry->linkName);
+                    dds3SetWorldCameraObject(dds3GetWorldObject(), (s32)camera);
+                    fldEnableCameraObjectFlag();
+                    return;
+                }
+            }
+        }
+    }
+}
 
 u8 fldIsSceneStateEight(void) {
     return D_003BAE68 == 8;
