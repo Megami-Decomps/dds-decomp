@@ -1,182 +1,215 @@
 #include "common.h"
 
+#define MC_CARD_SLOT 0
+#define MC_SYNC_POLL_MODE 1
+#define MC_SYNC_COMPLETE 1
+#define MC_SDK_COMMAND_SUCCESS 0
+#define MC_SDK_SPECIAL_ERROR (-4)
+#define MC_SDK_EXTENDED_ERROR_LIMIT (-10)
+#define MC_POLL_PENDING 0
+#define MC_POLL_SUCCESS 1
+#define MC_POLL_ERROR (-1)
+#define MC_POLL_SPECIAL_ERROR (-2)
+
 extern s32 func_0034F680(s32, s32 *, s32 *);
 
-/* Poll an asynchronous memory-card request: only status zero succeeds. */
+/* Return 1 only for completed status zero, -1 for other completed statuses.
+ * Every SDK poll return other than 1 maps to 0, including SDK-level failures. */
 s32 mcPollStrictSuccess(void) {
-    u32 cmdId;
-    s32 status;
-    s32 result = func_0034F680(1, &cmdId, &status);
+    u32 commandId;
+    s32 commandResult;
+    s32 pollResult = func_0034F680(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
-    if (result != 1) {
-        return 0;
+    if (pollResult != MC_SYNC_COMPLETE) {
+        return MC_POLL_PENDING;
     }
-    if (status == 0) {
-        return result;
+    if (commandResult == MC_SDK_COMMAND_SUCCESS) {
+        return pollResult;
     }
-    return -1;
+    return MC_POLL_ERROR;
 }
 
-void mcChangeCurrentDirectory(u32 port, u32 request) {
-    func_0034FB90(port, 0, request, 0);
+/* Start a directory change on slot zero; the u32 argument holds the path address. */
+void mcChangeCurrentDirectory(u32 port, u32 pathAddress) {
+    func_0034FB90(port, MC_CARD_SLOT, pathAddress, 0);
 }
 
-/* Async SDK polling: 0 pending, 1 success, -2 for SDK result -4, -1 otherwise. */
+/* Accept only completed status zero; translate -4 to -2 and other statuses
+ * to -1. Any SDK poll return other than 1 maps to 0; this does not wait. */
 s32 mcPollSyncResult(void) {
-    s32 command;
-    s32 result;
+    s32 commandId;
+    s32 commandResult;
 
-    if (func_0034F680(1, &command, &result) == 1) {
-        if (result == 0) {
-            return 1;
+    if (func_0034F680(MC_SYNC_POLL_MODE, &commandId, &commandResult) == MC_SYNC_COMPLETE) {
+        if (commandResult == MC_SDK_COMMAND_SUCCESS) {
+            return MC_POLL_SUCCESS;
         }
-        return result == -4 ? -2 : -1;
+        return commandResult == MC_SDK_SPECIAL_ERROR ? MC_POLL_SPECIAL_ERROR : MC_POLL_ERROR;
     }
-    return 0;
+    return MC_POLL_PENDING;
 }
 
+/* Start directory creation on slot zero; preserve the integer path representation. */
 void mcMakeDirectory(u32 port, u32 path) {
-    sceMcMkdir(port, 0, path);
+    sceMcMkdir(port, MC_CARD_SLOT, path);
 }
 
-/* Treat SDK errors below -10 as a distinct memory-card failure. */
+/* Accept only completed status zero. Completed statuses below -10 map to
+ * -2, all other nonzero statuses to -1; non-complete SDK polls map to 0. */
 s32 mcPollWithExtendedErrors(void) {
-    u32 cmdId;
-    s32 status;
-    s32 result = func_0034F680(1, &cmdId, &status);
+    u32 commandId;
+    s32 commandResult;
+    s32 pollResult = func_0034F680(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
-    if (result == 1) {
-        if (status == 0) {
-            return result;
+    if (pollResult == MC_SYNC_COMPLETE) {
+        if (commandResult == MC_SDK_COMMAND_SUCCESS) {
+            return pollResult;
         }
-        if (status < -10) {
-            return -2;
+        if (commandResult < MC_SDK_EXTENDED_ERROR_LIMIT) {
+            return MC_POLL_SPECIAL_ERROR;
         }
-        return -1;
+        return MC_POLL_ERROR;
     }
-    return 0;
+    return MC_POLL_PENDING;
 }
 
-void mcReadDirectoryEntries(u32 port, u32 path, u32 mode, u32 flags) {
-    func_0034F9B0(port, 0, path, 0, flags, mode);
+/* Request directory entries on slot zero with SDK mode zero. The caller's
+ * output address is SDK argument six; its entry limit is argument five. */
+void mcReadDirectoryEntries(u32 port, u32 path, u32 entriesAddress, u32 entryLimit) {
+    func_0034F9B0(port, MC_CARD_SLOT, path, 0, entryLimit, entriesAddress);
 }
 
-/* Return a nonnegative SDK result through out; map -4 to -2. */
+/* Accept any completed nonnegative status and write it to resultOut, which
+ * must be valid on success and stays untouched otherwise. Translate -4 to
+ * -2, other negatives to -1; non-complete SDK polls map to 0. */
 s32 mcPollNonnegativeResult(s32 *resultOut) {
-    u32 cmdId;
-    s32 status;
-    s32 result = func_0034F680(1, &cmdId, &status);
+    u32 commandId;
+    s32 commandResult;
+    s32 pollResult = func_0034F680(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
-    if (result == 1) {
-        if (status >= 0) {
-            *resultOut = status;
-            return result;
+    if (pollResult == MC_SYNC_COMPLETE) {
+        if (commandResult >= MC_SDK_COMMAND_SUCCESS) {
+            *resultOut = commandResult;
+            return pollResult;
         }
-        if (status == -4) {
-            return -2;
+        if (commandResult == MC_SDK_SPECIAL_ERROR) {
+            return MC_POLL_SPECIAL_ERROR;
         }
-        return -1;
+        return MC_POLL_ERROR;
     }
-    return 0;
+    return MC_POLL_PENDING;
 }
 
-void mcDeleteFilePath(u32 port, u32 request) {
-    func_0034FDA8(port, 0, request);
+/* Start removal of the supplied path on slot zero; no completion wait here. */
+void mcDeleteFilePath(u32 port, u32 pathAddress) {
+    func_0034FDA8(port, MC_CARD_SLOT, pathAddress);
 }
 
+/* Same zero-only completion policy as mcPollSyncResult; no blocking loop. */
 s32 mcPollNormalizedCommandStatus(void) {
-    s32 command;
-    s32 result;
+    s32 commandId;
+    s32 commandResult;
 
-    if (func_0034F680(1, &command, &result) == 1) {
-        if (result == 0) {
-            return 1;
+    if (func_0034F680(MC_SYNC_POLL_MODE, &commandId, &commandResult) == MC_SYNC_COMPLETE) {
+        if (commandResult == MC_SDK_COMMAND_SUCCESS) {
+            return MC_POLL_SUCCESS;
         }
-        return result == -4 ? -2 : -1;
+        return commandResult == MC_SDK_SPECIAL_ERROR ? MC_POLL_SPECIAL_ERROR : MC_POLL_ERROR;
     }
-    return 0;
+    return MC_POLL_PENDING;
 }
 
-void mcOpenFilePath(u32 port, u32 request, u32 buffer) {
-    func_0034EFE0(port, 0, request, buffer);
+/* Start opening a path on slot zero. The last operand is numeric open flags,
+ * not a data-buffer address (callers use 1 and 0x203). */
+void mcOpenFilePath(u32 port, u32 pathAddress, u32 openFlags) {
+    func_0034EFE0(port, MC_CARD_SLOT, pathAddress, openFlags);
 }
 
+/* Accept any completed nonnegative status, writing resultOut only then.
+ * Preserve the -4/-2 translation and all other poll/result distinctions. */
 s32 mcPollCommandStatusWithResult(s32 *resultOut) {
-    u32 cmdId;
-    s32 status;
-    s32 result = func_0034F680(1, &cmdId, &status);
+    u32 commandId;
+    s32 commandResult;
+    s32 pollResult = func_0034F680(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
-    if (result == 1) {
-        if (status >= 0) {
-            *resultOut = status;
-            return result;
+    if (pollResult == MC_SYNC_COMPLETE) {
+        if (commandResult >= MC_SDK_COMMAND_SUCCESS) {
+            *resultOut = commandResult;
+            return pollResult;
         }
-        if (status == -4) {
-            return -2;
+        if (commandResult == MC_SDK_SPECIAL_ERROR) {
+            return MC_POLL_SPECIAL_ERROR;
         }
-        return -1;
+        return MC_POLL_ERROR;
     }
-    return 0;
+    return MC_POLL_PENDING;
 }
 
+/* Forward the existing no-explicit-argument SDK close call; do not poll it. */
 void mcCloseOpenFile(void) {
     func_0034F150();
 }
 
+/* Despite its name, poll once rather than waiting; success requires status
+ * zero, -4 maps to -2 and other completed statuses to -1. */
 s32 fileWaitCommandDone(void) {
-    s32 command;
-    s32 result;
+    s32 commandId;
+    s32 commandResult;
 
-    if (func_0034F680(1, &command, &result) == 1) {
-        if (result == 0) {
-            return 1;
+    if (func_0034F680(MC_SYNC_POLL_MODE, &commandId, &commandResult) == MC_SYNC_COMPLETE) {
+        if (commandResult == MC_SDK_COMMAND_SUCCESS) {
+            return MC_POLL_SUCCESS;
         }
-        return result == -4 ? -2 : -1;
+        return commandResult == MC_SDK_SPECIAL_ERROR ? MC_POLL_SPECIAL_ERROR : MC_POLL_ERROR;
     }
-    return 0;
+    return MC_POLL_PENDING;
 }
 
+/* Forward the existing no-explicit-argument SDK read call; do not poll it. */
 void mcReadOpenFile(void) {
     func_0034F370();
 }
 
-/* Like the result poll, but only report completion, not the SDK result. */
+/* Any completed nonnegative status succeeds, but the SDK status is not
+ * returned to a caller output. Non-complete SDK polls map to 0. */
 s32 mcPollCompletionStatus(void) {
-    u32 cmdId;
-    s32 status;
-    s32 result = func_0034F680(1, &cmdId, &status);
+    u32 commandId;
+    s32 commandResult;
+    s32 pollResult = func_0034F680(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
-    if (result == 1) {
-        if (status >= 0) {
-            return result;
+    if (pollResult == MC_SYNC_COMPLETE) {
+        if (commandResult >= MC_SDK_COMMAND_SUCCESS) {
+            return pollResult;
         }
-        if (status == -4) {
-            return -2;
+        if (commandResult == MC_SDK_SPECIAL_ERROR) {
+            return MC_POLL_SPECIAL_ERROR;
         }
-        return -1;
+        return MC_POLL_ERROR;
     }
-    return 0;
+    return MC_POLL_PENDING;
 }
 
+/* Begin the SDK write through the existing unprototyped call. Keep its
+ * argument form unchanged; this entry does not report completion. */
 void fileWriteBegin(s32 request, u32 first, u32 second) {
     func_0034F490();
 }
 
-/* Poll the memory-card write: busy is 0, success 1, and the card's
- * -4 status is translated to the menu's -2 error. */
+/* Poll once: any completed nonnegative write status returns 1; -4 becomes
+ * -2 and other negatives become -1. Non-complete SDK polls map to 0. */
 s32 fileWriteWait(void) {
-    u32 cmdId;
-    s32 status;
-    s32 result = func_0034F680(1, &cmdId, &status);
+    u32 commandId;
+    s32 commandResult;
+    s32 pollResult = func_0034F680(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
-    if (result == 1) {
-        if (status >= 0) {
-            return result;
+    if (pollResult == MC_SYNC_COMPLETE) {
+        if (commandResult >= MC_SDK_COMMAND_SUCCESS) {
+            return pollResult;
         }
-        if (status == -4) {
-            return -2;
+        if (commandResult == MC_SDK_SPECIAL_ERROR) {
+            return MC_POLL_SPECIAL_ERROR;
         }
-        return -1;
+        return MC_POLL_ERROR;
     }
-    return 0;
+    return MC_POLL_PENDING;
 }
