@@ -25,9 +25,11 @@ typedef struct SdfPacDispatchPacket {
 extern u8 sdfPacDispatchPacket[];
 
 
-INCLUDE_ASM(const s32, "game/code_002ED760", func_002ED760);
+INCLUDE_ASM(const s32, "game/code_002ED740", func_002ED740);
 
-INCLUDE_ASM(const s32, "game/code_002ED760", func_002ED8D0);
+INCLUDE_ASM(const s32, "game/code_002ED740", func_002ED760);
+
+INCLUDE_ASM(const s32, "game/code_002ED740", func_002ED8D0);
 
 typedef struct PacOwnedBuffers {
     void *primary;
@@ -136,7 +138,7 @@ void func_002EDC40(PacStatePrefix *state) {
     state->flags = state->flags | PAC_STATE_ALLOCATE_HIGH;
 }
 
-INCLUDE_ASM(const s32, "game/code_002ED760", func_002EDC50);
+INCLUDE_ASM(const s32, "game/code_002ED740", func_002EDC50);
 
 /* Mark the caller's phase byte finished. */
 void func_002EDC88(u8 *phaseByte) {
@@ -261,5 +263,5 @@ void sdfDecodePacNodeAndAdvanceTail(PacCompletionState *state) {
     state->phase = 0;
 }
 
-INCLUDE_SDATA(const s32, "game/code_002ED760", D_003BD638);
+INCLUDE_SDATA(const s32, "game/code_002ED740", D_003BD638);
 

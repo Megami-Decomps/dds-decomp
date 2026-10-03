@@ -67,6 +67,43 @@ def _transition_destination(entry: wap.Entry, current_field: int) -> dict:
     return destination
 
 
+def transition_metadata(
+    entry: wap.Entry,
+    entry_index: int,
+    current_field: int,
+    default: wap.Entry,
+) -> dict:
+    """Return the semantic and exact transition fields useful to consumers."""
+
+    transition = {
+        "entry": entry_index,
+        "kindId": entry.kind,
+        "kind": wap.ENTRY_KIND_NAMES.get(entry.kind, "unknown"),
+        "destination": _transition_destination(entry, current_field),
+    }
+    if entry.flag_mode or entry.flag:
+        transition["gate"] = {"mode": entry.flag_mode, "flag": entry.flag}
+    if entry.attributes:
+        transition["attributes"] = entry.attributes
+    after = {}
+    if entry.bgm != default.bgm:
+        after["bgm"] = entry.bgm
+    if entry.footstep != default.footstep:
+        after["footstep"] = entry.footstep
+    if entry.after_flag:
+        after["flags"] = entry.after_flag
+    if entry.after_script.value:
+        after["script"] = entry.after_script.value
+    if after:
+        transition["after"] = after
+    if entry.tail != default.tail:
+        transition["tail"] = {
+            "control": entry.tail[0],
+            "arguments": list(entry.tail[1:]),
+        }
+    return transition
+
+
 def area_transitions(
     table: wap.WapFile,
     current_field: int,
@@ -79,32 +116,7 @@ def area_transitions(
     for entry_index, entry in enumerate(table.entries):
         if entry.kind == 0 or entry.area != current_area or not entry.name.value:
             continue
-        transition = {
-            "entry": entry_index,
-            "kindId": entry.kind,
-            "kind": wap.ENTRY_KIND_NAMES.get(entry.kind, "unknown"),
-            "destination": _transition_destination(entry, current_field),
-        }
-        if entry.flag_mode or entry.flag:
-            transition["gate"] = {"mode": entry.flag_mode, "flag": entry.flag}
-        if entry.attributes:
-            transition["attributes"] = entry.attributes
-        after = {}
-        if entry.bgm != default.bgm:
-            after["bgm"] = entry.bgm
-        if entry.footstep != default.footstep:
-            after["footstep"] = entry.footstep
-        if entry.after_flag:
-            after["flags"] = entry.after_flag
-        if entry.after_script.value:
-            after["script"] = entry.after_script.value
-        if after:
-            transition["after"] = after
-        if entry.tail != default.tail:
-            transition["tail"] = {
-                "control": entry.tail[0],
-                "arguments": list(entry.tail[1:]),
-            }
+        transition = transition_metadata(entry, entry_index, current_field, default)
         result.setdefault(entry.name.value, []).append(transition)
     return {name: tuple(rows) for name, rows in result.items()}
 

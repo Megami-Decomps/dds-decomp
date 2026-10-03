@@ -463,7 +463,7 @@ typedef struct {
     u32 fontResource; /* 0x2410: returned by func_001951C8 */
     u8 pad2414[0x14];
     s32 descriptorResource; /* 0x2428 */
-    u8 pad242C[4];
+    s32 descriptorBackingHandle; /* 0x242C */
     s32 menuState; /* 0x2430 */
     s32 shopFlag;  /* 0x2434: 1 once the shop descriptor was submitted */
     u32 auxResource; /* 0x2438 */
@@ -678,18 +678,42 @@ void mnuAdvanceShopMenuState(CampScene *scene) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00243BF0);
-
-extern s32 kwlnHeldTextureReference;
-extern s32 sdfAllocatePacketList();
-extern void sdfCreateDescriptorPacket();
-
 typedef struct BufferDescriptor {
     u8 pad00[0x10];
     void (*open)(struct BufferDescriptor *, s32);
 } BufferDescriptor;
 
 extern BufferDescriptor D_00325708;
+extern u8 D_00325860[];
+extern void *sdfAllocGeneralBlockHigh(s32 size);
+extern s32 sdfAllocatePacketList(s32 (*alloc)(s32));
+extern s32 sdfAllocPacketAligned(s32 size);
+extern void sdfClearLinkedPacketList(void *list);
+extern void sdfCreatePatchableResourcePacket(void *list, void *linkedList, s32 arg2, s32 arg3,
+                                            s32 width, s32 height, void *resource, s32 arg7,
+                                            s32 arg8, s32 (*alloc)(s32));
+extern void sdfAppendPacketChainNode(void *head, void *node);
+extern void sdfCreateDescriptorPacket();
+
+void func_00243BF0(CampScene *scene) {
+    s32 surface;
+    s32 context;
+    s32 handle;
+
+    if (scene->descriptorBackingHandle == 0) {
+        handle = (s32)sdfAllocGeneralBlockHigh(0x70000);
+        scene->descriptorBackingHandle = handle;
+        scene->descriptorResource = (s32)sdfResourceRetainAddress(handle);
+    }
+    memset((void *)scene->descriptorResource, 0x40, 0x70000);
+    surface = sdfAllocatePacketList(0);
+    context = sdfAllocPacketAligned(0x10);
+    sdfClearLinkedPacketList((void *)context);
+    sdfCreatePatchableResourcePacket((void *)surface, (void *)context, 0, 0, 0x200, 0xE0,
+                                    (void *)scene->descriptorResource, 0, 0, 0);
+    sdfAppendPacketChainNode(D_00325860, (void *)context);
+    D_00325708.open(&D_00325708, surface);
+}
 
 void mnuShopSubmitDescriptor(CampScene *scene) {
     s32 packet;
