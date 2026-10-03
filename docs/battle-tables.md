@@ -99,8 +99,10 @@ background-map 0 map=22
 end
 ```
 
-A zone records its three conditions, the selector for each truth combination,
-and its weighted encounter pools:
+A zone records three conditions, a most-specific-first fallback table, and its
+weighted encounter pools. The runtime tries the satisfied `abc`, pair, and
+single-condition entries in that order, followed by `none`. Value 8 continues
+to the next fallback; if every applicable entry is 8, pool 0 is selected:
 
 ```text
 zone 4 backgrounds=203,2 bgm=5

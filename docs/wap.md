@@ -194,11 +194,13 @@ python3 tools/field_graph.py src/dds1/data/field dds1-field-world.json
 python3 tools/field_graph.py src/dds1/data/field dds1-field-world.dot \
   --format dot
 python3 tools/field_graph.py src/dds1/data/field dds1-field-world-full.json \
-  --include-interactions --include-events
+  --include-interactions --include-events --include-random-encounters
 python3 tools/field_graph.py src/dds1/data/field f004_001-interactions.dot \
   --format dot --interaction-area f004_001
 python3 tools/field_graph.py src/dds1/data/field f011-events.dot \
   --format dot --event-field f011
+python3 tools/field_graph.py src/dds1/data/field f022_001-encounters.dot \
+  --format dot --encounter-area f022_001
 ```
 
 An area node records whether its FLD2 source is present. A field-transition
@@ -311,8 +313,47 @@ Placement closure reaches 36 DDS1 and 32 DDS2 encounter nodes. Nine reachable
 battle-event edges in DDS1 and 13 in DDS2 enter nine additional event scripts
 in each game.
 
+`--include-random-encounters` upgrades the graph to schema 8 and connects each
+ordinary field area to the maintained `ENCOUNT.TBL` zone selected by its map
+and area numbers. Flag B has priority over flag A, which has priority over the
+default zone. FLD2 collision faces form higher-priority override edges; faces
+that select the same zone in one area are represented by one edge with their
+exact multiplicity.
+
+Each zone node retains its backgrounds, BGM, unknown header value, three raw
+conditions, and all eight authored route values. The runtime does not index
+those routes as an exclusive truth table. It tries the satisfied `abc` route,
+then satisfied pairs and singles, and finally `none`; value 8 continues down
+that chain, and an all-8 chain resolves to pool 0. The JSON therefore includes
+both the raw routes and one resolved edge for each of the eight condition
+result states. Every physical pool remains visible and records whether any
+condition result selects it.
+
+Pool-to-formation edges preserve the physical slot, weight, modifier, and
+next-roll byte. A nonzero encounter with zero weight remains as a dashed,
+nonselectable edge in the focused DOT view. This distinguishes exact authored
+storage from formations the observed weighted selector can choose. Formation
+nodes reuse the same enemy names and exact encounter metadata as the script
+execution graph.
+
+DDS1 links 419 areas and 40 collision faces to 70 zones. Those zones contain
+280 physical pools, of which 76 are selected by at least one condition-result
+state, and 816 populated slots leading to 398 formation nodes. Of those slots,
+789 have positive weight in a selected pool and can select 391 formations.
+DDS2 links 452 areas and 22 collision faces to 34 zones. It retains 102
+physical pools and 561 populated slots leading to 370 formations; the authored
+routes select only the 34 pool-0 rows, where 537 positive-weight slots can
+select 369 formations.
+
+`--encounter-area fNNN_AAA` enables this layer and renders one focused area.
+It shows default and flag alternatives, collision overrides, condition routes,
+pool thresholds and total weights, and each weighted formation choice. It does
+not choose a current flag state, collision face, condition result, or random
+roll.
+
 Run the codec and complete-corpus regression tests with:
 
 ```sh
-python3 -m unittest tools.test_wap tools.test_field_graph tools.test_encounter_flow
+python3 -m unittest tools.test_wap tools.test_field_graph \
+  tools.test_encounter_flow tools.test_random_encounter_flow
 ```

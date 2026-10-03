@@ -50,13 +50,15 @@ def _checked_index(table: battle_tbl.EncountTable, value: int, context: str) -> 
     return value
 
 
-def _encounter_node(
+def encounter_node(
     index: int,
     encounter: battle_tbl.Encounter,
     enemy_names: dict[int, str],
     requested: set[int],
     reachable: set[int],
 ) -> dict:
+    """Describe one exact encounter formation with shared graph identity."""
+
     slots = [
         None if enemy == 0 else {"id": enemy, "name": enemy_names.get(enemy)}
         for enemy in encounter.enemies
@@ -153,7 +155,7 @@ def build_sections(
             pending.append(next_index)
 
     nodes = [
-        _encounter_node(
+        encounter_node(
             index, table.encounters[index], enemy_names, requested, reachable
         )
         for index in sorted(included)
