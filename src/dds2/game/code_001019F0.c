@@ -42,7 +42,83 @@ void dds3ClearScopedObjectFlags(u32 object, u32 mask, u32 scope) {
     func_00100F48(0, object, mask, scope);
 }
 
-INCLUDE_ASM(const s32, "game/code_001019F0", func_00101AC0);
+typedef struct SdfThreadNode SdfThreadNode;
+
+extern void func_00356F58(void);
+extern void sceSifInitRpc(s32);
+extern s32 sceSifInitIopHeap(void);
+extern void sdfInitDeviceSemaphores(void);
+extern s32 sceSifRebootIop(const char *);
+extern s32 func_0036DD28(void);
+extern void sceSifLoadFileReset(void);
+extern void sceFsReset(void);
+extern void func_0034CB60(s32);
+extern void func_0034D038(u32);
+extern s32 sceSifLoadModule(const char *, s32, const char *);
+extern void sdfDevStartLoad(s32, s32);
+extern void sdfLoadIopModulePair(const char *, s32);
+extern void func_00328858(u32, u32, u32);
+extern void sdfPadRequestMode(s32, u8);
+extern void func_0033EB80(const char *);
+extern void func_0033EC28(s8);
+extern void sdfEnsureDeviceWorkerThreadStarted(s32);
+extern void func_00329C20(const char *, const char *);
+extern void sdfStartAndSuspendWorkerThread(void);
+extern void sdfStartTrackedThread(SdfThreadNode *, s32, s32, s64, s32, s32);
+extern s32 sdfThreadSleepSelf(void);
+extern void func_001004B0(void);
+
+extern const char D_004110A8[];
+extern const char D_004110C8[];
+extern const char D_004110E8[];
+extern const char D_00411108[];
+extern const char D_00411118[];
+extern const char D_00411130[];
+extern const char D_00411140[];
+extern const char D_00411158[];
+extern const char D_00411178[];
+extern const s32 D_00435C0C;
+extern u32 sdfDiscType;
+extern u8 D_00438A8C;
+extern u32 D_00438D80;
+extern u8 D_00439410[];
+s32 func_00101AC0(void) {
+    func_00356F58();
+    sceSifInitRpc(0);
+    sceSifInitIopHeap();
+    sdfDiscType = D_00435C0C;
+    sdfInitDeviceSemaphores();
+    while (sceSifRebootIop(D_004110A8) == 0) {
+    }
+    while (func_0036DD28() == 0) {
+    }
+    sceSifInitRpc(0);
+    sceSifInitIopHeap();
+    sceSifLoadFileReset();
+    sceFsReset();
+    func_0034CB60(0);
+    func_0034D038(D_00435C0C);
+    while (sceSifLoadModule(D_004110C8, 0, 0) < 0) {
+    }
+    while (sceSifLoadModule(D_004110E8, 0, 0) < 0) {
+    }
+    sdfDevStartLoad((s32)D_00411108, (s32)D_00411118);
+    sdfLoadIopModulePair(D_00411130, 1);
+    func_00328858(0x17C0000, 0x200000, 0x335000);
+    D_00438A8C = 1;
+    sdfPadRequestMode(0, 3);
+    sdfPadRequestMode(1, 3);
+    func_0033EB80(D_00411140);
+    func_0033EC28(3);
+    sdfEnsureDeviceWorkerThreadStarted(3);
+    sdfEnsureDeviceWorkerThreadStarted(0);
+    func_00329C20(D_00411158, D_00411178);
+    sdfStartAndSuspendWorkerThread();
+    sdfStartTrackedThread((SdfThreadNode *)((u8 *)&D_00438D80 + 8),
+                         (s32)func_001004B0, (s32)D_00439410, 0x4000, 0x60, 0);
+    sdfThreadSleepSelf();
+    return 0;
+}
 
 typedef struct KwlnDrawSink {
     u8 pad00[0x10];
@@ -328,6 +404,8 @@ void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBy
         }
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_001019F0", D_004110A8);
 
 INCLUDE_RODATA(const s32, "game/code_001019F0", D_00411198);
 
