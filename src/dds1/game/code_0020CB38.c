@@ -438,7 +438,50 @@ INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020DE50);
 
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020DE70);
 
-INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020E058);
+extern s32 btlIsActorCategoryMarked(s32);
+extern s32 btlHasLinkedEffectNodeTrigger(u8 *);
+extern void func_0020DE70(BtlLinkedCommand *);
+extern void func_001DF410(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+
+typedef struct ActionUnit ActionUnit;
+typedef struct BtlCameraPose BtlCameraPose;
+extern void btlSetupCameraPoseAimUnit(ActionUnit *, BtlCameraPose *, BtlCameraPose *);
+
+typedef struct CameraPoseAction CameraPoseAction;
+typedef struct CameraPoseTransform CameraPoseTransform;
+extern void btlPrepareRandomizedActionCameraPose(CameraPoseAction *, CameraPoseTransform *, CameraPoseTransform *);
+
+s32 func_0020E058(BtlLinkedCommand *command, s8 a, s8 b) {
+    s32 kind;
+
+    if (btlIsActorCategoryMarked((s32)command) != 0) {
+        return 0;
+    }
+    if (command->task->unit->flags & 0x200) {
+        if (a == 1 || b != 1) {
+            return 0;
+        }
+        if (btlHasLinkedEffectNodeTrigger((u8 *)command) != 0) {
+            func_0020DE70(command);
+            command->flags |= 0x800;
+            return 1;
+        }
+        kind = ((BtlActionTableRow *)datActionAnimationRecords)[command->actionCode].pad00[0];
+        if (kind < 8) {
+            if (kind >= 6) {
+                btlSetupCameraPoseAimUnit((ActionUnit *)command, (BtlCameraPose *)&command->frontCamera,
+                                          (BtlCameraPose *)&command->backCamera);
+                return 1;
+            }
+        }
+        func_001DF410(command, &command->frontCamera, &command->backCamera);
+        return 1;
+    }
+    btlPrepareRandomizedActionCameraPose((CameraPoseAction *)command,
+                                         (CameraPoseTransform *)&command->frontCamera,
+                                         (CameraPoseTransform *)&command->backCamera);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020E170);
 
