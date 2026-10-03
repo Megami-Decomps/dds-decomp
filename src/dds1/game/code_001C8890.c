@@ -5871,7 +5871,35 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001DE5F8);
 void func_001DE958(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001DE960);
+extern void func_001E0DA0(ActionUnit *, f32 *, s32, f32, f32);
+
+void func_001DE960(ActionUnit *action) {
+    BtlUnit *target;
+    s32 kind;
+    f32 pos[4];
+    if (btlGetIndexListCount(action->actorIndices) != 1) {
+        return;
+    }
+    target = (BtlUnit *)btlGetIndexListEntry(action->actorIndices, 0);
+    if (action->link->unit->flags & 0x200) {
+        func_001E3E58(action, action, target, 0);
+        return;
+    }
+    if (btlHasActorCategoryFlag100((s32)action) != 0) {
+        return;
+    }
+    btlUnitGetBodyPosVU(target);
+    VU0_STORE_VF(vf10, pos);
+    if (pos[0] > 0.0f) {
+        kind = 2;
+    } else {
+        kind = 3;
+    }
+    func_001E0DA0(action, (f32 *)action + 12, kind, 45.0f, 0.25f);
+    func_001E0DA0(action, (f32 *)((u8 *)action + 0xC0), kind, 1.0f, 0.5f);
+    ((BattlePoseBlendState *)action)->duration = 30.0f;
+    action->flags |= 0x41;
+}
 
 void func_001DEA68(void) {
 }
