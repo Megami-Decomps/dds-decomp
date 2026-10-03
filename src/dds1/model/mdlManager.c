@@ -113,7 +113,7 @@ typedef struct MdlNode {
     u8 pad4[4];           /* 0x4 */
     void *unk8;           /* 0x8: dereferenced by mdlGetNodeRefHalf */
     u8 padC[0x10];        /* 0xC */
-    f32 unk1C;            /* 0x1C: read as int by mdlGetNodeInt1C */
+    f32 unk1C;            /* 0x1C: numerically converted to s32 by mdlGetNodeInt1C */
     f32 floatValue;       /* 0x20: accessed as a float by mdlGet/SetNodeFloat20 */
     u8 pad24[4];           /* 0x24 */
     s16 searchId;          /* 0x28: identifies a node in list lookups */
@@ -134,7 +134,7 @@ extern void sdfDestroyMotion(void *arg);
 extern char *strcat(char *dst, const char *src);
 
 MdlNode *mdlFindNodeById(MdlCtx *ctx, s32 id);
-void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 id, s32 motionIndex, s32 loopEnabled,
+void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 searchId, s32 motionIndex, s32 loopEnabled,
                                      f32 blendLeadFrames, f32 blendDurationFrames);
 
 extern void *fileGetLoadedDataAddress();
@@ -310,6 +310,8 @@ typedef struct MdlLoadCmd {
 
 extern s32 sdfRelocatePackedResourcePayload();
 
+/* Retain the resource handle, relocate the loaded payload and retire the file
+ * entry. Execute the group job now only when the command is not deferred. */
 void mdlFinishLoadCmd(s32 entryId, MdlLoadCmd *cmd) {
     cmd->handle = fileGetResourceHandle(entryId);
     cmd->size = sdfRelocatePackedResourcePayload(fileGetLoadedDataAddress(entryId));
@@ -327,6 +329,8 @@ typedef struct MdlLoadJob {
     u32 handle;    /* 0x1C */
 } MdlLoadJob;
 
+/* Retain the handle and relocated size word, retire the file entry, then run
+ * the group job. Unlike mdlFinishLoadCmd, this path has no deferred flag. */
 void mdlFinishLoadJob(s32 entryId, MdlLoadJob *job) {
     job->handle = fileGetResourceHandle(entryId);
     job->sizeWord = sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress(entryId));
@@ -334,6 +338,8 @@ void mdlFinishLoadJob(s32 entryId, MdlLoadJob *job) {
     mdlExecuteAndFreeJob((MdlPacket *)job);
 }
 
+/* Copy the fixed eight-byte prefix, then append src. Prefix termination and
+ * sufficient destination capacity are obligations of the data/caller. */
 char *mdlBuildPrefixedString(char *dst, const char *src) {
     *(Hdr8 *)dst = *(Hdr8 *)D_003BBB60;
     return strcat(dst, src);
@@ -341,13 +347,15 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", mdlRequestAsset);
 
+/* Request the group/id asset with option 1; that option's meaning is not
+ * established by this forwarding body. */
 void func_00217298(u32 group, u32 id) {
     mdlRequestAsset(group, id, 1);
 }
 
 typedef struct MdlGroup {
     u8 unk0[0xC];
-    u8 flag;
+    u8 destroyWhenEmpty;
     u8 unkD[3];
     struct MdlLink *tail;
 } MdlGroup;
@@ -361,23 +369,25 @@ typedef struct MdlLink {
 
 extern void btlDestroyGroupNode();
 
+/* Unlink without clearing this entry's own links. Update the group tail and
+ * destroy the group only when its last entry leaves and destroyWhenEmpty is set. */
 void mdlUnlinkGroupEntry(MdlLink *link) {
-    MdlLink *prev = link->prev;
-    MdlLink *next = link->next;
+    MdlLink *previousEntry = link->prev;
+    MdlLink *nextEntry = link->next;
     MdlGroup *group;
 
-    if (prev != NULL) {
-        prev->next = next;
+    if (previousEntry != NULL) {
+        previousEntry->next = nextEntry;
     }
-    if (next != NULL) {
-        next->prev = prev;
+    if (nextEntry != NULL) {
+        nextEntry->prev = previousEntry;
     } else {
         group = link->group;
-        if (prev != NULL) {
-            group->tail = prev;
+        if (previousEntry != NULL) {
+            group->tail = previousEntry;
         } else {
             group->tail = NULL;
-            if (group->flag != 0) {
+            if (group->destroyWhenEmpty != 0) {
                 btlDestroyGroupNode(group);
             }
         }
@@ -388,20 +398,22 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00217310);
 
 extern void sdfReleaseDevSlot(void *, s32, s32);
 
+/* Release every device slot and its list node, then the list owner. A missing
+ * list is a no-op; a released list is removed from the context. */
 void mdlReleaseDevSlots(MdlCtx *ctx) {
-    MdlDevList *list = ctx->devList;
-    MdlDevSlot *node;
-    MdlDevSlot *cur;
+    MdlDevList *deviceList = ctx->devList;
+    MdlDevSlot *nextSlot;
+    MdlDevSlot *currentSlot;
 
-    if (list != NULL) {
-        node = list->first;
-        while (node != NULL) {
-            cur = node;
-            node = node->next;
-            sdfReleaseDevSlot(cur->slot, 1, 1);
-            sdfReleaseChipBlock(cur);
+    if (deviceList != NULL) {
+        nextSlot = deviceList->first;
+        while (nextSlot != NULL) {
+            currentSlot = nextSlot;
+            nextSlot = nextSlot->next;
+            sdfReleaseDevSlot(currentSlot->slot, 1, 1);
+            sdfReleaseChipBlock(currentSlot);
         }
-        sdfReleaseChipBlock(list);
+        sdfReleaseChipBlock(deviceList);
         ctx->devList = NULL;
     }
 }
@@ -413,18 +425,21 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00217680);
 extern void mdlDestroyResourceItem(u32 *);
 extern void sdfResourceListRelease(u32, s32);
 
+/* Destroy motions, resources, device slots and the context itself. Motion
+ * destruction must unlink inner->list; save each resource's next link before
+ * destroying it. ctx and inner are required, not checked here. */
 void mdlDestroyContext(MdlCtx *ctx) {
     MdlInner *inner = ctx->inner;
-    u32 *node;
-    u32 *next;
+    u32 *resourceNode;
+    u32 *nextResource;
 
     while (inner->list != NULL) {
         sdfDestroyMotion(inner->list);
     }
     sdfResourceListRelease(inner->resourceHandle, 1);
-    for (node = ctx->list14; node != NULL; node = next) {
-        next = (u32 *)*node;
-        mdlDestroyResourceItem(node);
+    for (resourceNode = ctx->list14; resourceNode != NULL; resourceNode = nextResource) {
+        nextResource = (u32 *)*resourceNode;
+        mdlDestroyResourceItem(resourceNode);
     }
     mdlReleaseDevSlots(ctx);
     sdfReleaseDevSlot(inner, 1, 1);
@@ -480,83 +495,101 @@ extern void sdfSetPrimaryIdentityMatrixVU(void *);
 extern void sdfRotateVuMatrixAboutX(f32 angle);
 extern void sdfRotateVuMatrixAboutY(f32 angle);
 
-/* Same update as mdlProcessContextNodesAndTransforms, first easing the entry `index` towards a pitch/yaw rotation (degrees). */
-void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 arg, s32 index, f32 pitch, f32 yaw) {
+#define MDL_MOTION_SLOT_COUNT 4
+#define MDL_NO_BLEND_ENTRY (-1)
+#define MDL_RADIANS_PER_DEGREE 0.017453293f
+#define MDL_FULL_BLEND_PITCH 25.0f
+#define MDL_SKIP_TRANSFORMS 1
+#define MDL_SKIP_ANCHORS 2
+#define MDL_REQUIRE_ANCHOR_ENABLE 4
+#define MDL_ANCHOR_ENABLE_BIT 0x10
+#define MDL_ENTRY_ENABLED 1
+#define MDL_PRIMARY_MOTION_SLOT 0
+#define MDL_MOTION_LOOP_ENABLED 1
+#define MDL_MOTION_LOOP_DISABLED 0
+
+/* Blend the selected basis towards pitch/yaw (degrees), then update transforms
+ * and anchors. For abs(pitch)<25, weight is abs(pitch)/25; otherwise one;
+ * -1 skips basis blending. Slot motions/blending precede the skip flags.
+ * updateArg is forwarded unchanged to the remaining update routines. */
+void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, f32 pitch, f32 yaw) {
     MdlInner *inner;
     MdlEntry *entry = NULL;
-    f32 rows[4][4];
-    f32 amount;
-    f32 weight;
-    f32 keep;
-    u32 *rec;
-    s32 i;
+    f32 targetRows[4][4];
+    f32 pitchMagnitude;
+    f32 targetWeight;
+    f32 existingWeight;
+    u32 *resourceNode;
+    s32 slotIndex;
 
     inner = ctx->inner;
-    if (index != -1) {
-        entry = inner->entries->items[index];
+    if (entryIndex != MDL_NO_BLEND_ENTRY) {
+        entry = inner->entries->items[entryIndex];
         sdfSetPrimaryIdentityMatrixVU(inner->entries);
-        sdfRotateVuMatrixAboutX(pitch * 0.017453293f);
-        sdfRotateVuMatrixAboutY(yaw * 0.017453293f);
-        VU0_STORE_MATRIX(rows);
+        sdfRotateVuMatrixAboutX(pitch * MDL_RADIANS_PER_DEGREE);
+        sdfRotateVuMatrixAboutY(yaw * MDL_RADIANS_PER_DEGREE);
+        VU0_STORE_MATRIX(targetRows);
     }
-    for (i = 0; i != 4; i++) {
-        if (ctx->slots[i] != NULL) {
-            if (ctx->slots[i]->unk30 != 0) {
-                sdfMotionUpdate(ctx->slots[i]);
+    for (slotIndex = 0; slotIndex != MDL_MOTION_SLOT_COUNT; slotIndex++) {
+        if (ctx->slots[slotIndex] != NULL) {
+            if (ctx->slots[slotIndex]->unk30 != 0) {
+                sdfMotionUpdate(ctx->slots[slotIndex]);
             }
         }
     }
-    amount = pitch;
-    if (index != -1) {
-        if (amount < 0.0f) {
-            amount = -amount;
+    pitchMagnitude = pitch;
+    if (entryIndex != MDL_NO_BLEND_ENTRY) {
+        if (pitchMagnitude < 0.0f) {
+            pitchMagnitude = -pitchMagnitude;
         }
-        weight = 1.0f;
-        if (amount < 25.0f) {
-            weight = amount / 25.0f;
+        targetWeight = 1.0f;
+        if (pitchMagnitude < MDL_FULL_BLEND_PITCH) {
+            targetWeight = pitchMagnitude / MDL_FULL_BLEND_PITCH;
         }
-        keep = 1.0f - weight;
-        entry->row0[0] = rows[0][0] * weight + entry->row0[0] * keep;
-        entry->row0[1] = rows[0][1] * weight + entry->row0[1] * keep;
-        entry->row0[2] = rows[0][2] * weight + entry->row0[2] * keep;
-        entry->row1[0] = rows[1][0] * weight + entry->row1[0] * keep;
-        entry->row1[1] = rows[1][1] * weight + entry->row1[1] * keep;
-        entry->row1[2] = rows[1][2] * weight + entry->row1[2] * keep;
-        entry->row2[0] = rows[2][0] * weight + entry->row2[0] * keep;
-        entry->row2[1] = rows[2][1] * weight + entry->row2[1] * keep;
-        entry->row2[2] = rows[2][2] * weight + entry->row2[2] * keep;
+        existingWeight = 1.0f - targetWeight;
+        entry->row0[0] = targetRows[0][0] * targetWeight + entry->row0[0] * existingWeight;
+        entry->row0[1] = targetRows[0][1] * targetWeight + entry->row0[1] * existingWeight;
+        entry->row0[2] = targetRows[0][2] * targetWeight + entry->row0[2] * existingWeight;
+        entry->row1[0] = targetRows[1][0] * targetWeight + entry->row1[0] * existingWeight;
+        entry->row1[1] = targetRows[1][1] * targetWeight + entry->row1[1] * existingWeight;
+        entry->row1[2] = targetRows[1][2] * targetWeight + entry->row1[2] * existingWeight;
+        entry->row2[0] = targetRows[2][0] * targetWeight + entry->row2[0] * existingWeight;
+        entry->row2[1] = targetRows[2][1] * targetWeight + entry->row2[1] * existingWeight;
+        entry->row2[2] = targetRows[2][2] * targetWeight + entry->row2[2] * existingWeight;
     }
-    if (ctx->flags & 1) {
+    if (ctx->flags & MDL_SKIP_TRANSFORMS) {
         return;
     }
     inner = ctx->inner;
     sdfModelUpdateCurrentFrameTransforms(inner);
-    func_002D9238(arg, inner);
-    if (ctx->flags & 2) {
+    func_002D9238(updateArg, inner);
+    if (ctx->flags & MDL_SKIP_ANCHORS) {
         return;
     }
-    if (ctx->flags & 4) {
-        if ((inner->flags19 & 0x10) == 0) {
+    if (ctx->flags & MDL_REQUIRE_ANCHOR_ENABLE) {
+        if ((inner->flags19 & MDL_ANCHOR_ENABLE_BIT) == 0) {
             return;
         }
     }
-    for (rec = ctx->list14; rec != NULL; rec = (u32 *)*rec) {
-        mdlDispatchViewerAnchorRecord(ctx, rec);
+    for (resourceNode = ctx->list14; resourceNode != NULL; resourceNode = (u32 *)*resourceNode) {
+        mdlDispatchViewerAnchorRecord(ctx, resourceNode);
     }
     if (ctx->devList == NULL) {
         return;
     }
-    func_002174C0(ctx, arg);
+    func_002174C0(ctx, updateArg);
 }
 
+/* Enable each table entry. The signed table count governs iteration; entry
+ * pointers and the context's inner/table pointers are required. */
 void mdlEnableAllEntries(MdlCtx *ctx) {
     MdlEntryTable *table = ctx->inner->entries;
-    s32 count = table->count;
-    MdlEntry **items = table->items;
-    s32 i;
+    s32 entryCount = table->count;
+    MdlEntry **entries = table->items;
+    s32 entryIndex;
 
-    for (i = 0; i < count; i++) {
-        items[i]->enabled = 1;
+    for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+        entries[entryIndex]->enabled = MDL_ENTRY_ENABLED;
     }
 }
 
@@ -565,51 +598,56 @@ extern void sdfMotionInitialize(MdlNode *, s32, s32, f32, f32);
 extern void mdlRemoveResourceSubtype(MdlCtx *, s32);
 extern void mdlApplyResourceEntries(MdlCtx *, s32, s32);
 
-/* Select (or create) the node for `id`, make it the current node of its slot
- * and apply its resource entries. */
-void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 id, s32 motionIndex, s32 loopEnabled,
+/* Select the first matching searchId, or create it, and make it current in its
+ * signed slot index. Allocation success/slot bounds are assumed. Slot zero
+ * also becomes ctx->first; id and motionIndex narrow into the current pair. */
+void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 searchId, s32 motionIndex, s32 loopEnabled,
                                      f32 blendLeadFrames, f32 blendDurationFrames) {
     MdlNode *node;
-    s16 slot;
+    s16 slotIndex;
 
     for (node = ctx->inner->list; node != NULL; node = node->next) {
-        if (node->searchId == id) {
+        if (node->searchId == searchId) {
             break;
         }
     }
     if (node == NULL) {
-        node = motionOwnerCreateObjectForRecord(ctx, id);
+        node = motionOwnerCreateObjectForRecord(ctx, searchId);
     }
-    slot = node->slotIndex;
-    ctx->slots[slot] = node;
-    if (slot == 0) {
+    slotIndex = node->slotIndex;
+    ctx->slots[slotIndex] = node;
+    if (slotIndex == MDL_PRIMARY_MOTION_SLOT) {
         ctx->first = node;
     }
     sdfMotionInitialize(node, motionIndex, loopEnabled, blendLeadFrames, blendDurationFrames);
-    ctx->current.h.id = id;
+    ctx->current.h.id = searchId;
     ctx->current.h.arg = motionIndex;
-    mdlRemoveResourceSubtype(ctx, slot);
-    mdlApplyResourceEntries(ctx, motionIndex, slot);
+    mdlRemoveResourceSubtype(ctx, slotIndex);
+    mdlApplyResourceEntries(ctx, motionIndex, slotIndex);
 }
 
+/* Select a looping motion with both blend-frame parameters zero. */
 void mdlAddEntryFlagged(MdlCtx *ctx, s32 searchId, s32 motionIndex) {
-    mdlFindOrCreateMotionRecordNode(ctx, searchId, motionIndex, 1, 0.0f, 0.0f);
+    mdlFindOrCreateMotionRecordNode(ctx, searchId, motionIndex, MDL_MOTION_LOOP_ENABLED, 0.0f, 0.0f);
 }
 
+/* Select a nonlooping motion with both blend-frame parameters zero. */
 void mdlAddEntryPlain(MdlCtx *ctx, s32 searchId, s32 motionIndex) {
-    mdlFindOrCreateMotionRecordNode(ctx, searchId, motionIndex, 0, 0.0f, 0.0f);
+    mdlFindOrCreateMotionRecordNode(ctx, searchId, motionIndex, MDL_MOTION_LOOP_DISABLED, 0.0f, 0.0f);
 }
 
+/* Select a looping motion with the supplied blend-frame parameters. */
 void mdlAddEntryFlaggedEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
                           f32 blendDurationFrames) {
     mdlFindOrCreateMotionRecordNode(
-        ctx, searchId, motionIndex, 1, blendLeadFrames, blendDurationFrames);
+        ctx, searchId, motionIndex, MDL_MOTION_LOOP_ENABLED, blendLeadFrames, blendDurationFrames);
 }
 
+/* Select a nonlooping motion with the supplied blend-frame parameters. */
 void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
                         f32 blendDurationFrames) {
     mdlFindOrCreateMotionRecordNode(
-        ctx, searchId, motionIndex, 0, blendLeadFrames, blendDurationFrames);
+        ctx, searchId, motionIndex, MDL_MOTION_LOOP_DISABLED, blendLeadFrames, blendDurationFrames);
 }
 
 MdlNode *mdlFindNodeById(MdlCtx *ctx, s32 id) {
@@ -623,77 +661,93 @@ MdlNode *mdlFindNodeById(MdlCtx *ctx, s32 id) {
     return NULL;
 }
 
-s32 mdlGetNodeField2C(MdlCtx *ctx, s32 id) {
-    MdlNode *node = mdlFindNodeById(ctx, id);
+#define MDL_NODE_FIELD_MISSING (-1)
+#define MDL_NODE_BYTE_CHECK_MISSING 2
+#define MDL_NODE_BYTE_CHECK_MATCH 5
 
-    if (node == NULL) {
-        return -1;
+/* Read the node's unknown halfword, widened to s32. Missing nodes return -1,
+ * distinct from a present halfword of 0xFFFF. */
+s32 mdlGetNodeField2C(MdlCtx *ctx, s32 searchId) {
+    MdlNode *matchedNode = mdlFindNodeById(ctx, searchId);
+
+    if (matchedNode == NULL) {
+        return MDL_NODE_FIELD_MISSING;
     }
-    return node->unk2C;
+    return matchedNode->unk2C;
 }
 
-s32 mdlGetNodeField2E(MdlCtx *ctx, s32 id) {
-    MdlNode *node = mdlFindNodeById(ctx, id);
+/* Read the other unknown halfword; return zero for a missing node. */
+s32 mdlGetNodeField2E(MdlCtx *ctx, s32 searchId) {
+    MdlNode *matchedNode = mdlFindNodeById(ctx, searchId);
 
-    if (node == NULL) {
+    if (matchedNode == NULL) {
         return 0;
     }
-    return node->unk2E;
+    return matchedNode->unk2E;
 }
 
-s32 mdlGetNodeInt1C(MdlCtx *ctx, s32 id) {
-    MdlNode *node = mdlFindNodeById(ctx, id);
+/* Numerically convert the stored float to s32, not a bit reinterpretation.
+ * Return zero when the searched node is absent. */
+s32 mdlGetNodeInt1C(MdlCtx *ctx, s32 searchId) {
+    MdlNode *matchedNode = mdlFindNodeById(ctx, searchId);
 
-    if (node == NULL) {
+    if (matchedNode == NULL) {
         return 0;
     }
-    return (s32)node->unk1C;
+    return (s32)matchedNode->unk1C;
 }
 
-s32 mdlCheckNodeByte30(MdlCtx *ctx, s32 id) {
-    MdlNode *node = mdlFindNodeById(ctx, id);
+/* Three outcomes: 2 for a missing node, otherwise 1/0 for byte equal/not equal
+ * to 5. The meaning of that byte value is not established here. */
+s32 mdlCheckNodeByte30(MdlCtx *ctx, s32 searchId) {
+    MdlNode *matchedNode = mdlFindNodeById(ctx, searchId);
 
-    if (node == NULL) {
-        return 2;
+    if (matchedNode == NULL) {
+        return MDL_NODE_BYTE_CHECK_MISSING;
     }
-    return node->unk30 == 5;
+    return matchedNode->unk30 == MDL_NODE_BYTE_CHECK_MATCH;
 }
 
-f32 mdlGetNodeFloat20(MdlCtx *ctx, s32 id) {
-    MdlNode *node = mdlFindNodeById(ctx, id);
-    f32 r = 0.0f;
+/* Read the stored float, defaulting to zero when the searched node is absent. */
+f32 mdlGetNodeFloat20(MdlCtx *ctx, s32 searchId) {
+    MdlNode *matchedNode = mdlFindNodeById(ctx, searchId);
+    f32 result = 0.0f;
 
-    if (node != NULL) {
-        r = node->floatValue;
+    if (matchedNode != NULL) {
+        result = matchedNode->floatValue;
     }
-    return r;
+    return result;
 }
 
-void mdlSetNodeFloat20(MdlCtx *ctx, s32 id, f32 value) {
-    MdlNode *node = mdlFindNodeById(ctx, id);
+/* Replace the stored float only when the searched node exists. */
+void mdlSetNodeFloat20(MdlCtx *ctx, s32 searchId, f32 value) {
+    MdlNode *matchedNode = mdlFindNodeById(ctx, searchId);
 
-    if (node != NULL) {
-        node->floatValue = value;
+    if (matchedNode != NULL) {
+        matchedNode->floatValue = value;
     }
 }
 
-/* These shims transfer vectors between model state and VU0 registers. */
+/* vu0 routine: load the primary vector into vf10, not a C return value. */
 void mdlLoadPrimaryVectorVU(MdlCtx *ctx) {
     VU0_LOAD_VF_MEMORY(vf10, &ctx->inner->vector50);
 }
 
+/* vu0 routine: force vf10.w to one and store it as the primary vector. */
 void mdlStorePrimaryVectorVU(MdlCtx *ctx) {
     VU0_SET_W_ONE(vf10);
     VU0_STORE_VF(vf10, &ctx->inner->vector50);
 }
 
+/* vu0 routine: load the secondary vector into vf10 without interpreting it. */
 void mdlLoadSecondaryVectorVU(MdlCtx *ctx) {
     VU0_LOAD_VF_MEMORY(vf10, &ctx->inner->vector60);
 }
 
 extern void effMiscQuaternionToMatrixVU(void);
 
-/* Store vf10 as the secondary vector, then the rotation matrix rows built by the VU0 routine. */
+/* vu0 routine: consume vf10 as a quaternion, preserve it in the secondary vector,
+ * then store the resulting basis rows from vf28-vf30. No C argument supplies vf10. */
 void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *ctx) {
     VU0_STORE_VF(vf10, &ctx->inner->vector60);
     effMiscQuaternionToMatrixVU();
@@ -702,23 +756,27 @@ void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *ctx) {
     VU0_STORE_VF(vf30, &ctx->inner->vector40);
 }
 
+/* vu0 routine: load the tertiary vector into vf10; projection uses its row scale. */
 void mdlLoadTertiaryVectorVU(MdlCtx *ctx) {
     VU0_LOAD_VF_MEMORY(vf10, &ctx->inner->vector70);
 }
 
+/* vu0 routine: store all vf10 components as the tertiary vector, without forcing w. */
 void mdlStoreTertiaryVectorVU(MdlCtx *ctx) {
     VU0_STORE_VF(vf10, &ctx->inner->vector70);
 }
 
+/* Return the last original value stored by either broadcast path. */
 u32 mdlGetBroadcastValue(MdlCtx *ctx) {
     return ctx->inner->broadcastValue;
 }
 
+/* Forward value to each next-linked resource; an empty resource list is a no-op. */
 void mdlSetAllResourceFrames(MdlCtx *ctx, u32 value) {
-    u32 *node;
+    u32 *resourceNode;
 
-    for (node = ctx->list14; node != NULL; node = (u32 *)*node) {
-        mdlSetResourceFrame(ctx, node, value);
+    for (resourceNode = ctx->list14; resourceNode != NULL; resourceNode = (u32 *)*resourceNode) {
+        mdlSetResourceFrame(ctx, resourceNode, value);
     }
 }
 
@@ -727,20 +785,24 @@ void mdlBroadcastMasked(MdlCtx *ctx, u32 value) {
     mdlSetAllResourceFrames(ctx, (value & 0xFF000000) | 0x808080);
 }
 
+/* Cache the original value and send that same value to every resource. */
 void mdlBroadcastValue(MdlCtx *ctx, u32 value) {
     ctx->inner->broadcastValue = value;
     mdlSetAllResourceFrames(ctx, value);
 }
 
+/* Forward the floating amount to each resource without changing broadcastValue. */
 void mdlSetAmountOnAllContextResources(MdlCtx *ctx, f32 amount) {
-    u32 *node;
+    u32 *resourceNode;
 
-    for (node = ctx->list14; node != NULL; node = (u32 *)*node) {
-        mdlSetResourceAmount(ctx, node, amount);
+    for (resourceNode = ctx->list14; resourceNode != NULL; resourceNode = (u32 *)*resourceNode) {
+        mdlSetResourceAmount(ctx, resourceNode, amount);
     }
 }
 
-/* vu0 routine: project `point` through the camera and the model's scaled matrix, result left in vf10 */
+/* vu0 routine: project point with the model/camera matrices and viewport vectors.
+ * Row scaling uses live vf10 before loading point; the result is left in vf10.
+ * Preserve the distinct matrix-composition order of this single-point path. */
 void mdlProjectPointVU(MdlCtx *ctx, void *point)
 {
     VU0_LOAD_MATRIX(sdfViewMatrix);
@@ -761,55 +823,65 @@ void mdlProjectPointVU(MdlCtx *ctx, void *point)
     VU0_ADD(vf10, vf10, vf11);
 }
 
-/* Project `count` points through the model's scaled matrix and the camera. */
-void mdlProjectPoints(MdlCtx *ctx, f32 (*in)[4], f32 (*out)[4], s32 count)
+#define MDL_PROJECTION_SCALE_OFFSET 0x40
+#define MDL_PROJECTION_BIAS_OFFSET 0x50
+
+/* vu0 routine: project pointCount four-float vectors using the stored tertiary
+ * row scale. Matrix setup still runs for nonpositive counts. Output stores all
+ * four components; perspective division is not guarded against zero w. */
+void mdlProjectPoints(MdlCtx *ctx, f32 (*inputPoints)[4], f32 (*outputPoints)[4], s32 pointCount)
 {
-    s32 i;
+    s32 pointIndex;
 
     VU0_LOAD_MATRIX(&ctx->inner->vector20);
     VU0_LOAD_VF(vf10, &ctx->inner->vector70);
     VU0_SCALE_MATRIX_ROWS(vf10);
     sdfPostmultiplyVuMatrixFromMemory(sdfViewMatrix);
     sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
-    for (i = 0; i < count; i++) {
-        VU0_LOAD_VF(vf10, in[i]);
+    for (pointIndex = 0; pointIndex < pointCount; pointIndex++) {
+        VU0_LOAD_VF(vf10, inputPoints[pointIndex]);
         VU0_TRANSFORM_POINT(vf10, vf10);
         VU0_PERSPECTIVE_DIVIDE_VF10();
-        VU0_LOAD_VF(vf11, sdfProjectionMatrix + 0x40);
+        VU0_LOAD_VF(vf11, sdfProjectionMatrix + MDL_PROJECTION_SCALE_OFFSET);
         VU0_MUL(vf10, vf10, vf11);
-        VU0_LOAD_VF(vf11, sdfProjectionMatrix + 0x50);
+        VU0_LOAD_VF(vf11, sdfProjectionMatrix + MDL_PROJECTION_BIAS_OFFSET);
         VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, out[i]);
+        VU0_STORE_VF(vf10, outputPoints[pointIndex]);
     }
 }
 
+/* Suspend every node in the inner motion list, not just the active slots. */
 void mdlSuspendAllContextMotions(MdlCtx *ctx) {
-    MdlNode *node;
+    MdlNode *motionNode;
 
-    for (node = ctx->inner->list; node != NULL; node = node->next) {
-        sdfMotionSuspend(node);
+    for (motionNode = ctx->inner->list; motionNode != NULL; motionNode = motionNode->next) {
+        sdfMotionSuspend(motionNode);
     }
 }
 
+/* Resume every node in the inner motion list, not just the active slots. */
 void mdlResumeAllContextMotions(MdlCtx *ctx) {
-    MdlNode *node;
+    MdlNode *motionNode;
 
-    for (node = ctx->inner->list; node != NULL; node = node->next) {
-        sdfMotionResume(node);
+    for (motionNode = ctx->inner->list; motionNode != NULL; motionNode = motionNode->next) {
+        sdfMotionResume(motionNode);
     }
 }
 
-u8 mdlHasNode(MdlCtx *ctx, s32 id) {
-    MdlNode *found;
+/* Return whether the searched node exists; do not expose the lookup result. */
+u8 mdlHasNode(MdlCtx *ctx, s32 searchId) {
+    MdlNode *lookupResult;
 
-    found = mdlFindNodeById(ctx, id);
-    return found != NULL;
+    lookupResult = mdlFindNodeById(ctx, searchId);
+    return lookupResult != NULL;
 }
 
+/* Read the context resource-group halfword; ctx/sub are required. */
 u16 mdlGetContextResourceGroup(MdlCtx *ctx) {
     return ctx->sub->unk8;
 }
 
+/* Read the context resource-id halfword; ctx/sub are required. */
 u16 mdlGetContextResourceId(MdlCtx *ctx) {
     return ctx->sub->unkA;
 }
@@ -818,32 +890,41 @@ u32 func_002183F0(void) {
     return 8;
 }
 
-u32 mdlGetTableWord(s32 idx) {
-    return D_00367904[idx][0];
+/* Return the first word of the selected two-word table row, without bounds checks. */
+u32 mdlGetTableWord(s32 tableIndex) {
+    return D_00367904[tableIndex][0];
 }
 
-s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 id) {
-    MdlNode *node = mdlFindNodeById(ctx, id);
+/* Read the referenced halfword or return zero for a missing node. A present
+ * node's unk8 reference is dereferenced without a separate NULL check. */
+s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId) {
+    MdlNode *matchedNode = mdlFindNodeById(ctx, searchId);
 
-    if (node == NULL) {
+    if (matchedNode == NULL) {
         return 0;
     }
-    return *(u16 *)node->unk8;
+    return *(u16 *)matchedNode->unk8;
 }
 
+/* Pass the inner resource handle to its release/update routine. ctx is required. */
 void mdlReleaseInnerResourceHandle(MdlCtx *ctx) {
     sdfUpdateActiveResourceListScalars(ctx->inner->resourceHandle);
 }
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218460);
 
-s32 mdlIsInnerSentinel(MdlCtx *ctx) {
-    s32 r = 0;
+#define MDL_SENTINEL_CURRENT_BYTE 1
+#define MDL_PART_INFO_TAG 0x30424950
 
-    if ((u8)ctx->current.word == 1) {
-        r = ctx->inner == (MdlInner *)0x30424950;
+/* Test the raw PIB0 marker only when the low current byte is one. This is a
+ * pointer-value comparison, not a dereference or a check of the complete id. */
+s32 mdlIsInnerSentinel(MdlCtx *ctx) {
+    s32 isSentinel = 0;
+
+    if ((u8)ctx->current.word == MDL_SENTINEL_CURRENT_BYTE) {
+        isSentinel = ctx->inner == (MdlInner *)MDL_PART_INFO_TAG;
     }
-    return r;
+    return isSentinel;
 }
 
 typedef struct PacWork {
@@ -874,63 +955,76 @@ extern void mdlAddEffectPart(MdlPartList *, s32);
 extern void sdfReleaseResourceAllocation(s32);
 extern void *memset(void *, s32, u32);
 
-PacWork *func_002185B0(PacWork *work, s32 group, s32 id, s32 mode) {
-    MdlGroupSetup setup;
-    MdlPartList *parts;
-    s32 count;
+#define MDL_PART_PACKET_COMMAND 1
+#define MDL_RESOURCE_LIST_PACKET_COMMAND 9
+#define MDL_REQUEST_PACKET_COMMAND 6
+#define MDL_RESOURCE_PACKET_COMMAND 8
+#define MDL_BILLBOARD_PART_TAG 0x413250
+#define MDL_EFFECT_PART_TAG 0x503344
 
-    memset(&setup, 0, sizeof(setup));
-    parts = NULL;
-    while (work != NULL) {
-        switch (((PacHead *)work->packet)->command) {
-        case 1:
-            switch (((PacHead *)work->packet)->tag) {
-            case 0x30424950: /* PIB0: model part information. */
-                setup.handleA = (s32)work->dataCursor;
-                setup.handleB = work->resourceHandle;
-                count = func_002193E8((MdlRecord *)work->dataCursor);
-                if (count > 0) {
-                    parts = mdlCreateBufferedPartRequest(count);
-                    setup.handleC = (s32)parts;
+/* Consume all packet work, then apply the accumulated group setup once.
+ * Request/resource packets latch a nonzero handle; part-info replaces its data
+ * and handle, but retains an existing part list when its requested count is zero.
+ * Resource-list packets overwrite their handle. Part additions assume a list.
+ * Unknown commands/tags are still removed. Normal completion returns NULL. */
+PacWork *func_002185B0(PacWork *packetWork, s32 group, s32 id, s32 mode) {
+    MdlGroupSetup groupSetup;
+    MdlPartList *partList;
+    s32 requestedPartCount;
+
+    memset(&groupSetup, 0, sizeof(groupSetup));
+    partList = NULL;
+    while (packetWork != NULL) {
+        switch (((PacHead *)packetWork->packet)->command) {
+        case MDL_PART_PACKET_COMMAND:
+            switch (((PacHead *)packetWork->packet)->tag) {
+            case MDL_PART_INFO_TAG: /* PIB0: model part information. */
+                groupSetup.handleA = (s32)packetWork->dataCursor;
+                groupSetup.handleB = packetWork->resourceHandle;
+                requestedPartCount = func_002193E8((MdlRecord *)packetWork->dataCursor);
+                if (requestedPartCount > 0) {
+                    partList = mdlCreateBufferedPartRequest(requestedPartCount);
+                    groupSetup.handleC = (s32)partList;
                 }
                 break;
-            case 0x413250: /* P2A: billboard part. */
-                mdlAddBillboardPart(parts, (s32)work->dataCursor);
-                sdfReleaseResourceAllocation(work->resourceHandle);
+            case MDL_BILLBOARD_PART_TAG: /* P2A: billboard part. */
+                mdlAddBillboardPart(partList, (s32)packetWork->dataCursor);
+                sdfReleaseResourceAllocation(packetWork->resourceHandle);
                 break;
-            case 0x503344: /* D3P: effect part. */
-                mdlAddEffectPart(parts, (s32)work->dataCursor);
-                sdfReleaseResourceAllocation(work->resourceHandle);
+            case MDL_EFFECT_PART_TAG: /* D3P: effect part. */
+                mdlAddEffectPart(partList, (s32)packetWork->dataCursor);
+                sdfReleaseResourceAllocation(packetWork->resourceHandle);
                 break;
             }
             break;
-        case 9:
-            setup.resourceList = work->resourceHandle;
+        case MDL_RESOURCE_LIST_PACKET_COMMAND:
+            groupSetup.resourceList = packetWork->resourceHandle;
             break;
-        case 6:
-            if (setup.requestHandle == 0) {
-                setup.requestHandle = work->resourceHandle;
-                setup.unk4 = (s32)work->dataCursor;
+        case MDL_REQUEST_PACKET_COMMAND:
+            if (groupSetup.requestHandle == 0) {
+                groupSetup.requestHandle = packetWork->resourceHandle;
+                groupSetup.unk4 = (s32)packetWork->dataCursor;
             }
             break;
-        case 8:
-            if (setup.resource == 0) {
-                setup.resource = work->resourceHandle;
-                setup.flags = (s32)work->dataCursor;
+        case MDL_RESOURCE_PACKET_COMMAND:
+            if (groupSetup.resource == 0) {
+                groupSetup.resource = packetWork->resourceHandle;
+                groupSetup.flags = (s32)packetWork->dataCursor;
             }
             break;
         }
-        work = sdfPacRemovePacket(work);
+        packetWork = sdfPacRemovePacket(packetWork);
     }
-    mdlApplyGroupSetup(group, id, mode, &setup);
-    return work;
+    mdlApplyGroupSetup(group, id, mode, &groupSetup);
+    return packetWork;
 }
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218768);
 
-void mdlDestroyLoadRequestOwner(MdlRes *res) {
-    func_00288788(res->unk8);
-    sdfReleaseChipBlock(res);
+/* Clean up the owner word at +8, then release its containing block. */
+void mdlDestroyLoadRequestOwner(MdlRes *ownerBlock) {
+    func_00288788(ownerBlock->unk8);
+    sdfReleaseChipBlock(ownerBlock);
 }
 
 /* Completion job created by mdlRequestLoadWithCallback and run by mdlCompleteGroupedJobAndNotify. */
@@ -951,16 +1045,18 @@ typedef struct MdlLoadSlot {
 
 extern s32 func_00218768();
 
-/* Run a completed load job: apply it, drop its group id, then call its done callback and free it. */
-void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *owner, MdlDoneJob *job) {
-    job->owner = owner;
-    func_00218768(owner->handle, job->group, job->id, job->arg);
+/* Apply the completed load and remove its group id under the semaphore.
+ * A non-NULL callback is invoked before owner/job cleanup; without a callback,
+ * this function leaves cleanup to the request path. */
+void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *requestOwner, MdlDoneJob *completionJob) {
+    completionJob->owner = requestOwner;
+    func_00218768(requestOwner->handle, completionJob->group, completionJob->id, completionJob->arg);
     WaitSema(mdlGroupJobSemaphore);
-    btlRemoveGroupId(job->group, job->id);
+    btlRemoveGroupId(completionJob->group, completionJob->id);
     SignalSema(mdlGroupJobSemaphore);
-    if (job->done != NULL) {
-        job->done(job->doneArg);
-        mdlDestroyLoadRequestOwner((MdlRes *)job);
+    if (completionJob->done != NULL) {
+        completionJob->done(completionJob->doneArg);
+        mdlDestroyLoadRequestOwner((MdlRes *)completionJob);
     }
 }
 
@@ -969,20 +1065,26 @@ extern s32 fileAllocateDispatchRequest();
 extern void func_00288C50();
 extern void mdlCompleteGroupedJobAndNotify();
 
-s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 arg, s32 handle, void (*done)(u32), u32 doneArg) {
-    MdlDoneJob *job = sdfAllocAndClearQuadwords(0x14);
-    s32 slot;
+#define MDL_DONE_JOB_BYTES 0x14
 
-    job->group = group;
-    job->id = id;
-    job->arg = arg;
-    job->doneArg = doneArg;
-    job->done = done;
-    slot = fileAllocateDispatchRequest(handle, 0, 0, mdlCompleteGroupedJobAndNotify, job);
-    job->owner = slot;
-    if (done == NULL) {
-        func_00288C50(slot);
-        mdlDestroyLoadRequestOwner((MdlRes *)job);
+/* Allocate a completion job and dispatch the request. Group/id narrow to u16.
+ * Without onComplete, run the existing no-callback completion path and clean up
+ * here; otherwise the completion callback path owns cleanup. Always return zero.
+ * Preserve the provider's existing short-arity/unprototyped calling convention. */
+s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle, void (*onComplete)(u32), u32 callbackArg) {
+    MdlDoneJob *completionJob = sdfAllocAndClearQuadwords(MDL_DONE_JOB_BYTES);
+    s32 requestSlot;
+
+    completionJob->group = group;
+    completionJob->id = id;
+    completionJob->arg = jobArg;
+    completionJob->doneArg = callbackArg;
+    completionJob->done = onComplete;
+    requestSlot = fileAllocateDispatchRequest(requestHandle, 0, 0, mdlCompleteGroupedJobAndNotify, completionJob);
+    completionJob->owner = requestSlot;
+    if (onComplete == NULL) {
+        func_00288C50(requestSlot);
+        mdlDestroyLoadRequestOwner((MdlRes *)completionJob);
     }
     return 0;
 }
