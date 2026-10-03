@@ -7815,7 +7815,38 @@ void sndClearList(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_002048C8);
+typedef struct SoundSlotTableEntry {
+    s16 resourceOffset;
+    u16 fileId;
+} SoundSlotTableEntry;
+
+extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
+
+u32 func_002048C8(u32 *sound, u32 slot) {
+    u32 id = sound[2];
+    u32 category = sound[1];
+    SoundSlotTableEntry *table = btlSelectSideIndexedActorParameterTable(category, id);
+    s32 specialCategory = 1;
+    s32 scaledId = id * 0x20;
+    s32 offset;
+    u32 resource = 0;
+
+    table += slot;
+    offset = table->resourceOffset;
+
+    if (offset < 0) {
+        return resource;
+    }
+    resource = (scaledId + offset + 0x440) << 16;
+    if (category != specialCategory) {
+        return resource;
+    }
+    resource = 0;
+    if (slot >= 23) {
+        return resource;
+    }
+    return (id * 0x10 + offset + 0x1000) << 16;
+}
 
 extern char D_004192F8[];
 extern char D_00419308[];
@@ -7958,13 +7989,6 @@ s32 sndHasActiveFileLoad(void) {
     }
     return 0;
 }
-
-typedef struct SoundSlotTableEntry {
-    u16 unk0;
-    u16 fileId;
-} SoundSlotTableEntry;
-
-extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
 
 void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {
     SoundSlotOwner *owner = (SoundSlotOwner *)((BtlUnit *)args->actor)->unk328;
@@ -8650,4 +8674,3 @@ INCLUDE_SDATA(const s32, "game/code_001DD390", btlTintTransitionHoldCount);
 INCLUDE_SDATA(const s32, "game/code_001DD390", D_00436AE0);
 
 INCLUDE_SDATA(const s32, "game/code_001DD390", D_00436AE8);
-
