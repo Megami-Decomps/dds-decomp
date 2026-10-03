@@ -2,6 +2,21 @@
 #include "mnu.h"
 #include "kwln.h"
 
+#define MNU_PARTY_SLOT_COUNT 5
+#define MNU_PARTY_RECORD_BYTES 0x1A4
+#define MNU_PERCENT_PAIR_BYTES 0xA8
+#define MNU_PERCENT_PANEL_BYTES 0x54
+#define MNU_TERMINAL_SCENE_BYTES 0x164
+#define MNU_MENU_HOST_BYTES 0x82C
+#define MNU_EFFECT_BATCH_COUNT 7
+#define MNU_SELECTED_SLOT_COUNT 2
+#define MNU_TEXT_DRAW_PRIORITY 0x53
+#define MNU_TERMINAL_DEFAULT_BGM 0x20001
+#define MNU_BGM_BANK_MASK 0xFFFF0000
+#define MNU_RECOVERY_STATUS_KEEP_MASK 0xFA2F
+#define MNU_TERMINAL_EXIT_PROCESS 0x322
+#define MNU_COLOR_LOW_BYTE_MASK 0xFF
+
 
 extern s32 func_0027B888(u32);
 
@@ -21,7 +36,7 @@ typedef struct MenuProgressNode {
     u8 pad4C[0xC];
     struct MenuProgressNode *next;
     u8 pad5C[4];
-    u32 itemIndex; /* 0x60: party entry index */
+    u32 entryIndex; /* 0x60: party slot or command-list entry */
     u32 requiredAmount; /* 0x64 */
     u8 pad68[8];
     s32 panel; /* 0x70: allocated panel resource */
@@ -95,7 +110,7 @@ typedef struct MenuTerminalWork {
     u8 padE0[4];
     s32 unkE4;               /* 0xE4 */
     u8 padE8[0x78];
-    u32 resourceHandle;      /* 0x160: music bank handle */
+    u32 bgmHandle;           /* 0x160: encoded bank/track handle */
 } MenuTerminalWork; /* 0x164 allocation (mnuTerminalCreateScene) */
 
 extern s32 mnuCreateDualPercentPanel(s32, s32);
@@ -129,8 +144,8 @@ extern void func_001958A0(s32, s32, s32);
 extern void frFontQueueGlyphInSelectedSlot(s32);
 
 typedef struct EffectPair {
-    s32 a;
-    s32 b;
+    s32 firstValue;
+    s32 secondValue;
 } EffectPair;
 
 extern EffectPair D_003BC400[];
@@ -153,11 +168,13 @@ extern EffectObject *effCreateStatusBatch(s32);
 
 extern s32 effDestroyPackedBatch(s32);
 
+/* Release both visual resources in order; the work object itself is retained. */
 void mnuReleaseVisualResources(MenuVisualWork *work) {
     effResolveAndReleaseResource(work->firstResource);
     effResolveAndReleaseResource(work->secondResource);
 }
 
+/* Release/reset the two resources' texture slots without freeing the work object. */
 void mnuReleaseBothVisualResourceTextures(MenuVisualWork *work) {
     effReleaseTextureHandlesAndResetSlots(work->firstResource);
     effReleaseTextureHandlesAndResetSlots(work->secondResource);
@@ -173,8 +190,8 @@ typedef struct MenuTextEntry {
 extern MenuTextEntry D_00347C68[];
 extern MenuTextEntry D_003482A8[];
 
-/* gridX/gridY are the glyph helper's grid cell coordinates (see
-   sdfCounterDrawGlyphAtGridCell); depth is its z argument. */
+/* Select an encoded text row, draw it at the supplied grid cell, and queue the glyph.
+ * The signed-byte slot is not bounds checked; DDS1 has no DDS2 x-origin adjustment. */
 void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, s8 slot, s8 alternate) {
     u8 *text;
     s32 handle;
@@ -185,51 +202,54 @@ void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, 
         text = D_003482A8[slot].encodedText;
     }
     handle = func_00197760(gridX, gridY, depth, value, (s32)text, 0);
-    func_001958A0(handle, 1, 0x53);
+    func_001958A0(handle, 1, MNU_TEXT_DRAW_PRIORITY);
     frFontQueueGlyphInSelectedSlot(handle);
 }
 
+/* Party vitals and status word, not a screen rectangle. Full stride is 0x1A4. */
 typedef struct BoxRecord {
-    u16 status; /* 0x00: bit 0 set when the record is in use */
+    u16 unitFlags; /* 0x00: bit 0 set when the party slot is active */
     u8 pad02[4];
-    u16 y0; /* 0x06 */
-    u16 y1; /* 0x08 */
-    u16 x0; /* 0x0A */
-    u16 x1; /* 0x0C */
-    u16 flags; /* 0x0E */
+    u16 hp;        /* 0x06 */
+    u16 maxHp;     /* 0x08 */
+    u16 mp;        /* 0x0A */
+    u16 maxMp;     /* 0x0C */
+    u16 statusFlags; /* 0x0E */
 } BoxRecord;
 
-s32 mnuTerminalScoreBox(BoxRecord *box) {
-    f32 w = box->x1 - box->x0;
-    f32 h = box->y1 - box->y0;
-    s32 bonus = 0;
+/* Price recovery from missing HP/MP plus the five charged status bits.
+ * Preserve DDS1's arithmetic and separate truncations; deficits are not clamped. */
+s32 mnuTerminalScoreBox(BoxRecord *unit) {
+    f32 missingMp = unit->maxMp - unit->mp;
+    f32 missingHp = unit->maxHp - unit->hp;
+    s32 statusCost = 0;
 
-    if (box->flags & 0x400) {
-        bonus = 100;
+    if (unit->statusFlags & 0x400) {
+        statusCost = 100;
     }
-    if (box->flags & 0x100) {
-        bonus += 50;
+    if (unit->statusFlags & 0x100) {
+        statusCost += 50;
     }
-    if (box->flags & 0x80) {
-        bonus += 100;
+    if (unit->statusFlags & 0x80) {
+        statusCost += 100;
     }
-    if (box->flags & 0x40) {
-        bonus += 100;
+    if (unit->statusFlags & 0x40) {
+        statusCost += 100;
     }
-    if (box->flags & 0x10) {
-        bonus += 100;
+    if (unit->statusFlags & 0x10) {
+        statusCost += 100;
     }
-    return (s32)h + (s32)(w * (w / 200.0f + 3.0f)) + bonus;
+    return (s32)missingHp + (s32)(missingMp * (missingMp / 200.0f + 3.0f)) + statusCost;
 }
 
-/* Mark entries whose required amount exceeds the current profile amount. */
+/* Mark nodes unaffordable when their required amount exceeds current currency. */
 void mnuRefreshThresholdNodeFlags(MenuProgressOwner *owner) {
     MenuProgressNode *node = owner->firstProgressNode;
     if (node != 0) {
         s32 base = datGameState;
         do {
-            u32 amount = *(u32 *)(base + 0x3c);
-            if (amount < node->requiredAmount) {
+            u32 currency = *(u32 *)(base + 0x3c);
+            if (currency < node->requiredAmount) {
                 node->flags |= 1;
             } else {
                 node->flags &= ~1u;
@@ -239,12 +259,13 @@ void mnuRefreshThresholdNodeFlags(MenuProgressOwner *owner) {
     }
 }
 
-void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 fade, s32 number, u32 color, s32 priority) {
+/* Draw formatted numeric text using a blend toward the color with its low byte clear. */
+void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number, u32 color, s32 priority) {
     char text[16];
     s32 sprite;
 
     func_003014F0(text, mnuNumberSpriteFormat, number);
-    sprite = func_001978E8(x, y, layer, uiBlendColors(color, color & ~0xFF, fade), (s32)text, 0);
+    sprite = func_001978E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), (s32)text, 0);
     func_001958A0(sprite, 1, priority);
     frFontQueueGlyphInSelectedSlot(sprite);
 }
@@ -257,22 +278,25 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00248810);
 
 
 
-s32 mnuCreateDualPercentPanel(s32 resource, s32 context) {
-    s32 panel = sdfAllocSizeClassBlock(0xa8);
+/* Allocate adjacent HP/MP percentage panels, preserving the native 0x54 stride.
+ * The source is a party-vitals record; the context supplies the panel style. */
+s32 mnuCreateDualPercentPanel(s32 unitAddress, s32 workAddress) {
+    s32 panel = sdfAllocSizeClassBlock(MNU_PERCENT_PAIR_BYTES);
     mnuDrawPanelSequenceByRow(panel, 0, 0, 0x1e,
-        mnuPercentOrHundred(*(u16 *)(resource + 6), *(u16 *)(resource + 8)),
-        *(s32 *)(context + 0xe0));
-    mnuDrawPanelSequenceByRow(panel + 0x54, 1, 0, 0x1e,
-        mnuPercentOrHundred(*(u16 *)(resource + 0xa), *(u16 *)(resource + 0xc)),
-        *(s32 *)(context + 0xe0));
+        mnuPercentOrHundred(*(u16 *)(unitAddress + 6), *(u16 *)(unitAddress + 8)),
+        *(s32 *)(workAddress + 0xe0));
+    mnuDrawPanelSequenceByRow(panel + MNU_PERCENT_PANEL_BYTES, 1, 0, 0x1e,
+        mnuPercentOrHundred(*(u16 *)(unitAddress + 0xa), *(u16 *)(unitAddress + 0xc)),
+        *(s32 *)(workAddress + 0xe0));
     return panel;
 }
 
-/* Release both texture sets and the backing allocation for the panel pair. */
+/* Release both texture sets and the backing allocation for a nonzero panel pair.
+ * Retain the legacy zero-argument first texture-release call. */
 void mnuReleaseDualPercentPanel(s32 panel) {
     if (panel != 0) {
         mnuReleaseSpriteTextures();
-        mnuReleaseSpriteTextures((s32)panel + 0x54);
+        mnuReleaseSpriteTextures((s32)panel + MNU_PERCENT_PANEL_BYTES);
         sdfReleaseChipBlock(panel);
         return;
     }
@@ -283,11 +307,12 @@ void mnuUpdateGroupResources(u8 *scene) {
     MenuProgressNode *node = *(MenuProgressNode **)(*(u8 **)(scene + 0x74) + 0x10);
 
     while (node != NULL) {
-        node->panel = mnuCreateDualPercentPanel(datGameState + node->itemIndex * 420 + 0xA60, (s32)scene);
+        node->panel = mnuCreateDualPercentPanel(datGameState + node->entryIndex * MNU_PARTY_RECORD_BYTES + 0xA60, (s32)scene);
         node = node->next;
     }
 }
 
+/* Release each progress node's child panel, leaving the nodes/list intact. */
 void mnuDestroyThresholdNodePanels(s32 owner) {
     s32 entry;
 
@@ -313,39 +338,43 @@ extern s32 mnuTerminalScoreBox(BoxRecord *box);
 
 extern s32 func_00248810(s32);
 
+/* Build recovery-cost nodes for active party slots with a nonzero computed cost.
+ * Node values are party indices here, unlike the command-list builder below. */
 void mnuBuildTerminalNodeList(MenuTerminalWork *host) {
     MenuProgressList *list;
-    s32 i;
+    s32 partyIndex;
 
-    list = (MenuProgressList *)mnuCreateListState(0, 5, 0x24);
+    list = (MenuProgressList *)mnuCreateListState(0, MNU_PARTY_SLOT_COUNT, 0x24);
     list->callback = (s32)host;
     *(s32 *)&host->list = (s32)list;
     list->updateCallback = (s32)func_00248810;
     list->visible = 0;
-    for (i = 0; i < 5; i++) {
-        s32 box = datGameState + i * 0x1A4 + 0xA60;
+    for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
+        s32 unitAddress = datGameState + partyIndex * MNU_PARTY_RECORD_BYTES + 0xA60;
 
-        if ((u16)(*(u16 *)box & 1)) {
-            s32 score = mnuTerminalScoreBox(box);
+        if ((u16)(*(u16 *)unitAddress & 1)) {
+            s32 recoveryCost = mnuTerminalScoreBox(unitAddress);
 
-            if (score != 0) {
+            if (recoveryCost != 0) {
                 MenuProgressNode *node =
                     (MenuProgressNode *)mnuListAppendNode(host->list, (s32)D_003BC3F8);
-                MenuThresholdEntry *entry = (MenuThresholdEntry *)&node->itemIndex;
+                MenuThresholdEntry *entry = (MenuThresholdEntry *)&node->entryIndex;
 
                 node->panel = 0;
-                entry->requiredAmount = score;
-                entry->entryId = i;
+                entry->requiredAmount = recoveryCost;
+                entry->entryId = partyIndex;
             }
         }
     }
     mnuRefreshThresholdNodeFlags(host->list);
 }
 
+/* Destroy the progress-list allocation retained by the terminal work. */
 void mnuReleaseProgressWorkList(MenuTerminalWork *work) {
     mnuDestroyListState((u32)work->list);
 }
 
+/* Release the selected recovery panel, then pass its owning list to the follow-up. */
 void mnuReleaseSelectedProgressPanel(MenuTerminalWork *work) {
     mnuReleaseDualPercentPanel(work->list->selectedNode->panel);
     func_0027B888((u32)work->list);
@@ -361,13 +390,13 @@ typedef struct MenuSlotKind {
 extern MenuSlotKind D_0032EF18[];
 
 /* Same slot kind, or both kinds in the 30/31 pair. */
-s32 mnuSlotKindMatchesGroupOrSpecial(s32 index, s32 value) {
+s32 mnuSlotKindMatchesGroupOrSpecial(s32 index, s32 requestedKind) {
     s16 current = D_0032EF18[index].kind;
 
-    if (value == current) {
+    if (requestedKind == current) {
         return 1;
     }
-    if (value == 30 || value == 31) {
+    if (requestedKind == 30 || requestedKind == 31) {
         if (current == 30) {
             return 1;
         }
@@ -380,6 +409,7 @@ s32 mnuSlotKindMatchesGroupOrSpecial(s32 index, s32 value) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249058);
 
+/* Return whether model flag 0x902 is clear; its storyline meaning is not asserted. */
 u8 func_00249198(void) {
     s64 flagSet;
 
@@ -394,23 +424,24 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_002491B8);
 
 
 
-/* Omit the selected entry when building the progress list. */
+/* Omit the input-array position `excluded`, not all entries with that same value. */
 s32 mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback) {
     s32 list = mnuCreateListState(0, count, 0x15, callback);
-    s32 i;
+    s32 entryIndex;
     *(s32 *)(list + 0x30) = callback;
     *(s32 *)(list + 0x2c) = (s32)func_002491B8;
     *(s32 *)(list + 0x3c) = 0;
-    for (i = 0; i < count; i++) {
-        if (i != excluded) {
+    for (entryIndex = 0; entryIndex < count; entryIndex++) {
+        if (entryIndex != excluded) {
             s32 node = mnuListAppendNode(list, (s32)D_003BC3F8);
-            *(s32 *)(node + 0x60) = items[i];
+            *(s32 *)(node + 0x60) = items[entryIndex];
         }
     }
     return list;
 }
 
 
+/* Mark the selected command-list node only for modes zero/one and an idle owner. */
 void mnuHighlightProgressNodeFromOwnerSelection(s32 object) {
     s32 state = ((MenuTerminalWork *)object)->mode;
     if (state < 2) {
@@ -426,6 +457,7 @@ void mnuHighlightProgressNodeFromOwnerSelection(s32 object) {
 }
 
 
+/* Highlight the mode-zero or mode-two command node only while the progress list is idle. */
 void mnuHighlightProgressNodeByMode(s32 object) {
     s32 state = ((MenuTerminalWork *)object)->mode;
     s32 selectedIndex;
@@ -447,6 +479,8 @@ extern void mnuResolveStaffImageHandles(u8 *);
 
 extern s32 mnuTerminalMenuTemplate[];
 
+/* Build the mode-specific command list and the separate party recovery list.
+ * DDS1 retains its copied table and model-flag exclusion rather than DDS2's literals. */
 void mnuTerminalBuildMenus(MenuTerminalWork *host) {
     s32 table[15];
     s32 row;
@@ -489,6 +523,8 @@ extern void mnuDestroyListState(u32);
 
 extern void mnuReleaseStaffImageHandles(u8 *);
 
+/* Release command/progress lists, child percentage panels and staff image handles.
+ * Preserve their existing order and the single-iteration list loop. */
 void mnuReleaseWorkResources(u8 *work) {
     u32 i;
 
@@ -509,6 +545,8 @@ extern void evtClearActiveFlag(s32);
 
 extern void evtSetBoundedDisplayValue(s32, s32);
 
+/* Close via a black fade for modes one/two, otherwise request process 0x322.
+ * All paths clear active flag zero and set display slot one. No sound call occurs here. */
 void mnuFadeOrPlayCloseSfx(s32 skip, u8 *work) {
     if (skip == 0) {
         s32 mode = ((MenuTerminalWork *)work)->mode;
@@ -517,18 +555,19 @@ void mnuFadeOrPlayCloseSfx(s32 skip, u8 *work) {
             if (mode > 0) {
                 kwlnFadeOutStart(0, 0, 0, 15);
             } else {
-                evtCreateEventScriptProcess(0x322);
+                evtCreateEventScriptProcess(MNU_TERMINAL_EXIT_PROCESS);
             }
         } else {
-            evtCreateEventScriptProcess(0x322);
+            evtCreateEventScriptProcess(MNU_TERMINAL_EXIT_PROCESS);
         }
     } else {
-        evtCreateEventScriptProcess(0x322);
+        evtCreateEventScriptProcess(MNU_TERMINAL_EXIT_PROCESS);
     }
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(1, 1);
 }
 
+/* Return to mode zero and copy the owner's selected entry into the saved slot. */
 void mnuResetProgressModeFromOwner(u8 *work) {
     u8 *owner = (u8 *)((MenuTerminalWork *)work)->owner;
     ((MenuTerminalWork *)work)->mode = 0;
@@ -547,11 +586,12 @@ extern void mnuInitPartyPanelSlots(s32);
 
 extern void mnuAppendCampSpriteRequests(s32, s32);
 
+/* Allocate/zero the visual host, retain its allocation, and begin resource setup. */
 u8 *mnuCreateWorkBlock(void) {
-    s32 handle = sdfAllocGeneralBlock(0x82C);
+    s32 handle = sdfAllocGeneralBlock(MNU_MENU_HOST_BYTES);
     u8 *work = (u8 *)sdfResourceRetainAddress(handle);
 
-    memset(work, 0, 0x82C);
+    memset(work, 0, MNU_MENU_HOST_BYTES);
     *(s32 *)work = handle;
     ((MenuTerminalWork *)work)->groupResource = mnuAllocateValueRecord(1);
     mnuInitPartyPanelSlots((s32)(work + 0x84));
@@ -560,12 +600,13 @@ u8 *mnuCreateWorkBlock(void) {
     return work;
 }
 
-void mnuReleaseStaffMenuContextAndResources(u32 *arg0) {
-    mnuShutdownContext(arg0 + 100);
-    mnuReleaseStaffMenuTextureHandles(arg0 + 2);
-    mnuReleaseStaffResourceGroups(arg0 + 2);
-    func_002BC618(arg0[1]);
-    sdfReleaseResourceAllocation(*arg0);
+/* Release staff window/texture/resource work before the value record and allocation. */
+void mnuReleaseStaffMenuContextAndResources(u32 *workWords) {
+    mnuShutdownContext(workWords + 100);
+    mnuReleaseStaffMenuTextureHandles(workWords + 2);
+    mnuReleaseStaffResourceGroups(workWords + 2);
+    func_002BC618(workWords[1]);
+    sdfReleaseResourceAllocation(*workWords);
 }
 
 extern s32 mnuStaffSlotsAllFilled(s32, s32 *);
@@ -574,6 +615,8 @@ extern void mnuReleaseStaffMenuResources(s32 *);
 
 extern void mnuInitializeStaffPageWindows(s32, s32 *, s32, s32);
 
+/* Return one while initialization is pending (including state zero), zero when ready.
+ * On resource readiness, release loading resources, initialize windows, and store state two. */
 s32 mnuTickInitState(u8 *work) {
     s32 state = ((MenuTerminalWork *)work)->initState;
     s32 *group;
@@ -594,6 +637,7 @@ s32 mnuTickInitState(u8 *work) {
     return 0;
 }
 
+/* Bind the party selection's textures/grid, then create its panel and profile visuals. */
 void func_00249850(s32 source, MenuVisualWork *work) {
     s32 window = (s32)work->window;
     s32 index;
@@ -609,6 +653,7 @@ void func_00249850(s32 source, MenuVisualWork *work) {
     func_00276720(window, 1, 1, 1);
 }
 
+/* Release the window's entries/icons before its panel, sprite and profile allocations. */
 void mnuReleaseMenuVisualWorkResources(MenuVisualWork *work) {
     mnuClearEntries((s32)work + 400);
     mnuReleasePartyIconBundles((s32)work + 400);
@@ -617,14 +662,16 @@ void mnuReleaseMenuVisualWorkResources(MenuVisualWork *work) {
     mnuFreeProfilePanelWork(work->effectResource);
 }
 
-void effUpdateAttached(s32 arg0, s32 arg1, s32 arg2, MenuVisualWork *work) {
-    mnuDrawAndAdvanceProfilePanel(arg0, arg1, arg2, work->effectResource);
+/* Forward coordinates/mode to the retained profile panel; do not advance other visuals. */
+void effUpdateAttached(s32 x, s32 y, s32 mode, MenuVisualWork *work) {
+    mnuDrawAndAdvanceProfilePanel(x, y, mode, work->effectResource);
 }
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249998);
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249A60);
 
+/* Only the exact signed-byte value one enables the world/menu flags; all others disable. */
 void mnuSetWorldObjectAndMenuEnabled(s8 enabled) {
     s64 worldObject;
 
@@ -644,44 +691,47 @@ void mnuSetWorldObjectAndMenuEnabled(s8 enabled) {
     }
 }
 
+/* Allocate seven effect batches and seed their two opaque parameter words.
+ * EffectPair also carries drawing positions elsewhere, so its fields stay role-neutral. */
 void mnuTerminalCreateEffects(MenuTerminalWork *state) {
     EffectObject *obj;
 
     obj = effCreateStatusBatch(1);
     state->effect[0] = (s32)obj;
-    obj->inner->pair->a = 0x14;
-    obj->inner->pair->b = 1;
+    obj->inner->pair->firstValue = 0x14;
+    obj->inner->pair->secondValue = 1;
     obj = effCreateStatusBatch(1);
     state->effect[1] = (s32)obj;
-    obj->inner->pair->a = 0xF;
-    obj->inner->pair->b = 0;
+    obj->inner->pair->firstValue = 0xF;
+    obj->inner->pair->secondValue = 0;
     obj = effCreateStatusBatch(8);
     state->effect[2] = (s32)obj;
-    obj->inner->pair->a = 6;
-    obj->inner->pair->b = 1;
+    obj->inner->pair->firstValue = 6;
+    obj->inner->pair->secondValue = 1;
     obj = effCreateStatusBatch(8);
     state->effect[3] = (s32)obj;
-    obj->inner->pair->a = 6;
-    obj->inner->pair->b = 0;
+    obj->inner->pair->firstValue = 6;
+    obj->inner->pair->secondValue = 0;
     obj = effCreateStatusBatch(1);
     state->effect[4] = (s32)obj;
-    obj->inner->pair->a = 6;
-    obj->inner->pair->b = 1;
+    obj->inner->pair->firstValue = 6;
+    obj->inner->pair->secondValue = 1;
     obj = effCreateStatusBatch(1);
     state->effect[5] = (s32)obj;
-    obj->inner->pair->a = 6;
-    obj->inner->pair->b = 0;
+    obj->inner->pair->firstValue = 6;
+    obj->inner->pair->secondValue = 0;
     obj = effCreateStatusBatch(1);
     state->effect[6] = (s32)obj;
-    obj->inner->pair->a = 0x78;
-    obj->inner->pair->b = 0;
+    obj->inner->pair->firstValue = 0x78;
+    obj->inner->pair->secondValue = 0;
 }
 
+/* Destroy every retained effect batch; the slots and terminal allocation are not cleared. */
 void mnuDestroyAllMenuSlotEffectBatches(s32 object) {
     s32 *batch = ((MenuTerminalWork *)object)->effect;
     u32 i;
 
-    for (i = 0; i < 7; i++) {
+    for (i = 0; i < MNU_EFFECT_BATCH_COUNT; i++) {
         effDestroyPackedBatch(batch[i]);
     }
 }
@@ -689,14 +739,15 @@ void mnuDestroyAllMenuSlotEffectBatches(s32 object) {
 extern s32 fldGetCurrentBgmHandle(void);
 extern void sndEnsureMidiBankResident(u32);
 
-/* Pick the scene's music bank (default bank when the mode is zero) and make it resident. */
+/* Select the native default/current BGM handle and make only its bank bits resident.
+ * DDS1's default includes track one; DDS2's default has a zero low halfword. */
 void mnuSelectTerminalResourceBank(MenuTerminalWork *work) {
     if (work->mode == 0) {
-        work->resourceHandle = 0x20001;
+        work->bgmHandle = MNU_TERMINAL_DEFAULT_BGM;
     } else {
-        work->resourceHandle = fldGetCurrentBgmHandle();
+        work->bgmHandle = fldGetCurrentBgmHandle();
     }
-    sndEnsureMidiBankResident(work->resourceHandle & 0xFFFF0000);
+    sndEnsureMidiBankResident(work->bgmHandle & MNU_BGM_BANK_MASK);
 }
 
 extern void mnuClearPanelTransitionState(void *);
@@ -709,6 +760,8 @@ extern void evtLoadResourcePair(const char *, void *);
 
 extern s32 evtCreateMessageWindowIfMissing(s32);
 
+/* Allocate the terminal scene and its lists/effects/message resource.
+ * Keep the K&R definition and native calls; both cursor slots start at -1. */
 INCLUDE_RODATA(const s32, "game/code_00248580", mnuTerminalMenuTemplate);
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF620);
@@ -721,9 +774,9 @@ u8 *mnuTerminalCreateScene(reduced, slot)
     u8 *obj;
     u32 i;
 
-    handle = sdfAllocGeneralBlock(0x164);
+    handle = sdfAllocGeneralBlock(MNU_TERMINAL_SCENE_BYTES);
     obj = (u8 *)sdfResourceRetainAddress(handle);
-    memset(obj, 0, 0x164);
+    memset(obj, 0, MNU_TERMINAL_SCENE_BYTES);
     ((MenuTerminalWork *)obj)->allocation = handle;
     mnuClearPanelTransitionState(obj + 8);
     mnuLoadResourceHandles(obj);
@@ -735,7 +788,7 @@ u8 *mnuTerminalCreateScene(reduced, slot)
     mnuTerminalBuildMenus((MenuTerminalWork *)obj);
     evtLoadResourcePair("/facility/msg/terminal/mes_data.bmd", ((MenuTerminalWork *)obj)->messageResources);
     evtCreateMessageWindowIfMissing(((MenuTerminalWork *)obj)->messageResources[1]);
-    for (i = 0; i < 2; i++) {
+    for (i = 0; i < MNU_SELECTED_SLOT_COUNT; i++) {
         ((MenuTerminalWork *)obj)->cursor[i] = -1;
     }
     mnuSelectTerminalResourceBank((MenuTerminalWork *)obj);
@@ -754,7 +807,8 @@ extern void fldProcessDeferredSceneCommand(void);
 extern void sdfReleaseResourceAllocation(s32 handle);
 extern s8 mnuTerminalTaskState;
 
-/* Tear down the terminal menu task: release its resources and effect batches, then hand the saved mode/slot to the field scene. */
+/* Release the terminal task's resources/effects, then hand its mode/slot to the field.
+ * Native final work-field reads remain after allocation release and outside the NULL guard. */
 void mnuReleaseTerminalWorkAndResumeField(s32 arg) {
     MenuTerminalWork *work = (MenuTerminalWork *)kwlnTaskGetUserValue();
 
@@ -802,6 +856,8 @@ extern s64 func_0024A138(s32);
 extern s64 func_0024A170(s32);
 extern void mnuReleaseTerminalWorkAndResumeField(s32);
 
+/* Create the terminal update/draw/exit tasks sharing one scene.
+ * Preserve the legacy no-argument scene constructor call. */
 s32 mnuTerminalCreateTasks(void) {
     s32 result;
     void *work = mnuTerminalCreateScene();
@@ -813,6 +869,7 @@ s32 mnuTerminalCreateTasks(void) {
     return result;
 }
 
+/* Destroy the three named terminal tasks and clear the retained task handle. */
 void fldStopSceneTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003AF658, 0);
     kwlnTaskDestroyWithHierarchyByName(D_003AF668, 0);
@@ -820,6 +877,7 @@ void fldStopSceneTasks(void) {
     D_003BC3E4 = 0;
 }
 
+/* Report one only for active state one; consume completed state two by clearing it. */
 s32 fldPollSceneState(void) {
     s32 state = mnuTerminalTaskState;
     if (state == 1) {
@@ -838,6 +896,7 @@ extern char D_0036ADF4[];
 
 extern void mnuSetPopupEntry(s32 *, char *);
 
+/* Seed the task's popup slot before running panel mode zero with the supplied request. */
 s64 mnuPrepareTerminalPopupAndDispatch(s32 value) {
     s32 context = kwlnTaskGetUserValue();
     s32 *state = (s32 *)(context + 0x54);
@@ -846,18 +905,21 @@ s64 mnuPrepareTerminalPopupAndDispatch(s32 value) {
     return menuRunPanel(context, 0, value);
 }
 
+/* Dispatch current task work through panel mode one; distinct callback role unknown. */
 s64 func_0024A138(s32 value) {
     s32 context = kwlnTaskGetUserValue();
 
     return menuRunPanel(context, 1, value);
 }
 
+/* Dispatch current task work through panel mode two; distinct callback role unknown. */
 s64 func_0024A170(s32 value) {
     s32 context = kwlnTaskGetUserValue();
 
     return menuRunPanel(context, 2, value);
 }
 
+/* Require the fade to be inactive before testing message-window control for idle. */
 s32 evtIsFadeCompleteAndMessageWindowIdle(void) {
     s32 fadeActive = kwlnFadeIsActive();
 
@@ -871,22 +933,24 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_0024A1D8);
 
 typedef struct {
     u8 pad00[6];
-    u16 previousA; /* 0x06 */
-    u16 currentA;  /* 0x08 */
-    u16 previousB; /* 0x0A */
-    u16 currentB;  /* 0x0C */
-    u16 flags;     /* 0x0E */
+    u16 hp;          /* 0x06 */
+    u16 maxHp;       /* 0x08 */
+    u16 mp;          /* 0x0A */
+    u16 maxMp;       /* 0x0C */
+    u16 statusFlags; /* 0x0E */
 } SceneOptionRecord;
 
+/* Restore current HP/MP to their stored maxima and clear exactly the charged status bits.
+ * No boosted-max calculation or range validation is performed here. */
 void fldSaveSceneOptionsAndClearFlags(SceneOptionRecord *option) {
-    u16 flags = option->flags;
-    u16 currentA = option->currentA;
-    u16 currentB = option->currentB;
-    u16 retainedFlags = flags & 0xfa2f;
+    u16 statusFlags = option->statusFlags;
+    u16 maxHp = option->maxHp;
+    u16 maxMp = option->maxMp;
+    u16 retainedStatus = statusFlags & MNU_RECOVERY_STATUS_KEEP_MASK;
 
-    option->previousA = currentA;
-    option->previousB = currentB;
-    option->flags = retainedFlags;
+    option->hp = maxHp;
+    option->mp = maxMp;
+    option->statusFlags = retainedStatus;
 }
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024A2D8);
@@ -894,6 +958,9 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_0024A2D8);
 extern s32 D_003AF688[3][2];
 extern void func_002BF4E0(s32, s32, s32, s32, s32, u32, s32, s32);
 
+/* Draw the terminal panels before advancing their 0..256 blend weight.
+ * Reduced modes one/two set an endpoint immediately; normal opening adds twelve,
+ * closing subtracts seventeen. Keep the native draw-before-update order. */
 void func_0024A340(s32 close, s32 context) {
     MenuTerminalWork *work = (MenuTerminalWork *)context;
     s32 positions[3][2];
@@ -934,6 +1001,8 @@ void func_0024A340(s32 close, s32 context) {
     }
 }
 
+/* Classify panel fade: zero, nonzero below sixty, or at least sixty.
+ * This field is a blend weight, not a remaining-frame countdown. */
 s32 fldClassifyRemainingFrames(MenuTerminalWork *work) {
     s32 fade = work->panelFade;
     if (fade == 0) {
@@ -942,6 +1011,8 @@ s32 fldClassifyRemainingFrames(MenuTerminalWork *work) {
     return fade >= 60 ? 2 : 1;
 }
 
+/* Configure the current cursor effect; mode three also configures a valid previous slot.
+ * A negative current slot prevents every configuration, including the previous slot. */
 void mnuTerminalConfigureEffects(u32 mode, MenuTerminalWork *state) {
     s32 *slot = &state->cursor[0];
 
@@ -964,6 +1035,9 @@ void mnuTerminalConfigureEffects(u32 mode, MenuTerminalWork *state) {
     }
 }
 
+/* Map a command index to the native four-slot table, then configure its effect.
+ * Mode-one index one remaps to three; -2 clears only the previous slot.
+ * Other negative indices retain both slots. Nonnegative indices require caller bounds. */
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF658);
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF668);
@@ -989,16 +1063,17 @@ void mnuSelectTerminalCursorSlot(u32 mode, s32 index, MenuTerminalWork *state) {
     mnuTerminalConfigureEffects(mode, state);
 }
 
+/* Draw valid current/previous slots; mode two also runs its native extra draw step. */
 void mnuDrawTerminalSelectedSlots(s32 context) {
     MenuTerminalWork *state = (MenuTerminalWork *)context;
     EffectPair position = D_003BC400[0];
     s32 *slot;
     u32 i;
 
-    for (i = 0, slot = state->cursor; i < 2; i++, slot++) {
+    for (i = 0, slot = state->cursor; i < MNU_SELECTED_SLOT_COUNT; i++, slot++) {
         if (*slot >= 0) {
-            itfDrawGridWithResolvedSlot(position.a, position.b, 0, 0x81,
-                                        (s32)state->batch, *slot, 0x53);
+            itfDrawGridWithResolvedSlot(position.firstValue, position.secondValue, 0, 0x81,
+                                        (s32)state->batch, *slot, MNU_TEXT_DRAW_PRIORITY);
         }
     }
     if (state->mode == 2) {
@@ -1062,7 +1137,7 @@ typedef struct MenuFadeHost {
     u8 pad00[0x7C];
     s32 reduced;      /* 0x7C */
     u8 pad80[0xE0];
-    s32 fadeColor;    /* 0x160 */
+    s32 bgmHandle;    /* 0x160: encoded bank/track handle */
 } MenuFadeHost;
 
 extern void sndStartTrackExtended(s32);
@@ -1183,6 +1258,7 @@ typedef struct {
     u32 previousCallback; /* 0xC8 */
 } SceneTransition;
 
+/* Install the new transition callback while retaining the previous callback address. */
 void evtRememberDispatchCallback(u32 callback, SceneTransition *transition) {
     u32 previous;
 
@@ -1202,15 +1278,17 @@ void mnuDispatchTransitionHostCallbacks(TransitionHost *host) {
     }
 }
 
+/* Mode zero starts the selected BGM in full mode or invokes the reduced-mode action.
+ * Other modes use their counterpart actions; keep the native selection field. */
 void mnuApplyFadeTrackMode(s32 mode, MenuFadeHost *host) {
     if (mode == 0) {
         if (host->reduced == 0) {
-            sndStartTrackExtended(host->fadeColor);
+            sndStartTrackExtended(host->bgmHandle);
         } else {
             func_002E9708();
         }
     } else if (host->reduced == 0) {
-        func_002E96D8(host->fadeColor);
+        func_002E96D8(host->bgmHandle);
     } else {
         func_002E9730();
     }
@@ -1256,7 +1334,7 @@ typedef struct EvtBContext {
     u8 padE0[0x78];
     s32 effectHandle;   /* 0x158: effect resource handle */
     s32 dispatchMode; /* 0x15C */
-    u32 resourceHandle; /* 0x160 */
+    u32 bgmHandle;    /* 0x160: encoded bank/track handle */
 } EvtBContext;
 
 typedef struct EvtBSelectionNode {
@@ -1662,7 +1740,7 @@ u32 evtBReleaseImagesAndQueueMenuTransition(void) {
     *(s32 *)(context + 0x98) = 0;
     evtFinishMessageWindowAndNotify();
     dspCloseChannel();
-    func_002E96D8(((EvtBContext *)context)->resourceHandle);
+    func_002E96D8(((EvtBContext *)context)->bgmHandle);
     return 1;
 }
 
@@ -1677,7 +1755,7 @@ s32 mnuOpenTerminalSelectionMessageWindow(void) {
     ((EvtBContext *)context)->exitPending = 0;
     evtCreateMessageWindowIfMissing(((MenuTerminalWork *)context)->messageResources[1]);
     if (((EvtBContext *)context)->state7C != 0) {
-        sndStartTrackExtended(((EvtBContext *)context)->resourceHandle);
+        sndStartTrackExtended(((EvtBContext *)context)->bgmHandle);
     }
     return 1;
 }
@@ -1849,7 +1927,7 @@ u32 evtExitSelectionMenuAndSendSoundCommand(void) {
     }
     evtRememberDispatchCallback(0, context);
     ((EvtBContext *)context)->exitPending = 1;
-    func_002E96D8(((EvtBContext *)context)->resourceHandle);
+    func_002E96D8(((EvtBContext *)context)->bgmHandle);
     evtClearActiveFlag(0);
     return 1;
 }
