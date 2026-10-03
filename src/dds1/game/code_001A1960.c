@@ -3437,7 +3437,49 @@ s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BCB88);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BCCE0);
+typedef struct BtlSceneFlowState {
+    u8 pad00[0x3C];
+    s8 state;
+    u8 pad3D[3];
+    s32 counter;
+    s32 threshold;
+} BtlSceneFlowState;
+
+s32 func_001BCCE0(void) {
+    BtlSceneFlowState *flow;
+    s64 task;
+    s32 counter;
+
+    if (btlTrackedTaskHandles != 0) {
+        task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+        flow = (BtlSceneFlowState *)btlTrackedTaskHandles;
+        switch (flow->state) {
+        case 1:
+            flow->counter++;
+            if (flow->counter >= flow->threshold) {
+                flow->state = 2;
+            }
+            break;
+        case 3:
+            counter = flow->counter + 1;
+            flow->counter = counter;
+            if (counter < flow->threshold) {
+                break;
+            }
+            counter = counter <= 0 ? 0 :
+                (counter < flow->threshold ? counter : flow->threshold);
+            flow->counter = counter;
+            if (btlAreLinkedSceneCountersAtThreshold() != 0) {
+                if (task != 0) {
+                    func_001B83D8(*(s32 *)(kwlnTaskGetUserValue(task) + 0x2C), 2, 0);
+                }
+                ((BtlSceneFlowState *)btlTrackedTaskHandles)->state = 0;
+            }
+            break;
+        }
+    }
+    return 0;
+}
 
 void fldInitializeBattleSceneFlow(void) {
     s32 context = btlGetRuntime();
