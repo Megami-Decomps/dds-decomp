@@ -324,3 +324,7 @@ s32 func_002ED5C0(void *unused, MovObj *movie, s32 operation, u8 *data, s32 size
 
     return 0;
 }
+
+INCLUDE_ASM(const s32, "sdf/sdfMovie", func_002ED740);
+
+INCLUDE_ASM(const s32, "sdf/sdfMovie", func_002ED760);
