@@ -118,7 +118,9 @@ typedef struct EventViewerState {
     s32 pendingResource; /* 0x242C */
     u8 pad2430[0x10];
     s32 titleStreamWaitFrames; /* 0x2440 */
-    u8 pad2444[0x4C]; /* allocated as 0x2490 bytes */
+    u8 pad2444[0x34];
+    s32 unk2478;
+    u8 pad247C[0x14]; /* allocated as 0x2490 bytes */
 } EventViewerState;
 
 typedef struct EvtViewSel {
