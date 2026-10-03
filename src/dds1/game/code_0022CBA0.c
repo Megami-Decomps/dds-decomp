@@ -62,7 +62,7 @@ typedef struct EventViewerState {
     u8 pad2028[4];
     s32 fallbackEntry;
     u8 pad2030[4];
-    struct EvtViewNode *nodes; /* 0x2034 */
+    struct EvtViewTrack *tracks; /* 0x2034 */
     u8 pad2038[0x204];
     struct {
         u16 id;
@@ -149,8 +149,10 @@ typedef struct EvtViewEntry {
 
 u16 evtViewerPopHistory(EventViewerState *viewer);
 
-typedef struct EvtViewGlyph {
-    u16 id;       /* 0x00 */
+/* Timeline key shared by several track kinds, not a rendered font glyph.
+ * The selector/channel widths depend on the enclosing track and key kind. */
+typedef struct EvtViewKey {
+    u16 frame; /* 0x00: track-local frame position. */
     u16 duration;
     u8 pad04[4];
     union {
@@ -158,36 +160,45 @@ typedef struct EvtViewGlyph {
         s16 unitIndex;
     } selector; /* Interpretation depends on the enclosing track kind. */
     s16 enabled;
-    s8 channel;   /* 0x0C */
-    u8 pad0D[3];
+    union {
+        s8 value;
+        s16 objectIndex;
+    } channel; /* 0x0C: byte value or signed world-object name-table index. */
+    u8 pad0E[2];
     s16 condition; /* 0x10 */
     u8 pad12[0x1E];
-    struct EvtViewGlyph *next; /* 0x30 */
-    struct EvtViewGlyph *previous; /* 0x34 */
-} EvtViewGlyph;
+    struct EvtViewKey *next; /* 0x30 */
+    struct EvtViewKey *previous; /* 0x34 */
+} EvtViewKey;
 
-typedef struct EvtViewNode {
+/* Linked timeline track. Saved vectors and the attachment latch are used by
+ * kind-1 world-object tracks; the vectors keep their original embedded layout. */
+typedef struct EvtViewTrack {
     s32 kind;                 /* 0x00 */
     u8 pad04[0xC];
     u32 owner;                /* 0x10 */
     u8 pad14[8];
-    s16 time;                 /* 0x1C */
+    s16 frameOffset; /* 0x1C: added to relative key frames. */
     u8 pad1E[6];
     s32 unk24;
     s32 keyMode;              /* 0x28: mode 1 uses the viewer's pending key */
-    u8 pad2C[0x24];
-    s32 hasGlyphs;            /* 0x50 */
-    EvtViewGlyph *glyphs;     /* 0x54 */
-    EvtViewGlyph *lastGlyph;  /* 0x58 */
+    f32 savedFirstVector[4]; /* 0x2C: restored when detaching a world object. */
+    f32 savedSecondVector[4]; /* 0x3C */
+    s32 objectAttached; /* 0x4C: world-object attachment needs restoring. */
+    s32 hasKeys; /* 0x50 */
+    EvtViewKey *keys; /* 0x54 */
+    EvtViewKey *lastKey; /* 0x58 */
     u8 pad5C[0x20];
-    struct EvtViewNode *next; /* 0x7C */
-} EvtViewNode;
+    struct EvtViewTrack *next; /* 0x7C */
+} EvtViewTrack;
 
 
 extern void func_00243048(u16 *from, u16 *to, u8 *out, f32 ratio);
 extern void func_00243608(s32 handle, u8 *out);
 
-void evtViewerApplyInterpolatedNodeKey(EventViewerState *viewer, EvtViewNode *node, u16 *from, u16 *to) {
+/* Interpolates parameter keys at the viewer's current frame, accounting for
+ * the track offset. A missing next key leaves the interpolation ratio at zero. */
+void evtViewerApplyInterpolatedNodeKey(EventViewerState *viewer, EvtViewTrack *node, u16 *from, u16 *to) {
     u8 out[0x20];
     f32 ratio = 0.0f;
 
@@ -195,7 +206,7 @@ void evtViewerApplyInterpolatedNodeKey(EventViewerState *viewer, EvtViewNode *no
         if (to != NULL) {
             s32 start = *from;
             f32 span = *to - start;
-            f32 elapsed = viewer->glyphAdvancePosition - (start + node->time);
+            f32 elapsed = viewer->glyphAdvancePosition - (start + node->frameOffset);
 
             if (span != 0.0f) {
                 ratio = elapsed / span;
@@ -206,8 +217,10 @@ void evtViewerApplyInterpolatedNodeKey(EventViewerState *viewer, EvtViewNode *no
     }
 }
 
+/* Applies kind-24 parameter tracks using bracketing keys, or the pending key
+ * when keyMode is 1. Traversal uses the shared timeline-key record. */
 void evtViewerApplyParameterKeyTracks(EventViewerState *viewer) {
-    EvtViewNode *node = viewer->nodes;
+    EvtViewTrack *node = viewer->tracks;
     s32 position = viewer->glyphAdvancePosition;
 
     while (node != NULL) {
@@ -216,16 +229,16 @@ void evtViewerApplyParameterKeyTracks(EventViewerState *viewer) {
                 u16 *key = (u16 *)evtEventViewerGetPendingNode((s32)viewer);
                 evtViewerApplyInterpolatedNodeKey(viewer, node, key, NULL);
             } else {
-                EvtViewGlyph *glyph = node->glyphs;
-                EvtViewGlyph *from;
+                EvtViewKey *glyph = node->keys;
+                EvtViewKey *from;
 
-                while (glyph != NULL && position >= glyph->id + node->time) {
+                while (glyph != NULL && position >= glyph->frame + node->frameOffset) {
                     glyph = glyph->next;
                 }
                 if (glyph != NULL) {
                     from = glyph->previous;
                 } else {
-                    from = node->lastGlyph;
+                    from = node->lastKey;
                 }
                 evtViewerApplyInterpolatedNodeKey(viewer, node, (u16 *)from, (u16 *)glyph);
             }
@@ -326,11 +339,13 @@ extern s32 evtUnitGetNestedValue(u8 *);
 extern void evtSetUnitValueTransition(EvtUnit *, s32, s32);
 extern void evtEndUnitValueTransition(EvtUnit *, s32);
 
+/* At time, selects each named unit's latest kind-9 transition key and starts,
+ * ends or leaves its value transition according to the selected key flags. */
 void func_0022E098(s32 time, EventViewerState *viewer) {
     EvtWorldLink *object;
-    EvtViewNode *node;
-    EvtViewGlyph *key;
-    EvtViewGlyph *selected;
+    EvtViewTrack *node;
+    EvtViewKey *key;
+    EvtViewKey *selected;
     EvtUnit *unit;
     s32 selectedValue;
     s32 selectedTime;
@@ -342,17 +357,17 @@ void func_0022E098(s32 time, EventViewerState *viewer) {
                 selected = NULL;
                 selectedValue = 0;
                 selectedTime = -1;
-                node = viewer->nodes;
+                node = viewer->tracks;
                 while (node != NULL) {
                     if (node->kind == 9) {
-                        key = node->glyphs;
+                        key = node->keys;
                         while (key != NULL) {
-                            if (time >= key->id + node->time && key->selector.unitIndex >= 0 &&
+                            if (time >= key->frame + node->frameOffset && key->selector.unitIndex >= 0 &&
                                 object == dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(),
                                     EVT_WORLD_SLOT_UNIT, viewer->unitNames[key->selector.unitIndex])) {
-                                if (selectedTime < key->id + node->time) {
+                                if (selectedTime < key->frame + node->frameOffset) {
                                     selectedValue = node->owner;
-                                    selectedTime = key->id + node->time;
+                                    selectedTime = key->frame + node->frameOffset;
                                     selected = key;
                                 }
                             }
@@ -392,11 +407,13 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022E5A0);
 extern s32 dds3GetSlot(s32 owner, s32 kind);
 extern void evtPolygonMovieClampTime(s32 object, s32 arg1, s32 start, s32 end);
 
+/* Clamps each movie object's playback interval using its linked track's first
+ * key frame (or track offset) and the supplied endTime. */
 void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
     s32 table;
     s32 slots;
     s32 object;
-    EvtViewNode *node;
+    EvtViewTrack *node;
     s32 time;
 
     if (dds3GetWorldObject() != 0) {
@@ -407,16 +424,16 @@ void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
                 object = (s32)((EvtWorldSlot *)slots)[EVT_WORLD_SLOT_MOVIE].head;
                 if (object != 0) {
                     do {
-                        node = viewer->nodes;
+                        node = viewer->tracks;
                         while (node != NULL) {
                             if (node->owner != 0 && object == dds3GetSlot(node->owner, 1)) {
                                 if (node->kind == 2) {
                                     time = 0;
-                                    if (node->hasGlyphs != 0) {
-                                        time = node->glyphs->id;
+                                    if (node->hasKeys != 0) {
+                                        time = node->keys->frame;
                                     }
                                 } else {
-                                    time = node->time;
+                                    time = node->frameOffset;
                                 }
                                 evtPolygonMovieClampTime(object, 0, time, endTime);
                                 break;
@@ -435,16 +452,18 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022EB10);
 
 extern void func_0022EB10();
 
+/* Updates world units at position using the first track whose owner word
+ * matches that unit's object-chain node. */
 void evtViewerSyncWorldGroups(s32 position, EventViewerState *viewer) {
     s32 object;
-    EvtViewNode *node;
-    EvtViewNode *found;
+    EvtViewTrack *node;
+    EvtViewTrack *found;
 
     if (dds3GetWorldObject() != 0) {
         object = (s32)((EvtWorldObject *)dds3GetWorldObject())->table->slots[EVT_WORLD_SLOT_UNIT].head;
         if (object != 0) {
             do {
-                node = viewer->nodes;
+                node = viewer->tracks;
                 found = NULL;
                 while (node != NULL) {
                     if (node->owner == object) {
@@ -464,23 +483,25 @@ void evtViewerSyncWorldGroups(s32 position, EventViewerState *viewer) {
 
 extern s32 sdfGetLodChunkValue();
 
+/* Applies the latest kind-6 key at/before position to a kind-1 track's LOD
+ * byte, provided the requested signed-byte level is supported by its chunk. */
 void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
-    EvtViewNode *node = viewer->nodes;
-    EvtViewGlyph *glyph;
-    EvtViewGlyph *best;
-    s32 bestId;
+    EvtViewTrack *node = viewer->tracks;
+    EvtViewKey *glyph;
+    EvtViewKey *best;
+    s32 bestFrame;
     u8 *lod;
     s8 level;
 
     while (node != NULL) {
         if (node->kind == 1) {
-            glyph = node->glyphs;
-            bestId = -1;
+            glyph = node->keys;
+            bestFrame = -1;
             best = NULL;
             if (glyph != NULL) {
                 do {
-                    if (position >= glyph->id && bestId < glyph->id && glyph->selector.kind == 6) {
-                        bestId = glyph->id;
+                    if (position >= glyph->frame && bestFrame < glyph->frame && glyph->selector.kind == 6) {
+                        bestFrame = glyph->frame;
                         best = glyph;
                     }
                     glyph = glyph->next;
@@ -490,9 +511,9 @@ void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
             if (best == NULL) {
                 lod[0x98] = 0;
             } else {
-                level = best->channel;
+                level = best->channel.value;
                 if (sdfGetLodChunkValue(lod) >= level) {
-                    lod[0x98] = best->channel;
+                    lod[0x98] = best->channel.value;
                 }
             }
         }
@@ -508,57 +529,59 @@ extern void effObjFetchInnerFirstVec(EffTransformNode *);
 extern u32 *dds3FindObjectChainNodeByName(struct WorldObjectPointer *, const u8 *);
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
+/* At an exact kind-7 key frame, attaches the indexed world object. Index -1
+ * restores the saved vectors; losing the active key restores them once too. */
 void func_0022F038(s32 position, EventViewerState *viewer) {
-    EvtViewNode *node = viewer->nodes;
-    EvtViewGlyph *glyph;
-    EvtViewGlyph *best;
-    s32 bestId;
+    EvtViewTrack *node = viewer->tracks;
+    EvtViewKey *glyph;
+    EvtViewKey *best;
+    s32 bestFrame;
 
     while (node != NULL) {
         if (node->kind == 1) {
-            glyph = node->glyphs;
-            bestId = -1;
+            glyph = node->keys;
+            bestFrame = -1;
             best = NULL;
             if (glyph != NULL) {
                 do {
-                    if (glyph->selector.kind == 7 && position >= glyph->id &&
-                        bestId < glyph->id) {
-                        bestId = glyph->id;
+                    if (glyph->selector.kind == 7 && position >= glyph->frame &&
+                        bestFrame < glyph->frame) {
+                        bestFrame = glyph->frame;
                         best = glyph;
                     }
                     glyph = glyph->next;
                 } while (glyph != NULL);
             }
             if (best == NULL) {
-                if (*(s32 *)((u8 *)node + 0x4C) == 1) {
+                if (node->objectAttached == 1) {
                     effObjSetInnerFirstVec((EffTransformNode *)node->owner,
-                        (u128 *)((u8 *)node + 0x2C));
+                        (u128 *)node->savedFirstVector);
                     effObjSetInnerSecondVec((EffTransformNode *)node->owner,
-                        (u128 *)((u8 *)node + 0x3C));
+                        (u128 *)node->savedSecondVector);
                     effObjFetchInnerFirstVec((EffTransformNode *)node->owner);
                     VU0_STORE_VF(vf10,
                         (u8 *)*(void **)((u8 *)node->owner + 0x1C) + 0x70);
-                    *(s32 *)((u8 *)node + 0x4C) = 0;
+                    node->objectAttached = 0;
                 }
-            } else if (best->id == position) {
-                s16 channel = *(s16 *)((u8 *)best + 0xC);
+            } else if (best->frame == position) {
+                s16 channel = best->channel.objectIndex;
 
                 if (channel == -1) {
                     effObjSetInnerFirstVec((EffTransformNode *)node->owner,
-                        (u128 *)((u8 *)node + 0x2C));
+                        (u128 *)node->savedFirstVector);
                     effObjSetInnerSecondVec((EffTransformNode *)node->owner,
-                        (u128 *)((u8 *)node + 0x3C));
+                        (u128 *)node->savedSecondVector);
                     effObjFetchInnerFirstVec((EffTransformNode *)node->owner);
                     VU0_STORE_VF(vf10,
                         (u8 *)*(void **)((u8 *)node->owner + 0x1C) + 0x70);
-                    *(s32 *)((u8 *)node + 0x4C) = 0;
+                    node->objectAttached = 0;
                 } else {
                     u32 *object = dds3FindObjectChainNodeByName(
                         dds3GetWorldObject(), viewer->unitNames[channel]);
 
                     mdlAttachWorldObjectToSourceVector(
                         *(s32 *)((u8 *)node->owner + 4), object[1]);
-                    *(s32 *)((u8 *)node + 0x4C) = 1;
+                    node->objectAttached = 1;
                 }
             }
         }
@@ -571,20 +594,22 @@ extern void mnuUnpackNibbleFields(struct CampPacked *, s32 *, s32 *);
 extern u32 itfMesGetWindowEntryItems(s32, s32);
 void evtViewerMarkWindowActive(EventViewerState *viewer);
 
+/* Activates the message window thirty frames before a kind-4 key when its
+ * unpacked entry is ready. id is the current timeline position, not a glyph ID. */
 void evtViewerActivateWindowForGlyphEntry(s32 id, EventViewerState *viewer) {
     s32 low;
     s32 high;
-    EvtViewNode *node;
-    EvtViewGlyph *glyph;
+    EvtViewTrack *node;
+    EvtViewKey *glyph;
 
     if (viewer->windowContext != 0) {
         if (((EvtWindowContext *)viewer->windowContext)->windowHandle != -1) {
-            for (node = viewer->nodes; node != NULL; node = node->next) {
+            for (node = viewer->tracks; node != NULL; node = node->next) {
                 if (node->kind != 4) {
                     continue;
                 }
-                for (glyph = node->glyphs; glyph != NULL; glyph = glyph->next) {
-                    if (glyph->id - 30 != id) {
+                for (glyph = node->keys; glyph != NULL; glyph = glyph->next) {
+                    if (glyph->frame - 30 != id) {
                         continue;
                     }
                     mnuUnpackNibbleFields((struct CampPacked *)glyph, &low, &high);
@@ -707,16 +732,18 @@ void func_0022FA60(void) {
 
 s32 evtViewerTestIndexedCondition(u32 condition);
 
-EvtViewGlyph *evtViewerFindLatestMatchingGlyph(EvtViewNode *group, s32 position, s32 channel) {
-    s32 bestId = -1;
-    EvtViewGlyph *best = NULL;
-    EvtViewGlyph *glyph = group->glyphs;
+/* Returns the latest eligible kind-5 key at/before position for channel, or
+ * NULL. The condition must pass; equal-frame ties retain the first key visited. */
+EvtViewKey *evtViewerFindLatestMatchingGlyph(EvtViewTrack *group, s32 position, s32 channel) {
+    s32 bestFrame = -1;
+    EvtViewKey *best = NULL;
+    EvtViewKey *glyph = group->keys;
 
     if (glyph != NULL) {
         do {
-            if (position >= glyph->id && bestId < glyph->id && glyph->selector.kind == 5 &&
-                glyph->channel == channel && evtViewerTestIndexedCondition(glyph->condition) == 1) {
-                bestId = glyph->id;
+            if (position >= glyph->frame && bestFrame < glyph->frame && glyph->selector.kind == 5 &&
+                glyph->channel.value == channel && evtViewerTestIndexedCondition(glyph->condition) == 1) {
+                bestFrame = glyph->frame;
                 best = glyph;
             }
             glyph = glyph->next;
@@ -739,21 +766,23 @@ void evtViewerDispatchFlagMode(u32 viewerAddr) {
     func_0022FB30(1, ((EventViewerState *)viewer)->glyphAdvancePosition, viewerAddr);
 }
 
+/* Returns the address word of the nearest kind-2 key strictly after the current
+ * frame, or zero. Equal-distance ties retain the first key visited. */
 s32 evtViewFindNextGlyph(EventViewerState *viewer) {
-    EvtViewGlyph *result = NULL;
+    EvtViewKey *result = NULL;
     s32 best = 99999;
-    EvtViewNode *node = viewer->nodes;
+    EvtViewTrack *node = viewer->tracks;
 
     while (node != NULL) {
         if (node->kind == 2) {
-            EvtViewGlyph *glyph = node->glyphs;
+            EvtViewKey *glyph = node->keys;
 
             if (glyph != NULL) {
                 do {
-                    s32 x = glyph->id;
+                    s32 frame = glyph->frame;
 
-                    if (viewer->glyphAdvancePosition < x) {
-                        s32 distance = x - viewer->glyphAdvancePosition;
+                    if (viewer->glyphAdvancePosition < frame) {
+                        s32 distance = frame - viewer->glyphAdvancePosition;
 
                         if (distance < best) {
                             best = distance;
@@ -769,21 +798,23 @@ s32 evtViewFindNextGlyph(EventViewerState *viewer) {
     return (s32)result;
 }
 
+/* Returns the address word of the nearest kind-2 key strictly before the current
+ * frame, or zero. Equal-distance ties retain the first key visited. */
 s32 evtViewFindPrevGlyph(EventViewerState *viewer) {
-    EvtViewGlyph *result = NULL;
+    EvtViewKey *result = NULL;
     s32 best = 99999;
-    EvtViewNode *node = viewer->nodes;
+    EvtViewTrack *node = viewer->tracks;
 
     while (node != NULL) {
         if (node->kind == 2) {
-            EvtViewGlyph *glyph = node->glyphs;
+            EvtViewKey *glyph = node->keys;
 
             if (glyph != NULL) {
                 do {
-                    s32 x = glyph->id;
+                    s32 frame = glyph->frame;
 
-                    if (x < viewer->glyphAdvancePosition) {
-                        s32 distance = viewer->glyphAdvancePosition - x;
+                    if (frame < viewer->glyphAdvancePosition) {
+                        s32 distance = viewer->glyphAdvancePosition - frame;
 
                         if (distance < best) {
                             best = distance;
