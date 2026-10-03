@@ -1178,6 +1178,10 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_0024AB70);
 
 extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
 extern s32 D_003AF6E0[2][2];
+typedef struct MenuGridPositions {
+    EffectPair entries[2];
+} MenuGridPositions;
+extern const MenuGridPositions D_003AF6F0;
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
 void func_0024ACD8(s32 close, s32 context) {
@@ -1213,7 +1217,36 @@ void func_0024ACD8(s32 close, s32 context) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024AE18);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024AF58);
+void func_0024AF58(s32 close, s32 context) {
+    MenuTerminalWork *work = (MenuTerminalWork *)context;
+    MenuGridPositions positions = D_003AF6F0;
+    u32 progress;
+    SceneFrameTable *frames;
+
+    itfDrawGridWithResolvedSlot(positions.entries[1].firstValue, positions.entries[1].secondValue, 0, 0x80,
+                                (s32)work->batch, 10, 0x53);
+    mnuCallInitWide(0x330, 0x2E8, 0, (s32)work->owner, 0x53);
+    itfDrawGridWithResolvedSlot(positions.entries[0].firstValue, positions.entries[0].secondValue, 0, 0x80,
+                                (s32)work->batch, 9, 0x53);
+    frames = work->batch;
+    progress = ((u32)frames->records[9].unk14 << 8) /
+               frames->records[9].unk84;
+    if (close != 0) {
+        if (work->owner->scale > 0) {
+            work->owner->scale -= 0x40;
+        }
+        if (work->owner->scale < 0) {
+            work->owner->scale = 0;
+        }
+    } else if (progress == 0x100) {
+        if (work->owner->scale < 0x100) {
+            work->owner->scale += 0x40;
+        }
+        if (work->owner->scale > 0x100) {
+            work->owner->scale = 0x100;
+        }
+    }
+}
 
 typedef struct GridPanelHost {
     u8 pad00[0x64];
@@ -1530,7 +1563,6 @@ s64 evtBSetupDispatchSyncB(s32 request) {
 
 extern void mnuSelectFirstListNode(s32);
 extern void func_0024A728(s32, s32);
-extern void func_0024AF58(void);
 extern void func_0024AE18(s32, s32);
 
 
