@@ -2408,7 +2408,7 @@ extern s32 D_003898B4[];
 
 extern s32 D_00436378;
 
-extern void func_0014EDB8(void);
+extern s32 func_0014EDB8(void);
 
 extern void fldReleaseTitleMiniTexture(void);
 
