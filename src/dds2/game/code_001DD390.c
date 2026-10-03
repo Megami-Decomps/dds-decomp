@@ -124,7 +124,8 @@ typedef struct BtlWork {
     s32 (*hook618)(BtlUnit *);
     u8 pad61C[0x1C];
     void (*hook638)(BtlUnit *);
-    u8 pad63C[0x10];
+    s32 (*commandHook)(s32, s32);
+    u8 pad640[0xC];
     s32 (*hook64C)(BtlUnit *);
     s32 (*hook650)(BtlUnit *);
     s32 (*hook654)(BtlUnit *);
@@ -819,7 +820,93 @@ extern void btlDestroyAllActionSeqs(void);
 extern BtlUnit *btlFindUnitByActor(BtlUnit *actor);
 extern s32 func_001DD1A8();
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001DD390);
+extern s8 *datCommandSelectors;
+extern s32 btlGetLoggedIndexedCommandItem(s32);
+extern void scrSetGlobalBitFlag(u32);
+
+/* A hook result of -1 leaves dispatch to the command-kind handler. */
+void func_001DD390(u8 *command, u8 *argument) {
+    s32 (*handler)(s32, s32) = ((BtlWork *)btlGetRuntime())->commandHook;
+
+    if (handler != 0) {
+        s32 result = handler((s32)command, (s32)argument);
+        if (result != -1) {
+            btlDispatchStateHandler((s32 *)command, result);
+            return;
+        }
+    }
+    switch (*(s32 *)argument) {
+    case 1:
+        btlDispatchStateHandler((s32 *)command, 0xD);
+        break;
+    case 4:
+        *(s32 *)(argument + 4) = btlGetLoggedIndexedCommandItem(*(s32 *)(argument + 8));
+        /* fallthrough */
+    case 2:
+    case 3:
+    case 7:
+    case 8:
+        if (*(s8 *)(datCommandSelectors + *(s32 *)(argument + 4) * 2 + 1) != 1) {
+            btlDispatchStateHandler((s32 *)command, 0xE);
+        } else {
+            if (*(u32 *)(*(s32 *)(command + 0x18) + 0x110) & 0x200) {
+                scrSetGlobalBitFlag(*(u16 *)(argument + 4));
+            }
+            btlDispatchStateHandler((s32 *)command, 0xF);
+        }
+        break;
+    case 5: {
+        u32 flags = *(u32 *)(*(s32 *)(command + 0x18) + 0x110);
+        if (flags & 0x200) {
+            if (flags & 0x1000) {
+                btlDispatchStateHandler((s32 *)command, 0x10);
+            } else {
+                btlDispatchStateHandler((s32 *)command, 0x11);
+            }
+        } else {
+            btlDispatchStateHandler((s32 *)command, 0x13);
+        }
+        break;
+    }
+    case 10:
+    case 13:
+    case 14:
+    case 18:
+        btlDispatchStateHandler((s32 *)command, 0x14);
+        break;
+    case 9:
+        if (*(u32 *)(*(s32 *)(command + 0x34) + 0x110) & 1) {
+            btlDispatchStateHandler((s32 *)command, 0x17);
+        } else {
+            btlDispatchStateHandler((s32 *)command, 0x16);
+        }
+        break;
+    case 12:
+        btlDispatchStateHandler((s32 *)command, 0x16);
+        break;
+    case 6: {
+        u32 flags = *(u32 *)(*(s32 *)(command + 0x18) + 0x110);
+        if (flags & 0x200) {
+            btlDispatchStateHandler((s32 *)command, 0x18);
+        } else if (flags & 0x400) {
+            btlDispatchStateHandler((s32 *)command, 0x15);
+        }
+        break;
+    }
+    case 11:
+        btlDispatchStateHandler((s32 *)command, 0x15);
+        break;
+    case 15:
+        btlDispatchStateHandler((s32 *)command, 0x19);
+        break;
+    case 16:
+        btlDispatchStateHandler((s32 *)command, 0x1A);
+        break;
+    case 17:
+        btlDispatchStateHandler((s32 *)command, 0x20);
+        break;
+    }
+}
 
 s32 btlIsSupportedCommandKind(s32 *state) {
     switch (*state) {
