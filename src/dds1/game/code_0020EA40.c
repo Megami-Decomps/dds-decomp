@@ -91,12 +91,24 @@ s32 btlGetAlternatePhaseCommand(void) {
 
 INCLUDE_ASM(const s32, "game/code_0020EA40", func_0020EC20);
 
+/* Native 0x28-byte scene descriptor; the list stores unit modes, not command IDs. */
+typedef struct SceneDescriptor {
+    s8 unk00;
+    u8 pad01[5];
+    u16 unitModes[11]; /* 0x06 */
+    u8 pad1C[4];
+    u16 flags;        /* 0x20: also read by scene entry */
+    u8 pad22[4];
+    u16 eventId;      /* 0x26: zero disables; event loading then converts to s16 */
+} SceneDescriptor;
+
 extern s32 datBattleSceneRecords;
 
+/* Despite the historical name, test the unit mode against eleven scene entries. */
 s32 btlIsActionIdListed(BtlUnit *unit) {
     BtlState *battle;
-    u16 *entry;
-    u32 id;
+    u16 *listedMode;
+    u32 unitMode;
     u32 i;
 
     if ((unit->flags & 0x400) == 0) {
@@ -104,10 +116,12 @@ s32 btlIsActionIdListed(BtlUnit *unit) {
     }
     battle = (BtlState *)btlGetRuntime();
     i = 0;
-    entry = (u16 *)(battle->battleMode * 0x28 + datBattleSceneRecords + 6);
-    id = unit->mode;
+    /* Keep the signed byte offset before the SDK word address (required to match). */
+    listedMode = ((SceneDescriptor *)(battle->battleMode * (s32)sizeof(SceneDescriptor) +
+                                     datBattleSceneRecords))->unitModes;
+    unitMode = unit->mode;
     for (; i < 0xB; i++) {
-        if (*entry++ == id) {
+        if (*listedMode++ == unitMode) {
             return 1;
         }
     }
