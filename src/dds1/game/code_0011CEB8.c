@@ -7,30 +7,26 @@ extern u32 func_0011B150(u64);
 
 extern u32 dds3OwnedNodeListHead;
 
-/* Intrusive list node: next at +4, payload at +8, vtable at +0xC. */
+typedef struct Dds3Node Dds3Node;
+
+/* Intrusive list node callbacks; font nodes own a glyph at +0x10. */
 typedef struct Dds3NodeVTable {
-    void (*destroy)(s32);
-    void (*update)(s32);
+    void (*destroy)(Dds3Node *node);
+    void (*update)(Dds3Node *node);
 } Dds3NodeVTable;
 
-typedef struct Dds3Node {
-    s32 unk0;
+struct Dds3Node {
+    struct Dds3Node *prev;
     struct Dds3Node *next;
     s32 value;
     Dds3NodeVTable *vtable;
-    s32 unk10;
-} Dds3Node;
+    u32 glyph;
+};
 
 extern s32 func_001951C8(u32, s32, s32, s32, s32);
 extern void frFontSetContextPair(s32, u32, u32);
 extern s32 sdfAllocAndClearQuadwords(s32);
-extern u32 dds3FontNodeVTable;
-
-/* Shared glyph owner layout: handle at +0x10, released by the font routines. */
-typedef struct GlyphOwner {
-    u8 pad00[0x10];
-    u32 glyph;
-} GlyphOwner;
+extern Dds3NodeVTable dds3FontNodeVTable;
 
 /* Remove the party unit specified by script operand 0 and return success to
  * the script VM, while writing whether a unit was actually removed. */
@@ -105,18 +101,18 @@ void dds3RegisterOwnedIntrusiveNode(Dds3Node *node, Dds3NodeVTable *vtable) {
 
 void dds3DestroyLinkedNode(Dds3Node *node) {
     dds3UnlinkNodeFromList((s32 *)&dds3OwnedNodeListHead, (s32)node, 0);
-    node->vtable->destroy((s32)node);
+    node->vtable->destroy(node);
 }
 
 void dds3DestroyAllOwnedIntrusiveNodes(void) {
-    u32 current;
-    while ((current = dds3OwnedNodeListHead) != 0) {
+    Dds3Node *current;
+    while ((current = (Dds3Node *)dds3OwnedNodeListHead) != 0) {
         dds3DestroyLinkedNode(current);
     }
 }
 
-void dds3SetLinkedNodeValue(s32 node, u32 value) {
-    *(u32 *)(node + 8) = value;
+void dds3SetLinkedNodeValue(Dds3Node *node, u32 value) {
+    node->value = value;
 }
 
 void dds3DestroyNodesWithValue(s32 value) {
@@ -135,18 +131,18 @@ void dds3UpdateLinkedNodes(void) {
     Dds3Node *node = (Dds3Node *)dds3OwnedNodeListHead;
 
     while (node != NULL) {
-        node->vtable->update((s32)node);
+        node->vtable->update(node);
         node = node->next;
     }
 }
 
-void frFontSubmitAndFreeGlyphOwner(GlyphOwner *owner) {
-    frFontQueueGlyphInSelectedSlot(owner->glyph);
-    sdfReleaseChipBlock(owner);
+void frFontSubmitAndFreeGlyphOwner(Dds3Node *node) {
+    frFontQueueGlyphInSelectedSlot(node->glyph);
+    sdfReleaseChipBlock(node);
 }
 
-void frFontDrawOwnedGlyph(GlyphOwner *owner) {
-    frFontDrawGlyphInDefaultMode(owner->glyph);
+void frFontDrawOwnedGlyph(Dds3Node *node) {
+    frFontDrawGlyphInDefaultMode(node->glyph);
 }
 
 Dds3Node *dds3CreateFontNode(u32 arg0, u32 arg1, u32 arg2) {
@@ -159,18 +155,20 @@ Dds3Node *dds3CreateFontNode(u32 arg0, u32 arg1, u32 arg2) {
     }
     frFontSetContextPair(obj, arg0, arg1);
     node = (Dds3Node *)sdfAllocAndClearQuadwords(0x14);
-    node->unk10 = obj;
-    dds3RegisterOwnedIntrusiveNode(node, (Dds3NodeVTable *)&dds3FontNodeVTable);
+    node->glyph = obj;
+    dds3RegisterOwnedIntrusiveNode(node, &dds3FontNodeVTable);
     return node;
 }
 
-void itfConfigureOwnedGlyphChainFlag(GlyphOwner *owner, u8 value) {
-    frFontSetChainFlag(owner->glyph, value);
+void itfConfigureOwnedGlyphChainFlag(Dds3Node *node, u8 value) {
+    frFontSetChainFlag(node->glyph, value);
 }
 
 void frFontReleaseOwnerStorage(void) {
     sdfReleaseChipBlock();
 }
 
-INCLUDE_SDATA(const s32, "game/code_0011CEB8", dds3FontNodeVTable);
-
+Dds3NodeVTable dds3FontNodeVTable __attribute__((section(".sdata"))) = {
+    frFontSubmitAndFreeGlyphOwner,
+    frFontDrawOwnedGlyph,
+};
