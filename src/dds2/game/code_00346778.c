@@ -66,12 +66,7 @@ typedef struct SdfPacDispatchPacket {
 /* The built-in packet callback is referenced as an address in this unit. */
 extern u8 sdfPacDispatchPacket[];
 
-INCLUDE_ASM(const s32, "game/code_003465E8", func_003465E8);
-
-INCLUDE_ASM(const s32, "game/code_003465E8", func_00346608);
-
-INCLUDE_ASM(const s32, "game/code_003465E8", func_00346778);
-
+INCLUDE_ASM(const s32, "game/code_00346778", func_00346778);
 
 extern s32 sdfDevQueueActiveOperation(void *);
 extern void sdfCreateSemaphoreFromOptions(void);
@@ -140,7 +135,7 @@ void func_00346AE8(SdfPacFlags *state) {
     state->flags = state->flags | PAC_STATE_ALLOCATE_HIGH;
 }
 
-INCLUDE_ASM(const s32, "game/code_003465E8", func_00346AF8);
+INCLUDE_ASM(const s32, "game/code_00346778", func_00346AF8);
 
 /* Mark the caller's phase byte finished. */
 void func_00346B30(u8 *phaseByte) {
@@ -265,5 +260,4 @@ void sdfDecodePacNodeAndAdvanceTail(PacCompletionState *state) {
     state->phase = 0;
 }
 
-INCLUDE_SDATA(const s32, "game/code_003465E8", D_00438D28);
-
+INCLUDE_SDATA(const s32, "game/code_00346778", D_00438D28);
