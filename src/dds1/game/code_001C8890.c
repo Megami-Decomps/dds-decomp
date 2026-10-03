@@ -1259,7 +1259,39 @@ void func_001CEA58(s32 arg0) {
     ;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001CEA70);
+extern u8 *btlCreateModelChangeTask(u8 *, s32, s32, s32, s32, u8);
+
+void func_001CEA70(u8 *task) {
+    u8 *actor;
+    u8 *effectTask;
+    u8 *modelTask;
+    s32 *statusTable;
+    s32 model;
+
+    if (btlCountTasksByKind(0x1A) != 0 ||
+        btlCountTasksByKind(0x18) != 0 ||
+        btlCountTasksByKind(0x23) != 0) {
+        return;
+    }
+
+    btlGetRuntime();
+    actor = *(u8 **)(task + 0x18);
+    statusTable = (s32 *)btlGetSideIndexedActorStatusTable(
+        *(s32 *)(actor + 0xC4), *(s32 *)(actor + 0xC8));
+    model = *(u16 *)((u8 *)statusTable + 0x2A);
+    effectTask = (u8 *)btlCreateEffObjB(actor, 0x7E);
+    btlStartTask((s32)effectTask);
+    modelTask = btlCreateModelChangeTask(actor, 0, 0x1F, model, 0x12, 1);
+    btlStartTask((s32)modelTask);
+
+    *(u32 *)(actor + 0x110) = (*(u32 *)(actor + 0x110) | 0x1000) & 0xEFFFFFFF;
+    *(u16 *)(actor + 0x120) |= 0x1000;
+    if (*(u32 *)(task + 8) & 0x10) {
+        btlDispatchStateHandler((s32)task, 0x1B);
+    } else {
+        btlDispatchStateHandler((s32)task, 0x1A);
+    }
+}
 
 void func_001CEB78(void) {
 }
