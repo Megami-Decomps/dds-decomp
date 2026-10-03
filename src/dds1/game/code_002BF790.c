@@ -25,17 +25,18 @@ typedef struct GridWidget {
 
 typedef struct GridTextListItem GridTextListItem;
 
+/* Native 0x40-byte text/list widget. Navigation and child layout share these links. */
 typedef struct GridTextWidget {
     char *text;          /* 0x00 */
     u16 textLength;      /* 0x04 */
     s16 rows;            /* 0x06 */
-    u16 unk08;
-    s16 unk0A;
+    u16 cursorRow;       /* 0x08: selected row within the visible window */
+    s16 itemCount;       /* 0x0A */
     u32 flags;           /* 0x0C */
-    void *unk10;
-    void *unk14;
-    void *children;      /* 0x18 */
-    void *unk1C;
+    GridTextListItem *firstVisible; /* 0x10 */
+    GridTextListItem *head;         /* 0x14 */
+    GridTextListItem *selected;     /* 0x18 */
+    GridTextListItem *tail;         /* 0x1C */
     s32 x;               /* 0x20 */
     s32 y;               /* 0x24 */
     s32 width;           /* 0x28 */
@@ -44,6 +45,23 @@ typedef struct GridTextWidget {
     u8 pad34[8];
     s32 rowOffset;       /* 0x3C */
 } GridTextWidget;
+
+/* Native 0x2C-byte list item. parameter points to a range or numeric kind
+ * for value rows; plain text rows leave it NULL. */
+struct GridTextListItem {
+    char *text;
+    u16 textLength;
+    u16 index;
+    void *parameter; /* 0x08 */
+    f32 number;      /* 0x0C: numeric value or scroll position */
+    s32 formatWidth; /* 0x10 */
+    u32 value;       /* 0x14: caller-supplied value for a plain text item */
+    struct GridTextListItem *previous;
+    struct GridTextListItem *next;
+    GridTextWidget *child; /* 0x20 */
+    u8 pad24[4];
+    void (*format)(void *, void *, char *, s32); /* 0x28 */
+};
 
 extern s32 sdfGridSeekSelectedNodeByIndex(s32, void *);
 
@@ -63,11 +81,6 @@ typedef struct GridEntryOwner {
     u8 pad1C[0xC];
     s32 defaultValue;     /* 0x28 */
 } GridEntryOwner;
-
-typedef struct GridChildLink {
-    u8 pad00[0x20];
-    GridTextWidget *child; /* 0x20 */
-} GridChildLink;
 
 typedef struct RenderCallbackEntry {
     u8 reserved[0x10];
@@ -858,9 +871,9 @@ s32 itfSetWidgetFlagsAndActivateChild(u8 *widget, u32 flags) {
         return 0;
     }
     ((GridTextWidget *)widget)->flags = (((GridTextWidget *)widget)->flags & ~2) | flags;
-    childLink = (s32)((GridTextWidget *)widget)->children;
+    childLink = (s32)((GridTextWidget *)widget)->selected;
     if (childLink != 0) {
-        s32 childWidget = (s32)((GridChildLink *)childLink)->child;
+        s32 childWidget = (s32)((GridTextListItem *)childLink)->child;
         if (childWidget != 0) {
             ((GridTextWidget *)childWidget)->flags |= 2;
         }
@@ -881,19 +894,19 @@ GridTextWidget *itfCreateGridTextWidget(const char *text, s32 x, s32 y, s32 colu
     widget->textLength = textBytes;
     widget->text = textCopy;
     memcpy(textCopy, text, textBytes);
-    widget->unk10 = NULL;
+    widget->firstVisible = NULL;
     widget->x = x << 4;
     widget->y = y << 3;
     widget->reference = reference;
     widget->rows = rows;
     widget->width = columns * 12 + 6;
     widget->height = rows * 14 + 6;
-    widget->unk14 = NULL;
-    widget->children = NULL;
-    widget->unk1C = NULL;
+    widget->head = NULL;
+    widget->selected = NULL;
+    widget->tail = NULL;
     widget->flags = 0;
-    widget->unk08 = 0;
-    widget->unk0A = 0;
+    widget->cursorRow = 0;
+    widget->itemCount = 0;
     return widget;
 }
 
@@ -922,16 +935,6 @@ u32 itfDestroyGridTextWidget(GridTextWidget *widget) {
     return 1;
 }
 
-typedef struct GridIndexedNode {
-    u8 pad00[6];
-    u16 key;                     /* 0x06 */
-    struct GridScrollRange *range; /* 0x08 */
-    f32 position;                /* 0x0C */
-    u8 pad10[0xC];
-    struct GridIndexedNode *next; /* 0x1C */
-    struct GridTextWidget *child; /* 0x20 */
-} GridIndexedNode;
-
 typedef struct GridScrollRange {
     u8 pad00[4];
     f32 minimum; /* 0x04 */
@@ -939,28 +942,15 @@ typedef struct GridScrollRange {
     f32 step;  /* 0x0C */
 } GridScrollRange;
 
-typedef struct GridScrollControl {
-    u8 pad00[6];
-    u16 width;              /* 0x06 */
-    u16 skipped;            /* 0x08 */
-    s16 count;              /* 0x0A */
-    u32 flags;              /* 0x0C */
-    GridIndexedNode *cursor; /* 0x10 */
-    GridIndexedNode *first;  /* 0x14 */
-    GridIndexedNode *selected; /* 0x18 */
-    u8 pad1C[0x20];
-    s32 keyOffset;          /* 0x3C */
-} GridScrollControl;
-
 /* Destroy linked child widgets recursively before releasing the parent widget. */
 u32 itfDestroyGridTextWidgetTree(GridTextWidget *widget) {
     u32 childLink;
 
     sdfReleaseChipBlock(widget->text);
-    childLink = (u32)widget->children;
+    childLink = (u32)widget->selected;
     if (childLink != 0) {
         do {
-            u32 childWidget = (u32)((GridIndexedNode *)childLink)->child;
+            u32 childWidget = (u32)((GridTextListItem *)childLink)->child;
             if (childWidget != 0) {
                 itfDestroyGridTextWidgetTree((GridTextWidget *)childWidget);
             }
@@ -987,43 +977,17 @@ void itfExpandWidgetColumnWidth(s32 columns, GridTextWidget *widget) {
     }
 }
 
-struct GridTextListItem {
-    char *text;
-    u16 textLength;
-    u16 index;
-    u32 unk08;
-    u32 unk0C;
-    u32 unk10;
-    u32 value;
-    struct GridTextListItem *previous;
-    struct GridTextListItem *next;
-    u8 pad20[0xC];
-};
-
-typedef struct GridListNode {
-    u8 pad0[0x18];
-    void *head;                 /* 0x18 */
-    struct GridListNode *next;  /* 0x1C */
-} GridListNode;
-
-typedef struct GridListOwner {
-    u8 pad00[6];
-    u16 count;                  /* 0x06 */
-    u8 pad08[8];
-    GridListNode *list;         /* 0x10 */
-} GridListOwner;
-
-/* Bit 0: the first node has a head. Bit 1: the list has at least `count` links. */
-u32 itfGetGridListLinkFlags(GridListOwner *owner) {
-    GridListNode *node = owner->list;
+/* Bit 0: the visible node has a predecessor. Bit 1: at least rows successors remain. */
+u32 itfGetGridListLinkFlags(GridTextWidget *owner) {
+    GridTextListItem *node = owner->firstVisible;
     u32 flags;
     s32 i;
 
     if (node == 0) {
         return 0;
     }
-    flags = node->head != 0;
-    for (i = 0; i < owner->count; i++) {
+    flags = node->previous != 0;
+    for (i = 0; i < (u16)owner->rows; i++) {
         node = node->next;
         if (node == 0) {
             flags &= ~2;
@@ -1042,10 +1006,10 @@ GridTextListItem *func_002C1A30(GridTextWidget *owner, const char *text, u32 val
     char *copy;
 
     memset(item, 0, 0x2C);
-    if (owner->unk0A == 0) {
-        *(GridTextListItem **)((u8 *)owner + 0x10) = item;
-        *(GridTextListItem **)((u8 *)owner + 0x18) = item;
-        *(GridTextListItem **)((u8 *)owner + 0x14) = item;
+    if (owner->itemCount == 0) {
+        owner->firstVisible = item;
+        owner->selected = item;
+        owner->head = item;
     }
     length = strlen(text);
     allocation = length + 1;
@@ -1056,18 +1020,18 @@ GridTextListItem *func_002C1A30(GridTextWidget *owner, const char *text, u32 val
     itfExpandWidgetColumnWidth(length, owner);
 
     /* Initialize the node links, then append it after the current tail. */
-    item->previous = *(GridTextListItem **)((u8 *)owner + 0x1C);
+    item->previous = owner->tail;
     item->next = 0;
     item->value = value;
-    tail = *(GridTextListItem **)((u8 *)owner + 0x1C);
-    item->unk08 = 0;
+    tail = owner->tail;
+    item->parameter = NULL;
     item->previous = tail;
     if (tail != 0) {
         tail->next = item;
     }
-    *(GridTextListItem **)((u8 *)owner + 0x1C) = item;
-    item->index = owner->unk0A;
-    owner->unk0A++;
+    owner->tail = item;
+    item->index = owner->itemCount;
+    owner->itemCount++;
     return item;
 }
 
@@ -1102,8 +1066,8 @@ void itfAdvanceGridScrollPosition(u32 widget, u32 key, s32 steps) {
     float previous;
 
     entry = itfFindGridNodeByKey(key, widget);
-    range = (s32)((GridIndexedNode *)entry)->range;
-    position = &((GridIndexedNode *)entry)->position;
+    range = (s32)((GridTextListItem *)entry)->parameter;
+    position = &((GridTextListItem *)entry)->number;
     delta = ((GridScrollRange *)range)->step;
     if (1 < steps) {
         delta = delta * (float)(s32)steps;
@@ -1119,8 +1083,8 @@ void itfAdvanceSelectedGridScroll(u32 widget, u32 steps) {
     s32 widgetAddress;
 
     widgetAddress = (s32)widget;
-    if ((((GridScrollControl *)widgetAddress)->flags & 1) != 0) {
-        itfAdvanceGridScrollPosition(widget, (u32)((GridScrollControl *)widgetAddress)->selected->key + ((GridScrollControl *)widgetAddress)->keyOffset,
+    if ((((GridTextWidget *)widgetAddress)->flags & 1) != 0) {
+        itfAdvanceGridScrollPosition(widget, (u32)((GridTextWidget *)widgetAddress)->selected->index + ((GridTextWidget *)widgetAddress)->rowOffset,
                                     steps);
         return;
     }
@@ -1135,8 +1099,8 @@ void itfReverseGridScrollPosition(u32 widget, u32 key, s32 steps) {
     float previous;
 
     entry = itfFindGridNodeByKey(key, widget);
-    range = (s32)((GridIndexedNode *)entry)->range;
-    position = &((GridIndexedNode *)entry)->position;
+    range = (s32)((GridTextListItem *)entry)->parameter;
+    position = &((GridTextListItem *)entry)->number;
     delta = ((GridScrollRange *)range)->step;
     if (1 < steps) {
         delta = delta * (float)(s32)steps;
@@ -1152,8 +1116,8 @@ void itfReverseSelectedGridScroll(u32 widget, u32 steps) {
     s32 widgetAddress;
 
     widgetAddress = (s32)widget;
-    if ((((GridScrollControl *)widgetAddress)->flags & 1) != 0) {
-        itfReverseGridScrollPosition(widget, (u32)((GridScrollControl *)widgetAddress)->selected->key + ((GridScrollControl *)widgetAddress)->keyOffset,
+    if ((((GridTextWidget *)widgetAddress)->flags & 1) != 0) {
+        itfReverseGridScrollPosition(widget, (u32)((GridTextWidget *)widgetAddress)->selected->index + ((GridTextWidget *)widgetAddress)->rowOffset,
                                     steps);
         return;
     }
@@ -1163,64 +1127,54 @@ s32 itfGetGridChildLayoutMode(u8 *widget, u32 target) {
     u32 flags = ((GridTextWidget *)widget)->flags;
 
     if (flags & 2) {
-        if (target == (u32)((GridTextWidget *)widget)->children) {
+        if (target == (u32)((GridTextWidget *)widget)->selected) {
             return (flags & 1) ? 6 : 4;
         }
         return 0;
     }
     if (flags & 0x80) {
-        if (target == (u32)((GridTextWidget *)widget)->children) {
+        if (target == (u32)((GridTextWidget *)widget)->selected) {
             return 12;
         }
-    } else if (target == (u32)((GridTextWidget *)widget)->children && (flags & 1)) {
+    } else if (target == (u32)((GridTextWidget *)widget)->selected && (flags & 1)) {
         return 6;
     }
     return 0;
 }
-
-typedef struct GridValueEntry {
-    char *label;     /* 0x00 */
-    u16 pad04;
-    u16 index;       /* 0x06 */
-    s32 *kind;       /* 0x08: 0 decimal, 1 hex, 2 float */
-    f32 value;       /* 0x0C */
-    s32 width;       /* 0x10 */
-    u8 pad14[0x14];
-    void (*format)(void *, void *, char *, s32); /* 0x28 */
-} GridValueEntry;
 
 extern s32 strlen(const char *);
 extern char *strcpy(char *, const char *);
 extern s32 func_003014F0(char *, const char *, ...);
 extern double fptodp(f32);
 
-void itfFormatGridValueEntryText(GridTextWidget *widget, GridValueEntry *entry, char *out) {
+/* Format a native value row, then optionally prefix its decimal/hex row number. */
+void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry, char *out) {
     char text[0x100];
     char prefix[0x100];
     char format[0x100];
 
     if (entry->format != NULL) {
         entry->format(widget, entry, text, 0x100);
-    } else if (entry->kind == NULL) {
-        func_003014F0(text, "%s", entry->label);
+    } else if (entry->parameter == NULL) {
+        func_003014F0(text, "%s", entry->text);
     } else {
-        if (strlen(entry->label) == 0) {
+        if (strlen(entry->text) == 0) {
             strcpy(prefix, "");
         } else {
-            func_003014F0(prefix, "%s ", entry->label);
+            func_003014F0(prefix, "%s ", entry->text);
         }
-        switch (*entry->kind) {
+        switch (*(s32 *)entry->parameter) {
         case 0:
-            func_003014F0(format, "%%s%%0%dd", entry->width);
-            func_003014F0(text, format, prefix, (s32)entry->value);
+            func_003014F0(format, "%%s%%0%dd", entry->formatWidth);
+            func_003014F0(text, format, prefix, (s32)entry->number);
             break;
         case 1:
-            func_003014F0(format, "%%s0x%%0%dX", entry->width - 2);
-            func_003014F0(text, format, prefix, (s32)entry->value);
+            func_003014F0(format, "%%s0x%%0%dX", entry->formatWidth - 2);
+            func_003014F0(text, format, prefix, (s32)entry->number);
             break;
         case 2:
-            func_003014F0(format, "%%s%%0%d.1f", entry->width);
-            func_003014F0(text, format, prefix, (double)entry->value);
+            func_003014F0(format, "%%s%%0%d.1f", entry->formatWidth);
+            func_003014F0(text, format, prefix, (double)entry->number);
             break;
         }
     }
@@ -1242,37 +1196,37 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002C22F0);
 s32 itfFindGridNodeByKey(u32 key, u32 head) {
     u32 n;
 
-    n = (u32)((GridScrollControl *)head)->first;
-    while (n != 0 && ((GridIndexedNode *)n)->key != key) {
-        n = (u32)((GridIndexedNode *)n)->next;
+    n = (u32)((GridTextWidget *)head)->head;
+    while (n != 0 && ((GridTextListItem *)n)->index != key) {
+        n = (u32)((GridTextListItem *)n)->next;
     }
     return n;
 }
 
 s32 sdfGridSeekSelectedNodeByIndex(s32 index, void *w) {
     u8 *widget = (u8 *)w;
-    s16 count = ((GridScrollControl *)widget)->count;
+    s16 count = ((GridTextWidget *)widget)->itemCount;
     u16 width;
     u8 *first;
 
     if (index >= count) {
         return 0;
     }
-    first = (u8 *)((GridScrollControl *)widget)->first;
-    ((GridScrollControl *)widget)->skipped = 0;
-    ((GridScrollControl *)widget)->cursor = (GridIndexedNode *)first;
-    ((GridScrollControl *)widget)->selected = (GridIndexedNode *)first;
+    first = (u8 *)((GridTextWidget *)widget)->head;
+    ((GridTextWidget *)widget)->cursorRow = 0;
+    ((GridTextWidget *)widget)->firstVisible = (GridTextListItem *)first;
+    ((GridTextWidget *)widget)->selected = (GridTextListItem *)first;
     if (index > 0) {
-        width = ((GridScrollControl *)widget)->width;
+        width = (u16)((GridTextWidget *)widget)->rows;
         do {
-            u8 *current = (u8 *)((GridScrollControl *)widget)->cursor;
-            if (width >= count - ((GridIndexedNode *)current)->key) {
-                ((GridScrollControl *)widget)->skipped++;
+            u8 *current = (u8 *)((GridTextWidget *)widget)->firstVisible;
+            if (width >= count - ((GridTextListItem *)current)->index) {
+                ((GridTextWidget *)widget)->cursorRow++;
             } else {
-                ((GridScrollControl *)widget)->cursor = ((GridIndexedNode *)current)->next;
+                ((GridTextWidget *)widget)->firstVisible = ((GridTextListItem *)current)->next;
             }
-            current = (u8 *)((GridScrollControl *)widget)->selected;
-            ((GridScrollControl *)widget)->selected = ((GridIndexedNode *)current)->next;
+            current = (u8 *)((GridTextWidget *)widget)->selected;
+            ((GridTextWidget *)widget)->selected = ((GridTextListItem *)current)->next;
         } while (--index != 0);
     }
     return 1;
@@ -1283,7 +1237,7 @@ void sdfGridSeekFirstNode(u32 widget) {
 }
 
 s32 sdfGridSeekLastNode(s32 widget) {
-    return sdfGridSeekSelectedNodeByIndex(((GridScrollControl *)widget)->count - 1, (void *)widget);
+    return sdfGridSeekSelectedNodeByIndex(((GridTextWidget *)widget)->itemCount - 1, (void *)widget);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002BF790", fldLocalMapTaskName);
