@@ -91,124 +91,78 @@ s32 sdfThreadSleepSelf(void) {
     return SleepThread();
 }
 
-typedef struct SdfCursorLink {
-    struct SdfCursorLink *next;
-} SdfCursorLink;
-
-typedef struct {
-    SdfCursorLink *current;
-    SdfCursorLink *next;
-} SdfNodeCursor;
-
 /* Promote the next list node to current; an empty list clears current. */
-void sdfAdvanceNodeCursor(SdfNodeCursor *cursor) {
-    SdfCursorLink *nextNode;
+void sdfAdvanceNodeCursor(SdfChipClass *sizeClass) {
+    SdfChipPage *nextPage;
 
-    nextNode = cursor->next;
-    if (nextNode != (SdfCursorLink *)0x0) {
-        cursor->next = nextNode->next;
+    nextPage = sizeClass->availablePages;
+    if (nextPage != NULL) {
+        sizeClass->availablePages = nextPage->next;
     }
-    cursor->current = nextNode;
+    sizeClass->currentPage = nextPage;
 }
 
-typedef struct SdfCursorNode {
-    u8 unk0[8];
-    struct SdfCursorNode *next;
-} SdfCursorNode;
-
-typedef struct SdfCursorState {
-    SdfNodeCursor cursor;
-    u8 unk8[2];
-    s16 limit;
-} SdfCursorState;
-
-typedef struct SdfCursorWalk {
-    u8 unk0[0x10];
-    SdfCursorNode *node;
-    s16 visited;
-} SdfCursorWalk;
-
-/* Pop a recycled block, count it live, and advance the size-class cursor when this slot fills. */
-SdfCursorNode *sdfAdvanceCursorWalk(SdfCursorState *sizeClassState, SdfCursorWalk *slotState) {
-    SdfCursorNode *freeBlock = slotState->node;
-
-    slotState->visited++;
-    slotState->node = freeBlock->next;
-    if (slotState->visited == sizeClassState->limit) {
-        sdfAdvanceNodeCursor(&sizeClassState->cursor);
+/* Pop a recycled cell, count it live, and advance when its page becomes full. */
+SdfChipCell *sdfAdvanceCursorWalk(SdfChipClass *sizeClass, SdfChipPage *page) {
+    SdfChipCell *freeCell = page->freeCells;
+    page->usedCells++;
+    page->freeCells = freeCell->nextFree;
+    if (page->usedCells == sizeClass->cellCount) {
+        sdfAdvanceNodeCursor(sizeClass);
     }
-    return freeBlock;
+    return freeCell;
 }
-typedef struct SdfCursorSlot {
-    struct SdfCursorSlot *next;
-    SdfCursorNode *base;
-    SdfCursorNode *(*handler)();
-    struct SdfCursorOwner *owner;
-    SdfCursorNode *node;
-    u16 count;
-    s16 limit;
-    s16 visited;
-} SdfCursorSlot;
 
-typedef struct SdfCursorOwner {
-    SdfCursorSlot *slot;
-    SdfCursorSlot *next;
-    s16 stride;
-    s16 limit;
-} SdfCursorOwner;
+SdfChipCell *func_00328CA0(SdfChipClass *sizeClass, SdfChipPage *page) {
+    s16 cellCount = sizeClass->cellCount;
+    s32 usedCells = (u16)page->usedCells + 1;
+    s32 remaining = page->bumpCellsRemaining;
+    SdfChipCell *cell;
 
-extern SdfCursorSlot *sdfFreeCursorSlotHead;
-SdfCursorNode *func_00328CA0(SdfCursorOwner *owner, SdfCursorSlot *slot) {
-    s16 ownerLimit = owner->limit;
-    s32 count = slot->count + 1;
-    s32 remaining = slot->limit;
-    SdfCursorNode *node;
-
-    slot->count = count;
-    node = (SdfCursorNode *)((u8 *)slot->base + (ownerLimit - remaining) * owner->stride);
-    slot->limit = remaining - 1;
-    if (slot->limit == 0) {
-        slot->handler = (SdfCursorNode *(*)())sdfAdvanceCursorWalk;
-        if ((s16)count == ownerLimit) {
-            sdfAdvanceNodeCursor((SdfNodeCursor *)owner);
+    page->usedCells = usedCells;
+    cell = (SdfChipCell *)(page->base + (cellCount - remaining) * sizeClass->cellSize);
+    page->bumpCellsRemaining = remaining - 1;
+    if (page->bumpCellsRemaining == 0) {
+        page->allocate = sdfAdvanceCursorWalk;
+        if ((s16)usedCells == cellCount) {
+            sdfAdvanceNodeCursor(sizeClass);
         }
     }
-    return node;
+    return cell;
 }
 
-SdfCursorNode *sdfCursorSlotAlloc(SdfCursorOwner *owner) {
-    SdfCursorSlot *slot = sdfFreeCursorSlotHead;
+SdfChipCell *sdfCursorSlotAlloc(SdfChipClass *sizeClass) {
+    SdfChipPage *page = sdfFreeChipPages;
 
-    sdfFreeCursorSlotHead = slot->next;
-    slot->count = 0;
-    slot->handler = func_00328CA0;
-    owner->slot = slot;
-    slot->owner = owner;
-    slot->limit = owner->limit;
-    return func_00328CA0(owner, slot);
+    sdfFreeChipPages = page->next;
+    page->usedCells = 0;
+    page->allocate = func_00328CA0;
+    sizeClass->currentPage = page;
+    page->sizeClass = sizeClass;
+    page->bumpCellsRemaining = sizeClass->cellCount;
+    return func_00328CA0(sizeClass, page);
 }
 
-extern SdfCursorOwner D_0045F0A0[];
 extern s32 func_0036DE70(void);
 extern void EIntr(void);
 
 /* Allocate a block of `size` bytes from the size class that covers it (classes are powers of two from 16 bytes up); each class hands out from its own slot list. */
-SdfCursorNode *sdfAllocSizeClassBlock(s32 size) {
+void *sdfAllocSizeClassBlock(s32 size) {
     s32 index = 0;
-    SdfCursorOwner *owner;
-    SdfCursorNode *result;
+    SdfChipClass *sizeClass;
+    SdfChipCell *result;
     s32 interruptsDisabled;
 
     if (size > 16) {
         EE_MMI_PLZCW(index, size - 1);
         index = 27 - (index & 0xFF);
     }
-    owner = &D_0045F0A0[index];
+    sizeClass = &sdfChipClassTable.classes[index];
     interruptsDisabled = func_0036DE70();
-    if (owner->slot == NULL) {
-        result = sdfCursorSlotAlloc(owner);
+    if (sizeClass->currentPage == NULL) {
+        result = sdfCursorSlotAlloc(sizeClass);
     } else {
-        result = owner->slot->handler(owner, owner->slot);
+        result = sizeClass->currentPage->allocate(sizeClass, sizeClass->currentPage);
     }
     if (interruptsDisabled != 0) {
         EIntr();

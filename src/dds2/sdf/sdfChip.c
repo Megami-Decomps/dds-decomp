@@ -1,32 +1,14 @@
 #include "common.h"
+#include "sdf.h"
 
-typedef struct SdfCursorSlot {
-    struct SdfCursorSlot *next;
-    u8 unk4[4];
-    void *(*handler)();
-    struct SdfChipOwner *owner;
-    void *node;
-    s16 count;
-    u16 limit;
-} SdfCursorSlot;
+SdfChipPage *sdfChipPages __attribute__((section(".sbss"), aligned(8)));
+SdfChipPage *sdfFreeChipPages __attribute__((section(".sbss")));
+u8 *sdfChipHeapStart __attribute__((section(".sbss")));
+u8 *sdfChipHeapEnd __attribute__((section(".sbss")));
+s32 sdfChipPageCount[2] __attribute__((section(".sbss")));
+SdfPendingRequest sdfChipReleaseRequest __attribute__((section(".sbss"), aligned(8)));
 
-typedef struct SdfChipOwner {
-    SdfCursorSlot *slot;
-    SdfCursorSlot *next;
-    u8 unk8[2];
-    s16 limit;
-} SdfChipOwner;
-
-typedef struct SdfChipBlock {
-    u8 pad0[8];
-    void *next;
-} SdfChipBlock;
-
-extern SdfCursorSlot *sdfFreeCursorSlotHead;
-extern s32 D_00439108;
-extern s32 sdfChipHeapStart;
-extern s32 D_00439114;
-extern u8 D_00439120;
+SdfChipClassTable sdfChipClassTable __attribute__((section(".bss"), aligned(8)));
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *sdfClearQuadwords(void *memory, s32 quadwordCount);
@@ -35,7 +17,7 @@ void sdfPendingQueuePush(void *arg0, s32 arg1);
 
 s32 func_0036DE70(void);
 s32 EIntr(void);
-void sdfAdvanceNodeCursor(SdfChipOwner *owner);
+void sdfAdvanceNodeCursor(SdfChipClass *sizeClass);
 
 void *sdfAllocAndClearQuadwords(s32 size) {
     void *allocation;
@@ -45,10 +27,10 @@ void *sdfAllocAndClearQuadwords(s32 size) {
 }
 
 void sdfReleaseChipBlock(void *memory) {
-    SdfCursorSlot *slot;
-    SdfChipOwner *owner;
-    SdfChipBlock *block = memory;
-    SdfCursorSlot **link;
+    SdfChipPage *page;
+    SdfChipClass *sizeClass;
+    SdfChipCell *cell = memory;
+    SdfChipPage **link;
     s32 interrupts;
     s16 count;
     s32 index;
@@ -56,35 +38,35 @@ void sdfReleaseChipBlock(void *memory) {
     if (memory == NULL) {
         return;
     }
-    index = (s32)memory - sdfChipHeapStart;
+    index = (s32)memory - (s32)sdfChipHeapStart;
     if (index < 0) {
         index += 0xFFF;
     }
-    slot = (SdfCursorSlot *)(D_00439108 + (index >> 12) * 24);
-    owner = slot->owner;
+    page = (SdfChipPage *)((u8 *)sdfChipPages + (index >> 12) * sizeof(SdfChipPage));
+    sizeClass = page->sizeClass;
     interrupts = func_0036DE70();
-    count = slot->count;
-    slot->count = count - 1;
-    if (slot->count == 0) {
-        link = &owner->next;
-        if (owner->slot == slot) {
-            sdfAdvanceNodeCursor(owner);
+    count = page->usedCells;
+    page->usedCells = count - 1;
+    if (page->usedCells == 0) {
+        link = &sizeClass->availablePages;
+        if (sizeClass->currentPage == page) {
+            sdfAdvanceNodeCursor(sizeClass);
         } else {
-            while (*link != slot) {
+            while (*link != page) {
                 link = &(*link)->next;
             }
-            *link = slot->next;
+            *link = page->next;
         }
-        slot->owner = NULL;
-        slot->next = sdfFreeCursorSlotHead;
-        sdfFreeCursorSlotHead = slot;
+        page->sizeClass = NULL;
+        page->next = sdfFreeChipPages;
+        sdfFreeChipPages = page;
     } else {
-        if (count == owner->limit) {
-            slot->next = owner->next;
-            owner->next = slot;
+        if (count == sizeClass->cellCount) {
+            page->next = sizeClass->availablePages;
+            sizeClass->availablePages = page;
         }
-        block->next = slot->node;
-        slot->node = block;
+        cell->nextFree = page->freeCells;
+        page->freeCells = cell;
     }
     if (interrupts != 0) {
         EIntr();
@@ -92,15 +74,15 @@ void sdfReleaseChipBlock(void *memory) {
 }
 
 void sdfQueuePendingChipValue(s32 value) {
-    sdfPendingQueuePush(&D_00439120, value);
+    sdfPendingQueuePush(&sdfChipReleaseRequest, value);
 }
 
 s32 sdfChipIsInRange(s32 address) {
     s32 withinRange;
 
     withinRange = 0;
-    if (address >= sdfChipHeapStart) {
-        withinRange = address < D_00439114;
+    if (address >= (s32)sdfChipHeapStart) {
+        withinRange = address < (s32)sdfChipHeapEnd;
     }
     return withinRange;
 }

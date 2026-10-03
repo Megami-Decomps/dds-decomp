@@ -1,7 +1,6 @@
 #include "common.h"
 #include "sdf.h"
 
-#define SDF_CHIP_CLASS_COUNT 7
 #define SDF_CHIP_BLOCK_SHIFT 12
 #define SDF_CHIP_BLOCK_BYTES (1 << SDF_CHIP_BLOCK_SHIFT)
 #define SDF_MEM_ALIGNMENT_MASK 0x7F
@@ -10,32 +9,6 @@
 
 extern u32 D_003E274C[];
 
-/* Size class of the chip heap: cells per block and bytes per cell. */
-typedef struct SdfChipClass {
-    void *slot; /* 0x0 */
-    void *next; /* 0x4 */
-    s16 unitSize; /* 0x8: bytes per cell */
-    s16 cellCount; /* 0xA: cells per block */
-} SdfChipClass; /* 0xC */
-
-/* One 0x18-byte heap block record. */
-typedef struct SdfChipBlockRecord {
-    struct SdfChipBlockRecord *next; /* 0x0 */
-    void *page; /* 0x4 */
-    u8 pad08[4];
-    SdfChipClass *sizeClass; /* 0xC: NULL when the block is unassigned */
-    u8 pad10[4];
-    s16 usedCells; /* 0x14 */
-    u8 pad16[2];
-} SdfChipBlockRecord; /* 0x18 */
-
-extern SdfChipBlockRecord *D_003BD9A8;
-extern SdfChipBlockRecord *sdfFreeCursorSlotHead;
-extern u8 *sdfChipHeapStart;
-extern u8 *D_003BD9B4;
-extern s32 D_003BD9B8;
-extern u8 D_003BD9C0[8];
-extern SdfChipClass D_003E26F0[];
 extern void *func_002FF538(u32 size);
 extern void sdfInitializeSynchronizedRequest(void *request, void (*callback)(void *));
 extern void sdfReleaseChipBlock(void *memory);
@@ -45,8 +18,8 @@ void func_002D00F8(u32 heapSize) {
     s32 alignment;
     s32 remaining;
     void *allocation;
-    SdfChipBlockRecord *record;
-    SdfChipBlockRecord *next;
+    SdfChipPage *record;
+    SdfChipPage *next;
     u8 *recordEnd;
     u8 *heapStart;
     u8 *page;
@@ -56,23 +29,23 @@ void func_002D00F8(u32 heapSize) {
     s32 cellCount;
 
     allocation = func_002FF538(heapSize);
-    D_003BD9A8 = allocation;
-    recordBytes = (heapSize / 0x1018U) * sizeof(SdfChipBlockRecord);
+    sdfChipPages = allocation;
+    recordBytes = (heapSize / 0x1018U) * sizeof(SdfChipPage);
     recordEnd = (u8 *)allocation + recordBytes;
     record = allocation;
-    sdfFreeCursorSlotHead = record;
+    sdfFreeChipPages = record;
     alignment = -(s32)recordEnd & 0x3F;
     remaining = (heapSize - recordBytes) - alignment;
     heapStart = recordEnd + alignment;
     sdfChipHeapStart = heapStart;
     pageCount = remaining / SDF_CHIP_BLOCK_BYTES;
-    D_003BD9B8 = pageCount;
-    D_003BD9B4 = heapStart + pageCount * SDF_CHIP_BLOCK_BYTES;
+    sdfChipPageCount[0] = pageCount;
+    sdfChipHeapEnd = heapStart + pageCount * SDF_CHIP_BLOCK_BYTES;
     page = heapStart;
     do {
         next = record + 1;
         pageCount--;
-        record->page = page;
+        record->base = page;
         page += SDF_CHIP_BLOCK_BYTES;
         record->sizeClass = NULL;
         record->next = next;
@@ -80,21 +53,21 @@ void func_002D00F8(u32 heapSize) {
     } while (pageCount != 0);
     next[-1].next = NULL;
 
-    sizeClass = D_003E26F0;
+    sizeClass = sdfChipClassTable.classes;
     unitSize = 0x10;
     cellCount = 0x100;
     pageCount = SDF_CHIP_CLASS_COUNT;
     do {
         pageCount--;
-        sizeClass->unitSize = unitSize;
+        sizeClass->cellSize = unitSize;
         sizeClass->cellCount = cellCount;
         cellCount >>= 1;
-        sizeClass->slot = NULL;
+        sizeClass->currentPage = NULL;
         unitSize <<= 1;
-        sizeClass->next = NULL;
+        sizeClass->availablePages = NULL;
         sizeClass++;
     } while (pageCount != 0);
-    sdfInitializeSynchronizedRequest(D_003BD9C0, sdfReleaseChipBlock);
+    sdfInitializeSynchronizedRequest(&sdfChipReleaseRequest, sdfReleaseChipBlock);
 }
 
 typedef struct SdfChipStats {
@@ -108,7 +81,7 @@ typedef struct SdfChipStats {
 
 /* Fill `stats` with the chip heap's block totals and per-size-class usage. */
 void sdfGetChipHeapStats(SdfChipStats *stats) {
-    SdfChipBlockRecord *block;
+    SdfChipPage *block;
     s32 blocksRemaining;
     s32 classIndex;
     s32 partialBlocks;
@@ -116,13 +89,13 @@ void sdfGetChipHeapStats(SdfChipStats *stats) {
     s32 freeBytes;
     s32 freeCells;
 
-    blocksRemaining = D_003BD9B8;
+    blocksRemaining = sdfChipPageCount[0];
     stats->blockCount = blocksRemaining;
     stats->totalBytes = blocksRemaining << SDF_CHIP_BLOCK_SHIFT;
     for (classIndex = 0; classIndex != SDF_CHIP_CLASS_COUNT; classIndex++) {
         stats->usedCells[classIndex] = 0;
     }
-    block = D_003BD9A8;
+    block = sdfChipPages;
     emptyBlocks = 0;
     partialBlocks = 0;
     freeBytes = 0;
@@ -135,9 +108,9 @@ void sdfGetChipHeapStats(SdfChipStats *stats) {
             freeCells = block->sizeClass->cellCount - block->usedCells;
             if (freeCells != 0) {
                 partialBlocks++;
-                freeBytes += freeCells * block->sizeClass->unitSize;
+                freeBytes += freeCells * block->sizeClass->cellSize;
             }
-            stats->usedCells[block->sizeClass - D_003E26F0] += block->usedCells;
+            stats->usedCells[block->sizeClass - sdfChipClassTable.classes] += block->usedCells;
         }
         block++;
     } while (--blocksRemaining != 0);
