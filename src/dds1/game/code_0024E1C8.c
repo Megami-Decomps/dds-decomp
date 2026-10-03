@@ -67,6 +67,7 @@ enum {
 
 extern MnuSpritePlacement D_0036B510[];
 extern MnuVariantSpritePlacement D_0036B7F0[];
+extern u16 D_0036BC68[][4];
 extern s32 D_0036C6AC[];
 extern s32 func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern void mnuDestroyMantraDrawPool(void *);
@@ -212,13 +213,110 @@ void func_0024E5A0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024E728);
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024E8D0);
+void func_0024E8D0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
+                   s32 placementIndex, s32 context, f32 scaleX, f32 scaleY) {
+    {
+        MnuSpriteResource *resource =
+            (MnuSpriteResource *)D_0036C698[
+                D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+
+        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+            .width = (s32)(scaleX *
+                           (f32)resource->sprites[D_0036B510[placementIndex]
+                                                      [MNU_SPRITE_INDEX]]
+                               .nativeWidth)
+                    << 4;
+        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+            .height = (s32)(scaleY *
+                            (f32)resource->sprites[D_0036B510[placementIndex]
+                                                       [MNU_SPRITE_INDEX]]
+                                .nativeHeight)
+                     << 3;
+    }
+    func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+                  (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  flags,
+                  D_0036C698[D_0036B510[placementIndex]
+                                         [MNU_SPRITE_RESOURCE_INDEX]],
+                  D_0036B510[placementIndex][MNU_SPRITE_INDEX],
+                  context);
+
+    {
+        MnuSpriteResource *resource =
+            (MnuSpriteResource *)D_0036C698[
+                D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+
+        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+            .width =
+            resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                .nativeWidth
+            << 4;
+        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+            .height =
+            resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                .nativeHeight
+            << 3;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024EA50);
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024EC08);
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024EDC0);
+void func_0024EDC0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                   s32 flags, s32 context, f32 scaleX, f32 scaleY) {
+    {
+        MnuSpriteResource *resource =
+            (MnuSpriteResource *)D_0036C698[
+                D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+
+        resource->sprites[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].width =
+            (s32)(scaleX *
+                  (f32)resource->sprites[D_0036BC68[placementIndex]
+                                            [MNU_SPRITE_INDEX]]
+                      .nativeWidth)
+            << 4;
+        resource->sprites[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].height =
+            (s32)(scaleY *
+                  (f32)resource->sprites[D_0036BC68[placementIndex]
+                                            [MNU_SPRITE_INDEX]]
+                      .nativeHeight)
+            << 3;
+    }
+    func_002BF4E0((s32)((f32)(x + D_0036BC68[placementIndex]
+                                           [MNU_SPRITE_X_OFFSET]) *
+                        scaleX)
+                      << 4,
+                  (s32)((f32)(y + D_0036BC68[placementIndex]
+                                           [MNU_SPRITE_Y_OFFSET]) *
+                        scaleY)
+                      << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  flags,
+                  D_0036C698[D_0036BC68[placementIndex]
+                                         [MNU_SPRITE_RESOURCE_INDEX]],
+                  D_0036BC68[placementIndex][MNU_SPRITE_INDEX],
+                  context);
+
+    {
+        /* Reload the resource after drawing before restoring native size. */
+        MnuSpriteResource *resource =
+            (MnuSpriteResource *)D_0036C698[
+                D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+
+        resource->sprites[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].width =
+            resource->sprites[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]]
+                .nativeWidth
+            << 4;
+        resource->sprites[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].height =
+            resource->sprites[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]]
+                .nativeHeight
+            << 3;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024EF68);
 
