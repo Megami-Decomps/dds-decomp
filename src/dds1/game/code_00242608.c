@@ -1146,7 +1146,63 @@ s32 mnuCampRunPanel2(u64 request) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244C00);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244D10);
+typedef struct ShopRankPriceEntry {
+    u16 itemId;
+    u8 type;
+    u8 pricePercent;
+    u32 flags;
+} ShopRankPriceEntry;
+
+typedef struct ShopRankPriceRow {
+    s16 unlockFlag;
+    u16 pricePercent;
+    ShopRankPriceEntry entries[0x20];
+} ShopRankPriceRow;
+
+typedef struct ShopProgressPriceScale {
+    f32 percent;
+    u8 pad04[4];
+} ShopProgressPriceScale;
+
+typedef struct ShopItemPriceRecord {
+    u8 pad00[4];
+    s32 price;
+} ShopItemPriceRecord;
+
+extern ShopProgressPriceScale D_0036A234[];
+
+s32 func_00244D10(s32 index, s32 halfPrice) {
+    u32 rowOffset;
+    u8 *row;
+    u8 *entry;
+    u32 itemId;
+    u32 rowPercent;
+    u32 pricePercent;
+    s32 itemPrice;
+    s32 price;
+    s32 progressStage;
+
+    rowOffset = (u8)mnuCampFindActiveSlot() * sizeof(ShopRankPriceRow);
+    entry = D_00369A88 + index * sizeof(ShopRankPriceEntry) + rowOffset;
+    row = D_00369A88 + rowOffset;
+    itemId = *(u16 *)(entry + 4);
+    if (halfPrice == 0) {
+        itemPrice = ((ShopItemPriceRecord *)datItemSkillRecords)[itemId].price;
+        rowPercent = *(u16 *)(row + 2);
+        pricePercent = entry[7];
+        if (pricePercent == 0) {
+            pricePercent = rowPercent;
+        }
+        price = itemPrice * pricePercent / 100;
+        progressStage = mnuCampGetProgressStage();
+        if (progressStage != 0) {
+            price = price * (s32)D_0036A234[progressStage].percent / 100;
+        }
+    } else {
+        price = (u32)((ShopItemPriceRecord *)datItemSkillRecords)[itemId].price >> 1;
+    }
+    return price;
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244E08);
 
