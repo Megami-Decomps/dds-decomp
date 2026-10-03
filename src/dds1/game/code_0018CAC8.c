@@ -4,6 +4,18 @@
 #include "fpu.h"
 #include "eff.h"
 
+#define EFF_DISPATCH_RESULT_BYTES 8
+#define EFF_SUBWORK_PREFIX_BYTES 0x40
+#define EFF_DIRECTORY_PATH_BYTES 0x70
+#define EFF_BUILTIN_NAME_COUNT 0x2F
+#define EFF_DIRECTORY_FLAG_CLEAR 0x1000
+#define EFF_RESOURCE_DESCRIPTOR_BYTES 0x44
+#define EFF_MATRIX_BYTES 0x40
+#define EFF_VECTOR_WORD_COUNT 4
+#define EFF_COLOR_UNPACK_SCALE_BITS 0x3C000000
+#define EFF_SLOT_BYTES 0x38
+#define EFF_SLOT_HEADER_BYTES 0xC
+
 /* Directory entry filled by the effect data directory iterator. */
 typedef struct EffDirEnt {
     u32 flags;      /* 0x00: bit 12 cleared */
@@ -53,8 +65,10 @@ extern u8 sdfViewUpVector[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 
+/* Allocate a result pair and store the selected callback's returned word.
+   Type, allocation, and callback are trusted; allocation occurs before dispatch. */
 EffResult *effAllocDispatch(s32 type, s32 handlerArg) {
-    EffResult *result = sdfAllocSizeClassBlock(8);
+    EffResult *result = sdfAllocSizeClassBlock(EFF_DISPATCH_RESULT_BYTES);
     s32 handlerResult = D_00355730[type].handler(handlerArg);
 
     result->unk0 = type;
@@ -62,21 +76,25 @@ EffResult *effAllocDispatch(s32 type, s32 handlerArg) {
     return result;
 }
 
+/* Invoke the primary type callback with the payload; no NULL or type bounds check. */
 void effTypeDispatch(EffWork *work) {
     D_00355734[work->type].handler(work->payload);
 }
 
+/* Invoke the release callback, then free the outer work; no callback NULL check. */
 void effTypeDispatchFree(EffWork *work) {
     D_00355738[work->type].handler(work->payload);
     sdfReleaseChipBlock(work);
 }
 
+/* Return the raw payload word used as the type callback's argument. */
 u32 effGetHandlerArg(EffWork *work) {
     return (u32)work->payload;
 }
 
-u32 func_0018CBC0(u32 *value) {
-    return *value;
+/* Read the pointed word without validating the pointer or asserting a record kind. */
+u32 func_0018CBC0(u32 *word) {
+    return *word;
 }
 
 void func_0018CBC8(void) {
@@ -86,6 +104,7 @@ u32 func_0018CBD0(void) {
     return 1;
 }
 
+/* Invoke the optional A callback when present; work and type index remain unchecked. */
 void effTypeDispatchGuardedA(EffWork *work) {
     void (*handler)(void *) = D_0035573C[work->type].handler;
 
@@ -94,6 +113,7 @@ void effTypeDispatchGuardedA(EffWork *work) {
     }
 }
 
+/* Invoke the optional B callback when present; work and type index remain unchecked. */
 void effTypeDispatchGuardedB(EffWork *work) {
     void (*handler)(void *) = D_00355744[work->type].handler;
 
@@ -102,6 +122,7 @@ void effTypeDispatchGuardedB(EffWork *work) {
     }
 }
 
+/* Invoke the optional C callback when present; work and type index remain unchecked. */
 void effTypeDispatchGuardedC(EffWork *work) {
     void (*handler)(void *) = D_00355740[work->type].handler;
 
@@ -110,33 +131,35 @@ void effTypeDispatchGuardedC(EffWork *work) {
     }
 }
 
-/* Each effect type keeps its mutable subslot at a different byte offset
- * within the callback payload at EffWork +4. */
+/* Store the low byte of slotValue at the type-specific subslot.
+   Types two through four share the same location; other types are left unchanged. */
 void effSetSubSlot(EffWork *work, s32 slotValue) {
-    u8 value = slotValue;
+    u8 slotByte = slotValue;
     u32 type = work->type;
 
     switch (type) {
     case 0:
-        ((EffSub *)work->payload)->unk20 = value;
+        ((EffSub *)work->payload)->unk20 = slotByte;
         return;
     case 1:
-        ((EffSub *)work->payload)->unk40 = value;
+        ((EffSub *)work->payload)->unk40 = slotByte;
         return;
     case 2:
-        ((EffSub *)work->payload)->unk50 = value;
+        ((EffSub *)work->payload)->unk50 = slotByte;
         return;
     case 3:
-        ((EffSub *)work->payload)->unk50 = value;
+        ((EffSub *)work->payload)->unk50 = slotByte;
         return;
     case 4:
-        ((EffSub *)work->payload)->unk50 = value;
+        ((EffSub *)work->payload)->unk50 = slotByte;
         return;
     default:
         return;
     }
 }
 
+/* Read the type-specific subslot, or zero for other types.
+   Retain the unused argument and DDS1's native unused byte declaration. */
 u32 effGetSubSlot(EffWork *work, s32 unusedSlotValue) {
     u8 unusedValue = unusedSlotValue;
     u32 type = work->type;
@@ -158,6 +181,8 @@ u32 effGetSubSlot(EffWork *work, s32 unusedSlotValue) {
     return 0;
 }
 
+/* Types zero/one dispatch from the payload base; two through four skip its prefix.
+   Other types still dispatch with a zero argument; no type bounds check is added. */
 void effAllocSubWork(EffWork *work) {
     u32 type = work->type;
     u32 handlerArg = 0;
@@ -170,13 +195,13 @@ void effAllocSubWork(EffWork *work) {
         handlerArg = work->payload;
         break;
     case 2:
-        handlerArg = work->payload + 0x40;
+        handlerArg = work->payload + EFF_SUBWORK_PREFIX_BYTES;
         break;
     case 3:
-        handlerArg = work->payload + 0x40;
+        handlerArg = work->payload + EFF_SUBWORK_PREFIX_BYTES;
         break;
     case 4:
-        handlerArg = work->payload + 0x40;
+        handlerArg = work->payload + EFF_SUBWORK_PREFIX_BYTES;
         break;
     default:
         break;
@@ -192,8 +217,9 @@ void func_0018CDA8(void) {
     dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }
 
-u32 func_0018CDD0(u32 arg0) {
-    return arg0;
+/* Return the callback word unchanged; its payload semantics are not established here. */
+u32 func_0018CDD0(u32 value) {
+    return value;
 }
 
 void func_0018CDD8(void) {
@@ -229,8 +255,9 @@ void func_0018CE20(void) {
 void func_0018CE28(void) {
 }
 
-u32 func_0018CE30(u32 arg0) {
-    return arg0;
+/* Return the callback word unchanged, retaining this entry's unsigned C surface. */
+u32 func_0018CE30(u32 value) {
+    return value;
 }
 
 void func_0018CE38(void) {
@@ -258,10 +285,10 @@ s32 func_0018CE68(void) {
     return D_003BB04D;
 }
 
-/* An enabled disc directory uses sceDopen; otherwise iteration uses
- * the built-in name table and starts over at entry zero. */
+/* Debug filesystem mode opens the formatted pfs0 directory; otherwise reset built-in iteration.
+   Return the native directory-open result, or zero for built-in mode. */
 s32 effOpenDataDir(void *name) {
-    u8 path[0x70];
+    u8 path[EFF_DIRECTORY_PATH_BYTES];
 
     if (sdfPfsDebugMode != 0) {
         func_003014F0(path, D_003BB058, name);
@@ -273,23 +300,24 @@ s32 effOpenDataDir(void *name) {
 }
 
 
+/* Run the native directory callback only in debug filesystem mode; its result is ignored. */
 void effRunIfEnabled(void) {
     if (sdfPfsDebugMode != 0) {
         func_003101B8();
     }
 }
 
-/* In built-in mode the name table supplies entries instead of the
- * directory iterator; clearing 0x1000 marks a synthesized entry. */
+/* Debug mode delegates to the native iterator. Built-in mode copies the next name,
+   clears flag mask 0x1000, and returns name length; zero also marks table exhaustion. */
 s32 effNextDataDirEntry(s32 unused, EffDirEnt *entry) {
     if (sdfPfsDebugMode != 0) {
         return func_00310320();
     }
-    if ((u32)effDataDirectoryIndex >= 0x2F) {
+    if ((u32)effDataDirectoryIndex >= EFF_BUILTIN_NAME_COUNT) {
         return 0;
     }
     strcpy(entry->name, D_003557A8[effDataDirectoryIndex]);
-    entry->flags &= ~0x1000;
+    entry->flags &= ~EFF_DIRECTORY_FLAG_CLEAR;
     effDataDirectoryIndex++;
     return strlen(entry->name);
 }
@@ -297,8 +325,8 @@ s32 effNextDataDirEntry(s32 unused, EffDirEnt *entry) {
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018CF98);
 
-/* The root's +8 points to the first node; each node's +0x38 points to the
- * next. The root also owns the separate allocation stored at +4. */
+/* Free linked nodes, then the root's separate payload and the root itself.
+   Save each successor before freeing; node payloads are not separately released here. */
 void effFreeWorkList(EffWork *root) {
     EffWork *node = (EffWork *)root->listHead;
 
@@ -314,7 +342,7 @@ void effFreeWorkList(EffWork *root) {
 }
 
 typedef struct EffResourceList {
-    s32 count;
+    s32 resourceCount;
     s32 unk04;
     void *head;
 } EffResourceList;
@@ -332,17 +360,18 @@ typedef struct EffResourceDescriptor {
     void *word34;
     u32 word38;
     u32 word3C;
-    EffResourceList *resourceList; /* 0x40: source list retained by descriptor */
+    EffResourceList *resourceList; /* 0x40: source list pointer copied into descriptor */
 } EffResourceDescriptor;
 
-/* Build a resource descriptor with the list's count and head. */
+/* Copy the source count, duplicate its head pointer, and store the source-list pointer.
+   Other descriptor words retain their native defaults; no retain operation occurs here. */
 EffResourceDescriptor *effCreateResourceListDescriptor(EffResourceList *list) {
-    EffResourceDescriptor *resource = sdfAllocSizeClassBlock(0x44);
+    EffResourceDescriptor *resource = sdfAllocSizeClassBlock(EFF_RESOURCE_DESCRIPTOR_BYTES);
 
     resource->word00 = 0;
     resource->word04 = 0xC8;
     resource->word08 = 0;
-    resource->resourceCount = list->count;
+    resource->resourceCount = list->resourceCount;
     resource->word10[0] = 0;
     resource->word10[1] = 0;
     resource->word10[2] = 0;
@@ -361,6 +390,7 @@ EffResourceDescriptor *effCreateResourceListDescriptor(EffResourceList *list) {
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018D4B8);
 
+/* Release any retained texture reference, clear its handle, and free the work block. */
 void effFreeWork(EffWork *work) {
     if (work->textureHandle != 0) {
         sdfTexReleaseReferenceViaHandler(work->textureHandle);
@@ -369,40 +399,48 @@ void effFreeWork(EffWork *work) {
     sdfReleaseChipBlock(work);
 }
 
+/* Store two opaque message-header words; neither meaning is established by this setter. */
 void effSetMsgHeader(EffMsg *message, s32 first, s32 second) {
     message->unk0 = first;
     message->unk4 = second;
 }
 
 
+/* Return the opaque work parameter word unchanged. */
 u32 effGetWorkParam(EffWork *work) {
     return work->unk14;
 }
 
+/* Return the raw list-head word, without traversing or retaining the list. */
 u32 effGetWorkLink(EffWork *work) {
     return work->listHead;
 }
 
+/* Format the prefix/name records through the native template and return the name record's first word.
+   Buffer capacity and record pointers remain unchecked. */
 u32 effFormatMsgNames(EffMsg *message, void *destination) {
     func_003014F0(destination, D_003BB060, message->prefixRecord[1], message->nameRecord + 1);
     return *message->nameRecord;
 }
 
+/* Store the first opaque work word; leave its field unnamed until a reader establishes meaning. */
 void effSetWorkFirst(EffWork *work, u32 value) {
     work->unk20 = value;
 }
 
+/* Store the second opaque work word without interpreting it. */
 void effSetWorkSecond(EffWork *work, u32 value) {
     work->unk24 = value;
 }
 
+/* Store the message's two opaque pair words without narrowing or interpretation. */
 void effSetMsgPair(EffMsg *message, u32 first, u32 second) {
     message->unk28 = first;
     message->unk2C = second;
 }
 
-/* Replace the retained texture reference, then release the temporary resource
- * returned by the loader. */
+/* Release the previous texture reference before loading/acquiring its replacement.
+   Release the temporary loaded resource afterward; native failure results are unchecked. */
 void effSetWorkTextureResource(EffWork *work, u64 textureResource) {
     u32 textureHandle;
     u64 loadedResource;
@@ -428,15 +466,17 @@ void func_0018DBB0(void) {
     dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }
 
+/* vu0 routine: transform the point in vf10 by view/projection, divide by w, then scale/bias.
+   No clipping or zero-w check is performed; the result remains in vf10. */
 void sdfProjectVuVectorToScreen(void) {
-    u8 *matrix;
+    u8 *projectionData;
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    matrix = sdfProjectionMatrix;
-    sdfPostmultiplyVuMatrixFromMemory(matrix);
+    projectionData = sdfProjectionMatrix;
+    sdfPostmultiplyVuMatrixFromMemory(projectionData);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_PERSPECTIVE_DIVIDE_VF10();
-    matrix += 0x40;
-    VU0_LOAD_VF_MEMORY(vf11, matrix);
+    projectionData += EFF_MATRIX_BYTES;
+    VU0_LOAD_VF_MEMORY(vf11, projectionData);
     VU0_MUL(vf10, vf10, vf11);
     VU0_LOAD_VF_MEMORY(vf11, D_00324660);
     VU0_ADD(vf10, vf10, vf11);
@@ -503,64 +543,69 @@ u32 effBlendColor(u32 colorA, u32 colorB, f32 t) {
     return packed;
 }
 
-/* vu0 routine: modulate two RGBA8888 colours, (a/128 * b/128) * 128 per channel */
+/* vu0 routine: multiply RGBA channels normalized by 128, then pack at the same scale.
+   Native integer conversion/byte packing remains unclamped; quadword storage is unchanged. */
 u32 effMultiplyPackedColors(u32 colorA, u32 colorB) {
-    s32 color1[4];
-    s32 color2[4];
-    s32 blended[4];
+    s32 colorAWords[EFF_VECTOR_WORD_COUNT];
+    s32 colorBWords[EFF_VECTOR_WORD_COUNT];
+    s32 packedWords[EFF_VECTOR_WORD_COUNT];
     u32 packed;
-    u32 unit = 0x3C000000;
-    color1[0] = colorA;
-    EE_MMI_RGBA_UNPACK(color1, unit);
+    u32 unpackScaleBits = EFF_COLOR_UNPACK_SCALE_BITS;
+    colorAWords[0] = colorA;
+    EE_MMI_RGBA_UNPACK(colorAWords, unpackScaleBits);
     VU0_MOVE_VF(vf11, vf10);
-    color2[0] = colorB;
-    EE_MMI_RGBA_UNPACK(color2, unit);
+    colorBWords[0] = colorB;
+    EE_MMI_RGBA_UNPACK(colorBWords, unpackScaleBits);
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK(packed);
-    blended[0] = packed;
-    return blended[0];
+    packedWords[0] = packed;
+    return packedWords[0];
 }
 
-/* vu0 routine: distance from `point` to the line through `origin` along the unit vector `direction`. */
+/* vu0 routine: distance from point to the line through origin along a unit direction.
+   Direction is not normalized here; dot/length use xyz despite full quadword loads. */
 f32 effPointToLineDistance(f32 *direction, f32 *origin, f32 *point) {
-    f32 projection[4];
-    f32 offset[4];
-    f32 along;
+    f32 projectedOffset[EFF_VECTOR_WORD_COUNT];
+    f32 pointOffset[EFF_VECTOR_WORD_COUNT];
+    f32 projectionAmount;
     f32 distance;
 
     VU0_LOAD_VF(vf10, point);
     VU0_LOAD_VF(vf11, origin);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, offset);
+    VU0_STORE_VF(vf10, pointOffset);
     VU0_LOAD_VF(vf11, direction);
-    VU0_DOT_XYZ(along, vf10, vf11);
-    projection[0] = direction[0] * along;
-    projection[1] = direction[1] * along;
-    projection[2] = direction[2] * along;
-    VU0_LOAD_VF(vf10, offset);
-    VU0_LOAD_VF(vf11, projection);
+    VU0_DOT_XYZ(projectionAmount, vf10, vf11);
+    /* The fourth projection component remains unwritten: only xyz contributes to distance. */
+    projectedOffset[0] = direction[0] * projectionAmount;
+    projectedOffset[1] = direction[1] * projectionAmount;
+    projectedOffset[2] = direction[2] * projectionAmount;
+    VU0_LOAD_VF(vf10, pointOffset);
+    VU0_LOAD_VF(vf11, projectedOffset);
     VU0_SUB(vf10, vf10, vf11);
     VU0_LENGTH_VF10(distance);
     return distance;
 }
 
+/* Allocate/retain slot storage and return its header after the slots, not the slot base.
+   Only the two native slot defaults are initialized; count/allocation validity is unchecked. */
 void *effAllocSlotArray(s32 count) {
-    void *allocation = sdfAllocGeneralBlock(count * 0x38 + 0xC);
+    void *allocation = sdfAllocGeneralBlock(count * EFF_SLOT_BYTES + EFF_SLOT_HEADER_BYTES);
     void *retainedAddress = sdfResourceRetainAddress(allocation);
-    u32 index = 0;
+    u32 slotIndex = 0;
     EffSlot38 *slot = retainedAddress;
-    u8 *headerAddress = (u8 *)slot + count * 0x38;
+    u8 *headerAddress = (u8 *)slot + count * EFF_SLOT_BYTES;
 
     ((EffArrHdr *)headerAddress)->allocation = allocation;
     ((EffArrHdr *)headerAddress)->slots = retainedAddress;
     ((EffArrHdr *)headerAddress)->unk4 = count;
     if (count != 0) {
         do {
-            index++;
+            slotIndex++;
             slot->unk30 = 0;
             slot->unk34 = 0.05f;
-            slot = (EffSlot38 *)((u8 *)slot + 0x38);
-        } while (index < count);
+            slot = (EffSlot38 *)((u8 *)slot + EFF_SLOT_BYTES);
+        } while (slotIndex < count);
     }
     return headerAddress;
 }
