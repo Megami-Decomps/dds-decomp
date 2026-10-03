@@ -187,13 +187,12 @@ references become ordinary relocated address pairs in development, leaving
 zero physical GP references to the moved heap state. The three units retain
 three declared assembly fallbacks per title.
 
-Together the replacements move 142 DDS1 and 143 DDS2 exported symbols, plus
-five/three retained small-data symbols. Eighty-five moved definitions per title
-change their relative offsets. The verifier follows 1,411/1,450 external
-relocation sites targeting shifted definitions, 96/98 relocations between
-replacement objects, and 1,846/1,921 total relocation targets into moved
-content. The moved sections retain 668/684 relocation entries. All counts are
-asserted by the version descriptors.
+Together the replacements cover 168 DDS1 and 169 DDS2 exported symbols; 90
+definitions per title change their relative offsets. The verifier follows
+1,414/1,453 external relocation sites targeting shifted definitions, 126/128
+relocations between replacement objects, and 2,776/2,972 total relocation
+targets into moved content. The moved sections retain 764/780 relocation
+entries. All counts are asserted by the version descriptors.
 
 Replacement-owned code and read-only data may change size and contents. A
 declared, file-backed initialized small-data section may also move when all of

@@ -6,8 +6,8 @@
   "heap_alignment": "0x80",
   "expected_replacement_symbols": 168,
   "expected_shifted_replacement_symbols": 90,
-  "expected_shifted_symbol_relocations": 1411,
-  "expected_cross_replacement_relocations": 96,
+  "expected_shifted_symbol_relocations": 1414,
+  "expected_cross_replacement_relocations": 126,
   "expected_repaired_relocation_words": 0,
   "retail_static_end": "0x0040C5F0",
   "bss_end_assertions": [
