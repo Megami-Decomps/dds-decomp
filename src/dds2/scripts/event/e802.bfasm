@@ -81,29 +81,15 @@ _1:
     SET_MODEL_FLAG(1065)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02)))
     PREPARE_UNIT_MOTION_STATE(local_int[0], 23, 3, 15, 1)
-    push 0
-    push 25
-    push 0
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_01_2))
-    push local_int[0]
-    COMM 0x0017
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_MOTION))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_2))
-    COMM 0x0013
+    START_UNIT_MOVE_TO_POSITION_OBJECT(local_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_01_2)), 0, 25, 0)
+    START_CAMERA_PATH_MOVE(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_2)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_MOTION)))
     WAIT_FOR_TIMER_LIMIT(100)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03)))
     push local_int[0]
     COMM 0x0123
-    push 0
-    push 20
-    push 0
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04))
-    push local_int[0]
-    COMM 0x0017
+    START_UNIT_MOVE_TO_POSITION_OBJECT(local_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04)), 0, 20, 0)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03)))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_MOTION))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_2))
-    COMM 0x0013
+    START_CAMERA_PATH_MOVE(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_2)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_MOTION)))
     WAIT_FOR_UNIT_MOTION(local_int[0])
     PREPARE_UNIT_MOTION_STATE(local_int[0], 0, 20, 20, 1)
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_3))
@@ -114,8 +100,7 @@ _3:
   WAIT_FOR_TIMER_LIMIT(10)
   RESET_DRAW_EFFECTS()
   RESET_FIELD_EFFECTS()
-  push local_int[0]
-  COMM 0x0016
+  DESTROY_WORLD_UNIT(local_int[0])
   COMM 0x0023
   push 0
   COMM 0x011d

@@ -1835,17 +1835,10 @@ proc_0013:
     push 10
     push 23
     COMM 0x01f0
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_MOTION))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_3))
-    COMM 0x0013
+    START_CAMERA_PATH_MOVE(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_3)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_MOTION)))
     WAIT_FOR_TIMER_LIMIT(90)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 23, 3, 15, 1)
-    push 8
-    push 25
-    push 0
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03))
-    push global_int[0]
-    COMM 0x0017
+    START_UNIT_MOVE_TO_POSITION_OBJECT(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03)), 0, 25, 8)
     WAIT_FOR_TIMER_LIMIT(20)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02)))
     WAIT_FOR_UNIT_MOTION(global_int[0])
@@ -1981,10 +1974,8 @@ proc_0015:
   FINISH_SCRIPT_MESSAGE_WINDOW()
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
-  push local_int[56]
-  COMM 0x0016
-  push local_int[57]
-  COMM 0x0016
+  DESTROY_WORLD_UNIT(local_int[56])
+  DESTROY_WORLD_UNIT(local_int[57])
   UPDATE_FIELD_LOOK_AT_SEGMENT()
   ADD_EFFECT_UNIT_TO_WORLD(-(1))
   SCREEN_FADE_A(0, 15)
@@ -2013,12 +2004,7 @@ proc_0016:
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_09)))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_17)))
     PREPARE_UNIT_MOTION_STATE(global_int[0], 23, 3, 15, 1)
-    push 8
-    push 25
-    push 0
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_18))
-    push global_int[0]
-    COMM 0x0017
+    START_UNIT_MOVE_TO_POSITION_OBJECT(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_18)), 0, 25, 8)
     WAIT_FOR_UNIT_MOTION(global_int[0])
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 3, 15, 1)
     ACTIVATE_MESSAGE_PANEL()
@@ -2585,8 +2571,7 @@ _293:
         FINISH_SCRIPT_MESSAGE_WINDOW()
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
-        push local_int[59]
-        COMM 0x0016
+        DESTROY_WORLD_UNIT(local_int[59])
         ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_2)))
         UPDATE_FIELD_LOOK_AT_SEGMENT()
         ADD_EFFECT_UNIT_TO_WORLD(-(1))
@@ -2702,8 +2687,7 @@ proc_0027:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    push local_int[60]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(local_int[60])
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_3)))
     UPDATE_FIELD_LOOK_AT_SEGMENT()
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
@@ -2825,15 +2809,8 @@ _325:
     WAIT_FOR_OBJECT_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_01_2)))
     WAIT_FOR_OBJECT_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_01b_2)))
     PREPARE_UNIT_MOTION_STATE(global_int[0], 1, 3, 15, 1)
-    push 8
-    push 150
-    push 0
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08_3))
-    push global_int[0]
-    COMM 0x0017
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_MOTION_2))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_12))
-    COMM 0x0013
+    START_UNIT_MOVE_TO_POSITION_OBJECT(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08_3)), 0, 150, 8)
+    START_CAMERA_PATH_MOVE(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_12)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_MOTION_2)))
     WAIT_FOR_TIMER_LIMIT(30)
     PLAY_FIELD_SE_VOLUME_PAN(65)
     MOVE_OBJECT_ALONG_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_01_3)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01path_02_3)), 1)
@@ -3110,12 +3087,7 @@ _351:
       MESSAGE_REQUEST_AND_POLL(message(DOOR_OPEN))
       FINISH_SCRIPT_MESSAGE_WINDOW()
       PREPARE_UNIT_MOTION_STATE(global_int[0], 1, 3, 15, 1)
-      push 8
-      push 150
-      push 0
-      push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_12_2))
-      push global_int[0]
-      COMM 0x0017
+      START_UNIT_MOVE_TO_POSITION_OBJECT(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_12_2)), 0, 150, 8)
       WAIT_FOR_TIMER_LIMIT(15)
       SCREEN_FADE_B(0, 5)
       WAIT_FOR_TIMER_LIMIT(5)
@@ -3704,12 +3676,7 @@ proc_0043:
   FINISH_SCRIPT_MESSAGE_WINDOW()
   STOP_ARCHIVE_SOUND(10, 0)
   PREPARE_UNIT_MOTION_STATE(global_int[0], 23, 3, 15, 1)
-  push 8
-  push 25
-  push 0
-  push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04_3))
-  push global_int[0]
-  COMM 0x0017
+  START_UNIT_MOVE_TO_POSITION_OBJECT(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04_3)), 0, 25, 8)
   WAIT_FOR_UNIT_MOTION(global_int[0])
   PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 3, 15, 1)
   WAIT_FOR_TIMER_LIMIT(30)
@@ -3717,12 +3684,7 @@ proc_0043:
   MESSAGE_REQUEST_AND_POLL(message(SPY_012_01_1))
   FINISH_SCRIPT_MESSAGE_WINDOW()
   PREPARE_UNIT_MOTION_STATE(global_int[0], 23, 3, 15, 1)
-  push 8
-  push 25
-  push 0
-  push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_6))
-  push global_int[0]
-  COMM 0x0017
+  START_UNIT_MOVE_TO_POSITION_OBJECT(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_6)), 0, 25, 8)
   WAIT_FOR_UNIT_MOTION(global_int[0])
   PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 3, 15, 1)
   WAIT_FOR_TIMER_LIMIT(15)
@@ -3785,12 +3747,7 @@ _464:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     STOP_ARCHIVE_SOUND(10, 0)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 23, 3, 15, 1)
-    push 8
-    push 25
-    push 0
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04_5))
-    push global_int[0]
-    COMM 0x0017
+    START_UNIT_MOVE_TO_POSITION_OBJECT(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04_5)), 0, 25, 8)
     WAIT_FOR_UNIT_MOTION(global_int[0])
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 3, 15, 1)
     WAIT_FOR_TIMER_LIMIT(30)
@@ -3870,8 +3827,7 @@ re_mes_03:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(30)
-    push local_int[63]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(local_int[63])
     RUN_FIELD_TRANSITION_SELECTOR(3)
     return
     goto _465
@@ -3898,8 +3854,7 @@ re_mes_04:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(30)
-    push local_int[63]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(local_int[63])
     RUN_FIELD_TRANSITION_SELECTOR(3)
     return
     goto _467
@@ -3911,8 +3866,7 @@ _470:
   FINISH_SCRIPT_MESSAGE_WINDOW()
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(30)
-  push local_int[63]
-  COMM 0x0016
+  DESTROY_WORLD_UNIT(local_int[63])
   RUN_FIELD_TRANSITION_SELECTOR(3)
   return
   goto _469
@@ -3968,12 +3922,7 @@ proc_0046:
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_9)))
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     PREPARE_UNIT_MOTION_STATE(global_int[0], 1, 3, 15, 1)
-    push 8
-    push 150
-    push 0
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_06_5))
-    push global_int[0]
-    COMM 0x0017
+    START_UNIT_MOVE_TO_POSITION_OBJECT(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_06_5)), 0, 150, 8)
     CLEAR_UNIT_LOW_FLAG(global_int[10])
     PREPARE_UNIT_MOTION_STATE(global_int[10], 21, 0, 0, 0)
     WAIT_FOR_TIMER_LIMIT(10)
@@ -4208,12 +4157,7 @@ _501:
       MESSAGE_REQUEST_AND_POLL(message(DOOR_OPEN))
       FINISH_SCRIPT_MESSAGE_WINDOW()
       PREPARE_UNIT_MOTION_STATE(global_int[0], 1, 3, 15, 1)
-      push 8
-      push 150
-      push 0
-      push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_09_3))
-      push global_int[0]
-      COMM 0x0017
+      START_UNIT_MOVE_TO_POSITION_OBJECT(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_09_3)), 0, 150, 8)
       WAIT_FOR_TIMER_LIMIT(15)
       SCREEN_FADE_B(0, 5)
       WAIT_FOR_TIMER_LIMIT(5)
@@ -4840,8 +4784,7 @@ re_mes_05:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(30)
-    push local_int[65]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(local_int[65])
     RUN_FIELD_TRANSITION_SELECTOR(4)
     return
     goto _611
@@ -4871,8 +4814,7 @@ re_mes_06:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(30)
-    push local_int[65]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(local_int[65])
     RUN_FIELD_TRANSITION_SELECTOR(4)
     return
     goto _613
@@ -4884,8 +4826,7 @@ _616:
   FINISH_SCRIPT_MESSAGE_WINDOW()
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(30)
-  push local_int[65]
-  COMM 0x0016
+  DESTROY_WORLD_UNIT(local_int[65])
   RUN_FIELD_TRANSITION_SELECTOR(4)
   return
   goto _615
@@ -4941,12 +4882,7 @@ proc_005f:
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_11)))
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     PREPARE_UNIT_MOTION_STATE(global_int[0], 1, 3, 15, 1)
-    push 8
-    push 150
-    push 0
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_06_6))
-    push global_int[0]
-    COMM 0x0017
+    START_UNIT_MOVE_TO_POSITION_OBJECT(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_06_6)), 0, 150, 8)
     CLEAR_UNIT_LOW_FLAG(global_int[10])
     PREPARE_UNIT_MOTION_STATE(global_int[10], 21, 0, 0, 0)
     WAIT_FOR_TIMER_LIMIT(10)
@@ -5161,12 +5097,7 @@ _645:
       MESSAGE_REQUEST_AND_POLL(message(DOOR_OPEN))
       FINISH_SCRIPT_MESSAGE_WINDOW()
       PREPARE_UNIT_MOTION_STATE(global_int[0], 1, 3, 15, 1)
-      push 8
-      push 150
-      push 0
-      push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_09_4))
-      push global_int[0]
-      COMM 0x0017
+      START_UNIT_MOVE_TO_POSITION_OBJECT(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_09_4)), 0, 150, 8)
       WAIT_FOR_TIMER_LIMIT(15)
       SCREEN_FADE_B(0, 5)
       WAIT_FOR_TIMER_LIMIT(5)
@@ -5812,8 +5743,7 @@ proc_0077:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    push local_int[66]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(local_int[66])
     RUN_FIELD_TRANSITION_SELECTOR(5)
     return
   } else {
@@ -5834,8 +5764,7 @@ proc_0077:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    push local_int[66]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(local_int[66])
     RUN_FIELD_TRANSITION_SELECTOR(5)
     return
     goto _755
@@ -5981,12 +5910,7 @@ proc_007a:
     CLEAR_UNIT_LOW_FLAG(local_int[75])
     ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_8)))
     PREPARE_UNIT_MOTION_STATE(local_int[75], 16, 0, 0, 1)
-    push 8
-    push 45
-    push 0
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_17_2))
-    push local_int[75]
-    COMM 0x0017
+    START_UNIT_MOVE_TO_POSITION_OBJECT(local_int[75], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_17_2)), 0, 45, 8)
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(30)
     WAIT_FOR_TIMER_LIMIT(120)
@@ -5995,17 +5919,10 @@ proc_007a:
     ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_06_3)))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[75], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_18_2)))
     PREPARE_UNIT_MOTION_STATE(local_int[75], 16, 0, 0, 1)
-    push 8
-    push 45
-    push 0
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_19))
-    push local_int[75]
-    COMM 0x0017
+    START_UNIT_MOVE_TO_POSITION_OBJECT(local_int[75], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_19)), 0, 45, 8)
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(60)
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_06_MOTION))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_06_4))
-    COMM 0x0013
+    START_CAMERA_PATH_MOVE(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_06_4)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_06_MOTION)))
     WAIT_FOR_TIMER_LIMIT(150)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(30)
@@ -6033,12 +5950,7 @@ proc_007a:
     push local_int[75]
     COMM 0x0123
     PREPARE_UNIT_MOTION_STATE(local_int[75], 18, 0, 0, 1)
-    push 8
-    push 25
-    push 0
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_23))
-    push local_int[75]
-    COMM 0x0017
+    START_UNIT_MOVE_TO_POSITION_OBJECT(local_int[75], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_23)), 0, 25, 8)
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(30)
     WAIT_FOR_TIMER_LIMIT(150)
@@ -6047,12 +5959,7 @@ proc_007a:
     ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_9)))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[75], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_24)))
     PREPARE_UNIT_MOTION_STATE(local_int[75], 18, 0, 0, 1)
-    push 8
-    push 25
-    push 0
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_25))
-    push local_int[75]
-    COMM 0x0017
+    START_UNIT_MOVE_TO_POSITION_OBJECT(local_int[75], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_25)), 0, 25, 8)
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(30)
     WAIT_FOR_TIMER_LIMIT(90)
@@ -6061,8 +5968,7 @@ proc_007a:
     ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_12)))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[75], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_29)))
     PREPARE_UNIT_MOTION_STATE(local_int[75], 2, 0, 0, 1)
-    push local_int[77]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(local_int[77])
     local_int[77] = CREATE_LINKED_CAMERA_VIEWER(2, 2)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[77], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_12_3)))
     APPLY_FIELD_MODEL_LIGHTING(local_int[77])
@@ -6167,12 +6073,7 @@ _771:
     MESSAGE_REQUEST_AND_POLL(message(ROALD_02))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     PREPARE_UNIT_MOTION_STATE(global_int[0], 23, 3, 15, 1)
-    push 8
-    push 25
-    push 0
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02_9))
-    push global_int[0]
-    COMM 0x0017
+    START_UNIT_MOVE_TO_POSITION_OBJECT(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02_9)), 0, 25, 8)
     WAIT_FOR_UNIT_MOTION(global_int[0])
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 3, 15, 1)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -6185,8 +6086,7 @@ _771:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    push local_int[81]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(local_int[81])
     UPDATE_FIELD_LOOK_AT_SEGMENT()
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
     SCREEN_FADE_A(0, 15)
@@ -6253,8 +6153,7 @@ _775:
       _777:
         SCREEN_FADE_B(0, 15)
         WAIT_FOR_TIMER_LIMIT(15)
-        push local_int[82]
-        COMM 0x0016
+        DESTROY_WORLD_UNIT(local_int[82])
         goto _779
       }
     _779:

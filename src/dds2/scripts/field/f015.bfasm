@@ -1761,15 +1761,13 @@ _264:
   return
 proc_0021:
   PROC proc_0021
-  push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_2))
-  COMM 0x00a3
+  FOCUS_CAMERA_ON_OBJECT(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_2)))
   SET_FIELD_CAMERA_TABLE(15)
   return
 proc_0022:
   PROC proc_0022
   ENABLE_FIELD_MODEL_GROUP(15, 2, 1)
-  push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_3))
-  COMM 0x00a3
+  FOCUS_CAMERA_ON_OBJECT(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_3)))
   SET_FIELD_CAMERA_TABLE(15)
   return
 proc_0023:
@@ -1888,12 +1886,7 @@ player_warp:
   COMM 0x00b3
   WAIT_FOR_TIMER_LIMIT(30)
   SET_UNIT_LOW_FLAG(global_int[0])
-  push 0
-  push 360
-  push 1
-  push global_int[21]
-  push global_int[0]
-  COMM 0x0017
+  START_UNIT_MOVE_TO_POSITION_OBJECT(global_int[0], global_int[21], 1, 360, 0)
   WAIT_FOR_UNIT_MOTION(global_int[0])
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], global_int[21])
   CLEAR_UNIT_LOW_FLAG(global_int[0])
