@@ -2556,6 +2556,29 @@ def _gp_contract_is_subset(
     )
 
 
+def _gp_shifted_contract_is_subset(
+    development: list[tuple[str, int, str, int, int]],
+    retail: list[tuple[str, int, str, int, int]],
+) -> bool:
+    """Compare GP contracts while allowing the site to move within its function."""
+
+    def without_site_offset(
+        contract: list[tuple[str, int, str, int, int]],
+    ) -> Counter[tuple[str, str, int, int]]:
+        return Counter(
+            (site_name, target_name, target_offset, instruction)
+            for site_name, _site_offset, target_name, target_offset, instruction
+            in contract
+        )
+
+    development_counts = without_site_offset(development)
+    retail_counts = without_site_offset(retail)
+    return all(
+        count <= retail_counts[identity]
+        for identity, count in development_counts.items()
+    )
+
+
 def _main_text_range(
     symbols: list[LinkedSymbol], context: str
 ) -> tuple[int, int]:
@@ -2906,7 +2929,19 @@ def _audit_retained_sections(
             development_symbols,
             f"{context} development",
         )
-        if not _gp_contract_is_subset(development_identities, retail_identities):
+        allow_shifted_offsets = entry.get(
+            "allow_shifted_gp_reference_offsets", False
+        )
+        if not isinstance(allow_shifted_offsets, bool):
+            raise DevElfError(
+                f"{context}.allow_shifted_gp_reference_offsets must be boolean"
+            )
+        if allow_shifted_offsets:
+            if not _gp_shifted_contract_is_subset(
+                development_identities, retail_identities
+            ):
+                raise DevElfError(f"{context} changed its GP-reference signatures")
+        elif not _gp_contract_is_subset(development_identities, retail_identities):
             raise DevElfError(f"{context} changed its GP-reference contract")
         retained_symbol_count += len(retail_contract)
         raw_gp_count += len(development_sites)
