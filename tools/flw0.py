@@ -67,6 +67,10 @@ OPCODE_NAMES = (
 OPCODE_IDS = {name: opcode for opcode, name in enumerate(OPCODE_NAMES)}
 _EXTENDED_OPCODES = {0, 1}
 _NO_OPERAND_OPCODES = {4, 9, *range(14, 28)}
+_SINGLE_WORD_VALUE_PUSH_OPCODES = {
+    OPCODE_IDS[name]
+    for name in ("PUSHIX", "PUSHIF", "PUSHREG", "PUSHLIX", "PUSHLFX", "PUSHTYPE5")
+}
 
 
 class Flw0Error(ValueError):
@@ -609,9 +613,11 @@ def _event_push_symbol(
         if argument is None or argument >= len(following_raws):
             continue
         # Handler argument zero is the stack top. A literal argument N is
-        # therefore followed by N other literal pushes and then the command.
+        # followed by N single-word pushes and then the command. The other
+        # pushes may be dynamic; their values do not affect event-name typing.
         if any(
-            word & 0xFFFF != OPCODE_IDS["PUSHIS"]
+            word & 0xFFFF
+            not in ({OPCODE_IDS["PUSHIS"]} | _SINGLE_WORD_VALUE_PUSH_OPCODES)
             for word in following_raws[:argument]
         ):
             continue
