@@ -65,15 +65,15 @@ extern void sdfStartTrackedThread(SdfThreadNode *, s32, s32, s64, s32, s32);
 extern s32 sdfThreadSleepSelf(void);
 extern void func_001005C8(void);
 
-const char D_0039DF28[] __attribute__((aligned(8))) = "cdrom0:\\IRX\\IOPRP255.IMG;1";
-const char D_0039DF48[] __attribute__((aligned(8))) = "cdrom0:\\IRX\\SIO2MAN.IRX;1";
-const char D_0039DF68[] __attribute__((aligned(8))) = "cdrom0:\\IRX\\PADMAN.IRX;1";
-const char D_0039DF88[] __attribute__((aligned(8))) = "\\DDS3.IMG;1";
-const char D_0039DF98[] __attribute__((aligned(8))) = "cdrom0:\\DDS3.DDT;1";
-const char D_0039DFB0[] __attribute__((aligned(8))) = "cdrom0:\\IRX";
-const char D_0039DFC0[] __attribute__((aligned(8))) = "../../../dds3data";
-const char D_0039DFD8[] __attribute__((aligned(8))) = "cdrom0:\\USERIRX\\SDFIOP.IRX;1";
-const char D_0039DFF8[] __attribute__((aligned(8))) = "cdrom0:\\IRX\\MSIFRPC.IRX;1";
+extern char D_0039DF28[]; /* "cdrom0:\IRX\IOPRP255.IMG;1" */
+extern char D_0039DF48[]; /* "cdrom0:\IRX\SIO2MAN.IRX;1" */
+extern char D_0039DF68[]; /* "cdrom0:\IRX\PADMAN.IRX;1" */
+extern char D_0039DF88[]; /* "\DDS3.IMG;1" */
+extern char D_0039DF98[]; /* "cdrom0:\DDS3.DDT;1" */
+extern char D_0039DFB0[]; /* "cdrom0:\IRX" */
+extern char D_0039DFC0[]; /* "../../../dds3data" */
+extern char D_0039DFD8[]; /* "cdrom0:\USERIRX\SDFIOP.IRX;1" */
+extern char D_0039DFF8[]; /* "cdrom0:\IRX\MSIFRPC.IRX;1" */
 extern const s32 D_003BA83C;
 extern u32 sdfDiscType;
 extern u8 D_003BD39C;
@@ -406,6 +406,24 @@ void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBy
         }
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_00101B08", D_0039DF28);
+
+INCLUDE_RODATA(const s32, "game/code_00101B08", D_0039DF48);
+
+INCLUDE_RODATA(const s32, "game/code_00101B08", D_0039DF68);
+
+INCLUDE_RODATA(const s32, "game/code_00101B08", D_0039DF88);
+
+INCLUDE_RODATA(const s32, "game/code_00101B08", D_0039DF98);
+
+INCLUDE_RODATA(const s32, "game/code_00101B08", D_0039DFB0);
+
+INCLUDE_RODATA(const s32, "game/code_00101B08", D_0039DFC0);
+
+INCLUDE_RODATA(const s32, "game/code_00101B08", D_0039DFD8);
+
+INCLUDE_RODATA(const s32, "game/code_00101B08", D_0039DFF8);
 
 INCLUDE_RODATA(const s32, "game/code_00101B08", D_0039E018);
 
