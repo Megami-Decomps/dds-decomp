@@ -18,6 +18,7 @@ import flw0
 import flw0_flow
 import flw0_profiles
 import inf
+import random_encounter_flow
 import wap
 
 
@@ -662,10 +663,144 @@ def _render_event_dot(graph: dict, field_id: str) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _render_random_encounter_dot(graph: dict, area_id: str) -> str:
+    """Render one area's exact zone, pool, and weighted encounter graph."""
+
+    selector = next(
+        (
+            row
+            for row in graph.get("areaEncounterSelectors", ())
+            if row["area"] == area_id
+        ),
+        None,
+    )
+    area_edges = [
+        edge
+        for edge in graph.get("areaEncounterZoneEdges", ())
+        if edge["source"] == area_id
+    ]
+    if selector is None and not area_edges:
+        raise FieldGraphError(f"no random encounter selector found for {area_id}")
+    zone_ids = {edge["target"] for edge in area_edges}
+    zones = {
+        row["id"]: row
+        for row in graph.get("encounterZoneNodes", ())
+        if row["id"] in zone_ids
+    }
+    route_edges = [
+        edge
+        for edge in graph.get("encounterZoneRouteEdges", ())
+        if edge["source"] in zone_ids
+    ]
+    pool_ids = {edge["target"] for edge in route_edges}
+    pools = {
+        row["id"]: row
+        for row in graph.get("encounterPoolNodes", ())
+        if row["id"] in pool_ids
+    }
+    slot_edges = [
+        edge
+        for edge in graph.get("encounterPoolSlotEdges", ())
+        if edge["source"] in pool_ids
+    ]
+    encounter_ids = {edge["target"] for edge in slot_edges}
+    encounters = {
+        row["id"]: row
+        for row in graph.get("encounterNodes", ())
+        if row["id"] in encounter_ids
+    }
+
+    lines = [
+        "digraph dds_random_encounters {",
+        "  graph [rankdir=LR];",
+        '  node [fontname="sans-serif"];',
+        '  edge [fontname="sans-serif" fontsize=9];',
+        f"  {json.dumps(area_id)} [label={json.dumps(area_id)}, shape=box];",
+    ]
+    for zone in zones.values():
+        conditions = ", ".join(
+            f"{chr(ord('a') + row['index'])}={row['kind']}:{row['value']}"
+            for row in zone["conditions"]
+        )
+        label = (
+            f"zone {zone['index']} | {conditions} | "
+            f"bg {zone['backgrounds'][0]}/{zone['backgrounds'][1]} | "
+            f"bgm {zone['bgm']}"
+        )
+        lines.append(
+            f"  {json.dumps(zone['id'])} "
+            f"[label={json.dumps(label)}, shape=diamond];"
+        )
+    for pool in pools.values():
+        label = (
+            f"pool {pool['index']} | threshold {pool['threshold']} | "
+            f"weight {pool['totalWeight']}"
+        )
+        lines.append(
+            f"  {json.dumps(pool['id'])} "
+            f"[label={json.dumps(label)}, shape=ellipse];"
+        )
+    for encounter in encounters.values():
+        enemies = [
+            slot["name"] or str(slot["id"])
+            for slot in encounter["enemySlots"]
+            if slot is not None
+        ]
+        label = f"encounter {encounter['index']}"
+        if enemies:
+            label += " | " + ", ".join(enemies)
+        attributes = [f"label={json.dumps(label)}", "shape=box"]
+        if not encounter["availableAsRandomEncounter"]:
+            attributes.extend(('style="dashed"', 'color="gray"'))
+        lines.append(
+            f"  {json.dumps(encounter['id'])} [{', '.join(attributes)}];"
+        )
+    for edge in area_edges:
+        if edge["type"] == "default":
+            label = "default"
+        elif edge["type"] == "collision-override":
+            label = f"collision faces x{edge['faceCount']}"
+        else:
+            label = f"flag {edge['flag']} priority {edge['priority']}"
+        lines.append(
+            f"  {json.dumps(edge['source'])} -> {json.dumps(edge['target'])} "
+            f"[label={json.dumps(label)}];"
+        )
+    grouped_routes: dict[tuple[str, str, str], list[str]] = defaultdict(list)
+    for edge in route_edges:
+        grouped_routes[
+            (edge["source"], edge["target"], edge["selectedBy"])
+        ].append(edge["truth"])
+    for (source, target, selected_by), truths in sorted(grouped_routes.items()):
+        label = ",".join(truths)
+        if selected_by != "default":
+            label += f" via {selected_by}"
+        lines.append(
+            f"  {json.dumps(source)} -> {json.dumps(target)} "
+            f"[label={json.dumps(label)}];"
+        )
+    for edge in slot_edges:
+        label = f"slot {edge['slot']} | weight {edge['weight']}"
+        if edge["modifier"]:
+            label += f" | modifier {edge['modifier']}"
+        if edge["nextRoll"]:
+            label += f" | next {edge['nextRoll']}"
+        attributes = [f"label={json.dumps(label)}"]
+        if not edge["selectable"]:
+            attributes.extend(('style="dashed"', 'color="gray"'))
+        lines.append(
+            f"  {json.dumps(edge['source'])} -> {json.dumps(edge['target'])} "
+            f"[{', '.join(attributes)}];"
+        )
+    lines.append("}")
+    return "\n".join(lines) + "\n"
+
+
 def render_dot(
     graph: dict,
     interaction_area: str | None = None,
     event_field: str | None = None,
+    encounter_area: str | None = None,
 ) -> str:
     """Render the world graph or one area's INF interaction state machines."""
 
@@ -673,6 +808,8 @@ def render_dot(
         return _render_interaction_dot(graph, interaction_area)
     if event_field is not None:
         return _render_event_dot(graph, event_field)
+    if encounter_area is not None:
+        return _render_random_encounter_dot(graph, encounter_area)
 
     lines = [
         "digraph dds_field_world {",
@@ -1164,6 +1301,7 @@ def _load_graph(
     include_interactions: bool = False,
     include_events: bool = False,
     profile_name: str | None = None,
+    include_random_encounters: bool = False,
 ) -> dict:
     if not field_dir.is_dir():
         raise FieldGraphError(f"field source directory does not exist: {field_dir}")
@@ -1223,6 +1361,13 @@ def _load_graph(
             message_symbols,
         )
 
+    encounter_table = None
+    battle_symbols = None
+    if include_events or include_random_encounters:
+        encounter_table, battle_symbols = encounter_flow.load_sources(
+            field_dir.parent / "battle"
+        )
+
     if include_events:
         if profile_name is None:
             raise FieldGraphError("event flow requires a DDS command profile")
@@ -1230,9 +1375,7 @@ def _load_graph(
             profile = flw0_profiles.get(profile_name)
         except KeyError as exc:
             raise FieldGraphError(f"unknown command profile {profile_name!r}") from exc
-        encounter_table, battle_symbols = encounter_flow.load_sources(
-            field_dir.parent / "battle"
-        )
+        assert encounter_table is not None and battle_symbols is not None
         if encounter_table.profile.name != profile_name:
             raise FieldGraphError(
                 f"{encounter_table.profile.name} encounter source does not match "
@@ -1248,6 +1391,50 @@ def _load_graph(
         )
         graph["schema"] = "dds-field-world-7"
         graph["summary"].update(sections.pop("eventSummary"))
+        graph.update(sections)
+    if include_random_encounters:
+        assert encounter_table is not None and battle_symbols is not None
+        fields = tuple(
+            (
+                source.stem,
+                fld.encode(fld.parse_source(source.read_text(encoding="utf-8"))),
+            )
+            for source in field_paths
+        )
+        sections = random_encounter_flow.build_sections(
+            fields, encounter_table, battle_symbols
+        )
+        random_nodes = sections.pop("encounterNodes")
+        existing_nodes = {
+            row["id"]: {**row, "availableAsRandomEncounter": False}
+            for row in graph.get("encounterNodes", ())
+        }
+        for node in random_nodes:
+            existing = existing_nodes.get(node["id"])
+            if existing is None:
+                existing_nodes[node["id"]] = node
+                continue
+            for key, value in node.items():
+                if key in {
+                    "requested",
+                    "reachableFromPlacement",
+                    "availableAsRandomEncounter",
+                }:
+                    continue
+                if existing[key] != value:
+                    raise FieldGraphError(
+                        f"encounter node {node['id']} disagrees on {key}"
+                    )
+            existing["availableAsRandomEncounter"] = (
+                existing["availableAsRandomEncounter"]
+                or node["availableAsRandomEncounter"]
+            )
+        graph["encounterNodes"] = [
+            existing_nodes[node_id] for node_id in sorted(existing_nodes)
+        ]
+        graph["schema"] = "dds-field-world-8"
+        graph["summary"].update(sections.pop("randomEncounterSummary"))
+        graph["summary"]["totalEncounterNodes"] = len(existing_nodes)
         graph.update(sections)
     return graph
 
@@ -1273,6 +1460,11 @@ def main() -> None:
         help="include placement-rooted script and encounter execution flow",
     )
     parser.add_argument(
+        "--include-random-encounters",
+        action="store_true",
+        help="include exact area, zone, pool, and weighted encounter flow",
+    )
+    parser.add_argument(
         "--profile",
         choices=("dds1", "dds2"),
         help="command profile for event flow (inferred from the repository layout)",
@@ -1284,6 +1476,10 @@ def main() -> None:
     parser.add_argument(
         "--event-field",
         help="render one fNNN placement and procedure graph (DOT output only)",
+    )
+    parser.add_argument(
+        "--encounter-area",
+        help="render one fNNN_AAA random encounter graph (DOT output only)",
     )
     args = parser.parse_args()
     try:
@@ -1306,6 +1502,18 @@ def main() -> None:
                 raise FieldGraphError(
                     "--event-field and --interaction-area are mutually exclusive"
                 )
+        encounter_area = None
+        if args.encounter_area is not None:
+            encounter_area = args.encounter_area.lower()
+            if args.format != "dot":
+                raise FieldGraphError("--encounter-area requires --format dot")
+            if FIELD_AREA_PATTERN.fullmatch(encounter_area) is None:
+                raise FieldGraphError("encounter area must have the form fNNN_AAA")
+            if interaction_area is not None or event_field is not None:
+                raise FieldGraphError(
+                    "--encounter-area, --event-field, and --interaction-area "
+                    "are mutually exclusive"
+                )
         profile_name = args.profile
         if profile_name is None:
             inferred_profile = script_dir.parent.parent.name.lower()
@@ -1317,11 +1525,12 @@ def main() -> None:
             args.include_interactions or interaction_area is not None,
             args.include_events or event_field is not None,
             profile_name,
+            args.include_random_encounters or encounter_area is not None,
         )
         text = (
             json.dumps(graph, indent=2, ensure_ascii=True) + "\n"
             if args.format == "json"
-            else render_dot(graph, interaction_area, event_field)
+            else render_dot(graph, interaction_area, event_field, encounter_area)
         )
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(text, encoding="utf-8")
@@ -1344,6 +1553,11 @@ def main() -> None:
         )
     if "encounterNodes" in summary:
         description += f", and {summary['encounterNodes']} linked encounters"
+    if "randomEncounterAreas" in summary:
+        description += (
+            f", {summary['randomEncounterAreas']} random-encounter areas, and "
+            f"{summary['weightedEncounterEdges']} weighted encounter slots"
+        )
     print(f"wrote {description} to {args.output}")
 
 
