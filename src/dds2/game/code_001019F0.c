@@ -124,7 +124,7 @@ typedef struct KwlnDrawSink {
     u8 pad00[0x10];
     void (*invoke)(void *, void *); /* 0x10 */
 } KwlnDrawSink;
-extern s32 kwlnGetDrawBufferIndex(void);
+extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 D_003808B0[];
 extern u8 kwlnDrawSurfaces[];
 extern u8 D_00380860[];
