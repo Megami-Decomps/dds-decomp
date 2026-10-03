@@ -1,5 +1,11 @@
 #include "common.h"
 
+/* The selected script entry and the terminal value of the native load state. */
+enum {
+    EVT_PACK_ENTRY_POINT_KIND = 0,
+    EVT_PACK_LOAD_COMPLETE = 2
+};
+
 extern s32 kwlnTaskGetUserValue(void);
 extern void *evtGetTaskData(s32 eventId);
 extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32, s32, s32);
@@ -83,12 +89,12 @@ s32 func_0025D390(s32 eventId, s32 resourceId) {
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D4D0);
 
-/* Free the event state shared with the motion-sound task. */
+/* Free the current task's user-value block. */
 void evtFreeEventPackState(void) {
-    s32 state;
+    s32 stateHandle;
 
-    state = kwlnTaskGetUserValue();
-    sdfReleaseChipBlock(state);
+    stateHandle = kwlnTaskGetUserValue();
+    sdfReleaseChipBlock(stateHandle);
 }
 
 void func_0025D4D0(void);
@@ -176,9 +182,12 @@ extern s32 filePollEntryCleanup(struct FileCleanup *);
 extern u32 sdfResourceRetainAddress(struct SdfAllocation *);
 extern char D_004377E8[];
 
+/* Retain a ready pack and select its first entry-point record.
+ * Clearing the request handle and marking completion occur on separate calls;
+ * no entry-point record leaves the existing entryPoint value untouched. */
 void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
     EvtPackScriptHeader *header;
-    s32 i;
+    s32 entryIndex;
 
     if (state->fileHandle != 0) {
         if (fileIsRequestReadyInCurrentMode((struct FileRequest *)state->fileHandle) != 0) {
@@ -190,16 +199,16 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
             state->data = (u8 *)header;
             state->header = header;
             state->entries = header->entries;
-            for (i = 0; i < state->header->entryCount; i++) {
-                if (state->entries[i].kind == 0) {
-                    state->entryPoint = state->data + state->entries[i].dataOffset;
+            for (entryIndex = 0; entryIndex < state->header->entryCount; entryIndex++) {
+                if (state->entries[entryIndex].kind == EVT_PACK_ENTRY_POINT_KIND) {
+                    state->entryPoint = state->data + state->entries[entryIndex].dataOffset;
                     break;
                 }
             }
         }
     } else {
         func_0035B6E0(D_004377E8);
-        state->loaded = 2;
+        state->loaded = EVT_PACK_LOAD_COMPLETE;
     }
 }
 
@@ -232,43 +241,44 @@ extern void sdfReleaseResourceAllocation(s32);
 extern void sdfReleaseChipBlock(s32);
 
 
-/* Release the event task's owned handles, then free its state. */
+/* Release the event task's owned handles, then free its state.
+ * File I/O is waited on even when the user-value handle is zero. */
 void evtReleaseEventPackResources(void) {
-    s32 state = kwlnTaskGetUserValue();
-    EvtPackLoadState *resources = (EvtPackLoadState *)state;
+    s32 stateHandle = kwlnTaskGetUserValue();
+    EvtPackLoadState *state = (EvtPackLoadState *)stateHandle;
 
     fileWaitIdle();
-    if (state != 0) {
-        if (resources->effect72 != 0) {
+    if (stateHandle != 0) {
+        if (state->effect72 != 0) {
             effInitCh72Id();
-            sdfTexReleaseReferenceViaHandler(resources->effect72);
+            sdfTexReleaseReferenceViaHandler(state->effect72);
         }
-        if (resources->effect71 != 0) {
+        if (state->effect71 != 0) {
             effInitCh71Id();
-            sdfTexReleaseReferenceViaHandler(resources->effect71);
+            sdfTexReleaseReferenceViaHandler(state->effect71);
         }
-        if (resources->effect76 != 0) {
+        if (state->effect76 != 0) {
             effInitCh76Id();
-            sdfTexReleaseReferenceViaHandler(resources->effect76);
+            sdfTexReleaseReferenceViaHandler(state->effect76);
         }
-        if (resources->effect75 != 0) {
+        if (state->effect75 != 0) {
             effInitCh75Id();
-            sdfTexReleaseReferenceViaHandler(resources->effect75);
+            sdfTexReleaseReferenceViaHandler(state->effect75);
         }
-        if (resources->fileHandle != 0) {
-            filePollEntryCleanup((struct FileCleanup *)resources->fileHandle);
+        if (state->fileHandle != 0) {
+            filePollEntryCleanup((struct FileCleanup *)state->fileHandle);
         }
-        if (resources->resourceHandle != 0) {
-            sdfQueueNonzeroResourceId(resources->resourceHandle);
+        if (state->resourceHandle != 0) {
+            sdfQueueNonzeroResourceId(state->resourceHandle);
         }
-        if (resources->sceneAllocation1 != 0) {
-            sdfReleaseResourceAllocation(resources->sceneAllocation1);
+        if (state->sceneAllocation1 != 0) {
+            sdfReleaseResourceAllocation(state->sceneAllocation1);
         }
-        if (resources->sceneAllocation2 != 0) {
-            sdfReleaseResourceAllocation(resources->sceneAllocation2);
+        if (state->sceneAllocation2 != 0) {
+            sdfReleaseResourceAllocation(state->sceneAllocation2);
         }
     }
-    sdfReleaseChipBlock(state);
+    sdfReleaseChipBlock(stateHandle);
 }
 
 INCLUDE_RODATA(const s32, "event/evtEventPack", D_00424890);

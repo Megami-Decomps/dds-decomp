@@ -2,6 +2,16 @@
 #include "dds3obj.h"
 #include "pcp_vu0.h"
 
+/* Fixed dispatch payload sizes and the native six-kind world-object scan. */
+enum {
+    EVT_SCALAR_REQUEST_SIZE = 4,
+    EVT_PAIRED_REQUEST_SIZE = 8,
+    EVT_FIELD_SEQUENCE_REQUEST_SIZE = 0xA0,
+    EVT_WORLD_OBJECT_KIND_FIRST = 4,
+    EVT_WORLD_OBJECT_KIND_LIMIT = 10,
+    EVT_CAMP_TASK_READY_VALUE = 2
+};
+
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
 s32 scrReadIntParameter(s32 idx);
 
@@ -198,6 +208,8 @@ s32 evtCommandEnablePathUnit(void)
     return 1;
 }
 
+/* Bind the selected effect path to the first owner found in kinds 4..9.
+ * Missing paths or owners complete the command without binding anything. */
 s32 evtCommandAssignEffectObjectOwner(void) {
     void *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     s32 owner;
@@ -206,11 +218,11 @@ s32 evtCommandAssignEffectObjectOwner(void) {
     if (effectPath == NULL) {
         return 1;
     }
-    objectKind = 4;
+    objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
         owner = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
         objectKind++;
-    } while (objectKind < 10 && owner == 0);
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && owner == 0);
     if (owner == 0) {
         return 1;
     }
@@ -218,6 +230,7 @@ s32 evtCommandAssignEffectObjectOwner(void) {
     return 1;
 }
 
+/* Search the same owner kinds, then bind with the VM's third entry argument. */
 s32 evtCommandAssignEffectObjectOwnerWithEntry(void) {
     void *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     s32 owner;
@@ -226,11 +239,11 @@ s32 evtCommandAssignEffectObjectOwnerWithEntry(void) {
     if (effectPath == NULL) {
         return 1;
     }
-    objectKind = 4;
+    objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
         owner = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
         objectKind++;
-    } while (objectKind < 10 && owner == 0);
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && owner == 0);
     if (owner == 0) {
         return 1;
     }
@@ -323,36 +336,39 @@ s32 func_002266B0(void)
     return 1;
 }
 
+/* Forward two VM integers as the admin request's two-word payload. */
 s32 evtCommandSubmitPairedAdminRequest(void)
 {
-    s32 args[2];
+    s32 payload[2];
 
-    args[0] = scrReadIntParameter(0);
-    args[1] = scrReadIntParameter(1);
-    dds3AdminSubmitModeRequest(0x15, (s32)args, 8, 0);
+    payload[0] = scrReadIntParameter(0);
+    payload[1] = scrReadIntParameter(1);
+    dds3AdminSubmitModeRequest(0x15, (s32)payload, EVT_PAIRED_REQUEST_SIZE, 0);
     scrSetIntegerReturnValue(0);
     return 1;
 }
 
+/* Log all three arguments, then re-read command and parameter for dispatch. */
 s32 evtCommandDeferFieldTransition(void) {
-    s32 a = scrReadIntParameter(0);
-    s32 b = scrReadIntParameter(1);
-    s32 c = scrReadIntParameter(2);
-    s32 d;
+    s32 loggedArgument = scrReadIntParameter(0);
+    s32 loggedCommand = scrReadIntParameter(1);
+    s32 loggedParameter = scrReadIntParameter(2);
+    s32 command;
 
-    func_003003F0("CALL_NEXT(%d,%d,%d)\n", a, b, c);
-    d = scrReadIntParameter(1);
-    fldSetDeferredFieldCommand(d, scrReadIntParameter(2));
+    func_003003F0("CALL_NEXT(%d,%d,%d)\n", loggedArgument, loggedCommand, loggedParameter);
+    command = scrReadIntParameter(1);
+    fldSetDeferredFieldCommand(command, scrReadIntParameter(2));
     return 1;
 }
 
+/* The event ID becomes a four-byte dispatch payload. */
 s32 evtCommandCallEvent(void)
 {
     s32 eventId;
 
     eventId = scrReadIntParameter(0);
     func_003003F0("call_event:%d\n", eventId);
-    dds3AdminSubmitModeRequest(6, (s32)&eventId, 4, 0);
+    dds3AdminSubmitModeRequest(6, (s32)&eventId, EVT_SCALAR_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
@@ -365,16 +381,18 @@ s32 evtCommandSignalAdminAtTimerZero(void)
     return 0;
 }
 
-void evtSubmitEventRequest(s32 eventId, s32 mode)
+/* Queue an event request after preparing BGM/encounter state, then stop scripts.
+ * The mode is retained separately; only its positivity controls dispatch mode. */
+void evtSubmitEventRequest(s32 eventId, s32 requestMode)
 {
-    s32 args[2];
+    s32 payload[2];
 
     fldPlayCurrentBgmSound();
     fldRequestEncounterWithFade(2, eventId);
-    evtPendingEventSelection = mode;
-    args[0] = 0;
-    args[1] = eventId;
-    dds3AdminSubmitModeRequest(0xe, (s32)args, 8, mode > 0);
+    evtPendingEventSelection = requestMode;
+    payload[0] = 0;
+    payload[1] = eventId;
+    dds3AdminSubmitModeRequest(0xe, (s32)payload, EVT_PAIRED_REQUEST_SIZE, requestMode > 0);
     scrDestroyAllNamedProcesses();
 }
 
@@ -387,16 +405,17 @@ s32 evtCommandSubmitEvent(void)
     return 1;
 }
 
+/* Stop BGM and submit the event payload with immediate dispatch enabled. */
 void evtSubmitEventRequestImmediate(s32 eventId)
 {
-    s32 args[2];
+    s32 payload[2];
 
     fldStopCurrentBgm();
     fldRequestEncounterWithFade(2, eventId);
     evtPendingEventSelection = 0;
-    args[0] = 0;
-    args[1] = eventId;
-    dds3AdminSubmitModeRequest(0xe, (s32)args, 8, 1);
+    payload[0] = 0;
+    payload[1] = eventId;
+    dds3AdminSubmitModeRequest(0xe, (s32)payload, EVT_PAIRED_REQUEST_SIZE, 1);
     scrDestroyAllNamedProcesses();
 }
 
@@ -412,64 +431,68 @@ s32 evtCommandSubmitEventImmediate(void)
 s32 evtCommandSubmitEventWithMode(void)
 {
     s32 eventId;
-    s32 mode;
+    s32 requestMode;
 
     eventId = scrReadIntParameter(0);
-    mode = scrReadIntParameter(1);
-    evtSubmitEventRequest(eventId, mode);
+    requestMode = scrReadIntParameter(1);
+    evtSubmitEventRequest(eventId, requestMode);
     return 1;
 }
 
+/* A field-sequence request is a fixed 0xa0-byte VM message. */
 s32 evtCommandRequestFieldSequence(void)
 {
-    s32 firstArg;
-    s32 secondArg;
-    char *textArg;
-    u8 request[0xa0];
+    s32 stage;
+    s32 kind;
+    char *sequenceName;
+    u8 requestBuffer[EVT_FIELD_SEQUENCE_REQUEST_SIZE];
 
     fldReleaseCurrentBgm();
-    firstArg = scrReadIntParameter(0);
-    secondArg = scrReadIntParameter(1);
-    textArg = scrReadStringParameter(2);
-    fldInitializeSequenceAndResetFlags((s32)request, firstArg, secondArg, textArg);
-    dds3AdminSubmitModeRequest(5, (s32)request, 0xa0, 0);
+    stage = scrReadIntParameter(0);
+    kind = scrReadIntParameter(1);
+    sequenceName = scrReadStringParameter(2);
+    fldInitializeSequenceAndResetFlags((s32)requestBuffer, stage, kind, sequenceName);
+    dds3AdminSubmitModeRequest(5, (s32)requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
 
+/* Use the current group's stage with the VM's kind and sequence-name inputs. */
 s32 evtCommandRequestCurrentGroupSequence(void)
 {
-    s32 firstArg;
-    char *textArg;
-    u8 request[0xa0];
+    s32 kind;
+    char *sequenceName;
+    u8 requestBuffer[EVT_FIELD_SEQUENCE_REQUEST_SIZE];
 
-    firstArg = scrReadIntParameter(0);
-    textArg = scrReadStringParameter(1);
-    fldInitializeSequenceAndResetFlags((s32)request, D_0032E3C0[0], firstArg, textArg);
-    dds3AdminSubmitModeRequest(5, (s32)request, 0xa0, 0);
+    kind = scrReadIntParameter(0);
+    sequenceName = scrReadStringParameter(1);
+    fldInitializeSequenceAndResetFlags((s32)requestBuffer, D_0032E3C0[0], kind, sequenceName);
+    dds3AdminSubmitModeRequest(5, (s32)requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
 
+/* Forward the first VM integer as an opaque four-byte admin payload. */
 s32 func_00226A70(void)
 {
-    s32 p0;
+    s32 payloadValue;
 
-    p0 = scrReadIntParameter(0);
-    dds3AdminSubmitModeRequest(0x1c, (s32)&p0, 4, 0);
+    payloadValue = scrReadIntParameter(0);
+    dds3AdminSubmitModeRequest(0x1c, (s32)&payloadValue, EVT_SCALAR_REQUEST_SIZE, 0);
     return 1;
 }
 
+/* Build the current group's field request using the alternate initializer. */
 s32 evtCommandRequestAlternateFieldSequence(void)
 {
-    s32 firstArg;
-    char *textArg;
-    u8 request[0xa0];
+    s32 kind;
+    char *sequenceName;
+    u8 requestBuffer[EVT_FIELD_SEQUENCE_REQUEST_SIZE];
 
-    firstArg = scrReadIntParameter(0);
-    textArg = scrReadStringParameter(1);
-    fldInitializeAlternateSequence((s32)request, D_0032E3C0[0], firstArg, textArg);
-    dds3AdminSubmitModeRequest(5, (s32)request, 0xa0, 0);
+    kind = scrReadIntParameter(0);
+    sequenceName = scrReadStringParameter(1);
+    fldInitializeAlternateSequence((s32)requestBuffer, D_0032E3C0[0], kind, sequenceName);
+    dds3AdminSubmitModeRequest(5, (s32)requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
@@ -603,16 +626,17 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00226E98);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00226F38);
 
+/* Create with a zero position and identity rotation; return the world value to the VM. */
 s32 evtCommandCreateWorldEffectObject(void) {
-    f32 pos[4];
-    f32 rot[4];
+    f32 position[4];
+    f32 rotation[4];
     s32 world;
 
-    memset(pos, 0, 0x10);
-    memset(rot, 0, 0x10);
-    rot[3] = 1.0f;
+    memset(position, 0, 0x10);
+    memset(rotation, 0, 0x10);
+    rotation[3] = 1.0f;
     world = dds3AdvanceWorldCounter();
-    effObjSetInnerFloat(dds3CreateCameraObject(world, pos, rot), 1.0f);
+    effObjSetInnerFloat(dds3CreateCameraObject(world, position, rotation), 1.0f);
     scrSetIntegerReturnValue(world);
     return 1;
 }
@@ -651,10 +675,11 @@ s32 evtCommandSetEffectUnitFirstVector(void) {
     return 1;
 }
 
+/* Convert the three degree inputs before composing and storing a quaternion. */
 s32 evtCommandSetEffectUnitEulerRotation(void) {
     void *unit;
     f32 quaternion[4];
-    f32 radians;
+    f32 degreesToRadians;
     f32 pitch;
 
     if (scrReadIntParameter(0) < 0) {
@@ -665,11 +690,11 @@ s32 evtCommandSetEffectUnitEulerRotation(void) {
     if (unit == NULL) {
         return 1;
     }
-    radians = 0.017453293f;
-    pitch = bfWaitReadArgFloat(1) * radians;
-    func_002E7F20(pitch, bfWaitReadArgFloat(2) * radians, 0.0f);
+    degreesToRadians = 0.017453293f;
+    pitch = bfWaitReadArgFloat(1) * degreesToRadians;
+    func_002E7F20(pitch, bfWaitReadArgFloat(2) * degreesToRadians, 0.0f);
     VU0_MOVE_VF(vf11, vf10);
-    func_002E7F20(0.0f, 0.0f, bfWaitReadArgFloat(3) * radians);
+    func_002E7F20(0.0f, 0.0f, bfWaitReadArgFloat(3) * degreesToRadians);
     effMiscQuatMultiplyVU();
     VU0_STORE_VF(vf10, quaternion);
     effObjSetInnerSecondVec(unit, quaternion);
@@ -870,96 +895,105 @@ s32 evtCommandSetSolarPhase(void)
     return 1;
 }
 
+/* Create a missing camp task, then wait for its ready value.
+ * No VM context completes immediately; a pending task returns zero. */
 s32 evtCommandWaitForCampTask(void) {
-    s32 id = scrReadIntParameter(0);
-    EvtCommandWork *work = (EvtCommandWork *)scrGetCurrentContext();
-    char *msg;
+    s32 taskId = scrReadIntParameter(0);
+    EvtCommandWork *commandWork = (EvtCommandWork *)scrGetCurrentContext();
+    char *message;
 
-    if (work == NULL) {
+    if (commandWork == NULL) {
         return 1;
     }
-    if (evtFindTaskById(id) == 0) {
-        msg = D_003AC958;
-        evtPrintDeveloperConsoleMessage(msg, id);
-        sdfPrintFormattedDevMessage(msg, id);
-        func_00101A80((s32)work->campTask, mnuCampCreateTask(id));
+    if (evtFindTaskById(taskId) == 0) {
+        message = D_003AC958;
+        evtPrintDeveloperConsoleMessage(message, taskId);
+        sdfPrintFormattedDevMessage(message, taskId);
+        func_00101A80((s32)commandWork->campTask, mnuCampCreateTask(taskId));
         return 0;
     }
-    if (evtGetTaskValueWord(id) == 2) {
-        msg = D_003AC968;
-        evtPrintDeveloperConsoleMessage(msg, id);
-        sdfPrintFormattedDevMessage(msg, id);
+    if (evtGetTaskValueWord(taskId) == EVT_CAMP_TASK_READY_VALUE) {
+        message = D_003AC968;
+        evtPrintDeveloperConsoleMessage(message, taskId);
+        sdfPrintFormattedDevMessage(message, taskId);
         return 1;
     }
     return 0;
 }
 
+/* Start the camp task only if no task with this ID exists yet.
+ * A missing VM context completes without creating a task. */
 s32 evtCommandStartCampTaskIfAbsent(void) {
-    s32 id = scrReadIntParameter(0);
-    EvtCommandWork *work = (EvtCommandWork *)scrGetCurrentContext();
+    s32 taskId = scrReadIntParameter(0);
+    EvtCommandWork *commandWork = (EvtCommandWork *)scrGetCurrentContext();
 
-    if (work == NULL) {
+    if (commandWork == NULL) {
         return 1;
     }
-    if (evtFindTaskById(id) != 0) {
+    if (evtFindTaskById(taskId) != 0) {
         return 1;
     }
-    evtPrintDeveloperConsoleMessage(D_003AC978, id);
-    func_00101A80((s32)work->campTask, mnuCampCreateTask(id));
+    evtPrintDeveloperConsoleMessage(D_003AC978, taskId);
+    func_00101A80((s32)commandWork->campTask, mnuCampCreateTask(taskId));
     return 1;
 }
 
+/* Store readiness in the VM result; the command itself always completes. */
 s32 evtCommandTestCampTaskReady(void) {
-    s32 id = scrReadIntParameter(0);
-    s32 ok;
+    s32 taskId = scrReadIntParameter(0);
+    s32 isReady;
 
-    if (scrGetCurrentContext() != 0 && evtFindTaskById(id) != 0 && evtGetTaskValueWord(id) == 2) {
-        evtPrintDeveloperConsoleMessage(D_003AC968, id);
-        ok = 1;
+    if (scrGetCurrentContext() != 0 && evtFindTaskById(taskId) != 0 && evtGetTaskValueWord(taskId) == EVT_CAMP_TASK_READY_VALUE) {
+        evtPrintDeveloperConsoleMessage(D_003AC968, taskId);
+        isReady = 1;
     } else {
-        ok = 0;
+        isReady = 0;
     }
-    scrSetIntegerReturnValue(ok);
+    scrSetIntegerReturnValue(isReady);
     return 1;
 }
 
+/* Destroy the requested camp task; missing context or task is a completed no-op. */
 s32 evtCommandDestroyCampTask(void) {
-    s32 id = scrReadIntParameter(0);
+    s32 taskId = scrReadIntParameter(0);
 
     if (scrGetCurrentContext() == 0) {
         return 1;
     }
-    if (evtFindTaskById(id) == 0) {
+    if (evtFindTaskById(taskId) == 0) {
         return 1;
     }
-    evtPrintDeveloperConsoleMessage(D_003AC988, id);
-    mnuCampDestroyTaskById(id);
+    evtPrintDeveloperConsoleMessage(D_003AC988, taskId);
+    mnuCampDestroyTaskById(taskId);
     return 1;
 }
 
+/* Create an event/scene movie task using the active camp resource, set bit 0,
+ * and return its handle through the VM result. Missing work skips creation. */
 s32 evtCommandStartPolygonMovie(void) {
-    EvtCommandWork *work = (EvtCommandWork *)scrGetCurrentContext();
-    s32 a;
-    s32 b;
-    s32 result;
+    EvtCommandWork *commandWork = (EvtCommandWork *)scrGetCurrentContext();
+    s32 eventId;
+    s32 sceneId;
+    s32 movieTask;
 
-    if (work == NULL) {
+    if (commandWork == NULL) {
         return 1;
     }
-    if (work->campTask == 0) {
+    if (commandWork->campTask == 0) {
         func_003003F0(D_003AC998);
         return 1;
     }
-    a = scrReadIntParameter(0);
-    b = scrReadIntParameter(1);
-    result = evtViewerCreateTask(work->campTask->resource, a, b);
+    eventId = scrReadIntParameter(0);
+    sceneId = scrReadIntParameter(1);
+    movieTask = evtViewerCreateTask(commandWork->campTask->resource, eventId, sceneId);
     evtPrintDeveloperConsoleMessage(D_003AC9E0, scrReadIntParameter(0), scrReadIntParameter(1));
-    func_00101A80((s32)work->campTask, result);
-    evtPolygonMovieSetFlagBits(result, 1);
-    scrSetIntegerReturnValue(result);
+    func_00101A80((s32)commandWork->campTask, movieTask);
+    evtPolygonMovieSetFlagBits(movieTask, 1);
+    scrSetIntegerReturnValue(movieTask);
     return 1;
 }
 
+/* Clear bit 0 and echo the movie ID through the VM result. */
 s32 evtCommandClearPolygonMovieFlag(void)
 {
     s32 movieId;
@@ -970,73 +1004,79 @@ s32 evtCommandClearPolygonMovieFlag(void)
     return 1;
 }
 
+/* Create and return an event/scene movie task without setting bit 0.
+ * The active camp resource supplies the viewer task's first argument. */
 s32 evtCommandCreatePolygonMovie(void) {
-    EvtCommandWork *work = (EvtCommandWork *)scrGetCurrentContext();
-    s32 a;
-    s32 b;
-    s32 result;
+    EvtCommandWork *commandWork = (EvtCommandWork *)scrGetCurrentContext();
+    s32 eventId;
+    s32 sceneId;
+    s32 movieTask;
 
-    if (work == NULL) {
+    if (commandWork == NULL) {
         return 1;
     }
-    if (work->campTask == 0) {
+    if (commandWork->campTask == 0) {
         func_003003F0(D_003AC9F8);
         return 1;
     }
-    a = scrReadIntParameter(0);
-    b = scrReadIntParameter(1);
-    result = evtViewerCreateTask(work->campTask->resource, a, b);
-    func_00101A80((s32)work->campTask, result);
-    scrSetIntegerReturnValue(result);
+    eventId = scrReadIntParameter(0);
+    sceneId = scrReadIntParameter(1);
+    movieTask = evtViewerCreateTask(commandWork->campTask->resource, eventId, sceneId);
+    func_00101A80((s32)commandWork->campTask, movieTask);
+    scrSetIntegerReturnValue(movieTask);
     return 1;
 }
 
+/* Look up a world unit across the six kinds before trying the fallback slot. */
 s32 evtCommandSetWorldSlotStatusFlag(void) {
-    s32 found;
-    s32 i = 4;
+    s32 unit;
+    s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        found = (s32)evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(0));
-        i++;
-    } while (i < 10 && found == 0);
-    if (found == 0) {
-        found = func_00126200(scrReadIntParameter(0));
-        if (found == 0) {
+        unit = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        objectKind++;
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == 0);
+    if (unit == 0) {
+        unit = func_00126200(scrReadIntParameter(0));
+        if (unit == 0) {
             return 1;
         }
     }
-    evtSetWorldSlotStatusFlag(found);
+    evtSetWorldSlotStatusFlag(unit);
     return 1;
 }
 
+/* Clear the first matching unit's status flag, using the same fallback search. */
 s32 evtCommandClearWorldSlotStatusFlag(void) {
-    s32 found;
-    s32 i = 4;
+    s32 unit;
+    s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        found = (s32)evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(0));
-        i++;
-    } while (i < 10 && found == 0);
-    if (found == 0) {
-        found = func_00126200(scrReadIntParameter(0));
-        if (found == 0) {
+        unit = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        objectKind++;
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == 0);
+    if (unit == 0) {
+        unit = func_00126200(scrReadIntParameter(0));
+        if (unit == 0) {
             return 1;
         }
     }
-    evtClearWorldSlotStatusFlag(found);
+    evtClearWorldSlotStatusFlag(unit);
     return 1;
 }
 
+/* Apply the float state, then update a room flag when its parsed number is positive.
+ * Values above 0.5 set that flag; the VM float parameter is deliberately re-read. */
 s32 evtCommandSetUnitRoomFloatState(void) {
     u8 *unit;
-    s32 count;
-    char *owner;
-    s32 i = 4;
+    s32 roomNumber;
+    char *roomName;
+    s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        unit = (u8 *)evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(0));
-        i++;
-    } while (i < 10 && unit == NULL);
+        unit = (u8 *)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        objectKind++;
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
         unit = (u8 *)func_00126200(scrReadIntParameter(0));
         if (unit == NULL) {
@@ -1044,31 +1084,33 @@ s32 evtCommandSetUnitRoomFloatState(void) {
         }
     }
     evtScaleSlotByClampedMultiplier(unit, bfWaitReadArgFloat(1));
-    owner = ((EvtWorldUnit *)unit)->roomName;
-    if (owner == 0) {
+    roomName = ((EvtWorldUnit *)unit)->roomName;
+    if (roomName == 0) {
         return 1;
     }
-    count = fldParseRoomNumberFromName(owner);
-    if (count > 0) {
+    roomNumber = fldParseRoomNumberFromName(roomName);
+    if (roomNumber > 0) {
         if (bfWaitReadArgFloat(1) > 0.5f) {
-            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, count, 1);
+            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, roomNumber, 1);
         } else {
-            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, count, 0);
+            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, roomNumber, 0);
         }
     }
     return 1;
 }
 
+/* Apply the integer state and update a positive parsed room number's flag.
+ * Unlike the float command, an integer value of zero sets the room flag. */
 s32 evtCommandSetUnitRoomIntegerState(void) {
     u8 *unit;
-    s32 count;
-    char *owner;
-    s32 i = 4;
+    s32 roomNumber;
+    char *roomName;
+    s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        unit = (u8 *)evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(0));
-        i++;
-    } while (i < 10 && unit == NULL);
+        unit = (u8 *)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        objectKind++;
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
         unit = (u8 *)func_00126200(scrReadIntParameter(0));
         if (unit == NULL) {
@@ -1076,31 +1118,32 @@ s32 evtCommandSetUnitRoomIntegerState(void) {
         }
     }
     evtSetWorldSlotValue(unit, scrReadIntParameter(1));
-    owner = ((EvtWorldUnit *)unit)->roomName;
-    if (owner == 0) {
+    roomName = ((EvtWorldUnit *)unit)->roomName;
+    if (roomName == 0) {
         return 1;
     }
-    count = fldParseRoomNumberFromName(owner);
-    if (count > 0) {
+    roomNumber = fldParseRoomNumberFromName(roomName);
+    if (roomNumber > 0) {
         if (scrReadIntParameter(1) == 0) {
-            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, count, 1);
+            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, roomNumber, 1);
         } else {
-            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, count, 0);
+            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, roomNumber, 0);
         }
     }
     return 1;
 }
 
+/* Enable the scaled-value flag on the first unit found, including the fallback. */
 s32 evtCommandSetUnitScaledValueFlag(void)
 {
-    s32 unitType;
+    s32 objectKind;
     void *unit;
 
-    unitType = 4;
+    objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
-        unit = evtFindWorldObjectByIdAndKind(unitType, scrReadIntParameter(0));
-        unitType++;
-    } while (unitType < 10 && unit == NULL);
+        unit = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        objectKind++;
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
         unit = (void *)func_00126200(scrReadIntParameter(0));
         if (unit == NULL) {
@@ -1111,16 +1154,17 @@ s32 evtCommandSetUnitScaledValueFlag(void)
     return 1;
 }
 
+/* Disable the scaled-value flag using the same six-kind and fallback search. */
 s32 evtCommandClearUnitScaledValueFlag(void)
 {
-    s32 unitType;
+    s32 objectKind;
     void *unit;
 
-    unitType = 4;
+    objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
-        unit = evtFindWorldObjectByIdAndKind(unitType, scrReadIntParameter(0));
-        unitType++;
-    } while (unitType < 10 && unit == NULL);
+        unit = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        objectKind++;
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
         unit = (void *)func_00126200(scrReadIntParameter(0));
         if (unit == NULL) {
