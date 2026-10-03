@@ -19,7 +19,7 @@ void func_0026E160(s32 a, s32 b, s32 c, s32 d, s32 value) {
 }
 
 
-extern void func_0026DED0(s32, s32, u8 *, s32);
+extern void func_0026DED0(s32, s32, u8 *, s8);
 extern u8 *sdfListRemoveNode(s32, u8 *);
 
 typedef struct SdfTaskHeader {

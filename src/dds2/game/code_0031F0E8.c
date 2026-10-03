@@ -36,7 +36,8 @@ typedef struct DdsNamedRecord {
 } DdsNamedRecord;
 
 typedef struct DdsNamedNode {
-    u8 pad00[8];
+    u32 id;                   /* 0x00: resource key serialized with nested records */
+    u8 pad04[4];
     struct DdsNamedNode *next; /* 0x08 */
     u8 pad0C[4];
     void *record;             /* 0x10: named reference or format-specific record */
@@ -96,6 +97,39 @@ typedef struct DdsSpriteExtendedRecord {
     u8 inlineData[8];
     void *data;
 } DdsSpriteExtendedRecord;
+
+typedef struct DdsCountedPayload {
+    u32 count;
+    void *data;
+} DdsCountedPayload;
+
+typedef struct DdsNestedGroup {
+    u32 unk_00;
+    u16 firstCount;
+    u16 secondCount;
+    DdsCountedPayload *first;
+    DdsCountedPayload *second;
+} DdsNestedGroup;
+
+typedef struct DdsNestedHeader {
+    u32 unk_00;
+    u32 unk_04;
+    u32 unk_08;
+    u16 unk_0C;
+    u16 groupCount;
+    DdsNestedGroup *groups;
+} DdsNestedHeader;
+
+typedef struct DdsNestedRecord {
+    u32 unk_00;
+    u32 unk_04;
+    s16 unk_08;
+    u8 unk_0A;
+    u8 wordCount;
+    DdsNestedHeader *header;
+    u32 *words;
+    char *name;
+} DdsNestedRecord;
 
 typedef struct DdsCallbackNode {
     u8 pad00[0xC];
@@ -207,6 +241,7 @@ extern u32 func_0031F168(void);
 extern char D_00438960[];
 /* SDK sprintf returns the formatted byte count. */
 extern s32 func_0035C860(char *dst, const char *format, ...);
+extern char *strncpy(char *dst, const char *source, u32 bytes);
 extern char D_00438978[];
 
 void dds3RegisterNamedPackedOffset(DdsPackedObject *object, const char *name) {
@@ -381,7 +416,112 @@ u32 *func_0031F878(u32 **source) {
     return (u32 *)object;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031FA60);
+/* Nested references precede their arrays of counted eight-byte payloads. */
+u32 *func_0031FA60(u32 **source) {
+    DdsPackedObject *object = func_0031F280();
+    DdsNamedNode *node;
+    DdsNestedRecord *record;
+    DdsNestedHeader *header;
+    DdsNestedGroup *group;
+    DdsCountedPayload *entry;
+    s32 i;
+    s32 j;
+    char name[16];
+
+    for (node = ((DdsNamedList *)*source)->first; node; node = node->next) {
+        record = node->record;
+        dds3WritePackedValue((u32)object, node->id, 4);
+        dds3WritePackedValue((u32)object, record->unk_04, 4);
+        dds3WritePackedValue((u32)object, record->unk_08, 2);
+        dds3WritePackedValue((u32)object, record->unk_0A, 1);
+        dds3WritePackedValue((u32)object, record->wordCount, 1);
+        memset(name, 0, sizeof(name));
+        func_0035C860(name, D_00438978, (void *)record->header);
+        dds3RecordNamedReference((u32)object, name);
+        memset(name, 0, sizeof(name));
+        func_0035C860(name, D_00438978, (void *)record->words);
+        dds3RecordNamedReference((u32)object, name);
+        memset(name, 0, sizeof(name));
+        func_0035C860(name, D_00438978, (void *)record->name);
+        dds3RecordNamedReference((u32)object, name);
+    }
+    for (node = ((DdsNamedList *)*source)->first; node; node = node->next) {
+        record = node->record;
+        memset(name, 0, sizeof(name));
+        func_0035C860(name, D_00438978, (void *)record->words);
+        dds3RegisterNamedPackedOffset(object, name);
+        dds3AppendPackedBytes(object, record->words, record->wordCount * sizeof(*record->words));
+        memset(name, 0, sizeof(name));
+        func_0035C860(name, D_00438978, (void *)record->name);
+        dds3RegisterNamedPackedOffset(object, name);
+        strncpy(name, record->name, sizeof(name));
+        dds3AppendPackedBytes(object, name, sizeof(name));
+        header = record->header;
+        memset(name, 0, sizeof(name));
+        func_0035C860(name, D_00438978, (void *)header);
+        dds3RegisterNamedPackedOffset(object, name);
+        if (header != NULL) {
+            dds3WritePackedValue((u32)object, header->unk_00, 4);
+            dds3AppendPackedBytes(object, &header->unk_04, 4);
+            dds3AppendPackedBytes(object, &header->unk_08, 4);
+            dds3WritePackedValue((u32)object, header->unk_0C, 2);
+            dds3WritePackedValue((u32)object, header->groupCount, 2);
+            memset(name, 0, sizeof(name));
+            func_0035C860(name, D_00438978, (void *)header->groups);
+            dds3RecordNamedReference((u32)object, name);
+            group = header->groups;
+            memset(name, 0, sizeof(name));
+            func_0035C860(name, D_00438978, (void *)group);
+            dds3RegisterNamedPackedOffset(object, name);
+            for (i = 0; i < header->groupCount; i++, group++) {
+                dds3WritePackedValue((u32)object, group->unk_00, 4);
+                dds3WritePackedValue((u32)object, group->firstCount, 2);
+                dds3WritePackedValue((u32)object, group->secondCount, 2);
+                memset(name, 0, sizeof(name));
+                func_0035C860(name, D_00438978, (void *)group->first);
+                dds3RecordNamedReference((u32)object, name);
+                memset(name, 0, sizeof(name));
+                func_0035C860(name, D_00438978, (void *)group->second);
+                dds3RecordNamedReference((u32)object, name);
+            }
+            for (i = 0, group = header->groups; i < header->groupCount; i++, group++) {
+                entry = group->first;
+                memset(name, 0, sizeof(name));
+                func_0035C860(name, D_00438978, (void *)entry);
+                dds3RegisterNamedPackedOffset(object, name);
+                for (j = 0; j < group->firstCount; j++, entry++) {
+                    dds3WritePackedValue((u32)object, entry->count, 4);
+                    memset(name, 0, sizeof(name));
+                    func_0035C860(name, D_00438978, entry->data);
+                    dds3RecordNamedReference((u32)object, name);
+                }
+                for (j = 0, entry = group->first; j < group->firstCount; j++, entry++) {
+                    memset(name, 0, sizeof(name));
+                    func_0035C860(name, D_00438978, entry->data);
+                    dds3RegisterNamedPackedOffset(object, name);
+                    dds3AppendPackedBytes(object, entry->data, entry->count * 8);
+                }
+                entry = group->second;
+                memset(name, 0, sizeof(name));
+                func_0035C860(name, D_00438978, (void *)entry);
+                dds3RegisterNamedPackedOffset(object, name);
+                for (j = 0; j < group->secondCount; j++, entry++) {
+                    dds3WritePackedValue((u32)object, entry->count, 4);
+                    memset(name, 0, sizeof(name));
+                    func_0035C860(name, D_00438978, entry->data);
+                    dds3RecordNamedReference((u32)object, name);
+                }
+                for (j = 0, entry = group->second; j < group->secondCount; j++, entry++) {
+                    memset(name, 0, sizeof(name));
+                    func_0035C860(name, D_00438978, entry->data);
+                    dds3RegisterNamedPackedOffset(object, name);
+                    dds3AppendPackedBytes(object, entry->data, entry->count * 8);
+                }
+            }
+        }
+    }
+    return (u32 *)object;
+}
 
 /* Write pointer-named references first, then their sixteen-byte payloads. */
 u32 *func_00320020(u32 **source) {
