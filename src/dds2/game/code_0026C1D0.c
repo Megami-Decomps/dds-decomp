@@ -510,7 +510,11 @@ EvtMantraWork *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", evtReleaseMantraSelectionWork);
+s32 evtReleaseMantraSelectionWork(EvtMantraWork *work) {
+    if (work != NULL) {
+        sdfReleaseResourceAllocation(work->allocation);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D168);
 
@@ -621,4 +625,3 @@ INCLUDE_SDATA(const s32, "game/code_0026C1D0", D_00437890);
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", mnuMantraNodePositionTable);
 
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", mnuMantraPanelPositionTable);
-
