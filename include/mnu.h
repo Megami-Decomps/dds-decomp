@@ -32,6 +32,15 @@ static inline void panelSetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alph
 /* Camp task priority for the menu task family. */
 #define CAMP_TASK_PRIORITY 0x3EC
 
+/* Serialized map arguments and the two four-word rows used by camp effects. */
+typedef struct CampMapArguments {
+    u32 values[11];
+} CampMapArguments;
+
+typedef struct CampEffectRows {
+    u32 values[2][4];
+} CampEffectRows;
+
 #ifdef VERSION_DDS2
 /* Staff menu task context (DDS2 layout). */
 typedef struct MenuStaffWindow MenuStaffWindow;
