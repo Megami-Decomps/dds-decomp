@@ -3487,8 +3487,6 @@ void mnuReleaseEffectResource(MantraEffectResource *resource) {
     sdfReleaseChipBlock(resource);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00285788);
-
 typedef struct MantraSpark {
     s16 x;
     s16 y;
@@ -3506,7 +3504,23 @@ typedef struct MantraSparkState {
     MantraSpark particles[8];
 } MantraSparkState;
 
+typedef struct MantraSparkEffectState {
+    MantraSparkState sparkle;
+    u32 effectHandle;
+} MantraSparkEffectState;
+
 void mnuUpdateSparkle(MantraSpark *);
+void mnuTickMantraSparkParticles(MantraSparkState *);
+s32 func_00285AC0(MantraSparkEffectState *, u32, s32);
+
+s32 func_00285788(MantraSparkEffectState *state, s32 unused, s32 arg2) {
+    f32 fraction = (f32)state->sparkle.timer / (f32)state->sparkle.unk4;
+
+    fraction = 1.0f - fraction;
+    sdfSinPoly(fraction * 3.14159265f);
+    mnuTickMantraSparkParticles(&state->sparkle);
+    return func_00285AC0(state, state->effectHandle, arg2);
+}
 
 /* Reset the shared timer as needed, then advance all eight spark particles. */
 void mnuTickMantraSparkParticles(MantraSparkState *state) {
