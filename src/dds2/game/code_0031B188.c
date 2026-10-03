@@ -104,6 +104,28 @@ typedef struct MnuEffectWork {
     u32 unkC;
 } MnuEffectWork;
 
+typedef struct SdfMat4 {
+    f32 m[16];
+} SdfMat4;
+
+extern f32 sdfViewTargetVector[4];
+extern void *memset(void *, s32, u32);
+extern void func_00326BC8(SdfMat4 *, f32);
+extern void func_003270C8(SdfMat4 *, f32);
+extern void func_003275C8(SdfMat4 *, f32);
+extern void sdfMat4Transpose(SdfMat4 *, SdfMat4 *);
+extern void func_00327C80(f32 *, SdfMat4 *);
+extern void fileReadVector40(void *, void *);
+extern void fileQueueSetRotation(FileQueue *, void *);
+
+static inline void mnuSetBasisRow(f32 *row, f32 x, f32 y, f32 z, f32 w) {
+    row[0] = x;
+    row[1] = y;
+    row[2] = z;
+    row[3] = w;
+}
+
+
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 extern void mdlBroadcastMasked();
@@ -118,6 +140,7 @@ extern u32 mdlGetBroadcastValue(u32 model);
 extern void func_00328160(f32 *out);
 
 extern void mdlUpdateContextRotationBasisFromQuaternion(u32 model);
+
 
 void mnuClearNodeBroadcastFlag(u8 *node);
 void dds3ReleaseSoundSlotPool(void);
@@ -409,7 +432,42 @@ u32 mnuLoadNodeModelFromResource(u32 *owner, u32 resource) {
     return *owner;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BC10);
+/* Only the target direction is normalized; the lateral basis stays fixed at -X. */
+void func_0031BC10(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 zAngle) {
+    f32 vector[4];
+    f32 left[4];
+    f32 up[4];
+    f32 position[4];
+    SdfMat4 basis;
+    f32 quaternion[4];
+
+    fileReadVector40(record->queue, position);
+    mnuSetBasisRow(vector, sdfViewTargetVector[0] - position[0],
+                   sdfViewTargetVector[1] - position[1],
+                   sdfViewTargetVector[2] - position[2], 0.0f);
+    mnuSetBasisRow(left, -1.0f, 0.0f, 0.0f, 0.0f);
+    VU0_NORMALIZE_PACKED_VECTOR(vector);
+    VU0_LOAD_VF(vf10, vector);
+    VU0_LOAD_VF(vf11, left);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, up);
+
+    memset(&basis, 0, sizeof(basis));
+    mnuSetBasisRow(basis.m, left[0], left[1], left[2], 0.0f);
+    mnuSetBasisRow(basis.m + 4, up[0], up[1], up[2], 0.0f);
+    mnuSetBasisRow(basis.m + 8, vector[0], vector[1], vector[2], 0.0f);
+    mnuSetBasisRow(basis.m + 12, 0.0f, 0.0f, 0.0f, 1.0f);
+    func_00326BC8(&basis, xAngle);
+    func_003270C8(&basis, yAngle);
+    func_003275C8(&basis, zAngle);
+    sdfMat4Transpose(&basis, &basis);
+    func_00327C80(quaternion, &basis);
+    vector[0] = quaternion[0];
+    vector[1] = quaternion[1];
+    vector[2] = quaternion[2];
+    vector[3] = quaternion[3];
+    fileQueueSetRotation(record->queue, vector);
+}
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BDE8);
 
@@ -617,7 +675,40 @@ void mnuRefreshNodeSecondaryVector(u8 *node) {
     mdlUpdateContextRotationBasisFromQuaternion((u32)((MnuModelNode *)node)->model);
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C688);
+void func_0031C688(MnuModelNode *node, f32 xAngle, f32 yAngle, f32 zAngle) {
+    f32 vector[4];
+    f32 left[4];
+    f32 up[4];
+    SdfMat4 basis;
+    f32 quaternion[4];
+
+    mnuSetBasisRow(vector, sdfViewTargetVector[0] - node->primary[0],
+                   sdfViewTargetVector[1] - node->primary[1],
+                   sdfViewTargetVector[2] - node->primary[2], 0.0f);
+    mnuSetBasisRow(left, -1.0f, 0.0f, 0.0f, 0.0f);
+    VU0_NORMALIZE_PACKED_VECTOR(vector);
+    VU0_LOAD_VF(vf10, vector);
+    VU0_LOAD_VF(vf11, left);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, up);
+
+    memset(&basis, 0, sizeof(basis));
+    mnuSetBasisRow(basis.m, left[0], left[1], left[2], 0.0f);
+    mnuSetBasisRow(basis.m + 4, up[0], up[1], up[2], 0.0f);
+    mnuSetBasisRow(basis.m + 8, vector[0], vector[1], vector[2], 0.0f);
+    mnuSetBasisRow(basis.m + 12, 0.0f, 0.0f, 0.0f, 1.0f);
+    func_00326BC8(&basis, xAngle);
+    func_003270C8(&basis, yAngle);
+    func_003275C8(&basis, zAngle);
+    sdfMat4Transpose(&basis, &basis);
+    func_00327C80(quaternion, &basis);
+    vector[0] = quaternion[0];
+    vector[1] = quaternion[1];
+    vector[2] = quaternion[2];
+    vector[3] = quaternion[3];
+    VU0_LOAD_VF(vf10, vector);
+    mdlUpdateContextRotationBasisFromQuaternion((u32)node->model);
+}
 
 /* Fill the tertiary (0x20) vector with one value and load it into the model. */
 void mnuSetNodeScaleVector(u8 *node, f32 value) {

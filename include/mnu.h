@@ -46,7 +46,9 @@ typedef struct MenuStaffContext {
     s32 windowResource; /* Source resource for the window's fixed sprite slots. */
     u8 pad70[0x54];
     s32 spriteArg2;       /* 0xC4 */
-    u8 padC8[0x40];
+    u8 padC8[0x2C];
+    void *panelLayout;    /* 0xF4: layout used by staff panel construction */
+    u8 padF8[0x10];
     MenuStaffList *activeWindow; /* 0x108: window used by staff image states */
     u8 pad10C[0x178];
     u32 windowFlags;      /* 0x284 */
