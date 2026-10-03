@@ -4,6 +4,24 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
+#define BTL_AI_SLOT_COUNT 5
+#define BTL_AI_SCRATCH_BYTES 0x10
+#define BTL_AI_WEIGHT_MASK 0xFFFF
+#define BTL_HEALTH_RATE_SCALE 100
+#define BTL_PARTY_QUERY_MASK 0x221
+#define BTL_PARTY_ACTIVE_FLAGS 0x201
+#define BTL_ENEMY_QUERY_MASK 0x421
+#define BTL_ENEMY_ACTIVE_MASK 0x401
+#define BTL_ENEMY_ACTIVE_FLAGS 0x401
+#define BTL_REQUIRED_ACTION_CATEGORY_COUNT 10
+#define BTL_ENTRY_CODE_SCAN_COUNT 10
+#define BTL_AI_COUNTER_SATURATION 0x100
+#define BTL_AI_COUNTER_MAX 0xFF
+#define BTL_LOW_HP_ACTION_DELAY 0xF
+#define BTL_LOW_HP_PERCENT_LIMIT 0x1E
+#define BTL_LOW_HP_BUCKET_LIMIT 0x1E
+#define BTL_LOW_HP_ENEMY_COUNT_LIMIT 2
+
 /* Native 0x20-byte action-animation descriptor, shared by motion and camera selection. */
 typedef struct BtlActionAnimationRecord {
     u8 pad00[3];
@@ -137,14 +155,15 @@ extern void *memset(void *, s32, u32);
 
 extern s32 func_002024A8(s32, u16 *, u16);
 
-void btlRunWeightedAiAction(BtlTask *task, s32 row) {
-    u16 species;
-    s32 index;
+/* Pick a weighted slot in one species row, run its action and release the shared scratch allocation. */
+void btlRunWeightedAiAction(BtlTask *task, s32 rowIndex) {
+    u16 speciesId;
+    s32 slotIndex;
 
-    btlActionScratchWork = sdfAllocAndClearQuadwords(0x10);
-    species = task->unit->mode;
-    index = btlPickWeightedAiSlot(task->unit, species, row);
-    btlRunAiAction(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId, datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
+    btlActionScratchWork = sdfAllocAndClearQuadwords(BTL_AI_SCRATCH_BYTES);
+    speciesId = task->unit->mode;
+    slotIndex = btlPickWeightedAiSlot(task->unit, speciesId, rowIndex);
+    btlRunAiAction(task, datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].actionId, datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].actionArg);
     sdfReleaseChipBlock(btlActionScratchWork);
 }
 
@@ -158,22 +177,22 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF560);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF8D8);
 
-/* Weighted pick of a table row: returns the first slot whose cumulative
-   weight reaches `roll` (btlRollAiBucket) among the five slots of row `rowIndex`. */
-u32 btlPickWeightedAiSlot(s32 unit, s32 species, s32 rowIndex) {
-    u32 roll;
-    u32 total;
-    u32 i;
+/* Pick the first nonzero-weight slot whose 16-bit cumulative weight reaches the roll.
+ * The unit argument is unused; preserve the runtime lookup, debug failure path and zero fallback. */
+u32 btlPickWeightedAiSlot(s32 unusedUnit, s32 speciesId, s32 rowIndex) {
+    u32 weightRoll;
+    u32 cumulativeWeight;
+    u32 slotIndex;
 
     btlGetRuntime();
-    roll = btlRollAiBucket();
-    total = 0;
-    for (i = 0; i < 5; i++) {
-        u32 weight = datEnemyAiRecords[species].slot[rowIndex * 5 + i].weight;
+    weightRoll = btlRollAiBucket();
+    cumulativeWeight = 0;
+    for (slotIndex = 0; slotIndex < BTL_AI_SLOT_COUNT; slotIndex++) {
+        u32 weight = datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].weight;
 
-        total = (total + weight) & 0xFFFF;
-        if (total >= roll && weight != 0) {
-            return i;
+        cumulativeWeight = (cumulativeWeight + weight) & BTL_AI_WEIGHT_MASK;
+        if (cumulativeWeight >= weightRoll && weight != 0) {
+            return slotIndex;
         }
     }
     btlDebugPrintf("AI_BUGBUGBUGBUGBUG           \n");
@@ -230,67 +249,72 @@ extern s32 btlReadCurrentUnitHp(void *);
 
 extern s32 btlComputeSkillAdjustedMaxHp(void *);
 
-s32 btlIsUnitAtOrBelowHealthRate(BtlUnit *unit, s32 multiplier) {
-    void *stats = &unit->statBits;
-    s32 current = btlReadCurrentUnitHp(stats);
-    s32 maximum = btlComputeSkillAdjustedMaxHp(stats);
-    if ((u32)(maximum * multiplier) < (u32)(current * 100)) {
+/* Compare HP against a signed percentage using the native products and unsigned comparison. */
+s32 btlIsUnitAtOrBelowHealthRate(BtlUnit *unit, s32 healthPercent) {
+    void *statAddress = &unit->statBits;
+    s32 currentHp = btlReadCurrentUnitHp(statAddress);
+    s32 maximumHp = btlComputeSkillAdjustedMaxHp(statAddress);
+    if ((u32)(maximumHp * healthPercent) < (u32)(currentHp * BTL_HEALTH_RATE_SCALE)) {
         return 0;
     }
     return 1;
 }
 
-s32 btlHasBossAtOrBelowHealthRate(s32 unused, s32 multiplier) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x401) == 0x401) {
-            if (btlIsUnitAtOrBelowHealthRate(unit, multiplier) != 0) {
+/* Return whether an active enemy-side unit passes the HP percentage check; bit 0x20 is not filtered here. */
+s32 btlHasBossAtOrBelowHealthRate(s32 unused, s32 healthPercent) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_ENEMY_ACTIVE_MASK) == BTL_ENEMY_ACTIVE_FLAGS) {
+            if (btlIsUnitAtOrBelowHealthRate(unitCursor, healthPercent) != 0) {
                 return 1;
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
     return 0;
 }
 
+/* Reset the scratch-context counter only when its query succeeds; retain the native no-argument query. */
 u32 btlResetAiCounterAtLimit(void) {
-    u32 result;
+    u32 limitReached;
 
-    result = btlAiCounterReachedLimit();
-    if (result == 0) {
-        return result;
+    limitReached = btlAiCounterReachedLimit();
+    if (limitReached == 0) {
+        return limitReached;
     }
     *(u16 *)(*(s32 *)btlActionScratchWork + 0x88) = 0;
     return 1;
 }
 
-s32 btlIsGroup400CountAtMost(s32 unused, u32 limit) {
-    u32 count = 0;
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x421) == 0x401) {
-            count++;
+/* Check an inclusive upper bound on active enemy-side units with bit 0x20 clear. */
+s32 btlIsGroup400CountAtMost(s32 unused, u32 maximumCount) {
+    u32 matchingCount = 0;
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS) {
+            matchingCount++;
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
-    if (limit < count) {
+    if (maximumCount < matchingCount) {
         return 0;
     }
     return 1;
 }
 
-s32 btlIsGroup200EligibleCountAtMost(s32 unused, u32 limit) {
-    u32 count = 0;
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
-            if ((unit->conditionFlags & 0x800) == 0) {
-                count++;
+/* Check an inclusive upper bound on eligible party units, additionally excluding condition bit 0x800. */
+s32 btlIsGroup200EligibleCountAtMost(s32 unused, u32 maximumCount) {
+    u32 matchingCount = 0;
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
+            if ((unitCursor->conditionFlags & 0x800) == 0) {
+                matchingCount++;
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
-    if (limit < count) {
+    if (maximumCount < matchingCount) {
         return 0;
     }
     return 1;
@@ -303,90 +327,95 @@ u8 func_00200308(void) {
     return result != 0;
 }
 
-s32 btlIsGroup200CountAtMost(s32 unused, u32 limit) {
-    u32 count = 0;
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
-            count++;
+/* Check an inclusive upper bound on active party-side units with bit 0x20 clear. */
+s32 btlIsGroup200CountAtMost(s32 unused, u32 maximumCount) {
+    u32 matchingCount = 0;
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
+            matchingCount++;
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
-    if (limit < count) {
+    if (maximumCount < matchingCount) {
         return 0;
     }
     return 1;
 }
 
-s32 btlUnitHasActionMask(s32 unit, s32 mask) {
-    return (btlReadUnitStatusMask(unit + 0x120, mask) & mask) != 0;
+/* Return whether the native unit-status query intersects any requested action-mask bit. */
+s32 btlUnitHasActionMask(s32 unitAddress, s32 actionMask) {
+    return (btlReadUnitStatusMask(unitAddress + 0x120, actionMask) & actionMask) != 0;
 }
 
-s32 btlAnyGroup400HasActionMask(s32 unused, s32 action) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x401) == 0x401) {
-            if (btlUnitHasActionMask((s32)unit, action) != 0) {
+/* Test active enemy-side units for any requested action bit; do not filter bit 0x20. */
+s32 btlAnyGroup400HasActionMask(s32 unused, s32 actionMask) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_ENEMY_ACTIVE_MASK) == BTL_ENEMY_ACTIVE_FLAGS) {
+            if (btlUnitHasActionMask((s32)unitCursor, actionMask) != 0) {
                 return 1;
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
     return 0;
 }
 
-s32 btlAnyGroup200HasActionMask(s32 unused, s32 action) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
-            if (btlUnitHasActionMask((s32)unit, action) != 0) {
+/* Test party-side units for any requested action bit; DDS1 also requires bit 0x20 clear. */
+s32 btlAnyGroup200HasActionMask(s32 unused, s32 actionMask) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
+            if (btlUnitHasActionMask((s32)unitCursor, actionMask) != 0) {
                 return 1;
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
     return 0;
 }
 
-s32 btlAllGroup200HaveActionMask(s32 unused, s32 action) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
-            if (btlUnitHasActionMask((s32)unit, action) == 0) {
+/* Require every eligible party unit to intersect the requested mask; an empty selection succeeds. */
+s32 btlAllGroup200HaveActionMask(s32 unused, s32 actionMask) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
+            if (btlUnitHasActionMask((s32)unitCursor, actionMask) == 0) {
                 return 0;
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
     return 1;
 }
 
-/* Find an active unit on the 0x200 side with the requested unit mode. */
-s32 btlHasGroup200UnitMode(s32 unused, s32 kind) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
-            if (((BtlUnit *)unit)->mode == kind) {
+/* Find an eligible party-side unit with the requested mode. */
+s32 btlHasGroup200UnitMode(s32 unused, s32 unitMode) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
+            if (((BtlUnit *)unitCursor)->mode == unitMode) {
                 return 1;
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
     return 0;
 }
 
-/* Check the opposing side for another unit of the same mode but a different identity. */
-s32 btlHasOtherGroup400UnitMode(BtlUnit *actor, s32 kind) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x421) == 0x401) {
-            if (((BtlUnit *)unit)->mode == kind) {
-                if (unit->identity != actor->identity) {
+/* Find an eligible enemy-side unit of the requested mode with a different native identity. */
+s32 btlHasOtherGroup400UnitMode(BtlUnit *excludedUnit, s32 unitMode) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS) {
+            if (((BtlUnit *)unitCursor)->mode == unitMode) {
+                if (unitCursor->identity != excludedUnit->identity) {
                     return 1;
                 }
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
     return 0;
 }
@@ -400,32 +429,32 @@ extern s32 btlGetActorEntryCode();
 /* Kinds 0xB/0xC scan the even/odd entry codes; other kinds test their own
    entry. Every failure falls out to the single trailing `return 0`. K&R:
    callers pass one argument or none. */
-s32 btlMatchesActorEntryCodeCondition(actor, kind)
-    s32 actor;
-    s32 kind;
+s32 btlMatchesActorEntryCodeCondition(actorAddress, conditionIndex)
+    s32 actorAddress;
+    s32 conditionIndex;
 {
-    s32 i;
-    s32 j;
+    s32 evenIndex;
+    s32 oddIndex;
 
-    if (kind == 0xB) {
-        for (i = 0; i < 10; i += 2) {
-            if (btlActorEntryIsExpired(actor, D_00360E98[i]) != 0 && btlGetActorEntryCode(actor, D_00360E98[i]) > 0) {
+    if (conditionIndex == 0xB) {
+        for (evenIndex = 0; evenIndex < BTL_ENTRY_CODE_SCAN_COUNT; evenIndex += 2) {
+            if (btlActorEntryIsExpired(actorAddress, D_00360E98[evenIndex]) != 0 && btlGetActorEntryCode(actorAddress, D_00360E98[evenIndex]) > 0) {
                 return 1;
             }
         }
-    } else if (kind == 0xC) {
-        for (j = 1; j < 10; j += 2) {
-            if (btlActorEntryIsExpired(actor, D_00360E98[j]) != 0 && btlGetActorEntryCode(actor, D_00360E98[j]) <= 0) {
+    } else if (conditionIndex == 0xC) {
+        for (oddIndex = 1; oddIndex < BTL_ENTRY_CODE_SCAN_COUNT; oddIndex += 2) {
+            if (btlActorEntryIsExpired(actorAddress, D_00360E98[oddIndex]) != 0 && btlGetActorEntryCode(actorAddress, D_00360E98[oddIndex]) <= 0) {
                 return 1;
             }
         }
-    } else if (btlActorEntryIsExpired(actor, D_00360E98[kind]) != 0 || kind == 0xA || kind == 0xD) {
-        if ((kind & 1) == 0 || kind == 0xD) {
-            if (btlGetActorEntryCode(actor, D_00360E98[kind]) > 0) {
+    } else if (btlActorEntryIsExpired(actorAddress, D_00360E98[conditionIndex]) != 0 || conditionIndex == 0xA || conditionIndex == 0xD) {
+        if ((conditionIndex & 1) == 0 || conditionIndex == 0xD) {
+            if (btlGetActorEntryCode(actorAddress, D_00360E98[conditionIndex]) > 0) {
                 return 1;
             }
         } else {
-            if (btlGetActorEntryCode(actor, D_00360E98[kind]) <= 0) {
+            if (btlGetActorEntryCode(actorAddress, D_00360E98[conditionIndex]) <= 0) {
                 return 1;
             }
         }
@@ -439,154 +468,167 @@ extern s32 btlTestSelectedItemCategoryMask(void *, s32);
 
 extern const s32 btlRequiredActionCategories[10];
 
+/* Require all ten category queries to succeed; retain the complete local copy of the native category table. */
 s32 btlUnitHasAllTenActions(void *actor) {
-    s32 actions[10];
-    s32 i;
-    memcpy(actions, btlRequiredActionCategories, sizeof(actions));
-    for (i = 0; i < 10; i++) {
-        if (btlTestSelectedItemCategoryMask(actor, actions[i]) == 0) {
+    s32 requiredCategories[BTL_REQUIRED_ACTION_CATEGORY_COUNT];
+    s32 categoryIndex;
+    memcpy(requiredCategories, btlRequiredActionCategories, sizeof(requiredCategories));
+    for (categoryIndex = 0; categoryIndex < BTL_REQUIRED_ACTION_CATEGORY_COUNT; categoryIndex++) {
+        if (btlTestSelectedItemCategoryMask(actor, requiredCategories[categoryIndex]) == 0) {
             return 0;
         }
     }
     return 1;
 }
 
-s32 btlAnyPartyMeetsEntryCodeCondition(s32 unused, s32 action) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
-            if (btlMatchesActorEntryCodeCondition((s32)unit, action) != 0) {
+/* Return whether any eligible party unit meets the requested entry-code condition. */
+s32 btlAnyPartyMeetsEntryCodeCondition(s32 unused, s32 conditionIndex) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
+            if (btlMatchesActorEntryCodeCondition((s32)unitCursor, conditionIndex) != 0) {
                 return 1;
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
     return 0;
 }
 
-s32 btlAnyEnemyMeetsEntryCodeCondition(s32 unused, s32 action) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x421) == 0x401) {
-            if (btlMatchesActorEntryCodeCondition((s32)unit, action) != 0) {
+/* Return whether any eligible enemy unit meets the requested entry-code condition. */
+s32 btlAnyEnemyMeetsEntryCodeCondition(s32 unused, s32 conditionIndex) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS) {
+            if (btlMatchesActorEntryCodeCondition((s32)unitCursor, conditionIndex) != 0) {
                 return 1;
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
     return 0;
 }
 
-u8 btlCheckUnitActionModeZero(u32 unit, u32 action) {
-    s32 result;
+/* Normalize the mode-zero action query to a byte boolean; preserve its native result width. */
+u8 btlCheckUnitActionModeZero(u32 unitAddress, u32 actionQuery) {
+    s32 queryResult;
 
-    result = func_002007A8(unit, action, 0);
-    return result != 0;
+    queryResult = func_002007A8(unitAddress, actionQuery, 0);
+    return queryResult != 0;
 }
 
-u8 btlCheckUnitActionModeOne(u32 unit, u32 action) {
-    s32 result;
+/* Normalize the mode-one action query to a byte boolean; preserve its native result width. */
+u8 btlCheckUnitActionModeOne(u32 unitAddress, u32 actionQuery) {
+    s32 queryResult;
 
-    result = func_002007A8(unit, action, 1);
-    return result != 0;
+    queryResult = func_002007A8(unitAddress, actionQuery, 1);
+    return queryResult != 0;
 }
 
-s32 btlAnyPartyPassesEntryCheck(s32 unused, u32 action) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
-            if (func_002007A8((u32)unit, action, 0) != 0) {
+/* Return whether an eligible party unit has a nonzero mode-zero query result. */
+s32 btlAnyPartyPassesEntryCheck(s32 unused, u32 actionQuery) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
+            if (func_002007A8((u32)unitCursor, actionQuery, 0) != 0) {
                 return 1;
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
     return 0;
 }
 
-s32 btlAnyPartyPassesInverseEntryCheck(s32 unused, u32 action) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
-            if (func_002007A8((u32)unit, action, 1) != 0) {
+/* Return whether an eligible party unit has a nonzero mode-one query result. */
+s32 btlAnyPartyPassesInverseEntryCheck(s32 unused, u32 actionQuery) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
+            if (func_002007A8((u32)unitCursor, actionQuery, 1) != 0) {
                 return 1;
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
     return 0;
 }
 
-s32 btlAnyEnemyPassesEntryCheck(s32 unused, u32 action) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x421) == 0x401) {
-            if (func_002007A8((u32)unit, action, 0) != 0) {
+/* Return whether an eligible enemy unit has a nonzero mode-zero query result. */
+s32 btlAnyEnemyPassesEntryCheck(s32 unused, u32 actionQuery) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS) {
+            if (func_002007A8((u32)unitCursor, actionQuery, 0) != 0) {
                 return 1;
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
     return 0;
 }
 
-s32 btlAnyEnemyPassesInverseEntryCheck(s32 unused, u32 action) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x421) == 0x401) {
-            if (func_002007A8((u32)unit, action, 1) != 0) {
+/* Return whether an eligible enemy unit has a nonzero mode-one query result. */
+s32 btlAnyEnemyPassesInverseEntryCheck(s32 unused, u32 actionQuery) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS) {
+            if (func_002007A8((u32)unitCursor, actionQuery, 1) != 0) {
                 return 1;
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
     return 0;
 }
 
-s32 btlAnyPartyFailsEntryCheck(s32 unused, u32 action) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
-            if (func_002007A8((u32)unit, action, 0) == 0) {
+/* Return whether an eligible party unit has a zero mode-zero query result. */
+s32 btlAnyPartyFailsEntryCheck(s32 unused, u32 actionQuery) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
+            if (func_002007A8((u32)unitCursor, actionQuery, 0) == 0) {
                 return 1;
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
     return 0;
 }
 
-s32 btlAnyEnemyFailsEntryCheck(s32 unused, u32 action) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x421) == 0x401) {
-            if (func_002007A8((u32)unit, action, 0) == 0) {
+/* Return whether an eligible enemy unit has a zero mode-zero query result. */
+s32 btlAnyEnemyFailsEntryCheck(s32 unused, u32 actionQuery) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS) {
+            if (func_002007A8((u32)unitCursor, actionQuery, 0) == 0) {
                 return 1;
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
     return 0;
 }
 
+/* Look for an eligible party unit with native flag 0x1000 clear; its meaning is not established here. */
 s32 btlAnyGroup200LacksFlag1000(void) {
-    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    while (unit != 0) {
-        if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
-            if ((((BtlUnit *)unit)->flags & 0x1000) == 0) {
+    BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
+    while (unitCursor != 0) {
+        if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
+            if ((((BtlUnit *)unitCursor)->flags & 0x1000) == 0) {
                 return 1;
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unitCursor = (u8 *)((BtlUnit *)unitCursor)->next;
     }
     return 0;
 }
 
-u8 btlUnitPassesActionTenCheck(u32 unit) {
-    s32 result;
+/* Normalize entry-code condition 10 to a byte boolean without changing the native short-arity calls. */
+u8 btlUnitPassesActionTenCheck(u32 unitAddress) {
+    s32 queryResult;
 
-    result = btlMatchesActorEntryCodeCondition(unit, 10);
-    return result != 0;
+    queryResult = btlMatchesActorEntryCodeCondition(unitAddress, 10);
+    return queryResult != 0;
 }
 
 s32 func_00200F00(void) {
@@ -603,14 +645,16 @@ s32 func_00200F20(BtlUnit *unit) {
     return flags != 0;
 }
 
+/* Test scratch-context bit 1; no gameplay meaning for this flag is established here. */
 s32 btlHasContextFlagTwo(void) {
     return ((*(s32 *)(*(s32 *)btlActionScratchWork + 0xc) & 2) > 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", btlCheckCounterLimit);
 
-s32 btlCounterReachedLimit(s32 unused, u32 limit) {
-    if (func_001A9488(4) < limit) {
+/* Return whether counter query 4 has reached the requested inclusive lower bound. */
+s32 btlCounterReachedLimit(s32 unused, u32 minimumCount) {
+    if (func_001A9488(4) < minimumCount) {
         return 0;
     }
     return 1;
@@ -621,28 +665,31 @@ typedef struct BtlCounterState {
     u16 count; /* 0x88: saturates at 0xFF */
 } BtlCounterState;
 
-s32 btlAiCounterReachedLimit(s32 unused, u32 limit) {
-    BtlCounterState *state = *(BtlCounterState **)btlActionScratchWork;
-    state->count++;
-    state->count = state->count <= 0 ? 0 : state->count >= 0x100 ? 0xFF : state->count;
-    if ((*(BtlCounterState **)btlActionScratchWork)->count < limit) {
+/* Increment the stored counter, retain native wrap/clamp behavior, then reread it for the limit test. */
+s32 btlAiCounterReachedLimit(s32 unused, u32 minimumCount) {
+    BtlCounterState *counterState = *(BtlCounterState **)btlActionScratchWork;
+    counterState->count++;
+    counterState->count = counterState->count <= 0 ? 0 : counterState->count >= BTL_AI_COUNTER_SATURATION ? BTL_AI_COUNTER_MAX : counterState->count;
+    if ((*(BtlCounterState **)btlActionScratchWork)->count < minimumCount) {
         return 0;
     }
     return 1;
 }
 
-s32 btlTurnReachedLimit(s32 unused, u32 limit) {
-    BtlState *battle = (BtlState *)btlGetRuntime();
-    if ((u32)battle->turnCount < limit) {
+/* Compare the battle turn count with an inclusive lower bound. */
+s32 btlTurnReachedLimit(s32 unused, u32 minimumTurns) {
+    BtlState *battleState = (BtlState *)btlGetRuntime();
+    if ((u32)battleState->turnCount < minimumTurns) {
         return 0;
     }
     return 1;
 }
 
+/* Return true only in phase 2 with no counted turns. */
 s32 btlIsReadyWithoutTurns(void) {
-    BtlState *battle = (BtlState *)btlGetRuntime();
-    if (battle->turnPhase == 2) {
-        if (battle->turnCount == 0) {
+    BtlState *battleState = (BtlState *)btlGetRuntime();
+    if (battleState->turnPhase == 2) {
+        if (battleState->turnCount == 0) {
             return 1;
         }
     }
@@ -656,10 +703,10 @@ extern s32 btlComputeSkillAdjustedMaxMp(void *);
 /* Compare a unit stat with a percentage of its maximum.
  * The stat's identity is not established by these two accessors. */
 s32 btlIsUnitStatAtOrBelowRate(BtlUnit *unit, s32 percentage) {
-    void *stats = &unit->statBits;
-    u32 current = btlReadCurrentUnitMp(stats);
-    u32 scaledMaximum = btlComputeSkillAdjustedMaxMp(stats) * percentage;
-    if (scaledMaximum < current * 100) {
+    void *statAddress = &unit->statBits;
+    u32 currentValue = btlReadCurrentUnitMp(statAddress);
+    u32 scaledMaximum = btlComputeSkillAdjustedMaxMp(statAddress) * percentage;
+    if (scaledMaximum < currentValue * BTL_HEALTH_RATE_SCALE) {
         return 0;
     }
     return 1;
@@ -678,46 +725,49 @@ extern s32 btlGetIndexListEntry(void *, u32);
 
 extern void btlFreeIndexList(void *);
 
+/* Query the context's index list, freeing it on both the first success and exhausted-list paths. */
 s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
-    u32 i;
-    u32 count;
-    s32 battle;
-    void *list;
+    u32 entryIndex;
+    u32 entryCount;
+    s32 contextAddress;
+    void *indexList;
     if (unit->flags & 0x400) {
         return 0;
     }
-    battle = *(s32 *)btlActionScratchWork;
-    list = btlAllocateIndexList(13);
-    func_001A30F8(battle, list, 2, 0, 0);
-    count = btlGetIndexListCount(list);
-    for (i = 0; i < count; i++) {
-        if (btlAreUnitStatusAndEntryFlagsClear(btlGetIndexListEntry(list, i)) != 0) {
-            btlFreeIndexList(list);
+    contextAddress = *(s32 *)btlActionScratchWork;
+    indexList = btlAllocateIndexList(13);
+    func_001A30F8(contextAddress, indexList, 2, 0, 0);
+    entryCount = btlGetIndexListCount(indexList);
+    for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+        if (btlAreUnitStatusAndEntryFlagsClear(btlGetIndexListEntry(indexList, entryIndex)) != 0) {
+            btlFreeIndexList(indexList);
             return 1;
         }
     }
-    btlFreeIndexList(list);
+    btlFreeIndexList(indexList);
     return 0;
 }
 
+/* Gate the low-HP action on hold, delay, HP ratio, enemy count, bucket roll, and selected-actor status.
+ * Preserve native unsigned timing and division behavior, including the absence of a max-HP guard. */
 s32 btlIsLowHpActionReady(BtlUnit *unit) {
-    s32 battle = *btlActionScratchWork;
-    s32 hit = 0;
-    u32 base = unit->actionTime;
-    u32 now = func_001A9488(4);
-    s16 roll;
+    s32 contextAddress = *btlActionScratchWork;
+    s32 conditionMet = 0;
+    u32 actionTime = unit->actionTime;
+    u32 currentTime = func_001A9488(4);
+    s16 bucketRoll;
 
-    if (*(s8 *)(battle + 0x146) <= 0) {
-        if (now >= base + 0xF) {
-            if (unit->hp * 100 / unit->maxHp < 0x1E) {
-                if (btlIsGroup400CountAtMost((s32)unit, 2) != 0) {
-                    roll = btlRollAiBucket();
-                    hit = roll < 0x1E;
+    if (*(s8 *)(contextAddress + 0x146) <= 0) {
+        if (currentTime >= actionTime + BTL_LOW_HP_ACTION_DELAY) {
+            if (unit->hp * BTL_HEALTH_RATE_SCALE / unit->maxHp < BTL_LOW_HP_PERCENT_LIMIT) {
+                if (btlIsGroup400CountAtMost((s32)unit, BTL_LOW_HP_ENEMY_COUNT_LIMIT) != 0) {
+                    bucketRoll = btlRollAiBucket();
+                    conditionMet = bucketRoll < BTL_LOW_HP_BUCKET_LIMIT;
                 }
             }
         }
     }
-    if (hit == 1) {
+    if (conditionMet == 1) {
         if (btlIsSelectedActorStatusAndRecordClear(unit) != 0) {
             return 1;
         }
@@ -725,8 +775,9 @@ s32 btlIsLowHpActionReady(BtlUnit *unit) {
     return 0;
 }
 
-s32 btlUnitHasFlag1000(s32 unit) {
-    return (((s32)((BtlUnit *)unit)->flags & 0x1000) > 0);
+/* Test native unit flag 0x1000 without assigning it an unverified gameplay meaning. */
+s32 btlUnitHasFlag1000(s32 unitAddress) {
+    return (((s32)((BtlUnit *)unitAddress)->flags & 0x1000) > 0);
 }
 
 u8 func_002012C0(void) {
