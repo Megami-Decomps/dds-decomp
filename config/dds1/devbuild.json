@@ -4,10 +4,10 @@
   "extension_vaddr": "0x00412000",
   "alignment": "0x1000",
   "heap_alignment": "0x80",
-  "expected_replacement_symbols": 53,
-  "expected_shifted_replacement_symbols": 40,
-  "expected_shifted_symbol_relocations": 1011,
-  "expected_cross_replacement_relocations": 35,
+  "expected_replacement_symbols": 71,
+  "expected_shifted_replacement_symbols": 50,
+  "expected_shifted_symbol_relocations": 1002,
+  "expected_cross_replacement_relocations": 45,
   "expected_repaired_relocation_words": 0,
   "retail_static_end": "0x0040C5F0",
   "bss_end_assertions": [
@@ -58,6 +58,26 @@
           "size": 0
         }
       ]
+    },
+    {
+      "retail_object": "build/dds1/src/dds1/game/code_0011CEB8.o",
+      "object": "build/dds1/dev/code_0011CEB8.o",
+      "expected_symbols": 18,
+      "expected_shifted_symbols": 10,
+      "retained_sections": [
+        {
+          "section": ".rodata",
+          "size": 0
+        },
+        {
+          "section": ".data",
+          "size": 0
+        },
+        {
+          "section": ".bss",
+          "size": 0
+        }
+      ]
     }
   ],
   "moves": [
@@ -92,6 +112,22 @@
       "alignment": 16,
       "old_vaddr": "0x0039F3D0",
       "expected_relocations": 49
+    },
+    {
+      "object": "build/dds1/src/dds1/game/code_0011CEB8.o",
+      "section": ".text",
+      "old_size": "0x3D4",
+      "alignment": 8,
+      "old_vaddr": "0x0011CEB8",
+      "expected_relocations": 40
+    },
+    {
+      "object": "build/dds1/src/dds1/game/code_0011CEB8.o",
+      "section": ".sdata",
+      "old_size": "0x8",
+      "alignment": 8,
+      "old_vaddr": "0x003BAAD0",
+      "expected_relocations": 2
     }
   ],
   "additions": [

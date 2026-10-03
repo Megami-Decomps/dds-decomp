@@ -81,6 +81,7 @@ extern u128 D_003F9890;
 extern f32 D_003BDA30;
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern u8 D_003F98A0[];
+extern u8 D_003F9860[];
 extern u128 *D_003EB860[][3];
 extern void *D_003BD37C;
 extern void *D_003BD380;
@@ -382,7 +383,65 @@ void func_002DE408(void *rows, s32 count, void *vectors, f32 scale) {
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE450);
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE488);
+/* vu0 routine: transform packed points, derive clip weights, and store clip flags in 0x60-byte rows */
+void func_002DE488(void *rows, s32 count, void *points, void *weights) {
+    void *clipParameters = D_003F9860;
+    __asm__ volatile (
+        ".set noreorder\n"
+        "lqc2 vf19, 0x00(%4)\n"
+        "lqc2 vf20, 0x10(%4)\n"
+        "lqc2 vf21, 0x20(%4)\n"
+        "vmulx.w vf24, vf19, vf24x\n"
+        "vmulx.w vf25, vf19, vf25x\n"
+        "vmulx.w vf26, vf19, vf26x\n"
+        "1:\n"
+        "ldr $2, 0x00(%3)\n"
+        "ldl $2, 0x07(%3)\n"
+        "lw $3, 0x08(%3)\n"
+        "pcpyld $2, $3, $2\n"
+        "qmtc2 $2, vf6\n"
+        "addi %3, %3, 0x0C\n"
+        "ldr $2, 0x00(%2)\n"
+        "ldl $2, 0x07(%2)\n"
+        "lw $3, 0x08(%2)\n"
+        "pcpyld $2, $3, $2\n"
+        "qmtc2 $2, vf2\n"
+        "addi %2, %2, 0x0C\n"
+        "vmulay.w ACC, vf0, vf19y\n"
+        "vmaddax.w ACC, vf24, vf6x\n"
+        "vmadday.w ACC, vf25, vf6y\n"
+        "vmaddz.w vf7, vf26, vf6z\n"
+        "vmulax.xyzw ACC, vf28, vf2x\n"
+        "vmadday.xyzw ACC, vf29, vf2y\n"
+        "vmaddaz.xyzw ACC, vf30, vf2z\n"
+        "vmaddw.xyzw vf3, vf31, vf0w\n"
+        "vaddaw.w ACC, vf7, vf7w\n"
+        "vmsubw.w vf6, vf0, vf0w\n"
+        "vmaxx.w vf8, vf7, vf0x\n"
+        "vclipw.xyzw vf3, vf3w\n"
+        "sqc2 vf3, 0x00(%0)\n"
+        "addi %1, %1, -1\n"
+        "vaddw.x vf9, vf0, vf6w\n"
+        "vminiw.w vf8, vf8, vf0w\n"
+        "sqc2 vf6, 0x10(%0)\n"
+        "addi %0, %0, 0x60\n"
+        "vmulaw.xyzw ACC, vf20, vf0w\n"
+        "cfc2.ni $2, $vi18\n"
+        "vmaddw.xyzw vf8, vf21, vf8w\n"
+        "vclipw.xyzw vf9, vf0w\n"
+        "vnop\n"
+        "vnop\n"
+        "sqc2 vf8, -0x40(%0)\n"
+        "sb $2, -0x0F(%0)\n"
+        "cfc2.ni $2, $vi18\n"
+        "andi $2, $2, 3\n"
+        "bne $0, %1, 1b\n"
+        "sb $2, -0x10(%0)\n"
+        ".set reorder"
+        : "+r"(rows), "+r"(count), "+r"(points), "+r"(weights)
+        : "r"(clipParameters)
+        : "$2", "$3", "memory");
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE558);
 
@@ -1815,4 +1874,3 @@ INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD3A9);
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD3C0);
 
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD3C4);
-

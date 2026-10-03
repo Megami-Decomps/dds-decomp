@@ -232,7 +232,10 @@ typedef struct SifClient {
 } SifClient;
 
 extern SifClient D_003F9B50;
-extern u8 D_003BD3C8;
+extern s8 D_003BD3C8;
+extern char D_003BD3D0[];
+extern s32 func_002F4FD8(SifClient *, s32, s32, void *, s32, void *, s32, void (*)(void *), void *);
+extern s32 func_0030C8E0(const char *, ...);
 extern s32 sdfCreateThreadWithAllocatedWorkspace();
 extern s32 func_002CF930(void);
 extern s32 sdfGetElapsedTimerTicks(s32);
@@ -255,7 +258,22 @@ void sdfStartDevRpcServerAndBindClient(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4B80);
+void func_002E4B80(const char *text) {
+    u8 buffer[0x13F];
+    u8 *alignedBuffer;
+    s32 length;
+
+    if (D_003BD3C8 != 0) {
+        length = strlen(text);
+        if (length != 0) {
+            alignedBuffer = (u8 *)(((u32)&buffer[0x3F]) & ~0x3F);
+            memcpy(alignedBuffer, text, length);
+            func_002F4FD8(&D_003F9B50, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
+        }
+    } else {
+        func_0030C8E0(D_003BD3D0, text);
+    }
+}
 
 s32 sdfPrintFormattedDevMessage(const char *fmt, ...) {
     char buffer[0x100];
@@ -1364,4 +1382,3 @@ INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD470);
 INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD478);
 
 INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD480);
-
