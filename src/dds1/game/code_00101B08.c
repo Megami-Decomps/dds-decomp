@@ -29,10 +29,12 @@ void kwlnUnlinkListNode(KwlnTask *task) {
     task->next = 0;
 }
 
+/* Set mask bits on the object selection described by object and scope. */
 void dds3SetScopedObjectFlags(u32 object, u32 mask, u32 scope) {
     func_00101060(1, object, mask, scope);
 }
 
+/* Clear the same scoped object mask bits without changing the selection. */
 void dds3ClearScopedObjectFlags(u32 object, u32 mask, u32 scope) {
     func_00101060(0, object, mask, scope);
 }
@@ -54,23 +56,54 @@ extern void sdfClearPacketListHead(void *);
 extern void func_00105150(s32);
 extern void sdfInitializeDrawPacketGroups(u8 *);
 
+#define KWLN_FRAME_BUFFER_BYTES 0x1F40
+#define KWLN_FRAME_POOL_NODE_COUNT 0x62
+#define KWLN_FRAME_LAST_GROUP_INDEX 12
+#define KWLN_FRAME_GROUP_BYTES 0x1B0
+#define KWLN_FRAME_GROUP_HEAD_BYTES 0x10
+#define KWLN_FRAME_PACKET_LIST_BYTES 0x20
+#define KWLN_FRAME_GS_PACKET_BYTES 0x40
+#define KWLN_FRAME_GIF_AD_REGISTER 0xE
+#define KWLN_FRAME_GIF_SINGLE_REG_FIELD 0x10000000
+#define KWLN_FRAME_GIF_TWO_WRITES_EOP 0x8002
+#define KWLN_FRAME_GS_TEXA 0x3B
+#define KWLN_FRAME_GS_TEXFLUSH 0x3F
+#define KWLN_FRAME_GS_TEST_PRIMARY 0x47
+#define KWLN_FRAME_GS_ALPHA_PRIMARY 0x42
+#define KWLN_FRAME_NEUTRAL_COLOR 0x80
+#define KWLN_FRAME_HALF_WIDTH 0x100
+#define KWLN_FRAME_HALF_HEIGHT 0xE0
+#define KWLN_FRAME_SCALE_FRACTION_BITS 12
+#define KWLN_FRAME_X_UNITS_PER_PIXEL 16
+#define KWLN_FRAME_Y_UNITS_PER_PIXEL 8
+#define KWLN_FRAME_LEFT_BASE 0x7000
+#define KWLN_FRAME_TOP_BASE 0x7900
+#define KWLN_FRAME_RIGHT_BASE 0x9000
+#define KWLN_FRAME_BOTTOM_BASE 0x8700
+#define KWLN_FRAME_U_EXTENT 0x2000
+#define KWLN_FRAME_V_EXTENT 0xE00
+#define KWLN_FRAME_SKIP_POOL_QUEUE_BIT 0x2000000
+#define KWLN_FRAME_CLEAR_SKIP_POOL_QUEUE 0xFDFFFFFF
+
+/* Prepare the selected buffer's thirteen packet groups and link its draw sink.
+ * The buffer index is sampled before waiting/selecting; keep that ordering. */
 s32 func_00101D60(void) {
-    s32 buffer = kwlnGetDrawBufferIndex();
-    s32 i;
-    u8 *groups;
-    KwlnDrawSink *sink;
+    s32 bufferIndex = kwlnGetDrawBufferIndex();
+    s32 groupIndex;
+    u8 *packetGroups;
+    KwlnDrawSink *drawSink;
 
     sdfWaitAndSelectBuffer();
-    func_002D4240(kwlnDrawSurfaces, 0x62);
+    func_002D4240(kwlnDrawSurfaces, KWLN_FRAME_POOL_NODE_COUNT);
     sdfClearPacketListHead(D_00325860);
-    func_00105150(buffer);
-    groups = D_003258B0 + buffer * 0x1F40;
-    for (i = 12; i >= 0; i--) {
-        sdfInitializeDrawPacketGroups(groups);
-        groups += 0x1B0;
+    func_00105150(bufferIndex);
+    packetGroups = D_003258B0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES;
+    for (groupIndex = KWLN_FRAME_LAST_GROUP_INDEX; groupIndex >= 0; groupIndex--) {
+        sdfInitializeDrawPacketGroups(packetGroups);
+        packetGroups += KWLN_FRAME_GROUP_BYTES;
     }
-    sink = (KwlnDrawSink *)kwlnDrawSurfaces;
-    sink->invoke(sink, D_00325870 + buffer * 0x1F40);
+    drawSink = (KwlnDrawSink *)kwlnDrawSurfaces;
+    drawSink->invoke(drawSink, D_00325870 + bufferIndex * KWLN_FRAME_BUFFER_BYTES);
     return 0;
 }
 
@@ -121,19 +154,19 @@ extern u32 kwlnDrawControlFlags;
 extern s8 D_003BD330;
 
 
-/* Per-frame render task: update the HUD pieces, submit the thirteen draw-packet groups of the current buffer, optionally draw the
- * screen-edge vignette, then flush the packet pools. */
+/* Update draw controls, submit thirteen packet groups, optionally draw the
+ * vignette, then flush pools. The skip bit suppresses one packet-slot publication. */
 s32 kwlnRenderFrame(void) {
-    s32 buf = kwlnGetDrawBufferIndex();
-    u8 *target;
-    u8 *block;
-    u64 *list;
-    u64 *packet;
-    u64 *packet2;
-    KwlnSpriteVertex *vtx;
-    s32 *column;
-    s32 *pool;
-    s32 rect[4];
+    s32 bufferIndex = kwlnGetDrawBufferIndex();
+    u8 *groupHeads;
+    u8 *packetGroups;
+    u64 *packetList;
+    u64 *texturePacket;
+    u64 *blendPacket;
+    KwlnSpriteVertex *vertex;
+    s32 *spritePacket;
+    s32 *poolHead;
+    s32 edgeDistances[4];
     s32 i;
 
     kwlnDrawBlurErrorCounters();
@@ -142,85 +175,89 @@ s32 kwlnRenderFrame(void) {
     kwlnFadeUpdate();
     func_00105DD8();
     func_001071E8();
-    target = D_00325788;
-    block = D_003258B0 + buf * 0x1F40;
-    for (i = 12; i >= 0; i--) {
-        sdfSubmitDrawPacketGroups(target, block);
-        target += 0x10;
-        block += 0x1B0;
+    groupHeads = D_00325788;
+    packetGroups = D_003258B0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES;
+    for (i = KWLN_FRAME_LAST_GROUP_INDEX; i >= 0; i--) {
+        sdfSubmitDrawPacketGroups(groupHeads, packetGroups);
+        groupHeads += KWLN_FRAME_GROUP_HEAD_BYTES;
+        packetGroups += KWLN_FRAME_GROUP_BYTES;
     }
     if (kwlnDrawOverlayEnabled != 0 && func_0011E278() == 0) {
-        list = sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(list);
-        sdfAppendDmaPrimary(list, kwlnFrameDrawPacketRecords + buf * 0x1F40, sdfAllocPacketAligned(0x20));
-        packet = sdfAllocPacketAligned(0x40);
-        packet[0] = 3;
-        packet[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
-        packet[2] = ((u64)0x10000000 << 32) | 0x8002;
-        packet[3] = 0xE;
-        packet[4] = ((u64)0x80 << 32) | 0x80;
-        packet[5] = 0x3B;
-        packet[6] = 0;
-        packet[7] = 0x3F;
-        sdfAppendPacket(list, packet);
-        packet2 = sdfAllocPacketAligned(0x40);
-        packet2[0] = 3;
-        packet2[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
-        packet2[2] = ((u64)0x10000000 << 32) | 0x8002;
-        packet2[3] = 0xE;
-        packet2[4] = 0x31001;
-        packet2[5] = 0x47;
-        packet2[6] = 0x44;
-        packet2[7] = 0x42;
-        sdfAppendPacket(list, packet2);
-        rect[0] = D_003BA910[0] + 0x100;
-        rect[1] = D_003BA910[1] + 0xE0;
-        rect[2] = 0x100 - D_003BA910[0];
-        rect[3] = 0xE0 - D_003BA910[1];
+        packetList = sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES);
+        sdfInitPacketList(packetList);
+        sdfAppendDmaPrimary(packetList, kwlnFrameDrawPacketRecords + bufferIndex * KWLN_FRAME_BUFFER_BYTES, sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES));
+        texturePacket = sdfAllocPacketAligned(KWLN_FRAME_GS_PACKET_BYTES);
+        texturePacket[0] = 3;
+        /* VIF FLUSHA, then DIRECT for the three following quadwords. */
+        texturePacket[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
+        texturePacket[2] = ((u64)KWLN_FRAME_GIF_SINGLE_REG_FIELD << 32) | KWLN_FRAME_GIF_TWO_WRITES_EOP;
+        texturePacket[3] = KWLN_FRAME_GIF_AD_REGISTER;
+        texturePacket[4] = ((u64)KWLN_FRAME_NEUTRAL_COLOR << 32) | KWLN_FRAME_NEUTRAL_COLOR;
+        texturePacket[5] = KWLN_FRAME_GS_TEXA;
+        texturePacket[6] = 0;
+        texturePacket[7] = KWLN_FRAME_GS_TEXFLUSH;
+        sdfAppendPacket(packetList, texturePacket);
+        blendPacket = sdfAllocPacketAligned(KWLN_FRAME_GS_PACKET_BYTES);
+        blendPacket[0] = 3;
+        blendPacket[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
+        blendPacket[2] = ((u64)KWLN_FRAME_GIF_SINGLE_REG_FIELD << 32) | KWLN_FRAME_GIF_TWO_WRITES_EOP;
+        blendPacket[3] = KWLN_FRAME_GIF_AD_REGISTER;
+        blendPacket[4] = 0x31001;
+        blendPacket[5] = KWLN_FRAME_GS_TEST_PRIMARY;
+        blendPacket[6] = 0x44;
+        blendPacket[7] = KWLN_FRAME_GS_ALPHA_PRIMARY;
+        sdfAppendPacket(packetList, blendPacket);
+        edgeDistances[0] = D_003BA910[0] + KWLN_FRAME_HALF_WIDTH;
+        edgeDistances[1] = D_003BA910[1] + KWLN_FRAME_HALF_HEIGHT;
+        edgeDistances[2] = KWLN_FRAME_HALF_WIDTH - D_003BA910[0];
+        edgeDistances[3] = KWLN_FRAME_HALF_HEIGHT - D_003BA910[1];
+        /* Signed Q12 scale; X and Y use distinct GS coordinate units below. */
         for (i = 0; i != 4; i++) {
-            rect[i] = rect[i] * kwlnDrawOverlayScale >> 12;
+            edgeDistances[i] = edgeDistances[i] * kwlnDrawOverlayScale >> KWLN_FRAME_SCALE_FRACTION_BITS;
         }
-        column = sdfConsAllocateColumnPacket(1);
-        vtx = sdfConsMeasurePacketWithHeader(column);
-        vtx->r = 0x80;
-        vtx->g = 0x80;
-        vtx->b = 0x80;
-        vtx->a = kwlnDrawOverlayAlpha;
-        vtx->corner[0].u = 0;
-        vtx->corner[0].v = 0;
-        vtx->corner[0].x = 0x7000 - rect[0] * 16;
-        vtx->corner[0].y = 0x7900 - rect[1] * 8;
-        vtx->corner[0].mask = 0;
-        vtx->corner[0].flag = 0;
-        vtx->corner[1].u = 0x2000;
-        vtx->corner[1].v = 0xE00;
-        vtx->corner[1].x = 0x9000 + rect[2] * 16;
-        vtx->corner[1].y = 0x8700 + rect[3] * 8;
-        vtx->corner[1].mask = 0;
-        vtx->corner[1].flag = 0;
-        sdfAppendPacket(list, column);
-        ((KwlnDrawSink *)D_00325708)->invoke(D_00325708, list);
+        spritePacket = sdfConsAllocateColumnPacket(1);
+        vertex = sdfConsMeasurePacketWithHeader(spritePacket);
+        vertex->r = KWLN_FRAME_NEUTRAL_COLOR;
+        vertex->g = KWLN_FRAME_NEUTRAL_COLOR;
+        vertex->b = KWLN_FRAME_NEUTRAL_COLOR;
+        vertex->a = kwlnDrawOverlayAlpha;
+        vertex->corner[0].u = 0;
+        vertex->corner[0].v = 0;
+        vertex->corner[0].x = KWLN_FRAME_LEFT_BASE - edgeDistances[0] * KWLN_FRAME_X_UNITS_PER_PIXEL;
+        vertex->corner[0].y = KWLN_FRAME_TOP_BASE - edgeDistances[1] * KWLN_FRAME_Y_UNITS_PER_PIXEL;
+        vertex->corner[0].mask = 0;
+        vertex->corner[0].flag = 0;
+        vertex->corner[1].u = KWLN_FRAME_U_EXTENT;
+        vertex->corner[1].v = KWLN_FRAME_V_EXTENT;
+        vertex->corner[1].x = KWLN_FRAME_RIGHT_BASE + edgeDistances[2] * KWLN_FRAME_X_UNITS_PER_PIXEL;
+        vertex->corner[1].y = KWLN_FRAME_BOTTOM_BASE + edgeDistances[3] * KWLN_FRAME_Y_UNITS_PER_PIXEL;
+        vertex->corner[1].mask = 0;
+        vertex->corner[1].flag = 0;
+        sdfAppendPacket(packetList, spritePacket);
+        ((KwlnDrawSink *)D_00325708)->invoke(D_00325708, packetList);
     }
-    pool = sdfFlushPoolNodes(kwlnDrawSurfaces);
-    D_003BA844 = pool;
+    poolHead = sdfFlushPoolNodes(kwlnDrawSurfaces);
+    D_003BA844 = poolHead;
     if (D_003BA7FC != 0) {
-        func_002EA5C0(pool[1]);
+        func_002EA5C0(poolHead[1]);
         D_003BA7FC = 0;
     }
-    if (!(kwlnDrawControlFlags & 0x2000000)) {
-        func_002D4EE8(pool, D_00325860);
+    if (!(kwlnDrawControlFlags & KWLN_FRAME_SKIP_POOL_QUEUE_BIT)) {
+        func_002D4EE8(poolHead, D_00325860);
     } else {
-        kwlnDrawControlFlags &= 0xFDFFFFFF;
+        kwlnDrawControlFlags &= KWLN_FRAME_CLEAR_SKIP_POOL_QUEUE;
     }
     D_003BD330 = 0;
     return 0;
 }
 
+/* Invoke the active world's first callback column; this task step returns zero. */
 u32 func_00102850(void) {
     dds3InvokeWorldCallbackFirst(dds3ActiveWorld);
     return 0;
 }
 
+/* Invoke the active world's second callback column; this task step returns zero. */
 u32 func_00102878(void) {
     dds3InvokeWorldCallbackSecond(dds3ActiveWorld);
     return 0;
@@ -230,57 +267,65 @@ extern char dds3AdminTaskName[];
 extern void *kwlnTaskGetTaskByName(char *);
 extern AdminWork *kwlnTaskGetUserValue(void *);
 
+/* Return the named administration task's user state; the task must exist. */
 AdminWork *dds3GetAdminTaskWork(void) {
     return kwlnTaskGetUserValue(kwlnTaskGetTaskByName(dds3AdminTaskName));
 }
 
+/* Read the administration state's shared value word, without modifying it. */
 u32 dds3GetAdminTaskValue(void) {
-    AdminWork *context;
+    AdminWork *work;
 
-    context = dds3GetAdminTaskWork();
-    return context->value;
+    work = dds3GetAdminTaskWork();
+    return work->value;
 }
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
-/* Replace the admin task's attached data block (copied, max 0x100 bytes) and set
- * its mode byte and flags. The outer guard skips everything when data is NULL or
- * the size is over 0x100 (retail: beqz data / sltiu size,257 -> skip), so the
- * body only ever runs for a present block of at most 0x100 bytes; the inner
- * `if (data != NULL)` is therefore always true and is kept to match the store
- * order retail produces. */
-void dds3AdminSubmitModeRequest(s32 value, void *data, u32 size, s32 flag) {
+#define DDS3_ADMIN_REQUEST_PENDING_BIT 1
+#define DDS3_ADMIN_KEEP_HISTORY_SLOT_BIT 8
+#define DDS3_ADMIN_RESTORE_HISTORY_BIT 0x10000
+#define DDS3_ADMIN_MARK_HISTORY_BIT 4
+#define DDS3_ADMIN_REQUEST_DATA_MAX_BYTES 0x100
+#define DDS3_ADMIN_REQUEST_DELAY 2
+
+/* Request a mode and replace its attached data. NULL data is accepted regardless
+ * of dataBytes; only oversized non-NULL data rejects the entire request.
+ * Mode and stored byte count retain their byte truncation (256 bytes records zero).
+ * Previous data is released before copying; the history flag marks the old slot
+ * when the requested mode is activated. */
+void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory) {
     AdminWork *work;
-    void *old;
+    void *previousData;
     u32 flags;
 
-    if (data == NULL || size <= 0x100) {
+    if (requestData == NULL || dataBytes <= DDS3_ADMIN_REQUEST_DATA_MAX_BYTES) {
         work = dds3GetAdminTaskWork();
-        old = work->unk1C;
-        work->unk09 = value;
+        previousData = work->unk1C;
+        work->unk09 = requestedMode;
         flags = work->flags;
-        flags |= 1;
-        flags &= ~8;
-        flags &= ~0x10000;
+        flags |= DDS3_ADMIN_REQUEST_PENDING_BIT;
+        flags &= ~DDS3_ADMIN_KEEP_HISTORY_SLOT_BIT;
+        flags &= ~DDS3_ADMIN_RESTORE_HISTORY_BIT;
         work->flags = flags;
-        work->unk21 = 2;
-        if (old != NULL) {
-            sdfReleaseChipBlock(old);
+        work->unk21 = DDS3_ADMIN_REQUEST_DELAY;
+        if (previousData != NULL) {
+            sdfReleaseChipBlock(previousData);
             work->unk1C = NULL;
             work->unk20 = 0;
         }
-        if (data != NULL) {
-            work->unk1C = sdfAllocSizeClassBlock(size);
-            memcpy(work->unk1C, data, size);
-            work->unk20 = size;
+        if (requestData != NULL) {
+            work->unk1C = sdfAllocSizeClassBlock(dataBytes);
+            memcpy(work->unk1C, requestData, dataBytes);
+            work->unk20 = dataBytes;
         } else {
             work->unk1C = NULL;
             work->unk20 = 0;
         }
-        if (flag != 0) {
-            work->flags |= 4;
+        if (markHistory != 0) {
+            work->flags |= DDS3_ADMIN_MARK_HISTORY_BIT;
         } else {
-            work->flags &= ~4;
+            work->flags &= ~DDS3_ADMIN_MARK_HISTORY_BIT;
         }
     }
 }
