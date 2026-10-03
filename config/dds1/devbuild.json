@@ -134,9 +134,7 @@
       "object": "build/dds1/dev/code_002CF8C8.o",
       "expected_symbols": 9,
       "expected_shifted_symbols": 4,
-      "fallback_symbols": [
-        "func_002CF930"
-      ],
+      "fallback_symbols": [],
       "retained_sections": [
         {
           "section": ".rodata",
