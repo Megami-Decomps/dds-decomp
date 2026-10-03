@@ -163,7 +163,11 @@ typedef struct BattleController {
     UiObject *actors;
     u8 pad_250[0x20];
     u16 variant; /* 0x270 */
-    u8 pad_272[0x52];
+    u8 pad_272[0x22];
+    s32 adjustmentRecordIndex; /* 0x294 */
+    s32 adjustmentGroupIndex;  /* 0x298 */
+    s32 adjustmentEntryIndex;  /* 0x29C */
+    u8 pad_2A0[0x24];
     s32 drawTask;
     u8 pad2C8[0x14];
     BattleItemDrop itemDrops[3];
@@ -1996,7 +2000,39 @@ s32 btlAllActiveUnitsReady(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD978);
+typedef struct BattleAdjustmentEntry {
+    s8 value;
+    u8 pad_01[5];
+} BattleAdjustmentEntry;
+
+typedef struct BattleAdjustmentGroup {
+    u8 pad_00[0x24];
+    BattleAdjustmentEntry entries[14];
+    u8 pad_78[4];
+} BattleAdjustmentGroup;
+
+typedef struct BattleAdjustmentRecord {
+    BattleAdjustmentGroup groups[3];
+    u8 pad_174[0x1C];
+} BattleAdjustmentRecord;
+
+extern BattleAdjustmentRecord *D_00435E0C;
+extern u8 *datBattleParameters;
+
+f32 func_001AD978(void) {
+    BattleController *runtime = (BattleController *)btlGetRuntime();
+    s32 adjustment = D_00435E0C[runtime->adjustmentRecordIndex]
+                         .groups[runtime->adjustmentGroupIndex]
+                         .entries[runtime->adjustmentEntryIndex]
+                         .value;
+
+    if (adjustment < -3) {
+        adjustment = -3;
+    } else if (adjustment > 3) {
+        adjustment = 3;
+    }
+    return *(f32 *)(datBattleParameters + 0x8CC + adjustment * 4);
+}
 
 u32 func_001ADA10(void) {
     s32 controller;
@@ -2650,7 +2686,6 @@ void func_001B1F78(void) {
 
 extern f32 func_001B20C8(u8 *, u8 *, s32);
 extern s32 func_001B39E8(u32);
-extern u8 *datBattleParameters;
 
 /* Scale the enemy's normal EP reward; flag 0x2000 multiplies it by 100. */
 s32 btlCalculateEnemyExperienceReward(u8 *acquirer, u8 *enemy) {
@@ -4783,4 +4818,3 @@ INCLUDE_SDATA(const s32, "game/code_001A5BB8", D_00436840);
 INCLUDE_SDATA(const s32, "game/code_001A5BB8", D_00436848);
 
 INCLUDE_SDATA(const s32, "game/code_001A5BB8", D_00436850);
-
