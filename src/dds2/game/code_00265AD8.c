@@ -2,7 +2,7 @@
 
 extern void func_0025FD78(s32);
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
 
 extern void func_0026C900(void);
 
@@ -43,7 +43,7 @@ extern FlagSource mnuSceneFlagEventEntries[];
 
 extern FlagPair mnuPartyFlagEventEntries[];
 
-extern s64 kwlnFadeIsActive(void);
+extern s32 kwlnFadeIsActive(void);
 
 extern u8 D_003CE6AC[];
 
@@ -89,7 +89,7 @@ typedef struct EventDispatchState {
 
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265AD8);
 
-s64 evtAdvancePopupWithOptionalPreparation(s32 callback) {
+s32 evtAdvancePopupWithOptionalPreparation(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     if (*(s32 *)(context + 0xE0) != 0) {
@@ -101,7 +101,7 @@ s64 evtAdvancePopupWithOptionalPreparation(s32 callback) {
     return evtMenuSetHandler(context, 1, callback);
 }
 /* Route the supplied callback through dispatch mode 2 after menu setup. */
-s64 func_00265EE8(s32 callback) {
+s32 func_00265EE8(s32 callback) {
     s32 eventContext = kwlnTaskGetUserValue();
     func_0026C900();
     return evtMenuSetHandler(eventContext, 2, callback);
@@ -119,10 +119,10 @@ u32 func_00265F58(void) {
 
 extern u8 D_003CE690[];
 
-s64 mnuPollMessageWindowBeforeClosing(s32 callback) {
+s32 mnuPollMessageWindowBeforeClosing(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *window = (s32 *)(context + 0x58);
-    s64 state = func_002C4038(context + 0xC, window, 0, callback);
+    s32 state = func_002C4038(context + 0xC, window, 0, callback);
 
     if (state == 0) {
         if (*window == 0) {
@@ -136,14 +136,14 @@ s64 mnuPollMessageWindowBeforeClosing(s32 callback) {
     return state;
 }
 
-s64 func_00265FE8(s32 callback) {
+s32 func_00265FE8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0025FD78(context);
     return evtMenuSetHandler(context, 1, callback);
 }
 
-s64 func_00266038(s32 callback) {
+s32 func_00266038(s32 callback) {
     s32 eventContext = kwlnTaskGetUserValue();
     func_0026C900();
     return evtMenuSetHandler(eventContext, 2, callback);
@@ -163,10 +163,10 @@ u32 evtStartFadeOut(void) {
     return 1;
 }
 
-s64 mnuWaitForFadeBeforePopup(s32 callback) {
+s32 mnuWaitForFadeBeforePopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *window = (s32 *)(context + 0x58);
-    s64 state = func_002C4038(context + 0xc, window, 0, callback);
+    s32 state = func_002C4038(context + 0xc, window, 0, callback);
     if (state == 0) {
         if (*window == 0) {
             if (kwlnFadeIsActive() == 0) {
@@ -178,14 +178,14 @@ s64 mnuWaitForFadeBeforePopup(s32 callback) {
     return state;
 }
 
-s64 func_00266188(s32 callback) {
+s32 func_00266188(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0025FD78(context);
     return evtMenuSetHandler(context, 1, callback);
 }
 
-s64 evtDispatchSync(s32 callback) {
+s32 evtDispatchSync(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     return evtMenuSetHandler(context, 2, callback);

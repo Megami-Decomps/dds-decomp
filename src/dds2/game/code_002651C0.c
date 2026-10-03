@@ -132,10 +132,10 @@ u32 func_002652D8(void) {
 }
 
 /* Poll the event window; when it closes, install the default window if needed. */
-s64 evtMenuPollWindow(s32 callback) {
+s32 evtMenuPollWindow(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *window = &((EvtMenuContext *)context)->window;
-    s64 state = func_002C4038(context + 0xc, window, 0, callback);
+    s32 state = func_002C4038(context + 0xc, window, 0, callback);
     if (state == 0) {
         if (*window == 0) {
             if (evtGetMessageWindowControlState() == 0) {
@@ -147,14 +147,14 @@ s64 evtMenuPollWindow(s32 callback) {
     return state;
 }
 
-s64 func_00265360(s32 callback) {
+s32 func_00265360(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297970(context);
     return evtMenuSetHandler(context, 1, callback);
 }
 
-s64 evtFinishPopupAfterMenuConfiguration(s32 callback) {
+s32 evtFinishPopupAfterMenuConfiguration(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C7F8(1, 0);
     return evtMenuSetHandler(context, 2, callback);
@@ -184,14 +184,14 @@ s32 evtMenuPersistSelectedSlot(void) {
 
 INCLUDE_ASM(const s32, "game/code_002651C0", func_002655C0);
 
-s64 func_002657F8(s32 callback) {
+s32 func_002657F8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297970(context);
     return evtMenuSetHandler(context, 1, callback);
 }
 
-s64 func_00265850(s32 callback) {
+s32 func_00265850(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return evtMenuSetHandler(context, 2, callback);

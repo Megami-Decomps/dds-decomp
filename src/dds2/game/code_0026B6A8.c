@@ -1,12 +1,12 @@
 #include "mnu.h"
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
 
 extern void func_002686F0(s32);
 
 extern void func_0026C900(void);
 
-extern s64 evtGetMessageWindowControlState(void);
+extern s32 evtGetMessageWindowControlState(void);
 
 extern s32 datGameState;
 
@@ -110,10 +110,10 @@ u32 func_0026B930(void) {
     return 1;
 }
 
-s64 dspUpdateFlagEvent(s32 request) {
+s32 dspUpdateFlagEvent(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     s32 *panel = (s32 *)(state + 0x54);
-    s64 result = func_002C4038(state + 8, panel, 0, request);
+    s32 result = func_002C4038(state + 8, panel, 0, request);
     if (result != 0) {
         return result;
     }
@@ -127,14 +127,14 @@ s64 dspUpdateFlagEvent(s32 request) {
     return 0;
 }
 
-s64 mnuDispatchTerminalPanel(s32 request) {
+s32 mnuDispatchTerminalPanel(s32 request) {
     s32 state = kwlnTaskGetUserValue();
 
     func_002686F0(state);
     return menuSetHandler(state, 1, request);
 }
 
-s64 mnuDispatchTerminalPanelExit(s32 request) {
+s32 mnuDispatchTerminalPanelExit(s32 request) {
     s32 state = kwlnTaskGetUserValue();
 
     func_0026C900();
@@ -168,10 +168,10 @@ extern s32 kwlnFadeIsActive(void);
 extern char D_003CE998[];
 
 /* When the current panel is idle and no fade is running, start its queued step. */
-s64 func_0026BAF8(u64 request) {
+s32 func_0026BAF8(u64 request) {
     s32 state = kwlnTaskGetUserValue();
     s32 *panelState = (s32 *)(state + 0x54);
-    s64 result = func_002C4038(state + 8, panelState, 0, request);
+    s32 result = func_002C4038(state + 8, panelState, 0, request);
     if (result == 0) {
         if (*panelState == 0 && kwlnFadeIsActive() == 0) {
             mnuSetPopupEntryFlagged(panelState, D_003CE998);
@@ -181,14 +181,14 @@ s64 func_0026BAF8(u64 request) {
     return result;
 }
 
-s64 func_0026BB78(s32 request) {
+s32 func_0026BB78(s32 request) {
     s32 state = kwlnTaskGetUserValue();
 
     func_002686F0(state);
     return menuSetHandler(state, 1, request);
 }
 
-s64 func_0026BBC8(s32 request) {
+s32 func_0026BBC8(s32 request) {
     s32 state = kwlnTaskGetUserValue();
 
     return menuSetHandler(state, 2, request);

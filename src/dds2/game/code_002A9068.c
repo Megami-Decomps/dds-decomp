@@ -4,7 +4,7 @@ extern u32 mnuMovieShutdownCounter;
 
 extern s32 kwlnFadeIsActive(void);
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
 
 extern char mnuCampInputTaskName[]; /* "camp" */
 
@@ -28,11 +28,11 @@ extern void sdfReleaseResourceAllocation(u32);
 
 extern void *memset(void *, s32, u32);
 
-extern void func_002AAF70();
+extern s32 func_002AAF70(s32);
 
 extern void func_002AB0E0();
 
-extern void mnuFinishStaffConfigPopup();
+extern s32 mnuFinishStaffConfigPopup(s32);
 
 extern void func_00101968(s32, s32);
 

@@ -2,9 +2,9 @@
 
 extern s32 evtAdvanceSlotFlags(void);
 
-extern s64 evtGetMessageWindowControlState(void);
+extern s32 evtGetMessageWindowControlState(void);
 
-extern s64 func_002C4038(s32, s32 *, u64, u64);
+extern s32 func_002C4038(s32, s32 *, u64, u64);
 
 extern s32 kwlnFadeIsActive(void);
 
@@ -197,14 +197,14 @@ s32 evtAdvancePhaseOne(void) {
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00261F48);
 
-s64 func_00262190(s32 callback) {
+s32 func_00262190(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297320(context);
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 1, callback);
 }
 
-s64 evtSetupDispatchSync(s32 callback) {
+s32 evtSetupDispatchSync(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
@@ -242,14 +242,14 @@ s32 evtSelectStateAction(void) {
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00262330);
 
-s64 func_00262598(s32 callback) {
+s32 func_00262598(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297970(context);
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 1, callback);
 }
 
-s64 evtSetupDispatchSyncB(s32 callback) {
+s32 evtSetupDispatchSyncB(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
@@ -287,14 +287,14 @@ s32 evtSelectStateActionB(void) {
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00262740);
 
-s64 func_002629A8(s32 callback) {
+s32 func_002629A8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297970(context);
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 1, callback);
 }
 
-s64 func_00262A00(s32 callback) {
+s32 func_00262A00(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
@@ -332,14 +332,14 @@ s32 mnuResetCommandStepAndSelectPhase(void) {
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00262B50);
 
-s64 func_00262DB8(s32 callback) {
+s32 func_00262DB8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297970(context);
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 1, callback);
 }
 
-s64 func_00262E10(s32 callback) {
+s32 func_00262E10(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
@@ -377,14 +377,14 @@ s32 evtEnterProgressCommandPhase(void) {
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00262F78);
 
-s64 func_00263180(s32 callback) {
+s32 func_00263180(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297970(context);
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 1, callback);
 }
 
-s64 func_002631D8(s32 callback) {
+s32 func_002631D8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
@@ -428,10 +428,10 @@ u32 func_00263378(void) {
     return 1;
 }
 
-s64 evtOpenProgressResultPopupWhenIdle(s32 callback) {
+s32 evtOpenProgressResultPopupWhenIdle(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *result = (s32 *)(context + 0x58);
-    s64 state = func_002C4038(context + 0xc, result, 0, callback);
+    s32 state = func_002C4038(context + 0xc, result, 0, callback);
     if (state == 0) {
         if (evtGetMessageWindowControlState() == 0) {
             mnuSetPopupEntryFlagged(result, D_003CE498);
@@ -441,14 +441,14 @@ s64 evtOpenProgressResultPopupWhenIdle(s32 callback) {
     return state;
 }
 
-s64 func_002633F0(s32 callback) {
+s32 func_002633F0(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297320(context);
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 1, callback);
 }
 
-s64 func_00263448(s32 callback) {
+s32 func_00263448(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
@@ -460,10 +460,10 @@ u32 func_002635E0(void) {
     return 1;
 }
 
-s64 func_002635E8(s32 callback) {
+s32 func_002635E8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *result = (s32 *)(context + 0x58);
-    s64 state = func_002C4038(context + 0xc, result, 0, callback);
+    s32 state = func_002C4038(context + 0xc, result, 0, callback);
     if (state == 0) {
         if (evtGetMessageWindowControlState() == 0) {
             mnuSetPopupEntryFlagged(result, D_003CE498);
@@ -473,14 +473,14 @@ s64 func_002635E8(s32 callback) {
     return state;
 }
 
-s64 func_00263658(s32 callback) {
+s32 func_00263658(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297320(context);
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 1, callback);
 }
 
-s64 func_002636B0(s32 callback) {
+s32 func_002636B0(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
@@ -496,10 +496,10 @@ u32 evtResetStateProgressTimer(void) {
 }
 
 /* Delay the next state table until dispatch is idle and 20 progress ticks elapse. */
-s64 evtQueryStateProgress(s32 callback) {
+s32 evtQueryStateProgress(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *window = (s32 *)(context + 0x58);
-    s64 state = func_002C4038(context + 0xc, window, 0, callback);
+    s32 state = func_002C4038(context + 0xc, window, 0, callback);
     if (state == 0) {
         if (*window == 0) {
             if (evtGetMessageWindowControlState() == 0) {
@@ -516,14 +516,14 @@ s64 evtQueryStateProgress(s32 callback) {
     return state;
 }
 
-s64 evtDispatchProgressCallback(s32 callback) {
+s32 evtDispatchProgressCallback(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00294930(context, ((EvtStateTableContext *)context)->progressTimer);
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 1, callback);
 }
 
-s64 evtSetupDispatchSyncE(s32 callback) {
+s32 evtSetupDispatchSyncE(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
@@ -551,14 +551,14 @@ s32 evtAdvanceStateStage(void) {
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00263920);
 
-s64 func_00263B98(s32 callback) {
+s32 func_00263B98(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00298648(context);
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 1, callback);
 }
 
-s64 func_00263BF0(s32 callback) {
+s32 func_00263BF0(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
@@ -645,7 +645,7 @@ INCLUDE_ASM(const s32, "game/code_00261E10", func_00263FB0);
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00264120);
 
-s64 evtDispatchSceneReadyFollowup(s32 callback) {
+s32 evtDispatchSceneReadyFollowup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     if (((EvtStateTableContext *)context)->sceneReady == 1) {
@@ -656,7 +656,7 @@ s64 evtDispatchSceneReadyFollowup(s32 callback) {
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 1, callback);
 }
 
-s64 func_002642B8(s32 callback) {
+s32 func_002642B8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
@@ -692,9 +692,9 @@ s32 evtApplyDispatchModeState(void) {
     return 1;
 }
 
-s64 evtSetPopupEntryWhenMessageWindowIdle(u64 callback) {
+s32 evtSetPopupEntryWhenMessageWindowIdle(u64 callback) {
     s32 context;
-    s64 state;
+    s32 state;
     s32 *window;
 
     context = kwlnTaskGetUserValue();
@@ -711,7 +711,7 @@ s64 evtSetPopupEntryWhenMessageWindowIdle(u64 callback) {
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00264480);
 
-s64 func_002646C8(s32 callback) {
+s32 func_002646C8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
@@ -725,14 +725,14 @@ u32 func_00264848(void) {
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00264850);
 
-s64 func_00264AB8(s32 callback) {
+s32 func_00264AB8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297970(context);
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 1, callback);
 }
 
-s64 func_00264B10(s32 callback) {
+s32 func_00264B10(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
@@ -766,10 +766,10 @@ u32 func_00264C58(void) {
     return 1;
 }
 
-s64 evtOpenSlotAdvancePopupWhenIdle(s32 callback) {
+s32 evtOpenSlotAdvancePopupWhenIdle(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *window = (s32 *)(context + 0x58);
-    s64 state = func_002C4038(context + 0xc, window, 0, callback);
+    s32 state = func_002C4038(context + 0xc, window, 0, callback);
     if (state == 0) {
         if (*window == 0) {
             if (evtGetMessageWindowControlState() == 0) {
@@ -781,14 +781,14 @@ s64 evtOpenSlotAdvancePopupWhenIdle(s32 callback) {
     return state;
 }
 
-s64 func_00264CE0(s32 callback) {
+s32 func_00264CE0(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297970(context);
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 1, callback);
 }
 
-s64 func_00264D38(s32 callback) {
+s32 func_00264D38(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);
@@ -831,10 +831,10 @@ u32 func_00264EF8(void) {
     return 1;
 }
 
-s64 evtTriggerProgressGateThenOpenPopup(s32 callback) {
+s32 evtTriggerProgressGateThenOpenPopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *window = (s32 *)(context + 0x58);
-    s64 state = func_002C4038(context + 0xc, window, 0, callback);
+    s32 state = func_002C4038(context + 0xc, window, 0, callback);
     if (state == 0) {
         if (*window == 0) {
             if (evtGetMessageWindowControlState() == 0) {
@@ -848,14 +848,14 @@ s64 evtTriggerProgressGateThenOpenPopup(s32 callback) {
     return state;
 }
 
-s64 func_00264F98(s32 callback) {
+s32 func_00264F98(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297970(context);
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 1, callback);
 }
 
-s64 func_00264FF0(s32 callback) {
+s32 func_00264FF0(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(context + 0xc, (s32 *)(context + 0x58), 2, callback);

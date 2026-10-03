@@ -64,7 +64,7 @@ extern s32 mnuLookupRangeEntry(u16);
 
 extern u64 ptyGetCombinedRecordAndSlotValue(u64, s32);
 
-extern s64 func_002C4038(s32, s32 *, u64, u64);
+extern s32 func_002C4038(s32, s32 *, u64, u64);
 
 extern s32 func_002C6CE8(void);
 

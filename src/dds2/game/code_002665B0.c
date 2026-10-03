@@ -18,9 +18,9 @@
 
 extern KwlnTask *kwlnTaskCreate();
 extern void func_00101968(KwlnTask *, KwlnTask *);
-extern s64 mnuPrepareTerminalPopupAndDispatch(s32);
-extern s64 func_00268550(s32);
-extern s64 func_00268588(s32);
+extern s32 mnuPrepareTerminalPopupAndDispatch(s32);
+extern s32 func_00268550(s32);
+extern s32 func_00268588(s32);
 
 
 extern void func_00266C08();
@@ -226,7 +226,7 @@ extern void mnuDestroyListState(u32);
 
 extern void mnuReleaseCampTextureHandlesAndClearOutput(u8 *);
 
-extern s64 func_002C4038(s32, s32 *, u64, u64);
+extern s32 func_002C4038(s32, s32 *, u64, u64);
 
 /* Work record whose packed effect batch is held at +0x3C. */
 typedef struct MenuBatchContext {
@@ -981,7 +981,7 @@ s32 fldPollSceneState(void) {
 }
 
 /* Seed the task's popup slot before dispatching mode zero with the supplied request. */
-s64 mnuPrepareTerminalPopupAndDispatch(s32 request) {
+s32 mnuPrepareTerminalPopupAndDispatch(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     mnuSetPopupEntry((s32 *)(context + 0x54), D_003CE944);
@@ -989,12 +989,12 @@ s64 mnuPrepareTerminalPopupAndDispatch(s32 request) {
 }
 
 /* Dispatch current task work through panel mode one; distinct callback role unknown. */
-s64 func_00268550(s32 request) {
+s32 func_00268550(s32 request) {
     return menuSetHandler(kwlnTaskGetUserValue(), 1, request);
 }
 
 /* Dispatch current task work through panel mode two; distinct callback role unknown. */
-s64 func_00268588(s32 request) {
+s32 func_00268588(s32 request) {
     return menuSetHandler(kwlnTaskGetUserValue(), 2, request);
 }
 
@@ -1386,7 +1386,7 @@ extern char D_003CE8B8[];
 extern char D_003CE8F0[];
 
 /* Event panel input: confirm opens the popup for the selected entry's action, cancel opens the back popup, left/right step the list. */
-s64 evtBHandleSelectionPanelInput(u64 input) {
+s32 evtBHandleSelectionPanelInput(u64 input) {
     EventDispatchState *context = (EventDispatchState *)kwlnTaskGetUserValue();
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *state = &context->dispatchStatus;
@@ -1394,7 +1394,7 @@ s64 evtBHandleSelectionPanelInput(u64 input) {
     s32 frames;
     s32 action;
     EventMenuSelection *node;
-    s64 result;
+    s32 result;
 
     result = func_002C4038((s32)context + 8, state, 0, input);
     if (result != 0) {
@@ -1449,7 +1449,7 @@ s64 evtBHandleSelectionPanelInput(u64 input) {
     return 0;
 }
 
-s64 evtDispatchSelectionAfterFieldFrameGate(s32 request) {
+s32 evtDispatchSelectionAfterFieldFrameGate(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
 
@@ -1464,7 +1464,7 @@ s64 evtDispatchSelectionAfterFieldFrameGate(s32 request) {
     return menuSetHandler((s32)dispatchState, 1, request);
 }
 
-s64 evtBSetupDispatchSync(s32 request) {
+s32 evtBSetupDispatchSync(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
 
     func_0026C900();
@@ -1507,10 +1507,10 @@ extern void fileSetPreviewLocation();
 extern void func_002CE208();
 
 /* Poll the file task after the dispatch/fade barrier, then restore the menu popup. */
-s64 func_0026A048(u64 request) {
+s32 func_0026A048(u64 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
     s32 *dispatch = &state->dispatchStatus;
-    s64 result = func_002C4038((s32)state->dispatchWork, dispatch, 0, request);
+    s32 result = func_002C4038((s32)state->dispatchWork, dispatch, 0, request);
 
     if (result != 0) {
         return result;
@@ -1532,13 +1532,13 @@ s64 func_0026A048(u64 request) {
     return 0;
 }
 
-s64 evtBDispatchStart(s32 request) {
+s32 evtBDispatchStart(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
 
     return menuSetHandler((s32)state, 1, request);
 }
 
-s64 evtBSetupDispatchSyncB(s32 request) {
+s32 evtBSetupDispatchSyncB(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
 
     func_0026C900();
@@ -1578,11 +1578,11 @@ u32 evtFinishPendingSelectionTransition(void) {
 }
 
 /* Handle owner-panel input only after dispatch completes and the panel is fully shown. */
-s64 func_0026A2E0(u64 request) {
+s32 func_0026A2E0(u64 request) {
     EventDispatchState *context = (EventDispatchState *)kwlnTaskGetUserValue();
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *dispatch = &context->dispatchStatus;
-    s64 result = func_002C4038((s32)context->dispatchWork, dispatch, 0, request);
+    s32 result = func_002C4038((s32)context->dispatchWork, dispatch, 0, request);
 
     if (result != 0 || context->menuOwner->scale < 0x100) {
         return result;
@@ -1609,7 +1609,7 @@ s64 func_0026A2E0(u64 request) {
     return 0;
 }
 
-s64 func_0026A3F8(s32 request) {
+s32 func_0026A3F8(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
@@ -1620,7 +1620,7 @@ s64 func_0026A3F8(s32 request) {
     return menuSetHandler((s32)dispatchState, 1, request);
 }
 
-s64 evtBSetupDispatchSyncC(s32 request) {
+s32 evtBSetupDispatchSyncC(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
 
     func_0026C900();
@@ -1680,7 +1680,7 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 context) {
     frFontQueueGlyphInSelectedSlot(font);
 }
 
-s64 mnuInitializeSelectionDispatchWhenModeUnset(s32 request) {
+s32 mnuInitializeSelectionDispatchWhenModeUnset(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
@@ -1694,7 +1694,7 @@ s64 mnuInitializeSelectionDispatchWhenModeUnset(s32 request) {
     return menuSetHandler((s32)dispatchState, 1, request);
 }
 
-s64 evtBSetupDispatchSyncD(s32 request) {
+s32 evtBSetupDispatchSyncD(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
 
     func_0026C900();
@@ -1709,10 +1709,10 @@ u32 evtSelectFinalVisualNode(void) {
     return 1;
 }
 
-s64 evtOpenTerminalFollowupPopupWhenIdle(s32 request) {
+s32 evtOpenTerminalFollowupPopupWhenIdle(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     s32 *panel = (s32 *)(state + 0x54);
-    s64 result = func_002C4038(state + 8, panel, 0, request);
+    s32 result = func_002C4038(state + 8, panel, 0, request);
     if (result != 0) {
         return result;
     }
@@ -1728,7 +1728,7 @@ s64 evtOpenTerminalFollowupPopupWhenIdle(s32 request) {
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_0026A998);
 
-s64 evtBSetupDispatchSyncE(s32 request) {
+s32 evtBSetupDispatchSyncE(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
 
     func_0026C900();
@@ -1776,10 +1776,10 @@ extern char D_003CE848[];
 
 /* Dispatch completion waits for the fade and pending resource/graph work;
  * keep the request outstanding until that barrier has drained. */
-s64 evtPollDispatchAfterFade(u64 request) {
+s32 evtPollDispatchAfterFade(u64 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
     s32 *dispatch = &state->dispatchStatus;
-    s64 result = func_002C4038((s32)state->dispatchWork, dispatch, 0, request);
+    s32 result = func_002C4038((s32)state->dispatchWork, dispatch, 0, request);
     if (result == 0) {
         if (kwlnFadeIsActive() == 0) {
             if (state->fadeStarted == 0) {
@@ -1807,7 +1807,7 @@ extern void func_00268EC8(s32);
 
 extern void mnuDrawTerminalSelectedSlots(s32);
 
-s64 func_0026AC90(s32 request) {
+s32 func_0026AC90(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
@@ -1818,7 +1818,7 @@ s64 func_0026AC90(s32 request) {
     return menuSetHandler((s32)dispatchState, 1, request);
 }
 
-s64 evtBDispatchSync(s32 request) {
+s32 evtBDispatchSync(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
 
     return menuSetHandler((s32)state, 2, request);
@@ -1848,10 +1848,10 @@ u32 func_0026ADC0(void) {
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern char D_003CE928[];
 
-s64 evtOpenTerminalOwnerStatePopup(s32 request) {
+s32 evtOpenTerminalOwnerStatePopup(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
     s32 *dispatch = &state->dispatchStatus;
-    s64 result = func_002C4038((s32)state->dispatchWork, dispatch, 0, request);
+    s32 result = func_002C4038((s32)state->dispatchWork, dispatch, 0, request);
 
     if (result == 0) {
         /* Choose the follow-up only after menu and message-window work is idle. */
@@ -1871,7 +1871,7 @@ s64 evtOpenTerminalOwnerStatePopup(s32 request) {
     return result;
 }
 
-s64 func_0026AEB0(s32 request) {
+s32 func_0026AEB0(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
@@ -1882,7 +1882,7 @@ s64 func_0026AEB0(s32 request) {
     return menuSetHandler((s32)dispatchState, 1, request);
 }
 
-s64 evtBSetupDispatchSyncF(s32 request) {
+s32 evtBSetupDispatchSyncF(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
 
     func_0026C900();
@@ -1904,9 +1904,9 @@ u32 evtBCheckPanelMode(void) {
     return 1;
 }
 
-s64 evtBContinueDispatchOrRestoreTable(u64 request) {
+s32 evtBContinueDispatchOrRestoreTable(u64 request) {
     EventDispatchState *state;
-    s64 result;
+    s32 result;
     s32 *dispatch;
 
     state = (EventDispatchState *)kwlnTaskGetUserValue();
@@ -1921,7 +1921,7 @@ s64 evtBContinueDispatchOrRestoreTable(u64 request) {
     return 0;
 }
 
-s64 mnuPrepareDispatchStateAndBindHandler(s32 request) {
+s32 mnuPrepareDispatchStateAndBindHandler(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
@@ -1932,7 +1932,7 @@ s64 mnuPrepareDispatchStateAndBindHandler(s32 request) {
     return menuSetHandler((s32)dispatchState, 1, request);
 }
 
-s64 evtBSetupDispatchSyncG(s32 request) {
+s32 evtBSetupDispatchSyncG(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
 
     func_0026C900();
@@ -1973,40 +1973,34 @@ s32 evtBRebuildTerminalMenuAndResetDispatch(void) {
 }
 
 /* Selection chain startup: fade in once the field frames are drained, then open the popup when the fade finishes. */
-s64 evtBStartSelectionChainAfterFade(u64 request) {
+s32 evtBStartSelectionChainAfterFade(u64 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
     s32 *dispatch = &state->dispatchStatus;
-    s64 result = func_002C4038((s32)state + 8, dispatch, 0, request);
+    s32 result = func_002C4038((s32)state + 8, dispatch, 0, request);
 
-    if (result != 0) {
-        return result;
-    }
-    if (*dispatch == 0) {
-        if (fldClassifyRemainingFrames((SceneTimerView *)state) != 0) {
-            return 0;
-        }
-        switch (state->stage) {
-        case 1:
-            kwlnFadeInStart(0, 0, 0, 15);
-            if (state->savedMenuMode != 0) {
-                mnuTerminalSelectResourceBank((MenuSlotState *)state);
+    if (result == 0) {
+        if (*dispatch == 0 && fldClassifyRemainingFrames((SceneTimerView *)state) == 0) {
+            switch (state->stage) {
+            case 1:
+                kwlnFadeInStart(0, 0, 0, 15);
+                if (state->savedMenuMode != 0) {
+                    mnuTerminalSelectResourceBank((MenuSlotState *)state);
+                }
+                state->stage = 2;
+                break;
+            case 2:
+                if (kwlnFadeIsActive() == 0) {
+                    mnuSetPopupEntryFlagged(dispatch, D_003CE848);
+                }
+                break;
             }
-            state->stage = 2;
-            break;
-        case 2:
-            if (kwlnFadeIsActive() != 0) {
-                return 0;
-            }
-            mnuSetPopupEntryFlagged(dispatch, D_003CE848);
-            break;
-        default:
-            return 0;
         }
+        return 0;
     }
-    return 0;
+    return result;
 }
 
-s64 evtBDispatchSyncD2(s32 request) {
+s32 evtBDispatchSyncD2(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
 
@@ -2024,7 +2018,7 @@ s64 evtBDispatchSyncD2(s32 request) {
     return menuSetHandler((s32)dispatchState, 1, request);
 }
 
-s64 evtBDispatchSyncB(s32 request) {
+s32 evtBDispatchSyncB(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
 
     return menuSetHandler((s32)state, 2, request);
@@ -2059,16 +2053,68 @@ INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424FC8);
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424FF8);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_0026B4A8);
+extern KwlnTask *func_00101740(const char *);
+extern s32 mnuHasMantraSpriteTaskFinished(void);
+extern void func_002665E8(EventDispatchState *);
+extern char D_00425008[];
+extern char D_003CE960[];
 
-s64 evtBLateDispatchStart(s32 request) {
+/* Wait for the mode's load/fade barrier before binding the terminal exit popup. */
+s32 func_0026B4A8(u64 request) {
+    EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
+    s32 *dispatch = &state->dispatchStatus;
+    s32 ready = 0;
+    s32 result = func_002C4038((s32)state->dispatchWork, dispatch, 0, request);
+
+    if (result != 0) {
+        return result;
+    }
+    if (state->menuMode < 2) {
+        if (state->menuMode >= 0) {
+            result = mnuHasMantraSpriteTaskFinished();
+            if (result == 0) {
+                return result;
+            }
+        }
+    }
+    if (state->dispatchStatus == 0) {
+        if (state->menuMode == 0) {
+            ready = func_00101740(D_00425008) == NULL;
+            if (evtIsActiveFlagSet(0) != 0) {
+                ready = 1;
+            }
+            if (ready != 0) {
+                if (state->stage == 0) {
+                    ready = 0;
+                    func_002665E8(state);
+                    kwlnFadeOutStart(0, 0, 0, 15);
+                    state->stage = 1;
+                }
+            }
+        } else {
+            if (state->stage == 0) {
+                func_002665E8(state);
+                kwlnFadeOutStart(0, 0, 0, 15);
+                state->stage = 1;
+            } else {
+                ready = kwlnFadeIsActive() == 0;
+            }
+        }
+        if (ready != 0) {
+            mnuSetPopupEntryFlagged(dispatch, D_003CE960);
+        }
+    }
+    return 0;
+}
+
+s32 evtBLateDispatchStart(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
 
     func_002686F0((s32)state);
     return menuSetHandler((s32)state, 1, request);
 }
 
-s64 evtBDispatchSyncC(s32 request) {
+s32 evtBDispatchSyncC(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
 
     return menuSetHandler((s32)state, 2, request);

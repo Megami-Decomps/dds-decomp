@@ -89,7 +89,7 @@ typedef struct FieldResourceRecord {
 extern FieldResourceRecord *D_00435E18;
 extern s32 func_001514A8(void);
 extern s16 func_001514B8(void);
-extern s64 func_002C4038(s32, s32 *, u64, u64);
+extern s32 func_002C4038(s32, s32 *, u64, u64);
 extern s32 evtGetMessageWindowControlState(void);
 extern void func_00299B98(MenuItemScene *, s32);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
@@ -102,7 +102,7 @@ extern char D_003D6458[];
 
 INCLUDE_ASM(const s32, "game/code_00299D58", brsMessageInputStep);
 
-s64 mnuStaffRunPanel1(s32 input) {
+s32 mnuStaffRunPanel1(s32 input) {
     s32 context = kwlnTaskGetUserValue();
 
     if (brsTaskIsUiUpdateAllowed(context) != 0) {
@@ -111,7 +111,7 @@ s64 mnuStaffRunPanel1(s32 input) {
     }
 }
 
-s64 mnuStaffRunPanel2(s32 input) {
+s32 mnuStaffRunPanel2(s32 input) {
     s32 context = kwlnTaskGetUserValue();
 
     if (brsTaskIsUiUpdateAllowed(context) != 0) {
@@ -128,19 +128,19 @@ u32 func_00299EF8(void) {
     return 1;
 }
 
-s64 mnuStaffRunPanel0(s32 input) {
+s32 mnuStaffRunPanel0(s32 input) {
     s32 context = kwlnTaskGetUserValue();
     mnuMapPadMaskToFlags(0x33);
     return menuSetHandler(context, 0, input);
 }
 
-s64 mnuRefreshAndDispatchCurrentPanel(s32 input) {
+s32 mnuRefreshAndDispatchCurrentPanel(s32 input) {
     s32 context = kwlnTaskGetUserValue();
     mnuTitleRenderFadeAndPanels(context);
     return menuSetHandler(context, 1, input);
 }
 
-s64 func_00299FA0(s32 input) {
+s32 func_00299FA0(s32 input) {
     s32 context = kwlnTaskGetUserValue();
     return menuSetHandler(context, 2, input);
 }
@@ -294,8 +294,8 @@ s32 func_0029A2F8(MenuItemScene *scene) {
 }
 
 
-s64 func_0029A400(void *task) {
-    s64 result;
+s32 func_0029A400(void *task) {
+    s32 result;
     MenuItemScene *scene = (MenuItemScene *)kwlnTaskGetUserValue(task);
     s32 *dispatchStatus = &scene->dispatchState;
 
@@ -345,14 +345,14 @@ s64 func_0029A400(void *task) {
 }
 
 
-s64 func_0029A588(s32 request) {
+s32 func_0029A588(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     mnuTitleRenderFadeAndPanels(context);
     return menuSetHandler(context, 1, request);
 }
 
-s64 func_0029A5D8(s32 request) {
+s32 func_0029A5D8(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
