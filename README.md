@@ -207,13 +207,13 @@ the other automatically (`tools/shared_funcs.py`).
 
 **Can I mod the game with this?**
 Not comfortably yet. The experimental `dds1-dev` and `dds2-dev` targets can
-each recompile and relocate five code units' selected code, read-only data,
-initialized small data, and one exact zero-initialized state object into an
-appended loadable segment without changing the exact retail targets.
-Replacement code may change size, current units may retain explicitly verified
-assembly fallbacks, and the targets also link a development-only C
-entry hook and state block. Broader mutable-state relocation and a mod loader
-are still out of scope.
+each recompile and relocate selected code, read-only data, and initialized
+small data from eleven source objects, and move three source-owned
+zero-initialized state objects into an appended loadable segment without
+changing the exact retail targets. Replacement code may change size and retain
+explicitly verified assembly fallbacks and initialized small-data islands. The
+targets also link a development-only C entry hook and state block. Arbitrary
+mutable-state relocation and a mod loader remain out of scope.
 
 ## Names
 

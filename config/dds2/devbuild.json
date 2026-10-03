@@ -4,8 +4,8 @@
   "extension_vaddr": "0x0048E000",
   "alignment": "0x1000",
   "heap_alignment": "0x80",
-  "expected_replacement_symbols": 143,
-  "expected_shifted_replacement_symbols": 85,
+  "expected_replacement_symbols": 169,
+  "expected_shifted_replacement_symbols": 90,
   "expected_shifted_symbol_relocations": 1450,
   "expected_cross_replacement_relocations": 98,
   "expected_repaired_relocation_words": 0,
@@ -198,6 +198,80 @@
           "size": 0
         }
       ]
+    },
+    {
+      "retail_object": "build/dds2/src/dds2/game/code_00328FA8.o",
+      "object": "build/dds2/dev/code_00328FA8.o",
+      "expected_symbols": 5,
+      "expected_shifted_symbols": 3,
+      "fallback_symbols": [
+        "func_00328FA8"
+      ],
+      "retained_sections": [
+        {
+          "section": ".rodata",
+          "size": 0
+        },
+        {
+          "section": ".data",
+          "size": 0
+        },
+        {
+          "section": ".sdata",
+          "size": "0xC",
+          "old_vaddr": "0x004389CC",
+          "alignment": 4,
+          "storage": "file",
+          "expected_symbols": 3,
+          "expected_retail_gp_references": 3,
+          "expected_gp_references": 0
+        },
+        {
+          "section": ".bss",
+          "size": 0
+        }
+      ]
+    },
+    {
+      "retail_object": "build/dds2/src/dds2/sdf/sdfMemory.o",
+      "object": "build/dds2/dev/sdfMemory.o",
+      "expected_symbols": 7,
+      "expected_shifted_symbols": 2,
+      "fallback_symbols": [],
+      "retained_sections": [
+        {
+          "section": ".rodata",
+          "size": 0
+        },
+        {
+          "section": ".data",
+          "size": 0
+        }
+      ]
+    },
+    {
+      "retail_object": "build/dds2/src/dds2/game/code_00329600.o",
+      "object": "build/dds2/dev/code_00329600.o",
+      "expected_symbols": 14,
+      "expected_shifted_symbols": 0,
+      "fallback_symbols": [
+        "func_00329600",
+        "func_00329CE0"
+      ],
+      "retained_sections": [
+        {
+          "section": ".rodata",
+          "size": 0
+        },
+        {
+          "section": ".data",
+          "size": 0
+        },
+        {
+          "section": ".bss",
+          "size": 0
+        }
+      ]
     }
   ],
   "moves": [
@@ -338,6 +412,47 @@
       "alignment": 8,
       "old_vaddr": "0x00328AC8",
       "expected_relocations": 56
+    },
+    {
+      "object": "build/dds2/src/dds2/game/code_00328FA8.o",
+      "section": ".text",
+      "old_size": "0x294",
+      "new_size": "0x2AC",
+      "alignment": 8,
+      "old_vaddr": "0x00328FA8",
+      "expected_relocations": 25,
+      "expected_target_relocations": 6
+    },
+    {
+      "object": "build/dds2/src/dds2/sdf/sdfMemory.o",
+      "section": ".text",
+      "old_size": "0x3BC",
+      "new_size": "0x3C4",
+      "alignment": 8,
+      "old_vaddr": "0x00329240",
+      "expected_relocations": 23,
+      "expected_target_relocations": 377
+    },
+    {
+      "object": "build/dds2/src/dds2/game/code_00329600.o",
+      "section": ".text",
+      "old_size": "0x738",
+      "new_size": "0x738",
+      "alignment": 8,
+      "old_vaddr": "0x00329600",
+      "expected_relocations": 48,
+      "expected_target_relocations": 652
+    },
+    {
+      "object": "build/dds2/src/dds2/sdf/sdfMemory.o",
+      "section": ".bss",
+      "storage": "nobits",
+      "old_size": "0x28",
+      "new_size": "0x28",
+      "alignment": 8,
+      "old_vaddr": "0x0045F0F8",
+      "expected_relocations": 0,
+      "expected_target_relocations": 16
     }
   ],
   "additions": [
