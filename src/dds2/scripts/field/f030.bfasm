@@ -1626,8 +1626,7 @@ nega_on:
   SET_SOLAR_OVERLAY_MODE(4)
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   SET_UNIT_VALUE(global_int[0], 2)
-  push 22
-  COMM 0x0217
+  LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(22)
   push 3
   COMM 0x012d
   push 75
@@ -1636,16 +1635,12 @@ nega_on:
   push 100
   COMM 0x012e
   PREPARE_UNIT_MOTION_STATE(global_int[0], 4, 3, 15, 3)
-  push 0
-  push 22
-  COMM 0x01f3
+  START_ARCHIVE_SOUND(22, 0)
   push 5
   COMM 0x0130
   PREPARE_UNIT_MOTION_STATE(global_int[0], 4, 3, 15, 3)
   WAIT_FOR_TIMER_LIMIT(20)
-  push 0
-  push 22
-  COMM 0x01f4
+  STOP_ARCHIVE_SOUND(22, 0)
   push 5
   COMM 0x0131
   PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 3, 15, 0)
@@ -1841,18 +1836,14 @@ proc_0021:
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02)))
     local_int[56] = CREATE_LINKED_CAMERA_VIEWER(3, 64)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[56], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08)))
-    push local_int[56]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(local_int[56])
     SET_UNIT_LOW_FLAG(local_int[56])
-    push 23
-    COMM 0x0217
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(23)
     CLEAR_UNIT_LOW_FLAG(global_int[0])
     SCREEN_FADE_A(0, 30)
     WAIT_FOR_TIMER_LIMIT(30)
     WAIT_FOR_TIMER_LIMIT(5)
-    push 0
-    push 23
-    COMM 0x01f3
+    START_ARCHIVE_SOUND(23, 0)
     push float32(0.0, bits=0x00000000)
     push 0
     push local_int[56]
@@ -1863,9 +1854,7 @@ proc_0021:
     push local_int[56]
     COMM 0x00b3
     WAIT_FOR_TIMER_LIMIT(40)
-    push 0
-    push 23
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(23, 0)
     ACTIVATE_MESSAGE_PANEL()
     MESSAGE_REQUEST_AND_POLL(message(SHURE_01))
     FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -1982,17 +1971,13 @@ proc_0028:
     local_int[58] = CREATE_LINKED_CAMERA_VIEWER(3, 64)
     SET_UNIT_LOW_FLAG(local_int[58])
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[58], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_12)))
-    push local_int[58]
-    COMM 0x021e
-    push 23
-    COMM 0x0217
+    APPLY_FIELD_MODEL_LIGHTING(local_int[58])
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(23)
     CLEAR_UNIT_LOW_FLAG(global_int[0])
     SCREEN_FADE_A(0, 30)
     WAIT_FOR_TIMER_LIMIT(30)
     WAIT_FOR_TIMER_LIMIT(5)
-    push 0
-    push 23
-    COMM 0x01f3
+    START_ARCHIVE_SOUND(23, 0)
     push float32(0.0, bits=0x00000000)
     push 0
     push local_int[58]
@@ -2003,9 +1988,7 @@ proc_0028:
     push local_int[58]
     COMM 0x00b3
     WAIT_FOR_TIMER_LIMIT(40)
-    push 0
-    push 23
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(23, 0)
     ACTIVATE_MESSAGE_PANEL()
     MESSAGE_REQUEST_AND_POLL(message(SHURE_02))
     FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -2196,7 +2179,7 @@ _278:
     MESSAGE_REQUEST_AND_POLL(message(LAST_BOSS))
     if (MESSAGE_SELECTION_REQUEST_AND_POLL(selection(DOOR_SEL)) == 0) {
       FINISH_SCRIPT_MESSAGE_WINDOW()
-      COMM 0x0216
+      RELEASE_CURRENT_BGM()
       SCREEN_FADE_B(0, 15)
       WAIT_FOR_TIMER_LIMIT(15)
       SET_SOLAR_OVERLAY_MODE(0)
@@ -2339,14 +2322,12 @@ proc_0038:
     SET_SOLAR_OVERLAY_MODE(0)
     SET_MODEL_FLAG(1604)
     START_AND_WAIT_FOR_STREAM_SOUND(40)
-    COMM 0x0216
-    push 128
-    COMM 0x0210
+    RELEASE_CURRENT_BGM()
+    START_SCENE_BGM(128)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_08)))
     local_int[61] = CREATE_LINKED_CAMERA_VIEWER(2, 45)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[61], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08_2)))
-    push local_int[61]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(local_int[61])
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_2)))
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 3, 15, 1)
@@ -2373,20 +2354,16 @@ proc_0038:
     push local_int[62]
     COMM 0x001b
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[62], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08_3)))
-    push local_int[62]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(local_int[62])
     SET_UNIT_VALUE(local_int[62], 0)
-    push 31
-    COMM 0x0217
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(31)
     WAIT_FOR_TIMER_LIMIT(10)
     SCREEN_FADE_A(1, 5)
     WAIT_FOR_TIMER_LIMIT(5)
     WAIT_FOR_TIMER_LIMIT(45)
     PREPARE_UNIT_MOTION_STATE(local_int[62], 4, 3, 15, 0)
     WAIT_FOR_TIMER_LIMIT(5)
-    push 0
-    push 31
-    COMM 0x01f3
+    START_ARCHIVE_SOUND(31, 0)
     WAIT_FOR_TIMER_LIMIT(75)
     push 0
     push float32(0.9700000286102295, bits=0x3f7851ec)
@@ -2404,9 +2381,7 @@ proc_0038:
     COMM 0x0041
     WAIT_FOR_TIMER_LIMIT(3)
     WAIT_FOR_TIMER_LIMIT(5)
-    push 0
-    push 31
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(31, 0)
     RESET_STREAM_PLAYBACK()
     WAIT_FOR_STREAM_IDLE()
     push 700
@@ -2465,18 +2440,14 @@ proc_003a:
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_5)))
     local_int[64] = CREATE_LINKED_CAMERA_VIEWER(3, 64)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[64], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08_4)))
-    push local_int[64]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(local_int[64])
     SET_UNIT_LOW_FLAG(local_int[64])
-    push 23
-    COMM 0x0217
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(23)
     CLEAR_UNIT_LOW_FLAG(global_int[0])
     SCREEN_FADE_A(0, 30)
     WAIT_FOR_TIMER_LIMIT(30)
     WAIT_FOR_TIMER_LIMIT(5)
-    push 0
-    push 23
-    COMM 0x01f3
+    START_ARCHIVE_SOUND(23, 0)
     push float32(0.0, bits=0x00000000)
     push 0
     push local_int[64]
@@ -2487,9 +2458,7 @@ proc_003a:
     push local_int[64]
     COMM 0x00b3
     WAIT_FOR_TIMER_LIMIT(40)
-    push 0
-    push 23
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(23, 0)
     ACTIVATE_MESSAGE_PANEL()
     MESSAGE_REQUEST_AND_POLL(message(SHURE_03))
     FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -2575,9 +2544,8 @@ proc_0040:
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(0)
     SET_MODEL_FLAG(1734)
-    COMM 0x0216
-    push 128
-    COMM 0x0210
+    RELEASE_CURRENT_BGM()
+    START_SCENE_BGM(128)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_07_3)))
     local_int[66] = CREATE_LINKED_CAMERA_VIEWER(6, 294)
     push float32(7.0, bits=0x40e00000)
@@ -2587,10 +2555,8 @@ proc_0040:
     COMM 0x001b
     SET_UNIT_VALUE(local_int[66], 0)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[66], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08_5)))
-    push local_int[66]
-    COMM 0x021e
-    push 24
-    COMM 0x0217
+    APPLY_FIELD_MODEL_LIGHTING(local_int[66])
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(24)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_09)))
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 3, 15, 1)
@@ -2601,9 +2567,7 @@ proc_0040:
     MESSAGE_REQUEST_AND_POLL(message(BOSS_09))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     WAIT_FOR_TIMER_LIMIT(5)
-    push 0
-    push 24
-    COMM 0x01f3
+    START_ARCHIVE_SOUND(24, 0)
     PREPARE_UNIT_MOTION_STATE(local_int[66], 14, 3, 15, 0)
     WAIT_FOR_TIMER_LIMIT(40)
     push 0
@@ -2621,9 +2585,7 @@ proc_0040:
     push 3
     COMM 0x0041
     WAIT_FOR_TIMER_LIMIT(10)
-    push 0
-    push 24
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(24, 0)
     push 705
     push 30
     push 1
@@ -2779,9 +2741,8 @@ proc_0048:
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(0)
     SET_MODEL_FLAG(1735)
-    COMM 0x0216
-    push 128
-    COMM 0x0210
+    RELEASE_CURRENT_BGM()
+    START_SCENE_BGM(128)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_07_4)))
     local_int[68] = CREATE_LINKED_CAMERA_VIEWER(6, 295)
     push float32(1.25, bits=0x3fa00000)
@@ -2791,10 +2752,8 @@ proc_0048:
     COMM 0x001b
     SET_UNIT_VALUE(local_int[68], 0)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[68], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08_6)))
-    push local_int[68]
-    COMM 0x021e
-    push 25
-    COMM 0x0217
+    APPLY_FIELD_MODEL_LIGHTING(local_int[68])
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(25)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_4)))
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 3, 15, 1)
@@ -2805,9 +2764,7 @@ proc_0048:
     MESSAGE_REQUEST_AND_POLL(message(BOSS_08))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     WAIT_FOR_TIMER_LIMIT(5)
-    push 0
-    push 25
-    COMM 0x01f3
+    START_ARCHIVE_SOUND(25, 0)
     PREPARE_UNIT_MOTION_STATE(local_int[68], 17, 3, 15, 0)
     WAIT_FOR_TIMER_LIMIT(50)
     push 0
@@ -2825,9 +2782,7 @@ proc_0048:
     push 3
     COMM 0x0041
     WAIT_FOR_TIMER_LIMIT(10)
-    push 0
-    push 25
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(25, 0)
     push 704
     push 30
     push 1
@@ -2844,19 +2799,15 @@ stn_after_btl:
   SET_SOLAR_OVERLAY_MODE(0)
   local_int[70] = CREATE_LINKED_CAMERA_VIEWER(3, 64)
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[70], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_09_2)))
-  push local_int[70]
-  COMM 0x021e
+  APPLY_FIELD_MODEL_LIGHTING(local_int[70])
   SET_UNIT_LOW_FLAG(local_int[70])
-  push 23
-  COMM 0x0217
+  LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(23)
   WAIT_FOR_TIMER_LIMIT(60)
   ACTIVATE_MESSAGE_PANEL()
   MESSAGE_REQUEST_AND_POLL(message(SATAN_AFTER))
   MESSAGE_REQUEST_AND_POLL(message(SATAN_AFTER_02))
   FINISH_SCRIPT_MESSAGE_WINDOW()
-  push 0
-  push 23
-  COMM 0x01f3
+  START_ARCHIVE_SOUND(23, 0)
   push float32(0.0, bits=0x00000000)
   push 0
   push local_int[70]
@@ -2867,9 +2818,7 @@ stn_after_btl:
   push local_int[70]
   COMM 0x00b3
   WAIT_FOR_TIMER_LIMIT(40)
-  push 0
-  push 23
-  COMM 0x01f4
+  STOP_ARCHIVE_SOUND(23, 0)
   ACTIVATE_MESSAGE_PANEL()
   MESSAGE_REQUEST_AND_POLL(message(SATAN_AFTER_03))
   FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -3163,22 +3112,19 @@ proc_005e:
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(0)
     SET_MODEL_FLAG(1613)
-    COMM 0x0216
-    push 128
-    COMM 0x0210
+    RELEASE_CURRENT_BGM()
+    START_SCENE_BGM(128)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_13)))
     local_int[71] = CREATE_LINKED_CAMERA_VIEWER(6, 17)
     SET_UNIT_VALUE(local_int[71], 0)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[71], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02_3)))
-    push local_int[71]
-    COMM 0x021e
+    APPLY_FIELD_MODEL_LIGHTING(local_int[71])
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
     push float32(2.5, bits=0x40200000)
     push local_int[71]
     COMM 0x001b
-    push 36
-    COMM 0x0217
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(36)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     SET_UNIT_VALUE(global_int[0], 3)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 3, 0, 0, 0)
@@ -3187,9 +3133,7 @@ proc_005e:
     MESSAGE_REQUEST_AND_POLL(message(KYOSEI_01))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     PREPARE_UNIT_MOTION_STATE(local_int[71], 4, 3, 15, 0)
-    push 0
-    push 36
-    COMM 0x01f3
+    START_ARCHIVE_SOUND(36, 0)
     WAIT_FOR_TIMER_LIMIT(55)
     push 0
     push float32(0.9800000190734863, bits=0x3f7ae148)
@@ -3206,9 +3150,7 @@ proc_005e:
     push 3
     COMM 0x0041
     WAIT_FOR_TIMER_LIMIT(5)
-    push 0
-    push 36
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(36, 0)
     push 706
     push 30
     push 1
@@ -3348,9 +3290,8 @@ proc_0066:
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(0)
       SET_MODEL_FLAG(1732)
-      COMM 0x0216
-      push 128
-      COMM 0x0210
+      RELEASE_CURRENT_BGM()
+      START_SCENE_BGM(128)
       ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_07_5)))
       local_int[72] = CREATE_LINKED_CAMERA_VIEWER(6, 296)
       push float32(2.299999952316284, bits=0x40133333)
@@ -3360,10 +3301,8 @@ proc_0066:
       COMM 0x001b
       SET_UNIT_VALUE(local_int[72], 0)
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[72], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08_8)))
-      push local_int[72]
-      COMM 0x021e
-      push 26
-      COMM 0x0217
+      APPLY_FIELD_MODEL_LIGHTING(local_int[72])
+      LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(26)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_7)))
       PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 3, 15, 1)
@@ -3373,9 +3312,7 @@ proc_0066:
       MESSAGE_REQUEST_AND_POLL(message(BOSS_07))
       FINISH_SCRIPT_MESSAGE_WINDOW()
       WAIT_FOR_TIMER_LIMIT(5)
-      push 0
-      push 26
-      COMM 0x01f3
+      START_ARCHIVE_SOUND(26, 0)
       PREPARE_UNIT_MOTION_STATE(local_int[72], 4, 3, 15, 0)
       WAIT_FOR_TIMER_LIMIT(36)
       push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_08_MOTION))
@@ -3397,9 +3334,7 @@ proc_0066:
       push 3
       COMM 0x0041
       WAIT_FOR_TIMER_LIMIT(10)
-      push 0
-      push 26
-      COMM 0x01f4
+      STOP_ARCHIVE_SOUND(26, 0)
       push 702
       push 30
       push 1
@@ -3454,9 +3389,8 @@ proc_0068:
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(0)
       SET_MODEL_FLAG(1733)
-      COMM 0x0216
-      push 128
-      COMM 0x0210
+      RELEASE_CURRENT_BGM()
+      START_SCENE_BGM(128)
       ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_07_6)))
       local_int[74] = CREATE_LINKED_CAMERA_VIEWER(6, 297)
       push float32(1.7000000476837158, bits=0x3fd9999a)
@@ -3466,10 +3400,8 @@ proc_0068:
       COMM 0x001b
       SET_UNIT_VALUE(local_int[74], 0)
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[74], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08_9)))
-      push local_int[74]
-      COMM 0x021e
-      push 27
-      COMM 0x0217
+      APPLY_FIELD_MODEL_LIGHTING(local_int[74])
+      LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(27)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_9)))
       PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 3, 15, 1)
@@ -3479,9 +3411,7 @@ proc_0068:
       MESSAGE_REQUEST_AND_POLL(message(BOSS_06))
       FINISH_SCRIPT_MESSAGE_WINDOW()
       WAIT_FOR_TIMER_LIMIT(5)
-      push 0
-      push 27
-      COMM 0x01f3
+      START_ARCHIVE_SOUND(27, 0)
       PREPARE_UNIT_MOTION_STATE(local_int[74], 3, 3, 15, 0)
       WAIT_FOR_TIMER_LIMIT(35)
       push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_08_MOTION_2))
@@ -3503,9 +3433,7 @@ proc_0068:
       push 3
       COMM 0x0041
       WAIT_FOR_TIMER_LIMIT(10)
-      push 0
-      push 27
-      COMM 0x01f4
+      STOP_ARCHIVE_SOUND(27, 0)
       push 703
       push 30
       push 1
@@ -3545,24 +3473,19 @@ proc_006a:
     SET_SOLAR_OVERLAY_MODE(0)
     DISABLE_FIELD_MODEL_GROUP(0, 0, 1)
     SET_MODEL_FLAG(1605)
-    COMM 0x0216
-    push 128
-    COMM 0x0210
+    RELEASE_CURRENT_BGM()
+    START_SCENE_BGM(128)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_08_6)))
     local_int[76] = CREATE_LINKED_CAMERA_VIEWER(6, 283)
     SET_UNIT_VALUE(local_int[76], 1)
     PREPARE_UNIT_MOTION_STATE(local_int[76], 1, 0, 0, 0)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[76], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08_10)))
-    push local_int[76]
-    COMM 0x021e
-    push 21
-    COMM 0x0217
+    APPLY_FIELD_MODEL_LIGHTING(local_int[76])
+    LOAD_ARCHIVE_SOUND_BANK_AND_WAIT(21)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     SET_UNIT_LOW_FLAG(global_int[0])
     WAIT_FOR_TIMER_LIMIT(60)
-    push 0
-    push 21
-    COMM 0x01f3
+    START_ARCHIVE_SOUND(21, 0)
     PREPARE_UNIT_MOTION_STATE(local_int[76], 21, 3, 15, 0)
     WAIT_FOR_TIMER_LIMIT(48)
     push 0
@@ -3580,9 +3503,7 @@ proc_006a:
     push 3
     COMM 0x0041
     WAIT_FOR_TIMER_LIMIT(10)
-    push 0
-    push 21
-    COMM 0x01f4
+    STOP_ARCHIVE_SOUND(21, 0)
     ENABLE_FIELD_MODEL_GROUP(0, 0, 1)
     push 701
     push 30

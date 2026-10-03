@@ -3012,7 +3012,7 @@ _367:
       local_int[70] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(BOSS_BTL))
       FINISH_SCRIPT_MESSAGE_WINDOW()
       if (local_int[70] == 0) {
-        COMM 0x0216
+        RELEASE_CURRENT_BGM()
         push 652
         push 28
         push 1
@@ -3022,7 +3022,7 @@ _367:
       } else {
       _370:
         if (local_int[70] == 1) {
-          COMM 0x0216
+          RELEASE_CURRENT_BGM()
           push 657
           push 31
           push 1
