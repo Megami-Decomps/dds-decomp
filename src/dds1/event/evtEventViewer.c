@@ -2,7 +2,9 @@
 
 /* Node queued on an entry, linked through +0x30/+0x34, owning a buffer. */
 typedef struct EvtEvNode {
-    u8 pad00[0x2C];
+    u8 pad00[8];
+    s8 slot;                  /* 0x08: signed world-object slot, negative when unused */
+    u8 pad09[0x23];
     void *buf;                 /* 0x2C */
     struct EvtEvNode *next;    /* 0x30 */
     struct EvtEvNode *prev;    /* 0x34 */
@@ -73,10 +75,6 @@ typedef struct EvtRange {
     s32 value;        /* 0x18 */
 } EvtRange;
 
-typedef struct EvtViewBuf {
-    u8 unk00[0x2c];   /* 0x0 */
-    void *buf;        /* 0x2c */
-} EvtViewBuf;
 
 void evtUnlinkListNode(EvtEvEntry *entry, EvtEvNode *node);
 void sdfReleaseChipBlock(void *ptr);
@@ -93,7 +91,10 @@ void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
 void kwlnPadResetMotorLevelsAndOutput(void);
 EvtEvNode *evtEventViewerGetPendingNode(EvtViewer *viewer);
 void func_0022BF00(EvtViewer *viewer);
-void dds3RemoveWorldObjectNode(void *ptr);
+void evtEventViewerFreeSlot(s32 index, EvtViewer *viewer);
+void evtEventViewerFreeBuffer(EvtEvNode *node);
+struct WorldListNode;
+void dds3RemoveWorldObjectNode(struct WorldListNode *ptr);
 void *sdfAllocSizeClassBlock(s32 size);
 void *memset(void *dst, s32 value, u32 size);
 s32 dds3GetWorldObject(void);
@@ -137,9 +138,70 @@ void evtEventViewerReleaseNode(EvtEvEntry *entry, EvtEvNode *node)
     sdfReleaseChipBlock(node);
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022BF00);
+/* Release the pending node and consume its position in the viewer queue. */
+void func_0022BF00(EvtViewer *viewer)
+{
+    EvtEvEntry *entry;
+    EvtEvNode *node;
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022BFD8);
+    entry = viewer->queue;
+    node = evtEventViewerGetPendingNode(viewer);
+    switch (entry->id) {
+    case 3:
+    case 20:
+    case 21:
+    case 26:
+        if (node->slot >= 0) {
+            evtEventViewerFreeSlot(node->slot, viewer);
+        }
+        break;
+    case 18:
+        evtEventViewerFreeBuffer(node);
+        break;
+    }
+    evtEventViewerReleaseNode(entry, node);
+    if (viewer->queuedB == 0) {
+        if (viewer->queuedA > 0) {
+            viewer->queuedA--;
+        }
+    } else {
+        if (viewer->queuedA > 0) {
+            viewer->queuedA--;
+        } else {
+            viewer->queuedB--;
+        }
+    }
+}
+
+/* Release a supplied queued node, with the same resource and counter handling. */
+void func_0022BFD8(EvtViewer *viewer, EvtEvEntry *entry, EvtEvNode *node)
+{
+    switch (entry->id) {
+    case 3:
+    case 20:
+    case 21:
+    case 26:
+        if (node->slot >= 0) {
+            evtEventViewerFreeSlot(node->slot, viewer);
+        }
+        break;
+    case 18:
+        evtEventViewerFreeBuffer(node);
+        break;
+    }
+    evtEventViewerReleaseNode(entry, node);
+    if (viewer->queuedB == 0) {
+        if (viewer->queuedA > 0) {
+            viewer->queuedA--;
+        }
+    } else {
+        if (viewer->queuedA > 0) {
+            viewer->queuedA--;
+        } else {
+            viewer->queuedB--;
+        }
+    }
+}
 
 /* Consume queued viewer events until the pending check reports none. */
 void evtEventViewerProcessPending(EvtViewer *viewer)
@@ -515,7 +577,7 @@ void evtEventViewerFreeSlot(s32 index, EvtViewer *viewer)
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022CA88);
 
-void evtEventViewerFreeBuffer(EvtViewBuf *work)
+void evtEventViewerFreeBuffer(EvtEvNode *work)
 {
     if (work->buf != NULL) {
         dds3RemoveWorldObjectNode(work->buf);

@@ -81,7 +81,6 @@ typedef struct BrsResultWork {
 } BrsResultWork;
 
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A05C0);
-
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A08D8);
 
 /* Complete the result screen after five counter pairs have settled. */
@@ -531,8 +530,8 @@ INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428628);
 
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2198);
 
-INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2200);
 
+INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2200);
 u32 mnuUpdateTitleTransition(void) {
     if (mnuTitleStreamStatus[9] == 1) {
         mnuCompleteTitleStreamFileLoad(mnuTitleStreamStatus);

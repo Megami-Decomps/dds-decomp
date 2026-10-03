@@ -359,7 +359,50 @@ void evtSubmitGsRegister48(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108CB8);
+void func_00108CB8(s32 mode) {
+    void *list = sdfAllocPacketAligned(0x20);
+    void *packet;
+    EvtGsCommand *command;
+
+    sdfInitPacketList(list);
+    packet = sdfAllocPacketAligned(0x30);
+    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, 0x30);
+    switch (mode) {
+    case 1:
+        command->data = 0x48;
+        break;
+    case 2:
+        command->data = 0x42;
+        break;
+    case 3:
+        command->data = 0x84;
+        break;
+    case 4:
+        command->data = 0x06;
+        break;
+    case 5:
+        command->data = 0x89;
+        break;
+    case 6:
+        command->data = 0x42;
+        break;
+    case 10:
+        command->data = 0x2A;
+        break;
+    case 20:
+        command->data = 0x4A;
+        break;
+    default:
+        command->data = 0x44;
+        break;
+    }
+    command->registerId = 0x42;
+    sdfAppendPacket(list, packet);
+    {
+        EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+        surface->submit(surface, list);
+    }
+}
 
 void evtSubmitTexturePacket(s32 value) {
     void *list = sdfAllocPacketAligned(0x20);
@@ -1391,3 +1434,4 @@ INCLUDE_SDATA(const s32, "game/code_00107FD8", scrNamedProcessCount);
 INCLUDE_SDATA(const s32, "game/code_00107FD8", scrNamedProcessHead);
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", scrNamedProcessTail);
+

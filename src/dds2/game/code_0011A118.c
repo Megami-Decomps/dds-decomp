@@ -31,12 +31,33 @@ typedef struct Entry1A4 {
     u8 padA[2]; /* 0xA */
     u16 unkC; /* 0xC */
     u16 unkE; /* 0xE */
-    u8 pad10[4]; /* 0x10 */
+    u32 totalExp; /* 0x10 */
     u16 level; /* 0x14: clamped at level 99 by dds3Clamp99 */
-    u8 pad16[0x3C]; /* 0x16 */
+    u8 stats[5]; /* 0x16 */
+    u8 pad1B[0x37];
     u16 tableValue; /* 0x52 */
-    u8 pad54[0x150]; /* through 0x1A4 */
+    u8 pad54[0x15E];
+    u16 itemId; /* 0x1B2 */
+    u8 pad1B4[0x10]; /* DDS2 entry stride is 0x1C4. */
 } Entry1A4;
+
+/* Native bulk backups assume eight-aligned mantra table storage. */
+typedef struct PtyMantraBitmap {
+    u32 words[12];
+} __attribute__((aligned(8))) PtyMantraBitmap;
+
+typedef struct PtyMantraProgress {
+    u32 value;
+    u32 flags;
+} PtyMantraProgress;
+
+typedef struct PtyStatePrefix {
+    SaveItemCounts inventory;
+    u8 pad1440[0x15AD0];
+    PtyMantraBitmap mantraBits[16];
+    PtyMantraProgress mantraProgress[16][0xB0] __attribute__((aligned(8)));
+    Entry1A4 templates[8];
+} PtyStatePrefix;
 
 typedef struct TableEntry32 {
     u16 value; /* 0x0: copied to active roster entry */
@@ -445,9 +466,85 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011B328);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011B4B0);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011B6F0);
+extern void ptyAccumulateStatGains(s32 *, s32, u8 *);
+extern s32 ptyComputeTotalExp(u8 *, s32);
+extern void ptyRecomputeMaxHpMp(u32);
+extern void evtCopyRosterTableValue(s32);
+extern void func_00286618(void);
+extern void func_002866C8(void);
+extern void func_003140C8(s32, u8 *);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011B9A0);
+void func_0011B6F0(Entry1A4 *entry, s32 flags) {
+    s32 targetLevel = 0;
+    s32 maximum = dds3EntryMax();
+    s32 average = ptyGetRoundedAveragePartyLevel();
+    s32 gains[5];
+    s32 i;
+    PtyStatePrefix *state;
+
+    memcpy(entry, &((PtyStatePrefix *)datGameState)->templates[1], sizeof(*entry));
+    entry->rosterIndex = 2;
+    if (!(flags & 4)) {
+        if (!(flags & 1)) {
+            targetLevel = average;
+        }
+    } else {
+        targetLevel = maximum;
+    }
+    if (entry->level < targetLevel) {
+        ptyAccumulateStatGains(gains, targetLevel - entry->level, (u8 *)entry);
+        for (i = 0; i < 5; i++) {
+            entry->stats[i] += gains[i];
+        }
+        entry->level = targetLevel;
+        entry->totalExp = ptyComputeTotalExp((u8 *)entry, 0);
+        ptyRecomputeMaxHpMp((u32)entry);
+    }
+    evtCopyRosterTableValue((s32)entry);
+    state = (PtyStatePrefix *)datGameState;
+    memcpy(&state->mantraBits[2], &state->mantraBits[1], sizeof(state->mantraBits[2]));
+    memcpy(state->mantraProgress[2], state->mantraProgress[1], sizeof(state->mantraProgress[2]));
+    func_00286618();
+    entry->itemId = 0;
+}
+
+void func_0011B9A0(Entry1A4 *entry, s32 flags) {
+    s32 targetLevel = 0;
+    s32 maximum = dds3EntryMax();
+    s32 average = ptyGetRoundedAveragePartyLevel();
+    s32 gains[5];
+    s32 i;
+    PtyStatePrefix *state;
+
+    memcpy(entry, &((PtyStatePrefix *)datGameState)->templates[7], sizeof(*entry));
+    entry->rosterIndex = 3;
+    if (!(flags & 4)) {
+        if (!(flags & 1)) {
+            targetLevel = average;
+        }
+    } else {
+        targetLevel = maximum;
+    }
+    if (entry->level < targetLevel) {
+        ptyAccumulateStatGains(gains, targetLevel - entry->level, (u8 *)entry);
+        for (i = 0; i < 5; i++) {
+            entry->stats[i] += gains[i];
+        }
+        entry->level = targetLevel;
+        entry->totalExp = ptyComputeTotalExp((u8 *)entry, 0);
+        ptyRecomputeMaxHpMp((u32)entry);
+    }
+    state = (PtyStatePrefix *)datGameState;
+    memcpy(&state->mantraBits[3], &state->mantraBits[7], sizeof(state->mantraBits[3]));
+    memcpy(state->mantraProgress[3], state->mantraProgress[7], sizeof(state->mantraProgress[3]));
+    func_002866C8();
+    if (!(flags & 2)) {
+        func_003140C8(1, (u8 *)entry);
+    }
+    if (entry->itemId != 0) {
+        ((PtyStatePrefix *)datGameState)->inventory.counts[entry->itemId] = 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011BC80);
 
