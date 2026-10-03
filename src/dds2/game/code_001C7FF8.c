@@ -569,7 +569,25 @@ s32 btlHasSpecialActiveSceneActor(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CA8D8);
+s32 func_001CA8D8(void) {
+    u32 requiredFlags = 0x201;
+    SceneActor *actor = ((BattleSceneWork *)btlGetRuntime())->actors;
+    s32 i;
+
+    if (actor != 0) {
+        do {
+            if ((actor->status.words.activeFlags & requiredFlags) == requiredFlags) {
+                for (i = 0; i < 8; i++) {
+                    if ((u16)(actor->cards[i] - 0xE0) < 0x20) {
+                        return actor->cards[i];
+                    }
+                }
+            }
+            actor = actor->next;
+        } while (actor != 0);
+    }
+    return 0;
+}
 
 s32 btlHasSelectedActiveSceneActor(void) {
     SceneActor *actor = ((BattleSceneWork *)btlGetRuntime())->actors;
