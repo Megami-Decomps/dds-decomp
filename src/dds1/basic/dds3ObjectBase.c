@@ -40,22 +40,32 @@ typedef struct ObjBaseFull {
     u32 unk44;
 } ObjBaseFull;
 
-/* Free an object base: owner, the slot nodes, its devices and finally the block itself. */
+#define DDS3_OBJECT_SLOT_COUNT 8
+#define DDS3_OBJECT_WORLD_SLOT_LIMIT 3
+#define DDS3_OBJECT_OWNER_SLOT 0
+#define DDS3_OBJECT_HANDLER_SLOT 5
+#define DDS3_OBJECT_DATA_SLOT 1
+#define DDS3_OBJECT_RESOURCE_MODEL_CONTEXT 0
+#define DDS3_OBJECT_RESOURCE_DEV_MOTION 1
+#define DDS3_OBJECT_RESOURCE_RELEASED 3
+
+/* Process the owner's entry in the auxiliary handler index, destroy world nodes
+ * in slots 1/2, release owned resources/devices, then free the index and base. */
 void dds3DestroyObjectBase(ObjBaseFull *base) {
     void *owner;
-    void *slot;
-    s32 i;
+    void *handler;
+    s32 slotIndex;
 
-    owner = base->slots[0];
-    slot = dds3GetSlot(owner, 5);
-    if (slot != NULL) {
-        func_00111258(slot, owner);
+    owner = base->slots[DDS3_OBJECT_OWNER_SLOT];
+    handler = dds3GetSlot(owner, DDS3_OBJECT_HANDLER_SLOT);
+    if (handler != NULL) {
+        func_00111258(handler, owner);
     }
-    for (i = 0; i < 8; i++) {
-        if (i < 3) {
-            if (i > 0) {
-                if (base->slots[i] != NULL) {
-                    dds3RemoveWorldObjectNode(base->slots[i]);
+    for (slotIndex = 0; slotIndex < DDS3_OBJECT_SLOT_COUNT; slotIndex++) {
+        if (slotIndex < DDS3_OBJECT_WORLD_SLOT_LIMIT) {
+            if (slotIndex > DDS3_OBJECT_OWNER_SLOT) {
+                if (base->slots[slotIndex] != NULL) {
+                    dds3RemoveWorldObjectNode(base->slots[slotIndex]);
                 }
             }
         }
@@ -68,75 +78,88 @@ void dds3DestroyObjectBase(ObjBaseFull *base) {
     sdfReleaseChipBlock(base);
 }
 
-void dds3SetObjectFlags(void *obj, s32 flags) {
+/* Set mask bits in the object's resolved base. */
+void dds3SetObjectFlags(void *object, s32 mask) {
     ObjBase *base;
 
-    base = dds3GetObjectOwnedHandle(obj);
-    base->flags = base->flags | flags;
+    base = dds3GetObjectOwnedHandle(object);
+    base->flags = base->flags | mask;
 }
 
-void dds3ClearObjectFlags(void *obj, s32 flags) {
+/* Clear mask bits in the object's resolved base. */
+void dds3ClearObjectFlags(void *object, s32 mask) {
     ObjBase *base;
 
-    base = dds3GetObjectOwnedHandle(obj);
-    base->flags = base->flags & ~flags;
+    base = dds3GetObjectOwnedHandle(object);
+    base->flags = base->flags & ~mask;
 }
 
-u8 dds3TestObjectFlags(void *obj, s32 flags) {
+/* Return whether any requested mask bit is set, not whether all bits are set. */
+u8 dds3TestObjectFlags(void *object, s32 mask) {
     ObjBase *base;
 
-    base = dds3GetObjectOwnedHandle(obj);
-    return (base->flags & flags) != 0;
+    base = dds3GetObjectOwnedHandle(object);
+    return (base->flags & mask) != 0;
 }
 
-void dds3SetExtData(void *obj, void *data) {
+/* Replace the extension pointer without releasing its previous value.
+ * Keep the existing extension getter call before the store. */
+void dds3SetExtData(void *object, void *extensionData) {
     ObjBase *base;
 
-    base = dds3GetObjectOwnedHandle(obj);
-    dds3GetExtData(obj);
-    base->extData = data;
+    base = dds3GetObjectOwnedHandle(object);
+    dds3GetExtData(object);
+    base->extData = extensionData;
 }
 
-void *dds3GetExtData(void *obj) {
-    return dds3GetObjectOwnedHandle(obj)->extData;
+/* Return the stored extension pointer; no copy or ownership change. */
+void *dds3GetExtData(void *object) {
+    return dds3GetObjectOwnedHandle(object)->extData;
 }
 
-void *dds3SetSlotByKind(void *obj, ObjData *data) {
-    if (data == NULL) {
+/* Exchange the slot selected by the data kind; NULL data leaves every slot alone. */
+void *dds3SetSlotByKind(void *object, ObjData *slotData) {
+    if (slotData == NULL) {
         return NULL;
     }
-    return dds3ExchangeSlot(obj, data, dds3GetObjectSlotRingOccupancy(data->kind));
+    return dds3ExchangeSlot(object, slotData, dds3GetObjectSlotRingOccupancy(slotData->kind));
 }
 
-void *dds3ExchangeSlot(void *obj, void *data, s32 index) {
-    void *old;
+/* Replace one caller-selected slot and return its previous pointer; no release. */
+void *dds3ExchangeSlot(void *object, void *slotData, s32 slotIndex) {
+    void *previousData;
 
-    old = dds3GetSlot(obj, index);
-    dds3GetObjectOwnedHandle(obj)->slots[index] = data;
-    return old;
+    previousData = dds3GetSlot(object, slotIndex);
+    dds3GetObjectOwnedHandle(object)->slots[slotIndex] = slotData;
+    return previousData;
 }
 
-void *dds3GetSlot(void *obj, s32 index) {
-    return dds3GetObjectOwnedHandle(obj)->slots[index];
+/* Read an indexed slot; the caller supplies a valid index. */
+void *dds3GetSlot(void *object, s32 slotIndex) {
+    return dds3GetObjectOwnedHandle(object)->slots[slotIndex];
 }
 
-u32 dds3GetUnk04(void *obj) {
-    return dds3GetObjectOwnedHandle(obj)->unk4;
+/* Return the world-index node word also used when destroying the full base. */
+u32 dds3GetUnk04(void *object) {
+    return dds3GetObjectOwnedHandle(object)->unk4;
 }
 
-u32 dds3GetUnk0C(void *obj) {
-    return dds3GetObjectOwnedHandle(obj)->unkC;
+/* Return the primary resource-handle word, whose interpretation depends on state. */
+u32 dds3GetUnk0C(void *object) {
+    return dds3GetObjectOwnedHandle(object)->unkC;
 }
 
-/* Tear down the model/context behind an object's primary handle and mark it released (state 3). */
+/* A nonzero handle releases model/context state (0) or device/motion state (1),
+ * then clears the handle and marks state 3. Other states skip backend release;
+ * an absent handle leaves state untouched, and the stored motion pointer remains. */
 void dds3ReleaseObjectBaseResources(World *world) {
     ObjBaseFull *base;
     WorldInfo *info;
 
     base = (ObjBaseFull *)dds3GetObjectOwnedHandle(world);
     if (base->resourceHandle != 0) {
-        if (base->resourceState != 1) {
-            if (base->resourceState == 0) {
+        if (base->resourceState != DDS3_OBJECT_RESOURCE_DEV_MOTION) {
+            if (base->resourceState == DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
                 mdlDestroyContext(base->resourceHandle);
                 info = world->info;
                 if (info->primaryObject != NULL) {
@@ -149,7 +172,7 @@ void dds3ReleaseObjectBaseResources(World *world) {
             sdfDestroyMotion(base->motion);
         }
         base->resourceHandle = 0;
-        base->resourceState = 3;
+        base->resourceState = DDS3_OBJECT_RESOURCE_RELEASED;
     }
 }
 
@@ -191,11 +214,12 @@ typedef struct ObjMode {
     f32 weight;  /* 0x40 */
 } ObjMode;
 
-/* Select the object's mode 0..6; modes 0, 4 and 5 use full weight, the others zero. */
-void dds3SetObjectModeAndDefaultWeight(void *obj, u32 mode) {
-    ObjMode *base = (ObjMode *)dds3GetObjectOwnedHandle(obj);
+/* Modes 0, 4 and 5 use weight 1; the other valid modes use 0.
+ * Values outside 0..6 leave both the current mode and weight unchanged. */
+void dds3SetObjectModeAndDefaultWeight(void *object, u32 requestedMode) {
+    ObjMode *base = (ObjMode *)dds3GetObjectOwnedHandle(object);
 
-    switch (mode) {
+    switch (requestedMode) {
     case 0:
         base->mode = 0;
         base->weight = 1.0f;
@@ -227,10 +251,12 @@ void dds3SetObjectModeAndDefaultWeight(void *obj, u32 mode) {
     }
 }
 
+/* Ensure the owner appears in its auxiliary handler's world index.
+ * Return 0 for an absent handler, otherwise 1 after updating the index. */
 s32 dds3InvokeSlot5Handler(void *object) {
     void *handler;
 
-    handler = dds3GetSlot(object, 5);
+    handler = dds3GetSlot(object, DDS3_OBJECT_HANDLER_SLOT);
     if (handler == NULL) {
         return 0;
     }
@@ -293,14 +319,16 @@ void func_00112100(void *object) {
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001122F0);
 
+/* Create and attach kind-3 slot data only when the data slot is empty.
+ * Existing data is retained; attachment still uses the new object's kind. */
 void dds3EnsureSlotData(void *object) {
-    void *existing;
-    void *data;
+    void *existingData;
+    void *newData;
 
-    existing = dds3GetSlot(object, 1);
-    if (existing == NULL) {
-        data = dds3SpawnSlotRingObj3(object);
-        dds3SetSlotByKind(object, data);
+    existingData = dds3GetSlot(object, DDS3_OBJECT_DATA_SLOT);
+    if (existingData == NULL) {
+        newData = dds3SpawnSlotRingObj3(object);
+        dds3SetSlotByKind(object, newData);
         return;
     }
 }
@@ -318,20 +346,27 @@ s32 dds3InvokeSlot1Handler(void *obj, void *context) {
     return 1;
 }
 
-void dds3RunSlot1Handlers(void *obj, void *context) {
+/* Store the source object on the data-slot handler, then replace the supplied
+ * object's curve work. The replacement call uses object, not handler;
+ * unlike the conditional dispatcher, this path does not check for NULL. */
+void dds3RunSlot1Handlers(void *object, void *sourceObject) {
     void *handler;
 
-    handler = dds3GetSlot(obj, 1);
-    dds3SetSlotKey(handler, context);
-    dds3ReplaceObjectResource(obj);
+    handler = dds3GetSlot(object, DDS3_OBJECT_DATA_SLOT);
+    dds3SetSlotKey(handler, sourceObject);
+    dds3ReplaceObjectResource(object);
 }
 
-void dds3ReleaseSlot1Data(void *obj) {
-    dds3ReleaseObjectResource(dds3GetSlot(obj, 1));
+/* Release the data slot's curve work and clear its handle, not the slot pointer.
+ * The caller must have established the data slot. */
+void dds3ReleaseSlot1Data(void *object) {
+    dds3ReleaseObjectResource(dds3GetSlot(object, DDS3_OBJECT_DATA_SLOT));
 }
 
-void dds3GetSlot1Data(void *obj) {
-    dds3GetObjectResourceHandle(dds3GetSlot(obj, 1));
+/* Legacy name: this void entry calls the curve-work getter but discards its
+ * result. It neither returns slot data nor checks that the data slot exists. */
+void dds3GetSlot1Data(void *object) {
+    dds3GetObjectResourceHandle(dds3GetSlot(object, DDS3_OBJECT_DATA_SLOT));
 }
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_003BA9C8);
