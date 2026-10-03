@@ -18,6 +18,44 @@ import wap  # noqa: E402
 
 
 class FieldGraphTests(unittest.TestCase):
+    def test_resolves_deferred_battle_exits_through_wap_rows(self) -> None:
+        field_dir = ROOT / "src/dds1/data/field"
+        script_source = ROOT / "src/dds1/scripts/field/f022.bfasm"
+        wap_source = field_dir / "f022.wapasm"
+        references = wap.load_references(
+            script_source, field_dir / "f022.infasm"
+        )
+        table = wap.parse_source(
+            wap_source.read_text(encoding="utf-8"), references
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            script_dir = Path(temporary) / "scripts/field"
+            script_dir.mkdir(parents=True)
+            (script_dir / script_source.name).write_text(
+                script_source.read_text(encoding="utf-8"), encoding="utf-8"
+            )
+            sections = field_graph._event_sections(
+                sorted(field_dir.glob("f022_*.fldasm")),
+                script_dir,
+                flw0_profiles.get("dds1"),
+                {22: table},
+            )
+
+        self.assertEqual(
+            [edge["target"] for edge in sections["deferredBattleExitEdges"]],
+            ["f022_010", "f022_011", "f022_028", "f022_031"],
+        )
+        self.assertEqual(
+            [
+                edge["candidates"][0]["entry"]
+                for edge in sections["deferredBattleExitEdges"]
+            ],
+            [1, 2, 6, 7],
+        )
+        self.assertEqual(
+            sections["eventSummary"]["resolvedDeferredBattleExitSites"], 4
+        )
+
     def test_links_event_placements_to_reachable_script_procedures(self) -> None:
         source_script = ROOT / "src/dds1/scripts/field/f011.bfasm"
         field_source = ROOT / "src/dds1/data/field/f011_001.fldasm"

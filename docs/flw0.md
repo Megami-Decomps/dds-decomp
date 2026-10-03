@@ -310,24 +310,27 @@ name. The disassembler uses this form only for an adjacent literal passed to
 references remain numeric. The command waits for the selection to finish and
 returns the selected value through the VM result register.
 
-An adjacent literal target for the profiled event command uses the maintained
+An adjacent literal target for a profiled event command uses the maintained
 event script's resource name:
 
 ```text
   PUSHEVENT e602
   COMM CALL_EVENT
+
+  PUSHEVENT e633
+  COMM SUBMIT_EVENT
 ```
 
 `PUSHEVENT` also assembles to `PUSHIS`. The selected game profile binds names
 to the event IDs present in its maintained corpus. This mirrors the runtime,
 which formats event ID 602 as
 `/event/e600/e602/scr/e602.bf`. The disassembler emits the name only for an
-adjacent literal `PUSHIS` followed by `CALL_EVENT` and only when that event
-target is maintained for the selected game. Dynamic values and references to
-absent targets stay numeric.
+adjacent literal `PUSHIS` followed by `CALL_EVENT` or `SUBMIT_EVENT`, and only
+when that event target is maintained for the selected game. Dynamic values and
+references to absent targets stay numeric.
 
-The reading view carries the same evidence as `CALL_EVENT(event(e602))` while
-leaving an unresolved literal as `CALL_EVENT(10)`.
+The reading view carries the same evidence as `CALL_EVENT(event(e602))` or
+`SUBMIT_EVENT(event(e633))`, while leaving an unresolved literal numeric.
 
 A literal procedure-table index passed to the script-task command uses a local
 procedure symbol:
@@ -467,6 +470,7 @@ table and native implementation; shared commands were checked in both games:
 | `RESTORE_CAMERA_NODE_MODE` | `0x060` | 0 | Resets the player scene-object state and restores camera node mode |
 | `RELEASE_CURRENT_OBJECT` | `0x061` | 0 | Releases the current field object and refreshes field state |
 | `CALL_EVENT` | `0x066` | 1 | Submits an event request and clears named processes |
+| `SUBMIT_EVENT` | `0x067` | 1 | Submits an event request with mode zero |
 | `READ_CURRENT_WORLD_OBJECT_ID` | `0x068` | 0 | Returns the current world object's ID, or `-1` when absent |
 | `CLEAR_UNIT_LOW_FLAG` | `0x069` | 1 | Clears the selected unit's low flag bit |
 | `SET_UNIT_LOW_FLAG` | `0x06A` | 1 | Sets the selected unit's low flag bit |
@@ -477,6 +481,8 @@ table and native implementation; shared commands were checked in both games:
 | `PREPARE_UNIT_MOTION_STATE` | `0x073` | 5 | Looks up an event unit and applies four motion-state values |
 | `START_UNIT_PATH_FOLLOW` | `0x08B` | 7 | Starts a staged unit following a selected path resource |
 | `READ_SECONDARY_WORLD_ID_VALUE` | `0x094` | 1 | Looks up a named secondary-world ID and returns its value or zero |
+| `DEFER_BATTLE_EXIT` | `0x097` | 3 | Records a field and WAP battle-exit event for deferred dispatch; the first value is diagnostic |
+| `REQUEST_CURRENT_GROUP_SEQUENCE` | `0x098` | 2 | Starts a named sequence in the current field group and clears named processes |
 | `RESET_FIELD_EFFECTS` | `0x099` | 0 | Resets field draw, sway, sky, and fade state |
 | `DESTROY_WORLD_EFFECT_OBJECT` | `0x09B` | 1 | Removes the selected world effect object |
 | `COPY_EFFECT_OBJECT_TRANSFORM_FROM_SOURCE` | `0x09D` | 2 | Copies a source vector's position and rotation to an effect object |
@@ -636,8 +642,8 @@ row flag, but its full role is not yet established, so it remains numeric.
 `READ_WARP_EFFECT_MODE` is retained by the shared warp procedure even though
 both DDS handlers are stubs that return zero.
 
-The reviewed set names 51,285 of 53,389 native calls in the complete DDS1
-corpus and 37,586 of 38,839 calls in the complete DDS2 corpus. It also makes
+The reviewed set names 51,421 of 53,389 native calls in the complete DDS1
+corpus and 37,752 of 38,839 calls in the complete DDS2 corpus. It also makes
 the adjacent message-command pattern safe to recognize, producing 188 symbolic
 DDS1 message references in the original event slice, 2,368 across complete
 DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic
