@@ -1,5 +1,24 @@
 #include "common.h"
 
+enum {
+    PTY_ACTIVE_ROSTER_COUNT = 5,
+    PTY_ACTIVE_ROSTER_OFFSET = 0xA60,
+    PTY_ACTIVE_ROSTER_STRIDE = 0x1C4,
+    PTY_RECOVERY_DELTA = 9999,
+    PTY_MAX_LEVEL = 99,
+    PTY_LEVEL_LIMIT = 100
+};
+
+enum {
+    EVT_DEFAULT_STAT_VALUE = 100,
+    EVT_ROSTER_DETAIL_KIND = 5,
+    EVT_DEFAULT_GROUP_MASK = 4,
+    EVT_ALTERNATE_GROUP_MASK = 0x20,
+    EVT_CONTEXT_BYTES = 0x18,
+    EVT_RESULT_WRITTEN_FLAG = 1,
+    EVT_RESULT_RESET_MASK = 0xFFFE
+};
+
 extern s32 datAffinityRecords;
 extern u8 D_00386350[];
 extern s32 func_0011C6A8(s32, s32, u8);
@@ -278,17 +297,17 @@ u8 evtGetFlaggedRosterValue(Entry1A4 *entry) {
 s32 dds3FindEntryIndex(rosterIndex)
     s32 rosterIndex;
 {
-    s32 index = 0;
-    s32 entry = datGameState + 0xA60;
+    s32 slotIndex = 0;
+    s32 entry = datGameState + PTY_ACTIVE_ROSTER_OFFSET;
     do {
         if (((Entry1A4 *)entry)->flags & 1) {
             if (((Entry1A4 *)entry)->rosterIndex == rosterIndex) {
-                return index;
+                return slotIndex;
             }
         }
-        index++;
-        entry += 0x1C4;
-    } while (index < 5);
+        slotIndex++;
+        entry += PTY_ACTIVE_ROSTER_STRIDE;
+    } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     return -1;
 }
 
@@ -300,37 +319,39 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A328);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A510);
 
+/* Recover HP/MP in each occupied roster slot and preserve only status bit 15. */
 void ptyRecoverAllUnits(void) {
     s32 offset = 0;
     s32 remaining = 4;
     do {
-        Entry1A4 *entry = (Entry1A4 *)(datGameState + offset + 0xA60);
-        offset += 0x1C4;
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + offset + PTY_ACTIVE_ROSTER_OFFSET);
+        offset += PTY_ACTIVE_ROSTER_STRIDE;
         if (entry->flags & 1) {
-            datAdjustCurrentHp(entry, 9999);
-            datAdjustCurrentMp(entry, 9999);
+            datAdjustCurrentHp(entry, PTY_RECOVERY_DELTA);
+            datAdjustCurrentMp(entry, PTY_RECOVERY_DELTA);
             entry->unkE &= 0x8000;
         }
         remaining--;
     } while (remaining >= 0);
 }
 
-s32 ptyAnyUnitFlagMatch(u32 mask, s32 mode) {
-    s32 index = 0;
-    s32 entry = datGameState + 0xA60;
+/* Test occupied entries with nonzero HP; mode 1 additionally requires flag bit 1. */
+s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode) {
+    s32 slotIndex = 0;
+    s32 entry = datGameState + PTY_ACTIVE_ROSTER_OFFSET;
     do {
         if (((Entry1A4 *)entry)->flags & 1) {
             if (((Entry1A4 *)entry)->unk6 != 0) {
-                if (mode != 1 || (((Entry1A4 *)entry)->flags & 2)) {
-                    if (((Entry1A4 *)entry)->unkE & mask) {
+                if (flagMode != 1 || (((Entry1A4 *)entry)->flags & 2)) {
+                    if (((Entry1A4 *)entry)->unkE & statusMask) {
                         return 1;
                     }
                 }
             }
         }
-        index++;
-        entry += 0x1C4;
-    } while (index < 5);
+        slotIndex++;
+        entry += PTY_ACTIVE_ROSTER_STRIDE;
+    } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     return 0;
 }
 
@@ -340,47 +361,48 @@ void evtAdvanceCounterValue(s32 counterAddress, s32 increment) {
 
 extern s32 datAbilityParameters;
 
-/* Skill-driven cursor shifts: the ability's float rate scales the entry's two halfwords into an X and a Y step. */
-void func_0011A808(Entry1A4 *entry, u32 skill) {
-    f32 rate;
-    s32 dx;
-    s32 dy;
+/* Apply the owned skill's positive HP/MP recovery rate; unsupported skills do nothing. */
+void func_0011A808(Entry1A4 *entry, u32 skillId) {
+    f32 recoveryRate;
+    s32 hpRecovery;
+    s32 mpRecovery;
 
-    if (datUnitHasSkill(entry, skill) == 0) {
+    if (datUnitHasSkill(entry, skillId) == 0) {
         return;
     }
-    dx = 0;
-    dy = 0;
-    rate = *(f32 *)(datAbilityParameters + skill * 8 - 0x1100);
-    switch (skill) {
+    hpRecovery = 0;
+    mpRecovery = 0;
+    recoveryRate = *(f32 *)(datAbilityParameters + skillId * 8 - 0x1100);
+    switch (skillId) {
     case 0x24B:
-        if (rate > 0.0f) {
-            dx = (s32)((f32)entry->unk8 * rate);
-            dy = (s32)((f32)entry->unkC * rate);
+        if (recoveryRate > 0.0f) {
+            hpRecovery = (s32)((f32)entry->unk8 * recoveryRate);
+            mpRecovery = (s32)((f32)entry->unkC * recoveryRate);
         }
         break;
     case 0x24A:
     case 0x24C:
     case 0x270:
-        if (rate > 0.0f) {
-            dy = (s32)((f32)entry->unkC * rate);
+        if (recoveryRate > 0.0f) {
+            mpRecovery = (s32)((f32)entry->unkC * recoveryRate);
         }
         break;
     }
-    if (dx > 0) {
-        datAdjustCurrentHp(entry, dx);
+    if (hpRecovery > 0) {
+        datAdjustCurrentHp(entry, hpRecovery);
     }
-    if (dy > 0) {
-        datAdjustCurrentMp(entry, dy);
+    if (mpRecovery > 0) {
+        datAdjustCurrentMp(entry, mpRecovery);
     }
 }
 
+/* Apply the two selected recovery skills to occupied entries carrying flag bit 1. */
 void evtUpdateFlaggedStats(void) {
-    s32 offset = 0;
+    s32 entryOffset = 0;
     s32 remaining = 4;
     do {
-        Entry1A4 *entry = (Entry1A4 *)(datGameState + offset + 0xA60);
-        offset += 0x1C4;
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + entryOffset + PTY_ACTIVE_ROSTER_OFFSET);
+        entryOffset += PTY_ACTIVE_ROSTER_STRIDE;
         if (entry->flags & 1) {
             if (entry->flags & 2) {
                 func_0011A808(entry, 0x24C);
@@ -391,19 +413,20 @@ void evtUpdateFlaggedStats(void) {
     } while (remaining >= 0);
 }
 
-s32 evtHasMatchingFlaggedEntry(s32 mask) {
-    s32 index = 0;
-    s32 offset = 0;
+/* Return whether an occupied, flag-bit-1 entry owns the requested skill. */
+s32 evtHasMatchingFlaggedEntry(s32 skillId) {
+    s32 slotIndex = 0;
+    s32 entryOffset = 0;
     do {
-        Entry1A4 *entry = (Entry1A4 *)(datGameState + offset + 0xA60);
-        offset += 0x1C4;
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + entryOffset + PTY_ACTIVE_ROSTER_OFFSET);
+        entryOffset += PTY_ACTIVE_ROSTER_STRIDE;
         if ((entry->flags & 1) && (entry->flags & 2)) {
-            if (datUnitHasSkill(entry, mask)) {
+            if (datUnitHasSkill(entry, skillId)) {
                 return 1;
             }
         }
-        index++;
-    } while (index < 5);
+        slotIndex++;
+    } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     return 0;
 }
 
@@ -439,24 +462,26 @@ u16 evtGetIndexedEventRecordId(s32 tableIndex) {
     return ((EventIndexRecord *)datItemSkillRecords)[tableIndex].index;
 }
 
-u16 dds3Clamp99(s32 unit) {
-    s32 level = ((Entry1A4 *)unit)->level;
+/* Read the entry's level, capped at the script-visible maximum. */
+u16 dds3Clamp99(s32 entryAddress) {
+    s32 level = ((Entry1A4 *)entryAddress)->level;
 
-    return level < 100 ? level : 99;
+    return level < PTY_LEVEL_LIMIT ? level : PTY_MAX_LEVEL;
 }
 
+/* Find the first occupied slot with this roster identifier, or return zero. */
 s32 dds3FindEntry(rosterIndex)
     s32 rosterIndex;
 {
-    s32 index = 0;
-    s32 entry = datGameState + 0xA60;
+    s32 slotIndex = 0;
+    s32 entry = datGameState + PTY_ACTIVE_ROSTER_OFFSET;
     do {
         if (((Entry1A4 *)entry)->rosterIndex == rosterIndex && (((Entry1A4 *)entry)->flags & 1)) {
             return entry;
         }
-        index++;
-        entry += 0x1C4;
-    } while (index < 5);
+        slotIndex++;
+        entry += PTY_ACTIVE_ROSTER_STRIDE;
+    } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     return 0;
 }
 
@@ -469,40 +494,42 @@ u8 ptyIsRosterEntryPresent(void) {
     return entry != 0;
 }
 
+/* Return the highest occupied-slot level, or zero when no slot is occupied. */
 s32 dds3EntryMax(void) {
-    s32 max = 0;
+    s32 maximumLevel = 0;
     s32 remaining = 4;
-    s32 entry = datGameState + 0xA60;
+    s32 entry = datGameState + PTY_ACTIVE_ROSTER_OFFSET;
     do {
         remaining--;
         if (((Entry1A4 *)entry)->flags & 1) {
             s32 level = ((Entry1A4 *)entry)->level;
-            if (max < level) {
-                max = level;
+            if (maximumLevel < level) {
+                maximumLevel = level;
             }
         }
-        entry += 0x1C4;
+        entry += PTY_ACTIVE_ROSTER_STRIDE;
     } while (remaining >= 0);
-    return max;
+    return maximumLevel;
 }
 
+/* Ceiling average of occupied-slot levels, with zero for an empty roster. */
 s32 ptyGetRoundedAveragePartyLevel(void) {
-    s32 sum = 0;
-    s32 count = 0;
+    s32 levelSum = 0;
+    s32 activeCount = 0;
     s32 remaining = 4;
-    s32 entry = datGameState + 0xA60;
+    s32 entry = datGameState + PTY_ACTIVE_ROSTER_OFFSET;
     do {
         remaining--;
         if ((((Entry1A4 *)entry)->flags & 1) != 0) {
-            count++;
-            sum += ((Entry1A4 *)entry)->level;
+            activeCount++;
+            levelSum += ((Entry1A4 *)entry)->level;
         }
-        entry += 0x1C4;
+        entry += PTY_ACTIVE_ROSTER_STRIDE;
     } while (remaining >= 0);
-    if (count == 0) {
+    if (activeCount == 0) {
         return 0;
     }
-    return (sum + count - 1) / count;
+    return (levelSum + activeCount - 1) / activeCount;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011B328);
@@ -613,31 +640,32 @@ u32 func_0011C6A0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011C6A8);
 
+/* Try the six stored orders; success requires exactly the non-sentinel requirement count. */
 s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity) {
-    s32 *requirement = (s32 *)(datAffinityRecords + affinity * 16 - 0x1AB0);
+    s32 *requirementCursor = (s32 *)(datAffinityRecords + affinity * 16 - 0x1AB0);
     u32 i;
-    s32 required = 0;
-    u32 permutation;
-    s32 offset;
-    s32 matched;
-    u8 *order;
-    s32 *actor;
-    s32 value;
+    s32 requiredCount = 0;
+    u32 orderIndex;
+    s32 orderOffset;
+    s32 matchedCount;
+    u8 *orderCursor;
+    s32 *actorCursor;
+    s32 actorValue;
 
     for (i = 0; i < 3; i++) {
-        if (*requirement++ != -1) {
-            required++;
+        if (*requirementCursor++ != -1) {
+            requiredCount++;
         }
     }
-    for (permutation = 0, offset = 0; permutation < 6; permutation++, offset += 3) {
-        matched = 0;
-        for (i = 0, order = D_00386350 + offset, actor = actors; i < 3; i++, order++) {
-            value = *actor++;
-            if (value != 0 && func_0011C6A8(value, affinity, *order) != 0) {
-                matched++;
+    for (orderIndex = 0, orderOffset = 0; orderIndex < 6; orderIndex++, orderOffset += 3) {
+        matchedCount = 0;
+        for (i = 0, orderCursor = D_00386350 + orderOffset, actorCursor = actors; i < 3; i++, orderCursor++) {
+            actorValue = *actorCursor++;
+            if (actorValue != 0 && func_0011C6A8(actorValue, affinity, *orderCursor) != 0) {
+                matchedCount++;
             }
         }
-        if (required == matched) {
+        if (requiredCount == matchedCount) {
             return 1;
         }
     }
@@ -648,56 +676,59 @@ void evtCopyRosterTableValue(s32 entryAddress) {
     ((Entry1A4 *)entryAddress)->tableValue = D_00386248[((Entry1A4 *)entryAddress)->rosterIndex].value;
 }
 
+/* Copy table values only for occupied slots whose roster identifier is below 16. */
 void evtUpdateFlaggedEntries(void) {
-    s32 offset = 0;
+    s32 entryOffset = 0;
     s32 remaining = 4;
     do {
-        Entry1A4 *entry = (Entry1A4 *)(datGameState + offset + 0xA60);
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + entryOffset + PTY_ACTIVE_ROSTER_OFFSET);
         if (entry->flags & 1) {
-            s32 index = 0;
+            s32 rosterIndex = 0;
             do {
-                if (entry->rosterIndex == index) {
+                if (entry->rosterIndex == rosterIndex) {
                     evtCopyRosterTableValue(entry);
                 }
-                index++;
-            } while (index < 16);
+                rosterIndex++;
+            } while (rosterIndex < 16);
         }
         remaining--;
-        offset += 0x1C4;
+        entryOffset += PTY_ACTIVE_ROSTER_STRIDE;
     } while (remaining >= 0);
 }
 
+/* Apply the two configured count/flag updates; a zero index disables its record. */
 void dds3ForEachEntry(void) {
-    Entry4 *p = D_003862C8;
-    u32 i = 0;
+    Entry4 *updates = D_003862C8;
+    u32 updateIndex = 0;
 
     do {
-        u16 a0 = p->unk0;
-        u8 a1 = p->unk2;
+        u16 valueIndex = updates->unk0;
+        u8 delta = updates->unk2;
 
-        p++;
-        if (a0 != 0) {
-            func_0011A118(a0, a1);
+        updates++;
+        if (valueIndex != 0) {
+            func_0011A118(valueIndex, delta);
         }
-        i++;
-    } while (i < 2);
+        updateIndex++;
+    } while (updateIndex < 2);
 }
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011CA88);
 
+/* Visit occupied roster slots for native per-entry processing. */
 void dds3ForEachFlagged(void) {
-    s32 off = 0;
-    s32 n = 4;
+    s32 entryOffset = 0;
+    s32 remaining = 4;
 
     do {
-        Entry1A4 *p = (Entry1A4 *)(datGameState + off + 0xa60);
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + entryOffset + PTY_ACTIVE_ROSTER_OFFSET);
 
-        if (p->flags & 1) {
-            func_0011CA88(p);
+        if (entry->flags & 1) {
+            func_0011CA88(entry);
         }
-        off += 0x1C4;
-        n--;
-    } while (n >= 0);
+        entryOffset += PTY_ACTIVE_ROSTER_STRIDE;
+        remaining--;
+    } while (remaining >= 0);
 }
 
 void ptyClearSelectedSkillFlagsFromActiveEntries(void) {
@@ -729,26 +760,26 @@ void evtRandomizeEntryValue(s32 unit) {
 /* Clear a subset of per-unit status flags on occupied qualifying entries,
  * gated by the event RNG; report whether any flags were cleared. */
 s32 evtClearRandomStatusFlags(void) {
-    s32 changed = 0;
+    s32 clearedAny = 0;
     s32 remaining;
-    s32 entry;
+    s32 entryAddress;
     if (effMiscRandMod(0, 100) >= 51) {
         return 0;
     }
     remaining = 4;
-    entry = datGameState + 0xA60;
+    entryAddress = datGameState + PTY_ACTIVE_ROSTER_OFFSET;
     do {
-        if ((((Entry1A4 *)entry)->flags & 1) != 0 && ((Entry1A4 *)entry)->unk6 != 0) {
-            u16 flags = ((Entry1A4 *)entry)->unkE;
-            if ((flags & 0x5D0) != 0) {
-                ((Entry1A4 *)entry)->unkE = flags & ~0x5D0;
-                changed = 1;
+        if ((((Entry1A4 *)entryAddress)->flags & 1) != 0 && ((Entry1A4 *)entryAddress)->unk6 != 0) {
+            u16 statusFlags = ((Entry1A4 *)entryAddress)->unkE;
+            if ((statusFlags & 0x5D0) != 0) {
+                ((Entry1A4 *)entryAddress)->unkE = statusFlags & ~0x5D0;
+                clearedAny = 1;
             }
         }
         remaining--;
-        entry += 0x1C4;
+        entryAddress += PTY_ACTIVE_ROSTER_STRIDE;
     } while (remaining >= 0);
-    return changed;
+    return clearedAny;
 }
 
 s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot) {
@@ -801,20 +832,22 @@ void ptyAssignPartyRosterItemsAndMarkOwned(void) {
     } while (remaining >= 0);
 }
 
-s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 flags) {
+/* Step the script with these context values; clear the written flag, not the stored result. */
+s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 options) {
     func_0010C058(evtWorkScriptTask, script);
     D_0043E5C0[1] = third;
     D_0043E5C0[2] = first;
     D_0043E5C0[3] = second;
-    ((EventScriptEntry *)D_0043E5C0)->index14 = flags;
-    ((EventScriptEntry *)D_0043E5C0)->flags &= 0xFFFE;
+    ((EventScriptEntry *)D_0043E5C0)->index14 = options;
+    ((EventScriptEntry *)D_0043E5C0)->flags &= EVT_RESULT_RESET_MASK;
     bfStepContext(evtWorkScriptTask);
     return D_0043E5C0[4];
 }
 
+/* Create the script task and clear its separate 24-byte context. */
 void dds3WorkInit(void) {
     evtWorkScriptTask = scrCreateTaskWithDefaultOption();
-    memset(D_0043E5C0, 0, 0x18);
+    memset(D_0043E5C0, 0, EVT_CONTEXT_BYTES);
 }
 
 u32 scrGetWorkTaskHandle(void) {
@@ -858,130 +891,138 @@ s32 evtPushSecondRosterMaximumHp(void) {
 
 extern s32 btlResolveUnitValueWithOverride(s32, s32);
 extern u32 datReadLowHalfOfCalculatedValue(s32, s32);
+/* Push the first entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushFirstRosterSelectedStat(void) {
-    s8 stat = ((EventModeSlot *)datCommandSelectors)[D_0043E5C0[1]].stat;
-    s32 value;
+    s8 statIndex = ((EventModeSlot *)datCommandSelectors)[D_0043E5C0[1]].stat;
+    s32 statValue;
 
-    switch (stat) {
+    switch (statIndex) {
     case -1:
     case 16:
     case 17:
-        value = 100;
+        statValue = EVT_DEFAULT_STAT_VALUE;
         break;
     default:
         if (btlIsRuntimeAllocated()) {
-            value = (u16)btlResolveUnitValueWithOverride(D_0043E5C0[2], stat);
+            statValue = (u16)btlResolveUnitValueWithOverride(D_0043E5C0[2], statIndex);
         } else {
-            value = datReadLowHalfOfCalculatedValue(D_0043E5C0[2], stat);
+            statValue = datReadLowHalfOfCalculatedValue(D_0043E5C0[2], statIndex);
         }
         break;
     }
-    scrSetIntegerReturnValue(value);
+    scrSetIntegerReturnValue(statValue);
     return 1;
 }
 
+/* Push the second entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushSecondRosterSelectedStat(void) {
-    s8 stat = ((EventModeSlot *)datCommandSelectors)[D_0043E5C0[1]].stat;
-    s32 value;
+    s8 statIndex = ((EventModeSlot *)datCommandSelectors)[D_0043E5C0[1]].stat;
+    s32 statValue;
 
-    switch (stat) {
+    switch (statIndex) {
     case -1:
     case 16:
     case 17:
-        value = 100;
+        statValue = EVT_DEFAULT_STAT_VALUE;
         break;
     default:
         if (btlIsRuntimeAllocated()) {
-            value = (u16)btlResolveUnitValueWithOverride(D_0043E5C0[3], stat);
+            statValue = (u16)btlResolveUnitValueWithOverride(D_0043E5C0[3], statIndex);
         } else {
-            value = datReadLowHalfOfCalculatedValue(D_0043E5C0[3], stat);
+            statValue = datReadLowHalfOfCalculatedValue(D_0043E5C0[3], statIndex);
         }
         break;
     }
-    scrSetIntegerReturnValue(value);
+    scrSetIntegerReturnValue(statValue);
     return 1;
 }
 
 extern s32 datFlagToElementIndex(s32);
 
+/* Push the first entry's option-selected stat, retaining the same default selectors. */
 s32 evtPushFirstRosterOptionStat(void) {
-    s8 stat = datFlagToElementIndex(((EventScriptEntry *)D_0043E5C0)->index14);
-    s32 value = 100;
+    s8 statIndex = datFlagToElementIndex(((EventScriptEntry *)D_0043E5C0)->index14);
+    s32 statValue = EVT_DEFAULT_STAT_VALUE;
 
-    switch (stat) {
+    switch (statIndex) {
     case -1:
     case 16:
     case 17:
         break;
     default:
         if (btlIsRuntimeAllocated()) {
-            value = (u16)btlResolveUnitValueWithOverride(D_0043E5C0[2], stat);
+            statValue = (u16)btlResolveUnitValueWithOverride(D_0043E5C0[2], statIndex);
         } else {
-            value = datReadLowHalfOfCalculatedValue(D_0043E5C0[2], stat);
+            statValue = datReadLowHalfOfCalculatedValue(D_0043E5C0[2], statIndex);
         }
         break;
     }
-    scrSetIntegerReturnValue(value);
+    scrSetIntegerReturnValue(statValue);
     return 1;
 }
 
+/* Push the second entry's option-selected stat, retaining the same default selectors. */
 s32 evtPushSecondRosterOptionStat(void) {
-    s8 stat = datFlagToElementIndex(((EventScriptEntry *)D_0043E5C0)->index14);
-    s32 value = 100;
+    s8 statIndex = datFlagToElementIndex(((EventScriptEntry *)D_0043E5C0)->index14);
+    s32 statValue = EVT_DEFAULT_STAT_VALUE;
 
-    switch (stat) {
+    switch (statIndex) {
     case -1:
     case 16:
     case 17:
         break;
     default:
         if (btlIsRuntimeAllocated()) {
-            value = (u16)btlResolveUnitValueWithOverride(D_0043E5C0[3], stat);
+            statValue = (u16)btlResolveUnitValueWithOverride(D_0043E5C0[3], statIndex);
         } else {
-            value = datReadLowHalfOfCalculatedValue(D_0043E5C0[3], stat);
+            statValue = datReadLowHalfOfCalculatedValue(D_0043E5C0[3], statIndex);
         }
         break;
     }
-    scrSetIntegerReturnValue(value);
+    scrSetIntegerReturnValue(statValue);
     return 1;
 }
 
+/* Push the first entry's profile-adjusted stat, including its native status override. */
 s32 evtPushFirstRosterStatEligibility(void) {
-    s32 val = scrReadIntParameter(0);
+    s32 statIndex = scrReadIntParameter(0);
 
-    scrSetIntegerReturnValue(datGetStatWithStatusOverride(D_0043E5C8[0], val));
+    scrSetIntegerReturnValue(datGetStatWithStatusOverride(D_0043E5C8[0], statIndex));
     return 1;
 }
 
+/* Push the second entry's profile-adjusted stat, including its native status override. */
 s32 evtPushSecondRosterStatEligibility(void) {
-    s32 val = scrReadIntParameter(0);
+    s32 statIndex = scrReadIntParameter(0);
 
-    scrSetIntegerReturnValue(datGetStatWithStatusOverride(D_0043E5CC[0], val));
+    scrSetIntegerReturnValue(datGetStatWithStatusOverride(D_0043E5CC[0], statIndex));
     return 1;
 }
 
+/* Kind 5 selects the first entry's roster detail instead of the command-table stat. */
 s32 evtPushSelectedStatOrRosterLowValue(void) {
-    s32 value;
-    s32 index = D_0043E5C0[1];
-    if (((EventModeSlot *)datCommandSelectors)[index].kind == 5) {
-        u16 id = ((EventScriptEntry *)D_0043E5C0[2])->rosterIndex;
-        value = ((EventRosterStat *)datRosterDetails)[id].alternateA;
+    s32 statValue;
+    s32 commandIndex = D_0043E5C0[1];
+    if (((EventModeSlot *)datCommandSelectors)[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
+        u16 rosterIndex = ((EventScriptEntry *)D_0043E5C0[2])->rosterIndex;
+        statValue = ((EventRosterStat *)datRosterDetails)[rosterIndex].alternateA;
     } else {
-        value = ((EventStatRecord *)datCommandRecords)[index].stat11;
+        statValue = ((EventStatRecord *)datCommandRecords)[commandIndex].stat11;
     }
-    scrSetIntegerReturnValue(value);
+    scrSetIntegerReturnValue(statValue);
     return 1;
 }
 
+/* Kind 5 scales the command stat by the first entry's roster multiplier, then truncates. */
 s32 evtPushSelectedScaledStat(void) {
-    s32 value;
-    s32 index = D_0043E5C0[1];
-    value = ((EventStatRecord *)datCommandRecords)[index].stat25;
-    if (((EventModeSlot *)datCommandSelectors)[index].kind == 5) {
-        u16 id = ((EventScriptEntry *)D_0043E5C0[2])->rosterIndex;
-        value = (s32)((f32)value * ((EventRosterStat *)datRosterDetails)[id].multiplier);
+    s32 statValue;
+    s32 commandIndex = D_0043E5C0[1];
+    statValue = ((EventStatRecord *)datCommandRecords)[commandIndex].stat25;
+    if (((EventModeSlot *)datCommandSelectors)[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
+        u16 rosterIndex = ((EventScriptEntry *)D_0043E5C0[2])->rosterIndex;
+        statValue = (s32)((f32)statValue * ((EventRosterStat *)datRosterDetails)[rosterIndex].multiplier);
     }
-    scrSetIntegerReturnValue(value);
+    scrSetIntegerReturnValue(statValue);
     return 1;
 }
 
@@ -990,55 +1031,58 @@ s32 evtPushSelectedStatGrade(void) {
     return 1;
 }
 
+/* Options 1 and 2 select alternate command halfwords; other options push zero. */
 s32 evtSelectScriptStatValue(void) {
-    s32 *work = D_0043E5C0;
-    s32 value;
-    u16 mode = ((EventScriptEntry *)work)->index14;
-    switch (mode) {
+    s32 *contextWords = D_0043E5C0;
+    s32 statValue;
+    u16 statOption = ((EventScriptEntry *)contextWords)->index14;
+    switch (statOption) {
     case 1:
-        value = ((EventStatRecord *)datCommandRecords)[work[1]].stat18;
+        statValue = ((EventStatRecord *)datCommandRecords)[contextWords[1]].stat18;
         break;
     case 2:
-        value = ((EventStatRecord *)datCommandRecords)[work[1]].stat1C;
+        statValue = ((EventStatRecord *)datCommandRecords)[contextWords[1]].stat1C;
         break;
     default:
-        value = 0;
+        statValue = 0;
         break;
     }
-    scrSetIntegerReturnValue(value);
+    scrSetIntegerReturnValue(statValue);
     return 1;
 }
 
+/* Select the alternate stat through the first entry's table value, not the context selector. */
 s32 evtPushEntryIndexedStatOption(void) {
-    s32 *work = D_0043E5C0;
-    s32 value;
-    u16 mode = ((EventScriptEntry *)work)->index14;
-    u16 index = ((EventIndexRecord *)datItemSkillRecords)[((Entry1A4 *)work[2])->tableValue].index;
-    switch (mode) {
+    s32 *contextWords = D_0043E5C0;
+    s32 statValue;
+    u16 statOption = ((EventScriptEntry *)contextWords)->index14;
+    u16 commandIndex = ((EventIndexRecord *)datItemSkillRecords)[((Entry1A4 *)contextWords[2])->tableValue].index;
+    switch (statOption) {
     case 1:
-        value = ((EventStatRecord *)datCommandRecords)[index].stat18;
+        statValue = ((EventStatRecord *)datCommandRecords)[commandIndex].stat18;
         break;
     case 2:
-        value = ((EventStatRecord *)datCommandRecords)[index].stat1C;
+        statValue = ((EventStatRecord *)datCommandRecords)[commandIndex].stat1C;
         break;
     default:
-        value = 0;
+        statValue = 0;
         break;
     }
-    scrSetIntegerReturnValue(value);
+    scrSetIntegerReturnValue(statValue);
     return 1;
 }
 
+/* Kind 5 selects the first entry's high roster detail instead of the command total. */
 s32 evtPushSelectedTotalOrRosterHighValue(void) {
-    s32 value;
-    s32 index = D_0043E5C0[1];
-    if (((EventModeSlot *)datCommandSelectors)[index].kind == 5) {
-        u16 id = ((EventScriptEntry *)D_0043E5C0[2])->rosterIndex;
-        value = ((EventRosterStat *)datRosterDetails)[id].alternateB;
+    s32 statValue;
+    s32 commandIndex = D_0043E5C0[1];
+    if (((EventModeSlot *)datCommandSelectors)[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
+        u16 rosterIndex = ((EventScriptEntry *)D_0043E5C0[2])->rosterIndex;
+        statValue = ((EventRosterStat *)datRosterDetails)[rosterIndex].alternateB;
     } else {
-        value = ((EventStatRecord *)datCommandRecords)[index].stat34;
+        statValue = ((EventStatRecord *)datCommandRecords)[commandIndex].stat34;
     }
-    scrSetIntegerReturnValue(value);
+    scrSetIntegerReturnValue(statValue);
     return 1;
 }
 
@@ -1047,10 +1091,11 @@ s32 evtPushSelectedStatMaximum(void) {
     return 1;
 }
 
+/* Store the script argument as the context result and mark it written. */
 s32 evtStoreScriptParameterResult(void) {
-    u16 bits = ((EventScriptEntry *)D_0043E5C0)->flags | 1;
+    u16 stateFlags = ((EventScriptEntry *)D_0043E5C0)->flags | EVT_RESULT_WRITTEN_FLAG;
 
-    ((EventScriptEntry *)D_0043E5C0)->flags = bits;
+    ((EventScriptEntry *)D_0043E5C0)->flags = stateFlags;
     D_0043E5C0[4] = scrReadIntParameter(0);
     return 1;
 }
@@ -1065,92 +1110,98 @@ s32 evtPushEntryFlagBitInverted(void) {
     return 1;
 }
 
-/* Apply a random percentage offset around 1.0 to the active script value. */
+/* For positive ranges, return 1.0 plus a percentage jitter; the upper endpoint is excluded. */
 s32 evtRollRandomScale(void) {
-    s32 range = scrReadIntParameter(0);
-    s32 roll = effMiscRandMod(0, range * 2);
+    s32 percentRange = scrReadIntParameter(0);
+    s32 roll = effMiscRandMod(0, percentRange * 2);
 
-    scrSetFloatReturnValue((f32)(roll - range + 100) / 100.0f);
+    scrSetFloatReturnValue((f32)(roll - percentRange + 100) / 100.0f);
     return 1;
 }
 
+/* Without a battle runtime, push zero without reading the group-choice argument. */
 s32 scrGetBattleAverageCurrentValueForGroup(void) {
-    s32 available = btlIsRuntimeAllocated();
-    s32 value;
-    if (available) {
-        s32 choice = scrReadIntParameter(0);
-        value = btlAverageAllCurrentForMask(choice ? 0x20 : 4);
+    s32 battleAvailable = btlIsRuntimeAllocated();
+    s32 averageValue;
+    if (battleAvailable) {
+        s32 groupChoice = scrReadIntParameter(0);
+        averageValue = btlAverageAllCurrentForMask(groupChoice ? EVT_ALTERNATE_GROUP_MASK : EVT_DEFAULT_GROUP_MASK);
     }
     else {
-        value = 0;
+        averageValue = 0;
     }
-    scrSetIntegerReturnValue(value);
+    scrSetIntegerReturnValue(averageValue);
     return 1;
 }
 
+/* Without a battle runtime, push zero without reading the group-choice argument. */
 s32 scrGetBattleAverageMaximumValueForGroup(void) {
-    s32 available = btlIsRuntimeAllocated();
-    s32 value;
-    if (available) {
-        s32 choice = scrReadIntParameter(0);
-        value = btlAverageAllMaximumForMask(choice ? 0x20 : 4);
+    s32 battleAvailable = btlIsRuntimeAllocated();
+    s32 averageValue;
+    if (battleAvailable) {
+        s32 groupChoice = scrReadIntParameter(0);
+        averageValue = btlAverageAllMaximumForMask(groupChoice ? EVT_ALTERNATE_GROUP_MASK : EVT_DEFAULT_GROUP_MASK);
     }
     else {
-        value = 0;
+        averageValue = 0;
     }
-    scrSetIntegerReturnValue(value);
+    scrSetIntegerReturnValue(averageValue);
     return 1;
 }
 
+/* Without a battle runtime, push zero without reading the group-choice argument. */
 s32 scrGetBattleAverageActorStatForGroup(void) {
-    s32 available = btlIsRuntimeAllocated();
-    s32 value;
-    if (available) {
-        s32 choice = scrReadIntParameter(0);
-        value = func_001B3A00(choice ? 0x20 : 4);
+    s32 battleAvailable = btlIsRuntimeAllocated();
+    s32 averageValue;
+    if (battleAvailable) {
+        s32 groupChoice = scrReadIntParameter(0);
+        averageValue = func_001B3A00(groupChoice ? EVT_ALTERNATE_GROUP_MASK : EVT_DEFAULT_GROUP_MASK);
     }
     else {
-        value = 0;
+        averageValue = 0;
     }
-    scrSetIntegerReturnValue(value);
+    scrSetIntegerReturnValue(averageValue);
     return 1;
 }
 
+/* Divide the numeric group mask, not an actor stat; preserve native unsigned division. */
 s32 evtPushAvailableChoiceRatio(void) {
-    s32 available = btlIsRuntimeAllocated();
-    u64 value;
-    if (available) {
-        s32 choice = scrReadIntParameter(0);
+    s32 battleAvailable = btlIsRuntimeAllocated();
+    u64 quotient;
+    if (battleAvailable) {
+        s32 groupChoice = scrReadIntParameter(0);
         s32 divisor = scrReadIntParameter(1);
-        s32 dividend = choice ? 0x20 : 4;
-        value = (u64)dividend / divisor;
+        s32 selectedMask = groupChoice ? EVT_ALTERNATE_GROUP_MASK : EVT_DEFAULT_GROUP_MASK;
+        quotient = (u64)selectedMask / divisor;
     }
     else {
-        value = 0;
+        quotient = 0;
+    }
+    scrSetIntegerReturnValue(quotient);
+    return 1;
+}
+
+/* Push the native battle float when a runtime exists, otherwise zero. */
+s32 evtPushAvailableFloatValue(void) {
+    s32 battleAvailable = btlIsRuntimeAllocated();
+    f32 value = 0.0f;
+
+    if (battleAvailable != 0) {
+        value = func_001AD978();
+    }
+    scrSetFloatReturnValue(value);
+    return 1;
+}
+
+/* Push the native battle integer when a runtime exists, otherwise zero. */
+s32 evtPushAvailableIntegerValue(void) {
+    s32 battleAvailable = btlIsRuntimeAllocated();
+    s32 value = 0;
+
+    if (battleAvailable != 0) {
+        value = func_001ADA10();
     }
     scrSetIntegerReturnValue(value);
-    return 1;
-}
-
-s32 evtPushAvailableFloatValue(void) {
-    s32 v0 = btlIsRuntimeAllocated();
-    f32 val = 0.0f;
-
-    if (v0 != 0) {
-        val = func_001AD978();
-    }
-    scrSetFloatReturnValue(val);
-    return 1;
-}
-
-s32 evtPushAvailableIntegerValue(void) {
-    s32 v0 = btlIsRuntimeAllocated();
-    s32 val = 0;
-
-    if (v0 != 0) {
-        val = func_001ADA10();
-    }
-    scrSetIntegerReturnValue(val);
     return 1;
 }
 
@@ -1172,31 +1223,32 @@ s32 func_0011E018(void) {
 
 extern s32 datComputeSkillBoostedMaxHp(s32);
 
+/* Push the coarse HP-percentage table value; only exactly 100 percent uses index zero. */
 s32 evtSelectStatGrade(void) {
-    s32 total = datComputeSkillBoostedMaxHp(D_0043E5C0[3]);
-    s32 current = ((Entry1A4 *)D_0043E5C0[3])->unk6;
-    s32 percent = (s32)((f32)current / (f32)total * 100.0f);
-    s32 grade = 0;
+    s32 maximumHp = datComputeSkillBoostedMaxHp(D_0043E5C0[3]);
+    s32 currentHp = ((Entry1A4 *)D_0043E5C0[3])->unk6;
+    s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
+    s32 gradeIndex = 0;
 
-    if (percent != 100) {
-        grade = 1;
-        if (percent < 80) {
-            grade = 2;
-            if (percent < 60) {
-                grade = 3;
-                if (percent < 40) {
-                    grade = 4;
-                    if (percent < 30) {
-                        grade = 5;
-                        if (percent < 20) {
-                            grade = percent >= 10 ? 6 : 7;
+    if (hpPercent != 100) {
+        gradeIndex = 1;
+        if (hpPercent < 80) {
+            gradeIndex = 2;
+            if (hpPercent < 60) {
+                gradeIndex = 3;
+                if (hpPercent < 40) {
+                    gradeIndex = 4;
+                    if (hpPercent < 30) {
+                        gradeIndex = 5;
+                        if (hpPercent < 20) {
+                            gradeIndex = hpPercent >= 10 ? 6 : 7;
                         }
                     }
                 }
             }
         }
     }
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + grade * 4 + 0x318));
+    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + gradeIndex * 4 + 0x318));
     return 1;
 }
 
@@ -1245,30 +1297,31 @@ s32 evtPushRosterBaseValue(void) {
     return 1;
 }
 
+/* Push the finer HP-percentage table value; only exactly 100 percent uses index zero. */
 s32 evtSelectFineStatGrade(void) {
-    s32 total = datComputeSkillBoostedMaxHp(D_0043E5C0[3]);
-    s32 current = ((Entry1A4 *)D_0043E5C0[3])->unk6;
-    s32 percent = (s32)((f32)current / (f32)total * 100.0f);
-    s32 grade = 0;
+    s32 maximumHp = datComputeSkillBoostedMaxHp(D_0043E5C0[3]);
+    s32 currentHp = ((Entry1A4 *)D_0043E5C0[3])->unk6;
+    s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
+    s32 gradeIndex = 0;
 
-    if (percent != 100) {
-        grade = 1;
-        if (percent < 90) {
-            grade = 2;
-            if (percent < 80) {
-                grade = 3;
-                if (percent < 70) {
-                    grade = 4;
-                    if (percent < 60) {
-                        grade = 5;
-                        if (percent < 50) {
-                            grade = 6;
-                            if (percent < 40) {
-                                grade = 7;
-                                if (percent < 30) {
-                                    grade = 8;
-                                    if (percent < 20) {
-                                        grade = percent >= 10 ? 9 : 10;
+    if (hpPercent != 100) {
+        gradeIndex = 1;
+        if (hpPercent < 90) {
+            gradeIndex = 2;
+            if (hpPercent < 80) {
+                gradeIndex = 3;
+                if (hpPercent < 70) {
+                    gradeIndex = 4;
+                    if (hpPercent < 60) {
+                        gradeIndex = 5;
+                        if (hpPercent < 50) {
+                            gradeIndex = 6;
+                            if (hpPercent < 40) {
+                                gradeIndex = 7;
+                                if (hpPercent < 30) {
+                                    gradeIndex = 8;
+                                    if (hpPercent < 20) {
+                                        gradeIndex = hpPercent >= 10 ? 9 : 10;
                                     }
                                 }
                             }
@@ -1278,7 +1331,7 @@ s32 evtSelectFineStatGrade(void) {
             }
         }
     }
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + grade * 4 + 0x338));
+    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + gradeIndex * 4 + 0x338));
     return 1;
 }
 
