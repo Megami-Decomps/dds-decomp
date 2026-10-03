@@ -93,7 +93,61 @@ f32 dds3ShortestAngleDelta(f32 fromDegrees, f32 toDegrees) {
     return toDegrees - fromDegrees;
 }
 
-INCLUDE_ASM(const s32, "game/code_001130E0", func_001131E0);
+extern void effObjFetchInnerFirstVec(EffectObject *);
+extern void effObjFetchInnerSecondVecNorm(EffectObject *);
+extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
+extern f32 sdfAtan2(f32, f32);
+
+/* The first conversion follows the original 180 / 3.14 approximation; the
+ * quaternion helper uses the more precise radians-to-degrees factor. */
+#define EFFECT_HEADING_DEGREES_PER_RADIAN_APPROX 57.32484055f
+#define EFFECT_HEADING_RADIANS_TO_DEGREES 57.29577637f
+
+void func_001131E0(EffectObject *obj, const f32 *targetPosition) {
+    EffectObjectData *data = obj->data;
+    f32 position[4];
+    f32 currentAngle = data->angle;
+    f32 heading;
+    f32 targetAngle;
+    f32 referenceAngle;
+    f32 angleDelta;
+    f32 step;
+
+    effObjFetchInnerFirstVec(obj);
+    VU0_STORE_VF(vf10, position);
+    if (position[0] == targetPosition[0] &&
+        position[2] == targetPosition[2]) {
+        return;
+    }
+
+    heading = -(sdfAtan2(position[0] - targetPosition[0],
+                         position[2] - targetPosition[2]) *
+                EFFECT_HEADING_DEGREES_PER_RADIAN_APPROX);
+    effObjFetchInnerSecondVecNorm(obj);
+    referenceAngle = effMiscComputeQuaternionRotatedReferenceAngle();
+    referenceAngle *= EFFECT_HEADING_RADIANS_TO_DEGREES;
+    targetAngle = dds3ShortestAngleDelta(referenceAngle, heading);
+
+    if (targetAngle < data->limitMin2C) {
+        targetAngle = data->limitMin2C;
+    }
+    if (data->limitMax30 < targetAngle) {
+        targetAngle = data->limitMax30;
+    }
+
+    angleDelta = dds3ShortestAngleDelta(currentAngle, targetAngle);
+    step = 3.0f;
+    if ((0.0f <= angleDelta && angleDelta <= step) ||
+        (angleDelta <= 0.0f && -step <= angleDelta)) {
+        angleDelta = targetAngle;
+    } else if (angleDelta < 0.0f) {
+        angleDelta = currentAngle - step;
+    } else {
+        angleDelta = currentAngle + step;
+    }
+    data->angle = angleDelta;
+    data->word34 = 0;
+}
 
 extern void dds3ClearObjectFlags(EffectObject *, s32);
 
@@ -220,8 +274,8 @@ extern void effMiscQuatMultiplyVU(void);
 extern void effObjInnerVecBackup(f32 *);
 extern void func_00113AF0(EffectObject *);
 extern void func_00113338(EffectObject *);
-extern void func_001131E0(EffectObject *, s32);
-extern s32 func_00117650(s32);
+extern void func_001131E0(EffectObject *, const f32 *);
+extern f32 *func_00117650(s32);
 
 /* Per-frame refresh of a model effect object: rebuild the child transform from the follow record (a tilt that wobbles with its angle), then run the timed callbacks. */
 s32 effUpdateFollowModelTransform(EffectObject *obj) {
