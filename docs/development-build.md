@@ -3,9 +3,9 @@
 The `dds1-dev` and `dds2-dev` targets build separate executables whose layouts
 can grow without weakening the byte-identical retail builds. Each target
 recompiles and replaces selected code, read-only data, and initialized
-small-data sections from five paired code units, and moves one source-owned
-zero-initialized state object. The FileManager driver replacements retain six
-declared assembly fallback functions in each title. The targets also link
+small-data sections from eight paired code units, and moves two source-owned
+zero-initialized state objects. The replacements retain seven declared
+assembly fallback functions in DDS1 and six in DDS2. The targets also link
 development-only C code and data into an appended loadable segment:
 
 ```sh
@@ -63,8 +63,10 @@ the following hold:
 - every nonempty retained section stays at its asserted retail address with
   exact linked bytes and exported symbols, preserves the retail `_gp`, and has
   exactly the declared retail and development physical GP-based address forms;
-  development sites must remain a subset of the same named retail function
-  offsets, while source rebuilt with `-G0` may replace declared retail sites
+  development sites normally remain a subset of the same named retail function
+  offsets, while a narrowly declared shifted-offset contract instead preserves
+  their containing functions, opcodes, registers, target offsets, and
+  multiplicities; source rebuilt with `-G0` may replace declared retail sites
   with audited `HI16`/`LO16` relocations;
 - every moved writable section that overlaps the signed retail `_gp` window
   declares exact retail and development GP-reference counts; no development
@@ -92,6 +94,11 @@ both `expected_retail_gp_references` and `expected_gp_references`. These counts
 cover physical GP-based address forms across the complete main text and all
 moved or development-only text, rather than only relocation records emitted by
 replacement code.
+
+The optional `allow_shifted_gp_reference_offsets` is limited to retained state
+whose access instructions move within expanded replacement functions. It still
+requires the same containing functions, opcodes, registers, target offsets,
+and multiplicities; without it, intra-function offsets must match exactly.
 
 The descriptors for the current moves and their asserted binary sites are
 `config/dds1/devbuild.json` and `config/dds2/devbuild.json`. The checks
@@ -121,7 +128,7 @@ placing any of them in the retail link.
 ## Current scope
 
 These are relocatable development builds, not general mod loaders. Each
-version replaces five paired units, then links one development entry object.
+version replaces eight paired units, then links one development entry object.
 The first smaller replacement is compiled separately with `-G0`: its `.text`
 is `0x3D0` bytes rather than the retail `0x3C8`, so two later function
 definitions move by eight bytes. The mixed-source replacement grows from
@@ -135,7 +142,7 @@ from `0x3D4` to `0x40C` and DDS2 text from `0x464` to `0x49C`. The table's two
 function pointers are relocated to the shifted callbacks in the same object;
 the old code and small-data slots are zero-filled.
 
-The first NOBITS move recovers `fileManagerWork`, a `0x40`-byte asynchronous
+The FileManager NOBITS move recovers `fileManagerWork`, a `0x40`-byte asynchronous
 file-manager state object, as an explicit source definition in each title. Its
 four slots begin at `+0x20` and consist of a value followed by a request
 pointer; this corrects the previous nominal C layout, which was `0x44` bytes
@@ -157,13 +164,22 @@ proves those physical references at the same fallback-function offsets, exact
 retained objects, and an unchanged `_gp` instead of silently splitting the
 live state.
 
-Together the replacements move 120 DDS1 and 121 DDS2 exported symbols, plus
-two retained FileManager small-data symbols per title. Seventy-three moved
-definitions change their relative offsets in each title. The verifier follows
-1,089/1,113 external relocation sites targeting shifted definitions, 75/77
-relocations between replacement objects, and 1,461/1,521 total relocation
-targets into moved content. The moved sections retain 549/563 relocation
-entries. All counts are asserted by the version descriptors.
+The paired SDF thread registry is the first moved small-BSS state. Three source
+units per title own and consume its semaphore and linked-list head. Their
+retail text totals `0x698` bytes; the development text grows to `0x728` in DDS1
+and `0x730` in DDS2. All 15 retail GP-relative accesses to the eight-byte
+registry become 23 audited HI16/LO16 relocation records, and no physical GP
+reference remains to either the moved state or its abandoned retail range.
+The adjacent tick callback state stays at its retail address with exact bytes,
+symbols, and access signatures.
+
+Together the replacements move 142 DDS1 and 143 DDS2 exported symbols, plus
+five/three retained small-data symbols. Eighty-five moved definitions per title
+change their relative offsets. The verifier follows 1,411/1,450 external
+relocation sites targeting shifted definitions, 96/98 relocations between
+replacement objects, and 1,846/1,921 total relocation targets into moved
+content. The moved sections retain 668/684 relocation entries. All counts are
+asserted by the version descriptors.
 
 Replacement-owned code and read-only data may change size and contents. A
 declared, file-backed initialized small-data section may also move when all of
