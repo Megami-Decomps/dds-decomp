@@ -19,7 +19,8 @@ typedef struct UiObject {
     u16 maximumValue;
     u8 unk_12A[4];
     u16 statusFlags;
-    u8 unk_130[6];
+    u8 unk_130[4];
+    u16 level;
     u8 unk_136[0x18E];
     u8 kind;
     u8 pad_2C5;
@@ -122,7 +123,16 @@ typedef struct BtlUnit {
     u32 stateFlags;
     u32 gunResourceFlags;
     s8 lookupId;
-    u8 pad_11D[0x1A7];
+    u8 pad_11D[3];
+    u16 statBits;
+    u16 unk122;
+    u16 mode;
+    u16 hp;
+    u16 maxHp;
+    u16 unk12A;
+    u8 pad12C[2];
+    u16 conditionFlags;
+    u8 pad130[0x194];
     s8 unk2C4;
     u8 pad_2C5[0x2B];
     s32 unk2F0;
@@ -432,7 +442,47 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2B00);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2CC0);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2DE8);
+extern s32 func_001A2B00(s32, s32);
+
+s32 func_001A2DE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
+                  BtlUnit *third, s32 command) {
+    BtlUnit snapshot = *base;
+    s32 totalMaxHp = 0;
+    s32 count = 0;
+
+    if (first != NULL) {
+        if ((first->flags & 0x100) == 0) {
+            return 3;
+        }
+        if ((first->conditionFlags & 0x2A0E) != 0) {
+            return 3;
+        }
+        totalMaxHp = first->maxHp;
+        count = 1;
+    }
+    if (second != NULL) {
+        if ((second->flags & 0x100) == 0) {
+            return 3;
+        }
+        if ((second->conditionFlags & 0x2A0E) != 0) {
+            return 3;
+        }
+        count++;
+        totalMaxHp += second->maxHp;
+    }
+    if (third != NULL) {
+        if ((third->flags & 0x100) == 0) {
+            return 3;
+        }
+        if ((third->conditionFlags & 0x2A0E) != 0) {
+            return 3;
+        }
+        count++;
+        totalMaxHp += third->maxHp;
+    }
+    snapshot.maxHp = totalMaxHp / count;
+    return func_001A2B00((s32)&snapshot, command);
+}
 
 s8 btlGetActorIndexedSignedValue(s32 object, s32 index) {
     if (index == 0 && (*(u32 *)(object + 0x110) & 0x400) != 0) {
@@ -1289,9 +1339,39 @@ extern char D_003A1B90[];
 
 extern char D_003A1BA8[];
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A7C20);
+f32 func_001A7C20(u8 *acquirer, u8 *enemy, s32 rewardKind) {
+    s32 level;
+    s32 difference;
+    f32 factor;
+
+    if (*(u16 *)(datBattleSceneRecords + ((BattleController *)btlGetRuntime())->mode * 40 + 0x20) & 0x400) {
+        btlBossDebugPrintf(D_003A1B90);
+        return 1.0f;
+    }
+    if (acquirer == NULL) {
+        level = func_001A9488(4);
+    } else {
+        level = ((UiObject *)acquirer)->level;
+    }
+    if (level > 60) {
+        level = 60;
+    }
+    difference = level - ((UiObject *)enemy)->level;
+    if (difference > 15) {
+        difference = 15;
+    } else if (difference < -15) {
+        difference = -15;
+    }
+    factor = *(f32 *)(datBattleParameters + 0x974 + ((15 - difference) * 2 + rewardKind) * 4);
+    btlBossDebugPrintf(D_003A1BA8, factor, difference, rewardKind);
+    return factor;
+}
 
 /* Read the money reward with the same eligibility and 100-fold table flag. */
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1B90);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1BA8);
+
 s32 btlGetEnemyMoney(u8 *acquirer, u8 *enemy) {
     s32 result = 0;
     s32 money;
@@ -1733,8 +1813,8 @@ s32 btlAverageMaskedActorStat(u32 mask, s8 allowDisabled) {
     return 1;
 }
 
-void func_001A9488(u32 arg0) {
-    btlAverageMaskedActorStat(arg0, 1);
+s32 func_001A9488(u32 arg0) {
+    return btlAverageMaskedActorStat(arg0, 1);
 }
 
 void func_001A94A0(u32 arg0) {
