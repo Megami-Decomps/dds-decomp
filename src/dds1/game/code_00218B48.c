@@ -3,6 +3,10 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
+#define MDL_VIEWER_RESOURCE_SLOTS 12
+
+typedef struct MdlResource MdlResource;
+
 /* Viewer-wide state for the model viewer task (DDS1 game/code_00218B48 and
  * DDS2 game/code_00233660 share this layout field for field). Fields that are
  * only written by a defaults initialiser and never read in either game are
@@ -12,7 +16,7 @@ typedef struct MdlViewState {
     s32 viewerTask;
     s8 unk08;
     s8 unk09;
-    s8 unk0A;
+    s8 taskPhase; /* 0x0A: one-based index into D_00367A40 */
     s8 unk0B;
     s8 unitStepMode;  /* 0x0C: toggled by the step button (D_003D24510[0x23]) */
     s8 unitStepSign;  /* 0x0D: +1/-1, derived from the input keys at 0x24/0x25 */
@@ -22,9 +26,8 @@ typedef struct MdlViewState {
     u8 pad11[3];
     s16 unk14;
     s16 resourceCount;
-    s16 unk18; /* 0x18: first s16 handed to func_00217680, and set from
-                 mdlGetContextResourceGroup's return */
-    s16 unk1A; /* 0x1A: second s16, and set from mdlGetContextResourceId */
+    s16 resourceGroup; /* 0x18: group passed to the resource loader */
+    s16 resourceId;    /* 0x1A: ID passed to the resource loader */
     s16 unk1C;
     s16 unk1E;
     s16 unk20;
@@ -56,11 +59,10 @@ typedef struct MdlViewState {
     s16 unk50;
     s16 unk52;
     f32 viewerScale;      /* 0x54: viewer zoom, in hundredths */
-    u8 pad58[0x34];
-    s32 slotBeforeResources[1]; /* One element before resources[] for rightward rotation. */
-    s32 resources[1];
+    u8 pad58[0x38];
+    MdlResource *resources[MDL_VIEWER_RESOURCE_SLOTS]; /* 0x90 */
+    s32 packetList; /* 0xC0: drawing packet destination */
 } MdlViewState;
-
 typedef struct MdlPadState {
     u8 pad00[4];
     s8 stepDownA;  /* 0x04 */
@@ -172,13 +174,13 @@ extern s8 D_00324510[];
 
 extern void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8 *pad);
 
-/* Assemble the resource request in a temporary buffer before loading it. */
 extern void sdfReleaseChipBlock();
 
+/* Three independently allocated resources; their individual roles are unresolved. */
 typedef struct MdlSlotEntry {
-    s32 a;
-    s32 b;
-    s32 c;
+    s32 firstHandle;
+    s32 secondHandle;
+    s32 thirdHandle;
 } MdlSlotEntry;
 
 typedef struct MdlSlotTable {
@@ -196,23 +198,24 @@ extern s32 D_003BBB70;
 
 extern void sdfReleaseMemorySlot(s32 *slot);
 
-/* The package request helpers fill a 0x40-byte buffer with a handle at +0x30. */
+/* Native 0x40-byte package request; the package helpers fill handle at +0x30. */
 typedef struct MdlPackageRequest {
     u8 pad00[0x30];
     s32 handle;
     u8 pad34[0xC];
 } MdlPackageRequest;
 
+/* Load a viewer package; flag 2 enables the extra request-preparation step. */
 void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, s32 requestFirst, s32 requestSecond) {
-    u8 buffer[0x40];
+    MdlPackageRequest request;
 
-    sdfPacInitializeDispatchPacket(buffer, 0);
+    sdfPacInitializeDispatchPacket(&request, 0);
     if (flags & 2) {
-        func_002EDC30(buffer);
+        func_002EDC30(&request);
     }
-    func_002EDE48(buffer, requestFirst, requestSecond);
-    func_00218768(((MdlPackageRequest *)buffer)->handle, first, second, flags);
-    func_002EDC50(buffer);
+    func_002EDE48(&request, requestFirst, requestSecond);
+    func_00218768(request.handle, first, second, flags);
+    func_002EDC50(&request);
 }
 
 void func_00218BE8(s32 resource) {
@@ -230,9 +233,9 @@ void mdlReleaseViewerSlotResources(void) {
         i = 0;
         do {
             i++;
-            sdfReleaseChipBlock(entry->b);
-            sdfReleaseChipBlock(entry->a);
-            sdfReleaseChipBlock(entry->c);
+            sdfReleaseChipBlock(entry->secondHandle);
+            sdfReleaseChipBlock(entry->firstHandle);
+            sdfReleaseChipBlock(entry->thirdHandle);
             entry++;
         } while (i < count);
     }
@@ -277,13 +280,13 @@ void mdlInitializeViewerResourceTable(void) {
     for (i = 0; i != 3; i++) {
         switch (i) {
         case 0:
-            source = (char *)D_00365858[0].entries->b;
+            source = (char *)D_00365858[0].entries->secondHandle;
             break;
         case 1:
-            source = (char *)D_00365858[0].entries->a;
+            source = (char *)D_00365858[0].entries->firstHandle;
             break;
         default:
-            source = (char *)D_00365858[0].entries->c;
+            source = (char *)D_00365858[0].entries->thirdHandle;
             break;
         }
         if (source != NULL) {
@@ -329,10 +332,25 @@ typedef struct MdlViewerData {
     MdlViewerSlots *slotTable; /* 0xA8: indexable object slots */
 } MdlViewerData;
 
-typedef struct MdlViewerResource {
+typedef struct MdlMotionState {
+    u8 pad00[0x1C];
+    f32 time;   /* 0x1C */
+    u8 pad20[0xE];
+    u16 length; /* 0x2E */
+    u8 pad30[2];
+    u8 reverse; /* 0x32 */
+} MdlMotionState;
+
+/* Native loaded resource: viewer tables, linked parts, chunk data and motion. */
+struct MdlResource {
     u8 pad00[0x0C];
-    MdlViewerData *data;
-} MdlViewerResource;
+    MdlViewerData *data; /* 0x0C */
+    u8 pad10[2];
+    s16 unk12;
+    struct MdlResourceItem *first; /* 0x14: owned resource-item list */
+    u8 *chunk;              /* 0x18: SDK chunk data, including the node-count prefix */
+    MdlMotionState *motion; /* 0x1C: time also gates deferred object initialization */
+};
 
 struct MdlViewerSlots {
     u8 pad00[4];
@@ -351,7 +369,7 @@ u16 mdlGetViewerRecordListCount(MdlRecord *record) {
 }
 
 /* Follow the relative links in a resource's record table to find an ID. */
-MdlRecord *mdlFindViewerRecord(MdlViewerResource *resource, s32 id) {
+MdlRecord *mdlFindViewerRecord(MdlResource *resource, s32 id) {
     MdlRecord *table = resource->data->records;
     MdlRecord *record;
     s32 remaining;
@@ -653,20 +671,8 @@ typedef struct MdlResourceItem {
     u8 pad0C[0x14];
 } MdlResourceItem;
 
-/* A resource owner's counter source exposes the current scalar at +0x1C. */
-typedef struct MdlCounterSource {
-    u8 pad00[0x1C];
-    f32 value;
-} MdlCounterSource;
 
-typedef struct {
-    u8 pad00[0x14];
-    MdlResourceItem *first; /* 0x14 */
-    void *chunk;            /* 0x18 */
-    MdlCounterSource *counterSource; /* 0x1C */
-} MdlResourceOwner;
-
-MdlResourceItem *mdlInsertResourceItem(MdlResourceOwner *object, s32 type, s32 subtype) {
+MdlResourceItem *mdlInsertResourceItem(MdlResource *object, s32 type, s32 subtype) {
     MdlResourceItem *item = sdfAllocAndClearQuadwords(0x20);
     MdlResourceItem *previous = object->first;
     item->type = type;
@@ -687,7 +693,7 @@ void mdlAdvanceEffectPart(MdlPartEntry *entry) {
 }
 
 /* Resolve a fixed-size viewer slot after checking the slot table's bounds. */
-s32 mdlFindViewerPartSlot(MdlViewerResource *resource, s32 index) {
+s32 mdlFindViewerPartSlot(MdlResource *resource, s32 index) {
     MdlViewerSlots *slots;
 
     slots = resource->data->slotTable;
@@ -720,8 +726,8 @@ typedef struct MdlPartItem {
 extern void *sdfChunkFindRecordById(void *chunk, s32 id);
 
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
-void mdlBindViewerPartRecords(MdlResourceOwner *owner, MdlPartRec *rec, s32 option, s32 type, s32 (*create)(MdlPartEntry *)) {
-    MdlPartEntry *part = (MdlPartEntry *)mdlFindViewerPartSlot((MdlViewerResource *)owner, rec->partIndex);
+void mdlBindViewerPartRecords(MdlResource *owner, MdlPartRec *rec, s32 option, s32 type, s32 (*create)(MdlPartEntry *)) {
+    MdlPartEntry *part = (MdlPartEntry *)mdlFindViewerPartSlot(owner, rec->partIndex);
 
     if (part != NULL) {
         void *chunk = owner->chunk;
@@ -763,7 +769,7 @@ typedef struct MdlEffectRec {
 } MdlEffectRec;
 
 typedef struct MdlEffectParams {
-    MdlResourceOwner *owner; /* 0x00 */
+    MdlResource *owner; /* 0x00 */
     s32 effectId;            /* 0x04 */
     s32 param0C;             /* 0x08 */
     f32 scaleX;              /* 0x0C */
@@ -780,7 +786,7 @@ typedef struct MdlEffectParams {
 
 extern s32 effTrackPolyCreateWork(MdlEffectParams *params);
 
-void mdlCreateViewerEffectPart(MdlResourceOwner *owner, MdlEffectRec *rec, s32 option) {
+void mdlCreateViewerEffectPart(MdlResource *owner, MdlEffectRec *rec, s32 option) {
     MdlEffectParams params;
     MdlResourceItem *item;
 
@@ -820,7 +826,7 @@ void mdlLoadViewerStreamRecord(u32 owner, s32 record) {
 
 typedef struct MdlObjItem {
     u8 pad00[8];
-    MdlResourceOwner *owner; /* 0x08 */
+    MdlResource *owner; /* 0x08 */
     s32 obj;                 /* 0x0C */
     s32 data;                /* 0x10 */
     s32 param;               /* 0x14 */
@@ -843,8 +849,8 @@ typedef struct MdlSlotRec {
 
 extern void *sdfFindResourceById(s32 id);
 
-void mdlClaimViewerObjectPart(MdlResourceOwner *owner, MdlEntryRec *entry, s32 option) {
-    MdlSlotRec *slot = (MdlSlotRec *)mdlFindViewerPartSlot((MdlViewerResource *)owner, entry->index);
+void mdlClaimViewerObjectPart(MdlResource *owner, MdlEntryRec *entry, s32 option) {
+    MdlSlotRec *slot = (MdlSlotRec *)mdlFindViewerPartSlot(owner, entry->index);
 
     if (slot != 0) {
         MdlObj *obj = slot->obj;
@@ -872,7 +878,7 @@ void mdlCondInitEntry(s32 entry) {
     s32 object = ((MdlObjItem *)entry)->obj;
     if (((MdlObj *)object)->initialized == 0) {
         s32 count = ((MdlObjItem *)entry)->param;
-        f32 counterValue = ((MdlObjItem *)entry)->owner->counterSource->value;
+        f32 counterValue = ((MdlObjItem *)entry)->owner->motion->time;
         if ((u32)(s32)counterValue < (u32)count) {
             return;
         }
@@ -880,7 +886,7 @@ void mdlCondInitEntry(s32 entry) {
     }
 }
 
-void mdlDispatchResourceEntry(MdlResourceOwner *owner, MdlRecord *record, s32 option) {
+void mdlDispatchResourceEntry(MdlResource *owner, MdlRecord *record, s32 option) {
     switch (record->kind) {
     case 1:
         mdlBindViewerPartRecords(owner, (MdlPartRec *)record, option, 0, mdlAdvanceBillboardPart);
@@ -901,7 +907,7 @@ void mdlDispatchResourceEntry(MdlResourceOwner *owner, MdlRecord *record, s32 op
 }
 
 void mdlApplyResourceEntries(s32 object, s32 id, s32 option) {
-    MdlRecord *block = mdlFindViewerRecord((MdlViewerResource *)object, id);
+    MdlRecord *block = mdlFindViewerRecord((MdlResource *)object, id);
     if (block != NULL) {
         MdlRecord *entry = mdlGetFirstRecord((s32)block);
         while (entry != NULL) {
@@ -926,7 +932,7 @@ void mdlDestroyResourceItem(MdlResourceItem *item) {
     sdfReleaseChipBlock((void *)item);
 }
 
-void mdlRemoveResourceSubtype(MdlResourceOwner *object, s32 subtype) {
+void mdlRemoveResourceSubtype(MdlResource *object, s32 subtype) {
     MdlResourceItem **link = &object->first;
     MdlResourceItem *item = *link;
     while (item != 0) {
@@ -991,7 +997,7 @@ extern void effUpdateNode(s32 handle);
 
 extern void effTrackPolyUpdate(s32 handle);
 
-void mdlDispatchViewerAnchorRecord(MdlResourceOwner *owner, MdlAnchorRec *rec) {
+void mdlDispatchViewerAnchorRecord(MdlResource *owner, MdlAnchorRec *rec) {
     void *chunk = owner->chunk;
     f32 position[4];
     s32 handle;
@@ -1163,32 +1169,15 @@ s32 mdlUpdateViewerCursorWithPageStep(s16 *cursor, s32 count, s32 step) {
     return 0;
 }
 
-typedef struct MdlMotionState {
-    u8 pad00[0x1C];
-    f32 time;   /* 0x1C */
-    u8 pad20[0xE];
-    u16 length; /* 0x2E */
-    u8 pad30[2];
-    u8 reverse; /* 0x32 */
-} MdlMotionState;
-
-typedef struct MdlResource {
-    u8 pad00[0x12];
-    s16 unk12;
-    u8 pad14[4];
-    u8 *chunk;              /* 0x18 */
-    MdlMotionState *motion; /* 0x1C */
-} MdlResource;
 
 extern MdlResource *func_00217680(s16, s16);
 
 extern void mdlAddEntryFlagged(void *, s32, s32);
 
 void mdlLoadViewerResourceAndResetCursors(void) {
-    MdlResource *resource = func_00217680(mdlViewerState.unk18, mdlViewerState.unk1A);
+    MdlResource *resource = func_00217680(mdlViewerState.resourceGroup, mdlViewerState.resourceId);
 
-    /* Required to match: storing through a typed pointer preserves the load/store order. */
-    *(MdlResource **)&mdlViewerState.resources[0] = resource;
+    mdlViewerState.resources[0] = resource;
     mdlViewerState.activeEntryId = 0;
     mdlViewerState.selectedEntryId = 0;
     mdlViewerState.selectedNodeId = 0;
@@ -1229,11 +1218,11 @@ void mdlResetViewerBasisVectors(void) {
 /* Rotate the viewer resource list in place without moving its allocation. */
 void mdlRotateViewResourcesRight(void) {
     s32 i = mdlViewerState.resourceCount - 1;
-    s32 saved = mdlViewerState.resources[i];
+    MdlResource *saved = mdlViewerState.resources[i];
 
     if (i > 0) {
         do {
-            mdlViewerState.resources[i] = mdlViewerState.slotBeforeResources[i];
+            mdlViewerState.resources[i] = mdlViewerState.resources[i - 1];
             i -= 1;
         } while (i > 0);
     }
@@ -1243,7 +1232,7 @@ void mdlRotateViewResourcesRight(void) {
 void mdlRotateViewList(void) {
     s32 i;
     s32 count = mdlViewerState.resourceCount;
-    s32 first = mdlViewerState.resources[0];
+    MdlResource *first = mdlViewerState.resources[0];
 
     for (i = 0; i < count - 1; i++) {
         mdlViewerState.resources[i] = mdlViewerState.resources[i + 1];
@@ -1459,7 +1448,7 @@ extern s32 sdfCreateFormattedSifCommand();
 
 void mdlDrawViewerIndexedLabelOverlay(void) {
     mdlAppendViewerRectToDrawList(0x8A10, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
-    sdfAppendPacket(mdlViewerState.resources[12], sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B10[mdlViewerState.labelIndexA]));
+    sdfAppendPacket(mdlViewerState.packetList, sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B10[mdlViewerState.labelIndexA]));
 }
 
 u32 mdlRunViewerIndexedLabelTask(void) {
@@ -1468,11 +1457,10 @@ u32 mdlRunViewerIndexedLabelTask(void) {
     return 0;
 }
 
-typedef struct MdlCtx MdlCtx;
-extern void mdlLoadPrimaryVectorVU(MdlCtx *context);
-extern void mdlStorePrimaryVectorVU(MdlCtx *context);
-extern void mdlLoadSecondaryVectorVU(MdlCtx *context);
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *context);
+extern void mdlLoadPrimaryVectorVU(MdlResource *context);
+extern void mdlStorePrimaryVectorVU(MdlResource *context);
+extern void mdlLoadSecondaryVectorVU(MdlResource *context);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlResource *context);
 extern f32 D_00398380[4];
 extern f32 D_00398390[4];
 extern f32 D_003983A0[4];
@@ -1491,12 +1479,12 @@ void func_0021B9F8(void) {
     }
     if (sdfPadButtonStates[0xC] < 0) {
         VU0_MOVE_VF(vf10, vf0);
-        mdlStorePrimaryVectorVU((MdlCtx *)mdlViewerState.resources[0]);
-        mdlUpdateContextRotationBasisFromQuaternion((MdlCtx *)mdlViewerState.resources[0]);
+        mdlStorePrimaryVectorVU(mdlViewerState.resources[0]);
+        mdlUpdateContextRotationBasisFromQuaternion(mdlViewerState.resources[0]);
         return;
     }
     if (mdlViewerState.yawStepMode != 0) {
-        mdlLoadSecondaryVectorVU((MdlCtx *)mdlViewerState.resources[0]);
+        mdlLoadSecondaryVectorVU(mdlViewerState.resources[0]);
         if (sdfPadButtonStates[5] < 0) {
             VU0_LOAD_VF(vf11, D_00398390);
             angle = 5.0f * 3.14159265f / 180.0f;
@@ -1508,7 +1496,7 @@ void func_0021B9F8(void) {
         }
         effMiscAxisAngleToQuaternionVf11(angle);
         effMiscQuatMultiplyVU();
-        mdlUpdateContextRotationBasisFromQuaternion((MdlCtx *)mdlViewerState.resources[0]);
+        mdlUpdateContextRotationBasisFromQuaternion(mdlViewerState.resources[0]);
     } else if (mdlViewerState.labelIndexB == 0) {
         speed = 1.25f;
         if (sdfPadButtonStates[1] == 0) {
@@ -1517,7 +1505,7 @@ void func_0021B9F8(void) {
                 speed = 5.0f;
             }
         }
-        mdlLoadPrimaryVectorVU((MdlCtx *)mdlViewerState.resources[0]);
+        mdlLoadPrimaryVectorVU(mdlViewerState.resources[0]);
         EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
         VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
         if (sdfPadButtonStates[5] != 0) {
@@ -1539,7 +1527,7 @@ void func_0021B9F8(void) {
         } else if (sdfPadButtonStates[8] != 0) {
             VU0_SUB(vf10, vf10, vf11);
         }
-        mdlStorePrimaryVectorVU((MdlCtx *)mdlViewerState.resources[0]);
+        mdlStorePrimaryVectorVU(mdlViewerState.resources[0]);
     } else {
         speed = 0.5f * 3.14159265f / 180.0f;
         if (sdfPadButtonStates[1] == 0) {
@@ -1548,7 +1536,7 @@ void func_0021B9F8(void) {
                 speed = 2.0f * 3.14159265f / 180.0f;
             }
         }
-        mdlLoadSecondaryVectorVU((MdlCtx *)mdlViewerState.resources[0]);
+        mdlLoadSecondaryVectorVU(mdlViewerState.resources[0]);
         if (sdfPadButtonStates[5] != 0) {
             VU0_LOAD_VF(vf11, D_00398390);
             effMiscAxisAngleToQuaternionVf11(speed);
@@ -1576,7 +1564,7 @@ void func_0021B9F8(void) {
             effMiscAxisAngleToQuaternionVf11(-speed);
             effMiscQuatMultiplyVU();
         }
-        mdlUpdateContextRotationBasisFromQuaternion((MdlCtx *)mdlViewerState.resources[0]);
+        mdlUpdateContextRotationBasisFromQuaternion(mdlViewerState.resources[0]);
     }
 }
 
@@ -1584,7 +1572,7 @@ extern s32 D_00367B18[];
 
 void mdlDrawViewerSelectionLabel(void) {
     mdlAppendViewerRectToDrawList(0x8A10, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
-    sdfAppendPacket(mdlViewerState.resources[12], sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B18[mdlViewerState.labelIndexB]));
+    sdfAppendPacket(mdlViewerState.packetList, sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B18[mdlViewerState.labelIndexB]));
 }
 
 s32 mdlRunViewerSelectionLabelTask(void) {
@@ -1648,11 +1636,11 @@ void mdlDrawViewerMotionTimeline(void) {
     s32 step;
 
     mdlAppendViewerRectToDrawList(0x81D0, 0x7948, 0xFF007F, 0xD20, 0xF0, 0);
-    list = mdlViewerState.resources[12];
+    list = mdlViewerState.packetList;
     sdfAppendFillRectanglePacket(list, 0x80303030, 0, 0x8200, 0x7990, 0x8EC0, 0x7990, 0xFF0080, 0);
     sdfAppendFillRectanglePacket(list, 0x80303030, 0, 0x8200, 0x7960, 0x8200, 0x79C0, 0xFF0080, 0);
     sdfAppendFillRectanglePacket(list, 0x80303030, 0, 0x8EC0, 0x7960, 0x8EC0, 0x79C0, 0xFF0080, 0);
-    resource = (MdlResource *)mdlViewerState.resources[0];
+    resource = mdlViewerState.resources[0];
     motion = resource->motion;
     if (motion != NULL) {
         x = (s32)(motion->time * 3264.0f / motion->length);
@@ -1661,12 +1649,12 @@ void mdlDrawViewerMotionTimeline(void) {
         }
         x += 0x8200;
         sdfAppendFillRectanglePacket(list, 0x800000E0, 0, x, 0x7960, x, 0x79C0, 0xFF0090, 0);
-        sdfAppendPacket(mdlViewerState.resources[12], sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[%5.1f/%-3d]", motion->time, motion->length));
+        sdfAppendPacket(mdlViewerState.packetList, sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[%5.1f/%-3d]", motion->time, motion->length));
     } else {
-        sdfAppendPacket(mdlViewerState.resources[12], sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[---.-/---]"));
+        sdfAppendPacket(mdlViewerState.packetList, sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[---.-/---]"));
     }
     step = mdlViewerState.unitStepMode != 0 ? 2 : 0;
-    sdfAppendPacket(mdlViewerState.resources[12], sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, step, D_003BBC80, mdlViewerState.viewerScale));
+    sdfAppendPacket(mdlViewerState.packetList, sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, step, D_003BBC80, mdlViewerState.viewerScale));
 }
 
 u32 mdlUpdateViewerScaleTask(void) {
@@ -1686,14 +1674,15 @@ u32 func_0021C2E8(void) {
     return 0;
 }
 
-extern s32 mdlGetContextResourceGroup(s32);
-extern s32 mdlGetContextResourceId(s32);
-extern void mdlDestroyContext(s32 resource);
+extern u16 mdlGetContextResourceGroup(MdlResource *resource);
+extern u16 mdlGetContextResourceId(MdlResource *resource);
+extern void mdlDestroyContext(MdlResource *resource);
 extern void sdfMotionInitializeAtZeroTime(void *, s32, s32);
 
 void mdlApplyViewerResourceMenuAction(void) {
     s32 i;
-    s32 item; /* resource handle, then its frame id */
+    MdlResource *resource;
+    s32 entryId;
     MdlMotionState *motion;
 
     if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.scrollPage, 5, 1) != 0) {
@@ -1704,7 +1693,7 @@ void mdlApplyViewerResourceMenuAction(void) {
     }
     switch (mdlViewerState.scrollPage) {
     case 0:
-        if (mdlViewerState.resourceCount != 12) {
+        if (mdlViewerState.resourceCount != MDL_VIEWER_RESOURCE_SLOTS) {
             mdlViewerState.resources[mdlViewerState.resourceCount] = 0;
             mdlViewerState.resourceCount++;
             mdlRotateViewResourcesRight();
@@ -1731,22 +1720,22 @@ void mdlApplyViewerResourceMenuAction(void) {
         break;
     case 4:
         for (i = 0; i < mdlViewerState.resourceCount; i++) {
-            item = mdlViewerState.resources[i];
-            motion = ((MdlResource *)item)->motion;
+            resource = mdlViewerState.resources[i];
+            motion = resource->motion;
             if (motion != NULL) {
-                item = ((MdlResource *)item)->unk12;
+                entryId = resource->unk12;
                 if (motion->reverse == 0) {
-                    sdfMotionInitializeAtZeroTime(motion, item, 0);
+                    sdfMotionInitializeAtZeroTime(motion, entryId, 0);
                 } else {
-                    sdfMotionInitializeAtZeroTime(motion, item, 1);
+                    sdfMotionInitializeAtZeroTime(motion, entryId, 1);
                 }
             }
         }
         break;
     }
-    mdlViewerState.unk1C = mdlViewerState.unk18 = mdlGetContextResourceGroup(mdlViewerState.resources[0]);
-    mdlViewerState.unk1E = mdlViewerState.unk1A = mdlGetContextResourceId(mdlViewerState.resources[0]);
-    i = ((MdlResource *)mdlViewerState.resources[0])->unk12;
+    mdlViewerState.unk1C = mdlViewerState.resourceGroup = mdlGetContextResourceGroup(mdlViewerState.resources[0]);
+    mdlViewerState.unk1E = mdlViewerState.resourceId = mdlGetContextResourceId(mdlViewerState.resources[0]);
+    i = mdlViewerState.resources[0]->unk12;
     if (i < 0) {
         i = 0;
     }
@@ -1772,13 +1761,9 @@ typedef struct MdlLoadedInfo {
     MdlCountNode *first;
 } MdlLoadedInfo;
 
-typedef struct MdlLoaded {
-    u8 pad00[0x18];
-    MdlLoadedInfo *info;
-} MdlLoaded;
 
 void mdlHandleViewerNodeCursorInput(void) {
-    MdlCountNode *firstNode = ((MdlLoaded *)mdlViewerState.resources[0])->info->first;
+    MdlCountNode *firstNode = ((MdlLoadedInfo *)mdlViewerState.resources[0]->chunk)->first;
 
     if (firstNode != 0) {
         s16 nodeCount = firstNode->count;
@@ -1899,7 +1884,7 @@ u32 mdlRunViewerSettingsTask(void) {
 }
 
 s32 mdlCountActiveRecords(void) {
-    MdlViewerResource *resource = (MdlViewerResource *)mdlViewerState.resources[0];
+    MdlResource *resource = mdlViewerState.resources[0];
     s32 first = mdlCountRecords((s32)mdlFindViewerRecord(resource, -1));
     s32 second = mdlCountRecords((s32)mdlFindViewerRecord(resource, mdlViewerState.activeEntryId));
 
@@ -1945,8 +1930,8 @@ extern s32 func_002EF2E0(void *, void *, s32, s32);
 void mdlSubmitViewerIntermediateDrawPacket(void) {
     s32 list;
 
-    if (mdlViewerState.unk0A < 4) {
-        if (mdlViewerState.unk0A >= 2) {
+    if (mdlViewerState.taskPhase < 4) {
+        if (mdlViewerState.taskPhase >= 2) {
             list = sdfCreateResetPacketList();
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
             sdfAppendPacket(list, func_002EF2E0(D_00367B80, D_00367BE0, 6, 0x80));
@@ -1968,9 +1953,9 @@ void mdlSubmitViewerResourceDrawPacket(void) {
     s32 packet;
     MdlResource *resource;
 
-    if (mdlViewerState.unk0A == 3) {
+    if (mdlViewerState.taskPhase == 3) {
         list = sdfCreateResetPacketList();
-        resource = (MdlResource *)mdlViewerState.resources[0];
+        resource = mdlViewerState.resources[0];
     VU0_LOAD_MATRIX(resource->chunk + 0x20);
         packet = func_002EF2E0(D_00367C00, D_00367C40, 4, 0x80);
         if ((sdfPadButtonStates[13] < 0) & (D_003BBCB8 == 0)) {
@@ -1991,7 +1976,7 @@ void mdlViewerTaskDestroy(void) {
 
 void mdlRestartViewerPhaseTask(void) {
     mdlViewerTaskDestroy();
-    mdlViewerState.viewerTask = kwlnTaskCreate(D_00367A40[mdlViewerState.unk0A - 1].name, 0x2B00, 1, 0, D_00367A40[mdlViewerState.unk0A - 1].update, 0, D_00367A40[mdlViewerState.unk0A - 1].data);
+    mdlViewerState.viewerTask = kwlnTaskCreate(D_00367A40[mdlViewerState.taskPhase - 1].name, 0x2B00, 1, 0, D_00367A40[mdlViewerState.taskPhase - 1].update, 0, D_00367A40[mdlViewerState.taskPhase - 1].data);
     func_00101A80(mdlViewerState.unk00, mdlViewerState.viewerTask);
 }
 
@@ -2129,11 +2114,11 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E1C8);
 
 void mdlFreeViewResources(void) {
     s32 i;
-    for (i = 0; i != 12; i++) {
-        s32 handle = mdlViewerState.resources[i];
-        if (handle != 0) {
+    for (i = 0; i != MDL_VIEWER_RESOURCE_SLOTS; i++) {
+        MdlResource *resource = mdlViewerState.resources[i];
+        if (resource != 0) {
             mdlViewerState.resources[i] = 0;
-            mdlDestroyContext(handle);
+            mdlDestroyContext(resource);
         }
     }
 }
