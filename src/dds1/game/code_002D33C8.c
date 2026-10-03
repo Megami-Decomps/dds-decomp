@@ -7,15 +7,18 @@
 #define SDF_DMA_TAG_NEXT_BYTE 0x20
 #define SDF_DMA_TAG_REF_BYTE 0x30
 #define SDF_DMA_TAG_CALL_BYTE 0x50
+#define SDF_DMA_TAG_END_BYTE 0x70
 #define SDF_DMA_QWC_MASK 0xFFFF
 #define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
 
-/* First tag word carries the DMA operation; second is its 28-bit address. */
-typedef struct SdfDmaTagHeader {
-    u8 pad00[3];
+/* Native DMAC tag: QWC/ID/ADDR followed by the two packed VIF command words. */
+typedef struct SdfDmaTag {
+    u16 quadwordCount;
+    u8 pad02;
     u8 kind;
     u32 address;
-} SdfDmaTagHeader;
+    u64 vifCommands;
+} SdfDmaTag;
 
 typedef struct SdfPacketChain {
     SdfListHead *head;
@@ -450,8 +453,8 @@ void sdfAppendPacket(SdfListHead *list, u32 packet) {
         list->first = packet;
     }
     else {
-        ((SdfDmaTagHeader *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTagHeader *)last)->address = packet & 0xfffffff;
+        ((SdfDmaTag *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTag *)last)->address = packet & SDF_DMA_ADDRESS_MASK;
     }
     list->last = packet;
 }
@@ -464,8 +467,8 @@ void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end) {
         list->first = packet;
     }
     else {
-        ((SdfDmaTagHeader *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTagHeader *)last)->address = packet & 0xfffffff;
+        ((SdfDmaTag *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTag *)last)->address = packet & SDF_DMA_ADDRESS_MASK;
     }
     list->last = end;
 }
@@ -474,14 +477,14 @@ void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end) {
 void sdfAppendReferencePacket(SdfListHead *list, u32 packet) {
     s32 last;
 
-    ((SdfDmaTagHeader *)packet)->kind = SDF_DMA_TAG_REF_BYTE;
+    ((SdfDmaTag *)packet)->kind = SDF_DMA_TAG_REF_BYTE;
     last = list->last;
     if (last == 0) {
         list->first = packet;
     }
     else {
-        ((SdfDmaTagHeader *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTagHeader *)last)->address = packet & 0xfffffff;
+        ((SdfDmaTag *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTag *)last)->address = packet & SDF_DMA_ADDRESS_MASK;
     }
     list->last = packet + 0x10;
 }
@@ -494,8 +497,8 @@ void sdfAppendDmaTagToList(SdfListHead *list, u32 packet) {
         list->first = packet;
     }
     else {
-        ((SdfDmaTagHeader *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTagHeader *)last)->address = packet & 0xfffffff;
+        ((SdfDmaTag *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTag *)last)->address = packet & SDF_DMA_ADDRESS_MASK;
     }
     list->last = packet + 0x30;
 }
@@ -504,14 +507,14 @@ void sdfAppendDmaTagToList(SdfListHead *list, u32 packet) {
 void sdfAppendCallPacket(SdfListHead *list, u32 packet) {
     s32 last;
 
-    ((SdfDmaTagHeader *)packet)->kind = SDF_DMA_TAG_CALL_BYTE;
+    ((SdfDmaTag *)packet)->kind = SDF_DMA_TAG_CALL_BYTE;
     last = list->last;
     if (last == 0) {
         list->first = packet;
     }
     else {
-        ((SdfDmaTagHeader *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTagHeader *)last)->address = packet & 0xfffffff;
+        ((SdfDmaTag *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTag *)last)->address = packet & SDF_DMA_ADDRESS_MASK;
     }
     list->last = packet + 0x10;
 }
@@ -596,9 +599,9 @@ next_node:
 /* Make a REF DMA node for the payload following the source tag. */
 u32 sdfCreateReferenceDmaNode(u32 source) {
     SdfDmaNode *node = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
-    SdfDmaSrc *src = (SdfDmaSrc *)source;
+    SdfDmaTag *src = (SdfDmaTag *)source;
     u64 tag = src->quadwordCount;
-    u32 address = ((u32)src + 0x10) & 0x0FFFFFFF;
+    u32 address = ((u32)src + 0x10) & SDF_DMA_ADDRESS_MASK;
     s64 shifted = (s64)address << 32;
 
     tag |= 0x30000000;
@@ -614,8 +617,8 @@ s32 sdfLinkReferenceDmaNode(s32 previous, u32 source) {
     u32 packet;
 
     packet = sdfCreateReferenceDmaNode(source);
-    ((SdfDmaTagHeader *)previous)->kind = SDF_DMA_TAG_NEXT_BYTE;
-    ((SdfDmaTagHeader *)previous)->address = packet & 0xfffffff;
+    ((SdfDmaTag *)previous)->kind = SDF_DMA_TAG_NEXT_BYTE;
+    ((SdfDmaTag *)previous)->address = packet & SDF_DMA_ADDRESS_MASK;
     return packet + 0x10;
 }
 
@@ -642,8 +645,8 @@ void sdfConnectPacketLists(SdfListHead *previous, SdfListHead *item) {
             item->secondReferenceSource = source;
         }
     }
-    ((SdfDmaTagHeader *)head)->kind = SDF_DMA_TAG_NEXT_BYTE;
-    ((SdfDmaTagHeader *)head)->address = item->first & 0x0FFFFFFF;
+    ((SdfDmaTag *)head)->kind = SDF_DMA_TAG_NEXT_BYTE;
+    ((SdfDmaTag *)head)->address = item->first & SDF_DMA_ADDRESS_MASK;
 }
 
 typedef struct SdfRefNode {
@@ -690,8 +693,8 @@ s32 sdfFlushPoolNodes(SdfPoolNode *node) {
         }
     }
     if (tail != NULL) {
-        ((SdfDmaTagHeader *)tail->last)->kind = 0x70;
-        ((SdfDmaTagHeader *)tail->last)->address = 0;
+        ((SdfDmaTag *)tail->last)->kind = SDF_DMA_TAG_END_BYTE;
+        ((SdfDmaTag *)tail->last)->address = 0;
     }
     return head;
 }
@@ -826,19 +829,27 @@ void sdfBuildSceneDrawHeader(SdfPacket *packet, s32 frameAddress, s32 width, s32
     sdfBuildFrameDepthScissorPacket(packet + 1, frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, context);
 }
 
-typedef struct SdfBufferRef {
-    u8 pad00[0xC];
-    s32 bufferAddress; /* 0xC */
-} SdfBufferRef;
+/* Native VRAM range returned by sdfAllocImageBuffer; offsets match its owner unit. */
+typedef struct SdfTexHead {
+    struct SdfTexHead *next;
+    struct SdfTexHead *prev;
+    s32 allocationMode;
+    u32 address; /* 0x0C: VRAM offset in 32-bit words */
+    s32 size;
+    s16 width;
+    s16 height;
+    s32 format;
+} SdfTexHead;
 
-typedef struct SdfRenderTargetView {
-    s16 width;       /* 0x0 */
-    u8 pad2[2];
-    s16 height;      /* 0x4 */
-    u8 frameFormat;  /* 0x6 */
-    u8 depthFormat;  /* 0x7 */
-    SdfBufferRef *buffers[3]; /* 0x8 */
-} SdfRenderTargetView;
+/* Native graph target: two color buffers followed by the shared depth buffer. */
+typedef struct SdfGraphObj {
+    s16 width;
+    s16 unk2;
+    s16 height;
+    u8 bufferFormat;
+    u8 auxiliaryFormat;
+    SdfTexHead *buffers[3];
+} SdfGraphObj;
 
 typedef struct SdfSceneDrawPacket {
     SdfPacket header;    /* 0x00 */
@@ -852,7 +863,7 @@ typedef struct SdfSceneDrawPacket {
 extern u8 D_003BD332;
 
 /* Build both GS drawing contexts from the selected frame buffer and shared depth buffer. */
-void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfRenderTargetView *view, s32 bufferIndex) {
+void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s32 bufferIndex) {
     s32 frameAddress;
     s32 depthAddress;
     s32 width;
@@ -861,15 +872,15 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfRenderTargetView 
     s32 depthFormat;
 
     sdfInitializeDmaReferenceTag(&packet->header, 0x15);
-    frameAddress = view->buffers[bufferIndex]->bufferAddress;
-    depthAddress = view->buffers[2]->bufferAddress;
+    frameAddress = view->buffers[bufferIndex]->address;
+    depthAddress = view->buffers[2]->address;
     width = view->width;
-    frameFormat = view->frameFormat;
+    frameFormat = view->bufferFormat;
     height = view->height;
-    depthFormat = view->depthFormat;
+    depthFormat = view->auxiliaryFormat;
     sdfBuildFrameDepthScissorPacket(packet->contextOne, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_003BD332, 0);
     sdfBuildFrameDepthScissorPacket(packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_003BD332, 1);
-    sdfBuildCenteredViewBoundsPacket(packet->limits, view->width, view->height, view->frameFormat, view->depthFormat);
+    sdfBuildCenteredViewBoundsPacket(packet->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
     packet->regs[0] = 0x517FB;
     packet->regs[1] = 0x47;
     packet->regs[2] = 0x44;
@@ -883,18 +894,10 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfRenderTargetView 
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D49E8);
 
-typedef struct SdfRenderTargetInfo {
-    s16 width;       /* 0x0 */
-    u8 pad2[2];
-    s16 height;      /* 0x4 */
-    u8 frameFormat;  /* 0x6 */
-    u8 depthFormat;  /* 0x7 */
-} SdfRenderTargetInfo;
-
 typedef struct SdfSceneNode {
     u8 pad00[4];
     void (*handler)(); /* 0x4 */
-    SdfRenderTargetInfo *view; /* 0x8 */
+    SdfGraphObj *view; /* 0x8 */
     u8 padC[4];
     SdfPacket header;  /* 0x10 */
     u64 draw[24];      /* 0x30 */
@@ -905,11 +908,11 @@ typedef struct SdfSceneNode {
 extern void func_002D49E8();
 
 /* Retain the render-target view and initialize the scene callback and fixed drawing state. */
-void sdfInitSceneNode(SdfSceneNode *node, SdfRenderTargetInfo *view) {
+void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
     sdfInitializeDmaReferenceTag(&node->header, 0x15);
     node->view = view;
     node->handler = func_002D49E8;
-    sdfBuildCenteredViewBoundsPacket(node->limits, view->width, view->height, view->frameFormat, view->depthFormat);
+    sdfBuildCenteredViewBoundsPacket(node->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
     node->regs[0] = 0x517FB;
     node->regs[1] = 0x47;
     node->regs[2] = 0x44;
@@ -1227,31 +1230,13 @@ void sdfPatchPacketResourceReference(SdfBigPacket *packet, s32 entryIndex) {
     packet->unk30 = (packet->unk30 & ~0x3FFF) | (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->resourceIndexXor]->baseAddress >> 6);
 }
 
-typedef struct SdfExtendedPacketSource {
-    u8 pad00[0xC];
-    u32 resourceWord;
-    u8 pad10[4];
-    s16 formatSelector;
-    u8 pad16[2];
-    s32 pixelFormat;
-} SdfExtendedPacketSource;
+extern SdfGraphObj D_003980E0;
 
-typedef struct SdfGraphPacketState {
-    s16 width;
-    s16 unk2;
-    s16 height;
-    u8 bufferMode;
-    u8 auxiliaryMode;
-    SdfTexResource *buffers[3];
-} SdfGraphPacketState;
-
-extern SdfGraphPacketState D_003980E0;
-
-/* Wrap an extended texture draw packet with a patchable resource header. */
+/* Build a local-to-local GS copy from graph buffer zero into destination. */
 void func_002D5CD0(SdfListHead *drawList, SdfListHead *linkedList,
-                   SdfExtendedPacketSource *source, s32 arg3, s32 arg4,
-                   s32 arg5, s32 arg6, s32 arg7, s32 arg_sp0,
-                   s32 arg_sp8, s32 (*allocPacket)(s32)) {
+                   SdfTexHead *destination, s32 destinationX, s32 destinationY,
+                   s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight,
+                   s32 resourceIndexXor, s32 (*allocPacket)(s32)) {
     SdfNode *packet;
     SdfPacket *drawPacket;
 
@@ -1259,15 +1244,15 @@ void func_002D5CD0(SdfListHead *drawList, SdfListHead *linkedList,
         allocPacket = sdfAllocPacketAligned;
     }
     packet = (SdfNode *)allocPacket(0x70);
-    packet->unk8 = arg_sp8;
+    packet->unk8 = resourceIndexXor;
     packet->unk4 = (u32)sdfPatchPacketResourceReference;
     drawPacket = (SdfPacket *)((u8 *)packet + 0x10);
 
     sdfInitializeExtendedDrawPacket(
-        drawPacket, source->resourceWord, source->formatSelector,
-        source->pixelFormat, arg3, arg4, D_003980E0.buffers[0]->word,
-        D_003980E0.width, D_003980E0.bufferMode, arg5, arg6, arg7,
-        arg_sp0, 2);
+        drawPacket, destination->address, destination->width,
+        destination->format, destinationX, destinationY, D_003980E0.buffers[0]->address,
+        D_003980E0.width, D_003980E0.bufferFormat, sourceX, sourceY, transferWidth,
+        transferHeight, 2);
     sdfAppendLinkedPacketNode(linkedList, (u32 *)packet);
     sdfAppendPacket(drawList, (s32)drawPacket);
 }
