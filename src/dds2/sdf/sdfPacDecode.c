@@ -24,13 +24,6 @@ typedef struct PacHead {
     u8 payload[1]; /* 0x10: variable-length packet data */
 } PacHead;
 
-typedef struct PacExtensionHeader {
-    u8 pad00[0x11];
-    u8 extensionFlags; /* 0x11 */
-    u8 pad12[0xE];
-    u8 data[1]; /* 0x20 */
-} PacExtensionHeader;
-
 typedef struct PacWork {
     struct PacWork *next; /* 0x0 */
     struct PacState *owner; /* 0x4 */
@@ -53,16 +46,18 @@ typedef struct PacBuf {
     s32 remainingBytes; /* 0xC */
 } PacBuf;
 
+/* Event 0 supplies a payload-size word; event 1 omits it. Keep the
+ * packet callback's native short-arity interface unprototyped. */
 typedef struct PacState {
     u8 phase; /* 0x0 */
     u8 flags; /* 0x1 */
-    u8 pad2[2]; /* 0x2 */
-    s32 unk4; /* 0x4 */
+    u16 packetCounter; /* 0x2: wraps from the initial 0xFFFF */
+    s32 (*packetCallback)(); /* 0x4 */
     void (*onInput)(struct PacState *); /* 0x8 */
     void (*onComplete)(struct PacState *); /* 0xC */
     u8 *inputCursor; /* 0x10 */
     s32 inputAvailable; /* 0x14 */
-    s32 unk18; /* 0x18 */
+    s32 consumedBytes; /* 0x18 */
     u8 *outputCursor; /* 0x1C */
     s32 pendingBytes; /* 0x20 */
     PacBuf *decoder; /* 0x24 */
@@ -207,13 +202,14 @@ s32 sdfPacDispatchPacket(PacState *state, s32 status, PacHead *packet) {
     return 0;
 }
 
-/* Return the extension payload only when its high-nibble length is nonzero. */
-void *sdfPacGetExtensionData(PacExtensionHeader *header) {
-    s32 extensionBytes = header->extensionFlags & PAC_EXTENSION_BYTES_MASK;
+/* Return the second header's payload when its extension-length nibble is nonzero. */
+void *sdfPacGetExtensionData(PacHead *header) {
+    PacHead *extension = (PacHead *)header->payload;
+    s32 extensionBytes = extension->flags & PAC_EXTENSION_BYTES_MASK;
     if (extensionBytes <= 0) {
         return NULL;
     }
-    return header->data;
+    return extension->payload;
 }
 
 /* Incrementally copy raw payload bytes, invoking completion at zero remaining. */

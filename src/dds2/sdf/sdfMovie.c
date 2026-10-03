@@ -2,21 +2,28 @@
 
 typedef struct DevState DevState;
 typedef struct MemBlock MemBlock;
+typedef struct SdfStreamTextureHead SdfStreamTextureHead;
 
-typedef struct MovSub {
-    u8 pad0[0x4];
+/* The two stream variants have distinct native allocations: 0x14 and 0x78. */
+typedef struct MovLinearStream {
+    MemBlock *allocation;
     u8 *bufferStart;
     u8 *readCursor;
     u8 *writeCursor;
     s32 bufferedBytes;
-    u8 pad14[0x4];
+} MovLinearStream;
+
+/* The first 0x40 bytes receive the movie-PAC file header. This is not
+ * the generic PAC decoder state. */
+typedef struct MovPacStream {
+    u8 pad00[0x18];
     s32 packetBytes;
     s32 blockBytes;
     u8 pad20[0x20];
     MemBlock *payloadAllocation;
     u8 *blockMask;
     s32 blockIndex;
-    u8 pad4C[0x4];
+    MemBlock *allocation;
     void *pendingCursor;
     u8 *pacBuffer;
     s32 pacReadOffset;
@@ -25,18 +32,65 @@ typedef struct MovSub {
     s32 ringOffset;
     s32 ringLength;
     s32 unk6C;
-} MovSub;
+    s32 scratchSize;
+    u8 *scratch;
+} MovPacStream;
+
+/* Native 0x8C sound/IPU stream node, owned inline by the movie object. */
+typedef struct SdfStreamFrameNode {
+    u8 pad00[8];
+    struct SdfStreamFrameNode *next;
+    u8 active;
+    u8 pad0D[2];
+    u8 drained;
+    u8 pad10[4];
+    u8 audioMode;
+    u8 loopMode;
+    u8 playbackMode;
+    u8 pad17[3];
+    u8 unk1A;
+    u8 pad1B;
+    s32 bufferSize;
+    u32 buffers[2];
+    s32 textureResources[2];
+    u8 pad30[4];
+    s32 resourceWord;
+    SdfStreamTextureHead *textureHead;
+    u16 width;
+    u16 height;
+    s32 sourceBytes;
+    u8 pad44[8];
+    u32 unk4C;
+    u8 headerReady;
+    u8 done;
+    u8 filledSlots;
+    u8 firstSlot;
+    u32 scratchBuffer;
+    u8 pad58[4];
+    s32 (*read)(struct SdfStreamFrameNode *, u32, s32, void *, s32);
+    u32 source;
+    u8 pad64[0x28];
+} SdfStreamFrameNode;
 
 typedef struct MovObj {
-    u8 unk0;
+    u8 active;
     u8 state;
     u8 stopRequested;
-    u8 pad3;
-    u8 pad4[0xC];
+    u8 isPac;
+    u16 unk04;
+    u16 unk06;
+    u32 unk08;
+    u16 unk0C;
+    u16 unk0E;
     DevState *deviceState;
     s32 totalBytes;
     s32 remainingBytes;
-    MovSub *stream;
+    void *stream; /* MovLinearStream or MovPacStream, selected by isPac. */
+    u8 pacEnabled;
+    u8 pad21;
+    u8 packetLimit;
+    u8 pad23;
+    SdfStreamFrameNode soundNode;
 } MovObj;
 
 s32 sdfDevQueueRead(DevState *state, void *data, s32 size);
@@ -52,8 +106,9 @@ s32 func_0036DE70(void);
 s32 EIntr(void);
 extern s32 D_00438D08;
 
+/* Queue up to 0x4000 bytes into the linear ring; state 5 means insufficient room. */
 void func_00345E18(MovObj *movie) {
-    MovSub *stream = movie->stream;
+    MovLinearStream *stream = movie->stream;
     s32 remaining = movie->remainingBytes;
     s32 readSize;
     u8 *bufferPosition;
@@ -88,8 +143,9 @@ void func_00345E18(MovObj *movie) {
     sdfDevQueueRead(deviceState, bufferPosition, readSize);
 }
 
+/* Consume device completions and stop requests for the linear stream; always return 0. */
 s32 func_00345EB0(DevState *deviceState, s32 operation, void *data, s32 bytesRead, MovObj *movie) {
-    MovSub *stream;
+    MovLinearStream *stream;
     s32 restoreInterrupts;
 
     movie->deviceState = deviceState;
@@ -143,8 +199,9 @@ s32 func_00345EB0(DevState *deviceState, s32 operation, void *data, s32 bytesRea
     return 0;
 }
 
+/* Queue a movie-PAC block only when both ring-buffer room predicates allow it. */
 void sdfMovieProcessPendingData(MovObj *movie) {
-    MovSub *stream;
+    MovPacStream *stream;
     s32 remaining;
 
     stream = movie->stream;
@@ -160,8 +217,9 @@ void sdfMovieProcessPendingData(MovObj *movie) {
     sdfDevQueueRead(movie->deviceState, stream->pendingCursor, remaining <= 0x4000 ? remaining : 0x4000);
 }
 
+/* Process movie-PAC header, block-mask and payload completions; always return 0. */
 s32 func_003460D8(DevState *deviceState, s32 operation, void *data, s32 bytesRead, MovObj *movie) {
-    MovSub *stream;
+    MovPacStream *stream;
 
     movie->deviceState = deviceState;
     stream = movie->stream;
@@ -276,8 +334,9 @@ s32 func_003460D8(DevState *deviceState, s32 operation, void *data, s32 bytesRea
     return 0;
 }
 
+/* Sound/IPU source operations: report available bytes/EOF, copy data, or resume reads. */
 s32 func_00346468(void *unused, MovObj *movie, s32 operation, u8 *data, s32 size) {
-    MovSub *stream = movie->stream;
+    MovLinearStream *stream = movie->stream;
 
     switch (operation) {
     case 0:
@@ -325,11 +384,12 @@ s32 func_00346468(void *unused, MovObj *movie, s32 operation, u8 *data, s32 size
     return 0;
 }
 
+/* Sound/IPU source operations for the movie-PAC ring; retain the native copy helper. */
 s32 func_00346608(void *unused, MovObj *movie, s32 operation, u8 *data, s32 size) {
     void func_003465E8(void *destination, const void *source, u32 byteCount) {
         memcpy(destination, source, byteCount);
     }
-    MovSub *stream = movie->stream;
+    MovPacStream *stream = movie->stream;
 
     switch (operation) {
     case 0:
