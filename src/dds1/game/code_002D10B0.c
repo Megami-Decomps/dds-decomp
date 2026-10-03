@@ -130,7 +130,42 @@ void sdfSetBufferSlot(s32 updateSingleSlot, s32 bufferIndex, s32 slotIndex) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1380);
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D14C8);
+extern u8 D_003BD2E1;
+extern volatile u8 D_003BD2F1;
+extern s32 D_003BD9D8;
+extern s32 D_003BD2FC;
+extern volatile u8 sdfPacketSlotIndex;
+extern void sdfSleepThreadCount(s32);
+extern void sdfDevSignalPendingSemaphore(void);
+extern s32 WakeupThread(s32);
+extern s32 WaitSema(s32);
+extern void sdfGraphSelectDisplayBuffer(s32);
+
+void func_002D14C8(void) {
+    s8 bufferIndex;
+    s32 idleFlag;
+
+    for (;;) {
+        sdfSleepThreadCount(0);
+        if ((D_003BD2E1 & 1) == 0) {
+            sdfDevSignalPendingSemaphore();
+        }
+        idleFlag = (~*(volatile u64 *)0x12001000 >> 13) & 1;
+        D_003BD2E1 = idleFlag ^ 1;
+        if (D_003BD2F1 == 1) {
+            D_003BD2F1 = 2;
+            WakeupThread(D_003BD9D8);
+            WaitSema(D_003BD2FC);
+        }
+        bufferIndex = sdfBufferSlotIndices[D_003BD2E1];
+        if (bufferIndex >= 0) {
+            sdfGraphSelectDisplayBuffer(bufferIndex);
+        }
+        if (sdfPacketSlotIndex != 0) {
+            sdfPacketSlotIndex += 0xFF;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1590);
 
@@ -868,3 +903,4 @@ INCLUDE_SDATA(const s32, "game/code_002D10B0", sdfBusyBufferIndex);
 INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD304);
 
 INCLUDE_SDATA(const s32, "game/code_002D10B0", sdfResourceListHead);
+
