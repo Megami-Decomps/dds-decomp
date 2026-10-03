@@ -499,6 +499,8 @@ extern s32 func_00115840(s32 mode, s32 arg);
 extern void effObjDispatchMagatuhiState(s32 obj);
 extern s32 effObjCopyMagatuhiSourceParameters(s32 obj, s32 a, s32 b, s32 c, s32 d);
 extern void func_0022C6B0(s32 obj, s32 value, s32 type, u32 word, EvtViewer *viewer);
+extern void *func_00115298(void *obj, f32 *vecA, f32 *vecB);
+extern void effObjReplaceActiveEventNode(void *obj, u32 entryId);
 
 /* Create the viewer object for a command in the first free slot; returns the slot, or -1 when full. */
 s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *params, EvtViewer *viewer) {
@@ -575,7 +577,20 @@ void evtEventViewerFreeSlot(s32 index, EvtViewer *viewer)
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022CA88);
+s32 func_0022CA88(void *descriptor, u32 entryId, s32 value, s32 type, u32 word, EvtViewer *viewer) {
+    f32 vec0[4];
+    f32 vec1[4];
+    s32 handle;
+
+    memset(vec0, 0, 0x10);
+    memset(vec1, 0, 0x10);
+    vec1[3] = 1.0f;
+    handle = (s32)func_00115298(descriptor, vec0, vec1);
+    effObjSetFlags(handle, 1);
+    effObjReplaceActiveEventNode((void *)handle, entryId);
+    func_0022C6B0(handle, value, type, word, viewer);
+    return handle;
+}
 
 void evtEventViewerFreeBuffer(EvtEvNode *work)
 {

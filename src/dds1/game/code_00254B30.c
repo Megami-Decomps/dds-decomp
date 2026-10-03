@@ -64,6 +64,7 @@ typedef struct {
 } DspEntrySpriteLookup;
 
 extern DspEntrySpriteLookup D_003BC448[];
+extern DspEntrySpriteLookup D_003BC480[];
 extern char D_003BC450[];
 extern s32 func_0024E310(s32, s32, s32, s32, s32, s32, s32);
 extern void func_003014F0(char *, const char *, ...);
@@ -410,7 +411,18 @@ void mnuDrawDisplayEntrySpriteFromLookup(s32 x, s32 y, s32 layer, DspEntry *entr
     func_0024E260(x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
 }
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_002562E8);
+/* Draw both layers of a display entry and queue its formatted value. */
+void func_002562E8(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context) {
+    DspEntrySpriteLookup lookup = D_003BC480[0];
+    char text[0x10];
+    u32 tag = scale | 0xA09DC300;
+
+    func_0024E260(x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
+    func_0024E260(x, y, layer, scale, lookup.spriteIndices[entry->unitId] + 0x14, context);
+    func_003014F0(text, D_003BC450, entry->level);
+    frFontQueueFlaggedGlyphAndMeasure(x + 0x1BB, y + 0x173, layer, tag,
+                                     4, (u32)text, 0, context);
+}
 
 extern f32 sdfSinPoly(f32);
 
@@ -588,3 +600,4 @@ INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC470);
 INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC478);
 
 INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC480);
+
