@@ -10,6 +10,8 @@ import struct
 from collections import Counter, defaultdict, deque
 from pathlib import Path
 
+import amb
+import automap_flow
 import battle_tbl
 import encounter_flow
 import fld
@@ -796,11 +798,103 @@ def _render_random_encounter_dot(graph: dict, area_id: str) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _render_automap_dot(graph: dict, area_id: str) -> str:
+    """Render one room's active AMB row and collision discovery selectors."""
+
+    selection = next(
+        (row for row in graph.get("automapAreaEdges", ()) if row["source"] == area_id),
+        None,
+    )
+    if selection is None:
+        raise FieldGraphError(f"no automap selection found for {area_id}")
+    area_rows = {row["id"]: row for row in graph.get("automapAreas", ())}
+    subblock_rows = {
+        row["id"]: row for row in graph.get("automapSubblocks", ())
+    }
+    discovery = [
+        row
+        for row in graph.get("automapDiscoveryEdges", ())
+        if row["source"] == area_id
+    ]
+
+    lines = [
+        "digraph dds_field_automap {",
+        "  graph [rankdir=LR];",
+        '  node [fontname="sans-serif"];',
+        '  edge [fontname="sans-serif" fontsize=9];',
+        f"  {json.dumps(area_id)} [label={json.dumps(area_id)}, shape=box];",
+    ]
+    active_id = selection["target"] or f"{area_id}:automap:{selection['status']}"
+    if selection["target"] is None:
+        active_label = f"{selection['status']} | runtime area {selection['areaIndex']}"
+        lines.append(
+            f"  {json.dumps(active_id)} "
+            f"[label={json.dumps(active_label)}, shape=ellipse, style=\"dashed\", color=\"gray\"];"
+        )
+    else:
+        area = area_rows[selection["target"]]
+        active_label = (
+            f"{area['source']} | area {area['index']} | {area['name']} | "
+            f"{area['subblockCount']} sub-blocks"
+        )
+        lines.append(
+            f"  {json.dumps(active_id)} "
+            f"[label={json.dumps(active_label)}, shape=ellipse];"
+        )
+    lines.append(
+        f"  {json.dumps(area_id)} -> {json.dumps(active_id)} "
+        f"[label={json.dumps('room - 1 = ' + str(selection['areaIndex']))}];"
+    )
+
+    grouped: Counter[tuple[str | None, str, int, int, int | None]] = Counter()
+    for edge in discovery:
+        key = (
+            edge["target"],
+            edge["resolution"],
+            edge["selector"],
+            edge["upperName"],
+            edge["runtimeFloor"],
+        )
+        grouped[key] += 1
+    rendered: set[str] = set()
+    for (target, resolution, selector, upper_name, runtime_floor), count in sorted(
+        grouped.items(), key=lambda row: (row[0][1], row[0][2], row[0][3])
+    ):
+        if target is None:
+            target = f"{active_id}:{resolution}:{selector}"
+            if target not in rendered:
+                label = resolution.replace("-", " ")
+                if runtime_floor is not None:
+                    label += f" | runtime floor {runtime_floor}"
+                lines.append(
+                    f"  {json.dumps(target)} "
+                    f"[label={json.dumps(label)}, shape=box, style=\"dashed\", color=\"gray\"];"
+                )
+        elif target not in rendered:
+            row = subblock_rows[target]
+            label = (
+                f"sub-block {row['index']} | {row['name']} | floor {row['floor']} "
+                f"(runtime {row['runtimeFloor']}) | {row['iconCount']} icons"
+            )
+            lines.append(
+                f"  {json.dumps(target)} [label={json.dumps(label)}, shape=box];"
+            )
+        rendered.add(target)
+        label = f"selector {selector} | upper {upper_name} | faces x{count}"
+        lines.append(
+            f"  {json.dumps(active_id)} -> {json.dumps(target)} "
+            f"[label={json.dumps(label)}];"
+        )
+    lines.append("}")
+    return "\n".join(lines) + "\n"
+
+
 def render_dot(
     graph: dict,
     interaction_area: str | None = None,
     event_field: str | None = None,
     encounter_area: str | None = None,
+    automap_area: str | None = None,
 ) -> str:
     """Render the world graph or one area's INF interaction state machines."""
 
@@ -810,6 +904,8 @@ def render_dot(
         return _render_event_dot(graph, event_field)
     if encounter_area is not None:
         return _render_random_encounter_dot(graph, encounter_area)
+    if automap_area is not None:
+        return _render_automap_dot(graph, automap_area)
 
     lines = [
         "digraph dds_field_world {",
@@ -1302,6 +1398,7 @@ def _load_graph(
     include_events: bool = False,
     profile_name: str | None = None,
     include_random_encounters: bool = False,
+    include_automap: bool = False,
 ) -> dict:
     if not field_dir.is_dir():
         raise FieldGraphError(f"field source directory does not exist: {field_dir}")
@@ -1392,17 +1489,20 @@ def _load_graph(
         graph["schema"] = "dds-field-world-7"
         graph["summary"].update(sections.pop("eventSummary"))
         graph.update(sections)
-    if include_random_encounters:
-        assert encounter_table is not None and battle_symbols is not None
-        fields = tuple(
+    encoded_fields = None
+    if include_random_encounters or include_automap:
+        encoded_fields = tuple(
             (
                 source.stem,
                 fld.encode(fld.parse_source(source.read_text(encoding="utf-8"))),
             )
             for source in field_paths
         )
+    if include_random_encounters:
+        assert encounter_table is not None and battle_symbols is not None
+        assert encoded_fields is not None
         sections = random_encounter_flow.build_sections(
-            fields, encounter_table, battle_symbols
+            encoded_fields, encounter_table, battle_symbols
         )
         random_nodes = sections.pop("encounterNodes")
         existing_nodes = {
@@ -1436,6 +1536,26 @@ def _load_graph(
         graph["summary"].update(sections.pop("randomEncounterSummary"))
         graph["summary"]["totalEncounterNodes"] = len(existing_nodes)
         graph.update(sections)
+    if include_automap:
+        assert encoded_fields is not None
+        automaps = {}
+        for source in sorted(field_dir.glob("f[0-9][0-9][0-9].ambasm")):
+            field_number = int(source.stem[1:])
+            if field_number in automaps:
+                raise FieldGraphError(f"duplicate base AMB for field {field_number}")
+            automaps[field_number] = (
+                source.stem,
+                amb.encode(amb.parse_source(source.read_text(encoding="utf-8"))),
+            )
+        if not automaps:
+            raise FieldGraphError(f"no base .ambasm sources found in {field_dir}")
+        try:
+            sections = automap_flow.build_sections(encoded_fields, automaps)
+        except automap_flow.AutomapFlowError as exc:
+            raise FieldGraphError(str(exc)) from exc
+        graph["schema"] = "dds-field-world-9"
+        graph["summary"].update(sections.pop("automapSummary"))
+        graph.update(sections)
     return graph
 
 
@@ -1465,6 +1585,11 @@ def main() -> None:
         help="include exact area, zone, pool, and weighted encounter flow",
     )
     parser.add_argument(
+        "--include-automap",
+        action="store_true",
+        help="include exact room, AMB area, sub-block, and discovery-face flow",
+    )
+    parser.add_argument(
         "--profile",
         choices=("dds1", "dds2"),
         help="command profile for event flow (inferred from the repository layout)",
@@ -1480,6 +1605,10 @@ def main() -> None:
     parser.add_argument(
         "--encounter-area",
         help="render one fNNN_AAA random encounter graph (DOT output only)",
+    )
+    parser.add_argument(
+        "--automap-area",
+        help="render one fNNN_AAA automap discovery graph (DOT output only)",
     )
     args = parser.parse_args()
     try:
@@ -1514,6 +1643,20 @@ def main() -> None:
                     "--encounter-area, --event-field, and --interaction-area "
                     "are mutually exclusive"
                 )
+        automap_area = None
+        if args.automap_area is not None:
+            automap_area = args.automap_area.lower()
+            if args.format != "dot":
+                raise FieldGraphError("--automap-area requires --format dot")
+            if FIELD_AREA_PATTERN.fullmatch(automap_area) is None:
+                raise FieldGraphError("automap area must have the form fNNN_AAA")
+            if any(
+                value is not None
+                for value in (interaction_area, event_field, encounter_area)
+            ):
+                raise FieldGraphError(
+                    "--automap-area and other focused views are mutually exclusive"
+                )
         profile_name = args.profile
         if profile_name is None:
             inferred_profile = script_dir.parent.parent.name.lower()
@@ -1526,11 +1669,14 @@ def main() -> None:
             args.include_events or event_field is not None,
             profile_name,
             args.include_random_encounters or encounter_area is not None,
+            args.include_automap or automap_area is not None,
         )
         text = (
             json.dumps(graph, indent=2, ensure_ascii=True) + "\n"
             if args.format == "json"
-            else render_dot(graph, interaction_area, event_field, encounter_area)
+            else render_dot(
+                graph, interaction_area, event_field, encounter_area, automap_area
+            )
         )
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(text, encoding="utf-8")
@@ -1557,6 +1703,11 @@ def main() -> None:
         description += (
             f", {summary['randomEncounterAreas']} random-encounter areas, and "
             f"{summary['weightedEncounterEdges']} weighted encounter slots"
+        )
+    if "linkedAutomapFieldAreas" in summary:
+        description += (
+            f", {summary['linkedAutomapFieldAreas']} automap-linked areas, and "
+            f"{summary['automapDiscoveryFaces']} discovery faces"
         )
     print(f"wrote {description} to {args.output}")
 

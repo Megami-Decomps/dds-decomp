@@ -98,6 +98,32 @@ malformed extents, noncanonical relocation streams, misplaced relocations,
 invalid fixed strings, overlapping typed objects, invalid hierarchy or asset
 references, inconsistent draw sizes, and malformed VIF mesh packets.
 
+## Runtime field identity
+
+Ordinary field rooms and automap rows have an exact index relationship. Loading
+`fNNN_AAA.LB` sets the active field to `NNN` and the active automap area index
+to `AAA - 1`. The shared `fNNN_000.LB` archive supplies the base `fNNN.AMB`;
+the runtime installs its area table without looking up the area's string name
+or testing its coordinates. The names remain useful presentation data, but are
+not the room-to-area key.
+
+On a collision face with attribute `0x800`, the first `automap` byte is a
+one-based sub-block selector. The runtime records selector `N` as discovery bit
+`N - 1`, searches that same zero-based row in the active AMB area, and returns
+the row's signed `floor + 1`. A missing row takes the native default return of
+`1`. The second byte is retained as the separate numeric `upperName` channel;
+it is not treated as another sub-block identity.
+
+The maintained ordinary field sources link 464 of 554 DDS1 rooms and 477 of
+568 DDS2 rooms to an in-range base AMB row. DDS1 has 86 fields without a base
+map and four out-of-range room indices; DDS2 has 84 and seven. The complete
+collision corpus contains 2,956 DDS1 and 2,109 DDS2 discovery-tagged faces.
+Of these, 2,547 and 1,986 resolve to a sub-block, 344 and 18 take the native
+default-floor path, and 65 and 105 belong to resources without a proven active
+automap row. The latter split into 63/102 faces in `k*` resources and 2/3 in
+out-of-range ordinary rooms; the ordinary rooms without a base map contain no
+tagged faces. These cases remain explicit in graph output.
+
 ## Scene export
 
 `tools/amb_scene.py` turns the decoded graph into a self-contained glTF 2.0
@@ -107,6 +133,8 @@ GLB. It accepts either a retail binary or tracked source:
 python3 tools/amb_scene.py f024.amb f024.glb --meters-per-unit 0.01
 python3 tools/amb_scene.py src/dds1/data/field/f024.ambasm f024.glb \
   --area 003 --meters-per-unit 0.01
+python3 tools/amb_scene.py src/dds1/data/field/f024.ambasm f024-area-0.glb \
+  --area-index 0 --meters-per-unit 0.01
 ```
 
 The export retains every selected area's native model hierarchy, transforms,
@@ -118,6 +146,10 @@ Icons also receive a reusable octahedral marker;
 `--icon-marker-size 0` omits that diagnostic geometry. Native axes are
 preserved, and `--meters-per-unit` applies one explicit scale to geometry,
 transforms, bounds, positions, and markers.
+
+Area names and zero-based indices are alternative selectors. Index selection
+is useful when reproducing the field runtime's `AAA - 1` choice; the composed
+field exporter applies it automatically.
 
 All 54 retail AMBs export without an alternate parser: the scene exporter
 consumes the same decoded model graph used by disassembly and reuses the FLD1
