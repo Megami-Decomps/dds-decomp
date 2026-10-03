@@ -3,7 +3,6 @@
 #include "btl_command.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
-
 extern u32 btlGetEffectActor(void);
 
 extern u32 func_001A3360(s32, s32, s32);
@@ -49,6 +48,8 @@ extern u32 btlGetSelectedBossEffectId(void);
 extern u32 btlGetSpecialModeEffectValue(void);
 
 extern s32 btlGetRuntime(void);
+extern void btlBossDebugPrintf(s32, ...);
+extern s32 btlFindUnitByActor(s32);
 
 extern void func_001D6300(void *, void *);
 
@@ -166,7 +167,7 @@ u32 btlPickWeightedAiSlot(s32 unit, s32 species, s32 rowIndex) {
     }
     btlDebugPrintf("AI_BUGBUGBUGBUGBUG           \n");
     if (sdfPfsDebugMode == 0) {
-        btlBossDebugPrintf(D_003A5988);
+        btlBossDebugPrintf((s32)D_003A5988);
     }
     return 0;
 }
@@ -882,12 +883,12 @@ extern u8 sdfPfsDebugMode;
 s32 btlCheckActorEligibilityWithDebug(s32 actor) {
     if (btlWouldUiValueFallBelowQuarter(actor, 0) != 0) {
         if (sdfPfsDebugMode == 0) {
-            btlBossDebugPrintf(D_003A5A80);
+            btlBossDebugPrintf((s32)D_003A5A80);
         }
         return 1;
     }
     if (sdfPfsDebugMode == 0) {
-        btlBossDebugPrintf(D_003A5AA8);
+        btlBossDebugPrintf((s32)D_003A5AA8);
     }
     return 0;
 }
@@ -3073,11 +3074,12 @@ void btlTriggerSpecialUnitAction(void) {
     }
 }
 
-extern u32 effMiscRand(char *);
+struct EffRandState;
+extern u32 effMiscRand(struct EffRandState *);
 
 extern char D_003A5D98[];
 
-extern char effSharedRandomState[];
+extern struct EffRandState effSharedRandomState;
 
 /* Boss-selection view of battle->effect: +0x0C is a full-width lookup ID
  * here, unlike the timer/phase view in BattleEffectState. */
@@ -3092,8 +3094,8 @@ void btlInitRandomBossSelection(void) {
     u8 *data = (u8 *)((BtlState *)btlGetRuntime())->effect;
     ((BtlBossEffectPayload *)data)->color = 0x80808080;
     ((BtlBossEffectPayload *)data)->options = 0;
-    ((BtlBossEffectPayload *)data)->selectedId = effMiscRand(effSharedRandomState) % 6;
-    btlBossDebugPrintf(D_003A5D98, ((BtlBossEffectPayload *)data)->selectedId);
+    ((BtlBossEffectPayload *)data)->selectedId = effMiscRand(&effSharedRandomState) % 6;
+    btlBossDebugPrintf((s32)D_003A5D98, ((BtlBossEffectPayload *)data)->selectedId);
 }
 
 s32 btlFilterBossCommandBySelection(u8 *unit, s32 command) {
@@ -3127,7 +3129,7 @@ u8 *unit;
     ((BtlUnit *)unit)->unkB8 = 100.0f;
     ((BtlUnit *)unit)->unkBC = 25.0f;
     if (((BtlBossEffectPayload *)battleData)->selectedId != ((BtlUnit *)unit)->lookupId) {
-        entry = (u8 *)btlFindUnitByActor(unit);
+        entry = (u8 *)btlFindUnitByActor((s32)unit);
         if (entry != 0) {
             *(u16 *)(entry + 4) = 0;
             ((BtlUnit *)unit)->mode = 0x10f;
@@ -3249,7 +3251,7 @@ s32 btlCheckLinkedActionEffectTarget(BtlUnit *actor, BtlUnit *target, s32 comman
         return 0;
     }
     if (datCommandSelectors[command * 2 + 1] != 1) {
-        unit = btlFindUnitByActor(actor);
+        unit = btlFindUnitByActor((s32)actor);
         if (unit == 0) {
             return 0;
         }
@@ -3277,7 +3279,74 @@ u32 btlSelectResponseCodeForEnemyFlag(u32 unused, s32 unit) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00209238);
+extern char D_003A5DB8[];
+
+s32 func_00209238(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlBossEffectPayload *effect = (BtlBossEffectPayload *)battle->effect;
+    s32 options;
+    BtlUnit *actor;
+    BtlUnit *unit;
+    BtlUnit *oldUnit;
+    BtlUnit *newUnit;
+    s32 entry;
+    u32 newId;
+    u32 unitFlags;
+
+    options = effect->options;
+    effect->options = options & ~2;
+    if (battle->mode != 1) {
+        return -1;
+    }
+    actor = (BtlUnit *)effect->actor;
+    if (actor == NULL) {
+        return -1;
+    }
+    if ((actor->flags & 2) == 0) {
+        return -1;
+    }
+    if ((options & 1) == 0) {
+        return -1;
+    }
+
+    newId = effMiscRand(&effSharedRandomState) % 6;
+    if (newId == effect->selectedId) {
+        newId = (newId + 1) % 6;
+    }
+    oldUnit = NULL;
+    newUnit = NULL;
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
+        unitFlags = unit->flags;
+        if (unitFlags & 1) {
+            if (unitFlags & 0x400) {
+                oldUnit = unit->lookupId == effect->selectedId ? unit : oldUnit;
+                newUnit = unit->lookupId == newId ? unit : newUnit;
+            }
+        }
+    }
+    if (oldUnit->flags & 0x20) {
+        return -1;
+    }
+
+    effect->selectedId = newId;
+    if (oldUnit != newUnit) {
+        newUnit->mode = 0x10E;
+        oldUnit->mode = 0x10F;
+        newUnit->hp = oldUnit->hp;
+        newUnit->unk_12A = oldUnit->unk_12A;
+        newUnit->conditionFlags = oldUnit->conditionFlags;
+        oldUnit->conditionFlags = 0;
+        oldUnit->hp = oldUnit->maxHp;
+        oldUnit->unk_12A = *(u16 *)((u8 *)oldUnit + 0x12C);
+        entry = btlFindUnitByActor((s32)newUnit);
+        *(u16 *)(entry + 4) = 1;
+        entry = btlFindUnitByActor((s32)oldUnit);
+        *(u16 *)(entry + 4) = 0;
+    }
+    btlBossDebugPrintf((s32)D_003A5DB8, oldUnit->lookupId, newUnit->lookupId, oldUnit, newUnit);
+    effect->options = ((effect->options & ~4) | 2) & ~1;
+    return -1;
+}
 
 s32 btlFindSubsequentTurnScript(void) {
     s32 battle;
