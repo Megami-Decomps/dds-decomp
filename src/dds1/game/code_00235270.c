@@ -61,13 +61,20 @@ extern s16 evtSkyTransitionTargetValue;
 
 /* Native viewer child node; frame rows traverse this same linked record. */
 typedef struct EvtRuntimeChild {
-    u8 pad00[2];
+    u16 unk00;
     u16 unk02;
-    u8 pad04[6];
-    u16 groupTypeIndex; /* Reassigned consecutively across children of a group type. */
-    u8 pad0C[6];
-    u16 unk12;
-    u8 pad14[0x18];
+    u16 unk04;
+    u8 pad06[2];
+    union {
+        s32 words[8];
+        struct {
+            u8 pad00[2];
+            u16 groupTypeIndex; /* Reassigned consecutively across children of a group type. */
+            u8 pad04[6];
+            u16 groupTypeAIndex;
+        } f;
+    } body; /* 0x08 */
+    u8 pad28[4];
     void *payload; /* 0x2C: serialized child data */
     struct EvtRuntimeChild *next; /* 0x30 */
     struct EvtRuntimeChild *prev; /* 0x34 */
@@ -113,7 +120,9 @@ typedef struct EvtRuntime {
     u8 pad00[4];
     u32 flags; /* 0x04 */
     s32 windowContext; /* 0x08 */
-    u8 pad0C[0xC];
+    u8 pad0C[8];
+    u16 rangeEnd; /* 0x14: terminal value for the final type-8 serialized span */
+    u8 pad16[2];
     s32 curFrame; /* 0x18 */
     u8 pad1C[4];
     s32 entryTotal; /* 0x20 */
@@ -1638,7 +1647,7 @@ s32 evtAssignRuntimeChildSequenceAndCount(EvtRuntime *runtime) {
         if (group->type == 0xA) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk12 = index++;
+                child->body.f.groupTypeAIndex = index++;
             }
         }
     }
@@ -1666,7 +1675,7 @@ s32 evtIndexGroupTypeThirteenChildren(EvtRuntime *runtime) {
         if (group->type == 0xD) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->groupTypeIndex = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1680,7 +1689,7 @@ s32 evtIndexGroupTypeFourteenChildren(EvtRuntime *runtime) {
         if (group->type == 0xE) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->groupTypeIndex = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1694,7 +1703,7 @@ s32 evtIndexGroupTypeFifteenChildren(EvtRuntime *runtime) {
         if (group->type == 0xF) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->groupTypeIndex = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1708,7 +1717,7 @@ s32 evtIndexGroupTypeTwentyThreeChildren(EvtRuntime *runtime) {
         if (group->type == 0x17) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->groupTypeIndex = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1722,7 +1731,7 @@ s32 evtIndexGroupTypeTwentySevenChildren(EvtRuntime *runtime) {
         if (group->type == 0x1B) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->groupTypeIndex = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1736,7 +1745,7 @@ s32 evtIndexGroupTypeSixteenChildren(EvtRuntime *runtime) {
         if (group->type == 0x10) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->groupTypeIndex = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1750,7 +1759,7 @@ s32 evtIndexGroupTypeSeventeenChildren(EvtRuntime *runtime) {
         if (group->type == 0x11) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->groupTypeIndex = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1764,7 +1773,7 @@ s32 evtIndexGroupTypeTwentyFiveChildren(EvtRuntime *runtime) {
         if (group->type == 0x19) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->groupTypeIndex = index++;
+                child->body.f.groupTypeIndex = index++;
             }
         }
     }
@@ -1787,7 +1796,59 @@ void evtWriteRuntimeHeaderValues(s32 output, s32 *state) {
     func_0023D5B0(output, buf, 0x10);
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023DFA8);
+typedef struct EvtSerializedChild {
+    u16 groupType;
+    u16 start;
+    u16 span;
+    u16 value;
+    u8 pad08[4];
+    s32 body[8];
+} EvtSerializedChild;
+
+void func_0023DFA8(s32 output, s32 mode, EvtRuntime *runtime) {
+    EvtRuntimeGroup *group;
+
+    for (group = runtime->groups; group != NULL; group = group->next) {
+        EvtRuntimeChild *child = group->children;
+
+        if (mode == 2) {
+            if (group->type == 5 || group->type == 0x13) {
+                continue;
+            }
+        } else if (mode == 3) {
+            if (group->type != 5 && group->type != 0x13) {
+                continue;
+            }
+        }
+
+        for (; child != NULL; child = child->next) {
+            EvtSerializedChild record;
+            s32 i;
+            u16 value;
+
+            value = child->unk04;
+            record.groupType = group->type;
+            record.start = child->unk00;
+            record.span = child->unk02;
+            record.value = value;
+            for (i = 0; i < 8; i++) {
+                record.body[i] = child->body.words[i];
+            }
+            if (group->type == 8) {
+                if (child->body.words[0] == 0) {
+                    record.span = 0;
+                } else {
+                    if (child->next != NULL) {
+                        record.span = child->next->unk00 - child->unk00;
+                    } else {
+                        record.span = runtime->rangeEnd - child->unk00;
+                    }
+                }
+            }
+            func_0023D5B0(output, &record, sizeof(record));
+        }
+    }
+}
 
 typedef struct EvtFixedEntryTable {
     u8 pad00[0x20];
@@ -2609,4 +2670,3 @@ INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC350);
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC358);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC360);
-
