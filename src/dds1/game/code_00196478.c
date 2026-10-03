@@ -437,7 +437,25 @@ u32 func_001979C8(s32 x, s32 y, s32 depth, s32 colors, char *text, s32 previousG
     return glyph;
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00197A98);
+u32 func_00197A98(s32 x, s32 y, s32 depth, u32 colors, char *text, s32 previousGlyph) {
+    u32 glyph;
+    extern u32 appendGlyphForConstruction(void *, s8, s8, s8, s32) __asm__("frFontAppendGlyphFromData");
+    extern u32 createGlyphForConstruction(char *, s32, s32, s32, s32) __asm__("func_001951C8");
+    extern void addGlyphFlagsForConstruction(s32) __asm__("frFontAddSharedGlyphFlags");
+    extern void setGlyphContextForConstruction(u32, u32, u32) __asm__("frFontSetContextPair");
+    extern void setGlyphShiftForConstruction(u32, u32) __asm__("frFontStoreShiftedContextValue");
+    extern void setGlyphColorsForConstruction(u32, u32) __asm__("frFontSetChildColors");
+
+    glyph = appendGlyphForConstruction(D_003BB188, 0, 0, 0, previousGlyph);
+    frFontClearFlagBits(2);
+    glyph = createGlyphForConstruction(text, 3, 0, 0, glyph);
+    frFontSetFlagAndMeasureGlyphs(glyph, -2);
+    addGlyphFlagsForConstruction(2);
+    setGlyphContextForConstruction(glyph, x, y);
+    setGlyphShiftForConstruction(glyph, depth << 4);
+    setGlyphColorsForConstruction(glyph, colors);
+    return glyph;
+}
 
 /* Attach the alternate font glyph, with a 12x16 cell, to its parent. */
 void itfAttachGlyph12x16(u64 x, u64 y, s32 depth, u64 colors,
