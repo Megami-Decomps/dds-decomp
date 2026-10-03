@@ -598,26 +598,30 @@ def _selection_push_symbol(
 
 def _event_push_symbol(
     raw: int,
-    next_raw: int | None,
+    following_raws: tuple[int, ...],
     command_profile: flw0_profiles.CommandProfile | None,
 ) -> str | None:
-    if command_profile is None or next_raw is None:
-        return None
-    event_commands = {
-        command.command_id
-        for name in ("CALL_EVENT", "SUBMIT_EVENT")
-        if (command := command_profile.by_name.get(name)) is not None
-    }
-    if not event_commands:
+    if command_profile is None or raw & 0xFFFF != OPCODE_IDS["PUSHIS"]:
         return None
     event_id = raw >> 16
-    if (
-        raw & 0xFFFF != OPCODE_IDS["PUSHIS"]
-        or next_raw & 0xFFFF != OPCODE_IDS["COMM"]
-        or next_raw >> 16 not in event_commands
-    ):
-        return None
-    return command_profile.events_by_id.get(event_id)
+    for command in command_profile.commands:
+        argument = command.event_argument
+        if argument is None or argument >= len(following_raws):
+            continue
+        # Handler argument zero is the stack top. A literal argument N is
+        # therefore followed by N other literal pushes and then the command.
+        if any(
+            word & 0xFFFF != OPCODE_IDS["PUSHIS"]
+            for word in following_raws[:argument]
+        ):
+            continue
+        command_word = following_raws[argument]
+        if (
+            command_word & 0xFFFF == OPCODE_IDS["COMM"]
+            and command_word >> 16 == command.command_id
+        ):
+            return command_profile.events_by_id.get(event_id)
+    return None
 
 
 def _procedure_push_symbol(
@@ -692,7 +696,7 @@ def _render_code(
             continue
         event_symbol = _event_push_symbol(
             raw,
-            words[pc + 1] if pc + 1 < len(words) else None,
+            tuple(words[pc + 1 : pc + 3]),
             command_profile,
         )
         if event_symbol is not None:

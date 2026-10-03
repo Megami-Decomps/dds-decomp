@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 #define SDF_CHIP_CLASS_COUNT 7
 #define SDF_CHIP_BLOCK_SHIFT 12
@@ -6,8 +7,6 @@
 #define SDF_MEM_ALIGNMENT_MASK 0x7F
 #define SDF_MEM_BLOCK_FREE 0
 #define SDF_MEM_BLOCK_SENTINEL 2
-
-extern u32 D_003E274C[];
 
 INCLUDE_ASM(const s32, "game/code_002D00F8", func_002D00F8);
 
@@ -81,23 +80,6 @@ void sdfGetChipHeapStats(SdfChipStats *stats) {
     stats->partialBlocks = partialBlocks;
 }
 
-/* Heap block header: linked list node with its address, state (0 free, 1 used, 2 end marker) and tag. */
-typedef struct SdfMemBlock {
-    struct SdfMemBlock *prev; /* 0x0 */
-    struct SdfMemBlock *next; /* 0x4 */
-    u32 address; /* 0x8 */
-    u16 state; /* 0xC */
-    s16 tag; /* 0xE */
-} SdfMemBlock; /* 0x10 */
-
-typedef struct SdfMemHeap {
-    SdfMemBlock head; /* 0x00: start sentinel */
-    SdfMemBlock tail; /* 0x10: end sentinel */
-    u32 base; /* 0x20 */
-    u32 size; /* 0x24 */
-} SdfMemHeap;
-
-extern SdfMemHeap D_003E2748;
 extern void *func_002FF538(u32 size);
 extern void *sdfAllocSizeClassBlock(u32 size);
 extern s32 D_003BD2DC;
@@ -107,7 +89,7 @@ extern void sdfInitializeSynchronizedRequest();
 
 /* Align the usable span to 128 bytes and link one free block between sentinels. */
 void sdfInitGeneralHeap(u32 heapSize) {
-    SdfMemHeap *heap = &D_003E2748;
+    SdfMemHeap *heap = &sdfGeneralHeap;
     SdfMemBlock *freeBlock;
     u32 alignedStart;
     u32 alignedEnd;
@@ -120,9 +102,9 @@ void sdfInitGeneralHeap(u32 heapSize) {
     heap->head.prev = NULL;
     heap->head.next = freeBlock;
     heap->head.state = SDF_MEM_BLOCK_SENTINEL;
-    heap->head.tag = -1;
+    heap->head.referenceCount = -1;
     heap->tail.state = SDF_MEM_BLOCK_SENTINEL;
-    heap->tail.tag = -1;
+    heap->tail.referenceCount = -1;
     heap->tail.address = alignedEnd;
     heap->tail.prev = freeBlock;
     heap->tail.next = NULL;
@@ -131,7 +113,7 @@ void sdfInitGeneralHeap(u32 heapSize) {
     freeBlock->state = SDF_MEM_BLOCK_FREE;
     freeBlock->next = &heap->tail;
     freeBlock->address = alignedStart;
-    freeBlock->tag = 0;
+    freeBlock->referenceCount = 0;
     D_003BD2DC = 0;
     sdfInitializeSynchronizedRequest(D_003BD9C8, sdfReleaseResourceAllocation);
 }
@@ -141,7 +123,7 @@ u16 sdfGetMemoryBlockState(SdfMemBlock *block) {
 }
 
 u32 func_002D0380(void) {
-    return D_003E274C[0];
+    return (u32)sdfGeneralHeap.head.next;
 }
 
 INCLUDE_SDATA(const s32, "game/code_002D00F8", D_003BD2DC);
