@@ -10,9 +10,11 @@ extern u8 brsGetLevelStepForValue(s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern void dspSetActive(s32);
 extern void dspStartEntry(s32);
+extern void evtStageTestQueueMotion(s32, u32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern char D_003BC550[];
 extern char D_003BC558[];
+extern char *D_0036D3A8[];
 
 typedef struct MenuSumBytes {
     u8 pad00[4];
@@ -34,6 +36,8 @@ typedef struct MenuSumTable {
     s32 values[MENU_SUM_COUNT];
     u8 pad3E4[0x11A0];
     u32 unk1584;
+    s32 rewardMode;
+    s32 rewardIndex;
 } MenuSumTable;
 
 /* All five signed-byte plus table-word totals must meet the minimum. */
@@ -186,7 +190,36 @@ u32 func_002647B0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00263EB0", func_002647D0);
+s32 func_002647D0(MenuSumTable *work) {
+    MenuSumBytes *entry = work->state->entry;
+    s32 result;
+
+    if (work->rewardMode > 0) {
+        if (work->rewardMode < 4) {
+            goto showItem;
+        }
+        if (work->rewardMode == 4) {
+            s32 rewardIndex = work->rewardIndex;
+
+            work->values[rewardIndex]++;
+            evtCopyEntryStringToActiveWindow(1, D_0036D3A8[rewardIndex]);
+        } else {
+            goto queueMotion;
+        }
+
+showItem:
+        evtCopyEntryStringToActiveWindow(0, D_003BAA70 + entry->itemId * 17);
+        dspStartEntry(work->rewardMode + 0x18);
+    }
+
+queueMotion:
+    evtStageTestQueueMotion(2, 1);
+    result = work->rewardMode < 4;
+    if (result != 0 && work->rewardMode > 0) {
+        result = evtStageTestSetPendingEffect(0);
+    }
+    return result;
+}
 
 INCLUDE_SDATA(const s32, "game/code_00263EB0", D_003BC558);
 
