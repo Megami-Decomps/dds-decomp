@@ -952,6 +952,20 @@ typedef struct BtlOperandEntry {
     u32 flags;             /* 0x28 */
 } BtlOperandEntry;
 
+typedef struct BtlOperandGroup {
+    u8 count;              /* 0x00 */
+    u8 pad01[0x1B];
+    BtlOperandEntry entries[32]; /* 0x1C */
+} BtlOperandGroup;
+
+/* The caller passes the linked-action state window beginning at +0x20. */
+typedef struct BtlOperandScanState {
+    u8 pad00[0x40];
+    s32 actorIndices;      /* 0x40 */
+    u8 pad44[0x24];
+    BtlOperandGroup *groups; /* 0x68 */
+} BtlOperandScanState;
+
 s32 btlActionEntryIsEmpty(s32 index, BtlOperandSlot *slot, BtlOperandEntry *entry) {
     s32 kind;
 
@@ -1010,7 +1024,25 @@ s32 btlActionEntryIsEmpty(s32 index, BtlOperandSlot *slot, BtlOperandEntry *entr
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001DDAD0);
+s32 func_001DDAD0(s32 unused, BtlOperandScanState *state) {
+    u32 groupIndex;
+    u32 entryIndex;
+    u32 groupCount = btlGetIndexListCount(state->actorIndices);
+    BtlOperandGroup *groups = state->groups;
+
+    for (groupIndex = 0; groupIndex < groupCount; groupIndex++) {
+        /* Entries begin eight bytes after the native group payload cursor. */
+        u8 *group = (u8 *)&groups[groupIndex] + 0x14;
+        u32 entryCount = group[-0x14];
+
+        for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+            if (((BtlOperandEntry *)(group + 8))[entryIndex].flags & 1) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001DDB60);
 
