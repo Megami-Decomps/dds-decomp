@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl_task.h"
+#include "dds3obj.h"
 #include "pcp_vu0.h"
 #include "fpu.h"
 
@@ -6887,7 +6888,37 @@ void btlTickFieldSwayAndTint(void) {
     btlDrawTintIfVisible();
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001EFD58);
+typedef struct BattleWorldTransitionWork {
+    u8 pad00[0x204];
+    s32 listener;
+} BattleWorldTransitionWork;
+
+struct WorldTransformOwner;
+struct WorldUnitOwner;
+extern WorldTransformSetup D_003D74A0;
+extern void dds3LoadWorldTransformSetup(struct WorldTransformOwner *, WorldTransformSetup *);
+extern void evtBeginUnitValueColorTransition(struct WorldUnitOwner *, s32);
+
+void func_001EFD58(f32 *position, f32 *scale, s32 value) {
+    BattleWorldTransitionWork *work = (BattleWorldTransitionWork *)btlGetRuntime();
+    s32 listener = work->listener;
+
+    D_003D74A0.transform.position[0] = position[0];
+    D_003D74A0.transform.position[1] = position[1];
+    D_003D74A0.transform.position[2] = position[2];
+    D_003D74A0.transform.scale[0] = scale[0];
+    D_003D74A0.transform.scale[1] = scale[1];
+    D_003D74A0.transform.scale[2] = scale[2];
+    D_003D74A0.unk00 = 0;
+    D_003D74A0.flags = 0;
+    D_003D74A0.mode = 0;
+    D_003D74A0.transform.rotation[0] = 0.0f;
+    D_003D74A0.transform.rotation[1] = 0.0f;
+    D_003D74A0.transform.rotation[2] = 0.0f;
+    D_003D74A0.transform.rotation[3] = 0.0f;
+    dds3LoadWorldTransformSetup((struct WorldTransformOwner *)listener, &D_003D74A0);
+    evtBeginUnitValueColorTransition((struct WorldUnitOwner *)work->listener, value);
+}
 
 extern s32 effCreateSelectionFlagListFromWork(void *work);
 extern u8 D_0035F5F8[];
