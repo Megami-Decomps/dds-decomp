@@ -1,5 +1,27 @@
 #include "mnu.h"
 
+#define ITF_PANEL_COLUMN_COUNT 4
+#define ITF_PANEL_ROW_COUNT 2
+#define ITF_PANEL_COLUMN_INSET 0x200
+#define ITF_PANEL_CORNER_COLUMN_COUNT 3
+#define ITF_PANEL_CORNER_STRIP_WIDTH 0x5A0
+#define ITF_PANEL_FULL_COLOR_SCALE 0x80
+#define ITF_PANEL_HOLD_CAPACITY 0x40
+#define ITF_PANEL_STATE_PACKET_BYTES 0x40
+#define ITF_PANEL_QUAD_INDEX_COUNT 4
+#define ITF_PANEL_WIDE_INDEX_COUNT 8
+#define ITF_PANEL_WIDE_PASS_COUNT 3
+#define ITF_PANEL_SEVEN_COLOR_COUNT 7
+#define ITF_PANEL_FIVE_COLOR_COUNT 5
+#define ITF_PANEL_SEVEN_SIDE_PASS_COUNT 6
+#define ITF_PANEL_FIVE_SIDE_PASS_COUNT 2
+#define ITF_PANEL_MESSAGE_FADE_TICKS 30
+#define ITF_PANEL_MESSAGE_EXIT_TICKS 10
+#define ITF_PANEL_TINT_ALPHA_NUMERATOR 0x67
+#define ITF_PANEL_TINT_ALPHA_DENOMINATOR 128
+#define ITF_PANEL_TINT_BORDER_WIDTH 0x240
+
+
 /* 0x10-byte packet record in the work object buffer. */
 typedef struct PktRec {
     s32 unk0; /* 0x0 */
@@ -74,9 +96,9 @@ typedef struct PanelHoldItem {
 typedef struct PanelHold {
     s32 window;
     s16 unk4;
-    s16 count;   /* 0x6: entries used in items[] */
+    s16 queuedCount; /* 0x6: entries used in items[] */
     s32 unk8;
-    PanelHoldItem items[0x40]; /* 0xC: queued entries, count bounds them */
+    PanelHoldItem items[ITF_PANEL_HOLD_CAPACITY]; /* 0xC: native 64-entry queue */
 } PanelHold;
 
 extern PanelHold itfHeldPanelCursor;
@@ -124,29 +146,32 @@ typedef struct PanelVert {
     s32 y;
 } PanelVert;
 
+/* Invoke the indexed panel handler; panel and handlerIndex are trusted. */
 void itfPanelDispatchHandler(PanelObj *panel) {
     itfPanelHandlers[panel->handlerIndex](panel);
 }
 
-void itfPanelSetFourColumnVertices(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
-    s32 xs[4];
-    s32 i;
+/* Emit top/bottom vertices for four columns; collapse overlapping inner columns to the midpoint.
+   Coordinates and inset remain in the renderer's native integer units. */
+void itfPanelSetFourColumnVertices(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+    s32 columnX[ITF_PANEL_COLUMN_COUNT];
+    s32 columnIndex;
 
-    xs[0] = x0;
-    xs[1] = x0 + 0x200;
-    xs[2] = x1 - 0x200;
-    xs[3] = x1;
-    if (xs[2] < xs[1]) {
-        xs[1] = ((x1 - x0) >> 1) + x0;
-        xs[2] = xs[1];
+    columnX[0] = x0;
+    columnX[1] = x0 + ITF_PANEL_COLUMN_INSET;
+    columnX[2] = x1 - ITF_PANEL_COLUMN_INSET;
+    columnX[3] = x1;
+    if (columnX[2] < columnX[1]) {
+        columnX[1] = ((x1 - x0) >> 1) + x0;
+        columnX[2] = columnX[1];
     }
-    for (i = 0; i < 4; i++) {
-        v->x = xs[i];
-        v->y = y0;
-        v++;
-        v->x = xs[i];
-        v->y = y1;
-        v++;
+    for (columnIndex = 0; columnIndex < ITF_PANEL_COLUMN_COUNT; columnIndex++) {
+        vertices->x = columnX[columnIndex];
+        vertices->y = y0;
+        vertices++;
+        vertices->x = columnX[columnIndex];
+        vertices->y = y1;
+        vertices++;
     }
 }
 
@@ -154,6 +179,7 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A1BB0);
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A1D20);
 
+/* Write the rectangle corners in top-left, top-right, bottom-right, bottom-left order. */
 void itfPanelSetRectVerts(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     PanelVert *p;
     v->x = x0;
@@ -169,107 +195,117 @@ void itfPanelSetRectVerts(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     p->y = y1;
 }
 
+/* Write two rows of three columns; the middle column is the right edge minus a fixed strip width. */
 void itfSetPanelCornerGrid(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
-    s32 xs[3];
-    s32 ys[2];
-    s32 i;
-    s32 j;
+    s32 columnX[ITF_PANEL_CORNER_COLUMN_COUNT];
+    s32 rowY[ITF_PANEL_ROW_COUNT];
+    s32 rowIndex;
+    s32 columnIndex;
 
-    xs[0] = x0;
-    xs[1] = x1 - 0x5A0;
-    xs[2] = x1;
-    ys[0] = y0;
-    ys[1] = y1;
-    for (i = 0; i < 2; i++) {
-        for (j = 0; j < 3; j++) {
-            v->x = xs[j];
-            v->y = ys[i];
+    columnX[0] = x0;
+    columnX[1] = x1 - ITF_PANEL_CORNER_STRIP_WIDTH;
+    columnX[2] = x1;
+    rowY[0] = y0;
+    rowY[1] = y1;
+    for (rowIndex = 0; rowIndex < ITF_PANEL_ROW_COUNT; rowIndex++) {
+        for (columnIndex = 0; columnIndex < ITF_PANEL_CORNER_COLUMN_COUNT; columnIndex++) {
+            v->x = columnX[columnIndex];
+            v->y = rowY[rowIndex];
             v++;
         }
     }
 }
 
+/* Write four fixed horizontal columns with inset top/bottom coordinates.
+   x0 and x1 are intentionally unused; do not replace the fixed horizontal positions. */
 void itfSetPanelInsetVertexColumns(u8 *base, s32 x0, s32 y0, s32 x1, s32 y1) {
-    s32 xs[4];
-    s32 ys[2];
-    PanelVert *v = (PanelVert *)(base + 4);
-    s32 i;
-
-    xs[0] = 0x1A0;
-    xs[1] = 0x480;
-    xs[2] = 0x1B70;
-    xs[3] = 0x1E50;
-    ys[0] = y0 + 0x160;
-    ys[1] = y1 - 0x140;
-    for (i = 0; i < 4; i++) {
-        v->x = xs[i];
-        v->y = ys[0];
-        v++;
-        v->x = xs[i];
-        v->y = ys[1];
-        v++;
+    s32 columnX[ITF_PANEL_COLUMN_COUNT];
+    s32 rowY[ITF_PANEL_ROW_COUNT];
+    PanelVert *vertices = (PanelVert *)(base + 4);
+    s32 columnIndex;
+    columnX[0] = 0x1A0;
+    columnX[1] = 0x480;
+    columnX[2] = 0x1B70;
+    columnX[3] = 0x1E50;
+    rowY[0] = y0 + 0x160;
+    rowY[1] = y1 - 0x140;
+    for (columnIndex = 0; columnIndex < ITF_PANEL_COLUMN_COUNT; columnIndex++) {
+        vertices->x = columnX[columnIndex];
+        vertices->y = rowY[0];
+        vertices++;
+        vertices->x = columnX[columnIndex];
+        vertices->y = rowY[1];
+        vertices++;
     }
 }
 
-/* Populate two panel vertex pairs at slots 8 and 10. */
-void itfPanelSetVertexPairs(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
-    PanelVert *pair = &vertices[8];
-    pair->x = x0;
-    pair->y = y0;
-    pair[1].x = x1;
-    pair[1].y = 0;
-    pair = &vertices[10];
-    pair->x = x0;
-    pair->y = y0;
-    pair[1].x = x1;
-    pair[1].y = y1;
+/* Populate RGBA rows at bytes 0x40/0x50; the first row is transparent.
+   The existing vertex-typed view addresses the same color records as the quad consumer. */
+void itfPanelSetVertexPairs(PanelVert *data, s32 red, s32 green, s32 blue, s32 alpha) {
+    PanelVert *colorRow = &data[8];
+    colorRow->x = red;
+    colorRow->y = green;
+    colorRow[1].x = blue;
+    colorRow[1].y = 0;
+    colorRow = &data[10];
+    colorRow->x = red;
+    colorRow->y = green;
+    colorRow[1].x = blue;
+    colorRow[1].y = alpha;
 }
 
+/* Write the two color rows, then scale six template rows; the first fourth component is one. */
 void itfSetPanelColorAndAlphaVectors(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
-    u32 *vec = (u32 *)(base + 0x140);
+    u32 *colorRow = (u32 *)(base + 0x140);
 
-    panelSetVec4(vec, red, green, blue, 1);
-    vec = (u32 *)(base + 0x150);
-    panelSetVec4(vec, red, green, blue, alpha);
+    panelSetVec4(colorRow, red, green, blue, 1);
+    colorRow = (u32 *)(base + 0x150);
+    panelSetVec4(colorRow, red, green, blue, alpha);
     itfScaleVectors((s32 *)(base + 0x160), red, green, blue, alpha, itfPanelColorTemplates, 6);
 }
 
+/* Write the two color rows, then scale four template rows; the first fourth component is one. */
 void itfSetPanelColorVectors(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
-    u32 *vec = (u32 *)(base + 0x100);
+    u32 *colorRow = (u32 *)(base + 0x100);
 
-    panelSetVec4(vec, red, green, blue, 1);
-    vec = (u32 *)(base + 0x110);
-    panelSetVec4(vec, red, green, blue, alpha);
+    panelSetVec4(colorRow, red, green, blue, 1);
+    colorRow = (u32 *)(base + 0x110);
+    panelSetVec4(colorRow, red, green, blue, alpha);
     itfScaleVectors((s32 *)(base + 0x120), red, green, blue, alpha, D_003B4548, 4);
 }
 
+/* Set the base color, one alpha-scaled gradient row, and two rows at full color scale. */
 void itfSetPanelGradientColor(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
-    u32 *vec = (u32 *)(base + 0x20);
+    u32 *colorRow = (u32 *)(base + 0x20);
 
-    panelSetVec4(vec, red, green, blue, alpha);
+    panelSetVec4(colorRow, red, green, blue, alpha);
     itfScaleVectors((s32 *)(base + 0x30), red, green, blue, alpha, itfPanelGradientColorTemplate, 1);
-    itfScaleVectors((s32 *)(base + 0x40), red, green, blue, 0x80, itfPanelGradientColorPair, 2);
+    itfScaleVectors((s32 *)(base + 0x40), red, green, blue, ITF_PANEL_FULL_COLOR_SCALE, itfPanelGradientColorPair, 2);
 }
 
-void itfPanelSetRectSpan(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
-    PanelVert *p = &v[4];
-    p->x = x0;
-    p->y = y0;
-    p[1].x = x1;
-    p[1].y = y1;
+/* Set the four color words at byte 0x20, consumed as a color record by the quad path.
+   Preserve the existing vertex-typed access and signed arguments. */
+void itfPanelSetRectSpan(PanelVert *data, s32 red, s32 green, s32 blue, s32 alpha) {
+    PanelVert *colorRow = &data[4];
+    colorRow->x = red;
+    colorRow->y = green;
+    colorRow[1].x = blue;
+    colorRow[1].y = alpha;
 }
 
-void itfPanelInitRects30(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
-    PanelVert *p = &v[6];
-    p->x = x0;
-    p->y = y0;
-    p[1].x = x1;
-    p[1].y = 0;
-    p = &v[8];
-    p->x = x0;
-    p->y = y0;
-    p[1].x = x1;
-    p[1].y = y1;
+/* Populate RGBA rows at bytes 0x30/0x40; the first row is transparent.
+   The six-index quad path consumes its color rows from this same base offset. */
+void itfPanelInitRects30(PanelVert *data, s32 red, s32 green, s32 blue, s32 alpha) {
+    PanelVert *colorRow = &data[6];
+    colorRow->x = red;
+    colorRow->y = green;
+    colorRow[1].x = blue;
+    colorRow[1].y = 0;
+    colorRow = &data[8];
+    colorRow->x = red;
+    colorRow->y = green;
+    colorRow[1].x = blue;
+    colorRow[1].y = alpha;
 }
 
 /* The panel's two four-channel colors begin 0x44 and 0x54 bytes in. */
@@ -281,16 +317,16 @@ typedef struct PanelColorPair {
 
 /* Set both panel colors to the same blue tint with zero alpha. */
 void itfPanelSetBlueTint(PanelColorPair *panel) {
-    s32 *color = panel->first;
-    color[0] = 0x73;
-    color[1] = 0x87;
-    color[2] = 0xFF;
-    color[3] = 0;
-    color = panel->second;
-    color[0] = 0x73;
-    color[1] = 0x87;
-    color[2] = 0xFF;
-    color[3] = 0;
+    s32 *colorRow = panel->first;
+    colorRow[0] = 0x73;
+    colorRow[1] = 0x87;
+    colorRow[2] = 0xFF;
+    colorRow[3] = 0;
+    colorRow = panel->second;
+    colorRow[0] = 0x73;
+    colorRow[1] = 0x87;
+    colorRow[2] = 0xFF;
+    colorRow[3] = 0;
 }
 
 extern u8 D_003B45C8[];
@@ -298,49 +334,53 @@ extern u8 D_003B45D8[];
 
 /* Draw the panel's three flat quads from one vertex/color buffer; each quad uses its own 4-byte index rows. */
 void itfDrawIndexedPanelFlatQuads(PanelObj *panel, u64 command) {
-    PktRec *buf = panel->buf;
-    PktRec *colors = buf + 4;
-    s32 i;
+    PktRec *drawBuffer = panel->buf;
+    PktRec *colors = drawBuffer + 4;
+    s32 quadIndex;
 
     colors[1].unkC = panel->alpha;
-    for (i = 0; i < 3; i++) {
-        itfDrawQuadFlat4(buf, colors, &D_003B45C8[i * 4], &D_003B45D8[i * 4], panel->tail, command);
+    for (quadIndex = 0; quadIndex < ITF_PANEL_WIDE_PASS_COUNT; quadIndex++) {
+        itfDrawQuadFlat4(drawBuffer, colors, &D_003B45C8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], &D_003B45D8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], panel->tail, command);
     }
 }
 
+/* Update seven alpha words, then emit three wide and six side strips.
+   The first color row is deliberately excluded from the alpha update. */
 void itfDrawSevenColorPanelQuads(PanelObj *panel, u64 command) {
-    PktRec *buf = panel->buf;
-    PktRec *colors = buf + 21;
+    PktRec *drawBuffer = panel->buf;
+    PktRec *colors = drawBuffer + 21;
     s32 alpha = panel->alpha;
-    s32 i;
+    s32 rowIndex;
 
-    for (i = 0; i < 7; i++, colors++) {
+    for (rowIndex = 0; rowIndex < ITF_PANEL_SEVEN_COLOR_COUNT; rowIndex++, colors++) {
         colors->unkC = alpha;
     }
-    colors = buf + 20;
-    for (i = 0; i < 3; i++) {
-        itfEmitQuadListWide(buf, colors, &D_003B45E8[i * 8], &D_003B4600[i * 8], 8, panel->tail, command);
+    colors = drawBuffer + 20;
+    for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
+        itfEmitQuadListWide(drawBuffer, colors, &D_003B45E8[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_003B4600[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->tail, command);
     }
-    for (i = 0; i < 6; i++) {
-        itfEmitQuadListA(buf + 8 + i * 2, colors, D_004365A8, &D_003B4618[i * 4], 4, panel->tail, command);
+    for (rowIndex = 0; rowIndex < ITF_PANEL_SEVEN_SIDE_PASS_COUNT; rowIndex++) {
+        itfEmitQuadListA(drawBuffer + 8 + rowIndex * 2, colors, D_004365A8, &D_003B4618[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->tail, command);
     }
 }
 
+/* Update five alpha words, then emit three wide and two side strips.
+   The first color row is deliberately excluded from the alpha update. */
 void itfDrawFiveColorPanelQuads(PanelObj *panel, u64 command) {
-    PktRec *buf = panel->buf;
-    PktRec *colors = buf + 17;
+    PktRec *drawBuffer = panel->buf;
+    PktRec *colors = drawBuffer + 17;
     s32 alpha = panel->alpha;
-    s32 i;
+    s32 rowIndex;
 
-    for (i = 0; i < 5; i++, colors++) {
+    for (rowIndex = 0; rowIndex < ITF_PANEL_FIVE_COLOR_COUNT; rowIndex++, colors++) {
         colors->unkC = alpha;
     }
-    colors = buf + 16;
-    for (i = 0; i < 3; i++) {
-        itfEmitQuadListWide(buf, colors, &D_003B4630[i * 8], &D_003B4648[i * 8], 8, panel->tail, command);
+    colors = drawBuffer + 16;
+    for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
+        itfEmitQuadListWide(drawBuffer, colors, &D_003B4630[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_003B4648[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->tail, command);
     }
-    for (i = 0; i < 2; i++) {
-        itfEmitQuadListA(buf + 8 + i * 2, colors, D_004365B0, &D_003B4660[i * 4], 4, panel->tail, command);
+    for (rowIndex = 0; rowIndex < ITF_PANEL_FIVE_SIDE_PASS_COUNT; rowIndex++) {
+        itfEmitQuadListA(drawBuffer + 8 + rowIndex * 2, colors, D_004365B0, &D_003B4660[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->tail, command);
     }
 }
 
@@ -372,6 +412,7 @@ void func_001A2450(PanelObj *panel, u64 command) {
     }
 }
 
+/* Update the first color row's alpha and emit one indexed quad. */
 void itfDrawPanelQuadWithCommand(PanelObj *panel, u64 command) {
     PktRec *colors = panel->buf + 2;
 
@@ -379,13 +420,14 @@ void itfDrawPanelQuadWithCommand(PanelObj *panel, u64 command) {
     itfDrawQuadFlat4(panel->buf, colors, D_004365C8, D_004365D0, panel->tail, command);
 }
 
+/* Bracket the six-index panel draw with table-state two and its native reset to zero. */
 void itfEmitPanelQuadPacket(PanelObj *panel, u64 command) {
-    PktRec *buf = panel->buf;
-    PktRec *colors = buf + 3;
+    PktRec *drawBuffer = panel->buf;
+    PktRec *colors = drawBuffer + 3;
 
     colors[1].unkC = panel->alpha;
     itfSendTablePacket(command, 2, 0);
-    itfEmitQuadListWide(buf, colors, D_004365D8, D_004365E0, 6, panel->tail, command);
+    itfEmitQuadListWide(drawBuffer, colors, D_004365D8, D_004365E0, 6, panel->tail, command);
     itfSendTablePacket(command, 0, 0);
 }
 
@@ -395,65 +437,74 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A29D8);
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2AF0);
 
+/* Copy bounds and draw the tinted border; alpha uses the native signed 103/128 scale. */
 void itfDrawTintedPanelRect(PanelObj *panel, u64 command) {
     PanelRect rect;
 
-    D_003B4760[3] = panel->alpha * 0x67 / 128;
+    D_003B4760[3] = panel->alpha * ITF_PANEL_TINT_ALPHA_NUMERATOR / ITF_PANEL_TINT_ALPHA_DENOMINATOR;
     rect.x0 = panel->rect.x0;
     rect.y0 = panel->rect.y0;
     rect.x1 = panel->rect.x1;
     rect.y1 = panel->rect.y1;
-    func_001A09C0(&rect, D_003B4760, panel->tail, 0x240, command);
+    func_001A09C0(&rect, D_003B4760, panel->tail, ITF_PANEL_TINT_BORDER_WIDTH, command);
 }
 
+/* Append two GS A+D state writes: TEST_1 (0x47), then ALPHA_1 (0x42). */
 void itfAppendGsPanelStatePacket(void *list) {
-    void *packet = sdfAllocPacketAligned(0x40);
-    u64 *entry = sdfConsFinalizePacketHeader(packet, 0x40);
+    void *packet = sdfAllocPacketAligned(ITF_PANEL_STATE_PACKET_BYTES);
+    u64 *stateWords = sdfConsFinalizePacketHeader(packet, ITF_PANEL_STATE_PACKET_BYTES);
 
-    entry[4] = 0x5101B;
-    entry[5] = 0x47;
-    entry[6] = 0x44;
-    entry[7] = 0x42;
+    stateWords[4] = 0x5101B;
+    stateWords[5] = 0x47;
+    stateWords[6] = 0x44;
+    stateWords[7] = 0x42;
     sdfAppendPacket(list, packet);
 }
 
+/* Poll/start an entry: one ends the command, zero keeps waiting.
+   A negative signed status is consumed by clearing it; positive status keeps waiting. */
 s32 itfPanelStartEntry(void) {
     s32 window = scrGetWindow();
-    PanelRec *rec;
-    PanelRecSub *sub;
-    s32 value;
+    PanelRec *record;
+    PanelRecSub *entryState;
+    s32 entryIndex;
     s8 status;
 
     if (window < 0) {
         return 1;
     }
-    rec = itfWindowSlots[window].ptr;
-    value = scrReadIntParameter(0);
-    sub = &rec->sub24;
-    status = sub->status;
+    record = itfWindowSlots[window].ptr;
+    entryIndex = scrReadIntParameter(0);
+    entryState = &record->sub24;
+    status = entryState->status;
     if (status == 0) {
-        if (itfMesStartEntry(window, value, 0) == 0) {
+        if (itfMesStartEntry(window, entryIndex, 0) == 0) {
             return 1;
         }
     } else if (status < 0) {
-        sub->status = 0;
+        entryState->status = 0;
         return 1;
     }
     return 0;
 }
 
+/* Forward this record's opaque layout word and the supplied value; index is unchecked. */
 void itfPanelEmitRecord(s32 index, s32 value) {
     itfAdvancePanelLayoutAndNotify(itfWindowSlots[index].ptr->unkA8, 0, value, 0, 0, 0);
 }
 
+/* Return the signed byte entry status; this is separate from the option-block s16 status. */
 s8 itfPanelGetStatus(s32 index) {
     return itfWindowSlots[index].ptr->sub24.status;
 }
 
-void itfPanelSetStatus(s32 index, s8 value) {
-    itfWindowSlots[index].ptr->sub24.status = value;
+/* Store the signed byte entry status; index and payload pointer are trusted. */
+void itfPanelSetStatus(s32 index, s8 status) {
+    itfWindowSlots[index].ptr->sub24.status = status;
 }
 
+/* Capture the script window, reset its held queue, and switch to page three.
+   Invalid windows still return the native command-complete value of one. */
 s32 itfPanelAcquireHold(void) {
     PanelHold *hold;
     s32 window;
@@ -466,11 +517,12 @@ s32 itfPanelAcquireHold(void) {
     hold->window = window;
     hold->unk4 = -1;
     hold->unk8 = -1;
-    hold->count = 0;
+    hold->queuedCount = 0;
     itfMesSetWindowPageAndRefresh(window, 3, 0);
     return 1;
 }
 
+/* Clean up the active held window and reset its queue; an inactive hold is a no-op. */
 s32 itfPanelReleaseHold(void) {
     PanelHold *hold = &itfHeldPanelCursor;
 
@@ -481,11 +533,12 @@ s32 itfPanelReleaseHold(void) {
     hold->window = -1;
     hold->unk4 = -1;
     hold->unk8 = -1;
-    hold->count = 0;
+    hold->queuedCount = 0;
     return 1;
 }
 
-/* Queue one (first, second, third) entry from the script parameters; ignored when no hold is active or the queue is full. */
+/* Queue script words in native second/first/third field order; first and third narrow to s16.
+   Inactive/full queues are ignored with status one; negative queuedCount is not checked. */
 s32 itfCommandQueueHeldPanelEntry(void) {
     PanelHold *cursor = &itfHeldPanelCursor;
     s32 first;
@@ -495,16 +548,16 @@ s32 itfCommandQueueHeldPanelEntry(void) {
     if (cursor->window < 0) {
         return 1;
     }
-    if (cursor->count >= 0x40) {
+    if (cursor->queuedCount >= ITF_PANEL_HOLD_CAPACITY) {
         return 1;
     }
     first = scrReadIntParameter(0);
     second = scrReadIntParameter(1);
     third = scrReadIntParameter(2);
-    cursor->items[cursor->count].second = first;
-    cursor->items[cursor->count].first = second;
-    cursor->items[cursor->count].third = third;
-    cursor->count++;
+    cursor->items[cursor->queuedCount].second = first;
+    cursor->items[cursor->queuedCount].first = second;
+    cursor->items[cursor->queuedCount].third = third;
+    cursor->queuedCount++;
     return 1;
 }
 
@@ -541,11 +594,12 @@ extern void kwlnDrawSetupDc8(s32);
 extern void kwlnDrawEnableDc8(s32);
 extern s32 D_00438F28;
 
-/* Fade the message page in before polling the option block for completion. */
+/* Configure the fade on timer zero, wait thirty ticks, then consume a negative option status.
+   Keep both timer reads: setup tests a second read, while later comparisons use the cached one. */
 s32 func_001A31E0(void) {
     s32 window;
-    s32 timer;
-    s32 entry;
+    s32 elapsedTicks;
+    s32 entryIndex;
     PanelRec *record;
     PanelOptionBlock *options;
 
@@ -553,30 +607,30 @@ s32 func_001A31E0(void) {
     if (window < 0) {
         return 1;
     }
-    timer = scrGetCommandTimer();
+    elapsedTicks = scrGetCommandTimer();
     if (scrGetCommandTimer() == 0) {
         kwlnDrawSetDc8Second(0x44);
         kwlnDrawSetDc8First(0x5E1C1C1C);
-        kwlnDrawSetupDc8(30);
+        kwlnDrawSetupDc8(ITF_PANEL_MESSAGE_FADE_TICKS);
         D_00438F28 = -1;
         return 0;
     }
-    if (timer < 30) {
+    if (elapsedTicks < ITF_PANEL_MESSAGE_FADE_TICKS) {
         return 0;
     }
-    if (timer == 30) {
+    if (elapsedTicks == ITF_PANEL_MESSAGE_FADE_TICKS) {
         itfMesSetWindowPageAndRefresh(window, 3, 0);
     } else if (D_00438F28 == -1) {
         record = itfWindowSlots[window].ptr;
-        entry = scrReadIntParameter(0);
+        entryIndex = scrReadIntParameter(0);
         options = &record->options;
         if (options->status == 0) {
-            itfMesBuildOptionList(window, entry);
+            itfMesBuildOptionList(window, entryIndex);
         } else if (options->status < 0) {
             options->status = 0;
             scrSetIntegerReturnValue(options->clearBitCount);
             itfMesResetWindow(window);
-            kwlnDrawEnableDc8(10);
+            kwlnDrawEnableDc8(ITF_PANEL_MESSAGE_EXIT_TICKS);
             D_00438F28 = 0;
             return 1;
         }
@@ -584,14 +638,17 @@ s32 func_001A31E0(void) {
     return 0;
 }
 
+/* Return the option-block signed status word, not the separate entry status byte. */
 s16 itfPanelGetPairFirst(s32 index) {
     return itfWindowSlots[index].ptr->options.status;
 }
 
-void itfPanelSetPairFirst(s32 index, s16 value) {
-    itfWindowSlots[index].ptr->options.status = value;
+/* Store the option-block signed status word without validating the slot. */
+void itfPanelSetPairFirst(s32 index, s16 status) {
+    itfWindowSlots[index].ptr->options.status = status;
 }
 
+/* Return the same signed word forwarded as the script result when an option completes. */
 s16 itfPanelGetPairSecond(s32 index) {
     return itfWindowSlots[index].ptr->options.clearBitCount;
 }
