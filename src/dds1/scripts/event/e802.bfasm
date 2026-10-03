@@ -131,8 +131,7 @@ _7:
   WAIT_FOR_TIMER_LIMIT(10)
   RESET_DRAW_EFFECTS()
   RESET_FIELD_EFFECTS()
-  push local_int[0]
-  COMM 0x0016
+  DESTROY_WORLD_UNIT(local_int[0])
   COMM 0x0023
   push 0
   COMM 0x011d

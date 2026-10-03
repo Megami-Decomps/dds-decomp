@@ -2283,17 +2283,10 @@ _325:
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_09)))
       PREPARE_UNIT_MOTION_STATE(global_int[0], 23, 3, 15, 1)
-      push 0
-      push 25
-      push 0
-      push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_10))
-      push global_int[0]
-      COMM 0x0017
+      START_UNIT_MOVE_TO_POSITION_OBJECT(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_10)), 0, 25, 0)
       SCREEN_FADE_A(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)
-      push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_MOTION))
-      push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_2))
-      COMM 0x0013
+      START_CAMERA_PATH_MOVE(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_2)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_MOTION)))
       WAIT_FOR_TIMER_LIMIT(5)
       MOVE_OBJECT_ALONG_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_01)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01path_01_2)), 0)
       WAIT_FOR_TIMER_LIMIT(40)
@@ -2552,10 +2545,8 @@ proc_0031:
     WAIT_FOR_TIMER_LIMIT(20)
     UPDATE_FIELD_LOOK_AT_SEGMENT()
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push global_int[1]
-    COMM 0x0016
-    push global_int[2]
-    COMM 0x0016
+    DESTROY_WORLD_UNIT(global_int[1])
+    DESTROY_WORLD_UNIT(global_int[2])
     SCREEN_FADE_A(0, 20)
     WAIT_FOR_TIMER_LIMIT(20)
     SET_SOLAR_OVERLAY_MODE(1)
@@ -2574,16 +2565,9 @@ proc_0032:
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_06)))
     PREPARE_UNIT_MOTION_STATE(global_int[0], 23, 3, 15, 1)
-    push 0
-    push 35
-    push 0
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_2))
-    push global_int[0]
-    COMM 0x0017
+    START_UNIT_MOVE_TO_POSITION_OBJECT(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_2)), 0, 35, 0)
     WAIT_FOR_TIMER_LIMIT(60)
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_MOTION_2))
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_4))
-    COMM 0x0013
+    START_CAMERA_PATH_MOVE(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_4)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_05_MOTION_2)))
     WAIT_FOR_TIMER_LIMIT(30)
     SCREEN_FADE_B(0, 60)
     WAIT_FOR_TIMER_LIMIT(60)
@@ -2624,12 +2608,9 @@ proc_0033:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     SCREEN_FADE_B(0, 20)
     WAIT_FOR_TIMER_LIMIT(20)
-    push global_int[1]
-    COMM 0x0016
-    push global_int[2]
-    COMM 0x0016
-    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_3))
-    COMM 0x00a3
+    DESTROY_WORLD_UNIT(global_int[1])
+    DESTROY_WORLD_UNIT(global_int[2])
+    FOCUS_CAMERA_ON_OBJECT(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_3)))
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
     SCREEN_FADE_A(0, 20)
     WAIT_FOR_TIMER_LIMIT(20)
@@ -2663,8 +2644,7 @@ _369:
       FINISH_SCRIPT_MESSAGE_WINDOW()
       SCREEN_FADE_B(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)
-      push global_int[1]
-      COMM 0x0016
+      DESTROY_WORLD_UNIT(global_int[1])
       ADD_EFFECT_UNIT_TO_WORLD(-(1))
       SET_SOLAR_OVERLAY_MODE(1)
       SCREEN_FADE_A(0, 10)
@@ -2916,12 +2896,9 @@ proc_0039:
   WAIT_FOR_TIMER_LIMIT(15)
   UPDATE_FIELD_LOOK_AT_SEGMENT()
   ADD_EFFECT_UNIT_TO_WORLD(-(1))
-  push global_int[1]
-  COMM 0x0016
-  push global_int[2]
-  COMM 0x0016
-  push local_int[89]
-  COMM 0x0016
+  DESTROY_WORLD_UNIT(global_int[1])
+  DESTROY_WORLD_UNIT(global_int[2])
+  DESTROY_WORLD_UNIT(local_int[89])
   SCREEN_FADE_A(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
   SET_SOLAR_OVERLAY_MODE(1)
@@ -3011,8 +2988,7 @@ _405:
           FINISH_SCRIPT_MESSAGE_WINDOW()
           SCREEN_FADE_B(0, 10)
           WAIT_FOR_TIMER_LIMIT(10)
-          push global_int[1]
-          COMM 0x0016
+          DESTROY_WORLD_UNIT(global_int[1])
           ADD_EFFECT_UNIT_TO_WORLD(-(1))
           SCREEN_FADE_A(0, 10)
           WAIT_FOR_TIMER_LIMIT(10)
@@ -3111,8 +3087,7 @@ _423:
           FINISH_SCRIPT_MESSAGE_WINDOW()
           SCREEN_FADE_B(0, 10)
           WAIT_FOR_TIMER_LIMIT(10)
-          push global_int[1]
-          COMM 0x0016
+          DESTROY_WORLD_UNIT(global_int[1])
           ADD_EFFECT_UNIT_TO_WORLD(-(1))
           SCREEN_FADE_A(0, 10)
           WAIT_FOR_TIMER_LIMIT(10)
@@ -3341,8 +3316,7 @@ proc_0044:
   FINISH_SCRIPT_MESSAGE_WINDOW()
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
-  push global_int[1]
-  COMM 0x0016
+  DESTROY_WORLD_UNIT(global_int[1])
   SET_SOLAR_OVERLAY_MODE(1)
   UPDATE_FIELD_LOOK_AT_SEGMENT()
   ADD_EFFECT_UNIT_TO_WORLD(-(1))
@@ -3384,8 +3358,7 @@ _471:
       FINISH_SCRIPT_MESSAGE_WINDOW()
       SCREEN_FADE_B(0, 15)
       WAIT_FOR_TIMER_LIMIT(15)
-      push global_int[1]
-      COMM 0x0016
+      DESTROY_WORLD_UNIT(global_int[1])
       SET_SOLAR_OVERLAY_MODE(1)
       UPDATE_FIELD_LOOK_AT_SEGMENT()
       ADD_EFFECT_UNIT_TO_WORLD(-(1))
@@ -3437,8 +3410,7 @@ _477:
       FINISH_SCRIPT_MESSAGE_WINDOW()
       SCREEN_FADE_B(0, 15)
       WAIT_FOR_TIMER_LIMIT(15)
-      push local_int[96]
-      COMM 0x0016
+      DESTROY_WORLD_UNIT(local_int[96])
       ENABLE_FIELD_NPCS(0, 0, string(npc_hoji_01_12))
       UPDATE_FIELD_LOOK_AT_SEGMENT()
       ADD_EFFECT_UNIT_TO_WORLD(-(1))

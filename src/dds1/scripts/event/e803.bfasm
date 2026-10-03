@@ -267,8 +267,7 @@ _4:
   DESTROY_WORLD_EFFECT_OBJECT(local_int[21])
   DESTROY_WORLD_EFFECT_OBJECT(local_int[22])
   DESTROY_WORLD_EFFECT_OBJECT(local_int[23])
-  push local_int[0]
-  COMM 0x0016
+  DESTROY_WORLD_UNIT(local_int[0])
   COMM 0x0023
   push 0
   COMM 0x011d
