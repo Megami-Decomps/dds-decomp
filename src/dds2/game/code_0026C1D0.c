@@ -50,7 +50,7 @@ void sdfReleaseResourceAllocation(u32 sprite);
 
 typedef struct EvtResourcePair {
     u32 handle;
-    u32 loadedDataAddress;
+    u32 unk04; /* Loader output; not read through this local view. */
 } EvtResourcePair;
 
 extern s32 datGameState;
@@ -199,7 +199,7 @@ void evtRandomSwapBytes(u8 *buffer, u32 length, s32 swapCount) {
 void evtLoadResourcePair(u32 resourceId, EvtResourcePair *record) {
     u32 handle;
 
-    handle = sdfReadNamedResource(resourceId, &record->loadedDataAddress, 0);
+    handle = sdfReadNamedResource(resourceId, &record->unk04, 0);
     record->handle = handle;
 }
 
