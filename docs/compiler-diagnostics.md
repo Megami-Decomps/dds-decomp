@@ -292,19 +292,23 @@ For instructions in the same basic block, the pinned compiler's
 
 1. higher priority;
 2. smaller register-pressure weight in sched1 only;
-3. the relationship to the most recently scheduled instruction;
+3. the relationship to the most recently scheduled instruction, ranked as:
+   no dependency or a cost-1 dependency, then a costlier anti/output
+   dependency, then a costlier data dependency;
 4. more forward dependents;
 5. original RTL LUID, with the earlier instruction winning the final tie.
 
 Sched2 omits the register-pressure comparison. Interblock scheduling adds
 speculation and probability tests between the first two groups and the
 dependency tests, so do not extend the same-block rule across basic blocks.
-Printed cost, incoming dependency count, functional-unit name, and GPR versus
-FPR register class are not independent rank keys. They can still matter
-indirectly by changing priority, readiness, dependencies, or whether an
-instruction can issue in that clock. The MIPS reorder hook is not a generic
-GPR/FPR tie-break either: before reload, and only with more than two ready
-instructions, it groups operations around the R5900 multiply/divide unit.
+Printed candidate cost, incoming dependency count, functional-unit name, and
+GPR versus FPR register class are not independent rank keys. Dependency cost
+does help classify a candidate's relationship to the previous instruction;
+these facts can also matter indirectly by changing priority, readiness,
+dependencies, or whether an instruction can issue in that clock. The MIPS
+reorder hook is not a generic GPR/FPR tie-break either: before reload, and only
+with more than two ready instructions, it groups operations around the R5900
+multiply/divide unit.
 
 This gives a cheap stop rule for a local order mismatch. Find the clock before
 the first wrong instruction and verify that both candidate UIDs are in the
@@ -316,6 +320,14 @@ unchanged cannot reverse them. The remaining credible source levers are a
 truthful dependency or critical-path change, or an earlier expansion change
 that changes their LUIDs. Adding an artificial dependency or merely renaming
 locals does not explain retail code.
+
+Mixed integer and floating-point parameters provide one legitimate earlier
+lever on EE. The ABI uses separate GPR and FPR argument banks, so two source
+orders can use the same physical incoming registers while producing different
+pass-00 parameter-copy LUIDs. Only test this when callers and the callee's real
+interface support the alternate order: compare the first parameter copies in
+`.00.rtl`, then confirm that the predicted sched2 tie changes. The unchanged
+call registers alone do not make a reordered prototype semantically valid.
 
 This is enough to distinguish two useful outcomes. If the desired order has a
 truthful dependency, lifetime, or register-use fact that changes the ready set
