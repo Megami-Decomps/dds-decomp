@@ -470,6 +470,8 @@ typedef struct EvtViewParams {
 } EvtViewParams;
 
 extern void effObjSetFlags(s32 obj, s32 flags);
+extern void *func_00115500(void *resource, void *position, void *scale);
+extern void effObjReplaceActiveEventNode(void *obj, u32 entryId);
 extern s32 effObjSpawnDescriptorBoundEffect(s32 arg, f32 *vec0, f32 *vec1);
 extern s32 func_00115318(s32 arg, f32 *vec0, f32 *vec1);
 extern s32 func_00115AA8(s32 mode, s32 arg);
@@ -553,7 +555,22 @@ void evtEventViewerFreeSlot(s32 index, s32 viewerAddress) {
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_00247400);
+/* Create an event-viewer effect at the origin and attach its active event node. */
+void *func_00247400(void *resource, u32 entryId, s32 value, s32 type, u32 word,
+                    EvtViewer *viewer) {
+    f32 position[4];
+    f32 scale[4];
+    void *effect;
+
+    memset(position, 0, 0x10);
+    memset(scale, 0, 0x10);
+    scale[3] = 1.0f;
+    effect = func_00115500(resource, position, scale);
+    effObjSetFlags((s32)effect, 1);
+    effObjReplaceActiveEventNode(effect, entryId);
+    func_00247028((s32)effect, value, type, word, viewer);
+    return effect;
+}
 
 void evtEventViewerFreeBuffer(EvtEvNode *node) {
     if (node->buf != NULL) {
@@ -563,4 +580,3 @@ void evtEventViewerFreeBuffer(EvtEvNode *node) {
 }
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004224A8);
-
