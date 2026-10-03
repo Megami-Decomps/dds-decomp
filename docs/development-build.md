@@ -3,9 +3,9 @@
 The `dds1-dev` and `dds2-dev` targets build separate executables whose layouts
 can grow without weakening the byte-identical retail builds. Each target
 recompiles and replaces selected code, read-only data, and initialized
-small-data sections from eight paired code units, and moves two source-owned
-zero-initialized state objects. The replacements retain seven declared
-assembly fallback functions in DDS1 and six in DDS2. The targets also link
+small-data sections from eleven paired source objects, and moves three
+source-owned zero-initialized state objects. The replacements retain ten
+declared assembly fallback functions in DDS1 and nine in DDS2. The targets also link
 development-only C code and data into an appended loadable segment:
 
 ```sh
@@ -86,8 +86,10 @@ symbol count, and development GP-reference count. If the retail count differs,
 `expected_retail_gp_references` declares it explicitly; otherwise it defaults
 to the development count. Nonempty retained NOBITS is unsupported. A
 replacement source may contain `INCLUDE_ASM` only when its symbols are
-explicitly listed as fallbacks in source order. `INCLUDE_RODATA` and
-`INCLUDE_SDATA` remain unsupported for replacement objects.
+explicitly listed as fallbacks in source order. `INCLUDE_SDATA` is accepted
+only when the object declares the corresponding nonempty `.sdata` section as
+retained and the retained-section audit succeeds. `INCLUDE_RODATA` remains
+unsupported for replacement objects.
 
 A writable move whose retail range overlaps the signed `_gp` window must set
 both `expected_retail_gp_references` and `expected_gp_references`. These counts
@@ -128,7 +130,8 @@ placing any of them in the retail link.
 ## Current scope
 
 These are relocatable development builds, not general mod loaders. Each
-version replaces eight paired units, then links one development entry object.
+version replaces eleven paired source objects, then links one development
+entry object.
 The first smaller replacement is compiled separately with `-G0`: its `.text`
 is `0x3D0` bytes rather than the retail `0x3C8`, so two later function
 definitions move by eight bytes. The mixed-source replacement grows from
@@ -164,7 +167,7 @@ proves those physical references at the same fallback-function offsets, exact
 retained objects, and an unchanged `_gp` instead of silently splitting the
 live state.
 
-The paired SDF thread registry is the first moved small-BSS state. Three source
+The paired SDF thread registry is a moved small-BSS state. Three source
 units per title own and consume its semaphore and linked-list head. Their
 retail text totals `0x698` bytes; the development text grows to `0x728` in DDS1
 and `0x730` in DDS2. All 15 retail GP-relative accesses to the eight-byte
@@ -172,6 +175,17 @@ registry become 23 audited HI16/LO16 relocation records, and no physical GP
 reference remains to either the moved state or its abandoned retail range.
 The adjacent tick callback state stays at its retail address with exact bytes,
 symbols, and access signatures.
+
+The paired general SDF heap is another complete mutable lifecycle. Three
+source units per title move `0xD88` bytes of retail text, growing to `0xDA8`,
+along with the source-owned `0x28`-byte NOBITS heap root. Its two embedded
+sentinels, base, and size have one canonical typed owner. Eight address
+materializations into that root become 16 audited target relocation records;
+the abandoned range has no surviving reference. Each leading unit retains an
+exact `0xC` `.sdata` island containing three symbols. Its three retail GP
+references become ordinary relocated address pairs in development, leaving
+zero physical GP references to the moved heap state. The three units retain
+three declared assembly fallbacks per title.
 
 Together the replacements move 142 DDS1 and 143 DDS2 exported symbols, plus
 five/three retained small-data symbols. Eighty-five moved definitions per title
