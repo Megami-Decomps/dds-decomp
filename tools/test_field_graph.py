@@ -20,8 +20,12 @@ import wap  # noqa: E402
 class FieldGraphTests(unittest.TestCase):
     def test_links_complete_maintained_event_corpora(self) -> None:
         expected = {
-            "dds1": (24, 104, 1528, 165, 607, 12, 107, 59, 48, 24, 19),
-            "dds2": (22, 103, 1711, 135, 724, 11, 121, 83, 38, 22, 10),
+            "dds1": (
+                24, 104, 1528, 165, 607, 12, 54, 6, 48, 69, 53, 16, 24, 19
+            ),
+            "dds2": (
+                22, 103, 1711, 135, 723, 10, 52, 19, 33, 79, 64, 15, 22, 10
+            ),
         }
         for game, counts in expected.items():
             with self.subTest(game=game):
@@ -48,6 +52,9 @@ class FieldGraphTests(unittest.TestCase):
                         summary["eventScriptEdges"],
                         summary["fieldEventScriptEdges"],
                         summary["eventEventScriptEdges"],
+                        summary["eventRequestEdges"],
+                        summary["fieldEventRequestEdges"],
+                        summary["eventEventRequestEdges"],
                         summary["unresolvedScriptTargets"],
                         selected_sites,
                     ),
@@ -58,6 +65,18 @@ class FieldGraphTests(unittest.TestCase):
                         edge["targetPresent"]
                         for edge in sections["eventScriptEdges"]
                         if edge["command"] == "SUBMIT_EVENT_WITH_SELECTION"
+                    )
+                )
+                self.assertFalse(
+                    any(
+                        edge["command"] == "SUBMIT_EVENT"
+                        for edge in sections["eventScriptEdges"]
+                    )
+                )
+                self.assertTrue(
+                    any(
+                        edge["command"] == "SUBMIT_EVENT"
+                        for edge in sections["eventRequestEdges"]
                     )
                 )
                 self.assertEqual(

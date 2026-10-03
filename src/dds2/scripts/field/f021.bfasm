@@ -2326,7 +2326,7 @@ _314:
       WAIT_FOR_TIMER_LIMIT(25)
       RESET_STREAM_PLAYBACK()
       DEFER_BATTLE_EXIT(1, 21, 510)
-      SUBMIT_EVENT(event(e803))
+      SUBMIT_EVENT(803)
       return
     } else {
     _319:
@@ -2428,7 +2428,7 @@ proc_0030:
     WAIT_FOR_TIMER_LIMIT(25)
     RESET_STREAM_PLAYBACK()
     DEFER_BATTLE_EXIT(1, 21, 510)
-    SUBMIT_EVENT(event(e803))
+    SUBMIT_EVENT(803)
     return
   }
 _324:
@@ -2620,7 +2620,7 @@ proc_0034:
     WAIT_FOR_TIMER_LIMIT(25)
     RESET_STREAM_PLAYBACK()
     DEFER_BATTLE_EXIT(1, 21, 500)
-    SUBMIT_EVENT(event(e802))
+    SUBMIT_EVENT(802)
     return
   }
 _332:

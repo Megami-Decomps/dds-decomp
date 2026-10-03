@@ -131,8 +131,8 @@ SHARED_DDS_COMMANDS = (
         "SUBMIT_EVENT",
         1,
         writes_result=False,
-        event_argument=0,
         event_dispatch="submit",
+        event_request_argument=0,
     ),
     NativeCommand(0x068, "READ_CURRENT_WORLD_OBJECT_ID", 0, writes_result=True),
     NativeCommand(0x069, "CLEAR_UNIT_LOW_FLAG", 1, writes_result=False),
@@ -264,8 +264,8 @@ SHARED_DDS_COMMANDS = (
         "SUBMIT_EVENT_IMMEDIATE",
         1,
         writes_result=False,
-        event_argument=0,
         event_dispatch="submit-immediate",
+        event_request_argument=0,
     ),
     NativeCommand(
         0x1E0, "QUEUE_WORLD_OBJECT_PENDING_VALUE", 2, writes_result=False
@@ -765,10 +765,14 @@ for _profile in PROFILES.values():
                 assert -0x8000 <= _value <= 0x7FFF
                 assert _name.isidentifier() and _name.upper() == _name
                 assert _name not in {"NAN", "INF", "RESULT"}
-        if _command.event_argument is None:
+        if _command.event_argument is not None:
+            assert 0 <= _command.event_argument < _command.stack_pop
+        if (
+            _command.event_argument is None
+            and _command.event_request_argument is None
+        ):
             assert _command.event_dispatch is None
         else:
-            assert 0 <= _command.event_argument < _command.stack_pop
             assert _command.event_dispatch is not None
         if _command.event_request_argument is not None:
             assert 0 <= _command.event_request_argument < _command.stack_pop
