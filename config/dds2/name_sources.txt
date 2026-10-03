@@ -5365,6 +5365,10 @@
 0x00328AE8	sdfWakeThreadOnCompletionEvent	inferred	Wakes the registered thread and decrements pending count for completion events. [names_reviewed8.tsv]
 0x00328B20	sdfWakeQueuedThreadWaiters	inferred	Sleeps until an event, then walks and wakes the semaphore-guarded waiter list. [names_reviewed21.tsv]
 0x00328BA0	sdfStartQueuedThreadWakeWorker	inferred	confidence=high; src/dds2/game/code_00328AC8.c:func_00328BA0; Resets the tracked-thread list, creates its semaphore, and starts the dedicated queued-thread wake worker. [names_qp9.tsv]
+0x00328C30	sdfSelectNextChipPage	inferred	Paired with DDS1 0x002CFD80; selects the next available chip page as the size class's current page.
+0x00328C50	sdfAllocRecycledChipCell	inferred	Paired with DDS1 0x002CFDA0; allocates a recycled cell from a chip page and advances the class when the page becomes full.
+0x00328CA0	sdfAllocFreshChipCell	inferred	Paired with DDS1 0x002CFDF0; allocates the next never-used cell from a newly assigned chip page.
+0x00328D20	sdfAllocFromNewChipPage	inferred	Paired with DDS1 0x002CFE70; assigns a free chip page to the size class and allocates its first cell.
 0x00328D68	sdfAllocSizeClassBlock	inferred	confidence=high; matched-C; src/dds2/game/code_00328AC8.c:174:func_00328D68; Allocates a byte-sized block from power-of-two size classes through cursor slots while preserving interrupt state; widely used core allocator.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00328E18	sdfAllocAndClearQuadwords	inferred	Allocates requested bytes and zeroes rounded-up quadwords. [names_reviewed6.tsv]
 0x00328E48	sdfReleaseChipBlock	inferred	Retires block from slot, updates owner links or free list with interrupts preserved. [names_reviewed6.tsv]
