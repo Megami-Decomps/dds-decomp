@@ -50,7 +50,8 @@ typedef struct EventViewerState {
     u32 resourceHandle; /* 0x00 */
     u32 flags;
     s32 windowContext;  /* 0x08: owns the message-window handle at +0x104 */
-    u8 padC[8];
+    u8 padC[4];
+    s32 glyphAdvanceStart;    /* 0x10 */
     s32 glyphAdvanceLimit;    /* 0x14 */
     s32 glyphAdvancePosition; /* 0x18 */
     u8 pad1C[0x2008];
@@ -471,7 +472,49 @@ void evtViewerCountFlaggedUpdates(EventViewerState *viewer) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F2E0);
+extern s32 campAnyPackedFlagSet(void *scene);
+extern s32 scrCommandIsProcessControlFlagClear(void);
+extern u32 mnuCampGetSecondaryOption(void *scene);
+extern void mnuReleaseCampSceneRegisteredIds();
+extern s32 mnuQueryTitleSoundBusy(void);
+extern void mnuStopTitleVoicePlayback(void);
+extern void sdfSoundSetChannelCount(u32 channels);
+extern s32 fldTitleIsActive(void);
+extern void func_0014A298(s32 active);
+void evtViewerCleanupMessageWindow(s32 viewerAddr);
+
+void func_0022F2E0(EventViewerState *viewer) {
+    if (campAnyPackedFlagSet(viewer) == 1 || scrCommandIsProcessControlFlagClear() == 0) {
+        if (viewer->glyphTickCount == 0) {
+            viewer->glyphTickCount = 1;
+        }
+        return;
+    }
+    if (viewer->glyphAdvancePosition < viewer->glyphAdvanceLimit - 30) {
+        if (viewer->glyphAdvanceStart + 20 >= viewer->glyphAdvancePosition) {
+            return;
+        }
+    } else {
+        return;
+    }
+
+    viewer->flags |= 0x10;
+    if (mnuCampGetSecondaryOption(viewer) == 2) {
+        viewer->updateCount = 0x17;
+    } else {
+        viewer->updateCount = 0;
+    }
+    mnuReleaseCampSceneRegisteredIds(viewer);
+    if (mnuQueryTitleSoundBusy() == 1) {
+        mnuStopTitleVoicePlayback();
+    } else if (viewer->timedActive == 1) {
+        sdfSoundSetChannelCount(10);
+    }
+    if (fldTitleIsActive() == 1) {
+        func_0014A298(0);
+    }
+    evtViewerCleanupMessageWindow((s32)viewer);
+}
 
 /* Required to match: the signed raw load generates the original flag test. */
 s32 evtViewerHasUpdateFlag(s32 viewerAddr) {
@@ -1233,4 +1276,3 @@ INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF60);
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF68);
 
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF70);
-
