@@ -181,22 +181,42 @@ typedef struct KwlnNamedSlot {
 extern KwlnNamedSlot D_003C1C90[];
 extern s32 D_003BA850;
 
-s32 kwlnFindNamedSlot(const char *name) {
-    s32 slot = D_003BA850;
-    s32 i;
+#define KWLN_PAD_INPUTS_PER_SET 16
+#define KWLN_PAD_REPEAT_BIT 2
+#define KWLN_ALT_CONFIRM_INPUT 0x11
+#define KWLN_ALT_CANCEL_INPUT 0x13
+#define KWLN_PAD_SMALL_MOTOR 0
+#define KWLN_PAD_LARGE_MOTOR 1
+#define KWLN_PAD_MOTOR_COUNT 2
+#define KWLN_DEBUG_RUMBLE_PERIOD 0x4650
+#define KWLN_DEBUG_SMALL_PULSE_FRAMES 0xF
+#define KWLN_DEBUG_LARGE_PULSE_FRAMES 30
+#define KWLN_DEBUG_RUMBLE_VARIATION 150
+#define KWLN_DEBUG_RUMBLE_BASE 100
+#define KWLN_SHARED_RANDOM_SEED 0x12345678
+#define KWLN_CELL_COLUMN_SPAN 0xC0
+#define KWLN_CELL_ROW_SPAN 0x60
+#define KWLN_PREVIEW_MAX_TEXELS 0x100
+#define KWLN_PREVIEW_WRAP_TEXELS 0x400
+#define KWLN_DIAG_DEPTH 0x0FFFFF80
 
-    while (slot >= 0) {
-        i = 0;
-        while (D_003C1C90[slot].name[i] != '\0') {
-            if (name[i] != D_003C1C90[slot].name[i]) {
+/* Find an exact NUL-terminated name along the linked slot indices, or return -1. */
+s32 kwlnFindNamedSlot(const char *name) {
+    s32 slotIndex = D_003BA850;
+    s32 characterIndex;
+
+    while (slotIndex >= 0) {
+        characterIndex = 0;
+        while (D_003C1C90[slotIndex].name[characterIndex] != '\0') {
+            if (name[characterIndex] != D_003C1C90[slotIndex].name[characterIndex]) {
                 break;
             }
-            i++;
+            characterIndex++;
         }
-        if (D_003C1C90[slot].name[i] == '\0' && name[i] == '\0') {
-            return slot;
+        if (D_003C1C90[slotIndex].name[characterIndex] == '\0' && name[characterIndex] == '\0') {
+            return slotIndex;
         }
-        slot = D_003C1C90[slot].next;
+        slotIndex = D_003C1C90[slotIndex].next;
     }
     return -1;
 }
@@ -214,81 +234,83 @@ void func_001035F0(void) {
 
 extern s8 D_00324510[];
 
-/* Move one list cursor (scroll offset + cursor row) with the up / down buttons of pad set `padSet`: a fresh press wraps around the list, a held repeat stops at the ends. The scroll pointer is NULL for a list without scrolling. */
-void kwlnStepListCursor(s32 *scroll, s32 *cursor, s32 count, s32 visible, s32 padSet, s32 downButton, s32 upButton) {
-    s32 up;
-    s32 down;
+/* Fresh presses wrap; repeat-bit input stops at the implemented end bounds.
+ * Without scrolling, forward motion is bounded by visibleRows, not itemCount. */
+void kwlnStepListCursor(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 visibleRows, s32 padSet, s32 forwardInput, s32 backwardInput) {
+    s32 backwardState;
+    s32 forwardState;
 
-    if (cursor == NULL) {
+    if (cursorRow == NULL) {
         return;
     }
-    if (count < 2) {
+    if (itemCount < 2) {
         return;
     }
-    up = D_00324510[upButton + padSet * 16];
-    if (up < 0) {
-        if (scroll == NULL) {
-            if (*cursor > 0) {
-                (*cursor)--;
-            } else if (count < visible) {
-                *cursor = count - 1;
+    backwardState = D_00324510[backwardInput + padSet * KWLN_PAD_INPUTS_PER_SET];
+    if (backwardState < 0) {
+        if (scrollOffset == NULL) {
+            if (*cursorRow > 0) {
+                (*cursorRow)--;
+            } else if (itemCount < visibleRows) {
+                *cursorRow = itemCount - 1;
             } else {
-                *cursor = visible - 1;
+                *cursorRow = visibleRows - 1;
             }
-        } else if (*cursor > 0) {
-            (*cursor)--;
-        } else if (*scroll > 0) {
-            (*scroll)--;
-        } else if (visible < count) {
-            *scroll = count - visible;
-            *cursor = visible - 1;
+        } else if (*cursorRow > 0) {
+            (*cursorRow)--;
+        } else if (*scrollOffset > 0) {
+            (*scrollOffset)--;
+        } else if (visibleRows < itemCount) {
+            *scrollOffset = itemCount - visibleRows;
+            *cursorRow = visibleRows - 1;
         } else {
-            *cursor = count - 1;
+            *cursorRow = itemCount - 1;
         }
-    } else if (D_00324510[upButton + padSet * 16] & 2) {
-        if (scroll == NULL) {
-            if (*cursor > 0) {
-                (*cursor)--;
+    } else if (D_00324510[backwardInput + padSet * KWLN_PAD_INPUTS_PER_SET] & KWLN_PAD_REPEAT_BIT) {
+        if (scrollOffset == NULL) {
+            if (*cursorRow > 0) {
+                (*cursorRow)--;
             }
-        } else if (*cursor > 0) {
-            (*cursor)--;
-        } else if (*scroll > 0) {
-            (*scroll)--;
+        } else if (*cursorRow > 0) {
+            (*cursorRow)--;
+        } else if (*scrollOffset > 0) {
+            (*scrollOffset)--;
         }
     }
-    down = D_00324510[downButton + padSet * 16];
-    if (down < 0) {
-        if (scroll == NULL) {
-            if (*cursor < visible - 1) {
-                (*cursor)++;
+    forwardState = D_00324510[forwardInput + padSet * KWLN_PAD_INPUTS_PER_SET];
+    if (forwardState < 0) {
+        if (scrollOffset == NULL) {
+            if (*cursorRow < visibleRows - 1) {
+                (*cursorRow)++;
             } else {
-                *cursor = 0;
+                *cursorRow = 0;
             }
-        } else if (*cursor < visible - 1) {
-            (*cursor)++;
-        } else if (*scroll + visible < count) {
-            (*scroll)++;
+        } else if (*cursorRow < visibleRows - 1) {
+            (*cursorRow)++;
+        } else if (*scrollOffset + visibleRows < itemCount) {
+            (*scrollOffset)++;
         } else {
-            *scroll = 0;
-            *cursor = 0;
+            *scrollOffset = 0;
+            *cursorRow = 0;
         }
-    } else if (D_00324510[downButton + padSet * 16] & 2) {
-        if (scroll == NULL) {
-            if (*cursor < visible - 1) {
-                (*cursor)++;
+    } else if (D_00324510[forwardInput + padSet * KWLN_PAD_INPUTS_PER_SET] & KWLN_PAD_REPEAT_BIT) {
+        if (scrollOffset == NULL) {
+            if (*cursorRow < visibleRows - 1) {
+                (*cursorRow)++;
             }
-        } else if (*cursor < visible - 1) {
-            (*cursor)++;
-        } else if (*scroll + visible < count) {
-            (*scroll)++;
+        } else if (*cursorRow < visibleRows - 1) {
+            (*cursorRow)++;
+        } else if (*scrollOffset + visibleRows < itemCount) {
+            (*scrollOffset)++;
         }
     }
 }
 
-/* Step two list cursors (scroll + cursor each) from pad set `padSet`; returns 1 / -1 when the confirm / cancel button of that set is down, else 0. */
-s32 kwlnStepTwoListCursors(s32 padSet, s32 count2, s32 count1, s32 visible2, s32 visible1, s32 *scroll2, s32 *scroll1, s32 *cursor2, s32 *cursor1) {
-    kwlnStepListCursor(scroll1, cursor1, count1, visible1, padSet, 7, 6);
-    kwlnStepListCursor(scroll2, cursor2, count2, visible2, padSet, 5, 4);
+/* Step the primary then secondary cursor pair; return 1/-1 for confirm/cancel.
+ * Any nonzero padSet tests set 1's confirm/cancel, while movement uses padSet. */
+s32 kwlnStepTwoListCursors(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 secondaryVisible, s32 primaryVisible, s32 *secondaryScroll, s32 *primaryScroll, s32 *secondaryCursor, s32 *primaryCursor) {
+    kwlnStepListCursor(primaryScroll, primaryCursor, primaryCount, primaryVisible, padSet, 7, 6);
+    kwlnStepListCursor(secondaryScroll, secondaryCursor, secondaryCount, secondaryVisible, padSet, 5, 4);
     if (padSet == 0) {
         if (D_00324510[1] < 0) {
             return 1;
@@ -297,34 +319,37 @@ s32 kwlnStepTwoListCursors(s32 padSet, s32 count2, s32 count1, s32 visible2, s32
             return -1;
         }
     } else {
-        if (D_00324510[0x11] < 0) {
+        if (D_00324510[KWLN_ALT_CONFIRM_INPUT] < 0) {
             return 1;
         }
-        if (D_00324510[0x13] < 0) {
+        if (D_00324510[KWLN_ALT_CANCEL_INPUT] < 0) {
             return -1;
         }
     }
     return 0;
 }
 
-void kwlnDrawSpriteCell(u32 list, s32 col, s32 row, s32 cols, s32 rows) {
-    s32 cw = 0xC0, ch = 0x60;
-    sdfAppendPacket(list, func_0011D3E8(col * 0x10 + 0x6FD0, row * 8 + 0x78E8, 0xFEFFFF,
-                                           cols * cw + ch, rows * ch + 0x30,
+/* Append a cell rectangle; rowSpan also supplies the horizontal padding. */
+void kwlnDrawSpriteCell(u32 packetList, s32 column, s32 row, s32 columnCount, s32 rowCount) {
+    s32 columnSpan = KWLN_CELL_COLUMN_SPAN, rowSpan = KWLN_CELL_ROW_SPAN;
+    sdfAppendPacket(packetList, func_0011D3E8(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, 0xFEFFFF,
+                                           columnCount * columnSpan + rowSpan, rowCount * rowSpan + 0x30,
                                            0x60000000, 0x40806020));
 }
 
-void kwlnDrawSpriteCellZ(u32 list, s32 col, s32 row, s32 cols, s32 rows, s32 z) {
-    s32 cw = 0xC0, ch = 0x60;
-    sdfAppendPacket(list, func_0011D3E8(col * 0x10 + 0x6FD0, row * 8 + 0x78E8, z,
-                                           cols * cw + ch, rows * ch + 0x30,
+/* Append the same cell rectangle with caller-selected depth. */
+void kwlnDrawSpriteCellZ(u32 packetList, s32 column, s32 row, s32 columnCount, s32 rowCount, s32 depth) {
+    s32 columnSpan = KWLN_CELL_COLUMN_SPAN, rowSpan = KWLN_CELL_ROW_SPAN;
+    sdfAppendPacket(packetList, func_0011D3E8(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, depth,
+                                           columnCount * columnSpan + rowSpan, rowCount * rowSpan + 0x30,
                                            0x60000000, 0x40806020));
 }
 
+/* Despite the legacy name, this periodically pulses both pad motors, not colors. */
 s32 kwlnDebugPulseColors(void) {
-    if (kwlnTaskGetTimer() % 0x4650 == 0) {
-        kwlnPadStartMotor(0, 1, 0xF);
-        kwlnPadStartMotor(1, (u8)(effMiscRandMod(0, 150) + 100), 30);
+    if (kwlnTaskGetTimer() % KWLN_DEBUG_RUMBLE_PERIOD == 0) {
+        kwlnPadStartMotor(KWLN_PAD_SMALL_MOTOR, 1, KWLN_DEBUG_SMALL_PULSE_FRAMES);
+        kwlnPadStartMotor(KWLN_PAD_LARGE_MOTOR, (u8)(effMiscRandMod(0, KWLN_DEBUG_RUMBLE_VARIATION) + KWLN_DEBUG_RUMBLE_BASE), KWLN_DEBUG_LARGE_PULSE_FRAMES);
     }
     return 0;
 }
@@ -358,38 +383,40 @@ extern s32 fileTestSavedSlotFlags(u32 kind);
 extern void sdfPadSetSmallMotor(s32 padIndex, u16 strength);
 extern void sdfPadSetLargeMotor(s32 padIndex, u8 strength);
 
-/* Start rumble on pad motor 0 (small, on/off) or 1 (large, stepped toward the target) with `level` for `duration`. */
+/* Honor the saved rumble option, normalize small-motor strength and clamp
+ * motor indices to the large motor. Preserve target update before output. */
 void kwlnPadStartMotor(u32 motor, u8 level, s32 duration) {
     if (fileTestSavedSlotFlags(0) == 0) {
         return;
     }
-    if (motor == 0) {
+    if (motor == KWLN_PAD_SMALL_MOTOR) {
         if (level != 0) {
             level = 1;
         }
-    } else if (motor >= 2) {
-        motor = 1;
+    } else if (motor >= KWLN_PAD_MOTOR_COUNT) {
+        motor = KWLN_PAD_LARGE_MOTOR;
     }
-    if (motor == 0) {
-        D_003BD698[0] = level;
-        kwlnPadMotorLevels[0] = level;
+    if (motor == KWLN_PAD_SMALL_MOTOR) {
+        D_003BD698[KWLN_PAD_SMALL_MOTOR] = level;
+        kwlnPadMotorLevels[KWLN_PAD_SMALL_MOTOR] = level;
     } else {
         D_003BD698[motor] = level;
         kwlnPadStepLargeMotorLevel();
     }
     D_003BD6A0[motor] = duration;
-    if (motor == 0) {
+    if (motor == KWLN_PAD_SMALL_MOTOR) {
         sdfPadSetSmallMotor(0, level);
     } else {
         sdfPadSetLargeMotor(0, kwlnPadMotorLevels[motor]);
     }
 }
 
+/* Clear motor levels and countdowns, then send both zero strengths to pad 0. */
 void kwlnPadResetMotorLevelsAndOutput(void) {
-    kwlnPadMotorLevels[0] = 0;
-    D_003BD6A0[0] = 0;
-    kwlnPadMotorLevels[1] = 0;
-    D_003BD6A0[1] = 0;
+    kwlnPadMotorLevels[KWLN_PAD_SMALL_MOTOR] = 0;
+    D_003BD6A0[KWLN_PAD_SMALL_MOTOR] = 0;
+    kwlnPadMotorLevels[KWLN_PAD_LARGE_MOTOR] = 0;
+    D_003BD6A0[KWLN_PAD_LARGE_MOTOR] = 0;
     sdfDevConsSetEntryPair(0, 0, 0);
 }
 
@@ -399,8 +426,9 @@ u32 func_00104260(void) {
     return 0;
 }
 
+/* Seed the shared effect random state with the fixed initialization seed. */
 void kwlnInitMagicState(void) {
-    effMiscSeedRandom(effSharedRandomState, 0x12345678);
+    effMiscSeedRandom(effSharedRandomState, KWLN_SHARED_RANDOM_SEED);
 }
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104290);
@@ -408,6 +436,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104290);
 void func_001045F8(void) {
 }
 
+/* Only mode 1 creates and mode 0 destroys the timing graph; other modes do nothing. */
 void kwlnDebugGraphSetEnabled(s8 mode) {
     if (mode == 1) {
         D_003BD6A8 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, func_00104290, func_001045F8, NULL);
@@ -426,109 +455,136 @@ extern s32 sdfConsCreateDrawPacket(s32, void *, s32);
 extern void sdfAppendTexturedLinePacket(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 x1,
                                         s32 y1, s32 u1, s32 v1, s32 depth, s32 (*alloc)(s32));
 
-/* Draw a texture-sized outline: scale the longer side down to 0x100 texels (0x400 is treated as 0x3FF) and submit one textured line packet. */
-void kwlnDrawImageOutline(s32 list, KwlnImageSize *image) {
+/* Scale the longer preview side to at most 256 texels, preserving division
+ * before coordinate scaling; UV endpoints at 1024 texels are reduced by one. */
+void kwlnDrawImageOutline(s32 packetList, KwlnImageSize *image) {
     s32 width = image->width;
     s32 height = image->height;
     s32 drawWidth;
     s32 drawHeight;
 
-    sdfConsCreateDrawPacket(list, image, 0);
+    sdfConsCreateDrawPacket(packetList, image, 0);
     drawWidth = width * 0x10;
     drawHeight = height * 8;
     if (width < height) {
-        if (height > 0x100) {
+        if (height > KWLN_PREVIEW_MAX_TEXELS) {
             drawHeight = 0x800;
             drawWidth = (width << 8) / height * 0x10;
         }
-    } else if (width > 0x100) {
+    } else if (width > KWLN_PREVIEW_MAX_TEXELS) {
         drawWidth = 0x1000;
         drawHeight = (height << 8) / width * 8;
     }
-    if (width == 0x400) {
+    if (width == KWLN_PREVIEW_WRAP_TEXELS) {
         width--;
     }
-    if (height == 0x400) {
+    if (height == KWLN_PREVIEW_WRAP_TEXELS) {
         height--;
     }
-    sdfAppendTexturedLinePacket(list, 0x80808080, 0, 0x7180, 0x7A60, 0, 0, drawWidth + 0x7180, drawHeight + 0x7A60,
-                                width * 0x10, height * 0x10, 0x0FFFFF80, 0);
+    sdfAppendTexturedLinePacket(packetList, 0x80808080, 0, 0x7180, 0x7A60, 0, 0, drawWidth + 0x7180, drawHeight + 0x7A60,
+                                width * 0x10, height * 0x10, KWLN_DIAG_DEPTH, 0);
 }
 
-void kwlnTextureDrawPageCounter(void *task) {
-    char buffer[0x70];
-    s32 current = kwlnTextureGetPageIndex();
-    s32 count = kwlnTextureCountIncompleteResources();
-    func_003014F0(buffer, "TEX VIEWER [%d/%d]", current, count - 1);
-    sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x7180, 0x79C0, 0xFFFFF80, 0, buffer));
+/* Append the zero-based viewer page and final page index; an empty list prints -1. */
+void kwlnTextureDrawPageCounter(void *packetList) {
+    char pageText[0x70];
+    s32 pageIndex = kwlnTextureGetPageIndex();
+    s32 resourceCount = kwlnTextureCountIncompleteResources();
+    func_003014F0(pageText, "TEX VIEWER [%d/%d]", pageIndex, resourceCount - 1);
+    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7180, 0x79C0, KWLN_DIAG_DEPTH, 0, pageText));
 }
 
 INCLUDE_RODATA(const s32, "game/code_00102ED8", D_0039E078);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104810);
 
+#define KWLN_DIAG_PACKET_LIST_BYTES 0x20
+#define KWLN_VIEWER_FAST_PAGE_STEP 10
+#define KWLN_MAP_ROW_UNITS 0x1000
+#define KWLN_MAP_ROW_SHIFT 12
+#define KWLN_MAP_ROW_MASK 0xFFF
+#define KWLN_MAP_COLUMN_SHIFT 5
+#define KWLN_MAP_COLUMN_UNITS 32
+#define KWLN_MAP_COLUMN_COUNT 128
+#define KWLN_MAP_ROW_SPAN 0x800
+#define KWLN_MAP_BORDER_WIDTH 0x840
+#define KWLN_MAP_CELL_X_STEP 16
+#define KWLN_MAP_ROW_Y_STEP 8
+#define KWLN_MAP_CELL_X_SHIFT 4
+#define KWLN_MAP_GREEN 0x80008000
+#define KWLN_MAP_YELLOW 0x80008080
+#define KWLN_MAP_RED 0x80000080
+#define KWLN_MAP_BLUE 0x80800000
+#define KWLN_MAP_CYAN 0x80808000
+#define KWLN_HELD_TEXTURE_CLAMP_MODE 5
+
+/* Count nodes with a null readiness pointer or a zero readiness word. */
 s32 kwlnTextureCountIncompleteResources(void) {
-    KwlnResourceNode *node = (KwlnResourceNode *)sdfResourceListHead;
-    KwlnResourceNode *next;
-    s32 count = 0;
-    while (node != NULL) {
-        while (node->ready != NULL && *node->ready != 0) {
-            next = node->next;
-            if (next == NULL) {
-                return count;
+    KwlnResourceNode *resourceNode = (KwlnResourceNode *)sdfResourceListHead;
+    KwlnResourceNode *nextNode;
+    s32 incompleteCount = 0;
+    while (resourceNode != NULL) {
+        while (resourceNode->ready != NULL && *resourceNode->ready != 0) {
+            nextNode = resourceNode->next;
+            if (nextNode == NULL) {
+                return incompleteCount;
             }
-            node = next;
+            resourceNode = nextNode;
         }
-        count++;
-        node = node->next;
+        incompleteCount++;
+        resourceNode = resourceNode->next;
     }
-    return count;
+    return incompleteCount;
 }
 
 u32 kwlnTextureGetPageIndex(void) {
     return kwlnTextureViewerPageIndex;
 }
 
-s32 func_00104A18(s32 index) {
-    KwlnResourceNode *node = (KwlnResourceNode *)sdfResourceListHead;
-    KwlnResourceNode *next;
-    s32 count = 0;
+/* Clamp a negative request and return the reached index. DDS1 index zero
+ * selects the head without scanning readiness; tail exits retain prior writes. */
+s32 func_00104A18(s32 requestedIndex) {
+    KwlnResourceNode *resourceNode = (KwlnResourceNode *)sdfResourceListHead;
+    KwlnResourceNode *nextNode;
+    s32 visitedIndex = 0;
 
-    if (index < 0) {
-        index = 0;
+    if (requestedIndex < 0) {
+        requestedIndex = 0;
     }
-    while (node != NULL && count != index) {
-        kwlnCurrentIncompleteResource = (s32)node;
-        while (node->ready != NULL && *node->ready != 0) {
-            next = node->next;
-            if (next == NULL) {
-                return count;
+    while (resourceNode != NULL && visitedIndex != requestedIndex) {
+        kwlnCurrentIncompleteResource = (s32)resourceNode;
+        while (resourceNode->ready != NULL && *resourceNode->ready != 0) {
+            nextNode = resourceNode->next;
+            if (nextNode == NULL) {
+                return visitedIndex;
             }
-            node = next;
+            resourceNode = nextNode;
         }
-        next = node->next;
-        if (next == NULL) {
-            return count;
+        nextNode = resourceNode->next;
+        if (nextNode == NULL) {
+            return visitedIndex;
         }
-        count++;
-        node = next;
+        visitedIndex++;
+        resourceNode = nextNode;
     }
-    kwlnCurrentIncompleteResource = (s32)node;
-    return count;
+    kwlnCurrentIncompleteResource = (s32)resourceNode;
+    return visitedIndex;
 }
 
+/* Exit input returns 0 immediately; otherwise apply one prioritized page step,
+ * select its reached index, then optionally toggle the viewer mode and return 1. */
 s32 kwlnTextureViewerHandlePad(void) {
     if (sdfPadButtonStates.unk13 < 0) {
         return 0;
     }
-    if (sdfPadButtonStates.unk14 & 2) {
+    if (sdfPadButtonStates.unk14 & KWLN_PAD_REPEAT_BIT) {
         kwlnTextureViewerPageIndex -= 1;
-    } else if (sdfPadButtonStates.unk15 & 2) {
+    } else if (sdfPadButtonStates.unk15 & KWLN_PAD_REPEAT_BIT) {
         kwlnTextureViewerPageIndex += 1;
-    } else if ((sdfPadButtonStates.unk18 & 2) || (sdfPadButtonStates.unk19 & 2)) {
-        kwlnTextureViewerPageIndex -= 10;
-    } else if ((sdfPadButtonStates.unk1A & 2) || (sdfPadButtonStates.unk1B & 2)) {
-        kwlnTextureViewerPageIndex += 10;
+    } else if ((sdfPadButtonStates.unk18 & KWLN_PAD_REPEAT_BIT) || (sdfPadButtonStates.unk19 & KWLN_PAD_REPEAT_BIT)) {
+        kwlnTextureViewerPageIndex -= KWLN_VIEWER_FAST_PAGE_STEP;
+    } else if ((sdfPadButtonStates.unk1A & KWLN_PAD_REPEAT_BIT) || (sdfPadButtonStates.unk1B & KWLN_PAD_REPEAT_BIT)) {
+        kwlnTextureViewerPageIndex += KWLN_VIEWER_FAST_PAGE_STEP;
     }
     kwlnTextureViewerPageIndex = func_00104A18(kwlnTextureViewerPageIndex);
     if (sdfPadButtonStates.unk12 < 0) {
@@ -539,17 +595,20 @@ s32 kwlnTextureViewerHandlePad(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104B88);
 
-s32 kwlnSwapActiveResource(s32 resource) {
-    s32 status;
+/* With a nonempty list, invoke its renderer even when input reports exit.
+ * surfaceAddress identifies the submission callback owner; return input status. */
+s32 kwlnSwapActiveResource(s32 surfaceAddress) {
+    s32 inputStatus;
 
     if (sdfResourceListHead == 0) {
         return 0;
     }
-    status = kwlnTextureViewerHandlePad();
-    func_00104B88((void *)resource, kwlnCurrentIncompleteResource);
-    return status;
+    inputStatus = kwlnTextureViewerHandlePad();
+    func_00104B88((void *)surfaceAddress, kwlnCurrentIncompleteResource);
+    return inputStatus;
 }
 
+/* Use the default surface: empty list returns 0, exit input -1, drawing 0. */
 s32 kwlnLoadDefaultResource(void) {
     if (sdfResourceListHead == 0) {
         return 0;
@@ -561,20 +620,22 @@ s32 kwlnLoadDefaultResource(void) {
     return 0;
 }
 
+/* Initialize viewer state and return its default renderer for the first eligible
+ * node. Exhausting a nonempty list returns NULL after the initial state writes. */
 s32 (*kwlnTextureFindIncompleteResource(void))(void) {
-    KwlnResourceNode *node = (KwlnResourceNode *)sdfResourceListHead;
-    if (node == NULL) {
+    KwlnResourceNode *resourceNode = (KwlnResourceNode *)sdfResourceListHead;
+    if (resourceNode == NULL) {
         return NULL;
     }
-    kwlnCurrentIncompleteResource = (s32)node;
+    kwlnCurrentIncompleteResource = (s32)resourceNode;
     D_003BA890 = 1;
     kwlnTextureViewerPageIndex = 0;
-    while (node->ready != NULL && *node->ready != 0) {
-        node = ((KwlnResourceNode *)kwlnCurrentIncompleteResource)->next;
-        if (node == NULL) {
+    while (resourceNode->ready != NULL && *resourceNode->ready != 0) {
+        resourceNode = ((KwlnResourceNode *)kwlnCurrentIncompleteResource)->next;
+        if (resourceNode == NULL) {
             return NULL;
         }
-        kwlnCurrentIncompleteResource = (s32)node;
+        kwlnCurrentIncompleteResource = (s32)resourceNode;
     }
     return kwlnLoadDefaultResource;
 }
@@ -592,92 +653,98 @@ typedef struct SdfTexHead {
 
 extern void sdfAppendFillRectanglePacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
-void func_00104E20(void *list, s32 x, s32 y, SdfTexHead *block, u8 mode) {
+/* Draw one allocation-map block in address units, choosing color by mode.
+ * Only the initial partial row forces a nonzero remainder to occupy one cell;
+ * the final partial row retains its truncated cell count. */
+void func_00104E20(void *packetList, s32 x, s32 y, SdfTexHead *block, u8 mode) {
     s32 color;
-    u32 wordsLeft;
-    s32 column;
-    s32 rowWords;
-    s32 left;
-    s32 top;
-    s32 width;
+    u32 remainingUnits;
+    s32 columnIndex;
+    s32 rowUnits;
+    s32 leftX;
+    s32 topY;
+    s32 cellCount;
 
     if (mode == 0) {
         switch (block->allocationMode) {
         case 1:
-            color = 0x80008000;
+            color = KWLN_MAP_GREEN;
             break;
         case 2:
-            color = 0x80008080;
+            color = KWLN_MAP_YELLOW;
             break;
         case 3:
-            color = 0x80000080;
+            color = KWLN_MAP_RED;
             break;
         default:
             color = 0;
             break;
         }
     } else {
-        color = mode == 1 ? 0x80800000 : 0x80808000;
+        color = mode == 1 ? KWLN_MAP_BLUE : KWLN_MAP_CYAN;
     }
-    wordsLeft = block->size;
-    top = y + (block->address >> 12) * 8;
-    column = (block->address & 0xFFF) >> 5;
-    left = x + column * 16;
-    if (column > 0) {
-        rowWords = (128 - column) * 32;
-        if (wordsLeft >= rowWords) {
-            sdfAppendFillRectanglePacket(list, color, 0, left, top,
-                                         left + (128 - column) * 16, top + 8,
-                                         0x0FFFFF80, NULL);
-            wordsLeft -= rowWords;
+    remainingUnits = block->size;
+    topY = y + (block->address >> KWLN_MAP_ROW_SHIFT) * KWLN_MAP_ROW_Y_STEP;
+    columnIndex = (block->address & KWLN_MAP_ROW_MASK) >> KWLN_MAP_COLUMN_SHIFT;
+    leftX = x + columnIndex * KWLN_MAP_CELL_X_STEP;
+    if (columnIndex > 0) {
+        rowUnits = (KWLN_MAP_COLUMN_COUNT - columnIndex) * KWLN_MAP_COLUMN_UNITS;
+        if (remainingUnits >= rowUnits) {
+            sdfAppendFillRectanglePacket(packetList, color, 0, leftX, topY,
+                                         leftX + (KWLN_MAP_COLUMN_COUNT - columnIndex) * KWLN_MAP_CELL_X_STEP, topY + KWLN_MAP_ROW_Y_STEP,
+                                         KWLN_DIAG_DEPTH, NULL);
+            remainingUnits -= rowUnits;
         } else {
-            width = wordsLeft >> 5;
-            if (width == 0) {
-                width = wordsLeft != 0;
+            cellCount = remainingUnits >> KWLN_MAP_COLUMN_SHIFT;
+            if (cellCount == 0) {
+                cellCount = remainingUnits != 0;
             }
-            sdfAppendFillRectanglePacket(list, color, 0, left, top,
-                                         left + width * 16, top + 8,
-                                         0x0FFFFF80, NULL);
-            wordsLeft = 0;
+            sdfAppendFillRectanglePacket(packetList, color, 0, leftX, topY,
+                                         leftX + cellCount * KWLN_MAP_CELL_X_STEP, topY + KWLN_MAP_ROW_Y_STEP,
+                                         KWLN_DIAG_DEPTH, NULL);
+            remainingUnits = 0;
         }
-        top += 8;
+        topY += KWLN_MAP_ROW_Y_STEP;
     }
-    while (wordsLeft >= 0x1000) {
-        sdfAppendFillRectanglePacket(list, color, 0, x, top, x + 0x800, top + 8,
-                                     0x0FFFFF80, NULL);
-        wordsLeft -= 0x1000;
-        top += 8;
+    while (remainingUnits >= KWLN_MAP_ROW_UNITS) {
+        sdfAppendFillRectanglePacket(packetList, color, 0, x, topY, x + KWLN_MAP_ROW_SPAN, topY + KWLN_MAP_ROW_Y_STEP,
+                                     KWLN_DIAG_DEPTH, NULL);
+        remainingUnits -= KWLN_MAP_ROW_UNITS;
+        topY += KWLN_MAP_ROW_Y_STEP;
     }
-    if (wordsLeft != 0) {
-        sdfAppendFillRectanglePacket(list, color, 0, x, top,
-                                     x + ((wordsLeft >> 5) << 4), top + 8,
-                                     0x0FFFFF80, NULL);
+    if (remainingUnits != 0) {
+        sdfAppendFillRectanglePacket(packetList, color, 0, x, topY,
+                                     x + ((remainingUnits >> KWLN_MAP_COLUMN_SHIFT) << KWLN_MAP_CELL_X_SHIFT), topY + KWLN_MAP_ROW_Y_STEP,
+                                     KWLN_DIAG_DEPTH, NULL);
     }
 }
 
 extern SdfTexHead *sdfGetTextureListHead(void);
 
-void kwlnDrawTextureListDiagnostic(void *list, s32 x, s32 y) {
-    SdfTexHead *texture = sdfGetTextureListHead();
+/* Draw the allocation-map border, then walk blocks through their prev links. */
+void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y) {
+    SdfTexHead *block = sdfGetTextureListHead();
 
-    if (texture != NULL) {
-        sdfAppendPacket(list, func_0011D3E8(x - 0x20, y - 0x10,
-                                          0x0FFFFF7F, 0x840, 0x820,
+    if (block != NULL) {
+        sdfAppendPacket(packetList, func_0011D3E8(x - 0x20, y - 0x10,
+                                          0x0FFFFF7F, KWLN_MAP_BORDER_WIDTH, 0x820,
                                           0x80000000, 0x80806020));
         do {
-            func_00104E20(list, x, y, texture, 0);
-            texture = texture->prev;
-        } while (texture != NULL);
+            func_00104E20(packetList, x, y, block, 0);
+            block = block->prev;
+        } while (block != NULL);
     }
 }
 
-void kwlnTextureAttachTask(u8 *scene) {
-    void *task = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(task);
-    kwlnDrawTextureListDiagnostic(task, 0x7180, 0x79C0);
-    (*(void (**)(void *, void *))(scene + 0x10))(scene, task);
+/* Build an allocation-map packet list and submit it through the surface callback. */
+void kwlnTextureAttachTask(u8 *surface) {
+    void *packetList = sdfAllocPacketAligned(KWLN_DIAG_PACKET_LIST_BYTES);
+    sdfInitPacketList(packetList);
+    kwlnDrawTextureListDiagnostic(packetList, 0x7180, 0x79C0);
+    (*(void (**)(void *, void *))(surface + 0x10))(surface, packetList);
 }
 
+/* Submit the default surface's map only when the control array's first byte is zero. */
 s32 kwlnEnsureDefaultResource(void) {
     if (D_0032453B[0] != 0) {
         return 0;
@@ -688,6 +755,7 @@ s32 kwlnEnsureDefaultResource(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105150);
 
+/* Select display mode 1, rebuild both projection blocks and reset draw-vector state. */
 void evtResetDisplayProjectionAndVectorState(void) {
     sdfGraphSetDisplayMode(1);
     sdfCameraBuildProjection(&sdfSceneProjectionParameters);
@@ -711,9 +779,10 @@ extern void sdfTexSetClampMode(s32 texture, s32 mode);
 extern void sdfTexCreateFirstPacket(s32 texture);
 extern f32 D_003247B0[];
 
-/* Allocate a width x height image buffer and wrap it in the held texture reference; returns 1 when both exist. */
+/* Replace the held texture with a width x height image buffer; return 1 on success.
+ * A texture-creation failure does not roll back the already allocated image buffer. */
 s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
-    s32 texture;
+    s32 textureHandle;
 
     if (kwlnHeldTextureReference != 0) {
         kwlnTextureReleaseHeldReference();
@@ -725,13 +794,13 @@ s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
     if (D_003BA8F4 == 0) {
         return 0;
     }
-    texture = sdfTexCreateResourceWithReference(width, height, 0, 0, D_003BA8F4, 0, 0, 0);
-    if (texture == 0) {
+    textureHandle = sdfTexCreateResourceWithReference(width, height, 0, 0, D_003BA8F4, 0, 0, 0);
+    if (textureHandle == 0) {
         return 0;
     }
-    kwlnHeldTextureReference = texture;
-    sdfTexSetClampMode(texture, 5);
-    sdfTexCreateFirstPacket(texture);
+    kwlnHeldTextureReference = textureHandle;
+    sdfTexSetClampMode(textureHandle, KWLN_HELD_TEXTURE_CLAMP_MODE);
+    sdfTexCreateFirstPacket(textureHandle);
     D_003247B0[1] = value;
     D_003247B0[6] = width;
     D_003247B0[7] = height;
@@ -739,7 +808,7 @@ s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
     return 1;
 }
 
-/* Release the retained texture and clear its request/pending flags. */
+/* Release the held texture if present and clear tracking; no separate buffer free. */
 void kwlnTextureReleaseHeldReference(void) {
     if (kwlnHeldTextureReference != 0) {
         sdfTexReleaseReference(kwlnHeldTextureReference);
@@ -749,6 +818,7 @@ void kwlnTextureReleaseHeldReference(void) {
     kwlnTextureReferenceFlag = 0;
 }
 
+/* Set the flag and return 1 when a held handle exists; otherwise leave it and return 0. */
 s32 kwlnTextureSetReferenceFlagIfPresent(void) {
     s32 result = 0;
 
@@ -773,7 +843,29 @@ s32 kwlnTextureGetHeldReference(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105630);
 
-/* The frame count is stored in tenths before deriving the forty-percent mark. */
+#define KWLN_FADE_TICKS_PER_FRAME 10
+#define KWLN_FADE_MARK_NUMERATOR 4
+#define KWLN_FRAME_STATE_BYTES 0x160
+#define KWLN_FRAME_BUFFER_BYTES 0xB0
+#define KWLN_FADE_COUNT_DOWN_BIT 1
+#define KWLN_FADE_COUNT_UP_BIT 2
+#define KWLN_FADE_DIRECTION_BITS 3
+#define KWLN_FADE_MAX_ALPHA 0x80
+#define KWLN_FADE_ALPHA_SHIFT 7
+#define KWLN_COLOR_ALPHA_CHANNEL 3
+#define KWLN_BGFADE_COUNT_DOWN_BIT 0x04000000
+#define KWLN_BGFADE_COUNT_UP_BIT 0x08000000
+#define KWLN_BGFADE_DIRECTION_BITS 0x0C000000
+#define KWLN_BGFADE_KEEP_OTHER_BITS 0xF3FFFFFF
+#define KWLN_BGFADE_CLEAR_UP_MASK 0xF7FFFFFF
+#define KWLN_BGFADE_CLEAR_DOWN_MASK 0xFBFFFFFF
+#define KWLN_BGFADE_FIRST_RAMP_MAX 0x31
+#define KWLN_BGFADE_SECOND_RAMP_MAX 0x4F
+#define KWLN_BGFADE_FIRST_RAMP_SCALE 49.0f
+#define KWLN_BGFADE_SECOND_RAMP_SCALE 79.0f
+
+/* Store tenths in the 16-bit duration before deriving its forty-percent mark.
+ * Zero frames only disables the configuration; mode zero stores the -1 sentinel. */
 void kwlnFadeSetupFrames(s32 mode, s32 frames) {
     if (frames == 0) {
         D_003BA918 = 0;
@@ -785,55 +877,62 @@ void kwlnFadeSetupFrames(s32 mode, s32 frames) {
     } else {
         D_003BA91A = mode;
     }
-    D_003BA91E = frames * 10;
-    D_003BA91C = D_003BA91E * 4 / 10;
+    D_003BA91E = frames * KWLN_FADE_TICKS_PER_FRAME;
+    D_003BA91C = D_003BA91E * KWLN_FADE_MARK_NUMERATOR / KWLN_FADE_TICKS_PER_FRAME;
 }
 
+/* Disable the configured fade without clearing its stored timing parameters. */
 void kwlnCancelConfiguredFadeFrames(void) {
     D_003BA918 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105890);
 
+/* Append the selected state's packet for the current draw buffer to a new list. */
 u64 evtBuildFrameStatePacketList(s32 stateIndex) {
-    u64 list = sdfCreateResetPacketList();
+    u64 packetList = sdfCreateResetPacketList();
 
-    sdfAppendPacket(list, D_003C2620 + stateIndex * 0x160 + kwlnGetDrawBufferIndex() * 0xB0);
-    return list;
+    sdfAppendPacket(packetList, D_003C2620 + stateIndex * KWLN_FRAME_STATE_BYTES + kwlnGetDrawBufferIndex() * KWLN_FRAME_BUFFER_BYTES);
+    return packetList;
 }
 
-/* The low two bits select the active fade direction; clearing cancels it. */
+/* Cancel the foreground direction and zero RGBA; timing words are unchanged. */
 void kwlnFadeClear(void) {
-    kwlnDrawControlFlags &= ~3;
+    kwlnDrawControlFlags &= ~KWLN_FADE_DIRECTION_BITS;
     kwlnFadeColor.r = 0;
     kwlnFadeColor.g = 0;
     kwlnFadeColor.b = 0;
     kwlnFadeColor.a = 0;
 }
 
+/* Store RGBA and cancel foreground direction flags without changing timing. */
 void kwlnFadeSetColor(s8 red, s8 green, s8 blue, s8 alpha) {
-    kwlnDrawControlFlags &= ~3;
+    kwlnDrawControlFlags &= ~KWLN_FADE_DIRECTION_BITS;
     kwlnFadeColor.r = red;
     kwlnFadeColor.g = green;
     kwlnFadeColor.b = blue;
     kwlnFadeColor.a = alpha;
 }
 
-void kwlnFadeGetColor(KwlnFadeColor **color) {
-    *color = &kwlnFadeColor;
+/* Return the live color address through outColor, rather than copying channels. */
+void kwlnFadeGetColor(KwlnFadeColor **outColor) {
+    *outColor = &kwlnFadeColor;
 }
 
+/* Replace RGB only; alpha, direction flags and timing are preserved. */
 void kwlnFadeSetRGB(s8 red, s8 green, s8 blue) {
     kwlnFadeColor.r = red;
     kwlnFadeColor.g = green;
     kwlnFadeColor.b = blue;
 }
 
+/* Start the countdown with caller RGB. A zero duration also clears RGB via FadeClear.
+ * The signed alpha byte -0x80 carries the raw maximum-alpha value 0x80. */
 void kwlnFadeOutStart(s8 red, s8 green, s8 blue, s32 duration) {
     kwlnFadeColor.r = red;
     kwlnFadeColor.g = green;
     kwlnFadeColor.b = blue;
-    kwlnFadeColor.a = -0x80;
+    kwlnFadeColor.a = -KWLN_FADE_MAX_ALPHA;
     if (duration == 0) {
         kwlnFadeColor.a = 0;
         kwlnFadeCounter = 0;
@@ -843,25 +942,25 @@ void kwlnFadeOutStart(s8 red, s8 green, s8 blue, s32 duration) {
     }
     kwlnFadeDuration = duration;
     kwlnFadeCounter = duration;
-    kwlnDrawControlFlags = (kwlnDrawControlFlags | 1) & ~2;
+    kwlnDrawControlFlags = (kwlnDrawControlFlags | KWLN_FADE_COUNT_DOWN_BIT) & ~KWLN_FADE_COUNT_UP_BIT;
 }
 
-/* Enter the first fade direction; a zero duration finishes immediately. */
+/* Start the same countdown using existing RGB; zero duration preserves RGB. */
 void kwlnFadeStartIn(s32 duration) {
-    kwlnFadeColor.a = -0x80;
+    kwlnFadeColor.a = -KWLN_FADE_MAX_ALPHA;
     if (duration == 0) {
         kwlnFadeColor.a = 0;
-        kwlnDrawControlFlags &= ~3;
+        kwlnDrawControlFlags &= ~KWLN_FADE_DIRECTION_BITS;
         kwlnFadeCounter = 0;
         kwlnFadeDuration = 0;
     } else {
         kwlnFadeDuration = duration;
         kwlnFadeCounter = duration;
-        kwlnDrawControlFlags = (kwlnDrawControlFlags | 1) & ~2;
+        kwlnDrawControlFlags = (kwlnDrawControlFlags | KWLN_FADE_COUNT_DOWN_BIT) & ~KWLN_FADE_COUNT_UP_BIT;
     }
 }
 
-/* Select the second fade direction using the specified RGB color. */
+/* Start the count-up with caller RGB; zero duration leaves maximum alpha. */
 void kwlnFadeInStart(s8 red, s8 green, s8 blue, s32 duration) {
     kwlnFadeColor.r = red;
     kwlnFadeColor.g = green;
@@ -870,164 +969,177 @@ void kwlnFadeInStart(s8 red, s8 green, s8 blue, s32 duration) {
     if (duration == 0) {
         kwlnFadeCounter = 0;
         kwlnFadeDuration = 0;
-        kwlnFadeColor.a = -0x80;
-        kwlnDrawControlFlags &= ~3;
+        kwlnFadeColor.a = -KWLN_FADE_MAX_ALPHA;
+        kwlnDrawControlFlags &= ~KWLN_FADE_DIRECTION_BITS;
         return;
     }
     kwlnFadeDuration = duration;
     kwlnFadeCounter = 0;
-    kwlnDrawControlFlags = (kwlnDrawControlFlags & ~1) | 2;
+    kwlnDrawControlFlags = (kwlnDrawControlFlags & ~KWLN_FADE_COUNT_DOWN_BIT) | KWLN_FADE_COUNT_UP_BIT;
 }
 
-/* Enter the second fade direction; a zero duration finishes immediately. */
+/* Start the same count-up using existing RGB; zero duration preserves RGB. */
 void kwlnFadeStartOut(s32 duration) {
     kwlnFadeColor.a = 0;
     if (duration == 0) {
         kwlnFadeCounter = 0;
-        kwlnFadeColor.a = -0x80;
-        kwlnDrawControlFlags &= ~3;
+        kwlnFadeColor.a = -KWLN_FADE_MAX_ALPHA;
+        kwlnDrawControlFlags &= ~KWLN_FADE_DIRECTION_BITS;
         kwlnFadeDuration = 0;
     } else {
         kwlnFadeDuration = duration;
         kwlnFadeCounter = 0;
-        kwlnDrawControlFlags = (kwlnDrawControlFlags & ~1) | 2;
+        kwlnDrawControlFlags = (kwlnDrawControlFlags & ~KWLN_FADE_COUNT_DOWN_BIT) | KWLN_FADE_COUNT_UP_BIT;
     }
 }
 
+/* Return whether either foreground counter direction is enabled. */
 u8 kwlnFadeIsActive(void) {
-    return (kwlnDrawControlFlags & 3) != 0;
+    return (kwlnDrawControlFlags & KWLN_FADE_DIRECTION_BITS) != 0;
 }
 
+/* Step the u16 counter and sample alpha before testing exact completion.
+ * Completion clears timing/flags but leaves the sampled endpoint alpha intact. */
 void kwlnFadeUpdate(void) {
     if (kwlnFadeIsActive() != 0) {
-        if (kwlnDrawControlFlags & 1) {
+        if (kwlnDrawControlFlags & KWLN_FADE_COUNT_DOWN_BIT) {
             kwlnFadeCounter -= 1;
         } else {
             kwlnFadeCounter += 1;
         }
-        kwlnFadeColor.a = (kwlnFadeCounter << 7) / kwlnFadeDuration;
-        if (((kwlnDrawControlFlags & 1) && kwlnFadeCounter == 0) || ((kwlnDrawControlFlags & 2) && kwlnFadeCounter == kwlnFadeDuration)) {
+        kwlnFadeColor.a = (kwlnFadeCounter << KWLN_FADE_ALPHA_SHIFT) / kwlnFadeDuration;
+        if (((kwlnDrawControlFlags & KWLN_FADE_COUNT_DOWN_BIT) && kwlnFadeCounter == 0) || ((kwlnDrawControlFlags & KWLN_FADE_COUNT_UP_BIT) && kwlnFadeCounter == kwlnFadeDuration)) {
             kwlnFadeCounter = 0;
             kwlnFadeDuration = 0;
-            kwlnDrawControlFlags &= ~3;
+            kwlnDrawControlFlags &= ~KWLN_FADE_DIRECTION_BITS;
         }
     }
 }
 
+/* Submit diagnostics when enabled and either counter is nonzero; only positive
+ * counters produce text, so negative-only errors still submit an empty list. */
 void kwlnDrawBlurErrorCounters(void) {
-    void *task;
+    void *packetList;
 
     if (D_003BA724 != 0) {
         if (kwlnDistanceBlurErrorCount != 0 || kwlnRippleBlurErrorCount != 0) {
-            task = sdfAllocPacketAligned(0x20);
-            sdfInitPacketList(task);
+            packetList = sdfAllocPacketAligned(KWLN_DIAG_PACKET_LIST_BYTES);
+            sdfInitPacketList(packetList);
             if (kwlnDistanceBlurErrorCount > 0) {
-                sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", kwlnDistanceBlurErrorCount));
+                sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", kwlnDistanceBlurErrorCount));
             }
             if (kwlnRippleBlurErrorCount > 0) {
-                sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", kwlnRippleBlurErrorCount));
+                sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", kwlnRippleBlurErrorCount));
             }
-            D_00325708.submit(&D_00325708, task);
+            D_00325708.submit(&D_00325708, packetList);
         }
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105DD8);
 
-/* Reset the background fade's color bytes and its two parameter words. */
+/* Cancel background direction, zero RGBA and restore the inactive ramp maxima.
+ * This reset does not rewrite the background counter or duration. */
 void kwlnFadeResetBackground(void) {
-    kwlnDrawControlFlags &= 0xF3FFFFFF;
+    kwlnDrawControlFlags &= KWLN_BGFADE_KEEP_OTHER_BITS;
     kwlnBackgroundFadeColor[0] = 0;
     kwlnBackgroundFadeColor[1] = 0;
     kwlnBackgroundFadeColor[2] = 0;
-    kwlnBackgroundFadeColor[3] = 0;
-    D_003BA92E = 0x31;
-    D_003BA930 = 0x4F;
+    kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = 0;
+    D_003BA92E = KWLN_BGFADE_FIRST_RAMP_MAX;
+    D_003BA930 = KWLN_BGFADE_SECOND_RAMP_MAX;
 }
 
+/* Start the background countdown; zero duration performs the full background reset. */
 void kwlnFadeBackgroundStartOut(s32 duration) {
     kwlnBackgroundFadeColor[0] = 0;
     kwlnBackgroundFadeColor[1] = 0;
     kwlnBackgroundFadeColor[2] = 0;
-    kwlnBackgroundFadeColor[3] = 0x80;
+    kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
     if (duration == 0) {
-        kwlnBackgroundFadeColor[3] = 0;
+        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = 0;
         kwlnBackgroundFadeCounter = 0;
         kwlnBackgroundFadeDuration = 0;
-        D_003BA92E = 0x31;
-        D_003BA930 = 0x4F;
+        D_003BA92E = KWLN_BGFADE_FIRST_RAMP_MAX;
+        D_003BA930 = KWLN_BGFADE_SECOND_RAMP_MAX;
         kwlnFadeResetBackground();
     } else {
         kwlnBackgroundFadeDuration = duration;
         kwlnBackgroundFadeCounter = duration;
-        kwlnDrawControlFlags = (kwlnDrawControlFlags | 0x04000000) & 0xF7FFFFFF;
+        kwlnDrawControlFlags = (kwlnDrawControlFlags | KWLN_BGFADE_COUNT_DOWN_BIT) & KWLN_BGFADE_CLEAR_UP_MASK;
     }
     D_003245EC[2] = 2048.0f;
 }
 
+/* Start the background count-up; zero duration leaves max alpha and zero ramps. */
 void kwlnFadeBackgroundStartIn(s32 duration) {
     kwlnBackgroundFadeColor[0] = 0;
     kwlnBackgroundFadeColor[1] = 0;
     kwlnBackgroundFadeColor[2] = 0;
-    kwlnBackgroundFadeColor[3] = 0;
+    kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = 0;
     if (duration == 0) {
         kwlnBackgroundFadeCounter = 0;
         kwlnBackgroundFadeDuration = 0;
-        kwlnBackgroundFadeColor[3] = 0x80;
-        kwlnDrawControlFlags &= 0xF3FFFFFF;
+        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
+        kwlnDrawControlFlags &= KWLN_BGFADE_KEEP_OTHER_BITS;
         D_003BA92E = 0;
         D_003BA930 = 0;
     } else {
         kwlnBackgroundFadeDuration = duration;
         kwlnBackgroundFadeCounter = 0;
-        kwlnDrawControlFlags = (kwlnDrawControlFlags & 0xFBFFFFFF) | 0x08000000;
+        kwlnDrawControlFlags = (kwlnDrawControlFlags & KWLN_BGFADE_CLEAR_DOWN_MASK) | KWLN_BGFADE_COUNT_UP_BIT;
     }
     D_003245EC[2] = 2041.0f;
 }
 
+/* Direction flags take precedence; idle visibility uses alpha in mode zero,
+ * otherwise it tests whether the first ramp differs from its inactive maximum. */
 s32 kwlnFadeIsBackgroundOverlayActive(void) {
-    if (kwlnDrawControlFlags & 0x0C000000) {
+    if (kwlnDrawControlFlags & KWLN_BGFADE_DIRECTION_BITS) {
         return 1;
     }
     if (kwlnBackgroundFadeMode == 0) {
-        if (0x80 - kwlnBackgroundFadeColor[3] >= 0x80) {
+        if (KWLN_FADE_MAX_ALPHA - kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] >= KWLN_FADE_MAX_ALPHA) {
             return 0;
         }
-    } else if (D_003BA92E == 0x31) {
+    } else if (D_003BA92E == KWLN_BGFADE_FIRST_RAMP_MAX) {
         return 0;
     }
     return 1;
 }
 
-void kwlnFadeSetMode(s32 mode) {
-    kwlnBackgroundFadeMode = mode;
+/* Store the visibility mode; its stored zero value clears ramps, otherwise
+ * maximum alpha is selected. Counter direction and timing are unchanged. */
+void kwlnFadeSetMode(s32 visibilityMode) {
+    kwlnBackgroundFadeMode = visibilityMode;
     if (kwlnBackgroundFadeMode == 0) {
         D_003BA92E = 0;
         D_003BA930 = 0;
     } else {
-        kwlnBackgroundFadeColor[3] = 0x80;
+        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
     }
 }
 
-/* Step the background fade counter in the direction chosen by the control flags and derive the fade alpha and the two ramp values. */
+/* Step the u16 counter, then derive integer alpha and f32 ramp samples.
+ * Completion clears timing/flags after sampling, retaining endpoint values. */
 void kwlnStepBackgroundFade(void) {
-    f32 ratio;
+    f32 fadeRatio;
 
-    if (kwlnDrawControlFlags & 0x0C000000) {
-        if (kwlnDrawControlFlags & 0x04000000) {
+    if (kwlnDrawControlFlags & KWLN_BGFADE_DIRECTION_BITS) {
+        if (kwlnDrawControlFlags & KWLN_BGFADE_COUNT_DOWN_BIT) {
             kwlnBackgroundFadeCounter--;
         } else {
             kwlnBackgroundFadeCounter++;
         }
-        ratio = (f32)kwlnBackgroundFadeCounter / (f32)kwlnBackgroundFadeDuration;
-        kwlnBackgroundFadeColor[3] = (kwlnBackgroundFadeCounter << 7) / kwlnBackgroundFadeDuration;
-        D_003BA92E = 49.0f - ratio * 49.0f;
-        D_003BA930 = 79.0f - ratio * 79.0f;
-        if (((kwlnDrawControlFlags & 0x04000000) && kwlnBackgroundFadeCounter == 0) ||
-            ((kwlnDrawControlFlags & 0x08000000) && kwlnBackgroundFadeCounter == kwlnBackgroundFadeDuration)) {
+        fadeRatio = (f32)kwlnBackgroundFadeCounter / (f32)kwlnBackgroundFadeDuration;
+        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = (kwlnBackgroundFadeCounter << KWLN_FADE_ALPHA_SHIFT) / kwlnBackgroundFadeDuration;
+        D_003BA92E = KWLN_BGFADE_FIRST_RAMP_SCALE - fadeRatio * KWLN_BGFADE_FIRST_RAMP_SCALE;
+        D_003BA930 = KWLN_BGFADE_SECOND_RAMP_SCALE - fadeRatio * KWLN_BGFADE_SECOND_RAMP_SCALE;
+        if (((kwlnDrawControlFlags & KWLN_BGFADE_COUNT_DOWN_BIT) && kwlnBackgroundFadeCounter == 0) ||
+            ((kwlnDrawControlFlags & KWLN_BGFADE_COUNT_UP_BIT) && kwlnBackgroundFadeCounter == kwlnBackgroundFadeDuration)) {
             kwlnBackgroundFadeCounter = 0;
             kwlnBackgroundFadeDuration = 0;
-            kwlnDrawControlFlags &= 0xF3FFFFFF;
+            kwlnDrawControlFlags &= KWLN_BGFADE_KEEP_OTHER_BITS;
         }
     }
 }
