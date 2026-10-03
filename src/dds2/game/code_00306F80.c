@@ -45,6 +45,14 @@ typedef struct GridScrollRange {
     float step;           /* 0x0C */
 } GridScrollRange;
 
+typedef struct GridNumericDescriptor {
+    s32 mode;
+    f32 minimum;
+    f32 maximum;
+    f32 step;
+    f32 value;
+} GridNumericDescriptor;
+
 typedef struct GridTextListItem GridTextListItem;
 
 /* Native 0x40-byte text/list widget. Navigation and child layout share these links. */
@@ -1173,7 +1181,52 @@ void itfReplaceGridTextAndExpandColumn(GridTextWidget *widget, u8 *node, const c
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00309880);
+s32 func_00309880(GridTextWidget *widget, GridTextListItem *item,
+                  GridNumericDescriptor *descriptor) {
+    GridNumericDescriptor *copy;
+    f32 maximum;
+    s32 width = 1;
+    s32 length;
+
+    copy = (GridNumericDescriptor *)sdfAllocSizeClassBlock(sizeof(GridNumericDescriptor));
+    item->parameter = copy;
+    memcpy(copy, descriptor, sizeof(GridNumericDescriptor));
+    item->number = descriptor->value;
+    length = strlen(item->text);
+    maximum = ((GridNumericDescriptor *)item->parameter)->maximum;
+
+    switch (descriptor->mode) {
+        case 1:
+            while (maximum >= 16.0f) {
+                maximum *= 0.0625f;
+                width++;
+            }
+            width += 2;
+            break;
+        case 2:
+            while (maximum >= 10.0f) {
+                maximum /= 10.0f;
+                width++;
+            }
+            width += 2;
+            break;
+        default:
+            while (maximum >= 10.0f) {
+                maximum /= 10.0f;
+                width++;
+            }
+            break;
+    }
+
+    item->formatWidth = width;
+    if (widget->flags & 0x100) {
+        length += width;
+    } else {
+        length += width + 1;
+    }
+    itfExpandWidgetColumnWidth(length, widget);
+    return 1;
+}
 
 /* Advance by at least one configured step; crossing the maximum wraps to minimum. */
 void itfAdvanceGridScrollPosition(u32 owner, u32 key, s32 steps) {
