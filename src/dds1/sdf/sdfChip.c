@@ -15,7 +15,7 @@ void *sdfClearQuadwords(void *arg0, s32 arg1);
 void sdfPendingQueuePush(void *arg0, s32 arg1);
 s32 func_00312C08(void);
 s32 EIntr(void);
-void sdfAdvanceNodeCursor(SdfChipClass *sizeClass);
+void sdfSelectNextChipPage(SdfChipClass *sizeClass);
 
 void *sdfAllocAndClearQuadwords(s32 size) {
     return sdfClearQuadwords(sdfAllocSizeClassBlock(size), (size + 15) >> 4);
@@ -45,7 +45,7 @@ void sdfReleaseChipBlock(void *memory) {
     if (page->usedCells == 0) {
         link = &sizeClass->availablePages;
         if (sizeClass->currentPage == page) {
-            sdfAdvanceNodeCursor(sizeClass);
+            sdfSelectNextChipPage(sizeClass);
         } else {
             while (*link != page) {
                 link = &(*link)->next;
