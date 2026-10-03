@@ -1,5 +1,12 @@
 #include "common.h"
 
+#define MTR_RECORD_COUNT 32
+#define MTR_STATUS_RESOURCE_BYTES 0xC08
+#define MTR_UNIT_ENTRY_COUNT 5
+#define MTR_SELECTION_PHASE_PER_TICK 0.125f
+#define MTR_SELECTION_ALPHA_SCALE 128.0f
+#define MTR_UNIT_FADE_FRAMES 10
+
 typedef struct {
     u16 flags;
     u16 pad2;
@@ -104,12 +111,13 @@ extern void sdfReleaseResourceAllocation(u32);
 extern void mnuReleasePanelEntryPool(void);
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286BA8);
 
+/* Process each of the 32 game-state records whose flags bit 0 is set, then print the native mantra banner. */
 void func_00286E20(void) {
-    s32 i;
+    s32 recordIndex;
 
-    for (i = 0; i < 32; i++) {
-        if (datGameState->records[i].flags & 1) {
-            func_00286A58(&datGameState->records[i]);
+    for (recordIndex = 0; recordIndex < MTR_RECORD_COUNT; recordIndex++) {
+        if (datGameState->records[recordIndex].flags & 1) {
+            func_00286A58(&datGameState->records[recordIndex]);
         }
     }
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraSetBitAll()]*****************\n");
@@ -147,32 +155,33 @@ typedef struct MnuStatusResource {
 
 extern void mtrInitUnitSelectionWork(MnuStatusResource *);
 
-/* Allocate and zero the 0xC08 status resource, then wire up its host pointer,
- * console banner and panel sound entries. */
+/* Allocate and clear status work, retain its allocation handle and create the progress host.
+ * Print the native load banner and initialize panel sound entries before returning the work pointer. */
 void *func_00286E98(void) {
-    u32 handle = sdfAllocGeneralBlock(0xC08);
-    MnuStatusResource *resource = (MnuStatusResource *)sdfMemoryGetBlockAddress(handle);
+    u32 allocationHandle = sdfAllocGeneralBlock(MTR_STATUS_RESOURCE_BYTES);
+    MnuStatusResource *resourceWork = (MnuStatusResource *)sdfMemoryGetBlockAddress(allocationHandle);
 
-    memset(resource, 0, 0xC08);
-    resource->allocationHandle = handle;
-    resource->progressHost = (MenuProgressHost *)mnuCreateProgressHost();
+    memset(resourceWork, 0, MTR_STATUS_RESOURCE_BYTES);
+    resourceWork->allocationHandle = allocationHandle;
+    resourceWork->progressHost = (MenuProgressHost *)mnuCreateProgressHost();
     evtPrintDeveloperConsoleMessage("trmLoadStartStatusResource()!!!! \n");
     evtPrintDeveloperConsoleMessage("mtrInit\n");
     mnuInitPanelSoundEntries();
-    return resource;
+    return resourceWork;
 }
 
-void func_00286F18(s32 arg0, s32 work) {
-    if (work != 0) {
-        MnuStatusResource *resource = (MnuStatusResource *)work;
+/* Release status-owned resources only for a nonzero work address; print the release banner even when it is zero. */
+void func_00286F18(s32 unused, s32 resourceAddress) {
+    if (resourceAddress != 0) {
+        MnuStatusResource *resourceWork = (MnuStatusResource *)resourceAddress;
 
         dspCloseChannel();
-        sdfQueueNonzeroResourceId(resource->resourceIdA);
-        sdfQueueNonzeroResourceId(resource->resourceIdB);
+        sdfQueueNonzeroResourceId(resourceWork->resourceIdA);
+        sdfQueueNonzeroResourceId(resourceWork->resourceIdB);
         mnuReleaseFirstMantraSpriteSlots();
-        mnuReleaseStaffAndTitleVisualResources((u32 *)resource->progressHost);
+        mnuReleaseStaffAndTitleVisualResources((u32 *)resourceWork->progressHost);
         evtPrintDeveloperConsoleMessage("trmDestroyStatusResource()!!!! \n");
-        sdfReleaseResourceAllocation(resource->allocationHandle);
+        sdfReleaseResourceAllocation(resourceWork->allocationHandle);
         mnuReleasePanelEntryPool();
     }
     evtPrintDeveloperConsoleMessage("mtrRelease\n");
@@ -181,10 +190,11 @@ void func_00286F18(s32 arg0, s32 work) {
 /* Store the task handle so the existence probe and explicit stop can
  * invalidate or destroy the same resource group. */
 void mnuCreateResourceTask(void) {
-    MnuStatusResource *resource = (MnuStatusResource *)func_00286E98();
-    mnuMantraSelectionResource = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, D_003CFCC0, func_00286F18, resource);
+    MnuStatusResource *resourceWork = (MnuStatusResource *)func_00286E98();
+    mnuMantraSelectionResource = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, D_003CFCC0, func_00286F18, resourceWork);
 }
 
+/* Return whether the named resource task exists; invalidate the cached handle when it does not. */
 s32 mnuCheckResourceTask(void) {
     if (kwlnTaskExists(mnuResourceTaskName) != 0) {
         return 1;
@@ -193,6 +203,7 @@ s32 mnuCheckResourceTask(void) {
     return 0;
 }
 
+/* Destroy the cached resource-task group and clear its handle. */
 void mnuStopResourceTask(void) {
     sdfDestroyTaskWorkerTasks(mnuMantraSelectionResource);
     mnuMantraSelectionResource = 0;
@@ -213,49 +224,52 @@ INCLUDE_RODATA(const s32, "game/code_00286BA8", mnuResourceTaskName);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287078);
 
+/* Initialize the unit-selection state of the current resource-task work; return zero. */
 s32 mtrUnitSelectInit(void) {
-    MnuStatusResource *selected = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
+    MnuStatusResource *resourceWork = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
 
-    mtrInitUnitSelectionWork(selected);
+    mtrInitUnitSelectionWork(resourceWork);
     evtPrintDeveloperConsoleMessage("mtrUnitSelectInit\n");
     return 0;
 }
 
+/* Release the current work's unit-selection list, profile panel and drawing resources. */
 void mtrUnitSelectRelease(void) {
-    MnuStatusResource *selected = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
+    MnuStatusResource *resourceWork = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
 
-    mnuReleaseSelectionWorkResources(selected);
+    mnuReleaseSelectionWorkResources(resourceWork);
     evtPrintDeveloperConsoleMessage("mtrUnitSelectRelease\n");
 }
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287670);
 
-/* Both handlers consume the current resource-task selection, but report
- * completion independently of the selected value. */
+/* Draw the current unit-selection resource; the handler's native u64 return is always zero. */
 u64 func_00287768(void) {
-    MnuStatusResource *selected;
+    MnuStatusResource *resourceWork;
 
-    selected = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
-    func_00288920(selected);
+    resourceWork = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
+    func_00288920(resourceWork);
     return 0;
 }
 
+/* Enter mantra selection on the current work address and disable terminal-track mode; return zero. */
 s32 mtrMantraSelectInit(void) {
-    u64 selected = func_00312810(mnuMantraSelectionResource, -1);
+    u64 resourceAddress = func_00312810(mnuMantraSelectionResource, -1);
 
     mnuEnableTerminalTrackMode(0);
-    mnuOpenMantraSelectionAndLoadTitleStream(selected);
+    mnuOpenMantraSelectionAndLoadTitleStream(resourceAddress);
     evtPrintDeveloperConsoleMessage("mtrMantraSelectInit\n");
     return 0;
 }
 
+/* Release mantra visuals, clear the work's visible bit and restore terminal-track mode. */
 void mtrMantraSelectRelease(void) {
-    MnuStatusResource *selected =
+    MnuStatusResource *resourceWork =
         (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
 
     mnuReleaseMantraPanelPositionTable();
-    mnuCleanupMantraVisualsAndResetTitleStream(selected);
-    selected->flags.visible = 0;
+    mnuCleanupMantraVisualsAndResetTitleStream(resourceWork);
+    resourceWork->flags.visible = 0;
     mnuEnableTerminalTrackMode(1);
     evtPrintDeveloperConsoleMessage("mtrMantraSelectRelease\n");
 }
@@ -265,6 +279,8 @@ extern void mnuTickPanelSoundEntries(void);
 extern s32 func_0028A1D0(MnuStatusResource *);
 extern void sdfSetTaskItemMode(void *, s32, u32);
 
+/* Tick panel sounds and process the selection result. Case 2 intentionally falls through to case 3;
+ * case 4 requests task-item mode (1,1) and returns -1, while other results return zero. */
 s32 func_00287848(s32 key) {
     mnuTickPanelSoundEntries();
     switch (func_0028A1D0((MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1))) {
@@ -282,11 +298,12 @@ s32 func_00287848(s32 key) {
     return 0;
 }
 
+/* Run the current mantra resource's drawing path; retain the native u64 work address and zero return. */
 u64 func_00287900(void) {
-    u64 selected;
+    u64 resourceAddress;
 
-    selected = func_00312810(mnuMantraSelectionResource, -1);
-    func_0028B1B0(selected);
+    resourceAddress = func_00312810(mnuMantraSelectionResource, -1);
+    func_0028B1B0(resourceAddress);
     return 0;
 }
 
@@ -339,43 +356,46 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_002882B8);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_002884C0);
 
-void mtrInitUnitSelectionWork(MnuStatusResource *work) {
-    MtrSelectionState *selection = &work->selection;
-    MenuList *list;
-    s32 i;
+/* Create the unit list and selection state; when a marked unit exists, move to the first marked entry.
+ * Preserve the two independent fade-in requests and the post-callback work-field reads. */
+void mtrInitUnitSelectionWork(MnuStatusResource *resourceWork) {
+    MtrSelectionState *selectionState = &resourceWork->selection;
+    MenuList *unitList;
+    s32 unitIndex;
 
-    selection->state = 1;
-    selection->timer = 0;
-    list = func_002884C0();
-    list->userData = (u32)selection;
-    work->list = list;
-    work->flags.visible = 0;
+    selectionState->state = 1;
+    selectionState->timer = 0;
+    unitList = func_002884C0();
+    unitList->userData = (u32)selectionState;
+    resourceWork->list = unitList;
+    resourceWork->flags.visible = 0;
 
     if (mdlFlagTest(0x1B1) != 0) {
         if (mdlFlagTest(0x995) == 0) {
-            selection->state = 3;
-            kwlnFadeInStart(0, 0, 0, 10);
+            selectionState->state = 3;
+            kwlnFadeInStart(0, 0, 0, MTR_UNIT_FADE_FRAMES);
         }
-        func_00289BA0(work);
-        if (work->unkBA4 != 0 || work->playerFlags.hasMarkedUnit) {
-            if (work->playerFlags.hasMarkedUnit) {
-                for (i = 0; i < 5; i++) {
-                    if (work->unitEntries[i].marked) {
-                        mnuMoveNodeCursorToTargetIndex((MenuContainer *)work, i);
+        func_00289BA0(resourceWork);
+        if (resourceWork->unkBA4 != 0 || resourceWork->playerFlags.hasMarkedUnit) {
+            if (resourceWork->playerFlags.hasMarkedUnit) {
+                for (unitIndex = 0; unitIndex < MTR_UNIT_ENTRY_COUNT; unitIndex++) {
+                    if (resourceWork->unitEntries[unitIndex].marked) {
+                        mnuMoveNodeCursorToTargetIndex((MenuContainer *)resourceWork, unitIndex);
                         break;
                     }
                 }
             }
-            selection->state = 3;
-            kwlnFadeInStart(0, 0, 0, 10);
+            selectionState->state = 3;
+            kwlnFadeInStart(0, 0, 0, MTR_UNIT_FADE_FRAMES);
         }
     }
 }
 
-void mnuReleaseSelectionWorkResources(MnuStatusResource *work) {
-    mnuDestroyListState(work->list);
-    mnuCloseCurrentProfilePanel(work->progressHost);
-    mnuReleaseMantraMenuDrawResources(work);
+/* Release list state, the current profile panel and mantra drawing resources in native order. */
+void mnuReleaseSelectionWorkResources(MnuStatusResource *resourceWork) {
+    mnuDestroyListState(resourceWork->list);
+    mnuCloseCurrentProfilePanel(resourceWork->progressHost);
+    mnuReleaseMantraMenuDrawResources(resourceWork);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426280);
@@ -386,36 +406,38 @@ extern void func_0026C900(void);
 extern s32 func_00288BD8(s32, s32, s32, s32, MnuStatusResource *, s32, f32);
 extern s32 func_00288DD0(s32, s32, s32, s32, MnuStatusResource *, s32);
 
-s32 func_00288920(MnuStatusResource *work) {
-    f32 phase = 1.0f;
+/* Draw visible unit-selection work using a timer-based triangular alpha.
+ * Re-read visibility after the first drawing call; do not clamp the native phase/alpha range. */
+s32 func_00288920(MnuStatusResource *resourceWork) {
+    f32 fadePhase = 1.0f;
     s32 alpha;
-    MtrSelectionState *selection;
+    MtrSelectionState *selectionState;
 
-    if (!work->flags.visible) {
+    if (!resourceWork->flags.visible) {
         return 0;
     }
     func_0026C900();
-    selection = &work->selection;
-    switch (selection->state) {
+    selectionState = &resourceWork->selection;
+    switch (selectionState->state) {
         case 1:
-            phase = selection->timer * 0.125f;
+            fadePhase = selectionState->timer * MTR_SELECTION_PHASE_PER_TICK;
             break;
         case 2:
-            phase = selection->timer * 0.125f;
+            fadePhase = selectionState->timer * MTR_SELECTION_PHASE_PER_TICK;
             break;
         case 3:
         case 4:
-            phase = 0.0f;
+            fadePhase = 0.0f;
             break;
     }
-    if (phase > 1.0f) {
-        alpha = (2.0f - phase) * 128.0f;
+    if (fadePhase > 1.0f) {
+        alpha = (2.0f - fadePhase) * MTR_SELECTION_ALPHA_SCALE;
     } else {
-        alpha = phase * 128.0f;
+        alpha = fadePhase * MTR_SELECTION_ALPHA_SCALE;
     }
-    func_00288BD8(0, 0, 0, alpha, work, 0x53, phase);
-    if (work->flags.visible) {
-        func_00288DD0(0, 0, 1, alpha, work, 0x53);
+    func_00288BD8(0, 0, 0, alpha, resourceWork, 0x53, fadePhase);
+    if (resourceWork->flags.visible) {
+        func_00288DD0(0, 0, 1, alpha, resourceWork, 0x53);
     }
     return 0;
 }
