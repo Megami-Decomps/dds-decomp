@@ -32,7 +32,7 @@ main:
   COMM CREATE_SCRIPT_TASK
   PUSHEVENT e632
   COMM CALL_EVENT
-  PUSHEVENT e633
+  PUSHIS 633
   COMM SUBMIT_EVENT
   PUSHIS 501
   PUSHIS 22
@@ -95,14 +95,24 @@ class Flw0FlowTests(unittest.TestCase):
                     "command": "CALL_EVENT",
                     "count": 1,
                 },
+            ],
+        )
+        self.assertEqual(
+            [
+                {
+                    key: request[key]
+                    for key in ("source", "requestId", "kind", "command", "count")
+                }
+                for request in flow["eventRequests"]
+            ],
+            [
                 {
                     "source": 0,
-                    "eventId": 633,
-                    "event": "e633",
+                    "requestId": 633,
                     "kind": "submit",
                     "command": "SUBMIT_EVENT",
                     "count": 1,
-                },
+                }
             ],
         )
         self.assertEqual(
@@ -121,7 +131,7 @@ class Flw0FlowTests(unittest.TestCase):
 
     def test_keeps_dynamic_event_target_unresolved(self) -> None:
         source = SOURCE.replace("  PUSHEVENT e632\n", "  PUSHIX 0\n").replace(
-            "  PUSHEVENT e633\n", "  PUSHIX 0\n"
+            "  PUSHIS 633\n", "  PUSHIX 0\n"
         )
         flow = flw0_flow.analyze(
             flw0.parse_source(source), flw0_profiles.get("dds1")
@@ -141,7 +151,7 @@ class Flw0FlowTests(unittest.TestCase):
                 {
                     "source": 0,
                     "pc": 8,
-                    "kind": "event",
+                    "kind": "eventRequest",
                     "value": None,
                     "command": "SUBMIT_EVENT",
                     "dispatch": "submit",
@@ -188,10 +198,70 @@ class Flw0FlowTests(unittest.TestCase):
             {
                 "source": 0,
                 "pc": 17,
-                "kind": "event",
+                "kind": "eventRequest",
                 "value": None,
                 "command": "SUBMIT_EVENT_IMMEDIATE",
                 "dispatch": "submit-immediate",
+            },
+            flow["unresolvedTargets"],
+        )
+
+    def test_keeps_literal_request_when_selected_event_is_dynamic(self) -> None:
+        source = SOURCE.replace(
+            "  return\nworker:",
+            "  PUSHIX 0\n  PUSHIS 258\n"
+            "  COMM SUBMIT_EVENT_WITH_SELECTION\n  return\nworker:",
+        )
+        flow = flw0_flow.analyze(
+            flw0.parse_source(source), flw0_profiles.get("dds1")
+        )
+        self.assertEqual(
+            [row["requestId"] for row in flow["eventRequests"]
+             if row["command"] == "SUBMIT_EVENT_WITH_SELECTION"],
+            [258],
+        )
+        self.assertNotIn(
+            "selectionId",
+            next(
+                row
+                for row in flow["eventRequests"]
+                if row["command"] == "SUBMIT_EVENT_WITH_SELECTION"
+            ),
+        )
+        self.assertIn(
+            {
+                "source": 0,
+                "pc": 15,
+                "kind": "event",
+                "value": None,
+                "command": "SUBMIT_EVENT_WITH_SELECTION",
+                "dispatch": "submit-selection",
+            },
+            flow["unresolvedTargets"],
+        )
+
+    def test_keeps_literal_selected_event_when_request_is_dynamic(self) -> None:
+        source = SOURCE.replace(
+            "  return\nworker:",
+            "  PUSHEVENT e634\n  PUSHIX 0\n"
+            "  COMM SUBMIT_EVENT_WITH_SELECTION\n  return\nworker:",
+        )
+        flow = flw0_flow.analyze(
+            flw0.parse_source(source), flw0_profiles.get("dds1")
+        )
+        self.assertEqual(
+            [row["eventId"] for row in flow["eventEdges"]
+             if row["command"] == "SUBMIT_EVENT_WITH_SELECTION"],
+            [634],
+        )
+        self.assertIn(
+            {
+                "source": 0,
+                "pc": 15,
+                "kind": "eventRequest",
+                "value": None,
+                "command": "SUBMIT_EVENT_WITH_SELECTION",
+                "dispatch": "submit-selection",
             },
             flow["unresolvedTargets"],
         )
