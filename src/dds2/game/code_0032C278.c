@@ -133,7 +133,8 @@ typedef struct SdfFreeRoot {
 typedef struct SdfObjectList {
     u8 pad00[4];
     s16 count;
-    u8 pad06[6];
+    s16 capacity; /* 0x06: native signed bound used before buffered-request growth */
+    u8 pad08[4];
     SdfFreeRoot **elements;
 } SdfObjectList;
 
@@ -142,7 +143,7 @@ extern void sdfDestroyDevRequest(void *);
 typedef struct SdfRouteNode SdfRouteNode;
 
 typedef struct SdfRouteOwner {
-    u8 pad00[4];
+    s32 requestAddress; /* 0x00: buffered root's request; opaque for other owners */
     SdfRouteNode *first;
     u8 pad08[4];
     SdfRouteNode *last;
@@ -1867,24 +1868,27 @@ void sdfCollectTreeNodes(SdfHierarchy *hierarchy) {
     }
 }
 
-/* DevRequest +4 tracks occupied slots; +6 is capacity and +C is the element buffer. */
+/* Append node to list's buffered request, then attach it to owner (NULL: root head).
+ * Fetch the element buffer after growth, since the SDK can relocate its allocation.
+ * list is the buffered root; owner/node and array entries remain 32-bit addresses.
+ */
 void sdfAppendBufferedRouteNode(s32 *list, u32 owner, u32 node) {
     s16 usedCount;
-    s32 elements;
-    s32 request;
+    s32 elementsAddress;
+    s32 requestAddress;
     s32 newCount;
 
-    request = *list;
-    usedCount = *(s16 *)(request + 4);
+    requestAddress = ((SdfRouteOwner *)list)->requestAddress;
+    usedCount = ((SdfObjectList *)requestAddress)->count;
     newCount = usedCount + 1;
-    if ((s64)*(s16 *)(request + 6) < (s64)newCount) {
-        sdfDevBufferedRequestGrow(request);
-        request = *list;
+    if ((s64)((SdfObjectList *)requestAddress)->capacity < (s64)newCount) {
+        sdfDevBufferedRequestGrow(requestAddress);
+        requestAddress = ((SdfRouteOwner *)list)->requestAddress;
     }
-    elements = *(s32 *)(request + 0xc);
-    *(s32 **)((s32)node + 0x10) = list;
-    *(s16 *)(request + 4) = (s16)newCount;
-    *(s32 *)(usedCount * 4 + elements) = (s32)node;
+    elementsAddress = (s32)((SdfObjectList *)requestAddress)->elements;
+    ((SdfRouteNode *)node)->root = (SdfRouteOwner *)list;
+    ((SdfObjectList *)requestAddress)->count = (s16)newCount;
+    *(s32 *)(usedCount * 4 + elementsAddress) = (s32)node;
     sdfLinkRouteNode(node, owner);
 }
 
