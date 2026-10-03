@@ -79,6 +79,13 @@ battle-table 1 kind=encounter profile=dds1
 encounter 1 enemies=JACK_FROST_036,MOTHMAN,MOTHMAN,MOTHMAN,JACK_FROST_036 backgrounds=222,2 flags=0xd
 ```
 
+Field-script `SUBMIT_EVENT`, `SUBMIT_EVENT_IMMEDIATE`, and the first argument
+of `SUBMIT_EVENT_WITH_SELECTION` select these rows by encounter index. A
+nonzero `next` value links another encounter row, while a nonzero `event`
+value names the battle-owned `eNNN.bf` event script. The field-world exporter
+follows all three relations without treating an encounter index as an event
+resource ID.
+
 Default-zone and background maps use separate vocabulary for the same physical
 selector shape:
 

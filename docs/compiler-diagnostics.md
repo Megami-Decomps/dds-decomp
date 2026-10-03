@@ -231,6 +231,16 @@ The combined command
 returns status 2 for insufficient evidence, 1 for a divergence, and 0 only for
 a complete comparison with no divergence.
 
+Two pass-00 outcomes have narrower actions. If one side uniquely zero-extends
+an SI value into a DI value consumed by a nearby DI store while the other side
+uniquely sign-extends it, the report flags an integer-widening lead. Verify the
+authentic source width and signedness before testing one type or cast boundary;
+an extension elsewhere in the function is not enough. If normalized
+intermediate RTL differs but extracted final assembly agrees, the report flags
+final-code convergence: stop changing source for the match, and inspect the
+intermediate passes only when the compiler mechanism itself is the subject.
+The command still exits 1 because the captured compiler artifacts differ.
+
 When both manifests name the same extracted function, `ee_gcc_why.py` infers
 that scope if `--function` is omitted. It rejects one-sided or conflicting
 manifest scopes instead of silently comparing unrelated translation-unit

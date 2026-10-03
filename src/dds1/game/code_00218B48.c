@@ -7,6 +7,13 @@
 
 typedef struct MdlResource MdlResource;
 
+typedef struct MdlSifCommand {
+    s32 source;
+    s32 end;
+    s32 argument;
+    u32 command;
+} MdlSifCommand;
+
 /* Viewer-wide state for the model viewer task (DDS1 game/code_00218B48 and
  * DDS2 game/code_00233660 share this layout field for field). Fields that are
  * only written by a defaults initialiser and never read in either game are
@@ -80,6 +87,10 @@ typedef struct MdlCtrlState {
 
 extern MdlViewState mdlViewerState;
 
+static inline s8 mdlGetViewerDisplayMode(MdlViewState *state) {
+    return state->unk0F;
+}
+
 extern MdlCtrlState mdlViewerControlState;
 
 extern s32 datGameState;
@@ -109,6 +120,16 @@ extern char D_003ABF88[]; /* "modelViewerEnd" */
 
 extern char D_003BBC80[]; /* "%5.2f" */
 
+extern char D_003ABC98[]; /* "MODEL : %d-%03d " */
+
+extern char D_003ABCB0[]; /* "MODEL : %d-%03x " */
+
+extern char D_003ABCC8[]; /* "%02d/%02d" */
+
+extern char D_003ABCD8[]; /* "%02x/%02x" */
+
+extern char D_003BBC28[]; /* "" */
+
 extern void mdlViewer();
 
 extern void mdlViewerEnd();
@@ -128,6 +149,14 @@ s32 billCreateIndexed(s32, s32);
 s32 mdlBuildViewerRectanglePacket(s32, s32, s32, s32, s32);
 
 s32 mdlUpdateViewerCursor(s16 *, s32);
+
+extern void sdfPktInit(void *, s32, s32, s32, s32);
+
+extern s32 sdfFormatSifPacket();
+
+extern s32 mdlGetNodeRefHalf(MdlResource *, s32);
+
+extern s32 mdlGetNodeField2C(MdlResource *, s32);
 
 void func_0021B9F8(void);
 
@@ -1272,7 +1301,42 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABC70);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABC80);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021ABB8);
+INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABC98);
+
+INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABCB0);
+
+void func_0021ABB8(void) {
+    MdlSifCommand packet;
+    const char *format;
+    s32 displayMode;
+    s32 nodeCount;
+    s32 formatted;
+
+    mdlAppendViewerRectToDrawList(0x7E10, 0x8608, 0xFF0080, 0xEA0, 0x90, 0);
+    sdfPktInit(&packet, 0x7E40, 0x8620, 0xFF0080, 0);
+
+    if ((displayMode = mdlGetViewerDisplayMode(&mdlViewerState)) == 0) {
+        format = D_003ABC98;
+    } else {
+        format = D_003ABCB0;
+    }
+    sdfAppendPacket(mdlViewerState.packetList,
+                    sdfFormatSifPacket(&packet, format, mdlViewerState.resourceGroup, mdlViewerState.resourceId));
+
+    nodeCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], 0);
+    if (nodeCount == 0) {
+        formatted = sdfFormatSifPacket(&packet, D_003BBC28);
+    } else {
+        if (mdlViewerState.unk0F == 0) {
+            format = D_003ABCC8;
+        } else {
+            format = D_003ABCD8;
+        }
+        formatted = sdfFormatSifPacket(&packet, format,
+                                       mdlGetNodeField2C(mdlViewerState.resources[0], 0), nodeCount - 1);
+    }
+    sdfAppendPacket(mdlViewerState.packetList, formatted);
+}
 
 extern s32 mdlHasNode(s32 resource, s32 id);
 
@@ -2642,4 +2706,3 @@ INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD98);
 INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBDA0);
 
 INCLUDE_SDATA(const s32, "game/code_00218B48", evtPendingEventSelection);
-

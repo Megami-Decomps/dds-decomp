@@ -498,6 +498,21 @@ class WhyTests(unittest.TestCase):
 ;; Hard regs used: 4
 """
 
+    ZERO_EXTEND_STORE = """;; Function wanted
+(insn 10 0 11 (set (reg:DI 100)
+        (lshiftrt:DI (reg:DI 101) (const_int 32))) -1 (nil)
+    (expr_list:REG_EQUAL (zero_extend:DI (reg:SI 90)) (nil)))
+(insn 11 10 0 (set (mem:DI (reg:SI 88) 0)
+        (reg:DI 100)) -1 (nil) (nil))
+"""
+
+    SIGN_EXTEND_STORE = """;; Function wanted
+(insn 20 0 21 (set (reg:DI 200)
+        (sign_extend:DI (reg:SI 91))) -1 (nil) (nil))
+(insn 21 20 0 (set (mem:DI (reg:SI 89) 0)
+        (reg:DI 200)) -1 (nil) (nil))
+"""
+
     def make_probe(self, root, name, passes, assembly="same\n", manifest=None):
         run = root / name
         (run / "functions/wanted").mkdir(parents=True)
@@ -541,10 +556,10 @@ class WhyTests(unittest.TestCase):
             root = Path(directory)
             left = self.make_probe(root, "left", {
                 "19.lreg": "same\n", "20.greg": self.ALLOC + "left\n"
-            })
+            }, assembly="left\n")
             right = self.make_probe(root, "right", {
                 "19.lreg": "same\n", "20.greg": self.ALLOC + "right\n"
-            })
+            }, assembly="right\n")
             report = why.analyze(left, right, "wanted")
             self.assertEqual("register-allocation", report["diagnosis"]["class"])
             self.assertEqual([84], report["allocation"]["left"][0]["global_allocation_order"])
@@ -554,9 +569,13 @@ class WhyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             sample = DelaySlotTests.SAMPLE
-            left = self.make_probe(root, "left", {"28.mach": "same\n", "29.dbr": sample})
+            left = self.make_probe(
+                root, "left", {"28.mach": "same\n", "29.dbr": sample},
+                assembly="left\n",
+            )
             right = self.make_probe(
-                root, "right", {"28.mach": "same\n", "29.dbr": sample.replace("convert", "other")}
+                root, "right", {"28.mach": "same\n", "29.dbr": sample.replace("convert", "other")},
+                assembly="right\n",
             )
             report = why.analyze(left, right, "wanted")
             self.assertEqual("delay-slot-selection", report["diagnosis"]["class"])
@@ -568,10 +587,10 @@ class WhyTests(unittest.TestCase):
             root = Path(directory)
             left = self.make_probe(root, "left", {
                 "22.ce2": "same\n", "25.sched2": ScheduleTests.SAMPLE + "left\n"
-            })
+            }, assembly="left\n")
             right = self.make_probe(root, "right", {
                 "22.ce2": "same\n", "25.sched2": ScheduleTests.SAMPLE + "right\n"
-            })
+            }, assembly="right\n")
             report = why.analyze(left, right, "wanted")
             self.assertEqual("post-reload-scheduling", report["diagnosis"]["class"])
             self.assertEqual(2, report["schedules"]["left"][0]["contested_count"])
@@ -582,10 +601,10 @@ class WhyTests(unittest.TestCase):
             sample = ScheduleTests.SAMPLE.replace("after reload", "before reload")
             left = self.make_probe(root, "left", {
                 "14.combine": "same\n", "17.sched": sample + "left\n"
-            })
+            }, assembly="left\n")
             right = self.make_probe(root, "right", {
                 "14.combine": "same\n", "17.sched": sample + "right\n"
-            })
+            }, assembly="right\n")
             report = why.analyze(left, right, "wanted")
             self.assertEqual("pre-reload-scheduling", report["diagnosis"]["class"])
             self.assertEqual(2, report["schedules"]["left"][0]["contested_count"])
@@ -683,6 +702,95 @@ class WhyTests(unittest.TestCase):
                         "-fsched-verbose=5", "/tmp/input.c", "-o", "/tmp/out.o"],
         }
         self.assertEqual(["-fsched-verbose=5"], why.effective_cflags(manifest))
+
+    def test_pass00_opposite_widening_before_di_store_is_diagnosed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            left = self.make_probe(
+                root, "left", {"00.rtl": self.ZERO_EXTEND_STORE},
+                assembly="zero\n",
+            )
+            right = self.make_probe(
+                root, "right", {"00.rtl": self.SIGN_EXTEND_STORE},
+                assembly="sign\n",
+            )
+            report = why.analyze(left, right, "wanted")
+            self.assertEqual("integer-widening", report["diagnosis"]["class"])
+            self.assertIn("uid 10 -> store 11", why.render(report))
+            self.assertEqual(
+                ["zero_extend", "sign_extend"],
+                [
+                    report["integer_widening"]["left"][0]["kind"],
+                    report["integer_widening"]["right"][0]["kind"],
+                ],
+            )
+
+    def test_pass00_widening_diagnosis_is_orientation_independent(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            left = self.make_probe(
+                root, "left", {"00.rtl": self.SIGN_EXTEND_STORE},
+                assembly="sign\n",
+            )
+            right = self.make_probe(
+                root, "right", {"00.rtl": self.ZERO_EXTEND_STORE},
+                assembly="zero\n",
+            )
+            report = why.analyze(left, right, "wanted")
+            self.assertEqual("integer-widening", report["diagnosis"]["class"])
+
+    def test_pass00_extension_without_wide_store_stays_generic(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            no_store = self.SIGN_EXTEND_STORE.split("(insn 21", 1)[0]
+            left = self.make_probe(
+                root, "left", {"00.rtl": self.ZERO_EXTEND_STORE},
+                assembly="zero\n",
+            )
+            right = self.make_probe(
+                root, "right", {"00.rtl": no_store}, assembly="sign\n",
+            )
+            report = why.analyze(left, right, "wanted")
+            self.assertEqual("rtl-expansion", report["diagnosis"]["class"])
+            self.assertFalse(report["integer_widening"]["opposite_signedness"])
+
+    def test_nested_parallel_set_is_not_treated_as_primary_extension(self):
+        parallel = self.SIGN_EXTEND_STORE.replace(
+            "(set (reg:DI 200)\n        (sign_extend:DI (reg:SI 91)))",
+            "(parallel [(set (reg:DI 200)\n"
+            "        (sign_extend:DI (reg:SI 91)))])",
+        )
+        self.assertEqual([], why.integer_widening_stores(parallel))
+
+    def test_intermediate_rtl_difference_with_same_final_code_stops(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            left = self.make_probe(root, "left", {"00.rtl": self.ZERO_EXTEND_STORE})
+            right = self.make_probe(root, "right", {"00.rtl": self.SIGN_EXTEND_STORE})
+            report = why.analyze(left, right, "wanted")
+            self.assertEqual("final-code-convergence", report["diagnosis"]["class"])
+            self.assertIn("stop", report["diagnosis"]["next_step"])
+
+    def test_incompatible_flags_override_widening_diagnosis(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            base = {
+                "version": "dds1", "as_unit": "src/dds1/sample.c",
+                "compiler": {"sha256": "compiler"},
+                "wrapper_returncode": 0, "cc1_succeeded": True,
+                "object": None,
+            }
+            left = self.make_probe(
+                root, "left", {"00.rtl": self.ZERO_EXTEND_STORE},
+                assembly="zero\n", manifest={**base, "extra_cflags": []},
+            )
+            right = self.make_probe(
+                root, "right", {"00.rtl": self.SIGN_EXTEND_STORE},
+                assembly="sign\n",
+                manifest={**base, "extra_cflags": ["-fno-schedule-insns2"]},
+            )
+            report = why.analyze(left, right, "wanted")
+            self.assertEqual("insufficient-evidence", report["diagnosis"]["class"])
 
     def test_function_scope_is_inferred_from_both_manifests(self):
         with tempfile.TemporaryDirectory() as directory:
