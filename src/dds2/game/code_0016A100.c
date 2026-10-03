@@ -3,25 +3,32 @@
 #include "evt_unit.h"
 #include "pcp_vu0.h"
 
-/* Effect parameter-set dispatch tables. Every effect kind owns one 0x28-byte
- * entry per table; the handler lives at +0x0. Slots are declared as separate
- * arrays (D_00353710/14/18/1C/20/24/28/2C/30/34 and D_00353880/84/88/90/94/
- * 98/9C/A0/A4). The family2 create table (D_00353880) additionally carries a
- * fallback selector at +0x0C: nonzero calls the entry handler directly,
- * zero falls back through D_003536A0.
- */
+#define EFF_PARAM_WORK_BYTES 8
+#define EFF_PARAM_EXTENDED_WORK_BYTES 0xC
+#define EFF_PARAM_RECORD_BYTES 16
+#define EFF_PARAM_TABLE_HEADER_BYTES 0x10
+#define EFF_PARAM_BLOCK_OFFSET 0x14
+#define EFF_PARAM_KIND_WORD_OFFSET 0x18
+#define EFF_VIEWER_RESOURCE_GROUP 7
+#define EFF_VIEWER_LOAD_FLAGS 0x101
+#define EFF_CELL_SYSTEM_KIND 4
+
+/* Callback columns are indexed by effect kind with a 0x28-byte stride.
+ * The create/clone column also supplies a duplicate callback at +0x0C:
+ * non-NULL selects raw-source creation and payload duplication; NULL selects
+ * the kind/tableIndex fallback lookup for both creation and cloning. */
 typedef struct EffDispatchEntry {
-    void *(*func)(void *); /* 0x00 handler, may be NULL */
+    void *(*handler)(void *); /* 0x00 handler, may be NULL */
     u8 pad04[0x08];        /* 0x04 */
-    void *(*altFunc)(void *); /* 0x0C create table only: set means the entry handler takes the raw source data */
+    void *(*duplicate)(void *); /* 0x0C create/clone column only */
     u8 pad10[0x18];        /* 0x10 */
 } EffDispatchEntry; /* 0x28 */
 
-/* 8-byte parameter work (family1): kind id plus one data pointer. */
+/* Compact work: a halfword effect kind and an opaque callback payload. */
 typedef struct EffParamWork {
-    u16 id;       /* 0x00 effect kind */
+    u16 kind;     /* 0x00 effect kind */
     u8 pad02[2];  /* 0x02 */
-    void *data;   /* 0x04 parameter block */
+    void *payload; /* 0x04 callback payload */
 } EffParamWork; /* 0x08 */
 
 extern EffDispatchEntry effParamWorkFactories[];
@@ -48,7 +55,7 @@ extern EffDispatchEntry D_003B0064[];
 typedef struct EffInitWork {
     u32 flags;      /* 0x00 bit0 cleared on init */
     u8 pad04[0x18]; /* 0x04 */
-    void *param;    /* 0x1C optional block */
+    void *parameterBlock; /* 0x1C optional block */
 } EffInitWork; /* 0x20 */
 
 typedef struct EffScatterWork {
@@ -78,11 +85,11 @@ extern void *mdlGetContextResourceGroup(void *arg);
 
 extern void *mdlGetContextResourceId(void *arg);
 
-/* 12-byte parameter work (family2): full-word id plus two data words. */
+/* Extended work: a full-word kind, fallback-table index, and payload. */
 typedef struct EffParamWorkEx {
-    u32 id;       /* 0x00 effect kind */
-    u32 unk04;    /* 0x04 */
-    void *data;   /* 0x08 parameter block */
+    u32 kind;       /* 0x00 effect kind */
+    u32 tableIndex; /* 0x04 fallback index, retained for cloning */
+    void *payload;  /* 0x08 callback payload */
 } EffParamWorkEx; /* 0x0C */
 
 extern EffDispatchEntry D_003B01C0[];
@@ -99,7 +106,7 @@ extern EffDispatchEntry D_003B01D4[];
 
 /* Kind-specific callback slot, 0x28 bytes per entry. */
 typedef struct EffParamCallbackEntry {
-    void (*cb)(void *arg); /* 0x00 */
+    void (*handler)(void *payload); /* 0x00 */
     u8 pad4[0x24];         /* 0x04 */
 } EffParamCallbackEntry;
 
@@ -152,11 +159,11 @@ typedef struct {
     u32 spreadB;        /* 0x2C modulus of the second cell counter */
     u16 perCell;        /* 0x30 */
     u8 pad32[0x04];
-    void *unk38;        /* 0x38 first dispatch argument */
+    void *firstDispatchArg;  /* 0x38 first dispatch argument */
     u32 pad3C;
-    void *dispatchArg;  /* 0x40 second dispatch argument */
+    void *secondDispatchArg; /* 0x40 second dispatch argument */
     u32 pad44;
-    void *unk48;        /* 0x48 third dispatch argument */
+    void *thirdDispatchArg;  /* 0x48 third dispatch argument */
 } EffThunderHead4C;
 
 typedef struct {
@@ -233,92 +240,104 @@ void func_0016A578(void) {
     dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }
 
+/* Return the compact work's payload address without changing its ownership. */
 u32 effParamWorkGetData(EffParamWork *work) {
-    return (u32)work->data;
+    return (u32)work->payload;
 }
 
+/* Return the compact work's halfword effect kind. */
 u16 effParamWorkGetId(EffParamWork *work) {
-    return work->id;
+    return work->kind;
 }
 
-EffParamWork *effParamWorkCreate(u16 id, void *data) {
+/* Allocate compact work and create its payload through the required kind factory. */
+EffParamWork *effParamWorkCreate(u16 kind, void *source) {
     EffParamWork *work;
 
-    work = sdfAllocSizeClassBlock(8);
-    work->id = id;
-    work->data = effParamWorkFactories[id].func(data);
+    work = sdfAllocSizeClassBlock(EFF_PARAM_WORK_BYTES);
+    work->kind = kind;
+    work->payload = effParamWorkFactories[kind].handler(source);
     return work;
 }
 
+/* Dispatch the payload before freeing its compact owner; this callback is required. */
 void effDispatchParameterDataAndFreeWork(EffParamWork *work) {
-    D_003B0048[work->id].cb(work->data);
+    D_003B0048[work->kind].handler(work->payload);
     sdfReleaseChipBlock(work);
 }
 
 /* Invoke the kind-specific callback on this parameter block. */
 void effParamWorkInvokeCallback(EffParamWork *work) {
-    u16 id = work->id;
+    u16 kind = work->kind;
 
-    D_003B0044[id].cb(work->data);
+    D_003B0044[kind].handler(work->payload);
 }
 
-EffParamWork *effParamWorkDuplicate(EffParamWork *src) {
+/* Allocate a second compact owner and duplicate the source payload by kind. */
+EffParamWork *effParamWorkDuplicate(EffParamWork *source) {
     EffParamWork *work;
 
-    work = sdfAllocSizeClassBlock(8);
-    work->id = src->id;
-    work->data = effParamWorkDuplicators[src->id].func(src->data);
+    work = sdfAllocSizeClassBlock(EFF_PARAM_WORK_BYTES);
+    work->kind = source->kind;
+    work->payload = effParamWorkDuplicators[source->kind].handler(source->payload);
     return work;
 }
 
+/* Optional compact-work dispatches. Other callers supply additional native
+ * arguments; the existing unit-local callback prototypes remain unchanged. */
 void effParamWorkCallback0(EffParamWork *work) {
-    if (D_003B0050[work->id].func != NULL) {
-        D_003B0050[work->id].func(work->data);
+    if (D_003B0050[work->kind].handler != NULL) {
+        D_003B0050[work->kind].handler(work->payload);
     }
 }
 
 void effParamWorkCallback1(EffParamWork *work) {
-    if (D_003B0054[work->id].func != NULL) {
-        D_003B0054[work->id].func(work->data);
+    if (D_003B0054[work->kind].handler != NULL) {
+        D_003B0054[work->kind].handler(work->payload);
     }
 }
 
 void effParamWorkCallback2(EffParamWork *work) {
-    if (D_003B0058[work->id].func != NULL) {
-        D_003B0058[work->id].func(work->data);
+    if (D_003B0058[work->kind].handler != NULL) {
+        D_003B0058[work->kind].handler(work->payload);
     }
 }
 
 void effParamWorkCallback3(EffParamWork *work) {
-    if (D_003B005C[work->id].func != NULL) {
-        D_003B005C[work->id].func(work->data);
+    if (D_003B005C[work->kind].handler != NULL) {
+        D_003B005C[work->kind].handler(work->payload);
     }
 }
 
 void effParamWorkCallback4(EffParamWork *work) {
-    if (D_003B0060[work->id].func != NULL) {
-        D_003B0060[work->id].func(work->data);
+    if (D_003B0060[work->kind].handler != NULL) {
+        D_003B0060[work->kind].handler(work->payload);
     }
 }
 
 void effParamWorkCallback5(EffParamWork *work) {
-    if (D_003B0064[work->id].func != NULL) {
-        D_003B0064[work->id].func(work->data);
+    if (D_003B0064[work->kind].handler != NULL) {
+        D_003B0064[work->kind].handler(work->payload);
     }
 }
 
+/* Select billboard kind zero; the index is passed through without validation. */
 void func_0016A890(u32 index) {
     billCreateIndexed(0, index);
 }
 
+/* Select billboard kind one; the index is passed through without validation. */
 void func_0016A8B0(u32 index) {
     billCreateIndexed(1, index);
 }
 
+/* Use the same floating value for both billboard child-scale components. */
 void effParamDispatchFloat(f32 value) {
     billSetChildScaleComponents(value, value);
 }
 
+/* Load the default primary/rotation/tertiary vectors and packed broadcast value.
+ * Reset the optional parameter float to 1.0f, then clear flag bit zero. */
 void effParamInitWork(EffInitWork *work) {
     VU0_LOAD_VF(vf10, &D_003B0180);
     mdlStorePrimaryVectorVU(work);
@@ -327,9 +346,9 @@ void effParamInitWork(EffInitWork *work) {
     VU0_LOAD_VF(vf10, &D_003B01A0);
     mdlStoreTertiaryVectorVU(work);
     mdlBroadcastMasked(work, 0x80808080);
-    if (work->param != NULL) {
+    if (work->parameterBlock != NULL) {
         mdlAddEntryFlagged(work, 0, 0);
-        *(f32 *)((u8 *)work->param + 0x20) = 1.0f;
+        *(f32 *)((u8 *)work->parameterBlock + 0x20) = 1.0f;
     }
     work->flags &= ~1u;
 }
@@ -338,20 +357,22 @@ extern u16 D_00436434;
 extern s32 btlFindGroupedEntity();
 extern void mdlLoadViewerPackage();
 
-/* Create a viewer-package effect object from `package` (header word, data from +0x10) under the next free id of group 7. */
+/* Create and initialize a viewer-package context in the fixed effect group.
+ * DDS2 skips occupied halfword ids before loading; DDS1 does not scan them. */
 void *func_0016A990(s32 *package) {
     void *work;
 
-    while (btlFindGroupedEntity(7, D_00436434) != 0) {
+    while (btlFindGroupedEntity(EFF_VIEWER_RESOURCE_GROUP, D_00436434) != 0) {
         D_00436434++;
     }
-    mdlLoadViewerPackage(7, D_00436434, 0x101, package + 4, package[0]);
-    work = func_00232198((void *)7, (void *)D_00436434);
+    mdlLoadViewerPackage(EFF_VIEWER_RESOURCE_GROUP, D_00436434, EFF_VIEWER_LOAD_FLAGS, package + 4, package[0]);
+    work = func_00232198((void *)EFF_VIEWER_RESOURCE_GROUP, (void *)D_00436434);
     effParamInitWork(work);
     D_00436434++;
     return work;
 }
 
+/* Run the context/node update with this game's fixed global argument. */
 void effParamInitFromGlobal(void *work) {
     mdlProcessContextNodesAndTransforms(work, &D_00380828);
 }
@@ -360,45 +381,48 @@ void func_0016AA38(void) {
     mdlDestroyContext();
 }
 
-/* Assemble a parameter work item from the two pieces extracted from source. */
+/* Resolve the source's resource group/id, obtain its context, and initialize it. */
 void *effParamAssembleWork(void *source) {
-    void *firstPart;
-    void *secondPart;
+    void *resourceGroup;
+    void *resourceId;
     void *work;
 
-    firstPart = mdlGetContextResourceGroup(source);
-    secondPart = mdlGetContextResourceId(source);
-    work = func_00232198(firstPart, secondPart);
+    resourceGroup = mdlGetContextResourceGroup(source);
+    resourceId = mdlGetContextResourceId(source);
+    work = func_00232198(resourceGroup, resourceId);
     effParamInitWork(work);
     return work;
 }
 
-void effParamForwardVector(void *work, void *vec) {
-    VU0_LOAD_VF_MEMORY(vf10, vec);
+/* Load a full source quadword into vf10 and store it as the primary vector. */
+void effParamForwardVector(void *work, void *vector) {
+    VU0_LOAD_VF_MEMORY(vf10, vector);
     mdlStorePrimaryVectorVU(work);
 }
 
-/* Broadcast one scalar into three components before loading VU0 vf10. */
+/* Initialize only three components before the quadword VU load.
+ * The fourth component is not initialized here; retain the native array size. */
 void effParamBuildVector(void *work, f32 scalar) {
-    f32 v[3];
+    f32 components[3];
 
-    v[0] = v[1] = v[2] = scalar;
-    VU0_LOAD_VF_MEMORY(vf10, v);
+    components[0] = components[1] = components[2] = scalar;
+    VU0_LOAD_VF_MEMORY(vf10, components);
     mdlStoreTertiaryVectorVU(work);
 }
 
-void effParamScatterVectors(EffScatterWork *work, void *src) {
-    u8 *d0;
-    u8 *d1;
-    u8 *d2;
+/* Load four source quadwords, then scatter only vf28-vf30 to the destination block. */
+void effParamScatterVectors(EffScatterWork *work, void *matrix) {
+    u8 *firstVector;
+    u8 *secondVector;
+    u8 *thirdVector;
 
-    VU0_LOAD_MATRIX(src);
-    d0 = work->destination + 0x20;
-    VU0_STORE_VF(vf28, d0);
-    d1 = work->destination + 0x30;
-    VU0_STORE_VF(vf29, d1);
-    d2 = work->destination + 0x40;
-    VU0_STORE_VF(vf30, d2);
+    VU0_LOAD_MATRIX(matrix);
+    firstVector = work->destination + 0x20;
+    VU0_STORE_VF(vf28, firstVector);
+    secondVector = work->destination + 0x30;
+    VU0_STORE_VF(vf29, secondVector);
+    thirdVector = work->destination + 0x40;
+    VU0_STORE_VF(vf30, thirdVector);
 }
 
 void func_0016AB30(void) {
@@ -410,139 +434,153 @@ extern void **D_003AFFD0[];
 extern u32 func_0016AEA0(u32 *word);
 extern u32 func_0016AEA8(s32 address);
 
+/* Create extended work from a kind/index descriptor. Kinds with a duplicate
+ * callback consume the raw descriptor; other kinds use the fallback table. */
 EffParamWorkEx *effCreateDispatchedParameterWork(u32 *source) {
     EffParamWorkEx *work;
 
-    work = sdfAllocSizeClassBlock(0xC);
-    work->id = func_0016AEA0(source);
-    work->unk04 = func_0016AEA8((s32)source);
-    if (effParameterWorkOperations[work->id].altFunc == NULL) {
-        work->data = effParameterWorkOperations[work->id].func(D_003AFFD0[work->id][work->unk04]);
+    work = sdfAllocSizeClassBlock(EFF_PARAM_EXTENDED_WORK_BYTES);
+    work->kind = func_0016AEA0(source);
+    work->tableIndex = func_0016AEA8((s32)source);
+    if (effParameterWorkOperations[work->kind].duplicate == NULL) {
+        work->payload = effParameterWorkOperations[work->kind].handler(D_003AFFD0[work->kind][work->tableIndex]);
     } else {
-        work->data = effParameterWorkOperations[work->id].func(source);
+        work->payload = effParameterWorkOperations[work->kind].handler(source);
     }
     return work;
 }
 
+/* Release the extended payload through its required kind callback, then its owner. */
 void effReleaseDispatchedParameterWork(EffParamWorkEx *work) {
-    ((void (*)(void *))effParamWorkReleaseCallbacks[work->id].func)(work->data);
+    ((void (*)(void *))effParamWorkReleaseCallbacks[work->kind].handler)(work->payload);
     sdfReleaseChipBlock(work);
 }
 
+/* Invoke the extended work's required dispatch callback. */
 void effInvokeParameterWorkDispatch(EffParamWorkEx *work) {
-    ((void (*)(void *))D_003B01B4[work->id].func)(work->data);
+    ((void (*)(void *))D_003B01B4[work->kind].handler)(work->payload);
 }
 
-EffParamWorkEx *effCloneDispatchedParameterWork(EffParamWorkEx *src) {
+/* Recreate table-backed payloads; duplicate payloads only for raw-source kinds. */
+EffParamWorkEx *effCloneDispatchedParameterWork(EffParamWorkEx *source) {
     EffParamWorkEx *work;
 
-    work = sdfAllocSizeClassBlock(0xC);
-    work->id = src->id;
-    work->unk04 = src->unk04;
-    if (effParameterWorkOperations[work->id].altFunc == NULL) {
-        work->data = effParameterWorkOperations[work->id].func(D_003AFFD0[work->id][work->unk04]);
+    work = sdfAllocSizeClassBlock(EFF_PARAM_EXTENDED_WORK_BYTES);
+    work->kind = source->kind;
+    work->tableIndex = source->tableIndex;
+    if (effParameterWorkOperations[work->kind].duplicate == NULL) {
+        work->payload = effParameterWorkOperations[work->kind].handler(D_003AFFD0[work->kind][work->tableIndex]);
     } else {
-        work->data = effParameterWorkOperations[work->id].altFunc(src->data);
+        work->payload = effParameterWorkOperations[work->kind].duplicate(source->payload);
     }
     return work;
 }
 
+/* Optional extended-work dispatches; preserve the native column order,
+ * including the reversed fourth/fifth column addresses. */
 void effParamWorkExCallback0(EffParamWorkEx *work) {
-    if (D_003B01C0[work->id].func != NULL) {
-        D_003B01C0[work->id].func(work->data);
+    if (D_003B01C0[work->kind].handler != NULL) {
+        D_003B01C0[work->kind].handler(work->payload);
     }
 }
 
 void effParamWorkExCallback1(EffParamWorkEx *work) {
-    if (D_003B01C4[work->id].func != NULL) {
-        D_003B01C4[work->id].func(work->data);
+    if (D_003B01C4[work->kind].handler != NULL) {
+        D_003B01C4[work->kind].handler(work->payload);
     }
 }
 
 void effParamWorkExCallback2(EffParamWorkEx *work) {
-    if (D_003B01C8[work->id].func != NULL) {
-        D_003B01C8[work->id].func(work->data);
+    if (D_003B01C8[work->kind].handler != NULL) {
+        D_003B01C8[work->kind].handler(work->payload);
     }
 }
 
 void effParamWorkExCallback3(EffParamWorkEx *work) {
-    if (D_003B01D0[work->id].func != NULL) {
-        D_003B01D0[work->id].func(work->data);
+    if (D_003B01D0[work->kind].handler != NULL) {
+        D_003B01D0[work->kind].handler(work->payload);
     }
 }
 
 void effParamWorkExCallback4(EffParamWorkEx *work) {
-    if (D_003B01CC[work->id].func != NULL) {
-        D_003B01CC[work->id].func(work->data);
+    if (D_003B01CC[work->kind].handler != NULL) {
+        D_003B01CC[work->kind].handler(work->payload);
     }
 }
 
 void effParamWorkExCallback5(EffParamWorkEx *work) {
-    if (D_003B01D4[work->id].func != NULL) {
-        D_003B01D4[work->id].func(work->data);
+    if (D_003B01D4[work->kind].handler != NULL) {
+        D_003B01D4[work->kind].handler(work->payload);
     }
 }
 
+/* Read the descriptor's full-word effect kind. */
 u32 func_0016AEA0(u32 *word) {
     return *word;
 }
 
+/* Read the descriptor's full-word fallback-table index at +4. */
 u32 func_0016AEA8(s32 address) {
     return *(u32 *)(address + 4);
 }
 
-/* Table records are 16 bytes apart after a 16-byte header; block offsets
- * are relative to the start of the table, not to each record.
- */
+/* Records follow a 16-byte header and have a 16-byte stride. Block offsets
+ * are signed and relative to the whole table, not to individual records.
+ * Neither the index nor the resulting target address is validated here. */
 void *effParamTableGetBlock(void *table, s32 index) {
-    u8 *data = (u8 *)table;
-    u8 *row = data + index * 16;
+    u8 *base = (u8 *)table;
+    u8 *indexedBase = base + index * EFF_PARAM_RECORD_BYTES;
 
-    return data + *(s32 *)(row + 0x14);
+    return base + *(s32 *)(indexedBase + EFF_PARAM_BLOCK_OFFSET);
 }
 
+/* Return the record's first word without interpreting its meaning. */
 u32 effParamTableGetWord(void *table, s32 index) {
-    u8 *data = (u8 *)table;
+    u8 *bytes = (u8 *)table;
 
-    data += index * 16;
-    return *(u32 *)(data + 0x10);
+    bytes += index * EFF_PARAM_RECORD_BYTES;
+    return *(u32 *)(bytes + EFF_PARAM_TABLE_HEADER_BYTES);
 }
 
+/* Return the full record word whose low halfword selects a compact-work factory. */
 u32 effParamTableGetWord2(void *table, s32 index) {
-    u8 *data = (u8 *)table;
+    u8 *bytes = (u8 *)table;
 
-    data += index * 16;
-    return *(u32 *)(data + 0x18);
+    bytes += index * EFF_PARAM_RECORD_BYTES;
+    return *(u32 *)(bytes + EFF_PARAM_KIND_WORD_OFFSET);
 }
 
-EffParamWork *effParamCreateFromTable(EffParamWork *work, s32 index) {
-    u16 id;
-    void *data;
+/* Create compact work from a table record; retain the legacy parameter type
+ * even though this argument is used as a raw table rather than a work owner. */
+EffParamWork *effParamCreateFromTable(EffParamWork *table, s32 index) {
+    u16 kind;
+    void *source;
 
-    id = (u16)effParamTableGetWord2(work, index);
-    data = effParamTableGetBlock(work, index);
-    return effParamWorkCreate(id, data);
+    kind = (u16)effParamTableGetWord2(table, index);
+    source = effParamTableGetBlock(table, index);
+    return effParamWorkCreate(kind, source);
 }
 
-/* Second thunder effect: the cell sub-system is dispatched with three head
- * pointers and a perCell group divisor of four. */
-EffThunderWork4C *effCreateThunderCellSystemWork(EffThunderHead4C *src) {
-    u32 handle = sdfAllocGeneralBlock(src->count * sizeof(EffThunderCell2C) + sizeof(EffThunderWork4C));
-    EffThunderWork4C *work = (EffThunderWork4C *)sdfResourceRetainAddress(handle);
-    u32 i;
+/* Allocate the copied head and its trailing cells as one block, then create
+ * the cell system with native arguments groupDivisor=0 and kind=4.
+ * Only three words per cell are zeroed here; vector/range storage is untouched. */
+EffThunderWork4C *effCreateThunderCellSystemWork(EffThunderHead4C *source) {
+    u32 allocationHandle = sdfAllocGeneralBlock(source->count * sizeof(EffThunderCell2C) + sizeof(EffThunderWork4C));
+    EffThunderWork4C *work = (EffThunderWork4C *)sdfResourceRetainAddress(allocationHandle);
+    u32 cellIndex;
 
-    work->head = *src;
+    work->head = *source;
     work->cells = (EffThunderCell2C *)(work + 1);
-    work->baseFirst = src->scaledFirst;
-    work->baseSecond = src->scaledSecond;
-    work->handle = handle;
-    work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, 4);
-    func_00164AE8(work->system, work->head.unk38, work->head.dispatchArg, work->head.unk48);
+    work->baseFirst = source->scaledFirst;
+    work->baseSecond = source->scaledSecond;
+    work->handle = allocationHandle;
+    work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, EFF_CELL_SYSTEM_KIND);
+    func_00164AE8(work->system, work->head.firstDispatchArg, work->head.secondDispatchArg, work->head.thirdDispatchArg);
     func_00164C68(work->system, work->head.systemParam);
-    for (i = 0; i < work->head.count; i++) {
-        work->cells[i].unk00 = 0;
-        work->cells[i].unk04 = 0;
-        work->cells[i].unk28 = 0;
+    for (cellIndex = 0; cellIndex < work->head.count; cellIndex++) {
+        work->cells[cellIndex].unk00 = 0;
+        work->cells[cellIndex].unk04 = 0;
+        work->cells[cellIndex].unk28 = 0;
     }
     work->color = 0x80808080;
     return work;
