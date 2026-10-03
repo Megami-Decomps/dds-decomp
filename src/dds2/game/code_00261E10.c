@@ -83,7 +83,9 @@ typedef struct EvtSelectionRecord {
 
 
 typedef struct EvtStateTableContext {
-    u8 pad00[0x5C];
+    u8 pad00[0xC];
+    u8 dispatchWork[0x4C];
+    s32 dispatchState;
     s32 stateTable;
     u8 pad60[0x1C];
     EvtSceneObject *primaryObject;
@@ -710,7 +712,54 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(u64 callback) {
     return state;
 }
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_00264480);
+extern void func_00294B40(s32, s32, s32, void *, s32, s32);
+extern void func_00294D50(s32, s32, s32, void *, s32, s32);
+extern void func_00294EB8(s32, s32, s32, void *, s32, s32);
+extern void func_00295030(s32, s32, s32, void *, s32, s32, s32);
+extern void mnuDrawIfActive(s32, s32, s32, void *, s32);
+extern void func_002969D8(s32, s32, s32, void *, s32);
+extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
+extern void mnuClearWindowPanelTransitionFlag(void *);
+extern void func_00296B48(s32, s32, s32, s32, s32, s32);
+extern void func_00296D90(void *, s32);
+extern void func_00296E98(s32, u32, s32, s32);
+
+/* Draw the active dispatch mode before advancing its callback state. */
+s32 func_00264480(s32 callback) {
+    EvtStateTableContext *state = (EvtStateTableContext *)kwlnTaskGetUserValue();
+
+    func_0025FD78((s32)state);
+    switch (state->dispatchMode) {
+    case 1:
+        func_00294B40(0, 0, 0, state, 0x100, 0x53);
+        func_00294EB8(0, 0, 0, state, 0x100, 0x53);
+        func_00295030(0, 0, 0, state, 0x100, 0, 0x53);
+        mnuDrawIfActive(0, 0, 0, state->secondaryObject, 0x53);
+        func_002969D8(0, 0, 0, state, 0x53);
+        func_00296D90(state, 0xA09DC380);
+        func_00296E98((s32)state, 0x100, 3, 0x53);
+        break;
+    case 2:
+        if (state->stateTable == (s32)D_003CE498) {
+            func_00294B40(0, 0, 0, state, 0x100, 0x53);
+            func_00294D50(0, 0, 0, state, 0x100, 0x53);
+            mnuDrawListChildrenWithCountdown(
+                0, 0, 0, (u8 *)state->primaryObject->node, 0x53);
+            func_00296D90(state, 0xA09DC380);
+            func_00296E98((s32)state, 0x100, 4, 0x53);
+        } else {
+            func_00294B40(0, 0, 0, state, 0x100, 0x53);
+            func_00294EB8(0, 0, 0, state, 0x100, 0x53);
+            func_00295030(0, 0, 0, state, 0x100, 0, 0x53);
+            mnuClearWindowPanelTransitionFlag(state->primaryObject);
+            func_00296B48(0, 0, 0, (s32)state, 0x100, 0x53);
+            func_00296D90(state, 0xA09DC380);
+            func_00296E98((s32)state, 0x100, 2, 0x53);
+        }
+        break;
+    }
+    return func_002C4038((s32)state->dispatchWork, &state->dispatchState, 1, callback);
+}
 
 s32 func_002646C8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
