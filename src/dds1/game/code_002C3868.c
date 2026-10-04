@@ -405,7 +405,67 @@ void sdfCounterTickCountdownAndMapTimers(void) {
     sdfCounterTickPositionTransition();
 }
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4680);
+extern s8 D_00324510[];
+extern s32 D_003BD240;
+extern s8 D_003BD280;
+extern SdfCounterChannel *mnuRetreatListCursorDefault(SdfCounterRuntime *);
+extern SdfCounterChannel *mnuAdvanceListCursorDefault(SdfCounterRuntime *);
+extern void mnuClearListFlagsOneAndTwo(SdfCounterRuntime *);
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+extern void sdfCounterSetMode(s32);
+extern void sdfCounterStartTimerPositionTransition(s32, s32);
+extern s32 sdfCounterGetSelectionBoundaryFlags(void);
+extern void mnuSetMapTimerFlags(s32);
+
+/* Step the map selection, restore its starting channel, or confirm/cancel. */
+s32 func_002C4680(void) {
+    s32 index;
+    s32 previousIndex;
+
+    if (D_00324510[0x26] < 0 || (D_00324510[0x26] & 2)) {
+        previousIndex = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
+        if (mnuRetreatListCursorDefault((SdfCounterRuntime *)sdfActiveCounterRuntime) != NULL) {
+            index = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
+            sdfCounterSetMode(previousIndex);
+            sdfCounterStartTimerPositionTransition(0,
+                index * (((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX >> 3));
+            sndSetSequenceVolumePan(0, 127, 63);
+        }
+    }
+    if (D_00324510[0x27] < 0 || (D_00324510[0x27] & 2)) {
+        previousIndex = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
+        if (mnuAdvanceListCursorDefault((SdfCounterRuntime *)sdfActiveCounterRuntime) != NULL) {
+            index = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
+            sdfCounterSetMode(previousIndex);
+            sndSetSequenceVolumePan(0, 127, 63);
+            sdfCounterStartTimerPositionTransition(0,
+                index * (((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX >> 3));
+        }
+    }
+    if (D_00324510[0x23] < 0) {
+        sdfCounterSetMode(((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index);
+        index = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
+        if (D_003BD240 != index) {
+            sdfCounterSelectChannelByIndex((SdfCounterRuntime *)sdfActiveCounterRuntime,
+                D_003BD240);
+        }
+        sdfSetSelectedIndex(D_003BD240);
+        sndSetSequenceVolumePan(10, 127, 63);
+    }
+    if (D_00324510[0x21] < 0) {
+        sndSetSequenceVolumePan(8, 127, 63);
+        sdfSetSelectedIndex(((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index);
+        return -2;
+    }
+    mnuSetMapTimerFlags(sdfCounterGetSelectionBoundaryFlags());
+    if (D_00324510[0x26] == 0 && D_00324510[0x27] == 0) {
+        mnuClearListFlagsOneAndTwo((SdfCounterRuntime *)sdfActiveCounterRuntime);
+    }
+    if (D_003BD280 < 11) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4850);
 
@@ -535,7 +595,7 @@ s32 sdfCounterGetSelectionBoundaryFlags(void) {
     return ((count + rt->base - 1) ^ rt->last->index) != 0 ? (done | 2) : done;
 }
 
-void sdfCounterStartTimerPositionTransition(s16 x, s16 y) {
+void sdfCounterStartTimerPositionTransition(s32 x, s32 y) {
     SdfCounterTimer *timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
 
     timer->startX = timer->curX;

@@ -1842,17 +1842,41 @@ void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
 
 INCLUDE_ASM(const s32, "game/code_0027BF00", func_00280A90);
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_00280BC0);
+extern s32 func_00280A90(MenuPageWindow *, s32);
+extern void uiDrawSurfaceAtNearDepth(s32);
 
-s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unusedDepth, u32 *window, s32 option) {
+/* Draw the party row's frame variant and restore the near-depth surface. */
+void func_00280BC0(s32 x, s32 y, s32 z, MenuPageWindow *menu,
+    s32 index, s32 force, s32 context) {
+    s32 alpha = menu->fade / 2 + 0x80;
+    u16 *partyFlags = (u16 *)(datGameState
+        + menu->records->entries[index].partyIndex * 0x1A4 + 0xA60);
+
+    if (func_00280A90(menu, index) == 1 || force != 0) {
+        if (*partyFlags & 2) {
+            func_002BF4E0(x + 0x150, y + 0xA8, z, alpha, 1, menu->source, 11, context);
+            func_002BF4E0(x + 0x660, y + 0x110, z, alpha, 1, menu->source, 16, context);
+            func_002BF4E0(x + 0x130, y + 0x250, z, alpha, 1, menu->source, 20, context);
+        } else if (force == 0) {
+            func_002BF4E0(x + 0x1A0, y + 0x60, z, alpha, 1, menu->source, 21, context);
+            uiDrawSurfaceAtNearDepth(context);
+            func_002BF4E0(x + 0x1E0, y + 0x58, z, alpha, 1, menu->source, 10, context);
+        } else {
+            func_002BF4E0(x + 0x1C0, y + 0xE0, z, alpha, 1, menu->source, 20, context);
+        }
+    }
+    uiDrawSurfaceAtNearDepth(context);
+}
+
+s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unusedDepth, MenuPageWindow *window, s32 option) {
     s32 result = func_00280A90(window, option);
 
     switch (result) {
     case 1:
-        *window &= ~2;
+        window->flags &= ~2;
         return 1;
     case 2:
-        *window &= ~2;
+        window->flags &= ~2;
         return 1;
     default:
         return 0;
