@@ -1016,12 +1016,42 @@ typedef struct PacHead {
 } PacHead;
 
 typedef struct MdlPartList MdlPartList;
-typedef struct MdlRecord MdlRecord;
+typedef struct MdlRecord {
+    s32 kind;
+    s32 nextOffset;
+    union {
+        u32 word;
+        struct {
+            u16 selectorA;
+            u16 selectorB;
+        } stream;
+    } payload;
+    union {
+        u32 word;
+        struct {
+            s16 value;
+            u16 partIndex;
+        } part;
+    } parameter;
+    u16 unk10;
+} MdlRecord;
+
+typedef struct MdlPartEntry {
+    u32 kind;
+    u8 state;
+    u8 pad05[3];
+    s32 object;
+    u8 pad0C[4];
+} MdlPartEntry;
+
 extern PacWork *sdfPacRemovePacket(PacWork *);
+extern s32 mdlGetViewerRecordPayloadWord(MdlRecord *);
 extern u16 func_002193E8(MdlRecord *);
+extern u16 func_002193F0(MdlRecord *);
 extern MdlPartList *mdlCreateBufferedPartRequest(u32);
 extern void mdlAddBillboardPart(MdlPartList *, s32);
 extern void mdlAddEffectPart(MdlPartList *, s32);
+extern void mdlAppendObjectPart(MdlPartList *, s32, void *, s32);
 extern void sdfReleaseResourceAllocation(s32);
 extern void *memset(void *, s32, u32);
 
@@ -1031,6 +1061,7 @@ extern void *memset(void *, s32, u32);
 #define MDL_RESOURCE_PACKET_COMMAND 8
 #define MDL_BILLBOARD_PART_TAG 0x413250
 #define MDL_EFFECT_PART_TAG 0x503344
+#define MDL_OBJECT_PART_TAG 0x555049
 
 /* Consume all packet work, then apply the accumulated group setup once.
  * Request/resource packets latch a nonzero handle; part-info replaces its data
@@ -1089,7 +1120,90 @@ PacWork *mdlApplyQueuedGroupPackets(PacWork *packetWork, s32 group, s32 id, s32 
     return packetWork;
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00218768);
+/* Expand a sentinel batch into its model parts and grouped-entity slots.
+ * Ordinary packet chains continue through the general group setup path. */
+PacWork *func_00218768(PacWork *packetWork, s32 group, s32 id, s32 mode) {
+    MdlGroupSetup groupSetup;
+    MdlPartEntry unknownPart;
+    PacHead *packetHeader;
+    MdlRecord *record;
+    MdlRecord *slotRecord;
+    s32 partCount;
+    MdlPartList *partList;
+    s32 slotCount;
+    s32 objectSize;
+    s32 remainingParts;
+
+    if (mdlIsInnerSentinel((MdlCtx *)packetWork) == 0) {
+        return mdlApplyQueuedGroupPackets(packetWork, group, id, mode);
+    }
+    record = (MdlRecord *)packetWork->dataCursor;
+    if (mdlGetViewerRecordPayloadWord(record) <= 0) {
+        return mdlApplyQueuedGroupPackets(packetWork, group, id, mode);
+    }
+
+    memset(&groupSetup, 0, sizeof(groupSetup));
+    groupSetup.handleA = (s32)record;
+    groupSetup.handleB = packetWork->resourceHandle;
+    packetWork = sdfPacRemovePacket(packetWork);
+    partCount = func_002193E8(record);
+    remainingParts = partCount;
+    if (partCount > 0) {
+        partList = mdlCreateBufferedPartRequest(partCount);
+        groupSetup.handleC = (s32)partList;
+    }
+    if (remainingParts > 0) {
+        do {
+            switch (((PacHead *)packetWork->packet)->tag) {
+            case MDL_BILLBOARD_PART_TAG:
+                mdlAddBillboardPart(partList, (s32)packetWork->dataCursor);
+                sdfReleaseResourceAllocation(packetWork->resourceHandle);
+                break;
+            case MDL_EFFECT_PART_TAG:
+                mdlAddEffectPart(partList, (s32)packetWork->dataCursor);
+                sdfReleaseResourceAllocation(packetWork->resourceHandle);
+                break;
+            case MDL_OBJECT_PART_TAG:
+                objectSize = ((PacHead *)packetWork->packet)->decodedSize;
+                if (objectSize == 0) {
+                    objectSize = ((PacHead *)packetWork->packet)->payloadSize
+                               + (((PacHead *)packetWork->packet)->flags & 0xF0) - 0x10;
+                }
+                mdlAppendObjectPart(partList, (s32)packetWork->dataCursor,
+                                    (void *)packetWork->resourceHandle, objectSize);
+                break;
+            default:
+                packetHeader = (PacHead *)packetWork->packet;
+                unknownPart.kind = packetHeader->tag;
+                unknownPart.state = 0;
+                break;
+            }
+            packetWork = sdfPacRemovePacket(packetWork);
+            remainingParts--;
+        } while (remainingParts != 0);
+    }
+
+    if (((PacHead *)packetWork->packet)->command == MDL_RESOURCE_LIST_PACKET_COMMAND) {
+        groupSetup.resourceList = packetWork->resourceHandle;
+        packetWork = sdfPacRemovePacket(packetWork);
+    }
+    groupSetup.requestHandle = packetWork->resourceHandle;
+    groupSetup.unk4 = (s32)packetWork->dataCursor;
+    packetWork = sdfPacRemovePacket(packetWork);
+    mdlApplyGroupSetup(group, id, mode, &groupSetup);
+
+    slotCount = func_002193F0(record);
+    while (slotCount > 0) {
+        slotRecord = (MdlRecord *)(packetWork->dataCursor - 0x10);
+        mdlConfigureGroupedEntitySlot(group, id, mode, slotRecord->parameter.part.value,
+                                      slotRecord->payload.stream.selectorA,
+                                      slotRecord->payload.stream.selectorB,
+                                      (u32)packetWork->dataCursor, packetWork->resourceHandle);
+        packetWork = sdfPacRemovePacket(packetWork);
+        slotCount--;
+    }
+    return packetWork;
+}
 
 /* Clean up the owner word at +8, then release its containing block. */
 void mdlDestroyLoadRequestOwner(MdlRes *ownerBlock) {
@@ -1110,10 +1224,8 @@ typedef struct MdlDoneJob {
 /* Request slot handed back by fileAllocateDispatchRequest; its +0x60 word feeds the load apply. */
 typedef struct MdlLoadSlot {
     u8 pad00[0x60];
-    u32 handle; /* 0x60 */
+    PacWork *handle; /* 0x60 */
 } MdlLoadSlot;
-
-extern s32 func_00218768();
 
 /* Apply the completed load and remove its group id under the semaphore.
  * A non-NULL callback is invoked before owner/job cleanup; without a callback,
