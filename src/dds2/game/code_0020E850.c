@@ -105,20 +105,44 @@ typedef struct BtlEffLink {
     u32 elapsedTicks;  /* 0x08: elapsed callback updates */
 } BtlEffLink;
 
-typedef struct BtlEffTask {
-    u8 kind;           /* 0x00 */
-    u8 pad01[0xF];
-    u8 unk10;          /* 0x10 */
-    u8 pad11[0xF];
-    u16 id;            /* 0x20 */
-    u8 pad22[2];
-    u16 flags;         /* 0x24 */
-    u8 pad26[0x1A];
-    u64 ownerData;      /* 0x40 */
-    u8 pad48[4];
-    s32 (*callback)(); /* 0x4C */
-    void (*destroy)(); /* 0x50 */
-} BtlEffTask;
+/* Scheduler predicate used for task entry and exit, not a battle actor record. */
+typedef struct TaskCondition {
+    u8 kind; /* 0 never, 1 always, 2 counter threshold, 3-10 task queries. */
+    u8 pad01[7];
+    union {
+        s32 count;
+        u64 handle;
+        u64 owner;
+        u16 taskKind;
+    } value;
+} TaskCondition;
+
+/* Generic battle scheduler header; effect arguments begin at byte 0x70.
+ * Creators choose start kind 1 (always) and end kind 0 (no exit predicate);
+ * update reports completion instead. BtlTask in btl_task.h is a different object. */
+typedef struct BtlEffectTask {
+    TaskCondition startCondition;
+    TaskCondition endCondition;
+    u16 taskId;
+    u16 state; /* 0 waiting, 1 start delay, 2 running, 3 end delay. */
+    u16 flags;
+    u8 unk26[2];
+    s32 startDelay;
+    s32 endDelay;
+    u32 pollCount; /* Eligible scheduler polls, including waits and delays. */
+    u32 runCount; /* Update calls that continued the running phase. */
+    u64 handle; /* Installed by btlStartTask, independently of owner. */
+    u64 owner; /* Actor identity, or the command's runtime-sequence token. */
+    void (*onStart)(u32);
+    s32 (*update)(); /* Called with args; nonzero completes the running phase. */
+    void (*onFinish)(); /* Called with args before unlinking and release. */
+    void *args; /* Allocator-recorded payload address, not an actor pointer. */
+    struct BtlEffectTask *next;
+    struct BtlEffectTask *prev;
+    struct BtlEffectTask *deferNext;
+    struct BtlEffectTask *deferPrev;
+    u8 pad68[8];
+} BtlEffectTask;
 
 typedef struct BtlEffActor {
     u8 pad00[0x108];
@@ -127,7 +151,7 @@ typedef struct BtlEffActor {
 } BtlEffActor;
 
 
-extern BtlEffTask *btlAllocTask(s32 size);
+extern BtlEffectTask *btlAllocTask(s32 size);
 extern BtlEffLink *btlGetTaskArguments();
 
 typedef struct BtlHistActor {
@@ -355,30 +379,30 @@ void effDecrementFirstCountdown(BtlLinkedEffectArgs *args) {
 }
 
 /* Create the selected numbered-display task with its frame count starting at zero. */
-BtlEffTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind) {
-    BtlEffTask *obj = btlAllocTask(0x34);
+BtlEffectTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind) {
+    BtlEffectTask *task = btlAllocTask(0x34);
     BtlLinkedEffectArgs *args;
 
-    obj->kind = 1;
-    obj->unk10 = 0;
+    task->startCondition.kind = 1;
+    task->endCondition.kind = 0;
     switch (kind) {
     case 0:
-        obj->id = 0x3C;
+        task->taskId = 0x3C;
         break;
     case 1:
-        obj->id = 0x3D;
+        task->taskId = 0x3D;
         break;
     }
-    obj->flags |= 2;
-    obj->ownerData = owner->owner;
-    obj->callback = func_0020F5E0;
-    obj->destroy = effDecrementFirstCountdown;
-    args = (BtlLinkedEffectArgs *)btlGetTaskArguments(obj);
+    task->flags |= 2;
+    task->owner = owner->owner;
+    task->update = func_0020F5E0;
+    task->onFinish = effDecrementFirstCountdown;
+    args = (BtlLinkedEffectArgs *)btlGetTaskArguments(task);
     args->payload.linked.kind = kind;
     args->unit = owner;
     args->payload.linked.value = value;
     args->payload.linked.elapsedTicks = 0;
-    return obj;
+    return task;
 }
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020FA98);
@@ -393,22 +417,22 @@ void effDecrementSecondCountdown(BtlLinkedEffectArgs *args) {
 }
 
 /* Create the counter-display task; its kind is stored as a byte. */
-BtlEffTask *btlCreateEffectCounterTask(BtlUnit *owner, s32 kind) {
-    BtlEffTask *obj = btlAllocTask(0x2C);
+BtlEffectTask *btlCreateEffectCounterTask(BtlUnit *owner, s32 kind) {
+    BtlEffectTask *task = btlAllocTask(0x2C);
     BtlLinkedEffectArgs *args;
 
-    obj->kind = 1;
-    obj->unk10 = 0;
-    obj->flags |= 2;
-    obj->id = 0x3E;
-    obj->ownerData = owner->owner;
-    obj->callback = func_0020FA98;
-    obj->destroy = effDecrementSecondCountdown;
-    args = (BtlLinkedEffectArgs *)btlGetTaskArguments(obj);
+    task->startCondition.kind = 1;
+    task->endCondition.kind = 0;
+    task->flags |= 2;
+    task->taskId = 0x3E;
+    task->owner = owner->owner;
+    task->update = func_0020FA98;
+    task->onFinish = effDecrementSecondCountdown;
+    args = (BtlLinkedEffectArgs *)btlGetTaskArguments(task);
     args->payload.counter.kind = kind;
     args->unit = owner;
     args->payload.counter.elapsedTicks = 0;
-    return obj;
+    return task;
 }
 
 s32 btlPollActorOrEntryLabelTask(BtlEffLink *link) {
@@ -441,21 +465,21 @@ s32 btlPollActorOrEntryLabelTask(BtlEffLink *link) {
     return 0;
 }
 
-BtlEffTask *btlCreateEffObjD(BtlEffActor *owner, s32 resourceIndex) {
-    BtlEffTask *obj = btlAllocTask(0xC);
+BtlEffectTask *btlCreateEffObjD(BtlEffActor *owner, s32 resourceIndex) {
+    BtlEffectTask *task = btlAllocTask(0xC);
     BtlEffLink *link;
 
-    obj->kind = 1;
-    obj->unk10 = 0;
-    obj->flags |= 2;
-    obj->id = 0x43;
-    obj->ownerData = owner->ownerData;
-    obj->callback = btlPollActorOrEntryLabelTask;
-    link = btlGetTaskArguments(obj);
+    task->startCondition.kind = 1;
+    task->endCondition.kind = 0;
+    task->flags |= 2;
+    task->taskId = 0x43;
+    task->owner = owner->ownerData;
+    task->update = btlPollActorOrEntryLabelTask;
+    link = btlGetTaskArguments(task);
     link->owner = (s32)owner;
     link->arg = resourceIndex;
     link->elapsedTicks = 0;
-    return obj;
+    return task;
 }
 
 s32 btlPollTimedTaskLink(BtlEffLink *link) {
@@ -470,21 +494,21 @@ s32 btlPollTimedTaskLink(BtlEffLink *link) {
     return 0;
 }
 
-BtlEffTask *btlCreateOwnerLinkedTimedTask(BtlEffActor *owner, s32 arg) {
-    BtlEffTask *obj = btlAllocTask(0xC);
+BtlEffectTask *btlCreateOwnerLinkedTimedTask(BtlEffActor *owner, s32 arg) {
+    BtlEffectTask *task = btlAllocTask(0xC);
     BtlEffLink *link;
 
-    obj->kind = 1;
-    obj->unk10 = 0;
-    obj->flags |= 2;
-    obj->id = 0x44;
-    obj->ownerData = owner->ownerData;
-    obj->callback = btlPollTimedTaskLink;
-    link = btlGetTaskArguments(obj);
+    task->startCondition.kind = 1;
+    task->endCondition.kind = 0;
+    task->flags |= 2;
+    task->taskId = 0x44;
+    task->owner = owner->ownerData;
+    task->update = btlPollTimedTaskLink;
+    link = btlGetTaskArguments(task);
     link->owner = (s32)owner;
     link->arg = arg;
     link->elapsedTicks = 0;
-    return obj;
+    return task;
 }
 
 s32 btlPollCategoryLabelTask(BtlEffLink *link) {
@@ -539,23 +563,23 @@ s32 btlPollCategoryLabelTask(BtlEffLink *link) {
 }
 
 /* Preserve the owner's effect data in the new task. */
-BtlEffTask *btlCreateEffObjA(BtlEffActor *owner, s32 category) {
-    BtlEffTask *obj = btlAllocTask(0xC);
+BtlEffectTask *btlCreateEffObjA(BtlEffActor *owner, s32 category) {
+    BtlEffectTask *task = btlAllocTask(0xC);
     BtlEffLink *link;
 
-    obj->kind = 1;
-    obj->id = 0x45;
-    obj->flags |= 2;
-    obj->unk10 = 0;
+    task->startCondition.kind = 1;
+    task->taskId = 0x45;
+    task->flags |= 2;
+    task->endCondition.kind = 0;
     if (owner != NULL) {
-        obj->ownerData = owner->ownerData;
+        task->owner = owner->ownerData;
     }
-    obj->callback = btlPollCategoryLabelTask;
-    link = btlGetTaskArguments(obj);
+    task->update = btlPollCategoryLabelTask;
+    link = btlGetTaskArguments(task);
     link->owner = (s32)owner;
     link->arg = category;
     link->elapsedTicks = 0;
-    return obj;
+    return task;
 }
 
 s32 btlPollActorDialogTask(BtlEffLink *link) {
@@ -575,23 +599,23 @@ s32 btlPollActorDialogTask(BtlEffLink *link) {
     return 0;
 }
 
-BtlEffTask *btlCreateEffObjB(BtlEffActor *owner, s32 messageId) {
-    BtlEffTask *obj = btlAllocTask(0xC);
+BtlEffectTask *btlCreateEffObjB(BtlEffActor *owner, s32 messageId) {
+    BtlEffectTask *task = btlAllocTask(0xC);
     BtlEffLink *link;
 
-    obj->kind = 1;
-    obj->id = 0x3F;
-    obj->flags |= 2;
-    obj->unk10 = 0;
+    task->startCondition.kind = 1;
+    task->taskId = 0x3F;
+    task->flags |= 2;
+    task->endCondition.kind = 0;
     if (owner != NULL) {
-        obj->ownerData = owner->ownerData;
+        task->owner = owner->ownerData;
     }
-    obj->callback = btlPollActorDialogTask;
-    link = btlGetTaskArguments(obj);
+    task->update = btlPollActorDialogTask;
+    link = btlGetTaskArguments(task);
     link->owner = (s32)owner;
     link->arg = messageId;
     link->elapsedTicks = 0;
-    return obj;
+    return task;
 }
 
 s32 btlUpdateLinkedDialogueEffect(BtlEffLink *link) {
@@ -614,44 +638,44 @@ s32 btlUpdateLinkedDialogueEffect(BtlEffLink *link) {
     return 0;
 }
 
-BtlEffTask *btlCreateEffObjC(BtlEffActor *owner, s32 messageId) {
-    BtlEffTask *obj = btlAllocTask(0xC);
+BtlEffectTask *btlCreateEffObjC(BtlEffActor *owner, s32 messageId) {
+    BtlEffectTask *task = btlAllocTask(0xC);
     BtlEffLink *link;
 
-    obj->kind = 1;
-    obj->id = 0x40;
-    obj->flags |= 2;
-    obj->unk10 = 0;
+    task->startCondition.kind = 1;
+    task->taskId = 0x40;
+    task->flags |= 2;
+    task->endCondition.kind = 0;
     if (owner != NULL) {
-        obj->ownerData = owner->ownerData;
+        task->owner = owner->ownerData;
     }
-    obj->callback = btlUpdateLinkedDialogueEffect;
-    link = btlGetTaskArguments(obj);
+    task->update = btlUpdateLinkedDialogueEffect;
+    link = btlGetTaskArguments(task);
     link->owner = (s32)owner;
     link->arg = messageId;
     link->elapsedTicks = 0;
-    return obj;
+    return task;
 }
 
 u32 func_00210688(void) {
     return 1;
 }
 
-BtlEffTask *btlCreateEffectTask3E(BtlEffActor *owner, u16 arg) {
-    BtlEffTask *obj = btlAllocTask(0xC);
+BtlEffectTask *btlCreateEffectTask3E(BtlEffActor *owner, u16 arg) {
+    BtlEffectTask *task = btlAllocTask(0xC);
     BtlEffLink *link;
 
-    obj->kind = 1;
-    obj->unk10 = 0;
-    obj->flags |= 2;
-    obj->id = 0x41;
-    obj->ownerData = owner->ownerData;
-    obj->callback = func_00210688;
-    link = btlGetTaskArguments(obj);
+    task->startCondition.kind = 1;
+    task->endCondition.kind = 0;
+    task->flags |= 2;
+    task->taskId = 0x41;
+    task->owner = owner->ownerData;
+    task->update = func_00210688;
+    link = btlGetTaskArguments(task);
     link->owner = (s32)owner;
     *(u16 *)&link->arg = arg;
     link->elapsedTicks = 0;
-    return obj;
+    return task;
 }
 
 s32 btlPollTimedPresentationTask(BtlEffLink *link) {
@@ -671,21 +695,21 @@ s32 btlPollTimedPresentationTask(BtlEffLink *link) {
     return 0;
 }
 
-BtlEffTask *btlCreateOwnerLinkedTimedPresentation(BtlEffActor *owner, s32 messageId) {
-    BtlEffTask *obj = btlAllocTask(0xC);
+BtlEffectTask *btlCreateOwnerLinkedTimedPresentation(BtlEffActor *owner, s32 messageId) {
+    BtlEffectTask *task = btlAllocTask(0xC);
     BtlEffLink *link;
 
-    obj->kind = 1;
-    obj->unk10 = 0;
-    obj->flags |= 2;
-    obj->id = 0x42;
-    obj->ownerData = owner->ownerData;
-    obj->callback = btlPollTimedPresentationTask;
-    link = btlGetTaskArguments(obj);
+    task->startCondition.kind = 1;
+    task->endCondition.kind = 0;
+    task->flags |= 2;
+    task->taskId = 0x42;
+    task->owner = owner->ownerData;
+    task->update = btlPollTimedPresentationTask;
+    link = btlGetTaskArguments(task);
     link->owner = (s32)owner;
     link->arg = messageId;
     link->elapsedTicks = 0;
-    return obj;
+    return task;
 }
 
 s32 btlPollEffectWaitTask(BtlEffLink *link) {
@@ -704,23 +728,23 @@ s32 btlPollEffectWaitTask(BtlEffLink *link) {
     return 0;
 }
 
-BtlEffTask *btlCreateEffectWaitTask(BtlEffActor *owner, u16 mode) {
-    BtlEffTask *obj = btlAllocTask(0xC);
+BtlEffectTask *btlCreateEffectWaitTask(BtlEffActor *owner, u16 mode) {
+    BtlEffectTask *task = btlAllocTask(0xC);
     BtlEffLink *link;
 
-    obj->kind = 1;
-    obj->id = 0x46;
-    obj->flags |= 2;
-    obj->unk10 = 0;
+    task->startCondition.kind = 1;
+    task->taskId = 0x46;
+    task->flags |= 2;
+    task->endCondition.kind = 0;
     if (owner != NULL) {
-        obj->ownerData = owner->ownerData;
+        task->owner = owner->ownerData;
     }
-    obj->callback = btlPollEffectWaitTask;
-    link = btlGetTaskArguments(obj);
+    task->update = btlPollEffectWaitTask;
+    link = btlGetTaskArguments(task);
     link->owner = (s32)owner;
     *(u16 *)&link->arg = mode;
     link->elapsedTicks = 0;
-    return obj;
+    return task;
 }
 
 /* Waits for the task startup delay, then finishes when its two actor slots are clear. */
@@ -743,20 +767,20 @@ s32 btlWaitEffectTask(BtlWaitTask *task) {
     return 0;
 }
 
-BtlEffTask *btlCreateEffectTask44(BtlEffActor *owner) {
-    BtlEffTask *obj = btlAllocTask(8);
+BtlEffectTask *btlCreateEffectTask44(BtlEffActor *owner) {
+    BtlEffectTask *task = btlAllocTask(8);
     BtlEffLink *link;
 
-    obj->kind = 1;
-    obj->unk10 = 0;
-    obj->flags |= 2;
-    obj->id = 0x47;
-    obj->ownerData = owner->ownerData;
-    obj->callback = btlWaitEffectTask;
-    link = btlGetTaskArguments(obj);
+    task->startCondition.kind = 1;
+    task->endCondition.kind = 0;
+    task->flags |= 2;
+    task->taskId = 0x47;
+    task->owner = owner->ownerData;
+    task->update = btlWaitEffectTask;
+    link = btlGetTaskArguments(task);
     link->owner = (s32)owner;
     link->arg = 0;
-    return obj;
+    return task;
 }
 
 s32 btlAdvanceActorEffectLabelTask(BtlEffLink *link) {
@@ -779,30 +803,30 @@ s32 btlAdvanceActorEffectLabelTask(BtlEffLink *link) {
     return 0;
 }
 
-BtlEffTask *btlCreateTimedActorEffectLinkTask(BtlEffActor *owner, s32 arg) {
-    BtlEffTask *obj = btlAllocTask(0xC);
+BtlEffectTask *btlCreateTimedActorEffectLinkTask(BtlEffActor *owner, s32 arg) {
+    BtlEffectTask *task = btlAllocTask(0xC);
     BtlEffLink *link;
 
-    obj->kind = 1;
-    obj->id = 0x48;
-    obj->flags |= 2;
-    obj->unk10 = 0;
+    task->startCondition.kind = 1;
+    task->taskId = 0x48;
+    task->flags |= 2;
+    task->endCondition.kind = 0;
     if (owner != NULL) {
-        obj->ownerData = owner->ownerData;
+        task->owner = owner->ownerData;
     }
-    obj->callback = btlAdvanceActorEffectLabelTask;
-    link = btlGetTaskArguments(obj);
+    task->update = btlAdvanceActorEffectLabelTask;
+    link = btlGetTaskArguments(task);
     link->owner = (s32)owner;
     link->arg = arg;
     link->elapsedTicks = 0;
-    return obj;
+    return task;
 }
 
 extern s32 scrReadIntParameter(s32 index);
 extern BtlEffActor *btlFindUnitByModeClear(s32 id);
 extern BtlEffActor *btlFindUnitByModeFlagged(s32 id);
-extern BtlEffTask *btlCreateEffObjB(BtlEffActor *actor, s32 arg);
-extern void btlStartTask(BtlEffTask *task);
+extern BtlEffectTask *btlCreateEffObjB(BtlEffActor *actor, s32 arg);
+extern void btlStartTask(BtlEffectTask *task);
 extern s64 btlAdvanceRuntimeSequenceCounter();
 
 s32 btlCmdSpawnEffectTaskForSelectedUnit(void) {
@@ -810,7 +834,7 @@ s32 btlCmdSpawnEffectTaskForSelectedUnit(void) {
     s32 unitId;
     s32 arg;
     BtlEffActor *unit;
-    BtlEffTask *task;
+    BtlEffectTask *task;
 
     mode = scrReadIntParameter(0);
     unitId = scrReadIntParameter(1);
@@ -824,7 +848,7 @@ s32 btlCmdSpawnEffectTaskForSelectedUnit(void) {
         return 1;
     }
     task = btlCreateEffObjB(unit, arg);
-    task->ownerData = btlAdvanceRuntimeSequenceCounter();
+    task->owner = btlAdvanceRuntimeSequenceCounter();
     btlStartTask(task);
     return 1;
 }
