@@ -12,17 +12,19 @@ typedef struct {
     AreaSub *callbackRecord;
 } AreaObj;
 
-s32 dds3ExchangeAreaSlot(void *arg) {
-    dds3ExchangeSlot(arg, 0, 5);
+/* Exchange the area's slot, retaining the native selector pair (0, 5). */
+s32 dds3ExchangeAreaSlot(void *areaObject) {
+    dds3ExchangeSlot(areaObject, 0, 5);
     return 1;
 }
 
-s32 dds3InvokeAreaCallback(AreaObj *arg) {
-    s32 (*func)(void);
+/* A missing callback returns one; otherwise propagate its return unchanged. */
+s32 dds3InvokeAreaCallback(AreaObj *areaObject) {
+    s32 (*callback)(void);
 
-    func = arg->callbackRecord->callback;
-    if (func == NULL) {
+    callback = areaObject->callbackRecord->callback;
+    if (callback == NULL) {
         return 1;
     }
-    return func();
+    return callback();
 }
