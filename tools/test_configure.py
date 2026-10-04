@@ -251,9 +251,11 @@ class ObjdiffProgressTests(unittest.TestCase):
         all_objects = sorted({p for rows in self.units.values() for row in rows
                               for p in (row["target"], row["base"]) if p})
         self.assertEqual(builds["objdiff"].args, ("objdiff", "phony", all_objects))
-        self.assertEqual(builds["report.json"].kwargs, {
+        self.assertEqual(builds["report.json.raw"].kwargs, {
             "implicit": all_objects + ["objdiff.json"], "variables": {"project": "."},
         })
+        self.assertEqual(builds["report.json"].args, ("report.json", "reconcile_report", "report.json.raw"))
+        self.assertEqual(builds["report.json"].kwargs["variables"], {"scope": "all"})
         expected_reports = {"report.json"}
         for version, rows in self.units.items():
             for selected, project, out in (
@@ -262,13 +264,16 @@ class ObjdiffProgressTests(unittest.TestCase):
             ):
                 expected_reports.add(out)
                 objects = sorted({p for row in selected for p in (row["target"], row["base"]) if p})
-                self.assertEqual(builds[out].args, (out, "report"))
-                self.assertEqual(builds[out].kwargs, {
+                self.assertEqual(builds[f"{out}.raw"].args, (f"{out}.raw", "objdiff_report"))
+                self.assertEqual(builds[f"{out}.raw"].kwargs, {
                     "implicit": objects + [f"{project}/objdiff.json"], "variables": {"project": project},
                 })
+                self.assertEqual(builds[out].args, (out, "reconcile_report", f"{out}.raw"))
+                self.assertEqual(builds[out].kwargs["variables"], {"scope": version})
         self.assertEqual(set(builds["report"].args[2]), expected_reports)
-        writer.rule.assert_called_once_with(
-            "report", f"{configure.OBJDIFF} report generate -p $project -o $out", description="objdiff report $out"
+        writer.rule.assert_any_call(
+            "objdiff_report", f"{configure.OBJDIFF} report generate -p $project -o $out",
+            description="objdiff report $out"
         )
 
 
