@@ -3679,9 +3679,53 @@ SoundTask *func_001E61A0(BtlUnit *actor, s32 option) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E6228);
+u32 func_001E6228(u32 *arguments) {
+    BtlUnit *unit = (BtlUnit *)arguments[0];
+    s32 finished = 0;
+    u32 alpha;
 
-extern u32 func_001E6228(s32);
+    if (arguments[2] == 0) {
+        unit->flags |= 0x80;
+        btlFlagUnitDefeatCandidate(unit);
+    }
+
+    switch (arguments[1]) {
+    case 0:
+        if (arguments[2] == 1) {
+            btlFlagUnitDefeatCandidate(unit);
+            evtSetUnitRgbTransition(unit->ext, 10, 0x80000000);
+        } else if (arguments[2] == 10) {
+            evtSetUnitRgbTransition(unit->ext, 0, 0x80000000);
+            evtSetUnitAlphaTransition((u32)unit->ext, 6, 0);
+            unit->flags |= 0x200000;
+        }
+        if ((unit->flags & 0x200000) == 0 && (s32)arguments[2] >= 16) {
+            finished = 1;
+        }
+        break;
+
+    case 1:
+        if ((s32)arguments[2] >= 8) {
+            unit->flags &= ~0x20000;
+            unit->overlayColor = unit->baseColor & 0xFFFFFF;
+            finished = 1;
+        } else {
+            unit->flags |= 0x20000;
+            alpha = (u32)((1.0f - (f32)(s32)arguments[2] * 0.125f) * 128.0f);
+            alpha <<= 24;
+            unit->overlayColor = alpha | (unit->baseColor & 0xFFFFFF);
+        }
+        break;
+    }
+
+    arguments[2]++;
+    if (finished != 0) {
+        unit->flags = (unit->flags & ~0x80) | 0x40;
+        return 1;
+    }
+    return 0;
+}
+
 
 SoundTask *func_001E6428(BtlUnit *actor, s32 option) {
     SoundTask *task = btlAllocTask(0xC);
