@@ -174,11 +174,17 @@ typedef struct BtlUnit {
     struct BtlUnit *nextActor;
 } BtlUnit;
 
+/* Shared runtime prefix: actors plus the registered task queue endpoints. */
 typedef struct BtlActorWork {
     u8 pad_00[0x228];
     BtlUnit *actorList;
+    struct SoundTask *taskTail; /* Newest registration; reverse traversal. */
+    struct SoundTask *taskHead; /* Oldest registration; forward traversal. */
 } BtlActorWork;
 
+/* Generic scheduler header; task-specific arguments follow at byte 0x70.
+ * next/prev link registration order, independently of the deferred queue. */
+/* enabled/status are start/end condition selectors, not scheduler phases. */
 typedef struct SoundTask {
     u8 enabled;
     u8 unk_01[0xF];
@@ -192,7 +198,7 @@ typedef struct SoundTask {
     s32 endDelay;
     u32 unk_30;
     u32 unk_34;
-    u64 unk_38;
+    u64 handle; /* Installed by btlStartTask; independent of owner. */
     u64 owner;
     void (*onStart)(u32);
     union {
@@ -207,9 +213,10 @@ typedef struct SoundTask {
     void (*onFinish)(u32 *);
     void *args;
     struct SoundTask *next;
-    struct SoundTask *nextActive;
+    struct SoundTask *prev;
     struct SoundTask *deferNext;
     struct SoundTask *deferPrev;
+    u8 pad68[8];
 } SoundTask;
 
 typedef struct ActiveSoundNode {
@@ -2522,57 +2529,62 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001D3FE8);
 void btlFindSoundTaskByWorkValue(void) {
 }
 
-s32 btlFindTaskByHandle(s64 owner) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x230);
-    while (node != 0) {
-        if (*(s64 *)(node + 0x38) == owner) {
-            return node;
+/* Return the oldest matching handle, or zero; unstarted tasks may have handle 0. */
+s32 btlFindTaskByHandle(s64 handle) {
+    SoundTask *task = ((BtlActorWork *)btlGetRuntime())->taskHead;
+    while (task != 0) {
+        if ((s64)task->handle == handle) {
+            return (s32)task;
         }
-        node = *(s32 *)(node + 0x58);
+        task = task->next;
     }
     return 0;
 }
 
+/* Return the oldest task with this owner, or zero. */
 s32 btlFindTaskByOwner(s64 owner) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x230);
-    while (node != 0) {
-        if (*(s64 *)(node + 0x40) == owner) {
-            return node;
+    SoundTask *task = ((BtlActorWork *)btlGetRuntime())->taskHead;
+    while (task != 0) {
+        if ((s64)task->owner == owner) {
+            return (s32)task;
         }
-        node = *(s32 *)(node + 0x58);
+        task = task->next;
     }
     return 0;
 }
 
+/* Return the oldest registered task of this kind, or zero. */
 s32 btlFindTaskByKind(u16 kind) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x230);
-    while (node != 0) {
-        if (*(u16 *)(node + 0x20) == kind) {
-            return node;
+    SoundTask *task = ((BtlActorWork *)btlGetRuntime())->taskHead;
+    while (task != 0) {
+        if (task->taskId == kind) {
+            return (s32)task;
         }
-        node = *(s32 *)(node + 0x58);
+        task = task->next;
     }
     return 0;
 }
 
+/* Count all registrations, including tasks awaiting startup or release. */
 s32 btlCountRegisteredTasks(void) {
-    s32 temp_v0;
-    s32 temp_v1;
+    s32 address;
+    s32 count;
 
-    temp_v0 = btlGetRuntime();
-    temp_v1 = 0;
-    for (temp_v0 = *(s32 *)(temp_v0 + 0x230); temp_v0 != 0; temp_v0 = *(s32 *)(temp_v0 + 0x58)) {
-        temp_v1 = temp_v1 + 1;
+    address = btlGetRuntime();
+    count = 0;
+    for (address = (s32)((BtlActorWork *)address)->taskHead; address != 0; address = (s32)((SoundTask *)address)->next) {
+        count = count + 1;
     }
-    return temp_v1;
+    return count;
 }
 
+/* Count registrations with this full-width owner key. */
 s32 btlCountTasksForOwner(s64 key) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x230);
+    SoundTask *task = ((BtlActorWork *)btlGetRuntime())->taskHead;
     s32 count = 0;
-    while (node != 0) {
-        s64 owner = *(s64 *)(node + 0x40);
-        node = *(s32 *)(node + 0x58);
+    while (task != 0) {
+        s64 owner = task->owner;
+        task = task->next;
         if (owner == key) {
             count++;
         }
@@ -2580,28 +2592,30 @@ s32 btlCountTasksForOwner(s64 key) {
     return count;
 }
 
+/* Count registrations of the requested task kind. */
 s32 btlCountTasksByKind(u16 kind) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x230);
+    SoundTask *task = ((BtlActorWork *)btlGetRuntime())->taskHead;
     s32 count = 0;
-    while (node != 0) {
-        u16 nodeKind = *(u16 *)(node + 0x20);
-        node = *(s32 *)(node + 0x58);
-        if (nodeKind == kind) {
+    while (task != 0) {
+        u16 taskKind = task->taskId;
+        task = task->next;
+        if (taskKind == kind) {
             count++;
         }
     }
     return count;
 }
 
+/* Walk newest first and request release for tasks carrying allocation bit 1. */
 void btlFlagTasksForUpdate(void) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x22C);
-    while (node != 0) {
-        u16 flags = *(u16 *)(node + 0x24);
-        s32 next = *(s32 *)(node + 0x5C);
+    SoundTask *task = ((BtlActorWork *)btlGetRuntime())->taskTail;
+    while (task != 0) {
+        u16 flags = task->flags;
+        SoundTask *next = task->prev;
         if ((flags & 1) != 0) {
-            *(u16 *)(node + 0x24) = flags | 4;
+            task->flags = flags | 4;
         }
-        node = next;
+        task = next;
     }
 }
 
@@ -2688,74 +2702,80 @@ s32 btlEvalTaskCondition(TaskCondition *condition, s32 value) {
     return result;
 }
 
+/* Append a cleared task; positive size exposes argument bytes after the header. */
 void *btlAllocTask(s32 size) {
-    u8 *task = sdfAllocAndClearQuadwords(size + 0x70);
-    u8 *context;
-    u8 *head;
+    SoundTask *task = sdfAllocAndClearQuadwords(size + 0x70);
+    BtlActorWork *context;
+    SoundTask *tail;
 
     if (size > 0) {
-        *(u8 **)(task + 0x54) = task + 0x70;
+        task->args = (u8 *)task + 0x70;
     } else {
-        *(u8 **)(task + 0x54) = 0;
+        task->args = 0;
     }
-    context = (u8 *)btlGetRuntime();
-    *(u8 **)(task + 0x58) = 0;
-    head = *(u8 **)(context + 0x22C);
-    if (head != 0) {
-        *(u8 **)(head + 0x58) = task;
-        *(u8 **)(task + 0x5C) = *(u8 **)(context + 0x22C);
+    context = (BtlActorWork *)btlGetRuntime();
+    task->next = 0;
+    tail = context->taskTail;
+    if (tail != 0) {
+        tail->next = task;
+        task->prev = context->taskTail;
     } else {
-        *(u8 **)(context + 0x230) = task;
-        *(u8 **)(task + 0x5C) = 0;
+        context->taskHead = task;
+        task->prev = 0;
     }
-    *(u8 **)(context + 0x22C) = task;
-    *(u16 *)(task + 0x24) |= 1;
+    context->taskTail = task;
+    task->flags |= 1;
     return task;
 }
 
-u32 btlGetTaskArguments(s32 arg0) {
-    return *(u32 *)(arg0 + 0x54);
+/* Return the argument address recorded by allocation (zero for no arguments). */
+u32 btlGetTaskArguments(s32 task) {
+    return (u32)((SoundTask *)task)->args;
 }
 
-void btlFreeTask(s32 task) {
-    s32 context;
-    s32 next;
-    s32 previous;
-    void (*cleanup)(s32);
-    cleanup = *(void (**)(s32))(task + 0x50);
+/* Invoke the finish hook before unlinking, then release the task block. */
+void btlFreeTask(s32 taskAddress) {
+    BtlActorWork *context;
+    SoundTask *next;
+    SoundTask *previous;
+    void (*cleanup)(u32 *);
+    SoundTask *task = (SoundTask *)taskAddress;
+    cleanup = task->onFinish;
     if (cleanup != 0) {
-        cleanup(*(s32 *)(task + 0x54));
+        cleanup(task->args);
     }
-    context = btlGetRuntime();
-    previous = *(s32 *)(task + 0x5C);
+    context = (BtlActorWork *)btlGetRuntime();
+    previous = task->prev;
     if (previous != 0) {
-        *(s32 *)(previous + 0x58) = *(s32 *)(task + 0x58);
+        previous->next = task->next;
     } else {
-        *(s32 *)(context + 0x230) = *(s32 *)(task + 0x58);
+        context->taskHead = task->next;
     }
-    next = *(s32 *)(task + 0x58);
+    next = task->next;
     if (next != 0) {
-        *(s32 *)(next + 0x5C) = *(s32 *)(task + 0x5C);
+        next->prev = task->prev;
     } else {
-        *(s32 *)(context + 0x22C) = *(s32 *)(task + 0x5C);
+        context->taskTail = task->prev;
     }
-    sdfReleaseChipBlock(task);
+    sdfReleaseChipBlock(taskAddress);
 }
 
-u64 btlStartTask(s32 task) {
+/* Install a fresh handle/reset phase counters, invoke startup, then reread handle. */
+u64 btlStartTask(s32 taskAddress) {
     u64 value = btlAdvanceRuntimeSequenceCounter();
-    s32 callback = *(s32 *)(task + 0x48);
-    *(u16 *)(task + 0x24) |= 8;
-    *(u64 *)(task + 0x38) = value;
-    *(u32 *)(task + 0x30) = 0;
-    *(u32 *)(task + 0x34) = 0;
-    *(u16 *)(task + 0x22) = 0;
-    *(u32 *)(task + 0x60) = 0;
-    *(u32 *)(task + 0x64) = 0;
+    SoundTask *task = (SoundTask *)taskAddress;
+    void (*callback)(u32) = task->onStart;
+    task->flags |= 8;
+    task->handle = value;
+    task->unk_30 = 0;
+    task->unk_34 = 0;
+    task->state = 0;
+    task->deferNext = 0;
+    task->deferPrev = 0;
     if (callback != 0) {
-        ((void (*)(s32))callback)(*(s32 *)(task + 0x54));
+        callback((u32)task->args);
     }
-    return *(u64 *)(task + 0x38);
+    return task->handle;
 }
 
 void btlResetDeferredTaskQueue(void) {
@@ -2809,7 +2829,7 @@ void btlRunTask(s32 taskAddress) {
 }
 
 void btlSweepFinishedTasks(void) {
-    SoundTask *task = *(SoundTask **)(btlGetRuntime() + 0x230);
+    SoundTask *task = ((BtlActorWork *)btlGetRuntime())->taskHead;
     SoundTask *next;
     while (task != 0) {
         next = task->next;
@@ -2841,12 +2861,13 @@ void btlClearDeferredTasks(void) {
     btlDeferredTaskHead = 0;
 }
 
+/* Release newest first; cache the previous registration before its block is freed. */
 void btlClearTaskLists(void) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x22C);
-    while (node != 0) {
-        s32 next = *(s32 *)(node + 0x5C);
-        btlFreeTask(node);
-        node = next;
+    SoundTask *task = ((BtlActorWork *)btlGetRuntime())->taskTail;
+    while (task != 0) {
+        SoundTask *next = task->prev;
+        btlFreeTask((s32)task);
+        task = next;
     }
     btlDeferredTaskTail = 0;
     btlDeferredTaskHead = 0;
