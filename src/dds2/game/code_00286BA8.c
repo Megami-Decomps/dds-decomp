@@ -54,7 +54,10 @@ typedef struct MtrSelectionState {
 typedef struct MtrSelectionFlags {
     u32 unk00 : 1;
     u32 visible : 1;
-    u32 unk02 : 30;
+    u32 fadeProgress : 1;
+    u32 profileReady : 1;
+    u32 unk04 : 1;
+    u32 unk05 : 27;
 } MtrSelectionFlags;
 
 typedef struct MtrPlayerFlags {
@@ -69,6 +72,33 @@ typedef struct MtrUnitMenuEntry {
     u16 unk14 : 2;
     u8 pad02[6];
 } MtrUnitMenuEntry;
+
+typedef struct MnuPartySnapshot {
+    u16 flags;
+    u16 unk02;
+    u16 rosterIndex;
+    u16 unk06;
+    u16 hp;
+    u16 unk0A;
+    u16 mp;
+    u16 unk0E;
+    u32 totalExp;
+    u16 level;
+    u8 stats[5];
+    u8 pad1B[0x3A];
+    u8 unk55;
+    u8 pad56[0x16E];
+} MnuPartySnapshot;
+
+struct MenuListNode {
+    u8 pad00[0x70];
+    u8 *items;
+};
+
+typedef struct MtrEquipState {
+    s32 state;
+    s32 timer;
+} MtrEquipState;
 
 extern MenuList *func_002884C0(void);
 extern s32 mdlFlagTest(s32);
@@ -106,7 +136,7 @@ extern struct SdfTaskItemDesc D_003CFCD4;
 extern void sdfAttachTaskItem(struct TaskWork *, struct SdfTaskItemDesc *);
 extern void mnuReleaseFirstMantraSpriteSlots(void);
 extern void mnuReleaseStaffAndTitleVisualResources(u32 *);
-extern void evtPrintDeveloperConsoleMessage(const char *);
+extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void sdfReleaseResourceAllocation(u32);
 extern void mnuReleasePanelEntryPool(void);
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286BA8);
@@ -138,9 +168,11 @@ typedef struct MnuStatusResource {
     u8 pad08[0x30];
     u32 resourceIdA;      /* 0x38 */
     u32 resourceIdB;      /* 0x3C */
-    u8 pad40[8];
+    s32 messageWindow;
+    u8 pad44[4];
     MenuProgressHost *progressHost; /* 0x48 */
-    u8 pad4C[0x1CC];
+    u8 pad4C[8];
+    MnuPartySnapshot snapshot;
     MtrSelectionFlags flags;
     u8 pad21C[0x10];
     MtrSelectionState selection; /* 0x22C */
@@ -150,7 +182,10 @@ typedef struct MnuStatusResource {
     u32 unkBA4;
     u8 padBA8[8];
     MtrUnitMenuEntry unitEntries[5]; /* 0xBB0 */
-    u8 padBD8[0x30];
+    u8 padBD8[0x20];
+    MtrEquipState equip;
+    u32 drawPool;
+    u8 padC04[4];
 } MnuStatusResource; /* 0xC08 */
 
 extern void mtrInitUnitSelectionWork(MnuStatusResource *);
@@ -307,7 +342,45 @@ u64 func_00287900(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287930);
+extern u32 mnuGetDefaultPanelSelector(MnuStatusResource *);
+extern void evtCreateMessageWindowIfMissing(s32);
+extern void func_00267B40(s32, MenuProgressHost *);
+extern void mnuEnsureProfilePanelEffect(s32, MenuProgressHost *);
+extern void mnuInitPartyPanelSlots(void *);
+extern void func_002BCAB0(void *);
+extern char D_00426208[];
+extern char D_00426218[];
+
+/* Initialize the equip panel from the selected party entry and selector. */
+s32 func_00287930(void) {
+    MnuStatusResource *work = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
+    MnuPartySnapshot *snapshot = &work->snapshot;
+    MtrEquipState *equip = &work->equip;
+    u8 *selector;
+
+    work->flags.unk04 = 0;
+    selector = (u8 *)mnuGetDefaultPanelSelector(work);
+    dspCloseChannel();
+    evtCreateMessageWindowIfMissing(work->messageWindow);
+    mnuCloseCurrentProfilePanel(work->progressHost);
+    memcpy(snapshot, work->list->cursor->items, sizeof(*snapshot));
+    work->snapshot.unk55 = selector[2];
+    evtPrintDeveloperConsoleMessage(D_00426208, work->snapshot.hp, work->snapshot.mp);
+    func_00267B40((s32)snapshot, work->progressHost);
+    mnuEnsureProfilePanelEffect((s32)snapshot, work->progressHost);
+    mnuInitPartyPanelSlots((u8 *)work->progressHost + 0x70);
+    func_002BCAB0((u8 *)work->progressHost + 0x17C);
+    work->flags.fadeProgress = 0;
+    work->flags.profileReady = 0;
+    equip->state = 1;
+    equip->timer = 0;
+    evtPrintDeveloperConsoleMessage(D_00426218);
+    return 0;
+}
+
+INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426208);
+
+INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426218);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287AF8);
 
@@ -328,26 +401,26 @@ s32 func_00288158(void) {
     s32 value;
 
     func_0026C900();
-    mnuUpdateMantraDrawPool(*(u32 *)((u8 *)work + 0xC00));
+    mnuUpdateMantraDrawPool(work->drawPool);
     ratio = 0.0f;
-    if (((*(u32 *)((u8 *)work + 0x218) >> 2) & 1) != 0) {
-        if (*(s32 *)((u8 *)work + 0xBFC) < 30) {
-            (*(s32 *)((u8 *)work + 0xBFC))++;
+    if (work->flags.fadeProgress) {
+        if (work->equip.timer < 30) {
+            work->equip.timer++;
         }
-        ratio = (f32)*(s32 *)((u8 *)work + 0xBFC) / 30.0f;
+        ratio = (f32)work->equip.timer / 30.0f;
     }
     value = (s32)(ratio * 128.0f);
     func_0026E788(0, 0, 0, value, 0x68, 0, 0x4A);
     func_0026E788(0, 0, 0, value, 0x69, 0, 0x4A);
-    if (mnuDrawLoadedProgressPanels((s32)((u8 *)work + 0x54), work->progressHost, 0x53) != 0) {
-        if (((*(u32 *)((u8 *)work + 0x218) >> 3) & 1) == 0) {
-            evtStageTestSelectEntryWithoutInitialValue(*(u16 *)((u8 *)work + 0x58), 0);
+    if (mnuDrawLoadedProgressPanels((s32)&work->snapshot, work->progressHost, 0x53) != 0) {
+        if (!work->flags.profileReady) {
+            evtStageTestSelectEntryWithoutInitialValue(work->snapshot.rosterIndex, 0);
         }
-        *(u32 *)((u8 *)work + 0x218) |= 8;
+        work->flags.profileReady = 1;
     }
     mnuDrawCurrentProfilePanel(0xE80, 0x5B8, 1, work->progressHost, 0x53);
     if (evtStageTestUpdate((s32)D_00380818) >= 2) {
-        *(u32 *)((u8 *)work + 0x218) |= 4;
+        work->flags.fadeProgress = 1;
     }
     return 0;
 }

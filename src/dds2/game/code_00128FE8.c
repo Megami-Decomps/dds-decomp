@@ -38,9 +38,9 @@ extern s32 sdfAllocateBlockBySizeThreshold(u32);
 
 extern u32 D_00436088;
 
-extern u64 dds3GetWorldObject(void);
+extern void *dds3GetWorldObject(void);
 
-extern s64 dds3GetWorldCameraObject(u64);
+extern s32 dds3GetWorldCameraObject(s32);
 
 extern s64 fldGetPlayerSceneState(void);
 
@@ -122,11 +122,11 @@ extern void *sdfCreateAssetWithDrawEntries(void);
 
 extern u32 sdfTexAcquireResourceTexture(void *);
 
-extern u32 D_004360B0;
+extern f32 D_004360B0;
 
 extern u8 D_00444980[];
 
-extern u8 D_00444970[];
+extern f32 D_00444970[];
 
 extern void dds3TransformCameraVectorsByInnerRotation(s64, void *, void *);
 
@@ -2230,7 +2230,7 @@ s32 fldSetEncounterMode(s32 mode) {
             if (fldEncounterRuntimeState >= 0) {
                 btlActivateRuntime(fldEncounterRuntimeState);
                 if (dds3GetWorldObject() != 0) {
-                    dds3SetWorldObjectDataValue(dds3GetWorldObject(), 1);
+                    dds3SetWorldObjectDataValue((s32)dds3GetWorldObject(), 1);
                 }
             }
         }
@@ -2284,11 +2284,11 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_001300A0);
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_001302A0);
 
 s64 fldGetUnselectedWorldEntry(void) {
-    u64 worldObject;
+    s32 worldObject;
     s64 object;
     s64 currentObject;
 
-    worldObject = dds3GetWorldObject();
+    worldObject = (s32)dds3GetWorldObject();
     object = dds3GetWorldCameraObject(worldObject);
     currentObject = fldGetPlayerSceneState();
     if (currentObject == object) {
@@ -2299,11 +2299,71 @@ s64 fldGetUnselectedWorldEntry(void) {
 
 void fldSetCameraMoveMode(u32 value) {
     D_004360AC = value;
-    dds3TransformCameraVectorsByInnerRotation(dds3GetWorldCameraObject(dds3GetWorldObject()), D_00444980, D_00444970);
+    dds3TransformCameraVectorsByInnerRotation(dds3GetWorldCameraObject((s32)dds3GetWorldObject()), D_00444980, D_00444970);
     D_004360B0 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00130A40);
+/* The camera object's inner node carries its look-at target at +0x40. */
+typedef struct FldCameraTransformNode {
+    u8 pad00[0x40];
+    f32 position[4];
+    f32 rotation[4];
+} FldCameraTransformNode;
+
+typedef struct FldWorldCamera {
+    u8 pad00[4];
+    s32 key;
+    u8 pad08[0x10];
+    void *data;
+    FldCameraTransformNode *inner;
+} FldWorldCamera;
+
+extern void effObjSetNodeFlags(void *, s32);
+
+void func_00130A40(void) {
+    f32 direction = 0.0f;
+    f32 phase = D_004360B0;
+    FldWorldCamera *camera;
+
+    if (D_004360AC != 0) {
+        if (D_004360AC == 1) {
+            direction = 1.0f;
+        }
+        if (D_004360AC == 2) {
+            direction = 1.0f;
+        }
+        if (D_004360AC == -1) {
+            direction = -1.0f;
+        }
+        if (D_004360AC == -2) {
+            direction = -1.0f;
+        }
+        camera = (FldWorldCamera *)dds3GetWorldCameraObject((s32)dds3GetWorldObject());
+        if (D_004360AC == 1 || D_004360AC == -1) {
+            if (phase < 3.14f) {
+                phase += 0.2f;
+                camera->inner->position[1] = D_00444970[1] + sdfSinPoly(phase * direction) * 2.5f;
+            } else {
+                phase += 0.02f;
+                camera->inner->position[1] = D_00444970[1] + sdfSinPoly(phase * direction) * 2.0f;
+            }
+        }
+        if (D_004360AC == 2 || D_004360AC == -2) {
+            phase += 11.0f;
+            if (phase > 0.0f) {
+                phase -= 1.0f;
+            } else if (phase > -3.14f) {
+                phase -= 0.2f;
+                camera->inner->position[1] = D_00444970[1] + sdfSinPoly(phase * direction) * 2.0f;
+            } else {
+                phase -= 0.01f;
+            }
+            phase -= 11.0f;
+        }
+        D_004360B0 = phase;
+        effObjSetNodeFlags(camera->inner, 1);
+    }
+}
 
 void fldClearCameraMoveMode(void) {
     D_004360AC = 0;

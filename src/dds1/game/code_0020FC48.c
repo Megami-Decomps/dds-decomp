@@ -1170,7 +1170,34 @@ void func_00212680(s32 packets, s32 primitive, s32 x, s32 y, s32 depth, s32 colo
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_002127A8);
+extern s32 effAppendTexturedTrianglePacket(s32, s32, s32,
+    s32, s32, f32, f32, s32, s32, f32, f32, s32, s32, f32, f32, s32);
+
+/* The textured cell uses the same six-triangle rim as the flat cell above. */
+void func_002127A8(s32 packets, s32 primitive, s32 x, s32 y, s32 depth, s32 color, f32 scale) {
+    f32 widthScale = scale * 16.0f;
+    f32 heightScale = scale * 8.0f;
+    s32 x0;
+    s32 y0;
+    s32 x1;
+    s32 y1;
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        x0 = x + (s32)(D_00360F30[i * 2] * widthScale);
+        y0 = y + (s32)(D_00360F30[i * 2 + 1] * heightScale);
+        x1 = x + (s32)(D_00360F30[i * 2 + 2] * widthScale);
+        y1 = y + (s32)(D_00360F30[i * 2 + 3] * heightScale);
+        effAppendTexturedTrianglePacket(packets, color, primitive,
+            x + 0x7000, y + 0x7900,
+            (f32)x * (1.0f / 8192.0f), (f32)y * 0.875f / 3584.0f,
+            x0 + 0x7000, y0 + 0x7900,
+            (f32)x0 * (1.0f / 8192.0f), (f32)y0 * 0.875f / 3584.0f,
+            x1 + 0x7000, y1 + 0x7900,
+            (f32)x1 * (1.0f / 8192.0f), (f32)y1 * 0.875f / 3584.0f,
+            depth);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_00212998);
 
