@@ -605,6 +605,8 @@ void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u,
     }
 }
 
+extern s32 sdfCreateResetPacketList(void);
+
 extern void sdfPktInit();
 extern void *sdfFormatSifPacket();
 

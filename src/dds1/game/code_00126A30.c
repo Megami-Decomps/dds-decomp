@@ -190,7 +190,7 @@ extern s32 datBattleSceneRecords;
 
 extern u32 D_003BACF8;
 
-extern u32 sdfCreateResetPacketList(void);
+extern s32 sdfCreateResetPacketList(void);
 extern s32 sdfAllocPacketAligned(s32);
 
 extern u64 func_00197760(s32, s32, u64, u64, u64, u64);
@@ -4382,12 +4382,12 @@ s32 fldGetActorStat0(s32 attribute) {
     return 0;
 }
 
+/* Read a selected actor attribute; selector zero maps its motion code.
+ * Missing named objects fall through to subsequent attribute cases. */
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0270);
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0280);
 
-/* Read a selected actor attribute; selector zero maps its motion code.
- * Missing named objects fall through to subsequent attribute cases. */
 s32 fldGetActorStat1(u32 attribute) {
     FldActorEntry *actor = (FldActorEntry *)(D_00337D00 + fldSelectedActorEntryIndex * 108);
     s32 *objectNode;
@@ -4944,3 +4944,4 @@ INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE68);
 INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE6C);
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", fldFieldTaskHandle);
+

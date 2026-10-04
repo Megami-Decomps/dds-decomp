@@ -127,7 +127,6 @@ extern void *func_00101740(const char *);
 extern void dds3WorkClear(void);
 
 extern char D_00412D50[]; /* "fldProcSequence" */
-
 extern u8 D_00435F24;
 
 extern u8 D_00387D60[];
@@ -367,8 +366,8 @@ void fldSetPacketArgumentPair(u32 *packet, u32 first, u32 second) {
     packet[5] = second;
 }
 
-u64 sdfCreateResetPacketList(void) {
-    u64 packet;
+s32 sdfCreateResetPacketList(void) {
+    s32 packet;
 
     packet = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
