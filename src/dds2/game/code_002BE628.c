@@ -850,12 +850,12 @@ void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface) {
     }
 }
 
-void mnuDrawRepeatedPanelSprites(u8 *object, s32 x, s32 y, s32 depth, s32 count, s32 drawArg, s32 variant, s32 texture) {
+void mnuDrawRepeatedPanelSprites(s32 x, s32 y, s32 depth, s32 fade, s32 count, s32 drawArg, s32 variant, s32 texture) {
     s32 i;
 
     for (i = 0; i < count; i++) {
-        func_00306CD0(object, x, y, depth, 1, drawArg, variant, texture);
-        object += 0xA0;
+        func_00306CD0(x, y, depth, fade, 1, drawArg, variant, texture);
+        x += 0xA0;
     }
 }
 
