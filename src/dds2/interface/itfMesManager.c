@@ -5,6 +5,8 @@ void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int 
 
 extern u32 itfMessageFlags;
 
+typedef struct ItfMesWindowRec ItfMesWindowRec;
+
 /* One 0x14-byte slot per message window; the first field points at its state. */
 typedef struct ItfMesSlot {
     struct ItfMesState *mes;
@@ -57,14 +59,14 @@ typedef struct ItfMesRelocResource {
     u8 payload[1];
 } ItfMesRelocResource;
 
-/* 3 words zeroed by func_0019D0A0. */
-typedef struct ItfMesZero {
-    u32 unk0;
-    u32 unk4;
-    u32 unk8;
-} ItfMesZero;
+/* State of the interactive message-layout inspector. */
+typedef struct ItfMesDebugState {
+    s32 selectedItem;
+    s32 mode;
+    ItfMesWindowRec *window;
+} ItfMesDebugState;
 
-extern ItfMesZero D_003B4770;
+extern ItfMesDebugState D_003B4770;
 
 /* Sized table indexed by func_0019D268: s16 count + u32 items. */
 typedef struct ItfMesTable {
@@ -125,12 +127,24 @@ typedef struct ItfMesBlk40 {
     s16 rowCount;        /* +0x16: number of displayed option rows */
 } ItfMesBlk40;
 
+typedef struct ItfMesPanelPosition {
+    u8 pad0[0x10];
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+} ItfMesPanelPosition;
+
 /* Block at ItfMesState +0xA4. */
 typedef struct ItfMesBlkA4 {
     u8 unk0[4];          /* +0x0 */
-    void *unk4;          /* +0x4 */
+    ItfMesPanelPosition *unk4; /* +0x4 */
     u32 panelHandle;      /* +0x8: panel handle */
-    u8 unkC[0x1C];       /* +0xC */
+    s32 offsetLeft;       /* +0xC */
+    s32 offsetTop;        /* +0x10 */
+    s32 offsetRight;      /* +0x14 */
+    s32 offsetBottom;     /* +0x18 */
+    u8 unk1C[0xC];        /* +0x1C */
     u32 unk28;           /* +0x28 */
 } ItfMesBlkA4;
 
@@ -888,7 +902,103 @@ u32 itfMesGetWindowTableValue(s32 window, s32 slotIndex) {
     return itfWindowSlots[window].mes->textSlots.addresses[slotIndex];
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A45C0);
+extern s32 D_00435E48;
+extern s32 D_00435E4C;
+extern s32 D_00435E5C;
+extern s32 D_00435E60;
+extern s32 D_00435E64;
+extern char D_003A41A8[][0x20];
+extern char D_003A47E8[][0x20];
+extern char *D_00386048[];
+extern char D_004365F0[];
+extern void func_0035C860(char *dst, const char *format, ...);
+extern void itfConvertText(char *dst, const char *src);
+extern u16 *txtFormatNumberU16(s32 value, u16 *dst);
+void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, u32 sourceAddress);
+
+/* Copy one of the built-in interface strings into a window replacement slot. */
+void func_001A45C0(s32 window, s32 slotIndex, s32 value, s32 selector) {
+    char formatted[0x10];
+    u16 number[0x20];
+    char converted13[0x19];
+    char converted15[0x11];
+    char converted14[0x11];
+    char *converted;
+    s32 negative = 0;
+
+    switch (selector) {
+    case 0:
+        func_0035C860(formatted, D_004365F0, value);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)formatted);
+        break;
+    case 1:
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, D_00435E4C + value * 0x11);
+        break;
+    case 14:
+        memset(converted14, 0, sizeof(converted14));
+        itfConvertText(converted14, (char *)D_00435E4C + value * 0x11);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)converted14);
+        break;
+    case 8:
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, D_00435E60 + value * 7);
+        break;
+    case 2:
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, D_00435E48 + value * 0x11);
+        break;
+    case 15:
+        memset(converted15, 0, sizeof(converted15));
+        itfConvertText(converted15, (char *)D_00435E48 + value * 0x11);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)converted15);
+        break;
+    case 3:
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, D_00435E5C + value * 0x19);
+        break;
+    case 13:
+        memset(converted13, 0, sizeof(converted13));
+        itfConvertText(converted13, (char *)D_00435E5C + value * 0x19);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)converted13);
+        break;
+    case 4:
+        converted = (char *)number;
+        if (value >= 1001) {
+            *(u16 *)converted = 0xB280;
+            number[1] = 0;
+        } else {
+            if (value < 0) {
+                value = -value;
+                *(u16 *)converted = 0xA280;
+                converted += 2;
+                negative = 1;
+            }
+            if (!negative) {
+                converted = (char *)txtFormatNumberU16(value, (u16 *)converted);
+                ((u16 *)converted)[0] = 0xA680;
+                ((u16 *)converted)[1] = 0;
+            } else {
+                converted = (char *)txtFormatNumberU16(value, (u16 *)converted);
+                ((u16 *)converted)[1] = 0;
+            }
+        }
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)number);
+        break;
+    case 5:
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, D_00435E64 + value * 0x11);
+        break;
+    case 6:
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)D_003A41A8[value]);
+        break;
+    case 7:
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)D_003A47E8[value]);
+        break;
+    case 9:
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)D_00386048[value]);
+        break;
+    case 10:
+    case 11:
+    case 12:
+        break;
+    }
+}
 
 /* Replace a text slot with a copied NUL-terminated string; sourceAddress
  * remains a raw address in the existing interface. */
@@ -1017,6 +1127,35 @@ u16 itfMesGetGlobalFlags(void) {
     return itfMesWork.flags;
 }
 
+typedef struct ItfMesDrawCallback {
+    u8 pad0[0x10];
+    void (*invoke)(void *, s32);
+} ItfMesDrawCallback;
+
+struct ItfMesWindowRec {
+    u8 pad00[0xC];
+    ItfMesState *mes;
+    s32 handle;
+};
+
+extern s8 D_0037F510[];
+extern char *D_003B4990[];
+extern char *D_00436600[2];
+extern char D_00436608[];
+extern char D_00436610[];
+extern char D_00436618[];
+extern char D_00436620[];
+extern char D_00436628[];
+extern ItfMesDrawCallback kwlnPositionedTextSurface;
+extern s32 sdfCreateResetPacketList(void);
+extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
+extern void sdfAppendPacket(s32, s32);
+extern void kwlnDrawSpriteCell();
+extern ItfMesWindowRec *func_001A7A98(ItfMesWindowRec *window);
+extern void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 selectedItem);
+extern void sndStepIndexByPad(ItfMesBlkA4 *panel);
+
+/* Run and draw the interactive message-layout inspector. */
 INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414CE0);
 
 INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414CF0);
@@ -1025,20 +1164,122 @@ INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D00);
 
 INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D10);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4CF8);
+s32 func_001A4CF8(void) {
+    ItfMesBlkA4 *panel;
+    ItfMesPanelPosition *panelPosition;
+    s32 *position;
+    s32 packetList;
+    s32 item;
+    s32 y;
+    const char *format;
+    const char *marker;
+    const char *positionFormat;
+
+    if (D_003B4770.window == NULL) {
+        ItfMesWindowRec *window = func_001A7A98(NULL);
+
+        D_003B4770.window = window;
+        if (window == NULL) {
+            return 0;
+        }
+    }
+    {
+        ItfMesDebugState *debug = &D_003B4770;
+
+        panel = &debug->window->mes->blkA4;
+        switch (debug->mode) {
+        case 0:
+            if (D_0037F510[0x36] & 2) {
+                if (--debug->selectedItem < 0) {
+                    debug->selectedItem = 2;
+                }
+            } else if (D_0037F510[0x37] & 2) {
+                if (++debug->selectedItem >= 5) {
+                    debug->selectedItem = 0;
+                }
+            }
+            if (D_0037F510[0x31] < 0) {
+                ItfMesDebugState *confirmDebug = &D_003B4770;
+
+                switch (confirmDebug->selectedItem) {
+                case 0:
+                case 1:
+                case 2:
+                    confirmDebug->mode = 1;
+                    break;
+                case 3:
+                    confirmDebug->mode = 2;
+                    break;
+                case 4:
+                    confirmDebug->window = func_001A7A98(confirmDebug->window);
+                    break;
+                }
+            } else if (D_0037F510[0x33] < 0) {
+                return -1;
+            }
+            break;
+        case 1:
+            itfAdjustPanelBoundsWithPad(panel, debug->selectedItem);
+            if (D_0037F510[0x33] < 0) {
+                debug->mode = 0;
+            }
+            break;
+        case 2:
+            sndStepIndexByPad(panel);
+            if (D_0037F510[0x33] < 0) {
+                D_003B4770.mode = 0;
+            }
+            break;
+        }
+    }
+
+    packetList = sdfCreateResetPacketList();
+    kwlnDrawSpriteCell(packetList, 0x10, 0x10, 0x1E, 9);
+    format = D_00436618;
+    y = 0x7A00;
+    for (item = 0; item < 5; item++, y += 0x60) {
+        if (D_003B4770.selectedItem == item) {
+            marker = D_00436600[D_003B4770.mode != 0];
+        } else {
+            marker = D_00436620;
+        }
+        sdfAppendPacket(packetList,
+                        sdfCreateFormattedSifCommand(0x7180, y, 0xFFFFF0, 0,
+                                                     format, marker, D_003B4990[item]));
+    }
+
+    positionFormat = "( %3d,%3d )";
+    panelPosition = panel->unk4;
+    position = &panelPosition->left;
+    sdfAppendPacket(packetList,
+                    sdfCreateFormattedSifCommand(0x7E00, 0x7A00, 0xFFFFF0, 0,
+                                                 positionFormat, position[0] >> 4,
+                                                 position[1] >> 3));
+    sdfAppendPacket(packetList,
+                    sdfCreateFormattedSifCommand(0x7E00, 0x7A60, 0xFFFFF0, 0,
+                                                 positionFormat, position[2] >> 4,
+                                                 position[3] >> 3));
+    sdfAppendPacket(packetList,
+                    sdfCreateFormattedSifCommand(0x7E00, 0x7B20, 0xFFFFF0, 0,
+                                                 D_00436628, panel->unk28));
+    position = &D_003B4770.window->mes->blkA4.offsetLeft;
+    sdfAppendPacket(packetList,
+                    sdfCreateFormattedSifCommand(0x7180, 0x7C40, 0xFFFFF0, 0,
+                                                 "OFFSET : %3d,%3d - %3d,%3d",
+                                                 position[0] >> 4,
+                                                 position[1] >> 3,
+                                                 position[2] >> 4,
+                                                 position[3] >> 3));
+    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, packetList);
+    return 0;
+}
 
 /* Reset the three otherwise unnamed message-state words. */
 void itfMesClearGlobalWords(void) {
-    D_003B4770.unk0 = 0;
-    D_003B4770.unk4 = 0;
-    D_003B4770.unk8 = 0;
+    D_003B4770.selectedItem = 0;
+    D_003B4770.mode = 0;
+    D_003B4770.window = NULL;
 }
-
-typedef struct ItfMesWindowRec {
-    u8 pad00[0xC];
-    ItfMesState *mes;
-    s32 handle;
-} ItfMesWindowRec;
 
 extern ItfMesWindowRec D_00452960[];
 extern void btlReleaseEffectResourceHandles();
@@ -1478,6 +1719,8 @@ INCLUDE_SDATA(const s32, "interface/itfMesManager", D_004365F0);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_004365F8);
 
+char *D_00436600[2] __attribute__((section(".sdata"))) = {D_00436610, D_00436608};
+
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436608);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436610);
@@ -1487,4 +1730,3 @@ INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436618);
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436620);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436628);
-
