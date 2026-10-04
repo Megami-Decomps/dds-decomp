@@ -5232,13 +5232,37 @@ u32 func_001DB368(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001DB370);
+typedef struct XformData {
+    f32 position[4];
+    f32 direction[4];
+    f32 distance;
+    f32 fov;
+} XformData;
+
+void func_001DB370(XformData *dst, XformData *current, XformData *target, f32 blend) {
+    f32 delta;
+    f32 value;
+
+    dst->position[0] = current->position[0] + (target->position[0] - current->position[0]) * blend;
+    dst->position[1] = current->position[1] + (target->position[1] - current->position[1]) * blend;
+    dst->position[2] = current->position[2] + (target->position[2] - current->position[2]) * blend;
+    dst->position[3] = 0.0f;
+    dst->direction[0] = current->direction[0] + (target->direction[0] - current->direction[0]) * blend;
+    dst->direction[1] = current->direction[1] + (target->direction[1] - current->direction[1]) * blend;
+    value = current->direction[2];
+    dst->direction[2] = value + (target->direction[2] - value) * blend;
+    dst->direction[3] = 0.0f;
+    delta = target->distance - current->distance;
+    dst->distance = current->distance + delta * blend;
+    delta = target->fov - current->fov;
+    dst->fov = current->fov + delta * blend;
+}
 
 extern void btlScalarRangeInitQuadratic(u8 *, f32);
 
 extern f32 btlScalarRangeStepQuadratic(u8 *, f32);
 
-extern void func_001DB370(u8 *, u8 *, u8 *, f32);
+extern void func_001DB370(XformData *, XformData *, XformData *, f32);
 
 s32 btlStepPoseBlendHalf(u8 *object) {
     f32 blend;
@@ -5252,7 +5276,8 @@ s32 btlStepPoseBlendHalf(u8 *object) {
     if (blend > 0.5f) {
         blend = 0.5f;
     }
-    func_001DB370(object, object + 0x30, object + 0xC0, 2.0f * blend);
+    func_001DB370((XformData *)object, (XformData *)(object + 0x30), (XformData *)(object + 0xC0),
+                  2.0f * blend);
     *(f32 *)(object + 0x128) = blend;
     if (blend >= 0.5f) {
         return 1;
@@ -5266,7 +5291,7 @@ extern f32 btlScalarRangeStepExponential(u8 *);
 
 extern void btlCopyMotionTransform(u8 *, u8 *);
 
-extern void func_001DB370(u8 *, u8 *, u8 *, f32);
+extern void func_001DB370(XformData *, XformData *, XformData *, f32);
 
 s32 btlStepPoseBlend(u8 *actor) {
     u8 *motion = actor + 0x134;
@@ -5277,7 +5302,7 @@ s32 btlStepPoseBlend(u8 *actor) {
         btlCopyMotionTransform(actor, position);
     }
     value = btlScalarRangeStepExponential(motion);
-    func_001DB370(actor, position, actor + 0xC0, value);
+    func_001DB370((XformData *)actor, (XformData *)position, (XformData *)(actor + 0xC0), value);
     *(f32 *)(actor + 0x128) = value;
     return 0.9999990f <= value;
 }
@@ -5295,7 +5320,7 @@ s32 btlStepPoseBlendFrame(u8 *actor) {
         return 0;
     }
     value = btlScalarRangeStepQuadratic(actor + 0x13C, 1.0f);
-    func_001DB370(actor, actor + 0x30, actor + 0xC0, value);
+    func_001DB370((XformData *)actor, (XformData *)(actor + 0x30), (XformData *)(actor + 0xC0), value);
     *(f32 *)(actor + 0x128) = value;
     return 0.9999990f <= value;
 }
@@ -5303,7 +5328,7 @@ s32 btlStepPoseBlendFrame(u8 *actor) {
 s32 btlStepPoseBlendRatio(u8 *actor) {
     f32 ratio = (f32)*(s32 *)(actor + 0x110) / (f32)*(s32 *)(actor + 0x12C);
     if (ratio <= 1.0f) {
-        func_001DB370(actor, actor + 0x30, actor + 0xC0, ratio);
+        func_001DB370((XformData *)actor, (XformData *)(actor + 0x30), (XformData *)(actor + 0xC0), ratio);
         return 0;
     }
     btlCopyMotionTransform(actor, actor + 0xC0);
@@ -7081,6 +7106,7 @@ void btlClearCommandCursorAndRunAction(s32 actor) {
 }
 
 extern s32 D_0035DAF0[];
+extern s32 D_0035DAF8[];
 
 void btlAdvanceCommandCursorOrAction(s32 action, s32 state) {
     if (CURSOR->unk_00 == 1) {
@@ -7098,7 +7124,21 @@ void btlAdvanceCommandCursorOrAction(s32 action, s32 state) {
 }
 INCLUDE_ASM(const s32, "game/code_001C8890", btlInitCommandCursorForCategory);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001EEED8);
+/* Advance the command cursor with the neighboring animation-entry table. */
+void func_001EEED8(s32 action, s32 state) {
+    if (CURSOR->unk_00 == 1) {
+        if (((BtlCursorAction *)action)->link->unit->flags & 0x400) {
+            return;
+        }
+        func_001E9DE0(action, state, D_0035DAF8[CURSOR->unk_0C]);
+        func_001EB368(action, state);
+        func_001EB1B0(action, state, 0, 1);
+        CURSOR->frame++;
+        CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
+    } else {
+        func_001E2970(action, action);
+    }
+}
 
 void btlInitCommandCursorForFirstActor(s32 arg0, s32 arg1) {
     BattleController *work = (BattleController *)btlGetRuntime();
@@ -7147,7 +7187,48 @@ void btlInitLinkedUnitActionCursor(u8 *arg0) {
     func_001E6668(context, context, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", btlInitTargetCursorAndFacing);
+/* Initialize the target cursor and orient the linked unit toward its target. */
+void btlInitTargetCursorAndFacing(ActionUnit *action, void *state) {
+    f32 position[4];
+    f32 quaternion[4];
+    f32 aimPosition[4];
+    f32 rotation[4];
+    f32 offset[4];
+    BtlUnit *unit;
+    BtlUnit *target;
+
+    memset(offset, 0, sizeof(offset));
+    offset[2] = 1.0f;
+    memset(D_0035F100, 0, 0x130);
+    func_001E6BB0((s32)action, (s32)state, 2, 3);
+    func_001E6668((s32)action, (s32)state, 0, 0);
+    func_001EB1B0((s32)action, (s32)state, 0, 1);
+    btlFlagMatchingUnitsDefeatCandidate(0x600);
+    unit = action->link->unit;
+    if (unit->flags & 0x80000) {
+        btlUnitGetPosVU((u32)unit, 0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        btlCopyUnitRotationQuaternion((u8 *)unit, (s128 *)quaternion);
+        VU0_LOAD_VF(vf10, quaternion);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, offset);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_SCALAR_OP(1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, position);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, aimPosition);
+        target = (BtlUnit *)btlGetIndexListEntry(action->actorIndices, 0);
+        if (target->flags & 0x400) {
+            func_001F66D8(0x400, 0, 0);
+        } else {
+            func_001F66D8(0x200, 0, 0);
+        }
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        btlAimHorizontalDirectionVU((s128 *)aimPosition, (s128 *)position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+        btlSetUnitRotation((u8 *)unit, (s128 *)rotation);
+    }
+}
 
 extern void func_001E6BB0(s32, s32, s32, s32);
 

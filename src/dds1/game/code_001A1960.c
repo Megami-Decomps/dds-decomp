@@ -48,6 +48,12 @@ typedef struct SceneTask {
     UiObject *actor;
 } SceneTask;
 
+typedef struct BattleItemDrop {
+    u16 id;
+    u8 count;
+    u8 pad03;
+} BattleItemDrop;
+
 typedef struct BattleController {
     u8 pad_000[0x1F4];
     u32 flags;
@@ -66,7 +72,9 @@ typedef struct BattleController {
     s32 taskParent;
     u8 pad_2A0[0xC];
     s32 spriteObject;
-    u8 pad_2B0[0x24];
+    u8 pad_2B0[4];
+    BattleItemDrop itemDrops[3];
+    u8 pad_2C0[0x14];
     SceneSlot slots[8];
     SceneTask *groupPrimary[20];
     SceneTask *groupSecondary[45];
@@ -666,7 +674,31 @@ s32 btlSelectActorAction(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A4130);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A4240);
+void func_001A4240(u16 item) {
+    BattleController *controller = (BattleController *)btlGetRuntime();
+
+    if (item != 0) {
+        s32 found = 0;
+        u16 i;
+
+        for (i = 0; i < 3; i++) {
+            if (controller->itemDrops[i].id == item) {
+                found = 1;
+                controller->itemDrops[i].count++;
+                break;
+            }
+        }
+        if (!found) {
+            for (i = 0; i < 3; i++) {
+                if (controller->itemDrops[i].id == 0) {
+                    controller->itemDrops[i].id = item;
+                    controller->itemDrops[i].count = 1;
+                    break;
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A4328);
 

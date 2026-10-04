@@ -4445,7 +4445,24 @@ u32 func_001E8578(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E8580);
+void func_001E8580(XformData *dst, XformData *current, XformData *target, f32 blend) {
+    f32 delta;
+    f32 value;
+
+    dst->position[0] = current->position[0] + (target->position[0] - current->position[0]) * blend;
+    dst->position[1] = current->position[1] + (target->position[1] - current->position[1]) * blend;
+    dst->position[2] = current->position[2] + (target->position[2] - current->position[2]) * blend;
+    dst->position[3] = 0.0f;
+    dst->direction[0] = current->direction[0] + (target->direction[0] - current->direction[0]) * blend;
+    dst->direction[1] = current->direction[1] + (target->direction[1] - current->direction[1]) * blend;
+    value = current->direction[2];
+    dst->direction[2] = value + (target->direction[2] - value) * blend;
+    dst->direction[3] = 0.0f;
+    delta = target->f20 - current->f20;
+    dst->f20 = current->f20 + delta * blend;
+    delta = target->f24 - current->f24;
+    dst->f24 = current->f24 + delta * blend;
+}
 
 extern void func_001E8580(XformData *, XformData *, XformData *, f32);
 

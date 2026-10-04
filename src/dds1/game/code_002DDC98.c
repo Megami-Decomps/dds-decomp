@@ -1203,7 +1203,41 @@ void sdfVuEmitSelectedNodePacket(VuWork *work) {
     sdfVuEmitColoredTriangleBatches();
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E02D8);
+/* Finish the selected node's transformed rows and emit its textured geometry. */
+void func_002E02D8(u32 workAddress) {
+    VuWork *work = (VuWork *)workAddress;
+    VuTransformWork *node;
+    u32 mode;
+    u32 paramC;
+    u32 param8;
+
+    func_002DE868((void *)work->dmaBase, work->param1, work->unkA4,
+                  (u8 *)work->node + 0x80);
+    sdfVuBlendNodeXY(work->blendList);
+    node = work->node;
+    mode = node->mode;
+    paramC = node->paramC;
+    param8 = node->param8;
+    switch (mode) {
+        case 0:
+        case 1:
+        case 2:
+            if (param8 != paramC) {
+                u128 parameters[3];
+
+                func_002DE010(parameters, D_003BDA28, work->reference,
+                              paramC, node->param4, node->scale,
+                              node->x + work->offsetX, node->y + work->offsetY);
+                func_002DE980(work, parameters);
+            }
+            break;
+        case 3:
+            func_002DEA18(work, paramC);
+            break;
+    }
+    sdfBuildChunkedVuNodeTransfer(work, node->unk50, node->unk58,
+                                  node->unk60, node->unk20, 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E03C0);
 
