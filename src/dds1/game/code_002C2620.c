@@ -13,7 +13,7 @@ extern u32 D_003BD260;
 
 extern u32 D_003BD970;
 
-extern u32 D_003BD974;
+extern s32 D_003BD974;
 
 extern s32 mdlFlagTest(u32);
 extern u32 sdfCounterGetDisplayWordPointer(void);
@@ -68,6 +68,26 @@ extern void func_002CF420(void);
 extern void sndStartTrackDefault(s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void sdfCounterInitializeDisplayAnimation(void);
+extern s32 sdfHandleMapCounterSelectionInput(void);
+extern void sdfCounterTickCountdownAndMapTimers(void);
+extern void func_002C7738(s32);
+extern void sdfCounterStepDownAnimationValue(void);
+extern void sdfLatchBaseVectorsForSelection(void);
+extern s32 sdfStepSelectedMapCameraTransition(void);
+extern s32 func_002C4160(void);
+extern void sdfCounterAdvanceBoundedAnimationValue(void);
+extern s32 fldLmapToggleOverlay(void);
+extern void fldDisplayLocalMapCounterMessage(void);
+extern s32 func_002C3DB0(void);
+extern s32 evtGetCapturedWindowPanelValue(void);
+/* The retail caller passes color bytes as promoted ints; the callee narrows them. */
+extern void kwlnFadeInStart();
+extern void sdfClearCounterDisplayFlags(void);
+extern s32 sdfCounterGetDisplayValue(void);
+extern void fldSetPendingSceneAction(u32);
+extern void sdfInitInnerVectors(void);
+extern void func_00132BD0(void);
+extern void fldUpdateSwayOffset(void);
 extern u32 D_003BA8EC;
 extern s32 D_003BD240;
 extern u32 D_003BD258;
@@ -508,7 +528,85 @@ void fldInitializeLocalMapScene(void) {
     sdfCounterInitializeDisplayAnimation();
 }
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3220);
+s32 func_002C3220(void) {
+    s32 result = 0;
+
+    switch (D_003BD25C) {
+    case 1:
+        result = sdfHandleMapCounterSelectionInput();
+        sdfCounterTickCountdownAndMapTimers();
+        func_002C7738(1);
+        sdfCounterStepDownAnimationValue();
+        if (result == -2) {
+            D_003BD25C = 3;
+            sdfLatchBaseVectorsForSelection();
+            sdfCounterInitializeDisplayAnimation();
+        }
+        sdfStepSelectedMapCameraTransition();
+        if (result != 1) {
+            break;
+        }
+        D_003BD25C = 2;
+        sdfLatchBaseVectorsForSelection();
+        break;
+    case 2:
+        result = sdfHandleMapCounterSelectionInput();
+        sdfCounterTickCountdownAndMapTimers();
+        func_002C7738(1);
+        sdfCounterStepDownAnimationValue();
+        if (result == -2) {
+            D_003BD25C = 3;
+            sdfLatchBaseVectorsForSelection();
+            sdfCounterInitializeDisplayAnimation();
+        }
+        func_002C4160();
+        if (result == 0) {
+            D_003BD25C = 1;
+            sdfLatchBaseVectorsForSelection();
+        }
+        break;
+    case 3:
+        sdfCounterTickCountdownAndMapTimers();
+        func_002C7738(0);
+        sdfCounterAdvanceBoundedAnimationValue();
+        if (fldLmapToggleOverlay() != 0) {
+            if (D_003BD970 == 0) {
+                fldDisplayLocalMapCounterMessage();
+                D_003BD970 = 1;
+            } else {
+                D_003BD970 = 0;
+                D_003BD25C = 4;
+                sdfLatchBaseVectorsForSelection();
+            }
+        }
+        func_002C3DB0();
+        break;
+    case 4:
+        result = evtGetCapturedWindowPanelValue();
+        if (result == 1) {
+            D_003BD25C = 1;
+        } else {
+            D_003BD25C = 5;
+            kwlnFadeInStart(255, 255, 255, 30);
+        }
+        break;
+    case 5:
+        D_003BD974++;
+        if (D_003BD974 >= 31) {
+            D_003BD25C = 6;
+        }
+        break;
+    case 6:
+        result = -1;
+        sdfClearCounterDisplayFlags();
+        fldSetPendingSceneAction(sdfCounterGetDisplayValue());
+        break;
+    }
+    sdfInitInnerVectors();
+    func_00132BD0();
+    fldUpdateSwayOffset();
+    return result;
+}
 
 extern void func_00132010(void);
 extern void evtSetDrawSurfaceIndex(s32);
@@ -619,7 +717,6 @@ s32 fldLmapToggleOverlay(void) {
     return result;
 }
 
-extern s32 sdfCounterGetDisplayValue(void);
 extern void mdlFlagClear(s32 flag);
 extern void mdlFlagSet(s32 flag);
 
