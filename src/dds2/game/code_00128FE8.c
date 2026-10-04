@@ -18,7 +18,7 @@ extern s32 fldSecondarySceneObject;
 
 extern s32 datBattleSceneRecords;
 
-extern u32 sdfCreateResetPacketList(void);
+extern s32 sdfCreateResetPacketList(void);
 
 extern s32 sdfAllocPacketAligned(s32);
 

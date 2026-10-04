@@ -319,7 +319,7 @@ extern void sdfAppendPacket(void *, void *);
 
 extern u8 *sdfConsFinalizePacketHeader(void *, s32);
 
-extern void *sdfCreateResetPacketList(void);
+extern s32 sdfCreateResetPacketList(void);
 
 extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
 

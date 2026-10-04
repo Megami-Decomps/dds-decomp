@@ -46,7 +46,7 @@ extern s64 evtGetObjectTransitionWork(u64);
 
 extern s32 datGameState;
 
-extern u64 sdfAllocPacketAligned(u64);
+extern s32 sdfAllocPacketAligned(s32 size);
 extern u32 fldDeferredCommandParameter;
 extern s32 D_003BAB08;
 extern s32 D_003BAB0C;
@@ -156,8 +156,8 @@ void fldSetPacketArgumentPair(u32 *packet, u32 first, u32 second) {
     packet[5] = second;
 }
 
-u64 sdfCreateResetPacketList(void) {
-    u64 packet;
+s32 sdfCreateResetPacketList(void) {
+    s32 packet;
 
     packet = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);

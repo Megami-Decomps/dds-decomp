@@ -580,6 +580,8 @@ s32 btlIndexListMatchesEntryCodes(void *indexList, s32 entryCode, u32 allowedCod
     return matchedCount == entryCount;
 }
 
+/* Reject expired positive or negative codes according to the command's rule.
+ * A returned code value of zero is not rejected; other expiry rules pass. */
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6738);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6758);
@@ -602,8 +604,6 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6838);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6848);
 
-/* Reject expired positive or negative codes according to the command's rule.
- * A returned code value of zero is not rejected; other expiry rules pass. */
 s32 btlIndexListNoExpiredEntryCodes(void *indexList, s32 commandId) {
     s32 entryCodes[BTL_ENTRY_CODE_COUNT] = {0, 1, 2, 3, 4};
     s32 entryCount = btlGetIndexListCount(indexList);
@@ -924,9 +924,9 @@ void btlReleaseAllModelEntries(void) {
     }
 }
 
+/* Format the model path into the caller's buffer; nonzero selects devil data. */
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A68F8);
 
-/* Format the model path into the caller's buffer; nonzero selects devil data. */
 void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *pathOut) {
     if (isDevil == 0) {
         func_003014F0(pathOut, "%spc%03X_ms.LB", "/model/human/", modelId);
@@ -1160,7 +1160,7 @@ typedef struct BattleGraphicsCallback {
 
 extern BattleGraphicsCallback D_00325708;
 
-extern u32 sdfCreateResetPacketList(void);
+extern s32 sdfCreateResetPacketList(void);
 
 extern void func_00212998(u32, u32, u32, u32, u32, s32);
 
@@ -1254,6 +1254,7 @@ void btlInitializeGraphicsRuntime(void) {
 extern void sdfCreateDescriptorPacket(void *, s32, s32, s32, s32, s32, void *, s32);
 
 extern void sdfQueueNonzeroResourceId(void *);
+
 
 extern u8 *kwlnHeldTextureReference;
 

@@ -138,7 +138,7 @@ extern void *sdfAllocSizeClassBlock(s32);
 extern void *func_00102BC8(void *task);
 extern void dds3AdminReleaseTaskWork(void);
 extern char dds3AdminTaskName[];
-extern u64 sdfCreateResetPacketList(void);
+extern s32 sdfCreateResetPacketList(void);
 extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 D_0043DDA0[];
 extern u16 kwlnBackgroundFadeCounter;
@@ -925,8 +925,8 @@ void kwlnCancelConfiguredFadeFrames(void) {
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_001057B0);
 
 /* Append the selected state's packet for the current draw buffer to a new list. */
-u64 evtBuildFrameStatePacketList(s32 stateIndex) {
-    u64 packetList = sdfCreateResetPacketList();
+s32 evtBuildFrameStatePacketList(s32 stateIndex) {
+    s32 packetList = sdfCreateResetPacketList();
 
     sdfAppendPacket(packetList, D_0043DDA0 + stateIndex * KWLN_FRAME_STATE_BYTES + kwlnGetDrawBufferIndex() * KWLN_FRAME_BUFFER_BYTES);
     return packetList;
