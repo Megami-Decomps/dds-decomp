@@ -3,7 +3,10 @@
 /* Draw payload shared with effBlur_Filter. Angle/displacement offset texture
    sampling around the rectangle; blendControl is the GS ALPHA_1 word. */
 typedef struct {
-    u32 color;
+    union {
+        u32 color;
+        u8 colorChannels[4];
+    };
     s32 blendControl;
     f32 angle;
     f32 displacement;
@@ -14,6 +17,25 @@ typedef struct {
     s32 right;  /* 0x20 */
     s32 bottom; /* 0x24 */
 } EffBlurQuad; /* 0x28 */
+
+typedef struct EffBlurDrawVertex {
+    f32 u;
+    f32 v;
+    u8 pad08[8];
+    s32 x;
+    s32 y;
+    u32 unk18;
+    u16 unk1C;
+    u16 pad1E;
+} EffBlurDrawVertex;
+
+typedef struct EffBlurDrawData {
+    u32 color[4];
+    EffBlurDrawVertex vertices[4];
+} EffBlurDrawData;
+
+extern f32 sdfSinPoly(f32);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 typedef struct {
     u32 color;
@@ -125,12 +147,68 @@ extern void sdfAppendDmaPrimary(void *, const void *, void *);
 extern void *effCreateSizedDrawPacket();
 extern u64 *effBuildDrawPacketWithFlags(u32 flags);
 extern void *billGetWorkTransformMatrix();
-extern void effBlurBuildSamplingQuad();
 extern void sdfAppendPacket();
 
 INCLUDE_ASM(const s32, "game/code_001873E0", func_00187598);
 
-INCLUDE_ASM(const s32, "game/code_001873E0", effBlurBuildSamplingQuad);
+void effBlurBuildSamplingQuad(source, data, fixedPoint)
+    EffBlurQuad *source;
+    EffBlurDrawData *data;
+    u8 fixedPoint;
+{
+    f32 phase = source->angle * 0.017453292519943295f;
+    f32 amplitude = source->displacement;
+    f32 dx = sdfSinPoly(phase) * amplitude;
+    f32 dy = sdfEvaluateCosineViaSinePhaseShift(phase) * amplitude;
+
+    data->color[0] = source->colorChannels[0];
+    data->color[1] = source->colorChannels[1];
+    data->color[2] = source->colorChannels[2];
+    data->color[3] = source->colorChannels[3];
+    if (fixedPoint == 0) {
+        data->vertices[0].x = (source->left << 4) + 0x7000;
+        data->vertices[0].y = (source->top << 3) + 0x7900;
+        data->vertices[1].x = data->vertices[0].x;
+        data->vertices[1].y = (source->bottom << 3) + 0x7900;
+        data->vertices[2].x = (source->right << 4) + 0x7000;
+        data->vertices[2].y = data->vertices[0].y;
+        data->vertices[3].x = data->vertices[2].x;
+        data->vertices[3].y = data->vertices[1].y;
+        data->vertices[0].u = (source->left + dx) * 0.001953125f;
+        data->vertices[0].v = (source->top + dy) * 0.001953125f;
+        data->vertices[1].u = data->vertices[0].u;
+        data->vertices[1].v = (source->bottom + dy) * 0.001953125f;
+        data->vertices[2].u = (source->right + dx) * 0.001953125f;
+        data->vertices[2].v = data->vertices[0].v;
+        data->vertices[3].u = data->vertices[2].u;
+        data->vertices[3].v = data->vertices[1].v;
+    } else {
+        data->vertices[0].x = source->left + 0x7000;
+        data->vertices[0].y = source->top + 0x7900;
+        data->vertices[1].x = data->vertices[0].x;
+        data->vertices[1].y = source->bottom + 0x7900;
+        data->vertices[2].x = source->right + 0x7000;
+        data->vertices[2].y = data->vertices[0].y;
+        data->vertices[3].x = data->vertices[2].x;
+        data->vertices[3].y = data->vertices[1].y;
+        data->vertices[0].u = (source->left + dx) * 0.0001220703125f;
+        data->vertices[0].v = (source->top + dy) * 0.000244140625f;
+        data->vertices[1].u = data->vertices[0].u;
+        data->vertices[1].v = (source->bottom + dy) * 0.000244140625f;
+        data->vertices[2].u = (source->right + dx) * 0.0001220703125f;
+        data->vertices[2].v = data->vertices[0].v;
+        data->vertices[3].u = data->vertices[2].u;
+        data->vertices[3].v = data->vertices[1].v;
+    }
+    data->vertices[0].unk18 = 0;
+    data->vertices[0].unk1C = 0;
+    data->vertices[1].unk18 = 0;
+    data->vertices[1].unk1C = 0;
+    data->vertices[2].unk18 = 0;
+    data->vertices[2].unk1C = 0;
+    data->vertices[3].unk18 = 0;
+    data->vertices[3].unk1C = 0;
+}
 
 /* Submit a frame-buffer quad with sampling, texture-alpha, blend and clamp packets. */
 void effBlurDrawFramebufferQuad(EffBlurQuad *source)
