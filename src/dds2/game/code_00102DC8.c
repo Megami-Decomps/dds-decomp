@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "pcp_vu0.h"
 
 typedef struct KwlnResourceNode {
     s32 unk0;
@@ -36,7 +37,7 @@ extern u16 kwlnFadeDuration;
 
 extern s16 D_00435CEA;
 
-extern s16 D_00435CEC;
+extern u16 D_00435CEC;
 
 extern u16 D_00435CEE;
 
@@ -877,7 +878,58 @@ s32 kwlnTextureGetHeldReference(void) {
     return kwlnHeldTextureReference;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105550);
+extern f32 D_0037F590[];
+extern f32 D_00435D10[];
+extern f32 effMiscRandUnitFloat(void *stream);
+extern f32 fabsf(f32 value);
+
+/* Advance the two bounded shake offsets and taper finite-duration amplitudes. */
+void func_00105550(void) {
+    f32 limits[2];
+    f32 weights[2];
+    s32 axis;
+
+    memcpy(weights, D_00435D10, sizeof(weights));
+    if (D_00435CE8 == 0) {
+        VU0_MOVE_VF(vf10, vf0);
+        VU0_CLEAR_W(vf10);
+        return;
+    }
+    if (D_00435CEA == 0) {
+        D_00435CE8 = 0;
+        return;
+    }
+    limits[0] = D_00435CEC * 0.01f;
+    limits[1] = D_00435CEE * 0.01f;
+    for (axis = 0; axis < 2; axis++) {
+        if (limits[axis] != 0.0f) {
+            f32 step = effMiscRandUnitFloat(0) * limits[axis] * 0.5f + limits[axis] * 0.5f;
+
+            if (limits[axis] * weights[axis] <= fabsf(D_0037F590[axis])) {
+                if (D_0037F590[axis] <= 0.0f) {
+                    D_0037F590[axis] += step;
+                } else {
+                    D_0037F590[axis] -= step;
+                }
+            } else {
+                D_0037F590[axis] += 2.0f * (step * (effMiscRandUnitFloat(0) - 0.5f));
+            }
+            if (D_0037F590[axis] < -limits[axis]) {
+                D_0037F590[axis] = -limits[axis];
+            }
+            if (limits[axis] < D_0037F590[axis]) {
+                D_0037F590[axis] = limits[axis];
+            }
+        }
+    }
+    if (D_00435CEA > 0) {
+        s32 divisor = D_00435CEA + 5;
+
+        D_00435CEC -= D_00435CEC / divisor;
+        D_00435CEE -= D_00435CEE / divisor;
+        D_00435CEA--;
+    }
+}
 
 #define KWLN_FADE_TICKS_PER_FRAME 10
 #define KWLN_FADE_MARK_NUMERATOR 4

@@ -1163,7 +1163,81 @@ s32 evtTestSolarPhaseOrModelFlag(u32 flags) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011C790);
+/* Four conditional encounter groups follow the record's condition header. */
+typedef struct BattleAdjustmentEntry {
+    u16 sceneIndex;
+    u16 weight;
+    s8 value;
+    u8 unk05;
+} BattleAdjustmentEntry;
+
+typedef struct BattleAdjustmentGroup {
+    s32 interval;
+    BattleAdjustmentEntry entries[20];
+} BattleAdjustmentGroup;
+
+typedef struct BattleAdjustmentRecord {
+    u8 pad00[8];
+    u32 conditions[3];
+    u8 variantCodes[8];
+    BattleAdjustmentGroup groups[4];
+} BattleAdjustmentRecord;
+
+extern BattleAdjustmentRecord *D_003BAA3C;
+
+u8 func_0011C790(s32 index) {
+    s8 enabled[3];
+    s32 i;
+    u8 code;
+
+    for (i = 0; i < 3; i++) {
+        enabled[i] = evtTestSolarPhaseOrModelFlag(D_003BAA3C[index].conditions[i]);
+    }
+    code = D_003BAA3C[index].variantCodes[0];
+    if (enabled[0] && enabled[1] && enabled[2]) {
+        if (code != 8) {
+            return code;
+        }
+    }
+    code = D_003BAA3C[index].variantCodes[1];
+    if (enabled[0] && enabled[1]) {
+        if (code != 8) {
+            return code;
+        }
+    }
+    code = D_003BAA3C[index].variantCodes[2];
+    if (enabled[0] && enabled[2]) {
+        if (code != 8) {
+            return code;
+        }
+    }
+    code = D_003BAA3C[index].variantCodes[3];
+    if (enabled[1] && enabled[2]) {
+        if (code != 8) {
+            return code;
+        }
+    }
+    code = D_003BAA3C[index].variantCodes[4];
+    if (enabled[0]) {
+        if (code != 8) {
+            return code;
+        }
+    }
+    code = D_003BAA3C[index].variantCodes[5];
+    if (enabled[1]) {
+        if (code != 8) {
+            return code;
+        }
+    }
+    code = D_003BAA3C[index].variantCodes[6];
+    if (enabled[2]) {
+        if (code != 8) {
+            return code;
+        }
+    }
+    code = D_003BAA3C[index].variantCodes[7];
+    return code == 8 ? 0 : code;
+}
 
 /* Compare truncated averages: enemy average + party average / 4 >= party average.
  * Requires a nonzero scene, a nonempty enemy list, and party entries carrying

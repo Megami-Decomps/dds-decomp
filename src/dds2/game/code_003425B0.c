@@ -1177,24 +1177,7 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
     }
 }
 
-void func_00344D60(SdfStreamFrameNode *stream) {
-    if (stream->active == 0) {
-        D_00439208 = stream;
-        *(vu32 *)SDF_IPU_INPUT_DMA_TAG_ADDRESS = stream->unk4C & SDF_EE_PHYSICAL_MASK;
-        *(vu32 *)SDF_IPU_INPUT_DMA_QWC = 0;
-        *(vu32 *)SDF_IPU_INPUT_DMA_CTRL = SDF_IPU_DMA_CHAIN_START;
-        stream->pad12 = 0;
-    } else if (stream->filledSlots == 0) {
-        stream->pad12 = 1;
-    } else {
-        D_00439208 = stream;
-        stream->pad64 = 1;
-        *(vu32 *)SDF_IPU_INPUT_DMA_ADDRESS = (stream->scratchBuffer + (stream->firstSlot << SDF_STREAM_SLOT_SHIFT)) & SDF_EE_PHYSICAL_MASK;
-        *(vu32 *)SDF_IPU_INPUT_DMA_QWC = SDF_STREAM_SLOT_BYTES / SDF_STREAM_QWORD_BYTES;
-        *(vu32 *)SDF_IPU_INPUT_DMA_CTRL = SDF_IPU_DMA_NORMAL_START;
-        *(volatile u8 *)&stream->pad12 = 0;
-    }
-}
+INCLUDE_ASM(const s32, "game/code_003425B0", func_00344D60);
 
 /* Start DMA from the IPU into the selected buffer, then toggle the byte index. */
 void sdfSoundQueueIpuBuffer(SdfStreamFrameNode *stream) {
