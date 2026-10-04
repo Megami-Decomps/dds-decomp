@@ -733,7 +733,10 @@ typedef struct SoundCursor {
     s16 frame;
     s16 mode;
     s16 index;
-    u16 unk_08;
+    union {
+        u16 unk_08;
+        s8 category;
+    };
     s16 unk_0A;
     s16 unk_0C;
     u16 unk_0E;
@@ -7024,7 +7027,53 @@ void func_001E6260(ActionUnit *action, s32 state) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001E6368);
+typedef struct BtlCursorPartyEntry {
+    u16 flags;
+    u8 pad02[0x1A2];
+} BtlCursorPartyEntry;
+
+typedef struct BtlCursorGameState {
+    u8 pad0000[0xA60];
+    BtlCursorPartyEntry party[5];
+    u8 pad1294[8];
+    s32 partyCount;
+} BtlCursorGameState;
+
+extern u8 *datGameState;
+extern u32 btlNextScaledRandom(u32);
+extern void func_001E6BB0(s32, s32, s32, s32);
+extern void func_001E6668(s32, s32, s32, s32);
+extern s16 D_0035D810[];
+extern s16 D_0035D7F0[];
+
+typedef struct BtlCursorChoices {
+    u16 values[3][3][8];
+} BtlCursorChoices;
+
+extern const BtlCursorChoices D_003A4668;
+
+void func_001E6368(ActionUnit *action, s32 state) {
+    BtlCursorChoices choices = D_003A4668;
+    BtlCursorGameState *game;
+    s16 markedCount = 0;
+    s16 i;
+    s16 random;
+
+    memset(CURSOR, 0, 0x130);
+    CURSOR->mode = 0;
+    game = (BtlCursorGameState *)datGameState;
+    for (i = 0; i < game->partyCount; i++) {
+        if (game->party[i].flags & 2) {
+            markedCount++;
+        }
+    }
+
+    CURSOR->category = action->link->unit->lookupId;
+    random = btlNextScaledRandom(8);
+    CURSOR->index = choices.values[markedCount][CURSOR->category - 3][random];
+    func_001E6BB0((s32)action, state, 0, D_0035D810[CURSOR->index]);
+    func_001E6668((s32)action, state, 0, D_0035D7F0[CURSOR->index]);
+}
 
 
 void btlAdvanceCommandCursor(s32 arg0, s32 arg1) {
