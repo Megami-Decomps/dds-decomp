@@ -1,6 +1,33 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
+/* One allocated 0xCC-byte command panel, not a header plus overlapping rows.
+ * Rows begin at +0x14/+0x64; the class Y coordinate occupies +0x10. */
+typedef struct BattleCmdPanelSlot {
+    s8 hidden; /* Nonzero grid entries are omitted by the row renderer. */
+    u8 unk01; /* Initialized to 0/1 by bank; no consumer read established. */
+    s16 fadeValue; /* Signed narrow ramp; rendering uses its low color byte. */
+    u8 pad04[4];
+    s32 x;
+    s32 y;
+} BattleCmdPanelSlot;
+
+typedef struct BattleCmdPanel {
+    s8 state;
+    s8 classIndex;
+    u16 labelEntry;
+    s16 labelFade;
+    s16 classFade;
+    u8 pad08[4];
+    u32 classX;
+    u32 classY;
+    BattleCmdPanelSlot slotsA[5];
+    BattleCmdPanelSlot slotsB[5];
+    s16 cornerFade[4]; /* Four low-byte color levels used by the backdrop. */
+    u32 cornerPhase[4]; /* Advanced by 8 modulo 360 before the sine pulse. */
+} BattleCmdPanel;
+
+
 typedef struct ActorEntrySlot {
     s16 code;
     s16 unk02;
@@ -233,7 +260,7 @@ extern s64 kwlnTaskIsRegistered(s64);
 
 extern s32 btlGetTrackedTaskHandle(s32);
 
-extern u32 btlCommandPanelWork;
+extern BattleCmdPanel *btlCommandPanelWork;
 
 extern s32 func_001A8DD8(s32, s32 *);
 
@@ -2020,7 +2047,7 @@ s32 btlHasHighPriorityState(void) {
     u8 *resource;
     s8 index;
     s32 count;
-    if (*(s8 *)btlCommandPanelWork == 2) {
+    if (btlCommandPanelWork->state == 2) {
         resource = (u8 *)btlLinkedSelectionTaskBuffer;
         index = *(s8 *)resource;
         count = *(s16 *)(resource + index * 2);
@@ -2046,26 +2073,6 @@ s32 btlCountFlaggedSceneActors(void) {
     return count;
 }
 
-typedef struct BattleCmdPanelSlot {
-    u8 pad_00[5];
-    u8 flag;
-    u16 value;
-    u8 pad_08[8];
-} BattleCmdPanelSlot;
-
-typedef struct BattleCmdPanelHead {
-    u8 kind;
-    s8 index;
-    u16 mask;
-    u8 pad_04[8];
-    u32 first;
-} BattleCmdPanelHead;
-
-typedef struct BattleCmdPanel {
-    BattleCmdPanelHead head;
-    BattleCmdPanelSlot slotsA[5];
-    BattleCmdPanelSlot slotsB[5];
-} BattleCmdPanel;
 
 typedef struct BattleCmdPanelSlotTable {
     u32 values[5];
@@ -2080,18 +2087,18 @@ void btlInitializeCommandPanelSlotTables(void) {
     BattleCmdPanelSlotTable tableB = D_003A1FC0;
     s32 i;
 
-    btlCommandPanelWork = (u32)sdfAllocAndClearQuadwords(0xCC);
-    ((BattleCmdPanelHead *)btlCommandPanelWork)->kind = 1;
-    ((BattleCmdPanelHead *)btlCommandPanelWork)->index = 0;
-    ((BattleCmdPanelHead *)btlCommandPanelWork)->mask = btlGetActorIdForClass(((BattleCmdPanelHead *)btlCommandPanelWork)->index);
-    btlGetActorClassPair(((BattleCmdPanelHead *)btlCommandPanelWork)->index,
-                  &((BattleCmdPanelHead *)btlCommandPanelWork)->first,
-                  (u32 *)(btlCommandPanelWork + 0x10));
+    btlCommandPanelWork = sdfAllocAndClearQuadwords(0xCC);
+    btlCommandPanelWork->state = 1;
+    btlCommandPanelWork->classIndex = 0;
+    btlCommandPanelWork->labelEntry = btlGetActorIdForClass(btlCommandPanelWork->classIndex);
+    btlGetActorClassPair(btlCommandPanelWork->classIndex,
+                  &btlCommandPanelWork->classX,
+                  &btlCommandPanelWork->classY);
     for (i = 0; i < 5; i++) {
-        ((BattleCmdPanel *)btlCommandPanelWork)->slotsA[i].flag = 0;
-        ((BattleCmdPanel *)btlCommandPanelWork)->slotsA[i].value = tableB.values[i];
-        ((BattleCmdPanel *)btlCommandPanelWork)->slotsB[i].flag = 1;
-        ((BattleCmdPanel *)btlCommandPanelWork)->slotsB[i].value = tableA.values[i];
+        btlCommandPanelWork->slotsA[i].unk01 = 0;
+        btlCommandPanelWork->slotsA[i].fadeValue = tableB.values[i];
+        btlCommandPanelWork->slotsB[i].unk01 = 1;
+        btlCommandPanelWork->slotsB[i].fadeValue = tableA.values[i];
     }
 }
 
@@ -2120,7 +2127,6 @@ void btlGetActorClassPair(s8 classId, u32 *first, u32 *second) {
 
 extern SndPad D_00324510;
 
-extern u32 btlCommandPanelWork;
 
 extern u32 btlLinkedSelectionTaskBuffer;
 
@@ -2154,14 +2160,60 @@ void btlPopulateCommandPanelGrid(void) {
     s32 i;
 
     for (i = 0; i < 5; i++) {
-        *(u8 *)(btlCommandPanelWork + 0x14 + i * 0x10) =
-            table1.values[*(s8 *)(btlCommandPanelWork + 1) * 5 + i];
-        *(u8 *)(btlCommandPanelWork + 0x64 + i * 0x10) =
-            table2.values[*(s8 *)(btlCommandPanelWork + 1) * 5 + i];
+        btlCommandPanelWork->slotsA[i].hidden =
+            table1.values[btlCommandPanelWork->classIndex * 5 + i];
+        btlCommandPanelWork->slotsB[i].hidden =
+            table2.values[btlCommandPanelWork->classIndex * 5 + i];
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AB270);
+/* Ramp both five-row banks by panel state; narrow each update before clamping. */
+void func_001AB270(void) {
+    s32 i;
+
+    switch (btlCommandPanelWork->state) {
+    case 1:
+        for (i = 0; i < 5; i++) {
+            btlCommandPanelWork->slotsA[i].fadeValue += 0x10;
+            btlCommandPanelWork->slotsA[i].fadeValue = btlCommandPanelWork->slotsA[i].fadeValue <= 0 ? 0 :
+                btlCommandPanelWork->slotsA[i].fadeValue > 0xF0 ? 0xF0 : btlCommandPanelWork->slotsA[i].fadeValue;
+            btlCommandPanelWork->slotsB[i].fadeValue += 0x10;
+            btlCommandPanelWork->slotsB[i].fadeValue = btlCommandPanelWork->slotsB[i].fadeValue <= 0 ? 0 :
+                btlCommandPanelWork->slotsB[i].fadeValue > 0xF0 ? 0xF0 : btlCommandPanelWork->slotsB[i].fadeValue;
+        }
+        break;
+    case 2:
+        for (i = 0; i < 5; i++) {
+            btlCommandPanelWork->slotsA[i].fadeValue -= 0x10;
+            btlCommandPanelWork->slotsA[i].fadeValue = btlCommandPanelWork->slotsA[i].fadeValue <= 0x80 ? 0x80 :
+                btlCommandPanelWork->slotsA[i].fadeValue > 0xF0 ? 0xF0 : btlCommandPanelWork->slotsA[i].fadeValue;
+            btlCommandPanelWork->slotsB[i].fadeValue -= 0x10;
+            btlCommandPanelWork->slotsB[i].fadeValue = btlCommandPanelWork->slotsB[i].fadeValue <= 0x80 ? 0x80 :
+                btlCommandPanelWork->slotsB[i].fadeValue > 0xF0 ? 0xF0 : btlCommandPanelWork->slotsB[i].fadeValue;
+        }
+        break;
+    case 3:
+        for (i = 0; i < 5; i++) {
+            btlCommandPanelWork->slotsA[i].fadeValue -= 0x10;
+            btlCommandPanelWork->slotsA[i].fadeValue = btlCommandPanelWork->slotsA[i].fadeValue <= 0 ? 0 :
+                btlCommandPanelWork->slotsA[i].fadeValue > 0x80 ? 0x80 : btlCommandPanelWork->slotsA[i].fadeValue;
+            btlCommandPanelWork->slotsB[i].fadeValue -= 0x10;
+            btlCommandPanelWork->slotsB[i].fadeValue = btlCommandPanelWork->slotsB[i].fadeValue <= 0 ? 0 :
+                btlCommandPanelWork->slotsB[i].fadeValue > 0x80 ? 0x80 : btlCommandPanelWork->slotsB[i].fadeValue;
+        }
+        break;
+    case 4:
+        for (i = 0; i < 5; i++) {
+            btlCommandPanelWork->slotsA[i].fadeValue -= *(u16 *)(btlTrackedTaskHandles + 0x3E);
+            btlCommandPanelWork->slotsA[i].fadeValue = btlCommandPanelWork->slotsA[i].fadeValue <= 0 ? 0 :
+                btlCommandPanelWork->slotsA[i].fadeValue > 0x80 ? 0x80 : btlCommandPanelWork->slotsA[i].fadeValue;
+            btlCommandPanelWork->slotsB[i].fadeValue -= *(u16 *)(btlTrackedTaskHandles + 0x3E);
+            btlCommandPanelWork->slotsB[i].fadeValue = btlCommandPanelWork->slotsB[i].fadeValue <= 0 ? 0 :
+                btlCommandPanelWork->slotsB[i].fadeValue > 0x80 ? 0x80 : btlCommandPanelWork->slotsB[i].fadeValue;
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AB558);
 
@@ -2533,7 +2585,7 @@ void btlSetTaskPhase5(void) {
     s64 task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     if (task != 0) {
         ((BtlPhaseTask *)kwlnTaskGetUserValue(task))->phase = 5;
-        *(u8 *)btlCommandPanelWork = 3;
+        btlCommandPanelWork->state = 3;
     }
 }
 
@@ -3661,7 +3713,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BD750);
 extern void btlDrawRetreatCommandLabel(s32);
 
 void fldDispatchSceneKindHandler(s32 arg0) {
-    switch (func_001BD0D0(arg0, *(s8 *)(btlCommandPanelWork + 1))) {
+    switch (func_001BD0D0(arg0, btlCommandPanelWork->classIndex)) {
     case 0:
         func_001BDF60(arg0, 0, 2, 3);
         return;
@@ -3760,9 +3812,9 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BF4C0);
 void fldSetSceneObjectAndGroupStates(void) {
     s32 *task = (s32 *)fldGetSceneObjectTaskUserData();
     if (task != 0) {
-        u8 *state = (u8 *)btlCommandPanelWork;
+        BattleCmdPanel *panel = btlCommandPanelWork;
         *task = 5;
-        *state = 3;
+        panel->state = 3;
     }
 }
 

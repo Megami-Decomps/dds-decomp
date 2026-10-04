@@ -2,6 +2,33 @@
 #include "itf.h"
 #include "btl_state.h"
 
+/* One allocated 0xCC-byte command panel, not a header plus overlapping rows.
+ * Rows begin at +0x14/+0x64; the class Y coordinate occupies +0x10. */
+typedef struct BattleCmdPanelSlot {
+    s8 hidden; /* Nonzero grid entries are omitted by the row renderer. */
+    u8 unk01; /* Initialized to 0/1 by bank; no consumer read established. */
+    s16 fadeValue; /* Signed narrow ramp; rendering uses its low color byte. */
+    u8 pad04[4];
+    s32 x;
+    s32 y;
+} BattleCmdPanelSlot;
+
+typedef struct BattleCmdPanel {
+    s8 state;
+    s8 classIndex;
+    u16 labelEntry;
+    s16 labelFade;
+    s16 classFade;
+    u8 pad08[4];
+    u32 classX;
+    u32 classY;
+    BattleCmdPanelSlot slotsA[5];
+    BattleCmdPanelSlot slotsB[5];
+    s16 cornerFade[4]; /* Four low-byte color levels used by the backdrop. */
+    u32 cornerPhase[4]; /* Advanced by 8 modulo 360 before the sine pulse. */
+} BattleCmdPanel;
+
+
 extern s32 func_001ABB10(BtlUnit *, s32);
 
 typedef struct UiQuadColor {
@@ -47,7 +74,7 @@ extern s32 datItemSkillRecords;
 
 extern s32 btlGetRuntime(void);
 
-extern u8 *btlCommandPanelWork;
+extern BattleCmdPanel *btlCommandPanelWork;
 
 extern s32 datGameState;
 
@@ -3503,7 +3530,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5688);
 s32 btlHasHighPriorityState(void) {
     u8 *table;
     s32 index;
-    if (*(s8 *)btlCommandPanelWork == 2) {
+    if (btlCommandPanelWork->state == 2) {
         table = (u8 *)btlLinkedSelectionTaskBuffer;
         index = *(s8 *)table;
         if (*(s16 *)(table + index * 2) >= 0x80) {
@@ -3529,26 +3556,6 @@ s32 btlCountFlaggedSceneActors(void) {
     return count;
 }
 
-typedef struct BattleCmdPanelSlot {
-    u8 pad_00[5];
-    u8 flag;
-    u16 value;
-    u8 pad_08[8];
-} BattleCmdPanelSlot;
-
-typedef struct BattleCmdPanelHead {
-    u8 kind;
-    s8 index;
-    u16 mask;
-    u8 pad_04[8];
-    u32 first;
-} BattleCmdPanelHead;
-
-typedef struct BattleCmdPanel {
-    BattleCmdPanelHead head;
-    BattleCmdPanelSlot slotsA[5];
-    BattleCmdPanelSlot slotsB[5];
-} BattleCmdPanel;
 
 extern void *sdfAllocAndClearQuadwords(s32);
 extern s16 btlGetActorIdForClass(s8);
@@ -3560,18 +3567,18 @@ void btlInitializeCommandPanelSlotTables(void) {
     s32 i;
 
     btlCommandPanelWork = sdfAllocAndClearQuadwords(0xCC);
-    ((BattleCmdPanelHead *)btlCommandPanelWork)->kind = 1;
-    ((BattleCmdPanelHead *)btlCommandPanelWork)->index = 0;
-    ((BattleCmdPanelHead *)btlCommandPanelWork)->mask =
-        btlGetActorIdForClass(((BattleCmdPanelHead *)btlCommandPanelWork)->index);
-    btlGetActorClassPair(((BattleCmdPanelHead *)btlCommandPanelWork)->index,
-                         &((BattleCmdPanelHead *)btlCommandPanelWork)->first,
-                         (u32 *)(btlCommandPanelWork + 0x10));
+    btlCommandPanelWork->state = 1;
+    btlCommandPanelWork->classIndex = 0;
+    btlCommandPanelWork->labelEntry =
+        btlGetActorIdForClass(btlCommandPanelWork->classIndex);
+    btlGetActorClassPair(btlCommandPanelWork->classIndex,
+                         &btlCommandPanelWork->classX,
+                         &btlCommandPanelWork->classY);
     for (i = 0; i < 5; i++) {
-        ((BattleCmdPanel *)btlCommandPanelWork)->slotsA[i].flag = 0;
-        ((BattleCmdPanel *)btlCommandPanelWork)->slotsA[i].value = tableB[i];
-        ((BattleCmdPanel *)btlCommandPanelWork)->slotsB[i].flag = 1;
-        ((BattleCmdPanel *)btlCommandPanelWork)->slotsB[i].value = tableA[i];
+        btlCommandPanelWork->slotsA[i].unk01 = 0;
+        btlCommandPanelWork->slotsA[i].fadeValue = tableB[i];
+        btlCommandPanelWork->slotsB[i].unk01 = 1;
+        btlCommandPanelWork->slotsB[i].fadeValue = tableA[i];
     }
 }
 
@@ -3601,15 +3608,61 @@ void btlPopulateCommandPanelGrid(void) {
     s32 i;
 
     for (i = 0; i < 5; i++) {
-        *(u8 *)(btlCommandPanelWork + 0x14 + i * 0x10) =
-            table1.values[*(s8 *)(btlCommandPanelWork + 1) * 5 + i];
-        *(u8 *)(btlCommandPanelWork + 0x64 + i * 0x10) =
-            table2.values[*(s8 *)(btlCommandPanelWork + 1) * 5 + i];
+        btlCommandPanelWork->slotsA[i].hidden =
+            table1.values[btlCommandPanelWork->classIndex * 5 + i];
+        btlCommandPanelWork->slotsB[i].hidden =
+            table2.values[btlCommandPanelWork->classIndex * 5 + i];
     }
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5E98);
+/* Ramp both five-row banks by panel state; narrow each update before clamping. */
+void func_001B5E98(void) {
+    s32 i;
+
+    switch (btlCommandPanelWork->state) {
+    case 1:
+        for (i = 0; i < 5; i++) {
+            btlCommandPanelWork->slotsA[i].fadeValue += 0x10;
+            btlCommandPanelWork->slotsA[i].fadeValue = btlCommandPanelWork->slotsA[i].fadeValue <= 0 ? 0 :
+                btlCommandPanelWork->slotsA[i].fadeValue > 0xF0 ? 0xF0 : btlCommandPanelWork->slotsA[i].fadeValue;
+            btlCommandPanelWork->slotsB[i].fadeValue += 0x10;
+            btlCommandPanelWork->slotsB[i].fadeValue = btlCommandPanelWork->slotsB[i].fadeValue <= 0 ? 0 :
+                btlCommandPanelWork->slotsB[i].fadeValue > 0xF0 ? 0xF0 : btlCommandPanelWork->slotsB[i].fadeValue;
+        }
+        break;
+    case 2:
+        for (i = 0; i < 5; i++) {
+            btlCommandPanelWork->slotsA[i].fadeValue -= 0x10;
+            btlCommandPanelWork->slotsA[i].fadeValue = btlCommandPanelWork->slotsA[i].fadeValue <= 0x80 ? 0x80 :
+                btlCommandPanelWork->slotsA[i].fadeValue > 0xF0 ? 0xF0 : btlCommandPanelWork->slotsA[i].fadeValue;
+            btlCommandPanelWork->slotsB[i].fadeValue -= 0x10;
+            btlCommandPanelWork->slotsB[i].fadeValue = btlCommandPanelWork->slotsB[i].fadeValue <= 0x80 ? 0x80 :
+                btlCommandPanelWork->slotsB[i].fadeValue > 0xF0 ? 0xF0 : btlCommandPanelWork->slotsB[i].fadeValue;
+        }
+        break;
+    case 3:
+        for (i = 0; i < 5; i++) {
+            btlCommandPanelWork->slotsA[i].fadeValue -= 0x10;
+            btlCommandPanelWork->slotsA[i].fadeValue = btlCommandPanelWork->slotsA[i].fadeValue <= 0 ? 0 :
+                btlCommandPanelWork->slotsA[i].fadeValue > 0x80 ? 0x80 : btlCommandPanelWork->slotsA[i].fadeValue;
+            btlCommandPanelWork->slotsB[i].fadeValue -= 0x10;
+            btlCommandPanelWork->slotsB[i].fadeValue = btlCommandPanelWork->slotsB[i].fadeValue <= 0 ? 0 :
+                btlCommandPanelWork->slotsB[i].fadeValue > 0x80 ? 0x80 : btlCommandPanelWork->slotsB[i].fadeValue;
+        }
+        break;
+    case 4:
+        for (i = 0; i < 5; i++) {
+            btlCommandPanelWork->slotsA[i].fadeValue -= *(u16 *)(btlTrackedTaskHandles + 0x3E);
+            btlCommandPanelWork->slotsA[i].fadeValue = btlCommandPanelWork->slotsA[i].fadeValue <= 0 ? 0 :
+                btlCommandPanelWork->slotsA[i].fadeValue > 0x80 ? 0x80 : btlCommandPanelWork->slotsA[i].fadeValue;
+            btlCommandPanelWork->slotsB[i].fadeValue -= *(u16 *)(btlTrackedTaskHandles + 0x3E);
+            btlCommandPanelWork->slotsB[i].fadeValue = btlCommandPanelWork->slotsB[i].fadeValue <= 0 ? 0 :
+                btlCommandPanelWork->slotsB[i].fadeValue > 0x80 ? 0x80 : btlCommandPanelWork->slotsB[i].fadeValue;
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B6180);
 
@@ -3963,7 +4016,7 @@ void btlSetTaskPhase5(void) {
     s64 task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     if (task != 0) {
         ((BtlPhaseTask *)kwlnTaskGetUserValue(task))->phase = 5;
-        *btlCommandPanelWork = 3;
+        btlCommandPanelWork->state = 3;
     }
 }
 
