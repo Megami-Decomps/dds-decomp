@@ -1272,13 +1272,37 @@ u8 btlGetActorDisplayByteWithDefault(s32 object, s32 index) {
     return 12;
 }
 
-extern u8 D_00358490[];
+typedef struct BtlActionDelayRecord {
+    u8 pad00;
+    u8 delayIndex;
+    u8 pad02[0x1E];
+} BtlActionDelayRecord;
+
+extern s32 datActionAnimationRecords;
+extern s32 D_00358490[];
 
 extern char D_003A1A58[]; /* "btl:delay=%d\n" */
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1A40);
+s32 func_001A6AA0(BtlUnit *unit, s32 actionId) {
+    s32 *delayTable;
+    u32 delayIndex;
+    s32 *delay;
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A6AA0);
+    if ((actionId == 0) || (*(s8 *)(datCommandSelectors + actionId * 2 + 1) == 5)) {
+        if (((unit->flags & 0x200) != 0) && (unit->mode == 6)) {
+            return 9;
+        }
+    }
+    if (actionId == 0) {
+        return 1;
+    }
+    delayTable = D_00358490;
+    delayTable++;
+    delayIndex = ((BtlActionDelayRecord *)datActionAnimationRecords)[actionId].delayIndex;
+    delay = delayTable + delayIndex * 2;
+    btlBossDebugPrintf(D_003A1A58, *delay);
+    return *delay;
+}
 
 s32 btlResolveSkillCategory(s32 unused, u32 id) {
     switch (id) {
@@ -1296,6 +1320,10 @@ s32 btlResolveSkillCategory(s32 unused, u32 id) {
         return *(s8 *)(datCommandSelectors + id * 2 + 1) == 2 ? 0x2D : 0;
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1A40);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1A58);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A6BE0);
 
