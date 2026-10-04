@@ -97,13 +97,29 @@ typedef struct EvtRuntimeGroup {
     struct EvtRuntimeGroup *prev; /* 0x80 */
 } EvtRuntimeGroup;
 
+/* The command API stores words; timed-prompt drawing consumes their text pointers. */
+typedef union EvtCommandArgument {
+    s32 word;
+    char *text;
+} EvtCommandArgument;
+
+/* The file header emits this whole word; type-8 spans use its low halfword. */
+typedef union EvtFrameRange {
+    s32 word;
+    struct {
+        u16 end;
+        u16 unk02;
+    } f;
+} EvtFrameRange;
+/* Native viewer runtime: dialogs, task polls and file writers consume this same
+ * record. The recovered extent includes the trailing serialized metadata word. */
 typedef struct EvtRuntime {
     u8 pad0000[4];
     u32 flags; /* 0x04 */
-    s32 windowContext; /* 0x08 */
-    u8 pad000C[8];
-    u16 rangeEnd; /* 0x14: terminal value for the final type-8 serialized span */
-    u8 pad0016[2];
+    struct EvtMessageWindow *windowContext; /* 0x08: message window context */
+    s32 headerThird; /* 0x0C: third emitted header word */
+    s32 headerFirst; /* 0x10: first emitted header word */
+    EvtFrameRange frameRange; /* 0x14: second header word and terminal span value */
     s32 curFrame; /* 0x18 */
     u8 pad001C[0x4];
     s32 entryTotal; /* 0x20 */
@@ -112,9 +128,9 @@ typedef struct EvtRuntime {
     s32 entryCount; /* 0x2030 */
     EvtRuntimeGroup *groups; /* 0x2034 */
     u8 pad2038[0x248];
-    s32 mode; /* 0x2280 */
+    s32 actionMode; /* 0x2280 */
     u8 pad2284[0x8];
-    s32 busy; /* 0x228C */
+    s32 controlState; /* 0x228C */
     u8 pad2290[0x18];
     s32 inputA; /* 0x22A8 */
     s32 groupFirst; /* 0x22AC */
@@ -138,20 +154,20 @@ typedef struct EvtRuntime {
     s32 value; /* 0x2310: modes D/E pack a 12-bit number and 4-bit option */
     s32 valueMin; /* 0x2314 */
     s32 valueMax; /* 0x2318 */
-    f32 fvalue; /* 0x231C */
-    f32 fvalueMin; /* 0x2320 */
-    f32 fvalueMax; /* 0x2324 */
+    f32 floatValue; /* 0x231C */
+    f32 floatMin; /* 0x2320 */
+    f32 floatMax; /* 0x2324 */
     u8 pad2328[0x68];
     s32 messageField;
-    s32 cutSel; /* 0x2394 */
+    s32 compareField; /* 0x2394 */
     s32 fieldIndex; /* 0x2398: selected column of the motion editor row */
     u8 pad239C[0x2C];
     s32 tableColumn; /* 0x23C8: index within selected table row */
     u8 pad23CC[0x14];
-    s32 selected; /* 0x23E0 */
-    s32 frames; /* 0x23E4 */
-    char *text0; /* 0x23E8 */
-    char *text1; /* 0x23EC */
+    s32 selectedEntry; /* 0x23E0 */
+    s32 commandFirst; /* 0x23E4 */
+    EvtCommandArgument commandSecond; /* 0x23E8 */
+    EvtCommandArgument commandThird; /* 0x23EC */
     u8 pad23F0[0x24];
     s32 timedActive; /* 0x2414 */
     u8 pad2418[0x8];
@@ -161,6 +177,8 @@ typedef struct EvtRuntime {
     f32 shadowY; /* 0x2424 */
     s32 pendingWork; /* 0x2428 */
     s32 pendingResource; /* 0x242C */
+    u8 pad2430[0xC];
+    s32 headerMetadata; /* 0x243C: fourth emitted header word */
 } EvtRuntime;
 extern s32 effUpdateCh72Params(void);
 extern s32 effEventAdvanceBlurTemplateSetup(void);
@@ -365,6 +383,8 @@ s32 evtAppendValueChangeDebugLabel(s32 list, s32 x, s32 y) {
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250558);
 
 extern s32 func_00250558(s32, s32, s32, s32, EvtRuntime *);
+/* Edit the bounded float only in mode 8. Confirm precedes cancel; coarse steps
+ * replace fine steps before the value is clamped to the runtime limits. */
 s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     f32 step;
@@ -372,7 +392,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     list = sdfCreateResetPacketList();
     func_00250338(list, x, y, 0x16, 9, 0, 1, ctx, evtAppendValueChangeDebugLabel, func_00250558);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
-    if (ctx->mode != 8) {
+    if (ctx->actionMode != 8) {
         return 0;
     }
     if (D_0037F510.confirm < 0) {
@@ -392,12 +412,12 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     } else if (D_0037F510.incTen & 2) {
         step = 1.0f;
     }
-    ctx->fvalue += step;
-    if (ctx->fvalue < ctx->fvalueMin) {
-        ctx->fvalue = ctx->fvalueMin;
+    ctx->floatValue += step;
+    if (ctx->floatValue < ctx->floatMin) {
+        ctx->floatValue = ctx->floatMin;
     }
-    if (ctx->fvalue >= ctx->fvalueMax) {
-        ctx->fvalue = ctx->fvalueMax;
+    if (ctx->floatValue >= ctx->floatMax) {
+        ctx->floatValue = ctx->floatMax;
     }
     return 0;
 }
@@ -445,7 +465,7 @@ s32 evtUpdateValueChangeDialog(s32 x, s32 y, EvtRuntime *ctx) {
     list = sdfCreateResetPacketList();
     func_00250338(list, x, y, 0x16, 9, 0, 1, ctx, evtDrawValueChangeNoticeRow, evtDrawValueChangeInstructionRow);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
-    if (ctx->mode != 7) {
+    if (ctx->actionMode != 7) {
         return 0;
     }
     if (D_0037F510.confirm < 0) {
@@ -523,7 +543,7 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     list = sdfCreateResetPacketList();
     func_00250338(list, x, y, 0x16, 0xB, 0, 1, ctx, mnuDrawFrameChangeLabel, evtViewerDrawFrameChangeRow);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
-    if (ctx->mode != 6) {
+    if (ctx->actionMode != 6) {
         return 0;
     }
     if (D_0037F510.confirm < 0) {
@@ -579,7 +599,7 @@ s32 mnuDrawInfoWindowA(s32 x, s32 y, EvtRuntime *ctx) {
     list = sdfCreateResetPacketList();
     func_00250338(list, x, y, 0xF, 0xB, 0, 0xB, ctx, NULL, func_00250F20);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
-    if (ctx->mode != 1) {
+    if (ctx->actionMode != 1) {
         return 0;
     }
     return kwlnStepTwoListCursors(0, 1, 0xB, 1, 0xB, 0, 0, 0, &ctx->inputA);
@@ -587,6 +607,7 @@ s32 mnuDrawInfoWindowA(s32 x, s32 y, EvtRuntime *ctx) {
 
 extern char D_004374D0[];
 
+/* Draw the runtime title when present; return two rows used, or zero for no title. */
 s32 evtDrawStringEntry(s32 list, s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->title == NULL) {
         return 0;
@@ -597,12 +618,13 @@ s32 evtDrawStringEntry(s32 list, s32 x, s32 y, EvtRuntime *ctx) {
 
 extern char D_004374D8[]; /* " %s" */
 
+/* Draw an in-range item name, distinguishing selected active and inactive rows. */
 void evtDrawSelectableTextRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     if (index < ctx->itemCount) {
         s32 color;
 
         if (ctx->cursor == index) {
-            if (ctx->mode == 2) {
+            if (ctx->actionMode == 2) {
                 color = 4;
             } else {
                 color = 5;
@@ -616,6 +638,7 @@ void evtDrawSelectableTextRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx
 
 extern s32 strlen(const char *s);
 
+/* Draw a title-sized selection dialog; only action mode 2 advances its cursor. */
 s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     s32 width;
@@ -632,7 +655,7 @@ s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtRuntime *ctx) {
     }
     func_00250338(list, x, y, width, ctx->itemCount + 3, 0, ctx->itemCount, ctx, evtDrawStringEntry, evtDrawSelectableTextRow);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
-    if (ctx->mode != 2) {
+    if (ctx->actionMode != 2) {
         return 0;
     }
     return kwlnStepTwoListCursors(0, 1, ctx->itemCount, 1, ctx->itemCount, 0, 0, 0, &ctx->cursor);
@@ -651,6 +674,8 @@ s32 evtDrawInputValueRow(s32 list, s32 x, s32 y, u8 *ctx) {
 extern s8 D_003C9688[];
 extern char D_004374E8[]; /* "%c" */
 
+/* Draw eleven characters from a twelve-byte keyboard row and highlight the
+ * runtime character selection, using mode 3 for the active color. */
 void evtDrawKeyboardRow(s32 list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
     s32 i;
     s32 color;
@@ -658,7 +683,7 @@ void evtDrawKeyboardRow(s32 list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
     for (i = 0; i < 11; i++) {
         color = 0;
         if (ctx->charRow == row && ctx->charCol == i) {
-            if (ctx->mode == 3) {
+            if (ctx->actionMode == 3) {
                 color = 4;
             } else {
                 color = 5;
@@ -726,7 +751,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
     list = sdfCreateResetPacketList();
     func_00250338(list, x, y, 0x12, 0xB, 0, 8, ctx, evtDrawEventFileNameRow, evtDrawEventCutSelectRow);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
-    if (ctx->mode != 9) {
+    if (ctx->actionMode != 9) {
         return 0;
     }
     if (D_0037F510.decTen < 0) {
@@ -832,7 +857,7 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *ctx) {
     list = sdfCreateResetPacketList();
     func_00250338(list, x, y, 8, 0x1D, ctx->entryFirst, ctx->entryCount, ctx, NULL, func_00251ED0);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
-    if (ctx->mode != 4) {
+    if (ctx->actionMode != 4) {
         return 0;
     }
     count = ctx->entryCount;
@@ -887,7 +912,7 @@ s32 evtDrawFrameListRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
             }
         }
         if (ctx->frameCursor + ctx->frameFirst == index) {
-            if (ctx->mode == 5) {
+            if (ctx->actionMode == 5) {
                 color = 4;
             } else {
                 color = 5;
@@ -989,7 +1014,7 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *ctx) {
     }
     func_00250338(list, x, y, 0x1C, rows, 0, rows, ctx, NULL, evtViewerDrawPendingNodeRow);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
-    if (ctx->mode != 0xC) {
+    if (ctx->actionMode != 0xC) {
         return 0;
     }
     return kwlnStepTwoListCursors(0, 1, rows, 1, rows, 0, 0, 0, &ctx->inputB);
@@ -1003,13 +1028,11 @@ typedef struct EvtMessageWindow {
     s32 entryHandle;
 } EvtMessageWindow;
 
-typedef struct EvtMessageMenuWork {
-    u8 pad00[8];
-    EvtMessageWindow *window;
-} EvtMessageMenuWork;
 
-s32 mnuDrawMessageMenuLabel(s32 list, s32 x, s32 y, EvtMessageMenuWork *ctx) {
-    sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_00423EC0, itfMesGetEntryCount(ctx->window->entryHandle)));
+/* Draw the message count from the runtime window context
+ * and its entry handle, returning two rows used. */
+s32 mnuDrawMessageMenuLabel(s32 list, s32 x, s32 y, EvtRuntime *ctx) {
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_00423EC0, itfMesGetEntryCount(ctx->windowContext->entryHandle)));
     return 2;
 }
 
@@ -1066,9 +1089,9 @@ void evtDrawMessageDataRow(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *ctx) {
             color = 0;
         }
         sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_004374A0, ctx->value & 0xFFF));
-        if (((EvtMessageWindow *)ctx->windowContext)->entryHandle == -1) {
+        if (ctx->windowContext->entryHandle == -1) {
             sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "NONE MESDATA!!"));
-        } else if (itfMesGetWindowEntryItems(((EvtMessageWindow *)ctx->windowContext)->entryHandle, ctx->value & 0xFFF) == 0) {
+        } else if (itfMesGetWindowEntryItems(ctx->windowContext->entryHandle, ctx->value & 0xFFF) == 0) {
             sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "(NORMAL)"));
         } else {
             sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "(BRANCH)"));
@@ -1110,7 +1133,7 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     list = sdfCreateResetPacketList();
     func_00250338(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawMessageMenuLabel, evtDrawMessageDataRow);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
-    if (ctx->mode != 0xD) {
+    if (ctx->actionMode != 0xD) {
         return 0;
     }
     packed = ctx->value;
@@ -1147,7 +1170,7 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         ctx->messageField = !field;
     }
     if (D_0037F510.confirm < 0) {
-        handle = ((EvtMessageWindow *)ctx->windowContext)->entryHandle;
+        handle = ctx->windowContext->entryHandle;
         if (handle != -1) {
             if (branch == 0) {
                 if (itfMesGetWindowEntryItems(handle, number) == 0) {
@@ -1169,6 +1192,8 @@ s32 mnuDrawCutFlagLabel(s32 target, s32 x, s32 y) {
 }
 
 
+/* Draw the packed four-bit option or twelve-bit number and highlight
+ * the selected comparison field; later rows provide input instructions. */
 void evtDrawComparisonValueRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     char *labels[11] = {D_004376C8, D_00423EE0, D_00423EF0, D_00423F00,
         D_00423F10, D_00423F20, D_00423F30, D_00423F40, D_00423F50, D_00423F60, D_00423F70};
@@ -1176,11 +1201,11 @@ void evtDrawComparisonValueRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ct
 
     switch (index) {
     case 0:
-        flag = ctx->cutSel != 0 ? 0 : 4;
+        flag = ctx->compareField != 0 ? 0 : 4;
         sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, flag, D_004376C0, labels[(ctx->value >> 12) & 0xF]));
         return;
     case 1:
-        flag = ctx->cutSel != 1 ? 0 : 4;
+        flag = ctx->compareField != 1 ? 0 : 4;
         sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, flag, D_004374A0, ctx->value & 0xFFF));
         sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, flag, "  (CMP VALUE)"));
         return;
@@ -1210,13 +1235,13 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     list = sdfCreateResetPacketList();
     func_00250338(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawCutFlagLabel, evtDrawComparisonValueRow);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
-    if (ctx->mode != 0xE) {
+    if (ctx->actionMode != 0xE) {
         return 0;
     }
     packed = ctx->value;
     number = packed & 0xFFF;
     branch = (packed >> 12) & 0xF;
-    field = ctx->cutSel;
+    field = ctx->compareField;
     switch (field) {
     case 0:
         if (D_0037F510.decOne & 2) {
@@ -1245,7 +1270,7 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         break;
     }
     if ((D_0037F510.decTen & 2) || (D_0037F510.incTen & 2)) {
-        ctx->cutSel = !field;
+        ctx->compareField = !field;
     }
     if (D_0037F510.confirm < 0) {
         return 1;
@@ -1325,7 +1350,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
     model = ((EvtModelSlot *)ctx->frameGroup->info->data)->ref->handle;
     func_00250338(list, x, y, 0x14, 0xA, 0, 1, ctx, mnuDrawMotionChangeLabel, func_00254CE0);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
-    if (ctx->mode != 0x10) {
+    if (ctx->actionMode != 0x10) {
         return 0;
     }
     if (D_0037F510.decTen & 2) {
@@ -1499,17 +1524,18 @@ void func_002560A8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_002560B0);
 
+/* Draw command text for row 0 or 1; null texts and other rows emit nothing. */
 void evtDrawOptionalPromptText(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *ctx) {
     switch (kind) {
     case 0:
-        if (ctx->text0 != NULL) {
-            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004374D0, ctx->text0));
+        if (ctx->commandSecond.text != NULL) {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004374D0, ctx->commandSecond.text));
             return;
         }
         break;
     case 1:
-        if (ctx->text1 != NULL) {
-            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004374D0, ctx->text1));
+        if (ctx->commandThird.text != NULL) {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004374D0, ctx->commandThird.text));
         }
         break;
     }
@@ -1517,18 +1543,20 @@ void evtDrawOptionalPromptText(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *ctx
 
 extern void evtDrawOptionalPromptText(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *ctx);
 
+/* In mode 0x14, count down before checking input: zero expires, negative waits
+ * indefinitely, and confirm takes precedence over cancel. */
 s32 mnuDrawTimedPrompt(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
 
     list = sdfCreateResetPacketList();
     func_00250338(list, x, y, 0x19, 2, 0, 1, ctx, NULL, evtDrawOptionalPromptText);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
-    if (ctx->mode != 0x14) {
+    if (ctx->actionMode != 0x14) {
         return 0;
     }
-    if (ctx->frames > 0) {
-        ctx->frames--;
-    } else if (ctx->frames == 0) {
+    if (ctx->commandFirst > 0) {
+        ctx->commandFirst--;
+    } else if (ctx->commandFirst == 0) {
         return -1;
     }
     if (D_0037F510.confirm < 0) {
@@ -1540,10 +1568,12 @@ s32 mnuDrawTimedPrompt(s32 x, s32 y, EvtRuntime *ctx) {
     return -1;
 }
 
+/* Store three command arguments. Timed prompts consume the first as a countdown
+ * and the other two as text; the DDS1 API passes those addresses as words. */
 void evtSetRuntimeCommandValues(EvtRuntime *runtime, s32 frames, char *firstText, char *secondText) {
-    runtime->frames = frames;
-    runtime->text0 = firstText;
-    runtime->text1 = secondText;
+    runtime->commandFirst = frames;
+    runtime->commandSecond.text = firstText;
+    runtime->commandThird.text = secondText;
 }
 
 extern char D_00437768[]; /* "CURRENT" */
@@ -1593,44 +1623,47 @@ extern u32 kwlnTaskGetTimer(s32 task);
 
 typedef struct EvtSelectionCache {
     u8 pad00[0x24];
-    s32 selected; /* 0x24 */
+    s32 selectedEntry; /* 0x24 */
 } EvtSelectionCache;
 
 extern EvtSelectionCache *D_00436518;
 
 extern s32 evtActiveEntryFlags;
 
+/* Cache nonzero entry selections, publishing first-tick flags only at timer zero.
+ * A zero setup status clears runtime control and returns -1. */
 s32 evtSynchronizeSelectedEntry(s32 task) {
     EvtRuntime *runtime = (EvtRuntime *)kwlnTaskGetUserValue(task);
 
     if (effEventAdvanceResourceTemplateSetup() == 0) {
-        runtime->busy = 0;
+        runtime->controlState = 0;
         return -1;
     }
     if (kwlnTaskGetTimer(task) == 0) {
-        s32 selected = runtime->selected;
+        s32 selected = runtime->selectedEntry;
 
         evtActiveEntryFlags = selected;
         if (selected != 0) {
-            D_00436518->selected = selected;
+            D_00436518->selectedEntry = selected;
         }
     }
-    if (D_00436518->selected != runtime->selected) {
-        s32 selected = runtime->selected;
+    if (D_00436518->selectedEntry != runtime->selectedEntry) {
+        s32 selected = runtime->selectedEntry;
 
         if (selected != 0) {
-            D_00436518->selected = selected;
+            D_00436518->selectedEntry = selected;
         }
     }
     return 0;
 }
 
+/* Poll solid-rectangle setup; zero status clears runtime control and returns -1. */
 s32 evtPollRuntimeControlReady(void) {
     void *runtime;
 
     runtime = kwlnTaskGetUserValue();
     if (effEventAdvanceSolidRectangleSetup() == 0) {
-        ((EvtRuntime *)runtime)->busy = 0;
+        ((EvtRuntime *)runtime)->controlState = 0;
         return -1;
     }
     return 0;
@@ -1657,20 +1690,20 @@ s32 func_00258700(s32 arg0, s32 arg1, EvtRuntime *runtime) {
         break;
     case 0xE:
         status = effEventAdvanceBlurTemplateSetup();
-        if (runtime->selected != 0) {
-            *(s32 *)((u8 *)D_004364B0 + 0x2C) = runtime->selected;
+        if (runtime->selectedEntry != 0) {
+            *(s32 *)((u8 *)D_004364B0 + 0x2C) = runtime->selectedEntry;
         }
         break;
     case 0xF:
         status = effEventAdvanceScatterBlurSetup();
-        if (runtime->selected != 0) {
-            *(s32 *)((u8 *)D_0043653C + 0x2C) = runtime->selected;
+        if (runtime->selectedEntry != 0) {
+            *(s32 *)((u8 *)D_0043653C + 0x2C) = runtime->selectedEntry;
         }
         break;
     case 0x17:
         status = effEventAdvanceScaleBlurSetup();
-        if (runtime->selected != 0) {
-            *(s32 *)((u8 *)D_00436520 + 0x2C) = runtime->selected;
+        if (runtime->selectedEntry != 0) {
+            *(s32 *)((u8 *)D_00436520 + 0x2C) = runtime->selectedEntry;
         }
         break;
     case 0x1B:
@@ -1678,7 +1711,7 @@ s32 func_00258700(s32 arg0, s32 arg1, EvtRuntime *runtime) {
         break;
     case 0x10:
     case 0x11:
-        if (runtime->busy == 0) {
+        if (runtime->controlState == 0) {
             return 1;
         }
         break;
@@ -1707,15 +1740,15 @@ s32 func_00258700(s32 arg0, s32 arg1, EvtRuntime *runtime) {
     if (status != 0) {
         return 0;
     }
-    if (runtime->busy != 0) {
-        kwlnTaskDestroyWithHierarchy(runtime->busy, 1);
-        runtime->busy = 0;
+    if (runtime->controlState != 0) {
+        kwlnTaskDestroyWithHierarchy(runtime->controlState, 1);
+        runtime->controlState = 0;
     }
     return 1;
 }
 
 s32 evtDispatchActionByIndex(s32 index, s32 x, s32 y, void *runtime) {
-    s32 mode = ((EvtRuntime *)runtime)->mode;
+    s32 mode = ((EvtRuntime *)runtime)->actionMode;
     if (mode == 11 && index != mode) {
         return 0;
     }
@@ -1868,25 +1901,15 @@ s32 evtIndexGroupTypeTwentyFiveChildren(EvtRuntime *runtime) {
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00258CC8);
 
-/* Header fields precede 0x20-byte records; trailing metadata is at +0x243C. */
-typedef struct EvtSerializedState {
-    u8 pad00[0xC];
-    s32 third; /* 0x0C */
-    s32 first; /* 0x10 */
-    s32 second; /* 0x14 */
-    u8 pad18[8];
-    s32 count; /* 0x20 */
-    u8 records[0x20]; /* 0x24: first serialized record */
-    u8 pad44[0x23F8];
-    s32 metadata; /* 0x243C */
-} EvtSerializedState;
 
-void evtWriteRuntimeHeaderValues(s32 output, EvtSerializedState *state) {
+/* Emit first, range, third and metadata words in file order. The range word
+ * is written whole, not narrowed to the terminal halfword used by child spans. */
+void evtWriteRuntimeHeaderValues(s32 output, EvtRuntime *state) {
     s32 buffer[4];
-    buffer[0] = state->first;
-    buffer[1] = state->second;
-    buffer[2] = state->third;
-    buffer[3] = state->metadata;
+    buffer[0] = state->headerFirst;
+    buffer[1] = state->frameRange.word;
+    buffer[2] = state->headerThird;
+    buffer[3] = state->headerMetadata;
     func_002588A0(output, buffer, 0x10);
 }
 
@@ -1899,6 +1922,8 @@ typedef struct EvtSerializedChild {
     s32 body[8];
 } EvtSerializedChild;
 
+/* Filter groups by mode and serialize each child body. Type-8 spans use the
+ * next start or terminal range halfword, unless their body marker disables them. */
 void func_00259298(s32 output, s32 mode, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
 
@@ -1935,7 +1960,7 @@ void func_00259298(s32 output, s32 mode, EvtRuntime *runtime) {
                     if (child->next != NULL) {
                         record.span = child->next->unk00 - child->unk00;
                     } else {
-                        record.span = runtime->rangeEnd - child->unk00;
+                        record.span = runtime->frameRange.f.end - child->unk00;
                     }
                 }
             }
@@ -1944,17 +1969,18 @@ void func_00259298(s32 output, s32 mode, EvtRuntime *runtime) {
     }
 }
 
-void evtWriteFixedSizeEntries(s32 output, EvtSerializedState *table) {
+/* Emit entryTotal consecutive thirty-two-byte names; nonpositive totals emit nothing. */
+void evtWriteFixedSizeEntries(s32 output, EvtRuntime *table) {
     s32 i;
     u8 *entry;
     i = 0;
-    if (table->count > 0) {
-        entry = table->records;
+    if (table->entryTotal > 0) {
+        entry = (u8 *)table->entryName;
         do {
             func_002588A0(output, entry, 0x20);
             entry += 0x20;
             i++;
-        } while (i < table->count);
+        } while (i < table->entryTotal);
     }
 }
 
@@ -2279,7 +2305,7 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     }
     handle = func_0024FB48(D_004372B0, D_004372B2, mode);
     if (handle != 0) {
-        runtime->windowContext = handle;
+        runtime->windowContext = (EvtMessageWindow *)handle;
         func_0025A280(handle, runtime);
         return 1;
     }
@@ -2475,11 +2501,11 @@ void evtRefreshTaskData(s32 taskId, s32 key) {
 }
 
 /* Party/enemy model table entry (0x270 bytes); only the scale-source field is known here. */
-typedef struct Entry270 {
+typedef struct EvtModelScaleEntry {
     u8 pad00[0x18];
     f32 modelScale;
     u8 pad1C[0x254];
-} Entry270;
+} EvtModelScaleEntry;
 
 typedef struct EvtEffectInner {
     u8 pad00[0x2C];
@@ -2491,13 +2517,15 @@ typedef struct EvtEffectObject {
     EvtEffectInner *inner;
 } EvtEffectObject;
 
-extern Entry270 *D_00435DE0;
-extern Entry270 *D_00435DF0;
+extern EvtModelScaleEntry *D_00435DE0;
+extern EvtModelScaleEntry *D_00435DF0;
 extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
 extern void *func_00115500(void *obj, void *vecA, void *vecB);
 extern void effEventSetScale(void *target, f32 scale);
 
+/* Spawn from a keyed task resource with two zeroed constructor vectors.
+ * A nonnegative index applies the selected model-table scale relative to the base. */
 void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
     u8 vecA[16];
     u8 vecB[16];
