@@ -962,7 +962,55 @@ void parFadeAlphaTriangleAllCells(ParSystem *system, u32 middleWord, u32 edgeWor
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00162348", func_00164208);
+typedef struct ParTriangleVertexColors {
+    s32 edge0;
+    s32 middle;
+    s32 edge1;
+} ParTriangleVertexColors;
+
+void func_00164208(ParSystem *system, u32 middleWord, u32 edgeWord) {
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    s32 halfCount = (words / 3) >> 1;
+    u32 middleStep = middleAlpha / halfCount;
+    u32 edgeStep = edgeAlpha / halfCount;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParTriangleVertexColors *vertex;
+
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParTriangleVertexColors **)cell;
+            middle = 0;
+            edge = 0;
+            for (j = 0; j < halfCount; j++, vertex++) {
+                vertex->middle = middleWord | (middle & 0xFF000000);
+                vertex->edge0 = vertex->edge1 = edgeWord | (edge & 0xFF000000);
+                middle += middleStep;
+                edge += edgeStep;
+            }
+            middle = middleAlpha;
+            edge = edgeAlpha;
+            for (j = 0; j < halfCount; j++, vertex++) {
+                middle -= middleStep;
+                edge -= edgeStep;
+                vertex->middle = middleWord | (middle & 0xFF000000);
+                vertex->edge0 = vertex->edge1 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
 
 /* Ordered packed color words for the three particle vertex layouts. */
 typedef struct ParStripVertexColors {
