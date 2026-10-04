@@ -1233,7 +1233,7 @@ typedef struct CampWindowListData {
     CampWindowNode *cursor; /* 0x1C */
     s32 count;
     u8 pad24[8];
-    void (*callback)(void);
+    s32 (*callback)();
     void *buffer;
 } CampWindowListData;
 
@@ -1813,13 +1813,205 @@ s32 mnuCampAdvanceCounter(s32 delta, u8 *scene) {
     return cur;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261538);
+extern u8 *D_00435E5C;
+extern u8 D_003C9BC4[];
+extern s32 mnuAdvanceListCursorDefault();
+extern void mnuSelectFirstListNode();
+extern void func_002B9808();
+extern s32 func_002958B0();
+extern s32 func_00260950(s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261670);
+s32 func_00261538(ShopScene *scene) {
+    s32 rowIndex;
+    u8 *entry;
+    CampWindowContainer *window;
+    u32 i;
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261850);
+    rowIndex = mnuCampFindActiveSlot();
+    if (rowIndex == -1) {
+        return 0;
+    }
+    entry = D_003CBB70 + rowIndex * 0x104;
+    for (i = 0; i < 0x20; i++, entry += 8) {
+        u32 id = *(u16 *)(entry + 4);
+        u32 mode = entry[6];
+        CampWindowNode *node;
+        CampWindowParams *params;
+        s32 price;
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_002619A8);
+        if (mnuIsBulletItemId(id) != 0 || id == 0) {
+            continue;
+        }
+        node = (CampWindowNode *)mnuAppendWindowListNode((struct MenuWindowContainer *)scene->extra,
+            (s32)(D_00435E5C + id * 0x19));
+        func_002B9808((struct MenuWindowContainer *)scene->extra);
+        window = scene->extra;
+        mnuAdvanceListCursorDefault(window->list);
+        params = &node->params;
+        price = func_00260A58(i, 0);
+        params->id = id;
+        params->value = price;
+        params->price = price;
+        params->mode = mode;
+        if (func_00261198(scene) == 0) {
+            node->flags = 1;
+        }
+    }
+    mnuSelectFirstListNode(scene->extra->list);
+    return 0;
+}
+
+s32 func_00261850(ShopScene *scene, s32 filterMode);
+
+s32 func_00261670(ShopScene *scene) {
+    CampWindowBuffer *buffer;
+    u8 *entry;
+    u32 i;
+    s32 row;
+
+    if (scene->extra != NULL) {
+        if (scene->extra->list->buffer != NULL) {
+            sdfReleaseChipBlock(scene->extra->list->buffer);
+            scene->extra->list->buffer = NULL;
+        }
+        mnuDestroyWindowContainer(scene->extra);
+    }
+    row = mnuCampResolveFlagRowValue(scene->stockGroup);
+    scene->extra = (CampWindowContainer *)mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x16);
+    /* Each packed stock row spans 0xC1 halfwords. */
+    entry = D_003C9BC4 + (row << 8) + (((row << 6) + row) << 1);
+    for (i = 0; i < 0x60; i++, entry += 4) {
+        u32 id = *(u16 *)(entry - 2);
+        u32 mode = entry[0];
+        CampWindowNode *node;
+        CampWindowParams *params;
+        s32 price;
+
+        if (mnuIsBulletItemId(id) != 0 || func_002C54B0(id) != 0 || id == 0) {
+            continue;
+        }
+        node = (CampWindowNode *)mnuAppendWindowListNode((struct MenuWindowContainer *)scene->extra,
+            (s32)(D_00435E5C + id * 0x19));
+        func_002B9808((struct MenuWindowContainer *)scene->extra);
+        mnuAdvanceListCursorDefault(scene->extra->list);
+        params = &node->params;
+        price = func_00260950(i, scene->stockGroup, 0);
+        params->value = price;
+        params->id = id;
+        params->price = price;
+        params->mode = mode;
+        if (func_00261198(scene) == 0) {
+            node->flags = 1;
+        }
+    }
+    func_00261538(scene);
+    mnuSelectFirstListNode(scene->extra->list);
+    scene->extra->list->callback = func_002958B0;
+    buffer = sdfAllocSizeClassBlock(0x14);
+    memset(buffer, 0, 0x14);
+    scene->extra->list->buffer = buffer;
+    return scene->extra->list->count;
+}
+
+s32 func_00261850(ShopScene *scene, s32 filterMode) {
+    s32 rowIndex;
+    u8 *entry;
+    u32 i;
+
+    rowIndex = mnuCampFindActiveSlot();
+    if (rowIndex == -1) {
+        return 0;
+    }
+    entry = D_003CBB70 + rowIndex * 0x104;
+    for (i = 0; i < 0x20; i++, entry += 8) {
+        u32 id = *(u16 *)(entry + 4);
+        u32 mode = entry[6];
+        CampWindowNode *node;
+        CampWindowParams *params;
+        s32 price;
+        s32 include;
+
+        if (filterMode == 1) {
+            include = mnuIsBulletItemId(id);
+        } else {
+            include = func_002C54B0(id);
+        }
+        if (include == 0) {
+            continue;
+        }
+        node = (CampWindowNode *)mnuAppendWindowListNode((struct MenuWindowContainer *)scene->extra,
+            (s32)(D_00435E5C + id * 0x19));
+        func_002B9808((struct MenuWindowContainer *)scene->extra);
+        mnuAdvanceListCursorDefault(scene->extra->list);
+        params = &node->params;
+        price = func_00260A58(i, 0);
+        params->value = price;
+        params->id = id;
+        params->price = price;
+        params->mode = mode;
+        if (func_00261198(scene) == 0) {
+            node->flags = 1;
+        }
+    }
+    mnuSelectFirstListNode(scene->extra->list);
+    return 0;
+}
+
+s32 func_002619A8(ShopScene *scene, s32 filterMode) {
+    CampWindowBuffer *buffer;
+    CampWindowNode *node;
+    u8 *entry;
+    u32 i;
+    s32 row;
+
+    if (scene->extra != NULL) {
+        if (scene->extra->list->buffer != NULL) {
+            sdfReleaseChipBlock(scene->extra->list->buffer);
+            scene->extra->list->buffer = NULL;
+        }
+        mnuDestroyWindowContainer(scene->extra);
+    }
+    row = mnuCampResolveFlagRowValue(scene->stockGroup);
+    scene->extra = (CampWindowContainer *)mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x16);
+    /* Each packed stock row spans 0xC1 halfwords. */
+    entry = D_003C9BC4 + (row << 8) + (((row << 6) + row) << 1);
+    for (i = 0; i < 0x60; i++, entry += 4) {
+        u32 id = *(u16 *)(entry - 2);
+        u32 mode = entry[0];
+        CampWindowParams *params;
+        s32 price;
+        s32 include;
+
+        if (filterMode == 1) {
+            include = mnuIsBulletItemId(id);
+        } else {
+            include = func_002C54B0(id);
+        }
+        if (include == 0) {
+            continue;
+        }
+        node = (CampWindowNode *)mnuAppendWindowListNode((struct MenuWindowContainer *)scene->extra,
+            (s32)(D_00435E5C + id * 0x19));
+        func_002B9808((struct MenuWindowContainer *)scene->extra);
+        mnuAdvanceListCursorDefault(scene->extra->list);
+        params = &node->params;
+        price = func_00260950(i, scene->stockGroup, 0);
+        params->value = price;
+        params->id = id;
+        params->price = price;
+        params->mode = mode;
+        if (func_00261198(scene) == 0) {
+            node->flags = 1;
+        }
+    }
+    func_00261850(scene, filterMode);
+    mnuSelectFirstListNode(scene->extra->list);
+    scene->extra->list->callback = func_002958B0;
+    buffer = sdfAllocSizeClassBlock(0x14);
+    memset(buffer, 0, 0x14);
+    scene->extra->list->buffer = buffer;
+    return scene->extra->list->count;
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261B98);
 
@@ -1853,4 +2045,3 @@ INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437828);
 INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437830);
 
 INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437838);
-
