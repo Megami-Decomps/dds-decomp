@@ -85,15 +85,6 @@ extern u16 parGetRestartFlag(ParObj *obj);
 
 extern void parCellInit();
 
-/* 20-byte cell initialized by parCellInit (grey plus zeros). */
-typedef struct ParCell {
-    u128 *history;   /* 0x00 */
-    void *vertices;  /* 0x04 */
-    s32 vertexCount; /* 0x08: processed in groups of three */
-    s32 unk0C;       /* 0x0C cleared */
-    u32 color;       /* 0x10 set to grey 0x80808080 */
-} ParCell; /* 0x14 */
-
 typedef struct ParSystem {
     s16 kind;            /* 0x00 */
     s16 unk2;            /* 0x02 */
