@@ -26,6 +26,27 @@ typedef struct {
     s32 selection; /* 0x28 */
 } StaffWindowResources;
 
+typedef struct StaffDescriptionNode {
+    u8 pad00[0x60];
+    s32 sortKeyPrimary;   /* 0x60 */
+    s32 sortKeySecondary; /* 0x64 */
+} StaffDescriptionNode;
+
+typedef struct StaffDescriptionList {
+    u8 pad00[0x1C];
+    StaffDescriptionNode *selectedNode; /* 0x1C */
+} StaffDescriptionList;
+
+typedef struct StaffDescriptionWindow {
+    u8 pad00[0x14];
+    StaffDescriptionList *list; /* 0x14 */
+} StaffDescriptionWindow;
+
+typedef struct StaffDescriptionResources {
+    u8 pad00[0x08];
+    StaffDescriptionWindow *windows[3]; /* 0x08 */
+} StaffDescriptionResources;
+
 /* Inventory quantities are byte entries indexed by each caller's original item ID. */
 typedef struct SaveItemCounts {
     u8 pad00[0x12A0];
@@ -212,10 +233,12 @@ s32 func_002734C0(s32 callback) {
 
 extern void func_00272778(s32);
 extern void mnuCreateStaffImageSprite(s32);
+extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern void func_00272668(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawWindowContainer(s32, s32, s32, s32, s32);
 extern void func_002723B0(s32, s32);
 extern u8 D_0037C860[];
+extern s32 D_003BAA9C;
 
 s32 mnuStaffDrawImagePanelA(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
@@ -281,4 +304,16 @@ void mnuRefreshStaffItemSelection(s32 selection, s32 context) {
 
 INCLUDE_ASM(const s32, "game/code_00272D50", func_002738A0);
 
-INCLUDE_ASM(const s32, "game/code_00272D50", func_00273A30);
+/* Refresh the description panel from the selected node in one of the staff-menu windows. */
+void func_00273A30(StaffDisplayContext *context, s32 windowIndex) {
+    StaffDescriptionResources *resources = (StaffDescriptionResources *)context->resources;
+    StaffDescriptionNode *node = resources->windows[windowIndex]->list->selectedNode;
+    s32 emptyLabel = 0;
+    s32 selectedLabel = node->sortKeySecondary;
+
+    if (node->sortKeyPrimary != 0) {
+        func_00272518(1, selectedLabel, D_003BAA9C, (s32)context, 1, 1, 0x53);
+    } else {
+        func_00272668(1, emptyLabel, 0, (s32)context, 1, 0x53);
+    }
+}
