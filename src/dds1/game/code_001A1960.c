@@ -410,7 +410,7 @@ u32 func_001A29D0(s32 arg0, s32 arg1) {
     return datGetStatWithStatusOverride(arg0, arg1);
 }
 
-extern s32 datAbilityParameters;
+extern u8 *datAbilityParameters;
 
 s32 btlApplyCommandAbilityMultiplier(s32 arg0, s32 arg1) {
     u32 value = func_0011A158(arg0, arg1);
@@ -966,7 +966,7 @@ void btlTickActorEntryCountdowns(u8 *scene) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A5030);
 
-extern s32 datAbilityParameters;
+extern u8 *datAbilityParameters;
 
 s32 btlGetAbilityAttributeMultiplierPercent(u8 *actor, s32 attr) {
     u32 value = 100;
@@ -1477,7 +1477,7 @@ u32 func_001A7ED8(void) {
 
 extern char D_003A1C10[]; /* "btl:hunt mp rec[%d]\n" */
 
-extern s32 datAbilityParameters;
+extern u8 *datAbilityParameters;
 
 s32 btlCalculateAbilityRecoveryAmount(u8 *actor) {
     s32 recovery = 0;
@@ -1746,7 +1746,7 @@ s32 btlChooseEligibleSkill(s32 object) {
     return choices[effMiscRandMod(0, count)];
 }
 
-extern s32 datAbilityParameters;
+extern u8 *datAbilityParameters;
 
 f32 btlGetActionCategoryMultiplier(s32 object, s32 unused, s32 index) {
     s32 category = *(u16 *)(datCommandRecords + index * 56 + 0x16);
@@ -1964,7 +1964,28 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1DA0);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A9F40);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AA030);
+extern s32 D_00358690[];
+
+s32 func_001AA030(u8 *actor) {
+    u32 i;
+    s32 result;
+    s32 threshold;
+
+    if (btlIsUnitDefeatTriggeredByValueDelta(actor, 0)) {
+        return -1;
+    }
+    result = 0;
+    for (i = 0; i < 3; i++) {
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), D_00358690[i * 2])) {
+            threshold = (s32)(*(f32 *)(datAbilityParameters + (D_00358690[i * 2] * 8 - 0x1000)) * 100.0f);
+            if (btlRollAiBucket() < threshold) {
+                result = (D_00358690 + i * 2)[1];
+                break;
+            }
+        }
+    }
+    return result != 0 ? result : -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AA130);
 
