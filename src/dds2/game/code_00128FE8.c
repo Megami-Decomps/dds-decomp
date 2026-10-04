@@ -1180,7 +1180,43 @@ void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 v
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B690);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B7F8);
+void func_0012B7F8(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, u32 drawMode) {
+    s32 handle = (s32)sdfConsAllocateColumnPacket(1);
+    FldSpriteVertex *vtx = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(handle);
+    s32 r = color & 0xFF;
+    s32 g = (color >> 8) & 0xFF;
+    s32 b = (color >> 16) & 0xFF;
+    s32 a = (color >> 24) & 0xFF;
+    s32 ubase = u * 16;
+    s32 vbase = v * 16;
+    s32 xl = (s32)(x * 16.0f) + 0x7000;
+    s32 yt = (s32)(y * 8.0f) + 0x7900;
+    s32 command;
+    FieldBufferDescriptor *descriptor;
+
+    vtx->r = r;
+    vtx->g = g;
+    vtx->b = b;
+    vtx->a = a;
+    vtx->corner[0].u = ubase;
+    vtx->corner[0].v = vbase;
+    vtx->corner[0].x = xl;
+    vtx->corner[0].y = yt;
+    vtx->corner[0].mask = -1;
+    vtx->corner[0].flag = 0;
+    vtx->corner[1].u = ubase + uw * 16;
+    vtx->corner[1].v = vbase + vh * 16;
+    vtx->corner[1].x = xl + (s32)(w * 16.0f);
+    vtx->corner[1].y = yt + (s32)(h * 8.0f);
+    vtx->corner[1].mask = -1;
+    vtx->corner[1].flag = 0;
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList((SdfListHead *)command);
+    sdfConsCreateDrawPacket(command, drawMode, 0);
+    sdfAppendPacket((SdfListHead *)command, handle);
+    descriptor = (FieldBufferDescriptor *)&kwlnDrawSurfaces[fldDisplayRow * 8];
+    descriptor->open(descriptor, command);
+}
 
 void fldProjectPointSetup(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };

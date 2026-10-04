@@ -2,7 +2,7 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 
-extern u32 D_004390A4;
+extern s32 D_004390A4;
 
 extern u32 D_0045C7A0[];
 
@@ -39,7 +39,7 @@ extern s32 D_004390AC;
 
 extern s32 D_004390B0;
 
-extern u32 D_004390A8;
+extern s32 D_004390A8;
 
 typedef struct SdfRingNode {
     u32 value;                       /* 0x00 */
@@ -149,7 +149,36 @@ void sdfCommitPendingVectorAndMarkChanged(void) {
 
 INCLUDE_ASM(const s32, "game/code_0030E390", func_0030EAA8);
 
-INCLUDE_ASM(const s32, "game/code_0030E390", func_0030ECC0);
+extern s32 sdfCounterGetDisplayValue(void);
+extern f32 sdfCounterGetScaledValue(void);
+extern void func_0030F038(SdfRing *);
+extern f32 D_00400700[][4];
+
+/* Draw the selected map marker and overlay its highlight twice. */
+void func_0030ECC0(void) {
+    s8 index = sdfCounterGetDisplayValue() - 1;
+    f32 alpha = 1.0f;
+    f32 remaining = 1.0f - sdfCounterGetScaledValue();
+    s32 gridX;
+    s32 gridY;
+    s32 opacity;
+
+    if (D_004390A4 != 0) {
+        alpha = (f32)D_004390A4 / 7.0f;
+    }
+    if (D_004390A8 != 0) {
+        alpha = (f32)(5 - D_004390A8) / 5.0f;
+        D_004390A8--;
+    } else if (remaining > 0.0f) {
+        alpha = remaining;
+    }
+    func_0030F038((SdfRing *)D_004390B0);
+    fldProjectPointToGridCell(&gridX, &gridY, D_00400700[index][0], D_00400700[index][1], D_00400700[index][2]);
+    opacity = alpha * 32.0f;
+    sdfDrawUniformlyScaledSlotImage(gridX, gridY, 0, opacity, 0x20, 0, 0x54, 2.0f);
+    sdfDrawUniformlyScaledSlotImage(gridX, gridY, 0, opacity, 0x23, 0, 0x54, 1.0f);
+    sdfDrawUniformlyScaledSlotImage(gridX, gridY, 0, opacity, 0x23, 0, 0x54, 1.0f);
+}
 
 /* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
 SdfRing *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
