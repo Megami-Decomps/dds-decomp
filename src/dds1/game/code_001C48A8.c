@@ -81,8 +81,12 @@ typedef struct SceneFadingRecord {
 
 /* Dispatch-list node, separate from the unit-data actor list. */
 typedef struct SceneLinkedNode {
-    s32 state;
-    u8 pad04[0x168];
+    u32 state;
+    u8 pad04[4];
+    u32 flags;
+    u8 pad0C[0xC];
+    UiObject *actor;
+    u8 pad1C[0x150];
     struct SceneLinkedNode *next; /* 0x16C */
 } SceneLinkedNode;
 
@@ -144,6 +148,8 @@ typedef struct BattleSceneWork {
 } BattleSceneWork;
 
 extern s32 btlCountTasksForOwner(s64);
+extern s64 btlStartTask(void *);
+extern void btlDispatchStateHandler(void *, s32);
 
 extern void func_001BCB88(s32, s32);
 
@@ -384,7 +390,103 @@ void fldAdvanceSceneVariant(BattleSceneWork *scene) {
     func_001AC7D8();
 }
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C5910);
+typedef struct SceneEffectRequest {
+    u8 startKind;
+    u8 pad01[7];
+    u16 taskId;
+} SceneEffectRequest;
+
+extern void btlTickActorEntryCountdowns(u8 *);
+extern void btlClearNodeFlags(void);
+extern void btlClearActorSelectedEntryIndex(UiObject *);
+extern void btlRefreshUnitMotionSelection(u8 *);
+extern SceneEffectRequest *btlCreateEffObjC(UiObject *, s32);
+
+s32 func_001C5910(BattleSceneWork *scene) {
+    s32 ready = 1;
+    u32 group = scene->variant == 1 ? FLD_SCENE_ACTOR_PRIMARY_BIT : FLD_SCENE_ACTOR_SECONDARY_BIT;
+    SceneLinkedNode *head = scene->linkedNodes;
+    SceneLinkedNode *node;
+    UiObject *actor;
+
+    for (node = head; node != NULL; node = node->next) {
+        if ((node->flags & FLD_SCENE_TASK_BOUND_BIT) &&
+            (node->actor->flags & FLD_SCENE_TASK_ACTIVE_BIT) &&
+            node->state >= 3) {
+            ready = 0;
+            break;
+        }
+    }
+    for (node = head; node != NULL; node = node->next) {
+        if (node->flags & FLD_SCENE_TASK_BOUND_BIT) {
+            actor = node->actor;
+            if ((actor->flags & group) && (actor->flags & FLD_SCENE_TASK_ACTIVE_BIT) &&
+                !(actor->flags & 0xE0)) {
+                if (node->state != 2) {
+                    ready = 0;
+                }
+            }
+        }
+    }
+    if (ready && scene->frame > 16) {
+        for (node = head; node != NULL; node = node->next) {
+            if (node->flags & FLD_SCENE_TASK_BOUND_BIT) {
+                actor = node->actor;
+                if (actor->flags & FLD_SCENE_TASK_ACTIVE_BIT) {
+                    if (!(actor->flags & 0xE0)) {
+                        actor->flags &= ~0x10U;
+                        btlTickActorEntryCountdowns((u8 *)actor);
+                        if (actor->statusFlags & 0x122F) {
+                            btlDispatchStateHandler(node, 4);
+                        }
+                        if (actor->flags & group) {
+                            btlClearNodeFlags();
+                            btlClearActorSelectedEntryIndex(actor);
+                            btlRefreshUnitMotionSelection((u8 *)actor);
+                        }
+                    }
+                }
+            }
+        }
+        if (scene->subFlags & FLD_SCENE_COUNTERS_ENABLED_BIT) {
+            s32 affected = 0;
+            s32 total = 0;
+            UiObject *selected = NULL;
+            s32 message;
+            SceneEffectRequest *request;
+            u16 status;
+
+            for (actor = scene->actors; actor != NULL; actor = actor->next) {
+                if (actor->flags & FLD_SCENE_TASK_ACTIVE_BIT) {
+                    if (actor->flags & FLD_SCENE_ACTOR_SECONDARY_BIT) {
+                        total++;
+                        status = actor->statusFlags & 1;
+                        if (status != 0) {
+                            affected++;
+                            selected = actor;
+                        }
+                    }
+                }
+            }
+            if (affected == 1) {
+                message = 0;
+            } else if (affected == total) {
+                message = 1;
+            } else {
+                message = 2;
+            }
+            if (affected != 0) {
+                request = btlCreateEffObjC(selected, message);
+                request->startKind = 0xA;
+                request->taskId = 0x2B;
+                btlStartTask(request);
+            }
+            scene->subFlags &= ~FLD_SCENE_COUNTERS_ENABLED_BIT;
+        }
+        return 8;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C5B90);
 
@@ -510,7 +612,6 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
 
 extern s32 func_002629A8();
 
-extern void btlDispatchStateHandler();
 
 extern s32 fldLoadAreaResource();
 
@@ -1105,7 +1206,6 @@ s32 fldGetSceneGroupEntry(s32 entryIndex) {
 }
 
 extern s32 func_001A8188(void);
-extern void btlDispatchStateHandler();
 
 /* Advance one scene group task after both scene gates have opened. */
 void func_001C8330(void) {
