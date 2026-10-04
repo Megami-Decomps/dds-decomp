@@ -79,7 +79,7 @@ extern s32 func_002C6480();
 
 extern char D_003E75C4[];
 
-extern void func_002B9CF8(s32, s32, s32, s32, s32);
+extern void func_002B9CF8(s32, s32, s32, MenuWindowContainer *, s32);
 
 extern s32 func_002B86E8(u32);
 
@@ -427,15 +427,11 @@ struct MenuWindowContainer {
     s32 sprite20;          /* 0x20 */
     s32 param24;           /* 0x24 */
     s32 param28;           /* 0x28 */
-    u32 layout2C;         /* 0x2C */
-    u32 layout30;
-    u32 layout34;
-    u32 layout38;
-    u32 layout3C;
-    u32 layout40;
-    u32 layout44;
-    u32 layout48;
-    u32 layout4C;
+    struct {
+        u32 sprite;
+        u32 parameter;
+    } decorations[3];      /* 0x2C: optional window decoration sprites */
+    u32 decorationX[3];    /* 0x44 */
     s32 scale50;           /* 0x50 */
     s32 scale54;           /* 0x54 */
     MenuIconState panel; /* 0x58: embedded drawable panel layout */
@@ -1159,7 +1155,7 @@ void mnuDestroyWindowContainer(MenuWindowContainer *menu) {
 }
 
 void mnuSetWindowOverlaySprite(MenuWindowContainer *menu, u32 layout) {
-    menu->layout3C = layout;
+    menu->decorations[2].sprite = layout;
 }
 
 void mnuSetWindowContainerState(MenuWindowContainer *menu, u32 state) {
@@ -1169,15 +1165,15 @@ void mnuSetWindowContainerState(MenuWindowContainer *menu, u32 state) {
 void mnuSetWindowContainerLayout(MenuWindowContainer *menu, u32 layout2C, u32 layout30, u32 layout34,
                                     u32 layout48, u32 layout38, u32 layout3C, u32 layout40,
                                     u32 layout4C) {
-    menu->layout2C = layout2C;
-    menu->layout4C = layout4C;
-    menu->layout30 = layout30;
-    menu->layout34 = layout34;
-    menu->layout38 = layout38;
-    menu->layout48 = layout48;
-    menu->layout3C = layout3C;
-    menu->layout40 = layout40;
-    menu->layout44 = 0;
+    menu->decorations[0].sprite = layout2C;
+    menu->decorationX[2] = layout4C;
+    menu->decorations[0].parameter = layout30;
+    menu->decorations[1].sprite = layout34;
+    menu->decorations[1].parameter = layout38;
+    menu->decorationX[1] = layout48;
+    menu->decorations[2].sprite = layout3C;
+    menu->decorations[2].parameter = layout40;
+    menu->decorationX[0] = 0;
 }
 
 void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, u32 first, u32 second) {
@@ -1330,7 +1326,23 @@ void mnuDrawVisibleWindowIconRows(u32 x, u32 y, u32 flags, MenuWindowContainer *
     mnuDrawWindowIconRows(x, y, flags, window, window->list->visibleCount, option);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002B9CF8);
+/* Draw the three optional decoration sprites at their individual X offsets. */
+void func_002B9CF8(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 option)
+{
+    u32 i;
+    u32 state = window->state;
+
+    for (i = 0; i < 3; i++) {
+        u32 sprite = window->decorations[i].sprite;
+        u32 parameter = window->decorations[i].parameter;
+        u32 offset = window->decorationX[i];
+
+        if (sprite != 0) {
+            func_00306CD0(x + offset + 0xC0, y - 0xB8, depth, state,
+                         1, sprite, parameter, option);
+        }
+    }
+}
 
 /* Draw at the selected row before advancing the panel's transition value.
  * DDS2's alternate selection flag overrides its ordinary selection flag. */

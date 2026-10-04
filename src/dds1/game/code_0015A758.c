@@ -997,9 +997,115 @@ void parFillStripCellColors(ParSystem *system, s32 centerWord, s32 middleWord, s
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C7A0);
+/* Fade the three strip colors toward transparent across each cell. */
+void func_0015C7A0(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+{
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    u32 centerAlpha = centerWord & 0xFF000000;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    s32 perCell = words / 6;
+    u32 centerStep = centerAlpha / perCell;
+    u32 middleStep = middleAlpha / perCell;
+    u32 edgeStep = edgeAlpha / perCell;
+    u32 center;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParStripVertexColors *vertex;
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C8C0);
+    centerWord &= 0xFFFFFF;
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParStripVertexColors **)cell;
+            center = centerAlpha;
+            middle = middleAlpha;
+            edge = edgeAlpha;
+            for (j = 0; j < perCell; j++, vertex++) {
+                center -= centerStep;
+                middle -= middleStep;
+                edge -= edgeStep;
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->center0 = centerWord | (center & 0xFF000000);
+                vertex->center1 = centerWord | (center & 0xFF000000);
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
+
+/* Raise then lower the three alphas across the two halves of each strip cell. */
+void func_0015C8C0(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+{
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    u32 centerAlpha = centerWord & 0xFF000000;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    s32 half = (words / 6) >> 1;
+    u32 centerStep = centerAlpha / half;
+    u32 middleStep = middleAlpha / half;
+    u32 edgeStep = edgeAlpha / half;
+    u32 center;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParStripVertexColors *vertex;
+
+    centerWord &= 0xFFFFFF;
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParStripVertexColors **)cell;
+            center = 0;
+            middle = 0;
+            edge = 0;
+            for (j = 0; j < half; j++, vertex++) {
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->center0 = centerWord | (center & 0xFF000000);
+                vertex->center1 = centerWord | (center & 0xFF000000);
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+                center += centerStep;
+                middle += middleStep;
+                edge += edgeStep;
+            }
+            center = centerAlpha;
+            middle = middleAlpha;
+            edge = edgeAlpha;
+            for (j = 0; j < half; j++, vertex++) {
+                center -= centerStep;
+                middle -= middleStep;
+                edge -= edgeStep;
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->center0 = centerWord | (center & 0xFF000000);
+                vertex->center1 = centerWord | (center & 0xFF000000);
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
 
 void parFillCellVertexQuads(ParSystem *system, s32 middleWord, s32 edgeWord) {
     s32 count = system->cellCount;
@@ -1103,9 +1209,112 @@ void parFillSymmetricCellColors(ParSystem *system, s32 centerWord, s32 middleWor
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015CCD0);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015CDF0);
+/* Increase each symmetric color's alpha from zero across the cell. */
+void func_0015CDF0(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+{
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    u32 centerAlpha = centerWord & 0xFF000000;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    s32 perCell = words / 5;
+    u32 centerStep = centerAlpha / perCell;
+    u32 middleStep = middleAlpha / perCell;
+    u32 edgeStep = edgeAlpha / perCell;
+    u32 center;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParSymmetricVertexColors *vertex;
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015CEF8);
+    centerWord &= 0xFFFFFF;
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParSymmetricVertexColors **)cell;
+            center = 0;
+            middle = 0;
+            edge = 0;
+            for (j = 0; j < perCell; j++, vertex++) {
+                center += centerStep;
+                middle += middleStep;
+                edge += edgeStep;
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->center = centerWord | (center & 0xFF000000);
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
+
+/* Raise then lower the three alphas across the two halves of each cell. */
+void func_0015CEF8(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+{
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    u32 centerAlpha = centerWord & 0xFF000000;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    s32 half = (words / 5) >> 1;
+    u32 centerStep = centerAlpha / half;
+    u32 middleStep = middleAlpha / half;
+    u32 edgeStep = edgeAlpha / half;
+    u32 center;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParSymmetricVertexColors *vertex;
+
+    centerWord &= 0xFFFFFF;
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParSymmetricVertexColors **)cell;
+            center = 0;
+            middle = 0;
+            edge = 0;
+            for (j = 0; j < half; j++, vertex++) {
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->center = centerWord | (center & 0xFF000000);
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+                center += centerStep;
+                middle += middleStep;
+                edge += edgeStep;
+            }
+            center = centerAlpha;
+            middle = middleAlpha;
+            edge = edgeAlpha;
+            for (j = 0; j < half; j++, vertex++) {
+                center -= centerStep;
+                middle -= middleStep;
+                edge -= edgeStep;
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->center = centerWord | (center & 0xFF000000);
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
 
 void func_0015D078(s32 recordAddress, u16 value) {
     *(u16 *)(recordAddress + 2) = value;
