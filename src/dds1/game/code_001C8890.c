@@ -7020,6 +7020,7 @@ void btlClearCommandCursorAndRunAction(s32 actor) {
 }
 
 extern s32 D_0035DAF0[];
+extern s32 D_0035DAF8[];
 
 void btlAdvanceCommandCursorOrAction(s32 action, s32 state) {
     if (CURSOR->unk_00 == 1) {
@@ -7037,7 +7038,21 @@ void btlAdvanceCommandCursorOrAction(s32 action, s32 state) {
 }
 INCLUDE_ASM(const s32, "game/code_001C8890", btlInitCommandCursorForCategory);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001EEED8);
+/* Advance the command cursor with the neighboring animation-entry table. */
+void func_001EEED8(s32 action, s32 state) {
+    if (CURSOR->unk_00 == 1) {
+        if (((BtlCursorAction *)action)->link->unit->flags & 0x400) {
+            return;
+        }
+        func_001E9DE0(action, state, D_0035DAF8[CURSOR->unk_0C]);
+        func_001EB368(action, state);
+        func_001EB1B0(action, state, 0, 1);
+        CURSOR->frame++;
+        CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
+    } else {
+        func_001E2970(action, action);
+    }
+}
 
 void btlInitCommandCursorForFirstActor(s32 arg0, s32 arg1) {
     BattleController *work = (BattleController *)btlGetRuntime();
