@@ -101,9 +101,6 @@
       "expected_symbols": 25,
       "expected_shifted_symbols": 23,
       "fallback_symbols": [
-        "func_002890B8",
-        "func_00289380",
-        "func_00289540",
         "fileManUpdate",
         "fileReqInit",
         "fileReqPoll"
