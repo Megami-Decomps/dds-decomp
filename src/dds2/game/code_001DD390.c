@@ -244,7 +244,9 @@ typedef struct BtlActionTableEntry {
     u8 kind;               /* 0x00 */
     u8 pad01[2];
     u8 resourceType;       /* 0x03 */
-    u8 pad04[0x14];
+    u8 pad04[4];
+    f32 lightColorMode;
+    f32 lightColor[3];
     s32 defaultValue;      /* 0x18 */
     u16 flags;             /* 0x1C */
     u8 pad1E[2];
@@ -6939,7 +6941,56 @@ void btlInitializeSceneLightingAndTint(void) {
     ((BtlWork *)context)->tint71C = 0x807E5C5E;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_00200290);
+typedef struct BtlSceneLightParams {
+    f32 position[3];
+    f32 unk0C;
+    f32 color[3];
+    f32 unk1C;
+    f32 secondaryColor[3];
+    f32 unk2C;
+} BtlSceneLightParams;
+
+void func_00200290(s32 index, BtlSceneLightParams *light) {
+    BtlWork *work = (BtlWork *)btlGetRuntime();
+    BtlActionTableEntry *action;
+    f32 *vector;
+    f32 *defaultColor;
+    u32 color;
+
+    if ((work->battleFlags & 0x30000000) == 0) {
+        /* The record table is stored as an integer address. */
+        action = (BtlActionTableEntry *)(index * sizeof(BtlActionTableEntry) +
+                                        datActionAnimationRecords);
+        if (action->lightColorMode != 0.0f) {
+            light->color[0] = action->lightColor[0];
+            light->color[1] = action->lightColor[1];
+            light->color[2] = action->lightColor[2];
+            light->secondaryColor[0] = action->lightColor[0];
+            light->secondaryColor[1] = action->lightColor[1];
+            light->secondaryColor[2] = action->lightColor[2];
+        } else {
+            vector = D_0037F770[0];
+            defaultColor = (f32 *)kwlnDefaultColorVector;
+            light->color[0] = vector[0];
+            light->color[1] = vector[1];
+            light->color[2] = vector[2];
+            light->secondaryColor[0] = defaultColor[0];
+            light->secondaryColor[1] = defaultColor[1];
+            light->secondaryColor[2] = defaultColor[2];
+        }
+    } else {
+        color = work->tint71C;
+        light->color[0] = (f32)(color & 0xFF) / 255.0f;
+        light->color[1] = (f32)((color >> 8) & 0xFF) / 255.0f;
+        light->color[2] = (f32)((color >> 16) & 0xFF) / 255.0f;
+        light->secondaryColor[0] = light->color[0];
+        light->secondaryColor[1] = light->color[1];
+        light->secondaryColor[2] = light->color[2];
+    }
+    light->position[0] = D_0037F770[0][4];
+    light->position[1] = D_0037F770[0][5];
+    light->position[2] = D_0037F770[0][6];
+}
 
 s32 btlGetActionDefaultOrOverride(s32 index) {
     BtlWork *work = (BtlWork *)btlGetRuntime();
