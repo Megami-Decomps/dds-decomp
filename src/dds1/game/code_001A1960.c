@@ -1,32 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
-
-/* One allocated 0xCC-byte command panel, not a header plus overlapping rows.
- * Rows begin at +0x14/+0x64; the class Y coordinate occupies +0x10. */
-typedef struct BattleCmdPanelSlot {
-    s8 hidden; /* Nonzero grid entries are omitted by the row renderer. */
-    u8 unk01; /* Initialized to 0/1 by bank; no consumer read established. */
-    s16 fadeValue; /* Signed narrow ramp; rendering uses its low color byte. */
-    u8 pad04[4];
-    s32 x;
-    s32 y;
-} BattleCmdPanelSlot;
-
-typedef struct BattleCmdPanel {
-    s8 state;
-    s8 classIndex;
-    u16 labelEntry;
-    s16 labelFade;
-    s16 classFade;
-    u8 pad08[4];
-    u32 classX;
-    u32 classY;
-    BattleCmdPanelSlot slotsA[5];
-    BattleCmdPanelSlot slotsB[5];
-    s16 cornerFade[4]; /* Four low-byte color levels used by the backdrop. */
-    u32 cornerPhase[4]; /* Advanced by 8 modulo 360 before the sine pulse. */
-} BattleCmdPanel;
-
+#include "btl_ui.h"
 
 typedef struct ActorEntrySlot {
     s16 code;
@@ -226,7 +200,7 @@ extern u32 fldGetSceneScriptTaskUserData(void);
 
 extern u64 func_001978E8(s32, s32, u64, u64, u64, u64);
 
-extern s32 btlTrackedTaskHandles;
+extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
 extern u32 D_003BB3DC;
 
@@ -234,7 +208,7 @@ extern u32 D_003BD834;
 
 extern u32 D_003BD838;
 
-extern u32 btlLinkedSelectionTaskBuffer;
+extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 
 extern u32 D_003BB3A8;
 
@@ -2044,15 +2018,15 @@ s32 btlIsActorModeActionCodeAllowed(u8 *actor) {
 }
 
 s32 btlHasHighPriorityState(void) {
-    u8 *resource;
+    BattleSelectionWork *resource;
     s8 index;
     s32 count;
     if (btlCommandPanelWork->state == 2) {
-        resource = (u8 *)btlLinkedSelectionTaskBuffer;
-        index = *(s8 *)resource;
-        count = *(s16 *)(resource + index * 2);
+        resource = btlLinkedSelectionTaskBuffer;
+        index = resource->selectedRow;
+        count = resource->rowFade[index - 1];
         if (count >= 0x80) {
-            if (*(s32 *)(resource + index * 8 + 4) >= 11) {
+            if (resource->positions[index - 1].x >= 11) {
                 return 1;
             }
         }
@@ -2128,7 +2102,6 @@ void btlGetActorClassPair(s8 classId, u32 *first, u32 *second) {
 extern SndPad D_00324510;
 
 
-extern u32 btlLinkedSelectionTaskBuffer;
 
 extern u8 D_00359160[];
 
@@ -2204,10 +2177,10 @@ void func_001AB270(void) {
         break;
     case 4:
         for (i = 0; i < 5; i++) {
-            btlCommandPanelWork->slotsA[i].fadeValue -= *(u16 *)(btlTrackedTaskHandles + 0x3E);
+            btlCommandPanelWork->slotsA[i].fadeValue -= btlTrackedTaskHandles->status.bytes.fadeStep;
             btlCommandPanelWork->slotsA[i].fadeValue = btlCommandPanelWork->slotsA[i].fadeValue <= 0 ? 0 :
                 btlCommandPanelWork->slotsA[i].fadeValue > 0x80 ? 0x80 : btlCommandPanelWork->slotsA[i].fadeValue;
-            btlCommandPanelWork->slotsB[i].fadeValue -= *(u16 *)(btlTrackedTaskHandles + 0x3E);
+            btlCommandPanelWork->slotsB[i].fadeValue -= btlTrackedTaskHandles->status.bytes.fadeStep;
             btlCommandPanelWork->slotsB[i].fadeValue = btlCommandPanelWork->slotsB[i].fadeValue <= 0 ? 0 :
                 btlCommandPanelWork->slotsB[i].fadeValue > 0x80 ? 0x80 : btlCommandPanelWork->slotsB[i].fadeValue;
         }
@@ -2608,7 +2581,7 @@ void btlSetTrackedTaskDisplayMode(s32 mode) {
 void func_001AD6D8(s32 unused) {
     btlGetRuntime();
     kwlnTaskGetUserValue(btlGetTrackedTaskHandle(7));
-    *(u8 *)(btlTrackedTaskHandles + 0x48) = 0;
+    btlTrackedTaskHandles->fadeKindsCached = 0;
 }
 
 u32 btlHasRegisteredPsechgPanelTask(void) {
@@ -2708,18 +2681,19 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     return 1;
 }
 
-s32 btlGetTrackedTaskHandle(s32 arg0) {
-    s32 temp_v0;
+/* Query one of the fourteen task slots retained by the command UI. */
+s32 btlGetTrackedTaskHandle(s32 slotIndex) {
+    s32 *handle;
 
-    temp_v0 = btlTrackedTaskHandles + arg0 * 4;
-    return *(s32 *)temp_v0;
+    handle = &btlTrackedTaskHandles->handles[slotIndex];
+    return *handle;
 }
 
-void btlSetTrackedTaskHandle(s32 arg0, s32 arg1) {
-    s32 temp_v0;
+void btlSetTrackedTaskHandle(s32 slotIndex, s32 taskHandle) {
+    s32 *handle;
 
-    temp_v0 = btlTrackedTaskHandles + arg0 * 4;
-    *(s32 *)temp_v0 = arg1;
+    handle = &btlTrackedTaskHandles->handles[slotIndex];
+    *handle = taskHandle;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001ADCE8);
@@ -2999,11 +2973,11 @@ s32 btlUpdatePhaseGatedTaskUntilTimeout(s64 task) {
         return 0;
     }
     func_001B1518(state);
-    if (*(s8 *)(btlTrackedTaskHandles + 0x54) == 0) {
+    if (btlTrackedTaskHandles->phaseGate == 0) {
         func_001B19F8(state);
     }
     func_001B1C88(state);
-    if (*(s8 *)(btlTrackedTaskHandles + 0x54) == 0) {
+    if (btlTrackedTaskHandles->phaseGate == 0) {
         func_001B2390(state);
     }
     ++state[0];
@@ -3235,7 +3209,7 @@ void btlReleaseWindowTask(s64 task) {
     sdfReleaseChipBlock(kwlnTaskGetUserValue(task));
     btlSetTrackedTaskHandle(13, 0);
     battle->flags |= 0x100000;
-    *(u8 *)(btlTrackedTaskHandles + 0x3D) = 0;
+    btlTrackedTaskHandles->status.bytes.blocked = 0;
     evtFinishMessageWindowAndNotify();
 }
 
@@ -3243,16 +3217,17 @@ extern u8 btlSoundSlotDefaults[];
 
 void btlInitSoundSlotTable(void) {
     u8 initial[0x20];
-    u8 *allocated;
+    BattleSelectionWork *allocated;
     u32 *source;
-    u32 *destination;
+    s32 *destination;
     s16 *state;
     s32 i;
     memcpy(initial, btlSoundSlotDefaults, sizeof(initial));
     allocated = sdfAllocAndClearQuadwords(0x30);
-    btlLinkedSelectionTaskBuffer = (u32)allocated;
-    state = (s16 *)(allocated + 2);
-    destination = (u32 *)(allocated + 0x10);
+    btlLinkedSelectionTaskBuffer = allocated;
+    state = allocated->rowFade;
+    /* Retail copies coordinate pairs with its cursor on each row's Y word. */
+    destination = &allocated->positions[0].y;
     source = (u32 *)initial;
     for (i = 3; i >= 0; i--) {
         *state = 0;
@@ -3301,20 +3276,20 @@ void btlReleaseStwrPanelResource(s64 arg0) {
 }
 
 s32 btlAreLinkedSceneCountersAtThreshold(void) {
-    s32 base;
+    BattleSelectionWork *base;
     s32 i;
     if (btlGetTrackedTaskHandle(8) == 0) {
         if (btlGetTrackedTaskHandle(2) != 0) {
             base = btlLinkedSelectionTaskBuffer;
             for (i = 0; i < 4; i++) {
-                if (*(s16 *)(base + 2 + i * 2) < 0x80) {
+                if (base->rowFade[i] < 0x80) {
                     return 0;
                 }
-                if (*(s32 *)(base + 0xC + i * 8) < 11) {
+                if (base->positions[i].x < 11) {
                     return 0;
                 }
             }
-            if (*(s32 *)(base + 0x18) == *(s32 *)(base + 0x10) + 23) {
+            if (base->positions[1].y == base->positions[0].y + 23) {
                 return 1;
             }
         }
@@ -3534,8 +3509,8 @@ s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
         if (first == 0 && second == 0) {
             return -128;
         }
-        if (*(s8 *)(btlTrackedTaskHandles + 0x3D) == 0) {
-            return *(s8 *)(btlTrackedTaskHandles + 0x3C);
+        if (btlTrackedTaskHandles->status.bytes.blocked == 0) {
+            return btlTrackedTaskHandles->status.bytes.state;
         }
         return 0;
     }
@@ -3544,27 +3519,20 @@ s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BCB88);
 
-typedef struct BtlSceneFlowState {
-    u8 pad00[0x3C];
-    s8 state;
-    u8 pad3D[3];
-    s32 counter;
-    s32 threshold;
-} BtlSceneFlowState;
 
 s32 func_001BCCE0(void) {
-    BtlSceneFlowState *flow;
+    BattleTrackedTaskWork *flow;
     s64 task;
     s32 counter;
 
     if (btlTrackedTaskHandles != 0) {
         task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
-        flow = (BtlSceneFlowState *)btlTrackedTaskHandles;
-        switch (flow->state) {
+        flow = btlTrackedTaskHandles;
+        switch (flow->status.bytes.state) {
         case 1:
             flow->counter++;
             if (flow->counter >= flow->threshold) {
-                flow->state = 2;
+                flow->status.bytes.state = 2;
             }
             break;
         case 3:
@@ -3580,7 +3548,7 @@ s32 func_001BCCE0(void) {
                 if (task != 0) {
                     func_001B83D8(*(s32 *)(kwlnTaskGetUserValue(task) + 0x2C), 2, 0);
                 }
-                ((BtlSceneFlowState *)btlTrackedTaskHandles)->state = 0;
+                btlTrackedTaskHandles->status.bytes.state = 0;
             }
             break;
         }
@@ -3748,9 +3716,9 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     battle = (BattleController *)btlGetRuntime();
     modeFlags = (s8 *)datBattleSceneRecords;
     if (modeFlags[battle->mode * 0x28] != 0) {
-        color = *(s16 *)(btlLinkedSelectionTaskBuffer + 2) | 0x504F6100;
+        color = btlLinkedSelectionTaskBuffer->rowFade[0] | 0x504F6100;
     } else {
-        color = *(s16 *)(btlLinkedSelectionTaskBuffer + 2) | 0x89FEFF00;
+        color = btlLinkedSelectionTaskBuffer->rowFade[0] | 0x89FEFF00;
     }
     itfSetTextDrawLimit(0x13);
     handle = func_00197760(0x1A0, 0xA60, 0xFF0010, color, (s32)text, 0);
@@ -4131,7 +4099,7 @@ s32 fldCountSceneFadeKinds(BattleController *scene, s32 *outFadeCount) {
     s32 countA = 0;
     s32 countB = 0;
     u32 slotCount;
-    s8 *global;
+    BattleTrackedTaskWork *global;
 
     while (fadeCount < 8 && record[fadeCount].slot.a != 0) {
         if (record[fadeCount].slot.a == 1) {
@@ -4142,12 +4110,12 @@ s32 fldCountSceneFadeKinds(BattleController *scene, s32 *outFadeCount) {
         }
         fadeCount++;
     }
-    global = (s8 *)btlTrackedTaskHandles;
-    if (global[0x48] == 0) {
+    global = btlTrackedTaskHandles;
+    if (global->fadeKindsCached == 0) {
         if (countA != 0 || countB != 0) {
-            *(s32 *)(global + 0x4C) = countA;
-            *(s32 *)(global + 0x50) = countB;
-            global[0x48] = 1;
+            global->fadeKindACount = countA;
+            global->fadeKindBCount = countB;
+            global->fadeKindsCached = 1;
         }
     }
     fadeCount--;
@@ -4168,7 +4136,7 @@ s32 fldSceneCleanupTask(s64 task) {
     if ((scene->flags & 0x200) == 0) {
         return 0;
     }
-    if (*(u32 *)(btlTrackedTaskHandles + 0x38) == 1 && *(s8 *)(btlTrackedTaskHandles + 0x3D) == 0) {
+    if (btlTrackedTaskHandles->presentationState == 1 && btlTrackedTaskHandles->status.bytes.blocked == 0) {
         return 0;
     }
     func_001C4278();

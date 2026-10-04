@@ -1,6 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "eff_queue.h"
 
 extern void mdlAddEntryPlain(s32, u32, u32);
 
@@ -8409,8 +8410,6 @@ extern char D_004386D0[];
 
 extern char D_004386D8[];
 
-extern void effUpdateResourceQueue(u32 *, void *, u8 *);
-
 extern void fileWriteToPfs(u32, char *);
 
 extern s32 func_0035C860(char *, char *, ...);
@@ -8418,17 +8417,6 @@ extern s32 func_0035C860(char *, char *, ...);
 extern void func_002D50D8(u32, char *);
 
 extern void func_002D55B0(u32, char *);
-
-/* Queue output: filename at 0x32 and completion state at 0x64. */
-typedef struct EffQueueRecord {
-    u8 pad_00[0x32];
-    char name[0x32];
-    union {
-        s32 signedState; // 0x64
-        u32 state;
-    } completion;
-    u8 pad_68[8];
-} EffQueueRecord;
 
 /* Asset selection request and table entry use different ID offsets. */
 typedef struct EffAssetRequest {
@@ -8446,16 +8434,16 @@ typedef struct EffAssetIdentifier {
 } EffAssetIdentifier;
 
 s32 effPollPrimaryFile(void) {
-    u8 request[0x70];
+    EffQueueRecord request;
     char path[0x70];
     s32 result = 0x400001;
 
-    effUpdateResourceQueue(D_0042CF58, D_004386D0, request);
-    if (((EffQueueRecord *)request)->completion.signedState == 2) {
+    effUpdateResourceQueue(D_0042CF58, D_004386D0, &request);
+    if (request.completion.signedState == 2) {
         result = 0x400000;
-    } else if (((EffQueueRecord *)request)->completion.signedState == 1) {
+    } else if (request.completion.signedState == 1) {
         if (effQueuedFileHandle != 0) {
-            func_0035C860(path, D_004386D8, D_0042CF58, request);
+            func_0035C860(path, D_004386D8, D_0042CF58, request.nameWithPrefix);
             result = 0x400002;
             fileWriteToPfs(effQueuedFileHandle, path);
         }
@@ -8469,17 +8457,17 @@ void effQueueNamedResourceRequest(void) {
 }
 
 s32 effPollNamedFile(void) {
-    u8 request[0x70];
+    EffQueueRecord request;
     char path[0x70];
     s32 result = 0x400001;
 
-    effUpdateResourceQueue(D_0042CF70, D_004386E0, request);
-    if (((EffQueueRecord *)request)->completion.signedState == 2) {
+    effUpdateResourceQueue(D_0042CF70, D_004386E0, &request);
+    if (request.completion.signedState == 2) {
         result = 0x400000;
-    } else if (((EffQueueRecord *)request)->completion.signedState == 1) {
+    } else if (request.completion.signedState == 1) {
         if (effFileQueue != 0) {
-            strcpy((char *)D_0045C1A0, ((EffQueueRecord *)request)->name);
-            func_0035C860(path, D_004386D8, D_0042CF70, request);
+            strcpy((char *)D_0045C1A0, request.name);
+            func_0035C860(path, D_004386D8, D_0042CF70, request.nameWithPrefix);
             result = 0x400002;
             func_002D50D8(effFileQueue, path);
         }
@@ -8493,17 +8481,17 @@ void effQueueAttachedResourceRequest(void) {
 }
 
 s32 effPollAttachedFile(void) {
-    u8 request[0x70];
+    EffQueueRecord request;
     char path[0x70];
     s32 result = 0x400001;
 
-    effUpdateResourceQueue(D_0042CF70, D_004386E8, request);
-    if (((EffQueueRecord *)request)->completion.signedState == 2) {
+    effUpdateResourceQueue(D_0042CF70, D_004386E8, &request);
+    if (request.completion.signedState == 2) {
         result = 0x400000;
-    } else if (((EffQueueRecord *)request)->completion.signedState == 1) {
+    } else if (request.completion.signedState == 1) {
         if (effFileQueue != 0) {
-            strcpy((char *)D_0045C1A0, ((EffQueueRecord *)request)->name);
-            func_0035C860(path, D_004386D8, D_0042CF70, request);
+            strcpy((char *)D_0045C1A0, request.name);
+            func_0035C860(path, D_004386D8, D_0042CF70, request.nameWithPrefix);
             result = 0x400002;
             func_002D55B0(effFileQueue, path);
         }
@@ -9469,7 +9457,7 @@ void effQueueResource(s32 unused, s32 entry) {
     btlResourceRecordSetName(effQueuedResourceNameRecord, entry);
 }
 
-void effUpdateResourceQueue(u32 *result, void *queueData, u8 *record) {
+void effUpdateResourceQueue(u32 *result, void *queueData, EffQueueRecord *record) {
     u32 state;
 
     if (effQueuedResourceNameRecord == 0) {
@@ -9478,16 +9466,16 @@ void effUpdateResourceQueue(u32 *result, void *queueData, u8 *record) {
         return;
     }
     func_0020E380(effQueuedResourceNameRecord);
-    btlFormatResourceNameWithPrefix(effQueuedResourceNameRecord, record);
-    btlFormatResourceNameWithoutPrefix(effQueuedResourceNameRecord, record + 0x32);
+    btlFormatResourceNameWithPrefix(effQueuedResourceNameRecord, record->nameWithPrefix);
+    btlFormatResourceNameWithoutPrefix(effQueuedResourceNameRecord, record->name);
     state = func_0020E7B0(effQueuedResourceNameRecord);
-    ((EffQueueRecord *)record)->completion.state = state;
+    record->completion.state = state;
     if (state == 1) {
         if (func_0020E858(effQueuedResourceNameRecord, result) != 0) {
             func_0020E368(effQueuedResourceNameRecord);
             effQueuedResourceNameRecord = 0;
         } else {
-            ((EffQueueRecord *)record)->completion.state = 0;
+            record->completion.state = 0;
         }
     }
 }
