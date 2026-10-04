@@ -3704,7 +3704,7 @@ typedef struct EffectSlotNode54 {
     u32 jobBuffer;         // 0x3C
     u32 *queues;           // 0x40
     u32 queueBuffer;       // 0x44
-    u32 resourceHolder;    // 0x48
+    RefObj *resourceHolder; // 0x48
     u32 record;            // 0x4C
     u16 active;            // 0x50
 } EffectSlotNode54;
@@ -3849,6 +3849,8 @@ s32 effRecreateSurfaceNodeFromWork(u8 *work) {
 }
 
 
+void func_002E7F60(EffectSlotNode54 *, u8 *);
+
 u32 effCreateSurfaceGridWithConfiguration(u8 *work) {
     EffGridRecord *config = (EffGridRecord *)((EffectSlotNode54 *)work)->record;
     s32 arg = (s32)config->params;
@@ -3860,7 +3862,74 @@ u32 effCreateSurfaceGridWithConfiguration(u8 *work) {
     return object;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E7F60);
+void func_002E7F60(EffectSlotNode54 *dst, u8 *work) {
+    EffectSlotNode54 *src = (EffectSlotNode54 *)work;
+    u32 count;
+    s32 size;
+    u32 i;
+
+    switch (src->kind) {
+    case 1:
+    case 2:
+    case 4:
+        if (dst->billResource != 0) {
+            billDispatchByKind(dst->billResource);
+        }
+        dst->billResource = billCloneObjectRetainingSharedData(src->billResource);
+        billMarkKindOneFlag(dst->billResource);
+        if (dst->record != 0) {
+            billSetBillboardMode(dst->billResource, ((EffGridRecord *)dst->record)->bill->mode);
+        }
+        break;
+    case 5:
+        count = ((EffGridRecord *)src->record)->count;
+        if (dst->jobBuffer != 0) {
+            for (i = 0; i < count; i++) {
+                fileJobDestroy(dst->jobs[i]);
+            }
+            sdfReleaseResourceAllocation(dst->jobBuffer);
+            dst->jobs = 0;
+            dst->jobBuffer = 0;
+        }
+        size = count * 4;
+        if (size == 0) {
+            return;
+        }
+        dst->jobBuffer = (u32)sdfAllocGeneralBlock(size);
+        dst->jobs = (u32 *)sdfResourceRetainAddress(dst->jobBuffer);
+        for (i = 0; i < count; i++) {
+            dst->jobs[i] = fileJobCreateChild(src->jobs[0]);
+        }
+        break;
+    case 6:
+        count = ((EffGridRecord *)src->record)->count;
+        if (dst->queueBuffer != 0) {
+            for (i = 0; i < count; i++) {
+                fileQueueDestroy(dst->queues[i]);
+            }
+            sdfReleaseResourceAllocation(dst->queueBuffer);
+            dst->queues = 0;
+            dst->queueBuffer = 0;
+        }
+        size = count * 4;
+        if (size == 0) {
+            return;
+        }
+        dst->queueBuffer = (u32)sdfAllocGeneralBlock(size);
+        dst->queues = (u32 *)sdfResourceRetainAddress(dst->queueBuffer);
+        for (i = 0; i < count; i++) {
+            dst->queues[i] = (u32)fileQueueClone((void *)src->queues[0]);
+        }
+        break;
+    case 7:
+        if (dst->resourceHolder != 0) {
+            effReleaseReferenceHolder((u32 *)dst->resourceHolder);
+        }
+        dst->resourceHolder = effReferenceObjectRetain(src->resourceHolder);
+        break;
+    }
+    dst->kind = src->kind;
+}
 
 typedef struct EffMotionSetup {
     u16 mode;       // 0x00
