@@ -28,9 +28,20 @@ typedef struct {
     DspListNode *first; /* 0x08 */
 } DspListHead;
 
+typedef struct MovieCueNode MovieCueNode;
+
+typedef struct MovieCueLink {
+    u8 pad00[8];
+    struct MovieCueLink *next; /* 0x08 */
+    u8 pad0C[4];
+    MovieCueNode *cue; /* 0x10 */
+} MovieCueLink;
+
 typedef struct {
     u32 allocation;
-    u8 pad04[0xC];
+    u8 pad04[4];
+    MovieCueLink *firstCue; /* 0x08 */
+    u8 pad0C[4];
     u32 userData;
     u32 callback14;
     void (*onDestroy)(s32, u32);
@@ -67,14 +78,15 @@ void mnuDrawIconAlpha(s32 x, s32 y, s32 z, s32 alpha, s32 param) {
     func_002BF4E0(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), 0, D_0036C698[0], 0x25, param);
 }
 
-typedef struct MovieCueNode {
-    u8 pad00[8];
+struct MovieCueNode {
+    s32 x;
+    s32 y;
     s32 framesLeft;       /* 0x08 */
     s32 duration;         /* 0x0C */
     u8 pad10;
     s8 cueIndex;          /* 0x11 */
     u8 enabled;           /* 0x12 */
-} MovieCueNode;
+};
 
 extern void func_0025BA20(s32, s32, u8 *, s8);
 extern u8 *sdfListRemoveNode(s32, u8 *);
@@ -137,7 +149,34 @@ void func_0025BDD0(MovieResourceGroup *resources) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025BF18);
+extern f32 sdfSinPoly(f32);
+
+/* Draw every live cue in the ten task slots using its remaining-life sine fade. */
+void func_0025BF18(s32 x, s32 y, s32 depth, s32 alpha,
+                   MovieResourceGroup *resources, s32 drawArg) {
+    SdfTaskHeader **slot = resources->tasks;
+    s32 i;
+
+    for (i = 9; i >= 0; i--, slot++) {
+        SdfTaskHeader *group = *slot;
+
+        if (group != NULL) {
+            MovieCueLink *link = group->firstCue;
+
+            if (link != NULL) {
+                do {
+                    MovieCueNode *cue = link->cue;
+                    f32 fade = sdfSinPoly(((f32)cue->framesLeft /
+                                           (f32)cue->duration) * 3.14159265f);
+
+                    mnuDrawIconAlpha(x + cue->x, y + cue->y, depth,
+                                     (s32)((f32)alpha * fade), drawArg);
+                    link = link->next;
+                } while (link != NULL);
+            }
+        }
+    }
+}
 
 typedef struct {
     u8 pad00[0x6C];
@@ -152,7 +191,11 @@ u32 mnuRequestEffectResource(u32 ctx, u32 config) {
 }
 
 typedef struct MenuListNode {
-    u8 pad00[0x10];
+    s32 frame;
+    u8 pad04[4];
+    s32 recordAddress;
+    s16 kind;
+    u8 pad0E[2];
     struct MenuListNode *next; /* 0x10 */
 } MenuListNode;
 
@@ -198,7 +241,8 @@ typedef struct MnuSceneRenderWork {
     u8 pad488[0x114];
     s16 cursorX; /* 0x59C */
     s16 cursorY; /* 0x59E */
-    u8 pad5A0[0xD];
+    u8 pad5A0[0xC];
+    u8 displayFlags; /* 0x5AC */
     u8 cursorMoving; /* 0x5AD */
 } MnuSceneRenderWork;
 
@@ -429,7 +473,102 @@ void mnuAdvanceDisplayGridAndLoopingFrame(s32 gridOwner, s32 animationContext) {
     mnuAdvanceLoopingFrame((s32 *)(gridOwner + 0x490));
 }
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D2F8);
+typedef struct MnuRequirementIds {
+    u16 ids[4];
+} MnuRequirementIds;
+
+typedef struct MnuPanelRegion {
+    u16 x;
+    u16 y;
+} MnuPanelRegion;
+
+typedef struct MnuPanelRegions {
+    MnuPanelRegion rows[4];
+} MnuPanelRegions;
+
+extern const MnuRequirementIds D_003BC4D8[];
+extern const MnuPanelRegions D_003AFA18;
+extern u32 mnuGetSelectedNodeValue(void);
+extern s32 prfReqCheckWithFallback(void *, u16);
+extern s32 mdlFlagTest(s32);
+extern void sdfSubmitGsTestOneRegisterPacket();
+extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
+extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
+extern void uiDrawActiveSurfaceRegion(s32);
+extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
+
+/* Build the mantra selection surface, including requirement-dependent panels,
+ * then draw the grid and restore the surface state for the caller. */
+void func_0025D2F8(s32 x, s32 y, s32 unusedDepth, s32 alpha,
+                   MnuSceneRenderWork *gridOwner, s32 context) {
+    MnuProfileOwner *profileOwner = (MnuProfileOwner *)mnuGetSelectedNodeValue();
+
+    mnuAdvanceDisplayGridAndLoopingFrame((s32)gridOwner, (s32)profileOwner);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, context);
+    uiDrawUniformColorRect(0, 0, -1, 0x2000, 0xE00, 0, context);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, context);
+    uiDrawActiveSurfaceRegion(context);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, context);
+
+    {
+        MnuRequirementIds requirementIds = D_003BC4D8[0];
+        MnuPanelRegions panelRegions = D_003AFA18;
+        u16 *requirement;
+        MnuPanelRegion *region;
+        s32 remaining;
+
+        if (prfReqCheckWithFallback((void *)profileOwner->unit,
+                                    requirementIds.ids[0]) != 0) {
+            uiDrawUniformColorRect(0x1980, 0, 0, 0x680, 0x280, 0x80,
+                                   context);
+            uiDrawUniformColorRect(0x1BF0, panelRegions.rows[0].y << 3, 0,
+                                   0x410, 0x4B0, 0x80, context);
+        }
+
+        region = &panelRegions.rows[1];
+        requirement = &requirementIds.ids[1];
+        for (remaining = 2; remaining >= 0;
+             remaining--, requirement++, region++) {
+            if (prfReqCheckWithFallback((void *)profileOwner->unit,
+                                        *requirement) != 0) {
+                uiDrawUniformColorRect(region->x << 4, region->y << 3, 0,
+                                       0x200, 0x100, 0x80, context);
+            }
+        }
+
+        if (prfReqCheckWithFallback((void *)profileOwner->unit, 0x4E) != 0 ||
+            mdlFlagTest(0x908) != 0) {
+            uiDrawUniformColorRect(0x1C90, 0x640, 0, 0x200, 0xA0, 0x80,
+                                   context);
+        }
+        if (prfReqCheckWithFallback((void *)profileOwner->unit, 0x4F) != 0) {
+            uiDrawUniformColorRect(0x1C90, 0x6E0, 0, 0x200, 0xA0, 0x80,
+                                   context);
+        }
+    }
+
+    {
+        u32 displayFlags = gridOwner->displayFlags;
+
+        if (displayFlags & 1) {
+            uiDrawUniformColorRect(0, 0x280, 0, 0x1BF0, 0xB80, 0x80,
+                                   context);
+        } else {
+            uiDrawUniformColorRect(0, 0x280, 0, 0x1980, 0xB80, 0x80,
+                                   context);
+        }
+    }
+    uiDrawUniformColorRect(0x1980, 0xC10, 0, 0x680, 0x1F0, 0x80,
+                           context);
+    sdfDispatchSurfaceWithPreparedTexturePacket(context);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, context);
+    sdfSubmitGsTestOneRegisterPacket(0x50000, context);
+    func_0025D100(x, y, 1, alpha, profileOwner, (s32)gridOwner, context);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, context);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, context);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, context);
+    sdfSubmitGsTestOneRegisterPacket(0x5100DL, context);
+}
 
 extern f32 func_002C84F0(f32 *);
 extern s32 D_003BC4E0;
@@ -500,7 +639,60 @@ void mnuDrawMantraCostIcon(s32 x, s32 y, s32 depth, s32 recordAddress, s32 amoun
     func_0024E260(x - MNU_MANTRA_COST_ICON_X_OFFSET, y + MNU_MANTRA_COST_ICON_Y_OFFSET, depth, amount, table.b[*(u16 *)(recordAddress + 4)], drawArg);
 }
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D7F8);
+/* Advance and draw one transient cost/list notification; report expiry at frame 11. */
+s32 func_0025D7F8(MenuListNode *node, s32 index, s32 drawArg) {
+    s32 frame = node->frame;
+    s32 opening = frame < 7;
+    s32 context = drawArg;
+    f32 progress;
+
+    if (opening != 0) {
+        progress = (f32)frame / 6.0f;
+        if (progress > 1.0f) {
+            progress = 1.0f;
+        }
+        mnuDrawMantraCostIcon(0, 0, 0, node->recordAddress,
+                              (s32)(progress * 128.0f), context);
+    }
+
+    if (node->next == NULL) {
+        if (opening == 0) {
+            mnuDrawMantraCostIcon(0, 0, 0, node->recordAddress, 0x80,
+                                  context);
+        }
+    }
+
+    if (opening != 0) {
+        progress = (f32)frame / 6.0f;
+        if (node->kind == 1) {
+            func_0024E260((s32)(progress * -16.0f + -27.0f), 52, 1,
+                          (s32)(progress * 96.0f + 32.0f), 0x18, context);
+        } else if (node->kind == 2) {
+            func_0024E260((s32)(progress * 16.0f + -27.0f), 52, 1,
+                          (s32)(progress * 96.0f + 32.0f), 0x19, context);
+        }
+    }
+
+    if (frame >= 4) {
+        if (frame < 9) {
+            progress = (f32)(frame - 3) / 6.0f;
+            progress = sdfSinPoly(progress * 3.14159265f);
+            if (node->kind == 1) {
+                func_0024E260(-27, 52, 1, (s32)(progress * 128.0f),
+                              0x16, context);
+            } else if (node->kind == 2) {
+                func_0024E260(-27, 52, 1, (s32)(progress * 128.0f),
+                              0x17, context);
+            }
+        }
+    }
+
+    node->frame++;
+    if (frame < 11) {
+        return 0;
+    }
+    return 1;
+}
 
 MenuListNode *mnuAllocateMenuListNode(void) {
     MenuListNode *node = (MenuListNode *)sdfAllocSizeClassBlock(0x14);
