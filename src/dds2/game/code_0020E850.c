@@ -375,15 +375,48 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F048);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F200);
 
-typedef struct BtlCommandTargetResult {
-    u8 pad00[8];
-    u32 kind;
-    u8 pad0C[4];
-    u8 skipped;
+typedef struct BtlOperandEntry {
+    s32 unk00;
+    s32 unk04;
+    s32 unk08;
+    s32 unk0C;
+    s32 unk10;
+    u8 pad14[4];
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    u8 pad24[4];
+    u32 flags;
+} BtlOperandEntry;
+
+typedef struct BtlOperandGroup {
+    u8 count;
+    u8 pad01[7];
+    u32 unk08;
+    s32 unk0C;
+    u8 unk10;
     u8 pad11[3];
-    u8 blocked;
-    u8 pad15[0x587];
-} BtlCommandTargetResult;
+    u8 unk14;
+    u8 pad15[7];
+    BtlOperandEntry entries[32];
+} BtlOperandGroup;
+
+/* Shared command/link layout also used by the action-execution unit. */
+typedef struct BattleActionLinkState {
+    u8 pad00[0x18];
+    BtlUnit *unit;
+    u8 pad1C[8];
+    union {
+        u32 cursorKind;
+        u16 cursorKindLow;
+    };
+    u8 pad28[0x1C];
+    s32 resourceNodeIndex;
+    u8 pad48[0x18];
+    s32 actorIndices;
+    u8 pad64[0x24];
+    BtlOperandGroup *groups;
+} BattleActionLinkState;
 
 typedef struct BtlCommandEffect {
     s32 command;
@@ -405,19 +438,19 @@ extern BtlUnit *btlGetIndexListEntry(s32, u32);
 extern s32 btlCheckCommandRequiredEntryMatches(s32, s32);
 extern s32 effOffsetIfOwnerFlagClear(BtlEffActor *, s32);
 
-s16 func_0020F3B0(BtlTask *task, s32 command) {
-    BtlCommandTargetResult *result = *(BtlCommandTargetResult **)((u8 *)task + 0x88);
+s16 func_0020F3B0(BattleActionLinkState *link, s32 command) {
+    BtlOperandGroup *result = link->groups;
     u32 i;
-    u32 count = btlGetIndexListCount(task->targetList);
+    u32 count = btlGetIndexListCount(link->actorIndices);
     s32 rejected = 0;
     s16 effect;
     u8 adjustSide;
 
     for (i = 0; i < count; i++, result++) {
-        if (result->skipped) {
+        if (result->unk10) {
             rejected++;
         } else {
-            switch (result->kind) {
+            switch (result->unk08) {
             case 2:
             case 4:
             case 0x10000:
@@ -425,7 +458,7 @@ s16 func_0020F3B0(BtlTask *task, s32 command) {
                 rejected++;
                 break;
             default:
-                if (result->blocked) {
+                if (result->unk14) {
                     rejected++;
                 }
                 break;
@@ -444,7 +477,7 @@ s16 func_0020F3B0(BtlTask *task, s32 command) {
             break;
         }
     }
-    if (btlCheckCommandRequiredEntryMatches(task->targetList, command) != 0) {
+    if (btlCheckCommandRequiredEntryMatches(link->actorIndices, command) != 0) {
         if (datCommandRecords[command].requiredFlags == 0x800 ||
             datCommandRecords[command].requiredFlags == 0x1000) {
             effect = 0x6A;
@@ -452,17 +485,17 @@ s16 func_0020F3B0(BtlTask *task, s32 command) {
             effect = 0x84;
         }
     }
-    effect = effOffsetIfOwnerFlagClear((BtlEffActor *)task->unit, effect);
+    effect = effOffsetIfOwnerFlagClear((BtlEffActor *)link->unit, effect);
     if (adjustSide) {
-        s32 ownerSide = task->unit->flags & 0x600;
+        s32 ownerSide = link->unit->flags & 0x600;
         s32 targetSides = 0;
 
-        count = btlGetIndexListCount(task->targetList);
+        count = btlGetIndexListCount(link->actorIndices);
         for (i = 0; i < count; i++) {
-            targetSides |= btlGetIndexListEntry(task->targetList, i)->flags & 0x600;
+            targetSides |= btlGetIndexListEntry(link->actorIndices, i)->flags & 0x600;
         }
         if (ownerSide != targetSides && targetSides != 0) {
-            effect = (task->unit->flags & 0x200) ? effect + 1 : effect - 1;
+            effect = (link->unit->flags & 0x200) ? effect + 1 : effect - 1;
         }
     }
     return effect;
