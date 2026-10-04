@@ -1195,7 +1195,53 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A5C40);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A6118);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A6570);
+typedef struct BtlHitResult {
+    s32 amount;
+    u8 pad04[0x24];
+} BtlHitResult;
+
+typedef struct BtlTargetResult {
+    u8 hitCount;
+    u8 pad01[7];
+    u32 kind;
+    u8 pad0C[4];
+    u8 skipped;
+    u8 pad11[3];
+    u8 blocked;
+    u8 pad15[7];
+    BtlHitResult hits[64];
+} BtlTargetResult;
+
+s32 func_001A6570(u8 *action) {
+    BtlTargetResult *result = *(BtlTargetResult **)(action + 0x80);
+    u32 count = btlGetIndexListCount(*(s32 *)(action + 0x60));
+    u32 i;
+    u32 j;
+    s32 total = 0;
+
+    for (i = 0; i < count; i++, result++) {
+        if (result->skipped != 0 || result->blocked != 0) {
+            continue;
+        }
+        switch (result->kind) {
+        case 2:
+        case 4:
+        case 0x10000:
+        case 0x20000:
+        case 0x40000:
+            break;
+        default:
+            if (*(s32 *)(action + 0x18) !=
+                btlGetIndexListEntry(*(s32 *)(action + 0x60), i)) {
+                for (j = 0; j < result->hitCount; j++) {
+                    total += result->hits[j].amount;
+                }
+            }
+            break;
+        }
+    }
+    return total;
+}
 
 s32 btlTestActorStatusPredicate(s32 object) {
     s32 (*predicate)(s32) = *(s32 (**)(s32))(btlGetRuntime() + 0x650);
