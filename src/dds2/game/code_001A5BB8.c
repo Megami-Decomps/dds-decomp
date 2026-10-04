@@ -4234,7 +4234,51 @@ u32 func_001B8038(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8078);
+typedef struct BtlGuidePanelWork {
+    s8 state;
+    u8 pad01[0x1B];
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+} BtlGuidePanelWork;
+
+extern s32 func_001BB5C0(s64);
+extern void btlReleaseMessageWindowTask(void);
+extern u32 btlHasRegisteredGuidePanelTask(void);
+extern u32 btlHasRegisteredSkillNamePanelTask(void);
+extern u32 btlHasRegisteredAphNamePanelTask(void);
+extern void btlSetTrackedTaskHandle(s32, s32);
+
+s32 func_001B8078(s32 arg0, s32 arg1) {
+    BattleController *context = (BattleController *)btlGetRuntime();
+    BtlGuidePanelWork *data;
+    s32 task;
+
+    if (btlHasRegisteredGuidePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
+    }
+    if (btlHasRegisteredSkillNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
+    }
+    if (btlHasRegisteredAphNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0), 0);
+    }
+    if (btlIsNamedBattleTaskRegistered() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(10), 0);
+    }
+    data = sdfAllocAndClearQuadwords(sizeof(*data));
+    data->state = 0;
+    data->unk1C = 0x18;
+    data->unk20 = 0x60;
+    data->unk24 = arg0;
+    data->unk28 = arg1;
+    task = kwlnTaskCreate(D_004367E0, 0x2B0E, 1, 1, func_001BB5C0,
+                          btlReleaseMessageWindowTask, data);
+    func_00101968(context->drawTask, task);
+    btlSetTrackedTaskHandle(9, task);
+    return 1;
+}
 
 void func_001B81B0(void) {
     u8 *puVar1;
@@ -4368,7 +4412,6 @@ extern void *sdfAllocAndClearQuadwords(s32);
 extern void func_001BF690(s32);
 extern void btlReleaseDialogTaskData(s32);
 extern s32 btlGetTrackedTaskHandle(s32);
-extern void btlSetTrackedTaskHandle(s32, s32);
 
 s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     s32 context = btlGetRuntime();
