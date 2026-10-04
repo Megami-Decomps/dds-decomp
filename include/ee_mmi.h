@@ -331,4 +331,10 @@
  */
 #define EE_SYNC() __asm__ volatile ("sync")
 
+/* Expand packed RGB5 channels into byte lanes (PEXT5), before replicating
+ * their high bits into the low three bits. DDS1 func_002D32B8 and DDS2
+ * func_0032C168 share this texture-intensity conversion instruction.
+ * Registers are selected by gcc; the output may reuse the input register. */
+#define EE_MMI_PEXT5(out, in) __asm__ volatile ("pext5 %0, %1" : "=r" (out) : "r" (in))
+
 #endif

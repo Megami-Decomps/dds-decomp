@@ -11,37 +11,7 @@ typedef struct {
     u32 value; /* 0x04 */
 } EventContext;
 
-typedef struct EvtMovieResourceSpec {
-    u32 unk00;
-    u32 unk04;
-    char format[4];
-    u32 unk0C;
-    u32 unk10;
-    s32 type;
-    u32 unk18;
-    u32 unk1C;
-} EvtMovieResourceSpec;
-
-extern char D_004373B8[];
-extern s32 sdfAllocGeneralBlock(s32 size);
-extern u32 *sdfResourceRetainAddress(s32 handle);
-extern void *memset(void *dst, s32 value, u32 size);
-extern void *copyResourceBytes(void *dst, const void *src, u32 size) __asm__("memcpy");
-
-s32 func_0024F9B8(void **address) {
-    EvtMovieResourceSpec spec;
-    s32 handle;
-    u32 *resource;
-
-    memset(&spec, 0, sizeof(spec));
-    memcpy(spec.format, D_004373B8, sizeof(spec.format));
-    spec.type = 9;
-    handle = sdfAllocGeneralBlock(sizeof(spec));
-    resource = sdfResourceRetainAddress(handle);
-    copyResourceBytes(resource, &spec, sizeof(spec));
-    *address = resource;
-    return handle;
-}
+INCLUDE_ASM(const s32, "game/code_0024F9B8", func_0024F9B8);
 
 extern s32 func_0035C860(char *output, const char *format, ...);
 

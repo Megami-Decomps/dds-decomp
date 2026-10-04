@@ -6,10 +6,6 @@
 
 extern u32 effMiscRandMod(void *state, u32 modulus);
 
-#define VU_LOAD10(p) __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(p))
-
-#define VU_STORE10(p) __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(p))
-
 typedef struct ActorEntrySlot {
     s16 code;
     s16 unk02;
@@ -3560,10 +3556,11 @@ void btlSetUnitPosition(u8 *object, void *position) {
         return;
     }
     context = btlGetRuntime();
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(position));
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(object + 0x60) : "memory");
-    __asm__ volatile(".set noreorder\n\tlqc2 vf11, 0(%0)\n\tvadd.xyzw vf10, vf10, vf11\n\t.set reorder" : : "r"(context));
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(world) : "memory");
+    VU0_LOAD_VF(vf10, position);
+    VU0_STORE_VF(vf10, object + 0x60);
+    VU0_LOAD_VF(vf11, context);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, world);
     if ((*(u32 *)(object + 0x110) & 2) != 0) {
         world[2] += *(f32 *)(object + 0x88);
         effObjSetInnerFirstVec(*(s32 *)(object + 0x31C), world);
@@ -3576,8 +3573,10 @@ void func_001D6300(u8 *object, void *position) {
 
 void btlGetUnitWorldPos(u8 *object, void *worldPosition) {
     s32 context = btlGetRuntime();
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\tlqc2 vf11, 0(%1)\n\tvadd.xyzw vf10, vf10, vf11\n\tsqc2 vf10, 0(%2)\n\t.set reorder"
-                     : : "r"(object + 0x60), "r"(context), "r"(worldPosition) : "memory");
+    VU0_LOAD_VF(vf10, object + 0x60);
+    VU0_LOAD_VF(vf11, context);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, worldPosition);
 }
 
 extern void btlRefreshUnitFxVectors(u8 *);
@@ -3640,7 +3639,7 @@ void btlSetAlternateEffectParameterOrMuzzlePosition(void) {
     if (btlSetActorAlternateEffectParameter() != 0) {
         return;
     }
-    __asm__ volatile(".set noreorder\n\tvsub.xyzw vf28, vf0, vf0\n\tvmr32.xyzw vf30, vf0\n\tvmove.xyzw vf31, vf0\n\tvaddw.x vf28, vf28, vf0w\n\tvmr32.xyzw vf29, vf30\n\t.set reorder");
+    VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
 }
 
 s32 btlIsUnitAtStoredPosition(u8 *object) {
@@ -3665,15 +3664,15 @@ void btlSetUnitRotation(u8 *object, void *rotation) {
     if ((*(u32 *)(object + 0x114) & 0x100) != 0) {
         return;
     }
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(rotation));
+    VU0_LOAD_VF(vf10, rotation);
     if ((*(u32 *)(object + 0x110) & 0x10) != 0) {
-        __asm__ volatile(".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r"(D_003A3B70));
+        VU0_LOAD_VF(vf11, D_003A3B70);
         effMiscQuatMultiplyVU();
     }
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(object + 0x70));
-    __asm__ volatile(".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r"(D_003A3B70));
+    VU0_STORE_VF_UNCLOBBERED(vf10, object + 0x70);
+    VU0_LOAD_VF(vf11, D_003A3B70);
     effMiscQuatMultiplyVU();
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(vector));
+    VU0_STORE_VF_UNCLOBBERED(vf10, vector);
     if ((*(u32 *)(object + 0x110) & 2) != 0) {
         effObjSetInnerSecondVec(*(s32 *)(object + 0x31C), vector);
     }
@@ -3740,11 +3739,11 @@ void btlUnitFaceTarget(u8 *object, u8 *target) {
     u8 result[16];
     if ((*(u32 *)(object + 0x110) & 0x80000) != 0) {
         btlUnitGetBodyPosVU(object);
-        VU_STORE10(first);
+        VU0_STORE_VF_UNCLOBBERED(vf10, first);
         btlUnitGetBodyPosVU(target);
-        VU_STORE10(second);
+        VU0_STORE_VF_UNCLOBBERED(vf10, second);
         if (btlAimHorizontalDirectionVU(first, second) != 0) {
-            VU_STORE10(result);
+            VU0_STORE_VF_UNCLOBBERED(vf10, result);
             btlSetUnitRotation(object, result);
         }
     }
@@ -3758,11 +3757,11 @@ void btlUnitFaceTargetScaled(u8 *object, u8 *target, f32 scale) {
     u8 result[16];
     if ((*(u32 *)(object + 0x110) & 0x80000) != 0) {
         btlUnitGetBodyPosVU(object);
-        __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(first));
+        VU0_STORE_VF_UNCLOBBERED(vf10, first);
         btlUnitGetBodyPosVU(target);
-        __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(second));
+        VU0_STORE_VF_UNCLOBBERED(vf10, second);
         btlAimHorizontalDirectionClampedVU(first, second, scale);
-        __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(result));
+        VU0_STORE_VF_UNCLOBBERED(vf10, result);
         btlSetUnitRotation(object, result);
     }
 }
@@ -4324,7 +4323,7 @@ void btlPrepareUnitStatusFxOnStart(s32 arg0) {
 u32 btlApplyUnitVectorFxWhenLoaded(u8 *arguments) {
     u8 *object = *(u8 **)(arguments + 0x14);
     if ((*(u32 *)(object + 0x110) & 2) != 0) {
-        __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(arguments));
+        VU0_LOAD_VF(vf10, arguments);
         evtSetUnitNormalizedDirection(*(s32 *)(object + 0x320), *(s32 *)(arguments + 0x10));
     }
     return 1;
@@ -4679,7 +4678,7 @@ u32 btlStiffenDamageShakeStep(u32 *task) {
         }
         if (*(u64 *)((u8 *)*task + 0x110) & 0x808000000000) {
             effObjFetchInnerFirstVec(*(u32 *)((u8 *)*task + 0x31C));
-            VU_STORE10(pos);
+            VU0_STORE_VF_UNCLOBBERED(vf10, pos);
             pos[0] += scale;
         } else {
             func_001D6300((u8 *)*task, pos);
@@ -4691,7 +4690,7 @@ u32 btlStiffenDamageShakeStep(u32 *task) {
     } else {
         if (*(u64 *)((u8 *)*task + 0x110) & 0x808000000000) {
             effObjFetchInnerFirstVec(*(u32 *)((u8 *)*task + 0x31C));
-            VU_STORE10(pos);
+            VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         } else {
             func_001D6300((u8 *)*task, pos);
             pos[2] += *(f32 *)((u8 *)*task + 0x88);
@@ -5222,7 +5221,7 @@ void btlInterpolateVectorStep(f32 *src) {
     vec[0] = src[4] * step + src[0];
     vec[1] = src[5] * step + src[1];
     vec[2] = src[6] * step + src[2];
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(vec) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 
 u32 func_001DB358(void) {
@@ -5597,25 +5596,17 @@ extern void btlClearRuntimeFlag2000(void);
 extern u8 D_0037E110[];
 
 void btlInitMotionTransformFromVectors(u8 *object, f32 *origin, f32 *direction) {
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(direction));
+    VU0_LOAD_VF(vf10, direction);
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(D_0037E110));
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "vmulax.xyzw ACC, vf28, vf10x\n\t"
-        "vmadday.xyzw ACC, vf29, vf10y\n\t"
-        "vmaddz.xyzw vf10, vf30, vf10z\n\t"
-        ".set reorder");
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(object + 0x10) : "memory");
-    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(1.0f));
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "vmulx.xyzw vf10, vf10, vf2x\n\t"
-        "vmove.xyzw vf11, vf10\n\t"
-        ".set reorder");
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(origin));
-    __asm__ volatile(".set noreorder\n\tvadd.xyzw vf10, vf10, vf11\n\t.set reorder");
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(object) : "memory");
+    VU0_LOAD_VF(vf10, D_0037E110);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, object + 0x10);
+    VU0_SET_VF2X(1.0f);
+    VU0_MUL_VF2X(vf10, vf10);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, origin);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, object);
     *(f32 *)(object + 0x20) = 1.0f;
     *(f32 *)(object + 0x24) = 0.6981317f;
     btlClearRuntimeFlag2000();
@@ -6678,7 +6669,7 @@ void btlAimEffectPoseAtUnit(u8 *actor) {
         if (btlSetActorEffectParameter(object, 1) == 0) {
             btlUnitGetMuzzlePosVU(object);
         }
-        __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(actor + 0xC0));
+        VU0_STORE_VF_UNCLOBBERED(vf10, actor + 0xC0);
         func_001DB698((CameraPoseTransform *)(actor + 0xC0));
     }
 }
@@ -6804,9 +6795,9 @@ void btlFlagUserAndTargetDefeat(u8 *command, u8 *unused) {
         btlFlagUnitDefeatCandidate((u8 *)target);
     }
     btlUnitGetMuzzlePosVU(user);
-    VU_STORE10(userPos);
+    VU0_STORE_VF_UNCLOBBERED(vf10, userPos);
     btlUnitGetMuzzlePosVU(target);
-    VU_STORE10(targetPos);
+    VU0_STORE_VF_UNCLOBBERED(vf10, targetPos);
     btlUnitFaceTarget((u8 *)target, (u8 *)user);
     if (userPos[0] < targetPos[0]) {
         *(u32 *)(command + 0xF0) |= 0x200;
@@ -7074,15 +7065,15 @@ void btlUnitGetPosVU(u32 unit, u8 mode) {
     switch (mode) {
     case 1:
         btlSetActorEffectParameterOrMuzzlePosition(unit, 1);
-        VU_STORE10(pos);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         break;
     case 0:
     default:
         btlUnitGetMuzzlePosVU(unit);
-        VU_STORE10(pos);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         break;
     }
-    VU_LOAD10(pos);
+    VU0_LOAD_VF(vf10, pos);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4668);
@@ -7405,15 +7396,15 @@ void btlInitializeSceneLightingAndTint(void) {
     u8 *context = (u8 *)btlGetRuntime();
     fldApplyLightSetCurrent();
     btlInitTintTransitionResource(0x80, 0);
-    VU_LOAD10((u8 *)D_00324770[0] + 0x10);
-    VU_STORE10(context + 0x10);
-    VU_STORE10(context + 0x40);
-    VU_LOAD10(D_00324770[0]);
-    VU_STORE10(context + 0x20);
-    VU_STORE10(context + 0x50);
-    VU_LOAD10(kwlnDefaultColorVector);
-    VU_STORE10(context + 0x30);
-    VU_STORE10(context + 0x60);
+    VU0_LOAD_VF(vf10, (u8 *)D_00324770[0] + 0x10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, context + 0x10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, context + 0x40);
+    VU0_LOAD_VF(vf10, D_00324770[0]);
+    VU0_STORE_VF_UNCLOBBERED(vf10, context + 0x20);
+    VU0_STORE_VF_UNCLOBBERED(vf10, context + 0x50);
+    VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
+    VU0_STORE_VF_UNCLOBBERED(vf10, context + 0x30);
+    VU0_STORE_VF_UNCLOBBERED(vf10, context + 0x60);
     *(u32 *)(context + 0x698) = 0x807E5C5E;
 }
 
@@ -8754,10 +8745,10 @@ void btlUpdateJobPositionFromModel(s32 *args) {
 
     if (sdfLoadMapRecordPositionVector(*(s32 *)(args[1] + 0x18), 1) == 0) {
         mdlLoadPrimaryVectorVU(args[1]);
-        VU_STORE10(pos);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         pos[1] -= 150.0f;
     } else {
-        VU_STORE10(pos);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
     }
     fileQueueSetPosition(args[0], pos);
     fileQueueUpdate(args[0]);

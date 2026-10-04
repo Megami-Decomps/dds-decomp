@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "sdf.h"
+#include "ee_mmi.h"
 
 /* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
 enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
@@ -22,10 +23,6 @@ typedef struct SdfTextureFileHeader {
     s32 unk20;
     u8 pad24[0x1C];
 } SdfTextureFileHeader;
-
-/* Expand the packed 5:5:5 color channels to separate byte lanes. */
-#define SDF_TEX_EXPAND_RGB5(out, in) \
-    __asm__ volatile ("pext5 %0, %1" : "=r" (out) : "r" (in))
 
 extern SdfTex *sdfResourceListHead;
 
@@ -280,7 +277,7 @@ void func_0032C168(SdfTex *texture) {
         } else {
             u16 packed = *(u16 *)source;
             source += 2;
-            SDF_TEX_EXPAND_RGB5(color, packed);
+            EE_MMI_PEXT5(color, packed);
             color |= (color >> 5) & 0x070707;
         }
         second = (color >> 8) & 0xFF;

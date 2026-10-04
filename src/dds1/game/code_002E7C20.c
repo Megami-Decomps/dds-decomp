@@ -25,18 +25,7 @@ void effMiscQuatMultiplyVU(void)
 /* vu0 routine: vf10 = inverse of quaternion vf10 (conjugate / |q|^2) */
 void effMiscInvertQuaternionVU(void)
 {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmul.xyzw vf2, vf10, vf10\n"
-        "vaddax.w ACC, vf2, vf2x\n"
-        "vmadday.w ACC, vf0, vf2y\n"
-        "vmaddz.w vf3, vf0, vf2z\n"
-        "vmove.w vf2, vf10\n"
-        "vdiv Q, vf0w, vf3w\n"
-        "vsub.xyz vf2, vf0, vf10\n"
-        "vwaitq\n"
-        "vmulq.xyzw vf10, vf2, Q\n"
-        ".set reorder\n");
+    VU0_QUAT_INVERSE_VF10();
 }
 
 /* Persona 4 effMiscNormalizeVU @ 004BCE80 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
@@ -85,39 +74,7 @@ void effMiscAxisAngleToQuaternionVf11(f32 angle)
 /* vu0 routine: rotation matrix vf28-vf31 from the quaternion in vf10 */
 void effMiscQuaternionToMatrixVU(void)
 {
-    __asm__ volatile (
-        ".set noreorder                              \n"
-        "vaddw.xyz vf1, vf0, vf0w                    \n"
-        "vadd.xyzw vf2, vf10, vf10                   \n"
-        "vmulx.w vf28, vf0, vf0x                     \n"
-        "vmulx.w vf29, vf0, vf0x                     \n"
-        "vmulx.w vf30, vf0, vf0x                     \n"
-        "vmul.xyzw vf3, vf10, vf2                    \n"
-        "vmuly.xyzw vf4, vf10, vf2y                  \n"
-        "vmulz.xyzw vf5, vf10, vf2z                  \n"
-        "vmulx.xyzw vf6, vf10, vf2x                  \n"
-        "vaddaw.xyz ACC, vf0, vf0w                   \n"
-        "vmsubay.x ACC, vf1, vf3y                    \n"
-        "vmsubz.x vf28, vf1, vf3z                    \n"
-        "vmsubax.y ACC, vf1, vf3x                    \n"
-        "vmsubz.y vf29, vf1, vf3z                    \n"
-        "vmsubax.z ACC, vf1, vf3x                    \n"
-        "vmsuby.z vf30, vf1, vf3y                    \n"
-        "vmulax.y ACC, vf1, vf4x                     \n"
-        "vmsubw.y vf28, vf1, vf5w                    \n"
-        "vaddw.x vf29, vf4, vf5w                     \n"
-        "vsubw.x vf30, vf5, vf4w                     \n"
-        "vmulax.z ACC, vf1, vf5x                     \n"
-        "vmaddw.z vf28, vf1, vf4w                    \n"
-        "vmulay.z ACC, vf1, vf5y                     \n"
-        "vmsubw.z vf29, vf1, vf6w                    \n"
-        "vaddw.y vf30, vf5, vf6w                     \n"
-        "vmove.xyzw vf31, vf0                        \n"
-        ".set reorder"
-        :
-        :
-        : "memory"
-    );
+    VU0_QUAT_TO_MATRIX_VF10();
 }
 
 INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E7E08);
@@ -185,19 +142,9 @@ f32 effMiscComputeQuaternionRotatedReferenceAngle(void)
     f32 rotatedX;
     effMiscQuaternionToMatrixVU();
     /* PEXEW exchanges words 0 and 2: output 0 is Z, while output 1 is X. */
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf10, 0(%2)\n"
-        "vmulax.xyzw ACC, vf28, vf10x\n"
-        "vmadday.xyzw ACC, vf29, vf10y\n"
-        "vmaddz.xyzw vf10, vf30, vf10z\n"
-        "qmfc2.ni $2, vf10\n"
-        "pexew $2, $2\n"
-        "mtc1 $2, %0\n"
-        "qmfc2.ni $2, vf10\n"
-        "mtc1 $2, %1\n"
-        ".set reorder\n"
-        : "=f"(rotatedZ), "=f"(rotatedX) : "r"(D_00398380) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, D_00398380);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_READ_ZX(rotatedZ, rotatedX, vf10);
     return sdfAtan2(rotatedZ, rotatedX);
 }
 

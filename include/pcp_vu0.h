@@ -669,4 +669,68 @@
 #define VU0_ADD_XYZ(dst, a, b) __asm__ volatile ( \
     ".set noreorder\n\tvadd.xyz " #dst ", " #a ", " #b "\n\t.set reorder")
 
+/* Quaternion conjugate divided by its squared length; vf10 is input/result.
+ * Shared COP2 sequence in both games' effMiscInvertQuaternionVU. */
+#define VU0_QUAT_INVERSE_VF10() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmul.xyzw vf2, vf10, vf10\n\t" \
+    "vaddax.w ACC, vf2, vf2x\n\t" \
+    "vmadday.w ACC, vf0, vf2y\n\t" \
+    "vmaddz.w vf3, vf0, vf2z\n\t" \
+    "vmove.w vf2, vf10\n\tvdiv Q, vf0w, vf3w\n\t" \
+    "vsub.xyz vf2, vf0, vf10\n\tvwaitq\n\t" \
+    "vmulq.xyzw vf10, vf2, Q\n\t.set reorder")
+
+/* Convert vf10's quaternion to the primary rotation-matrix bank.
+ * Shared COP2 sequence in both games' effMiscQuaternionToMatrixVU. */
+#define VU0_QUAT_TO_MATRIX_VF10() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vaddw.xyz vf1, vf0, vf0w\n\tvadd.xyzw vf2, vf10, vf10\n\t" \
+    "vmulx.w vf28, vf0, vf0x\n\tvmulx.w vf29, vf0, vf0x\n\tvmulx.w vf30, vf0, vf0x\n\t" \
+    "vmul.xyzw vf3, vf10, vf2\n\tvmuly.xyzw vf4, vf10, vf2y\n\t" \
+    "vmulz.xyzw vf5, vf10, vf2z\n\tvmulx.xyzw vf6, vf10, vf2x\n\t" \
+    "vaddaw.xyz ACC, vf0, vf0w\n\t" \
+    "vmsubay.x ACC, vf1, vf3y\n\tvmsubz.x vf28, vf1, vf3z\n\t" \
+    "vmsubax.y ACC, vf1, vf3x\n\tvmsubz.y vf29, vf1, vf3z\n\t" \
+    "vmsubax.z ACC, vf1, vf3x\n\tvmsuby.z vf30, vf1, vf3y\n\t" \
+    "vmulax.y ACC, vf1, vf4x\n\tvmsubw.y vf28, vf1, vf5w\n\t" \
+    "vaddw.x vf29, vf4, vf5w\n\tvsubw.x vf30, vf5, vf4w\n\t" \
+    "vmulax.z ACC, vf1, vf5x\n\tvmaddw.z vf28, vf1, vf4w\n\t" \
+    "vmulay.z ACC, vf1, vf5y\n\tvmsubw.z vf29, vf1, vf6w\n\t" \
+    "vaddw.y vf30, vf5, vf6w\n\tvmove.xyzw vf31, vf0\n\t.set reorder" \
+    : : : "memory")
+
+/* Read Z and X as scalar floats; PEXEW brings word 2 to the low word.
+ * The GPR scratch is declared explicitly, unlike the former local copies. */
+#define VU0_READ_ZX(z, x, vf) __asm__ volatile ( \
+    ".set noreorder\n\tqmfc2.ni $2, " #vf "\n\tpexew $2, $2\n\tmtc1 $2, %0\n\t" \
+    "qmfc2.ni $2, " #vf "\n\tmtc1 $2, %1\n\t.set reorder" \
+    : "=f" (z), "=f" (x) : : "$2", "memory")
+
+/* Rotate the basis at vectors+0x40 into vf24-vf26, caching its original
+ * three vectors separately. Matrix rows start at matrix+0x10.
+ * Shared COP2 sequence in both games' sdfVuRotateObjectBasis. */
+#define VU0_ROTATE_BASIS_AND_CACHE(vectors, matrix, cache) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf2, 0x40(%0)\n\tlqc2 vf5, 0x10(%1)\n\t" \
+    "lqc2 vf6, 0x20(%1)\n\tlqc2 vf7, 0x30(%1)\n\t" \
+    "lqc2 vf3, 0x50(%0)\n\tlqc2 vf4, 0x60(%0)\n\t" \
+    "vmulax.xyz ACC, vf5, vf2x\n\tvmadday.xyz ACC, vf6, vf2y\n\tvmaddz.xyz vf24, vf7, vf2z\n\t" \
+    "vmulax.xyz ACC, vf5, vf3x\n\tvmadday.xyz ACC, vf6, vf3y\n\tvmaddz.xyz vf25, vf7, vf3z\n\t" \
+    "vmulax.xyz ACC, vf5, vf4x\n\tvmadday.xyz ACC, vf6, vf4y\n\tvmaddz.xyz vf26, vf7, vf4z\n\t" \
+    "sqc2 vf2, 0x0(%2)\n\tsqc2 vf3, 0x10(%2)\n\tsqc2 vf4, 0x20(%2)\n\t.set reorder" \
+    : : "r" (vectors), "r" (matrix), "r" (cache) : "memory")
+
+/* Interpolate the XY pair at +0x30 and vector at +0x20 by node's +0x40 W.
+ * Shared COP2 sequence in both games' sdfVuBlendNodeVectors; the linked-list
+ * traversal remains in C. */
+#define VU0_BLEND_NODE_VECTORS(node, first, second) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf2, 0x40(%0)\n\tlqc2 vf8, 0x30(%1)\n\tlqc2 vf9, 0x30(%2)\n\t" \
+    "lqc2 vf10, 0x20(%1)\n\tlqc2 vf11, 0x20(%2)\n\t" \
+    "vmulaw.xy ACC, vf8, vf0w\n\tvmaddaw.xy ACC, vf9, vf2w\n\tvmsubw.xy vf15, vf8, vf2w\n\t" \
+    "vmulaw.xyzw ACC, vf10, vf0w\n\tvmaddaw.xyzw ACC, vf11, vf2w\n\tvmsubw.xyzw vf16, vf10, vf2w\n\t" \
+    "sqc2 vf15, 0x30(%0)\n\tsqc2 vf16, 0x20(%0)\n\t.set reorder" \
+    : : "r" (node), "r" (first), "r" (second) : "memory")
+
 #endif
