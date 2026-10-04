@@ -6,6 +6,12 @@
 #define EVT_DISPATCH_OPERATION_PRIMARY 1
 #define EVT_DISPATCH_OPERATION_SECONDARY 2
 
+#define EVT_PROGRESS_SLOT_COUNT 8
+#define EVT_PROGRESS_RECORD_WORDS 3
+#define EVT_ALLOWED_ITEM_COUNT 3
+#define EVT_PROGRESS_UNSIGNED_LIMIT 999999U
+#define EVT_PROGRESS_FLAG_GATE_COUNT 1
+
 extern s32 evtAdvanceSlotFlags(void);
 
 extern s32 evtGetMessageWindowControlState(void);
@@ -170,35 +176,35 @@ s32 evtIsFadeDispatchIdle(void) {
     return evtGetMessageWindowControlState() == 0;
 }
 
-void evtInstallStateTable(s32 event) {
-    if (((EvtStateTableContext *)event)->dispatchMode == 2) {
-        ((EvtStateTableContext *)event)->stateTable = (s32)D_003CE498;
-        mnuSetPopupEntry(event + 0x58, (s32)(D_003CE498 + 0x118));
+void evtInstallStateTable(s32 stateAddress) {
+    if (((EvtStateTableContext *)stateAddress)->dispatchMode == 2) {
+        ((EvtStateTableContext *)stateAddress)->stateTable = (s32)D_003CE498;
+        mnuSetPopupEntry(stateAddress + 0x58, (s32)(D_003CE498 + 0x118));
     }
 }
 
 /* Mirror the chosen slot into both the active scene record and dispatch state. */
 s32 evtInitializeSelectedSlot(void) {
-    s32 context = kwlnTaskGetUserValue();
-    s32 selectionRecord;
-    s32 slot;
+    s32 stateAddress = kwlnTaskGetUserValue();
+    s32 selectionRecordAddress;
+    s32 selectedSlot;
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 2);
-    if (((EvtStateTableContext *)context)->primaryObject == 0) {
-        func_00260020(context);
+    if (((EvtStateTableContext *)stateAddress)->primaryObject == 0) {
+        func_00260020(stateAddress);
     }
-    selectionRecord = ((EvtSceneNode *)((EvtStateTableContext *)context)->primaryObject->node)->selectionRecord;
-    slot = mnuCampHasEligibleOwnedItems(context);
-    ((EvtStateTableContext *)context)->cachedSelection = *(s32 *)(datGameState + 0x3c);
-    ((EvtSelectionRecord *)selectionRecord)->slot = slot;
-    ((EvtStateTableContext *)context)->selectedSlot = slot;
+    selectionRecordAddress = ((EvtSceneNode *)((EvtStateTableContext *)stateAddress)->primaryObject->node)->selectionRecord;
+    selectedSlot = mnuCampHasEligibleOwnedItems(stateAddress);
+    ((EvtStateTableContext *)stateAddress)->cachedSelection = *(s32 *)(datGameState + 0x3c);
+    ((EvtSelectionRecord *)selectionRecordAddress)->slot = selectedSlot;
+    ((EvtStateTableContext *)stateAddress)->selectedSlot = selectedSlot;
     return 1;
 }
 
 s32 evtAdvancePhaseOne(void) {
-    EvtStateTableContext *context = (EvtStateTableContext *)kwlnTaskGetUserValue();
-    if (context->stateCode == 1) {
-        mnuSetCommandPhase((s32)context, 4);
+    EvtStateTableContext *state = (EvtStateTableContext *)kwlnTaskGetUserValue();
+    if (state->stateCode == 1) {
+        mnuSetCommandPhase((s32)state, 4);
     }
     return 1;
 }
@@ -218,33 +224,33 @@ s32 evtSetupDispatchSync(s32 callbackContext) {
     return func_002C4038(stateAddress + 0xc, (s32 *)(stateAddress + 0x58), EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
 }
 
-void evtInstallStateTableB(s32 event) {
-    if (((EvtStateTableContext *)event)->dispatchMode == 1) {
-        ((EvtStateTableContext *)event)->stateTable = (s32)D_003CE4B4;
-        mnuSetPopupEntry(event + 0x58, (s32)(D_003CE4B4 + 0xfc));
+void evtInstallStateTableB(s32 stateAddress) {
+    if (((EvtStateTableContext *)stateAddress)->dispatchMode == 1) {
+        ((EvtStateTableContext *)stateAddress)->stateTable = (s32)D_003CE4B4;
+        mnuSetPopupEntry(stateAddress + 0x58, (s32)(D_003CE4B4 + 0xfc));
     }
 }
 
 s32 func_00262270(void) {
-    s32 context = kwlnTaskGetUserValue();
-    if (((EvtStateTableContext *)context)->stateCode == 1) {
-        func_00261670(context);
+    s32 stateAddress = kwlnTaskGetUserValue();
+    if (((EvtStateTableContext *)stateAddress)->stateCode == 1) {
+        func_00261670(stateAddress);
     }
     return 1;
 }
 
 s32 evtSelectStateAction(void) {
-    s32 context = kwlnTaskGetUserValue();
-    s32 sceneNode;
-    if (((EvtStateTableContext *)context)->stateCode == 5) {
-        mnuSetCommandPhase(context, 3);
-    } else if (((EvtStateTableContext *)context)->stateCode == 7) {
-        mnuSetCommandPhase(context, 9);
-        sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
-        ((EvtSceneNode *)sceneNode)->callback = (s32)func_00295D38;
-        func_00297200(sceneNode, 0xa);
+    s32 stateAddress = kwlnTaskGetUserValue();
+    s32 linkedNodeAddress;
+    if (((EvtStateTableContext *)stateAddress)->stateCode == 5) {
+        mnuSetCommandPhase(stateAddress, 3);
+    } else if (((EvtStateTableContext *)stateAddress)->stateCode == 7) {
+        mnuSetCommandPhase(stateAddress, 9);
+        linkedNodeAddress = ((EvtStateTableContext *)stateAddress)->secondaryObject->node;
+        ((EvtSceneNode *)linkedNodeAddress)->callback = (s32)func_00295D38;
+        func_00297200(linkedNodeAddress, 0xa);
     }
-    ((EvtStateTableContext *)context)->stateStep = 0;
+    ((EvtStateTableContext *)stateAddress)->stateStep = 0;
     return 1;
 }
 
@@ -263,17 +269,17 @@ s32 evtSetupDispatchSyncB(s32 callbackContext) {
     return func_002C4038(stateAddress + 0xc, (s32 *)(stateAddress + 0x58), EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
 }
 
-void evtInstallStateTableC(s32 event) {
-    if (((EvtStateTableContext *)event)->dispatchMode == 1) {
-        ((EvtStateTableContext *)event)->stateTable = (s32)D_003CE4D0;
-        mnuSetPopupEntry(event + 0x58, (s32)(D_003CE4D0 + 0xe0));
+void evtInstallStateTableC(s32 stateAddress) {
+    if (((EvtStateTableContext *)stateAddress)->dispatchMode == 1) {
+        ((EvtStateTableContext *)stateAddress)->stateTable = (s32)D_003CE4D0;
+        mnuSetPopupEntry(stateAddress + 0x58, (s32)(D_003CE4D0 + 0xe0));
     }
 }
 
 s32 func_00262678(void) {
-    s32 context = kwlnTaskGetUserValue();
-    if (((EvtStateTableContext *)context)->stateCode == 1) {
-        func_002619A8(context, 1);
+    s32 stateAddress = kwlnTaskGetUserValue();
+    if (((EvtStateTableContext *)stateAddress)->stateCode == 1) {
+        func_002619A8(stateAddress, 1);
     }
     return 1;
 }
@@ -308,33 +314,33 @@ s32 func_00262A00(s32 callbackContext) {
     return func_002C4038(stateAddress + 0xc, (s32 *)(stateAddress + 0x58), EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
 }
 
-void func_00262A48(s32 event) {
-    if (((EvtStateTableContext *)event)->dispatchMode == 1) {
-        ((EvtStateTableContext *)event)->stateTable = (s32)D_003CE4EC;
-        mnuSetPopupEntry(event + 0x58, (s32)(D_003CE4EC + 0xc4));
+void func_00262A48(s32 stateAddress) {
+    if (((EvtStateTableContext *)stateAddress)->dispatchMode == 1) {
+        ((EvtStateTableContext *)stateAddress)->stateTable = (s32)D_003CE4EC;
+        mnuSetPopupEntry(stateAddress + 0x58, (s32)(D_003CE4EC + 0xc4));
     }
 }
 
 s32 func_00262A88(void) {
-    s32 context = kwlnTaskGetUserValue();
-    if (((EvtStateTableContext *)context)->stateCode == 1) {
-        func_002619A8(context, 3);
+    s32 stateAddress = kwlnTaskGetUserValue();
+    if (((EvtStateTableContext *)stateAddress)->stateCode == 1) {
+        func_002619A8(stateAddress, 3);
     }
     return 1;
 }
 
 s32 mnuResetCommandStepAndSelectPhase(void) {
-    s32 context = kwlnTaskGetUserValue();
-    s32 sceneNode;
-    if (((EvtStateTableContext *)context)->stateCode == 5) {
-        mnuSetCommandPhase(context, 3);
-    } else if (((EvtStateTableContext *)context)->stateCode == 7) {
-        mnuSetCommandPhase(context, 9);
-        sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
-        ((EvtSceneNode *)sceneNode)->callback = (s32)func_00295D38;
-        func_00297200(sceneNode, 0xa);
+    s32 stateAddress = kwlnTaskGetUserValue();
+    s32 linkedNodeAddress;
+    if (((EvtStateTableContext *)stateAddress)->stateCode == 5) {
+        mnuSetCommandPhase(stateAddress, 3);
+    } else if (((EvtStateTableContext *)stateAddress)->stateCode == 7) {
+        mnuSetCommandPhase(stateAddress, 9);
+        linkedNodeAddress = ((EvtStateTableContext *)stateAddress)->secondaryObject->node;
+        ((EvtSceneNode *)linkedNodeAddress)->callback = (s32)func_00295D38;
+        func_00297200(linkedNodeAddress, 0xa);
     }
-    ((EvtStateTableContext *)context)->stateStep = 0;
+    ((EvtStateTableContext *)stateAddress)->stateStep = 0;
     return 1;
 }
 
@@ -353,33 +359,33 @@ s32 func_00262E10(s32 callbackContext) {
     return func_002C4038(stateAddress + 0xc, (s32 *)(stateAddress + 0x58), EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
 }
 
-void evtInstallStateTableD(s32 event) {
-    if (((EvtStateTableContext *)event)->dispatchMode == 2) {
-        ((EvtStateTableContext *)event)->stateTable = (s32)D_003CE508;
-        mnuSetPopupEntry(event + 0x58, (s32)(D_003CE508 + 0xa8));
+void evtInstallStateTableD(s32 stateAddress) {
+    if (((EvtStateTableContext *)stateAddress)->dispatchMode == 2) {
+        ((EvtStateTableContext *)stateAddress)->stateTable = (s32)D_003CE508;
+        mnuSetPopupEntry(stateAddress + 0x58, (s32)(D_003CE508 + 0xa8));
     }
 }
 
 s32 evtEnableStateFlag(void) {
-    s32 context = kwlnTaskGetUserValue();
-    if (((EvtStateTableContext *)context)->stateCode == 1 && !func_00261B98(context)) {
-        ((EvtStateTableContext *)context)->dispatchMode = 2;
+    s32 stateAddress = kwlnTaskGetUserValue();
+    if (((EvtStateTableContext *)stateAddress)->stateCode == 1 && !func_00261B98(stateAddress)) {
+        ((EvtStateTableContext *)stateAddress)->dispatchMode = 2;
     }
     return 1;
 }
 
 s32 evtEnterProgressCommandPhase(void) {
-    s32 context = kwlnTaskGetUserValue();
-    s32 sceneNode;
-    if (((EvtStateTableContext *)context)->stateCode == 5) {
-        mnuSetCommandPhase(context, 3);
-    } else if (((EvtStateTableContext *)context)->stateCode == 7) {
-        mnuSetCommandPhase(context, 9);
-        sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
-        ((EvtSceneNode *)sceneNode)->callback = (s32)func_00295D38;
-        func_00297200(sceneNode, 0xa);
+    s32 stateAddress = kwlnTaskGetUserValue();
+    s32 linkedNodeAddress;
+    if (((EvtStateTableContext *)stateAddress)->stateCode == 5) {
+        mnuSetCommandPhase(stateAddress, 3);
+    } else if (((EvtStateTableContext *)stateAddress)->stateCode == 7) {
+        mnuSetCommandPhase(stateAddress, 9);
+        linkedNodeAddress = ((EvtStateTableContext *)stateAddress)->secondaryObject->node;
+        ((EvtSceneNode *)linkedNodeAddress)->callback = (s32)func_00295D38;
+        func_00297200(linkedNodeAddress, 0xa);
     }
-    ((EvtStateTableContext *)context)->stateStep = 0;
+    ((EvtStateTableContext *)stateAddress)->stateStep = 0;
     return 1;
 }
 
@@ -402,10 +408,10 @@ s32 func_002631D8(s32 callbackContext) {
 s32 evtGetRemainingSlotThreshold(u32 slotIndex) {
     s32 threshold;
     s32 remaining;
-    if (slotIndex >= 8) {
+    if (slotIndex >= EVT_PROGRESS_SLOT_COUNT) {
         return -1;
     }
-    threshold = D_003CE148[slotIndex * 3];
+    threshold = D_003CE148[slotIndex * EVT_PROGRESS_RECORD_WORDS];
     if (threshold == 0) {
         return -1;
     }
@@ -417,13 +423,13 @@ s32 evtGetRemainingSlotThreshold(u32 slotIndex) {
 }
 
 s32 evtShowResultText(void) {
-    char text[0x40];
+    char formattedText[0x40];
     evtCopyEntryStringToActiveWindow(0, D_00435E48 + 0x11);
-    func_0035C860(text, D_00437840, ((EvtProgressState *)datGameState)->total);
-    evtCopyEntryStringToActiveWindow(1, text);
+    func_0035C860(formattedText, D_00437840, ((EvtProgressState *)datGameState)->total);
+    evtCopyEntryStringToActiveWindow(1, formattedText);
     evtCopyEntryStringToActiveWindow(2, D_003C9A20[((EvtProgressState *)datGameState)->slotIndex]);
-    func_0035C860(text, D_00437840, evtGetRemainingSlotThreshold(((EvtProgressState *)datGameState)->slotIndex + 1));
-    evtCopyEntryStringToActiveWindow(3, text);
+    func_0035C860(formattedText, D_00437840, evtGetRemainingSlotThreshold(((EvtProgressState *)datGameState)->slotIndex + 1));
+    evtCopyEntryStringToActiveWindow(3, formattedText);
     if (evtGetRemainingSlotThreshold(((EvtProgressState *)datGameState)->slotIndex + 1) >= 0) {
         dspStartEntry(((EvtProgressState *)datGameState)->slotIndex + 0x1a);
     } else {
@@ -495,11 +501,11 @@ s32 func_002636B0(s32 callbackContext) {
 }
 
 u32 evtResetStateProgressTimer(void) {
-    EvtStateTableContext *context;
+    EvtStateTableContext *state;
 
-    context = (EvtStateTableContext *)kwlnTaskGetUserValue();
-    context->progressTimer = 0;
-    mnuSelectLastListNode(context->primaryObject->node);
+    state = (EvtStateTableContext *)kwlnTaskGetUserValue();
+    state->progressTimer = 0;
+    mnuSelectLastListNode(state->primaryObject->node);
     return 1;
 }
 
@@ -538,21 +544,21 @@ s32 evtSetupDispatchSyncE(s32 callbackContext) {
 }
 
 s32 evtApplyBaseRateProgressStep(void) {
-    EvtStateTableContext *context = (EvtStateTableContext *)kwlnTaskGetUserValue();
-    context->entryMultiplier = 1;
-    mnuCampAdvanceCounter(-1, (s32)context);
+    EvtStateTableContext *state = (EvtStateTableContext *)kwlnTaskGetUserValue();
+    state->entryMultiplier = 1;
+    mnuCampAdvanceCounter(-1, (s32)state);
     return 1;
 }
 
 s32 evtAdvanceStateStage(void) {
-    s32 context = kwlnTaskGetUserValue();
-    s32 sceneNode;
-    if (((EvtStateTableContext *)context)->stateCode == 0xa) {
-        ((EvtStateTableContext *)context)->stateStep = 0xa;
-        mnuSetCommandPhase(context, 6);
-        sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
-        ((EvtSceneNode *)sceneNode)->callback = (s32)func_002958B0;
-        mnuStorePendingMenuCommandValue(sceneNode, 0);
+    s32 stateAddress = kwlnTaskGetUserValue();
+    s32 linkedNodeAddress;
+    if (((EvtStateTableContext *)stateAddress)->stateCode == 0xa) {
+        ((EvtStateTableContext *)stateAddress)->stateStep = 0xa;
+        mnuSetCommandPhase(stateAddress, 6);
+        linkedNodeAddress = ((EvtStateTableContext *)stateAddress)->secondaryObject->node;
+        ((EvtSceneNode *)linkedNodeAddress)->callback = (s32)func_002958B0;
+        mnuStorePendingMenuCommandValue(linkedNodeAddress, 0);
     }
     return 1;
 }
@@ -575,24 +581,24 @@ s32 func_00263BF0(s32 callbackContext) {
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00263C38);
 
 s32 evtUpdateSlotItemCompletionState(void) {
-    s32 context = kwlnTaskGetUserValue();
-    s32 stage = ((EvtEntryRecord *)((EvtSceneNode *)((EvtStateTableContext *)context)->primaryObject->node)->entryRecord)->stage + 1;
-    s32 id = ((EvtEntryRecord *)((EvtSceneNode *)((EvtStateTableContext *)context)->secondaryObject->node)->entryRecord)->itemId;
-    if (stage == 4) {
-        if (((SaveItemCounts *)datGameState)->counts[id] == 0) {
-            func_002B86E8(((EvtStateTableContext *)context)->secondaryObject->node);
+    s32 stateAddress = kwlnTaskGetUserValue();
+    s32 nextStage = ((EvtEntryRecord *)((EvtSceneNode *)((EvtStateTableContext *)stateAddress)->primaryObject->node)->entryRecord)->stage + 1;
+    s32 itemId = ((EvtEntryRecord *)((EvtSceneNode *)((EvtStateTableContext *)stateAddress)->secondaryObject->node)->entryRecord)->itemId;
+    if (nextStage == 4) {
+        if (((SaveItemCounts *)datGameState)->counts[itemId] == 0) {
+            func_002B86E8(((EvtStateTableContext *)stateAddress)->secondaryObject->node);
         }
-        if (((EvtSceneNode *)((EvtStateTableContext *)context)->secondaryObject->node)->completionState == 0) {
-            ((EvtStateTableContext *)context)->dispatchMode = 2;
+        if (((EvtSceneNode *)((EvtStateTableContext *)stateAddress)->secondaryObject->node)->completionState == 0) {
+            ((EvtStateTableContext *)stateAddress)->dispatchMode = 2;
         }
     }
     return 1;
 }
 
 s32 evtPollStageSelectionAndAdvance(void) {
-    s32 context = kwlnTaskGetUserValue();
-    s32 sceneNode;
-    switch (mnuTickExtendedCommandPhase(context)) {
+    s32 stateAddress = kwlnTaskGetUserValue();
+    s32 linkedNodeAddress;
+    switch (mnuTickExtendedCommandPhase(stateAddress)) {
     case 6:
         return 1;
     case 0:
@@ -603,11 +609,11 @@ s32 evtPollStageSelectionAndAdvance(void) {
     case 5:
         return 0;
     case 8:
-        mnuSetCommandPhase(context, 6);
-        sceneNode = ((EvtStateTableContext *)context)->secondaryObject->node;
-        ((EvtSceneNode *)sceneNode)->callback = (s32)func_002958B0;
-        mnuStorePendingMenuCommandValue(sceneNode, 0);
-        ((EvtStateTableContext *)context)->stateStep = 0xa;
+        mnuSetCommandPhase(stateAddress, 6);
+        linkedNodeAddress = ((EvtStateTableContext *)stateAddress)->secondaryObject->node;
+        ((EvtSceneNode *)linkedNodeAddress)->callback = (s32)func_002958B0;
+        mnuStorePendingMenuCommandValue(linkedNodeAddress, 0);
+        ((EvtStateTableContext *)stateAddress)->stateStep = 0xa;
         return 0;
     default:
         return 0;
@@ -615,36 +621,37 @@ s32 evtPollStageSelectionAndAdvance(void) {
 }
 
 /* The stage-selection caller forwards its task to the user-value lookup. */
-void evtMarkSceneFollowupReadyAndQueueAction(s32 callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
-    mnuSetCommandPhase(context, 8);
-    func_00297220(((EvtStateTableContext *)context)->secondaryObject->node, 10);
-    ((EvtStateTableContext *)context)->sceneReady = 1;
+void evtMarkSceneFollowupReadyAndQueueAction(s32 taskAddress) {
+    s32 stateAddress = kwlnTaskGetUserValue(taskAddress);
+    mnuSetCommandPhase(stateAddress, 8);
+    func_00297220(((EvtStateTableContext *)stateAddress)->secondaryObject->node, 10);
+    ((EvtStateTableContext *)stateAddress)->sceneReady = 1;
 }
 
-void evtAccumulateEligibleStageMultiplierValue(EvtStateTableContext *context) {
-    s32 *entry = &((EvtEntryRecord *)((EvtSceneNode *)context->secondaryObject->node)->entryRecord)->stage;
-    if (func_002C5498(entry[1])) {
-        *(s32 *)(datGameState + 0xa50) += entry[0] * context->entryMultiplier;
+void evtAccumulateEligibleStageMultiplierValue(EvtStateTableContext *state) {
+    s32 *entryValues = &((EvtEntryRecord *)((EvtSceneNode *)state->secondaryObject->node)->entryRecord)->stage;
+    if (func_002C5498(entryValues[1])) {
+        *(s32 *)(datGameState + 0xa50) += entryValues[0] * state->entryMultiplier;
     }
 }
 
-s32 evtIsAllowedId(s32 id) {
-    u32 i;
-    for (i = 0; i < 3; i++) {
-        if (D_003CE3F8[i] == id) {
+s32 evtIsAllowedId(s32 itemId) {
+    u32 allowedItemIndex;
+    for (allowedItemIndex = 0; allowedItemIndex < EVT_ALLOWED_ITEM_COUNT; allowedItemIndex++) {
+        if (D_003CE3F8[allowedItemIndex] == itemId) {
             return 1;
         }
     }
     return 0;
 }
 
-s32 func_00263F50(s32 delta) {
-    if (delta == 0) {
-        delta = 1;
+/* Add progress, treating zero as one. The unsigned check also clamps negative totals. */
+s32 func_00263F50(s32 progressDelta) {
+    if (progressDelta == 0) {
+        progressDelta = 1;
     }
-    ((EvtProgressState *)datGameState)->total += delta;
-    if ((u32)((EvtProgressState *)datGameState)->total > 999999U) {
+    ((EvtProgressState *)datGameState)->total += progressDelta;
+    if ((u32)((EvtProgressState *)datGameState)->total > EVT_PROGRESS_UNSIGNED_LIMIT) {
         ((EvtProgressState *)datGameState)->total = 999999;
     }
     return ((EvtProgressState *)datGameState)->total;
@@ -672,9 +679,9 @@ s32 func_002642B8(s32 callbackContext) {
 }
 
 s32 evtPlayDispatchModeCue(void) {
-    s32 context = kwlnTaskGetUserValue();
+    s32 stateAddress = kwlnTaskGetUserValue();
     dspSetActive(1);
-    switch (((EvtStateTableContext *)context)->dispatchMode) {
+    switch (((EvtStateTableContext *)stateAddress)->dispatchMode) {
     case 1:
         dspStartEntry(5);
         break;
@@ -686,18 +693,18 @@ s32 evtPlayDispatchModeCue(void) {
 }
 
 s32 evtApplyDispatchModeState(void) {
-    s32 context = kwlnTaskGetUserValue();
-    switch (((EvtStateTableContext *)context)->dispatchMode) {
+    s32 stateAddress = kwlnTaskGetUserValue();
+    switch (((EvtStateTableContext *)stateAddress)->dispatchMode) {
     case 1:
-        mnuSetCommandPhase(context, 6);
+        mnuSetCommandPhase(stateAddress, 6);
         break;
     case 2:
-        if (((EvtStateTableContext *)context)->stateTable != (s32)D_003CE498) {
-            mnuSetCommandPhase(context, 5);
+        if (((EvtStateTableContext *)stateAddress)->stateTable != (s32)D_003CE498) {
+            mnuSetCommandPhase(stateAddress, 5);
         }
         break;
     }
-    ((EvtStateTableContext *)context)->dispatchMode = 0;
+    ((EvtStateTableContext *)stateAddress)->dispatchMode = 0;
     return 1;
 }
 
@@ -796,23 +803,23 @@ s32 func_00264B10(s32 callbackContext) {
 
 /* Mark each newly completed slot and advance the persistent slot index. */
 s32 evtAdvanceSlotFlags(void) {
-    s32 i = 0;
-    while (evtGetRemainingSlotThreshold(((EvtProgressState *)datGameState)->slotIndex + i + 1) == 0) {
-        mdlFlagSet(D_003CE14C[(((EvtProgressState *)datGameState)->slotIndex + i) * 3 + 3]);
-        i++;
+    s32 advancedSlots = 0;
+    while (evtGetRemainingSlotThreshold(((EvtProgressState *)datGameState)->slotIndex + advancedSlots + 1) == 0) {
+        mdlFlagSet(D_003CE14C[(((EvtProgressState *)datGameState)->slotIndex + advancedSlots) * EVT_PROGRESS_RECORD_WORDS + EVT_PROGRESS_RECORD_WORDS]);
+        advancedSlots++;
     }
-    ((EvtProgressState *)datGameState)->slotIndex += i;
-    return i;
+    ((EvtProgressState *)datGameState)->slotIndex += advancedSlots;
+    return advancedSlots;
 }
 
 u32 evtUpdateSlotAdvanceCount(void) {
     u8 advancedSlots;
-    s32 context;
+    s32 stateAddress;
 
-    context = kwlnTaskGetUserValue();
+    stateAddress = kwlnTaskGetUserValue();
     advancedSlots = evtAdvanceSlotFlags();
-    ((EvtStateTableContext *)context)->advancedSlots = advancedSlots;
-    if ((((EvtStateTableContext *)context)->unkC8 == 0) && (((EvtStateTableContext *)context)->followupMode == '\x01')) {
+    ((EvtStateTableContext *)stateAddress)->advancedSlots = advancedSlots;
+    if ((((EvtStateTableContext *)stateAddress)->unkC8 == 0) && (((EvtStateTableContext *)stateAddress)->followupMode == '\x01')) {
         dspStartEntry(0x22);
     }
     return 1;
@@ -852,14 +859,14 @@ s32 func_00264D38(s32 callbackContext) {
 
 /* Raise a gate's flag and play its cue only on the first threshold crossing. */
 s32 evtTriggerProgressFlagGate(s32 unusedContext) {
-    EvtFlagGate *entry = (EvtFlagGate *)D_003CE400;
-    u32 i;
-    for (i = 0; i < 1; i++, entry++) {
-        if ((u32)(((EvtProgressState *)datGameState)->slotIndex + 1) >= (u32)entry->threshold) {
-            u32 flag = entry->flag;
-            if (mdlFlagTest(flag) == 0) {
-                mdlFlagSet(flag);
-                dspStartEntry(entry->cue);
+    EvtFlagGate *gateEntry = (EvtFlagGate *)D_003CE400;
+    u32 gateIndex;
+    for (gateIndex = 0; gateIndex < EVT_PROGRESS_FLAG_GATE_COUNT; gateIndex++, gateEntry++) {
+        if ((u32)(((EvtProgressState *)datGameState)->slotIndex + 1) >= (u32)gateEntry->threshold) {
+            u32 progressFlag = gateEntry->flag;
+            if (mdlFlagTest(progressFlag) == 0) {
+                mdlFlagSet(progressFlag);
+                dspStartEntry(gateEntry->cue);
                 return 1;
             }
         }
@@ -868,11 +875,11 @@ s32 evtTriggerProgressFlagGate(s32 unusedContext) {
 }
 
 s32 evtShowSlotText(void) {
-    char text[0x40];
+    char formattedText[0x40];
     if (*(s8 *)(kwlnTaskGetUserValue() + 0xcc) > 0) {
         evtCopyEntryStringToActiveWindow(0, D_00435E48 + 0x11);
-        func_0035C860(text, D_00437840, D_003CE148[((EvtProgressState *)datGameState)->slotIndex * 3]);
-        evtCopyEntryStringToActiveWindow(1, text);
+        func_0035C860(formattedText, D_00437840, D_003CE148[((EvtProgressState *)datGameState)->slotIndex * EVT_PROGRESS_RECORD_WORDS]);
+        evtCopyEntryStringToActiveWindow(1, formattedText);
         evtCopyEntryStringToActiveWindow(2, D_003C9A20[((EvtProgressState *)datGameState)->slotIndex]);
         if (evtGetRemainingSlotThreshold(((EvtProgressState *)datGameState)->slotIndex + 1) >= 0) {
             dspStartEntry(0x24);
@@ -921,9 +928,9 @@ INCLUDE_ASM(const s32, "game/code_00261E10", func_00265038);
 
 s32 evtIsLastSlot(s32 slotIndex) {
     s32 activeSlots = 0;
-    u32 i;
-    for (i = 0; i < 8; i++) {
-        if (((EvtSlot *)D_003CE1A8)[i].flag != 0) {
+    u32 entryIndex;
+    for (entryIndex = 0; entryIndex < EVT_PROGRESS_SLOT_COUNT; entryIndex++) {
+        if (((EvtSlot *)D_003CE1A8)[entryIndex].flag != 0) {
             activeSlots++;
         }
     }
