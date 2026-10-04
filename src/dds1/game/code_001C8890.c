@@ -2,6 +2,7 @@
 #include "btl_task.h"
 #include "dds3obj.h"
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 #include "fpu.h"
 
 typedef struct SceneAiEntry {
@@ -167,7 +168,9 @@ typedef struct BtlUnit {
     u8 pad_11D[3];
     u32 statBits;
     u16 mode; /* Species/actor entry identifier used by the AI table. */
-    u8 pad_126[0x19E];
+    u8 pad_126[8];
+    u16 conditionFlags;
+    u8 pad_130[0x194];
     s8 unk2C4;
     u8 pad_2C5[0x2B];
     s32 unk2F0;
@@ -196,7 +199,8 @@ typedef struct BtlUnit {
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum {
     BTL_SOUND_ENTRY_COUNT = 0x31,
-    BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26
+    BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26,
+    BTL_COMMAND_UNIT_EFFECT_SOUND_SLOT = 0x2C
 };
 
 /* Battle runtime prefix: actor/task/sound registrations and packed battle tint. */
@@ -287,13 +291,21 @@ typedef struct SoundResourceNode {
     struct SoundResourceNode *next;
 } SoundResourceNode;
 
+typedef struct BtlEffectHandle {
+    u8 pad0[8];
+    u32 color;
+    u16 flags;
+} BtlEffectHandle;
+
 typedef struct SoundLink {
     void *owner;
-    void *sound;
-    void *task;
+    BtlEffectHandle *effectHandle;
+    u32 *effect;
     u16 variant;
     u16 unk_0E;
 } SoundLink;
+
+extern void func_001F2C00(SoundLink *);
 
 typedef struct SoundResourceLink {
     void *owner;
@@ -552,7 +564,8 @@ typedef struct BtlCategoryTableEntry {
     u8 flags00;
     u8 pad01[2];
     u8 kind03;
-    u8 pad04[0x2C];
+    u8 pad04[0x2A];
+    u16 unk2E;
     s32 categoryType;
     u8 pad34[4];
 } BtlCategoryTableEntry;
@@ -5114,7 +5127,7 @@ void btlUpdateActorModelColorAndLinks(void) {
                 }
             }
             func_001F2818(unit->resourceLink);
-            func_001F2C00(unit->link);
+            func_001F2C00((SoundLink *)unit->link);
             func_001FC998(unit);
         }
     }
@@ -8928,22 +8941,74 @@ void btlMarkTaskReady(s32 arg0) {
 SoundLink *sndAllocLink(void *owner) {
     SoundLink *node = sdfAllocAndClearQuadwords(sizeof(SoundLink));
     node->owner = owner;
-    node->sound = 0;
+    node->effectHandle = 0;
     node->variant = 0;
-    node->task = 0;
+    node->effect = 0;
     return node;
 }
 
 void sndFreeLink(SoundLink *node) {
-    if (node->sound) {
-        effReleaseBattleVoiceOwner(node->sound);
-        --*(s32 *)((u8 *)node->task + 4);
-        sndDeleteSystemEffect(node->task);
+    if (node->effectHandle) {
+        effReleaseBattleVoiceOwner(node->effectHandle);
+        node->effect[1]--;
+        sndDeleteSystemEffect(node->effect);
     }
     sdfReleaseChipBlock(node);
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001F2C00);
+/* Blend the linked command effect through the SDK's packed-color vectors. */
+void func_001F2C00(SoundLink *link) {
+    BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
+    BtlUnit *actor = link->owner;
+    u16 effectId;
+
+    if (actor->unk2F0 > 0) {
+        effectId = ((BtlCategoryTableEntry *)datCommandRecords)[actor->unk2F0].unk2E;
+    } else {
+        effectId = 0;
+    }
+    if (effectId != 0 && !(actor->conditionFlags & 0x4000)) {
+        if (link->effectHandle == 0) {
+            link->effect = (u32 *)work->soundResourceSlots[BTL_COMMAND_UNIT_EFFECT_SOUND_SLOT];
+            sndCreateSystemEffect(link->effect);
+            link->effectHandle = (BtlEffectHandle *)func_00160958(link->effect[4], 2, (u8 *)actor, 0);
+            link->effect[1]++;
+            link->effectHandle->flags = (link->effectHandle->flags | 1) & ~6;
+        }
+        link->variant = effectId;
+    } else if (link->effectHandle != 0) {
+        effReleaseBattleVoiceOwner(link->effectHandle);
+        link->effect[1]--;
+        sndDeleteSystemEffect(link->effect);
+        link->effectHandle = 0;
+        link->effect = 0;
+    }
+    if (link->effectHandle != 0 && (actor->flags & 4) && (work->fadeColor & 0xFF000000)) {
+        s32 actorColor[4];
+        s32 fadeColor[4];
+        s32 propertyColor[4];
+        s32 blended[4];
+        u32 property = btlGetSelectedUnitProperty(actor);
+        u32 unit;
+        u32 packed;
+
+        actorColor[0] = (actor->overlayColor & 0xFF000000) | 0x808080;
+        unit = 0x3C000000;
+        EE_MMI_RGBA_UNPACK(actorColor, unit);
+        VU0_MOVE_VF(vf11, vf10);
+        fadeColor[0] = work->fadeColor;
+        EE_MMI_RGBA_UNPACK(fadeColor, unit);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_MOVE_VF(vf11, vf10);
+        propertyColor[0] = property;
+        EE_MMI_RGBA_UNPACK(propertyColor, unit);
+        VU0_MUL(vf10, vf10, vf11);
+        EE_MMI_RGBA_PACK(packed);
+        blended[0] = packed;
+        link->effectHandle->color = blended[0];
+        func_00160D88((u8 *)link->effectHandle);
+    }
+}
 
 /* Clear the fade gate and report completion; the frame updater may overwrite it. */
 u32 btlDisableBattleFade(void) {
