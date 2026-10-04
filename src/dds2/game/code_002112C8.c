@@ -3711,7 +3711,7 @@ typedef struct BtlParams {
 
 extern BtlParams *datBattleParameters;
 extern BtlActionAnimationRecord *datActionAnimationRecords;
-extern void btlBossDebugPrintf(const char *, ...);
+extern void btlBossDebugPrintf(const char *format, ...);
 extern BtlRuntimeTask *func_001E5FF8(s32, s32);
 extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
 extern s32 btlAdjustPointsForCombatFlags(BtlUnit *, s32, s32, s32, s32);
@@ -5775,7 +5775,7 @@ extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32,
     f32, f32, f32, f32, f32, f32, f32, f32);
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 extern u32 effMiscRandMod(void *, u32);
-extern void btlBossDebugPrintf(const char *, ...);
+extern void btlBossDebugPrintf(const char *format, ...);
 extern void btlFlagLinkedGroupDefeatCandidatesTask(s32);
 extern char D_0041B3B8[];
 

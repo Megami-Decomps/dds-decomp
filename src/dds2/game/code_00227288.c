@@ -31,7 +31,7 @@ extern s32 datBattleSceneRecords;
 extern s32 btlGetRuntime(void);
 extern s32 btlIsCurrentValueBelowQuarterThreshold(void *);
 
-extern void btlBossDebugPrintf();
+extern void btlBossDebugPrintf(const char *format, ...);
 
 extern u32 btlGetEffectActive(void);
 

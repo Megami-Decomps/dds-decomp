@@ -584,7 +584,7 @@ extern s32 btlCountTasksForOwner(s64);
 
 extern void btlRunTask(SoundTask *);
 
-extern s32 btlBossDebugPrintf(const char *, ...);
+extern void btlBossDebugPrintf(const char *format, ...);
 
 extern s32 mdlGetContextResourceGroup(s32);
 
@@ -3395,7 +3395,9 @@ INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417B10);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417B30);
 
-s32 btlBeginModelChange(u32 *arguments) {
+/* Task-start callbacks do not return a status to the scheduler. */
+void btlBeginModelChange(u32 argumentsAddress) {
+    u32 *arguments = (u32 *)argumentsAddress;
     s32 owner = arguments[0];
     u32 model = arguments[1];
     u32 variant = arguments[2];
@@ -3404,9 +3406,8 @@ s32 btlBeginModelChange(u32 *arguments) {
     if (status == 0) {
         btlRequestModelAssetByMode(owner, model, variant);
         ((BtlUnit *)owner)->gunResourceFlags = (((BtlUnit *)owner)->gunResourceFlags | 1) & ~2;
-        return btlBossDebugPrintf("btl:model change start[%X,%X]\n", model, variant);
+        btlBossDebugPrintf("btl:model change start[%X,%X]\n", model, variant);
     }
-    return status;
 }
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001E50E0);
@@ -3421,7 +3422,7 @@ SoundTask *btlCreateModelChangeTask(BtlUnit *unit, s32 option, s32 value08, s32 
     task->taskId = 0x1A;
     task->flags &= ~1;
     task->owner = unit->owner;
-    task->onStart = (void (*)(u32))btlBeginModelChange;
+    task->onStart = btlBeginModelChange;
     task->callback = func_001E50E0;
     args = btlGetTaskArguments((s32)task);
     args->actor = unit;

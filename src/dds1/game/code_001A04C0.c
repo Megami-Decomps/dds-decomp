@@ -1,6 +1,8 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
+extern void btlBossDebugPrintf(const char *format, ...);
+
 extern s32 datComputeSkillBoostedMaxHp();
 
 extern s32 datComputeSkillBoostedMaxMp();

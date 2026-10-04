@@ -140,7 +140,11 @@ typedef struct UiObject {
 } UiObject;
 
 typedef struct BtlSlotRecord {
-    u8 pad_00[0x84];
+    u8 pad00[0xC];
+    s32 unk0C;
+    u8 pad10[0x6C];
+    s32 unk7C;
+    u8 pad80[4];
     u32 word[7];
 } BtlSlotRecord;
 
@@ -4015,9 +4019,9 @@ typedef struct BtlResBlock {
     s32 nameA;
     s32 nameB;
     s32 nameC;
-    s32 resA;
-    s32 resB;
-    s32 resC;
+    BtlSlotOwner *resA;
+    BtlSlotOwner *resB;
+    BtlSlotOwner *resC;
     s32 unk1C;
 } BtlResBlock;
 
@@ -4077,12 +4081,12 @@ void btlPanelResourcesLoad(void) {
 
 typedef struct BtlWorkRes {
     u8 pad[0x4D8];
-    s32 resA;
-    s32 resB;
-    s32 resC;
+    BtlSlotOwner *resA;
+    BtlSlotOwner *resB;
+    BtlSlotOwner *resC;
 } BtlWorkRes;
 
-extern s32 func_00305148();
+extern BtlSlotOwner *func_00305148();
 
 void btlLoadResourceBlock(void) {
     BtlWorkRes *work = (BtlWorkRes *)btlGetRuntime();
@@ -4096,7 +4100,7 @@ void btlLoadResourceBlock(void) {
     }
 }
 
-extern s32 effDestroyResourceSlotSet(s32);
+extern s32 effDestroyResourceSlotSet(BtlSlotOwner *);
 
 void btlReleaseResourceBlock(void) {
     BtlWorkRes *work = (BtlWorkRes *)btlGetRuntime();
@@ -4465,12 +4469,21 @@ typedef struct MsgQueueTaskData {
     s32 task;
     s32 id;
     s32 unk08;
-    u8 pad0C[4];
+    s32 counter;
     s32 value;
+    s16 fade;
 } MsgQueueTaskData;
 
+typedef struct BattlePanelColors {
+    u32 values[4];
+} BattlePanelColors;
+
+extern const BattlePanelColors D_004165C0;
+extern s32 itfMesMeasureEntryItem(s32, s32, s32);
+extern void itfMesBlk24MoveTo(s32, s32, s32);
+
 extern void *sdfAllocAndClearQuadwords(s32);
-extern void func_001BF690(s32);
+extern s32 func_001BF690(s64);
 extern void btlReleaseDialogTaskData(s32);
 extern s32 btlGetTrackedTaskHandle(s32);
 
@@ -4668,10 +4681,10 @@ void btlDrawThreePanelSpriteStrips(s32 unused, s32 x, s32 y, s32 delta) {
 
     for (strip = strips, i = 0; i < 3; i++, strip++) {
         for (j = 0; j < 4; j++) {
-            colors[j] = btlSetSlotLowByteClamped((BtlSlotOwner *)btlResourceBlock->resA, strip->texture, j, delta);
+            colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resA, strip->texture, j, delta);
         }
         func_00306C28((x + strip->x) << 4, (y + strip->y) << 3,
-                     0, colors, 0, (BtlSlotOwner *)btlResourceBlock->resA, strip->texture, 0x53);
+                     0, colors, 0, btlResourceBlock->resA, strip->texture, 0x53);
     }
 }
 
@@ -4955,7 +4968,48 @@ void btlToggleModelFlagOnInput(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BF690);
+s32 func_001BF690(s64 task) {
+    BattlePanelColors colors = D_004165C0;
+    MsgQueueTaskData *data;
+    s32 expired;
+    s32 width;
+    s32 half;
+    s32 i;
+
+    if (btlGetTrackedTaskHandle(0) == 0) {
+        return 0;
+    }
+    data = (MsgQueueTaskData *)kwlnTaskGetUserValue(task);
+    if (data->counter++ < data->value) {
+        expired = 0;
+    } else {
+        expired = 1;
+    }
+    width = itfMesMeasureEntryItem(data->id, data->unk08, 0);
+    data->fade = 0x80;
+    for (i = 0; i < 4; i++) {
+        colors.values[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x15, i, data->fade);
+    }
+    half = width / 32;
+    func_00306C28(((width >> 4) - half + 0x105) << 4, 0x200, 0,
+                  colors.values, 0, btlResourceBlock->resC, 0x17, 0x53);
+    btlResourceBlock->resC->records[0x16].unk0C = (width >> 4) << 4;
+    func_00306C28((0x100 - half) << 4, 0x200, 0,
+                  colors.values, 0, btlResourceBlock->resC, 0x16, 0x53);
+    btlResourceBlock->resC->records[0x16].unk0C =
+        btlResourceBlock->resC->records[0x16].unk7C << 4;
+    func_00306C28((0x92 - half) << 4, 0x200, 0,
+                  colors.values, 0, btlResourceBlock->resC, 0x15, 0x53);
+    if (expired) {
+        return -1;
+    }
+    itfMesBlk24MoveTo(data->id, (0x100 - (width >> 5)) << 4, 0x220);
+    evtSetDrawSurfaceIndex(0x53);
+    evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    itfMesStartEntry(data->id, data->unk08, 0);
+    return 0;
+}
 
 void btlReleaseDialogTaskData(s32 handle) {
     u8 *window;

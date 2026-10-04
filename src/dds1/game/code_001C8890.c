@@ -19,7 +19,7 @@ extern void btlBindActorSlot(void *, s32);
 extern s32 btlRunRandomWeightedAiTableAction(BtlTask *);
 extern s32 kwlnTaskIsRegistered(s32);
 extern void btlDebugPrintf(const char *, ...);
-extern s32 btlBossDebugPrintf(const char *, ...);
+extern void btlBossDebugPrintf(const char *format, ...);
 extern u32 effMiscRandMod(void *state, u32 modulus);
 extern s64 btlStartTask(void *);
 extern void btlDispatchStateHandler(void *, s32);
@@ -4324,7 +4324,9 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3BE8);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3C08);
 
-s32 btlBeginModelChange(u32 *arguments) {
+/* Task-start callbacks do not return a status to the scheduler. */
+void btlBeginModelChange(u32 argumentsAddress) {
+    u32 *arguments = (u32 *)argumentsAddress;
     s32 owner = arguments[0];
     u32 model = arguments[1];
     u32 variant = arguments[2];
@@ -4333,9 +4335,8 @@ s32 btlBeginModelChange(u32 *arguments) {
     if (status == 0) {
         btlRequestModelAssetByMode(owner, model, variant);
         *(u32 *)(owner + 0x118) = (*(u32 *)(owner + 0x118) | 1) & ~2;
-        return btlBossDebugPrintf("btl:model change start[%X,%X]\n", model, variant);
+        btlBossDebugPrintf("btl:model change start[%X,%X]\n", model, variant);
     }
-    return status;
 }
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001D8190);

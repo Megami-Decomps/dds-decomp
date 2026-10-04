@@ -693,7 +693,7 @@ extern void fldPollAreaResourceLoad();
 
 extern s32 fldGetResourceReadyFlag();
 
-extern s32 btlBossDebugPrintf();
+extern void btlBossDebugPrintf(const char *format, ...);
 
 extern s32 brsTaskPollDone();
 
