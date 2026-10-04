@@ -21,20 +21,31 @@ extern s32 D_003BD8E8;
 
 /* Async job handled by func_00288E70 and friends. */
 typedef struct FileJob {
-    u8 unk0;      /* 0x00 */
+    u8 kind;      /* 0x00 */
     u8 state;     /* 0x01 */
-    u8 unk2[2];   /* 0x02 */
-    struct FileJob *unk4; /* 0x04 */
-    u8 unk8[4];   /* 0x08 */
+    u8 retryCount; /* 0x02 */
+    u8 allocationMode; /* 0x03 */
+    struct FileJob *next; /* 0x04 */
+    char *name;   /* 0x08 */
     void *deviceRequest; /* 0x0C: transfer backend dereferences mode at +0x16 */
     s32 transferBytes; /* 0x10: capped at 0x8000 for each device operation */
     s32 totalBytes; /* 0x14 */
-    u8 pad18[0x10];
+    void (*completionCallback)(void *job, u32 arg); /* 0x18 */
+    u32 completionArg; /* 0x1C */
+    s32 allocationHandle; /* 0x20 */
+    u32 retainedAddress; /* 0x24 */
     u32 transferAddress; /* 0x28: forwarded to backend request at +0x20 */
-    u8 pad2C[0x3C];
+    struct FileJob *completionNext; /* 0x2C */
+    u8 pad30[0x38];
     u16 stateRequired; /* 0x68 */
     u16 slot; /* 0x6A */
 } FileJob;
+
+/* The open device state retains the resolved path at +0x10. */
+typedef struct DevStatePathView {
+    u8 pad00[0x10];
+    char *path;
+} DevStatePathView;
 
 /* Completion node drained by fileManDispatchDone. */
 typedef struct FileCbNode {
@@ -56,6 +67,8 @@ s32 SignalSema(s32 sema);
 void *memset(void *dst, s32 val, u32 len);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 s32 sdfAllocGeneralBlock(s32 arg0);
+s32 sdfAllocGeneralBlockHigh(s32 size);
+s32 sdfTryAllocGeneralBlock(s32 size);
 s32 sdfResourceRetainAddress(s32 arg0);
 s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 s32 func_002F6990(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4);
@@ -72,7 +85,13 @@ extern s32 sdfDevQueueReleaseState(void *);
 extern void fileQueuePendingRequestInFreeSlot(FileJob *);
 extern void filePrependNode(void *, void *);
 extern void fileUnlinkNode(void *, void *);
-extern s32 func_00289540(void);
+extern void func_00289540(void);
+extern void *sdfDevCreateCallbackState(s32 path,
+                        s32 (*callback)(void *, s32, s32, s32, FileJob *), FileJob *job);
+extern void *sdfDevCreateModeState(s32 path,
+                        s32 (*callback)(void *, s32, s32, s32, FileJob *), FileJob *job,
+                        s32 options);
+extern s32 sdfPrintFormattedDevMessage(const char *fmt, ...);
 
 s32 func_00288E70(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileJob *job) {
     FileManWork *work = &fileManagerWork;
@@ -99,8 +118,8 @@ s32 func_00288E70(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
             job->transferBytes -= byteCount;
             if (job->transferBytes == 0) {
                 job->state = 5;
-                work->head = (struct FileNode *)job->unk4;
-                if (job->unk4 == NULL) {
+                work->head = (struct FileNode *)job->next;
+                if (job->next == NULL) {
                     work->tail = NULL;
                 }
             } else {
@@ -143,7 +162,92 @@ void fileStartChunkedReadWhenReady(FileJob *job) {
     sdfDevQueueRead(job->deviceRequest, job->transferAddress, job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
 }
 
-INCLUDE_ASM(const s32, "game/code_00288E70", func_002890B8);
+/* Drive allocation, chunked reads, close, and completion-list handoff. */
+s32 func_002890B8(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileJob *job) {
+    FileManWork *work = &fileManagerWork;
+    s32 saved;
+
+    switch (event) {
+    case 2:
+        job->deviceRequest = deviceRequest;
+        job->state = event;
+        sdfDevQueueControlRequest(deviceRequest);
+        break;
+    case 4: {
+        s32 allocationHandle;
+
+        job->transferBytes = byteCount;
+        job->totalBytes = byteCount;
+        if (job->allocationMode == 0) {
+            allocationHandle = sdfTryAllocGeneralBlock(byteCount);
+            job->allocationHandle = allocationHandle;
+            if (allocationHandle == 0) {
+                job->retryCount = 10;
+                job->state = 7;
+                break;
+            }
+        } else {
+            allocationHandle = sdfAllocGeneralBlockHigh(byteCount);
+            job->allocationHandle = allocationHandle;
+        }
+        {
+            u32 address = sdfResourceRetainAddress(allocationHandle);
+
+            job->transferAddress = address;
+            job->retainedAddress = address;
+            job->state = FILE_JOB_READY;
+        }
+        fileStartChunkedReadWhenReady(job);
+        break;
+    }
+    case 5:
+        WaitSema(work->sema);
+        job->transferBytes -= byteCount;
+        if (job->transferBytes == 0) {
+            job->state = 5;
+            if (work->head == (struct FileNode *)job) {
+                work->head = (struct FileNode *)job->next;
+                if (job->next == NULL) {
+                    work->tail = NULL;
+                }
+            }
+        } else {
+            job->state = FILE_JOB_READY;
+            job->transferAddress += byteCount;
+        }
+        if (job->state == 5) {
+            filePrependNode(work, job);
+            SignalSema(work->sema);
+            sdfDevQueueActiveOperation(deviceRequest);
+            saved = fileManGuardActive;
+            fileManGuardActive = 2;
+            func_00289540();
+            fileManGuardActive = saved;
+        } else {
+            SignalSema(work->sema);
+            fileStartChunkedReadWhenReady(job);
+        }
+        break;
+    case 7:
+        sdfDevQueueReleaseState(deviceRequest);
+        job->deviceRequest = NULL;
+        job->state = 6;
+        WaitSema(work->sema);
+        fileUnlinkNode(work, job);
+        if (job->completionCallback != NULL) {
+            FileJob **link = (FileJob **)&work->done;
+            FileJob *next;
+
+            while ((next = *link) != NULL) {
+                link = &next->completionNext;
+            }
+            *link = job;
+        }
+        SignalSema(work->sema);
+        break;
+    }
+    return 0;
+}
 
 void fileStartChunkedWriteWhenReady(FileJob *job) {
     WaitSema(fileManagerWork.sema);
@@ -156,9 +260,132 @@ void fileStartChunkedWriteWhenReady(FileJob *job) {
     sdfDevQueueWrite(job->deviceRequest, job->transferAddress, job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
 }
 
-INCLUDE_ASM(const s32, "game/code_00288E70", func_00289380);
+/* Advance a chunked write, then close and queue its completion callback. */
+s32 func_00289380(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileJob *job) {
+    FileManWork *work = &fileManagerWork;
+    s32 saved;
 
-INCLUDE_ASM(const s32, "game/code_00288E70", func_00289540);
+    switch (event) {
+    case 2:
+        job->state = FILE_JOB_READY;
+        fileStartChunkedWriteWhenReady(job);
+        break;
+    case 6:
+        WaitSema(work->sema);
+        job->transferAddress += byteCount;
+        job->transferBytes -= byteCount;
+        if (job->transferBytes == 0) {
+            job->state = 5;
+            if (work->head == (struct FileNode *)job) {
+                work->head = (struct FileNode *)job->next;
+                if (job->next == NULL) {
+                    work->tail = NULL;
+                }
+            }
+        } else {
+            job->state = FILE_JOB_READY;
+        }
+        if (job->state == 5) {
+            filePrependNode(work, job);
+            SignalSema(work->sema);
+            sdfDevQueueActiveOperation(deviceRequest);
+            saved = fileManGuardActive;
+            fileManGuardActive = 3;
+            func_00289540();
+            fileManGuardActive = saved;
+        } else {
+            SignalSema(work->sema);
+            fileStartChunkedWriteWhenReady(job);
+        }
+        break;
+    case 7:
+        sdfDevQueueReleaseState(deviceRequest);
+        job->deviceRequest = NULL;
+        job->state = 6;
+        WaitSema(work->sema);
+        fileUnlinkNode(work, job);
+        if (job->completionCallback != NULL) {
+            FileJob **link = (FileJob **)&work->done;
+            FileJob *next;
+
+            while ((next = *link) != NULL) {
+                link = &next->completionNext;
+            }
+            *link = job;
+        }
+        SignalSema(work->sema);
+        break;
+    }
+    return 0;
+}
+
+/* Start or resume the read, PAC, or write job at the head of the queue. */
+void func_00289540(void) {
+    FileManWork *work = &fileManagerWork;
+    FileJob *job;
+    s32 locked;
+
+    WaitSema(work->sema);
+    job = (FileJob *)work->head;
+    if (job == NULL) {
+        SignalSema(work->sema);
+        return;
+    }
+    locked = 1;
+    switch (job->kind) {
+    case 0:
+        switch (job->state) {
+        case 0:
+            job->state = 1;
+            locked = 0;
+            SignalSema(work->sema);
+            job->deviceRequest = sdfDevCreateCallbackState((s32)job->name, func_002890B8, job);
+            break;
+        case 7:
+            job->allocationHandle = sdfTryAllocGeneralBlock(job->totalBytes);
+            if (job->allocationHandle == 0) {
+                sdfPrintFormattedDevMessage("alloc retry for %s\n",
+                                            ((DevStatePathView *)job->deviceRequest)->path);
+                job->retryCount--;
+            } else {
+                u32 address = sdfResourceRetainAddress(job->allocationHandle);
+
+                job->transferAddress = address;
+                job->retainedAddress = address;
+                job->state = FILE_JOB_READY;
+                fileStartChunkedReadWhenReady(job);
+            }
+            break;
+        }
+        break;
+    case 1:
+        switch (job->state) {
+        case 0:
+            job->state = 1;
+            locked = 0;
+            SignalSema(work->sema);
+            job->deviceRequest = sdfDevCreateCallbackState((s32)job->name, func_00288E70, job);
+            break;
+        case FILE_JOB_READY:
+            locked = 0;
+            SignalSema(work->sema);
+            fileQueuePendingRequestInFreeSlot(job);
+            break;
+        }
+        break;
+    case 2:
+        if (job->state == 0) {
+            job->state = 1;
+            locked = 0;
+            SignalSema(work->sema);
+            job->deviceRequest = sdfDevCreateModeState((s32)job->name, func_00289380, job, 0x180);
+        }
+        break;
+    }
+    if (locked != 0) {
+        SignalSema(work->sema);
+    }
+}
 
 void fileManDispatchDone(void) {
     FileManWork *work = &fileManagerWork;
