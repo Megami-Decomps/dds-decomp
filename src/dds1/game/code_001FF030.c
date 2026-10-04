@@ -99,7 +99,7 @@ extern u32 btlGetSelectedBossEffectId(void);
 extern u32 btlGetSpecialModeEffectValue(void);
 
 extern s32 btlGetRuntime(void);
-extern void btlBossDebugPrintf(s32, ...);
+extern void btlBossDebugPrintf(const char *, ...);
 extern s32 btlFindUnitByActor(s32);
 extern void func_001A1990(void *, s32);
 
@@ -220,7 +220,7 @@ u32 btlPickWeightedAiSlot(s32 unusedUnit, s32 speciesId, s32 rowIndex) {
     }
     btlDebugPrintf("AI_BUGBUGBUGBUGBUG           \n");
     if (sdfPfsDebugMode == 0) {
-        btlBossDebugPrintf((s32)D_003A5988);
+        btlBossDebugPrintf(D_003A5988);
     }
     return 0;
 }
@@ -963,12 +963,12 @@ extern u8 sdfPfsDebugMode;
 s32 btlCheckActorEligibilityWithDebug(s32 actor) {
     if (btlWouldUiValueFallBelowQuarter(actor, 0) != 0) {
         if (sdfPfsDebugMode == 0) {
-            btlBossDebugPrintf((s32)D_003A5A80);
+            btlBossDebugPrintf(D_003A5A80);
         }
         return 1;
     }
     if (sdfPfsDebugMode == 0) {
-        btlBossDebugPrintf((s32)D_003A5AA8);
+        btlBossDebugPrintf(D_003A5AA8);
     }
     return 0;
 }
@@ -3171,7 +3171,7 @@ void btlInitRandomBossSelection(void) {
     ((BtlBossEffectPayload *)data)->color = 0x80808080;
     ((BtlBossEffectPayload *)data)->options = 0;
     ((BtlBossEffectPayload *)data)->selectedId = effMiscRand(&effSharedRandomState) % 6;
-    btlBossDebugPrintf((s32)D_003A5D98, ((BtlBossEffectPayload *)data)->selectedId);
+    btlBossDebugPrintf(D_003A5D98, ((BtlBossEffectPayload *)data)->selectedId);
 }
 
 s32 btlFilterBossCommandBySelection(u8 *unit, s32 command) {
@@ -3422,7 +3422,7 @@ s32 btlSwapRandomBossSelection(void) {
         entry = btlFindUnitByActor((s32)oldUnit);
         *(u16 *)(entry + 4) = 0;
     }
-    btlBossDebugPrintf((s32)D_003A5DB8, oldUnit->lookupId, newUnit->lookupId, oldUnit, newUnit);
+    btlBossDebugPrintf(D_003A5DB8, oldUnit->lookupId, newUnit->lookupId, oldUnit, newUnit);
     effect->options = ((effect->options & ~4) | 2) & ~1;
     return -1;
 }
@@ -3803,7 +3803,7 @@ s32 func_00209C90(void) {
             fldAppendSceneGroupHandle(task);
             task->result = 0x11;
             btlAppendIndexListEntry(task->targetList, (s32)task->unit);
-            btlBossDebugPrintf((s32)"btl:HARI1 form = %d\n", *formCount);
+            btlBossDebugPrintf("btl:HARI1 form = %d\n", *formCount);
         }
     }
     return -1;
