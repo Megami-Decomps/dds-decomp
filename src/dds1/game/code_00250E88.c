@@ -39,9 +39,11 @@ extern SceneEntry D_0036BE38[];
 typedef struct MenuSceneWork {
     s32 allocationHandle; /* 0x000 */
     u8 pad004[0x480];
-    s32 gridHandle;       /* 0x484 */
+    struct MenuGrid *gridHandle; /* 0x484 */
     u32 gridRefreshControl[2]; /* 0x488 */
-    u8 pad490[0xB0];
+    u8 pad490[0x5C];
+    s32 pendingMantras[8]; /* 0x4EC: entries awaiting display */
+    u8 pad50C[0x34];
     s32 coordinateA;      /* 0x540 */
     s32 coordinateB;      /* 0x544 */
 } MenuSceneWork;
@@ -124,7 +126,70 @@ void mnuFreeTaskData(s32 unused, void *taskData) {
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_002515F0);
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_002517C0);
+typedef struct DspEntry {
+    u8 pad0[4];
+    u16 unitId;
+    u8 pad06[0xE];
+    u16 level;
+} DspEntry;
+
+typedef struct DspSelection {
+    DspEntry *entry;
+    s32 mantraId;
+} DspSelection;
+
+typedef struct DspUnitName {
+    u8 encodedText[17];
+} DspUnitName;
+
+typedef struct DspMantraName {
+    u8 encodedText[19];
+} DspMantraName;
+
+extern DspUnitName *D_003BAA70;
+extern DspMantraName *D_003BAA78;
+extern const s32 D_003AF840[];
+extern const s32 D_003AF850[];
+extern void *memcpy(void *, const void *, u32);
+extern u32 mnuGetSelectedNodeValue(void);
+extern s32 fldGetSceneMetadataNode(void);
+extern void evtCopyEntryStringToActiveWindow(s32, s32);
+extern s32 dspStartEntry(s32);
+extern void *sdfGridSelectFilledCell(MenuGrid *, s32, s32);
+
+/* Display the selected mantra and move the scene grid to its filled cell. */
+s32 func_002517C0(s32 context) {
+    s16 mantraIds[8];
+    s32 coordinates[8][2];
+    DspSelection *selection;
+    s32 *pendingFlags;
+    s32 i;
+    MenuGrid *grid;
+    s32 x;
+    s32 y;
+
+    memcpy(mantraIds, D_003AF840, sizeof(mantraIds));
+    memcpy(coordinates, D_003AF850, sizeof(coordinates));
+    selection = (DspSelection *)mnuGetSelectedNodeValue();
+    fldGetSceneMetadataNode();
+    pendingFlags = ((MenuSceneWork *)context)->pendingMantras;
+    for (i = 0; i < 8; i++) {
+        if (pendingFlags[i] != 0) {
+            evtCopyEntryStringToActiveWindow(
+                0, (s32)D_003BAA70[selection->entry->unitId].encodedText);
+            evtCopyEntryStringToActiveWindow(
+                1, (s32)D_003BAA78[mantraIds[i]].encodedText);
+            dspStartEntry(1);
+            pendingFlags[i] = 0;
+            grid = ((MenuSceneWork *)context)->gridHandle;
+            y = coordinates[i][1];
+            x = coordinates[i][0];
+            sdfGridSelectFilledCell(grid, x, y);
+            return 0;
+        }
+    }
+    return 1;
+}
 
 
 extern s32 sdfAllocGeneralBlock(s32);
@@ -150,7 +215,7 @@ s32 mnuCreateSceneWork(void) {
 /* Retain the native metadata lookup, then release grid/list/allocation resources and reset projection state. */
 void mnuReleaseSceneContext(s32 unused, s32 sceneAddress) {
     func_002CB3B8(mnuSceneResourceContext, -1);
-    sdfDestroyGridWork(((MenuSceneWork *)sceneAddress)->gridHandle);
+    sdfDestroyGridWork((s32)((MenuSceneWork *)sceneAddress)->gridHandle);
     mnuReleaseDisplayListNodes(sceneAddress + 0x584);
     sdfReleaseResourceAllocation(((MenuSceneWork *)sceneAddress)->allocationHandle);
     mnuResetWorkFloats();
@@ -182,7 +247,7 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00253208);
 
 /* Recreate the scene's selection grid and copy its resulting coordinates. */
 void mnuReinitializeSceneGrid(s32 sceneAddress) {
-    sdfDestroyGridWork(((MenuSceneWork *)sceneAddress)->gridHandle);
+    sdfDestroyGridWork((s32)((MenuSceneWork *)sceneAddress)->gridHandle);
     mnuInitializeMantraSelectionGrid(sceneAddress);
     mnuCopySceneCoordinates(sceneAddress);
 }
@@ -194,23 +259,23 @@ extern void func_002CC0D0(MenuGrid *grid);
 
 
 void func_00253558(s32 context) {
-    s32 grid = ((MenuSceneWork *)context)->gridHandle;
-    MenuGridCell *cursor = ((MenuGrid *)grid)->cursor;
+    MenuGrid *grid = ((MenuSceneWork *)context)->gridHandle;
+    MenuGridCell *cursor = grid->cursor;
     s32 selected = cursor->value;
     u16 entryId = *(u16 *)(selected + 0xC);
-    MenuGridCoordinate *entries = ((MenuGrid *)grid)->entries;
+    MenuGridCoordinate *entries = grid->entries;
     s16 x = entries[entryId].x;
     s16 y = entries[entryId].y;
     s32 scene;
     s32 field;
 
-    func_002CBB48((MenuGrid *)grid);
+    func_002CBB48(grid);
     scene = func_002CB3B8(mnuSceneResourceContext, 0);
     field = *(s32 *)(*(s32 *)(scene + 0xC) + 0x1C);
     func_00253208(context, *(s32 *)(field + 0x70), NULL, NULL);
     if (sdfGridSelectFilledCell(
-            (MenuGrid *)((MenuSceneWork *)context)->gridHandle, x, y) == NULL) {
-        func_002CC0D0((MenuGrid *)((MenuSceneWork *)context)->gridHandle);
+            ((MenuSceneWork *)context)->gridHandle, x, y) == NULL) {
+        func_002CC0D0(((MenuSceneWork *)context)->gridHandle);
     }
 }
 
