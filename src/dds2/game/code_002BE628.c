@@ -870,13 +870,15 @@ typedef struct MenuEffectNode {
 } MenuEffectNode;
 
 typedef struct MenuEffectPair {
-    u8 pad00[0x14];
+    u8 pad00[0x10];
+    s32 quantizedSpan; /* 0x10 */
     s32 *settings; /* 0x14: four selectable effect settings */
     u8 settingIndex; /* 0x18 */
     s8 positionY; /* 0x19 */
     u8 pad1A[0x0E];
     s32 configurationHandle; /* 0x28 */
-    u8 pad2C[0x0C];
+    s32 secondaryHandle; /* 0x2C */
+    u8 pad30[8];
     MenuEffectNode *first;  /* 0x38 */
     MenuEffectNode *second; /* 0x3C */
 } MenuEffectPair;
@@ -898,7 +900,21 @@ void mnuSetPairedEffectPositions(MenuEffectPair *pair) {
     coordinates[2] = 10;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1D10);
+/* Divide a quantized horizontal span into the two effect-grid regions. */
+void func_002C1D10(MenuEffectPair *pair) {
+    s32 start = ((pair->quantizedSpan * 8) / 100) * 16;
+    s32 end = ((pair->quantizedSpan * 77) / 100) * 16;
+    s32 offset = -0x60;
+    s32 bounds[2];
+
+    bounds[0] = 0;
+    bounds[1] = end;
+    itfGridSetQuantizedBounds(pair->configurationHandle, 0,
+                              start + offset, bounds[0],
+                              bounds[1] - start + offset, bounds[0]);
+    end += offset;
+    itfGridSetQuantizedBounds(pair->secondaryHandle, 0, end, 0, end, 0);
+}
 
 /* Cycle through four indexed settings while refreshing the paired effects. */
 void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {

@@ -1098,6 +1098,13 @@ void mnuShopReleaseSprites(ShopScene *scene) {
     }
 }
 
+typedef struct ShopProgressPriceScale {
+    f32 percent;
+    u32 threshold;
+} ShopProgressPriceScale;
+
+extern ShopProgressPriceScale D_0036A234[];
+
 s32 mnuCampGetProgressStage(void) {
     s32 result = 0;
     if (mdlFlagTest(0x970)) {
@@ -1118,7 +1125,20 @@ s32 mnuCampGetProgressStage(void) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244848);
+s32 func_00244848(void) {
+    u32 stage = mnuCampGetProgressStage();
+
+    if (stage < 5) {
+        if (*(u32 *)(datGameState + 0xA50) >= D_0036A234[stage].threshold) {
+            stage++;
+        } else {
+            stage = 0;
+        }
+    } else {
+        stage = 0;
+    }
+    return stage;
+}
 
 /* Sum the active low bit across five entries using the native halfword stride. */
 s32 mnuCountActivePartyEntries(void) {
@@ -1253,18 +1273,12 @@ typedef struct ShopSourcePriceRow {
     ShopSourcePriceEntry entries[0x40];
 } ShopSourcePriceRow;
 
-typedef struct ShopProgressPriceScale {
-    f32 percent;
-    u8 pad04[4];
-} ShopProgressPriceScale;
-
 typedef struct ShopItemPriceRecord {
     u8 pad00[4];
     s32 price;
 } ShopItemPriceRecord;
 
 extern ShopSourcePriceRow D_00368CF0[];
-extern ShopProgressPriceScale D_0036A234[];
 
 s32 func_00244C00(s32 index, s32 source, s32 halfPrice) {
     u32 rowIndex;
