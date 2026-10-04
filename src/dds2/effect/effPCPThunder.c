@@ -944,7 +944,8 @@ void effThunderUpdateChainSegments(EffThunderGroup *group) {
 
 /* Point history and its resource/allocation ownership share one header. */
 typedef struct EffFragmentResources {
-    u8 pad00[8];
+    u32 color;
+    s32 surfaceIndex;
     s32 count;
     s32 activePointCount;
     s32 position;
@@ -953,6 +954,8 @@ typedef struct EffFragmentResources {
     u32 *colors;
     u32 resourceHandle;
     u32 allocation;
+    u128 *endPoints;
+    u32 *endColors;
 } EffFragmentResources;
 
 /* The native Bezier update advances the two floating states at +0x74/+0x78. */
@@ -1243,7 +1246,102 @@ void func_001719D0(EffFragmentResources *history, u128 *source) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00171A68);
+typedef struct EffThunderDrawParams {
+    s16 primitiveCount;
+    s16 pointCount;
+    u16 flags;
+    u8 pad06[2];
+    u32 color;
+    u8 pad0C[4];
+    u128 *points;
+    u8 pad14[0xC];
+    u32 *colors;
+    u8 pad24[0xC];
+} EffThunderDrawParams;
+
+typedef struct EffThunderSurface {
+    u8 pad00[0x10];
+    void (*submit)(struct EffThunderSurface *, s32);
+} EffThunderSurface;
+
+extern EffThunderDrawParams D_00451F90;
+extern EffThunderDrawParams D_00451FC0;
+extern EffThunderSurface *D_003B1210[];
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(s32);
+extern void sdfConsAppendClearPacket(s32, s32);
+extern void sdfConsAppendAssetPacket(s32, u32, s32);
+extern void sdfAppendPacket(s32, s32);
+extern s32 func_00167A10(EffThunderDrawParams *);
+
+/* Render the two runs of a wrapped three-point history and its end cap. */
+void func_00171A68(EffFragmentResources *history) {
+    s32 start[4];
+    s32 length[4];
+    s32 list;
+    s32 recent;
+    s32 wrapped;
+    s32 i;
+    s32 remaining;
+    EffThunderDrawParams *draw;
+    u32 *colors;
+    u32 edgeColor;
+    u32 centerColor;
+    EffThunderSurface *surface;
+
+    if (history->activePointCount == 0) {
+        return;
+    }
+    list = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    sdfConsAppendClearPacket(list, 0);
+    sdfConsAppendAssetPacket(list, history->resourceHandle, 0);
+    recent = history->activePointCount;
+    start[0] = history->position - recent;
+    if (start[0] < 3) {
+        wrapped = start[0] - 3;
+        start[1] = 0;
+        start[0] = wrapped + history->count;
+        length[0] = -wrapped;
+        length[1] = recent - length[0] + 3;
+    } else {
+        length[0] = recent;
+        length[1] = 0;
+    }
+    D_00451F90.colors = history->colors;
+    D_00451F90.color = history->color;
+    for (i = 0; i < 2; i++) {
+        draw = &D_00451F90;
+        remaining = length[i];
+        draw->primitiveCount = 16;
+        draw->points = history->points + start[i];
+        draw->pointCount = 15;
+        while (remaining >= 15) {
+            remaining -= 12;
+            sdfAppendPacket(list, func_00167A10(&D_00451F90));
+            D_00451F90.points += 12;
+            D_00451F90.colors += 12;
+        }
+        if (remaining >= 6) {
+            draw->primitiveCount = (remaining / 3) * 4 - 4;
+            draw->pointCount = remaining;
+            sdfAppendPacket(list, func_00167A10(draw));
+            draw->colors += remaining;
+        }
+    }
+    colors = history->endColors;
+    edgeColor = D_00451F90.colors[-3];
+    centerColor = D_00451F90.colors[-2];
+    colors[0] = centerColor;
+    colors[7] = colors[6] = colors[5] = colors[4] =
+        colors[3] = colors[2] = colors[1] = edgeColor;
+    D_00451FC0.colors = colors;
+    D_00451FC0.points = history->endPoints;
+    D_00451FC0.color = history->color;
+    sdfAppendPacket(list, func_00167A10(&D_00451FC0));
+    surface = D_003B1210[history->surfaceIndex];
+    surface->submit(surface, list);
+}
 
 typedef struct EffFlashRecordPart {
     u32 unk00;

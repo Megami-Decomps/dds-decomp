@@ -4172,14 +4172,18 @@ typedef struct FldActorEntry {
     char motionName[0x0C]; /* 0x18 */
     char otherName[0x0C];  /* 0x24 */
     s8 variantMode;        /* 0x30 */
-    u8 flags31;            /* 0x31 */
+    s8 flags31;            /* 0x31 */
     s16 variant;           /* 0x32 */
-    u8 pad34[0x10];
+    s16 sequenceKind;      /* 0x34: zero uses the default kind */
+    u8 pad36[2];
+    char sequenceName[0x0C]; /* 0x38 */
     s8 linkKind;           /* 0x44 */
-    u8 pad45;
-    char linkName[0x0E];    /* 0x46 */
-    u8 flags54;            /* 0x54 */
-    u8 pad55[0x0F];
+    s8 rowIndex;           /* 0x45 */
+    char linkName[0x0C];   /* 0x46 */
+    s8 sequenceCode;       /* 0x52 */
+    s8 selectedRoom;       /* 0x53: one-based optional room */
+    s8 flags54;            /* 0x54 */
+    char taskName[0x0F];   /* 0x55 */
     u8 flags64;            /* 0x64 */
     u8 unk65;
     u8 unk66;
@@ -4340,7 +4344,7 @@ s32 fldQuerySelectedActorMotionState(s32 query) {
         return 0x14;
     }
     if (query == 1) {
-        return fldTestBits(entry->flags54, 8);
+        return fldTestBits((u8)entry->flags54, 8);
     }
     return 0;
 }
@@ -4476,7 +4480,69 @@ void fldSelectActorFromSceneIndexTables(s32 mode, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013EC68);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013EF10);
+extern void fldLoadActorWaypointTable(s32);
+struct FieldSequenceRecord;
+extern void fldInitializeLinkedSequence(struct FieldSequenceRecord *, s32, s32, const char *, s32, s32, const char *);
+
+void func_0013EF10(s32 mode, s32 index, u8 *sequence) {
+    s32 field;
+    s32 motion;
+    s32 kind;
+    s32 i;
+    FldActorEntry *entry;
+
+    if (mode == 0) {
+        field = D_0032EF18[index].unk0;
+        motion = 3;
+    } else {
+        motion = 4;
+        field = D_0032EFE0[index].unk0;
+    }
+    if (field == 0) {
+        return;
+    }
+    fldLoadActorWaypointTable(field);
+    for (i = 0; i < 0x100; i++) {
+        entry = (FldActorEntry *)D_00337D00 + i;
+        if (entry->requiredFlag != 0 && !mdlFlagTest(entry->requiredFlag)) {
+            continue;
+        }
+        if (entry->kind != 7 || motion != entry->motion ||
+            index != entry->secondaryMotion || entry->variantMode != 0) {
+            continue;
+        }
+        fldAreaState[0x16] = entry->rowIndex;
+        if (entry->flags54 != 0) {
+            D_003BAB3C = entry->flags54;
+            strcpy((char *)D_0032C9A0, entry->taskName);
+            D_003BAB40 = i + 1;
+        }
+        if (entry->flags31 & 1) {
+            fldAreaState[0x4B] = 1;
+        } else {
+            fldAreaState[0x4B] = 0;
+        }
+        if (entry->variant != 0) {
+            field = entry->variant;
+        }
+        kind = 1;
+        if (entry->sequenceKind != 0) {
+            kind = entry->sequenceKind;
+        }
+        if (field != 0 && kind != 0) {
+            fldInitializeLinkedSequence((struct FieldSequenceRecord *)sequence, field, kind, entry->sequenceName,
+                                        entry->sequenceCode, entry->linkKind, entry->linkName);
+            *(s32 *)(sequence + 0x5C) = 5;
+            if (fldAreaState[0xA] != entry->sequenceCode && entry->sequenceCode != 0) {
+                fldAreaState[0xA] = entry->sequenceCode;
+            }
+            if (entry->selectedRoom != 0) {
+                fldAreaState[0x22] = entry->selectedRoom - 1;
+            }
+        }
+        return;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F100);
 

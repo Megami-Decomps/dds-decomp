@@ -1841,7 +1841,8 @@ typedef struct {
     s32 id;
     s32 unk8;
     s32 activationRequested;
-    u8 pad10[0x14];
+    u8 pad10[0x10];
+    s32 effectVariant;
     s32 effectNode;
     u8 pad28[8];
 } FldObj30; /* 0x30 bytes */
@@ -1914,7 +1915,85 @@ void fldReleaseObjectSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00148D78);
+typedef struct FldModelDescriptor {
+    u8 pad00[0x30];
+    u8 kind;
+} FldModelDescriptor;
+
+typedef struct FldModelResource {
+    u8 pad00[0x1C];
+    FldModelDescriptor *descriptor;
+} FldModelResource;
+
+extern s32 *dds3GetObjectBaseResourceHandle();
+extern void mdlAddEntryPlain(FldModelResource *, s32, s32);
+extern void mdlAddEntryFlagged(FldModelResource *, s32, s32);
+extern s32 fldTestSceneControlFlags(s32);
+
+void func_00148D78(void) {
+    s32 i;
+    FldModelResource *resource;
+
+    for (i = 0; i < fldObjectSlotCount; i++) {
+        switch (fldObjectSlots[i].unk8) {
+        case 0:
+            if (fldObjectSlots[i].activationRequested == 1) {
+                resource = (FldModelResource *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+                mdlAddEntryPlain(resource, 0, 1);
+                fldObjectSlots[i].unk8 = fldObjectSlots[i].activationRequested;
+                switch (fldObjectSlots[i].effectVariant) {
+                case 0:
+                case 3:
+                    if (D_003BAF58 != 0) {
+                        effDestroyNode(D_003BAF58);
+                        D_003BAF58 = 0;
+                    }
+                    D_003BAF58 = effCreateNodeFromDescriptor(D_003BAF54);
+                    effRestartNodeInstance(D_003BAF4C);
+                    break;
+                case 1:
+                    if (D_003BAF64 != 0) {
+                        effDestroyNode(D_003BAF64);
+                        D_003BAF64 = 0;
+                    }
+                    D_003BAF64 = effCreateNodeFromDescriptor(D_003BAF60);
+                    effRestartNodeInstance(D_003BAF4C);
+                    break;
+                }
+            } else {
+                resource = (FldModelResource *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+                if (resource->descriptor->kind == 5) {
+                    mdlAddEntryPlain(resource, 0, 0);
+                }
+            }
+            break;
+        case 1:
+            resource = (FldModelResource *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+            if (resource->descriptor->kind == 5) {
+                mdlAddEntryFlagged(resource, 0, 2);
+                fldObjectSlots[i].activationRequested = 2;
+                fldObjectSlots[i].unk8 = 2;
+            }
+            break;
+        case 2:
+            if (fldTestSceneControlFlags(0x40)) {
+                resource = (FldModelResource *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+                mdlAddEntryFlagged(resource, 0, 3);
+                fldObjectSlots[i].activationRequested = 3;
+                fldObjectSlots[i].unk8 = 3;
+                if (D_003BAF58 != 0) {
+                    effDestroyNode(D_003BAF58);
+                    D_003BAF58 = 0;
+                }
+                if (D_003BAF64 != 0) {
+                    effDestroyNode(D_003BAF64);
+                    D_003BAF64 = 0;
+                }
+            }
+            break;
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0788);
 

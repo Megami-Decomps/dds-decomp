@@ -7033,9 +7033,94 @@ void btlStopRainSoundTransition(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_00200B30);
+typedef struct BtlFieldArchiveNode {
+    struct BtlFieldArchiveNode *next;
+    u32 unk04;
+    s32 handle;
+    void *data;
+} BtlFieldArchiveNode;
 
-extern u32 func_00200B30(void);
+typedef struct BtlFieldArchiveRequest {
+    u8 pad00[0x60];
+    BtlFieldArchiveNode *resources;
+} BtlFieldArchiveRequest;
+
+typedef struct BtlFieldLoadArgs {
+    s32 stage;
+    s32 variant;
+    BtlFieldArchiveRequest *request;
+    u8 pad0C[0xC];
+    void *fieldF1;
+    void *fieldF2;
+    void *fieldTB;
+    s32 frame;
+} BtlFieldLoadArgs;
+
+extern BtlFieldArchiveRequest *fileQueuePlainDispatchRequest(const char *);
+
+u32 func_00200B30(args)
+    BtlFieldLoadArgs *args;
+{
+    BattleFieldBlocks *blocks = (BattleFieldBlocks *)btlGetRuntime();
+    char directory[0x80];
+    char path[0x80];
+    BtlFieldArchiveNode *node;
+    u32 i;
+
+    if (args->frame == 0) {
+        btlFreeFieldBlocks();
+        fldFormatAreaDirectory(directory, args->stage, 1);
+        func_0035C860(path, "%sf%03d_%03d.LB", directory, args->stage, args->variant);
+        btlBossDebugPrintf("btl:field load[%s]\n", path);
+        args->request = fileQueuePlainDispatchRequest(path);
+        args->fieldF1 = NULL;
+        args->fieldF2 = NULL;
+        args->fieldTB = NULL;
+    } else {
+        if (args->request != NULL && fileRequestIsReady(args->request)) {
+            BtlFieldArchiveRequest *request = args->request;
+            node = request->resources;
+            i = 0;
+            while (node != NULL) {
+                switch (i) {
+                case 0:
+                    blocks->fieldTB = node->handle;
+                    args->fieldTB = node->data;
+                    break;
+                case 1:
+                    blocks->fieldF2 = node->handle;
+                    args->fieldF2 = node->data;
+                    break;
+                case 2:
+                    blocks->fieldF1 = node->handle;
+                    args->fieldF1 = node->data;
+                    break;
+                }
+                node = node->next;
+                i++;
+            }
+            func_002C7CE8(request);
+            args->request = NULL;
+        }
+        if (args->fieldF1 != NULL && args->fieldF2 != NULL && args->fieldTB != NULL) {
+            evtCreateWorldObjectFromResource(args->stage, args->variant,
+                                             args->fieldF1, args->fieldF2, args->fieldTB, 0);
+            btlInitializeSceneLightingAndTint();
+            if (blocks->fieldTB != 0) {
+                sdfQueueNonzeroResourceId(blocks->fieldTB);
+                blocks->fieldTB = 0;
+                btlBossDebugPrintf(D_00418C58);
+            }
+            ((BtlWork *)blocks)->battleFlags |= 2;
+            btlBossDebugPrintf("btl:field load end[f%03d_%03d]\n", args->stage, args->variant);
+            return 1;
+        }
+    }
+    args->frame++;
+    return 0;
+}
+
+extern u32 func_00200B30();
 
 SoundTask *fldCreateSceneTileTask(s32 value, s32 option) {
     SoundTask *task = btlAllocTask(0x28);

@@ -100,9 +100,10 @@ typedef struct MdlViewState {
     s16 nodeCursor; /* 0x3A: selection within the loaded node count */
     s16 unk3C;
     s16 unk3E;
-    u8 pad40[2];
+    s16 editorMode; /* 0x40: 0 selects records, 1 edits a mark record */
     s16 unk42;
-    u8 pad44[4];
+    u8 pad44[2];
+    s16 markFieldCursor; /* 0x46: selected row in the mark parameter editor */
     s16 unk48;
     s16 unk4A;
     s16 unk4C;
@@ -669,7 +670,7 @@ s32 mdlCountRecords(s32 listAddress) {
     return recordCount;
 }
 
-u8 mdlRecordMatchesId(MdlRecord *record, s32 wantedId) {
+s32 mdlRecordMatchesId(MdlRecord *record, s32 wantedId) {
     return record->kind == wantedId;
 }
 
@@ -2093,7 +2094,56 @@ s32 mdlCountActiveRecords(void) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00237A70);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00237B30);
+extern MdlRecord *func_00237A70(void);
+
+void func_00237B30(void) {
+    MdlViewState *state = &mdlViewerState;
+    s32 count;
+    MdlRecord *record;
+
+    switch (state->editorMode) {
+    case 0:
+        count = mdlCountActiveRecords();
+        if (D_0037F510[0x27] < 0) {
+            state->unk42++;
+            if (state->unk42 >= count) {
+                state->unk42 = 0;
+            }
+        } else if (((u8)D_0037F510[0x27] & MDL_PAD_REPEAT_FLAG) != 0) {
+            if (state->unk42 < count - 1) {
+                state->unk42++;
+            }
+        } else if (D_0037F510[0x26] < 0) {
+            if (state->unk42 == 0) {
+                state->unk42 = count - 1;
+            } else {
+                state->unk42--;
+            }
+        } else if (((u8)D_0037F510[0x26] & MDL_PAD_REPEAT_FLAG) != 0) {
+            if (state->unk42 > 0) {
+                state->unk42--;
+            }
+        } else if (D_0037F510[0x21] < 0) {
+            record = func_00237A70();
+            if (record != NULL && mdlRecordMatchesId(record, 3)) {
+                state->editorMode = 1;
+            }
+        }
+        break;
+    case 1:
+        record = func_00237A70();
+        if (D_0037F510[0x23] >= 0 && record != NULL && mdlRecordMatchesId(record, 3)) {
+            if (D_0037F510[0x21] < 0) {
+                mdlAddPlainViewerEntryForSelectedNode();
+            } else {
+                mdlEditMarkParametersWithPad((EffMarkParams *)record, &state->markFieldCursor);
+            }
+        } else {
+            state->editorMode = 0;
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00237D08);
 
