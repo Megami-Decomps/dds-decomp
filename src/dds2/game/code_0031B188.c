@@ -75,7 +75,24 @@ extern u32 mnuResolveTaggedRegistryRecord(u32 taggedRecord);
 extern ShortRecord *func_003225C0(ShortRecordList *list);
 
 
-typedef struct FileQueue FileQueue;
+typedef struct FileJob FileJob;
+typedef struct FileQueue {
+    f32 offset[4];
+    f32 axis[4];
+    u8 unk20[0x20];
+    f32 position[4];
+    f32 quat[4];
+    f32 scale;
+    u32 color;
+    u32 transformWord;
+    u8 pad6C[8];
+    f32 transformValue;
+    u8 pad78[8];
+    s32 count;
+    u32 unk84;
+    FileJob *last;
+    FileJob *first;
+} FileQueue;
 
 typedef struct MnuEffectPositionStep {
     f32 x;
@@ -497,7 +514,50 @@ void func_0031BC10(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 zAngle) 
     fileQueueSetRotation(record->queue, vector);
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BDE8);
+extern void fileQueueUpdate(FileQueue *queue);
+extern void func_002D49B8(FileQueue *queue, u32 color);
+extern u32 D_0040AE10[];
+
+/* Advance active effect queues, honoring their delay and optional position step. */
+void func_0031BDE8(MnuEffectWork *work, s32 flags) {
+    f32 position[4];
+    MnuEffectList *list = work->lists;
+    MnuEffectRecord *record;
+    s32 listIndex;
+    s32 recordIndex;
+
+    for (listIndex = 0; listIndex < work->count; listIndex++, list++) {
+        record = list->records;
+        for (recordIndex = 0; recordIndex < list->count; recordIndex++, record++) {
+            if (record->flags & 1) {
+                if (listIndex == 1) {
+                    func_002D49B8(record->queue, 0x40808080);
+                }
+                if (flags & 1) {
+                    if (record->delay == 0) {
+                        fileQueueUpdate(record->queue);
+                    }
+                } else if (record->delay > 0) {
+                    record->delay--;
+                } else {
+                    if ((record->flags >> 9) & 1) {
+                        fileReadVector40(record->queue, position);
+                        position[0] += record->positionStep.x;
+                        position[1] += record->positionStep.y;
+                        position[2] += record->positionStep.z;
+                        position[3] += record->positionStep.w;
+                        fileQueueSetPosition(record->queue, position);
+                    }
+                    fileQueueUpdate(record->queue);
+                    if (record->queue->unk84 == D_0040AE10[(record->flags >> 1) & 0xFF] ||
+                        ((record->flags >> 11) & 1)) {
+                        mnuClearNodeBroadcastFlag((u8 *)record);
+                    }
+                }
+            }
+        }
+    }
+}
 
 void mnuPauseEffectQueueFrameAdvance(void) {
     fileSetRenderFlag(2);
