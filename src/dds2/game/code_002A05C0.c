@@ -90,6 +90,8 @@ extern s32 sceSifAllocIopHeap(s32 size);
 extern void Exit(s32 status);
 extern s32 D_00438FD8;
 
+extern u32 func_0034E820();
+
 /* libc sprintf returns the signed vfprintf character count. */
 extern s32 func_0035C860(char *dst, const char *fmt, ...);
 extern u32 D_00437A20[2];
@@ -428,15 +430,29 @@ void sndInitializeStreamTransferBuffers(s32 wordCount) {
     sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[1], wordCount);
 }
 
-INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A1678);
+/* Configure both remote stream channels, bind their IOP transfer buffer, and
+ * start them at full output volume. */
+void sndConfigureTitleStreamRemoteOutput(s32 wordCount) {
+    volatile s32 channel;
+
+    for (channel = 0; channel < 2; channel++) {
+        u32 attributes;
+
+        func_0034E820(1, 0x8010, channel | 0x980, 0x3fff);
+        func_0034E820(1, 0x8010, channel | 0xa80, 0x3fff);
+        attributes = func_0034E820(1, 0x8020, channel | 0x800);
+        func_0034E820(1, 0x8010, channel | 0x800, attributes & ~0x30);
+    }
+    func_0034E820(1, 0x80e0, 0, 0x10, D_00438FD8, wordCount * 8);
+    func_0034E820(1, 0x8010, 0xf80, 0x7fff);
+    func_0034E820(1, 0x8010, 0x1080, 0x7fff);
+}
 
 void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
     sceSdRemoteInit();
     sndInitializeStreamTransferBuffers(wordCount);
     D_00437A2C = 0;
 }
-
-extern u64 func_0034E820();
 
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A1790);
 
