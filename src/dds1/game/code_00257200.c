@@ -1,8 +1,13 @@
 #include "common.h"
 
+typedef struct MantraPulseEntryRecord {
+    u8 pad00[0xC];
+    u16 positionKind;
+} MantraPulseEntryRecord;
+
 typedef struct MantraPulseEntry {
     s32 unk_0;
-    s32 active;
+    MantraPulseEntryRecord *active;
 } MantraPulseEntry;
 
 typedef struct MantraPulseGrid {
@@ -10,6 +15,7 @@ typedef struct MantraPulseGrid {
     MantraPulseEntry *entries;
     u8 pad08[0xC];
     s32 stride;
+    void (*drawEntry)(s32, s32, s32, struct MantraPulseGrid *, MantraPulseEntry *, s32);
 } MantraPulseGrid;
 
 extern void itfDspDrawStrip(s32, s32, s32, s32, s32);
@@ -25,7 +31,70 @@ void mnuDrawMantraPulseStripAndKind(void *object, s32 scale, s32 context) {
 
 INCLUDE_ASM(const s32, "game/code_00257200", func_00257270);
 
-INCLUDE_ASM(const s32, "game/code_00257200", func_002573E8);
+typedef struct MantraPulseDisplayWork {
+    u8 pad00[0x484];
+    MantraPulseGrid *grid;
+    u8 pad488[0x118];
+    s16 scrollX;
+    s16 scrollY;
+    u8 pad5A4[8];
+    u8 flags;
+} MantraPulseDisplayWork;
+
+extern s16 D_0036B7F0[][6];
+extern void sdfSubmitGsTestOneRegisterPacket();
+extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
+extern void uiDrawActiveSurfaceRegion(s32);
+extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
+extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
+
+/* Draw the two mantra-entry passes, then restore the surface's GS state. */
+void func_002573E8(MantraPulseDisplayWork *work, s32 surface) {
+    MantraPulseGrid *grid;
+    MantraPulseEntry *entry;
+    s32 row;
+    s32 col;
+    s32 x;
+    s32 y;
+
+    grid = work->grid;
+    x = -9 - work->scrollX;
+    y = 0x45 - work->scrollY;
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0, -1, 0x2000, 0xE00, 0, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, surface);
+    uiDrawActiveSurfaceRegion(surface);
+    for (row = 0; row < 0x11; row++) {
+        entry = grid->entries + row * grid->stride;
+        for (col = 0; col < 15; col++) {
+            if (entry[col].active != NULL) {
+                grid->drawEntry(x + D_0036B7F0[entry[col].active->positionKind][2],
+                                y + D_0036B7F0[entry[col].active->positionKind][3],
+                                0, grid, &entry[col], surface);
+            }
+        }
+    }
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0, -1, 0x2000, 0x190, 0, surface);
+    uiDrawUniformColorRect(0, 0xA50, -1, 0x2000, 0x4B0, 0, surface);
+    sdfDispatchSurfaceWithPreparedTexturePacket(surface);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x50000, surface);
+    for (row = 0; row < 0x11; row++) {
+        entry = grid->entries + row * grid->stride;
+        for (col = 0; col < 15; col++) {
+            if (entry[col].active != NULL) {
+                grid->drawEntry(x + D_0036B7F0[entry[col].active->positionKind][2],
+                                y + D_0036B7F0[entry[col].active->positionKind][3],
+                                1, grid, &entry[col], surface);
+            }
+        }
+    }
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x5100DL, surface);
+}
 
 extern void *func_002CB3B8(s32, s32);
 extern void func_002593E0(s32, MantraPulseGrid *, MantraPulseEntry *);
@@ -50,10 +119,6 @@ void mnuAdvanceMantraPulseGridEntries(s32 argument, MantraPulseGrid *grid) {
 
 INCLUDE_ASM(const s32, "game/code_00257200", func_00257718);
 
-typedef struct MantraPulseDisplayWork {
-    u8 pad00[0x5AC];
-    u8 flags;
-} MantraPulseDisplayWork;
 
 
 extern void *func_002CB3B8(s32, s32);
