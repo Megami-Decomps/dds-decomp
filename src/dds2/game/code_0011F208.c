@@ -737,7 +737,55 @@ void fldDrawRgbEditor(void *packetList, s32 x, s32 y, s32 selected, f32 *values)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_0011FEE8);
+extern char D_00435EB8[];
+extern char D_00435EC0[];
+extern char D_00435EC8[];
+extern char D_00435ED0[];
+extern char D_00435ED8[];
+
+void func_0011FEE8(void *packetList, s32 x, s32 y, s32 selected,
+                   u32 color, s32 showNormalized) {
+    s32 i;
+    s32 style;
+    s32 channel;
+    const char *label;
+
+    color = (color & 0xFFFFFF) | 0x80000000;
+    sdfAppendPacket(packetList, func_0011F250(x + 0x510, y + 0x18,
+                    0xFF0080, 0x240, 0xF0, color, 0x40806020));
+    for (i = 0; i != 3; i++) {
+        switch (i) {
+        case 0:
+            style = 2;
+            label = D_00435EC8;
+            channel = color & 0xFF;
+            break;
+        case 1:
+            style = 4;
+            label = D_00435EC0;
+            channel = (color >> 8) & 0xFF;
+            break;
+        default:
+            style = 5;
+            label = D_00435EB8;
+            channel = (color >> 16) & 0xFF;
+            break;
+        }
+        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(
+                        x, y, 0xFF0080, style, label));
+        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(
+                        x + 0x180, y, 0xFF0080, i == selected ? 6 : 0,
+                        D_00435ED0, channel));
+        if (showNormalized != 0) {
+            sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(
+                            x, y + 0x180, 0xFF0080, style, label));
+            sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(
+                            x + 0x240, y + 0x180, 0xFF0080, 0,
+                            D_00435ED8, channel * (1.0f / 255.0f)));
+        }
+        y += 0x60;
+    }
+}
 
 u32 func_001200E0(void) {
     return 0;
