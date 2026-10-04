@@ -3,28 +3,37 @@
 extern u32 dds3CreateSlotResourceState(u32);
 extern u32 sdfAllocSizeClassBlock(u32);
 
-/* The resource pointer is stored at +0x18 in both games. */
+/* Object resource storage is polymorphic: reset expects the kind-7 effect
+ * prefix below, while initialization attaches a separate 16-byte slot block. */
 typedef struct WorldResourceOwner {
     u8 pad00[0x18];
-    u32 *resource;
+    void *resource;
 } WorldResourceOwner;
 
-/* The record behind the owner's +0x18 pointer: a flag word, then the value
-   pair at the end of the layout that a reset clears. */
+/* Kind-7 effect owner-link prefix, also consumed by dds3EffectObjectBasic. */
 typedef struct WorldResource {
     u8 pad00[4];
     u32 flags;
     u8 pad08[0x18];
-    u32 unk20;
-    u16 unk24;
-    u16 unk26;
+    void *owner; /* +0x20: owner used by the billboard parameter lookup */
+    u16 entryId; /* +0x24: entry forwarded to that lookup */
+    u16 unk26; /* Written from the bound owner's kind; no read established. */
 } WorldResource;
 
-void dds3ResetWorldResourceState(WorldResourceOwner *owner) {
-    WorldResource *resource = (WorldResource *)owner->resource;
+/* The initializer allocates 16 bytes and writes only the slot-state handle.
+ * The remaining bytes and subsequent uses of this word are unknown here. */
+typedef struct DdsSlotResourceBlock {
+    u32 unk00;
+    u8 pad04[0xC];
+} DdsSlotResourceBlock;
 
-    resource->unk24 = 0;
-    resource->unk20 = 0;
+/* Clear the kind-7 owner link and entry, preserving every flag except 4 and 8.
+ * The caller supplies an existing effect resource; this does not free its owner. */
+void dds3ResetWorldResourceState(WorldResourceOwner *owner) {
+    WorldResource *resource = owner->resource;
+
+    resource->entryId = 0;
+    resource->owner = NULL;
     resource->unk26 = 0;
     resource->flags &= ~4;
     resource->flags &= ~8;
@@ -102,15 +111,16 @@ void billCopySourceVectorAndSetConfig(BillOwner *owner, BillConfig *config) {
 
 INCLUDE_ASM(const s32, "game/code_00115CD8", func_00115E10);
 
-/* Attach the owner's newly allocated resource slot and store its handle. */
+/* Attach a 16-byte slot block, then publish its newly created state handle.
+ * The block is attached before the state constructor sees the object. Returns 1. */
 u32 dds3InitializeResourceOwner(WorldResourceOwner *object) {
-    u32 *resource;
+    DdsSlotResourceBlock *resource;
     u32 handle;
 
     effObjInnerCreate();
-    resource = (u32 *)sdfAllocSizeClassBlock(0x10);
+    resource = (DdsSlotResourceBlock *)sdfAllocSizeClassBlock(0x10);
     object->resource = resource;
     handle = dds3CreateSlotResourceState((u32)object);
-    *resource = handle;
+    resource->unk00 = handle;
     return 1;
 }
