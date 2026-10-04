@@ -451,6 +451,10 @@ extern void btlApplyUnitModelScaledValue(u8 *);
 extern s32 btlIsActorModeAcceptedByBattleHook(u8 *);
 extern void func_001D5578(u8 *, s32, s32, f32);
 extern void func_001D5990(u8 *);
+extern void func_001D74B8(u8 *);
+extern void mdlAddEntryFlagged(void *, s32, s32);
+extern void mdlAddEntryPlain(void *, s32, s32);
+extern void sdfMotionSampleAtFrame(void *, f32);
 
 s32 btlGetLoggedIndexedCommandItem(s32 index);
 
@@ -3330,9 +3334,10 @@ f32 btlGetUnitModelValue1C(s32 arg0) {
     return *(f32 *)(*(s32 *)(*(s32 *)(*(s32 *)(arg0 + 0x320) + 0x8c) + 0x1c) + 0x1c);
 }
 
-void btlAdvanceUnitModelFrame(s32 arg0) {
+/* The caller's frame argument is forwarded unchanged to the sampler. */
+void btlAdvanceUnitModelFrame(s32 arg0, f32 frame) {
     if ((*(u32 *)(arg0 + 0x110) & 2) != 0) {
-        sdfMotionSampleAtFrame(*(u32 *)(*(s32 *)(*(s32 *)(arg0 + 800) + 0x8c) + 0x1c));
+        sdfMotionSampleAtFrame(*(void **)(*(s32 *)(*(s32 *)(arg0 + 800) + 0x8c) + 0x1c), frame);
         return;
     }
 }
@@ -3701,7 +3706,29 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3BA8);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001D7258);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001D74B8);
+void func_001D74B8(u8 *unit) {
+    u32 flags = *(u32 *)(unit + 0x110);
+    if ((flags & 2) == 0) {
+        return;
+    }
+    if (*(s32 *)(unit + 0xEC) != *(s32 *)(unit + 0xFC)) {
+        func_001D5990(unit);
+        *(u16 *)(unit + 0xF8) = 0;
+        *(u16 *)(unit + 0xFA) = 0;
+        func_001D5578(unit, *(s32 *)(unit + 0xFC),
+                      *(s32 *)(unit + 0x100), *(f32 *)(unit + 0x104));
+        flags = *(u32 *)(unit + 0x110);
+    }
+    if ((flags & 0x2000) == 0) {
+        s32 index = *(s32 *)(unit + 0xFC);
+        if (index != 11) {
+            mdlAddEntryFlagged(*(void **)(*(u8 **)(unit + 0x320) + 0x8C), 0, index);
+        } else {
+            mdlAddEntryPlain(*(void **)(*(u8 **)(unit + 0x320) + 0x8C), 0, 11);
+        }
+        sdfMotionSampleAtFrame(*(void **)(*(u8 **)(*(u8 **)(unit + 0x320) + 0x8C) + 0x1C), 0.0f);
+    }
+}
 
 u32 btlApplyIndexedUnitEffectTask(u8 *arguments) {
     s32 index = *(s32 *)(arguments + 4);
@@ -6862,7 +6889,7 @@ void btlAdvanceTargetCursorAnimation(s32 action, s32 state) {
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     }
 }
-extern void func_001D74B8(s32);
+extern void func_001D74B8(u8 *);
 
 extern void func_001E6BB0(s32, s32, s32, s32);
 

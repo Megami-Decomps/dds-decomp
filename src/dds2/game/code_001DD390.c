@@ -121,8 +121,9 @@ typedef struct BtlWork {
     u8 pad5B9[3];
     u32 fadeColor; /* Packed tint; retain the original whole-word arithmetic. */
     s32 soundTransitionTask; /* 0x5C0 */
-    u8 pad5C4[0x14];
-    s32 (*hook5D8)(s32);
+    u8 pad5C4[0x10];
+    s32 (*hook5D4)(BtlUnit *, s32, s32); /* Selects the requested motion. */
+    s32 (*hook5D8)(BtlUnit *);
     u8 pad5DC[0x14];
     s32 (*hook5F0)(BtlUnit *, s32);
     u8 pad5F4[0x24];
@@ -154,13 +155,30 @@ typedef struct BtlWork {
     s32 (*hook6E8)(BtlUnit *);
     u8 pad6EC[4];
     void (*hook6F0)(BtlUnit *, s32, f32, s32, s32, s32);
-    u8 pad6F4[0x1C];
+    void (*hook6F4)(BtlUnit *, s32, f32); /* Replaces the event motion update. */
+    u8 pad6F8[4];
+    s32 (*hook6FC)(BtlUnit *, s32, s32); /* Overrides the transition mode. */
+    u8 pad700[0x10];
     s32 (*hook710)(BtlUnit *, s32);
     u8 pad714[8];
     u32 tint71C;
     u8 pad720[4];
     s32 unk724;
 } BtlWork;
+/* Per-model effect node records begin at +0x2C, with a 0x14-byte stride. */
+typedef struct BtlEffectNode {
+    s16 triggerKind;
+    u8 pad02[2];
+    s16 rateKind;
+    u8 pad06[2];
+    f32 scale;
+    u8 pad0C[8];
+} BtlEffectNode;
+
+typedef struct BtlEffectResource {
+    u8 pad00[0x2C];
+    BtlEffectNode nodes[1];
+} BtlEffectResource;
 
 extern void btlResetIndexWork();
 extern void btlAdvanceHistoryCounter(BtlUnit *);
@@ -749,6 +767,17 @@ typedef struct BtlCommandTask {
 extern s32 btlDoesEnabledStatusMatchCurrentId(void *, s32);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern s32 btlGetEntryFlagsUnlessDisabled(const void *);
+extern void evtSetUnitRgbTransition(BtlUnitExt *, s32, u32);
+extern void evtUnitSetStoredParameter(void *, s32);
+extern void evtSetTransitionMotionScale(void *, f32);
+extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
+extern s32 btlTestActorStatusPredicate(BtlUnit *);
+extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
+extern void btlApplyUnitModelScaledValue(u8 *);
+extern s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *);
+extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
+extern void func_001E22D8(u8 *, s32, s32, f32);
+extern void func_001E2758(BtlUnit *);
 extern void btlClearAllActorEntrySlots(BtlUnit *);
 extern void btlReleaseUnitResources(BtlUnit *);
 extern void btlInitUnitFxDefaults(BtlFx *);
@@ -2241,7 +2270,110 @@ INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417940);
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001E22D8);
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E2758);
+void func_001E2758(BtlUnit *unit) {
+    s32 entryFlags;
+    BtlWork *work;
+    s32 index;
+    s32 selected;
+    s32 mode;
+    BtlEffectResource *resource;
+    f32 rate;
+    f32 speed;
+    u32 color;
+    s32 (*chooseStatus)(BtlUnit *);
+    s32 (*chooseMotion)(BtlUnit *, s32, s32);
+    void (*setMotion)(BtlUnit *, s32, f32);
+    s32 (*chooseMode)(BtlUnit *, s32, s32);
+
+    if ((unit->flags & 2) == 0) {
+        return;
+    }
+    entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->statBits);
+    work = (BtlWork *)btlGetRuntime();
+    if (unit->updateFlags & 2) {
+        color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
+        evtSetUnitRgbTransition(unit->ext, 0, color);
+        evtSetUnitAlphaTransition((u32)unit->ext, 0, color);
+        unit->overlayColor = color;
+        unit->updateFlags &= ~4;
+        unit->updateFlags &= ~2;
+    }
+    index = 0;
+    if (btlIsCurrentValueBelowQuarterThreshold(unit) != 0 &&
+        ((unit->flags & 0x200) || (entryFlags & 0x200))) {
+        index = 10;
+    }
+    if (unit->unk310 > 0 &&
+        ((unit->flags & 0x200) || (entryFlags & 0x200))) {
+        index = 9;
+    }
+    switch (unit->conditionFlags & 0x7FFF) {
+    case 1: case 8: case 0x10: case 0x20: case 0x40:
+    case 0x80: case 0x100: case 0x200: case 0x400: case 0x2000:
+        index = 2;
+        break;
+    }
+    if (btlTestActorStatusPredicate(unit) != 0) {
+        if ((unit->flags & 0x2000) == 0) {
+            unit->flags |= 0x80002000;
+        }
+    } else if (unit->flags & 0x2000) {
+        btlApplyUnitModelScaledValue((u8 *)unit);
+        unit->flags &= 0x7FFFFFFF;
+        unit->flags &= ~0x2000;
+    }
+    chooseStatus = work->hook5D8;
+    if (chooseStatus != 0) {
+        selected = chooseStatus(unit);
+        if (selected >= 0) {
+            index = selected;
+        }
+    }
+    if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0) != 0 &&
+        ((unit->flags & 0x200) || (entryFlags & 0x200)) &&
+        ((unit->stateFlags & 0x40) == 0)) {
+        index = 11;
+        btlApplyUnitModelScaledValue((u8 *)unit);
+        unit->flags &= 0x7FFFFFFF;
+        unit->flags &= ~0x2000;
+    }
+    resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(
+        unit->resourceKind, unit->resourceIndex);
+    rate = resource->nodes[index].scale;
+    chooseMotion = work->hook5D4;
+    if (chooseMotion != 0) {
+        selected = chooseMotion(unit, index, 1);
+        if (selected == -1) {
+            return;
+        }
+        if (index != selected) {
+            index = selected;
+            rate = resource->nodes[index].scale;
+        }
+    }
+    unit->effectScale = rate;
+    speed = rate * (30.0f / work->unk4C4);
+    speed *= work->unk4C8;
+    setMotion = work->hook6F4;
+    unit->effectIndex = index;
+    if (setMotion != 0) {
+        setMotion(unit, index, speed);
+    } else {
+        evtUnitSetStoredParameter(unit->ext, index);
+        evtSetTransitionMotionScale(unit->ext, speed);
+    }
+    chooseMode = work->hook6FC;
+    mode = index != 11 ? 1 : 2;
+    if (chooseMode != 0) {
+        mode = chooseMode(unit, index, mode);
+    }
+    unit->effectParameter = mode;
+    if (unit->unkEC != 11 &&
+        (btlIsActorModeAcceptedByBattleHook(unit) != 0 || index == 11) &&
+        unit->unkEC != index) {
+        func_001E22D8((u8 *)unit, index, mode, rate);
+    }
+}
 
 s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *unit) {
     BtlWork *work;
@@ -2268,20 +2400,6 @@ extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 extern void func_001E22D8(u8 *, s32, s32, f32);
 
-/* Per-model effect node records begin at +0x2C, with a 0x14-byte stride. */
-typedef struct BtlEffectNode {
-    s16 triggerKind;
-    u8 pad02[2];
-    s16 rateKind;
-    u8 pad06[2];
-    f32 scale;
-    u8 pad0C[8];
-} BtlEffectNode;
-
-typedef struct BtlEffectResource {
-    u8 pad00[0x2C];
-    BtlEffectNode nodes[1];
-} BtlEffectResource;
 
 void btlApplyScaledUnitEffectParameter(u8 *unit, s32 index, s32 option, f32 scale) {
     u8 *table = (u8 *)btlGetSideIndexedActorStatusTable(((BtlUnit *)unit)->resourceKind, ((BtlUnit *)unit)->resourceIndex);
