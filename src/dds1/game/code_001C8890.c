@@ -4,6 +4,8 @@
 #include "pcp_vu0.h"
 #include "fpu.h"
 
+extern u32 effMiscRandMod(void *state, u32 modulus);
+
 #define VU_LOAD10(p) __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(p))
 
 #define VU_STORE10(p) __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(p))
@@ -507,6 +509,8 @@ typedef struct ActionUnit {
 typedef struct BtlActionPoseRuntime {
     u8 pad00[0x1FC];
     u32 flags;
+    u8 pad200[0x28];
+    BtlUnit *actorHead;
 } BtlActionPoseRuntime;
 
 typedef struct BattlePoseBlendState {
@@ -3526,7 +3530,7 @@ void btlSeekRandomModelFrame(u8 *object) {
     }
     duration = btlGetUnitModelFrameCount((s32)object);
     if (duration > 0) {
-        randomFrame = (u32)effMiscRandMod(0, duration);
+        randomFrame = effMiscRandMod(0, duration);
         frame = (f32)randomFrame;
         resource = *(u8 **)(object + 0x320);
         sdfMotionSampleAtFrame(*(void **)(*(u8 **)(resource + 0x8C) + 0x1C),
@@ -5996,7 +6000,7 @@ u32 btlHasMarkedEntry10(u8 *object) {
 
 extern s32 btlGetRuntime(void);
 
-extern f32 btlUnitGetTopY(s32);
+extern f32 btlUnitGetTopY(BtlUnit *);
 
 s32 btlCheckActorDistanceLimit(void) {
     s32 actor = *(s32 *)(btlGetRuntime() + 0x228);
@@ -6005,7 +6009,7 @@ s32 btlCheckActorDistanceLimit(void) {
         u32 flags = *(u32 *)(actor + 0x110);
         if (flags & 1) {
             if (flags & 0x400) {
-                if (btlUnitGetTopY(actor) > 400.0f) {
+                if (btlUnitGetTopY((BtlUnit *)actor) > 400.0f) {
                     return 0;
                 }
             }
@@ -6216,7 +6220,64 @@ void func_001DD4A8(void) {
 void func_001DD4B0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001DD4B8);
+extern s32 func_001E4578(void *unit, f32 *pose, u8 *out);
+extern void func_001E4708(void *unit, f32 *pose, u8 *out);
+extern s32 func_001E4720(void *unit, f32 *pose, u8 *out);
+
+/* Choose the action's camera pose from active ally and enemy height maxima. */
+void func_001DD4B8(ActionUnit *action) {
+    BtlUnit *unit;
+    s32 enemyCount = 0;
+    f32 enemyHeight = 0.0f;
+    f32 allyHeight = 0.0f;
+    f32 height;
+
+    unit = ((BtlActionPoseRuntime *)btlGetRuntime())->actorHead;
+    for (; unit != NULL; unit = unit->nextActor) {
+        if (unit->flags & 1) {
+            height = btlUnitGetTopY(unit);
+            if (unit->flags & 0x200) {
+                if (allyHeight < height) {
+                    allyHeight = height;
+                }
+            } else if (unit->flags & 0x400) {
+                if (enemyHeight < height) {
+                    enemyHeight = height;
+                }
+                enemyCount++;
+            }
+        }
+    }
+    if (enemyCount == 1 && allyHeight + 100.0f < enemyHeight) {
+        switch (effMiscRandMod(0, 4)) {
+        case 0:
+        case 1:
+            if (enemyHeight <= 500.0f) {
+                func_001E4720(action, action->pos30, (u8 *)action + 0xC0);
+            } else {
+                func_001E4578(action, action->pos30, (u8 *)action + 0xC0);
+            }
+            break;
+        case 2:
+            func_001E4578(action, action->pos30, (u8 *)action + 0xC0);
+            break;
+        case 3:
+            func_001E4708(action, action->pos30, (u8 *)action + 0xC0);
+            break;
+        }
+    } else {
+        switch (effMiscRandMod(0, 2)) {
+        case 0:
+            func_001E4578(action, action->pos30, (u8 *)action + 0xC0);
+            break;
+        case 1:
+            func_001E4708(action, action->pos30, (u8 *)action + 0xC0);
+            break;
+        }
+    }
+    action->unk130 = 100.0f;
+    action->flags |= 0x41;
+}
 
 void func_001DD678(void) {
 }
@@ -6785,8 +6846,8 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001E4578);
 
 extern void btlPrepareUnitPoseWithTiltRotation();
 
-void func_001E4708(void) {
-    btlPrepareUnitPoseWithTiltRotation();
+void func_001E4708(void *unit, f32 *pose, u8 *out) {
+    btlPrepareUnitPoseWithTiltRotation(unit, pose, out);
 }
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E4720);

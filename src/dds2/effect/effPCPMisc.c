@@ -3334,12 +3334,41 @@ EffPCPBlockSetWork *effPcpBuildBlockSet(args)
     return effPcpCreateBlockSetWork(first, &set);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00185500);
+/* Duplicate the block-set handles and allocate its three optional instance lists. */
+void func_00185500(EffPCPBlockSetWork *work, EffPCPBlockSetWork *src) {
+    EffPCPBlockModel *model;
+    u32 i;
+    u32 j;
+    u32 n;
+
+    work->headHandle = effParamWorkDuplicate(src->headHandle);
+    for (i = 0; i < ARRAY_COUNT(work->handleA); i++) {
+        work->handleA[i] = effParamWorkDuplicate(src->handleA[i]);
+    }
+    model = effParamWorkGetData(work->headHandle);
+    work->count = model->info->unk2E;
+    for (j = 0; j < ARRAY_COUNT(work->list); j++) {
+        if (work->params.groupSize[j] > 0) {
+            n = work->count * work->params.groupSize[j];
+            work->alloc[j] = (u32)sdfAllocGeneralBlock(n * 4);
+            work->list[j] = sdfResourceRetainAddress((void *)work->alloc[j]);
+            work->list[j][0] = effParamWorkDuplicate(src->list[j][0]);
+            for (i = 1; i < n; i++) {
+                work->list[j][i] = 0;
+            }
+        } else {
+            work->alloc[j] = 0;
+        }
+    }
+    for (i = 0; i < ARRAY_COUNT(work->handleB); i++) {
+        work->handleB[i] = effParamWorkDuplicate(src->handleB[i]);
+    }
+    work->tailHandle = effParamWorkDuplicate(src->tailHandle);
+}
 
 
 extern void *memset(void *s, int c, u32 n);
 
-extern void func_00185500(void *dst, void *src);
 
 /* Clone of a block-set work that shares the source's blocks (no back pointer). */
 EffPCPBlockSetWork *effPcpBlockSetCloneShared(EffPCPBlockSetWork *src) {
