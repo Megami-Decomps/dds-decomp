@@ -18,12 +18,16 @@ extern void memset();
 #define SCR_GLOBAL_FLAG_WRAP_BIAS 0xFE55
 #define SCR_GLOBAL_FLAG_WORD_SHIFT 5
 #define SCR_GLOBAL_FLAG_BIT_MASK 31
+#define SCR_GLOBAL_FLAG_TABLE_OFFSET 0x16ef0
+#define SCR_GLOBAL_FLAG_WORD_BYTES 4
 #define PTY_SKILL_SLOT_COUNT 24
 #define PRF_SKILL_LIST_ENTRY_COUNT 8
 #define PRF_SKILL_LIST_FLAGGED 4
 
 #define PTY_PRESET_SKILL_SLOT_COUNT 8
 #define PTY_PRESET_POOL_SKILL_COUNT 40
+/* Observed gate for the post-mark call; its gameplay meaning is not established. */
+#define PTY_PRESET_POOL_EXTRA_GATE 0xBA0
 #define PTY_PROFILE_UNIT_LAST_INDEX 4
 #define PTY_PROFILE_UNIT_TABLE_OFFSET 0xA60
 #define PTY_PROFILE_UNIT_STRIDE 0x1C4
@@ -50,6 +54,8 @@ extern void memset();
 #define SDF_FLAG_LIST_ENTRY_VERTEX_BYTES 32
 #define SDF_FLAG_LIST_VERTICES_PER_ENTRY 2
 #define SDF_FLAG_LIST_PACKET_BYTES 0x20
+#define SDF_FLAG_SLOT_TABLE_SHIFT 7
+#define SDF_FLAG_SLOT_COUNT 16
 
 extern s32 sdfReleaseResourceAllocation(u32);
 
@@ -297,7 +303,7 @@ void ptyMarkPresetSkillPool(u8 *unit) {
         }
         presetIndex++;
     } while (presetIndex < PTY_PRESET_POOL_SKILL_COUNT);
-    if (mdlFlagTest(0xBA0)) {
+    if (mdlFlagTest(PTY_PRESET_POOL_EXTRA_GATE)) {
         func_0011CA88(unit);
     }
 }
@@ -350,13 +356,14 @@ void ptySetProfileRecordValue(u32 work, u16 scriptId, u32 value) {
     *record = value;
 }
 
-void ptySetProfileRecordToCap(u32 work, u16 scriptId) {
-    u32 *record;
-    u32 cap;
+/* Store the configured capacity in an unchecked profile record. */
+void ptySetProfileRecordToCap(u32 unitAddress, u16 profileId) {
+    u32 *recordAddress;
+    u32 recordCap;
 
-    record = (u32 *)ptyGetProfileRecordPointer(work, scriptId);
-    cap = ptyGetProfileRecordCap(scriptId);
-    *record = cap;
+    recordAddress = (u32 *)ptyGetProfileRecordPointer(unitAddress, profileId);
+    recordCap = ptyGetProfileRecordCap(profileId);
+    *recordAddress = recordCap;
 }
 
 /* Add to the selected record and cap the unsigned result; no selection returns zero. */
@@ -385,15 +392,17 @@ void prfDecodeFlagPair(u32 v, u32 *a, u32 *b) {
     *b = lo << 1;
 }
 
-u32 sdfSetFlagBySlotId(u8 *work, u32 id) {
-    ScriptFlagSlot *slot = (ScriptFlagSlot *)((u8 *)D_00404AA8 + (((ScrVmOperand *)work)->h04 << 7));
-    u32 i;
+/* Search the selected 16-entry table for an exact nonzero byte ID.
+ * Set and return its global flag ID; return zero if no entry matches. */
+u32 sdfSetFlagBySlotId(u8 *unit, u32 slotId) {
+    ScriptFlagSlot *slotCursor = (ScriptFlagSlot *)((u8 *)D_00404AA8 + (((ScrVmOperand *)unit)->h04 << SDF_FLAG_SLOT_TABLE_SHIFT));
+    u32 slotIndex;
 
-    for (i = 0; i < 16; i++, slot++) {
-        if (slot->id != 0 && slot->id == id) {
-            u32 flag = slot->flag;
-            mdlFlagSet(flag);
-            return flag;
+    for (slotIndex = 0; slotIndex < SDF_FLAG_SLOT_COUNT; slotIndex++, slotCursor++) {
+        if (slotCursor->id != 0 && slotCursor->id == slotId) {
+            u32 globalFlagId = slotCursor->flag;
+            mdlFlagSet(globalFlagId);
+            return globalFlagId;
         }
     }
     return 0;
@@ -526,7 +535,7 @@ void scrSetGlobalBitFlag(u32 flagId) {
     if (flagId < SCR_GLOBAL_FLAG_FIRST_ID) return;
     if (flagId >= SCR_GLOBAL_FLAG_END_ID) return;
     bitIndex = flagId + SCR_GLOBAL_FLAG_WRAP_BIAS;
-    byteOffset = 0x16ef0 + (bitIndex >> SCR_GLOBAL_FLAG_WORD_SHIFT) * 4;
+    byteOffset = SCR_GLOBAL_FLAG_TABLE_OFFSET + (bitIndex >> SCR_GLOBAL_FLAG_WORD_SHIFT) * SCR_GLOBAL_FLAG_WORD_BYTES;
     flagWord = (u32 *)(datGameState + byteOffset);
     *flagWord |= SCR_FLAG_PRIMARY_BIT << (bitIndex & SCR_GLOBAL_FLAG_BIT_MASK);
 }
@@ -536,7 +545,7 @@ u32 scrTestGlobalBitFlag(u16 bitIndex) {
     if (bitIndex < SCR_GLOBAL_FLAG_FIRST_ID) return 0;
     if (bitIndex >= SCR_GLOBAL_FLAG_END_ID) return 0;
     bitIndex += SCR_GLOBAL_FLAG_WRAP_BIAS;
-    return *(u32 *)(datGameState + 0x16ef0 + (bitIndex >> SCR_GLOBAL_FLAG_WORD_SHIFT) * 4) & (SCR_FLAG_PRIMARY_BIT << (bitIndex & SCR_GLOBAL_FLAG_BIT_MASK));
+    return *(u32 *)(datGameState + SCR_GLOBAL_FLAG_TABLE_OFFSET + (bitIndex >> SCR_GLOBAL_FLAG_WORD_SHIFT) * SCR_GLOBAL_FLAG_WORD_BYTES) & (SCR_FLAG_PRIMARY_BIT << (bitIndex & SCR_GLOBAL_FLAG_BIT_MASK));
 }
 
 /* Set only bit 2 of the selected flag nibble. */
@@ -667,15 +676,18 @@ u8 func_00315220(u16 profileId) {
     return D_00401325[profileId * PRF_PROFILE_PARAM_BYTES];
 }
 
-u32 prfGetIndexedProfileByte(u16 id, s32 sub) {
-    return D_0040132C[sub + id * 36];
+/* Read an unchecked byte offset within the profile parameter row. */
+u32 prfGetIndexedProfileByte(u16 profileId, s32 byteIndex) {
+    return D_0040132C[byteIndex + profileId * PRF_PROFILE_PARAM_BYTES];
 }
 
-u32 scrCallIfOperandReady(u8 *operand, s32 value) {
-    s32 selected = func_00314C10((s32)operand);
+/* Read the selected profile's indexed byte when a selection is present.
+ * Retain both selection reads and the no-selection fall-through. */
+u32 scrCallIfOperandReady(u8 *operand, s32 byteIndex) {
+    s32 selectedProfileId = func_00314C10((s32)operand);
 
     if (func_00314C10((s32)operand)) {
-        return prfGetIndexedProfileByte((u16)selected, value);
+        return prfGetIndexedProfileByte((u16)selectedProfileId, byteIndex);
     }
 }
 
@@ -739,38 +751,38 @@ s32 func_00315388(u16 profile, PrfSkillList *output) {
  * nibble states and marking them in the output. The profile argument is unused;
  * output may be NULL when only the resulting count is needed. */
 s32 prfBuildSkillList(ScriptFlagWork *unit, u32 unusedProfile, PrfSkillList *output, s32 includeFlagged) {
-    PrfSkillList list;
-    u32 entryIndex;
-    u16 *profileSkills;
+    PrfSkillList compactedList;
+    u32 sourceIndex;
+    u16 *profileSkillCursor;
     u16 skillId;
     u32 skillState;
-    s32 selectedProfile;
+    s32 selectedProfileId;
 
-    memset(&list, 0, sizeof(PrfSkillList));
-    selectedProfile = unit->scriptId;
-    list.count = 0;
-    if (selectedProfile != 0) {
-        profileSkills = &D_00401332[selectedProfile * PRF_SKILL_TABLE_STRIDE];
-        for (entryIndex = 0; entryIndex < PRF_SKILL_LIST_ENTRY_COUNT; entryIndex++) {
-            skillId = *profileSkills++;
+    memset(&compactedList, 0, sizeof(PrfSkillList));
+    selectedProfileId = unit->scriptId;
+    compactedList.count = 0;
+    if (selectedProfileId != 0) {
+        profileSkillCursor = &D_00401332[selectedProfileId * PRF_SKILL_TABLE_STRIDE];
+        for (sourceIndex = 0; sourceIndex < PRF_SKILL_LIST_ENTRY_COUNT; sourceIndex++) {
+            skillId = *profileSkillCursor++;
             if (skillId != 0) {
                 skillState = ptyGetSkillNibbleState((u8 *)unit, skillId);
                 if (skillState != 0 && includeFlagged == 0) {
                     continue;
                 }
-                list.flags[list.count] = 0;
+                compactedList.flags[compactedList.count] = 0;
                 if (skillState != 0) {
-                    list.flags[list.count] |= PRF_SKILL_LIST_FLAGGED;
+                    compactedList.flags[compactedList.count] |= PRF_SKILL_LIST_FLAGGED;
                 }
-                list.skills[list.count] = skillId;
-                list.count++;
+                compactedList.skills[compactedList.count] = skillId;
+                compactedList.count++;
             }
         }
     }
     if (output != NULL) {
-        *output = list;
+        *output = compactedList;
     }
-    return list.count;
+    return compactedList.count;
 }
 
 /* Build the stored selection's list without flagged skills; the explicit ID is ignored. */
@@ -1202,12 +1214,14 @@ void func_00316C88(SdfFlagListWork *work) {
     sdfReleaseResourceAllocation(vertexAllocation);
 }
 
-float scrGetOperandFloatValue(ScrVmOperand *op) {
-    return op->f50;
+/* Read the operand's stored float; its gameplay meaning remains unknown. */
+float scrGetOperandFloatValue(ScrVmOperand *operand) {
+    return operand->f50;
 }
 
-void scrSetOperandFloatValue(ScrVmOperand *op, float value) {
-    op->f50 = value;
+/* Replace the operand's stored float without validation. */
+void scrSetOperandFloatValue(ScrVmOperand *operand, float value) {
+    operand->f50 = value;
 }
 
 void func_00316DE0(s32 work) {
