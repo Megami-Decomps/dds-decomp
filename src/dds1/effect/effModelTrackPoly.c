@@ -75,7 +75,7 @@ void effTrackPolyReset(EffTrackPolyWork *work) {
 }
 
 extern s32 sdfLoadMapRecordPositionVector(void *param, s32 id);
-extern void func_00188A78();
+void func_00188A78(EffTrackPolyData *data, u128 *src);
 
 void effSampleTrackPolyEndpoints(EffTrackPolyWork *work) {
     EffTrackPolyModel *model = work->params.model;
@@ -89,7 +89,7 @@ void effSampleTrackPolyEndpoints(EffTrackPolyWork *work) {
 }
 
 void effTrackPolyPushWorkEndpoints(EffTrackPolyWork *work, void *data) {
-    func_00188A78(work->data);
+    func_00188A78(work->data, data);
 }
 
 void effTrackPolySetColor(EffTrackPolyWork *work, u32 color) {
@@ -347,7 +347,121 @@ void effTrackPolyAppendPointPair(EffTrackPolyData *data, u128 *src) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188A78);
+/* Resample the newest history span at a fixed interval, smoothing established
+ * tracks with Catmull-Rom interpolation and linearly extending short tracks. */
+void func_00188A78(EffTrackPolyData *data, u128 *src) {
+    f32 points0[4][4];
+    f32 points1[4][4];
+    f32 base0[4];
+    f32 base1[4];
+    f32 delta0[4];
+    f32 delta1[4];
+    f32 out0[4];
+    f32 out1[4];
+    s32 activePointCount = data->activePointCount;
+    s32 step = data->step;
+    f32 interval;
+    f32 t;
+    s32 i;
+    u128 *dst1;
+
+    if (activePointCount == 0) {
+        effTrackPolyAppendPointPair(data, src);
+        return;
+    }
+
+    if (activePointCount >= step * 6) {
+        s32 position = data->position;
+        u128 *dstBase;
+        u128 *dst;
+
+        effTrackPolyCopyHistoryPointPair(data, (u128 *)points0[0], (u128 *)points1[0], 3);
+        effTrackPolyCopyHistoryPointPair(data, (u128 *)points0[1], (u128 *)points1[1], 2);
+        effTrackPolyCopyHistoryPointPair(data, (u128 *)points0[2], (u128 *)points1[2], 1);
+        PCP_COPY_VECTOR(points0[3], src);
+        PCP_COPY_VECTOR(points1[3], src + 1);
+        t = 0.0f;
+        interval = 1.0f / (f32)step;
+        effTrackPolyAdvancePosition(data, 2);
+        if (step > 0) {
+            dst = (u128 *)out0;
+            dst1 = (u128 *)out1;
+            dstBase = dst;
+            i = step;
+            do {
+                t += interval;
+                effTrackPolyInterpolateCatmullRomPoint(points0, t);
+                VU0_STORE_VF_UNCLOBBERED(vf10, dst);
+                effTrackPolyInterpolateCatmullRomPoint(points1, t);
+                VU0_STORE_VF_UNCLOBBERED(vf10, dst1);
+                dst = dstBase;
+                i--;
+                effTrackPolyAppendPointPair(data, dst);
+            } while (i != 0);
+        }
+        data->activePointCount = activePointCount;
+        data->position = position;
+    }
+
+    if (activePointCount >= step * 4) {
+        u128 *dstBase;
+        u128 *dst;
+
+        effTrackPolyCopyHistoryPointPair(data, (u128 *)points0[0], (u128 *)points1[0], 2);
+        effTrackPolyCopyHistoryPointPair(data, (u128 *)points0[1], (u128 *)points1[1], 1);
+        PCP_COPY_VECTOR(points0[2], src);
+        PCP_COPY_VECTOR(points1[2], src + 1);
+        PCP_COPY_VECTOR(points0[3], src);
+        PCP_COPY_VECTOR(points1[3], src + 1);
+        t = 0.0f;
+        interval = 1.0f / (f32)step;
+        i = 0;
+        if (step > 0) {
+            dst = (u128 *)out0;
+            dst1 = (u128 *)out1;
+            dstBase = dst;
+            do {
+                t += interval;
+                effTrackPolyInterpolateCatmullRomPoint(points0, t);
+                VU0_STORE_VF_UNCLOBBERED(vf10, dst);
+                effTrackPolyInterpolateCatmullRomPoint(points1, t);
+                VU0_STORE_VF_UNCLOBBERED(vf10, dst1);
+                dst = dstBase;
+                effTrackPolyAppendPointPair(data, dst);
+                i++;
+            } while (i < step);
+        }
+    } else {
+        u128 *linearDst;
+
+        effTrackPolyCopyHistoryPointPair(data, (u128 *)base0, (u128 *)base1, 1);
+        VU0_LOAD_VF(vf10, src);
+        VU0_LOAD_VF(vf11, base0);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, delta0);
+        VU0_LOAD_VF(vf10, src + 1);
+        VU0_LOAD_VF(vf11, base1);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, delta1);
+        t = 0.0f;
+        interval = 1.0f / (f32)step;
+        if (step > 0) {
+            i = step;
+            linearDst = (u128 *)out0;
+            do {
+                t += interval;
+                i--;
+                out0[0] = base0[0] + delta0[0] * t;
+                out0[1] = base0[1] + delta0[1] * t;
+                out0[2] = base0[2] + delta0[2] * t;
+                out1[0] = base1[0] + delta1[0] * t;
+                out1[1] = base1[1] + delta1[1] * t;
+                out1[2] = base1[2] + delta1[2] * t;
+                effTrackPolyAppendPointPair(data, linearDst);
+            } while (i != 0);
+        }
+    }
+}
 
 
 typedef struct EffTrackPolyFinish {
