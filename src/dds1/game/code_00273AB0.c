@@ -1,6 +1,15 @@
 #include "mnu.h"
 #include "kwln.h"
 
+/* Staff callbacks receive a task handle as an integer word. Preserve the
+ * native parameter widths and the short-arity task-user-value calls. */
+#define MNU_STAFF_INPUT_CONFIRM 1
+#define MNU_STAFF_INPUT_CANCEL 2
+#define MNU_STAFF_INPUT_PREVIOUS_ROW 0x10
+#define MNU_STAFF_INPUT_NEXT_ROW 0x20
+#define MNU_STAFF_INPUT_PREVIOUS_PAGE 0x100
+#define MNU_STAFF_INPUT_NEXT_PAGE 0x200
+
 extern void func_0024DD78(void);
 
 extern u32 kwlnTaskGetUserValue();
@@ -113,11 +122,11 @@ extern void mnuRetreatListCursorDefault();
 extern void mnuAdvanceListCursorDefault();
 extern void mnuClearListFlagsOneAndTwo();
 
-s32 mnuStaffImageEnterA(s32 callback) {
+s32 mnuStaffImageEnterA(s32 task) {
     s32 context = kwlnTaskGetUserValue();
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
 
-    func_00272778(callback);
+    func_00272778(task);
     mnuCreateStaffImageSprite(5);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->primaryObject, 0x53);
     if (menu->primaryObject->window->panelActive != 0) {
@@ -127,7 +136,7 @@ s32 mnuStaffImageEnterA(s32 callback) {
         func_00272668(1, 0, 0, context, 1, 0x53);
     }
     func_002723B0(0, ((StaffImageContext *)context)->group);
-    return menuRunPanel(context, 1, callback);
+    return menuRunPanel(context, 1, task);
 }
 
 INCLUDE_ASM(const s32, "game/code_00273AB0", func_00273B98);
@@ -142,7 +151,7 @@ u32 func_00273C48(void) {
 }
 
 /* Once the popup is idle, confirmation captures the page-selection cursor index. */
-s32 mnuPollStaffValueSelectionConfirmation(s32 callback) {
+s32 mnuPollStaffValueSelectionConfirmation(s32 task) {
     s32 context = kwlnTaskGetUserValue();
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
@@ -150,17 +159,17 @@ s32 mnuPollStaffValueSelectionConfirmation(s32 callback) {
     s32 state;
     s32 window;
 
-    state = func_00285670(context + 8, popup, 0, callback);
+    state = func_00285670(context + 8, popup, 0, task);
     if (state != 0) {
         return state;
     }
     window = (s32)&((StaffImageContext *)context)->windowFlags;
     mnuStepPartyPanelListFromInput(4, window);
-    if (buttons & 1) {
+    if (buttons & MNU_STAFF_INPUT_CONFIRM) {
         menu->currentSelection = ((StaffImageContext *)context)->selection->cursor->index;
         mnuSetPopupEntryFlagged(popup, D_0037CA38);
     }
-    if (buttons & 2) {
+    if (buttons & MNU_STAFF_INPUT_CANCEL) {
         mnuClearListFlags(0, window);
         mnuSetPopupEntryFlagged(popup, D_0037C9AC);
     }
@@ -168,37 +177,38 @@ s32 mnuPollStaffValueSelectionConfirmation(s32 callback) {
     return 0;
 }
 
-s32 mnuPrepareStaffImageAndSelectionLabel(s32 callback) {
+s32 mnuPrepareStaffImageAndSelectionLabel(s32 task) {
     s32 context = kwlnTaskGetUserValue();
-    func_00272778(callback);
+    func_00272778(task);
     mnuCreateStaffImageSprite(7);
     func_00272668(1, ((StaffImageContext *)context)->activeWindow->window->selectedNode->label, (s32)D_0037C860, context, 1, 0x53);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)((StaffImageContext *)context)->activeWindow, 0x53);
     func_002723B0(0, ((StaffImageContext *)context)->group);
-    return menuRunPanel(context, 1, callback);
+    return menuRunPanel(context, 1, task);
 }
 
-s32 func_00273DE8(s32 callback) {
+/* Run the label-image state's teardown phase and return its scheduler word. */
+s32 func_00273DE8(s32 task) {
     s32 context = kwlnTaskGetUserValue();
-    return menuRunPanel(context, 2, callback);
+    return menuRunPanel(context, 2, task);
 }
 
-s32 mnuHandleSecondaryStaffObjectInput(s32 callback) {
-    StaffImageContext *context = (StaffImageContext *)kwlnTaskGetUserValue((KwlnTask *)callback);
+s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
+    StaffImageContext *context = (StaffImageContext *)kwlnTaskGetUserValue((KwlnTask *)task);
     s32 *popup = (s32 *)((u8 *)context + 0x54);
     StaffImageChoices *menu = context->menu;
     s32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 state;
     StaffImageList *window;
 
-    state = func_00285670((s32)context + 8, popup, 0, callback);
+    state = func_00285670((s32)context + 8, popup, 0, task);
     if (state != 0) {
         return state;
     }
-    if (buttons & 1) {
+    if (buttons & MNU_STAFF_INPUT_CONFIRM) {
         buttons = 0;
     }
-    if (buttons & 2) {
+    if (buttons & MNU_STAFF_INPUT_CANCEL) {
         mnuSetPopupEntry((s32)popup, (s32)D_0037C9AC);
     }
     window = menu->secondaryObject;
@@ -206,10 +216,10 @@ s32 mnuHandleSecondaryStaffObjectInput(s32 callback) {
         if (!(buttons & 0x300000)) {
             func_0027C788(window);
         }
-        if (buttons & 0x10) {
+        if (buttons & MNU_STAFF_INPUT_PREVIOUS_ROW) {
             mnuRetreatWindowListSelection(window);
         }
-        if (buttons & 0x20) {
+        if (buttons & MNU_STAFF_INPUT_NEXT_ROW) {
             mnuAdvanceWindowListSelection(window);
         }
         mnuClearWindowPanelTransitionFlag(window);
@@ -218,11 +228,11 @@ s32 mnuHandleSecondaryStaffObjectInput(s32 callback) {
     return 0;
 }
 
-s32 mnuStaffImageEnterD(s32 callback) {
+s32 mnuStaffImageEnterD(s32 task) {
     s32 context = kwlnTaskGetUserValue();
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
 
-    func_00272778(callback);
+    func_00272778(task);
     mnuCreateStaffImageSprite(9);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->secondaryObject, 0x53);
     if (menu->secondaryObject->window->panelActive != 0) {
@@ -232,12 +242,13 @@ s32 mnuStaffImageEnterD(s32 callback) {
         func_00272668(1, 0, 0, context, 1, 0x53);
     }
     func_002723B0(2, ((StaffImageContext *)context)->group);
-    return menuRunPanel(context, 1, callback);
+    return menuRunPanel(context, 1, task);
 }
 
-s32 func_00274008(s32 callback) {
+/* Run the secondary-image state's teardown phase and return its scheduler word. */
+s32 func_00274008(s32 task) {
     s32 context = kwlnTaskGetUserValue();
-    return menuRunPanel(context, 2, callback);
+    return menuRunPanel(context, 2, task);
 }
 
 u32 func_00274040(void) {
@@ -250,11 +261,11 @@ u32 func_00274048(void) {
 
 INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274050);
 
-s32 mnuStaffImageEnterB(s32 callback) {
+s32 mnuStaffImageEnterB(s32 task) {
     s32 context = kwlnTaskGetUserValue();
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
 
-    func_00272778(callback);
+    func_00272778(task);
     mnuCreateStaffImageSprite(6);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->primaryObject, 0x53);
     if (menu->primaryObject->window->panelActive != 0) {
@@ -264,12 +275,13 @@ s32 mnuStaffImageEnterB(s32 callback) {
         func_00272668(1, 0, 0, context, 1, 0x53);
     }
     func_002723B0(0, ((StaffImageContext *)context)->group);
-    return menuRunPanel(context, 1, callback);
+    return menuRunPanel(context, 1, task);
 }
 
-s32 func_00274310(s32 callback) {
+/* Run the alternate primary-image state's teardown phase and return its scheduler word. */
+s32 func_00274310(s32 task) {
     s32 context = kwlnTaskGetUserValue();
-    return menuRunPanel(context, 2, callback);
+    return menuRunPanel(context, 2, task);
 }
 
 /* Build the staff value page for the current page-selection cursor. */
@@ -364,43 +376,45 @@ void mnuSwapEquippedBullet(s32 scene, u8 *unit, s32 itemId) {
     }
 }
 
-s32 mnuHandleStaffValuePageInput(s32 callback) {
+/* Change pages only once per input sample, then restore the saved node and
+ * row count on the new page. Returns one when the page changed, zero otherwise. */
+s32 mnuHandleStaffValuePageInput(s32 task) {
     s32 context = kwlnTaskGetUserValue();
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
-    s32 changed = 0;
+    s32 pageChanged = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
     StaffImageWindow *window = menu->list->window;
-    s32 *node = window->cursor;
-    s32 first;
-    s32 count;
+    s32 *cursor = window->cursor;
+    s32 savedNodeIndex;
+    s32 savedRowCount;
     s32 i;
 
-    if (node != 0) {
-        first = *node;
-        count = window->rowCount;
+    if (cursor != 0) {
+        savedNodeIndex = *cursor;
+        savedRowCount = window->rowCount;
     } else {
-        first = 0;
-        count = 0;
+        savedNodeIndex = 0;
+        savedRowCount = 0;
     }
-    if (buttons & 0x100) {
-        changed = 1;
-        mnuReleaseStaffValuePageResources(callback);
+    if (buttons & MNU_STAFF_INPUT_PREVIOUS_PAGE) {
+        pageChanged = 1;
+        mnuReleaseStaffValuePageResources(task);
         mnuRetreatListCursorDefault(((StaffImageContext *)context)->selection);
     }
-    if (buttons & 0x200 && changed == 0) {
-        changed = 1;
-        mnuReleaseStaffValuePageResources(callback);
+    if (buttons & MNU_STAFF_INPUT_NEXT_PAGE && pageChanged == 0) {
+        pageChanged = 1;
+        mnuReleaseStaffValuePageResources(task);
         mnuAdvanceListCursorDefault(((StaffImageContext *)context)->selection);
     }
     mnuClearListFlagsOneAndTwo(((StaffImageContext *)context)->selection);
-    if (changed == 0) {
+    if (pageChanged == 0) {
         return 0;
     }
-    mnuInitializeStaffValuePage(callback);
-    if (first != 0 || count != 0) {
-        mnuSeekListNode(first, (s32)menu->list->window);
-        if (count > 0) {
-            for (i = count; i != 0; i--) {
+    mnuInitializeStaffValuePage(task);
+    if (savedNodeIndex != 0 || savedRowCount != 0) {
+        mnuSeekListNode(savedNodeIndex, (s32)menu->list->window);
+        if (savedRowCount > 0) {
+            for (i = savedRowCount; i != 0; i--) {
                 mnuAdvanceWindowListSelection(menu->list);
             }
         }
@@ -414,11 +428,12 @@ INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274768);
 
 INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274978);
 
-s32 func_00274B30(s32 selection) {
+/* Request message-window mode one before the value-page teardown phase. */
+s32 func_00274B30(s32 task) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return menuRunPanel(context, 2, selection);
+    return menuRunPanel(context, 2, task);
 }
 
 u32 func_00274B78(void) {
