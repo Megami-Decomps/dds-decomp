@@ -1,5 +1,19 @@
 #include "common.h"
 
+#define MNU_MANTRA_GRID_ROW_COUNT 0x11
+#define MNU_MANTRA_GRID_COLUMN_COUNT 15
+#define MNU_MANTRA_GRID_SLOT_BYTES 8
+#define MNU_MANTRA_PROFILE_MATCH_FLAG 1
+#define MNU_MANTRA_PROFILE_CAP_FLAG 2
+#define MNU_MANTRA_ENTRY_STATE_PAIR_MASK 0xC
+#define MNU_MANTRA_SELECTED_DRAW_CODE 0x34
+#define MNU_MANTRA_CAP_DRAW_CODE 0x32
+#define MNU_MANTRA_STATE_DRAW_CODE 0x33
+#define MNU_MANTRA_CAP_OVERLAY_CODE 0x2F
+#define MNU_MANTRA_SELECTED_OVERLAY_CODE 0x30
+#define MNU_MANTRA_COST_ICON_X_OFFSET 0x19
+#define MNU_MANTRA_COST_ICON_Y_OFFSET 0x5C
+
 extern s32 sdfAllocSizeClassBlock(u32);
 
 void effDestroyResourceSlotSet(u32);
@@ -212,16 +226,17 @@ typedef struct MenuAnimationSlot {
     s32 counterAddress; /* 0x04: address of the frame counter */
 } MenuAnimationSlot;
 
-void mnuAdvanceActiveGridSlotAnimations(s32 animationContext, s32 owner) {
-    u8 *grid = *(u8 **)(owner + 0x484);
+/* Advance only occupied animation slots across the fixed mantra grid. */
+void mnuAdvanceActiveGridSlotAnimations(s32 animationContext, s32 gridOwner) {
+    u8 *grid = *(u8 **)(gridOwner + 0x484);
     s32 row;
-    s32 col;
+    s32 column;
 
-    for (row = 0; row < 0x11; row++) {
-        MenuAnimationSlot *slot = (MenuAnimationSlot *)(*(s32 *)(grid + 4) + row * *(s32 *)(grid + 0x14) * 8);
-        for (col = 0; col < 15; col++) {
-            if (slot[col].counterAddress != 0) {
-                mnuAdvanceGridSlotAnimation(animationContext, (s32)grid, (u8 *)&slot[col]);
+    for (row = 0; row < MNU_MANTRA_GRID_ROW_COUNT; row++) {
+        MenuAnimationSlot *slot = (MenuAnimationSlot *)(*(s32 *)(grid + 4) + row * *(s32 *)(grid + 0x14) * MNU_MANTRA_GRID_SLOT_BYTES);
+        for (column = 0; column < MNU_MANTRA_GRID_COLUMN_COUNT; column++) {
+            if (slot[column].counterAddress != 0) {
+                mnuAdvanceGridSlotAnimation(animationContext, (s32)grid, (u8 *)&slot[column]);
             }
         }
     }
@@ -229,22 +244,23 @@ void mnuAdvanceActiveGridSlotAnimations(s32 animationContext, s32 owner) {
 
 extern void func_0025C278(s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_0025C8D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *entry, s32 arg6) {
-    u32 flags = mnuGetMantraDisplayFlags(entry, arg4);
+/* Choose draw codes from profile-match, cap and entry-state flags; cap overlay is half-strength. */
+void func_0025C8D0(s32 x, s32 y, s32 depth, s32 amount, s32 profileAddress, u8 *entry, s32 drawArg) {
+    u32 flags = mnuGetMantraDisplayFlags(entry, profileAddress);
 
-    if (flags & 1) {
-        func_0025C278(arg0, arg1, arg2, arg3, *(u16 *)(entry + 0xC), 0x34, 0, arg6);
-    } else if (flags & 2) {
-        func_0025C278(arg0, arg1, arg2, arg3, *(u16 *)(entry + 0xC), 0x32, 0, arg6);
-    } else if (flags & 0xC) {
-        func_0025C278(arg0, arg1, arg2, arg3, *(u16 *)(entry + 0xC), 0x33, 0, arg6);
+    if (flags & MNU_MANTRA_PROFILE_MATCH_FLAG) {
+        func_0025C278(x, y, depth, amount, *(u16 *)(entry + 0xC), MNU_MANTRA_SELECTED_DRAW_CODE, 0, drawArg);
+    } else if (flags & MNU_MANTRA_PROFILE_CAP_FLAG) {
+        func_0025C278(x, y, depth, amount, *(u16 *)(entry + 0xC), MNU_MANTRA_CAP_DRAW_CODE, 0, drawArg);
+    } else if (flags & MNU_MANTRA_ENTRY_STATE_PAIR_MASK) {
+        func_0025C278(x, y, depth, amount, *(u16 *)(entry + 0xC), MNU_MANTRA_STATE_DRAW_CODE, 0, drawArg);
     }
-    if (flags & 2) {
-        func_0025C278(arg0, arg1, arg2, (s32)((f32)arg3 * 0.5f),
-                      *(u16 *)(entry + 0xC), 0x2F, 0, arg6);
+    if (flags & MNU_MANTRA_PROFILE_CAP_FLAG) {
+        func_0025C278(x, y, depth, (s32)((f32)amount * 0.5f),
+                      *(u16 *)(entry + 0xC), MNU_MANTRA_CAP_OVERLAY_CODE, 0, drawArg);
     }
-    if (flags & 1) {
-        func_0025C278(arg0, arg1, arg2, arg3, *(u16 *)(entry + 0xC), 0x30, 0, arg6);
+    if (flags & MNU_MANTRA_PROFILE_MATCH_FLAG) {
+        func_0025C278(x, y, depth, amount, *(u16 *)(entry + 0xC), MNU_MANTRA_SELECTED_OVERLAY_CODE, 0, drawArg);
     }
 }
 
@@ -285,6 +301,7 @@ extern void func_0025CA50(s32, s32, s32, s32, s32,
                           MnuProfileOwner *, u8 *, s32);
 extern void func_0025C588(s32, s32, s32, s32, s32, s32);
 
+/* Draw the grid background and profile markers, then animation and status layers in separate passes. */
 void func_0025D100(s32 x, s32 y, s32 z, s32 alpha,
                    MnuProfileOwner *profileOwner, s32 gridOwner,
                    s32 context) {
@@ -298,10 +315,10 @@ void func_0025D100(s32 x, s32 y, s32 z, s32 alpha,
     mnuDrawCappedProfileMarkers(x, y, z,
                                 (s32)((f32)alpha * 0.5f),
                                 profileOwner, context);
-    for (row = 0; row < 0x11; row++) {
+    for (row = 0; row < MNU_MANTRA_GRID_ROW_COUNT; row++) {
         entry = (u8 *)(*(s32 *)(grid + 4) +
-                       row * *(s32 *)(grid + 0x14) * 8);
-        for (column = 0; column < 0xF; column++, entry += 8) {
+                       row * *(s32 *)(grid + 0x14) * MNU_MANTRA_GRID_SLOT_BYTES);
+        for (column = 0; column < MNU_MANTRA_GRID_COLUMN_COUNT; column++, entry += MNU_MANTRA_GRID_SLOT_BYTES) {
             counter = (u8 *)*(s32 *)(entry + 4);
             if (counter != NULL) {
                 func_0025CA50(x, y, z,
@@ -310,10 +327,10 @@ void func_0025D100(s32 x, s32 y, s32 z, s32 alpha,
             }
         }
     }
-    for (row = 0; row < 0x11; row++) {
+    for (row = 0; row < MNU_MANTRA_GRID_ROW_COUNT; row++) {
         entry = (u8 *)(*(s32 *)(grid + 4) +
-                       row * *(s32 *)(grid + 0x14) * 8);
-        for (column = 0; column < 0xF; column++, entry += 8) {
+                       row * *(s32 *)(grid + 0x14) * MNU_MANTRA_GRID_SLOT_BYTES);
+        for (column = 0; column < MNU_MANTRA_GRID_COLUMN_COUNT; column++, entry += MNU_MANTRA_GRID_SLOT_BYTES) {
             counter = (u8 *)*(s32 *)(entry + 4);
             if (counter != NULL) {
                 func_0025C8D0(x, y, z, alpha,
@@ -326,9 +343,10 @@ void func_0025D100(s32 x, s32 y, s32 z, s32 alpha,
 
 extern void mnuAdvanceActiveGridSlotAnimations(s32, s32);
 
-void mnuAdvanceDisplayGridAndLoopingFrame(s32 arg0, s32 arg1) {
-    mnuAdvanceActiveGridSlotAnimations(arg1, arg0);
-    mnuAdvanceLoopingFrame((s32 *)(arg0 + 0x490));
+/* Update the owner's grid slots and its independent looping-frame counter. */
+void mnuAdvanceDisplayGridAndLoopingFrame(s32 gridOwner, s32 animationContext) {
+    mnuAdvanceActiveGridSlotAnimations(animationContext, gridOwner);
+    mnuAdvanceLoopingFrame((s32 *)(gridOwner + 0x490));
 }
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D2F8);
@@ -342,10 +360,11 @@ typedef struct Bytes7 {
 extern Bytes7 D_003BC4E8[];
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 
-void mnuDrawMantraCostIcon(s32 x, s32 y, s32 z, s32 entry, s32 arg4, s32 arg5) {
+/* Select the cost marker from the record's icon index and draw at the fixed badge offset. */
+void mnuDrawMantraCostIcon(s32 x, s32 y, s32 depth, s32 recordAddress, s32 amount, s32 drawArg) {
     Bytes7 table = D_003BC4E8[0];
 
-    func_0024E260(x - 0x19, y + 0x5C, z, arg4, table.b[*(u16 *)(entry + 4)], arg5);
+    func_0024E260(x - MNU_MANTRA_COST_ICON_X_OFFSET, y + MNU_MANTRA_COST_ICON_Y_OFFSET, depth, amount, table.b[*(u16 *)(recordAddress + 4)], drawArg);
 }
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D7F8);
@@ -441,9 +460,10 @@ s32 mnuAdvanceDisplayList(s32 arg0, s32 arg1, s32 arg2) {
 extern s32 mnuAdvanceDisplayList(s32, s32, s32);
 extern void mnuDrawMantraCostIcon(s32, s32, s32, s32, s32, s32);
 
-void mnuDrawMantraCostAfterListAdvance(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    if (mnuAdvanceDisplayList(arg1, arg2, arg3) != 0) {
-        mnuDrawMantraCostIcon(0, 0, 0, arg0, arg2, arg3);
+/* Draw the selected record's cost marker once the animated list reports completion. */
+void mnuDrawMantraCostAfterListAdvance(s32 recordAddress, s32 listAddress, s32 amount, s32 drawArg) {
+    if (mnuAdvanceDisplayList(listAddress, amount, drawArg) != 0) {
+        mnuDrawMantraCostIcon(0, 0, 0, recordAddress, amount, drawArg);
     }
 }
 
