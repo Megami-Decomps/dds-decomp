@@ -25,6 +25,7 @@ typedef struct UiPanelPlacement {
     s32 unk1C;
     s32 unk20;
     s32 unk24;
+    s32 fadeLimit;
 } UiPanelPlacement;
 
 typedef struct UiTexRef { u8 pad0[4]; s32 unk4; s32 unk8; s32 unkC; } UiTexRef;
@@ -396,7 +397,73 @@ void itfUpdateBattleDisplayAndFadeIndicator(u32 object) {
     btlUpdateFadeIndicator(object);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019E130);
+void func_0019E130(UiPanel *panel) {
+    UiPanelPlacement *place = &panel->place;
+    s32 *sprite;
+    s32 transition;
+
+    /* The panel fade word is at +0x38 in each sprite record. */
+    sprite = (s32 *)place->sprite;
+    transition = panel->flags & 0x300;
+    switch (transition) {
+    case 0x100:
+        sprite[14] += 24;
+        if (sprite[14] >= place->fadeLimit || panel->state == 3) {
+            sprite[14] = place->fadeLimit;
+            panel->flags = (panel->flags & ~0x307) | 0x203;
+        }
+        break;
+    case 0x300:
+        sprite[14] -= 8;
+        if (sprite[14] <= 0 || panel->state == 3) {
+            sprite[14] = 0;
+            panel->flags &= ~0x300;
+        }
+        break;
+    }
+
+    sprite = (s32 *)place->frame;
+    transition = panel->flags & 0x3000;
+    switch (transition) {
+    case 0x1000:
+        sprite[14] += 32;
+        if (sprite[14] >= 200) {
+            sprite[14] = 200;
+            panel->flags = (panel->flags & ~0x3000) | 0x2000;
+        }
+        break;
+    case 0x3000:
+        sprite[14] -= 32;
+        if (sprite[14] <= 0) {
+            sprite[14] = 0;
+            panel->flags &= ~0x3000;
+            itfPanelReleasePrimitiveResources(sprite);
+            place->frame = NULL;
+        }
+        break;
+    }
+
+    sprite = (s32 *)place->overlay;
+    transition = panel->flags & 0xC00;
+    switch (transition) {
+    case 0x400:
+        sprite[14] += 24;
+        if (sprite[14] >= place->fadeLimit) {
+            sprite[14] = place->fadeLimit;
+            panel->flags = (panel->flags & ~0xC07) | 0x803;
+        }
+        break;
+    case 0xC00:
+        sprite[14] -= 8;
+        if (sprite[14] <= 0) {
+            sprite[14] = 0;
+            panel->flags &= ~0xC00;
+            itfPanelReleasePrimitiveResources(sprite);
+            place->overlay = NULL;
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019E320);
 
