@@ -108,6 +108,26 @@ typedef struct MdlNode {
 
 extern u32 D_003C86B4[][2];
 
+typedef struct MdlResourceSelection {
+    u16 pathTable;
+    u16 pathIndex;
+    u32 unk4;
+} MdlResourceSelection;
+
+typedef struct MdlResourcePath {
+    u32 unk0;
+    char *path;
+    u32 unk8;
+} MdlResourcePath;
+
+typedef struct MdlResourceTable {
+    void *entries;
+    s32 count;
+} MdlResourceTable;
+
+extern MdlResourceTable D_003C86B0[];
+extern MdlResourceTable D_003C6588[];
+
 extern void sdfDestroyMotion(void *arg);
 
 /* 8-byte prefix copied from D_003BBB60 by mdlBuildPrefixedString. */
@@ -747,7 +767,55 @@ void mdlReleaseInnerResourceHandle(MdlCtx *ctx) {
     sdfUpdateActiveResourceListScalars(ctx->inner->resourceHandle);
 }
 
-INCLUDE_ASM(const s32, "game/code_00231A80", func_00232F78);
+/* Copy a resource path's basename without its extension into destination. */
+void func_00232F78(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity) {
+    MdlResourceSelection *selection;
+    MdlResourcePath *pathEntry;
+    char *path;
+    char *basename;
+    s32 pathLength;
+    s32 startIndex;
+    s32 endIndex;
+    s32 copyLength;
+
+    selection = (MdlResourceSelection *)D_003C86B0[selectionListIndex].entries;
+    selection += selectionIndex;
+    pathEntry = (MdlResourcePath *)D_003C6588[selection->pathTable].entries;
+    pathEntry += selection->pathIndex;
+    path = pathEntry->path;
+    startIndex = strlen(path);
+    pathLength = startIndex;
+    startIndex--;
+
+    while (1) {
+        basename = &path[startIndex];
+        if (*basename == '/') {
+            startIndex++;
+            basename = &path[startIndex];
+            break;
+        }
+        if (startIndex == 0) {
+            break;
+        }
+        startIndex--;
+    }
+
+    endIndex = startIndex;
+    do {
+        endIndex++;
+        if (endIndex >= pathLength) {
+            break;
+        }
+    } while (path[endIndex] != '.');
+
+    copyLength = endIndex - startIndex;
+    capacity--;
+    if (capacity < copyLength) {
+        copyLength = capacity;
+    }
+    memcpy(destination, basename, copyLength);
+    destination[copyLength] = '\0';
+}
 
 #define MDL_SENTINEL_CURRENT_BYTE 1
 #define MDL_PART_INFO_TAG 0x30424950
