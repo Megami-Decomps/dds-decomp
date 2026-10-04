@@ -115,7 +115,7 @@ typedef struct BtlState {
     void *eventAssets; /* 0x210 */
     u8 pad214[4];
     u32 battleFlags; /* 0x218 */
-    u8 pad21C[4];
+    u32 unk21C; /* 0x21C: bit 0x10 blocks commands with the +0x30 restriction */
     u32 unk220;
     u8 pad224[0x24];
     BtlTask *tasks; /* 0x248 */
