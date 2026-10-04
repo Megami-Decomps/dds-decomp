@@ -15,12 +15,16 @@
 #define SCR_GLOBAL_FLAG_WRAP_BIAS 0xFE55
 #define SCR_GLOBAL_FLAG_WORD_SHIFT 5
 #define SCR_GLOBAL_FLAG_BIT_MASK 31
+#define SCR_GLOBAL_FLAG_TABLE_OFFSET 0x2e9d0
+#define SCR_GLOBAL_FLAG_WORD_BYTES 4
 #define PTY_SKILL_SLOT_COUNT 24
 #define PRF_SKILL_LIST_ENTRY_COUNT 8
 #define PRF_SKILL_LIST_FLAGGED 4
 
 #define PTY_PRESET_SKILL_SLOT_COUNT 8
 #define PTY_PRESET_POOL_SKILL_COUNT 40
+/* Observed gate for the post-mark call; its gameplay meaning is not established. */
+#define PTY_PRESET_POOL_EXTRA_GATE 0xB90
 #define PTY_PROFILE_UNIT_LAST_INDEX 4
 #define PTY_PROFILE_UNIT_TABLE_OFFSET 0xA60
 #define PTY_PROFILE_UNIT_STRIDE 0x1A4
@@ -46,6 +50,8 @@
 #define SDF_FLAG_LIST_ENTRY_VERTEX_BYTES 32
 #define SDF_FLAG_LIST_VERTICES_PER_ENTRY 2
 #define SDF_FLAG_LIST_PACKET_BYTES 0x20
+#define SDF_FLAG_SLOT_TABLE_SHIFT 7
+#define SDF_FLAG_SLOT_COUNT 16
 
 extern void memset();
 extern u16 ptyPresetSkillSlots[][96];
@@ -238,7 +244,7 @@ void ptyMarkPresetSkillPool(u8 *unit) {
         }
         presetIndex++;
     } while (presetIndex < PTY_PRESET_POOL_SKILL_COUNT);
-    if (mdlFlagTest(0xB90)) {
+    if (mdlFlagTest(PTY_PRESET_POOL_EXTRA_GATE)) {
         ptyMergeStockSkills(unit);
     }
 }
@@ -283,14 +289,14 @@ u32 prfGetCapValue(u16 profileId) {
     return D_003907B8[profileId].v0;
 }
 
-/* Clamp one profile record to its configured capacity. */
-void ptySetProfileRecordToCap(u32 unit, u16 profileId) {
-    u32 *record;
-    u32 cap;
+/* Store the configured capacity in an unchecked profile record. */
+void ptySetProfileRecordToCap(u32 unitAddress, u16 profileId) {
+    u32 *recordAddress;
+    u32 recordCap;
 
-    record = (u32 *)ptyGetProfileRecord(unit, profileId);
-    cap = prfGetCapValue(profileId);
-    *record = cap;
+    recordAddress = (u32 *)ptyGetProfileRecord(unitAddress, profileId);
+    recordCap = prfGetCapValue(profileId);
+    *recordAddress = recordCap;
 }
 
 /* Add to the selected record and cap the unsigned result; no selection returns zero. */
@@ -332,15 +338,17 @@ typedef struct ScriptFlagSlot {
 
 extern ScriptFlagSlot D_00393280[];
 
-u32 sdfSetFlagBySlotId(u8 *work, u32 id) {
-    ScriptFlagSlot *slot = (ScriptFlagSlot *)((u8 *)D_00393280 + (*(u16 *)(work + 4) << 7));
-    u32 i;
+/* Search the selected 16-entry table for an exact nonzero byte ID.
+ * Set and return its global flag ID; return zero if no entry matches. */
+u32 sdfSetFlagBySlotId(u8 *unit, u32 slotId) {
+    ScriptFlagSlot *slotCursor = (ScriptFlagSlot *)((u8 *)D_00393280 + (*(u16 *)(unit + 4) << SDF_FLAG_SLOT_TABLE_SHIFT));
+    u32 slotIndex;
 
-    for (i = 0; i < 16; i++, slot++) {
-        if (slot->id != 0 && slot->id == id) {
-            u32 flag = slot->flag;
-            mdlFlagSet(flag);
-            return flag;
+    for (slotIndex = 0; slotIndex < SDF_FLAG_SLOT_COUNT; slotIndex++, slotCursor++) {
+        if (slotCursor->id != 0 && slotCursor->id == slotId) {
+            u32 globalFlagId = slotCursor->flag;
+            mdlFlagSet(globalFlagId);
+            return globalFlagId;
         }
     }
     return 0;
@@ -460,7 +468,7 @@ void scrSetGlobalSeenBit(u32 flagId) {
     if (flagId < SCR_GLOBAL_FLAG_FIRST_ID) return;
     if (flagId >= SCR_GLOBAL_FLAG_END_ID) return;
     bitIndex = flagId + SCR_GLOBAL_FLAG_WRAP_BIAS;
-    byteOffset = 0x2e9d0 + (bitIndex >> SCR_GLOBAL_FLAG_WORD_SHIFT) * 4;
+    byteOffset = SCR_GLOBAL_FLAG_TABLE_OFFSET + (bitIndex >> SCR_GLOBAL_FLAG_WORD_SHIFT) * SCR_GLOBAL_FLAG_WORD_BYTES;
     flagWord = (u32 *)(datGameState + byteOffset);
     *flagWord |= SCR_FLAG_PRIMARY_BIT << (bitIndex & SCR_GLOBAL_FLAG_BIT_MASK);
 }
@@ -473,7 +481,7 @@ u32 scrTestGlobalSeenBit(u32 flagId) {
     if (bitIndex < SCR_GLOBAL_FLAG_FIRST_ID) return 0;
     if (bitIndex >= SCR_GLOBAL_FLAG_END_ID) return 0;
     bitIndex = bitIndex + SCR_GLOBAL_FLAG_WRAP_BIAS;
-    byteOffset = 0x2e9d0 + (bitIndex >> SCR_GLOBAL_FLAG_WORD_SHIFT) * 4;
+    byteOffset = SCR_GLOBAL_FLAG_TABLE_OFFSET + (bitIndex >> SCR_GLOBAL_FLAG_WORD_SHIFT) * SCR_GLOBAL_FLAG_WORD_BYTES;
     flagWord = (u32 *)(datGameState + byteOffset);
     return *flagWord & (SCR_FLAG_PRIMARY_BIT << (bitIndex & SCR_GLOBAL_FLAG_BIT_MASK));
 }
@@ -607,11 +615,13 @@ u32 func_002CDDB0() {
     return 0;
 }
 
-u32 scrCallIfOperandReady(ScrVmOperand *operand, u32 value) {
-    s8 selected = ptyGetCurrentProfileId(operand);
+/* DDS2 reads an indexed profile byte here; DDS1's native callee returns zero.
+ * Retain both selection reads and the no-selection fall-through. */
+u32 scrCallIfOperandReady(ScrVmOperand *operand, u32 byteIndex) {
+    s8 selectedProfileId = ptyGetCurrentProfileId(operand);
 
     if (ptyGetCurrentProfileId(operand)) {
-        return func_002CDDB0((u16)selected, value);
+        return func_002CDDB0((u16)selectedProfileId, byteIndex);
     }
 }
 
@@ -677,38 +687,38 @@ s32 prfBuildRawSkillList(u16 profile, PrfSkillList *output) {
  * nibble states and marking them in the output. The profile argument is unused;
  * output may be NULL when only the resulting count is needed. */
 s32 prfBuildSkillList(ScrVmOperand *unit, u32 unusedProfile, PrfSkillList *output, s32 includeFlagged) {
-    PrfSkillList list;
-    u32 entryIndex;
-    u16 *profileSkills;
+    PrfSkillList compactedList;
+    u32 sourceIndex;
+    u16 *profileSkillCursor;
     u16 skillId;
     u32 skillState;
-    s32 selectedProfile;
+    s32 selectedProfileId;
 
-    memset(&list, 0, sizeof(PrfSkillList));
-    selectedProfile = unit->selectedIndex;
-    list.count = 0;
-    if (selectedProfile != 0) {
-        profileSkills = &D_003907BC[selectedProfile * PRF_SKILL_TABLE_STRIDE];
-        for (entryIndex = 0; entryIndex < PRF_SKILL_LIST_ENTRY_COUNT; entryIndex++) {
-            skillId = *profileSkills++;
+    memset(&compactedList, 0, sizeof(PrfSkillList));
+    selectedProfileId = unit->selectedIndex;
+    compactedList.count = 0;
+    if (selectedProfileId != 0) {
+        profileSkillCursor = &D_003907BC[selectedProfileId * PRF_SKILL_TABLE_STRIDE];
+        for (sourceIndex = 0; sourceIndex < PRF_SKILL_LIST_ENTRY_COUNT; sourceIndex++) {
+            skillId = *profileSkillCursor++;
             if (skillId != 0) {
                 skillState = ptyGetSkillNibbleState(unit, skillId);
                 if (skillState != 0 && includeFlagged == 0) {
                     continue;
                 }
-                list.flags[list.count] = 0;
+                compactedList.flags[compactedList.count] = 0;
                 if (skillState != 0) {
-                    list.flags[list.count] |= PRF_SKILL_LIST_FLAGGED;
+                    compactedList.flags[compactedList.count] |= PRF_SKILL_LIST_FLAGGED;
                 }
-                list.skills[list.count] = skillId;
-                list.count++;
+                compactedList.skills[compactedList.count] = skillId;
+                compactedList.count++;
             }
         }
     }
     if (output != NULL) {
-        *output = list;
+        *output = compactedList;
     }
-    return list.count;
+    return compactedList.count;
 }
 
 /* Build the stored selection's list without flagged skills; the explicit ID is ignored. */
@@ -1025,12 +1035,14 @@ void func_002CF248(SdfFlagListWork *work) {
     sdfReleaseResourceAllocation(vertexAllocation);
 }
 
-float scrGetOperandFloatValue(ScrVmOperand *op) {
-    return op->f50;
+/* Read the operand's stored float; its gameplay meaning remains unknown. */
+float scrGetOperandFloatValue(ScrVmOperand *operand) {
+    return operand->f50;
 }
 
-void scrSetOperandFloatValue(ScrVmOperand *op, float value) {
-    op->f50 = value;
+/* Replace the operand's stored float without validation. */
+void scrSetOperandFloatValue(ScrVmOperand *operand, float value) {
+    operand->f50 = value;
 }
 
 void func_002CF3A0(s32 arg0) {
