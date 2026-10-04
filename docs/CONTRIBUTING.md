@@ -118,10 +118,13 @@ Other diff tools:
   `ninja report` also generates game-only primary reports for decomp.dev;
   `build/<v>/report.all.json` retains the full-binary audit view.
   That separate compile can differ from the production build's C because of
-  ee-gcc's context sensitivity. `check_unit` recognizes a function that matches
-  as built even if this comparison differs; the report does not yet account
-  for that distinction. A fuzzy score is not a substitute for the unit and
-  retail checksum checks above.
+  ee-gcc's context sensitivity, and equivalent linked values may use different
+  relocations. `check_unit` recognizes a function that matches the executable.
+  The report postprocessor corrects only the units listed in
+  `config/report_reconciliations.json`, verifies the source-object/fallback
+  partition, and resolves every corrected function against that executable.
+  Unconfigured context differences stay visible. A fuzzy score is not a
+  substitute for the unit and retail checksum checks above.
 - asm-differ (`diff_settings.py`; `DDS_VERSION=dds2` for the sequel)
 - decomp.me (compiler `ee-gcc2.96`, flags `-O2`; `tools/m2ctx.py` writes the context)
 

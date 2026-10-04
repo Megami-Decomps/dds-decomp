@@ -323,9 +323,36 @@ def objdiff_progress_category(version: str, name: str) -> str:
 def write_objdiff_reports(n, units: dict[str, list[dict]]) -> None:
     objdiff_objects = sorted({p for rows in units.values() for row in rows
                               for p in (row["target"], row["base"]) if p})
-    n.rule("report", f"{OBJDIFF} report generate -p $project -o $out", description="objdiff report $out")
+    n.rule("objdiff_report", f"{OBJDIFF} report generate -p $project -o $out",
+           description="objdiff report $out")
+    n.rule(
+        "reconcile_report",
+        f"{sys.executable} tools/reconcile_report.py --scope $scope $in $out",
+        description="reconcile report $out",
+    )
+
+    def report(out: str, project: str, objs: list[str], scope: str) -> None:
+        raw = f"{out}.raw"
+        project_config = "objdiff.json" if project == "." else f"{project}/objdiff.json"
+        n.build(raw, "objdiff_report", implicit=objs + [project_config],
+                variables={"project": project})
+        dependencies = [
+            "tools/reconcile_report.py",
+            "tools/resolved_code.py",
+            "tools/check_unit.py",
+            "config/report_reconciliations.json",
+        ]
+        if scope in ("all", "dds1"):
+            dependencies.extend([
+                "build/dds1/base/src/dds1/effect/effPCPMisc.o",
+                "config/dds1/symbol_addrs.txt",
+                f"orig/dds1/{VERSIONS['dds1']['serial']}",
+            ])
+        n.build(out, "reconcile_report", raw, implicit=dependencies,
+                variables={"scope": scope})
+
     n.build("objdiff", "phony", objdiff_objects)
-    n.build("report.json", "report", implicit=objdiff_objects + ["objdiff.json"], variables={"project": "."})
+    report("report.json", ".", objdiff_objects, "all")
     reports = []
     for version, rows in units.items():
         game_rows = [row for row in rows if objdiff_progress_category(version, row["name"]) == "game"]
@@ -336,7 +363,7 @@ def write_objdiff_reports(n, units: dict[str, list[dict]]) -> None:
             (game_rows, f"build/{version}/progress", f"build/{version}/report.json"),
         ):
             objs = sorted({p for row in selected for p in (row["target"], row["base"]) if p})
-            n.build(out, "report", implicit=objs + [f"{project}/objdiff.json"], variables={"project": project})
+            report(out, project, objs, version)
             reports.append(out)
     n.build("report", "phony", ["report.json"] + reports)
 
