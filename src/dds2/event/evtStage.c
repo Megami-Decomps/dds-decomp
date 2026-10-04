@@ -165,8 +165,8 @@ void evtClearWorldSlotStatusFlag(void) {
 
 extern void evtScaleValueByMultiplier(s32 slotData, f32 multiplier);
 
-/* Scale the slot data by a multiplier clamped to [0, 1]. */
-void evtScaleSlotByClampedMultiplier(f32 multiplier) {
+/* The unit remains an ABI argument; scaling resolves the active slot itself. */
+void evtScaleSlotByClampedMultiplier(void *unused, f32 multiplier) {
     s32 slotData;
 
     slotData = dds3GetSlot1Data();
