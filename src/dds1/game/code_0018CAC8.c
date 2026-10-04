@@ -483,9 +483,9 @@ void sdfProjectVuVectorToScreen(void) {
     VU0_ADD(vf10, vf10, vf11);
 }
 
-/* Project a point and its camera-right offset, returning their rounded screen distance. */
+/* vu0 routine: project a point and its camera-right offset, returning their rounded screen distance. */
 s32 func_0018DC58(f32 scale) {
-    volatile f32 scaleVector[4];
+    f32 scaleVector[4];
     f32 projectedEnd[4];
     f32 projectedStart[4];
     f32 original[4];
@@ -496,9 +496,7 @@ s32 func_0018DC58(f32 scale) {
     sdfProjectVuVectorToScreen();
     VU0_STORE_VF(vf10, projectedStart);
 
-    scaleVector[0] = scale;
-    scaleVector[2] = scale;
-    scaleVector[1] = scale;
+    scaleVector[0] = scaleVector[1] = scaleVector[2] = scale;
     VU0_LOAD_VF(vf10, original);
     VU0_MOVE_VF(vf12, vf10);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
@@ -506,7 +504,7 @@ s32 func_0018DC58(f32 scale) {
     VU0_LOAD_VF(vf11, sdfViewUpVector);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
-    VU0_LOAD_VF(vf11, scaleVector);
+    VU0_LOAD_VF_MEMORY(vf11, scaleVector);
     VU0_MUL(vf10, vf10, vf11);
     VU0_MOVE_VF(vf11, vf12);
     VU0_ADD(vf10, vf10, vf11);

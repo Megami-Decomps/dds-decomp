@@ -206,8 +206,8 @@ extern u32 D_003BAD40;
 
 extern u32 D_003BAD1C;
 
-extern u64 dds3GetWorldObject(void);
-extern s64 dds3GetWorldCameraObject(u64);
+extern void *dds3GetWorldObject(void);
+extern s32 dds3GetWorldCameraObject(s32);
 extern s64 fldGetPlayerSceneState(void);
 
 extern s32 datBattleSceneRecords;
@@ -267,10 +267,10 @@ extern s16 D_003C9518[];
 extern void fldFormatAreaResourceName(char *arg0);
 extern void func_00132FD0(u32 arg0, s32 arg1);
 extern s32 strcmp(const char *a, const char *b);
-extern u32 D_003BAD20;
+extern f32 D_003BAD20;
 extern char fldEncounterTaskName[];
 extern u8 D_003C9230[];
-extern u8 D_003C9220[];
+extern f32 D_003C9220[];
 extern s32 fldEncProc(void);
 extern void fldResetEncounterAsyncState(void);
 extern void func_00213808(void);
@@ -1132,20 +1132,14 @@ void fldProjectPointSetupAlt(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     *dstY = result[1];
 }
 
+/* vu0 routine: prepare the shared projection and secondary matrix bank. */
 void fldPrepareProjectionMatrix(void) {
     u8 *matrix;
         VU0_LOAD_MATRIX(sdfViewMatrix);
 ;
     matrix = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmove.xyzw vf24, vf28\n"
-        "vmove.xyzw vf25, vf29\n"
-        "vmove.xyzw vf26, vf30\n"
-        "vmove.xyzw vf27, vf31\n"
-        ".set reorder"
-        : : : "memory");
+    VU0_MOVE_MATRIX_TO_B();
     matrix += 0x40;
     VU0_LOAD_VF_MEMORY(vf11, matrix);
 ;
@@ -2183,7 +2177,7 @@ s32 fldSetEncounterMode(s32 mode) {
             if (fldEncounterRuntimeState >= 0) {
                 btlActivateRuntime(fldEncounterRuntimeState);
                 if (dds3GetWorldObject() != 0) {
-                    dds3SetWorldObjectDataValue(dds3GetWorldObject(), 1);
+                    dds3SetWorldObjectDataValue((s32)dds3GetWorldObject(), 1);
                 }
             }
         }
@@ -2242,11 +2236,11 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012DD70);
 
 /* Suppress the world object's current entry when it is already selected. */
 s64 fldGetUnselectedWorldEntry(void) {
-    u64 worldObject;
+    s32 worldObject;
     s64 currentEntry;
     s64 selectedEntry;
 
-    worldObject = dds3GetWorldObject();
+    worldObject = (s32)dds3GetWorldObject();
     currentEntry = dds3GetWorldCameraObject(worldObject);
     selectedEntry = fldGetPlayerSceneState();
     if (selectedEntry == currentEntry) {
@@ -2257,11 +2251,71 @@ s64 fldGetUnselectedWorldEntry(void) {
 
 void fldSetCameraMoveMode(u32 value) {
     D_003BAD1C = value;
-    dds3TransformCameraVectorsByInnerRotation(dds3GetWorldCameraObject(dds3GetWorldObject()), D_003C9230, D_003C9220);
+    dds3TransformCameraVectorsByInnerRotation(dds3GetWorldCameraObject((s32)dds3GetWorldObject()), D_003C9230, D_003C9220);
     D_003BAD20 = 0;
 }
 
-INCLUDE_ASM(void, "game/code_00126A30", func_0012E510);
+/* The camera object's inner node carries its look-at target at +0x40. */
+typedef struct FldCameraTransformNode {
+    u8 pad00[0x40];
+    f32 position[4];
+    f32 rotation[4];
+} FldCameraTransformNode;
+
+typedef struct FldWorldCamera {
+    u8 pad00[4];
+    s32 key;
+    u8 pad08[0x10];
+    void *data;
+    FldCameraTransformNode *inner;
+} FldWorldCamera;
+
+extern void effObjSetNodeFlags(void *, s32);
+
+void func_0012E510(void) {
+    f32 direction = 0.0f;
+    f32 phase = D_003BAD20;
+    FldWorldCamera *camera;
+
+    if (D_003BAD1C != 0) {
+        if (D_003BAD1C == 1) {
+            direction = 1.0f;
+        }
+        if (D_003BAD1C == 2) {
+            direction = 1.0f;
+        }
+        if (D_003BAD1C == -1) {
+            direction = -1.0f;
+        }
+        if (D_003BAD1C == -2) {
+            direction = -1.0f;
+        }
+        camera = (FldWorldCamera *)dds3GetWorldCameraObject((s32)dds3GetWorldObject());
+        if (D_003BAD1C == 1 || D_003BAD1C == -1) {
+            if (phase < 3.14f) {
+                phase += 0.2f;
+                camera->inner->position[1] = D_003C9220[1] + sdfSinPoly(phase * direction) * 2.5f;
+            } else {
+                phase += 0.02f;
+                camera->inner->position[1] = D_003C9220[1] + sdfSinPoly(phase * direction) * 2.0f;
+            }
+        }
+        if (D_003BAD1C == 2 || D_003BAD1C == -2) {
+            phase += 11.0f;
+            if (phase > 0.0f) {
+                phase -= 1.0f;
+            } else if (phase > -3.14f) {
+                phase -= 0.2f;
+                camera->inner->position[1] = D_003C9220[1] + sdfSinPoly(phase * direction) * 2.0f;
+            } else {
+                phase -= 0.01f;
+            }
+            phase -= 11.0f;
+        }
+        D_003BAD20 = phase;
+        effObjSetNodeFlags(camera->inner, 1);
+    }
+}
 
 void fldClearCameraMoveMode(void) {
     D_003BAD1C = 0;
@@ -3626,7 +3680,7 @@ void fldResetTaskSlots(void) {
             if (taskInfo->slot >= 0) {
                 task = dds3GetPathState(dds3FindWorldObjectNodeByKey(world, *(u32 *)D_003C92E0[taskInfo->slot], 0xD));
                 if (scrFindNamedProcessNode(task) != 0) {
-                    evtDestroyNamedTask(dds3GetWorldObject(), task);
+                    evtDestroyNamedTask((s32)dds3GetWorldObject(), task);
                 }
             }
         }
@@ -3893,7 +3947,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013AFC8);
 s32 fldDestroyFlaggedNamedTask(u32 flag, u32 slot) {
     D_003308B0[slot] = 0;
     if (scrFindNamedProcessNode(flag) != 0) {
-        evtDestroyNamedTask(dds3GetWorldObject(), flag);
+        evtDestroyNamedTask((s32)dds3GetWorldObject(), flag);
         return 0;
     }
     return -1;
@@ -3916,13 +3970,13 @@ s32 fldRestartSceneResourceTask(void) {
         return 0;
     }
     if ((state & 2) != 0 && D_0032C9A0[0] != 0) {
-        evtDestroyNamedTask(dds3GetWorldObject(), (u32)D_0032C9A0);
+        evtDestroyNamedTask((s32)dds3GetWorldObject(), (u32)D_0032C9A0);
     }
     D_0032C9A0[0] = 0;
     D_003BAB3C = 0;
     object = fldSelectCurrentActorOnNextFloor();
     if (scrFindNamedProcessNode((u32)object) == 0) {
-        evtStartSceneResourceTask(dds3GetWorldObject(), object);
+        evtStartSceneResourceTask((s32)dds3GetWorldObject(), object);
     }
     return 1;
 }
@@ -4354,8 +4408,8 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     }
 }
 
-extern s32 dds3FindIndexedObjectChainNodeByName(u64, s32, void *);
-extern void dds3SetWorldCameraObject(u64, s32);
+extern void *dds3FindIndexedObjectChainNodeByName(void *, s32, const u8 *);
+extern void dds3SetWorldCameraObject(void *, u32);
 void func_0013DDF0(const char *name) {
     FldActorEntry *entry;
     char *entryName;
@@ -4382,7 +4436,7 @@ void func_0013DDF0(const char *name) {
                 if (entry->variantMode == 0 && entry->linkKind == 3) {
                     camera = dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(), 4,
                                                                  entry->linkName);
-                    dds3SetWorldCameraObject(dds3GetWorldObject(), (s32)camera);
+                    dds3SetWorldCameraObject(dds3GetWorldObject(), (u32)camera);
                     fldEnableCameraObjectFlag();
                     return;
                 }

@@ -2746,23 +2746,14 @@ extern u8 sdfProjectionMatrix[];
 extern u8 D_00324660[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
+/* vu0 routine: project the point in vf10 through view/projection and screen scale/bias. */
 void mnuProjectViewPoint(void) {
     u8 *matrix;
     VU0_LOAD_MATRIX(sdfViewMatrix);
     matrix = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmulax.xyzw ACC, vf28, vf10x\n"
-        "vmadday.xyzw ACC, vf29, vf10y\n"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n"
-        "vmaddw.xyzw vf10, vf31, vf0w\n"
-        "vdiv Q, vf0w, vf10w\n"
-        "vmove.w vf10, vf0\n"
-        "vwaitq\n"
-        "vmulq.xyzw vf10, vf10, Q\n"
-        ".set reorder"
-        : : : "memory");
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
     matrix += 0x40;
     VU0_LOAD_VF(vf11, matrix);
     VU0_MUL(vf10, vf10, vf11);

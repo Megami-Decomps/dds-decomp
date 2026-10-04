@@ -397,31 +397,10 @@ void sdfInitializeVuWorkParameters(VuWork *work, u16 *parameterWords, u32 select
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-/* vu0 routine: rotate the three vectors at vectors + 0x40 by the 3x3 of the global matrix into vf24-vf26, store them */
+/* vu0 routine: rotate the basis at vectors+0x40 into vf24-vf26 and cache the original vectors. */
 void sdfVuRotateObjectBasis(void *vectors) {
     void *m = (void *)D_00439188;
-    __asm__ volatile (
-        ".set noreorder                \n"
-        "lqc2 vf2, 0x40(%0)            \n"
-        "lqc2 vf5, 0x10(%1)            \n"
-        "lqc2 vf6, 0x20(%1)            \n"
-        "lqc2 vf7, 0x30(%1)            \n"
-        "lqc2 vf3, 0x50(%0)            \n"
-        "lqc2 vf4, 0x60(%0)            \n"
-        "vmulax.xyz ACC, vf5, vf2x    \n"
-        "vmadday.xyz ACC, vf6, vf2y   \n"
-        "vmaddz.xyz vf24, vf7, vf2z   \n"
-        "vmulax.xyz ACC, vf5, vf3x    \n"
-        "vmadday.xyz ACC, vf6, vf3y   \n"
-        "vmaddz.xyz vf25, vf7, vf3z   \n"
-        "vmulax.xyz ACC, vf5, vf4x    \n"
-        "vmadday.xyz ACC, vf6, vf4y   \n"
-        "vmaddz.xyz vf26, vf7, vf4z   \n"
-        "sqc2 vf2, 0x0(%2)            \n"
-        "sqc2 vf3, 0x10(%2)           \n"
-        "sqc2 vf4, 0x20(%2) \n"
-        ".set reorder"
-        : : "r"(vectors), "r"(m), "r"(D_00476250) : "memory");
+    VU0_ROTATE_BASIS_AND_CACHE(vectors, m, D_00476250);
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00336EC0);
@@ -478,23 +457,7 @@ void sdfVuBlendNodeVectors(VuBlendNode *node) {
     while (node != NULL) {
         void *sourceA = node->sourceA;
         void *sourceB = node->sourceB;
-        __asm__ volatile (
-            ".set noreorder\n"
-            "lqc2 vf2, 0x40(%0)\n"
-            "lqc2 vf8, 0x30(%1)\n"
-            "lqc2 vf9, 0x30(%2)\n"
-            "lqc2 vf10, 0x20(%1)\n"
-            "lqc2 vf11, 0x20(%2)\n"
-            "vmulaw.xy ACC, vf8, vf0w\n"
-            "vmaddaw.xy ACC, vf9, vf2w\n"
-            "vmsubw.xy vf15, vf8, vf2w\n"
-            "vmulaw.xyzw ACC, vf10, vf0w\n"
-            "vmaddaw.xyzw ACC, vf11, vf2w\n"
-            "vmsubw.xyzw vf16, vf10, vf2w\n"
-            "sqc2 vf15, 0x30(%0)\n"
-            "sqc2 vf16, 0x20(%0)\n"
-            ".set reorder\n"
-            : : "r"(node), "r"(sourceA), "r"(sourceB) : "memory");
+        VU0_BLEND_NODE_VECTORS(node, sourceA, sourceB);
         node = node->next;
     }
 }

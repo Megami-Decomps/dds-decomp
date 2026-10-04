@@ -29,7 +29,10 @@ extern char mnuMantraNumberFormat[]; /* "%d" */
 extern char D_004378B0[]; /* "---" */
 extern s32 mnuGetMantraSourceValue(u16);
 extern f32 sdfSinPoly(f32);
-extern void func_00311DB0(s32, s32, s32, s32, s32, char *, s32, s32);
+extern u32 func_00311D00(s32, s32, s32, u32, u8, char *, s32, s32);
+extern u32 func_00311DB0(s32, s32, s32, u32, u8, char *, s32, s32);
+extern u32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const u8 *, s32, s32);
+extern u32 frFontQueueTintedGlyphChainAndMeasure(s32, s32, s32, u32, u8, u16, s32, s32, s32, s32);
 
 extern u32 mnuAllocateMantraPanelBurstPool(void);
 
