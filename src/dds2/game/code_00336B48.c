@@ -124,7 +124,7 @@ extern ConsNode *D_00438AB0;
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
-extern void sdfEnsureFreeRootWorkspace(u32 object);
+extern void *sdfEnsureFreeRootWorkspace(void *object);
 
 extern void sdfSetPacketCursorAligned(s32);
 extern s32 sdfGetPacketCursor(void);
@@ -1422,7 +1422,7 @@ void sdfProcessReferencedObjects(VuObjectContext **context, VuObjectRefCommand *
         if (count != 0) {
             indices++;
             do {
-                sdfEnsureFreeRootWorkspace(objects[*indices++]);
+                sdfEnsureFreeRootWorkspace((void *)objects[*indices++]);
             } while (--count != 0);
         }
     }

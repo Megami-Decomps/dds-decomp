@@ -113,7 +113,7 @@ extern void *D_003BD380;
 extern void *D_003BD390;
 extern void *sdfTexAcquireResourceTexture(void *);
 extern void *sdfTexAcquireAlternateResourceTexture(void *);
-extern void sdfEnsureFreeRootWorkspace(u32 object);
+extern void *sdfEnsureFreeRootWorkspace(void *object);
 extern void *sdfAllocPacketAligned(s32);
 extern void func_002DE010(void *, u32, void *, u32, u32, f32, f32, f32);
 extern s32 sdfGetPacketCursor(void);
@@ -1322,7 +1322,7 @@ void sdfProcessReferencedObjects(VuObjectContext **context, VuObjectRefCommand *
         if (count != 0) {
             indices++;
             do {
-                sdfEnsureFreeRootWorkspace(objects[*indices++]);
+                sdfEnsureFreeRootWorkspace((void *)objects[*indices++]);
             } while (--count != 0);
         }
     }

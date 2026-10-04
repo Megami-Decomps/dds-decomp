@@ -141,15 +141,20 @@ typedef struct MnuPackageEntry {
 
 /* Shared work for the shooting task's package requests and state callbacks. */
 typedef struct MnuShootingWork {
-    u32 unk00; /* Written with the allocation handle; consumption not identified. */
+    SdfAllocation *allocation;
     MnuSectionObjectList *objects;
     MnuSectionObjectList *playerObjects;
     MnuSectionObjectList *mapObjects;
     MnuSectionObjectList *drawObjects;
-    u8 pad14[8];
+    MnuSectionObjectList *progressWork;
+    MnuSectionObjectList *alternateProgressWork;
     MnuSectionModelWork *modelWork;
     MnuEffectWork *effectWork;
-    u8 pad24[0x34];
+    MnuSectionObjectList *work24;
+    u32 *spriteWork;
+    u32 *tintWork;
+    u32 resourceSlots[7];
+    u8 pad4C[0xC];
     s32 state;
     s32 (*initialize)(u8 *work);
     s32 (*update)(u8 *work);
@@ -161,7 +166,7 @@ typedef struct MnuShootingWork {
     u32 unk70Rest : 30;
     u32 unk74;
     u8 pad78[0x1E];
-    u16 unk96;
+    s16 unk96;
     u8 pad98[0x140];
     u16 unk1D8;
     u8 pad1DA[6];
@@ -190,6 +195,7 @@ extern MnuShootingWork *D_0043891C;
 
 extern s32 func_00317FE0(MnuShootingWork *);
 extern void func_00318570(MnuShootingWork *);
+extern void func_00317E48(MnuShootingWork *);
 
 extern u32 D_00438918;
 
@@ -213,6 +219,23 @@ extern void func_00317AD0(MnuShootingWork *handle);
 extern void *sdfAllocGeneralBlock(s32 size);
 
 extern void *sdfMemoryGetBlockAddress(void *block);
+extern void func_0031D928(u32 *);
+extern void func_0031DF48(u32 *);
+extern void dds3ReleaseSoundSlotPool(void);
+extern SdfAllocation *D_00438948;
+extern void mnuDestroyNodeJobQueues(s32 *);
+extern void mnuUpdateHighScoreFlag(void *);
+/* Retail passes the task work to this otherwise empty legacy callback. */
+extern void func_0031AF60();
+extern void itfClearTintAndWorkBuffers(u8 *);
+extern u32 effDestroyResourceSlotSet(u32);
+extern u32 D_00435CBC;
+extern void *dds3GetWorldSecondaryObject(void);
+extern void dds3DestroyWorldNode(void *);
+extern void mdlFlagSet(s32);
+extern void mdlFlagClear(s32);
+extern void mnuMarkTitleStreamResetPending(void);
+extern void mnuResetTitleStreamLocked(void);
 
 u32 mdlAdvanceViewerPackageTask(void);
 
@@ -244,7 +267,7 @@ extern char D_0042D4D0[];
 
 extern s32 kwlnTaskGetTaskByName(const char *arg0);
 
-void func_00316FA8(u32 sprite);
+void func_00316FA8(MnuShootingWork *work);
 
 void itfSetPackedRgbAlpha(RgbAlpha *entry, u32 color) {
     entry->rgb = color & 0xFFFFFF;
@@ -292,7 +315,7 @@ u8 func_00316ED0(void) {
 u32 func_00316EF8(void) {
     mnuMovieTaskState = 2;
     D_00435BB0 = 1;
-    func_00316FA8((u32)D_0043891C);
+    func_00316FA8(D_0043891C);
     kwlnTaskDestroyWithHierarchyByName(D_0042D4D0, 1);
     return mnuResumeEffectQueueFrameAdvance();
 }
@@ -303,7 +326,7 @@ MnuShootingWork *mdlAllocateViewerPackageWork(void) {
     MnuShootingWork *work = (MnuShootingWork *)sdfMemoryGetBlockAddress(block);
 
     memset(work, 0, 0x1E0);
-    work->unk00 = (u32)block;
+    work->allocation = block;
     work->unk68 = 0;
     work->unk1D8 = 0x80;
     work->unk96 = 0;
@@ -311,9 +334,9 @@ MnuShootingWork *mdlAllocateViewerPackageWork(void) {
     return work;
 }
 
-void func_00316FA8(u32 sprite) {
-    if (sprite != 0) {
-        func_00317E48(sprite);
+void func_00316FA8(MnuShootingWork *work) {
+    if (work != NULL) {
+        func_00317E48(work);
     }
 }
 
@@ -366,7 +389,59 @@ INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D7A0);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317AD0);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00317E48);
+/* Release the shooting task's owned lists, queues, slots and world object. */
+void func_00317E48(MnuShootingWork *work) {
+    s32 i;
+    u32 *slot;
+
+    func_0031D928(work->spriteWork);
+    func_0031DF48(work->tintWork);
+    dds3ReleaseSoundSlotPool();
+    if (D_00438948 != NULL) {
+        sdfReleaseResourceAllocation(D_00438948);
+        D_00438948 = NULL;
+    }
+    if (work->progressWork != NULL) {
+        sdfReleaseResourceAllocation(work->progressWork->allocation);
+        work->progressWork = NULL;
+    }
+    if (work->alternateProgressWork != NULL) {
+        sdfReleaseResourceAllocation(work->alternateProgressWork->allocation);
+        work->alternateProgressWork = NULL;
+    }
+    if (work->effectWork != NULL) {
+        for (i = 0; i < work->effectWork->count; i++) {
+            mnuDestroyNodeJobQueues((s32 *)&work->effectWork->lists[i]);
+        }
+        sdfReleaseResourceAllocation((SdfAllocation *)work->effectWork->handle);
+        work->effectWork = NULL;
+    }
+    if (work->work24 != NULL) {
+        sdfReleaseResourceAllocation(work->work24->allocation);
+        work->work24 = NULL;
+    }
+    slot = work->resourceSlots;
+    mnuUpdateHighScoreFlag(work);
+    func_00318570(work);
+    func_0031AF60(work);
+    itfClearTintAndWorkBuffers((u8 *)work);
+    for (i = 6; i >= 0; i--, slot++) {
+        if (*slot != 0) {
+            effDestroyResourceSlotSet(*slot);
+            *slot = 0;
+        }
+    }
+    D_00435CBC = 0x80000000;
+    dds3DestroyWorldNode(dds3GetWorldSecondaryObject());
+    if (work->unk96 >= 3) {
+        mdlFlagSet(0x849);
+    } else {
+        mdlFlagClear(0x849);
+    }
+    sdfReleaseResourceAllocation(work->allocation);
+    mnuMarkTitleStreamResetPending();
+    mnuResetTitleStreamLocked();
+}
 
 /* Advance initialization; completing state zero releases the section resources. */
 s32 func_00317FE0(MnuShootingWork *work) {

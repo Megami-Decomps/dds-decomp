@@ -10,7 +10,7 @@ typedef struct PrfSkillList {
 extern u32 *ptyGetCurrentProfileRecord(s32);
 extern u32 ptyGetProfileRecordCap(u16);
 extern s32 func_00314990(s32, u16);
-extern void prfBuildSkillListState0();
+extern s32 prfBuildSkillListState0(s32, s32, s32);
 extern void scrClearAllSecondaryScriptFlags(u8 *);
 extern s32 scrSetFlag(u8 *, u16);
 extern void scrSetSecondaryScriptFlag(u8 *, u16);
@@ -265,7 +265,42 @@ s32 func_0029D2D8(BrsLevelUpList *list) {
     return list->count;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029CC90", func_0029D3D8);
+/* Build rows for active, capped profiles, excluding unit ID 9. */
+s32 func_0029D3D8(BrsLevelUpList *list) {
+    PrfSkillList skills;
+    s32 *rowData = &list->rows[0].levelUps;
+    s32 offset = 0;
+    s32 remaining = 4;
+    BrsProfileUnit *unit;
+    u32 *profile;
+
+    memset(list, 0, 0x7C);
+    list->count = 0;
+    do {
+        unit = (BrsProfileUnit *)(datGameState + 0xA60 + offset);
+        offset += 0x1C4;
+        if ((unit->flags & 1) != 0) {
+            if (unit->unitId != 9) {
+                profile = ptyGetCurrentProfileRecord((s32)unit);
+                prfBuildSkillListState0((s32)unit, (s32)profile, (s32)&skills);
+                if (unit->profileId != 0) {
+                    if (ptyGetProfileRecordCap(unit->profileId) == *profile) {
+                        if (func_00314990((s32)unit, unit->profileId) == 0) {
+                            s32 rowIndex = list->count * 6;
+                            u32 *unitRow = &((u32 *)list)[rowIndex];
+                            s32 *skillRow = &rowData[rowIndex];
+
+                            *skillRow = skills.count;
+                            *unitRow = (u32)unit;
+                            list->count++;
+                        }
+                    }
+                }
+            }
+        }
+    } while (--remaining >= 0);
+    return list->count;
+}
 
 s32 mnuAdvanceTitleEntryAnimation(u8 *entry) {
     s32 step = ptyCalcLevelUps(entry);
@@ -299,7 +334,7 @@ u32 func_0029D790(u8 *entry, PrfSkillList *out) {
     memset(&result, 0, 0x34);
     slot = ptyGetCurrentProfileRecord((s32)entry);
     if (entry[0x55] != 0 && ptyGetProfileRecordCap(entry[0x55]) == *slot && func_00314990((s32)entry, entry[0x55]) == 0) {
-        prfBuildSkillListState0(entry, slot, &result);
+        prfBuildSkillListState0((s32)entry, (s32)slot, (s32)&result);
         applied = result.count;
         if (applied != 0) {
             u32 i = 0;
