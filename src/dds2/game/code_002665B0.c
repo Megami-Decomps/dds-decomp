@@ -1008,7 +1008,31 @@ s32 evtIsFadeCompleteAndMessageWindowIdle(void) {
     return evtGetMessageWindowControlState() == 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_002685F0);
+extern char D_003CE848[];
+
+s32 func_002685F0(s32 action, s32 context) {
+    switch (action) {
+    case 3:
+        if (*(s32 *)(*(s32 *)(context + 0x7C) + 0x20) == 0) {
+            *(u8 **)(context + 0x58) = D_003CE848;
+            mnuSetPopupEntry((s32 *)(context + 0x54), D_003CE848 + 0xC4);
+            *(s32 *)(context + 0x90) = 1;
+            **(u32 **)(context + 0x54) |= 0x20000;
+            return 1;
+        }
+        break;
+    case 2:
+        if (*(s32 *)(*(s32 *)(context + 0x80) + 0x20) == 0) {
+            *(u8 **)(context + 0x58) = D_003CE848;
+            mnuSetPopupEntry((s32 *)(context + 0x54), D_003CE848 + 0xC4);
+            *(s32 *)(context + 0x90) = 2;
+            **(u32 **)(context + 0x54) |= 0x20000;
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 typedef struct {
     u8 pad00[6];
